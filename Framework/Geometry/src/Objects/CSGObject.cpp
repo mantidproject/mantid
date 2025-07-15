@@ -2121,47 +2121,6 @@ std::shared_ptr<GeometryHandler> CSGObject::getGeometryHandler() const {
   return m_handler;
 }
 
-std::string CSGObject::getGeometryShape() const {
-  Geometry::detail::ShapeInfo::GeometryShape geometryShape;
-  std::vector<V3D> points;
-  double radius, innerRadius, height = 0;
-  m_handler->GetObjectGeom(geometryShape, points, innerRadius, radius, height);
-  switch (geometryShape) {
-  case detail::ShapeInfo::GeometryShape::NOSHAPE:
-    return "NOSHAPE";
-  case detail::ShapeInfo::GeometryShape::CUBOID:
-    return "CUBOID";
-  case detail::ShapeInfo::GeometryShape::HEXAHEDRON:
-    return "HEXAHEDRON";
-  case detail::ShapeInfo::GeometryShape::SPHERE:
-    return "SPHERE";
-  case detail::ShapeInfo::GeometryShape::CYLINDER:
-    return "CYLINDER";
-  case detail::ShapeInfo::GeometryShape::CONE:
-    return "CONE";
-  case detail::ShapeInfo::GeometryShape::HOLLOWCYLINDER:
-    return "HOLLOWCYLINDER";
-  default:
-    throw std::invalid_argument("Unknown GeometryShape");
-  }
-}
-
-const std::vector<V3D> CSGObject::getGeometryPoints() const {
-  Geometry::detail::ShapeInfo::GeometryShape geometryShape;
-  std::vector<V3D> points;
-  double radius, innerRadius, height = 0;
-  m_handler->GetObjectGeom(geometryShape, points, innerRadius, radius, height);
-  return points;
-}
-
-const std::vector<double> CSGObject::getGeometryDimensions() const {
-  Geometry::detail::ShapeInfo::GeometryShape geometryShape;
-  std::vector<V3D> points;
-  double radius, innerRadius, height = 0;
-  m_handler->GetObjectGeom(geometryShape, points, innerRadius, radius, height);
-  return {innerRadius, radius, height};
-}
-
 /**
  * Updates the geometry handler if needed
  */
