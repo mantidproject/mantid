@@ -86,7 +86,7 @@ NexusAddress NexusAddress::stem() const { return NexusAddress(m_path.stem()); }
 
 NexusAddress NexusAddress::root() { return NexusAddress(nxroot); }
 
-std::string NexusAddress::operator+(std::string const &s) const { return m_path.string() + s; }
+std::string NexusAddress::operator+(std::string const &s) const { return m_resolved_path + s; }
 
 std::vector<std::string> NexusAddress::parts() const {
   std::vector<std::string> names;
