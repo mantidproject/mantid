@@ -71,7 +71,7 @@ public:
                        Mantid::NeXus::H5Util::defaultFileAcc());
 
       // Copy all of the NXentry groups to a new file.
-      H5::H5File testInput(multipleEntryInput.fullPath(), H5F_ACC_TRUNC, access_plist);
+      H5::H5File testInput(multipleEntryInput.fullPath(), H5F_ACC_TRUNC, Mantid::NeXus::H5Util::defaultFileAcc());
       H5Util::copyGroup(testInput, "/mantid_workspace_1", input, "/mantid_workspace_1");
       H5Util::copyGroup(testInput, "/mantid_workspace_2", input, "/mantid_workspace_2");
       H5Util::copyGroup(testInput, "/mantid_workspace_3", input, "/mantid_workspace_3");
