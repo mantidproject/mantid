@@ -6,20 +6,10 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from instrumentview.Projections.Projection import Projection
 import numpy as np
-from instrumentview.Detectors import DetectorPosition
 
 
 class CylindricalProjection(Projection):
     """2D projection with a cylindrical coordinate system, see https://en.wikipedia.org/wiki/Cylindrical_coordinate_system"""
-
-    def __init__(
-        self,
-        sample_position: np.ndarray,
-        root_position: np.ndarray,
-        detector_positions: list[DetectorPosition] | np.ndarray,
-        axis: np.ndarray,
-    ):
-        super().__init__(sample_position, root_position, detector_positions, axis)
 
     def _calculate_2d_coordinates(self, detector_position: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
         detector_relative_position = detector_position - self._sample_position
