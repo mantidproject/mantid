@@ -1067,7 +1067,7 @@ template <typename NumT> void File::getSlab(NumT *data, DimSizeVector const &sta
         mySize[0] = H5Tget_size(pFile->iCurrentT);
       }
       if (mySize[0] > 0) {
-        tmp_data = static_cast<char *>(calloc(mySize[0]), sizeof(char));
+        tmp_data = static_cast<char *>(calloc(mySize[0], sizeof(char)));
       } else {
         tmp_data = static_cast<char *>(calloc(1, sizeof(char)));
       }
@@ -1334,10 +1334,10 @@ Entries File::getEntries() const {
 void File::getEntries(Entries &result) const {
   result.clear();
 
-  int iRet = H5Literate_by_name(m_pfile_id->iFID, m_pfile_id->name_ref.c_str(), H5_INDEX_NAME, H5_ITER_NATIVE, nullptr,
+  int iRet = H5Literate_by_name(m_pfile_id->iFID, m_pfile_id->groupaddr.c_str(), H5_INDEX_NAME, H5_ITER_NATIVE, nullptr,
                                 gr_iterate_cb, &result, H5P_DEFAULT);
   if (iRet < 0) {
-    throw NXEXCEPTION("H5Literate failed on group: " + m_pfile_id->name_ref);
+    throw NXEXCEPTION("H5Literate failed on group: " + m_pfile_id->groupaddr);
   }
 }
 
