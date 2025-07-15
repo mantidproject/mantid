@@ -143,6 +143,8 @@ New features
 - ``Instrument.getFilename()`` and ``Instrument.setFilename()`` have been exposed to python.
 - A new method named ``getFittingParameter`` has been added to ``Mantid::Geometry::Component`` class and exposed to
   python. This allows access to fitting parameters from components in an instrument definition file.
+- Exposed ``ExperimentInfo.populateInstrumentParameters`` to the Python api.  This will facilitate the update of parameterized
+  instruments from Python, allowing parameters to be directly transferred as properties without converting to and from ``string``.
 
 Bugfixes
 ############

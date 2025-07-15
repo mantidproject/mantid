@@ -5,6 +5,13 @@ Muon Changes
 .. contents:: Table of Contents
    :local:
 
+ALC
+---
+
+Bugfixes
+############
+- :ref:`ALC interface <MuonALC-ref>` no longer crashes when non numeric characters are input in Backward and Forward Grouping line edits.
+
 Muon Analysis
 -------------
 
