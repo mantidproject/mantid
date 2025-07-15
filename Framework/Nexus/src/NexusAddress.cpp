@@ -92,7 +92,7 @@ std::vector<std::string> NexusAddress::parts() const {
   std::vector<std::string> names;
   for (auto it = m_path.begin(); it != m_path.end(); it++) {
     if (*it != nxroot) {
-      names.push_back(*it);
+      names.push_back(it->generic_string());
     }
   }
   return names;
