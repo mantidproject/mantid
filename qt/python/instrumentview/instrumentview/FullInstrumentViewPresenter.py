@@ -42,14 +42,14 @@ class FullInstrumentViewPresenter:
         self._view.set_camera_focal_point(self._model.sample_position())
 
         self._counts_label = "Integrated Counts"
-        self._detector_mesh = self.createPolyDataMesh(self._model.detector_positions())
+        self._detector_mesh = self.create_poly_data_mesh(self._model.detector_positions())
         self._detector_mesh[self._counts_label] = self._model.detector_counts()
         self._contour_limits = [self._model.data_limits()[0], self._model.data_limits()[1]]
 
         self._view.add_main_mesh(self._detector_mesh, scalars=self._counts_label, clim=self._contour_limits)
         self._view.set_contour_range_limits(self._contour_limits)
 
-        self._pickable_main_mesh = self.createPolyDataMesh(self._model.detector_positions())
+        self._pickable_main_mesh = self.create_poly_data_mesh(self._model.detector_positions())
         self._pickable_main_mesh["visibility"] = self._model.picked_visibility()
 
         self._view.add_pickable_main_mesh(self._pickable_main_mesh, scalars="visibility")
@@ -58,8 +58,8 @@ class FullInstrumentViewPresenter:
         self._view.set_tof_range_limits(self._bin_limits)
 
         if len(self._model.monitor_positions()) > 0:
-            monitor_point_cloud = self.createPolyDataMesh(self._model.monitor_positions())
-            monitor_point_cloud["colours"] = self.generateSingleColour(self._model.monitor_positions(), 1, 0, 0, 1)
+            monitor_point_cloud = self.create_poly_data_mesh(self._model.monitor_positions())
+            monitor_point_cloud["colours"] = self.generate_single_colour(len(self._model.monitor_positions()), 1, 0, 0, 1)
             self._view.add_rgba_mesh(monitor_point_cloud, scalars="colours")
 
         self.projection_option_selected(0)
@@ -90,11 +90,11 @@ class FullInstrumentViewPresenter:
             raise ValueError(f"Unknown projection type {projection_type}")
 
         self._model.calculate_projection(is_spherical, axis)
-        projection_mesh = self.createPolyDataMesh(self._model.detector_projection_positions())
+        projection_mesh = self.create_poly_data_mesh(self._model.detector_projection_positions())
         projection_mesh[self._counts_label] = self._model.detector_counts()
         self._view.add_projection_mesh(projection_mesh, self._counts_label, clim=self._contour_limits)
 
-        self._pickable_projection_mesh = self.createPolyDataMesh(self._model.detector_projection_positions())
+        self._pickable_projection_mesh = self.create_poly_data_mesh(self._model.detector_projection_positions())
         self._pickable_projection_mesh["visibility"] = self._model.picked_visibility()
         self._view.add_pickable_projection_mesh(self._pickable_projection_mesh, scalars="visibility")
 
@@ -143,14 +143,14 @@ class FullInstrumentViewPresenter:
     def clear_all_picked_detectors(self) -> None:
         self.update_picked_detectors([])
 
-    def createPolyDataMesh(self, points, faces=None) -> pv.PolyData:
+    def create_poly_data_mesh(self, points, faces=None) -> pv.PolyData:
         """Create a PyVista mesh from the given points and faces"""
         mesh = pv.PolyData(points, faces)
         return mesh
 
-    def generateSingleColour(self, points, red: float, green: float, blue: float, alpha: float) -> np.ndarray:
+    def generate_single_colour(self, number_of_points, red: float, green: float, blue: float, alpha: float) -> np.ndarray:
         """Returns an RGBA colours array for the given set of points, with all points the same colour"""
-        rgba = np.zeros((len(points), 4))
+        rgba = np.zeros((number_of_points, 4))
         rgba[:, 0] = red
         rgba[:, 1] = green
         rgba[:, 2] = blue

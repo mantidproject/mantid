@@ -33,9 +33,9 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._presenter.projection_option_selected(1)
         self._mock_view.add_projection_mesh.assert_called()
 
-    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.createPolyDataMesh")
+    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.create_poly_data_mesh")
     @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.calculate_projection")
-    def test_projection_option_axis(self, mock_calculate_projection, mock_createPolyDataMesh):
+    def test_projection_option_axis(self, mock_calculate_projection, mock_create_poly_data_mesh):
         for option_index in range(len(self._presenter.projection_combo_options())):
             option = self._presenter.projection_combo_options()[option_index]
             if option.endswith("X"):
@@ -48,9 +48,9 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
                 return
             self._presenter.projection_option_selected(option_index)
             mock_calculate_projection.assert_called_once_with(option.startswith("Spherical"), axis)
-            mock_createPolyDataMesh.assert_called()
+            mock_create_poly_data_mesh.assert_called()
             mock_calculate_projection.reset_mock()
-            mock_createPolyDataMesh.reset_mock()
+            mock_create_poly_data_mesh.reset_mock()
 
     def test_set_contour_limits(self):
         self._presenter.set_contour_limits(0, 100)
@@ -105,7 +105,7 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._mock_view.update_selected_detector_info.assert_called_once_with(["a", "a"])
 
     def test_generate_single_colour(self):
-        green_vector = self._presenter.generateSingleColour([[1, 0, 0], [0, 1, 0]], 0, 1, 0, 0)
+        green_vector = self._presenter.generate_single_colour(2, 0, 1, 0, 0)
         self.assertEqual(len(green_vector), 2)
         self.assertTrue(green_vector.all(where=[0, 1, 0, 0]))
 
