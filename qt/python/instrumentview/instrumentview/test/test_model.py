@@ -62,8 +62,37 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         self.assertEqual(min(integrated_spectra), model._data_min)
         self.assertEqual(max(integrated_spectra), model._data_max)
 
-    # TODO: Add test for picked_detectors_info_text
-    # TODO: Add tests for other picking methods
+    @mock.patch("instrumentview.FullInstrumentViewModel.DetectorInfo")
+    def test_picked_detectors_info_text(self, det_info_mock):
+        mock_workspace = self._create_mock_workspace([1, 20, 300])
+        mock_workspace.getDetector.side_effect = lambda i: mock.MagicMock(
+            getName=mock.Mock(return_value=str(i)), getFullName=mock.Mock(return_value=f"Full_{i}")
+        )
+        model = FullInstrumentViewModel(mock_workspace)
+        model._is_valid = np.array([False, True, True])
+        model._detector_is_picked = np.array([False, True])
+        model.picked_detectors_info_text()
+        # Test each argument one by one because of array equality
+        mock_args, mock_kwargs = det_info_mock.call_args
+        self.assertEqual(mock_args[0], "2")
+        self.assertEqual(mock_args[1], np.int64(300))
+        self.assertEqual(mock_args[2], np.int64(2))
+        np.testing.assert_equal(mock_args[3], [2, 2, 2])
+        np.testing.assert_equal(mock_args[4], [2, 2, 2])
+        self.assertEqual(mock_args[5], "Full_2")
+        self.assertEqual(mock_args[6], 30000)
+
+    def test_negate_picked_visibility(self):
+        model = FullInstrumentViewModel(self._ws)
+        model._detector_is_picked = np.array([False, False, False])
+        model.negate_picked_visibility([1, 2])
+        np.testing.assert_equal(model._detector_is_picked, [False, True, True])
+
+    def test_clear_all_picked_detectors(self):
+        model = FullInstrumentViewModel(self._ws)
+        model._detector_is_picked = np.array([False, True, True])
+        model.clear_all_picked_detectors()
+        np.testing.assert_equal(model._detector_is_picked, [False, False, False])
 
     def test_detectors_with_no_spectra(self):
         mock_workspace = self._create_mock_workspace([1, 20, 300])
@@ -98,6 +127,25 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         mock_workspace.componentInfo().samplePosition.return_value = expected_position
         model = FullInstrumentViewModel(mock_workspace)
         np.testing.assert_array_equal(model.sample_position(), expected_position)
+
+    def test_detector_positions(self):
+        mock_workspace = self._create_mock_workspace([1, 2, 3])
+        model = FullInstrumentViewModel(mock_workspace)
+        np.testing.assert_array_equal(model.detector_positions(), [[0, 0, 0], [1, 1, 1], [2, 2, 2]])
+
+    def test_picked_detector_ids(self):
+        mock_workspace = self._create_mock_workspace([1, 2, 3])
+        model = FullInstrumentViewModel(mock_workspace)
+        model._is_valid = np.array([False, True, True])
+        model._detector_is_picked = np.array([False, True])
+        self.assertEqual(model.picked_detector_ids(), [3])
+
+    def test_picked_workspace_indices(self):
+        mock_workspace = self._create_mock_workspace([1, 2, 3])
+        model = FullInstrumentViewModel(mock_workspace)
+        model._is_valid = np.array([False, True, True])
+        model._detector_is_picked = np.array([False, True])
+        self.assertEqual(model.picked_workspace_indices(), [2])
 
     def test_source_position(self):
         expected_position = np.array([0.5, 1.0, 0.2])
