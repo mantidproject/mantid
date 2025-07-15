@@ -211,70 +211,16 @@ int main(int argc, char *argv[]) {
   std::cout << "Read/Write to read \"" << nxFile << "\"" << std::endl;
   ASSERT_NO_ERROR(NXopen(nxFile, NXaccess::RDWR, fileid), "Failed to open \"" << nxFile << "\" for read/write");
   NXnumtype NXtype;
-  NXstatus entry_status;
-  std::size_t NXrank;
   Mantid::Nexus::DimVector NXdims(32);
   // used to be test of NXgetnextattra here
   ASSERT_NO_ERROR(NXopengroup(fileid, "entry", "NXentry"), "");
   ASSERT_NO_ERROR(NXgetaddress(fileid, address), "");
-  std::cout << "NXentry address " << address << std::endl;
-  // used to be test of NXgetnextattra here
+  std::cout << "NXentry address " << address << std::endl << std::flush;
 
-  do {
-    entry_status = NXgetnextentry(fileid, name, nxclass, NXtype);
-    if (entry_status == NXstatus::NX_ERROR)
-      return TEST_FAILED;
-    if (nxclass != "SDS") {
-      if (entry_status != NXstatus::NX_EOD) {
-        printf("   Subgroup: %s(%s)\n", name.c_str(), nxclass.c_str());
-        entry_status = NXstatus::NX_OK;
-      }
-    } else {
-      void *data_buffer;
-      if (entry_status == NXstatus::NX_OK) {
-        ASSERT_NO_ERROR(NXopendata(fileid, name), "");
-        ASSERT_NO_ERROR(NXgetaddress(fileid, address), "");
-        printf("Data address %s\n", address.c_str());
-        ASSERT_NO_ERROR(NXgetinfo64(fileid, NXrank, NXdims, NXtype), "");
-        printf("   %s(%d)", name.c_str(), (int)NXtype);
-        ASSERT_NO_ERROR(NXmalloc64(data_buffer, NXrank, NXdims, NXtype), "");
-        int64_t n = 1;
-        for (std::size_t k = 0; k < NXrank; k++) {
-          n *= NXdims[k];
-        }
-        if (NXtype == NXnumtype::CHAR) {
-          ASSERT_NO_ERROR(NXgetdata(fileid, data_buffer), "");
-          print_data(" = ", std::cout, data_buffer, NXtype, n);
-        } else if (NXtype != NXnumtype::FLOAT32 && NXtype != NXnumtype::FLOAT64) {
-          ASSERT_NO_ERROR(NXgetdata(fileid, data_buffer), "");
-          print_data(" = ", std::cout, data_buffer, NXtype, n);
-        } else {
-          slab_start[0] = 0;
-          slab_start[1] = 0;
-          slab_size[0] = 1;
-          slab_size[1] = 4;
-          ASSERT_NO_ERROR(NXgetslab64(fileid, data_buffer, slab_start, slab_size), "");
-          print_data("\n      ", std::cout, data_buffer, NXtype, 4);
-          slab_start[0] = TEST_FAILED;
-          ASSERT_NO_ERROR(NXgetslab64(fileid, data_buffer, slab_start, slab_size), "");
-          print_data("      ", std::cout, data_buffer, NXtype, 4);
-          slab_start[0] = 2;
-          ASSERT_NO_ERROR(NXgetslab64(fileid, data_buffer, slab_start, slab_size), "");
-          print_data("      ", std::cout, data_buffer, NXtype, 4);
-          slab_start[0] = 3;
-          ASSERT_NO_ERROR(NXgetslab64(fileid, data_buffer, slab_start, slab_size), "");
-          print_data("      ", std::cout, data_buffer, NXtype, 4);
-          slab_start[0] = 4;
-          ASSERT_NO_ERROR(NXgetslab64(fileid, data_buffer, slab_start, slab_size), "");
-          print_data("      ", std::cout, data_buffer, NXtype, 4);
-          // used to be test of NXgetnextattra here
-        }
-        ASSERT_NO_ERROR(NXclosedata(fileid), "");
-        // cppcheck-suppress cstyleCast
-        ASSERT_NO_ERROR(NXfree((void **)&data_buffer), "");
-      }
-    }
-  } while (entry_status == NXstatus::NX_OK);
+  // NOTE used to be test of NXgetnextattra here
+
+  // NOTE used to be test of NXgetnextentry here
+
   ASSERT_NO_ERROR(NXclosegroup(fileid), "");
   // check links
   std::cout << "check links\n";
@@ -291,7 +237,7 @@ int main(int argc, char *argv[]) {
   ASSERT_NO_ERROR(NXopendata(fileid, "r8_data"), "");
   ASSERT_NO_ERROR(NXgetdataID(fileid, blink), "");
   ASSERT_NO_ERROR(NXclosedata(fileid), "");
-  if (NXsameID(fileid, dlink, blink) != NXstatus::NX_OK) {
+  if (dlink.targetAddress != blink.targetAddress) {
     std::cout << "Link check FAILED (r8_data)\n";
     return TEST_FAILED;
   }
@@ -302,7 +248,7 @@ int main(int argc, char *argv[]) {
   ASSERT_NO_ERROR(NXgetaddress(fileid, address), "");
   std::cout << "Group address " << address << "\n";
   ASSERT_NO_ERROR(NXgetgroupID(fileid, blink), "");
-  if (NXsameID(fileid, glink, blink) != NXstatus::NX_OK) {
+  if (glink.targetAddress != blink.targetAddress) {
     std::cout << "Link check FAILED (sample)\n";
     return TEST_FAILED;
   }
@@ -312,12 +258,12 @@ int main(int argc, char *argv[]) {
   std::cout << "Link check OK\n";
 
   // tests for NXopenaddress
-  std::cout << "tests for NXopenaddress\n";
-  ASSERT_NO_ERROR(NXopenaddress(fileid, "/entry/data/comp_data"), "Failure on NXopenaddress\n");
-  ASSERT_NO_ERROR(NXopenaddress(fileid, "/entry/data/comp_data"), "Failure on NXopenaddress\n");
-  ASSERT_NO_ERROR(NXopenaddress(fileid, "../r8_data"), "Failure on NXopenaddress\n");
-  ASSERT_NO_ERROR(NXopengroupaddress(fileid, "/entry/data/comp_data"), "Failure on NXopengroupaddress\n");
-  ASSERT_NO_ERROR(NXopenaddress(fileid, "/entry/data/r8_data"), "Failure on NXopenaddress\n");
+  std::cout << "tests for NXopenaddress\n" << std::flush;
+  ASSERT_NO_ERROR(NXopenaddress(fileid, "/entry/data/comp_data"), "Failed to open /entry/data/comp_data 1st\n");
+  ASSERT_NO_ERROR(NXopenaddress(fileid, "/entry/data/comp_data"), "Failed to open /entry/data/comp_data 2nd\n");
+  ASSERT_NO_ERROR(NXopenaddress(fileid, "../r8_data"), "Failed to open ../r8_data\n");
+  ASSERT_NO_ERROR(NXopengroupaddress(fileid, "/entry/data/comp_data"), "Failed to open /entry/data/comp_data group\n");
+  ASSERT_NO_ERROR(NXopenaddress(fileid, "/entry/data/r8_data"), "Failed to open /entry/r8_data\n");
   std::cout << "NXopenaddress checks OK\n";
 
   ASSERT_NO_ERROR(NXclose(fileid), "");

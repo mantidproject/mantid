@@ -151,7 +151,7 @@ void NXClass::readAllInfo() {
       NXInfo info(m_fileID->getInfo(), entry.first);
       m_fileID->closeData();
       m_datasets->emplace_back(info);
-    } else if (entry.second.substr(0, 2) == "NX" || entry.second.substr(0, 2) == "IX") {
+    } else if (entry.second.starts_with("NX") || entry.second.starts_with("IX")) {
       m_groups->emplace_back(NXClassInfo(entry));
     }
   }

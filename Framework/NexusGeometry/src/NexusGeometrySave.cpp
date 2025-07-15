@@ -22,6 +22,7 @@
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidKernel/ProgressBase.h"
+#include "MantidNexus/H5Util.h"
 #include "MantidNexusGeometry/NexusGeometryDefinitions.h"
 #include "MantidNexusGeometry/NexusGeometryUtilities.h"
 #include <H5Cpp.h>
@@ -1041,16 +1042,13 @@ void saveInstrument(const Geometry::ComponentInfo &compInfo, const Geometry::Det
 
   validateInputs(logger, fullPath, compInfo);
 
-  H5::FileAccPropList access_plist;
-  access_plist.setFcloseDegree(H5F_CLOSE_STRONG);
-
   H5::Group parentGroup;
   H5::H5File file;
   if (append) {
-    file = H5::H5File(fullPath, H5F_ACC_RDWR, access_plist); // open file
+    file = H5::H5File(fullPath, H5F_ACC_RDWR, Mantid::NeXus::H5Util::defaultFileAcc()); // open file
     parentGroup = file.openGroup(parentGroupName);
   } else {
-    file = H5::H5File(fullPath, H5F_ACC_TRUNC, access_plist); // open file
+    file = H5::H5File(fullPath, H5F_ACC_TRUNC, Mantid::NeXus::H5Util::defaultFileAcc()); // open file
     parentGroup = file.createGroup(parentGroupName);
     writeStrAttribute(parentGroup, NX_CLASS, NX_ENTRY);
   }
@@ -1111,15 +1109,12 @@ void saveInstrument(const Mantid::API::MatrixWorkspace &ws, const std::string &f
 
   validateInputs(logger, filePath, compInfo);
 
-  H5::FileAccPropList access_plist;
-  access_plist.setFcloseDegree(H5F_CLOSE_STRONG);
-
   H5::H5File file;
   H5::Group parentGroup;
 
   // Create or overwrite the NXentry parent group.
   if (Poco::File(filePath).exists() && append) {
-    file = H5::H5File(filePath, H5F_ACC_RDWR, access_plist); // open existing file
+    file = H5::H5File(filePath, H5F_ACC_RDWR, Mantid::NeXus::H5Util::defaultFileAcc()); // open existing file
     H5::Group rootGroup = file.openGroup("/");
     std::optional<H5::Group> maybeParent = utilities::findGroupByName(rootGroup, parentGroupName, NX_ENTRY);
     if (maybeParent)
@@ -1129,7 +1124,8 @@ void saveInstrument(const Mantid::API::MatrixWorkspace &ws, const std::string &f
       writeStrAttribute(parentGroup, NX_CLASS, NX_ENTRY);
     }
   } else {
-    file = H5::H5File(filePath, H5F_ACC_TRUNC, access_plist); // create a new file (or overwrite an existing one)
+    file = H5::H5File(filePath, H5F_ACC_TRUNC,
+                      Mantid::NeXus::H5Util::defaultFileAcc()); // create a new file (or overwrite an existing one)
     parentGroup = file.createGroup(std::string("/") + parentGroupName);
     writeStrAttribute(parentGroup, NX_CLASS, NX_ENTRY);
   }
@@ -1190,10 +1186,8 @@ void saveInstrument(const Mantid::API::MatrixWorkspace &ws, const std::string &f
     throw std::runtime_error(std::string("NexusGeometrySave::saveInstrument: append specified but file '") + filePath +
                              "' does not exist");
 
-  H5::FileAccPropList access_plist;
-  access_plist.setFcloseDegree(H5F_CLOSE_STRONG);
-
-  H5::H5File file = H5::H5File(filePath, append ? H5F_ACC_RDWR : H5F_ACC_TRUNC, access_plist);
+  H5::H5File file =
+      H5::H5File(filePath, append ? H5F_ACC_RDWR : H5F_ACC_TRUNC, Mantid::NeXus::H5Util::defaultFileAcc());
   H5::Group rootGroup = file.openGroup("/");
 
   // Construct the correct parent-group (i.e. NXentry) name.

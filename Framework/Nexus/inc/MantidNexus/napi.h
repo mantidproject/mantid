@@ -307,20 +307,6 @@ MANTID_NEXUS_DLL NXstatus NXgetinfo64(NXhandle handle, std::size_t &rank, Mantid
                                       NXnumtype &datatype);
 
 /**
- * Get the next entry in the currently open group. This is for retrieving infromation about the
- * content of a NeXus group. In order to search a group #NXgetnextentry is called in a loop until
- * #NXgetnextentry returns NX_EOD which indicates that there are no further items in the group.
- * Reset search using #NXinitgroupdir
- * \param handle A NeXus file handle as initialized by NXopen.
- * \param name The name of the object
- * \param nxclass The NeXus class name for a group or the string SDS for a dataset.
- * \param datatype The NeXus data type if the item is a SDS.
- * \return NX_OK on success, NX_ERROR in the case of an error, NX_EOD when there are no more items.
- * \ingroup c_navigation
- */
-MANTID_NEXUS_DLL NXstatus NXgetnextentry(NXhandle handle, std::string &name, std::string &nxclass, NXnumtype &datatype);
-
-/**
  * Read a subset of data from file into memory.
  * \param handle A NeXus file handle as initialized by NXopen.
  * \param data A pointer to the memory data where to copy the data too. The pointer must point
@@ -357,54 +343,6 @@ MANTID_NEXUS_DLL NXstatus NXgetattr(NXhandle handle, std::string const &name, vo
  * \ingroup c_linking
  */
 MANTID_NEXUS_DLL NXstatus NXgetgroupID(NXhandle handle, NXlink &pLink);
-
-/**
- * Tests if two link data structures describe the same item.
- * \param handle A NeXus file handle as initialized by NXopen.
- * \param pFirstID The first link data for the test.
- * \param pSecondID The second link data structure.
- * \return NX_OK when both link data structures describe the same item, NX_ERROR else.
- * \ingroup c_linking
- */
-MANTID_NEXUS_DLL NXstatus NXsameID(NXhandle handle, NXlink const &pFirstID, NXlink const &pSecondID);
-
-/**
- * Resets a pending group search to the start again. To be called in a #NXgetnextentry loop when
- * a group search has to be restarted.
- * \param handle A NeXus file handle as initialized by NXopen.
- * \return NX_OK on success, NX_ERROR in the case of an error.
- * \ingroup c_navigation
- */
-MANTID_NEXUS_DLL NXstatus NXinitgroupdir(NXhandle handle);
-
-/**
- * Resets a pending attribute search to the start again. To be called in a NXgetnextattr loop when
- * an attribute search has to be restarted.
- * \param handle A NeXus file handle as initialized by NXopen.
- * \return NX_OK on success, NX_ERROR in the case of an error.
- * \ingroup c_navigation
- */
-MANTID_NEXUS_DLL NXstatus NXinitattrdir(NXhandle handle);
-
-/**
- * Utility function which allocates a suitably sized memory area for the dataset characteristics specified.
- * \param data A pointer to a pointer which will be initialized with a pointer to a suitably sized memory area.
- * \param rank the rank of the data.
- * \param dims An array holding the size of the data in each dimension.
- * \param datatype The NeXus data type of the data.
- * \return NX_OK when allocation succeeds, NX_ERROR in the case of an error.
- * \ingroup c_memory
- */
-MANTID_NEXUS_DLL NXstatus NXmalloc64(void *&data, std::size_t rank, Mantid::Nexus::DimVector const &dims,
-                                     NXnumtype datatype);
-
-/**
- * Utility function to release the memory for data.
- * \param data A pointer to a pointer to free.
- * \return NX_OK on success, NX_ERROR in the case of an error.
- * \ingroup c_memory
- */
-MANTID_NEXUS_DLL NXstatus NXfree(void **data);
 
 /**
  * Dispatches the error message

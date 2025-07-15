@@ -8,7 +8,7 @@ constexpr int TEST_SUCCEED{0};
 // error out and return failure
 #define ON_ERROR(msgstr)                                                                                               \
   {                                                                                                                    \
-    std::cout << msgstr << std::endl;                                                                                  \
+    std::cout << msgstr << std::endl << std::flush;                                                                    \
     return TEST_FAILED;                                                                                                \
   }
 

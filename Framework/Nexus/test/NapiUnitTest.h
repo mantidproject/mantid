@@ -34,16 +34,14 @@ using std::vector;
 #define NX_ASSERT_OKAY(status, msg)                                                                                    \
   if ((status) != NXstatus::NX_OK) {                                                                                   \
     NXclose(fid);                                                                                                      \
-    std::cerr << msg;                                                                                                  \
-    fflush(stderr);                                                                                                    \
+    std::cerr << msg << std::flush;                                                                                    \
     TS_FAIL(msg);                                                                                                      \
   }
 
 #define NX_ASSERT_ERROR(status, msg)                                                                                   \
   if ((status) != NXstatus::NX_ERROR) {                                                                                \
     NXclose(fid);                                                                                                      \
-    std::cerr << msg;                                                                                                  \
-    fflush(stderr);                                                                                                    \
+    std::cerr << msg << std::flush;                                                                                    \
     TS_FAIL(msg);                                                                                                      \
   }
 
@@ -118,8 +116,7 @@ public:
   }
 
   void test_clear_on_create() {
-    cout << "\ncreation clear old\n";
-    fflush(stdout);
+    cout << "\ncreation clear old\n" << std::flush;
 
     // create an empty file
     FileResource resource("fake_empty_file.nxs.h5");
@@ -540,7 +537,7 @@ public:
   }
 
   void test_data_putget_array() {
-    cout << "\ntest dataset read/write -- arrays\n";
+    cout << "\ntest dataset read/write -- arrays\n" << std::flush;
 
     // open a file
     FileResource resource("test_napi_file_dataRW.h5");
@@ -632,7 +629,7 @@ public:
   // #################################################################################################################
 
   void test_get_address_groups() {
-    cout << "\ntest get address -- groups only\n";
+    cout << "\ntest get address -- groups only\n" << std::flush;
     FileResource resource("test_napi_file_grp.h5");
     std::string filename = resource.fullPath();
     std::string address;
@@ -681,7 +678,7 @@ public:
   }
 
   void test_get_address_data() {
-    cout << "\ntest get address -- groups and data!\n";
+    cout << "\ntest get address -- groups and data!\n" << std::flush;
     FileResource resource("test_napi_file_grpdata.h5");
     std::string filename = resource.fullPath();
     NexusFile5 *fid;
@@ -708,7 +705,7 @@ public:
   }
 
   void test_open_address() {
-    cout << "tests for open address\n";
+    cout << "tests for open address\n" << std::flush;
 
     // make file with path /entry
     FileResource resource("test_napi_openpathtest.nxs");
@@ -780,7 +777,7 @@ public:
   }
 
   void test_get_info() {
-    cout << "\ntest get info -- good\n";
+    cout << "\ntest get info -- good\n" << std::flush;
 
     // open a file
     FileResource resource("test_napi_file_dataRW.h5");
@@ -835,7 +832,7 @@ public:
   }
 
   void test_get_info_bad() {
-    cout << "\ntest get info -- bad\n";
+    cout << "\ntest get info -- bad\n" << std::flush;
     // open a file
     FileResource resource("test_napi_file_dataRW.h5");
     std::string filename = resource.fullPath();
@@ -868,7 +865,7 @@ public:
   // ################################################################################################################
 
   template <typename T> void do_test_putget_attr(NexusFile5 *fid, string name, T const &data) {
-    cout << "\tput/get attribute " << name << "\n";
+    cout << "\tput/get attribute " << name << "\n" << std::flush;
     // test put/get by pointer to data
     T out;
     std::size_t len;
@@ -881,7 +878,7 @@ public:
   }
 
   void test_putget_attr_basic() {
-    cout << "\ntest attribute read/write\n";
+    cout << "\ntest attribute read/write\n" << std::flush;
 
     // open a file
     FileResource resource("test_napi_attr.h5");
@@ -905,7 +902,7 @@ public:
   }
 
   void test_putget_attr_str() {
-    cout << "\ntest string attribute read/write\n";
+    cout << "\ntest string attribute read/write\n" << std::flush;
 
     // open a file
     FileResource resource("test_napi_attr.h5");
@@ -958,7 +955,7 @@ public:
   // ################################################################################################################
 
   void test_links() {
-    cout << "tests of linkature\n";
+    cout << "tests of linkature\n" << std::flush;
 
     FileResource resource("test_napi_link.nxs");
     std::string filename = resource.fullPath();
@@ -968,7 +965,7 @@ public:
     NX_ASSERT_OKAY(NXopengroup(fid, "entry", "NXentry"), "failed to open group");
 
     // Create some data
-    cout << "create entry at /entry/some_data\n";
+    cout << "create entry at /entry/some_data\n" << std::flush;
     string const somedata("this is some data");
     DimVector dims{static_cast<dimsize_t>(somedata.size())};
     NX_ASSERT_OKAY(NXmakedata64(fid, "some_data", NXnumtype::CHAR, 1, dims), "failed to make data");
@@ -985,7 +982,7 @@ public:
     NX_ASSERT_OKAY(NXclosedata(fid), "failed to close data");
 
     // Create a group, and link it to that data
-    cout << "create group at /entry/data to link to the data\n";
+    cout << "create group at /entry/data to link to the data\n" << std::flush;
     NX_ASSERT_OKAY(NXmakegroup(fid, "data", "NXdata"), "failed to make group");
     NX_ASSERT_OKAY(NXopengroup(fid, "data", "NXdata"), "failed to open group");
     NX_ASSERT_OKAY(NXmakelink(fid, datalink), "failed to make link");
@@ -1000,13 +997,14 @@ public:
     cout << "data link works\n";
     NX_ASSERT_OKAY(NXclosedata(fid), "failed to close linked data");
 
-    NXopenaddress(fid, "/entry");
+    NX_ASSERT_OKAY(NXopenaddress(fid, "/entry"), "failed to open /entry");
+    TS_ASSERT_EQUALS(fid->groupaddr, "/entry");
 
     // Create two groups, group1 and group2
     // Make a link inside group2 to group1
 
     // make group1
-    cout << "create group /entry/group1\n";
+    cout << "create group /entry/group1\n" << std::flush;
     NX_ASSERT_OKAY(NXmakegroup(fid, "group1", "NXpants"), "failed to make group");
     NX_ASSERT_OKAY(NXopengroup(fid, "group1", "NXpants"), "failed to open group");
     NXlink grouplink;
@@ -1016,7 +1014,7 @@ public:
     NX_ASSERT_OKAY(NXclosegroup(fid), "failed to close group");
 
     // make group 2
-    cout << "create group /entry/group2/group1\n";
+    cout << "create group /entry/group2/group1\n" << std::flush;
     NX_ASSERT_OKAY(NXmakegroup(fid, "group2", "NXshorts"), "failed to make group");
     NX_ASSERT_OKAY(NXopengroup(fid, "group2", "NXshorts"), "failed to open group");
     NX_ASSERT_OKAY(NXmakelink(fid, grouplink), "failed to make link");
@@ -1028,7 +1026,7 @@ public:
     NX_ASSERT_OKAY(NXgetgroupID(fid, res2), "failed to get linked group ID");
     TS_ASSERT_EQUALS(grouplink.linkType, res2.linkType);
     TS_ASSERT_EQUALS(string(grouplink.targetAddress), string(res2.targetAddress));
-    cout << "group link works\n";
+    cout << "group link works\n" << std::flush;
 
     // cleanup
     NX_ASSERT_OKAY(NXclose(fid), "failed to close");

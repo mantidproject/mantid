@@ -25,7 +25,6 @@ using std::vector;
 #endif
 
 #define NXEXCEPTION(message) Exception((message), __func__, m_filename);
-#define NX_UNKNOWN_GROUP ""
 
 #define NAPI_CALL(status, msg)                                                                                         \
   NXstatus tmp = (status);                                                                                             \
@@ -43,6 +42,7 @@ namespace { // anonymous namespace to keep it in the file
 std::string const group_class_spec("NX_class");
 std::string const target_attr_name("target");
 std::string const scientific_data_set("SDS");
+std::string const unknown_group_spec("NX_UNKNOWN_GROUP");
 constexpr int default_deflate_level(6);
 
 template <typename NumT> static string toString(const vector<NumT> &data) {
@@ -59,13 +59,12 @@ template <typename NumT> static string toString(const vector<NumT> &data) {
   return result.str();
 }
 
-pNexusFile5 assertNXID(std::shared_ptr<NexusFile5> pfid) { return NXI5assert(pfid.get()); }
+pNexusFile5 assertNXID(std::shared_ptr<NexusFile5> const &pfid) { return pfid.get(); }
 
 } // end of anonymous namespace
 
 NexusFile5::NexusFile5(std::string const &filename, NXaccess const am)
-    : iStack5{{"", 0, 0}}, iFID(0), iCurrentG(0), iCurrentD(0), iCurrentS(0), iCurrentT(0), iCurrentA(0),
-      iCurrentIDX(0), iNX(0), name_ref(""), name_tmp("") {
+    : iStack5{0}, iFID(0), iCurrentG(0), iCurrentD(0), iCurrentS(0), iCurrentT(0), groupaddr() {
   // check HDF5 version installed
   unsigned int vers_major, vers_minor, vers_release;
   if (H5get_libversion(&vers_major, &vers_minor, &vers_release) < 0) {
@@ -81,7 +80,7 @@ NexusFile5::NexusFile5(std::string const &filename, NXaccess const am)
 
   // create file acccess property list
   hid_t fapl = -1;
-  fapl = create_file_access_plist(filename);
+  fapl = H5Pcopy(Mantid::NeXus::H5Util::defaultFileAcc().getId());
 
   if (am != NXaccess::CREATE5) {
     if (H5Fis_accessible(filename.c_str(), fapl) <= 0) {
@@ -127,27 +126,23 @@ NexusFile5::NexusFile5(std::string const &filename, NXaccess const am)
   }
   H5Fflush(iFID, H5F_SCOPE_GLOBAL);
 
-  iStack5[0].iVref = 0; // root!
+  iStack5[0] = 0; // root!
 };
 
 NexusFile5::NexusFile5(NexusFile5 const &origHandle)
-    : iStack5{{"", 0, 0}}, iFID(0), iCurrentG(0), iCurrentD(0), iCurrentS(0), iCurrentT(0), iCurrentA(0),
-      iCurrentIDX(0), iNX(0), name_ref(""), name_tmp("") {
+    : iStack5{0}, iFID(0), iCurrentG(0), iCurrentD(0), iCurrentS(0), iCurrentT(0), groupaddr() {
   iFID = H5Freopen(origHandle.iFID);
   if (iFID <= 0) {
     throw Mantid::Nexus::Exception("Error reopening file");
   }
-  iStack5[0].iVref = 0; // root!
+  iStack5[0] = 0; // root!
 };
 
 NexusFile5 &NexusFile5::operator=(NexusFile5 const &origHandle) {
-  this->iStack5 = {{"", 0, 0}};
+  this->iStack5 = {0};
   this->iFID = H5Freopen(origHandle.iFID);
-  this->iCurrentG = this->iCurrentD = this->iCurrentS = this->iCurrentT = this->iCurrentA = 0;
-  this->iCurrentIDX = 0;
-  this->iNX = 0;
-  this->name_ref = "";
-  this->name_tmp = "";
+  this->iCurrentG = this->iCurrentD = this->iCurrentS = this->iCurrentT = 0;
+  this->groupaddr = Mantid::Nexus::NexusAddress::root();
   return *this;
 }
 
@@ -155,8 +150,8 @@ NexusFile5::~NexusFile5() {
   if (iCurrentD != 0) {
     H5Dclose(iCurrentD);
   }
-  for (auto entry : iStack5) {
-    H5Gclose(entry.iVref);
+  for (hid_t gid : iStack5) {
+    H5Gclose(gid);
   }
   H5Fclose(iFID);
   H5garbage_collect();
@@ -207,12 +202,12 @@ namespace Mantid::Nexus {
 // new constructors
 
 File::File(const string &filename, const NXaccess access)
-    : m_filename(filename), m_access(access), m_close_handle(true), m_descriptor(m_filename, m_access) {
+    : m_filename(filename), m_access(access), m_address(), m_close_handle(true), m_descriptor(m_filename, m_access) {
   this->initOpenFile(m_filename, m_access);
 }
 
 File::File(const char *filename, const NXaccess access)
-    : m_filename(filename), m_access(access), m_close_handle(true), m_descriptor(m_filename, m_access) {
+    : m_filename(filename), m_access(access), m_address(), m_close_handle(true), m_descriptor(m_filename, m_access) {
   this->initOpenFile(m_filename, m_access);
 }
 
@@ -233,22 +228,23 @@ void File::initOpenFile(const string &filename, const NXaccess access) {
 // copy constructors
 
 File::File(File const &f)
-    : m_filename(f.m_filename), m_access(f.m_access), m_close_handle(false), m_pfile_id(f.m_pfile_id),
-      m_descriptor(f.m_descriptor) {}
+    : m_filename(f.m_filename), m_access(f.m_access), m_address(f.m_address), m_close_handle(false),
+      m_pfile_id(f.m_pfile_id), m_descriptor(f.m_descriptor) {}
 
 File::File(File const *const pf)
-    : m_filename(pf->m_filename), m_access(pf->m_access), m_close_handle(false), m_pfile_id(pf->m_pfile_id),
-      m_descriptor(pf->m_descriptor) {}
+    : m_filename(pf->m_filename), m_access(pf->m_access), m_address(pf->m_address), m_close_handle(false),
+      m_pfile_id(pf->m_pfile_id), m_descriptor(pf->m_descriptor) {}
 
 File::File(std::shared_ptr<File> pf)
-    : m_filename(pf->m_filename), m_access(pf->m_access), m_close_handle(false), m_pfile_id(pf->m_pfile_id),
-      m_descriptor(pf->m_descriptor) {}
+    : m_filename(pf->m_filename), m_access(pf->m_access), m_address(pf->m_address), m_close_handle(false),
+      m_pfile_id(pf->m_pfile_id), m_descriptor(pf->m_descriptor) {}
 
 File &File::operator=(File const &f) {
   if (this == &f) {
   } else {
     this->m_filename = f.m_filename;
     this->m_access = f.m_access;
+    this->m_address = f.m_address;
     this->m_pfile_id = f.m_pfile_id;
     this->m_close_handle = f.m_close_handle;
     this->m_descriptor = f.m_descriptor;
@@ -268,11 +264,10 @@ File::~File() {
 void File::close() {
   if (m_pfile_id != nullptr) {
     /* release memory */
-    for (auto entry : m_pfile_id->iStack5) {
-      H5Gclose(entry.iVref);
+    for (hid_t gid : m_pfile_id->iStack5) {
+      H5Gclose(gid);
     }
     H5Fclose(m_pfile_id->iFID);
-    NXI5KillDir(m_pfile_id.get());
     H5garbage_collect();
     m_pfile_id = nullptr;
   }
@@ -292,54 +287,54 @@ void File::flush() {
 //------------------------------------------------------------------------------------------------------------------
 
 void File::openAddress(std::string const &address) {
+  NexusAddress absaddr(formAbsoluteAddress(address));
   if (address.empty()) {
     throw NXEXCEPTION("Supplied empty address");
   }
-  NAPI_CALL(NXopenaddress(m_pfile_id.get(), address), "NXopenaddress(" + address + ") failed");
+  NXstatus ret = NXopenaddress(m_pfile_id.get(), absaddr);
+  m_address = getObjectAddress(getCurrentId());
+  NAPI_CALL(ret, "NXopenaddress(" + address + ") failed");
 }
 
 void File::openGroupAddress(std::string const &address) {
   if (address.empty()) {
     throw NXEXCEPTION("Supplied empty address");
   }
-  NAPI_CALL(NXopengroupaddress(m_pfile_id.get(), address), "NXopengroupaddress(" + address + ") failed");
+  // get the address of the containing group and open it
+  openAddress(groupAddress(formAbsoluteAddress(address)));
 }
 
-std::string File::getAddress() {
-  hid_t current = getCurrentId();
-  // call once to get the address length, again to get whole address
-  std::size_t addrlen = H5Iget_name(current, NULL, 0);
-  char *caddr = new char[addrlen + 1];
-  H5Iget_name(current, caddr, addrlen + 1);
-  std::string address(caddr);
-  delete[] caddr;
-  // openAddress expects "/" to open root
-  // for consitency, this should return "/" at the root
-  if (address == "") {
-    address = "/";
+NexusAddress File::groupAddress(NexusAddress const &addr) const {
+  if (hasData(addr)) {
+    return addr.parent_path();
+  } else if (hasAddress(addr)) {
+    return addr;
+  } else {
+    throw NXEXCEPTION("Address " + addr + " does not exist");
   }
-  return address;
 }
 
-bool File::hasAddress(std::string const &name) {
+std::string File::getAddress() const { return m_address; }
+
+bool File::hasAddress(std::string const &name) const {
   if (name == "/") { // NexusDescriptor does not keep the root, but it does exist
     return true;
+  } else {
+    return m_descriptor.isEntry(formAbsoluteAddress(name));
   }
-  std::string const address = formAbsoluteAddress(name);
-  return m_descriptor.isEntry(address);
 }
 
-bool File::hasGroup(std::string const &name, std::string const &class_type) {
+bool File::hasGroup(std::string const &name, std::string const &class_type) const {
   std::string const address = formAbsoluteAddress(name);
   return m_descriptor.isEntry(address, class_type);
 }
 
-bool File::hasData(std::string const &name) {
+bool File::hasData(std::string const &name) const {
   std::string const address = formAbsoluteAddress(name);
   return m_descriptor.isEntry(address, scientific_data_set);
 }
 
-bool File::isDataSetOpen() {
+bool File::isDataSetOpen() const {
   if (m_pfile_id->iCurrentD == 0) {
     return false;
   } else {
@@ -347,7 +342,7 @@ bool File::isDataSetOpen() {
   }
 }
 
-bool File::isDataInt() {
+bool File::isDataInt() const {
   if (m_pfile_id->iCurrentD == 0) {
     throw NXEXCEPTION("No dataset is open");
   }
@@ -357,16 +352,12 @@ bool File::isDataInt() {
   return dataclass == H5T_INTEGER;
 }
 
-std::string File::formAbsoluteAddress(std::string const &name) {
-  std::string new_name;
-  if (name.front() == '/') {
+NexusAddress File::formAbsoluteAddress(NexusAddress const &name) const {
+  NexusAddress new_name(name);
+  if (new_name.isAbsolute()) {
     new_name = name;
   } else {
-    std::string to_root = this->getAddress();
-    if (to_root == "/") {
-      to_root = "";
-    }
-    new_name = to_root + "/" + name;
+    new_name = groupAddress(getAddress()) / name;
   }
   // the caller is responsible for checking that it exists
   return new_name;
@@ -407,166 +398,88 @@ void File::registerEntry(std::string const &address, std::string const &name) {
 // GROUP MAKE / OPEN / CLOSE
 //------------------------------------------------------------------------------------------------------------------
 
-void File::makeGroup(const std::string &name, const std::string &class_name, bool open_group) {
+void File::makeGroup(const std::string &name, const std::string &nxclass, bool open_group) {
   if (name.empty()) {
     throw NXEXCEPTION("Supplied empty name to makeGroup");
   }
-  if (class_name.empty()) {
+  if (nxclass.empty()) {
     throw NXEXCEPTION("Supplied empty class name to makeGroup");
   }
 
-  pNexusFile5 pFile;
-  hid_t iVID;
-  hid_t attr1, aid1, aid2;
-  std::string pBuffer;
+  // get full address
+  NexusAddress const absaddr(formAbsoluteAddress(name));
+  // create group with H5Util by getting an H5File object from iFID
+  H5::H5File h5file(m_pfile_id->iFID);
+  Mantid::NeXus::H5Util::createGroupNXS(h5file, absaddr, nxclass);
 
-  pFile = assertNXID(m_pfile_id);
-  /* create and configure the group */
-  if (pFile->iCurrentG == 0) {
-    pBuffer = "/" + std::string(name);
-  } else {
-    pBuffer = "/" + std::string(pFile->name_ref) + "/" + std::string(name);
-  }
-  iVID = H5Gcreate(pFile->iFID, pBuffer.c_str(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-  if (iVID < 0) {
-    throw NXEXCEPTION("Could not create Group");
-  }
-  aid2 = H5Screate(H5S_SCALAR);
-  aid1 = H5Tcopy(H5T_C_S1);
-  H5Tset_size(aid1, class_name.length());
-  attr1 = H5Acreate(iVID, "NX_class", aid1, aid2, H5P_DEFAULT, H5P_DEFAULT);
-  if (attr1 < 0) {
-    throw NXEXCEPTION("Failed to store class name");
-  }
-  if (H5Awrite(attr1, aid1, const_cast<char *>(static_cast<const char *>(class_name.c_str()))) < 0) {
-    throw NXEXCEPTION("Failed to store class name");
-  }
-  /* close group */
-  hid_t iRet = H5Sclose(aid2);
-  iRet += H5Tclose(aid1);
-  iRet += H5Aclose(attr1);
-  iRet += H5Gclose(iVID);
-  UNUSED_ARG(iRet);
-
-  registerEntry(formAbsoluteAddress(name), class_name);
+  // cleanup
+  registerEntry(absaddr, nxclass);
   if (open_group) {
-    this->openGroup(name, class_name);
+    this->openGroup(name, nxclass);
   }
 }
 
-void File::openGroup(std::string const &name, std::string const &class_name) {
+void File::openGroup(std::string const &name, std::string const &nxclass) {
   if (name.empty()) {
     throw NXEXCEPTION("Supplied empty name");
   }
-  if (class_name.empty()) {
+  if (nxclass.empty()) {
     throw NXEXCEPTION("Supplied empty class name");
   }
-  pNexusFile5 pFile;
-  hid_t attr1, iVID;
-  herr_t iRet;
-  std::string pBuffer;
 
-  pFile = assertNXID(m_pfile_id);
-  if (pFile->iCurrentG == 0) {
-    pBuffer = name;
-  } else {
-    pBuffer = pFile->name_tmp + "/" + name;
+  NexusAddress const absaddr(formAbsoluteAddress(name));
+  if (absaddr == getAddress()) {
+    // we are already there
+    return;
   }
-  iVID = H5Gopen(pFile->iFID, pBuffer.c_str(), H5P_DEFAULT);
+
+  hid_t iVID;
+  if (m_descriptor.isEntry(absaddr, nxclass)) {
+    iVID = H5Gopen(m_pfile_id->iFID, absaddr.c_str(), H5P_DEFAULT);
+  } else {
+    throw NXEXCEPTION("The supplied group " + absaddr + " does not exist");
+  }
+
   if (iVID < 0) {
     std::stringstream msg;
-    msg << "Group " << pFile->name_tmp << " does not exist";
+    msg << "Group " << absaddr.string() << " does not exist";
     throw NXEXCEPTION(msg.str());
-  }
-  pFile->iCurrentG = iVID;
-  pFile->name_tmp = pBuffer;
-  pFile->name_ref = pBuffer;
-
-  if ((!class_name.empty()) && (strcmp(class_name.c_str(), NX_UNKNOWN_GROUP) != 0)) {
-    /* check group attribute */
-    iRet = H5Aiterate(pFile->iCurrentG, H5_INDEX_CRT_ORDER, H5_ITER_INC, 0, attr_check, NULL);
-    if (iRet < 0) {
-      throw NXEXCEPTION("Error iterating through attribute list");
-    } else if (iRet == 1) {
-      /* group attribute was found */
-    } else {
-      /* no group attribute available */
-      throw NXEXCEPTION("No group attribute available");
-    }
-    /* check contents of group attribute */
-    attr1 = H5Aopen_by_name(pFile->iCurrentG, ".", "NX_class", H5P_DEFAULT, H5P_DEFAULT);
-    if (attr1 < 0) {
-      throw NXEXCEPTION("Error opening NX_class group attribute");
-    }
-    const H5::Group group(pFile->iCurrentG);
-    std::string data;
-    Mantid::NeXus::H5Util::readStringAttribute(group, "NX_class", data);
-    if (data == class_name) {
-      /* test OK */
-    } else {
-      H5Aclose(attr1);
-      std::stringstream msg;
-      msg << "Group class is not identical: '" << data << "' != '" << class_name << "'";
-      throw NXEXCEPTION(msg.str());
-    }
-    H5Aclose(attr1);
   }
 
   /* maintain stack */
-  pFile->iStack5.emplace_back(name, pFile->iCurrentG, 0);
-  pFile->iCurrentIDX = 0;
-  pFile->iCurrentD = 0;
-  NXI5KillDir(pFile);
+  m_pfile_id->iCurrentG = iVID;
+  m_pfile_id->iStack5.push_back(iVID);
+  m_pfile_id->groupaddr = absaddr;
+  m_address = absaddr;
+  // if we are opening a new group, close whatever dataset is already open
+  if (m_pfile_id->iCurrentD != 0) {
+    closeData();
+  }
 }
 
 void File::closeGroup() {
-  pNexusFile5 pFile;
-
-  pFile = assertNXID(m_pfile_id);
-  /* first catch the trivial case: we are at root and cannot get
-     deeper into a negative directory hierarchy (anti-directory)
-   */
+  pNexusFile5 pFile = assertNXID(m_pfile_id);
   if (pFile->iCurrentG == 0) {
-    NXI5KillDir(pFile);
+    // do nothing
   } else {
-    /* close the current group and decrement name_ref */
-    H5Gclose(pFile->iCurrentG);
-    size_t i = pFile->iStack5.back().irefn.size();
-    size_t ii = pFile->name_ref.size();
-    if (pFile->iStack5.size() > 2) {
-      ii = ii - i - 1;
-    } else {
-      ii = ii - i;
+    // if a group is closed while a dataset is still open,
+    // make sure the dataset and all its parts are closed
+    if (pFile->iCurrentD != 0) {
+      closeData();
     }
-    if (ii > 0) {
-      char *uname = strdup(pFile->name_ref.c_str());
-      char *u1name = NULL;
-      u1name = static_cast<char *>(malloc((ii + 1) * sizeof(char)));
-      memset(u1name, 0, ii);
-      for (i = 0; i < ii; i++) {
-        *(u1name + i) = *(uname + i);
-      }
-      *(u1name + i) = '\0';
-      /*
-         strncpy(u1name, uname, ii);
-       */
-      pFile->name_ref = u1name;
-      pFile->name_tmp = u1name;
-      free(uname);
-      free(u1name);
-    } else {
-      pFile->name_ref = "";
-      pFile->name_tmp = "";
+    // close the current group and maintain stack
+    if (H5Gclose(pFile->iCurrentG) < 0) {
+      throw NXEXCEPTION("Failed to close group at " + pFile->groupaddr);
     }
-    NXI5KillDir(pFile);
-    pFile->iCurrentD = 0;
+    pFile->groupaddr = pFile->groupaddr.parent_path();
     pFile->iStack5.pop_back();
     if (!pFile->iStack5.empty()) {
-      pFile->iCurrentG = pFile->iStack5.back().iVref;
+      pFile->iCurrentG = pFile->iStack5.back();
     } else {
       pFile->iCurrentG = 0;
     }
   }
+  m_address = m_address.parent_path();
 }
 
 //------------------------------------------------------------------------------------------------------------------
@@ -596,35 +509,48 @@ void File::openData(std::string const &name) {
   if (name.empty()) {
     throw NXEXCEPTION("Supplied empty name to openData");
   }
-  pNexusFile5 pFile;
 
-  pFile = assertNXID(m_pfile_id);
-  /* clear pending attribute directories first */
-  NXI5KillAttDir(pFile);
-
+  pNexusFile5 pFile = assertNXID(m_pfile_id);
   // close any open dataset
   if (pFile->iCurrentD != 0) {
-    H5Dclose(pFile->iCurrentD);
+    closeData();
   }
 
+  NexusAddress absaddr(formAbsoluteAddress(name));
+
   /* find the ID number and open the dataset */
-  pFile->iCurrentD = H5Dopen(pFile->iCurrentG, name.c_str(), H5P_DEFAULT);
-  if (pFile->iCurrentD < 0) {
+  hid_t newData, newType, newSpace;
+  newData = H5Dopen(pFile->iFID, absaddr.c_str(), H5P_DEFAULT);
+  if (newData < 0) {
     pFile->iCurrentD = 0;
-    throw NXEXCEPTION("dataset (" + name + ") not found at this level");
+    pFile->iCurrentT = 0;
+    pFile->iCurrentS = 0;
+    throw NXEXCEPTION("dataset (" + absaddr + ") not found at this level");
   }
   /* find the ID number of datatype */
-  pFile->iCurrentT = H5Dget_type(pFile->iCurrentD);
+  newType = H5Dget_type(newData);
   if (pFile->iCurrentT < 0) {
+    H5Dclose(newData);
+    pFile->iCurrentD = 0;
     pFile->iCurrentT = 0;
-    throw NXEXCEPTION("error opening dataset (" + name + ")");
+    pFile->iCurrentS = 0;
+    throw NXEXCEPTION("error opening dataset (" + absaddr + ")");
   }
   /* find the ID number of dataspace */
-  pFile->iCurrentS = H5Dget_space(pFile->iCurrentD);
+  newSpace = H5Dget_space(newData);
   if (pFile->iCurrentS < 0) {
+    H5Dclose(newData);
+    H5Tclose(newType);
+    pFile->iCurrentD = 0;
+    pFile->iCurrentT = 0;
     pFile->iCurrentS = 0;
-    throw NXEXCEPTION("HDF error opening dataset (" + name + ")");
+    throw NXEXCEPTION("HDF error opening dataset (" + absaddr + ")");
   }
+  // now maintain stack
+  pFile->iCurrentD = newData;
+  pFile->iCurrentT = newType;
+  pFile->iCurrentS = newSpace;
+  m_address = absaddr;
 }
 
 template <typename NumT> void File::putData(NumT const *data) {
@@ -739,17 +665,31 @@ string File::getStrData() {
 }
 
 void File::closeData() {
-  pNexusFile5 pFile;
-  herr_t iRet;
-
-  pFile = assertNXID(m_pfile_id);
-  iRet = H5Sclose(pFile->iCurrentS);
-  iRet += H5Tclose(pFile->iCurrentT);
-  iRet += H5Dclose(pFile->iCurrentD);
-  if (iRet < 0) {
-    throw NXEXCEPTION("Cannot end access to dataset");
+  herr_t iRet = 0;
+  if (m_pfile_id->iCurrentS != 0) {
+    iRet = H5Sclose(m_pfile_id->iCurrentS);
+    if (iRet < 0) {
+      throw NXEXCEPTION("Cannot end access to dataset: failed to close dataspace");
+    }
   }
-  pFile->iCurrentD = 0;
+  if (m_pfile_id->iCurrentT != 0) {
+    iRet = H5Tclose(m_pfile_id->iCurrentT);
+    if (iRet < 0) {
+      throw NXEXCEPTION("Cannot end access to dataset: failed to close datatype");
+    }
+  }
+  if (m_pfile_id->iCurrentD != 0) {
+    iRet = H5Dclose(m_pfile_id->iCurrentD);
+    if (iRet < 0) {
+      throw NXEXCEPTION("Cannot end access to dataset: failed to close dataset");
+    }
+  } else {
+    throw NXEXCEPTION("Cannot end access to dataset: no data open");
+  }
+  m_pfile_id->iCurrentD = 0;
+  m_pfile_id->iCurrentS = 0;
+  m_pfile_id->iCurrentT = 0;
+  m_address = m_address.parent_path();
 }
 
 //------------------------------------------------------------------------------------------------------------------
@@ -922,9 +862,10 @@ void File::makeCompData(std::string const &name, NXnumtype const type, DimVector
     msg << "HDF cannot close dataset";
     throw NXEXCEPTION(msg.str());
   }
-  registerEntry(formAbsoluteAddress(name), scientific_data_set);
+  NexusAddress absaddr(formAbsoluteAddress(name));
+  registerEntry(absaddr, scientific_data_set);
   if (open_data) {
-    this->openData(name);
+    this->openData(absaddr);
   }
 }
 
@@ -1351,8 +1292,6 @@ Info File::getInfo() {
   return info;
 }
 
-void File::initGroupDir() { m_pfile_id->iStack5.back().iCurrentIDX = 0; }
-
 namespace {
 herr_t gr_iterate_cb(hid_t loc_id, const char *name, const H5L_info2_t *info, void *op_data) {
   UNUSED_ARG(info);
@@ -1374,7 +1313,7 @@ herr_t gr_iterate_cb(hid_t loc_id, const char *name, const H5L_info2_t *info, vo
         H5Tclose(atype);
         H5Aclose(attr);
       } else {
-        type_str = "NX_UNKNOWN_GROUP";
+        type_str = unknown_group_spec;
       }
       H5Gclose(grp);
     }
@@ -1389,28 +1328,36 @@ herr_t gr_iterate_cb(hid_t loc_id, const char *name, const H5L_info2_t *info, vo
 }
 } // namespace
 
-Entries File::getEntries() {
+Entries File::getEntries() const {
   Entries result;
   this->getEntries(result);
   return result;
 }
 
-void File::getEntries(Entries &result) {
+void File::getEntries(Entries &result) const {
   result.clear();
-
-  pNexusFile5 pFile = assertNXID(m_pfile_id);
-  if (pFile->name_ref.empty()) {
-    pFile->name_ref = "/"; // Ensure we start at the root
-  }
-
-  int iRet = H5Literate_by_name(pFile->iFID, pFile->name_ref.c_str(), H5_INDEX_NAME, H5_ITER_NATIVE, nullptr,
-                                gr_iterate_cb, &result, H5P_DEFAULT);
-  if (iRet < 0) {
-    throw NXEXCEPTION("H5Literate failed on group: " + pFile->name_ref);
+  auto current = getCurrentObject();
+  for (size_t i = 0; i < current->getNumObjs(); i++) {
+    std::string name = current->getObjnameByIdx(i);
+    std::string className;
+    H5G_obj_t type = current->getObjTypeByIdx(i);
+    if (type == H5G_GROUP) {
+      H5::Group grp = current->openGroup(name);
+      if (grp.attrExists(group_class_spec)) {
+        H5::Attribute attr = grp.openAttribute(group_class_spec);
+        attr.read(attr.getDataType(), className);
+      } else {
+        className = unknown_group_spec;
+      }
+    } else if (type == H5G_DATASET) {
+      className = scientific_data_set;
+    }
+    if (!className.empty())
+      result[name] = className;
   }
 }
 
-std::string File::getTopLevelEntryName() {
+std::string File::getTopLevelEntryName() const {
   std::string top("");
   // check all of the NXentry's for one at top-level
   auto allEntryAddresses = m_descriptor.allAddressesOfType("NXentry");
@@ -1498,30 +1445,6 @@ template <> MANTID_NEXUS_DLL void File::getAttr(const std::string &name, std::st
 }
 
 template <typename NumT> void File::getAttr(const std::string &name, NumT &value) {
-  // hid_t vid = getCurrentId();
-
-  // // open the attribute
-  // hid_t attr = H5Aopen(vid, name.c_str(), H5P_DEFAULT);
-  // if (attr < 0) {
-  //   throw NXEXCEPTION("ERROR: attribute \"" + name + "\" not found");
-  // }
-
-  // // ensure the attribute is a scalar
-  // hid_t filespace = H5Aget_space(attr);
-  // if (H5Sget_simple_extent_type(filespace) != H5S_SCALAR) {
-  //   H5Sclose(filespace);
-  //   H5Aclose(attr);
-  //   throw NXEXCEPTION("ERROR: attribute arrays not supported by this api");
-  // }
-  // H5Sclose(filespace);
-
-  // hid_t datatype = nxToHDF5Type(getType<NumT>());
-  // herr_t iret = H5Aread(attr, datatype, &value);
-  // H5Tclose(datatype);
-  // H5Aclose(attr);
-  // if (iret < 0) {
-  //   throw NXEXCEPTION("ERROR: could not read attribute data for \"" + name + "\"");
-  // }
   auto current = getCurrentObject();
   try {
     value = Mantid::NeXus::H5Util::readNumAttributeCoerce<NumT>(*current, name);
@@ -1595,7 +1518,7 @@ std::vector<AttrInfo> File::getAttrInfos() {
   return infos;
 }
 
-bool File::hasAttr(const std::string &name) {
+bool File::hasAttr(const std::string &name) const {
   hid_t current = getCurrentId();
   return H5Aexists(current, name.c_str()) > 0;
 }
@@ -1606,17 +1529,14 @@ bool File::hasAttr(const std::string &name) {
 
 NXlink File::getGroupID() {
   NXlink link;
-  pNexusFile5 pFile;
-
-  pFile = assertNXID(m_pfile_id);
-  if (pFile->iCurrentG == 0) {
+  if (m_pfile_id->iCurrentG == 0) {
     throw NXEXCEPTION("getGroupID failed, No current group open");
   }
 
   try {
     getAttr(target_attr_name, link.targetAddress);
   } catch (const Mantid::Nexus::Exception &) {
-    link.targetAddress = buildCurrentAddress(pFile);
+    link.targetAddress = getAddress();
   }
   link.linkType = NXentrytype::group;
   return link;
@@ -1624,19 +1544,15 @@ NXlink File::getGroupID() {
 
 NXlink File::getDataID() {
   NXlink link;
-  pNexusFile5 pFile;
-
-  pFile = assertNXID(m_pfile_id);
-
   /* we cannot return ID's when no datset is open */
-  if (pFile->iCurrentD <= 0) {
+  if (!isDataSetOpen()) {
     throw NXEXCEPTION("getDataID failed, No current dataset open");
   }
 
   try {
     getAttr(target_attr_name, link.targetAddress);
   } catch (const Mantid::Nexus::Exception &) {
-    link.targetAddress = buildCurrentAddress(pFile);
+    link.targetAddress = getAddress();
   }
 
   link.linkType = NXentrytype::sds;
@@ -1644,67 +1560,30 @@ NXlink File::getDataID() {
 }
 
 void File::makeLink(NXlink const &link) {
-  pNexusFile5 pFile;
-  std::string linkTarget;
-
-  pFile = assertNXID(m_pfile_id);
-  if (pFile->iCurrentG == 0) { /* root level, can not link here */
+  if (m_pfile_id->iCurrentG == 0) { /* root level, can not link here */
     throw NXEXCEPTION("makeLink failed");
   }
 
-  /*
-     locate name of the element to link
-   */
-  const char *itemName = strrchr(link.targetAddress.data(), '/');
-  if (itemName == NULL) {
-    throw NXEXCEPTION("makeLink failed bad link structure");
-  }
-  itemName++;
+  // locate name of the element to link
+  NexusAddress target(link.targetAddress);
+  std::string itemName(target.stem());
 
   /*
      build addressname to link from our current group and the name
      of the thing to link
    */
-  linkTarget = "/" + pFile->name_ref + "/" + itemName;
-  H5Lcreate_hard(pFile->iFID, link.targetAddress.c_str(), H5L_SAME_LOC, linkTarget.c_str(), H5P_DEFAULT, H5P_DEFAULT);
+  std::string linkTarget(m_pfile_id->groupaddr / itemName);
+  H5Lcreate_hard(m_pfile_id->iFID, link.targetAddress.c_str(), H5L_SAME_LOC, linkTarget.c_str(), H5P_DEFAULT,
+                 H5P_DEFAULT);
 
-  hid_t dataID, aid2, aid1, attID;
+  // register the entry
+  registerEntry(linkTarget, m_descriptor.classTypeForName(link.targetAddress));
 
-  /*
-     set the target attribute
-   */
-  if (link.linkType == NXentrytype::sds) {
-    dataID = H5Dopen(pFile->iFID, link.targetAddress.c_str(), H5P_DEFAULT);
-  } else {
-    dataID = H5Gopen(pFile->iFID, link.targetAddress.c_str(), H5P_DEFAULT);
-  }
-  if (dataID < 0) {
-    throw NXEXCEPTION("Internal error, address to link does not exist");
-  }
-  hid_t status = H5Aopen_by_name(dataID, ".", target_attr_name.c_str(), H5P_DEFAULT, H5P_DEFAULT);
-  if (status > 0) {
-    H5Aclose(status);
-    status = H5Adelete(dataID, target_attr_name.c_str());
-    if (status < 0) {
-      return;
-    }
-  }
-  aid2 = H5Screate(H5S_SCALAR);
-  aid1 = H5Tcopy(H5T_C_S1);
-  H5Tset_size(aid1, link.targetAddress.size());
-  attID = H5Acreate(dataID, target_attr_name.c_str(), aid1, aid2, H5P_DEFAULT, H5P_DEFAULT);
-  if (attID < 0) {
-    return;
-  }
-  UNUSED_ARG(H5Awrite(attID, aid1, link.targetAddress.c_str()));
-  H5Tclose(aid1);
-  H5Sclose(aid2);
-  H5Aclose(attID);
-  if (link.linkType == NXentrytype::sds) {
-    H5Dclose(dataID);
-  } else {
-    H5Gclose(dataID);
-  }
+  // set the target attribute
+  NexusAddress here(m_address);
+  openAddress(linkTarget);
+  putAttr(target_attr_name, link.targetAddress);
+  openAddress(here);
 }
 
 } // namespace Mantid::Nexus

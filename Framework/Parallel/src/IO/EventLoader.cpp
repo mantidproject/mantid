@@ -8,6 +8,7 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/MantidVersion.h"
 #include "MantidKernel/MultiThreaded.h"
+#include "MantidNexus/H5Util.h"
 #include "MantidParallel/IO/EventLoaderHelpers.h"
 #include "MantidParallel/IO/MultiProcessEventLoader.h"
 #include "MantidParallel/IO/NXEventDataLoader.h"
@@ -25,9 +26,7 @@ namespace Mantid::Parallel::IO::EventLoader {
 std::unordered_map<int32_t, size_t> makeAnyEventIdToBankMap(const std::string &filename, const std::string &groupName,
                                                             const std::vector<std::string> &bankNames) {
   std::unordered_map<int32_t, size_t> idToBank;
-  H5::FileAccPropList access_plist;
-  access_plist.setFcloseDegree(H5F_CLOSE_STRONG);
-  H5::H5File file(filename, H5F_ACC_RDONLY, access_plist);
+  H5::H5File file(filename, H5F_ACC_RDONLY, Mantid::NeXus::H5Util::defaultFileAcc());
   H5::Group group = file.openGroup(groupName);
   for (size_t i = 0; i < bankNames.size(); ++i) {
     try {
