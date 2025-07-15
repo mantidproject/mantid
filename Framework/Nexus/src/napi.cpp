@@ -39,6 +39,7 @@
 
 // cppcheck-suppress-begin [unmatchedSuppression, variableScope]
 // cppcheck-suppress-begin [constVariablePointer, constParameterReference, unusedVariable, unreadVariable]
+// cppcheck-suppress-begin [nullPointerArithmeticOutOfMemory, nullPointerOutOfMemory]
 
 // this has to be after the other napi includes
 #include "MantidNexus/napi5.h"
@@ -1309,5 +1310,6 @@ std::string NXIformatNeXusTime() {
   return res;
 }
 
+// cppcheck-suppress-end [nullPointerArithmeticOutOfMemory, nullPointerOutOfMemory]
 // cppcheck-suppress-end [constVariablePointer, constParameterReference, unusedVariable, unreadVariable]
 // cppcheck-suppress-end [unmatchedSuppression, variableScope]

@@ -205,7 +205,7 @@ int main(int argc, char *argv[]) {
     return TEST_SUCCEED; /* create only */
   }
 
-  std::string name, nxclass, address;
+  std::string address;
 
   // read test
   std::cout << "Read/Write to read \"" << nxFile << "\"" << std::endl;

@@ -1018,9 +1018,9 @@ template <typename NumT> void File::getSlab(NumT *data, DimSizeVector const &sta
   }
 
   pNexusFile5 pFile;
-  hsize_t myStart[H5S_MAX_RANK];
-  hsize_t mySize[H5S_MAX_RANK];
-  hsize_t mStart[H5S_MAX_RANK];
+  hsize_t myStart[H5S_MAX_RANK] = {0};
+  hsize_t mySize[H5S_MAX_RANK] = {0};
+  hsize_t mStart[H5S_MAX_RANK] = {0};
   hid_t memspace, iRet;
   H5T_class_t tclass;
   hid_t memtype_id;
@@ -1066,8 +1066,11 @@ template <typename NumT> void File::getSlab(NumT *data, DimSizeVector const &sta
       if (mySize[0] == 1) {
         mySize[0] = H5Tget_size(pFile->iCurrentT);
       }
-      tmp_data = static_cast<char *>(malloc((size_t)mySize[0]));
-      memset(tmp_data, 0, sizeof(mySize[0]));
+      if (mySize[0] > 0) {
+        tmp_data = static_cast<char *>(calloc(mySize[0]), sizeof(char));
+      } else {
+        tmp_data = static_cast<char *>(calloc(1, sizeof(char)));
+      }
       iRet = H5Sselect_hyperslab(pFile->iCurrentS, H5S_SELECT_SET, mStart, NULL, mySize, NULL);
     } else {
       iRet = H5Sselect_hyperslab(pFile->iCurrentS, H5S_SELECT_SET, myStart, NULL, mySize, NULL);
