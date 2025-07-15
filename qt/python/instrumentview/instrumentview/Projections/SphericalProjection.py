@@ -4,13 +4,13 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from instrumentview.Projections.projection import projection
+from instrumentview.Projections.Projection import Projection
 import numpy as np
 from instrumentview.Detectors import DetectorPosition
 
 
-class cylindrical_projection(projection):
-    """2D projection with a cylindrical coordinate system, see https://en.wikipedia.org/wiki/Cylindrical_coordinate_system"""
+class SphericalProjection(Projection):
+    """2D projection with a spherical coordinate system, see https://en.wikipedia.org/wiki/Spherical_coordinate_system"""
 
     def __init__(
         self,
@@ -23,15 +23,14 @@ class cylindrical_projection(projection):
 
     def _calculate_2d_coordinates(self, detector_position: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
         detector_relative_position = detector_position - self._sample_position
-        z = detector_relative_position.dot(self._projection_axis)
+        v = detector_relative_position.dot(self._projection_axis)
         x = detector_relative_position.dot(self._x_axis)
         y = detector_relative_position.dot(self._y_axis)
 
+        r = np.sqrt(x * x + y * y + v * v)
         # u_scale = 1. / np.sqrt(x * x + y * y)
-        v_scale = 1.0 / np.sqrt(x * x + y * y + z * z)
+        # v_scale = 1. / r
 
-        v = z * v_scale
         u = -np.atan2(y, x)  # * u_scale
-
-        # use equal area cylindrical projection with v = sin(latitude), u = longitude
+        v = -np.acos(v / r)  # * v_scale
         return (u, v)

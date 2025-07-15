@@ -5,8 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from instrumentview.Detectors import DetectorInfo
-import instrumentview.Projections.spherical_projection as iv_spherical
-import instrumentview.Projections.cylindrical_projection as iv_cylindrical
+import instrumentview.Projections.SphericalProjection as iv_spherical
+import instrumentview.Projections.CylindricalProjection as iv_cylindrical
 import numpy as np
 import math
 
@@ -139,9 +139,9 @@ class FullInstrumentViewModel:
         """Calculate the 2D projection with the specified axis. Can be either cylindrical or spherical."""
         root_position = np.array(self._component_info.position(0))
         projection = (
-            iv_spherical.spherical_projection(self._sample_position, root_position, self._detector_positions, np.array(axis))
+            iv_spherical.SphericalProjection(self._sample_position, root_position, self._detector_positions, np.array(axis))
             if is_spherical
-            else iv_cylindrical.cylindrical_projection(self._sample_position, root_position, self._detector_positions, np.array(axis))
+            else iv_cylindrical.CylindricalProjection(self._sample_position, root_position, self._detector_positions, np.array(axis))
         )
         self._detector_projection_positions[:, :2] = projection.positions()  # Assign only x and y coordinate
         return self._detector_projection_positions

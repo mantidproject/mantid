@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 import unittest.mock
-from instrumentview.Projections.cylindrical_projection import cylindrical_projection
+from instrumentview.Projections.CylindricalProjection import CylindricalProjection
 
 import numpy as np
 import unittest
@@ -20,7 +20,7 @@ class TestProjection(unittest.TestCase):
         cls.detector_positions = np.array([[0, 1, 0], [2, 1, 0], [-2, 1, 0]])
 
     def test_apply_x_correction_below_min(self):
-        proj = cylindrical_projection(self.sample_position, self.root_position, self.detector_positions, np.array([0, 1, 0]))
+        proj = CylindricalProjection(self.sample_position, self.root_position, self.detector_positions, np.array([0, 1, 0]))
         x_min = proj._x_range[0]
         x_max = proj._x_range[1]
         proj._detector_x_coordinates[0] = x_min - np.pi / 2
@@ -30,7 +30,7 @@ class TestProjection(unittest.TestCase):
         self.assertLessEqual(proj._detector_x_coordinates[0], x_max)
 
     def test_apply_x_correction_above_max(self):
-        proj = cylindrical_projection(self.sample_position, self.root_position, self.detector_positions, np.array([0, 1, 0]))
+        proj = CylindricalProjection(self.sample_position, self.root_position, self.detector_positions, np.array([0, 1, 0]))
         x_min = proj._x_range[0]
         x_max = proj._x_range[1]
         proj._detector_x_coordinates[0] = x_max + np.pi / 2
@@ -47,7 +47,7 @@ class TestProjection(unittest.TestCase):
             "instrumentview.Projections.cylindrical_projection.cylindrical_projection._calculate_2d_coordinates",
             side_effect=mock_calculate_2d_coordinates,
         ):
-            proj = cylindrical_projection(self.sample_position, self.root_position, self.detector_positions, np.array([0, 0, 1]))
+            proj = CylindricalProjection(self.sample_position, self.root_position, self.detector_positions, np.array([0, 0, 1]))
             np.testing.assert_allclose(proj._detector_x_coordinates, [0, np.pi / 4, -np.pi / 4], rtol=1e-3)
             np.testing.assert_allclose(proj._x_range, [-np.pi / 4, np.pi / 4], rtol=1e-3)
             proj._u_period = np.pi / 2

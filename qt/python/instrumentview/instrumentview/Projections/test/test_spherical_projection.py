@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest.mock
-from instrumentview.Projections.spherical_projection import spherical_projection
+from instrumentview.Projections.SphericalProjection import SphericalProjection
 import unittest
 import numpy as np
 
@@ -47,7 +47,7 @@ class TestSphericalProjection(unittest.TestCase):
         )
 
     def _run_test(self, projection_axis, expected_x_axis, expected_y_axis, expected_projections):
-        sphere = spherical_projection(self.sample_position, self.root_position, self.detector_positions, np.array(projection_axis))
+        sphere = SphericalProjection(self.sample_position, self.root_position, self.detector_positions, np.array(projection_axis))
         np.testing.assert_allclose(sphere._projection_axis, projection_axis, atol=self.abs_tol)
         np.testing.assert_allclose(sphere._x_axis, expected_x_axis, atol=self.abs_tol)
         np.testing.assert_allclose(sphere._y_axis, expected_y_axis, atol=self.abs_tol)
