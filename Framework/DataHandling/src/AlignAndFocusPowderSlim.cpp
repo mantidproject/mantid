@@ -48,6 +48,7 @@ using Mantid::Kernel::ArrayBoundedValidator;
 using Mantid::Kernel::ArrayProperty;
 using Mantid::Kernel::Direction;
 using Mantid::Kernel::EnumeratedStringProperty;
+using Mantid::Kernel::TimeROI;
 using Mantid::Kernel::TimeSeriesProperty;
 
 namespace { // anonymous namespace
@@ -148,6 +149,26 @@ std::vector<double> calculate_difc_focused(const double l1, const std::vector<do
                  });
 
   return difc;
+}
+
+std::vector<size_t> calculate_pulse_indices_from_timeroi(const TimeROI &roi,
+                                                         const std::vector<DateAndTime> &pulse_times) {
+  std::vector<size_t> indices;
+  indices.reserve(roi.numBoundaries());
+
+  for (size_t i = 0; i < roi.numBoundaries(); i += 2) {
+    const auto start = std::lower_bound(pulse_times.cbegin(), pulse_times.cend(), roi.timeAtIndex(i));
+    if (start != pulse_times.cend()) {
+      indices.push_back(std::distance(pulse_times.cbegin(), start));
+      const auto stop = std::lower_bound(pulse_times.cbegin(), pulse_times.cend(), roi.timeAtIndex(i + 1));
+      if (stop != pulse_times.cend())
+        indices.push_back(std::distance(pulse_times.cbegin(), stop));
+      else
+        indices.push_back(std::numeric_limits<size_t>::max());
+    }
+  }
+
+  return indices;
 }
 
 class NexusLoader {
@@ -619,32 +640,23 @@ void AlignAndFocusPowderSlim::exec() {
     const auto pulse_times =
         std::make_unique<std::vector<Mantid::Types::Core::DateAndTime>>(frequency_log->timesAsVector());
     const auto startOfRun = wksp->run().getFirstPulseTime();
-    g_log.information() << "Pulse times from " << pulse_times->front() << " to " << pulse_times->back()
-                        << " with length " << pulse_times->size() << " and start of run at " << startOfRun << '\n';
-    if (!std::is_sorted(pulse_times->cbegin(), pulse_times->cend())) {
-      g_log.warning() << "Pulse times are not sorted, pulse time filtering will not be accurate\n";
+
+    TimeROI roi;
+    try {
+      roi.addROI(startOfRun + (filter_time_start_sec == EMPTY_DBL() ? 0.0 : filter_time_start_sec),
+                 startOfRun + filter_time_stop_sec); // start and stop times in seconds
+    } catch (const std::runtime_error &e) {
+      throw std::invalid_argument("Invalid time range for filtering: " + std::string(e.what()));
     }
+    const auto indices = calculate_pulse_indices_from_timeroi(roi, *pulse_times);
+    g_log.information() << "Time filtering will use " << indices.size() / 2 << " time ranges, starting at index "
+                        << indices.front() << " and stopping at index " << indices.back() << '\n';
 
-    if (filter_time_start_sec != EMPTY_DBL()) {
-      const auto filter_time_start = startOfRun + filter_time_start_sec;
-      const auto itStart = std::lower_bound(pulse_times->cbegin(), pulse_times->cend(), filter_time_start);
-      if (itStart == pulse_times->cend())
-        throw std::invalid_argument("Invalid pulse time filtering, start time will filter all pulses");
+    if (indices.empty())
+      throw std::invalid_argument("No valid pulse time indices found for filtering");
 
-      pulse_start_index = std::distance(pulse_times->cbegin(), itStart);
-    }
-
-    if (filter_time_stop_sec != EMPTY_DBL()) {
-      const auto filter_time_stop = startOfRun + filter_time_stop_sec;
-      const auto itStop = std::upper_bound(pulse_times->cbegin(), pulse_times->cend(), filter_time_stop);
-      if (itStop == pulse_times->cend())
-        pulse_stop_index = std::numeric_limits<size_t>::max();
-      else
-        pulse_stop_index = std::distance(pulse_times->cbegin(), itStop);
-    }
-
-    if (pulse_start_index >= pulse_stop_index)
-      throw std::invalid_argument("Invalid pulse time filtering");
+    pulse_start_index = indices.front();
+    pulse_stop_index = indices.back();
 
     g_log.information() << "Filtering pulses from " << pulse_start_index << " to " << pulse_stop_index << '\n';
   }
