@@ -105,7 +105,8 @@ void WorkspaceGroup::reorderMembersWithIndices(const std::vector<int> &indices) 
     return;
   }
 
-  if (!std::all_of(indices.cbegin(), indices.cend(), [&](int i) { return i >= 0 && i < m_workspaces.size(); })) {
+  if (!std::all_of(indices.cbegin(), indices.cend(),
+                   [&](const int i) { return i >= 0 && i < static_cast<int>(m_workspaces.size()); })) {
     g_log.warning("All indices must be >= 0 and < the number of workspaces in the group\n");
     return;
   }
