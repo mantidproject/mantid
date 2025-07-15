@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import numpy as np
+from dataclasses import dataclass
 
 
 class DetectorPosition(np.ndarray):
@@ -17,23 +18,17 @@ class DetectorPosition(np.ndarray):
         return np.allclose(self, other)
 
 
+@dataclass()
 class DetectorInfo:
-    """Class for wrapping up information relating to a detector. Used for transferring this info to the View to be displayed."""
+    """
+    Class for wrapping up information relating to a detector.
+    Used for transferring detector info from Model to View to be displayed.
+    """
 
-    def __init__(
-        self,
-        name: str,
-        detector_id: int,
-        workspace_index: int,
-        xyz_position: np.ndarray,
-        spherical_position: np.ndarray,
-        component_path: str,
-        pixel_counts: int,
-    ):
-        self.name = name
-        self.detector_id = detector_id
-        self.workspace_index = workspace_index
-        self.xyz_position = xyz_position
-        self.spherical_position = spherical_position
-        self.component_path = component_path
-        self.pixel_counts = pixel_counts
+    name: str
+    detector_id: int
+    workspace_index: int
+    xyz_position: np.ndarray
+    spherical_position: np.ndarray
+    component_path: str
+    pixel_counts: int
