@@ -652,7 +652,13 @@ template <> void File::getData<char>(char *data) {
 
   if (rank == 0 || rank == 1) {
     if (size == 1) {
-      *data = buffer[0];
+      if (isspace(buffer[0])) {
+        *data = '\0'; // if the only character is whitespace, return null
+      } else if (buffer[0] == '\0') {
+        *data = '\0'; // if the only character is null, return null
+      } else {
+        *data = buffer[0];
+      }
       return;
     }
 
