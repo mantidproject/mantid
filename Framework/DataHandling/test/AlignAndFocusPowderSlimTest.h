@@ -36,7 +36,8 @@ public:
   MatrixWorkspace_sptr run_algorithm(const std::string &filename, const std::vector<double> &xmin = {},
                                      const std::vector<double> &xmax = {}, const std::vector<double> &xdelta = {},
                                      const std::string binning = "Logarithmic",
-                                     const std::string binningUnits = "dSpacing") {
+                                     const std::string binningUnits = "dSpacing", const double timeMin = -1.,
+                                     const double timeMax = -1., const bool should_throw = false) {
     const std::string wksp_name("VULCAN");
 
     std::cout << "==================> " << filename << '\n';
@@ -56,6 +57,16 @@ public:
       TS_ASSERT_THROWS_NOTHING(alg.setProperty("XMax", xmax));
     if (!xdelta.empty())
       TS_ASSERT_THROWS_NOTHING(alg.setProperty("XDelta", xdelta));
+    if (timeMin > 0.)
+      TS_ASSERT_THROWS_NOTHING(alg.setProperty("FilterByTimeStart", timeMin));
+    if (timeMax > 0.)
+      TS_ASSERT_THROWS_NOTHING(alg.setProperty("FilterByTimeStop", timeMax));
+
+    if (should_throw) {
+      TS_ASSERT_THROWS(alg.execute(), const std::invalid_argument &);
+      return MatrixWorkspace_sptr();
+    }
+
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
     std::cout << "==================> " << timer << '\n';
@@ -236,23 +247,9 @@ public:
   }
 
   void test_start_stop_time_filtering() {
-    AlignAndFocusPowderSlim alg;
-    alg.setChild(true);
-    TS_ASSERT_THROWS_NOTHING(alg.initialize())
-    TS_ASSERT(alg.isInitialized());
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", "VULCAN_218062.nxs.h5"));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("FilterByTimeStart", 200.));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("FilterByTimeStop", 300.));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("BinningUnits", "TOF"));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("BinningMode", "Linear"));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("XMin", std::vector<double>{0.}));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("XMax", std::vector<double>{50000.}));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("XDelta", std::vector<double>{50000.}));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "unused"));
-    TS_ASSERT_THROWS_NOTHING(alg.execute());
-
-    MatrixWorkspace_sptr outputWS = alg.getProperty("OutputWorkspace");
-    TS_ASSERT(outputWS);
+    MatrixWorkspace_sptr outputWS =
+        run_algorithm("VULCAN_218062.nxs.h5", std::vector<double>{0.}, std::vector<double>{50000.},
+                      std::vector<double>{50000.}, "Linear", "TOF", 200., 300.);
 
     /* expected results came from running
 
@@ -268,6 +265,79 @@ public:
     TS_ASSERT_EQUALS(outputWS->readY(3).front(), 4244796);
     TS_ASSERT_EQUALS(outputWS->readY(4).front(), 1435593);
     TS_ASSERT_EQUALS(outputWS->readY(5).front(), 2734113);
+  }
+
+  void test_start_time_filtering() {
+    MatrixWorkspace_sptr outputWS =
+        run_algorithm("VULCAN_218062.nxs.h5", std::vector<double>{0.}, std::vector<double>{50000.},
+                      std::vector<double>{50000.}, "Linear", "TOF", 200., -1.);
+
+    /* expected results came from running
+
+    ws = LoadEventNexus("VULCAN_218062.nxs.h5", FilterByTimeStart=200, NumberOfBins=1)
+    grp = CreateGroupingWorkspace(ws, GroupDetectorsBy='bank')
+    ws = GroupDetectors(ws, CopyGroupingFromWorkspace="grp")
+    print(ws.extractY())
+    */
+
+    TS_ASSERT_EQUALS(outputWS->readY(0).front(), 16370014);
+    TS_ASSERT_EQUALS(outputWS->readY(1).front(), 16353116);
+    TS_ASSERT_EQUALS(outputWS->readY(2).front(), 18782610);
+    TS_ASSERT_EQUALS(outputWS->readY(3).front(), 18572804);
+    TS_ASSERT_EQUALS(outputWS->readY(4).front(), 6275399);
+    TS_ASSERT_EQUALS(outputWS->readY(5).front(), 11972050);
+  }
+
+  void test_stop_time_filtering() {
+    MatrixWorkspace_sptr outputWS =
+        run_algorithm("VULCAN_218062.nxs.h5", std::vector<double>{0.}, std::vector<double>{50000.},
+                      std::vector<double>{50000.}, "Linear", "TOF", -1., 300.);
+
+    /* expected results came from running
+
+    ws = LoadEventNexus("VULCAN_218062.nxs.h5", FilterByTimeStop=300, NumberOfBins=1)
+    grp = CreateGroupingWorkspace(ws, GroupDetectorsBy='bank')
+    ws = GroupDetectors(ws, CopyGroupingFromWorkspace="grp")
+    print(ws.extractY())
+    */
+
+    TS_ASSERT_EQUALS(outputWS->readY(0).front(), 10348627);
+    TS_ASSERT_EQUALS(outputWS->readY(1).front(), 10328566);
+    TS_ASSERT_EQUALS(outputWS->readY(2).front(), 11877182);
+    TS_ASSERT_EQUALS(outputWS->readY(3).front(), 11734382);
+    TS_ASSERT_EQUALS(outputWS->readY(4).front(), 3969153);
+    TS_ASSERT_EQUALS(outputWS->readY(5).front(), 7567195);
+  }
+
+  void test_all_time_filtering() {
+    // run is only ~600 seconds long so this include all events
+    MatrixWorkspace_sptr outputWS =
+        run_algorithm("VULCAN_218062.nxs.h5", std::vector<double>{0.}, std::vector<double>{50000.},
+                      std::vector<double>{50000.}, "Linear", "TOF", 0., 3000.);
+
+    /* expected results came from running
+
+    ws = LoadEventNexus("VULCAN_218062.nxs.h5", NumberOfBins=1)
+    grp = CreateGroupingWorkspace(ws, GroupDetectorsBy='bank')
+    ws = GroupDetectors(ws, CopyGroupingFromWorkspace="grp")
+    print(ws.extractY())
+    */
+
+    TS_ASSERT_EQUALS(outputWS->readY(0).front(), 22976166);
+    TS_ASSERT_EQUALS(outputWS->readY(1).front(), 22946029);
+    TS_ASSERT_EQUALS(outputWS->readY(2).front(), 26364490);
+    TS_ASSERT_EQUALS(outputWS->readY(3).front(), 26062390);
+    TS_ASSERT_EQUALS(outputWS->readY(4).front(), 8808959);
+    TS_ASSERT_EQUALS(outputWS->readY(5).front(), 16805132);
+  }
+
+  void test_invalid_time_filtering() {
+    // start time > stop time
+    run_algorithm("VULCAN_218062.nxs.h5", std::vector<double>{0.}, std::vector<double>{50000.},
+                  std::vector<double>{50000.}, "Linear", "TOF", 300., 200., true);
+    // start time longer than run time of ~600 seconds
+    run_algorithm("VULCAN_218062.nxs.h5", std::vector<double>{0.}, std::vector<double>{50000.},
+                  std::vector<double>{50000.}, "Linear", "TOF", 1000., 2000., true);
   }
 
   // ==================================
