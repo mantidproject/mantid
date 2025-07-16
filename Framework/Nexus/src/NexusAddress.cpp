@@ -88,6 +88,8 @@ NexusAddress NexusAddress::root() { return NexusAddress(nxroot); }
 
 std::string NexusAddress::operator+(std::string const &s) const { return m_resolved_path + s; }
 
+std::string NexusAddress::operator+(char const s[]) const { return m_resolved_path + s; }
+
 std::vector<std::string> NexusAddress::parts() const {
   std::vector<std::string> names;
   for (auto it = m_path.begin(); it != m_path.end(); it++) {
@@ -104,6 +106,8 @@ bool operator==(std::string const &s, Mantid::Nexus::NexusAddress const &p) { re
 bool operator!=(std::string const &s, Mantid::Nexus::NexusAddress const &p) { return s != p.string(); }
 
 std::string operator+(std::string const &s, Mantid::Nexus::NexusAddress const &p) { return s + p.string(); }
+
+std::string operator+(char const s[], Mantid::Nexus::NexusAddress const &p) { return s + p.string(); }
 
 std::ostream &operator<<(std::ostream &os, Mantid::Nexus::NexusAddress const &p) {
   os << p.string();

@@ -86,6 +86,8 @@ public:
 
   std::string operator+(std::string const &s) const;
 
+  std::string operator+(char const s[]) const;
+
   operator std::string() const { return m_resolved_path; }
 
   std::string const &string() const { return m_resolved_path; }
@@ -106,5 +108,7 @@ MANTID_NEXUS_DLL bool operator==(std::string const &s, Mantid::Nexus::NexusAddre
 MANTID_NEXUS_DLL bool operator!=(std::string const &s, Mantid::Nexus::NexusAddress const &p);
 
 MANTID_NEXUS_DLL std::string operator+(std::string const &s, Mantid::Nexus::NexusAddress const &p);
+
+MANTID_NEXUS_DLL std::string operator+(char const s[], Mantid::Nexus::NexusAddress const &p);
 
 MANTID_NEXUS_DLL std::ostream &operator<<(std::ostream &os, Mantid::Nexus::NexusAddress const &p);

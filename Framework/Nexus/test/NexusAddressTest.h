@@ -215,9 +215,12 @@ public:
     NexusAddress np("/entry1/two");
     std::string pref = "path located at ";
     std::string post = " is a good path";
+    char carr[] = " a c style string ";
 
     TS_ASSERT_EQUALS("path located at /entry1/two", pref + np);
     TS_ASSERT_EQUALS("/entry1/two is a good path", np + post);
+    TS_ASSERT_EQUALS(" a c style string /entry1/two", carr + np);
+    TS_ASSERT_EQUALS("/entry1/two a c style string ", np + carr);
   }
 
   std::string function_with_string_argument(std::string x) {
