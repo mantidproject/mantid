@@ -1,0 +1,1 @@
+- When mantidworkbench is installed with conda, ``mslice`` becomes an optional dependancy. However ``mslice`` would still be installed explicitly in mantid-developer metapackage, IDAaaS and inside standalone packages.
