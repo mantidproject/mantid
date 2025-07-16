@@ -19,14 +19,14 @@ class FullInstrumentViewPresenter:
     _CYLINDRICAL_Z = "Cylindrical Z"
     _PROJECTION_OPTIONS = [_SPHERICAL_X, _SPHERICAL_Y, _SPHERICAL_Z, _CYLINDRICAL_X, _CYLINDRICAL_Y, _CYLINDRICAL_Z]
 
-    def __init__(self, view, presenter):
+    def __init__(self, view, model):
         """For the given workspace, use the data from the model to plot the detectors. Also include points at the origin and
         any monitors."""
         pv.global_theme.color_cycler = "default"
         pv.global_theme.allow_empty_mesh = True
 
         self._view = view
-        self._model = presenter
+        self._model = model
 
         self._view.subscribe_presenter(self)
 
