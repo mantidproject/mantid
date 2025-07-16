@@ -10,6 +10,7 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidDataHandling/DllConfig.h"
 #include "MantidGeometry/IDTypes.h"
+#include "MantidKernel/TimeROI.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -56,12 +57,12 @@ private:
   std::map<detid_t, double> m_calibration; // detid: 1/difc
   std::set<detid_t> m_masked;
   bool is_time_filtered{false};
-  size_t pulse_start_index{0};
-  size_t pulse_stop_index{std::numeric_limits<size_t>::max()};
   /// Index to load start at in the file
   std::vector<int64_t> loadStart;
   /// How much to load in the file
   std::vector<int64_t> loadSize;
+  Kernel::TimeROI roi;
+  std::vector<size_t> pulse_indices;
 };
 
 } // namespace DataHandling

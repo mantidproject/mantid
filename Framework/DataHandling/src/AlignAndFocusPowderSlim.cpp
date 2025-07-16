@@ -173,32 +173,29 @@ std::vector<size_t> calculate_pulse_indices_from_timeroi(const TimeROI &roi,
 
 class NexusLoader {
 public:
-  NexusLoader(const bool is_time_filtered, const size_t pulse_start_index, const size_t pulse_stop_index)
-      : m_is_time_filtered(is_time_filtered), m_pulse_start_index(pulse_start_index),
-        m_pulse_stop_index(pulse_stop_index) {}
+  NexusLoader(const bool is_time_filtered, const std::vector<size_t> &pulse_indices)
+      : m_is_time_filtered(is_time_filtered), m_pulse_indices(pulse_indices) {}
 
   template <typename TofType>
-  void loadTOF(H5::DataSet &tof_SDS, std::unique_ptr<std::vector<TofType>> &data, const size_t offset,
-               const size_t slabsize) {
+  void loadTOF(H5::DataSet &tof_SDS, std::unique_ptr<std::vector<TofType>> &data, const std::vector<size_t> &offsets,
+               const std::vector<size_t> &slabsizes) {
     H5::DataSpace filespace = tof_SDS.getSpace();
-    const auto length_actual = static_cast<size_t>(filespace.getSelectNpoints());
 
-    if (offset >= length_actual && offset != 0) {
-      std::stringstream msg;
-      msg << "Tried to read offset=" << offset << " into array that is only lenght=" << length_actual << " long";
-      throw std::runtime_error(msg.str());
+    const hsize_t rankedoffset[1] = {static_cast<hsize_t>(offsets[0])};
+    const hsize_t rankedextent[1] = {static_cast<hsize_t>(slabsizes[0])};
+
+    filespace.selectHyperslab(H5S_SELECT_SET, rankedextent, rankedoffset);
+
+    size_t total_size = slabsizes.at(0);
+    for (size_t i = 1; i < offsets.size(); ++i) {
+      const hsize_t rankedoffset[1] = {static_cast<hsize_t>(offsets[i])};
+      const hsize_t rankedextent[1] = {static_cast<hsize_t>(slabsizes[i])};
+      filespace.selectHyperslab(H5S_SELECT_OR, rankedextent, rankedoffset);
+      total_size += slabsizes.at(i);
     }
 
-    // set extent and offset in DataSpace
-    const hsize_t rankedoffset[1] = {static_cast<hsize_t>(offset)};
-    const hsize_t rankedextent[1] = {
-        static_cast<hsize_t>(std::min(slabsize, length_actual - offset))}; // don't read past the end
-    // select a part of filespace if appropriate
-    if (rankedextent[0] < length_actual)
-      filespace.selectHyperslab(H5S_SELECT_SET, rankedextent, rankedoffset);
-
-    // size of thing being read out
-    H5::DataSpace memspace(1, rankedextent);
+    const hsize_t total_rankedextent[1] = {static_cast<hsize_t>(total_size)};
+    H5::DataSpace memspace(1, total_rankedextent);
 
     // do the actual read
     const H5::DataType dataType = tof_SDS.getDataType();
@@ -209,27 +206,25 @@ public:
   }
 
   template <typename DetidType>
-  void loadDetid(H5::DataSet &detID_SDS, std::unique_ptr<std::vector<DetidType>> &data, const size_t offset,
-                 const size_t slabsize) {
+  void loadDetid(H5::DataSet &detID_SDS, std::unique_ptr<std::vector<DetidType>> &data,
+                 const std::vector<size_t> &offsets, const std::vector<size_t> &slabsizes) {
     H5::DataSpace filespace = detID_SDS.getSpace();
-    const auto length_actual = static_cast<size_t>(filespace.getSelectNpoints());
 
-    if (offset >= length_actual && offset != 0) {
-      std::stringstream msg;
-      msg << "Tried to read offset=" << offset << " into array that is only lenght=" << length_actual << " long";
-      throw std::runtime_error(msg.str());
+    const hsize_t rankedoffset[1] = {static_cast<hsize_t>(offsets[0])};
+    const hsize_t rankedextent[1] = {static_cast<hsize_t>(slabsizes[0])};
+
+    filespace.selectHyperslab(H5S_SELECT_SET, rankedextent, rankedoffset);
+
+    size_t total_size = slabsizes.at(0);
+    for (size_t i = 1; i < offsets.size(); ++i) {
+      const hsize_t rankedoffset[1] = {static_cast<hsize_t>(offsets[i])};
+      const hsize_t rankedextent[1] = {static_cast<hsize_t>(slabsizes[i])};
+      filespace.selectHyperslab(H5S_SELECT_OR, rankedextent, rankedoffset);
+      total_size += slabsizes.at(i);
     }
 
-    // set extent and offset in DataSpace
-    const hsize_t rankedoffset[1] = {static_cast<hsize_t>(offset)};
-    const hsize_t rankedextent[1] = {
-        static_cast<hsize_t>(std::min(slabsize, length_actual - offset))}; // don't read past the end
-    // select a part of filespace if appropriate
-    if (rankedextent[0] < length_actual)
-      filespace.selectHyperslab(H5S_SELECT_SET, rankedextent, rankedoffset);
-
-    // size of thing being read out
-    H5::DataSpace memspace(1, rankedextent);
+    const hsize_t total_rankedextent[1] = {static_cast<hsize_t>(total_size)};
+    H5::DataSpace memspace(1, total_rankedextent);
 
     // do the actual read
     const H5::DataType dataType = detID_SDS.getDataType();
@@ -247,27 +242,31 @@ private:
   }
 
 public:
-  std::pair<uint64_t, uint64_t> getEventIndexRange(H5::Group &event_group, const uint64_t number_events) {
+  std::deque<std::pair<uint64_t, uint64_t>> getEventIndexRanges(H5::Group &event_group, const uint64_t number_events) {
+    std::deque<std::pair<uint64_t, uint64_t>> ranges;
     if (m_is_time_filtered) {
       // TODO this should be made smarter to only read the necessary range
       std::unique_ptr<std::vector<uint64_t>> event_index = std::make_unique<std::vector<uint64_t>>();
       this->loadEventIndex(event_group, event_index);
 
-      uint64_t start_event = event_index->at(m_pulse_start_index);
-      uint64_t stop_event = number_events;
-      if (m_pulse_stop_index != std::numeric_limits<size_t>::max())
-        stop_event = event_index->at(m_pulse_stop_index);
-      return {start_event, stop_event};
+      for (size_t i = 0; i < m_pulse_indices.size(); i += 2) {
+        uint64_t start_event = event_index->at(m_pulse_indices[i]);
+        uint64_t stop_event = number_events;
+        if (i + 1 < m_pulse_indices.size() && m_pulse_indices[i + 1] != std::numeric_limits<size_t>::max())
+          stop_event = event_index->at(m_pulse_indices[i + 1]);
+        ranges.emplace_back(start_event, stop_event);
+      }
+      return ranges;
     } else {
       constexpr uint64_t START_DEFAULT = 0;
-      return {START_DEFAULT, number_events};
+      ranges.emplace_back(START_DEFAULT, number_events);
+      return ranges;
     }
   }
 
 private:
   const bool m_is_time_filtered;
-  const size_t m_pulse_start_index;
-  const size_t m_pulse_stop_index;
+  const std::vector<size_t> m_pulse_indices;
 };
 
 template <typename Type> class MinMax {
@@ -370,13 +369,12 @@ private:
 class ProcessBankTask {
 public:
   ProcessBankTask(std::vector<std::string> &bankEntryNames, H5::H5File &h5file, const bool is_time_filtered,
-                  const size_t pulse_start_index, const size_t pulse_stop_index, MatrixWorkspace_sptr &wksp,
-                  const std::map<detid_t, double> &calibration, const std::set<detid_t> &masked,
-                  const size_t events_per_chunk, const size_t grainsize_event, std::shared_ptr<API::Progress> &progress)
-      : m_h5file(h5file), m_bankEntries(bankEntryNames),
-        m_loader(is_time_filtered, pulse_start_index, pulse_stop_index), m_wksp(wksp), m_calibration(calibration),
-        m_masked(masked), m_events_per_chunk(events_per_chunk), m_grainsize_event(grainsize_event),
-        m_progress(progress) {}
+                  MatrixWorkspace_sptr &wksp, const std::map<detid_t, double> &calibration,
+                  const std::set<detid_t> &masked, const size_t events_per_chunk, const size_t grainsize_event,
+                  std::vector<size_t> pulse_indices, std::shared_ptr<API::Progress> &progress)
+      : m_h5file(h5file), m_bankEntries(bankEntryNames), m_loader(is_time_filtered, pulse_indices), m_wksp(wksp),
+        m_calibration(calibration), m_masked(masked), m_events_per_chunk(events_per_chunk),
+        m_grainsize_event(grainsize_event), m_progress(progress) {}
 
   void operator()(const tbb::blocked_range<size_t> &range) const {
     auto entry = m_h5file.openGroup("entry"); // type=NXentry
@@ -396,19 +394,10 @@ public:
         continue;
       }
 
-      // get filtering range and update it for data that is present
-      auto eventRangeFull = m_loader.getEventIndexRange(event_group, total_events);
-      // skip empty filter range
-      if (eventRangeFull.first == eventRangeFull.second) {
-        // g_log.warning() << "No data for bank " << entry_name << '\n';
-        m_progress->report();
-        continue;
+      auto eventRange = m_loader.getEventIndexRanges(event_group, total_events);
+      for (const auto &range : eventRange) {
+        std::cout << "Processing " << bankName << " with " << range.first << " to " << range.second << " events\n";
       }
-
-      // TODO REMOVE debug print
-      std::cout << bankName << " has " << eventRangeFull.second << " events\n"
-                << "   and should be read in " << (1 + (eventRangeFull.second / m_events_per_chunk)) << " chunks of "
-                << m_events_per_chunk << " (" << (m_events_per_chunk / 1024 / 1024) << "MB)\n";
 
       // create a histogrammer to process the events
       auto &spectrum = m_wksp->getSpectrum(wksp_index);
@@ -438,19 +427,39 @@ public:
       auto event_time_of_flight = std::make_unique<std::vector<float>>(); // float for ORNL nexus files
 
       // read parts of the bank at a time
-      size_t event_index_start = eventRangeFull.first;
-      while (event_index_start < eventRangeFull.second) {
-        // H5Cpp will truncate correctly
-        // H5Util resizes the vector
-        const size_t offset = event_index_start;
-        const size_t slabsize =
-            std::min(m_events_per_chunk, static_cast<size_t>(eventRangeFull.second) - event_index_start);
+      while (!eventRange.empty()) {
+        std::vector<size_t> offsets;
+        std::vector<size_t> slabsizes;
+
+        size_t total_events_to_read = 0;
+        while (!eventRange.empty() && total_events_to_read < m_events_per_chunk) {
+          auto range = eventRange.front();
+          eventRange.pop_front();
+
+          size_t range_size = range.second - range.first;
+          size_t remaining_chunk = m_events_per_chunk - total_events_to_read;
+
+          if (range_size > remaining_chunk) {
+            // Split the range: process only part of it now, push the rest back for later
+            offsets.push_back(range.first);
+            slabsizes.push_back(remaining_chunk);
+            total_events_to_read += remaining_chunk;
+            // Push the remainder of the range back to the front for next iteration
+            eventRange.emplace_front(range.first + remaining_chunk, range.second);
+            break;
+          } else {
+            offsets.push_back(range.first);
+            slabsizes.push_back(range_size);
+            total_events_to_read += range_size;
+            // Continue to next range
+          }
+        }
 
         // load detid and tof at the same time
         tbb::parallel_invoke(
             [&] { // load detid
               // event_detid->clear();
-              m_loader.loadDetid(detID_SDS, event_detid, offset, slabsize);
+              m_loader.loadDetid(detID_SDS, event_detid, offsets, slabsizes);
               // immediately find min/max to allow for other things to read disk
               const auto [minval, maxval] = parallel_minmax(event_detid.get(), m_grainsize_event);
               // only recreate calibration if it doesn't already have the useful information
@@ -463,7 +472,7 @@ public:
             },
             [&] { // load time-of-flight
               // event_time_of_flight->clear();
-              m_loader.loadTOF(tof_SDS, event_time_of_flight, offset, slabsize);
+              m_loader.loadTOF(tof_SDS, event_time_of_flight, offsets, slabsizes);
             });
 
         // Create a local task for this thread
@@ -477,8 +486,6 @@ public:
         for (size_t i = 0; i < y_temp.size(); ++i) {
           y_temp[i].fetch_add(task.y_temp[i], std::memory_order_relaxed);
         }
-
-        event_index_start += m_events_per_chunk;
       }
 
       tgroup.wait();
@@ -503,6 +510,7 @@ private:
   const size_t m_events_per_chunk;
   /// number of events to histogram in a single thread
   const size_t m_grainsize_event;
+  const std::vector<size_t> pulse_indices;
   std::shared_ptr<API::Progress> m_progress;
 };
 
@@ -691,24 +699,27 @@ void AlignAndFocusPowderSlim::exec() {
         std::make_unique<std::vector<Mantid::Types::Core::DateAndTime>>(frequency_log->timesAsVector());
     const auto startOfRun = wksp->run().getFirstPulseTime();
 
-    TimeROI roi;
     try {
       roi.addROI(startOfRun + (filter_time_start_sec == EMPTY_DBL() ? 0.0 : filter_time_start_sec),
                  startOfRun + filter_time_stop_sec); // start and stop times in seconds
     } catch (const std::runtime_error &e) {
       throw std::invalid_argument("Invalid time range for filtering: " + std::string(e.what()));
     }
-    const auto indices = calculate_pulse_indices_from_timeroi(roi, *pulse_times);
-    g_log.information() << "Time filtering will use " << indices.size() / 2 << " time ranges, starting at index "
-                        << indices.front() << " and stopping at index " << indices.back() << '\n';
 
-    if (indices.empty())
+    // hard coded pulse times for testing
+    // roi.addROI(startOfRun + 200., startOfRun + 210.);
+    pulse_indices = calculate_pulse_indices_from_timeroi(roi, *pulse_times);
+    if (pulse_indices.empty())
       throw std::invalid_argument("No valid pulse time indices found for filtering");
 
-    pulse_start_index = indices.front();
-    pulse_stop_index = indices.back();
+    g_log.information() << "Time filtering will use " << pulse_indices.size() / 2 << " time ranges, starting at "
+                        << pulse_indices.front() << " and stopping at " << pulse_indices.back() << '\n';
+  }
 
-    g_log.information() << "Filtering pulses from " << pulse_start_index << " to " << pulse_stop_index << '\n';
+  if (roi.useAll()) {
+    pulse_indices.clear();
+    pulse_indices.push_back(0);
+    pulse_indices.push_back(std::numeric_limits<size_t>::max());
   }
 
   // Now we want to go through all the bankN_event entries
@@ -749,9 +760,9 @@ void AlignAndFocusPowderSlim::exec() {
     const int GRAINSIZE_EVENTS = getProperty(PropertyNames::EVENTS_PER_THREAD);
     auto progress = std::make_shared<API::Progress>(this, .17, .9, num_banks_to_read);
     std::cout << (DISK_CHUNK / GRAINSIZE_EVENTS) << " threads per chunk\n"; // TODO REMOVE debug print
-    ProcessBankTask task(bankEntryNames, h5file, is_time_filtered, pulse_start_index, pulse_stop_index, wksp,
-                         m_calibration, m_masked, static_cast<size_t>(DISK_CHUNK),
-                         static_cast<size_t>(GRAINSIZE_EVENTS), progress);
+    ProcessBankTask task(bankEntryNames, h5file, is_time_filtered, wksp, m_calibration, m_masked,
+                         static_cast<size_t>(DISK_CHUNK), static_cast<size_t>(GRAINSIZE_EVENTS), pulse_indices,
+                         progress);
     // generate threads only if appropriate
     if (num_banks_to_read > 1) {
       tbb::parallel_for(tbb::blocked_range<size_t>(0, num_banks_to_read), task);
