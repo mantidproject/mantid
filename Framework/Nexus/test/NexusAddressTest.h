@@ -247,4 +247,13 @@ public:
     TS_ASSERT_EQUALS(np, NexusAddress("/raw_data_1"));
     TS_ASSERT_EQUALS(np.string(), "/raw_data_1");
   }
+
+  void test_abs_slash_abs() {
+    NexusAddress np("/entry0");
+    std::string name("/data");
+    TS_ASSERT_EQUALS((np / name).string(), "/entry0/data");
+
+    NexusAddress np2("/data");
+    TS_ASSERT_EQUALS((np / np2).string(), "/entry0/data");
+  }
 };

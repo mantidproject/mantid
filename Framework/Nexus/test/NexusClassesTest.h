@@ -107,4 +107,17 @@ public:
     Mantid::Nexus::NXEntry entry = root.openEntry(entryName);
     TS_ASSERT_EQUALS(entry.address(), entryName);
   }
+
+  void test_proper_concat() {
+    // this protects against a regression that can occur in LoadILLSANS
+    std::string filename = NexusTest::getFullPath("ILL/D16/025786.nxs");
+    Mantid::Nexus::NXRoot root(filename);
+    Mantid::Nexus::NXEntry firstEntry(root.openFirstEntry());
+
+    std::string relAddr = "data_scan/scanned_variables/data";
+    TS_ASSERT_THROWS_NOTHING(firstEntry.openNXData(relAddr));
+
+    std::string absAddr = "/data_scan/scanned_variables/data";
+    TS_ASSERT_THROWS_NOTHING(firstEntry.openNXData(absAddr));
+  }
 };

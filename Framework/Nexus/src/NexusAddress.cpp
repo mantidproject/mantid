@@ -54,11 +54,17 @@ bool NexusAddress::operator!=(std::string const &s) const { return m_resolved_pa
 
 bool NexusAddress::operator!=(char const *const s) const { return m_resolved_path != std::string(s); }
 
-NexusAddress NexusAddress::operator/(std::string const &s) const { return NexusAddress(m_path / s); }
+NexusAddress NexusAddress::operator/(std::string const &s) const { return *this / NexusAddress(s); }
 
-NexusAddress NexusAddress::operator/(char const *const s) const { return *this / std::string(s); }
+NexusAddress NexusAddress::operator/(char const *const s) const { return *this / NexusAddress(s); }
 
-NexusAddress NexusAddress::operator/(NexusAddress const &p) const { return NexusAddress(m_path / p.m_path); }
+NexusAddress NexusAddress::operator/(NexusAddress const &p) const {
+  std::string fp(p);
+  if (p.isAbsolute()) {
+    fp = fp.substr(1);
+  }
+  return NexusAddress(m_path / fp);
+}
 
 NexusAddress &NexusAddress::operator/=(std::string const &s) {
   m_path /= s;
