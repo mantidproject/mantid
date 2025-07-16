@@ -60,7 +60,7 @@ class Projection(ABC):
     def _calculate_2d_coordinates(self, detector_position: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
         pass
 
-    def _calculate_detector_coordinates(self):
+    def _calculate_detector_coordinates(self) -> None:
         """Calculate 2D projection coordinates and store data"""
 
         self._detector_x_coordinates, self._detector_y_coordinates = self._calculate_2d_coordinates(np.array(self._detector_positions))
@@ -68,7 +68,7 @@ class Projection(ABC):
         self._x_range = (self._detector_x_coordinates.min(), self._detector_x_coordinates.max())
         self._y_range = (self._detector_y_coordinates.min(), self._detector_y_coordinates.max())
 
-    def _find_and_correct_x_gap(self):
+    def _find_and_correct_x_gap(self) -> None:
         """Shift points based on the specified period so that they appear within the correct x range when plotted"""
         if self._u_period == 0:
             return

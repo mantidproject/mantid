@@ -4,6 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+from pyvista import PolyData
 from qtpy.QtWidgets import (
     QMainWindow,
     QVBoxLayout,
@@ -20,12 +21,13 @@ from qtpy.QtWidgets import (
     QPushButton,
 )
 from qtpy.QtGui import QPalette, QIntValidator
-from qtpy.QtCore import Qt
+from qtpy.QtCore import Qt, QEvent
 from pyvistaqt import BackgroundPlotter
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from instrumentview.Detectors import DetectorInfo
 from typing import Callable
+from mantid.dataobjects import Workspace2D
 import numpy as np
 
 
@@ -102,7 +104,7 @@ class FullInstrumentViewWindow(QMainWindow):
         options_vertical_layout.addStretch()
         central_widget.setLayout(parent_horizontal_layout)
 
-    def reset_camera(self):
+    def reset_camera(self) -> None:
         if not self._off_screen:
             self.main_plotter.reset_camera()
             self.projection_plotter.reset_camera()
@@ -143,13 +145,13 @@ class FullInstrumentViewWindow(QMainWindow):
         line_edit.setPalette(palette)
         return line_edit
 
-    def subscribe_presenter(self, presenter):
+    def subscribe_presenter(self, presenter) -> None:
         self._presenter = presenter
 
-    def add_projection_combo_options(self, options):
+    def add_projection_combo_options(self, options: list[str]) -> None:
         self._projection_combo_box.addItems(options)
 
-    def setup_connections_to_presenter(self):
+    def setup_connections_to_presenter(self) -> None:
         self._projection_combo_box.currentIndexChanged.connect(self._presenter.projection_option_selected)
         self._multi_select_check.stateChanged.connect(self._presenter.multi_select_checkbox_clicked)
         self._clear_selection_button.clicked.connect(self._presenter.clear_all_picked_detectors)
@@ -158,19 +160,19 @@ class FullInstrumentViewWindow(QMainWindow):
         self._tof_min_edit.textEdited.connect(self._on_tof_limits_updated)
         self._tof_max_edit.textEdited.connect(self._on_tof_limits_updated)
 
-    def _on_tof_limits_updated(self):
+    def _on_tof_limits_updated(self) -> None:
         """When TOF limits are changed, read the new limits and tell the presenter to update the colours accordingly"""
         is_valid, min, max = self._parse_min_max_text(self._tof_min_edit, self._tof_max_edit)
         if is_valid:
             self._presenter.set_tof_limits(min, max)
 
-    def _on_contour_limits_updated(self):
+    def _on_contour_limits_updated(self) -> None:
         """When contour limits are changed, read the new limits and tell the presenter to update the colours accordingly"""
         is_valid, min, max = self._parse_min_max_text(self._contour_range_min_edit, self._contour_range_max_edit)
         if is_valid:
             self._presenter.set_contour_limits(min, max)
 
-    def _parse_min_max_text(self, min_edit, max_edit) -> tuple[bool, int, int]:
+    def _parse_min_max_text(self, min_edit: QLineEdit, max_edit: QLineEdit) -> tuple[bool, int, int]:
         """Try to parse the text in the edit boxes as numbers. Return the results and whether the attempt was successful."""
         try:
             min = int(min_edit.text())
@@ -196,7 +198,7 @@ class FullInstrumentViewWindow(QMainWindow):
         self.main_plotter.update_scalar_bar_range(clim, label)
         self.projection_plotter.update_scalar_bar_range(clim, label)
 
-    def closeEvent(self, QCloseEvent):
+    def closeEvent(self, QCloseEvent: QEvent) -> None:
         """When closing, make sure to close the plotters and figure correctly to prevent errors"""
         super().closeEvent(QCloseEvent)
         self.main_plotter.close()
@@ -204,15 +206,15 @@ class FullInstrumentViewWindow(QMainWindow):
         if self._detector_spectrum_fig is not None:
             plt.close(self._detector_spectrum_fig.get_label())
 
-    def add_simple_shape(self, mesh, colour=None, pickable=False):
+    def add_simple_shape(self, mesh: PolyData, colour=None, pickable=False) -> None:
         """Draw the given mesh in the main plotter window"""
         self.main_plotter.add_mesh(mesh, color=colour, pickable=pickable)
 
-    def add_main_mesh(self, mesh, scalars=None, clim=None) -> None:
+    def add_main_mesh(self, mesh: PolyData, scalars=None, clim=None) -> None:
         """Draw the given mesh in the main plotter window"""
         self.main_plotter.add_mesh(mesh, pickable=False, scalars=scalars, clim=clim, render_points_as_spheres=True, point_size=7)
 
-    def add_pickable_main_mesh(self, point_cloud, scalars) -> None:
+    def add_pickable_main_mesh(self, point_cloud: PolyData, scalars: np.ndarray | str) -> None:
         self.main_plotter.add_mesh(
             point_cloud,
             scalars=scalars,
@@ -224,11 +226,11 @@ class FullInstrumentViewWindow(QMainWindow):
             render_points_as_spheres=True,
         )
 
-    def add_rgba_mesh(self, mesh, scalars):
+    def add_rgba_mesh(self, mesh: PolyData, scalars: np.ndarray | str):
         """Draw the given mesh in the main plotter window, and set the colours manually with RGBA numbers"""
         self.main_plotter.add_mesh(mesh, scalars=scalars, rgba=True, pickable=False, render_points_as_spheres=True, point_size=10)
 
-    def enable_point_picking(self, callback) -> None:
+    def enable_point_picking(self, callback: Callable) -> None:
         """Switch on point picking, i.e. picking a single point with right-click"""
         self.main_plotter.disable_picking()
         if not self.main_plotter.off_screen:
@@ -248,13 +250,13 @@ class FullInstrumentViewWindow(QMainWindow):
                 tolerance=0.01,
             )
 
-    def enable_rectangle_picking(self, callback=None) -> None:
+    def enable_rectangle_picking(self, callback: Callable) -> None:
         """Switch on rectangle picking, i.e. draw a rectangle to select all detectors within the rectangle"""
         self.main_plotter.disable_picking()
         if not self.main_plotter.off_screen:
             self.main_plotter.enable_rectangle_picking(callback=callback, use_picker=callback is not None, font_size=12)
 
-    def add_projection_mesh(self, mesh, scalars=None, clim=None) -> None:
+    def add_projection_mesh(self, mesh: PolyData, scalars=None, clim=None) -> None:
         """Draw the given mesh in the projection plotter. This is a 2D plot so we set options accordingly on the plotter"""
         self.projection_plotter.clear()
         self.projection_plotter.add_mesh(mesh, scalars=scalars, clim=clim, render_points_as_spheres=True, point_size=7, pickable=False)
@@ -262,7 +264,7 @@ class FullInstrumentViewWindow(QMainWindow):
         if not self.projection_plotter.off_screen:
             self.projection_plotter.enable_image_style()
 
-    def add_pickable_projection_mesh(self, mesh, scalars=None) -> None:
+    def add_pickable_projection_mesh(self, mesh: PolyData, scalars=None) -> None:
         """Draw the given mesh in the projection plotter. This is a 2D plot so we set options accordingly on the plotter"""
         self.projection_plotter.add_mesh(
             mesh,
@@ -283,11 +285,11 @@ class FullInstrumentViewWindow(QMainWindow):
         if not self.main_plotter.off_screen:
             self.main_plotter.show_axes()
 
-    def set_camera_focal_point(self, focal_point) -> None:
+    def set_camera_focal_point(self, focal_point: np.ndarray) -> None:
         """Set the camera focal point on the main plotter"""
         self.main_plotter.camera.focal_point = focal_point
 
-    def show_plot_for_detectors(self, workspace, workspace_indices: list) -> None:
+    def show_plot_for_detectors(self, workspace: Workspace2D, workspace_indices: list) -> None:
         """Plot all the given spectra, where they are defined by their workspace indices, not the spectra numbers"""
         self._detector_spectrum_axes.clear()
         for d in workspace_indices:

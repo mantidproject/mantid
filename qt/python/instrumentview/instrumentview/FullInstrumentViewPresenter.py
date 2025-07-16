@@ -6,6 +6,11 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import numpy as np
 import pyvista as pv
+from pyvista.plotting.picking import RectangleSelection
+from pyvista.plotting.opts import PickerType
+
+from instrumentview.FullInstrumentViewModel import FullInstrumentViewModel
+from instrumentview.FullInstrumentViewWindow import FullInstrumentViewWindow
 
 
 class FullInstrumentViewPresenter:
@@ -19,7 +24,7 @@ class FullInstrumentViewPresenter:
     _CYLINDRICAL_Z = "Cylindrical Z"
     _PROJECTION_OPTIONS = [_SPHERICAL_X, _SPHERICAL_Y, _SPHERICAL_Z, _CYLINDRICAL_X, _CYLINDRICAL_Y, _CYLINDRICAL_Z]
 
-    def __init__(self, view, model):
+    def __init__(self, view: FullInstrumentViewWindow, model: FullInstrumentViewModel):
         """For the given workspace, use the data from the model to plot the detectors. Also include points at the origin and
         any monitors."""
         pv.global_theme.color_cycler = "default"
@@ -107,7 +112,7 @@ class FullInstrumentViewPresenter:
         self._detector_mesh[self._counts_label] = self._model.detector_counts()
         self.set_contour_limits(self._model.data_limits()[0], self._model.data_limits()[1])
 
-    def point_picked(self, point_position, picker):
+    def point_picked(self, point_position: np.ndarray, picker: PickerType) -> None:
         if point_position is None:
             return
         point_index = picker.GetPointId()
@@ -120,7 +125,7 @@ class FullInstrumentViewPresenter:
         else:
             self._view.enable_point_picking(callback=self.point_picked)
 
-    def rectangle_picked(self, rectangle):
+    def rectangle_picked(self, rectangle: RectangleSelection) -> None:
         """Get points within the selection rectangle and display information for those detectors"""
         selected_mesh = self._detector_mesh.select_enclosed_points(rectangle.frustum_mesh)
         selected_mask = selected_mesh.point_data["SelectedPoints"].view(bool)
@@ -143,12 +148,12 @@ class FullInstrumentViewPresenter:
     def clear_all_picked_detectors(self) -> None:
         self.update_picked_detectors([])
 
-    def create_poly_data_mesh(self, points, faces=None) -> pv.PolyData:
+    def create_poly_data_mesh(self, points: np.ndarray, faces=None) -> pv.PolyData:
         """Create a PyVista mesh from the given points and faces"""
         mesh = pv.PolyData(points, faces)
         return mesh
 
-    def generate_single_colour(self, number_of_points, red: float, green: float, blue: float, alpha: float) -> np.ndarray:
+    def generate_single_colour(self, number_of_points: int, red: float, green: float, blue: float, alpha: float) -> np.ndarray:
         """Returns an RGBA colours array for the given set of points, with all points the same colour"""
         rgba = np.zeros((number_of_points, 4))
         rgba[:, 0] = red

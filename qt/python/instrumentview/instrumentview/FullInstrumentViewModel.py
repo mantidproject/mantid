@@ -7,6 +7,8 @@
 from instrumentview.Detectors import DetectorInfo
 import instrumentview.Projections.SphericalProjection as iv_spherical
 import instrumentview.Projections.CylindricalProjection as iv_cylindrical
+
+from mantid.dataobjects import Workspace2D
 import numpy as np
 import math
 
@@ -20,7 +22,7 @@ class FullInstrumentViewModel:
     _data_min = 0.0
     _data_max = 0.0
 
-    def __init__(self, workspace):
+    def __init__(self, workspace: Workspace2D):
         """For the given workspace, calculate detector positions, the map from detector indices to workspace indices, and integrated
         counts. Optionally will draw detector geometry, e.g. rectangular bank or tube instead of points."""
         self._workspace = workspace
@@ -53,7 +55,7 @@ class FullInstrumentViewModel:
 
         self.update_time_of_flight_range(self._bin_min, self._bin_max, True)
 
-    def _union_with_current_bin_min_max(self, bin_edge) -> None:
+    def _union_with_current_bin_min_max(self, bin_edge: float) -> None:
         """Expand current bin limits to include new bin edge"""
         if not math.isinf(bin_edge):
             if bin_edge < self._bin_min:
@@ -61,7 +63,7 @@ class FullInstrumentViewModel:
             elif bin_edge > self._bin_max:
                 self._bin_max = bin_edge
 
-    def update_time_of_flight_range(self, tof_min: float, tof_max: float, entire_range=False) -> None:
+    def update_time_of_flight_range(self, tof_min: float, tof_max: float, entire_range: bool = False) -> None:
         workspace_indices = self._workspace_indices[self._is_valid]
         new_detector_counts = np.array(
             self._workspace.getIntegratedCountsForWorkspaceIndices(
@@ -73,16 +75,16 @@ class FullInstrumentViewModel:
         self._data_min = min(new_detector_counts)
         self._counts[self._is_valid] = new_detector_counts
 
-    def workspace(self):
+    def workspace(self) -> Workspace2D:
         return self._workspace
 
     def sample_position(self) -> np.ndarray:
         return self._sample_position
 
-    def detector_positions(self):
+    def detector_positions(self) -> np.ndarray:
         return self._detector_positions[self._is_valid]
 
-    def detector_projection_positions(self):
+    def detector_projection_positions(self) -> np.ndarray:
         return self._detector_projection_positions[self._is_valid]
 
     def negate_picked_visibility(self, indices: list[int] | np.ndarray) -> None:
@@ -97,13 +99,13 @@ class FullInstrumentViewModel:
     def picked_detector_ids(self) -> np.ndarray:
         return self._detector_ids[self._is_valid][self._detector_is_picked]
 
-    def picked_workspace_indices(self):
+    def picked_workspace_indices(self) -> np.ndarray:
         return self._workspace_indices[self._is_valid][self._detector_is_picked]
 
     def detector_counts(self) -> np.ndarray:
         return self._counts[self._is_valid]
 
-    def detector_ids(self):
+    def detector_ids(self) -> np.ndarray:
         return self._detector_ids[self._is_valid]
 
     def data_limits(self) -> list:
@@ -112,7 +114,7 @@ class FullInstrumentViewModel:
     def bin_limits(self) -> list:
         return [self._bin_min, self._bin_max]
 
-    def monitor_positions(self):
+    def monitor_positions(self) -> np.ndarray:
         return self._detector_positions[[self._detector_info.isMonitor(i) for i in range(len(self._detector_ids))]]
 
     def picked_detectors_info_text(self) -> list[DetectorInfo]:

@@ -18,7 +18,7 @@ class DetectorPosition(np.ndarray):
         return np.allclose(self, other)
 
 
-@dataclass()
+@dataclass
 class DetectorInfo:
     """
     Class for wrapping up information relating to a detector.
