@@ -18,10 +18,10 @@ import os
 class InstrumentView:
     """Show the Instrument View in a separate window"""
 
-    def main(file_path: Path):
+    def main(file_path: Path) -> None:
         sys.exit(InstrumentView.start_app_open_window(file_path))
 
-    def start_app_open_window(file_path: Path):
+    def start_app_open_window(file_path: Path) -> None:
         """Load the given file, then open the Instrument View in a separate window with that workspace displayed"""
         app = QApplication(sys.argv)
         ws = Load(str(file_path), StoreInADS=False)
