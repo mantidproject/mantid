@@ -20,10 +20,11 @@ class FindUBFromScatteringPlane(PythonAlgorithm):
         # declaring intake variables to define the scattering plane,
         self.declareProperty(FloatArrayProperty(name="Vector1", direction=Direction.Input, validator=ArrayLength3))
         self.declareProperty(FloatArrayProperty(name="Vector2", direction=Direction.Input, validator=ArrayLength3))
+        # might need it to raise an error here
 
         # declaring intake variables abc, alpha, beta, gamma, and the peak
         self.declareProperty(
-            IPeaksWorkspaceProperty(name="PeakWorkSpace", defaultvalue="", direction=Direction.Input)
+            IPeaksWorkspaceProperty(name="PeakWorkSpace", defaultvalue="", direction=Direction.InOut)
         )  # mantid does not like
 
         self.declareProperty(name="a", direction=Direction.Input, validator=LowerLatticeParameterLimit)
@@ -45,7 +46,7 @@ class FindUBFromScatteringPlane(PythonAlgorithm):
         out_props = tuple(alg.getProperty(prop).value for prop in alg.outputProperties())
         return out_props[0] if len(out_props) == 1 else out_props
 
-    # Can change these to be 2 arrays of abc, and alphabetagamma if that is preferred
+    # Can change these to be 2 arrays of abc, and alpha,beta,gamma if that is preferred
     def PyExec(self):
         # getting lattice parameters
         a = self.getProperty("a").value
@@ -72,7 +73,7 @@ class FindUBFromScatteringPlane(PythonAlgorithm):
         B_v2 = np.matmul(B, v2)
 
         SingleCrystalPeakTable = self.getProperty("PeakWorkSpace").value
-        peak_ip = SingleCrystalPeakTable.getPeak(1)
+        peak_ip = SingleCrystalPeakTable.getPeak(0)
         hklpeak = np.array(peak_ip.getHKL())
         hklpeak = hklpeak.reshape(-1, 1)
         Ql = np.array(peak_ip.getQLabFrame())
@@ -84,7 +85,7 @@ class FindUBFromScatteringPlane(PythonAlgorithm):
         Sp_N = np.cross(B_v1.flatten(), B_v2.flatten())
 
         # Finding scalar product may need to add some tolerance as B is not exact
-        SCP = round(np.dot(Sp_N, Qs.flatten()))
+        SCP = round(np.dot(Sp_N, Qs.flatten()), 1)
         if SCP != 0:
             raise ValueError("given peak does not lie in the plane")
 
@@ -103,10 +104,10 @@ class FindUBFromScatteringPlane(PythonAlgorithm):
         sintheta = mt.sin(Theta)
         negativesintheta = -1 * sintheta
         one_costheta = 1 - mt.cos(Theta)
-        K = np.ndarray([[0, -Axis[2], Axis[1]], [Axis[2], 0, -Axis[0]], [-Axis[1], Axis[0], 0]])
+        K = np.array([[0, -Axis[2], Axis[1]], [Axis[2], 0, -Axis[0]], [-Axis[1], Axis[0], 0]])
 
-        RUclockwise = 2 * pi * (Identity3 + sintheta * K + (one_costheta) * (np.matmul(K, K)))
-        RUanticlockwise = 2 * pi * (Identity3 + negativesintheta * K + (one_costheta) * (np.matmul(K, K)))
+        RUclockwise = 2 * pi * (Identity3 + sintheta * K + one_costheta * (np.matmul(K, K)))
+        RUanticlockwise = 2 * pi * (Identity3 + negativesintheta * K + one_costheta * np.matmul(K, K))
 
         ##time to apply the matrix to check
         Qlcalc = np.matmul(RUclockwise, Qs)
