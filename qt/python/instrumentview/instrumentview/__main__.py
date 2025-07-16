@@ -10,6 +10,6 @@ from pathlib import Path
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Displays the 3D view of an instrument, given a file.")
-    parser.add_argument("--file", help="File path", type=str, required=True)
+    parser.add_argument("--file", help="Path to Nexus file", type=str, required=True)
     args = parser.parse_args()
     InstrumentView.main(Path(args.file))
