@@ -103,11 +103,11 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         np.testing.assert_array_equal(model._is_valid, [True, True, False])
         np.testing.assert_array_equal(model._counts, [100, 200, 0])
 
-    @mock.patch("instrumentview.Projections.spherical_projection.spherical_projection")
+    @mock.patch("instrumentview.Projections.SphericalProjection.SphericalProjection")
     def test_calculate_spherical_projection(self, mock_spherical_projection):
         self._run_projection_test(mock_spherical_projection, True)
 
-    @mock.patch("instrumentview.Projections.cylindrical_projection.cylindrical_projection")
+    @mock.patch("instrumentview.Projections.CylindricalProjection.CylindricalProjection")
     def test_calculate_cylindrical_projection(self, mock_cylindrical_projection):
         self._run_projection_test(mock_cylindrical_projection, False)
 
