@@ -38,7 +38,7 @@ public:
   }
 
   void test_construct_from_filepath_lexically_normal() {
-    std::filesystem::path p("/path/good/../other");
+    std::filesystem::path p("/path/good/../other/");
     NexusAddress np(p);
     TS_ASSERT_EQUALS(np.string(), "/path/other");
   }
@@ -246,6 +246,10 @@ public:
     NexusAddress np("//raw_data_1");
     TS_ASSERT_EQUALS(np, NexusAddress("/raw_data_1"));
     TS_ASSERT_EQUALS(np.string(), "/raw_data_1");
+
+    std::filesystem::path p("//raw_data_1");
+    NexusAddress np2(p);
+    TS_ASSERT_EQUALS(np2.string(), "/raw_data_1");
   }
 
   void test_abs_slash_abs() {
@@ -255,5 +259,14 @@ public:
 
     NexusAddress np2("/data");
     TS_ASSERT_EQUALS((np / np2).string(), "/entry0/data");
+  }
+
+  void test_slash() {
+    NexusAddress np("/entry0");
+    std::string name("data/copy");
+    TS_ASSERT_EQUALS((np / name).string(), "/entry0/data/copy");
+
+    NexusAddress np2("data/copy");
+    TS_ASSERT_EQUALS((np / np2).string(), "/entry0/data/copy");
   }
 };

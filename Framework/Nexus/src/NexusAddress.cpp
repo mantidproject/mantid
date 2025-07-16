@@ -14,21 +14,25 @@ std::filesystem::path const nxroot("/");
 
 std::filesystem::path cleanup(std::string const &s) {
   std::filesystem::path ret(s);
-  std::string ns(s);
   if (ret == nxroot) {
     // the root path is already clean
-  } else if (ns.back() == '/') {
+  } else if (s.back() == '/') {
     // make sure no entries end in "/" -- this confuses path location
-    ns.pop_back();
-    ret = ns;
+    ret = s.substr(0, s.size() - 1);
+  }
+  if (s.starts_with("//")) {
+    ret = s.substr(1);
   }
   // cast as lexically normal
   return ret.lexically_normal();
 }
+
+std::filesystem::path cleanup(std::filesystem::path const &p) { return cleanup(p.string()); }
+
 } // namespace
 
 NexusAddress::NexusAddress(std::filesystem::path const &path)
-    : m_path(path.lexically_normal()), m_resolved_path(m_path.generic_string()) {}
+    : m_path(cleanup(path)), m_resolved_path(m_path.generic_string()) {}
 
 NexusAddress::NexusAddress(std::string const &path) : m_path(cleanup(path)), m_resolved_path(m_path.generic_string()) {}
 
@@ -59,24 +63,16 @@ NexusAddress NexusAddress::operator/(std::string const &s) const { return *this 
 NexusAddress NexusAddress::operator/(char const *const s) const { return *this / NexusAddress(s); }
 
 NexusAddress NexusAddress::operator/(NexusAddress const &p) const {
-  std::string fp(p);
-  if (p.isAbsolute()) {
-    fp = fp.substr(1);
-  }
-  return NexusAddress(m_path / fp);
+  return NexusAddress(m_path / p.m_path.relative_path());
 }
 
-NexusAddress &NexusAddress::operator/=(std::string const &s) {
-  m_path /= s;
-  m_resolved_path = m_path.generic_string();
-  return *this;
-}
+NexusAddress &NexusAddress::operator/=(std::string const &s) { return *this /= NexusAddress(s); }
 
-NexusAddress &NexusAddress::operator/=(char const *const s) { return *this /= std::string(s); }
+NexusAddress &NexusAddress::operator/=(char const *const s) { return *this /= NexusAddress(s); }
 
 NexusAddress &NexusAddress::operator/=(NexusAddress const &p) {
-  m_path /= p.m_path;
-  m_resolved_path = m_path.generic_string();
+  m_path = cleanup(m_path / p.m_path);
+  m_resolved_path = std::string(m_path.generic_string());
   return *this;
 }
 
