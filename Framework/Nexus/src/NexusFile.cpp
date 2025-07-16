@@ -651,6 +651,12 @@ template <> void File::getData<char>(char *data) {
   }
 
   if (rank == 0 || rank == 1) {
+    if (size == 1) {
+      data[0] = buffer[0];
+      data[1] = '\0';
+      return;
+    }
+
     char *start = buffer.data();
     while (*start && isspace(*start))
       ++start;
