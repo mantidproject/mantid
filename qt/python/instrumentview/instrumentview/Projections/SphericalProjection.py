@@ -11,16 +11,14 @@ import numpy as np
 class SphericalProjection(Projection):
     """2D projection with a spherical coordinate system, see https://en.wikipedia.org/wiki/Spherical_coordinate_system"""
 
-    def _calculate_2d_coordinates(self, detector_position: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
-        detector_relative_position = detector_position - self._sample_position
-        v = detector_relative_position.dot(self._projection_axis)
-        x = detector_relative_position.dot(self._x_axis)
-        y = detector_relative_position.dot(self._y_axis)
+    def _calculate_2d_coordinates(self, detector_positions: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+        detector_relative_positions = detector_positions - self._sample_position
+        v = detector_relative_positions.dot(self._projection_axis)
+        x = detector_relative_positions.dot(self._x_axis)
+        y = detector_relative_positions.dot(self._y_axis)
 
         r = np.sqrt(x * x + y * y + v * v)
-        # u_scale = 1. / np.sqrt(x * x + y * y)
-        # v_scale = 1. / r
 
-        u = -np.atan2(y, x)  # * u_scale
-        v = -np.acos(v / r)  # * v_scale
+        u = -np.atan2(y, x)
+        v = -np.acos(v / r)
         return (u, v)
