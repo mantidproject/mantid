@@ -59,6 +59,10 @@
       <value val="1"/>
   </parameter>
 
+  <parameter name="Diagnostics">
+      <value val="1"/>
+  </parameter>
+
   <!-- Per Theta options -->
 
   <parameter name="QMin">

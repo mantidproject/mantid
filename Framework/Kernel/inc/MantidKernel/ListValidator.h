@@ -12,6 +12,7 @@
 #include <boost/lexical_cast.hpp>
 #include <memory>
 #endif
+#include <algorithm>
 #include <map>
 #include <set>
 #include <unordered_set>

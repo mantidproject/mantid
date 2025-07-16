@@ -59,6 +59,7 @@ const std::string FILTER_TIMESTOP("FilterByTimeStop");
 const std::string X_MIN("XMin");
 const std::string X_MAX("XMax");
 const std::string X_DELTA("XDelta");
+const std::string BIN_UNITS("BinningUnits");
 const std::string BINMODE("BinningMode");
 const std::string OUTPUT_WKSP("OutputWorkspace");
 const std::string READ_SIZE_FROM_DISK("ReadSizeFromDisk");
@@ -77,6 +78,10 @@ const std::string MICROSEC("microseconds");
 const std::vector<std::string> binningModeNames{"Logarithmic", "Linear"};
 enum class BinningMode { LOGARITHMIC, LINEAR, enum_count };
 typedef Mantid::Kernel::EnumeratedString<BinningMode, &binningModeNames> BINMODE;
+
+const std::vector<std::string> unitNames{"dSpacing", "TOF", "MomentumTransfer"};
+enum class BinUnit { DSPACE, TOF, Q, enum_count };
+typedef Mantid::Kernel::EnumeratedString<BinUnit, &unitNames> BINUNIT;
 
 const size_t NUM_HIST{6}; // TODO make this determined from groupin
 
@@ -150,17 +155,6 @@ public:
   NexusLoader(const bool is_time_filtered, const size_t pulse_start_index, const size_t pulse_stop_index)
       : m_is_time_filtered(is_time_filtered), m_pulse_start_index(pulse_start_index),
         m_pulse_stop_index(pulse_stop_index) {}
-
-  static void loadPulseTimes(H5::Group &entry, std::unique_ptr<std::vector<double>> &data) {
-    // /entry/DASlogs/frequency/time
-    auto logs = entry.openGroup("DASlogs");       // type=NXcollection
-    auto frequency = logs.openGroup("frequency"); // type=NXlog"
-
-    auto dataset = frequency.openDataSet("time");
-    NeXus::H5Util::readArray1DCoerce(dataset, *data); // pass by reference
-
-    // groups close themselves
-  }
 
   template <typename TofType>
   void loadTOF(H5::DataSet &tof_SDS, std::unique_ptr<std::vector<TofType>> &data, const size_t offset,
@@ -378,9 +372,8 @@ public:
         // H5Cpp will truncate correctly
         // H5Util resizes the vector
         const size_t offset = event_index_start;
-        const size_t slabsize = (event_index_start + m_events_per_chunk == std::numeric_limits<size_t>::max())
-                                    ? std::numeric_limits<size_t>::max()
-                                    : m_events_per_chunk;
+        const size_t slabsize =
+            std::min(m_events_per_chunk, static_cast<size_t>(eventRangeFull.second) - event_index_start);
 
         // load detid and tof at the same time
         tbb::parallel_invoke(
@@ -468,13 +461,14 @@ void AlignAndFocusPowderSlim::init() {
                   "be specified.");
   auto mustBePosArr = std::make_shared<Kernel::ArrayBoundedValidator<double>>();
   mustBePosArr->setLower(0.0);
-  declareProperty(std::make_unique<ArrayProperty<double>>(PropertyNames::X_MIN, std::vector<double>{10}, mustBePosArr),
+  declareProperty(std::make_unique<ArrayProperty<double>>(PropertyNames::X_MIN, std::vector<double>{0.1}, mustBePosArr),
                   "Minimum x-value for the output binning");
   declareProperty(std::make_unique<ArrayProperty<double>>(PropertyNames::X_DELTA, std::vector<double>{0.0016}),
                   "Bin size for output data");
-  declareProperty(
-      std::make_unique<ArrayProperty<double>>(PropertyNames::X_MAX, std::vector<double>{16667}, mustBePosArr),
-      "Minimum x-value for the output binning");
+  declareProperty(std::make_unique<ArrayProperty<double>>(PropertyNames::X_MAX, std::vector<double>{2.0}, mustBePosArr),
+                  "Minimum x-value for the output binning");
+  declareProperty(std::make_unique<EnumeratedStringProperty<BinUnit, &unitNames>>(PropertyNames::BIN_UNITS),
+                  "The units of the input X min, max and delta values. Output will always be TOF");
   declareProperty(std::make_unique<EnumeratedStringProperty<BinningMode, &binningModeNames>>(PropertyNames::BINMODE),
                   "Specify binning behavior ('Logarithmic')");
   declareProperty(
@@ -574,6 +568,14 @@ void AlignAndFocusPowderSlim::exec() {
     this->initCalibrationConstants(wksp, difc_focused);
   }
 
+  // set the instrument
+  this->progress(.07, "Set instrument geometry");
+  wksp = this->editInstrumentGeometry(wksp, l1, polars, specids, l2s, azimuthals);
+
+  // convert to TOF if not already
+  this->progress(.1, "Convert bins to TOF");
+  wksp = this->convertToTOF(wksp);
+
   /* TODO create grouping information
   // create IndexInfo
   // prog->doReport("Creating IndexInfo"); TODO add progress bar stuff
@@ -582,6 +584,21 @@ void AlignAndFocusPowderSlim::exec() {
   auto indexInfo = indexSetup.makeIndexInfo();
   const size_t numHist = indexInfo.size();
   */
+
+  // load run metadata
+  this->progress(.11, "Loading metadata");
+  // prog->doReport("Loading metadata"); TODO add progress bar stuff
+  try {
+    LoadEventNexus::loadEntryMetadata(filename, wksp, ENTRY_TOP_LEVEL, descriptor);
+  } catch (std::exception &e) {
+    g_log.warning() << "Error while loading meta data: " << e.what() << '\n';
+  }
+
+  // load logs
+  this->progress(.12, "Loading logs");
+  auto periodLog = std::make_unique<const TimeSeriesProperty<int>>("period_log"); // not used
+  int nPeriods{1};
+  LoadEventNexus::runLoadNexusLogs<MatrixWorkspace_sptr>(filename, wksp, *this, false, nPeriods, periodLog);
 
   // load the events
   H5::H5File h5file(filename, H5F_ACC_RDONLY, NeXus::H5Util::defaultFileAcc());
@@ -593,17 +610,23 @@ void AlignAndFocusPowderSlim::exec() {
     this->progress(.15, "Creating time filtering");
     is_time_filtered = true;
     g_log.information() << "Filtering pulses from " << filter_time_start_sec << " to " << filter_time_stop_sec << "s\n";
-    std::unique_ptr<std::vector<double>> pulse_times = std::make_unique<std::vector<double>>();
-    auto entry = h5file.openGroup(ENTRY_TOP_LEVEL);
-    NexusLoader::loadPulseTimes(entry, pulse_times);
+
+    // get pulse times from frequency log on workspace
+    const auto frequency_log = dynamic_cast<const TimeSeriesProperty<double> *>(wksp->run().getProperty("frequency"));
+    if (!frequency_log) {
+      throw std::runtime_error("Frequency log not found in workspace run");
+    }
+    const auto pulse_times =
+        std::make_unique<std::vector<Mantid::Types::Core::DateAndTime>>(frequency_log->timesAsVector());
+    const auto startOfRun = wksp->run().getFirstPulseTime();
     g_log.information() << "Pulse times from " << pulse_times->front() << " to " << pulse_times->back()
-                        << " with length " << pulse_times->size() << '\n';
+                        << " with length " << pulse_times->size() << " and start of run at " << startOfRun << '\n';
     if (!std::is_sorted(pulse_times->cbegin(), pulse_times->cend())) {
       g_log.warning() << "Pulse times are not sorted, pulse time filtering will not be accurate\n";
     }
 
     if (filter_time_start_sec != EMPTY_DBL()) {
-      const double filter_time_start = pulse_times->front() + filter_time_start_sec;
+      const auto filter_time_start = startOfRun + filter_time_start_sec;
       const auto itStart = std::lower_bound(pulse_times->cbegin(), pulse_times->cend(), filter_time_start);
       if (itStart == pulse_times->cend())
         throw std::invalid_argument("Invalid pulse time filtering, start time will filter all pulses");
@@ -612,7 +635,7 @@ void AlignAndFocusPowderSlim::exec() {
     }
 
     if (filter_time_stop_sec != EMPTY_DBL()) {
-      const double filter_time_stop = pulse_times->front() + filter_time_stop_sec;
+      const auto filter_time_stop = startOfRun + filter_time_stop_sec;
       const auto itStop = std::upper_bound(pulse_times->cbegin(), pulse_times->cend(), filter_time_stop);
       if (itStop == pulse_times->cend())
         pulse_stop_index = std::numeric_limits<size_t>::max();
@@ -678,28 +701,6 @@ void AlignAndFocusPowderSlim::exec() {
   // close the file so child algorithms can do their thing
   h5file.close();
 
-  // set the instrument
-  this->progress(.9, "Set instrument geometry");
-  wksp = this->editInstrumentGeometry(wksp, l1, polars, specids, l2s, azimuthals);
-
-  // load run metadata
-  this->progress(.91, "Loading metadata");
-  // prog->doReport("Loading metadata"); TODO add progress bar stuff
-  try {
-    LoadEventNexus::loadEntryMetadata(filename, wksp, ENTRY_TOP_LEVEL, descriptor);
-  } catch (std::exception &e) {
-    g_log.warning() << "Error while loading meta data: " << e.what() << '\n';
-  }
-
-  // load logs
-  this->progress(.92, "Loading logs");
-  auto periodLog = std::make_unique<const TimeSeriesProperty<int>>("period_log"); // not used
-  int nPeriods{1};
-  LoadEventNexus::runLoadNexusLogs<MatrixWorkspace_sptr>(filename, wksp, *this, false, nPeriods, periodLog);
-
-  // set output units to be the same as coming from AlignAndFocusPowderFromFiles
-  wksp->setYUnit("Counts");
-  wksp->getAxis(0)->setUnit("TOF");
   setProperty(PropertyNames::OUTPUT_WKSP, std::move(wksp));
 }
 
@@ -707,6 +708,7 @@ MatrixWorkspace_sptr AlignAndFocusPowderSlim::createOutputWorkspace() {
   // set up the output workspace binning
   const BINMODE binmode = getPropertyValue(PropertyNames::BINMODE);
   const bool linearBins = bool(binmode == BinningMode::LINEAR);
+  const std::string binUnits = getPropertyValue(PropertyNames::BIN_UNITS);
   std::vector<double> x_delta = getProperty(PropertyNames::X_DELTA);
   std::vector<double> x_min = getProperty(PropertyNames::X_MIN);
   std::vector<double> x_max = getProperty(PropertyNames::X_MAX);
@@ -753,6 +755,10 @@ MatrixWorkspace_sptr AlignAndFocusPowderSlim::createOutputWorkspace() {
       wksp->setHistogram(i, hist);
     }
   }
+
+  wksp->getAxis(0)->setUnit(binUnits);
+  wksp->setYUnit("Counts");
+
   return wksp;
 }
 
@@ -811,6 +817,21 @@ API::MatrixWorkspace_sptr AlignAndFocusPowderSlim::editInstrumentGeometry(
   editAlg->executeAsChildAlg();
 
   wksp = editAlg->getProperty("Workspace");
+
+  return wksp;
+}
+
+API::MatrixWorkspace_sptr AlignAndFocusPowderSlim::convertToTOF(API::MatrixWorkspace_sptr &wksp) {
+  if (wksp->getAxis(0)->unit()->unitID() == "TOF") {
+    // already in TOF, no need to convert
+    return wksp;
+  }
+
+  API::IAlgorithm_sptr convertUnits = createChildAlgorithm("ConvertUnits");
+  convertUnits->setProperty("InputWorkspace", wksp);
+  convertUnits->setPropertyValue("Target", "TOF");
+  convertUnits->executeAsChildAlg();
+  wksp = convertUnits->getProperty("OutputWorkspace");
 
   return wksp;
 }
@@ -877,7 +898,7 @@ const double &AlignAndFocusPowderSlim::BankCalibration::value(const detid_t deti
 
 const detid_t &AlignAndFocusPowderSlim::BankCalibration::idmin() const { return m_detid_offset; }
 detid_t AlignAndFocusPowderSlim::BankCalibration::idmax() const {
-  return m_detid_offset + static_cast<detid_t>(m_calibration.size());
+  return m_detid_offset + static_cast<detid_t>(m_calibration.size()) - 1;
 }
 
 } // namespace Mantid::DataHandling

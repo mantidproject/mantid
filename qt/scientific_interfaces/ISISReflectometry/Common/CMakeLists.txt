@@ -17,7 +17,6 @@ set(COMMON_INC_FILES
     Parse.h
     QWidgetGroup.h
     ValidationResult.h
-    ValueOr.h
     ZipRange.h
 )
 
