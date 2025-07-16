@@ -6,6 +6,7 @@
 #pragma once
 
 #include "MantidNexus/DllConfig.h"
+#include "MantidNexus/NexusAddress.h"
 #include <iosfwd>
 #include <map>
 #include <string>
@@ -28,28 +29,18 @@ enum class NXaccess : unsigned int { READ = 0x0000u, RDWR = 0x0001u, CREATE5 = 0
 
 MANTID_NEXUS_DLL std::ostream &operator<<(std::ostream &os, const NXaccess &value);
 
-struct stackEntry {
-  std::string irefn;
-  hid_t iVref;
-  hsize_t iCurrentIDX;
-};
-
 /** NexusFile5
  * NOTE this needs to either be moved to a separate file,
  * or entirely absorbed inside Nexus::File
  */
 struct MANTID_NEXUS_DLL NexusFile5 {
-  std::vector<stackEntry> iStack5;
+  std::vector<hid_t> iStack5;
   hid_t iFID;
   hid_t iCurrentG;
   hid_t iCurrentD;
   hid_t iCurrentS;
   hid_t iCurrentT;
-  hid_t iCurrentA;
-  hsize_t iCurrentIDX;
-  int iNX;
-  std::string name_ref;
-  std::string name_tmp;
+  Mantid::Nexus::NexusAddress groupaddr;
 
   // constructors
   NexusFile5() = delete;
@@ -65,11 +56,6 @@ typedef NexusFile5 *pNexusFile5;
 typedef NexusFile5 *NXhandle;
 
 typedef char NXname[128];
-
-typedef struct {
-  char *iname;
-  int type;
-} info_type, *pinfo;
 
 /** \enum NXentrytype
  * Describes the type of entry in a NeXus file, either group or dataset

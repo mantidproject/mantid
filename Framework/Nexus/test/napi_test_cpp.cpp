@@ -93,7 +93,7 @@ static void writeTest(const string &filename, NXaccess create_code) {
   file.putAttr("ch_attribute", "NeXus");
   file.putAttr("i4_attribute", 42);
   file.putAttr("r4_attribute", 3.14159265);
-  std::cout << "... done" << std::endl;
+  std::cout << "... done" << std::endl << std::flush;
 
   // set up for creating a link
   NXlink link = file.getDataID();
@@ -177,9 +177,12 @@ static void writeTest(const string &filename, NXaccess create_code) {
   // make more links
   NXlink glink = file.getGroupID();
   file.openAddress("/");
+  if (file.getAddress() != "/") {
+    throw std::runtime_error("root not at root");
+  }
   file.makeGroup("link", "NXentry", true);
   file.makeLink(glink);
-  std::cout << "writeTest(" << filename << ") successful\n";
+  std::cout << "writeTest(" << filename << ") successful\n" << std::flush;
 }
 
 template <typename NumT> string toString(const vector<NumT> &data) {
@@ -197,38 +200,38 @@ template <typename NumT> string toString(const vector<NumT> &data) {
 }
 
 int readTest(const string &filename) {
-  std::cout << "readTest(" << filename << ") started\n";
+  std::cout << "readTest(" << filename << ") started\n" << std::flush;
   const string SDS("SDS");
   // top level file information
   Mantid::Nexus::File file(filename);
   vector<Mantid::Nexus::AttrInfo> attr_infos = file.getAttrInfos();
-  cout << "Number of global attributes: " << attr_infos.size() << endl;
+  cout << "Number of global attributes: " << attr_infos.size() << endl << std::flush;
   for (vector<Mantid::Nexus::AttrInfo>::iterator it = attr_infos.begin(); it != attr_infos.end(); ++it) {
     if (it->name != "file_time" && it->name != "HDF_version" && it->name != "HDF5_Version" &&
         it->name != "XML_version") {
-      cout << "   " << it->name << " = ";
+      cout << "   " << it->name << " = " << std::flush;
       if (it->type == NXnumtype::CHAR) {
         cout << file.getStrAttr(it->name);
       }
-      cout << endl;
+      cout << endl << std::flush;
     }
   }
 
   // check group attributes
   file.openGroup("entry", "NXentry");
   attr_infos = file.getAttrInfos();
-  cout << "Number of group attributes: " << attr_infos.size() << endl;
+  cout << "Number of group attributes: " << attr_infos.size() << endl << std::flush;
   for (vector<Mantid::Nexus::AttrInfo>::iterator it = attr_infos.begin(); it != attr_infos.end(); ++it) {
-    cout << "   " << it->name << " = ";
+    cout << "   " << it->name << " = " << std::flush;
     if (it->type == NXnumtype::CHAR) {
       cout << file.getStrAttr(it->name);
     }
-    cout << endl;
+    cout << endl << std::flush << std::flush;
   }
 
   // print out the entry level fields
   map<string, string> entries = file.getEntries();
-  cout << "Group contains " << entries.size() << " items" << endl;
+  cout << "Group contains " << entries.size() << " items" << endl << std::flush;
   Mantid::Nexus::Info info;
   for (map<string, string>::const_iterator it = entries.begin(); it != entries.end(); ++it) {
     cout << "   " << it->first;
@@ -284,10 +287,10 @@ int readTest(const string &filename) {
         cout << toString(result);
       }
       cout << endl;
-      cout << "   Address = " << file.getAddress() << endl;
+      cout << "   Address = " << file.getAddress() << endl << std::flush;
       file.closeData();
     } else {
-      cout << ":" << it->second << endl;
+      cout << ":" << it->second << endl << std::flush;
     }
   }
 
@@ -347,7 +350,7 @@ int readTest(const string &filename) {
     file.openData("r8_data");
     file.getDataCoerce(ints);
     file.closeData();
-    cout << "getDataCoerce(int) of doubles did not throw (it is supposed to throw)." << endl;
+    cout << "getDataCoerce(int) of doubles did not throw (it is supposed to throw)." << endl << std::flush;
   } catch (...) {
     // Good! It is supposed to throw
     didThrow = true;
@@ -363,20 +366,20 @@ int readTest(const string &filename) {
   file.openAddress("/entry/data/comp_data");
   file.openAddress("/entry/data/comp_data");
   file.openAddress("../r8_data");
-  printf("NXopenaddress checks OK\n");
+  cout << "NXopenaddress checks OK\n" << std::flush;
 
   // everything went fine
-  std::cout << "readTest(" << filename << ") successful\n";
+  std::cout << "readTest(" << filename << ") successful\n" << std::flush;
   return TEST_SUCCEED;
 }
 
 int testLoadPath(const string &filename) {
   if (getenv("NX_LOAD_PATH") != NULL) {
     Mantid::Nexus::File file(filename);
-    cout << "Success loading NeXus file from path" << endl;
+    cout << "Success loading NeXus file from path" << endl << std::flush;
     return TEST_SUCCEED;
   } else {
-    cout << "NX_LOAD_PATH variable not defined. Skipping testLoadPath\n";
+    cout << "NX_LOAD_PATH variable not defined. Skipping testLoadPath\n" << std::flush;
     return TEST_SUCCEED;
   }
 }
@@ -390,30 +393,30 @@ int main(int argc, char **argv) {
   try {
     writeTest(fullname, nx_creation_code);
     if (!std::filesystem::exists(fullname)) {
-      std::cerr << "NeXus file \"" << fullname << "\" does not exist after write test\n";
+      std::cerr << "NeXus file \"" << fullname << "\" does not exist after write test\n" << std::flush;
       return TEST_FAILED;
     }
   } catch (const std::runtime_error &e) {
-    cout << "writeTest failed:\n" << e.what() << endl;
+    cout << "writeTest failed:\n" << e.what() << endl << std::flush;
     return TEST_FAILED;
   }
   if ((argc >= 2) && !strcmp(argv[1], "-q")) {
-    cout << "Ending test early\n";
+    cout << "Ending test early\n" << std::flush;
     return TEST_SUCCEED;
   }
 
   if (!std::filesystem::exists(fullname)) {
-    std::cerr << "NeXus file \"" << fullname << "\" does not exist after write test\n";
+    std::cerr << "NeXus file \"" << fullname << "\" does not exist after write test\n" << std::flush;
     return TEST_FAILED;
   }
   // try reading a file
   try {
     if (readTest(fullname) != TEST_SUCCEED) {
-      cout << "readTest failed" << endl;
+      cout << "readTest failed" << endl << std::flush;
       return TEST_FAILED;
     }
   } catch (const std::runtime_error &e) {
-    cout << "readTest failed:\n" << e.what() << endl;
+    cout << "readTest failed:\n" << e.what() << endl << std::flush;
     return TEST_FAILED;
   }
 
@@ -422,7 +425,7 @@ int main(int argc, char **argv) {
   // try using the load path
   std::string fileext(".h5");
   if (testLoadPath(DMC01 + fileext) != TEST_SUCCEED) {
-    cout << "testLoadPath failed" << endl;
+    cout << "testLoadPath failed" << endl << std::flush;
     return TEST_FAILED;
   }
 

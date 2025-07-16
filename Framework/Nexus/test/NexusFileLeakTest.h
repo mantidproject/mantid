@@ -111,8 +111,7 @@ public:
   }
 
   void test_leak3() {
-    cout << "Running Leak Test 3\n";
-    fflush(stdout);
+    cout << "Running Leak Test 3\n" << std::flush;
     const int nFiles = 10;
     const int nEntry = 2;
     const int nData = 2;
@@ -129,8 +128,7 @@ public:
     std::string const szFile(fr.fullPath());
 
     int const iBinarySize = TEST_SIZE * TEST_SIZE;
-    cout << "Creating array of " << iBinarySize << " integers\n";
-    fflush(stdout);
+    cout << "Creating array of " << iBinarySize << " integers\n" << std::flush;
     int16_t aiBinaryData[iBinarySize];
 
     for (int i = 0; i < iBinarySize; i++) {

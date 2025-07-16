@@ -92,7 +92,7 @@ bool keyExists(std::string const &key, std::map<std::string, std::string> const 
 
 // returns true if all of the entries necessary for a histogram exist monitor in
 // the currently open group
-bool isHistoMonitor(Nexus::File &monitorFileHandle) {
+bool isHistoMonitor(Nexus::File const &monitorFileHandle) {
   const auto fields = monitorFileHandle.getEntries();
   return keyExists("data", fields) && keyExists("time_of_flight", fields);
 }

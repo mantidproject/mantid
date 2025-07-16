@@ -1,6 +1,7 @@
 #pragma once
 
 #include "MantidNexus/DllConfig.h"
+#include "MantidNexus/NexusAddress.h"
 #include "MantidNexus/NexusDescriptor.h"
 #include "MantidNexus/NexusFile_fwd.h"
 #include <map>
@@ -42,6 +43,8 @@ class MANTID_NEXUS_DLL File {
 private:
   std::string m_filename;
   NXaccess m_access;
+  /** The address of currently-opened element */
+  NexusAddress m_address;
   /** should be close handle on exit */
   bool m_close_handle;
   /** The handle for the C-API. */
@@ -51,7 +54,7 @@ private:
    * - hasRootAttr
    * - firstEntryNameType
    */
-  Mantid::Nexus::NexusDescriptor m_descriptor;
+  NexusDescriptor m_descriptor;
 
   //------------------------------------------------------------------------------------------------------------------
   // CONSTRUCTORS / ASSIGNMENT / DECONSTRUCTOR
@@ -147,30 +150,33 @@ public:
    * \return A unix like address string pointing to the current
    *         position in the file
    */
-  std::string getAddress();
+  std::string getAddress() const;
 
   // CHECK ADDRESS EXISTENCE
 
-  bool hasAddress(std::string const &);
+  bool hasAddress(std::string const &) const;
 
-  bool hasGroup(std::string const &, std::string const &);
+  bool hasGroup(std::string const &, std::string const &) const;
 
-  bool hasData(std::string const &);
+  bool hasData(std::string const &) const;
 
   /**
    * This function checks if we are in an open dataset
    * \returns true if we are currently in an open dataset else false
    */
-  bool isDataSetOpen();
+  bool isDataSetOpen() const;
 
   /** Return true if the data opened is of one of the
    * int data types, 32 bits or less.
    */
-  bool isDataInt();
+  bool isDataInt() const;
 
 private:
   // EXPLORE FILE LEVEL ENTRIES / ATTRIBUTES
 
+  /** get the ID of current open location
+   * \returns if a datset is open, the ID of the dataset; else ID of open group
+   */
   hid_t getCurrentId() const;
 
   /** It is sometimes necessary to interface with code using the H5Cpp library
@@ -181,7 +187,8 @@ private:
   std::shared_ptr<H5::H5Object> getCurrentObject() const;
 
   // these are used for updating the NexusDescriptor
-  std::string formAbsoluteAddress(std::string const &);
+  NexusAddress groupAddress(NexusAddress const &) const;
+  NexusAddress formAbsoluteAddress(NexusAddress const &) const;
   void registerEntry(std::string const &, std::string const &);
 
   //------------------------------------------------------------------------------------------------------------------
@@ -510,27 +517,22 @@ public:
   Info getInfo();
 
   /**
-   * Initialize the pending group search to start again.
-   */
-  void initGroupDir();
-
-  /**
    * Return the entries available in the current place in the file.
    */
-  Entries getEntries();
+  Entries getEntries() const;
 
   /** Return the entries available in the current place in the file,
    * but avoids the map copy of getEntries().
    *
    * \param result The map that will be filled with the entries
    */
-  void getEntries(Entries &result);
+  void getEntries(Entries &result) const;
 
   /** Return the string name of the top-level entry
    *
    * \return a string with the name (not abs address) of the top-level entry
    */
-  std::string getTopLevelEntryName();
+  std::string getTopLevelEntryName() const;
 
   //------------------------------------------------------------------------------------------------------------------
   // ATTRIBUTE METHODS
@@ -603,7 +605,7 @@ public:
    *  \return true if the current point in the file has the named attribute
    *  \param name the name of the attribute to look for.
    */
-  bool hasAttr(const std::string &name);
+  bool hasAttr(const std::string &name) const;
 
   //------------------------------------------------------------------------------------------------------------------
   // LINK METHODS

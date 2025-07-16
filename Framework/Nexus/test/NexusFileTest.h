@@ -45,7 +45,7 @@ public:
 
   void test_remove() {
     // create a simple file, and make sure removeFile works as intended
-    cout << "\nremoving\n";
+    cout << "\nremoving\n" << std::flush;
     FileResource resource("not_a_real_file.txt");
     std::string filename = resource.fullPath();
 
@@ -69,7 +69,7 @@ public:
   }
 
   void test_can_create() {
-    cout << "\ntest creation\n";
+    cout << "\ntest creation\n" << std::flush;
 
     FileResource resource("test_nexus_file_init.h5");
     std::string filename = resource.fullPath();
@@ -81,7 +81,7 @@ public:
   }
 
   void test_can_open_existing() {
-    cout << "\ntest open exisitng\n";
+    cout << "\ntest open exisitng\n" << std::flush;
 
     FileResource resource("test_nexus_file_init.h5");
     std::string filename = resource.fullPath();
@@ -325,6 +325,7 @@ public:
     // make and open lateral data
     TS_ASSERT_THROWS_NOTHING(file.makeData("data2", NXnumtype::CHAR, 2, false));
     TS_ASSERT_THROWS_NOTHING(file.openData("data2"));
+    TS_ASSERT(file.hasData("/entry/data2"));
     std::string address2 = file.getAddress();
 
     // make sure new data is created off of entry
@@ -717,6 +718,16 @@ public:
 
     // put an initial entry
     hid_t groupid = H5Gcreate(fid, "entry", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    // add a NX_class attribute
+    hid_t attrtype = H5Tcopy(H5T_C_S1);
+    H5Tset_size(attrtype, 7);
+    hid_t attrspce = H5Screate(H5S_SCALAR);
+    hid_t attrid = H5Acreate(groupid, "NX_class", attrtype, attrspce, H5P_DEFAULT, H5P_DEFAULT);
+    H5Awrite(attrid, attrtype, "NXpants");
+    // cleanup attribute
+    H5Sclose(attrspce);
+    H5Tclose(attrtype);
+    H5Aclose(attrid);
 
     // make and put the data
     hid_t datatype = H5Tcopy(H5T_C_S1);
@@ -899,8 +910,8 @@ public:
     TS_ASSERT_EQUALS(file.getAddress(), "/");
     TS_ASSERT_THROWS(file.openAddress("/pants"), Mantid::Nexus::Exception &);
     TS_ASSERT_EQUALS(file.getAddress(), "/");
+    // NOTE pre-existent behavior will partially open invalid paths
     TS_ASSERT_THROWS(file.openAddress("/entry1/pants"), Mantid::Nexus::Exception &);
-    // Should this still be "/"?
     TS_ASSERT_EQUALS(file.getAddress(), "/entry1");
 
     // open the root

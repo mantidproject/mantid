@@ -90,32 +90,7 @@ extern void *NXpData;
 /* ------------------------------------------------------------------- */
 /*----------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------*/
-
 /* Operator function. */
-
-herr_t nxgroup_info(hid_t loc_id, const char *name, const H5L_info_t *statbuf, void *op_data) {
-  UNUSED_ARG(statbuf);
-  pinfo self = static_cast<pinfo>(op_data);
-  H5O_info1_t object_info;
-  // TODO use new version of method rather than v2
-  H5Oget_info_by_name2(loc_id, name, &object_info, H5O_INFO_ALL, H5P_DEFAULT);
-  switch ((object_info).type) {
-  case H5O_TYPE_GROUP:
-    self->iname = strdup(name);
-    self->type = H5O_TYPE_GROUP;
-    break;
-  case H5O_TYPE_DATASET:
-    self->iname = strdup(name);
-    self->type = H5O_TYPE_DATASET;
-    break;
-  default:
-    // TODO defaults to group. not what we would want?
-    self->type = 0;
-    break;
-  }
-  return 1;
-}
-
 /* --------------------------------------------------------------------- */
 
 /* Operator function. */
@@ -144,138 +119,6 @@ herr_t group_info(hid_t loc_id, const char *name, const H5L_info_t *statbuf, voi
 /*-------------------------------------------------------------------------*/
 /*----------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------*/
-
-NXstatus NX5getnextentry(NXhandle fid, std::string &name, std::string &nxclass, NXnumtype &datatype) {
-  pNexusFile5 pFile;
-  hid_t grp, attr1, type, atype;
-  herr_t iRet;
-  hsize_t idx;
-  H5T_class_t tclass;
-  info_type op_data;
-  herr_t iRet_iNX = -1;
-
-  pFile = NXI5assert(fid);
-  op_data.iname = NULL;
-
-  /*
-     iterate to next entry in group list
-   */
-  idx = pFile->iStack5.back().iCurrentIDX;
-  if (pFile->name_ref.empty()) {
-    /* root group */
-    pFile->name_ref = "/";
-  }
-  grp = H5Gopen(pFile->iFID, pFile->name_ref.c_str(), H5P_DEFAULT);
-  // index can be wrong here
-  iRet = H5Literate(grp, H5_INDEX_NAME, H5_ITER_INC, &idx, nxgroup_info, &op_data);
-  H5Gclose(grp);
-  nxclass = NX_UNKNOWN_GROUP;
-
-  /*
-     figure out the number of items in the current group. We need this in order to
-     find out if we are at the end of the search.
-   */
-  if (pFile->iCurrentG == 0) {
-    // if pFile->iCurrentG == 0 would not pFile->name_ref be "/" already, so we could skip that if statement ?
-    pFile->iNX = 0;
-    grp = H5Gopen(pFile->iFID, "/", H5P_DEFAULT);
-    iRet_iNX = H5Literate(grp, H5_INDEX_NAME, H5_ITER_INC, 0, group_info, &pFile->iNX);
-    H5Gclose(grp);
-  } else {
-    pFile->iNX = 0;
-    grp = H5Gopen(pFile->iFID, pFile->name_ref.c_str(), H5P_DEFAULT);
-    // index can be wrong here
-    iRet_iNX = H5Literate(grp, H5_INDEX_NAME, H5_ITER_INC, 0, group_info, &pFile->iNX);
-    H5Gclose(grp);
-  }
-  if (idx == static_cast<hsize_t>(pFile->iNX)) {
-    // why 2?
-    iRet_iNX = 2;
-  }
-
-  if (iRet > 0) {
-    pFile->iStack5.back().iCurrentIDX++;
-    if (op_data.iname != NULL) {
-      name = op_data.iname;
-      free(op_data.iname);
-    } else {
-      pFile->iStack5.back().iCurrentIDX = 0;
-      return NXstatus::NX_EOD;
-    }
-    if (op_data.type == H5O_TYPE_GROUP) {
-      /*
-         open group and find class name attribute
-       */
-      std::string ph_name("");
-      for (stackEntry const &entry : pFile->iStack5) {
-        ph_name += entry.irefn + "/";
-      }
-      ph_name += name;
-      grp = H5Gopen(pFile->iFID, ph_name.c_str(), H5P_DEFAULT);
-      if (grp < 0) {
-        size_t const Nbuff(2048);
-        char pBuffer[Nbuff];
-        snprintf(pBuffer, Nbuff, "ERROR: group %s does not exist", ph_name.c_str());
-        NXReportError(pBuffer);
-        return NXstatus::NX_ERROR;
-      }
-      attr1 = H5Aopen_by_name(grp, ".", "NX_class", H5P_DEFAULT, H5P_DEFAULT);
-      if (attr1 < 0) {
-        nxclass = NX_UNKNOWN_GROUP;
-      } else {
-        type = H5T_C_S1;
-        atype = H5Tcopy(type);
-        char data[128];
-        H5Tset_size(atype, sizeof(data));
-        if (readStringAttributeN(attr1, data, sizeof(data)) < 0) {
-          NXReportError("ERROR: reading attribute");
-          return NXstatus::NX_ERROR;
-        }
-        nxclass = data;
-        H5Tclose(atype);
-        H5Aclose(attr1);
-      }
-      H5Gclose(grp);
-    } else if (op_data.type == H5O_TYPE_DATASET) {
-      /*
-         open dataset and find type
-       */
-      if (pFile->iCurrentG == 0) {
-        grp = H5Dopen(pFile->iFID, name.c_str(), H5P_DEFAULT);
-      } else {
-        grp = H5Dopen(pFile->iCurrentG, name.c_str(), H5P_DEFAULT);
-      }
-      type = H5Dget_type(grp);
-      atype = H5Tcopy(type);
-      tclass = H5Tget_class(atype);
-      NXnumtype iPtype = hdf5ToNXType(tclass, atype);
-      datatype = iPtype;
-      nxclass = "SDS";
-      H5Tclose(atype);
-      H5Tclose(type);
-      H5Dclose(grp);
-    }
-    return NXstatus::NX_OK;
-  } else {
-    /*
-       we are at the end of the search: clear the data structure and reset
-       iCurrentIDX to 0
-     */
-    if (iRet_iNX == 2) {
-      if (op_data.iname != NULL) {
-        free(op_data.iname);
-      }
-      pFile->iStack5.back().iCurrentIDX = 0;
-      return NXstatus::NX_EOD;
-    }
-    if (op_data.iname != NULL) {
-      free(op_data.iname);
-    }
-    NXReportError("ERROR: iterating through group not successful");
-    return NXstatus::NX_ERROR;
-  }
-}
-
 /*-------------------------------------------------------------------------*/
 
 NXstatus NX5getchardata(NXhandle fid, void *data) {
@@ -415,16 +258,6 @@ NXstatus NX5getinfo64(NXhandle fid, std::size_t &rank, Mantid::Nexus::DimVector 
 
 /*-------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------*/
-
-/* Operator function. */
-
-herr_t attr_info(hid_t loc_id, const char *name, const H5A_info_t *unused, void *opdata) {
-  UNUSED_ARG(loc_id);
-  UNUSED_ARG(unused);
-  *(static_cast<char **>(opdata)) = strdup(name);
-
-  return 1;
-}
 
 // cppcheck-suppress-end [constParameterCallback, unreadVariable, constParameter, constParameterPointer, shadowArgument]
 // cppcheck-suppress-end [variableScope, invalidPrintfArgType_uint, constParameterReference]

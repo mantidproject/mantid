@@ -39,6 +39,7 @@
 
 // cppcheck-suppress-begin [unmatchedSuppression, variableScope]
 // cppcheck-suppress-begin [constVariablePointer, constParameterReference, unusedVariable, unreadVariable]
+// cppcheck-suppress-begin [nullPointerArithmeticOutOfMemory, nullPointerOutOfMemory]
 
 // this has to be after the other napi includes
 #include "MantidNexus/napi5.h"
@@ -121,7 +122,6 @@ NXstatus NXclose(NXhandle &fid) {
     NXReportError("ERROR: cannot close HDF file");
   }
   /* release memory */
-  NXI5KillDir(pFile);
   delete fid;
   fid = nullptr;
   H5garbage_collect();
@@ -134,15 +134,10 @@ NXstatus NXmakegroup(NXhandle fid, std::string const &name, std::string const &n
   pNexusFile5 pFile;
   hid_t iVID;
   hid_t attr1, aid1, aid2;
-  std::string pBuffer;
 
   pFile = NXI5assert(fid);
   /* create and configure the group */
-  if (pFile->iCurrentG == 0) {
-    pBuffer = "/" + std::string(name);
-  } else {
-    pBuffer = "/" + std::string(pFile->name_ref) + "/" + std::string(name);
-  }
+  Mantid::Nexus::NexusAddress pBuffer = pFile->groupaddr / name;
   iVID = H5Gcreate(pFile->iFID, pBuffer.c_str(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
   if (iVID < 0) {
     NXReportError("ERROR: could not create Group");
@@ -173,23 +168,16 @@ NXstatus NXmakegroup(NXhandle fid, std::string const &name, std::string const &n
 /*------------------------------------------------------------------------*/
 
 NXstatus NXopengroup(NXhandle fid, std::string const &name, std::string const &nxclass) {
-  std::string pBuffer;
-
   pNexusFile5 pFile = NXI5assert(fid);
-  if (pFile->iCurrentG == 0) {
-    pBuffer = name;
-  } else {
-    pBuffer = pFile->name_tmp + "/" + name;
-  }
+  std::string pBuffer = pFile->groupaddr / name;
   hid_t iVID = H5Gopen(pFile->iFID, pBuffer.c_str(), H5P_DEFAULT);
   if (iVID < 0) {
-    std::string msg = std::string("ERROR: group ") + pFile->name_tmp + " does not exist";
+    std::string msg = std::string("ERROR: group ") + pFile->groupaddr + " does not exist";
     NXReportError(const_cast<char *>(msg.c_str()));
     return NXstatus::NX_ERROR;
   }
   pFile->iCurrentG = iVID;
-  pFile->name_tmp = pBuffer;
-  pFile->name_ref = pBuffer;
+  pFile->groupaddr = pBuffer;
 
   if ((!nxclass.empty()) && (nxclass != NX_UNKNOWN_GROUP)) {
     /* check group attribute */
@@ -232,10 +220,8 @@ NXstatus NXopengroup(NXhandle fid, std::string const &name, std::string const &n
   }
 
   /* maintain stack */
-  pFile->iStack5.emplace_back(name, pFile->iCurrentG, 0);
-  pFile->iCurrentIDX = 0;
+  pFile->iStack5.push_back(pFile->iCurrentG);
   pFile->iCurrentD = 0;
-  NXI5KillDir(pFile);
   return NXstatus::NX_OK;
 }
 
@@ -249,43 +235,15 @@ NXstatus NXclosegroup(NXhandle fid) {
      deeper into a negative directory hierarchy (anti-directory)
    */
   if (pFile->iCurrentG == 0) {
-    NXI5KillDir(pFile);
     return NXstatus::NX_OK;
   } else {
-    /* close the current group and decrement name_ref */
+    /* close the current group and decrement groupaddr */
     H5Gclose(pFile->iCurrentG);
-    size_t i = pFile->iStack5.back().irefn.size();
-    size_t ii = pFile->name_ref.size();
-    if (pFile->iStack5.size() > 2) {
-      ii = ii - i - 1;
-    } else {
-      ii = ii - i;
-    }
-    if (ii > 0) {
-      char *uname = strdup(pFile->name_ref.c_str());
-      char *u1name = NULL;
-      u1name = static_cast<char *>(malloc((ii + 1) * sizeof(char)));
-      memset(u1name, 0, ii);
-      for (i = 0; i < ii; i++) {
-        *(u1name + i) = *(uname + i);
-      }
-      *(u1name + i) = '\0';
-      /*
-         strncpy(u1name, uname, ii);
-       */
-      pFile->name_ref = u1name;
-      pFile->name_tmp = u1name;
-      free(uname);
-      free(u1name);
-    } else {
-      pFile->name_ref = "";
-      pFile->name_tmp = "";
-    }
-    NXI5KillDir(pFile);
+    pFile->groupaddr = pFile->groupaddr.parent_path();
     pFile->iCurrentD = 0;
     pFile->iStack5.pop_back();
     if (!pFile->iStack5.empty()) {
-      pFile->iCurrentG = pFile->iStack5.back().iVref;
+      pFile->iCurrentG = pFile->iStack5.back();
     } else {
       pFile->iCurrentG = 0;
     }
@@ -468,15 +426,19 @@ NXstatus NXcompmakedata64(NXhandle fid, std::string const &name, NXnumtype const
 
 NXstatus NXopendata(NXhandle fid, std::string const &name) {
   pNexusFile5 pFile = NXI5assert(fid);
-  /* clear pending attribute directories first */
-  NXI5KillAttDir(pFile);
 
+  // if a dataset is already open, close it
+  if (pFile->iCurrentD != 0) {
+    H5Dclose(pFile->iCurrentD);
+    pFile->iCurrentD = 0;
+  }
   /* find the ID number and open the dataset */
   pFile->iCurrentD = H5Dopen(pFile->iCurrentG, name.c_str(), H5P_DEFAULT);
   if (pFile->iCurrentD < 0) {
     char pBuffer[256];
     sprintf(pBuffer, "ERROR: dataset \"%s\" not found at this level", name.c_str());
     NXReportError(pBuffer);
+    pFile->iCurrentD = 0;
     return NXstatus::NX_ERROR;
   }
   /* find the ID number of datatype */
@@ -512,6 +474,8 @@ NXstatus NXclosedata(NXhandle fid) {
     return NXstatus::NX_ERROR;
   }
   pFile->iCurrentD = 0;
+  pFile->iCurrentS = 0;
+  pFile->iCurrentT = 0;
   return NXstatus::NX_OK;
 }
 
@@ -755,7 +719,7 @@ NXstatus NXmakelink(NXhandle fid, NXlink const &sLink) {
      build addressname to link from our current group and the name
      of the thing to link
    */
-  linkTarget = "/" + pFile->name_ref + "/" + itemName;
+  linkTarget = pFile->groupaddr / itemName;
 
   H5Lcreate_hard(pFile->iFID, sLink.targetAddress.c_str(), H5L_SAME_LOC, linkTarget.c_str(), H5P_DEFAULT, H5P_DEFAULT);
 
@@ -786,70 +750,14 @@ NXstatus NXflush(NXhandle &fid) {
 }
 
 /*-------------------------------------------------------------------------*/
-
-NXstatus NXmalloc64(void *&data, std::size_t rank, Mantid::Nexus::DimVector const &dims, NXnumtype datatype) {
-  size_t size = 1;
-  data = nullptr;
-  for (size_t i = 0; i < rank; i++) {
-    size *= dims[i];
-  }
-  switch (datatype) {
-  case NXnumtype::CHAR:
-  case NXnumtype::INT8:
-  case NXnumtype::UINT8:
-    size += 2;
-    break;
-  case NXnumtype::INT16:
-  case NXnumtype::UINT16:
-    size *= 2;
-    break;
-  case NXnumtype::INT32:
-  case NXnumtype::UINT32:
-  case NXnumtype::FLOAT32:
-    size *= 4;
-    break;
-  case NXnumtype::INT64:
-  case NXnumtype::UINT64:
-  case NXnumtype::FLOAT64:
-    size *= 8;
-    break;
-  default:
-    NXReportError("ERROR: NXmalloc - unknown data type in array");
-    return NXstatus::NX_ERROR;
-  }
-  data = calloc(size, 1);
-  return NXstatus::NX_OK;
-}
-
 /*-------------------------------------------------------------------------*/
-
-NXstatus NXfree(void **data) {
-  if (data == nullptr) {
-    NXReportError("ERROR: passing NULL to NXfree");
-    return NXstatus::NX_ERROR;
-  }
-  if (*data == nullptr) {
-    NXReportError("ERROR: passing already freed pointer to NXfree");
-    return NXstatus::NX_ERROR;
-  }
-  free(*data);
-  *data = nullptr;
-  return NXstatus::NX_OK;
-}
-
 /* --------------------------------------------------------------------- */
-
-NXstatus NXgetnextentry(NXhandle fid, std::string &name, std::string &nxclass, NXnumtype &datatype) {
-  return NX5getnextentry(fid, name, nxclass, datatype);
-}
-
 /*----------------------------------------------------------------------*/
 /*
 **  TRIM.C - Remove leading, trailing, & excess embedded spaces
 **
 **  public domain by Bob Stout
 */
-#define NUL '\0'
 
 char *nxitrim(char *str) {
   // Trap NULL
@@ -866,7 +774,7 @@ char *nxitrim(char *str) {
       if (!isspace(str[i]))
         break;
     }
-    str[++i] = NUL;
+    str[++i] = '\0';
   }
   return str;
 }
@@ -1125,45 +1033,44 @@ NXstatus NXgetcharattr(NXhandle fid, std::string const &name, void *data, std::s
 
 // cppcheck-suppress constParameterCallback
 NXstatus NXgetattr(NXhandle fid, std::string const &name, void *data, std::size_t &datalen, NXnumtype &iType) {
-  pNexusFile5 pFile;
-  hid_t vid, iNew;
-  hsize_t dims[H5S_MAX_RANK], totalsize;
   herr_t iRet;
-  hid_t type, filespace;
   char pBuffer[256];
 
-  pFile = NXI5assert(fid);
+  pNexusFile5 pFile = NXI5assert(fid);
 
-  type = nxToHDF5Type(iType);
+  hid_t type = nxToHDF5Type(iType);
 
-  vid = getAttVID(pFile);
-  iNew = H5Aopen_by_name(vid, ".", name.c_str(), H5P_DEFAULT, H5P_DEFAULT);
-  if (iNew < 0) {
+  hid_t vid = getAttVID(pFile);
+  hid_t attrid = H5Aopen_by_name(vid, ".", name.c_str(), H5P_DEFAULT, H5P_DEFAULT);
+  if (attrid < 0) {
     sprintf(pBuffer, "ERROR: attribute \"%s\" not found", name.c_str());
     killAttVID(pFile, vid);
     NXReportError(pBuffer);
     return NXstatus::NX_ERROR;
   }
-  pFile->iCurrentA = iNew;
 
   // get the dataspace and proper dimensions
-  filespace = H5Aget_space(pFile->iCurrentA);
-  totalsize = 1;
-  const auto ndims = H5Sget_simple_extent_dims(filespace, dims, NULL);
-  for (int i = 0; i < ndims; i++) {
-    totalsize *= dims[i];
-  }
-  if (ndims != 0 && totalsize > 1) {
-    NXReportError("ERROR: attribute arrays not supported by this api");
-    return NXstatus::NX_ERROR;
+  hid_t filespace = H5Aget_space(attrid);
+  int ndims = H5Sget_simple_extent_ndims(filespace);
+  if (ndims > 0) {
+    hsize_t totalsize = 1;
+    hsize_t *dims = new hsize_t[ndims];
+    H5Sget_simple_extent_dims(filespace, dims, NULL);
+    for (int i = 0; i < ndims; i++) {
+      totalsize *= dims[i];
+    }
+    if (totalsize > 1) {
+      NXReportError("ERROR: attribute arrays not supported by this api");
+      return NXstatus::NX_ERROR;
+    }
   }
 
   /* finally read the data */
   if (type == H5T_C_S1) {
-    iRet = readStringAttributeN(pFile->iCurrentA, static_cast<char *>(data), datalen);
+    iRet = readStringAttributeN(attrid, static_cast<char *>(data), datalen);
     datalen = strlen(static_cast<char *>(data));
   } else {
-    iRet = H5Aread(pFile->iCurrentA, type, data);
+    iRet = H5Aread(attrid, type, data);
     datalen = 1;
   }
 
@@ -1174,7 +1081,7 @@ NXstatus NXgetattr(NXhandle fid, std::string const &name, void *data, std::size_
     return NXstatus::NX_ERROR;
   }
 
-  H5Aclose(pFile->iCurrentA);
+  H5Aclose(attrid);
 
   killAttVID(pFile, vid);
   return NXstatus::NX_OK;
@@ -1211,34 +1118,7 @@ NXstatus NXgetgroupID(NXhandle fileid, NXlink &sRes) {
 
 /*-------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------*/
-
-NXstatus NXsameID(NXhandle fileid, NXlink const &pFirstID, NXlink const &pSecondID) {
-  NXI5assert(fileid);
-  if (pFirstID.targetAddress == pSecondID.targetAddress) {
-    return NXstatus::NX_OK;
-  } else {
-    return NXstatus::NX_ERROR;
-  }
-}
-
 /*-------------------------------------------------------------------------*/
-
-NXstatus NXinitattrdir(NXhandle fid) {
-  pNexusFile5 pFile;
-
-  pFile = NXI5assert(fid);
-  NXI5KillAttDir(pFile);
-  return NXstatus::NX_OK;
-}
-
-NXstatus NXinitgroupdir(NXhandle fid) {
-  pNexusFile5 pFile;
-
-  pFile = NXI5assert(fid);
-  NXI5KillDir(pFile);
-  return NXstatus::NX_OK;
-}
-
 /*------------------------------------------------------------------------
   Implementation of NXopenaddress
   --------------------------------------------------------------------------*/
@@ -1246,60 +1126,116 @@ NXstatus NXinitgroupdir(NXhandle fid) {
 /*-------------------------------------------------------------------*/
 /*---------------------------------------------------------------------*/
 NXstatus NXopenaddress(NXhandle fid, std::string const &address) {
-  NXstatus status;
-  int run = 1;
   std::string addressElement;
-  if (fid == NULL || address.empty()) {
-    NXReportError("ERROR: NXopendata needs both a file handle and a address string");
+  if (fid == nullptr || address.empty()) {
+    NXReportError("ERROR: NXopenaddress needs both a file handle and a address string");
     return NXstatus::NX_ERROR;
   }
 
-  std::string pPtr(moveDown(fid, address, status));
-  if (status != NXstatus::NX_OK) {
-    NXReportError("ERROR: NXopendata failed to move down in hierarchy");
-    return status;
+  // establish the new address absolutely
+  Mantid::Nexus::NexusAddress absaddr(address);
+  if (!absaddr.isAbsolute()) {
+    absaddr = fid->groupaddr / address;
   }
 
-  while (run == 1) {
-    pPtr = extractNextAddress(pPtr, addressElement);
-    status = stepOneUp(fid, addressElement);
-    if (status != NXstatus::NX_OK) {
-      return status;
+  // if we are already there, do nothing
+  if (absaddr == buildCurrentAddress(fid)) {
+    return NXstatus::NX_OK;
+  }
+
+  // go all the way down to the root
+  // if a dataset is open then close it
+  if (isDataSetOpen(fid)) {
+    H5Dclose(fid->iCurrentD);
+    H5Sclose(fid->iCurrentS);
+    H5Tclose(fid->iCurrentT);
+    fid->iCurrentD = 0;
+    fid->iCurrentS = 0;
+    fid->iCurrentT = 0;
+  }
+  // now close all the groups in the stack
+  for (hid_t gid : fid->iStack5) {
+    if (gid != 0) {
+      H5Gclose(gid);
     }
-    if (pPtr.empty()) {
-      run = 0;
+  }
+  fid->iStack5.clear();
+  // reset to the root condition
+  fid->iStack5.push_back(0);
+
+  // if we wanted to go to root, then stop here
+  if (absaddr == Mantid::Nexus::NexusAddress::root()) {
+    fid->iCurrentG = 0;
+    fid->groupaddr = Mantid::Nexus::NexusAddress::root();
+    return NXstatus::NX_OK;
+  }
+
+  // build new address
+  Mantid::Nexus::NexusAddress up(absaddr.parent_path());
+  std::string last(absaddr.stem());
+  // open groups up the address
+  if (up.isRoot()) {
+    fid->iCurrentG = 0;
+  } else {
+    fid->iCurrentG = fid->iFID;
+    for (auto const &name : up.parts()) {
+      hid_t gid = H5Gopen(fid->iCurrentG, name.c_str(), H5P_DEFAULT);
+      if (gid < 0) {
+        return NXstatus::NX_ERROR;
+      }
+      fid->iStack5.push_back(gid);
+      fid->iCurrentG = gid;
+      fid->groupaddr /= name;
     }
+  }
+  // now open the last element -- either a group or a dataset
+  H5O_info2_t op_data;
+  H5Oget_info_by_name(fid->iFID, absaddr.c_str(), &op_data, H5O_INFO_BASIC, H5P_DEFAULT);
+  if (op_data.type == H5O_TYPE_GROUP) {
+    hid_t gid = H5Gopen(fid->iFID, absaddr.c_str(), H5P_DEFAULT);
+    if (gid < 0) {
+      return NXstatus::NX_ERROR;
+    }
+    fid->iStack5.push_back(gid);
+    fid->iCurrentG = gid;
+  } else if (op_data.type == H5O_TYPE_DATASET) {
+    NXstatus ret = NXopendata(fid, last);
+    if (ret != NXstatus::NX_OK) {
+      return ret;
+    }
+  } else {
+    return NXstatus::NX_ERROR;
+  }
+  // now set the address
+  if (fid->iCurrentG == 0) {
+    fid->groupaddr = Mantid::Nexus::NexusAddress::root();
+  } else {
+    fid->groupaddr = getObjectAddress(fid->iCurrentG);
   }
   return NXstatus::NX_OK;
 }
 
 /*---------------------------------------------------------------------*/
 NXstatus NXopengroupaddress(NXhandle fid, std::string const &address) {
-  NXstatus status;
-  std::string addressElement;
-
   if (fid == nullptr || address.empty()) {
     NXReportError("ERROR: NXopengroupaddress needs both a file handle and a address string");
     return NXstatus::NX_ERROR;
   }
 
-  std::string pPtr(moveDown(fid, address, status));
-  if (status != NXstatus::NX_OK) {
-    NXReportError("ERROR: NXopengroupaddress failed to move down in hierarchy");
-    return status;
+  Mantid::Nexus::NexusAddress groupAddress(address);
+  // determine whether this address refers to a group or a dataset
+  // if a dataset, then go to the parent
+  H5O_info2_t op_data;
+  H5Oget_info_by_name(fid->iFID, address.c_str(), &op_data, H5O_INFO_BASIC, H5P_DEFAULT);
+  if (op_data.type == H5O_TYPE_GROUP) {
+    // leave address as it is
+  } else if (op_data.type == H5O_TYPE_DATASET) {
+    groupAddress = groupAddress.parent_path();
+  } else {
+    return NXstatus::NX_ERROR;
   }
-
-  do {
-    pPtr = extractNextAddress(pPtr, addressElement);
-    status = stepOneGroupUp(fid, addressElement);
-    if (status == NXstatus::NX_ERROR) {
-      std::string msg("ERROR: NXopengroupaddress cannot reach address ");
-      msg += address;
-      NXReportError(msg.c_str());
-      return NXstatus::NX_ERROR;
-    }
-  } while (!pPtr.empty() && status != NXstatus::NX_EOD);
-  return NXstatus::NX_OK;
+  // now open the correct address
+  return NXopenaddress(fid, groupAddress.string());
 }
 
 /*---------------------------------------------------------------------*/
@@ -1374,5 +1310,6 @@ std::string NXIformatNeXusTime() {
   return res;
 }
 
+// cppcheck-suppress-end [nullPointerArithmeticOutOfMemory, nullPointerOutOfMemory]
 // cppcheck-suppress-end [constVariablePointer, constParameterReference, unusedVariable, unreadVariable]
 // cppcheck-suppress-end [unmatchedSuppression, variableScope]
