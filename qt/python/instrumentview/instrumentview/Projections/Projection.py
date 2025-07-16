@@ -109,11 +109,12 @@ class Projection(ABC):
 
     def _apply_x_correction(self) -> None:
         """Set x coordinate of specified point to be within the correct range, with the period used as the modulus"""
+        if self._u_period == 0:
+            return
+
         x = self._detector_x_coordinates
         x_min = self._x_range[0]
         x_max = self._x_range[1]
-        if self._u_period == 0:
-            return
 
         x[x < x_min] += np.floor((x_max - x[x < x_min]) / self._u_period) * self._u_period
         x[x > x_max] -= np.floor((x[x > x_max] - x_min) / self._u_period) * self._u_period
