@@ -81,7 +81,7 @@ NXObject::NXObject() : m_fileID(nullptr), m_open(false) {}
  */
 NXObject::NXObject(File *fileID, NXClass const *parent, const std::string &name) : m_fileID(fileID), m_open(false) {
   if (parent && !name.empty()) {
-    m_address = parent->address() + "/" + name;
+    m_address = parent->address() / name;
   }
 }
 
@@ -94,17 +94,11 @@ NXObject::NXObject(File *fileID, NXClass const *parent, const std::string &name)
 NXObject::NXObject(std::shared_ptr<File> fileID, NXClass const *parent, const std::string &name)
     : m_fileID(fileID), m_open(false) {
   if (parent && !name.empty()) {
-    m_address = parent->address() + "/" + name;
+    m_address = parent->address() / name;
   }
 }
 
-std::string NXObject::name() const {
-  size_t i = m_address.find_last_of('/');
-  if (i == std::string::npos)
-    return m_address;
-  else
-    return m_address.substr(i + 1, m_address.size() - i - 1);
-}
+std::string NXObject::name() const { return m_address.stem(); }
 
 /**  Reads in attributes
  */
@@ -330,10 +324,9 @@ NXDataSet::NXDataSet(const NXClass &parent, const std::string &name) : NXObject(
 
 // Opens the data set. Does not read in any data. Call load(...) to load the data
 void NXDataSet::open() {
-  size_t i = m_address.find_last_of('/');
-  if (i == std::string::npos || i == 0)
+  NexusAddress group_address(m_address.parent_path());
+  if (group_address == NexusAddress::root())
     return; // we are in the root group, assume it is open
-  std::string group_address = m_address.substr(0, i);
   m_fileID->openAddress(group_address);
   m_fileID->openData(name());
   m_info = NXInfo(m_fileID->getInfo(), name());

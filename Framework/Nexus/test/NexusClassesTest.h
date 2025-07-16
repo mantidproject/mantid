@@ -97,4 +97,14 @@ public:
     // This can cause an error in `File::getEntries()` which can be very hard to pin down
     TS_ASSERT_THROWS_NOTHING(root.openEntry("mantid_workspace_1"));
   }
+
+  void test_double_root() {
+    // this protects against a regression that could occur, only on Windows,
+    // and only in the tests of LoadMuonNexus3 and LoadMuonNexusV2
+    std::string filename(NexusTest::getFullPath("EMU00102347.nxs_v2"));
+    std::string entryName("/raw_data_1");
+    Mantid::Nexus::NXRoot root(filename);
+    Mantid::Nexus::NXEntry entry = root.openEntry(entryName);
+    TS_ASSERT_EQUALS(entry.address(), entryName);
+  }
 };

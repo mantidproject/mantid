@@ -100,15 +100,15 @@ public:
   // definition.
   // virtual bool isStandard()const = 0;
   /// Returns the absolute address to the object
-  std::string const &address() const { return m_address; }
+  NexusAddress const &address() const { return m_address; }
   /// Returns the name of the object
   std::string name() const;
   /// Nexus file id
   std::shared_ptr<File> m_fileID;
 
 protected:
-  std::string m_address; ///< Keeps the absolute address to the object
-  bool m_open;           ///< Set to true if the object has been open
+  NexusAddress m_address; ///< Keeps the absolute address to the object
+  bool m_open;            ///< Set to true if the object has been open
 private:
   NXObject(); ///< Private default constructor
 };

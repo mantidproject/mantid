@@ -238,4 +238,10 @@ public:
     std::string out(np.c_str());
     TS_ASSERT_EQUALS(out, np.string());
   }
+
+  void test_root_root() {
+    NexusAddress np("//raw_data_1");
+    TS_ASSERT_EQUALS(np, NexusAddress("/raw_data_1"));
+    TS_ASSERT_EQUALS(np.string(), "/raw_data_1");
+  }
 };
