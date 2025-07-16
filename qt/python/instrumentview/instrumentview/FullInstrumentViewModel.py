@@ -34,7 +34,7 @@ class FullInstrumentViewModel:
 
         self._detector_ids = np.array(self._detector_info.detectorIDs())
         self._detector_positions = np.array([self._detector_info.position(i) for i in range(len(self._detector_ids))])
-        self._spherical_positions = np.array([det.getSpherical() for det in self._detector_positions])
+        self._spherical_positions = np.array([self._detector_info.position(i).getSpherical() for i in range(len(self._detector_ids))])
         self._counts = np.zeros_like(self._detector_ids)
         workspace_map = self._workspace.getDetectorIDToWorkspaceIndexMap(False, False)
         self._workspace_indices = np.array([workspace_map.get(int(i), -1) for i in self._detector_ids])
