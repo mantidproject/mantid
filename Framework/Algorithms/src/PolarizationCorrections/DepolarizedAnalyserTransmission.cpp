@@ -128,7 +128,7 @@ std::map<std::string, std::string> DepolarizedAnalyserTransmission::validateInpu
     validateWorkspace(mtWs, PropNames::MT_WORKSPACE, result);
     m_mtWs = mtWs;
   } else if (!isDefault(PropNames::MT_FILE)) {
-    auto loadAlg = createChildAlgorithm("Load");
+    auto loadAlg = createChildAlgorithm("LoadNexus");
     loadAlg->initialize();
     loadAlg->setProperty("Filename", getPropertyValue(PropNames::MT_FILE));
     loadAlg->execute();
@@ -142,7 +142,7 @@ std::map<std::string, std::string> DepolarizedAnalyserTransmission::validateInpu
     m_mtWs = mtWs;
   } else {
     result[PropNames::MT_WORKSPACE] =
-        "Must set either " + std::string(PropNames::MT_WORKSPACE) + " or " + std::string(PropNames::MT_FILE);
+        "Must set either " + std::string(PropNames::MT_WORKSPACE) + " or " + std::string(PropNames::MT_FILE) + ".";
     return result;
   }
 
