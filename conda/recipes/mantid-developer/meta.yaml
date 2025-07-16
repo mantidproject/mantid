@@ -4,6 +4,9 @@ package:
   name: mantid-developer
   version: {{ version }}
 
+build:
+  noarch: generic
+
 requirements:
   run:
     - ccache
