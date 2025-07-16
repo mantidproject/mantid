@@ -79,7 +79,7 @@ const std::string BAD_PULSES_CUTOFF("FilterBadPulsesLowerCutoff");
  * @param name : sub entry name to look for
  * @return true only if it exists
  */
-bool exists(Nexus::File &file, const std::string &name) {
+bool exists(Nexus::File const &file, const std::string &name) {
   const auto entries = file.getEntries();
   return exists(entries, name);
 }

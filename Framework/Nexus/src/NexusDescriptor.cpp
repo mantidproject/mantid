@@ -71,12 +71,12 @@ void getGroup(H5::Group groupID, std::map<std::string, std::set<std::string>> &a
 
 // PUBLIC
 
-NexusDescriptor::NexusDescriptor(std::string filename)
-    : m_filename(std::move(filename)), m_extension(std::filesystem::path(m_filename).extension().string()),
-      m_firstEntryNameType(), m_allEntries(initAllEntries()) {}
+NexusDescriptor::NexusDescriptor(std::string const &filename)
+    : m_filename(filename), m_extension(std::filesystem::path(m_filename).extension().string()), m_firstEntryNameType(),
+      m_allEntries(initAllEntries()) {}
 
-NexusDescriptor::NexusDescriptor(std::string filename, NXaccess access)
-    : m_filename(std::move(filename)), m_extension(std::filesystem::path(m_filename).extension().string()),
+NexusDescriptor::NexusDescriptor(std::string const &filename, NXaccess access)
+    : m_filename(filename), m_extension(std::filesystem::path(m_filename).extension().string()),
       m_firstEntryNameType() {
   // if we are creating a file and it already exists, then delete it first
   if (access == NXaccess::CREATE5) {

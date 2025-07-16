@@ -77,7 +77,7 @@ private:
   /// Parse an algorithm history string loaded from file
   AlgorithmHistory_sptr parseAlgorithmHistory(const std::string &rawData);
   /// Find the history entries at this level in the file.
-  std::set<int> findHistoryEntries(Nexus::File *file);
+  std::set<int> findHistoryEntries(Nexus::File const *file);
   /// The environment of the workspace
   const Kernel::EnvironmentHistory m_environment;
   /// The algorithms which have been called on the workspace

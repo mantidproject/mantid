@@ -313,7 +313,7 @@ public:
   }
 
   void test_links() {
-    cout << "tests of linkature\n";
+    cout << "tests of linkature\n" << std::flush;
 
     string const filename("NexusFile_linktest.nxs");
     removeFile(filename);
@@ -354,7 +354,7 @@ public:
     // Create two groups, group1 and group2
     // Make a link inside group2 to group1
     // make group1
-    cout << "create group /entry/group1\n";
+    cout << "create group /entry/group1\n" << std::flush;
     std::string const strdata("NeXus sample data");
     fileid.makeGroup("group1", "NXentry");
     fileid.openGroup("group1", "NXentry");

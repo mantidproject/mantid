@@ -27,9 +27,9 @@ public:
    * Unique constructor
    * @param filename input HDF5 Nexus file name
    */
-  NexusDescriptor(std::string filename);
+  NexusDescriptor(std::string const &filename);
 
-  NexusDescriptor(std::string filename, NXaccess access);
+  NexusDescriptor(std::string const &filename, NXaccess access);
 
   NexusDescriptor() = delete;
 

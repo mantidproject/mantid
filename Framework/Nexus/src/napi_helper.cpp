@@ -9,8 +9,6 @@
 
 pNexusFile5 NXI5assert(NXhandle fid) { return fid; }
 
-void NXI5KillDir(pNexusFile5 self) { self->iStack5.back().iCurrentIDX = 0; }
-
 herr_t readStringAttribute(hid_t attr, char **data) {
   herr_t iRet = 0;
   hid_t atype = -1;
@@ -94,10 +92,19 @@ herr_t readStringAttributeN(hid_t attr, char *data, std::size_t maxlen) {
   return iRet;
 }
 
-void NXI5KillAttDir(pNexusFile5 self) { self->iCurrentIDX = 0; }
+std::string getObjectAddress(hid_t obj) {
+  // get correctly sized array for name
+  std::size_t addrlen = H5Iget_name(obj, NULL, 0);
+  char *caddr = new char[addrlen + 1];
+  // get name and store inside string
+  H5Iget_name(obj, caddr, addrlen + 1);
+  std::string ret(caddr);
+  delete[] caddr;
+  return ret;
+}
 
 std::string buildCurrentAddress(pNexusFile5 fid) {
-  hid_t current;
+  hid_t current = 0;
   if (fid->iCurrentD != 0) {
     current = fid->iCurrentD;
   } else if (fid->iCurrentG != 0) {
@@ -105,9 +112,7 @@ std::string buildCurrentAddress(pNexusFile5 fid) {
   } else {
     current = fid->iFID;
   }
-  char caddr[2048];
-  H5Iget_name(current, caddr, 2048);
-  return std::string(caddr);
+  return getObjectAddress(current);
 }
 
 hid_t getAttVID(pNexusFile5 fid) {
@@ -341,203 +346,27 @@ herr_t attr_check(hid_t loc_id, const char *member_name, const H5A_info_t *unuse
   The below methods all help NXopenaddress move around inside an address stack
   --------------------------------------------------------------------------*/
 
-int isDataSetOpen(NXhandle hfil) {
-  NXlink id;
-
-  /*
-     This uses the (sensible) feauture that NXgetdataID returns NX_ERROR
-     when no dataset is open
-   */
-  if (NXgetdataID(hfil, id) == NXstatus::NX_ERROR) {
-    return 0;
+bool isDataSetOpen(NXhandle fid) {
+  if (fid->iCurrentD == 0) {
+    return false;
   } else {
-    return 1;
+    return H5Iget_type(fid->iCurrentD) == H5I_DATASET;
   }
 }
 
 /*----------------------------------------------------------------------*/
-int isRoot(NXhandle hfil) {
-  NXlink id;
-
-  /*
-     This uses the feauture that NXgetgroupID returns NX_ERROR
-     when we are at root level
-   */
-  if (NXgetgroupID(hfil, id) == NXstatus::NX_ERROR) {
-    return 1;
-  } else {
-    return 0;
-  }
-}
-
 /*--------------------------------------------------------------------
   copies the next address element into element.
   returns a pointer into address beyond the extracted address
   ---------------------------------------------------------------------*/
-std::string extractNextAddress(std::string const &address, std::string &element) {
-  std::size_t start = 0;
-  /*
-     skip over leading /
-   */
-  if (address.starts_with('/')) {
-    start++;
-  }
-
-  /*
-     find next /
-   */
-  std::size_t next = address.find_first_of('/', start);
-  std::size_t width = next - start;
-  element = address.substr(start, width);
-  if (next == std::string::npos) {
-    return "";
-  } else {
-    return address.substr(next + 1, std::string::npos);
-  }
-}
-
 /*-------------------------------------------------------------------*/
-NXstatus gotoRoot(NXhandle hfil) {
-  if (isDataSetOpen(hfil)) {
-    NXstatus status = NXclosedata(hfil);
-    if (status == NXstatus::NX_ERROR) {
-      return status;
-    }
-  }
-  while (!isRoot(hfil)) {
-    NXclosegroup(hfil);
-  }
-  return NXstatus::NX_OK;
-}
-
 /*--------------------------------------------------------------------*/
-int isRelative(std::string const &address) {
-  if (address.starts_with(".."))
-    return 1;
-  else
-    return 0;
-}
-
 /*------------------------------------------------------------------*/
-NXstatus moveOneDown(NXhandle hfil) {
-  if (isDataSetOpen(hfil)) {
-    return NXclosedata(hfil);
-  } else {
-    return NXclosegroup(hfil);
-  }
-}
-
-/*-------------------------------------------------------------------
-  returns a pointer to the remaining address string to move up
-  --------------------------------------------------------------------*/
-std::string moveDown(NXhandle fid, std::string const &address, NXstatus &code) {
-  code = NXstatus::NX_OK;
-  std::string ret(address);
-
-  if (address.starts_with('/')) {
-    code = gotoRoot(fid);
-  } else {
-    while (isRelative(ret)) {
-      NXstatus status = moveOneDown(fid);
-      if (status == NXstatus::NX_ERROR) {
-        code = status;
-        break;
-      } else {
-        ret = ret.substr(3, std::string::npos);
-      }
-    }
-  }
-  return ret;
-}
-
 /*--------------------------------------------------------------------*/
-NXstatus stepOneUp(NXhandle fid, std::string const &name) {
-  NXnumtype datatype;
-  std::string name2, xclass;
-
-  /*
-     catch the case when we are there: i.e. no further stepping
-     necessary. This can happen with address like ../
-   */
-  if (name.size() < 1) {
-    return NXstatus::NX_OK;
-  }
-
-  NXinitgroupdir(fid);
-
-  while (NXgetnextentry(fid, name2, xclass, datatype) != NXstatus::NX_EOD) {
-    if (name2 == name) {
-      if (xclass == "SDS") {
-        return NXopendata(fid, name);
-      } else {
-        return NXopengroup(fid, name, xclass);
-      }
-    }
-  }
-  std::string warning("ERROR: NXopenaddress cannot step into " + name);
-  NXReportError(warning.c_str());
-  return NXstatus::NX_ERROR;
-}
-
 /*--------------------------------------------------------------------*/
-NXstatus stepOneGroupUp(NXhandle fid, std::string const &name) {
-  NXnumtype datatype;
-  std::string name2, xclass;
-
-  /*
-     catch the case when we are there: i.e. no further stepping
-     necessary. This can happen with address like ../
-   */
-  if (name.size() < 1) {
-    return NXstatus::NX_OK;
-  }
-
-  NXinitgroupdir(fid);
-  while (NXgetnextentry(fid, name2, xclass, datatype) != NXstatus::NX_EOD) {
-
-    if (name2 == name) {
-      if (xclass == "SDS") {
-        return NXstatus::NX_EOD;
-      } else {
-        return NXopengroup(fid, name, xclass);
-      }
-    }
-  }
-  std::string warning("ERROR: NXopengroupaddress cannot step into " + name);
-  NXReportError(warning.c_str());
-  return NXstatus::NX_ERROR;
-}
-
 /*---------------------------------------------------------------------
  * private functions used in NX5open
  */
-
-hid_t create_file_access_plist(std::string const &filename) {
-  char pBuffer[512];
-  hid_t fapl = -1;
-
-  /* create file access property list - required in all cases*/
-  if ((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0) {
-    sprintf(pBuffer,
-            "Error: failed to create file access property "
-            "list for file %s",
-            filename.c_str());
-    NXReportError(pBuffer);
-    return fapl;
-  }
-
-  /* set file close policy - need this in all cases*/
-  if (H5Pset_fclose_degree(fapl, H5F_CLOSE_STRONG) < 0) {
-    sprintf(pBuffer,
-            "Error: cannot set close policy for file "
-            "%s",
-            filename.c_str());
-    NXReportError(pBuffer);
-    return fapl;
-  }
-
-  return fapl;
-}
 
 herr_t set_str_attribute(hid_t parent_id, std::string const &name, std::string const &buffer) {
   char pBuffer[512];
