@@ -156,17 +156,6 @@ public:
       : m_is_time_filtered(is_time_filtered), m_pulse_start_index(pulse_start_index),
         m_pulse_stop_index(pulse_stop_index) {}
 
-  static void loadPulseTimes(H5::Group &entry, std::unique_ptr<std::vector<double>> &data) {
-    // /entry/DASlogs/frequency/time
-    auto logs = entry.openGroup("DASlogs");       // type=NXcollection
-    auto frequency = logs.openGroup("frequency"); // type=NXlog"
-
-    auto dataset = frequency.openDataSet("time");
-    NeXus::H5Util::readArray1DCoerce(dataset, *data); // pass by reference
-
-    // groups close themselves
-  }
-
   template <typename TofType>
   void loadTOF(H5::DataSet &tof_SDS, std::unique_ptr<std::vector<TofType>> &data, const size_t offset,
                const size_t slabsize) {
@@ -596,6 +585,21 @@ void AlignAndFocusPowderSlim::exec() {
   const size_t numHist = indexInfo.size();
   */
 
+  // load run metadata
+  this->progress(.11, "Loading metadata");
+  // prog->doReport("Loading metadata"); TODO add progress bar stuff
+  try {
+    LoadEventNexus::loadEntryMetadata(filename, wksp, ENTRY_TOP_LEVEL, descriptor);
+  } catch (std::exception &e) {
+    g_log.warning() << "Error while loading meta data: " << e.what() << '\n';
+  }
+
+  // load logs
+  this->progress(.12, "Loading logs");
+  auto periodLog = std::make_unique<const TimeSeriesProperty<int>>("period_log"); // not used
+  int nPeriods{1};
+  LoadEventNexus::runLoadNexusLogs<MatrixWorkspace_sptr>(filename, wksp, *this, false, nPeriods, periodLog);
+
   // load the events
   H5::H5File h5file(filename, H5F_ACC_RDONLY, NeXus::H5Util::defaultFileAcc());
 
@@ -606,17 +610,23 @@ void AlignAndFocusPowderSlim::exec() {
     this->progress(.15, "Creating time filtering");
     is_time_filtered = true;
     g_log.information() << "Filtering pulses from " << filter_time_start_sec << " to " << filter_time_stop_sec << "s\n";
-    std::unique_ptr<std::vector<double>> pulse_times = std::make_unique<std::vector<double>>();
-    auto entry = h5file.openGroup(ENTRY_TOP_LEVEL);
-    NexusLoader::loadPulseTimes(entry, pulse_times);
+
+    // get pulse times from frequency log on workspace
+    const auto frequency_log = dynamic_cast<const TimeSeriesProperty<double> *>(wksp->run().getProperty("frequency"));
+    if (!frequency_log) {
+      throw std::runtime_error("Frequency log not found in workspace run");
+    }
+    const auto pulse_times =
+        std::make_unique<std::vector<Mantid::Types::Core::DateAndTime>>(frequency_log->timesAsVector());
+    const auto startOfRun = wksp->run().getFirstPulseTime();
     g_log.information() << "Pulse times from " << pulse_times->front() << " to " << pulse_times->back()
-                        << " with length " << pulse_times->size() << '\n';
+                        << " with length " << pulse_times->size() << " and start of run at " << startOfRun << '\n';
     if (!std::is_sorted(pulse_times->cbegin(), pulse_times->cend())) {
       g_log.warning() << "Pulse times are not sorted, pulse time filtering will not be accurate\n";
     }
 
     if (filter_time_start_sec != EMPTY_DBL()) {
-      const double filter_time_start = pulse_times->front() + filter_time_start_sec;
+      const auto filter_time_start = startOfRun + filter_time_start_sec;
       const auto itStart = std::lower_bound(pulse_times->cbegin(), pulse_times->cend(), filter_time_start);
       if (itStart == pulse_times->cend())
         throw std::invalid_argument("Invalid pulse time filtering, start time will filter all pulses");
@@ -625,7 +635,7 @@ void AlignAndFocusPowderSlim::exec() {
     }
 
     if (filter_time_stop_sec != EMPTY_DBL()) {
-      const double filter_time_stop = pulse_times->front() + filter_time_stop_sec;
+      const auto filter_time_stop = startOfRun + filter_time_stop_sec;
       const auto itStop = std::upper_bound(pulse_times->cbegin(), pulse_times->cend(), filter_time_stop);
       if (itStop == pulse_times->cend())
         pulse_stop_index = std::numeric_limits<size_t>::max();
@@ -690,21 +700,6 @@ void AlignAndFocusPowderSlim::exec() {
 
   // close the file so child algorithms can do their thing
   h5file.close();
-
-  // load run metadata
-  this->progress(.91, "Loading metadata");
-  // prog->doReport("Loading metadata"); TODO add progress bar stuff
-  try {
-    LoadEventNexus::loadEntryMetadata(filename, wksp, ENTRY_TOP_LEVEL, descriptor);
-  } catch (std::exception &e) {
-    g_log.warning() << "Error while loading meta data: " << e.what() << '\n';
-  }
-
-  // load logs
-  this->progress(.92, "Loading logs");
-  auto periodLog = std::make_unique<const TimeSeriesProperty<int>>("period_log"); // not used
-  int nPeriods{1};
-  LoadEventNexus::runLoadNexusLogs<MatrixWorkspace_sptr>(filename, wksp, *this, false, nPeriods, periodLog);
 
   setProperty(PropertyNames::OUTPUT_WKSP, std::move(wksp));
 }
