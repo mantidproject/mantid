@@ -312,14 +312,14 @@ public:
 
   void setUp() override {
     m_loadedData = loadMuonDataset();
-    phaseQuad = setupAlg(m_loadedData, false);
+    m_phaseQuad = setupAlg(m_loadedData, false);
   }
 
   void tearDown() override { Mantid::API::AnalysisDataService::Instance().remove("outputWs"); }
 
-  void testPerformanceWs() { phaseQuad->execute(); }
+  void testPerformanceWs() { m_phaseQuad->execute(); }
 
 private:
   MatrixWorkspace_sptr m_loadedData;
-  IAlgorithm_sptr phaseQuad;
+  IAlgorithm_sptr m_phaseQuad;
 };

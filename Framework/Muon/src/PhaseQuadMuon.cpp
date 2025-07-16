@@ -17,6 +17,14 @@
 
 #include "Eigen/Dense"
 
+// Use of a `long double` datatype is required on osx-arm64 to bring the precision of eigen vector-matrix multiplication
+// inline with the other operating systems.
+#if defined(__APPLE__) && defined(__arm64__)
+typedef long double eigenDataType;
+#else
+typedef double eigenDataType;
+#endif
+
 using namespace Mantid::DataObjects;
 using namespace Mantid::HistogramData;
 
@@ -239,7 +247,7 @@ API::MatrixWorkspace_sptr PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr 
   }
   std::vector<bool> emptySpectrum;
   emptySpectrum.reserve(nspec);
-  std::vector<Eigen::Vector<long double, 2>> n0Vectors(nspec);
+  std::vector<Eigen::Vector<eigenDataType, 2>> n0Vectors(nspec);
 
   // Calculate coefficients aj, bj
 
@@ -255,21 +263,21 @@ API::MatrixWorkspace_sptr PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr 
       const double phi = phase->Double(h, phaseIndex);
       const double X = n0[h] * asym * cos(phi);
       const double Y = n0[h] * asym * sin(phi);
-      Eigen::Vector<long double, 2> n0vec;
+      Eigen::Vector<eigenDataType, 2> n0vec;
       n0Vectors[h] = {X, Y};
       sxx += X * X;
       syy += Y * Y;
       sxy += X * Y;
     } else {
-      n0Vectors[h] = Eigen::Vector<long double, 2>::Zero();
+      n0Vectors[h] = Eigen::Vector<eigenDataType, 2>::Zero();
     }
   }
 
-  Eigen::Matrix<long double, 2, 2> muLamMatrix;
+  Eigen::Matrix<eigenDataType, 2, 2> muLamMatrix;
   muLamMatrix << sxx, sxy, sxy, syy;
-  muLamMatrix = Eigen::PartialPivLU<Eigen::Matrix<long double, 2, 2>>(muLamMatrix).inverse();
+  muLamMatrix = Eigen::PartialPivLU<Eigen::Matrix<eigenDataType, 2, 2>>(muLamMatrix).inverse();
 
-  std::vector<long double> aj(nspec), bj(nspec);
+  std::vector<eigenDataType> aj(nspec), bj(nspec);
   for (size_t h = 0; h < nspec; h++) {
     aj[h] = bj[h] = 0;
     if (!emptySpectrum[h]) {
