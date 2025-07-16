@@ -180,13 +180,63 @@ public:
   template <typename TofType>
   void loadTOF(H5::DataSet &tof_SDS, std::unique_ptr<std::vector<TofType>> &data, const size_t offset,
                const size_t slabsize) {
-    NeXus::H5Util::readArray1DCoerce(tof_SDS, *data, slabsize, offset);
+    H5::DataSpace filespace = tof_SDS.getSpace();
+    const auto length_actual = static_cast<size_t>(filespace.getSelectNpoints());
+
+    if (offset >= length_actual && offset != 0) {
+      std::stringstream msg;
+      msg << "Tried to read offset=" << offset << " into array that is only lenght=" << length_actual << " long";
+      throw std::runtime_error(msg.str());
+    }
+
+    // set extent and offset in DataSpace
+    const hsize_t rankedoffset[1] = {static_cast<hsize_t>(offset)};
+    const hsize_t rankedextent[1] = {
+        static_cast<hsize_t>(std::min(slabsize, length_actual - offset))}; // don't read past the end
+    // select a part of filespace if appropriate
+    if (rankedextent[0] < length_actual)
+      filespace.selectHyperslab(H5S_SELECT_SET, rankedextent, rankedoffset);
+
+    // size of thing being read out
+    H5::DataSpace memspace(1, rankedextent);
+
+    // do the actual read
+    const H5::DataType dataType = tof_SDS.getDataType();
+
+    std::size_t dataSize = filespace.getSelectNpoints();
+    data->resize(dataSize);
+    tof_SDS.read(data->data(), dataType, memspace, filespace);
   }
 
   template <typename DetidType>
   void loadDetid(H5::DataSet &detID_SDS, std::unique_ptr<std::vector<DetidType>> &data, const size_t offset,
                  const size_t slabsize) {
-    NeXus::H5Util::readArray1DCoerce(detID_SDS, *data, slabsize, offset);
+    H5::DataSpace filespace = detID_SDS.getSpace();
+    const auto length_actual = static_cast<size_t>(filespace.getSelectNpoints());
+
+    if (offset >= length_actual && offset != 0) {
+      std::stringstream msg;
+      msg << "Tried to read offset=" << offset << " into array that is only lenght=" << length_actual << " long";
+      throw std::runtime_error(msg.str());
+    }
+
+    // set extent and offset in DataSpace
+    const hsize_t rankedoffset[1] = {static_cast<hsize_t>(offset)};
+    const hsize_t rankedextent[1] = {
+        static_cast<hsize_t>(std::min(slabsize, length_actual - offset))}; // don't read past the end
+    // select a part of filespace if appropriate
+    if (rankedextent[0] < length_actual)
+      filespace.selectHyperslab(H5S_SELECT_SET, rankedextent, rankedoffset);
+
+    // size of thing being read out
+    H5::DataSpace memspace(1, rankedextent);
+
+    // do the actual read
+    const H5::DataType dataType = detID_SDS.getDataType();
+
+    std::size_t dataSize = filespace.getSelectNpoints();
+    data->resize(dataSize);
+    detID_SDS.read(data->data(), dataType, memspace, filespace);
   }
 
 private:
