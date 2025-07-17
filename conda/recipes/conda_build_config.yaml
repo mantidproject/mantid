@@ -3,21 +3,21 @@ c_compiler:
   - clang                    # [osx]
   - vs2022                   # [win]
 c_compiler_version:          # [unix]
-  - 18                       # [osx]
-  - 13                       # [linux]
+  - '18.*'                   # [osx]
+  - '13.*'                   # [linux]
 cxx_compiler:
   - gxx                      # [linux]
   - clangxx                  # [osx]
   - vs2022                   # [win]
 cxx_compiler_version:        # [unix]
-  - 18                       # [osx]
-  - 13                       # [linux]
+  - '18.*'                   # [osx]
+  - '13.*'                   # [linux]
 llvm_openmp:                 # [osx]
-  - 18                       # [osx]
+  - '18.*'                   # [osx]
 c_stdlib:                    # [linux]
   - sysroot                  # [linux]
 c_stdlib_version:            # [linux]
-  - 2.17                     # [linux]
+  - '2.17.*'                 # [linux]
 
 python:
   - '3.11.*'
@@ -88,10 +88,10 @@ pydantic:
  - '>=2.11.4,<3'
 
 sphinx:
-  - '>=4.5.*'
+  - '>=4.5'
 
 sphinx_bootstrap_theme:
-  - 0.8.1
+  - '==0.8.1'
 
 scipy:
   - '>=1.10.0'
@@ -116,14 +116,14 @@ pyyaml:
 
 # Pins qt to a specific version to avoid gui rendering problems in certain versions
 qt_main:
-  - 5.15
+  - '5.15.*'
 
 # 5.4.2 crashes the jupyter console. 5.5.0 raises a TypeError when using tab completion.
 qtconsole:
   - '>5.5.0'
 
 qscintilla2:
-  - 2.13
+  - '2.13.*'
 
 # 2.4.2 fails workbench.test_mainwindow.test_mainwindow which uses isinstance()
 qtpy:
