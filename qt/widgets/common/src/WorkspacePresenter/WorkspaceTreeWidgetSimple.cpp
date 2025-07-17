@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/WorkspacePresenter/WorkspaceTreeWidgetSimple.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidQtWidgets/Common/MantidTreeModel.h"
 #include "MantidQtWidgets/Common/MantidTreeWidget.h"
 #include "MantidQtWidgets/Common/MantidTreeWidgetItem.h"
@@ -277,7 +278,8 @@ void WorkspaceTreeWidgetSimple::addMatrixWorkspaceActions(QMenu *menu, const Man
   }
   menu->addAction(m_showNewInstrumentView);
   m_showNewInstrumentView->setEnabled(workspace.getInstrument() && !workspace.getInstrument()->getName().empty() &&
-                                      workspace.getAxis(1)->isSpectra());
+                                      workspace.getAxis(1)->isSpectra() &&
+                                      !workspace.detectorInfo().detectorIDs().empty());
 }
 
 void WorkspaceTreeWidgetSimple::addTableWorkspaceActions(QMenu *menu, const Mantid::API::ITableWorkspace &workspace) {

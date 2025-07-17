@@ -27,8 +27,6 @@ class FullInstrumentViewPresenter:
     def __init__(self, view: FullInstrumentViewWindow, model: FullInstrumentViewModel):
         """For the given workspace, use the data from the model to plot the detectors. Also include points at the origin and
         any monitors."""
-        pv.global_theme.color_cycler = "default"
-        pv.global_theme.allow_empty_mesh = True
 
         self._view = view
         self._model = model
