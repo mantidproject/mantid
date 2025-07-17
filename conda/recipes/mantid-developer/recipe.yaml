@@ -1,0 +1,139 @@
+schema_version: 1
+
+context:
+  # dynamic versioning hasn't been figured out
+  version: 1.2.3
+  #version: load_setup_py_data(setup_file='../../../setup.py', from_recipe_dir=True) | get('version', '0.0.0')
+
+package:
+  name: mantid-developer
+  version: ${{ version }}
+
+requirements:
+  run:
+    - ccache
+    - cmake ${{ cmake }}
+    - conda-verify
+    - if: win
+      then: conda-wrappers
+    - if: win
+      then: gdk-pixbuf ${{ gdk_pixbuf }}
+    - doxygen ${{ doxygen }}
+    - eigen ${{ eigen }}
+    - euphonic ${{ euphonic }}
+    # remove seekpath altogether once newer euphonic is released
+    - seekpath=2.1.0=*2
+    - graphviz ${{ graphviz }}
+    - gsl ${{ gsl }}
+    - h5py
+    - hdf4 ${{ hdf4 }}
+    - hdf5 ${{ hdf5 }}
+    - if: linux
+      then: jemalloc ${{ jemalloc }}
+    - jsoncpp ${{ jsoncpp }}
+    - if: win
+      then: lib3mf
+    - libboost-devel ${{ libboost_devel }}
+    - libboost-python-devel ${{ libboost_python_devel }}
+    - if: osx or linux
+      then: libopenblas ${{ libopenblas }}
+    - librdkafka ${{ librdkafka }}
+    - if: linux
+      then: lz4
+    - matplotlib ${{ matplotlib }}
+    - muparser ${{ muparser }}
+    - ninja ${{ ninja }}
+    - numpy ${{ numpy }}
+    - occt ${{ occt }}
+    - pip ${{ pip }}
+    - poco ${{ poco }}
+    - psutil ${{ psutil }}
+    - pycifrw
+    - pydantic ${{ pydantic }}
+    - pyqt ${{ pyqt }}
+    - pyqtwebengine
+    - if: linux
+      then: pystack
+    - pystog ${{ pystog }}
+    - python-dateutil ${{ python_dateutil }}
+    - python ${{ python }}
+    - if: osx
+      then: python.app
+    - pyyaml ${{ pyyaml }}
+    - qscintilla2 ${{ qscintilla2 }}
+    - qt ${{ qt_main }}
+    - qtconsole ${{ qtconsole }}
+    - qtpy ${{ qtpy }}
+    - if: linux
+      then: qt-gtk-platformtheme
+    - quasielasticbayes ${{ quasielasticbayes }}
+    - quickbayes ${{ quickbayes }}
+    - requests>=2.32.4
+    - scipy ${{ scipy }}
+    - setuptools
+    - sphinx ${{ sphinx }}
+    - sphinx_bootstrap_theme ${{ sphinx_bootstrap_theme }}
+    - tbb-devel ${{ tbb }}
+    - if: linux
+      then: texlive-core ${{ texlive_core }}
+    - if: osx and not arm64
+      then: texlive-core ${{ texlive_core }}
+    - toml ${{ toml }}
+    - versioningit ${{ versioningit }}
+    - if: linux
+      then: vtk {{ vtk }}
+    - zlib
+    - joblib
+    - orsopy ${{ orsopy }}
+    # Not Windows, OpenGL implementation:
+    - if: linux
+      then: libgl-devel
+    # Linux only
+    - if: linux
+      then: gxx_linux-64 ${{ cxx_compiler_version }}
+    - if: linux
+      then: libglu ${{ libglu }}
+    # Needed for test suite on Linux
+    - if: linux
+      then: ${{ cdt('pciutils-libs') }}
+    - if: linux
+      then: xorg-libxcomposite>=0.4.5
+    - if: linux
+      then: xorg-libxcursor>=1.2.0
+    - if: linux
+      then: xorg-libxdamage>=1.1.5
+    - if: linux
+      then: xorg-libxi>=1.7.10
+    - if: linux
+      then: xorg-libxscrnsaver>=1.2.3
+    - if: linux
+      then: xorg-libxtst>=1.2.3
+    # Development tooling
+    - cppcheck==2.18.1
+    - if: linux
+      then: gcovr>=4.2
+    - pre-commit>=4.0
+    - if: osx
+      then: libcxx
+    # Use conda version of clang to get matching CXXFLAGS.
+    # Pinned to same version as conda forge: https://github.com/conda-forge/conda-forge-pinning-feedstock/blob/main/recipe/conda_build_config.yaml
+    - if: osx and not arm64
+      then: clang_osx-64 ${{ c_compiler_version }}
+    - if: osx and not arm64
+      then: clangxx_osx-64 ${{ cxx_compiler_version }}
+    - if: osx and arm64
+      then: clang_osx-arm64 ${{ c_compiler_version }}
+    - if: osx and arm64
+      then: clangxx_osx-arm64 ${{ cxx_compiler_version }}
+    - if: osx
+      then: llvm-openmp ${{ llvm_openmp }}
+
+about:
+  license: GPL-3.0-or-later
+  summary: A metapackage for mantid developers
+  description: A metapackage containing the dependencies required for building, testing and developing mantid.
+  homepage: https://github.com/mantidproject/mantid
+
+extra:
+  recipe-maintainers:
+    - thomashampson
