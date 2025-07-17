@@ -10,6 +10,8 @@ from functools import partial
 from qtpy.QtWidgets import QApplication, QVBoxLayout
 
 from instrumentview.FullInstrumentViewWindow import FullInstrumentViewWindow
+from instrumentview.FullInstrumentViewModel import FullInstrumentViewModel
+from instrumentview.FullInstrumentViewPresenter import FullInstrumentViewPresenter
 from mantid.api import AnalysisDataService, WorkspaceGroup
 from mantid.kernel import logger
 from mantidqt.plotting import functions
@@ -302,7 +304,9 @@ class WorkspaceWidget(PluginWidget):
         for ws in self._ads.retrieveWorkspaces(names, unrollGroups=True):
             if ws.getInstrument().getName():
                 try:
-                    view = FullInstrumentViewWindow(ws, parent=parent, off_screen=off_screen)
+                    view = FullInstrumentViewWindow(parent=parent, off_screen=off_screen)
+                    model = FullInstrumentViewModel(ws)
+                    FullInstrumentViewPresenter(view, model)
                     view.show()
                 except Exception as exception:
                     logger.warning("Could not show instrument for workspace '{}':\n{}\n".format(ws.name(), exception))
