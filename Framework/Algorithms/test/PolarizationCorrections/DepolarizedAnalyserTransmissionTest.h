@@ -6,13 +6,13 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include <cstdio>
 #include <cxxtest/TestSuite.h>
 #include <filesystem>
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAlgorithms/CreateSampleWorkspace.h"
 #include "MantidAlgorithms/PolarizationCorrections/DepolarizedAnalyserTransmission.h"
+#include "MantidKernel/Strings.h"
 
 namespace {
 constexpr double PXD_VALUE = 9.32564;
@@ -231,12 +231,13 @@ private:
 
   std::shared_ptr<DepolarizedAnalyserTransmission> createAlgorithmUsingFilename(MatrixWorkspace_sptr const &mtWs,
                                                                                 MatrixWorkspace_sptr const &depWs) {
-    std::string filePath = std::tmpnam(nullptr);
+
+    std::filesystem::path filePath = std::filesystem::temp_directory_path() / Mantid::Kernel::Strings::randomString(8);
 
     auto saveAlg = Mantid::API::AlgorithmManager::Instance().create("SaveNexus");
     saveAlg->setChild(true);
     saveAlg->initialize();
-    saveAlg->setProperty("Filename", filePath);
+    saveAlg->setProperty("Filename", filePath.string());
     saveAlg->setProperty("InputWorkspace", mtWs);
     saveAlg->execute();
     TS_ASSERT(std::filesystem::exists(filePath));
@@ -246,7 +247,7 @@ private:
     alg->initialize();
     TS_ASSERT(alg->isInitialized());
     alg->setProperty("DepolarizedWorkspace", depWs);
-    alg->setProperty("EmptyCellFilename", filePath);
+    alg->setProperty("EmptyCellFilename", filePath.string());
     alg->setPropertyValue("OutputWorkspace", "__unused_for_child");
     return alg;
   }
