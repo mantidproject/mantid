@@ -7,8 +7,6 @@
 #include <string.h>
 #include <time.h>
 
-pNexusFile5 NXI5assert(NXhandle fid) { return fid; }
-
 herr_t readStringAttribute(hid_t attr, char **data) {
   herr_t iRet = 0;
   hid_t atype = -1;

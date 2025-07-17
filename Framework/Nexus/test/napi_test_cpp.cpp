@@ -1,5 +1,4 @@
 #include "MantidNexus/NexusFile.h"
-#include "napi_test_util.h"
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -10,9 +9,6 @@
 #include <string>
 #include <vector>
 
-using NexusNapiTest::removeFile;
-using NexusNapiTest::write_dmc01;
-using NexusNapiTest::write_dmc02;
 using std::cout;
 using std::endl;
 using std::map;
@@ -20,7 +16,19 @@ using std::multimap;
 using std::string;
 using std::vector;
 
+// return to system when any test failed
+constexpr int TEST_FAILED{1};
+// return to system when all tests succeed
+constexpr int TEST_SUCCEED{0};
+
 namespace { // anonymous namespace
+
+void removeFile(const std::string &filename) {
+  if (std::filesystem::exists(filename)) {
+    std::filesystem::remove(filename);
+  }
+}
+
 const std::string DMC01("dmc01cpp");
 const std::string DMC02("dmc02cpp");
 
