@@ -298,9 +298,57 @@ void File::openAddress(std::string const &address) {
   if (address.empty()) {
     throw NXEXCEPTION("Supplied empty address");
   }
-  NXstatus ret = NXopenaddress(m_pfile_id.get(), absaddr);
-  m_address = getObjectAddress(getCurrentId());
-  NAPI_CALL(ret, "NXopenaddress(" + address + ") failed");
+  // NOTE to support pre-existing behavior, do NOT check if the address exists first
+  // it must open as many path elements as it can until failing
+  // TODO is this behavior relied on anywhere but the tests?
+  // if (!hasAddress(absaddr)) {
+  //   throw NXEXCEPTION("Address " + address + " is not valid");
+  // }
+
+  // if we are already there, do nothing
+  if (absaddr == m_address) {
+    return;
+  }
+
+  // if a dataset is open, close it
+  if (isDataSetOpen()) {
+    closeData();
+  }
+
+  // close all groups in the stack
+  std::size_t stacksize = m_pfile_id->iStack5.size();
+  for (size_t i = 0; i < stacksize; i++) {
+    closeGroup();
+  }
+
+  // if we wanted to go to root, then stop here
+  if (absaddr == NexusAddress::root()) {
+    m_pfile_id->iStack5.clear();
+    m_pfile_id->iStack5.push_back(0);
+    m_address = NexusAddress::root();
+    return;
+  }
+
+  // open all groups in the address
+  NexusAddress groupstack(absaddr.parent_path());
+  NexusAddress fromroot;
+  for (auto const &name : groupstack.parts()) {
+    fromroot /= name;
+    if (m_descriptor.isEntry(fromroot)) {
+      openGroup(fromroot, m_descriptor.classTypeForName(fromroot));
+    } else {
+      throw NXEXCEPTION("Failed to open address " + absaddr + " at element " + fromroot);
+    }
+  }
+
+  // open the last element -- either a group or a dataset
+  if (hasData(absaddr)) {
+    openData(absaddr);
+  } else if (hasAddress(absaddr)) {
+    openGroup(absaddr, m_descriptor.classTypeForName(absaddr));
+  } else {
+    throw NXEXCEPTION("Failed to open final element of address " + absaddr);
+  }
 }
 
 void File::openGroupAddress(std::string const &address) {
