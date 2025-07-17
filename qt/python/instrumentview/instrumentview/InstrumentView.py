@@ -8,6 +8,7 @@ from instrumentview.FullInstrumentViewWindow import FullInstrumentViewWindow
 from instrumentview.FullInstrumentViewModel import FullInstrumentViewModel
 from instrumentview.FullInstrumentViewPresenter import FullInstrumentViewPresenter
 from mantid.simpleapi import Load
+from mantid.kernel import logger
 from pathlib import Path
 from qtpy.QtWidgets import QApplication
 from qtpy.QtGui import QIcon
@@ -25,6 +26,16 @@ class InstrumentView:
         """Load the given file, then open the Instrument View in a separate window with that workspace displayed"""
         app = QApplication(sys.argv)
         ws = Load(str(file_path), StoreInADS=False)
+
+        if (
+            not ws.getInstrument()
+            or not ws.getInstrument().getName()
+            or not ws.getAxis(1).isSpectra()
+            or (ws.detectorInfo().detectorIDs().size == 0)
+        ):
+            logger.error(f"Could not open instrument for {file_path}. Check that instrument and detectors are present in the workspace.")
+            return
+
         model = FullInstrumentViewModel(ws)
         window = FullInstrumentViewWindow()
         FullInstrumentViewPresenter(window, model)

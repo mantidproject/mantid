@@ -29,7 +29,7 @@ class FullInstrumentViewModel:
         self._detector_info = workspace.detectorInfo()
 
         self._component_info = workspace.componentInfo()
-        self._sample_position = np.array(self._component_info.samplePosition())
+        self._sample_position = np.array(self._component_info.samplePosition()) if self._component_info.hasSample() else np.zeros(3)
 
         has_source = workspace.getInstrument().getSource() is not None
         self._source_position = np.array(self._component_info.sourcePosition()) if has_source else np.array([0, 0, 0])
