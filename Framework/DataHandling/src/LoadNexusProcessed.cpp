@@ -998,10 +998,9 @@ API::Workspace_sptr LoadNexusProcessed::loadLeanElasticPeaksEntry(const NXEntry 
   try {
     m_nexusFile->openAddress(entry.address()); // This is
   } catch (std::runtime_error &re) {
-    throw std::runtime_error("Error while opening a address in a Peaks entry in a "
-                             "Nexus processed file. "
-                             "This address is wrong: " +
-                             entry.address() + ". Lower level error description: " + re.what());
+    throw std::runtime_error(
+        "Error while opening a address in a Peaks entry in a Nexus processed file. This address is wrong: " +
+        std::string(entry.address()) + ". Lower level error description: " + re.what());
   }
   try {
     // Get information from all but data group
@@ -1021,8 +1020,7 @@ API::Workspace_sptr LoadNexusProcessed::loadLeanElasticPeaksEntry(const NXEntry 
   try {
     m_nexusFile->openGroup(peaksWSName, "NXentry");
   } catch (std::runtime_error &re) {
-    throw std::runtime_error("Error while opening a peaks workspace in a Nexus processed file. "
-                             "Cannot open gropu " +
+    throw std::runtime_error("Error while opening a peaks workspace in a Nexus processed file. Cannot open group " +
                              peaksWSName + ". Lower level error description: " + re.what());
   }
   try {
@@ -1278,10 +1276,9 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(const NXEntry &entry) {
   try {
     m_nexusFile->openAddress(entry.address()); // This is
   } catch (std::runtime_error &re) {
-    throw std::runtime_error("Error while opening a address in a Peaks entry in a "
-                             "Nexus processed file. "
-                             "This address is wrong: " +
-                             entry.address() + ". Lower level error description: " + re.what());
+    throw std::runtime_error(
+        "Error while opening a address in a Peaks entry in a Nexus processed file. This address is wrong: " +
+        std::string(entry.address()) + ". Lower level error description: " + re.what());
   }
   try {
     // Get information from all but data group
@@ -1301,8 +1298,7 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(const NXEntry &entry) {
   try {
     m_nexusFile->openGroup(peaksWSName, "NXentry");
   } catch (std::runtime_error &re) {
-    throw std::runtime_error("Error while opening a peaks workspace in a Nexus processed file. "
-                             "Cannot open gropu " +
+    throw std::runtime_error("Error while opening a peaks workspace in a Nexus processed file. Cannot open group " +
                              peaksWSName + ". Lower level error description: " + re.what());
   }
   try {

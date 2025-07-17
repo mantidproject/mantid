@@ -74,4 +74,50 @@ public:
     duration.load();
     TS_ASSERT_DELTA(duration[0], 7200., .1);
   }
+
+  void test_concurrent_read_address_and_id() {
+    std::cout << "test file and nexus classes\n" << std::flush;
+    // this test mimics behavior found inside LoadNexusProcessed::loadLeanelasticPeaksEntry
+    // and protects against a regression that can occur in tests of LoadNexusProcessed
+    // This error occurs when multiple places are trying to access the same file resource,
+    // and put the stack of HDF IDs in an inconsistent state.
+    std::string filename = NexusTest::getFullPath("SingleCrystalLeanElasticPeakTableNew.nxs");
+
+    // open an NXRoot and a NexusFile
+    Mantid::Nexus::NXRoot root(filename);
+    Mantid::Nexus::File file(root.m_fileID);
+
+    // in the file, go to one place, in the NXRoot another
+    TS_ASSERT_THROWS_NOTHING(file.openGroupAddress("/mantid_workspace_1"));
+    TS_ASSERT_THROWS_NOTHING(root.openEntry("mantid_workspace_1"));
+    TS_ASSERT_THROWS_NOTHING(file.openGroupAddress("/mantid_workspace_1/peaks_workspace"));
+    // If the error is not fixed, the result of the above COULD mean that the file is in an
+    // inconsistent situation.  It will then try to open a dataset "definition", which is
+    // inside "/mantid_workspace_1", even though the currently opened group is "peaks_workspace"
+    // This can cause an error in `File::getEntries()` which can be very hard to pin down
+    TS_ASSERT_THROWS_NOTHING(root.openEntry("mantid_workspace_1"));
+  }
+
+  void test_double_root() {
+    // this protects against a regression that could occur, only on Windows,
+    // and only in the tests of LoadMuonNexus3 and LoadMuonNexusV2
+    std::string filename(NexusTest::getFullPath("EMU00102347.nxs_v2"));
+    std::string entryName("/raw_data_1");
+    Mantid::Nexus::NXRoot root(filename);
+    Mantid::Nexus::NXEntry entry = root.openEntry(entryName);
+    TS_ASSERT_EQUALS(entry.address(), entryName);
+  }
+
+  void test_proper_concat() {
+    // this protects against a regression that can occur in LoadILLSANS
+    std::string filename = NexusTest::getFullPath("ILL/D16/025786.nxs");
+    Mantid::Nexus::NXRoot root(filename);
+    Mantid::Nexus::NXEntry firstEntry(root.openFirstEntry());
+
+    std::string relAddr = "data_scan/scanned_variables/data";
+    TS_ASSERT_THROWS_NOTHING(firstEntry.openNXData(relAddr));
+
+    std::string absAddr = "/data_scan/scanned_variables/data";
+    TS_ASSERT_THROWS_NOTHING(firstEntry.openNXData(absAddr));
+  }
 };

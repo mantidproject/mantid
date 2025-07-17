@@ -8,13 +8,11 @@
 
 MANTID_NEXUS_DLL pNexusFile5 NXI5assert(NXhandle fid);
 
-MANTID_NEXUS_DLL void NXI5KillDir(pNexusFile5 self);
-
 MANTID_NEXUS_DLL herr_t readStringAttribute(hid_t attr, char **data);
 
 MANTID_NEXUS_DLL herr_t readStringAttributeN(hid_t attr, char *data, std::size_t maxlen);
 
-MANTID_NEXUS_DLL void NXI5KillAttDir(pNexusFile5 self);
+MANTID_NEXUS_DLL std::string getObjectAddress(hid_t obj);
 
 MANTID_NEXUS_DLL std::string buildCurrentAddress(pNexusFile5 fid);
 
@@ -35,19 +33,10 @@ MANTID_NEXUS_DLL herr_t attr_check(hid_t loc_id, const char *member_name, const 
 /*------------------------------------------------------------------------
   Implementation of NXopenaddress
   --------------------------------------------------------------------------*/
-MANTID_NEXUS_DLL int isDataSetOpen(NXhandle hfil);
-MANTID_NEXUS_DLL int isRoot(NXhandle hfil);
-MANTID_NEXUS_DLL std::string extractNextAddress(std::string const &address, std::string &element);
-MANTID_NEXUS_DLL NXstatus gotoRoot(NXhandle hfil);
-MANTID_NEXUS_DLL int isRelative(std::string const &address);
-MANTID_NEXUS_DLL NXstatus moveOneDown(NXhandle hfil);
-MANTID_NEXUS_DLL std::string moveDown(NXhandle hfil, std::string const &address, NXstatus &code);
-MANTID_NEXUS_DLL NXstatus stepOneUp(NXhandle hfil, std::string const &name);
-MANTID_NEXUS_DLL NXstatus stepOneGroupUp(NXhandle hfil, std::string const &name);
+MANTID_NEXUS_DLL bool isDataSetOpen(NXhandle hfil);
 
 /*---------------------------------------------------------------------
  * private functions used in NX5open
  */
 
-hid_t create_file_access_plist(std::string const &filename);
 herr_t set_str_attribute(hid_t parent_id, std::string const &name, std::string const &buffer);

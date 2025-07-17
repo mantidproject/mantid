@@ -309,7 +309,7 @@ void WorkspaceHistory::loadNestedHistory(Nexus::File *file, const AlgorithmHisto
  * @param file :: The handle to the nexus file
  * @returns set of integers. One for each algorithm at the level in the file.
  */
-std::set<int> WorkspaceHistory::findHistoryEntries(Nexus::File *file) {
+std::set<int> WorkspaceHistory::findHistoryEntries(Nexus::File const *file) {
   std::set<int> historyNumbers;
   std::map<std::string, std::string> entries;
   file->getEntries(entries);

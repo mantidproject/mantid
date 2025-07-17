@@ -7,6 +7,7 @@ set(SRC_FILES
     src/NexusDescriptor.cpp
     src/NexusException.cpp
     src/NexusFile.cpp
+    src/NexusAddress.cpp
 )
 
 set(INC_FILES
@@ -20,6 +21,7 @@ set(INC_FILES
     inc/MantidNexus/NexusDescriptor.h
     inc/MantidNexus/NexusException.h
     inc/MantidNexus/NexusFile.h
+    inc/MantidNexus/NexusAddress.h
 )
 
 set(TEST_FILES
@@ -31,6 +33,7 @@ set(TEST_FILES
     NexusFileLeakTest.h
     NexusFileNapiTest.h
     NexusFileReadWriteTest.h
+    NexusAddressTest.h
     NapiUnitTest.h
 )
 
