@@ -199,9 +199,9 @@ public:
       filespace.selectHyperslab(H5S_SELECT_SET, rankedextent, rankedoffset);
 
       for (size_t i = 1; i < offsets.size(); ++i) {
-        const hsize_t rankedoffset[1] = {static_cast<hsize_t>(offsets[i])};
-        const hsize_t rankedextent[1] = {static_cast<hsize_t>(slabsizes[i])};
-        filespace.selectHyperslab(H5S_SELECT_OR, rankedextent, rankedoffset);
+        const hsize_t offset[1] = {static_cast<hsize_t>(offsets[i])};
+        const hsize_t extent[1] = {static_cast<hsize_t>(slabsizes[i])};
+        filespace.selectHyperslab(H5S_SELECT_OR, extent, offset);
         total_size += slabsizes[i];
       }
     }
@@ -376,7 +376,7 @@ public:
         continue;
       }
 
-      auto eventRange = m_loader.getEventIndexRanges(event_group, total_events);
+      auto eventRanges = m_loader.getEventIndexRanges(event_group, total_events);
 
       // create a histogrammer to process the events
       auto &spectrum = m_wksp->getSpectrum(wksp_index);
@@ -406,28 +406,28 @@ public:
       auto event_time_of_flight = std::make_unique<std::vector<float>>(); // float for ORNL nexus files
 
       // read parts of the bank at a time
-      while (!eventRange.empty()) {
+      while (!eventRanges.empty()) {
         std::vector<size_t> offsets;
         std::vector<size_t> slabsizes;
 
         size_t total_events_to_read = 0;
-        while (!eventRange.empty() && total_events_to_read < m_events_per_chunk) {
-          auto range = eventRange.front();
-          eventRange.pop_front();
+        while (!eventRanges.empty() && total_events_to_read < m_events_per_chunk) {
+          auto eventRange = eventRanges.front();
+          eventRanges.pop_front();
 
-          size_t range_size = range.second - range.first;
+          size_t range_size = eventRange.second - eventRange.first;
           size_t remaining_chunk = m_events_per_chunk - total_events_to_read;
 
           if (range_size > remaining_chunk) {
             // Split the range: process only part of it now, push the rest back for later
-            offsets.push_back(range.first);
+            offsets.push_back(eventRange.first);
             slabsizes.push_back(remaining_chunk);
             total_events_to_read += remaining_chunk;
             // Push the remainder of the range back to the front for next iteration
-            eventRange.emplace_front(range.first + remaining_chunk, range.second);
+            eventRanges.emplace_front(eventRange.first + remaining_chunk, eventRange.second);
             break;
           } else {
-            offsets.push_back(range.first);
+            offsets.push_back(eventRange.first);
             slabsizes.push_back(range_size);
             total_events_to_read += range_size;
             // Continue to next range
@@ -489,7 +489,6 @@ private:
   const size_t m_events_per_chunk;
   /// number of events to histogram in a single thread
   const size_t m_grainsize_event;
-  const std::vector<size_t> pulse_indices;
   std::shared_ptr<API::Progress> m_progress;
 };
 
