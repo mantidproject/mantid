@@ -1,5 +1,3 @@
-cdt_name:
-  - conda
 c_compiler:
   - gcc                      # [linux]
   - clang                    # [osx]
