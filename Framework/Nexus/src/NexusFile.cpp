@@ -59,7 +59,7 @@ template <typename NumT> static string toString(const vector<NumT> &data) {
   return result.str();
 }
 
-pNexusFile5 assertNXID(std::shared_ptr<NexusFile5> const &pfid) { return pfid.get(); }
+pNexusFile5 assertNXID(std::unique_ptr<NexusFile5> const &pfid) { return pfid.get(); }
 
 } // end of anonymous namespace
 
@@ -131,16 +131,23 @@ NexusFile5::NexusFile5(std::string const &filename, NXaccess const am)
 
 NexusFile5::NexusFile5(NexusFile5 const &origHandle)
     : iStack5{0}, iFID(0), iCurrentG(0), iCurrentD(0), iCurrentS(0), iCurrentT(0), groupaddr() {
-  iFID = H5Freopen(origHandle.iFID);
-  if (iFID <= 0) {
-    throw Mantid::Nexus::Exception("Error reopening file");
+  if (H5Iget_type(origHandle.iFID) == H5I_FILE) {
+    iFID = origHandle.iFID; // H5Freopen(origHandle.iFID);
+    H5Iinc_ref(iFID);
+  } else {
+    throw Mantid::Nexus::Exception("Failure of NexusFile5 copy constructor, invalid FID");
   }
   iStack5[0] = 0; // root!
 };
 
 NexusFile5 &NexusFile5::operator=(NexusFile5 const &origHandle) {
   this->iStack5 = {0};
-  this->iFID = H5Freopen(origHandle.iFID);
+  if (H5Iget_type(origHandle.iFID) == H5I_FILE) {
+    iFID = origHandle.iFID; // H5Freopen(origHandle.iFID);
+    H5Iinc_ref(iFID);
+  } else {
+    throw Mantid::Nexus::Exception("Failure of NexusFile5 assignment, invalid FID");
+  }
   this->iCurrentG = this->iCurrentD = this->iCurrentS = this->iCurrentT = 0;
   this->groupaddr = Mantid::Nexus::NexusAddress::root();
   return *this;
@@ -221,7 +228,7 @@ void File::initOpenFile(const string &filename, const NXaccess access) {
     msg << "File::initOpenFile(" << filename << ", " << access << ") failed";
     throw NXEXCEPTION(msg.str());
   } else {
-    m_pfile_id = std::make_shared<NexusFile5>(tmp);
+    m_pfile_id = std::make_unique<NexusFile5>(tmp);
   }
 }
 
@@ -229,15 +236,15 @@ void File::initOpenFile(const string &filename, const NXaccess access) {
 
 File::File(File const &f)
     : m_filename(f.m_filename), m_access(f.m_access), m_address(f.m_address), m_close_handle(false),
-      m_pfile_id(f.m_pfile_id), m_descriptor(f.m_descriptor) {}
+      m_pfile_id(std::make_unique<NexusFile5>(m_filename, m_access)), m_descriptor(f.m_descriptor) {}
 
 File::File(File const *const pf)
     : m_filename(pf->m_filename), m_access(pf->m_access), m_address(pf->m_address), m_close_handle(false),
-      m_pfile_id(pf->m_pfile_id), m_descriptor(pf->m_descriptor) {}
+      m_pfile_id(std::make_unique<NexusFile5>(m_filename, m_access)), m_descriptor(pf->m_descriptor) {}
 
 File::File(std::shared_ptr<File> pf)
     : m_filename(pf->m_filename), m_access(pf->m_access), m_address(pf->m_address), m_close_handle(false),
-      m_pfile_id(pf->m_pfile_id), m_descriptor(pf->m_descriptor) {}
+      m_pfile_id(std::make_unique<NexusFile5>(m_filename, m_access)), m_descriptor(pf->m_descriptor) {}
 
 File &File::operator=(File const &f) {
   if (this == &f) {
@@ -245,7 +252,7 @@ File &File::operator=(File const &f) {
     this->m_filename = f.m_filename;
     this->m_access = f.m_access;
     this->m_address = f.m_address;
-    this->m_pfile_id = f.m_pfile_id;
+    this->m_pfile_id = std::make_unique<NexusFile5>(m_filename, m_access);
     this->m_close_handle = f.m_close_handle;
     this->m_descriptor = f.m_descriptor;
   }
