@@ -66,7 +66,7 @@ WorkspaceTreeWidgetSimple::WorkspaceTreeWidgetSimple(bool viewOnly, QWidget *par
       m_superplotWithErrs(new QAction("Superplot with errors...", this)),
       m_superplotBins(new QAction("Superplot bins...", this)),
       m_superplotBinsWithErrs(new QAction("Superplot bins with errors...", this)),
-      m_showNewInstrumentView(new QAction("Show Instrument (New)...", this)) {
+      m_showNewInstrumentView(new QAction("(Experimental) Show Instrument", this)) {
 
   // Replace the double click action on the MantidTreeWidget
   m_tree->m_doubleClickAction = [&](const QString &wsName) { emit workspaceDoubleClicked(wsName); };
