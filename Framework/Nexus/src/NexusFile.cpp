@@ -1864,7 +1864,9 @@ template MANTID_NEXUS_DLL void File::getData(int32_t *data);
 template MANTID_NEXUS_DLL void File::getData(uint32_t *data);
 template MANTID_NEXUS_DLL void File::getData(int64_t *data);
 template MANTID_NEXUS_DLL void File::getData(uint64_t *data);
+#ifdef _WIN32
 template MANTID_NEXUS_DLL void File::getData<char>(char *data);
+#endif
 template MANTID_NEXUS_DLL void File::getData(bool *data);
 
 template MANTID_NEXUS_DLL void File::getData(vector<float> &data);
