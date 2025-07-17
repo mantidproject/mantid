@@ -23,7 +23,7 @@ from matplotlib.contour import QuadContourSet
 from qtpy.QtCore import Qt
 from qtpy.QtGui import QCursor
 from qtpy.QtWidgets import QActionGroup, QMenu, QApplication, QAction
-from matplotlib.colors import LogNorm, Normalize
+from matplotlib.colors import LogNorm, Normalize, SymLogNorm
 from matplotlib.collections import Collection
 from mpl_toolkits.mplot3d.axes3d import Axes3D
 
@@ -49,15 +49,8 @@ from workbench.plotting.style import VALID_LINE_STYLE, VALID_COLORS
 from workbench.plotting.toolbar import ToolbarStateManager
 
 # Map canvas context-menu string labels to a pair of matplotlib scale-type strings
-AXES_SCALE_MENU_OPTS = OrderedDict(
-    [
-        ("Lin x/Lin y", ("linear", "linear")),
-        ("Log x/Log y", ("log", "log")),
-        ("Lin x/Log y", ("linear", "log")),
-        ("Log x/Lin y", ("log", "linear")),
-    ]
-)
-COLORBAR_SCALE_MENU_OPTS = OrderedDict([("Linear", Normalize), ("Log", LogNorm)])
+AXES_SCALE_MENU_OPTS = ["linear", "log", "symlog"]
+COLORBAR_SCALE_MENU_OPTS = OrderedDict([("Linear", Normalize), ("Log", LogNorm), ("SymLog", SymLogNorm)])
 
 
 @contextmanager
@@ -476,14 +469,18 @@ class FigureInteraction(object):
     def _add_axes_scale_menu(self, menu, ax):
         """Add the Axes scale options menu to the given menu"""
         axes_menu = QMenu("Axes", menu)
-        axes_actions = QActionGroup(axes_menu)
-        current_scale_types = (ax.get_xscale(), ax.get_yscale())
-        for label, scale_types in AXES_SCALE_MENU_OPTS.items():
-            action = axes_menu.addAction(label, partial(self._quick_change_axes, scale_types, ax))
-            if current_scale_types == scale_types:
-                action.setCheckable(True)
-                action.setChecked(True)
-            axes_actions.addAction(action)
+        for x_scale_type in AXES_SCALE_MENU_OPTS:
+            sub_axes_menu = QMenu(f"{x_scale_type} x", axes_menu)
+            axes_actions = QActionGroup(sub_axes_menu)
+            for y_scale_type in AXES_SCALE_MENU_OPTS:
+                action = sub_axes_menu.addAction(f"{y_scale_type} y", partial(self._quick_change_axes, (x_scale_type, y_scale_type), ax))
+                if x_scale_type == ax.get_xscale() and y_scale_type == ax.get_yscale():
+                    action.setCheckable(True)
+                    action.setChecked(True)
+                    sub_axes_menu.menuAction().setCheckable(True)
+                    sub_axes_menu.menuAction().setChecked(True)
+                axes_actions.addAction(action)
+            axes_menu.addMenu(sub_axes_menu)
         menu.addMenu(axes_menu)
 
     def _add_normalization_option_menu(self, menu, ax):
@@ -835,7 +832,8 @@ class FigureInteraction(object):
             # to duplicate the handling.
             colorbar_log = False
             if ax.images:
-                colorbar_log = isinstance(ax.images[-1].norm, LogNorm)
+                colorbar_scale = ax.images[-1].norm
+                colorbar_log = isinstance(colorbar_scale, LogNorm) or isinstance(colorbar_scale, SymLogNorm)
                 if colorbar_log:
                     self._change_colorbar_axes(Normalize)
 
@@ -856,7 +854,7 @@ class FigureInteraction(object):
                     if cb:
                         datafunctions.add_colorbar_label(cb, ax.get_figure().axes)
                 if colorbar_log:  # If it had a log scaled colorbar before, put it back.
-                    self._change_colorbar_axes(LogNorm)
+                    self._change_colorbar_axes(colorbar_scale)
 
                 axesfunctions.update_colorplot_datalimits(ax, ax.images)
 
@@ -943,10 +941,15 @@ class FigureInteraction(object):
         # not rescaled properly because the vertical marker artists were
         # included in the last computation of the data limits and
         # set_xscale/set_yscale only autoscale the view
+
+        scale_args = [
+            {"value": scale_type, "linthresh": 2} if scale_type == "symlog" else {"value": scale_type} for scale_type in scale_types
+        ]
+
         xlim = copy(ax.get_xlim())
         ylim = copy(ax.get_ylim())
-        ax.set_xscale(scale_types[0])
-        ax.set_yscale(scale_types[1])
+        ax.set_xscale(**scale_args[0])
+        ax.set_yscale(**scale_args[1])
         ax.set_xlim(xlim)
         ax.set_ylim(ylim)
 
@@ -957,8 +960,16 @@ class FigureInteraction(object):
             images = ax.get_images() + [col for col in ax.collections if isinstance(col, Collection)]
             for image in images:
                 if image.norm.vmin is not None and image.norm.vmax is not None:
-                    datafunctions.update_colorbar_scale(self.canvas.figure, image, scale_type, image.norm.vmin, image.norm.vmax)
-
+                    update_args = {
+                        "figure": self.canvas.figure,
+                        "image": image,
+                        "scale": scale_type,
+                        "vmin": image.norm.vmin,
+                        "vmax": image.norm.vmax,
+                    }
+                    if scale_type == SymLogNorm:
+                        update_args["linthresh"] = 2.0  # Set to default mpl linthresh
+                    datafunctions.update_colorbar_scale(**update_args)
         self.canvas.draw_idle()
 
     def _toggle_legend_and_redraw(self, ax):
