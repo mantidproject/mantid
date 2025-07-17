@@ -157,9 +157,8 @@ class FigureInteraction(object):
             self._quick_change_axes((ax.get_xscale(), next_yscale), ax)
 
     def _get_next_axis_scale(self, current_scale):
-        if current_scale == "linear":
-            return "log"
-        return "linear"
+        next_index = AXES_SCALE_MENU_OPTS.index(current_scale) + 1
+        return AXES_SCALE_MENU_OPTS[next_index] if next_index < len(AXES_SCALE_MENU_OPTS) else AXES_SCALE_MENU_OPTS[0]
 
     def _correct_for_scroll_event_on_legend(self, event):
         # Corrects default behaviour in Matplotlib where legend is picked up by scroll event
@@ -832,7 +831,7 @@ class FigureInteraction(object):
             # to duplicate the handling.
             colorbar_log = False
             if ax.images:
-                colorbar_scale = ax.images[-1].norm
+                colorbar_scale = ax.images[-1].norm.__class__
                 colorbar_log = isinstance(colorbar_scale, LogNorm) or isinstance(colorbar_scale, SymLogNorm)
                 if colorbar_log:
                     self._change_colorbar_axes(Normalize)
