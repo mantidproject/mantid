@@ -7,7 +7,7 @@
 
 from functools import cached_property, partial
 import json
-from multiprocessing import Pool
+from multiprocessing import get_context
 from operator import attrgetter
 from pathlib import Path
 from typing import Dict, Tuple, Union
@@ -597,7 +597,7 @@ class SPowderSemiEmpiricalCalculator:
         if isinstance(spectra, Spectrum1DCollection):
             frequencies = spectra.x_data.to(self.freq_unit).magnitude
 
-            with Pool(n_threads) as p:
+            with get_context("spawn").Pool(n_threads) as p:
                 broadened_spectra = p.map(
                     partial(self._apply_resolution, frequencies, self._bins, scheme=broadening_scheme, instrument=self._instrument),
                     spectra._y_data,
@@ -626,7 +626,7 @@ class SPowderSemiEmpiricalCalculator:
             z_data_magnitude = spectra.z_data.to(self.s_unit).magnitude
             s_rows = np.reshape(z_data_magnitude, (-1, z_data_magnitude.shape[-1]))
 
-            with Pool(n_threads) as p:
+            with get_context("spawn").Pool(n_threads) as p:
                 broadened_spectra = p.map(
                     partial(self._apply_resolution, frequencies, self._bins, scheme=broadening_scheme, instrument=self._instrument),
                     s_rows,

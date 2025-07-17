@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from functools import partial
 from itertools import chain, groupby
-from multiprocessing import Pool
+from multiprocessing import get_context
 from operator import itemgetter
 from typing import (
     Dict,
@@ -167,7 +167,7 @@ def add_autoconvolution_spectra(
     # create new spectra using first and last spectra in initial group, iterating until order = max_order
     x_data = spectra.x_data
 
-    with Pool(N_THREADS) as p:
+    with get_context("spawn").Pool(N_THREADS) as p:
         output_spectra = p.map(partial(_autoconvolve_atom_spectra, x_data=x_data, max_order=max_order), spectra_by_atom)
 
         if output_bins is not None:
