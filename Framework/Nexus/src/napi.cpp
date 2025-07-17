@@ -675,7 +675,7 @@ NXstatus NXopendata(NXhandle fid, CONSTCHAR *name) {
   status = LOCKED_CALL(pFunc->nxopendata(pFunc->pNexusData, name));
 
   if (status == NXstatus::NX_OK) {
-    pushPath(fileStack, name);
+    pushPath(fileStack, name, true);
   }
 
   char nxurl[1024];
