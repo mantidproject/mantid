@@ -169,16 +169,16 @@ class WorkbenchNavigationToolbar(MantidNavigationToolbar):
     def _home_wrapper(self):
         """Wraps the call to home, editing the nav stack to enforce a colorbar minimum of >0 if it has a log scale."""
         edit_stack = self.is_colormap(self.canvas.figure) and self._colorbar_is_log_scale(self.canvas.figure) and self._nav_stack._elements
-        orig_entry = None
-        if edit_stack:
-            orig_entry = self._nav_stack._elements[0].data
-            orig_limits = list(orig_entry.items())[1][1][0]
-            self._nav_stack._elements[0].data = {
-                k: self._recursive_replace(v, find=orig_limits, replace=(0.0001, orig_limits[1])) for k, v in orig_entry.items()
-            }
+        if not edit_stack:
+            self.home()
+            return
+        orig_entry = self._nav_stack._elements[0].data
+        orig_limits = list(orig_entry.items())[1][1][0]
+        self._nav_stack._elements[0].data = {
+            k: self._recursive_replace(v, find=orig_limits, replace=(0.0001, orig_limits[1])) for k, v in orig_entry.items()
+        }
         self.home()
-        if edit_stack:
-            self._nav_stack._elements[0].data = orig_entry
+        self._nav_stack._elements[0].data = orig_entry
 
     def _recursive_replace(self, item: dict, find, replace):
         """Recurses through a structure of nested tuples, looking to replace a specified find object with a replace object"""
@@ -317,16 +317,14 @@ class WorkbenchNavigationToolbar(MantidNavigationToolbar):
         if figure_type(fig) in [FigureType.Image] and len(fig.get_axes()) == 2:
             if isinstance(fig.get_axes()[0], MantidAxes) and self._is_colorbar(fig.get_axes()[1]):
                 return True
-        else:
-            return False
+        return False
 
     def _colorbar_is_log_scale(self, fig):
         """Identify if a colorbar is logscale"""
         if figure_type(fig) in [FigureType.Image] and len(fig.get_axes()) == 2:
             if self._is_colorbar(fig.get_axes()[1]) and isinstance(fig.get_axes()[1]._colorbar.norm, LogNorm):
                 return True
-        else:
-            return False
+        return False
 
     @classmethod
     def _is_colorbar(cls, ax):

@@ -170,22 +170,22 @@ class AxisEditor(PropertiesEditorBase):
         self.axis_id = axis_id
 
         if isinstance(axes, Axes3D):
-            self.lim_setter = getattr(axes, "set_{}lim3d".format(axis_id))
+            self.lim_setter = getattr(axes, f"set_{axis_id}lim3d")
         else:
-            self.lim_setter = getattr(axes, "set_{}lim".format(axis_id))
+            self.lim_setter = getattr(axes, f"set_{axis_id}lim")
 
-        self.scale_setter = getattr(axes, "set_{}scale".format(axis_id))
+        self.scale_setter = getattr(axes, f"set_{axis_id}scale")
         self.nonposkw = "nonpositive"
 
         # Store the axis for attributes that can't be directly accessed
         # from axes object (e.g. grid and tick parameters).
-        self.axis = getattr(axes, "{}axis".format(axis_id))
+        self.axis = getattr(axes, f"{axis_id}axis")
 
     def create_model(self):
         memento = AxisEditorModel()
         self._memento = memento
-        memento.min, memento.max = getattr(self.axes, "get_{}lim".format(self.axis_id))()
-        memento.scale_mode = getattr(self.axes, "get_{}scale".format(self.axis_id))()
+        memento.min, memento.max = getattr(self.axes, f"get_{self.axis_id}lim")()
+        memento.scale_mode = getattr(self.axes, f"get_{self.axis_id}scale")()
         memento.grid = self.axis.grid_on() if hasattr(self.axis, "grid_on") else self.axis._major_tick_kw.get("gridOn", False)
         if type(self.axis.get_major_formatter()) is ScalarFormatter:
             memento.formatter = DECIMAL_FORMAT
@@ -224,7 +224,7 @@ class AxisEditor(PropertiesEditorBase):
             fmt = ScalarFormatter(useOffset=True)
         elif formatter == SCIENTIFIC_FORMAT:
             fmt = LogFormatterSciNotation()
-        getattr(self.axes, "{}axis".format(self.axis_id)).set_major_formatter(fmt)
+        getattr(self.axes, f"{self.axis_id}axis").set_major_formatter(fmt)
         return
 
 
@@ -346,12 +346,12 @@ class MarkerEditor(QWidget):
         if new_name == "":
             raise RuntimeError("Marker names cannot be empty")
         if new_name in self.used_names and new_name != old_name:
-            raise RuntimeError("Marker names cannot be duplicated.\n Another marker is named '{}'".format(new_name))
+            raise RuntimeError(f"Marker names cannot be duplicated.\n Another marker is named '{new_name}'")
         try:
             marker.set_name(new_name)
         except:
             marker.set_name(old_name)
-            raise RuntimeError("Invalid label '{}'".format(new_name))
+            raise RuntimeError(f"Invalid label '{new_name}'")
 
         marker.set_position(float(self.widget.position.text()))
         marker.draggable = not self.widget.fixed_marker.isChecked()
