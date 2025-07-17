@@ -10,7 +10,6 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidDataHandling/DllConfig.h"
 #include "MantidGeometry/IDTypes.h"
-#include "MantidKernel/TimeROI.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -61,7 +60,6 @@ private:
   std::vector<int64_t> loadStart;
   /// How much to load in the file
   std::vector<int64_t> loadSize;
-  Kernel::TimeROI roi;
   std::vector<size_t> pulse_indices;
 };
 

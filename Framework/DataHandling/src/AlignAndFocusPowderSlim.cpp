@@ -154,6 +154,13 @@ std::vector<double> calculate_difc_focused(const double l1, const std::vector<do
 std::vector<size_t> calculate_pulse_indices_from_timeroi(const TimeROI &roi,
                                                          const std::vector<DateAndTime> &pulse_times) {
   std::vector<size_t> indices;
+
+  if (roi.useAll()) {
+    // if the ROI is set to use all, then we just return the whole range
+    indices.push_back(0);
+    indices.push_back(std::numeric_limits<size_t>::max());
+    return indices;
+  }
   indices.reserve(roi.numBoundaries());
 
   for (size_t i = 0; i < roi.numBoundaries(); i += 2) {
@@ -176,62 +183,37 @@ public:
   NexusLoader(const bool is_time_filtered, const std::vector<size_t> &pulse_indices)
       : m_is_time_filtered(is_time_filtered), m_pulse_indices(pulse_indices) {}
 
-  template <typename TofType>
-  void loadTOF(H5::DataSet &tof_SDS, std::unique_ptr<std::vector<TofType>> &data, const std::vector<size_t> &offsets,
-               const std::vector<size_t> &slabsizes) {
-    H5::DataSpace filespace = tof_SDS.getSpace();
+  template <typename Type>
+  void loadData(H5::DataSet &SDS, std::unique_ptr<std::vector<Type>> &data, const std::vector<size_t> &offsets,
+                const std::vector<size_t> &slabsizes) {
+    // assumes that data is the same type as the dataset
+    H5::DataSpace filespace = SDS.getSpace();
+
+    const auto length_actual = static_cast<size_t>(filespace.getSelectNpoints());
 
     const hsize_t rankedoffset[1] = {static_cast<hsize_t>(offsets[0])};
     const hsize_t rankedextent[1] = {static_cast<hsize_t>(slabsizes[0])};
 
-    filespace.selectHyperslab(H5S_SELECT_SET, rankedextent, rankedoffset);
+    size_t total_size = slabsizes[0];
+    if (rankedextent[0] < length_actual) {
+      filespace.selectHyperslab(H5S_SELECT_SET, rankedextent, rankedoffset);
 
-    size_t total_size = slabsizes.at(0);
-    for (size_t i = 1; i < offsets.size(); ++i) {
-      const hsize_t rankedoffset[1] = {static_cast<hsize_t>(offsets[i])};
-      const hsize_t rankedextent[1] = {static_cast<hsize_t>(slabsizes[i])};
-      filespace.selectHyperslab(H5S_SELECT_OR, rankedextent, rankedoffset);
-      total_size += slabsizes.at(i);
+      for (size_t i = 1; i < offsets.size(); ++i) {
+        const hsize_t rankedoffset[1] = {static_cast<hsize_t>(offsets[i])};
+        const hsize_t rankedextent[1] = {static_cast<hsize_t>(slabsizes[i])};
+        filespace.selectHyperslab(H5S_SELECT_OR, rankedextent, rankedoffset);
+        total_size += slabsizes[i];
+      }
     }
-
     const hsize_t total_rankedextent[1] = {static_cast<hsize_t>(total_size)};
     H5::DataSpace memspace(1, total_rankedextent);
 
     // do the actual read
-    const H5::DataType dataType = tof_SDS.getDataType();
+    const H5::DataType dataType = SDS.getDataType();
 
     std::size_t dataSize = filespace.getSelectNpoints();
     data->resize(dataSize);
-    tof_SDS.read(data->data(), dataType, memspace, filespace);
-  }
-
-  template <typename DetidType>
-  void loadDetid(H5::DataSet &detID_SDS, std::unique_ptr<std::vector<DetidType>> &data,
-                 const std::vector<size_t> &offsets, const std::vector<size_t> &slabsizes) {
-    H5::DataSpace filespace = detID_SDS.getSpace();
-
-    const hsize_t rankedoffset[1] = {static_cast<hsize_t>(offsets[0])};
-    const hsize_t rankedextent[1] = {static_cast<hsize_t>(slabsizes[0])};
-
-    filespace.selectHyperslab(H5S_SELECT_SET, rankedextent, rankedoffset);
-
-    size_t total_size = slabsizes.at(0);
-    for (size_t i = 1; i < offsets.size(); ++i) {
-      const hsize_t rankedoffset[1] = {static_cast<hsize_t>(offsets[i])};
-      const hsize_t rankedextent[1] = {static_cast<hsize_t>(slabsizes[i])};
-      filespace.selectHyperslab(H5S_SELECT_OR, rankedextent, rankedoffset);
-      total_size += slabsizes.at(i);
-    }
-
-    const hsize_t total_rankedextent[1] = {static_cast<hsize_t>(total_size)};
-    H5::DataSpace memspace(1, total_rankedextent);
-
-    // do the actual read
-    const H5::DataType dataType = detID_SDS.getDataType();
-
-    std::size_t dataSize = filespace.getSelectNpoints();
-    data->resize(dataSize);
-    detID_SDS.read(data->data(), dataType, memspace, filespace);
+    SDS.read(data->data(), dataType, memspace, filespace);
   }
 
 private:
@@ -395,9 +377,6 @@ public:
       }
 
       auto eventRange = m_loader.getEventIndexRanges(event_group, total_events);
-      for (const auto &range : eventRange) {
-        std::cout << "Processing " << bankName << " with " << range.first << " to " << range.second << " events\n";
-      }
 
       // create a histogrammer to process the events
       auto &spectrum = m_wksp->getSpectrum(wksp_index);
@@ -459,7 +438,7 @@ public:
         tbb::parallel_invoke(
             [&] { // load detid
               // event_detid->clear();
-              m_loader.loadDetid(detID_SDS, event_detid, offsets, slabsizes);
+              m_loader.loadData(detID_SDS, event_detid, offsets, slabsizes);
               // immediately find min/max to allow for other things to read disk
               const auto [minval, maxval] = parallel_minmax(event_detid.get(), m_grainsize_event);
               // only recreate calibration if it doesn't already have the useful information
@@ -472,7 +451,7 @@ public:
             },
             [&] { // load time-of-flight
               // event_time_of_flight->clear();
-              m_loader.loadTOF(tof_SDS, event_time_of_flight, offsets, slabsizes);
+              m_loader.loadData(tof_SDS, event_time_of_flight, offsets, slabsizes);
             });
 
         // Create a local task for this thread
@@ -682,6 +661,8 @@ void AlignAndFocusPowderSlim::exec() {
   // load the events
   H5::H5File h5file(filename, H5F_ACC_RDONLY, NeXus::H5Util::defaultFileAcc());
 
+  TimeROI roi;
+
   // filter by time
   double filter_time_start_sec = getProperty(PropertyNames::FILTER_TIMESTART);
   double filter_time_stop_sec = getProperty(PropertyNames::FILTER_TIMESTOP);
@@ -706,7 +687,7 @@ void AlignAndFocusPowderSlim::exec() {
       throw std::invalid_argument("Invalid time range for filtering: " + std::string(e.what()));
     }
 
-    // hard coded pulse times for testing
+    // hard coded ROI for testing
     // roi.addROI(startOfRun + 200., startOfRun + 210.);
     pulse_indices = calculate_pulse_indices_from_timeroi(roi, *pulse_times);
     if (pulse_indices.empty())
@@ -714,12 +695,6 @@ void AlignAndFocusPowderSlim::exec() {
 
     g_log.information() << "Time filtering will use " << pulse_indices.size() / 2 << " time ranges, starting at "
                         << pulse_indices.front() << " and stopping at " << pulse_indices.back() << '\n';
-  }
-
-  if (roi.useAll()) {
-    pulse_indices.clear();
-    pulse_indices.push_back(0);
-    pulse_indices.push_back(std::numeric_limits<size_t>::max());
   }
 
   // Now we want to go through all the bankN_event entries
