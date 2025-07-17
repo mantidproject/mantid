@@ -1,0 +1,120 @@
+schema_version: 1
+
+context:
+  # dynamic versioning hasn't been figured out
+  version: 1.2.3
+  # load_setup_py_data() | get('version', '0.0.0')
+
+package:
+  name: mantid
+  version: ${{ version }}
+
+source:
+  path: ../../../
+
+build:
+  number: 0
+
+requirements:
+  build:
+    - ${{ compiler("c") }}
+    - if: linux
+      then: ${{ stdlib("c") }}
+    - ${{ compiler("cxx") }}
+    - if: osx
+      then: llvm-openmp ${{ llvm_openmp }}
+    - if: linux
+      then: libgomp
+    - ninja ${{ ninja }}
+    - cmake ${{ cmake }}
+    - git
+    - if: build_platform != target_platform
+      then:
+        - python ${{ python }}
+        - cross-python_${{ target_platform }}
+        - setuptools
+        - numpy ${{ numpy }}
+  host:
+    - eigen ${{ eigen }}
+    - gsl ${{ gsl }}
+    - hdf4 ${{ hdf4 }}
+    - h5py
+    - hdf5 ${{ hdf5 }}
+    - if: osx or linux
+      then: jemalloc  ${{ jemalloc }}
+    - jsoncpp ${{ jsoncpp }}
+    - libboost-devel ${{ libboost }}
+    - libboost-python-devel ${{ libboost_devel }}
+    - if: osx or linux
+      then: libopenblas ${{ libopenblas }}
+    - librdkafka ${{ librdkafka }}
+    - if: win
+      then: lib3mf
+    - muparser ${{ muparser }}
+    - numpy ${{ numpy }}
+    - occt
+    - python ${{ python }}
+    - poco ${{ poco }}
+    - setuptools
+    - tbb-devel ${{ tbb }}
+    - pip ${{ pip }}
+    - versioningit ${{ versioningit }}
+    - zlib
+    - if: linux
+      then:
+        - libglu ${{ libglu }}
+        - libgl-devel
+        - xorg-libxxf86vm
+        - xorg-libx11
+        - xorg-xorgproto
+  run:
+    - ${{ pin_compatible("gsl", upper_bound="x.x") }}
+    - ${{ pin_compatible("hdf4", upper_bound="x.x") }}
+    - h5py
+    - ${{ pin_compatible("hdf5", upper_bound="x.x") }}
+    - if: osx or linux
+      then: jemalloc ${{ jemalloc }}
+    - if: win
+      then: lib3mf
+    - muparser ${{ muparser }}
+    - occt
+    - pycifrw
+    - pydantic ${{ pydantic }}
+    - python
+    - python-dateutil ${{ python_dateutil }}
+    - pyyaml ${{ pyyaml }}
+    - scipy ${{ scipy }}
+    - euphonic ${{ euphonic }}
+    # remove seekpath altogether once newer euphonic is released
+    - seekpath=2.1.0=*2
+    - toml ${{ toml }}
+    - if: linux
+      then: libglu ${{ libglu }}
+    - joblib
+    - orsopy ${{ orsopy }}
+    - quasielasticbayes ${{ quasielasticbayes }}
+    - quickbayes ${{ quickbayes }}
+    - zlib
+  run_exports:
+    - ${{ pin_subpackage('mantid', upper_bound='x.x.x') }}
+  run_constraints:
+    - matplotlib-base ${{ matplotlib }}
+    - pystog ${{ pystog }}
+
+tests:
+  - python:
+      imports:
+        - mantid
+        - mantid.kernel
+
+about:
+  license: GPL-3.0-or-later
+  summary: Mantid provides a framework that supports high-performance computing and visualisation of materials science data.
+  description: Mantid provides a framework that supports high-performance computing and visualisation of materials science data. To use the optional plotting sub package you must conda install matplotlib.
+  homepage: https://github.com/mantidproject/mantid
+
+extra:
+  recipe-maintainers:
+    - thomashampson
+    - sf1919
+    - martyngigg
