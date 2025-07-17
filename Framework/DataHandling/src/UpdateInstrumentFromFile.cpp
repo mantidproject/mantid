@@ -16,6 +16,7 @@
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/StringTokenizer.h"
+#include "MantidNexus/H5Util.h"
 #include "MantidNexus/NexusDescriptor.h"
 #include "MantidNexus/NexusException.h"
 #include "MantidNexus/NexusFile.h"
@@ -89,7 +90,7 @@ void UpdateInstrumentFromFile::exec() {
   m_ignoreMonitors = (!moveMonitors);
 
   // Check file type
-  if (H5::H5File::isHdf5(filename)) {
+  if (Mantid::NeXus::H5Util::isHdf5(filename)) {
     LoadISISNexus2 isisNexus;
     LoadEventNexus eventNexus;
 

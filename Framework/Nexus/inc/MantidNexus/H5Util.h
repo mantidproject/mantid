@@ -37,6 +37,9 @@ enum class Narrowing : bool { Allow = true, Prevent = false };
 /** Default file access is H5F_CLOSE_STRONG. This should be set consistently for all access of a file. */
 MANTID_NEXUS_DLL H5::FileAccPropList defaultFileAcc();
 
+/** Check if a file can be opened in HDF5 using the proper file access list. */
+MANTID_NEXUS_DLL bool isHdf5(std::string const &);
+
 /// Create a 1D data-space to hold data of length.
 MANTID_NEXUS_DLL H5::DataSpace getDataSpace(const size_t length);
 

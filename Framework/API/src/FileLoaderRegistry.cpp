@@ -7,6 +7,7 @@
 #include "MantidAPI/FileLoaderRegistry.h"
 #include "MantidAPI/IFileLoader.h"
 #include "MantidAPI/NexusFileLoader.h"
+#include "MantidNexus/H5Util.h"
 
 #include <H5Cpp.h>
 #include <Poco/File.h>
@@ -119,7 +120,7 @@ const std::shared_ptr<IAlgorithm> FileLoaderRegistryImpl::chooseLoader(const std
 
   IAlgorithm_sptr bestLoader;
 
-  if (H5::H5File::isHdf5(filename)) {
+  if (Mantid::NeXus::H5Util::isHdf5(filename)) {
     std::pair<IAlgorithm_sptr, int> NexusResult =
         searchForLoader<NexusDescriptor, IFileLoader<NexusDescriptor>>(filename, m_names[Nexus], m_log);
 
@@ -187,7 +188,7 @@ bool FileLoaderRegistryImpl::canLoad(const std::string &algorithmName, const std
       m_log.debug() << "Error in looking for NeXus files: " << e.what() << '\n';
     }
   } else if (nexus) {
-    if (H5::H5File::isHdf5(filename)) {
+    if (Mantid::NeXus::H5Util::isHdf5(filename)) {
       try {
         loader = searchForLoader<NexusDescriptor, IFileLoader<NexusDescriptor>>(filename, names, m_log).first;
       } catch (const std::invalid_argument &e) {
