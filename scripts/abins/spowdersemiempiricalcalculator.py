@@ -7,7 +7,6 @@
 
 from functools import cached_property, partial
 import json
-from multiprocessing import get_context
 from operator import attrgetter
 from pathlib import Path
 from typing import Dict, Tuple, Union
@@ -591,18 +590,13 @@ class SPowderSemiEmpiricalCalculator:
         (There is room for improvement, by reworking all the broadening
         implementations to accept 2-D input.)
         """
-        n_threads = abins.parameters.performance.get("threads")
-        chunksize = abins.parameters.performance.get("broadening_chunksize")
-
         if isinstance(spectra, Spectrum1DCollection):
             frequencies = spectra.x_data.to(self.freq_unit).magnitude
 
-            with get_context("spawn").Pool(n_threads) as p:
-                broadened_spectra = p.map(
-                    partial(self._apply_resolution, frequencies, self._bins, scheme=broadening_scheme, instrument=self._instrument),
-                    spectra._y_data,
-                    chunksize=chunksize,
-                )
+            broadened_spectra = map(
+                partial(self._apply_resolution, frequencies, self._bins, scheme=broadening_scheme, instrument=self._instrument),
+                spectra._y_data,
+            )
             broadened_spectra = list(broadened_spectra)
 
             return Spectrum1DCollection(
@@ -626,13 +620,11 @@ class SPowderSemiEmpiricalCalculator:
             z_data_magnitude = spectra.z_data.to(self.s_unit).magnitude
             s_rows = np.reshape(z_data_magnitude, (-1, z_data_magnitude.shape[-1]))
 
-            with get_context("spawn").Pool(n_threads) as p:
-                broadened_spectra = p.map(
-                    partial(self._apply_resolution, frequencies, self._bins, scheme=broadening_scheme, instrument=self._instrument),
-                    s_rows,
-                    chunksize=chunksize,
-                )
-                broadened_spectra = list(broadened_spectra)
+            broadened_spectra = map(
+                partial(self._apply_resolution, frequencies, self._bins, scheme=broadening_scheme, instrument=self._instrument),
+                s_rows,
+            )
+            broadened_spectra = list(broadened_spectra)
 
             return Spectrum2DCollection(
                 x_data=spectra.x_data,
