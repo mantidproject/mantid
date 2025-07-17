@@ -25,6 +25,7 @@ using std::vector;
 #endif
 
 #define NXEXCEPTION(message) Exception((message), __func__, m_filename);
+#define NX_UNKNOWN_GROUP ""
 
 #define NAPI_CALL(status, msg)                                                                                         \
   NXstatus tmp = (status);                                                                                             \
@@ -612,11 +613,110 @@ template <typename NumT> void File::putData(const vector<NumT> &data) {
   this->putData(data.data());
 }
 
+template <> void File::getData<char>(char *data) {
+  pNexusFile5 pFile = assertNXID(m_pfile_id);
+
+  if (pFile->iCurrentD == 0) {
+    throw NXEXCEPTION("getData ERROR: no dataset open");
+  }
+
+  hsize_t dims[H5S_MAX_RANK] = {0};
+  int rank = H5Sget_simple_extent_dims(pFile->iCurrentS, dims, nullptr);
+  herr_t ret = -1;
+  std::size_t size = 0;
+  std::vector<char> buffer;
+
+  if (H5Tis_variable_str(pFile->iCurrentT)) {
+    char *cdata = nullptr;
+    ret = H5Dread(pFile->iCurrentD, pFile->iCurrentT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &cdata);
+    if (ret < 0 || cdata == nullptr)
+      throw NXEXCEPTION("getData ERROR: failed to read variable length string dataset");
+
+    size = strlen(cdata);
+    buffer.assign(cdata, cdata + size + 1);
+    H5free_memory(cdata);
+  } else {
+    hsize_t len = H5Tget_size(pFile->iCurrentT);
+    for (int i = 0; i < rank - 1; i++) {
+      len *= (dims[i] > 1 ? dims[i] : 1);
+    }
+
+    buffer.resize(len + 1, '\0');
+    ret = H5Dread(pFile->iCurrentD, pFile->iCurrentT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buffer.data());
+    if (ret < 0)
+      throw NXEXCEPTION("getData ERROR: failed to read string\n");
+
+    buffer[len] = '\0';
+    size = len;
+  }
+
+  if (rank == 0 || rank == 1) {
+    if (size == 1) {
+      if (isspace(buffer[0])) {
+        *data = '\0'; // if the only character is whitespace, return null
+      } else if (buffer[0] == '\0') {
+        *data = '\0'; // if the only character is null, return null
+      } else {
+        *data = buffer[0];
+      }
+      return;
+    }
+
+    char *start = buffer.data();
+    while (*start && isspace(*start))
+      ++start;
+
+    int i = (int)strlen(start);
+    while (--i >= 0) {
+      if (!isspace(start[i])) {
+        break;
+      }
+    }
+    start[++i] = '\0';
+
+    std::memcpy(data, start, i);
+    data[i] = '\0';
+  } else {
+    std::memcpy(data, buffer.data(), size);
+  }
+}
+
 template <typename NumT> void File::getData(NumT *data) {
-  if (data == NULL) {
+  if (!data) {
     throw NXEXCEPTION("Supplied null pointer to write data to");
   }
-  NAPI_CALL(NXgetdata(m_pfile_id.get(), data), "NXgetdata failed");
+
+  pNexusFile5 pFile = assertNXID(m_pfile_id);
+  if (pFile->iCurrentD == 0) {
+    throw NXEXCEPTION("getData ERROR: no dataset open");
+  }
+
+  herr_t ret = -1;
+  hsize_t dims[H5S_MAX_RANK];
+  H5Sget_simple_extent_dims(pFile->iCurrentS, dims, nullptr);
+  hsize_t ndims = H5Sget_simple_extent_ndims(pFile->iCurrentS);
+
+  if (ndims == 0) {
+    hid_t datatype = H5Dget_type(pFile->iCurrentD);
+    hid_t filespace = H5Dget_space(pFile->iCurrentD);
+    hid_t memtype_id = H5Screate(H5S_SCALAR);
+    H5Sselect_all(filespace);
+    ret = H5Dread(pFile->iCurrentD, datatype, memtype_id, filespace, H5P_DEFAULT, data);
+    H5Sclose(memtype_id);
+    H5Sclose(filespace);
+    H5Tclose(datatype);
+  } else {
+    if (H5Tget_class(pFile->iCurrentT) == H5T_STRING) {
+      this->getData<char>(reinterpret_cast<char *>(data));
+      return;
+    }
+    hid_t memtype_id = h5MemType(pFile->iCurrentT);
+    ret = H5Dread(pFile->iCurrentD, memtype_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
+  }
+
+  if (ret < 0) {
+    throw NXEXCEPTION("getData ERROR: failed to transfer dataset");
+  }
 }
 
 template <typename NumT> void File::getData(vector<NumT> &data) {
@@ -652,15 +752,9 @@ string File::getStrData() {
     msg << "getStrData() only understand rank=1 data. Found rank=" << info.dims.size();
     throw NXEXCEPTION(msg.str());
   }
-  char *value = new char[static_cast<size_t>(info.dims[0]) + 1]; // probably do not need +1, but being safe
-  try {
-    this->getData(value);
-  } catch (const Exception &) {
-    delete[] value;
-    throw; // rethrow the original exception
-  }
-  std::string res(value, static_cast<size_t>(info.dims[0]));
-  delete[] value;
+  std::vector<char> value(static_cast<size_t>(info.dims[0]) + 1, '\0');
+  this->getData(value.data());
+  std::string res(value.data(), strlen(value.data()));
   return res;
 }
 
@@ -1024,7 +1118,6 @@ template <typename NumT> void File::getSlab(NumT *data, DimSizeVector const &sta
   hid_t memspace, iRet;
   H5T_class_t tclass;
   hid_t memtype_id;
-  char *tmp_data = NULL;
   int iRank;
 
   pFile = assertNXID(m_pfile_id);
@@ -1066,17 +1159,9 @@ template <typename NumT> void File::getSlab(NumT *data, DimSizeVector const &sta
       if (mySize[0] == 1) {
         mySize[0] = H5Tget_size(pFile->iCurrentT);
       }
-      if (mySize[0] > 0) {
-        tmp_data = static_cast<char *>(calloc(mySize[0], sizeof(char)));
-      } else {
-        tmp_data = static_cast<char *>(calloc(1, sizeof(char)));
-      }
-      iRet = H5Sselect_hyperslab(pFile->iCurrentS, H5S_SELECT_SET, mStart, NULL, mySize, NULL);
-    } else {
-      iRet = H5Sselect_hyperslab(pFile->iCurrentS, H5S_SELECT_SET, myStart, NULL, mySize, NULL);
     }
-    /* define slab */
-    /* deal with HDF errors */
+
+    iRet = H5Sselect_hyperslab(pFile->iCurrentS, H5S_SELECT_SET, myStart, NULL, mySize, NULL);
     if (iRet < 0) {
       throw NXEXCEPTION("Selecting slab failed");
     }
@@ -1088,11 +1173,11 @@ template <typename NumT> void File::getSlab(NumT *data, DimSizeVector const &sta
     }
     /* read slab */
     if (mtype == NXnumtype::CHAR) {
-      iRet = H5Dread(pFile->iCurrentD, memtype_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, tmp_data);
+      std::vector<char> tmp_data(mySize[0] + 1, '\0');
+      iRet = H5Dread(pFile->iCurrentD, memtype_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, tmp_data.data());
       char const *data1;
-      data1 = tmp_data + myStart[0];
+      data1 = tmp_data.data() + myStart[0];
       strncpy(static_cast<char *>(static_cast<void *>(data)), data1, static_cast<size_t>(size[0]));
-      free(tmp_data);
     } else {
       iRet = H5Dread(pFile->iCurrentD, memtype_id, memspace, pFile->iCurrentS, H5P_DEFAULT, data);
     }
@@ -1290,8 +1375,63 @@ void File::readData(std::string const &dataName, std::string &data) {
 
 Info File::getInfo() {
   Info info;
-  std::size_t rank;
-  NAPI_CALL(NXgetinfo64(m_pfile_id.get(), rank, info.dims, info.type), "NXgetinfo failed");
+
+  pNexusFile5 pFile;
+  std::size_t iRank;
+  NXnumtype mType;
+  hsize_t myDim[H5S_MAX_RANK];
+  H5T_class_t tclass;
+  hid_t memType;
+  char *vlData = NULL;
+
+  pFile = assertNXID(m_pfile_id);
+  /* check if there is an Dataset open */
+  if (pFile->iCurrentD == 0) {
+    throw NXEXCEPTION("getInfo Error: no dataset open");
+  }
+
+  /* read information */
+  tclass = H5Tget_class(pFile->iCurrentT);
+  mType = hdf5ToNXType(tclass, pFile->iCurrentT);
+  iRank = H5Sget_simple_extent_dims(pFile->iCurrentS, myDim, NULL);
+  if (iRank == 0) {
+    iRank = 1; /* we pretend */
+    myDim[0] = 1;
+  }
+  /* conversion to proper ints for the platform */
+  info.type = mType;
+  if (tclass == H5T_STRING && myDim[iRank - 1] == 1) {
+    if (H5Tis_variable_str(pFile->iCurrentT)) {
+      /* this will not work for arrays of strings */
+      memType = H5Tcopy(H5T_C_S1);
+      H5Tset_size(memType, H5T_VARIABLE);
+      H5Dread(pFile->iCurrentD, memType, H5S_ALL, H5S_ALL, H5P_DEFAULT, &vlData);
+      if (vlData != NULL) {
+        myDim[iRank - 1] = strlen(vlData) + 1;
+        H5Dvlen_reclaim(memType, pFile->iCurrentS, H5P_DEFAULT, &vlData);
+      }
+      H5Tclose(memType);
+    } else {
+      myDim[iRank - 1] = H5Tget_size(pFile->iCurrentT);
+    }
+  }
+
+  info.dims.resize(iRank);
+  for (std::size_t i = 0; i < iRank; i++) {
+    info.dims[i] = myDim[i];
+  }
+
+  // Trim 1D CHAR arrays to the actual string length
+  if ((info.type == NXnumtype::CHAR) && (iRank == 1)) {
+    char *buf = static_cast<char *>(malloc(static_cast<size_t>((info.dims[0] + 1) * sizeof(char))));
+    if (buf == NULL) {
+      throw NXEXCEPTION("getInfo: Unable to allocate memory for CHAR buffer");
+    }
+    memset(buf, 0, static_cast<size_t>((info.dims[0] + 1) * sizeof(char)));
+    this->getData<char>(buf);
+    info.dims[0] = static_cast<int64_t>(strlen(buf));
+    free(buf);
+  }
   return info;
 }
 
@@ -1724,7 +1864,9 @@ template MANTID_NEXUS_DLL void File::getData(int32_t *data);
 template MANTID_NEXUS_DLL void File::getData(uint32_t *data);
 template MANTID_NEXUS_DLL void File::getData(int64_t *data);
 template MANTID_NEXUS_DLL void File::getData(uint64_t *data);
-template MANTID_NEXUS_DLL void File::getData(char *data);
+#ifdef _WIN32
+template MANTID_NEXUS_DLL void File::getData<char>(char *data);
+#endif
 template MANTID_NEXUS_DLL void File::getData(bool *data);
 
 template MANTID_NEXUS_DLL void File::getData(vector<float> &data);
