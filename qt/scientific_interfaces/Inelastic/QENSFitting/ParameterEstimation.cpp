@@ -7,7 +7,7 @@
 #include "ParameterEstimation.h"
 #include "MantidAPI/IFunction.h"
 
-#include <math.h>
+#include <cmath>
 
 namespace {
 
