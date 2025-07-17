@@ -7,7 +7,6 @@
 import systemtesting
 from mantid.simpleapi import Abins, Abins2D, mtd, DeleteWorkspace
 
-import abins
 from abins.constants import (
     ALL_INSTRUMENTS,
     ALL_SUPPORTED_AB_INITIO_PROGRAMS,
@@ -184,12 +183,14 @@ class HelperTestingClass(object):
         Destructor removes output files after tests and workspaces.
         :return:
         """
+        import glob
+        import os
+        from mantid.kernel import ConfigService
 
-        try:
-            abins.test_helpers.remove_output_files(list_of_names=[self._system_name])
-        except TypeError:
-            # nothing to remove but it is OK
-            pass
+        save_dir_path = ConfigService.getString("defaultsave.directory")
+
+        for cache_file in glob.glob(f"{save_dir_path}/{self._system_name}*.hdf5"):
+            os.remove(cache_file)
 
         mtd.clear()
 
