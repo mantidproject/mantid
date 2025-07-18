@@ -344,6 +344,7 @@ Types::Core::DateAndTime TimeROI::timeAtIndex(unsigned long index) const {
 
 // return the indices of the TimeROI would fall in the supplied vector of times
 std::vector<std::pair<size_t, size_t>> TimeROI::calculate_indices(const std::vector<DateAndTime> &times) const {
+  // this will create a vector of pairs, where each pair is the start and stop index of the time intervals
   std::vector<std::pair<size_t, size_t>> indices;
   if (this->useAll()) {
     // if the ROI is set to use all, then we just return the whole range
@@ -352,6 +353,8 @@ std::vector<std::pair<size_t, size_t>> TimeROI::calculate_indices(const std::vec
   }
   indices.reserve(m_roi.size() / 2);
 
+  // Iterate through the m_roi vector in pairs to find the start and stop indices for each ROI.
+  // Don't add anything if the start is out of range. Set stop to max if the stop is out of range.
   for (size_t i = 0; i < m_roi.size(); i += 2) {
     const auto start = std::lower_bound(times.cbegin(), times.cend(), m_roi[i]);
     if (start != times.cend()) {

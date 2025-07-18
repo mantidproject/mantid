@@ -169,9 +169,14 @@ public:
     const hsize_t rankedextent[1] = {static_cast<hsize_t>(slabsizes[0])};
 
     size_t total_size = slabsizes[0];
+
+    // only select hyperslab if not loading all the data
     if (rankedextent[0] < length_actual) {
+      // set the first hyperslab with H5S_SELECT_SET
       filespace.selectHyperslab(H5S_SELECT_SET, rankedextent, rankedoffset);
 
+      // If more slabs, select them with H5S_SELECT_OR to include in the read.
+      // This allows reading non-contiguous data.
       for (size_t i = 1; i < offsets.size(); ++i) {
         const hsize_t offset[1] = {static_cast<hsize_t>(offsets[i])};
         const hsize_t extent[1] = {static_cast<hsize_t>(slabsizes[i])};
@@ -179,6 +184,8 @@ public:
         total_size += slabsizes[i];
       }
     }
+
+    // create a memory space for the data to read into, total size is all the slabs combined
     const hsize_t total_rankedextent[1] = {static_cast<hsize_t>(total_size)};
     H5::DataSpace memspace(1, total_rankedextent);
 
@@ -199,12 +206,14 @@ private:
 
 public:
   std::stack<std::pair<uint64_t, uint64_t>> getEventIndexRanges(H5::Group &event_group, const uint64_t number_events) {
+    // This will return a stack of pairs, where each pair is the start and stop index of the event ranges
     std::stack<std::pair<uint64_t, uint64_t>> ranges;
     if (m_is_time_filtered) {
       // TODO this should be made smarter to only read the necessary range
       std::unique_ptr<std::vector<uint64_t>> event_index = std::make_unique<std::vector<uint64_t>>();
       this->loadEventIndex(event_group, event_index);
 
+      // add backwards so that the first range is on top
       for (const auto &pair : m_pulse_indices | std::views::reverse) {
         uint64_t start_event = event_index->at(pair.first);
         uint64_t stop_event =
@@ -377,19 +386,25 @@ public:
       auto event_detid = std::make_unique<std::vector<uint32_t>>();       // uint32 for ORNL nexus file
       auto event_time_of_flight = std::make_unique<std::vector<float>>(); // float for ORNL nexus files
 
-      // read parts of the bank at a time
+      // read parts of the bank at a time until all events are processed
       while (!eventRanges.empty()) {
+        // Create offsets and slab sizes for the next chunk of events.
+        // This will read at most m_events_per_chunk events from the file
+        // and will split the ranges if necessary for the next iteration.
         std::vector<size_t> offsets;
         std::vector<size_t> slabsizes;
 
         size_t total_events_to_read = 0;
+        // Process the event ranges until we reach the desired number of events to read or run out of ranges
         while (!eventRanges.empty() && total_events_to_read < m_events_per_chunk) {
+          // Get the next event range from the stack
           auto eventRange = eventRanges.top();
           eventRanges.pop();
 
           size_t range_size = eventRange.second - eventRange.first;
           size_t remaining_chunk = m_events_per_chunk - total_events_to_read;
 
+          // If the range size is larger than the remaining chunk, we need to split it
           if (range_size > remaining_chunk) {
             // Split the range: process only part of it now, push the rest back for later
             offsets.push_back(eventRange.first);
