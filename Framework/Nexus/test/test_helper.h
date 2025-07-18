@@ -1,4 +1,3 @@
-#include "MantidKernel/ConfigService.h"
 #include <filesystem>
 #include <string>
 

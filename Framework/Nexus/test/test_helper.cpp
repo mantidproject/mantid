@@ -1,4 +1,5 @@
 #include "test_helper.h"
+#include "MantidKernel/ConfigService.h"
 #include <cstdarg>
 #include <iostream>
 
