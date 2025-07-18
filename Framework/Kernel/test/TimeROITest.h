@@ -473,4 +473,23 @@ public:
     TS_ASSERT_EQUALS(roi.debugStrPrint(1),
                      "2022-Dec-19 00:01:00 2022-Dec-26 00:01:00 2022-Dec-31 00:01:00 2023-Jan-01 00:01:00 \n");
   }
+
+  void test_calculate_indices() {
+    TimeROI roi;
+    roi.addROI(ONE, TWO);
+    roi.addROI(THREE, FOUR);
+    roi.addROI(FIVE, SIX);
+    roi.addROI(SIX + 100.0, SIX + 200.0); // region that is not included in the times
+
+    std::vector<DateAndTime> times{ONE + 100.0, TWO + 100.0, THREE, FOUR - 100.0, FIVE + 100.0};
+
+    auto indices = roi.calculate_indices(times);
+    TS_ASSERT_EQUALS(indices.size(), 6);
+    TS_ASSERT_EQUALS(indices[0], 0);                                  // ONE
+    TS_ASSERT_EQUALS(indices[1], 1);                                  // TWO
+    TS_ASSERT_EQUALS(indices[2], 2);                                  // THREE
+    TS_ASSERT_EQUALS(indices[3], 4);                                  // FOUR
+    TS_ASSERT_EQUALS(indices[4], 4);                                  // FIVE
+    TS_ASSERT_EQUALS(indices[5], std::numeric_limits<size_t>::max()); // SIX
+  }
 };

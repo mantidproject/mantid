@@ -151,33 +151,6 @@ std::vector<double> calculate_difc_focused(const double l1, const std::vector<do
   return difc;
 }
 
-std::vector<size_t> calculate_pulse_indices_from_timeroi(const TimeROI &roi,
-                                                         const std::vector<DateAndTime> &pulse_times) {
-  std::vector<size_t> indices;
-
-  if (roi.useAll()) {
-    // if the ROI is set to use all, then we just return the whole range
-    indices.push_back(0);
-    indices.push_back(std::numeric_limits<size_t>::max());
-    return indices;
-  }
-  indices.reserve(roi.numBoundaries());
-
-  for (size_t i = 0; i < roi.numBoundaries(); i += 2) {
-    const auto start = std::lower_bound(pulse_times.cbegin(), pulse_times.cend(), roi.timeAtIndex(i));
-    if (start != pulse_times.cend()) {
-      indices.push_back(std::distance(pulse_times.cbegin(), start));
-      const auto stop = std::lower_bound(pulse_times.cbegin(), pulse_times.cend(), roi.timeAtIndex(i + 1));
-      if (stop != pulse_times.cend())
-        indices.push_back(std::distance(pulse_times.cbegin(), stop));
-      else
-        indices.push_back(std::numeric_limits<size_t>::max());
-    }
-  }
-
-  return indices;
-}
-
 class NexusLoader {
 public:
   NexusLoader(const bool is_time_filtered, const std::vector<size_t> &pulse_indices)
@@ -688,7 +661,7 @@ void AlignAndFocusPowderSlim::exec() {
 
     // hard coded ROI for testing
     // roi.addROI(startOfRun + 200., startOfRun + 210.);
-    pulse_indices = calculate_pulse_indices_from_timeroi(roi, *pulse_times);
+    pulse_indices = roi.calculate_indices(*pulse_times);
     if (pulse_indices.empty())
       throw std::invalid_argument("No valid pulse time indices found for filtering");
 
