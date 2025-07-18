@@ -189,7 +189,6 @@ class CreatePoleFigureTableTest(unittest.TestCase):
         self.assertEqual(outws.rowCount(), 2)  # default args should have only chi2 < 2 (det 0 and det 1)
 
         # alpha
-        print(outws.column("Alpha"))
         self.eval_arrays(outws.column("Alpha"), self.default_alphas[:2] + (np.pi / 4))
 
         # beta
