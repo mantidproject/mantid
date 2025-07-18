@@ -171,17 +171,17 @@ template <typename T> MatrixVectorPair<T, V3R> parseMatrixVectorPair(const std::
 
   MatrixVectorPairBuilder builder;
 
-  auto positiveSignAction = [&builder](auto &ctx) { builder.setCurrentSignPositive(); };
+  auto positiveSignAction = [&builder](auto const &ctx) { builder.setCurrentSignPositive(); };
 
-  auto negativeSignAction = [&builder](auto &ctx) { builder.setCurrentSignNegative(); };
+  auto negativeSignAction = [&builder](auto const &ctx) { builder.setCurrentSignNegative(); };
 
   auto currentFactorAction = [&builder](auto &ctx) { builder.setCurrentFactor(_attr(ctx)); };
 
   auto currentDirectionAction = [&builder](auto &ctx) { builder.setCurrentDirection(_attr(ctx)); };
 
-  auto addCurrentStateToResultAction = [&builder](auto &ctx) { builder.addCurrentStateToResult(); };
+  auto addCurrentStateToResultAction = [&builder](auto const &ctx) { builder.addCurrentStateToResult(); };
 
-  auto advanceRowAction = [&builder](auto &ctx) { builder.advanceRow(); };
+  auto advanceRowAction = [&builder](auto const &ctx) { builder.advanceRow(); };
 
   // Switch sign in the builder
   auto m_sign = lit('+')[positiveSignAction] | lit('-')[negativeSignAction];
