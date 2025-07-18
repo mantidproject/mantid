@@ -165,8 +165,8 @@ private:
   type stored in the matrix. The vector is currently always V3R.
 */
 
-/// Tries to parse the given string. Throws a ParseError-exception if there is
-/// unparsable string left at the end.
+/// Tries to parse the given string. Throws a ParseError-exception if the
+/// string is unparsable.
 template <typename T> MatrixVectorPair<T, V3R> parseMatrixVectorPair(const std::string &matrixVectorString) {
 
   MatrixVectorPairBuilder builder;
@@ -175,9 +175,9 @@ template <typename T> MatrixVectorPair<T, V3R> parseMatrixVectorPair(const std::
 
   auto negativeSignAction = [&builder](auto const &ctx) { builder.setCurrentSignNegative(); };
 
-  auto currentFactorAction = [&builder](auto &ctx) { builder.setCurrentFactor(_attr(ctx)); };
+  auto currentFactorAction = [&builder](auto const &ctx) { builder.setCurrentFactor(_attr(ctx)); };
 
-  auto currentDirectionAction = [&builder](auto &ctx) { builder.setCurrentDirection(_attr(ctx)); };
+  auto currentDirectionAction = [&builder](auto const &ctx) { builder.setCurrentDirection(_attr(ctx)); };
 
   auto addCurrentStateToResultAction = [&builder](auto const &ctx) { builder.addCurrentStateToResult(); };
 
@@ -211,18 +211,8 @@ template <typename T> MatrixVectorPair<T, V3R> parseMatrixVectorPair(const std::
   auto success = parse(matrixVectorString, m_parser);
 
   if (!success) {
-    throw std::runtime_error("Parse error");
+    throw Kernel::Exception::ParseError("Parse error in ", matrixVectorString, 0);
   }
-
-  // try {
-  //   qi::phrase_parse(strIterator, strEnd, parser, qi::space);
-
-  //  if (std::distance(strIterator, strEnd) > 0) {
-  //    throw std::runtime_error("Additional characters at end of string: '" + std::string(strIterator, strEnd) + "'.");
-  //  }
-  //} catch (std::runtime_error &builderError) {
-  //  throw Kernel::Exception::ParseError("Parse error: " + std::string(builderError.what()), matrixVectorString, 0);
-  //}
 
   return builder.getMatrixVectorPair<T>();
 }
