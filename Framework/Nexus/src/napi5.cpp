@@ -92,30 +92,7 @@ extern void *NXpData;
 /*-------------------------------------------------------------------------*/
 /* Operator function. */
 /* --------------------------------------------------------------------- */
-
 /* Operator function. */
-
-herr_t group_info(hid_t loc_id, const char *name, const H5L_info_t *statbuf, void *opdata) {
-  UNUSED_ARG(statbuf);
-  int iNX = *(static_cast<int *>(opdata));
-  H5O_info1_t object_info;
-  // TODO use new version of method rather than v2
-  H5Oget_info_by_name2(loc_id, name, &object_info, H5O_INFO_ALL, H5P_DEFAULT);
-  switch ((object_info).type) {
-  case H5O_TYPE_GROUP:
-    iNX++;
-    *(static_cast<int *>(opdata)) = iNX;
-    break;
-  case H5O_TYPE_DATASET:
-    iNX++;
-    *(static_cast<int *>(opdata)) = iNX;
-    break;
-  default:
-    break;
-  }
-  return 0;
-}
-
 /*-------------------------------------------------------------------------*/
 /*----------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------*/

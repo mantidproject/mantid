@@ -48,7 +48,7 @@ private:
   /** should be close handle on exit */
   bool m_close_handle;
   /** The handle for the C-API. */
-  std::shared_ptr<NexusFile5> m_pfile_id;
+  std::unique_ptr<NexusFile5> m_pfile_id;
   /** nexus descriptor to track the file tree
    * NOTE: in file write, the following cannot be relied upon:
    * - hasRootAttr

@@ -60,7 +60,7 @@ template <typename NumT> static string toString(const vector<NumT> &data) {
   return result.str();
 }
 
-pNexusFile5 assertNXID(std::shared_ptr<NexusFile5> const &pfid) { return pfid.get(); }
+pNexusFile5 assertNXID(std::unique_ptr<NexusFile5> const &pfid) { return pfid.get(); }
 
 } // end of anonymous namespace
 
@@ -132,16 +132,23 @@ NexusFile5::NexusFile5(std::string const &filename, NXaccess const am)
 
 NexusFile5::NexusFile5(NexusFile5 const &origHandle)
     : iStack5{0}, iFID(0), iCurrentG(0), iCurrentD(0), iCurrentS(0), iCurrentT(0), groupaddr() {
-  iFID = H5Freopen(origHandle.iFID);
-  if (iFID <= 0) {
-    throw Mantid::Nexus::Exception("Error reopening file");
+  if (H5Iget_type(origHandle.iFID) == H5I_FILE) {
+    iFID = origHandle.iFID; // H5Freopen(origHandle.iFID);
+    H5Iinc_ref(iFID);
+  } else {
+    throw Mantid::Nexus::Exception("Failure of NexusFile5 copy constructor, invalid FID");
   }
   iStack5[0] = 0; // root!
 };
 
 NexusFile5 &NexusFile5::operator=(NexusFile5 const &origHandle) {
   this->iStack5 = {0};
-  this->iFID = H5Freopen(origHandle.iFID);
+  if (H5Iget_type(origHandle.iFID) == H5I_FILE) {
+    iFID = origHandle.iFID; // H5Freopen(origHandle.iFID);
+    H5Iinc_ref(iFID);
+  } else {
+    throw Mantid::Nexus::Exception("Failure of NexusFile5 assignment, invalid FID");
+  }
   this->iCurrentG = this->iCurrentD = this->iCurrentS = this->iCurrentT = 0;
   this->groupaddr = Mantid::Nexus::NexusAddress::root();
   return *this;
@@ -222,7 +229,7 @@ void File::initOpenFile(const string &filename, const NXaccess access) {
     msg << "File::initOpenFile(" << filename << ", " << access << ") failed";
     throw NXEXCEPTION(msg.str());
   } else {
-    m_pfile_id = std::make_shared<NexusFile5>(tmp);
+    m_pfile_id = std::make_unique<NexusFile5>(tmp);
   }
 }
 
@@ -230,15 +237,15 @@ void File::initOpenFile(const string &filename, const NXaccess access) {
 
 File::File(File const &f)
     : m_filename(f.m_filename), m_access(f.m_access), m_address(f.m_address), m_close_handle(false),
-      m_pfile_id(f.m_pfile_id), m_descriptor(f.m_descriptor) {}
+      m_pfile_id(std::make_unique<NexusFile5>(m_filename, m_access)), m_descriptor(f.m_descriptor) {}
 
 File::File(File const *const pf)
     : m_filename(pf->m_filename), m_access(pf->m_access), m_address(pf->m_address), m_close_handle(false),
-      m_pfile_id(pf->m_pfile_id), m_descriptor(pf->m_descriptor) {}
+      m_pfile_id(std::make_unique<NexusFile5>(m_filename, m_access)), m_descriptor(pf->m_descriptor) {}
 
 File::File(std::shared_ptr<File> pf)
     : m_filename(pf->m_filename), m_access(pf->m_access), m_address(pf->m_address), m_close_handle(false),
-      m_pfile_id(pf->m_pfile_id), m_descriptor(pf->m_descriptor) {}
+      m_pfile_id(std::make_unique<NexusFile5>(m_filename, m_access)), m_descriptor(pf->m_descriptor) {}
 
 File &File::operator=(File const &f) {
   if (this == &f) {
@@ -246,7 +253,7 @@ File &File::operator=(File const &f) {
     this->m_filename = f.m_filename;
     this->m_access = f.m_access;
     this->m_address = f.m_address;
-    this->m_pfile_id = f.m_pfile_id;
+    this->m_pfile_id = std::make_unique<NexusFile5>(m_filename, m_access);
     this->m_close_handle = f.m_close_handle;
     this->m_descriptor = f.m_descriptor;
   }
@@ -292,9 +299,57 @@ void File::openAddress(std::string const &address) {
   if (address.empty()) {
     throw NXEXCEPTION("Supplied empty address");
   }
-  NXstatus ret = NXopenaddress(m_pfile_id.get(), absaddr);
-  m_address = getObjectAddress(getCurrentId());
-  NAPI_CALL(ret, "NXopenaddress(" + address + ") failed");
+  // NOTE to support pre-existing behavior, do NOT check if the address exists first
+  // it must open as many path elements as it can until failing
+  // TODO is this behavior relied on anywhere but the tests?
+  // if (!hasAddress(absaddr)) {
+  //   throw NXEXCEPTION("Address " + address + " is not valid");
+  // }
+
+  // if we are already there, do nothing
+  if (absaddr == m_address) {
+    return;
+  }
+
+  // if a dataset is open, close it
+  if (isDataSetOpen()) {
+    closeData();
+  }
+
+  // close all groups in the stack
+  std::size_t stacksize = m_pfile_id->iStack5.size();
+  for (size_t i = 0; i < stacksize; i++) {
+    closeGroup();
+  }
+
+  // if we wanted to go to root, then stop here
+  if (absaddr == NexusAddress::root()) {
+    m_pfile_id->iStack5.clear();
+    m_pfile_id->iStack5.push_back(0);
+    m_address = NexusAddress::root();
+    return;
+  }
+
+  // open all groups in the address
+  NexusAddress groupstack(absaddr.parent_path());
+  NexusAddress fromroot;
+  for (auto const &name : groupstack.parts()) {
+    fromroot /= name;
+    if (m_descriptor.isEntry(fromroot)) {
+      openGroup(fromroot, m_descriptor.classTypeForName(fromroot));
+    } else {
+      throw NXEXCEPTION("Failed to open address " + absaddr + " at element " + fromroot);
+    }
+  }
+
+  // open the last element -- either a group or a dataset
+  if (hasData(absaddr)) {
+    openData(absaddr);
+  } else if (hasAddress(absaddr)) {
+    openGroup(absaddr, m_descriptor.classTypeForName(absaddr));
+  } else {
+    throw NXEXCEPTION("Failed to open final element of address " + absaddr);
+  }
 }
 
 void File::openGroupAddress(std::string const &address) {
