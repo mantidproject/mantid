@@ -10,9 +10,9 @@ import requests
 
 doc = """.. _v{version}:
 
-==========================
+===========================
 Mantid {version} Release Notes
-==========================
+===========================
 
 .. contents:: Table of Contents
    :local:
