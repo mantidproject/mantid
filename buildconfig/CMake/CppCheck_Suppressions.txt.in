@@ -208,8 +208,8 @@ uselessCallsSubstr:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadFITS.cpp:5
 mismatchingContainerExpression:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadInstrument.cpp:148
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadIsawDetCal.cpp:277
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadIsawDetCal.cpp:286
+nullPointerOutOfResources:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadLog.cpp:445
 nullPointerOutOfResources:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadLog.cpp:446
-nullPointerOutOfResources:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadLog.cpp:447
 integerOverflowCond:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/byte_rel_comp.cpp:59
 unusedStructMember:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/vms_convert.cpp:222
 unusedStructMember:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/vms_convert.cpp:223

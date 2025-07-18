@@ -115,7 +115,7 @@ void ShapeInfo::setHollowCylinder(const Kernel::V3D &centreBottomBase, const Ker
   m_height = height;
 }
 
-bool ShapeInfo::operator==(const ShapeInfo &other) {
+bool ShapeInfo::operator==(const ShapeInfo &other) const {
   return m_shape == other.m_shape && std::abs(m_height - other.m_height) < Kernel::Tolerance &&
          std::abs(m_radius - other.m_radius) < Kernel::Tolerance && m_points == other.m_points;
 }
