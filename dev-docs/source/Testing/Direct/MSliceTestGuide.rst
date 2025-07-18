@@ -19,6 +19,8 @@ Set Up
 ------
 
 #. Ensure you have the `ISIS Sample Data <http://download.mantidproject.org>`__ available on your machine.
+#. If you are using a conda install of Mantid Workbench, make sure to install MSlice by running ``mamba install -c mantid mslice`` inside your conda enviroment and restart the Mantid Workbench.
+#. If you are using a standalone install of Mantid Workbench, MSlice should already be available within it.
 #. Open ``Interfaces`` > ``Direct`` > ``MSlice``
 #. Go to the ``Data Loading`` tab and select ``MAR21335_Ei60meV.nxs`` from the sample data.
 #. Click ``Load Data``
