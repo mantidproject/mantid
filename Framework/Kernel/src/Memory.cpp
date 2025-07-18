@@ -226,13 +226,9 @@ void MemoryStats::process_mem_system(size_t &sys_avail, size_t &sys_total) {
 #else
   auto info = mallinfo();
 #endif
-  int unusedReserved = info.fordblks / 1024;
-  // unusedReserved can sometimes be negative, which wen added to a low
-  // sys_avail will overflow the unsigned int.
-  if (unusedReserved < 0)
-    unusedReserved = 0;
-  // g_log.debug() << "Linux - Adding reserved but unused memory of " <<
-  // unusedReserved << " KB\n";
+  // Now add in reserved but unused memory as reported by malloc
+  const size_t unusedReserved = info.fordblks / 1024;
+  g_log.debug() << "Linux - Adding reserved but unused memory of " << unusedReserved << " KB\n";
   sys_avail += unusedReserved;
 
 #elif __APPLE__
