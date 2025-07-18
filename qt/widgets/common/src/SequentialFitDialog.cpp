@@ -298,7 +298,8 @@ void SequentialFitDialog::accept() {
 
   Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("PlotPeakByLogValue");
   alg->initialize();
-  alg->setPropertyValue("Input", inputStr.join(";").toStdString());
+  std::string inputStdStr = inputStr.join(";").toStdString();
+  alg->setPropertyValue("Input", inputStdStr);
   alg->setProperty("WorkspaceIndex", m_fitBrowser->workspaceIndex());
   // Create an array property of start and end X times, each pair startX[i]
   // endX[i] will be used for the ith fit.

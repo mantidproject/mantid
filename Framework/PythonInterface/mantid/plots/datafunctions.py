@@ -1253,7 +1253,7 @@ def line_colour_fill(ax):
     ax.get_figure().canvas.draw()
 
 
-def update_colorbar_scale(figure, image, scale, vmin, vmax):
+def update_colorbar_scale(figure, image, scale, vmin, vmax, linthresh=None):
     """ "
     Updates the colorbar to the scale and limits given.
 
@@ -1262,6 +1262,7 @@ def update_colorbar_scale(figure, image, scale, vmin, vmax):
     :param scale: The norm scale of the colorbar, this should be a matplotlib colormap norm type
     :param vmin: the minimum value on the colorbar
     :param vmax: the maximum value on the colorbar
+    :param linthresh: if using a SymLog norm scale, the width of the linear region.
     """
     if vmin <= 0 and scale == LogNorm:
         vmin = 0.0001  # Avoid 0 log scale error
@@ -1271,7 +1272,11 @@ def update_colorbar_scale(figure, image, scale, vmin, vmax):
         vmax = 1  # Avoid 0 log scale error
         mantid.kernel.logger.warning("Scale is set to logarithmic so non-positive max value has been changed to 1.")
 
-    image.set_norm(scale(vmin=vmin, vmax=vmax))
+    scale_args = {"vmin": vmin, "vmax": vmax}
+    if linthresh:
+        scale_args["linthresh"] = linthresh
+
+    image.set_norm(scale(**scale_args))
 
     if image.colorbar:
         colorbar = image.colorbar
