@@ -166,7 +166,6 @@ public:
   std::shared_ptr<GeometryHandler> getGeometryHandler() const override;
   /// Set Geometry Handler
   void setGeometryHandler(const std::shared_ptr<GeometryHandler> &h);
-
   /// set vtkGeometryCache writer
   void setVtkGeometryCacheWriter(std::shared_ptr<vtkGeometryCacheWriter>);
   /// set vtkGeometryCache reader
