@@ -28,7 +28,6 @@ cmake -G Ninja \
   -DDOCS_DOTDIAGRAMS=ON \
   -DDOCS_MATH_EXT=sphinx.ext.mathjax \
   -DDOCS_PLOTDIRECTIVE=ON \
-  -DDOCS_QTHELP=OFF \
   -DDOCS_SCREENSHOTS=ON \
   ${WORKSPACE}/source
 
