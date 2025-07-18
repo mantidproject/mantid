@@ -60,7 +60,7 @@ private:
   std::vector<int64_t> loadStart;
   /// How much to load in the file
   std::vector<int64_t> loadSize;
-  std::vector<size_t> pulse_indices;
+  std::vector<std::pair<size_t, size_t>> pulse_indices;
 };
 
 } // namespace DataHandling

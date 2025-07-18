@@ -484,12 +484,12 @@ public:
     std::vector<DateAndTime> times{ONE + 100.0, TWO + 100.0, THREE, FOUR - 100.0, FIVE + 100.0};
 
     auto indices = roi.calculate_indices(times);
-    TS_ASSERT_EQUALS(indices.size(), 6);
-    TS_ASSERT_EQUALS(indices[0], 0);                                  // ONE
-    TS_ASSERT_EQUALS(indices[1], 1);                                  // TWO
-    TS_ASSERT_EQUALS(indices[2], 2);                                  // THREE
-    TS_ASSERT_EQUALS(indices[3], 4);                                  // FOUR
-    TS_ASSERT_EQUALS(indices[4], 4);                                  // FIVE
-    TS_ASSERT_EQUALS(indices[5], std::numeric_limits<size_t>::max()); // SIX
+    TS_ASSERT_EQUALS(indices.size(), 3);
+    TS_ASSERT_EQUALS(indices[0].first, 0);                                   // ONE
+    TS_ASSERT_EQUALS(indices[0].second, 1);                                  // TWO
+    TS_ASSERT_EQUALS(indices[1].first, 2);                                   // THREE
+    TS_ASSERT_EQUALS(indices[1].second, 4);                                  // FOUR
+    TS_ASSERT_EQUALS(indices[2].first, 4);                                   // FIVE
+    TS_ASSERT_EQUALS(indices[2].second, std::numeric_limits<size_t>::max()); // SIX
   }
 };

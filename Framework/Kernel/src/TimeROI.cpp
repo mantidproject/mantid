@@ -343,12 +343,11 @@ Types::Core::DateAndTime TimeROI::timeAtIndex(unsigned long index) const {
 }
 
 // return the indices of the TimeROI would fall in the supplied vector of times
-std::vector<size_t> TimeROI::calculate_indices(const std::vector<DateAndTime> &times) const {
-  std::vector<size_t> indices;
+std::vector<std::pair<size_t, size_t>> TimeROI::calculate_indices(const std::vector<DateAndTime> &times) const {
+  std::vector<std::pair<size_t, size_t>> indices;
   if (this->useAll()) {
     // if the ROI is set to use all, then we just return the whole range
-    indices.push_back(0);
-    indices.push_back(std::numeric_limits<size_t>::max());
+    indices.emplace_back(0, std::numeric_limits<size_t>::max());
     return indices;
   }
   indices.reserve(m_roi.size() / 2);
@@ -356,12 +355,11 @@ std::vector<size_t> TimeROI::calculate_indices(const std::vector<DateAndTime> &t
   for (size_t i = 0; i < m_roi.size(); i += 2) {
     const auto start = std::lower_bound(times.cbegin(), times.cend(), m_roi[i]);
     if (start != times.cend()) {
-      indices.push_back(std::distance(times.cbegin(), start));
       const auto stop = std::lower_bound(times.cbegin(), times.cend(), m_roi[i + 1]);
       if (stop != times.cend())
-        indices.push_back(std::distance(times.cbegin(), stop));
+        indices.emplace_back(std::distance(times.cbegin(), start), std::distance(times.cbegin(), stop));
       else
-        indices.push_back(std::numeric_limits<size_t>::max());
+        indices.emplace_back(std::distance(times.cbegin(), start), std::numeric_limits<size_t>::max());
     }
   }
 

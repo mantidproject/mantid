@@ -35,6 +35,7 @@
 #include <H5Cpp.h>
 #include <atomic>
 #include <numbers>
+#include <ranges>
 #include <regex>
 
 namespace Mantid::DataHandling {
@@ -153,7 +154,7 @@ std::vector<double> calculate_difc_focused(const double l1, const std::vector<do
 
 class NexusLoader {
 public:
-  NexusLoader(const bool is_time_filtered, const std::vector<size_t> &pulse_indices)
+  NexusLoader(const bool is_time_filtered, const std::vector<std::pair<size_t, size_t>> &pulse_indices)
       : m_is_time_filtered(is_time_filtered), m_pulse_indices(pulse_indices) {}
 
   template <typename Type>
@@ -197,31 +198,29 @@ private:
   }
 
 public:
-  std::deque<std::pair<uint64_t, uint64_t>> getEventIndexRanges(H5::Group &event_group, const uint64_t number_events) {
-    std::deque<std::pair<uint64_t, uint64_t>> ranges;
+  std::stack<std::pair<uint64_t, uint64_t>> getEventIndexRanges(H5::Group &event_group, const uint64_t number_events) {
+    std::stack<std::pair<uint64_t, uint64_t>> ranges;
     if (m_is_time_filtered) {
       // TODO this should be made smarter to only read the necessary range
       std::unique_ptr<std::vector<uint64_t>> event_index = std::make_unique<std::vector<uint64_t>>();
       this->loadEventIndex(event_group, event_index);
 
-      for (size_t i = 0; i < m_pulse_indices.size(); i += 2) {
-        uint64_t start_event = event_index->at(m_pulse_indices[i]);
-        uint64_t stop_event = number_events;
-        if (i + 1 < m_pulse_indices.size() && m_pulse_indices[i + 1] != std::numeric_limits<size_t>::max())
-          stop_event = event_index->at(m_pulse_indices[i + 1]);
-        ranges.emplace_back(start_event, stop_event);
+      for (const auto &pair : m_pulse_indices | std::views::reverse) {
+        uint64_t start_event = event_index->at(pair.first);
+        uint64_t stop_event =
+            (pair.second == std::numeric_limits<size_t>::max()) ? number_events : event_index->at(pair.second);
+        ranges.emplace(start_event, stop_event);
       }
-      return ranges;
     } else {
       constexpr uint64_t START_DEFAULT = 0;
-      ranges.emplace_back(START_DEFAULT, number_events);
-      return ranges;
+      ranges.emplace(START_DEFAULT, number_events);
     }
+    return ranges;
   }
 
 private:
   const bool m_is_time_filtered;
-  const std::vector<size_t> m_pulse_indices;
+  const std::vector<std::pair<size_t, size_t>> m_pulse_indices;
 };
 
 template <typename Type> class MinMax {
@@ -326,7 +325,7 @@ public:
   ProcessBankTask(std::vector<std::string> &bankEntryNames, H5::H5File &h5file, const bool is_time_filtered,
                   MatrixWorkspace_sptr &wksp, const std::map<detid_t, double> &calibration,
                   const std::set<detid_t> &masked, const size_t events_per_chunk, const size_t grainsize_event,
-                  std::vector<size_t> pulse_indices, std::shared_ptr<API::Progress> &progress)
+                  std::vector<std::pair<size_t, size_t>> pulse_indices, std::shared_ptr<API::Progress> &progress)
       : m_h5file(h5file), m_bankEntries(bankEntryNames), m_loader(is_time_filtered, pulse_indices), m_wksp(wksp),
         m_calibration(calibration), m_masked(masked), m_events_per_chunk(events_per_chunk),
         m_grainsize_event(grainsize_event), m_progress(progress) {}
@@ -385,8 +384,8 @@ public:
 
         size_t total_events_to_read = 0;
         while (!eventRanges.empty() && total_events_to_read < m_events_per_chunk) {
-          auto eventRange = eventRanges.front();
-          eventRanges.pop_front();
+          auto eventRange = eventRanges.top();
+          eventRanges.pop();
 
           size_t range_size = eventRange.second - eventRange.first;
           size_t remaining_chunk = m_events_per_chunk - total_events_to_read;
@@ -397,7 +396,7 @@ public:
             slabsizes.push_back(remaining_chunk);
             total_events_to_read += remaining_chunk;
             // Push the remainder of the range back to the front for next iteration
-            eventRanges.emplace_front(eventRange.first + remaining_chunk, eventRange.second);
+            eventRanges.emplace(eventRange.first + remaining_chunk, eventRange.second);
             break;
           } else {
             offsets.push_back(eventRange.first);
@@ -666,7 +665,7 @@ void AlignAndFocusPowderSlim::exec() {
       throw std::invalid_argument("No valid pulse time indices found for filtering");
 
     g_log.information() << "Time filtering will use " << pulse_indices.size() / 2 << " time ranges, starting at "
-                        << pulse_indices.front() << " and stopping at " << pulse_indices.back() << '\n';
+                        << pulse_indices.front().first << " and stopping at " << pulse_indices.back().second << '\n';
   }
 
   // Now we want to go through all the bankN_event entries
