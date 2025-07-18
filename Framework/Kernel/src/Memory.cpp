@@ -219,12 +219,12 @@ void MemoryStats::process_mem_system(size_t &sys_avail, size_t &sys_total) {
 // right now
 #ifdef __GLIBC_MINOR__
 #if __GLIBC_MINOR__ >= 33 // mallinfo2 available since glibc 2.33
-  struct mallinfo info = mallinfo2();
+  auto info = mallinfo2();
 #else
-  struct mallinfo info = mallinfo();
+  auto info = mallinfo();
 #endif
 #else
-  struct mallinfo info = mallinfo();
+  auto info = mallinfo();
 #endif
   int unusedReserved = info.fordblks / 1024;
   // unusedReserved can sometimes be negative, which wen added to a low
