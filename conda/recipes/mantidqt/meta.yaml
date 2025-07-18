@@ -29,11 +29,6 @@ requirements:
     - pyqtwebengine                          # [build_platform != target_platform]
     - qt-main {{ qt_main }}                  # [build_platform != target_platform]
     - sip                                    # [build_platform != target_platform]
-    - {{ cdt('mesa-libgl-devel') }}  # [linux]
-    - {{ cdt('mesa-dri-drivers') }}  # [linux]
-    - {{ cdt('libxxf86vm') }}  # [linux]
-    - {{ cdt('libx11-devel') }}  # [linux]
-    - {{ cdt('xorg-x11-proto-devel') }}  # [linux]
 
   host:
     - libboost-devel {{ libboost_devel }}
@@ -52,7 +47,10 @@ requirements:
     - versioningit {{ versioningit }}
     - numpy {{ numpy }}                      # [build_platform != target_platform]
     - sip {{ sip }}                          # [build_platform != target_platform]
-
+    - libgl-devel  # [linux]
+    - xorg-libxxf86vm  # [linux]
+    - xorg-libx11  # [linux]
+    - xorg-xorgproto  # [linux]
   run:
     - matplotlib {{ matplotlib }}
     - {{ pin_compatible("qscintilla2", max_pin="x.x") }}
