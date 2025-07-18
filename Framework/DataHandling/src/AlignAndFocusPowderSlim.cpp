@@ -664,7 +664,7 @@ void AlignAndFocusPowderSlim::exec() {
     }
     const auto pulse_times =
         std::make_unique<std::vector<Mantid::Types::Core::DateAndTime>>(frequency_log->timesAsVector());
-    const auto startOfRun = wksp->run().getFirstPulseTime();
+    const auto startOfRun = wksp->run().startTime();
 
     try {
       roi.addROI(startOfRun + (filter_time_start_sec == EMPTY_DBL() ? 0.0 : filter_time_start_sec),
@@ -734,6 +734,10 @@ void AlignAndFocusPowderSlim::exec() {
 
   // close the file so child algorithms can do their thing
   h5file.close();
+
+  // update the run TimeROI and remove log data outside the time ROI
+  wksp->mutableRun().setTimeROI(roi);
+  wksp->mutableRun().removeDataOutsideTimeROI();
 
   setProperty(PropertyNames::OUTPUT_WKSP, std::move(wksp));
 }
