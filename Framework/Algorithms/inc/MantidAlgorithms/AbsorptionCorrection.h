@@ -117,7 +117,7 @@ private:
   void constructSample(API::Sample &sample);
   void calculateDistances(const Geometry::IDetector &detector, std::vector<double> &L2s) const;
   inline double doIntegration(const double linearCoefAbs, const std::vector<double> &L2s, const size_t startIndex,
-                              const size_t endIndex) const;
+                              const size_t endIndex, const size_t printIndex) const;
   inline double doIntegration(const double linearCoefAbsL1, const double linearCoefAbsL2,
                               const std::vector<double> &L2s, const size_t startIndex, const size_t endIndex) const;
 

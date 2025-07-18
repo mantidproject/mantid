@@ -201,6 +201,8 @@ void AbsorptionCorrection::exec() {
   for (int64_t i = 0; i < int64_t(numHists); ++i) {
     PARALLEL_START_INTERRUPT_REGION
     // Copy over bins
+    if (i == 0)
+      std::cout << "'### DEBUG OUTPUT (initial): " << correctionFactors->readY(i).front() << std::endl;
     correctionFactors->setSharedX(i, m_inputWS->sharedX(i));
 
     if (!spectrumInfo.hasDetectors(i)) {
@@ -237,10 +239,13 @@ void AbsorptionCorrection::exec() {
     // Get a reference to the Y's in the output WS for storing the factors
     auto &Y = correctionFactors->mutableY(i);
 
+    if (i == 0)
+      std::cout << "'### DEBUG OUTPUT (pre integration): " << correctionFactors->readY(i).front() << std::endl;
     // Loop through the bins in the current spectrum every m_xStep
     for (int64_t j = 0; j < specSize; j = j + m_xStep) {
       if (m_emode == DeltaEMode::Elastic) {
-        Y[j] = this->doIntegration(-linearCoefAbs[j], L2s, 0, L2s.size());
+        const size_t printIndex = (i == 0) ? j : -1;
+        Y[j] = this->doIntegration(-linearCoefAbs[j], L2s, 0, L2s.size(), printIndex);
       } else if (m_emode == DeltaEMode::Direct) {
         Y[j] = this->doIntegration(linearCoefAbsFixed, -linearCoefAbs[j], L2s, 0, L2s.size());
       } else if (m_emode == DeltaEMode::Indirect) {
@@ -248,7 +253,17 @@ void AbsorptionCorrection::exec() {
       } else { // should never happen
         throw std::runtime_error("AbsorptionCorrection doesn't have a known DeltaEMode defined");
       }
+      if (i == 0 && j == 0)
+        std::cout << "'### DEBUG OUTPUT (pre shape divide / post integration): " << correctionFactors->readY(i).front()
+                  << std::endl;
+
+      if (i == 0 && j == 0)
+        std::cout << "'### DEBUG OUTPUT SAMPLE VOLUME: " << m_sampleVolume << std::endl;
+
       Y[j] /= m_sampleVolume; // Divide by total volume of the shape
+
+      if (i == 0 && j == 0)
+        std::cout << "'### DEBUG OUTPUT (post shape divide): " << correctionFactors->readY(i).front() << std::endl;
 
       // Make certain that last point is calculated
       if (m_xStep > 1 && j + m_xStep >= specSize && j + 1 != specSize) {
@@ -259,9 +274,14 @@ void AbsorptionCorrection::exec() {
     // Interpolate linearly between points separated by m_xStep,
     // last point required
     if (m_xStep > 1) {
+      if (i == 0)
+        std::cout << "'### DEBUG OUTPUT (pre interpolation/ post shape divie): " << correctionFactors->readY(i).front()
+                  << std::endl;
       auto histnew = correctionFactors->histogram(i);
       interpolateLinearInplace(histnew, m_xStep);
       correctionFactors->setHistogram(i, histnew);
+      if (i == 0)
+        std::cout << "'### DEBUG OUTPUT (post interpolation): " << correctionFactors->readY(i).front() << std::endl;
     }
 
     prog.report();
@@ -419,21 +439,32 @@ void AbsorptionCorrection::calculateDistances(const IDetector &detector, std::ve
 /// Carries out the numerical integration over the sample for elastic
 /// instruments
 double AbsorptionCorrection::doIntegration(const double linearCoefAbs, const std::vector<double> &L2s,
-                                           const size_t startIndex, const size_t endIndex) const {
+                                           const size_t startIndex, const size_t endIndex,
+                                           const size_t printIndex) const {
   // Seems cppcheck is using the same temporary size_t to evaluate endIndex-startIndex in static analysis,
   // so it thinks the result of the comparison is always 0<1000. Hence the suppresion.
   // cppcheck-suppress knownConditionTrueFalse
   if (endIndex - startIndex > MAX_INTEGRATION_LENGTH) {
     size_t middle = findMiddle(startIndex, endIndex);
 
-    return doIntegration(linearCoefAbs, L2s, startIndex, middle) + doIntegration(linearCoefAbs, L2s, middle, endIndex);
+    double intRes = doIntegration(linearCoefAbs, L2s, startIndex, middle, printIndex) +
+                    doIntegration(linearCoefAbs, L2s, middle, endIndex, printIndex);
+    if (printIndex == 0)
+      std::cout << "SUMMED_INTEGRAL: " << intRes << std::endl;
+    return intRes;
+
   } else {
     double integral = 0.0;
 
     // Iterate over all the elements, summing up the integral
     for (size_t i = startIndex; i < endIndex; ++i) {
       const double exponent = (linearCoefAbs + m_linearCoefTotScatt) * (m_L1s[i] + L2s[i]);
-      integral += (EXPONENTIAL(exponent) * (m_elementVolumes[i]));
+      const double newIntegral = (EXPONENTIAL(exponent) * (m_elementVolumes[i]));
+      integral += newIntegral;
+      if (printIndex == 0)
+        std::cout << "NEW_INTEGRAL: " << newIntegral << std::endl;
+      if (printIndex == 0)
+        std::cout << "TOTAL INTEGRAL: " << integral << std::endl;
     }
 
     return integral;
