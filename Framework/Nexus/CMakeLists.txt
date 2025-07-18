@@ -2,7 +2,6 @@ set(SRC_FILES
     src/H5Util.cpp
     src/NexusClasses.cpp
     src/napi.cpp
-    src/napi5.cpp
     src/napi_helper.cpp
     src/NexusDescriptor.cpp
     src/NexusException.cpp
@@ -16,7 +15,6 @@ set(INC_FILES
     inc/MantidNexus/NexusIOHelper.h
     inc/MantidNexus/NexusFile_fwd.h
     inc/MantidNexus/napi.h
-    inc/MantidNexus/napi5.h
     inc/MantidNexus/napi_helper.h
     inc/MantidNexus/NexusDescriptor.h
     inc/MantidNexus/NexusException.h
