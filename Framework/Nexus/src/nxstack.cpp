@@ -84,8 +84,8 @@ void setCloseID(pFileStack self, const NXlink &id) { self->fileStack[self->fileS
 /*----------------------------------------------------------------------*/
 int fileStackDepth(pFileStack self) { return self->fileStackPointer; }
 /*----------------------------------------------------------------------*/
-void pushPath(pFileStack self, const char *name) {
-  if (self->pathPointer >= 0 && name == self->pathStack[self->pathPointer]) {
+void pushPath(pFileStack self, const char *name, bool isdata) {
+  if (self->pathPointer >= 0 && name == self->pathStack[self->pathPointer] && isdata) {
     return;
   }
   self->pathPointer++;
