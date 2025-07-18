@@ -226,7 +226,7 @@ void MemoryStats::process_mem_system(size_t &sys_avail, size_t &sys_total) {
 #else
   auto info = mallinfo();
 #endif
-  int unusedReserved = info.fordblks / 1024;
+  auto unusedReserved = info.fordblks / 1024;
   // unusedReserved can sometimes be negative, which wen added to a low
   // sys_avail will overflow the unsigned int.
   if (unusedReserved < 0)
