@@ -62,34 +62,38 @@ class FindUBFromScatteringPlane(PythonAlgorithm):
 
         # defining sample cell inorder to find B to orthogonalise the vectors provided
         sample_cell = UnitCell(a, b, c, alpha, beta, gamma)
-        B = sample_cell.getB()
-
-        # applying B to the vectors to orthogonalise them
-        B_vector_1 = B @ vector_1
-        B_vector_2 = B @ vector_2
+        B_unoriented = sample_cell.getB()
 
         SingleCrystalPeakTable = self.getProperty("PeaksWorkspace").value
+        Inst = SingleCrystalPeakTable.getInstrument()
+        lab_orientation = Inst.getReferenceFrame()
+        orient_vec_1 = lab_orientation.vecPointingAlongBeam()
+        orient_vec_2 = lab_orientation.vecPointingUp()
+        orient_vec_3 = np.cross(orient_vec_2, orient_vec_1)
+        orientation_matrix = np.transpose(np.array([orient_vec_1, orient_vec_3, orient_vec_2]))
+        B = orientation_matrix @ B_unoriented
+
         peak_ip = SingleCrystalPeakTable.getPeak(0)
         hkl_peak = np.array(peak_ip.getHKL())
         hkl_peak = hkl_peak.reshape(-1, 1)
         Ql = np.array(peak_ip.getQLabFrame())
         Ql = Ql.reshape(-1, 1)
 
-        Qs = 2 * np.pi * (B @ hkl_peak)
+        # applying B to the vectors to orthogonalise them
+        B_vector_1 = B @ vector_1
+        B_vector_2 = B @ vector_2
+
+        Qs = B @ hkl_peak
 
         # defining the normal to the scattering plane
         scatt_plane_norm = np.array(np.cross(B_vector_1.flatten(), B_vector_2.flatten()))
+        sign = np.dot(scatt_plane_norm, orient_vec_2)
+        scatt_plane_norm = scatt_plane_norm * sign / abs(sign)
         theta = mt.acos(np.dot(Ql.flatten(), Qs.flatten()) / (np.linalg.norm(Ql) * np.linalg.norm(Qs)))
-        # if np.isclose(np.dot(Qs.flatten(), scatt_plane_norm), 0, atol=0.01) != True:
-        #    raise ValueError("given peak does not lie in the plane")
+        if not np.isclose(np.dot(Qs.flatten(), scatt_plane_norm), 0, atol=0.01):
+            raise ValueError("given peak does not lie in the plane")
 
-        #        (
-        #            U,
-        #            rssd,
-        #        ) = R.align_vectors(Ql.flatten(), Qs.flatten())
-        #        U = U.as_matrix()
-
-        rotation_object = R.from_rotvec(theta * scatt_plane_norm.flatten() / np.linalg.norm(scatt_plane_norm))
+        rotation_object = R.from_rotvec(-theta * scatt_plane_norm.flatten() / np.linalg.norm(scatt_plane_norm))
         U = rotation_object.as_matrix()
 
         UB_rel = U @ B
