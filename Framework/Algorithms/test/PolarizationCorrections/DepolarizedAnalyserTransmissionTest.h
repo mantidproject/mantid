@@ -55,10 +55,12 @@ public:
   }
 
   void test_normal_exec_with_file() {
+    // GIVEN
     auto const &[mtWs, depWs] = createDefaultWorkspaces();
     auto alg = createAlgorithmUsingFilename(mtWs, depWs);
     alg->execute();
 
+    // THEN
     TS_ASSERT(alg->isExecuted());
     ITableWorkspace_sptr const &outputWs = alg->getProperty("OutputWorkspace");
     MatrixWorkspace_sptr const &fitWs = alg->getProperty("OutputFitCurves");
@@ -145,11 +147,13 @@ public:
   }
 
   void test_invalid_empty_cell_workspace_length_from_file() {
+    // GIVEN
     MatrixWorkspace_sptr const &mtWs =
         createTestingWorkspace("__mt", "name=LinearBackground, A0=0.112, A1=-0.004397", 12);
     auto const &depWs = createTestingWorkspace("__dep", "name=ExpDecay, Height=0.1239, Lifetime=1.338", 1);
     auto alg = createAlgorithmUsingFilename(mtWs, depWs);
 
+    // THEN
     TS_ASSERT_THROWS_EQUALS(alg->execute(), std::runtime_error const &e, std::string(e.what()),
                             "Some invalid Properties found: \n EmptyCellFilename: EmptyCellFilename "
                             "must contain a single spectrum. Contains 12 spectra.");
@@ -171,6 +175,7 @@ public:
   }
 
   void test_error_if_neither_empty_cell_workspace_or_file_are_set() {
+    // GIVEN
     auto const &depWs = createTestingWorkspace("__dep", "name=ExpDecay, Height=0.1239, Lifetime=1.338");
 
     auto alg = std::make_shared<DepolarizedAnalyserTransmission>();
@@ -180,6 +185,7 @@ public:
     alg->setProperty("DepolarizedWorkspace", depWs);
     alg->setPropertyValue("OutputWorkspace", "__unused_for_child");
 
+    // THEN
     TS_ASSERT_THROWS_EQUALS(alg->execute(), std::runtime_error const &e, std::string(e.what()),
                             "Some invalid Properties found: \n EmptyCellWorkspace: Must set either EmptyCellWorkspace "
                             "or EmptyCellFilename.");
