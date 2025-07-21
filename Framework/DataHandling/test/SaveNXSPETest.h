@@ -199,7 +199,9 @@ public:
 
   void test_WorkspaceBadName() {
     auto saver = setupWithWSName("bad/name");
-    TS_ASSERT_THROWS_ANYTHING(saver->execute());
+    TS_ASSERT_THROWS_EQUALS(saver->execute(), const std::runtime_error &e, std::string(e.what()),
+                            "Some invalid Properties found: \n"
+                            " InputWorkspace: The input workspace name cannot contain a \'/\' character.");
     TS_ASSERT(!saver->isExecuted());
   }
 
