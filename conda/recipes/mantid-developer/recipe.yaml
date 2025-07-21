@@ -65,6 +65,7 @@ requirements:
       then: qt-gtk-platformtheme
     - quasielasticbayes ${{ quasielasticbayes }}
     - quickbayes ${{ quickbayes }}
+    - rattler-build
     - requests>=2.32.4
     - scipy ${{ scipy }}
     - setuptools
