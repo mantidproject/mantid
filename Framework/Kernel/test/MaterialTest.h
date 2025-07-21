@@ -259,7 +259,7 @@ public:
     TS_ASSERT_DELTA(cf[3].multiplicity, 6.56, .01);
   }
 
-  void test_linearAbsorpCoefl() {
+  void test_linearAbsorpCoef() {
     const std::vector<double> lambda{1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
     Material::ChemicalFormula cf;
     cf = Material::parseChemicalFormula("F14");
