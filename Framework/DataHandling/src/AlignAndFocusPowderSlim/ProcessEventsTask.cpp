@@ -2,21 +2,16 @@
 
 namespace Mantid::DataHandling {
 
-template <typename DetidType, typename TofType>
-ProcessEventsTask<DetidType, TofType>::ProcessEventsTask(const std::vector<DetidType> *detids,
-                                                         const std::vector<TofType> *tofs,
-                                                         const BankCalibration *calibration,
-                                                         const std::vector<double> *binedges)
+ProcessEventsTask::ProcessEventsTask(const std::vector<uint32_t> *detids, const std::vector<float> *tofs,
+                                     const BankCalibration *calibration, const std::vector<double> *binedges)
     : y_temp(binedges->size() - 1, 0), m_detids(detids), m_tofs(tofs), m_calibration(calibration),
       m_binedges(binedges) {}
 
-template <typename DetidType, typename TofType>
-ProcessEventsTask<DetidType, TofType>::ProcessEventsTask(ProcessEventsTask &other, tbb::split)
+ProcessEventsTask::ProcessEventsTask(ProcessEventsTask &other, tbb::split)
     : y_temp(other.y_temp.size(), 0), m_detids(other.m_detids), m_tofs(other.m_tofs),
       m_calibration(other.m_calibration), m_binedges(other.m_binedges) {}
 
-template <typename DetidType, typename TofType>
-void ProcessEventsTask<DetidType, TofType>::operator()(const tbb::blocked_range<size_t> &range) {
+void ProcessEventsTask::operator()(const tbb::blocked_range<size_t> &range) {
   // Cache values to reduce number of function calls
   const auto &range_end = range.end();
   const auto &binedges_cbegin = m_binedges->cbegin();
@@ -47,8 +42,7 @@ void ProcessEventsTask<DetidType, TofType>::operator()(const tbb::blocked_range<
   }
 }
 
-template <typename DetidType, typename TofType>
-void ProcessEventsTask<DetidType, TofType>::join(const ProcessEventsTask &other) {
+void ProcessEventsTask::join(const ProcessEventsTask &other) {
   // Combine local histograms
   std::transform(y_temp.begin(), y_temp.end(), other.y_temp.cbegin(), y_temp.begin(), std::plus<>{});
 }

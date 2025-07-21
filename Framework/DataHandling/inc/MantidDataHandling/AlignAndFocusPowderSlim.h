@@ -24,19 +24,6 @@ public:
   const std::string summary() const override;
   const std::vector<std::string> seeAlso() const override;
 
-  class MANTID_DATAHANDLING_DLL BankCalibration {
-  public:
-    BankCalibration(const detid_t idmin, const detid_t idmax, const double time_conversion,
-                    const std::map<detid_t, double> &calibration_map, const std::set<detid_t> &mask);
-    const double &value(const detid_t detid) const;
-    const detid_t &idmin() const;
-    detid_t idmax() const;
-
-  private:
-    std::vector<double> m_calibration;
-    const detid_t m_detid_offset;
-  };
-
 private:
   void init() override;
   std::map<std::string, std::string> validateInputs() override;

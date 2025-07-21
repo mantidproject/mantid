@@ -75,4 +75,10 @@ void NexusLoader::loadEventIndex(H5::Group &event_group, std::unique_ptr<std::ve
   NeXus::H5Util::readArray1DCoerce(index_SDS, *data);
 }
 
+// explict instantiation for uint32_t and float
+template void NexusLoader::loadData<uint32_t>(H5::DataSet &SDS, std::unique_ptr<std::vector<uint32_t>> &data,
+                                              const std::vector<size_t> &offsets, const std::vector<size_t> &slabsizes);
+template void NexusLoader::loadData<float>(H5::DataSet &SDS, std::unique_ptr<std::vector<float>> &data,
+                                           const std::vector<size_t> &offsets, const std::vector<size_t> &slabsizes);
+
 }; // namespace Mantid::DataHandling
