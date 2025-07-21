@@ -38,16 +38,15 @@ public:
   static NexusFileReadWriteTest *createSuite() { return new NexusFileReadWriteTest(); }
   static void destroySuite(NexusFileReadWriteTest *suite) { delete suite; }
 
-  /**
+  /** NOTE
    * These tests correspond to tests inside napi_test.cpp
    * Refactored to work as unit tests with asserts and comparisons
    * as opposed to a single long print-out test
+   * see https://github.com/nexusformat/code/blob/master/test/napi_test.c
    */
 
 private:
   File do_prep_files(std::string const nxFile) {
-    removeFile(nxFile); // in case previous run didn't clean up
-
     cout << "Creating \"" << nxFile << "\"" << endl;
     // create file
     File fileid(nxFile, NXaccess::CREATE5);
@@ -149,7 +148,8 @@ private:
 public:
   void test_napi_char() {
     cout << "Starting NAPI CHAR Test\n";
-    std::string const nxFile("NexusFile_test_char.h5");
+    FileResource resource("NexusFile_test_char.h5");
+    std::string const nxFile(resource.fullPath());
     File fileid = do_prep_files(nxFile);
 
     // tests of string/char read/write
@@ -186,12 +186,12 @@ public:
     // cleanup and return
     fileid.close();
     cout << "napi slab test done\n";
-    removeFile(nxFile);
   }
 
   void test_napi_vec() {
     cout << "Starting NAPI VEC Test\n";
-    std::string const nxFile("NexusFile_test_vec.h5");
+    FileResource resource("NexusFile_test_vec.h5");
+    std::string const nxFile(resource.fullPath());
     File fileid = do_prep_files(nxFile);
 
     // tests of integer read/write
@@ -226,12 +226,12 @@ public:
     // cleanup and return
     fileid.close();
     cout << "napi vec test done\n";
-    removeFile(nxFile);
   }
 
   void test_napi_slab() {
     cout << "Starting NAPI SLAB Test\n";
-    std::string const nxFile("NexusFile_test_slab.h5");
+    FileResource resource("NexusFile_test_slab.h5");
+    std::string const nxFile(resource.fullPath());
     File fileid = do_prep_files(nxFile);
 
     // test of slab read/write
@@ -258,14 +258,43 @@ public:
     // cleanup and return
     fileid.close();
     cout << "napi slab test done\n";
-    removeFile(nxFile);
+  }
+
+  void test_unlimited() {
+    // NOTE this test is a copy of what was formerly called test_nxunlimited.cpp
+    // which tested the old napi layer.  This is a useful test, to ensure unlimited
+    // dimensions still work with putting slabs of data
+    // NOTE the original really did not do any reading, only putting
+    // see https://github.com/nexusformat/code/blob/master/test/test_nxunlimited.c
+    constexpr std::size_t DATA_SIZE(200);
+    static double d[DATA_SIZE];
+    Mantid::Nexus::DimVector dims{NX_UNLIMITED, DATA_SIZE};
+
+    FileResource resource("test_nxunlimited.nx5");
+    std::string filename = resource.fullPath();
+    File fileid = do_prep_files(filename);
+
+    // make and open compressed data
+    TS_ASSERT_THROWS_NOTHING(fileid.makeCompData("data", NXnumtype::FLOAT64, dims, NXcompression::NONE, dims, true));
+
+    Mantid::Nexus::DimSizeVector slab_start{0, 0}, slab_size{1, DATA_SIZE};
+    for (Mantid::Nexus::dimsize_t i = 0; i < 2; i++) {
+      slab_start[0] = i;
+      TS_ASSERT_THROWS_NOTHING(fileid.putSlab(d, slab_start, slab_size));
+    }
+
+    // cleanup
+    fileid.closeData();
+    fileid.closeGroup();
+    fileid.close();
   }
 
   void test_openPath() {
     cout << "tests for openPath\n";
 
     // make file with path /entry
-    string const filename("NexusFile_openpathtest.nxs");
+    FileResource resource("NexusFile_openpathtest.nxs");
+    string const filename(resource.fullPath());
     File fileid = do_prep_files(filename);
 
     // make path /entry/data1
@@ -308,15 +337,14 @@ public:
 
     // cleanup
     fileid.close();
-    removeFile(filename);
     cout << "NXopenaddress checks OK\n";
   }
 
   void test_links() {
     cout << "tests of linkature\n" << std::flush;
 
-    string const filename("NexusFile_linktest.nxs");
-    removeFile(filename);
+    FileResource resource("NexusFile_linktest.nxs");
+    std::string const filename(resource.fullPath());
     File fileid = do_prep_files(filename);
 
     // Create some data with a link
