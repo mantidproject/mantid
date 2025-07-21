@@ -24,13 +24,13 @@ repos:
         exclude: .md5$|^external/|^tools/|Testing/Tools/cxxtest
 
   - repo: https://github.com/pre-commit/mirrors-clang-format
-    rev: v20.1.4
+    rev: v20.1.7
     hooks:
     - id: clang-format
       exclude: Testing/Tools/cxxtest|tools|qt/icons/resources/
 
   - repo: https://github.com/mantidproject/pre-commit-hooks.git
-    rev: 15c7c52cf8eeb0d74c736a1f100743a244c2f0a8
+    rev: 312eb3e59ed829275f3b87ece24a04f5345a7c6b
     hooks:
       - id: cmake-missing-pytest-files
         # Exclude sphinx / template file
@@ -45,7 +45,7 @@ repos:
     #- id: cmake-lint <- not ready yet
 
   - repo: https://github.com/rstcheck/rstcheck
-    rev: v6.2.4
+    rev: v6.2.5
     hooks:
       - id: rstcheck
         additional_dependencies: [sphinx]
@@ -59,7 +59,7 @@ repos:
           )$
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.11.10
+    rev: v0.12.2
     # ruff must appear before black in the list of hooks
     hooks:
       - id: ruff

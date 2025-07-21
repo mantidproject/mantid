@@ -29,7 +29,7 @@
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidNexus/NeXusFile.hpp"
+#include "MantidNexus/NexusFile.h"
 
 #include <boost/lexical_cast.hpp>
 
@@ -90,7 +90,7 @@ public:
     doExec(outputFile.fullPath(), useXErrors);
 
     // Assert XError correctness
-    ::NeXus::File savedNexus(outputFile.fullPath());
+    Mantid::Nexus::File savedNexus(outputFile.fullPath());
     savedNexus.openGroup("mantid_workspace_1", "NXentry");
     savedNexus.openGroup("workspace", "NXdata");
 
@@ -412,7 +412,7 @@ public:
       return; // Nothing to check
 
     try {
-      ::NeXus::File savedNexus(outputFileName.fullPath());
+      Mantid::Nexus::File savedNexus(outputFileName.fullPath());
 
       savedNexus.openGroup("mantid_workspace_1", "NXentry");
       savedNexus.openGroup("table_workspace", "NXdata");
@@ -421,7 +421,7 @@ public:
 
       savedNexus.openData("column_1");
 
-      ::NeXus::Info columnInfo1 = savedNexus.getInfo();
+      Mantid::Nexus::Info columnInfo1 = savedNexus.getInfo();
       TS_ASSERT_EQUALS(columnInfo1.dims.size(), 2);
       TS_ASSERT_EQUALS(columnInfo1.dims[0], 3);
       TS_ASSERT_EQUALS(columnInfo1.dims[1], 4);
@@ -437,28 +437,28 @@ public:
       TS_ASSERT_EQUALS(data1[8], 4);
       TS_ASSERT_EQUALS(data1[11], 7);
 
-      std::vector<::NeXus::AttrInfo> attrInfos1 = savedNexus.getAttrInfos();
+      std::vector<Mantid::Nexus::AttrInfo> attrInfos1 = savedNexus.getAttrInfos();
       TS_ASSERT_EQUALS(attrInfos1.size(), 6);
 
       if (attrInfos1.size() == 6) {
         TS_ASSERT_EQUALS(attrInfos1[0].name, "row_size_0");
-        TS_ASSERT_EQUALS(savedNexus.getAttr<int>(attrInfos1[0]), 1);
+        TS_ASSERT_EQUALS(savedNexus.getAttr<int>(attrInfos1[0].name), 1);
 
         TS_ASSERT_EQUALS(attrInfos1[2].name, "row_size_2");
-        TS_ASSERT_EQUALS(savedNexus.getAttr<int>(attrInfos1[2]), 4);
+        TS_ASSERT_EQUALS(savedNexus.getAttr<int>(attrInfos1[2].name), 4);
 
         TS_ASSERT_EQUALS(attrInfos1[4].name, "interpret_as");
-        TS_ASSERT_EQUALS(savedNexus.getStrAttr(attrInfos1[4]), "");
+        TS_ASSERT_EQUALS(savedNexus.getStrAttr(attrInfos1[4].name), "");
 
         TS_ASSERT_EQUALS(attrInfos1[5].name, "name");
-        TS_ASSERT_EQUALS(savedNexus.getStrAttr(attrInfos1[5]), "IntVectorColumn");
+        TS_ASSERT_EQUALS(savedNexus.getStrAttr(attrInfos1[5].name), "IntVectorColumn");
       }
 
       // -- Checking double column -----
 
       savedNexus.openData("column_2");
 
-      ::NeXus::Info columnInfo2 = savedNexus.getInfo();
+      Mantid::Nexus::Info columnInfo2 = savedNexus.getInfo();
       TS_ASSERT_EQUALS(columnInfo2.dims.size(), 2);
       TS_ASSERT_EQUALS(columnInfo2.dims[0], 3);
       TS_ASSERT_EQUALS(columnInfo2.dims[1], 2);
@@ -472,21 +472,21 @@ public:
       TS_ASSERT_EQUALS(data2[3], 2.5);
       TS_ASSERT_EQUALS(data2[5], 0.0);
 
-      std::vector<::NeXus::AttrInfo> attrInfos2 = savedNexus.getAttrInfos();
+      std::vector<Mantid::Nexus::AttrInfo> attrInfos2 = savedNexus.getAttrInfos();
       TS_ASSERT_EQUALS(attrInfos2.size(), 6);
 
       if (attrInfos2.size() == 6) {
         TS_ASSERT_EQUALS(attrInfos2[0].name, "row_size_0");
-        TS_ASSERT_EQUALS(savedNexus.getAttr<int>(attrInfos2[0]), 1);
+        TS_ASSERT_EQUALS(savedNexus.getAttr<int>(attrInfos2[0].name), 1);
 
         TS_ASSERT_EQUALS(attrInfos2[1].name, "row_size_1");
-        TS_ASSERT_EQUALS(savedNexus.getAttr<int>(attrInfos2[1]), 2);
+        TS_ASSERT_EQUALS(savedNexus.getAttr<int>(attrInfos2[1].name), 2);
 
         TS_ASSERT_EQUALS(attrInfos2[4].name, "interpret_as");
-        TS_ASSERT_EQUALS(savedNexus.getStrAttr(attrInfos2[4]), "");
+        TS_ASSERT_EQUALS(savedNexus.getStrAttr(attrInfos2[4].name), "");
 
         TS_ASSERT_EQUALS(attrInfos2[5].name, "name");
-        TS_ASSERT_EQUALS(savedNexus.getStrAttr(attrInfos2[5]), "DoubleVectorColumn");
+        TS_ASSERT_EQUALS(savedNexus.getStrAttr(attrInfos2[5].name), "DoubleVectorColumn");
       }
     } catch (std::exception &e) {
       TS_FAIL(e.what());
@@ -575,7 +575,7 @@ public:
     if (!alg.isExecuted())
       return; // Nothing to check
 
-    ::NeXus::File savedNexus(outputFileName.fullPath());
+    Mantid::Nexus::File savedNexus(outputFileName.fullPath());
 
     savedNexus.openGroup("mantid_workspace_1", "NXentry");
     savedNexus.openGroup("table_workspace", "NXdata");
@@ -639,24 +639,24 @@ public:
     {
       savedNexus.openData("column_9");
 
-      ::NeXus::Info columnInfo = savedNexus.getInfo();
+      Mantid::Nexus::Info columnInfo = savedNexus.getInfo();
       TS_ASSERT_EQUALS(columnInfo.dims.size(), 2);
       TS_ASSERT_EQUALS(columnInfo.dims[0], 3);
       TS_ASSERT_EQUALS(columnInfo.dims[1], 9);
       TS_ASSERT_EQUALS(columnInfo.type, NXnumtype::CHAR);
 
-      std::vector<::NeXus::AttrInfo> attrInfos = savedNexus.getAttrInfos();
+      std::vector<Mantid::Nexus::AttrInfo> attrInfos = savedNexus.getAttrInfos();
       TS_ASSERT_EQUALS(attrInfos.size(), 3);
 
       if (attrInfos.size() == 3) {
         TS_ASSERT_EQUALS(attrInfos[1].name, "interpret_as");
-        TS_ASSERT_EQUALS(savedNexus.getStrAttr(attrInfos[1]), "A string");
+        TS_ASSERT_EQUALS(savedNexus.getStrAttr(attrInfos[1].name), "A string");
 
         TS_ASSERT_EQUALS(attrInfos[2].name, "name");
-        TS_ASSERT_EQUALS(savedNexus.getStrAttr(attrInfos[2]), "StringColumn");
+        TS_ASSERT_EQUALS(savedNexus.getStrAttr(attrInfos[2].name), "StringColumn");
 
         TS_ASSERT_EQUALS(attrInfos[0].name, "units");
-        TS_ASSERT_EQUALS(savedNexus.getStrAttr(attrInfos[0]), "N/A");
+        TS_ASSERT_EQUALS(savedNexus.getStrAttr(attrInfos[0].name), "N/A");
       }
 
       std::vector<char> data;
@@ -705,7 +705,7 @@ public:
     if (!alg.isExecuted())
       return; // Nothing to check
 
-    ::NeXus::File savedNexus(outputFileName);
+    Mantid::Nexus::File savedNexus(outputFileName);
 
     savedNexus.openGroup("mantid_workspace_1", "NXentry");
     savedNexus.openGroup("table_workspace", "NXdata");
@@ -720,24 +720,24 @@ public:
     {
       savedNexus.openData("column_2");
 
-      ::NeXus::Info columnInfo = savedNexus.getInfo();
+      Mantid::Nexus::Info columnInfo = savedNexus.getInfo();
       TS_ASSERT_EQUALS(columnInfo.dims.size(), 2);
       TS_ASSERT_EQUALS(columnInfo.dims[0], 3);
       TS_ASSERT_EQUALS(columnInfo.dims[1], 1);
       TS_ASSERT_EQUALS(columnInfo.type, NXnumtype::CHAR);
 
-      std::vector<::NeXus::AttrInfo> attrInfos = savedNexus.getAttrInfos();
+      std::vector<Mantid::Nexus::AttrInfo> attrInfos = savedNexus.getAttrInfos();
       TS_ASSERT_EQUALS(attrInfos.size(), 3);
 
       if (attrInfos.size() == 3) {
         TS_ASSERT_EQUALS(attrInfos[1].name, "interpret_as");
-        TS_ASSERT_EQUALS(savedNexus.getStrAttr(attrInfos[1]), "A string");
+        TS_ASSERT_EQUALS(savedNexus.getStrAttr(attrInfos[1].name), "A string");
 
         TS_ASSERT_EQUALS(attrInfos[2].name, "name");
-        TS_ASSERT_EQUALS(savedNexus.getStrAttr(attrInfos[2]), "EmptyColumn");
+        TS_ASSERT_EQUALS(savedNexus.getStrAttr(attrInfos[2].name), "EmptyColumn");
 
         TS_ASSERT_EQUALS(attrInfos[0].name, "units");
-        TS_ASSERT_EQUALS(savedNexus.getStrAttr(attrInfos[0]), "N/A");
+        TS_ASSERT_EQUALS(savedNexus.getStrAttr(attrInfos[0].name), "N/A");
       }
 
       std::vector<char> data;
@@ -1036,52 +1036,53 @@ public:
   }
 
 private:
-  void doTestColumnInfo(::NeXus::File &file, NXnumtype type, const std::string &interpret_as, const std::string &name) {
-    ::NeXus::Info columnInfo = file.getInfo();
+  void doTestColumnInfo(Mantid::Nexus::File &file, NXnumtype type, const std::string &interpret_as,
+                        const std::string &name) {
+    Mantid::Nexus::Info columnInfo = file.getInfo();
     TSM_ASSERT_EQUALS(name, columnInfo.dims.size(), 1);
     TSM_ASSERT_EQUALS(name, columnInfo.dims[0], 3);
     TSM_ASSERT_EQUALS(name, columnInfo.type, type);
 
-    std::vector<::NeXus::AttrInfo> attrInfos = file.getAttrInfos();
+    std::vector<Mantid::Nexus::AttrInfo> attrInfos = file.getAttrInfos();
     TSM_ASSERT_EQUALS(name, attrInfos.size(), 3);
 
     if (attrInfos.size() == 3) {
       TSM_ASSERT_EQUALS(name, attrInfos[1].name, "interpret_as");
-      TSM_ASSERT_EQUALS(name, file.getStrAttr(attrInfos[1]), interpret_as);
+      TSM_ASSERT_EQUALS(name, file.getStrAttr(attrInfos[1].name), interpret_as);
 
       TSM_ASSERT_EQUALS(name, attrInfos[2].name, "name");
-      TSM_ASSERT_EQUALS(name, file.getStrAttr(attrInfos[2]), name);
+      TSM_ASSERT_EQUALS(name, file.getStrAttr(attrInfos[2].name), name);
 
       TSM_ASSERT_EQUALS(name, attrInfos[0].name, "units");
-      TSM_ASSERT_EQUALS(name, file.getStrAttr(attrInfos[0]), "Not known");
+      TSM_ASSERT_EQUALS(name, file.getStrAttr(attrInfos[0].name), "Not known");
     }
   }
 
-  void doTestColumnInfo2(::NeXus::File &file, NXnumtype type, const std::string &interpret_as, const std::string &name,
-                         int dim1) {
-    ::NeXus::Info columnInfo = file.getInfo();
+  void doTestColumnInfo2(Mantid::Nexus::File &file, NXnumtype type, const std::string &interpret_as,
+                         const std::string &name, int dim1) {
+    Mantid::Nexus::Info columnInfo = file.getInfo();
     TSM_ASSERT_EQUALS(name, columnInfo.dims.size(), 2);
     TSM_ASSERT_EQUALS(name, columnInfo.dims[0], 3);
     TSM_ASSERT_EQUALS(name, columnInfo.dims[1], dim1);
     TSM_ASSERT_EQUALS(name, columnInfo.type, type);
 
-    std::vector<::NeXus::AttrInfo> attrInfos = file.getAttrInfos();
+    std::vector<Mantid::Nexus::AttrInfo> attrInfos = file.getAttrInfos();
     TSM_ASSERT_EQUALS(name, attrInfos.size(), 6);
 
     if (attrInfos.size() == 6) {
       TSM_ASSERT_EQUALS(name, attrInfos[4].name, "interpret_as");
-      TSM_ASSERT_EQUALS(name, file.getStrAttr(attrInfos[4]), interpret_as);
+      TSM_ASSERT_EQUALS(name, file.getStrAttr(attrInfos[4].name), interpret_as);
 
       TSM_ASSERT_EQUALS(name, attrInfos[5].name, "name");
-      TSM_ASSERT_EQUALS(name, file.getStrAttr(attrInfos[5]), name);
+      TSM_ASSERT_EQUALS(name, file.getStrAttr(attrInfos[5].name), name);
 
       TSM_ASSERT_EQUALS(name, attrInfos[3].name, "units");
-      TSM_ASSERT_EQUALS(name, file.getStrAttr(attrInfos[3]), "Not known");
+      TSM_ASSERT_EQUALS(name, file.getStrAttr(attrInfos[3].name), "Not known");
     }
   }
 
   template <typename T>
-  void doTestColumnData(const std::string &name, ::NeXus::File &file, const T expectedData[], size_t len = 3) {
+  void doTestColumnData(const std::string &name, Mantid::Nexus::File &file, const T expectedData[], size_t len = 3) {
     std::vector<T> data;
     file.getData(data);
 

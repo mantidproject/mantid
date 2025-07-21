@@ -7,7 +7,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 
-# DMG bundle application launcher. Just redirects to the Conda-executable
+# DMG bundle application launcher. Just redirects to the conda-executable
 CONTENTS=$(dirname "$(dirname "$0")")
 PREFIX="$CONTENTS"/Resources
 QTWEBENGINE_CHROMIUM_FLAGS="--disable-gpu"

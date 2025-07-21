@@ -68,12 +68,6 @@ std::string InstrumentNameInfo::getIdfFromFile(const std::string &instrumentName
 InstrumentNameInfo::InstrumentNameInfo(const H5::Group &entry)
     : instrumentName(getInstrumentNameFromFile(entry)), idf(getIdfFromFile(instrumentName)) {}
 
-std::optional<size_t> findWorkspaceIndexForSpinState(const std::vector<std::string> &spinStates,
-                                                     const std::string &targetState) {
-  size_t index = std::ranges::find(spinStates, targetState) - spinStates.cbegin();
-  return index == spinStates.size() ? std::nullopt : std::optional(index);
-}
-
 SpinVectorBuilder::SpinVectorBuilder(const std::vector<std::string> &spinStateStr) : spinVec(spinStateStr) {
   // If there is polarized data, we set the default state vector as -1,1 and then arrange workspaces accordingly
   // when storing the polarized data set.

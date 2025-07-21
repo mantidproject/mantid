@@ -31,8 +31,8 @@ QModelIndex RowLocationAdapter::walkFromRootToParentIndexOf(RowLocation const &l
   return parentIndex;
 }
 
-boost::optional<QModelIndexForMainModel> RowLocationAdapter::indexIfExistsAt(RowLocation const &location,
-                                                                             int column) const {
+std::optional<QModelIndexForMainModel> RowLocationAdapter::indexIfExistsAt(RowLocation const &location,
+                                                                           int column) const {
   if (location.isRoot()) {
     return fromMainModel(QModelIndex(), m_model);
   } else {
@@ -41,14 +41,14 @@ boost::optional<QModelIndexForMainModel> RowLocationAdapter::indexIfExistsAt(Row
     if (m_model.hasIndex(row, column, parentIndex))
       return fromMainModel(m_model.index(row, column, parentIndex), m_model);
     else
-      return boost::none;
+      return std::nullopt;
   }
 }
 
 QModelIndexForMainModel RowLocationAdapter::indexAt(RowLocation const &location, int column) const {
   auto maybeIndex = indexIfExistsAt(location, column);
-  if (maybeIndex.is_initialized())
-    return maybeIndex.get();
+  if (maybeIndex.has_value())
+    return maybeIndex.value();
   else {
     throw std::runtime_error("indexAt: Attempted to get model index for "
                              "row location which does not exist.");

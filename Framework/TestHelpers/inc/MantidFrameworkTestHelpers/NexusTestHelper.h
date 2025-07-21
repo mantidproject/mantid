@@ -15,7 +15,7 @@
 #include <memory>
 #include <string>
 
-namespace NeXus {
+namespace Mantid::Nexus {
 class File;
 }
 
@@ -32,7 +32,7 @@ public:
   void reopenFile();
 
   /// Nexus file handle
-  std::unique_ptr<::NeXus::File> file;
+  std::unique_ptr<Mantid::Nexus::File> file;
 
   /// Created filename (full path)
   std::string filename;

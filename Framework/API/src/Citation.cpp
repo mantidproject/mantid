@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/Citation.h"
 
-#include "MantidNexus/NeXusFile.hpp"
+#include "MantidNexus/NexusFile.h"
 #include <stdexcept>
 
 #include <stdexcept>
@@ -46,7 +46,7 @@ Citation::Citation(const std::string &doi, const std::string &bibtex, const std:
       throw std::invalid_argument("If none of doi, bibtex, or endnote is provided, then url must be");
 }
 
-Citation::Citation(::NeXus::File *file, const std::string &group) { loadNexus(file, group); }
+Citation::Citation(Nexus::File *file, const std::string &group) { loadNexus(file, group); }
 
 bool Citation::operator==(const Citation &rhs) const {
   return m_bibtex == rhs.m_bibtex && m_description == rhs.m_description && m_doi == rhs.m_doi &&
@@ -59,7 +59,7 @@ const std::string &Citation::doi() const { return m_doi; }
 const std::string &Citation::bibtex() const { return m_bibtex; }
 const std::string &Citation::endnote() const { return m_endnote; }
 
-void Citation::loadNexus(::NeXus::File *file, const std::string &group) {
+void Citation::loadNexus(Nexus::File *file, const std::string &group) {
   file->openGroup(group, "NXCite");
   file->readData("url", m_url);
   file->readData("description", m_description);
@@ -69,7 +69,7 @@ void Citation::loadNexus(::NeXus::File *file, const std::string &group) {
   file->closeGroup();
 }
 
-void Citation::saveNexus(::NeXus::File *file, const std::string &group) {
+void Citation::saveNexus(Nexus::File *file, const std::string &group) {
   file->makeGroup(group, "NXCite", true);
   file->writeData("url", m_url);
   file->writeData("description", m_description);

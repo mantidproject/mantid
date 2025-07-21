@@ -39,10 +39,10 @@ template<TYPE>
     // Check if type is compatible
     return isIterable(sipPy);
   } else {
-    auto cppValue = pythonListToVector<TYPE>(sipPy, [&](PyObject* pyItem) -> boost::optional<TYPE> {
+    auto cppValue = pythonListToVector<TYPE>(sipPy, [&](PyObject* pyItem) -> std::optional<TYPE> {
       if (!sipCanConvertToType(pyItem, sipType_TYPE, SIP_NOT_NONE)) {
         PyErr_Format(PyExc_TypeError, "object in iterable cannot be converted to TYPE");
-        return boost::none;
+        return std::nullopt;
       } else {
         int state;
         auto* cppItemPtr = reinterpret_cast<TYPE*>(
@@ -58,11 +58,11 @@ template<TYPE>
 };
 
 template<TYPE>
-%MappedType boost::optional<std::vector<TYPE>>
+%MappedType std::optional<std::vector<TYPE>>
 {
 %TypeHeaderCode
 #include <vector>
-#include <boost/optional.hpp>
+#include <optional>
 %End
 
 %ConvertFromTypeCode
@@ -79,11 +79,11 @@ template<TYPE>
       // Check if type is compatible
       return isIterable(sipPy) || sipPy == Py_None;
     } else {
-      auto cppValue = pythonObjectToOptional<std::vector<TYPE>>(sipPy, [&](PyObject* pythonList) -> boost::optional<std::vector<TYPE>> {
-        return pythonListToVector<TYPE>(pythonList, [&](PyObject* pyItem) -> boost::optional<TYPE> {
+      auto cppValue = pythonObjectToOptional<std::vector<TYPE>>(sipPy, [&](PyObject* pythonList) -> std::optional<std::vector<TYPE>> {
+        return pythonListToVector<TYPE>(pythonList, [&](PyObject* pyItem) -> std::optional<TYPE> {
           if (!sipCanConvertToType(pyItem, sipType_TYPE, SIP_NOT_NONE)) {
             PyErr_Format(PyExc_TypeError, "object in iterable cannot be converted to TYPE");
-            return boost::none;
+            return std::nullopt;
           } else {
             int state;
             auto* cppItemPtr = reinterpret_cast<TYPE*>(
@@ -119,10 +119,10 @@ template<TYPE>
     // Check if type is compatible
     return isIterable(sipPy) || sipPy == Py_None;
   } else {
-    auto cppValue = pythonListToVector<double>(sipPy, [&](PyObject* pyItem) -> boost::optional<double> {
+    auto cppValue = pythonListToVector<double>(sipPy, [&](PyObject* pyItem) -> std::optional<double> {
       if (!PyNumber_Check(pyItem)) {
         PyErr_Format(PyExc_TypeError, "object in iterable is not a number");
-        return boost::none;
+        return std::nullopt;
       } else {
         return PyFloat_AsDouble(pyItem);
       }
@@ -153,10 +153,10 @@ template<TYPE>
     // Check if type is compatible
     return isIterable(sipPy) || sipPy == Py_None;
   } else {
-    auto cppValue = pythonListToVector<int>(sipPy, [&](PyObject* pyItem) -> boost::optional<int> {
+    auto cppValue = pythonListToVector<int>(sipPy, [&](PyObject* pyItem) -> std::optional<int> {
       if (!INT_CHECK(pyItem)) {
         PyErr_Format(PyExc_TypeError, "object in iterable is not an int");
-        return boost::none;
+        return std::nullopt;
       } else {
         return static_cast<int>(TO_LONG(pyItem));
       }
@@ -188,10 +188,10 @@ template<TYPE>
     // Check if type is compatible
     return isIterable(sipPy) || sipPy == Py_None;
   } else {
-    auto cppValue = pythonListToVector<unsigned int>(sipPy, [&](PyObject* pyItem) -> boost::optional<unsigned int> {
+    auto cppValue = pythonListToVector<unsigned int>(sipPy, [&](PyObject* pyItem) -> std::optional<unsigned int> {
       if (!INT_CHECK(pyItem)) {
         PyErr_Format(PyExc_TypeError, "object in iterable is not an int");
-        return boost::none;
+        return std::nullopt;
       } else {
         return static_cast<unsigned int>(TO_LONG(pyItem));
       }
@@ -221,7 +221,7 @@ template<TYPE>
     // Check if type is compatible
     return isIterable(sipPy) || sipPy == Py_None;
   } else {
-    auto cppValue = pythonListToVector<std::string>(sipPy, [&](PyObject* pyItem) -> boost::optional<std::string> {
+    auto cppValue = pythonListToVector<std::string>(sipPy, [&](PyObject* pyItem) -> std::optional<std::string> {
       auto maybeValue = pythonStringToStdString(pyItem);
       return typeErrorIfNoneElseValue(maybeValue, "object in iterable is not a string.");
     });
@@ -256,11 +256,11 @@ template<TYPE>
     // Check if type is compatible
     return isIterable(sipPy);
   } else {
-    auto cppValue = pythonListToVector<std::vector<TYPE>>(sipPy, [&](PyObject* pyItem) -> boost::optional<std::vector<TYPE>> {
-      return pythonListToVector<TYPE>(pyItem, [&](PyObject* pyInnerItem) -> boost::optional<TYPE> {
+    auto cppValue = pythonListToVector<std::vector<TYPE>>(sipPy, [&](PyObject* pyItem) -> std::optional<std::vector<TYPE>> {
+      return pythonListToVector<TYPE>(pyItem, [&](PyObject* pyInnerItem) -> std::optional<TYPE> {
         if (!sipCanConvertToType(pyInnerItem, sipType_TYPE, SIP_NOT_NONE)) {
           PyErr_Format(PyExc_TypeError, "object in iterable cannot be converted to the damn TYPE");
-          return boost::none;
+          return std::nullopt;
         } else {
           int state;
           auto* cppItemPtr = reinterpret_cast<TYPE*>(
@@ -280,7 +280,7 @@ template<TYPE>
 // ****************************************************
 
 template<TYPE>
-%MappedType boost::optional<std::vector<std::vector<TYPE>>>
+%MappedType std::optional<std::vector<std::vector<TYPE>>>
 {
 %TypeHeaderCode
 #include <vector>
@@ -306,12 +306,12 @@ template<TYPE>
     return isIterable(sipPy) || sipPy == Py_None;
   } else {
     auto cppValue = pythonObjectToOptional<std::vector<std::vector<TYPE>>>(sipPy,
-        [&](PyObject* pythonList) -> boost::optional<std::vector<std::vector<TYPE>>> {
-          return pythonListToVector<std::vector<TYPE>>(pythonList, [&](PyObject* pythonInnerList) -> boost::optional<std::vector<TYPE>> {
-            return pythonListToVector<TYPE>(pythonInnerList, [&](PyObject* pyItem) -> boost::optional<TYPE> {
+        [&](PyObject* pythonList) -> std::optional<std::vector<std::vector<TYPE>>> {
+          return pythonListToVector<std::vector<TYPE>>(pythonList, [&](PyObject* pythonInnerList) -> std::optional<std::vector<TYPE>> {
+            return pythonListToVector<TYPE>(pythonInnerList, [&](PyObject* pyItem) -> std::optional<TYPE> {
               if (!sipCanConvertToType(pyItem, sipType_TYPE, SIP_NOT_NONE)) {
                 PyErr_Format(PyExc_TypeError, "object in iterable cannot be converted to TYPE");
-                return boost::none;
+                return std::nullopt;
               } else {
                 int state;
                 auto* cppItemPtr = reinterpret_cast<TYPE*>(

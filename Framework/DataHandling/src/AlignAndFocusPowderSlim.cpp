@@ -18,7 +18,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
-#include "MantidKernel/ArrayLengthValidator.h"
+#include "MantidKernel/ArrayBoundedValidator.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/EnumeratedString.h"
@@ -29,10 +29,12 @@
 #include "MantidKernel/VectorHelper.h"
 #include "MantidNexus/H5Util.h"
 #include "tbb/parallel_for.h"
+#include "tbb/parallel_invoke.h"
 #include "tbb/parallel_reduce.h"
 
 #include <H5Cpp.h>
 #include <atomic>
+#include <numbers>
 #include <regex>
 
 namespace Mantid::DataHandling {
@@ -42,7 +44,7 @@ using Mantid::API::MatrixWorkspace_sptr;
 using Mantid::API::WorkspaceProperty;
 using Mantid::DataObjects::MaskWorkspace_sptr;
 using Mantid::DataObjects::Workspace2D;
-using Mantid::Kernel::ArrayLengthValidator;
+using Mantid::Kernel::ArrayBoundedValidator;
 using Mantid::Kernel::ArrayProperty;
 using Mantid::Kernel::Direction;
 using Mantid::Kernel::EnumeratedStringProperty;
@@ -57,16 +59,16 @@ const std::string FILTER_TIMESTOP("FilterByTimeStop");
 const std::string X_MIN("XMin");
 const std::string X_MAX("XMax");
 const std::string X_DELTA("XDelta");
+const std::string BIN_UNITS("BinningUnits");
 const std::string BINMODE("BinningMode");
 const std::string OUTPUT_WKSP("OutputWorkspace");
-const std::string READ_BANKS_IN_THREAD("ReadBanksInThread");
 const std::string READ_SIZE_FROM_DISK("ReadSizeFromDisk");
 const std::string EVENTS_PER_THREAD("EventsPerThread");
 } // namespace PropertyNames
 
 namespace NxsFieldNames {
-const std::string TIME_OF_FLIGHT("event_time_offset");
-const std::string DETID("event_id");
+const std::string TIME_OF_FLIGHT("event_time_offset"); // float32 in ORNL nexus files
+const std::string DETID("event_id");                   // uint32 in ORNL nexus files
 const std::string INDEX_ID("event_index");
 } // namespace NxsFieldNames
 
@@ -76,6 +78,12 @@ const std::string MICROSEC("microseconds");
 const std::vector<std::string> binningModeNames{"Logarithmic", "Linear"};
 enum class BinningMode { LOGARITHMIC, LINEAR, enum_count };
 typedef Mantid::Kernel::EnumeratedString<BinningMode, &binningModeNames> BINMODE;
+
+const std::vector<std::string> unitNames{"dSpacing", "TOF", "MomentumTransfer"};
+enum class BinUnit { DSPACE, TOF, Q, enum_count };
+typedef Mantid::Kernel::EnumeratedString<BinUnit, &unitNames> BINUNIT;
+
+const size_t NUM_HIST{6}; // TODO make this determined from groupin
 
 // TODO refactor this to use the actual grouping
 double getFocussedPostion(const detid_t detid, const std::vector<double> &difc_focus) {
@@ -98,6 +106,9 @@ double getFocussedPostion(const detid_t detid, const std::vector<double> &difc_f
     throw std::runtime_error("detid > 600000 is not supported");
   }
 }
+
+/// detids with this calibration factor are something to not bother with
+constexpr double IGNORE_PIXEL{1.e6};
 
 } // namespace
 
@@ -127,7 +138,7 @@ const std::vector<std::string> AlignAndFocusPowderSlim::seeAlso() const { return
 namespace { // anonymous
 std::vector<double> calculate_difc_focused(const double l1, const std::vector<double> &l2s,
                                            const std::vector<double> &polars) {
-  constexpr double deg2rad = M_PI / 180.;
+  constexpr double deg2rad = std::numbers::pi_v<double> / 180.;
 
   std::vector<double> difc;
 
@@ -145,48 +156,15 @@ public:
       : m_is_time_filtered(is_time_filtered), m_pulse_start_index(pulse_start_index),
         m_pulse_stop_index(pulse_stop_index) {}
 
-  static void loadPulseTimes(H5::Group &entry, std::unique_ptr<std::vector<double>> &data) {
-    // /entry/DASlogs/frequency/time
-    auto logs = entry.openGroup("DASlogs");       // type=NXcollection
-    auto frequency = logs.openGroup("frequency"); // type=NXlog"
-
-    auto dataset = frequency.openDataSet("time");
-    NeXus::H5Util::readArray1DCoerce(dataset, *data); // pass by reference
-
-    // groups close themselves
-  }
-
-  void loadTOF(H5::Group &event_group, std::unique_ptr<std::vector<float>> &data,
-               const std::pair<uint64_t, uint64_t> &eventRange) {
-    // g_log.information(NxsFieldNames::TIME_OF_FLIGHT);
-    auto tof_SDS = event_group.openDataSet(NxsFieldNames::TIME_OF_FLIGHT);
-
-    // H5Util resizes the vector
-    const size_t offset = eventRange.first;
-    const size_t slabsize = (eventRange.second == std::numeric_limits<size_t>::max())
-                                ? std::numeric_limits<size_t>::max()
-                                : eventRange.second - eventRange.first;
+  template <typename TofType>
+  void loadTOF(H5::DataSet &tof_SDS, std::unique_ptr<std::vector<TofType>> &data, const size_t offset,
+               const size_t slabsize) {
     NeXus::H5Util::readArray1DCoerce(tof_SDS, *data, slabsize, offset);
-
-    // get the units
-    std::string tof_unit;
-    NeXus::H5Util::readStringAttribute(tof_SDS, "units", tof_unit);
-
-    // Convert Tof to microseconds
-    if (tof_unit != MICROSEC)
-      Kernel::Units::timeConversionVector(*data, tof_unit, MICROSEC);
   }
 
-  void loadDetid(H5::Group &event_group, std::unique_ptr<std::vector<detid_t>> &data,
-                 const std::pair<uint64_t, uint64_t> &eventRange) {
-    // g_log.information(NxsFieldNames::DETID);
-    auto detID_SDS = event_group.openDataSet(NxsFieldNames::DETID);
-
-    // H5Util resizes the vector
-    const size_t offset = eventRange.first;
-    const size_t slabsize = (eventRange.second == std::numeric_limits<size_t>::max())
-                                ? std::numeric_limits<size_t>::max()
-                                : eventRange.second - eventRange.first;
+  template <typename DetidType>
+  void loadDetid(H5::DataSet &detID_SDS, std::unique_ptr<std::vector<DetidType>> &data, const size_t offset,
+                 const size_t slabsize) {
     NeXus::H5Util::readArray1DCoerce(detID_SDS, *data, slabsize, offset);
   }
 
@@ -198,22 +176,20 @@ private:
   }
 
 public:
-  std::pair<uint64_t, uint64_t> getEventIndexRange(H5::Group &event_group) {
-    constexpr uint64_t START_DEFAULT = 0;
-    constexpr uint64_t STOP_DEFAULT = std::numeric_limits<uint64_t>::max();
-
+  std::pair<uint64_t, uint64_t> getEventIndexRange(H5::Group &event_group, const uint64_t number_events) {
     if (m_is_time_filtered) {
       // TODO this should be made smarter to only read the necessary range
       std::unique_ptr<std::vector<uint64_t>> event_index = std::make_unique<std::vector<uint64_t>>();
       this->loadEventIndex(event_group, event_index);
 
       uint64_t start_event = event_index->at(m_pulse_start_index);
-      uint64_t stop_event = STOP_DEFAULT;
+      uint64_t stop_event = number_events;
       if (m_pulse_stop_index != std::numeric_limits<size_t>::max())
         stop_event = event_index->at(m_pulse_stop_index);
       return {start_event, stop_event};
     } else {
-      return {START_DEFAULT, STOP_DEFAULT};
+      constexpr uint64_t START_DEFAULT = 0;
+      return {START_DEFAULT, number_events};
     }
   }
 
@@ -221,38 +197,6 @@ private:
   const bool m_is_time_filtered;
   const size_t m_pulse_start_index;
   const size_t m_pulse_stop_index;
-};
-
-class Histogrammer {
-public:
-  Histogrammer(const std::vector<double> *binedges, const double width, const bool linear_bins) : m_binedges(binedges) {
-    m_xmin = binedges->front();
-    m_xmax = binedges->back();
-
-    if (linear_bins) {
-      m_findBin = DataObjects::EventList::findLinearBin;
-      m_bin_divisor = 1. / width;
-      m_bin_offset = m_xmin * m_bin_divisor;
-    } else {
-      m_findBin = DataObjects::EventList::findLogBin;
-      m_bin_divisor = 1. / log1p(abs(width)); // use this to do change of base
-      m_bin_offset = log(m_xmin) * m_bin_divisor;
-    }
-  }
-
-  bool inRange(const double tof) const { return !(tof < m_xmin || tof >= m_xmax); }
-
-  const std::optional<size_t> findBin(const double tof) const {
-    return m_findBin(*m_binedges, tof, m_bin_divisor, m_bin_offset, true);
-  }
-
-private:
-  double m_bin_divisor;
-  double m_bin_offset;
-  double m_xmin;
-  double m_xmax;
-  const std::vector<double> *m_binedges;
-  std::optional<size_t> (*m_findBin)(const MantidVec &, const double, const double, const double, const bool);
 };
 
 template <typename Type> class MinMax {
@@ -269,11 +213,11 @@ public:
       maxval = *maxele;
   }
 
-  MinMax(MinMax &other, tbb::split)
-      : vec(other.vec), minval(std::numeric_limits<Type>::max()), maxval(std::numeric_limits<Type>::min()) {}
+  // copy min/max from the other. we're all friends
+  MinMax(MinMax &other, tbb::split) : vec(other.vec), minval(other.minval), maxval(other.maxval) {}
 
-  MinMax(const std::vector<Type> *vec)
-      : vec(vec), minval(std::numeric_limits<Type>::max()), maxval(std::numeric_limits<Type>::min()) {}
+  // set the min=max=first element supplied
+  MinMax(const std::vector<Type> *vec) : vec(vec), minval(vec->front()), maxval(vec->front()) {}
 
   void join(const MinMax &other) {
     if (other.minval < minval)
@@ -294,66 +238,76 @@ template <typename Type> std::pair<Type, Type> parallel_minmax(const std::vector
   }
 }
 
-template <typename CountsType> class ProcessEventsTask {
+template <typename DetidType, typename TofType> class ProcessEventsTask {
 public:
-  ProcessEventsTask(const Histogrammer *histogrammer, const std::vector<detid_t> *detids,
-                    const std::vector<float> *tofs, const AlignAndFocusPowderSlim::BankCalibration *calibration,
-                    std::vector<CountsType> *y_temp, const std::set<detid_t> *masked)
-      : m_histogrammer(histogrammer), m_detids(detids), m_tofs(tofs), m_calibration(calibration), y_temp(y_temp),
-        masked(masked), no_mask(masked->empty()) {}
+  ProcessEventsTask(const std::vector<DetidType> *detids, const std::vector<TofType> *tofs,
+                    const AlignAndFocusPowderSlim::BankCalibration *calibration, const std::vector<double> *binedges)
+      : y_temp(binedges->size() - 1, 0), m_detids(detids), m_tofs(tofs), m_calibration(calibration),
+        m_binedges(binedges) {}
 
-  void operator()(const tbb::blocked_range<size_t> &range) const {
-    // both iterators need to be incremented in each loop
-    auto detid_ptr = m_detids->cbegin() + range.begin();
-    auto tof_ptr = m_tofs->cbegin() + range.begin();
+  ProcessEventsTask(ProcessEventsTask &other, tbb::split)
+      : y_temp(other.y_temp.size(), 0), m_detids(other.m_detids), m_tofs(other.m_tofs),
+        m_calibration(other.m_calibration), m_binedges(other.m_binedges) {}
 
-    for (size_t i = range.begin(); i < range.end(); ++i) {
-      if (no_mask || (!masked->contains(*detid_ptr))) {
-        // focussed time-off-flight
-        const auto tof = static_cast<double>(*tof_ptr) * m_calibration->value(*detid_ptr);
-        // increment the bin if it is found
-        if (m_histogrammer->inRange(tof)) {
-          if (const auto binnum = m_histogrammer->findBin(tof)) {
-            y_temp->at(binnum.value())++;
-          }
+  void operator()(const tbb::blocked_range<size_t> &range) {
+    // Cache values to reduce number of function calls
+    const auto &range_end = range.end();
+    const auto &binedges_cbegin = m_binedges->cbegin();
+    const auto &binedges_cend = m_binedges->cend();
+    const auto &tof_min = m_binedges->front();
+    const auto &tof_max = m_binedges->back();
+
+    // Calibrate and histogram the data
+    auto detid_iter = m_detids->cbegin() + range.begin();
+    auto tof_iter = m_tofs->cbegin() + range.begin();
+    for (size_t i = range.begin(); i < range_end; ++i) {
+      const auto &detid = *detid_iter;
+      const auto &calib_factor = m_calibration->value(detid);
+      if (calib_factor < IGNORE_PIXEL) {
+        // Apply calibration
+        const double &tof = static_cast<double>(*tof_iter) * calib_factor;
+        if ((tof < tof_max) && (!(tof < tof_min))) { // check against max first to allow skipping second
+          // Find the bin index using binary search
+          const auto &it = std::upper_bound(binedges_cbegin, binedges_cend, tof);
+
+          // Increment the count if a bin was found
+          const auto &bin = static_cast<size_t>(std::distance(binedges_cbegin, it) - 1);
+          y_temp[bin]++;
         }
       }
-      ++detid_ptr;
-      ++tof_ptr;
+      ++detid_iter;
+      ++tof_iter;
     }
   }
 
+  void join(const ProcessEventsTask &other) {
+    // Combine local histograms
+    std::transform(y_temp.begin(), y_temp.end(), other.y_temp.cbegin(), y_temp.begin(), std::plus<>{});
+  }
+
+public:
+  /// Local histogram for this block/thread
+  std::vector<uint32_t> y_temp;
+
 private:
-  const Histogrammer *m_histogrammer;
-  const std::vector<detid_t> *m_detids;
-  const std::vector<float> *m_tofs;
+  const std::vector<DetidType> *m_detids;
+  const std::vector<TofType> *m_tofs;
   const AlignAndFocusPowderSlim::BankCalibration *m_calibration;
-  std::vector<CountsType> *y_temp;
-  const std::set<detid_t> *masked;
-  const bool no_mask; // whether there are any masked pixels
+  const std::vector<double> *m_binedges;
 };
 
 class ProcessBankTask {
 public:
   ProcessBankTask(std::vector<std::string> &bankEntryNames, H5::H5File &h5file, const bool is_time_filtered,
                   const size_t pulse_start_index, const size_t pulse_stop_index, MatrixWorkspace_sptr &wksp,
-                  const std::map<detid_t, double> &calibration, const std::set<detid_t> &masked, const double binWidth,
-                  const bool linearBins, const size_t events_per_chunk, const size_t grainsize_event,
-                  std::shared_ptr<API::Progress> &progress)
+                  const std::map<detid_t, double> &calibration, const std::set<detid_t> &masked,
+                  const size_t events_per_chunk, const size_t grainsize_event, std::shared_ptr<API::Progress> &progress)
       : m_h5file(h5file), m_bankEntries(bankEntryNames),
         m_loader(is_time_filtered, pulse_start_index, pulse_stop_index), m_wksp(wksp), m_calibration(calibration),
-        m_masked(masked), m_binWidth(binWidth), m_linearBins(linearBins), m_events_per_chunk(events_per_chunk),
-        m_grainsize_event(grainsize_event), m_progress(progress) {
-    if (false) { // H5Freopen_async(h5file.getId(), m_h5file.getId()) < 0) {
-      throw std::runtime_error("failed to reopen async");
-    }
-  }
+        m_masked(masked), m_events_per_chunk(events_per_chunk), m_grainsize_event(grainsize_event),
+        m_progress(progress) {}
 
   void operator()(const tbb::blocked_range<size_t> &range) const {
-    // re-use vectors to save malloc/free calls
-    std::unique_ptr<std::vector<detid_t>> event_detid = std::make_unique<std::vector<detid_t>>();
-    std::unique_ptr<std::vector<float>> event_time_of_flight = std::make_unique<std::vector<float>>();
-
     auto entry = m_h5file.openGroup("entry"); // type=NXentry
     for (size_t wksp_index = range.begin(); wksp_index < range.end(); ++wksp_index) {
       const auto &bankName = m_bankEntries[wksp_index];
@@ -363,79 +317,106 @@ public:
       // open the bank
       auto event_group = entry.openGroup(bankName); // type=NXevent_data
 
-      // get filtering range
-      auto eventRangeFull = m_loader.getEventIndexRange(event_group);
-      // update range for data that is present
-      if (eventRangeFull.second == std::numeric_limits<size_t>::max()) {
-        auto tof_SDS = event_group.openDataSet(NxsFieldNames::TIME_OF_FLIGHT);
-        const auto length_actual = static_cast<size_t>(tof_SDS.getSpace().getSelectNpoints());
-        eventRangeFull.second = length_actual;
+      // skip empty dataset
+      auto tof_SDS = event_group.openDataSet(NxsFieldNames::TIME_OF_FLIGHT);
+      const int64_t total_events = static_cast<size_t>(tof_SDS.getSpace().getSelectNpoints());
+      if (total_events == 0) {
+        m_progress->report();
+        continue;
       }
+
+      // get filtering range and update it for data that is present
+      auto eventRangeFull = m_loader.getEventIndexRange(event_group, total_events);
+      // skip empty filter range
+      if (eventRangeFull.first == eventRangeFull.second) {
+        // g_log.warning() << "No data for bank " << entry_name << '\n';
+        m_progress->report();
+        continue;
+      }
+
+      // TODO REMOVE debug print
+      std::cout << bankName << " has " << eventRangeFull.second << " events\n"
+                << "   and should be read in " << (1 + (eventRangeFull.second / m_events_per_chunk)) << " chunks of "
+                << m_events_per_chunk << " (" << (m_events_per_chunk / 1024 / 1024) << "MB)\n";
+
+      // create a histogrammer to process the events
+      auto &spectrum = m_wksp->getSpectrum(wksp_index);
+
+      // std::atomic allows for multi-threaded accumulation and who cares about floats when you are just
+      // counting things
+      std::vector<std::atomic_uint32_t> y_temp(spectrum.dataY().size());
+      // std::vector<uint32_t> y_temp(spectrum.dataY().size());
+
+      // task group allows for separate of disk read from processing
+      tbb::task_group_context tgroupcontext; // needed by parallel_reduce
+      tbb::task_group tgroup(tgroupcontext);
 
       // create object so bank calibration can be re-used
       std::unique_ptr<AlignAndFocusPowderSlim::BankCalibration> calibration = nullptr;
 
-      if (eventRangeFull.first == eventRangeFull.second) {
-        // g_log.warning() << "No data for bank " << entry_name << '\n';
-      } else {
-        // TODO REMOVE debug print
-        std::cout << bankName << " has " << eventRangeFull.second << " events\n"
-                  << "   and should be read in " << (1 + (eventRangeFull.second / m_events_per_chunk)) << " chunks of "
-                  << m_events_per_chunk << " (" << (m_events_per_chunk / 1024 / 1024) << "MB)"
-                  << "\n";
+      // get handle to the data
+      auto detID_SDS = event_group.openDataSet(NxsFieldNames::DETID);
+      // auto tof_SDS = event_group.openDataSet(NxsFieldNames::TIME_OF_FLIGHT);
+      // and the units
+      std::string tof_unit;
+      NeXus::H5Util::readStringAttribute(tof_SDS, "units", tof_unit);
+      const double time_conversion = Kernel::Units::timeConversionValue(tof_unit, MICROSEC);
 
-        // create a histogrammer to process the events
-        auto &spectrum = m_wksp->getSpectrum(wksp_index);
-        Histogrammer histogrammer(&spectrum.readX(), m_binWidth, m_linearBins);
+      // declare arrays once so memory can be reused
+      auto event_detid = std::make_unique<std::vector<uint32_t>>();       // uint32 for ORNL nexus file
+      auto event_time_of_flight = std::make_unique<std::vector<float>>(); // float for ORNL nexus files
 
-        // std::atomic allows for multi-threaded accumulation and who cares about floats when you are just
-        // counting things
-        std::vector<std::atomic_uint32_t> y_temp(spectrum.dataY().size());
-        // std::vector<uint32_t> y_temp(spectrum.dataY().size());
+      // read parts of the bank at a time
+      size_t event_index_start = eventRangeFull.first;
+      while (event_index_start < eventRangeFull.second) {
+        // H5Cpp will truncate correctly
+        // H5Util resizes the vector
+        const size_t offset = event_index_start;
+        const size_t slabsize =
+            std::min(m_events_per_chunk, static_cast<size_t>(eventRangeFull.second) - event_index_start);
 
-        // read parts of the bank at a time
-        size_t event_index_start = eventRangeFull.first;
-        while (event_index_start < eventRangeFull.second) {
-          // H5Cpp will truncate correctly
-          const std::pair<uint64_t, uint64_t> eventRangePartial{event_index_start,
-                                                                event_index_start + m_events_per_chunk};
+        // load detid and tof at the same time
+        tbb::parallel_invoke(
+            [&] { // load detid
+              // event_detid->clear();
+              m_loader.loadDetid(detID_SDS, event_detid, offset, slabsize);
+              // immediately find min/max to allow for other things to read disk
+              const auto [minval, maxval] = parallel_minmax(event_detid.get(), m_grainsize_event);
+              // only recreate calibration if it doesn't already have the useful information
+              if ((!calibration) || (calibration->idmin() > static_cast<detid_t>(minval)) ||
+                  (calibration->idmax() < static_cast<detid_t>(maxval))) {
+                calibration = std::make_unique<AlignAndFocusPowderSlim::BankCalibration>(
+                    static_cast<detid_t>(minval), static_cast<detid_t>(maxval), time_conversion, m_calibration,
+                    m_masked);
+              }
+            },
+            [&] { // load time-of-flight
+              // event_time_of_flight->clear();
+              m_loader.loadTOF(tof_SDS, event_time_of_flight, offset, slabsize);
+            });
 
-          // load data and reuse chunk memory
-          event_detid->clear();
-          event_time_of_flight->clear();
-          m_loader.loadTOF(event_group, event_time_of_flight, eventRangePartial);
-          m_loader.loadDetid(event_group, event_detid, eventRangePartial);
+        // Create a local task for this thread
+        ProcessEventsTask task(event_detid.get(), event_time_of_flight.get(), calibration.get(), &spectrum.readX());
 
-          // process the events that were loaded
-          const auto [minval, maxval] = parallel_minmax(event_detid.get(), m_grainsize_event);
-          // only recreate if it doesn't already have the useful information
-          if ((!calibration) || (calibration->idmin() > static_cast<detid_t>(minval)) ||
-              (calibration->idmax() < static_cast<detid_t>(maxval))) {
-            calibration = std::make_unique<AlignAndFocusPowderSlim::BankCalibration>(
-                static_cast<detid_t>(minval), static_cast<detid_t>(maxval), m_calibration);
-          }
+        // Non-blocking processing of the events
+        const tbb::blocked_range<size_t> range_info(0, event_time_of_flight->size(), m_grainsize_event);
+        tbb::parallel_reduce(range_info, task, tgroupcontext);
 
-          const auto numEvent = event_time_of_flight->size();
-
-          // threaded processing of the events
-          ProcessEventsTask task(&histogrammer, event_detid.get(), event_time_of_flight.get(), calibration.get(),
-                                 &y_temp, &m_masked);
-          if (numEvent > m_grainsize_event) {
-            // use tbb
-            tbb::parallel_for(tbb::blocked_range<size_t>(0, numEvent, m_grainsize_event), task);
-          } else {
-            // single thread
-            task(tbb::blocked_range<size_t>(0, numEvent, m_grainsize_event));
-          }
-
-          event_index_start += m_events_per_chunk;
+        // Atomically accumulate results into shared y_temp to combine local histograms
+        for (size_t i = 0; i < y_temp.size(); ++i) {
+          y_temp[i].fetch_add(task.y_temp[i], std::memory_order_relaxed);
         }
-        // copy the data out into the correct spectrum
-        auto &y_values = spectrum.dataY();
-        std::copy(y_temp.cbegin(), y_temp.cend(), y_values.begin());
 
-        std::cout << bankName << " stop " << timer << std::endl;
+        event_index_start += m_events_per_chunk;
       }
+
+      tgroup.wait();
+
+      // copy the data out into the correct spectrum
+      auto &y_values = spectrum.dataY();
+      std::copy(y_temp.cbegin(), y_temp.cend(), y_values.begin());
+
+      std::cout << bankName << " stop " << timer << std::endl;
       m_progress->report();
     }
   }
@@ -447,8 +428,6 @@ private:
   MatrixWorkspace_sptr m_wksp;
   const std::map<detid_t, double> m_calibration; // detid: 1/difc
   const std::set<detid_t> m_masked;
-  const double m_binWidth;
-  const bool m_linearBins;
   /// number of events to read from disk at one time
   const size_t m_events_per_chunk;
   /// number of events to histogram in a single thread
@@ -480,19 +459,18 @@ void AlignAndFocusPowderSlim::init() {
   declareProperty(std::make_unique<FileProperty>(PropertyNames::CAL_FILE, "", FileProperty::OptionalLoad, cal_exts),
                   "The .cal file containing the position correction factors. Either this or OffsetsWorkspace needs to "
                   "be specified.");
-  auto positiveDblValidator = std::make_shared<Mantid::Kernel::BoundedValidator<double>>();
-  positiveDblValidator->setLower(0);
-  declareProperty(std::make_unique<Kernel::PropertyWithValue<double>>(PropertyNames::X_MIN, 10, positiveDblValidator,
-                                                                      Direction::Input),
+  auto mustBePosArr = std::make_shared<Kernel::ArrayBoundedValidator<double>>();
+  mustBePosArr->setLower(0.0);
+  declareProperty(std::make_unique<ArrayProperty<double>>(PropertyNames::X_MIN, std::vector<double>{0.1}, mustBePosArr),
                   "Minimum x-value for the output binning");
-  declareProperty(std::make_unique<Kernel::PropertyWithValue<double>>(PropertyNames::X_DELTA, 0.0016,
-                                                                      positiveDblValidator, Direction::Input),
+  declareProperty(std::make_unique<ArrayProperty<double>>(PropertyNames::X_DELTA, std::vector<double>{0.0016}),
                   "Bin size for output data");
-  declareProperty(std::make_unique<Kernel::PropertyWithValue<double>>(PropertyNames::X_MAX, 16667, positiveDblValidator,
-                                                                      Direction::Input),
+  declareProperty(std::make_unique<ArrayProperty<double>>(PropertyNames::X_MAX, std::vector<double>{2.0}, mustBePosArr),
                   "Minimum x-value for the output binning");
+  declareProperty(std::make_unique<EnumeratedStringProperty<BinUnit, &unitNames>>(PropertyNames::BIN_UNITS),
+                  "The units of the input X min, max and delta values. Output will always be TOF");
   declareProperty(std::make_unique<EnumeratedStringProperty<BinningMode, &binningModeNames>>(PropertyNames::BINMODE),
-                  "Specify binning behavior ('Logorithmic')");
+                  "Specify binning behavior ('Logarithmic')");
   declareProperty(
       std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(PropertyNames::OUTPUT_WKSP, "", Direction::Output),
       "An output workspace.");
@@ -501,16 +479,12 @@ void AlignAndFocusPowderSlim::init() {
   const std::string CHUNKING_PARAM_GROUP("Chunking-temporary");
   auto positiveIntValidator = std::make_shared<Mantid::Kernel::BoundedValidator<int>>();
   positiveIntValidator->setLower(1);
-  declareProperty(
-      std::make_unique<Kernel::PropertyWithValue<int>>(PropertyNames::READ_BANKS_IN_THREAD, 1, positiveIntValidator),
-      "Number of banks to read in a single thread. Lower means more parallelization.");
-  setPropertyGroup(PropertyNames::READ_BANKS_IN_THREAD, CHUNKING_PARAM_GROUP);
   declareProperty(std::make_unique<Kernel::PropertyWithValue<int>>(PropertyNames::READ_SIZE_FROM_DISK, 2000 * 50000,
                                                                    positiveIntValidator),
                   "Number of elements of time-of-flight or detector-id to read at a time. This is a maximum");
   setPropertyGroup(PropertyNames::READ_SIZE_FROM_DISK, CHUNKING_PARAM_GROUP);
   declareProperty(
-      std::make_unique<Kernel::PropertyWithValue<int>>(PropertyNames::EVENTS_PER_THREAD, 2000, positiveIntValidator),
+      std::make_unique<Kernel::PropertyWithValue<int>>(PropertyNames::EVENTS_PER_THREAD, 1000000, positiveIntValidator),
       "Number of events to read in a single thread. Higher means less threads are created.");
   setPropertyGroup(PropertyNames::EVENTS_PER_THREAD, CHUNKING_PARAM_GROUP);
 }
@@ -528,6 +502,25 @@ std::map<std::string, std::string> AlignAndFocusPowderSlim::validateInputs() {
     errors[PropertyNames::EVENTS_PER_THREAD] = msg;
   }
 
+  const std::vector<double> xmins = getProperty(PropertyNames::X_MIN);
+  const std::vector<double> xmaxs = getProperty(PropertyNames::X_MAX);
+  const std::vector<double> deltas = getProperty(PropertyNames::X_DELTA);
+
+  const auto numMin = xmins.size();
+  const auto numMax = xmaxs.size();
+  const auto numDelta = deltas.size();
+
+  if (std::any_of(deltas.cbegin(), deltas.cend(), [](double d) { return !std::isfinite(d) || d == 0; }))
+    errors[PropertyNames::X_DELTA] = "All must be nonzero";
+  else if (!(numDelta == 1 || numDelta == NUM_HIST))
+    errors[PropertyNames::X_DELTA] = "Must have 1 or 6 values";
+
+  if (!(numMin == 1 || numMin == NUM_HIST))
+    errors[PropertyNames::X_MIN] = "Must have 1 or 6 values";
+
+  if (!(numMax == 1 || numMax == NUM_HIST))
+    errors[PropertyNames::X_MAX] = "Must have 1 or 6 values";
+
   return errors;
 }
 
@@ -536,18 +529,14 @@ std::map<std::string, std::string> AlignAndFocusPowderSlim::validateInputs() {
  */
 void AlignAndFocusPowderSlim::exec() {
   // create a histogram workspace
-  constexpr size_t numHist{6}; // TODO make this determined from grouping
 
   // These give the limits in each file as to which events we actually load (when filtering by time).
   loadStart.resize(1, 0);
   loadSize.resize(1, 0);
 
-  // set up the output workspace binning
   this->progress(.0, "Create output workspace");
-  const BINMODE binmode = getPropertyValue(PropertyNames::BINMODE);
-  const bool linearBins = bool(binmode == BinningMode::LINEAR); // this is needed later
-  const double x_delta = getProperty(PropertyNames::X_DELTA);   // this is needed later
-  MatrixWorkspace_sptr wksp = createOutputWorkspace(numHist, linearBins, x_delta);
+
+  MatrixWorkspace_sptr wksp = createOutputWorkspace();
 
   const std::string filename = getPropertyValue(PropertyNames::FILENAME);
   { // TODO TEMPORARY - this algorithm is hard coded for VULCAN
@@ -579,6 +568,14 @@ void AlignAndFocusPowderSlim::exec() {
     this->initCalibrationConstants(wksp, difc_focused);
   }
 
+  // set the instrument
+  this->progress(.07, "Set instrument geometry");
+  wksp = this->editInstrumentGeometry(wksp, l1, polars, specids, l2s, azimuthals);
+
+  // convert to TOF if not already
+  this->progress(.1, "Convert bins to TOF");
+  wksp = this->convertToTOF(wksp);
+
   /* TODO create grouping information
   // create IndexInfo
   // prog->doReport("Creating IndexInfo"); TODO add progress bar stuff
@@ -587,6 +584,21 @@ void AlignAndFocusPowderSlim::exec() {
   auto indexInfo = indexSetup.makeIndexInfo();
   const size_t numHist = indexInfo.size();
   */
+
+  // load run metadata
+  this->progress(.11, "Loading metadata");
+  // prog->doReport("Loading metadata"); TODO add progress bar stuff
+  try {
+    LoadEventNexus::loadEntryMetadata(filename, wksp, ENTRY_TOP_LEVEL, descriptor);
+  } catch (std::exception &e) {
+    g_log.warning() << "Error while loading meta data: " << e.what() << '\n';
+  }
+
+  // load logs
+  this->progress(.12, "Loading logs");
+  auto periodLog = std::make_unique<const TimeSeriesProperty<int>>("period_log"); // not used
+  int nPeriods{1};
+  LoadEventNexus::runLoadNexusLogs<MatrixWorkspace_sptr>(filename, wksp, *this, false, nPeriods, periodLog);
 
   // load the events
   H5::H5File h5file(filename, H5F_ACC_RDONLY, NeXus::H5Util::defaultFileAcc());
@@ -598,17 +610,23 @@ void AlignAndFocusPowderSlim::exec() {
     this->progress(.15, "Creating time filtering");
     is_time_filtered = true;
     g_log.information() << "Filtering pulses from " << filter_time_start_sec << " to " << filter_time_stop_sec << "s\n";
-    std::unique_ptr<std::vector<double>> pulse_times = std::make_unique<std::vector<double>>();
-    auto entry = h5file.openGroup(ENTRY_TOP_LEVEL);
-    NexusLoader::loadPulseTimes(entry, pulse_times);
+
+    // get pulse times from frequency log on workspace
+    const auto frequency_log = dynamic_cast<const TimeSeriesProperty<double> *>(wksp->run().getProperty("frequency"));
+    if (!frequency_log) {
+      throw std::runtime_error("Frequency log not found in workspace run");
+    }
+    const auto pulse_times =
+        std::make_unique<std::vector<Mantid::Types::Core::DateAndTime>>(frequency_log->timesAsVector());
+    const auto startOfRun = wksp->run().getFirstPulseTime();
     g_log.information() << "Pulse times from " << pulse_times->front() << " to " << pulse_times->back()
-                        << " with length " << pulse_times->size() << '\n';
+                        << " with length " << pulse_times->size() << " and start of run at " << startOfRun << '\n';
     if (!std::is_sorted(pulse_times->cbegin(), pulse_times->cend())) {
       g_log.warning() << "Pulse times are not sorted, pulse time filtering will not be accurate\n";
     }
 
     if (filter_time_start_sec != EMPTY_DBL()) {
-      const double filter_time_start = pulse_times->front() + filter_time_start_sec;
+      const auto filter_time_start = startOfRun + filter_time_start_sec;
       const auto itStart = std::lower_bound(pulse_times->cbegin(), pulse_times->cend(), filter_time_start);
       if (itStart == pulse_times->cend())
         throw std::invalid_argument("Invalid pulse time filtering, start time will filter all pulses");
@@ -617,7 +635,7 @@ void AlignAndFocusPowderSlim::exec() {
     }
 
     if (filter_time_stop_sec != EMPTY_DBL()) {
-      const double filter_time_stop = pulse_times->front() + filter_time_stop_sec;
+      const auto filter_time_stop = startOfRun + filter_time_stop_sec;
       const auto itStop = std::upper_bound(pulse_times->cbegin(), pulse_times->cend(), filter_time_stop);
       if (itStop == pulse_times->cend())
         pulse_stop_index = std::numeric_limits<size_t>::max();
@@ -665,68 +683,82 @@ void AlignAndFocusPowderSlim::exec() {
     const auto num_banks_to_read = bankEntryNames.size();
 
     // threaded processing of the banks
-    const int GRAINSIZE_BANK = getProperty(PropertyNames::READ_BANKS_IN_THREAD);
     const int DISK_CHUNK = getProperty(PropertyNames::READ_SIZE_FROM_DISK);
     const int GRAINSIZE_EVENTS = getProperty(PropertyNames::EVENTS_PER_THREAD);
     auto progress = std::make_shared<API::Progress>(this, .17, .9, num_banks_to_read);
+    std::cout << (DISK_CHUNK / GRAINSIZE_EVENTS) << " threads per chunk\n"; // TODO REMOVE debug print
     ProcessBankTask task(bankEntryNames, h5file, is_time_filtered, pulse_start_index, pulse_stop_index, wksp,
-                         m_calibration, m_masked, x_delta, linearBins, static_cast<size_t>(DISK_CHUNK),
+                         m_calibration, m_masked, static_cast<size_t>(DISK_CHUNK),
                          static_cast<size_t>(GRAINSIZE_EVENTS), progress);
     // generate threads only if appropriate
-    if (static_cast<size_t>(GRAINSIZE_BANK) < num_banks_to_read) {
-      tbb::parallel_for(tbb::blocked_range<size_t>(0, num_banks_to_read, static_cast<size_t>(GRAINSIZE_BANK)), task);
+    if (num_banks_to_read > 1) {
+      tbb::parallel_for(tbb::blocked_range<size_t>(0, num_banks_to_read), task);
     } else {
-      task(tbb::blocked_range<size_t>(0, num_banks_to_read, static_cast<size_t>(GRAINSIZE_BANK)));
+      task(tbb::blocked_range<size_t>(0, num_banks_to_read));
     }
   }
 
   // close the file so child algorithms can do their thing
   h5file.close();
 
-  // set the instrument
-  this->progress(.9, "Set instrument geometry");
-  wksp = this->editInstrumentGeometry(wksp, l1, polars, specids, l2s, azimuthals);
-
-  // load run metadata
-  this->progress(.91, "Loading metadata");
-  // prog->doReport("Loading metadata"); TODO add progress bar stuff
-  try {
-    LoadEventNexus::loadEntryMetadata(filename, wksp, ENTRY_TOP_LEVEL, descriptor);
-  } catch (std::exception &e) {
-    g_log.warning() << "Error while loading meta data: " << e.what() << '\n';
-  }
-
-  // load logs
-  this->progress(.92, "Loading logs");
-  auto periodLog = std::make_unique<const TimeSeriesProperty<int>>("period_log"); // not used
-  int nPeriods{1};
-  LoadEventNexus::runLoadNexusLogs<MatrixWorkspace_sptr>(filename, wksp, *this, false, nPeriods, periodLog);
-
-  // set output units to be the same as coming from AlignAndFocusPowderFromFiles
-  wksp->setYUnit("Counts");
-  wksp->getAxis(0)->setUnit("TOF");
   setProperty(PropertyNames::OUTPUT_WKSP, std::move(wksp));
 }
 
-MatrixWorkspace_sptr AlignAndFocusPowderSlim::createOutputWorkspace(const size_t numHist, const bool linearBins,
-                                                                    const double x_delta) {
-  const double x_min = getProperty(PropertyNames::X_MIN);
-  const double x_max = getProperty(PropertyNames::X_MAX);
+MatrixWorkspace_sptr AlignAndFocusPowderSlim::createOutputWorkspace() {
+  // set up the output workspace binning
+  const BINMODE binmode = getPropertyValue(PropertyNames::BINMODE);
+  const bool linearBins = bool(binmode == BinningMode::LINEAR);
+  const std::string binUnits = getPropertyValue(PropertyNames::BIN_UNITS);
+  std::vector<double> x_delta = getProperty(PropertyNames::X_DELTA);
+  std::vector<double> x_min = getProperty(PropertyNames::X_MIN);
+  std::vector<double> x_max = getProperty(PropertyNames::X_MAX);
+  const bool raggedBins = (x_delta.size() != 1 || x_min.size() != 1 || x_max.size() != 1);
 
   constexpr bool resize_xnew{true};
   constexpr bool full_bins_only{false};
 
-  HistogramData::BinEdges XValues_new(0);
+  // always use the first histogram x-values for initialization
+  HistogramData::BinEdges XValues(0);
   if (linearBins) {
-    const std::vector<double> params{x_min, x_delta, x_max};
-    UNUSED_ARG(Kernel::VectorHelper::createAxisFromRebinParams(params, XValues_new.mutableRawData(), resize_xnew,
-                                                               full_bins_only));
+    const std::vector<double> params{x_min[0], x_delta[0], x_max[0]};
+    UNUSED_ARG(
+        Kernel::VectorHelper::createAxisFromRebinParams(params, XValues.mutableRawData(), resize_xnew, full_bins_only));
   } else {
-    const std::vector<double> params{x_min, -1. * x_delta, x_max};
-    UNUSED_ARG(Kernel::VectorHelper::createAxisFromRebinParams(params, XValues_new.mutableRawData(), resize_xnew,
-                                                               full_bins_only));
+    const std::vector<double> params{x_min[0], -1. * x_delta[0], x_max[0]};
+    UNUSED_ARG(
+        Kernel::VectorHelper::createAxisFromRebinParams(params, XValues.mutableRawData(), resize_xnew, full_bins_only));
   }
-  MatrixWorkspace_sptr wksp = Mantid::DataObjects::create<Workspace2D>(numHist, XValues_new);
+  MatrixWorkspace_sptr wksp = Mantid::DataObjects::create<Workspace2D>(NUM_HIST, XValues);
+
+  if (raggedBins) {
+    // if ragged bins, we need to resize the x-values for each histogram after the first one
+    if (x_delta.size() == 1)
+      x_delta.resize(NUM_HIST, x_delta[0]);
+    if (x_min.size() == 1)
+      x_min.resize(NUM_HIST, x_min[0]);
+    if (x_max.size() == 1)
+      x_max.resize(NUM_HIST, x_max[0]);
+
+    for (size_t i = 1; i < NUM_HIST; ++i) {
+      HistogramData::BinEdges XValues_new(0);
+
+      if (linearBins) {
+        const std::vector<double> params{x_min[i], x_delta[i], x_max[i]};
+        Kernel::VectorHelper::createAxisFromRebinParams(params, XValues_new.mutableRawData(), resize_xnew,
+                                                        full_bins_only);
+      } else {
+        const std::vector<double> params{x_min[i], -1. * x_delta[i], x_max[i]};
+        Kernel::VectorHelper::createAxisFromRebinParams(params, XValues_new.mutableRawData(), resize_xnew,
+                                                        full_bins_only);
+      }
+      HistogramData::Histogram hist(XValues_new, HistogramData::Counts(XValues_new.size() - 1, 0.0));
+      wksp->setHistogram(i, hist);
+    }
+  }
+
+  wksp->getAxis(0)->setUnit(binUnits);
+  wksp->setYUnit("Counts");
+
   return wksp;
 }
 
@@ -788,9 +820,37 @@ API::MatrixWorkspace_sptr AlignAndFocusPowderSlim::editInstrumentGeometry(
   return wksp;
 }
 
+API::MatrixWorkspace_sptr AlignAndFocusPowderSlim::convertToTOF(API::MatrixWorkspace_sptr &wksp) {
+  if (wksp->getAxis(0)->unit()->unitID() == "TOF") {
+    // already in TOF, no need to convert
+    return wksp;
+  }
+
+  API::IAlgorithm_sptr convertUnits = createChildAlgorithm("ConvertUnits");
+  convertUnits->setProperty("InputWorkspace", wksp);
+  convertUnits->setPropertyValue("Target", "TOF");
+  convertUnits->executeAsChildAlg();
+  wksp = convertUnits->getProperty("OutputWorkspace");
+
+  return wksp;
+}
+
 // ------------------------ BankCalibration object
+/**
+ * Calibration of a subset of pixels as requested in the constructor. This is used because a vector is faster lookup
+ * than a map for dense array of values.
+ *
+ * @param idmin Minimum detector id to include in the calibration
+ * @param idmax Maximum detector id to include in the calibration
+ * @param time_conversion Value to bundle into the calibration constant to account for converting the time-of-flight
+ * into microseconds. Applying it here is effectively the same as applying it to each event time-of-flight.
+ * @param calibration_map Calibration for the entire instrument.
+ * @param mask detector ids that exist in the map should not be included.
+ */
 AlignAndFocusPowderSlim::BankCalibration::BankCalibration(const detid_t idmin, const detid_t idmax,
-                                                          const std::map<detid_t, double> &calibration_map)
+                                                          const double time_conversion,
+                                                          const std::map<detid_t, double> &calibration_map,
+                                                          const std::set<detid_t> &mask)
     : m_detid_offset(idmin) {
   // error check the id-range
   if (idmax < idmin)
@@ -799,20 +859,36 @@ AlignAndFocusPowderSlim::BankCalibration::BankCalibration(const detid_t idmin, c
   // allocate memory and set the default value to 1
   m_calibration.assign(static_cast<size_t>(idmax - idmin + 1), 1.);
 
-  // copy over values that matter
+  // set up iterators for copying data
   auto iter = calibration_map.find(idmin);
   if (iter == calibration_map.end())
     throw std::runtime_error("ALSO BAD!");
   auto iter_end = calibration_map.find(idmax);
   if (iter_end != calibration_map.end())
     ++iter_end;
+
+  // copy over values that matter
   for (; iter != iter_end; ++iter) {
     const auto index = static_cast<size_t>(iter->first - m_detid_offset);
     m_calibration[index] = iter->second;
   }
+
+  // apply time conversion here so it is effectively applied for each detector once rather than on each event
+  if (time_conversion != 1.) {
+    std::transform(m_calibration.begin(), m_calibration.end(), m_calibration.begin(),
+                   [time_conversion](const auto &value) { return std::move(time_conversion * value); });
+  }
+
+  // setup the detector mask - this assumes there are not many pixels in the overall mask
+  // TODO could benefit from using lower_bound/upper_bound on the input mask rather than all
+  for (const auto &detid : mask) {
+    if (detid >= idmin && detid <= idmax) {
+      m_calibration[detid - m_detid_offset] = IGNORE_PIXEL;
+    }
+  }
 }
 
-/*
+/**
  * This assumes that everything is in range. Values that weren't in the calibration map get set to 1.
  */
 const double &AlignAndFocusPowderSlim::BankCalibration::value(const detid_t detid) const {
@@ -821,7 +897,7 @@ const double &AlignAndFocusPowderSlim::BankCalibration::value(const detid_t deti
 
 const detid_t &AlignAndFocusPowderSlim::BankCalibration::idmin() const { return m_detid_offset; }
 detid_t AlignAndFocusPowderSlim::BankCalibration::idmax() const {
-  return m_detid_offset + static_cast<detid_t>(m_calibration.size());
+  return m_detid_offset + static_cast<detid_t>(m_calibration.size()) - 1;
 }
 
 } // namespace Mantid::DataHandling

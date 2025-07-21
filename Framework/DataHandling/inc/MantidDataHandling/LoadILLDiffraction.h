@@ -55,22 +55,22 @@ private:
 
   void calculateRelativeRotations(std::vector<double> &instrumentAngles, const Kernel::V3D &firstTubePosition);
 
-  void fillDataScanMetaData(const NeXus::NXDouble &);
-  void fillMovingInstrumentScan(const NeXus::NXInt &, const NeXus::NXDouble &);
-  void fillStaticInstrumentScan(const NeXus::NXInt &, const NeXus::NXDouble &, const double &);
+  void fillDataScanMetaData(const Nexus::NXDouble &);
+  void fillMovingInstrumentScan(const Nexus::NXInt &, const Nexus::NXDouble &);
+  void fillStaticInstrumentScan(const Nexus::NXInt &, const Nexus::NXDouble &, const double &);
 
-  std::vector<Types::Core::DateAndTime> getAbsoluteTimes(const NeXus::NXDouble &) const;
-  std::vector<double> getAxis(const NeXus::NXDouble &) const;
-  std::vector<double> getDurations(const NeXus::NXDouble &) const;
-  std::vector<double> getMonitor(const NeXus::NXDouble &) const;
+  std::vector<Types::Core::DateAndTime> getAbsoluteTimes(const Nexus::NXDouble &) const;
+  std::vector<double> getAxis(const Nexus::NXDouble &) const;
+  std::vector<double> getDurations(const Nexus::NXDouble &) const;
+  std::vector<double> getMonitor(const Nexus::NXDouble &) const;
   std::string getInstrumentFilePath(const std::string &) const;
   Kernel::V3D getReferenceComponentPosition(const API::MatrixWorkspace_sptr &instrumentWorkspace);
 
-  std::vector<double> getScannedVaribleByPropertyName(const NeXus::NXDouble &scan,
+  std::vector<double> getScannedVaribleByPropertyName(const Nexus::NXDouble &scan,
                                                       const std::string &propertyName) const;
 
   void initStaticWorkspace();
-  void initMovingWorkspace(const NeXus::NXDouble &scan);
+  void initMovingWorkspace(const Nexus::NXDouble &scan);
 
   void loadDataScan();
   void loadMetaData();

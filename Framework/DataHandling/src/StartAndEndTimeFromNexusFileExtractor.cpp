@@ -9,7 +9,7 @@
 #include "MantidDataHandling/LoadNexus.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
-#include "MantidNexus/NeXusFile.hpp"
+#include "MantidNexus/NexusFile.h"
 #include <vector>
 
 namespace Mantid::DataHandling {
@@ -20,11 +20,11 @@ Mantid::Kernel::Logger g_log("StartAndEndTimeFromNexusFileExtractor");
 enum class NexusType { Muon, Processed, ISIS, TofRaw };
 enum class TimeType { StartTime, EndTime };
 
-Mantid::Types::Core::DateAndTime getValue(const std::string &filename, const std::string &abspath) {
-  ::NeXus::File nxfile(filename, NXACC_READ);
-  nxfile.openPath(abspath);
+Mantid::Types::Core::DateAndTime getValue(const std::string &filename, const std::string &absAddress) {
+  Nexus::File nxfile(filename, NXaccess::READ);
+  nxfile.openAddress(absAddress);
   const auto valueStr = nxfile.getStrData();
-  g_log.debug(valueStr + " from " + abspath + " in " + filename);
+  g_log.debug(valueStr + " from " + absAddress + " in " + filename);
   return Mantid::Types::Core::DateAndTime(valueStr);
 }
 
@@ -54,11 +54,11 @@ NexusType whichNexusType(const std::string &filename) {
   } else if (entryName[0] == "raw_data_1") {
     nexusType = NexusType::ISIS;
   } else {
-    ::NeXus::File nxfile(filename, NXACC_READ);
+    Nexus::File nxfile(filename, NXaccess::READ);
     const auto entries = nxfile.getEntries();
     const auto firstEntryName = entries.begin()->first;
     try {
-      nxfile.openPath("/" + firstEntryName + "/instrument/SNSdetector_calibration_id");
+      nxfile.openAddress("/" + firstEntryName + "/instrument/SNSdetector_calibration_id");
     } catch (...) {
       g_log.error("File " + filename + " is a currently unsupported type of NeXus file");
       throw Mantid::Kernel::Exception::FileError("Unable to read File:", filename);
@@ -72,42 +72,42 @@ NexusType whichNexusType(const std::string &filename) {
 /**
  * This holds all of the logic for what field in the file contains the DateAndTime information requested.
  */
-std::string getDataFieldPath(const NexusType nexusType, const TimeType type) {
-  std::string datafieldpath;
+std::string getDataFieldAddress(const NexusType nexusType, const TimeType type) {
+  std::string datafieldaddress;
   switch (nexusType) {
   case NexusType::Muon:
     if (type == TimeType::StartTime) {
-      datafieldpath = "/run/start_time";
+      datafieldaddress = "/run/start_time";
     } else {
-      datafieldpath = "/run/stop_time";
+      datafieldaddress = "/run/stop_time";
     }
     break;
   case NexusType::ISIS:
     if (type == TimeType::StartTime) {
-      datafieldpath = "/raw_data_1/start_time";
+      datafieldaddress = "/raw_data_1/start_time";
     } else {
-      datafieldpath = "/raw_data_1/end_time";
+      datafieldaddress = "/raw_data_1/end_time";
     }
     break;
   case NexusType::Processed:
     if (type == TimeType::StartTime) {
-      datafieldpath = "/mantid_workspace_1/logs/run_start/value";
+      datafieldaddress = "/mantid_workspace_1/logs/run_start/value";
     } else {
-      datafieldpath = "/mantid_workspace_1/logs/run_end/value";
+      datafieldaddress = "/mantid_workspace_1/logs/run_end/value";
     }
     break;
   case NexusType::TofRaw:
     if (type == TimeType::StartTime) {
-      datafieldpath = "/entry/start_time";
+      datafieldaddress = "/entry/start_time";
     } else {
-      datafieldpath = "/entry/end_time";
+      datafieldaddress = "/entry/end_time";
     }
     break;
   default:
     throw std::runtime_error("Unkown Nexus format. Not able to extract a date and time.");
   };
 
-  return datafieldpath;
+  return datafieldaddress;
 }
 
 /**
@@ -119,10 +119,10 @@ Mantid::Types::Core::DateAndTime extractDateAndTime(TimeType type, const std::st
   // Figure out the type of the Nexus file. We need to handle them individually since they store the datetime
   // differently
   auto nexusType = whichNexusType(fullFileName);
-  // convert the type information into a path within the nexus file
-  const auto datapath = getDataFieldPath(nexusType, type);
+  // convert the type information into a address within the nexus file
+  const auto dataAddress = getDataFieldAddress(nexusType, type);
   // return the result
-  return getValue(fullFileName, datapath);
+  return getValue(fullFileName, dataAddress);
 }
 } // namespace
 

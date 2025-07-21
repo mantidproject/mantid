@@ -23,6 +23,8 @@
 
 ----------------------------------------------------------------------------*/
 
+#include <algorithm>
+#include <array>
 #include <assert.h>
 #include <ctype.h>
 #include <stdarg.h>
@@ -31,880 +33,705 @@
 #include <string.h>
 #include <time.h>
 
-#include "MantidNexus/napi.h"
-#include "MantidNexus/napi_internal.h"
-#include "MantidNexus/napiconfig.h"
-#include "MantidNexus/nxstack.h"
+#include <hdf5.h>
 
-/*---------------------------------------------------------------------
- Recognized and handled napimount URLS
- -----------------------------------------------------------------------*/
-#define NXBADURL 0
-#define NXFILE 1
+#include "MantidNexus/napi.h"
+
+// cppcheck-suppress-begin [unmatchedSuppression, variableScope]
+// cppcheck-suppress-begin [constVariablePointer, constParameterReference, unusedVariable, unreadVariable]
+// cppcheck-suppress-begin [nullPointerArithmeticOutOfMemory, nullPointerOutOfMemory]
+
+// this has to be after the other napi includes
+#include "MantidNexus/napi_helper.h"
+
+#define NX_UNKNOWN_GROUP "" /* for when no NX_class attr */
 
 /*--------------------------------------------------------------------*/
 /* static int iFortifyScope; */
 /*----------------------------------------------------------------------
   This is a section with code for searching the NX_LOAD_PATH
   -----------------------------------------------------------------------*/
-#ifdef _WIN32
-#define LIBSEP ";"
-#define PATHSEP "\\"
-#define THREAD_LOCAL __declspec(thread)
-#else
-#define LIBSEP ":"
-#define PATHSEP "/"
-#define THREAD_LOCAL __thread
-#endif
 
 #ifdef WIN32
 #define snprintf _snprintf
 #define strdup _strdup
 #endif
 
-#include "MantidNexus/nx_stptok.h"
-
-#if HAVE_LIBPTHREAD
-
-#include <pthread.h>
-
-static pthread_mutex_t nx_mutex;
-
-#if defined(PTHREAD_MUTEX_RECURSIVE) || defined(__FreeBSD__)
-#define RECURSIVE_LOCK PTHREAD_MUTEX_RECURSIVE
-#else
-#define RECURSIVE_LOCK PTHREAD_MUTEX_RECURSIVE_NP
-#endif /* PTHREAD_MUTEX_RECURSIVE */
-
-static void nx_pthread_init() {
-  pthread_mutexattr_t attr;
-  pthread_mutexattr_init(&attr);
-  pthread_mutexattr_settype(&attr, RECURSIVE_LOCK);
-  pthread_mutex_init(&nx_mutex, &attr);
-}
-
-static NXstatus nxilock() {
-  static pthread_once_t once_control = PTHREAD_ONCE_INIT;
-  if (pthread_once(&once_control, nx_pthread_init) != 0) {
-    NXReportError("pthread_once failed");
-    return NXstatus::NX_ERROR;
-  }
-  if (pthread_mutex_lock(&nx_mutex) != 0) {
-    NXReportError("pthread_mutex_lock failed");
-    return NXstatus::NX_ERROR;
-  }
-  return NXstatus::NX_OK;
-}
-
-static NXstatus nxiunlock(int ret) {
-  if (pthread_mutex_unlock(&nx_mutex) != 0) {
-    NXReportError("pthread_mutex_unlock failed");
-    return NXstatus::NX_ERROR;
-  }
-  return ret;
-}
-
-#define LOCKED_CALL(__call) (nxilock(), nxiunlock(__call))
-
-#elif defined(WIN32)
-/*
- *  HDF5 on windows does not do locking for multiple threads conveniently so we will implement it ourselves.
- *  Freddie Akeroyd, 16/06/2011
- */
-#include <windows.h>
-
-static CRITICAL_SECTION nx_critical;
-
-static NXstatus nxilock() {
-  static int first_call = 1;
-  if (first_call) {
-    first_call = 0;
-    InitializeCriticalSection(&nx_critical);
-  }
-  EnterCriticalSection(&nx_critical);
-  return NXstatus::NX_OK;
-}
-
-static NXstatus nxiunlock(NXstatus ret) {
-  LeaveCriticalSection(&nx_critical);
-  return ret;
-}
-
-#define LOCKED_CALL(__call) (nxilock(), nxiunlock(__call))
-
-#else
-
-#define LOCKED_CALL(__call) __call
-
-#endif /* _WIN32 */
-
-/**
- * valid NeXus names
- */
-int validNXName(const char *name, int allow_colon) {
-  int i;
-  if (name == NULL) {
-    return 0;
-  }
-  for (i = 0; i < (int)strlen(name); ++i) {
-    if ((name[i] >= 'a' && name[i] <= 'z') || (name[i] >= 'A' && name[i] <= 'Z') ||
-        (name[i] >= '0' && name[i] <= '9') || (name[i] == '_')) {
-      ;
-    } else if (allow_colon && name[i] == ':') {
-      ;
-    } else {
-      return 0;
-    }
-  }
-  return 1;
-}
-
-static int64_t *dupDimsArray(int const *dims_array, int rank) {
-  int64_t *dims64 = static_cast<int64_t *>(malloc(static_cast<size_t>(rank) * sizeof(int64_t)));
-  if (dims64 != NULL) {
-    for (int i = 0; i < rank; ++i) {
-      dims64[i] = dims_array[i];
-    }
-  }
-  return dims64;
-}
-
-/*---------------------------------------------------------------------
- wrapper for getenv. This is a future proofing thing for porting to OS
- which have different ways of accessing environment variables
- --------------------------------------------------------------------*/
-static char *nxgetenv(const char *name) { return getenv(name); }
-
-/*----------------------------------------------------------------------*/
-static int canOpen(char const *filename) {
-  FILE *fd = NULL;
-
-  fd = fopen(filename, "r");
-  if (fd != NULL) {
-    fclose(fd);
-    return 1;
-  } else {
-    return 0;
-  }
-}
-
-/*--------------------------------------------------------------------*/
-static char *locateNexusFileInPath(char const *const startName) {
-  char const *loadPath = NULL, *pPtr = NULL;
-  char *testPath = NULL;
-  char pathPrefix[256];
-
-  if (canOpen(startName)) {
-    return strdup(startName);
-  }
-
-  loadPath = nxgetenv("NX_LOAD_PATH");
-  if (loadPath == NULL) {
-    // file not found will be issued by upper level code
-    return strdup(startName);
-  }
-
-  pPtr = stptok(loadPath, pathPrefix, 255, LIBSEP);
-  while (pPtr != NULL) {
-    auto length = strlen(pathPrefix) + strlen(startName) + strlen(PATHSEP) + 2;
-    testPath = static_cast<char *>(malloc(length * sizeof(char)));
-    if (testPath == NULL) {
-      return strdup(startName);
-    }
-    memset(testPath, 0, length * sizeof(char));
-    strcpy(testPath, pathPrefix);
-    strcat(testPath, PATHSEP);
-    strcat(testPath, startName);
-    if (canOpen(testPath)) {
-      return (testPath);
-    }
-    free(testPath);
-    pPtr = stptok(pPtr, pathPrefix, 255, LIBSEP);
-  }
-  return strdup(startName);
-}
-
-/*------------------------------------------------------------------------
-  HDF-5 cache size special stuff
-  -------------------------------------------------------------------------*/
-long nx_cacheSize = 1024000; /* 1MB, HDF-5 default */
-
-NXstatus NXsetcache(long newVal) {
-  if (newVal > 0) {
-    nx_cacheSize = newVal;
-    return NXstatus::NX_OK;
-  }
-  return NXstatus::NX_ERROR;
-}
-
 /*----------------------------------------------------------------------*/
 
 void NXReportError(const char *string) { UNUSED_ARG(string); }
 
-/*----------------------------------------------------------------------*/
-#ifdef WITH_HDF5
-#include "MantidNexus/napi5.h"
-#endif
 /* ----------------------------------------------------------------------
 
    Definition of NeXus API
 
    --------------------------------------------------------------------- */
-static int determineFileTypeImpl(CONSTCHAR *filename) {
-  FILE *fd = NULL;
-  int iRet;
 
-  /*
-     this is for reading, check for existence first
-   */
-  fd = fopen(filename, "r");
+static bool canBeOpened(std::string const &filename) {
+  // this is for reading, check for existence first
+  FILE *fd = NULL;
+  fd = fopen(filename.c_str(), "r");
   if (fd == NULL) {
-    return -1;
+    return false;
   }
   fclose(fd);
-#ifdef WITH_HDF5
-  iRet = H5Fis_hdf5(static_cast<const char *>(filename));
-  if (iRet > 0) {
-    return NXACC_CREATE5;
-  }
-#endif
-  /*
-     file type not recognized
-   */
-  return 0;
-}
 
-static int determineFileType(CONSTCHAR *filename) { return determineFileTypeImpl(filename); }
-
-/*---------------------------------------------------------------------*/
-static pNexusFunction handleToNexusFunc(NXhandle fid) {
-  if (pFileStack fileStack = static_cast<pFileStack>(fid)) {
-    return peekFileOnStack(fileStack);
+  // check that this is indeed hdf5
+  if (H5Fis_hdf5(filename.c_str()) > 0) {
+    return true;
   } else {
-    return NULL;
+    // file type not recognized
+    return false;
   }
 }
 
-/*--------------------------------------------------------------------*/
-static NXstatus NXinternalopen(CONSTCHAR *userfilename, NXaccess am, pFileStack fileStack);
 /*----------------------------------------------------------------------*/
-NXstatus NXopen(CONSTCHAR *userfilename, NXaccess am, NXhandle *gHandle) {
-  NXstatus status;
-  pFileStack fileStack = NULL;
-
-  *gHandle = NULL;
-  fileStack = makeFileStack();
-  if (fileStack == NULL) {
-    NXReportError("ERROR: no memory to create filestack");
-    return NXstatus::NX_ERROR;
+NXstatus NXopen(std::string const &filename, NXaccess const am, NXhandle &fid) {
+  // allocate the object on the heap
+  fid = nullptr;
+  // determine if the file can be opened
+  bool isHDF5 = (am == NXaccess::CREATE5 ? true : canBeOpened(filename));
+  NXstatus status = NXstatus::NX_ERROR;
+  if (isHDF5) {
+    // construct on heap
+    fid = new NexusFile5(filename, am);
+    status = NXstatus::NX_OK;
+  } else {
+    NXReportError("ERROR: Format not readable by this NeXus library");
+    status = NXstatus::NX_ERROR;
   }
-  status = NXinternalopen(userfilename, am, fileStack);
-  if (status == NXstatus::NX_OK) {
-    *gHandle = fileStack;
+  if (status != NXstatus::NX_OK && fid != nullptr) {
+    delete fid;
+    fid = nullptr;
   }
 
   return status;
 }
 
 /*-----------------------------------------------------------------------*/
-static NXstatus NXinternalopenImpl(CONSTCHAR *userfilename, NXaccess am, pFileStack fileStack) {
-  int backend_type, iRet;
-  pNexusFunction fHandle = NULL;
-  char error[1024];
-  char *filename = NULL;
-  int my_am = (am & NXACCMASK_REMOVEFLAGS);
+/* ------------------------------------------------------------------------- */
 
-  /* configure fortify
-     iFortifyScope = Fortify_EnterScope();
-     Fortify_CheckAllMemory();
-   */
-
-  /*
-     allocate data
-   */
-  fHandle = static_cast<pNexusFunction>(malloc(sizeof(NexusFunction)));
-  if (fHandle == NULL) {
-    NXReportError("ERROR: no memory to create Function structure");
-    return NXstatus::NX_ERROR;
+NXstatus NXclose(NXhandle &fid) {
+  if (fid == nullptr) {
+    return NXstatus::NX_OK;
   }
-  memset(fHandle, 0, sizeof(NexusFunction)); /* so any functions we miss are NULL */
-
-  /*
-     test the strip flag. Elimnate it for the rest of the tests to work
-   */
-  fHandle->stripFlag = 1;
-  if (am & NXACC_NOSTRIP) {
-    fHandle->stripFlag = 0;
-    am = (NXaccess)(am & ~NXACC_NOSTRIP);
+  herr_t iRet = H5Fclose(fid->iFID);
+  if (iRet < 0) {
+    NXReportError("ERROR: cannot close HDF file");
   }
-  fHandle->checkNameSyntax = 0;
-  if (am & NXACC_CHECKNAMESYNTAX) {
-    fHandle->checkNameSyntax = 1;
-    am = (NXaccess)(am & ~NXACC_CHECKNAMESYNTAX);
-  }
-
-  if (my_am == NXACC_CREATE5) {
-    /* HDF5 will be used ! */
-    backend_type = NXACC_CREATE5;
-    filename = static_cast<char *>(malloc(strlen(userfilename) + 1));
-    strcpy(filename, userfilename);
-  } else if (my_am == NXACC_CREATEXML) {
-    snprintf(error, 1023, "xml backend not supported for %s", userfilename);
-    NXReportError(error);
-    free(fHandle);
-    return NXstatus::NX_ERROR;
-  } else {
-    filename = locateNexusFileInPath(const_cast<char *>(static_cast<const char *>(userfilename)));
-    if (filename == NULL) {
-      NXReportError("Out of memory in NeXus-API");
-      free(fHandle);
-      return NXstatus::NX_ERROR;
-    }
-    /* check file type hdf4/hdf5/XML for reading */
-    iRet = determineFileType(filename);
-    if (iRet < 0) {
-      snprintf(error, 1023, "failed to open %s for reading", filename);
-      NXReportError(error);
-      free(filename);
-      free(fHandle);
-      return NXstatus::NX_ERROR;
-    }
-    if (iRet == 0) {
-      snprintf(error, 1023, "failed to determine filetype for %s ", filename);
-      NXReportError(error);
-      free(filename);
-      free(fHandle);
-      return NXstatus::NX_ERROR;
-    }
-    backend_type = iRet;
-  }
-  if (filename == NULL) {
-    NXReportError("Out of memory in NeXus-API");
-    free(fHandle);
-    return NXstatus::NX_ERROR;
-  }
-
-  NXstatus retstat = NXstatus::NX_ERROR;
-  if (backend_type == NXACC_CREATE5) {
-    /* HDF5 type */
-#ifdef WITH_HDF5
-    NXhandle hdf5_handle = NULL;
-    retstat = NX5open(filename, am, &hdf5_handle);
-    if (retstat != NXstatus::NX_OK) {
-      free(fHandle);
-      free(filename);
-      return retstat;
-    }
-    fHandle->pNexusData = hdf5_handle;
-    fHandle->access_mode = backend_type || (NXACC_READ && am);
-    NX5assignFunctions(fHandle);
-    pushFileStack(fileStack, fHandle, filename);
-#else
-    NXReportError("ERROR: Attempt to create HDF5 file when not linked with HDF5");
-    retstat = NXstatus::NX_ERROR;
-#endif /* HDF5 */
-    free(filename);
-    return retstat;
-  } else if (backend_type == NXACC_CREATEXML) {
-    /*
-       XML type
-     */
-    NXReportError("ERROR: Attempt to create XML file when not linked with XML");
-    retstat = NXstatus::NX_ERROR;
-  } else {
-    NXReportError("ERROR: Format not readable by this NeXus library");
-    retstat = NXstatus::NX_ERROR;
-  }
-  if (filename != NULL) { // cppcheck-suppress knownConditionTrueFalse
-    free(filename);
-  }
-  if (fHandle != NULL) {
-    free(fHandle);
-  }
-  return retstat;
-}
-
-static NXstatus NXinternalopen(CONSTCHAR *userfilename, NXaccess am, pFileStack fileStack) {
-  return LOCKED_CALL(NXinternalopenImpl(userfilename, am, fileStack));
-}
-
-NXstatus NXreopen(NXhandle pOrigHandle, NXhandle *pNewHandle) {
-  pFileStack newFileStack;
-  pFileStack origFileStack = static_cast<pFileStack>(pOrigHandle);
-  pNexusFunction fOrigHandle = NULL, fNewHandle = NULL;
-  *pNewHandle = NULL;
-  newFileStack = makeFileStack();
-  if (newFileStack == NULL) {
-    NXReportError("ERROR: no memory to create filestack");
-    return NXstatus::NX_ERROR;
-  }
-  // The code below will only open the last file on a stack
-  // for the moment raise an error, but this behaviour may be OK
-  if (fileStackDepth(origFileStack) > 0) {
-    NXReportError("ERROR: handle stack referes to many files - cannot reopen");
-    return NXstatus::NX_ERROR;
-  }
-  fOrigHandle = peekFileOnStack(origFileStack);
-  if (fOrigHandle->nxreopen == NULL) {
-    NXReportError("ERROR: NXreopen not implemented for this underlying file format");
-    return NXstatus::NX_ERROR;
-  }
-  fNewHandle = static_cast<NexusFunction *>(malloc(sizeof(NexusFunction)));
-  memcpy(fNewHandle, fOrigHandle, sizeof(NexusFunction));
-  LOCKED_CALL(fNewHandle->nxreopen(fOrigHandle->pNexusData, &(fNewHandle->pNexusData)));
-  pushFileStack(newFileStack, fNewHandle, peekFilenameOnStack(origFileStack));
-  *pNewHandle = newFileStack;
+  /* release memory */
+  delete fid;
+  fid = nullptr;
+  H5garbage_collect();
   return NXstatus::NX_OK;
 }
 
-/* ------------------------------------------------------------------------- */
-
-NXstatus NXclose(NXhandle *fid) {
-  NXhandle hfil;
-  NXstatus status;
-  pFileStack fileStack = NULL;
-  pNexusFunction pFunc = NULL;
-  if (*fid == NULL) {
-    return NXstatus::NX_OK;
-  }
-  fileStack = (pFileStack)*fid;
-  pFunc = peekFileOnStack(fileStack);
-  hfil = pFunc->pNexusData;
-  status = LOCKED_CALL(pFunc->nxclose(&hfil));
-  pFunc->pNexusData = hfil;
-  free(pFunc);
-  popFileStack(fileStack);
-  if (fileStackDepth(fileStack) < 0) {
-    killFileStack(fileStack);
-    *fid = NULL;
-  }
-  /* we can't set fid to NULL always as the handle points to a stack of files for external file support */
-  /*
-     Fortify_CheckAllMemory();
-   */
-
-  return status;
-}
-
 /*-----------------------------------------------------------------------*/
 
-NXstatus NXmakegroup(NXhandle fid, CONSTCHAR *name, CONSTCHAR *nxclass) {
-  pNexusFunction pFunc = handleToNexusFunc(fid);
-  if (pFunc->checkNameSyntax && (nxclass != NULL) /* && !strncmp("NX", nxclass, 2) */ && !validNXName(name, 0)) {
-    char buffer[256];
-    sprintf(buffer, "ERROR: invalid characters in group name \"%s\"", name);
-    NXReportError(buffer);
+NXstatus NXmakegroup(NXhandle fid, std::string const &name, std::string const &nxclass) {
+  hid_t iVID;
+  hid_t attr1, aid1, aid2;
+
+  /* create and configure the group */
+  Mantid::Nexus::NexusAddress pBuffer = fid->groupaddr / name;
+  iVID = H5Gcreate(fid->iFID, pBuffer.c_str(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+  if (iVID < 0) {
+    NXReportError("ERROR: could not create Group");
     return NXstatus::NX_ERROR;
   }
-  return LOCKED_CALL(pFunc->nxmakegroup(pFunc->pNexusData, name, nxclass));
-}
-
-/*------------------------------------------------------------------------*/
-static int analyzeNapimount(char *napiMount, char *extFile, int extFileLen, char *extPath, int extPathLen) {
-  char *pPtr = NULL;
-  char const *path = NULL;
-
-  memset(extFile, 0, static_cast<size_t>(extFileLen));
-  memset(extPath, 0, static_cast<size_t>(extPathLen));
-  pPtr = strstr(napiMount, "nxfile://");
-  if (pPtr == NULL) {
-    return NXBADURL;
+  aid2 = H5Screate(H5S_SCALAR);
+  aid1 = H5Tcopy(H5T_C_S1);
+  H5Tset_size(aid1, nxclass.size());
+  attr1 = H5Acreate(iVID, "NX_class", aid1, aid2, H5P_DEFAULT, H5P_DEFAULT);
+  if (attr1 < 0) {
+    NXReportError("ERROR: failed to store class name");
+    return NXstatus::NX_ERROR;
   }
-  path = strrchr(napiMount, '#');
-  if (path == NULL) {
-    const auto length = strlen(napiMount) - 9;
-    if (length > static_cast<size_t>(extFileLen)) {
-      NXReportError("ERROR: internal errro with external linking");
-      return NXBADURL;
-    }
-    memcpy(extFile, pPtr + 9, length);
-    strcpy(extPath, "/");
-    return NXFILE;
-  } else {
-    pPtr += 9;
-    int length = static_cast<int>(path - pPtr);
-    if (length > extFileLen) {
-      NXReportError("ERROR: internal errro with external linking");
-      return NXBADURL;
-    }
-    memcpy(extFile, pPtr, static_cast<size_t>(length));
-    length = static_cast<int>(strlen(path - 1));
-    if (length > extPathLen) {
-      NXReportError("ERROR: internal error with external linking");
-      return NXBADURL;
-    }
-    strcpy(extPath, path + 1);
-    return NXFILE;
+  if (H5Awrite(attr1, aid1, nxclass.c_str()) < 0) {
+    NXReportError("ERROR: failed to store class name");
+    return NXstatus::NX_ERROR;
   }
-  return NXBADURL;
+  /* close group */
+  hid_t iRet = H5Sclose(aid2);
+  iRet += H5Tclose(aid1);
+  iRet += H5Aclose(attr1);
+  iRet += H5Gclose(iVID);
+  UNUSED_ARG(iRet);
+  // always return that it worked
+  return NXstatus::NX_OK;
 }
 
 /*------------------------------------------------------------------------*/
 
-NXstatus NXopengroup(NXhandle fid, CONSTCHAR *name, CONSTCHAR *nxclass) {
-  NXnumtype type = NXnumtype::CHAR;
-  int length = 1023;
-  NXstatus status, attStatus;
-  NXaccess access = NXACC_READ;
-  NXlink breakID;
-  pFileStack fileStack;
-  pNexusFunction pFunc = NULL;
-
-  fileStack = static_cast<pFileStack>(fid);
-  pFunc = handleToNexusFunc(fid);
-
-  status = LOCKED_CALL(pFunc->nxopengroup(pFunc->pNexusData, name, nxclass));
-  if (status == NXstatus::NX_OK) {
-    pushPath(fileStack, name);
+NXstatus NXopengroup(NXhandle fid, std::string const &name, std::string const &nxclass) {
+  std::string pBuffer = fid->groupaddr / name;
+  hid_t iVID = H5Gopen(fid->iFID, pBuffer.c_str(), H5P_DEFAULT);
+  if (iVID < 0) {
+    std::string msg = std::string("ERROR: group ") + fid->groupaddr + " does not exist";
+    NXReportError(const_cast<char *>(msg.c_str()));
+    return NXstatus::NX_ERROR;
   }
-  char nxurl[1024];
-  attStatus = NXgetattr(fid, "napimount", nxurl, &length, &type);
-  if (attStatus == NXstatus::NX_OK) {
-    // this is an external linking group
-    char exfile[512];
-    char expath[512];
-    int const napistat = static_cast<int>(analyzeNapimount(nxurl, exfile, 511, expath, 511));
-    if (napistat == NXBADURL) {
+  fid->iCurrentG = iVID;
+  fid->groupaddr = pBuffer;
+
+  if ((!nxclass.empty()) && (nxclass != NX_UNKNOWN_GROUP)) {
+    /* check group attribute */
+    herr_t iRet = H5Aiterate(fid->iCurrentG, H5_INDEX_CRT_ORDER, H5_ITER_INC, 0, attr_check, NULL);
+    if (iRet < 0) {
+      NXReportError("ERROR: iterating through attribute list");
+      return NXstatus::NX_ERROR;
+    } else if (iRet == 1) {
+      /* group attribute was found */
+    } else {
+      /* no group attribute available */
+      NXReportError("ERROR: no group attribute available");
       return NXstatus::NX_ERROR;
     }
-    status = NXinternalopen(exfile, access, fileStack);
-    if (status == NXstatus::NX_ERROR) {
-      return status;
+    /* check contents of group attribute */
+    hid_t attr1 = H5Aopen_by_name(fid->iCurrentG, ".", "NX_class", H5P_DEFAULT, H5P_DEFAULT);
+    if (attr1 < 0) {
+      NXReportError("ERROR: opening NX_class group attribute");
+      return NXstatus::NX_ERROR;
     }
-    status = NXopenpath(fid, expath);
-    NXgetgroupID(fid, &breakID);
-    setCloseID(fileStack, breakID);
+    hid_t atype = H5Tcopy(H5T_C_S1);
+    char data[128];
+    H5Tset_size(atype, sizeof(data));
+    iRet = readStringAttributeN(attr1, data, sizeof(data));
+    if (data == nxclass) {
+      /* test OK */
+    } else {
+      std::string warning("ERROR: group class is not identical: \"");
+      warning += data;
+      warning += "\" != \"";
+      warning += nxclass;
+      warning += "\"";
+      NXReportError(warning.c_str());
+      H5Tclose(atype);
+      H5Aclose(attr1);
+      return NXstatus::NX_ERROR;
+    }
+    H5Tclose(atype);
+    H5Aclose(attr1);
   }
 
-  return status;
+  /* maintain stack */
+  fid->iStack5.push_back(fid->iCurrentG);
+  fid->iCurrentD = 0;
+  return NXstatus::NX_OK;
 }
 
 /* ------------------------------------------------------------------- */
 
 NXstatus NXclosegroup(NXhandle fid) {
-  NXstatus status;
-  pFileStack fileStack = NULL;
-  NXlink closeID, currentID;
-
-  pNexusFunction pFunc = handleToNexusFunc(fid);
-  fileStack = static_cast<pFileStack>(fid);
-  if (fileStackDepth(fileStack) == 0) {
-    status = LOCKED_CALL(pFunc->nxclosegroup(pFunc->pNexusData));
-    if (status == NXstatus::NX_OK) {
-      popPath(fileStack);
-    }
-    return status;
+  /* first catch the trivial case: we are at root and cannot get
+     deeper into a negative directory hierarchy (anti-directory)
+   */
+  if (fid->iCurrentG == 0) {
+    return NXstatus::NX_OK;
   } else {
-    /* we have to check for leaving an external file */
-    NXgetgroupID(fid, &currentID);
-    peekIDOnStack(fileStack, &closeID);
-    if (NXsameID(fid, &closeID, &currentID) == NXstatus::NX_OK) {
-      NXclose(&fid);
-      status = NXclosegroup(fid);
+    /* close the current group and decrement groupaddr */
+    H5Gclose(fid->iCurrentG);
+    fid->groupaddr = fid->groupaddr.parent_path();
+    fid->iCurrentD = 0;
+    fid->iStack5.pop_back();
+    if (!fid->iStack5.empty()) {
+      fid->iCurrentG = fid->iStack5.back();
     } else {
-      status = LOCKED_CALL(pFunc->nxclosegroup(pFunc->pNexusData));
-      if (status == NXstatus::NX_OK) {
-        popPath(fileStack);
+      fid->iCurrentG = 0;
+    }
+  }
+  return NXstatus::NX_OK;
+}
+
+/* --------------------------------------------------------------------- */
+
+NXstatus NXmakedata64(NXhandle fid, std::string const &name, NXnumtype const datatype, std::size_t const rank,
+                      Mantid::Nexus::DimVector const &dims) {
+  Mantid::Nexus::DimSizeVector chunk_size(dims);
+  for (std::size_t i = 0; i < rank; i++) {
+    if (dims[i] == NX_UNLIMITED || dims[i] <= 0) {
+      chunk_size[i] = 1;
+    }
+  }
+  return NXcompmakedata64(fid, name, datatype, rank, dims, NXcompression::NONE, chunk_size);
+}
+
+/* --------------------------------------------------------------------- */
+
+NXstatus NXcompmakedata64(NXhandle fid, std::string const &name, NXnumtype const datatype, std::size_t const rank,
+                          Mantid::Nexus::DimVector const &dims, NXcompression const compress_type,
+                          Mantid::Nexus::DimSizeVector const &chunk_size) {
+  hid_t datatype1, dataspace, iNew;
+  hid_t type, cparms = -1;
+  char pBuffer[256];
+  size_t byte_zahl = 0;
+  hsize_t chunkdims[H5S_MAX_RANK];
+  hsize_t mydim[H5S_MAX_RANK];
+  hsize_t size[H5S_MAX_RANK];
+  hsize_t maxdims[H5S_MAX_RANK];
+  unsigned int compress_level;
+  int unlimiteddim = 0;
+
+  if (fid->iCurrentG <= 0) {
+    sprintf(pBuffer, "ERROR: no group open for makedata on %s", name.c_str());
+    NXReportError(pBuffer);
+    return NXstatus::NX_ERROR;
+  }
+
+  if (rank == 0) {
+    sprintf(pBuffer, "ERROR: invalid rank specified %s", name.c_str());
+    NXReportError(pBuffer);
+    return NXstatus::NX_ERROR;
+  }
+
+  type = nxToHDF5Type(datatype);
+
+  /*
+     Check dimensions for consistency. Dimension may be -1
+     thus denoting an unlimited dimension.
+   */
+  for (std::size_t i = 0; i < rank; i++) {
+    chunkdims[i] = chunk_size[i];
+    mydim[i] = dims[i];
+    maxdims[i] = dims[i];
+    size[i] = dims[i];
+    if (dims[i] <= 0) {
+      mydim[i] = 1;
+      maxdims[i] = H5S_UNLIMITED;
+      size[i] = 1;
+      unlimiteddim = 1;
+    } else {
+      mydim[i] = dims[i];
+      maxdims[i] = dims[i];
+      size[i] = dims[i];
+    }
+  }
+
+  if (datatype == NXnumtype::CHAR) {
+    /*
+     *  This assumes string lenght is in the last dimensions and
+     *  the logic must be the same as used in NX5getslab and NX5getinfo
+     *
+     *  search for tests on H5T_STRING
+     */
+    byte_zahl = (size_t)mydim[rank - 1];
+    hsize_t mydim1[H5S_MAX_RANK];
+    for (std::size_t i = 0; i < rank; i++) {
+      mydim1[i] = mydim[i];
+      if (dims[i] <= 0) {
+        mydim1[0] = 1;
+        maxdims[0] = H5S_UNLIMITED;
       }
     }
-    return status;
+    mydim1[rank - 1] = 1;
+    if (mydim[rank - 1] > 1) {
+      maxdims[rank - 1] = size[rank - 1] = 1;
+    }
+    if (chunkdims[rank - 1] > 1) {
+      chunkdims[rank - 1] = 1;
+    }
+    dataspace = H5Screate_simple(static_cast<int>(rank), mydim1, maxdims);
+  } else {
+    if (unlimiteddim) {
+      dataspace = H5Screate_simple(static_cast<int>(rank), mydim, maxdims);
+    } else {
+      /* dataset creation */
+      dataspace = H5Screate_simple(static_cast<int>(rank), mydim, NULL);
+    }
   }
-}
-
-/* --------------------------------------------------------------------- */
-
-NXstatus NXmakedata(NXhandle fid, CONSTCHAR *name, NXnumtype datatype, int rank,
-                    int dimensions[]) { // cppcheck-suppress constParameter
-  NXstatus status;
-  int64_t *dims64 = dupDimsArray(dimensions, rank);
-  status = NXmakedata64(fid, name, datatype, rank, dims64);
-  free(dims64);
-  return status;
-}
-
-NXstatus NXmakedata64(NXhandle fid, CONSTCHAR *name, NXnumtype datatype, int rank, int64_t dimensions[]) {
-  pNexusFunction pFunc = handleToNexusFunc(fid);
-  if (pFunc->checkNameSyntax && !validNXName(name, 0)) {
-    char buffer[256];
-    sprintf(buffer, "ERROR: invalid characters in dataset name \"%s\"", name);
-    NXReportError(buffer);
-    return NXstatus::NX_ERROR;
+  datatype1 = H5Tcopy(type);
+  if (datatype == NXnumtype::CHAR) {
+    H5Tset_size(datatype1, byte_zahl);
+    /*       H5Tset_strpad(H5T_STR_SPACEPAD); */
   }
-  return LOCKED_CALL(pFunc->nxmakedata64(pFunc->pNexusData, name, datatype, rank, dimensions));
-}
-
-/* --------------------------------------------------------------------- */
-
-NXstatus NXcompmakedata(NXhandle fid, CONSTCHAR *name, NXnumtype datatype, int rank,
-                        int dimensions[], // cppcheck-suppress constParameter
-                        int compress_type, int const chunk_size[]) {
-  int64_t *dims64 = dupDimsArray(dimensions, rank);
-  int64_t *chunk64 = dupDimsArray(chunk_size, rank);
-  NXstatus const status = NXcompmakedata64(fid, name, datatype, rank, dims64, compress_type, chunk64);
-  free(dims64);
-  free(chunk64);
-  return status;
-}
-
-NXstatus NXcompmakedata64(NXhandle fid, CONSTCHAR *name, NXnumtype datatype, int rank, int64_t dimensions[],
-                          int compress_type, int64_t const chunk_size[]) {
-  pNexusFunction pFunc = handleToNexusFunc(fid);
-  if (pFunc->checkNameSyntax && !validNXName(name, 0)) {
-    char buffer[256];
-    sprintf(buffer, "ERROR: invalid characters in dataset name \"%s\"", name);
-    NXReportError(buffer);
-    return NXstatus::NX_ERROR;
-  }
-  return LOCKED_CALL(
-      pFunc->nxcompmakedata64(pFunc->pNexusData, name, datatype, rank, dimensions, compress_type, chunk_size));
-}
-
-/* --------------------------------------------------------------------- */
-
-NXstatus NXopendata(NXhandle fid, CONSTCHAR *name) {
-  NXnumtype type = NXnumtype::CHAR;
-  int length = 1023;
-  NXstatus status, attStatus;
-  NXaccess access = NXACC_READ;
-  NXlink breakID;
-  pFileStack fileStack;
-  pNexusFunction pFunc = NULL;
-
-  fileStack = static_cast<pFileStack>(fid);
-  pFunc = handleToNexusFunc(fid);
-  status = LOCKED_CALL(pFunc->nxopendata(pFunc->pNexusData, name));
-
-  if (status == NXstatus::NX_OK) {
-    pushPath(fileStack, name);
-  }
-
-  char nxurl[1024];
-  attStatus = NXgetattr(fid, "napimount", nxurl, &length, &type);
-  if (attStatus == NXstatus::NX_OK) {
-    // this is an external linking group
-    char exfile[512];
-    char expath[512];
-    int napistat = analyzeNapimount(nxurl, exfile, 511, expath, 511);
-    if (napistat == NXBADURL) {
+  compress_level = 6;
+  hid_t dID;
+  if (compress_type == NXcompression::LZW) {
+    cparms = H5Pcreate(H5P_DATASET_CREATE);
+    iNew = H5Pset_chunk(cparms, static_cast<int>(rank), chunkdims);
+    if (iNew < 0) {
+      NXReportError("ERROR: size of chunks could not be set");
       return NXstatus::NX_ERROR;
     }
-    status = NXinternalopen(exfile, access, fileStack);
-    if (status == NXstatus::NX_ERROR) {
-      return status;
+    H5Pset_shuffle(cparms); // mrt: improves compression
+    H5Pset_deflate(cparms, compress_level);
+    dID = H5Dcreate(fid->iCurrentG, name.c_str(), datatype1, dataspace, H5P_DEFAULT, cparms, H5P_DEFAULT);
+  } else if (compress_type == NXcompression::NONE) {
+    if (unlimiteddim) {
+      cparms = H5Pcreate(H5P_DATASET_CREATE);
+      iNew = H5Pset_chunk(cparms, static_cast<int>(rank), chunkdims);
+      if (iNew < 0) {
+        NXReportError("ERROR: size of chunks could not be set");
+        return NXstatus::NX_ERROR;
+      }
+      dID = H5Dcreate(fid->iCurrentG, name.c_str(), datatype1, dataspace, H5P_DEFAULT, cparms, H5P_DEFAULT);
+    } else {
+      dID = H5Dcreate(fid->iCurrentG, name.c_str(), datatype1, dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     }
-    status = NXopenpath(fid, expath);
-    NXgetdataID(fid, &breakID);
-    setCloseID(fileStack, breakID);
+  } else if (compress_type == NXcompression::CHUNK) {
+    cparms = H5Pcreate(H5P_DATASET_CREATE);
+    iNew = H5Pset_chunk(cparms, static_cast<int>(rank), chunkdims);
+    if (iNew < 0) {
+      NXReportError("ERROR: size of chunks could not be set");
+      return NXstatus::NX_ERROR;
+    }
+    dID = H5Dcreate(fid->iCurrentG, name.c_str(), datatype1, dataspace, H5P_DEFAULT, cparms, H5P_DEFAULT);
+
+  } else {
+    NXReportError("HDF5 doesn't support selected compression method! Dataset created without compression");
+    dID = H5Dcreate(fid->iCurrentG, name.c_str(), datatype1, dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+  }
+  if (dID < 0) {
+    NXReportError("ERROR: creating chunked dataset failed");
+    return NXstatus::NX_ERROR;
+  } else {
+    fid->iCurrentD = dID;
+  }
+  if (unlimiteddim) {
+    iNew = H5Dset_extent(fid->iCurrentD, size);
+    if (iNew < 0) {
+      sprintf(pBuffer, "ERROR: cannot create dataset %s", name.c_str());
+      NXReportError(pBuffer);
+      return NXstatus::NX_ERROR;
+    }
+  }
+  herr_t iRet;
+  if (cparms != -1) {
+    H5Pclose(cparms);
+  }
+  iRet = H5Sclose(dataspace);
+  iRet += H5Tclose(datatype1);
+  iRet += H5Dclose(fid->iCurrentD);
+  fid->iCurrentD = 0;
+  if (iRet < 0) {
+    NXReportError("ERROR: HDF cannot close dataset");
+    return NXstatus::NX_ERROR;
+  }
+  return NXstatus::NX_OK;
+}
+
+/* --------------------------------------------------------------------- */
+
+NXstatus NXopendata(NXhandle fid, std::string const &name) {
+  // if a dataset is already open, close it
+  if (fid->iCurrentD != 0) {
+    H5Dclose(fid->iCurrentD);
+    fid->iCurrentD = 0;
+  }
+  /* find the ID number and open the dataset */
+  fid->iCurrentD = H5Dopen(fid->iCurrentG, name.c_str(), H5P_DEFAULT);
+  if (fid->iCurrentD < 0) {
+    char pBuffer[256];
+    sprintf(pBuffer, "ERROR: dataset \"%s\" not found at this level", name.c_str());
+    NXReportError(pBuffer);
+    fid->iCurrentD = 0;
+    return NXstatus::NX_ERROR;
+  }
+  /* find the ID number of datatype */
+  fid->iCurrentT = H5Dget_type(fid->iCurrentD);
+  if (fid->iCurrentT < 0) {
+    NXReportError("ERROR: error opening dataset");
+    fid->iCurrentT = 0;
+    return NXstatus::NX_ERROR;
+  }
+  /* find the ID number of dataspace */
+  fid->iCurrentS = H5Dget_space(fid->iCurrentD);
+  if (fid->iCurrentS < 0) {
+    NXReportError("ERROR:HDF error opening dataset");
+    fid->iCurrentS = 0;
+    return NXstatus::NX_ERROR;
   }
 
-  return status;
+  return NXstatus::NX_OK;
 }
 
 /* ----------------------------------------------------------------- */
 
 NXstatus NXclosedata(NXhandle fid) {
-  NXstatus status;
-  pFileStack fileStack = NULL;
-  NXlink closeID, currentID;
+  herr_t iRet;
 
-  pNexusFunction pFunc = handleToNexusFunc(fid);
-  fileStack = static_cast<pFileStack>(fid);
-
-  if (fileStackDepth(fileStack) == 0) {
-    status = LOCKED_CALL(pFunc->nxclosedata(pFunc->pNexusData));
-    if (status == NXstatus::NX_OK) {
-      popPath(fileStack);
-    }
-    return status;
-  } else {
-    /* we have to check for leaving an external file */
-    NXgetdataID(fid, &currentID);
-    peekIDOnStack(fileStack, &closeID);
-    if (NXsameID(fid, &closeID, &currentID) == NXstatus::NX_OK) {
-      NXclose(&fid);
-      status = NXclosedata(fid);
-    } else {
-      status = LOCKED_CALL(pFunc->nxclosedata(pFunc->pNexusData));
-      if (status == NXstatus::NX_OK) {
-        popPath(fileStack);
-      }
-    }
-    return status;
+  iRet = H5Sclose(fid->iCurrentS);
+  iRet += H5Tclose(fid->iCurrentT);
+  iRet += H5Dclose(fid->iCurrentD);
+  if (iRet < 0) {
+    NXReportError("ERROR: cannot end access to dataset");
+    return NXstatus::NX_ERROR;
   }
+  fid->iCurrentD = 0;
+  fid->iCurrentS = 0;
+  fid->iCurrentT = 0;
+  return NXstatus::NX_OK;
 }
 
 /* ------------------------------------------------------------------- */
 
 NXstatus NXputdata(NXhandle fid, const void *data) {
-  pNexusFunction pFunc = handleToNexusFunc(fid);
-  return LOCKED_CALL(pFunc->nxputdata(pFunc->pNexusData, data));
+  herr_t iRet;
+  std::array<hsize_t, H5S_MAX_RANK> thedims{0}, maxdims{0};
+
+  int rank = H5Sget_simple_extent_ndims(fid->iCurrentS);
+  if (rank < 0) {
+    NXReportError("ERROR: Cannot determine dataset rank");
+    return NXstatus::NX_ERROR;
+  }
+  iRet = H5Sget_simple_extent_dims(fid->iCurrentS, thedims.data(), maxdims.data());
+  if (iRet < 0) {
+    NXReportError("ERROR: Cannot determine dataset dimensions");
+    return NXstatus::NX_ERROR;
+  }
+  bool unlimiteddim = std::any_of(maxdims.cbegin(), maxdims.cend(), [](auto x) -> bool { return x == H5S_UNLIMITED; });
+  /* If we are using putdata on an unlimied dimension dataset, assume we want to append one single new slab */
+  if (unlimiteddim) {
+    Mantid::Nexus::DimSizeVector myStart(rank, 0), mySize(rank);
+    for (int i = 0; i < rank; i++) {
+      if (maxdims[i] == H5S_UNLIMITED) {
+        myStart[i] = thedims[i] + 1;
+        mySize[i] = 1;
+      } else {
+        myStart[i] = 0;
+        mySize[i] = thedims[i];
+      }
+    }
+    return NXputslab64(fid, data, myStart, mySize);
+  } else {
+    iRet = H5Dwrite(fid->iCurrentD, fid->iCurrentT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
+    if (iRet < 0) {
+      NXReportError("ERROR: failure to write data");
+      return NXstatus::NX_ERROR;
+    }
+  }
+  return NXstatus::NX_OK;
 }
 
 /* ------------------------------------------------------------------- */
 
-NXstatus NXputattr(NXhandle fid, CONSTCHAR *name, const void *data, int datalen, NXnumtype iType) {
-  pNexusFunction pFunc = handleToNexusFunc(fid);
+NXstatus NXputattr(NXhandle fid, std::string const &name, const void *data, std::size_t const datalen,
+                   NXnumtype const iType) {
   if (datalen > 1 && iType != NXnumtype::CHAR) {
     NXReportError(
         "NXputattr: numeric arrays are not allowed as attributes - only character strings and single numbers");
     return NXstatus::NX_ERROR;
   }
-  if (pFunc->checkNameSyntax && !validNXName(name, 0)) {
-    char buffer[256];
-    sprintf(buffer, "ERROR: invalid characters in attribute name \"%s\"", name);
-    NXReportError(buffer);
+
+  // determine ID of containing HDF object
+  hid_t vid = getAttVID(fid);
+
+  // check if the attribute exists -- if so, delete it
+  hid_t attRet = H5Aopen_by_name(vid, ".", name.c_str(), H5P_DEFAULT, H5P_DEFAULT);
+  if (attRet > 0) {
+    H5Aclose(attRet);
+    herr_t iRet = H5Adelete(vid, name.c_str());
+    if (iRet < 0) {
+      NXReportError("ERROR: old attribute cannot be removed! ");
+      killAttVID(fid, vid);
+      return NXstatus::NX_ERROR;
+    }
+  }
+
+  // prepare new dataspace, datatype
+  hid_t dataspace = H5Screate(H5S_SCALAR);
+  hid_t datatype = H5Tcopy(nxToHDF5Type(iType));
+  if (iType == NXnumtype::CHAR) {
+    H5Tset_size(datatype, datalen);
+  }
+
+  // create the attribute
+  hid_t attr1 = H5Acreate(vid, name.c_str(), datatype, dataspace, H5P_DEFAULT, H5P_DEFAULT);
+  if (attr1 < 0) {
+    NXReportError("ERROR: attribute cannot created! ");
+    killAttVID(fid, vid);
     return NXstatus::NX_ERROR;
   }
-  return LOCKED_CALL(pFunc->nxputattr(pFunc->pNexusData, name, data, datalen, iType));
-}
-
-/* ------------------------------------------------------------------- */
-
-NXstatus NXputslab(NXhandle fid, const void *data, const int iStart[], const int iSize[]) {
-  int i, rank;
-  NXnumtype iType;
-  int64_t iStart64[NX_MAXRANK], iSize64[NX_MAXRANK];
-  if (NXgetinfo64(fid, &rank, iStart64, &iType) != NXstatus::NX_OK) {
+  if (H5Awrite(attr1, datatype, data) < 0) {
+    NXReportError("ERROR: failed to store attribute ");
+    killAttVID(fid, vid);
     return NXstatus::NX_ERROR;
   }
-  for (i = 0; i < rank; ++i) {
-    iStart64[i] = iStart[i];
-    iSize64[i] = iSize[i];
-  }
-  return NXputslab64(fid, data, iStart64, iSize64);
+  /* Close attribute dataspace */
+  H5Tclose(datatype);
+  H5Sclose(dataspace);
+  /* Close attribute  */
+  H5Aclose(attr1);
+  killAttVID(fid, vid);
+  // return that it is okay
+  return NXstatus::NX_OK;
 }
 
-NXstatus NXputslab64(NXhandle fid, const void *data, const int64_t iStart[], const int64_t iSize[]) {
-  pNexusFunction pFunc = handleToNexusFunc(fid);
-  return LOCKED_CALL(pFunc->nxputslab64(pFunc->pNexusData, data, iStart, iSize));
-}
+NXstatus NXputslab64(NXhandle fid, const void *data, Mantid::Nexus::DimSizeVector const &iStart,
+                     Mantid::Nexus::DimSizeVector const &iSize) {
+  int iRet, rank;
+  hsize_t myStart[H5S_MAX_RANK];
+  hsize_t mySize[H5S_MAX_RANK];
+  hsize_t size[H5S_MAX_RANK], thedims[H5S_MAX_RANK], maxdims[H5S_MAX_RANK];
+  hid_t dataspace;
+  int unlimiteddim = 0;
 
-/* ------------------------------------------------------------------- */
-
-NXstatus NXgetdataID(NXhandle fid, NXlink *sRes) {
-  pNexusFunction pFunc = handleToNexusFunc(fid);
-  return LOCKED_CALL(pFunc->nxgetdataID(pFunc->pNexusData, sRes));
-}
-
-/* ------------------------------------------------------------------- */
-
-NXstatus NXmakelink(NXhandle fid, NXlink *sLink) {
-  pNexusFunction pFunc = handleToNexusFunc(fid);
-  return LOCKED_CALL(pFunc->nxmakelink(pFunc->pNexusData, sLink));
-}
-
-/* ------------------------------------------------------------------- */
-
-NXstatus NXmakenamedlink(NXhandle fid, CONSTCHAR *newname, NXlink *sLink) {
-  pNexusFunction pFunc = handleToNexusFunc(fid);
-  if (pFunc->checkNameSyntax && !validNXName(newname, 0)) {
-    char buffer[256];
-    sprintf(buffer, "ERROR: invalid characters in link name \"%s\"", newname);
-    NXReportError(buffer);
+  /* check if there is an Dataset open */
+  if (fid->iCurrentD == 0) {
+    NXReportError("ERROR: no dataset open");
     return NXstatus::NX_ERROR;
   }
-  return LOCKED_CALL(pFunc->nxmakenamedlink(pFunc->pNexusData, newname, sLink));
+  rank = H5Sget_simple_extent_ndims(fid->iCurrentS);
+  if (rank < 0) {
+    NXReportError("ERROR: cannot get rank");
+    return NXstatus::NX_ERROR;
+  }
+  iRet = H5Sget_simple_extent_dims(fid->iCurrentS, thedims, maxdims);
+  if (iRet < 0) {
+    NXReportError("ERROR: cannot get dimensions");
+    return NXstatus::NX_ERROR;
+  }
+
+  for (int i = 0; i < rank; i++) {
+    myStart[i] = static_cast<hsize_t>(iStart[i]);
+    mySize[i] = static_cast<hsize_t>(iSize[i]);
+    size[i] = static_cast<hsize_t>(iStart[i] + iSize[i]);
+    if (maxdims[i] == H5S_UNLIMITED) {
+      unlimiteddim = 1;
+    }
+  }
+  if (H5Tget_class(fid->iCurrentT) == H5T_STRING) {
+    mySize[rank - 1] = 1;
+    myStart[rank - 1] = 0;
+    size[rank - 1] = 1;
+  }
+  dataspace = H5Screate_simple(rank, mySize, NULL);
+  if (unlimiteddim) {
+    for (int i = 0; i < rank; i++) {
+      if (size[i] < thedims[i]) {
+        size[i] = thedims[i];
+      }
+    }
+    iRet = H5Dset_extent(fid->iCurrentD, size);
+    if (iRet < 0) {
+      NXReportError("ERROR: extend slab failed");
+      return NXstatus::NX_ERROR;
+    }
+
+    hid_t filespace = H5Dget_space(fid->iCurrentD);
+
+    /* define slab */
+    iRet = H5Sselect_hyperslab(filespace, H5S_SELECT_SET, myStart, NULL, mySize, NULL);
+    /* deal with HDF errors */
+    if (iRet < 0) {
+      NXReportError("ERROR: selecting slab failed");
+      return NXstatus::NX_ERROR;
+    }
+    /* write slab */
+    iRet = H5Dwrite(fid->iCurrentD, fid->iCurrentT, dataspace, filespace, H5P_DEFAULT, data);
+    if (iRet < 0) {
+      NXReportError("ERROR: writing slab failed");
+    }
+    /* update with new size */
+    iRet = H5Sclose(fid->iCurrentS);
+    if (iRet < 0) {
+      NXReportError("ERROR: updating size failed");
+    }
+    fid->iCurrentS = filespace;
+  } else {
+    /* define slab */
+    iRet = H5Sselect_hyperslab(fid->iCurrentS, H5S_SELECT_SET, myStart, NULL, mySize, NULL);
+    /* deal with HDF errors */
+    if (iRet < 0) {
+      NXReportError("ERROR: selecting slab failed");
+      return NXstatus::NX_ERROR;
+    }
+    /* write slab */
+    iRet = H5Dwrite(fid->iCurrentD, fid->iCurrentT, dataspace, fid->iCurrentS, H5P_DEFAULT, data);
+    if (iRet < 0) {
+      NXReportError("ERROR: writing slab failed");
+    }
+  }
+  /* deal with HDF errors */
+  iRet = H5Sclose(dataspace);
+  if (iRet < 0) {
+    NXReportError("ERROR: closing slab failed");
+    return NXstatus::NX_ERROR;
+  }
+  return NXstatus::NX_OK;
+}
+
+/* ---- --------------------------------------------------------------- */
+
+NXstatus NXgetdataID(NXhandle fid, NXlink &sRes) {
+  NXnumtype type = NXnumtype::CHAR;
+
+  /* we cannot return ID's when no datset is open */
+  if (fid->iCurrentD <= 0) {
+    return NXstatus::NX_ERROR;
+  }
+
+  /*
+     this means: if the item is already linked: use the target attribute else,
+     the address to the current node
+   */
+  std::size_t datalen = 1024;
+  char caddr[1024] = {0};
+  if (NXgetattr(fid, "target", caddr, datalen, type) != NXstatus::NX_OK) {
+    sRes.targetAddress = buildCurrentAddress(fid);
+  } else {
+    sRes.targetAddress = std::string(caddr);
+  }
+  sRes.linkType = NXentrytype::sds;
+  return NXstatus::NX_OK;
+}
+
+/* ------------------------------------------------------------------- */
+
+NXstatus NXmakelink(NXhandle fid, NXlink const &sLink) {
+  std::string linkTarget;
+  // char *itemName = NULL;
+
+  if (fid->iCurrentG == 0) { /* root level, can not link here */
+    return NXstatus::NX_ERROR;
+  }
+
+  /*
+     locate name of the element to link
+   */
+  std::string itemName = sLink.targetAddress.substr(sLink.targetAddress.find_last_of('/') + 1);
+
+  /*
+     build addressname to link from our current group and the name
+     of the thing to link
+   */
+  linkTarget = fid->groupaddr / itemName;
+
+  H5Lcreate_hard(fid->iFID, sLink.targetAddress.c_str(), H5L_SAME_LOC, linkTarget.c_str(), H5P_DEFAULT, H5P_DEFAULT);
+
+  return NX5settargetattribute(fid, sLink);
 }
 
 /* -------------------------------------------------------------------- */
-NXstatus NXopensourcegroup(NXhandle fid) {
-  char target_path[512];
-  NXnumtype type = NXnumtype::CHAR;
-  int length = 511;
-  NXstatus status;
-
-  status = NXgetattr(fid, "target", target_path, &length, &type);
-  if (status != NXstatus::NX_OK) {
-    NXReportError("ERROR: item not linked");
-    return NXstatus::NX_ERROR;
-  }
-  return NXopengrouppath(fid, target_path);
-}
 
 /*----------------------------------------------------------------------*/
 
-NXstatus NXflush(NXhandle *pHandle) {
-  NXhandle hfil;
-  pFileStack fileStack = NULL;
-  NXstatus status;
+NXstatus NXflush(NXhandle &fid) {
+  herr_t iRet;
 
-  pNexusFunction pFunc = NULL;
-  fileStack = (pFileStack)*pHandle;
-  pFunc = peekFileOnStack(fileStack);
-  hfil = pFunc->pNexusData;
-  status = LOCKED_CALL(pFunc->nxflush(&hfil));
-  pFunc->pNexusData = hfil;
-  return status;
-}
-
-/*-------------------------------------------------------------------------*/
-
-NXstatus NXmalloc(void **data, int rank, const int dimensions[], NXnumtype datatype) {
-  int64_t *dims64 = dupDimsArray(static_cast<const int *>(dimensions), rank);
-  NXstatus status = NXmalloc64(data, rank, dims64, datatype);
-  free(dims64);
-  return status;
-}
-
-NXstatus NXmalloc64(void **data, int rank, const int64_t dimensions[], NXnumtype datatype) {
-  int i;
-  size_t size = 1;
-  *data = NULL;
-  for (i = 0; i < rank; i++) {
-    size *= (size_t)dimensions[i];
-  }
-  if ((datatype == NXnumtype::CHAR) || (datatype == NXnumtype::INT8) || (datatype == NXnumtype::UINT8)) {
-    /* allow for terminating \0 */
-    size += 2;
-  } else if ((datatype == NXnumtype::INT16) || (datatype == NXnumtype::UINT16)) {
-    size *= 2;
-  } else if ((datatype == NXnumtype::INT32) || (datatype == NXnumtype::UINT32) || (datatype == NXnumtype::FLOAT32)) {
-    size *= 4;
-  } else if ((datatype == NXnumtype::INT64) || (datatype == NXnumtype::UINT64)) {
-    size *= 8;
-  } else if (datatype == NXnumtype::FLOAT64) {
-    size *= 8;
+  if (fid->iCurrentD != 0) {
+    iRet = H5Fflush(fid->iCurrentD, H5F_SCOPE_LOCAL);
+  } else if (fid->iCurrentG != 0) {
+    iRet = H5Fflush(fid->iCurrentG, H5F_SCOPE_LOCAL);
   } else {
-    NXReportError("ERROR: NXmalloc - unknown data type in array");
-    return NXstatus::NX_ERROR;
+    iRet = H5Fflush(fid->iFID, H5F_SCOPE_LOCAL);
   }
-  *data = malloc(size);
-  if (*data != NULL) {
-    memset(*data, 0, size);
+  if (iRet < 0) {
+    NXReportError("ERROR: The object cannot be flushed");
+    return NXstatus::NX_ERROR;
   }
   return NXstatus::NX_OK;
 }
 
 /*-------------------------------------------------------------------------*/
-
-NXstatus NXfree(void **data) {
-  if (data == NULL) {
-    NXReportError("ERROR: passing NULL to NXfree");
-    return NXstatus::NX_ERROR;
-  }
-  if (*data == NULL) {
-    NXReportError("ERROR: passing already freed pointer to NXfree");
-    return NXstatus::NX_ERROR;
-  }
-  free(*data);
-  *data = NULL;
-  return NXstatus::NX_OK;
-}
-
+/*-------------------------------------------------------------------------*/
 /* --------------------------------------------------------------------- */
-
-NXstatus NXgetnextentry(NXhandle fid, NXname name, NXname nxclass, NXnumtype *datatype) {
-  pNexusFunction pFunc = handleToNexusFunc(fid);
-  return LOCKED_CALL(pFunc->nxgetnextentry(pFunc->pNexusData, name, nxclass, datatype));
-}
-
 /*----------------------------------------------------------------------*/
 /*
 **  TRIM.C - Remove leading, trailing, & excess embedded spaces
 **
 **  public domain by Bob Stout
 */
-#define NUL '\0'
 
 char *nxitrim(char *str) {
   // Trap NULL
@@ -921,636 +748,533 @@ char *nxitrim(char *str) {
       if (!isspace(str[i]))
         break;
     }
-    str[++i] = NUL;
+    str[++i] = '\0';
   }
   return str;
 }
 
 /*-------------------------------------------------------------------------*/
 
-NXstatus NXgetdata(NXhandle fid, void *data) {
-  NXstatus status;
-  NXnumtype type;
-  int rank;
-  int64_t iDim[NX_MAXRANK];
+NXstatus NXgetchardata(NXhandle fid, void *data) {
+  NXstatus status = NXstatus::NX_ERROR;
 
-  pNexusFunction pFunc = handleToNexusFunc(fid);
-  LOCKED_CALL(pFunc->nxgetinfo64(pFunc->pNexusData, &rank, iDim, &type)); /* unstripped size if string */
-  /* only strip one dimensional strings */
-  if ((type == NXnumtype::CHAR) && (pFunc->stripFlag == 1) && (rank == 1)) {
-    char *pPtr;
-    pPtr = static_cast<char *>(malloc((size_t)iDim[0] + 5));
-    memset(pPtr, 0, (size_t)iDim[0] + 5);
-    status = LOCKED_CALL(pFunc->nxgetdata(pFunc->pNexusData, pPtr));
-    char const *pPtr2;
-    pPtr2 = nxitrim(pPtr);
-#if defined(__GNUC__) && !(defined(__clang__))
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wstringop-truncation"
-#endif
-    strncpy(static_cast<char *>(data), pPtr2, strlen(pPtr2)); /* not NULL terminated by default */
-#if defined(__GNUC__) && !(defined(__clang__))
-#pragma GCC diagnostic pop
-#endif
-    free(pPtr);
+  if (H5Tis_variable_str(fid->iCurrentT)) {
+    char *cdata = nullptr;
+    herr_t ret = H5Dread(fid->iCurrentD, fid->iCurrentT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &cdata);
+    if (ret < 0 || cdata == nullptr) {
+      status = NXstatus::NX_ERROR;
+    } else {
+      memcpy(data, cdata, (strlen(cdata) + 1) * sizeof(char));
+      H5free_memory(cdata);
+      status = NXstatus::NX_OK;
+    }
   } else {
-    status = LOCKED_CALL(pFunc->nxgetdata(pFunc->pNexusData, data));
+    hsize_t len = H5Tget_size(fid->iCurrentT);
+    int rank = H5Sget_simple_extent_ndims(fid->iCurrentS);
+    if (rank > 0) {
+      hsize_t *dims = new hsize_t[rank];
+      H5Sget_simple_extent_dims(fid->iCurrentS, dims, NULL);
+      for (int i = 0; i < rank - 1; i++) {
+        len *= (dims[i] > 1 ? dims[i] : 1); // min of dims[0], 1
+      }
+      delete[] dims;
+    }
+    // reserve space in memory
+    char *cdata = new char[len + 1];
+    memset(cdata, 0, (len + 1) * sizeof(char));
+    herr_t ret = H5Dread(fid->iCurrentD, fid->iCurrentT, H5S_ALL, H5S_ALL, H5P_DEFAULT, cdata);
+    if (ret < 0) {
+      status = NXstatus::NX_ERROR;
+    } else {
+      cdata[len] = '\0'; // ensure null termination
+      /* NOTE len is truly the correct length to use here.
+       * It is not necessary to use (len + 1); null termination is already handled,
+       * and even-more-handling it causes errors downstream.
+       * It is not preferable to use strlen(cdata), as the cdata may have \0 between char arrays. */
+      memcpy(data, cdata, len * sizeof(char));
+      status = NXstatus::NX_OK;
+    }
+    delete[] cdata;
   }
   return status;
 }
 
-/*---------------------------------------------------------------------------*/
-NXstatus NXgetrawinfo64(NXhandle fid, int *rank, int64_t dimension[], NXnumtype *iType) {
-  pNexusFunction pFunc = handleToNexusFunc(fid);
-  return LOCKED_CALL(pFunc->nxgetinfo64(pFunc->pNexusData, rank, dimension, iType));
-}
-
-NXstatus NXgetrawinfo(NXhandle fid, int *rank, int dimension[], NXnumtype *iType) {
-  int i;
-  NXstatus status;
-  int64_t dims64[NX_MAXRANK];
-  pNexusFunction pFunc = handleToNexusFunc(fid);
-  status = LOCKED_CALL(pFunc->nxgetinfo64(pFunc->pNexusData, rank, dims64, iType));
-  for (i = 0; i < *rank; ++i) {
-    dimension[i] = (int)dims64[i];
+NXstatus NXgetdata(NXhandle fid, void *data) {
+  // handle string data separately
+  NXstatus status = NXstatus::NX_ERROR;
+  if (H5Tget_class(fid->iCurrentT) == H5T_STRING) {
+    status = NXgetchardata(fid, data);
+  } else {
+    herr_t ret = -1;
+    int ndims = H5Sget_simple_extent_ndims(fid->iCurrentS);
+    if (ndims == 0) { // SCALAR dataset
+      hid_t datatype = H5Dget_type(fid->iCurrentD);
+      hid_t filespace = H5Dget_space(fid->iCurrentD);
+      hid_t memtype_id = H5Screate(H5S_SCALAR);
+      H5Sselect_all(filespace);
+      ret = H5Dread(fid->iCurrentD, datatype, memtype_id, filespace, H5P_DEFAULT, data);
+      // cleanup
+      H5Sclose(memtype_id);
+      H5Sclose(filespace);
+      H5Tclose(datatype);
+    } else {
+      // map datatypes of other platforms
+      hid_t memtype_id = h5MemType(fid->iCurrentT);
+      ret = H5Dread(fid->iCurrentD, memtype_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
+    }
+    if (ret < 0) {
+      NXReportError("ERROR: failed to transfer dataset");
+      status = NXstatus::NX_ERROR;
+    } else {
+      status = NXstatus::NX_OK;
+    }
   }
   return status;
 }
 
 /*-------------------------------------------------------------------------*/
 
-NXstatus NXgetinfo(NXhandle fid, int *rank, int dimension[], NXnumtype *iType) {
-  int i;
-  NXstatus status;
-  int64_t dims64[NX_MAXRANK];
-  status = NXgetinfo64(fid, rank, dims64, iType);
-  for (i = 0; i < *rank; ++i) {
-    dimension[i] = (int)dims64[i];
-  }
-  return status;
-}
-
-NXstatus NXgetinfo64(NXhandle fid, int *rank, int64_t dimension[], NXnumtype *iType) {
-  NXstatus status;
+NXstatus NXgetinfo64(NXhandle fid, std::size_t &rank, Mantid::Nexus::DimVector &dims, NXnumtype &iType) {
   char *pPtr = NULL;
-  pNexusFunction pFunc = handleToNexusFunc(fid);
-  *rank = 0;
-  status = LOCKED_CALL(pFunc->nxgetinfo64(pFunc->pNexusData, rank, dimension, iType));
+  rank = 0;
+
+  std::size_t iRank;
+  NXnumtype mType;
+  hsize_t myDim[H5S_MAX_RANK];
+  H5T_class_t tclass;
+  hid_t memType;
+  char *vlData = NULL;
+
+  /* check if there is an Dataset open */
+  if (fid->iCurrentD == 0) {
+    NXReportError("ERROR: no dataset open");
+    return NXstatus::NX_ERROR;
+  }
+
+  /* read information */
+  tclass = H5Tget_class(fid->iCurrentT);
+  mType = hdf5ToNXType(tclass, fid->iCurrentT);
+  iRank = H5Sget_simple_extent_dims(fid->iCurrentS, myDim, NULL);
+  if (iRank == 0) {
+    iRank = 1; /* we pretend */
+    myDim[0] = 1;
+  } else {
+    H5Sget_simple_extent_dims(fid->iCurrentS, myDim, NULL);
+  }
+  /* conversion to proper ints for the platform */
+  iType = mType;
+  if (tclass == H5T_STRING && myDim[iRank - 1] == 1) {
+    if (H5Tis_variable_str(fid->iCurrentT)) {
+      /* this will not work for arrays of strings */
+      memType = H5Tcopy(H5T_C_S1);
+      H5Tset_size(memType, H5T_VARIABLE);
+      H5Dread(fid->iCurrentD, memType, H5S_ALL, H5S_ALL, H5P_DEFAULT, &vlData);
+      if (vlData != NULL) {
+        myDim[iRank - 1] = strlen(vlData) + 1;
+        H5Dvlen_reclaim(memType, fid->iCurrentS, H5P_DEFAULT, &vlData);
+      }
+      H5Tclose(memType);
+    } else {
+      myDim[iRank - 1] = H5Tget_size(fid->iCurrentT);
+    }
+  }
+  rank = iRank;
+  dims.resize(rank);
+  for (std::size_t i = 0; i < rank; i++) {
+    dims[i] = myDim[i];
+  }
+
   /*
      the length of a string may be trimmed....
    */
   /* only strip one dimensional strings */
-  if ((*iType == NXnumtype::CHAR) && (pFunc->stripFlag == 1) && (*rank == 1)) {
-    pPtr = static_cast<char *>(malloc(static_cast<size_t>(dimension[0] + 1) * sizeof(char)));
+  if ((iType == NXnumtype::CHAR) && (rank == 1)) {
+    pPtr = static_cast<char *>(malloc(static_cast<size_t>(dims[0] + 1) * sizeof(char)));
     if (pPtr != NULL) {
-      memset(pPtr, 0, static_cast<size_t>(dimension[0] + 1) * sizeof(char));
-      LOCKED_CALL(pFunc->nxgetdata(pFunc->pNexusData, pPtr));
-      dimension[0] = static_cast<int64_t>(strlen(nxitrim(pPtr)));
+      memset(pPtr, 0, static_cast<size_t>(dims[0] + 1) * sizeof(char));
+      NXgetdata(fid, pPtr);
+      dims[0] = static_cast<int64_t>(strlen(nxitrim(pPtr)));
       free(pPtr);
     }
   }
+  return NXstatus::NX_OK;
+  ;
+}
+
+/*-------------------------------------------------------------------------*/
+
+NXstatus NXgetslab64(NXhandle fid, void *data, Mantid::Nexus::DimSizeVector const &iStart,
+                     Mantid::Nexus::DimSizeVector const &iSize) {
+  hsize_t mySize[H5S_MAX_RANK];
+  hid_t memspace, iRet;
+  H5T_class_t tclass;
+  hid_t memtype_id;
+  char *tmp_data = nullptr;
+  int iRank;
+
+  /* check if there is an Dataset open */
+  if (fid->iCurrentD == 0) {
+    NXReportError("ERROR: no dataset open");
+    return NXstatus::NX_ERROR;
+  }
+  tclass = H5Tget_class(fid->iCurrentT);
+  /* map datatypes of other platforms */
+  if (tclass == H5T_STRING) {
+    memtype_id = fid->iCurrentT;
+  } else {
+    memtype_id = h5MemType(fid->iCurrentT);
+  }
+
+  iRank = H5Sget_simple_extent_ndims(fid->iCurrentS);
+
+  if (iRank == 0) {
+    /* this is an unslabbale SCALAR */
+    hid_t filespace = H5Dget_space(fid->iCurrentD);
+    memspace = H5Screate(H5S_SCALAR);
+    H5Sselect_all(filespace);
+    iRet = H5Dread(fid->iCurrentD, memtype_id, memspace, filespace, H5P_DEFAULT, data);
+    H5Sclose(filespace);
+  } else {
+    hsize_t myStart[H5S_MAX_RANK];
+    hsize_t mStart[H5S_MAX_RANK];
+    for (int i = 0; i < iRank; i++) {
+      myStart[i] = static_cast<hsize_t>(iStart[i]);
+      mySize[i] = static_cast<hsize_t>(iSize[i]);
+      mStart[i] = static_cast<hsize_t>(0);
+    }
+
+    /*
+     * this does not work for multidimensional string arrays.
+     */
+    int mtype = 0;
+    if (tclass == H5T_STRING) {
+      mtype = NXnumtype::CHAR;
+      if (mySize[0] == 1) {
+        mySize[0] = H5Tget_size(fid->iCurrentT);
+      }
+      tmp_data = static_cast<char *>(malloc((size_t)mySize[0]));
+      memset(tmp_data, 0, sizeof(mySize[0]));
+      iRet = H5Sselect_hyperslab(fid->iCurrentS, H5S_SELECT_SET, mStart, NULL, mySize, NULL);
+    } else {
+      iRet = H5Sselect_hyperslab(fid->iCurrentS, H5S_SELECT_SET, myStart, NULL, mySize, NULL);
+    }
+    /* define slab */
+    /* deal with HDF errors */
+    if (iRet < 0) {
+      NXReportError("ERROR: selecting slab failed");
+      return NXstatus::NX_ERROR;
+    }
+
+    memspace = H5Screate_simple(iRank, mySize, NULL);
+    iRet = H5Sselect_hyperslab(memspace, H5S_SELECT_SET, mStart, NULL, mySize, NULL);
+    if (iRet < 0) {
+      NXReportError("ERROR: selecting memspace failed");
+      return NXstatus::NX_ERROR;
+    }
+    /* read slab */
+    if (mtype == NXnumtype::CHAR) {
+      iRet = H5Dread(fid->iCurrentD, memtype_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, tmp_data);
+      char const *data1;
+      data1 = tmp_data + myStart[0];
+      strncpy(static_cast<char *>(data), data1, (size_t)iSize[0]);
+      free(tmp_data);
+    } else {
+      iRet = H5Dread(fid->iCurrentD, memtype_id, memspace, fid->iCurrentS, H5P_DEFAULT, data);
+    }
+  }
+  /* cleanup */
+  H5Sclose(memspace);
+  H5Tclose(tclass);
+
+  if (iRet < 0) {
+    NXReportError("ERROR: reading slab failed");
+    return NXstatus::NX_ERROR;
+  }
+  return NXstatus::NX_OK;
+}
+
+/*-------------------------------------------------------------------------*/
+
+NXstatus NXgetcharattr(NXhandle fid, std::string const &name, void *data, std::size_t &datalen, NXnumtype &iType) {
+  hid_t vid = getAttVID(fid);
+
+  hid_t attr = H5Aopen(vid, name.c_str(), H5P_DEFAULT);
+  if (attr < 0) {
+    killAttVID(fid, vid);
+    NXReportError(("ERROR: attribute \"" + name + "\" not found").c_str());
+    return NXstatus::NX_ERROR;
+  }
+
+  // determine the datatype and size
+  // hid_t datatype = H5Aget_type(attr);
+  // H5T_class_t dataclass = H5Tget_class(datatype);
+  // iType = hdf5ToNXType(dataclass, datatype);
+
+  hid_t datatype = nxToHDF5Type(iType);
+  H5T_class_t dataclass = H5Tget_class(datatype);
+
+  NXstatus status;
+  if (dataclass != H5T_STRING) {
+    NXReportError("ERROR: attribute is not a string");
+    status = NXstatus::NX_ERROR;
+  } else if (H5Tis_variable_str(datatype)) {
+    char *rdata = nullptr;
+    herr_t iRet = H5Aread(attr, datatype, &rdata);
+    if (iRet < 0 || rdata == nullptr) {
+      NXReportError("Failed to read variable-length string");
+      status = NXstatus::NX_ERROR;
+    } else {
+      // datalen = strlen(rdata);
+      memcpy(data, rdata, datalen * sizeof(char));
+      H5free_memory(rdata); // NOTE must free rdata within hdf5
+      status = NXstatus::NX_OK;
+    }
+  } else {
+    // datalen = H5Tget_size(datatype);
+    char *rdata = static_cast<char *>(calloc(datalen + 1, sizeof(char)));
+    herr_t iRet = H5Aread(attr, datatype, rdata);
+    if (iRet < 0) {
+      NXReportError("Failed to read fixed-length string");
+      status = NXstatus::NX_ERROR;
+    } else {
+      rdata[datalen] = '\0'; // ensure null termination
+      memcpy(data, rdata, (datalen) * sizeof(char));
+      status = NXstatus::NX_OK;
+    }
+    free(rdata);
+  }
+
+  // cleanup
+  H5Tclose(datatype);
+  H5Aclose(attr);
+  killAttVID(fid, vid);
   return status;
 }
 
-/*-------------------------------------------------------------------------*/
+// cppcheck-suppress constParameterCallback
+NXstatus NXgetattr(NXhandle fid, std::string const &name, void *data, std::size_t &datalen, NXnumtype &iType) {
+  herr_t iRet;
+  char pBuffer[256];
 
-NXstatus NXgetslab(NXhandle fid, void *data, const int iStart[], const int iSize[]) {
-  int i, rank;
-  NXnumtype iType;
-  int64_t iStart64[NX_MAXRANK], iSize64[NX_MAXRANK];
-  if (NXgetinfo64(fid, &rank, iStart64, &iType) != NXstatus::NX_OK) {
+  hid_t type = nxToHDF5Type(iType);
+
+  hid_t vid = getAttVID(fid);
+  hid_t attrid = H5Aopen_by_name(vid, ".", name.c_str(), H5P_DEFAULT, H5P_DEFAULT);
+  if (attrid < 0) {
+    sprintf(pBuffer, "ERROR: attribute \"%s\" not found", name.c_str());
+    killAttVID(fid, vid);
+    NXReportError(pBuffer);
     return NXstatus::NX_ERROR;
   }
-  for (i = 0; i < rank; ++i) {
-    iStart64[i] = iStart[i];
-    iSize64[i] = iSize[i];
-  }
-  return NXgetslab64(fid, data, iStart64, iSize64);
-}
 
-NXstatus NXgetslab64(NXhandle fid, void *data, const int64_t iStart[], const int64_t iSize[]) {
-  pNexusFunction pFunc = handleToNexusFunc(fid);
-  return LOCKED_CALL(pFunc->nxgetslab64(pFunc->pNexusData, data, iStart, iSize));
-}
-
-/*-------------------------------------------------------------------------*/
-
-NXstatus NXgetattr(NXhandle fid, const char *name, void *data, int *datalen, NXnumtype *iType) {
-  pNexusFunction pFunc = handleToNexusFunc(fid);
-  return LOCKED_CALL(pFunc->nxgetattr(pFunc->pNexusData, name, data, datalen, iType));
-}
-
-/*-------------------------------------------------------------------------*/
-
-NXstatus NXgetattrinfo(NXhandle fid, int *iN) {
-  pNexusFunction pFunc = handleToNexusFunc(fid);
-  return LOCKED_CALL(pFunc->nxgetattrinfo(pFunc->pNexusData, iN));
-}
-
-/*-------------------------------------------------------------------------*/
-
-NXstatus NXgetgroupID(NXhandle fileid, NXlink *sRes) {
-  pNexusFunction pFunc = handleToNexusFunc(fileid);
-  return LOCKED_CALL(pFunc->nxgetgroupID(pFunc->pNexusData, sRes));
-}
-
-/*-------------------------------------------------------------------------*/
-
-NXstatus NXgetgroupinfo(NXhandle fid, int *iN, NXname pName, NXname pClass) {
-  pNexusFunction pFunc = handleToNexusFunc(fid);
-  return LOCKED_CALL(pFunc->nxgetgroupinfo(pFunc->pNexusData, iN, pName, pClass));
-}
-
-/*-------------------------------------------------------------------------*/
-
-NXstatus NXsameID(NXhandle fileid, NXlink const *pFirstID, NXlink const *pSecondID) {
-  pNexusFunction pFunc = handleToNexusFunc(fileid);
-  return LOCKED_CALL(pFunc->nxsameID(pFunc->pNexusData, pFirstID, pSecondID));
-}
-
-/*-------------------------------------------------------------------------*/
-
-NXstatus NXinitattrdir(NXhandle fid) {
-  pNexusFunction pFunc = handleToNexusFunc(fid);
-  return LOCKED_CALL(pFunc->nxinitattrdir(pFunc->pNexusData));
-}
-
-/*-------------------------------------------------------------------------*/
-
-NXstatus NXinitgroupdir(NXhandle fid) {
-  pNexusFunction pFunc = handleToNexusFunc(fid);
-  return LOCKED_CALL(pFunc->nxinitgroupdir(pFunc->pNexusData));
-}
-
-/*----------------------------------------------------------------------*/
-NXstatus NXinquirefile(NXhandle handle, char *filename, int filenameBufferLength) {
-  pFileStack fileStack;
-
-  pNexusFunction pFunc = handleToNexusFunc(handle);
-  if (pFunc->nxnativeinquirefile != NULL) {
-
-    NXstatus status = LOCKED_CALL(pFunc->nxnativeinquirefile(pFunc->pNexusData, filename, filenameBufferLength));
-    if (status != NXstatus::NX_OK) {
-      return NXstatus::NX_ERROR;
-    } else {
-      return NXstatus::NX_OK;
+  // get the dataspace and proper dimensions
+  hid_t filespace = H5Aget_space(attrid);
+  int ndims = H5Sget_simple_extent_ndims(filespace);
+  if (ndims > 0) {
+    hsize_t totalsize = 1;
+    hsize_t *dims = new hsize_t[ndims];
+    H5Sget_simple_extent_dims(filespace, dims, NULL);
+    for (int i = 0; i < ndims; i++) {
+      totalsize *= dims[i];
     }
-  }
-
-  fileStack = static_cast<pFileStack>(handle);
-  char const *pPtr = NULL;
-  pPtr = peekFilenameOnStack(fileStack);
-  if (pPtr != NULL) {
-    auto length = strlen(pPtr);
-    if (length > static_cast<size_t>(filenameBufferLength)) {
-      length = static_cast<size_t>(filenameBufferLength - 1);
-    }
-    memset(filename, 0, static_cast<size_t>(filenameBufferLength));
-    memcpy(filename, pPtr, length);
-    return NXstatus::NX_OK;
-  } else {
-    return NXstatus::NX_ERROR;
-  }
-}
-
-/*------------------------------------------------------------------------*/
-NXstatus NXisexternalgroup(NXhandle fid, CONSTCHAR *name, CONSTCHAR *nxclass, char *url, int urlLen) {
-  NXstatus status, attStatus;
-  int length = 1023;
-  NXnumtype type = NXnumtype::CHAR;
-  char nxurl[1024];
-
-  pNexusFunction pFunc = handleToNexusFunc(fid);
-
-  if (pFunc->nxnativeisexternallink != NULL) {
-    status = LOCKED_CALL(pFunc->nxnativeisexternallink(pFunc->pNexusData, name, url, urlLen));
-    if (status == NXstatus::NX_OK) {
-      return NXstatus::NX_OK;
-    }
-    // need to continue, could still be old style link
-  }
-
-  status = LOCKED_CALL(pFunc->nxopengroup(pFunc->pNexusData, name, nxclass));
-  if (status != NXstatus::NX_OK) {
-    return status;
-  }
-  attStatus = NXgetattr(fid, "napimount", nxurl, &length, &type);
-  LOCKED_CALL(pFunc->nxclosegroup(pFunc->pNexusData));
-  if (attStatus == NXstatus::NX_OK) {
-    length = (int)strlen(nxurl);
-    if (length >= urlLen) {
-      length = urlLen - 1;
-    }
-    memset(url, 0, static_cast<size_t>(urlLen));
-    memcpy(url, nxurl, static_cast<size_t>(length));
-    return attStatus;
-  } else {
-    return NXstatus::NX_ERROR;
-  }
-}
-
-/*------------------------------------------------------------------------*/
-NXstatus NXisexternaldataset(NXhandle fid, CONSTCHAR *name, char *url, int urlLen) {
-  NXstatus status, attStatus;
-  NXnumtype type = NXnumtype::CHAR;
-  char nxurl[1024];
-
-  pNexusFunction pFunc = handleToNexusFunc(fid);
-
-  if (pFunc->nxnativeisexternallink != NULL) {
-    status = LOCKED_CALL(pFunc->nxnativeisexternallink(pFunc->pNexusData, name, url, urlLen));
-    if (status == NXstatus::NX_OK) {
-      return NXstatus::NX_OK;
-    }
-    // need to continue, could still be old style link
-  }
-
-  status = LOCKED_CALL(pFunc->nxopendata(pFunc->pNexusData, name));
-  if (status != NXstatus::NX_OK) {
-    return status;
-  }
-  int length = 1023;
-  attStatus = NXgetattr(fid, "napimount", nxurl, &length, &type);
-  LOCKED_CALL(pFunc->nxclosedata(pFunc->pNexusData));
-  if (attStatus == NXstatus::NX_OK) {
-    length = static_cast<int>(strlen(nxurl));
-    if (length >= urlLen) {
-      length = urlLen - 1;
-    }
-    memset(url, 0, static_cast<size_t>(urlLen));
-    memcpy(url, nxurl, static_cast<size_t>(length));
-    return attStatus;
-  } else {
-    return NXstatus::NX_ERROR;
-  }
-}
-
-/*------------------------------------------------------------------------*/
-NXstatus NXlinkexternal(NXhandle fid, CONSTCHAR *name, CONSTCHAR *nxclass, CONSTCHAR *url) {
-  NXstatus status;
-  NXnumtype type = NXnumtype::CHAR;
-  size_t length = 1024;
-  pNexusFunction pFunc = handleToNexusFunc(fid);
-
-  // in HDF5 we support external linking natively
-  if (pFunc->nxnativeexternallink != NULL) {
-    size_t urllen = strlen(url);
-    char nxurl[1024];
-    memset(nxurl, 0, length);
-    if (urllen >= length) {
-      urllen = length - 1;
-    }
-    memcpy(nxurl, url, urllen);
-    char exfile[512];
-    char expath[512];
-    int napistat = analyzeNapimount(nxurl, exfile, 511, expath, 511);
-    if (napistat != NXFILE) {
+    if (totalsize > 1) {
+      NXReportError("ERROR: attribute arrays not supported by this api");
       return NXstatus::NX_ERROR;
     }
-    status = LOCKED_CALL(pFunc->nxnativeexternallink(pFunc->pNexusData, name, exfile, expath));
-    if (status != NXstatus::NX_OK) {
-      return status;
-    }
-    return NXstatus::NX_OK;
   }
 
-  LOCKED_CALL(pFunc->nxmakegroup(pFunc->pNexusData, name, nxclass));
+  /* finally read the data */
+  if (type == H5T_C_S1) {
+    iRet = readStringAttributeN(attrid, static_cast<char *>(data), datalen);
+    datalen = strlen(static_cast<char *>(data));
+  } else {
+    iRet = H5Aread(attrid, type, data);
+    datalen = 1;
+  }
 
-  status = LOCKED_CALL(pFunc->nxopengroup(pFunc->pNexusData, name, nxclass));
-  if (status != NXstatus::NX_OK) {
-    return status;
+  if (iRet < 0) {
+    sprintf(pBuffer, "ERROR: could not read attribute data for \"%s\"", name.c_str());
+    NXReportError(pBuffer);
+    killAttVID(fid, vid);
+    return NXstatus::NX_ERROR;
   }
-  length = strlen(url);
-  status = NXputattr(fid, "napimount", url, static_cast<int>(length), type);
-  if (status != NXstatus::NX_OK) {
-    return status;
-  }
-  LOCKED_CALL(pFunc->nxclosegroup(pFunc->pNexusData));
+
+  H5Aclose(attrid);
+
+  killAttVID(fid, vid);
   return NXstatus::NX_OK;
 }
 
-/*------------------------------------------------------------------------*/
-NXstatus NXlinkexternaldataset(NXhandle fid, CONSTCHAR *name, CONSTCHAR *url) {
+/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*/
+
+NXstatus NXgetgroupID(NXhandle fid, NXlink &sRes) {
   NXnumtype type = NXnumtype::CHAR;
-  NXstatus status;
-  size_t length = 1024;
-  pNexusFunction pFunc = handleToNexusFunc(fid);
-  int rank = 1;
-  int64_t dims[1] = {1};
 
-  // TODO cut and paste
-
-  // in HDF5 we support external linking natively
-  if (pFunc->nxnativeexternallink != NULL) {
-    auto urllen = strlen(url);
-    char nxurl[1024];
-    memset(nxurl, 0, length);
-    if (urllen > length) {
-      urllen = length - 1;
-    }
-    memcpy(nxurl, url, urllen);
-    char exfile[512];
-    char expath[512];
-    int napistat = analyzeNapimount(nxurl, exfile, 511, expath, 511);
-    if (napistat != NXFILE) {
-      return NXstatus::NX_ERROR;
-    }
-    status = LOCKED_CALL(pFunc->nxnativeexternallink(pFunc->pNexusData, name, exfile, expath));
-    if (status != NXstatus::NX_OK) {
-      return status;
-    }
-    return NXstatus::NX_OK;
-  }
-
-  status = LOCKED_CALL(pFunc->nxmakedata64(pFunc->pNexusData, name, NXnumtype::CHAR, rank, dims));
-  if (status != NXstatus::NX_OK) {
-    return status;
-  }
-  status = LOCKED_CALL(pFunc->nxopendata(pFunc->pNexusData, name));
-  if (status != NXstatus::NX_OK) {
-    return status;
-  }
-  length = strlen(url);
-  status = NXputattr(fid, "napimount", url, static_cast<int>(length), type);
-  if (status != NXstatus::NX_OK) {
-    return status;
-  }
-  LOCKED_CALL(pFunc->nxclosedata(pFunc->pNexusData));
-  return NXstatus::NX_OK;
-}
-
-/*------------------------------------------------------------------------
-  Implementation of NXopenpath
-  --------------------------------------------------------------------------*/
-static int isDataSetOpen(NXhandle hfil) {
-  NXlink id;
-
-  /*
-     This uses the (sensible) feauture that NXgetdataID returns NX_ERROR
-     when no dataset is open
-   */
-  if (NXgetdataID(hfil, &id) == NXstatus::NX_ERROR) {
-    return 0;
+  if (fid->iCurrentG == 0) {
+    return NXstatus::NX_ERROR;
   } else {
-    return 1;
-  }
-}
-
-/*----------------------------------------------------------------------*/
-static int isRoot(NXhandle hfil) {
-  NXlink id;
-
-  /*
-     This uses the feauture that NXgetgroupID returns NX_ERROR
-     when we are at root level
-   */
-  if (NXgetgroupID(hfil, &id) == NXstatus::NX_ERROR) {
-    return 1;
-  } else {
-    return 0;
-  }
-}
-
-/*--------------------------------------------------------------------
-  copies the next path element into element.
-  returns a pointer into path beyond the extracted path
-  ---------------------------------------------------------------------*/
-static char *extractNextPath(char *path, NXname element) {
-  char *pStart = path;
-  /*
-     skip over leading /
-   */
-  if (*pStart == '/') {
-    pStart++;
-  }
-
-  /*
-     find next /
-   */
-  char *pNext = strchr(pStart, '/');
-  if (pNext == NULL) {
     /*
-       this is the last path element
+       this means: if the item is already linked: use the target attribute, else
+       the address to the current node
      */
-    strcpy(element, pStart);
-    return NULL;
-  } else {
-    size_t length = (size_t)(pNext - pStart);
-    strncpy(element, pStart, length);
-    element[length] = '\0';
+    std::size_t datalen = 1024;
+    char caddr[1024] = {0};
+    if (NXgetattr(fid, "target", caddr, datalen, type) != NXstatus::NX_OK) {
+      sRes.targetAddress = buildCurrentAddress(fid);
+    } else {
+      sRes.targetAddress = std::string(caddr);
+    }
+    sRes.linkType = NXentrytype::group;
+    return NXstatus::NX_OK;
   }
-  return pNext++;
+  /* not reached */
+  return NXstatus::NX_ERROR;
 }
 
+/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*/
+/*------------------------------------------------------------------------
+  Implementation of NXopenaddress
+  --------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*/
 /*-------------------------------------------------------------------*/
-static NXstatus gotoRoot(NXhandle hfil) {
-  NXstatus status;
-
-  if (isDataSetOpen(hfil)) {
-    status = NXclosedata(hfil);
-    if (status == NXstatus::NX_ERROR) {
-      return status;
-    }
-  }
-  while (!isRoot(hfil)) {
-    status = NXclosegroup(hfil);
-    if (status == NXstatus::NX_ERROR) {
-      return status;
-    }
-  }
-  return NXstatus::NX_OK;
-}
-
-/*--------------------------------------------------------------------*/
-static int isRelative(char const *path) {
-  if (path[0] == '.' && path[1] == '.')
-    return 1;
-  else
-    return 0;
-}
-
-/*------------------------------------------------------------------*/
-static NXstatus moveOneDown(NXhandle hfil) {
-  if (isDataSetOpen(hfil)) {
-    return NXclosedata(hfil);
-  } else {
-    return NXclosegroup(hfil);
-  }
-}
-
-/*-------------------------------------------------------------------
-  returns a pointer to the remaining path string to move up
-  --------------------------------------------------------------------*/
-static char *moveDown(NXhandle hfil, char *path, NXstatus *code) {
-  *code = NXstatus::NX_OK;
-
-  if (path[0] == '/') {
-    *code = gotoRoot(hfil);
-    return path;
-  } else {
-    char *pPtr;
-    pPtr = path;
-    while (isRelative(pPtr)) {
-      NXstatus status = moveOneDown(hfil);
-      if (status == NXstatus::NX_ERROR) {
-        *code = status;
-        return pPtr;
-      }
-      pPtr += 3;
-    }
-    return pPtr;
-  }
-}
-
-/*--------------------------------------------------------------------*/
-static NXstatus stepOneUp(NXhandle hfil, char const *name) {
-  NXnumtype datatype;
-  NXname name2, xclass;
-  char pBueffel[256];
-
-  /*
-     catch the case when we are there: i.e. no further stepping
-     necessary. This can happen with paths like ../
-   */
-  if (strlen(name) < 1) {
-    return NXstatus::NX_OK;
-  }
-
-  NXinitgroupdir(hfil);
-
-  while (NXgetnextentry(hfil, name2, xclass, &datatype) != NXstatus::NX_EOD) {
-    if (strcmp(name2, name) == 0) {
-      if (strcmp(xclass, "SDS") == 0) {
-        return NXopendata(hfil, name);
-      } else {
-        return NXopengroup(hfil, name, xclass);
-      }
-    }
-  }
-  snprintf(pBueffel, 255, "ERROR: NXopenpath cannot step into %s", name);
-  NXReportError(pBueffel);
-  return NXstatus::NX_ERROR;
-}
-
-/*--------------------------------------------------------------------*/
-static NXstatus stepOneGroupUp(NXhandle hfil, char const *name) {
-  NXnumtype datatype;
-  NXname name2, xclass;
-  char pBueffel[256];
-
-  /*
-     catch the case when we are there: i.e. no further stepping
-     necessary. This can happen with paths like ../
-   */
-  if (strlen(name) < 1) {
-    return NXstatus::NX_OK;
-  }
-
-  NXinitgroupdir(hfil);
-  while (NXgetnextentry(hfil, name2, xclass, &datatype) != NXstatus::NX_EOD) {
-
-    if (strcmp(name2, name) == 0) {
-      if (strcmp(xclass, "SDS") == 0) {
-        return NXstatus::NX_EOD;
-      } else {
-        return NXopengroup(hfil, name, xclass);
-      }
-    }
-  }
-  snprintf(pBueffel, 255, "ERROR: NXopengrouppath cannot step into %s", name);
-  NXReportError(pBueffel);
-  return NXstatus::NX_ERROR;
-}
-
 /*---------------------------------------------------------------------*/
-NXstatus NXopenpath(NXhandle hfil, CONSTCHAR *path) {
-  NXstatus status;
-  int run = 1;
-  NXname pathElement;
-  char *pPtr;
-
-  if (hfil == NULL || path == NULL) {
-    NXReportError("ERROR: NXopendata needs both a file handle and a path string");
+NXstatus NXopenaddress(NXhandle fid, std::string const &address) {
+  std::string addressElement;
+  if (fid == nullptr || address.empty()) {
+    NXReportError("ERROR: NXopenaddress needs both a file handle and a address string");
     return NXstatus::NX_ERROR;
   }
 
-  pPtr = moveDown(hfil, const_cast<char *>(static_cast<const char *>(path)), &status);
-  if (status != NXstatus::NX_OK) {
-    NXReportError("ERROR: NXopendata failed to move down in hierarchy");
-    return status;
+  // establish the new address absolutely
+  Mantid::Nexus::NexusAddress absaddr(address);
+  if (!absaddr.isAbsolute()) {
+    absaddr = fid->groupaddr / address;
   }
 
-  while (run == 1) {
-    pPtr = extractNextPath(pPtr, pathElement);
-    status = stepOneUp(hfil, pathElement);
-    if (status != NXstatus::NX_OK) {
-      return status;
+  // if we are already there, do nothing
+  if (absaddr == buildCurrentAddress(fid)) {
+    return NXstatus::NX_OK;
+  }
+
+  // go all the way down to the root
+  // if a dataset is open then close it
+  if (isDataSetOpen(fid)) {
+    H5Dclose(fid->iCurrentD);
+    H5Sclose(fid->iCurrentS);
+    H5Tclose(fid->iCurrentT);
+    fid->iCurrentD = 0;
+    fid->iCurrentS = 0;
+    fid->iCurrentT = 0;
+  }
+  // now close all the groups in the stack
+  for (hid_t gid : fid->iStack5) {
+    if (gid != 0) {
+      H5Gclose(gid);
     }
-    if (pPtr == NULL) {
-      run = 0;
+  }
+  fid->iStack5.clear();
+  // reset to the root condition
+  fid->iStack5.push_back(0);
+
+  // if we wanted to go to root, then stop here
+  if (absaddr == Mantid::Nexus::NexusAddress::root()) {
+    fid->iCurrentG = 0;
+    fid->groupaddr = Mantid::Nexus::NexusAddress::root();
+    return NXstatus::NX_OK;
+  }
+
+  // build new address
+  Mantid::Nexus::NexusAddress up(absaddr.parent_path());
+  std::string last(absaddr.stem());
+  // open groups up the address
+  if (up.isRoot()) {
+    fid->iCurrentG = 0;
+  } else {
+    fid->iCurrentG = fid->iFID;
+    for (auto const &name : up.parts()) {
+      hid_t gid = H5Gopen(fid->iCurrentG, name.c_str(), H5P_DEFAULT);
+      if (gid < 0) {
+        return NXstatus::NX_ERROR;
+      }
+      fid->iStack5.push_back(gid);
+      fid->iCurrentG = gid;
+      fid->groupaddr /= name;
     }
   }
-  return NXstatus::NX_OK;
-}
-
-/*---------------------------------------------------------------------*/
-NXstatus NXopengrouppath(NXhandle hfil, CONSTCHAR *path) {
-  NXstatus status;
-  NXname pathElement;
-  char *pPtr;
-  char buffer[256];
-
-  if (hfil == NULL || path == NULL) {
-    NXReportError("ERROR: NXopengrouppath needs both a file handle and a path string");
-    return NXstatus::NX_ERROR;
-  }
-
-  pPtr = moveDown(hfil, const_cast<char *>(static_cast<const char *>(path)), &status);
-  if (status != NXstatus::NX_OK) {
-    NXReportError("ERROR: NXopengrouppath failed to move down in hierarchy");
-    return status;
-  }
-
-  do {
-    pPtr = extractNextPath(pPtr, pathElement);
-    status = stepOneGroupUp(hfil, pathElement);
-    if (status == NXstatus::NX_ERROR) {
-      sprintf(buffer, "ERROR: NXopengrouppath cannot reach path %s", path);
-      NXReportError(buffer);
+  // now open the last element -- either a group or a dataset
+  H5O_info2_t op_data;
+  H5Oget_info_by_name(fid->iFID, absaddr.c_str(), &op_data, H5O_INFO_BASIC, H5P_DEFAULT);
+  if (op_data.type == H5O_TYPE_GROUP) {
+    hid_t gid = H5Gopen(fid->iFID, absaddr.c_str(), H5P_DEFAULT);
+    if (gid < 0) {
       return NXstatus::NX_ERROR;
     }
-  } while (pPtr != NULL && status != NXstatus::NX_EOD);
-  return NXstatus::NX_OK;
-}
-
-/*---------------------------------------------------------------------*/
-NXstatus NXIprintlink(NXhandle fid, NXlink const *link) {
-  pNexusFunction pFunc = handleToNexusFunc(fid);
-  return LOCKED_CALL(pFunc->nxprintlink(pFunc->pNexusData, link));
-}
-
-/*----------------------------------------------------------------------*/
-NXstatus NXgetpath(NXhandle fid, char *path, int pathlen) {
-  int status;
-  pFileStack fileStack = NULL;
-
-  fileStack = static_cast<pFileStack>(fid);
-  status = buildPath(fileStack, path, pathlen);
-  if (status != 1) {
+    fid->iStack5.push_back(gid);
+    fid->iCurrentG = gid;
+  } else if (op_data.type == H5O_TYPE_DATASET) {
+    NXstatus ret = NXopendata(fid, last);
+    if (ret != NXstatus::NX_OK) {
+      return ret;
+    }
+  } else {
     return NXstatus::NX_ERROR;
+  }
+  // now set the address
+  if (fid->iCurrentG == 0) {
+    fid->groupaddr = Mantid::Nexus::NexusAddress::root();
+  } else {
+    fid->groupaddr = getObjectAddress(fid->iCurrentG);
   }
   return NXstatus::NX_OK;
 }
 
-NXstatus NXgetnextattra(NXhandle handle, NXname pName, int *rank, int dim[], NXnumtype *iType) {
-  pNexusFunction pFunc = handleToNexusFunc(handle);
-  return LOCKED_CALL(pFunc->nxgetnextattra(pFunc->pNexusData, pName, rank, dim, iType));
+/*---------------------------------------------------------------------*/
+NXstatus NXopengroupaddress(NXhandle fid, std::string const &address) {
+  if (fid == nullptr || address.empty()) {
+    NXReportError("ERROR: NXopengroupaddress needs both a file handle and a address string");
+    return NXstatus::NX_ERROR;
+  }
+
+  Mantid::Nexus::NexusAddress groupAddress(address);
+  // determine whether this address refers to a group or a dataset
+  // if a dataset, then go to the parent
+  H5O_info2_t op_data;
+  H5Oget_info_by_name(fid->iFID, address.c_str(), &op_data, H5O_INFO_BASIC, H5P_DEFAULT);
+  if (op_data.type == H5O_TYPE_GROUP) {
+    // leave address as it is
+  } else if (op_data.type == H5O_TYPE_DATASET) {
+    groupAddress = groupAddress.parent_path();
+  } else {
+    return NXstatus::NX_ERROR;
+  }
+  // now open the correct address
+  return NXopenaddress(fid, groupAddress.string());
+}
+
+/*---------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*/
+NXstatus NXgetaddress(NXhandle fid, std::string &address) {
+  hid_t current;
+  if (fid->iCurrentD != 0) {
+    current = fid->iCurrentD;
+  } else if (fid->iCurrentG != 0) {
+    current = fid->iCurrentG;
+  } else {
+    current = fid->iFID;
+  }
+  char caddr[NX_MAXADDRESSLEN];
+  H5Iget_name(current, caddr, NX_MAXADDRESSLEN);
+  address = std::string(caddr);
+  return NXstatus::NX_OK;
 }
 
 /*--------------------------------------------------------------------
   format NeXus time. Code needed in every NeXus file driver
   ---------------------------------------------------------------------*/
-char *NXIformatNeXusTime() {
+std::string NXIformatNeXusTime() {
   time_t timer;
   char *time_buffer = NULL;
   struct tm *time_info;
@@ -1597,7 +1321,11 @@ char *NXIformatNeXusTime() {
   } else {
     strcpy(time_buffer, "1970-01-01T00:00:00+00:00");
   }
-  return time_buffer;
+  std::string res(time_buffer);
+  free(time_buffer);
+  return res;
 }
 
-const char *NXgetversion() { return NEXUS_VERSION; }
+// cppcheck-suppress-end [nullPointerArithmeticOutOfMemory, nullPointerOutOfMemory]
+// cppcheck-suppress-end [constVariablePointer, constParameterReference, unusedVariable, unreadVariable]
+// cppcheck-suppress-end [unmatchedSuppression, variableScope]

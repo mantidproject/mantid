@@ -77,6 +77,7 @@ set(SRC_FILES
     src/LegacyNexusDescriptor.cpp
     src/NullValidator.cpp
     src/OptionalBool.cpp
+    src/SpinStateHelpers.cpp
     src/ProgressBase.cpp
     src/Property.cpp
     src/PropertyHistory.cpp
@@ -199,6 +200,7 @@ set(INC_FILES
     inc/MantidKernel/Interpolation.h
     inc/MantidKernel/InvisibleProperty.h
     inc/MantidKernel/LambdaValidator.h
+    inc/MantidKernel/LegacyNexusDescriptor.h
     inc/MantidKernel/LibraryManager.h
     inc/MantidKernel/LibraryWrapper.h
     inc/MantidKernel/ListValidator.h
@@ -232,7 +234,6 @@ set(INC_FILES
     inc/MantidKernel/NearestNeighbours.h
     inc/MantidKernel/NetworkProxy.h
     inc/MantidKernel/NeutronAtom.h
-    inc/MantidKernel/LegacyNexusDescriptor.h
     inc/MantidKernel/NullValidator.h
     inc/MantidKernel/OptionalBool.h
     inc/MantidKernel/PhysicalConstants.h
@@ -261,6 +262,7 @@ set(INC_FILES
     inc/MantidKernel/SingletonHolder.h
     inc/MantidKernel/SobolSequence.h
     inc/MantidKernel/SpecialCoordinateSystem.h
+    inc/MantidKernel/SpinStateHelpers.h
     inc/MantidKernel/SpinStateValidator.h
     inc/MantidKernel/SplittingInterval.h
     inc/MantidKernel/StartsWithValidator.h
@@ -361,6 +363,7 @@ set(TEST_FILES
     InterpolationTest.h
     InvisiblePropertyTest.h
     LambdaValidatorTest.h
+    LegacyNexusDescriptorTest.h
     ListValidatorTest.h
     LiveListenerInfoTest.h
     LogFilterTest.h
@@ -389,7 +392,6 @@ set(TEST_FILES
     NDRandomNumberGeneratorTest.h
     NearestNeighboursTest.h
     NeutronAtomTest.h
-    LegacyNexusDescriptorTest.h
     NullValidatorTest.h
     OptionalBoolTest.h
     ProgressBaseTest.h
@@ -411,6 +413,7 @@ set(TEST_FILES
     ShrinkToFitTest.h
     SobolSequenceTest.h
     SpecialCoordinateSystemTest.h
+    SpinStateHelpersTest.h
     SpinStateValidatorTest.h
     SplittingIntervalTest.h
     StartsWithValidatorTest.h
@@ -609,7 +612,7 @@ set(CHECK_FOR_NEW_MANTID_VERSION "${ENABLE_NETWORK_ACCESS}")
 set(ENABLE_USAGE_REPORTS "${ENABLE_NETWORK_ACCESS}")
 set(DATADIRS "")
 set(MANTIDPUBLISHER "https://upload.mantidproject.org/scriptrepository")
-set(HTML_ROOT ../share/doc/html)
+set(HTML_ROOT ${CMAKE_INSTALL_PREFIX}/share/doc/html)
 
 # For a framework-only (e.g. MPI) build some of these are not relevant and should be left empty to avoid warnings on
 # starting Mantid
@@ -639,3 +642,19 @@ mtd_install_files(
 # Installation settings
 set(TARGET_EXPORT_NAME "MantidKernelTargets")
 mtd_install_framework_lib(TARGETS Kernel INSTALL_EXPORT_FILE EXPORT_NAME ${TARGET_EXPORT_NAME})
+
+# For a local build using documentation built in the tree
+if(MANTID_FRAMEWORK_LIB STREQUAL "BUILD")
+  set(HTML_ROOT ${DOCS_BUILDDIR}/html)
+else()
+  if(PROJECT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
+    set(HTML_ROOT ${CMAKE_INSTALL_PREFIX}/share/doc/html)
+  else()
+    set(HTML_ROOT "\\${Mantid_HTML_ROOT}")
+  endif()
+endif()
+
+# location of the properties file
+if(NOT DEFINED PROPERTIES_FILE_LOCATION)
+  set(PROPERTIES_FILE_LOCATION ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties.config)
+endif()

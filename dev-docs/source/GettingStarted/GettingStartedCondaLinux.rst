@@ -1,7 +1,7 @@
 .. _GettingStartedCondaLinux:
 
 ===========================
-Develop with Conda on Linux
+Develop with conda on Linux
 ===========================
 
 Install Git
@@ -58,7 +58,7 @@ Building and debugging with CLion
 ---------------------------------
 Please follow the Linux related instructions on :ref:`this page <clion-ref>`.
 
-CMake Conda variables
+CMake conda variables
 -----------------------
 The `CONDA_BUILD` parameter is used to customise our installation, which is required when we are using the conda-build tool to build and package Mantid. This option can be passed to CMake on the command line using -DCONDA_BUILD=True.
 

@@ -17,7 +17,7 @@ add_executable(launch main.cpp Model.cpp View.cpp Presenter.cpp ${MOC_FILES} ${U
 # For the auto generated ui_*.h file
 target_include_directories(launch SYSTEM PUBLIC ${CMAKE_BINARY_DIR})
 
-# Link with the Release version of the standard library. This is required because Conda does not provide packages with
+# Link with the Release version of the standard library. This is required because conda does not provide packages with
 # Debug symbols.
 if(WIN32)
   set_property(TARGET launch PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreadedDLL")

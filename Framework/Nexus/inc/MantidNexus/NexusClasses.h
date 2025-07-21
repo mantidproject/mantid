@@ -7,7 +7,7 @@
 #pragma once
 
 #include "MantidNexus/DllConfig.h"
-#include "MantidNexus/NeXusFile.hpp"
+#include "MantidNexus/NexusFile.h"
 
 #include <algorithm>
 #include <array>
@@ -20,7 +20,7 @@
 #include <vector>
 
 namespace Mantid {
-namespace NeXus {
+namespace Nexus {
 
 /** C++ implementation of NeXus classes.
 
@@ -36,7 +36,7 @@ typedef std::array<nxdimsize_t, 4> NXDimArray;
  */
 struct NXInfo {
   NXInfo() : nxname(), rank(0), dims(), type(NXnumtype::BAD), allGood(false) {}
-  NXInfo(::NeXus::Info const &info, std::string const &name);
+  NXInfo(Info const &info, std::string const &name);
   std::string nxname;                 ///< name of the object
   std::size_t rank;                   ///< number of dimensions of the data
   NXDimArray dims;                    ///< sizes along each dimension
@@ -47,7 +47,7 @@ struct NXInfo {
 
 /// Information about a Nexus class
 struct NXClassInfo {
-  NXClassInfo(::NeXus::Entry e) : nxname(e.first), nxclass(e.second), datatype(NXnumtype::BAD), allGood(true) {}
+  NXClassInfo(Entry e) : nxname(e.first), nxclass(e.second), datatype(NXnumtype::BAD), allGood(true) {}
   NXClassInfo() : nxname(), nxclass(), datatype(NXnumtype::BAD), allGood(false) {}
   std::string nxname;                 ///< name of the object
   std::string nxclass;                ///< NX class of the object or "SDS" if a dataset
@@ -91,24 +91,24 @@ class MANTID_NEXUS_DLL NXObject {
   friend class NXRoot;    ///< a friend class declaration
 public:
   // Constructor
-  NXObject(::NeXus::File *fileID, NXClass const *parent, std::string const &name);
-  NXObject(std::shared_ptr<::NeXus::File> fileID, NXClass const *parent, std::string const &name);
+  NXObject(File *fileID, NXClass const *parent, std::string const &name);
+  NXObject(std::shared_ptr<File> fileID, NXClass const *parent, std::string const &name);
   virtual ~NXObject() = default;
   /// Return the NX class name for a class (HDF group) or "SDS" for a data set;
   virtual std::string NX_class() const = 0;
   // True if complies with our understanding of the www.nexusformat.org
   // definition.
   // virtual bool isStandard()const = 0;
-  /// Returns the absolute path to the object
-  std::string const &path() const { return m_path; }
+  /// Returns the absolute address to the object
+  NexusAddress const &address() const { return m_address; }
   /// Returns the name of the object
   std::string name() const;
   /// Nexus file id
-  std::shared_ptr<::NeXus::File> m_fileID;
+  std::shared_ptr<File> m_fileID;
 
 protected:
-  std::string m_path; ///< Keeps the absolute path to the object
-  bool m_open;        ///< Set to true if the object has been open
+  NexusAddress m_address; ///< Keeps the absolute address to the object
+  bool m_open;            ///< Set to true if the object has been open
 private:
   NXObject(); ///< Private default constructor
 };
@@ -177,8 +177,7 @@ protected:
    * size of the array) must be equal to the rank of the data.
    * @throw runtime_error if the operation fails.
    */
-  template <typename NumT>
-  void getSlab(NumT *data, ::NeXus::DimSizeVector const &start, ::NeXus::DimSizeVector const &size) {
+  template <typename NumT> void getSlab(NumT *data, DimSizeVector const &start, DimSizeVector const &size) {
     m_fileID->openData(name());
     m_fileID->getSlab(data, start, size);
     m_fileID->closeData();
@@ -213,13 +212,13 @@ public:
    */
   const T *operator()() const {
     if (m_data.empty())
-      throw std::runtime_error("Attempt to read uninitialized data from " + path());
+      throw std::runtime_error("Attempt to read uninitialized data from " + address());
     return m_data.data();
   }
 
   T *operator()() {
     if (m_data.empty())
-      throw std::runtime_error("Attempt to read uninitialized data from " + path());
+      throw std::runtime_error("Attempt to read uninitialized data from " + address());
     return m_data.data();
   }
 
@@ -233,7 +232,7 @@ public:
    */
   const T &operator[](std::size_t i) const {
     if (m_data.empty())
-      throw std::runtime_error("Attempt to read uninitialized data from " + path());
+      throw std::runtime_error("Attempt to read uninitialized data from " + address());
     if (i >= m_size)
       rangeError();
     return m_data[i];
@@ -291,10 +290,19 @@ public:
         }
       }
     }
+    if constexpr (std::is_same_v<T, char>) {
+      // For char type we need to add one for the null terminator
+      num_ele += 1;
+    }
     this->alloc(static_cast<std::size_t>(num_ele));
 
     // do the actual load
     getData(m_data.data());
+
+    if constexpr (std::is_same_v<T, char>) {
+      // For char type we need to add a null terminator
+      m_data.push_back('\0');
+    }
   }
 
   /**
@@ -314,7 +322,7 @@ public:
       throw std::runtime_error("Cannot load dataset of rank greater than 4");
     }
     nxdimsize_t n = 0, id(i), jd(j); // cppcheck-suppress variableScope
-    ::NeXus::DimSizeVector datastart, datasize;
+    DimSizeVector datastart, datasize;
     if (rank() == 4) {
       if (i < 0) // load all data
       {
@@ -405,7 +413,7 @@ private:
    */
   void alloc(nxdimsize_t new_size) {
     if (new_size <= 0) {
-      throw std::runtime_error("Attempt to load from an empty dataset " + path());
+      throw std::runtime_error("Attempt to load from an empty dataset " + address());
     }
     try {
       if (new_size != static_cast<nxdimsize_t>(m_size)) {
@@ -465,11 +473,11 @@ public:
   std::string NX_class() const override { return "NXClass"; }
 
   /**
-   * Check if a path exists relative to the current class path
-   * @param path :: A string representing the path to test
+   * Check if a address exists relative to the current class address
+   * @param address :: A string representing the address to test
    * @return True if it is valid
    */
-  bool isValid(const std::string &path) const;
+  bool isValid(const std::string &address) const;
   /**
    * Templated method for creating derived NX classes. It also opens the created class.
    *
@@ -576,7 +584,7 @@ public:
   bool containsDataSet(const std::string &query) const;
   /// Close this class
   void close();
-  /// Opens this NXClass using NXopengrouppath. Can be slow (or is slow)
+  /// Opens this NXClass using NXopengroupaddress. Can be slow (or is slow)
   void open();
   /// Opens this NXClass using NXopengroup. It is fast, but the parent of this
   /// class must be open at
@@ -722,5 +730,5 @@ private:
   const std::string m_filename; ///< The file name
 };
 
-} // namespace NeXus
+} // namespace Nexus
 } // namespace Mantid

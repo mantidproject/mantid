@@ -670,7 +670,7 @@ bool TimeROI::useNone() const { return *this == USE_NONE; }
 void TimeROI::clear() { m_roi.clear(); }
 
 // serialization / deserialization items
-void TimeROI::saveNexus(::NeXus::File *file) const {
+void TimeROI::saveNexus(Nexus::File *file) const {
   // create a local TimeSeriesProperty which will do the actual work
   TimeSeriesProperty<bool> tsp(NAME);
   for (const auto &interval : this->toTimeIntervals()) {

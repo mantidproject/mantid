@@ -28,7 +28,7 @@ namespace Mantid::DataHandling {
 
 using namespace Kernel;
 using namespace API;
-using namespace NeXus;
+using namespace Nexus;
 
 DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadSINQFocus)
 
@@ -106,24 +106,24 @@ void LoadSINQFocus::exec() {
 
 /*
  * Set global variables:
- * m_instrumentPath
+ * m_instrumentAddress
  * m_instrumentName
  * Note that the instrument in the nexus file is of the form "FOCUS at SINQ"
  *
  */
-void LoadSINQFocus::setInstrumentName(const NeXus::NXEntry &entry) {
+void LoadSINQFocus::setInstrumentName(const Nexus::NXEntry &entry) {
 
-  m_instrumentPath = LoadHelper::findInstrumentNexusPath(entry);
+  m_instrumentAddress = LoadHelper::findInstrumentNexusAddress(entry);
 
-  if (m_instrumentPath.empty()) {
+  if (m_instrumentAddress.empty()) {
     throw std::runtime_error("Cannot set the instrument name from the Nexus file!");
   }
-  m_instrumentName = LoadHelper::getStringFromNexusPath(entry, m_instrumentPath + "/name");
+  m_instrumentName = LoadHelper::getStringFromNexusAddress(entry, m_instrumentAddress + "/name");
   size_t pos = m_instrumentName.find(' ');
   m_instrumentName.erase(pos + 1, m_instrumentName.size());
 }
 
-void LoadSINQFocus::initWorkSpace(const NeXus::NXEntry &entry) {
+void LoadSINQFocus::initWorkSpace(const Nexus::NXEntry &entry) {
 
   // read in the data
   NXData dataGroup = entry.openNXData("merged");
@@ -153,14 +153,14 @@ void LoadSINQFocus::initWorkSpace(const NeXus::NXEntry &entry) {
   m_localWorkspace->setYUnitLabel("Counts");
 }
 
-void LoadSINQFocus::loadDataIntoTheWorkSpace(NeXus::NXEntry &entry) {
+void LoadSINQFocus::loadDataIntoTheWorkSpace(Nexus::NXEntry &entry) {
 
   // read in the data
   NXData dataGroup = entry.openNXData("merged");
   NXInt data = dataGroup.openIntData();
   data.load();
 
-  std::vector<double> timeBinning = LoadHelper::getTimeBinningFromNexusPath(entry, "merged/time_binning");
+  std::vector<double> timeBinning = LoadHelper::getTimeBinningFromNexusAddress(entry, "merged/time_binning");
   auto &x = m_localWorkspace->mutableX(0);
   x.assign(timeBinning.begin(), timeBinning.end());
 
@@ -201,10 +201,10 @@ void LoadSINQFocus::loadRunDetails(const NXEntry &entry) {
   // end_time = getDateTimeInIsoFormat(end_time);
   runDetails.addProperty("run_end", end_time);
 
-  double wavelength = entry.getFloat(m_instrumentPath + "/monochromator/lambda");
+  double wavelength = entry.getFloat(m_instrumentAddress + "/monochromator/lambda");
   runDetails.addProperty<double>("wavelength", wavelength);
 
-  double energy = entry.getFloat(m_instrumentPath + "/monochromator/energy");
+  double energy = entry.getFloat(m_instrumentAddress + "/monochromator/energy");
   runDetails.addProperty<double>("Ei", energy, true); // overwrite
 
   std::string title = entry.getString("title");

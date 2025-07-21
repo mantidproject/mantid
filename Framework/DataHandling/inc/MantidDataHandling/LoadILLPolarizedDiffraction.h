@@ -38,15 +38,15 @@ private:
   std::map<std::string, std::string> validateInputs() override;
   void exec() override;
 
-  API::MatrixWorkspace_sptr initStaticWorkspace(const NeXus::NXEntry &);
+  API::MatrixWorkspace_sptr initStaticWorkspace(const Nexus::NXEntry &);
 
   void loadData();
   void loadMetaData();
   API::WorkspaceGroup_sptr sortPolarisations();
-  std::vector<double> loadTwoThetaDetectors(const API::MatrixWorkspace_sptr &, const NeXus::NXEntry &, const int);
+  std::vector<double> loadTwoThetaDetectors(const API::MatrixWorkspace_sptr &, const Nexus::NXEntry &, const int);
   std::vector<double> loadBankParameters(const API::MatrixWorkspace_sptr &, const int);
-  void moveTwoTheta(const NeXus::NXEntry &, const API::MatrixWorkspace_sptr &);
-  std::vector<double> prepareAxes(const NeXus::NXEntry &);
+  void moveTwoTheta(const Nexus::NXEntry &, const API::MatrixWorkspace_sptr &);
+  std::vector<double> prepareAxes(const Nexus::NXEntry &);
 
   API::MatrixWorkspace_sptr convertSpectrumAxis(API::MatrixWorkspace_sptr);
   API::MatrixWorkspace_sptr transposeMonochromatic(const API::MatrixWorkspace_sptr &);

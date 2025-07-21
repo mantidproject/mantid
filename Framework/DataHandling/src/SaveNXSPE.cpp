@@ -15,7 +15,7 @@
 
 #include "MantidDataHandling/FindDetectorsPar.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidNexus/NeXusFile.hpp"
+#include "MantidNexus/NexusFile.h"
 
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/MantidVersion.h"
@@ -90,7 +90,7 @@ void SaveNXSPE::exec() {
   std::string filename = getPropertyValue("Filename");
 
   // Create the file.
-  ::NeXus::File nxFile(filename, NXACC_CREATE5);
+  Nexus::File nxFile(filename, NXaccess::CREATE5);
 
   // Make the top level entry (and open it)
   std::string entryName = getPropertyValue("InputWorkspace");

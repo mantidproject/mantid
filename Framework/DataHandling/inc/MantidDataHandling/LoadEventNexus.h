@@ -26,8 +26,8 @@
 
 #include "MantidKernel/TimeSeriesProperty.h"
 
-#include "MantidNexus/NeXusException.hpp"
-#include "MantidNexus/NeXusFile.hpp"
+#include "MantidNexus/NexusException.h"
+#include "MantidNexus/NexusFile.h"
 
 #include <Poco/Path.h>
 #include <algorithm>
@@ -55,7 +55,7 @@ public:
   InvalidLogPeriods(const std::string &msg) : std::invalid_argument(msg) {}
 };
 
-bool exists(::NeXus::File &file, const std::string &name);
+bool exists(Nexus::File &file, const std::string &name);
 
 bool exists(const std::map<std::string, std::string> &entries, const std::string &name);
 
@@ -128,11 +128,11 @@ public:
   static bool runLoadInstrument(const std::string &nexusfilename, T localWorkspace, const std::string &top_entry_name,
                                 Algorithm *alg, const Nexus::NexusDescriptor *descriptor = nullptr);
 
-  static void loadSampleDataISIScompatibility(::NeXus::File &file, EventWorkspaceCollection &WS);
+  static void loadSampleDataISIScompatibility(Nexus::File &file, EventWorkspaceCollection &WS);
 
   /// method used to return instrument name for some old ISIS files where it is
   /// not written properly within the instrument
-  static std::string readInstrumentFromISIS_VMSCompat(::NeXus::File &hFile);
+  static std::string readInstrumentFromISIS_VMSCompat(Nexus::File &hFile);
 
 public:
   /// The name and path of the input file
@@ -186,7 +186,7 @@ public:
 
   /// name of top level NXentry to use
   std::string m_top_entry_name;
-  std::unique_ptr<::NeXus::File> m_file;
+  std::unique_ptr<Nexus::File> m_file;
 
 private:
   /// Possible loaders types
@@ -271,7 +271,7 @@ private:
  * @param end_wi :: Last workspace index to process
  */
 template <typename T>
-void makeTimeOfFlightDataFuzzy(::NeXus::File &file, T localWorkspace, const std::string &binsName, size_t start_wi = 0,
+void makeTimeOfFlightDataFuzzy(Nexus::File &file, T localWorkspace, const std::string &binsName, size_t start_wi = 0,
                                size_t end_wi = 0) {
   const std::string EVENT_TIME_SHIFT_TAG("event_time_offset_shift");
   // first check if the data is already randomized
@@ -360,11 +360,11 @@ void makeTimeOfFlightDataFuzzy(::NeXus::File &file, T localWorkspace, const std:
  * @param descriptor :: input descriptor carrying metadata information
  */
 template <typename T>
-void adjustTimeOfFlightISISLegacy(::NeXus::File &file, T localWorkspace, const std::string &entry_name,
+void adjustTimeOfFlightISISLegacy(Nexus::File &file, T localWorkspace, const std::string &entry_name,
                                   const std::string &classType, const Nexus::NexusDescriptor *descriptor = nullptr) {
   bool done = false;
   // Go to the root, and then top entry
-  file.openPath("/");
+  file.openAddress("/");
   file.openGroup(entry_name, "NXentry");
 
   // NexusDescriptor
@@ -486,7 +486,7 @@ bool LoadEventNexus::runLoadInstrument(const std::string &nexusfilename, T local
     instFilename = nexusfilename;
   } else {
     // Get the instrument name
-    ::NeXus::File nxfile(nexusfilename);
+    Nexus::File nxfile(nexusfilename);
     // Start with the base entry
     nxfile.openGroup(top_entry_name, "NXentry");
     // Open the instrument
@@ -495,7 +495,7 @@ bool LoadEventNexus::runLoadInstrument(const std::string &nexusfilename, T local
       nxfile.openData("name");
       instrument = nxfile.getStrData();
       alg->getLogger().debug() << "Instrument name read from NeXus file is " << instrument << '\n';
-    } catch (::NeXus::Exception &) {
+    } catch (Nexus::Exception const &) {
       // Try to fall back to isis compatibility options
       nxfile.closeGroup();
       instrument = readInstrumentFromISIS_VMSCompat(nxfile);
@@ -605,7 +605,7 @@ template <typename T>
 void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, T WS, const std::string &entry_name,
                                        const Nexus::NexusDescriptor &descriptor) {
   // Open the file
-  ::NeXus::File file(nexusfilename);
+  Nexus::File file(nexusfilename);
   file.openGroup(entry_name, "NXentry");
 
   // get the title
@@ -687,7 +687,7 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, T WS, c
           WS->mutableSample().setName(sampleName);
         }
       }
-    } catch (::NeXus::Exception &) {
+    } catch (Nexus::Exception const &) {
       // let it drop on floor if an exception occurs while reading sample
     }
     file.closeGroup();
@@ -760,9 +760,9 @@ bool LoadEventNexus::runLoadIDFFromNexus(const std::string &nexusfilename, T loc
                                          const std::string &top_entry_name, Algorithm *alg) {
   // Test if IDF exists in file, move on quickly if not
   try {
-    ::NeXus::File nxsfile(nexusfilename);
-    nxsfile.openPath(top_entry_name + "/instrument/instrument_xml");
-  } catch (::NeXus::Exception &) {
+    Nexus::File nxsfile(nexusfilename);
+    nxsfile.openAddress(top_entry_name + "/instrument/instrument_xml");
+  } catch (Nexus::Exception const &) {
     alg->getLogger().information("No instrument XML definition found in " + nexusfilename + " at " + top_entry_name +
                                  "/instrument");
     return false;

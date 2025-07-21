@@ -21,9 +21,6 @@ namespace PolarizationCorrectionsHelpers {
 MANTID_ALGORITHMS_DLL API::MatrixWorkspace_sptr workspaceForSpinState(API::WorkspaceGroup_sptr group,
                                                                       const std::string &spinStateOrder,
                                                                       const std::string &targetSpinState);
-MANTID_ALGORITHMS_DLL std::optional<size_t> indexOfWorkspaceForSpinState(const std::vector<std::string> &spinStateOrder,
-                                                                         std::string targetSpinState);
-MANTID_ALGORITHMS_DLL std::vector<std::string> splitSpinStateString(const std::string &spinStates);
 } // namespace PolarizationCorrectionsHelpers
 
 namespace FlipperConfigurations {

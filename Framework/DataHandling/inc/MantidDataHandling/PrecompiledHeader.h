@@ -14,8 +14,8 @@
 // STL
 
 // NeXus
-#include "MantidNexus/NeXusException.hpp"
-#include "MantidNexus/NeXusFile.hpp"
+#include "MantidNexus/NexusException.h"
+#include "MantidNexus/NexusFile.h"
 
 // Poco
 #include <Poco/DOM/DOMParser.h>

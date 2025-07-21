@@ -34,8 +34,8 @@ template <typename T> int countEntriesOfType(const T &entry, const std::string &
 }
 
 template <typename T>
-std::vector<Mantid::NeXus::NXClassInfo> findEntriesOfType(const T &entry, const std::string &nxClass) {
-  std::vector<Mantid::NeXus::NXClassInfo> result;
+std::vector<Mantid::Nexus::NXClassInfo> findEntriesOfType(const T &entry, const std::string &nxClass) {
+  std::vector<Mantid::Nexus::NXClassInfo> result;
   std::copy_if(entry.groups().cbegin(), entry.groups().cend(), std::back_inserter(result),
                [&nxClass](const auto &group) { return group.nxclass == nxClass; });
   return result;
@@ -47,7 +47,7 @@ std::vector<Mantid::NeXus::NXClassInfo> findEntriesOfType(const T &entry, const 
  * @param entry
  * @return
  */
-InstrumentLayout instrumentFormat(Mantid::NeXus::NXEntry &entry) {
+InstrumentLayout instrumentFormat(Mantid::Nexus::NXEntry &entry) {
   auto result = InstrumentLayout::NotRecognised;
   const auto instrumentsCount = countEntriesOfType(entry, "NXinstrument");
   if (instrumentsCount == 1) {
@@ -72,7 +72,7 @@ InstrumentLayout instrumentFormat(Mantid::NeXus::NXEntry &entry) {
 /// Algorithm's version for identification. @see Algorithm::version
 int LoadNexusProcessed2::version() const { return 2; }
 
-void LoadNexusProcessed2::readSpectraToDetectorMapping(Mantid::NeXus::NXEntry &mtd_entry,
+void LoadNexusProcessed2::readSpectraToDetectorMapping(Mantid::Nexus::NXEntry &mtd_entry,
                                                        Mantid::API::MatrixWorkspace &ws) {
 
   m_instrumentLayout = instrumentFormat(mtd_entry);
@@ -86,8 +86,8 @@ void LoadNexusProcessed2::readSpectraToDetectorMapping(Mantid::NeXus::NXEntry &m
   }
 }
 
-void LoadNexusProcessed2::extractMappingInfoNew(const Mantid::NeXus::NXEntry &mtd_entry) {
-  using namespace Mantid::NeXus;
+void LoadNexusProcessed2::extractMappingInfoNew(const Mantid::Nexus::NXEntry &mtd_entry) {
+  using namespace Mantid::Nexus;
 
   const std::string &parent = mtd_entry.name();
   auto result = findEntriesOfType(mtd_entry, "NXinstrument");

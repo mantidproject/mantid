@@ -2,28 +2,24 @@ set(SRC_FILES
     src/H5Util.cpp
     src/NexusClasses.cpp
     src/napi.cpp
-    src/napi5.cpp
+    src/napi_helper.cpp
     src/NexusDescriptor.cpp
-    src/NeXusException.cpp
-    src/NeXusFile.cpp
-    src/nxstack.cpp
-    src/stptok.cpp
+    src/NexusException.cpp
+    src/NexusFile.cpp
+    src/NexusAddress.cpp
 )
 
 set(INC_FILES
     inc/MantidNexus/H5Util.h
     inc/MantidNexus/NexusClasses.h
     inc/MantidNexus/NexusIOHelper.h
-    inc/MantidNexus/NeXusFile_fwd.h
+    inc/MantidNexus/NexusFile_fwd.h
     inc/MantidNexus/napi.h
-    inc/MantidNexus/napi5.h
-    inc/MantidNexus/napiconfig.h
-    inc/MantidNexus/napi_internal.h
+    inc/MantidNexus/napi_helper.h
     inc/MantidNexus/NexusDescriptor.h
-    inc/MantidNexus/NeXusException.hpp
-    inc/MantidNexus/NeXusFile.hpp
-    inc/MantidNexus/nx_stptok.h
-    inc/MantidNexus/nxstack.h
+    inc/MantidNexus/NexusException.h
+    inc/MantidNexus/NexusFile.h
+    inc/MantidNexus/NexusAddress.h
 )
 
 set(TEST_FILES
@@ -31,10 +27,12 @@ set(TEST_FILES
     NexusIOHelperTest.h
     NexusClassesTest.h
     NexusDescriptorTest.h
-    NeXusFileTest.h
-    NeXusFileLeakTest.h
-    NeXusFileNapiTest.h
-    NeXusFileReadWriteTest.h
+    NexusFileTest.h
+    NexusFileLeakTest.h
+    NexusFileNapiTest.h
+    NexusFileReadWriteTest.h
+    NexusAddressTest.h
+    NapiUnitTest.h
 )
 
 if(COVERAGE)

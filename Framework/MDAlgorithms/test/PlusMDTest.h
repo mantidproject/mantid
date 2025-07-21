@@ -107,7 +107,7 @@ public:
         freeSpace += freeSpaceMap[2 * i + 1];
       }
 
-      ::NeXus::File *file = loader->getFile();
+      Mantid::Nexus::File *file = loader->getFile();
       // The file should have an entry of 20000 points too (with some error due
       // to the free space blocks). This means the file back-end was updated
       if (mask_ws_num == 0) {

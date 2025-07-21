@@ -21,7 +21,7 @@ using namespace Mantid;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 using namespace Poco::XML;
-using NeXus::File;
+using Nexus::File;
 
 class ComponentParserTest : public CxxTest::TestSuite {
 public:
@@ -89,8 +89,8 @@ public:
   //
   //    if (true)
   //    {
-  //      ::NeXus::File * file = new ::NeXus::File("components.nxs",
-  //      NXACC_CREATE5);
+  //      Nexus::File * file = new ::Nexus::File("components.nxs",
+  //      NXaccess::CREATE5);
   //      file->makeGroup("test_comps", "NXdata",1);
   //      std::vector<double> posArray(num*3);
   //      std::vector<double> rotArray(num*4);

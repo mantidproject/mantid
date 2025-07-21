@@ -13,10 +13,6 @@
 
 #include <vector>
 
-namespace NeXus {
-class File;
-}
-
 namespace Mantid {
 
 namespace Kernel {
@@ -109,14 +105,14 @@ public:
   const std::vector<Kernel::Matrix<double>> getGoniometerMatrices() const;
 
   /// Save the run to a NeXus file with a given group name
-  void saveNexus(::NeXus::File *file, const std::string &group, bool keepOpen = false) const override;
+  void saveNexus(Nexus::File *file, const std::string &group, bool keepOpen = false) const override;
 
   /// Load the run from a NeXus file with a given group name. Overload that uses NexusDescriptor for faster metadata
   /// lookup
-  void loadNexus(::NeXus::File *file, const std::string &group, const Mantid::Nexus::NexusDescriptor &fileInfo,
+  void loadNexus(Nexus::File *file, const std::string &group, const Mantid::Nexus::NexusDescriptor &fileInfo,
                  const std::string &prefix, bool keepOpen = false) override;
   /// Load the run from a NeXus file with a given group name
-  void loadNexus(::NeXus::File *file, const std::string &group, bool keepOpen = false) override;
+  void loadNexus(Nexus::File *file, const std::string &group, bool keepOpen = false) override;
 
 private:
   /// Calculate the average gonoimeter matrix
@@ -134,7 +130,7 @@ private:
   void copyGoniometers(const Run &other);
 
   // Function common to loadNexus overloads populating relevant members
-  void loadNexusCommon(::NeXus::File *file, const std::string &nameClass);
+  void loadNexusCommon(Nexus::File *file, const std::string &nameClass);
 };
 } // namespace API
 } // namespace Mantid

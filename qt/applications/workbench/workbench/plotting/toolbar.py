@@ -9,6 +9,7 @@
 #
 from matplotlib.collections import LineCollection, PathCollection
 from matplotlib.contour import ContourSet
+from matplotlib.colors import LogNorm
 from qtpy import QtCore, QtGui, QtPrintSupport, QtWidgets
 
 from mantid.plots import MantidAxes
@@ -162,8 +163,29 @@ class WorkbenchNavigationToolbar(MantidNavigationToolbar):
 
     def on_home_clicked(self):
         self.sig_home_clicked.emit()
-        self.home()
+        self._home_wrapper()
         self.push_current()
+
+    def _home_wrapper(self):
+        """Wraps the call to home, editing the nav stack to enforce a colorbar minimum of >0 if it has a log scale."""
+        edit_stack = self.is_colormap(self.canvas.figure) and self._colorbar_is_log_scale(self.canvas.figure) and self._nav_stack._elements
+        if not edit_stack:
+            self.home()
+            return
+        orig_entry = self._nav_stack._elements[0].data
+        orig_limits = list(orig_entry.items())[1][1][0]
+        self._nav_stack._elements[0].data = {
+            k: self._recursive_replace(v, find=orig_limits, replace=(0.0001, orig_limits[1])) for k, v in orig_entry.items()
+        }
+        self.home()
+        self._nav_stack._elements[0].data = orig_entry
+
+    def _recursive_replace(self, item: dict, find, replace):
+        """Recurses through a structure of nested tuples, looking to replace a specified find object with a replace object"""
+        found = item == find
+        if found or not isinstance(item, tuple):
+            return replace if found else item
+        return tuple(self._recursive_replace(sub_item, find, replace) for sub_item in item)
 
     def waterfall_conversion(self, is_waterfall):
         self.sig_waterfall_conversion.emit(is_waterfall)
@@ -293,14 +315,16 @@ class WorkbenchNavigationToolbar(MantidNavigationToolbar):
     def is_colormap(self, fig):
         """Identify as a single colour map if it has a axes, one with the plot and the other the colorbar"""
         if figure_type(fig) in [FigureType.Image] and len(fig.get_axes()) == 2:
-            if (
-                len(fig.get_axes()[0].get_images()) == 1
-                and len(fig.get_axes()[1].get_images()) == 0
-                and self._is_colorbar(fig.get_axes()[1])
-            ):
+            if isinstance(fig.get_axes()[0], MantidAxes) and self._is_colorbar(fig.get_axes()[1]):
                 return True
-        else:
-            return False
+        return False
+
+    def _colorbar_is_log_scale(self, fig):
+        """Identify if a colorbar is logscale"""
+        if figure_type(fig) in [FigureType.Image] and len(fig.get_axes()) == 2:
+            if self._is_colorbar(fig.get_axes()[1]) and isinstance(fig.get_axes()[1]._colorbar.norm, LogNorm):
+                return True
+        return False
 
     @classmethod
     def _is_colorbar(cls, ax):

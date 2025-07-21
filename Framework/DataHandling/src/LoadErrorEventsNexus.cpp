@@ -84,15 +84,15 @@ void LoadErrorEventsNexus::exec() {
   }
 
   // load the data
-  ::NeXus::File file(filename);
+  Nexus::File file(filename);
 
-  file.openPath("/");
+  file.openAddress("/");
   file.openGroup("entry", "NXentry");
   file.openGroup("bank_error_events", "NXevent_data");
 
-  const auto event_times = Mantid::NeXus::NeXusIOHelper::readNexusVector<float>(file, "event_time_offset");
-  const auto event_index = std::make_shared<std::vector<uint64_t>>(
-      Mantid::NeXus::NeXusIOHelper::readNexusVector<uint64_t>(file, "event_index"));
+  const auto event_times = Nexus::IOHelper::readNexusVector<float>(file, "event_time_offset");
+  const auto event_index =
+      std::make_shared<std::vector<uint64_t>>(Nexus::IOHelper::readNexusVector<uint64_t>(file, "event_index"));
   const auto bankPulseTimes = std::make_shared<BankPulseTimes>(boost::ref(file), periodLog->valuesAsVector());
 
   file.closeGroup(); // bank_error_events

@@ -335,6 +335,8 @@ _translations = {
     "yusufjimoh": "Yusuf, Jimoh",
     "Jimoh Yusuf": "Yusuf, Jimoh",
     "Oluwaseun Jimoh": "Yusuf, Jimoh",
+    "Yusuf Jimoh": "Yusuf, Jimoh",
+    "Yusuf Jimoh Local": "Yusuf, Jimoh",
     "Kyle Ma": "Qianli Ma, Kyle",
     "Kyle Qianli Ma": "Qianli Ma, Kyle",
     "Despiix": "Ioannide, Despina",
@@ -346,6 +348,10 @@ _translations = {
     "Andy Bridger": "Bridger, Andy",
     "andy-bridger": "Bridger, Andy",
     "RabiyaF": "Farooq, Rabiya",
+    "Jack": "Allen, Jack E.",
+    "Daniel Caballero": "Caballero, Daniel",
+    "Darsh": "Dinger, Darsh",
+    "Darsh Dinger": "Dinger, Darsh",
 }
 
 # Used to ensure a Git author does not appear in any of the DOIs.  This is NOT

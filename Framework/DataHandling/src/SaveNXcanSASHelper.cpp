@@ -18,7 +18,7 @@
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidKernel/MDUnit.h"
 #include "MantidKernel/MantidVersion.h"
-#include "MantidKernel/StringTokenizer.h"
+#include "MantidKernel/SpinStateHelpers.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidNexus/H5Util.h"
 
@@ -26,6 +26,7 @@
 #include <regex>
 
 using namespace Mantid::Kernel;
+using namespace Mantid::Kernel::SpinStateHelpers;
 using namespace Mantid::Geometry;
 using namespace Mantid::API;
 using namespace Mantid::DataHandling::NXcanSAS;
@@ -225,7 +226,7 @@ void writePolarizedDataToFile(H5::DataSet &dataSet, WorkspaceExtractorFunctor fu
   for (size_t i = 0; i < spin.pIn.size(); i++) {
     for (size_t j = 0; j < spin.pOut.size(); j++) {
       auto state = stateConverter(spin.pIn.at(i)) + stateConverter(spin.pOut.at(j));
-      auto index = findWorkspaceIndexForSpinState(spin.spinVec, state);
+      auto index = indexOfWorkspaceForSpinState(spin.spinVec, state);
       if (!index.has_value()) {
         throw std::runtime_error("Couldn't find workspace for spin state " + state);
       }
@@ -791,7 +792,7 @@ void addPolarizedData(H5::Group &data, const WorkspaceGroup_sptr &wsGroup, const
   }
 
   writeStandardDataAttributes(data, sasDataIAxesAttrSpin, qIndices);
-  const auto inputSpinOrder = StringTokenizer{inputSpinStates, ",", StringTokenizer::TOK_TRIM}.asVector();
+  const auto inputSpinOrder = splitSpinStateString(inputSpinStates);
   const auto &spinPairs = SpinVectorBuilder(inputSpinOrder);
   writeSpinDataAttributes(data, spinPairs);
 

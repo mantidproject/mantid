@@ -36,18 +36,20 @@ requirements:
     - sphinx_bootstrap_theme {{ sphinx_bootstrap_theme }}
     - mantidqt {{ version }}
     - versioningit {{ versioningit }}
+    - graphviz {{ graphviz }}
+    - texlive-core {{ texlive_core }}
 
 # there are no run requirements as it's just pure html
 
 test:
   files:
-    - share/doc/index.html
-    - share/doc/mantid.png
+    - share/doc/html/index.html
+    - share/doc/html/mantid.png
 
 about:
   home: https://github.com/mantidproject/mantid
   license: GPL-3.0-or-later
-  summary: The QtHelp documentation for mantid
+  summary: HTML Documentation for Mantid
 
 extra:
   recipe-maintainers:

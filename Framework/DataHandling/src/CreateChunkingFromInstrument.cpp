@@ -15,11 +15,9 @@
 #include "MantidGeometry/IDetector.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/OptionalBool.h"
-
 #include "MantidKernel/StringTokenizer.h"
-
-#include "MantidNexus/NeXusException.hpp"
-#include "MantidNexus/NeXusFile.hpp"
+#include "MantidNexus/NexusException.h"
+#include "MantidNexus/NexusFile.h"
 
 #include <algorithm>
 
@@ -297,7 +295,7 @@ Instrument_const_sptr CreateChunkingFromInstrument::getInstrument() {
 
     // read information from the nexus file itself
     try {
-      NeXus::File nxsfile(filename);
+      Nexus::File nxsfile(filename);
 
       // get the run start time
       string start_time;
@@ -311,7 +309,7 @@ Instrument_const_sptr CreateChunkingFromInstrument::getInstrument() {
       nxsfile.closeGroup();
 
       // Test if IDF exists in file, move on quickly if not
-      nxsfile.openPath("instrument/instrument_xml");
+      nxsfile.openAddress("instrument/instrument_xml");
       nxsfile.close();
       auto loadInst = createChildAlgorithm("LoadIDFFromNexus", 0.0, 0.2);
       // Now execute the Child Algorithm. Catch and log any error, but don't
@@ -332,7 +330,7 @@ Instrument_const_sptr CreateChunkingFromInstrument::getInstrument() {
       else
         g_log.information("No IDF loaded from Nexus file.");
 
-    } catch (::NeXus::Exception &) {
+    } catch (Nexus::Exception const &) {
       g_log.information("No instrument definition found in " + filename + " at " + top_entry_name + "/instrument");
     }
   }

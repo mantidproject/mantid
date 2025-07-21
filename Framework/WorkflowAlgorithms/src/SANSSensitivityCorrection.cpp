@@ -19,8 +19,8 @@
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/PropertyManagerDataService.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidNexus/NeXusException.hpp"
-#include "MantidNexus/NeXusFile.hpp"
+#include "MantidNexus/NexusException.h"
+#include "MantidNexus/NexusFile.h"
 #include "Poco/File.h"
 #include "Poco/NumberFormatter.h"
 #include "Poco/Path.h"
@@ -97,7 +97,7 @@ bool SANSSensitivityCorrection::fileCheck(const std::string &filePath) {
 
   // open file and make sure it has entries
   try {
-    ::NeXus::File handle(filePath, NXACC_READ);
+    Nexus::File handle(filePath, NXaccess::READ);
     const auto entries = handle.getEntries();
     if (entries.size() == 0) {
       g_log.error("Error no entries found in " + filePath);
@@ -109,7 +109,7 @@ bool SANSSensitivityCorrection::fileCheck(const std::string &filePath) {
       return false;
     else
       return iter->second == "NXentry";
-  } catch (NeXus::Exception &) {
+  } catch (Nexus::Exception const &) {
     throw Exception::FileError("Unable to read data in File:", filePath);
   }
 }

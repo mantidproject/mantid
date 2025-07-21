@@ -22,7 +22,7 @@
 #include "MantidKernel/Strings.h"
 #include <Poco/File.h>
 
-using file_holder_type = std::unique_ptr<::NeXus::File>;
+using file_holder_type = std::unique_ptr<Mantid::Nexus::File>;
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -227,7 +227,7 @@ void SaveMD::doSaveHisto(const Mantid::DataObjects::MDHistoWorkspace_sptr &ws) {
     oldFile.remove();
 
   // Create a new file in HDF5 mode.
-  auto file = std::make_unique<::NeXus::File>(filename, NXACC_CREATE5);
+  auto file = std::make_unique<Nexus::File>(filename, NXaccess::CREATE5);
 
   // The base entry. Named so as to distinguish from other workspace types.
   file->makeGroup("MDHistoWorkspace", "NXentry", true);

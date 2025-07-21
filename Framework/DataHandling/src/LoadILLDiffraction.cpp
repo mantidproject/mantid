@@ -22,9 +22,9 @@
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidNexus/H5Util.h"
-#include "MantidNexus/NeXusException.hpp"
-#include "MantidNexus/NeXusFile.hpp"
 #include "MantidNexus/NexusClasses.h"
+#include "MantidNexus/NexusException.h"
+#include "MantidNexus/NexusFile.h"
 
 #include <H5Cpp.h>
 #include <Poco/Path.h>
@@ -38,7 +38,7 @@ using namespace API;
 using namespace Geometry;
 using namespace H5;
 using namespace Kernel;
-using namespace NeXus;
+using namespace Nexus;
 using Types::Core::DateAndTime;
 
 namespace {
@@ -226,9 +226,9 @@ void LoadILLDiffraction::loadMetaData() {
 
   // get some information from the NeXus file
   try {
-    ::NeXus::File filehandle(m_filename, NXACC_READ);
+    Nexus::File filehandle(m_filename, NXaccess::READ);
     LoadHelper::addNexusFieldsToWsRun(filehandle, mutableRun);
-  } catch (const ::NeXus::Exception &e) {
+  } catch (Nexus::Exception const &e) {
     g_log.debug() << "Failed to open nexus file \"" << m_filename << "\" in read mode: " << e.what() << "\n";
   }
 
@@ -511,9 +511,9 @@ void LoadILLDiffraction::loadScanVars() {
   Group scanVar = dataScan.openGroup("scanned_variables");
   Group varNames = scanVar.openGroup("variables_names");
 
-  const auto names = H5Util::readStringVector(varNames, "name");
-  const auto properties = H5Util::readStringVector(varNames, "property");
-  const auto units = H5Util::readStringVector(varNames, "unit");
+  const auto names = NeXus::H5Util::readStringVector(varNames, "name");
+  const auto properties = NeXus::H5Util::readStringVector(varNames, "property");
+  const auto units = NeXus::H5Util::readStringVector(varNames, "unit");
 
   for (size_t i = 0; i < names.size(); ++i) {
     m_scanVar.emplace_back(ScannedVariables(names[i], properties[i], units[i]));

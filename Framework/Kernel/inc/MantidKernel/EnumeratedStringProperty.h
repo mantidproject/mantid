@@ -9,10 +9,6 @@
 #include "MantidKernel/Property.h"
 #include <vector>
 
-namespace NeXus {
-class File;
-}
-
 namespace Mantid {
 
 namespace Kernel {
@@ -71,7 +67,7 @@ public:
 
   // MUTATORS AND SUNDRY
   EnumeratedStringProperty &operator+=(Property const *right) override;
-  void saveProperty(::NeXus::File *file) override;
+  void saveProperty(Nexus::File *file) override;
 
 protected:
   /// The value of the property

@@ -23,7 +23,6 @@ Current limitations compared to ``AlignAndFocusPowderFromFiles``
 
 - only supports the VULCAN instrument
 - hard coded for 6 particular groups
-- common binning across all output spectra
 - only specify binning in time-of-flight
 - does not support event filtering
 - does not support copping data

@@ -10,7 +10,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/Exception.h"
-#include "MantidNexus/NeXusFile.hpp"
+#include "MantidNexus/NexusFile.h"
 
 #include <Poco/Path.h>
 #include <boost/algorithm/string/compare.hpp>
@@ -220,8 +220,8 @@ void LoadDetectorInfo::loadFromRAW(const std::string &filename) {
  * @param filename filename A full path to the input RAW file
  */
 void LoadDetectorInfo::loadFromIsisNXS(const std::string &filename) {
-  ::NeXus::File nxsFile(filename,
-                        NXACC_READ); // will throw if file can't be opened
+  Nexus::File nxsFile(filename,
+                      NXaccess::READ); // will throw if file can't be opened
 
   // two types of file:
   //   - new type entry per detector
@@ -284,7 +284,7 @@ void LoadDetectorInfo::loadFromIsisNXS(const std::string &filename) {
  * @param detInfo A reference to the struct that will hold the data from the
  *file
  */
-void LoadDetectorInfo::readLibisisNxs(::NeXus::File &nxsFile, DetectorInfo &detInfo) const {
+void LoadDetectorInfo::readLibisisNxs(Nexus::File &nxsFile, DetectorInfo &detInfo) const {
   nxsFile.readData<int32_t>("det_no", detInfo.ids);
   nxsFile.readData<int32_t>("det_type", detInfo.codes);
   nxsFile.readData<double>("delay_time", detInfo.delays);
@@ -329,7 +329,7 @@ void LoadDetectorInfo::readLibisisNxs(::NeXus::File &nxsFile, DetectorInfo &detI
  * @param detInfo A reference to the struct that will hold the data from the
  *file
  */
-void LoadDetectorInfo::readNXSDotDat(::NeXus::File &nxsFile, DetectorInfo &detInfo) const {
+void LoadDetectorInfo::readNXSDotDat(Nexus::File &nxsFile, DetectorInfo &detInfo) const {
   std::vector<int32_t> fileIDs;
   nxsFile.readData<int32_t>("detID", fileIDs); // containts both ids & codes
   std::vector<float> fileOffsets;

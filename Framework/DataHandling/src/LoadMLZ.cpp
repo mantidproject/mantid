@@ -31,7 +31,7 @@ namespace Mantid::DataHandling {
 
 using namespace Kernel;
 using namespace API;
-using namespace NeXus;
+using namespace Nexus;
 using HistogramData::BinEdges;
 using HistogramData::Counts;
 
@@ -73,7 +73,7 @@ void LoadMLZ::exec() {
   std::string filenameData = getPropertyValue("Filename");
 
   // open the root node
-  NeXus::NXRoot dataRoot(filenameData);
+  Nexus::NXRoot dataRoot(filenameData);
   NXEntry dataFirstEntry = dataRoot.openFirstEntry();
 
   loadInstrumentDetails(dataFirstEntry);
@@ -111,11 +111,11 @@ int LoadMLZ::confidence(Nexus::NexusDescriptor &descriptor) const {
 /**
  * Loads Masked detectors from the /Scan/instrument/Detector/pixel_mask
  */
-void LoadMLZ::maskDetectors(const NeXus::NXEntry &entry) {
-  // path to the pixel_mask
-  std::string pmpath = "instrument/detector/pixel_mask";
+void LoadMLZ::maskDetectors(const Nexus::NXEntry &entry) {
+  // address to the pixel_mask
+  std::string pmaddress = "instrument/detector/pixel_mask";
 
-  NeXus::NXInt pmdata = entry.openNXInt(pmpath);
+  Nexus::NXInt pmdata = entry.openNXInt(pmaddress);
   // load the counts from the file into memory
   pmdata.load();
   g_log.debug() << "PMdata size: " << pmdata.size() << '\n';
@@ -142,17 +142,17 @@ void LoadMLZ::maskDetectors(const NeXus::NXEntry &entry) {
 }
 
 /**
- * Set the instrument name along with its path on the nexus file
+ * Set the instrument name along with its address on the nexus file
  */
-void LoadMLZ::loadInstrumentDetails(const NeXus::NXEntry &firstEntry) {
+void LoadMLZ::loadInstrumentDetails(const Nexus::NXEntry &firstEntry) {
 
-  m_instrumentPath = LoadHelper::findInstrumentNexusPath(firstEntry);
+  m_instrumentAddress = LoadHelper::findInstrumentNexusAddress(firstEntry);
 
-  if (m_instrumentPath.empty()) {
+  if (m_instrumentAddress.empty()) {
     throw std::runtime_error("Cannot set the instrument name from the Nexus file!");
   }
 
-  m_instrumentName = LoadHelper::getStringFromNexusPath(firstEntry, m_instrumentPath + "/name");
+  m_instrumentName = LoadHelper::getStringFromNexusAddress(firstEntry, m_instrumentAddress + "/name");
 
   if (std::find(m_supportedInstruments.begin(), m_supportedInstruments.end(), m_instrumentName) ==
       m_supportedInstruments.end()) {
@@ -170,7 +170,7 @@ void LoadMLZ::loadInstrumentDetails(const NeXus::NXEntry &firstEntry) {
  * @param entry :: The Nexus entry
  *
  */
-void LoadMLZ::initWorkspace(const NeXus::NXEntry &entry) //, const std::vector<std::vector<int> >&monitors)
+void LoadMLZ::initWorkspace(const Nexus::NXEntry &entry) //, const std::vector<std::vector<int> >&monitors)
 {
   // read in the data
   NXData dataGroup = entry.openNXData("data");
@@ -208,7 +208,7 @@ void LoadMLZ::initInstrumentSpecific() {
  * Load the time details from the nexus file.
  * @param entry :: The Nexus entry
  */
-void LoadMLZ::loadTimeDetails(const NeXus::NXEntry &entry) {
+void LoadMLZ::loadTimeDetails(const Nexus::NXEntry &entry) {
 
   m_wavelength = entry.getFloat("wavelength");
 
@@ -353,7 +353,7 @@ void LoadMLZ::loadExperimentDetails(const NXEntry &entry) {
  *
  * @param entry :: The Nexus entry
  */
-void LoadMLZ::loadDataIntoTheWorkSpace(const NeXus::NXEntry &entry) {
+void LoadMLZ::loadDataIntoTheWorkSpace(const Nexus::NXEntry &entry) {
   // read in the data
   NXData dataGroup = entry.openNXData("data");
   NXInt data = dataGroup.openIntData();

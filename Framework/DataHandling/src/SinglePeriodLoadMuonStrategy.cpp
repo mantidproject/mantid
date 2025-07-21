@@ -15,7 +15,7 @@
 namespace Mantid::DataHandling {
 
 using namespace API;
-using namespace NeXus;
+using namespace Nexus;
 using std::size_t;
 using namespace DataObjects;
 

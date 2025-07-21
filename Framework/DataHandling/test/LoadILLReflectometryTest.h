@@ -370,7 +370,6 @@ public:
 
   void testSourceAndSampleLocationsFigaro() {
     // In the following, all distance units are millimeter (proposed by NeXus)!
-    using namespace NeXus;
     LoadILLReflectometry loader;
     loader.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(loader.initialize())
@@ -389,7 +388,6 @@ public:
 
   void testSourceAndSampleLocationsFigaroCycle213() {
     // In the following, all distance units are millimeter (proposed by NeXus)!
-    using namespace NeXus;
     LoadILLReflectometry loader;
     loader.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(loader.initialize())

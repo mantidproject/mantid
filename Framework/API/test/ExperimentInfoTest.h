@@ -24,8 +24,8 @@
 #include "MantidFrameworkTestHelpers/NexusTestHelper.h"
 #include "PropertyManagerHelper.h"
 
-#include "MantidNexus/NeXusException.hpp"
-#include "MantidNexus/NeXusFile.hpp"
+#include "MantidNexus/NexusException.h"
+#include "MantidNexus/NexusFile.h"
 
 #include <Poco/DirectoryIterator.h>
 #include <Poco/File.h>
@@ -40,7 +40,6 @@
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
-using namespace NeXus;
 using Mantid::Types::Core::DateAndTime;
 
 class ExperimentInfoTest : public CxxTest::TestSuite {
@@ -443,7 +442,7 @@ public:
     std::string path = FileFinder::Instance().getFullPath(testFile);
 
     // Get nexus file for this.
-    ::NeXus::File nxFile(path, NXACC_READ);
+    Mantid::Nexus::File nxFile(path, NXaccess::READ);
 
     // Load the Nexus IDF info
     std::string params;
@@ -465,7 +464,7 @@ public:
     std::string path = FileFinder::Instance().getFullPath(testFile);
 
     // Get nexus file for this.
-    ::NeXus::File nxFile(path, NXACC_READ);
+    Mantid::Nexus::File nxFile(path, NXaccess::READ);
     // Open instrument group
     nxFile.openGroup("instrument", "NXinstrument");
 

@@ -94,9 +94,9 @@ void AddSinglePointTimeSeriesProperty(API::LogManager &logManager, const std::st
 // Utility functions for loading values with defaults
 // Single value properties only support int, double, string and bool
 template <typename Type>
-Type GetNeXusValue(const NeXus::NXEntry &entry, const std::string &path, const Type &defval, int32_t index) {
+Type GetNeXusValue(const Nexus::NXEntry &entry, const std::string &address, const Type &defval, int32_t index) {
   try {
-    NeXus::NXDataSetTyped<Type> dataSet = entry.openNXDataSet<Type>(path);
+    Nexus::NXDataSetTyped<Type> dataSet = entry.openNXDataSet<Type>(address);
     dataSet.load();
 
     return dataSet()[index];
@@ -106,10 +106,10 @@ Type GetNeXusValue(const NeXus::NXEntry &entry, const std::string &path, const T
 }
 // string and double are special cases
 template <>
-double GetNeXusValue<double>(const NeXus::NXEntry &entry, const std::string &path, const double &defval,
+double GetNeXusValue<double>(const Nexus::NXEntry &entry, const std::string &address, const double &defval,
                              int32_t index) {
   try {
-    NeXus::NXFloat dataSet = entry.openNXFloat(path);
+    Nexus::NXFloat dataSet = entry.openNXFloat(address);
     dataSet.load();
 
     return dataSet()[index];
@@ -118,39 +118,39 @@ double GetNeXusValue<double>(const NeXus::NXEntry &entry, const std::string &pat
   }
 }
 template <>
-std::string GetNeXusValue<std::string>(const NeXus::NXEntry &entry, const std::string &path, const std::string &defval,
-                                       int32_t /*unused*/) {
+std::string GetNeXusValue<std::string>(const Nexus::NXEntry &entry, const std::string &address,
+                                       const std::string &defval, int32_t /*unused*/) {
 
   try {
-    return entry.getString(path);
+    return entry.getString(address);
   } catch (std::runtime_error &) {
     return defval;
   }
 }
 
 template <typename T>
-void MapNeXusToProperty(const NeXus::NXEntry &entry, const std::string &path, const T &defval,
+void MapNeXusToProperty(const Nexus::NXEntry &entry, const std::string &address, const T &defval,
                         API::LogManager &logManager, const std::string &name, const T &factor, int32_t index) {
 
-  T value = GetNeXusValue<T>(entry, path, defval, index);
+  T value = GetNeXusValue<T>(entry, address, defval, index);
   logManager.addProperty<T>(name, value * factor);
 }
 
 // sting is a special case
 template <>
-void MapNeXusToProperty<std::string>(NeXus::NXEntry const &entry, const std::string &path, const std::string &defval,
+void MapNeXusToProperty<std::string>(Nexus::NXEntry const &entry, const std::string &address, const std::string &defval,
                                      API::LogManager &logManager, const std::string &name,
                                      const std::string & /*unused*/, int32_t index) {
 
-  std::string const value = GetNeXusValue<std::string>(entry, path, defval, index);
+  std::string const value = GetNeXusValue<std::string>(entry, address, defval, index);
   logManager.addProperty<std::string>(name, value);
 }
 
 template <typename T>
-void MapNeXusToSeries(NeXus::NXEntry &entry, const std::string &path, const T &defval, API::LogManager &logManager,
+void MapNeXusToSeries(Nexus::NXEntry &entry, const std::string &address, const T &defval, API::LogManager &logManager,
                       const std::string &time, const std::string &name, const T &factor, int32_t index) {
 
-  auto value = GetNeXusValue<T>(entry, path, defval, index);
+  auto value = GetNeXusValue<T>(entry, address, defval, index);
   AddSinglePointTimeSeriesProperty<T>(logManager, time, name, value * factor);
 }
 
@@ -1099,8 +1099,8 @@ std::vector<bool> LoadEMU<FD>::createRoiVector(const std::string &selected, cons
 /// Load parameters from input \p hdfFile and save to the log manager, \p logm.
 template <typename FD> void LoadEMU<FD>::loadParameters(const std::string &hdfFile, API::LogManager &logm) {
 
-  NeXus::NXRoot root(hdfFile);
-  NeXus::NXEntry entry = root.openFirstEntry();
+  Nexus::NXRoot root(hdfFile);
+  Nexus::NXEntry entry = root.openFirstEntry();
 
   MapNeXusToProperty<std::string>(entry, "sample/name", "unknown", logm, "SampleName", "", 0);
   MapNeXusToProperty<std::string>(entry, "sample/description", "unknown", logm, "SampleDescription", "", 0);
@@ -1142,8 +1142,8 @@ template <typename FD> void LoadEMU<FD>::loadParameters(const std::string &hdfFi
 /// time series to the log manager, \p logm.
 template <typename FD> void LoadEMU<FD>::loadEnvironParameters(const std::string &hdfFile, API::LogManager &logm) {
 
-  NeXus::NXRoot root(hdfFile);
-  NeXus::NXEntry entry = root.openFirstEntry();
+  Nexus::NXRoot root(hdfFile);
+  Nexus::NXEntry entry = root.openFirstEntry();
   auto time_str = logm.getPropertyValueAsType<std::string>("end_time");
 
   // load the environment variables for the dataset loaded
@@ -1234,8 +1234,8 @@ void LoadEMUHdf::exec() {
   // number from the hdf file, however if this is not a valid path then try
   // the basename with a '.bin' extension
   if (fs::is_directory(evtPath)) {
-    NeXus::NXRoot root(hdfFile);
-    NeXus::NXEntry entry = root.openFirstEntry();
+    Nexus::NXRoot root(hdfFile);
+    Nexus::NXEntry entry = root.openFirstEntry();
     auto eventDir = GetNeXusValue<std::string>(entry, "instrument/detector/daq_dirname", "./", 0);
     auto dataset = GetNeXusValue<int32_t>(entry, "instrument/detector/dataset_number", 0, m_datasetIndex);
     if (dataset < 0) {

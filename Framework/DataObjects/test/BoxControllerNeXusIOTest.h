@@ -9,7 +9,7 @@
 #include "MantidAPI/FileFinder.h"
 #include "MantidDataObjects/BoxControllerNeXusIO.h"
 #include "MantidFrameworkTestHelpers/MDEventsTestHelper.h"
-#include "MantidNexus/NeXusFile.hpp"
+#include "MantidNexus/NexusFile.h"
 
 #include <Poco/File.h>
 #include <map>

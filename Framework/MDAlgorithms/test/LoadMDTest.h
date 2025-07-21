@@ -329,7 +329,7 @@ public:
     if (!loader)
       return;
 
-    ::NeXus::File *file = loader->getFile();
+    Nexus::File *file = loader->getFile();
     TSM_ASSERT_LESS_THAN("The event_data field in the file must be at least 10002 long.", 10002,
                          file->getInfo().dims[0]);
 
@@ -940,6 +940,10 @@ public:
   }
 
   void test_loading_MD_with_missing_parameter_map() {
+    // NOTE if changes are made to Nexus::File::getAttr that create an error
+    // then this test will be one of the places the error appears
+    std::cout << "Test Loading MD with missing parameter map\n" << std::flush;
+
     // Arrange
     std::string filename("md_missing_paramater_map.nxs");
     std::string outWSName("LoadMD_md_missing_paramater_map");
@@ -975,6 +979,7 @@ public:
     if (iws) {
       AnalysisDataService::Instance().remove(outWSName);
     }
+    std::cout << "finished loading missing parameter map\n" << std::flush;
   }
 
   void test_simple_file() {

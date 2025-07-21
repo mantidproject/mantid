@@ -17,7 +17,7 @@
 #include <algorithm>
 #include <utility>
 
-using file_holder_type = std::unique_ptr<::NeXus::File>;
+using file_holder_type = std::unique_ptr<Mantid::Nexus::File>;
 
 namespace Mantid::DataObjects {
 namespace {
@@ -210,7 +210,7 @@ void MDBoxFlatTree::saveBoxStructure(const std::string &fileName) {
   hFile->close();
 }
 
-void MDBoxFlatTree::saveBoxStructure(::NeXus::File *hFile) {
+void MDBoxFlatTree::saveBoxStructure(Mantid::Nexus::File *hFile) {
   size_t maxBoxes = this->getNBoxes();
   if (maxBoxes == 0)
     return;
@@ -235,18 +235,18 @@ void MDBoxFlatTree::saveBoxStructure(::NeXus::File *hFile) {
     hFile->putAttr("box_controller_xml", m_bcXMLDescr);
   }
 
-  ::NeXus::DimVector exents_dims(2, 0);
-  exents_dims[0] = (::NeXus::dimsize_t(maxBoxes));
+  Nexus::DimVector exents_dims(2, 0);
+  exents_dims[0] = (Nexus::dimsize_t(maxBoxes));
   exents_dims[1] = (m_nDim * 2);
-  ::NeXus::DimVector exents_chunk(2, 0);
-  exents_chunk[0] = ::NeXus::dimsize_t(16384);
+  Nexus::DimVector exents_chunk(2, 0);
+  exents_chunk[0] = Nexus::dimsize_t(16384);
   exents_chunk[1] = (m_nDim * 2);
 
-  ::NeXus::DimVector box_2_dims(2, 0);
-  box_2_dims[0] = ::NeXus::dimsize_t(maxBoxes);
+  Nexus::DimVector box_2_dims(2, 0);
+  box_2_dims[0] = Nexus::dimsize_t(maxBoxes);
   box_2_dims[1] = (2);
-  ::NeXus::DimVector box_2_chunk(2, 0);
-  box_2_chunk[0] = ::NeXus::dimsize_t(16384);
+  Nexus::DimVector box_2_chunk(2, 0);
+  box_2_chunk[0] = Nexus::dimsize_t(16384);
   box_2_chunk[1] = (2);
 
   if (create) {
@@ -316,7 +316,7 @@ void MDBoxFlatTree::loadBoxStructure(const std::string &fileName, int &nDim, con
   // close the NeXus file
   hFile->close();
 }
-void MDBoxFlatTree::loadBoxStructure(::NeXus::File *hFile, bool onlyEventInfo) {
+void MDBoxFlatTree::loadBoxStructure(Mantid::Nexus::File *hFile, bool onlyEventInfo) {
   // ----------------------------------------- Box Structure
   // ------------------------------
   hFile->openGroup("box_structure", "NXdata");
@@ -372,7 +372,7 @@ void MDBoxFlatTree::loadBoxStructure(::NeXus::File *hFile, bool onlyEventInfo) {
  *@param ws   -- the shared pointer to the workspace with experiment infos to
  *write.
  */
-void MDBoxFlatTree::saveExperimentInfos(::NeXus::File *const file, const API::IMDEventWorkspace_const_sptr &ws) {
+void MDBoxFlatTree::saveExperimentInfos(Mantid::Nexus::File *const file, const API::IMDEventWorkspace_const_sptr &ws) {
 
   std::map<std::string, std::string> entries;
   file->getEntries(entries);
@@ -410,7 +410,7 @@ void MDBoxFlatTree::saveExperimentInfos(::NeXus::File *const file, const API::IM
   }
 }
 
-void MDBoxFlatTree::loadExperimentInfos(::NeXus::File *const file, const std::string &filename,
+void MDBoxFlatTree::loadExperimentInfos(Mantid::Nexus::File *const file, const std::string &filename,
                                         std::shared_ptr<Mantid::API::MultipleExperimentInfos> mei,
                                         const Mantid::Nexus::NexusDescriptor &fileInfo, const std::string &currentGroup,
                                         bool lazy) {
@@ -442,7 +442,7 @@ void MDBoxFlatTree::loadExperimentInfos(::NeXus::File *const file, const std::st
   for (; itr != experimentBlockNum.end(); itr++) {
     std::string groupName = "experiment" + Kernel::Strings::toString(*itr);
     if (lazy) {
-      auto ei = std::make_shared<API::FileBackedExperimentInfo>(filename, file->getPath() + "/" + groupName);
+      auto ei = std::make_shared<API::FileBackedExperimentInfo>(filename, file->getAddress() + "/" + groupName);
       // And add it to the mutliple experiment info.
       mei->addExperimentInfo(ei);
     } else {
@@ -451,7 +451,7 @@ void MDBoxFlatTree::loadExperimentInfos(::NeXus::File *const file, const std::st
       std::string parameterStr;
       try {
         // Get the sample, logs, instrument
-        ei->loadExperimentInfoNexus(filename, file, parameterStr, fileInfo, file->getPath());
+        ei->loadExperimentInfoNexus(filename, file, parameterStr, fileInfo, file->getAddress());
         // Now do the parameter map
         if (parameterStr.empty()) {
           ei->populateInstrumentParameters();
@@ -481,7 +481,7 @@ void MDBoxFlatTree::loadExperimentInfos(::NeXus::File *const file, const std::st
  * @param lazy :: If true, use the FileBackedExperimentInfo class to only load
  * the data from the file when it is requested
  */
-void MDBoxFlatTree::loadExperimentInfos(::NeXus::File *const file, const std::string &filename,
+void MDBoxFlatTree::loadExperimentInfos(Mantid::Nexus::File *const file, const std::string &filename,
                                         const std::shared_ptr<Mantid::API::MultipleExperimentInfos> &mei, bool lazy) {
   // First, find how many experimentX blocks there are
   std::map<std::string, std::string> entries;
@@ -500,7 +500,7 @@ void MDBoxFlatTree::loadExperimentInfos(::NeXus::File *const file, const std::st
   for (; itr != experimentBlockNum.end(); itr++) {
     std::string groupName = "experiment" + Kernel::Strings::toString(*itr);
     if (lazy) {
-      auto ei = std::make_shared<API::FileBackedExperimentInfo>(filename, file->getPath() + "/" + groupName);
+      auto ei = std::make_shared<API::FileBackedExperimentInfo>(filename, file->getAddress() + "/" + groupName);
       // And add it to the mutliple experiment info.
       mei->addExperimentInfo(ei);
     } else {
@@ -667,25 +667,25 @@ uint64_t MDBoxFlatTree::restoreBoxTree(std::vector<API::IMDNode *> &Boxes, API::
  read-only or if the existing file parameters are not equal to the
             input parameters.
 */
-::NeXus::File *MDBoxFlatTree::createOrOpenMDWSgroup(const std::string &fileName, int &nDims,
-                                                    const std::string &WSEventType, bool readOnly,
-                                                    bool &alreadyExists) {
+Mantid::Nexus::File *MDBoxFlatTree::createOrOpenMDWSgroup(const std::string &fileName, int &nDims,
+                                                          const std::string &WSEventType, bool readOnly,
+                                                          bool &alreadyExists) {
   alreadyExists = false;
   Poco::File oldFile(fileName);
   bool fileExists = oldFile.exists();
   if (!fileExists && readOnly)
     throw Kernel::Exception::FileError("Attempt to open non-existing file in read-only mode", fileName);
 
-  NXaccess access(NXACC_RDWR);
+  NXaccess access(NXaccess::RDWR);
   if (readOnly)
-    access = NXACC_READ;
+    access = NXaccess::READ;
 
   file_holder_type hFile;
   try {
     if (fileExists)
-      hFile = file_holder_type(new ::NeXus::File(fileName, access));
+      hFile = file_holder_type(new Mantid::Nexus::File(fileName, access));
     else
-      hFile = file_holder_type(new ::NeXus::File(fileName, NXACC_CREATE5));
+      hFile = file_holder_type(new Mantid::Nexus::File(fileName, NXaccess::CREATE5));
   } catch (...) {
     throw Kernel::Exception::FileError("Can not open NeXus file", fileName);
   }
@@ -775,7 +775,7 @@ uint64_t MDBoxFlatTree::restoreBoxTree(std::vector<API::IMDNode *> &Boxes, API::
 
 /**Save workspace generic info like dimension structure, history, title
  * dimensions etc.*/
-void MDBoxFlatTree::saveWSGenericInfo(::NeXus::File *const file, const API::IMDWorkspace_const_sptr &ws) {
+void MDBoxFlatTree::saveWSGenericInfo(Mantid::Nexus::File *const file, const API::IMDWorkspace_const_sptr &ws) {
   // Write out the coordinate system
   file->writeData("coordinate_system", static_cast<uint32_t>(ws->getSpecialCoordinateSystem()));
 
@@ -816,7 +816,8 @@ void MDBoxFlatTree::saveWSGenericInfo(::NeXus::File *const file, const API::IMDW
  * @param file : pointer to the NeXus file
  * @param ws : workspace to get matrix from
  */
-void MDBoxFlatTree::saveAffineTransformMatricies(::NeXus::File *const file, const API::IMDWorkspace_const_sptr &ws) {
+void MDBoxFlatTree::saveAffineTransformMatricies(Mantid::Nexus::File *const file,
+                                                 const API::IMDWorkspace_const_sptr &ws) {
   try {
     saveAffineTransformMatrix(file, ws->getTransformToOriginal(), "transform_to_orig");
   } catch (std::runtime_error &) {
@@ -834,7 +835,7 @@ void MDBoxFlatTree::saveAffineTransformMatricies(::NeXus::File *const file, cons
  * @param transform : the object to extract the affine matrix from
  * @param entry_name : the tag in the NeXus file to save under
  */
-void MDBoxFlatTree::saveAffineTransformMatrix(::NeXus::File *const file, API::CoordTransform const *transform,
+void MDBoxFlatTree::saveAffineTransformMatrix(Mantid::Nexus::File *const file, API::CoordTransform const *transform,
                                               const std::string &entry_name) {
   if (!transform)
     return;
@@ -852,7 +853,7 @@ void MDBoxFlatTree::saveAffineTransformMatrix(::NeXus::File *const file, API::Co
  * @param tag : id for an affine matrix conversion
  */
 template <typename T>
-void saveMatrix(::NeXus::File *const file, const std::string &name, Kernel::Matrix<T> &m, NXnumtype type,
+void saveMatrix(Mantid::Nexus::File *const file, const std::string &name, Kernel::Matrix<T> &m, NXnumtype type,
                 const std::string &tag) {
   std::vector<T> v = m.getVector();
   // Number of data points

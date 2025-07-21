@@ -169,7 +169,7 @@ class SXDIntegrateDataShoebox(systemtesting.MantidSystemTest):
 
     def validate(self):
         intens_over_sigma = [0.0, 12.749, 11.941, 136.535, 0.0]
-        self.assertTrue(np.allclose(self.integrated_peaks.column("Intens/SigInt"), intens_over_sigma, atol=1e-2))
+        np.testing.assert_allclose(self.integrated_peaks.column("Intens/SigInt"), intens_over_sigma, atol=1e-2)
 
 
 class SXDIntegrateData1DProfile(systemtesting.MantidSystemTest):
