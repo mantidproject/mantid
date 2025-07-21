@@ -148,52 +148,32 @@ class FullInstrumentViewWindow(QMainWindow):
     def subscribe_presenter(self, presenter) -> None:
         self._presenter = presenter
 
-    def add_projection_combo_options(self, options: list[str]) -> None:
-        self._projection_combo_box.addItems(options)
-
     def setup_connections_to_presenter(self) -> None:
-        self._projection_combo_box.currentIndexChanged.connect(self._presenter.projection_option_selected)
-        self._multi_select_check.stateChanged.connect(self._presenter.multi_select_checkbox_clicked)
-        self._clear_selection_button.clicked.connect(self._presenter.clear_all_picked_detectors)
-        self._contour_range_min_edit.textEdited.connect(self._on_contour_limits_updated)
-        self._contour_range_max_edit.textEdited.connect(self._on_contour_limits_updated)
-        self._tof_min_edit.textEdited.connect(self._on_tof_limits_updated)
-        self._tof_max_edit.textEdited.connect(self._on_tof_limits_updated)
+        self._projection_combo_box.currentIndexChanged.connect(self._presenter.on_projection_option_selected)
+        self._multi_select_check.stateChanged.connect(self._presenter.on_multi_select_detectors_clicked)
+        self._clear_selection_button.clicked.connect(self._presenter.on_clear_selected_detectors_clicked)
+        self._contour_range_min_edit.textEdited.connect(self._presenter.on_contour_limits_updated)
+        self._contour_range_max_edit.textEdited.connect(self._presenter.on_contour_limits_updated)
+        self._tof_min_edit.textEdited.connect(self._presenter.on_tof_limits_updated)
+        self._tof_max_edit.textEdited.connect(self._presenter.on_tof_limits_updated)
 
-    def _on_tof_limits_updated(self) -> None:
-        """When TOF limits are changed, read the new limits and tell the presenter to update the colours accordingly"""
-        is_valid, min, max = self._parse_min_max_text(self._tof_min_edit, self._tof_max_edit)
-        if is_valid:
-            self._presenter.set_tof_limits(min, max)
-
-    def _on_contour_limits_updated(self) -> None:
-        """When contour limits are changed, read the new limits and tell the presenter to update the colours accordingly"""
-        is_valid, min, max = self._parse_min_max_text(self._contour_range_min_edit, self._contour_range_max_edit)
-        if is_valid:
-            self._presenter.set_contour_limits(min, max)
-
-    def _parse_min_max_text(self, min_edit: QLineEdit, max_edit: QLineEdit) -> tuple[bool, int, int]:
-        """Try to parse the text in the edit boxes as numbers. Return the results and whether the attempt was successful."""
-        try:
-            min = int(min_edit.text())
-            max = int(max_edit.text())
-        except ValueError:
-            return (False, 0, 0)
-        if max <= min:
-            return (False, min, max)
-        return (True, min, max)
-
-    def set_contour_range_limits(self, contour_limits: list) -> None:
-        """Update the contour range edit boxes with formatted text"""
-        self._contour_range_min_edit.setText(f"{contour_limits[0]:.0f}")
-        self._contour_range_max_edit.setText(f"{contour_limits[1]:.0f}")
+    def get_tof_limits_text(self) -> tuple[str, str]:
+        return self._tof_min_edit.text(), self._tof_max_edit.text()
 
     def set_tof_range_limits(self, tof_limits: list) -> None:
         """Update the TOF edit boxes with formatted text"""
         self._tof_min_edit.setText(f"{tof_limits[0]:.0f}")
         self._tof_max_edit.setText(f"{tof_limits[1]:.0f}")
 
-    def update_scalar_range(self, clim: list[float], label: str) -> None:
+    def get_contour_limits_text(self) -> tuple[str, str]:
+        return self._contour_range_min_edit.text(), self._contour_range_max_edit.text()
+
+    def set_contour_range_limits(self, contour_limits: list) -> None:
+        """Update the contour range edit boxes with formatted text"""
+        self._contour_range_min_edit.setText(f"{contour_limits[0]:.0f}")
+        self._contour_range_max_edit.setText(f"{contour_limits[1]:.0f}")
+
+    def set_plotter_scalar_bar_range(self, clim: list[int], label: str) -> None:
         """Set the range of the colours displayed, i.e. the legend"""
         self.main_plotter.update_scalar_bar_range(clim, label)
         self.projection_plotter.update_scalar_bar_range(clim, label)
@@ -205,6 +185,9 @@ class FullInstrumentViewWindow(QMainWindow):
         self.projection_plotter.close()
         if self._detector_spectrum_fig is not None:
             plt.close(self._detector_spectrum_fig.get_label())
+
+    def set_projection_combo_options(self, options: list[str]) -> None:
+        self._projection_combo_box.addItems(options)
 
     def add_simple_shape(self, mesh: PolyData, colour=None, pickable=False) -> None:
         """Draw the given mesh in the main plotter window"""
@@ -289,7 +272,7 @@ class FullInstrumentViewWindow(QMainWindow):
         """Set the camera focal point on the main plotter"""
         self.main_plotter.camera.focal_point = focal_point
 
-    def show_plot_for_detectors(self, workspace: Workspace2D, workspace_indices: list) -> None:
+    def set_plot_for_detectors(self, workspace: Workspace2D, workspace_indices: list | np.ndarray) -> None:
         """Plot all the given spectra, where they are defined by their workspace indices, not the spectra numbers"""
         self._detector_spectrum_axes.clear()
         for d in workspace_indices:
@@ -300,7 +283,7 @@ class FullInstrumentViewWindow(QMainWindow):
 
         self._detector_figure_canvas.draw()
 
-    def update_selected_detector_info(self, detector_infos: list[DetectorInfo]) -> None:
+    def set_selected_detector_info(self, detector_infos: list[DetectorInfo]) -> None:
         """For a list of detectors, with their info wrapped up in a class, update all of the info text boxes"""
         self._set_detector_edit_text(self._detector_name_edit, detector_infos, lambda d: d.name)
         self._set_detector_edit_text(self._detector_id_edit, detector_infos, lambda d: str(d.detector_id))

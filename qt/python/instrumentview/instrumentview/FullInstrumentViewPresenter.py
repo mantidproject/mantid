@@ -33,7 +33,7 @@ class FullInstrumentViewPresenter:
 
         self._view.subscribe_presenter(self)
 
-        self._view.add_projection_combo_options(self.projection_combo_options())
+        self._view.set_projection_combo_options(self.projection_combo_options())
 
         self._view.setup_connections_to_presenter()
 
@@ -65,14 +65,43 @@ class FullInstrumentViewPresenter:
             monitor_point_cloud["colours"] = self.generate_single_colour(len(self._model.monitor_positions()), 1, 0, 0, 1)
             self._view.add_rgba_mesh(monitor_point_cloud, scalars="colours")
 
-        self.projection_option_selected(0)
+        self.on_projection_option_selected(0)
         self._view.enable_point_picking(callback=self.point_picked)
         self._view.reset_camera()
 
     def projection_combo_options(self) -> list[str]:
         return self._PROJECTION_OPTIONS
 
-    def projection_option_selected(self, selected_index: int) -> None:
+    def on_tof_limits_updated(self) -> None:
+        """When TOF limits are changed, read the new limits and tell the presenter to update the colours accordingly"""
+        limits = self._parse_min_max_text(*self._view.get_tof_limits_text())
+        if limits:
+            self._model.update_time_of_flight_range(*limits)
+            self._detector_mesh[self._counts_label] = self._model.detector_counts()
+            self.set_contour_limits(*self._model.data_limits())
+
+    def on_contour_limits_updated(self) -> None:
+        """When contour limits are changed, read the new limits and tell the presenter to update the colours accordingly"""
+        limits = self._parse_min_max_text(*self._view.get_contour_limits_text())
+        if limits:
+            self.set_contour_limits(*limits)
+
+    def _parse_min_max_text(self, min_text: str, max_text: str) -> tuple:
+        """Try to parse the text in the edit boxes as numbers. Return the results and whether the attempt was successful."""
+        try:
+            min = int(min_text)
+            max = int(max_text)
+        except ValueError:
+            return ()
+        if max <= min:
+            return ()
+        return (min, max)
+
+    def set_contour_limits(self, min: int, max: int) -> None:
+        self._contour_limits = [min, max]
+        self._view.set_plotter_scalar_bar_range(self._contour_limits, self._counts_label)
+
+    def on_projection_option_selected(self, selected_index: int) -> None:
         """Update the projection based on the selected option."""
         projection_type = self._PROJECTION_OPTIONS[selected_index]
         is_spherical = True
@@ -101,27 +130,18 @@ class FullInstrumentViewPresenter:
         self._pickable_projection_mesh["visibility"] = self._model.picked_visibility()
         self._view.add_pickable_projection_mesh(self._pickable_projection_mesh, scalars="visibility")
 
-    def set_contour_limits(self, min: int, max: int) -> None:
-        self._contour_limits = [min, max]
-        self._view.update_scalar_range(self._contour_limits, self._counts_label)
-
-    def set_tof_limits(self, min: int, max: int) -> None:
-        self._model.update_time_of_flight_range(min, max)
-        self._detector_mesh[self._counts_label] = self._model.detector_counts()
-        self.set_contour_limits(self._model.data_limits()[0], self._model.data_limits()[1])
+    def on_multi_select_detectors_clicked(self, state: int) -> None:
+        """Change between single and multi point picking"""
+        if state == 2:
+            self._view.enable_rectangle_picking(callback=self.rectangle_picked)
+        else:
+            self._view.enable_point_picking(callback=self.point_picked)
 
     def point_picked(self, point_position: np.ndarray, picker: PickerType) -> None:
         if point_position is None:
             return
         point_index = picker.GetPointId()
         self.update_picked_detectors([point_index])
-
-    def multi_select_checkbox_clicked(self, state: int) -> None:
-        """Change between single and multi point picking"""
-        if state == 2:
-            self._view.enable_rectangle_picking(callback=self.rectangle_picked)
-        else:
-            self._view.enable_point_picking(callback=self.point_picked)
 
     def rectangle_picked(self, rectangle: RectangleSelection) -> None:
         """Get points within the selection rectangle and display information for those detectors"""
@@ -140,10 +160,10 @@ class FullInstrumentViewPresenter:
         self._pickable_main_mesh["visibility"] = self._model.picked_visibility()
         self._pickable_projection_mesh["visibility"] = self._model.picked_visibility()
 
-        self._view.show_plot_for_detectors(self._model.workspace(), self._model.picked_workspace_indices())
-        self._view.update_selected_detector_info(self._model.picked_detectors_info_text())
+        self._view.set_plot_for_detectors(self._model.workspace(), self._model.picked_workspace_indices())
+        self._view.set_selected_detector_info(self._model.picked_detectors_info_text())
 
-    def clear_all_picked_detectors(self) -> None:
+    def on_clear_selected_detectors_clicked(self) -> None:
         self.update_picked_detectors([])
 
     def create_poly_data_mesh(self, points: np.ndarray, faces=None) -> pv.PolyData:
