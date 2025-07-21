@@ -6,10 +6,10 @@
 
 namespace Mantid::DataHandling {
 
-template <typename DetidType, typename TofType> class ProcessEventsTask {
+class ProcessEventsTask {
 
 public:
-  ProcessEventsTask(const std::vector<DetidType> *detids, const std::vector<TofType> *tofs,
+  ProcessEventsTask(const std::vector<uint32_t> *detids, const std::vector<float> *tofs,
                     const BankCalibration *calibration, const std::vector<double> *binedges);
 
   ProcessEventsTask(ProcessEventsTask &other, tbb::split);
@@ -22,8 +22,8 @@ public:
   std::vector<uint32_t> y_temp;
 
 private:
-  const std::vector<DetidType> *m_detids;
-  const std::vector<TofType> *m_tofs;
+  const std::vector<uint32_t> *m_detids;
+  const std::vector<float> *m_tofs;
   const BankCalibration *m_calibration;
   const std::vector<double> *m_binedges;
 };
