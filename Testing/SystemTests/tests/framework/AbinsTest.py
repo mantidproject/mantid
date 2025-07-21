@@ -4,7 +4,11 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+import glob
+import os
+
 import systemtesting
+from mantid.kernel import ConfigService
 from mantid.simpleapi import Abins, Abins2D, mtd, DeleteWorkspace
 
 from abins.constants import (
@@ -183,10 +187,6 @@ class HelperTestingClass(object):
         Destructor removes output files after tests and workspaces.
         :return:
         """
-        import glob
-        import os
-        from mantid.kernel import ConfigService
-
         save_dir_path = ConfigService.getString("defaultsave.directory")
 
         for cache_file in glob.glob(f"{save_dir_path}/{self._system_name}*.hdf5"):
