@@ -135,10 +135,10 @@ export CONDA_SUBDIR=$PLATFORM
 
 # Run conda build.
 if [[ $ENABLE_BUILD_MANTID_DEVELOPER == true ]]; then
-    conda mambabuild ./mantid-developer/ $EXTRA_BUILD_OPTIONS
+    rattler-build build -r ./mantid-developer/ -m ./conda_build_config.yaml --output-dir $CONDA_BLD_PATH $EXTRA_BUILD_OPTIONS
 fi
 if [[ $ENABLE_BUILD_MANTID == true ]]; then
-    conda mambabuild ./mantid/ $EXTRA_BUILD_OPTIONS
+    rattler-build build -r ./mantid/ -m ./conda_build_config.yaml --output-dir $CONDA_BLD_PATH $EXTRA_BUILD_OPTIONS
 fi
 if [[ $ENABLE_BUILD_QT == true ]]; then
     conda mambabuild ./mantidqt/ $EXTRA_BUILD_OPTIONS
