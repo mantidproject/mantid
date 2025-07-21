@@ -37,6 +37,7 @@
 #include <numbers>
 #include <ranges>
 #include <regex>
+#include <stack>
 
 namespace Mantid::DataHandling {
 using Mantid::API::FileProperty;
@@ -420,6 +421,15 @@ public:
             // Continue to next range
           }
         }
+
+        // log the event ranges being processed
+        std::ostringstream oss;
+        oss << "Processing " << bankName << " with " << total_events_to_read << " events in the ranges: ";
+        for (size_t i = 0; i < offsets.size(); ++i) {
+          oss << "[" << offsets[i] << ", " << (offsets[i] + slabsizes[i]) << "), ";
+        }
+        oss << "\n";
+        std::cout << oss.str();
 
         // load detid and tof at the same time
         tbb::parallel_invoke(
