@@ -64,44 +64,6 @@
  */
 
 /**
- * Open a NeXus file.
- * NXopen honours full path file names. But it also searches
- * for files in all the paths given in the NX_LOAD_PATH environment variable.
- * NX_LOAD_PATH is supposed to hold a list of path string separated by the platform
- * specific path separator. For unix this is the : , for DOS the ; . Please note
- * that crashing on an open NeXus file will result in corrupted data. Only after a NXclose
- * or a NXflush will the data file be valid.
- * \param filename The name of the file to open
- * \param access_method The file access method. This can be:
- * \li READ read access
- * \li RDWR read write access
- * \li CREATE5 create a new HDF-5 NeXus file
- * see #NXaccess
- * Support for HDF-4 is deprecated.
- * \param handle A file handle which will be initialized upon successfull completeion of NXopen.
- * \return NX_OK on success, NX_ERROR in the case of an error.
- * \ingroup c_init
- */
-MANTID_NEXUS_DLL NXstatus NXopen(std::string const &filename, NXaccess const access_method, NXhandle &handle);
-
-/**
- * close a NeXus file
- * \param pHandle A NeXus file handle as returned from NXopen. pHandle is invalid after this
- * call.
- * \return NX_OK on success, NX_ERROR in the case of an error.
- * \ingroup c_init
- */
-MANTID_NEXUS_DLL NXstatus NXclose(NXhandle &handle);
-
-/**
- * flush data to disk
- * \param pHandle A NeXus file handle as initialized by NXopen.
- * \return NX_OK on success, NX_ERROR in the case of an error.
- * \ingroup c_readwrite
- */
-MANTID_NEXUS_DLL NXstatus NXflush(NXhandle &handle);
-
-/**
  * NeXus groups are NeXus way of structuring information into a hierarchy.
  * This function creates a group but does not open it.
  * \param handle A NeXus file handle as initialized NXopen.
@@ -110,7 +72,7 @@ MANTID_NEXUS_DLL NXstatus NXflush(NXhandle &handle);
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_group
  */
-MANTID_NEXUS_DLL NXstatus NXmakegroup(NXhandle handle, std::string const &name, std::string const &NXclass);
+MANTID_NEXUS_DLL NXstatus NXmakegroup(NXhandle fid, std::string const &name, std::string const &nxclass);
 
 /**
  * Step into a group. All further access will be within the opened group.
@@ -120,7 +82,7 @@ MANTID_NEXUS_DLL NXstatus NXmakegroup(NXhandle handle, std::string const &name, 
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_group
  */
-MANTID_NEXUS_DLL NXstatus NXopengroup(NXhandle handle, std::string const &name, std::string const &NXclass);
+MANTID_NEXUS_DLL NXstatus NXopengroup(NXhandle fid, std::string const &name, std::string const &nxclass);
 
 /**
  * Open the NeXus object with the address specified
@@ -131,27 +93,7 @@ MANTID_NEXUS_DLL NXstatus NXopengroup(NXhandle handle, std::string const &name, 
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_navigation
  */
-MANTID_NEXUS_DLL NXstatus NXopenaddress(NXhandle handle, std::string const &address);
-
-/**
- * Opens the group in which the NeXus object with the specified address exists
- * \param handle A NeXus file handle as initialized by NXopen.
- * \param address A unix like address string to a NeXus group or dataset. The address string
- * is a list of group names and SDS names separated with / (slash).
- * Example: /entry1/sample/name
- * \return NX_OK on success, NX_ERROR in the case of an error.
- * \ingroup c_navigation
- */
-MANTID_NEXUS_DLL NXstatus NXopengroupaddress(NXhandle handle, std::string const &address);
-
-/**
- * Retrieve the current address in the NeXus file
- * \param handle a NeXus file handle
- * \param address A string into which to copy the address
- * \return NX_OK or NX_ERROR
- * \ingroup c_navigation
- */
-MANTID_NEXUS_DLL NXstatus NXgetaddress(NXhandle handle, std::string &address);
+MANTID_NEXUS_DLL NXstatus NXopenaddress(NexusFile5 &fid, std::string const &address);
 
 /**
  * Closes the currently open group and steps one step down in the NeXus file
@@ -159,7 +101,7 @@ MANTID_NEXUS_DLL NXstatus NXgetaddress(NXhandle handle, std::string &address);
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_group
  */
-MANTID_NEXUS_DLL NXstatus NXclosegroup(NXhandle handle);
+MANTID_NEXUS_DLL NXstatus NXclosegroup(NXhandle fid);
 
 /**
  * Create a multi dimensional data array or dataset. The dataset is NOT opened.
@@ -172,33 +114,8 @@ MANTID_NEXUS_DLL NXstatus NXclosegroup(NXhandle handle);
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_readwrite
  */
-MANTID_NEXUS_DLL NXstatus NXmakedata64(NXhandle handle, std::string const &name, NXnumtype const datatype,
+MANTID_NEXUS_DLL NXstatus NXmakedata64(NXhandle fid, std::string const &name, NXnumtype const datatype,
                                        std::size_t const rank, Mantid::Nexus::DimVector const &dims);
-
-/**
- * Create a compressed dataset. The dataset is NOT opened. Data from this set will automatically be compressed when
- * writing and decompressed on reading.
- * \param handle A NeXus file handle as initialized by NXopen.
- * \param name The name of the dataset
- * \param datatype The data type of this data set.
- * \param rank The number of dimensions this dataset is going to have
- * \param comp_typ The compression scheme to use. Possible values:
- * \li NONE no compression
- * \li LZW (recommended) despite the name this enabled zlib compression (of various levels, see above)
- * \li RLE run length encoding (only HDF-4)
- * \li HUF Huffmann encoding (only HDF-4)
- * \param dim An array of size rank holding the size of the dataset in each dimension. The first dimension
- * can be NX_UNLIMITED. Data can be appended to such a dimension using NXputslab.
- * \param bufsize The dimensions of the subset of the data which usually be writen in one go.
- * This is a parameter used by HDF for performance optimisations. If you write your data in one go, this
- * should be the same as the data dimension. If you write it in slabs, this is your preferred slab size.
- * \return NX_OK on success, NX_ERROR in the case of an error.
- * \ingroup c_readwrite
- */
-MANTID_NEXUS_DLL NXstatus NXcompmakedata64(NXhandle handle, std::string const &name, NXnumtype const datatype,
-                                           std::size_t const rank, Mantid::Nexus::DimVector const &dims,
-                                           NXcompression const comp_typ,
-                                           Mantid::Nexus::DimSizeVector const &chunk_size);
 
 /**
  * Open access to a dataset. After this call it is possible to write and read data or
@@ -208,7 +125,7 @@ MANTID_NEXUS_DLL NXstatus NXcompmakedata64(NXhandle handle, std::string const &n
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_readwrite
  */
-MANTID_NEXUS_DLL NXstatus NXopendata(NXhandle handle, std::string const &name);
+MANTID_NEXUS_DLL NXstatus NXopendata(NXhandle fid, std::string const &name);
 
 /**
  * Close access to a dataset.
@@ -216,7 +133,7 @@ MANTID_NEXUS_DLL NXstatus NXopendata(NXhandle handle, std::string const &name);
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_readwrite
  */
-MANTID_NEXUS_DLL NXstatus NXclosedata(NXhandle handle);
+MANTID_NEXUS_DLL NXstatus NXclosedata(NXhandle fid);
 
 /**
  * Write data to a datset which has previouly been opened with NXopendata.
@@ -227,7 +144,7 @@ MANTID_NEXUS_DLL NXstatus NXclosedata(NXhandle handle);
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_readwrite
  */
-MANTID_NEXUS_DLL NXstatus NXputdata(NXhandle handle, const void *data);
+MANTID_NEXUS_DLL NXstatus NXputdata(NXhandle fid, char const *data);
 
 /**
  * Write an attribute. The kind of attribute written depends on the
@@ -244,42 +161,8 @@ MANTID_NEXUS_DLL NXstatus NXputdata(NXhandle handle, const void *data);
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_readwrite
  */
-MANTID_NEXUS_DLL NXstatus NXputattr(NXhandle handle, std::string const &name, const void *data,
-                                    std::size_t const iDataLen, NXnumtype const iType);
-
-/**
- * Write  a subset of a multi dimensional dataset.
- * \param handle A NeXus file handle as initialized by NXopen.
- * \param data A pointer to a memory area holding the data to write.
- * \param start An array holding the start indices where to start the data subset.
- * \param size An array holding the size of the data subset to write in each dimension.
- * \return NX_OK on success, NX_ERROR in the case of an error.
- * \ingroup c_readwrite
- */
-MANTID_NEXUS_DLL NXstatus NXputslab64(NXhandle handle, const void *data, Mantid::Nexus::DimSizeVector const &start,
-                                      Mantid::Nexus::DimSizeVector const &size);
-
-/**
- * Retrieve link data for a dataset. This link data can later on be used to link this
- * dataset into a different group.
- * \param handle A NeXus file handle as initialized by NXopen.
- * \param pLink A link data structure which will be initialized with the required information
- * for linking.
- * \return NX_OK on success, NX_ERROR in the case of an error.
- * \ingroup c_linking
- */
-MANTID_NEXUS_DLL NXstatus NXgetdataID(NXhandle handle, NXlink &pLink);
-
-/**
- * Create a link to the group or dataset described by pLink in the currently open
- * group.
- * \param handle A NeXus file handle as initialized by NXopen.
- * \param pLink A link data structure describing the object to link. This must have been initialized
- * by either a call to NXgetdataID or NXgetgroupID.
- * \return NX_OK on success, NX_ERROR in the case of an error.
- * \ingroup c_linking
- */
-MANTID_NEXUS_DLL NXstatus NXmakelink(NXhandle handle, NXlink const &pLink);
+MANTID_NEXUS_DLL NXstatus NXputattr(NXhandle fid, std::string const &name, char const *data, std::size_t const iDataLen,
+                                    NXnumtype const iType);
 
 /**
  * Read a complete dataset from the currently open dataset into memory.
@@ -290,7 +173,7 @@ MANTID_NEXUS_DLL NXstatus NXmakelink(NXhandle handle, NXlink const &pLink);
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_readwrite
  */
-MANTID_NEXUS_DLL NXstatus NXgetdata(NXhandle handle, void *data);
+MANTID_NEXUS_DLL NXstatus NXgetdata(NXhandle fid, char *data);
 
 /**
  * Retrieve information about the curretly open dataset.
@@ -303,21 +186,8 @@ MANTID_NEXUS_DLL NXstatus NXgetdata(NXhandle handle, void *data);
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_metadata
  */
-MANTID_NEXUS_DLL NXstatus NXgetinfo64(NXhandle handle, std::size_t &rank, Mantid::Nexus::DimVector &dimension,
+MANTID_NEXUS_DLL NXstatus NXgetinfo64(NXhandle fid, std::size_t &rank, Mantid::Nexus::DimVector &dimension,
                                       NXnumtype &datatype);
-
-/**
- * Read a subset of data from file into memory.
- * \param handle A NeXus file handle as initialized by NXopen.
- * \param data A pointer to the memory data where to copy the data too. The pointer must point
- * to a memory area large enough to accomodate the size of the data read.
- * \param start An array holding the start indices where to start reading the data subset.
- * \param size An array holding the size of the data subset to read for each dimension.
- * \return NX_OK on success, NX_ERROR in the case of an error.
- * \ingroup c_readwrite
- */
-MANTID_NEXUS_DLL NXstatus NXgetslab64(NXhandle handle, void *data, Mantid::Nexus::DimSizeVector const &start,
-                                      Mantid::Nexus::DimSizeVector const &size);
 
 /**
  * Read an attribute containing a single string or numerical value.
@@ -330,19 +200,8 @@ MANTID_NEXUS_DLL NXstatus NXgetslab64(NXhandle handle, void *data, Mantid::Nexus
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_readwrite
  */
-MANTID_NEXUS_DLL NXstatus NXgetattr(NXhandle handle, std::string const &name, void *data, std::size_t &iDataLen,
+MANTID_NEXUS_DLL NXstatus NXgetattr(NXhandle fid, std::string const &name, char *data, std::size_t &iDataLen,
                                     NXnumtype &iType);
-
-/**
- * Retrieve link data for the currently open group. This link data can later on be used to link this
- * group into a different group.
- * \param handle A NeXus file handle as initialized by NXopen.
- * \param pLink A link data structure which will be initialized with the required information
- * for linking.
- * \return NX_OK on success, NX_ERROR in the case of an error.
- * \ingroup c_linking
- */
-MANTID_NEXUS_DLL NXstatus NXgetgroupID(NXhandle handle, NXlink &pLink);
 
 /**
  * Dispatches the error message

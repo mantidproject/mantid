@@ -47,14 +47,26 @@ private:
   NexusAddress m_address;
   /** should be close handle on exit */
   bool m_close_handle;
-  /** The handle for the C-API. */
-  std::shared_ptr<NexusFile5> m_pfile_id;
+  /** Variables for use inside the C-API, formerly of NexusFile5
+   * \li m_fid -- the ID for open file object
+   * \li m_current_group_id -- the ID for currently opened group (or 0 if none)
+   * \li m_current_data_id -- the ID forcurrently opened dataset (or 0 if none)
+   * \li m_gid_stack -- a vector stack of opened group IDs
+   */
+  hid_t m_fid;
+  hid_t m_current_group_id;
+  hid_t m_current_data_id;
+  hid_t m_current_type_id;
+  hid_t m_current_space_id;
+  std::vector<hid_t> m_gid_stack;
   /** nexus descriptor to track the file tree
    * NOTE: in file write, the following cannot be relied upon:
    * - hasRootAttr
    * - firstEntryNameType
    */
   NexusDescriptor m_descriptor;
+  /** NOTE: this is temporary until `napi` is fully deleted*/
+  NexusAddress m_group_address;
 
   //------------------------------------------------------------------------------------------------------------------
   // CONSTRUCTORS / ASSIGNMENT / DECONSTRUCTOR
@@ -126,6 +138,12 @@ private:
   //------------------------------------------------------------------------------------------------------------------
 public:
   // ADDRESS GET / OPEN
+
+  /**
+   * DO NOT USE THIS FUNCTION FOR ANY REASON
+   * It is needed as a temporary solution while deleting napi.
+   */
+  NexusFile5 getFileStruct();
 
   /**
    * Open the NeXus object with the address specified.

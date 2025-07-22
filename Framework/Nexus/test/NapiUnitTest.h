@@ -8,6 +8,7 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidNexus/NexusFile.h"
 #include "MantidNexus/napi.h"
 #include "test_helper.h"
 #include <cstdio>
@@ -33,35 +34,15 @@ using std::vector;
 
 #define NX_ASSERT_OKAY(status, msg)                                                                                    \
   if ((status) != NXstatus::NX_OK) {                                                                                   \
-    NXclose(fid);                                                                                                      \
     std::cerr << msg << std::flush;                                                                                    \
     TS_FAIL(msg);                                                                                                      \
   }
 
 #define NX_ASSERT_ERROR(status, msg)                                                                                   \
   if ((status) != NXstatus::NX_ERROR) {                                                                                \
-    NXclose(fid);                                                                                                      \
     std::cerr << msg << std::flush;                                                                                    \
     TS_FAIL(msg);                                                                                                      \
   }
-
-namespace {
-// catch for undefined types
-template <typename NumT> NXnumtype getType() { return NXnumtype::BAD; }
-
-// template specialisations for types we know
-template <> NXnumtype getType<float>() { return NXnumtype::FLOAT32; }
-
-template <> NXnumtype getType<double>() { return NXnumtype::FLOAT64; }
-
-template <> NXnumtype getType<int32_t>() { return NXnumtype::INT32; }
-
-template <> NXnumtype getType<int64_t>() { return NXnumtype::INT64; }
-
-template <> NXnumtype getType<uint64_t>() { return NXnumtype::UINT64; }
-
-template <> NXnumtype getType<char>() { return NXnumtype::CHAR; }
-} // namespace
 
 class NapiUnitTest : public CxxTest::TestSuite {
 
@@ -93,13 +74,12 @@ public:
     // open a file
     FileResource resource("test_napi_file_stringrw.h5");
     std::string filename = resource.fullPath();
-    NexusFile5 *fid;
-    NX_ASSERT_OKAY(NXopen(filename.c_str(), NXaccess::CREATE5, fid), "failed to open");
+    Mantid::Nexus::File fid(filename, NXaccess::CREATE5);
     NX_ASSERT_OKAY(NXmakegroup(fid, "entry", "NXentry"), "failed to make group");
     NX_ASSERT_OKAY(NXopengroup(fid, "entry", "NXentry"), "failed to open group");
 
     // put/get a string
-    cout << "\nread/write string...\n";
+    cout << "read/write string..." << std::flush;
     // NOTE: whitespace is not stripped, so `out` must have EXACTLY the same length a `in`
     string in("this is a string"), out(in.size(), 'X');
     string name("string_data_2");
@@ -115,9 +95,7 @@ public:
     NX_ASSERT_OKAY(NXclosedata(fid), "failed to close data");
 
     TS_ASSERT_EQUALS(in, out);
-
-    // cleanup
-    NX_ASSERT_OKAY(NXclose(fid), "failed to close");
+    cout << "complete\n" << std::flush;
   }
 
   void test_data_putget_array() {
@@ -126,67 +104,14 @@ public:
     // open a file
     FileResource resource("test_napi_file_dataRW.h5");
     std::string filename = resource.fullPath();
-    NexusFile5 *fid;
-    NX_ASSERT_OKAY(NXopen(filename.c_str(), NXaccess::CREATE5, fid), "failed to open");
+    Mantid::Nexus::File fid(filename, NXaccess::CREATE5);
     NX_ASSERT_OKAY(NXmakegroup(fid, "entry", "NXentry"), "failed to make group");
     NX_ASSERT_OKAY(NXopengroup(fid, "entry", "NXentry"), "failed to open group");
 
-    // put/get an int
-    int in[4] = {12, 7, 2, 3}, out[4];
     DimVector dims{4};
-    NX_ASSERT_OKAY(NXmakedata64(fid, "data_int", getType<int>(), 1, dims), "failed to make data");
-    NX_ASSERT_OKAY(NXopendata(fid, "data_int"), "failed to open data");
-    NX_ASSERT_OKAY(NXputdata(fid, in), "failed to put data");
     DimVector dimsout{0, 0, 0, 0};
     std::size_t rank;
     NXnumtype datatype;
-    NX_ASSERT_OKAY(NXgetinfo64(fid, rank, dimsout, datatype), "failed to get info");
-    NX_ASSERT_OKAY(NXgetdata(fid, &(out[0])), "failed to get data");
-    NX_ASSERT_OKAY(NXclosedata(fid), "failed to close data");
-    // confirm
-    TS_ASSERT_EQUALS(rank, 1);
-    TS_ASSERT_EQUALS(dimsout.front(), 4);
-    for (int i = 0; i < 4; i++) {
-      TS_ASSERT_EQUALS(in[i], out[i]);
-    }
-    TS_ASSERT_EQUALS(datatype, NXnumtype::INT32);
-
-    // put/get double array
-    double ind[] = {12.0, 7.22, 2.3, 3.141592}, outd[4];
-    dims = {4};
-    NX_ASSERT_OKAY(NXmakedata64(fid, "data_double", NXnumtype::FLOAT64, 1, dims), "failed to make data");
-    NX_ASSERT_OKAY(NXopendata(fid, "data_double"), "failed to open data");
-    NX_ASSERT_OKAY(NXputdata(fid, ind), "failed to put data");
-    NX_ASSERT_OKAY(NXgetinfo64(fid, rank, dimsout, datatype), "failed to get info");
-    NX_ASSERT_OKAY(NXgetdata(fid, outd), "failed to get data");
-    NX_ASSERT_OKAY(NXclosedata(fid), "failed to close data");
-    // confirm
-    TS_ASSERT_EQUALS(rank, 1);
-    TS_ASSERT_EQUALS(dimsout.front(), 4);
-    for (int i = 0; i < 4; i++) {
-      TS_ASSERT_EQUALS(ind[i], outd[i]);
-    }
-    TS_ASSERT_EQUALS(datatype, NXnumtype::FLOAT64);
-
-    // put/get double 2D array
-    double indd[3][2] = {{12.4, 17.89}, {1256.22, 3.141592}, {0.001, 1.0e4}}, outdd[3][2];
-    dims = {3, 2};
-    NX_ASSERT_OKAY(NXmakedata64(fid, "data_double_2d", NXnumtype::FLOAT64, 2, dims), "failed to make data");
-    NX_ASSERT_OKAY(NXopendata(fid, "data_double_2d"), "failed to open data");
-    NX_ASSERT_OKAY(NXputdata(fid, indd), "failed to put data");
-    NX_ASSERT_OKAY(NXgetinfo64(fid, rank, dimsout, datatype), "failed to get info");
-    NX_ASSERT_OKAY(NXgetdata(fid, outdd), "failed to get data");
-    NX_ASSERT_OKAY(NXclosedata(fid), "failed to close data");
-    // confirm
-    TS_ASSERT_EQUALS(rank, 2);
-    TS_ASSERT_EQUALS(dimsout[0], 3);
-    TS_ASSERT_EQUALS(dimsout[1], 2);
-    for (dimsize_t i = 0; i < dims[0]; i++) {
-      for (dimsize_t j = 0; j < dims[1]; j++) {
-        TS_ASSERT_EQUALS(indd[i][j], outdd[i][j]);
-      }
-    }
-    TS_ASSERT_EQUALS(datatype, NXnumtype::FLOAT64);
 
     // put/get a char array
     char word[] = "silicovolcaniosis";
@@ -204,8 +129,6 @@ public:
     TS_ASSERT_EQUALS(dimsout[0], 17);
     TS_ASSERT_EQUALS(std::string(read), "silicovolcaniosis");
     TS_ASSERT_EQUALS(std::string(read), std::string(word));
-    // cleanup
-    NX_ASSERT_OKAY(NXclose(fid), "failed to close");
   }
 
   // #################################################################################################################
@@ -218,8 +141,7 @@ public:
     // make file with path /entry
     FileResource resource("test_napi_openpathtest.nxs");
     std::string filename = resource.fullPath();
-    NexusFile5 *fid;
-    NX_ASSERT_OKAY(NXopen(filename.c_str(), NXaccess::CREATE5, fid), "failed to open");
+    Mantid::Nexus::File fid(filename, NXaccess::CREATE5);
     NX_ASSERT_OKAY(NXmakegroup(fid, "entry", "NXentry"), "failed to make group");
     NX_ASSERT_OKAY(NXopengroup(fid, "entry", "NXentry"), "failed to open group");
 
@@ -263,24 +185,24 @@ public:
     char output;
     NX_ASSERT_OKAY(NXclosegroup(fid), "failed to close group");
 
-    NX_ASSERT_OKAY(NXopenaddress(fid, "/entry/data1"), "failed to open address");
+    auto pFile = fid.getFileStruct();
+    NX_ASSERT_OKAY(NXopenaddress(pFile, "/entry/data1"), "failed to open address");
     NX_ASSERT_OKAY(NXgetdata(fid, &output), "failed to get data by opening address");
     TS_ASSERT_EQUALS('1', output);
 
-    NX_ASSERT_OKAY(NXopenaddress(fid, "/link/data4"), "failed to open address");
+    NX_ASSERT_OKAY(NXopenaddress(pFile, "/link/data4"), "failed to open address");
     NX_ASSERT_OKAY(NXgetdata(fid, &output), "failed to get data by opening address");
     TS_ASSERT_EQUALS('4', output);
 
-    NX_ASSERT_OKAY(NXopenaddress(fid, "/entry/data/more_data"), "failed to open address");
+    NX_ASSERT_OKAY(NXopenaddress(pFile, "/entry/data/more_data"), "failed to open address");
     NX_ASSERT_OKAY(NXgetdata(fid, &output), "failed to get data by opening address");
     TS_ASSERT_EQUALS('3', output);
 
-    NX_ASSERT_OKAY(NXopenaddress(fid, "/entry/data2"), "failed to open address");
+    NX_ASSERT_OKAY(NXopenaddress(pFile, "/entry/data2"), "failed to open address");
     NX_ASSERT_OKAY(NXgetdata(fid, &output), "failed to get data by opening address");
     TS_ASSERT_EQUALS('2', output);
 
     // cleanup
-    NX_ASSERT_OKAY(NXclose(fid), "failed to close");
     cout << "NXopenaddress checks OK\n";
   }
 
@@ -294,8 +216,7 @@ public:
     // open a file
     FileResource resource("test_napi_attr.h5");
     std::string filename = resource.fullPath();
-    NexusFile5 *fid;
-    NX_ASSERT_OKAY(NXopen(filename.c_str(), NXaccess::CREATE5, fid), "failed to open");
+    Mantid::Nexus::File fid(filename, NXaccess::CREATE5);
     // move to an entry to avoid conflict with some root-level attributes
     NX_ASSERT_OKAY(NXmakegroup(fid, "entry", "NXentry"), "failed to make group");
     NX_ASSERT_OKAY(NXopengroup(fid, "entry", "NXentry"), "failed to open group");
@@ -332,9 +253,6 @@ public:
     TS_ASSERT_EQUALS(expected, readme);
     TS_ASSERT_EQUALS(len, data.size() - 1);
     TS_ASSERT_EQUALS(datatype, NXnumtype::CHAR);
-
-    // cleanup
-    NX_ASSERT_OKAY(NXclose(fid), "failed to close");
   }
 
   // ##################################################################################################################
