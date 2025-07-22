@@ -68,25 +68,6 @@ void NXReportError(const char *string) { UNUSED_ARG(string); }
    Definition of NeXus API
 
    --------------------------------------------------------------------- */
-
-static bool canBeOpened(std::string const &filename) {
-  // this is for reading, check for existence first
-  FILE *fd = NULL;
-  fd = fopen(filename.c_str(), "r");
-  if (fd == NULL) {
-    return false;
-  }
-  fclose(fd);
-
-  // check that this is indeed hdf5
-  if (H5Fis_hdf5(filename.c_str()) > 0) {
-    return true;
-  } else {
-    // file type not recognized
-    return false;
-  }
-}
-
 /*----------------------------------------------------------------------*/
 /*-----------------------------------------------------------------------*/
 /* ------------------------------------------------------------------------- */
@@ -249,13 +230,15 @@ NXstatus NXgetinfo64(NXhandle fid, std::size_t &rank, Mantid::Nexus::DimVector &
 // cppcheck-suppress constParameterCallback
 NXstatus NXgetattr(NXhandle fid, std::string const &name, char *data, std::size_t &datalen, NXnumtype &iType) {
   // NOTE this is written to mimic NXgetattr with readStringAttributeN
-  // readStringAttributeN for some reason set data[maxlen - 1] = '\0', which truncated the result by one char
-  // and then NXgetattr set datalen to the strlen of the truncated result
+  // readStringAttribute fetched a string value with correct handling of the length
+  // readStringAttributeN took that value and copied it with `strncpy(data, vdat, maxlen)`
+  // then for some reason set `data[maxlen - 1] = '\0'`, which truncated the result by one char
+  // and then NXgetattr set `datalen` to the `strlen` of the truncated result
   try {
-    std::string value = fid.getStrAttr(name);
-    strncpy(data, value.c_str(), datalen);
-    data[datalen - 1] = '\0';
-    datalen = strlen(data);
+    std::string value = fid.getStrAttr(name); // get correct string value
+    strncpy(data, value.c_str(), datalen);    // copy first datalen chars
+    data[datalen - 1] = '\0';                 // set a null terminator
+    datalen = strlen(data);                   // changevalue of datalen
     iType = NXnumtype::CHAR;
   } catch (Mantid::Nexus::Exception const &) {
     return NXstatus::NX_ERROR;

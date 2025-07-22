@@ -183,3 +183,21 @@ hid_t h5MemType(hid_t atype) {
   }
   return memtype_id;
 }
+
+bool canBeOpened(std::string const &filename) {
+  // this is for reading, check for existence first
+  FILE *fd = NULL;
+  fd = fopen(filename.c_str(), "r");
+  if (fd == NULL) {
+    return false;
+  }
+  fclose(fd);
+
+  // check that this is indeed hdf5
+  if (H5Fis_hdf5(filename.c_str()) > 0) {
+    return true;
+  } else {
+    // file type not recognized
+    return false;
+  }
+}
