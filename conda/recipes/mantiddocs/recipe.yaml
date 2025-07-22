@@ -1,0 +1,77 @@
+# there are no run requirements as it's just pure html
+schema_version: 1
+
+context:
+  # dynamic versioning hasn't been figured out
+  version: 1.2.3
+  # load_setup_py_data() | get('version', '0.0.0')
+
+package:
+  name: mantiddocs
+  version: ${{ version }}
+
+source:
+  path: ../../../
+
+build:
+  number: 0
+  noarch: generic
+  script_env:
+      - MANTID_DATA_STORE={{ environ.get('MANTID_DATA_STORE', '~/MantidExternalData') }}
+
+requirements:
+  build:
+    - ${{ compiler("cxx") }}
+    - if: osx or linux
+      then: ninja ${{ ninja }}
+    - cmake ${{ cmake }}
+    - git
+    - if: build_platform != target_platform
+      then: python ${{ python }}
+    - if: build_platform != target_platform
+      then: cross-python_${{ target_platform }}
+    - if: build_platform != target_platform
+      then: setuptools
+    - if: build_platform != target_platform
+      then: numpy ${{ numpy }}
+    - if: linux
+      then: ${{ cdt('mesa-libgl-devel') }}
+    - if: linux
+      then: ${{ cdt('mesa-dri-drivers') }}
+    - if: linux
+      then: ${{ cdt('libxxf86vm') }}
+    - if: linux
+      then: ${{ cdt('libx11-devel') }}
+    - if: linux
+      then: ${{ cdt('xorg-x11-proto-devel') }}
+  host:
+    - python ${{ python }}
+    - setuptools
+    - sphinx ${{ sphinx }}
+    - sphinx_bootstrap_theme ${{ sphinx_bootstrap_theme }}
+    - mantidqt == ${{ version }}
+    - versioningit ${{ versioningit }}
+    - graphviz ${{ graphviz }}
+    - pystog ${{ pystog }}
+    - texlive-core ${{ texlive_core }}
+  ignore_run_exports:
+    from_package:
+      - ${{ compiler('cxx') }}
+      - python
+
+tests:
+  - package_contents:
+      files:
+        - share/doc/html/index.html
+        - share/doc/html/mantid.png
+
+about:
+  license: GPL-3.0-or-later
+  summary: HTML Documentation for Mantid
+  homepage: https://github.com/mantidproject/mantid
+
+extra:
+  recipe-maintainers:
+    - thomashampson
+    - sf1919
+    - martyngigg
