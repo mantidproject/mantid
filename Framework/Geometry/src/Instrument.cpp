@@ -1083,28 +1083,11 @@ Instrument::ContainsState Instrument::containsRectDetectors() const {
 }
 
 std::vector<RectangularDetector_const_sptr> Instrument::findRectDetectors() const {
-  std::queue<IComponent_const_sptr> compQueue; // Search queue
-  addInstrumentChildrenToQueue(compQueue);
+  return findDetectorsOfType<RectangularDetector>();
+}
 
-  std::vector<RectangularDetector_const_sptr> detectors;
-
-  IComponent_const_sptr comp;
-
-  while (!compQueue.empty()) {
-    comp = compQueue.front();
-    compQueue.pop();
-
-    if (!validateComponentProperties(comp))
-      continue;
-
-    if (auto const detector = std::dynamic_pointer_cast<const RectangularDetector>(comp)) {
-      detectors.push_back(detector);
-    } else {
-      // If component is a ComponentAssembly, we add its children to the queue to check if they're Rectangular Detectors
-      addAssemblyChildrenToQueue(compQueue, comp);
-    }
-  }
-  return detectors;
+std::vector<GridDetector_const_sptr> Instrument::findGridDetectors() const {
+  return findDetectorsOfType<GridDetector>();
 }
 
 bool Instrument::validateComponentProperties(IComponent_const_sptr component) const {

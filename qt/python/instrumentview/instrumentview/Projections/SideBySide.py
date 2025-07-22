@@ -60,7 +60,7 @@ class SideBySide(projection):
         self._flat_banks.clear()
         self._detector_id_to_flat_bank_map.clear()
         instrument = workspace.getInstrument()
-        rectangular_banks = instrument.findRectDetectors()
+        rectangular_banks = instrument.findGridDetectors()
 
         if len(rectangular_banks) == 0:
             return

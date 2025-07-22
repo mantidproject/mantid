@@ -206,6 +206,7 @@ public:
   ContainsState containsRectDetectors() const;
 
   std::vector<RectangularDetector_const_sptr> findRectDetectors() const;
+  std::vector<GridDetector_const_sptr> findGridDetectors() const;
 
   bool isMonitorViaIndex(const size_t index) const;
   size_t detectorIndex(const detid_t detID) const;
@@ -228,6 +229,30 @@ private:
 
   void addInstrumentChildrenToQueue(std::queue<IComponent_const_sptr> &queue) const;
   bool addAssemblyChildrenToQueue(std::queue<IComponent_const_sptr> &queue, IComponent_const_sptr component) const;
+  template <typename T> std::vector<std::shared_ptr<const T>> findDetectorsOfType() const {
+    std::queue<IComponent_const_sptr> compQueue; // Search queue
+    addInstrumentChildrenToQueue(compQueue);
+
+    std::vector<std::shared_ptr<const T>> detectors;
+
+    IComponent_const_sptr comp;
+
+    while (!compQueue.empty()) {
+      comp = compQueue.front();
+      compQueue.pop();
+
+      if (!validateComponentProperties(comp))
+        continue;
+
+      if (auto const detector = std::dynamic_pointer_cast<const T>(comp)) {
+        detectors.push_back(detector);
+      } else {
+        // If component is a ComponentAssembly, we add its children to the queue to check if they're type T
+        addAssemblyChildrenToQueue(compQueue, comp);
+      }
+    }
+    return detectors;
+  }
 
   /// Private copy assignment operator
   Instrument &operator=(const Instrument &);
