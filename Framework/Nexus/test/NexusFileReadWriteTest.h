@@ -47,7 +47,7 @@ public:
 
 private:
   File do_prep_files(std::string const nxFile) {
-    cout << "Creating \"" << nxFile << "\"" << endl;
+    cout << "Creating \"" << nxFile << "\"" << endl << std::flush;
     // create file
     File fileid(nxFile, NXaccess::CREATE5);
 
@@ -59,7 +59,7 @@ private:
   }
 
   template <typename T> void do_rw_test(File &fileid, std::string const &dataname, T const &data) {
-    cout << "Testing data " << dataname << "\n";
+    cout << "Testing data " << dataname << "\n" << std::flush;
     // write
     fileid.writeData(dataname, data);
 
@@ -73,7 +73,7 @@ private:
 
   template <size_t N, size_t M, typename T>
   void do_rw2darray_test(File &fileid, std::string const &dataname, T const (&data)[N][M]) {
-    cout << "Testing attribute " << dataname << "\n";
+    cout << "Testing attribute " << dataname << "\n" << std::flush;
     // write
     fileid.makeData(dataname, getType<T>(), DimVector({N, M}));
     fileid.openData(dataname);
@@ -95,7 +95,7 @@ private:
   }
 
   template <typename T> void do_rwslabvec_test(File &fileid, std::string const dataname, vector<T> const &data) {
-    cout << "Testing slab " << dataname << "\n";
+    cout << "Testing slab " << dataname << "\n" << std::flush;
 
     // write
     dimsize_t dimsize = data.size();
@@ -120,7 +120,7 @@ private:
 
   template <typename T, size_t N, size_t M>
   void do_rwslab_test(File &fileid, char const *const dataname, T const (&data)[N][M]) {
-    cout << "Testing slab " << dataname << "\n";
+    cout << "Testing slab " << dataname << "\n" << std::flush;
 
     // write
     DimSizeVector start({0, 0}), size({N, M});
@@ -147,7 +147,7 @@ private:
 
 public:
   void test_napi_char() {
-    cout << "Starting NAPI CHAR Test\n";
+    cout << "\nStarting NAPI CHAR Test\n" << std::flush;
     FileResource resource("NexusFile_test_char.h5");
     std::string const nxFile(resource.fullPath());
     File fileid = do_prep_files(nxFile);
@@ -189,7 +189,7 @@ public:
   }
 
   void test_napi_vec() {
-    cout << "Starting NAPI VEC Test\n";
+    cout << "Starting NAPI VEC Test\n" << std::flush;
     FileResource resource("NexusFile_test_vec.h5");
     std::string const nxFile(resource.fullPath());
     File fileid = do_prep_files(nxFile);
@@ -229,7 +229,7 @@ public:
   }
 
   void test_napi_slab() {
-    cout << "Starting NAPI SLAB Test\n";
+    cout << "Starting NAPI SLAB Test\n" << std::flush;
     FileResource resource("NexusFile_test_slab.h5");
     std::string const nxFile(resource.fullPath());
     File fileid = do_prep_files(nxFile);
@@ -290,7 +290,7 @@ public:
   }
 
   void test_openPath() {
-    cout << "tests for openPath\n";
+    cout << "tests for openPath\n" << std::flush;
 
     // make file with path /entry
     FileResource resource("NexusFile_openpathtest.nxs");

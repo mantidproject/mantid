@@ -1326,7 +1326,7 @@ public:
     using Mantid::Nexus::Entries;
     using Mantid::Nexus::Entry;
 
-    cout << "\ntest getEntries\n";
+    cout << "\ntest getEntries\n" << std::flush;
 
     // open a file
     FileResource resource("test_nexus_entries.h5");
