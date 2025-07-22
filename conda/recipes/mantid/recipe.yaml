@@ -1,9 +1,8 @@
 schema_version: 1
 
 context:
-  # dynamic versioning hasn't been figured out
-  version: 1.2.3
-  # load_setup_py_data() | get('version', '0.0.0')
+  # Version is injected via an environment variable
+  version: ${{ env.get('MANTID_VERSION', default='0.0.0') }}
 
 package:
   name: mantid
