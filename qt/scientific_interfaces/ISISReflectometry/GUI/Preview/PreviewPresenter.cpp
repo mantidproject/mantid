@@ -61,7 +61,8 @@ PreviewPresenter::PreviewPresenter(Dependencies dependencies)
   m_dockedWidgets->setInstViewToolbarEnabled(false);
   m_dockedWidgets->setRegionSelectorEnabled(false);
 
-  m_plotPresenter->setScaleLog(AxisID::YLeft);
+  m_plotPresenter->setScaleSymLog(AxisID::YLeft, 1e-4);
+  m_plotPresenter->setAxisLimit(AxisID::YLeft, -1e-5, 2.0);
   m_plotPresenter->setScaleLog(AxisID::XBottom);
   m_plotPresenter->setPlotErrorBars(true);
 }
