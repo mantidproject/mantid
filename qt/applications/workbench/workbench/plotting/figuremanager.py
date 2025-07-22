@@ -621,6 +621,12 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
             self._crosshair_background = None
             self._crosshair_cid = self.canvas.mpl_connect("motion_notify_event", self.crosshair)
 
+            # Connect draw events for background refresh
+            self._crosshair_draw_cid = self.canvas.mpl_connect("draw_event", self._crosshair_refresh_background)
+
+            self.canvas.draw()
+            self._crosshair_refresh_background()
+
         else:
             if hasattr(self, "_crosshair_cid"):
                 self.canvas.mpl_disconnect(self._crosshair_cid)
@@ -653,6 +659,16 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
                 vline.set_visible(False)
 
         self.canvas.draw_idle()
+
+    def _crosshair_refresh_background(self, event=None):
+        if not hasattr(self, "_crosshair_lines"):
+            return
+        self._crosshair_background = self.canvas.copy_from_bbox(self.canvas.figure.bbox)
+        for ax, (hline, vline) in self._crosshair_lines.items():
+            ax.draw_artist(hline)
+            ax.draw_artist(vline)
+
+        self.canvas.blit(self.canvas.figure.bbox)
 
 
 # -----------------------------------------------------------------------------
