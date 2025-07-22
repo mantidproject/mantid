@@ -88,27 +88,18 @@ requirements:
     - orsopy ${{ orsopy }}
     # Not Windows, OpenGL implementation:
     - if: linux
-      then: libgl-devel
-    # Linux only
-    - if: linux
-      then: gxx_linux-64 ${{ cxx_compiler_version }}
-    - if: linux
-      then: libglu ${{ libglu }}
-    # Needed for test suite on Linux
-    - if: linux
-      then: ${{ cdt('pciutils-libs') }}
-    - if: linux
-      then: xorg-libxcomposite>=0.4.5
-    - if: linux
-      then: xorg-libxcursor>=1.2.0
-    - if: linux
-      then: xorg-libxdamage>=1.1.5
-    - if: linux
-      then: xorg-libxi>=1.7.10
-    - if: linux
-      then: xorg-libxscrnsaver>=1.2.3
-    - if: linux
-      then: xorg-libxtst>=1.2.3
+      then:
+        - libgl-devel
+        - gxx_linux-64 ${{ cxx_compiler_version }}
+        - libglu ${{ libglu }}
+        # Needed for test suite on Linux
+        - ${{ cdt('pciutils-libs') }}
+        - xorg-libxcomposite>=0.4.5
+        - xorg-libxcursor>=1.2.0
+        - xorg-libxdamage>=1.1.5
+        - xorg-libxi>=1.7.10
+        - xorg-libxscrnsaver>=1.2.3
+        - xorg-libxtst>=1.2.3
     # Development tooling
     - cppcheck==2.18.1
     - if: linux
@@ -119,13 +110,11 @@ requirements:
     # Use conda version of clang to get matching CXXFLAGS.
     # Pinned to same version as conda forge: https://github.com/conda-forge/conda-forge-pinning-feedstock/blob/main/recipe/conda_build_config.yaml
     - if: osx and not arm64
-      then: clang_osx-64 ${{ c_compiler_version }}
-    - if: osx and not arm64
-      then: clangxx_osx-64 ${{ cxx_compiler_version }}
-    - if: osx and arm64
-      then: clang_osx-arm64 ${{ c_compiler_version }}
-    - if: osx and arm64
-      then: clangxx_osx-arm64 ${{ cxx_compiler_version }}
+      then:
+        - clang_osx-64 ${{ c_compiler_version }}
+        - clangxx_osx-64 ${{ cxx_compiler_version }}
+        - clang_osx-arm64 ${{ c_compiler_version }}
+        - clangxx_osx-arm64 ${{ cxx_compiler_version }}
     - if: osx
       then: llvm-openmp ${{ llvm_openmp }}
 

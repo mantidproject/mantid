@@ -27,23 +27,11 @@ requirements:
     - cmake ${{ cmake }}
     - git
     - if: build_platform != target_platform
-      then: python ${{ python }}
-    - if: build_platform != target_platform
-      then: cross-python_${{ target_platform }}
-    - if: build_platform != target_platform
-      then: setuptools
-    - if: build_platform != target_platform
-      then: numpy ${{ numpy }}
-    - if: linux
-      then: ${{ cdt('mesa-libgl-devel') }}
-    - if: linux
-      then: ${{ cdt('mesa-dri-drivers') }}
-    - if: linux
-      then: ${{ cdt('libxxf86vm') }}
-    - if: linux
-      then: ${{ cdt('libx11-devel') }}
-    - if: linux
-      then: ${{ cdt('xorg-x11-proto-devel') }}
+      then:
+        - python ${{ python }}
+        - cross-python_${{ target_platform }}
+        - setuptools
+        - numpy ${{ numpy }}
   host:
     - python ${{ python }}
     - setuptools

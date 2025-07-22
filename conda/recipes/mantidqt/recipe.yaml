@@ -29,23 +29,16 @@ requirements:
     - cmake ${{ cmake }}
     - git
     - if: build_platform != target_platform
-      then: python ${{ python }}
-    - if: build_platform != target_platform
-      then: cross-python_${{ target_platform }}
-    - if: build_platform != target_platform
-      then: setuptools
-    - if: build_platform != target_platform
-      then: numpy ${{ numpy }}
-    - if: build_platform != target_platform
-      then: pyqt ${{ pyqt }}
-    - if: build_platform != target_platform
-      then: pyqt5-sip ${{ pyqt5_sip }}
-    - if: build_platform != target_platform
-      then: pyqtwebengine
-    - if: build_platform != target_platform
-      then: qt-main ${{ qt_main }}
-    - if: build_platform != target_platform
-      then: sip
+      then:
+        - python ${{ python }}
+        - cross-python_${{ target_platform }}
+        - setuptools
+        - numpy ${{ numpy }}
+        - pyqt ${{ pyqt }}
+        - pyqt5-sip ${{ pyqt5_sip }}
+        - pyqtwebengine
+        - qt-main ${{ qt_main }}
+        - sip
   host:
     - libboost-devel ${{ libboost_devel }}
     - libboost-python-devel ${{ libboost_python_devel }}
@@ -64,9 +57,9 @@ requirements:
     - tbb-devel ${{ tbb }}
     - versioningit ${{ versioningit }}
     - if: build_platform != target_platform
-      then: numpy ${{ numpy }}
-    - if: build_platform != target_platform
-      then: sip ${{ sip }}
+      then:
+        - numpy ${{ numpy }}
+        - sip ${{ sip }}
     - if: linux
       then:
         - libgl-devel
