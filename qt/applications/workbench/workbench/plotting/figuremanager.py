@@ -663,7 +663,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
                 ax.draw_artist(vline)
         else:
             # Hide all crosshairs when mouse is out of axes
-            for hline, vline in self._crosshair_lines.values():
+            for ax, (hline, vline) in self._crosshair_lines.items():
                 hline.set_visible(False)
                 vline.set_visible(False)
                 ax.draw_artist(hline)
