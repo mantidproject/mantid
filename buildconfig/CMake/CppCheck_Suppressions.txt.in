@@ -362,7 +362,6 @@ constParameterReference:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/Replicate
 templateRecursion:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/SliceMD.cpp:300
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/TransposeMD.cpp:83
 uselessCallsSubstr:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/UnaryOperationMD.cpp:59
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Nexus/src/NexusFile.cpp:1361
 cstyleCast:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/core/src/Converters/NDArrayToVector.cpp:151
 cstyleCast:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/core/src/Converters/NDArrayToVector.cpp:156
 cstyleCast:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/core/src/Converters/PyObjectToMatrix.cpp:44

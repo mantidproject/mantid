@@ -20,7 +20,14 @@ using std::string;
 using std::stringstream;
 using std::vector;
 
+#ifdef H5_VERSION_GE
+#if !H5_VERSION_GE(1, 8, 0)
+#error HDF5 Version must be 1.8.0 or higher
+#endif
+#endif
+
 #ifdef WIN32
+#define snprintf _snprintf
 #define strdup _strdup
 #endif
 
@@ -1355,11 +1362,10 @@ template <typename NumT> void File::readData(std::string const &dataName, std::v
 }
 
 template <typename NumT> void File::readData(std::string const &dataName, NumT &data) {
-  std::vector<NumT> dataVector;
+  std::vector<NumT> dataVector(1, 0);
   this->openData(dataName);
   this->getData(dataVector);
-  if (!dataVector.empty())
-    data = dataVector[0];
+  data = dataVector[0];
   this->closeData();
 }
 

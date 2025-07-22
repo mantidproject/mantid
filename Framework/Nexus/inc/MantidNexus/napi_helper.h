@@ -6,8 +6,6 @@
 
 #include <hdf5.h>
 
-MANTID_NEXUS_DLL pNexusFile5 NXI5assert(NXhandle fid);
-
 MANTID_NEXUS_DLL herr_t readStringAttribute(hid_t attr, char **data);
 
 MANTID_NEXUS_DLL herr_t readStringAttributeN(hid_t attr, char *data, std::size_t maxlen);

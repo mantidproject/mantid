@@ -82,7 +82,7 @@ typedef struct {
  * \li EOD end of file -1
  * \ingroup cpp_types
  */
-enum class NXstatus : const int { NX_OK = 1, NX_ERROR = 0, NX_EOD = -1 };
+enum class NXstatus : const int { NX_OK = 1, NX_ERROR = 0 };
 
 /*--------------------------------------------------------------------------*/
 
