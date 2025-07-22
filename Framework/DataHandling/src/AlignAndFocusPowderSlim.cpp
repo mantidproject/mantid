@@ -35,7 +35,9 @@
 #include <H5Cpp.h>
 #include <atomic>
 #include <numbers>
+#include <ranges>
 #include <regex>
+#include <stack>
 
 namespace Mantid::DataHandling {
 using Mantid::API::FileProperty;
@@ -48,6 +50,7 @@ using Mantid::Kernel::ArrayBoundedValidator;
 using Mantid::Kernel::ArrayProperty;
 using Mantid::Kernel::Direction;
 using Mantid::Kernel::EnumeratedStringProperty;
+using Mantid::Kernel::TimeROI;
 using Mantid::Kernel::TimeSeriesProperty;
 
 namespace { // anonymous namespace
@@ -152,20 +155,47 @@ std::vector<double> calculate_difc_focused(const double l1, const std::vector<do
 
 class NexusLoader {
 public:
-  NexusLoader(const bool is_time_filtered, const size_t pulse_start_index, const size_t pulse_stop_index)
-      : m_is_time_filtered(is_time_filtered), m_pulse_start_index(pulse_start_index),
-        m_pulse_stop_index(pulse_stop_index) {}
+  NexusLoader(const bool is_time_filtered, const std::vector<std::pair<size_t, size_t>> &pulse_indices)
+      : m_is_time_filtered(is_time_filtered), m_pulse_indices(pulse_indices) {}
 
-  template <typename TofType>
-  void loadTOF(H5::DataSet &tof_SDS, std::unique_ptr<std::vector<TofType>> &data, const size_t offset,
-               const size_t slabsize) {
-    NeXus::H5Util::readArray1DCoerce(tof_SDS, *data, slabsize, offset);
-  }
+  template <typename Type>
+  void loadData(H5::DataSet &SDS, std::unique_ptr<std::vector<Type>> &data, const std::vector<size_t> &offsets,
+                const std::vector<size_t> &slabsizes) {
+    // assumes that data is the same type as the dataset
+    H5::DataSpace filespace = SDS.getSpace();
 
-  template <typename DetidType>
-  void loadDetid(H5::DataSet &detID_SDS, std::unique_ptr<std::vector<DetidType>> &data, const size_t offset,
-                 const size_t slabsize) {
-    NeXus::H5Util::readArray1DCoerce(detID_SDS, *data, slabsize, offset);
+    const auto length_actual = static_cast<size_t>(filespace.getSelectNpoints());
+
+    const hsize_t rankedoffset[1] = {static_cast<hsize_t>(offsets[0])};
+    const hsize_t rankedextent[1] = {static_cast<hsize_t>(slabsizes[0])};
+
+    size_t total_size = slabsizes[0];
+
+    // only select hyperslab if not loading all the data
+    if (rankedextent[0] < length_actual) {
+      // set the first hyperslab with H5S_SELECT_SET
+      filespace.selectHyperslab(H5S_SELECT_SET, rankedextent, rankedoffset);
+
+      // If more slabs, select them with H5S_SELECT_OR to include in the read.
+      // This allows reading non-contiguous data.
+      for (size_t i = 1; i < offsets.size(); ++i) {
+        const hsize_t offset[1] = {static_cast<hsize_t>(offsets[i])};
+        const hsize_t extent[1] = {static_cast<hsize_t>(slabsizes[i])};
+        filespace.selectHyperslab(H5S_SELECT_OR, extent, offset);
+        total_size += slabsizes[i];
+      }
+    }
+
+    // create a memory space for the data to read into, total size is all the slabs combined
+    const hsize_t total_rankedextent[1] = {static_cast<hsize_t>(total_size)};
+    H5::DataSpace memspace(1, total_rankedextent);
+
+    // do the actual read
+    const H5::DataType dataType = SDS.getDataType();
+
+    std::size_t dataSize = filespace.getSelectNpoints();
+    data->resize(dataSize);
+    SDS.read(data->data(), dataType, memspace, filespace);
   }
 
 private:
@@ -176,27 +206,31 @@ private:
   }
 
 public:
-  std::pair<uint64_t, uint64_t> getEventIndexRange(H5::Group &event_group, const uint64_t number_events) {
+  std::stack<std::pair<uint64_t, uint64_t>> getEventIndexRanges(H5::Group &event_group, const uint64_t number_events) {
+    // This will return a stack of pairs, where each pair is the start and stop index of the event ranges
+    std::stack<std::pair<uint64_t, uint64_t>> ranges;
     if (m_is_time_filtered) {
       // TODO this should be made smarter to only read the necessary range
       std::unique_ptr<std::vector<uint64_t>> event_index = std::make_unique<std::vector<uint64_t>>();
       this->loadEventIndex(event_group, event_index);
 
-      uint64_t start_event = event_index->at(m_pulse_start_index);
-      uint64_t stop_event = number_events;
-      if (m_pulse_stop_index != std::numeric_limits<size_t>::max())
-        stop_event = event_index->at(m_pulse_stop_index);
-      return {start_event, stop_event};
+      // add backwards so that the first range is on top
+      for (const auto &pair : m_pulse_indices | std::views::reverse) {
+        uint64_t start_event = event_index->at(pair.first);
+        uint64_t stop_event =
+            (pair.second == std::numeric_limits<size_t>::max()) ? number_events : event_index->at(pair.second);
+        ranges.emplace(start_event, stop_event);
+      }
     } else {
       constexpr uint64_t START_DEFAULT = 0;
-      return {START_DEFAULT, number_events};
+      ranges.emplace(START_DEFAULT, number_events);
     }
+    return ranges;
   }
 
 private:
   const bool m_is_time_filtered;
-  const size_t m_pulse_start_index;
-  const size_t m_pulse_stop_index;
+  const std::vector<std::pair<size_t, size_t>> m_pulse_indices;
 };
 
 template <typename Type> class MinMax {
@@ -299,13 +333,12 @@ private:
 class ProcessBankTask {
 public:
   ProcessBankTask(std::vector<std::string> &bankEntryNames, H5::H5File &h5file, const bool is_time_filtered,
-                  const size_t pulse_start_index, const size_t pulse_stop_index, MatrixWorkspace_sptr &wksp,
-                  const std::map<detid_t, double> &calibration, const std::set<detid_t> &masked,
-                  const size_t events_per_chunk, const size_t grainsize_event, std::shared_ptr<API::Progress> &progress)
-      : m_h5file(h5file), m_bankEntries(bankEntryNames),
-        m_loader(is_time_filtered, pulse_start_index, pulse_stop_index), m_wksp(wksp), m_calibration(calibration),
-        m_masked(masked), m_events_per_chunk(events_per_chunk), m_grainsize_event(grainsize_event),
-        m_progress(progress) {}
+                  MatrixWorkspace_sptr &wksp, const std::map<detid_t, double> &calibration,
+                  const std::set<detid_t> &masked, const size_t events_per_chunk, const size_t grainsize_event,
+                  std::vector<std::pair<size_t, size_t>> pulse_indices, std::shared_ptr<API::Progress> &progress)
+      : m_h5file(h5file), m_bankEntries(bankEntryNames), m_loader(is_time_filtered, pulse_indices), m_wksp(wksp),
+        m_calibration(calibration), m_masked(masked), m_events_per_chunk(events_per_chunk),
+        m_grainsize_event(grainsize_event), m_progress(progress) {}
 
   void operator()(const tbb::blocked_range<size_t> &range) const {
     auto entry = m_h5file.openGroup("entry"); // type=NXentry
@@ -325,19 +358,7 @@ public:
         continue;
       }
 
-      // get filtering range and update it for data that is present
-      auto eventRangeFull = m_loader.getEventIndexRange(event_group, total_events);
-      // skip empty filter range
-      if (eventRangeFull.first == eventRangeFull.second) {
-        // g_log.warning() << "No data for bank " << entry_name << '\n';
-        m_progress->report();
-        continue;
-      }
-
-      // TODO REMOVE debug print
-      std::cout << bankName << " has " << eventRangeFull.second << " events\n"
-                << "   and should be read in " << (1 + (eventRangeFull.second / m_events_per_chunk)) << " chunks of "
-                << m_events_per_chunk << " (" << (m_events_per_chunk / 1024 / 1024) << "MB)\n";
+      auto eventRanges = m_loader.getEventIndexRanges(event_group, total_events);
 
       // create a histogrammer to process the events
       auto &spectrum = m_wksp->getSpectrum(wksp_index);
@@ -366,20 +387,55 @@ public:
       auto event_detid = std::make_unique<std::vector<uint32_t>>();       // uint32 for ORNL nexus file
       auto event_time_of_flight = std::make_unique<std::vector<float>>(); // float for ORNL nexus files
 
-      // read parts of the bank at a time
-      size_t event_index_start = eventRangeFull.first;
-      while (event_index_start < eventRangeFull.second) {
-        // H5Cpp will truncate correctly
-        // H5Util resizes the vector
-        const size_t offset = event_index_start;
-        const size_t slabsize =
-            std::min(m_events_per_chunk, static_cast<size_t>(eventRangeFull.second) - event_index_start);
+      // read parts of the bank at a time until all events are processed
+      while (!eventRanges.empty()) {
+        // Create offsets and slab sizes for the next chunk of events.
+        // This will read at most m_events_per_chunk events from the file
+        // and will split the ranges if necessary for the next iteration.
+        std::vector<size_t> offsets;
+        std::vector<size_t> slabsizes;
+
+        size_t total_events_to_read = 0;
+        // Process the event ranges until we reach the desired number of events to read or run out of ranges
+        while (!eventRanges.empty() && total_events_to_read < m_events_per_chunk) {
+          // Get the next event range from the stack
+          auto eventRange = eventRanges.top();
+          eventRanges.pop();
+
+          size_t range_size = eventRange.second - eventRange.first;
+          size_t remaining_chunk = m_events_per_chunk - total_events_to_read;
+
+          // If the range size is larger than the remaining chunk, we need to split it
+          if (range_size > remaining_chunk) {
+            // Split the range: process only part of it now, push the rest back for later
+            offsets.push_back(eventRange.first);
+            slabsizes.push_back(remaining_chunk);
+            total_events_to_read += remaining_chunk;
+            // Push the remainder of the range back to the front for next iteration
+            eventRanges.emplace(eventRange.first + remaining_chunk, eventRange.second);
+            break;
+          } else {
+            offsets.push_back(eventRange.first);
+            slabsizes.push_back(range_size);
+            total_events_to_read += range_size;
+            // Continue to next range
+          }
+        }
+
+        // log the event ranges being processed
+        std::ostringstream oss;
+        oss << "Processing " << bankName << " with " << total_events_to_read << " events in the ranges: ";
+        for (size_t i = 0; i < offsets.size(); ++i) {
+          oss << "[" << offsets[i] << ", " << (offsets[i] + slabsizes[i]) << "), ";
+        }
+        oss << "\n";
+        std::cout << oss.str();
 
         // load detid and tof at the same time
         tbb::parallel_invoke(
             [&] { // load detid
               // event_detid->clear();
-              m_loader.loadDetid(detID_SDS, event_detid, offset, slabsize);
+              m_loader.loadData(detID_SDS, event_detid, offsets, slabsizes);
               // immediately find min/max to allow for other things to read disk
               const auto [minval, maxval] = parallel_minmax(event_detid.get(), m_grainsize_event);
               // only recreate calibration if it doesn't already have the useful information
@@ -392,7 +448,7 @@ public:
             },
             [&] { // load time-of-flight
               // event_time_of_flight->clear();
-              m_loader.loadTOF(tof_SDS, event_time_of_flight, offset, slabsize);
+              m_loader.loadData(tof_SDS, event_time_of_flight, offsets, slabsizes);
             });
 
         // Create a local task for this thread
@@ -406,8 +462,6 @@ public:
         for (size_t i = 0; i < y_temp.size(); ++i) {
           y_temp[i].fetch_add(task.y_temp[i], std::memory_order_relaxed);
         }
-
-        event_index_start += m_events_per_chunk;
       }
 
       tgroup.wait();
@@ -603,6 +657,8 @@ void AlignAndFocusPowderSlim::exec() {
   // load the events
   H5::H5File h5file(filename, H5F_ACC_RDONLY, NeXus::H5Util::defaultFileAcc());
 
+  TimeROI roi;
+
   // filter by time
   double filter_time_start_sec = getProperty(PropertyNames::FILTER_TIMESTART);
   double filter_time_stop_sec = getProperty(PropertyNames::FILTER_TIMESTOP);
@@ -618,35 +674,23 @@ void AlignAndFocusPowderSlim::exec() {
     }
     const auto pulse_times =
         std::make_unique<std::vector<Mantid::Types::Core::DateAndTime>>(frequency_log->timesAsVector());
-    const auto startOfRun = wksp->run().getFirstPulseTime();
-    g_log.information() << "Pulse times from " << pulse_times->front() << " to " << pulse_times->back()
-                        << " with length " << pulse_times->size() << " and start of run at " << startOfRun << '\n';
-    if (!std::is_sorted(pulse_times->cbegin(), pulse_times->cend())) {
-      g_log.warning() << "Pulse times are not sorted, pulse time filtering will not be accurate\n";
+    const auto startOfRun = wksp->run().startTime();
+
+    try {
+      roi.addROI(startOfRun + (filter_time_start_sec == EMPTY_DBL() ? 0.0 : filter_time_start_sec),
+                 startOfRun + filter_time_stop_sec); // start and stop times in seconds
+    } catch (const std::runtime_error &e) {
+      throw std::invalid_argument("Invalid time range for filtering: " + std::string(e.what()));
     }
 
-    if (filter_time_start_sec != EMPTY_DBL()) {
-      const auto filter_time_start = startOfRun + filter_time_start_sec;
-      const auto itStart = std::lower_bound(pulse_times->cbegin(), pulse_times->cend(), filter_time_start);
-      if (itStart == pulse_times->cend())
-        throw std::invalid_argument("Invalid pulse time filtering, start time will filter all pulses");
+    // hard coded ROI for testing
+    // roi.addROI(startOfRun + 200., startOfRun + 210.);
+    pulse_indices = roi.calculate_indices(*pulse_times);
+    if (pulse_indices.empty())
+      throw std::invalid_argument("No valid pulse time indices found for filtering");
 
-      pulse_start_index = std::distance(pulse_times->cbegin(), itStart);
-    }
-
-    if (filter_time_stop_sec != EMPTY_DBL()) {
-      const auto filter_time_stop = startOfRun + filter_time_stop_sec;
-      const auto itStop = std::upper_bound(pulse_times->cbegin(), pulse_times->cend(), filter_time_stop);
-      if (itStop == pulse_times->cend())
-        pulse_stop_index = std::numeric_limits<size_t>::max();
-      else
-        pulse_stop_index = std::distance(pulse_times->cbegin(), itStop);
-    }
-
-    if (pulse_start_index >= pulse_stop_index)
-      throw std::invalid_argument("Invalid pulse time filtering");
-
-    g_log.information() << "Filtering pulses from " << pulse_start_index << " to " << pulse_stop_index << '\n';
+    g_log.information() << "Time filtering will use " << pulse_indices.size() / 2 << " time ranges, starting at "
+                        << pulse_indices.front().first << " and stopping at " << pulse_indices.back().second << '\n';
   }
 
   // Now we want to go through all the bankN_event entries
@@ -687,9 +731,9 @@ void AlignAndFocusPowderSlim::exec() {
     const int GRAINSIZE_EVENTS = getProperty(PropertyNames::EVENTS_PER_THREAD);
     auto progress = std::make_shared<API::Progress>(this, .17, .9, num_banks_to_read);
     std::cout << (DISK_CHUNK / GRAINSIZE_EVENTS) << " threads per chunk\n"; // TODO REMOVE debug print
-    ProcessBankTask task(bankEntryNames, h5file, is_time_filtered, pulse_start_index, pulse_stop_index, wksp,
-                         m_calibration, m_masked, static_cast<size_t>(DISK_CHUNK),
-                         static_cast<size_t>(GRAINSIZE_EVENTS), progress);
+    ProcessBankTask task(bankEntryNames, h5file, is_time_filtered, wksp, m_calibration, m_masked,
+                         static_cast<size_t>(DISK_CHUNK), static_cast<size_t>(GRAINSIZE_EVENTS), pulse_indices,
+                         progress);
     // generate threads only if appropriate
     if (num_banks_to_read > 1) {
       tbb::parallel_for(tbb::blocked_range<size_t>(0, num_banks_to_read), task);
@@ -700,6 +744,10 @@ void AlignAndFocusPowderSlim::exec() {
 
   // close the file so child algorithms can do their thing
   h5file.close();
+
+  // update the run TimeROI and remove log data outside the time ROI
+  wksp->mutableRun().setTimeROI(roi);
+  wksp->mutableRun().removeDataOutsideTimeROI();
 
   setProperty(PropertyNames::OUTPUT_WKSP, std::move(wksp));
 }
