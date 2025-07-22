@@ -569,6 +569,10 @@ TimeROI AlignAndFocusPowderSlim::timeROIFromSplitterWorkspace(const Types::Core:
         DataObjects::TimeSplitter(matrixSplitterWS, isSplittersRelativeTime ? filterStartTime : DateAndTime::GPS_EPOCH);
   }
 
+  if (timeSplitter.outputWorkspaceIndices().size() != 1) {
+    throw std::runtime_error("Current we only support a single output workspace from the splitter workspace");
+  }
+
   return timeSplitter.getTimeROI(0);
 }
 
