@@ -367,10 +367,8 @@ public:
 
     // check data link
     fileid.openAddress("/entry/data/some_data");
-    // TODO why can't we get the data through the link?
-    // string output1;
-    // fileid.getData(&output1);
-    // TS_ASSERT_EQUALS(somedata, output1);
+    string output1 = fileid.getStrData();
+    TS_ASSERT_EQUALS(somedata, output1);
     NXlink res1 = fileid.getDataID();
     TS_ASSERT_EQUALS(datalink.linkType, res1.linkType);
     TS_ASSERT_EQUALS(datalink.targetAddress, res1.targetAddress);
