@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from instrumentview.Projections.projection import projection
+from instrumentview.Projections.Projection import Projection
 import numpy as np
 from instrumentview.Detectors import DetectorPosition
 from mantid.api import PanelsSurfaceCalculator
@@ -30,7 +30,7 @@ class FlatBankInfo:
             self.detector_id_position_map[id] += shift
 
 
-class SideBySide(projection):
+class SideBySide(Projection):
     _detector_id_to_flat_bank_map: dict[int, FlatBankInfo] = {}
     _flat_banks: list[FlatBankInfo] = []
     _calculator: PanelsSurfaceCalculator

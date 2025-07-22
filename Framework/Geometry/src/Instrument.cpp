@@ -1082,14 +1082,6 @@ Instrument::ContainsState Instrument::containsRectDetectors() const {
     return Instrument::ContainsState::None;
 }
 
-std::vector<RectangularDetector_const_sptr> Instrument::findRectDetectors() const {
-  return findDetectorsOfType<RectangularDetector>();
-}
-
-std::vector<GridDetector_const_sptr> Instrument::findGridDetectors() const {
-  return findDetectorsOfType<GridDetector>();
-}
-
 bool Instrument::validateComponentProperties(IComponent_const_sptr component) const {
   // Skip source, if has one
   if (m_sourceCache && m_sourceCache->getComponentID() == component->getComponentID())

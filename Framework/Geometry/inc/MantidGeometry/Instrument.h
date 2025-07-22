@@ -205,8 +205,10 @@ public:
   /// @return Full if all detectors are rect., Partial if some, None if none
   ContainsState containsRectDetectors() const;
 
-  std::vector<RectangularDetector_const_sptr> findRectDetectors() const;
-  std::vector<GridDetector_const_sptr> findGridDetectors() const;
+  std::vector<RectangularDetector_const_sptr> findRectDetectors() const {
+    return findDetectorsOfType<RectangularDetector>();
+  }
+  std::vector<GridDetector_const_sptr> findGridDetectors() const { return findDetectorsOfType<GridDetector>(); }
 
   bool isMonitorViaIndex(const size_t index) const;
   size_t detectorIndex(const detid_t detID) const;
