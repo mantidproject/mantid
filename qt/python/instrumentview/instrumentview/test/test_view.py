@@ -37,54 +37,6 @@ class TestFullInstrumentViewWindow(unittest.TestCase):
     def test_figure_canvas_created(self):
         self._mock_figure_canvas.assert_called_once()
 
-    # @mock.patch("instrumentview.FullInstrumentViewWindow.FullInstrumentViewWindow._parse_min_max_text")
-    # def test_on_tof_limits_updated_true(self, mock_parse_min_max_text):
-    #     mock_parse_min_max_text.return_value = (True, 0, 100)
-    #     self._view._on_tof_limits_updated()
-    #     mock_parse_min_max_text.assert_called_once()
-    #     self._view._presenter.set_tof_limits.assert_called_once_with(0, 100)
-    #
-    # @mock.patch("instrumentview.FullInstrumentViewWindow.FullInstrumentViewWindow._parse_min_max_text")
-    # def test_on_tof_limits_updated_false(self, mock_parse_min_max_text):
-    #     mock_parse_min_max_text.return_value = (False, 0, 100)
-    #     self._view._on_tof_limits_updated()
-    #     mock_parse_min_max_text.assert_called_once()
-    #     self._view._presenter.set_tof_limits.assert_not_called()
-    #
-    # @mock.patch("instrumentview.FullInstrumentViewWindow.FullInstrumentViewWindow._parse_min_max_text")
-    # def test_on_contour_limits_updated_false(self, mock_parse_min_max_text):
-    #     mock_parse_min_max_text.return_value = (False, 0, 100)
-    #     self._view._on_contour_limits_updated()
-    #     self._view._presenter.set_contour_limits.assert_not_called()
-    #
-    # @mock.patch("instrumentview.FullInstrumentViewWindow.FullInstrumentViewWindow._parse_min_max_text")
-    # def test_on_contour_limits_updated_true(self, mock_parse_min_max_text):
-    #     mock_parse_min_max_text.return_value = (True, 0, 100)
-    #     self._view._on_contour_limits_updated()
-    #     self._view._presenter.set_contour_limits.assert_called_once_with(0, 100)
-    #
-    # def _do_test_parse_min_max_text_valid(self, min_return: str, max_return: str, exp_is_valid: bool, exp_min: int, exp_max: int) -> None:
-    #     min_edit = MagicMock()
-    #     min_edit.text.return_value = min_return
-    #     max_edit = MagicMock()
-    #     max_edit.text.return_value = max_return
-    #     [is_valid, min, max] = self._view._parse_min_max_text(min_edit, max_edit)
-    #     self.assertEqual(exp_is_valid, is_valid)
-    #     self.assertEqual(exp_min, min)
-    #     self.assertEqual(exp_max, max)
-    #
-    # def test_parse_min_max_text_valid(self):
-    #     self._do_test_parse_min_max_text_valid("1", "200", True, 1, 200)
-    #
-    # def test_parse_min_max_text_reverse(self):
-    #     self._do_test_parse_min_max_text_valid("100", "5", False, 100, 5)
-    #
-    # def test_parse_min_max_text_invalid_min(self):
-    #     self._do_test_parse_min_max_text_valid("boom", "5", False, 0, 0)
-    #
-    # def test_parse_min_max_text_invalid_max(self):
-    #     self._do_test_parse_min_max_text_valid("5", "boom", False, 0, 0)
-
     def test_update_scalar_range(self):
         self._view.set_plotter_scalar_bar_range([0, 100], "label")
         self.assertEqual(2, self._view.main_plotter.update_scalar_bar_range.call_count)
