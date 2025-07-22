@@ -190,6 +190,20 @@ public:
       Poco::File(outputFile).remove();
   }
 
+  void test_WorkspaceNameData() {
+    auto saver = setupWithWSName("data");
+    TS_ASSERT_THROWS_NOTHING(saver->execute());
+    TS_ASSERT(saver->isExecuted());
+  }
+
+  void test_WorkspaceBadName() {
+    auto saver = setupWithWSName("bad/name");
+    TS_ASSERT_THROWS_EQUALS(saver->execute(), const std::runtime_error &e, std::string(e.what()),
+                            "Some invalid Properties found: \n"
+                            " InputWorkspace: The input workspace name cannot contain a \'/\' character.");
+    TS_ASSERT(!saver->isExecuted());
+  }
+
 private:
   MatrixWorkspace_sptr makeWS_direct(MatrixWorkspace_sptr inputWS, double ei = 12.0) {
     std::unique_ptr<Mantid::Kernel::PropertyWithValue<std::string>> mode(
@@ -304,5 +318,22 @@ private:
     h5file.close();
 
     return boost::make_tuple(dims, signal, error, efixed);
+  }
+
+  SaveNXSPE *setupWithWSName(const std::string &workspaceName) {
+    MatrixWorkspace_sptr input = makeWorkspace();
+    Mantid::API::AnalysisDataService::Instance().add(workspaceName, input);
+
+    auto *saver = new SaveNXSPE();
+    saver->initialize();
+    saver->setChild(true);
+    TS_ASSERT_THROWS_NOTHING(saver->setProperty("InputWorkspace", workspaceName));
+    TS_ASSERT_EQUALS(saver->getPropertyValue("InputWorkspace"), workspaceName);
+    std::string outputFile("SaveNXSPETest_testEXEC.nxspe");
+    TS_ASSERT_THROWS_NOTHING(saver->setPropertyValue("Filename", outputFile));
+    outputFile = saver->getPropertyValue("Filename"); // get absolute path
+    TS_ASSERT_THROWS_NOTHING(saver->setProperty("Psi", 0.0));
+    TS_ASSERT_THROWS_NOTHING(saver->setProperty("KiOverKfScaling", true));
+    return saver;
   }
 };
