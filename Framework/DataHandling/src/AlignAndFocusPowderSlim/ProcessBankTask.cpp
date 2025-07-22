@@ -7,15 +7,9 @@
 #include "tbb/parallel_reduce.h"
 #include <iostream>
 
-namespace Mantid::DataHandling {
+namespace Mantid::DataHandling::AlignAndFocusPowderSlim {
 
 namespace {
-
-namespace NxsFieldNames {
-const std::string TIME_OF_FLIGHT("event_time_offset"); // float32 in ORNL nexus files
-const std::string DETID("event_id");                   // uint32 in ORNL nexus files
-const std::string INDEX_ID("event_index");
-} // namespace NxsFieldNames
 
 const std::string MICROSEC("microseconds");
 
@@ -202,4 +196,4 @@ void ProcessBankTask::operator()(const tbb::blocked_range<size_t> &range) const 
     m_progress->report();
   }
 }
-}; // namespace Mantid::DataHandling
+}; // namespace Mantid::DataHandling::AlignAndFocusPowderSlim

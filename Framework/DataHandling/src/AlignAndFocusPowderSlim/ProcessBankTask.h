@@ -8,7 +8,7 @@
 #include <tbb/tbb.h>
 #include <vector>
 
-namespace Mantid::DataHandling {
+namespace Mantid::DataHandling::AlignAndFocusPowderSlim {
 
 class ProcessBankTask {
 public:
@@ -32,4 +32,4 @@ private:
   const size_t m_grainsize_event;
   std::shared_ptr<API::Progress> m_progress;
 };
-} // namespace Mantid::DataHandling
+} // namespace Mantid::DataHandling::AlignAndFocusPowderSlim

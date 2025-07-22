@@ -6,8 +6,13 @@
 #include <string>
 #include <vector>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling::AlignAndFocusPowderSlim {
+
+namespace NxsFieldNames {
+const std::string TIME_OF_FLIGHT("event_time_offset"); // float32 in ORNL nexus files
+const std::string DETID("event_id");                   // uint32 in ORNL nexus files
+const std::string INDEX_ID("event_index");
+} // namespace NxsFieldNames
 
 class NexusLoader {
 public:
@@ -23,5 +28,4 @@ private:
   void loadEventIndex(H5::Group &event_group, std::unique_ptr<std::vector<uint64_t>> &data);
 };
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling::AlignAndFocusPowderSlim

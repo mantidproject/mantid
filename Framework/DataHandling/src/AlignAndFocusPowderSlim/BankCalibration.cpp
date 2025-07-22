@@ -2,7 +2,7 @@
 #include <algorithm>
 #include <stdexcept>
 
-namespace Mantid::DataHandling {
+namespace Mantid::DataHandling::AlignAndFocusPowderSlim {
 
 // ------------------------ BankCalibration object
 /**
@@ -62,4 +62,4 @@ const double &BankCalibration::value(const detid_t detid) const { return m_calib
 
 const detid_t &BankCalibration::idmin() const { return m_detid_offset; }
 detid_t BankCalibration::idmax() const { return m_detid_offset + static_cast<detid_t>(m_calibration.size()) - 1; }
-} // namespace Mantid::DataHandling
+} // namespace Mantid::DataHandling::AlignAndFocusPowderSlim

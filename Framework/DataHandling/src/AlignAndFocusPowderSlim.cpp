@@ -34,7 +34,7 @@
 #include <numbers>
 #include <regex>
 
-namespace Mantid::DataHandling {
+namespace Mantid::DataHandling::AlignAndFocusPowderSlim {
 using Mantid::API::FileProperty;
 using Mantid::API::ITableWorkspace_sptr;
 using Mantid::API::MatrixWorkspace_sptr;
@@ -529,4 +529,4 @@ API::MatrixWorkspace_sptr AlignAndFocusPowderSlim::convertToTOF(API::MatrixWorks
   return wksp;
 }
 
-} // namespace Mantid::DataHandling
+} // namespace Mantid::DataHandling::AlignAndFocusPowderSlim
