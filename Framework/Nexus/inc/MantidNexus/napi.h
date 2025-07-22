@@ -22,29 +22,7 @@
   For further information, see <http://www.nexusformat.org>
 
  ----------------------------------------------------------------------------*/
-/** \file
- * Documentation for the NeXus-API version 4.4.3
- * 2000-2011, the NeXus International Advisory Commitee
- * \defgroup c_main C API
- * \defgroup c_types Data Types
- * \ingroup c_main
- * \defgroup c_init General Initialisation and shutdown
- * \ingroup c_main
- * \defgroup c_group Reading and Writing Groups
- * \ingroup c_main
- * \defgroup c_readwrite Reading and Writing Data
- * \ingroup c_main
- * \defgroup c_navigation General File navigation
- * \ingroup c_main
- * \defgroup c_metadata Meta data routines
- * \ingroup c_main
- * \defgroup c_linking Linking
- * \ingroup c_main
- * \defgroup c_memory Memory allocation
- * \ingroup c_main
- * \defgroup c_external External linking
- * \ingroup c_main
- */
+
 #pragma once
 
 #include "MantidNexus/DllConfig.h"
@@ -53,15 +31,6 @@
 
 /* NeXus HDF45 */
 #define NEXUS_VERSION "4.4.3" /* major.minor.patch */
-
-/*
- * Standard interface
- *
- * Functions added here are not automatically exported from
- * a shared library/dll - the symbol name must also be added
- * to the file   src/nexus_symbols.txt
- *
- */
 
 /**
  * NeXus groups are NeXus way of structuring information into a hierarchy.
