@@ -30,7 +30,7 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self.assertTrue("Spherical X" in projections)
 
     def test_projection_option_selected(self):
-        self._presenter.projection_option_selected(1)
+        self._presenter.on_projection_option_selected(1)
         self._mock_view.add_projection_mesh.assert_called()
 
     @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.create_poly_data_mesh")
@@ -46,15 +46,65 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
                 axis = [0, 0, 1]
             else:
                 return
-            self._presenter.projection_option_selected(option_index)
+            self._presenter.on_projection_option_selected(option_index)
             mock_calculate_projection.assert_called_once_with(option.startswith("Spherical"), axis)
             mock_create_poly_data_mesh.assert_called()
             mock_calculate_projection.reset_mock()
             mock_create_poly_data_mesh.reset_mock()
 
+    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.set_tof_limits")
+    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter._parse_min_max_text")
+    def test_on_tof_limits_updated_true(self, mock_parse_min_max_text, mock_set_tof_limits):
+        mock_parse_min_max_text.return_value = (0, 100)
+        self._presenter.on_tof_limits_updated()
+        mock_parse_min_max_text.assert_called_once()
+        mock_set_tof_limits.assert_called_once_with(0, 100)
+
+    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.set_tof_limits")
+    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter._parse_min_max_text")
+    def test_on_tof_limits_updated_false(self, mock_parse_min_max_text, mock_set_tof_limits):
+        mock_parse_min_max_text.return_value = ()
+        self._presenter.on_tof_limits_updated()
+        mock_parse_min_max_text.assert_called_once()
+        mock_set_tof_limits.assert_not_called()
+
+    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.set_contour_limits")
+    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter._parse_min_max_text")
+    def test_on_contour_limits_updated_false(self, mock_parse_min_max_text, mock_set_contour_limits):
+        mock_parse_min_max_text.return_value = ()
+        self._presenter.on_contour_limits_updated()
+        mock_set_contour_limits.assert_not_called()
+
+    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.set_contour_limits")
+    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter._parse_min_max_text")
+    def test_on_contour_limits_updated_true(self, mock_parse_min_max_text, mock_set_contour_limits):
+        mock_parse_min_max_text.return_value = (0, 100)
+        self._presenter.on_contour_limits_updated()
+        mock_set_contour_limits.assert_called_once_with(0, 100)
+
+    def _do_test_parse_min_max_text_valid(self, min_text: str, max_text: str, exp_is_valid: bool, exp_min: int, exp_max: int) -> None:
+        limits = self._presenter._parse_min_max_text(min_text, max_text)
+        self.assertEqual(exp_is_valid, bool(limits))
+        if limits:
+            min, max = limits
+            self.assertEqual(exp_min, min)
+            self.assertEqual(exp_max, max)
+
+    def test_parse_min_max_text_valid(self):
+        self._do_test_parse_min_max_text_valid("1", "200", True, 1, 200)
+
+    def test_parse_min_max_text_reverse(self):
+        self._do_test_parse_min_max_text_valid("100", "5", False, 0, 0)
+
+    def test_parse_min_max_text_invalid_min(self):
+        self._do_test_parse_min_max_text_valid("boom", "5", False, 0, 0)
+
+    def test_parse_min_max_text_invalid_max(self):
+        self._do_test_parse_min_max_text_valid("5", "boom", False, 0, 0)
+
     def test_set_contour_limits(self):
         self._presenter.set_contour_limits(0, 100)
-        self._mock_view.update_scalar_range.assert_called_once_with([0, 100], self._presenter._counts_label)
+        self._mock_view.set_plotter_scalar_bar_range.assert_called_once_with([0, 100], self._presenter._counts_label)
 
     @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.update_time_of_flight_range")
     @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.set_contour_limits")
@@ -101,8 +151,8 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self.assertEqual(self._presenter._pickable_main_mesh["visibility"], [True, True, False])
         self.assertEqual(self._presenter._pickable_projection_mesh["visibility"], [True, True, False])
 
-        self._mock_view.show_plot_for_detectors.assert_called_once_with(mock_model.workspace(), [0, 1])
-        self._mock_view.update_selected_detector_info.assert_called_once_with(["a", "a"])
+        self._mock_view.set_plot_for_detectors.assert_called_once_with(mock_model.workspace(), [0, 1])
+        self._mock_view.set_selected_detector_info.assert_called_once_with(["a", "a"])
 
     def test_generate_single_colour(self):
         green_vector = self._presenter.generate_single_colour(2, 0, 1, 0, 0)
@@ -110,11 +160,11 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self.assertTrue(green_vector.all(where=[0, 1, 0, 0]))
 
     def test_set_multi_select_enabled(self):
-        self._presenter.multi_select_checkbox_clicked(2)
+        self._presenter.on_multi_select_detectors_clicked(2)
         self._mock_view.enable_rectangle_picking.assert_called_once()
         self._mock_view.enable_point_picking.assert_not_called()
 
     def test_set_multi_select_disabled(self):
-        self._presenter.multi_select_checkbox_clicked(1)
+        self._presenter.on_multi_select_detectors_clicked(1)
         self._mock_view.enable_rectangle_picking.assert_not_called()
         self._mock_view.enable_point_picking.assert_called_once()

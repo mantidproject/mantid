@@ -76,9 +76,7 @@ class FullInstrumentViewPresenter:
         """When TOF limits are changed, read the new limits and tell the presenter to update the colours accordingly"""
         limits = self._parse_min_max_text(*self._view.get_tof_limits_text())
         if limits:
-            self._model.update_time_of_flight_range(*limits)
-            self._detector_mesh[self._counts_label] = self._model.detector_counts()
-            self.set_contour_limits(*self._model.data_limits())
+            self.set_tof_limits(*limits)
 
     def on_contour_limits_updated(self) -> None:
         """When contour limits are changed, read the new limits and tell the presenter to update the colours accordingly"""
@@ -96,6 +94,11 @@ class FullInstrumentViewPresenter:
         if max <= min:
             return ()
         return (min, max)
+
+    def set_tof_limits(self, min: int, max: int) -> None:
+        self._model.update_time_of_flight_range(min, max)
+        self._detector_mesh[self._counts_label] = self._model.detector_counts()
+        self.set_contour_limits(*self._model.data_limits())
 
     def set_contour_limits(self, min: int, max: int) -> None:
         self._contour_limits = [min, max]
