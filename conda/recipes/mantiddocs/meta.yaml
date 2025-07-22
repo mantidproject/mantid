@@ -24,11 +24,6 @@ requirements:
     - cross-python_{{ target_platform }}     # [build_platform != target_platform]
     - setuptools                             # [build_platform != target_platform]
     - numpy {{ numpy }}                      # [build_platform != target_platform]
-    - {{ cdt('mesa-libgl-devel') }}  # [linux]
-    - {{ cdt('mesa-dri-drivers') }}  # [linux]
-    - {{ cdt('libxxf86vm') }}  # [linux]
-    - {{ cdt('libx11-devel') }}  # [linux]
-    - {{ cdt('xorg-x11-proto-devel') }}  # [linux]
   host:
     - python {{ python }}
     - setuptools
@@ -38,6 +33,10 @@ requirements:
     - versioningit {{ versioningit }}
     - graphviz {{ graphviz }}
     - texlive-core {{ texlive_core }}
+    - libgl-devel  # [linux]
+    - xorg-libxxf86vm  # [linux]
+    - xorg-libx11  # [linux]
+    - xorg-xorgproto  # [linux]
 
 # there are no run requirements as it's just pure html
 

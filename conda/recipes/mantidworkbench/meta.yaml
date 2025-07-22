@@ -27,16 +27,15 @@ requirements:
     - setuptools                             # [build_platform != target_platform]
     - numpy {{ numpy }}                      # [build_platform != target_platform]
     - pyqt {{ pyqt }}                        # [build_platform != target_platform]
-    - {{ cdt('mesa-libgl-devel') }}  # [linux]
-    - {{ cdt('mesa-dri-drivers') }}  # [linux]
-    - {{ cdt('libxxf86vm') }}  # [linux]
-    - {{ cdt('libx11-devel') }}  # [linux]
-    - {{ cdt('xorg-x11-proto-devel') }}  # [linux]
   host:
     - setuptools
     - mantidqt {{ version }}
     - python {{ python }}
     - versioningit {{ versioningit }}
+    - libgl-devel  # [linux]
+    - xorg-libxxf86vm  # [linux]
+    - xorg-libx11  # [linux]
+    - xorg-xorgproto  # [linux]
   run:
     - ipykernel
     - lz4  # [linux]
