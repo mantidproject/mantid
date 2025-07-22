@@ -283,11 +283,8 @@ NXstatus NXopenaddress(NexusFile5 &fid, std::string const &address) {
 
   // establish the new address absolutely
   Mantid::Nexus::NexusAddress absaddr(address);
-  printf("ADDRESS %s | %s\n", fid.groupaddr.c_str(), absaddr.c_str());
   if (!absaddr.isAbsolute()) {
-    printf("not absolute -- %s | ", absaddr.c_str());
     absaddr = fid.groupaddr / address;
-    printf("%s\n", absaddr.c_str());
   }
 
   // if we are already there, do nothing
@@ -319,27 +316,26 @@ NXstatus NXopenaddress(NexusFile5 &fid, std::string const &address) {
   // if we wanted to go to root, then stop here
   if (absaddr == Mantid::Nexus::NexusAddress::root()) {
     fid.iCurrentG = 0;
-    fid.groupaddr = Mantid::Nexus::NexusAddress::root();
     return NXstatus::NX_OK;
   }
 
   // build new address
   Mantid::Nexus::NexusAddress up(absaddr.parent_path());
-  std::string last(absaddr.stem());
+  Mantid::Nexus::NexusAddress fromroot;
   // open groups up the address
   if (up.isRoot()) {
     fid.iCurrentG = 0;
   } else {
     fid.iCurrentG = fid.iFID;
     for (auto const &name : up.parts()) {
-      printf("open %s from %s\n", name.c_str(), fid.groupaddr.c_str());
-      hid_t gid = H5Gopen(fid.iCurrentG, name.c_str(), H5P_DEFAULT);
+      fromroot /= name;
+      hid_t gid = H5Gopen(fid.iFID, fromroot.c_str(), H5P_DEFAULT);
       if (gid < 0) {
         return NXstatus::NX_ERROR;
       }
       fid.iStack5.push_back(gid);
       fid.iCurrentG = gid;
-      fid.groupaddr /= name;
+      fid.groupaddr = fromroot;
     }
   }
   // now open the last element -- either a group or a dataset

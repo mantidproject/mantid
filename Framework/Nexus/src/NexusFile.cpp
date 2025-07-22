@@ -299,10 +299,6 @@ void File::openAddress(std::string const &address) {
   auto tmp = getFileStruct();
   NXstatus ret = NXopenaddress(tmp, absaddr);
   m_address = getObjectAddress(getCurrentId());
-  printf("wanted to go %s\n", address.c_str());
-  printf("actually went %s\n", m_address.c_str());
-  printf("value in struct: %s\n", tmp.groupaddr.c_str());
-  fflush(stdout);
   NAPI_CALL(ret, "NXopenaddress(" + address + ") failed");
 }
 
@@ -1664,7 +1660,7 @@ NXlink File::getDataID() {
 
 void File::makeLink(NXlink const &link) {
   if (m_current_group_id == 0) { /* root level, can not link here */
-    throw NXEXCEPTION("makeLink failed");
+    throw NXEXCEPTION("makeLink failed : cannot form link at root level");
   }
 
   // locate name of the element to link
@@ -1675,7 +1671,7 @@ void File::makeLink(NXlink const &link) {
      build addressname to link from our current group and the name
      of the thing to link
    */
-  std::string linkTarget(m_address.parent_path() / itemName);
+  std::string linkTarget(groupAddress(m_address) / itemName);
   H5Lcreate_hard(m_fid, link.targetAddress.c_str(), H5L_SAME_LOC, linkTarget.c_str(), H5P_DEFAULT, H5P_DEFAULT);
 
   // register the entry
