@@ -10,12 +10,12 @@
 #include "MantidQtWidgets/Plotting/DllOption.h"
 
 #include <string>
-#include <unordered_map>
 #include <vector>
 
 // Forward Declarations
 class QString;
 class QVariant;
+template <typename T1, typename T2> class QHash;
 
 namespace MantidQt::MantidWidgets {
 class EXPORT_OPT_MANTIDQT_PLOTTING IPlotView {
@@ -24,7 +24,7 @@ public:
   virtual void setScaleLog(const AxisID axisID) = 0;
   virtual void setScaleSymLog(const AxisID axisID, const double lintresh) = 0;
   virtual void setScale(const AxisID axisID, const std::string &scale,
-                        const std::unordered_map<QString, QVariant> &additionalProperties) = 0;
+                        const QHash<QString, QVariant> &additionalProperties) = 0;
   virtual void plot(const std::vector<Mantid::API::MatrixWorkspace_sptr> &workspaces,
                     const std::vector<int> &workspaceIndices, const bool plotErrorBars) = 0;
   virtual void setAxisLimit(const AxisID axisID, const double axMin, const double axMax) = 0;
