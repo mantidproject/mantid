@@ -91,6 +91,9 @@ setup_mamba $WORKSPACE/miniforge "" true $PLATFORM
 mamba activate base
 mamba install --yes rattler-build versioningit python=3.11
 
+# Set the version to inject into the recipe file
+export MANTID_VERSION=$(versioningit "${REPO_ROOT_DIR}")
+
 # Clean up any legacy conda-recipes git clones
 cd $WORKSPACE
 if [[ -d conda-recipes ]]; then
