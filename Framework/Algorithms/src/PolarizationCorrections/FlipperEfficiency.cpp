@@ -8,6 +8,7 @@
 
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/PolSANSWorkspaceValidator.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAlgorithms/PolarizationCorrections/FlipperEfficiency.h"
 #include "MantidAlgorithms/PolarizationCorrections/PolarizationCorrectionsHelpers.h"
@@ -40,8 +41,10 @@ DECLARE_ALGORITHM(FlipperEfficiency)
 std::string const FlipperEfficiency::summary() const { return "Calculate the efficiency of the polarization flipper."; }
 
 void FlipperEfficiency::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<WorkspaceGroup>>(PropNames::INPUT_WS, "", Direction::Input),
-                  "Group workspace containing flipper transmissions for all 4 polarization states.");
+  declareProperty(
+      std::make_unique<WorkspaceProperty<WorkspaceGroup>>(PropNames::INPUT_WS, "", Direction::Input,
+                                                          std::make_shared<Mantid::API::PolSANSWorkspaceValidator>()),
+      "Group workspace containing flipper transmissions for all 4 polarization states.");
   auto const spinValidator = std::make_shared<SpinStateValidator>(std::unordered_set<int>{4});
   declareProperty(PropNames::SPIN_STATES, INITIAL_SPIN, spinValidator,
                   "Order of individual flipper configurations in the input group workspace, e.g. \"01,11,00,10\"");
@@ -53,19 +56,6 @@ void FlipperEfficiency::init() {
 }
 
 namespace {
-void validateInputWorkspace(Mantid::API::MatrixWorkspace_sptr const &workspace,
-                            std::map<std::string, std::string> &problems) {
-  Kernel::Unit_const_sptr unit = workspace->getAxis(0)->unit();
-  if (unit->unitID() != "Wavelength") {
-    problems[PropNames::INPUT_WS] = "All input workspaces must be in units of Wavelength.";
-    return;
-  }
-
-  if (workspace->getNumberHistograms() != 1) {
-    problems[PropNames::INPUT_WS] = "All input workspaces must contain only a single spectrum.";
-    return;
-  }
-}
 
 double calculateErrorValue(double const t11Y, double const t11E, double const t10Y, double const t10E,
                            double const t01Y, double const t01E, double const t00Y, double const t00E) {
@@ -86,21 +76,6 @@ double calculateErrorValue(double const t11Y, double const t11E, double const t1
 
 std::map<std::string, std::string> FlipperEfficiency::validateInputs() {
   std::map<std::string, std::string> problems;
-  // Check input.
-  WorkspaceGroup_sptr const groupWs = getProperty(PropNames::INPUT_WS);
-  if (groupWs == nullptr) {
-    // Return early so the following checks don't freak out.
-    problems[PropNames::INPUT_WS] = "The input workspace must be a group workspace";
-    return problems;
-  }
-  if (groupWs->size() != 4) {
-    problems[PropNames::INPUT_WS] = "The input group must contain a workspace for all four spin states.";
-  } else {
-    for (size_t i = 0; i < groupWs->size(); ++i) {
-      MatrixWorkspace_sptr const stateWs = std::dynamic_pointer_cast<MatrixWorkspace>(groupWs->getItem(i));
-      validateInputWorkspace(stateWs, problems);
-    }
-  }
 
   // Check outputs.
   auto const &outputWs = getPropertyValue(PropNames::OUTPUT_WS);

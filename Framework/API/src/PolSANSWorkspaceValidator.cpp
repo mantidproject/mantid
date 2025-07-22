@@ -13,8 +13,10 @@
 namespace Mantid {
 namespace API {
 
-PolSANSWorkspaceValidator::PolSANSWorkspaceValidator(bool expectHistogramData, bool allowMultiPeriodData)
-    : m_expectHistogramData(expectHistogramData), m_allowMultiPeriodData(allowMultiPeriodData) {};
+PolSANSWorkspaceValidator::PolSANSWorkspaceValidator(bool expectHistogramData, bool allowMultiPeriodData,
+                                                     std::unordered_set<int> allowedNumberOfPeriods)
+    : m_expectHistogramData(expectHistogramData), m_allowMultiPeriodData(allowMultiPeriodData),
+      m_allowedNumberOfPeriods(allowedNumberOfPeriods) {};
 
 Kernel::IValidator_sptr PolSANSWorkspaceValidator::clone() const {
   return std::make_shared<PolSANSWorkspaceValidator>(*this);
@@ -52,8 +54,9 @@ const std::string PolSANSWorkspaceValidator::validateGroupItem(API::MatrixWorksp
 
 std::string PolSANSWorkspaceValidator::checkValidity(const WorkspaceGroup_sptr &workspace) const {
 
-  if (workspace->getNumberOfEntries() != 4) {
-    return "Input workspace group must have 4 entries.";
+  const int numberOfEntries = workspace->getNumberOfEntries();
+  if (m_allowedNumberOfPeriods.find(numberOfEntries) == m_allowedNumberOfPeriods.cend()) {
+    return "The number of periods within the input workspace is not an allowed value.";
   }
 
   for (const API::Workspace_sptr &ws : workspace->getAllItems()) {
