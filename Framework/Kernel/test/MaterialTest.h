@@ -258,4 +258,18 @@ public:
     TS_ASSERT_EQUALS(cf[3].atom->symbol, "O");
     TS_ASSERT_DELTA(cf[3].multiplicity, 6.56, .01);
   }
+
+  void test_linearAbsorpCoef() {
+    const std::vector<double> lambda{1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+    Material::ChemicalFormula cf;
+    cf = Material::parseChemicalFormula("F14");
+    Material test("test", cf, 5.0, 0.5, 50.0, 50.0);
+    const auto linearCoef = test.linearAbsorpCoef(lambda.begin(), lambda.end());
+
+    const std::vector<double> expectedResults{1.33466, 2.66936, 4.00400, 5.33867, 6.67334,
+                                              8.00800, 9.34268, 10.6773, 12.0120, 13.3467};
+    for (size_t i = 0; i < linearCoef.size(); i++) {
+      TS_ASSERT_DELTA(linearCoef[i], expectedResults[i], 0.0001)
+    }
+  }
 };
