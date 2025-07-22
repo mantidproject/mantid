@@ -137,6 +137,20 @@ public:
     TS_ASSERT_THROWS_NOTHING(file.makeGroup(grp, cls));
   }
 
+  void test_same_make_group() {
+    cout << "\ntest same makeGroup\n";
+    FileResource resource("test_nexus_file_grp.h5");
+    std::string filename = resource.fullPath();
+    NeXus::File file(filename, NXACC_CREATE5);
+
+    string grp("test_group");
+
+    // check that we can make '/test_group/test_group'
+    TS_ASSERT_THROWS_NOTHING(file.makeGroup(grp, "NXsample", true));
+    TS_ASSERT_THROWS_NOTHING(file.makeGroup(grp, "NXdata", true));
+    TS_ASSERT_EQUALS(file.getPath(), "/test_group/test_group");
+  }
+
   void test_open_group() {
     cout << "\ntest openGroup\n";
     FileResource resource("test_nexus_file_grp.h5");
