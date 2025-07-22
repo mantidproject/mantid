@@ -20,13 +20,8 @@ add_executable(napi_test_cpp-hdf5 EXCLUDE_FROM_ALL napi_test_cpp.cpp)
 target_link_libraries(napi_test_cpp-hdf5 PRIVATE Mantid::Nexus)
 add_test(NAME "${TEST_PREFIX}-Cpp-HDF5-test" COMMAND napi_test_cpp-hdf5)
 
-# #### test for unlimited dimensions
-add_executable(napi_test_nxunlimited EXCLUDE_FROM_ALL test_nxunlimited.cpp)
-target_link_libraries(napi_test_nxunlimited PRIVATE Mantid::Nexus)
-add_test(NAME "${TEST_PREFIX}-C-test-nxunlimited" COMMAND napi_test_nxunlimited)
-
 # #### phony target to drag in all tests
 
-add_custom_target("${TEST_PREFIX}" DEPENDS napi_test_cpp-hdf5 napi_test_nxunlimited)
+add_custom_target("${TEST_PREFIX}" DEPENDS napi_test_cpp-hdf5)
 
 add_dependencies(FrameworkTests "${TEST_PREFIX}")

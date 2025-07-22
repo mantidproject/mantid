@@ -807,7 +807,7 @@ void File::makeCompData(std::string const &name, NXnumtype const type, DimVector
     throw NXEXCEPTION("Supplied empty dimensions to makeCompData");
   }
   if (chunk.empty()) {
-    throw NXEXCEPTION("Supplied empty bufsize to makeCompData");
+    throw NXEXCEPTION("Supplied empty chunk size to makeCompData");
   }
   if (dims.size() != chunk.size()) {
     stringstream msg;
@@ -816,157 +816,150 @@ void File::makeCompData(std::string const &name, NXnumtype const type, DimVector
     throw NXEXCEPTION(msg.str());
   }
 
-  // do the work
-
-  hid_t datatype1, dataspace, iNew;
-  hid_t dtype, cparms = -1;
-  pNexusFile5 pFile;
-  size_t byte_zahl = 0;
-  hsize_t chunkdims[H5S_MAX_RANK];
-  hsize_t mydim[H5S_MAX_RANK], mydim1[H5S_MAX_RANK];
-  hsize_t dsize[H5S_MAX_RANK];
-  hsize_t maxdims[H5S_MAX_RANK];
-  bool unlimiteddim = false;
-  int rank = static_cast<int>(dims.size());
   stringstream msg;
   msg << "compMakeData(" << name << ", " << type << ", " << dims.size() << ", " << toString(dims) << ", " << comp
       << ", " << toString(chunk) << ") failed: ";
 
-  pFile = assertNXID(m_pfile_id);
+  pNexusFile5 pFile = assertNXID(m_pfile_id);
   if (pFile->iCurrentG <= 0) {
     msg << "No group open for makedata on " << name;
     throw NXEXCEPTION(msg.str());
   }
 
-  if (rank <= 0) {
-    msg << "Invalid rank specified " << name;
-    throw NXEXCEPTION(msg.str());
-  }
+  // check if any data is unlimited
+  bool unlimited = std::any_of(dims.cbegin(), dims.cend(), [](auto x) -> bool { return x == NX_UNLIMITED || x <= 0; });
 
-  dtype = nxToHDF5Type(type);
-
-  /*
-     Check dimensions for consistency. Dimension may be -1
-     thus denoting an unlimited dimension.
-   */
-  for (int i = 0; i < rank; i++) {
-    chunkdims[i] = chunk[i];
-    mydim[i] = dims[i];
-    maxdims[i] = dims[i];
-    dsize[i] = dims[i];
-    if (dims[i] <= 0) {
-      mydim[i] = 1;
-      maxdims[i] = H5S_UNLIMITED;
-      dsize[i] = 1;
-      unlimiteddim = true;
-    } else {
-      mydim[i] = dims[i];
-      maxdims[i] = dims[i];
-      dsize[i] = dims[i];
-    }
-  }
-
-  if (type == NXnumtype::CHAR) {
-    /*
-     *  This assumes string lenght is in the last dimensions and
-     *  the logic must be the same as used in NX5getslab and NX5getinfo
-     *
-     *  search for tests on H5T_STRING
-     */
-    byte_zahl = (size_t)mydim[rank - 1];
+  // set the dimensions for use
+  int rank = static_cast<int>(dims.size());
+  std::vector<hsize_t> mydim(dims.cbegin(), dims.cend());
+  std::vector<hsize_t> maxdims(dims.cbegin(), dims.cend());
+  std::vector<hsize_t> chunkdims(chunk.cbegin(), chunk.cend());
+  // handle unlimited data
+  if (unlimited) {
     for (int i = 0; i < rank; i++) {
-      mydim1[i] = mydim[i];
-      if (dims[i] <= 0) {
-        mydim1[0] = 1;
-        maxdims[0] = H5S_UNLIMITED;
+      if (dims[i] <= 0 || dims[i] == NX_UNLIMITED) {
+        mydim[i] = 1;
+        chunkdims[i] = 1;
+        maxdims[i] = H5S_UNLIMITED;
       }
     }
-    mydim1[rank - 1] = 1;
-    if (mydim[rank - 1] > 1) {
-      maxdims[rank - 1] = dsize[rank - 1] = 1;
-    }
-    if (chunkdims[rank - 1] > 1) {
-      chunkdims[rank - 1] = 1;
-    }
-    dataspace = H5Screate_simple(rank, mydim1, maxdims);
-  } else {
-    if (unlimiteddim) {
-      dataspace = H5Screate_simple(rank, mydim, maxdims);
-    } else {
-      /* dataset creation */
-      dataspace = H5Screate_simple(rank, mydim, NULL);
-    }
   }
-  datatype1 = H5Tcopy(dtype);
+
+  // create the correct datatype for this numeric type
+  hid_t datatype = H5Tcopy(nxToHDF5Type(type));
+
+  // create a dataspace
+  hid_t dataspace;
   if (type == NXnumtype::CHAR) {
-    H5Tset_size(datatype1, byte_zahl);
-    /*       H5Tset_strpad(H5T_STR_SPACEPAD); */
+    std::size_t byte_zahl(mydim.back());
+    std::vector<hsize_t> mydim1(mydim.cbegin(), mydim.cend());
+    if (unlimited) {
+      mydim1[0] = 1;
+      maxdims[0] = H5S_UNLIMITED;
+    }
+    mydim1.back() = 1;
+    if (mydim.back() > 1) {
+      mydim.back() = maxdims.back() = 1;
+    }
+    if (chunkdims.back() > 1) {
+      chunkdims.back() = 1;
+    }
+    dataspace = H5Screate_simple(rank, mydim1.data(), maxdims.data());
+    H5Tset_size(datatype, byte_zahl);
+  } else {
+    if (unlimited) {
+      dataspace = H5Screate_simple(rank, mydim.data(), maxdims.data());
+    } else {
+      dataspace = H5Screate_simple(rank, mydim.data(), NULL);
+    }
   }
-  hid_t dID;
+
+  // set the compression parameters
+  hid_t cparms = H5Pcreate(H5P_DATASET_CREATE);
   if (comp == NXcompression::LZW) {
-    cparms = H5Pcreate(H5P_DATASET_CREATE);
-    iNew = H5Pset_chunk(cparms, rank, chunkdims);
-    if (iNew < 0) {
+    herr_t ret = H5Pset_chunk(cparms, rank, chunkdims.data());
+    if (ret < 0) {
+      H5Pclose(cparms);
+      H5Tclose(datatype);
+      H5Sclose(dataspace);
       msg << "Size of chunks could not be set";
       throw NXEXCEPTION(msg.str());
     }
     H5Pset_shuffle(cparms); // mrt: improves compression
     H5Pset_deflate(cparms, default_deflate_level);
-    dID = H5Dcreate(pFile->iCurrentG, name.c_str(), datatype1, dataspace, H5P_DEFAULT, cparms, H5P_DEFAULT);
-  } else if (comp == NXcompression::NONE) {
-    if (unlimiteddim) {
-      cparms = H5Pcreate(H5P_DATASET_CREATE);
-      iNew = H5Pset_chunk(cparms, rank, chunkdims);
-      if (iNew < 0) {
+  }
+  // NOTE if compression is NONE but a dimension is unlimited,
+  // then it still compresses by CHUNK.
+  // this behavior is inherited from napi
+  else if (comp == NXcompression::NONE) {
+    if (unlimited) {
+      herr_t ret = H5Pset_chunk(cparms, rank, chunkdims.data());
+      if (ret < 0) {
+        H5Pclose(cparms);
+        H5Tclose(datatype);
+        H5Sclose(dataspace);
         msg << "Size of chunks could not be set";
         throw NXEXCEPTION(msg.str());
       }
-      dID = H5Dcreate(pFile->iCurrentG, name.c_str(), datatype1, dataspace, H5P_DEFAULT, cparms, H5P_DEFAULT);
     } else {
-      dID = H5Dcreate(pFile->iCurrentG, name.c_str(), datatype1, dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+      H5Pclose(cparms);
+      cparms = H5Pcopy(H5P_DEFAULT);
     }
   } else if (comp == NXcompression::CHUNK) {
-    cparms = H5Pcreate(H5P_DATASET_CREATE);
-    iNew = H5Pset_chunk(cparms, rank, chunkdims);
-    if (iNew < 0) {
+    herr_t ret = H5Pset_chunk(cparms, rank, chunkdims.data());
+    if (ret < 0) {
+      H5Pclose(cparms);
+      H5Tclose(datatype);
+      H5Sclose(dataspace);
       msg << "Size of chunks could not be set";
       throw NXEXCEPTION(msg.str());
     }
-    dID = H5Dcreate(pFile->iCurrentG, name.c_str(), datatype1, dataspace, H5P_DEFAULT, cparms, H5P_DEFAULT);
-
   } else {
     NXReportError("HDF5 doesn't support selected compression method! Dataset created without compression");
-    dID = H5Dcreate(pFile->iCurrentG, name.c_str(), datatype1, dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    H5Pclose(cparms);
+    cparms = H5Pcopy(H5P_DEFAULT);
   }
-  if (dID < 0) {
+
+  // create the dataset with the compression parameters
+  NexusAddress absaddr(formAbsoluteAddress(name));
+  hid_t dataset = H5Dcreate(pFile->iFID, absaddr.c_str(), datatype, dataspace, H5P_DEFAULT, cparms, H5P_DEFAULT);
+  H5Pclose(cparms);
+  if (dataset < 0) {
+    H5Tclose(datatype);
+    H5Sclose(dataspace);
     msg << "Creating chunked dataset failed";
     throw NXEXCEPTION(msg.str());
-  } else {
-    pFile->iCurrentD = dID;
   }
-  if (unlimiteddim) {
-    iNew = H5Dset_extent(pFile->iCurrentD, dsize);
-    if (iNew < 0) {
+  if (unlimited) {
+    herr_t ret = H5Dset_extent(dataset, mydim.data());
+    if (ret < 0) {
+      H5Tclose(datatype);
+      H5Sclose(dataspace);
+      H5Dclose(dataset);
       msg << "Cannot create dataset " << name;
       throw NXEXCEPTION(msg.str());
     }
   }
-  herr_t iRet;
-  if (cparms != -1) {
-    H5Pclose(cparms);
-  }
-  iRet = H5Sclose(dataspace);
-  iRet += H5Tclose(datatype1);
-  iRet += H5Dclose(pFile->iCurrentD);
-  pFile->iCurrentD = 0;
-  if (iRet < 0) {
-    msg << "HDF cannot close dataset";
-    throw NXEXCEPTION(msg.str());
-  }
-  NexusAddress absaddr(formAbsoluteAddress(name));
+  // cleanup
   registerEntry(absaddr, scientific_data_set);
   if (open_data) {
-    this->openData(absaddr);
+    pFile->iCurrentT = datatype;
+    pFile->iCurrentS = dataspace;
+    pFile->iCurrentD = dataset;
+    m_address = absaddr;
+  } else {
+    if (H5Sclose(dataspace) < 0) {
+      msg << "HDF cannot close dataspace";
+      throw NXEXCEPTION(msg.str());
+    }
+    if (H5Tclose(datatype) < 0) {
+      msg << "HDF cannot close datatype";
+      throw NXEXCEPTION(msg.str());
+    }
+    if (H5Dclose(dataset) < 0) {
+      msg << "HDF cannot close dataset";
+      throw NXEXCEPTION(msg.str());
+    }
   }
 }
 
