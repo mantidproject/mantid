@@ -8,6 +8,7 @@
 # std imports
 import math
 from typing import List
+from copy import copy
 
 import numpy as np
 from collections.abc import Sequence
@@ -365,9 +366,13 @@ def get_plot_fig(overplot=None, ax_properties=None, window_title=None, axes_num=
             ax_properties["yscale"] = "log"
         else:
             ax_properties["yscale"] = "linear"
+
     if ax_properties:
+        scales_to_amend = [scale for scale in ["x", "y"] if f"{scale}scale" in ax_properties]
         for axis in fig.axes:
-            axis.set(**ax_properties)
+            for scale_id in scales_to_amend:
+                ax_properties = _apply_scale_properties(ax_properties, scale_id, axis)
+            axis.set(**_post_process_props(ax_properties))
     if window_title and fig.canvas.manager is not None:
         fig.canvas.manager.set_window_title(window_title)
 
@@ -577,3 +582,29 @@ def _do_single_plot(ax, workspaces, errors, set_title, nums, kw, plot_kwargs, lo
             title += f" ({log_name})"
 
         ax.set_title(title)
+
+
+def _apply_scale_properties(ax_properties, scale_id, axis):
+    scale_properties = {"value": ax_properties.pop(f"{scale_id}scale")}
+    for k, v in copy(ax_properties).items():
+        # __ADD_X_/__ADD_Y_
+        add_prop_flag = f"__ADD_{scale_id.upper()}_"
+        if add_prop_flag in k:
+            scale_properties[k[len(add_prop_flag) : len(k)]] = v
+            ax_properties.pop(k)
+    getattr(axis, f"set_{scale_id}scale")(**scale_properties)
+    return ax_properties
+
+
+def _post_process_props(ax_properties):
+    """
+    ax_properties can be passed from c++, converted from Q objects into python objects.
+    post-processing can be necessary, if SIP does not convert Q objects into the required form.
+    :param ax_properties:
+    """
+    for k, v in ax_properties.items():
+        match k:
+            case "limits":  # Convert list to tuple
+                if isinstance(v, list):
+                    ax_properties[k] = tuple(v)
+    return ax_properties
