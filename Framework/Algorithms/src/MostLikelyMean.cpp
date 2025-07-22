@@ -56,6 +56,10 @@ void MostLikelyMean::init() {
 void MostLikelyMean::exec() {
   const std::vector<double> input = getProperty("InputArray");
   const auto size = static_cast<int>(input.size());
+#if defined(_WIN32)
+// disable warning about multi_array
+#pragma warning(disable : 4996)
+#endif
   boost::multi_array<double, 2> cov(boost::extents[size][size]);
   PARALLEL_FOR_NO_WSP_CHECK()
   for (int i = 0; i < size; ++i) {
