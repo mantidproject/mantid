@@ -10,6 +10,7 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidDataHandling/DllConfig.h"
 #include "MantidGeometry/IDTypes.h"
+#include "MantidKernel/TimeROI.h"
 
 namespace Mantid::DataHandling::AlignAndFocusPowderSlim {
 
@@ -38,6 +39,7 @@ private:
   void initCalibrationConstants(API::MatrixWorkspace_sptr &wksp, const std::vector<double> &difc_focus);
   void loadCalFile(const API::Workspace_sptr &inputWS, const std::string &filename,
                    const std::vector<double> &difc_focus);
+  Kernel::TimeROI timeROIFromSplitterWorkspace(const Types::Core::DateAndTime &);
 
   std::map<detid_t, double> m_calibration; // detid: 1/difc
   std::set<detid_t> m_masked;
