@@ -215,15 +215,20 @@ void MemoryStats::process_mem_system(size_t &sys_avail, size_t &sys_total) {
     // sys_avail = avPages / 1024 * pageSize;
     sys_avail = totPages / 1024 * pageSize;
   }
-  // Can get the info on the memory that we've already obtained but aren't using
-  // right now
-  int unusedReserved = mallinfo().fordblks / 1024;
-  // unusedReserved can sometimes be negative, which wen added to a low
-  // sys_avail will overflow the unsigned int.
-  if (unusedReserved < 0)
-    unusedReserved = 0;
-  // g_log.debug() << "Linux - Adding reserved but unused memory of " <<
-  // unusedReserved << " KB\n";
+// Can get the info on the memory that we've already obtained but aren't using
+// right now
+#ifdef __GLIBC_MINOR__
+#if __GLIBC_MINOR__ >= 33 // mallinfo2 available since glibc 2.33
+  auto info = mallinfo2();
+#else
+  auto info = mallinfo();
+#endif
+#else
+  auto info = mallinfo();
+#endif
+  // Now add in reserved but unused memory as reported by malloc
+  const size_t unusedReserved = info.fordblks / 1024;
+  g_log.debug() << "Linux - Adding reserved but unused memory of " << unusedReserved << " KB\n";
   sys_avail += unusedReserved;
 
 #elif __APPLE__
