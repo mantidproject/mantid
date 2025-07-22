@@ -7,7 +7,7 @@
 #include <string.h>
 #include <time.h>
 
-std::string getObjectAddress(hid_t obj) {
+std::string getObjectAddress(hid_t const obj) {
   // get correctly sized array for name
   std::size_t addrlen = H5Iget_name(obj, NULL, 0);
   char *caddr = new char[addrlen + 1];
@@ -18,7 +18,7 @@ std::string getObjectAddress(hid_t obj) {
   return ret;
 }
 
-std::string buildCurrentAddress(NexusFile5 &fid) {
+std::string buildCurrentAddress(NexusFile5 const &fid) {
   hid_t current = 0;
   if (fid.iCurrentD != 0) {
     current = fid.iCurrentD;

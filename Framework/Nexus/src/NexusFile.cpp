@@ -257,7 +257,7 @@ File::~File() {
     H5Gclose(m_current_group_id);
     m_current_group_id = 0;
   }
-  for (hid_t gid : m_gid_stack) {
+  for (hid_t &gid : m_gid_stack) {
     H5Gclose(gid);
     gid = 0;
   }

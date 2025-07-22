@@ -267,7 +267,7 @@ public:
     // NOTE the original really did not do any reading, only putting
     // see https://github.com/nexusformat/code/blob/master/test/test_nxunlimited.c
     constexpr std::size_t DATA_SIZE(200);
-    static double d[DATA_SIZE];
+    double d[DATA_SIZE];
     Mantid::Nexus::DimVector dims{NX_UNLIMITED, DATA_SIZE};
 
     FileResource resource("test_nxunlimited.nx5");

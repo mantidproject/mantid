@@ -6,9 +6,9 @@
 
 #include <hdf5.h>
 
-MANTID_NEXUS_DLL std::string getObjectAddress(hid_t obj);
+MANTID_NEXUS_DLL std::string getObjectAddress(hid_t const obj);
 
-MANTID_NEXUS_DLL std::string buildCurrentAddress(NexusFile5 &fid);
+MANTID_NEXUS_DLL std::string buildCurrentAddress(NexusFile5 const &fid);
 
 MANTID_NEXUS_DLL NXnumtype hdf5ToNXType(H5T_class_t tclass, hid_t atype);
 
