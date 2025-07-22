@@ -642,6 +642,13 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         self.canvas.draw_idle()
 
     def crosshair(self, event):
+        if not hasattr(self, "_crosshair_lines"):
+            return
+
+        # Restore background first
+        if self._crosshair_background is not None:
+            self.canvas.restore_region(self._crosshair_background)
+
         if event.inaxes and event.xdata is not None and event.ydata is not None:
             x = event.xdata
             y = event.ydata
@@ -652,13 +659,18 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
                 vline.set_xdata([x])
                 hline.set_visible(True)
                 vline.set_visible(True)
+                ax.draw_artist(hline)
+                ax.draw_artist(vline)
         else:
             # Hide all crosshairs when mouse is out of axes
             for hline, vline in self._crosshair_lines.values():
                 hline.set_visible(False)
                 vline.set_visible(False)
+                ax.draw_artist(hline)
+                ax.draw_artist(vline)
 
-        self.canvas.draw_idle()
+        # Blit updated artists
+        self.canvas.blit(self.canvas.figure.bbox)
 
     def _crosshair_refresh_background(self, event=None):
         if not hasattr(self, "_crosshair_lines"):
