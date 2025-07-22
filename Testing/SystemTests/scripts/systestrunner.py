@@ -56,11 +56,9 @@ def main(argv):
     # Configure mantid
     #########################################################################
 
-    # Parse files containing the search and save directories, unless otherwise given
-    data_paths = DATA_DIRS_LIST_PATH
-    if data_paths is None or data_paths == "":
-        with open(DATA_DIRS_LIST_PATH, "r") as f_handle:
-            data_paths = f_handle.read().strip()
+    # Parse files containing the search and save directories
+    with open(DATA_DIRS_LIST_PATH, "r") as f_handle:
+        data_paths = f_handle.read().strip()
 
     with open(SAVE_DIR_LIST_PATH, "r") as f_handle:
         save_dir = f_handle.read().strip()
@@ -86,7 +84,7 @@ def main(argv):
     test_classes = dict(inspect.getmembers(test_module, inspect.isclass))
 
     test_class_names = [test_class for test_class in test_classes if
-                    systemtesting.isValidTestClass(test_classes[test_class])]
+                    systemtesting.isValidTestClass(test_classes[test_class]) and test_class != "MantidSystemTest"]
 
     if not test_class_names:
         raise NameError(f"No test classes found in system test module: {test_module_name}.")
