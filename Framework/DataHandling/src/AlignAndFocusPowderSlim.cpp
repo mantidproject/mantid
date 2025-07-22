@@ -15,7 +15,9 @@
 #include "MantidDataHandling/LoadEventNexus.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/MaskWorkspace.h"
+#include "MantidDataObjects/SplittersWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidDataObjects/TimeSplitter.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
@@ -54,6 +56,8 @@ const std::string FILENAME("Filename");
 const std::string CAL_FILE("CalFileName");
 const std::string FILTER_TIMESTART("FilterByTimeStart");
 const std::string FILTER_TIMESTOP("FilterByTimeStop");
+const std::string SPLITTER_WS("SplitterWorkspace");
+const std::string SPLITTER_RELATIVE("RelativeTime");
 const std::string X_MIN("XMin");
 const std::string X_MAX("XMax");
 const std::string X_DELTA("XDelta");
@@ -152,6 +156,14 @@ void AlignAndFocusPowderSlim::init() {
       std::make_unique<Kernel::PropertyWithValue<double>>(PropertyNames::FILTER_TIMESTOP, EMPTY_DBL(),
                                                           Direction::Input),
       "To only include events before the provided stop time, in seconds (relative to the start of the run).");
+  declareProperty(
+      std::make_unique<API::WorkspaceProperty<API::Workspace>>(PropertyNames::SPLITTER_WS, "", Direction::Input,
+                                                               API::PropertyMode::Optional),
+      "Input workspace specifying \"splitters\", i.e. time intervals and targets for InputWorkspace filtering.");
+  declareProperty(
+      PropertyNames::SPLITTER_RELATIVE, false,
+      "Flag indicating whether in SplitterWorkspace the times are absolute or "
+      "relative. If true, they are relative to either the run start time or, if specified, FilterStartTime.");
   const std::vector<std::string> cal_exts{".h5", ".hd5", ".hdf", ".cal"};
   declareProperty(std::make_unique<FileProperty>(PropertyNames::CAL_FILE, "", FileProperty::OptionalLoad, cal_exts),
                   "The .cal file containing the position correction factors. Either this or OffsetsWorkspace needs to "
@@ -301,14 +313,34 @@ void AlignAndFocusPowderSlim::exec() {
   H5::H5File h5file(filename, H5F_ACC_RDONLY, NeXus::H5Util::defaultFileAcc());
 
   TimeROI roi;
+  const auto startOfRun = wksp->run().startTime();
 
   // filter by time
   double filter_time_start_sec = getProperty(PropertyNames::FILTER_TIMESTART);
   double filter_time_stop_sec = getProperty(PropertyNames::FILTER_TIMESTOP);
   if (filter_time_start_sec != EMPTY_DBL() || filter_time_stop_sec != EMPTY_DBL()) {
     this->progress(.15, "Creating time filtering");
-    is_time_filtered = true;
     g_log.information() << "Filtering pulses from " << filter_time_start_sec << " to " << filter_time_stop_sec << "s\n";
+
+    try {
+      roi.addROI(startOfRun + (filter_time_start_sec == EMPTY_DBL() ? 0.0 : filter_time_start_sec),
+                 startOfRun + filter_time_stop_sec); // start and stop times in seconds
+    } catch (const std::runtime_error &e) {
+      throw std::invalid_argument("Invalid time range for filtering: " + std::string(e.what()));
+    }
+  }
+
+  const auto splitter_roi = timeROIFromSplitterWorkspace(startOfRun);
+
+  if (roi.useAll())
+    roi = splitter_roi; // use the splitter ROI if no time filtering is specified
+  else if (!splitter_roi.useAll())
+    roi.update_intersection(splitter_roi); // otherwise intersect with the splitter ROI
+
+  if (roi.useAll()) {
+    pulse_indices.emplace_back(0, std::numeric_limits<size_t>::max());
+  } else {
+    is_time_filtered = true;
 
     // get pulse times from frequency log on workspace
     const auto frequency_log = dynamic_cast<const TimeSeriesProperty<double> *>(wksp->run().getProperty("frequency"));
@@ -317,23 +349,10 @@ void AlignAndFocusPowderSlim::exec() {
     }
     const auto pulse_times =
         std::make_unique<std::vector<Mantid::Types::Core::DateAndTime>>(frequency_log->timesAsVector());
-    const auto startOfRun = wksp->run().startTime();
 
-    try {
-      roi.addROI(startOfRun + (filter_time_start_sec == EMPTY_DBL() ? 0.0 : filter_time_start_sec),
-                 startOfRun + filter_time_stop_sec); // start and stop times in seconds
-    } catch (const std::runtime_error &e) {
-      throw std::invalid_argument("Invalid time range for filtering: " + std::string(e.what()));
-    }
-
-    // hard coded ROI for testing
-    // roi.addROI(startOfRun + 200., startOfRun + 210.);
     pulse_indices = roi.calculate_indices(*pulse_times);
     if (pulse_indices.empty())
       throw std::invalid_argument("No valid pulse time indices found for filtering");
-
-    g_log.information() << "Time filtering will use " << pulse_indices.size() / 2 << " time ranges, starting at "
-                        << pulse_indices.front().first << " and stopping at " << pulse_indices.back().second << '\n';
   }
 
   // Now we want to go through all the bankN_event entries
@@ -524,6 +543,33 @@ API::MatrixWorkspace_sptr AlignAndFocusPowderSlim::convertToTOF(API::MatrixWorks
   wksp = convertUnits->getProperty("OutputWorkspace");
 
   return wksp;
+}
+
+TimeROI AlignAndFocusPowderSlim::timeROIFromSplitterWorkspace(const Types::Core::DateAndTime &filterStartTime) {
+  API::Workspace_sptr tempws = this->getProperty("SplitterWorkspace");
+  DataObjects::SplittersWorkspace_sptr splittersWorkspace =
+      std::dynamic_pointer_cast<DataObjects::SplittersWorkspace>(tempws);
+  DataObjects::TableWorkspace_sptr splitterTableWorkspace =
+      std::dynamic_pointer_cast<DataObjects::TableWorkspace>(tempws);
+  API::MatrixWorkspace_sptr matrixSplitterWS = std::dynamic_pointer_cast<API::MatrixWorkspace>(tempws);
+
+  if (!splittersWorkspace && !splitterTableWorkspace && !matrixSplitterWS)
+    return TimeROI();
+
+  const bool isSplittersRelativeTime = this->getProperty("RelativeTime");
+
+  DataObjects::TimeSplitter timeSplitter;
+  if (splittersWorkspace) {
+    timeSplitter = DataObjects::TimeSplitter{splittersWorkspace};
+  } else if (splitterTableWorkspace) {
+    timeSplitter = DataObjects::TimeSplitter(splitterTableWorkspace,
+                                             isSplittersRelativeTime ? filterStartTime : DateAndTime::GPS_EPOCH);
+  } else {
+    timeSplitter =
+        DataObjects::TimeSplitter(matrixSplitterWS, isSplittersRelativeTime ? filterStartTime : DateAndTime::GPS_EPOCH);
+  }
+
+  return timeSplitter.getTimeROI(0);
 }
 
 } // namespace Mantid::DataHandling::AlignAndFocusPowderSlim
