@@ -609,13 +609,18 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
             # Create crosshair lines for each axes (except colorbars)
             self._crosshair_lines = {}
             for ax in self._axes_that_are_not_colour_bars():
+                # disable autoscale
                 ax.set_autoscalex_on(False)
                 ax.set_autoscaley_on(False)
-                hline = ax.axhline(color="r", lw=1.0, ls="-", visible=False, label="_nolegend_")
-                vline = ax.axvline(color="r", lw=1.0, ls="-", visible=False, label="_nolegend_")
+                # add animation
+                hline = ax.axhline(color="r", lw=1.0, ls="-", visible=False, animated=True, label="_nolegend_")
+                vline = ax.axvline(color="r", lw=1.0, ls="-", visible=False, animated=True, label="_nolegend_")
                 self._crosshair_lines[ax] = (hline, vline)
 
+            # add blitting
+            self._crosshair_background = None
             self._crosshair_cid = self.canvas.mpl_connect("motion_notify_event", self.crosshair)
+
         else:
             if hasattr(self, "_crosshair_cid"):
                 self.canvas.mpl_disconnect(self._crosshair_cid)
