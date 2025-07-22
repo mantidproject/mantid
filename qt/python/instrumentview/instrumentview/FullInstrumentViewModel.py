@@ -7,7 +7,7 @@
 from instrumentview.Detectors import DetectorInfo
 import instrumentview.Projections.SphericalProjection as iv_spherical
 import instrumentview.Projections.CylindricalProjection as iv_cylindrical
-
+import instrumentview.Projections.SideBySide as iv_side_by_side
 from mantid.dataobjects import Workspace2D
 from mantid.simpleapi import CreateDetectorTable
 import numpy as np
@@ -15,6 +15,16 @@ import numpy as np
 
 class FullInstrumentViewModel:
     """Model for the Instrument View Window. Will calculate detector positions, indices, and integrated counts that give the colours"""
+
+    _FULL_3D = "3D"
+    _SPHERICAL_X = "Spherical X"
+    _SPHERICAL_Y = "Spherical Y"
+    _SPHERICAL_Z = "Spherical Z"
+    _CYLINDRICAL_X = "Cylindrical X"
+    _CYLINDRICAL_Y = "Cylindrical Y"
+    _CYLINDRICAL_Z = "Cylindrical Z"
+    _SIDE_BY_SIDE = "Side by Side"
+    _PROJECTION_OPTIONS = [_SPHERICAL_X, _SPHERICAL_Y, _SPHERICAL_Z, _CYLINDRICAL_X, _CYLINDRICAL_Y, _CYLINDRICAL_Z, _SIDE_BY_SIDE]
 
     _sample_position = np.array([0, 0, 0])
     _source_position = np.array([0, 0, 0])
@@ -179,12 +189,20 @@ class FullInstrumentViewModel:
             picked_info.append(det_info)
         return picked_info
 
-    def calculate_projection(self, is_spherical: bool, axis: list[int]):
-        """Calculate the 2D projection with the specified axis. Can be either cylindrical or spherical."""
-        projection = (
-            iv_spherical.SphericalProjection(self._sample_position, self._root_position, self._detector_positions, np.array(axis))
-            if is_spherical
-            else iv_cylindrical.CylindricalProjection(self._sample_position, self._root_position, self._detector_positions, np.array(axis))
-        )
+    def calculate_projection(self, projection_option: str, axis: list[int]):
+        """Calculate the 2D projection with the specified axis. Can be cylindrical, spherical, or side-by-side."""
+        if projection_option == self._SIDE_BY_SIDE:
+            projection = iv_side_by_side.SideBySide(
+                self._workspace, self._detector_ids, self._sample_position, self._root_position, self._detector_positions, np.array(axis)
+            )
+        elif projection_option.startswith("Spherical"):
+            projection = iv_spherical.SphericalProjection(self._sample_position, self._root_position, self._detector_positions, np.array(axis))
+        elif projection_option.startswith("Cylindrical"):
+            projection = iv_cylindrical.CylindricalProjection(
+                self._sample_position, self._root_position, self._detector_positions, np.array(axis)
+            )
+        else:
+            raise ValueError(f"Unknown projection type: {projection_option}")
+
         self._detector_projection_positions[:, :2] = projection.positions()  # Assign only x and y coordinate
         return self._detector_projection_positions

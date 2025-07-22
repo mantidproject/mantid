@@ -18,16 +18,7 @@ from instrumentview.InstrumentViewADSObserver import InstrumentViewADSObserver
 
 class FullInstrumentViewPresenter:
     """Presenter for the Instrument View window"""
-
-    _FULL_3D = "3D"
-    _SPHERICAL_X = "Spherical X"
-    _SPHERICAL_Y = "Spherical Y"
-    _SPHERICAL_Z = "Spherical Z"
-    _CYLINDRICAL_X = "Cylindrical X"
-    _CYLINDRICAL_Y = "Cylindrical Y"
-    _CYLINDRICAL_Z = "Cylindrical Z"
-    _PROJECTION_OPTIONS = [_FULL_3D, _SPHERICAL_X, _SPHERICAL_Y, _SPHERICAL_Z, _CYLINDRICAL_X, _CYLINDRICAL_Y, _CYLINDRICAL_Z]
-
+    
     def __init__(self, view: FullInstrumentViewWindow, model: FullInstrumentViewModel):
         """For the given workspace, use the data from the model to plot the detectors. Also include points at the origin and
         any monitors."""
@@ -71,7 +62,7 @@ class FullInstrumentViewPresenter:
             default_index = possible_returns.index(default_projection)
         except ValueError:
             default_index = 0
-        return default_index, self._PROJECTION_OPTIONS
+        return default_index, self._model._PROJECTION_OPTIONS
 
     def on_tof_limits_updated(self) -> None:
         """When TOF limits are changed, read the new limits and tell the presenter to update the colours accordingly"""
@@ -91,7 +82,7 @@ class FullInstrumentViewPresenter:
 
     def on_projection_option_selected(self, selected_index: int) -> None:
         """Update the projection based on the selected option."""
-        projection_type = self._PROJECTION_OPTIONS[selected_index]
+        projection_type = self._model._PROJECTION_OPTIONS[selected_index]
 
         if projection_type.startswith("3D"):
             # Plot orange sphere at the origin
@@ -115,10 +106,12 @@ class FullInstrumentViewPresenter:
             axis = [0, 1, 0]
         elif projection_type.endswith("Z"):
             axis = [0, 0, 1]
+        elif projection_type == self._model._SIDE_BY_SIDE:
+            axis = [0, 0, 1]
         else:
             raise ValueError(f"Unknown projection type {projection_type}")
 
-        self._model.calculate_projection(is_spherical, axis)
+        self._model.calculate_projection(projection_type, axis)
         self._view.disable_rectangle_picking_checkbox()
         self._update_view_main_plotter(self._model.detector_projection_positions, is_projection=True)
 
