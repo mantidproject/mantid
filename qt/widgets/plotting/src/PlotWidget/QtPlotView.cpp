@@ -30,22 +30,20 @@ void QtPlotView::setScaleSymLog(const AxisID axisID, const double linthresh) {
 }
 
 void QtPlotView::setScale(const AxisID axisID, const std::string &scale,
-                          const std::unordered_map<QString, QVariant> &additionalProperties) {
+                          const QHash<QString, QVariant> &additionalProperties) {
   QString addPropID;
   switch (axisID) {
   case AxisID::XBottom:
-    addPropID = "__ADD_X_";
+    addPropID = "xscale_opts";
     m_axisProperties[QString("xscale")] = QVariant(scale.c_str());
     break;
   case AxisID::YLeft:
-    addPropID = "__ADD_Y_";
+    addPropID = "yscale_opts";
     m_axisProperties[QString("yscale")] = QVariant(scale.c_str());
     break;
   }
   if (!additionalProperties.empty()) {
-    for (auto prop : additionalProperties) {
-      m_axisProperties[addPropID + prop.first] = prop.second;
-    }
+    m_axisProperties[addPropID] = additionalProperties;
   }
 }
 
