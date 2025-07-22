@@ -73,7 +73,6 @@ matplotlib:
 mslice:
   - '>=2.12'
 
-
 ninja:
   - '>=1.10.2'
 

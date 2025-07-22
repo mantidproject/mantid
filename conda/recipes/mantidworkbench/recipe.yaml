@@ -1,0 +1,89 @@
+schema_version: 1
+
+context:
+  # dynamic versioning hasn't been figured out
+  version: 1.2.3
+  # load_setup_py_data() | get('version', '0.0.0')
+
+package:
+  name: mantidworkbench
+  version: ${{ version }}
+
+source:
+  path: ../../../
+
+build:
+  number: 0
+  python:
+    entry_points:
+      - workbench = workbench.app.mantidworkbench_launch_wrapper:launch
+      - mantidworkbench = workbench.app.mantidworkbench_launch_wrapper:launch
+
+requirements:
+  build:
+    - ${{ compiler("cxx") }}
+    - ninja ${{ ninja }}
+    - cmake ${{ cmake }}
+    - git
+    - if: build_platform != target_platform
+      then: python ${{ python }}
+    - if: build_platform != target_platform
+      then: cross-python_${{ target_platform }}
+    - if: build_platform != target_platform
+      then: setuptools
+    - if: build_platform != target_platform
+      then: numpy ${{ numpy }}
+    - if: build_platform != target_platform
+      then: pyqt ${{ pyqt }}
+  host:
+    - setuptools
+    - mantidqt == ${{ version }}
+    - python ${{ python }}
+    - versioningit ${{ versioningit }}
+    - if: linux
+      then:
+        - libgl-devel
+        - xorg-libxxf86vm
+        - xorg-libx11
+        - xorg-xorgproto
+
+  run:
+    - ipykernel
+    - if: linux
+      then: lz4
+    - psutil ${{ psutil }}
+    - ${{ pin_compatible("python", upper_bound="x.x") }}
+    - matplotlib ${{ matplotlib }}
+    - if: osx
+      then: python.app
+    - if: linux
+      then: pystack
+    - if: win
+      then: gdk-pixbuf ${{ gdk_pixbuf }}
+    - pyvista
+    - pyvistaqt
+    - superqt
+    - qtconsole ${{ qtconsole }}
+    - ${{ pin_compatible("setuptools", upper_bound="x.x") }}
+    - mantiddocs == ${{ version }}
+  run_constrained:
+    - mslice ${{ mslice }}
+  ignore_run_exports:
+    from_package:
+      - ${{ compiler('cxx') }}
+
+tests:
+  - python:
+      imports:
+        - workbench
+
+about:
+  license: GPL-3.0-or-later
+  summary: MantidWorkbench provides a graphical user interface to the Mantid framework, supporting high-performance computing and visualisation of materials science data.
+  homepage: https://github.com/mantidproject/mantid
+
+extra:
+  recipe-maintainers:
+    - thomashampson
+    - sf1919
+    - martyngigg

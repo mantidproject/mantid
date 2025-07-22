@@ -1,6 +1,6 @@
 #!/bin/bash -ex
 
-# This script expects to be in a POSIX environment. Uses boa to build the suite of
+# This script expects to be in a POSIX environment. Uses rattler to build the suite of
 # mantid packages. You must pass flags to specify which packages to build. If building
 # a package dependent on another one it will either install a locally built package
 # (if present from a previous build step) or build and produce that package too.
@@ -144,16 +144,16 @@ if [[ $ENABLE_BUILD_MANTID == true ]]; then
     rattler-build build -r ./mantid/ -m ./conda_build_config.yaml --output-dir $CONDA_BLD_PATH $EXTRA_BUILD_OPTIONS
 fi
 if [[ $ENABLE_BUILD_QT == true ]]; then
-    conda mambabuild ./mantidqt/ $EXTRA_BUILD_OPTIONS
+    rattler-build build -r ./mantidqt/ -m ./conda_build_config.yaml --output-dir $CONDA_BLD_PATH $EXTRA_BUILD_OPTIONS
 fi
 if [[ $ENABLE_BUILD_DOCS == true ]]; then
-    conda mambabuild ./mantiddocs/ $EXTRA_BUILD_OPTIONS -c neutrons
+    rattler-build build -r ./mantiddocs/ -m ./conda_build_config.yaml --output-dir $CONDA_BLD_PATH -c neutrons $EXTRA_BUILD_OPTIONS
 fi
 if [[ $ENABLE_BUILD_WORKBENCH == true ]]; then
     if [[ $BUILD_WORKBENCH_WITH_DOCS == false ]]; then
 	export INCLUDE_MANTIDDOCS=False
     fi
-    conda mambabuild ./mantidworkbench/ -c mantid/label/main $EXTRA_BUILD_OPTIONS
+    rattler-build build -r ./mantidworkbench/ -m ./conda_build_config.yaml --output-dir $CONDA_BLD_PATH $EXTRA_BUILD_OPTIONS
 fi
 
 # elapsed time with second resolution
