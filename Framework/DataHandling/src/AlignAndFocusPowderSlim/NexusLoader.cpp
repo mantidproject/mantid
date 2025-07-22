@@ -2,7 +2,7 @@
 #include "MantidNexus/H5Util.h"
 #include <ranges>
 
-namespace Mantid::DataHandling {
+namespace Mantid::DataHandling::AlignAndFocusPowderSlim {
 
 NexusLoader::NexusLoader(const bool is_time_filtered, const std::vector<std::pair<size_t, size_t>> &pulse_indices)
     : m_is_time_filtered(is_time_filtered), m_pulse_indices(pulse_indices) {}
@@ -71,7 +71,7 @@ std::stack<std::pair<uint64_t, uint64_t>> NexusLoader::getEventIndexRanges(H5::G
 }
 
 void NexusLoader::loadEventIndex(H5::Group &event_group, std::unique_ptr<std::vector<uint64_t>> &data) {
-  auto index_SDS = event_group.openDataSet("event_index");
+  auto index_SDS = event_group.openDataSet(NxsFieldNames::INDEX_ID);
   NeXus::H5Util::readArray1DCoerce(index_SDS, *data);
 }
 
@@ -81,4 +81,4 @@ template void NexusLoader::loadData<uint32_t>(H5::DataSet &SDS, std::unique_ptr<
 template void NexusLoader::loadData<float>(H5::DataSet &SDS, std::unique_ptr<std::vector<float>> &data,
                                            const std::vector<size_t> &offsets, const std::vector<size_t> &slabsizes);
 
-}; // namespace Mantid::DataHandling
+}; // namespace Mantid::DataHandling::AlignAndFocusPowderSlim

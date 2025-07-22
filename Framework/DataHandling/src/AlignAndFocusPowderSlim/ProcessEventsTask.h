@@ -4,7 +4,7 @@
 #include <tbb/tbb.h>
 #include <vector>
 
-namespace Mantid::DataHandling {
+namespace Mantid::DataHandling::AlignAndFocusPowderSlim {
 
 class ProcessEventsTask {
 
@@ -27,4 +27,4 @@ private:
   const BankCalibration *m_calibration;
   const std::vector<double> *m_binedges;
 };
-} // namespace Mantid::DataHandling
+} // namespace Mantid::DataHandling::AlignAndFocusPowderSlim

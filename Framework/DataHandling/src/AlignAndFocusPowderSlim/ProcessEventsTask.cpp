@@ -1,6 +1,6 @@
 #include "ProcessEventsTask.h"
 
-namespace Mantid::DataHandling {
+namespace Mantid::DataHandling::AlignAndFocusPowderSlim {
 
 ProcessEventsTask::ProcessEventsTask(const std::vector<uint32_t> *detids, const std::vector<float> *tofs,
                                      const BankCalibration *calibration, const std::vector<double> *binedges)
@@ -47,4 +47,4 @@ void ProcessEventsTask::join(const ProcessEventsTask &other) {
   std::transform(y_temp.begin(), y_temp.end(), other.y_temp.cbegin(), y_temp.begin(), std::plus<>{});
 }
 
-} // namespace Mantid::DataHandling
+} // namespace Mantid::DataHandling::AlignAndFocusPowderSlim

@@ -5,8 +5,7 @@
 #include <set>
 #include <vector>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling::AlignAndFocusPowderSlim {
 
 constexpr double IGNORE_PIXEL{1.e6};
 
@@ -22,5 +21,4 @@ private:
   std::vector<double> m_calibration;
   const detid_t m_detid_offset;
 };
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling::AlignAndFocusPowderSlim

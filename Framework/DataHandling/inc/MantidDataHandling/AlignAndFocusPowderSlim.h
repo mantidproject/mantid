@@ -11,8 +11,7 @@
 #include "MantidDataHandling/DllConfig.h"
 #include "MantidGeometry/IDTypes.h"
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling::AlignAndFocusPowderSlim {
 
 /** AlignAndFocusPowderSlim : TODO: DESCRIPTION
  */
@@ -49,6 +48,4 @@ private:
   std::vector<int64_t> loadSize;
   std::vector<std::pair<size_t, size_t>> pulse_indices;
 };
-
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling::AlignAndFocusPowderSlim
