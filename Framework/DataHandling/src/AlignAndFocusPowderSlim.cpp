@@ -96,6 +96,20 @@ double getFocussedPostion(const detid_t detid, const std::vector<double> &difc_f
   }
 }
 
+std::vector<double> calculate_difc_focused(const double l1, const std::vector<double> &l2s,
+                                           const std::vector<double> &polars) {
+  constexpr double deg2rad = std::numbers::pi_v<double> / 180.;
+
+  std::vector<double> difc;
+
+  std::transform(l2s.cbegin(), l2s.cend(), polars.cbegin(), std::back_inserter(difc),
+                 [l1, deg2rad](const auto &l2, const auto &polar) {
+                   return 1. / Kernel::Units::tofToDSpacingFactor(l1, l2, deg2rad * polar, 0.);
+                 });
+
+  return difc;
+}
+
 } // namespace
 
 // Register the algorithm into the AlgorithmFactory
@@ -119,23 +133,6 @@ const std::string AlignAndFocusPowderSlim::summary() const {
 }
 
 const std::vector<std::string> AlignAndFocusPowderSlim::seeAlso() const { return {"AlignAndFocusPowderFromFiles"}; }
-
-//----------------------------------------------------------------------------------------------
-namespace { // anonymous
-std::vector<double> calculate_difc_focused(const double l1, const std::vector<double> &l2s,
-                                           const std::vector<double> &polars) {
-  constexpr double deg2rad = std::numbers::pi_v<double> / 180.;
-
-  std::vector<double> difc;
-
-  std::transform(l2s.cbegin(), l2s.cend(), polars.cbegin(), std::back_inserter(difc),
-                 [l1, deg2rad](const auto &l2, const auto &polar) {
-                   return 1. / Kernel::Units::tofToDSpacingFactor(l1, l2, deg2rad * polar, 0.);
-                 });
-
-  return difc;
-}
-} // anonymous namespace
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
