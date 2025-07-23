@@ -6,13 +6,32 @@
 
 # SPDX - License - Identifier: GPL - 3.0 +
 from abc import ABCMeta, abstractmethod
+from functools import wraps
 from pathlib import Path
-from typing import Sequence
+from typing import Callable, Sequence
+
+import numpy as np
+from pydantic import ConfigDict, validate_call, with_config
+from typing_extensions import TypedDict
 
 from mantid.kernel import logger
 from mantid.kernel import Atom
 import abins
+from abins.abinsdata import AbinsData
+from abins.atomsdata import AtomData
 from abins.constants import MASS_EPS
+
+
+@with_config(ConfigDict(arbitrary_types_allowed=True))
+class AbinsDataDict(TypedDict):
+    """Dict form of AbinsData used for caching"""
+
+    frequencies: np.ndarray
+    weights: np.ndarray
+    k_vectors: np.ndarray
+    atomic_displacements: np.ndarray  # indexed: (kpt, atom, mode, direction)
+    unit_cell: np.ndarray  # 3x3 array, Å
+    atoms: dict[str, AtomData]
 
 
 # Make it easier to inspect program classes by cleaning up result from str()
@@ -30,7 +49,7 @@ class AbInitioLoader(metaclass=NamedAbstractClass):
     read_formatted_data() if necessary and caching the results.
     """
 
-    def __init__(self, input_ab_initio_filename: str = None, cache_directory: Path | None = None):
+    def __init__(self, input_ab_initio_filename: str | None = None, cache_directory: Path | None = None):
         """An object for loading phonon data from ab initio output files"""
 
         if not isinstance(input_ab_initio_filename, str):
@@ -51,89 +70,19 @@ class AbInitioLoader(metaclass=NamedAbstractClass):
     @abstractmethod
     def read_vibrational_or_phonon_data(self) -> abins.AbinsData:
         """
-        This method is different for different ab initio programs. It has to be overridden by inheriting class.
-        This method reads vibrational or phonon data produced by an ab initio program.
-        This method should do the following:
+        Read external data to an AbinsData object. This method must be implemented for each format supported by AbINS.
 
-          1) Open file with vibrational or phonon data (CASTEP: foo.phonon). Name of a file is
-             accessed via self._clerk.get_input_filename(). There must be no spaces in the name of a
-             file. Extension of a file (part of a name after '.') is arbitrary.
+        Implementations of this method should always be decorated with ``@AbInitioLoader.abinsdata_saver``, which will use the object
+        attributes _ab_initio_program and _clerk to cache the AbinsData from this method to .hdf5.
 
-          2) Method should read from an ab initio file information about frequencies, atomic displacements,
-          k-point vectors, weights of k-points and ions.
+        Implementations should do the following:
 
-          3) Method should reconstruct data for symmetry equivalent k-points
-             (protected method _recover_symmetry_points).
+          1) Open file with vibrational or phonon data (e.g. "foo.phonon" for CASTEP). The filename is
+             accessed via self._clerk.get_input_filename().
 
-             **Notice: this step is not implemented now. At the moment only Gamma point calculations are supported.**
+          2) Read information about frequencies, atomic displacements, k-point vectors, weights of k-points and ions.
 
-          4) Method should determine symmetry equivalent atoms
-
-              **Notice: this step is not implemented now.**
-
-          5) Method should calculate hash of a file with vibrational or phonon data (protected method _calculateHash).
-
-          6) Method should store vibrational or phonon data in an hdf file (using inherited method
-             save_ab_initio_data()). The name of an hdf file is foo.hdf5 (CASTEP: foo.phonon -> foo.hdf5). In order to
-             save the data to hdf file the following fields should be set:
-
-                    self._hdf_filename
-                    self._group_name
-                    self._attributes
-                    self._datasets
-
-              The datasets should be a dictionary with the following entries:
-
-                        "frequencies"  - frequencies for all k-points grouped in one numpy.array in cm^-1
-
-                        "weights"      - weights of all k-points in one numpy.array
-
-                        "k_vectors"    - all k-points in one numpy array
-
-                                         **Notice: both symmetry equivalent and inequivalent points should be stored; at
-                                          the moment only Gamma point calculations are supported**
-
-                        "atomic_displacements" - atomic displacements for all atoms and all k-points in one numpy array
-                                                 indexed: (kpt, atom, mode, direction)
-
-                        "unit_cell"      -   numpy array with unit cell vectors in Angstroms
-
-              The following structured datasets should be also defined:
-
-                        "atoms"          - Python dictionary with the information about ions. Each entry in the
-                                           dictionary has the following format 'atom_n'. Here n means number of
-                                           atom in the unit cell.
-
-                                           Each entry 'atom_n' in the  dictionary is a dictionary with the following
-                                           entries:
-
-                                               "symbol" - chemical symbol of the element (for example hydrogen -> H)
-
-                                               "sort"   - defines symmetry equivalent atoms, e.g, atoms with the same
-                                                          sort are symmetry equivalent
-
-                                                          **Notice at the moment this parameter is not functional
-                                                            in LoadCastep**
-
-                                               "coord" - equilibrium position of atom in Angstroms;
-                                                         it has a form of numpy array with three floats
-
-                                               "mass" - mass of atom
-
-              The attributes should be a dictionary with the following entries:
-
-                        "hash"  - hash of a file with the vibrational or phonon data. It should be a string
-                                  representation of hash.
-
-                        "ab_initio_program" - name of the ab initio program which was used to obtain vibrational or
-                                              phonon data (for CASTEP -> CASTEP).
-
-                        "filename" - name of input ab initio file
-
-          For more details about these fields please look at the documentation of abins.IO class.
-
-        :returns: Method should return an object of type AbinsData.
-
+          3) Construct and return a valid AbinsData
         """
         ...
 
@@ -145,22 +94,26 @@ class AbInitioLoader(metaclass=NamedAbstractClass):
         data = self._clerk.load(list_of_datasets=["frequencies", "weights", "k_vectors", "atomic_displacements", "unit_cell", "atoms"])
         datasets = data["datasets"]
 
-        loaded_data = {
-            "frequencies": datasets["frequencies"],
-            "weights": datasets["weights"],
-            "k_vectors": datasets["k_vectors"],
-            "atomic_displacements": datasets["atomic_displacements"],
-            "unit_cell": datasets["unit_cell"],
-            "atoms": datasets["atoms"],
-        }
+        loaded_data = AbinsDataDict(
+            frequencies=datasets["frequencies"],
+            weights=datasets["weights"],
+            k_vectors=datasets["k_vectors"],
+            atomic_displacements=datasets["atomic_displacements"],
+            unit_cell=datasets["unit_cell"],
+            atoms=datasets["atoms"],
+        )
 
         return self._rearrange_data(data=loaded_data)
 
     # Internal method for use by child classes which read ab initio phonon data
     @staticmethod
-    def _rearrange_data(data: dict) -> abins.AbinsData:
+    @validate_call
+    def _rearrange_data(data: AbinsDataDict) -> abins.AbinsData:
         """
-        This method rearranges data read from input ab initio file.
+        This method rearranges data to an AbinsData from an equivalent dict format
+
+        This dictionary format exists for use with HDF caching, but is also a legacy implementation detail of Abins loaders.
+
         :param data: dictionary with the data to rearrange
         """
 
@@ -179,13 +132,43 @@ class AbInitioLoader(metaclass=NamedAbstractClass):
         atoms = abins.AtomsData(data["atoms"])
         return abins.AbinsData(k_points_data=k_points, atoms_data=atoms)
 
-    def save_ab_initio_data(self, data: dict) -> None:
+    @staticmethod
+    def abinsdata_saver(read_function: Callable[..., AbinsData]) -> Callable[..., AbinsData]:
+        """Decorated function also passes return value to self.save_ab_initio_data
+
+        read_function should return an object of type abins_data
+
+        The class containing the wrapped method must have attributes "_ab_initio_program" (a str) and "_clerk" (instance of abins.io.IO).
+
+        """
+
+        @wraps(read_function)
+        def wrapper(self, *args, **kwargs) -> AbinsData:
+            abins_data = read_function(self, *args, **kwargs)
+            self._save_ab_initio_data(abins_data=abins_data)
+            return abins_data
+
+        return wrapper
+
+    def _save_ab_initio_data(self, abins_data: AbinsData) -> None:
         """
         Saves ab initio data to an HDF5 file.
         :param data: dictionary with data to be saved.
         """
-        for name in data:
-            self._clerk.add_data(name=name, value=data[name])
+        atoms_data = abins_data.get_atoms_data()
+        kpoints_data = abins_data.get_kpoints_data()
+
+        data = AbinsDataDict(
+            frequencies=kpoints_data._frequencies,
+            weights=kpoints_data._weights,
+            k_vectors=kpoints_data._k_vectors,
+            atomic_displacements=kpoints_data._atomic_displacements,
+            unit_cell=kpoints_data.unit_cell,
+            atoms=atoms_data.extract(),
+        )
+
+        for key, value in data.items():
+            self._clerk.add_data(name=key, value=value)
         self._clerk.add_file_attributes()
         self._clerk.add_attribute("ab_initio_program", self._ab_initio_program)
         self._clerk.save()

@@ -17,6 +17,7 @@ set(TEST_PY_FILES
     AbinsLoadDMOL3InternalsTest.py
     AbinsLoadGAUSSIANTest.py
     AbinsLoadJSONTest.py
+    AbinsLoadMoldenTest.py
     AbinsLoadPhonopyTest.py
     AbinsLoadVASPTest.py
     AbinsPowderDataTest.py
