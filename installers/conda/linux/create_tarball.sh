@@ -144,6 +144,7 @@ echo "Creating conda environment in '$bundle_conda_prefix'"
 "$CONDA_EXE" create --quiet --prefix "$bundle_conda_prefix" --copy \
   --channel "$conda_channel" --channel conda-forge --channel $mantid_channel --yes \
   mantidworkbench \
+  mslice \
   jq  # used for processing the version string
 echo
 
