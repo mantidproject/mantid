@@ -10,6 +10,7 @@ import numpy as np
 from unittest.mock import patch, MagicMock, mock_open, call
 from mantid.api import AnalysisDataService as ADS
 from mantid.simpleapi import CreateSampleWorkspace, SetGoniometer, SetSample
+from Engineering.common.xml_shapes import get_cube_xml
 
 from Engineering.texture.correction.correction_model import TextureCorrectionModel
 
@@ -55,16 +56,6 @@ class TextureCorrectionModelTest(unittest.TestCase):
     def tearDown(self):
         if ADS.doesExist(self.ws_name):
             ADS.remove(self.ws_name)
-
-    def get_cube_xml(self, name, side_len):
-        return f"""
-        <cuboid id='{name}'> \
-        <height val='{side_len}'  /> \
-        <width val='{side_len}' />  \
-        <depth  val='{side_len}' />  \
-        <centre x='0.0' y='0.0' z='0.0'  />  \
-        </cuboid>  \
-        <algebra val='{name}' /> \\ """
 
     def run_euler_gonio_test(self, test_wss, txt_data, euler_scheme, euler_sense, target_calls, mock_set_gonio):
         mock_set_gonio.reset_mock()
@@ -197,7 +188,7 @@ class TextureCorrectionModelTest(unittest.TestCase):
         # Create a reference ws with a goniometer set and a shape
         CreateSampleWorkspace(OutputWorkspace=self.ws_name)
         SetGoniometer(self.ws_name, Axis0="30,0,1,0,1", Axis1="15,0,0,1,1", Axis2="30,0,1,0,1")
-        SetSample(self.ws_name, Geometry={"Shape": "CSG", "Value": self.get_cube_xml("cube", 10.0)})
+        SetSample(self.ws_name, Geometry={"Shape": "CSG", "Value": get_cube_xml("cube", 10.0)})
 
         # Create another ws with a different Goniometer set to copy the shape to
         other_ws = "copy_to_ws"
@@ -210,7 +201,7 @@ class TextureCorrectionModelTest(unittest.TestCase):
         non_copy_str = "non_copy"
         uncopy_ws = CreateSampleWorkspace(OutputWorkspace=non_copy_str)
         SetGoniometer(non_copy_str, Axis0="20,0,1,0,1", Axis1="35,0,0,1,1", Axis2="10,0,1,0,1")
-        SetSample(non_copy_str, Geometry={"Shape": "CSG", "Value": self.get_cube_xml("cube", 10.0)})
+        SetSample(non_copy_str, Geometry={"Shape": "CSG", "Value": get_cube_xml("cube", 10.0)})
         ref_shape = uncopy_ws.sample().getShape()
         ref_mat = uncopy_ws.getRun().getGoniometer().getR()
 
@@ -298,7 +289,7 @@ class TextureCorrectionModelTest(unittest.TestCase):
     @patch(correction_model_path + ".TextureCorrectionModel._read_xml")
     def test_define_gauge_vol_for_custom(self, mock_read_xml, mock_def_gauge_vol):
         preset = "Custom Shape"
-        expected_str = self.get_cube_xml("some-gv", 4.0)
+        expected_str = get_cube_xml("some-gv", 0.004)
         mock_read_xml.return_value = expected_str
         self.model.define_gauge_volume(self.ws_name, preset=preset, custom="gv.xml")
         mock_def_gauge_vol.assert_called_once_with(self.ws_name, expected_str)

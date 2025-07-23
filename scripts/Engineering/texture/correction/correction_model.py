@@ -65,16 +65,13 @@ class TextureCorrectionModel:
             ref_ws = ADS.retrieve(ref_ws_name)
             trans_mat = ref_ws.getRun().getGoniometer().getR()
 
-            _tmp_ws = CloneWorkspace(ref_ws, OutputWorkspace="_tmp_ws")
+            _tmp_ws = CloneWorkspace(ref_ws, OutputWorkspace="_tmp_ws", StoreInADS=False)
             _tmp_ws.getRun().getGoniometer().setR(np.linalg.inv(trans_mat))
 
             CopySample(InputWorkspace=ref_ws, OutputWorkspace=_tmp_ws, CopyName=False, CopyEnvironment=False, CopyLattice=False)
 
             for ws in wss:
                 CopySample(InputWorkspace=_tmp_ws, OutputWorkspace=ws, CopyName=False, CopyEnvironment=False, CopyLattice=False)
-
-            # remove the tmp ws
-            ADS.remove("_tmp_ws")
         else:
             # if is_ref flag then we want to take this baked orientation forward
             for ws in wss:
@@ -142,7 +139,6 @@ class TextureCorrectionModel:
     def calc_absorption(self, ws, mc_param_str):
         method_dict = self._param_str_to_dict(mc_param_str) if mc_param_str else {}  # allow no kwargs to be given
         temp_ws = ConvertUnits(ws, Target="Wavelength")
-        # Scale(InputWorkspace=temp_ws, OutputWorkspace=temp_ws, Factor=1, Operation="Add")
         method_dict["OutputWorkspace"] = "_abs_corr"
         MonteCarloAbsorption(temp_ws, **method_dict)
 
@@ -170,7 +166,7 @@ class TextureCorrectionModel:
 
         ws = ADS.retrieve(ws_name)
         # extract thetas from detector table
-        det_tab = CreateDetectorTable(InputWorkspace=ws, DetectorTableWorkspace="det_tab")
+        det_tab = CreateDetectorTable(InputWorkspace=ws, DetectorTableWorkspace="det_tab", StoreInADS=False)
         thetas = np.deg2rad(det_tab.column("Theta"))
 
         # estimate per spectra divergence
@@ -182,14 +178,11 @@ class TextureCorrectionModel:
         y_shape = ws.readY(0).shape
         [_div_corr.setY(i, np.ones(y_shape) * div[i]) for i in range(num_spec)]
 
-        # clear ads
-        ADS.remove("det_tab")
-
     def apply_corrections(
         self, ws, out_ws, calibration_group, root_dir, abs_corr=1.0, div_corr=1.0, rb_num=None, remove_ws_after_processing=False
     ):
         ws = ADS.retrieve(ws)
-        temp_ws = ConvertUnits(ws, Target="dSpacing")
+        temp_ws = ConvertUnits(ws, Target="dSpacing", StoreInADS=False)
         if isinstance(abs_corr, str):
             abs_ws = ConvertUnits(ADS.retrieve(abs_corr), Target="dSpacing")
             temp_ws = temp_ws / abs_ws
@@ -207,7 +200,6 @@ class TextureCorrectionModel:
         if remove_ws_after_processing:
             # remove output ws from ADS to free up memory
             ADS.remove(out_ws)
-            ADS.remove("temp_ws")
             if isinstance(abs_corr, str):
                 ADS.remove(abs_corr)
             if isinstance(div_corr, str):

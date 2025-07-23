@@ -10,6 +10,7 @@ from Engineering.EnginX import EnginX
 from mantid.geometry import CrystalStructure
 from mantid.api import AnalysisDataService as ADS
 from typing import Optional, Sequence, Union
+from collections.abc import Iterable
 
 # -------- Utility --------------------------------
 
@@ -40,21 +41,8 @@ def mk(dir_path: str):
 
 
 class TextureInstrument(EnginX):
-    def __init__(
-        self,
-        vanadium_run: str,
-        focus_runs: Sequence[str],
-        save_dir: str,
-        full_inst_calib_path: str,
-        prm_path: Optional[str] = None,
-        ceria_run: Optional[str] = None,
-        group: Optional[GROUP] = None,
-        groupingfile_path: Optional[str] = None,
-        spectrum_num: Optional[str] = None,
-    ) -> None:
-        super().__init__(
-            vanadium_run, focus_runs, save_dir, full_inst_calib_path, prm_path, ceria_run, group, groupingfile_path, spectrum_num
-        )
+    # for now, just a wrapper to set up for inheriting from different instruments
+    pass
 
 
 # -------- Focus Script Logic--------------------------------
@@ -483,13 +471,7 @@ def make_iterable(param):
 
     param: parameter value
     """
-    return (
-        param
-        if (isinstance(param, list) or isinstance(param, tuple))
-        else [
-            param,
-        ]
-    )
+    return param if isinstance(param, Iterable) else [param]
 
 
 def create_pf_loop(
@@ -548,52 +530,32 @@ def create_pf_loop(
         hkl = hkls if len(param_wss) == 1 else hkls[iparam]
 
         for readout_column in make_iterable(readout_columns):
+            kwargs = {
+                "wss": wss,
+                "params": params,
+                "include_scatt_power": include_scatt_power,
+                "cif": cif,
+                "lattice": lattice,
+                "space_group": space_group,
+                "basis": basis,
+                "hkl": hkl,
+                "readout_column": readout_column,
+                "dir1": dir1,
+                "dir2": dir2,
+                "dir3": dir3,
+                "dir_names": dir_names,
+                "kernel": kernel,
+                "scat_vol_pos": scat_vol_pos,
+                "chi2_thresh": chi2_thresh,
+                "peak_thresh": peak_thresh,
+                "root_dir": save_root,
+                "exp_name": exp_name,
+                "projection_method": projection_method,
+            }
             if scatter == "both":
                 for scat in (True, False):
-                    create_pf(
-                        wss=wss,
-                        params=params,
-                        include_scatt_power=include_scatt_power,
-                        cif=cif,
-                        lattice=lattice,
-                        space_group=space_group,
-                        basis=basis,
-                        hkl=hkl,
-                        readout_column=readout_column,
-                        dir1=dir1,
-                        dir2=dir2,
-                        dir3=dir3,
-                        dir_names=dir_names,
-                        scatter=scat,
-                        kernel=kernel,
-                        scat_vol_pos=scat_vol_pos,
-                        chi2_thresh=chi2_thresh,
-                        peak_thresh=peak_thresh,
-                        root_dir=save_root,
-                        exp_name=exp_name,
-                        projection_method=projection_method,
-                    )
+                    kwargs["scatter"] = scat
+                    create_pf(**kwargs)
             else:
-                create_pf(
-                    wss=wss,
-                    params=params,
-                    include_scatt_power=include_scatt_power,
-                    cif=cif,
-                    lattice=lattice,
-                    space_group=space_group,
-                    basis=basis,
-                    hkl=hkl,
-                    readout_column=readout_column,
-                    dir1=dir1,
-                    dir2=dir2,
-                    dir3=dir3,
-                    dir_names=dir_names,
-                    scatter=scatter,
-                    kernel=kernel,
-                    scat_vol_pos=scat_vol_pos,
-                    chi2_thresh=chi2_thresh,
-                    peak_thresh=peak_thresh,
-                    root_dir=save_root,
-                    exp_name=exp_name,
-                    projection_method=projection_method,
-                )
+                kwargs["scatter"] = scatter
+                create_pf(**kwargs)
