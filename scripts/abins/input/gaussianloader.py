@@ -14,6 +14,7 @@ import numpy as np
 
 from .abinitioloader import AbInitioLoader
 from .textparser import TextParser
+from abins.abinsdata import AbinsData
 from abins.constants import COMPLEX_TYPE, FLOAT_TYPE, ROTATIONS_AND_TRANSLATIONS
 from mantid.kernel import Atom
 
@@ -36,11 +37,10 @@ class GAUSSIANLoader(AbInitioLoader):
     def _ab_initio_program(self) -> str:
         return "GAUSSIAN"
 
-    def read_vibrational_or_phonon_data(self):
+    @AbInitioLoader.abinsdata_saver
+    def read_vibrational_or_phonon_data(self) -> AbinsData:
         """
-        Reads vibrational data from GAUSSIAN output files. Saves frequencies and atomic displacements (only molecular
-        calculations), hash of file with vibrational data to <>.hdf5.
-        :returns: structure, frequency and displacement data from file
+        Read vibrational data from GAUSSIAN output files.
         """
 
         data = {}  # container to store read data
@@ -65,10 +65,6 @@ class GAUSSIANLoader(AbInitioLoader):
             # Check if atoms were frozen and remove from structure if so
             self._remove_frozen_atoms(active_atoms=self._active_atoms, data=data)
 
-            # save data to hdf file
-            self.save_ab_initio_data(data=data)
-
-            # return AbinsData object
             return self._rearrange_data(data=data)
 
     def _read_atomic_coordinates(self, *, file_obj: BufferedReader, data: dict, masses_from_file: List[float]) -> None:

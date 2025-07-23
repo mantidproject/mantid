@@ -101,8 +101,14 @@ class KpointsData(collections.abc.Sequence):
             raise ValueError("atomic_displacements should have four dimensions")
         num_atoms = atomic_displacements.shape[1]
 
-        if not (atomic_displacements.shape == (weights.size, num_atoms, num_freq, dim) and atomic_displacements.dtype.num == COMPLEX_ID):
-            raise ValueError("Invalid value of atomic_displacements.")
+        if not atomic_displacements.shape == (weights.size, num_atoms, num_freq, dim):
+            msg = (
+                "Invalid value of atomic_displacements. Expected shape "
+                f"{(weights.size, num_atoms, num_freq, dim)}, got {atomic_displacements.shape}."
+            )
+            raise ValueError(msg)
+        elif not atomic_displacements.dtype.num == COMPLEX_ID:
+            raise ValueError(f"Invalid value of atomic_displacements. Expected dtype {COMPLEX_TYPE}, got {atomic_displacements.dtype}")
         self._atomic_displacements = atomic_displacements
 
     @staticmethod
