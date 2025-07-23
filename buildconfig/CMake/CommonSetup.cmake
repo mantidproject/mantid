@@ -191,10 +191,11 @@ endif()
 set(AUTO_GENERATE_WARNING "/********** PLEASE NOTE! THIS FILE WAS AUTO-GENERATED FROM CMAKE.  ***********************/")
 
 # ######################################################################################################################
-# Enable CXX17_REMOVED_UNARY_BINARY_FUNCTION for boost on osx
+# Enable CXX17_REMOVED_UNARY_BINARY_FUNCTION for boost on osx Use GCC12 range adaptor closure for boost parser on osx
 # ######################################################################################################################
 if(APPLE)
   add_definitions(-D_LIBCPP_ENABLE_CXX17_REMOVED_UNARY_BINARY_FUNCTION)
+  add_definitions(-DBOOST_PARSER_USE_LIBSTDCPP_GCC12_RANGE_ADAPTOR_CLOSURE)
 endif()
 
 # ######################################################################################################################
