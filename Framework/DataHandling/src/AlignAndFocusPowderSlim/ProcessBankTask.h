@@ -22,7 +22,7 @@ public:
   ProcessBankTask(std::vector<std::string> &bankEntryNames, H5::H5File &h5file, const bool is_time_filtered,
                   API::MatrixWorkspace_sptr &wksp, const std::map<detid_t, double> &calibration,
                   const std::set<detid_t> &masked, const size_t events_per_chunk, const size_t grainsize_event,
-                  std::vector<std::pair<size_t, size_t>> pulse_indices, std::shared_ptr<API::Progress> &progress);
+                  std::vector<PulseROI> pulse_indices, std::shared_ptr<API::Progress> &progress);
 
   void operator()(const tbb::blocked_range<size_t> &range) const;
 

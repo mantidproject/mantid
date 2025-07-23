@@ -21,17 +21,20 @@ const std::string DETID("event_id");                   // uint32 in ORNL nexus f
 const std::string INDEX_ID("event_index");
 } // namespace NxsFieldNames
 
+using PulseROI = std::pair<size_t, size_t>;     // start and stop indices for the pulse ROIs
+using EventROI = std::pair<uint64_t, uint64_t>; // start and stop indices for the events ROIs
+
 class NexusLoader {
 public:
-  NexusLoader(const bool is_time_filtered, const std::vector<std::pair<size_t, size_t>> &pulse_indices);
+  NexusLoader(const bool is_time_filtered, const std::vector<PulseROI> &pulse_indices);
   template <typename Type>
   void loadData(H5::DataSet &SDS, std::unique_ptr<std::vector<Type>> &data, const std::vector<size_t> &offsets,
                 const std::vector<size_t> &slabsizes);
-  std::stack<std::pair<uint64_t, uint64_t>> getEventIndexRanges(H5::Group &event_group, const uint64_t number_events);
+  std::stack<EventROI> getEventIndexRanges(H5::Group &event_group, const uint64_t number_events);
 
 private:
   const bool m_is_time_filtered;
-  const std::vector<std::pair<size_t, size_t>> m_pulse_indices;
+  const std::vector<PulseROI> m_pulse_indices;
   void loadEventIndex(H5::Group &event_group, std::unique_ptr<std::vector<uint64_t>> &data);
 };
 
