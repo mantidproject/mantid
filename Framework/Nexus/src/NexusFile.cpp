@@ -166,14 +166,15 @@ void File::initOpenFile(std::string const &filename, NXaccess const am) {
   }
 
   // if in creation mode, must add the following attributes
-  // - file_namen
+  // - file_name
   // - file_time
   // - Nexus version
   // - HDF5 version
   if (am == NXaccess::CREATE5) {
     // open the root as a group and add these attributes
     // use H5Cpp to interface with H5Util
-    H5::H5File root(temp_fid);
+    hid_t root_id = H5Gopen(temp_fid, "/", H5P_DEFAULT);
+    H5::Group root(root_id);
     std::vector<std::pair<std::string, std::string>> attrs{{"NeXus_version", NEXUS_VERSION},
                                                            {"file_name", filename},
                                                            {"HDF5_Version", version_str},
@@ -182,7 +183,9 @@ void File::initOpenFile(std::string const &filename, NXaccess const am) {
     for (auto const &attr : attrs) {
       Mantid::NeXus::H5Util::writeStrAttribute(root, attr.first, attr.second);
     }
-    root.flush(H5F_SCOPE_GLOBAL);
+    root.close();
+    H5Gflush(root_id);
+    H5Gclose(root_id);
   }
   H5Fflush(temp_fid, H5F_SCOPE_GLOBAL);
 
@@ -199,27 +202,33 @@ void File::initOpenFile(std::string const &filename, NXaccess const am) {
 // copy constructors
 
 File::File(File const &f)
-    : m_filename(f.m_filename), m_access(f.m_access), m_address(f.m_address), m_close_handle(false),
-      m_fid(H5Freopen(f.m_fid)), m_current_group_id(0), m_current_data_id(0), m_current_type_id(0),
-      m_current_space_id(0), m_gid_stack{0}, m_descriptor(f.m_descriptor) {
-  if (m_fid <= 0)
+    : m_filename(f.m_filename), m_access(f.m_access), m_address(f.m_address), m_close_handle(false), m_fid(-1),
+      m_current_group_id(0), m_current_data_id(0), m_current_type_id(0), m_current_space_id(0), m_gid_stack{0},
+      m_descriptor(f.m_descriptor) {
+  if (f.m_fid <= 0)
     throw Mantid::Nexus::Exception("Error reopening file");
+  else
+    m_fid = f.m_fid;
 }
 
 File::File(File const *const pf)
-    : m_filename(pf->m_filename), m_access(pf->m_access), m_address(pf->m_address), m_close_handle(false),
-      m_fid(H5Freopen(pf->m_fid)), m_current_group_id(0), m_current_data_id(0), m_current_type_id(0),
-      m_current_space_id(0), m_gid_stack{0}, m_descriptor(pf->m_descriptor) {
-  if (m_fid <= 0)
+    : m_filename(pf->m_filename), m_access(pf->m_access), m_address(pf->m_address), m_close_handle(false), m_fid(-1),
+      m_current_group_id(0), m_current_data_id(0), m_current_type_id(0), m_current_space_id(0), m_gid_stack{0},
+      m_descriptor(pf->m_descriptor) {
+  if (pf->m_fid <= 0)
     throw Mantid::Nexus::Exception("Error reopening file");
+  else
+    m_fid = pf->m_fid;
 }
 
 File::File(std::shared_ptr<File> pf)
-    : m_filename(pf->m_filename), m_access(pf->m_access), m_address(pf->m_address), m_close_handle(false),
-      m_fid(H5Freopen(pf->m_fid)), m_current_group_id(0), m_current_data_id(0), m_current_type_id(0),
-      m_current_space_id(0), m_gid_stack{0}, m_descriptor(pf->m_descriptor) {
-  if (m_fid <= 0)
+    : m_filename(pf->m_filename), m_access(pf->m_access), m_address(pf->m_address), m_close_handle(false), m_fid(-1),
+      m_current_group_id(0), m_current_data_id(0), m_current_type_id(0), m_current_space_id(0), m_gid_stack{0},
+      m_descriptor(pf->m_descriptor) {
+  if (pf->m_fid <= 0)
     throw Mantid::Nexus::Exception("Error reopening file");
+  else
+    m_fid = pf->m_fid;
 }
 
 File &File::operator=(File const &f) {
@@ -262,8 +271,9 @@ File::~File() {
     gid = 0;
   }
   m_gid_stack.clear();
-  // now close the file
-  close();
+  if (m_close_handle) {
+    close();
+  }
   H5garbage_collect();
 }
 
