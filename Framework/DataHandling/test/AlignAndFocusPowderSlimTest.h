@@ -12,6 +12,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidDataHandling/AlignAndFocusPowderSlim.h"
+#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidKernel/TimeROI.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/Unit.h"
@@ -20,6 +21,7 @@
 
 using Mantid::API::MatrixWorkspace_sptr;
 using Mantid::DataHandling::AlignAndFocusPowderSlim::AlignAndFocusPowderSlim;
+using Mantid::DataObjects::TableWorkspace_sptr;
 
 class AlignAndFocusPowderSlimTest : public CxxTest::TestSuite {
 public:
@@ -39,7 +41,8 @@ public:
                                      const std::vector<double> &xmax = {}, const std::vector<double> &xdelta = {},
                                      const std::string binning = "Logarithmic",
                                      const std::string binningUnits = "dSpacing", const double timeMin = -1.,
-                                     const double timeMax = -1., const bool should_throw = false) {
+                                     const double timeMax = -1., const bool should_throw = false,
+                                     TableWorkspace_sptr tablesplitter = nullptr, const bool relativeTime = false) {
     const std::string wksp_name("VULCAN");
 
     std::cout << "==================> " << filename << '\n';
@@ -63,6 +66,10 @@ public:
       TS_ASSERT_THROWS_NOTHING(alg.setProperty("FilterByTimeStart", timeMin));
     if (timeMax > 0.)
       TS_ASSERT_THROWS_NOTHING(alg.setProperty("FilterByTimeStop", timeMax));
+    if (tablesplitter != nullptr) {
+      TS_ASSERT_THROWS_NOTHING(alg.setProperty("SplitterWorkspace", tablesplitter));
+      TS_ASSERT_THROWS_NOTHING(alg.setProperty("RelativeTime", relativeTime));
+    }
 
     if (should_throw) {
       TS_ASSERT_THROWS(alg.execute(), const std::invalid_argument &);
@@ -352,6 +359,117 @@ public:
     // start time longer than run time of ~600 seconds
     run_algorithm("VULCAN_218062.nxs.h5", std::vector<double>{0.}, std::vector<double>{50000.},
                   std::vector<double>{50000.}, "Linear", "TOF", 1000., 2000., true);
+  }
+
+  void test_splitter_table() {
+    Mantid::DataObjects::TableWorkspace_sptr tablesplitter = create_splitter_table();
+
+    MatrixWorkspace_sptr outputWS =
+        run_algorithm("VULCAN_218062.nxs.h5", std::vector<double>{0.}, std::vector<double>{50000.},
+                      std::vector<double>{50000.}, "Linear", "TOF", -1., -1., false, tablesplitter, true);
+
+    /* expected results came from running
+
+    splitter = CreateEmptyTableWorkspace()
+    splitter.addColumn('float', 'start')
+    splitter.addColumn('float', 'stop')
+    splitter.addColumn('str', 'target')
+    splitter.addRow((10,20, '0'))
+    splitter.addRow((200,210, '0'))
+    splitter.addRow((400,410, '0'))
+
+    ws = LoadEventNexus("VULCAN_218062.nxs.h5", NumberOfBins=1)
+    grp = CreateGroupingWorkspace(ws, GroupDetectorsBy='bank')
+    ws = GroupDetectors(ws, CopyGroupingFromWorkspace="grp")
+
+    FilterEvents(ws, SplitterWorkspace=splitter, RelativeTime=True, FilterByPulseTime=True,
+    OutputWorkspaceBaseName="filtered")
+
+    print(mtd["filtered_0"].extractY())
+    */
+    TS_ASSERT_EQUALS(outputWS->readY(0).front(), 807206);
+    TS_ASSERT_EQUALS(outputWS->readY(1).front(), 805367);
+    TS_ASSERT_EQUALS(outputWS->readY(2).front(), 920983);
+    TS_ASSERT_EQUALS(outputWS->readY(3).front(), 909955);
+    TS_ASSERT_EQUALS(outputWS->readY(4).front(), 310676);
+    TS_ASSERT_EQUALS(outputWS->readY(5).front(), 590230);
+  }
+
+  void test_splitter_table_abosolute_time() {
+    Mantid::DataObjects::TableWorkspace_sptr tablesplitter = create_splitter_table(false);
+
+    MatrixWorkspace_sptr outputWS =
+        run_algorithm("VULCAN_218062.nxs.h5", std::vector<double>{0.}, std::vector<double>{50000.},
+                      std::vector<double>{50000.}, "Linear", "TOF", -1., -1., false, tablesplitter, false);
+
+    /* expected results came from running the same as above but with absolute time */
+
+    TS_ASSERT_EQUALS(outputWS->readY(0).front(), 807206);
+    TS_ASSERT_EQUALS(outputWS->readY(1).front(), 805367);
+    TS_ASSERT_EQUALS(outputWS->readY(2).front(), 920983);
+    TS_ASSERT_EQUALS(outputWS->readY(3).front(), 909955);
+    TS_ASSERT_EQUALS(outputWS->readY(4).front(), 310676);
+    TS_ASSERT_EQUALS(outputWS->readY(5).front(), 590230);
+  }
+
+  void test_splitter_table_and_time_start_stop() {
+    TableWorkspace_sptr tablesplitter = create_splitter_table();
+
+    MatrixWorkspace_sptr outputWS =
+        run_algorithm("VULCAN_218062.nxs.h5", std::vector<double>{0.}, std::vector<double>{50000.},
+                      std::vector<double>{50000.}, "Linear", "TOF", 15., 300., false, tablesplitter, true);
+
+    /* expected results came from running
+
+    splitter = CreateEmptyTableWorkspace()
+    splitter.addColumn('float', 'start')
+    splitter.addColumn('float', 'stop')
+    splitter.addColumn('str', 'target')
+    splitter.addRow((15,20, '0'))
+    splitter.addRow((200,210, '0'))
+
+    ws = LoadEventNexus("VULCAN_218062.nxs.h5", NumberOfBins=1)
+    grp = CreateGroupingWorkspace(ws, GroupDetectorsBy='bank')
+    ws = GroupDetectors(ws, CopyGroupingFromWorkspace="grp")
+
+    FilterEvents(ws, SplitterWorkspace=splitter, RelativeTime=True, FilterByPulseTime=True,
+    OutputWorkspaceBaseName="filtered")
+
+    print(mtd["filtered_0"].extractY())
+    */
+    TS_ASSERT_EQUALS(outputWS->readY(0).front(), 415525);
+    TS_ASSERT_EQUALS(outputWS->readY(1).front(), 414435);
+    TS_ASSERT_EQUALS(outputWS->readY(2).front(), 476903);
+    TS_ASSERT_EQUALS(outputWS->readY(3).front(), 471846);
+    TS_ASSERT_EQUALS(outputWS->readY(4).front(), 160000);
+    TS_ASSERT_EQUALS(outputWS->readY(5).front(), 304167);
+  }
+
+  TableWorkspace_sptr create_splitter_table(const bool relativeTime = true) {
+    // create splitter table
+    TableWorkspace_sptr tablesplitter = std::make_shared<Mantid::DataObjects::TableWorkspace>();
+    tablesplitter->addColumn("double", "start");
+    tablesplitter->addColumn("double", "stop");
+    tablesplitter->addColumn("str", "target");
+
+    // start time was 2022-05-31T02:57:22.028123667 which is 1022813842.0281236 seconds since epoch
+    const double offset = relativeTime ? 0. : 1022813842.0281236;
+
+    tablesplitter->appendRow();
+    tablesplitter->cell<double>(0, 0) = 10.0 + offset;
+    tablesplitter->cell<double>(0, 1) = 20.0 + offset;
+    tablesplitter->cell<std::string>(0, 2) = "0";
+
+    tablesplitter->appendRow();
+    tablesplitter->cell<double>(1, 0) = 200.0 + offset;
+    tablesplitter->cell<double>(1, 1) = 210.0 + offset;
+    tablesplitter->cell<std::string>(1, 2) = "0";
+
+    tablesplitter->appendRow();
+    tablesplitter->cell<double>(2, 0) = 400.0 + offset;
+    tablesplitter->cell<double>(2, 1) = 410.0 + offset;
+    tablesplitter->cell<std::string>(2, 2) = "0";
+    return tablesplitter;
   }
 
   // ==================================
