@@ -11,6 +11,7 @@ from mantid import config
 from mantid.api import AnalysisDataService as ADS
 from Engineering.texture.TextureUtils import run_abs_corr, fit_all_peaks
 from mantid.simpleapi import LoadEmptyInstrument, CreateSampleShape, SetSampleMaterial, Load, ExtractSingleSpectrum, ConvertUnits
+from Engineering.common.xml_shapes import get_cube_xml
 
 DATA_DIR = config["datasearch.directories"].split(";")[0]
 CWDIR = os.path.join(config["datasearch.directories"].split(";")[0], "Texture")
@@ -25,18 +26,8 @@ config.appendDataSearchSubDir(CWDIR)
 
 
 class AbsCorrMixin(object):
-    def get_cube_xml(self, side_len):
-        return f"""
-                <cuboid id='some-shape'> \
-                <height val='{side_len}'  /> \
-                <width val='{side_len}' />  \
-                <depth  val='{side_len}' />  \
-                <centre x='0.0' y='0.0' z='0.0'  />  \
-                </cuboid>  \
-                <algebra val='some-shape' /> \\ """
-
     def setup_absorption_correction_inputs(self):
-        self.shape_xml = self.get_cube_xml(0.01)
+        self.shape_xml = get_cube_xml("test_cube", 0.01)
         LoadEmptyInstrument(InstrumentName="ENGINX", OutputWorkspace="ref_ws")
         CreateSampleShape(InputWorkspace="ref_ws", ShapeXML=self.shape_xml)
         SetSampleMaterial(InputWorkspace="ref_ws", ChemicalFormula="Fe")
@@ -47,6 +38,21 @@ class AbsCorrMixin(object):
 
         self.expected_files = [os.path.join(CWDIR, "AbsorptionCorrection", "Corrected_ENGINX299080.nxs")]
 
+        self.default_kwargs = {
+            "wss": ["ENGINX299080"],
+            "ref_ws": "ref_ws",
+            "copy_ref": True,
+            "include_abs_corr": True,
+            "monte_carlo_args": "SparseInstrument:False",
+            "gauge_vol_preset": "4mmCube",
+            "include_atten_table": False,
+            "eval_point": "2.00",
+            "eval_units": "dSpacing",
+            "exp_name": "Test",
+            "root_dir": CWDIR,
+            "clear_ads_after": False,
+        }
+
     def validate_expected_files(self):
         [self.assertTrue(os.path.exists(ef)) for ef in self.expected_files]
 
@@ -54,20 +60,10 @@ class AbsCorrMixin(object):
 class RunAStandardAbsorptionCorrectionWithAttenuationTable(systemtesting.MantidSystemTest, AbsCorrMixin):
     def runTest(self):
         self.setup_absorption_correction_inputs()
-        run_abs_corr(
-            wss=["ENGINX299080"],
-            ref_ws="ref_ws",
-            copy_ref=True,
-            include_abs_corr=True,
-            monte_carlo_args="SparseInstrument:False",
-            gauge_vol_preset="4mmCube",
-            include_atten_table=True,
-            eval_point="2.00",
-            eval_units="dSpacing",
-            exp_name="Test",
-            root_dir=CWDIR,
-            clear_ads_after=False,
-        )
+        kwargs = self.default_kwargs
+        kwargs["include_atten_table"] = True
+        run_abs_corr(**kwargs)
+
         self.corr_ws = ADS.retrieve("Corrected_ENGINX299080")
         self.attenuation_table = ADS.retrieve("ENGIN-X_299080_attenuation_coefficient_2.00_dSpacing")
 
@@ -90,17 +86,9 @@ class RunAStandardAbsorptionCorrectionWithAttenuationTable(systemtesting.MantidS
 class RunAStandardAbsorptionCorrection(systemtesting.MantidSystemTest, AbsCorrMixin):
     def runTest(self):
         self.setup_absorption_correction_inputs()
-        run_abs_corr(
-            wss=["ENGINX299080"],
-            ref_ws="ref_ws",
-            copy_ref=True,
-            include_abs_corr=True,
-            monte_carlo_args="SparseInstrument:False",
-            gauge_vol_preset="4mmCube",
-            exp_name="Test",
-            root_dir=CWDIR,
-            clear_ads_after=False,
-        )
+        kwargs = self.default_kwargs
+        run_abs_corr(**kwargs)
+
         self.corr_ws = ADS.retrieve("Corrected_ENGINX299080")
 
     def validate(self):
@@ -118,21 +106,12 @@ class RunAStandardAbsorptionCorrectionEulerGoniometer(systemtesting.MantidSystem
     def runTest(self):
         self.setup_absorption_correction_inputs()
         orientation_file = os.path.join(CWDIR, "rotation_as_euler.txt")
-        run_abs_corr(
-            wss=["ENGINX299080"],
-            ref_ws="ref_ws",
-            orientation_file=orientation_file,
-            orient_file_is_euler=True,
-            euler_scheme="YXY",
-            euler_axes_sense="-1,-1,-1",
-            copy_ref=True,
-            include_abs_corr=True,
-            monte_carlo_args="SparseInstrument:False",
-            gauge_vol_preset="4mmCube",
-            exp_name="Test",
-            root_dir=CWDIR,
-            clear_ads_after=False,
-        )
+        kwargs = self.default_kwargs
+        kwargs["orientation_file"] = orientation_file
+        kwargs["orient_file_is_euler"] = True
+        kwargs["euler_axes_sense"] = "-1,-1,-1"
+        run_abs_corr(**kwargs)
+
         self.corr_ws = ADS.retrieve("Corrected_ENGINX299080")
 
     def validate(self):
@@ -149,20 +128,11 @@ class RunAStandardAbsorptionCorrectionProvideGoniometerMatrix(systemtesting.Mant
     def runTest(self):
         self.setup_absorption_correction_inputs()
         orientation_file = os.path.join(CWDIR, "rotation_as_matrix.txt")
-        run_abs_corr(
-            wss=["ENGINX299080"],
-            ref_ws="ref_ws",
-            orientation_file=orientation_file,
-            orient_file_is_euler=False,
-            copy_ref=True,
-            include_abs_corr=True,
-            monte_carlo_args="SparseInstrument:False",
-            gauge_vol_preset="4mmCube",
-            eval_units="dSpacing",
-            exp_name="Test",
-            root_dir=CWDIR,
-            clear_ads_after=False,
-        )
+        kwargs = self.default_kwargs
+        kwargs["orientation_file"] = orientation_file
+        kwargs["orient_file_is_euler"] = False
+        run_abs_corr(**kwargs)
+
         self.corr_ws = ADS.retrieve("Corrected_ENGINX299080")
 
     def validate(self):
@@ -179,18 +149,11 @@ class RunAStandardAbsorptionCorrectionWithCustomGaugeVolume(systemtesting.Mantid
     def runTest(self):
         self.setup_absorption_correction_inputs()
         gv_file = os.path.join(CWDIR, "custom_gauge_volume.xml")
-        run_abs_corr(
-            wss=["ENGINX299080"],
-            ref_ws="ref_ws",
-            copy_ref=True,
-            include_abs_corr=True,
-            monte_carlo_args="SparseInstrument:False",
-            gauge_vol_preset="Custom",
-            gauge_vol_shape_file=gv_file,  # same as the preset 4mm cube
-            exp_name="Test",
-            root_dir=CWDIR,
-            clear_ads_after=False,
-        )
+        kwargs = self.default_kwargs
+        kwargs["gauge_vol_preset"] = "Custom"
+        kwargs["gauge_vol_shape_file"] = gv_file
+        run_abs_corr(**kwargs)
+
         self.corr_ws = ADS.retrieve("Corrected_ENGINX299080")
 
     def validate(self):
@@ -206,22 +169,14 @@ class RunAStandardAbsorptionCorrectionWithCustomGaugeVolume(systemtesting.Mantid
 class RunAStandardAbsorptionCorrectionWithDivergenceCorrection(systemtesting.MantidSystemTest, AbsCorrMixin):
     def runTest(self):
         self.setup_absorption_correction_inputs()
-        run_abs_corr(
-            wss=["ENGINX299080"],
-            ref_ws="ref_ws",
-            copy_ref=True,
-            include_abs_corr=True,
-            monte_carlo_args="SparseInstrument:False",
-            gauge_vol_preset="4mmCube",
-            gauge_vol_shape_file="",
-            exp_name="Test",
-            root_dir=CWDIR,
-            include_div_corr=True,
-            div_hoz=0.012,
-            div_vert=0.014,
-            det_hoz=0.002,
-            clear_ads_after=False,
-        )
+        kwargs = self.default_kwargs
+        kwargs["gauge_vol_preset"] = "4mmCube"
+        kwargs["include_div_corr"] = True
+        kwargs["div_hoz"] = 0.012
+        kwargs["div_vert"] = 0.014
+        kwargs["det_hoz"] = 0.002
+        run_abs_corr(**kwargs)
+
         self.corr_ws = ADS.retrieve("Corrected_ENGINX299080")
 
     def validate(self):
