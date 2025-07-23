@@ -63,6 +63,8 @@ private:
   void init() override;
   /// Execution code
   void exec() override;
+  /// Validate Inputs code
+  std::map<std::string, std::string> validateInputs() override;
 
   // Some constants to be written for masked values.
   /// Value for data if pixel is masked
