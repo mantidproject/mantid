@@ -34,26 +34,14 @@ MANTID_NEXUS_DLL std::ostream &operator<<(std::ostream &os, const NXaccess &valu
  * or entirely absorbed inside Nexus::File
  */
 struct MANTID_NEXUS_DLL NexusFile5 {
-  std::vector<hid_t> iStack5;
-  hid_t iFID;
-  hid_t iCurrentG;
-  hid_t iCurrentD;
-  hid_t iCurrentS;
-  hid_t iCurrentT;
-  Mantid::Nexus::NexusAddress groupaddr;
-
-  // constructors
-  NexusFile5() = delete;
-  NexusFile5(std::string const &, NXaccess const);
-  NexusFile5(NexusFile5 const &);
-  // assignment
-  NexusFile5 &operator=(NexusFile5 const &);
-  // destructor
-  ~NexusFile5();
+  std::vector<hid_t> &iStack5;
+  hid_t &iFID;
+  hid_t &iCurrentG;
+  hid_t &iCurrentD;
+  hid_t &iCurrentS;
+  hid_t &iCurrentT;
+  Mantid::Nexus::NexusAddress &groupaddr;
 };
-
-typedef NexusFile5 *pNexusFile5;
-typedef NexusFile5 *NXhandle;
 
 typedef char NXname[128];
 
@@ -188,6 +176,8 @@ struct AttrInfo {
 /** Forward declare of NeXus::File */
 class File;
 } // namespace Mantid::Nexus
+
+typedef Mantid::Nexus::File &NXhandle;
 
 constexpr std::size_t NX_MAXRANK(32);
 constexpr Mantid::Nexus::dimsize_t NX_UNLIMITED(-1); // 0xffffffffffffffffUL; // AKA max of unsigned long
