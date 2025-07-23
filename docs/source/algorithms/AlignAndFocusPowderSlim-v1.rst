@@ -23,8 +23,6 @@ Current limitations compared to ``AlignAndFocusPowderFromFiles``
 
 - only supports the VULCAN instrument
 - hard coded for 6 particular groups
-- only specify binning in time-of-flight
-- does not support event filtering
 - does not support copping data
 - does not support removing prompt pulse
 - does not support removing bad pulses
