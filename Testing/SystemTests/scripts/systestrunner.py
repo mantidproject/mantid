@@ -12,6 +12,8 @@ import sys
 import time
 import importlib.util
 
+from collections import OrderedDict
+
 # Prevents errors in systemtests that use matplotlib directly
 os.environ["MPLBACKEND"] = "Agg"
 
@@ -96,7 +98,7 @@ def main(argv):
         escape_quotes=True,
     )
 
-    results = dict()
+    results = OrderedDict()
     for test_class_name in test_class_names:
         script_obj = systemtesting.TestScript(test_dir_name, test_module_name, test_class_name, False)
         results[test_class_name] = runner.start_in_current_process(script_obj)
@@ -106,8 +108,7 @@ def main(argv):
     #########################################################################
 
     failure = False
-    exit_codes = list(results.values())
-    if any(exit_code[0] is not systemtesting.TestRunner.SUCCESS_CODE for exit_code in exit_codes):
+    if any(exit_code is not systemtesting.TestRunner.SUCCESS_CODE for (exit_code, _) in results.values()):
         failure = True
 
     #########################################################################
@@ -118,8 +119,12 @@ def main(argv):
     mtdconf.restoreconfig()
 
     if failure:
-        # The lack of details here is due to ctest handling the stdout dump on failures.
-        raise RuntimeError()
+        results_string = f"FAILURE REPORT FOR TESTS IN {test_file_name}:\n"
+        for class_name, (exit_code, stdout) in results.items():
+            results_string += f"{class_name}: {systemtesting.exit_code_to_str(exit_code)}\n"
+            if exit_code is not systemtesting.TestRunner.SUCCESS_CODE:
+                results_string += f"Stdout: {stdout}\n"
+        raise RuntimeError(results_string)
 
 
 if __name__ == "__main__":
