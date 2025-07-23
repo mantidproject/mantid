@@ -182,7 +182,7 @@ void File::initOpenFile(std::string const &filename, NXaccess const am) {
     for (auto const &attr : attrs) {
       Mantid::NeXus::H5Util::writeStrAttribute(root, attr.first, attr.second);
     }
-    root.flush(H5F_SCOPE_LOCAL);
+    root.flush(H5F_SCOPE_GLOBAL);
   }
   H5Fflush(temp_fid, H5F_SCOPE_GLOBAL);
 
@@ -262,9 +262,8 @@ File::~File() {
     gid = 0;
   }
   m_gid_stack.clear();
-  if (m_close_handle) {
-    close();
-  }
+  // now close the file
+  close();
   H5garbage_collect();
 }
 
