@@ -814,21 +814,7 @@ class TestSuite(object):
         self._result.date = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         self._result.addItem(["test_date", self._result.date])
 
-        if retcode == TestRunner.SUCCESS_CODE:
-            status = "success"
-        elif retcode == TestRunner.GENERIC_FAIL_CODE:
-            # This is most likely an algorithm failure, but it's not certain
-            status = "algorithm failure"
-        elif retcode == TestRunner.VALIDATION_FAIL_CODE:
-            status = "failed validation"
-        elif retcode == TestRunner.SEGFAULT_CODE:
-            status = "crashed"
-        elif retcode == TestRunner.SKIP_TEST:
-            status = "skipped"
-        elif retcode < 0:
-            status = "hung"
-        else:
-            status = "unknown"
+        status = exit_code_to_str(retcode)
 
         # Check return code and add result
         self._result.status = status if status in ["success", "skipped"] else "failed"
@@ -1305,6 +1291,24 @@ class MantidFrameworkConfig:
     def restoreconfig(self):
         self.__moveFile(self.__userPropsFile, self.__userPropsFileSystest)
         self.__moveFile(self.__userPropsFileBackup, self.__userPropsFile)
+
+def exit_code_to_str(exit_code):
+    if exit_code < 0:
+         return "hung"
+    match exit_code:
+        case TestRunner.SUCCESS_CODE:
+            return "success"
+        case TestRunner.GENERIC_FAIL_CODE:
+            # This is most likely an algorithm failure, but it's not certain
+            return "algorithm failure"
+        case TestRunner.VALIDATION_FAIL_CODE:
+            return "failed validation"
+        case TestRunner.SEGFAULT_CODE:
+            return "crashed"
+        case TestRunner.SKIP_TEST:
+            return "skipped"
+        case _:
+            return"unknown"
 
 #########################################################################
 # Function to check if a given class object is a Mantid System Test
