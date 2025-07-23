@@ -81,6 +81,9 @@ if(BUILD_MANTIDFRAMEWORK OR BUILD_MANTIDQT)
   add_definitions(-D_SILENCE_CXX17_OLD_ALLOCATOR_MEMBERS_DEPRECATION_WARNING)
   # The new interface is not available in Clang yet so we haven't migrated
   add_definitions(-D_SILENCE_CXX20_OLD_SHARED_PTR_ATOMIC_SUPPORT_DEPRECATION_WARNING)
+  if(APPLE)
+    add_definitions(-DBOOST_PARSER_USE_LIBSTDCPP_GCC12_RANGE_ADAPTOR_CLOSURE)
+  endif()
 
   find_package(Poco REQUIRED)
   find_package(TBB REQUIRED)
@@ -195,7 +198,6 @@ set(AUTO_GENERATE_WARNING "/********** PLEASE NOTE! THIS FILE WAS AUTO-GENERATED
 # ######################################################################################################################
 if(APPLE)
   add_definitions(-D_LIBCPP_ENABLE_CXX17_REMOVED_UNARY_BINARY_FUNCTION)
-  add_definitions(-DBOOST_PARSER_USE_LIBSTDCPP_GCC12_RANGE_ADAPTOR_CLOSURE)
 endif()
 
 # ######################################################################################################################
