@@ -8,13 +8,13 @@
 
 #include "MantidGeometry/Crystal/MatrixVectorPair.h"
 #include "MantidGeometry/Crystal/V3R.h"
+#include "MantidGeometry/DllConfig.h"
 #include "MantidKernel/Exception.h"
 
 #include <boost/parser/parser.hpp>
 
 #include <map>
 #include <optional>
-#include <ranges>
 #include <string>
 #include <tuple>
 
