@@ -11,6 +11,7 @@ from euphonic import QpointPhononModes
 import numpy as np
 
 from .abinitioloader import AbInitioLoader
+from abins.abinsdata import AbinsData
 from abins.parameters import sampling as sampling_parameters
 from dos.load_euphonic import euphonic_calculate_modes
 
@@ -49,7 +50,8 @@ class EuphonicLoader(AbInitioLoader):
         }
         return file_data
 
-    def read_vibrational_or_phonon_data(self):
+    @AbInitioLoader.abinsdata_saver
+    def read_vibrational_or_phonon_data(self) -> AbinsData:
         """Get AbinsData (structure and modes) from force constants data.
 
         Frequencies/displacements are interpolated using the Euphonic library
@@ -61,7 +63,5 @@ class EuphonicLoader(AbInitioLoader):
         """
         cutoff = sampling_parameters["force_constants"]["qpt_cutoff"]
         modes = euphonic_calculate_modes(filename=self._clerk.get_input_filename(), cutoff=cutoff)
-        file_data = self.data_dict_from_modes(modes)
-        self.save_ab_initio_data(data=file_data)
 
-        return self._rearrange_data(data=file_data)
+        return self._rearrange_data(data=self.data_dict_from_modes(modes))

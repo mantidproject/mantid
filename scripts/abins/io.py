@@ -35,7 +35,7 @@ class IO(BaseModel):
     setting: str = ""
     autoconvolution: int = 10
     temperature: float = None
-    cache_directory: Path
+    cache_directory: Path | None
 
     @staticmethod
     def _dir_is_not_writeable(directory: str):

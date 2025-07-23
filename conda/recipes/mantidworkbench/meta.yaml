@@ -42,7 +42,6 @@ requirements:
     - psutil {{ psutil }}
     - {{ pin_compatible("python", max_pin="x.x") }}
     - matplotlib {{ matplotlib }}
-    - mslice {{ mslice }}
     - python.app  # [osx]
     - pystack  # [linux]
     - pyvista
@@ -52,6 +51,8 @@ requirements:
     {% if environ.get('INCLUDE_MANTIDDOCS', 'True') != 'False' %}
     - mantiddocs {{ version }}
     {% endif %}
+  run_constrained:
+    - mslice {{ mslice }}
 
 test:
   imports:

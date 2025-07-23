@@ -10,7 +10,9 @@
 
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
 #include "MantidDataHandling/AlignAndFocusPowderSlim.h"
+#include "MantidKernel/TimeROI.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/Unit.h"
 
@@ -265,6 +267,18 @@ public:
     TS_ASSERT_EQUALS(outputWS->readY(3).front(), 4244796);
     TS_ASSERT_EQUALS(outputWS->readY(4).front(), 1435593);
     TS_ASSERT_EQUALS(outputWS->readY(5).front(), 2734113);
+
+    // check the time ROI
+    const auto &run_timeroi = outputWS->run().getTimeROI();
+    TS_ASSERT_EQUALS(run_timeroi.numberOfRegions(), 1);
+    TS_ASSERT_EQUALS(run_timeroi.timeAtIndex(0), outputWS->run().startTime() + 200.);
+    TS_ASSERT_EQUALS(run_timeroi.timeAtIndex(1), outputWS->run().startTime() + 300.);
+
+    // check that the logs are filtered corerctly by checking first and last pulse times
+    TS_ASSERT_DELTA(outputWS->run().getFirstPulseTime().totalNanoseconds(),
+                    (outputWS->run().startTime() + 200.).totalNanoseconds(), 1e8 /* 0.1 sec */);
+    TS_ASSERT_DELTA(outputWS->run().getLastPulseTime().totalNanoseconds(),
+                    (outputWS->run().startTime() + 300.).totalNanoseconds(), 1e8 /* 0.1 sec */);
   }
 
   void test_start_time_filtering() {

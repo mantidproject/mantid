@@ -29,6 +29,7 @@ class Tester(object):
         "EuphonicLoader": "castep_bin",
         "GAUSSIANLoader": "log",
         "JSONLoader": "json",
+        "MoldenLoader": "mol",
         "VASPLoader": "xml",
         "VASPOUTCARLoader": "OUTCAR",
     }
