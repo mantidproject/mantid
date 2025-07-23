@@ -20,11 +20,17 @@ Rules
 Environments
 ------------
 The following environments must be tested, ideally at all host facilities.
+Use a sensible supported version of each of the following:
 
-- Windows 10 64bit
-- Red Hat Enterprise 6 & 7  (IDAaaS at ISIS)
-- Ubuntu 18.04
-- Mac OS X Catalina
+- Windows
+- Rocky Linux (IDAaaS at ISIS)
+- Ubuntu
+- MacOS
+
+Linux Launch Tasks
+==================
+
+Check that the stand-alone and conda installs open without error on some common Linux distributions (e.g recent versions of Ubuntu, Alma Linux, Rocky Linux via IDAaaS)
 
 Grouped Tasks
 =============
