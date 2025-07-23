@@ -16,6 +16,7 @@ from Engineering.common.texture_sample_viewer import (
     get_scaled_intrinsic_sample_directions_in_lab_frame,
     get_mesh_vertices,
 )
+from Engineering.common.xml_shapes import get_cube_xml
 
 texture_sample_viewer_path = "Engineering.common.texture_sample_viewer"
 
@@ -33,16 +34,6 @@ class TextureCorrectionModelTest(unittest.TestCase):
     def tearDown(self):
         if ADS.doesExist(self.ws_name):
             ADS.remove(self.ws_name)
-
-    def get_cube_xml(self, name, side_len):
-        return f"""
-        <cuboid id='{name}'> \
-        <height val='{side_len}'  /> \
-        <width val='{side_len}' />  \
-        <depth  val='{side_len}' />  \
-        <centre x='0.0' y='0.0' z='0.0'  />  \
-        </cuboid>  \
-        <algebra val='{name}' /> \\ """
 
     def get_cube_mesh(self, side_len):
         p = side_len / 2
@@ -96,7 +87,7 @@ class TextureCorrectionModelTest(unittest.TestCase):
         self.assertTrue(not has_no_valid_shape("ws"))
 
     def test_get_xml_mesh_returns_mesh(self):
-        mesh = get_xml_mesh(self.get_cube_xml("test-cube", 2))  # create 2m cube
+        mesh = get_xml_mesh(get_cube_xml("test-cube", 2))  # create 2m cube
         self.assertTrue(np.all((mesh.shape, (12, 3, 3))))  # expect cube to have 12 triangles (2 per face)
         self.assertTrue(np.all((np.unique(mesh), (-1, 1))))  # all coordinates should be +/- 1m
         self.assertTrue(np.all((mesh, self.get_cube_mesh(2))))
