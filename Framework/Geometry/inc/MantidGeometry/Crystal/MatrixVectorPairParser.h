@@ -14,6 +14,7 @@
 
 #include <map>
 #include <optional>
+#include <ranges>
 #include <string>
 #include <tuple>
 
