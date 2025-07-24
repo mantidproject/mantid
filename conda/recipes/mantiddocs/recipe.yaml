@@ -41,6 +41,13 @@ requirements:
     - graphviz ${{ graphviz }}
     - pystog ${{ pystog }}
     - texlive-core ${{ texlive_core }}
+    - if: linux
+      then:
+        - libgl-devel
+        - xorg-libxxf86vm
+        - xorg-libx11
+        - xorg-xorgproto
+
   ignore_run_exports:
     from_package:
       - ${{ compiler('cxx') }}
@@ -62,3 +69,4 @@ extra:
     - thomashampson
     - sf1919
     - martyngigg
+    - peterfpeterson
