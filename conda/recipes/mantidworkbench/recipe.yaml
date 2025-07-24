@@ -37,6 +37,12 @@ requirements:
     - mantidqt == ${{ version }}
     - python ${{ python }}
     - versioningit ${{ versioningit }}
+    - if: linux
+      then:
+        - libgl-devel
+        - xorg-libxxf86vm
+        - xorg-libx11
+        - xorg-xorgproto
   run:
     - ipykernel
     - if: linux
@@ -50,9 +56,9 @@ requirements:
       then: pystack
     - qtconsole ${{ qtconsole }}
     - ${{ pin_compatible("setuptools", upper_bound="x.x") }}
-    - mantiddocs == ${{ version }}
-  run_constrained:
+  run_constraints:
     - mslice ${{ mslice }}
+    - mantiddocs == ${{ version }}
   ignore_run_exports:
     from_package:
       - ${{ compiler('cxx') }}
@@ -72,3 +78,4 @@ extra:
     - thomashampson
     - sf1919
     - martyngigg
+    - peterfpeterson
