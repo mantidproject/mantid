@@ -395,14 +395,14 @@ public:
     TS_ASSERT_EQUALS(outputWS->readY(5).front(), 590230);
   }
 
-  void test_splitter_table_abosolute_time() {
+  void test_splitter_table_absolute_time() {
     Mantid::DataObjects::TableWorkspace_sptr tablesplitter = create_splitter_table(false);
 
     MatrixWorkspace_sptr outputWS =
         run_algorithm("VULCAN_218062.nxs.h5", std::vector<double>{0.}, std::vector<double>{50000.},
                       std::vector<double>{50000.}, "Linear", "TOF", -1., -1., false, tablesplitter, false);
 
-    /* expected results came from running the same as above but with absolute time */
+    /* expected results should be the same as test_splitter_table but produced with absolute time */
 
     TS_ASSERT_EQUALS(outputWS->readY(0).front(), 807206);
     TS_ASSERT_EQUALS(outputWS->readY(1).front(), 805367);

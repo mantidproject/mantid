@@ -159,10 +159,10 @@ void AlignAndFocusPowderSlim::init() {
   declareProperty(std::make_unique<API::WorkspaceProperty<API::Workspace>>(
                       PropertyNames::SPLITTER_WS, "", Direction::Input, API::PropertyMode::Optional),
                   "Input workspace specifying \"splitters\", i.e. time intervals and targets for event filtering. "
-                  "Currently only a single workspace is supported.");
+                  "Currently only a single output workspace is supported.");
   declareProperty(PropertyNames::SPLITTER_RELATIVE, false,
                   "Flag indicating whether in SplitterWorkspace the times are absolute or "
-                  "relative. If true, they are relative to either the run start time.");
+                  "relative. If true, they are relative to the run start time.");
   const std::vector<std::string> cal_exts{".h5", ".hd5", ".hdf", ".cal"};
   declareProperty(std::make_unique<FileProperty>(PropertyNames::CAL_FILE, "", FileProperty::OptionalLoad, cal_exts),
                   "The .cal file containing the position correction factors. Either this or OffsetsWorkspace needs to "
