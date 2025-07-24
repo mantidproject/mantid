@@ -11,6 +11,7 @@ from typing import List
 
 import numpy as np
 from collections.abc import Sequence
+from copy import copy
 
 # 3rd party imports
 from matplotlib.gridspec import GridSpec
@@ -369,8 +370,9 @@ def get_plot_fig(overplot=None, ax_properties=None, window_title=None, axes_num=
     if ax_properties:
         scales_to_amend = [scale for scale in ["x", "y"] if f"{scale}scale" in ax_properties]
         for axis in fig.axes:
+            orig_ax_properties = copy(ax_properties)
             for scale_id in scales_to_amend:
-                ax_properties = _apply_scale_properties(ax_properties, scale_id, axis)
+                ax_properties = _apply_scale_properties(orig_ax_properties, scale_id, axis)
             axis.set(**_post_process_props(ax_properties))
     if window_title and fig.canvas.manager is not None:
         fig.canvas.manager.set_window_title(window_title)
