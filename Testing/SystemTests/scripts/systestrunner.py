@@ -108,7 +108,9 @@ def main(argv):
     #########################################################################
 
     failure = False
-    if any(exit_code is not systemtesting.TestRunner.SUCCESS_CODE for (exit_code, _) in results.values()):
+    if any(exit_code is not systemtesting.TestRunner.SUCCESS_CODE and
+           exit_code is not systemtesting.TestRunner.SKIP_TEST
+           for (exit_code, _) in results.values()):
         failure = True
 
     #########################################################################
