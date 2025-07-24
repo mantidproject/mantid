@@ -14,7 +14,7 @@ namespace Mantid {
 namespace API {
 
 PolSANSWorkspaceValidator::PolSANSWorkspaceValidator(bool expectHistogramData, bool allowMultiPeriodData,
-                                                     std::unordered_set<int> allowedNumberOfPeriods)
+                                                     const std::unordered_set<int> &allowedNumberOfPeriods)
     : m_expectHistogramData(expectHistogramData), m_allowMultiPeriodData(allowMultiPeriodData),
       m_allowedNumberOfPeriods(allowedNumberOfPeriods) {};
 

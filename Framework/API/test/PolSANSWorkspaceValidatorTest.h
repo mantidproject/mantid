@@ -40,7 +40,15 @@ public:
 
   void testWorkspaceGroupWithThreeWorkspaces() {
     auto wsGroupWithThree = WorkspaceCreationHelper::createWorkspaceGroup(3, 1, 10, "test_ws");
-    checkForErrorMessage(wsGroupWithThree, "Input workspace group must have 4 entries.");
+    checkForErrorMessage(wsGroupWithThree, "The number of periods within the input workspace is not an allowed value.");
+  }
+
+  void testWorkspaceGroupWithThreeWorkspacesButItIsAllowed() {
+    auto wsGroupWithThree = WorkspaceCreationHelper::createWorkspaceGroup(3, 1, 10, "test_ws");
+    PolSANSWorkspaceValidator validator(true, false, {3});
+    const auto result = validator.isValid(wsGroupWithThree);
+    const auto pos = result.find("The number of periods within the input workspace is not an allowed value.");
+    TS_ASSERT(pos == std::string::npos);
   }
 
   void testTableWorkspaces() {

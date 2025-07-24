@@ -19,7 +19,7 @@ namespace API {
 class MANTID_API_DLL PolSANSWorkspaceValidator : public Kernel::TypedValidator<WorkspaceGroup_sptr> {
 public:
   explicit PolSANSWorkspaceValidator(bool expectHistogramData = true, bool allowMultiPeriodData = false,
-                                     std::unordered_set<int> allowedNumberOfPeriods = {4});
+                                     const std::unordered_set<int> &allowedNumberOfPeriods = {4});
   /// Gets the type of the validator
   std::string getType() const { return "polSANS"; }
   /// Clone the current state

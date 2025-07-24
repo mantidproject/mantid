@@ -20,6 +20,7 @@ from mantid.api import (
     InstrumentValidator,
     MDFrameValidator,
     OrientedLatticeValidator,
+    PolSANSWorkspaceValidator,
 )
 
 
@@ -92,6 +93,16 @@ class WorkspaceValidatorsTest(unittest.TestCase):
         with no args
         """
         testhelpers.assertRaisesNothing(self, OrientedLatticeValidator)
+
+    def test_PolSANSWorkspaceValidator_construction(self):
+        """
+        Test that the OrientedLatticeValidator can be constructed
+        with different options
+        """
+        testhelpers.assertRaisesNothing(self, PolSANSWorkspaceValidator)
+        testhelpers.assertRaisesNothing(self, PolSANSWorkspaceValidator, True)
+        testhelpers.assertRaisesNothing(self, PolSANSWorkspaceValidator, True, False)
+        testhelpers.assertRaisesNothing(self, PolSANSWorkspaceValidator, True, False, [2, 3, 4])
 
 
 if __name__ == "__main__":
