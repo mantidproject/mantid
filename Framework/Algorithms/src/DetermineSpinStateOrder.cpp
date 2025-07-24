@@ -11,7 +11,6 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Strings.h"
 
@@ -151,6 +150,9 @@ void DetermineSpinStateOrder::exec() {
     const auto groupItem = std::dynamic_pointer_cast<API::MatrixWorkspace>(ws);
     const auto sfLog =
         dynamic_cast<const Kernel::TimeSeriesProperty<double> *>(groupItem->run().getLogData(m_spinFlipperLogName));
+    if (!sfLog) {
+      throw std::runtime_error(m_spinFlipperLogName + " was not a TimeSeriesProperty.");
+    }
     const auto sfLogValues = sfLog->filteredValuesAsVector();
     const double rfState =
         std::accumulate(sfLogValues.cbegin(), sfLogValues.cend(), 0.0) / static_cast<double>(sfLogValues.size());
