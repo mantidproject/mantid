@@ -15,6 +15,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <filesystem>
+#include <hdf5.h>
 #include <iostream>
 #include <map>
 #include <sstream>
@@ -216,8 +217,14 @@ private:
     // NOTE napi_test_cpp.cpp had logic here to print out global attributes
     // should have NeXus_version, file_name, HDF5_Version, and file_time
     std::vector<Mantid::Nexus::AttrInfo> attr_infos = file.getAttrInfos();
-    std::map<std::string, std::string> global_attrs{
-        {"NeXus_version", "4.4.3"}, {"file_name", filename}, {"HDF5_Version", "1.14.6"}, {"file_time", "today's date"}};
+    // set up the correct HDF5 version
+    unsigned major, minor, release;
+    H5get_libversion(&major, &minor, &release);
+    std::string hdf_version = strmakef("%u.%u.%u", major, minor, release);
+    Entries global_attrs{{"NeXus_version", NEXUS_VERSION},
+                         {"file_name", filename},
+                         {"HDF5_Version", hdf_version},
+                         {"file_time", "today's date"}};
     TS_ASSERT_EQUALS(attr_infos.size(), 4);
     for (Mantid::Nexus::AttrInfo const &attr : attr_infos) {
       TS_ASSERT_EQUALS(global_attrs.count(attr.name), 1);
