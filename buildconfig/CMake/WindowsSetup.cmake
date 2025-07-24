@@ -19,6 +19,8 @@ add_definitions(-D_SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING)
 # Suppress warnings about std::iterator as a base. TBB emits this warning and it is not yet fixed.
 add_definitions(-D_SILENCE_CXX17_ITERATOR_BASE_CLASS_DEPRECATION_WARNING)
 add_definitions(-D_SILENCE_CXX17_SHARED_PTR_UNIQUE_DEPRECATION_WARNING)
+# Suppress warnings about stdext::checked_array_iterator in VS2022
+add_definitions(-D_SILENCE_STDEXT_ARR_ITERS_DEPRECATION_WARNING)
 
 # ######################################################################################################################
 # Additional compiler flags

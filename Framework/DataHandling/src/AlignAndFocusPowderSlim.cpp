@@ -437,7 +437,8 @@ void AlignAndFocusPowderSlim::initCalibrationConstants(API::MatrixWorkspace_sptr
   for (auto iter = detInfo.cbegin(); iter != detInfo.cend(); ++iter) {
     if (!iter->isMonitor()) {
       const auto difc_focussed = getFocussedPostion(static_cast<detid_t>(iter->detid()), difc_focus);
-      m_calibration.emplace(iter->detid(), difc_focussed / detInfo.difcUncalibrated(iter->index()));
+      m_calibration.emplace(static_cast<detid_t>(iter->detid()),
+                            difc_focussed / detInfo.difcUncalibrated(iter->index()));
     }
   }
 }
