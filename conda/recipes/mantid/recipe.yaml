@@ -51,7 +51,7 @@ requirements:
       then: lib3mf
     - muparser ${{ muparser }}
     - numpy ${{ numpy }}
-    - occt
+    - occt ${{ occt }}
     - python ${{ python }}
     - poco ${{ poco }}
     - setuptools
@@ -76,7 +76,7 @@ requirements:
     - if: win
       then: lib3mf
     - muparser ${{ muparser }}
-    - occt
+    - occt ${{ occt }}
     - pycifrw
     - pydantic ${{ pydantic }}
     - python
@@ -117,3 +117,4 @@ extra:
     - thomashampson
     - sf1919
     - martyngigg
+    - peterfpeterson
