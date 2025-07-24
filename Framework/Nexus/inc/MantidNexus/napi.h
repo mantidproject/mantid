@@ -29,9 +29,6 @@
 #include "MantidNexus/NexusFile_fwd.h"
 #include <stdint.h>
 
-/* NeXus HDF45 */
-#define NEXUS_VERSION "4.4.3" /* major.minor.patch */
-
 /**
  * NeXus groups are NeXus way of structuring information into a hierarchy.
  * This function creates a group but does not open it.
