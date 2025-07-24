@@ -3,15 +3,16 @@ import numpy as np
 from os import path, scandir
 from Engineering.texture.polefigure.polefigure_model import TextureProjection
 from Engineering.texture.correction.correction_model import TextureCorrectionModel
-from mantid.simpleapi import SaveNexus, logger, CreateEmptyTableWorkspace, CropWorkspace, LoadCIF, Fit, CreateDetectorTable
+from mantid.simpleapi import SaveNexus, logger, CreateEmptyTableWorkspace, LoadCIF, Fit, CreateSingleValuedWorkspace
 from pathlib import Path
 from Engineering.EnggUtils import GROUP
 from Engineering.EnginX import EnginX
 from mantid.geometry import CrystalStructure
-from mantid.api import AnalysisDataService as ADS
+from mantid.api import AnalysisDataService as ADS, MultiDomainFunction, FunctionFactory
 from typing import Optional, Sequence, Union
-from collections.abc import Iterable
-
+from mantid.dataobjects import Workspace2D
+from mantid.fitfunctions import FunctionWrapper, CompositeFunctionWrapper
+from plugins.algorithms.IntegratePeaks1DProfile import PeakFunctionGenerator
 # -------- Utility --------------------------------
 
 
@@ -260,37 +261,111 @@ def validate_abs_corr_inputs(
 # -------- Fitting Script Logic--------------------------------
 
 
-def get_numerical_integ(ws: str, ispec: int):
-    """
-    Perform a numerical integration of the whole peak window after a linear background has been subtracted
+class TexturePeakFunctionGenerator(PeakFunctionGenerator):
+    def __init__(self, peak_params_to_fix: Sequence[str], min_width: float = 1e-3):
+        super().__init__(peak_params_to_fix)
+        self.min_width = min_width
 
-    ws: workspace
-    ispec: spectra id
-    """
-    lin_back = "name=LinearBackground"
+    def get_initial_fit_function_and_kwargs_from_specs(
+        self,
+        ws: Workspace2D,
+        peak: float,
+        x_window: tuple[float, float],
+        parameters_to_tie: Sequence[str],
+        peak_func_name: str,
+        bg_func_name: str,
+    ):
+        # modification of get_initial_fit_function_and_kwargs to just fit a peak within the x_window
+        si = ws.spectrumInfo()
+        ispecs = list(range(si.size()))
+        x_start, x_end = x_window
+        function = MultiDomainFunction()
+        fit_kwargs = {}
+        # estimate background
+        istart = ws.yIndexOfX(x_start)
+        iend = ws.yIndexOfX(x_end)
+        # init bg func (global)
+        bg_func = FunctionFactory.createFunction(bg_func_name)
+        # init peak func
+        peak_func = FunctionFactory.Instance().createPeakFunction(peak_func_name)
+        # save parameter names for future ties/constraints
+        peak_func.setIntensity(1.0)
+        self.intens_par_name = next(peak_func.getParamName(ipar) for ipar in range(peak_func.nParams()) if peak_func.isExplicitlySet(ipar))
+        self.cen_par_name = peak_func.getCentreParameterName()
+        self.width_par_name = peak_func.getWidthParameterName()
+        avg_bg = 0
+        intensity_estimates = []
+        for ispec in ispecs:
+            # get param estimates
+            intens, sigma, bg = self._estimate_intensity_and_background(ws, ispec, istart, iend)
+            intensity_estimates.append(intens)
+            avg_bg += bg
+            # add peak, using provided value as guess for centre
+            peak_func.setCentre(peak)
+            peak_func.setIntensity(intens)
+            # add constraints
+            peak_func.addConstraints(f"{self.cen_par_name} > {x_start}")
+            peak_func.addConstraints(f"{self.cen_par_name} < {x_end}")
+            peak_func.addConstraints(f"{self.intens_par_name} > 0")
+            comp_func = CompositeFunctionWrapper(FunctionWrapper(peak_func), FunctionWrapper(bg_func), NumDeriv=True)
+            function.add(comp_func.function)
+            function.setDomainIndex(ispec, ispec)
+            key_suffix = f"_{ispec}" if ispec > 0 else ""
+            fit_kwargs["InputWorkspace" + key_suffix] = ws.name()
+            fit_kwargs["StartX" + key_suffix] = x_start
+            fit_kwargs["EndX" + key_suffix] = x_end
+            fit_kwargs["WorkspaceIndex" + key_suffix] = int(ispec)
+        # set background (background global tied to first domain function)
+        function[0][1]["A0"] = avg_bg / len(ispecs)
 
-    Fit(lin_back, InputWorkspace=ws, WorkspaceIndex=ispec, Output="fit_result")
+        available_params = [peak_func.getParamName(i) for i in range(peak_func.nParams())]
+        if parameters_to_tie is not None:
+            invalid = [p for p in parameters_to_tie if p not in available_params]
+            if invalid:
+                raise ValueError(f"Invalid parameter(s) to tie: {invalid}. Available: {available_params}")
 
-    fit_ws = ADS.retrieve("fit_result_Workspace")
-    diffx, diffy = fit_ws.extractX()[-1], fit_ws.extractY()[-1]
+        # set constraint on FWHM (to avoid peak fitting to noise or background)
+        self._add_fwhm_constraints(function, peak_func, fit_range=x_end - x_start, nbins=iend - istart)
+        return self._add_parameter_ties(function, parameters_to_tie), fit_kwargs, intensity_estimates
 
-    return np.trapezoid(diffy, np.convolve(diffx, np.ones(2) / 2, "valid"))
+    def _add_parameter_ties(self, function: MultiDomainFunction, pars_to_tie: Sequence[str]) -> str:
+        # fix peak params requested
+        [function[0][0].fixParameter(par) for par in self.peak_params_to_fix]
+        additional_pars_to_fix = set(self.peak_params_to_fix) - set(pars_to_tie)
+        ties = []
+        for idom in range(1, function.nDomains()):
+            # tie global params to first
+            for par in pars_to_tie:
+                ties.append(f"f{idom}.f0.{par}=f0.f0.{par}")  # global peak pars
+            for ipar_bg in range(function[idom][1].nParams()):
+                par = function[idom][1].getParamName(ipar_bg)
+                ties.append(f"f{idom}.f1.{par}=f0.f1.{par}")
+            for par in additional_pars_to_fix:
+                # pars to be fixed but not global/already tied
+                function[idom][0].fixParameter(par)
+        # add ties as string (orders of magnitude quicker than self.function.tie)
+        return f"{str(function)};ties=({','.join(ties)})"
 
 
-def get_spectrum_indices(wsname: str, xmin: float, xmax: float):
-    ws = ADS.retrieve(wsname)
-    det_table = CreateDetectorTable(ws)
-    monitor_list = np.asarray(det_table.column("Monitor"))
-    spec_nums = np.asarray(list(range(ws.getNumberHistograms())))
-    # ignore monitors
-    spec_nums = spec_nums[np.where(monitor_list == "no")]
-    # ignore spectra if outside peak range
-    return [int(ispec) for ispec in spec_nums if ws.readX(int(ispec)).min() < xmin and ws.readX(int(ispec)).max() > xmax]
+def _get_run_and_prefix_from_ws_log(ws, wsname):
+    try:
+        run = str(ws.getRun().getLogData("run_number").value)
+        prefix = wsname.split(run)[0]
+    except:
+        run = "unknown"
+        prefix = ""
+    return run, prefix
 
 
-def fit_all_peaks(
-    wss: Sequence[str], peaks: Sequence[float], peak_window: float, save_dir: str, do_numeric_integ: bool = True, override_dir: bool = False
-):
+def _get_grouping_from_ws_log(ws):
+    try:
+        grouping = str(ws.getRun().getLogData("Grouping").value)
+    except RuntimeError:
+        grouping = "GROUP"
+    return grouping
+
+
+def fit_all_peaks(wss: Sequence[str], peaks: Sequence[float], peak_window: float, save_dir: str, override_dir: bool = False):
     """
     Fit all the peaks given in all the spectra of all the workspaces, for use in a texture analysis workflow
 
@@ -298,79 +373,103 @@ def fit_all_peaks(
     peaks: Sequence of peak positions in d-spacing
     peak_window: size of the window to create around the desired peak for purpose of fitting
     save_dir: directory to save the results in
-    do_numeric_integ: flag for whether a results column should be added which performs a linear background subtraction
-                      followed by a numerical integration of the peak window
     override_dir: flag which, if True, will save files directly into save_dir rather than creating a folder structure
     """
     for wsname in wss:
         ws = ADS.retrieve(wsname)
-        try:
-            run = str(ws.getRun().getLogData("run_number").value)
-            prefix = wsname.split(run)[0]
-        except:
-            run = "unknown"
-            prefix = ""
-        try:
-            grouping = str(ws.getRun().getLogData("Grouping").value)
-        except RuntimeError:
-            grouping = "GROUP"
+        run, prefix = _get_run_and_prefix_from_ws_log(ws, wsname)
+        grouping = _get_grouping_from_ws_log(ws)
         for peak in peaks:
             # change peak window to fraction
             out_ws = f"{prefix}{run}_{peak}_{grouping}_Fit_Parameters"
             out_file = out_ws + ".nxs"
             out_path = path.join(save_dir, out_file) if override_dir else path.join(save_dir, grouping, str(peak), out_file)
 
-            fit_range_min = peak - peak_window
-            fit_range_max = peak + peak_window
-
-            func = f"""
-                    composite=CompositeFunction;
-                      name=LinearBackground;
-                      name=BackToBackExponential,X0={peak};
-                      constraints=({fit_range_min} < f1.X0 < {fit_range_max}, 0<f1.I)
-                    """
-            out_tab = CreateEmptyTableWorkspace(OutputWorkspace=out_ws)
-
             xmin, xmax = peak - peak_window, peak + peak_window
 
-            crop_ws = CropWorkspace(InputWorkspace=ws, XMin=xmin, XMax=xmax, OutputWorkspace="crop_ws")
-            spec_nums = get_spectrum_indices("crop_ws", xmin, xmax)
-            for ispec in spec_nums:
-                Fit(
-                    Function=func,
-                    InputWorkspace=ws,
-                    WorkspaceIndex=ispec,
-                    StartX=fit_range_min,
-                    EndX=fit_range_max,
-                    Output="fit",
-                    CreateOutput=True,
-                    OutputCompositeMembers=True,
-                    OutputParametersOnly=True,
-                    OutputWorkspace="focussed_peak_centres",
-                    CostFunction="Least squares",
-                )
+            out_tab = CreateEmptyTableWorkspace(OutputWorkspace=out_ws)
 
-                spec_fit = ADS.retrieve("fit_Parameters")
+            peak_func_name = "BackToBackExponential"
+            bg_func_name = "LinearBackground"
 
-                if ispec == 0:
-                    out_tab.addColumn("int", "wsindex")
-                    for param in spec_fit.column("Name"):
-                        param_name = param.split(".")[-1]
-                        col_name = "chi2" if param_name == "Cost function value" else param_name
-                        out_tab.addColumn("double", col_name)
-                    if do_numeric_integ:
-                        out_tab.addColumn("double", "I_est")
+            func_generator = TexturePeakFunctionGenerator([])  # don't fix any parameters
+            initial_function, md_fit_kwargs, intensity_estimates = func_generator.get_initial_fit_function_and_kwargs_from_specs(
+                ws, peak, (xmin, xmax), ("A", "B"), peak_func_name, bg_func_name
+            )
 
-                if do_numeric_integ:
-                    intensity_est = get_numerical_integ(crop_ws, ispec)
-                    out_tab.addRow([ispec] + spec_fit.column("Value") + [intensity_est])
-                else:
-                    out_tab.addRow([ispec] + spec_fit.column("Value"))
+            Fit(
+                Function=initial_function,
+                CostFunction="Least squares",
+                Output="fit",
+                MaxIterations=50,  # if it hasn't fit in 50 it is likely because the texture has the peak missing
+                **md_fit_kwargs,
+            )
 
+            spec_fit = ADS.retrieve("fit_Parameters")
+            si = ws.spectrumInfo()
+
+            out_tab.addColumn("int", "wsindex")
+            out_tab.addColumn("double", "I_est")
+            all_params = spec_fit.column("Name")[:-1]  # last row is cost function
+            param_vals = spec_fit.column("Value")[:-1]
+            param_errs = spec_fit.column("Error")[:-1]
+            u_params = []
+            for col in all_params:  # last col is cost of whole fit
+                spec_num, func_num, param = col.split(".")
+                # assume first function is the peak
+                if func_num == "f0" and param not in u_params:
+                    u_params.append(param)
+                    out_tab.addColumn("double", param)
+                    out_tab.addColumn("double", f"{param}_err")
+
+            for ispec in range(si.size()):
+                row = [ispec, intensity_estimates[ispec]]
+                for p in u_params:
+                    param_name = f"f{ispec}.f0.{p}"
+                    pind = all_params.index(param_name)
+                    row += [param_vals[pind], param_errs[pind]]
+                out_tab.addRow(row)
             SaveNexus(InputWorkspace=out_ws, Filename=out_path)
 
 
 # -------- Pole Figure Script Logic--------------------------------
+
+
+class CrystalPhase:
+    def __init__(self, crystal_structure: CrystalStructure):
+        self.xtal = crystal_structure
+
+    @classmethod
+    def from_cif(cls, cif_file: str):
+        ws = CreateSingleValuedWorkspace(StoreInADS=False, EnableLogging=False)
+        LoadCIF(ws, cif_file, StoreInADS=False)
+        return CrystalPhase(ws.sample().getCrystalStructure())
+
+    @classmethod
+    def from_alatt(cls, alatt: np.ndarray, space_group: str = "P 1", basis: str = ""):
+        alatt_str = " ".join([str(par) for par in alatt])
+        xtal = CrystalStructure(alatt_str, space_group, basis)
+        return CrystalPhase(xtal)
+
+    @classmethod
+    def from_string(cls, lattice: str, space_group: str, basis: str):
+        xtal = CrystalStructure(lattice, space_group, basis)
+        return CrystalPhase(xtal)
+
+
+def get_xtal_structure(input_method, *args, **kwargs):
+    match input_method:
+        case "cif":
+            phase = CrystalPhase.from_cif(*args, **kwargs)
+            return phase.xtal
+        case "array":
+            phase = CrystalPhase.from_alatt(*args, **kwargs)
+            return phase.xtal
+        case "string":
+            phase = CrystalPhase.from_string(*args, **kwargs)
+            return phase.xtal
+        case _:
+            raise ValueError(f"input_method must be: 'cif', 'array', or 'string', '{input_method}' was provided")
 
 
 def create_pf(
@@ -386,10 +485,7 @@ def create_pf(
     scat_vol_pos: Sequence[float] = (0.0, 0.0, 0.0),
     projection_method: str = "Azimuthal",
     params: Optional[Sequence[str]] = None,
-    cif: Optional[str] = None,
-    lattice: Optional[str] = None,
-    space_group: Optional[str] = None,
-    basis: Optional[str] = None,
+    xtal: Optional[CrystalStructure] = None,
     hkl: Optional[Sequence[int]] = None,
     readout_column: Optional[str] = None,
     kernel: Optional[float] = None,
@@ -403,10 +499,7 @@ def create_pf(
     wss: Workspace names of the ws with the orientation information present as a goniometer matrix
     params: Parameter Workspaces if you want to read a column of this table to each point in the pole figure
     include_scatt_power: flag for whether to adjust the value by a scattering power calculation
-    cif: path to CIF file for the crystal structure
-    lattice: String representation of Lattice for CrystalStructure
-    space_group: String representation of Space Group for CrystalStructure
-    basis: String representation of Basis for CrystalStructure
+    phase:
     hkl: H,K,L reflection of the peak fit in the param workspaces
     readout_column: column of the param ws that should be attached to the pole figure table
     dir1: vector of the first principle direction of the sample
@@ -425,14 +518,10 @@ def create_pf(
     override_dir: flag which, if True, will save files directly into save_dir rather than creating a folder structure
     """
     model = TextureProjection()
-    if include_scatt_power:
-        if cif:
-            for ws in wss:
-                LoadCIF(Workspace=ws, InputFile=cif)
-        else:
-            for ws in wss:
-                ws = ADS.retrieve(ws)
-                ws.sample().setCrystalStructure(CrystalStructure(lattice, space_group, basis))
+    if xtal:
+        for ws in wss:
+            ws = ADS.retrieve(ws)
+            ws.sample().setCrystalStructure(xtal)
 
     out_ws, grouping = model.get_pf_table_name(wss, params, hkl, readout_column)
     dir1, dir2, dir3 = np.asarray(dir1), np.asarray(dir2), np.asarray(dir3)
@@ -471,7 +560,7 @@ def make_iterable(param):
 
     param: parameter value
     """
-    return param if isinstance(param, Iterable) else [param]
+    return param if isinstance(param, tuple) or isinstance(param, list) else [param]
 
 
 def create_pf_loop(
@@ -487,10 +576,7 @@ def create_pf_loop(
     save_root: str,
     exp_name: str,
     projection_method: str,
-    cif: Optional[str] = None,
-    lattice: Optional[str] = None,
-    space_group: Optional[str] = None,
-    basis: Optional[str] = None,
+    xtal: Optional[CrystalStructure] = None,
     hkls: Optional[Union[Sequence[Sequence[int]], Sequence[int]]] = None,
     readout_columns: Optional[Union[str, Sequence[str]]] = None,
     kernel: Optional[float] = None,
@@ -527,17 +613,14 @@ def create_pf_loop(
     # get ws paths
     for iparam, params in enumerate(param_wss):
         # if multiple peaks are provided, multiple hkls should also be provided
-        hkl = hkls if len(param_wss) == 1 else hkls[iparam]
+        hkl = hkls if len(param_wss) == 1 else hkls[iparam] if hkls else None
 
         for readout_column in make_iterable(readout_columns):
             kwargs = {
                 "wss": wss,
                 "params": params,
                 "include_scatt_power": include_scatt_power,
-                "cif": cif,
-                "lattice": lattice,
-                "space_group": space_group,
-                "basis": basis,
+                "xtal": xtal,
                 "hkl": hkl,
                 "readout_column": readout_column,
                 "dir1": dir1,
