@@ -231,7 +231,7 @@ File &File::operator=(File const &f) {
     this->m_filename = f.m_filename;
     this->m_access = f.m_access;
     this->m_address = NexusAddress::root();
-    this->m_pfile = m_pfile;
+    this->m_pfile = f.m_pfile;
     this->m_current_group_id = this->m_current_data_id = this->m_current_type_id = this->m_current_space_id = 0;
     this->m_gid_stack.assign({0});
     this->m_close_handle = f.m_close_handle;
