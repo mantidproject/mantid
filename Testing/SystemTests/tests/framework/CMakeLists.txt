@@ -1,4 +1,5 @@
-# System tests for the Mantid Framework package.
+# System tests for the Mantid Framework package. Files that contain only base classes, and no actual tests, should not
+# be added to this list.
 
 set(SYSTEST_NAMES
     AbinsTest.py
@@ -38,7 +39,6 @@ set(SYSTEST_NAMES
     DirectInelasticDiagnostic.py
     DirectInelasticDiagnostic2.py
     DistributeProtonChargeTest.py
-    DocumentationTest.py
     DOSTest.py
     DrillProcessTest.py
     ElasticEMUReductionTest.py
