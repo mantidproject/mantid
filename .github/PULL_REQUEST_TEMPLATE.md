@@ -26,11 +26,9 @@ Ok to refer back to instructions in the issue.
 
 ### Reviewer
 
-Familiarise yourself with the ([review guidelines](http://developer.mantidproject.org/ReviewingAPullRequest.html)).
-
 **Your comments will be used as part of the gatekeeper process.** Comment clearly on what you have checked and tested during your review. Provide an audit trail for any changes requested.
 
-#### PR Review Checklist
+As per the ([review guidelines](http://developer.mantidproject.org/ReviewingAPullRequest.html)):
 
 - Is the code of an acceptable quality? [Code standards](http://developer.mantidproject.org/Standards/)/[GUI standards](http://developer.mantidproject.org/Standards/GUIStandards.html)
 - Has a thorough functional test been performed? Do the changes handle unexpected input/situations?
