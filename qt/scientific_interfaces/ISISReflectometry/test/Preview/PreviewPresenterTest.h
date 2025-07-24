@@ -890,6 +890,7 @@ private:
     EXPECT_CALL(linePlot, setScaleSymLog(AxisID::YLeft, 1e-4)).Times(1);
     EXPECT_CALL(linePlot, setScaleLog(AxisID::XBottom)).Times(1);
     EXPECT_CALL(linePlot, setPlotErrorBars(true)).Times(1);
+    EXPECT_CALL(linePlot, setAxisLimit(AxisID::YLeft, -1e-5, 2.0)).Times(1);
   }
 
   void expectLoadWorkspaceCompletedForLinearDetector(MockPreviewModel &mockModel,
