@@ -97,7 +97,7 @@ void WorkspaceGroup::sortMembersByName() {
 }
 
 /**
- *  Reorder the group members using a list of indicies (e.g the list 3,2,1,0 would reverse the order)
+ *  Reorder the group members using a list of indices (e.g the list 3,2,1,0 would reverse the order)
  */
 void WorkspaceGroup::reorderMembersWithIndices(const std::vector<int> &indices) {
   if (indices.size() != this->size()) {

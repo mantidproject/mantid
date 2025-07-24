@@ -89,18 +89,18 @@ PyObject *getItem(WorkspaceGroup &self, const int &index) {
   return convertWsToObj(self.getItem(index));
 }
 
-void reorder(WorkspaceGroup &self, const boost::python::object &pythonIndicies) {
-  std::vector<int> indicies(static_cast<size_t>(PySequence_Size(pythonIndicies.ptr())));
+void reorder(WorkspaceGroup &self, const boost::python::object &pythonIndices) {
+  std::vector<int> indices(static_cast<size_t>(PySequence_Size(pythonIndices.ptr())));
 
-  if (NDArray::check(pythonIndicies)) {
-    NDArrayToVector<int> converter(pythonIndicies);
-    converter.copyTo(indicies);
+  if (NDArray::check(pythonIndices)) {
+    NDArrayToVector<int> converter(pythonIndices);
+    converter.copyTo(indices);
   } else {
-    PySequenceToVector<int> converter(pythonIndicies);
-    converter.copyTo(indicies);
+    PySequenceToVector<int> converter(pythonIndices);
+    converter.copyTo(indices);
   }
 
-  self.reorderMembersWithIndices(indicies);
+  self.reorderMembersWithIndices(indices);
 }
 
 void export_WorkspaceGroup() {
@@ -112,7 +112,7 @@ void export_WorkspaceGroup() {
       .def("contains", (bool (WorkspaceGroup::*)(const std::string &wsName) const) & WorkspaceGroup::contains,
            (arg("self"), arg("workspace")), "Returns true if the given name is in the group")
       .def("sortByName", &WorkspaceGroup::sortByName, (arg("self")), "Sort members by name")
-      .def("reorder", reorder, (arg("self"), arg("indicies")), "Reorder the group members using a list of indicies")
+      .def("reorder", reorder, (arg("self"), arg("indices")), "Reorder the group members using a list of indices")
       .def("add", addItem, (arg("self"), arg("workspace_name")), "Add a name to the group")
       .def("addWorkspace", addWorkspace, (arg("self"), arg("workspace")), "Add a workspace to the group.")
       .def("size", &WorkspaceGroup::size, arg("self"), "Returns the number of workspaces contained in the group")
