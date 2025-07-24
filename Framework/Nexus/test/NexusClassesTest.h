@@ -99,6 +99,7 @@ public:
   }
 
   void test_double_root() {
+    std::cout << "test double root issue\n" << std::flush;
     // this protects against a regression that could occur, only on Windows,
     // and only in the tests of LoadMuonNexus3 and LoadMuonNexusV2
     std::string filename(NexusTest::getFullPath("EMU00102347.nxs_v2"));
@@ -109,6 +110,7 @@ public:
   }
 
   void test_proper_concat() {
+    std::cout << "test proper concat of addresses\n" << std::flush;
     // this protects against a regression that can occur in LoadILLSANS
     std::string filename = NexusTest::getFullPath("ILL/D16/025786.nxs");
     Mantid::Nexus::NXRoot root(filename);
