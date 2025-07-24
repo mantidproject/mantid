@@ -1204,13 +1204,13 @@ template <typename NumT> void File::getSlab(NumT *data, DimSizeVector const &sta
       }
     }
 
-    iRet = H5Sselect_hyperslab(m_current_space_id, H5S_SELECT_SET, myStart, NULL, mySize, NULL);
+    iRet = H5Sselect_hyperslab(m_current_space_id, H5S_SELECT_SET, myStart.data(), NULL, mySize.data(), NULL);
     if (iRet < 0) {
       throw NXEXCEPTION("Selecting slab failed");
     }
 
-    memspace = H5Screate_simple(iRank, mySize, NULL);
-    iRet = H5Sselect_hyperslab(memspace, H5S_SELECT_SET, mStart, NULL, mySize, NULL);
+    memspace = H5Screate_simple(iRank, mySize.data(), NULL);
+    iRet = H5Sselect_hyperslab(memspace, H5S_SELECT_SET, mStart.data(), NULL, mySize.data(), NULL);
     if (iRet < 0) {
       throw NXEXCEPTION("Selecting memspace failed");
     }
