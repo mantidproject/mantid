@@ -10,6 +10,11 @@
 #include <utility>
 #include <vector>
 
+/** NeXus HDF45
+ * major.minor.patch
+ */
+#define NEXUS_VERSION "4.4.3"
+
 namespace {
 static const std::string NULL_STR("NULL");
 }
