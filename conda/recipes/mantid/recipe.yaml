@@ -32,13 +32,6 @@ requirements:
         - cross-python_${{ target_platform }}
         - setuptools
         - numpy ${{ numpy }}
-    - if: linux
-      then:
-        - ${{ cdt('mesa-libgl-devel') }}
-        - ${{ cdt('mesa-dri-drivers') }}
-        - ${{ cdt('libxxf86vm') }}
-        - ${{ cdt('libx11-devel') }}
-        - ${{ cdt('xorg-x11-proto-devel') }}
   host:
     - eigen ${{ eigen }}
     - gsl ${{ gsl }}
@@ -57,7 +50,7 @@ requirements:
       then: lib3mf
     - muparser ${{ muparser }}
     - numpy ${{ numpy }}
-    - occt
+    - occt ${{ occt }}
     - python ${{ python }}
     - poco ${{ poco }}
     - setuptools
@@ -66,7 +59,12 @@ requirements:
     - versioningit ${{ versioningit }}
     - zlib
     - if: linux
-      then: libglu ${{ libglu }}
+      then:
+        - libglu ${{ libglu }}
+        - libgl-devel
+        - xorg-libxxf86vm
+        - xorg-libx11
+        - xorg-xorgproto
   run:
     - ${{ pin_compatible("gsl", upper_bound="x.x") }}
     - ${{ pin_compatible("hdf4", upper_bound="x.x") }}
@@ -78,7 +76,7 @@ requirements:
       then: lib3mf
     - muparser ${{ muparser }}
     - ${{ pin_compatible("numpy", upper_bound="2.2") }}
-    - occt
+    - occt ${{ occt }}
     - pycifrw
     - pydantic ${{ pydantic }}
     - python
@@ -116,3 +114,4 @@ extra:
     - thomashampson
     - sf1919
     - martyngigg
+    - peterfpeterson
