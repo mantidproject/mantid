@@ -9,6 +9,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidAlgorithms/DllConfig.h"
+#include "MantidKernel/EmptyValues.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -31,8 +32,8 @@ private:
   void init() override;
   void exec() override;
 
-  std::string m_spinFlipperLogName;
-  double m_rfStateCondition;
+  std::string m_spinFlipperLogName = "";
+  double m_rfStateCondition = EMPTY_DBL();
 };
 
 } // namespace Algorithms
