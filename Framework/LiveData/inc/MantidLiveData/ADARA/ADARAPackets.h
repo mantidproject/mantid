@@ -240,7 +240,7 @@ public:
   bool getSourceCORFlag() const { return m_isCorrected; }
   uint32_t getSourceTOFOffset() const { return m_TOFOffset; }
   uint32_t curBankId() const { return m_bankId; }
-  // uint32_t curEventCount() const { return ((uint32_t *)m_curBank)[1]; }
+  uint32_t curEventCount() const { return m_eventCount; }
 
 private:
   const uint32_t *m_fields;
