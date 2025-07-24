@@ -1,33 +1,17 @@
-/*---------------------------------------------------------------------------
-  NeXus - Neutron & X-ray Common Data Format
-
-  Application Program Interface Header File
-
-  Copyright (C) 2000-2014 NeXus International Advisory Committee
-
-  This library is free software; you can redistribute it and/or
-  modify it under the terms of the GNU Lesser General Public
-  License as published by the Free Software Foundation; either
-  version 2 of the License, or (at your option) any later version.
-
-  This library is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  Lesser General Public License for more details.
-
-  You should have received a copy of the GNU Lesser General Public
-  License along with this library; if not, write to the Free Software
-  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-
-  For further information, see <http://www.nexusformat.org>
-
- ----------------------------------------------------------------------------*/
-
 #pragma once
 
 #include "MantidNexus/DllConfig.h"
 #include "MantidNexus/NexusFile_fwd.h"
-#include <stdint.h>
+
+typedef Mantid::Nexus::File &NXhandle;
+
+/**
+ * Special codes for NeXus file status.
+ * \li OKAY success +1.
+ * \li ERROR error 0
+ * \ingroup cpp_types
+ */
+enum class NXstatus : const int { NX_OK = 1, NX_ERROR = 0 };
 
 /**
  * NeXus groups are NeXus way of structuring information into a hierarchy.
@@ -49,17 +33,6 @@ MANTID_NEXUS_DLL NXstatus NXmakegroup(NXhandle fid, std::string const &name, std
  * \ingroup c_group
  */
 MANTID_NEXUS_DLL NXstatus NXopengroup(NXhandle fid, std::string const &name, std::string const &nxclass);
-
-/**
- * Open the NeXus object with the address specified
- * \param handle A NeXus file handle as returned from NXopen.
- * \param address A unix like address string to a NeXus group or dataset. The address string
- * is a list of group names and SDS names separated with / (slash).
- * Example: /entry1/sample/name
- * \return NX_OK on success, NX_ERROR in the case of an error.
- * \ingroup c_navigation
- */
-MANTID_NEXUS_DLL NXstatus NXopenaddress(NexusFile5 &fid, std::string const &address);
 
 /**
  * Closes the currently open group and steps one step down in the NeXus file

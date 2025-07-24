@@ -138,7 +138,7 @@ EXCLUDE                = @CMAKE_CURRENT_SOURCE_DIR@/../ICat/src/GSoapGenerated \
                          @CMAKE_CURRENT_SOURCE_DIR@/../Kernel/inc/MantidKernel/span.hpp \
                          @CMAKE_CURRENT_SOURCE_DIR@/../Nexus/src/NexusFile.cpp \
                          @CMAKE_CURRENT_SOURCE_DIR@/../Nexus/inc/MantidNexus/NexusFile.h \
-                         @CMAKE_CURRENT_SOURCE_DIR@/../Nexus/inc/MantidNexus/napi.h
+                         @CMAKE_CURRENT_SOURCE_DIR@/../Nexus/inc/MantidNexus/inverted_napi.h
 
 
 EXCLUDE_SYMLINKS       = NO
