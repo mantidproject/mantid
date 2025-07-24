@@ -35,6 +35,13 @@ const std::string DMC01("dmc01cpp");
 const std::string DMC02("dmc02cpp");
 } // namespace
 
+/** NOTE
+ * This test is a faithful duplicate of the former test, napi_test_cpp.cpp,
+ * which was in turn based on the napi test, napi_test.cpp
+ * Some of the print-outs were converted to assertions, to make this a true test
+ * see https://github.com/nexusformat/code/blob/master/test/napi_test_cpp.cxx
+ */
+
 class NexusFileNapiTest : public CxxTest::TestSuite {
 
 public:
@@ -206,7 +213,80 @@ private:
     const string SDS("SDS");
     // top level file information
     Mantid::Nexus::File file(filename);
+    // NOTE napi_test_cpp.cpp had logic here to print out global attributes
+    // should have NeXus_version, file_name, HDF5_Version, and file_time
+    std::vector<Mantid::Nexus::AttrInfo> attr_infos = file.getAttrInfos();
+    std::map<std::string, std::string> global_attrs{
+        {"NeXus_version", "4.4.3"}, {"file_name", filename}, {"HDF5_Version", "1.14.6"}, {"file_time", "today's date"}};
+    TS_ASSERT_EQUALS(attr_infos.size(), 4);
+    for (Mantid::Nexus::AttrInfo const &attr : attr_infos) {
+      TS_ASSERT_EQUALS(global_attrs.count(attr.name), 1);
+      if (attr.name != "file_time") {
+        TS_ASSERT_EQUALS(global_attrs[attr.name], file.getStrAttr(attr.name));
+      }
+    }
+
+    // check group attributes
     file.openGroup("entry", "NXentry");
+    // NOTE napi_test_cpp.cpp had logic here to print out all entry-level attributes
+    attr_infos = file.getAttrInfos();
+    std::map<std::string, std::string> exp_names{
+        // Hugo Namenlos and his passion for cucumbers will live in Mantid infamy forever
+        {"hugo", "namenlos"},
+        {"cucumber", "passion"}};
+    TS_ASSERT_EQUALS(attr_infos.size(), 2);
+    for (Mantid::Nexus::AttrInfo const &attr : attr_infos) {
+      TS_ASSERT_EQUALS(exp_names.count(attr.name), 1);
+      TS_ASSERT_EQUALS(exp_names[attr.name], file.getStrAttr(attr.name));
+    }
+
+    // print out the entry level fields
+    // NOTE napi_test_cpp.cpp had logic here to print out all entries off of entry-level
+    // and also the value contained in any dataset
+    Mantid::Nexus::Entries entries = file.getEntries();
+    TS_ASSERT_EQUALS(entries.size(), 10);
+    std::vector<float> r4_array;
+    for (size_t i = 0; i < 20; i++) {
+      r4_array.push_back(static_cast<float>(i));
+    }
+    std::vector<double> r8_array;
+    for (size_t i = 20; i < 40; i++) {
+      r8_array.push_back(static_cast<double>(i));
+    }
+    std::set<std::string> exp_entries{"c1_data", "ch_data", "data",    "grosszahl", "i1_data",
+                                      "i2_data", "i4_data", "r4_data", "r8_data",   "sample"};
+    for (Mantid::Nexus::Entry entry : entries) {
+      TS_ASSERT_EQUALS(exp_entries.count(entry.first), 1);
+      if (entry.second == "SDS") {
+        // NOTE c1_data is a 2d char array and is skipped in napi_test_cpp.cpp
+        // NOTE grosszahl will be platform dependent
+        if (entry.first == "ch_data") {
+          file.openData(entry.first);
+          TS_ASSERT_EQUALS(file.getStrData(), "NeXus_data");
+          file.closeData();
+        } else if (entry.first == "i1_data") {
+          std::vector<uint8_t> res;
+          file.readData<uint8_t>(entry.first, res);
+          TS_ASSERT_EQUALS(res, std::vector<uint8_t>({1, 2, 3, 4}));
+        } else if (entry.first == "i2_data") {
+          std::vector<int16_t> res;
+          file.readData<int16_t>(entry.first, res);
+          TS_ASSERT_EQUALS(res, std::vector<int16_t>({1000, 2000, 3000, 4000}));
+        } else if (entry.first == "i4_data") {
+          std::vector<int32_t> res;
+          file.readData<int32_t>(entry.first, res);
+          TS_ASSERT_EQUALS(res, std::vector<int32_t>({1000000, 2000000, 3000000, 4000000}));
+        } else if (entry.first == "r4_data") {
+          std::vector<float> res;
+          file.readData<float>(entry.first, res);
+          TS_ASSERT_EQUALS(res, r4_array);
+        } else if (entry.first == "r8_data") {
+          std::vector<double> res;
+          file.readData<double>(entry.first, res);
+          TS_ASSERT_EQUALS(res, r8_array);
+        }
+      }
+    }
 
     // Test getDataCoerce() -------------------
     std::vector<int> ints;
@@ -279,10 +359,8 @@ public:
   void test_readwrite_hdf5() {
     cout << " Nexus File Tests\n";
     NXaccess const nx_creation_code = NXaccess::CREATE5;
-    string const fileext = ".h5";
-    string const filename("nexus_file_napi_test_cpp" + fileext);
-
-    removeFile(filename); // in case last round failed
+    NexusTest::FileResource resource("nexus_file_napi_test_cpp.h5");
+    std::string filename(resource.fullPath());
 
     // try writing a file
     do_test_write(filename, nx_creation_code);
@@ -290,9 +368,8 @@ public:
     // try reading a file
     do_test_read(filename);
 
-    removeFile(filename); // cleanup
-
     // try using the load path
+    std::string fileext(".h5");
     do_test_loadPath(DMC01 + fileext);
     do_test_loadPath(DMC02 + fileext);
 

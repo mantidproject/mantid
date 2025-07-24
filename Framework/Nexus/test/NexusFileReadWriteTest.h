@@ -267,7 +267,7 @@ public:
     // NOTE the original really did not do any reading, only putting
     // see https://github.com/nexusformat/code/blob/master/test/test_nxunlimited.c
     constexpr std::size_t DATA_SIZE(200);
-    static double d[DATA_SIZE];
+    double d[DATA_SIZE];
     Mantid::Nexus::DimVector dims{NX_UNLIMITED, DATA_SIZE};
 
     FileResource resource("test_nxunlimited.nx5");
@@ -367,10 +367,8 @@ public:
 
     // check data link
     fileid.openAddress("/entry/data/some_data");
-    // TODO why can't we get the data through the link?
-    // string output1;
-    // fileid.getData(&output1);
-    // TS_ASSERT_EQUALS(somedata, output1);
+    string output1 = fileid.getStrData();
+    TS_ASSERT_EQUALS(somedata, output1);
     NXlink res1 = fileid.getDataID();
     TS_ASSERT_EQUALS(datalink.linkType, res1.linkType);
     TS_ASSERT_EQUALS(datalink.targetAddress, res1.targetAddress);
