@@ -11,8 +11,7 @@
 #include "MantidDataHandling/DllConfig.h"
 #include "MantidGeometry/IDTypes.h"
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling::AlignAndFocusPowderSlim {
 
 /** AlignAndFocusPowderSlim : TODO: DESCRIPTION
  */
@@ -23,19 +22,6 @@ public:
   const std::string category() const override;
   const std::string summary() const override;
   const std::vector<std::string> seeAlso() const override;
-
-  class MANTID_DATAHANDLING_DLL BankCalibration {
-  public:
-    BankCalibration(const detid_t idmin, const detid_t idmax, const double time_conversion,
-                    const std::map<detid_t, double> &calibration_map, const std::set<detid_t> &mask);
-    const double &value(const detid_t detid) const;
-    const detid_t &idmin() const;
-    detid_t idmax() const;
-
-  private:
-    std::vector<double> m_calibration;
-    const detid_t m_detid_offset;
-  };
 
 private:
   void init() override;
@@ -62,6 +48,4 @@ private:
   std::vector<int64_t> loadSize;
   std::vector<std::pair<size_t, size_t>> pulse_indices;
 };
-
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling::AlignAndFocusPowderSlim
