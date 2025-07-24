@@ -108,12 +108,14 @@ requirements:
       then: libcxx
     # Use conda version of clang to get matching CXXFLAGS.
     # Pinned to same version as conda forge: https://github.com/conda-forge/conda-forge-pinning-feedstock/blob/main/recipe/conda_build_config.yaml
+    - if: osx and arm64
+      then:
+        - clang_osx-arm64 ${{ c_compiler_version }}
+        - clangxx_osx-arm64 ${{ cxx_compiler_version }}
     - if: osx and not arm64
       then:
         - clang_osx-64 ${{ c_compiler_version }}
         - clangxx_osx-64 ${{ cxx_compiler_version }}
-        - clang_osx-arm64 ${{ c_compiler_version }}
-        - clangxx_osx-arm64 ${{ cxx_compiler_version }}
     - if: osx
       then: llvm-openmp ${{ llvm_openmp }}
 
