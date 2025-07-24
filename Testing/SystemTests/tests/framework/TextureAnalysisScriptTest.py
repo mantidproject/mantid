@@ -12,6 +12,7 @@ from mantid.api import AnalysisDataService as ADS
 from Engineering.texture.TextureUtils import run_abs_corr, fit_all_peaks
 from mantid.simpleapi import LoadEmptyInstrument, CreateSampleShape, SetSampleMaterial, Load, ExtractSingleSpectrum, ConvertUnits
 from Engineering.common.xml_shapes import get_cube_xml
+import numpy as np
 
 DATA_DIR = config["datasearch.directories"].split(";")[0]
 CWDIR = os.path.join(config["datasearch.directories"].split(";")[0], "Texture")
@@ -28,6 +29,7 @@ config.appendDataSearchSubDir(CWDIR)
 class AbsCorrMixin(object):
     def setup_absorption_correction_inputs(self):
         self.shape_xml = get_cube_xml("test_cube", 0.01)
+        print(self.shape_xml)
         LoadEmptyInstrument(InstrumentName="ENGINX", OutputWorkspace="ref_ws")
         CreateSampleShape(InputWorkspace="ref_ws", ShapeXML=self.shape_xml)
         SetSampleMaterial(InputWorkspace="ref_ws", ChemicalFormula="Fe")
@@ -195,45 +197,48 @@ class PeakFitMixin(object):
         self.input_ws = ConvertUnits(InputWorkspace=raw_ws, OutputWorkspace="ENGINX_280625_focused_bank_1_dSpacing", Target="dSpacing")
         self.fit_dir = os.path.join(CWDIR, "FitParameters")
         self.peaks = (1.8, 1.44)
-        self.reference_columns = ["wsindex", "A0", "A1", "I", "A", "B", "X0", "S", "chi2", "I_est"]
+        self.reference_columns = ["wsindex", "I_est", "I", "I_err", "A", "A_err", "B", "B_err", "X0", "X0_err", "S", "S_err"]
         self.peak_1_vals = [
             0,
-            1500.856889154188,
-            -669.0606994822296,
-            70.61040576989895,
-            174.2113006175971,
-            127.43312817687284,
-            1.8001619058645897,
-            0.0030776621774879147,
-            0.16627024534662274,
-            41.97759313602705,
+            54.72063098592834,
+            219.83253111955707,
+            0.0,
+            8.11518344152499,
+            0.0,
+            -0.7790091073987409,
+            0.0,
+            1.7477947721710467,
+            0.0,
+            -0.7063715645490579,
+            0.0,
         ]
         self.peak_2_vals = [
             0,
-            -5072.716721937553,
-            3906.2564035129785,
-            60.66188215016203,
-            161.4951711779007,
-            242.50216981399444,
-            1.4402945900852524,
-            0.007282529342267018,
-            0.16767853995308524,
-            28.70083944783797,
+            45.836957142608,
+            60.962977355483645,
+            0.0,
+            212.37513269155008,
+            0.0,
+            155.94311474389426,
+            0.0,
+            1.4379627981678513,
+            0.0,
+            0.006968595663651428,
+            0.0,
         ]
 
     def validate_table(self, out_table, expected_dict):
         expected_cols = list(expected_dict.keys())
         for c in out_table.getColumnNames():
             self.assertIn(c, expected_cols)
+            self.assertTrue(np.allclose(np.nan_to_num(out_table.column(c)), expected_dict[c]))
             # fitting not reliable to test actual results across operating systems
 
 
 class TestFittingPeaksOfFocusedData(systemtesting.MantidSystemTest, PeakFitMixin):
     def runTest(self):
         self.setup_fit_peaks_inputs()
-        fit_all_peaks(
-            wss=["ENGINX_280625_focused_bank_1_dSpacing"], peaks=self.peaks, peak_window=0.03, save_dir=self.fit_dir, do_numeric_integ=False
-        )
+        fit_all_peaks(wss=["ENGINX_280625_focused_bank_1_dSpacing"], peaks=self.peaks, peak_window=0.03, save_dir=self.fit_dir)
 
     def validate(self):
         param_table1 = ADS.retrieve("ENGINX_280625_1.8_GROUP_Fit_Parameters")
@@ -242,30 +247,7 @@ class TestFittingPeaksOfFocusedData(systemtesting.MantidSystemTest, PeakFitMixin
             os.path.join(CWDIR, "FitParameters", "GROUP", "1.8", "ENGINX_280625_1.8_GROUP_Fit_Parameters.nxs"),
             os.path.join(CWDIR, "FitParameters", "GROUP", "1.44", "ENGINX_280625_1.44_GROUP_Fit_Parameters.nxs"),
         ]
-        # ignore the estimated intensity reference data (last column of reference)
-        self.validate_table(param_table1, dict(zip(self.reference_columns[:-1], self.peak_1_vals[:-1])))
-        self.validate_table(param_table2, dict(zip(self.reference_columns[:-1], self.peak_2_vals[:-1])))
-        [self.assertTrue(os.path.exists(ef)) for ef in expected_files]
 
-    def cleanup(self):
-        ADS.clear()
-        _try_delete_dirs(CWDIR, ["FitParameters"])
-
-
-class TestFittingPeaksOfFocusedDataWithNumericalIntegration(systemtesting.MantidSystemTest, PeakFitMixin):
-    def runTest(self):
-        self.setup_fit_peaks_inputs()
-        fit_all_peaks(
-            wss=["ENGINX_280625_focused_bank_1_dSpacing"], peaks=self.peaks, peak_window=0.03, save_dir=self.fit_dir, do_numeric_integ=True
-        )
-
-    def validate(self):
-        param_table1 = ADS.retrieve("ENGINX_280625_1.8_GROUP_Fit_Parameters")
-        param_table2 = ADS.retrieve("ENGINX_280625_1.44_GROUP_Fit_Parameters")
-        expected_files = [
-            os.path.join(CWDIR, "FitParameters", "GROUP", "1.8", "ENGINX_280625_1.8_GROUP_Fit_Parameters.nxs"),
-            os.path.join(CWDIR, "FitParameters", "GROUP", "1.44", "ENGINX_280625_1.44_GROUP_Fit_Parameters.nxs"),
-        ]
         self.validate_table(param_table1, dict(zip(self.reference_columns, self.peak_1_vals)))
         self.validate_table(param_table2, dict(zip(self.reference_columns, self.peak_2_vals)))
         [self.assertTrue(os.path.exists(ef)) for ef in expected_files]
@@ -280,9 +262,7 @@ class TestFittingPeaksOfFocusedDataWithGroup(systemtesting.MantidSystemTest, Pea
         self.setup_fit_peaks_inputs()
         self.input_ws.getRun().addProperty("Grouping", "TEST", False)
 
-        fit_all_peaks(
-            wss=["ENGINX_280625_focused_bank_1_dSpacing"], peaks=self.peaks, peak_window=0.03, save_dir=self.fit_dir, do_numeric_integ=False
-        )
+        fit_all_peaks(wss=["ENGINX_280625_focused_bank_1_dSpacing"], peaks=self.peaks, peak_window=0.03, save_dir=self.fit_dir)
 
     def validate(self):
         param_table1 = ADS.retrieve("ENGINX_280625_1.8_TEST_Fit_Parameters")
@@ -291,9 +271,9 @@ class TestFittingPeaksOfFocusedDataWithGroup(systemtesting.MantidSystemTest, Pea
             os.path.join(CWDIR, "FitParameters", "TEST", "1.8", "ENGINX_280625_1.8_TEST_Fit_Parameters.nxs"),
             os.path.join(CWDIR, "FitParameters", "TEST", "1.44", "ENGINX_280625_1.44_TEST_Fit_Parameters.nxs"),
         ]
-        # ignore the estimated intensity reference data (last column of reference)
-        self.validate_table(param_table1, dict(zip(self.reference_columns[:-1], self.peak_1_vals[:-1])))
-        self.validate_table(param_table2, dict(zip(self.reference_columns[:-1], self.peak_2_vals[:-1])))
+
+        self.validate_table(param_table1, dict(zip(self.reference_columns, self.peak_1_vals)))
+        self.validate_table(param_table2, dict(zip(self.reference_columns, self.peak_2_vals)))
         [self.assertTrue(os.path.exists(ef)) for ef in expected_files]
 
     def cleanup(self):
