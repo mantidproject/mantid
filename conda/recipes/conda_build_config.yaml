@@ -18,11 +18,10 @@ llvm_openmp:                   # [osx]
 python:
   - 3.11
 
-libboost_devel:
-  - 1.88 # Aim to follow conda-forge
-
-libboost_python_devel:
-  - 1.88 # Aim to follow conda-forge
+# Aim to follow conda-forge
+libboost:
+  - 1.88 # [win or linux]
+  - 1.86 # [osx]
 
 cmake:
   - '>=3.21.0'

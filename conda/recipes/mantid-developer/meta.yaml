@@ -21,8 +21,8 @@ requirements:
     - jemalloc {{ jemalloc }} # [linux]
     - jsoncpp {{ jsoncpp }}
     - lib3mf # [win]
-    - libboost-devel {{ libboost_devel }}
-    - libboost-python-devel {{ libboost_python_devel }}
+    - libboost-devel {{ libboost }}
+    - libboost-python-devel {{ libboost }}
     - libopenblas {{ libopenblas }} # [osx or linux]
     - librdkafka {{ librdkafka }}
     - lz4  # [linux]

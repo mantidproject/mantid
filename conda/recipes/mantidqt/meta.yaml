@@ -32,8 +32,8 @@ requirements:
     - sip                                    # [build_platform != target_platform]
 
   host:
-    - libboost-devel {{ libboost_devel }}
-    - libboost-python-devel {{ libboost_python_devel }}
+    - libboost-devel {{ libboost }}
+    - libboost-python-devel {{ libboost }}
     - eigen {{ eigen }}
     - libopenblas {{ libopenblas }}  # [osx or linux]
     - mantid {{ version }}
