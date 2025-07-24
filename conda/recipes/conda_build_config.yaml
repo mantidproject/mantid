@@ -76,6 +76,10 @@ mslice:
 ninja:
   - '>=1.10.2'
 
+# Fix the version to avoid updates being pulled in automatically, which might change the Reflectometry ORSO file content or layout and cause tests to fail.
+orsopy:
+  - '==1.2.1'
+
 # An API change to HTTPSClientSession was introduced in 1.14.0
 poco:
   - '>=1.14'
