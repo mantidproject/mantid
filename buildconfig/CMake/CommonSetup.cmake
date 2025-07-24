@@ -82,7 +82,7 @@ if(BUILD_MANTIDFRAMEWORK OR BUILD_MANTIDQT)
   # The new interface is not available in Clang yet so we haven't migrated
   add_definitions(-D_SILENCE_CXX20_OLD_SHARED_PTR_ATOMIC_SUPPORT_DEPRECATION_WARNING)
   if(APPLE)
-    add_definitions(-DBOOST_PARSER_USE_LIBSTDCPP_GCC12_RANGE_ADAPTOR_CLOSURE)
+    add_definitions(-DBOOST_PARSER_USE_CONCEPTS=0)
   endif()
 
   find_package(Poco REQUIRED)
