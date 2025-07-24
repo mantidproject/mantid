@@ -65,13 +65,14 @@ class TextureCorrectionModel:
             ref_ws = ADS.retrieve(ref_ws_name)
             trans_mat = ref_ws.getRun().getGoniometer().getR()
 
-            _tmp_ws = CloneWorkspace(ref_ws, OutputWorkspace="_tmp_ws", StoreInADS=False)
+            _tmp_ws = CloneWorkspace(ref_ws, OutputWorkspace="_tmp_ws")
             _tmp_ws.getRun().getGoniometer().setR(np.linalg.inv(trans_mat))
 
             CopySample(InputWorkspace=ref_ws, OutputWorkspace=_tmp_ws, CopyName=False, CopyEnvironment=False, CopyLattice=False)
 
             for ws in wss:
                 CopySample(InputWorkspace=_tmp_ws, OutputWorkspace=ws, CopyName=False, CopyEnvironment=False, CopyLattice=False)
+            ADS.remove("_tmp_ws")
         else:
             # if is_ref flag then we want to take this baked orientation forward
             for ws in wss:
@@ -184,20 +185,21 @@ class TextureCorrectionModel:
         ws = ADS.retrieve(ws)
         temp_ws = ConvertUnits(ws, Target="dSpacing", StoreInADS=False)
         if isinstance(abs_corr, str):
-            abs_ws = ConvertUnits(ADS.retrieve(abs_corr), Target="dSpacing")
+            abs_ws = ConvertUnits(ADS.retrieve(abs_corr), Target="dSpacing", StoreInADS=False)
             temp_ws = temp_ws / abs_ws
             ADS.remove("abs_ws")
         else:
             temp_ws = temp_ws / abs_corr
         if isinstance(div_corr, str):
-            div_ws = ConvertUnits(ADS.retrieve(div_corr), Target="dSpacing")
+            div_ws = ConvertUnits(ADS.retrieve(div_corr), Target="dSpacing", StoreInADS=False)
             temp_ws = temp_ws / div_ws
             ADS.remove("div_ws")
         else:
             temp_ws = temp_ws / div_corr
-        CloneWorkspace(temp_ws, OutputWorkspace=out_ws)
+        CloneWorkspace(temp_ws, OutputWorkspace=out_ws, StoreInADS=True)
         self._save_corrected_files(out_ws, root_dir, "AbsorptionCorrection", rb_num, calibration_group)
         if remove_ws_after_processing:
+            logger.notice("removing saved and temporary workspaces from ADS")
             # remove output ws from ADS to free up memory
             ADS.remove(out_ws)
             if isinstance(abs_corr, str):

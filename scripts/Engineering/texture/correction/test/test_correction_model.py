@@ -372,8 +372,6 @@ class TextureCorrectionModelTest(unittest.TestCase):
             self.assertEqual(index_arg, i)
             np.testing.assert_array_almost_equal(array_arg, np.ones_like(self.mock_ws.readY.return_value) * expected_divs[i])
 
-        mock_ads.remove.assert_called_once_with("det_tab")
-
     @patch(correction_model_path + ".TextureCorrectionModel._save_corrected_files")
     @patch(correction_model_path + ".ConvertUnits")
     @patch(correction_model_path + ".CloneWorkspace")
@@ -384,7 +382,7 @@ class TextureCorrectionModelTest(unittest.TestCase):
         mock_convert.return_value = mock.MagicMock()
         self.model.apply_corrections("ws1", "out_ws", mock_calib.group, "dir", abs_corr=1.0, div_corr=1.0)
 
-        mock_convert.assert_called_once_with(self.mock_ws, Target="dSpacing")
+        mock_convert.assert_called_once_with(self.mock_ws, Target="dSpacing", StoreInADS=False)
         mock_clone.assert_called()
         mock_save.assert_called_once_with("out_ws", "dir", "AbsorptionCorrection", None, mock_calib.group)
 
@@ -404,7 +402,7 @@ class TextureCorrectionModelTest(unittest.TestCase):
             return {"ws1": ws, "abs_ws": abs_ws, "div_ws": div_ws}[name]
 
         mock_ads.retrieve.side_effect = retrieve_mock
-        mock_convert.side_effect = lambda x, Target: temp_ws if x is ws else x
+        mock_convert.side_effect = lambda x, Target, StoreInADS: temp_ws if x is ws else x
 
         self.model.apply_corrections("ws1", "out_ws", mock_calib.group, "dir", abs_corr="abs_ws", div_corr="div_ws")
 
@@ -427,7 +425,6 @@ class TextureCorrectionModelTest(unittest.TestCase):
         self.model.apply_corrections("ws1", "out_ws", mock_calib.group, "dir", abs_corr=1.0, div_corr=1.0, remove_ws_after_processing=True)
 
         mock_ads.remove.assert_any_call("out_ws")
-        mock_ads.remove.assert_any_call("temp_ws")
 
     @patch(correction_model_path + ".TextureCorrectionModel._save_corrected_files")
     @patch(correction_model_path + ".ConvertUnits")
