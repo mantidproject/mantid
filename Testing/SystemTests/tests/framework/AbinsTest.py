@@ -29,6 +29,9 @@ class AbinsTestingMixin(ABC):
     def __init__(self):
         super().__init__()  # Init the base class as well as this mix-in
 
+        # Tolerance used when calling validate()
+        self.tolerance = 1e-2
+
         # This is usually the ref result, can always override later if needed
         self.ref_result = self.system_name + ".nxs"
 
@@ -63,7 +66,6 @@ class AbinsTestingMixin(ABC):
         mtd.clear()
 
     def validate(self):
-        self.tolerance = 1e-1
         return self.system_name, self.ref_result
 
 
@@ -81,10 +83,6 @@ class AbinsCRYSTALTestScratch(AbinsTestingMixin, systemtesting.MantidSystemTest)
 
     def excludeInPullRequests(self):
         return True
-
-    def validate(self):
-        self.tolerance = 1e-2
-        return self.system_name, self.ref_result
 
 
 class AbinsCRYSTALTestBiggerSystem(AbinsTestingMixin, systemtesting.MantidSystemTest):
@@ -130,6 +128,11 @@ class AbinsCRYSTALTestT(AbinsTestingMixin, systemtesting.MantidSystemTest):
     def excludeInPullRequests(self):
         return True
 
+    def validate(self):
+        """Loosen validation parameters for this test case"""
+        self.tolerance = 1e-1
+        return super().validate()
+
 
 class AbinsCRYSTALTestLargerOrder(AbinsTestingMixin, systemtesting.MantidSystemTest):
     """
@@ -148,6 +151,11 @@ class AbinsCRYSTALTestLargerOrder(AbinsTestingMixin, systemtesting.MantidSystemT
     def excludeInPullRequests(self):
         return True
 
+    def validate(self):
+        """Loosen validation parameters for this test case"""
+        self.tolerance = 1e-1
+        return super().validate()
+
 
 class AbinsCRYSTALTestSmallerOrder(AbinsTestingMixin, systemtesting.MantidSystemTest):
     """
@@ -163,6 +171,11 @@ class AbinsCRYSTALTestSmallerOrder(AbinsTestingMixin, systemtesting.MantidSystem
         DeleteWorkspace(self.system_name)
         Abins(**self.default_kwargs)
 
+    def validate(self):
+        """Loosen validation parameters for this test case"""
+        self.tolerance = 1e-1
+        return super().validate()
+
 
 class AbinsCRYSTALTestScale(AbinsTestingMixin, systemtesting.MantidSystemTest):
     """
@@ -174,6 +187,11 @@ class AbinsCRYSTALTestScale(AbinsTestingMixin, systemtesting.MantidSystemTest):
 
     def runTest(self):
         Abins(**(self.default_kwargs | {"QuantumOrderEventsNumber": "2", "Scale": 2.0}))
+
+    def validate(self):
+        """Loosen validation parameters for this test case"""
+        self.tolerance = 1e-1
+        return super().validate()
 
 
 # noinspection PyAttributeOutsideInit,PyPep8Naming
@@ -217,10 +235,6 @@ class AbinsDMOL3TestScratch(AbinsTestingMixin, systemtesting.MantidSystemTest):
     def excludeInPullRequests(self):
         return True
 
-    def validate(self):
-        self.tolerance = 1e-2
-        return self.system_name, self.ref_result
-
 
 class AbinsGAUSSIANestScratch(AbinsTestingMixin, systemtesting.MantidSystemTest):
     """
@@ -237,10 +251,6 @@ class AbinsGAUSSIANestScratch(AbinsTestingMixin, systemtesting.MantidSystemTest)
     def excludeInPullRequests(self):
         return True
 
-    def validate(self):
-        self.tolerance = 1e-2
-        return self.system_name, self.ref_result
-
 
 class AbinsBinWidth(AbinsTestingMixin, systemtesting.MantidSystemTest):
     """
@@ -255,10 +265,6 @@ class AbinsBinWidth(AbinsTestingMixin, systemtesting.MantidSystemTest):
     def runTest(self):
         Abins(**(self.default_kwargs | {"QuantumOrderEventsNumber": "2", "BinWidthInWavenumber": 3.0}))
 
-    def validate(self):
-        self.tolerance = 1e-2
-        return self.system_name, self.ref_result
-
 
 class AbinsCASTEPIsotopes(AbinsTestingMixin, systemtesting.MantidSystemTest):
     """
@@ -272,10 +278,6 @@ class AbinsCASTEPIsotopes(AbinsTestingMixin, systemtesting.MantidSystemTest):
 
     def runTest(self):
         Abins(**(self.default_kwargs | {"BinWidthInWavenumber": 2.0}))
-
-    def validate(self):
-        self.tolerance = 1e-2
-        return self.system_name, self.ref_result
 
 
 class AbinsCRYSTAL2D(AbinsTestingMixin, systemtesting.MantidSystemTest):
@@ -305,6 +307,7 @@ class AbinsCRYSTAL2D(AbinsTestingMixin, systemtesting.MantidSystemTest):
         )
 
     def validate(self):
+        """Tweak validation parameters for this test case"""
         self.tolerance = 1e-4
         self.nanEqual = True
-        return self.system_name, self.ref_result
+        super().validate()
