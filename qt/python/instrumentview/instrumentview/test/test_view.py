@@ -97,7 +97,13 @@ class TestFullInstrumentViewWindow(unittest.TestCase):
         self._view.enable_point_picking(mock_callback)
         self._view.main_plotter.disable_picking.assert_has_calls([mock.call(), mock.call()])
         self._view.main_plotter.enable_surface_point_picking.assert_called_once_with(
-            show_message=False, use_picker=True, callback=mock_callback, show_point=False, pickable_window=False, picker="point"
+            show_message=False,
+            use_picker=True,
+            callback=mock_callback,
+            show_point=False,
+            pickable_window=False,
+            picker="point",
+            tolerance=0.01,
         )
         self._view.projection_plotter.enable_point_picking.assert_called_once_with(
             show_message=False,
