@@ -71,7 +71,7 @@ set(PYTHON_PLUGINS
     algorithms/FindGlobalBMatrix.py
     algorithms/FindSatellitePeaks.py
     algorithms/FindSXPeaksConvolve.py
-    algorithms/FindUBUsingScatteringPlane.py
+    algorithms/FindUBFromScatteringPlane.py
     algorithms/FindMultipleUMatrices.py
     algorithms/FitGaussian.py
     algorithms/FitIncidentSpectrum.py

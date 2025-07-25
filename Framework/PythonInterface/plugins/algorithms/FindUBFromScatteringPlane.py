@@ -97,7 +97,7 @@ class FindUBFromScatteringPlane(PythonAlgorithm):
         U = rotation_object.as_matrix()
 
         UB_rel = U @ B
-        self.exec_child_alg("SetUB", workspace=SingleCrystalPeakTable, UB=UB_rel)
+        self.exec_child_alg("SetUB", Workspace=SingleCrystalPeakTable, UB=UB_rel)
 
         ## set ub on the workspace
 

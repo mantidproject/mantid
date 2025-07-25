@@ -55,7 +55,7 @@ set(TEST_PY_FILES
     FindGlobalBMatrixTest.py
     FindMultipleUMatricesTest.py
     FindSXPeaksConvolveTest.py
-    FindUBUsingScatteringPlaneTest.py
+    FindUBFromScatteringPlaneTest.py
     FitIncidentSpectrumTest.py
     FractionalIndexingTest.py
     GenerateGroupingSNSInelasticTest.py
