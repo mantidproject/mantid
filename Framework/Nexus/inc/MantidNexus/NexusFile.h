@@ -54,7 +54,6 @@ public:
   FileID &operator=(hid_t const);
   FileID &operator=(FileID const &);
   ~FileID();
-  friend File;
 };
 
 /**

@@ -218,7 +218,7 @@ void File::initOpenFile(std::string const &filename, NXaccess const am) {
 // copy constructors
 
 File::File(File const &f)
-    : m_filename(f.m_filename), m_access(f.m_access), m_address(f.m_address), m_close_handle(false), m_pfile(f.m_pfile),
+    : m_filename(f.m_filename), m_access(f.m_access), m_address(), m_close_handle(false), m_pfile(f.m_pfile),
       m_current_group_id(0), m_current_data_id(0), m_current_type_id(0), m_current_space_id(0), m_gid_stack{0},
       m_descriptor(f.m_descriptor) {
   if (m_pfile <= 0)
@@ -226,17 +226,17 @@ File::File(File const &f)
 }
 
 File::File(File const *const pf)
-    : m_filename(pf->m_filename), m_access(pf->m_access), m_address(pf->m_address), m_close_handle(false),
-      m_pfile(pf->m_pfile), m_current_group_id(0), m_current_data_id(0), m_current_type_id(0), m_current_space_id(0),
-      m_gid_stack{0}, m_descriptor(pf->m_descriptor) {
+    : m_filename(pf->m_filename), m_access(pf->m_access), m_address(), m_close_handle(false), m_pfile(pf->m_pfile),
+      m_current_group_id(0), m_current_data_id(0), m_current_type_id(0), m_current_space_id(0), m_gid_stack{0},
+      m_descriptor(pf->m_descriptor) {
   if (m_pfile <= 0)
     throw Mantid::Nexus::Exception("Error reopening file");
 }
 
 File::File(std::shared_ptr<File> pf)
-    : m_filename(pf->m_filename), m_access(pf->m_access), m_address(pf->m_address), m_close_handle(false),
-      m_pfile(pf->m_pfile), m_current_group_id(0), m_current_data_id(0), m_current_type_id(0), m_current_space_id(0),
-      m_gid_stack{0}, m_descriptor(pf->m_descriptor) {
+    : m_filename(pf->m_filename), m_access(pf->m_access), m_address(), m_close_handle(false), m_pfile(pf->m_pfile),
+      m_current_group_id(0), m_current_data_id(0), m_current_type_id(0), m_current_space_id(0), m_gid_stack{0},
+      m_descriptor(pf->m_descriptor) {
   if (m_pfile <= 0)
     throw Mantid::Nexus::Exception("Error reopening file");
 }
@@ -282,9 +282,7 @@ File::~File() {
     gid = 0;
   }
   m_gid_stack.clear();
-  if (m_close_handle) {
-    close();
-  }
+  // decrease reference counts to this file
   m_pfile.reset();
   H5garbage_collect();
 }
@@ -292,7 +290,9 @@ File::~File() {
 void File::close() {
   /* close the file handle */
   if (m_pfile != nullptr) {
-    // NOTE you actually need both closes
+    if (!m_pfile.unique()) {
+      std::cout << "WARNING: closing file " << m_filename << " which still has open references.\n" << std::flush;
+    }
     H5Fclose(m_pfile->getId());
     H5garbage_collect();
     m_pfile.reset();

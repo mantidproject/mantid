@@ -104,6 +104,13 @@ public:
     TS_ASSERT_EQUALS(result, "test_value2");
   }
 
+  void test_open_real_file() {
+    cout << "\ntest open existing file in unit test data\n";
+    // open the file in read-only mode
+    std::string filename = getFullPath("CG2_monotonically_increasing_pulse_times.nxs.h5");
+    TS_ASSERT_THROWS_NOTHING(Mantid::Nexus::File file(filename, NXaccess::READ));
+  }
+
   void test_fail_open() {
     // test opening a file that exists, but is unreadable
     std::string filename = getFullPath("Test_characterizations_char.txt");
@@ -1455,4 +1462,206 @@ public:
   // ################################################################################################################
 
   /* NOTE for historical reasons these exist in NexusFileReadWriteTest.h*/
+
+  // ##################################################################################################################
+  // TEST RULE OF THREE
+  // ################################################################################################################
+
+  bool file_is_closed(std::string const &filename) {
+    // this will check if a file is already opened, by trying to open it with incompativle (WEAK) access
+    // if this operation FAILS (fid <= 0), then the file is STILL OPENED
+    // if this operation SUCCEEDS (fid > 0), then the file was closed
+    // NOTE is ONLY meaningful AFTER a file with the name has been definitely opened
+    hid_t fapl = H5Pcreate(H5P_FILE_ACCESS);
+    H5Pset_fclose_degree(fapl, H5F_CLOSE_WEAK);
+    hid_t fid = H5Fopen(filename.c_str(), H5F_ACC_RDONLY, fapl);
+    bool ret = (fid > 0);
+    H5Fclose(fid);
+    return ret;
+  }
+
+  void test_file_is_closed() {
+    cout << "\ntest closing files\n" << std::flush;
+
+    FileResource resource("test_nexus_close.nxs");
+    std::string filename(resource.fullPath());
+    Mantid::Nexus::File file(filename, NXaccess::CREATE5);
+    TS_ASSERT(!file_is_closed(filename));
+    file.close();
+    TS_ASSERT(file_is_closed(filename));
+
+    { // scope the file to check deconstructor
+      Mantid::Nexus::File file2(filename, NXaccess::READ);
+      TS_ASSERT(!file_is_closed(filename));
+    }
+    TS_ASSERT(file_is_closed(filename));
+  }
+
+  void test_open_concurrent() {
+    cout << "\ntest open two concurrent files\n" << std::flush;
+
+    FileResource resource("test_nexus_concurrent.nxs");
+    std::string filename(resource.fullPath());
+    // create a file with two entries
+    Mantid::Nexus::File file(filename, NXaccess::CREATE5);
+    file.makeGroup("entry1", "NXshorts", false);
+    file.makeGroup("entry2", "NXpants", false);
+    file.close();
+    // check the file is closed
+    TS_ASSERT(file_is_closed(filename));
+
+    { // scope the files to verify close
+      // open the file, twice
+      Mantid::Nexus::File file1(filename, NXaccess::READ);
+      Mantid::Nexus::File file2(filename, NXaccess::READ);
+      // go to different entries
+      file1.openGroup("entry1", "NXshorts");
+      file2.openGroup("entry2", "NXpants");
+      // confirm we are in different locations
+      TS_ASSERT_EQUALS(file2.getAddress(), "/entry2");
+      TS_ASSERT_EQUALS(file1.getAddress(), "/entry1");
+      TS_ASSERT(!file_is_closed(filename));
+    }
+    // check the file is closed
+    TS_ASSERT(file_is_closed(filename));
+  }
+
+  void test_copy_creation() {
+    cout << "\ntest copy creation\n" << std::flush;
+
+    // create a file with two entries
+    FileResource resource("test_nexus_copy_create.nxs");
+    std::string filename(resource.fullPath());
+    Mantid::Nexus::File file(filename, NXaccess::CREATE5);
+    file.makeGroup("entry1", "NXshorts", true);
+    file.putAttr("info", "some info");
+    file.closeGroup();
+    file.makeGroup("entry2", "NXpants", false);
+    file.close();
+
+    { // scope file1
+      // open the file and go to an entry
+      Mantid::Nexus::File file1(filename, NXaccess::READ);
+      file1.openGroup("entry1", "NXshorts");
+      TS_ASSERT_EQUALS(file1.getAddress(), "/entry1");
+      TS_ASSERT_EQUALS(file1.getStrAttr("info"), "some info");
+      { // sccope file2
+        // copy the file and go to a different entry
+        Mantid::Nexus::File file2(file1);
+        TS_ASSERT_EQUALS(file2.getAddress(), "/");
+        file2.openGroup("entry2", "NXpants");
+        TS_ASSERT_EQUALS(file2.getAddress(), "/entry2");
+      } // file2 goes out of scope
+
+      // confirm the first did not move
+      TS_ASSERT_EQUALS(file1.getAddress(), "/entry1");
+      // confirm it can still be interacted with
+      TS_ASSERT_THROWS_NOTHING(file1.getStrAttr("info"));
+      TS_ASSERT_EQUALS(file1.getStrAttr("info"), "some info");
+      TS_ASSERT_THROWS_NOTHING(file1.openAddress("/entry2"));
+      TS_ASSERT_EQUALS(file1.getAddress(), "/entry2");
+    }
+    // check the file is closed
+    TS_ASSERT(file_is_closed(filename));
+  }
+
+  void test_assignment() {
+    cout << "\ntest assignmrnt operator\n" << std::flush;
+
+    // create a file with two entries
+    FileResource resource("test_nexus_assignment.nxs");
+    std::string filename(resource.fullPath());
+    Mantid::Nexus::File file(filename, NXaccess::CREATE5);
+    file.makeGroup("entry1", "NXshorts", false);
+    file.makeGroup("entry2", "NXpants", false);
+    file.close();
+
+    // create a dummy file
+    FileResource resource2("test_nexus_assign2.nxs");
+    std::string filename2(resource2.fullPath());
+    Mantid::Nexus::File other(filename2, NXaccess::CREATE5);
+    other.makeGroup("something", "NXshoes", false);
+    other.close();
+
+    { // scope file1
+      // open the file and go to an entry
+      Mantid::Nexus::File file1(filename, NXaccess::READ);
+      file1.openGroup("entry1", "NXshorts");
+      TS_ASSERT_EQUALS(file1.getAddress(), "/entry1");
+
+      { // scope the second file
+        // open some other file and go somewhere
+        Mantid::Nexus::File file2(filename2, NXaccess::READ);
+        file2.openGroup("something", "NXshoes");
+        TS_ASSERT_EQUALS(file2.getAddress(), "/something");
+
+        // now use the assignment operator
+        file2 = file1;
+        TS_ASSERT_EQUALS(file2.getAddress(), "/");
+
+        // open a different group and confirm
+        file2.openGroup("entry2", "NXpants");
+        TS_ASSERT_EQUALS(file2.getAddress(), "/entry2");
+      } // file2 goes out of scope
+
+      // confirm the first did not move
+      TS_ASSERT_EQUALS(file1.getAddress(), "/entry1");
+    } // file1 goes out of scope and file will close
+    // check the file is closed
+    TS_ASSERT(file_is_closed(filename));
+  }
+
+  void test_assignment_closing_other_order() {
+    cout << "\ntest assignment and closing order\n" << std::flush;
+
+    // create a file with two entries
+    FileResource resource("test_nexus_assignment.nxs");
+    std::string filename(resource.fullPath());
+    Mantid::Nexus::File file(filename, NXaccess::CREATE5);
+    file.makeGroup("entry1", "NXshorts", true);
+    file.putAttr("info", "entry one");
+    file.closeGroup();
+    file.makeGroup("entry2", "NXpants", false);
+    file.close();
+
+    // create a dummy file
+    FileResource resource2("test_nexus_assign2.nxs");
+    std::string filename2(resource2.fullPath());
+    Mantid::Nexus::File other(filename2, NXaccess::CREATE5);
+    other.makeGroup("something", "NXshoes", false);
+    other.close();
+
+    { // scope file1
+      // open the file and go to an entry
+      Mantid::Nexus::File file1(filename2, NXaccess::READ);
+      file1.openGroup("something", "NXshoes");
+      TS_ASSERT_EQUALS(file1.getAddress(), "/something");
+
+      { // scope the second file
+        // open some other file and go somewhere
+        Mantid::Nexus::File file2(filename, NXaccess::READ);
+        file2.openGroup("entry2", "NXpants");
+        TS_ASSERT_EQUALS(file2.getAddress(), "/entry2");
+
+        // now use the assignment operator
+        file1 = file2; // file1 is set to file2, and file2 will close on delete
+        TS_ASSERT_EQUALS(file1.getAddress(), "/");
+
+        // open a different group and confirm
+        file1.openGroup("entry1", "NXshorts");
+        TS_ASSERT_EQUALS(file1.getAddress(), "/entry1");
+        TS_ASSERT_EQUALS(file1.getStrAttr("info"), "entry one");
+      } // file2 goes out of scope, file1 persists
+
+      // confirm the first did not move
+      TS_ASSERT_EQUALS(file1.getAddress(), "/entry1");
+      TS_ASSERT_THROWS_NOTHING(file1.getStrAttr("info"));
+      TS_ASSERT_EQUALS(file1.getStrAttr("info"), "entry one");
+      // go somewhere else
+      TS_ASSERT_THROWS_NOTHING(file1.openAddress("/entry2"));
+      TS_ASSERT_EQUALS(file1.getAddress(), "/entry2");
+    } // file1 goes out of scope, file is closed
+    // check the file is closed
+    TS_ASSERT(file_is_closed(filename));
+  }
 };
