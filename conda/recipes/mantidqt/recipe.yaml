@@ -26,6 +26,7 @@ requirements:
       then: ninja ${{ ninja }}
     - cmake ${{ cmake }}
     - git
+    - pip ${{ pip }}
     - if: build_platform != target_platform
       then:
         - python ${{ python }}
