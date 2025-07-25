@@ -11,10 +11,6 @@ from types import MappingProxyType
 import systemtesting
 from mantid.simpleapi import Abins, Abins2D, mtd, DeleteWorkspace
 
-from abins.constants import (
-    QUANTUM_ORDER_TWO,
-)
-
 
 class AbinsTestingMixin(ABC):
     _extensions = {"CASTEP": ".phonon", "CRYSTAL": ".out", "DMOL3": ".outmol", "GAUSSIAN": ".log"}
@@ -79,7 +75,7 @@ class AbinsCRYSTALTestScratch(AbinsTestingMixin, systemtesting.MantidSystemTest)
     ab_initio_program = "CRYSTAL"
 
     def runTest(self):
-        Abins(**(self.default_kwargs) | {"QuantumOrderEventsNumber": str(QUANTUM_ORDER_TWO)})
+        Abins(**(self.default_kwargs) | {"QuantumOrderEventsNumber": "2"})
 
     def excludeInPullRequests(self):
         return True
