@@ -584,12 +584,10 @@ public:
   bool containsDataSet(const std::string &query) const;
   /// Close this class
   void close();
-  /// Opens this NXClass using NXopengroupaddress. Can be slow (or is slow)
+  /// Opens this NXClass using File::openGroupAddress(). Can be slow (or is slow)
   void open();
-  /// Opens this NXClass using NXopengroup. It is fast, but the parent of this
-  /// class must be open at
-  /// the time of calling. openNXClass uses open() (the slow one). To open calss
-  /// using openLocal() do:
+  /// Opens this NXClass using File::openGroup(). It is fast, but the parent of this class must be open at
+  /// the time of calling. openNXClass uses open() (the slow one). To open calss using openLocal() do:
   ///     NXTheClass class(parent,name);
   ///     class.openLocal();
   ///     // work with class

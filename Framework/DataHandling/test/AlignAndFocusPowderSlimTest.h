@@ -19,7 +19,7 @@
 #include <numbers>
 
 using Mantid::API::MatrixWorkspace_sptr;
-using Mantid::DataHandling::AlignAndFocusPowderSlim;
+using Mantid::DataHandling::AlignAndFocusPowderSlim::AlignAndFocusPowderSlim;
 
 class AlignAndFocusPowderSlimTest : public CxxTest::TestSuite {
 public:

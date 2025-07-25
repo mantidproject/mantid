@@ -337,40 +337,16 @@ public:
     std::string address1 = file.getAddress();
 
     // make and open lateral data
+    // with the other dataset open, then creates the dataset in the parent group
     TS_ASSERT_THROWS_NOTHING(file.makeData("data2", NXnumtype::CHAR, 2, false));
     TS_ASSERT_THROWS_NOTHING(file.openData("data2"));
     TS_ASSERT(file.hasData("/entry/data2"));
     std::string address2 = file.getAddress();
 
-    // make sure new data is created off of entry
+    // make sure new data is created off of parent group
     TS_ASSERT_DIFFERS(address1, address2);
     TS_ASSERT_EQUALS(address1, "/entry/data1");
     TS_ASSERT_EQUALS(address2, "/entry/data2");
-  }
-
-  void test_make_data_layers_bad() {
-    cout << "\ntest makeData layers -- bad\n";
-    FileResource resource("test_nexus_file_rdwr.h5");
-    std::string filename = resource.fullPath();
-    Mantid::Nexus::File file(filename, NXaccess::CREATE5);
-
-    NXnumtype type(NXnumtype::CHAR);
-    string data1("layer1"), data2("layer2");
-
-    // create a file with data -- open data
-    file.makeGroup("entry", "NXentry", true);
-    file.makeData(data1, type, 1, false);
-    file.openData(data1);
-
-    // This is not throwing, should it?
-    // try to create a dataset inside the dataset -- this throws an errpr
-    // TS_ASSERT_THROWS(file.makeData(data2, type, 2, false), Mantid::Nexus::Exception &);
-
-    // make the dataset one layer up, open data 1, then try opening data2 from within
-    file.closeData();
-    file.makeData(data2, type, 2, false);
-    file.openData(data1);
-    TS_ASSERT_THROWS_NOTHING(file.openData(data2));
   }
 
   void test_closeData() {
@@ -412,7 +388,9 @@ public:
 
     TS_ASSERT_DIFFERS(address1, address2);
 
+    // now close lateral data... where are we??
     TS_ASSERT_THROWS_NOTHING(file.closeData());
+    TS_ASSERT(!file.isDataSetOpen());
     TS_ASSERT_EQUALS(file.getAddress(), "/entry");
   }
 
@@ -498,8 +476,11 @@ public:
     TS_ASSERT_EQUALS(in, out);
 
     // do it another way
+    // NOTE: to properly set the DataSpace, should be `dims {in.size(), 1}` and use rank = 2
+    // However, that seems to contradict notes inside File::compMakeData about rank for string data
+    // Using rank = 1 works, but the DataSpace will register size = 1
     in = "this is some different data";
-    Mantid::Nexus::DimVector dims({(Mantid::Nexus::dimsize_t)in.size()});
+    Mantid::Nexus::DimVector dims{(Mantid::Nexus::dimsize_t)in.size()};
     file.makeData("more_string_data", NXnumtype::CHAR, dims, true);
     file.putData(&in);
     out = file.getStrData();
@@ -532,8 +513,6 @@ public:
     auto data = file.getStrData();
 
     TS_ASSERT_EQUALS(info.type, NXnumtype::CHAR);
-    // TODO should it be 13 or 128?
-    // TS_ASSERT_EQUALS(info.dims[0], 128);
     TS_ASSERT_EQUALS(info.dims[0], testStr.length());
     TS_ASSERT_EQUALS(data.length(), testStr.length());
     TS_ASSERT_EQUALS(data, testStr);
@@ -845,6 +824,10 @@ public:
     // go up a different step -- at "/abc/ghi"
     file.makeGroup("ghi", "NXfunsicle", true);
     TS_ASSERT_EQUALS("/abc/ghi", file.getAddress());
+
+    // make a group with the same name at this level -- "/abs/ghi/ghi"
+    file.makeGroup("ghi", "NXsnowcone", true);
+    TS_ASSERT_EQUALS("/abc/ghi/ghi", file.getAddress());
   }
 
   void test_getAddress_data() {
@@ -1220,7 +1203,7 @@ public:
     file.close();
   }
 
-  void test_putget_attr_group_and_datasrt_and_root() {
+  void test_putget_attr_group_and_dataset_and_root() {
     cout << "\ntest attribute read/write on group, on dataset, and on root\n";
 
     // open a file

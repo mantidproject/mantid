@@ -211,6 +211,10 @@ set(SRC_FILES
     src/UpdateInstrumentFromFile.cpp
     src/XmlHandler.cpp
     src/RotateSampleShape.cpp
+    src/AlignAndFocusPowderSlim/NexusLoader.cpp
+    src/AlignAndFocusPowderSlim/ProcessBankTask.cpp
+    src/AlignAndFocusPowderSlim/ProcessEventsTask.cpp
+    src/AlignAndFocusPowderSlim/BankCalibration.cpp
 )
 
 set(INC_FILES
@@ -429,6 +433,10 @@ set(INC_FILES
     src/LoadRaw/isisraw2.h
     src/LoadRaw/item_struct.h
     src/LoadRaw/vms_convert.h
+    src/AlignAndFocusPowderSlim/NexusLoader.h
+    src/AlignAndFocusPowderSlim/ProcessBankTask.h
+    src/AlignAndFocusPowderSlim/ProcessEventsTask.h
+    src/AlignAndFocusPowderSlim/BankCalibration.h
     inc/MantidDataHandling/RotateSampleShape.h
 )
 

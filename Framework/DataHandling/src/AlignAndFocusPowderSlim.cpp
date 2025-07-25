@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 #include "MantidDataHandling/AlignAndFocusPowderSlim.h"
+#include "AlignAndFocusPowderSlim/ProcessBankTask.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -28,18 +29,12 @@
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidNexus/H5Util.h"
-#include "tbb/parallel_for.h"
-#include "tbb/parallel_invoke.h"
-#include "tbb/parallel_reduce.h"
 
 #include <H5Cpp.h>
-#include <atomic>
 #include <numbers>
-#include <ranges>
 #include <regex>
-#include <stack>
 
-namespace Mantid::DataHandling {
+namespace Mantid::DataHandling::AlignAndFocusPowderSlim {
 using Mantid::API::FileProperty;
 using Mantid::API::ITableWorkspace_sptr;
 using Mantid::API::MatrixWorkspace_sptr;
@@ -68,15 +63,6 @@ const std::string OUTPUT_WKSP("OutputWorkspace");
 const std::string READ_SIZE_FROM_DISK("ReadSizeFromDisk");
 const std::string EVENTS_PER_THREAD("EventsPerThread");
 } // namespace PropertyNames
-
-namespace NxsFieldNames {
-const std::string TIME_OF_FLIGHT("event_time_offset"); // float32 in ORNL nexus files
-const std::string DETID("event_id");                   // uint32 in ORNL nexus files
-const std::string INDEX_ID("event_index");
-} // namespace NxsFieldNames
-
-// this is used for unit conversion to correct units
-const std::string MICROSEC("microseconds");
 
 const std::vector<std::string> binningModeNames{"Logarithmic", "Linear"};
 enum class BinningMode { LOGARITHMIC, LINEAR, enum_count };
@@ -110,8 +96,19 @@ double getFocussedPostion(const detid_t detid, const std::vector<double> &difc_f
   }
 }
 
-/// detids with this calibration factor are something to not bother with
-constexpr double IGNORE_PIXEL{1.e6};
+std::vector<double> calculate_difc_focused(const double l1, const std::vector<double> &l2s,
+                                           const std::vector<double> &polars) {
+  constexpr double deg2rad = std::numbers::pi_v<double> / 180.;
+
+  std::vector<double> difc;
+
+  std::transform(l2s.cbegin(), l2s.cend(), polars.cbegin(), std::back_inserter(difc),
+                 [l1, deg2rad](const auto &l2, const auto &polar) {
+                   return 1. / Kernel::Units::tofToDSpacingFactor(l1, l2, deg2rad * polar, 0.);
+                 });
+
+  return difc;
+}
 
 } // namespace
 
@@ -136,360 +133,6 @@ const std::string AlignAndFocusPowderSlim::summary() const {
 }
 
 const std::vector<std::string> AlignAndFocusPowderSlim::seeAlso() const { return {"AlignAndFocusPowderFromFiles"}; }
-
-//----------------------------------------------------------------------------------------------
-namespace { // anonymous
-std::vector<double> calculate_difc_focused(const double l1, const std::vector<double> &l2s,
-                                           const std::vector<double> &polars) {
-  constexpr double deg2rad = std::numbers::pi_v<double> / 180.;
-
-  std::vector<double> difc;
-
-  std::transform(l2s.cbegin(), l2s.cend(), polars.cbegin(), std::back_inserter(difc),
-                 [l1, deg2rad](const auto &l2, const auto &polar) {
-                   return 1. / Kernel::Units::tofToDSpacingFactor(l1, l2, deg2rad * polar, 0.);
-                 });
-
-  return difc;
-}
-
-class NexusLoader {
-public:
-  NexusLoader(const bool is_time_filtered, const std::vector<std::pair<size_t, size_t>> &pulse_indices)
-      : m_is_time_filtered(is_time_filtered), m_pulse_indices(pulse_indices) {}
-
-  template <typename Type>
-  void loadData(H5::DataSet &SDS, std::unique_ptr<std::vector<Type>> &data, const std::vector<size_t> &offsets,
-                const std::vector<size_t> &slabsizes) {
-    // assumes that data is the same type as the dataset
-    H5::DataSpace filespace = SDS.getSpace();
-
-    const auto length_actual = static_cast<size_t>(filespace.getSelectNpoints());
-
-    const hsize_t rankedoffset[1] = {static_cast<hsize_t>(offsets[0])};
-    const hsize_t rankedextent[1] = {static_cast<hsize_t>(slabsizes[0])};
-
-    size_t total_size = slabsizes[0];
-
-    // only select hyperslab if not loading all the data
-    if (rankedextent[0] < length_actual) {
-      // set the first hyperslab with H5S_SELECT_SET
-      filespace.selectHyperslab(H5S_SELECT_SET, rankedextent, rankedoffset);
-
-      // If more slabs, select them with H5S_SELECT_OR to include in the read.
-      // This allows reading non-contiguous data.
-      for (size_t i = 1; i < offsets.size(); ++i) {
-        const hsize_t offset[1] = {static_cast<hsize_t>(offsets[i])};
-        const hsize_t extent[1] = {static_cast<hsize_t>(slabsizes[i])};
-        filespace.selectHyperslab(H5S_SELECT_OR, extent, offset);
-        total_size += slabsizes[i];
-      }
-    }
-
-    // create a memory space for the data to read into, total size is all the slabs combined
-    const hsize_t total_rankedextent[1] = {static_cast<hsize_t>(total_size)};
-    H5::DataSpace memspace(1, total_rankedextent);
-
-    // do the actual read
-    const H5::DataType dataType = SDS.getDataType();
-
-    std::size_t dataSize = filespace.getSelectNpoints();
-    data->resize(dataSize);
-    SDS.read(data->data(), dataType, memspace, filespace);
-  }
-
-private:
-  void loadEventIndex(H5::Group &event_group, std::unique_ptr<std::vector<uint64_t>> &data) {
-    // g_log.information(NxsFieldNames::INDEX_ID);
-    auto index_SDS = event_group.openDataSet(NxsFieldNames::INDEX_ID);
-    NeXus::H5Util::readArray1DCoerce(index_SDS, *data);
-  }
-
-public:
-  std::stack<std::pair<uint64_t, uint64_t>> getEventIndexRanges(H5::Group &event_group, const uint64_t number_events) {
-    // This will return a stack of pairs, where each pair is the start and stop index of the event ranges
-    std::stack<std::pair<uint64_t, uint64_t>> ranges;
-    if (m_is_time_filtered) {
-      // TODO this should be made smarter to only read the necessary range
-      std::unique_ptr<std::vector<uint64_t>> event_index = std::make_unique<std::vector<uint64_t>>();
-      this->loadEventIndex(event_group, event_index);
-
-      // add backwards so that the first range is on top
-      for (const auto &pair : m_pulse_indices | std::views::reverse) {
-        uint64_t start_event = event_index->at(pair.first);
-        uint64_t stop_event =
-            (pair.second == std::numeric_limits<size_t>::max()) ? number_events : event_index->at(pair.second);
-        ranges.emplace(start_event, stop_event);
-      }
-    } else {
-      constexpr uint64_t START_DEFAULT = 0;
-      ranges.emplace(START_DEFAULT, number_events);
-    }
-    return ranges;
-  }
-
-private:
-  const bool m_is_time_filtered;
-  const std::vector<std::pair<size_t, size_t>> m_pulse_indices;
-};
-
-template <typename Type> class MinMax {
-  const std::vector<Type> *vec;
-
-public:
-  Type minval;
-  Type maxval;
-  void operator()(const tbb::blocked_range<size_t> &range) {
-    const auto [minele, maxele] = std::minmax_element(vec->cbegin() + range.begin(), vec->cbegin() + range.end());
-    if (*minele < minval)
-      minval = *minele;
-    if (*maxele > maxval)
-      maxval = *maxele;
-  }
-
-  // copy min/max from the other. we're all friends
-  MinMax(MinMax &other, tbb::split) : vec(other.vec), minval(other.minval), maxval(other.maxval) {}
-
-  // set the min=max=first element supplied
-  MinMax(const std::vector<Type> *vec) : vec(vec), minval(vec->front()), maxval(vec->front()) {}
-
-  void join(const MinMax &other) {
-    if (other.minval < minval)
-      minval = other.minval;
-    if (other.maxval > maxval)
-      maxval = other.maxval;
-  }
-};
-
-template <typename Type> std::pair<Type, Type> parallel_minmax(const std::vector<Type> *vec, const size_t grainsize) {
-  if (vec->size() < grainsize) {
-    const auto [minval, maxval] = std::minmax_element(vec->cbegin(), vec->cend());
-    return std::make_pair(*minval, *maxval);
-  } else {
-    MinMax<Type> finder(vec);
-    tbb::parallel_reduce(tbb::blocked_range<size_t>(0, vec->size(), grainsize), finder);
-    return std::make_pair(finder.minval, finder.maxval);
-  }
-}
-
-template <typename DetidType, typename TofType> class ProcessEventsTask {
-public:
-  ProcessEventsTask(const std::vector<DetidType> *detids, const std::vector<TofType> *tofs,
-                    const AlignAndFocusPowderSlim::BankCalibration *calibration, const std::vector<double> *binedges)
-      : y_temp(binedges->size() - 1, 0), m_detids(detids), m_tofs(tofs), m_calibration(calibration),
-        m_binedges(binedges) {}
-
-  ProcessEventsTask(ProcessEventsTask &other, tbb::split)
-      : y_temp(other.y_temp.size(), 0), m_detids(other.m_detids), m_tofs(other.m_tofs),
-        m_calibration(other.m_calibration), m_binedges(other.m_binedges) {}
-
-  void operator()(const tbb::blocked_range<size_t> &range) {
-    // Cache values to reduce number of function calls
-    const auto &range_end = range.end();
-    const auto &binedges_cbegin = m_binedges->cbegin();
-    const auto &binedges_cend = m_binedges->cend();
-    const auto &tof_min = m_binedges->front();
-    const auto &tof_max = m_binedges->back();
-
-    // Calibrate and histogram the data
-    auto detid_iter = m_detids->cbegin() + range.begin();
-    auto tof_iter = m_tofs->cbegin() + range.begin();
-    for (size_t i = range.begin(); i < range_end; ++i) {
-      const auto &detid = *detid_iter;
-      const auto &calib_factor = m_calibration->value(detid);
-      if (calib_factor < IGNORE_PIXEL) {
-        // Apply calibration
-        const double &tof = static_cast<double>(*tof_iter) * calib_factor;
-        if ((tof < tof_max) && (!(tof < tof_min))) { // check against max first to allow skipping second
-          // Find the bin index using binary search
-          const auto &it = std::upper_bound(binedges_cbegin, binedges_cend, tof);
-
-          // Increment the count if a bin was found
-          const auto &bin = static_cast<size_t>(std::distance(binedges_cbegin, it) - 1);
-          y_temp[bin]++;
-        }
-      }
-      ++detid_iter;
-      ++tof_iter;
-    }
-  }
-
-  void join(const ProcessEventsTask &other) {
-    // Combine local histograms
-    std::transform(y_temp.begin(), y_temp.end(), other.y_temp.cbegin(), y_temp.begin(), std::plus<>{});
-  }
-
-public:
-  /// Local histogram for this block/thread
-  std::vector<uint32_t> y_temp;
-
-private:
-  const std::vector<DetidType> *m_detids;
-  const std::vector<TofType> *m_tofs;
-  const AlignAndFocusPowderSlim::BankCalibration *m_calibration;
-  const std::vector<double> *m_binedges;
-};
-
-class ProcessBankTask {
-public:
-  ProcessBankTask(std::vector<std::string> &bankEntryNames, H5::H5File &h5file, const bool is_time_filtered,
-                  MatrixWorkspace_sptr &wksp, const std::map<detid_t, double> &calibration,
-                  const std::set<detid_t> &masked, const size_t events_per_chunk, const size_t grainsize_event,
-                  std::vector<std::pair<size_t, size_t>> pulse_indices, std::shared_ptr<API::Progress> &progress)
-      : m_h5file(h5file), m_bankEntries(bankEntryNames), m_loader(is_time_filtered, pulse_indices), m_wksp(wksp),
-        m_calibration(calibration), m_masked(masked), m_events_per_chunk(events_per_chunk),
-        m_grainsize_event(grainsize_event), m_progress(progress) {}
-
-  void operator()(const tbb::blocked_range<size_t> &range) const {
-    auto entry = m_h5file.openGroup("entry"); // type=NXentry
-    for (size_t wksp_index = range.begin(); wksp_index < range.end(); ++wksp_index) {
-      const auto &bankName = m_bankEntries[wksp_index];
-      Kernel::Timer timer;
-      std::cout << bankName << " start" << std::endl;
-
-      // open the bank
-      auto event_group = entry.openGroup(bankName); // type=NXevent_data
-
-      // skip empty dataset
-      auto tof_SDS = event_group.openDataSet(NxsFieldNames::TIME_OF_FLIGHT);
-      const int64_t total_events = static_cast<size_t>(tof_SDS.getSpace().getSelectNpoints());
-      if (total_events == 0) {
-        m_progress->report();
-        continue;
-      }
-
-      auto eventRanges = m_loader.getEventIndexRanges(event_group, total_events);
-
-      // create a histogrammer to process the events
-      auto &spectrum = m_wksp->getSpectrum(wksp_index);
-
-      // std::atomic allows for multi-threaded accumulation and who cares about floats when you are just
-      // counting things
-      std::vector<std::atomic_uint32_t> y_temp(spectrum.dataY().size());
-      // std::vector<uint32_t> y_temp(spectrum.dataY().size());
-
-      // task group allows for separate of disk read from processing
-      tbb::task_group_context tgroupcontext; // needed by parallel_reduce
-      tbb::task_group tgroup(tgroupcontext);
-
-      // create object so bank calibration can be re-used
-      std::unique_ptr<AlignAndFocusPowderSlim::BankCalibration> calibration = nullptr;
-
-      // get handle to the data
-      auto detID_SDS = event_group.openDataSet(NxsFieldNames::DETID);
-      // auto tof_SDS = event_group.openDataSet(NxsFieldNames::TIME_OF_FLIGHT);
-      // and the units
-      std::string tof_unit;
-      NeXus::H5Util::readStringAttribute(tof_SDS, "units", tof_unit);
-      const double time_conversion = Kernel::Units::timeConversionValue(tof_unit, MICROSEC);
-
-      // declare arrays once so memory can be reused
-      auto event_detid = std::make_unique<std::vector<uint32_t>>();       // uint32 for ORNL nexus file
-      auto event_time_of_flight = std::make_unique<std::vector<float>>(); // float for ORNL nexus files
-
-      // read parts of the bank at a time until all events are processed
-      while (!eventRanges.empty()) {
-        // Create offsets and slab sizes for the next chunk of events.
-        // This will read at most m_events_per_chunk events from the file
-        // and will split the ranges if necessary for the next iteration.
-        std::vector<size_t> offsets;
-        std::vector<size_t> slabsizes;
-
-        size_t total_events_to_read = 0;
-        // Process the event ranges until we reach the desired number of events to read or run out of ranges
-        while (!eventRanges.empty() && total_events_to_read < m_events_per_chunk) {
-          // Get the next event range from the stack
-          auto eventRange = eventRanges.top();
-          eventRanges.pop();
-
-          size_t range_size = eventRange.second - eventRange.first;
-          size_t remaining_chunk = m_events_per_chunk - total_events_to_read;
-
-          // If the range size is larger than the remaining chunk, we need to split it
-          if (range_size > remaining_chunk) {
-            // Split the range: process only part of it now, push the rest back for later
-            offsets.push_back(eventRange.first);
-            slabsizes.push_back(remaining_chunk);
-            total_events_to_read += remaining_chunk;
-            // Push the remainder of the range back to the front for next iteration
-            eventRanges.emplace(eventRange.first + remaining_chunk, eventRange.second);
-            break;
-          } else {
-            offsets.push_back(eventRange.first);
-            slabsizes.push_back(range_size);
-            total_events_to_read += range_size;
-            // Continue to next range
-          }
-        }
-
-        // log the event ranges being processed
-        std::ostringstream oss;
-        oss << "Processing " << bankName << " with " << total_events_to_read << " events in the ranges: ";
-        for (size_t i = 0; i < offsets.size(); ++i) {
-          oss << "[" << offsets[i] << ", " << (offsets[i] + slabsizes[i]) << "), ";
-        }
-        oss << "\n";
-        std::cout << oss.str();
-
-        // load detid and tof at the same time
-        tbb::parallel_invoke(
-            [&] { // load detid
-              // event_detid->clear();
-              m_loader.loadData(detID_SDS, event_detid, offsets, slabsizes);
-              // immediately find min/max to allow for other things to read disk
-              const auto [minval, maxval] = parallel_minmax(event_detid.get(), m_grainsize_event);
-              // only recreate calibration if it doesn't already have the useful information
-              if ((!calibration) || (calibration->idmin() > static_cast<detid_t>(minval)) ||
-                  (calibration->idmax() < static_cast<detid_t>(maxval))) {
-                calibration = std::make_unique<AlignAndFocusPowderSlim::BankCalibration>(
-                    static_cast<detid_t>(minval), static_cast<detid_t>(maxval), time_conversion, m_calibration,
-                    m_masked);
-              }
-            },
-            [&] { // load time-of-flight
-              // event_time_of_flight->clear();
-              m_loader.loadData(tof_SDS, event_time_of_flight, offsets, slabsizes);
-            });
-
-        // Create a local task for this thread
-        ProcessEventsTask task(event_detid.get(), event_time_of_flight.get(), calibration.get(), &spectrum.readX());
-
-        // Non-blocking processing of the events
-        const tbb::blocked_range<size_t> range_info(0, event_time_of_flight->size(), m_grainsize_event);
-        tbb::parallel_reduce(range_info, task, tgroupcontext);
-
-        // Atomically accumulate results into shared y_temp to combine local histograms
-        for (size_t i = 0; i < y_temp.size(); ++i) {
-          y_temp[i].fetch_add(task.y_temp[i], std::memory_order_relaxed);
-        }
-      }
-
-      tgroup.wait();
-
-      // copy the data out into the correct spectrum
-      auto &y_values = spectrum.dataY();
-      std::copy(y_temp.cbegin(), y_temp.cend(), y_values.begin());
-
-      std::cout << bankName << " stop " << timer << std::endl;
-      m_progress->report();
-    }
-  }
-
-private:
-  H5::H5File m_h5file;
-  const std::vector<std::string> m_bankEntries;
-  mutable NexusLoader m_loader;
-  MatrixWorkspace_sptr m_wksp;
-  const std::map<detid_t, double> m_calibration; // detid: 1/difc
-  const std::set<detid_t> m_masked;
-  /// number of events to read from disk at one time
-  const size_t m_events_per_chunk;
-  /// number of events to histogram in a single thread
-  const size_t m_grainsize_event;
-  std::shared_ptr<API::Progress> m_progress;
-};
-
-} // anonymous namespace
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
@@ -817,7 +460,8 @@ void AlignAndFocusPowderSlim::initCalibrationConstants(API::MatrixWorkspace_sptr
   for (auto iter = detInfo.cbegin(); iter != detInfo.cend(); ++iter) {
     if (!iter->isMonitor()) {
       const auto difc_focussed = getFocussedPostion(static_cast<detid_t>(iter->detid()), difc_focus);
-      m_calibration.emplace(iter->detid(), difc_focussed / detInfo.difcUncalibrated(iter->index()));
+      m_calibration.emplace(static_cast<detid_t>(iter->detid()),
+                            difc_focussed / detInfo.difcUncalibrated(iter->index()));
     }
   }
 }
@@ -883,69 +527,4 @@ API::MatrixWorkspace_sptr AlignAndFocusPowderSlim::convertToTOF(API::MatrixWorks
   return wksp;
 }
 
-// ------------------------ BankCalibration object
-/**
- * Calibration of a subset of pixels as requested in the constructor. This is used because a vector is faster lookup
- * than a map for dense array of values.
- *
- * @param idmin Minimum detector id to include in the calibration
- * @param idmax Maximum detector id to include in the calibration
- * @param time_conversion Value to bundle into the calibration constant to account for converting the time-of-flight
- * into microseconds. Applying it here is effectively the same as applying it to each event time-of-flight.
- * @param calibration_map Calibration for the entire instrument.
- * @param mask detector ids that exist in the map should not be included.
- */
-AlignAndFocusPowderSlim::BankCalibration::BankCalibration(const detid_t idmin, const detid_t idmax,
-                                                          const double time_conversion,
-                                                          const std::map<detid_t, double> &calibration_map,
-                                                          const std::set<detid_t> &mask)
-    : m_detid_offset(idmin) {
-  // error check the id-range
-  if (idmax < idmin)
-    throw std::runtime_error("BAD!"); // TODO better message
-
-  // allocate memory and set the default value to 1
-  m_calibration.assign(static_cast<size_t>(idmax - idmin + 1), 1.);
-
-  // set up iterators for copying data
-  auto iter = calibration_map.find(idmin);
-  if (iter == calibration_map.end())
-    throw std::runtime_error("ALSO BAD!");
-  auto iter_end = calibration_map.find(idmax);
-  if (iter_end != calibration_map.end())
-    ++iter_end;
-
-  // copy over values that matter
-  for (; iter != iter_end; ++iter) {
-    const auto index = static_cast<size_t>(iter->first - m_detid_offset);
-    m_calibration[index] = iter->second;
-  }
-
-  // apply time conversion here so it is effectively applied for each detector once rather than on each event
-  if (time_conversion != 1.) {
-    std::transform(m_calibration.begin(), m_calibration.end(), m_calibration.begin(),
-                   [time_conversion](const auto &value) { return std::move(time_conversion * value); });
-  }
-
-  // setup the detector mask - this assumes there are not many pixels in the overall mask
-  // TODO could benefit from using lower_bound/upper_bound on the input mask rather than all
-  for (const auto &detid : mask) {
-    if (detid >= idmin && detid <= idmax) {
-      m_calibration[detid - m_detid_offset] = IGNORE_PIXEL;
-    }
-  }
-}
-
-/**
- * This assumes that everything is in range. Values that weren't in the calibration map get set to 1.
- */
-const double &AlignAndFocusPowderSlim::BankCalibration::value(const detid_t detid) const {
-  return m_calibration[detid - m_detid_offset];
-}
-
-const detid_t &AlignAndFocusPowderSlim::BankCalibration::idmin() const { return m_detid_offset; }
-detid_t AlignAndFocusPowderSlim::BankCalibration::idmax() const {
-  return m_detid_offset + static_cast<detid_t>(m_calibration.size()) - 1;
-}
-
-} // namespace Mantid::DataHandling
+} // namespace Mantid::DataHandling::AlignAndFocusPowderSlim
