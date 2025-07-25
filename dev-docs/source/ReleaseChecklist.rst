@@ -595,8 +595,6 @@ publish a new `release <https://github.com/mantidproject/mantid/releases>`__ on 
 Open a PR updating the software ``doi``, ``date-released`` and ``version`` in the ``CITATION.cff`` file
 at the root of the repository.
 
-Notify the Release Manager when you complete all your tasks.
-
 **Deploy Versioned Documentation**
 
 Versioned documentation is accessible at https://docs.mantidproject.org/vX.Y.Z/.
@@ -613,3 +611,5 @@ To do this:
 * Copy the built documentation into this new directory. The built documentation will be in your mantid build directory at ``<build directory>/docs/html``.
 * Stage the newly created directory and commit it to your branch.
 * After double-checking that these instructions have been followed correctly, push your branch to the main repository to deploy.
+
+Notify the Release Manager when you complete all your tasks.
