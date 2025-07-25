@@ -45,4 +45,4 @@ As per the [gatekeeping guidelines](https://developer.mantidproject.org/Gatekeep
 - Has a thorough first line review been conducted, including functional testing?
 - At a high-level, is the code quality sufficient?
 - Are the base, milestone and labels correct?
-<!-- GATEKEEPER: ...To HERE  -->
+<!--  GATEKEEPER: ...To HERE  -->
