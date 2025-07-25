@@ -4,11 +4,9 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-import glob
-import os
+from tempfile import TemporaryDirectory
 
 import systemtesting
-from mantid.kernel import ConfigService
 from mantid.simpleapi import Abins, Abins2D, mtd, DeleteWorkspace
 
 from abins.constants import (
@@ -21,7 +19,7 @@ from abins.constants import (
 )
 
 
-class HelperTestingClass(object):
+class HelperTestingClass:
     def __init__(self):
         self._temperature = 10  # K
         self._sample_form = "Powder"
@@ -38,6 +36,8 @@ class HelperTestingClass(object):
         self._ab_initio_program = None
         self._quantum_order_event = None
         self._system_name = None
+
+        self._cache_directory = TemporaryDirectory()
 
     def set_bin_width(self, width):
         if not (isinstance(width, float) and 1.0 <= width <= 10.0):
@@ -97,6 +97,7 @@ class HelperTestingClass(object):
             Scale=self._scale,
             ScaleByCrossSection=self._cross_section_factor,
             OutputWorkspace=self._output_name,
+            CacheDirectory=self._cache_directory.name,
         )
 
     def case_restart_diff_t(self):
@@ -124,6 +125,7 @@ class HelperTestingClass(object):
             QuantumOrderEventsNumber=str(self._quantum_order_event),
             ScaleByCrossSection=self._cross_section_factor,
             OutputWorkspace=wrk_name + "init",
+            CacheDirectory=self._cache_directory.name,
         )
 
         # T = 20 K
@@ -140,6 +142,7 @@ class HelperTestingClass(object):
             QuantumOrderEventsNumber=str(self._quantum_order_event),
             ScaleByCrossSection=self._cross_section_factor,
             OutputWorkspace=wrk_name + "_mod",
+            CacheDirectory=self._cache_directory.name,
         )
 
         # T = 10 K
@@ -156,6 +159,7 @@ class HelperTestingClass(object):
             QuantumOrderEventsNumber=str(self._quantum_order_event),
             ScaleByCrossSection=self._cross_section_factor,
             OutputWorkspace=self._output_name,
+            CacheDirectory=self._cache_directory.name,
         )
 
     def case_restart_diff_order(self, order=None):
@@ -180,6 +184,7 @@ class HelperTestingClass(object):
             QuantumOrderEventsNumber=str(order),
             ScaleByCrossSection=self._cross_section_factor,
             OutputWorkspace=self._output_name,
+            CacheDirectory=self._cache_directory.name,
         )
 
     def __del__(self):
@@ -187,11 +192,7 @@ class HelperTestingClass(object):
         Destructor removes output files after tests and workspaces.
         :return:
         """
-        save_dir_path = ConfigService.getString("defaultsave.directory")
-
-        for cache_file in glob.glob(f"{save_dir_path}/{self._system_name}*.hdf5"):
-            os.remove(cache_file)
-
+        self._cache_directory.cleanup()
         mtd.clear()
 
 
@@ -572,6 +573,7 @@ class AbinsCRYSTAL2D(systemtesting.MantidSystemTest, HelperTestingClass):
             autoconvolution=True,
             ScaleByCrossSection=self._cross_section_factor,
             OutputWorkspace=self._output_name,
+            CacheDirectory=self._cache_directory.name,
             **params_2d,
         )
 
