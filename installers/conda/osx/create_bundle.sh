@@ -136,7 +136,7 @@ function usage() {
   echo "Options:"
   echo "  -c Optional conda channel overriding the default mantid"
   echo "  -s Optional Add a suffix to the output mantid file, has to be Unstable, or Nightly or not used"
-  echo "  -p Target platform, e.g. osx-64 or osx-arm64"
+  echo "  -p Target platform, must be either osx-64 or osx-arm64"
   exit $exitcode
 }
 
@@ -172,6 +172,20 @@ do
   esac
   shift
 done
+
+# Make sure platform argument is passed to ensure we're packaging with the right architecture.
+if [[ -z "$platform" ]]; then
+    echo "Error: -p argument is required."
+    echo "Usage: $0 -p <osx-64|osx-arm64>"
+    exit 1
+fi
+
+if [[ "$platform" != "osx-64" && "$platform" != "osx-arm64" ]]; then
+    echo "Error: Invalid value for -p. Must be 'osx-64' or 'osx-arm64'."
+    exit 1
+fi
+
+echo "Platform is: $platform"
 
 # If suffix is not empty and does not contain Unstable or Nightly then fail.
 if [ ! -z "$suffix" ]; then
