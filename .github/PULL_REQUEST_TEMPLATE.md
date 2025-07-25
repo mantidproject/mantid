@@ -17,11 +17,15 @@ Ok to refer back to instructions in the issue.
 -->
 
 <!-- REMEMBER:
-- Add release notes in separate file as per ([guidelines](https://developer.mantidproject.org/Standards/ReleaseNotesGuide.html)), or justify their absence.
 - Add labels, milestones, etc.
 - Ensure the base of this PR is correct (e.g. release-next or main)
+- Add release notes in separate file as per ([guidelines](https://developer.mantidproject.org/Standards/ReleaseNotesGuide.html)), or justify their absence:
+  *This does not require release notes* because <fill in an explanation of why>
 -->
 
+
+
+<!--  GATEKEEPER: When squashing, remove the section from HERE...  -->
 ---
 
 ### Reviewer
@@ -43,3 +47,5 @@ As per the [gatekeeping guidelines](https://developer.mantidproject.org/Gatekeep
 - Has a thorough first line review been conducted, including functional testing?
 - At a high-level, is the code quality sufficient?
 - Are the base, milestone and labels correct?
+
+<!-- GATEKEEPER: ...To HERE  -->
