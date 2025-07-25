@@ -4,185 +4,54 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+from abc import ABC, abstractmethod
 from tempfile import TemporaryDirectory
+from types import MappingProxyType
 
 import systemtesting
 from mantid.simpleapi import Abins, Abins2D, mtd, DeleteWorkspace
 
 from abins.constants import (
-    ALL_INSTRUMENTS,
-    ALL_SUPPORTED_AB_INITIO_PROGRAMS,
-    QUANTUM_ORDER_ONE,
     QUANTUM_ORDER_TWO,
 )
 
 
-class HelperTestingClass:
+class AbinsTestingMixin(ABC):
+    _extensions = {"CASTEP": ".phonon", "CRYSTAL": ".out", "DMOL3": ".outmol", "GAUSSIAN": ".log"}
+
+    @property
+    @abstractmethod
+    def system_name(self) -> str: ...
+
+    @abstractmethod
+    def ab_initio_program(self) -> str: ...
+
     def __init__(self):
-        self._temperature = 10  # K
-        self._sample_form = "Powder"
-        self._instrument_name = "TOSCA"
-        self._atoms = ""
-        self._sum_contributions = True
-        self._cross_section_factor = "Incoherent"
-        self._extension = {"CASTEP": ".phonon", "CRYSTAL": ".out", "DMOL3": ".outmol", "GAUSSIAN": ".log"}
-        self._output_name = "output_workspace"
-        self._ref = "reference_workspace"
-        self._scale = 1.0
-        self._bin_width = 1.0
+        super().__init__()  # Init the base class as well as this mix-in
 
-        self._ab_initio_program = None
-        self._quantum_order_event = None
-        self._system_name = None
+        # This is usually the ref result, can always override later if needed
+        self.ref_result = self.system_name + ".nxs"
 
+        # Temporary cache directory, allowing re-use within this MantidSystemTest instance
         self._cache_directory = TemporaryDirectory()
 
-    def set_bin_width(self, width):
-        if not (isinstance(width, float) and 1.0 <= width <= 10.0):
-            raise ValueError("Invalid bin width: {}. ".format(width) + "Valid range is [1.0, 10.0] cm^-1")
-        self._bin_width = width
-
-    def set_instrument_name(self, instrument_name=None):
-        if instrument_name in ALL_INSTRUMENTS:
-            self._instrument_name = instrument_name
-        else:
-            raise ValueError("Wrong instrument.")
-
-    def set_scale(self, scale=None):
-        if isinstance(scale, float) and scale > 0.0:
-            self._scale = scale
-        else:
-            raise ValueError("Wrong scale.")
-
-    def set_ab_initio_program(self, ab_initio_program=None):
-        if ab_initio_program in ALL_SUPPORTED_AB_INITIO_PROGRAMS:
-            self._ab_initio_program = ab_initio_program
-        else:
-            raise RuntimeError("Unsupported ab initio program: %s " % ab_initio_program)
-
-    def set_order(self, order=None):
-        orders = [QUANTUM_ORDER_ONE, QUANTUM_ORDER_TWO]
-
-        if order in orders:
-            self._quantum_order_event = order
-        else:
-            raise RuntimeError("Unsupported number of quantum order event %s" % order)
-
-    def set_name(self, name):
-        if isinstance(name, str):
-            self._system_name = name
-            self._output_name = name
-        else:
-            raise RuntimeError("Invalid name. Name should be a string but it is %s " % type(name))
-
-    def set_cross_section(self, cross_section=None):
-        self._cross_section_factor = cross_section
-
-    def case_from_scratch(self):
-        """
-        User performs calculation from scratch (not loaded from hdf file). All data is calculated.
-        """
-        Abins(
-            AbInitioProgram=self._ab_initio_program,
-            VibrationalOrPhononFile=self._system_name + self._extension[self._ab_initio_program],
-            TemperatureInKelvin=self._temperature,
-            SampleForm=self._sample_form,
-            Instrument=self._instrument_name,
-            BinWidthInWavenumber=self._bin_width,
-            Atoms=self._atoms,
-            SumContributions=self._sum_contributions,
-            QuantumOrderEventsNumber=str(self._quantum_order_event),
-            Scale=self._scale,
-            ScaleByCrossSection=self._cross_section_factor,
-            OutputWorkspace=self._output_name,
-            CacheDirectory=self._cache_directory.name,
-        )
-
-    def case_restart_diff_t(self):
-        """
-        The considered testing scenario looks as follows. First the user performs the simulation for T=10K (first run).
-        Then the user changes T to 20K (second run). For T=20K  S has to be recalculated. After that the user performs
-        simulation with the same parameters as for the initial simulation, e.g., T=10K (third run). In the third run all
-        required data will be read from hdf file. It is checked if workspace for the initial run and the third run is
-        the same (should be the same).
-        """
-        temperature_for_test = self._temperature + 10  # 20K
-        wrk_name = self._system_name
-
-        # T = 10 K
-        Abins(
-            AbInitioProgram=self._ab_initio_program,
-            VibrationalOrPhononFile=self._system_name + self._extension[self._ab_initio_program],
-            TemperatureInKelvin=self._temperature,
-            SampleForm=self._sample_form,
-            Instrument=self._instrument_name,
-            BinWidthInWavenumber=self._bin_width,
-            Atoms=self._atoms,
-            SumContributions=self._sum_contributions,
-            Scale=self._scale,
-            QuantumOrderEventsNumber=str(self._quantum_order_event),
-            ScaleByCrossSection=self._cross_section_factor,
-            OutputWorkspace=wrk_name + "init",
-            CacheDirectory=self._cache_directory.name,
-        )
-
-        # T = 20 K
-        Abins(
-            AbInitioProgram=self._ab_initio_program,
-            VibrationalOrPhononFile=self._system_name + self._extension[self._ab_initio_program],
-            TemperatureInKelvin=temperature_for_test,
-            SampleForm=self._sample_form,
-            Instrument=self._instrument_name,
-            BinWidthInWavenumber=self._bin_width,
-            Atoms=self._atoms,
-            SumContributions=self._sum_contributions,
-            Scale=self._scale,
-            QuantumOrderEventsNumber=str(self._quantum_order_event),
-            ScaleByCrossSection=self._cross_section_factor,
-            OutputWorkspace=wrk_name + "_mod",
-            CacheDirectory=self._cache_directory.name,
-        )
-
-        # T = 10 K
-        Abins(
-            AbInitioProgram=self._ab_initio_program,
-            VibrationalOrPhononFile=self._system_name + self._extension[self._ab_initio_program],
-            TemperatureInKelvin=self._temperature,
-            SampleForm=self._sample_form,
-            Instrument=self._instrument_name,
-            BinWidthInWavenumber=self._bin_width,
-            Atoms=self._atoms,
-            SumContributions=self._sum_contributions,
-            Scale=self._scale,
-            QuantumOrderEventsNumber=str(self._quantum_order_event),
-            ScaleByCrossSection=self._cross_section_factor,
-            OutputWorkspace=self._output_name,
-            CacheDirectory=self._cache_directory.name,
-        )
-
-    def case_restart_diff_order(self, order=None):
-        """
-        The considered testing scenario looks as follows. First calculations are performed for
-        self._quantum_order_event. Then calculations are performed for order (different quantum order event). In case
-        order >  self._quantum_order_event then S should be calculated. Otherwise, it will be loaded from an hdf file.
-        :param order: number of quantum order event for which restart should be done.
-        """
-        self.case_from_scratch()
-        DeleteWorkspace(self._output_name)
-        Abins(
-            AbInitioProgram=self._ab_initio_program,
-            VibrationalOrPhononFile=self._system_name + self._extension[self._ab_initio_program],
-            TemperatureInKelvin=self._temperature,
-            SampleForm=self._sample_form,
-            Instrument=self._instrument_name,
-            BinWidthInWavenumber=self._bin_width,
-            Atoms=self._atoms,
-            SumContributions=self._sum_contributions,
-            Scale=self._scale,
-            QuantumOrderEventsNumber=str(order),
-            ScaleByCrossSection=self._cross_section_factor,
-            OutputWorkspace=self._output_name,
-            CacheDirectory=self._cache_directory.name,
+        # Define defaults as an immutable dict to be copied and modified elsewhere
+        self.default_kwargs = MappingProxyType(
+            {
+                "AbInitioProgram": self.ab_initio_program,
+                "VibrationalOrPhononFile": self.system_name + self._extensions[self.ab_initio_program],
+                "TemperatureInKelvin": 10,
+                "SampleForm": "Powder",
+                "Instrument": "TOSCA",
+                "BinWidthInWavenumber": 1.0,
+                "Atoms": "",
+                "SumContributions": True,
+                "QuantumOrderEventsNumber": "1",
+                "Scale": 1.0,
+                "ScaleByCrossSection": "Incoherent",
+                "OutputWorkspace": self.system_name,
+                "CacheDirectory": self._cache_directory.name,
+            }
         )
 
     def __del__(self):
@@ -193,384 +62,244 @@ class HelperTestingClass:
         self._cache_directory.cleanup()
         mtd.clear()
 
+    def validate(self):
+        self.tolerance = 1e-1
+        return self.system_name, self.ref_result
 
-# ----------------------------------------------------------------------------------------------------------------
-# Tests for 1D S
-# ----------------------------------------------------------------------------------------------------------------
 
-
-class AbinsCRYSTALTestScratch(systemtesting.MantidSystemTest, HelperTestingClass):
+class AbinsCRYSTALTestScratch(AbinsTestingMixin, systemtesting.MantidSystemTest):
     """
-    In this benchmark it is tested if calculation from scratch with input data from CRYSTAL and for 1-4 quantum
+    In this benchmark it is tested if calculation from scratch with input data from CRYSTAL and for 1-2 quantum
     order events is correct.
     """
 
-    tolerance = None
-    ref_result = None
+    system_name = "TolueneScratchAbins"
+    ab_initio_program = "CRYSTAL"
 
     def runTest(self):
-        HelperTestingClass.__init__(self)
-
-        name = "TolueneScratchAbins"
-
-        self.ref_result = name + ".nxs"
-        self.set_ab_initio_program("CRYSTAL")
-        self.set_name(name)
-        self.set_order(QUANTUM_ORDER_TWO)
-        self.case_from_scratch()
+        Abins(**(self.default_kwargs) | {"QuantumOrderEventsNumber": str(QUANTUM_ORDER_TWO)})
 
     def excludeInPullRequests(self):
         return True
 
     def validate(self):
         self.tolerance = 1e-2
-        return self._output_name, self.ref_result
+        return self.system_name, self.ref_result
 
 
-# ----------------------------------------------------------------------------------------------------------------
-
-
-class AbinsCRYSTALTestBiggerSystem(systemtesting.MantidSystemTest, HelperTestingClass):
+class AbinsCRYSTALTestBiggerSystem(AbinsTestingMixin, systemtesting.MantidSystemTest):
     """
     In this benchmark it is tested if calculation from scratch with input data from CRYSTAL and for only 1 quantum
     order event is correct.
     """
 
-    tolerance = None
-    ref_result = None
+    system_name = "Crystalb3lypScratchAbins"
+    ab_initio_program = "CRYSTAL"
 
     def runTest(self):
-        HelperTestingClass.__init__(self)
-
-        name = "Crystalb3lypScratchAbins"
-
-        self.ref_result = name + ".nxs"
-        self.set_ab_initio_program("CRYSTAL")
-        self.set_name(name)
-        self.set_order(QUANTUM_ORDER_ONE)
-        self.case_from_scratch()
-
-    def validate(self):
-        self.tolerance = 1e-1
-        return self._output_name, self.ref_result
+        Abins(**self.default_kwargs)
 
 
-# ----------------------------------------------------------------------------------------------------------------
-
-
-class AbinsCRYSTALTestT(systemtesting.MantidSystemTest, HelperTestingClass):
+class AbinsCRYSTALTestT(AbinsTestingMixin, systemtesting.MantidSystemTest):
     """
-    In this benchmark scenario of restart is considered in which data for other temperature already exists in an hdf
-    file. In this benchmark input data from CRYSTAL DFT program is used.
+    In this scenario a restart is considered in which data for other
+    temperature already exists in an hdf file.
+
+    First a simulation is run for T=10K; then a T=20K for which S has to be
+    recalculated. After that another T=10K simulation is requested; the other
+    parameters are identical across calculations. In the third run the required
+    data /should/ be read from the hdf file. We only check that here that the
+    results are correct.
+
     """
 
-    tolerance = None
-    ref_result = None
+    system_name = "TolueneTAbins"
+    ab_initio_program = "CRYSTAL"
 
     def runTest(self):
-        HelperTestingClass.__init__(self)
+        case_1_kwargs = self.default_kwargs | {"OutputWorkspace": f"{self.system_name}init", "QuantumOrderEventsNumber": "2"}
+        case_2_kwargs = case_1_kwargs | {
+            "TemperatureInKelvin": self.default_kwargs["TemperatureInKelvin"] + 10,
+            "OutputWorkspace": f"{self.system_name}_mod",
+        }
+        case_3_kwargs = case_1_kwargs | {"OutputWorkspace": f"{self.system_name}"}
 
-        name = "TolueneTAbins"
-
-        self.ref_result = name + ".nxs"
-        self.set_ab_initio_program("CRYSTAL")
-        self.set_name(name)
-        self.set_order(QUANTUM_ORDER_TWO)
-        self.case_restart_diff_t()
+        for case_kwargs in (case_1_kwargs, case_2_kwargs, case_3_kwargs):
+            Abins(**case_kwargs)
 
     def excludeInPullRequests(self):
         return True
 
-    def validate(self):
-        self.tolerance = 1e-1
-        return self._output_name, self.ref_result
 
-
-# ----------------------------------------------------------------------------------------------------------------
-
-
-class AbinsCRYSTALTestLargerOrder(systemtesting.MantidSystemTest, HelperTestingClass):
+class AbinsCRYSTALTestLargerOrder(AbinsTestingMixin, systemtesting.MantidSystemTest):
     """
     In this benchmark it is tested if calculation from restart with input data from CRYSTAL is correct. Requested order
     of quantum event is larger than the one which is saved to an hdf file so S has to be calculated.
     """
 
-    tolerance = None
-    ref_result = None
+    system_name = "TolueneLargerOrderAbins"
+    ab_initio_program = "CRYSTAL"
 
     def runTest(self):
-        HelperTestingClass.__init__(self)
-
-        name = "TolueneLargerOrderAbins"
-
-        self.ref_result = name + ".nxs"
-        self.set_ab_initio_program("CRYSTAL")
-        self.set_name(name)
-        self.set_order(QUANTUM_ORDER_ONE)
-        self.case_restart_diff_order(QUANTUM_ORDER_TWO)
+        Abins(**self.default_kwargs)
+        DeleteWorkspace(self.system_name)
+        Abins(**(self.default_kwargs | {"QuantumOrderEventsNumber": "2"}))
 
     def excludeInPullRequests(self):
         return True
 
-    def validate(self):
-        self.tolerance = 1e-1
-        return self._output_name, self.ref_result
 
-
-# ----------------------------------------------------------------------------------------------------------------
-
-
-class AbinsCRYSTALTestSmallerOrder(systemtesting.MantidSystemTest, HelperTestingClass):
+class AbinsCRYSTALTestSmallerOrder(AbinsTestingMixin, systemtesting.MantidSystemTest):
     """
     In this benchmark it is tested if calculation from restart with input data from CRYSTAL is correct. Requested
     order of quantum event is smaller than the one which is saved to an hdf file so S is loaded from an hdf file.
     """
 
-    tolerance = None
-    ref_result = None
+    system_name = "TolueneSmallerOrderAbins"
+    ab_initio_program = "CRYSTAL"
 
     def runTest(self):
-        HelperTestingClass.__init__(self)
-
-        name = "TolueneSmallerOrderAbins"
-
-        self.ref_result = name + ".nxs"
-        self.set_ab_initio_program("CRYSTAL")
-        self.set_name(name)
-        self.set_order(QUANTUM_ORDER_TWO)
-        self.case_restart_diff_order(QUANTUM_ORDER_ONE)
-
-    def validate(self):
-        self.tolerance = 1e-1
-        return self._output_name, self.ref_result
+        Abins(**(self.default_kwargs | {"QuantumOrderEventsNumber": "2"}))
+        DeleteWorkspace(self.system_name)
+        Abins(**self.default_kwargs)
 
 
-class AbinsCRYSTALTestScale(systemtesting.MantidSystemTest, HelperTestingClass):
+class AbinsCRYSTALTestScale(AbinsTestingMixin, systemtesting.MantidSystemTest):
     """
     In this benchmark it is tested if scaling is correct.
     """
 
-    _wrk_1 = None
-    _ref_result = None
-    tolerance = None
+    system_name = "TolueneScale"
+    ab_initio_program = "CRYSTAL"
 
     def runTest(self):
-        HelperTestingClass.__init__(self)
-
-        scaling_factor = 2.0
-
-        name = "TolueneScale"
-        self.ref_result = name + ".nxs"
-        self.set_ab_initio_program("CRYSTAL")
-        self.set_name(name)
-        self.set_order(QUANTUM_ORDER_TWO)
-
-        self.set_scale(scale=scaling_factor)
-        self.case_from_scratch()
-
-    def validate(self):
-        self.tolerance = 1e-1
-        return self._output_name, self.ref_result
+        Abins(**(self.default_kwargs | {"QuantumOrderEventsNumber": "2", "Scale": 2.0}))
 
 
 # noinspection PyAttributeOutsideInit,PyPep8Naming
-class AbinsCASTEPNoH(systemtesting.MantidSystemTest, HelperTestingClass):
+class AbinsCASTEPNoH(AbinsTestingMixin, systemtesting.MantidSystemTest):
     """
     In this benchmark it is tested if calculation for systems without H is correct.
     """
 
-    tolerance = None
-    ref_result = None
+    system_name = "Na2SiF6_CASTEP"
+    ab_initio_program = "CASTEP"
 
     def runTest(self):
-        HelperTestingClass.__init__(self)
-
-        name = "Na2SiF6_CASTEP"
-        self.ref_result = name + ".nxs"
-        self.set_ab_initio_program("CASTEP")
-        self.set_name(name)
-        self.set_order(QUANTUM_ORDER_TWO)
-        self.set_cross_section(cross_section="Total")
-        self.case_from_scratch()
-        self._wrk_1 = self._output_name
-
-    def validate(self):
-        self.tolerance = 1e-1
-        return self._output_name, self.ref_result
+        Abins(**(self.default_kwargs | {"QuantumOrderEventsNumber": "2", "ScaleByCrossSection": "Total"}))
 
 
 # noinspection PyAttributeOutsideInit,PyPep8Naming
-class AbinsCASTEP1DDispersion(systemtesting.MantidSystemTest, HelperTestingClass):
+class AbinsCASTEP1DDispersion(AbinsTestingMixin, systemtesting.MantidSystemTest):
     """
     In this benchmark it is tested if calculation of S from phonon dispersion is correct (1D case).
     """
 
-    tolerance = None
-    ref_result = None
+    system_name = "Mapi"
+    ab_initio_program = "CASTEP"
 
     def runTest(self):
-        HelperTestingClass.__init__(self)
-
-        name = "Mapi"
-        self.ref_result = name + ".nxs"
-        self.set_ab_initio_program("CASTEP")
-        self.set_name(name)
-        self.set_order(QUANTUM_ORDER_ONE)
-        self.case_from_scratch()
-        self._wrk_1 = self._output_name
-
-    def validate(self):
-        self.tolerance = 1e-1
-        return self._output_name, self.ref_result
+        Abins(**self.default_kwargs)
 
 
-class AbinsDMOL3TestScratch(systemtesting.MantidSystemTest, HelperTestingClass):
+class AbinsDMOL3TestScratch(AbinsTestingMixin, systemtesting.MantidSystemTest):
     """
-    In this benchmark it is tested if calculation from scratch with input data from DMOL3 and for 1-4 quantum
+    In this benchmark it is tested if calculation from scratch with input data from DMOL3 and for 1-2 quantum
     order events is correct.
     """
 
-    tolerance = None
-    ref_result = None
+    system_name = "Na2SiF6_DMOL3"
+    ab_initio_program = "DMOL3"
 
     def runTest(self):
-        HelperTestingClass.__init__(self)
-
-        name = "Na2SiF6_DMOL3"
-
-        self.ref_result = name + ".nxs"
-        self.set_ab_initio_program("DMOL3")
-        self.set_name(name)
-        self.set_order(QUANTUM_ORDER_TWO)
-        self.set_cross_section(cross_section="Total")
-        self.case_from_scratch()
+        Abins(**(self.default_kwargs | {"QuantumOrderEventsNumber": "2", "ScaleByCrossSection": "Total"}))
 
     def excludeInPullRequests(self):
         return True
 
     def validate(self):
         self.tolerance = 1e-2
-        return self._output_name, self.ref_result
+        return self.system_name, self.ref_result
 
 
-class AbinsGAUSSIANestScratch(systemtesting.MantidSystemTest, HelperTestingClass):
+class AbinsGAUSSIANestScratch(AbinsTestingMixin, systemtesting.MantidSystemTest):
     """
     In this benchmark it is tested if calculation from scratch with input data from GAUSSIAN and for 1-4 quantum
     order events is correct.
     """
 
-    tolerance = None
-    ref_result = None
+    system_name = "C6H5Cl-Gaussian"
+    ab_initio_program = "GAUSSIAN"
 
     def runTest(self):
-        HelperTestingClass.__init__(self)
-
-        name = "C6H5Cl-Gaussian"
-
-        self.ref_result = name + ".nxs"
-        self.set_ab_initio_program("GAUSSIAN")
-        self.set_name(name)
-        self.set_order(QUANTUM_ORDER_TWO)
-        self.set_cross_section(cross_section="Incoherent")
-        self.case_from_scratch()
+        Abins(**(self.default_kwargs | {"QuantumOrderEventsNumber": "2"}))
 
     def excludeInPullRequests(self):
         return True
 
     def validate(self):
         self.tolerance = 1e-2
-        return self._output_name, self.ref_result
+        return self.system_name, self.ref_result
 
 
-class AbinsBinWidth(systemtesting.MantidSystemTest, HelperTestingClass):
+class AbinsBinWidth(AbinsTestingMixin, systemtesting.MantidSystemTest):
     """
     In this benchmark it is tested if calculation with bin width different than the default value is correct.
     Calculation performed for crystalline benzene for 1st and 2nd quantum event for output from CASTEP and bin width
     3 cm^-1. This system test should be fast so no need for excludeInPullRequests flag.
     """
 
-    tolerance = None
-    ref_result = None
+    system_name = "BenzeneBinWidthCASTEP"
+    ab_initio_program = "CASTEP"
 
     def runTest(self):
-        HelperTestingClass.__init__(self)
-        name = "BenzeneBinWidthCASTEP"
-
-        self.ref_result = name + ".nxs"
-        self.set_ab_initio_program("CASTEP")
-        self.set_name(name)
-        self.set_order(QUANTUM_ORDER_TWO)
-        self.set_cross_section(cross_section="Incoherent")
-        self.set_bin_width(width=3.0)
-        self.case_from_scratch()
+        Abins(**(self.default_kwargs | {"QuantumOrderEventsNumber": "2", "BinWidthInWavenumber": 3.0}))
 
     def validate(self):
         self.tolerance = 1e-2
-        return self._output_name, self.ref_result
+        return self.system_name, self.ref_result
 
 
-class AbinsCASTEPIsotopes(systemtesting.MantidSystemTest, HelperTestingClass):
+class AbinsCASTEPIsotopes(AbinsTestingMixin, systemtesting.MantidSystemTest):
     """
     In this benchmark it is tested if calculation of the system with isotopic substitutions: H -> 2H, Li -> 7Li,
     produces correct results. Input data is generated by CASTEP. This system test should be fast so no need for
     excludeInPullRequests flag.
     """
 
-    tolerance = None
-    ref_result = None
+    system_name = "LiOH_H2O_2D2O_CASTEP"
+    ab_initio_program = "CASTEP"
 
     def runTest(self):
-        HelperTestingClass.__init__(self)
-        name = "LiOH_H2O_2D2O_CASTEP"
-        self.ref_result = name + ".nxs"
-        self.set_ab_initio_program("CASTEP")
-        self.set_name(name)
-        self.set_order(QUANTUM_ORDER_ONE)
-        self.set_cross_section(cross_section="Incoherent")
-        self.set_bin_width(width=2.0)
-        self.case_from_scratch()
+        Abins(**(self.default_kwargs | {"BinWidthInWavenumber": 2.0}))
 
     def validate(self):
         self.tolerance = 1e-2
-        return self._output_name, self.ref_result
+        return self.system_name, self.ref_result
 
 
-# ------------------------------------------------------------------------------
-# Tests for 2D S
-# ------------------------------------------------------------------------------
-
-
-class AbinsCRYSTAL2D(systemtesting.MantidSystemTest, HelperTestingClass):
+class AbinsCRYSTAL2D(AbinsTestingMixin, systemtesting.MantidSystemTest):
     """
     Check Abins2D runs successfully for a typical use case
     """
 
-    tolerance = None
-    ref_result = None
+    system_name = "AbinsCRYSTAL2D"
+    ab_initio_program = "CRYSTAL"
 
     def runTest(self):
-        HelperTestingClass.__init__(self)
-
-        name = "AbinsCRYSTAL2D"
-
-        self.ref_result = name + ".nxs"
-        self.set_ab_initio_program("CRYSTAL")
-        self.set_name(name)
-        self.set_order(QUANTUM_ORDER_TWO)
-        self.set_instrument_name("MARI")
         params_2d = {"Chopper": "A", "ChopperFrequency": str(300), "IncidentEnergy": str(200), "EnergyUnits": "meV"}
 
         Abins2D(
             AbInitioProgram="CRYSTAL",
-            VibrationalOrPhononFile="TolueneScratchAbins" + self._extension[self._ab_initio_program],
-            TemperatureInKelvin=self._temperature,
-            Instrument=self._instrument_name,
-            Atoms=self._atoms,
-            SumContributions=self._sum_contributions,
-            QuantumOrderEventsNumber=str(self._quantum_order_event),
+            VibrationalOrPhononFile="TolueneScratchAbins" + self._extensions[self.ab_initio_program],
+            TemperatureInKelvin=10,
+            Instrument="MARI",
+            Atoms="",
+            SumContributions=True,
+            QuantumOrderEventsNumber="2",
             autoconvolution=True,
-            ScaleByCrossSection=self._cross_section_factor,
-            OutputWorkspace=self._output_name,
+            ScaleByCrossSection="Incoherent",
+            OutputWorkspace=self.system_name,
             CacheDirectory=self._cache_directory.name,
             **params_2d,
         )
@@ -578,4 +307,4 @@ class AbinsCRYSTAL2D(systemtesting.MantidSystemTest, HelperTestingClass):
     def validate(self):
         self.tolerance = 1e-4
         self.nanEqual = True
-        return self._output_name, self.ref_result
+        return self.system_name, self.ref_result
