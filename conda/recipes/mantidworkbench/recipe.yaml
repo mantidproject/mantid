@@ -34,6 +34,7 @@ requirements:
   host:
     - setuptools
     - mantidqt == ${{ version }}
+    - pip ${{ pip }}
     - python ${{ python }}
     - versioningit ${{ versioningit }}
     - if: linux
@@ -46,6 +47,7 @@ requirements:
     - ipykernel
     - if: linux
       then: lz4
+    - mantidqt == ${{ version }}
     - psutil ${{ psutil }}
     - ${{ pin_compatible("python", upper_bound="x.x") }}
     - matplotlib ${{ matplotlib }}
