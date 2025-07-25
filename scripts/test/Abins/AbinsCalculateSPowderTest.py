@@ -7,10 +7,12 @@
 from copy import deepcopy
 import functools
 import json
+from operator import attrgetter
 from pathlib import Path
 import unittest
 from tempfile import TemporaryDirectory
 
+from euphonic.spectra import Spectrum1DCollection, Spectrum2DCollection
 import numpy as np
 from numpy.testing import assert_almost_equal
 from pydantic import ValidationError
@@ -223,9 +225,6 @@ class SCalculatorFactoryPowderTest(unittest.TestCase):
         return correct_data
 
     def _check_data(self, good_data=None, data=None):
-        from operator import attrgetter
-        from euphonic.spectra import Spectrum1DCollection, Spectrum2DCollection
-
         if isinstance(data, Spectrum1DCollection):
             assert_almost_equal(good_data["frequencies"], data.x_data.to("1/cm").magnitude)
             get_s = attrgetter("y_data")

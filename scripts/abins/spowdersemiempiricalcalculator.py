@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
+from collections import defaultdict
 from functools import cached_property, partial
 import json
 from operator import attrgetter
@@ -25,7 +26,14 @@ from pydantic.types import PositiveFloat
 from scipy.special import factorial
 
 from abins import AbinsData, FrequencyPowderGenerator
-from abins.constants import FLOAT_TYPE, INT_TYPE, MIN_SIZE
+from abins.constants import (
+    FLOAT_TYPE,
+    INT_TYPE,
+    MASS_STR_FORMAT,
+    MIN_SIZE,
+    ONE_DIMENSIONAL_INSTRUMENTS,
+    TWO_DIMENSIONAL_INSTRUMENTS,
+)
 from abins.instruments import Instrument
 import abins.parameters
 from abins.sdata import (
@@ -144,8 +152,6 @@ class SPowderSemiEmpiricalCalculator:
 
     @cached_property
     def is_2d(self) -> bool:
-        from abins.constants import ONE_DIMENSIONAL_INSTRUMENTS, TWO_DIMENSIONAL_INSTRUMENTS
-
         """Validate instrument name and get dimensionality from known instruments"""
         if self._instrument.get_name() in ONE_DIMENSIONAL_INSTRUMENTS:
             return False
@@ -362,9 +368,6 @@ class SPowderSemiEmpiricalCalculator:
             Debye-Waller corrected scattering intensities at the calculated
             orders, for all atoms.
         """
-        from abins.constants import FLOAT_TYPE, MASS_STR_FORMAT
-        from collections import defaultdict
-
         # Calculate fundamentals and order-2 in isotropic powder-averaging approximation
         if self._quantum_order_num == 1 or self._use_autoconvolution:
             min_order = 1  # Need fundamentals without DW
@@ -657,8 +660,6 @@ class SPowderSemiEmpiricalCalculator:
             SpectrumCollection for fundamentals including mode-dependent Debye-Waller factor
 
         """
-        from abins.constants import FLOAT_TYPE, MASS_STR_FORMAT
-
         self._report_progress("Calculating fundamentals with mode-dependent Debye-Waller factor.", reporter=self.progress_reporter)
 
         if (angle is None) == (q2 is None):  # XNOR
