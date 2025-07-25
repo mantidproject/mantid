@@ -14,8 +14,6 @@ from abins.constants import (
     ALL_SUPPORTED_AB_INITIO_PROGRAMS,
     QUANTUM_ORDER_ONE,
     QUANTUM_ORDER_TWO,
-    QUANTUM_ORDER_THREE,
-    QUANTUM_ORDER_FOUR,
 )
 
 
@@ -63,7 +61,7 @@ class HelperTestingClass:
             raise RuntimeError("Unsupported ab initio program: %s " % ab_initio_program)
 
     def set_order(self, order=None):
-        orders = [QUANTUM_ORDER_ONE, QUANTUM_ORDER_TWO, QUANTUM_ORDER_THREE, QUANTUM_ORDER_FOUR]
+        orders = [QUANTUM_ORDER_ONE, QUANTUM_ORDER_TWO]
 
         if order in orders:
             self._quantum_order_event = order
