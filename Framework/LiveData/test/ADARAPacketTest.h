@@ -145,9 +145,9 @@ public:
     }
   }
 
-  void testBeamMonitorPacketParser() {
+  void testBeamMonitorPacketv0Parser() {
     std::shared_ptr<ADARA::BeamMonitorPkt> pkt =
-        basicPacketTests<ADARA::BeamMonitorPkt>(beamMonitorPacket, sizeof(beamMonitorPacket), 728504567, 761741666);
+        basicPacketTests<ADARA::BeamMonitorPkt>(beamMonitorPacketV0, sizeof(beamMonitorPacketV0), 728504567, 761741666);
     if (pkt != nullptr) {
       TS_ASSERT_EQUALS(pkt->cycle(), 0x3c);
       TS_ASSERT_EQUALS(pkt->flags(), 0);
@@ -156,6 +156,35 @@ public:
       // TODO: Find a different Beam Monitor Packet with actual monitor sections
       // in it
     }
+  }
+
+  void testBeamMonitorPacketv1Parser() {
+    std::shared_ptr<ADARA::BeamMonitorPkt> pkt = basicPacketTests<ADARA::BeamMonitorPkt>(
+        beamMonitorPacketV1, sizeof(beamMonitorPacketV1), 1117010871, 517706667);
+    auto expectedAt = [&](uint32_t start) { return packetCast<uint32_t>(beamMonitorPacketV1, start, 4); };
+    TS_ASSERT_EQUALS(pkt->payload_length(), 136 - 16) // 136 bytes total minus 16 bytes for the header
+    TS_ASSERT_EQUALS(pkt->pulseCharge(), expectedAt(16))
+    TS_ASSERT_EQUALS(pkt->pulseEnergy(), expectedAt(20))
+    TS_ASSERT_EQUALS(pkt->cycle(), expectedAt(24))
+    TS_ASSERT_EQUALS(pkt->flags(), ADARA::PARTIAL_DATA | ADARA::GOT_METADATA | ADARA::GOT_NEUTRONS)
+    // Look into the first section
+    TS_ASSERT(pkt->nextSection())
+    TS_ASSERT_EQUALS(pkt->getSectionEventCount(), expectedAt(32) & 0x003FFFFF) // lower 22 bits
+    TS_ASSERT_EQUALS(pkt->getSectionMonitorID(), expectedAt(32) >> 22)         // upper 10 bits
+    TS_ASSERT_EQUALS(pkt->getSectionSourceID(), expectedAt(36))
+    TS_ASSERT_EQUALS(pkt->getSectionTOFOffset(), expectedAt(40) & 0x7FFFFFFF)        // mask off the high bit
+    TS_ASSERT_EQUALS(pkt->sectionTOFCorrected(), (expectedAt(40) & 0x80000000) != 0) // only want the high bit
+    // Look into the first event of the first section
+    bool risingEdge;
+    uint32_t cycle;
+    uint32_t tof;
+    pkt->nextEvent(risingEdge, cycle, tof);
+    TS_ASSERT_EQUALS(tof, expectedAt(44) & 0x001FFFFF)               // bits 20 to 0 (inclusive)
+    TS_ASSERT_EQUALS(cycle, (expectedAt(44) & 0x7FE00000) >> 21)     // bits 30 to 21 (inclusive)
+    TS_ASSERT_EQUALS(risingEdge, (expectedAt(44) & 0x80000000) != 0) // only want the high bit
+    // There are 23 events in the first section, thus 44 + 23 * 4 = 136.
+    // This packet has a total of 136 bytes, so there can't be another section.
+    TS_ASSERT(!pkt->nextSection())
   }
 
   void testDeviceDescriptorPacketParser() {
