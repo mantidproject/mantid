@@ -111,7 +111,7 @@ class RunAStandardAbsorptionCorrectionEulerGoniometer(systemtesting.MantidSystem
         kwargs = self.default_kwargs
         kwargs["orientation_file"] = orientation_file
         kwargs["orient_file_is_euler"] = True
-        kwargs["euler_scheme"] = "YZY"
+        kwargs["euler_scheme"] = "YXY"
         kwargs["euler_axes_sense"] = "-1,-1,-1"
         run_abs_corr(**kwargs)
 
