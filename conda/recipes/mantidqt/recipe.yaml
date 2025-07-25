@@ -27,7 +27,6 @@ requirements:
     - ninja ${{ ninja }}
     - cmake ${{ cmake }}
     - git
-    - pip ${{ pip }}
     - if: build_platform != target_platform
       then:
         - python ${{ python }}
@@ -46,6 +45,7 @@ requirements:
     - if: osx or linux
       then: libopenblas ${{ libopenblas }}
     - mantid == ${{ version }}
+    - pip ${{ pip }}
     - python ${{ python }}
     - pyqt ${{ pyqt }}
     - pyqt5-sip ${{ pyqt5_sip }}
