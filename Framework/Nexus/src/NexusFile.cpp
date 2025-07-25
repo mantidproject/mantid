@@ -195,7 +195,7 @@ void File::initOpenFile(std::string const &filename, NXaccess const am) {
     msg << "File::initOpenFile(" << filename << ", " << am << ") failed";
     throw NXEXCEPTION(msg.str());
   } else {
-    m_pfile = std::make_shared<H5::H5File>(temp_fid);
+    m_pfile = std::make_shared<H5::H5File>(std::move(temp_fid));
   }
 }
 
@@ -281,7 +281,6 @@ void File::close() {
     m_pfile->close();
     H5garbage_collect();
     m_pfile.reset();
-    m_pfile = nullptr;
   }
 }
 
