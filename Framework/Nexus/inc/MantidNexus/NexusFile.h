@@ -4,7 +4,6 @@
 #include "MantidNexus/NexusAddress.h"
 #include "MantidNexus/NexusDescriptor.h"
 #include "MantidNexus/NexusFile_fwd.h"
-#include <H5Cpp.h>
 #include <map>
 #include <memory>
 #include <string>
@@ -38,6 +37,27 @@ namespace Nexus {
 static Entry const EOD_ENTRY(NULL_STR, NULL_STR);
 
 /**
+ * FileID
+ * Like a hid_t, except makes sure to call close on deletion
+ */
+class MANTID_NEXUS_DLL FileID {
+  hid_t m_fid;
+
+public:
+  bool operator==(int const v) const { return static_cast<int>(m_fid) == v; }
+  bool operator<=(int const v) const { return static_cast<int>(m_fid) <= v; }
+  operator hid_t const &() const { return m_fid; }
+  hid_t getId() const { return m_fid; }
+  FileID() : m_fid(-1) {}
+  FileID(hid_t const v) : m_fid(v) {}
+  FileID(FileID const &f) : m_fid(f.m_fid) {}
+  FileID &operator=(hid_t const);
+  FileID &operator=(FileID const &);
+  ~FileID();
+  friend File;
+};
+
+/**
  * The Object that allows access to the information in the file.
  * \ingroup cpp_core
  */
@@ -58,10 +78,10 @@ private:
    * \li m_current_group_id -- the ID for currently opened group (or 0 if none)
    * \li m_current_data_id -- the ID for currently opened dataset (or 0 if none)
    * \li m_current_type_id -- the ID of the type of the opened dataset
-   * \li m_current_soace_id -- the ID of the dataspace for the opened dataset
+   * \li m_current_space_id -- the ID of the dataspace for the opened dataset
    * \li m_gid_stack -- a vector stack of opened group IDs
    */
-  std::shared_ptr<H5::H5File> m_pfile;
+  std::shared_ptr<FileID> m_pfile;
   hid_t m_current_group_id;
   hid_t m_current_data_id;
   hid_t m_current_type_id;

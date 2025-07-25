@@ -106,6 +106,22 @@ template <> MANTID_NEXUS_DLL NXnumtype getType(string const) { return NXnumtype:
 
 namespace Mantid::Nexus {
 
+FileID &FileID::operator=(hid_t const v) {
+  m_fid = v;
+  return *this;
+}
+
+FileID &FileID::operator=(FileID const &f) {
+  m_fid = f.m_fid;
+  return *this;
+}
+
+FileID::~FileID() {
+  H5Fclose(m_fid);
+  H5garbage_collect();
+  m_fid = -1;
+}
+
 //------------------------------------------------------------------------------------------------------------------
 // CONSTRUCTORS / ASSIGNMENT / DECONSTRUCTOR
 //------------------------------------------------------------------------------------------------------------------
@@ -195,7 +211,7 @@ void File::initOpenFile(std::string const &filename, NXaccess const am) {
     msg << "File::initOpenFile(" << filename << ", " << am << ") failed";
     throw NXEXCEPTION(msg.str());
   } else {
-    m_pfile = std::make_shared<H5::H5File>(std::move(temp_fid));
+    m_pfile = std::make_shared<FileID>(temp_fid);
   }
 }
 
@@ -205,7 +221,7 @@ File::File(File const &f)
     : m_filename(f.m_filename), m_access(f.m_access), m_address(f.m_address), m_close_handle(false), m_pfile(f.m_pfile),
       m_current_group_id(0), m_current_data_id(0), m_current_type_id(0), m_current_space_id(0), m_gid_stack{0},
       m_descriptor(f.m_descriptor) {
-  if (m_pfile->getId() <= 0)
+  if (m_pfile <= 0)
     throw Mantid::Nexus::Exception("Error reopening file");
 }
 
@@ -213,7 +229,7 @@ File::File(File const *const pf)
     : m_filename(pf->m_filename), m_access(pf->m_access), m_address(pf->m_address), m_close_handle(false),
       m_pfile(pf->m_pfile), m_current_group_id(0), m_current_data_id(0), m_current_type_id(0), m_current_space_id(0),
       m_gid_stack{0}, m_descriptor(pf->m_descriptor) {
-  if (m_pfile->getId() <= 0)
+  if (m_pfile <= 0)
     throw Mantid::Nexus::Exception("Error reopening file");
 }
 
@@ -221,7 +237,7 @@ File::File(std::shared_ptr<File> pf)
     : m_filename(pf->m_filename), m_access(pf->m_access), m_address(pf->m_address), m_close_handle(false),
       m_pfile(pf->m_pfile), m_current_group_id(0), m_current_data_id(0), m_current_type_id(0), m_current_space_id(0),
       m_gid_stack{0}, m_descriptor(pf->m_descriptor) {
-  if (m_pfile->getId() <= 0)
+  if (m_pfile <= 0)
     throw Mantid::Nexus::Exception("Error reopening file");
 }
 
@@ -278,7 +294,6 @@ void File::close() {
   if (m_pfile != nullptr) {
     // NOTE you actually need both closes
     H5Fclose(m_pfile->getId());
-    m_pfile->close();
     H5garbage_collect();
     m_pfile.reset();
   }
@@ -397,7 +412,7 @@ std::shared_ptr<H5::H5Object> File::getCurrentObject() const {
   } else if (m_current_group_id != 0) {
     return std::make_shared<H5::Group>(m_current_group_id);
   } else {
-    return m_pfile;
+    return std::make_shared<H5::H5File>(m_pfile->getId());
   }
 }
 
@@ -427,7 +442,8 @@ void File::makeGroup(const std::string &name, const std::string &nxclass, bool o
   // get full address
   NexusAddress const absaddr(formAbsoluteAddress(name));
   // create group with H5Util by getting an H5File object from iFID
-  Mantid::NeXus::H5Util::createGroupNXS(*m_pfile, absaddr, nxclass);
+  H5::H5File h5file(m_pfile->getId());
+  Mantid::NeXus::H5Util::createGroupNXS(h5file, absaddr, nxclass);
 
   // cleanup
   registerEntry(absaddr, nxclass);
