@@ -30,11 +30,12 @@ requirements:
         - setuptools
         - numpy ${{ numpy }}
   host:
+    - mantid == ${{ version }}
+    - mantidqt == ${{ version }}
     - python ${{ python }}
     - setuptools
     - sphinx ${{ sphinx }}
     - sphinx_bootstrap_theme ${{ sphinx_bootstrap_theme }}
-    - mantidqt == ${{ version }}
     - versioningit ${{ versioningit }}
     - graphviz ${{ graphviz }}
     - texlive-core ${{ texlive_core }}
