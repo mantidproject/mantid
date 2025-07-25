@@ -187,6 +187,7 @@ public:
     TS_ASSERT(!pkt->nextSection())
   }
 
+  // There's only version 0 for the DeviceDescriptorPkt, so we don't need a version-specific test
   void testDeviceDescriptorPacketParser() {
     std::shared_ptr<ADARA::DeviceDescriptorPkt> pkt =
         basicPacketTests<ADARA::DeviceDescriptorPkt>(devDesPacket, sizeof(devDesPacket), 726785379, 0);
@@ -198,9 +199,9 @@ public:
     }
   }
 
-  void testRunStatusPacketParser() {
+  void testRunStatusPacketParserV0() {
     std::shared_ptr<ADARA::RunStatusPkt> pkt =
-        basicPacketTests<ADARA::RunStatusPkt>(runStatusPacket, sizeof(runStatusPacket), 728504568, 5625794);
+        basicPacketTests<ADARA::RunStatusPkt>(runStatusPacketV0, sizeof(runStatusPacketV0), 728504568, 5625794);
 
     if (pkt != nullptr) {
       TS_ASSERT_EQUALS(pkt->runNumber(), 13247);
@@ -214,9 +215,44 @@ public:
     }
   }
 
-  void testRTDLPacketParser() {
+  void testRunStatusPacketParserV1() {
+
+    // helper function to call on packets havind different run status types
+    auto testRunStatusPacket = [&](const unsigned char *packetData, size_t packetSize, uint32_t expectedPulseId,
+                                   uint32_t expectedId, ADARA::RunStatus::Enum expectedStatus) {
+      std::shared_ptr<ADARA::RunStatusPkt> pkt =
+          basicPacketTests<ADARA::RunStatusPkt>(packetData, packetSize, expectedPulseId, expectedId);
+
+      std::function<uint32_t(uint32_t)> expectedAt = [&](uint32_t start) {
+        return packetCast<uint32_t>(packetData, start, 4);
+      };
+
+      TS_ASSERT_EQUALS(pkt->runNumber(), expectedAt(16))
+      TS_ASSERT_EQUALS(pkt->runStart(), expectedAt(20))
+      auto status = static_cast<ADARA::RunStatus::Enum>(expectedAt(24) >> 24);
+      TS_ASSERT_EQUALS(pkt->status(), expectedStatus)
+      TS_ASSERT_EQUALS(pkt->fileNumber(), expectedAt(24) & 0xFFFFFF) // lower 24 bits
+    };
+
+    testRunStatusPacket(runStatusPacketV1NoRun, sizeof(runStatusPacketV1NoRun), 1117010859, 421225535,
+                        ADARA::RunStatus::NO_RUN);
+    testRunStatusPacket(runStatusPacketV1NewRun, sizeof(runStatusPacketV1NewRun), 1117010897, 11143026,
+                        ADARA::RunStatus::NEW_RUN);
+    testRunStatusPacket(runStatusPacketV1RunEOF, sizeof(runStatusPacketV1RunEOF), 1117010900, 37361961,
+                        ADARA::RunStatus::RUN_EOF);
+    testRunStatusPacket(runStatusPacketV1RunBOF, sizeof(runStatusPacketV1RunBOF), 1117010897, 17020018,
+                        ADARA::RunStatus::RUN_BOF);
+    testRunStatusPacket(runStatusPacketV1EndRun, sizeof(runStatusPacketV1EndRun), 1117041153, 518160111,
+                        ADARA::RunStatus::END_RUN);
+  }
+
+  /************************
+   *   RTDL Packets
+   ************************/
+
+  void testRTDLPacketParserV0() {
     std::shared_ptr<ADARA::RTDLPkt> pkt =
-        basicPacketTests<ADARA::RTDLPkt>(rtdlPacket, sizeof(rtdlPacket), 728504567, 761741666);
+        basicPacketTests<ADARA::RTDLPkt>(rtdlPacketV0, sizeof(rtdlPacketV0), 728504567, 761741666);
 
     if (pkt != nullptr) {
       TS_ASSERT_EQUALS(pkt->cycle(), 60);
@@ -229,6 +265,35 @@ public:
       TS_ASSERT_EQUALS(pkt->pulseCharge(), 1549703);
       TS_ASSERT_EQUALS(pkt->ringPeriod(), 955259);
     }
+  }
+
+  void testRTDLPacketParserV1() {
+    std::shared_ptr<ADARA::RTDLPkt> pkt =
+        basicPacketTests<ADARA::RTDLPkt>(rtdlPacketV1, sizeof(rtdlPacketV1), 728504567, 761741666);
+    auto expectedAt = [&](uint32_t start) { return packetCast<uint32_t>(rtdlPacketV1, start, 4); };
+
+    uint32_t quadByte = expectedAt(16);
+    TS_ASSERT_EQUALS(pkt->gotDataFlags(), true)                 // bit index 31
+    TS_ASSERT_EQUALS(pkt->dataFlags(), (quadByte >> 27) & 0x1f) // bit indexes 27 to 31
+    TS_ASSERT_EQUALS(pkt->flavor(), ADARA::PulseFlavor::NORMAL)
+    TS_ASSERT_EQUALS(pkt->pulseCharge(), quadByte & 0x00ffffff) // bit indexes 0 to 23
+
+    quadByte = expectedAt(20);
+    TS_ASSERT_EQUALS(pkt->badVeto(), (bool)(quadByte & 0x80000000))          // bit index 31
+    TS_ASSERT_EQUALS(pkt->badCycle(), (bool)(quadByte & 0x40000000))         // bit index 30
+    TS_ASSERT_EQUALS(pkt->timingStatus(), (uint8_t)(quadByte >> 22))         // bit indexes 22 to 29
+    TS_ASSERT_EQUALS(pkt->vetoFlags(), (uint16_t)((quadByte >> 10) & 0xfff)) // bit indexes 10 to 21
+    TS_ASSERT_EQUALS(pkt->cycle(), (uint16_t)(quadByte & 0x3ff))
+
+    TS_ASSERT_EQUALS(pkt->intraPulseTime(), expectedAt(24))
+    TS_ASSERT_EQUALS(pkt->tofCorrected(), (bool)(expectedAt(28) & 0x80000000)) // bit index 31
+    TS_ASSERT_EQUALS(pkt->tofOffset(), expectedAt(28) & 0x7fffffff);           // mask off the high bit
+    TS_ASSERT_EQUALS(pkt->ringPeriod(), expectedAt(32) & 0xffffff);            // bit indexes 0 to 23
+
+    TS_ASSERT_EQUALS(pkt->FNA(0), (expectedAt(36) >> 24) & 0xff)      // bit indexes 0 to 23
+    TS_ASSERT_EQUALS(pkt->frameData(0), expectedAt(36) & 0xffffff);   // bit indexes 24 to 31
+    TS_ASSERT_EQUALS(pkt->FNA(24), (expectedAt(132) >> 24) & 0xff)    // bit indexes 0 to 23
+    TS_ASSERT_EQUALS(pkt->frameData(24), expectedAt(132) & 0xffffff); // bit indexes 24 to 31
   }
 
   void testSyncPacketParser() {
