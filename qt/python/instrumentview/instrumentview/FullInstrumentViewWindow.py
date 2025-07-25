@@ -216,9 +216,16 @@ class FullInstrumentViewWindow(QMainWindow):
     def enable_point_picking(self, callback: Callable) -> None:
         """Switch on point picking, i.e. picking a single point with right-click"""
         self.main_plotter.disable_picking()
+        picking_tolerance = 0.01
         if not self.main_plotter.off_screen:
             self.main_plotter.enable_surface_point_picking(
-                show_message=False, use_picker=True, callback=callback, show_point=False, pickable_window=False, picker="point"
+                show_message=False,
+                use_picker=True,
+                callback=callback,
+                show_point=False,
+                pickable_window=False,
+                picker="point",
+                tolerance=picking_tolerance,
             )
 
         self.projection_plotter.disable_picking()
@@ -230,7 +237,7 @@ class FullInstrumentViewWindow(QMainWindow):
                 show_point=False,
                 pickable_window=False,
                 picker="point",
-                tolerance=0.01,
+                tolerance=picking_tolerance,
             )
 
     def enable_rectangle_picking(self, callback: Callable) -> None:
