@@ -42,7 +42,8 @@ public:
                                      const std::string binning = "Logarithmic",
                                      const std::string binningUnits = "dSpacing", const double timeMin = -1.,
                                      const double timeMax = -1., const bool should_throw = false,
-                                     TableWorkspace_sptr tablesplitter = nullptr, const bool relativeTime = false) {
+                                     TableWorkspace_sptr tablesplitter = nullptr, const bool relativeTime = false,
+                                     const int splitterTarget = -1) {
     const std::string wksp_name("VULCAN");
 
     std::cout << "==================> " << filename << '\n';
@@ -70,6 +71,8 @@ public:
       TS_ASSERT_THROWS_NOTHING(alg.setProperty("SplitterWorkspace", tablesplitter));
       TS_ASSERT_THROWS_NOTHING(alg.setProperty("RelativeTime", relativeTime));
     }
+    if (splitterTarget >= 0)
+      TS_ASSERT_THROWS_NOTHING(alg.setProperty("SplitterTarget", splitterTarget));
 
     if (should_throw) {
       TS_ASSERT_THROWS(alg.execute(), const std::invalid_argument &);
@@ -412,6 +415,71 @@ public:
     TS_ASSERT_EQUALS(outputWS->readY(5).front(), 590230);
   }
 
+  void test_splitter_table_multiple_targets() {
+    Mantid::DataObjects::TableWorkspace_sptr tablesplitter = create_splitter_table(true, false);
+
+    MatrixWorkspace_sptr outputWS0 =
+        run_algorithm("VULCAN_218062.nxs.h5", std::vector<double>{0.}, std::vector<double>{50000.},
+                      std::vector<double>{50000.}, "Linear", "TOF", -1., -1., false, tablesplitter, true, 0);
+
+    /* expected results came from running
+
+    ws = LoadEventNexus("VULCAN_218062.nxs.h5", NumberOfBins=1, FilterByTimeStart=10, FilterByTimeStop=20)
+    grp = CreateGroupingWorkspace(ws, GroupDetectorsBy='bank')
+    ws = GroupDetectors(ws, CopyGroupingFromWorkspace="grp")
+    print(ws.extractY())
+    */
+
+    TS_ASSERT_EQUALS(outputWS0->readY(0).front(), 59561);
+    TS_ASSERT_EQUALS(outputWS0->readY(1).front(), 59358);
+    TS_ASSERT_EQUALS(outputWS0->readY(2).front(), 63952);
+    TS_ASSERT_EQUALS(outputWS0->readY(3).front(), 63299);
+    TS_ASSERT_EQUALS(outputWS0->readY(4).front(), 22917);
+    TS_ASSERT_EQUALS(outputWS0->readY(5).front(), 43843);
+
+    MatrixWorkspace_sptr outputWS1 =
+        run_algorithm("VULCAN_218062.nxs.h5", std::vector<double>{0.}, std::vector<double>{50000.},
+                      std::vector<double>{50000.}, "Linear", "TOF", -1., -1., false, tablesplitter, true, 1);
+
+    /* expected results came from running
+
+    ws = LoadEventNexus("VULCAN_218062.nxs.h5", NumberOfBins=1, FilterByTimeStart=200, FilterByTimeStop=210)
+    grp = CreateGroupingWorkspace(ws, GroupDetectorsBy='bank')
+    ws = GroupDetectors(ws, CopyGroupingFromWorkspace="grp")
+    print(ws.extractY())
+    */
+
+    TS_ASSERT_EQUALS(outputWS1->readY(0).front(), 373262);
+    TS_ASSERT_EQUALS(outputWS1->readY(1).front(), 372186);
+    TS_ASSERT_EQUALS(outputWS1->readY(2).front(), 428220);
+    TS_ASSERT_EQUALS(outputWS1->readY(3).front(), 423472);
+    TS_ASSERT_EQUALS(outputWS1->readY(4).front(), 143703);
+    TS_ASSERT_EQUALS(outputWS1->readY(5).front(), 273072);
+
+    MatrixWorkspace_sptr outputWS2 =
+        run_algorithm("VULCAN_218062.nxs.h5", std::vector<double>{0.}, std::vector<double>{50000.},
+                      std::vector<double>{50000.}, "Linear", "TOF", -1., -1., false, tablesplitter, true, 2);
+
+    /* expected results came from running
+
+    ws = LoadEventNexus("VULCAN_218062.nxs.h5", NumberOfBins=1, FilterByTimeStart=400, FilterByTimeStop=410)
+    grp = CreateGroupingWorkspace(ws, GroupDetectorsBy='bank')
+    ws = GroupDetectors(ws, CopyGroupingFromWorkspace="grp")
+    print(ws.extractY())
+    */
+
+    TS_ASSERT_EQUALS(outputWS2->readY(0).front(), 374383);
+    TS_ASSERT_EQUALS(outputWS2->readY(1).front(), 373823);
+    TS_ASSERT_EQUALS(outputWS2->readY(2).front(), 428811);
+    TS_ASSERT_EQUALS(outputWS2->readY(3).front(), 423184);
+    TS_ASSERT_EQUALS(outputWS2->readY(4).front(), 144056);
+    TS_ASSERT_EQUALS(outputWS2->readY(5).front(), 273315);
+
+    // target out of range, should throw
+    run_algorithm("VULCAN_218062.nxs.h5", std::vector<double>{0.}, std::vector<double>{50000.},
+                  std::vector<double>{50000.}, "Linear", "TOF", -1., -1., true, tablesplitter, true, 3);
+  }
+
   void test_splitter_table_and_time_start_stop() {
     TableWorkspace_sptr tablesplitter = create_splitter_table();
 
@@ -445,7 +513,7 @@ public:
     TS_ASSERT_EQUALS(outputWS->readY(5).front(), 304167);
   }
 
-  TableWorkspace_sptr create_splitter_table(const bool relativeTime = true) {
+  TableWorkspace_sptr create_splitter_table(const bool relativeTime = true, const bool sameTarget = true) {
     // create splitter table
     TableWorkspace_sptr tablesplitter = std::make_shared<Mantid::DataObjects::TableWorkspace>();
     tablesplitter->addColumn("double", "start");
@@ -463,12 +531,12 @@ public:
     tablesplitter->appendRow();
     tablesplitter->cell<double>(1, 0) = 200.0 + offset;
     tablesplitter->cell<double>(1, 1) = 210.0 + offset;
-    tablesplitter->cell<std::string>(1, 2) = "0";
+    tablesplitter->cell<std::string>(1, 2) = sameTarget ? "0" : "1";
 
     tablesplitter->appendRow();
     tablesplitter->cell<double>(2, 0) = 400.0 + offset;
     tablesplitter->cell<double>(2, 1) = 410.0 + offset;
-    tablesplitter->cell<std::string>(2, 2) = "0";
+    tablesplitter->cell<std::string>(2, 2) = sameTarget ? "0" : "2";
     return tablesplitter;
   }
 

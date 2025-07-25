@@ -45,6 +45,7 @@ using Mantid::DataObjects::MaskWorkspace_sptr;
 using Mantid::DataObjects::Workspace2D;
 using Mantid::Kernel::ArrayBoundedValidator;
 using Mantid::Kernel::ArrayProperty;
+using Mantid::Kernel::BoundedValidator;
 using Mantid::Kernel::Direction;
 using Mantid::Kernel::EnumeratedStringProperty;
 using Mantid::Kernel::TimeROI;
@@ -58,6 +59,7 @@ const std::string FILTER_TIMESTART("FilterByTimeStart");
 const std::string FILTER_TIMESTOP("FilterByTimeStop");
 const std::string SPLITTER_WS("SplitterWorkspace");
 const std::string SPLITTER_RELATIVE("RelativeTime");
+const std::string SPLITTER_TARGET("SplitterTarget");
 const std::string X_MIN("XMin");
 const std::string X_MAX("XMax");
 const std::string X_DELTA("XDelta");
@@ -163,6 +165,9 @@ void AlignAndFocusPowderSlim::init() {
   declareProperty(PropertyNames::SPLITTER_RELATIVE, false,
                   "Flag indicating whether in SplitterWorkspace the times are absolute or "
                   "relative. If true, they are relative to the run start time.");
+  auto mustBePositive = std::make_shared<BoundedValidator<int>>();
+  mustBePositive->setLower(0);
+  declareProperty(PropertyNames::SPLITTER_TARGET, 0, mustBePositive, "The target workspace index for the splitter.");
   const std::vector<std::string> cal_exts{".h5", ".hd5", ".hdf", ".cal"};
   declareProperty(std::make_unique<FileProperty>(PropertyNames::CAL_FILE, "", FileProperty::OptionalLoad, cal_exts),
                   "The .cal file containing the position correction factors. Either this or OffsetsWorkspace needs to "
@@ -571,11 +576,12 @@ TimeROI AlignAndFocusPowderSlim::timeROIFromSplitterWorkspace(const Types::Core:
         DataObjects::TimeSplitter(matrixSplitterWS, isSplittersRelativeTime ? filterStartTime : DateAndTime::GPS_EPOCH);
   }
 
-  if (timeSplitter.outputWorkspaceIndices().size() != 1) {
-    throw std::runtime_error("Current we only support a single output workspace from the splitter workspace");
+  const int splitter_target = this->getProperty(PropertyNames::SPLITTER_TARGET);
+  if (static_cast<size_t>(splitter_target) >= timeSplitter.outputWorkspaceIndices().size()) {
+    throw std::invalid_argument("Selected splitter target is out of range.");
   }
 
-  return timeSplitter.getTimeROI(0);
+  return timeSplitter.getTimeROI(splitter_target);
 }
 
 } // namespace Mantid::DataHandling::AlignAndFocusPowderSlim

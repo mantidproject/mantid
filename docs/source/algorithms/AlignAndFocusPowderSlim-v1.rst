@@ -97,7 +97,7 @@ This algorithm accepts the sample SplitterWorkspace inputs as :ref:`FilterEvents
 
 .. note::
 
-    We currently only support a single output workspace when filtering events from a splitter table. We also can currently only filter base on the pulse time, not the event time-of-flight.
+    While we currently only support a single output workspace when filtering events from a splitter table but the output target can be selected with the ``SplitterTarget`` property and you can run the algorithm multiple times with different targets. We also can currently only filter base on the pulse time, not the event time-of-flight.
 
 .. categories::
 
