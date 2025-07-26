@@ -37,11 +37,20 @@ namespace Nexus {
 static Entry const EOD_ENTRY(NULL_STR, NULL_STR);
 
 /**
- * FileID
- * Like a hid_t, except makes sure to call close on deletion
+ * \class FileID
+ * \brief A wrapper class for managing HDF5 file handles (hid_t).
+ *
+ * The FileID class is designed to manage the lifecycle of HDF5 file handles (hid_t),
+ * ensuring that the handle is properly closed when the FileID object is destroyed.
+ * This helps prevent resource leaks and ensures proper cleanup of HDF5 resources.
  */
 class MANTID_NEXUS_DLL FileID {
+private:
   hid_t m_fid;
+  // There is no reason to copy or assign a file ID
+  FileID(FileID const &f) = delete;
+  FileID &operator=(hid_t const) = delete;
+  FileID &operator=(FileID const &) = delete;
 
 public:
   bool operator==(int const v) const { return static_cast<int>(m_fid) == v; }
@@ -50,9 +59,6 @@ public:
   hid_t getId() const { return m_fid; }
   FileID() : m_fid(-1) {}
   FileID(hid_t const v) : m_fid(v) {}
-  FileID(FileID const &f) : m_fid(f.m_fid) {}
-  FileID &operator=(hid_t const);
-  FileID &operator=(FileID const &);
   ~FileID();
 };
 
@@ -129,21 +135,20 @@ public:
    *
    * \param pf Pointer to file to copy over
    */
-  File(File const *const pf);
+  File(File const *const pf) : File(*pf) {}
 
   /**
-   * Copy constructor from pointer
+   * Copy constructor from shared pointer
    *
    * \param pf Pointer to file to copy over
    */
-  File(std::shared_ptr<File> pf);
+  File(std::shared_ptr<File> pf) : File(*pf) {}
 
   /**
-   * Assignment operator, to complete the rule of three
-   *
-   * \param f File to assign
+   * Prohibit assignment, as it can lead to
+   * race conditions when closing the HDF5 file handles
    */
-  File &operator=(File const &f);
+  File &operator=(File const &f) = delete;
 
   /** Destructor. This does close the file. */
   ~File();

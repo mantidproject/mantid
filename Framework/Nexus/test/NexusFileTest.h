@@ -1468,10 +1468,10 @@ public:
   // ################################################################################################################
 
   bool file_is_closed(std::string const &filename) {
-    // this will check if a file is already opened, by trying to open it with incompativle (WEAK) access
+    // this will check if a file is already opened, by trying to open it with incompatible (WEAK) access
     // if this operation FAILS (fid <= 0), then the file is STILL OPENED
-    // if this operation SUCCEEDS (fid > 0), then the file was closed
-    // NOTE is ONLY meaningful AFTER a file with the name has been definitely opened
+    // if this operation SUCCEEDS (fid > 0), then the file was CLOSED
+    // NOTE this is ONLY meaningful AFTER a file with the name has been definitely opened
     hid_t fapl = H5Pcreate(H5P_FILE_ACCESS);
     H5Pset_fclose_degree(fapl, H5F_CLOSE_WEAK);
     hid_t fid = H5Fopen(filename.c_str(), H5F_ACC_RDONLY, fapl);
@@ -1497,16 +1497,78 @@ public:
     TS_ASSERT(file_is_closed(filename));
   }
 
+  void test_file_id() {
+    cout << "\ntest the file id\n" << std::flush;
+
+    Mantid::Nexus::FileID fid;
+    TS_ASSERT_EQUALS(fid.getId(), -1);
+
+    // create a file
+    FileResource resource("test_nexus_fid.nxs");
+    std::string filename(resource.fullPath());
+    { // scoped file creation
+      Mantid::Nexus::File file(filename, NXaccess::CREATE5);
+    }
+    TS_ASSERT(file_is_closed(filename));
+
+    { // scoped fid
+      hid_t fapl = H5Pcreate(H5P_FILE_ACCESS);
+      H5Pset_fclose_degree(fapl, H5F_CLOSE_STRONG);
+      Mantid::Nexus::FileID fid = H5Fopen(filename.c_str(), H5F_ACC_RDONLY, fapl);
+      TS_ASSERT(!file_is_closed(filename));
+      TS_ASSERT_DIFFERS(fid.getId(), -1);
+    } // fid goes out of scope and deconstructor is called
+    // the file is now closed
+    TS_ASSERT(file_is_closed(filename));
+  }
+
+  void test_file_id_shared_ptr() {
+    cout << "\ntest the file id in shared ptr\n" << std::flush;
+
+    // create a file
+    FileResource resource("test_nexus_fid.nxs");
+    std::string filename(resource.fullPath());
+    { // scoped file creation
+      Mantid::Nexus::File file(filename, NXaccess::CREATE5);
+    }
+    TS_ASSERT(file_is_closed(filename));
+
+    { // scoped fid
+      hid_t fapl = H5Pcreate(H5P_FILE_ACCESS);
+      H5Pset_fclose_degree(fapl, H5F_CLOSE_STRONG);
+      auto pfid1 = std::make_shared<Mantid::Nexus::FileID>(H5Fopen(filename.c_str(), H5F_ACC_RDONLY, fapl));
+      auto pfid2(pfid1);
+      auto pfid3(pfid2);
+      TS_ASSERT(!file_is_closed(filename));
+      TS_ASSERT_DIFFERS(pfid1->getId(), -1);
+      TS_ASSERT_DIFFERS(pfid2->getId(), -1);
+      TS_ASSERT_DIFFERS(pfid3->getId(), -1);
+      // close pfid1
+      pfid1.reset();
+      TS_ASSERT(!file_is_closed(filename));
+      TS_ASSERT_DIFFERS(pfid2->getId(), -1);
+      TS_ASSERT_DIFFERS(pfid3->getId(), -1);
+      // close pfid3
+      pfid3.reset();
+      TS_ASSERT(!file_is_closed(filename));
+      TS_ASSERT_DIFFERS(pfid2->getId(), -1);
+    } // last pfid goes out of scope and deconstructor is called
+    // the file is now closed
+    TS_ASSERT(file_is_closed(filename));
+  }
+
   void test_open_concurrent() {
     cout << "\ntest open two concurrent files\n" << std::flush;
 
+    // create a file with two entries
     FileResource resource("test_nexus_concurrent.nxs");
     std::string filename(resource.fullPath());
-    // create a file with two entries
-    Mantid::Nexus::File file(filename, NXaccess::CREATE5);
-    file.makeGroup("entry1", "NXshorts", false);
-    file.makeGroup("entry2", "NXpants", false);
-    file.close();
+    { // scoped file creation
+      Mantid::Nexus::File file(filename, NXaccess::CREATE5);
+      file.makeGroup("entry1", "NXshorts", false);
+      file.makeGroup("entry2", "NXpants", false);
+      file.close();
+    }
     // check the file is closed
     TS_ASSERT(file_is_closed(filename));
 
@@ -1532,12 +1594,14 @@ public:
     // create a file with two entries
     FileResource resource("test_nexus_copy_create.nxs");
     std::string filename(resource.fullPath());
-    Mantid::Nexus::File file(filename, NXaccess::CREATE5);
-    file.makeGroup("entry1", "NXshorts", true);
-    file.putAttr("info", "some info");
-    file.closeGroup();
-    file.makeGroup("entry2", "NXpants", false);
-    file.close();
+    { // scoped file creation
+      Mantid::Nexus::File file(filename, NXaccess::CREATE5);
+      file.makeGroup("entry1", "NXshorts", true);
+      file.putAttr("info", "some info");
+      file.closeGroup();
+      file.makeGroup("entry2", "NXpants", false);
+      file.close();
+    }
 
     { // scope file1
       // open the file and go to an entry
@@ -1565,102 +1629,53 @@ public:
     TS_ASSERT(file_is_closed(filename));
   }
 
-  void test_assignment() {
-    cout << "\ntest assignmrnt operator\n" << std::flush;
+  void test_copy_from_pointers() {
+    cout << "\ntest copy creation\n" << std::flush;
 
-    // create a file with two entries
-    FileResource resource("test_nexus_assignment.nxs");
+    // create a file with an entry
+    FileResource resource("test_nexus_copy_create.nxs");
     std::string filename(resource.fullPath());
-    Mantid::Nexus::File file(filename, NXaccess::CREATE5);
-    file.makeGroup("entry1", "NXshorts", false);
-    file.makeGroup("entry2", "NXpants", false);
-    file.close();
 
-    // create a dummy file
-    FileResource resource2("test_nexus_assign2.nxs");
-    std::string filename2(resource2.fullPath());
-    Mantid::Nexus::File other(filename2, NXaccess::CREATE5);
-    other.makeGroup("something", "NXshoes", false);
-    other.close();
+    { // scope the created file
+      Mantid::Nexus::File file(filename, NXaccess::CREATE5);
+      file.makeGroup("entry", "NXshorts", true);
+      file.putAttr("info", "some info");
+      file.closeGroup();
+    }
+    TS_ASSERT(file_is_closed(filename));
 
+    // check with pointers
     { // scope file1
       // open the file and go to an entry
       Mantid::Nexus::File file1(filename, NXaccess::READ);
-      file1.openGroup("entry1", "NXshorts");
-      TS_ASSERT_EQUALS(file1.getAddress(), "/entry1");
-
-      { // scope the second file
-        // open some other file and go somewhere
-        Mantid::Nexus::File file2(filename2, NXaccess::READ);
-        file2.openGroup("something", "NXshoes");
-        TS_ASSERT_EQUALS(file2.getAddress(), "/something");
-
-        // now use the assignment operator
-        file2 = file1;
-        TS_ASSERT_EQUALS(file2.getAddress(), "/");
-
-        // open a different group and confirm
-        file2.openGroup("entry2", "NXpants");
-        TS_ASSERT_EQUALS(file2.getAddress(), "/entry2");
+      Mantid::Nexus::File *pfile = &file1;
+      { // sccope file2
+        // copy the file and go to a different entry
+        Mantid::Nexus::File file2(pfile);
+        file2.openGroup("entry", "NXshorts");
+        TS_ASSERT_EQUALS(file2.getStrAttr("info"), "some info");
       } // file2 goes out of scope
-
-      // confirm the first did not move
-      TS_ASSERT_EQUALS(file1.getAddress(), "/entry1");
-    } // file1 goes out of scope and file will close
+      TS_ASSERT(!file_is_closed(filename));
+      pfile->openGroup("entry", "NXshorts");
+      TS_ASSERT_EQUALS(pfile->getStrAttr("info"), "some info");
+    }
     // check the file is closed
     TS_ASSERT(file_is_closed(filename));
-  }
 
-  void test_assignment_closing_other_order() {
-    cout << "\ntest assignment and closing order\n" << std::flush;
-
-    // create a file with two entries
-    FileResource resource("test_nexus_assignment.nxs");
-    std::string filename(resource.fullPath());
-    Mantid::Nexus::File file(filename, NXaccess::CREATE5);
-    file.makeGroup("entry1", "NXshorts", true);
-    file.putAttr("info", "entry one");
-    file.closeGroup();
-    file.makeGroup("entry2", "NXpants", false);
-    file.close();
-
-    // create a dummy file
-    FileResource resource2("test_nexus_assign2.nxs");
-    std::string filename2(resource2.fullPath());
-    Mantid::Nexus::File other(filename2, NXaccess::CREATE5);
-    other.makeGroup("something", "NXshoes", false);
-    other.close();
-
+    // check with shared pointers
     { // scope file1
       // open the file and go to an entry
-      Mantid::Nexus::File file1(filename2, NXaccess::READ);
-      file1.openGroup("something", "NXshoes");
-      TS_ASSERT_EQUALS(file1.getAddress(), "/something");
-
-      { // scope the second file
-        // open some other file and go somewhere
-        Mantid::Nexus::File file2(filename, NXaccess::READ);
-        file2.openGroup("entry2", "NXpants");
-        TS_ASSERT_EQUALS(file2.getAddress(), "/entry2");
-
-        // now use the assignment operator
-        file1 = file2; // file1 is set to file2, and file2 will close on delete
-        TS_ASSERT_EQUALS(file1.getAddress(), "/");
-
-        // open a different group and confirm
-        file1.openGroup("entry1", "NXshorts");
-        TS_ASSERT_EQUALS(file1.getAddress(), "/entry1");
-        TS_ASSERT_EQUALS(file1.getStrAttr("info"), "entry one");
-      } // file2 goes out of scope, file1 persists
-
-      // confirm the first did not move
-      TS_ASSERT_EQUALS(file1.getAddress(), "/entry1");
-      TS_ASSERT_THROWS_NOTHING(file1.getStrAttr("info"));
-      TS_ASSERT_EQUALS(file1.getStrAttr("info"), "entry one");
-      // go somewhere else
-      TS_ASSERT_THROWS_NOTHING(file1.openAddress("/entry2"));
-      TS_ASSERT_EQUALS(file1.getAddress(), "/entry2");
-    } // file1 goes out of scope, file is closed
+      auto pfile = std::make_shared<Mantid::Nexus::File>(filename, NXaccess::READ);
+      { // scope file2
+        // copy the file and go to a different entry
+        Mantid::Nexus::File file2(pfile);
+        file2.openGroup("entry", "NXshorts");
+        TS_ASSERT_EQUALS(file2.getStrAttr("info"), "some info");
+      } // file2 goes out of scope
+      TS_ASSERT(!file_is_closed(filename));
+      pfile->openGroup("entry", "NXshorts");
+      TS_ASSERT_EQUALS(pfile->getStrAttr("info"), "some info");
+    }
     // check the file is closed
     TS_ASSERT(file_is_closed(filename));
   }

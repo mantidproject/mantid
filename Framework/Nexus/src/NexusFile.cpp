@@ -6,6 +6,7 @@
 #include "MantidNexus/napi.h"
 #include "MantidNexus/napi_helper.h"
 #include <H5Cpp.h>
+#include <Poco/Logger.h>
 #include <algorithm>
 #include <array>
 #include <assert.h>
@@ -38,6 +39,11 @@ using std::vector;
   if ((status) != NXstatus::NX_OK) {                                                                                   \
     throw NXEXCEPTION(msg);                                                                                            \
   }
+
+namespace {
+/// static logger object. Use Poco directly instead of Kernel::Logger so we don't need to import from Kernel
+const auto g_log = &Poco::Logger::get("NexusFile");
+} // namespace
 
 /**
  * \file NexusFile.cpp
@@ -102,26 +108,17 @@ template <> MANTID_NEXUS_DLL NXnumtype getType(char const) { return NXnumtype::C
 
 template <> MANTID_NEXUS_DLL NXnumtype getType(string const) { return NXnumtype::CHAR; }
 
+FileID::~FileID() {
+  if (H5Iis_valid(m_fid)) {
+    H5Fclose(m_fid);
+    H5garbage_collect();
+    m_fid = -1;
+  }
+}
+
 } // namespace Mantid::Nexus
 
 namespace Mantid::Nexus {
-
-FileID &FileID::operator=(hid_t const v) {
-  m_fid = v;
-  return *this;
-}
-
-FileID &FileID::operator=(FileID const &f) {
-  m_fid = f.m_fid;
-  return *this;
-}
-
-FileID::~FileID() {
-  H5Fclose(m_fid);
-  H5garbage_collect();
-  m_fid = -1;
-}
-
 //------------------------------------------------------------------------------------------------------------------
 // CONSTRUCTORS / ASSIGNMENT / DECONSTRUCTOR
 //------------------------------------------------------------------------------------------------------------------
@@ -225,38 +222,6 @@ File::File(File const &f)
     throw Mantid::Nexus::Exception("Error reopening file");
 }
 
-File::File(File const *const pf)
-    : m_filename(pf->m_filename), m_access(pf->m_access), m_address(), m_close_handle(false), m_pfile(pf->m_pfile),
-      m_current_group_id(0), m_current_data_id(0), m_current_type_id(0), m_current_space_id(0), m_gid_stack{0},
-      m_descriptor(pf->m_descriptor) {
-  if (m_pfile <= 0)
-    throw Mantid::Nexus::Exception("Error reopening file");
-}
-
-File::File(std::shared_ptr<File> pf)
-    : m_filename(pf->m_filename), m_access(pf->m_access), m_address(), m_close_handle(false), m_pfile(pf->m_pfile),
-      m_current_group_id(0), m_current_data_id(0), m_current_type_id(0), m_current_space_id(0), m_gid_stack{0},
-      m_descriptor(pf->m_descriptor) {
-  if (m_pfile <= 0)
-    throw Mantid::Nexus::Exception("Error reopening file");
-}
-
-File &File::operator=(File const &f) {
-  if (this == &f) {
-  } else {
-    this->m_filename = f.m_filename;
-    this->m_access = f.m_access;
-    this->m_address = NexusAddress::root();
-    this->m_pfile = f.m_pfile;
-    this->m_current_group_id = this->m_current_data_id = this->m_current_type_id = this->m_current_space_id = 0;
-    this->m_gid_stack.assign({0});
-    this->m_close_handle = f.m_close_handle;
-    this->m_descriptor = f.m_descriptor;
-    this->m_fid = -1;
-  }
-  return *this;
-}
-
 // deconstructor
 
 File::~File() {
@@ -290,8 +255,8 @@ File::~File() {
 void File::close() {
   /* close the file handle */
   if (m_pfile != nullptr) {
-    if (!m_pfile.unique()) {
-      std::cout << "WARNING: closing file " << m_filename << " which still has open references.\n" << std::flush;
+    if (m_pfile.use_count() > 1) {
+      g_log->warning("WARNING: closing file " + m_filename + " which still has open references.");
     }
     H5Fclose(m_pfile->getId());
     H5garbage_collect();
@@ -924,7 +889,7 @@ void File::makeCompData(std::string const &name, NXnumtype const type, DimVector
       throw NXEXCEPTION(msg.str());
     }
   } else {
-    NXReportError("HDF5 doesn't support selected compression method! Dataset created without compression");
+    g_log->error("HDF5 doesn't support selected compression method! Dataset created without compression");
     H5Pclose(cparms);
     cparms = H5Pcopy(H5P_DEFAULT);
   }
