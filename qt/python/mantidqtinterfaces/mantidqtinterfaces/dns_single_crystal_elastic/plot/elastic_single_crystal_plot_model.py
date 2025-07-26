@@ -72,6 +72,9 @@ class DNSElasticSCPlotModel(DNSObsModel):
         labels = axis_labels[axis_type]
         return labels
 
+    def get_changing_hkl_components(self):
+        return self._single_crystal_map.get_changing_hkl_components()
+
     def get_omega_offset(self):
         return self._single_crystal_map["omega_offset"]
 
