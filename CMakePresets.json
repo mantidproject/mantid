@@ -76,7 +76,7 @@
         "ci-default",
         "conda"
       ],
-      "generator": "Visual Studio 16 2019"
+      "generator": "Visual Studio 17 2022"
     },
     {
       "name": "win-64-ci-ninja",
@@ -145,7 +145,7 @@
         "conda"
       ],
       "generator": "Visual Studio 17 2022",
-      "toolset": "v142"
+      "toolset": "v143"
     },
     {
       "name": "win-ninja",
