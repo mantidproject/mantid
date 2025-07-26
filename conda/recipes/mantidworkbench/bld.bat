@@ -1,7 +1,7 @@
 set "parent_dir=%RECIPE_DIR%\.."
 CALL "%parent_dir%\archive_env_logs.bat" %BUILD_PREFIX% %PREFIX% mantidworkbench
 
-mkdir build && cd build
+mkdir -p build && cd build
 
 cmake ^
     -DCMAKE_INSTALL_PREFIX=%LIBRARY_PREFIX% ^
