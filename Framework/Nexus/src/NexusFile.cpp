@@ -125,17 +125,11 @@ namespace Mantid::Nexus {
 
 // new constructors
 
-File::File(const string &filename, const NXaccess access)
-    : m_filename(filename), m_access(access), m_address(), m_close_handle(true), m_current_group_id(0),
-      m_current_data_id(0), m_current_type_id(0), m_current_space_id(0), m_gid_stack{0},
-      m_descriptor(m_filename, m_access) {
-  this->initOpenFile(m_filename, m_access);
-}
+File::File(const string &filename, const NXaccess access) : File(filename.c_str(), access) {}
 
 File::File(const char *filename, const NXaccess access)
-    : m_filename(filename), m_access(access), m_address(), m_close_handle(true), m_current_group_id(0),
-      m_current_data_id(0), m_current_type_id(0), m_current_space_id(0), m_gid_stack{0},
-      m_descriptor(m_filename, m_access) {
+    : m_filename(filename), m_access(access), m_address(), m_current_group_id(0), m_current_data_id(0),
+      m_current_type_id(0), m_current_space_id(0), m_gid_stack{0}, m_descriptor(m_filename, m_access) {
   this->initOpenFile(m_filename, m_access);
 }
 
@@ -215,9 +209,8 @@ void File::initOpenFile(std::string const &filename, NXaccess const am) {
 // copy constructors
 
 File::File(File const &f)
-    : m_filename(f.m_filename), m_access(f.m_access), m_address(), m_close_handle(false), m_pfile(f.m_pfile),
-      m_current_group_id(0), m_current_data_id(0), m_current_type_id(0), m_current_space_id(0), m_gid_stack{0},
-      m_descriptor(f.m_descriptor) {
+    : m_filename(f.m_filename), m_access(f.m_access), m_address(), m_pfile(f.m_pfile), m_current_group_id(0),
+      m_current_data_id(0), m_current_type_id(0), m_current_space_id(0), m_gid_stack{0}, m_descriptor(f.m_descriptor) {
   if (m_pfile <= 0)
     throw Mantid::Nexus::Exception("Error reopening file");
 }
@@ -255,11 +248,6 @@ File::~File() {
 void File::close() {
   /* close the file handle */
   if (m_pfile != nullptr) {
-    if (m_pfile.use_count() > 1) {
-      g_log->warning("WARNING: closing file " + m_filename + " which still has open references.");
-    }
-    H5Fclose(m_pfile->getId());
-    H5garbage_collect();
     m_pfile.reset();
   }
 }

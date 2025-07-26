@@ -76,8 +76,6 @@ private:
   NXaccess m_access;
   /** The address of currently-opened element */
   NexusAddress m_address;
-  /** should be close handle on exit */
-  bool m_close_handle;
   /** Variables for use inside the C-API, formerly of NexusFile5
    * \li m_pfile -- shared ptr to a H5File object
    * \li m_current_group_id -- the ID for currently opened group (or 0 if none)
