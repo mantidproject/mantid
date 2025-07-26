@@ -115,6 +115,24 @@ public:
     AnalysisDataService::Instance().clear();
   }
 
+  void testReorderMembersWithIndices() {
+    WorkspaceGroup_sptr group = makeGroup();
+
+    group->reorderMembersWithIndices({2, 1, 0});
+    std::vector<std::string> testVector = {"ws2", "ws1", "ws0"};
+    TS_ASSERT_EQUALS(group->getNames(), testVector);
+
+    group->reorderMembersWithIndices({1, 2, 0});
+    testVector = {"ws1", "ws0", "ws2"};
+    TS_ASSERT_EQUALS(group->getNames(), testVector);
+
+    group->reorderMembersWithIndices({1, 0, 2});
+    testVector = {"ws0", "ws1", "ws2"};
+    TS_ASSERT_EQUALS(group->getNames(), testVector);
+
+    AnalysisDataService::Instance().clear();
+  }
+
   void test_add() {
     WorkspaceGroup_sptr group = makeGroup();
     TS_ASSERT_EQUALS(group->size(), 3);

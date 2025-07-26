@@ -97,6 +97,33 @@ void WorkspaceGroup::sortMembersByName() {
 }
 
 /**
+ *  Reorder the group members using a list of indices (e.g the list 3,2,1,0 would reverse the order)
+ */
+void WorkspaceGroup::reorderMembersWithIndices(const std::vector<int> &indices) {
+  if (indices.size() != this->size()) {
+    g_log.warning("Number of indices must match the number of workspace members\n");
+    return;
+  }
+
+  if (!std::all_of(indices.cbegin(), indices.cend(),
+                   [&](const int i) { return i >= 0 && i < static_cast<int>(m_workspaces.size()); })) {
+    g_log.warning("All indices must be >= 0 and < the number of workspaces in the group\n");
+    return;
+  }
+
+  // check all elements are unique by adding to a set and checking size
+  if (std::unordered_set<int>(indices.cbegin(), indices.cend()).size() != indices.size()) {
+    g_log.warning("All indices must be unique\n");
+    return;
+  }
+
+  std::vector<Mantid::API::Workspace_sptr> reordered;
+  std::transform(indices.cbegin(), indices.cend(), std::back_inserter(reordered),
+                 [&](const auto &i) { return m_workspaces[i]; });
+  m_workspaces = reordered;
+}
+
+/**
  * Adds a workspace to the group. The workspace does not have to be in the
  * ADS
  * @param workspace :: A shared pointer to a workspace to add. If the
@@ -435,7 +462,7 @@ bool WorkspaceGroup::isMultiperiod() const {
   for (const auto &workspace : m_workspaces) {
     if (MatrixWorkspace_sptr ws = std::dynamic_pointer_cast<MatrixWorkspace>(workspace)) {
       try {
-        Kernel::Property *nPeriodsProp = ws->run().getLogData("nperiods");
+        const Kernel::Property *nPeriodsProp = ws->run().getLogData("nperiods");
         int num = -1;
         Kernel::Strings::convert(nPeriodsProp->value(), num);
         if (num < 1) {
