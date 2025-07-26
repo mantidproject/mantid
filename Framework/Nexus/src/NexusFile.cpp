@@ -248,6 +248,11 @@ File::~File() {
 void File::close() {
   /* close the file handle */
   if (m_pfile != nullptr) {
+    if (m_pfile.use_count() > 1) {
+      g_log->warning("WARNING: closing file " + m_filename + " which still has open references.");
+    }
+    H5Fclose(m_pfile->getId());
+    H5garbage_collect();
     m_pfile.reset();
   }
 }
