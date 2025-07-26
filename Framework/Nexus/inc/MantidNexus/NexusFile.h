@@ -4,6 +4,7 @@
 #include "MantidNexus/NexusAddress.h"
 #include "MantidNexus/NexusDescriptor.h"
 #include "MantidNexus/NexusFile_fwd.h"
+#include <H5Cpp.h>
 #include <map>
 #include <memory>
 #include <string>
@@ -34,8 +35,6 @@ class H5Object;
 namespace Mantid {
 namespace Nexus {
 
-static Entry const EOD_ENTRY(NULL_STR, NULL_STR);
-
 /**
  * The Object that allows access to the information in the file.
  * \ingroup cpp_core
@@ -52,13 +51,15 @@ private:
   NexusAddress m_address;
   /** should be close handle on exit */
   bool m_close_handle;
-  /** Variables for use inside the C-API, formerly of NexusFile5
-   * \li m_fid -- the ID for open file object
+  /** Variables for use inside the C-API
+   * \li m_pfile -- shared ptr to a H5File object
    * \li m_current_group_id -- the ID for currently opened group (or 0 if none)
-   * \li m_current_data_id -- the ID forcurrently opened dataset (or 0 if none)
+   * \li m_current_data_id -- the ID for currently opened dataset (or 0 if none)
+   * \li m_current_type_id -- the ID of the type of the opened dataset
+   * \li m_current_soace_id -- the ID of the dataspace for the opened dataset
    * \li m_gid_stack -- a vector stack of opened group IDs
    */
-  hid_t m_fid;
+  std::shared_ptr<H5::H5File> m_pfile;
   hid_t m_current_group_id;
   hid_t m_current_data_id;
   hid_t m_current_type_id;
@@ -70,8 +71,6 @@ private:
    * - firstEntryNameType
    */
   NexusDescriptor m_descriptor;
-  /** NOTE: this is temporary until `napi` is fully deleted*/
-  NexusAddress m_group_address;
 
   //------------------------------------------------------------------------------------------------------------------
   // CONSTRUCTORS / ASSIGNMENT / DECONSTRUCTOR
@@ -143,12 +142,6 @@ private:
   //------------------------------------------------------------------------------------------------------------------
 public:
   // ADDRESS GET / OPEN
-
-  /**
-   * DO NOT USE THIS FUNCTION FOR ANY REASON
-   * It is needed as a temporary solution while deleting napi.
-   */
-  NexusFile5 getFileStruct();
 
   /**
    * Open the NeXus object with the address specified.
