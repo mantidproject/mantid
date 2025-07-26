@@ -28,7 +28,7 @@ fi
 ###############################################################################
 # Mamba
 ###############################################################################
-setup_mamba $WORKSPACE/mambaforge "devsite" false ""
+setup_mamba $WORKSPACE/miniforge "devsite" false ""
 mamba install --yes sphinx sphinx_bootstrap_theme
 
 ###############################################################################
