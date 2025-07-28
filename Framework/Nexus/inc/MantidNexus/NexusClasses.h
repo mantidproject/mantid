@@ -40,7 +40,7 @@ struct NXInfo {
   std::string nxname;                 ///< name of the object
   std::size_t rank;                   ///< number of dimensions of the data
   NXDimArray dims;                    ///< sizes along each dimension
-  NXnumtype type;                     ///< type of the data, e.g. NX_CHAR, NXnumtype::FLOAT32, see napi.h
+  NXnumtype type;                     ///< type of the data, e.g. NX_CHAR, FLOAT32; see NexusFile_fwd.h
   bool allGood;                       ///< return status
   operator bool() { return allGood; } ///< returns success of an operation
 };
@@ -51,7 +51,7 @@ struct NXClassInfo {
   NXClassInfo() : nxname(), nxclass(), datatype(NXnumtype::BAD), allGood(false) {}
   std::string nxname;                 ///< name of the object
   std::string nxclass;                ///< NX class of the object or "SDS" if a dataset
-  NXnumtype datatype;                 ///< NX data type if a dataset, e.g. NX_CHAR, NXnumtype::FLOAT32, see
+  NXnumtype datatype;                 ///< NX data type if a dataset, e.g. NX_CHAR, FLOAT32; see NexusFile_fwd.h
   bool allGood;                       ///< return status
   operator bool() { return allGood; } ///< returns success of an operation
 };
@@ -149,7 +149,7 @@ public:
   nxdimsize_t dim3() const;
   /// Returns the name of the data set
   std::string name() const { return m_info.nxname; } // cppcheck-suppress returnByReference
-  /// Returns the Nexus type of the data. The types are defied in napi.h
+  /// Returns the Nexus type of the data. The types are defined in NexusFile_fwd.h
   NXnumtype type() const { return m_info.type; }
   /// Attributes
   NXAttributes attributes;
