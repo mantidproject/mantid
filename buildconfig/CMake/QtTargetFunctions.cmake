@@ -300,7 +300,7 @@ function(mtd_add_qt_test_executable)
 
   # client and system headers
   target_include_directories(${_target_name} PRIVATE ${PARSED_INCLUDE_DIRS})
-  target_include_directories(${_target_name} SYSTEM PRIVATE ${CXXTEST_INCLUDE_DIR})
+  target_include_directories(${_target_name} SYSTEM PUBLIC ${CXXTEST_INCLUDE_DIR})
 
   target_link_libraries(${_target_name} LINK_PRIVATE ${LINK_LIBS} ${_link_libs} ${_mtd_qt_libs})
   if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
