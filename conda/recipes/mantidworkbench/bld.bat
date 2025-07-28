@@ -1,6 +1,8 @@
 set "parent_dir=%RECIPE_DIR%\.."
 CALL "%parent_dir%\archive_env_logs.bat" %BUILD_PREFIX% %PREFIX% mantidworkbench
 
+CALL "%VSINSTALLDIR%\VC\Auxiliary\Build\vcvarsall.bat" x64
+
 mkdir build && cd build
 
 cmake ^
@@ -15,6 +17,7 @@ cmake ^
     -DENABLE_WORKBENCH=ON ^
     -DWORKBENCH_SITE_PACKAGES=%SP_DIR% ^
     -DUSE_PRECOMPILED_HEADERS=OFF ^
+    -GNinja
     ..
 
 if errorlevel 1 exit 1
