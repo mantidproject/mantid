@@ -172,11 +172,12 @@ void AlignAndFocusPowderSlim::init() {
   auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(0);
   declareProperty(PropertyNames::SPLITTER_TARGET, 0, mustBePositive, "The target workspace index for the splitter.");
-  declareProperty(PropertyNames::FILTER_BAD_PULSES, false, "FilterBadPules");
+  declareProperty(PropertyNames::FILTER_BAD_PULSES, false,
+                  "Filter bad pulses in the same way that :ref:`algm-FilterBadPulses` does.");
   auto range = std::make_shared<BoundedValidator<double>>();
   range->setBounds(0., 100.);
   declareProperty(PropertyNames::FILTER_BAD_PULSES_LOWER_CUTOFF, 95., range,
-                  "The percentage of the average to use as the lower bound");
+                  "The percentage of the average to use as the lower bound when filtering bad pulses.");
   const std::vector<std::string> cal_exts{".h5", ".hd5", ".hdf", ".cal"};
   declareProperty(std::make_unique<FileProperty>(PropertyNames::CAL_FILE, "", FileProperty::OptionalLoad, cal_exts),
                   "The .cal file containing the position correction factors. Either this or OffsetsWorkspace needs to "

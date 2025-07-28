@@ -25,7 +25,6 @@ Current limitations compared to ``AlignAndFocusPowderFromFiles``
 - hard coded for 6 particular groups
 - does not support copping data
 - does not support removing prompt pulse
-- does not support removing bad pulses
 
 Child algorithms used are
 
