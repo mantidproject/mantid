@@ -187,17 +187,9 @@ public:
     TS_ASSERT(!pkt->nextSection())
   }
 
-  // There's only version 0 for the DeviceDescriptorPkt, so we don't need a version-specific test
-  void testDeviceDescriptorPacketParser() {
-    std::shared_ptr<ADARA::DeviceDescriptorPkt> pkt =
-        basicPacketTests<ADARA::DeviceDescriptorPkt>(devDesPacket, sizeof(devDesPacket), 726785379, 0);
-    if (pkt != nullptr) {
-      // Basic XML validation
-      Poco::XML::DOMParser parser;
-      TS_ASSERT_THROWS_NOTHING(Poco::AutoPtr<Poco::XML::Document> doc =
-                                   parser.parseMemory(pkt->description().c_str(), pkt->description().length()));
-    }
-  }
+  /************************
+   *   RUN STATUS Packets
+   ************************/
 
   void testRunStatusPacketParserV0() {
     std::shared_ptr<ADARA::RunStatusPkt> pkt =
@@ -217,7 +209,7 @@ public:
 
   void testRunStatusPacketParserV1() {
 
-    // helper function to call on packets havind different run status types
+    // helper function to call on packets having different run status types
     auto testRunStatusPacket = [&](const unsigned char *packetData, size_t packetSize, uint32_t expectedPulseId,
                                    uint32_t expectedId, ADARA::RunStatus::Enum expectedStatus) {
       std::shared_ptr<ADARA::RunStatusPkt> pkt =
@@ -296,39 +288,130 @@ public:
     TS_ASSERT_EQUALS(pkt->frameData(24), expectedAt(132) & 0xffffff); // bit indexes 24 to 31
   }
 
+  /************************
+   *   SYNC Packets
+   *   (there's only version 0)
+   ************************/
+
   void testSyncPacketParser() {
-    // the basic tests cover everything in the sync packet
-    basicPacketTests<ADARA::SyncPkt>(syncPacket, sizeof(syncPacket), 728504568, 5617153);
+    std::shared_ptr<ADARA::SyncPkt> pkt =
+        basicPacketTests<ADARA::SyncPkt>(syncPacket, sizeof(syncPacket), 728504568, 5617153);
+    auto x = pkt->signature();
+    TS_ASSERT_EQUALS(pkt->signature(), std::string(reinterpret_cast<const char *>(syncPacket) + 16, 16))
+    TS_ASSERT_EQUALS(pkt->fileOffset(), packetCast<uint64_t>(syncPacket, 32, 8))
+    TS_ASSERT_EQUALS(pkt->comment().length(), 0) // empty comment
+  }
+
+  /******************************
+   *   STREAM ANNOTATION Packets
+   *   (there's only version 0)
+   ********************************/
+
+  void testAnnotationPacketParser() {
+
+    std::shared_ptr<ADARA::AnnotationPkt> pkt = basicPacketTests<ADARA::AnnotationPkt>(
+        AnnotationPacketType0, sizeof(AnnotationPacketType0), 1117010897, 8968804);
+    TS_ASSERT_EQUALS(pkt->marker_type(), ADARA::MarkerType::GENERIC)
+    TS_ASSERT_EQUALS(pkt->scanIndex(), 0)
+    TS_ASSERT_EQUALS(pkt->comment(), "Run 44635 Started.")
+
+    pkt = basicPacketTests<ADARA::AnnotationPkt>(AnnotationPacketType1, sizeof(AnnotationPacketType1), 1117010982,
+                                                 114515313);
+    TS_ASSERT_EQUALS(pkt->marker_type(), ADARA::MarkerType::SCAN_START)
+    TS_ASSERT_EQUALS(pkt->scanIndex(), 2)
+    TS_ASSERT_EQUALS(pkt->comment(), "[Run 44635] Scan #2 Started.")
+
+    pkt = basicPacketTests<ADARA::AnnotationPkt>(AnnotationPacketType2, sizeof(AnnotationPacketType2), 1117011060,
+                                                 417136782);
+    TS_ASSERT_EQUALS(pkt->marker_type(), ADARA::MarkerType::SCAN_STOP)
+    TS_ASSERT_EQUALS(pkt->scanIndex(), 2)
+    TS_ASSERT_EQUALS(pkt->comment(), "[Run 44635] Scan #2 Stopped.")
+
+    pkt = basicPacketTests<ADARA::AnnotationPkt>(AnnotationPacketType3, sizeof(AnnotationPacketType3), 1117010897,
+                                                 14178350);
+    TS_ASSERT_EQUALS(pkt->marker_type(), ADARA::MarkerType::PAUSE)
+    TS_ASSERT_EQUALS(pkt->scanIndex(), 0)
+    TS_ASSERT_EQUALS(pkt->comment(), "Run 44635 Paused.")
+
+    pkt = basicPacketTests<ADARA::AnnotationPkt>(AnnotationPacketType4, sizeof(AnnotationPacketType4), 1117010897,
+                                                 16250000);
+    TS_ASSERT_EQUALS(pkt->marker_type(), ADARA::MarkerType::RESUME)
+    TS_ASSERT_EQUALS(pkt->scanIndex(), 0)
+    TS_ASSERT_EQUALS(pkt->comment(), "Run 44635 Resumed.")
+
+    pkt = basicPacketTests<ADARA::AnnotationPkt>(AnnotationPacketType5, sizeof(AnnotationPacketType5), 1117010859,
+                                                 418887449);
+    TS_ASSERT_EQUALS(pkt->marker_type(), ADARA::MarkerType::OVERALL_RUN_COMMENT)
+    TS_ASSERT_EQUALS(pkt->scanIndex(), 0)
+    TS_ASSERT_EQUALS(pkt->comment(), "(unset)")
+  }
+
+  /******************************
+   *   VARIABLE VALUE Packets
+   *   (there's only version 0)
+   ********************************/
+
+  void testVariableU32PacketParser() {
+    std::shared_ptr<ADARA::VariableU32Pkt> pkt =
+        basicPacketTests<ADARA::VariableU32Pkt>(variableU32Packet, sizeof(variableU32Packet), 728281149, 0);
+    TS_ASSERT_EQUALS(pkt->devId(), 2)
+    TS_ASSERT_EQUALS(pkt->varId(), 3)
+    TS_ASSERT_EQUALS(pkt->status(), 0)
+    TS_ASSERT_EQUALS(pkt->severity(), 0)
+    TS_ASSERT_EQUALS(pkt->value(), 3)
   }
 
   void testVariableDoublePacketParser() {
     std::shared_ptr<ADARA::VariableDoublePkt> pkt =
         basicPacketTests<ADARA::VariableDoublePkt>(variableDoublePacket, sizeof(variableDoublePacket), 728281149, 0);
-
-    if (pkt != nullptr) {
-      TS_ASSERT_EQUALS(pkt->devId(), 2);
-      TS_ASSERT_EQUALS(pkt->varId(), 1);
-      TS_ASSERT_EQUALS(pkt->status(), 0);
-      TS_ASSERT_EQUALS(pkt->severity(), 0);
-      TS_ASSERT_EQUALS(pkt->value(), 5.0015);
-      // Note: we're not allowing for any rounding errors here. Might have to
-      // for some values...
-    }
+    TS_ASSERT_EQUALS(pkt->devId(), 2)
+    TS_ASSERT_EQUALS(pkt->varId(), 1)
+    TS_ASSERT_EQUALS(pkt->status(), 0)
+    TS_ASSERT_EQUALS(pkt->severity(), 0)
+    TS_ASSERT_DELTA(pkt->value(), 5.0015, 1e-8)
   }
 
-  void testVariableU32PacketParser() {
-    std::shared_ptr<ADARA::VariableU32Pkt> pkt =
-        basicPacketTests<ADARA::VariableU32Pkt>(variableU32Packet, sizeof(variableU32Packet), 728281149, 0);
+  void testVariableStringPacketParser() {
+    std::shared_ptr<ADARA::VariableStringPkt> pkt = basicPacketTests<ADARA::VariableStringPkt>(
+        variableStringPacketValue1, sizeof(variableStringPacketValue1), 1116514626, 726460216);
+    TS_ASSERT_EQUALS(pkt->devId(), 17)
+    TS_ASSERT_EQUALS(pkt->varId(), 3)
+    TS_ASSERT_EQUALS(pkt->status(), ADARA::VariableStatus::OK)
+    TS_ASSERT_EQUALS(pkt->severity(), ADARA::VariableSeverity::OK)
+    TS_ASSERT_EQUALS(pkt->value(), "N/A")
 
-    if (pkt != nullptr) {
-      TS_ASSERT_EQUALS(pkt->devId(), 2);
-      TS_ASSERT_EQUALS(pkt->varId(), 3);
-      TS_ASSERT_EQUALS(pkt->status(), 0);
-      TS_ASSERT_EQUALS(pkt->severity(), 0);
-      TS_ASSERT_EQUALS(pkt->value(), 3);
-      // Note: we're not allowing for any rounding errors here. Might have to
-      // for some values...
-    }
+    pkt = basicPacketTests<ADARA::VariableStringPkt>(variableStringPacketValue2, sizeof(variableStringPacketValue2),
+                                                     1116514626, 726434341);
+    TS_ASSERT_EQUALS(pkt->devId(), 17)
+    TS_ASSERT_EQUALS(pkt->varId(), 2)
+    TS_ASSERT_EQUALS(pkt->status(), ADARA::VariableStatus::OK)
+    TS_ASSERT_EQUALS(pkt->severity(), ADARA::VariableSeverity::OK)
+    TS_ASSERT_EQUALS(pkt->value(), "No sample")
+
+    pkt = basicPacketTests<ADARA::VariableStringPkt>(variableStringPacketValue3, sizeof(variableStringPacketValue3),
+                                                     1112954908, 544477614);
+    TS_ASSERT_EQUALS(pkt->devId(), 7)
+    TS_ASSERT_EQUALS(pkt->varId(), 1)
+    TS_ASSERT_EQUALS(pkt->status(), ADARA::VariableStatus::OK)
+    TS_ASSERT_EQUALS(pkt->severity(), ADARA::VariableSeverity::OK)
+    TS_ASSERT_EQUALS(pkt->value(), "'SampleTemp', 'SampleTempSelect', 'MagneticField', 'MagneticFieldSelector', "
+                                   "'sequence_id', 'sequence_number', 'sequence_total', 'SF1', 'SF2'")
+  }
+
+  /*******************************
+   *   DEVICE DESCRIPTOR Packets
+   *******************************/
+
+  // There's only version 0 for the DeviceDescriptorPkt, so we don't need a version-specific test
+  void testDeviceDescriptorPacketParser() {
+    std::shared_ptr<ADARA::DeviceDescriptorPkt> pkt =
+        basicPacketTests<ADARA::DeviceDescriptorPkt>(devDesPacket, sizeof(devDesPacket), 726785379, 0);
+    auto expectedAt = [&](uint32_t start) { return packetCast<uint32_t>(devDesPacket, start, 4); };
+    TS_ASSERT_EQUALS(pkt->devId(), expectedAt(16))
+    // Basic XML validation
+    Poco::XML::DOMParser parser;
+    TS_ASSERT_THROWS_NOTHING(Poco::AutoPtr<Poco::XML::Document> doc =
+                                 parser.parseMemory(pkt->description().c_str(), pkt->description().length()));
   }
 
 protected:
