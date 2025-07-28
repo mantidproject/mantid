@@ -83,9 +83,8 @@ constVariableReference:${CMAKE_SOURCE_DIR}/Framework/API/src/ScopedWorkspace.cpp
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/API/src/ScriptBuilder.cpp:279
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/SpectraAxisValidator.cpp:26
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/WorkspaceGroup.cpp:79
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/API/src/WorkspaceGroup.cpp:126
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/API/src/WorkspaceGroup.cpp:407
-constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/WorkspaceGroup.cpp:438
+useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/API/src/WorkspaceGroup.cpp:153
+useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/API/src/WorkspaceGroup.cpp:434
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/ChangeLogTime.cpp:59
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/ChangeTimeZero.cpp:154
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/ChangeTimeZero.cpp:174
@@ -370,8 +369,8 @@ syntaxError:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports
 syntaxError:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/SpectrumDefinition.cpp:40
 cstyleCast:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/SpectrumInfo.cpp:87
 unusedScopedObject:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/Workspace.cpp:71
-constParameterCallback:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/WorkspaceGroup.cpp:80
-unusedScopedObject:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/WorkspaceGroup.cpp:113
+constParameterCallback:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/WorkspaceGroup.cpp:83
+unusedScopedObject:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/WorkspaceGroup.cpp:131
 syntaxError:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/dataobjects/src/Exports/EventList.cpp:37
 syntaxError:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/kernel/src/Exports/V3D.cpp:123
 syntaxError:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/kernel/src/Exports/VMD.cpp:100

@@ -11,6 +11,7 @@ set(PYTHON_PLUGINS
     algorithms/AngularAutoCorrelationsTwoAxes.py
     algorithms/ApplyDetectorScanEffCorr.py
     algorithms/ApplyNegMuCorrection.py
+    algorithms/AssertSpinStateOrder.py
     algorithms/BASISCrystalDiffraction.py
     algorithms/BASISDiffraction.py
     algorithms/BASISPowderDiffraction.py
