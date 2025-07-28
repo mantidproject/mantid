@@ -142,5 +142,3 @@ MANTID_NEXUS_DLL NXstatus NXgetinfo64(NXhandle fid, std::size_t &rank, Mantid::N
 MANTID_NEXUS_DLL NXstatus NXgetattr(NXhandle fid, std::string const &name, char *data, std::size_t &iDataLen,
                                     NXnumtype &iType);
 
-/* extern void *NXpData; */
-MANTID_NEXUS_DLL std::string NXIformatNeXusTime();

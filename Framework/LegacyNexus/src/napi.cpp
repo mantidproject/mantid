@@ -956,57 +956,6 @@ NXstatus NXgetnextattra(NXhandle fid, NXname pName, int *rank, int dim[], NXnumt
   return LOCKED_CALL(nexusFuncs.nxgetnextattra(nexusFuncs.pNexusData, pName, rank, dim, iType));
 }
 
-/*--------------------------------------------------------------------
-  format NeXus time. Code needed in every NeXus file driver
-  ---------------------------------------------------------------------*/
-char *NXIformatNeXusTime() {
-  time_t timer;
-  char *time_buffer = NULL;
-  struct tm *time_info;
-  const char *time_format;
-  long gmt_offset;
-#ifdef USE_FTIME
-  struct timeb timeb_struct;
-#endif
-
-  time_buffer = static_cast<char *>(malloc(64 * sizeof(char)));
-  if (!time_buffer) {
-    NXReportError("Failed to allocate buffer for time data");
-    return NULL;
-  }
-#ifdef NEED_TZSET
-  tzset();
-#endif
-  time(&timer);
-#ifdef USE_FTIME
-  ftime(&timeb_struct);
-  gmt_offset = -timeb_struct.timezone * 60;
-  if (timeb_struct.dstflag != 0) {
-    gmt_offset += 3600;
-  }
-#else
-  time_info = gmtime(&timer);
-  if (time_info != NULL) {
-    gmt_offset = (long)difftime(timer, mktime(time_info));
-  } else {
-    NXReportError("Your gmtime() function does not work ... timezone information will be incorrect\n");
-    gmt_offset = 0;
-  }
-#endif
-  time_info = localtime(&timer);
-  if (time_info != NULL) {
-    if (gmt_offset < 0) {
-      time_format = "%04d-%02d-%02dT%02d:%02d:%02d-%02ld:%02ld";
-    } else {
-      time_format = "%04d-%02d-%02dT%02d:%02d:%02d+%02ld:%02ld";
-    }
-    sprintf(time_buffer, time_format, 1900 + time_info->tm_year, 1 + time_info->tm_mon, time_info->tm_mday,
-            time_info->tm_hour, time_info->tm_min, time_info->tm_sec, labs(gmt_offset / 3600),
-            labs((gmt_offset % 3600) / 60));
-  } else {
-    strcpy(time_buffer, "1970-01-01T00:00:00+00:00");
-  }
-  return time_buffer;
-}
+/*--------------------------------------------------------------------*/
 
 const char *NXgetversion() { return NEXUS_VERSION; }
