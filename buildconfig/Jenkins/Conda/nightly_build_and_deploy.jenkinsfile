@@ -571,6 +571,7 @@ def build_and_test(platform) {
   common_args = '--clean-build --clean-external-projects --enable-systemtests'
   cmake_preset = "${platform}-ci"
   if(platform.startsWith('win')) {
+    cmake_preset += "-ninja"
     workspace_unix_style = toUnixStylePath("${WORKSPACE}")
     bat "\"${WIN_BASH}\" -ex -c \"${buildscript_path}\
       ${workspace_unix_style}/${CHECKOUT_DIR} ${cmake_preset} ${common_args}\""
