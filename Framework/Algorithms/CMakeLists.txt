@@ -1053,8 +1053,6 @@ if(COVERAGE)
   endforeach(loop_var)
 endif()
 
-# Add a precompiled header where they are supported
-enable_precompiled_headers(inc/MantidAlgorithms/PrecompiledHeader.h SRC_FILES)
 # Disable optimization for certain Segfault as the key lines that cause the segfault can be optimized away but this
 # algorithm is only ever intended to test the crashing behaviour of the framework
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
@@ -1064,6 +1062,9 @@ endif()
 # Add the target for this directory
 add_library(Algorithms ${SRC_FILES} ${C_SRC_FILES} ${INC_FILES})
 add_library(Mantid::Algorithms ALIAS Algorithms)
+
+# Add a precompiled header where they are supported
+target_precompile_headers(Algorithms PRIVATE inc/MantidAlgorithms/PrecompiledHeader.h)
 
 target_include_directories(
   Algorithms PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc> $<INSTALL_INTERFACE:include/Mantid>

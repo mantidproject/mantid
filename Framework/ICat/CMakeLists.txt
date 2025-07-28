@@ -61,11 +61,12 @@ endif()
 # Add ssl dependency
 add_definitions(-DWITH_OPENSSL -DWITH_NONAMESPACES)
 
-# Add a precompiled header where they are supported
-enable_precompiled_headers(inc/MantidICat/PrecompiledHeader.h SRC_FILES)
 # Add the target for this directory
 add_library(ICat ${SRC_FILES} ${INC_FILES})
 add_library(Mantid::ICat ALIAS ICat)
+
+# Add a precompiled header
+target_precompile_headers(ICat PRIVATE inc/MantidICat/PrecompiledHeader.h)
 
 target_include_directories(
   ICat PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc> $<INSTALL_INTERFACE:include/Mantid>

@@ -126,9 +126,7 @@ set(INC_FILES
     inc/MantidPythonInterface/api/WorkspacePropertyExporter.h
 )
 
-# Add a precompiled header where they are supported
 list(APPEND ALL_FILES ${EXPORT_FILES} ${SRC_FILES})
-enable_precompiled_headers(inc/MantidPythonInterface/api/PrecompiledHeader.h ALL_FILES)
 
 # Create the target for this directory
 set(FRAMEWORK_DIR ../../..)
@@ -136,6 +134,9 @@ include_directories(${FRAMEWORK_DIR}/CurveFitting/inc)
 
 add_library(PythonAPIModule ${ALL_FILES} ${MODULE_DEFINITION} ${INC_FILES} ${PYTHON_INSTALL_FILES})
 add_library(Mantid::PythonAPIModule ALIAS PythonAPIModule)
+
+# Add a precompiled header
+target_precompile_headers(PythonAPIModule PRIVATE inc/MantidPythonInterface/api/PrecompiledHeader.h)
 
 target_include_directories(
   PythonAPIModule PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc> $<INSTALL_INTERFACE:include/Mantid>
