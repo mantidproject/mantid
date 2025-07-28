@@ -9,7 +9,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidNexus/NexusFile.h"
-#include "MantidNexus/napi.h"
+#include "MantidNexus/inverted_napi.h"
 #include "test_helper.h"
 #include <cstdio>
 #include <cstdlib>
@@ -135,76 +135,7 @@ public:
   // TEST ADDRESS METHODS
   // #################################################################################################################
 
-  void test_open_address() {
-    cout << "tests for open address\n" << std::flush;
-
-    // make file with path /entry
-    FileResource resource("test_napi_openpathtest.nxs");
-    std::string filename = resource.fullPath();
-    Mantid::Nexus::File fid(filename, NXaccess::CREATE5);
-    NX_ASSERT_OKAY(NXmakegroup(fid, "entry", "NXentry"), "failed to make group");
-    NX_ASSERT_OKAY(NXopengroup(fid, "entry", "NXentry"), "failed to open group");
-
-    DimVector dims{1};
-
-    // make path /entry/data1
-    char one = '1';
-    NX_ASSERT_OKAY(NXmakedata64(fid, "data1", NXnumtype::CHAR, 1, dims), "failed to make data");
-    NX_ASSERT_OKAY(NXopendata(fid, "data1"), "failed to open data");
-    NX_ASSERT_OKAY(NXputdata(fid, &one), "failed to put data");
-    NX_ASSERT_OKAY(NXclosedata(fid), "failed to close data");
-
-    // make path /entry/data2
-    char two = '2';
-    NX_ASSERT_OKAY(NXmakedata64(fid, "data2", NXnumtype::CHAR, 1, dims), "failed to make data");
-    NX_ASSERT_OKAY(NXopendata(fid, "data2"), "failed to open data");
-    NX_ASSERT_OKAY(NXputdata(fid, &two), "failed to put data");
-    NX_ASSERT_OKAY(NXclosedata(fid), "failed to close data");
-
-    // make path /entry/data/more_data
-    char three = '3';
-    NX_ASSERT_OKAY(NXmakegroup(fid, "data", "NXdata"), "failed to make group");
-    NX_ASSERT_OKAY(NXopengroup(fid, "data", "NXdata"), "failed to open group");
-    NX_ASSERT_OKAY(NXmakedata64(fid, "more_data", NXnumtype::CHAR, 1, dims), "failed to make data");
-    NX_ASSERT_OKAY(NXopendata(fid, "more_data"), "failed to open data");
-    NX_ASSERT_OKAY(NXputdata(fid, &three), "failed to put data");
-    NX_ASSERT_OKAY(NXclosedata(fid), "failed to close data");
-
-    // make path /link
-    char four = '4';
-    NX_ASSERT_OKAY(NXclosegroup(fid), "failed to close data"); // close /entry/data
-    NX_ASSERT_OKAY(NXclosegroup(fid), "failed to close data"); // close /entry
-    NX_ASSERT_OKAY(NXmakegroup(fid, "link", "NXentry"), "failed to make group");
-    NX_ASSERT_OKAY(NXopengroup(fid, "link", "NXentry"), "failed to open group"); // open /entry/link
-    NX_ASSERT_OKAY(NXmakedata64(fid, "data4", NXnumtype::CHAR, 1, dims), "failed to make data");
-    NX_ASSERT_OKAY(NXopendata(fid, "data4"), "failed to open data");
-    NX_ASSERT_OKAY(NXputdata(fid, &four), "failed to put data");
-    NX_ASSERT_OKAY(NXclosedata(fid), "failed to close data");
-
-    // compare
-    char output;
-    NX_ASSERT_OKAY(NXclosegroup(fid), "failed to close group");
-
-    auto pFile = fid.getFileStruct();
-    NX_ASSERT_OKAY(NXopenaddress(pFile, "/entry/data1"), "failed to open address");
-    NX_ASSERT_OKAY(NXgetdata(fid, &output), "failed to get data by opening address");
-    TS_ASSERT_EQUALS('1', output);
-
-    NX_ASSERT_OKAY(NXopenaddress(pFile, "/link/data4"), "failed to open address");
-    NX_ASSERT_OKAY(NXgetdata(fid, &output), "failed to get data by opening address");
-    TS_ASSERT_EQUALS('4', output);
-
-    NX_ASSERT_OKAY(NXopenaddress(pFile, "/entry/data/more_data"), "failed to open address");
-    NX_ASSERT_OKAY(NXgetdata(fid, &output), "failed to get data by opening address");
-    TS_ASSERT_EQUALS('3', output);
-
-    NX_ASSERT_OKAY(NXopenaddress(pFile, "/entry/data2"), "failed to open address");
-    NX_ASSERT_OKAY(NXgetdata(fid, &output), "failed to get data by opening address");
-    TS_ASSERT_EQUALS('2', output);
-
-    // cleanup
-    cout << "NXopenaddress checks OK\n";
-  }
+  // all moved to NexusFileTest.h or NexusFileReadWriteTest.h
 
   // ##################################################################################################################
   // TEST ATTRIBUTE METHODS

@@ -29,22 +29,6 @@ enum class NXaccess : unsigned int { READ = 0x0000u, RDWR = 0x0001u, CREATE5 = 0
 
 MANTID_NEXUS_DLL std::ostream &operator<<(std::ostream &os, const NXaccess &value);
 
-/** NexusFile5
- * NOTE this needs to either be moved to a separate file,
- * or entirely absorbed inside Nexus::File
- */
-struct MANTID_NEXUS_DLL NexusFile5 {
-  std::vector<hid_t> &iStack5;
-  hid_t &iFID;
-  hid_t &iCurrentG;
-  hid_t &iCurrentD;
-  hid_t &iCurrentS;
-  hid_t &iCurrentT;
-  Mantid::Nexus::NexusAddress &groupaddr;
-};
-
-typedef char NXname[128];
-
 /** \enum NXentrytype
  * Describes the type of entry in a NeXus file, either group or dataset
  * \li group the entry is a group
@@ -62,15 +46,6 @@ typedef struct {
   std::string targetAddress; /* address to item to link */
   NXentrytype linkType;      /* HDF5: 0 for group link, 1 for SDS link */
 } NXlink;
-
-/**
- * Special codes for NeXus file status.
- * \li OKAY success +1.
- * \li ERROR error 0
- * \li EOD end of file -1
- * \ingroup cpp_types
- */
-enum class NXstatus : const int { NX_OK = 1, NX_ERROR = 0 };
 
 /*--------------------------------------------------------------------------*/
 
@@ -176,8 +151,6 @@ struct AttrInfo {
 /** Forward declare of NeXus::File */
 class File;
 } // namespace Mantid::Nexus
-
-typedef Mantid::Nexus::File &NXhandle;
 
 constexpr std::size_t NX_MAXRANK(32);
 constexpr Mantid::Nexus::dimsize_t NX_UNLIMITED(-1); // 0xffffffffffffffffUL; // AKA max of unsigned long
