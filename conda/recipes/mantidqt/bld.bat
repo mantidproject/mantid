@@ -18,9 +18,10 @@ cmake ^
     -DENABLE_WORKBENCH=OFF ^
     -DUSE_PRECOMPILED_HEADERS=OFF ^
     -GNinja ^
+    -DCMAKE_BUILD_TYPE=Release ^
     ..
 
 if errorlevel 1 exit 1
-cmake --build . --config Release
-cmake --build . --config Release --target install
+ninja
+ninja install
 if errorlevel 1 exit 1

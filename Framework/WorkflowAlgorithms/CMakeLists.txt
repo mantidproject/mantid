@@ -100,12 +100,12 @@ if(COVERAGE)
   endforeach(loop_var)
 endif()
 
-# Use a precompiled header where they are supported
-enable_precompiled_headers(inc/MantidWorkflowAlgorithms/PrecompiledHeader.h SRC_FILES)
-
 # Add the target for this directory
 add_library(WorkflowAlgorithms ${SRC_FILES} ${INC_FILES})
 add_library(Mantid::WorkflowAlgorithms ALIAS WorkflowAlgorithms)
+
+# Use a precompiled header
+target_precompile_headers(WorkflowAlgorithms PRIVATE inc/MantidWorkflowAlgorithms/PrecompiledHeader.h)
 
 target_include_directories(
   WorkflowAlgorithms PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc> $<INSTALL_INTERFACE:include/Mantid>

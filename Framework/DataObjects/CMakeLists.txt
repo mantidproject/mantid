@@ -219,11 +219,12 @@ if(COVERAGE)
   endforeach(loop_var)
 endif()
 
-# Use a precompiled header where they are supported
-enable_precompiled_headers(inc/MantidDataObjects/PrecompiledHeader.h SRC_FILES)
 # Add the target for this directory
 add_library(DataObjects ${SRC_FILES} ${INC_FILES})
 add_library(Mantid::DataObjects ALIAS DataObjects)
+
+# Use a precompiled header
+target_precompile_headers(DataObjects PRIVATE inc/MantidDataObjects/PrecompiledHeader.h)
 
 target_include_directories(
   DataObjects PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc> $<INSTALL_INTERFACE:include/Mantid>
