@@ -3,8 +3,8 @@
 #include "MantidNexus/H5Util.h"
 #include "MantidNexus/NexusException.h"
 #include "MantidNexus/NexusFile.h"
-#include "MantidNexus/napi.h"
-#include "MantidNexus/napi_helper.h"
+#include "MantidNexus/hdf5_type_helper.h"
+#include "MantidNexus/inverted_napi.h"
 #include <H5Cpp.h>
 #include <Poco/Logger.h>
 #include <algorithm>
@@ -33,12 +33,6 @@ using std::vector;
 #endif
 
 #define NXEXCEPTION(message) Exception((message), __func__, m_filename);
-#define NX_UNKNOWN_GROUP ""
-
-#define NAPI_CALL(status, msg)                                                                                         \
-  if ((status) != NXstatus::NX_OK) {                                                                                   \
-    throw NXEXCEPTION(msg);                                                                                            \
-  }
 
 namespace {
 /// static logger object. Use Poco directly instead of Kernel::Logger so we don't need to import from Kernel
@@ -269,22 +263,83 @@ void File::flush() {
 // FILE NAVIGATION METHODS
 //------------------------------------------------------------------------------------------------------------------
 
-NexusFile5 File::getFileStruct() {
-  m_group_address = groupAddress(m_address);
-  m_fid = m_pfile->getId();
-  return NexusFile5{m_gid_stack,       m_fid,          m_current_group_id, m_current_data_id, m_current_space_id,
-                    m_current_type_id, m_group_address};
-}
-
 void File::openAddress(std::string const &address) {
-  NexusAddress absaddr(formAbsoluteAddress(address));
   if (address.empty()) {
     throw NXEXCEPTION("Supplied empty address");
   }
-  auto tmp = getFileStruct();
-  NXstatus ret = NXopenaddress(tmp, absaddr);
-  m_address = getObjectAddress(getCurrentId());
-  NAPI_CALL(ret, "NXopenaddress(" + address + ") failed");
+  // NOTE to support pre-existing behavior, do NOT check if the address exists first
+  // it must open as many path elements as it can until failing
+  // TODO is this behavior relied on anywhere but the tests?
+  // if (!hasAddress(absaddr)) {
+  //   throw NXEXCEPTION("Address " + address + " is not valid");
+  // }
+
+  // if we are already there, do nothing
+  NexusAddress absaddr(formAbsoluteAddress(address));
+  if (absaddr == m_address) {
+    return;
+  }
+
+  // if a dataset is open, close it
+  if (isDataSetOpen()) {
+    H5Dclose(m_current_data_id);
+    H5Tclose(m_current_type_id);
+    H5Sclose(m_current_space_id);
+    m_current_data_id = 0;
+    m_current_space_id = 0;
+    m_current_type_id = 0;
+  }
+
+  // close all groups in the stack
+  for (hid_t &gid : m_gid_stack) {
+    if (gid != 0) {
+      H5Gclose(gid);
+    }
+  }
+  m_gid_stack.clear();
+  m_gid_stack.push_back(0);
+  m_address = NexusAddress::root();
+
+  // if we wanted to go to root, then stop here
+  if (absaddr == NexusAddress::root()) {
+    m_current_group_id = 0;
+    return;
+  }
+
+  // open all groups in the address
+  NexusAddress groupstack(absaddr.parent_path());
+  NexusAddress fromroot;
+  if (groupstack.isRoot()) {
+    m_current_group_id = 0;
+  } else {
+    m_current_group_id = m_pfile->getId();
+    for (auto const &name : groupstack.parts()) {
+      fromroot /= name;
+      if (m_descriptor.isEntry(fromroot, m_descriptor.classTypeForName(fromroot))) {
+        hid_t gid = H5Gopen(m_pfile->getId(), fromroot.c_str(), H5P_DEFAULT);
+        m_gid_stack.push_back(gid);
+        // update stack in case of failure
+        m_current_group_id = gid;
+        m_address = fromroot;
+      } else {
+        // failure, but return with the file in this state
+        return;
+      }
+    }
+  }
+  // open the last element -- either a group or a dataset
+  if (hasData(absaddr)) { // is a dataset
+    m_current_data_id = H5Dopen(m_pfile->getId(), absaddr.c_str(), H5P_DEFAULT);
+    m_current_type_id = H5Dget_type(m_current_data_id);
+    m_current_space_id = H5Dget_space(m_current_data_id);
+  } else if (hasAddress(absaddr)) { // not a dataset but exists = is a group
+    hid_t gid = H5Gopen(m_pfile->getId(), absaddr.c_str(), H5P_DEFAULT);
+    m_gid_stack.push_back(gid);
+    m_current_group_id = gid;
+  } else {
+    throw NXEXCEPTION("Failed to open final element of address " + absaddr);
+  }
+  m_address = absaddr;
 }
 
 void File::openGroupAddress(std::string const &address) {
@@ -955,7 +1010,7 @@ template <typename NumT> void File::putSlab(NumT const *data, DimSizeVector cons
   hsize_t myStart[H5S_MAX_RANK];
   hsize_t mySize[H5S_MAX_RANK];
   hsize_t dsize[H5S_MAX_RANK], thedims[H5S_MAX_RANK], maxdims[H5S_MAX_RANK];
-  hid_t filespace, dataspace;
+  hid_t dataspace;
   bool unlimiteddim = false;
   stringstream msg;
   msg << "putSlab(data, " << toString(start) << ", " << toString(size) << ") failed: ";
@@ -1002,7 +1057,7 @@ template <typename NumT> void File::putSlab(NumT const *data, DimSizeVector cons
       throw NXEXCEPTION(msg.str());
     }
 
-    filespace = H5Dget_space(m_current_data_id);
+    hid_t filespace = H5Dget_space(m_current_data_id);
 
     /* define slab */
     iRet = H5Sselect_hyperslab(filespace, H5S_SELECT_SET, myStart, NULL, mySize, NULL);
@@ -1076,9 +1131,6 @@ template <typename NumT> void File::getSlab(NumT *data, DimSizeVector const &sta
     throw NXEXCEPTION(msg.str());
   }
 
-  hsize_t myStart[H5S_MAX_RANK] = {0};
-  hsize_t mySize[H5S_MAX_RANK] = {0};
-  hsize_t mStart[H5S_MAX_RANK] = {0};
   hid_t memspace, iRet;
   H5T_class_t tclass;
   hid_t memtype_id;
@@ -1106,7 +1158,9 @@ template <typename NumT> void File::getSlab(NumT *data, DimSizeVector const &sta
     iRet = H5Dread(m_current_data_id, memtype_id, memspace, filespace, H5P_DEFAULT, data);
     H5Sclose(filespace);
   } else {
-
+    std::vector<hsize_t> myStart(iRank, 0);
+    std::vector<hsize_t> mySize(iRank, 0);
+    std::vector<hsize_t> mStart(iRank, 0);
     for (int i = 0; i < iRank; i++) {
       myStart[i] = static_cast<hsize_t>(start[i]);
       mySize[i] = static_cast<hsize_t>(size[i]);
@@ -1124,13 +1178,13 @@ template <typename NumT> void File::getSlab(NumT *data, DimSizeVector const &sta
       }
     }
 
-    iRet = H5Sselect_hyperslab(m_current_space_id, H5S_SELECT_SET, myStart, NULL, mySize, NULL);
+    iRet = H5Sselect_hyperslab(m_current_space_id, H5S_SELECT_SET, myStart.data(), NULL, mySize.data(), NULL);
     if (iRet < 0) {
       throw NXEXCEPTION("Selecting slab failed");
     }
 
-    memspace = H5Screate_simple(iRank, mySize, NULL);
-    iRet = H5Sselect_hyperslab(memspace, H5S_SELECT_SET, mStart, NULL, mySize, NULL);
+    memspace = H5Screate_simple(iRank, mySize.data(), NULL);
+    iRet = H5Sselect_hyperslab(memspace, H5S_SELECT_SET, mStart.data(), NULL, mySize.data(), NULL);
     if (iRet < 0) {
       throw NXEXCEPTION("Selecting memspace failed");
     }
@@ -1342,7 +1396,6 @@ Info File::getInfo() {
   NXnumtype mType;
   hsize_t myDim[H5S_MAX_RANK];
   H5T_class_t tclass;
-  hid_t memType;
   char *vlData = NULL;
 
   /* check if there is an Dataset open */
@@ -1363,7 +1416,7 @@ Info File::getInfo() {
   if (tclass == H5T_STRING && myDim[iRank - 1] == 1) {
     if (H5Tis_variable_str(m_current_type_id)) {
       /* this will not work for arrays of strings */
-      memType = H5Tcopy(H5T_C_S1);
+      hid_t memType = H5Tcopy(H5T_C_S1);
       H5Tset_size(memType, H5T_VARIABLE);
       H5Dread(m_current_data_id, memType, H5S_ALL, H5S_ALL, H5P_DEFAULT, &vlData);
       if (vlData != NULL) {

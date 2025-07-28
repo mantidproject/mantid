@@ -1,4 +1,4 @@
-#include "MantidNexus/napi_helper.h"
+#include "MantidNexus/hdf5_type_helper.h"
 #include <assert.h>
 #include <cstring>
 #include <map>
@@ -6,47 +6,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-
-std::string getObjectAddress(hid_t const obj) {
-  // get correctly sized array for name
-  std::size_t addrlen = H5Iget_name(obj, NULL, 0);
-  char *caddr = new char[addrlen + 1];
-  // get name and store inside string
-  H5Iget_name(obj, caddr, addrlen + 1);
-  std::string ret(caddr);
-  delete[] caddr;
-  return ret;
-}
-
-std::string buildCurrentAddress(NexusFile5 const &fid) {
-  hid_t current = 0;
-  if (fid.iCurrentD != 0) {
-    current = fid.iCurrentD;
-  } else if (fid.iCurrentG != 0) {
-    current = fid.iCurrentG;
-  } else {
-    current = fid.iFID;
-  }
-  return getObjectAddress(current);
-}
-
-// NOTE save in case needed later as model
-// std::size_t countObjectsInGroup(NexusFile5 const &fid) {
-//   std::size_t count = 0;
-//   herr_t iRet;
-//   if (fid.iCurrentG == 0) {
-//     hid_t gid = H5Gopen(fid.iFID, "/", H5P_DEFAULT);
-//     iRet = H5Gget_num_objs(gid, &count);
-//     H5Gclose(gid);
-//   } else {
-//     iRet = H5Gget_num_objs(fid.iCurrentG, &count);
-//   }
-//   if (iRet < 0) {
-//     NXReportError("Internal error, failed to retrieve no of objects");
-//     return 0;
-//   }
-//   return count;
-// }
 
 NXnumtype hdf5ToNXType(H5T_class_t tclass, hid_t atype) {
   // NOTE this is exploiting the bit-level representation of NXnumtype
@@ -69,11 +28,6 @@ NXnumtype hdf5ToNXType(H5T_class_t tclass, hid_t atype) {
     iPtype = NXnumtype(type);
   } else if (tclass == H5T_FLOAT) {
     iPtype = NXnumtype(0x20u + size);
-  }
-  if (iPtype == NXnumtype::BAD) {
-    char message[80];
-    snprintf(message, 79, "ERROR: hdf5ToNXtype: invalid type (%d)", tclass);
-    NXReportError(message);
   }
   return iPtype;
 }
@@ -126,7 +80,6 @@ hid_t nxToHDF5Type(NXnumtype datatype) {
     break;
   }
   default: {
-    NXReportError("ERROR: nxToHDF5Type: unknown type");
     type = -1;
   }
   }
@@ -177,9 +130,6 @@ hid_t h5MemType(hid_t atype) {
     } else if (size == 8) {
       memtype_id = H5T_NATIVE_DOUBLE;
     }
-  }
-  if (memtype_id == -1) {
-    NXReportError("ERROR: h5MemType: invalid type");
   }
   return memtype_id;
 }
