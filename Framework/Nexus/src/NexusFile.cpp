@@ -6,6 +6,7 @@
 #include "MantidNexus/napi.h"
 #include "MantidNexus/napi_helper.h"
 #include <H5Cpp.h>
+#include <Poco/Logger.h>
 #include <algorithm>
 #include <array>
 #include <assert.h>
@@ -38,6 +39,11 @@ using std::vector;
   if ((status) != NXstatus::NX_OK) {                                                                                   \
     throw NXEXCEPTION(msg);                                                                                            \
   }
+
+namespace {
+/// static logger object. Use Poco directly instead of Kernel::Logger so we don't need to import from Kernel
+const auto g_log = &Poco::Logger::get("NexusFile");
+} // namespace
 
 /**
  * \file NexusFile.cpp
@@ -102,27 +108,28 @@ template <> MANTID_NEXUS_DLL NXnumtype getType(char const) { return NXnumtype::C
 
 template <> MANTID_NEXUS_DLL NXnumtype getType(string const) { return NXnumtype::CHAR; }
 
+FileID::~FileID() {
+  if (H5Iis_valid(m_fid)) {
+    H5Fclose(m_fid);
+    H5garbage_collect();
+    m_fid = -1;
+  }
+}
+
 } // namespace Mantid::Nexus
 
 namespace Mantid::Nexus {
-
 //------------------------------------------------------------------------------------------------------------------
 // CONSTRUCTORS / ASSIGNMENT / DECONSTRUCTOR
 //------------------------------------------------------------------------------------------------------------------
 
 // new constructors
 
-File::File(const string &filename, const NXaccess access)
-    : m_filename(filename), m_access(access), m_address(), m_close_handle(true), m_fid(-1), m_current_group_id(0),
-      m_current_data_id(0), m_current_type_id(0), m_current_space_id(0), m_gid_stack{0},
-      m_descriptor(m_filename, m_access) {
-  this->initOpenFile(m_filename, m_access);
-}
+File::File(const string &filename, const NXaccess access) : File(filename.c_str(), access) {}
 
 File::File(const char *filename, const NXaccess access)
-    : m_filename(filename), m_access(access), m_address(), m_close_handle(true), m_fid(-1), m_current_group_id(0),
-      m_current_data_id(0), m_current_type_id(0), m_current_space_id(0), m_gid_stack{0},
-      m_descriptor(m_filename, m_access) {
+    : m_filename(filename), m_access(access), m_address(), m_current_group_id(0), m_current_data_id(0),
+      m_current_type_id(0), m_current_space_id(0), m_gid_stack{0}, m_descriptor(m_filename, m_access) {
   this->initOpenFile(m_filename, m_access);
 }
 
@@ -175,11 +182,11 @@ void File::initOpenFile(std::string const &filename, NXaccess const am) {
     // use H5Cpp to interface with H5Util
     hid_t root_id = H5Gopen(temp_fid, "/", H5P_DEFAULT);
     H5::Group root(root_id);
-    std::vector<std::pair<std::string, std::string>> attrs{{"NeXus_version", NEXUS_VERSION},
-                                                           {"file_name", filename},
-                                                           {"HDF5_Version", version_str},
-                                                           {"file_time", NXIformatNeXusTime()},
-                                                           {group_class_spec, "NXroot"}};
+    std::vector<Entry> attrs{{"NeXus_version", NEXUS_VERSION},
+                             {"file_name", filename},
+                             {"HDF5_Version", version_str},
+                             {"file_time", NXIformatNeXusTime()},
+                             {group_class_spec, "NXroot"}};
     for (auto const &attr : attrs) {
       Mantid::NeXus::H5Util::writeStrAttribute(root, attr.first, attr.second);
     }
@@ -195,55 +202,17 @@ void File::initOpenFile(std::string const &filename, NXaccess const am) {
     msg << "File::initOpenFile(" << filename << ", " << am << ") failed";
     throw NXEXCEPTION(msg.str());
   } else {
-    m_fid = temp_fid;
+    m_pfile = std::make_shared<FileID>(temp_fid);
   }
 }
 
 // copy constructors
 
 File::File(File const &f)
-    : m_filename(f.m_filename), m_access(f.m_access), m_address(f.m_address), m_close_handle(false), m_fid(-1),
-      m_current_group_id(0), m_current_data_id(0), m_current_type_id(0), m_current_space_id(0), m_gid_stack{0},
-      m_descriptor(f.m_descriptor) {
-  if (f.m_fid <= 0)
+    : m_filename(f.m_filename), m_access(f.m_access), m_address(), m_pfile(f.m_pfile), m_current_group_id(0),
+      m_current_data_id(0), m_current_type_id(0), m_current_space_id(0), m_gid_stack{0}, m_descriptor(f.m_descriptor) {
+  if (m_pfile <= 0)
     throw Mantid::Nexus::Exception("Error reopening file");
-  else
-    m_fid = f.m_fid;
-}
-
-File::File(File const *const pf)
-    : m_filename(pf->m_filename), m_access(pf->m_access), m_address(pf->m_address), m_close_handle(false), m_fid(-1),
-      m_current_group_id(0), m_current_data_id(0), m_current_type_id(0), m_current_space_id(0), m_gid_stack{0},
-      m_descriptor(pf->m_descriptor) {
-  if (pf->m_fid <= 0)
-    throw Mantid::Nexus::Exception("Error reopening file");
-  else
-    m_fid = pf->m_fid;
-}
-
-File::File(std::shared_ptr<File> pf)
-    : m_filename(pf->m_filename), m_access(pf->m_access), m_address(pf->m_address), m_close_handle(false), m_fid(-1),
-      m_current_group_id(0), m_current_data_id(0), m_current_type_id(0), m_current_space_id(0), m_gid_stack{0},
-      m_descriptor(pf->m_descriptor) {
-  if (pf->m_fid <= 0)
-    throw Mantid::Nexus::Exception("Error reopening file");
-  else
-    m_fid = pf->m_fid;
-}
-
-File &File::operator=(File const &f) {
-  if (this == &f) {
-  } else {
-    this->m_filename = f.m_filename;
-    this->m_access = f.m_access;
-    this->m_address = f.m_address;
-    this->m_fid = H5Freopen(f.m_fid);
-    this->m_current_group_id = this->m_current_data_id = this->m_current_type_id = this->m_current_space_id = 0;
-    this->m_gid_stack.assign({0});
-    this->m_close_handle = f.m_close_handle;
-    this->m_descriptor = f.m_descriptor;
-  }
-  return *this;
 }
 
 // deconstructor
@@ -271,15 +240,21 @@ File::~File() {
     gid = 0;
   }
   m_gid_stack.clear();
-  if (m_close_handle) {
-    close();
-  }
+  // decrease reference counts to this file
+  m_pfile.reset();
   H5garbage_collect();
 }
 
 void File::close() {
   /* close the file handle */
-  H5Fclose(m_fid);
+  if (m_pfile != nullptr) {
+    if (m_pfile.use_count() > 1) {
+      g_log->warning("WARNING: closing file " + m_filename + " which still has open references.");
+    }
+    H5Fclose(m_pfile->getId());
+    H5garbage_collect();
+    m_pfile.reset();
+  }
 }
 
 void File::flush() {
@@ -296,6 +271,7 @@ void File::flush() {
 
 NexusFile5 File::getFileStruct() {
   m_group_address = groupAddress(m_address);
+  m_fid = m_pfile->getId();
   return NexusFile5{m_gid_stack,       m_fid,          m_current_group_id, m_current_data_id, m_current_space_id,
                     m_current_type_id, m_group_address};
 }
@@ -384,7 +360,7 @@ hid_t File::getCurrentId() const {
   } else if (m_current_group_id != 0) {
     return m_current_group_id;
   } else {
-    return m_fid;
+    return m_pfile->getId();
   }
 }
 
@@ -394,7 +370,7 @@ std::shared_ptr<H5::H5Object> File::getCurrentObject() const {
   } else if (m_current_group_id != 0) {
     return std::make_shared<H5::Group>(m_current_group_id);
   } else {
-    return std::make_shared<H5::H5File>(m_fid);
+    return std::make_shared<H5::H5File>(m_pfile->getId());
   }
 }
 
@@ -424,7 +400,7 @@ void File::makeGroup(const std::string &name, const std::string &nxclass, bool o
   // get full address
   NexusAddress const absaddr(formAbsoluteAddress(name));
   // create group with H5Util by getting an H5File object from iFID
-  H5::H5File h5file(m_fid);
+  H5::H5File h5file(m_pfile->getId());
   Mantid::NeXus::H5Util::createGroupNXS(h5file, absaddr, nxclass);
 
   // cleanup
@@ -450,7 +426,7 @@ void File::openGroup(std::string const &name, std::string const &nxclass) {
 
   hid_t iVID;
   if (m_descriptor.isEntry(absaddr, nxclass)) {
-    iVID = H5Gopen(m_fid, absaddr.c_str(), H5P_DEFAULT);
+    iVID = H5Gopen(m_pfile->getId(), absaddr.c_str(), H5P_DEFAULT);
   } else {
     throw NXEXCEPTION("The supplied group " + absaddr + " does not exist");
   }
@@ -534,7 +510,7 @@ void File::openData(std::string const &name) {
 
   /* find the ID number and open the dataset */
   hid_t newData, newType, newSpace;
-  newData = H5Dopen(m_fid, absaddr.c_str(), H5P_DEFAULT);
+  newData = H5Dopen(m_pfile->getId(), absaddr.c_str(), H5P_DEFAULT);
   if (newData < 0) {
     throw NXEXCEPTION("dataset (" + absaddr + ") not found at this level");
   }
@@ -906,14 +882,14 @@ void File::makeCompData(std::string const &name, NXnumtype const type, DimVector
       throw NXEXCEPTION(msg.str());
     }
   } else {
-    NXReportError("HDF5 doesn't support selected compression method! Dataset created without compression");
+    g_log->error("HDF5 doesn't support selected compression method! Dataset created without compression");
     H5Pclose(cparms);
     cparms = H5Pcopy(H5P_DEFAULT);
   }
 
   // create the dataset with the compression parameters
   NexusAddress absaddr(formAbsoluteAddress(name));
-  hid_t dataset = H5Dcreate(m_fid, absaddr.c_str(), datatype, dataspace, H5P_DEFAULT, cparms, H5P_DEFAULT);
+  hid_t dataset = H5Dcreate(m_pfile->getId(), absaddr.c_str(), datatype, dataspace, H5P_DEFAULT, cparms, H5P_DEFAULT);
   H5Pclose(cparms);
   if (dataset < 0) {
     H5Tclose(datatype);
@@ -1458,8 +1434,8 @@ Entries File::getEntries() const {
 void File::getEntries(Entries &result) const {
   result.clear();
 
-  int iRet = H5Literate_by_name(m_fid, groupAddress(m_address).c_str(), H5_INDEX_NAME, H5_ITER_NATIVE, nullptr,
-                                gr_iterate_cb, &result, H5P_DEFAULT);
+  int iRet = H5Literate_by_name(m_pfile->getId(), groupAddress(m_address).c_str(), H5_INDEX_NAME, H5_ITER_NATIVE,
+                                nullptr, gr_iterate_cb, &result, H5P_DEFAULT);
   if (iRet < 0) {
     throw NXEXCEPTION("H5Literate failed on group: " + m_address.parent_path());
   }
@@ -1681,7 +1657,8 @@ void File::makeLink(NXlink const &link) {
      of the thing to link
    */
   std::string linkTarget(groupAddress(m_address) / itemName);
-  H5Lcreate_hard(m_fid, link.targetAddress.c_str(), H5L_SAME_LOC, linkTarget.c_str(), H5P_DEFAULT, H5P_DEFAULT);
+  H5Lcreate_hard(m_pfile->getId(), link.targetAddress.c_str(), H5L_SAME_LOC, linkTarget.c_str(), H5P_DEFAULT,
+                 H5P_DEFAULT);
 
   // register the entry
   registerEntry(linkTarget, m_descriptor.classTypeForName(link.targetAddress));
