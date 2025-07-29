@@ -1,14 +1,23 @@
-from mantid.simpleapi import CreateSampleWorkspace, CreateSampleShape, logger
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2025 ISIS Rutherford Appleton Laboratory UKRI,
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
+# SPDX - License - Identifier: GPL - 3.0 +
+#
 import numpy as np
+from mantid.simpleapi import CreateSampleWorkspace, CreateSampleShape, logger
 from mantid.api import AnalysisDataService as ADS
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
+from matplotlib.figure import Figure
+from typing import Sequence, Tuple
 
 
-def is_valid_mesh(mesh):
+def is_valid_mesh(mesh: np.ndarray) -> bool:
     return len(mesh) > 3
 
 
-def has_no_valid_shape(ws_name):
+def has_no_valid_shape(ws_name: str) -> bool:
     no_shape = False
     try:
         no_shape = not is_valid_mesh(ADS.retrieve(ws_name).sample().getShape().getMesh())
@@ -17,7 +26,7 @@ def has_no_valid_shape(ws_name):
     return no_shape
 
 
-def get_xml_mesh(xml):
+def get_xml_mesh(xml: str) -> np.ndarray:
     try:
         tmp_ws = CreateSampleWorkspace()
         CreateSampleShape(tmp_ws, xml)
@@ -26,10 +35,12 @@ def get_xml_mesh(xml):
         return mesh
     except RuntimeError:
         logger.error(f"Shape mesh could not be constructed, check xml string is ok: '{xml}'")
-        return []
+        return np.empty(0)
 
 
-def get_scaled_intrinsic_sample_directions_in_lab_frame(ax_transform, rotation_matrix, sample_mesh, scale=1.2):
+def get_scaled_intrinsic_sample_directions_in_lab_frame(
+    ax_transform: np.ndarray, rotation_matrix: np.ndarray, sample_mesh: np.ndarray, scale: float = 1.2
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray, Sequence[float]]:
     # apply the rotation matrix to the axes
     rotated_ax_transform = rotation_matrix @ ax_transform
     # transform the mesh vertices into new axes frame
@@ -42,18 +53,20 @@ def get_scaled_intrinsic_sample_directions_in_lab_frame(ax_transform, rotation_m
     return rd, nd, td, arrow_lens
 
 
-def get_mesh_vertices(mesh):
+def get_mesh_vertices(mesh: np.ndarray):
     n_faces = mesh.shape[0]
     return np.unique(mesh.reshape((n_faces * 3, 3)), axis=0)
 
 
-def get_mesh_vertices_in_intrinsic_sample_axes(rotated_ax_transform, sample_mesh):
+def get_mesh_vertices_in_intrinsic_sample_axes(rotated_ax_transform: np.ndarray, sample_mesh: np.ndarray) -> np.ndarray:
     # change of coordinate basis: S@v where S is the transformation matrix and v is a vector
     verts = get_mesh_vertices(sample_mesh)
     return np.asarray([rotated_ax_transform.T @ v for v in verts])
 
 
-def plot_sample_directions(fig, ws_name, ax_transform, ax_labels, fix_axes_to_sample=True):
+def plot_sample_directions(
+    fig: Figure, ws_name: str, ax_transform: np.ndarray, ax_labels: Sequence[str], fix_axes_to_sample: bool = True
+) -> None:
     ax = fig.axes[0]
     ws = ADS.retrieve(ws_name)
     rotation_matrix = ws.getRun().getGoniometer().getR() if fix_axes_to_sample else np.eye(3)
@@ -68,7 +81,7 @@ def plot_sample_directions(fig, ws_name, ax_transform, ax_labels, fix_axes_to_sa
     ax.text(*s_td, ax_labels[2])
 
 
-def plot_gauge_vol(gauge_vol_str, fig):
+def plot_gauge_vol(gauge_vol_str: str, fig: Figure) -> None:
     if gauge_vol_str:
         mesh = get_xml_mesh(gauge_vol_str)
         if is_valid_mesh(mesh):

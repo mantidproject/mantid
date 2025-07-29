@@ -1,4 +1,9 @@
-# import mantid algorithms, numpy and matplotlib
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2025 ISIS Rutherford Appleton Laboratory UKRI,
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
+# SPDX - License - Identifier: GPL - 3.0 +
 import numpy as np
 from os import path, scandir
 from Engineering.texture.polefigure.polefigure_model import TextureProjection
@@ -9,7 +14,7 @@ from Engineering.EnggUtils import GROUP
 from Engineering.EnginX import EnginX
 from mantid.geometry import CrystalStructure
 from mantid.api import AnalysisDataService as ADS, MultiDomainFunction, FunctionFactory
-from typing import Optional, Sequence, Union
+from typing import Optional, Sequence, Union, Tuple
 from mantid.dataobjects import Workspace2D
 from mantid.fitfunctions import FunctionWrapper, CompositeFunctionWrapper
 from plugins.algorithms.IntegratePeaks1DProfile import PeakFunctionGenerator
@@ -117,7 +122,7 @@ def run_abs_corr(
     div_vert: Optional[float] = None,
     det_hoz: Optional[float] = None,
     clear_ads_after: bool = True,
-):
+) -> None:
     """
     Apply absorption correction to data for use in texture analysis pipeline
     wss: Sequence of workspace names to have corrections calculated and applied
@@ -219,7 +224,7 @@ def validate_abs_corr_inputs(
     div_hoz: Optional[float] = None,
     div_vert: Optional[float] = None,
     det_hoz: Optional[float] = None,
-):
+) -> Tuple[bool, str]:
     valid_inputs = True
     error_msg = ""
     # validate inputs
@@ -274,7 +279,7 @@ class TexturePeakFunctionGenerator(PeakFunctionGenerator):
         parameters_to_tie: Sequence[str],
         peak_func_name: str,
         bg_func_name: str,
-    ):
+    ) -> Tuple[str, dict, Sequence[float]]:
         # modification of get_initial_fit_function_and_kwargs to just fit a peak within the x_window
         si = ws.spectrumInfo()
         ispecs = list(range(si.size()))
@@ -347,7 +352,7 @@ class TexturePeakFunctionGenerator(PeakFunctionGenerator):
         return f"{str(function)};ties=({','.join(ties)})"
 
 
-def _get_run_and_prefix_from_ws_log(ws, wsname):
+def _get_run_and_prefix_from_ws_log(ws: Workspace2D, wsname: str) -> Tuple[str, str]:
     try:
         run = str(ws.getRun().getLogData("run_number").value)
         prefix = wsname.split(run)[0]
@@ -357,7 +362,7 @@ def _get_run_and_prefix_from_ws_log(ws, wsname):
     return run, prefix
 
 
-def _get_grouping_from_ws_log(ws):
+def _get_grouping_from_ws_log(ws: Workspace2D) -> str:
     try:
         grouping = str(ws.getRun().getLogData("Grouping").value)
     except RuntimeError:
@@ -365,7 +370,7 @@ def _get_grouping_from_ws_log(ws):
     return grouping
 
 
-def fit_all_peaks(wss: Sequence[str], peaks: Sequence[float], peak_window: float, save_dir: str, override_dir: bool = False):
+def fit_all_peaks(wss: Sequence[str], peaks: Sequence[float], peak_window: float, save_dir: str, override_dir: bool = False) -> None:
     """
     Fit all the peaks given in all the spectra of all the workspaces, for use in a texture analysis workflow
 
@@ -457,7 +462,7 @@ class CrystalPhase:
         return CrystalPhase(xtal)
 
 
-def get_xtal_structure(input_method, *args, **kwargs):
+def get_xtal_structure(input_method: str, *args, **kwargs) -> CrystalStructure:
     match input_method:
         case "cif":
             phase = CrystalPhase.from_cif(*args, **kwargs)
@@ -492,29 +497,29 @@ def create_pf(
     chi2_thresh: Optional[float] = None,
     peak_thresh: Optional[float] = None,
     override_dir: bool = False,
-):
+) -> None:
     """
     Create a single pole figure, for use in texture analysis workflow
 
     wss: Workspace names of the ws with the orientation information present as a goniometer matrix
-    params: Parameter Workspaces if you want to read a column of this table to each point in the pole figure
-    include_scatt_power: flag for whether to adjust the value by a scattering power calculation
-    phase:
-    hkl: H,K,L reflection of the peak fit in the param workspaces
-    readout_column: column of the param ws that should be attached to the pole figure table
+    root_dir: root of the directory to which the data should be saved
+    exp_name: experiment name, which provides the overarching folder within the root directory
     dir1: vector of the first principle direction of the sample
     dir2: vector of the second (projection) principle direction of the sample
     dir3: vector of the third principle direction of the sample
     dir_names: Names of the first, second and third principle directions
-    scatter: flag as to whether the plotted pole figure should be a scatter plot of experimental points or a fitted contour plot
-    kernel: if scatter == False, the kernel size of the gaussian filter applied to smooth the contour plot
+    include_scatt_power: flag for whether to adjust the value by a scattering power calculation
+    scatter: flag for whether the plotted pole figure should be a scatter plot of experimental points, a fitted contour plot, or both
     scat_vol_pos: position of the centre of mass of the scattering gauge volume
+    projection_method: the type of projection to use to create the pole figure ("Azimuthal", "Stereographic")
+    params: Parameter Workspaces if you want to read a column of this table to each point in the pole figure
+    xtal: Crystal Structure of the sample
+    hkl: H,K,L reflection of the peak fit in the param workspaces
+    readout_column: column of the param ws that should be attached to the pole figure table
+    kernel: if scatter == False, the kernel size of the gaussian filter applied to smooth the contour plot
     chi2_thresh: if chi2 column present in params, the maximum value which will still get added to the pole figure table
     peak_thresh: if X0 present in params, the maximum allowable difference between a spectra's X0 and the mean X0/
                  X0 corresponding to the provided HKL
-    root_dir: root of the directory to which the data should be saved
-    exp_name: experiment name, which provides the overarching folder within the root directory
-    projection_method: the type of projection to use to create the pole figure ("Azimuthal", "Stereographic")
     override_dir: flag which, if True, will save files directly into save_dir rather than creating a folder structure
     """
     model = TextureProjection()
@@ -551,7 +556,7 @@ def create_pf(
     try:
         fig.show()
     except IndexError:
-        logger.notice("Ignoring a problem with the plt.get_edgecolor. This is probably fine")
+        logger.debug("Ignoring a problem with the plt.get_edgecolor. This is (probably) fine")
 
 
 def make_iterable(param):
@@ -582,33 +587,30 @@ def create_pf_loop(
     kernel: Optional[float] = None,
     chi2_thresh: Optional[float] = None,
     peak_thresh: Optional[float] = None,
-):
+) -> None:
     """
     Create a series of pole figures, for use in texture analysis workflow
 
     wss: Workspace names of the ws with the orientation information present as a goniometer matrix
     param_wss: Sequence of Parameter Workspaces if you want to read a column of each table to each point in the pole figure
     include_scatt_power: flag for whether to adjust the value by a scattering power calculation
-    cif: path to CIF file for the crystal structure
-    lattice: String representation of Lattice for CrystalStructure
-    space_group: String representation of Space Group for CrystalStructure
-    basis: String representation of Basis for CrystalStructure
-    hkls: H,K,L reflection of each peak fitted by the param workspaces
-    readout_columns: each column of the param ws that should be attached to its own pole figure table
     dir1: vector of the first principle direction of the sample
     dir2: vector of the second (projection) principle direction of the sample
     dir3: vector of the third principle direction of the sample
     dir_names: Names of the first, second and third principle directions
     scatter: flag as to whether the plotted pole figure should be a scatter plot of experimental points or a fitted contour plot.
             the string "both" is also a valid argument and that will create both
-    kernel: if scatter == False, the kernel size of the gaussian filter applied to smooth the contour plot
     scat_vol_pos: position of the centre of mass of the scattering gauge volume
-    chi2_thresh: if chi2 column present in params, the maximum value which will still get added to the pole figure table
-    peak_thresh: if X0 present in params, the maximum allowable difference between a spectra's X0 and the mean X0/
-                 X0 corresponding to the provided HKL
     save_root: root of the directory to which the data should be saved
     exp_name: experiment name, which provides the overarching folder within the root directory
     projection_method: the type of projection to use to create the pole figure ("Azimuthal", "Stereographic")
+    xtal: Crystal Structure of the sample
+    hkls: H,K,L reflection of each peak fitted by the param workspaces
+    readout_columns: each column of the param ws that should be attached to its own pole figure table
+    kernel: if scatter == False, the kernel size of the gaussian filter applied to smooth the contour plot
+    chi2_thresh: if chi2 column present in params, the maximum value which will still get added to the pole figure table
+    peak_thresh: if X0 present in params, the maximum allowable difference between a spectra's X0 and the mean X0/
+                 X0 corresponding to the provided HKL
     """
     # get ws paths
     for iparam, params in enumerate(param_wss):

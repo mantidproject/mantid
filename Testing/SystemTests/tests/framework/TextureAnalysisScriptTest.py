@@ -233,7 +233,6 @@ class PeakFitMixin(object):
         for c in out_table.getColumnNames():
             self.assertIn(c, expected_cols)
             self.assertTrue(np.allclose(np.nan_to_num(out_table.column(c)), expected_dict[c]))
-            # fitting not reliable to test actual results across operating systems
 
 
 class TestFittingPeaksOfFocusedData(systemtesting.MantidSystemTest, PeakFitMixin):
