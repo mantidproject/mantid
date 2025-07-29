@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="UTF-8" ?>
-<parameter-file instrument = "EMUau" valid-from = "2025-07-01T00:00:00">
+<parameter-file instrument = "EMUau" valid-from = "1901-01-01T00:00:00"  valid-to = "2025-06-30 23:59:59">
 
   <component-link name = "EMUau">
 
@@ -37,19 +37,19 @@
 
     <!-- time limits in msec -->
     <parameter name="DirectTauxMin">
-      <value val="8.41" />
+      <value val="1.0" />
     </parameter>
   
     <parameter name="DirectTauxMax">
-      <value val="11.86" />
+      <value val="4.45" />
     </parameter>
     
     <parameter name="AnalysedTauxMin">
-      <value val="13.86" />
+      <value val="6.45" />
     </parameter>
     
     <parameter name="AnalysedTauxMax">
-      <value val="18.70" />
+      <value val="10.9" />
     </parameter>    
     
     <parameter name="DetectorMap" type="string">

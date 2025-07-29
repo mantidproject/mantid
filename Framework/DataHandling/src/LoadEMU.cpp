@@ -815,7 +815,6 @@ template <typename FD> void LoadEMU<FD>::exec(const std::string &hdfFile, const 
   Types::Core::time_duration duration =
       boost::posix_time::microseconds(static_cast<boost::int64_t>(eventCounter.duration() * 1.0e6));
   Types::Core::DateAndTime endTime(startTime + duration);
-  logManager.addProperty("start_time", startTime.toISO8601String());
   logManager.addProperty("end_time", endTime.toISO8601String());
   logManager.addProperty<double>("dur", eventCounter.duration());
 
@@ -1118,6 +1117,7 @@ template <typename FD> void LoadEMU<FD>::loadParameters(const std::string &hdfFi
   } else {
     m_startRun = startTime.toISO8601String();
   }
+  logm.addProperty("start_time", m_startRun);
 
   MapNeXusToSeries<double>(entry, "instrument/doppler/ctrl/amplitude", 75.0, logm, m_startRun, "DopplerAmplitude",
                            0.001, m_datasetIndex);
