@@ -4,11 +4,11 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+from typing import Sequence
+
 
 # utility functions for creating standard shape xml strings
-
-
-def get_cube_xml(name, side_len, centre=(0.0, 0.0, 0.0)):
+def get_cube_xml(name: str, side_len: float, centre: Sequence[float] = (0.0, 0.0, 0.0)) -> str:
     return f"""
     <cuboid id='{name}'> \
     <height val='{side_len}'  /> \
