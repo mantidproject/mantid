@@ -72,8 +72,7 @@ class AbinsTestingMixin(ABC):
 
 class AbinsCRYSTALTestScratch(AbinsTestingMixin, systemtesting.MantidSystemTest):
     """
-    In this benchmark it is tested if calculation from scratch with input data from CRYSTAL and for 1-2 quantum
-    order events is correct.
+    Test calculation with input data from CRYSTAL for 1-2 quantum orders.
     """
 
     system_name = "TolueneScratchAbins"
@@ -88,8 +87,7 @@ class AbinsCRYSTALTestScratch(AbinsTestingMixin, systemtesting.MantidSystemTest)
 
 class AbinsCRYSTALTestBiggerSystem(AbinsTestingMixin, systemtesting.MantidSystemTest):
     """
-    In this benchmark it is tested if calculation from scratch with input data from CRYSTAL and for only 1 quantum
-    order event is correct.
+    Test calculation with input data from CRYSTAL for only 1 quantum order.
     """
 
     system_name = "Crystalb3lypScratchAbins"
@@ -101,15 +99,15 @@ class AbinsCRYSTALTestBiggerSystem(AbinsTestingMixin, systemtesting.MantidSystem
 
 class AbinsCRYSTALTestT(AbinsTestingMixin, systemtesting.MantidSystemTest):
     """
-    In this scenario a restart is considered in which data for other
-    temperature already exists in an hdf file.
+    Test a restart in which data for other temperature already exists in cache.
 
     First a simulation is run for T=10K; then a T=20K for which S has to be
     recalculated. After that another T=10K simulation is requested; the other
     parameters are identical across calculations. In the third run the required
-    data /should/ be read from the hdf file. We only check that here that the
-    results are correct.
+    data /should/ be read from the hdf file.
 
+    We only check that here that the results are correct, we cannot tell if the
+    cache was used.
     """
 
     system_name = "TolueneTAbins"
@@ -137,8 +135,7 @@ class AbinsCRYSTALTestT(AbinsTestingMixin, systemtesting.MantidSystemTest):
 
 class AbinsCRYSTALTestLargerOrder(AbinsTestingMixin, systemtesting.MantidSystemTest):
     """
-    In this benchmark it is tested if calculation from restart with input data from CRYSTAL is correct. Requested order
-    of quantum event is larger than the one which is saved to an hdf file so S has to be calculated.
+    Test calculation of order 1-2 when cache already contains order 1
     """
 
     system_name = "TolueneLargerOrderAbins"
@@ -160,8 +157,7 @@ class AbinsCRYSTALTestLargerOrder(AbinsTestingMixin, systemtesting.MantidSystemT
 
 class AbinsCRYSTALTestSmallerOrder(AbinsTestingMixin, systemtesting.MantidSystemTest):
     """
-    In this benchmark it is tested if calculation from restart with input data from CRYSTAL is correct. Requested
-    order of quantum event is smaller than the one which is saved to an hdf file so S is loaded from an hdf file.
+    Test calculation of order 1 when cache already contains orders 1-2
     """
 
     system_name = "TolueneSmallerOrderAbins"
@@ -180,7 +176,7 @@ class AbinsCRYSTALTestSmallerOrder(AbinsTestingMixin, systemtesting.MantidSystem
 
 class AbinsCRYSTALTestScale(AbinsTestingMixin, systemtesting.MantidSystemTest):
     """
-    In this benchmark it is tested if scaling is correct.
+    Test result scaling with Scale parameter
     """
 
     system_name = "TolueneScale"
@@ -198,7 +194,11 @@ class AbinsCRYSTALTestScale(AbinsTestingMixin, systemtesting.MantidSystemTest):
 # noinspection PyAttributeOutsideInit,PyPep8Naming
 class AbinsCASTEPNoH(AbinsTestingMixin, systemtesting.MantidSystemTest):
     """
-    In this benchmark it is tested if calculation for systems without H is correct.
+    Test if calculation for systems without H is correct
+
+    (Other elements are treated identically, but H tends to dominate the
+    results and its mass of 1 could cause some operations to get the right
+    result for the wrong reason!)
     """
 
     system_name = "Na2SiF6_CASTEP"
@@ -211,7 +211,9 @@ class AbinsCASTEPNoH(AbinsTestingMixin, systemtesting.MantidSystemTest):
 # noinspection PyAttributeOutsideInit,PyPep8Naming
 class AbinsCASTEP1DDispersion(AbinsTestingMixin, systemtesting.MantidSystemTest):
     """
-    In this benchmark it is tested if calculation of S from phonon dispersion is correct (1D case).
+    Tested calculation of S from CASTEP phonon dispersion data (1D case).
+
+    Note that this is NOT good practice, but some users will do it anyway.
     """
 
     system_name = "Mapi"
@@ -223,8 +225,7 @@ class AbinsCASTEP1DDispersion(AbinsTestingMixin, systemtesting.MantidSystemTest)
 
 class AbinsDMOL3TestScratch(AbinsTestingMixin, systemtesting.MantidSystemTest):
     """
-    In this benchmark it is tested if calculation from scratch with input data from DMOL3 and for 1-2 quantum
-    order events is correct.
+    Test calculation with input data from DMOL3 for 1-2 quantum orders.
     """
 
     system_name = "Na2SiF6_DMOL3"
@@ -239,8 +240,7 @@ class AbinsDMOL3TestScratch(AbinsTestingMixin, systemtesting.MantidSystemTest):
 
 class AbinsGAUSSIANestScratch(AbinsTestingMixin, systemtesting.MantidSystemTest):
     """
-    In this benchmark it is tested if calculation from scratch with input data from GAUSSIAN and for 1-4 quantum
-    order events is correct.
+    Test calculation with input data from GAUSSIAN for 1-2 quantum orders.
     """
 
     system_name = "C6H5Cl-Gaussian"
@@ -255,9 +255,7 @@ class AbinsGAUSSIANestScratch(AbinsTestingMixin, systemtesting.MantidSystemTest)
 
 class AbinsBinWidth(AbinsTestingMixin, systemtesting.MantidSystemTest):
     """
-    In this benchmark it is tested if calculation with bin width different than the default value is correct.
-    Calculation performed for crystalline benzene for 1st and 2nd quantum event for output from CASTEP and bin width
-    3 cm^-1. This system test should be fast so no need for excludeInPullRequests flag.
+    Test calculation with bin width different than the default value.
     """
 
     system_name = "BenzeneBinWidthCASTEP"
@@ -269,9 +267,7 @@ class AbinsBinWidth(AbinsTestingMixin, systemtesting.MantidSystemTest):
 
 class AbinsCASTEPIsotopes(AbinsTestingMixin, systemtesting.MantidSystemTest):
     """
-    In this benchmark it is tested if calculation of the system with isotopic substitutions: H -> 2H, Li -> 7Li,
-    produces correct results. Input data is generated by CASTEP. This system test should be fast so no need for
-    excludeInPullRequests flag.
+    Test calculation with isotopic substitutions: H -> 2H, Li -> 7Li.
     """
 
     system_name = "LiOH_H2O_2D2O_CASTEP"
