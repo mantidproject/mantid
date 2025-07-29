@@ -1462,6 +1462,7 @@ public:
 
     std::string time_str;
     file.getAttr("file_time", time_str);
+    file.close();
 
     std::tm tm = {};
     char sign;
