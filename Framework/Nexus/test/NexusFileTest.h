@@ -1477,8 +1477,7 @@ public:
     std::time_t local = std::mktime(&tm);
 
     std::string expected = Mantid::Types::Core::DateAndTime::getLocalTimeISO8601String(local);
-    TS_ASSERT_EQUALS(time_str.substr(0, time_str.find_last_of("+-") + 1),
-                     expected.substr(0, expected.find_last_of("+-") + 1));
+    TS_ASSERT_EQUALS(time_str.substr(0, time_str.find_last_of("+-")), expected.substr(0, expected.find_last_of("+-")));
     std::regex iso8601_regex(R"(^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[+-]\d{2}:\d{2}$)");
 
     TS_ASSERT(std::regex_match(time_str, iso8601_regex));
