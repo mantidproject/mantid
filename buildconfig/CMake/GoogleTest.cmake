@@ -43,6 +43,9 @@ endforeach()
 # W4 logging doesn't work with MSVC address sanitizer, turn off sanitizer since not our code
 if(MSVC)
   get_target_property(opts gmock COMPILE_OPTIONS)
+  if(NOT opts OR opts STREQUAL "opts-NOTFOUND")
+    set(opts "")
+  endif()
   list(APPEND opts "/DGTEST_HAS_PTHREAD=0")
 
   if(USE_SANITIZERS_LOWER STREQUAL "address")
