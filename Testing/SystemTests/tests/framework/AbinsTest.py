@@ -81,9 +81,6 @@ class AbinsCRYSTALTestScratch(AbinsTestingMixin, systemtesting.MantidSystemTest)
     def runTest(self):
         Abins(**(self.default_kwargs) | {"QuantumOrderEventsNumber": "2"})
 
-    def excludeInPullRequests(self):
-        return True
-
 
 class AbinsCRYSTALTestBiggerSystem(AbinsTestingMixin, systemtesting.MantidSystemTest):
     """
@@ -124,9 +121,6 @@ class AbinsCRYSTALTestT(AbinsTestingMixin, systemtesting.MantidSystemTest):
         for case_kwargs in (case_1_kwargs, case_2_kwargs, case_3_kwargs):
             Abins(**case_kwargs)
 
-    def excludeInPullRequests(self):
-        return True
-
     def validate(self):
         """Loosen validation parameters for this test case"""
         self.tolerance = 1e-1
@@ -145,9 +139,6 @@ class AbinsCRYSTALTestLargerOrder(AbinsTestingMixin, systemtesting.MantidSystemT
         Abins(**self.default_kwargs)
         DeleteWorkspace(self.system_name)
         Abins(**(self.default_kwargs | {"QuantumOrderEventsNumber": "2"}))
-
-    def excludeInPullRequests(self):
-        return True
 
     def validate(self):
         """Loosen validation parameters for this test case"""
@@ -234,9 +225,6 @@ class AbinsDMOL3TestScratch(AbinsTestingMixin, systemtesting.MantidSystemTest):
     def runTest(self):
         Abins(**(self.default_kwargs | {"QuantumOrderEventsNumber": "2", "ScaleByCrossSection": "Total"}))
 
-    def excludeInPullRequests(self):
-        return True
-
 
 class AbinsGAUSSIANestScratch(AbinsTestingMixin, systemtesting.MantidSystemTest):
     """
@@ -248,9 +236,6 @@ class AbinsGAUSSIANestScratch(AbinsTestingMixin, systemtesting.MantidSystemTest)
 
     def runTest(self):
         Abins(**(self.default_kwargs | {"QuantumOrderEventsNumber": "2"}))
-
-    def excludeInPullRequests(self):
-        return True
 
 
 class AbinsBinWidth(AbinsTestingMixin, systemtesting.MantidSystemTest):
