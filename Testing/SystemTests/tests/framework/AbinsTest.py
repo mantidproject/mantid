@@ -19,6 +19,7 @@ class AbinsTestingMixin(ABC):
     @abstractmethod
     def system_name(self) -> str: ...
 
+    @property
     @abstractmethod
     def ab_initio_program(self) -> str: ...
 
