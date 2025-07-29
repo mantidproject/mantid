@@ -577,7 +577,7 @@ TimeROI AlignAndFocusPowderSlim::timeROIFromSplitterWorkspace(const Types::Core:
   }
 
   const int splitter_target = this->getProperty(PropertyNames::SPLITTER_TARGET);
-  if (static_cast<size_t>(splitter_target) >= timeSplitter.outputWorkspaceIndices().size()) {
+  if (!timeSplitter.outputWorkspaceIndices().contains(splitter_target)) {
     throw std::invalid_argument("Selected splitter target is out of range.");
   }
 

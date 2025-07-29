@@ -40,7 +40,7 @@ Usage
 
 **Example - event filtering**
 
-This algorithm accepts the sample SplitterWorkspace inputs as :ref:`FilterEvents <algm-FilterEvents>`.
+This algorithm accepts the same ``SplitterWorkspace`` inputs as :ref:`FilterEvents <algm-FilterEvents>` and more information can be found on the :ref:`Event Filtering <EventFiltering>` page.
 
 .. code-block:: python
 
@@ -61,7 +61,7 @@ This algorithm accepts the sample SplitterWorkspace inputs as :ref:`FilterEvents
                                BinningMode="Linear",
                                BinningUnits="TOF")
 
-    # This is equilvalent to using FilterEvents with the same splitter table.
+    # This is equivalent to using FilterEvents with the same splitter table.
     # But note that this example doesn't align the data so put everything in 1 big bin to compare.
     ws2 = LoadEventNexus("VULCAN_218062.nxs.h5", NumberOfBins=1)
     grp = CreateGroupingWorkspace(ws2, GroupDetectorsBy='bank')
@@ -71,8 +71,9 @@ This algorithm accepts the sample SplitterWorkspace inputs as :ref:`FilterEvents
                  SplitterWorkspace=splitter, RelativeTime=True,
                  FilterByPulseTime=True,
                  OutputWorkspaceBaseName="filtered")
+    out = Rebin("filtered_0", "0,50000,50000", PreserveEvents=False)
 
-    np.testing.assert_array_equal(mtd["filtered_0"].extractY(), ws.extractY())
+    CompareWorkspaces(ws, out, CheckUncertainty=False, CheckSpectraMap=False, CheckInstrument=False)
 
 **Example - filter events based on log values**
 
@@ -97,7 +98,7 @@ This algorithm accepts the sample SplitterWorkspace inputs as :ref:`FilterEvents
 
 .. note::
 
-    While we currently only support a single output workspace when filtering events from a splitter table but the output target can be selected with the ``SplitterTarget`` property and you can run the algorithm multiple times with different targets. We also can currently only filter base on the pulse time, not the event time-of-flight.
+    While we currently only support a single output workspace when filtering events from a splitter table but the output target can be selected with the ``SplitterTarget`` property and you can run the algorithm multiple times with different targets. We also can currently only filter based on the pulse time, not the event time-of-flight.
 
 .. categories::
 
