@@ -15,7 +15,7 @@
 // The generated cpp file usually takes care of that but we are fording this to be included first
 #define _CXXTEST_HAVE_STD
 #define _CXXTEST_HAVE_EH
-#include <cxxTest/TestSuite.h>
+#include <cxxtest/TestSuite.h>
 #undef _CXXTEST_LONGLONG // Avoid a warning
 #undef _CXXTEST_HAVE_STD
 #undef _CXXTEST_HAVE_EH
