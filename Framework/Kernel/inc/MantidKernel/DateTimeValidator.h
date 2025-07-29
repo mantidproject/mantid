@@ -19,7 +19,7 @@ namespace Kernel {
 */
 class MANTID_KERNEL_DLL DateTimeValidator : public TypedValidator<std::string> {
 public:
-  DateTimeValidator();
+  DateTimeValidator(bool allowEmpty = false);
 
   /// Clone the current state
   IValidator_sptr clone() const override;
