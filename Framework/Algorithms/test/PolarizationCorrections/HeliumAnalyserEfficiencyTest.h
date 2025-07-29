@@ -201,6 +201,47 @@ public:
                             "number of periods within the input workspace is not an allowed value.");
   }
 
+  void testInputWorkspaceNotAGroupThrows() {
+    // Should accept a group workspace containing four workspaces, corresponding to the four spin configurations
+    std::vector<double> x{1, 2, 3, 4, 5};
+    std::vector<double> y{1, 4, 9, 16, 25};
+    MatrixWorkspace_sptr ws1 = generateWorkspace("ws1", x, y);
+    auto heliumAnalyserEfficiency = AlgorithmManager::Instance().create("HeliumAnalyserEfficiency");
+    heliumAnalyserEfficiency->initialize();
+    heliumAnalyserEfficiency->setProperty("OutputWorkspace", "P");
+    TS_ASSERT_THROWS(heliumAnalyserEfficiency->setProperty("InputWorkspace", ws1), std::invalid_argument &);
+    TS_ASSERT_THROWS(heliumAnalyserEfficiency->execute(), const std::runtime_error &);
+  }
+
+  void testInputWorkspaceWithWrongSizedGroupThrows() {
+    // Should accept a group workspace containing four workspaces, corresponding to the four spin configurations
+    std::vector<double> x{1, 2, 3, 4, 5};
+    std::vector<double> y{1, 4, 9, 16, 25};
+    MatrixWorkspace_sptr ws1 = generateWorkspace("ws1", x, y);
+    MatrixWorkspace_sptr ws2 = generateWorkspace("ws2", x, y);
+    MatrixWorkspace_sptr ws3 = generateWorkspace("ws3", x, y);
+    auto groupWs = groupWorkspaces("grp", std::vector<MatrixWorkspace_sptr>{ws1, ws2, ws3});
+    auto heliumAnalyserEfficiency = createHeliumAnalyserEfficiencyAlgorithm(groupWs, "P");
+    TS_ASSERT_THROWS(heliumAnalyserEfficiency->execute(), const std::runtime_error &);
+  }
+
+  void testInputWorkspaceNotAGroupThrows() {
+    // Should accept a group workspace containing four workspaces, corresponding to the four spin configurations
+    std::vector<double> x{1};
+    std::vector<double> y{1};
+    MatrixWorkspace_sptr test = generateWorkspace("test", x, y);
+    const auto alg = prepareAlgorithm({"test"});
+    TSM_ASSERT_THROWS("InputWorkspaces has to be a group", alg->execute(), const std::runtime_error &);
+  }
+
+  void testInputWorkspaceWithWrongSizedGroupThrows() {
+    // The units of the input workspace should be wavelength
+    const auto groupNames = generateEfficienciesFromLifetimeAndInitialPolarization();
+    AnalysisDataService::Instance().remove("T00_0");
+    const auto alg = prepareAlgorithm(groupNames);
+    TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
+  }
+
   void testInvalidSpinStateFormatThrowsError() {
     auto heliumAnalyserEfficiency = AlgorithmManager::Instance().create("HeliumAnalyserEfficiency");
     TS_ASSERT_THROWS(heliumAnalyserEfficiency->setProperty("SpinStates", "bad"), std::invalid_argument &);
