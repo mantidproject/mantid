@@ -84,10 +84,7 @@
       "inherits": [
         "ci-default",
         "conda"
-      ],
-      "cacheVariables": {
-        "USE_PRECOMPILED_HEADERS": "OFF"
-      }
+      ]
     },
     {
       "name": "cppcheck-ci",
@@ -161,7 +158,6 @@
       "cmakeExecutable": "cmake.exe",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "DebugWithRelRuntime",
-        "USE_PRECOMPILED_HEADERS": "OFF",
         "CMAKE_MAKE_PROGRAM": "ninja.exe"
       }
     },
