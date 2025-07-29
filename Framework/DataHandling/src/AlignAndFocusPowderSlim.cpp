@@ -364,7 +364,7 @@ void AlignAndFocusPowderSlim::exec() {
     const int DISK_CHUNK = getProperty(PropertyNames::READ_SIZE_FROM_DISK);
     const int GRAINSIZE_EVENTS = getProperty(PropertyNames::EVENTS_PER_THREAD);
     auto progress = std::make_shared<API::Progress>(this, .17, .9, num_banks_to_read);
-    std::cout << (DISK_CHUNK / GRAINSIZE_EVENTS) << " threads per chunk\n"; // TODO REMOVE debug print
+    g_log.debug() << (DISK_CHUNK / GRAINSIZE_EVENTS) << " threads per chunk\n"; // TODO REMOVE debug print
     ProcessBankTask task(bankEntryNames, h5file, is_time_filtered, wksp, m_calibration, m_masked,
                          static_cast<size_t>(DISK_CHUNK), static_cast<size_t>(GRAINSIZE_EVENTS), pulse_indices,
                          progress);
@@ -480,6 +480,7 @@ API::MatrixWorkspace_sptr AlignAndFocusPowderSlim::editInstrumentGeometry(
     API::MatrixWorkspace_sptr &wksp, const double l1, const std::vector<double> &polars,
     const std::vector<specnum_t> &specids, const std::vector<double> &l2s, const std::vector<double> &azimuthals) {
   API::IAlgorithm_sptr editAlg = createChildAlgorithm("EditInstrumentGeometry");
+  editAlg->setLoggingOffset(1);
   editAlg->setProperty("Workspace", wksp);
   if (l1 > 0.)
     editAlg->setProperty("PrimaryFlightPath", l1);
@@ -535,12 +536,11 @@ void AlignAndFocusPowderSlim::determinePulseIndices(const API::MatrixWorkspace_s
   // filter bad pulses
   if (getProperty(PropertyNames::FILTER_BAD_PULSES)) {
     this->progress(.16, "Filtering bad pulses");
-    g_log.information() << "Filtering bad pulses\n";
 
     // get limits from proton_charge
     const auto [min_pcharge, max_pcharge, mean] =
         wksp->run().getBadPulseRange(LOG_CHARGE_NAME, getProperty(PropertyNames::FILTER_BAD_PULSES_LOWER_CUTOFF));
-    g_log.information() << "Filtering pcharge outside of " << min_pcharge << " to " << max_pcharge << '\n';
+    g_log.information() << "Filtering bad pulses; pcharge outside of " << min_pcharge << " to " << max_pcharge << '\n';
 
     const auto run_start = wksp->getFirstPulseTime();
     const auto run_stop = wksp->getLastPulseTime();
