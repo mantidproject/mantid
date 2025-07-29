@@ -23,8 +23,9 @@
 #include "MantidKernel/SpinStateValidator.h"
 
 #include <algorithm>
-#include <boost/math/distributions/students_t.hpp>
 #include <vector>
+
+#include <boost/math/distributions/students_t.hpp>
 
 namespace Mantid::Algorithms {
 // Register the algorithm into the algorithm factory
