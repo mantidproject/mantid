@@ -13,7 +13,7 @@ from mantid.simpleapi import Abins, Abins2D, mtd, DeleteWorkspace
 
 
 class AbinsTestingMixin(ABC):
-    _extensions = {"CASTEP": ".phonon", "CRYSTAL": ".out", "DMOL3": ".outmol", "GAUSSIAN": ".log"}
+    _extensions = {"CASTEP": "phonon", "CRYSTAL": "out", "DMOL3": "outmol", "GAUSSIAN": "log"}
 
     @property
     @abstractmethod
@@ -22,6 +22,10 @@ class AbinsTestingMixin(ABC):
     @property
     @abstractmethod
     def ab_initio_program(self) -> str: ...
+
+    @property
+    def ext(self) -> str:
+        return self._extensions[self.ab_initio_program]
 
     def __init__(self):
         super().__init__()  # Init the base class as well as this mix-in
@@ -39,7 +43,7 @@ class AbinsTestingMixin(ABC):
         self.default_kwargs = MappingProxyType(
             {
                 "AbInitioProgram": self.ab_initio_program,
-                "VibrationalOrPhononFile": self.system_name + self._extensions[self.ab_initio_program],
+                "VibrationalOrPhononFile": f"{self.system_name}.{self.ext}",
                 "TemperatureInKelvin": 10,
                 "SampleForm": "Powder",
                 "Instrument": "TOSCA",
@@ -290,7 +294,7 @@ class AbinsCRYSTAL2D(AbinsTestingMixin, systemtesting.MantidSystemTest):
 
         Abins2D(
             AbInitioProgram="CRYSTAL",
-            VibrationalOrPhononFile="TolueneScratchAbins" + self._extensions[self.ab_initio_program],
+            VibrationalOrPhononFile=f"TolueneScratchAbins.{self.ext}",
             TemperatureInKelvin=10,
             Instrument="MARI",
             Atoms="",
