@@ -293,6 +293,7 @@ public:
    *   (there's only version 0)
    ************************/
 
+  // DEBUG: This test is failing
   void testSyncPacketParser() {
     std::shared_ptr<ADARA::SyncPkt> pkt =
         basicPacketTests<ADARA::SyncPkt>(syncPacket, sizeof(syncPacket), 728504568, 5617153);
@@ -396,6 +397,117 @@ public:
     TS_ASSERT_EQUALS(pkt->severity(), ADARA::VariableSeverity::OK)
     TS_ASSERT_EQUALS(pkt->value(), "'SampleTemp', 'SampleTempSelect', 'MagneticField', 'MagneticFieldSelector', "
                                    "'sequence_id', 'sequence_number', 'sequence_total', 'SF1', 'SF2'")
+  }
+
+  // DEBUG: this test is failing
+  void testVariableU32ArrayPacketParser() {
+    std::shared_ptr<ADARA::VariableU32ArrayPkt> pkt = basicPacketTests<ADARA::VariableU32ArrayPkt>(
+        variableU32ArrayPacket, sizeof(variableU32ArrayPacket), 728281149, 0);
+    TS_ASSERT_EQUALS(pkt->devId(), 2)
+    TS_ASSERT_EQUALS(pkt->varId(), 3)
+    TS_ASSERT_EQUALS(pkt->status(), ADARA::VariableStatus::OK)
+    TS_ASSERT_EQUALS(pkt->severity(), ADARA::VariableSeverity::OK)
+    TS_ASSERT_EQUALS(pkt->elemCount(), 4)
+    TS_ASSERT_EQUALS(pkt->value(), std::vector<uint32_t>({6, 7, 8, 9}))
+  }
+
+  // DEBUG: this test is failing
+  void testVariableDoubleArrayPacketParser() {
+    std::shared_ptr<ADARA::VariableDoubleArrayPkt> pkt = basicPacketTests<ADARA::VariableDoubleArrayPkt>(
+        variableDoubleArrayPacket, sizeof(variableDoubleArrayPacket), 728281149, 0);
+    TS_ASSERT_EQUALS(pkt->devId(), 2)
+    TS_ASSERT_EQUALS(pkt->varId(), 1)
+    TS_ASSERT_EQUALS(pkt->status(), ADARA::VariableStatus::OK)
+    TS_ASSERT_EQUALS(pkt->severity(), ADARA::VariableSeverity::OK)
+    TS_ASSERT_EQUALS(pkt->elemCount(), 2)
+    for (size_t i = 0; i < pkt->elemCount(); i++)
+      TS_ASSERT_DELTA(pkt->value()[i], static_cast<double>(i) + 5.0, 1.e-8)
+    TS_ASSERT_EQUALS(pkt->value(), std::vector<double>({5.0, 6.0}))
+  }
+
+  void testMultVariableU32PacketParser() {
+    std::shared_ptr<ADARA::MultVariableU32Pkt> pkt = basicPacketTests<ADARA::MultVariableU32Pkt>(
+        multVariableU32Packet, sizeof(multVariableU32Packet), 1117010982, 102843667);
+    TS_ASSERT_EQUALS(pkt->devId(), 1)
+    TS_ASSERT_EQUALS(pkt->varId(), 11)
+    TS_ASSERT_EQUALS(pkt->status(), ADARA::VariableStatus::OK)
+    TS_ASSERT_EQUALS(pkt->severity(), ADARA::VariableSeverity::OK)
+    TS_ASSERT_EQUALS(pkt->numValues(), 16)
+    std::vector<uint32_t> tofs = {17067500, 22171400, 22172800, 22203900, 22207000, 22237400, 22240900, 22255100,
+                                  22260900, 22270700, 22278400, 22287600, 22297700, 22303500, 22314900, 22319400};
+    std::vector<uint32_t> values = {1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0};
+    for (size_t i = 0; i < pkt->numValues(); i++) {
+      TS_ASSERT_EQUALS(pkt->tofs()[i], tofs[i])
+      TS_ASSERT_EQUALS(pkt->values()[i], values[i])
+    }
+  }
+
+  void testMultVariableDoublePacketParser() {
+    std::shared_ptr<ADARA::MultVariableDoublePkt> pkt = basicPacketTests<ADARA::MultVariableDoublePkt>(
+        multVariableDoublePacket, sizeof(multVariableDoublePacket), 1117010982, 102843667);
+    TS_ASSERT_EQUALS(pkt->devId(), 1)
+    TS_ASSERT_EQUALS(pkt->varId(), 11)
+    TS_ASSERT_EQUALS(pkt->status(), ADARA::VariableStatus::OK)
+    TS_ASSERT_EQUALS(pkt->severity(), ADARA::VariableSeverity::OK)
+    TS_ASSERT_EQUALS(pkt->numValues(), 8)
+    std::vector<uint32_t> tofs = {17067500, 22171400, 22172800, 22203900, 22207000, 22237400, 22240900, 22255100};
+    std::vector<uint32_t> values = {1, 2, 3, 4, 5, 6, 7, 8};
+    for (size_t i = 0; i < pkt->numValues(); i++) {
+      TS_ASSERT_EQUALS(pkt->tofs()[i], tofs[i])
+      TS_ASSERT_EQUALS(pkt->values()[i], values[i])
+    }
+  }
+
+  void testMultVariableStringPacketParser() {
+    std::shared_ptr<ADARA::MultVariableStringPkt> pkt = basicPacketTests<ADARA::MultVariableStringPkt>(
+        multVariableStringPacket, sizeof(multVariableStringPacket), 1117010982, 102843667);
+    TS_ASSERT_EQUALS(pkt->devId(), 1)
+    TS_ASSERT_EQUALS(pkt->varId(), 11)
+    TS_ASSERT_EQUALS(pkt->status(), ADARA::VariableStatus::OK)
+    TS_ASSERT_EQUALS(pkt->severity(), ADARA::VariableSeverity::OK)
+    TS_ASSERT_EQUALS(pkt->numValues(), 3)
+    std::vector<uint32_t> tofs = {17067500, 22171400, 22172800, 22203900, 22207000, 22237400, 22240900, 22255100};
+    std::vector<std::string> values = {"one", "two", "three"};
+    for (size_t i = 0; i < pkt->numValues(); i++) {
+      TS_ASSERT_EQUALS(pkt->tofs()[i], tofs[i])
+      TS_ASSERT_EQUALS(pkt->values()[i], values[i])
+    }
+  }
+
+  void testMultVariableU32ArrayParser() {
+    std::shared_ptr<ADARA::MultVariableU32ArrayPkt> pkt = basicPacketTests<ADARA::MultVariableU32ArrayPkt>(
+        multVariableU32ArrayPacket, sizeof(multVariableU32ArrayPacket), 1117010982, 102843667);
+    TS_ASSERT_EQUALS(pkt->devId(), 1)
+    TS_ASSERT_EQUALS(pkt->varId(), 11)
+    TS_ASSERT_EQUALS(pkt->status(), ADARA::VariableStatus::OK)
+    TS_ASSERT_EQUALS(pkt->severity(), ADARA::VariableSeverity::OK)
+    TS_ASSERT_EQUALS(pkt->numValues(), 3)
+    std::vector<uint32_t> tofs = {17067500, 22171400, 22172800};
+    std::vector<uint32_t> element_counts = {2, 1, 2};
+    std::vector<std::vector<uint32_t>> values = {{1, 2}, {3}, {4, 5}};
+    for (size_t i = 0; i < pkt->numValues(); i++) {
+      TS_ASSERT_EQUALS(pkt->tofs()[i], tofs[i])
+      for (size_t j = 0; j < element_counts[i]; ++j)
+        TS_ASSERT_EQUALS(pkt->values()[i][j], values[i][j])
+    }
+  }
+
+  void testMultVariableDoubleArrayParser() {
+    std::shared_ptr<ADARA::MultVariableDoubleArrayPkt> pkt = basicPacketTests<ADARA::MultVariableDoubleArrayPkt>(
+        multVariableDoubleArrayPacket, sizeof(multVariableDoubleArrayPacket), 1117010982, 102843667);
+    TS_ASSERT_EQUALS(pkt->devId(), 1)
+    TS_ASSERT_EQUALS(pkt->varId(), 11)
+    TS_ASSERT_EQUALS(pkt->status(), ADARA::VariableStatus::OK)
+    TS_ASSERT_EQUALS(pkt->severity(), ADARA::VariableSeverity::OK)
+    TS_ASSERT_EQUALS(pkt->numValues(), 3)
+    std::vector<uint32_t> tofs = {17067500, 22171400, 22172800};
+    std::vector<uint32_t> element_counts = {2, 1, 2};
+    std::vector<std::vector<double>> values = {{1.0, 2.0}, {3.0}, {4.0, 5.0}};
+    for (size_t i = 0; i < pkt->numValues(); i++) {
+      TS_ASSERT_EQUALS(pkt->tofs()[i], tofs[i])
+      for (size_t j = 0; j < element_counts[i]; ++j)
+        TS_ASSERT_DELTA(pkt->values()[i][j], values[i][j], 1e-8)
+    }
   }
 
   /*******************************
