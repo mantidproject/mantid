@@ -1056,7 +1056,7 @@ endif()
 # Disable optimization for certain Segfault as the key lines that cause the segfault can be optimized away but this
 # algorithm is only ever intended to test the crashing behaviour of the framework
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-  set_source_files_properties(src/Segfault.cpp PROPERTIES COMPILE_FLAGS -O0)
+  set_source_files_properties(src/Segfault.cpp PROPERTIES SKIP_PRECOMPILE_HEADERS ON COMPILE_FLAGS -O0)
 endif()
 
 # Add the target for this directory
