@@ -547,6 +547,7 @@ void AlignAndFocusPowderSlim::determinePulseIndices(const API::MatrixWorkspace_s
 
     const auto log = dynamic_cast<const TimeSeriesProperty<double> *>(wksp->run().getLogData(LOG_CHARGE_NAME));
     if (log) {
+      // need to have centre=true for proton_charge
       roi = log->makeFilterByValue(min_pcharge, max_pcharge, true, Mantid::Kernel::TimeInterval(run_start, run_stop),
                                    0.0, true, &roi);
     }
