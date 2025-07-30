@@ -11,7 +11,7 @@
 
 namespace Mantid::DataHandling::AlignAndFocusPowderSlim {
 
-NexusLoader::NexusLoader(const bool is_time_filtered, const std::vector<std::pair<size_t, size_t>> &pulse_indices)
+NexusLoader::NexusLoader(const bool is_time_filtered, const std::vector<PulseROI> &pulse_indices)
     : m_is_time_filtered(is_time_filtered), m_pulse_indices(pulse_indices) {}
 
 template <typename Type>
@@ -54,10 +54,9 @@ void NexusLoader::loadData(H5::DataSet &SDS, std::unique_ptr<std::vector<Type>> 
   SDS.read(data->data(), dataType, memspace, filespace);
 }
 
-std::stack<std::pair<uint64_t, uint64_t>> NexusLoader::getEventIndexRanges(H5::Group &event_group,
-                                                                           const uint64_t number_events) {
+std::stack<EventROI> NexusLoader::getEventIndexRanges(H5::Group &event_group, const uint64_t number_events) {
   // This will return a stack of pairs, where each pair is the start and stop index of the event ranges
-  std::stack<std::pair<uint64_t, uint64_t>> ranges;
+  std::stack<EventROI> ranges;
   if (m_is_time_filtered) {
     // TODO this should be made smarter to only read the necessary range
     std::unique_ptr<std::vector<uint64_t>> event_index = std::make_unique<std::vector<uint64_t>>();
