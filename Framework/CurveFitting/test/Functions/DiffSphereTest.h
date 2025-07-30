@@ -12,9 +12,6 @@
 #include <limits>
 #include <numeric>
 
-// Include local copy of Valgrind header to avoid creating a dependency
-#include "valgrind.h"
-
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidCurveFitting/Algorithms/Fit.h"
@@ -32,15 +29,6 @@ using namespace Mantid::CurveFitting::Functions;
 
 class DiffSphereTest : public CxxTest::TestSuite {
 public:
-  bool skipTests() override {
-    // Skip this test suite if running under valgrind as the Bessel function
-    // calls in DiffSphere sometimes return NaN in this situation.
-    // It's something to do with boost using 80 bit precision where valgrind
-    // drops this to 64. See
-    // https://www.mail-archive.com/valgrind-users@lists.sourceforge.net/msg00974.html
-    return (RUNNING_ON_VALGRIND);
-  }
-
   /// Convolve the elastic part with a resolution function, here a Gaussian
   void testDiffSphereElastic() {
 
