@@ -368,7 +368,7 @@ pipeline {
                   expression { env.BUILD_PACKAGE == 'all' }
               }
             }
-            agent { label "${PLATFORM}-j17" }
+            agent { label "${PLATFORM}" }
             options {
                 timestamps()
                 retry(3)
