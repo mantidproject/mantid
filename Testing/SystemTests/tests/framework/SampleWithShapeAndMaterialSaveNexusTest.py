@@ -23,25 +23,20 @@ class SetupMixin:
         self.fname_literal = json.dumps(self.fname)
         self.save_path_literal = json.dumps(self.save_fpath)
 
-    def execTest(self, test_script, runs=1):
+    def execTest(self, test_script):
         script_path = os.path.join(tempfile.gettempdir(), "subtest_script.py")
         with open(script_path, "w") as f:
             f.write(test_script)
 
-        run_num = 0
-        self.result_code = 0
+        result = subprocess.run(
+            [sys.executable, script_path],
+            capture_output=True,
+            text=True,
+        )
 
-        while run_num < runs:
-            result = subprocess.run(
-                [sys.executable, script_path],
-                capture_output=True,
-                text=True,
-            )
-
-            print("Subprocess STDOUT:\n", result.stdout)
-            print("Subprocess STDERR:\n", result.stderr)
-            self.result_code = result.returncode
-            run_num += 1
+        print("Subprocess STDOUT:\n", result.stdout)
+        print("Subprocess STDERR:\n", result.stderr)
+        self.result_code = result.returncode
 
     def validate(self):
         self.assertEqual(self.result_code, 0, "Subprocess crashed or failed assertion")
@@ -101,9 +96,9 @@ assert os.path.exists(save_fpath), "File was not saved."
         self.execTest(test_script)
 
 
-class TestRepeatedScriptMemoryAllocation(SetupMixin, MantidSystemTest):
+class TestRepeatedExecutionSameProcess(SetupMixin, MantidSystemTest):
     def runTest(self):
-        test_script = r"""
+        script_content = r"""
 from mantid.simpleapi import *
 
 cuboid = " \
@@ -116,15 +111,40 @@ cuboid = " \
 <algebra val='some-cuboid' /> \
 "
 
-ws = CreateSampleWorkspace()
-SetSample(ws, Geometry={'Shape': 'CSG', 'Value': cuboid})
-SetSampleMaterial(ws, "Fe")
+ws1 = CreateSampleWorkspace()
+SetSample(ws1, Geometry={'Shape': 'CSG', 'Value': cuboid})
+SetSampleMaterial(ws1, "Fe")
 
 ws2 = CreateSampleWorkspace()
 SetSampleMaterial(ws2, "Fe")
-ws2.sample().setShape(ws.sample().getShape())
-    """
-        self.execTest(test_script, 2)
+ws2.sample().setShape(ws1.sample().getShape())
+"""
+        # write script to a temp file
+        temp_dir = tempfile.gettempdir()
+        test_script_path = os.path.join(temp_dir, "mantid_shape_test_script.py")
+        with open(test_script_path, "w") as f:
+            f.write(script_content)
+
+        # write wrapper script to execute initial script twice
+        wrapper_script_path = os.path.join(temp_dir, "wrapper_exec_twice.py")
+        with open(wrapper_script_path, "w") as f:
+            f.write(f'''
+exec(open(r"{test_script_path}").read())
+exec(open(r"{test_script_path}").read())
+''')
+
+        # run in subprocess
+        result = subprocess.run(
+            [sys.executable, wrapper_script_path],
+            capture_output=True,
+            text=True,
+        )
+
+        print("Wrapper STDOUT:\n", result.stdout)
+        print("Wrapper STDERR:\n", result.stderr)
+
+        self.result_code = result.returncode
 
     def validate(self):
-        self.assertEqual(self.result_code, 0, "Subprocess crashed or failed assertion")
+        self.assertEqual(self.result_code, 0, "Script crashed on repeated execution in same process")
+        return True
