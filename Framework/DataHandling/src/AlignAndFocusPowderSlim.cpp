@@ -364,7 +364,7 @@ void AlignAndFocusPowderSlim::exec() {
     const int DISK_CHUNK = getProperty(PropertyNames::READ_SIZE_FROM_DISK);
     const int GRAINSIZE_EVENTS = getProperty(PropertyNames::EVENTS_PER_THREAD);
     auto progress = std::make_shared<API::Progress>(this, .17, .9, num_banks_to_read);
-    g_log.debug() << (DISK_CHUNK / GRAINSIZE_EVENTS) << " threads per chunk\n"; // TODO REMOVE debug print
+    g_log.debug() << (DISK_CHUNK / GRAINSIZE_EVENTS) << " threads per chunk\n";
     ProcessBankTask task(bankEntryNames, h5file, is_time_filtered, wksp, m_calibration, m_masked,
                          static_cast<size_t>(DISK_CHUNK), static_cast<size_t>(GRAINSIZE_EVENTS), pulse_indices,
                          progress);
