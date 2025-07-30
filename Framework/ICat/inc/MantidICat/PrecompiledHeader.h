@@ -5,5 +5,8 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
+#ifdef __GNUC__
+#pragma GCC system_header
+#endif
 
 #include "MantidAPI/Algorithm.h"
