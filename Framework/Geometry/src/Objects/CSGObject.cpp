@@ -444,7 +444,10 @@ CSGObject::~CSGObject() = default;
 /**
  * @param material The new Material that the object is composed from
  */
-void CSGObject::setMaterial(const Kernel::Material &material) { m_material = std::make_unique<Material>(material); }
+void CSGObject::setMaterial(const Kernel::Material &m) {
+  m_material = std::make_unique<Material>(m.name(), m.chemicalFormula(), m.numberDensity(), m.packingFraction(),
+                                          m.temperature(), m.pressure());
+}
 
 /**
  * @return The Material that the object is composed from
