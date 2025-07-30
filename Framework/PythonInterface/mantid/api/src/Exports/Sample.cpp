@@ -64,7 +64,8 @@ void export_Sample() {
       .def("setHeight", &Sample::setHeight, (arg("self"), arg("height")), "Set the height in mm.")
       .def("setWidth", &Sample::setWidth, (arg("self"), arg("width")), "Set the width in mm.")
       .def("getShape", &Sample::getShapePtr, arg("self"), "Returns a shape of a Sample object.")
-      .def("setShape", &Sample::setShape, arg("self"), "Set shape of Sample object.", with_custodian_and_ward<1, 2>())
+      .def("setShape", &Sample::setShape, (arg("self"), arg("shape")), "Set shape of Sample object.",
+           with_custodian_and_ward<1, 2>())
       .def("hasEnvironment", &Sample::hasEnvironment, arg("self"),
            "Returns True if the sample has an environment defined")
       .def("hasShape", &Sample::hasShape, arg("self"), "Returns True if the sample has a shape defined")
