@@ -16,7 +16,7 @@ cmake ^
     -DMANTID_QT_LIB=SYSTEM ^
     -DENABLE_WORKBENCH=ON ^
     -DWORKBENCH_SITE_PACKAGES=%SP_DIR% ^
-    -GNinja
+    -GNinja ^
     -DCMAKE_BUILD_TYPE=Release ^
     ..
 
