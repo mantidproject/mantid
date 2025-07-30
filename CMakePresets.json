@@ -33,7 +33,7 @@
       "cacheVariables": {
         "CMAKE_CXX_FLAGS_DEBUG": "-g -Og",
         "CMAKE_BUILD_TYPE": "Debug",
-        "USE_PRECOMPILED_HEADERS": "OFF"
+        "CMAKE_DISABLE_PRECOMPILE_HEADERS": "ON"
       }
     },
     {
@@ -159,7 +159,6 @@
       "cmakeExecutable": "cmake.exe",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "DebugWithRelRuntime",
-        "USE_PRECOMPILED_HEADERS": "OFF",
         "CMAKE_MAKE_PROGRAM": "ninja.exe"
       }
     },
