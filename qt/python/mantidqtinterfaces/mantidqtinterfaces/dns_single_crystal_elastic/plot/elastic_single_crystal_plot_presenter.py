@@ -117,7 +117,6 @@ class DNSElasticSCPlotPresenter(DNSObserver):
         self.view.single_crystal_plot.set_axis_labels(x_label, y_label)
 
     def _change_crystal_axes_grid(self):
-        # self._plot_param.grid_state = self._plot_param.grid_state % 4
         current_state = self._plot_param.grid_state % 4
         if current_state == 0:
             self._plot_param.grid_state = 1

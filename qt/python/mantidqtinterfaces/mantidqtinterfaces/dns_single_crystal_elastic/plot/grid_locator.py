@@ -24,7 +24,14 @@ def get_grid_formatter(grid_state):
 
 
 def get_grid_helper_arguments(a, b, c, d, switch):
+    """
+    Returns direct and inverse transformation helper functions.
+    """
+
     def tr(x, y):
+        """
+        Transforms from rectangular to crystallographic coordinates.
+        """
         if switch:
             x, y = y, x
         x, y = np.asarray(x), np.asarray(y)
@@ -35,6 +42,9 @@ def get_grid_helper_arguments(a, b, c, d, switch):
         return h, k
 
     def inv_tr(h, k):
+        """
+        Inverse transformation from crystallographic to rectangular coordinates.
+        """
         if switch:
             h, k = k, h
         h, k = np.asarray(h), np.asarray(k)

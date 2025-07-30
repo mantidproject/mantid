@@ -117,6 +117,11 @@ class DNSScMap(ObjectDict):
         return self.triangulation
 
     def return_changing_indexes(self):
+        """
+        Keeps track of the coordinates after transformation to the horizontal
+        scattering plane and returns the list of relevant indices of (x,y)
+        crystallographic coordinates.
+        """
         hkl1 = get_hkl_float_array(self.hkl1)
         hkl2 = get_hkl_float_array(self.hkl2)
         hkl = np.add(np.outer(self.hklx_mesh.flatten()[0:10], hkl1), np.outer(self.hkly_mesh.flatten()[0:10], hkl2))
