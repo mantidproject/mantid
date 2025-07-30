@@ -120,7 +120,7 @@ void Sample::setShape(const IObject_sptr &shape) {
       const auto &existingMat = shape->material(); // Should throw error if no material
       m_shape = std::shared_ptr<IObject>(shape->cloneWithMaterial(existingMat));
     } catch (...) {
-      // No material on new shape — just clone shape
+      // No material on new shape - just clone shape
       m_shape = IObject_sptr(shape->clone());
     }
   } else {
