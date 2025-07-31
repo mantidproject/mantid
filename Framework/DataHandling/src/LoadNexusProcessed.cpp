@@ -851,7 +851,7 @@ API::Workspace_sptr LoadNexusProcessed::loadTableEntry(const NXEntry &entry) {
 
           dimsize_t const maxStr = info.dims[1];
           data.load();
-          for (int64_t iR = 0; iR < nRows; ++iR) {
+          for (dimsize_t iR = 0; iR < nRows; ++iR) {
             auto &cellContents = workspace->cell<std::string>(iR, columnNumber - 1);
             auto startPoint = data() + maxStr * iR;
             cellContents.assign(startPoint, startPoint + maxStr);
@@ -1532,7 +1532,7 @@ API::MatrixWorkspace_sptr LoadNexusProcessed::loadNonEventEntry(NXData &wksp_cls
                                                                 const int64_t xlength, std::string &workspaceType) {
   // Filter the list of spectra to process, applying min/max/list options
   NXDouble data = wksp_cls.openDoubleData();
-  int64_t nchannels = data.dim1();
+  dimsize_t nchannels = data.dim1();
   size_t nspectra = data.dim0();
   // process optional spectrum parameters, if set
   checkOptionalProperties(nspectra);

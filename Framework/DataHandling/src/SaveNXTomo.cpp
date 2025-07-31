@@ -271,8 +271,8 @@ void SaveNXTomo::writeSingleWorkspace(const Workspace2D_sptr &workspace) {
     throw std::runtime_error("Unable to create a valid NXTomo file");
   }
 
-  int numFiles = 0;
-  m_nxFile->getAttr<int>("NumFiles", numFiles);
+  Nexus::dimsize_t numFiles = 0;
+  m_nxFile->getAttr("NumFiles", numFiles);
 
   // Change slab start to after last data position
   m_slabStart[0] = numFiles;
@@ -292,7 +292,7 @@ void SaveNXTomo::writeSingleWorkspace(const Workspace2D_sptr &workspace) {
   }
 
   m_nxFile->openData("rotation_angle");
-  m_nxFile->putSlab(rotValue, static_cast<Nexus::dimsize_t>(numFiles), 1);
+  m_nxFile->putSlab(rotValue, numFiles, 1);
   m_nxFile->closeData();
 
   // Copy data out, remake data with dimension of old size plus new elements.
@@ -303,9 +303,9 @@ void SaveNXTomo::writeSingleWorkspace(const Workspace2D_sptr &workspace) {
 
   // images can be as one-spectrum-per-pixel, or one-spectrum-per-row
   bool spectrumPerPixel = (1 == workspace->y(0).size());
-  for (int64_t i = 0; i < m_dimensions[1]; ++i) {
+  for (Nexus::dimsize_t i = 0; i < m_dimensions[1]; ++i) {
     const auto &Y = workspace->y(i);
-    for (int64_t j = 0; j < m_dimensions[2]; ++j) {
+    for (Nexus::dimsize_t j = 0; j < m_dimensions[2]; ++j) {
       if (spectrumPerPixel) {
         dataArr[i * m_dimensions[1] + j] = workspace->y(i * m_dimensions[1] + j)[0];
       } else {
@@ -329,7 +329,7 @@ void SaveNXTomo::writeSingleWorkspace(const Workspace2D_sptr &workspace) {
   delete[] dataArr;
 }
 
-void SaveNXTomo::writeImageKeyValue(const DataObjects::Workspace2D_sptr &workspace, int thisFileInd) {
+void SaveNXTomo::writeImageKeyValue(const DataObjects::Workspace2D_sptr &workspace, std::size_t thisFileInd) {
   // Add ImageKey to instrument/image_key if present, use 0 if not
   try {
     m_nxFile->openAddress("/entry1/tomo_entry/instrument/detector");
@@ -356,7 +356,7 @@ void SaveNXTomo::writeImageKeyValue(const DataObjects::Workspace2D_sptr &workspa
   m_nxFile->closeGroup();
 }
 
-void SaveNXTomo::writeLogValues(const DataObjects::Workspace2D_sptr &workspace, int thisFileInd) {
+void SaveNXTomo::writeLogValues(const DataObjects::Workspace2D_sptr &workspace, std::size_t thisFileInd) {
   // Add Log information (minus special values - Rotation, ImageKey, Intensity)
   // Unable to add multidimensional string data, storing strings as
   // multidimensional data set of uint8 values
@@ -396,7 +396,7 @@ void SaveNXTomo::writeLogValues(const DataObjects::Workspace2D_sptr &workspace, 
   }
 }
 
-void SaveNXTomo::writeIntensityValue(const DataObjects::Workspace2D_sptr &workspace, int thisFileInd) {
+void SaveNXTomo::writeIntensityValue(const DataObjects::Workspace2D_sptr &workspace, std::size_t thisFileInd) {
   // Add Intensity to control if present, use 1 if not
   try {
     m_nxFile->openAddress("/entry1/tomo_entry/control");

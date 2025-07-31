@@ -50,7 +50,7 @@ static const int NUMRANDOM = 7;
 static const int DETECTS[NUMRANDOM] = {4101, 4804, 1323, 1101, 3805, 1323, 3832};
 
 namespace SmallTestDatFile {
-const int NDETECTS = 6;
+const std::size_t NDETECTS = 6;
 }
 
 namespace {
@@ -71,7 +71,7 @@ void writeSmallDatFile(const std::string &filename) {
           "    w_y         w_z         f_x         f_y         f_z         a_x "
           "        a_y         a_z        det_1       det_2       det_3       "
           "det4\n";
-  for (int detector = 0; detector < SmallTestDatFile::NDETECTS; ++detector) {
+  for (std::size_t detector = 0; detector < SmallTestDatFile::NDETECTS; ++detector) {
     file << detector << "\t" << delta[detector] << "\t" << det_l2[detector] << "\t" << code[detector] << "\t"
          << det_theta[detector] << "\t" << det_phi[detector] << "\t" << NOTUSED << "\t" << NOTUSED << "\t" << NOTUSED
          << "\t" << NOTUSED << "\t" << NOTUSED << "\t" << NOTUSED << "\t" << NOTUSED << "\t" << NOTUSED << "\t"
@@ -81,7 +81,7 @@ void writeSmallDatFile(const std::string &filename) {
   file.close();
 }
 
-void writeDetNXSfile(const std::string &filename, const int nDets) {
+void writeDetNXSfile(const std::string &filename, const std::size_t nDets) {
   Mantid::Nexus::File nxsfile(filename, NXaccess::CREATE5);
   nxsfile.makeGroup("detectors.dat", "NXEntry", true);
   nxsfile.putAttr("version", "1.0");
@@ -97,7 +97,7 @@ void writeDetNXSfile(const std::string &filename, const int nDets) {
 
   int limit(6);
   int ic(0);
-  for (int i = 0; i < nDets; i++) {
+  for (std::size_t i = 0; i < nDets; i++) {
     detID[2 * i] = i;
     detID[2 * i + 1] = boost::lexical_cast<int>(code[ic]);
     timeOffsets[2 * i] = boost::lexical_cast<float>(delta[ic]);

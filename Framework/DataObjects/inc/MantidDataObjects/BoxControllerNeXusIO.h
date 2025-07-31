@@ -89,7 +89,7 @@ public:
    * @brief Number of data items in Nexus dataset "data_event" associated
    * with the particular event data version.
    */
-  int64_t dataEventCount(void) const;
+  uint64_t dataEventCount(void) const;
 
   /**
    * @brief Insert goniometer info in a block of event data, if necessary

@@ -392,10 +392,10 @@ void BoxControllerNeXusIO::setEventDataVersion(const size_t &traitsCount) {
   }
 }
 
-int64_t BoxControllerNeXusIO::dataEventCount(void) const {
+uint64_t BoxControllerNeXusIO::dataEventCount(void) const {
   // m_BlockSize[1] is the number of data events associated to an MDLeanEvent
   // or MDEvent object.
-  int64_t size(m_BlockSize[1]);
+  uint64_t size(m_BlockSize[1]);
   switch (m_EventDataVersion) {
   case (EventDataVersion::EDVLean):
     break;                              // no adjusting is necessary
@@ -587,8 +587,8 @@ void BoxControllerNeXusIO::closeFile() {
       std::vector<uint64_t> freeSpaceBlocks;
       this->getFreeSpaceVector(freeSpaceBlocks);
       if (!freeSpaceBlocks.empty()) {
-        std::vector<int64_t> free_dims(2, 2);
-        free_dims[0] = int64_t(freeSpaceBlocks.size() / 2);
+        Nexus::DimVector free_dims(2, 2);
+        free_dims[0] = Nexus::dimsize_t(freeSpaceBlocks.size() / 2);
 
         m_File->writeUpdatedData(g_DBDataName, freeSpaceBlocks, free_dims);
       }

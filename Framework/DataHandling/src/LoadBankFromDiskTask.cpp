@@ -133,26 +133,25 @@ std::unique_ptr<std::vector<uint64_t>> LoadBankFromDiskTask::loadEventIndex(Nexu
  * @param start_event_index ::  (a list of size of # of pulses giving the index in
  * the event list for that pulse)
  */
-void LoadBankFromDiskTask::prepareEventId(Nexus::File &file, int64_t &start_event, int64_t &stop_event,
+void LoadBankFromDiskTask::prepareEventId(Nexus::File &file, uint64_t &start_event, uint64_t &stop_event,
                                           const uint64_t &start_event_index) {
   // Get the list of pixel ID's
   file.openData(m_detIdFieldName);
 
   // By default, use all available indices
-  start_event = static_cast<int64_t>(start_event_index);
+  start_event = start_event_index;
   Nexus::Info id_info = file.getInfo();
   // dims[0] can be negative in ISIS meaning 2^32 + dims[0]. Take that into
   // account
-  int64_t dim0 = recalculateDataSize(id_info.dims[0]);
+  uint64_t dim0 = recalculateDataSize(id_info.dims[0]);
   stop_event = dim0;
 
   // We are loading part - work out the event number range
   if (m_loader.chunk != EMPTY_INT()) {
-    start_event = static_cast<int64_t>(m_loader.chunk - m_loader.firstChunkForBank) *
-                  static_cast<int64_t>(m_loader.eventsPerChunk);
+    start_event = (m_loader.chunk - m_loader.firstChunkForBank) * (m_loader.eventsPerChunk);
     // Don't change stop_event for the final chunk
-    if (start_event + static_cast<int64_t>(m_loader.eventsPerChunk) < stop_event)
-      stop_event = start_event + static_cast<int64_t>(m_loader.eventsPerChunk);
+    if (start_event + m_loader.eventsPerChunk < stop_event)
+      stop_event = start_event + m_loader.eventsPerChunk;
   }
 
   // Make sure it is within range
@@ -170,7 +169,7 @@ void LoadBankFromDiskTask::prepareEventId(Nexus::File &file, int64_t &start_even
 std::unique_ptr<std::vector<uint32_t>> LoadBankFromDiskTask::loadEventId(Nexus::File &file) {
   // This is the data size
   Nexus::Info id_info = file.getInfo();
-  const int64_t dim0 = recalculateDataSize(id_info.dims[0]);
+  const Nexus::dimsize_t dim0 = recalculateDataSize(id_info.dims[0]);
 
   // Check that the required space is there in the file.
   if (dim0 < m_loadSize[0] + m_loadStart[0]) {
@@ -227,11 +226,11 @@ std::unique_ptr<std::vector<float>> LoadBankFromDiskTask::loadTof(Nexus::File &f
 
   // This is the data size
   Nexus::Info id_info = file.getInfo();
-  const int64_t dim0 = recalculateDataSize(id_info.dims[0]);
+  const uint64_t dim0 = recalculateDataSize(id_info.dims[0]);
 
   // Check that the required space is there in the file.
   Nexus::Info tof_info = file.getInfo();
-  int64_t tof_dim0 = recalculateDataSize(tof_info.dims[0]);
+  uint64_t tof_dim0 = recalculateDataSize(tof_info.dims[0]);
   if (tof_dim0 < m_loadSize[0] + m_loadStart[0]) {
     m_loader.alg->getLogger().warning() << "Entry " << entry_name
                                         << "'s event_time_offset field is too small "
@@ -285,7 +284,7 @@ std::unique_ptr<std::vector<float>> LoadBankFromDiskTask::loadEventWeights(Nexus
   auto event_weight = std::make_unique<std::vector<float>>(m_loadSize[0]);
 
   Nexus::Info weight_info = file.getInfo();
-  int64_t weight_dim0 = recalculateDataSize(weight_info.dims[0]);
+  uint64_t weight_dim0 = recalculateDataSize(weight_info.dims[0]);
   if (weight_dim0 < m_loadSize[0] + m_loadStart[0]) {
     m_loader.alg->getLogger().warning() << "Entry " << entry_name
                                         << "'s event_weight field is too small to load the desired data.\n";
@@ -358,8 +357,8 @@ void LoadBankFromDiskTask::run() {
                                             << " has a mismatch between the number of event_index entries "
                                                "and the number of pulse times in event_time_zero.\n";
       // Open and validate event_id field.
-      int64_t start_event = 0;
-      int64_t stop_event = 0;
+      uint64_t start_event = 0;
+      uint64_t stop_event = 0;
       if (event_index)
         this->prepareEventId(file, start_event, stop_event, event_index->operator[](0));
       else
@@ -553,12 +552,13 @@ void LoadBankFromDiskTask::run() {
  * If the value is negative (can happen at ISIS) add 2^32 to it.
  * @param size :: The size of events value.
  */
-int64_t LoadBankFromDiskTask::recalculateDataSize(const int64_t size) {
+uint64_t LoadBankFromDiskTask::recalculateDataSize(const int64_t size) {
+  uint64_t ret(size);
   if (size < 0) {
-    const int64_t shift = int64_t(1) << 32;
-    return shift + size;
+    uint64_t const shift = uint64_t(1) << 32;
+    ret += shift;
   }
-  return size;
+  return ret;
 }
 
 } // namespace Mantid::DataHandling

@@ -38,11 +38,12 @@ public:
 private:
   void loadPulseTimes(Nexus::File &file);
   std::unique_ptr<std::vector<uint64_t>> loadEventIndex(Nexus::File &file);
-  void prepareEventId(Nexus::File &file, int64_t &start_event, int64_t &stop_event, const uint64_t &start_event_index);
+  void prepareEventId(Nexus::File &file, uint64_t &start_event, uint64_t &stop_event,
+                      const uint64_t &start_event_index);
   std::unique_ptr<std::vector<uint32_t>> loadEventId(Nexus::File &file);
   std::unique_ptr<std::vector<float>> loadTof(Nexus::File &file);
   std::unique_ptr<std::vector<float>> loadEventWeights(Nexus::File &file);
-  int64_t recalculateDataSize(const int64_t size);
+  uint64_t recalculateDataSize(const int64_t size);
 
   /// Algorithm being run
   DefaultEventLoader &m_loader;
