@@ -115,14 +115,8 @@ const IObject_sptr Sample::getShapePtr() const { return m_shape; }
  */
 void Sample::setShape(const IObject_sptr &shape) {
   if (shape) {
-    // In both cases clone shape to ensure correct ownership and scope of new shape and material
-    try {
-      const auto &existingMat = shape->material(); // Should throw error if no material
-      m_shape = std::shared_ptr<IObject>(shape->cloneWithMaterial(existingMat));
-    } catch (...) {
-      // No material on new shape - just clone shape
-      m_shape = IObject_sptr(shape->clone());
-    }
+    // Assign a clone to ensure correct ownership of shape
+    m_shape = IObject_sptr(shape->clone());
   } else {
     m_shape = ShapeFactory().createShape("");
   }
