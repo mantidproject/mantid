@@ -94,14 +94,13 @@ BankPulseTimes::BankPulseTimes(Nexus::File &file, const std::vector<int> &period
 template <typename ValueType>
 void BankPulseTimes::readData(Nexus::File &file, uint64_t numValues, Mantid::Types::Core::DateAndTime &start) {
   Nexus::DimVector indexStart{0};
-  Nexus::DimVector indexStep{
-      std::min(static_cast<Nexus::dimsize_t>(numValues), Nexus::dimsize_t(12 * 3600 * 60))}; // 12 hour at 60Hz
+  Nexus::DimVector indexStep{std::min(numValues, Nexus::dimsize_t(12 * 3600 * 60))}; // 12 hour at 60Hz
 
   // getSlab needs the data allocated already
   std::vector<ValueType> rawData(indexStep[0]);
 
   // loop over chunks of data and transform each chunk
-  while ((indexStep[0] > 0) && (indexStart[0] < static_cast<Nexus::dimsize_t>(numValues))) {
+  while ((indexStep[0] > 0) && (indexStart[0] < numValues)) {
     file.getSlab(rawData.data(), indexStart, indexStep);
 
     // Now create the pulseTimes
@@ -110,7 +109,7 @@ void BankPulseTimes::readData(Nexus::File &file, uint64_t numValues, Mantid::Typ
 
     // increment the slab to get
     indexStart[0] += indexStep[0];
-    indexStep[0] = std::min(indexStep[0], static_cast<Nexus::dimsize_t>(numValues) - indexStart[0]);
+    indexStep[0] = std::min(indexStep[0], numValues - indexStart[0]);
     // resize the vector
     rawData.resize(indexStep[0]);
   }

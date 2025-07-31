@@ -1292,7 +1292,7 @@ void File::writeData(std::string const &name, std::string const &value) {
   // Allow empty strings by defaulting to a space
   if (my_value.empty())
     my_value = " ";
-  const DimVector dims{static_cast<dimsize_t>(my_value.size())};
+  const DimVector dims{my_value.size()};
   this->makeData(name, NXnumtype::CHAR, dims, true);
 
   this->putData(my_value);
@@ -1301,7 +1301,7 @@ void File::writeData(std::string const &name, std::string const &value) {
 }
 
 template <typename NumT> void File::writeData(std::string const &name, vector<NumT> const &value) {
-  DimVector const dims{static_cast<dimsize_t>(value.size())};
+  DimVector const dims{value.size()};
   this->writeData(name, value, dims);
 }
 

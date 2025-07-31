@@ -271,7 +271,7 @@ void SaveNXSPE::exec() {
 
   // Write the data
   Progress progress(this, 0.0, 1.0, nHist);
-  int64_t bufferCounter(0);
+  uint64_t bufferCounter(0);
   const auto &spectrumInfo = inputWS->spectrumInfo();
   for (std::size_t i = 0; i < nHist; ++i) {
     progress.report();

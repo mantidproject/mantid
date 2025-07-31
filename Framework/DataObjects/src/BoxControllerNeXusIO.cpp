@@ -238,7 +238,7 @@ void BoxControllerNeXusIO::prepareNxSToWrite_CurVersion() {
     // Now the chunk size.
     // m_Blocksize == (number_events_to_write_at_a_time, data_items_per_event)
     Nexus::DimVector chunk(m_BlockSize);
-    chunk[0] = static_cast<Nexus::dimsize_t>(m_dataChunk);
+    chunk[0] = m_dataChunk;
 
     // Make and open the data
     if (m_CoordSize == 4)
@@ -328,7 +328,7 @@ void BoxControllerNeXusIO::saveGenericBlock(const std::vector<Type> &DataBlock, 
   Nexus::DimVector dims(m_BlockSize);
 
   std::lock_guard<std::mutex> _lock(m_fileMutex);
-  start[0] = static_cast<Nexus::dimsize_t>(blockPosition);
+  start[0] = blockPosition;
   dims[0] = Nexus::dimsize_t(DataBlock.size() / this->getNDataColums());
 
   // ugly cast but why would putSlab change the data?. This is NeXus bug which
@@ -504,11 +504,11 @@ void BoxControllerNeXusIO::loadGenericBlock(std::vector<Type> &Block, const uint
     throw Kernel::Exception::FileError("Attemtp to read behind the file end", m_fileName);
 
   Nexus::DimVector start(2, 0);
-  start[0] = static_cast<Nexus::dimsize_t>(blockPosition);
+  start[0] = blockPosition;
 
   Nexus::DimVector size(m_BlockSize);
-  size[0] = static_cast<Nexus::dimsize_t>(nPoints);
-  size[1] = static_cast<Nexus::dimsize_t>(dataEventCount()); // data item count per event in the Nexus file
+  size[0] = nPoints;
+  size[1] = dataEventCount(); // data item count per event in the Nexus file
 
   std::lock_guard<std::mutex> _lock(m_fileMutex);
 
