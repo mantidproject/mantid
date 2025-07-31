@@ -3,6 +3,8 @@
 set "parent_dir=%RECIPE_DIR%\.."
 CALL "%parent_dir%\archive_env_logs.bat" %BUILD_PREFIX% %PREFIX% mantid
 
+CALL "%VSINSTALLDIR%\VC\Auxiliary\Build\vcvarsall.bat" x64
+
 mkdir build && cd build
 
 cmake ^
@@ -16,9 +18,11 @@ cmake ^
     -DMANTID_FRAMEWORK_LIB=BUILD ^
     -DMANTID_QT_LIB=OFF ^
     -DENABLE_WORKBENCH=OFF ^
+    -GNinja ^
+    -DCMAKE_BUILD_TYPE=Release ^
     ..
 
 if errorlevel 1 exit 1
-cmake --build . --config Release
-cmake --build . --config Release --target install
+ninja
+ninja install
 if errorlevel 1 exit 1

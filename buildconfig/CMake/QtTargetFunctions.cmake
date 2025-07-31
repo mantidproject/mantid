@@ -135,11 +135,6 @@ function(mtd_add_qt_target)
     set(_target_exclude_from_all)
   endif()
 
-  # Use a precompiled header where they are supported
-  if(PARSED_PRECOMPILED)
-    enable_precompiled_headers(${PARSED_PRECOMPILED} ALL_SRC)
-  endif()
-
   if(PARSED_LIBRARY)
     add_library(
       ${_target} ${_target_exclude_from_all} ${ALL_SRC} ${UI_HEADERS} ${PARSED_MOC} ${PARSED_NOMOC} ${RES_FILES}
@@ -150,6 +145,11 @@ function(mtd_add_qt_target)
     )
   else()
     message(FATAL_ERROR "Unknown target type. Options=LIBRARY,EXECUTABLE")
+  endif()
+
+  # Use a precompiled header where they are supported
+  if(PARSED_PRECOMPILED)
+    target_precompile_headers(${_target} PRIVATE ${PARSED_PRECOMPILED})
   endif()
 
   # Target properties
