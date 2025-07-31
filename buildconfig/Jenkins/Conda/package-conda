@@ -87,9 +87,9 @@ done
 
 
 # Mamba
-setup_mamba $WORKSPACE/mambaforge "" true $PLATFORM
+setup_mamba $WORKSPACE/miniforge "" true $PLATFORM
 mamba activate base
-mamba install --yes boa conda-verify versioningit
+mamba install --yes boa conda-verify versioningit python=3.11
 
 # Clean up any legacy conda-recipes git clones
 cd $WORKSPACE
