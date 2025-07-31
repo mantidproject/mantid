@@ -304,6 +304,44 @@ public:
     }
   }
 
+  void load(dimsize_t const blocksize, dimsize_t const i) {
+    if (rank() > 4) {
+      throw std::runtime_error("Cannot load dataset of rank greater than 4");
+    }
+    dimsize_t n = 0; // cppcheck-suppress variableScope
+    DimVector datastart, datasize;
+    if (rank() == 4) {
+      if (i >= dim0())
+        rangeError();
+      n = dim1() * dim2() * dim3();
+      datastart = {i, 0, 0, 0};
+      datasize = {1, dim1(), dim2(), dim2()};
+    } else if (rank() == 3) {
+      if (i >= dim0())
+        rangeError();
+      n = dim1() * dim2();
+      datastart = {i, 0, 0};
+      datasize = {1, dim1(), dim2()};
+    } else if (rank() == 2) {
+      if (i >= dim0())
+        rangeError();
+      dimsize_t m = blocksize;
+      if (i + m > dim0())
+        m = dim0() - i;
+      n = dim1() * m;
+      datastart = {i, 0};
+      datasize = {m, dim1()};
+    } else if (rank() == 1) {
+      if (i >= dim0())
+        rangeError();
+      n = 1 * blocksize;
+      datastart = {i};
+      datasize = {blocksize};
+    }
+    alloc(n);
+    getSlab(m_data.data(), datastart, datasize);
+  }
+
   /**
    * Implementation of the virtual NXDataSet::load(...) method. Internally the data are stored as a 1d array. If the
    * data are loaded in chunks the newly read in data replace the old ones. The actual rank of the loaded data is equal
@@ -316,89 +354,39 @@ public:
    * @param j :: Non-negative value makes it read a chunk of dimension rank()-2. i and j are its indeces. The rank of
    * the data must be >= 2
    */
-  void load(dimsize_t const blocksize, dimsize_t const i = -1, dimsize_t const j = -1) {
+  void load(dimsize_t const blocksize, dimsize_t const i, dimsize_t const j) {
     if (rank() > 4) {
       throw std::runtime_error("Cannot load dataset of rank greater than 4");
     }
-    dimsize_t n = 0, id(i), jd(j); // cppcheck-suppress variableScope
+    dimsize_t n = 0; // cppcheck-suppress variableScope
     DimVector datastart, datasize;
     if (rank() == 4) {
-      if (i < 0) // load all data
-      {
-        n = dim0() * dim1() * dim2() * dim3();
-        alloc(static_cast<std::size_t>(n));
-        getData(m_data.data());
-        return;
-      } else if (j < 0) {
-        if (id >= dim0())
-          rangeError();
-        n = dim1() * dim2() * dim3();
-        datastart = {i, 0, 0, 0};
-        datasize = {1, dim1(), dim2(), dim2()};
-      } else {
-        if (id >= dim0() || jd >= dim1())
-          rangeError();
-        n = dim2() * dim3();
-        datastart = {i, j, 0, 0};
-        datasize = {1, 1, dim2(), dim2()};
-      }
+      if (i >= dim0() || j >= dim1())
+        rangeError();
+      n = dim2() * dim3();
+      datastart = {i, j, 0, 0};
+      datasize = {1, 1, dim2(), dim2()};
     } else if (rank() == 3) {
-      if (i < 0) {
-        n = dim0() * dim1() * dim2();
-        alloc(static_cast<std::size_t>(n));
-        getData(m_data.data());
-        return;
-      } else if (j < 0) {
-        if (id >= dim0())
-          rangeError();
-        n = dim1() * dim2();
-        datastart = {i, 0, 0};
-        datasize = {1, dim1(), dim2()};
-      } else {
-        if (id >= dim0() || jd >= dim1())
-          rangeError();
-        dimsize_t m = blocksize;
-        if (jd + m > dim1())
-          m = dim1() - jd;
-        n = dim2() * m;
-        datastart = {i, j, 0};
-        datasize = {1, m, dim2()};
-      }
+      if (i >= dim0() || j >= dim1())
+        rangeError();
+      dimsize_t m = blocksize;
+      if (j + m > dim1())
+        m = dim1() - j;
+      n = dim2() * m;
+      datastart = {i, j, 0};
+      datasize = {1, m, dim2()};
     } else if (rank() == 2) {
-      if (i < 0) {
-        n = dim0() * dim1();
-        alloc(static_cast<std::size_t>(n));
-        getData(m_data.data());
-        return;
-      } else if (j < 0) {
-        if (id >= dim0())
-          rangeError();
-        dimsize_t m = blocksize;
-        if (id + m > dim0())
-          m = dim0() - id;
-        n = dim1() * m;
-        datastart = {i, 0};
-        datasize = {m, dim1()};
-      } else {
-        if (id >= dim0() || jd >= dim1())
-          rangeError();
-        n = 1;
-        datastart = {i, j};
-        datasize = {1, 1};
-      }
+      if (i >= dim0() || j >= dim1())
+        rangeError();
+      n = 1;
+      datastart = {i, j};
+      datasize = {1, 1};
     } else if (rank() == 1) {
-      if (i < 0) {
-        n = dim0();
-        alloc(static_cast<std::size_t>(n));
-        getData(m_data.data());
-        return;
-      } else {
-        if (id >= dim0())
-          rangeError();
-        n = 1 * blocksize;
-        datastart = {i};
-        datasize = {blocksize};
-      }
+      if (i >= dim0())
+        rangeError();
+      n = 1 * blocksize;
+      datastart = {i};
+      datasize = {blocksize};
     }
     alloc(n);
     getSlab(m_data.data(), datastart, datasize);
@@ -411,7 +399,7 @@ private:
    * @param new_size :: The number of elements to allocate.
    */
   void alloc(dimsize_t new_size) {
-    if (new_size <= 0) {
+    if (new_size == 0) {
       throw std::runtime_error("Attempt to load from an empty dataset " + address());
     }
     try {

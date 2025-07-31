@@ -101,7 +101,7 @@ void BankPulseTimes::readData(Nexus::File &file, uint64_t numValues, Mantid::Typ
   std::vector<ValueType> rawData(indexStep[0]);
 
   // loop over chunks of data and transform each chunk
-  while ((indexStep[0] > 0) && (indexStart[0] < numValues)) {
+  while ((indexStep[0] > 0) && (indexStart[0] < static_cast<Nexus::dimsize_t>(numValues))) {
     file.getSlab(rawData.data(), indexStart, indexStep);
 
     // Now create the pulseTimes

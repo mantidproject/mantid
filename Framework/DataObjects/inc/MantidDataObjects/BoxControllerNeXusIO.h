@@ -127,10 +127,10 @@ private:
   //------
   /// the start of the current data block to read from. It related to current
   /// physical representation of the data in NeXus file
-  std::vector<int64_t> m_BlockStart;
+  Nexus::DimVector m_BlockStart;
   /// the vector, which describes the event specific data size, namely how many
   /// column an event is composed into and this class reads/writres
-  std::vector<int64_t> m_BlockSize;
+  Nexus::DimVector m_BlockSize;
   /// lock Nexus file operations as Nexus is not thread safe
   mutable std::mutex m_fileMutex;
 

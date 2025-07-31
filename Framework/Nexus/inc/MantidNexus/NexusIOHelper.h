@@ -201,8 +201,8 @@ void readNexusVector(std::vector<T> &out, Nexus::File &file, const std::string &
  * readNexusAnySlab via the RUN_NEXUSIOHELPER_FUNCTION macro.
  */
 template <typename T, Narrowing narrow = Narrowing::Prevent>
-std::vector<T> readNexusSlab(Nexus::File &file, const std::string &entry, const std::vector<int64_t> &start,
-                             const std::vector<int64_t> &size) {
+std::vector<T> readNexusSlab(Nexus::File &file, const std::string &entry, DimVector const &start,
+                             DimVector const &size) {
   const auto info_and_close = checkIfOpenAndGetInfo(file, std::move(std::move(entry)));
   RUN_NEXUSIOHELPER_FUNCTION(narrow, (info_and_close.first).type, readNexusAnySlab, file, start, size,
                              info_and_close.second);
@@ -213,8 +213,8 @@ std::vector<T> readNexusSlab(Nexus::File &file, const std::string &entry, const 
  * The provided output buffer is filled.
  */
 template <typename T, Narrowing narrow = Narrowing::Prevent>
-void readNexusSlab(std::vector<T> &out, Nexus::File &file, const std::string &entry, const std::vector<int64_t> &start,
-                   const std::vector<int64_t> &size) {
+void readNexusSlab(std::vector<T> &out, Nexus::File &file, const std::string &entry, DimVector const &start,
+                   DimVector const &size) {
   const auto info_and_close = checkIfOpenAndGetInfo(file, std::move(std::move(entry)));
   RUN_NEXUSIOHELPER_FUNCTION(narrow, (info_and_close.first).type, readNexusAnySlab, out, file, start, size,
                              info_and_close.second);
