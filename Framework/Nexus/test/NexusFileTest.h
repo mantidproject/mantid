@@ -1464,24 +1464,22 @@ public:
     file.getAttr("file_time", time_str);
     file.close();
 
-    std::tm tm = {};
-    char sign;
-    int offsetHours, offsetMinutes;
+    char *current_tz = getenv("TZ");
+    std::string real_tz = current_tz ? current_tz : "";
+    setenv("TZ", "America/New_York", 1);
+    tzset();
 
-    sscanf(time_str.c_str(), "%4d-%2d-%2dT%2d:%2d:%2d%c%2d:%2d", &tm.tm_year, &tm.tm_mon, &tm.tm_mday, &tm.tm_hour,
-           &tm.tm_min, &tm.tm_sec, &sign, &offsetHours, &offsetMinutes);
+    Mantid::Types::Core::DateAndTime dandt(time_str);
+    std::time_t ntime = dandt.to_time_t();
+    std::string new_str = Mantid::Types::Core::DateAndTime::getLocalTimeISO8601String(ntime);
+    TS_ASSERT_EQUALS(time_str, new_str);
 
-    tm.tm_year -= 1900;
-    tm.tm_mon -= 1;
-
-    std::time_t local = std::mktime(&tm);
-
-    std::string expected = Mantid::Types::Core::DateAndTime::getLocalTimeISO8601String(local);
-    TS_ASSERT_EQUALS(time_str.substr(0, time_str.find_last_of("+-")), expected.substr(0, expected.find_last_of("+-")));
-    std::regex iso8601_regex(R"(^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[+-]\d{2}:\d{2}$)");
-
-    TS_ASSERT(std::regex_match(time_str, iso8601_regex));
-    TS_ASSERT(std::regex_match(expected, iso8601_regex));
+    if (real_tz != "") {
+      setenv("TZ", real_tz.c_str(), 1);
+    } else {
+      unsetenv("TZ");
+    }
+    tzset();
   }
 
   // ##################################################################################################################
