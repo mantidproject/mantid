@@ -1,7 +1,8 @@
 set "parent_dir=%RECIPE_DIR%\.."
 CALL "%parent_dir%\archive_env_logs.bat" %BUILD_PREFIX% %PREFIX% mantidqt
 
-CALL "%VSINSTALLDIR%\VC\Auxiliary\Build\vcvarsall.bat" x64
+:: Specify MSVC version to avoid bug in 14.44
+CALL "%VSINSTALLDIR%\VC\Auxiliary\Build\vcvarsall.bat" x64 -vcvars_ver=14.38.17.8
 
 mkdir build && cd build
 
