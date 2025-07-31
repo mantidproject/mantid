@@ -29,26 +29,24 @@ class TestCylindricalProjection(unittest.TestCase):
             expected_projections=[(0, 0), (0, 3 / np.sqrt(10)), (0, -3 / np.sqrt(10))],
         )
 
-    @unittest.mock.patch("instrumentview.Projections.CylindricalProjection.CylindricalProjection._apply_x_correction")
-    def test_calculate_2d_coordinates_y(self, mock_apply_x_correction):
+    def test_calculate_2d_coordinates_y(self):
         # y-axis projection
         self._run_test(
             projection_axis=[0, 1, 0],
             expected_x_axis=[0, 0, 1],
             expected_y_axis=[1, 0, 0],
             expected_projections=[(0, 1), (-np.pi / 2, 1 / np.sqrt(10)), (np.pi / 2, 1 / np.sqrt(10))],
-            mock_apply_x_correction=mock_apply_x_correction,
+            mock_apply_x_correction=None,
         )
 
-    @unittest.mock.patch("instrumentview.Projections.CylindricalProjection.CylindricalProjection._apply_x_correction")
-    def test_calculate_2d_coordinates_z(self, mock_apply_x_correction):
+    def test_calculate_2d_coordinates_z(self):
         # z-axis projection
         self._run_test(
             projection_axis=[0, 0, 1],
             expected_x_axis=[1, 0, 0],
             expected_y_axis=[0, 1, 0],
             expected_projections=[(-np.pi / 2, 0), (-np.atan2(1, 3), 0), (-np.atan2(1, -3), 0)],
-            mock_apply_x_correction=mock_apply_x_correction,
+            mock_apply_x_correction=None,
         )
 
     def _run_test(self, projection_axis, expected_x_axis, expected_y_axis, expected_projections, mock_apply_x_correction=None):

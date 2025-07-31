@@ -82,13 +82,13 @@ class Projection(ABC):
         x_from = sorted_x_coordinates[x_gap_idx]
         x_to = sorted_x_coordinates[x_gap_idx + 1]
 
-        if x_to - x_from > self._u_period - (self._x_range[1] - self._x_range[0]):
-            # Update range that avoids gap entirely, wraps around gap
-            self._x_range = (x_to, x_from)
-            if self._x_range[0] > self._x_range[1]:
-                self._x_range = (self._x_range[0], self._x_range[1] + self._u_period)
+        if x_to - x_from <= self._u_period - (self._x_range[1] - self._x_range[0]):
+            return
 
-            self._apply_x_correction()
+        # Update range that avoids gap entirely, wraps around gap
+        self._x_range = (x_to, x_from + self._u_period)
+
+        self._apply_x_correction()
 
     def _apply_x_correction(self) -> None:
         """
@@ -101,6 +101,7 @@ class Projection(ABC):
         if self._u_period == 0:
             return
 
+        # Get view of x coordinates, can change in-place
         x = self._detector_x_coordinates
         x_min, x_max = self._x_range
 

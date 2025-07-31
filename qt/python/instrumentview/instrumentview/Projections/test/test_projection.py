@@ -51,26 +51,28 @@ class TestProjection(unittest.TestCase):
         np.testing.assert_allclose(proj._x_range, [0, np.pi / 4], rtol=1e-3)
 
     @unittest.mock.patch("instrumentview.Projections.CylindricalProjection.CylindricalProjection._calculate_2d_coordinates")
-    def test_find_and_correct_x_gap_big_gap_first(self, mock_calc_2d_coords):
+    def test_find_and_correct_x_gap_one_big_gap(self, mock_calc_2d_coords):
         mock_calc_2d_coords.return_value = np.array([0, np.pi / 8, -np.pi / 4]), np.array([0, 0, 0])
         proj = CylindricalProjection(self.sample_position, self.root_position, self.detector_positions, np.array([0, 0, 1]))
         np.testing.assert_allclose(proj._detector_x_coordinates, [0, np.pi / 8, -np.pi / 4], rtol=1e-3)
         np.testing.assert_allclose(proj._x_range, [-np.pi / 4, np.pi / 8], rtol=1e-3)
         proj._u_period = np.pi / 2
         proj._find_and_correct_x_gap()
-        np.testing.assert_allclose(proj._x_range, [np.pi / 4, np.pi / 2], rtol=1e-3)
-        np.testing.assert_allclose(proj._detector_x_coordinates, [np.pi / 2, np.pi / 8, np.pi / 4], rtol=1e-3)
+        np.testing.assert_allclose(proj._x_range, [0, np.pi / 4], rtol=1e-3)
+        np.testing.assert_allclose(proj._detector_x_coordinates, [0, np.pi / 8, np.pi / 4], rtol=1e-3)
 
+    @unittest.mock.patch("instrumentview.Projections.CylindricalProjection.CylindricalProjection._apply_x_correction")
     @unittest.mock.patch("instrumentview.Projections.CylindricalProjection.CylindricalProjection._calculate_2d_coordinates")
-    def test_find_and_correct_x_gap_big_gap_last(self, mock_calc_2d_coords):
+    def test_find_and_correct_x_gap_not_applied(self, mock_calc_2d_coords, mock_apply_x_correction):
         mock_calc_2d_coords.return_value = np.array([0, -np.pi / 8, np.pi / 4]), np.array([0, 0, 0])
         proj = CylindricalProjection(self.sample_position, self.root_position, self.detector_positions, np.array([0, 0, 1]))
-        np.testing.assert_allclose(proj._detector_x_coordinates, [0, np.pi / 8, -np.pi / 4], rtol=1e-3)
-        np.testing.assert_allclose(proj._x_range, [-np.pi / 4, np.pi / 8], rtol=1e-3)
-        proj._u_period = np.pi / 2
+        np.testing.assert_allclose(proj._detector_x_coordinates, [0, -np.pi / 8, np.pi / 4], rtol=1e-3)
+        np.testing.assert_allclose(proj._x_range, [-np.pi / 8, np.pi / 4], rtol=1e-3)
+        proj._u_period = np.pi
         proj._find_and_correct_x_gap()
-        np.testing.assert_allclose(proj._x_range, [np.pi / 4, np.pi / 2], rtol=1e-3)
-        np.testing.assert_allclose(proj._detector_x_coordinates, [np.pi / 2, 3 * np.pi / 8, np.pi / 4], rtol=1e-3)
+        np.testing.assert_allclose(proj._x_range, [-np.pi / 8, np.pi / 4], rtol=1e-3)
+        np.testing.assert_allclose(proj._detector_x_coordinates, [0, -np.pi / 8, np.pi / 4], rtol=1e-3)
+        mock_apply_x_correction.assert_not_called()
 
     @unittest.mock.patch("instrumentview.Projections.Projection.Projection._find_and_correct_x_gap")
     @unittest.mock.patch("instrumentview.Projections.CylindricalProjection.CylindricalProjection._calculate_2d_coordinates")
