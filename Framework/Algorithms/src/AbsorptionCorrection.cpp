@@ -187,6 +187,9 @@ void AbsorptionCorrection::exec() {
   message << "Numerical integration performed every " << m_xStep << " wavelength points";
   g_log.information(message.str());
   message.str("");
+  message << "maintenance July 2025 - test code";
+  g_log.information(message.str());
+  message.str("");
 
   // Calculate the cached values of L1, element volumes, and geometry size
   initialiseCachedDistances();
