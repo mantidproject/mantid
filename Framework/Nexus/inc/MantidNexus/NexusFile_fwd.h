@@ -111,7 +111,7 @@ MANTID_NEXUS_DLL std::ostream &operator<<(std::ostream &os, const NXcompression 
 // forward declare
 namespace Mantid::Nexus {
 
-typedef int64_t dimsize_t;
+typedef hsize_t dimsize_t;
 typedef std::vector<dimsize_t> DimVector;
 
 typedef std::pair<std::string, std::string> Entry;
