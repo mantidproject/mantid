@@ -13,6 +13,7 @@
 #include "MantidDataHandling/DllConfig.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidNexus/NexusFile_fwd.h"
 #include <vector>
 
 namespace Mantid {
@@ -101,14 +102,14 @@ private:
   bool m_includeError;
   bool m_overwriteFile;
   size_t m_spectraCount;
-  std::vector<int64_t> m_slabStart;
-  std::vector<int64_t> m_slabSize;
+  Nexus::DimVector m_slabStart;
+  Nexus::DimVector m_slabSize;
   /// The filename of the output file
   std::string m_filename;
   // Dimensions for axis in nxTomo file.
-  std::vector<int64_t> m_dimensions;
+  Nexus::DimVector m_dimensions;
   // Infinite file range dimensions / for use with makeData data and error
-  std::vector<int64_t> m_infDimensions;
+  Nexus::DimVector m_infDimensions;
 
   /// file format version
   static const std::string NXTOMO_VER;

@@ -209,11 +209,11 @@ void LoadILLIndirect2::loadDataDetails(const Nexus::NXEntry &entry) {
 
         if (flagSD[0] == 1.0) // is enabled
         {
-          m_activeSDIndices.insert(i);
+          m_activeSDIndices.insert(static_cast<detid_t>(i));
         }
       } catch (...) {
         // if the flags are not present in the file (e.g. old format), load all
-        m_activeSDIndices.insert(i);
+        m_activeSDIndices.insert(static_cast<detid_t>(i));
       }
     }
     m_numberOfSimpleDetectors = m_activeSDIndices.size();
@@ -275,7 +275,7 @@ void LoadILLIndirect2::loadDataIntoWorkspace(const Nexus::NXEntry &entry) {
   int offset = static_cast<int>(m_numberOfTubes * m_numberOfPixelsPerTube + m_numberOfMonitors);
   auto dataSD = LoadHelper::getIntDataset(entry, "dataSD");
   dataSD.load();
-  std::set<int> sdIndices;
+  std::set<detid_t> sdIndices;
   std::transform(m_activeSDIndices.cbegin(), m_activeSDIndices.cend(), std::inserter(sdIndices, sdIndices.begin()),
                  [offset](const auto &index) { return index + offset; });
   LoadHelper::fillStaticWorkspace(m_localWorkspace, dataSD, xAxis, offset, false, std::vector<int>(), sdIndices);

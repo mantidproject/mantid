@@ -432,7 +432,7 @@ void LoadILLTOF3::fillScanWorkspace(const Nexus::NXEntry &entry, const std::vect
   // Load scan data
   const std::vector<int> detectorIDs = m_localWorkspace->getInstrument()->getDetectorIDs(false);
   const std::tuple<int, int, int> dimOrder{1, 2, 0};
-  LoadHelper::fillStaticWorkspace(m_localWorkspace, data, xAxis, 0, true, detectorIDs, std::set<int>(), dimOrder);
+  LoadHelper::fillStaticWorkspace(m_localWorkspace, data, xAxis, 0, true, detectorIDs, std::set<detid_t>(), dimOrder);
 
   // Load monitor data, there is only one monitor
   const std::vector<int> monitorIDs = m_localWorkspace->getInstrument()->getMonitors();

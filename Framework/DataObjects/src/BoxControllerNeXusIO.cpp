@@ -323,13 +323,13 @@ void BoxControllerNeXusIO::getDiskBufferFileData() {
  *@param blockPosition -- The starting place to save data to   */
 template <typename Type>
 void BoxControllerNeXusIO::saveGenericBlock(const std::vector<Type> &DataBlock, const uint64_t blockPosition) const {
-  std::vector<int64_t> start(2, 0);
+  Nexus::DimVector start(2, 0);
   // Specify the dimensions
-  std::vector<int64_t> dims(m_BlockSize);
+  Nexus::DimVector dims(m_BlockSize);
 
   std::lock_guard<std::mutex> _lock(m_fileMutex);
-  start[0] = int64_t(blockPosition);
-  dims[0] = int64_t(DataBlock.size() / this->getNDataColums());
+  start[0] = static_cast<Nexus::dimsize_t>(blockPosition);
+  dims[0] = Nexus::dimsize_t(DataBlock.size() / this->getNDataColums());
 
   // ugly cast but why would putSlab change the data?. This is NeXus bug which
   // makes putSlab method non-constant
@@ -503,12 +503,12 @@ void BoxControllerNeXusIO::loadGenericBlock(std::vector<Type> &Block, const uint
   if (blockPosition + nPoints > this->getFileLength())
     throw Kernel::Exception::FileError("Attemtp to read behind the file end", m_fileName);
 
-  std::vector<int64_t> start(2, 0);
-  start[0] = static_cast<int64_t>(blockPosition);
+  Nexus::DimVector start(2, 0);
+  start[0] = static_cast<Nexus::dimsize_t>(blockPosition);
 
-  std::vector<int64_t> size(m_BlockSize);
-  size[0] = static_cast<int64_t>(nPoints);
-  size[1] = dataEventCount(); // data item count per event in the Nexus file
+  Nexus::DimVector size(m_BlockSize);
+  size[0] = static_cast<Nexus::dimsize_t>(nPoints);
+  size[1] = static_cast<Nexus::dimsize_t>(dataEventCount()); // data item count per event in the Nexus file
 
   std::lock_guard<std::mutex> _lock(m_fileMutex);
 

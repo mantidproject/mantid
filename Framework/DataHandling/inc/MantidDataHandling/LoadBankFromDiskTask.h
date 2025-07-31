@@ -10,6 +10,7 @@
 #include "MantidDataHandling/DllConfig.h"
 #include "MantidKernel/Task.h"
 #include "MantidKernel/ThreadScheduler.h"
+#include "MantidNexus/NexusFile_fwd.h"
 
 #include <cstdint>
 
@@ -63,9 +64,9 @@ private:
   std::string m_detIdFieldName;
   std::string m_timeOfFlightFieldName;
   /// Index to load start at in the file
-  std::vector<int64_t> m_loadStart;
+  Nexus::DimVector m_loadStart;
   /// How much to load in the file
-  std::vector<int64_t> m_loadSize;
+  Nexus::DimVector m_loadSize;
   /// Minimum pixel ID in this data
   uint32_t m_min_id;
   /// Maximum pixel ID in this data
