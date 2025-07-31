@@ -229,4 +229,81 @@ PanelsSurfaceCalculator::transformedBoundingBoxPoints(const ComponentInfo &compo
   return {bb0, bb1};
 }
 
+std::vector<std::vector<size_t>> PanelsSurfaceCalculator::examineAllComponents(
+    const ComponentInfo &componentInfo,
+    std::function<std::vector<size_t>(const ComponentInfo &, size_t, std::vector<bool> &)> operation) {
+  std::vector<bool> visited(componentInfo.size(), false);
+  std::vector<std::vector<size_t>> detectorIDs;
+
+  for (int64_t i = static_cast<int64_t>(componentInfo.root() - 1); i > 0; --i) {
+    auto children = componentInfo.children(i);
+
+    if (children.size() > 0 && !visited[i]) {
+      visited[i] = true;
+      detectorIDs.push_back(operation(componentInfo, i, visited));
+    } else if (children.size() == 0 && componentInfo.parent(i) == componentInfo.root()) {
+      visited[i] = true;
+    }
+  }
+  return detectorIDs;
+}
+
+std::vector<size_t> PanelsSurfaceCalculator::tubeDetectorParentIDs(const ComponentInfo &componentInfo, size_t rootIndex,
+                                                                   std::vector<bool> &visited) {
+  const auto componentType = componentInfo.componentType(rootIndex);
+  if (componentType != ComponentType::OutlineComposite)
+    return {};
+
+  const auto bankIndex0 = componentInfo.parent(rootIndex);
+  auto tubes = std::vector<size_t>();
+  bool foundFlatBank = false;
+  V3D normal;
+  size_t bankIndex;
+  auto addTubes = [&componentInfo](size_t parentIndex, std::vector<size_t> &tubes) {
+    const auto &children = componentInfo.children(parentIndex);
+    for (auto child : children) {
+      if (componentInfo.componentType(child) == ComponentType::OutlineComposite)
+        // tube must have more than one detector to enable normal to be calculated
+        if (componentInfo.children(child).size() > 1)
+          tubes.emplace_back(child);
+    }
+  };
+
+  // The main use case for this method has an assembly containing a set of
+  // individual assemblies each of which has a single tube but together
+  // these tubes make a flat structure.
+  // Try grandparent of the tube supplied tube initially
+  if (componentInfo.hasParent(bankIndex0)) {
+    bankIndex = componentInfo.parent(bankIndex0);
+    auto bankChildren = &componentInfo.children(bankIndex);
+
+    // Go down the tree to find all the tubes.
+    for (auto index : *bankChildren)
+      addTubes(index, tubes);
+    if (tubes.empty()) {
+      this->setBankVisited(componentInfo, bankIndex, visited);
+      return tubes;
+    }
+    // Now we found all the tubes that may form a flat struture.
+    // Use two of the tubes to calculate the normal to the plain of that structure
+    normal = tubes.size() > 1 ? this->calculateBankNormal(componentInfo, tubes) : V3D();
+    // If some of the tubes are not perpendicular to the normal the structure
+    // isn't flat
+    if (!normal.nullVector() && this->isBankFlat(componentInfo, bankIndex, tubes, normal))
+      foundFlatBank = true;
+  }
+
+  if (!foundFlatBank) {
+    // Try the next level down - parent of tube supplied
+    tubes.clear();
+    bankIndex = bankIndex0;
+    addTubes(bankIndex, tubes);
+    normal = tubes.size() > 1 ? this->calculateBankNormal(componentInfo, tubes) : V3D();
+    if (normal.nullVector() || !this->isBankFlat(componentInfo, bankIndex, tubes, normal))
+      this->setBankVisited(componentInfo, componentInfo.parent(rootIndex), visited);
+  }
+
+  this->setBankVisited(componentInfo, bankIndex, visited);
+  return tubes;
+}
 } // namespace Mantid::API

@@ -144,6 +144,24 @@ list transformedBoundingBoxPoints(PanelsSurfaceCalculator &self, const object &c
   return result;
 }
 
+list getAllTubeDetectorFlatGroupParents(PanelsSurfaceCalculator &self, const object &componentInfo) {
+  const std::shared_ptr<ComponentInfo> cInfoSharedPtr = extract<std::shared_ptr<ComponentInfo>>(componentInfo);
+  const auto allTubeGroupParents =
+      self.examineAllComponents(*(cInfoSharedPtr.get()), [&](const auto &cinfo, auto root, auto &visited) {
+        return self.tubeDetectorParentIDs(cinfo, root, visited);
+      });
+  list pyAllTubeGroupParents;
+  for (size_t groupIndex = 0; groupIndex < allTubeGroupParents.size(); groupIndex++) {
+    const auto tubeGroupParents = allTubeGroupParents[groupIndex];
+    list pyTubeGroupParents;
+    for (size_t tubeParentIndex = 0; tubeParentIndex < tubeGroupParents.size(); tubeParentIndex++) {
+      pyTubeGroupParents.append(tubeGroupParents[tubeParentIndex]);
+    }
+    pyAllTubeGroupParents.append(pyTubeGroupParents);
+  }
+  return pyAllTubeGroupParents;
+}
+
 } // namespace
 
 void export_PanelsSurfaceCalculator() {
@@ -175,5 +193,8 @@ void export_PanelsSurfaceCalculator() {
            (arg("self"), arg("componentInfo"), arg("detectorIndex"), arg("refPos"), arg("rotation"), arg("xaxis"),
             arg("yaxis")),
            "Transforms a component's bounding box based on reference position and rotation. The rotation should be "
-           "provided as a list containing the real and imaginary parts of a quarternion (length 4).");
+           "provided as a list containing the real and imaginary parts of a quarternion (length 4).")
+      .def("getAllTubeDetectorFlatGroupParents", &getAllTubeDetectorFlatGroupParents,
+           (arg("self"), arg("componentInfo")),
+           "Returns the parent component indices of detectors of all groups of tubes arranged in flat banks");
 }

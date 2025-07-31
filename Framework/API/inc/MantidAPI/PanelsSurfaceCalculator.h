@@ -13,6 +13,8 @@
 #include "MantidKernel/V2D.h"
 #include "MantidKernel/V3D.h"
 
+#include <functional>
+
 using Mantid::Geometry::ComponentInfo;
 using Mantid::Kernel::V3D;
 
@@ -34,6 +36,11 @@ public:
                                                                 size_t detectorIndex, const V3D &refPos,
                                                                 const Mantid::Kernel::Quat &rotation, const V3D &xaxis,
                                                                 const V3D &yaxis) const;
+  std::vector<size_t> tubeDetectorParentIDs(const ComponentInfo &componentInfo, size_t rootIndex,
+                                            std::vector<bool> &visited);
+  std::vector<std::vector<size_t>> examineAllComponents(
+      const ComponentInfo &componentInfo,
+      std::function<std::vector<size_t>(const ComponentInfo &, size_t, std::vector<bool> &)> operation);
 
 private:
   Mantid::Kernel::Logger g_log = Mantid::Kernel::Logger("PanelsSurfaceCalculator");
