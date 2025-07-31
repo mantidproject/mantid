@@ -29,6 +29,7 @@ from instrumentview.Detectors import DetectorInfo
 from typing import Callable
 from mantid.dataobjects import Workspace2D
 import numpy as np
+import pyvista as pv
 
 
 class FullInstrumentViewWindow(QMainWindow):
@@ -40,6 +41,9 @@ class FullInstrumentViewWindow(QMainWindow):
     def __init__(self, parent=None, off_screen=False):
         """The instrument in the given workspace will be displayed. The off_screen option is for testing or rendering an image
         e.g. in a script."""
+
+        pv.global_theme.background = "black"
+
         super(FullInstrumentViewWindow, self).__init__(parent)
         self.setWindowTitle("Instrument View")
 
@@ -195,7 +199,7 @@ class FullInstrumentViewWindow(QMainWindow):
 
     def add_main_mesh(self, mesh: PolyData, scalars=None, clim=None) -> None:
         """Draw the given mesh in the main plotter window"""
-        self.main_plotter.add_mesh(mesh, pickable=False, scalars=scalars, clim=clim, render_points_as_spheres=True, point_size=7)
+        self.main_plotter.add_mesh(mesh, pickable=False, scalars=scalars, clim=clim, render_points_as_spheres=True, point_size=14)
 
     def add_pickable_main_mesh(self, point_cloud: PolyData, scalars: np.ndarray | str) -> None:
         self.main_plotter.add_mesh(
@@ -205,7 +209,7 @@ class FullInstrumentViewWindow(QMainWindow):
             show_scalar_bar=False,
             pickable=True,
             cmap="Oranges",
-            point_size=20,
+            point_size=30,
             render_points_as_spheres=True,
         )
 
@@ -249,10 +253,10 @@ class FullInstrumentViewWindow(QMainWindow):
     def add_projection_mesh(self, mesh: PolyData, scalars=None, clim=None) -> None:
         """Draw the given mesh in the projection plotter. This is a 2D plot so we set options accordingly on the plotter"""
         self.projection_plotter.clear()
-        self.projection_plotter.add_mesh(mesh, scalars=scalars, clim=clim, render_points_as_spheres=True, point_size=7, pickable=False)
+        self.projection_plotter.add_mesh(mesh, scalars=scalars, clim=clim, render_points_as_spheres=True, point_size=14, pickable=False)
         self.projection_plotter.view_xy()
         if not self.projection_plotter.off_screen:
-            self.projection_plotter.enable_image_style()
+            self.projection_plotter.enable_zoom_style()
 
     def add_pickable_projection_mesh(self, mesh: PolyData, scalars=None) -> None:
         """Draw the given mesh in the projection plotter. This is a 2D plot so we set options accordingly on the plotter"""
@@ -263,12 +267,9 @@ class FullInstrumentViewWindow(QMainWindow):
             show_scalar_bar=False,
             pickable=True,
             cmap="Oranges",
-            point_size=20,
+            point_size=30,
             render_points_as_spheres=True,
         )
-        self.projection_plotter.view_xy()
-        if not self.projection_plotter.off_screen:
-            self.projection_plotter.enable_image_style()
 
     def show_axes(self) -> None:
         """Show axes on the main plotter"""
