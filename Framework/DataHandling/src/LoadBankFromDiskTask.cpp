@@ -368,7 +368,7 @@ void LoadBankFromDiskTask::run() {
       m_loadStart[0] = start_event;
       m_loadSize[0] = stop_event - start_event;
 
-      if ((m_loader.alg->compressEvents) || ((m_loadSize[0] > 0) && (m_loadStart[0] >= 0))) {
+      if ((m_loader.alg->compressEvents) || ((m_loadSize[0] > 0))) {
         if (m_loader.alg->getCancel()) {
           m_loader.alg->getLogger().error() << "Loading bank " << entry_name << " is cancelled.\n";
           m_loadError = true; // To allow cancelling the algorithm

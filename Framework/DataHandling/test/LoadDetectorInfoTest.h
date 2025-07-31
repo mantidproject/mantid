@@ -50,7 +50,7 @@ static const int NUMRANDOM = 7;
 static const int DETECTS[NUMRANDOM] = {4101, 4804, 1323, 1101, 3805, 1323, 3832};
 
 namespace SmallTestDatFile {
-const std::size_t NDETECTS = 6;
+const Mantid::detid_t NDETECTS = 6;
 }
 
 namespace {
@@ -98,7 +98,7 @@ void writeDetNXSfile(const std::string &filename, const std::size_t nDets) {
   int limit(6);
   int ic(0);
   for (std::size_t i = 0; i < nDets; i++) {
-    detID[2 * i] = i;
+    detID[2 * i] = static_cast<Mantid::detid_t>(i);
     detID[2 * i + 1] = boost::lexical_cast<int>(code[ic]);
     timeOffsets[2 * i] = boost::lexical_cast<float>(delta[ic]);
     timeOffsets[2 * i + 1] = 0;
@@ -349,7 +349,7 @@ public:
     const auto &pmap = WS->constInstrumentParameters();
     const auto &detInfo = WS->detectorInfo();
 
-    for (int j = 0; j < SmallTestDatFile::NDETECTS; ++j) {
+    for (Mantid::detid_t j = 0; j < SmallTestDatFile::NDETECTS; ++j) {
 
       const size_t detIndex = detInfo.indexOf(j);
       const IComponent *baseComp = detInfo.detector(detIndex).getComponentID();

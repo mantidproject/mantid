@@ -403,9 +403,9 @@ private:
       throw std::runtime_error("Attempt to load from an empty dataset " + address());
     }
     try {
-      if (new_size != static_cast<dimsize_t>(m_size)) {
+      if (new_size != m_size) {
         m_data.resize(new_size);
-        m_size = static_cast<size_t>(new_size);
+        m_size = new_size;
       }
     } catch (...) {
       std::ostringstream ostr;

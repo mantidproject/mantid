@@ -452,7 +452,7 @@ void LoadILLDiffraction::fillMovingInstrumentScan(const NXInt &data, const NXDou
   // prepare inputs, dimension orders and list of accepted IDs for exclusion of inactive detectors (D20)
   std::tuple<int, int, int> dimOrder{2, 1, 0}; // scan - tube - pixel
   std::set<int> acceptedIDs;
-  if (static_cast<Nexus::dimsize_t>(m_numberDetectorsActual) != data.dim1() * data.dim2()) {
+  if (m_numberDetectorsActual != data.dim1() * data.dim2()) {
     for (auto index = NUMBER_MONITORS; index < m_numberDetectorsActual + NUMBER_MONITORS; ++index)
       acceptedIDs.insert(static_cast<detid_t>(index));
   }
@@ -485,7 +485,7 @@ void LoadILLDiffraction::fillStaticInstrumentScan(const NXInt &data, const NXDou
   // prepare inputs, dimension orders and list of accepted IDs for exclusion of inactive detectors (D20)
   std::tuple<int, int, int> dimOrder{2, 1, 0}; // scan - tube - pixel
   std::set<detid_t> acceptedIDs;
-  if (static_cast<Nexus::dimsize_t>(m_numberDetectorsActual) != data.dim1() * data.dim2()) {
+  if (m_numberDetectorsActual != data.dim1() * data.dim2()) {
     for (std::size_t i = startIndex; i < startIndex + m_numberDetectorsActual; ++i)
       acceptedIDs.insert(static_cast<detid_t>(i));
   }

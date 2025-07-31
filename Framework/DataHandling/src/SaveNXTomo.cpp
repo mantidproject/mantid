@@ -350,7 +350,7 @@ void SaveNXTomo::writeImageKeyValue(const DataObjects::Workspace2D_sptr &workspa
   }
 
   m_nxFile->openData("image_key");
-  m_nxFile->putSlab(keyValue, static_cast<Nexus::dimsize_t>(thisFileInd), 1);
+  m_nxFile->putSlab(keyValue, thisFileInd, 1);
   m_nxFile->closeData();
 
   m_nxFile->closeGroup();
@@ -387,7 +387,7 @@ void SaveNXTomo::writeLogValues(const DataObjects::Workspace2D_sptr &workspace, 
       if (strSize > 80)
         strSize = 80;
       const Nexus::DimVector start{thisFileInd, 0};
-      const Nexus::DimVector size{1, static_cast<Nexus::dimsize_t>(strSize)};
+      const Nexus::DimVector size{1, strSize};
       // single item
       m_nxFile->putSlab(valueAsStr.data(), start, size);
 
@@ -417,7 +417,7 @@ void SaveNXTomo::writeIntensityValue(const DataObjects::Workspace2D_sptr &worksp
   }
 
   m_nxFile->openData("data");
-  m_nxFile->putSlab(intensityValue, static_cast<Nexus::dimsize_t>(thisFileInd), 1);
+  m_nxFile->putSlab(intensityValue, thisFileInd, 1);
   m_nxFile->closeData();
 }
 

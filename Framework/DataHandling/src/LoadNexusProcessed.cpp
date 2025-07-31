@@ -749,8 +749,8 @@ API::MatrixWorkspace_sptr LoadNexusProcessed::loadEventEntry(NXData &wksp_cls, N
       else {
         MantidVec x(xbins.dim1());
 
-        for (int i = 0; i < xbins.dim1(); i++)
-          x[i] = xbins(static_cast<int>(wi), i);
+        for (std::size_t i = 0; i < xbins.dim1(); i++)
+          x[i] = xbins(wi, i);
 
         // for ragged workspace we need to remove all NaN value from end of vector
         const auto idx =
