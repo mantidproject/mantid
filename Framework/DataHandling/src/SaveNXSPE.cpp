@@ -91,9 +91,9 @@ void SaveNXSPE::exec() {
   MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
 
   // Number of spectra
-  const auto nHist = static_cast<int64_t>(inputWS->getNumberHistograms());
+  const auto nHist = inputWS->getNumberHistograms();
   // Number of energy bins
-  const auto nBins = static_cast<int64_t>(inputWS->blocksize());
+  const auto nBins = inputWS->blocksize();
 
   // Retrieve the filename from the properties
   std::string filename = getPropertyValue("Filename");
@@ -240,10 +240,8 @@ void SaveNXSPE::exec() {
   nxFile.closeData();
 
   // let's create some blank arrays in the nexus file
-  using Dimensions = std::vector<int64_t>;
-  Dimensions arrayDims(2);
-  arrayDims[0] = nHist;
-  arrayDims[1] = nBins;
+  using Dimensions = Nexus::DimVector;
+  Dimensions arrayDims{nHist, nBins};
   nxFile.makeData("data", NXnumtype::FLOAT64, arrayDims, false);
   nxFile.makeData("error", NXnumtype::FLOAT64, arrayDims, false);
 
@@ -275,7 +273,7 @@ void SaveNXSPE::exec() {
   Progress progress(this, 0.0, 1.0, nHist);
   int64_t bufferCounter(0);
   const auto &spectrumInfo = inputWS->spectrumInfo();
-  for (int64_t i = 0; i < nHist; ++i) {
+  for (std::size_t i = 0; i < nHist; ++i) {
     progress.report();
 
     double *signalBufferStart = signalBuffer.get() + bufferCounter * nBins;

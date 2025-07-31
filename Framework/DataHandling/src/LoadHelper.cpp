@@ -500,7 +500,7 @@ void LoadHelper::fillMovingWorkspace(const API::MatrixWorkspace_sptr &ws, const 
   const auto useCustomSpectraMap = customDetectorIDs.size() != 0;
   const auto useAcceptedDetectorIDs = acceptedDetectorIDs.size() != 0;
 
-  std::array<int64_t, 3U> dims = {data.dim0(), data.dim1(), data.dim2()};
+  std::array<Nexus::dimsize_t, 3U> dims = {data.dim0(), data.dim1(), data.dim2()};
   const auto nTubes = dims[std::get<0>(axisOrder)];
   const auto nPixels = dims[std::get<1>(axisOrder)];
   const auto nScans = dims[std::get<2>(axisOrder)];

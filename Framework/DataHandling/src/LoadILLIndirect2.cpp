@@ -201,7 +201,7 @@ void LoadILLIndirect2::loadDataDetails(const Nexus::NXEntry &entry) {
   if (m_loadOption == "Spectrometer") {
     auto dataSD = LoadHelper::getIntDataset(entry, "dataSD");
 
-    for (int i = 0; i < dataSD.dim0(); ++i) {
+    for (Nexus::dimsize_t i = 0; i < dataSD.dim0(); ++i) {
       try {
         std::string entryNameFlagSD = boost::str(boost::format("instrument/SingleD/tubes%i_function") % (i + 1));
         NXFloat flagSD = entry.openNXFloat(entryNameFlagSD);

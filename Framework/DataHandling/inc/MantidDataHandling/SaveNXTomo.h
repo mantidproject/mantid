@@ -90,9 +90,9 @@ private:
 
   /// Write various pieces of data from the workspace log with checks on the
   /// structure of the nexus file
-  void writeLogValues(const DataObjects::Workspace2D_sptr &workspace, int thisFileInd);
-  void writeIntensityValue(const DataObjects::Workspace2D_sptr &workspace, int thisFileInd);
-  void writeImageKeyValue(const DataObjects::Workspace2D_sptr &workspace, int thisFileInd);
+  void writeLogValues(const DataObjects::Workspace2D_sptr &workspace, std::size_t thisFileInd);
+  void writeIntensityValue(const DataObjects::Workspace2D_sptr &workspace, std::size_t thisFileInd);
+  void writeImageKeyValue(const DataObjects::Workspace2D_sptr &workspace, std::size_t thisFileInd);
 
   /// Main exec routine, called for group or individual workspace processing.
   void processAll();

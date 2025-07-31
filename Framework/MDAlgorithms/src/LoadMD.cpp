@@ -260,12 +260,12 @@ void LoadMD::loadSlab(const std::string &name, NumT *data, const MDHistoWorkspac
 
   // verify that the number of points is correct
   const auto dataDims = m_file->getInfo().dims;
-  uint64_t nPoints = 1;
+  Nexus::dimsize_t nPoints = 1;
   const size_t numDims = dataDims.size();
   for (size_t d = 0; d < numDims; d++) {
-    nPoints *= static_cast<uint64_t>(dataDims[d]);
+    nPoints *= dataDims[d];
   }
-  if (nPoints != ws->getNPoints())
+  if (nPoints != static_cast<Nexus::dimsize_t>(ws->getNPoints()))
     throw std::runtime_error("Inconsistency between the number of points in '" + name +
                              "' and the number of bins defined by the dimensions.");
 

@@ -751,7 +751,7 @@ bool NexusFileIO::writeNexusBinMasking(const API::MatrixWorkspace_const_sptr &ws
     return false;
 
   // save spectra offsets as a 2d array of ints
-  std::vector<int64_t> dimensions = {spectra_count, 2};
+  Nexus::DimVector dimensions{spectra_count, 2};
 
   m_filehandle->makeData("masked_spectra", NXnumtype::INT32, dimensions, true);
   m_filehandle->putAttr("description", "spectra index,offset in masked_bins and mask_weights");
@@ -759,13 +759,13 @@ bool NexusFileIO::writeNexusBinMasking(const API::MatrixWorkspace_const_sptr &ws
   m_filehandle->closeData();
 
   // save masked bin indices
-  dimensions[0] = static_cast<int>(bins.size());
+  dimensions[0] = static_cast<Nexus::dimsize_t>(bins.size());
   m_filehandle->makeData("masked_bins", NXnumtype::UINT64, dimensions, true);
   m_filehandle->putData(bins.data());
   m_filehandle->closeData();
 
   // save masked bin weights
-  dimensions[0] = static_cast<int>(bins.size());
+  dimensions[0] = static_cast<Nexus::dimsize_t>(bins.size());
   m_filehandle->makeData("mask_weights", NXnumtype::FLOAT64, dimensions, true);
   m_filehandle->putData(weights.data());
   m_filehandle->closeData();
