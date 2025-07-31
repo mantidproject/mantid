@@ -9,7 +9,10 @@
 #include "MantidKernel/System.h"
 
 // STL
+#ifdef WIN32
 #include <crtdefs.h>
+#endif // WIN
+
 #include <cstddef>
 #include <cstdint>
 #include <cstdio>
