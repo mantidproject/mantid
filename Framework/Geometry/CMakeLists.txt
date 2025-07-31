@@ -445,11 +445,12 @@ else()
   list(APPEND SRC_FILES src/Rendering/RenderingHelpersThrowing.cpp)
 endif()
 
-# Add a precompiled header where they are supported
-enable_precompiled_headers(inc/MantidGeometry/PrecompiledHeader.h SRC_FILES)
 # Add the target for this directory
 add_library(Geometry ${SRC_FILES} ${INC_FILES})
 add_library(Mantid::Geometry ALIAS Geometry)
+
+# Add a precompiled header
+target_precompile_headers(Geometry PRIVATE inc/MantidGeometry/PrecompiledHeader.h)
 
 target_include_directories(
   Geometry PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc> $<INSTALL_INTERFACE:include/Mantid>

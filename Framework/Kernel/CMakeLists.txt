@@ -465,13 +465,14 @@ else()
   list(APPEND SRC_FILES src/NetworkProxyLinux.cpp)
 endif()
 
-# Enable precompiled headers where supported (must be done before target is added)
-enable_precompiled_headers(inc/MantidKernel/PrecompiledHeader.h SRC_FILES)
 # Add the target for this directory
 add_library(Kernel ${SRC_FILES} ${INC_FILES})
 add_library(Mantid::Kernel ALIAS Kernel)
 # Set the name of the generated library
 set_target_properties(Kernel PROPERTIES OUTPUT_NAME MantidKernel COMPILE_DEFINITIONS "IN_MANTID_KERNEL;PSAPI_VERSION=1")
+
+# Enable precompiled headers
+target_precompile_headers(Kernel PRIVATE inc/MantidKernel/PrecompiledHeader.h)
 
 target_include_directories(
   Kernel PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc> $<INSTALL_INTERFACE:include/Mantid>
