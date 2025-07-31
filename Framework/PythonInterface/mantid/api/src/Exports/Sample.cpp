@@ -58,12 +58,13 @@ void export_Sample() {
       .def("getHeight", &Sample::getHeight, arg("self"), "Return the height in mm")
       .def("getWidth", &Sample::getWidth, arg("self"), "Return the width in mm")
       .def("getMaterial", &Sample::getMaterial, arg("self"), "The material the sample is composed of",
-           return_internal_reference<>())
+           return_value_policy<reference_existing_object>())
       .def("setGeometryFlag", &Sample::setGeometryFlag, (arg("self"), arg("geom_id")), "Set the geometry flag.")
       .def("setThickness", &Sample::setThickness, (arg("self"), arg("thick")), "Set the thickness in mm.")
       .def("setHeight", &Sample::setHeight, (arg("self"), arg("height")), "Set the height in mm.")
       .def("setWidth", &Sample::setWidth, (arg("self"), arg("width")), "Set the width in mm.")
-      .def("getShape", &Sample::getShapePtr, arg("self"), "Returns a shape of a Sample object.")
+      .def("getShape", &Sample::getShape, arg("self"), "Returns a shape of a Sample object.",
+           return_value_policy<reference_existing_object>())
       .def("setShape", &Sample::setShape, (arg("self"), arg("shape")), "Set shape of Sample object.",
            with_custodian_and_ward<1, 2>())
       .def("hasEnvironment", &Sample::hasEnvironment, arg("self"),
