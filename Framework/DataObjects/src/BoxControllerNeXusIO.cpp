@@ -237,7 +237,7 @@ void BoxControllerNeXusIO::prepareNxSToWrite_CurVersion() {
 
     // Now the chunk size.
     // m_Blocksize == (number_events_to_write_at_a_time, data_items_per_event)
-    Nexus::DimSizeVector chunk(m_BlockSize);
+    Nexus::DimVector chunk(m_BlockSize);
     chunk[0] = static_cast<Nexus::dimsize_t>(m_dataChunk);
 
     // Make and open the data
@@ -298,7 +298,7 @@ void BoxControllerNeXusIO::getDiskBufferFileData() {
   //    // Get a vector of the free space blocks to save to the file
   Nexus::DimVector free_dims(2, 2);
   free_dims[0] = int64_t(freeSpaceBlocks.size() / 2);
-  Nexus::DimSizeVector free_chunk(2, 2);
+  Nexus::DimVector free_chunk(2, 2);
   free_chunk[0] = int64_t(m_dataChunk);
 
   std::map<std::string, std::string> groupEntries;

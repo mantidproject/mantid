@@ -238,7 +238,7 @@ void _writeChunkedData(std::shared_ptr<Nexus::File> dest, // Must have open grou
   const size_t chunk_size = _chunk_size;
 
   const Nexus::DimVector dims = {static_cast<Nexus::dimsize_t>(N_chunk), static_cast<Nexus::dimsize_t>(chunk_size)};
-  const Nexus::DimSizeVector chunk_dims = {1, static_cast<Nexus::dimsize_t>(chunk_size)};
+  const Nexus::DimVector chunk_dims = {1, static_cast<Nexus::dimsize_t>(chunk_size)};
 
   // Create and open the dataset.
   // (If compressionType == NXcompression::NONE, this just creates a non-compressed dataset.)
@@ -252,11 +252,11 @@ void _writeChunkedData(std::shared_ptr<Nexus::File> dest, // Must have open grou
   Nexus::DimVector start{0, 0};
   for (size_t n : indices) {
     const auto &v = ((*src).*vData)(n);
-    const Nexus::DimSizeVector data_dims = {1, static_cast<Nexus::dimsize_t>(v.size())};
+    const Nexus::DimVector data_dims = {1, static_cast<Nexus::dimsize_t>(v.size())};
     dest->putSlab(_dataPointer<V>(v), start, data_dims);
     if (pad_data && data_dims[1] != static_cast<Nexus::dimsize_t>(chunk_size)) {
       // Fill the remainder of the slab.
-      const Nexus::DimSizeVector fill_dims = {1, static_cast<Nexus::dimsize_t>(chunk_size) - data_dims[1]};
+      const Nexus::DimVector fill_dims = {1, static_cast<Nexus::dimsize_t>(chunk_size) - data_dims[1]};
       const Nexus::DimVector _start = {start[0], data_dims[1]};
       dest->putSlab(vFill.data(), _start, fill_dims);
     }
@@ -450,11 +450,11 @@ int NexusFileIO::writeNexusProcessedData2D(const API::MatrixWorkspace_const_sptr
 template <typename ColumnT, typename NexusT>
 void NexusFileIO::writeTableColumn(NXnumtype type, const std::string &interpret_as, const API::Column &col,
                                    const std::string &columnName) const {
-  const auto nRows = static_cast<int>(col.size());
-  const Nexus::DimVector dims_array = {nRows};
+  const auto nRows = col.size();
+  const Nexus::DimVector dims_array{static_cast<Nexus::dimsize_t>(nRows)};
 
   auto toNexus = new NexusT[nRows];
-  for (int ii = 0; ii < nRows; ii++)
+  for (std::size_t ii = 0; ii < nRows; ii++)
     toNexus[ii] = static_cast<NexusT>(col.cell<ColumnT>(ii));
   writeData(columnName.c_str(), type, dims_array, toNexus, false);
   delete[] toNexus;
@@ -562,7 +562,7 @@ int NexusFileIO::writeNexusTableWorkspace(const API::ITableWorkspace_const_sptr 
     return 2;
   }
 
-  auto nRows = static_cast<int>(itableworkspace->rowCount());
+  std::size_t nRows = itableworkspace->rowCount();
 
   for (size_t i = 0; i < itableworkspace->columnCount(); i++) {
     Column_const_sptr col = itableworkspace->getColumn(i);
@@ -586,7 +586,7 @@ int NexusFileIO::writeNexusTableWorkspace(const API::ITableWorkspace_const_sptr 
     } else if (col->isType<std::string>()) {
       // determine max string size
       std::size_t maxStr = 0;
-      for (int ii = 0; ii < nRows; ii++) {
+      for (std::size_t ii = 0; ii < nRows; ii++) {
         if (col->cell<std::string>(ii).size() > maxStr)
           maxStr = col->cell<std::string>(ii).size();
       }
@@ -595,14 +595,14 @@ int NexusFileIO::writeNexusTableWorkspace(const API::ITableWorkspace_const_sptr 
       if (maxStr == 0) {
         maxStr = 1;
       }
-      const Nexus::DimVector dims_array = {nRows, static_cast<Nexus::dimsize_t>(maxStr)};
-      const Nexus::DimSizeVector asize = {1, dims_array[1]};
+      const Nexus::DimVector dims_array{static_cast<Nexus::dimsize_t>(nRows), static_cast<Nexus::dimsize_t>(maxStr)};
+      const Nexus::DimVector asize{1, dims_array[1]};
 
       m_filehandle->makeCompData(str, NXnumtype::CHAR, dims_array, NXcompression::LZW, asize);
 
       m_filehandle->openData(str);
       auto toNexus = new char[maxStr * nRows];
-      for (int ii = 0; ii < nRows; ii++) {
+      for (std::size_t ii = 0; ii < nRows; ii++) {
         std::string rowStr = col->cell<std::string>(ii);
         for (size_t ic = 0; ic < rowStr.size(); ic++)
           toNexus[ii * maxStr + ic] = rowStr[ic];
