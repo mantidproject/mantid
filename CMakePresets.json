@@ -68,7 +68,10 @@
       "inherits": [
         "ci-default",
         "conda"
-      ]
+      ],
+      "cacheVariables": {
+        "CMAKE_DISABLE_PRECOMPILE_HEADERS": "ON"
+      }
     },
     {
       "name": "win-64-ci",
