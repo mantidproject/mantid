@@ -28,8 +28,7 @@ namespace Nexus {
 @date 28/05/2009
 */
 
-typedef int64_t nxdimsize_t;
-typedef std::array<nxdimsize_t, 4> NXDimArray;
+typedef std::array<dimsize_t, 4> NXDimArray;
 
 /**
  * Structure for keeping information about a Nexus data set, such as the dimensions and the type
@@ -138,15 +137,15 @@ public:
   /// Returns the rank (number of dimensions) of the data. The maximum is 4
   std::size_t rank() const { return m_info.rank; }
   /// Returns the number of elements along i-th dimension
-  nxdimsize_t dims(std::size_t i) const { return i < 4 ? m_info.dims[i] : 0; }
+  dimsize_t dims(std::size_t i) const { return i < 4 ? m_info.dims[i] : 0; }
   /// Returns the number of elements along the first dimension
-  nxdimsize_t dim0() const;
+  dimsize_t dim0() const;
   /// Returns the number of elements along the second dimension
-  nxdimsize_t dim1() const;
+  dimsize_t dim1() const;
   /// Returns the number of elements along the third dimension
-  nxdimsize_t dim2() const;
+  dimsize_t dim2() const;
   /// Returns the number of elements along the fourth dimension
-  nxdimsize_t dim3() const;
+  dimsize_t dim3() const;
   /// Returns the name of the data set
   std::string name() const { return m_info.nxname; } // cppcheck-suppress returnByReference
   /// Returns the Nexus type of the data. The types are defined in NexusFile_fwd.h
@@ -177,7 +176,7 @@ protected:
    * size of the array) must be equal to the rank of the data.
    * @throw runtime_error if the operation fails.
    */
-  template <typename NumT> void getSlab(NumT *data, DimSizeVector const &start, DimSizeVector const &size) {
+  template <typename NumT> void getSlab(NumT *data, DimVector const &start, DimVector const &size) {
     m_fileID->openData(name());
     m_fileID->getSlab(data, start, size);
     m_fileID->closeData();
@@ -317,12 +316,12 @@ public:
    * @param j :: Non-negative value makes it read a chunk of dimension rank()-2. i and j are its indeces. The rank of
    * the data must be >= 2
    */
-  void load(nxdimsize_t const blocksize, nxdimsize_t const i = -1, nxdimsize_t const j = -1) {
+  void load(dimsize_t const blocksize, dimsize_t const i = -1, dimsize_t const j = -1) {
     if (rank() > 4) {
       throw std::runtime_error("Cannot load dataset of rank greater than 4");
     }
-    nxdimsize_t n = 0, id(i), jd(j); // cppcheck-suppress variableScope
-    DimSizeVector datastart, datasize;
+    dimsize_t n = 0, id(i), jd(j); // cppcheck-suppress variableScope
+    DimVector datastart, datasize;
     if (rank() == 4) {
       if (i < 0) // load all data
       {
@@ -358,7 +357,7 @@ public:
       } else {
         if (id >= dim0() || jd >= dim1())
           rangeError();
-        nxdimsize_t m = blocksize;
+        dimsize_t m = blocksize;
         if (jd + m > dim1())
           m = dim1() - jd;
         n = dim2() * m;
@@ -374,7 +373,7 @@ public:
       } else if (j < 0) {
         if (id >= dim0())
           rangeError();
-        nxdimsize_t m = blocksize;
+        dimsize_t m = blocksize;
         if (id + m > dim0())
           m = dim0() - id;
         n = dim1() * m;
@@ -411,12 +410,12 @@ private:
    *
    * @param new_size :: The number of elements to allocate.
    */
-  void alloc(nxdimsize_t new_size) {
+  void alloc(dimsize_t new_size) {
     if (new_size <= 0) {
       throw std::runtime_error("Attempt to load from an empty dataset " + address());
     }
     try {
-      if (new_size != static_cast<nxdimsize_t>(m_size)) {
+      if (new_size != static_cast<dimsize_t>(m_size)) {
         m_data.resize(new_size);
         m_size = static_cast<size_t>(new_size);
       }

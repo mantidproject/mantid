@@ -209,10 +209,7 @@ void SaveNXTomo::setupFile() {
   // {data,distance,image_key,x_pixel_size,y_pixel_size}
   m_nxFile->makeGroup("detector", "NXdetector", true);
 
-  std::vector<int64_t> infDim;
-  infDim.emplace_back(NX_UNLIMITED);
-
-  m_nxFile->makeData("image_key", NXnumtype::FLOAT64, infDim, false);
+  m_nxFile->makeData("image_key", NXnumtype::FLOAT64, NX_UNLIMITED, false);
   m_nxFile->closeGroup(); // detector
 
   // source group // from diamond file contains {current,energy,name,probe,type}
@@ -224,7 +221,7 @@ void SaveNXTomo::setupFile() {
   // NXsample
   m_nxFile->makeGroup("sample", "NXsample", true);
 
-  m_nxFile->makeData("rotation_angle", NXnumtype::FLOAT64, infDim, true);
+  m_nxFile->makeData("rotation_angle", NXnumtype::FLOAT64, NX_UNLIMITED, true);
   // Create a link object for rotation_angle to use later
   NXlink rotationLink = m_nxFile->getDataID();
   m_nxFile->closeData();
@@ -234,7 +231,7 @@ void SaveNXTomo::setupFile() {
   // Make the NXmonitor group - Holds base beam intensity for each image
 
   m_nxFile->makeGroup("control", "NXmonitor", true);
-  m_nxFile->makeData("data", NXnumtype::FLOAT64, infDim, false);
+  m_nxFile->makeData("data", NXnumtype::FLOAT64, NX_UNLIMITED, false);
   m_nxFile->closeGroup(); // NXmonitor
 
   m_nxFile->makeGroup("data", "NXdata", true);
@@ -380,9 +377,7 @@ void SaveNXTomo::writeLogValues(const DataObjects::Workspace2D_sptr &workspace, 
         m_nxFile->openData(prop->name());
       } catch (Nexus::Exception const &) {
         // Create the data entry if it doesn't exist yet, and open.
-        std::vector<int64_t> infDim;
-        infDim.emplace_back(NX_UNLIMITED);
-        infDim.emplace_back(NX_UNLIMITED);
+        Nexus::DimVector infDim{NX_UNLIMITED, NX_UNLIMITED};
         m_nxFile->makeData(prop->name(), NXnumtype::UINT8, infDim, true);
       }
       auto valueAsStr = prop->value();
@@ -391,8 +386,8 @@ void SaveNXTomo::writeLogValues(const DataObjects::Workspace2D_sptr &workspace, 
       // it won't be greater than this. Otherwise Shorten it
       if (strSize > 80)
         strSize = 80;
-      const Nexus::DimVector start = {thisFileInd, 0};
-      const Nexus::DimSizeVector size = {1, static_cast<Nexus::dimsize_t>(strSize)};
+      const Nexus::DimVector start{thisFileInd, 0};
+      const Nexus::DimVector size{1, static_cast<Nexus::dimsize_t>(strSize)};
       // single item
       m_nxFile->putSlab(valueAsStr.data(), start, size);
 
