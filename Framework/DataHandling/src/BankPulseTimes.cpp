@@ -92,7 +92,7 @@ BankPulseTimes::BankPulseTimes(Nexus::File &file, const std::vector<int> &period
 }
 
 template <typename ValueType>
-void BankPulseTimes::readData(Nexus::File &file, uint64_t numValues, Mantid::Types::Core::DateAndTime &start) {
+void BankPulseTimes::readData(Nexus::File &file, std::size_t numValues, Mantid::Types::Core::DateAndTime &start) {
   Nexus::DimVector indexStart{0};
   Nexus::DimVector indexStep{std::min(numValues, Nexus::dimsize_t(12 * 3600 * 60))}; // 12 hour at 60Hz
 
