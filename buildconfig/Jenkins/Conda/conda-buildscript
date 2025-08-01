@@ -126,7 +126,7 @@ fi
 git clean -d -x --force --exclude=".Xauthority-*" $git_clean_excludes_extra
 
 # Mamba
-setup_mamba $WORKSPACE/miniforge "" $CLEAN_BUILD $PLATFORM
+setup_mamba $WORKSPACE/miniforge "" $CLEAN_BUILD
 create_and_activate_mantid_developer_env $WORKSPACE $PLATFORM
 
 # Check whether this is an incremental build that only changes rst files
@@ -169,7 +169,7 @@ fi
 set -o pipefail
 
 # Run the script that handles the build
-$SCRIPT_DIR/build $WORKSPACE $CMAKE_PRESET $ENABLE_DOCS $ENABLE_DEV_DOCS $ENABLE_BUILD_CODE $ENABLE_UNIT_TESTS $ENABLE_SYSTEM_TESTS $ENABLE_DOC_TESTS $ENABLE_COVERITY "$EXTRA_CMAKE_FLAGS" $BUILD_THREADS | tee $BUILD_DIR/test_logs/build_$OSTYPE.log
+$SCRIPT_DIR/build $WORKSPACE $CMAKE_PRESET $ENABLE_DOCS $ENABLE_DEV_DOCS $ENABLE_BUILD_CODE $ENABLE_UNIT_TESTS $ENABLE_SYSTEM_TESTS $ENABLE_DOC_TESTS $ENABLE_COVERITY "$EXTRA_CMAKE_FLAGS" | tee $BUILD_DIR/test_logs/build_$OSTYPE.log
 
 # Return to original behaviour.
 set +o pipefail
