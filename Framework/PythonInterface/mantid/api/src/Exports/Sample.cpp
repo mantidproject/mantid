@@ -69,7 +69,7 @@ void export_Sample() {
       .def("setWidth", &Sample::setWidth, (arg("self"), arg("width")), "Set the width in mm.")
       .def(
           "getShape", +[](std::shared_ptr<Sample> self) { return self->getShapePtr(); },
-          return_value_policy<return_by_value>(), "Returns shape with shared ownership of the Sample")
+          "Returns shape with shared ownership of the Sample", return_value_policy<return_by_value>())
       .def("setShape", &Sample::setShape, (arg("self"), arg("shape")), "Set shape of Sample object.")
       .def("hasEnvironment", &Sample::hasEnvironment, arg("self"),
            "Returns True if the sample has an environment defined")
