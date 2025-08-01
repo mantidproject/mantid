@@ -15,7 +15,7 @@ setup_mamba () {
   local env_name=$2
   local clean=$3
   local platform=$4
-  $SCRIPT_DIR/download-and-install-mambaforge $install_prefix $clean
+  $SCRIPT_DIR/download-and-install-miniforge $install_prefix $clean
   source $install_prefix/etc/profile.d/conda.sh
   source $install_prefix/etc/profile.d/mamba.sh
 

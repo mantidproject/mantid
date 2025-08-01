@@ -364,11 +364,12 @@ if(COVERAGE)
   endforeach(loop_var)
 endif()
 
-# Use a precompiled header where they are supported
-enable_precompiled_headers(inc/MantidMDAlgorithms/PrecompiledHeader.h SRC_FILES)
 # Add the target for this directory
 add_library(MDAlgorithms ${SRC_FILES} ${INC_FILES})
 add_library(Mantid::MDAlgorithms ALIAS MDAlgorithms)
+
+# Use a precompiled header
+target_precompile_headers(MDAlgorithms PRIVATE inc/MantidMDAlgorithms/PrecompiledHeader.h)
 
 target_include_directories(
   MDAlgorithms PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc> $<INSTALL_INTERFACE:include/Mantid>

@@ -130,7 +130,7 @@ class Abins(AbinsAlgorithm, PythonAlgorithm):
             cache_directory=self._cache_directory,
         )
         s_calculator.progress_reporter = prog_reporter
-        s_data = s_calculator.get_formatted_data()
+        spectra = s_calculator.get_formatted_data()
 
         # Hold reporter at 80% for this message
         prog_reporter.resetNumSteps(1, 0.8, 0.80000001)
@@ -149,11 +149,17 @@ class Abins(AbinsAlgorithm, PythonAlgorithm):
 
         workspaces.extend(
             self.create_workspaces(
-                atoms_symbols=atom_symbols, s_data=s_data, atoms_data=atoms_data, max_quantum_order=self._max_event_order
+                atoms_symbols=atom_symbols,
+                spectra=spectra,
+                max_quantum_order=self._max_event_order,
             )
         )
         workspaces.extend(
-            self.create_workspaces(atom_numbers=atom_numbers, s_data=s_data, atoms_data=atoms_data, max_quantum_order=self._max_event_order)
+            self.create_workspaces(
+                atom_numbers=atom_numbers,
+                spectra=spectra,
+                max_quantum_order=self._max_event_order,
+            )
         )
         prog_reporter.report("Workspaces with partial dynamical structure factors have been constructed.")
 

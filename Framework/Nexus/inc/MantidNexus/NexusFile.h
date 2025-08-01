@@ -34,7 +34,31 @@ class H5Object;
 namespace Mantid {
 namespace Nexus {
 
-static Entry const EOD_ENTRY(NULL_STR, NULL_STR);
+/**
+ * \class FileID
+ * \brief A wrapper class for managing HDF5 file handles (hid_t).
+ *
+ * The FileID class is designed to manage the lifecycle of HDF5 file handles (hid_t),
+ * ensuring that the handle is properly closed when the FileID object is destroyed.
+ * This helps prevent resource leaks and ensures proper cleanup of HDF5 resources.
+ */
+class MANTID_NEXUS_DLL FileID {
+private:
+  hid_t m_fid;
+  // There is no reason to copy or assign a file ID
+  FileID(FileID const &f) = delete;
+  FileID &operator=(hid_t const) = delete;
+  FileID &operator=(FileID const &) = delete;
+
+public:
+  bool operator==(int const v) const { return static_cast<int>(m_fid) == v; }
+  bool operator<=(int const v) const { return static_cast<int>(m_fid) <= v; }
+  operator hid_t const &() const { return m_fid; }
+  hid_t getId() const { return m_fid; }
+  FileID() : m_fid(-1) {}
+  FileID(hid_t const v) : m_fid(v) {}
+  ~FileID();
+};
 
 /**
  * The Object that allows access to the information in the file.
@@ -50,15 +74,15 @@ private:
   NXaccess m_access;
   /** The address of currently-opened element */
   NexusAddress m_address;
-  /** should be close handle on exit */
-  bool m_close_handle;
   /** Variables for use inside the C-API, formerly of NexusFile5
-   * \li m_fid -- the ID for open file object
+   * \li m_pfile -- shared ptr to a H5File object
    * \li m_current_group_id -- the ID for currently opened group (or 0 if none)
-   * \li m_current_data_id -- the ID forcurrently opened dataset (or 0 if none)
+   * \li m_current_data_id -- the ID for currently opened dataset (or 0 if none)
+   * \li m_current_type_id -- the ID of the type of the opened dataset
+   * \li m_current_space_id -- the ID of the dataspace for the opened dataset
    * \li m_gid_stack -- a vector stack of opened group IDs
    */
-  hid_t m_fid;
+  std::shared_ptr<FileID> m_pfile;
   hid_t m_current_group_id;
   hid_t m_current_data_id;
   hid_t m_current_type_id;
@@ -70,8 +94,6 @@ private:
    * - firstEntryNameType
    */
   NexusDescriptor m_descriptor;
-  /** NOTE: this is temporary until `napi` is fully deleted*/
-  NexusAddress m_group_address;
 
   //------------------------------------------------------------------------------------------------------------------
   // CONSTRUCTORS / ASSIGNMENT / DECONSTRUCTOR
@@ -105,21 +127,20 @@ public:
    *
    * \param pf Pointer to file to copy over
    */
-  File(File const *const pf);
+  File(File const *const pf) : File(*pf) {}
 
   /**
-   * Copy constructor from pointer
+   * Copy constructor from shared pointer
    *
    * \param pf Pointer to file to copy over
    */
-  File(std::shared_ptr<File> pf);
+  File(std::shared_ptr<File> pf) : File(*pf) {}
 
   /**
-   * Assignment operator, to complete the rule of three
-   *
-   * \param f File to assign
+   * Prohibit assignment, as it can lead to
+   * race conditions when closing the HDF5 file handles
    */
-  File &operator=(File const &f);
+  File &operator=(File const &f) = delete;
 
   /** Destructor. This does close the file. */
   ~File();
@@ -143,12 +164,6 @@ private:
   //------------------------------------------------------------------------------------------------------------------
 public:
   // ADDRESS GET / OPEN
-
-  /**
-   * DO NOT USE THIS FUNCTION FOR ANY REASON
-   * It is needed as a temporary solution while deleting napi.
-   */
-  NexusFile5 getFileStruct();
 
   /**
    * Open the NeXus object with the address specified.

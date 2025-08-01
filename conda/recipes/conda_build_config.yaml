@@ -1,14 +1,14 @@
 c_compiler:
   - gcc                      # [linux]
   - clang                    # [osx]
-  - vs2019                   # [win]
+  - vs2022                   # [win]
 c_compiler_version:            # [unix]
   - 18                         # [osx]
   - 13                         # [linux]
 cxx_compiler:
   - gxx                      # [linux]
   - clangxx                  # [osx]
-  - vs2019                   # [win]
+  - vs2022                   # [win]
 cxx_compiler_version:          # [unix]
   - 18                         # [osx]
   - 13                         # [linux]
@@ -155,7 +155,7 @@ libopenblas:
   - 0.3.27
 
 euphonic:
-  - '>=1.2.1,<2.0'
+  - '>=1.4.3,<2.0'
 
 librdkafka:
   - '>=1.6.0'

@@ -501,11 +501,12 @@ if(WIN32)
   set(BCRYPT bcrypt)
 endif()
 
-# Add a precompiled header where they are supported
-enable_precompiled_headers(inc/MantidAPI/PrecompiledHeader.h SRC_FILES)
 # Add the target for this directory
 add_library(API ${SRC_FILES} ${INC_FILES})
 add_library(Mantid::API ALIAS API)
+
+# Add a precompiled header where they are supported
+target_precompile_headers(API PRIVATE inc/MantidAPI/PrecompiledHeader.h)
 
 target_include_directories(
   API PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc> $<INSTALL_INTERFACE:include/Mantid>

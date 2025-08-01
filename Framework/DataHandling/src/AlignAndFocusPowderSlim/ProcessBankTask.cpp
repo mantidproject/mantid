@@ -64,8 +64,7 @@ ProcessBankTask::ProcessBankTask(std::vector<std::string> &bankEntryNames, H5::H
                                  const bool is_time_filtered, API::MatrixWorkspace_sptr &wksp,
                                  const std::map<detid_t, double> &calibration, const std::set<detid_t> &masked,
                                  const size_t events_per_chunk, const size_t grainsize_event,
-                                 std::vector<std::pair<size_t, size_t>> pulse_indices,
-                                 std::shared_ptr<API::Progress> &progress)
+                                 std::vector<PulseROI> pulse_indices, std::shared_ptr<API::Progress> &progress)
     : m_h5file(h5file), m_bankEntries(bankEntryNames), m_loader(is_time_filtered, pulse_indices), m_wksp(wksp),
       m_calibration(calibration), m_masked(masked), m_events_per_chunk(events_per_chunk),
       m_grainsize_event(grainsize_event), m_progress(progress) {}

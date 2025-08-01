@@ -52,15 +52,13 @@ public:
     std::string const szFile(fr.fullPath());
 
     File file_obj(szFile, NXaccess::CREATE5);
-    file_obj.close();
 
     for (int iReOpen = 0; iReOpen < nReOpen; iReOpen++) {
       if (0 == iReOpen % 100) {
         cout << "loop count " << iReOpen << "\n";
       }
 
-      file_obj = File(szFile, NXaccess::RDWR);
-      file_obj.close();
+      File other_file(file_obj);
     }
 
     cout << "Leak Test 1 Success!\n";
