@@ -107,7 +107,7 @@ public:
    * \param filename The name of the file to open.
    * \param access How to access the file.
    */
-  File(std::string const &filename, NXaccess const access = NXaccess::READ);
+  File(std::string const &filename, NXaccess const access = NXaccess::READ) : File(filename.c_str(), access) {}
 
   /**
    * Create a new File.
