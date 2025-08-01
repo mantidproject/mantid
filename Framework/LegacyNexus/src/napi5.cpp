@@ -42,6 +42,7 @@
 #include "MantidLegacyNexus/napi.h"
 #include "MantidLegacyNexus/napi_internal.h"
 #include "MantidLegacyNexus/napi5.h"
+#include "MantidTypes/Core/DateAndTime.h"
 // clang-format on
 
 #ifdef H5_VERSION_GE
@@ -318,7 +319,7 @@ NXstatus NX5open(CONSTCHAR *filename, NXaccess am, NXhandle *pHandle) {
   hid_t root_id;
   pLgcyNexusFile5 pNew = NULL;
   char pBuffer[512];
-  char *time_buffer = NULL;
+  std::string time_str;
   char version_nr[10];
   unsigned int vers_major, vers_minor, vers_release, am1;
   hid_t fapl = -1;
@@ -412,16 +413,12 @@ NXstatus NX5open(CONSTCHAR *filename, NXaccess am, NXhandle *pHandle) {
       return NXstatus::NX_ERROR;
     }
 
-    time_buffer = NXIformatNeXusTime();
-    if (time_buffer != NULL) {
-      if (set_str_attribute(root_id, "file_time", time_buffer) < 0) {
-        H5Gclose(root_id);
-        H5Fclose(pNew->iFID);
-        free(pNew);
-        free(time_buffer);
-        return NXstatus::NX_ERROR;
-      }
-      free(time_buffer);
+    time_str = Mantid::Types::Core::DateAndTime::getLocalTimeISO8601String();
+    if (set_str_attribute(root_id, "file_time", time_str.c_str()) < 0) {
+      H5Gclose(root_id);
+      H5Fclose(pNew->iFID);
+      free(pNew);
+      return NXstatus::NX_ERROR;
     }
 
     /*finally we set the NXroot NX_class attribute*/
