@@ -67,6 +67,7 @@ void export_Sample() {
       .def("setThickness", &Sample::setThickness, (arg("self"), arg("thick")), "Set the thickness in mm.")
       .def("setHeight", &Sample::setHeight, (arg("self"), arg("height")), "Set the height in mm.")
       .def("setWidth", &Sample::setWidth, (arg("self"), arg("width")), "Set the width in mm.")
+      // cppcheck-suppress syntaxError
       .def(
           "getShape", +[](std::shared_ptr<Sample> self) { return self->getShapePtr(); },
           "Returns shape with shared ownership of the Sample", return_value_policy<return_by_value>())
