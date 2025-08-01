@@ -7,7 +7,7 @@
 # pylint: disable=no-init
 
 import systemtesting
-from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
+from isis_sans_system_test import ISISSansSystemTest
 from mantid.simpleapi import LoadNexus, Plus
 from mantid import config, FileFinder
 from ISISCommandInterface import Detector, Gravity, LOQ, MaskFile, Set1D
