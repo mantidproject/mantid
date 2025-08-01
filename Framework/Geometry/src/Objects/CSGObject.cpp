@@ -416,6 +416,10 @@ CSGObject::CSGObject(const CSGObject &A) : CSGObject() { *this = A; }
 CSGObject &CSGObject::operator=(const CSGObject &A) {
   if (this != &A) {
     m_topRule = (A.m_topRule) ? A.m_topRule->clone() : nullptr;
+    if (m_topRule) {
+      m_topRule->setParent(nullptr); // Top rule has no parent
+      m_topRule->makeParents();
+    }
     AABBxMax = A.AABBxMax;
     AABByMax = A.AABByMax;
     AABBzMax = A.AABBzMax;
@@ -444,7 +448,10 @@ CSGObject::~CSGObject() = default;
 /**
  * @param material The new Material that the object is composed from
  */
-void CSGObject::setMaterial(const Kernel::Material &material) { m_material = std::make_unique<Material>(material); }
+void CSGObject::setMaterial(const Kernel::Material &m) {
+  m_material = std::make_unique<Material>(m.name(), m.chemicalFormula(), m.numberDensity(), m.packingFraction(),
+                                          m.temperature(), m.pressure());
+}
 
 /**
  * @return The Material that the object is composed from

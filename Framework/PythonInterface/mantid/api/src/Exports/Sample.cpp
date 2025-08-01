@@ -18,14 +18,18 @@
 #include <boost/python/register_ptr_to_python.hpp>
 
 using Mantid::API::Sample;
+using Mantid::Geometry::IObject;
 using Mantid::Geometry::OrientedLattice;
 using Mantid::Geometry::SampleEnvironment;
 using Mantid::Kernel::Material; // NOLINT
 using namespace boost::python;
+using namespace Mantid::Geometry;
 
 GET_POINTER_SPECIALIZATION(Material)
 GET_POINTER_SPECIALIZATION(OrientedLattice)
 GET_POINTER_SPECIALIZATION(Sample)
+GET_POINTER_SPECIALIZATION(IObject)
+GET_POINTER_SPECIALIZATION(CSGObject)
 
 void export_Sample() {
   register_ptr_to_python<Sample *>();
@@ -58,14 +62,16 @@ void export_Sample() {
       .def("getHeight", &Sample::getHeight, arg("self"), "Return the height in mm")
       .def("getWidth", &Sample::getWidth, arg("self"), "Return the width in mm")
       .def("getMaterial", &Sample::getMaterial, arg("self"), "The material the sample is composed of",
-           return_value_policy<reference_existing_object>())
+           return_internal_reference<>())
       .def("setGeometryFlag", &Sample::setGeometryFlag, (arg("self"), arg("geom_id")), "Set the geometry flag.")
       .def("setThickness", &Sample::setThickness, (arg("self"), arg("thick")), "Set the thickness in mm.")
       .def("setHeight", &Sample::setHeight, (arg("self"), arg("height")), "Set the height in mm.")
       .def("setWidth", &Sample::setWidth, (arg("self"), arg("width")), "Set the width in mm.")
-      .def("getShape", &Sample::getShape, arg("self"), "Returns a shape of a Sample object.",
-           return_value_policy<reference_existing_object>())
-      .def("setShape", &Sample::setShape, arg("self"), "Set shape of Sample object.")
+      // cppcheck-suppress syntaxError
+      .def(
+          "getShape", +[](std::shared_ptr<Sample> self) { return self->getShapePtr(); },
+          "Returns shape with shared ownership of the Sample", return_value_policy<return_by_value>())
+      .def("setShape", &Sample::setShape, (arg("self"), arg("shape")), "Set shape of Sample object.")
       .def("hasEnvironment", &Sample::hasEnvironment, arg("self"),
            "Returns True if the sample has an environment defined")
       .def("hasShape", &Sample::hasShape, arg("self"), "Returns True if the sample has a shape defined")
