@@ -494,8 +494,8 @@ void LoadHelper::loadingOrder(const std::tuple<short, short, short> &dataOrder, 
  */
 void LoadHelper::fillMovingWorkspace(const API::MatrixWorkspace_sptr &ws, const Mantid::Nexus::NXInt &data,
                                      const std::vector<double> &xAxis, int64_t initialSpectrum,
-                                     const std::set<int> &acceptedDetectorIDs,
-                                     const std::vector<int> &customDetectorIDs,
+                                     const std::set<detid_t> &acceptedDetectorIDs,
+                                     const std::vector<detid_t> &customDetectorIDs,
                                      const std::tuple<short, short, short> &axisOrder) {
 
   const auto useCustomSpectraMap = customDetectorIDs.size() != 0;
