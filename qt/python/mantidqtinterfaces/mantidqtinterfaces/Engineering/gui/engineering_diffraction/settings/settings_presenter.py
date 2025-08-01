@@ -8,11 +8,20 @@
 from os import path
 from mantidqt.utils.observer_pattern import Observable
 from Engineering.EnggUtils import CALIB_DIR
+from mantid.kernel import logger
+from numpy import all, array, concatenate, eye, abs, isclose
+from numpy.linalg import det
 
 DEFAULT_FULL_INST_CALIB = "ENGINX_full_instrument_calibration_193749.nxs"
 GSAS2_PATH_ON_IDAAAS = "/opt/gsas2"
 SETTINGS_DICT = {
     "save_location": str,
+    "rd_name": str,
+    "nd_name": str,
+    "td_name": str,
+    "rd_dir": str,
+    "nd_dir": str,
+    "td_dir": str,
     "full_calibration": str,
     "logs": str,
     "primary_log": str,
@@ -21,10 +30,25 @@ SETTINGS_DICT = {
     "path_to_gsas2": str,
     "timeout": str,
     "dSpacing_min": str,
+    "monte_carlo_params": str,
+    "clear_absorption_ws_after_processing": bool,
+    "cost_func_thresh": str,
+    "peak_pos_thresh": str,
+    "use_euler_angles": bool,
+    "euler_angles_scheme": str,
+    "euler_angles_sense": str,
+    "plot_exp_pf": bool,
+    "contour_kernel": str,
 }
 
 DEFAULT_SETTINGS = {
     "full_calibration": path.join(CALIB_DIR, DEFAULT_FULL_INST_CALIB),
+    "rd_name": "RD",
+    "nd_name": "ND",
+    "td_name": "TD",
+    "rd_dir": "1,0,0",
+    "nd_dir": "0,1,0",
+    "td_dir": "0,0,1",
     "save_location": path.join(path.expanduser("~"), "Engineering_Mantid"),
     "logs": ",".join(["Temp_1", "W_position", "X_position", "Y_position", "Z_position", "stress", "strain", "stressrig_go"]),
     "primary_log": "strain",
@@ -33,6 +57,15 @@ DEFAULT_SETTINGS = {
     "path_to_gsas2": GSAS2_PATH_ON_IDAAAS if path.exists(GSAS2_PATH_ON_IDAAAS) else "",
     "timeout": "10",  # seconds
     "dSpacing_min": "1.0",  # angstroms
+    "monte_carlo_params": "SparseInstrument:True",
+    "clear_absorption_ws_after_processing": True,
+    "cost_func_thresh": "100",
+    "peak_pos_thresh": "0.1",
+    "use_euler_angles": False,
+    "euler_angles_scheme": "YZY",
+    "euler_angles_sense": "1,-1,1",
+    "plot_exp_pf": True,
+    "contour_kernel": "2.0",
 }
 
 ALL_LOGS = ",".join(
@@ -156,6 +189,63 @@ class SettingsPresenter(object):
         if not self.validate_path_empty_or_valid(self.view.get_path_to_gsas2()):
             self.view.finder_path_to_gsas2.setFileProblem("Path does not exist")
 
+    def validate_reference_frame(self):
+        trans_mat = eye(3)
+        try:
+            rd = array([float(x) for x in self.settings["rd_dir"].split(",")])[:, None]
+            nd = array([float(x) for x in self.settings["nd_dir"].split(",")])[:, None]
+            td = array([float(x) for x in self.settings["td_dir"].split(",")])[:, None]
+            trans_mat = concatenate([rd, nd, td], axis=1)
+        except Exception as e:
+            logger.error("Invalid Reference Axes, values must all be able to be converted to floats. " + str(e))
+        if not isclose(abs(det(trans_mat)), 1):
+            logger.warning(
+                "The reference frame defined is not a volume preserving transformation from the standard "
+                "reference frame. This sort of reference frame is not anticipated so may lead to unexpected results"
+            )
+
+    def validate_euler_settings(self):
+        if self.view.get_use_euler_angles():
+            error_msg = ""
+            euler_scheme = self.settings["euler_angles_scheme"]
+            euler_sense = self.settings["euler_angles_sense"]
+            # check sense is comma separated
+            euler_sense_valid, sense_vals, sense_msg = self._validate_euler_sense_string(euler_sense)
+            if not euler_sense_valid:
+                error_msg += sense_msg
+
+            # validate euler_scheme
+            euler_scheme_valid = all([v in ("x", "y", "z") for v in euler_scheme.lower()])
+            if not euler_scheme_valid:
+                error_msg += "Euler Scheme should be defined in terms of X, Y and Z (eg. XYZ or YZY). "
+
+            # check euler_scheme has correct number of corresponding senses
+            sense_scheme_valid = len(euler_scheme) == len(sense_vals)
+            if not sense_scheme_valid:
+                error_msg += "Should be an equal number of Rotation Axes defined as euler senses. "
+            valid = euler_sense_valid and euler_scheme_valid and sense_scheme_valid
+            if not valid:
+                logger.error(error_msg)
+
+    def _validate_euler_sense_string(self, euler_sense):
+        try:
+            sense_vals = [int(x) for x in euler_sense.split(",")]
+            valid = all([v in (1, -1) for v in sense_vals])
+            error_msg = ""
+        except Exception as e:
+            error_msg = "Euler Senses should be comma separated +/-1s. " + str(e)
+            sense_vals = []
+            valid = False
+        return valid, sense_vals, error_msg
+
+    def _validate_convert_to_float(self, setting_name):
+        val = ""
+        try:
+            val = self.settings[setting_name]
+            float(val)
+        except ValueError:
+            logger.error(f"Could not convert {setting_name} value of {val} to a float")
+
     @staticmethod
     def validate_path_empty_or_valid(path_to_check):
         if path_to_check:
@@ -168,8 +258,13 @@ class SettingsPresenter(object):
         self._save_settings_to_file(set_nullables_to_default=False)
 
     def _collect_new_settings_from_view(self):
-        self._validate_settings()
         self.settings["save_location"] = self.view.get_save_location()
+        self.settings["rd_name"] = self.view.get_rd_name()
+        self.settings["nd_name"] = self.view.get_nd_name()
+        self.settings["td_name"] = self.view.get_td_name()
+        self.settings["rd_dir"] = self.view.get_rd_dir()
+        self.settings["nd_dir"] = self.view.get_nd_dir()
+        self.settings["td_dir"] = self.view.get_td_dir()
         self.settings["full_calibration"] = self.view.get_full_calibration()
         self.settings["logs"] = self.view.get_checked_logs()
         self.settings["primary_log"] = self.view.get_primary_log()
@@ -178,10 +273,26 @@ class SettingsPresenter(object):
         self.settings["path_to_gsas2"] = self.view.get_path_to_gsas2()
         self.settings["timeout"] = self.view.get_timeout()
         self.settings["dSpacing_min"] = self.view.get_dSpacing_min()
+        self.settings["monte_carlo_params"] = self.view.get_monte_carlo_params()
+        self.settings["clear_absorption_ws_after_processing"] = self.view.get_remove_corr_ws_after_processing()
+        self.settings["cost_func_thresh"] = self.view.get_cost_func_thresh()
+        self.settings["peak_pos_thresh"] = self.view.get_peak_pos_thresh()
+        self.settings["use_euler_angles"] = self.view.get_use_euler_angles()
+        self.settings["euler_angles_scheme"] = self.view.get_euler_angles_scheme()
+        self.settings["euler_angles_sense"] = self.view.get_euler_angles_sense()
+        self.settings["plot_exp_pf"] = self.view.get_plot_exp_pf()
+        self.settings["contour_kernel"] = self.view.get_contour_kernel()
+        self._validate_settings(set_nullables_to_default=False)
 
     def _show_settings_in_view(self):
         self._validate_settings(set_nullables_to_default=False)
         self.view.set_save_location(self.settings["save_location"])
+        self.view.set_rd_name(self.settings["rd_name"])
+        self.view.set_nd_name(self.settings["nd_name"])
+        self.view.set_td_name(self.settings["td_name"])
+        self.view.set_rd_dir(self.settings["rd_dir"])
+        self.view.set_nd_dir(self.settings["nd_dir"])
+        self.view.set_td_dir(self.settings["td_dir"])
         self.view.set_full_calibration(self.settings["full_calibration"])
         self.view.set_checked_logs(self.settings["logs"])
         self.view.set_primary_log_combobox(self.settings["primary_log"])
@@ -190,6 +301,15 @@ class SettingsPresenter(object):
         self.view.set_path_to_gsas2(self.settings["path_to_gsas2"])
         self.view.set_timeout(self.settings["timeout"])
         self.view.set_dSpacing_min(self.settings["dSpacing_min"])
+        self.view.set_monte_carlo_params(self.settings["monte_carlo_params"])
+        self.view.set_remove_corr_ws_after_processing(self.settings["clear_absorption_ws_after_processing"])
+        self.view.set_cost_func_thresh(self.settings["cost_func_thresh"])
+        self.view.set_peak_pos_thresh(self.settings["peak_pos_thresh"])
+        self.view.set_use_euler_angles(self.settings["use_euler_angles"])
+        self.view.set_euler_angles_scheme(self.settings["euler_angles_scheme"])
+        self.view.set_euler_angles_sense(self.settings["euler_angles_sense"])
+        self.view.set_plot_exp_pf(self.settings["plot_exp_pf"])
+        self.view.set_contour_kernel(self.settings["contour_kernel"])
         self._find_files()
 
     def _find_files(self):
@@ -220,6 +340,13 @@ class SettingsPresenter(object):
         for key in list(self.settings):
             if key not in DEFAULT_SETTINGS.keys():
                 del self.settings[key]
+        self.check_and_populate_with_default("rd_name")
+        self.check_and_populate_with_default("nd_name")
+        self.check_and_populate_with_default("td_name")
+        self.check_and_populate_with_default("rd_dir")
+        self.check_and_populate_with_default("nd_dir")
+        self.check_and_populate_with_default("td_dir")
+        self.validate_reference_frame()
         self.check_and_populate_with_default("default_peak")
         if self.settings["default_peak"] not in ALL_PEAKS:
             self.settings["default_peak"] = DEFAULT_SETTINGS["default_peak"]
@@ -232,11 +359,25 @@ class SettingsPresenter(object):
         if set_nullables_to_default:
             self.check_and_populate_with_default("primary_log")
 
-        # boolean values already checked to be "" or True or False in settings_helper
         self.check_and_populate_with_default("sort_ascending")
         self.check_and_populate_with_default("path_to_gsas2")
         self.check_and_populate_with_default("timeout")
+        self._validate_convert_to_float("timeout")
         self.check_and_populate_with_default("dSpacing_min")
+        self._validate_convert_to_float("dSpacing_min")
+        self.check_and_populate_with_default("monte_carlo_params")
+        self.check_and_populate_with_default("clear_absorption_ws_after_processing")
+        self.check_and_populate_with_default("cost_func_thresh")
+        self._validate_convert_to_float("cost_func_thresh")
+        self.check_and_populate_with_default("peak_pos_thresh")
+        self._validate_convert_to_float("peak_pos_thresh")
+        self.check_and_populate_with_default("use_euler_angles")
+        self.check_and_populate_with_default("euler_angles_scheme")
+        self.check_and_populate_with_default("euler_angles_sense")
+        self.validate_euler_settings()
+        self.check_and_populate_with_default("plot_exp_pf")
+        self.check_and_populate_with_default("contour_kernel")
+        self._validate_convert_to_float("contour_kernel")
 
     # -----------------------
     # Observers / Observables
