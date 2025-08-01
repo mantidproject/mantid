@@ -1495,6 +1495,37 @@ public:
     TZSET();
   }
 
+  void test_data_existing_time_string() {
+    cout << "\ntest dataset read existing -- time string attr\n";
+
+    // open an existing file
+    std::string filename = getFullPath("HB2C_7000.nxs.h5");
+    Mantid::Nexus::File file(filename, NXaccess::READ);
+
+    std::string time_str;
+    file.getAttr("file_time", time_str);
+    file.close();
+
+    std::tm tm = {};
+    char sign;
+    int offsetHours, offsetMinutes;
+
+    sscanf(time_str.c_str(), "%4d-%2d-%2dT%2d:%2d:%2d%c%2d:%2d", &tm.tm_year, &tm.tm_mon, &tm.tm_mday, &tm.tm_hour,
+           &tm.tm_min, &tm.tm_sec, &sign, &offsetHours, &offsetMinutes);
+
+    tm.tm_year -= 1900;
+    tm.tm_mon -= 1;
+
+    std::time_t local = std::mktime(&tm);
+
+    std::string expected = Mantid::Types::Core::DateAndTime::getLocalTimeISO8601String(local);
+    TS_ASSERT_EQUALS(time_str.substr(0, time_str.find_last_of("+-")), expected.substr(0, expected.find_last_of("+-")));
+    std::regex iso8601_regex(R"(^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[+-]\d{2}:\d{2}$)");
+
+    TS_ASSERT(std::regex_match(time_str, iso8601_regex));
+    TS_ASSERT(std::regex_match(expected, iso8601_regex));
+  }
+
   // ##################################################################################################################
   // TEST LINK METHODS
   // ################################################################################################################

@@ -313,11 +313,11 @@ constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/Unit.cpp:154
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/Unit.cpp:184
 nullPointerOutOfMemory:${CMAKE_SOURCE_DIR}/Framework/LegacyNexus/src/napi.cpp:622
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/LegacyNexus/src/napi.cpp:741
-unmatchedSuppression:${CMAKE_SOURCE_DIR}/Framework/LegacyNexus/src/napi5.cpp:191
-nullPointerOutOfMemory:${CMAKE_SOURCE_DIR}/Framework/LegacyNexus/src/napi5.cpp:609
-nullPointerArithmeticOutOfMemory:${CMAKE_SOURCE_DIR}/Framework/LegacyNexus/src/napi5.cpp:613
-nullPointerOutOfMemory:${CMAKE_SOURCE_DIR}/Framework/LegacyNexus/src/napi5.cpp:617
-nullPointerOutOfMemory:${CMAKE_SOURCE_DIR}/Framework/LegacyNexus/src/napi5.cpp:618
+unmatchedSuppression:${CMAKE_SOURCE_DIR}/Framework/LegacyNexus/src/napi5.cpp:192
+nullPointerOutOfMemory:${CMAKE_SOURCE_DIR}/Framework/LegacyNexus/src/napi5.cpp:606
+nullPointerArithmeticOutOfMemory:${CMAKE_SOURCE_DIR}/Framework/LegacyNexus/src/napi5.cpp:610
+nullPointerOutOfMemory:${CMAKE_SOURCE_DIR}/Framework/LegacyNexus/src/napi5.cpp:614
+nullPointerOutOfMemory:${CMAKE_SOURCE_DIR}/Framework/LegacyNexus/src/napi5.cpp:615
 cstyleCast:${CMAKE_SOURCE_DIR}/Framework/LiveData/inc/MantidLiveData/ADARA/ADARAPackets.h:388
 invalidPointerCast:${CMAKE_SOURCE_DIR}/Framework/LiveData/inc/MantidLiveData/ADARA/ADARAPackets.h:488
 cstyleCast:${CMAKE_SOURCE_DIR}/Framework/LiveData/inc/MantidLiveData/ADARA/ADARAPackets.h:531
