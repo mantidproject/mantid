@@ -65,7 +65,11 @@ endif()
 # Add to the 'Framework' group in VS
 set_property(TARGET Nexus PROPERTY FOLDER "MantidFramework")
 
-target_link_libraries(Nexus PRIVATE Poco::Foundation)
+target_link_libraries(
+  Nexus
+  PUBLIC Mantid::Types
+  PRIVATE Poco::Foundation
+)
 
 # Add the unit tests directory
 add_subdirectory(test)

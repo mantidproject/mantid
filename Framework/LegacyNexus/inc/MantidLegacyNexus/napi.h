@@ -390,9 +390,6 @@ MANTID_LEGACYNEXUS_DLL void NXMEnableErrorReporting();
  */
 MANTID_LEGACYNEXUS_DLL void NXReportError(const char *text);
 
-/* extern void *NXpData; */
-MANTID_LEGACYNEXUS_DLL char *NXIformatNeXusTime();
-
 /**
  * Freddie Akeroyd 11/8/2009
  * Add NeXus schema support - this uses BASE.xsd as the initial file

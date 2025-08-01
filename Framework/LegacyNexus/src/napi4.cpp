@@ -39,6 +39,7 @@
 #include "MantidLegacyNexus/napi.h"
 #include "MantidLegacyNexus/napi_internal.h"
 #include "MantidLegacyNexus/napi4.h"
+#include "MantidTypes/Core/DateAndTime.h"
 // clang-format on
 
 extern void *NXpData;
@@ -374,7 +375,7 @@ static void NXIbuildPath(pLgcyNexusFile pFile, char *buffer, int bufLen) {
 NXstatus NX4open(CONSTCHAR *filename, NXaccess am, NXhandle *pHandle) {
   pLgcyNexusFile pNew = NULL;
   char pBuffer[512];
-  char *time_puffer = NULL;
+  std::string time_str;
   uint32 lmajor, lminor, lrelease;
   int32 am1 = 0;
 
@@ -439,15 +440,11 @@ NXstatus NX4open(CONSTCHAR *filename, NXaccess am, NXhandle *pHandle) {
     }
 
     /* set the file_time attribute */
-    time_puffer = NXIformatNeXusTime();
-    if (time_puffer != NULL) {
-      if (SDsetattr(pNew->iSID, "file_time", DFNT_CHAR8, static_cast<int32>(strlen(time_puffer)), time_puffer) < 0) {
-        NXReportError("ERROR: HDF failed to store file_time attribute ");
-        free(pNew);
-        free(time_puffer);
-        return NXstatus::NX_ERROR;
-      }
-      free(time_puffer);
+    time_str = Mantid::Types::Core::DateAndTime::getLocalTimeISO8601String();
+    if (SDsetattr(pNew->iSID, "file_time", DFNT_CHAR8, static_cast<int32>(time_str.size()), time_str.c_str()) < 0) {
+      NXReportError("ERROR: HDF failed to store file_time attribute ");
+      free(pNew);
+      return NXstatus::NX_ERROR;
     }
 
     if (SDsetattr(pNew->iSID, "NX_class", DFNT_CHAR8, 7, "NXroot") < 0) {

@@ -5,6 +5,7 @@
 #include "MantidNexus/NexusFile.h"
 #include "MantidNexus/hdf5_type_helper.h"
 #include "MantidNexus/inverted_napi.h"
+#include "MantidTypes/Core/DateAndTime.h"
 #include <H5Cpp.h>
 #include <Poco/Logger.h>
 #include <algorithm>
@@ -179,7 +180,7 @@ void File::initOpenFile(std::string const &filename, NXaccess const am) {
     std::vector<Entry> attrs{{"NeXus_version", NEXUS_VERSION},
                              {"file_name", filename},
                              {"HDF5_Version", version_str},
-                             {"file_time", NXIformatNeXusTime()},
+                             {"file_time", Mantid::Types::Core::DateAndTime::getLocalTimeISO8601String()},
                              {group_class_spec, "NXroot"}};
     for (auto const &attr : attrs) {
       Mantid::NeXus::H5Util::writeStrAttribute(root, attr.first, attr.second);

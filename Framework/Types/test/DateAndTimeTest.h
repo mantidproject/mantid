@@ -16,6 +16,7 @@
 #include "MantidTypes/Core/DateAndTime.h"
 #include <ctime>
 #include <cxxtest/TestSuite.h>
+#include <regex>
 #include <sstream>
 #include <sys/stat.h>
 
@@ -441,6 +442,39 @@ public:
     TS_ASSERT_EQUALS(times[1], DateAndTime("1990-01-02 03:04:07.000"));
     TS_ASSERT_EQUALS(times[2], DateAndTime("1990-01-02 03:04:05.500"));
     TS_ASSERT_EQUALS(times[3], DateAndTime("1990-01-02 03:04:02.000"));
+  }
+
+  void test_getLocalTimeISO8601String_shouldFormatCorrectly() {
+
+    std::time_t fixedTime = 1700000000;
+    std::string result = DateAndTime::getLocalTimeISO8601String(fixedTime);
+
+    // Should match ISO8601 format: YYYY-MM-DDTHH:MM:SS+hh:mm or -hh:mm
+    std::regex isoPattern(R"(^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[+-]\d{2}:\d{2}$)");
+    TS_ASSERT(std::regex_match(result, isoPattern));
+
+    std::string datetimePart = result.substr(0, 19);
+    std::string offsetPart = result.substr(19);
+
+    DateAndTime dt;
+    dt.set_from_time_t(fixedTime);
+    std::tm localTm = dt.to_localtime_tm();
+
+    char expectedBuffer[72];
+    std::snprintf(expectedBuffer, sizeof(expectedBuffer), "%04d-%02d-%02dT%02d:%02d:%02d", localTm.tm_year + 1900,
+                  localTm.tm_mon + 1, localTm.tm_mday, localTm.tm_hour, localTm.tm_min, localTm.tm_sec);
+
+    // Check datetime part matches local time
+    TS_ASSERT_EQUALS(datetimePart, expectedBuffer);
+
+    // Basic sanity check on offset format
+    TS_ASSERT(offsetPart.length() == 6);
+    TS_ASSERT(offsetPart[0] == '+' || offsetPart[0] == '-');
+    TS_ASSERT(std::isdigit(offsetPart[1]));
+    TS_ASSERT(std::isdigit(offsetPart[2]));
+    TS_ASSERT(offsetPart[3] == ':');
+    TS_ASSERT(std::isdigit(offsetPart[4]));
+    TS_ASSERT(std::isdigit(offsetPart[5]));
   }
 };
 

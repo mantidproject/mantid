@@ -114,6 +114,7 @@ public:
   static time_duration durationFromNanoseconds(int64_t dur);
   static const DateAndTime &defaultTime();
   static void createVector(const DateAndTime start, const std::vector<double> &seconds, std::vector<DateAndTime> &out);
+  static std::string getLocalTimeISO8601String(std::time_t time = 0);
 
   /// The difference in seconds between standard unix and gps epochs.
   static const uint32_t EPOCH_DIFF;
