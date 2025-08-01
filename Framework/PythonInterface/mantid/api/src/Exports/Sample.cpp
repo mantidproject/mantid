@@ -27,6 +27,15 @@ GET_POINTER_SPECIALIZATION(Material)
 GET_POINTER_SPECIALIZATION(OrientedLattice)
 GET_POINTER_SPECIALIZATION(Sample)
 
+static boost::python::object getSampleShape(Sample &self) {
+  auto shape = self.getShapePtr();
+  if (!shape) {
+    return boost::python::object(); // Return None
+  }
+  // Force creation of a new Python wrapper
+  return boost::python::object(shape);
+}
+
 void export_Sample() {
   register_ptr_to_python<Sample *>();
   register_ptr_to_python<std::shared_ptr<Sample>>();
@@ -58,15 +67,13 @@ void export_Sample() {
       .def("getHeight", &Sample::getHeight, arg("self"), "Return the height in mm")
       .def("getWidth", &Sample::getWidth, arg("self"), "Return the width in mm")
       .def("getMaterial", &Sample::getMaterial, arg("self"), "The material the sample is composed of",
-           return_value_policy<reference_existing_object>())
+           return_internal_reference<>())
       .def("setGeometryFlag", &Sample::setGeometryFlag, (arg("self"), arg("geom_id")), "Set the geometry flag.")
       .def("setThickness", &Sample::setThickness, (arg("self"), arg("thick")), "Set the thickness in mm.")
       .def("setHeight", &Sample::setHeight, (arg("self"), arg("height")), "Set the height in mm.")
       .def("setWidth", &Sample::setWidth, (arg("self"), arg("width")), "Set the width in mm.")
-      .def("getShape", &Sample::getShape, arg("self"), "Returns a shape of a Sample object.",
-           return_value_policy<reference_existing_object>())
-      .def("setShape", &Sample::setShape, (arg("self"), arg("shape")), "Set shape of Sample object.",
-           with_custodian_and_ward<1, 2>())
+      .def("getShape", &getSampleShape, arg("self"), "Returns a shape of a Sample object.")
+      .def("setShape", &Sample::setShape, (arg("self"), arg("shape")), "Set shape of Sample object.")
       .def("hasEnvironment", &Sample::hasEnvironment, arg("self"),
            "Returns True if the sample has an environment defined")
       .def("hasShape", &Sample::hasShape, arg("self"), "Returns True if the sample has a shape defined")
@@ -79,5 +86,16 @@ void export_Sample() {
       .def("__getitem__", &Sample::operator[], (arg("self"), arg("index")), return_internal_reference<>())
       .def("__copy__", &Mantid::PythonInterface::generic__copy__<Sample>)
       .def("__deepcopy__", &Mantid::PythonInterface::generic__deepcopy__<Sample>)
-      .def("__eq__", &Sample::operator==, (arg("self"), arg("other")));
+      .def("__eq__", &Sample::operator==, (arg("self"), arg("other")))
+      .def(
+          "__del__",
+          +[](Sample &self) {
+            // Force cleanup before destruction
+            try {
+              self.setShape(nullptr); // Clear shape reference
+            } catch (...) {
+              // Ignore cleanup errors during destruction
+            }
+          },
+          arg("self"));
 }

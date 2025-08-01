@@ -107,17 +107,27 @@ const IObject &Sample::getShape() const { return *m_shape; }
  * its own coordinate system with its centre at [0,0,0]
  * @return A pointer to the object describing the shape
  */
-const IObject_sptr Sample::getShapePtr() const { return m_shape; }
+const IObject_sptr Sample::getShapePtr() const {
+  if (!m_shape) {
+    return nullptr;
+  }
+  return m_shape;
+}
 
 /** Set the object that describes the sample shape. The object is defined within
  * its own coordinate system
  * @param shape :: The object describing the shape
  */
 void Sample::setShape(const IObject_sptr &shape) {
+  // if a shape is provided
   if (shape) {
-    // Assign a clone to ensure correct ownership of shape
-    m_shape = IObject_sptr(shape->clone());
-  } else {
+    // ignore self assignment
+    if (shape.get() != m_shape.get()) {
+      m_shape = shape;
+    };
+  }
+  // if no shape provided create a shape object from an empty string
+  else {
     m_shape = ShapeFactory().createShape("");
   }
 }
