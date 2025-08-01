@@ -30,7 +30,7 @@
        <item>
         <widget class="QToolButton" name="tB_up">
          <property name="toolTip">
-          <string/>
+          <string>Navigate up to the next workspace</string>
          </property>
          <property name="text">
           <string>previous dataset</string>
@@ -39,6 +39,9 @@
        </item>
        <item>
         <widget class="QToolButton" name="tB_down">
+         <property name="toolTip">
+          <string>Navigate down to the next workspace</string>
+         </property>
          <property name="text">
           <string>next dataset</string>
          </property>
@@ -87,7 +90,7 @@
        <item>
         <widget class="QToolButton" name="tB_grid">
          <property name="toolTip">
-          <string>Toggle grid lines</string>
+          <string>Switch between different grid sizes</string>
          </property>
          <property name="text">
           <string>grid</string>
@@ -97,7 +100,7 @@
        <item>
         <widget class="QToolButton" name="tB_crystal_axes">
          <property name="toolTip">
-          <string>Select the grid on unit cell principal axes</string>
+          <string>Switch between orthogonal and crystallographic planes</string>
          </property>
          <property name="text">
           <string>crystal_axes</string>
@@ -269,6 +272,9 @@
        </item>
        <item>
         <widget class="QToolButton" name="tB_log">
+         <property name="toolTip">
+          <string>Turn on/off logarithmic scale</string>
+         </property>
          <property name="text">
           <string>log</string>
          </property>
@@ -279,6 +285,9 @@
        </item>
        <item>
         <widget class="QComboBox" name="combB_colormap">
+         <property name="toolTip">
+          <string>Select colorbar style</string>
+         </property>
          <property name="iconSize">
           <size>
            <width>100</width>
@@ -289,6 +298,9 @@
        </item>
        <item>
         <widget class="QToolButton" name="tB_invert_cb">
+         <property name="toolTip">
+          <string>Invert selected colormap</string>
+         </property>
          <property name="text">
           <string>invert</string>
          </property>
@@ -299,6 +311,9 @@
        </item>
        <item>
         <widget class="QLabel" name="l_fontsize">
+         <property name="toolTip">
+          <string>Change font size of the plot legend</string>
+         </property>
          <property name="text">
           <string>FontSize:</string>
          </property>
