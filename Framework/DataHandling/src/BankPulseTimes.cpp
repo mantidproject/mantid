@@ -70,8 +70,8 @@ BankPulseTimes::BankPulseTimes(Nexus::File &file, const std::vector<int> &period
 
   // number of pulse times
   const auto dataInfo = file.getInfo();
-  const int64_t numValues =
-      std::accumulate(dataInfo.dims.cbegin(), dataInfo.dims.cend(), int64_t{1}, std::multiplies<>());
+  const uint64_t numValues =
+      std::accumulate(dataInfo.dims.cbegin(), dataInfo.dims.cend(), uint64_t{1}, std::multiplies<>());
   if (numValues == 0)
     throw std::runtime_error("event_time_zero field has no data!");
 
@@ -92,9 +92,9 @@ BankPulseTimes::BankPulseTimes(Nexus::File &file, const std::vector<int> &period
 }
 
 template <typename ValueType>
-void BankPulseTimes::readData(Nexus::File &file, int64_t numValues, Mantid::Types::Core::DateAndTime &start) {
-  std::vector<int64_t> indexStart{0};
-  std::vector<int64_t> indexStep{std::min(numValues, static_cast<int64_t>(12 * 3600 * 60))}; // 12 hour at 60Hz
+void BankPulseTimes::readData(Nexus::File &file, std::size_t numValues, Mantid::Types::Core::DateAndTime &start) {
+  Nexus::DimVector indexStart{0};
+  Nexus::DimVector indexStep{std::min(numValues, std::size_t(12 * 3600 * 60))}; // 12 hour at 60Hz
 
   // getSlab needs the data allocated already
   std::vector<ValueType> rawData(indexStep[0]);

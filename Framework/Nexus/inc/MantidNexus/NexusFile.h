@@ -47,8 +47,10 @@ private:
   hid_t m_fid;
   // There is no reason to copy or assign a file ID
   FileID(FileID const &f) = delete;
+  FileID(FileID const &&f) = delete;
   FileID &operator=(hid_t const) = delete;
   FileID &operator=(FileID const &) = delete;
+  FileID &operator=(FileID const &&) = delete;
 
 public:
   bool operator==(int const v) const { return static_cast<int>(m_fid) == v; }
@@ -340,7 +342,7 @@ public:
    * \param open_data Whether or not to open the data after creating it.
    */
   void makeCompData(std::string const &name, NXnumtype const type, DimVector const &dims, NXcompression comp,
-                    DimSizeVector const &bufsize, bool open_data = false);
+                    DimVector const &bufsize, bool open_data = false);
 
   /**
    * Insert an array as part of a data in the final file.
@@ -349,7 +351,7 @@ public:
    * \param start The starting index to insert the data.
    * \param size The size of the array to put in the file.
    */
-  template <typename NumT> void putSlab(NumT const *data, DimSizeVector const &start, DimSizeVector const &size);
+  template <typename NumT> void putSlab(NumT const *data, DimVector const &start, DimVector const &size);
 
   /**
    * Insert an array as part of a data in the final file.
@@ -359,8 +361,7 @@ public:
    * \param size The size of the array to put in the file.
    * \tparam NumT numeric data type of \a data
    */
-  template <typename NumT>
-  void putSlab(std::vector<NumT> const &data, DimSizeVector const &start, DimSizeVector const &size);
+  template <typename NumT> void putSlab(std::vector<NumT> const &data, DimVector const &start, DimVector const &size);
 
   /**
    * Insert a number as part of a data in the final file.
@@ -380,7 +381,7 @@ public:
    * from.
    * \param size The size of the block to read from the file.
    */
-  template <typename NumT> void getSlab(NumT *data, DimSizeVector const &start, DimSizeVector const &size);
+  template <typename NumT> void getSlab(NumT *data, DimVector const &start, DimVector const &size);
 
   /** Get data and coerce into an int vector.
    *
@@ -474,7 +475,7 @@ public:
    */
   template <typename NumT>
   void writeExtendibleData(std::string const &name, std::vector<NumT> const &value, DimVector const &dims,
-                           DimSizeVector const &chunk);
+                           DimVector const &chunk);
 
   /** Updates the data written into an already-created
    * data vector. If the data was created as extendible, it will be resized.
@@ -508,7 +509,7 @@ public:
    */
   template <typename NumT>
   void writeCompData(std::string const &name, std::vector<NumT> const &value, DimVector const &dims,
-                     NXcompression const comp, DimSizeVector const &bufsize);
+                     NXcompression const comp, DimVector const &bufsize);
 
   /*----------------------------------------------------------------------*/
 

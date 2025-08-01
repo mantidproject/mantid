@@ -411,7 +411,8 @@ void LoadHelper::loadEmptyInstrument(const API::MatrixWorkspace_sptr &ws, const 
  */
 void LoadHelper::fillStaticWorkspace(const API::MatrixWorkspace_sptr &ws, const Mantid::Nexus::NXInt &data,
                                      const std::vector<double> &xAxis, int64_t initialSpectrum, bool pointData,
-                                     const std::vector<int> &detectorIDs, const std::set<int> &acceptedDetectorIDs,
+                                     const std::vector<detid_t> &detectorIDs,
+                                     const std::set<detid_t> &acceptedDetectorIDs,
                                      const std::tuple<short, short, short> &axisOrder) {
 
   const bool customDetectorIDs = detectorIDs.size() != 0;
@@ -435,7 +436,7 @@ void LoadHelper::fillStaticWorkspace(const API::MatrixWorkspace_sptr &ws, const 
 
 #pragma omp parallel for if (!excludeDetectorIDs && Kernel::threadSafe(*ws))
   for (specnum_t tube_no = 0; tube_no < static_cast<specnum_t>(nTubes); ++tube_no) {
-    for (specnum_t pixel_no = 0; pixel_no < nPixels; ++pixel_no) {
+    for (specnum_t pixel_no = 0; pixel_no < static_cast<specnum_t>(nPixels); ++pixel_no) {
       specnum_t currentSpectrum =
           static_cast<specnum_t>(initialSpectrum) + tube_no * static_cast<specnum_t>(nPixels) + pixel_no;
       if (excludeDetectorIDs != 0 && std::find(acceptedDetectorIDs.cbegin(), acceptedDetectorIDs.cend(),
@@ -446,7 +447,7 @@ void LoadHelper::fillStaticWorkspace(const API::MatrixWorkspace_sptr &ws, const 
       currentSpectrum -= nSkipped;
 
       std::vector<int> spectrum(nChannels);
-      for (auto channel_no = 0; channel_no < nChannels; ++channel_no) {
+      for (specnum_t channel_no = 0; channel_no < static_cast<specnum_t>(nChannels); ++channel_no) {
         const int dataIndices[3] = {tube_no, pixel_no, channel_no};
         spectrum[channel_no] = data(dataIndices[loadOrder[0]], dataIndices[loadOrder[1]], dataIndices[loadOrder[2]]);
       }
@@ -493,14 +494,14 @@ void LoadHelper::loadingOrder(const std::tuple<short, short, short> &dataOrder, 
  */
 void LoadHelper::fillMovingWorkspace(const API::MatrixWorkspace_sptr &ws, const Mantid::Nexus::NXInt &data,
                                      const std::vector<double> &xAxis, int64_t initialSpectrum,
-                                     const std::set<int> &acceptedDetectorIDs,
-                                     const std::vector<int> &customDetectorIDs,
+                                     const std::set<detid_t> &acceptedDetectorIDs,
+                                     const std::vector<detid_t> &customDetectorIDs,
                                      const std::tuple<short, short, short> &axisOrder) {
 
   const auto useCustomSpectraMap = customDetectorIDs.size() != 0;
   const auto useAcceptedDetectorIDs = acceptedDetectorIDs.size() != 0;
 
-  std::array<int64_t, 3U> dims = {data.dim0(), data.dim1(), data.dim2()};
+  std::array<Nexus::dimsize_t, 3U> dims = {data.dim0(), data.dim1(), data.dim2()};
   const auto nTubes = dims[std::get<0>(axisOrder)];
   const auto nPixels = dims[std::get<1>(axisOrder)];
   const auto nScans = dims[std::get<2>(axisOrder)];
@@ -508,7 +509,7 @@ void LoadHelper::fillMovingWorkspace(const API::MatrixWorkspace_sptr &ws, const 
   int nSkipped = 0;
 #pragma omp parallel for if (Kernel::threadSafe(*ws))
   for (specnum_t tube_no = 0; tube_no < static_cast<specnum_t>(nTubes); ++tube_no) {
-    for (specnum_t pixel_no = 0; pixel_no < nPixels; ++pixel_no) {
+    for (specnum_t pixel_no = 0; pixel_no < static_cast<specnum_t>(nPixels); ++pixel_no) {
       specnum_t currentDetector =
           static_cast<specnum_t>(initialSpectrum) + tube_no * static_cast<specnum_t>(nPixels) + pixel_no;
       if (useAcceptedDetectorIDs && std::find(acceptedDetectorIDs.cbegin(), acceptedDetectorIDs.cend(),
@@ -523,7 +524,7 @@ void LoadHelper::fillMovingWorkspace(const API::MatrixWorkspace_sptr &ws, const 
       else
         currentSpectrum = currentDetector;
       currentSpectrum *= nScans;
-      for (auto channel_no = 0; channel_no < nScans; ++channel_no) {
+      for (specnum_t channel_no = 0; channel_no < static_cast<specnum_t>(nScans); ++channel_no) {
         auto spectrumValue = data(channel_no, tube_no, pixel_no);
         ws->mutableY(currentSpectrum) = spectrumValue;
         ws->mutableE(currentSpectrum) = sqrt(spectrumValue);

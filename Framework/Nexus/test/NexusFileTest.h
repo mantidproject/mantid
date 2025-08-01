@@ -675,8 +675,7 @@ public:
       index += maxlen;
     }
     // write the strings as a flat array, but with dims for a block
-    Mantid::Nexus::DimVector dims{static_cast<Mantid::Nexus::dimsize_t>(numStr),
-                                  static_cast<Mantid::Nexus::dimsize_t>(maxlen)};
+    Mantid::Nexus::DimVector dims{numStr, maxlen};
     file.makeData("value", NXnumtype::CHAR, dims, true);
     file.putData(strs.data());
 

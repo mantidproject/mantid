@@ -20,6 +20,7 @@ namespace DataHandling {
 /** LoadHelper : Auxiliary functions for Loading Files
  */
 namespace LoadHelper {
+using detid_t = int32_t;
 
 std::string findInstrumentNexusAddress(const Mantid::Nexus::NXEntry &);
 std::string getStringFromNexusAddress(const Mantid::Nexus::NXEntry &, const std::string &);
@@ -41,14 +42,14 @@ void loadEmptyInstrument(const API::MatrixWorkspace_sptr &ws, const std::string 
 
 void fillStaticWorkspace(const API::MatrixWorkspace_sptr &, const Mantid::Nexus::NXInt &,
                          const std::vector<double> &xAxis, int64_t initialSpectrum = 0, bool pointData = false,
-                         const std::vector<int> &detectorIDs = std::vector<int>(),
-                         const std::set<int> &acceptedID = std::set<int>(),
+                         const std::vector<detid_t> &detectorIDs = std::vector<int>(),
+                         const std::set<detid_t> &acceptedID = std::set<int>(),
                          const std::tuple<short, short, short> &axisOrder = std::tuple<short, short, short>(0, 1, 2));
 
 void fillMovingWorkspace(const API::MatrixWorkspace_sptr &, const Mantid::Nexus::NXInt &,
                          const std::vector<double> &xAxis, int64_t initialSpectrum = 0,
-                         const std::set<int> &acceptedID = std::set<int>(),
-                         const std::vector<int> &customID = std::vector<int>(),
+                         const std::set<detid_t> &acceptedID = std::set<int>(),
+                         const std::vector<detid_t> &customID = std::vector<int>(),
                          const std::tuple<short, short, short> &axisOrder = std::tuple<short, short, short>(0, 1, 2));
 
 void loadingOrder(const std::tuple<short, short, short> &axisOrder, int *dataIndices);
