@@ -237,8 +237,8 @@ void _writeChunkedData(std::shared_ptr<Nexus::File> dest, // Must have open grou
   }
   const size_t chunk_size = _chunk_size;
 
-  const Nexus::DimVector dims = {static_cast<Nexus::dimsize_t>(N_chunk), static_cast<Nexus::dimsize_t>(chunk_size)};
-  const Nexus::DimSizeVector chunk_dims = {1, static_cast<Nexus::dimsize_t>(chunk_size)};
+  const Nexus::DimVector dims = {N_chunk, chunk_size};
+  const Nexus::DimVector chunk_dims = {1, chunk_size};
 
   // Create and open the dataset.
   // (If compressionType == NXcompression::NONE, this just creates a non-compressed dataset.)
@@ -252,11 +252,11 @@ void _writeChunkedData(std::shared_ptr<Nexus::File> dest, // Must have open grou
   Nexus::DimVector start{0, 0};
   for (size_t n : indices) {
     const auto &v = ((*src).*vData)(n);
-    const Nexus::DimSizeVector data_dims = {1, static_cast<Nexus::dimsize_t>(v.size())};
+    const Nexus::DimVector data_dims = {1, v.size()};
     dest->putSlab(_dataPointer<V>(v), start, data_dims);
-    if (pad_data && data_dims[1] != static_cast<Nexus::dimsize_t>(chunk_size)) {
+    if (pad_data && data_dims[1] != chunk_size) {
       // Fill the remainder of the slab.
-      const Nexus::DimSizeVector fill_dims = {1, static_cast<Nexus::dimsize_t>(chunk_size) - data_dims[1]};
+      const Nexus::DimVector fill_dims = {1, chunk_size - data_dims[1]};
       const Nexus::DimVector _start = {start[0], data_dims[1]};
       dest->putSlab(vFill.data(), _start, fill_dims);
     }
@@ -372,8 +372,7 @@ int NexusFileIO::writeNexusProcessedData2D(const API::MatrixWorkspace_const_sptr
 
   // write X data, as single array or all values if "ragged"
   if (uniformSpectra) {
-    m_filehandle->makeData("axis1", NXnumtype::FLOAT64,
-                           Nexus::DimVector{static_cast<Nexus::dimsize_t>(localworkspace->x(0).size())}, true);
+    m_filehandle->makeData("axis1", NXnumtype::FLOAT64, localworkspace->x(0).size(), true);
     m_filehandle->putData(localworkspace->x(0).rawData().data());
 
   } else {
@@ -399,8 +398,7 @@ int NexusFileIO::writeNexusProcessedData2D(const API::MatrixWorkspace_const_sptr
 
   if (!sAxis->isText()) {
     // write axis2, maybe just spectra number
-    m_filehandle->makeData("axis2", NXnumtype::FLOAT64, Nexus::DimVector{static_cast<Nexus::dimsize_t>(axis2.size())},
-                           true);
+    m_filehandle->makeData("axis2", NXnumtype::FLOAT64, axis2.size(), true);
     m_filehandle->putData(axis2.data());
     m_filehandle->putAttr("units", sLabel, false);
 
@@ -417,8 +415,7 @@ int NexusFileIO::writeNexusProcessedData2D(const API::MatrixWorkspace_const_sptr
     for (size_t i = 0; i < sAxis->length(); i++) {
       textAxis += sAxis->label(i) + "\n";
     }
-    m_filehandle->makeData("axis2", NXnumtype::CHAR, Nexus::DimVector{static_cast<Nexus::dimsize_t>(textAxis.size())},
-                           true);
+    m_filehandle->makeData("axis2", NXnumtype::CHAR, textAxis.size(), true);
     m_filehandle->putData(textAxis.c_str());
     m_filehandle->putAttr("units", "TextAxis");
 
@@ -450,11 +447,11 @@ int NexusFileIO::writeNexusProcessedData2D(const API::MatrixWorkspace_const_sptr
 template <typename ColumnT, typename NexusT>
 void NexusFileIO::writeTableColumn(NXnumtype type, const std::string &interpret_as, const API::Column &col,
                                    const std::string &columnName) const {
-  const auto nRows = static_cast<int>(col.size());
-  const Nexus::DimVector dims_array = {nRows};
+  const auto nRows = col.size();
+  const Nexus::DimVector dims_array{nRows};
 
   auto toNexus = new NexusT[nRows];
-  for (int ii = 0; ii < nRows; ii++)
+  for (std::size_t ii = 0; ii < nRows; ii++)
     toNexus[ii] = static_cast<NexusT>(col.cell<ColumnT>(ii));
   writeData(columnName.c_str(), type, dims_array, toNexus, false);
   delete[] toNexus;
@@ -500,7 +497,7 @@ void NexusFileIO::writeNexusVectorColumn(const Column_const_sptr &col, const std
   }
 
   // Set-up dimensions
-  const Nexus::DimVector dims{static_cast<Nexus::dimsize_t>(rowCount), static_cast<Nexus::dimsize_t>(maxSize)};
+  const Nexus::DimVector dims{rowCount, maxSize};
 
   // Create data array
   boost::scoped_array<ElemType> data(new ElemType[rowCount * maxSize]);
@@ -562,7 +559,7 @@ int NexusFileIO::writeNexusTableWorkspace(const API::ITableWorkspace_const_sptr 
     return 2;
   }
 
-  auto nRows = static_cast<int>(itableworkspace->rowCount());
+  std::size_t nRows = itableworkspace->rowCount();
 
   for (size_t i = 0; i < itableworkspace->columnCount(); i++) {
     Column_const_sptr col = itableworkspace->getColumn(i);
@@ -586,7 +583,7 @@ int NexusFileIO::writeNexusTableWorkspace(const API::ITableWorkspace_const_sptr 
     } else if (col->isType<std::string>()) {
       // determine max string size
       std::size_t maxStr = 0;
-      for (int ii = 0; ii < nRows; ii++) {
+      for (std::size_t ii = 0; ii < nRows; ii++) {
         if (col->cell<std::string>(ii).size() > maxStr)
           maxStr = col->cell<std::string>(ii).size();
       }
@@ -595,14 +592,14 @@ int NexusFileIO::writeNexusTableWorkspace(const API::ITableWorkspace_const_sptr 
       if (maxStr == 0) {
         maxStr = 1;
       }
-      const Nexus::DimVector dims_array = {nRows, static_cast<Nexus::dimsize_t>(maxStr)};
-      const Nexus::DimSizeVector asize = {1, dims_array[1]};
+      const Nexus::DimVector dims_array{nRows, maxStr};
+      const Nexus::DimVector asize{1, dims_array[1]};
 
       m_filehandle->makeCompData(str, NXnumtype::CHAR, dims_array, NXcompression::LZW, asize);
 
       m_filehandle->openData(str);
       auto toNexus = new char[maxStr * nRows];
-      for (int ii = 0; ii < nRows; ii++) {
+      for (std::size_t ii = 0; ii < nRows; ii++) {
         std::string rowStr = col->cell<std::string>(ii);
         for (size_t ic = 0; ic < rowStr.size(); ic++)
           toNexus[ii * maxStr + ic] = rowStr[ic];
@@ -660,7 +657,7 @@ int NexusFileIO::writeNexusProcessedDataEventCombined(const DataObjects::EventWo
   m_filehandle->openGroup("event_workspace", "NXdata");
 
   // The array of indices for each event list #
-  Nexus::DimVector dims_array = {static_cast<Nexus::dimsize_t>(indices.size())};
+  Nexus::DimVector dims_array = {indices.size()};
   if (!indices.empty()) {
     if (compress)
       m_filehandle->makeCompData("indices", NXnumtype::INT64, dims_array, m_nexuscompression, dims_array);
@@ -731,12 +728,12 @@ bool NexusFileIO::writeNexusBinMasking(const API::MatrixWorkspace_const_sptr &ws
   std::vector<int32_t> spectra;
   std::vector<int64_t> bins;
   std::vector<double> weights;
-  int spectra_count = 0;
+  std::size_t spectra_count = 0;
   int offset = 0;
   for (std::size_t i = 0; i < ws->getNumberHistograms(); ++i) {
     if (ws->hasMaskedBins(i)) {
       const API::MatrixWorkspace::MaskList &mList = ws->maskedBins(i);
-      spectra.emplace_back(spectra_count);
+      spectra.emplace_back(static_cast<int32_t>(spectra_count));
       spectra.emplace_back(offset);
       for (const auto &mask : mList) {
         bins.emplace_back(mask.first);
@@ -751,7 +748,7 @@ bool NexusFileIO::writeNexusBinMasking(const API::MatrixWorkspace_const_sptr &ws
     return false;
 
   // save spectra offsets as a 2d array of ints
-  std::vector<int64_t> dimensions = {spectra_count, 2};
+  Nexus::DimVector dimensions{spectra_count, 2};
 
   m_filehandle->makeData("masked_spectra", NXnumtype::INT32, dimensions, true);
   m_filehandle->putAttr("description", "spectra index,offset in masked_bins and mask_weights");
@@ -759,13 +756,13 @@ bool NexusFileIO::writeNexusBinMasking(const API::MatrixWorkspace_const_sptr &ws
   m_filehandle->closeData();
 
   // save masked bin indices
-  dimensions[0] = static_cast<int>(bins.size());
+  dimensions[0] = bins.size();
   m_filehandle->makeData("masked_bins", NXnumtype::UINT64, dimensions, true);
   m_filehandle->putData(bins.data());
   m_filehandle->closeData();
 
   // save masked bin weights
-  dimensions[0] = static_cast<int>(bins.size());
+  dimensions[0] = bins.size();
   m_filehandle->makeData("mask_weights", NXnumtype::FLOAT64, dimensions, true);
   m_filehandle->putData(weights.data());
   m_filehandle->closeData();

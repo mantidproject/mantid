@@ -87,7 +87,7 @@ public:
     // NOTE: to properly set the DataSpace, should be `dims {in.size(), 1}` and use rank = 2
     // However, that seems to contradict notes inside napi5 about rank for string data
     // Using rank = 1 works, but the DataSpace will register size = 1
-    DimVector dims{static_cast<dimsize_t>(in.size())};
+    DimVector dims{in.size()};
     NX_ASSERT_OKAY(NXmakedata64(fid, name.c_str(), NXnumtype::CHAR, 1, dims), "failed to make data");
     NX_ASSERT_OKAY(NXopendata(fid, name.c_str()), "failed to open data");
     NX_ASSERT_OKAY(NXputdata(fid, in.data()), "failed to put data");
@@ -116,7 +116,7 @@ public:
     // put/get a char array
     char word[] = "silicovolcaniosis";
     char read[30] = {'A'}; // pre-fill with junk data
-    dims = {static_cast<dimsize_t>(strlen(word))};
+    dims = {strlen(word)};
     NX_ASSERT_OKAY(NXmakedata64(fid, "data_char", NXnumtype::CHAR, 1, dims), "failed to make data");
     NX_ASSERT_OKAY(NXopendata(fid, "data_char"), "failed to open data");
     NX_ASSERT_OKAY(NXputdata(fid, word), "failed to put data");

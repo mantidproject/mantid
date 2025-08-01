@@ -106,7 +106,7 @@ private:
     }
     file.makeData("r8_data", NXnumtype::FLOAT64, array_dims, true);
     DimVector slab_start{4, 0};
-    DimSizeVector slab_size{1, 4};
+    DimVector slab_size{1, 4};
     file.putSlab(&(r8_array[16]), slab_start, slab_size);
     slab_start[0] = 0;
     slab_start[1] = 0;

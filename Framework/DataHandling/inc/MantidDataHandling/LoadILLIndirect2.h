@@ -53,15 +53,15 @@ private:
   std::string m_instrumentName; ///< Name of the instrument
 
   // Variables describing the data in the detector
-  size_t m_numberOfTubes;           // number of tubes - X
-  size_t m_numberOfPixelsPerTube;   // number of pixels per tube - Y
-  size_t m_numberOfChannels;        // time channels - Z
-  size_t m_numberOfSimpleDetectors; // number of simple detector
-  size_t m_numberOfMonitors;        // number of monitors
-  std::set<int> m_activeSDIndices;  // set of Single Detector indices,
-                                    // that were actually active
-  bool m_bats;                      // A flag marking the BATS mode
-  size_t m_firstTubeAngleRounded;   // A flag holding the rounded angle of the first tube
+  size_t m_numberOfTubes;              // number of tubes - X
+  size_t m_numberOfPixelsPerTube;      // number of pixels per tube - Y
+  size_t m_numberOfChannels;           // time channels - Z
+  size_t m_numberOfSimpleDetectors;    // number of simple detector
+  size_t m_numberOfMonitors;           // number of monitors
+  std::set<int32_t> m_activeSDIndices; // set of Single Detector indices,
+                                       // that were actually active
+  bool m_bats;                         // A flag marking the BATS mode
+  size_t m_firstTubeAngleRounded;      // A flag holding the rounded angle of the first tube
 
   std::vector<std::string> m_supportedInstruments;
   std::string m_loadOption;

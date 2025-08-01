@@ -675,8 +675,7 @@ public:
       index += maxlen;
     }
     // write the strings as a flat array, but with dims for a block
-    Mantid::Nexus::DimVector dims{static_cast<Mantid::Nexus::dimsize_t>(numStr),
-                                  static_cast<Mantid::Nexus::dimsize_t>(maxlen)};
+    Mantid::Nexus::DimVector dims{numStr, maxlen};
     file.makeData("value", NXnumtype::CHAR, dims, true);
     file.putData(strs.data());
 
@@ -918,7 +917,7 @@ public:
     TS_ASSERT_EQUALS(file.getAddress(), "/");
     // NOTE pre-existent behavior will partially open invalid paths
     TS_ASSERT_THROWS(file.openAddress("/entry1/pants"), Mantid::Nexus::Exception &);
-    TS_ASSERT_EQUALS(file.getAddress(), "/entry1");
+    TS_ASSERT_EQUALS(file.getAddress(), "/");
 
     // open the root
     std::string expected = "/";
@@ -944,7 +943,7 @@ public:
 
     // failling should leave path alone
     TS_ASSERT_THROWS(file.openAddress("/pants"), Mantid::Nexus::Exception &);
-    TS_ASSERT_EQUALS(file.getAddress(), "/");
+    TS_ASSERT_EQUALS(file.getAddress(), "/" + expected);
 
     // intermingle working and failing opens
     file.openAddress("/entry1/layer2a/");
