@@ -25,7 +25,6 @@ Current limitations compared to ``AlignAndFocusPowderFromFiles``
 - hard coded for 6 particular groups
 - does not support copping data
 - does not support removing prompt pulse
-- does not support removing bad pulses
 
 Child algorithms used are
 
@@ -55,11 +54,11 @@ This algorithm accepts the same ``SplitterWorkspace`` inputs as :ref:`FilterEven
     splitter.addRow((400,410, '0'))
 
     # pass the splitter table to AlignAndFocusPowderSlim
-    ws=AlignAndFocusPowderSlim("VULCAN_218062.nxs.h5",
-                               SplitterWorkspace=splitter, RelativeTime=True,
-                               XMin=0, XMax=50000, XDelta=50000,
-                               BinningMode="Linear",
-                               BinningUnits="TOF")
+    ws = AlignAndFocusPowderSlim("VULCAN_218062.nxs.h5",
+                                 SplitterWorkspace=splitter, RelativeTime=True,
+                                 XMin=0, XMax=50000, XDelta=50000,
+                                 BinningMode="Linear",
+                                 BinningUnits="TOF")
 
     # This is equivalent to using FilterEvents with the same splitter table.
     # But note that this example doesn't align the data so put everything in 1 big bin to compare.
@@ -93,8 +92,28 @@ This algorithm accepts the same ``SplitterWorkspace`` inputs as :ref:`FilterEven
                          MaximumLogValue=70.15)
 
     # Use the splitter table to filter the events during loading
-    ws=AlignAndFocusPowderSlim("VULCAN_218062.nxs.h5", SplitterWorkspace='splitter')
+    ws = AlignAndFocusPowderSlim("VULCAN_218062.nxs.h5", SplitterWorkspace='splitter')
 
+
+**Example - filter bad pulses**
+
+.. code-block:: python
+
+    ws = AlignAndFocusPowderSlim("VULCAN_218062.nxs.h5",
+                                 XMin=0, XMax=50000, XDelta=50000,
+                                 BinningMode="Linear",
+                                 BinningUnits="TOF",
+                                 FilterBadPulses=True)
+
+    # This is equivalent to using FilterBadPulses.
+    # But note that this example doesn't align the data so put everything in 1 big bin to compare.
+    ws2 = LoadEventNexus("VULCAN_218062.nxs.h5")
+    grp = CreateGroupingWorkspace(ws2, GroupDetectorsBy='bank')
+    ws2 = GroupDetectors(ws2, CopyGroupingFromWorkspace="grp")
+    ws2 = FilterBadPulses(ws2)
+    ws2 = Rebin(ws2, "0,50000,50000", PreserveEvents=False)
+
+    CompareWorkspaces(ws, ws2, CheckUncertainty=False, CheckSpectraMap=False, CheckInstrument=False)
 
 .. note::
 

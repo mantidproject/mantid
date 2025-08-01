@@ -60,6 +60,8 @@ const std::string FILTER_TIMESTOP("FilterByTimeStop");
 const std::string SPLITTER_WS("SplitterWorkspace");
 const std::string SPLITTER_RELATIVE("RelativeTime");
 const std::string SPLITTER_TARGET("SplitterTarget");
+const std::string FILTER_BAD_PULSES("FilterBadPulses");
+const std::string FILTER_BAD_PULSES_LOWER_CUTOFF("BadPulsesLowerCutoff");
 const std::string X_MIN("XMin");
 const std::string X_MAX("XMax");
 const std::string X_DELTA("XDelta");
@@ -69,6 +71,8 @@ const std::string OUTPUT_WKSP("OutputWorkspace");
 const std::string READ_SIZE_FROM_DISK("ReadSizeFromDisk");
 const std::string EVENTS_PER_THREAD("EventsPerThread");
 } // namespace PropertyNames
+
+const std::string LOG_CHARGE_NAME("proton_charge");
 
 const std::vector<std::string> binningModeNames{"Logarithmic", "Linear"};
 enum class BinningMode { LOGARITHMIC, LINEAR, enum_count };
@@ -168,6 +172,12 @@ void AlignAndFocusPowderSlim::init() {
   auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(0);
   declareProperty(PropertyNames::SPLITTER_TARGET, 0, mustBePositive, "The target workspace index for the splitter.");
+  declareProperty(PropertyNames::FILTER_BAD_PULSES, false,
+                  "Filter bad pulses in the same way that :ref:`algm-FilterBadPulses` does.");
+  auto range = std::make_shared<BoundedValidator<double>>();
+  range->setBounds(0., 100.);
+  declareProperty(PropertyNames::FILTER_BAD_PULSES_LOWER_CUTOFF, 95., range,
+                  "The percentage of the average to use as the lower bound when filtering bad pulses.");
   const std::vector<std::string> cal_exts{".h5", ".hd5", ".hdf", ".cal"};
   declareProperty(std::make_unique<FileProperty>(PropertyNames::CAL_FILE, "", FileProperty::OptionalLoad, cal_exts),
                   "The .cal file containing the position correction factors. Either this or OffsetsWorkspace needs to "
@@ -354,7 +364,7 @@ void AlignAndFocusPowderSlim::exec() {
     const int DISK_CHUNK = getProperty(PropertyNames::READ_SIZE_FROM_DISK);
     const int GRAINSIZE_EVENTS = getProperty(PropertyNames::EVENTS_PER_THREAD);
     auto progress = std::make_shared<API::Progress>(this, .17, .9, num_banks_to_read);
-    std::cout << (DISK_CHUNK / GRAINSIZE_EVENTS) << " threads per chunk\n"; // TODO REMOVE debug print
+    g_log.debug() << (DISK_CHUNK / GRAINSIZE_EVENTS) << " threads per chunk\n";
     ProcessBankTask task(bankEntryNames, h5file, is_time_filtered, wksp, m_calibration, m_masked,
                          static_cast<size_t>(DISK_CHUNK), static_cast<size_t>(GRAINSIZE_EVENTS), pulse_indices,
                          progress);
@@ -471,6 +481,7 @@ API::MatrixWorkspace_sptr AlignAndFocusPowderSlim::editInstrumentGeometry(
     API::MatrixWorkspace_sptr &wksp, const double l1, const std::vector<double> &polars,
     const std::vector<specnum_t> &specids, const std::vector<double> &l2s, const std::vector<double> &azimuthals) {
   API::IAlgorithm_sptr editAlg = createChildAlgorithm("EditInstrumentGeometry");
+  editAlg->setLoggingOffset(1);
   editAlg->setProperty("Workspace", wksp);
   if (l1 > 0.)
     editAlg->setProperty("PrimaryFlightPath", l1);
@@ -523,6 +534,27 @@ void AlignAndFocusPowderSlim::determinePulseIndices(const API::MatrixWorkspace_s
     }
   }
 
+  // filter bad pulses
+  if (getProperty(PropertyNames::FILTER_BAD_PULSES)) {
+    this->progress(.16, "Filtering bad pulses");
+
+    // get limits from proton_charge
+    const auto [min_pcharge, max_pcharge, mean] =
+        wksp->run().getBadPulseRange(LOG_CHARGE_NAME, getProperty(PropertyNames::FILTER_BAD_PULSES_LOWER_CUTOFF));
+    g_log.information() << "Filtering bad pulses; pcharge outside of " << min_pcharge << " to " << max_pcharge << '\n';
+
+    const auto run_start = wksp->getFirstPulseTime();
+    const auto run_stop = wksp->getLastPulseTime();
+
+    const auto log = dynamic_cast<const TimeSeriesProperty<double> *>(wksp->run().getLogData(LOG_CHARGE_NAME));
+    if (log) {
+      // need to have centre=true for proton_charge
+      roi = log->makeFilterByValue(min_pcharge, max_pcharge, true, Mantid::Kernel::TimeInterval(run_start, run_stop),
+                                   0.0, true, &roi);
+    }
+  }
+
+  // filter by splitter workspace
   const auto splitter_roi = timeROIFromSplitterWorkspace(startOfRun);
 
   if (roi.useAll())

@@ -79,7 +79,7 @@ void FilterBadPulses::exec() {
   // workspace
   auto filterAlgo = createChildAlgorithm("FilterByLogValue", 0., 1.);
   filterAlgo->setProperty("InputWorkspace", inputWS);
-  filterAlgo->setProperty("LogName", "proton_charge");
+  filterAlgo->setProperty("LogName", LOG_CHARGE_NAME);
   filterAlgo->setProperty("MinimumValue", min_pcharge);
   filterAlgo->setProperty("MaximumValue", max_pcharge);
   filterAlgo->execute();
