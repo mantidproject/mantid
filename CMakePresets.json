@@ -75,15 +75,6 @@
     },
     {
       "name": "win-64-ci",
-      "description": "Build options for a CI build on windows",
-      "inherits": [
-        "ci-default",
-        "conda"
-      ],
-      "generator": "Visual Studio 17 2022"
-    },
-    {
-      "name": "win-64-ci-ninja",
       "description": "Build options for a CI build on windows with Ninja",
       "inherits": [
         "ci-default",

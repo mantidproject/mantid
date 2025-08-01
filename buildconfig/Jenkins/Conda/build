@@ -14,7 +14,6 @@
 #   8. ENABLE_DOC_TESTS: whether or not to build the test data for doc tests
 #   9. ENABLE_COVERITY: enables the coverity scan static analysis
 #   10. EXTRA_CMAKE_FLAGS: Extra flags to pass directly to cmake, enclose in "".
-#   11. BUILD_THREADS: Pass the number of threads that can be used to build with
 
 WORKSPACE=$1
 CMAKE_PRESET=$2
@@ -26,16 +25,14 @@ ENABLE_SYSTEM_TESTS=$7
 ENABLE_DOC_TESTS=$8
 ENABLE_COVERITY=$9
 EXTRA_CMAKE_FLAGS=${10}
-BUILD_THREADS=${11}
 
 # Only pass MANTID_DATA_STORE to CMake if present in the environment otherwise rely on CMake default
 if [[ -n "${MANTID_DATA_STORE}" ]]; then
     MANTID_DATA_STORE_CMAKE="-DMANTID_DATA_STORE=${MANTID_DATA_STORE}"
 fi
 
-BUILD_OPTIONS=""
 if [[ $OSTYPE == "msys"* ]]; then
-    BUILD_OPTIONS="$BUILD_OPTIONS --config Release"
+    eval "$($WORKSPACE/buildconfig/Jenkins/Conda/vcvarsall.sh x64 -vcvars_ver=14.38.17.8)"
 fi
 
 # Run CMake using preset and variables
@@ -44,18 +41,10 @@ cmake --preset=${CMAKE_PRESET} ${MANTID_DATA_STORE_CMAKE} ${EXTRA_CMAKE_FLAGS} $
 # Run the actual builds for the code, unit tests, and system tests.
 cd $WORKSPACE/build
 
-if [ -f build.ninja ]; then
-    # if using ninja let ninja control compiling threads
-    echo "ninja will control number of threads"
-else
-    # prepend number of threads to build with
-    BUILD_OPTIONS="-j$BUILD_THREADS $BUILD_OPTIONS"
-fi
-
 if [[ $ENABLE_COVERITY == true ]]; then
     conda install -y jq curl
 
-    ${COVERITY_DIR}/cov-build --dir cov-int cmake --build . $BUILD_OPTIONS
+    ${COVERITY_DIR}/cov-build --dir cov-int cmake --build .
     tar czvf mantid.tgz cov-int
 
     curl --fail-with-body -X POST -d version=$GIT_COMMIT -d email=mantidproject@gmail.com -d token=$COVERITY_TOKEN -d file_name="mantid.tgz" https://scan.coverity.com/projects/335/builds/init > response
@@ -69,7 +58,7 @@ if [[ $ENABLE_COVERITY == true ]]; then
 fi
 
 if [[ $ENABLE_BUILD_CODE == true ]]; then
-    cmake --build . $BUILD_OPTIONS
+    cmake --build .
 fi
 
 # create a collection of targets to run all at once during main build
