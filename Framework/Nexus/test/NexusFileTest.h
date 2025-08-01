@@ -10,6 +10,7 @@
 
 #include "MantidNexus/NexusException.h"
 #include "MantidNexus/NexusFile.h"
+#include "MantidTypes/Core/DateAndTime.h"
 #include "test_helper.h"
 #include <H5Cpp.h>
 #include <cstdio>
@@ -19,6 +20,7 @@
 #include <fstream>
 #include <iostream>
 #include <map>
+#include <regex>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -1449,6 +1451,48 @@ public:
 
     TS_ASSERT_EQUALS(entries.count("soft_link"), 1);
     TS_ASSERT_EQUALS(entries["soft_link"], "NX_UNKNOWN_GROUP");
+  }
+  // ##################################################################################################################
+
+#ifdef _WIN32
+#define TZSET _tzset
+#define SETENV(value) _putenv_s("TZ", value)
+#define UNSETENV() _putenv_s("TZ", "")
+#define TARGET_TIMEZONE "EST5EDT"
+#else
+#define TZSET tzset
+#define SETENV(value) setenv("TZ", value, 1)
+#define UNSETENV() unsetenv("TZ")
+#define TARGET_TIMEZONE "America/New_York"
+#endif
+
+  void test_data_existing_time_string() {
+    cout << "\ntest dataset read existing -- time string attr\n";
+
+    // open an existing file
+    std::string filename = getFullPath("HB2C_7000.nxs.h5");
+    Mantid::Nexus::File file(filename, NXaccess::READ);
+
+    std::string time_str;
+    file.getAttr("file_time", time_str);
+    file.close();
+
+    char *current_tz = getenv("TZ");
+    std::string real_tz = current_tz ? current_tz : "";
+    SETENV(TARGET_TIMEZONE);
+    TZSET();
+
+    Mantid::Types::Core::DateAndTime dandt(time_str);
+    std::time_t ntime = dandt.to_time_t();
+    std::string new_str = Mantid::Types::Core::DateAndTime::getLocalTimeISO8601String(ntime);
+    TS_ASSERT_EQUALS(time_str, new_str);
+
+    if (real_tz != "") {
+      SETENV(real_tz.c_str());
+    } else {
+      UNSETENV();
+    }
+    TZSET();
   }
 
   // ##################################################################################################################
