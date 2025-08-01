@@ -46,6 +46,7 @@ class FullInstrumentViewWindow(QMainWindow):
 
         super(FullInstrumentViewWindow, self).__init__(parent)
         self.setWindowTitle("Instrument View")
+        self.resize(1500, 1500)
 
         self._off_screen = off_screen
 
