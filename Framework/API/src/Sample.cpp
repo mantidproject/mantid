@@ -13,7 +13,6 @@
 #include "MantidKernel/Material.h"
 #include "MantidKernel/Strings.h"
 #include "MantidNexus/NexusException.h"
-
 #include <utility>
 
 namespace Mantid::API {
@@ -108,6 +107,7 @@ const IObject &Sample::getShape() const { return *m_shape; }
  * @return A pointer to the object describing the shape
  */
 const IObject_sptr Sample::getShapePtr() const {
+
   if (!m_shape) {
     return nullptr;
   }
@@ -119,16 +119,13 @@ const IObject_sptr Sample::getShapePtr() const {
  * @param shape :: The object describing the shape
  */
 void Sample::setShape(const IObject_sptr &shape) {
-  // if a shape is provided
-  if (shape) {
-    // ignore self assignment
-    if (shape.get() != m_shape.get()) {
-      m_shape = shape;
-    };
+  if (shape && shape.get() == nullptr) {
   }
-  // if no shape provided create a shape object from an empty string
-  else {
+
+  else if (!shape) {
     m_shape = ShapeFactory().createShape("");
+  } else if (shape != m_shape) {
+    m_shape = shape; // share ownership safely
   }
 }
 
