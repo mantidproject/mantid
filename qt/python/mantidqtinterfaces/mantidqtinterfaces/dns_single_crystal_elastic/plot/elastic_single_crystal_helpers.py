@@ -80,11 +80,9 @@ def get_hkl_intensity_from_cursor(single_crystal_map, axis_type, x, y):
         hkly = hkl_to_hklx(hkl2, qy, dy)
         pos_q = closest_mesh_point(single_crystal_map.qx_mesh, single_crystal_map.qy_mesh, qx, qy)
     elif axis_type["type"] == "hkl":  # hkl
-        qx = hkl_xy_to_q(x, dx)
-        qy = hkl_xy_to_q(y, dy)
         hklx = hkl_to_hklx(hkl1, x=x)
         hkly = hkl_to_hklx(hkl2, x=y)
-        pos_q = closest_mesh_point(single_crystal_map.qx_mesh, single_crystal_map.qy_mesh, qx, qy)
+        pos_q = closest_mesh_point(single_crystal_map.hklx_mesh, single_crystal_map.hkly_mesh, x, y)
     z = single_crystal_map.z_mesh.flatten()[pos_q]
     error = single_crystal_map.error_mesh.flatten()[pos_q]
     hkl = hkl_xy_to_hkl(hklx, hkly)

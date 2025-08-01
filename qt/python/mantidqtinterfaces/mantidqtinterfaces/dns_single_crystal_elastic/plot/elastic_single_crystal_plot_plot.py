@@ -76,6 +76,9 @@ class DNSScPlot:
         self._ax.set_xlabel(x_label)
         self._ax.set_ylabel(y_label)
 
+    def set_format_coord(self, format_coord):
+        self._ax.format_coord = format_coord
+
     def set_xlim(self, xlim):
         if xlim[0] is None:
             self._ax.autoscale(axis="x")
