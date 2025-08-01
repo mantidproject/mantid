@@ -609,13 +609,24 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
             # Create crosshair lines for each axes (except colorbars)
             self._crosshair_lines = {}
             for ax in self._axes_that_are_not_colour_bars():
+                # disable autoscale
                 ax.set_autoscalex_on(False)
                 ax.set_autoscaley_on(False)
-                hline = ax.axhline(color="r", lw=1.0, ls="-", visible=False, label="_nolegend_")
-                vline = ax.axvline(color="r", lw=1.0, ls="-", visible=False, label="_nolegend_")
+                # add animation
+                hline = ax.axhline(color="r", lw=1.0, ls="-", visible=False, animated=True, label="_nolegend_")
+                vline = ax.axvline(color="r", lw=1.0, ls="-", visible=False, animated=True, label="_nolegend_")
                 self._crosshair_lines[ax] = (hline, vline)
 
+            # add blitting
+            self._crosshair_background = None
             self._crosshair_cid = self.canvas.mpl_connect("motion_notify_event", self.crosshair)
+
+            # Connect draw events for background refresh
+            self._crosshair_draw_cid = self.canvas.mpl_connect("draw_event", self._crosshair_refresh_background)
+
+            self.canvas.draw()
+            self._crosshair_refresh_background()
+
         else:
             if hasattr(self, "_crosshair_cid"):
                 self.canvas.mpl_disconnect(self._crosshair_cid)
@@ -631,6 +642,13 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         self.canvas.draw_idle()
 
     def crosshair(self, event):
+        if not hasattr(self, "_crosshair_lines"):
+            return
+
+        # Restore background first
+        if self._crosshair_background is not None:
+            self.canvas.restore_region(self._crosshair_background)
+
         if event.inaxes and event.xdata is not None and event.ydata is not None:
             x = event.xdata
             y = event.ydata
@@ -641,13 +659,28 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
                 vline.set_xdata([x])
                 hline.set_visible(True)
                 vline.set_visible(True)
+                ax.draw_artist(hline)
+                ax.draw_artist(vline)
         else:
             # Hide all crosshairs when mouse is out of axes
-            for hline, vline in self._crosshair_lines.values():
+            for ax, (hline, vline) in self._crosshair_lines.items():
                 hline.set_visible(False)
                 vline.set_visible(False)
+                ax.draw_artist(hline)
+                ax.draw_artist(vline)
 
-        self.canvas.draw_idle()
+        # Blit updated artists
+        self.canvas.blit(self.canvas.figure.bbox)
+
+    def _crosshair_refresh_background(self, event=None):
+        if not hasattr(self, "_crosshair_lines"):
+            return
+        self._crosshair_background = self.canvas.copy_from_bbox(self.canvas.figure.bbox)
+        for ax, (hline, vline) in self._crosshair_lines.items():
+            ax.draw_artist(hline)
+            ax.draw_artist(vline)
+
+        self.canvas.blit(self.canvas.figure.bbox)
 
 
 # -----------------------------------------------------------------------------
