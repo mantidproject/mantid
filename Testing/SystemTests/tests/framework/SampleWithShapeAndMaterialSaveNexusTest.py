@@ -117,7 +117,8 @@ SetSampleMaterial(ws1, "Fe")
 
 ws2 = CreateSampleWorkspace()
 SetSampleMaterial(ws2, "Fe")
-ws2.sample().setShape(ws1.sample().getShape())
+shape = ws1.sample().getShape()
+ws2.sample().setShape(shape)
 """
         # write script to a temp file
         temp_dir = tempfile.gettempdir()

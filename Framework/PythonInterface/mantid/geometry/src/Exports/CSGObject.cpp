@@ -77,6 +77,7 @@ boost::python::object wrapMeshWithNDArray(const CSGObject *self) {
 
 void export_Object() {
   register_ptr_to_python<std::shared_ptr<CSGObject>>();
+  register_ptr_to_python<std::shared_ptr<IObject>>();
 
   class_<CSGObject, boost::python::bases<IObject>, boost::noncopyable>("CSGObject", no_init)
       .def("getBoundingBox", (const BoundingBox &(CSGObject::*)() const) & CSGObject::getBoundingBox, arg("self"),
