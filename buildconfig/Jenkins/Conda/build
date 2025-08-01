@@ -31,6 +31,10 @@ if [[ -n "${MANTID_DATA_STORE}" ]]; then
     MANTID_DATA_STORE_CMAKE="-DMANTID_DATA_STORE=${MANTID_DATA_STORE}"
 fi
 
+if [[ $OSTYPE == "msys"* ]]; then
+    eval "$(./vcvarsall.sh x64 -vcvars_ver=14.38.17.8)"
+fi
+
 # Run CMake using preset and variables
 cmake --preset=${CMAKE_PRESET} ${MANTID_DATA_STORE_CMAKE} ${EXTRA_CMAKE_FLAGS} $WORKSPACE
 
@@ -51,10 +55,6 @@ if [[ $ENABLE_COVERITY == true ]]; then
     curl -f -X PUT -d token=$COVERITY_TOKEN https://scan.coverity.com/projects/335/builds/$build_id/enqueue
 
     exit 0
-fi
-
-if [[ $OSTYPE == "msys"* ]]; then
-    eval "$(./vcvarsall.sh x64 -vcvars_ver=14.38.17.8)"
 fi
 
 if [[ $ENABLE_BUILD_CODE == true ]]; then
