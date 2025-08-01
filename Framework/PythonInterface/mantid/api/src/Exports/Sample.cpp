@@ -34,8 +34,6 @@ GET_POINTER_SPECIALIZATION(CSGObject)
 void export_Sample() {
   register_ptr_to_python<Sample *>();
   register_ptr_to_python<std::shared_ptr<Sample>>();
-  register_ptr_to_python<std::shared_ptr<IObject>>();
-  register_ptr_to_python<std::shared_ptr<CSGObject>>();
 
   class_<Sample, boost::noncopyable>("Sample")
       .def("getName", &Sample::getName, return_value_policy<copy_const_reference>(), arg("self"),
@@ -70,15 +68,8 @@ void export_Sample() {
       .def("setHeight", &Sample::setHeight, (arg("self"), arg("height")), "Set the height in mm.")
       .def("setWidth", &Sample::setWidth, (arg("self"), arg("width")), "Set the width in mm.")
       .def(
-          "getShape",
-          +[](std::shared_ptr<Sample> self) {
-            auto shape = self->getShapePtr();
-            // Just copy, keep `self` alive via lambda capture
-            std::shared_ptr<IObject> copy = shape;
-            return copy;
-          },
+          "getShape", +[](std::shared_ptr<Sample> self) { return self->getShapePtr(); },
           return_value_policy<return_by_value>(), "Returns shape with shared ownership of the Sample")
-
       .def("setShape", &Sample::setShape, (arg("self"), arg("shape")), "Set shape of Sample object.")
       .def("hasEnvironment", &Sample::hasEnvironment, arg("self"),
            "Returns True if the sample has an environment defined")
