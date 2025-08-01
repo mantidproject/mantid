@@ -32,7 +32,7 @@ if [[ -n "${MANTID_DATA_STORE}" ]]; then
 fi
 
 if [[ $OSTYPE == "msys"* ]]; then
-    eval "$(./vcvarsall.sh x64 -vcvars_ver=14.38.17.8)"
+    eval "$($WORKSPACE/buildconfig/Jenkins/Conda/vcvarsall.sh x64 -vcvars_ver=14.38.17.8)"
 fi
 
 # Run CMake using preset and variables
