@@ -120,8 +120,6 @@ namespace Mantid::Nexus {
 
 // new constructors
 
-File::File(const string &filename, const NXaccess access) : File(filename.c_str(), access) {}
-
 File::File(const char *filename, const NXaccess access)
     : m_filename(filename), m_access(access), m_address(), m_current_group_id(0), m_current_data_id(0),
       m_current_type_id(0), m_current_space_id(0), m_gid_stack{0}, m_descriptor(m_filename, m_access) {
@@ -206,6 +204,8 @@ void File::initOpenFile(std::string const &filename, NXaccess const am) {
 File::File(File const &f)
     : m_filename(f.m_filename), m_access(f.m_access), m_address(), m_pfile(f.m_pfile), m_current_group_id(0),
       m_current_data_id(0), m_current_type_id(0), m_current_space_id(0), m_gid_stack{0}, m_descriptor(f.m_descriptor) {
+  // NOTE warning to future devs
+  // if you change this method, please run the systemtest VanadiumAndFocusWithSolidAngleTest
   if (m_pfile <= 0)
     throw Mantid::Nexus::Exception("Error reopening file");
 }
@@ -235,12 +235,16 @@ File::~File() {
     gid = 0;
   }
   m_gid_stack.clear();
+  // NOTE warning to future devs
+  // if you change this part of method, please run the systemtest VanadiumAndFocusWithSolidAngleTest
   // decrease reference counts to this file
   m_pfile.reset();
   H5garbage_collect();
 }
 
 void File::close() {
+  // NOTE warning to future devs
+  // if you change this method, please run the systemtest VanadiumAndFocusWithSolidAngleTest
   /* close the file handle */
   if (m_pfile != nullptr) {
     if (m_pfile.use_count() > 1) {
@@ -268,17 +272,16 @@ void File::openAddress(std::string const &address) {
   if (address.empty()) {
     throw NXEXCEPTION("Supplied empty address");
   }
-  // NOTE to support pre-existing behavior, do NOT check if the address exists first
-  // it must open as many path elements as it can until failing
-  // TODO is this behavior relied on anywhere but the tests?
-  // if (!hasAddress(absaddr)) {
-  //   throw NXEXCEPTION("Address " + address + " is not valid");
-  // }
 
   // if we are already there, do nothing
   NexusAddress absaddr(formAbsoluteAddress(address));
   if (absaddr == m_address) {
     return;
+  }
+
+  // confirm the address exists before trying to open
+  if (!hasAddress(absaddr)) {
+    throw NXEXCEPTION("Address " + address + " is not valid");
   }
 
   // if a dataset is open, close it
@@ -323,8 +326,7 @@ void File::openAddress(std::string const &address) {
         m_current_group_id = gid;
         m_address = fromroot;
       } else {
-        // failure, but return with the file in this state
-        return;
+        throw NXEXCEPTION("Failed to open " + name + " while opening " + absaddr);
       }
     }
   }

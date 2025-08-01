@@ -917,7 +917,7 @@ public:
     TS_ASSERT_EQUALS(file.getAddress(), "/");
     // NOTE pre-existent behavior will partially open invalid paths
     TS_ASSERT_THROWS(file.openAddress("/entry1/pants"), Mantid::Nexus::Exception &);
-    TS_ASSERT_EQUALS(file.getAddress(), "/entry1");
+    TS_ASSERT_EQUALS(file.getAddress(), "/");
 
     // open the root
     std::string expected = "/";
@@ -943,7 +943,7 @@ public:
 
     // failling should leave path alone
     TS_ASSERT_THROWS(file.openAddress("/pants"), Mantid::Nexus::Exception &);
-    TS_ASSERT_EQUALS(file.getAddress(), "/");
+    TS_ASSERT_EQUALS(file.getAddress(), "/" + expected);
 
     // intermingle working and failing opens
     file.openAddress("/entry1/layer2a/");
