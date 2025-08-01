@@ -43,6 +43,7 @@ class FullInstrumentViewWindow(QMainWindow):
         e.g. in a script."""
 
         pv.global_theme.background = "black"
+        pv.global_theme.font.color = "white"
 
         super(FullInstrumentViewWindow, self).__init__(parent)
         self.setWindowTitle("Instrument View")
@@ -82,7 +83,8 @@ class FullInstrumentViewWindow(QMainWindow):
         multi_select_group_box = QGroupBox("Multi-Select")
         multi_select_h_layout = QHBoxLayout()
         self._multi_select_check = QCheckBox()
-        self._multi_select_check.setText("Select multiple detectors")
+        self._multi_select_check.setText("Rectangular Select")
+        self._multi_select_check.setToolTip("Currently only working on 3D view.")
         multi_select_h_layout.addWidget(self._multi_select_check)
         self._clear_selection_button = QPushButton("Clear Selection")
         self._clear_selection_button.setToolTip("Clear the current selection of detectors")
@@ -95,10 +97,14 @@ class FullInstrumentViewWindow(QMainWindow):
         options_vertical_layout.addWidget(multi_select_group_box)
 
         projection_group_box = QGroupBox("Projection")
-        projection_vbox = QVBoxLayout()
+        projection_hbox = QHBoxLayout()
         self._projection_combo_box = QComboBox(self)
-        projection_vbox.addWidget(self._projection_combo_box)
-        projection_group_box.setLayout(projection_vbox)
+        projection_hbox.addWidget(self._projection_combo_box)
+        projection_group_box.setLayout(projection_hbox)
+        self._reset_projection = QPushButton("Reset Projection")
+        self._reset_projection.setToolTip("Resets the projection to default.")
+        self._reset_projection.clicked.connect(self.reset_projection)
+        projection_hbox.addWidget(self._reset_projection)
         options_vertical_layout.addWidget(projection_group_box)
 
         options_vertical_layout.addWidget(QSplitter(Qt.Horizontal))
@@ -112,6 +118,10 @@ class FullInstrumentViewWindow(QMainWindow):
     def reset_camera(self) -> None:
         if not self._off_screen:
             self.main_plotter.reset_camera()
+            self.projection_plotter.reset_camera()
+
+    def reset_projection(self) -> None:
+        if not self._off_screen:
             self.projection_plotter.reset_camera()
 
     def _add_min_max_group_box(self, parent_box: QGroupBox) -> tuple[QLineEdit, QLineEdit]:
