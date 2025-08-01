@@ -1452,6 +1452,19 @@ public:
     TS_ASSERT_EQUALS(entries.count("soft_link"), 1);
     TS_ASSERT_EQUALS(entries["soft_link"], "NX_UNKNOWN_GROUP");
   }
+  // ##################################################################################################################
+
+#ifdef _WIN32
+#define TZSET _tzset
+#define SETENV(value) _putenv_s("TZ", value)
+#define UNSETENV() _putenv_s("TZ", "")
+#define TARGET_TIMEZONE "EST5EDT"
+#else
+#define TZSET tzset
+#define SETENV(value) setenv("TZ", value, 1)
+#define UNSETENV() unsetenv("TZ")
+#define TARGET_TIMEZONE "America/New_York"
+#endif
 
   void test_data_existing_time_string() {
     cout << "\ntest dataset read existing -- time string attr\n";
@@ -1466,8 +1479,8 @@ public:
 
     char *current_tz = getenv("TZ");
     std::string real_tz = current_tz ? current_tz : "";
-    setenv("TZ", "America/New_York", 1);
-    tzset();
+    SETENV(TARGET_TIMEZONE);
+    TZSET();
 
     Mantid::Types::Core::DateAndTime dandt(time_str);
     std::time_t ntime = dandt.to_time_t();
@@ -1475,11 +1488,11 @@ public:
     TS_ASSERT_EQUALS(time_str, new_str);
 
     if (real_tz != "") {
-      setenv("TZ", real_tz.c_str(), 1);
+      SETENV(real_tz.c_str());
     } else {
-      unsetenv("TZ");
+      UNSETENV();
     }
-    tzset();
+    TZSET();
   }
 
   // ##################################################################################################################
