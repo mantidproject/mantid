@@ -26,6 +26,18 @@ def _get_mesh(omega, two_theta, z_mesh, z_error_mesh):
     return omega_mesh_no_nan, two_theta_mesh_no_nan, z_mesh_no_nan, z_error_mesh_no_nan
 
 
+def _is_rectangular_mesh(omega, two_theta, z_mesh):
+    return z_mesh.size == len(omega) * len(two_theta)
+
+
+def _correct_rect_grid(omega_mesh, two_theta_mesh, z_mesh, omega, two_theta):
+    rectangular_grid = _is_rectangular_mesh(omega, two_theta, z_mesh)
+    if rectangular_grid:
+        omega_mesh, two_theta_mesh = np.meshgrid(omega, two_theta)
+        z_mesh = np.reshape(z_mesh, omega_mesh.shape)
+    return omega_mesh, two_theta_mesh, z_mesh, rectangular_grid
+
+
 def _correct_omega_offset(omega, omega_offset):
     return np.subtract(omega, omega_offset)
 
@@ -58,13 +70,21 @@ class DNSScMap(ObjectDict):
         omega_corrected = _correct_omega_offset(omega, parameter["omega_offset"])
         omega_mesh, two_theta_mesh, z_mesh, z_error_mesh = _get_mesh(omega_corrected, two_theta, z_mesh, error_mesh)
         omega_unique, two_theta_unique = _get_unique(omega_mesh, two_theta_mesh)
+        omega_mesh, two_theta_mesh, z_mesh, rectangular_grid = _correct_rect_grid(
+            omega_mesh, two_theta_mesh, z_mesh, omega_corrected, two_theta_unique
+        )
         qx_mesh, qy_mesh = _get_q_mesh(omega_mesh, two_theta_mesh, parameter["wavelength"])
         hklx_mesh, hkly_mesh = _get_hkl_mesh(qx_mesh, qy_mesh, parameter["dx"], parameter["dy"])
         # setting attributes dictionary keys
         self.omega_interpolated = None
+        self.rectangular_grid = rectangular_grid
         self.two_theta = two_theta_unique
         self.omega = omega_unique
         self.omega_offset = parameter["omega_offset"]
+        self.omega_mesh = omega_mesh
+        self.two_theta_mesh = two_theta_mesh
+        self.qx_mesh = qx_mesh
+        self.qy_mesh = qy_mesh
         self.hklx_mesh = hklx_mesh
         self.hkly_mesh = hkly_mesh
         self.z_mesh = z_mesh

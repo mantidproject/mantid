@@ -1,3 +1,4 @@
+# ruff: noqa: E741  # Ambiguous variable name
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2023 ISIS Rutherford Appleton Laboratory UKRI,
@@ -14,6 +15,7 @@ import mantidqtinterfaces.dns_single_crystal_elastic.plot.elastic_single_crystal
 from mantidqtinterfaces.dns_powder_tof.data_structures.dns_obs_model import DNSObsModel
 from mantidqtinterfaces.dns_single_crystal_elastic.data_structures.dns_single_crystal_map import DNSScMap
 from mantidqtinterfaces.dns_powder_tof.data_structures.object_dict import ObjectDict
+from mantidqtinterfaces.dns_single_crystal_elastic.plot.elastic_single_crystal_helpers import get_hkl_intensity_from_cursor
 
 
 class DNSElasticSCPlotModel(DNSObsModel):
@@ -86,6 +88,14 @@ class DNSElasticSCPlotModel(DNSObsModel):
 
     def get_changing_hkl_components(self):
         return self._single_crystal_map.get_changing_hkl_components()
+
+    def get_format_coord(self, axis_type):
+        # adds z and hkl label to cursor position
+        def format_coord(x, y):
+            h, k, l, z, error = get_hkl_intensity_from_cursor(self._single_crystal_map, axis_type, x, y)
+            return f"x={x:2.3f}, y={y:2.3f}, hkl=({h:2.2f}, {k:2.2f}, {l:2.2f}), Intensity={z:6.4f}±{error:6.4f}"
+
+        return format_coord
 
     def get_data_z_min_max(self, xlim=None, ylim=None):
         return helper.get_z_min_max(self._data.z, xlim, ylim, self._data.x, self._data.y)
