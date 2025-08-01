@@ -294,7 +294,23 @@ void PlotPeakByLogValue::exec() {
     setProperty("OutputChiSquared", fitChiSquared);
   }
 
-  finaliseOutputWorkspaces(createFitOutput, fitWorkspaces, parameterWorkspaces, covarianceWorkspaces);
+  std::string range;
+  if (createFitOutput) {
+    auto start = wsNames[0];
+    auto end = wsNames[wsNames.size() - 1];
+    if (start.sp != -1) {
+      range = wsNames.size() > 1 && start.sp != end.sp ? std::format("sp{:g}-{:g}", start.sp, end.sp)
+                                                       : std::format("sp{:g}", start.sp);
+    } else if (start.v != -1) {
+      range = wsNames.size() > 1 && start.v != end.v ? std::format("v{:g}-{:g}", start.v, end.v)
+                                                     : std::format("v{:g}", start.v);
+    } else {
+      range = wsNames.size() > 1 && start.i != end.i ? std::format("i{}-{}", start.i, end.i)
+                                                     : "i" + std::to_string(start.i);
+    }
+  }
+
+  finaliseOutputWorkspaces(createFitOutput, fitWorkspaces, parameterWorkspaces, covarianceWorkspaces, range);
 }
 
 IFunction_sptr PlotPeakByLogValue::setupFunction(bool individual, bool passWSIndexToFunction,
@@ -328,14 +344,15 @@ IFunction_sptr PlotPeakByLogValue::setupFunction(bool individual, bool passWSInd
 
 void PlotPeakByLogValue::finaliseOutputWorkspaces(bool createFitOutput, const std::vector<std::string> &fitWorkspaces,
                                                   const std::vector<std::string> &parameterWorkspaces,
-                                                  const std::vector<std::string> &covarianceWorkspaces) {
+                                                  const std::vector<std::string> &covarianceWorkspaces,
+                                                  std::string range) {
   if (createFitOutput) {
     // collect output of fit for each spectrum into workspace groups
     auto const groupAlg = this->createChildAlgorithm("GroupWorkspaces");
     std::vector<std::pair<std::vector<std::string>, std::string>> groupingOperations = {
-        {covarianceWorkspaces, this->m_baseName + "_NormalisedCovarianceMatrices"},
-        {parameterWorkspaces, this->m_baseName + "_Parameters"},
-        {fitWorkspaces, this->m_baseName + "_Workspaces"}};
+        {covarianceWorkspaces, std::format("{}_{}_NormalisedCovarianceMatrices", m_baseName, range)},
+        {parameterWorkspaces, std::format("{}_{}_Parameters", m_baseName, range)},
+        {fitWorkspaces, std::format("{}_{}_Workspaces", m_baseName, range)}};
 
     for (const auto &[inputWorkspaces, outputName] : groupingOperations) {
       groupAlg->initialize();
@@ -455,11 +472,19 @@ std::shared_ptr<Algorithm> PlotPeakByLogValue::runSingleFit(bool createFitOutput
   g_log.debug() << "Fitting " << data.ws->getName() << " index " << data.i << " with \n";
   g_log.debug() << ifun->asString() << '\n';
 
-  const std::string spectrum_index = std::to_string(data.i);
   std::string wsBaseName;
 
-  if (createFitOutput)
-    wsBaseName = data.name + "_" + spectrum_index;
+  if (createFitOutput) {
+    wsBaseName = data.name;
+    if (data.sp != -1) {
+      wsBaseName += "_" + std::format("sp{:g}", data.sp);
+    } else if (data.v != -1) {
+      wsBaseName += "_" + std::format("v{:g}", data.v);
+    } else {
+      wsBaseName += "_i" + std::to_string(data.i);
+    }
+  }
+
   bool histogramFit = this->getPropertyValue("EvaluationType") == "Histogram";
   bool ignoreInvalidData = this->getProperty("IgnoreInvalidData");
 
@@ -473,7 +498,7 @@ std::shared_ptr<Algorithm> PlotPeakByLogValue::runSingleFit(bool createFitOutput
   fit->setProperty("StartX", startX);
   fit->setProperty("EndX", endX);
   fit->setProperty("IgnoreInvalidData", ignoreInvalidData);
-  fit->setPropertyValue("Minimizer", this->getMinimizerString(data.name, spectrum_index));
+  fit->setPropertyValue("Minimizer", this->getMinimizerString(data.name, std::to_string(data.i)));
   fit->setPropertyValue("CostFunction", this->getPropertyValue("CostFunction"));
   fit->setPropertyValue("MaxIterations", this->getPropertyValue("MaxIterations"));
   fit->setPropertyValue("PeakRadius", this->getPropertyValue("PeakRadius"));

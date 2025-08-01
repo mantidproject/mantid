@@ -122,14 +122,7 @@ std::vector<InputSpectraToFit> makeNames(const std::string &inputList, int defau
 void addMatrixworkspace(std::vector<InputSpectraToFit> &nameList, double start, double end, std::string &name, int wi,
                         int spec, int period, const std::optional<API::Workspace_sptr> &workspaceOptional,
                         const std::shared_ptr<API::MatrixWorkspace> &wsMatrix) {
-  auto workspaceIndices = getWorkspaceIndicesFromAxes(*wsMatrix, wi, spec, start, end);
-
-  for (auto workspaceIndex : workspaceIndices) {
-    nameList.emplace_back(name, workspaceIndex, period);
-    if (workspaceOptional) {
-      nameList.back().ws = wsMatrix;
-    }
-  }
+  appendInputSpectraToList(nameList, wsMatrix, wi, spec, start, end, period, workspaceOptional.has_value());
 }
 void addGroupWorkspace(std::vector<InputSpectraToFit> &nameList, double start, double end, int wi, int spec, int period,
                        const std::shared_ptr<API::WorkspaceGroup> &wsg) {
@@ -138,12 +131,7 @@ void addGroupWorkspace(std::vector<InputSpectraToFit> &nameList, double start, d
   for (const auto &wsName : wsNames) {
     if (auto workspace =
             std::dynamic_pointer_cast<API::MatrixWorkspace>(API::AnalysisDataService::Instance().retrieve(wsName))) {
-      auto workspaceIndices = getWorkspaceIndicesFromAxes(*workspace, wi, spec, start, end);
-
-      for (auto workspaceIndex : workspaceIndices) {
-        nameList.emplace_back(wsName, workspaceIndex, period);
-        nameList.back().ws = workspace;
-      }
+      appendInputSpectraToList(nameList, workspace, wi, spec, start, end, period, true);
     }
   }
 }
@@ -156,27 +144,29 @@ void addGroupWorkspace(std::vector<InputSpectraToFit> &nameList, double start, d
  * @param end :: End of range for value based spectrum range
  * @return Vector of workspace indices to fit
  */
-std::vector<int> getWorkspaceIndicesFromAxes(const API::MatrixWorkspace &ws, int workspaceIndex, int spectrumNumber,
-                                             double start, double end) {
+void appendInputSpectraToList(std::vector<InputSpectraToFit> &nameList, const std::shared_ptr<API::MatrixWorkspace> &ws,
+                              int workspaceIndex, int spectrumNumber, double start, double end, int period,
+                              const bool &workspaceOptional) {
+  auto mws = workspaceOptional ? ws : nullptr;
   if (workspaceIndex >= 0) {
-    return std::vector<int>({workspaceIndex});
+    nameList.emplace_back(ws->getName(), workspaceIndex, -1, -1, period, mws);
+    return;
   }
-  std::vector<int> out;
-  API::Axis *axis = ws.getAxis(1);
+
+  API::Axis *axis = ws->getAxis(1);
   if (axis->isSpectra()) {
     if (spectrumNumber < 0) {
-      for (size_t i = 0; i < axis->length(); ++i) {
+      for (int i = 0; i < axis->length(); ++i) {
         auto s = double(axis->spectraNo(i));
         if (s >= start && s <= end) {
-          out.emplace_back(static_cast<int>(i));
+          nameList.emplace_back(ws->getName(), i, s, -1, period, mws);
         }
       }
-
     } else {
-      for (size_t i = 0; i < axis->length(); ++i) {
+      for (int i = 0; i < axis->length(); ++i) {
         int j = axis->spectraNo(i);
         if (j == spectrumNumber) {
-          out.emplace_back(static_cast<int>(i));
+          nameList.emplace_back(ws->getName(), i, j, -1, period, mws);
           break;
         }
       }
@@ -186,15 +176,13 @@ std::vector<int> getWorkspaceIndicesFromAxes(const API::MatrixWorkspace &ws, int
       start = (*axis)(0);
       end = (*axis)(axis->length() - 1);
     }
-    for (size_t i = 0; i < axis->length(); ++i) {
+    for (int i = 0; i < axis->length(); ++i) {
       double s = (*axis)(i);
       if (s >= start && s <= end) {
-        out.emplace_back(static_cast<int>(i));
+        nameList.emplace_back(ws->getName(), i, -1, s, period, mws);
       }
     }
   }
-
-  return out;
 }
 
 std::optional<API::Workspace_sptr> getWorkspace(const std::string &workspaceName, int period) {
