@@ -1,6 +1,6 @@
 # Tests for Engineering common code
 
-set(TEST_PY_FILES test/test_calibration_info.py)
+set(TEST_PY_FILES test/test_calibration_info.py test/test_texture_sample_viewer.py)
 
 check_tests_valid(${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES})
 
