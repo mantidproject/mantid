@@ -29,6 +29,7 @@ from instrumentview.Detectors import DetectorInfo
 from typing import Callable
 from mantid.dataobjects import Workspace2D
 import numpy as np
+import pyvista as pv
 
 
 class FullInstrumentViewWindow(QMainWindow):
@@ -40,8 +41,13 @@ class FullInstrumentViewWindow(QMainWindow):
     def __init__(self, parent=None, off_screen=False):
         """The instrument in the given workspace will be displayed. The off_screen option is for testing or rendering an image
         e.g. in a script."""
+
+        pv.global_theme.background = "black"
+        pv.global_theme.font.color = "white"
+
         super(FullInstrumentViewWindow, self).__init__(parent)
         self.setWindowTitle("Instrument View")
+        self.resize(1500, 1500)
 
         self._off_screen = off_screen
 
@@ -77,7 +83,8 @@ class FullInstrumentViewWindow(QMainWindow):
         multi_select_group_box = QGroupBox("Multi-Select")
         multi_select_h_layout = QHBoxLayout()
         self._multi_select_check = QCheckBox()
-        self._multi_select_check.setText("Select multiple detectors")
+        self._multi_select_check.setText("Rectangular Select")
+        self._multi_select_check.setToolTip("Currently only working on 3D view.")
         multi_select_h_layout.addWidget(self._multi_select_check)
         self._clear_selection_button = QPushButton("Clear Selection")
         self._clear_selection_button.setToolTip("Clear the current selection of detectors")
@@ -90,10 +97,14 @@ class FullInstrumentViewWindow(QMainWindow):
         options_vertical_layout.addWidget(multi_select_group_box)
 
         projection_group_box = QGroupBox("Projection")
-        projection_vbox = QVBoxLayout()
+        projection_hbox = QHBoxLayout()
         self._projection_combo_box = QComboBox(self)
-        projection_vbox.addWidget(self._projection_combo_box)
-        projection_group_box.setLayout(projection_vbox)
+        projection_hbox.addWidget(self._projection_combo_box)
+        projection_group_box.setLayout(projection_hbox)
+        self._reset_projection = QPushButton("Reset Projection")
+        self._reset_projection.setToolTip("Resets the projection to default.")
+        self._reset_projection.clicked.connect(self.reset_projection)
+        projection_hbox.addWidget(self._reset_projection)
         options_vertical_layout.addWidget(projection_group_box)
 
         options_vertical_layout.addWidget(QSplitter(Qt.Horizontal))
@@ -107,6 +118,10 @@ class FullInstrumentViewWindow(QMainWindow):
     def reset_camera(self) -> None:
         if not self._off_screen:
             self.main_plotter.reset_camera()
+            self.projection_plotter.reset_camera()
+
+    def reset_projection(self) -> None:
+        if not self._off_screen:
             self.projection_plotter.reset_camera()
 
     def _add_min_max_group_box(self, parent_box: QGroupBox) -> tuple[QLineEdit, QLineEdit]:
@@ -195,7 +210,7 @@ class FullInstrumentViewWindow(QMainWindow):
 
     def add_main_mesh(self, mesh: PolyData, scalars=None, clim=None) -> None:
         """Draw the given mesh in the main plotter window"""
-        self.main_plotter.add_mesh(mesh, pickable=False, scalars=scalars, clim=clim, render_points_as_spheres=True, point_size=7)
+        self.main_plotter.add_mesh(mesh, pickable=False, scalars=scalars, clim=clim, render_points_as_spheres=True, point_size=14)
 
     def add_pickable_main_mesh(self, point_cloud: PolyData, scalars: np.ndarray | str) -> None:
         self.main_plotter.add_mesh(
@@ -205,7 +220,7 @@ class FullInstrumentViewWindow(QMainWindow):
             show_scalar_bar=False,
             pickable=True,
             cmap="Oranges",
-            point_size=20,
+            point_size=30,
             render_points_as_spheres=True,
         )
 
@@ -249,10 +264,10 @@ class FullInstrumentViewWindow(QMainWindow):
     def add_projection_mesh(self, mesh: PolyData, scalars=None, clim=None) -> None:
         """Draw the given mesh in the projection plotter. This is a 2D plot so we set options accordingly on the plotter"""
         self.projection_plotter.clear()
-        self.projection_plotter.add_mesh(mesh, scalars=scalars, clim=clim, render_points_as_spheres=True, point_size=7, pickable=False)
+        self.projection_plotter.add_mesh(mesh, scalars=scalars, clim=clim, render_points_as_spheres=True, point_size=14, pickable=False)
         self.projection_plotter.view_xy()
         if not self.projection_plotter.off_screen:
-            self.projection_plotter.enable_image_style()
+            self.projection_plotter.enable_zoom_style()
 
     def add_pickable_projection_mesh(self, mesh: PolyData, scalars=None) -> None:
         """Draw the given mesh in the projection plotter. This is a 2D plot so we set options accordingly on the plotter"""
@@ -263,12 +278,9 @@ class FullInstrumentViewWindow(QMainWindow):
             show_scalar_bar=False,
             pickable=True,
             cmap="Oranges",
-            point_size=20,
+            point_size=30,
             render_points_as_spheres=True,
         )
-        self.projection_plotter.view_xy()
-        if not self.projection_plotter.off_screen:
-            self.projection_plotter.enable_image_style()
 
     def show_axes(self) -> None:
         """Show axes on the main plotter"""

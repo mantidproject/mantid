@@ -33,7 +33,7 @@ class Projection(ABC):
         self._x_range = (0, 0)
         self._y_range = (0, 0)
 
-        self._u_period = np.pi
+        self._u_period = 2 * np.pi
 
         self._calculate_axes(root_position)
         self._calculate_detector_coordinates()
@@ -76,45 +76,34 @@ class Projection(ABC):
         if self._x_range[1] == self._x_range[0]:
             return
 
-        number_of_bins = 1000
-        bin_width = np.abs(self._x_range[1] - self._x_range[0]) / (number_of_bins - 1)
-        x_bins = np.full(number_of_bins, False)
-        bin_indices = ((self._detector_x_coordinates - self._x_range[0]) / bin_width).astype(int)
-        x_bins[bin_indices] = True
+        # Find biggest gap in x coordinates
+        sorted_x_coordinates = np.sort(self._detector_x_coordinates)
+        x_gap_idx = np.argmax(np.diff(sorted_x_coordinates))
+        x_from = sorted_x_coordinates[x_gap_idx]
+        x_to = sorted_x_coordinates[x_gap_idx + 1]
 
-        i_from = 0
-        i_to = 0
-        i0 = 0
-        in_gap = False
+        if x_to - x_from <= self._u_period - (self._x_range[1] - self._x_range[0]):
+            return
 
-        for i in range(number_of_bins):
-            if not x_bins[i]:
-                if not in_gap:
-                    i0 = i
-                in_gap = True
-            else:
-                if in_gap and i_to - i_from < i - i0:
-                    i_from = i0  # First bin in the gap
-                    i_to = i  # First bin after the gap
-                in_gap = False
+        # Update range that avoids gap entirely, wraps around gap
+        self._x_range = (x_to, x_from + self._u_period)
 
-        x_from = self._x_range[0] + i_from * bin_width
-        x_to = self._x_range[0] + i_to * bin_width
-        if x_to - x_from > self._u_period - (self._x_range[1] - self._x_range[0]):
-            self._x_range = (x_to, x_from)
-            if self._x_range[0] > self._x_range[1]:
-                self._x_range = (self._x_range[0], self._x_range[1] + self._u_period)
-
-            self._apply_x_correction()
+        self._apply_x_correction()
 
     def _apply_x_correction(self) -> None:
-        """Set x coordinate of specified point to be within the correct range, with the period used as the modulus"""
+        """
+        Updates x coordinates outside of current x range to be corrected to fit inside range.
+        Correction is applied by adding or subtracting a multiple of the period.
+        For example:
+            current range is (-2.1, np.pi)
+            current point at -np.pi is updated to -np.pi + 2*np.pi = np.pi
+        """
         if self._u_period == 0:
             return
 
+        # Get view of x coordinates, can change in-place
         x = self._detector_x_coordinates
-        x_min = self._x_range[0]
-        x_max = self._x_range[1]
+        x_min, x_max = self._x_range
 
         x[x < x_min] += np.floor((x_max - x[x < x_min]) / self._u_period) * self._u_period
         x[x > x_max] -= np.floor((x[x > x_max] - x_min) / self._u_period) * self._u_period

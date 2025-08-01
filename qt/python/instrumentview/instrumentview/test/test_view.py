@@ -62,7 +62,7 @@ class TestFullInstrumentViewWindow(unittest.TestCase):
         clim = [0, 250]
         self._view.add_main_mesh(mock_mesh, mock_scalars, clim)
         self._view.main_plotter.add_mesh.assert_called_once_with(
-            mock_mesh, pickable=False, scalars=mock_scalars, clim=clim, render_points_as_spheres=True, point_size=7
+            mock_mesh, pickable=False, scalars=mock_scalars, clim=clim, render_points_as_spheres=True, point_size=14
         )
 
     def test_add_pickable_main_mesh(self):
@@ -77,7 +77,7 @@ class TestFullInstrumentViewWindow(unittest.TestCase):
             show_scalar_bar=False,
             pickable=True,
             cmap="Oranges",
-            point_size=20,
+            point_size=30,
             render_points_as_spheres=True,
         )
 
@@ -149,10 +149,9 @@ class TestFullInstrumentViewWindow(unittest.TestCase):
         self._view.add_projection_mesh(mock_mesh, mock_scalars, clim)
         self._view.projection_plotter.clear.assert_called_once()
         self._view.projection_plotter.add_mesh.assert_called_once_with(
-            mock_mesh, scalars=mock_scalars, clim=clim, render_points_as_spheres=True, point_size=7, pickable=False
+            mock_mesh, scalars=mock_scalars, clim=clim, render_points_as_spheres=True, point_size=14, pickable=False
         )
-        self._view.projection_plotter.view_xy.assert_called_once()
-        self._view.projection_plotter.enable_image_style.assert_called_once()
+        self._view.projection_plotter.enable_zoom_style.assert_called_once()
 
     def test_add_projection_mesh_off_screen(self):
         self._view.projection_plotter.reset_mock()
@@ -163,10 +162,9 @@ class TestFullInstrumentViewWindow(unittest.TestCase):
         self._view.add_projection_mesh(mock_mesh, mock_scalars, clim)
         self._view.projection_plotter.clear.assert_called_once()
         self._view.projection_plotter.add_mesh.assert_called_once_with(
-            mock_mesh, scalars=mock_scalars, clim=clim, render_points_as_spheres=True, point_size=7, pickable=False
+            mock_mesh, scalars=mock_scalars, clim=clim, render_points_as_spheres=True, point_size=14, pickable=False
         )
-        self._view.projection_plotter.view_xy.assert_called_once()
-        self._view.projection_plotter.enable_image_style.assert_not_called()
+        self._view.projection_plotter.enable_zoom_style.assert_not_called()
 
     def test_add_pickable_projection_mesh(self):
         self._view.projection_plotter.reset_mock()
@@ -181,11 +179,9 @@ class TestFullInstrumentViewWindow(unittest.TestCase):
             show_scalar_bar=False,
             pickable=True,
             cmap="Oranges",
-            point_size=20,
+            point_size=30,
             render_points_as_spheres=True,
         )
-        self._view.projection_plotter.view_xy.assert_called_once()
-        self._view.projection_plotter.enable_image_style.assert_called_once()
 
     def test_add_pickable_projection_mesh_off_screen(self):
         self._view.projection_plotter.reset_mock()
@@ -200,8 +196,7 @@ class TestFullInstrumentViewWindow(unittest.TestCase):
             show_scalar_bar=False,
             pickable=True,
             cmap="Oranges",
-            point_size=20,
+            point_size=30,
             render_points_as_spheres=True,
         )
-        self._view.projection_plotter.view_xy.assert_called_once()
         self._view.projection_plotter.enable_image_style.assert_not_called()
