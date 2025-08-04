@@ -44,7 +44,7 @@ using Mantid::Kernel::PropertyWithValue;
 using Mantid::Kernel::Exception::FileError;
 
 using namespace H5;
-using namespace NeXus;
+using namespace Nexus;
 
 namespace {
 enum class CalibFilenameExtensionEnum { H5, HD5, HDF, CAL, enum_count };
@@ -461,7 +461,7 @@ void LoadDiffCal::exec() {
   H5::Exception::dontPrint();
   H5File file;
   try {
-    file = H5File(m_filename, H5F_ACC_RDONLY, NeXus::H5Util::defaultFileAcc());
+    file = H5File(m_filename, H5F_ACC_RDONLY, Nexus::H5Util::defaultFileAcc());
   } catch (FileIException &) {
     throw FileError("Failed to open file using HDF5", m_filename);
   }

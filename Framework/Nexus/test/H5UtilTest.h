@@ -16,7 +16,7 @@
 #include <limits>
 
 using namespace H5;
-using namespace Mantid::NeXus;
+using namespace Mantid::Nexus;
 using namespace NexusTest;
 
 class H5UtilTest : public CxxTest::TestSuite {

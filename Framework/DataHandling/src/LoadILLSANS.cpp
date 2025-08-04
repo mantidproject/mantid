@@ -310,7 +310,7 @@ void LoadILLSANS::getMonitorIndices(const std::string &filename) {
    * to open the same file with these two libraries (H5 and NX) simultaneously.
    */
   try {
-    H5::H5File h5file(filename, H5F_ACC_RDONLY, NeXus::H5Util::defaultFileAcc());
+    H5::H5File h5file(filename, H5F_ACC_RDONLY, Nexus::H5Util::defaultFileAcc());
     H5::DataSet scanVarNames = h5file.openDataSet("entry0/data_scan/scanned_variables/variables_names/name");
     H5::DataSpace scanVarNamesSpace = scanVarNames.getSpace();
     const auto nDims = scanVarNamesSpace.getSimpleExtentNdims();

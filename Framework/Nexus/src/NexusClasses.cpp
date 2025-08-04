@@ -263,7 +263,7 @@ bool NXClass::containsDataSet(const std::string &query) const { return getDataSe
  *   @param fname :: The file name to open
  */
 NXRoot::NXRoot(std::string fname) : m_filename(std::move(fname)) {
-  // Open NeXus file
+  // Open Nexus file
   try {
     m_fileID = std::make_shared<File>(m_filename, NXaccess::READ);
   } catch (Exception const &e) {
@@ -280,7 +280,7 @@ NXRoot::NXRoot(std::string fname) : m_filename(std::move(fname)) {
  */
 NXRoot::NXRoot(std::string fname, const std::string &entry) : m_filename(std::move(fname)) {
   UNUSED_ARG(entry);
-  // Open NeXus file
+  // Open Nexus file
   m_fileID = std::make_shared<File>(m_filename, NXaccess::CREATE5);
 }
 
@@ -293,14 +293,14 @@ bool NXRoot::isStandard() const { return true; }
  */
 NXEntry NXRoot::openFirstEntry() {
   if (groups().empty()) {
-    throw std::runtime_error("NeXus file has no entries");
+    throw std::runtime_error("Nexus file has no entries");
   }
   const auto it =
       std::find_if(groups().cbegin(), groups().cend(), [](const auto &group) { return group.nxclass == "NXentry"; });
   if (it != groups().cend()) {
     return openEntry(it->nxname);
   }
-  throw std::runtime_error("NeXus file has no entries");
+  throw std::runtime_error("Nexus file has no entries");
 }
 
 //---------------------------------------------------------

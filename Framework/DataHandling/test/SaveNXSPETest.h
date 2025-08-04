@@ -275,7 +275,7 @@ private:
                                std::vector<double>());
     }
 
-    H5::H5File h5file(outputFile, H5F_ACC_RDONLY, Mantid::NeXus::H5Util::defaultFileAcc());
+    H5::H5File h5file(outputFile, H5F_ACC_RDONLY, Mantid::Nexus::H5Util::defaultFileAcc());
     const char *dset = "/mantid_workspace/data/data";
     int rank(0);
     H5::DataSet dataset = h5file.openDataSet(dset);
@@ -290,10 +290,10 @@ private:
 
     size_t bufferSize(dims[0] * dims[1]);
     std::vector<double> signal(bufferSize), error(bufferSize);
-    Mantid::NeXus::H5Util::readArray1DCoerce(dataset, signal);
+    Mantid::Nexus::H5Util::readArray1DCoerce(dataset, signal);
 
     const char *dsetErr = "/mantid_workspace/data/error";
-    Mantid::NeXus::H5Util::readArray1DCoerce(h5file.openDataSet(dsetErr), error);
+    Mantid::Nexus::H5Util::readArray1DCoerce(h5file.openDataSet(dsetErr), error);
     //---------------------------------------------------------------
     // check efixed
     const char *efixed_dset = "/mantid_workspace/NXSPE_info/fixed_energy";
@@ -309,7 +309,7 @@ private:
 
     size_t EnBuffer(efix_dims[0]);
     std::vector<double> efixed(EnBuffer);
-    Mantid::NeXus::H5Util::readArray1DCoerce(efixed_dataset, efixed);
+    Mantid::Nexus::H5Util::readArray1DCoerce(efixed_dataset, efixed);
     if (set_efixed) {
       TS_ASSERT_EQUALS(EnBuffer, 1);
       TS_ASSERT_DELTA(efixed[0], efix_value, 1.e-8);

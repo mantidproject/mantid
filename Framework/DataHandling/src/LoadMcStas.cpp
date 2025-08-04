@@ -29,7 +29,7 @@ namespace Mantid::DataHandling {
 using namespace Kernel;
 using namespace API;
 using namespace DataObjects;
-using namespace NeXus;
+using namespace Nexus;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadMcStas)
@@ -74,7 +74,7 @@ void LoadMcStas::init() {
  */
 void LoadMcStas::execLoader() {
   std::string filename = getPropertyValue("Filename");
-  H5::H5File file(filename, H5F_ACC_RDONLY, NeXus::H5Util::defaultFileAcc());
+  H5::H5File file(filename, H5F_ACC_RDONLY, Nexus::H5Util::defaultFileAcc());
 
   auto const &descriptor = getFileInfo();
   auto const &allEntries = descriptor->getAllEntries();
@@ -525,7 +525,7 @@ int LoadMcStas::confidence(Nexus::NexusDescriptor &descriptor) const {
   if (!descriptor.isEntry("/entry1/simulation/name")) {
     return 0;
   }
-  H5::H5File file(descriptor.filename(), H5F_ACC_RDONLY, NeXus::H5Util::defaultFileAcc());
+  H5::H5File file(descriptor.filename(), H5F_ACC_RDONLY, Nexus::H5Util::defaultFileAcc());
   H5::Group group = file.openGroup("/entry1/simulation");
   H5::DataSet dataset = group.openDataSet("name");
 
