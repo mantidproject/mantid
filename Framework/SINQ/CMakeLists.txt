@@ -135,11 +135,12 @@ if(COVERAGE)
   endforeach(loop_var)
 endif()
 
-# Add a precompiled header where they are supported
-enable_precompiled_headers(inc/MantidSINQ/PrecompiledHeader.h SRC_FILES)
 # Add the target for this directory
 add_library(SINQ ${SRC_FILES} ${INC_FILES})
 add_library(Mantid::SINQ ALIAS SINQ)
+
+# Add a precompiled header where they are supported
+target_precompile_headers(SINQ PRIVATE inc/MantidSINQ/PrecompiledHeader.h)
 
 target_include_directories(
   SINQ PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc> $<INSTALL_INTERFACE:include/Mantid>
