@@ -31,14 +31,14 @@ class FlatBankInfo:
             self.detector_id_position_map[id] += shift
 
     def _transform_positions_so_origin_bottom_left(self) -> None:
-        if not self.relative_projected_positions.any():
+        if len(self.relative_projected_positions) == 0:
             return
 
         min_coordinates = np.min(self.relative_projected_positions, axis=0)
         self.relative_projected_positions -= min_coordinates
 
     def calculate_projected_positions(self) -> None:
-        if self.relative_projected_positions.any():
+        if len(self.relative_projected_positions) > 0:
             self._transform_positions_so_origin_bottom_left()
             for index in range(len(self.detector_ids)):
                 self.detector_id_position_map[self.detector_ids[index]] = self.relative_projected_positions[index] + self.reference_position
@@ -51,7 +51,7 @@ class FlatBankInfo:
             y_offset = iy * self.steps[1]
             for ix in range(x_pixels):
                 x_offset = ix * self.steps[0]
-                id = self.detector_ids[iy * y_pixels + ix]
+                id = self.detector_ids[iy * x_pixels + ix]
                 detector_position = np.add(origin, [x_offset, y_offset, 0])
                 self.detector_id_position_map[id] = detector_position
 
@@ -80,6 +80,10 @@ class SideBySide(Projection):
         self._component_index_detector_id_map = dict(zip(detector_component_indices, detector_ids))
         super().__init__(sample_position, root_position, detector_positions, axis)
 
+    def _find_and_correct_x_gap(self) -> None:
+        # We don't want any gaps corrected
+        return
+
     def _calculate_axes(self, root_position: np.ndarray) -> None:
         x = [0.0] * 3
         y = [0.0] * 3
@@ -92,6 +96,10 @@ class SideBySide(Projection):
         grids = self._construct_rectangles_and_grids(workspace)
         tubes = self._construct_tube_banks(workspace.componentInfo())
         self._flat_banks = grids + tubes
+        detectors_in_banks = np.array([d.detector_ids for d in self._flat_banks]).flatten()
+        remaining_detectors_bank = self._create_flat_bank_with_missing_detectors(detectors_in_banks)
+        if remaining_detectors_bank:
+            self._flat_banks.append(remaining_detectors_bank)
 
         if len(self._flat_banks) == 0:
             return
@@ -168,13 +176,55 @@ class SideBySide(Projection):
         v_plane = np.cross(u_plane, normal)
         return np.array([[np.dot(p, u_plane), np.dot(p, v_plane), 0] for p in positions])
 
+    def _create_flat_bank_with_missing_detectors(self, detectors_already_in_banks: np.ndarray) -> FlatBankInfo:
+        detectors = np.array(self._detector_ids)
+        missing_detectors = np.setdiff1d(detectors, detectors_already_in_banks)
+        number_of_detectors = len(missing_detectors)
+        if number_of_detectors == 0:
+            return None
+        flat_bank = FlatBankInfo()
+        flat_bank.detector_id_position_map.clear()
+        flat_bank.reference_position = np.zeros(3)
+        flat_bank.rotation = Rotation.identity()
+        flat_bank.detector_ids = list(missing_detectors)
+        detectors_on_x_axis = np.ceil(np.sqrt(number_of_detectors)).astype(int)
+        # Base separation roughly on any existing detector densities
+        separation = 0.01
+        if len(self._flat_banks) > 0 and detectors_on_x_axis > 1:
+            existing_max_dims = np.max([b.dimensions for b in self._flat_banks], axis=0)
+            area_per_detector = (existing_max_dims[0] * existing_max_dims[1]) / sum([len(f.detector_ids) for f in self._flat_banks])
+            if area_per_detector > 0:
+                separation = max([np.sqrt(area_per_detector) / number_of_detectors / (detectors_on_x_axis - 1), 0.001])
+
+        # Arrange detectors into a grid with sqrt(len) points on the x axis, the last
+        # row may have less than that number
+        points_in_square_grid = ((np.floor(number_of_detectors / detectors_on_x_axis)) * detectors_on_x_axis).astype(int)
+        square_grid = missing_detectors[0:points_in_square_grid].reshape((detectors_on_x_axis, -1))
+        # Get position for each detector in square grid
+        row_indices, column_indices = np.indices(square_grid.shape)
+        square_grid_positions = np.stack((row_indices, column_indices, np.zeros_like(row_indices)), axis=2) * separation
+        flat_bank.relative_projected_positions = square_grid_positions.reshape((-1, 3))
+
+        # Do the same for the remainder. Unless we're lucky, we'll have a partial row of
+        # detectors left over that we need to arrange
+        if points_in_square_grid < number_of_detectors:
+            remainder = missing_detectors[points_in_square_grid:]
+            row_y = square_grid.shape[1] * separation
+            remainder_positions = [[x * separation, row_y, 0] for x in range(len(remainder))]
+            flat_bank.relative_projected_positions = np.append(flat_bank.relative_projected_positions, remainder_positions, axis=0)
+
+        flat_bank.dimensions = np.max(flat_bank.relative_projected_positions, axis=0) - np.min(
+            flat_bank.relative_projected_positions, axis=0
+        )
+        return flat_bank
+
     def _arrange_panels(self) -> None:
         max_dims = np.max([b.dimensions for b in self._flat_banks], axis=0)
         number_banks = len(self._flat_banks)
         banks_per_row = np.ceil(np.sqrt(number_banks))
         position = np.zeros(3)
         banks_arranged = 0
-        space_factor = 1.1
+        space_factor = 1.2
         for bank in self._flat_banks:
             bank.translate(position - bank.reference_position)
             banks_arranged += 1
@@ -191,9 +241,7 @@ class SideBySide(Projection):
         v_positions = []
         for id in self._detector_ids:
             if id not in self._detector_id_to_flat_bank_map:
-                u_positions.append(0.0)
-                v_positions.append(0.0)
-                continue
+                raise RuntimeError(f"Detector with ID {id} not found in projection")
             bank = self._detector_id_to_flat_bank_map[id]
             position = bank.detector_id_position_map[id]
             u_positions.append(position[0])
