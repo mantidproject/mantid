@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Rendering/GeometryTriangulator.h"
+#include "MantidKernel/Logger.h"
 #include "MantidPythonInterface/core/Converters/NDArrayTypeIndex.h"
 #include "MantidPythonInterface/core/Converters/WrapWithNDArray.h"
 #include "MantidPythonInterface/core/GetPointer.h"
@@ -27,6 +28,10 @@ using Mantid::Geometry::BoundingBox;
 using Mantid::Geometry::CSGObject;
 using Mantid::Geometry::detail::GeometryTriangulator;
 using namespace boost::python;
+
+namespace {
+Mantid::Kernel::Logger g_log("CSGObject");
+}
 
 GET_POINTER_SPECIALIZATION(CSGObject)
 
@@ -69,8 +74,9 @@ boost::python::object wrapMeshWithNDArray(const CSGObject *self) {
     PyObject *ndarray = Impl::wrapWithNDArray(meshCoords, 3, dims, NumpyWrapMode::ReadOnly, OwnershipMode::Python);
     return object(handle<>(ndarray));
 
-  } catch (const std::exception) {
+  } catch (const std::exception &e) {
     // Return empty array on failure
+    g_log.error(e.what());
     return getEmptyArrayObject();
   }
 }
