@@ -2044,8 +2044,7 @@ template <> void TimeSeriesProperty<std::string>::saveProperty(Nexus::File *file
     index += maxlen;
   }
 
-  const Mantid::Nexus::DimVector dims{static_cast<Mantid::Nexus::dimsize_t>(values.size()),
-                                      static_cast<Mantid::Nexus::dimsize_t>(maxlen)};
+  const Mantid::Nexus::DimVector dims{values.size(), maxlen};
   file->makeData("value", NXnumtype::CHAR, dims, true);
   file->putData(strs.data());
   file->closeData();

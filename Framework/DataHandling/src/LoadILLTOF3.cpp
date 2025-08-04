@@ -338,8 +338,8 @@ std::vector<double> LoadILLTOF3::prepareAxis(const Nexus::NXEntry &entry, bool c
     // read which variable is going to be the axis
     NXInt scannedAxis = entry.openNXInt("data_scan/scanned_variables/variables_names/axis");
     scannedAxis.load();
-    int scannedVarId = 0;
-    for (int index = 0; index < scannedAxis.dim0(); index++) {
+    std::size_t scannedVarId = 0;
+    for (std::size_t index = 0; index < scannedAxis.dim0(); index++) {
       if (scannedAxis[index] == 1) {
         scannedVarId = index;
         break;
@@ -347,7 +347,7 @@ std::vector<double> LoadILLTOF3::prepareAxis(const Nexus::NXEntry &entry, bool c
     }
     auto axis = LoadHelper::getDoubleDataset(entry, "data_scan/scanned_variables/data");
     axis.load();
-    for (int index = 0; index < axis.dim1(); index++) {
+    for (std::size_t index = 0; index < axis.dim1(); index++) {
       xAxis[index] = axis(scannedVarId, index);
     }
   } else {
@@ -432,14 +432,14 @@ void LoadILLTOF3::fillScanWorkspace(const Nexus::NXEntry &entry, const std::vect
   // Load scan data
   const std::vector<int> detectorIDs = m_localWorkspace->getInstrument()->getDetectorIDs(false);
   const std::tuple<int, int, int> dimOrder{1, 2, 0};
-  LoadHelper::fillStaticWorkspace(m_localWorkspace, data, xAxis, 0, true, detectorIDs, std::set<int>(), dimOrder);
+  LoadHelper::fillStaticWorkspace(m_localWorkspace, data, xAxis, 0, true, detectorIDs, std::set<detid_t>(), dimOrder);
 
   // Load monitor data, there is only one monitor
   const std::vector<int> monitorIDs = m_localWorkspace->getInstrument()->getMonitors();
   const auto spectrumNo = data.dim1() * data.dim2();
   auto monitorData = LoadHelper::getDoubleDataset(entry, monitorList[0]);
   monitorData.load();
-  for (int index = 0; index < monitorData.dim1(); index++) {
+  for (std::size_t index = 0; index < monitorData.dim1(); index++) {
     // monitor is always the 4th row, if that ever changes, a name search for 'monitor1' would be necessary among
     // scanned_variables
     const auto counts = monitorData(3, index);

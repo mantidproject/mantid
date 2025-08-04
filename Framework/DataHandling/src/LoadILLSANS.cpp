@@ -742,7 +742,7 @@ size_t LoadILLSANS::loadDataFromTubes(Nexus::NXInt const &data, const std::vecto
     dimOrder = std::tuple<short, short, short>{0, 1, 2}; // default, tubes-pixels-channels
   }
   LoadHelper::fillStaticWorkspace(m_localWorkspace, data, timeBinning, static_cast<int>(firstIndex), pointData,
-                                  std::vector<int>(), std::set<int>(), dimOrder);
+                                  std::vector<int>(), std::set<detid_t>(), dimOrder);
   return firstIndex + numberOfTubes * numberOfPixelsPerTube;
 }
 

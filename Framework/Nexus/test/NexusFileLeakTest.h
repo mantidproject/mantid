@@ -92,7 +92,7 @@ public:
           fileid.openGroup(oss2, "NXdata");
           for (int iData = 0; iData < nData; iData++) {
             std::string oss3(strmakef("i2_data_%d", iData));
-            DimVector dims{static_cast<dimsize_t>(i2_array.size())};
+            DimVector dims{i2_array.size()};
             fileid.makeData(oss3, NXnumtype::INT16, dims);
             fileid.openData(oss3);
             fileid.putData(i2_array.data());

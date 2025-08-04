@@ -49,7 +49,7 @@ namespace {
     throw std::runtime_error(msg);                                                                                     \
   }
 
-int64_t vectorVolume(const Nexus::DimSizeVector &size) {
+int64_t vectorVolume(const Nexus::DimVector &size) {
   return std::accumulate(size.cbegin(), size.cend(), int64_t{1}, std::multiplies<>());
 }
 
@@ -109,8 +109,8 @@ void readNexusAnyVector(std::vector<T> &out, Nexus::File &file, const size_t siz
  * another type. If the two types are the same, the conversion is skipped.
  */
 template <typename T, typename U, Narrowing narrow>
-void doReadNexusAnySlab(std::vector<T> &out, Nexus::File &file, const Nexus::DimSizeVector &start,
-                        const Nexus::DimSizeVector &size, const int64_t volume, const bool close_data) {
+void doReadNexusAnySlab(std::vector<T> &out, Nexus::File &file, const Nexus::DimVector &start,
+                        const Nexus::DimVector &size, const int64_t volume, const bool close_data) {
   if constexpr (sizeof(T) < sizeof(U) && narrow == Narrowing::Prevent) {
     if (close_data)
       file.closeData();
@@ -133,7 +133,7 @@ void doReadNexusAnySlab(std::vector<T> &out, Nexus::File &file, const Nexus::Dim
 
 /// Read any type of slab and return it as a new vector.
 template <typename T, typename U, Narrowing narrow>
-std::vector<T> readNexusAnySlab(Nexus::File &file, const Nexus::DimSizeVector &start, const Nexus::DimSizeVector &size,
+std::vector<T> readNexusAnySlab(Nexus::File &file, const Nexus::DimVector &start, const Nexus::DimVector &size,
                                 const bool close_data) {
   const auto volume = vectorVolume(size);
   std::vector<T> vec(volume);
@@ -143,8 +143,8 @@ std::vector<T> readNexusAnySlab(Nexus::File &file, const Nexus::DimSizeVector &s
 
 /// Read any type of slab and store it into the provided buffer vector.
 template <typename T, typename U, Narrowing narrow>
-void readNexusAnySlab(std::vector<T> &out, Nexus::File &file, const Nexus::DimSizeVector &start,
-                      const Nexus::DimSizeVector &size, const bool close_data) {
+void readNexusAnySlab(std::vector<T> &out, Nexus::File &file, const Nexus::DimVector &start,
+                      const Nexus::DimVector &size, const bool close_data) {
   const auto volume = vectorVolume(size);
   if (out.size() < static_cast<size_t>(volume))
     throw std::runtime_error("The output buffer is too small in NeXusIOHelper::readNexusAnySlab");
@@ -201,8 +201,8 @@ void readNexusVector(std::vector<T> &out, Nexus::File &file, const std::string &
  * readNexusAnySlab via the RUN_NEXUSIOHELPER_FUNCTION macro.
  */
 template <typename T, Narrowing narrow = Narrowing::Prevent>
-std::vector<T> readNexusSlab(Nexus::File &file, const std::string &entry, const std::vector<int64_t> &start,
-                             const std::vector<int64_t> &size) {
+std::vector<T> readNexusSlab(Nexus::File &file, const std::string &entry, DimVector const &start,
+                             DimVector const &size) {
   const auto info_and_close = checkIfOpenAndGetInfo(file, std::move(std::move(entry)));
   RUN_NEXUSIOHELPER_FUNCTION(narrow, (info_and_close.first).type, readNexusAnySlab, file, start, size,
                              info_and_close.second);
@@ -213,8 +213,8 @@ std::vector<T> readNexusSlab(Nexus::File &file, const std::string &entry, const 
  * The provided output buffer is filled.
  */
 template <typename T, Narrowing narrow = Narrowing::Prevent>
-void readNexusSlab(std::vector<T> &out, Nexus::File &file, const std::string &entry, const std::vector<int64_t> &start,
-                   const std::vector<int64_t> &size) {
+void readNexusSlab(std::vector<T> &out, Nexus::File &file, const std::string &entry, DimVector const &start,
+                   DimVector const &size) {
   const auto info_and_close = checkIfOpenAndGetInfo(file, std::move(std::move(entry)));
   RUN_NEXUSIOHELPER_FUNCTION(narrow, (info_and_close.first).type, readNexusAnySlab, out, file, start, size,
                              info_and_close.second);
