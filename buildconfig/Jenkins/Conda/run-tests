@@ -54,12 +54,7 @@ function doctest_onexit {
 # Prevent race conditions when creating the user config directory
 if [[ $OSTYPE == "msys"* ]]; then
     userconfig_dir=$APPDATA/mantidproject/mantid
-    if [ -d "$WORKSPACE/build/bin/Release" ]; then
-        binary_dir=$WORKSPACE/build/bin/Release
-    else
-        binary_dir=$WORKSPACE/build/bin
-    fi
-    userprops=$binary_dir/Mantid.user.properties
+    userprops=/build/bin/Mantid.user.properties
     workbench_ini=$APPDATA/mantidproject/mantidworkbench.ini
 else
     userconfig_dir=$HOME/.mantid
@@ -78,8 +73,6 @@ rm -f $workbench_ini
 echo MultiThreaded.MaxCores=2 > $userprops
 
 if [[ $OSTYPE == "msys"* ]]; then
-    WINDOWS_BUILD_OPTIONS="--config Release"
-    WINDOWS_TEST_OPTIONS="-C Release"
     WINDOWS_UNITTEST_TIMEOUT_OPTIONS="--timeout 500"
     export PYTHONHOME=$CONDA_PREFIX
     SYSTEM_TEST_EXECUTABLE=$WORKSPACE/build/systemtest.bat
@@ -92,7 +85,7 @@ cd $WORKSPACE/build
 # mkdir for test logs
 mkdir -p test_logs
 if [[ $ENABLE_UNIT_TESTS == true ]]; then
-    run_with_xvfb ctest -j$UNIT_TEST_THREADS --no-compress-output -T Test -O test_logs/ctest_$OSTYPE.log --schedule-random --output-on-failure --repeat until-pass:3 $WINDOWS_TEST_OPTIONS $WINDOWS_UNITTEST_TIMEOUT_OPTIONS
+    run_with_xvfb ctest -j$UNIT_TEST_THREADS --no-compress-output -T Test -O test_logs/ctest_$OSTYPE.log --schedule-random --output-on-failure --repeat until-pass:3 $WINDOWS_UNITTEST_TIMEOUT_OPTIONS
 fi
 
 if [[ $ENABLE_DOCS == true && $ENABLE_DOC_TESTS == true ]]; then
@@ -100,7 +93,7 @@ if [[ $ENABLE_DOCS == true && $ENABLE_DOC_TESTS == true ]]; then
     trap doctest_onexit INT TERM EXIT
 
     # Build doctests without using Xvfb for better output when things fail. Output to file due to console memory issues
-    QT_QPA_PLATFORM=offscreen cmake --build . --target docs-doctest -j$BUILD_THREADS $WINDOWS_BUILD_OPTIONS > test_logs/doctest_$OSTYPE.log
+    QT_QPA_PLATFORM=offscreen cmake --build . --target docs-doctest -j$BUILD_THREADS > test_logs/doctest_$OSTYPE.log
 
     # Disable the trap if the doctests are successful
     trap - INT TERM EXIT
@@ -122,5 +115,5 @@ if [[ $ENABLE_SYSTEM_TESTS == true ]]; then
         SYSTEM_TEST_OPTIONS+=" --exclude-in-pull-requests"
     fi
 
-    run_with_xvfb $SYSTEM_TEST_EXECUTABLE $WINDOWS_TEST_OPTIONS $SYSTEM_TEST_OPTIONS
+    run_with_xvfb $SYSTEM_TEST_EXECUTABLE $SYSTEM_TEST_OPTIONS
 fi
