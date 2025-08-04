@@ -382,10 +382,7 @@ const Kernel::Material &MeshObject2D::material() const { return m_material; }
 /**
  * @param material :: material that is being set for the object
  */
-void MeshObject2D::setMaterial(const Kernel::Material &material) {
-  m_material = Kernel::Material(material.name(), material.chemicalFormula(), material.numberDensity(),
-                                material.packingFraction(), material.temperature(), material.pressure());
-}
+void MeshObject2D::setMaterial(const Kernel::Material &material) { m_material = material; }
 
 const std::string &MeshObject2D::id() const { return MeshObject2D::Id; }
 
