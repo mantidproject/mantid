@@ -198,7 +198,7 @@ std::vector<std::string> LoadMcStas::readEventData(const std::vector<std::string
       // Add to data service for later retrieval
       InstrumentDataService::Instance().add(instrumentNameMangled, instrument);
     }
-  } catch (Exception::InstrumentDefinitionError &e) {
+  } catch (Kernel::Exception::InstrumentDefinitionError &e) {
     g_log.warning() << "When trying to read the instrument description in the Nexus file: " << filename
                     << " the following error is reported: " << e.what() << " Ignore eventdata from the Nexus file\n";
     return scatteringWSNames;
