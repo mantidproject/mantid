@@ -31,11 +31,11 @@ class HeliumAnalyserEfficiencyTestBase(SANSPolarizationCorrectionsBase, metaclas
         )
 
     def _validate(self):
-        result_eff = "efficiency"
+        result_eff = "efficiency_0"
         reference_eff = f"{self.reference_basename}EfficiencyReference.nxs"
-        result_curves = "curves"
+        result_curves = "curves_He3_polarization_curves_0"
         reference_curves = f"{self.reference_basename}CurvesReference.nxs"
-        result_params = "params"
+        result_params = "params_He3_polarization_parameters_0"
         reference_params = f"{self.reference_basename}ParamsReference.nxs"
 
         return result_eff, reference_eff, result_curves, reference_curves, result_params, reference_params
