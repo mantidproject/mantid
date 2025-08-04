@@ -9,6 +9,7 @@
 DNS single crystal elastic plot tab presenter of DNS reduction GUI.
 """
 
+import numpy as np
 from mantidqtinterfaces.dns_powder_tof.data_structures.dns_observer import DNSObserver
 from mantidqtinterfaces.dns_powder_tof.data_structures.object_dict import ObjectDict
 from mantidqtinterfaces.dns_single_crystal_elastic.plot import mpl_helpers
@@ -27,6 +28,32 @@ class DNSElasticSCPlotPresenter(DNSObserver):
         self._plot_param.colormap_name = "jet"
         self._plot_param.font_size = 1
         self._plot_param.lines = 0
+        self._plot_param.xlim = [None, None]
+        self._plot_param.ylim = [None, None]
+        self._plot_param.zlim = [None, None]
+        self._plot_param.projections = False
+
+    def _toggle_projections(self, set_proj):
+        self.view.sig_change_cb_range_on_zoom.disconnect()
+        self._plot_param.projections = set_proj
+        axis_type = self.view.get_axis_type()
+        if set_proj and self.model.has_data():
+            x_proj, y_proj = self._calculate_projections(axis_type["switch"])
+            if axis_type["switch"]:
+                x_proj, y_proj = y_proj, x_proj
+            self.view.single_crystal_plot.set_projections(x_proj, y_proj)
+            self.view.draw()
+        else:
+            self.view.single_crystal_plot.remove_projections()
+            self._plot()
+        self.view.sig_change_cb_range_on_zoom.connect(self._change_color_bar_range)
+
+    def _calculate_projections(self, switch=False):
+        xlim, ylim = self.view.single_crystal_plot.get_active_limits()
+        if switch:
+            xlim, ylim = ylim, xlim
+        x_proj, y_proj = self.model.get_projections(xlim, ylim)
+        return x_proj, y_proj
 
     def _datalist_updated(self, workspaces):
         compare = self.view.datalist.get_datalist()
@@ -162,6 +189,13 @@ class DNSElasticSCPlotPresenter(DNSObserver):
         self.view.single_crystal_plot.set_cmap(cmap)
         self.view.draw()
 
+    def _set_log(self):
+        log = self.view.get_state()["log_scale"]
+        _dummy, _dummy, zlim, _dummy = self._get_current_limits(zoom=True)
+        norm = mpl_helpers.get_log_norm(log, zlim)
+        self.view.single_crystal_plot.set_norm(norm)
+        self.view.draw()
+
     def _change_font_size(self, draw=True):
         own_dict = self.view.get_state()
         font_size = own_dict["fontsize"]
@@ -181,8 +215,15 @@ class DNSElasticSCPlotPresenter(DNSObserver):
         self.view.sig_restore_default_omega_offset.connect(self._set_default_omega_offset)
         self.view.sig_update_dxdy.connect(self._update_dx_dy)
         self.view.sig_restore_default_dxdy.connect(self._set_default_dx_dy)
+        self.view.sig_calculate_projection.connect(self._toggle_projections)
+        self.view.sig_save_data.connect(self._save_data)
         self.view.sig_change_colormap.connect(self._set_colormap)
+        self.view.sig_change_log.connect(self._set_log)
+        self.view.sig_change_linestyle.connect(self._change_line_style)
+        self.view.sig_change_cb_range_on_zoom.connect(self._change_color_bar_range)
+        self.view.sig_manual_lim_changed.connect(self._manual_lim_changed)
         self._plotted_script_number = 0
         self.view.sig_change_grid.connect(self._change_grid_state)
         self.view.sig_change_crystal_axes.connect(self._change_crystal_axes)
         self.view.sig_change_font_size.connect(self._change_font_size)
+        self.view.sig_home_button_clicked.connect(self._home_button_clicked)
