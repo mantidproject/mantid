@@ -334,7 +334,7 @@ public:
     // anchor that dataset into the containing GROUP and not the DATASET
     // this is not good hygienic behavior, but is required by NexusClasses and can
     // lead to test regressions that are otherwise very hard to track down
-    cout << "\ntest make data lateral\n";
+    cout << "\ntest make data lateral\n" << std::flush;
     FileResource resource("test_napi_file_rdwr.h5");
     std::string filename = resource.fullPath();
     Mantid::Nexus::File file(filename, NXaccess::CREATE5);
@@ -359,7 +359,7 @@ public:
   }
 
   void test_closeData() {
-    cout << "\ntest closeData\n";
+    cout << "\ntest closeData\n" << std::flush;
     FileResource resource("test_nexus_file_dataclose.h5");
     std::string filename = resource.fullPath();
     Mantid::Nexus::File file(filename, NXaccess::CREATE5);
@@ -379,7 +379,7 @@ public:
   }
 
   void test_close_data_lateral() {
-    cout << "\ntest close data lateral\n";
+    cout << "\ntest close data lateral\n" << std::flush;
     FileResource resource("test_nexus_file_dataclose.h5");
     std::string filename = resource.fullPath();
     Mantid::Nexus::File file(filename, NXaccess::CREATE5);
@@ -413,7 +413,7 @@ public:
   }
 
   void test_data_putget_basic() {
-    cout << "\ntest dataset read/write\n";
+    cout << "\ntest dataset read/write\n" << std::flush;
 
     // open a file
     FileResource resource("test_nexus_file_dataRW.h5");
@@ -422,38 +422,38 @@ public:
     file.makeGroup("entry", "NXentry", true);
 
     // put/get an int
-    cout << "\tread/write int...";
+    cout << "\tread/write int..." << std::flush;
     do_test_data_putget<int32_t>(file, "data_int", 12);
     cout << "done\n";
 
     // put/get an int64_t
-    cout << "\tread/write int64_t...";
+    cout << "\tread/write int64_t..." << std::flush;
     do_test_data_putget<int64_t>(file, "data_int64", 12);
     cout << "done\n";
 
     // put/get a size_t
-    cout << "\tread/write size_T...";
+    cout << "\tread/write size_T..." << std::flush;
     do_test_data_putget<uint64_t>(file, "data_sizet", 12);
     cout << "done\n";
 
     // put/get a float
-    cout << "\tread/write float...";
+    cout << "\tread/write float..." << std::flush;
     do_test_data_putget<float>(file, "data_float", 1.2f);
     cout << "done\n";
 
     // put/get double
-    cout << "\tread/write double...";
+    cout << "\tread/write double..." << std::flush;
     do_test_data_putget<double>(file, "data_double", 1.4);
     cout << "done\n";
 
     // put/get a single char
-    cout << "\tread/write char...";
+    cout << "\tread/write char..." << std::flush;
     do_test_data_putget<char>(file, "data_char", 'x');
-    cout << "done\n";
+    cout << "done\n" << std::flush;
   }
 
   void test_putData_bad() {
-    cout << "\ntest putData -- bad\n";
+    cout << "\ntest putData -- bad\n" << std::flush;
     // open a file
     FileResource resource("test_nexus_file_dataRW.h5");
     std::string filename = resource.fullPath();
@@ -467,7 +467,7 @@ public:
   }
 
   void test_data_putget_string() {
-    cout << "\ntest dataset read/write -- string\n";
+    cout << "\ntest dataset read/write -- string\n" << std::flush;
 
     // open a file
     FileResource resource("test_nexus_file_stringrw.h5");
@@ -528,7 +528,7 @@ public:
   }
 
   void test_data_putget_array() {
-    cout << "\ntest dataset read/write -- arrays\n";
+    cout << "\ntest dataset read/write -- arrays\n" << std::flush;
 
     // open a file
     FileResource resource("test_nexus_file_dataRW.h5");
@@ -617,7 +617,7 @@ public:
   }
 
   void test_data_putget_vector() {
-    cout << "\ntest dataset read/write -- vector\n";
+    cout << "\ntest dataset read/write -- vector\n" << std::flush;
 
     // open a file
     FileResource resource("test_nexus_file_dataRW_vec.h5");
@@ -653,7 +653,7 @@ public:
   void test_data_string_array_as_char_array() {
     // this test checks that string arrays saved a block char arrays can be read back
     // this guards against a regression that would otherwise occur within PropertyNexusTest
-    cout << "\ntest dataset read existing -- char array properties\n";
+    cout << "\ntest dataset read existing -- char array properties\n" << std::flush;
 
     // must first create the file by loading an empty instrument and then saving the nexus file
     FileResource fileInfo("PropertyNexusTest.nxs");
@@ -701,7 +701,7 @@ public:
     // this test checks that string data lengths are still correctly determined
     // even if the dimensions of a char block have been (stupidly) set to 0 by saving as a scalar
     // this guards against a regression that would otherwise occur within NexusGeometrySave
-    cout << "\ntest dataset read existing -- zero dims\n";
+    cout << "\ntest dataset read existing -- zero dims\n" << std::flush;
 
     // create a file and write string data with zero dimensions
     // this has to be done using the hdf5 C library
@@ -780,7 +780,7 @@ public:
     // the correct length to use for rank-2 char blocks is H5Tget_size() x dims[0],
     // and not a single char more.  Null-termination will be correctly handled this way.
     // Trying to be even-more-null-terminated will lead to buffer overflow errors.
-    cout << "\ntest dataset read existing -- string block logs\n";
+    cout << "\ntest dataset read existing -- string block logs\n" << std::flush;
 
     // open a file
     std::string filename = getFullPath("SANS2D00022048.nxs");
@@ -809,7 +809,7 @@ public:
   /* NOTE for historical reasons, additional tests exist in NexusFileReadWriteTest.h*/
 
   void test_getAddress_groups() {
-    cout << "\ntest get_address -- groups only\n";
+    cout << "\ntest get_address -- groups only\n" << std::flush;
     FileResource resource("test_nexus_file_grp.h5");
     std::string filename = resource.fullPath();
     Mantid::Nexus::File file(filename, NXaccess::CREATE5);
@@ -839,7 +839,7 @@ public:
   }
 
   void test_getAddress_data() {
-    cout << "\ntest get_address -- groups and data!\n";
+    cout << "\ntest get_address -- groups and data!\n" << std::flush;
     FileResource resource("test_nexus_file_grpdata.h5");
     std::string filename = resource.fullPath();
     Mantid::Nexus::File file(filename, NXaccess::CREATE5);
@@ -861,7 +861,7 @@ public:
 
   void test_openAddress() {
     using Mantid::Nexus::Entry;
-    cout << "\ntest openAddress\n";
+    cout << "\ntest openAddress\n" << std::flush;
     // open a file
     FileResource resource("test_nexus_entries.h5");
     std::string filename = resource.fullPath();
@@ -953,7 +953,7 @@ public:
   }
 
   void test_getInfo() {
-    cout << "\ntest getInfo -- good\n";
+    cout << "\ntest getInfo -- good\n" << std::flush;
 
     // open a file
     FileResource resource("test_nexus_file_dataRW.h5");
@@ -987,7 +987,7 @@ public:
   }
 
   void test_getInfo_bad() {
-    cout << "\ntest getInfo -- bad\n";
+    cout << "\ntest getInfo -- bad\n" << std::flush;
     // open a file
     FileResource resource("test_nexus_file_dataRW.h5");
     std::string filename = resource.fullPath();
@@ -1006,7 +1006,7 @@ public:
   }
 
   void test_isDataSetOpen() {
-    cout << "\ntest is data set open\n";
+    cout << "\ntest is data set open\n" << std::flush;
     // open a file
     FileResource resource("test_nexus_file_isdataopen.h5");
     std::string filename = resource.fullPath();
