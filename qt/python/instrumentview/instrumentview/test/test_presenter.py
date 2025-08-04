@@ -53,54 +53,60 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
             mock_create_poly_data_mesh.reset_mock()
 
     @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.set_tof_limits")
-    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter._parse_min_max_text")
-    def test_on_tof_limits_updated_true(self, mock_parse_min_max_text, mock_set_tof_limits):
-        mock_parse_min_max_text.return_value = (0, 100)
+    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter._parse_min_max")
+    def test_on_tof_limits_updated_true(self, mock_parse_min_max, mock_set_tof_limits):
+        mock_parse_min_max.return_value = (0, 100)
         self._presenter.on_tof_limits_updated()
-        mock_parse_min_max_text.assert_called_once()
+        mock_parse_min_max.assert_called_once()
         mock_set_tof_limits.assert_called_once_with(0, 100)
 
     @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.set_tof_limits")
-    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter._parse_min_max_text")
-    def test_on_tof_limits_updated_false(self, mock_parse_min_max_text, mock_set_tof_limits):
-        mock_parse_min_max_text.return_value = ()
+    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter._parse_min_max")
+    def test_on_tof_limits_updated_false(self, mock_parse_min_max, mock_set_tof_limits):
+        mock_parse_min_max.return_value = ()
         self._presenter.on_tof_limits_updated()
-        mock_parse_min_max_text.assert_called_once()
+        mock_parse_min_max.assert_called_once()
         mock_set_tof_limits.assert_not_called()
 
     @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.set_contour_limits")
-    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter._parse_min_max_text")
-    def test_on_contour_limits_updated_false(self, mock_parse_min_max_text, mock_set_contour_limits):
-        mock_parse_min_max_text.return_value = ()
+    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter._parse_min_max")
+    def test_on_contour_limits_updated_false(self, mock_parse_min_max, mock_set_contour_limits):
+        mock_parse_min_max.return_value = ()
         self._presenter.on_contour_limits_updated()
         mock_set_contour_limits.assert_not_called()
 
     @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.set_contour_limits")
-    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter._parse_min_max_text")
-    def test_on_contour_limits_updated_true(self, mock_parse_min_max_text, mock_set_contour_limits):
-        mock_parse_min_max_text.return_value = (0, 100)
+    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter._parse_min_max")
+    def test_on_contour_limits_updated_true(self, mock_parse_min_max, mock_set_contour_limits):
+        mock_parse_min_max.return_value = (0, 100)
         self._presenter.on_contour_limits_updated()
         mock_set_contour_limits.assert_called_once_with(0, 100)
 
-    def _do_test_parse_min_max_text_valid(self, min_text: str, max_text: str, exp_is_valid: bool, exp_min: int, exp_max: int) -> None:
-        limits = self._presenter._parse_min_max_text(min_text, max_text)
+    def _do_test_parse_min_max_valid(self, min: str | float, max: str | float, exp_is_valid: bool, exp_min: int, exp_max: int) -> None:
+        limits = self._presenter._parse_min_max(min, max)
         self.assertEqual(exp_is_valid, bool(limits))
         if limits:
             min, max = limits
             self.assertEqual(exp_min, min)
             self.assertEqual(exp_max, max)
 
-    def test_parse_min_max_text_valid(self):
-        self._do_test_parse_min_max_text_valid("1", "200", True, 1, 200)
+    def test_parse_min_max_valid(self):
+        self._do_test_parse_min_max_valid("1", "200", True, 1, 200)
 
-    def test_parse_min_max_text_reverse(self):
-        self._do_test_parse_min_max_text_valid("100", "5", False, 0, 0)
+    def test_parse_min_max_int_valid(self):
+        self._do_test_parse_min_max_valid(1, 200, True, 1, 200)
 
-    def test_parse_min_max_text_invalid_min(self):
-        self._do_test_parse_min_max_text_valid("boom", "5", False, 0, 0)
+    def test_parse_min_max_float_valid(self):
+        self._do_test_parse_min_max_valid(1.6, 200.8, True, 1, 200)
 
-    def test_parse_min_max_text_invalid_max(self):
-        self._do_test_parse_min_max_text_valid("5", "boom", False, 0, 0)
+    def test_parse_min_max_reverse(self):
+        self._do_test_parse_min_max_valid("100", "5", False, 0, 0)
+
+    def test_parse_min_max_invalid_min(self):
+        self._do_test_parse_min_max_valid("boom", "5", False, 0, 0)
+
+    def test_parse_min_max_invalid_max(self):
+        self._do_test_parse_min_max_valid("5", "boom", False, 0, 0)
 
     def test_set_contour_limits(self):
         self._presenter.set_contour_limits(0, 100)
