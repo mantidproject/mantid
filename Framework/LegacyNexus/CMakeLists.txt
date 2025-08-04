@@ -43,7 +43,7 @@ target_include_directories(
 set_target_properties(LegacyNexus PROPERTIES OUTPUT_NAME MantidLegacyNexus COMPILE_DEFINITIONS IN_MANTID_NEXUSCPP)
 # H5_BUILT_AS_DYNAMIC_LIB required https://github.com/conda-forge/hdf5-feedstock/issues/58
 target_compile_definitions(LegacyNexus PUBLIC -DH5_BUILT_AS_DYNAMIC_LIB)
-target_link_libraries(LegacyNexus PUBLIC ${HDF4_DF_LIBRARY} ${HDF4_MFHDF_LIBRARY} ${HDF5_LIBRARIES})
+target_link_libraries(LegacyNexus PUBLIC Mantid::Types ${HDF4_DF_LIBRARY} ${HDF4_MFHDF_LIBRARY} ${HDF5_LIBRARIES})
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set_target_properties(LegacyNexus PROPERTIES INSTALL_RPATH "@loader_path/../MacOS;@loader_path/../Frameworks")
