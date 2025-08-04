@@ -30,6 +30,8 @@ GET_POINTER_SPECIALIZATION(OrientedLattice)
 GET_POINTER_SPECIALIZATION(Sample)
 
 std::shared_ptr<IObject> getShapeWrapper(std::shared_ptr<Sample> self) { return self->getShapePtr(); }
+bool equals_wrapper(const Sample &self, const Sample &other) { return self == other; }
+....def("__eq__", &equals_wrapper, (arg("self"), arg("other")));
 
 void export_Sample() {
   register_ptr_to_python<Sample *>();
@@ -81,6 +83,5 @@ void export_Sample() {
       .def("__getitem__", &Sample::operator[], (arg("self"), arg("index")), return_internal_reference<>())
       .def("__copy__", &Mantid::PythonInterface::generic__copy__<Sample>)
       .def("__deepcopy__", &Mantid::PythonInterface::generic__deepcopy__<Sample>)
-      .def("__eq__", static_cast<bool (Sample::*)(const Sample &) const>(&Sample::operator==),
-           (arg("self"), arg("other")));
+      .def("__eq__", &equals_wrapper, (arg("self"), arg("other")));
 }
