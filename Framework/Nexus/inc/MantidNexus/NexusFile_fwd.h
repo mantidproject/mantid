@@ -12,8 +12,7 @@
 #include <string>
 #include <vector>
 
-constexpr int NX_MAXADDRESSLEN = 1024;
-
+// forward declare typedefs from hdf5
 typedef int64_t hid_t;
 typedef uint64_t hsize_t;
 
@@ -112,12 +111,8 @@ MANTID_NEXUS_DLL std::ostream &operator<<(std::ostream &os, const NXcompression 
 // forward declare
 namespace Mantid::Nexus {
 
-// TODO change to std::size_t
-typedef std::int64_t dimsize_t;
-// TODO replace all instances with DimArray
-typedef std::vector<dimsize_t> DimVector; ///< use specifically for the dims array
-//  TODO this is probably the same as DimVector
-typedef std::vector<dimsize_t> DimSizeVector; ///< used for start, size, chunk, buffsize, etc.
+typedef hsize_t dimsize_t;
+typedef std::vector<dimsize_t> DimVector;
 
 typedef std::pair<std::string, std::string> Entry;
 typedef std::map<std::string, std::string> Entries;

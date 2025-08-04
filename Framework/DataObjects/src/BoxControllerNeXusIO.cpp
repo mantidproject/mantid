@@ -237,8 +237,8 @@ void BoxControllerNeXusIO::prepareNxSToWrite_CurVersion() {
 
     // Now the chunk size.
     // m_Blocksize == (number_events_to_write_at_a_time, data_items_per_event)
-    Nexus::DimSizeVector chunk(m_BlockSize);
-    chunk[0] = static_cast<Nexus::dimsize_t>(m_dataChunk);
+    Nexus::DimVector chunk(m_BlockSize);
+    chunk[0] = m_dataChunk;
 
     // Make and open the data
     if (m_CoordSize == 4)
@@ -298,7 +298,7 @@ void BoxControllerNeXusIO::getDiskBufferFileData() {
   //    // Get a vector of the free space blocks to save to the file
   Nexus::DimVector free_dims(2, 2);
   free_dims[0] = int64_t(freeSpaceBlocks.size() / 2);
-  Nexus::DimSizeVector free_chunk(2, 2);
+  Nexus::DimVector free_chunk(2, 2);
   free_chunk[0] = int64_t(m_dataChunk);
 
   std::map<std::string, std::string> groupEntries;
@@ -323,13 +323,13 @@ void BoxControllerNeXusIO::getDiskBufferFileData() {
  *@param blockPosition -- The starting place to save data to   */
 template <typename Type>
 void BoxControllerNeXusIO::saveGenericBlock(const std::vector<Type> &DataBlock, const uint64_t blockPosition) const {
-  std::vector<int64_t> start(2, 0);
+  Nexus::DimVector start(2, 0);
   // Specify the dimensions
-  std::vector<int64_t> dims(m_BlockSize);
+  Nexus::DimVector dims(m_BlockSize);
 
   std::lock_guard<std::mutex> _lock(m_fileMutex);
-  start[0] = int64_t(blockPosition);
-  dims[0] = int64_t(DataBlock.size() / this->getNDataColums());
+  start[0] = blockPosition;
+  dims[0] = Nexus::dimsize_t(DataBlock.size() / this->getNDataColums());
 
   // ugly cast but why would putSlab change the data?. This is NeXus bug which
   // makes putSlab method non-constant
@@ -392,10 +392,10 @@ void BoxControllerNeXusIO::setEventDataVersion(const size_t &traitsCount) {
   }
 }
 
-int64_t BoxControllerNeXusIO::dataEventCount(void) const {
+uint64_t BoxControllerNeXusIO::dataEventCount(void) const {
   // m_BlockSize[1] is the number of data events associated to an MDLeanEvent
   // or MDEvent object.
-  int64_t size(m_BlockSize[1]);
+  uint64_t size(m_BlockSize[1]);
   switch (m_EventDataVersion) {
   case (EventDataVersion::EDVLean):
     break;                              // no adjusting is necessary
@@ -503,11 +503,11 @@ void BoxControllerNeXusIO::loadGenericBlock(std::vector<Type> &Block, const uint
   if (blockPosition + nPoints > this->getFileLength())
     throw Kernel::Exception::FileError("Attemtp to read behind the file end", m_fileName);
 
-  std::vector<int64_t> start(2, 0);
-  start[0] = static_cast<int64_t>(blockPosition);
+  Nexus::DimVector start(2, 0);
+  start[0] = blockPosition;
 
-  std::vector<int64_t> size(m_BlockSize);
-  size[0] = static_cast<int64_t>(nPoints);
+  Nexus::DimVector size(m_BlockSize);
+  size[0] = nPoints;
   size[1] = dataEventCount(); // data item count per event in the Nexus file
 
   std::lock_guard<std::mutex> _lock(m_fileMutex);
@@ -587,8 +587,8 @@ void BoxControllerNeXusIO::closeFile() {
       std::vector<uint64_t> freeSpaceBlocks;
       this->getFreeSpaceVector(freeSpaceBlocks);
       if (!freeSpaceBlocks.empty()) {
-        std::vector<int64_t> free_dims(2, 2);
-        free_dims[0] = int64_t(freeSpaceBlocks.size() / 2);
+        Nexus::DimVector free_dims(2, 2);
+        free_dims[0] = Nexus::dimsize_t(freeSpaceBlocks.size() / 2);
 
         m_File->writeUpdatedData(g_DBDataName, freeSpaceBlocks, free_dims);
       }
