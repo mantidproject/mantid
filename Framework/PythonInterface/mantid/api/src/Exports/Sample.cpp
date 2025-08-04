@@ -31,7 +31,6 @@ GET_POINTER_SPECIALIZATION(Sample)
 
 std::shared_ptr<IObject> getShapeWrapper(std::shared_ptr<Sample> self) { return self->getShapePtr(); }
 bool equals_wrapper(const Sample &self, const Sample &other) { return self == other; }
-....def("__eq__", &equals_wrapper, (arg("self"), arg("other")));
 
 void export_Sample() {
   register_ptr_to_python<Sample *>();
