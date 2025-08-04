@@ -120,7 +120,7 @@ Usage
         groups.append(f"group_{n}")
         GroupWorkspaces(InputWorkspaces = names, OutputWorkspace = groups[-1])
 
-    out, curves, table = HeliumAnalyserPolarizationDecay(InputWorkspaces=groups,
+    out, curves, table = HeliumAnalyserEfficiency(InputWorkspaces=groups,
                                 SpinStates = "00,11,01,10")
 
     p0, tau=mtd['table_decay_parameters_0'].column(1)[0:-1]
