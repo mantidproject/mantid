@@ -106,13 +106,7 @@ const IObject &Sample::getShape() const { return *m_shape; }
  * its own coordinate system with its centre at [0,0,0]
  * @return A pointer to the object describing the shape
  */
-const IObject_sptr Sample::getShapePtr() const {
-
-  if (!m_shape) {
-    return nullptr;
-  }
-  return m_shape;
-}
+const IObject_sptr Sample::getShapePtr() const { return m_shape; }
 
 /** Set the object that describes the sample shape. The object is defined within
  * its own coordinate system
