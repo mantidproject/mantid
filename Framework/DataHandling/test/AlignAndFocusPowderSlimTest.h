@@ -43,7 +43,7 @@ public:
                                      const std::string binningUnits = "dSpacing", const double timeMin = -1.,
                                      const double timeMax = -1., const bool should_throw = false,
                                      TableWorkspace_sptr tablesplitter = nullptr, const bool relativeTime = false,
-                                     const int splitterTarget = -1) {
+                                     const int splitterTarget = -1, const bool filterBadPulses = false) {
     const std::string wksp_name("VULCAN");
 
     std::cout << "==================> " << filename << '\n';
@@ -73,6 +73,9 @@ public:
     }
     if (splitterTarget >= 0)
       TS_ASSERT_THROWS_NOTHING(alg.setProperty("SplitterTarget", splitterTarget));
+    if (filterBadPulses) {
+      TS_ASSERT_THROWS_NOTHING(alg.setProperty("FilterBadPulses", filterBadPulses));
+    }
 
     if (should_throw) {
       TS_ASSERT_THROWS(alg.execute(), const std::invalid_argument &);
@@ -538,6 +541,51 @@ public:
     tablesplitter->cell<double>(2, 1) = 410.0 + offset;
     tablesplitter->cell<std::string>(2, 2) = sameTarget ? "0" : "2";
     return tablesplitter;
+  }
+
+  void test_filter_bad_pulses() {
+    MatrixWorkspace_sptr outputWS =
+        run_algorithm("VULCAN_218062.nxs.h5", std::vector<double>{0.}, std::vector<double>{50000.},
+                      std::vector<double>{50000.}, "Linear", "TOF", -1., -1., false, nullptr, false, -1, true);
+
+    /* expected results came from running
+
+    ws = LoadEventNexus("VULCAN_218062.nxs.h5", NumberOfBins=1)
+    grp = CreateGroupingWorkspace(ws, GroupDetectorsBy='bank')
+    ws = GroupDetectors(ws, CopyGroupingFromWorkspace="grp")
+    ws = FilterBadPulses(ws)
+    print(ws.extractY())
+    */
+
+    TS_ASSERT_EQUALS(outputWS->readY(0).front(), 22668454);
+    TS_ASSERT_EQUALS(outputWS->readY(1).front(), 22639565);
+    TS_ASSERT_EQUALS(outputWS->readY(2).front(), 26014789);
+    TS_ASSERT_EQUALS(outputWS->readY(3).front(), 25716703);
+    TS_ASSERT_EQUALS(outputWS->readY(4).front(), 8690549);
+    TS_ASSERT_EQUALS(outputWS->readY(5).front(), 16577786);
+  }
+
+  void test_filter_bad_pulses_and_time_start_stop() {
+    MatrixWorkspace_sptr outputWS =
+        run_algorithm("VULCAN_218062.nxs.h5", std::vector<double>{0.}, std::vector<double>{50000.},
+                      std::vector<double>{50000.}, "Linear", "TOF", 200., 300., false, nullptr, false, -1, true);
+
+    /* expected results came from running
+
+    ws = LoadEventNexus("VULCAN_218062.nxs.h5", NumberOfBins=1, FilterByTimeStart=200, FilterByTimeStop=300)
+    grp = CreateGroupingWorkspace(ws, GroupDetectorsBy='bank')
+    ws = GroupDetectors(ws, CopyGroupingFromWorkspace="grp")
+    ws = FilterBadPulses(ws)
+    print(ws.extractY())
+    */
+
+    // values should be slightly smaller than in test_start_stop_time_filtering
+    TS_ASSERT_EQUALS(outputWS->readY(0).front(), 3736146);
+    TS_ASSERT_EQUALS(outputWS->readY(1).front(), 3729398);
+    TS_ASSERT_EQUALS(outputWS->readY(2).front(), 4288311);
+    TS_ASSERT_EQUALS(outputWS->readY(3).front(), 4237608);
+    TS_ASSERT_EQUALS(outputWS->readY(4).front(), 1433200);
+    TS_ASSERT_EQUALS(outputWS->readY(5).front(), 2729481);
   }
 
   // ==================================
