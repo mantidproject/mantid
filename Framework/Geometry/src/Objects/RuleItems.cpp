@@ -126,10 +126,13 @@ Intersection &Intersection::operator=(const Intersection &Iother)
   return *this;
 }
 
-Intersection *Intersection::doClone() const {
-  std::unique_ptr<Rule> left = this->leaf(0) ? this->leaf(0)->clone() : nullptr;
-  std::unique_ptr<Rule> right = this->leaf(1) ? this->leaf(1)->clone() : nullptr;
-  return new Intersection(std::move(left), std::move(right));
+Intersection *Intersection::doClone() const
+/**
+  Virtual copy constructor
+  @return new Intersection(this)
+*/
+{
+  return new Intersection(*this);
 }
 
 std::unique_ptr<Intersection> Intersection::clone() const
@@ -437,9 +440,7 @@ Union *Union::doClone() const
   @return new Union copy.
 */
 {
-  std::unique_ptr<Rule> left = this->leaf(0) ? this->leaf(0)->clone() : nullptr;
-  std::unique_ptr<Rule> right = this->leaf(1) ? this->leaf(1)->clone() : nullptr;
-  return new Union(std::move(left), std::move(right));
+  return new Union(*this);
 }
 
 std::unique_ptr<Union> Union::clone() const
@@ -750,16 +751,11 @@ void SurfPoint::setKeyN(const int Ky)
 
 void SurfPoint::setKey(const std::shared_ptr<Surface> &Spoint)
 /**
-  Sets the key pointer. The class shares ownership.
+  Sets the key pointer. The class takes ownership.
   @param Spoint :: new key values
 */
 {
-  if (Spoint) {
-    // Assuming Surface has a virtual clone method
-    m_key = std::shared_ptr<Surface>(Spoint->clone());
-  } else {
-    m_key = nullptr;
-  }
+  m_key = Spoint;
 }
 
 int SurfPoint::simplify()
