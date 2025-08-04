@@ -81,5 +81,6 @@ void export_Sample() {
       .def("__getitem__", &Sample::operator[], (arg("self"), arg("index")), return_internal_reference<>())
       .def("__copy__", &Mantid::PythonInterface::generic__copy__<Sample>)
       .def("__deepcopy__", &Mantid::PythonInterface::generic__deepcopy__<Sample>)
-      .def("__eq__", &Sample::operator==, (arg("self"), arg("other")));
+      .def("__eq__", static_cast<bool (Sample::*)(const Sample &) const>(&Sample::operator==),
+           (arg("self"), arg("other")));
 }
