@@ -895,7 +895,7 @@ void File::makeCompData(std::string const &name, NXnumtype const type, DimVector
     if (unlimited) {
       dataspace = H5Screate_simple(rank, mydim.data(), maxdims.data());
     } else {
-      dataspace = H5Screate_simple(rank, mydim.data(), NULL);
+      dataspace = H5Screate_simple(rank, mydim.data(), nullptr);
     }
   }
 
@@ -989,7 +989,7 @@ void File::makeCompData(std::string const &name, NXnumtype const type, DimVector
 }
 
 template <typename NumT> void File::putSlab(NumT const *data, DimVector const &start, DimVector const &size) {
-  if (data == NULL) {
+  if (data == nullptr) {
     throw NXEXCEPTION("Data specified as null");
   }
   if (start.empty()) {
@@ -1047,7 +1047,7 @@ template <typename NumT> void File::putSlab(NumT const *data, DimVector const &s
     myStart[rank - 1] = 0;
     dsize[rank - 1] = 1;
   }
-  dataspace = H5Screate_simple(rank, mySize, NULL);
+  dataspace = H5Screate_simple(rank, mySize, nullptr);
   if (unlimiteddim) {
     for (int i = 0; i < rank; i++) {
       if (dsize[i] < thedims[i]) {
@@ -1063,7 +1063,7 @@ template <typename NumT> void File::putSlab(NumT const *data, DimVector const &s
     hid_t filespace = H5Dget_space(m_current_data_id);
 
     /* define slab */
-    iRet = H5Sselect_hyperslab(filespace, H5S_SELECT_SET, myStart, NULL, mySize, NULL);
+    iRet = H5Sselect_hyperslab(filespace, H5S_SELECT_SET, myStart, nullptr, mySize, nullptr);
     /* deal with HDF errors */
     if (iRet < 0) {
       msg << "selecting slab failed";
@@ -1084,7 +1084,7 @@ template <typename NumT> void File::putSlab(NumT const *data, DimVector const &s
     m_current_space_id = filespace;
   } else {
     /* define slab */
-    iRet = H5Sselect_hyperslab(m_current_space_id, H5S_SELECT_SET, myStart, NULL, mySize, NULL);
+    iRet = H5Sselect_hyperslab(m_current_space_id, H5S_SELECT_SET, myStart, nullptr, mySize, nullptr);
     /* deal with HDF errors */
     if (iRet < 0) {
       msg << "selecting slab failed";
@@ -1119,7 +1119,7 @@ template <typename NumT> void File::putSlab(vector<NumT> const &data, dimsize_t 
 }
 
 template <typename NumT> void File::getSlab(NumT *data, DimVector const &start, DimVector const &size) {
-  if (data == NULL) {
+  if (data == nullptr) {
     throw NXEXCEPTION("Supplied null pointer to getSlab");
   }
   if (start.size() == 0) {
@@ -1180,13 +1180,13 @@ template <typename NumT> void File::getSlab(NumT *data, DimVector const &start, 
       }
     }
 
-    iRet = H5Sselect_hyperslab(m_current_space_id, H5S_SELECT_SET, myStart.data(), NULL, mySize.data(), NULL);
+    iRet = H5Sselect_hyperslab(m_current_space_id, H5S_SELECT_SET, myStart.data(), nullptr, mySize.data(), nullptr);
     if (iRet < 0) {
       throw NXEXCEPTION("Selecting slab failed");
     }
 
-    memspace = H5Screate_simple(iRank, mySize.data(), NULL);
-    iRet = H5Sselect_hyperslab(memspace, H5S_SELECT_SET, mStart.data(), NULL, mySize.data(), NULL);
+    memspace = H5Screate_simple(iRank, mySize.data(), nullptr);
+    iRet = H5Sselect_hyperslab(memspace, H5S_SELECT_SET, mStart.data(), nullptr, mySize.data(), nullptr);
     if (iRet < 0) {
       throw NXEXCEPTION("Selecting memspace failed");
     }
@@ -1439,7 +1439,7 @@ Info File::getInfo() {
   // Trim 1D CHAR arrays to the actual string length
   if ((info.type == NXnumtype::CHAR) && (iRank == 1)) {
     char *buf = static_cast<char *>(malloc(static_cast<size_t>((info.dims[0] + 1) * sizeof(char))));
-    if (buf == NULL) {
+    if (buf == nullptr) {
       throw NXEXCEPTION("getInfo: Unable to allocate memory for CHAR buffer");
     }
     memset(buf, 0, static_cast<size_t>((info.dims[0] + 1) * sizeof(char)));
@@ -1539,10 +1539,10 @@ template <typename NumT> void File::putAttr(std::string const &name, NumT const 
 }
 
 void File::putAttr(const char *name, const char *value) {
-  if (name == NULL) {
+  if (name == nullptr) {
     throw NXEXCEPTION("Specified name as null to putAttr");
   }
-  if (value == NULL) {
+  if (value == nullptr) {
     throw NXEXCEPTION("Specified value as null to putAttr");
   }
   this->putAttr(string(name), string(value));
@@ -1619,7 +1619,7 @@ std::vector<AttrInfo> File::getAttrInfos() {
     // https://github.com/HDFGroup/hdf5/blob/51dd7758fe5d79ec61e457ff30c697ceccb32e90/c%2B%2B/src/H5Object.cpp#L192
     hid_t attr = H5Aopen_by_idx(current, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, idx, H5P_DEFAULT, H5P_DEFAULT);
     // 1. get the attribute name
-    std::size_t namelen = H5Aget_name(attr, 0, NULL);
+    std::size_t namelen = H5Aget_name(attr, 0, nullptr);
     char *cname = new char[namelen + 1];
     H5Aget_name(attr, namelen + 1, cname);
     cname[namelen] = '\0'; // ensure null termination
@@ -1638,7 +1638,7 @@ std::vector<AttrInfo> File::getAttrInfos() {
       throw NXEXCEPTION("ERROR iterating through attributes found array attribute not understood by this api");
     }
     hsize_t *dims = new hsize_t[rank];
-    H5Sget_simple_extent_dims(attrspace, dims, NULL);
+    H5Sget_simple_extent_dims(attrspace, dims, nullptr);
     std::size_t length = 1;
     if (type == NXnumtype::CHAR) {
       length = getStrAttr(cname).size();
