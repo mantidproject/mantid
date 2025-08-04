@@ -28,8 +28,8 @@ using namespace Mantid::Geometry;
 GET_POINTER_SPECIALIZATION(Material)
 GET_POINTER_SPECIALIZATION(OrientedLattice)
 GET_POINTER_SPECIALIZATION(Sample)
-GET_POINTER_SPECIALIZATION(IObject)
-GET_POINTER_SPECIALIZATION(CSGObject)
+
+std::shared_ptr<IObject> getShapeWrapper(std::shared_ptr<Sample> self) { return self->getShapePtr(); }
 
 void export_Sample() {
   register_ptr_to_python<Sample *>();
@@ -67,10 +67,7 @@ void export_Sample() {
       .def("setThickness", &Sample::setThickness, (arg("self"), arg("thick")), "Set the thickness in mm.")
       .def("setHeight", &Sample::setHeight, (arg("self"), arg("height")), "Set the height in mm.")
       .def("setWidth", &Sample::setWidth, (arg("self"), arg("width")), "Set the width in mm.")
-      // cppcheck-suppress syntaxError
-      .def(
-          "getShape", +[](std::shared_ptr<Sample> self) { return self->getShapePtr(); },
-          "Returns shape with shared ownership of the Sample", return_value_policy<return_by_value>())
+      .def("getShape", &getShapeWrapper, return_value_policy<return_by_value>(), "Returns the shape of the Sample")
       .def("setShape", &Sample::setShape, (arg("self"), arg("shape")), "Set shape of Sample object.")
       .def("hasEnvironment", &Sample::hasEnvironment, arg("self"),
            "Returns True if the sample has an environment defined")
