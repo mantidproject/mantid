@@ -316,7 +316,8 @@ class FullInstrumentViewWindow(QMainWindow):
     def add_main_mesh(self, mesh: PolyData, is_projection: bool, scalars=None) -> None:
         """Draw the given mesh in the main plotter window"""
         self.main_plotter.clear()
-        self.main_plotter.add_mesh(mesh, pickable=False, scalars=scalars, render_points_as_spheres=True, point_size=15)
+        scalar_bar_args = dict(interactive=True, vertical=True) if scalars is not None else None
+        self.main_plotter.add_mesh(mesh, pickable=False, scalars=scalars, render_points_as_spheres=True, point_size=15, scalar_bar_args=scalar_bar_args)
 
         if not self.main_plotter.off_screen:
             self.main_plotter.enable_trackball_style()
