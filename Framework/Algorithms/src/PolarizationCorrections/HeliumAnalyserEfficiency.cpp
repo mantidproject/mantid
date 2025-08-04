@@ -394,8 +394,8 @@ void HeliumAnalyserEfficiency::makeFit(const Algorithm_sptr &fitAlgorithm, const
     // If output is a group, the name of the group will end with `Workspaces`.
     if (fitAlgorithm->getPropertyValue(PropertyNames::OUTPUT_WORKSPACE).ends_with('s')) {
       const WorkspaceGroup_sptr &fitCurves = fitAlgorithm->getProperty(PropertyNames::OUTPUT_WORKSPACE);
-      for (const auto &ws : *fitCurves) {
-        m_outputCurves.push_back(std::dynamic_pointer_cast<MatrixWorkspace>(ws));
+      for (int i = 0; i < fitCurves->getNumberOfEntries(); i++) {
+        m_outputCurves.push_back(std::dynamic_pointer_cast<MatrixWorkspace>(fitCurves->getItem(i)));
       }
     } else {
       const MatrixWorkspace_sptr &fitCurve = fitAlgorithm->getProperty(PropertyNames::OUTPUT_WORKSPACE);
