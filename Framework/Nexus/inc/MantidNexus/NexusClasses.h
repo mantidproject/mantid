@@ -91,7 +91,7 @@ class MANTID_NEXUS_DLL NXObject {
 public:
   // Constructor
   NXObject(File *fileID, NXClass const *parent, std::string const &name);
-  NXObject(std::shared_ptr<File> fileID, NXClass const *parent, std::string const &name);
+  NXObject(std::shared_ptr<File> const &fileID, NXClass const *parent, std::string const &name);
   virtual ~NXObject() = default;
   /// Return the NX class name for a class (HDF group) or "SDS" for a data set;
   virtual std::string NX_class() const = 0;

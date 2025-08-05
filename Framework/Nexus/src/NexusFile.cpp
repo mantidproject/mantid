@@ -120,8 +120,6 @@ namespace Mantid::Nexus {
 
 // new constructors
 
-File::File(const string &filename, const NXaccess access) : File(filename.c_str(), access) {}
-
 File::File(const char *filename, const NXaccess access)
     : m_filename(filename), m_access(access), m_address(), m_current_group_id(0), m_current_data_id(0),
       m_current_type_id(0), m_current_space_id(0), m_gid_stack{0}, m_descriptor(m_filename, m_access) {
@@ -143,11 +141,11 @@ void File::initOpenFile(std::string const &filename, NXaccess const am) {
   std::string version_str =
       std::to_string(vers_major) + "." + std::to_string(vers_minor) + "." + std::to_string(vers_release);
   // turn off the automatic HDF error handling
-  H5Eset_auto(H5E_DEFAULT, NULL, NULL);
+  H5Eset_auto(H5E_DEFAULT, nullptr, nullptr);
 
   // create file acccess property list
   hid_t fapl = -1;
-  fapl = H5Pcopy(Mantid::Nexus::H5Util::defaultFileAcc().getId());
+  fapl = H5Pcopy(H5Util::defaultFileAcc().getId());
 
   hid_t temp_fid(-1);
   if (am != NXaccess::CREATE5) {
@@ -183,7 +181,7 @@ void File::initOpenFile(std::string const &filename, NXaccess const am) {
                              {"file_time", Mantid::Types::Core::DateAndTime::getLocalTimeISO8601String()},
                              {group_class_spec, "NXroot"}};
     for (auto const &attr : attrs) {
-      Mantid::Nexus::H5Util::writeStrAttribute(root, attr.first, attr.second);
+      H5Util::writeStrAttribute(root, attr.first, attr.second);
     }
     root.close();
     H5Gflush(root_id);
@@ -206,6 +204,8 @@ void File::initOpenFile(std::string const &filename, NXaccess const am) {
 File::File(File const &f)
     : m_filename(f.m_filename), m_access(f.m_access), m_address(), m_pfile(f.m_pfile), m_current_group_id(0),
       m_current_data_id(0), m_current_type_id(0), m_current_space_id(0), m_gid_stack{0}, m_descriptor(f.m_descriptor) {
+  // NOTE warning to future devs
+  // if you change this method, please run the systemtest VanadiumAndFocusWithSolidAngleTest
   if (m_pfile <= 0)
     throw Mantid::Nexus::Exception("Error reopening file");
 }
@@ -235,12 +235,16 @@ File::~File() {
     gid = 0;
   }
   m_gid_stack.clear();
+  // NOTE warning to future devs
+  // if you change this part of method, please run the systemtest VanadiumAndFocusWithSolidAngleTest
   // decrease reference counts to this file
   m_pfile.reset();
   H5garbage_collect();
 }
 
 void File::close() {
+  // NOTE warning to future devs
+  // if you change this method, please run the systemtest VanadiumAndFocusWithSolidAngleTest
   /* close the file handle */
   if (m_pfile != nullptr) {
     if (m_pfile.use_count() > 1) {
@@ -268,17 +272,16 @@ void File::openAddress(std::string const &address) {
   if (address.empty()) {
     throw NXEXCEPTION("Supplied empty address");
   }
-  // NOTE to support pre-existing behavior, do NOT check if the address exists first
-  // it must open as many path elements as it can until failing
-  // TODO is this behavior relied on anywhere but the tests?
-  // if (!hasAddress(absaddr)) {
-  //   throw NXEXCEPTION("Address " + address + " is not valid");
-  // }
 
   // if we are already there, do nothing
   NexusAddress absaddr(formAbsoluteAddress(address));
   if (absaddr == m_address) {
     return;
+  }
+
+  // confirm the address exists before trying to open
+  if (!hasAddress(absaddr)) {
+    throw NXEXCEPTION("Address " + address + " is not valid");
   }
 
   // if a dataset is open, close it
@@ -323,8 +326,7 @@ void File::openAddress(std::string const &address) {
         m_current_group_id = gid;
         m_address = fromroot;
       } else {
-        // failure, but return with the file in this state
-        return;
+        throw NXEXCEPTION("Failed to open " + name + " while opening " + absaddr);
       }
     }
   }
@@ -457,7 +459,7 @@ void File::makeGroup(const std::string &name, const std::string &nxclass, bool o
   NexusAddress const absaddr(formAbsoluteAddress(name));
   // create group with H5Util by getting an H5File object from iFID
   H5::H5File h5file(m_pfile->getId());
-  Mantid::Nexus::H5Util::createGroupNXS(h5file, absaddr, nxclass);
+  H5Util::createGroupNXS(h5file, absaddr, nxclass);
 
   // cleanup
   registerEntry(absaddr, nxclass);
@@ -591,7 +593,7 @@ void File::openData(std::string const &name) {
 }
 
 template <typename NumT> void File::putData(NumT const *data) {
-  if (data == NULL) {
+  if (data == nullptr) {
     throw NXEXCEPTION("Data specified as null");
   }
   herr_t iRet;
@@ -893,7 +895,7 @@ void File::makeCompData(std::string const &name, NXnumtype const type, DimVector
     if (unlimited) {
       dataspace = H5Screate_simple(rank, mydim.data(), maxdims.data());
     } else {
-      dataspace = H5Screate_simple(rank, mydim.data(), NULL);
+      dataspace = H5Screate_simple(rank, mydim.data(), nullptr);
     }
   }
 
@@ -987,7 +989,7 @@ void File::makeCompData(std::string const &name, NXnumtype const type, DimVector
 }
 
 template <typename NumT> void File::putSlab(NumT const *data, DimVector const &start, DimVector const &size) {
-  if (data == NULL) {
+  if (data == nullptr) {
     throw NXEXCEPTION("Data specified as null");
   }
   if (start.empty()) {
@@ -1045,7 +1047,7 @@ template <typename NumT> void File::putSlab(NumT const *data, DimVector const &s
     myStart[rank - 1] = 0;
     dsize[rank - 1] = 1;
   }
-  dataspace = H5Screate_simple(rank, mySize, NULL);
+  dataspace = H5Screate_simple(rank, mySize, nullptr);
   if (unlimiteddim) {
     for (int i = 0; i < rank; i++) {
       if (dsize[i] < thedims[i]) {
@@ -1061,7 +1063,7 @@ template <typename NumT> void File::putSlab(NumT const *data, DimVector const &s
     hid_t filespace = H5Dget_space(m_current_data_id);
 
     /* define slab */
-    iRet = H5Sselect_hyperslab(filespace, H5S_SELECT_SET, myStart, NULL, mySize, NULL);
+    iRet = H5Sselect_hyperslab(filespace, H5S_SELECT_SET, myStart, nullptr, mySize, nullptr);
     /* deal with HDF errors */
     if (iRet < 0) {
       msg << "selecting slab failed";
@@ -1082,7 +1084,7 @@ template <typename NumT> void File::putSlab(NumT const *data, DimVector const &s
     m_current_space_id = filespace;
   } else {
     /* define slab */
-    iRet = H5Sselect_hyperslab(m_current_space_id, H5S_SELECT_SET, myStart, NULL, mySize, NULL);
+    iRet = H5Sselect_hyperslab(m_current_space_id, H5S_SELECT_SET, myStart, nullptr, mySize, nullptr);
     /* deal with HDF errors */
     if (iRet < 0) {
       msg << "selecting slab failed";
@@ -1117,7 +1119,7 @@ template <typename NumT> void File::putSlab(vector<NumT> const &data, dimsize_t 
 }
 
 template <typename NumT> void File::getSlab(NumT *data, DimVector const &start, DimVector const &size) {
-  if (data == NULL) {
+  if (data == nullptr) {
     throw NXEXCEPTION("Supplied null pointer to getSlab");
   }
   if (start.size() == 0) {
@@ -1178,13 +1180,13 @@ template <typename NumT> void File::getSlab(NumT *data, DimVector const &start, 
       }
     }
 
-    iRet = H5Sselect_hyperslab(m_current_space_id, H5S_SELECT_SET, myStart.data(), NULL, mySize.data(), NULL);
+    iRet = H5Sselect_hyperslab(m_current_space_id, H5S_SELECT_SET, myStart.data(), nullptr, mySize.data(), nullptr);
     if (iRet < 0) {
       throw NXEXCEPTION("Selecting slab failed");
     }
 
-    memspace = H5Screate_simple(iRank, mySize.data(), NULL);
-    iRet = H5Sselect_hyperslab(memspace, H5S_SELECT_SET, mStart.data(), NULL, mySize.data(), NULL);
+    memspace = H5Screate_simple(iRank, mySize.data(), nullptr);
+    iRet = H5Sselect_hyperslab(memspace, H5S_SELECT_SET, mStart.data(), nullptr, mySize.data(), nullptr);
     if (iRet < 0) {
       throw NXEXCEPTION("Selecting memspace failed");
     }
@@ -1396,7 +1398,7 @@ Info File::getInfo() {
   NXnumtype mType;
   hsize_t myDim[H5S_MAX_RANK];
   H5T_class_t tclass;
-  char *vlData = NULL;
+  char *vlData = nullptr;
 
   /* check if there is an Dataset open */
   if (m_current_data_id == 0) {
@@ -1406,7 +1408,7 @@ Info File::getInfo() {
   /* read information */
   tclass = H5Tget_class(m_current_type_id);
   mType = hdf5ToNXType(tclass, m_current_type_id);
-  iRank = H5Sget_simple_extent_dims(m_current_space_id, myDim, NULL);
+  iRank = H5Sget_simple_extent_dims(m_current_space_id, myDim, nullptr);
   if (iRank == 0) {
     iRank = 1; /* we pretend */
     myDim[0] = 1;
@@ -1419,7 +1421,7 @@ Info File::getInfo() {
       hid_t memType = H5Tcopy(H5T_C_S1);
       H5Tset_size(memType, H5T_VARIABLE);
       H5Dread(m_current_data_id, memType, H5S_ALL, H5S_ALL, H5P_DEFAULT, &vlData);
-      if (vlData != NULL) {
+      if (vlData != nullptr) {
         myDim[iRank - 1] = strlen(vlData) + 1;
         H5Dvlen_reclaim(memType, m_current_space_id, H5P_DEFAULT, &vlData);
       }
@@ -1437,7 +1439,7 @@ Info File::getInfo() {
   // Trim 1D CHAR arrays to the actual string length
   if ((info.type == NXnumtype::CHAR) && (iRank == 1)) {
     char *buf = static_cast<char *>(malloc(static_cast<size_t>((info.dims[0] + 1) * sizeof(char))));
-    if (buf == NULL) {
+    if (buf == nullptr) {
       throw NXEXCEPTION("getInfo: Unable to allocate memory for CHAR buffer");
     }
     memset(buf, 0, static_cast<size_t>((info.dims[0] + 1) * sizeof(char)));
@@ -1461,7 +1463,7 @@ herr_t gr_iterate_cb(hid_t loc_id, const char *name, const H5L_info2_t *info, vo
     if (grp >= 0) {
       H5::Group group(grp);
       try {
-        Mantid::Nexus::H5Util::readStringAttribute(group, group_class_spec, nxclass);
+        H5Util::readStringAttribute(group, group_class_spec, nxclass);
       } catch (...) {
         nxclass = unknown_group_spec;
       }
@@ -1530,17 +1532,17 @@ template <typename NumT> void File::putAttr(std::string const &name, NumT const 
     current->removeAttr(name);
   }
   try {
-    Mantid::Nexus::H5Util::writeNumAttribute<NumT>(*current, name, value);
+    H5Util::writeNumAttribute<NumT>(*current, name, value);
   } catch (H5::Exception const &e) {
     throw NXEXCEPTION(e.getDetailMsg());
   }
 }
 
 void File::putAttr(const char *name, const char *value) {
-  if (name == NULL) {
+  if (name == nullptr) {
     throw NXEXCEPTION("Specified name as null to putAttr");
   }
-  if (value == NULL) {
+  if (value == nullptr) {
     throw NXEXCEPTION("Specified value as null to putAttr");
   }
   this->putAttr(string(name), string(value));
@@ -1565,7 +1567,7 @@ void File::putAttr(const std::string &name, const string &value, const bool empt
     current->removeAttr(name);
   }
   try {
-    Mantid::Nexus::H5Util::writeStrAttribute(*current, name, my_value);
+    H5Util::writeStrAttribute(*current, name, my_value);
   } catch (H5::Exception const &e) {
     throw NXEXCEPTION(e.getDetailMsg());
   }
@@ -1584,7 +1586,7 @@ template <> MANTID_NEXUS_DLL void File::getAttr(const std::string &name, std::st
 template <typename NumT> void File::getAttr(const std::string &name, NumT &value) {
   auto current = getCurrentObject();
   try {
-    value = Mantid::Nexus::H5Util::readNumAttributeCoerce<NumT>(*current, name);
+    value = H5Util::readNumAttributeCoerce<NumT>(*current, name);
   } catch (H5::Exception const &e) {
     throw NXEXCEPTION(e.getDetailMsg());
   }
@@ -1595,7 +1597,7 @@ string File::getStrAttr(std::string const &name) {
   std::string res("");
   auto current = getCurrentObject();
   try {
-    Mantid::Nexus::H5Util::readStringAttribute(*current, name, res);
+    H5Util::readStringAttribute(*current, name, res);
   } catch (H5::Exception const &e) {
     throw NXEXCEPTION(e.getDetailMsg());
   }
@@ -1617,7 +1619,7 @@ std::vector<AttrInfo> File::getAttrInfos() {
     // https://github.com/HDFGroup/hdf5/blob/51dd7758fe5d79ec61e457ff30c697ceccb32e90/c%2B%2B/src/H5Object.cpp#L192
     hid_t attr = H5Aopen_by_idx(current, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, idx, H5P_DEFAULT, H5P_DEFAULT);
     // 1. get the attribute name
-    std::size_t namelen = H5Aget_name(attr, 0, NULL);
+    std::size_t namelen = H5Aget_name(attr, 0, nullptr);
     char *cname = new char[namelen + 1];
     H5Aget_name(attr, namelen + 1, cname);
     cname[namelen] = '\0'; // ensure null termination
@@ -1636,7 +1638,7 @@ std::vector<AttrInfo> File::getAttrInfos() {
       throw NXEXCEPTION("ERROR iterating through attributes found array attribute not understood by this api");
     }
     hsize_t *dims = new hsize_t[rank];
-    H5Sget_simple_extent_dims(attrspace, dims, NULL);
+    H5Sget_simple_extent_dims(attrspace, dims, nullptr);
     std::size_t length = 1;
     if (type == NXnumtype::CHAR) {
       length = getStrAttr(cname).size();

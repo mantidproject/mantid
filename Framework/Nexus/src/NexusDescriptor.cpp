@@ -62,8 +62,7 @@ void getGroup(H5::Group groupID, std::map<std::string, std::set<std::string>> &a
         firstEntryNameType = std::make_pair(memberName, lf_getNxClassAttribute(subGroupID));
       getGroup(subGroupID, allEntries, firstEntryNameType, level + 1);
     } else if (type == H5G_DATASET) {
-      const std::string absoluteEntryName = groupNameStr + "/" + memberName;
-      allEntries["SDS"].insert(absoluteEntryName);
+      allEntries["SDS"].emplace(groupNameStr + "/" + memberName);
     }
   }
 }
