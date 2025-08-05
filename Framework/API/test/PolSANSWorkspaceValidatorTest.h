@@ -24,7 +24,7 @@ public:
   static PolSANSWorkspaceValidatorTest *createSuite() { return new PolSANSWorkspaceValidatorTest(); }
   static void destroySuite(PolSANSWorkspaceValidatorTest *suite) { delete suite; }
 
-  void tearDown() { AnalysisDataService::Instance().clear(); }
+  void tearDown() override { AnalysisDataService::Instance().clear(); }
 
   void checkForErrorMessage(const WorkspaceGroup_sptr &ws, const std::string message) {
     PolSANSWorkspaceValidator validator;

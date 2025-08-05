@@ -34,7 +34,7 @@ polSANSValidatorConstructor(bool expectHistogramData = true, bool allowMultiPeri
   }
 
   std::unordered_set<int> allowedPeriodsSet;
-  for (size_t i = 0; i < len(allowedNumberOfPeriods); i++) {
+  for (int i = 0; i < len(allowedNumberOfPeriods); i++) {
     int periodN = extract<int>(allowedNumberOfPeriods[i]);
     allowedPeriodsSet.insert(periodN);
   }
