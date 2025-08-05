@@ -106,6 +106,23 @@ class AnstoCommonSearchTests(unittest.TestCase):
         except RuntimeError:
             pass
 
+    def test_search_path_filter(self):
+        search_path = ["/cycle/[10-12,120]/data/[src,bin]"]
+        tags = ["[10-12]", "[src,bin]"]
+        exp_paths = [
+            "/cycle/010/data/src",
+            "/cycle/011/data/src",
+            "/cycle/012/data/src",
+            "/cycle/120/data/src",
+            "/cycle/010/data/bin",
+            "/cycle/011/data/bin",
+            "/cycle/012/data/bin",
+            "/cycle/120/data/bin",
+        ]
+        ret_paths = replace_variants(search_path, tags)
+        self.assertEqual(len(ret_paths), 8)
+        self.assertCountEqual(ret_paths, exp_paths)
+
     def test_scratch_folder(self):
         # create a temp folder as the scratch folder
         with tempfile.TemporaryDirectory() as tmpdir:
