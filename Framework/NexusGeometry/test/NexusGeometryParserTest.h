@@ -31,7 +31,7 @@
 
 using namespace Mantid;
 using namespace NexusGeometry;
-using namespace Mantid::NeXus;
+using namespace Mantid::Nexus;
 
 namespace {
 std::unique_ptr<Geometry::DetectorInfo> extractDetectorInfo(const Mantid::Geometry::Instrument &instrument) {

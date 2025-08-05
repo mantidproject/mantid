@@ -33,7 +33,7 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::MDAlgorithms;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
-using namespace Mantid::NeXus;
+using namespace Mantid::Nexus;
 using namespace H5;
 
 class LoadMDTest : public CxxTest::TestSuite {
