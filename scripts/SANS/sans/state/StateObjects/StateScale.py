@@ -26,7 +26,8 @@ class StateScale(metaclass=JsonSerializable):
         self.thickness = None  # : Float (Positive)
         self.width = None  # : Float (Positive)
         self.height = None  # : Float (Positive)
-        self.scale = None  # : Float (Positive)
+        self.rear_scale = None  # : Float (Positive)
+        self.front_scale = None  # : Float (Positive)
 
         # Geometry from the file
         self.shape_from_file = SampleShape.DISC

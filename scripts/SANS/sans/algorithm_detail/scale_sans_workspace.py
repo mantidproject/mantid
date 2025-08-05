@@ -27,7 +27,7 @@ def scale_workspace(workspace, instrument, state_scale):
 
 
 def _multiply_by_abs_scale(instrument, state_scale, workspace):
-    scale_factor = state_scale.scale * DEFAULT_SCALING if state_scale is not None else DEFAULT_SCALING
+    scale_factor = state_scale.rear_scale * DEFAULT_SCALING if state_scale is not None else DEFAULT_SCALING
 
     if instrument is SANSInstrument.LOQ:
         rescale_to_colette = math.pi
