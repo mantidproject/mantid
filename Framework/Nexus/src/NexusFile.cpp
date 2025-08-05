@@ -141,7 +141,7 @@ void File::initOpenFile(std::string const &filename, NXaccess const am) {
   std::string version_str =
       std::to_string(vers_major) + "." + std::to_string(vers_minor) + "." + std::to_string(vers_release);
   // turn off the automatic HDF error handling
-  H5Eset_auto(H5E_DEFAULT, NULL, NULL);
+  H5Eset_auto(H5E_DEFAULT, nullptr, nullptr);
 
   // create file acccess property list
   hid_t fapl = -1;
@@ -593,7 +593,7 @@ void File::openData(std::string const &name) {
 }
 
 template <typename NumT> void File::putData(NumT const *data) {
-  if (data == NULL) {
+  if (data == nullptr) {
     throw NXEXCEPTION("Data specified as null");
   }
   herr_t iRet;
@@ -1398,7 +1398,7 @@ Info File::getInfo() {
   NXnumtype mType;
   hsize_t myDim[H5S_MAX_RANK];
   H5T_class_t tclass;
-  char *vlData = NULL;
+  char *vlData = nullptr;
 
   /* check if there is an Dataset open */
   if (m_current_data_id == 0) {
@@ -1408,7 +1408,7 @@ Info File::getInfo() {
   /* read information */
   tclass = H5Tget_class(m_current_type_id);
   mType = hdf5ToNXType(tclass, m_current_type_id);
-  iRank = H5Sget_simple_extent_dims(m_current_space_id, myDim, NULL);
+  iRank = H5Sget_simple_extent_dims(m_current_space_id, myDim, nullptr);
   if (iRank == 0) {
     iRank = 1; /* we pretend */
     myDim[0] = 1;
@@ -1421,7 +1421,7 @@ Info File::getInfo() {
       hid_t memType = H5Tcopy(H5T_C_S1);
       H5Tset_size(memType, H5T_VARIABLE);
       H5Dread(m_current_data_id, memType, H5S_ALL, H5S_ALL, H5P_DEFAULT, &vlData);
-      if (vlData != NULL) {
+      if (vlData != nullptr) {
         myDim[iRank - 1] = strlen(vlData) + 1;
         H5Dvlen_reclaim(memType, m_current_space_id, H5P_DEFAULT, &vlData);
       }
