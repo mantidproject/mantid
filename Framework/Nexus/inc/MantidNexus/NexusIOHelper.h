@@ -164,7 +164,7 @@ template <typename T, typename U, Narrowing narrow> T readNexusAnyVariable(Nexus
     file.getData(&buf);
   } else {
     U bufu;
-    file.getData(&bufu);
+    file.getData<U>(&bufu);
     buf = std::move(static_cast<T>(bufu));
   }
   if (close_data) {
