@@ -72,7 +72,7 @@ void doReadNexusAnyVector(std::vector<T> &out, Nexus::File &file, const size_t s
   if constexpr (sizeof(T) < sizeof(U) && narrow == Narrowing::Prevent) {
     if (close_data)
       file.closeData();
-    throw std::runtime_error("Narrowing is forbidden in NeXusIOHelper::readNexusAnyVector");
+    throw std::runtime_error("Narrowing is forbidden in NexusIOHelper::readNexusAnyVector");
   } else if constexpr (std::is_same_v<T, U>) {
     if (size > 0) {
       file.getData(out);
@@ -101,7 +101,7 @@ std::vector<T> readNexusAnyVector(Nexus::File &file, const size_t size, const bo
 template <typename T, typename U, Narrowing narrow>
 void readNexusAnyVector(std::vector<T> &out, Nexus::File &file, const size_t size, const bool close_data) {
   if (out.size() < size)
-    throw std::runtime_error("The output buffer is too small in NeXusIOHelper::readNexusAnyVector");
+    throw std::runtime_error("The output buffer is too small in NexusIOHelper::readNexusAnyVector");
   doReadNexusAnyVector<T, U, narrow>(out, file, size, close_data);
 }
 
@@ -114,7 +114,7 @@ void doReadNexusAnySlab(std::vector<T> &out, Nexus::File &file, const Nexus::Dim
   if constexpr (sizeof(T) < sizeof(U) && narrow == Narrowing::Prevent) {
     if (close_data)
       file.closeData();
-    throw std::runtime_error("Narrowing is forbidden in NeXusIOHelper::readNexusAnySlab");
+    throw std::runtime_error("Narrowing is forbidden in NexusIOHelper::readNexusAnySlab");
   } else if constexpr (std::is_same_v<T, U>) {
     if (volume > 0) {
       file.getSlab(out.data(), start, size);
@@ -147,7 +147,7 @@ void readNexusAnySlab(std::vector<T> &out, Nexus::File &file, const Nexus::DimSi
                       const Nexus::DimSizeVector &size, const bool close_data) {
   const auto volume = vectorVolume(size);
   if (out.size() < static_cast<size_t>(volume))
-    throw std::runtime_error("The output buffer is too small in NeXusIOHelper::readNexusAnySlab");
+    throw std::runtime_error("The output buffer is too small in NexusIOHelper::readNexusAnySlab");
   doReadNexusAnySlab<T, U, narrow>(out, file, start, size, volume, close_data);
 }
 
@@ -159,7 +159,7 @@ template <typename T, typename U, Narrowing narrow> T readNexusAnyVariable(Nexus
   if constexpr (sizeof(T) < sizeof(U) && narrow == Narrowing::Prevent) {
     if (close_data)
       file.closeData();
-    throw std::runtime_error("Narrowing is forbidden in NeXusIOHelper::readAnyVariable");
+    throw std::runtime_error("Narrowing is forbidden in NexusIOHelper::readAnyVariable");
   } else if constexpr (std::is_same_v<T, U>) {
     file.getData(&buf);
   } else {

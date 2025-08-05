@@ -71,7 +71,7 @@ void LoadSassena::dataSetInfo(const H5::H5File &h5file, const std::string &setNa
  * @param buf storing dataset
  */
 void LoadSassena::dataSetDouble(const H5::H5File &h5file, const std::string &setName, std::vector<double> &buf) {
-  Mantid::NeXus::H5Util::readArray1DCoerce(h5file.openDataSet(setName), buf);
+  Mantid::Nexus::H5Util::readArray1DCoerce(h5file.openDataSet(setName), buf);
 }
 
 /* Helper object and function to sort modulus of Q-vectors
@@ -355,7 +355,7 @@ void LoadSassena::exec() {
   m_filename = this->getPropertyValue("Filename");
   H5::H5File h5file;
   try {
-    h5file = H5::H5File(m_filename.c_str(), H5F_ACC_RDONLY, NeXus::H5Util::defaultFileAcc());
+    h5file = H5::H5File(m_filename.c_str(), H5F_ACC_RDONLY, Nexus::H5Util::defaultFileAcc());
   } catch (H5::FileIException &) {
     this->g_log.error("Cannot open " + m_filename);
     throw Kernel::Exception::FileError("Unable to open:", m_filename);

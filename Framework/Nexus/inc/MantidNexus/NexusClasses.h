@@ -22,7 +22,7 @@
 namespace Mantid {
 namespace Nexus {
 
-/** C++ implementation of NeXus classes.
+/** C++ implementation of Nexus classes.
 
 @author Roman Tolchenov, Tessella plc
 @date 28/05/2009
@@ -82,7 +82,7 @@ private:
 class NXClass;
 
 /**
- * The base abstract class for NeXus classes and data sets.
+ * The base abstract class for Nexus classes and data sets.
  * NX classes and data sets are defined at www.nexusformat.org
  */
 class MANTID_NEXUS_DLL NXObject {
@@ -451,12 +451,12 @@ using NXChar = NXDataSetTyped<char>;
 //-------------------- classes --------------------------//
 
 /**
- * The base class for a Nexus class (group). A Nexus class can contain datasets and other Nexus classes. The NeXus file
+ * The base class for a Nexus class (group). A Nexus class can contain datasets and other Nexus classes. The Nexus file
  * format (www.nexusformat.org) specifies the content of the Nexus classes.
  *
  * Derived classes have specialized methods for creating classes and datasets specific for the particular Nexus class.
  * NXClass is a conctrete C++ class so arbitrary, non-standard Nexus classes (groups) can be created and loaded from
- * NeXus files.
+ * Nexus files.
  */
 class MANTID_NEXUS_DLL NXClass : public NXObject {
   friend class NXRoot;

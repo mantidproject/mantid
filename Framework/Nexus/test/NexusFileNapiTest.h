@@ -356,7 +356,7 @@ private:
   void do_test_loadPath(const string &filename) {
     if (getenv("NX_LOAD_PATH") != NULL) {
       TS_ASSERT_THROWS_NOTHING(Mantid::Nexus::File file(filename, NXaccess::RDWR));
-      cout << "Success loading NeXus file from path" << endl;
+      cout << "Success loading Nexus file from path" << endl;
     } else {
       cout << "NX_LOAD_PATH variable not defined. Skipping testLoadPath\n";
     }

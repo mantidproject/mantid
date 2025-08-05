@@ -26,7 +26,7 @@ class H5Object;
 } // namespace H5
 
 namespace Mantid {
-namespace NeXus {
+namespace Nexus {
 namespace H5Util {
 /** H5Util : TODO: DESCRIPTION
  */
@@ -125,5 +125,5 @@ MANTID_NEXUS_DLL void copyGroup(H5::H5Object &dest, const std::string &destGroup
 MANTID_NEXUS_DLL void deleteObjectLink(H5::H5Object &h5, const std::string &target);
 
 } // namespace H5Util
-} // namespace NeXus
+} // namespace Nexus
 } // namespace Mantid

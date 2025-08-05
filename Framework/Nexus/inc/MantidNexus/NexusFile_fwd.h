@@ -1,4 +1,4 @@
-/** This class defines data types which are used as part of the NeXus API.
+/** This class defines data types which are used as part of the Nexus API.
  * They should more properly be moved into NexusFile, when the nexus layer has been cleaned up.
  * OR all type and enum definitions in NexusFile all moved here.
  */
@@ -18,19 +18,19 @@ typedef int64_t hid_t;
 typedef uint64_t hsize_t;
 
 /** \enum NXaccess
- * NeXus file access codes.
+ * Nexus file access codes.
  * these codes are taken directly from values used in hdf5 package
  * https://github.com/HDFGroup/hdf5/blob/develop/src/H5Fpublic.h
  * \li READ read-only. Same as H5F_ACC_RDONLY
  * \li RDWR open an existing file for reading and writing. Same as H5F_ACC_RDWR.
- * \li CREATE5 create a NeXus HDF-5 file. Same as H5F_ACC_TRUNC.
+ * \li CREATE5 create a Nexus HDF-5 file. Same as H5F_ACC_TRUNC.
  */
 enum class NXaccess : unsigned int { READ = 0x0000u, RDWR = 0x0001u, CREATE5 = 0x0002u };
 
 MANTID_NEXUS_DLL std::ostream &operator<<(std::ostream &os, const NXaccess &value);
 
 /** \enum NXentrytype
- * Describes the type of entry in a NeXus file, either group or dataset
+ * Describes the type of entry in a Nexus file, either group or dataset
  * \li group the entry is a group
  * \li sds the entry is a dataset (class SDS)
  */
@@ -38,7 +38,7 @@ enum class NXentrytype : int { group = 0, sds = 1 };
 
 /**
  * \struct NXlink
- * Represents a link between entries in a NeXus file
+ * Represents a link between entries in a Nexus file
  * \li targetAddress address to item to link
  * \li linkType 0 for group link, 1 for SDS link
  */
@@ -148,7 +148,7 @@ struct AttrInfo {
   std::string name;
 };
 
-/** Forward declare of NeXus::File */
+/** Forward declare of Nexus::File */
 class File;
 } // namespace Mantid::Nexus
 

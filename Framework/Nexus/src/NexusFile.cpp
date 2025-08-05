@@ -42,7 +42,7 @@ const auto g_log = &Poco::Logger::get("NexusFile");
 
 /**
  * \file NexusFile.cpp
- * The implementation of the NeXus C++ API
+ * The implementation of the Nexus C++ API
  */
 
 namespace { // anonymous namespace to keep it in the file
@@ -147,7 +147,7 @@ void File::initOpenFile(std::string const &filename, NXaccess const am) {
 
   // create file acccess property list
   hid_t fapl = -1;
-  fapl = H5Pcopy(Mantid::NeXus::H5Util::defaultFileAcc().getId());
+  fapl = H5Pcopy(Mantid::Nexus::H5Util::defaultFileAcc().getId());
 
   hid_t temp_fid(-1);
   if (am != NXaccess::CREATE5) {
@@ -183,7 +183,7 @@ void File::initOpenFile(std::string const &filename, NXaccess const am) {
                              {"file_time", Mantid::Types::Core::DateAndTime::getLocalTimeISO8601String()},
                              {group_class_spec, "NXroot"}};
     for (auto const &attr : attrs) {
-      Mantid::NeXus::H5Util::writeStrAttribute(root, attr.first, attr.second);
+      Mantid::Nexus::H5Util::writeStrAttribute(root, attr.first, attr.second);
     }
     root.close();
     H5Gflush(root_id);
@@ -457,7 +457,7 @@ void File::makeGroup(const std::string &name, const std::string &nxclass, bool o
   NexusAddress const absaddr(formAbsoluteAddress(name));
   // create group with H5Util by getting an H5File object from iFID
   H5::H5File h5file(m_pfile->getId());
-  Mantid::NeXus::H5Util::createGroupNXS(h5file, absaddr, nxclass);
+  Mantid::Nexus::H5Util::createGroupNXS(h5file, absaddr, nxclass);
 
   // cleanup
   registerEntry(absaddr, nxclass);
@@ -1462,7 +1462,7 @@ herr_t gr_iterate_cb(hid_t loc_id, const char *name, const H5L_info2_t *info, vo
     if (grp >= 0) {
       H5::Group group(grp);
       try {
-        Mantid::NeXus::H5Util::readStringAttribute(group, group_class_spec, nxclass);
+        Mantid::Nexus::H5Util::readStringAttribute(group, group_class_spec, nxclass);
       } catch (...) {
         nxclass = unknown_group_spec;
       }
@@ -1531,7 +1531,7 @@ template <typename NumT> void File::putAttr(std::string const &name, NumT const 
     current->removeAttr(name);
   }
   try {
-    Mantid::NeXus::H5Util::writeNumAttribute<NumT>(*current, name, value);
+    Mantid::Nexus::H5Util::writeNumAttribute<NumT>(*current, name, value);
   } catch (H5::Exception const &e) {
     throw NXEXCEPTION(e.getDetailMsg());
   }
@@ -1566,7 +1566,7 @@ void File::putAttr(const std::string &name, const string &value, const bool empt
     current->removeAttr(name);
   }
   try {
-    Mantid::NeXus::H5Util::writeStrAttribute(*current, name, my_value);
+    Mantid::Nexus::H5Util::writeStrAttribute(*current, name, my_value);
   } catch (H5::Exception const &e) {
     throw NXEXCEPTION(e.getDetailMsg());
   }
@@ -1585,7 +1585,7 @@ template <> MANTID_NEXUS_DLL void File::getAttr(const std::string &name, std::st
 template <typename NumT> void File::getAttr(const std::string &name, NumT &value) {
   auto current = getCurrentObject();
   try {
-    value = Mantid::NeXus::H5Util::readNumAttributeCoerce<NumT>(*current, name);
+    value = Mantid::Nexus::H5Util::readNumAttributeCoerce<NumT>(*current, name);
   } catch (H5::Exception const &e) {
     throw NXEXCEPTION(e.getDetailMsg());
   }
@@ -1596,7 +1596,7 @@ string File::getStrAttr(std::string const &name) {
   std::string res("");
   auto current = getCurrentObject();
   try {
-    Mantid::NeXus::H5Util::readStringAttribute(*current, name, res);
+    Mantid::Nexus::H5Util::readStringAttribute(*current, name, res);
   } catch (H5::Exception const &e) {
     throw NXEXCEPTION(e.getDetailMsg());
   }

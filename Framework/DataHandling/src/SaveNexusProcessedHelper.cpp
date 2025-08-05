@@ -28,7 +28,7 @@
 #include <Poco/Path.h>
 #include <memory>
 
-namespace Mantid::NeXus {
+namespace Mantid::Nexus {
 using namespace Kernel;
 using namespace API;
 using namespace DataObjects;
@@ -98,7 +98,7 @@ void NexusFileIO::openNexusWrite(const std::string &fileName, NexusFileIO::optio
 
   else {
     if (fileName.find(".xml") < fileName.size() || fileName.find(".XML") < fileName.size()) {
-      throw Exception::FileError("Cannot save XML files", fileName);
+      throw Kernel::Exception::FileError("Cannot save XML files", fileName);
     }
     mantidEntryName = "mantid_workspace_1";
   }
@@ -111,7 +111,7 @@ void NexusFileIO::openNexusWrite(const std::string &fileName, NexusFileIO::optio
     std::string baseName = path.getBaseName();
     if (baseName.size() > NAME_MAX) {
       std::string message = "Filename is too long. Unable to open file: ";
-      throw Exception::FileError(message, fileName);
+      throw Kernel::Exception::FileError(message, fileName);
     }
 
     auto file = new Nexus::File(fileName, mode);
@@ -781,4 +781,4 @@ NexusFileIO::~NexusFileIO() {
   // this->closeNexusFile();
 }
 
-} // namespace Mantid::NeXus
+} // namespace Mantid::Nexus
