@@ -113,10 +113,7 @@ const IObject_sptr Sample::getShapePtr() const { return m_shape; }
  * @param shape :: The object describing the shape
  */
 void Sample::setShape(const IObject_sptr &shape) {
-  if (shape && shape.get() == nullptr) {
-  }
-
-  else if (!shape) {
+  if (!shape) {
     m_shape = ShapeFactory().createShape("");
   } else if (shape != m_shape) {
     m_shape = shape; // share ownership safely

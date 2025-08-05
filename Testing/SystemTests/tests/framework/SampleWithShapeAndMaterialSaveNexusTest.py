@@ -13,7 +13,7 @@ from systemtesting import MantidSystemTest
 from mantid.simpleapi import Load
 
 
-class SetupMixin:
+class SetupMixin(object):
     def setUp(self):
         temp_dir = tempfile.gettempdir()
         self.fname = "test_file.nxs"
