@@ -68,10 +68,8 @@ class PoldiAutoCorrelation(PythonAlgorithm):
         if self.getProperty("WavelengthMax").value <= self.getProperty("WavelengthMin").value:
             issues["WavelengthMax"] = "WavelengthMax must be greater than WavelengthMin."
         ws = self.getProperty("InputWorkspace").value
-        if ws is None:
-            # group workspace
-            return issues
-        if ws.getNumberHistograms() == 400:
+        if ws is not None and ws.getNumberHistograms() == 400:
+            # ws is None if group workspace passed - see AlgorithmWorkspaceGroupValidateInputsTest
             issues["InputWorkspace"] = (
                 "InputWorkspace corresponds to the old 1D wire detector geometry on POLDI, "
                 "please use PoldiAutoCorrelation with keyword argument Version=5."
@@ -123,7 +121,7 @@ class PoldiAutoCorrelation(PythonAlgorithm):
         )  # npulses*nslits
         # average of inverse intermediate correlation func (Eq.8 in POLDI concept paper)
         with np.errstate(divide="ignore", invalid="ignore"):
-            corr = 1 / np.sum(1 / inter_corr, axis=1)
+            corr = 1 / np.nansum(1 / inter_corr, axis=1)
         ws_corr = self.exec_child_alg("CreateWorkspace", DataX=dspacs, DataY=corr, UnitX="dSpacing", YUnitLabel="Intensity (a.u.)")
         ws_corr = self.exec_child_alg("ConvertUnits", InputWorkspace=ws_corr, Target="MomentumTransfer")
         self.setProperty("OutputWorkspace", ws_corr)
