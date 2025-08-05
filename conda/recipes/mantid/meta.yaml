@@ -80,7 +80,7 @@ requirements:
     - zlib
 
   run_constrained:
-    - matplotlib {{ matplotlib }}
+    - matplotlib-base {{ matplotlib }}
 
 test:
   imports:
