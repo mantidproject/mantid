@@ -26,7 +26,7 @@ namespace Mantid::Parallel::IO::EventLoader {
 std::unordered_map<int32_t, size_t> makeAnyEventIdToBankMap(const std::string &filename, const std::string &groupName,
                                                             const std::vector<std::string> &bankNames) {
   std::unordered_map<int32_t, size_t> idToBank;
-  H5::H5File file(filename, H5F_ACC_RDONLY, Mantid::NeXus::H5Util::defaultFileAcc());
+  H5::H5File file(filename, H5F_ACC_RDONLY, Mantid::Nexus::H5Util::defaultFileAcc());
   H5::Group group = file.openGroup(groupName);
   for (size_t i = 0; i < bankNames.size(); ++i) {
     try {

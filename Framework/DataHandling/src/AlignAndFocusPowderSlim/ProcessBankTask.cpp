@@ -112,7 +112,7 @@ void ProcessBankTask::operator()(const tbb::blocked_range<size_t> &range) const 
     // auto tof_SDS = event_group.openDataSet(NxsFieldNames::TIME_OF_FLIGHT);
     // and the units
     std::string tof_unit;
-    NeXus::H5Util::readStringAttribute(tof_SDS, "units", tof_unit);
+    Nexus::H5Util::readStringAttribute(tof_SDS, "units", tof_unit);
     const double time_conversion = Kernel::Units::timeConversionValue(tof_unit, MICROSEC);
 
     // declare arrays once so memory can be reused

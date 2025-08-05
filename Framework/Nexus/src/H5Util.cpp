@@ -18,7 +18,7 @@
 
 using namespace H5;
 
-namespace Mantid::NeXus::H5Util {
+namespace Mantid::Nexus::H5Util {
 
 namespace {
 /// static logger object. Use Poco directly instead of Kernel::Logger so we don't need to import from Kernel
@@ -701,4 +701,4 @@ template MANTID_NEXUS_DLL void readArray1DCoerce(const DataSet &dataset, std::ve
                                                  const size_t length, const size_t offset);
 template MANTID_NEXUS_DLL void readArray1DCoerce(const DataSet &dataset, std::vector<char> &output, const size_t length,
                                                  const size_t offset);
-} // namespace Mantid::NeXus::H5Util
+} // namespace Mantid::Nexus::H5Util

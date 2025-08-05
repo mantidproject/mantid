@@ -14,7 +14,7 @@
 namespace Mantid::Nexus {
 
 /**
- * Class that provides for a standard NeXus exception
+ * Class that provides for a standard Nexus exception
  * \ingroup cpp_core
  */
 

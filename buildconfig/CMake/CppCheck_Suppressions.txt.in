@@ -232,8 +232,7 @@ constVariableReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveCanSAS
 uselessCallsSubstr:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveFocusedXYE.cpp:73
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveGSS.cpp:432
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveGSS.cpp:566
-constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveNXSPE.cpp:333
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveNexusProcessed.cpp:572
+knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveNexusProcessed.cpp:571
 syntaxError:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidDataObjects/MortonIndex/CoordinateConversion.h:109
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventWorkspace.cpp:712
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventWorkspace.cpp:738

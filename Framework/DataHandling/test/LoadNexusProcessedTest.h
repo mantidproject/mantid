@@ -46,7 +46,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
 using namespace Mantid::API;
 using namespace Mantid::HistogramData;
-using namespace Mantid::NeXus;
+using namespace Mantid::Nexus;
 using Mantid::detid_t;
 
 // Note that this suite tests an old version of Nexus processed files that we

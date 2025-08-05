@@ -15,7 +15,7 @@
 #include <optional>
 
 namespace Mantid {
-namespace NeXus {
+namespace Nexus {
 class NexusFileIO;
 }
 namespace DataHandling {
@@ -75,12 +75,12 @@ private:
   static void appendEventListData(const std::vector<T> &events, size_t offset, double *tofs, float *weights,
                                   float *errorSquareds, int64_t *pulsetimes);
 
-  void execEvent(const Mantid::NeXus::NexusFileIO *nexusFile, const bool uniformSpectra, const bool raggedSpectra,
+  void execEvent(const Mantid::Nexus::NexusFileIO *nexusFile, const bool uniformSpectra, const bool raggedSpectra,
                  const std::vector<int> &spec);
   /// sets non workspace properties for the algorithm
   void setOtherProperties(IAlgorithm *alg, const std::string &propertyName, const std::string &propertyValue,
                           int perioidNum) override;
-  void doExec(const Mantid::API::Workspace_sptr &inputWorkspace, std::shared_ptr<Mantid::NeXus::NexusFileIO> &nexusFile,
+  void doExec(const Mantid::API::Workspace_sptr &inputWorkspace, std::shared_ptr<Mantid::Nexus::NexusFileIO> &nexusFile,
               const bool keepFile = false, std::optional<size_t> entryNumber = std::optional<size_t>());
 
   /// Pointer to the local workspace

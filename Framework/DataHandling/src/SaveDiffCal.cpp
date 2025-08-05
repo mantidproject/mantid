@@ -30,7 +30,7 @@ using Mantid::DataObjects::MaskWorkspace_const_sptr;
 using Mantid::Kernel::Direction;
 
 using namespace H5;
-using namespace NeXus;
+using namespace Nexus;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SaveDiffCal)
@@ -277,7 +277,7 @@ void SaveDiffCal::exec() {
     Poco::File(filename).remove();
   }
 
-  H5File file(filename, H5F_ACC_EXCL, NeXus::H5Util::defaultFileAcc());
+  H5File file(filename, H5F_ACC_EXCL, Nexus::H5Util::defaultFileAcc());
 
   auto calibrationGroup = H5Util::createGroupNXS(file, "calibration", "NXentry");
 

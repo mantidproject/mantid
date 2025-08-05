@@ -99,7 +99,7 @@ private:
 
     // write
     dimsize_t dimsize = data.size();
-    DimSizeVector const start({0}), size({dimsize});
+    DimVector const start{0}, size{dimsize};
     fileid.makeData(dataname, getType<T>(), dimsize);
     fileid.openData(dataname);
     fileid.putSlab(data, start, size);
@@ -123,7 +123,7 @@ private:
     cout << "Testing slab " << dataname << "\n" << std::flush;
 
     // write
-    DimSizeVector start({0, 0}), size({N, M});
+    DimVector start{0, 0}, size{N, M};
     DimVector const dims({N, M});
     fileid.makeData(dataname, getType<T>(), dims);
     fileid.openData(dataname);
@@ -277,7 +277,7 @@ public:
     // make and open compressed data
     TS_ASSERT_THROWS_NOTHING(fileid.makeCompData("data", NXnumtype::FLOAT64, dims, NXcompression::NONE, dims, true));
 
-    Mantid::Nexus::DimSizeVector slab_start{0, 0}, slab_size{1, DATA_SIZE};
+    Mantid::Nexus::DimVector slab_start{0, 0}, slab_size{1, DATA_SIZE};
     for (Mantid::Nexus::dimsize_t i = 0; i < 2; i++) {
       slab_start[0] = i;
       TS_ASSERT_THROWS_NOTHING(fileid.putSlab(d, slab_start, slab_size));

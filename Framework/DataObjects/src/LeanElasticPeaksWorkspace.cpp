@@ -586,7 +586,7 @@ void LeanElasticPeaksWorkspace::saveNexus(Nexus::File *file) const {
   file->closeData();
 
   // Goniometer Matrix Column
-  const Nexus::DimVector array_dims{static_cast<Nexus::dimsize_t>(m_peaks.size()), 9};
+  const Nexus::DimVector array_dims{m_peaks.size(), 9};
   file->writeData("column_13", goniometerMatrix, array_dims);
   file->openData("column_13");
   file->putAttr("name", "Goniometer Matrix");
@@ -620,7 +620,7 @@ void LeanElasticPeaksWorkspace::saveNexus(Nexus::File *file) const {
   file->closeData();
 
   // Qlab
-  const Nexus::DimVector qlab_dims{static_cast<Nexus::dimsize_t>(m_peaks.size()), 3};
+  const Nexus::DimVector qlab_dims{m_peaks.size(), 3};
   file->writeData("column_15", qlabs, qlab_dims);
   file->openData("column_15");
   file->putAttr("name", "Q LabFrame");

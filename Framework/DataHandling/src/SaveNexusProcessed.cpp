@@ -33,7 +33,7 @@ using namespace API;
 using namespace DataObjects;
 using Geometry::Instrument_const_sptr;
 
-using optional_size_t = NeXus::NexusFileIO::optional_size_t;
+using optional_size_t = Nexus::NexusFileIO::optional_size_t;
 
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(SaveNexusProcessed)
@@ -201,9 +201,8 @@ void SaveNexusProcessed::getWSIndexList(std::vector<int> &indices, const MatrixW
   }
 }
 
-void SaveNexusProcessed::doExec(const Workspace_sptr &inputWorkspace,
-                                std::shared_ptr<Mantid::NeXus::NexusFileIO> &nexusFile, const bool keepFile,
-                                optional_size_t entryNumber) {
+void SaveNexusProcessed::doExec(const Workspace_sptr &inputWorkspace, std::shared_ptr<Nexus::NexusFileIO> &nexusFile,
+                                const bool keepFile, optional_size_t entryNumber) {
   //
   //
 
@@ -356,7 +355,7 @@ void SaveNexusProcessed::exec() {
   Workspace_sptr inputWorkspace = getProperty("InputWorkspace");
 
   // Then immediately open the file
-  auto nexusFile = std::make_shared<Mantid::NeXus::NexusFileIO>();
+  auto nexusFile = std::make_shared<Mantid::Nexus::NexusFileIO>();
 
   // Perform the execution.
   doExec(inputWorkspace, nexusFile);
@@ -405,7 +404,7 @@ void SaveNexusProcessed::appendEventListData(const std::vector<T> &events, size_
 /** Execute the saving of event data.
  * This will make one long event list for all events contained.
  * */
-void SaveNexusProcessed::execEvent(const Mantid::NeXus::NexusFileIO *nexusFile, const bool uniformSpectra,
+void SaveNexusProcessed::execEvent(const Mantid::Nexus::NexusFileIO *nexusFile, const bool uniformSpectra,
                                    const bool raggedSpectra, const std::vector<int> &spec) {
   m_progress = std::make_unique<Progress>(this, m_timeProgInit, 1.0, m_eventWorkspace->getNumberEvents() * 2);
 
@@ -527,7 +526,7 @@ void SaveNexusProcessed::setOtherProperties(IAlgorithm *alg, const std::string &
  */
 bool SaveNexusProcessed::processGroups() {
   // Then immediately open the file
-  auto nexusFile = std::make_shared<Mantid::NeXus::NexusFileIO>();
+  auto nexusFile = std::make_shared<Mantid::Nexus::NexusFileIO>();
 
   // If we have arrived here then a WorkspaceGroup was passed to the
   // InputWorkspace property. Pull out the unrolled workspaces and append an

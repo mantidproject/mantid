@@ -27,7 +27,7 @@ namespace Mantid::DataHandling {
 using namespace API;
 using namespace Geometry;
 using namespace Kernel;
-using namespace NeXus;
+using namespace Nexus;
 using Types::Core::DateAndTime;
 
 // Register the algorithm into the AlgorithmFactory
@@ -95,7 +95,7 @@ void LoadILLLagrange::exec() {
 void LoadILLLagrange::loadData() {
 
   // open the H5 file
-  H5::H5File h5file(getPropertyValue("Filename"), H5F_ACC_RDONLY, NeXus::H5Util::defaultFileAcc());
+  H5::H5File h5file(getPropertyValue("Filename"), H5F_ACC_RDONLY, Nexus::H5Util::defaultFileAcc());
 
   H5::DataSet dataset = h5file.openDataSet("entry0/data_scan/detector_data/data");
 

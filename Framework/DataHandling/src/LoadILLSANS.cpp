@@ -310,7 +310,7 @@ void LoadILLSANS::getMonitorIndices(const std::string &filename) {
    * to open the same file with these two libraries (H5 and NX) simultaneously.
    */
   try {
-    H5::H5File h5file(filename, H5F_ACC_RDONLY, NeXus::H5Util::defaultFileAcc());
+    H5::H5File h5file(filename, H5F_ACC_RDONLY, Nexus::H5Util::defaultFileAcc());
     H5::DataSet scanVarNames = h5file.openDataSet("entry0/data_scan/scanned_variables/variables_names/name");
     H5::DataSpace scanVarNamesSpace = scanVarNames.getSpace();
     const auto nDims = scanVarNamesSpace.getSimpleExtentNdims();
@@ -742,7 +742,7 @@ size_t LoadILLSANS::loadDataFromTubes(Nexus::NXInt const &data, const std::vecto
     dimOrder = std::tuple<short, short, short>{0, 1, 2}; // default, tubes-pixels-channels
   }
   LoadHelper::fillStaticWorkspace(m_localWorkspace, data, timeBinning, static_cast<int>(firstIndex), pointData,
-                                  std::vector<int>(), std::set<int>(), dimOrder);
+                                  std::vector<int>(), std::set<detid_t>(), dimOrder);
   return firstIndex + numberOfTubes * numberOfPixelsPerTube;
 }
 
