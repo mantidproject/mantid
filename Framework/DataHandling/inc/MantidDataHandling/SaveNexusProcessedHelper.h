@@ -27,7 +27,7 @@
 #include <optional>
 
 namespace Mantid {
-namespace NeXus {
+namespace Nexus {
 /** @class NexusFileIO SaveNexusProcessedHelper.h NeXus/SaveNexusProcessedHelper.h
 
 Utility methods for saving Mantid Workspaces in NeXus format.
@@ -145,5 +145,5 @@ inline bool NexusFileIO::writeNxValue(const std::string &name, const std::string
 /// Helper typedef for a shared pointer of a NexusFileIO.
 using NexusFileIO_sptr = std::shared_ptr<NexusFileIO>;
 
-} // namespace NeXus
+} // namespace Nexus
 } // namespace Mantid

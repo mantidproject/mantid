@@ -49,7 +49,7 @@ public:
     std::vector<uint64_t> event_index(size - 1);
     TS_ASSERT_THROWS_EQUALS(Nioh::readNexusVector(event_index, file, "event_index"), std::runtime_error & e,
                             std::string(e.what()),
-                            "The output buffer is too small in NeXusIOHelper::readNexusAnyVector");
+                            "The output buffer is too small in NexusIOHelper::readNexusAnyVector");
     event_index.resize(size);
     Nioh::readNexusVector(event_index, file, "event_index");
     file.closeData();
@@ -75,13 +75,13 @@ public:
     auto event_index = Nioh::readNexusVector<uint64_t>(file, "event_index");
     TS_ASSERT_EQUALS(event_index.size(), 1439);
     TS_ASSERT_THROWS_EQUALS(auto event_id = Nioh::readNexusVector<uint16_t>(file, "event_id"), std::runtime_error & e,
-                            std::string(e.what()), "Narrowing is forbidden in NeXusIOHelper::readNexusAnyVector");
+                            std::string(e.what()), "Narrowing is forbidden in NexusIOHelper::readNexusAnyVector");
     TS_ASSERT_THROWS_EQUALS(auto event_time_offset = Nioh::readNexusVector<uint16_t>(file, "event_time_offset"),
                             std::runtime_error & e, std::string(e.what()),
-                            "Narrowing is forbidden in NeXusIOHelper::readNexusAnyVector");
+                            "Narrowing is forbidden in NexusIOHelper::readNexusAnyVector");
     TS_ASSERT_THROWS_EQUALS(auto event_time_zero = Nioh::readNexusVector<float>(file, "event_time_zero"),
                             std::runtime_error & e, std::string(e.what()),
-                            "Narrowing is forbidden in NeXusIOHelper::readNexusAnyVector");
+                            "Narrowing is forbidden in NexusIOHelper::readNexusAnyVector");
     file.closeGroup();
     file.closeGroup();
   }
@@ -171,13 +171,13 @@ public:
     TS_ASSERT_EQUALS(event_index.size(), 222);
     TS_ASSERT_THROWS_EQUALS(auto event_id = Nioh::readNexusSlab<uint16_t>(file, "event_id", {222}, {333}),
                             std::runtime_error & e, std::string(e.what()),
-                            "Narrowing is forbidden in NeXusIOHelper::readNexusAnySlab");
+                            "Narrowing is forbidden in NexusIOHelper::readNexusAnySlab");
     TS_ASSERT_THROWS_EQUALS(
         auto event_time_offset = Nioh::readNexusSlab<uint16_t>(file, "event_time_offset", {333}, {444}),
-        std::runtime_error & e, std::string(e.what()), "Narrowing is forbidden in NeXusIOHelper::readNexusAnySlab");
+        std::runtime_error & e, std::string(e.what()), "Narrowing is forbidden in NexusIOHelper::readNexusAnySlab");
     TS_ASSERT_THROWS_EQUALS(auto event_time_zero = Nioh::readNexusSlab<float>(file, "event_time_zero", {444}, {555}),
                             std::runtime_error & e, std::string(e.what()),
-                            "Narrowing is forbidden in NeXusIOHelper::readNexusAnySlab");
+                            "Narrowing is forbidden in NexusIOHelper::readNexusAnySlab");
     file.closeGroup();
     file.closeGroup();
   }

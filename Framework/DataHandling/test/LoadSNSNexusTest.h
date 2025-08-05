@@ -14,7 +14,7 @@
 #include "MantidNexus/LoadSNSNexus.h"
 using namespace Mantid;
 using namespace Mantid::Geometry;
-using namespace Mantid::NeXus;
+using namespace Mantid::Nexus;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 

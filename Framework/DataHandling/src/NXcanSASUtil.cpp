@@ -13,7 +13,7 @@
 #include "MantidNexus/H5Util.h"
 
 using namespace Mantid::API;
-using namespace Mantid::NeXus;
+using namespace Mantid::Nexus;
 
 namespace Mantid::DataHandling::NXcanSAS {
 

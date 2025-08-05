@@ -62,7 +62,7 @@ void LoadILLSALSA::init() {
  */
 void LoadILLSALSA::exec() {
   const std::string filename = getPropertyValue("Filename");
-  H5::H5File h5file(filename, H5F_ACC_RDONLY, NeXus::H5Util::defaultFileAcc());
+  H5::H5File h5file(filename, H5F_ACC_RDONLY, Nexus::H5Util::defaultFileAcc());
 
   enum FileType { NONE, V1, V2 };
 

@@ -503,16 +503,16 @@ void LoadILLDiffraction::fillStaticInstrumentScan(const NXInt &data, const NXDou
  * Loads the scanned_variables/variables_names block
  */
 void LoadILLDiffraction::loadScanVars() {
-  H5File h5file(m_filename, H5F_ACC_RDONLY, NeXus::H5Util::defaultFileAcc());
+  H5File h5file(m_filename, H5F_ACC_RDONLY, Nexus::H5Util::defaultFileAcc());
 
   Group entry0 = h5file.openGroup("entry0");
   Group dataScan = entry0.openGroup("data_scan");
   Group scanVar = dataScan.openGroup("scanned_variables");
   Group varNames = scanVar.openGroup("variables_names");
 
-  const auto names = NeXus::H5Util::readStringVector(varNames, "name");
-  const auto properties = NeXus::H5Util::readStringVector(varNames, "property");
-  const auto units = NeXus::H5Util::readStringVector(varNames, "unit");
+  const auto names = Nexus::H5Util::readStringVector(varNames, "name");
+  const auto properties = Nexus::H5Util::readStringVector(varNames, "property");
+  const auto units = Nexus::H5Util::readStringVector(varNames, "unit");
 
   for (size_t i = 0; i < names.size(); ++i) {
     m_scanVar.emplace_back(ScannedVariables(names[i], properties[i], units[i]));

@@ -27,7 +27,7 @@
 using namespace Mantid::API;
 using namespace Mantid::DataHandling::NXcanSAS;
 using namespace Mantid::Kernel;
-using namespace Mantid::NeXus;
+using namespace Mantid::Nexus;
 
 namespace {
 bool hasUnit(const std::string &unitToCompareWith, const MatrixWorkspace_sptr &ws) {

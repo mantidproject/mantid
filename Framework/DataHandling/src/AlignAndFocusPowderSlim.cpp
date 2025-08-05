@@ -332,7 +332,7 @@ void AlignAndFocusPowderSlim::exec() {
   auto itClassEntries = allEntries.find("NXevent_data");
 
   // load the events
-  H5::H5File h5file(filename, H5F_ACC_RDONLY, NeXus::H5Util::defaultFileAcc());
+  H5::H5File h5file(filename, H5F_ACC_RDONLY, Nexus::H5Util::defaultFileAcc());
   if (itClassEntries != allEntries.end()) {
     this->progress(.17, "Reading events");
     const std::set<std::string> &classEntries = itClassEntries->second;

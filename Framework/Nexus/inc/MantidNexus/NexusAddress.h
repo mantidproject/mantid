@@ -15,7 +15,7 @@
 namespace Mantid::Nexus {
 
 /**
- * This simple class encapsulates some methods for working with paths inside a NeXus file.
+ * This simple class encapsulates some methods for working with paths inside a Nexus file.
  * The base is std::filesystem::path, but the root will always resolve to "/" regardless of OS.
  * New paths are always cast to lexically normal during creation.
  */

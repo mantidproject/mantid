@@ -10,7 +10,7 @@
 #include <utility>
 #include <vector>
 
-/** NeXus HDF45
+/** Nexus HDF45
  * major.minor.patch
  */
 #define NEXUS_VERSION "4.4.3"
@@ -25,7 +25,7 @@ class H5Object;
 } // namespace H5
 
 /**
- * \file NexusFile.h Definition of the NeXus C++ API.
+ * \file NexusFile.h Definition of the Nexus C++ API.
  * \defgroup cpp_types C++ Types
  * \defgroup cpp_core C++ Core
  * \ingroup cpp_main
@@ -168,7 +168,7 @@ public:
   // ADDRESS GET / OPEN
 
   /**
-   * Open the NeXus object with the address specified.
+   * Open the Nexus object with the address specified.
    *
    * \param address A unix like address string to a group or field. The address
    * string is a list of group names and SDS names separated with a slash,
@@ -177,7 +177,7 @@ public:
   void openAddress(std::string const &address);
 
   /**
-   * Open the group in which the NeXus object with the specified address exists.
+   * Open the group in which the Nexus object with the specified address exists.
    *
    * \param address A unix like address string to a group or field. The address
    * string is a list of group names and SDS names separated with a slash,
@@ -266,7 +266,7 @@ public:
    * Create a data field with the specified information.
    *
    * \param name The name of the field to create (i.e. "distance").
-   * \param type The primative type of the field (i.e. "NeXus::FLOAT32").
+   * \param type The primative type of the field (i.e. "Nexus::FLOAT32").
    * \param dims The dimensions of the field.
    * \param open_data Whether or not to open the data after creating it.
    */
@@ -276,7 +276,7 @@ public:
    * Create a data field with the specified information.
    *
    * \param name The name of the field to create (i.e. "distance").
-   * \param type The primative type of the field (i.e. "NeXus::FLOAT32").
+   * \param type The primative type of the field (i.e. "Nexus::FLOAT32").
    * \param length For 1D data, the length of the 1D array
    * \param open_data Whether or not to open the data after creating it.
    */

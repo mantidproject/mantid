@@ -267,7 +267,7 @@ public:
                                                                adapter, n > 1);
     }
 
-    H5::H5File h5(testInput.fullPath(), H5F_ACC_RDONLY, Mantid::NeXus::H5Util::defaultFileAcc());
+    H5::H5File h5(testInput.fullPath(), H5F_ACC_RDONLY, Mantid::Nexus::H5Util::defaultFileAcc());
     _assert_group_structure(h5, {
                                     {"/mantid_workspace_1", NX_ENTRY},
                                     {"/mantid_workspace_1/instrument_1", NX_INSTRUMENT},
@@ -297,13 +297,13 @@ public:
     const size_t N_workspace_entries = 3;
     {
       // Create several NXentry.
-      H5::H5File h5(testInput.fullPath(), H5F_ACC_TRUNC, Mantid::NeXus::H5Util::defaultFileAcc());
+      H5::H5File h5(testInput.fullPath(), H5F_ACC_TRUNC, Mantid::Nexus::H5Util::defaultFileAcc());
       for (size_t n = 1; n < N_workspace_entries; ++n) {
         std::ostringstream entryName;
         entryName << "/mantid_workspace_" << n;
         std::cout << "creating: " << entryName.str() << std::endl;
         H5::Group g = h5.createGroup(entryName.str());
-        Mantid::NeXus::H5Util::writeStrAttribute(g, NX_CLASS, NX_ENTRY);
+        Mantid::Nexus::H5Util::writeStrAttribute(g, NX_CLASS, NX_ENTRY);
       }
       h5.close();
     }
@@ -317,7 +317,7 @@ public:
                                                                adapter, true);
     }
 
-    H5::H5File h5(testInput.fullPath(), H5F_ACC_RDONLY, Mantid::NeXus::H5Util::defaultFileAcc());
+    H5::H5File h5(testInput.fullPath(), H5F_ACC_RDONLY, Mantid::Nexus::H5Util::defaultFileAcc());
     _assert_group_structure(h5, {
                                     {"/mantid_workspace_1", NX_ENTRY},
                                     {"/mantid_workspace_1/instrument_1", NX_INSTRUMENT},
@@ -349,11 +349,11 @@ public:
       {
         // Write the latest NXentry.
         H5::H5File h5(testInput.fullPath(), n > 1 ? H5F_ACC_RDWR : H5F_ACC_TRUNC,
-                      Mantid::NeXus::H5Util::defaultFileAcc());
+                      Mantid::Nexus::H5Util::defaultFileAcc());
         std::ostringstream entryName;
         entryName << "/mantid_workspace_" << n;
         H5::Group g = h5.createGroup(entryName.str());
-        Mantid::NeXus::H5Util::writeStrAttribute(g, NX_CLASS, NX_ENTRY);
+        Mantid::Nexus::H5Util::writeStrAttribute(g, NX_CLASS, NX_ENTRY);
         h5.close();
       }
       {
@@ -367,7 +367,7 @@ public:
     }
 
     // Verify the resulting structure.
-    H5::H5File h5(testInput.fullPath(), H5F_ACC_RDONLY, Mantid::NeXus::H5Util::defaultFileAcc());
+    H5::H5File h5(testInput.fullPath(), H5F_ACC_RDONLY, Mantid::Nexus::H5Util::defaultFileAcc());
     _assert_group_structure(h5, {
                                     {"/mantid_workspace_1", NX_ENTRY},
                                     {"/mantid_workspace_1/instrument_1", NX_INSTRUMENT},
@@ -464,9 +464,9 @@ private:
     for (const auto &pathWithClass : pathsWithClasses) {
       const std::string &groupPath = pathWithClass.first;
       const std::string &className = pathWithClass.second;
-      TS_ASSERT(Mantid::NeXus::H5Util::groupExists(file, groupPath));
+      TS_ASSERT(Mantid::Nexus::H5Util::groupExists(file, groupPath));
       H5::Group g = file.openGroup(groupPath);
-      TS_ASSERT(Mantid::NeXus::H5Util::keyHasValue(g, NX_CLASS, className));
+      TS_ASSERT(Mantid::Nexus::H5Util::keyHasValue(g, NX_CLASS, className));
     }
   }
 };
