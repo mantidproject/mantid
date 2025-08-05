@@ -10,7 +10,7 @@ from os import path
 
 import systemtesting
 from systemtesting import MantidSystemTest
-from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
+from isis_sans_system_test import ISISSansSystemTest
 
 from mantid import config
 from mantid.api import AnalysisDataService
