@@ -14,9 +14,9 @@ cxx_compiler_version:        # [unix]
   - 13                       # [linux]
 llvm_openmp:                 # [osx]
   - 18                       # [osx]
-c_stdlib:
+c_stdlib:                    # [linux]
   - sysroot                  # [linux]
-c_stdlib_version:
+c_stdlib_version:            # [linux]
   - 2.17                     # [linux]
 
 python:
