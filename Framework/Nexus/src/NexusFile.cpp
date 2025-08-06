@@ -1427,7 +1427,7 @@ Info File::getInfo() {
     std::size_t length;
     if (H5Tis_variable_str(m_current_type_id)) {
       // get the needed size for variable length data
-      if (H5Dvlen_get_buf_size(m_current_data_id, m_current_type_id, m_current_space_id, &length); < 0) {
+      if (H5Dvlen_get_buf_size(m_current_data_id, m_current_type_id, m_current_space_id, &length) < 0) {
         throw NXEXCEPTION("Failed to read string length for variable-length string");
       }
     } else {
