@@ -687,6 +687,26 @@ template <typename NumT> void File::putData(const vector<NumT> &data) {
   this->putData(data.data());
 }
 
+// GET DATA -- STR / CHAR
+
+string File::getStrData() {
+  Info info = this->getInfo();
+  if (info.type != NXnumtype::CHAR) {
+    stringstream msg;
+    msg << "Cannot use getStrData() on non-character data. Found type=" << info.type;
+    throw NXEXCEPTION(msg.str());
+  }
+  if (info.dims.size() != 1) {
+    stringstream msg;
+    msg << "getStrData() only understand rank=1 data. Found rank=" << info.dims.size();
+    throw NXEXCEPTION(msg.str());
+  }
+  std::vector<char> value(static_cast<size_t>(info.dims[0]) + 1, '\0');
+  this->getData(value.data());
+  std::string res(value.data(), strlen(value.data()));
+  return res;
+}
+
 template <> void File::getData<char>(char *data) {
   if (m_current_data_id == 0) {
     throw NXEXCEPTION("getData ERROR: no dataset open");
@@ -753,6 +773,8 @@ template <> void File::getData<char>(char *data) {
   }
 }
 
+// GET DATA -- NUM
+
 template <typename NumT> void File::getData(NumT *data) {
   if (!data) {
     throw NXEXCEPTION("Supplied null pointer to write data to");
@@ -809,24 +831,6 @@ template <typename NumT> void File::getData(vector<NumT> &data) {
 
   // fetch the data
   this->getData<NumT>(data.data());
-}
-
-string File::getStrData() {
-  Info info = this->getInfo();
-  if (info.type != NXnumtype::CHAR) {
-    stringstream msg;
-    msg << "Cannot use getStrData() on non-character data. Found type=" << info.type;
-    throw NXEXCEPTION(msg.str());
-  }
-  if (info.dims.size() != 1) {
-    stringstream msg;
-    msg << "getStrData() only understand rank=1 data. Found rank=" << info.dims.size();
-    throw NXEXCEPTION(msg.str());
-  }
-  std::vector<char> value(static_cast<size_t>(info.dims[0]) + 1, '\0');
-  this->getData(value.data());
-  std::string res(value.data(), strlen(value.data()));
-  return res;
 }
 
 //------------------------------------------------------------------------------------------------------------------
