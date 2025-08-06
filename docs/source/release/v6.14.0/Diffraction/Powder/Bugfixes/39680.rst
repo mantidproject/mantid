@@ -1,0 +1,1 @@
+- Fixed a potential crash when running :ref:`DiffractionFocussing <algm-DiffractionFocussing>` from the algorithm dialogue and setting ``InputWorkspace`` to a workspace group.
