@@ -687,7 +687,7 @@ template <typename NumT> void File::putData(const vector<NumT> &data) {
   this->putData(data.data());
 }
 
-// GET DATA -- STR / CHAR
+// GET DATA -- STRING / CHAR
 
 string File::getStrData() {
   Info info = this->getInfo();
@@ -773,15 +773,15 @@ template <> void File::getData<char>(char *data) {
   }
 }
 
-// GET DATA -- NUM
+// GET DATA -- NUMERIC
 
 template <typename NumT> void File::getData(NumT *data) {
   if (!data) {
-    throw NXEXCEPTION("Supplied null pointer to write data to");
+    throw NXEXCEPTION("Supplied null pointer to hold data");
   }
 
   if (m_current_data_id == 0) {
-    throw NXEXCEPTION("getData ERROR: no dataset open");
+    throw NXEXCEPTION("No dataset open");
   }
 
   herr_t ret = -1;
@@ -808,7 +808,7 @@ template <typename NumT> void File::getData(NumT *data) {
   }
 
   if (ret < 0) {
-    throw NXEXCEPTION("getData ERROR: failed to transfer dataset");
+    throw NXEXCEPTION("Failed to read dataset");
   }
 }
 
