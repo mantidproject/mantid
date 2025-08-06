@@ -73,12 +73,12 @@ class AnstoCommonSearchTests(unittest.TestCase):
         search_path = ["/cycle/[10-12]/data/[src,bin]"]
         tags = ["[10-12]", "[src,bin]"]
         exp_paths = [
-            "/cycle/10/data/src",
-            "/cycle/11/data/src",
-            "/cycle/12/data/src",
-            "/cycle/10/data/bin",
-            "/cycle/11/data/bin",
-            "/cycle/12/data/bin",
+            "/cycle/010/data/src",
+            "/cycle/011/data/src",
+            "/cycle/012/data/src",
+            "/cycle/010/data/bin",
+            "/cycle/011/data/bin",
+            "/cycle/012/data/bin",
         ]
         ret_paths = replace_variants(search_path, tags)
         self.assertEqual(len(ret_paths), 6)
@@ -86,12 +86,12 @@ class AnstoCommonSearchTests(unittest.TestCase):
 
     def test_replace_cycle(self):
         inp_paths = [
-            "/cycle/10/data/src",
+            "/cycle/010/data/src",
             "/cycle/NNN/data/src",
-            "/cycle/12/data/src",
-            "/cycle/10/data/bin",
+            "/cycle/012/data/src",
+            "/cycle/010/data/bin",
             "/cycle/NNN/data/bin",
-            "/cycle/12/data/bin",
+            "/cycle/012/data/bin",
         ]
         exp_paths = ["/cycle/138/data/src", "/cycle/138/data/bin"]
         ret_paths = find_cycle_folders(138, inp_paths)
