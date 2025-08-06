@@ -29,7 +29,6 @@ GET_POINTER_SPECIALIZATION(Material)
 GET_POINTER_SPECIALIZATION(OrientedLattice)
 GET_POINTER_SPECIALIZATION(Sample)
 
-std::shared_ptr<IObject> getShapeWrapper(std::shared_ptr<Sample> self) { return self->getShapePtr(); }
 bool equals_wrapper(const Sample &self, const Sample &other) { return self == other; }
 
 void export_Sample() {
@@ -68,7 +67,7 @@ void export_Sample() {
       .def("setThickness", &Sample::setThickness, (arg("self"), arg("thick")), "Set the thickness in mm.")
       .def("setHeight", &Sample::setHeight, (arg("self"), arg("height")), "Set the height in mm.")
       .def("setWidth", &Sample::setWidth, (arg("self"), arg("width")), "Set the width in mm.")
-      .def("getShape", &getShapeWrapper, return_value_policy<return_by_value>(), "Returns the shape of the Sample")
+      .def("getShape", &Sample::getShapePtr, return_value_policy<return_by_value>(), "Returns the shape of the Sample")
       .def("setShape", &Sample::setShape, (arg("self"), arg("shape")), "Set shape of Sample object.")
       .def("hasEnvironment", &Sample::hasEnvironment, arg("self"),
            "Returns True if the sample has an environment defined")
