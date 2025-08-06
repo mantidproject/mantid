@@ -73,6 +73,10 @@ def _calc_cycle_time_from_chopper_speed(chopper_speed):
     return 60.0 / (4.0 * chopper_speed) * 1.0e6  # mus
 
 
+def get_t0_parameters(chopper):
+    return chopper.getNumberParameter("t0")[0], chopper.getNumberParameter("t0_const")[0]
+
+
 def get_instrument_settings_from_log(ws: Workspace2D) -> Tuple[float, np.ndarray[float], float, float]:
     """
     Function to get instrument settings from logs stored on workspace
@@ -86,8 +90,7 @@ def get_instrument_settings_from_log(ws: Workspace2D) -> Tuple[float, np.ndarray
     source = inst.getSource()  # might not need these
     chopper = inst.getComponentByName("chopper")
     l1_chop = (chopper.getPos() - source.getPos()).norm()
-    t0 = chopper.getNumberParameter("t0")[0]
-    t0_const = chopper.getNumberParameter("t0_const")[0]
+    t0, t0_const = get_t0_parameters(chopper)
     chopper_speed = ws.run().getPropertyAsSingleValue("chopperspeed")  # rpm
     cycle_time = _calc_cycle_time_from_chopper_speed(chopper_speed)  # mus
     # get chopper offsets in time (stored as x position of child components of chopper)
