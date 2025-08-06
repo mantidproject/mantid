@@ -1424,7 +1424,7 @@ Info File::getInfo() {
   }
   // for string data, determine size, depending on if variable length or not
   if (tclass == H5T_STRING && info.dims.back() == 1) {
-    std::size_t length;
+    dimsize_t length;
     if (H5Tis_variable_str(m_current_type_id)) {
       // get the needed size for variable length data
       if (H5Dvlen_get_buf_size(m_current_data_id, m_current_type_id, m_current_space_id, &length) < 0) {
