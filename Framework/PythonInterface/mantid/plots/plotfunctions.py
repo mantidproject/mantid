@@ -372,7 +372,7 @@ def get_plot_fig(overplot=None, ax_properties=None, window_title=None, axes_num=
         for axis in fig.axes:
             orig_ax_properties = copy(ax_properties)
             for scale_id in scales_to_amend:
-                ax_properties = _apply_scale_properties(orig_ax_properties, scale_id, axis)
+                _apply_scale_properties(orig_ax_properties, scale_id, axis)
             axis.set(**_post_process_props(ax_properties))
     if window_title and fig.canvas.manager is not None:
         fig.canvas.manager.set_window_title(window_title)
@@ -591,7 +591,6 @@ def _apply_scale_properties(ax_properties, scale_id, axis):
     if add_prop_key in ax_properties:
         scale_properties.update(ax_properties.pop(add_prop_key))
     getattr(axis, f"set_{scale_id}scale")(**scale_properties)
-    return ax_properties
 
 
 def _post_process_props(ax_properties):
