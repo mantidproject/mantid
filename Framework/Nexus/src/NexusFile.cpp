@@ -1403,50 +1403,40 @@ void File::readData(std::string const &dataName, std::string &data) {
 Info File::getInfo() {
   Info info;
 
-  std::size_t iRank;
-  NXnumtype mType;
-  hsize_t myDim[H5S_MAX_RANK];
-  H5T_class_t tclass;
-  char *vlData = nullptr;
-
-  /* check if there is an Dataset open */
-  if (m_current_data_id == 0) {
-    throw NXEXCEPTION("getInfo Error: no dataset open");
+  // check if there is an open dataset
+  if (!isDataSetOpen()) {
+    throw NXEXCEPTION("No dataset open");
   }
 
-  /* read information */
-  tclass = H5Tget_class(m_current_type_id);
-  mType = hdf5ToNXType(tclass, m_current_type_id);
-  iRank = H5Sget_simple_extent_dims(m_current_space_id, myDim, nullptr);
-  if (iRank == 0) {
-    iRank = 1; /* we pretend */
-    myDim[0] = 1;
+  // read information
+  H5T_class_t tclass = H5Tget_class(m_current_type_id);
+  info.type = hdf5ToNXType(tclass, m_current_type_id);
+  int rank = H5Sget_simple_extent_ndims(m_current_space_id);
+  if (rank < 0) {
+    throw NXEXCEPTION("Cannot get rank for current dataset");
+  } else if (rank == 0) {
+    rank = 1; // we pretend
+    info.dims = {1};
+  } else {
+    info.dims.resize(rank);
+    H5Sget_simple_extent_dims(m_current_space_id, info.dims.data(), nullptr);
   }
-  /* conversion to proper ints for the platform */
-  info.type = mType;
-  if (tclass == H5T_STRING && myDim[iRank - 1] == 1) {
+  // for string data, determine size, depending on if variable length or not
+  if (tclass == H5T_STRING && info.dims.back() == 1) {
+    std::size_t length;
     if (H5Tis_variable_str(m_current_type_id)) {
-      /* this will not work for arrays of strings */
-      hid_t memType = H5Tcopy(H5T_C_S1);
-      H5Tset_size(memType, H5T_VARIABLE);
-      H5Dread(m_current_data_id, memType, H5S_ALL, H5S_ALL, H5P_DEFAULT, &vlData);
-      if (vlData != nullptr) {
-        myDim[iRank - 1] = strlen(vlData) + 1;
-        H5Dvlen_reclaim(memType, m_current_space_id, H5P_DEFAULT, &vlData);
+      herr_t suc = H5Dvlen_get_buf_size(m_current_data_id, m_current_type_id, m_current_space_id, &length);
+      if (suc < 0) {
+        throw NXEXCEPTION("Failed to read string length for variable-length string");
       }
-      H5Tclose(memType);
     } else {
-      myDim[iRank - 1] = H5Tget_size(m_current_type_id);
+      length = H5Tget_size(m_current_type_id);
     }
-  }
-
-  info.dims.resize(iRank);
-  for (std::size_t i = 0; i < iRank; i++) {
-    info.dims[i] = myDim[i];
+    info.dims.back() = length;
   }
 
   // Trim 1D CHAR arrays to the actual string length
-  if ((info.type == NXnumtype::CHAR) && (iRank == 1)) {
+  if ((info.type == NXnumtype::CHAR) && (rank == 1)) {
     char *buf = static_cast<char *>(malloc(static_cast<size_t>((info.dims[0] + 1) * sizeof(char))));
     if (buf == nullptr) {
       throw NXEXCEPTION("getInfo: Unable to allocate memory for CHAR buffer");
