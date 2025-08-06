@@ -1464,36 +1464,6 @@ Info File::getInfo() {
   return info;
 }
 
-namespace {
-herr_t gr_iterate_cb(hid_t loc_id, const char *name, const H5L_info2_t *info, void *op_data) {
-  UNUSED_ARG(info);
-  Entries *entryData = static_cast<Entries *>(op_data);
-  std::string nxclass;
-
-  H5O_info_t obj_info;
-  H5Oget_info_by_name(loc_id, name, &obj_info, H5O_INFO_ALL, H5P_DEFAULT);
-  if (obj_info.type == H5O_TYPE_GROUP) {
-    hid_t grp = H5Gopen(loc_id, name, H5P_DEFAULT);
-    if (grp >= 0) {
-      H5::Group group(grp);
-      try {
-        H5Util::readStringAttribute(group, group_class_spec, nxclass);
-      } catch (...) {
-        nxclass = unknown_group_spec;
-      }
-      H5Gclose(grp);
-    }
-  } else if (obj_info.type == H5O_TYPE_DATASET) {
-    nxclass = scientific_data_set;
-  } else {
-    nxclass = "unknown";
-  }
-
-  (*entryData)[name] = nxclass;
-  return 0;
-}
-} // namespace
-
 Entries File::getEntries() const {
   Entries result;
   this->getEntries(result);
@@ -1502,11 +1472,24 @@ Entries File::getEntries() const {
 
 void File::getEntries(Entries &result) const {
   result.clear();
-
-  int iRet = H5Literate_by_name(m_pfile->getId(), groupAddress(m_address).c_str(), H5_INDEX_NAME, H5_ITER_NATIVE,
-                                nullptr, gr_iterate_cb, &result, H5P_DEFAULT);
-  if (iRet < 0) {
-    throw NXEXCEPTION("H5Literate failed on group: " + m_address.parent_path());
+  auto current = getCurrentObject();
+  for (size_t i = 0; i < current->getNumObjs(); i++) {
+    std::string name = current->getObjnameByIdx(i);
+    std::string className;
+    H5G_obj_t type = current->getObjTypeByIdx(i);
+    if (type == H5G_GROUP) {
+      H5::Group grp = current->openGroup(name);
+      if (grp.attrExists(group_class_spec)) {
+        H5::Attribute attr = grp.openAttribute(group_class_spec);
+        attr.read(attr.getDataType(), className);
+      } else {
+        className = unknown_group_spec;
+      }
+    } else if (type == H5G_DATASET) {
+      className = scientific_data_set;
+    }
+    if (!className.empty())
+      result[name] = className;
   }
 }
 
