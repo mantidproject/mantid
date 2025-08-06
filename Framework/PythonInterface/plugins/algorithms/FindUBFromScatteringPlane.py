@@ -1,11 +1,11 @@
 # import mantid algorithms, numpy and matplotlib
 import numpy as np
-import math as mt
 from scipy.spatial.transform import Rotation as R
 from mantid.api import PythonAlgorithm, AlgorithmFactory
 from mantid.kernel import FloatArrayProperty, FloatArrayLengthValidator, Direction, FloatBoundedValidator
 from mantid.api import IPeaksWorkspaceProperty
-from mantid.geometry import UnitCell
+from mantid.kernel import V3D
+from scipy.optimize import minimize
 
 
 # Scattering + 1 peak algorithm
@@ -56,51 +56,60 @@ class FindUBFromScatteringPlane(PythonAlgorithm):
 
         # getting vectors to define the plane
         vector_1 = np.array(self.getProperty("vector_1").value)
-        vector_1 = vector_1.reshape(-1, 1)  # making column vector
+        vector_1 = V3D(vector_1[0], vector_1[1], vector_1[2])
         vector_2 = np.array(self.getProperty("vector_2").value)
-        vector_2 = vector_2.reshape(-1, 1)  # making column vector
+        vector_2 = V3D(vector_2[0], vector_2[1], vector_2[2])
 
         # defining sample cell inorder to find B to orthogonalise the vectors provided
-        sample_cell = UnitCell(a, b, c, alpha, beta, gamma)
-        B = sample_cell.getB()
 
         SingleCrystalPeakTable = self.getProperty("PeaksWorkspace").value
-        # Inst = SingleCrystalPeakTable.getInstrument()
-        # lab_orientation = Inst.getReferenceFrame()
-        # orient_vec_beam = lab_orientation.vecPointingAlongBeam()
-        # orient_vec_up = lab_orientation.vecPointingUp() ## vector 2 cross product
+        self.exec_child_alg(
+            "SetUB", Workspace=SingleCrystalPeakTable, u=vector_1, v=vector_2, a=a, b=b, c=c, alpha=alpha, beta=beta, gamma=gamma
+        )
+        OrientedLattice = SingleCrystalPeakTable.sample().getOrientedLattice()
+        UB_arb = OrientedLattice.getUB()
+
+        vertical_dir = SingleCrystalPeakTable.getInstrument().getReferenceFrame().vecPointingUp()
+        vertical_dir = V3D(vertical_dir[0], vertical_dir[1], vertical_dir[2])
 
         peak_ip = SingleCrystalPeakTable.getPeak(0)
         hkl_peak = np.array(peak_ip.getHKL())
         hkl_peak = hkl_peak.reshape(-1, 1)
-        Ql = np.array(peak_ip.getQLabFrame())
-        Ql = Ql.reshape(-1, 1)
+        Qscalc = np.array(np.pi * 2 * (UB_arb @ hkl_peak))
+        Qscalc = V3D(float(Qscalc[0]), float(Qscalc[1]), float(Qscalc[2]))
+        Qsreal = np.array(peak_ip.getQLabFrame())
+        Qsreal = V3D(float(Qsreal[0]), float(Qsreal[1]), float(Qsreal[2]))
 
-        # applying B to the vectors to orthogonalise them
-        B_vector_1 = B @ vector_1
-        B_vector_2 = B @ vector_2
-
-        scatt_plane_norm = np.cross(B_vector_1.flatten(), B_vector_2.flatten())
-        v = np.cross(B_vector_1.flatten(), scatt_plane_norm)
-        self.exec_child_alg("SetUB", Workspace=SingleCrystalPeakTable, u=vector_1, v=v, a=a, b=b, c=c, alpha=alpha, beta=beta, gamma=gamma)
-        UB = np.array(SingleCrystalPeakTable.sample().getOrientedLattice().getUB())
-        Qs = UB @ hkl_peak
-
-        # defining the normal to the scattering plane
-        cross = np.cross(Ql.flatten(), Qs.flatten())
-        sign = np.dot(scatt_plane_norm, cross)  # collinear or opposite
-        scatt_plane_norm_orient = scatt_plane_norm * sign / abs(sign)
-        theta = mt.acos(np.dot(Ql.flatten(), Qs.flatten()) / (np.linalg.norm(Ql) * np.linalg.norm(Qs)))
-        if not np.isclose(np.dot(Qs.flatten() / np.linalg.norm(Qs), scatt_plane_norm / np.linalg.norm(scatt_plane_norm)), 0, atol=0.03):
+        if not np.isclose(
+            np.dot(np.array(Qscalc) / np.linalg.norm(Qscalc), np.array(vertical_dir) / np.linalg.norm(vertical_dir)), 0, atol=0.03
+        ):
             raise ValueError("given peak does not lie in the plane")
 
-        rotation_object = R.from_rotvec(theta * scatt_plane_norm_orient.flatten() / np.linalg.norm(scatt_plane_norm))
-        UB = np.array(SingleCrystalPeakTable.sample().getOrientedLattice().getUB())
-        UB_final = rotation_object.apply(UB)
+        def rotation(theta, vertical_dir):
+            axis = np.array(vertical_dir) / np.linalg.norm(vertical_dir)
+            rotation_object = R.from_rotvec(theta * axis)
+            return rotation_object
+
+        def objective(angle, vertical_dir, target_vector):
+            rotation_object = rotation(angle, vertical_dir)
+            initial_vector = np.array(Qscalc)
+            rotated_vector = rotation_object.apply(initial_vector)
+
+            cost = (np.linalg.norm(np.array(target_vector) - rotated_vector)) ** 2
+            return cost
+
+        target_vector = np.array(Qsreal)
+        result = minimize(objective, 0, args=(np.array(vertical_dir), target_vector), bounds=[(-np.pi, np.pi)], method="Nelder-Mead")
+        theta_new = result.x[0]
+        print(np.degrees(theta_new))
+
+        rotation_object = R.from_rotvec(theta_new * np.array(vertical_dir) / np.linalg.norm(np.array(vertical_dir)))
+        rotation_matrix = rotation_object.as_matrix()
+        UB_final = rotation_matrix @ UB_arb
 
         self.exec_child_alg("SetUB", Workspace=SingleCrystalPeakTable, UB=UB_final)
-
-        ## set ub on the workspace
+        OrientedLattice = SingleCrystalPeakTable.sample().getOrientedLattice()
+        print(UB_final @ hkl_peak * 2 * np.pi)
 
 
 AlgorithmFactory.subscribe(FindUBFromScatteringPlane)
