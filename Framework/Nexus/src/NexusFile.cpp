@@ -459,12 +459,19 @@ void File::makeGroup(const std::string &name, const std::string &nxclass, bool o
   NexusAddress const absaddr(formAbsoluteAddress(name));
   // create group with H5Util by getting an H5File object from iFID
   H5::H5File h5file(m_pfile->getId());
-  H5Util::createGroupNXS(h5file, absaddr, nxclass);
+  H5::Group grp = H5Util::createGroupNXS(h5file, absaddr, nxclass);
 
   // cleanup
   registerEntry(absaddr, nxclass);
   if (open_group) {
-    this->openGroup(name, nxclass);
+    // grp will close when it goes out of scope -- open new copy
+    m_current_group_id = H5Gopen(grp.getId(), ".", H5P_DEFAULT);
+    m_gid_stack.push_back(m_current_group_id);
+    m_address = absaddr;
+    // if we are opening a new group, close whatever dataset is already open
+    if (m_current_data_id != 0) {
+      closeData();
+    }
   }
 }
 
@@ -524,12 +531,12 @@ void File::closeGroup() {
     } else {
       m_current_group_id = 0;
     }
+    m_address = m_address.parent_path();
   }
-  m_address = m_address.parent_path();
 }
 
 //------------------------------------------------------------------------------------------------------------------
-// DATA MAKE / OPEN / PUT / GET / CLOSE
+// DATA MAKE / OPEN / CLOSE / PUT / GET
 //------------------------------------------------------------------------------------------------------------------
 
 void File::makeData(const string &name, NXnumtype const type, DimVector const &dims, bool const open_data) {
@@ -570,20 +577,20 @@ void File::openData(std::string const &name) {
   hid_t newData, newType, newSpace;
   newData = H5Dopen(m_pfile->getId(), absaddr.c_str(), H5P_DEFAULT);
   if (newData < 0) {
-    throw NXEXCEPTION("dataset (" + absaddr + ") not found at this level");
+    throw NXEXCEPTION("Dataset (" + absaddr + ") not found at this level");
   }
   /* find the ID number of datatype */
   newType = H5Dget_type(newData);
   if (newType < 0) {
     H5Dclose(newData);
-    throw NXEXCEPTION("error opening dataset (" + absaddr + ")");
+    throw NXEXCEPTION("Error opening dataset (" + absaddr + ")");
   }
   /* find the ID number of dataspace */
   newSpace = H5Dget_space(newData);
   if (newSpace < 0) {
     H5Dclose(newData);
     H5Tclose(newType);
-    throw NXEXCEPTION("error opening dataset (" + absaddr + ")");
+    throw NXEXCEPTION("Error opening dataset (" + absaddr + ")");
   }
   // now maintain stack
   m_current_data_id = newData;
@@ -591,6 +598,36 @@ void File::openData(std::string const &name) {
   m_current_space_id = newSpace;
   m_address = absaddr;
 }
+
+void File::closeData() {
+  herr_t iRet = 0;
+  if (m_current_space_id != 0) {
+    iRet = H5Sclose(m_current_space_id);
+    if (iRet < 0) {
+      throw NXEXCEPTION("Cannot end access to dataset: failed to close dataspace");
+    }
+  }
+  if (m_current_type_id != 0) {
+    iRet = H5Tclose(m_current_type_id);
+    if (iRet < 0) {
+      throw NXEXCEPTION("Cannot end access to dataset: failed to close datatype");
+    }
+  }
+  if (m_current_data_id != 0) {
+    iRet = H5Dclose(m_current_data_id);
+    if (iRet < 0) {
+      throw NXEXCEPTION("Cannot end access to dataset: failed to close dataset");
+    }
+  } else {
+    throw NXEXCEPTION("Cannot end access to dataset: no data open");
+  }
+  m_current_data_id = 0;
+  m_current_space_id = 0;
+  m_current_type_id = 0;
+  m_address = m_address.parent_path();
+}
+
+// PUT DATA
 
 template <typename NumT> void File::putData(NumT const *data) {
   if (data == nullptr) {
@@ -789,34 +826,6 @@ string File::getStrData() {
   this->getData(value.data());
   std::string res(value.data(), strlen(value.data()));
   return res;
-}
-
-void File::closeData() {
-  herr_t iRet = 0;
-  if (m_current_space_id != 0) {
-    iRet = H5Sclose(m_current_space_id);
-    if (iRet < 0) {
-      throw NXEXCEPTION("Cannot end access to dataset: failed to close dataspace");
-    }
-  }
-  if (m_current_type_id != 0) {
-    iRet = H5Tclose(m_current_type_id);
-    if (iRet < 0) {
-      throw NXEXCEPTION("Cannot end access to dataset: failed to close datatype");
-    }
-  }
-  if (m_current_data_id != 0) {
-    iRet = H5Dclose(m_current_data_id);
-    if (iRet < 0) {
-      throw NXEXCEPTION("Cannot end access to dataset: failed to close dataset");
-    }
-  } else {
-    throw NXEXCEPTION("Cannot end access to dataset: no data open");
-  }
-  m_current_data_id = 0;
-  m_current_space_id = 0;
-  m_current_type_id = 0;
-  m_address = m_address.parent_path();
 }
 
 //------------------------------------------------------------------------------------------------------------------
