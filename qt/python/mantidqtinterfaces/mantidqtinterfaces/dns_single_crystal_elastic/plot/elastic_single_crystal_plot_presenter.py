@@ -49,7 +49,7 @@ class DNSElasticSCPlotPresenter(DNSObserver):
         self._change_grid_state(draw=False, change=False)
         self.view.create_subfigure(self._plot_param.grid_helper)
         self._want_plot(axis_type["plot_type"])
-        self._change_grid_state(draw=False, change=False)
+        self._set_plotting_grid(self._crystallographical_axes())
         self._set_axis_labels()
         self.view.single_crystal_plot.create_colorbar()
         self.view.single_crystal_plot.on_resize()
@@ -112,8 +112,7 @@ class DNSElasticSCPlotPresenter(DNSObserver):
 
     def _set_axis_labels(self):
         axis_type = self.view.get_axis_type()
-        own_dict = self.view.get_state()
-        x_label, y_label = self.model.get_axis_labels(axis_type["type"], own_dict["crystal_axes"])
+        x_label, y_label = self.model.get_axis_labels(axis_type["type"], self._crystallographical_axes())
         self.view.single_crystal_plot.set_axis_labels(x_label, y_label)
 
     def _change_crystal_axes_grid(self):
@@ -122,19 +121,24 @@ class DNSElasticSCPlotPresenter(DNSObserver):
             self._plot_param.grid_state = 1
         else:
             self._plot_param.grid_state = current_state
-        self._plot_param.grid_helper = self._create_grid_helper()
-        self.view.single_crystal_plot.set_grid(major=self._plot_param.grid_state, minor=self._plot_param.grid_state // 3)
+        self._set_plotting_grid(crystallographic_axes=True)
 
     def _change_normal_grid(self):
         self._plot_param.grid_state = self._plot_param.grid_state % 3
-        self._plot_param.grid_helper = None
-        self.view.single_crystal_plot.set_grid(major=self._plot_param.grid_state, minor=self._plot_param.grid_state // 2)
+        self._set_plotting_grid(crystallographic_axes=False)
+
+    def _set_plotting_grid(self, crystallographic_axes=True):
+        if crystallographic_axes:
+            self._plot_param.grid_helper = self._create_grid_helper()
+            self.view.single_crystal_plot.set_grid(major=self._plot_param.grid_state, minor=self._plot_param.grid_state // 3)
+        else:
+            self._plot_param.grid_helper = None
+            self.view.single_crystal_plot.set_grid(major=self._plot_param.grid_state, minor=self._plot_param.grid_state // 2)
 
     def _change_grid_state(self, draw=True, change=True):
-        own_dict = self.view.get_state()
         if change:
             self._plot_param.grid_state = self._plot_param.grid_state + 1
-        if own_dict["crystal_axes"]:
+        if self._crystallographical_axes():
             self._change_crystal_axes_grid()
         else:
             self._change_normal_grid()
@@ -142,8 +146,7 @@ class DNSElasticSCPlotPresenter(DNSObserver):
             self.view.draw()
 
     def _change_crystal_axes(self):
-        own_dict = self.view.get_state()
-        if own_dict["crystal_axes"]:
+        if self._crystallographical_axes():
             self._plot_param.grid_state = 1
         else:
             self._plot_param.grid_state = 0
@@ -167,6 +170,10 @@ class DNSElasticSCPlotPresenter(DNSObserver):
             self.view.single_crystal_plot.set_fontsize(font_size)
             if draw:
                 self._plot()
+
+    def _crystallographical_axes(self):
+        own_dict = self.view.get_state()
+        return own_dict["crystal_axes"]
 
     def _attach_signal_slots(self):
         self.view.sig_plot.connect(self._plot)

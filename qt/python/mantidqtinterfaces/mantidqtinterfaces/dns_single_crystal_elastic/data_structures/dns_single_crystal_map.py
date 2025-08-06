@@ -116,7 +116,7 @@ class DNSScMap(ObjectDict):
         self.triangulation.set_mask(np.invert(maxi))
         return self.triangulation
 
-    def return_changing_indexes(self):
+    def get_changing_indexes(self):
         """
         Keeps track of the coordinates after transformation to the horizontal
         scattering plane and returns the list of relevant indices of (x,y)
@@ -125,13 +125,13 @@ class DNSScMap(ObjectDict):
         hkl1 = get_hkl_float_array(self.hkl1)
         hkl2 = get_hkl_float_array(self.hkl2)
         hkl = np.add(np.outer(self.hklx_mesh.flatten()[0:10], hkl1), np.outer(self.hkly_mesh.flatten()[0:10], hkl2))
-        mylist = [len(np.unique(hkl[:, 0])), len(np.unique(hkl[:, 1])), len(np.unique(hkl[:, 2]))]
-        new_list = list(range(len(mylist)))
-        del new_list[mylist.index(min(mylist))]
-        return new_list
+        projection_dims = [len(np.unique(hkl[:, 0])), len(np.unique(hkl[:, 1])), len(np.unique(hkl[:, 2]))]
+        basis_indexes = list(range(len(projection_dims)))
+        del basis_indexes[projection_dims.index(min(projection_dims))]
+        return basis_indexes
 
     def get_changing_hkl_components(self):
-        index = self.return_changing_indexes()
+        index = self.get_changing_indexes()
         hkl1 = get_hkl_float_array(self.hkl1)
         hkl2 = get_hkl_float_array(self.hkl2)
         # transformation to crystal axis following
