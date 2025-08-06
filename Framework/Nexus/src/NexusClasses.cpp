@@ -27,7 +27,7 @@ std::vector<std::string> NXAttributes::names() const {
   std::vector<std::string> out;
   out.reserve(m_values.size());
   std::transform(m_values.cbegin(), m_values.cend(), std::back_inserter(out),
-                 [](const auto &value) { return value.first; });
+                 [](auto const &value) -> std::string { return value.first; });
   return out;
 }
 
@@ -35,14 +35,13 @@ std::vector<std::string> NXAttributes::values() const {
   std::vector<std::string> out;
   out.reserve(m_values.size());
   std::transform(m_values.cbegin(), m_values.cend(), std::back_inserter(out),
-                 [](const auto &value) { return value.second; });
+                 [](auto const &value) -> std::string { return value.second; });
   return out;
 }
 
 /**  Returns the value of an attribute
  *   @param name :: The name of the attribute
- *   @return The value of the attribute if it exists or an empty string
- * otherwise
+ *   @return The value of the attribute if it exists or an empty string otherwise
  */
 std::string NXAttributes::operator()(const std::string &name) const {
   auto it = m_values.find(name);
@@ -91,7 +90,7 @@ NXObject::NXObject(File *fileID, NXClass const *parent, const std::string &name)
  * containing the object.
  *   @param name :: The name of the object relative to its parent
  */
-NXObject::NXObject(std::shared_ptr<File> fileID, NXClass const *parent, const std::string &name)
+NXObject::NXObject(std::shared_ptr<File> const &fileID, NXClass const *parent, const std::string &name)
     : m_fileID(fileID), m_open(false) {
   if (parent && !name.empty()) {
     m_address = parent->address() / name;
@@ -284,7 +283,13 @@ NXRoot::NXRoot(std::string fname, const std::string &entry) : m_filename(std::mo
   m_fileID = std::make_shared<File>(m_filename, NXaccess::CREATE5);
 }
 
-NXRoot::~NXRoot() { m_fileID->close(); }
+NXRoot::~NXRoot() {
+  try {
+    m_fileID->close();
+  } catch (...) {
+    // do nothing
+  }
+}
 
 bool NXRoot::isStandard() const { return true; }
 
