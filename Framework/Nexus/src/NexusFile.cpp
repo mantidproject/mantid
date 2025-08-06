@@ -392,13 +392,10 @@ bool File::isDataSetOpen() const {
 }
 
 bool File::isDataInt() const {
-  if (m_current_data_id == 0) {
+  if (m_current_type_id == 0) {
     throw NXEXCEPTION("No dataset is open");
   }
-  hid_t datatype = H5Dget_type(m_current_data_id);
-  H5T_class_t dataclass = H5Tget_class(datatype);
-  H5Tclose(datatype);
-  return dataclass == H5T_INTEGER;
+  return H5Tget_class(m_current_type_id) == H5T_INTEGER;
 }
 
 NexusAddress File::formAbsoluteAddress(NexusAddress const &name) const {
@@ -870,9 +867,9 @@ void File::makeCompData(std::string const &name, NXnumtype const type, DimVector
 
   // set the dimensions for use
   int rank = static_cast<int>(dims.size());
-  std::vector<hsize_t> mydim(dims.cbegin(), dims.cend());
-  std::vector<hsize_t> maxdims(dims.cbegin(), dims.cend());
-  std::vector<hsize_t> chunkdims(chunk.cbegin(), chunk.cend());
+  DimVector mydim(dims.cbegin(), dims.cend());
+  DimVector maxdims(dims.cbegin(), dims.cend());
+  DimVector chunkdims(chunk.cbegin(), chunk.cend());
   // handle unlimited data
   if (unlimited) {
     for (int i = 0; i < rank; i++) {
@@ -891,7 +888,7 @@ void File::makeCompData(std::string const &name, NXnumtype const type, DimVector
   hid_t dataspace;
   if (type == NXnumtype::CHAR) {
     std::size_t byte_zahl(mydim.back());
-    std::vector<hsize_t> mydim1(mydim.cbegin(), mydim.cend());
+    DimVector mydim1(mydim.cbegin(), mydim.cend());
     if (unlimited) {
       mydim1[0] = 1;
       maxdims[0] = H5S_UNLIMITED;
@@ -1017,52 +1014,42 @@ template <typename NumT> void File::putSlab(NumT const *data, DimVector const &s
     msg << "Supplied start rank=" << start.size() << " must match supplied size rank=" << size.size();
     throw NXEXCEPTION(msg.str());
   }
-  if (start.size() > NX_MAXRANK) {
-    stringstream msg;
-    msg << "The supplied rank exceeds the max allowed rank " << start.size() << " > " << NX_MAXRANK;
-    throw NXEXCEPTION(msg.str());
-  }
-
-  int iRet, rank;
-  hsize_t myStart[H5S_MAX_RANK];
-  hsize_t mySize[H5S_MAX_RANK];
-  hsize_t dsize[H5S_MAX_RANK], thedims[H5S_MAX_RANK], maxdims[H5S_MAX_RANK];
-  hid_t dataspace;
-  bool unlimiteddim = false;
   stringstream msg;
   msg << "putSlab(data, " << toString(start) << ", " << toString(size) << ") failed: ";
 
   /* check if there is an Dataset open */
-  if (m_current_data_id == 0) {
+  if (!isDataSetOpen()) {
     msg << "no dataset open";
     throw NXEXCEPTION(msg.str());
   }
-  rank = H5Sget_simple_extent_ndims(m_current_space_id);
+
+  // copy over start, size vectors
+  DimVector myStart(start.cbegin(), start.cend());
+  DimVector mySize(size.cbegin(), size.cend());
+  DimVector dsize(size.size(), 0);
+  std::transform(start.cbegin(), start.cend(), size.cbegin(), dsize.cbegin(), std::plus<hsize_t>());
+  // get rank and stored dimensions
+  int rank = H5Sget_simple_extent_ndims(m_current_space_id);
   if (rank < 0) {
     msg << "cannot get rank";
     throw NXEXCEPTION(msg.str());
   }
-  iRet = H5Sget_simple_extent_dims(m_current_space_id, thedims, maxdims);
+  DimVector thedims(rank, 0), maxdims(rank, 0);
+  int iRet = H5Sget_simple_extent_dims(m_current_space_id, thedims.data(), maxdims.data());
   if (iRet < 0) {
     msg << "cannot get dimensions";
     throw NXEXCEPTION(msg.str());
   }
 
-  for (int i = 0; i < rank; i++) {
-    myStart[i] = static_cast<hsize_t>(start[i]);
-    mySize[i] = static_cast<hsize_t>(size[i]);
-    dsize[i] = static_cast<hsize_t>(start[i] + size[i]);
-    if (maxdims[i] == H5S_UNLIMITED) {
-      unlimiteddim = true;
-    }
-  }
+  // for string data, use 1 in the final dimension
   if (H5Tget_class(m_current_type_id) == H5T_STRING) {
-    mySize[rank - 1] = 1;
-    myStart[rank - 1] = 0;
-    dsize[rank - 1] = 1;
+    mySize.back() = 1;
+    myStart.back() = 0;
+    dsize.back() = 1;
   }
-  dataspace = H5Screate_simple(rank, mySize, nullptr);
-  if (unlimiteddim) {
+
+  // if any dimensions are unlimited,
+  if (std::any_of(maxdims.cbegin(), maxdims.cend(), [](auto x) -> bool { return x == H5S_UNLIMITED; })) {
     for (int i = 0; i < rank; i++) {
       if (dsize[i] < thedims[i]) {
         dsize[i] = thedims[i];
@@ -1074,45 +1061,49 @@ template <typename NumT> void File::putSlab(NumT const *data, DimVector const &s
       throw NXEXCEPTION(msg.str());
     }
 
+    // define slab
     hid_t filespace = H5Dget_space(m_current_data_id);
-
-    /* define slab */
     iRet = H5Sselect_hyperslab(filespace, H5S_SELECT_SET, myStart, nullptr, mySize, nullptr);
-    /* deal with HDF errors */
     if (iRet < 0) {
+      H5Sclose(filespace);
       msg << "selecting slab failed";
       throw NXEXCEPTION(msg.str());
     }
-    /* write slab */
+    // write slab
+    hid_t dataspace = H5Screate_simple(rank, mySize, nullptr);
     iRet = H5Dwrite(m_current_data_id, m_current_type_id, dataspace, filespace, H5P_DEFAULT, data);
+    H5Sclose(dataspace);
     if (iRet < 0) {
+      H5Sclose(filespace);
       msg << "writing slab failed";
       throw NXEXCEPTION(msg.str());
     }
     /* update with new size */
     iRet = H5Sclose(m_current_space_id);
     if (iRet < 0) {
+      H5Sclose(filespace);
       msg << "updating size failed";
       throw NXEXCEPTION(msg.str());
     }
     m_current_space_id = filespace;
-  } else {
-    /* define slab */
+  } else { // no unlimited dimensions
+    // define slab
     iRet = H5Sselect_hyperslab(m_current_space_id, H5S_SELECT_SET, myStart, nullptr, mySize, nullptr);
-    /* deal with HDF errors */
+    // deal with HDF errors
     if (iRet < 0) {
       msg << "selecting slab failed";
       throw NXEXCEPTION(msg.str());
     }
-    /* write slab */
+    // write slab
+    hid_t dataspace = H5Screate_simple(rank, mySize, nullptr);
     iRet = H5Dwrite(m_current_data_id, m_current_type_id, dataspace, m_current_space_id, H5P_DEFAULT, data);
+    H5Sclose(dataspace);
     if (iRet < 0) {
       msg << "writing slab failed";
       throw NXEXCEPTION(msg.str());
     }
   }
-  /* deal with HDF errors */
-  iRet = H5Sclose(dataspace);
+  // cleanup
   if (iRet < 0) {
     msg << "closing slab failed";
     throw NXEXCEPTION(msg.str());
@@ -1135,6 +1126,10 @@ template <typename NumT> void File::putSlab(vector<NumT> const &data, dimsize_t 
 template <typename NumT> void File::getSlab(NumT *data, DimVector const &start, DimVector const &size) {
   if (data == nullptr) {
     throw NXEXCEPTION("Supplied null pointer to getSlab");
+  }
+  // check if there is an Dataset open
+  if (!isDataSetOpen()) {
+    throw NXEXCEPTION("No dataset open");
   }
   if (start.size() == 0) {
     stringstream msg;
@@ -1590,7 +1585,6 @@ template <typename NumT> void File::getAttr(const std::string &name, NumT &value
 }
 
 string File::getStrAttr(std::string const &name) {
-  // NOTE ensure the H5Cpp objects created here are properly destroyed when exiting scope
   std::string res("");
   auto current = getCurrentObject();
   try {
@@ -1704,10 +1698,7 @@ void File::makeLink(NXlink const &link) {
   NexusAddress target(link.targetAddress);
   std::string itemName(target.stem());
 
-  /*
-     build addressname to link from our current group and the name
-     of the thing to link
-   */
+  // build addressname to link from our current group and the name of the thing to link
   std::string linkTarget(groupAddress(m_address) / itemName);
   H5Lcreate_hard(m_pfile->getId(), link.targetAddress.c_str(), H5L_SAME_LOC, linkTarget.c_str(), H5P_DEFAULT,
                  H5P_DEFAULT);
