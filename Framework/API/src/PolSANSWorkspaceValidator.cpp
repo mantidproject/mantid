@@ -22,7 +22,7 @@ Kernel::IValidator_sptr PolSANSWorkspaceValidator::clone() const {
   return std::make_shared<PolSANSWorkspaceValidator>(*this);
 }
 
-const std::string PolSANSWorkspaceValidator::validateGroupItem(API::MatrixWorkspace_sptr const &workspace) const {
+std::string PolSANSWorkspaceValidator::validateGroupItem(API::MatrixWorkspace_sptr const &workspace) const {
   std::vector<std::string> workspaceIssues;
   if (!workspace) {
     return "All workspaces must be of type MatrixWorkspace.";

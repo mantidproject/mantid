@@ -28,7 +28,7 @@ public:
 private:
   /// Check for validity.
   std::string checkValidity(const WorkspaceGroup_sptr &workspace) const override;
-  const std::string validateGroupItem(API::MatrixWorkspace_sptr const &workspace) const;
+  std::string validateGroupItem(API::MatrixWorkspace_sptr const &workspace) const;
 
   const bool m_expectHistogramData;
   const bool m_allowMultiPeriodData;

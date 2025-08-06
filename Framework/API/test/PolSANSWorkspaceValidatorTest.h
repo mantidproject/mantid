@@ -26,13 +26,6 @@ public:
 
   void tearDown() override { AnalysisDataService::Instance().clear(); }
 
-  void checkForErrorMessage(const WorkspaceGroup_sptr &ws, const std::string message) {
-    PolSANSWorkspaceValidator validator;
-    const auto result = validator.isValid(ws);
-    const auto pos = result.find(message);
-    TS_ASSERT(pos != std::string::npos);
-  }
-
   void testGetType() {
     PolSANSWorkspaceValidator validator;
     TS_ASSERT_EQUALS(validator.getType(), "polSANS");
@@ -61,30 +54,17 @@ public:
   }
 
   void testUnitTOF() {
-    auto wsGroupTOF = std::make_shared<WorkspaceGroup>();
-    for (int i = 0; i < 4; ++i) {
-      const auto ws = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 10, 0, 1);
-      ws->getAxis(0)->setUnit("TOF");
-      wsGroupTOF->addWorkspace(ws);
-    }
+    auto wsGroupTOF = createWorkspaceGroup(1, "TOF");
     checkForErrorMessage(wsGroupTOF, "All workspaces must be in units of Wavelength.");
   }
 
   void testMultipleHistograms() {
-    auto wsGroupMultipleHistograms = std::make_shared<WorkspaceGroup>();
-    for (int i = 0; i < 4; ++i) {
-      const auto ws = WorkspaceCreationHelper::create2DWorkspaceBinned(2, 10, 0, 1);
-      wsGroupMultipleHistograms->addWorkspace(ws);
-    }
+    auto wsGroupMultipleHistograms = createWorkspaceGroup(2);
     checkForErrorMessage(wsGroupMultipleHistograms, "All workspaces must contain a single histogram.");
   }
 
   void testMultipleHistogramsWithAllowMultiPeriodActive() {
-    auto wsGroupMultipleHistograms = std::make_shared<WorkspaceGroup>();
-    for (int i = 0; i < 4; ++i) {
-      const auto ws = WorkspaceCreationHelper::create2DWorkspaceBinned(2, 10, 0, 1);
-      wsGroupMultipleHistograms->addWorkspace(ws);
-    }
+    auto wsGroupMultipleHistograms = createWorkspaceGroup(2);
     PolSANSWorkspaceValidator validator(true, true);
     const auto result = validator.isValid(wsGroupMultipleHistograms);
     const auto pos = result.find("All workspaces must contain a single histogram.");
@@ -92,20 +72,12 @@ public:
   }
 
   void testNonHistogramData() {
-    auto wsGroupNonHistogram = std::make_shared<WorkspaceGroup>();
-    for (int i = 0; i < 4; ++i) {
-      const auto ws = WorkspaceCreationHelper::create2DWorkspace123(1, 10);
-      wsGroupNonHistogram->addWorkspace(ws);
-    }
+    auto wsGroupNonHistogram = createWorkspaceGroup(1, "Wavelength", false);
     checkForErrorMessage(wsGroupNonHistogram, "All workspaces must be histogram data.");
   }
 
   void testHistogramDataWithExpectHistoDataFalse() {
-    auto wsGroupHistogram = std::make_shared<WorkspaceGroup>();
-    for (int i = 0; i < 4; ++i) {
-      const auto ws = WorkspaceCreationHelper::create2DWorkspace123(1, 10, true);
-      wsGroupHistogram->addWorkspace(ws);
-    }
+    auto wsGroupHistogram = createWorkspaceGroup();
     PolSANSWorkspaceValidator validator(false);
     const auto result = validator.isValid(wsGroupHistogram);
     const auto pos = result.find("All workspaces must not be histogram data.");
@@ -113,14 +85,28 @@ public:
   }
 
   void testWithExpectedData() {
-    auto wsGroup = std::make_shared<WorkspaceGroup>();
-    for (int i = 0; i < 4; ++i) {
-      const auto ws = WorkspaceCreationHelper::create2DWorkspace123(1, 10, true);
-      ws->getAxis(0)->setUnit("Wavelength");
-      wsGroup->addWorkspace(ws);
-    }
+    auto wsGroup = createWorkspaceGroup();
     PolSANSWorkspaceValidator validator;
     const auto result = validator.isValid(wsGroup);
     TS_ASSERT_EQUALS(result, "");
+  }
+
+private:
+  void checkForErrorMessage(const WorkspaceGroup_sptr &ws, const std::string &message) {
+    PolSANSWorkspaceValidator validator;
+    const auto result = validator.isValid(ws);
+    const auto pos = result.find(message);
+    TS_ASSERT(pos != std::string::npos);
+  }
+
+  const WorkspaceGroup_sptr createWorkspaceGroup(const size_t nHist = 1, const std::string unit = "Wavelength",
+                                                 const bool isHist = true) {
+    auto wsGroup = std::make_shared<WorkspaceGroup>();
+    for (int i = 0; i < 4; i++) {
+      const auto ws = WorkspaceCreationHelper::create2DWorkspace123(nHist, 10, isHist);
+      ws->getAxis(0)->setUnit(unit);
+      wsGroup->addWorkspace(ws);
+    }
+    return wsGroup;
   }
 };
