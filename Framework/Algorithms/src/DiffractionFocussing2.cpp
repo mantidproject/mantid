@@ -94,13 +94,14 @@ std::map<std::string, std::string> DiffractionFocussing2::validateInputs() {
   API::MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
   if (!inputWS) {
     // Could be a workspace group
-    const auto inputProp = dynamic_cast<WorkspaceProperty<MatrixWorkspace> *>(getPointerToProperty("InputWorkspace"));
+    const auto inputProp =
+        dynamic_cast<const WorkspaceProperty<MatrixWorkspace> *>(getPointerToProperty("InputWorkspace"));
     API::WorkspaceGroup_const_sptr wsGroup =
         std::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve(inputProp->value()));
     if (!wsGroup) {
       issues["InputWorkspace"] = "InputWorksapce must be a matrix workspace or workspace group.";
     } else {
-      for (const Workspace_sptr ws : wsGroup->getAllItems()) {
+      for (const Workspace_sptr &ws : wsGroup->getAllItems()) {
         inputWS = std::dynamic_pointer_cast<MatrixWorkspace>(ws);
         validateInputWorkspaceUnit(inputWS, issues);
       }
