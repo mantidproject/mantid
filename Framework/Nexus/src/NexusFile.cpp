@@ -633,39 +633,40 @@ template <typename NumT> void File::putData(NumT const *data) {
   if (data == nullptr) {
     throw NXEXCEPTION("Data specified as null");
   }
-  herr_t iRet;
-  std::array<hsize_t, H5S_MAX_RANK> thedims{0}, maxdims{0};
-  int rank;
 
-  rank = H5Sget_simple_extent_ndims(m_current_space_id);
+  // get rank for proper size of dimension vectors
+  int rank = H5Sget_simple_extent_ndims(m_current_space_id);
   if (rank < 0) {
     throw NXEXCEPTION("Cannot determine dataset rank");
-  }
-  iRet = H5Sget_simple_extent_dims(m_current_space_id, thedims.data(), maxdims.data());
-  if (iRet < 0) {
-    throw NXEXCEPTION("Cannot determine dataset dimensions");
-  }
-  bool unlimiteddim = std::any_of(maxdims.cbegin(), maxdims.cend(), [](auto x) -> bool { return x == H5S_UNLIMITED; });
-  /* If we are using putdata on an unlimied dimension dataset, assume we want to append one single new slab */
-  if (unlimiteddim) {
-    std::array<int64_t, H5S_MAX_RANK> myStart{0}, mySize{0};
-    for (std::size_t i = 0; i < myStart.size(); i++) {
-      if (maxdims[i] == H5S_UNLIMITED) {
-        myStart[i] = static_cast<int64_t>(thedims[i] + 1);
-        mySize[i] = 1;
-      } else {
-        myStart[i] = 0;
-        mySize[i] = static_cast<int64_t>(thedims[i]);
-      }
-    }
-    DimVector vecStart(myStart.begin(), myStart.end());
-    DimVector vecSize(mySize.begin(), mySize.end());
-
-    return putSlab(data, vecStart, vecSize);
-  } else {
-    iRet = H5Dwrite(m_current_data_id, m_current_type_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
+  } else if (rank == 0) { // scalars have no extent, so cannot be unlimited
+    herr_t iRet = H5Dwrite(m_current_data_id, m_current_type_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
     if (iRet < 0) {
-      throw NXEXCEPTION("failure to write data");
+      throw NXEXCEPTION("Failure to write data");
+    }
+  } else { // check for unlimited marker in any of the data
+    DimVector thedims(rank, 0), maxdims(rank, 0);
+    herr_t iRet = H5Sget_simple_extent_dims(m_current_space_id, thedims.data(), maxdims.data());
+    if (iRet < 0) {
+      throw NXEXCEPTION("Cannot determine dataset dimensions");
+    }
+    /* If we are using putdata on an unlimited dimension dataset, assume we want to append one single new slab */
+    if (std::any_of(maxdims.cbegin(), maxdims.cend(), [](auto x) -> bool { return x == H5S_UNLIMITED; })) {
+      DimVector vecStart(rank, 0), vecSize(rank, 0);
+      for (int i = 0; i < rank; i++) {
+        if (maxdims[i] == H5S_UNLIMITED) {
+          vecStart[i] = thedims[i] + 1;
+          vecSize[i] = 1;
+        } else {
+          vecStart[i] = 0;
+          vecSize[i] = thedims[i];
+        }
+      }
+      return putSlab(data, vecStart, vecSize);
+    } else {
+      iRet = H5Dwrite(m_current_data_id, m_current_type_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
+      if (iRet < 0) {
+        throw NXEXCEPTION("Failure to write data");
+      }
     }
   }
 }
