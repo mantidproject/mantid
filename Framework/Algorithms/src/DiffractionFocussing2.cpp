@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/DiffractionFocussing2.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/ISpectrum.h"
@@ -13,6 +14,7 @@
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
@@ -90,15 +92,21 @@ std::map<std::string, std::string> DiffractionFocussing2::validateInputs() {
 
   // validate input workspace
   API::MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
-  // Validate UnitID (spacing)
-  const std::string unitid = inputWS->getAxis(0)->unit()->unitID();
-  if (unitid == "TOF") {
-    g_log.error(
-        "Support for TOF data in DiffractionFocussing is deprecated (on 29/04/21) - use GroupDetectors instead)");
-  } else if (unitid != "dSpacing" && unitid != "MomentumTransfer") {
-    std::stringstream msg;
-    msg << "UnitID " << unitid << " is not a supported spacing";
-    issues["InputWorkspace"] = msg.str();
+  if (!inputWS) {
+    // Could be a workspace group
+    const auto inputProp = dynamic_cast<WorkspaceProperty<MatrixWorkspace> *>(getPointerToProperty("InputWorkspace"));
+    API::WorkspaceGroup_const_sptr wsGroup =
+        std::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve(inputProp->value()));
+    if (!wsGroup) {
+      issues["InputWorkspace"] = "InputWorksapce must be a matrix workspace or workspace group.";
+    } else {
+      for (const Workspace_sptr ws : wsGroup->getAllItems()) {
+        inputWS = std::dynamic_pointer_cast<MatrixWorkspace>(ws);
+        validateInputWorkspaceUnit(inputWS, issues);
+      }
+    }
+  } else {
+    validateInputWorkspaceUnit(inputWS, issues);
   }
 
   if (isDefault("DMin") && isDefault("DMax") && isDefault("Delta"))
@@ -154,6 +162,20 @@ std::map<std::string, std::string> DiffractionFocussing2::validateInputs() {
   }
 
   return issues;
+}
+
+void DiffractionFocussing2::validateInputWorkspaceUnit(API::MatrixWorkspace_const_sptr inputWS,
+                                                       std::map<std::string, std::string> &issues) {
+  // Validate UnitID (spacing)
+  const std::string unitid = inputWS->getAxis(0)->unit()->unitID();
+  if (unitid == "TOF") {
+    g_log.error(
+        "Support for TOF data in DiffractionFocussing is deprecated (on 29/04/21) - use GroupDetectors instead)");
+  } else if (unitid != "dSpacing" && unitid != "MomentumTransfer") {
+    std::stringstream msg;
+    msg << "UnitID " << unitid << " is not a supported spacing";
+    issues["InputWorkspace"] = msg.str();
+  }
 }
 
 //=============================================================================
