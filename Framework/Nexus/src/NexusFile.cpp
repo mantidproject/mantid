@@ -721,6 +721,7 @@ template <> void File::getData<char>(char *data) {
     size = len;
   }
 
+  // strip whitespace
   if (rank == 0 || rank == 1) {
     if (size == 1) {
       if (isspace(buffer[0])) {
@@ -732,17 +733,18 @@ template <> void File::getData<char>(char *data) {
       }
       return;
     }
-
+    // skip over any front whitespace
     char *start = buffer.data();
     while (*start && isspace(*start))
       ++start;
-
+    // work from back until first non-whitespace char found
     int i = (int)strlen(start);
     while (--i >= 0) {
       if (!isspace(start[i])) {
         break;
       }
     }
+    // add a null terminator to the end
     start[++i] = '\0';
 
     std::memcpy(data, start, i);
@@ -924,8 +926,7 @@ void File::makeCompData(std::string const &name, NXnumtype const type, DimVector
     H5Pset_shuffle(cparms); // mrt: improves compression
     H5Pset_deflate(cparms, default_deflate_level);
   }
-  // NOTE if compression is NONE but a dimension is unlimited,
-  // then it still compresses by CHUNK.
+  // NOTE if compression is NONE but a dimension is unlimited, then it still compresses by CHUNK.
   // this behavior is inherited from napi
   else if (comp == NXcompression::NONE) {
     if (unlimited) {
@@ -1425,11 +1426,12 @@ Info File::getInfo() {
   if (tclass == H5T_STRING && info.dims.back() == 1) {
     std::size_t length;
     if (H5Tis_variable_str(m_current_type_id)) {
-      herr_t suc = H5Dvlen_get_buf_size(m_current_data_id, m_current_type_id, m_current_space_id, &length);
-      if (suc < 0) {
+      // get the needed size for variable length data
+      if (H5Dvlen_get_buf_size(m_current_data_id, m_current_type_id, m_current_space_id, &length); < 0) {
         throw NXEXCEPTION("Failed to read string length for variable-length string");
       }
     } else {
+      // the size of string data in bytes is stored in the string datatypes
       length = H5Tget_size(m_current_type_id);
     }
     info.dims.back() = length;
