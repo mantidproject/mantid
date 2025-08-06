@@ -1027,7 +1027,7 @@ template <typename NumT> void File::putSlab(NumT const *data, DimVector const &s
   DimVector myStart(start.cbegin(), start.cend());
   DimVector mySize(size.cbegin(), size.cend());
   DimVector dsize(size.size(), 0);
-  std::transform(start.cbegin(), start.cend(), size.cbegin(), dsize.cbegin(), std::plus<hsize_t>());
+  std::transform(start.cbegin(), start.cend(), size.cbegin(), dsize.begin(), std::plus<dimsize_t>());
   // get rank and stored dimensions
   int rank = H5Sget_simple_extent_ndims(m_current_space_id);
   if (rank < 0) {
@@ -1055,7 +1055,7 @@ template <typename NumT> void File::putSlab(NumT const *data, DimVector const &s
         dsize[i] = thedims[i];
       }
     }
-    iRet = H5Dset_extent(m_current_data_id, dsize);
+    iRet = H5Dset_extent(m_current_data_id, dsize.data());
     if (iRet < 0) {
       msg << "extend slab failed";
       throw NXEXCEPTION(msg.str());
@@ -1063,14 +1063,14 @@ template <typename NumT> void File::putSlab(NumT const *data, DimVector const &s
 
     // define slab
     hid_t filespace = H5Dget_space(m_current_data_id);
-    iRet = H5Sselect_hyperslab(filespace, H5S_SELECT_SET, myStart, nullptr, mySize, nullptr);
+    iRet = H5Sselect_hyperslab(filespace, H5S_SELECT_SET, myStart.data(), nullptr, mySize.data(), nullptr);
     if (iRet < 0) {
       H5Sclose(filespace);
       msg << "selecting slab failed";
       throw NXEXCEPTION(msg.str());
     }
     // write slab
-    hid_t dataspace = H5Screate_simple(rank, mySize, nullptr);
+    hid_t dataspace = H5Screate_simple(rank, mySize.data(), nullptr);
     iRet = H5Dwrite(m_current_data_id, m_current_type_id, dataspace, filespace, H5P_DEFAULT, data);
     H5Sclose(dataspace);
     if (iRet < 0) {
@@ -1088,14 +1088,14 @@ template <typename NumT> void File::putSlab(NumT const *data, DimVector const &s
     m_current_space_id = filespace;
   } else { // no unlimited dimensions
     // define slab
-    iRet = H5Sselect_hyperslab(m_current_space_id, H5S_SELECT_SET, myStart, nullptr, mySize, nullptr);
+    iRet = H5Sselect_hyperslab(m_current_space_id, H5S_SELECT_SET, myStart.data(), nullptr, mySize.data(), nullptr);
     // deal with HDF errors
     if (iRet < 0) {
       msg << "selecting slab failed";
       throw NXEXCEPTION(msg.str());
     }
     // write slab
-    hid_t dataspace = H5Screate_simple(rank, mySize, nullptr);
+    hid_t dataspace = H5Screate_simple(rank, mySize.data(), nullptr);
     iRet = H5Dwrite(m_current_data_id, m_current_type_id, dataspace, m_current_space_id, H5P_DEFAULT, data);
     H5Sclose(dataspace);
     if (iRet < 0) {
