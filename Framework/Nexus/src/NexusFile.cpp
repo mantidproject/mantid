@@ -689,24 +689,6 @@ template <typename NumT> void File::putData(const vector<NumT> &data) {
 
 // GET DATA -- STRING / CHAR
 
-string File::getStrData() {
-  Info info = this->getInfo();
-  if (info.type != NXnumtype::CHAR) {
-    stringstream msg;
-    msg << "Cannot use getStrData() on non-character data. Found type=" << info.type;
-    throw NXEXCEPTION(msg.str());
-  }
-  if (info.dims.size() != 1) {
-    stringstream msg;
-    msg << "getStrData() only understand rank=1 data. Found rank=" << info.dims.size();
-    throw NXEXCEPTION(msg.str());
-  }
-  std::vector<char> value(static_cast<size_t>(info.dims[0]) + 1, '\0');
-  this->getData(value.data());
-  std::string res(value.data(), strlen(value.data()));
-  return res;
-}
-
 template <> void File::getData<char>(char *data) {
   if (m_current_data_id == 0) {
     throw NXEXCEPTION("getData ERROR: no dataset open");
@@ -771,6 +753,24 @@ template <> void File::getData<char>(char *data) {
   } else {
     std::memcpy(data, buffer.data(), size);
   }
+}
+
+string File::getStrData() {
+  Info info = this->getInfo();
+  if (info.type != NXnumtype::CHAR) {
+    stringstream msg;
+    msg << "Cannot use getStrData() on non-character data. Found type=" << info.type;
+    throw NXEXCEPTION(msg.str());
+  }
+  if (info.dims.size() != 1) {
+    stringstream msg;
+    msg << "getStrData() only understand rank=1 data. Found rank=" << info.dims.size();
+    throw NXEXCEPTION(msg.str());
+  }
+  std::vector<char> value(static_cast<size_t>(info.dims[0]) + 1, '\0');
+  this->getData(value.data());
+  std::string res(value.data(), strlen(value.data()));
+  return res;
 }
 
 // GET DATA -- NUMERIC
