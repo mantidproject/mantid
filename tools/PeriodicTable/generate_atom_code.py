@@ -25,7 +25,7 @@ DELIMITOR_STOP = "// ---------- END DO NOT EDIT AREA----------"
 
 
 def writeBegin(handle, label, symbol, z, a=0):
-    handle.write('static const Atom %s("%s", %d, %d, ' % (label, symbol, z, a))
+    handle.write('inline const Atom %s("%s", %d, %d, ' % (label, symbol, z, a))
 
 
 def writeMiddle(handle, abundance, atom):
