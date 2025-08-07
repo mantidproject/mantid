@@ -58,7 +58,7 @@ tests:
   - package_contents:
       files:
         - share/doc/html/index.html
-        - share/doc/html/mantid.png
+        - share/doc/html/_images/mantid.png
 
 about:
   license: GPL-3.0-or-later
