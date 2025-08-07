@@ -43,8 +43,22 @@ void declareCPPAlgorithms() { AlgorithmFactory::Instance().subscribe<Mantid::Pyt
  * pythonscripts.directories
  */
 void updatePythonPaths() {
-  auto packagesetup = import("mantid.kernel.packagesetup");
-  packagesetup.attr("update_sys_paths")(ConfigService::Instance().getValue<std::string>(PYTHONPATHS_KEY).value_or(""));
+  // if the script directory is defined, get it
+  auto python_scripts_dir = ConfigService::Instance().getValue<std::string>(PYTHONPATHS_KEY).value_or("");
+
+  // sys.path doesn't like trailing slashes
+  if (python_scripts_dir.ends_with("\\"))
+    python_scripts_dir = python_scripts_dir.substr(0, python_scripts_dir.size() - 1);
+  if (python_scripts_dir.ends_with("/"))
+    python_scripts_dir = python_scripts_dir.substr(0, python_scripts_dir.size() - 1);
+
+  // nothing to do unless the path is non-empty
+  if (!python_scripts_dir.empty()) {
+    // can only import proper modules
+    object sys_pkg = import("sys");
+    // call sys.path.append(python_scripts_dir)
+    sys_pkg.attr("path").attr("append")(python_scripts_dir);
+  }
 }
 
 /**
