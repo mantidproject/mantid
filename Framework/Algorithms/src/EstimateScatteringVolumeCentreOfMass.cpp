@@ -39,11 +39,8 @@ EstimateScatteringVolumeCentreOfMass::EstimateScatteringVolumeCentreOfMass()
 
 void EstimateScatteringVolumeCentreOfMass::init() {
 
-  // The input workspace must have an instrument and units of wavelength
-  auto wsValidator = std::make_shared<CompositeValidator>();
-  wsValidator->add<InstrumentValidator>();
-
-  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input, wsValidator),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input,
+                                                        std::make_shared<InstrumentValidator>()),
                   "Input Workspace");
   declareProperty(std::make_unique<PropertyWithValue<std::vector<double>>>("CentreOfMass", V3D(), Direction::Output),
                   "Estimated centre of mass of illuminated sample volume");
@@ -53,8 +50,8 @@ void EstimateScatteringVolumeCentreOfMass::init() {
   declareProperty("ElementSize", 1.0, moreThanZero,
                   "The size of one side of an integration element cube in {ElementUnits}");
 
-  std::vector<std::string> unitOptions{UNIT_M, UNIT_CM, UNIT_MM};
-  declareProperty("ElementUnits", UNIT_MM, std::make_shared<StringListValidator>(std::move(unitOptions)),
+  declareProperty("ElementUnits", UNIT_MM,
+                  std::make_shared<StringListValidator>(std::vector<std::string>{UNIT_M, UNIT_CM, UNIT_MM}),
                   "The units which ElementSize has been provided in");
 }
 
@@ -62,10 +59,10 @@ void EstimateScatteringVolumeCentreOfMass::exec() {
   // Retrieve the input workspace
   m_inputWS = getProperty("InputWorkspace");
   // Cache the beam direction
-  m_beamDirection = m_inputWS->getInstrument()->getBeamDirection();
+  const V3D beamDirection = m_inputWS->getInstrument()->getBeamDirection();
   // Calculate the element size
   m_cubeSide = getProperty("ElementSize"); // in units
-  std::string elementUnits = getProperty("ElementUnits");
+  const std::string elementUnits = getProperty("ElementUnits");
 
   auto it = unitToMeters.find(elementUnits);
   if (it == unitToMeters.end()) {
@@ -84,15 +81,17 @@ void EstimateScatteringVolumeCentreOfMass::exec() {
   const Geometry::IObject_sptr integrationVolume =
       m_inputWS->run().hasProperty("GaugeVolume") ? getGaugeVolumeObject() : sampleObject;
 
-  const V3D averagePos = rasterizeGaugeVolumeAndCalculateMeanElementPosition(integrationVolume, sampleObject);
+  const V3D averagePos =
+      rasterizeGaugeVolumeAndCalculateMeanElementPosition(beamDirection, integrationVolume, sampleObject);
   setProperty("CentreOfMass", std::vector<double>(averagePos));
 }
 
 /// Calculate as raster of the illumination volume, evaluating which points are within the sample geometry.
 /// Calculate the mean position of all valid volume elements to get the Centre of Mass of the Scattering Volume
 const V3D EstimateScatteringVolumeCentreOfMass::rasterizeGaugeVolumeAndCalculateMeanElementPosition(
-    const Geometry::IObject_sptr integrationVolume, const Geometry::IObject_sptr sampleObject) {
-  const auto raster = Geometry::Rasterize::calculate(m_beamDirection, *integrationVolume, *sampleObject, m_cubeSide);
+    const V3D beamDirection, const Geometry::IObject_sptr integrationVolume,
+    const Geometry::IObject_sptr sampleObject) {
+  const auto raster = Geometry::Rasterize::calculate(beamDirection, *integrationVolume, *sampleObject, m_cubeSide);
   if (raster.l1.size() == 0) {
     // most errors should be caught by the rasterise function, but just in case
     const std::string mess("Failed to find any points in the rasterized illumination volume within the sample shape - "
@@ -113,7 +112,7 @@ const Geometry::IObject_sptr EstimateScatteringVolumeCentreOfMass::extractValidS
     g_log.error(mess);
     throw std::invalid_argument(mess);
   } else {
-    g_log.information("Successfully constructed the sample object");
+    g_log.information("Successfully extracted the sample object");
     return sample.getShapePtr();
   }
 }

@@ -37,11 +37,11 @@ public:
   int version() const override { return 1; };
 
   API::MatrixWorkspace_sptr m_inputWS; ///< A pointer to the input workspace
-  Kernel::V3D m_beamDirection;         ///< The direction of the beam.
   double m_cubeSide;                   ///< Element size of raster
   const Geometry::IObject_sptr getGaugeVolumeObject();
   const Kernel::V3D calcAveragePosition(const std::vector<Kernel::V3D> &pos);
-  const Kernel::V3D rasterizeGaugeVolumeAndCalculateMeanElementPosition(const Geometry::IObject_sptr integrationVolume,
+  const Kernel::V3D rasterizeGaugeVolumeAndCalculateMeanElementPosition(const Kernel::V3D beamDirection,
+                                                                        const Geometry::IObject_sptr integrationVolume,
                                                                         const Geometry::IObject_sptr sampleObject);
   const Geometry::IObject_sptr extractValidSampleObject(const API::Sample &sample);
 
