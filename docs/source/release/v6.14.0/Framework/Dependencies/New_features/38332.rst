@@ -11,7 +11,7 @@
 
   This should not impact the observed behavior, except that memory should be more cleanly freed in Workbench, and loading or saving operations might run slightly faster.
 
-  Loading of HDF4 files, especially those used in muon scattering at RAL, is still handled by the read-only ``LegacyNexus`` layer.
+  Loading of HDF4 files is still handled by the read-only ``LegacyNexus`` layer.
 
   Those interested in the details of the changes can see them in the (developer centric)
   `github issue <https://github.com/mantidproject/mantid/issues/38332>`_ or by following the `Nexus tag <https://github.com/mantidproject/mantid/pulls?q=is%3Apr+is%3Aclosed+label%3ANexus>`_.
