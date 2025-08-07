@@ -47,7 +47,6 @@ hdf5: # this is to move to libcurl>=8.4
 graphviz:
   - '>=2.47.0'
 
-# this must match the version in the developer dependencies
 jemalloc:
   - 5.2.0 # [linux]
   - 5.2.* # [osx]
@@ -58,7 +57,7 @@ jsoncpp:
 libglu:
   - '>=9.0'
 
-#v2.8.5 caused seg faults on Mantid conda versions and large numbers of tests failing
+#v2.3.5 caused seg faults on Mantid conda versions and large numbers of tests failing
 muparser:
   - '>=2.3.2, <2.3.5'
 
