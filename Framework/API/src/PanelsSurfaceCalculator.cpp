@@ -306,4 +306,13 @@ std::vector<size_t> PanelsSurfaceCalculator::tubeDetectorParentIDs(const Compone
   this->setBankVisited(componentInfo, bankIndex, visited);
   return tubes;
 }
+
+std::optional<Kernel::V2D> PanelsSurfaceCalculator::getSideBySideViewPos(const ComponentInfo &componentInfo,
+                                                                         const Instrument_const_sptr instrument,
+                                                                         const size_t componentIndex) const {
+  const auto *componentID = componentInfo.componentID(componentIndex);
+  const auto component = instrument->getComponentByID(componentID);
+  return component->getSideBySideViewPos();
+}
+
 } // namespace Mantid::API

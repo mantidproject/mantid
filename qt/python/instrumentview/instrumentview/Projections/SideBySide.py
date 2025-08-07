@@ -24,6 +24,7 @@ class FlatBankInfo:
     steps: list[int]
     pixels: list[int]
     relative_projected_positions: np.ndarray = np.array([])
+    has_position_in_idf: bool = False
 
     def translate(self, shift: np.ndarray):
         self.reference_position += shift
@@ -62,6 +63,7 @@ class SideBySide(Projection):
     _calculator: PanelsSurfaceCalculator
     _workspace: Workspace2D
     _component_index_detector_id_map: dict[int, int]
+    _detector_id_component_index_map: dict[int, int]
 
     def __init__(
         self,
@@ -78,6 +80,7 @@ class SideBySide(Projection):
         component_info = workspace.componentInfo()
         detector_component_indices = np.array(component_info.detectorsInSubtree(component_info.root()))
         self._component_index_detector_id_map = dict(zip(detector_component_indices, detector_ids))
+        self._detector_id_component_index_map = {id: c for c, id in self._component_index_detector_id_map.items()}
         super().__init__(sample_position, root_position, detector_positions, axis)
 
     def _find_and_correct_x_gap(self) -> None:
@@ -114,6 +117,7 @@ class SideBySide(Projection):
     def _construct_rectangles_and_grids(self, workspace: Workspace2D) -> list[FlatBankInfo]:
         instrument = workspace.getInstrument()
         rectangular_banks = instrument.findGridDetectors()
+        component_info = self._workspace.componentInfo()
         flat_banks = []
 
         if len(rectangular_banks) == 0:
@@ -129,6 +133,11 @@ class SideBySide(Projection):
             flat_bank.dimensions = np.abs([bank.xsize(), bank.ysize(), bank.zsize()])
             flat_bank.steps = np.abs([bank.xstep(), bank.ystep(), bank.zstep()])
             flat_bank.pixels = [bank.xpixels(), bank.ypixels(), bank.zpixels()]
+            parent_component_index = component_info.parent(int(self._detector_id_component_index_map[flat_bank.detector_ids[0]]))
+            override_pos = self._calculator.getSideBySideViewPos(component_info, instrument, parent_component_index)
+            flat_bank.has_position_in_idf = override_pos[0]
+            if flat_bank.has_position_in_idf:
+                flat_bank.reference_position = np.array(override_pos[1] + [0])
             flat_banks.append(flat_bank)
 
         return flat_banks
@@ -162,6 +171,10 @@ class SideBySide(Projection):
             flat_bank.dimensions = np.max(flat_bank.relative_projected_positions, axis=0) - np.min(
                 flat_bank.relative_projected_positions, axis=0
             )
+            override_pos = self._calculator.getSideBySideViewPos(component_info, self._workspace.getInstrument(), group[0])
+            flat_bank.has_position_in_idf = override_pos[0]
+            if flat_bank.has_position_in_idf:
+                flat_bank.reference_position = np.array(override_pos[1] + [0])
             flat_banks.append(flat_bank)
 
         return flat_banks
@@ -226,7 +239,8 @@ class SideBySide(Projection):
         banks_arranged = 0
         space_factor = 1.2
         for bank in self._flat_banks:
-            bank.translate(position - bank.reference_position)
+            if not bank.has_position_in_idf:
+                bank.translate(position - bank.reference_position)
             banks_arranged += 1
             if banks_arranged % banks_per_row == 0:
                 position[0] = 0
