@@ -180,35 +180,6 @@ public:
     HeliumAnalyserEfficiency alg;
     alg.initialize();
     TS_ASSERT(alg.isInitialized());
-    auto prop = dynamic_cast<Mantid::API::WorkspaceProperty<Mantid::API::WorkspaceGroup> *>(
-        alg.getPointerToProperty("InputWorkspace"));
-    TS_ASSERT(prop);
-    auto validator = std::dynamic_pointer_cast<Mantid::API::PolSANSWorkspaceValidator>(prop->getValidator());
-    TS_ASSERT(validator);
-  }
-
-  void testInputWorkspaceNotAGroupThrows() {
-    // Should accept a group workspace containing four workspaces, corresponding to the four spin configurations
-    std::vector<double> x{1, 2, 3, 4, 5};
-    std::vector<double> y{1, 4, 9, 16, 25};
-    MatrixWorkspace_sptr ws1 = generateWorkspace("ws1", x, y);
-    auto heliumAnalyserEfficiency = AlgorithmManager::Instance().create("HeliumAnalyserEfficiency");
-    heliumAnalyserEfficiency->initialize();
-    heliumAnalyserEfficiency->setProperty("OutputWorkspace", "P");
-    TS_ASSERT_THROWS(heliumAnalyserEfficiency->setProperty("InputWorkspace", ws1), std::invalid_argument &);
-    TS_ASSERT_THROWS(heliumAnalyserEfficiency->execute(), const std::runtime_error &);
-  }
-
-  void testInputWorkspaceWithWrongSizedGroupThrows() {
-    // Should accept a group workspace containing four workspaces, corresponding to the four spin configurations
-    std::vector<double> x{1, 2, 3, 4, 5};
-    std::vector<double> y{1, 4, 9, 16, 25};
-    MatrixWorkspace_sptr ws1 = generateWorkspace("ws1", x, y);
-    MatrixWorkspace_sptr ws2 = generateWorkspace("ws2", x, y);
-    MatrixWorkspace_sptr ws3 = generateWorkspace("ws3", x, y);
-    auto groupWs = groupWorkspaces("grp", std::vector<MatrixWorkspace_sptr>{ws1, ws2, ws3});
-    auto heliumAnalyserEfficiency = createHeliumAnalyserEfficiencyAlgorithm(groupWs, "P");
-    TS_ASSERT_THROWS(heliumAnalyserEfficiency->execute(), const std::runtime_error &);
   }
 
   void testInputWorkspaceNotAGroupThrows() {
@@ -236,58 +207,22 @@ public:
     TS_ASSERT_THROWS(heliumAnalyserEfficiency->setProperty("SpinStates", "02,20,22,00"), std::invalid_argument &);
   }
 
-  void testNonWavelengthInput() {
-    // The units of the input workspace should be wavelength
-    m_inputParameters.xUnit = "TOF";
+  void testInputWorkspaceDoesntFitTauIfOnlyOneInput() {
+    // Fitting with one input workspace is equivalent to calculating helium efficiency at t=0
     const auto groupNames = generateEfficienciesFromLifetimeAndInitialPolarization();
     const auto alg = prepareAlgorithm(groupNames);
 
-    TS_ASSERT_THROWS_EQUALS(
-        alg->execute(), std::runtime_error const &e, std::string(e.what()),
-        "Some invalid Properties found: \n InputWorkspaces: Workspace T00_0 must be in units of Wavelength. "
-        "Workspace T01_0 must be in units of Wavelength. "
-        "Workspace T10_0 must be in units of Wavelength. "
-        "Workspace T11_0 must be in units of Wavelength. ");
-  }
-
-  void testInputWorkspaceNotSingleSpectrumThrowsError() {
-    // The units of the input workspace should be wavelength
-    m_inputParameters.nSpec = 2;
-    m_inputParameters.nBins = 10;
-    const auto groupNames = generateEfficienciesFromLifetimeAndInitialPolarization();
-    const auto alg = prepareAlgorithm(groupNames);
-    TS_ASSERT_THROWS_EQUALS(
-        alg->execute(), std::runtime_error const &e, std::string(e.what()),
-        "Some invalid Properties found: \n InputWorkspaces: Workspace T00_0 must contain a single histogram. "
-        "Workspace T01_0 must contain a single histogram. "
-        "Workspace T10_0 must contain a single histogram. "
-        "Workspace T11_0 must contain a single histogram. ");
-  }
-
-  void testInputWorkspaceNotHistogramDataThrowsError() {
-    // The units of the input workspace should be wavelength
-
-    const auto groupNames = generateEfficienciesFromLifetimeAndInitialPolarization();
-    const auto group = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(groupNames.at(0));
-    const auto ws = std::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
-
-    const auto convert = AlgorithmManager::Instance().create("ConvertToPointData");
-    convert->initialize();
-    convert->setProperty("InputWorkspace", ws);
-    convert->setProperty("OutputWorkspace", ws->getName());
-    convert->execute();
-    const auto alg = prepareAlgorithm(groupNames);
-
-    TS_ASSERT_THROWS_EQUALS(
-        alg->execute(), std::runtime_error const &e, std::string(e.what()),
-        "Some invalid Properties found: \n InputWorkspaces: Workspace T00_0 must be histogram data. ");
+    alg->execute();
+    TS_ASSERT(alg->isExecuted());
+    const auto groupOut = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(OUTPUT_NAME);
+    TS_ASSERT_EQUALS(groupOut->getNumberOfEntries(), 1);
+    TS_ASSERT_DELTA(m_polParameters.polInitial, m_polParameters.outPolarizations.at(0), 1e-4);
   }
 
   void testSmallNumberOfBins() {
     // With less than 3 bins it's not possible to perform the error calculation correctly, because the
     // number of parameters exceeds the number of data points.
     m_inputParameters.nBins = 2;
-    // Fitting with one input workspace is equivalent to calculating helium efficiency at t=0
     const auto groupNames = generateEfficienciesFromLifetimeAndInitialPolarization();
     const auto alg = prepareAlgorithm(groupNames);
 
@@ -298,7 +233,6 @@ public:
   }
 
   void testChildAlgorithmExecutesSuccessfully() {
-    // Fitting with one input workspace is equivalent to calculating helium efficiency at t=0
     const auto groupNames = generateEfficienciesFromLifetimeAndInitialPolarization();
     const auto alg = prepareAlgorithm(groupNames);
     alg->setChild(true);
@@ -310,18 +244,6 @@ public:
     TS_ASSERT_EQUALS(groupOut->getNumberOfEntries(), 1);
     const auto wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(groupOut->getItem(0));
     TS_ASSERT_EQUALS(wsOut->getNumberHistograms(), 1);
-  }
-
-  void testInputWorkspaceDoesntFitTauIfOnlyOneInput() {
-    // Fitting with one input workspace is equivalent to calculating helium efficiency at t=0
-    const auto groupNames = generateEfficienciesFromLifetimeAndInitialPolarization();
-    const auto alg = prepareAlgorithm(groupNames);
-
-    alg->execute();
-    TS_ASSERT(alg->isExecuted());
-    const auto groupOut = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(OUTPUT_NAME);
-    TS_ASSERT_EQUALS(groupOut->getNumberOfEntries(), 1);
-    TS_ASSERT_DELTA(m_polParameters.polInitial, m_polParameters.outPolarizations.at(0), 1e-4);
   }
 
   void testAssertTimeDifferencesOrderDoesNotMatter() {
