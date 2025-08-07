@@ -47,11 +47,11 @@ const auto g_log = &Poco::Logger::get("NexusFile");
 
 namespace { // anonymous namespace to keep it in the file
 
-std::string const group_class_spec("NX_class");
-std::string const target_attr_name("target");
-std::string const scientific_data_set("SDS");
-std::string const unknown_group_spec("NX_UNKNOWN_GROUP");
-constexpr int default_deflate_level(6);
+std::string const GROUP_CLASS_SPEC("NX_class");
+std::string const TARGET_ATTR_NAME("target");
+std::string const SCIENTIFIC_DATA_SET("SDS");
+std::string const UNKNOWN_GROUP_SPEC("NX_UNKNOWN_GROUP");
+constexpr int DEFAULT_DEFLATE_LEVEL(6);
 
 template <typename NumT> static string toString(const vector<NumT> &data) {
   stringstream result;
@@ -179,7 +179,7 @@ void File::initOpenFile(std::string const &filename, NXaccess const am) {
                              {"file_name", filename},
                              {"HDF5_Version", version_str},
                              {"file_time", Mantid::Types::Core::DateAndTime::getLocalTimeISO8601String()},
-                             {group_class_spec, "NXroot"}};
+                             {GROUP_CLASS_SPEC, "NXroot"}};
     for (auto const &attr : attrs) {
       H5Util::writeStrAttribute(root, attr.first, attr.second);
     }
@@ -380,7 +380,7 @@ bool File::hasGroup(std::string const &name, std::string const &class_type) cons
 
 bool File::hasData(std::string const &name) const {
   std::string const address = formAbsoluteAddress(name);
-  return m_descriptor.isEntry(address, scientific_data_set);
+  return m_descriptor.isEntry(address, SCIENTIFIC_DATA_SET);
 }
 
 bool File::isDataSetOpen() const {
@@ -924,7 +924,7 @@ void File::makeCompData(std::string const &name, NXnumtype const type, DimVector
       throw NXEXCEPTION(msg.str());
     }
     H5Pset_shuffle(cparms); // mrt: improves compression
-    H5Pset_deflate(cparms, default_deflate_level);
+    H5Pset_deflate(cparms, DEFAULT_DEFLATE_LEVEL);
   }
   // NOTE if compression is NONE but a dimension is unlimited, then it still compresses by CHUNK.
   // this behavior is inherited from napi
@@ -978,7 +978,7 @@ void File::makeCompData(std::string const &name, NXnumtype const type, DimVector
     }
   }
   // cleanup
-  registerEntry(absaddr, scientific_data_set);
+  registerEntry(absaddr, SCIENTIFIC_DATA_SET);
   if (open_data) {
     m_current_type_id = datatype;
     m_current_space_id = dataspace;
@@ -1143,46 +1143,32 @@ template <typename NumT> void File::getSlab(NumT *data, DimVector const &start, 
     throw NXEXCEPTION(msg.str());
   }
 
-  hid_t memspace, iRet;
-  H5T_class_t tclass;
-  hid_t memtype_id;
-  int iRank;
-
-  /* check if there is an Dataset open */
-  if (m_current_data_id == 0) {
-    throw NXEXCEPTION("No dataset open");
-  }
-  tclass = H5Tget_class(m_current_type_id);
   /* map datatypes of other platforms */
+  hid_t memtype;
+  H5T_class_t tclass = H5Tget_class(m_current_type_id);
   if (tclass == H5T_STRING) {
-    memtype_id = m_current_type_id;
+    memtype = m_current_type_id;
   } else {
-    memtype_id = h5MemType(m_current_type_id);
+    memtype = h5MemType(m_current_type_id);
   }
 
-  iRank = H5Sget_simple_extent_ndims(m_current_space_id);
-
-  if (iRank == 0) {
-    /* this is an unslabbale SCALAR */
+  herr_t iRet = -1;
+  int rank = H5Sget_simple_extent_ndims(m_current_space_id);
+  if (rank < 0) {
+    throw NXEXCEPTION("Failed to fetch rank for slab data");
+  } else if (rank == 0) { // this is an unslabbable SCALAR
+    hid_t memspace = H5Screate(H5S_SCALAR);
     hid_t filespace = H5Dget_space(m_current_data_id);
-    memspace = H5Screate(H5S_SCALAR);
     H5Sselect_all(filespace);
-    iRet = H5Dread(m_current_data_id, memtype_id, memspace, filespace, H5P_DEFAULT, data);
+    iRet = H5Dread(m_current_data_id, memtype, memspace, filespace, H5P_DEFAULT, data);
     H5Sclose(filespace);
+    H5Sclose(memspace);
   } else {
-    std::vector<hsize_t> myStart(iRank, 0);
-    std::vector<hsize_t> mySize(iRank, 0);
-    std::vector<hsize_t> mStart(iRank, 0);
-    for (int i = 0; i < iRank; i++) {
-      myStart[i] = static_cast<hsize_t>(start[i]);
-      mySize[i] = static_cast<hsize_t>(size[i]);
-      mStart[i] = static_cast<hsize_t>(0);
-    }
-
-    /*
-     * this does not work for multidimensional string arrays.
-     */
-    int mtype = 0;
+    DimVector myStart(start.cbegin(), start.cend());
+    DimVector mySize(size.cbegin(), size.cend());
+    DimVector mStart(rank, 0);
+    // this does not work for multidimensional string arrays.
+    NXnumtype mtype(NXnumtype::BAD);
     if (tclass == H5T_STRING) {
       mtype = NXnumtype::CHAR;
       if (mySize[0] == 1) {
@@ -1195,26 +1181,27 @@ template <typename NumT> void File::getSlab(NumT *data, DimVector const &start, 
       throw NXEXCEPTION("Selecting slab failed");
     }
 
-    memspace = H5Screate_simple(iRank, mySize.data(), nullptr);
+    hid_t memspace = H5Screate_simple(rank, mySize.data(), nullptr);
     iRet = H5Sselect_hyperslab(memspace, H5S_SELECT_SET, mStart.data(), nullptr, mySize.data(), nullptr);
     if (iRet < 0) {
+      H5Tclose(memtype);
+      H5Sclose(memspace);
       throw NXEXCEPTION("Selecting memspace failed");
     }
-    /* read slab */
+    // read slab
     if (mtype == NXnumtype::CHAR) {
       std::vector<char> tmp_data(mySize[0] + 1, '\0');
-      iRet = H5Dread(m_current_data_id, memtype_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, tmp_data.data());
+      iRet = H5Dread(m_current_data_id, memtype, H5S_ALL, H5S_ALL, H5P_DEFAULT, tmp_data.data());
       char const *data1;
       data1 = tmp_data.data() + myStart[0];
-      strncpy(static_cast<char *>(static_cast<void *>(data)), data1, static_cast<size_t>(size[0]));
+      strncpy(static_cast<char *>(static_cast<void *>(data)), data1, size[0]);
     } else {
-      iRet = H5Dread(m_current_data_id, memtype_id, memspace, m_current_space_id, H5P_DEFAULT, data);
+      iRet = H5Dread(m_current_data_id, memtype, memspace, m_current_space_id, H5P_DEFAULT, data);
     }
+    H5Tclose(memspace);
   }
   /* cleanup */
-  H5Sclose(memspace);
-  H5Tclose(tclass);
-
+  H5Tclose(memtype);
   if (iRet < 0) {
     throw NXEXCEPTION("Reading slab failed");
   }
@@ -1441,7 +1428,7 @@ Info File::getInfo() {
   if ((info.type == NXnumtype::CHAR) && (rank == 1)) {
     char *buf = static_cast<char *>(malloc(static_cast<size_t>((info.dims[0] + 1) * sizeof(char))));
     if (buf == nullptr) {
-      throw NXEXCEPTION("getInfo: Unable to allocate memory for CHAR buffer");
+      throw NXEXCEPTION("Unable to allocate memory for CHAR buffer");
     }
     memset(buf, 0, static_cast<size_t>((info.dims[0] + 1) * sizeof(char)));
     this->getData<char>(buf);
@@ -1466,14 +1453,14 @@ void File::getEntries(Entries &result) const {
     H5G_obj_t type = current->getObjTypeByIdx(i);
     if (type == H5G_GROUP) {
       H5::Group grp = current->openGroup(name);
-      if (grp.attrExists(group_class_spec)) {
-        H5::Attribute attr = grp.openAttribute(group_class_spec);
+      if (grp.attrExists(GROUP_CLASS_SPEC)) {
+        H5::Attribute attr = grp.openAttribute(GROUP_CLASS_SPEC);
         attr.read(attr.getDataType(), className);
       } else {
-        className = unknown_group_spec;
+        className = UNKNOWN_GROUP_SPEC;
       }
     } else if (type == H5G_DATASET) {
-      className = scientific_data_set;
+      className = SCIENTIFIC_DATA_SET;
     }
     if (!className.empty())
       result[name] = className;
@@ -1607,7 +1594,8 @@ std::vector<AttrInfo> File::getAttrInfos() {
     H5Aget_name(attr, namelen + 1, cname);
     cname[namelen] = '\0'; // ensure null termination
     // do not include the group class spec
-    if (group_class_spec == cname) {
+    if (GROUP_CLASS_SPEC == cname) {
+      H5Aclose(attr);
       continue;
     }
     // 2. get the attribute type
@@ -1618,10 +1606,13 @@ std::vector<AttrInfo> File::getAttrInfos() {
     hid_t attrspace = H5Aget_space(attr);
     int rank = H5Sget_simple_extent_ndims(attrspace);
     if (rank > 2 || (rank == 2 && type != NXnumtype::CHAR)) {
+      H5Sclose(attrspace);
+      H5Tclose(attrtype);
+      H5Aclose(attr);
       throw NXEXCEPTION("ERROR iterating through attributes found array attribute not understood by this api");
     }
-    hsize_t *dims = new hsize_t[rank];
-    H5Sget_simple_extent_dims(attrspace, dims, nullptr);
+    DimVector dims(rank, 0);
+    H5Sget_simple_extent_dims(attrspace, dims.data(), nullptr);
     std::size_t length = 1;
     if (type == NXnumtype::CHAR) {
       length = getStrAttr(cname).size();
@@ -1629,7 +1620,6 @@ std::vector<AttrInfo> File::getAttrInfos() {
     for (int d = 0; d < rank; d++) {
       length *= dims[d];
     }
-    delete[] dims;
     // now add info to the vector
     infos.emplace_back(type, length, cname);
     delete[] cname;
@@ -1656,7 +1646,7 @@ NXlink File::getGroupID() {
   }
 
   try {
-    getAttr(target_attr_name, link.targetAddress);
+    getAttr(TARGET_ATTR_NAME, link.targetAddress);
   } catch (const Mantid::Nexus::Exception &) {
     link.targetAddress = getAddress();
   }
@@ -1672,7 +1662,7 @@ NXlink File::getDataID() {
   }
 
   try {
-    getAttr(target_attr_name, link.targetAddress);
+    getAttr(TARGET_ATTR_NAME, link.targetAddress);
   } catch (const Mantid::Nexus::Exception &) {
     link.targetAddress = getAddress();
   }
@@ -1701,7 +1691,7 @@ void File::makeLink(NXlink const &link) {
   // set the target attribute
   NexusAddress here(m_address);
   openAddress(linkTarget);
-  putAttr(target_attr_name, link.targetAddress);
+  putAttr(TARGET_ATTR_NAME, link.targetAddress);
   openAddress(here);
 }
 
