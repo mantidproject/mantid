@@ -399,7 +399,7 @@ def fit_all_peaks(wss: Sequence[str], peaks: Sequence[float], peak_window: float
 
             func_generator = TexturePeakFunctionGenerator([])  # don't fix any parameters
             initial_function, md_fit_kwargs, intensity_estimates = func_generator.get_initial_fit_function_and_kwargs_from_specs(
-                ws, peak, (xmin, xmax), ("A", "B"), peak_func_name, bg_func_name
+                ws, peak, (xmin, xmax), (), peak_func_name, bg_func_name
             )
 
             Fit(
