@@ -105,3 +105,12 @@ Tips
 
 * Make sure you install `devtoolset-7 <https://developer.mantidproject.org/BuildingWithCMake.html#from-the-command-line>`_ for Centos 7 as described in the provided link before CMake and build.
 * It might also be necessary to install some addition packages for Ubuntu 18.04, including `libnexus0-dev`.
+
+Troubleshooting
+###############
+
+If your WSL stops responding to commands, disabling and re-enabling it might be the best solution. To do this, go to ‘Control Panel’, then ‘Programs’, then ‘Turn Windows features on or off,’ and request
+administrator access for your laptop. Uncheck ‘Windows Subsystem for Linux’ and ‘Virtual Machine Platform’. Restart your laptop after clicking ‘Finish’ in the administrator access app. Request administrator access again,
+then re-check both ‘Windows Subsystem for Linux’ and ‘Virtual Machine Platform’.
+
+Be aware that if you maintain administrative access through a reboot, the session will remain active, but you will not be able to execute programs in administrator mode.
