@@ -139,7 +139,7 @@ pipeline {
                 expression { env.BUILD_DEVEL == 'linux-64' }
             }
           }
-          agent { label 'ornl-rocky' }
+          agent { label 'ornl-ubuntu' }
           options { timestamps () }
           steps {
             checkoutSource("${GIT_SHA}")
@@ -228,7 +228,7 @@ pipeline {
             // conda packages unless 'none' is specified.
             expression { env.BUILD_PACKAGE != 'none' }
           }
-          agent { label 'ornl-rocky' }
+          agent { label 'ornl-ubuntu' }
           options {
               timestamps ()
               retry(3)
