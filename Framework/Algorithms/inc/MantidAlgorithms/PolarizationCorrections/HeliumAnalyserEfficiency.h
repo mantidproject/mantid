@@ -12,7 +12,6 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
-#include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
@@ -33,6 +32,7 @@ public:
   int version() const override { return 1; }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "SANS\\PolarizationCorrections"; }
+  std::map<std::string, std::string> validateInputs() override;
 
 private:
   // Implement abstract Algorithm methods

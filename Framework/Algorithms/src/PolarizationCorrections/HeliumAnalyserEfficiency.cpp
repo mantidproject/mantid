@@ -6,32 +6,24 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 #include "MantidAlgorithms/PolarizationCorrections/HeliumAnalyserEfficiency.h"
+#include "MantidAlgorithms/PolarizationCorrections/PolarizationCorrectionsHelpers.h"
 
 #include "MantidAPI/ADSValidator.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/ITableWorkspace.h"
-#include "MantidAPI/WorkspaceUnitValidator.h"
-#include "MantidAlgorithms/PolarizationCorrections/PolarizationCorrectionsHelpers.h"
-
 #include "MantidAPI/MultiDomainFunction.h"
+#include "MantidAPI/PolSANSWorkspaceValidator.h"
 
-
-#include "MantidAlgorithms/PolarizationCorrections/PolarizationCorrectionsHelpers.h"
-#include <MantidDataObjects/Workspace2D.h>
-
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/CompositeValidator.h"
-#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/SpinStateValidator.h"
-#include "MantidKernel/Unit.h"
 
 #include <algorithm>
-#include <vector>
-
 #include <boost/math/distributions/students_t.hpp>
+#include <vector>
 
 namespace Mantid::Algorithms {
 // Register the algorithm into the algorithm factory
@@ -69,7 +61,6 @@ constexpr auto OUTPUT_DECAY_FIT{"_decay"};
 constexpr auto INPUT_WORKSPACE{"InputWorkspace"};
 constexpr auto START_X{"StartX"};
 constexpr auto END_X{"EndX"};
-
 
 /// Initial fitting function values.
 constexpr double PXD_INITIAL = 12.0;
@@ -224,29 +215,6 @@ void HeliumAnalyserEfficiency::init() {
   setPropertyGroup(PropertyNames::OUTPUT_WORKSPACE, PropertyNames::GROUP_OUTPUTS);
 }
 
-std::string validateInputWorkspace(const MatrixWorkspace_sptr &workspace) {
-  const auto preText = "Workspace " + workspace->getName();
-  std::string errorMessage;
-
-  if (!workspace) {
-    errorMessage = preText + " must be of type MatrixWorkspace. ";
-    return errorMessage;
-  }
-  Kernel::Unit_const_sptr unit = workspace->getAxis(0)->unit();
-  if (unit->unitID() != "Wavelength") {
-    errorMessage = preText + " must be in units of Wavelength. ";
-  }
-
-  if (workspace->getNumberHistograms() != 1) {
-    errorMessage += preText + " must contain a single histogram. ";
-  }
-
-  if (!workspace->isHistogramData()) {
-    errorMessage += preText + " must be histogram data. ";
-  }
-
-  return errorMessage;
-}
 /**
  * Tests that the inputs are all valid
  * @return A map containing the incorrect workspace
@@ -256,26 +224,13 @@ std::string validateInputWorkspace(const MatrixWorkspace_sptr &workspace) {
 std::map<std::string, std::string> HeliumAnalyserEfficiency::validateInputs() {
   std::map<std::string, std::string> errorList;
   const std::vector<std::string> &inputWorkspaces = getProperty(PropertyNames::INPUT_WORKSPACES);
+  const auto polSANSValidator = std::make_shared<PolSANSWorkspaceValidator>();
   for (const auto &wsName : inputWorkspaces) {
     const auto ws = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(wsName);
     if (!ws) {
-      errorList[PropertyNames::INPUT_WORKSPACES] = "Workspace " + wsName + " is not a group workspace.";
-      return errorList;
-    }
-    if (ws->size() != 4) {
-      errorList[PropertyNames::INPUT_WORKSPACES] =
-          "The input group workspace must have four periods corresponding to all four spin configurations.";
-      return errorList;
-    }
-
-    for (size_t i = 0; i < ws->size(); i++) {
-      const MatrixWorkspace_sptr stateWs = std::dynamic_pointer_cast<MatrixWorkspace>(ws->getItem(i));
-      const auto errorMsg = validateInputWorkspace(stateWs);
-      if (!errorMsg.empty()) {
-        errorList[PropertyNames::INPUT_WORKSPACES] = errorList[PropertyNames::INPUT_WORKSPACES].empty()
-                                                         ? errorMsg
-                                                         : errorList[PropertyNames::INPUT_WORKSPACES] + errorMsg;
-      }
+      errorList[PropertyNames::INPUT_WORKSPACES] += "Workspace " + wsName + " is not a group workspace.";
+    } else if (const auto polSANSError = polSANSValidator->isValid(ws); !polSANSError.empty()) {
+      errorList[PropertyNames::INPUT_WORKSPACES] += "Error in workspace " + wsName + " : " + polSANSError;
     }
   }
   return errorList;
@@ -302,14 +257,6 @@ void HeliumAnalyserEfficiency::exec() {
   const double mu = LAMBDA_CONVERSION_FACTOR * static_cast<double>(getProperty(PropertyNames::PXD));
 
   const auto efficiencies = calculateEfficiencies(workspaceNames, spinConfigurationInput);
-  /*double pHe, pHeError;
-  fitAnalyserEfficiency(mu, eff, pHe, pHeError);
-
-  // Now re-calculate the efficiency values in the workspace using the theoretical relationship with the fit result for
-  // pHe. We do this because the efficiency calculated from the data will include inherent noise and structure coming
-  // from the statistical noise, whereas the one calculated from the theory will give the expected smooth result.
-  convertToTheoreticalEfficiency(eff, pHe, pHeError, mu);
-  */
   const auto [pHe, pHeError] = fitHe3Polarization(mu, efficiencies);
   convertToTheoreticalEfficiencies(efficiencies, pHe, pHeError, mu);
   if (efficiencies.size() > 1) {
