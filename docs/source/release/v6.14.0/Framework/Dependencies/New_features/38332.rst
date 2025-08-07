@@ -9,7 +9,9 @@
 
   Throughout this release cycle, we have been methodically replacing and modernizing the ``Nexus`` abstraction layer, one piece of functionality at a time.  This has included modern objects such as vectors and strings in place of arrays and C-strings, fixing many instances that apparently led to memory leaks due to unclosed objects, and simplifying the logic inside many of the methods for saving or loading data.
 
-  This should not imapct the observed behavior, except that memory should be more cleanly freed in Workbench, and loading or saving operations might run slightly faster.
+  This should not impact the observed behavior, except that memory should be more cleanly freed in Workbench, and loading or saving operations might run slightly faster.
+
+  Loading of HDF4 files, especially those used in muon scattering at RAL, is still handled by the read-only ``LegacyNexus`` layer.
 
   Those interested in the details of the changes can see them in the (developer centric)
   `github issue <https://github.com/mantidproject/mantid/issues/38332>`_ or by following the `Nexus tag <https://github.com/mantidproject/mantid/pulls?q=is%3Apr+is%3Aclosed+label%3ANexus>`_.
