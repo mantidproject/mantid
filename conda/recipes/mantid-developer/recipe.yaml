@@ -12,7 +12,7 @@ requirements:
   run:
     - ccache
     - cmake ${{ cmake }}
-    - conda-verify
+    - conda-index
     - if: win
       then: conda-wrappers
     - if: win
