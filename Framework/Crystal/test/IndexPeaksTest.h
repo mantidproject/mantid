@@ -99,6 +99,20 @@ PeaksWorkspace_sptr createTestPeaksWorkspaceWithSatellites(const int maxOrder = 
   return createPeaksWorkspace<npeaks>(testPeaksInfo, ub, maxOrder, modVectors, crossTerms);
 }
 
+PeaksWorkspace_sptr createTestPeaksWorkspaceSingleRun() {
+  constexpr int npeaks{5};
+  const std::vector<double> ub = {-0.0122354, 0.00480056, -0.0860404,  0.1165450, 0.00178145,
+                                  0.0045884,  0.0273738,  -0.08973560, 0.0252595};
+  // All peaks from the same run (3007) - modified from createTestPeaksWorkspaceMainReflOnly
+  GNU_DIAG_OFF("missing-braces");
+  constexpr std::array<MinimalPeak, npeaks> testPeaksInfo = {
+      MinimalPeak{3007, V3D(-3.52961, 3.13589, 1.0899)}, MinimalPeak{3007, V3D(-2.42456, 2.29581, 1.71147)},
+      MinimalPeak{3007, V3D(-3.04393, 3.05739, 2.03727)}, MinimalPeak{3007, V3D(-4.02271, 2.4073, 1.62228)},
+      MinimalPeak{3007, V3D(-4.04552, 1.59916, 3.71776)}};
+  GNU_DIAG_ON("missing-braces");
+  return createPeaksWorkspace<npeaks>(testPeaksInfo, ub);
+}
+
 std::unique_ptr<IndexPeaks> indexPeaks(const IPeaksWorkspace_sptr &peaksWS,
                                        const std::unordered_map<std::string, std::string> &arguments) {
   auto alg = std::make_unique<IndexPeaks>();
@@ -580,6 +594,136 @@ public:
     TS_ASSERT_DELTA(ws->getPeak(1).getH(), 0, 1e-9)
     TS_ASSERT_DELTA(ws->getPeak(1).getK(), 2, 1e-9)
     TS_ASSERT_DELTA(ws->getPeak(1).getL(), 0, 1e-9)
+  }
+
+  void test_updateUB_with_suboptimal_matrix_shows_improvement() {
+    const auto ws = createTestPeaksWorkspaceSingleRun();
+
+    auto &lattice = ws->mutableSample().getOrientedLattice();
+    auto originalUB = lattice.getUB();
+
+    // Add very small error to make the matrix suboptimal
+    auto modifiedUB(originalUB);
+
+    modifiedUB[0][0] *= 0.85;
+
+    lattice.setUB(modifiedUB);
+
+    auto alg = indexPeaks(ws, {{"Tolerance", "0.2"}, {"RoundHKLs", "1"}, {"CommonUBForAll", "0"}, {"UpdateUB", "1"}});
+
+    TS_ASSERT(alg->isExecuted())
+
+    // Get the optimized matrix that was saved back
+    const auto optimizedUB = ws->sample().getOrientedLattice().getUB();
+
+    // The optimized matrix should be different from the modified one
+    bool matricesAreDifferent = false;
+    for (size_t i = 0; i < 3; ++i) {
+      for (size_t j = 0; j < 3; ++j) {
+        if (std::abs(modifiedUB[i][j] - optimizedUB[i][j]) > 1e-15) {
+          matricesAreDifferent = true;
+          break;
+        }
+      }
+      if (matricesAreDifferent)
+        break;
+    }
+    TS_ASSERT(matricesAreDifferent)
+
+    // The optimized matrix should be closer to the original than the modified one
+    double modifiedError = 0.0, optimizedError = 0.0;
+    for (size_t i = 0; i < 3; ++i) {
+      for (size_t j = 0; j < 3; ++j) {
+        modifiedError += std::pow(originalUB[i][j] - modifiedUB[i][j], 2);
+        optimizedError += std::pow(originalUB[i][j] - optimizedUB[i][j], 2);
+      }
+    }
+    TS_ASSERT(optimizedError < modifiedError)
+  }
+
+  void test_updateUB_false_does_not_save_optimized_matrix() {
+    const auto ws = createTestPeaksWorkspaceSingleRun();
+
+    // Get the original UB matrix for comparison
+    const auto originalUB = ws->sample().getOrientedLattice().getUB();
+
+    auto alg = indexPeaks(ws, {{"Tolerance", "0.1"}, {"RoundHKLs", "1"}, {"CommonUBForAll", "0"}, {"UpdateUB", "0"}});
+
+    // Check the algorithm executed successfully
+    TS_ASSERT(alg->isExecuted())
+    assertNumberPeaksIndexed(*alg, 5, 5, 0);
+
+    // Verify the UB matrix was NOT updated (should be same as original)
+    const auto unchangedUB = ws->sample().getOrientedLattice().getUB();
+
+    // The matrices should be identical
+    for (size_t i = 0; i < 3; ++i) {
+      for (size_t j = 0; j < 3; ++j) {
+        TS_ASSERT_DELTA(originalUB[i][j], unchangedUB[i][j], 1e-15)
+      }
+    }
+
+    // Peaks should still be properly indexed despite not saving the optimized UB
+    V3D peak_0_hkl(4, 1, 6);
+    const auto &peaks = ws->getPeaks();
+    V3D error = peak_0_hkl - peaks[0].getHKL();
+    TS_ASSERT_DELTA(error.norm(), 0.0, 2e-4)
+  }
+
+  void test_updateUB_with_commonUB_true_ignores_updateUB_flag() {
+    const auto ws = createTestPeaksWorkspaceSingleRun();
+
+    // Get the original UB matrix for comparison
+    const auto originalUB = ws->sample().getOrientedLattice().getUB();
+
+    auto alg = indexPeaks(ws, {{"Tolerance", "0.1"}, {"RoundHKLs", "1"}, {"CommonUBForAll", "1"}, {"UpdateUB", "1"}});
+
+    // Check the algorithm executed successfully
+    TS_ASSERT(alg->isExecuted())
+    assertNumberPeaksIndexed(*alg, 5, 5, 0);
+
+    // Verify the UB matrix was NOT updated when CommonUBForAll=true
+    // (UpdateUB only applies when CommonUBForAll=false)
+    const auto unchangedUB = ws->sample().getOrientedLattice().getUB();
+
+    // The matrices should be identical since CommonUB path doesn't optimize
+    for (size_t i = 0; i < 3; ++i) {
+      for (size_t j = 0; j < 3; ++j) {
+        TS_ASSERT_DELTA(originalUB[i][j], unchangedUB[i][j], 1e-15)
+      }
+    }
+  }
+
+  void test_updateUB_with_multiple_runs_does_not_save_matrix() {
+    // Create a workspace with peaks from multiple runs
+    constexpr int npeaks{3};
+    const std::vector<double> ub = {-0.0122354, 0.00480056, -0.0860404,  0.1165450, 0.00178145,
+                                    0.0045884,  0.0273738,  -0.08973560, 0.0252595};
+
+    // Use different run numbers to simulate multiple runs
+    GNU_DIAG_OFF("missing-braces");
+    constexpr std::array<MinimalPeak, npeaks> testPeaksInfo = {
+        MinimalPeak{3007, V3D(-3.52961, 3.13589, 1.0899)},  // Run 3007
+        MinimalPeak{3008, V3D(-2.42456, 2.29581, 1.71147)}, // Run 3008
+        MinimalPeak{3009, V3D(-3.04393, 3.05739, 2.03727)}  // Run 3009
+    };
+    GNU_DIAG_ON("missing-braces");
+
+    const auto ws = createPeaksWorkspace<npeaks>(testPeaksInfo, ub);
+    const auto originalUB = ws->sample().getOrientedLattice().getUB();
+
+    auto alg = indexPeaks(ws, {{"Tolerance", "0.1"}, {"RoundHKLs", "1"}, {"CommonUBForAll", "0"}, {"UpdateUB", "1"}});
+
+    TS_ASSERT(alg->isExecuted())
+
+    // With multiple runs, the UB should NOT be saved even if UpdateUB=true
+    const auto unchangedUB = ws->sample().getOrientedLattice().getUB();
+
+    for (size_t i = 0; i < 3; ++i) {
+      for (size_t j = 0; j < 3; ++j) {
+        TS_ASSERT_DELTA(originalUB[i][j], unchangedUB[i][j], 1e-15)
+      }
+    }
   }
 
 private:
