@@ -1143,46 +1143,32 @@ template <typename NumT> void File::getSlab(NumT *data, DimVector const &start, 
     throw NXEXCEPTION(msg.str());
   }
 
-  hid_t memspace, iRet;
-  H5T_class_t tclass;
-  hid_t memtype_id;
-  int iRank;
-
-  /* check if there is an Dataset open */
-  if (m_current_data_id == 0) {
-    throw NXEXCEPTION("No dataset open");
-  }
-  tclass = H5Tget_class(m_current_type_id);
   /* map datatypes of other platforms */
+  hid_t memtype;
+  H5T_class_t tclass = H5Tget_class(m_current_type_id);
   if (tclass == H5T_STRING) {
-    memtype_id = m_current_type_id;
+    memtype = m_current_type_id;
   } else {
-    memtype_id = h5MemType(m_current_type_id);
+    memtype = h5MemType(m_current_type_id);
   }
 
-  iRank = H5Sget_simple_extent_ndims(m_current_space_id);
-
-  if (iRank == 0) {
-    /* this is an unslabbale SCALAR */
+  herr_t iRet = -1;
+  int rank = H5Sget_simple_extent_ndims(m_current_space_id);
+  if (rank < 0) {
+    throw NXEXCEPTION("Failed to fetch rank for slab data");
+  } else if (rank == 0) { // this is an unslabbable SCALAR
+    hid_t memspace = H5Screate(H5S_SCALAR);
     hid_t filespace = H5Dget_space(m_current_data_id);
-    memspace = H5Screate(H5S_SCALAR);
     H5Sselect_all(filespace);
-    iRet = H5Dread(m_current_data_id, memtype_id, memspace, filespace, H5P_DEFAULT, data);
+    iRet = H5Dread(m_current_data_id, memtype, memspace, filespace, H5P_DEFAULT, data);
     H5Sclose(filespace);
+    H5Sclose(memspace);
   } else {
-    std::vector<hsize_t> myStart(iRank, 0);
-    std::vector<hsize_t> mySize(iRank, 0);
-    std::vector<hsize_t> mStart(iRank, 0);
-    for (int i = 0; i < iRank; i++) {
-      myStart[i] = static_cast<hsize_t>(start[i]);
-      mySize[i] = static_cast<hsize_t>(size[i]);
-      mStart[i] = static_cast<hsize_t>(0);
-    }
-
-    /*
-     * this does not work for multidimensional string arrays.
-     */
-    int mtype = 0;
+    DimVector myStart(start.cbegin(), start.cend());
+    DimVector mySize(size.cbegin(), size.cend());
+    DimVector mStart(rank, 0);
+    // this does not work for multidimensional string arrays.
+    NXnumtype mtype(NXnumtype::BAD);
     if (tclass == H5T_STRING) {
       mtype = NXnumtype::CHAR;
       if (mySize[0] == 1) {
@@ -1195,26 +1181,27 @@ template <typename NumT> void File::getSlab(NumT *data, DimVector const &start, 
       throw NXEXCEPTION("Selecting slab failed");
     }
 
-    memspace = H5Screate_simple(iRank, mySize.data(), nullptr);
+    hid_t memspace = H5Screate_simple(rank, mySize.data(), nullptr);
     iRet = H5Sselect_hyperslab(memspace, H5S_SELECT_SET, mStart.data(), nullptr, mySize.data(), nullptr);
     if (iRet < 0) {
+      H5Tclose(memtype);
+      H5Sclose(memspace);
       throw NXEXCEPTION("Selecting memspace failed");
     }
-    /* read slab */
+    // read slab
     if (mtype == NXnumtype::CHAR) {
       std::vector<char> tmp_data(mySize[0] + 1, '\0');
-      iRet = H5Dread(m_current_data_id, memtype_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, tmp_data.data());
+      iRet = H5Dread(m_current_data_id, memtype, H5S_ALL, H5S_ALL, H5P_DEFAULT, tmp_data.data());
       char const *data1;
       data1 = tmp_data.data() + myStart[0];
-      strncpy(static_cast<char *>(static_cast<void *>(data)), data1, static_cast<size_t>(size[0]));
+      strncpy(static_cast<char *>(static_cast<void *>(data)), data1, size[0]);
     } else {
-      iRet = H5Dread(m_current_data_id, memtype_id, memspace, m_current_space_id, H5P_DEFAULT, data);
+      iRet = H5Dread(m_current_data_id, memtype, memspace, m_current_space_id, H5P_DEFAULT, data);
     }
+    H5Tclose(memspace);
   }
   /* cleanup */
-  H5Sclose(memspace);
-  H5Tclose(tclass);
-
+  H5Tclose(memtype);
   if (iRet < 0) {
     throw NXEXCEPTION("Reading slab failed");
   }
@@ -1441,7 +1428,7 @@ Info File::getInfo() {
   if ((info.type == NXnumtype::CHAR) && (rank == 1)) {
     char *buf = static_cast<char *>(malloc(static_cast<size_t>((info.dims[0] + 1) * sizeof(char))));
     if (buf == nullptr) {
-      throw NXEXCEPTION("getInfo: Unable to allocate memory for CHAR buffer");
+      throw NXEXCEPTION("Unable to allocate memory for CHAR buffer");
     }
     memset(buf, 0, static_cast<size_t>((info.dims[0] + 1) * sizeof(char)));
     this->getData<char>(buf);
@@ -1608,6 +1595,7 @@ std::vector<AttrInfo> File::getAttrInfos() {
     cname[namelen] = '\0'; // ensure null termination
     // do not include the group class spec
     if (group_class_spec == cname) {
+      H5Aclose(attr);
       continue;
     }
     // 2. get the attribute type
@@ -1618,10 +1606,13 @@ std::vector<AttrInfo> File::getAttrInfos() {
     hid_t attrspace = H5Aget_space(attr);
     int rank = H5Sget_simple_extent_ndims(attrspace);
     if (rank > 2 || (rank == 2 && type != NXnumtype::CHAR)) {
+      H5Sclose(attrspace);
+      H5Tclose(attrtype);
+      H5Aclose(attr);
       throw NXEXCEPTION("ERROR iterating through attributes found array attribute not understood by this api");
     }
-    hsize_t *dims = new hsize_t[rank];
-    H5Sget_simple_extent_dims(attrspace, dims, nullptr);
+    DimVector dims(rank, 0);
+    H5Sget_simple_extent_dims(attrspace, dims.data(), nullptr);
     std::size_t length = 1;
     if (type == NXnumtype::CHAR) {
       length = getStrAttr(cname).size();
@@ -1629,7 +1620,6 @@ std::vector<AttrInfo> File::getAttrInfos() {
     for (int d = 0; d < rank; d++) {
       length *= dims[d];
     }
-    delete[] dims;
     // now add info to the vector
     infos.emplace_back(type, length, cname);
     delete[] cname;
