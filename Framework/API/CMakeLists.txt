@@ -1,5 +1,6 @@
 set(SRC_FILES
     src/ADSValidator.cpp
+    src/AlgoTimeRegister.cpp
     src/Algorithm.cpp
     src/AlgorithmExecuteProfile.cpp
     src/AlgorithmFactory.cpp
@@ -11,7 +12,6 @@ set(SRC_FILES
     src/AlgorithmProperties.cpp
     src/AlgorithmProperty.cpp
     src/AlgorithmRuntimeProps.cpp
-    src/AlgoTimeRegister.cpp
     src/AnalysisDataService.cpp
     src/AnalysisDataServiceObserver.cpp
     src/ArchiveSearchFactory.cpp
@@ -124,6 +124,7 @@ set(SRC_FILES
     src/ParameterReference.cpp
     src/ParameterTie.cpp
     src/PeakFunctionIntegrator.cpp
+    src/PolSANSWorkspaceValidator.cpp
     src/PreviewManager.cpp
     src/Progress.cpp
     src/Projection.cpp
@@ -229,8 +230,8 @@ set(INC_FILES
     inc/MantidAPI/HistoryItem.h
     inc/MantidAPI/HistoryView.h
     inc/MantidAPI/IAlgorithm.h
-    inc/MantidAPI/IAlgorithm_fwd.h
     inc/MantidAPI/IAlgorithmRuntimeProps.h
+    inc/MantidAPI/IAlgorithm_fwd.h
     inc/MantidAPI/IArchiveSearch.h
     inc/MantidAPI/IBackgroundFunction.h
     inc/MantidAPI/IBoxControllerIO.h
@@ -267,9 +268,9 @@ set(INC_FILES
     inc/MantidAPI/IPeaksWorkspace.h
     inc/MantidAPI/IPeaksWorkspace_fwd.h
     inc/MantidAPI/IPowderDiffPeakFunction.h
+    inc/MantidAPI/IPreview.h
     inc/MantidAPI/ISISInstrumentDataCache.h
     inc/MantidAPI/ISISRunLogs.h
-    inc/MantidAPI/IPreview.h
     inc/MantidAPI/ISpectrum.h
     inc/MantidAPI/ISplittersWorkspace.h
     inc/MantidAPI/ITableWorkspace.h
@@ -321,6 +322,7 @@ set(INC_FILES
     inc/MantidAPI/ParameterReference.h
     inc/MantidAPI/ParameterTie.h
     inc/MantidAPI/PeakFunctionIntegrator.h
+    inc/MantidAPI/PolSANSWorkspaceValidator.h
     inc/MantidAPI/PreviewManager.h
     inc/MantidAPI/Progress.h
     inc/MantidAPI/Projection.h
@@ -369,6 +371,7 @@ set(INC_FILES
 
 set(TEST_FILES
     ADSValidatorTest.h
+    AlgoTimeRegisterTest.h
     AlgorithmFactoryObserverTest.h
     AlgorithmFactoryTest.h
     AlgorithmHasPropertyTest.h
@@ -377,7 +380,6 @@ set(TEST_FILES
     AlgorithmPropertyTest.h
     AlgorithmRuntimePropsTest.h
     AlgorithmTest.h
-    AlgoTimeRegisterTest.h
     AnalysisDataServiceObserverTest.h
     AnalysisDataServiceTest.h
     AsynchronousTest.h
@@ -398,8 +400,8 @@ set(TEST_FILES
     ExpressionTest.h
     FileBackedExperimentInfoTest.h
     FileFinderTest.h
-    FilePropertyTest.h
     FileLoaderRegistryTest.h
+    FilePropertyTest.h
     FrameworkManagerTest.h
     FuncMinimizerFactoryTest.h
     FunctionAttributeTest.h
@@ -454,6 +456,7 @@ set(TEST_FILES
     ParameterReferenceTest.h
     ParameterTieTest.h
     PeakFunctionIntegratorTest.h
+    PolSANSWorkspaceValidatorTest.h
     PreviewManagerTest.h
     ProgressTest.h
     ProjectionTest.h

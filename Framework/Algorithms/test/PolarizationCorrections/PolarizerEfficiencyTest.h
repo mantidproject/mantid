@@ -9,6 +9,7 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/PolSANSWorkspaceValidator.h"
 #include "MantidAlgorithms/PolarizationCorrections/PolarizerEfficiency.h"
 #include "MantidKernel/ConfigService.h"
 
@@ -41,18 +42,11 @@ public:
     PolarizerEfficiency alg;
     alg.initialize();
     TS_ASSERT(alg.isInitialized());
-  }
-
-  void testNonGroupWorkspaceInput() {
-    // Should accept a group workspace containing four workspaces, corresponding to the four spin configurations
-    std::vector<double> x{1, 2, 3, 4, 5};
-    std::vector<double> y{1, 4, 9, 16, 25};
-
-    MatrixWorkspace_sptr ws1 = generateWorkspace("ws1", x, y);
-
-    auto polariserEfficiency = AlgorithmManager::Instance().create("PolarizerEfficiency");
-    polariserEfficiency->initialize();
-    TS_ASSERT_THROWS(polariserEfficiency->setProperty("InputWorkspace", ws1), const std::invalid_argument &);
+    auto prop = dynamic_cast<Mantid::API::WorkspaceProperty<Mantid::API::WorkspaceGroup> *>(
+        alg.getPointerToProperty("InputWorkspace"));
+    TS_ASSERT(prop);
+    auto validator = std::dynamic_pointer_cast<Mantid::API::PolSANSWorkspaceValidator>(prop->getValidator());
+    TS_ASSERT(validator);
   }
 
   void testOutput() {
@@ -76,15 +70,6 @@ public:
     TS_ASSERT_THROWS(polariserEfficiency->execute(), const std::runtime_error &);
   }
 
-  void testNonWavelengthInput() {
-    // The units of the input workspace should be wavelength
-    auto wsGrp = createExampleGroupWorkspace("wsGrp", "TOF");
-    auto polariserEfficiency = AlgorithmManager::Instance().create("PolarizerEfficiency");
-    polariserEfficiency->initialize();
-    polariserEfficiency->setProperty("InputWorkspace", wsGrp);
-    TS_ASSERT_THROWS(polariserEfficiency->execute(), const std::runtime_error &);
-  }
-
   void testNonMatchingBinsFails() {
     auto polariserEfficiency = createPolarizerEfficiencyAlgorithm(nullptr, true, true);
     TS_ASSERT_THROWS(polariserEfficiency->execute(), const std::runtime_error &);
@@ -93,17 +78,6 @@ public:
   void testInvalidAnalyzerWsFails() {
     generateFunctionDefinedWorkspace(ANALYSER_EFFICIENCY_WS_NAME, "1 + x*0", 2);
     auto polariserEfficiency = createPolarizerEfficiencyAlgorithm();
-    TS_ASSERT_THROWS(polariserEfficiency->execute(), const std::runtime_error &);
-  }
-
-  void testFailsWithTooManyHistograms() {
-    auto tPara = generateFunctionDefinedWorkspace("T_para", "4 + x*0", 2);
-    auto tAnti = generateFunctionDefinedWorkspace("T_anti", "2 + x*0", 2);
-
-    auto grpWs = groupWorkspaces("grpWs", {tPara, tAnti});
-
-    auto polariserEfficiency = createPolarizerEfficiencyAlgorithm(grpWs);
-    polariserEfficiency->setProperty("SpinStates", "00, 01");
     TS_ASSERT_THROWS(polariserEfficiency->execute(), const std::runtime_error &);
   }
 

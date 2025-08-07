@@ -10,6 +10,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/PolSANSWorkspaceValidator.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAlgorithms/PolarizationCorrections/HeliumAnalyserEfficiency.h"
 #include <boost/format.hpp>
@@ -33,30 +34,11 @@ public:
     HeliumAnalyserEfficiency alg;
     alg.initialize();
     TS_ASSERT(alg.isInitialized());
-  }
-
-  void testInputWorkspaceNotAGroupThrows() {
-    // Should accept a group workspace containing four workspaces, corresponding to the four spin configurations
-    std::vector<double> x{1, 2, 3, 4, 5};
-    std::vector<double> y{1, 4, 9, 16, 25};
-    MatrixWorkspace_sptr ws1 = generateWorkspace("ws1", x, y);
-    auto heliumAnalyserEfficiency = AlgorithmManager::Instance().create("HeliumAnalyserEfficiency");
-    heliumAnalyserEfficiency->initialize();
-    heliumAnalyserEfficiency->setProperty("OutputWorkspace", "P");
-    TS_ASSERT_THROWS(heliumAnalyserEfficiency->setProperty("InputWorkspace", ws1), std::invalid_argument &);
-    TS_ASSERT_THROWS(heliumAnalyserEfficiency->execute(), const std::runtime_error &);
-  }
-
-  void testInputWorkspaceWithWrongSizedGroupThrows() {
-    // Should accept a group workspace containing four workspaces, corresponding to the four spin configurations
-    std::vector<double> x{1, 2, 3, 4, 5};
-    std::vector<double> y{1, 4, 9, 16, 25};
-    MatrixWorkspace_sptr ws1 = generateWorkspace("ws1", x, y);
-    MatrixWorkspace_sptr ws2 = generateWorkspace("ws2", x, y);
-    MatrixWorkspace_sptr ws3 = generateWorkspace("ws3", x, y);
-    auto groupWs = groupWorkspaces("grp", std::vector<MatrixWorkspace_sptr>{ws1, ws2, ws3});
-    auto heliumAnalyserEfficiency = createHeliumAnalyserEfficiencyAlgorithm(groupWs, "P");
-    TS_ASSERT_THROWS(heliumAnalyserEfficiency->execute(), const std::runtime_error &);
+    auto prop = dynamic_cast<Mantid::API::WorkspaceProperty<Mantid::API::WorkspaceGroup> *>(
+        alg.getPointerToProperty("InputWorkspace"));
+    TS_ASSERT(prop);
+    auto validator = std::dynamic_pointer_cast<Mantid::API::PolSANSWorkspaceValidator>(prop->getValidator());
+    TS_ASSERT(validator);
   }
 
   void testInvalidSpinStateFormatThrowsError() {
@@ -65,45 +47,6 @@ public:
     TS_ASSERT_THROWS(heliumAnalyserEfficiency->setProperty("SpinStates", "10,01"), std::invalid_argument &);
     TS_ASSERT_THROWS(heliumAnalyserEfficiency->setProperty("SpinStates", "00,00,11,11"), std::invalid_argument &);
     TS_ASSERT_THROWS(heliumAnalyserEfficiency->setProperty("SpinStates", "02,20,22,00"), std::invalid_argument &);
-  }
-
-  void testNonWavelengthInput() {
-    // The units of the input workspace should be wavelength
-    MantidVec e;
-    auto wsGrp = createExampleGroupWorkspace("wsGrp", e, "TOF");
-    auto heliumAnalyserEfficiency = createHeliumAnalyserEfficiencyAlgorithm(wsGrp, "out");
-
-    TS_ASSERT_THROWS_EQUALS(
-        heliumAnalyserEfficiency->execute(), std::runtime_error const &e, std::string(e.what()),
-        "Some invalid Properties found: \n InputWorkspace: All input workspaces must be in units of Wavelength.");
-  }
-
-  void testInputWorkspaceNotSingleSpectrumThrowsError() {
-    MantidVec e;
-    auto wsGrp = createExampleGroupWorkspace("wsGrp", e, "Wavelength", 10, 0.2, 2);
-    auto heliumAnalyserEfficiency = createHeliumAnalyserEfficiencyAlgorithm(wsGrp, "out");
-
-    TS_ASSERT_THROWS_EQUALS(
-        heliumAnalyserEfficiency->execute(), std::runtime_error const &e, std::string(e.what()),
-        "Some invalid Properties found: \n InputWorkspace: All input workspaces must contain a single histogram.");
-  }
-
-  void testInputWorkspaceNotHistogramDataThrowsError() {
-    MantidVec e;
-    auto wsGrp = createExampleGroupWorkspace("wsGrp", e, "Wavelength");
-
-    MatrixWorkspace_sptr ws = std::dynamic_pointer_cast<MatrixWorkspace>(wsGrp->getItem(0));
-    auto convert = AlgorithmManager::Instance().create("ConvertToPointData");
-    convert->initialize();
-    convert->setProperty("InputWorkspace", ws);
-    convert->setProperty("OutputWorkspace", ws->getName());
-    convert->execute();
-
-    auto heliumAnalyserEfficiency = createHeliumAnalyserEfficiencyAlgorithm(wsGrp, "out");
-
-    TS_ASSERT_THROWS_EQUALS(
-        heliumAnalyserEfficiency->execute(), std::runtime_error const &e, std::string(e.what()),
-        "Some invalid Properties found: \n InputWorkspace: All input workspaces must be histogram data.");
   }
 
   void testZeroPdError() {

@@ -9,6 +9,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/PolSANSWorkspaceValidator.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAlgorithms/DetermineSpinStateOrder.h"
 #include "MantidFrameworkTestHelpers/InstrumentCreationHelper.h"
@@ -72,26 +73,13 @@ public:
 
   void test_Init() {
     DetermineSpinStateOrder alg;
-    TS_ASSERT_THROWS_NOTHING(alg.initialize())
-    TS_ASSERT(alg.isInitialized())
-  }
-
-  void test_validateInputs_inputWorkspaceSize() {
-    auto wsGroupWithThreeItems = std::make_shared<Mantid::API::WorkspaceGroup>();
-    for (int i = 0; i < 3; ++i) {
-      const auto ws = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(1, 10, false, false, true, "ZOOM");
-      ws->getAxis(0)->setUnit("WaveLength");
-      wsGroupWithThreeItems->addWorkspace(ws);
-    }
-
-    DetermineSpinStateOrder alg;
-    alg.initialize();
-    alg.setProperty("InputWorkspace", wsGroupWithThreeItems);
-
-    auto errors = alg.validateInputs();
-    TS_ASSERT(!errors.empty())
-    TS_ASSERT_EQUALS(errors["InputWorkspace"], "Input workspace group must have 4 entries.")
-    WorkspaceCreationHelper::removeWS("three_items");
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
+    auto prop = dynamic_cast<Mantid::API::WorkspaceProperty<Mantid::API::WorkspaceGroup> *>(
+        alg.getPointerToProperty("InputWorkspace"));
+    TS_ASSERT(prop);
+    auto validator = std::dynamic_pointer_cast<Mantid::API::PolSANSWorkspaceValidator>(prop->getValidator());
+    TS_ASSERT(validator);
   }
 
   void test_validateInputs_unsupportedInstrumentForNoLogInfo() {
@@ -110,57 +98,6 @@ public:
     TS_ASSERT(!errors.empty())
     TS_ASSERT_EQUALS(errors["InputWorkspace"], "Sub workspaces must be data from either LARMOR or ZOOM when "
                                                "SpinFlipperLogName or SpinFlipperAverageCurrent are not provided")
-  }
-
-  void test_validateInputs_wavelengthAxis() {
-    auto wsGroupTOF = std::make_shared<Mantid::API::WorkspaceGroup>();
-    for (int i = 0; i < 4; ++i) {
-      const auto ws = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(1, 10, false, false, true, "ZOOM");
-      ws->getAxis(0)->setUnit("TOF");
-      wsGroupTOF->addWorkspace(ws);
-    }
-
-    DetermineSpinStateOrder alg;
-    alg.initialize();
-    alg.setProperty("InputWorkspace", wsGroupTOF);
-
-    auto errors = alg.validateInputs();
-    TS_ASSERT(!errors.empty())
-    TS_ASSERT_EQUALS(errors["InputWorkspace"], "All input workspaces must be in units of Wavelength.")
-  }
-
-  void test_validateInputs_multipleHistograms() {
-    auto wsGroupThreeHistograms = std::make_shared<Mantid::API::WorkspaceGroup>();
-    for (int i = 0; i < 4; ++i) {
-      const auto ws = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(3, 10, false, false, true, "ZOOM");
-      ws->getAxis(0)->setUnit("Wavelength");
-      wsGroupThreeHistograms->addWorkspace(ws);
-    }
-
-    DetermineSpinStateOrder alg;
-    alg.initialize();
-    alg.setProperty("InputWorkspace", wsGroupThreeHistograms);
-
-    auto errors = alg.validateInputs();
-    TS_ASSERT(!errors.empty())
-    TS_ASSERT_EQUALS(errors["InputWorkspace"], "All input workspaces must contain a single histogram.")
-  }
-
-  void test_validateInputs_notHistogramData() {
-    auto wsGroupNonHistogram = std::make_shared<Mantid::API::WorkspaceGroup>();
-    for (int i = 0; i < 4; ++i) {
-      const auto ws = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(1, 10, false, false, false, "ZOOM");
-      ws->getAxis(0)->setUnit("Wavelength");
-      wsGroupNonHistogram->addWorkspace(ws);
-    }
-
-    DetermineSpinStateOrder alg;
-    alg.initialize();
-    alg.setProperty("InputWorkspace", wsGroupNonHistogram);
-
-    auto errors = alg.validateInputs();
-    TS_ASSERT(!errors.empty())
-    TS_ASSERT_EQUALS(errors["InputWorkspace"], "All input workspaces must be histogram data.")
   }
 
   void test_averageTransmission() {

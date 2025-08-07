@@ -9,16 +9,39 @@
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/MDFrameValidator.h"
 #include "MantidAPI/NumericAxisValidator.h"
+#include "MantidAPI/PolSANSWorkspaceValidator.h"
 #include "MantidAPI/RawCountValidator.h"
 #include "MantidAPI/SpectraAxisValidator.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidPythonInterface/core/TypedValidatorExporter.h"
 #include <boost/python/class.hpp>
+#include <boost/python/list.hpp>
+#include <boost/python/make_constructor.hpp>
 
 using Mantid::API::IMDWorkspace_sptr;
+using Mantid::API::WorkspaceGroup_sptr;
 using Mantid::Kernel::TypedValidator;
 using Mantid::PythonInterface::TypedValidatorExporter;
 using namespace boost::python;
+
+std::shared_ptr<Mantid::API::PolSANSWorkspaceValidator>
+polSANSValidatorConstructor(bool expectHistogramData = true, bool allowMultiPeriodData = false,
+                            list allowedNumberOfPeriods = list()) {
+  // setup default value
+  if (len(allowedNumberOfPeriods) == 0) {
+    allowedNumberOfPeriods.append(4);
+  }
+
+  std::unordered_set<int> allowedPeriodsSet;
+  for (int i = 0; i < len(allowedNumberOfPeriods); i++) {
+    int periodN = extract<int>(allowedNumberOfPeriods[i]);
+    allowedPeriodsSet.insert(periodN);
+  }
+
+  return std::make_shared<Mantid::API::PolSANSWorkspaceValidator>(expectHistogramData, allowMultiPeriodData,
+                                                                  allowedPeriodsSet);
+}
 
 /// This is the base TypedValidator for most of the WorkspaceValidators
 void export_MatrixWorkspaceValidator() {
@@ -26,11 +49,13 @@ void export_MatrixWorkspaceValidator() {
   using Mantid::API::MatrixWorkspaceValidator;
   TypedValidatorExporter<MatrixWorkspace_sptr>::define("MatrixWorkspaceValidator");
   TypedValidatorExporter<IMDWorkspace_sptr>::define("IMDWorkspaceValidator");
+  TypedValidatorExporter<WorkspaceGroup_sptr>::define("WorkspaceGroupValidator");
 
   class_<MatrixWorkspaceValidator, bases<TypedValidator<MatrixWorkspace_sptr>>, boost::noncopyable>(
       "MatrixWorkspaceValidator", no_init);
 
   class_<TypedValidator<IMDWorkspace_sptr>, boost::noncopyable>("IMDWorkspaceValidator", no_init);
+  class_<TypedValidator<WorkspaceGroup_sptr>, boost::noncopyable>("WorkspaceGroupValidator", no_init);
 }
 /// Export a validator derived from a MatrixWorkspaceValidator that has a no-arg
 /// constructor
@@ -72,4 +97,17 @@ void export_WorkspaceValidators() {
                                                               "currently: `HKL`, `QLab`, `QSample`, `Time of "
                                                               "Flight`, `Distance`, `General frame`, `Unknown "
                                                               "frame` "));
+
+  class_<PolSANSWorkspaceValidator, bases<TypedValidator<WorkspaceGroup_sptr>>,
+         std::shared_ptr<PolSANSWorkspaceValidator>, boost::noncopyable>("PolSANSWorkspaceValidator", no_init)
+      .def("__init__",
+           make_constructor(&polSANSValidatorConstructor, default_call_policies(),
+                            (arg("expectHistogramData") = true, arg("allowMultiPeriodData") = false,
+                             arg("allowedNumberOfPeriods") = list())),
+           "Checks that the workspace group is a valid Polarised SANS transmission run. It should have 4 (by default, "
+           "use allowedNumberOfPeriods with a list ints to change) "
+           "group entries which are of type MatrixWorkspace, "
+           "have X axis unit Wavelength, have a single spectrum per workspace (depending on the value of "
+           "allowMultiPeriodData), and are histogram data "
+           "(depending on expectHistogramData).");
 }

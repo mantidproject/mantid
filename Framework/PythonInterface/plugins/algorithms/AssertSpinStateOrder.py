@@ -6,25 +6,9 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,invalid-name
 
-from mantid.api import AlgorithmFactory, PythonAlgorithm, WorkspaceGroupProperty
+from mantid.api import AlgorithmFactory, PolSANSWorkspaceValidator, PythonAlgorithm, WorkspaceGroupProperty
 from mantid.simpleapi import DetermineSpinStateOrder
 from mantid.kernel import logger, Direction
-
-
-def validate_group_item(ws):
-    issues = []
-    if ws.getAxis(0).getUnit().unitID() != "Wavelength":
-        issues.append("All input workspaces must be in units of Wavelength.")
-
-    if ws.getNumberHistograms() != 1:
-        issues.append("All input workspaces must contain a single histogram.")
-
-    if not ws.isHistogramData():
-        issues.append("All input workspaces must be histogram data.")
-
-    if len(issues) != 0:
-        return {"InputWorkspace": ", ".join(issues)}
-    return {}
 
 
 class AssertSpinStateOrder(PythonAlgorithm):
@@ -42,7 +26,9 @@ class AssertSpinStateOrder(PythonAlgorithm):
 
     def PyInit(self):
         self.declareProperty(
-            WorkspaceGroupProperty(name="InputWorkspace", defaultValue="", direction=Direction.Input),
+            WorkspaceGroupProperty(
+                name="InputWorkspace", defaultValue="", direction=Direction.Input, validator=PolSANSWorkspaceValidator()
+            ),
             doc="Polarized SANS runs with 4 periods (workspace group with 4 entries).",
         )
 
@@ -69,15 +55,6 @@ class AssertSpinStateOrder(PythonAlgorithm):
 
     def validateInputs(self):
         issues = {}
-        group_ws = self.getProperty("InputWorkspace").value
-        if group_ws.getNumberOfEntries() != 4:
-            issues["InputWorkspace"] = "Input workspace group must have 4 entries."
-            return issues
-
-        for ws in group_ws:
-            issues = validate_group_item(ws)
-            if issues != {}:
-                return issues
 
         expected_spin_states = self.getProperty("ExpectedSpinStates").value
         if len(expected_spin_states.split(",")) != 4:
