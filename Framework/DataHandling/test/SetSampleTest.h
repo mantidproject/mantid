@@ -497,6 +497,39 @@ public:
     TS_ASSERT_EQUALS(xml, expectedXML.str());
   }
 
+  void SetSample_CSGSphereMergedWithCylinder_DoesNotCrash() {
+    // Create a workspace with dummy data
+    auto inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 1);
+
+    // Define CSG XML shape (sphere merged with cylinder)
+    std::string mergeXML = "<cylinder id=\"stick\">"
+                           "<centre-of-bottom-base x=\"-0.5\" y=\"0.0\" z=\"0.0\" />"
+                           "<axis x=\"1.0\" y=\"0.0\" z=\"0.0\" />"
+                           "<radius val=\"0.05\" />"
+                           "<height val=\"1.0\" />"
+                           "</cylinder>"
+                           "<sphere id=\"some-sphere\">"
+                           "<centre x=\"0.7\" y=\"0.0\" z=\"0.0\" />"
+                           "<radius val=\"0.2\" />"
+                           "</sphere>"
+                           "<rotate-all x=\"90\" y=\"-45\" z=\"0\" />"
+                           "<algebra val=\"some-sphere (: stick)\" />";
+
+    // Set the sample shape
+    auto alg = createAlgorithm(inputWS);
+    alg->setProperty("GeometryShape", "CSG");
+    alg->setProperty("GeometryValue", mergeXML);
+    alg->execute();
+
+    // Check sample shape was set
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    TS_ASSERT(alg->isExecuted());
+
+    const auto &sample = inputWS->sample();
+    const auto &sampleShape = sample.getShape();
+    TS_ASSERT(sampleShape.hasValidShape());
+  }
+
   void test_Setting_Container_Geometry_As_HollowCylinderHolder() {
     using Mantid::Kernel::V3D;
     auto inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 1);
