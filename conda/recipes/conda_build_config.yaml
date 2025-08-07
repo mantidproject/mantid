@@ -62,10 +62,8 @@ muparser:
   - '>=2.3.2, <2.3.5'
 
 # Aim to build using the latest minor version, and rely on numpy's generous backward compatibility.
-# Keep the >=2.0.0, and try to increment the upper bound as early as possible.
-# When incrementing the upper bound, make sure to also set the upper_bound in the mantid recipe run requirements.
 numpy:
-  - '>=2.0.0,<2.2'
+  - 2.1.*
 
 matplotlib:
   - 3.9.*

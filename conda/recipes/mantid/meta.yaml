@@ -63,7 +63,7 @@ requirements:
     - jemalloc {{ jemalloc }}  # [osx or linux]
     - lib3mf  # [win]
     - muparser {{ muparser }}
-    - {{ pin_compatible("numpy", upper_bound="2.2") }}
+    - {{ pin_compatible("numpy", min_pin="x", max_pin="x.x") }}
     - occt {{ occt }}
     - pycifrw
     - pydantic {{ pydantic }}
