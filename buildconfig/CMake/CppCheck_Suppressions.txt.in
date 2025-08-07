@@ -380,7 +380,6 @@ unusedScopedObject:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/
 cstyleCast:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/MDGeometry.cpp:96
 cstyleCast:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/MultipleExperimentInfos.cpp:37
 syntaxError:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/Run.cpp:258
-syntaxError:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/Sample.cpp:81
 syntaxError:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/SpectrumDefinition.cpp:40
 cstyleCast:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/SpectrumInfo.cpp:87
 unusedScopedObject:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/Workspace.cpp:71
