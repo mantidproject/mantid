@@ -121,6 +121,24 @@ H5::FileAccPropList defaultFileAcc() {
   return access_plist;
 }
 
+bool isHdf5(std::string const &filename) {
+  // Calls C routine H5Fis_accessible to determine whether the file is in
+  // HDF5 format.  It returns positive value, 0, or negative value
+  // Copies the function in H5Cpp, but using the correct access level
+  hid_t plist = H5Pcopy(H5Util::defaultFileAcc().getId());
+  htri_t ret_value = H5Fis_accessible(filename.c_str(), plist);
+  H5Pclose(plist);
+
+  if (ret_value > 0)
+    return true;
+  else if (ret_value == 0)
+    return false;
+  else // Raise exception when H5Fis_accessible returns a negative value
+  {
+    throw H5::FileIException("H5File::isHdf5", "H5Fis_accessible returned negative value");
+  }
+}
+
 DataSpace getDataSpace(const size_t length) {
   hsize_t dims[] = {length};
   return DataSpace(1, dims);
