@@ -94,7 +94,7 @@ class ParsedDictConverterTest(unittest.TestCase):
 
     def _assert_scale(self, state):
         scale = state.scale
-        self.assertEqual(scale.scale, 0.074)
+        self.assertEqual(scale.rear_scale, 0.074)
 
     def _assert_wavelength(self, state):
         wavelength = state.wavelength

@@ -9,7 +9,7 @@
 import math
 
 from sans.common.constants import EMPTY_NAME
-from sans.common.enums import SampleShape, SANSInstrument
+from sans.common.enums import SampleShape, SANSInstrument, DetectorType
 from sans.common.file_information import convert_to_flag
 
 from sans.common.general_functions import append_to_sans_file_tag, create_unmanaged_algorithm
@@ -17,8 +17,8 @@ from sans.common.general_functions import append_to_sans_file_tag, create_unmana
 DEFAULT_SCALING = 100.0
 
 
-def scale_workspace(workspace, instrument, state_scale):
-    workspace = _multiply_by_abs_scale(instrument, state_scale, workspace)
+def scale_workspace(workspace, instrument, state_scale, component: DetectorType):
+    workspace = _multiply_by_abs_scale(instrument, state_scale, workspace, component)
     workspace = _divide_by_sample_volume(workspace, scale_info=state_scale)
     workspace = _set_sample_values(workspace, state_scale)
 
@@ -26,8 +26,14 @@ def scale_workspace(workspace, instrument, state_scale):
     return workspace
 
 
-def _multiply_by_abs_scale(instrument, state_scale, workspace):
-    scale_factor = state_scale.scale * DEFAULT_SCALING if state_scale is not None else DEFAULT_SCALING
+def _multiply_by_abs_scale(instrument, state_scale, workspace, component: DetectorType):
+    if state_scale is None:
+        scale_factor = DEFAULT_SCALING
+    else:
+        if component is DetectorType.HAB and state_scale.front_scale is not None:
+            scale_factor = state_scale.front_scale * DEFAULT_SCALING
+        else:
+            scale_factor = state_scale.rear_scale * DEFAULT_SCALING if state_scale.rear_scale is not None else DEFAULT_SCALING
 
     if instrument is SANSInstrument.LOQ:
         rescale_to_colette = math.pi

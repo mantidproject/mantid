@@ -37,6 +37,7 @@ class TomlSchemaV1Validator(TomlSchemaValidator):
         detector_keys = {
             "configuration": {
                 "selected_detector": None,
+                "front_scale": None,
                 "rear_scale": None,
                 "all_centre": {"x", "y"},
                 "front_centre": {"x", "y"},

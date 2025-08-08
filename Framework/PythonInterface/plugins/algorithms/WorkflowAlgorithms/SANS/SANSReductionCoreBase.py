@@ -201,10 +201,10 @@ class SANSReductionCoreBase(DataProcessorAlgorithm):
         processed = {tuple(wav_range): ws for wav_range, ws in zip(selected_ranges, grouped_ws)}
         return processed
 
-    def _scale(self, state, ws_list: WsList):
+    def _scale(self, state, ws_list: WsList, component: str):
         instrument = state.data.instrument
         for key, ws in ws_list.items():
-            output_ws = scale_workspace(instrument=instrument, state_scale=state.scale, workspace=ws)
+            output_ws = scale_workspace(instrument=instrument, state_scale=state.scale, workspace=ws, component=DetectorType(component))
             ws_list[key] = output_ws
         return ws_list
 
