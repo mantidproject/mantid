@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidPythonInterface/api/Algorithms/RunPythonScript.h"
 #include "MantidPythonInterface/core/ReleaseGlobalInterpreterLock.h"
@@ -21,6 +22,7 @@ using Mantid::API::AlgorithmFactory;
 using Mantid::API::FrameworkManager;
 using Mantid::API::FrameworkManagerImpl;
 using Mantid::Kernel::ConfigService;
+using Mantid::Kernel::StringTokenizer;
 using namespace boost::python;
 using Mantid::PythonInterface::ReleaseGlobalInterpreterLock;
 
@@ -29,6 +31,7 @@ namespace {
 std::once_flag INIT_FLAG;
 bool INSTANCE_CALLED = false;
 constexpr auto PYTHONPATHS_KEY = "pythonscripts.directories";
+constexpr auto PATH_SEPARATOR = ";";
 
 /**
  * We don't want to register the C++ algorithms on loading the api python
@@ -46,18 +49,25 @@ void updatePythonPaths() {
   // if the script directory is defined, get it
   auto python_scripts_dir = ConfigService::Instance().getValue<std::string>(PYTHONPATHS_KEY).value_or("");
 
-  // sys.path doesn't like trailing slashes
-  if (python_scripts_dir.ends_with("\\"))
-    python_scripts_dir = python_scripts_dir.substr(0, python_scripts_dir.size() - 1);
-  if (python_scripts_dir.ends_with("/"))
-    python_scripts_dir = python_scripts_dir.substr(0, python_scripts_dir.size() - 1);
-
-  // nothing to do unless the path is non-empty
   if (!python_scripts_dir.empty()) {
-    // can only import proper modules
+    // import sys module once - boost can only import proper modules
     object sys_pkg = import("sys");
-    // call sys.path.append(python_scripts_dir)
-    sys_pkg.attr("path").attr("append")(python_scripts_dir);
+
+    // split based on ";" because that is what is allowed in the configuration
+    StringTokenizer tokens(python_scripts_dir, PATH_SEPARATOR);
+    for (auto python_dir : tokens) {
+      // sys.path doesn't like trailing slashes - do this with simple string parsing
+      if (python_dir.ends_with("\\"))
+        python_dir = python_dir.substr(0, python_dir.size() - 1);
+      if (python_dir.ends_with("/"))
+        python_dir = python_dir.substr(0, python_dir.size() - 1);
+
+      // nothing to do unless the path is non-empty
+      if (!python_dir.empty()) {
+        // call sys.path.append(python_dir)
+        sys_pkg.attr("path").attr("append")(python_dir);
+      }
+    }
   }
 }
 
