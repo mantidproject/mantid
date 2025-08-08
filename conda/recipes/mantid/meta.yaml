@@ -35,8 +35,8 @@ requirements:
     - hdf5 {{ hdf5 }}
     - jemalloc  {{ jemalloc }} # [osx or linux]
     - jsoncpp {{ jsoncpp }}
-    - libboost-devel {{ libboost_devel }}
-    - libboost-python-devel {{ libboost_python_devel }}
+    - libboost-devel {{ libboost }}
+    - libboost-python-devel {{ libboost }}
     - libopenblas {{ libopenblas }}  # [osx or linux]
     - librdkafka {{ librdkafka }}
     - lib3mf  # [win]
