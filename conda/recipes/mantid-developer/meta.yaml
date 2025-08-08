@@ -13,6 +13,7 @@ requirements:
     - doxygen {{ doxygen }}
     - eigen {{ eigen }}
     - euphonic {{ euphonic }}
+    - gdk-pixbuf {{ gdk_pixbuf }} # [win]
     - graphviz {{ graphviz }}
     - gsl {{ gsl }}
     - h5py

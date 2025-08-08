@@ -39,6 +39,9 @@ hdf4:
 hdf5: # this is to move to libcurl>=8.4
   - '>1.14.0,<1.15'
 
+gdk_pixbuf:
+  - '=2.42.12=hed59a49_0' # [win]
+
 graphviz:
   - '>=2.47.0'
 
