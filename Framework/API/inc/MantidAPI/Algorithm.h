@@ -211,6 +211,7 @@ public:
   bool execute() override final;
   void addTimer(const std::string &name, const Kernel::time_point_ns &begin, const Kernel::time_point_ns &end);
   void executeAsChildAlg() override;
+  std::map<std::string, std::string> validate() override;
   std::map<std::string, std::string> validateInputs() override;
 
   /// Gets the current execution state

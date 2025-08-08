@@ -98,7 +98,7 @@ class AlgorithmWithValidateInputs : public Algorithm {
 public:
   AlgorithmWithValidateInputs() : Algorithm() {}
   ~AlgorithmWithValidateInputs() override = default;
-  const std::string name() const override { return "StubbedWorkspaceAlgorithm2"; }
+  const std::string name() const override { return "AlgorithmWithValidateInputs"; }
   int version() const override { return 1; }
   const std::string category() const override { return "Cat;Leopard;Mink"; }
   const std::string summary() const override { return "Test summary"; }
@@ -121,6 +121,37 @@ public:
   }
 };
 DECLARE_ALGORITHM(AlgorithmWithValidateInputs)
+
+class AlgorithmWithValidateInputs2 : public Algorithm {
+public:
+  AlgorithmWithValidateInputs2() : Algorithm() {}
+  ~AlgorithmWithValidateInputs2() override = default;
+  const std::string name() const override { return "AlgorithmWithValidateInputs2"; }
+  int version() const override { return 1; }
+  const std::string category() const override { return "Cat;Leopard;Mink"; }
+  const std::string summary() const override { return "Test summary"; }
+  const std::string workspaceMethodName() const override { return "methodname"; }
+
+  void init() override {
+    declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace1", "", Direction::Input));
+    declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace2", "", Direction::Input));
+  }
+  void exec() override {}
+  std::map<std::string, std::string> validateInputs() override {
+    std::map<std::string, std::string> out;
+    const MatrixWorkspace_sptr input1 = getProperty("InputWorkspace1");
+    const MatrixWorkspace_sptr input2 = getProperty("InputWorkspace2");
+    const std::string &name1 = input1->getName();
+    const std::string &name2 = input2->getName();
+    if (name1.starts_with(name2[0])) {
+      // Workspaces start with the same letter
+      out["InputWorkspace2"] =
+          "InputWorkspace2 (" + name2 + ") must not start with the same letter as InputWorkspace1 (" + name1 + ")";
+    }
+    return out;
+  }
+};
+DECLARE_ALGORITHM(AlgorithmWithValidateInputs2)
 
 /**
  * Algorithm which fails on specified workspace
@@ -813,6 +844,30 @@ public:
     TS_ASSERT_EQUALS(ws2->getTitle(), "A2+D2+D2");
     TS_ASSERT_EQUALS(ws3->getName(), "D3");
     TS_ASSERT_EQUALS(ws3->getTitle(), "A3+D3+D3");
+  }
+
+  std::map<std::string, std::string> doTestValidateWithGroups(const std::string &name1, std::string contents1,
+                                                              const std::string &name2, std::string contents2) {
+    makeWorkspaceGroup(name1, contents1);
+    makeWorkspaceGroup(name2, contents2);
+
+    AlgorithmWithValidateInputs2 alg;
+    alg.initialize();
+    alg.setPropertyValue("InputWorkspace1", name1);
+    alg.setPropertyValue("InputWorkspace2", name2);
+
+    return alg.validate();
+  }
+
+  void test_validate_runsValidateInputsOnEachWorkspaceInAGroup() {
+    const auto result = doTestValidateWithGroups("A", "A1,A2,A3", "Another", "B1,B2,B3");
+    TS_ASSERT(result.empty());
+  }
+
+  void test_validate_failsWhenValidateInputsFailsForOnePairOfWorkspaceInputs() {
+    const auto result = doTestValidateWithGroups("A", "A1,A2,A3", "B", "B1,A20,B3");
+    TS_ASSERT_EQUALS(result.at("InputWorkspace2"),
+                     "InputWorkspace2 (A20) must not start with the same letter as InputWorkspace1 (A2)");
   }
 
   void doHistoryCopyTest(const std::string &inputWSName, const std::string &outputWSName) {

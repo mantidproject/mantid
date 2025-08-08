@@ -331,6 +331,68 @@ void Algorithm::initialize() {
  */
 std::map<std::string, std::string> Algorithm::validateInputs() { return std::map<std::string, std::string>(); }
 
+std::map<std::string, std::string> Algorithm::validate() {
+  this->cacheWorkspaceProperties();
+
+  if (!this->checkGroups()) {
+    return this->validateInputs();
+  }
+
+  // Go through each entry in the input group(s)
+  for (size_t entry = 0; entry < m_groupSize; entry++) {
+    // use create Child Algorithm that look like this one
+    Algorithm_sptr alg_sptr = this->createChildAlgorithm(this->name(), -1.0, -1.0, this->isLogging(), this->version());
+    // Make a child algorithm and turn off history recording for it, but always
+    // store result in the ADS
+    alg_sptr->setChild(true);
+    alg_sptr->setAlwaysStoreInADS(true);
+    alg_sptr->enableHistoryRecordingForChild(false);
+    alg_sptr->setRethrows(true);
+
+    Algorithm *alg = alg_sptr.get();
+    // Set all non-workspace properties
+    this->copyNonWorkspaceProperties(alg, int(entry) + 1);
+
+    for (size_t iwp = 0; iwp < m_unrolledInputWorkspaces.size(); iwp++) {
+      const std::vector<Workspace_sptr> &thisGroup = m_unrolledInputWorkspaces[iwp];
+      if (!thisGroup.empty()) {
+        // By default (for a single group) point to the first/only workspace
+        Workspace_sptr ws = thisGroup[0];
+
+        if ((m_singleGroup == int(iwp)) || m_singleGroup < 0) {
+          // Either: this is the single group
+          // OR: all inputs are groups
+          // ... so get then entry^th workspace in this group
+          if (entry < thisGroup.size()) {
+            ws = thisGroup[entry];
+          } else {
+            throw std::runtime_error("Unable to validate over groups; consider passing workspaces "
+                                     "one-by-one.");
+          }
+        }
+        // Set the property using the name of that workspace
+        if (auto *prop = dynamic_cast<Property *>(m_inputWorkspaceProps[iwp])) {
+          if (ws->getName().empty()) {
+            alg->setProperty(prop->name(), ws);
+          } else {
+            alg->setPropertyValue(prop->name(), ws->getName());
+          }
+        } else {
+          throw std::logic_error("Found a Workspace property which doesn't "
+                                 "inherit from Property.");
+        }
+      }
+    }
+
+    const auto results = alg->validateInputs();
+    if (!results.empty()) {
+      return results;
+    }
+  }
+
+  return std::map<std::string, std::string>();
+}
+
 //---------------------------------------------------------------------------------------------
 /**
  * Go through the properties and cache the input/output
