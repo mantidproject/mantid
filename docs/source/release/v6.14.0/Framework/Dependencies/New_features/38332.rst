@@ -1,0 +1,17 @@
+- This release has removed all reliance on the `NeXus API <https://github.com/nexusformat/code>`_ .  Instead the ``File`` class was rewritten to use direct calls to the `HDF5 API <https://github.com/HDFGroup/hdf5/tree/4f1c3b6a4c7f2af6b617aede8dfb0ff1a6c58850>`_. In some places the C++ API (``H5Cpp``) is used for compatibility with other Mantid packages that also use the C++ API, but otherwise the low-level C API (``hdf5``) is used.  This decision was made because:
+
+  1. The C++ API is unsupported by the HDF Group (in private correspondence they suggested we use a 3rd party API).
+  2. The C++ API is not properly documented.
+  3. The C++ API does not have access to every possible feature or option that might be needed.
+  4. The C API is fully documented.
+  5. The C API is regularly maintained.
+  6. The C API is the "base" API for HDF5, and so automatically supports all available features natively.
+
+  Throughout this release cycle, we have been methodically replacing and modernizing the ``Nexus`` abstraction layer, one piece of functionality at a time.  This has included modern objects such as vectors and strings in place of arrays and C-strings, fixing many instances that apparently led to memory leaks due to unclosed objects, and simplifying the logic inside many of the methods for saving or loading data.
+
+  This should not impact the observed behavior, except that memory should be more cleanly freed in Workbench, and loading or saving operations might run slightly faster.
+
+  Loading of HDF4 files is still handled by the read-only ``LegacyNexus`` layer.
+
+  Those interested in the details of the changes can see them in the (developer centric)
+  `github issue <https://github.com/mantidproject/mantid/issues/38332>`_ or by following the `Nexus tag <https://github.com/mantidproject/mantid/pulls?q=is%3Apr+is%3Aclosed+label%3ANexus>`_.
