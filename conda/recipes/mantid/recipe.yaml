@@ -51,7 +51,7 @@ requirements:
       then: lib3mf
     - muparser ${{ muparser }}
     - numpy ${{ numpy }}
-    - occt ${{ occt }}
+    - occt
     - python ${{ python }}
     - poco ${{ poco }}
     - setuptools

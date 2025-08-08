@@ -76,10 +76,6 @@ mslice:
 ninja:
   - '>=1.10.2'
 
-# This should specify novtk build variant to reduce install size, but that isn't currently working
-occt:
-  - '>=7.9.1'
-
 # Fix the version to avoid updates being pulled in automatically, which might change the Reflectometry ORSO file content or layout and cause tests to fail.
 orsopy:
   - '==1.2.1'
