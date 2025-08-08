@@ -206,7 +206,7 @@ File::File(File const &f)
       m_current_data_id(0), m_current_type_id(0), m_current_space_id(0), m_gid_stack{0}, m_descriptor(f.m_descriptor) {
   // NOTE warning to future devs
   // if you change this method, please run the systemtest VanadiumAndFocusWithSolidAngleTest
-  if (m_pfile <= 0)
+  if (m_pfile->getId() <= 0)
     throw Mantid::Nexus::Exception("Error reopening file");
 }
 
@@ -238,20 +238,15 @@ File::~File() {
   // NOTE warning to future devs
   // if you change this part of method, please run the systemtest VanadiumAndFocusWithSolidAngleTest
   // decrease reference counts to this file
-  m_pfile.reset();
+  close();
   H5garbage_collect();
 }
 
 void File::close() {
   // NOTE warning to future devs
   // if you change this method, please run the systemtest VanadiumAndFocusWithSolidAngleTest
-  /* close the file handle */
   if (m_pfile != nullptr) {
-    if (m_pfile.use_count() > 1) {
-      g_log->warning("WARNING: closing file " + m_filename + " which still has open references.");
-    }
-    H5Fclose(m_pfile->getId());
-    H5garbage_collect();
+    // decrease reference counts to this file
     m_pfile.reset();
   }
 }

@@ -505,6 +505,7 @@ void LoadNexusProcessed::execLoader() {
     }
 
     root.close();
+    m_nexusFile->close();
   }
 
   // All file resources should be scoped to here. All previous file handles
