@@ -51,7 +51,7 @@ requirements:
       then: lib3mf
     - muparser ${{ muparser }}
     - numpy ${{ numpy }}
-    - occt ${{ occt }}
+    - occt
     - python ${{ python }}
     - poco ${{ poco }}
     - setuptools
@@ -77,7 +77,9 @@ requirements:
       then: lib3mf
     - muparser ${{ muparser }}
     - ${{ pin_compatible("numpy", upper_bound="2.2") }}
-    - occt ${{ occt }}
+    # this should be set in the hosts as well, but pin_compatible doesn't currently support that
+    # https://github.com/prefix-dev/rattler-build/issues/1820
+    - ${{ pin_compatible("occt", build="*novtk*") }}
     - pycifrw
     - pydantic ${{ pydantic }}
     - python
