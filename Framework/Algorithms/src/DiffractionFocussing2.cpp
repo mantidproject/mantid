@@ -48,7 +48,7 @@ void DiffractionFocussing2::init() {
   auto wsValidator = std::make_shared<API::RawCountValidator>();
   declareProperty(
       std::make_unique<API::WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "", Direction::Input, wsValidator),
-      "A 2D workspace with X values of d-spacing, Q or TOF (TOF support deprecated on 29/04/21)");
+      "A 2D workspace with X values of d-spacing or Q");
   declareProperty(std::make_unique<API::WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
                   "The result of diffraction focussing of InputWorkspace");
 
@@ -169,10 +169,7 @@ void DiffractionFocussing2::validateInputWorkspaceUnit(API::MatrixWorkspace_cons
                                                        std::map<std::string, std::string> &issues) {
   // Validate UnitID (spacing)
   const std::string unitid = inputWS->getAxis(0)->unit()->unitID();
-  if (unitid == "TOF") {
-    g_log.error(
-        "Support for TOF data in DiffractionFocussing is deprecated (on 29/04/21) - use GroupDetectors instead)");
-  } else if (unitid != "dSpacing" && unitid != "MomentumTransfer") {
+  if (unitid != "dSpacing" && unitid != "MomentumTransfer") {
     std::stringstream msg;
     msg << "UnitID " << unitid << " is not a supported spacing";
     issues["InputWorkspace"] = msg.str();
