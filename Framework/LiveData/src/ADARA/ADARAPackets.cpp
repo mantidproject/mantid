@@ -1099,4 +1099,4 @@ MultVariableDoubleArrayPkt::MultVariableDoubleArrayPkt(const uint8_t *data, uint
 }
 
 MultVariableDoubleArrayPkt::MultVariableDoubleArrayPkt(const MultVariableDoubleArrayPkt &pkt)
-    : Packet(pkt), m_fields((const uint32_t *)payload()), m_vals(pkt.m_vals), m_tofs(pkt.m_tofs) {}
+    : Packet(pkt), m_fields(reinterpret_cast<const uint32_t *>(payload())), m_vals(pkt.m_vals), m_tofs(pkt.m_tofs) {}

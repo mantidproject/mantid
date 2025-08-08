@@ -187,6 +187,28 @@ public:
     TS_ASSERT(!pkt->nextSection())
   }
 
+  /*******************************************
+   *   Pixel Mapping Table Alternate Packets
+   *******************************************/
+
+  void testPixelMappingAltPktParserV0() {
+    std::shared_ptr<ADARA::PixelMappingAltPkt> pkt = basicPacketTests<ADARA::PixelMappingAltPkt>(
+        pixelMappingAltPktV0, sizeof(pixelMappingAltPktV0), 1112961350, 706131261);
+    TS_ASSERT_EQUALS(pkt->numBanks(), 1)
+  }
+
+  void testPixelMappingAltPktParserV1direct() {
+    std::shared_ptr<ADARA::PixelMappingAltPkt> pkt = basicPacketTests<ADARA::PixelMappingAltPkt>(
+        pixelMappingAltPktV1direct, sizeof(pixelMappingAltPktV1direct), 1112961350, 706131261);
+    TS_ASSERT_EQUALS(pkt->numBanks(), 1)
+  }
+
+  void testPixelMappingAltPktParserV1shorthand() {
+    std::shared_ptr<ADARA::PixelMappingAltPkt> pkt = basicPacketTests<ADARA::PixelMappingAltPkt>(
+        pixelMappingAltPktV1shorthand, sizeof(pixelMappingAltPktV1shorthand), 1112961350, 706131261);
+    TS_ASSERT_EQUALS(pkt->numBanks(), 1)
+  }
+
   /************************
    *   RUN STATUS Packets
    ************************/
@@ -210,7 +232,7 @@ public:
   void testRunStatusPacketParserV1() {
 
     // helper function to call on packets having different run status types
-    auto testRunStatusPacket = [&](const unsigned char *packetData, size_t packetSize, uint32_t expectedPulseId,
+    auto testRunStatusPacket = [&](const unsigned char *packetData, unsigned int packetSize, uint32_t expectedPulseId,
                                    uint32_t expectedId, ADARA::RunStatus::Enum expectedStatus) {
       std::shared_ptr<ADARA::RunStatusPkt> pkt =
           basicPacketTests<ADARA::RunStatusPkt>(packetData, packetSize, expectedPulseId, expectedId);
@@ -221,7 +243,6 @@ public:
 
       TS_ASSERT_EQUALS(pkt->runNumber(), expectedAt(16))
       TS_ASSERT_EQUALS(pkt->runStart(), expectedAt(20))
-      auto status = static_cast<ADARA::RunStatus::Enum>(expectedAt(24) >> 24);
       TS_ASSERT_EQUALS(pkt->status(), expectedStatus)
       TS_ASSERT_EQUALS(pkt->fileNumber(), expectedAt(24) & 0xFFFFFF) // lower 24 bits
     };
@@ -236,6 +257,38 @@ public:
                         ADARA::RunStatus::RUN_BOF);
     testRunStatusPacket(runStatusPacketV1EndRun, sizeof(runStatusPacketV1EndRun), 1117041153, 518160111,
                         ADARA::RunStatus::END_RUN);
+  }
+
+  /************************
+   *   Run Info Packets
+   ************************/
+
+  void testRunInfoPacketParserV0() {
+    std::shared_ptr<ADARA::RunInfoPkt> pkt =
+        basicPacketTests<ADARA::RunInfoPkt>(runInfoPacketV0, sizeof(runInfoPacketV0), 1117010859, 421225535);
+    const std::string expected = R"(<?xml version="1.0" encoding="UTF-8"?>
+<root>Power to Run Info!</root>)";
+    std::string result = pkt->info();
+    // remove the null terminators from the end of the string,
+    size_t nullPos = result.find_first_of('\0');
+    if (nullPos != std::string::npos) {
+      result.resize(nullPos);
+    }
+    TS_ASSERT_EQUALS(result, expected)
+  }
+
+  /**********************************
+   *   Translation Complete Packets
+   *********************************/
+
+  void testTranslationCompletePacketParserV0() {
+    std::shared_ptr<ADARA::TransCompletePkt> pkt = basicPacketTests<ADARA::TransCompletePkt>(
+        translationCompletePacketV0, sizeof(translationCompletePacketV0), 1117010859, 421225535);
+    uint16_t x = pkt->status();
+    uint16_t y = pkt->status();
+
+    TS_ASSERT_EQUALS(pkt->status(), (uint16_t)(42))
+    TS_ASSERT_EQUALS(pkt->reason().c_str(), std::string("the meaning of the Universe"))
   }
 
   /************************
@@ -527,8 +580,7 @@ public:
   }
 
 protected:
-  // The rxPacket() functions just make a copy of the packet available in the
-  // public member
+  // The rxPacket() functions just make a copy of the packet available in the public member
   // The test class will handle everything from there.
   using ADARA::Parser::rxPacket;
 #define DEFINE_RX_PACKET(PktType)                                                                                      \
@@ -542,7 +594,7 @@ protected:
   DEFINE_RX_PACKET(ADARA::SourceListPkt)
   DEFINE_RX_PACKET(ADARA::BankedEventPkt)
   DEFINE_RX_PACKET(ADARA::BeamMonitorPkt)
-  DEFINE_RX_PACKET(ADARA::PixelMappingPkt)
+  DEFINE_RX_PACKET(ADARA::PixelMappingAltPkt)
   DEFINE_RX_PACKET(ADARA::RunStatusPkt)
   DEFINE_RX_PACKET(ADARA::RunInfoPkt)
   DEFINE_RX_PACKET(ADARA::TransCompletePkt)
@@ -556,6 +608,13 @@ protected:
   DEFINE_RX_PACKET(ADARA::VariableU32Pkt)
   DEFINE_RX_PACKET(ADARA::VariableDoublePkt)
   DEFINE_RX_PACKET(ADARA::VariableStringPkt)
+  DEFINE_RX_PACKET(ADARA::VariableU32ArrayPkt)
+  DEFINE_RX_PACKET(ADARA::VariableDoubleArrayPkt)
+  DEFINE_RX_PACKET(ADARA::MultVariableU32Pkt)
+  DEFINE_RX_PACKET(ADARA::MultVariableDoublePkt)
+  DEFINE_RX_PACKET(ADARA::MultVariableStringPkt)
+  DEFINE_RX_PACKET(ADARA::MultVariableU32ArrayPkt)
+  DEFINE_RX_PACKET(ADARA::MultVariableDoubleArrayPkt)
 
   // Call the base class rxPacket(const ADARA::Packet &pkt) which will
   // eventually result
