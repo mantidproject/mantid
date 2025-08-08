@@ -8,7 +8,7 @@
 
 from mantid.api import AlgorithmFactory, PolSANSWorkspaceValidator, PythonAlgorithm, WorkspaceGroupProperty
 from mantid.simpleapi import DetermineSpinStateOrder
-from mantid.kernel import logger, Direction
+from mantid.kernel import logger, Direction, SpinStateValidator
 
 
 class AssertSpinStateOrder(PythonAlgorithm):
@@ -35,6 +35,7 @@ class AssertSpinStateOrder(PythonAlgorithm):
         self.declareProperty(
             name="ExpectedSpinStates",
             defaultValue="",
+            validator=SpinStateValidator(allowedNumberOfSpins=[4]),
             direction=Direction.Input,
             doc='Comma separate list of spin states (e.g "00,01,10,11") in the expected order of the group workspace periods.',
         )
@@ -52,18 +53,6 @@ class AssertSpinStateOrder(PythonAlgorithm):
             direction=Direction.Output,
             doc="Bool value stating whether the input workspace was found to have the same ordering as the ExpectSpinStates string",
         )
-
-    def validateInputs(self):
-        issues = {}
-
-        expected_spin_states = self.getProperty("ExpectedSpinStates").value
-        if len(expected_spin_states.split(",")) != 4:
-            issues["ExpectedSpinStates"] = "ExpectedSpinStates should have 4 values."
-
-        if expected_spin_states.replace("0", "").replace("1", "").replace(",", "") != "":
-            issues["ExpectedSpinStates"] = "ExpectedSpinStates should be in Wildes notation (e.g '00,01,10,11')."
-
-        return issues
 
     def PyExec(self):
         group_ws = self.getProperty("InputWorkspace").value

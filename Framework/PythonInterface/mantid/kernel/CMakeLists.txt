@@ -64,6 +64,7 @@ set(EXPORT_FILES
     src/Exports/RebinParamsValidator.cpp
     src/Exports/PhysicalConstants.cpp
     src/Exports/SpecialCoordinateSystem.cpp
+    src/Exports/SpinStateValidator.cpp
 )
 
 set(MODULE_DEFINITION ${CMAKE_CURRENT_BINARY_DIR}/kernel.cpp)
