@@ -42,7 +42,7 @@ list(APPEND ExternalData_URL_TEMPLATES "file:///home/builder/MantidExternalData-
 list(APPEND ExternalData_URL_TEMPLATES "file:///Users/builder/MantidExternalData-readonly/%(algo)/%(hash)")
 # facility based mirrors
 list(APPEND ExternalData_URL_TEMPLATES "http://130.246.80.136/external-data/%(algo)/%(hash)") # RAL
-list(APPEND ExternalData_URL_TEMPLATES "https://mantid-ilm.sns.gov/testdata/%(algo)/%(hash)") # ORNL
+list(APPEND ExternalData_URL_TEMPLATES "https://mantid-cache.sns.gov/testdata/%(algo)/%(hash)") # ORNL
 # This should always be last as it's the main read/write cache
 list(APPEND ExternalData_URL_TEMPLATES "https://testdata.mantidproject.org/ftp/external-data/%(algo)/%(hash)")
 
