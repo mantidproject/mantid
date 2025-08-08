@@ -855,7 +855,7 @@ private:
   friend class Parser;
 };
 
-class VariableDoubleArrayPkt : public Packet {
+class MANTID_LIVEDATA_DLL VariableDoubleArrayPkt : public Packet {
 public:
   VariableDoubleArrayPkt(const VariableDoubleArrayPkt &pkt);
 
@@ -880,7 +880,7 @@ private:
   friend class Parser;
 };
 
-class MultVariableU32Pkt : public Packet {
+class MANTID_LIVEDATA_DLL MultVariableU32Pkt : public Packet {
 public:
   MultVariableU32Pkt(const MultVariableU32Pkt &pkt);
 
@@ -907,7 +907,7 @@ private:
   friend class Parser;
 };
 
-class MultVariableDoublePkt : public Packet {
+class MANTID_LIVEDATA_DLL MultVariableDoublePkt : public Packet {
 public:
   MultVariableDoublePkt(const MultVariableDoublePkt &pkt);
 
@@ -939,7 +939,7 @@ private:
   friend class Parser;
 };
 
-class MultVariableStringPkt : public Packet {
+class MANTID_LIVEDATA_DLL MultVariableStringPkt : public Packet {
 public:
   MultVariableStringPkt(const MultVariableStringPkt &pkt);
 
@@ -966,7 +966,7 @@ private:
   friend class Parser;
 };
 
-class MultVariableU32ArrayPkt : public Packet {
+class MANTID_LIVEDATA_DLL MultVariableU32ArrayPkt : public Packet {
 public:
   MultVariableU32ArrayPkt(const MultVariableU32ArrayPkt &pkt);
 
@@ -996,7 +996,7 @@ private:
   friend class Parser;
 };
 
-class MultVariableDoubleArrayPkt : public Packet {
+class MANTID_LIVEDATA_DLL MultVariableDoubleArrayPkt : public Packet {
 public:
   MultVariableDoubleArrayPkt(const MultVariableDoubleArrayPkt &pkt);
 
