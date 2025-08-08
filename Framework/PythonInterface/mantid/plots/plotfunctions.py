@@ -11,6 +11,7 @@ from typing import List
 
 import numpy as np
 from collections.abc import Sequence
+from copy import copy
 
 # 3rd party imports
 from matplotlib.gridspec import GridSpec
@@ -365,9 +366,14 @@ def get_plot_fig(overplot=None, ax_properties=None, window_title=None, axes_num=
             ax_properties["yscale"] = "log"
         else:
             ax_properties["yscale"] = "linear"
+
     if ax_properties:
+        scales_to_amend = [scale for scale in ["x", "y"] if f"{scale}scale" in ax_properties]
         for axis in fig.axes:
-            axis.set(**ax_properties)
+            orig_ax_properties = copy(ax_properties)
+            for scale_id in scales_to_amend:
+                _apply_scale_properties(orig_ax_properties, scale_id, axis)
+            axis.set(**_post_process_props(ax_properties))
     if window_title and fig.canvas.manager is not None:
         fig.canvas.manager.set_window_title(window_title)
 
@@ -577,3 +583,25 @@ def _do_single_plot(ax, workspaces, errors, set_title, nums, kw, plot_kwargs, lo
             title += f" ({log_name})"
 
         ax.set_title(title)
+
+
+def _apply_scale_properties(ax_properties, scale_id, axis):
+    scale_properties = {"value": ax_properties.pop(f"{scale_id}scale")}
+    add_prop_key = f"{scale_id}scale_opts"
+    if add_prop_key in ax_properties:
+        scale_properties.update(ax_properties.pop(add_prop_key))
+    getattr(axis, f"set_{scale_id}scale")(**scale_properties)
+
+
+def _post_process_props(ax_properties):
+    """
+    ax_properties can be passed from c++, converted from Q objects into python objects.
+    post-processing can be necessary, if SIP does not convert Q objects into the required form.
+    :param ax_properties:
+    """
+    for k, v in ax_properties.items():
+        match k:
+            case "limits":  # Convert list to tuple
+                if isinstance(v, list):
+                    ax_properties[k] = tuple(v)
+    return ax_properties
