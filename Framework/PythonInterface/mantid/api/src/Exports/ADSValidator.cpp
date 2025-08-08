@@ -16,7 +16,7 @@ using namespace boost::python;
 
 /// This is the base TypedValidator for most of the WorkspaceValidators
 void export_ADSValidator() {
-  TypedValidatorExporter<std::vector<std::string>>::define("StringTypedValidator");
+  TypedValidatorExporter<std::vector<std::string>>::define("StringVectorTypedValidator");
 
   class_<ADSValidator, bases<TypedValidator<std::vector<std::string>>>, boost::noncopyable>(
       "ADSValidator", init<>("Default constructor"))
