@@ -554,36 +554,6 @@ public:
     return output;
   }
 
-  void test_tof_deprecation_error_thrown() {
-    // Simple test to be removed when TOF support is removed
-    std::string nxsWSname("DiffractionFocussing2Test_ws");
-    // Create the fake event workspace
-    EventWorkspace_sptr inputW = WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(3, 1);
-    AnalysisDataService::Instance().addOrReplace(nxsWSname, inputW);
-    // Set xunit TOF
-    inputW->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
-    // Create a grouping workspace
-    std::string GroupNames = "bank3";
-    std::string groupWSName("DiffractionFocussing2Test_group");
-    FrameworkManager::Instance().exec("CreateGroupingWorkspace", 6, "InputWorkspace", nxsWSname.c_str(), "GroupNames",
-                                      GroupNames.c_str(), "OutputWorkspace", groupWSName.c_str());
-    // Run algorithm
-    DiffractionFocussing2 focus;
-    focus.initialize();
-    TS_ASSERT_THROWS_NOTHING(focus.setPropertyValue("InputWorkspace", nxsWSname));
-    TS_ASSERT_THROWS_NOTHING(focus.setPropertyValue("OutputWorkspace", nxsWSname));
-    TS_ASSERT_THROWS_NOTHING(focus.setPropertyValue("GroupingWorkspace", groupWSName));
-    TS_ASSERT_THROWS_NOTHING(focus.setProperty("PreserveEvents", false));
-    // setup poco stream to catch log output
-    std::ostringstream oss;
-    auto psc = new Poco::StreamChannel(oss);
-    Poco::Logger::setChannel("DiffractionFocussing", psc);
-    TS_ASSERT_THROWS_NOTHING(focus.execute(););
-    // assert output contains deprecation message
-    const auto logMsg = oss.str();
-    TS_ASSERT(logMsg.find("Support for TOF data in DiffractionFocussing is deprecated") != std::string::npos)
-  }
-
   void dotestEventWorkspace(bool inplace, size_t numgroups, bool preserveEvents = true, int bankWidthInPixels = 16) {
     std::string nxsWSname("DiffractionFocussing2Test_ws");
 

@@ -97,6 +97,7 @@ private:
   void determineRebinParameters(const std::vector<int> &udet2group);
   void determineRebinParametersFromParameters(const std::vector<int> &udet2group);
   int validateSpectrumInGroup(const std::vector<int> &udet2group, size_t wi);
+  void validateInputWorkspaceUnit(API::MatrixWorkspace_const_sptr inputWS, std::map<std::string, std::string> &issues);
 
   /// Shared pointer to the input workspace
   API::MatrixWorkspace_const_sptr m_matrixInputW;
