@@ -381,7 +381,7 @@ pipeline {
               }
               checkoutSource("${GIT_SHA}")
               // Copy base packages to build workbench
-              copyArtifacts filter: "**/conda-bld/noarch/*.tar.bz2, **/conda-bld/${PLATFORM}/*.tar.bz2",
+              copyArtifacts filter: "**/conda-bld/noarch/*., **/conda-bld/${PLATFORM}/*.conda",
                 fingerprintArtifacts: true,
                 projectName: '${JOB_NAME}',
                 selector: specific('${BUILD_NUMBER}'),
@@ -421,7 +421,7 @@ pipeline {
         checkoutSource("${GIT_SHA}")
         // Conda first
         sh 'rm -fr ${WORKSPACE}/conda-packages'
-        copyArtifacts filter: '**/conda-bld/**/*.tar.bz2',
+        copyArtifacts filter: '**/conda-bld/**/*.conda',
           fingerprintArtifacts: true,
           projectName: '${JOB_NAME}',
           selector: specific('${BUILD_NUMBER}'),
@@ -429,7 +429,7 @@ pipeline {
           flatten: true
         // Single quotes are required for token variables to avoid them leaking
         sh "${CISCRIPT_DIR}/publish-to-anaconda ${WORKSPACE}" + ' ${ANACONDA_TOKEN} ' +\
-          "${ANACONDA_CHANNEL} ${ANACONDA_CHANNEL_LABEL} ${WORKSPACE}/conda-packages/*.tar.bz2"
+          "${ANACONDA_CHANNEL} ${ANACONDA_CHANNEL_LABEL} ${WORKSPACE}/conda-packages/*.conda"
       }
     }
 
@@ -480,7 +480,7 @@ pipeline {
           target: 'standalone-packages',
           flatten: true
         // Copy conda packages and create a tarball to upload to the github release for backup.
-        copyArtifacts filter: '**/conda-bld/**/*.tar.bz2',
+        copyArtifacts filter: '**/conda-bld/**/*.conda',
           fingerprintArtifacts: true,
           projectName: '${JOB_NAME}',
           selector: specific('${BUILD_NUMBER}'),
@@ -676,7 +676,7 @@ def prerelease_option() {
 def archive_conda_packages(platform) {
   // Only archive the mantiddocs package if it was built.
   if(platform != 'noarch' || BUILD_MANTIDDOCS_PACKAGE) {
-    archiveArtifacts artifacts: "**/conda-bld/${platform}/*.tar.bz2",
+    archiveArtifacts artifacts: "**/conda-bld/${platform}/*.conda",
       allowEmptyArchive: false,
       fingerprint: true,
       onlyIfSuccessful: true
