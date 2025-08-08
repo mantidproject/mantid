@@ -327,6 +327,27 @@ public:
                      std::string("<?xml version='1.0' encoding='ASCII'?>\\n<instrument>VACUO</instrument>"))
   }
 
+  /***************************
+   *   Beamline Info Packets
+   **************************/
+
+  void testBeamlineInfoPacketParserV0() {
+    std::shared_ptr<ADARA::BeamlineInfoPkt> pkt = basicPacketTests<ADARA::BeamlineInfoPkt>(
+        beamlineInfoPacketV0, sizeof(beamlineInfoPacketV0), 1117010859, 421225535);
+    TS_ASSERT_EQUALS(pkt->id(), "42")
+    TS_ASSERT_EQUALS(pkt->shortName(), "CG3")
+    TS_ASSERT_EQUALS(pkt->longName(), "BIOSANS")
+  }
+
+  void testBeamlineInfoPacketParserV1() {
+    std::shared_ptr<ADARA::BeamlineInfoPkt> pkt = basicPacketTests<ADARA::BeamlineInfoPkt>(
+        beamlineInfoPacketV1, sizeof(beamlineInfoPacketV1), 1117010859, 421225535);
+    TS_ASSERT_EQUALS(pkt->targetStationNumber(), 2)
+    TS_ASSERT_EQUALS(pkt->id(), "42")
+    TS_ASSERT_EQUALS(pkt->shortName(), "CG3")
+    TS_ASSERT_EQUALS(pkt->longName(), "BIOSANS")
+  }
+
   /************************
    *   RTDL Packets
    ************************/
