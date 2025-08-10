@@ -187,7 +187,7 @@ object createChildWithProps(tuple args, dict kwargs) {
       continue;
 
     object curArg = kwargs[keys[i]];
-    if (!curArg)
+    if (curArg.is_none())
       continue;
 
     using Mantid::PythonInterface::PyNativeTypeExtractor;
