@@ -18,6 +18,7 @@ requirements:
     - h5py
     - hdf4 {{ hdf4 }}
     - hdf5 {{ hdf5 }}
+    - intel-openmp {{ intel-openmp }} # [win]
     - jemalloc {{ jemalloc }} # [linux]
     - jsoncpp {{ jsoncpp }}
     - lib3mf # [win]
