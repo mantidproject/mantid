@@ -16,13 +16,14 @@ from mantidqtinterfaces.dns_powder_tof.data_structures.object_dict import Object
 from mantidqtinterfaces.dns_single_crystal_elastic.plot.elastic_single_crystal_helpers import angle_to_q, get_hkl_float_array
 
 
-def _get_mesh(omega, two_theta, z_mesh):
+def _get_mesh(omega, two_theta, z_mesh, z_error_mesh):
     omega_mesh_no_nan, two_theta_mesh_no_nan = np.meshgrid(omega, two_theta)
     not_nan_pos = ~np.isnan(z_mesh)
     omega_mesh_no_nan = omega_mesh_no_nan[not_nan_pos]
     two_theta_mesh_no_nan = two_theta_mesh_no_nan[not_nan_pos]
     z_mesh_no_nan = z_mesh[not_nan_pos]
-    return omega_mesh_no_nan, two_theta_mesh_no_nan, z_mesh_no_nan
+    z_error_mesh_no_nan = z_error_mesh[not_nan_pos]
+    return omega_mesh_no_nan, two_theta_mesh_no_nan, z_mesh_no_nan, z_error_mesh_no_nan
 
 
 def _correct_omega_offset(omega, omega_offset):
@@ -55,7 +56,7 @@ class DNSScMap(ObjectDict):
         super().__init__()
         # non interpolated data:
         omega_corrected = _correct_omega_offset(omega, parameter["omega_offset"])
-        omega_mesh, two_theta_mesh, z_mesh = _get_mesh(omega_corrected, two_theta, z_mesh)
+        omega_mesh, two_theta_mesh, z_mesh, z_error_mesh = _get_mesh(omega_corrected, two_theta, z_mesh, error_mesh)
         omega_unique, two_theta_unique = _get_unique(omega_mesh, two_theta_mesh)
         qx_mesh, qy_mesh = _get_q_mesh(omega_mesh, two_theta_mesh, parameter["wavelength"])
         hklx_mesh, hkly_mesh = _get_hkl_mesh(qx_mesh, qy_mesh, parameter["dx"], parameter["dy"])
@@ -67,7 +68,7 @@ class DNSScMap(ObjectDict):
         self.hklx_mesh = hklx_mesh
         self.hkly_mesh = hkly_mesh
         self.z_mesh = z_mesh
-        self.error_mesh = error_mesh
+        self.error_mesh = z_error_mesh
         self.dx = parameter["dx"]
         self.dy = parameter["dy"]
         self.hkl1 = parameter["hkl1"]
