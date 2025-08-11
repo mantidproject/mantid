@@ -5,9 +5,17 @@ prefix=$2
 package_name=$3
 
 log_directory=../../$target_platform/env_logs
-
 mkdir -p $log_directory
-source ../../../miniforge/etc/profile.d/conda.sh
+
+if [ ! $(command -v conda) ]; then
+  if [ -f ../../../miniforge/etc/profile.d/conda.sh ]; then
+    source ../../../miniforge/etc/profile.d/conda.sh || exit 1
+  else
+    echo "Failed to find conda.sh"
+    ls ../../../miniforge/
+    exit 1
+  fi
+fi
 
 #Just for first package (mantid), archive the package-conda environment
 if [ "$package_name" == mantid ] ; then
