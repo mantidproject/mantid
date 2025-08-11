@@ -46,6 +46,7 @@ requirements:
     - python.app # [osx]
     - pyvista
     - pyvistaqt
+    - superqt
     - pyyaml {{ pyyaml }}
     - qscintilla2 {{ qscintilla2 }}
     - qt {{ qt_main }}

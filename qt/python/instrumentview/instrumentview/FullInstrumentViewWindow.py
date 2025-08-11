@@ -22,6 +22,7 @@ from qtpy.QtWidgets import (
 )
 from qtpy.QtGui import QPalette, QIntValidator
 from qtpy.QtCore import Qt, QEvent
+from superqt import QDoubleRangeSlider
 from pyvistaqt import BackgroundPlotter
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
@@ -76,9 +77,11 @@ class FullInstrumentViewWindow(QMainWindow):
         detector_group_box.setLayout(detector_vbox)
 
         time_of_flight_group_box = QGroupBox("Time of Flight")
-        self._tof_min_edit, self._tof_max_edit = self._add_min_max_group_box(time_of_flight_group_box)
+        self._tof_min_edit, self._tof_max_edit, self._tof_slider = self._add_min_max_group_box(time_of_flight_group_box)
         contour_range_group_box = QGroupBox("Contour Range")
-        self._contour_range_min_edit, self._contour_range_max_edit = self._add_min_max_group_box(contour_range_group_box)
+        self._contour_range_min_edit, self._contour_range_max_edit, self._contour_range_slider = self._add_min_max_group_box(
+            contour_range_group_box
+        )
 
         multi_select_group_box = QGroupBox("Multi-Select")
         multi_select_h_layout = QHBoxLayout()
@@ -124,10 +127,9 @@ class FullInstrumentViewWindow(QMainWindow):
         if not self._off_screen:
             self.projection_plotter.reset_camera()
 
-    def _add_min_max_group_box(self, parent_box: QGroupBox) -> tuple[QLineEdit, QLineEdit]:
+    def _add_min_max_group_box(self, parent_box: QGroupBox) -> tuple[QLineEdit, QLineEdit, QDoubleRangeSlider]:
         """Creates a minimum and a maximum box (with labels) inside the given group box. The callbacks will be attached to textEdited
         signal of the boxes"""
-        root_vbox = QVBoxLayout()
         min_hbox = QHBoxLayout()
         min_hbox.addWidget(QLabel("Min"))
         min_edit = QLineEdit()
@@ -139,10 +141,49 @@ class FullInstrumentViewWindow(QMainWindow):
         max_edit = QLineEdit()
         max_edit.setValidator(QIntValidator(0, max_int_32, self))
         max_hbox.addWidget(max_edit)
-        root_vbox.addLayout(min_hbox)
-        root_vbox.addLayout(max_hbox)
+
+        slider = QDoubleRangeSlider(Qt.Orientation.Horizontal, parent=parent_box)
+        slider.setRange(0, 1)
+        slider_hbox = QHBoxLayout()
+        slider_hbox.addWidget(slider)
+
+        root_hbox = QHBoxLayout()
+        root_hbox.addLayout(min_hbox)
+        root_hbox.addLayout(max_hbox)
+
+        root_vbox = QVBoxLayout()
+        root_vbox.addLayout(slider_hbox)
+        root_vbox.addLayout(root_hbox)
         parent_box.setLayout(root_vbox)
-        return (min_edit, max_edit)
+
+        return (min_edit, max_edit, slider)
+
+    def _add_connections_to_edits_and_slider(self, min_edit: QLineEdit, max_edit: QLineEdit, slider, presenter_callback: Callable):
+        def set_edits(limits):
+            min, max = limits
+            min_edit.setText(f"{min:.0f}")
+            max_edit.setText(f"{max:.0f}")
+
+        def set_slider(callled_from_min):
+            def wrapped():
+                try:
+                    min, max = int(float(min_edit.text())), int(float(max_edit.text()))
+                except ValueError:
+                    return
+                if callled_from_min:
+                    min = max if min > max else min
+                else:
+                    max = min if max < min else max
+                slider.setValue((min, max))
+                presenter_callback()
+                return
+
+            return wrapped
+
+        # Connections to sync sliders and edits
+        slider.valueChanged.connect(set_edits)
+        min_edit.editingFinished.connect(set_slider(callled_from_min=True))
+        max_edit.editingFinished.connect(set_slider(callled_from_min=False))
 
     def _add_detector_info_boxes(self, parent_box: QVBoxLayout, label: str) -> QHBoxLayout:
         """Adds a text box to the given parent that is designed to show read-only information about the selected detector"""
@@ -167,26 +208,34 @@ class FullInstrumentViewWindow(QMainWindow):
         self._projection_combo_box.currentIndexChanged.connect(self._presenter.on_projection_option_selected)
         self._multi_select_check.stateChanged.connect(self._presenter.on_multi_select_detectors_clicked)
         self._clear_selection_button.clicked.connect(self._presenter.on_clear_selected_detectors_clicked)
-        self._contour_range_min_edit.textEdited.connect(self._presenter.on_contour_limits_updated)
-        self._contour_range_max_edit.textEdited.connect(self._presenter.on_contour_limits_updated)
-        self._tof_min_edit.textEdited.connect(self._presenter.on_tof_limits_updated)
-        self._tof_max_edit.textEdited.connect(self._presenter.on_tof_limits_updated)
+        self._contour_range_slider.sliderReleased.connect(self._presenter.on_contour_limits_updated)
+        self._tof_slider.sliderReleased.connect(self._presenter.on_tof_limits_updated)
 
-    def get_tof_limits_text(self) -> tuple[str, str]:
-        return self._tof_min_edit.text(), self._tof_max_edit.text()
+        self._add_connections_to_edits_and_slider(
+            self._contour_range_min_edit,
+            self._contour_range_max_edit,
+            self._contour_range_slider,
+            self._presenter.on_contour_limits_updated,
+        )
+        self._add_connections_to_edits_and_slider(
+            self._tof_min_edit, self._tof_max_edit, self._tof_slider, self._presenter.on_tof_limits_updated
+        )
+
+    def get_tof_limits(self) -> tuple[float, float]:
+        return self._tof_slider.value()
 
     def set_tof_range_limits(self, tof_limits: list) -> None:
         """Update the TOF edit boxes with formatted text"""
-        self._tof_min_edit.setText(f"{tof_limits[0]:.0f}")
-        self._tof_max_edit.setText(f"{tof_limits[1]:.0f}")
+        self._tof_slider.setRange(*tof_limits)
+        self._tof_slider.setValue(tof_limits)
 
-    def get_contour_limits_text(self) -> tuple[str, str]:
-        return self._contour_range_min_edit.text(), self._contour_range_max_edit.text()
+    def get_contour_limits(self) -> tuple[float, float]:
+        return self._contour_range_slider.value()
 
     def set_contour_range_limits(self, contour_limits: list) -> None:
         """Update the contour range edit boxes with formatted text"""
-        self._contour_range_min_edit.setText(f"{contour_limits[0]:.0f}")
-        self._contour_range_max_edit.setText(f"{contour_limits[1]:.0f}")
+        self._contour_range_slider.setRange(*contour_limits)
+        self._contour_range_slider.setValue(contour_limits)
 
     def set_plotter_scalar_bar_range(self, clim: list[int], label: str) -> None:
         """Set the range of the colours displayed, i.e. the legend"""

@@ -31,34 +31,21 @@ class FullInstrumentViewPresenter:
         self._view = view
         self._model = model
 
-        self._view.subscribe_presenter(self)
-
-        self._view.set_projection_combo_options(self.projection_combo_options())
-
-        self._view.setup_connections_to_presenter()
-
         # Plot orange sphere at the origin
         origin = pv.Sphere(radius=0.01, center=[0, 0, 0])
         self._view.add_simple_shape(origin, colour="orange", pickable=False)
-
-        self._view.show_axes()
-        self._view.set_camera_focal_point(self._model.sample_position())
 
         self._counts_label = "Integrated Counts"
         self._detector_mesh = self.create_poly_data_mesh(self._model.detector_positions())
         self._detector_mesh[self._counts_label] = self._model.detector_counts()
         self._contour_limits = [self._model.data_limits()[0], self._model.data_limits()[1]]
-
         self._view.add_main_mesh(self._detector_mesh, scalars=self._counts_label, clim=self._contour_limits)
-        self._view.set_contour_range_limits(self._contour_limits)
 
         self._pickable_main_mesh = self.create_poly_data_mesh(self._model.detector_positions())
         self._pickable_main_mesh["visibility"] = self._model.picked_visibility()
-
         self._view.add_pickable_main_mesh(self._pickable_main_mesh, scalars="visibility")
 
         self._bin_limits = [self._model.bin_limits()[0], self._model.bin_limits()[1]]
-        self._view.set_tof_range_limits(self._bin_limits)
 
         if len(self._model.monitor_positions()) > 0:
             monitor_point_cloud = self.create_poly_data_mesh(self._model.monitor_positions())
@@ -66,29 +53,37 @@ class FullInstrumentViewPresenter:
             self._view.add_rgba_mesh(monitor_point_cloud, scalars="colours")
 
         self.on_projection_option_selected(0)
+
+        self._view.set_projection_combo_options(self.projection_combo_options())
+        self._view.set_camera_focal_point(self._model.sample_position())
         self._view.enable_point_picking(callback=self.point_picked)
+        self._view.show_axes()
         self._view.reset_camera()
+        self._view.subscribe_presenter(self)
+        self._view.setup_connections_to_presenter()
+        self._view.set_contour_range_limits(self._contour_limits)
+        self._view.set_tof_range_limits(self._bin_limits)
 
     def projection_combo_options(self) -> list[str]:
         return self._PROJECTION_OPTIONS
 
     def on_tof_limits_updated(self) -> None:
         """When TOF limits are changed, read the new limits and tell the presenter to update the colours accordingly"""
-        limits = self._parse_min_max_text(*self._view.get_tof_limits_text())
+        limits = self._parse_min_max(*self._view.get_tof_limits())
         if limits:
             self.set_tof_limits(*limits)
 
     def on_contour_limits_updated(self) -> None:
         """When contour limits are changed, read the new limits and tell the presenter to update the colours accordingly"""
-        limits = self._parse_min_max_text(*self._view.get_contour_limits_text())
+        limits = self._parse_min_max(*self._view.get_contour_limits())
         if limits:
             self.set_contour_limits(*limits)
 
-    def _parse_min_max_text(self, min_text: str, max_text: str) -> tuple:
+    def _parse_min_max(self, min: str | float, max: str | float) -> tuple:
         """Try to parse the text in the edit boxes as numbers. Return the results and whether the attempt was successful."""
         try:
-            min = int(min_text)
-            max = int(max_text)
+            min = int(min)
+            max = int(max)
         except ValueError:
             return ()
         if max <= min:
