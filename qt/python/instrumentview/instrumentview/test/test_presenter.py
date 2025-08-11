@@ -25,7 +25,7 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         pass
 
     def test_projection_combo_options(self):
-        projections = self._presenter.projection_combo_options()
+        _, projections = self._presenter.projection_combo_options()
         self.assertGreater(len(projections), 0)
         self.assertTrue("Spherical X" in projections)
 
@@ -36,8 +36,8 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
     @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.create_poly_data_mesh")
     @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.calculate_projection")
     def test_projection_option_axis(self, mock_calculate_projection, mock_create_poly_data_mesh):
-        for option_index in range(len(self._presenter.projection_combo_options())):
-            option = self._presenter.projection_combo_options()[option_index]
+        _, options = self._presenter.projection_combo_options()
+        for option in options:
             if option.endswith("X"):
                 axis = [1, 0, 0]
             elif option.endswith("Y"):
@@ -46,7 +46,7 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
                 axis = [0, 0, 1]
             else:
                 return
-            self._presenter.on_projection_option_selected(option_index)
+            self._presenter.on_projection_option_selected(options.index(option))
             mock_calculate_projection.assert_called_once_with(option.startswith("Spherical"), axis)
             mock_create_poly_data_mesh.assert_called()
             mock_calculate_projection.reset_mock()

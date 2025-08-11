@@ -270,8 +270,9 @@ class FullInstrumentViewWindow(QMainWindow):
         if self._detector_spectrum_fig is not None:
             plt.close(self._detector_spectrum_fig.get_label())
 
-    def set_projection_combo_options(self, options: list[str]) -> None:
+    def set_projection_combo_options(self, default_index: int, options: list[str]) -> None:
         self._projection_combo_box.addItems(options)
+        self._projection_combo_box.setCurrentIndex(default_index)
 
     def add_simple_shape(self, mesh: PolyData, colour=None, pickable=False) -> None:
         """Draw the given mesh in the main plotter window"""

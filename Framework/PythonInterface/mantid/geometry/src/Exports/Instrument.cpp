@@ -57,6 +57,9 @@ void export_Instrument() {
            (std::shared_ptr<const IDetector> (Instrument::*)(const detid_t &) const) & Instrument::getDetector,
            (arg("self"), arg("detector_id")), "Returns the :class:`~mantid.geometry.Detector` with the given ID")
 
+      .def("getDefaultView", &Instrument::getDefaultView, arg("self"), return_value_policy<copy_const_reference>(),
+           "Return the name of the preferred view in instrument view.")
+
       .def("getNumberDetectors", &Instrument::getNumberDetectors,
            Instrument_getNumberDetectors((arg("self"), arg("skipMonitors") = false)))
 

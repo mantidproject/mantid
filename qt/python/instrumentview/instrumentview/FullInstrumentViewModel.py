@@ -77,6 +77,9 @@ class FullInstrumentViewModel:
     def workspace(self) -> Workspace2D:
         return self._workspace
 
+    def default_projection(self) -> str:
+        return self._workspace.getInstrument().getDefaultView()
+
     def sample_position(self) -> np.ndarray:
         return self._sample_position
 

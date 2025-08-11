@@ -42,7 +42,8 @@ class FullInstrumentViewPresenter:
     def setup(self):
         self._view.subscribe_presenter(self)
 
-        self._view.set_projection_combo_options(self.projection_combo_options())
+        default_index, options = self.projection_combo_options()
+        self._view.set_projection_combo_options(default_index, options)
 
         self._view.setup_connections_to_presenter()
 
@@ -67,10 +68,7 @@ class FullInstrumentViewPresenter:
             monitor_point_cloud["colours"] = self.generate_single_colour(len(self._model.monitor_positions()), 1, 0, 0, 1)
             self._view.add_rgba_mesh(monitor_point_cloud, scalars="colours")
 
-        self.on_projection_option_selected(0)
-
-        self._view.set_projection_combo_options(self.projection_combo_options())
-        self._view.set_camera_focal_point(self._model.sample_position())
+        self.on_projection_option_selected(default_index)
         self._view.enable_point_picking(callback=self.point_picked)
         self._view.show_axes()
         self._view.reset_camera()
@@ -81,8 +79,15 @@ class FullInstrumentViewPresenter:
 
         self._view.hide_status_box()
 
-    def projection_combo_options(self) -> list[str]:
-        return self._PROJECTION_OPTIONS
+    # TODO: Sort out view names and return names all in one place
+    def projection_combo_options(self) -> tuple[int, list[str]]:
+        default_projection = self._model.default_projection()
+        try:
+            possible_returns = ["SPHERICAL_X", "SPHERICAL_Y", "SPHERICAL_Z", "CYLINDRICAL_X", "CYLINDRICAL_Y", "CYLINDRICAL_Z"]
+            default_index = possible_returns.index(default_projection)
+        except ValueError:
+            default_index = 0
+        return default_index, self._PROJECTION_OPTIONS
 
     def on_tof_limits_updated(self) -> None:
         """When TOF limits are changed, read the new limits and tell the presenter to update the colours accordingly"""
