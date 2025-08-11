@@ -9,9 +9,12 @@ import pyvista as pv
 from pyvista.plotting.picking import RectangleSelection
 from pyvista.plotting.opts import PickerType
 from qtpy.QtCore import QThread, Signal
+from mantid import mtd
+from mantid.kernel import logger
 
 from instrumentview.FullInstrumentViewModel import FullInstrumentViewModel
 from instrumentview.FullInstrumentViewWindow import FullInstrumentViewWindow
+from instrumentview.InstrumentViewADSObserver import InstrumentViewADSObserver
 
 
 class FullInstrumentViewPresenter:
@@ -78,6 +81,11 @@ class FullInstrumentViewPresenter:
         self._view.set_tof_range_limits(self._bin_limits)
 
         self._view.hide_status_box()
+        self._ads_oberver = InstrumentViewADSObserver(
+            delete_callback=self.delete_workspace_callback,
+            rename_callback=self.rename_workspace_callback,
+            clear_callback=self.clear_workspace_callback,
+        )
 
     # TODO: Sort out view names and return names all in one place
     def projection_combo_options(self) -> tuple[int, list[str]]:
@@ -199,6 +207,24 @@ class FullInstrumentViewPresenter:
         rgba[:, 2] = blue
         rgba[:, 3] = alpha
         return rgba
+
+    def delete_workspace_callback(self, ws_name):
+        if self._model._workspace.name() != ws_name:
+            return
+        self._view.close()
+        logger.warning(f"Workspace {ws_name} deleted, closed Experimental Instrument View.")
+
+    def rename_workspace_callback(self, ws_old_name, ws_new_name):
+        if self._model._workspace.name() != ws_old_name:
+            return
+        self._model._workspace = mtd[ws_new_name]
+        logger.warning("Workspace renamed, updated Experimental Instrument View.")
+
+    def clear_workspace_callback(self):
+        self._view.close()
+
+    def handle_close(self):
+        self._ads_oberver.unsubscribe()
 
 
 class ModelSetupThread(QThread):
