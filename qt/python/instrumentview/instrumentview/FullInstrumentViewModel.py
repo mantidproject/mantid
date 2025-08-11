@@ -26,14 +26,13 @@ class FullInstrumentViewModel:
         """For the given workspace, calculate detector positions, the map from detector indices to workspace indices, and integrated
         counts. Optionally will draw detector geometry, e.g. rectangular bank or tube instead of points."""
         self._workspace = workspace
-        self._detector_info = workspace.detectorInfo()
 
-        self._component_info = workspace.componentInfo()
+    def setup(self):
+        self._detector_info = self._workspace.detectorInfo()
+        self._component_info = self._workspace.componentInfo()
         self._sample_position = np.array(self._component_info.samplePosition()) if self._component_info.hasSample() else np.zeros(3)
-
-        has_source = workspace.getInstrument().getSource() is not None
+        has_source = self._workspace.getInstrument().getSource() is not None
         self._source_position = np.array(self._component_info.sourcePosition()) if has_source else np.array([0, 0, 0])
-
         self._detector_ids = np.array(self._detector_info.detectorIDs())
         self._detector_positions = np.array([self._detector_info.position(i) for i in range(len(self._detector_ids))])
         self._spherical_positions = np.array([self._detector_info.position(i).getSpherical() for i in range(len(self._detector_ids))])
@@ -48,7 +47,7 @@ class FullInstrumentViewModel:
 
         self._bin_min = math.inf
         self._bin_max = -math.inf
-        for workspace_index in range(workspace.getNumberHistograms()):
+        for workspace_index in range(self._workspace.getNumberHistograms()):
             x_data = self._workspace.dataX(workspace_index)
             self._union_with_current_bin_min_max(x_data[0])
             self._union_with_current_bin_min_max(x_data[-1])

@@ -17,7 +17,7 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._mock_view = MagicMock()
         self._ws = CreateSampleWorkspace(OutputWorkspace="TestFullInstrumentViewPresenter")
         self._model = FullInstrumentViewModel(self._ws)
-        self._presenter = FullInstrumentViewPresenter(self._mock_view, self._model)
+        self._presenter = FullInstrumentViewPresenter(self._mock_view, self._model, model_setup_on_separate_thread=False)
         self._mock_view.reset_mock()
 
     def tearDown(self):

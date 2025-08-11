@@ -8,6 +8,7 @@ import numpy as np
 import pyvista as pv
 from pyvista.plotting.picking import RectangleSelection
 from pyvista.plotting.opts import PickerType
+from qtpy.QtCore import QThread, Signal
 
 from instrumentview.FullInstrumentViewModel import FullInstrumentViewModel
 from instrumentview.FullInstrumentViewWindow import FullInstrumentViewWindow
@@ -24,12 +25,26 @@ class FullInstrumentViewPresenter:
     _CYLINDRICAL_Z = "Cylindrical Z"
     _PROJECTION_OPTIONS = [_SPHERICAL_X, _SPHERICAL_Y, _SPHERICAL_Z, _CYLINDRICAL_X, _CYLINDRICAL_Y, _CYLINDRICAL_Z]
 
-    def __init__(self, view: FullInstrumentViewWindow, model: FullInstrumentViewModel):
+    def __init__(self, view: FullInstrumentViewWindow, model: FullInstrumentViewModel, model_setup_on_separate_thread=True):
         """For the given workspace, use the data from the model to plot the detectors. Also include points at the origin and
         any monitors."""
 
         self._view = view
         self._model = model
+
+        if model_setup_on_separate_thread:
+            self.thread = ModelSetupThread(self)
+            self.thread.start()
+        else:
+            self._model.setup()
+            self.setup()
+
+    def setup(self):
+        self._view.subscribe_presenter(self)
+
+        self._view.set_projection_combo_options(self.projection_combo_options())
+
+        self._view.setup_connections_to_presenter()
 
         # Plot orange sphere at the origin
         origin = pv.Sphere(radius=0.01, center=[0, 0, 0])
@@ -63,6 +78,8 @@ class FullInstrumentViewPresenter:
         self._view.setup_connections_to_presenter()
         self._view.set_contour_range_limits(self._contour_limits)
         self._view.set_tof_range_limits(self._bin_limits)
+
+        self._view.hide_status_box()
 
     def projection_combo_options(self) -> list[str]:
         return self._PROJECTION_OPTIONS
@@ -135,7 +152,7 @@ class FullInstrumentViewPresenter:
         else:
             self._view.enable_point_picking(callback=self.point_picked)
 
-    def point_picked(self, point_position: np.ndarray, picker: PickerType) -> None:
+    def point_picked(self, point_position: np.ndarray | None, picker: PickerType) -> None:
         if point_position is None:
             return
         point_index = picker.GetPointId()
@@ -177,3 +194,17 @@ class FullInstrumentViewPresenter:
         rgba[:, 2] = blue
         rgba[:, 3] = alpha
         return rgba
+
+
+class ModelSetupThread(QThread):
+    finished = Signal()
+
+    def __init__(self, presenter):
+        super(ModelSetupThread, self).__init__(presenter._view)
+        self.model = presenter._model
+        self.presenter = presenter
+        self.finished.connect(self.presenter.setup)
+
+    def run(self):
+        self.model.setup()
+        self.finished.emit()

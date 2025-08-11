@@ -20,7 +20,7 @@ from qtpy.QtWidgets import (
     QTextEdit,
     QPushButton,
 )
-from qtpy.QtGui import QPalette, QIntValidator
+from qtpy.QtGui import QPalette, QIntValidator, QMovie
 from qtpy.QtCore import Qt, QEvent
 from superqt import QDoubleRangeSlider
 from pyvistaqt import BackgroundPlotter
@@ -31,6 +31,7 @@ from typing import Callable
 from mantid.dataobjects import Workspace2D
 import numpy as np
 import pyvista as pv
+import os
 
 
 class FullInstrumentViewWindow(QMainWindow):
@@ -115,8 +116,27 @@ class FullInstrumentViewWindow(QMainWindow):
         self._detector_figure_canvas = FigureCanvas(self._detector_spectrum_fig)
         options_vertical_layout.addWidget(self._detector_figure_canvas)
 
+        self.status_group_box = QGroupBox("Status")
+        status_hbox = QHBoxLayout()
+        status_label = QLabel("Loading ...")
+        status_hbox.addWidget(status_label)
+        status_graphics = QLabel()
+        status_graphics.setFixedSize(50, 50)
+        status_graphics.setAlignment(Qt.AlignCenter)
+        status_graphics.setScaledContents(True)
+        spinner = QMovie(f"{os.path.dirname(__file__)}/loading.gif")
+        status_graphics.setMovie(spinner)
+        status_hbox.addWidget(status_graphics)
+        spinner.start()
+        status_hbox.addStretch()
+        self.status_group_box.setLayout(status_hbox)
+        options_vertical_layout.addWidget(self.status_group_box)
+
         options_vertical_layout.addStretch()
         central_widget.setLayout(parent_horizontal_layout)
+
+    def hide_status_box(self) -> None:
+        self.status_group_box.hide()
 
     def reset_camera(self) -> None:
         if not self._off_screen:
