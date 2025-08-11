@@ -81,7 +81,7 @@ private:
 
   void finaliseOutputWorkspaces(bool createFitOutput, const std::vector<std::string> &fitWorkspaces,
                                 const std::vector<std::string> &parameterWorkspaces,
-                                const std::vector<std::string> &covarianceWorkspaces, std::string range);
+                                const std::vector<std::string> &covarianceWorkspaces, const std::string &range);
 
   API::IFunction_sptr setupFunction(bool individual, bool passWSIndexToFunction,
                                     const API::IFunction_sptr &inputFunction, const std::vector<double> &initialParams,

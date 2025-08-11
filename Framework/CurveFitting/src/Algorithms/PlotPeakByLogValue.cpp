@@ -345,14 +345,14 @@ IFunction_sptr PlotPeakByLogValue::setupFunction(bool individual, bool passWSInd
 void PlotPeakByLogValue::finaliseOutputWorkspaces(bool createFitOutput, const std::vector<std::string> &fitWorkspaces,
                                                   const std::vector<std::string> &parameterWorkspaces,
                                                   const std::vector<std::string> &covarianceWorkspaces,
-                                                  std::string range) {
+                                                  const std::string &range) {
   if (createFitOutput) {
     // collect output of fit for each spectrum into workspace groups
     auto const groupAlg = this->createChildAlgorithm("GroupWorkspaces");
     std::vector<std::pair<std::vector<std::string>, std::string>> groupingOperations = {
-        {covarianceWorkspaces, std::format("{}_{}_NormalisedCovarianceMatrices", m_baseName, range)},
-        {parameterWorkspaces, std::format("{}_{}_Parameters", m_baseName, range)},
-        {fitWorkspaces, std::format("{}_{}_Workspaces", m_baseName, range)}};
+        {covarianceWorkspaces, std::format("{}_NormalisedCovarianceMatrices", m_baseName)},
+        {parameterWorkspaces, std::format("{}_Parameters", m_baseName)},
+        {fitWorkspaces, std::format("{}_Workspaces", m_baseName)}};
 
     for (const auto &[inputWorkspaces, outputName] : groupingOperations) {
       groupAlg->initialize();
