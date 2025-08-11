@@ -165,7 +165,8 @@ object createChildWithProps(tuple args, dict kwargs) {
   auto enableLogging = extractArg<bool>(4, args);
   auto version = extractArg<int>(5, args);
 
-  const std::array<std::string, 5> reservedNames = {"name", "startProgress", "endProgress", "enableLogging", "version"};
+  const std::array<std::string, 6> reservedNames = {"name",          "startProgress", "endProgress",
+                                                    "enableLogging", "version",       "StoreInADS"};
 
   extractKwargs<std::string>(kwargs, reservedNames[0], name);
   extractKwargs<double>(kwargs, reservedNames[1], startProgress);
