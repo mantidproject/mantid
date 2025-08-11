@@ -111,8 +111,3 @@ target_link_libraries(
 # Installation settings
 set_target_properties(PythonKernelModule PROPERTIES INSTALL_RPATH "${EXT_INSTALL_RPATH}")
 mtd_install_shared_library(TARGETS PythonKernelModule DESTINATION ${Python_SITELIB_RELPATH}/mantid/kernel)
-# packagesetup.py that will overwrite the ones from the built target
-mtd_install_files(
-  FILES ${CMAKE_CURRENT_BINARY_DIR}/${PACKAGESETUP_PY}.install.py INSTALL_DIRS ${Python_SITELIB_RELPATH}/mantid/kernel
-  RENAME ${PACKAGESETUP_PY}.py
-)
