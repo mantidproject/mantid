@@ -48,14 +48,14 @@ public:
     if (!algToBeTested.isInitialized())
       algToBeTested.initialize();
 
-    std::string outputSpace = "LoadEMUauTest";
+    const std::string outputSpace = "LoadEMUauTest";
     algToBeTested.setPropertyValue("OutputWorkspace", outputSpace);
 
     // should fail because mandatory parameter has not been set
     TS_ASSERT_THROWS(algToBeTested.execute(), const std::runtime_error &);
 
     // should succeed now
-    std::string inputFile = "EMU0006330.tar";
+    const std::string inputFile = "EMU0006330.tar";
     algToBeTested.setPropertyValue("Filename", inputFile);
     algToBeTested.setPropertyValue("SelectDetectorTubes", "16-50");
     TS_ASSERT_THROWS_NOTHING(algToBeTested.execute());
@@ -116,7 +116,7 @@ public:
     // total counts are the same regardless of the BM spectrum and that the
     // spectrum data is available when the flag is set.
 
-    std::string inputFile = "EMU0020493.tar";
+    const std::string inputFile = "EMU0020493.tar";
     algToBeTested.setPropertyValue("Filename", inputFile);
     algToBeTested.setPropertyValue("SelectDetectorTubes", "16-50");
     TS_ASSERT_THROWS_NOTHING(algToBeTested.execute());
@@ -159,8 +159,8 @@ public:
   }
 
   void test_find_definition_file() {
-    std::string instname = "EMUau";
-    std::string preMod("2018-07-26 10:13:12");
+    const std::string instname = "EMUau";
+    const std::string preMod("2018-07-26 10:13:12");
     auto filename = InstrumentFileFinder::getInstrumentFilename(instname, preMod);
 
     // confirm that file "EMUau_definition_2025.xml" is returned but ignore the file path
