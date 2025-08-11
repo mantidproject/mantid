@@ -126,12 +126,14 @@ cd $RECIPES_DIR
 
 # Add the '--debug' option to EXTRA_BUILD_OPTIONS if you want conda build to provide verbose debug info
 EXTRA_BUILD_OPTIONS=" "
+EXTRA_ENV_OPTIONS=""
 
 if [[ $OSTYPE == "msys" ]]; then
     # Do not use build id as it makes the path too long (>260 chars) for CMake (Legacy Windows API issue)
-    EXTRA_BUILD_OPTIONS+="--no-build-id"
+    EXTRA_BUILD_OPTIONS+="--no-build-id --log-style=plain"
 elif [[ $PLATFORM == "osx-64" ]]; then
-    # was -m ./osx_64.yaml
+    # These were contained in a separate file via -m ./osx_64.yaml
+    EXTRA_ENV_OPTIONS="MACOSX_DEPLOYMENT_TARGET=10.10 CONDA_BUILD_SYSROOT=/opt/MacOSX10.10.sdk"
     EXTRA_BUILD_OPTIONS+="--target-platform=osx-64"
 fi
 
@@ -139,22 +141,19 @@ export CONDA_SUBDIR=$PLATFORM
 
 # Run conda build.
 if [[ $ENABLE_BUILD_MANTID_DEVELOPER == true ]]; then
-    rattler-build build -r ./mantid-developer/ -m ./conda_build_config.yaml --output-dir $CONDA_BLD_PATH $EXTRA_BUILD_OPTIONS
+    $EXTRA_ENV_OPTIONS rattler-build build -r ./mantid-developer/ -m ./conda_build_config.yaml --output-dir $CONDA_BLD_PATH $EXTRA_BUILD_OPTIONS
 fi
 if [[ $ENABLE_BUILD_MANTID == true ]]; then
-    rattler-build build -r ./mantid/ -m ./conda_build_config.yaml --output-dir $CONDA_BLD_PATH $EXTRA_BUILD_OPTIONS
+    $EXTRA_ENV_OPTIONS rattler-build build -r ./mantid/ -m ./conda_build_config.yaml --output-dir $CONDA_BLD_PATH $EXTRA_BUILD_OPTIONS
 fi
 if [[ $ENABLE_BUILD_QT == true ]]; then
-    rattler-build build -r ./mantidqt/ -m ./conda_build_config.yaml --output-dir $CONDA_BLD_PATH $EXTRA_BUILD_OPTIONS
+    $EXTRA_ENV_OPTIONS rattler-build build -r ./mantidqt/ -m ./conda_build_config.yaml --output-dir $CONDA_BLD_PATH $EXTRA_BUILD_OPTIONS
 fi
 if [[ $ENABLE_BUILD_DOCS == true ]]; then
-    rattler-build build -r ./mantiddocs/ -m ./conda_build_config.yaml --output-dir $CONDA_BLD_PATH $EXTRA_BUILD_OPTIONS
+    $EXTRA_ENV_OPTIONS rattler-build build -r ./mantiddocs/ -m ./conda_build_config.yaml --output-dir $CONDA_BLD_PATH $EXTRA_BUILD_OPTIONS
 fi
 if [[ $ENABLE_BUILD_WORKBENCH == true ]]; then
-    if [[ $BUILD_WORKBENCH_WITH_DOCS == false ]]; then
-	export INCLUDE_MANTIDDOCS=False
-    fi
-    rattler-build build -r ./mantidworkbench/ -m ./conda_build_config.yaml --output-dir $CONDA_BLD_PATH $EXTRA_BUILD_OPTIONS
+    $EXTRA_ENV_OPTIONS rattler-build build -r ./mantidworkbench/ -m ./conda_build_config.yaml --output-dir $CONDA_BLD_PATH $EXTRA_BUILD_OPTIONS
 fi
 
 # elapsed time with second resolution
