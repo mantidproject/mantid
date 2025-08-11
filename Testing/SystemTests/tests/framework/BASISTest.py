@@ -323,18 +323,20 @@ class BASISReductionOutputSEnergyNXSTest(systemtesting.MantidSystemTest, Preppin
         self.prepset("BASISReduction")
 
     def requiredFiles(self):
-        return ["BSS_90146.nxs.h5", "BSS_90146_divided_Xqw_e.nxs"]
+        return ["BASIS_Mask_default_111.xml", "BSS_122089.nxs.h5", "BASIS_122089_divided_Xqw_e.nxs", "BASIS_122089_divided_sqw.nxs"]
 
     def runTest(self):
         try:
             BASISReduction(
-                RunNumbers="90146",
+                RunNumbers="122089",
                 DoFluxNormalization=True,
                 FluxNormalizationType="Monitor",
+                MaskFile="BASIS_Mask_default_111.xml",
                 ReflectionType="silicon_111",
                 EnergyBins=[-120, 0.4, 120],
+                MomentumTransferBins=[0.3, 0.2, 1.9],
                 DivideByVanadium=True,
-                NormRunNumbers="90146",
+                NormRunNumbers="122089",
                 OutputSusceptibilityEnergyNXS=True,
             )
         finally:
@@ -343,7 +345,7 @@ class BASISReductionOutputSEnergyNXSTest(systemtesting.MantidSystemTest, Preppin
     def validate(self):
         self.tolerance = 0.1
         self.disableChecking.extend(["SpectraMap", "Instrument"])
-        return "BSS_90146_divided_Xqw_e.nxs"
+        return "BSS_122089_divided_sqw", "BASIS_122089_divided_sqw.nxs", "BSS_122089_divided_Xqw_e", "BASIS_122089_divided_Xqw_e.nxs"
 
 
 class BASISReductionOutputSFrequencyNXSTest(systemtesting.MantidSystemTest, PreppingMixin):
@@ -355,18 +357,20 @@ class BASISReductionOutputSFrequencyNXSTest(systemtesting.MantidSystemTest, Prep
         self.prepset("BASISReduction")
 
     def requiredFiles(self):
-        return ["BSS_90146.nxs.h5", "BSS_90146_divided_Xqw_f.nxs"]
+        return ["BASIS_Mask_default_111.xml", "BSS_122089.nxs.h5", "BASIS_122089_divided_Xqw_f.nxs", "BASIS_122089_divided_sqw.nxs"]
 
     def runTest(self):
         try:
             BASISReduction(
-                RunNumbers="90146",
+                RunNumbers="122089",
                 DoFluxNormalization=True,
                 FluxNormalizationType="Monitor",
+                MaskFile="BASIS_Mask_default_111.xml",
                 ReflectionType="silicon_111",
                 EnergyBins=[-120, 0.4, 120],
+                MomentumTransferBins=[0.3, 0.2, 1.9],
                 DivideByVanadium=True,
-                NormRunNumbers="90146",
+                NormRunNumbers="122089",
                 OutputSusceptibilityFrequencyNXS=True,
             )
         finally:
@@ -375,7 +379,7 @@ class BASISReductionOutputSFrequencyNXSTest(systemtesting.MantidSystemTest, Prep
     def validate(self):
         self.tolerance = 0.1
         self.disableChecking.extend(["SpectraMap", "Instrument"])
-        return "BSS_90146_divided_Xqw_f.nxs"
+        return "BSS_122089_divided_sqw", "BASIS_122089_divided_sqw.nxs", "BSS_122089_divided_Xqw_f", "BASIS_122089_divided_Xqw_f.nxs"
 
 
 class BASISReductionOutputSFrequencyASCIITest(systemtesting.MantidSystemTest, PreppingMixin):
@@ -387,18 +391,20 @@ class BASISReductionOutputSFrequencyASCIITest(systemtesting.MantidSystemTest, Pr
         self.prepset("BASISReduction")
 
     def requiredFiles(self):
-        return ["BSS_90146.nxs.h5", "BSS_90146_divided_Xqw_f.dat"]
+        return ["BASIS_Mask_default_111.xml", "BSS_122089.nxs.h5", "BASIS_122089_divided_Xqw_f.dat", "BASIS_122089_divided_sqw.nxs"]
 
     def runTest(self):
         try:
             BASISReduction(
-                RunNumbers="90146",
+                RunNumbers="122089",
                 DoFluxNormalization=True,
                 FluxNormalizationType="Monitor",
+                MaskFile="BASIS_Mask_default_111.xml",
                 ReflectionType="silicon_111",
                 EnergyBins=[-120, 0.4, 120],
+                MomentumTransferBins=[0.3, 0.2, 1.9],
                 DivideByVanadium=True,
-                NormRunNumbers="90146",
+                NormRunNumbers="122089",
                 OutputSusceptibilityFrequencyASCII=True,
             )
         finally:
@@ -407,7 +413,12 @@ class BASISReductionOutputSFrequencyASCIITest(systemtesting.MantidSystemTest, Pr
     def validate(self):
         self.tolerance = 0.1
         self.disableChecking.extend(["SpectraMap", "Instrument"])
-        return "BSS_90146_divided_Xqw_f.dat"
+        return "BSS_122089_divided_sqw", "BASIS_122089_divided_sqw.nxs"
+
+    def validateASCII(self):
+        self.tolerance = 0.1
+        self.disableChecking.extend(["SpectraMap", "Instrument"])
+        return "BSS_122089_divided_Xqw_f", "BASIS_122089_divided_Xqw_f.dat"
 
 
 class BASISReductionOutputSEnergyASCIITest(systemtesting.MantidSystemTest, PreppingMixin):
@@ -419,18 +430,20 @@ class BASISReductionOutputSEnergyASCIITest(systemtesting.MantidSystemTest, Prepp
         self.prepset("BASISReduction")
 
     def requiredFiles(self):
-        return ["BSS_90146.nxs.h5", "BSS_90146_divided_Xqw_e.dat"]
+        return ["BASIS_Mask_default_111.xml", "BSS_122089.nxs.h5", "BASIS_122089_divided_Xqw_e.dat", "BASIS_122089_divided_sqw.nxs"]
 
     def runTest(self):
         try:
             BASISReduction(
-                RunNumbers="90146",
+                RunNumbers="122089",
                 DoFluxNormalization=True,
                 FluxNormalizationType="Monitor",
+                MaskFile="BASIS_Mask_default_111.xml",
                 ReflectionType="silicon_111",
                 EnergyBins=[-120, 0.4, 120],
+                MomentumTransferBins=[0.3, 0.2, 1.9],
                 DivideByVanadium=True,
-                NormRunNumbers="90146",
+                NormRunNumbers="122089",
                 OutputSusceptibilityEnergyASCII=True,
             )
         finally:
@@ -439,7 +452,12 @@ class BASISReductionOutputSEnergyASCIITest(systemtesting.MantidSystemTest, Prepp
     def validate(self):
         self.tolerance = 0.1
         self.disableChecking.extend(["SpectraMap", "Instrument"])
-        return "BSS_90146_divided_Xqw_e.dat"
+        return "BSS_122089_divided_sqw", "BASIS_122089_divided_sqw.nxs"
+
+    def validateASCII(self):
+        self.tolerance = 0.1
+        self.disableChecking.extend(["SpectraMap", "Instrument"])
+        return "BSS_122089_divided_Xqw_e", "BASIS_122089_divided_Xqw_e.dat"
 
 
 class CrystalDiffractionTest(systemtesting.MantidSystemTest, PreppingMixin):
@@ -598,3 +616,7 @@ class PowderSampleNewDASTest(systemtesting.MantidSystemTest, PreppingMixin):
         self.tolerance = 0.1
         self.disableChecking.extend(["SpectraMap", "Instrument"])
         return "powder", "BASIS_powder_90177.nxs"
+
+
+# TODO https://developer.mantidproject.org/DataFilesForTesting.html#datafilesfortesting-addinganewfile
+# git add-test-data Testing/Data/SystemTest/BASIS/BASISReduction/
