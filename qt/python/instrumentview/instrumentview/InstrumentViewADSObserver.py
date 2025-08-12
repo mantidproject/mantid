@@ -8,6 +8,7 @@ from functools import wraps
 import sys
 
 from mantid.api import AnalysisDataServiceObserver
+from mantidqt.utils.qt.qappthreadcall import QAppThreadCall
 
 
 def _catch_exceptions(func):
@@ -31,9 +32,9 @@ def _catch_exceptions(func):
 class InstrumentViewADSObserver(AnalysisDataServiceObserver):
     def __init__(self, delete_callback, clear_callback, rename_callback):
         super(InstrumentViewADSObserver, self).__init__()
-        self.delete_callback = delete_callback
-        self.clear_callback = clear_callback
-        self.rename_callback = rename_callback
+        self.delete_callback = QAppThreadCall(delete_callback)
+        self.clear_callback = QAppThreadCall(clear_callback)
+        self.rename_callback = QAppThreadCall(rename_callback)
 
         self.observeDelete(True)
         self.observeRename(True)
@@ -63,8 +64,3 @@ class InstrumentViewADSObserver(AnalysisDataServiceObserver):
         Called when the ADS has been cleared, removes all data.
         """
         self.clear_callback()
-
-    def unsubscribe(self):
-        self.observeDelete(False)
-        self.observeRename(False)
-        self.observeClear(False)
