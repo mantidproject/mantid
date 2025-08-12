@@ -62,7 +62,7 @@ repos:
     rev: v0.12.7
     # ruff must appear before black in the list of hooks
     hooks:
-      - id: ruff-check
+      - id: ruff
         args: [--fix, --exit-non-zero-on-fix]
       - id: ruff-format
         exclude: scripts/templates/reference/|Testing/Tools/cxxtest

@@ -27,7 +27,7 @@ The following settings, relating to the documentation, are available:
 * ``DOCS_SCREENSHOTS``: If enabled then the automatic screenshots of algorithm dialogs and interfaces are included
   otherwise a placeholder image is included with a caption indicating the processing is disabled. Default=OFF.
 * ``DOCS_MATH_EXT``: Extension used to provide the ``:math:`` processing ability.
-  Default=``sphinx.ext.mathjax`` in CMake but this can be set to ``sphinx.ext.imgmath``
+  Default=``sphinx.ext.mathjax`` in CMake but this is set to ``sphinx.ext.imgmath``
   for clean package builds to remove the javascript dependency.
 * ``DOCS_PLOTDIRECTIVE``: If enabled then the ``:plot:`` directive is processed and
   the code/plots are included. WARNING: This can add ~15mins to the build time. Default=OFF.

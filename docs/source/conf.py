@@ -55,7 +55,7 @@ extensions = [
     "mantiddoc.doctest",
 ]
 # Deal with math extension. Can be overridden with MATH_EXT environment variable
-mathext = os.environ.get("MATH_EXT", "sphinx.ext.mathjax")
+mathext = os.environ.get("MATH_EXT", "sphinx.ext.imgmath")
 extensions.append(mathext)
 
 # Add any paths that contain templates here, relative to this directory.
