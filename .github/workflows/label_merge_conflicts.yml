@@ -1,5 +1,6 @@
 name: 'Check for merge conflicts'
 on:
+  # see https://github.com/mantidproject/mantid/pull/39155 for why branches
   push:
     branches:
       - 'main'
