@@ -322,7 +322,7 @@ class TexturePeakFunctionGenerator(PeakFunctionGenerator):
             fit_kwargs["WorkspaceIndex" + key_suffix] = int(ispec)
         # set background (background global tied to first domain function)
         function[0][1]["A0"] = avg_bg / len(ispecs)
-
+        function[0][0].setMatrixWorkspace(ws, 0, x_start, x_end)
         available_params = [peak_func.getParamName(i) for i in range(peak_func.nParams())]
         if parameters_to_tie is not None:
             invalid = [p for p in parameters_to_tie if p not in available_params]
@@ -399,7 +399,7 @@ def fit_all_peaks(wss: Sequence[str], peaks: Sequence[float], peak_window: float
 
             func_generator = TexturePeakFunctionGenerator([])  # don't fix any parameters
             initial_function, md_fit_kwargs, intensity_estimates = func_generator.get_initial_fit_function_and_kwargs_from_specs(
-                ws, peak, (xmin, xmax), (), peak_func_name, bg_func_name
+                ws, peak, (xmin, xmax), ("A", "B"), peak_func_name, bg_func_name
             )
 
             Fit(
@@ -490,7 +490,8 @@ def create_pf(
     scat_vol_pos: Sequence[float] = (0.0, 0.0, 0.0),
     projection_method: str = "Azimuthal",
     params: Optional[Sequence[str]] = None,
-    xtal: Optional[CrystalStructure] = None,
+    xtal_input: Optional[str] = None,
+    xtal_args: Optional[Sequence[str]] = None,
     hkl: Optional[Sequence[int]] = None,
     readout_column: Optional[str] = None,
     kernel: Optional[float] = None,
@@ -513,7 +514,11 @@ def create_pf(
     scat_vol_pos: position of the centre of mass of the scattering gauge volume
     projection_method: the type of projection to use to create the pole figure ("Azimuthal", "Stereographic")
     params: Parameter Workspaces if you want to read a column of this table to each point in the pole figure
-    xtal: Crystal Structure of the sample
+    xtal_input: method by which the crystal structure will be input, options are ("cif", "array", "string")
+    xtal_args: list of arguments for the specified crystal input:
+                for input "cif", require the cif filepath, example: ["C:/User/Fe.cif",],
+                for "array" array of lattice parameters, space group, basis, example: [(1.0,1.0,1.0), "P1", "Fe 0 0 0 1 0"]
+                for "string" lattice parameter string, space group and basis, example: ["1.0 1.0 1.0", "P1", "Fe 0 0 0 1 0"]
     hkl: H,K,L reflection of the peak fit in the param workspaces
     readout_column: column of the param ws that should be attached to the pole figure table
     kernel: if scatter == False, the kernel size of the gaussian filter applied to smooth the contour plot
@@ -523,9 +528,10 @@ def create_pf(
     override_dir: flag which, if True, will save files directly into save_dir rather than creating a folder structure
     """
     model = TextureProjection()
-    if xtal:
+    if xtal_input:
         for ws in wss:
             ws = ADS.retrieve(ws)
+            xtal = get_xtal_structure(xtal_input, *xtal_args) if xtal_input else None
             ws.sample().setCrystalStructure(xtal)
 
     out_ws, grouping = model.get_pf_table_name(wss, params, hkl, readout_column)
@@ -581,7 +587,8 @@ def create_pf_loop(
     save_root: str,
     exp_name: str,
     projection_method: str,
-    xtal: Optional[CrystalStructure] = None,
+    xtal_input: Optional[str] = None,
+    xtal_args: Optional[Sequence[str]] = None,
     hkls: Optional[Union[Sequence[Sequence[int]], Sequence[int]]] = None,
     readout_columns: Optional[Union[str, Sequence[str]]] = None,
     kernel: Optional[float] = None,
@@ -604,7 +611,11 @@ def create_pf_loop(
     save_root: root of the directory to which the data should be saved
     exp_name: experiment name, which provides the overarching folder within the root directory
     projection_method: the type of projection to use to create the pole figure ("Azimuthal", "Stereographic")
-    xtal: Crystal Structure of the sample
+    xtal_input: method by which the crystal structure will be input, options are ("cif", "array", "string")
+    xtal_args: list of arguments for the specified crystal input:
+                for input "cif", require the cif filepath, example: ["C:/User/Fe.cif",],
+                for "array" array of lattice parameters, space group, basis, example: [(1.0,1.0,1.0), "P1", "Fe 0 0 0 1 0"]
+                for "string" lattice parameter string, space group and basis, example: ["1.0 1.0 1.0", "P1", "Fe 0 0 0 1 0"]
     hkls: H,K,L reflection of each peak fitted by the param workspaces
     readout_columns: each column of the param ws that should be attached to its own pole figure table
     kernel: if scatter == False, the kernel size of the gaussian filter applied to smooth the contour plot
@@ -622,7 +633,8 @@ def create_pf_loop(
                 "wss": wss,
                 "params": params,
                 "include_scatt_power": include_scatt_power,
-                "xtal": xtal,
+                "xtal_input": xtal_input,
+                "xtal_args": xtal_args,
                 "hkl": hkl,
                 "readout_column": readout_column,
                 "dir1": dir1,

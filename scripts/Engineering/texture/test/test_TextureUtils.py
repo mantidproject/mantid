@@ -418,7 +418,7 @@ class TextureUtilsTest(unittest.TestCase, CrystalPhaseHelperMixin):
             "wss": ["ws1"],
             "param_wss": [["p1"]],
             "include_scatt_power": False,
-            "xtal": None,
+            "xtal_input": None,
             "hkls": [[1, 1, 1]],
             "readout_columns": ["X0", "I"],
             "dir1": [1, 0, 0],
