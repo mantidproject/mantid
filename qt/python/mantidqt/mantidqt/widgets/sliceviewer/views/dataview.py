@@ -488,54 +488,54 @@ class SliceViewerDataView(QWidget):
         """
         self.presenter.data_limits_changed()
 
-    def on_masking_clicked(self):
+    def on_masking_clicked(self, state):
         """
         React to masking clicked
         """
-        pass
+        self.presenter.masking_clicked(state)
 
-    def on_rect_masking_clicked(self):
+    def on_rect_masking_clicked(self, state):
         """
         React to rectangle masking selected
         """
-        pass
+        self.presenter.rect_masking_clicked(state)
 
-    def on_elli_masking_clicked(self):
+    def on_elli_masking_clicked(self, state):
         """
         React to elliptical masking selected
         """
-        pass
+        self.presenter.elli_masking_clicked(state)
 
-    def on_poly_masking_clicked(self):
+    def on_poly_masking_clicked(self, state):
         """
         React to polygon masking selected
         """
-        pass
+        self.presenter.poly_masking_clicked(state)
 
     def on_export_masking_clicked(self):
         """
         React to export masking selected
         """
-        pass
+        self.presenter.export_masking_clicked()
 
     def on_apply_masking_clicked(self):
         """
         React to apply masking selected
         """
-        pass
+        self.presenter.apply_masking_clicked()
 
     def deactivate_and_disable_tool(self, tool_text):
         """Deactivate a tool as if the control had been pressed and disable the functionality"""
         self.deactivate_tool(tool_text)
         self.disable_tool_button(tool_text)
 
-    def activate_tool(self, tool_text):
+    def activate_tool(self, tool_text, trigger=True):
         """Activate a given tool as if the control had been pressed"""
-        self.mpl_toolbar.set_action_checked(tool_text, True)
+        self.mpl_toolbar.set_action_checked(tool_text, True, trigger)
 
-    def deactivate_tool(self, tool_text):
+    def deactivate_tool(self, tool_text, trigger=True):
         """Deactivate a given tool as if the tool button had been pressed"""
-        self.mpl_toolbar.set_action_checked(tool_text, False)
+        self.mpl_toolbar.set_action_checked(tool_text, False, trigger)
 
     def enable_tool_button(self, tool_text):
         """Set a given tool button enabled so it can be interacted with"""

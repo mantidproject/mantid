@@ -52,3 +52,27 @@ class IDataViewSubscriber(ABC):
     @abstractmethod
     def zoom_pan_clicked(self, active) -> None:
         pass
+
+    @abstractmethod
+    def masking_clicked(self, active) -> None:
+        pass
+
+    @abstractmethod
+    def rect_masking_clicked(self, active) -> None:
+        pass
+
+    @abstractmethod
+    def elli_masking_clicked(self, active) -> None:
+        pass
+
+    @abstractmethod
+    def poly_masking_clicked(self, active) -> None:
+        pass
+
+    @abstractmethod
+    def export_masking_clicked(self) -> None:
+        pass
+
+    @abstractmethod
+    def apply_masking_clicked(self) -> None:
+        pass
