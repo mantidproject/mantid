@@ -132,6 +132,7 @@ Dynamic Susceptibility
 
 The algorithm offers 4 options that create one additional workspace (extensions ends with "sqw") and one Nexus or ASCII file
 both containing the dynamic susceptibility:
+
 - OutputSusceptibilityFrequencyNXS: If checked the Nexus file contains the dynamic susceptibility as a function of frequency, in units of GHz
 - OutputSusceptibilityEnergyNXS:  If checked the Nexus file contains the dynamic susceptibility as a function of energy, in units of meV
 - OutputSusceptibilityFrequencyASCII:  If checked the dat file contains the dynamic susceptibility as a function of frequency, in units of GHz
