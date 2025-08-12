@@ -616,7 +616,3 @@ class PowderSampleNewDASTest(systemtesting.MantidSystemTest, PreppingMixin):
         self.tolerance = 0.1
         self.disableChecking.extend(["SpectraMap", "Instrument"])
         return "powder", "BASIS_powder_90177.nxs"
-
-
-# TODO https://developer.mantidproject.org/DataFilesForTesting.html#datafilesfortesting-addinganewfile
-# git add-test-data Testing/Data/SystemTest/BASIS/BASISReduction/
