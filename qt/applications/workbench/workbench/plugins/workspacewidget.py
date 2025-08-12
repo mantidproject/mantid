@@ -305,9 +305,9 @@ class WorkspaceWidget(PluginWidget):
             if ws.getInstrument().getName():
                 try:
                     view = FullInstrumentViewWindow(parent=parent, off_screen=off_screen)
+                    view.show()
                     model = FullInstrumentViewModel(ws)
                     FullInstrumentViewPresenter(view, model)
-                    view.show()
                 except Exception as exception:
                     logger.warning("Could not show instrument for workspace '{}':\n{}\n".format(ws.name(), exception))
             else:
