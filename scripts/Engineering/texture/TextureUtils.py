@@ -528,13 +528,18 @@ def create_pf(
     override_dir: flag which, if True, will save files directly into save_dir rather than creating a folder structure
     """
     model = TextureProjection()
+    has_xtal = False
     if xtal_input:
+        has_xtal = True
         for ws in wss:
             ws = ADS.retrieve(ws)
             xtal = get_xtal_structure(xtal_input, *xtal_args) if xtal_input else None
             ws.sample().setCrystalStructure(xtal)
-
+    # only pass the HKL to CreatePoleFigureTable if crystal structure has been defined
+    # otherwise `hkl` is just used for naming the output workspace
+    pf_hkl = hkl if has_xtal else None
     out_ws, grouping = model.get_pf_table_name(wss, params, hkl, readout_column)
+
     dir1, dir2, dir3 = np.asarray(dir1), np.asarray(dir2), np.asarray(dir3)
     ax_transform = np.concatenate((dir1[:, None], dir2[:, None], dir3[:, None]), axis=1)
     ax_labels = dir_names
@@ -545,7 +550,7 @@ def create_pf(
     chi2_thresh = chi2_thresh if chi2_thresh else 0.0
     peak_thresh = peak_thresh if peak_thresh else 0.0
     model.make_pole_figure_tables(
-        wss, params, out_ws, hkl, include_scatt_power, scat_vol_pos, chi2_thresh, peak_thresh, save_dirs, ax_transform, readout_column
+        wss, params, out_ws, pf_hkl, include_scatt_power, scat_vol_pos, chi2_thresh, peak_thresh, save_dirs, ax_transform, readout_column
     )
 
     fig = model.plot_pole_figure(
