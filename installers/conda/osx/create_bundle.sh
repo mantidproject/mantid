@@ -133,10 +133,12 @@ function usage() {
   echo "The final name will be '${BUNDLENAME}${suffix}.app'"
   echo "This directory will be created if it does not exist or purged if it already exists."
   echo "The final .dmg will be created in the current working directory."
-  echo "Options:"
-  echo "  -c Optional conda channel overriding the default mantid"
-  echo "  -s Optional Add a suffix to the output mantid file, has to be Unstable, or Nightly or not used"
-  echo "  -p Target platform, must be either osx-64 or osx-arm64"
+  echo "Required arguments:"
+  echo "  -p: target platform, must be either osx-64 or osx-arm64"
+  echo "Optional arguments:"
+  echo "  -c: conda channel overriding the default mantid"
+  echo "  -s: add a suffix to the output mantid file, has to be Unstable, or Nightly or not used"
+  echo "  --codesign: sign the application and the dmg"
   exit $exitcode
 }
 
@@ -145,6 +147,7 @@ function usage() {
 conda_channel=mantid
 platform=""
 suffix=
+sign_code=false
 while [ ! $# -eq 0 ]
 do
   case "$1" in
@@ -159,6 +162,9 @@ do
     -s)
         suffix="$2"
         shift
+        ;;
+    --codesign)
+        sign_code=true
         ;;
     -h)
         usage 0
@@ -251,6 +257,24 @@ fixup_qt "$bundle_conda_prefix" "$HERE"/../common/qt.conf
 fixup_reexport_paths "$bundle_conda_prefix"
 add_resources "$bundle_contents" "$bundle_name" "$bundle_icon"
 create_plist "$bundle_contents" "$bundle_name" "$bundle_icon" "$version"
+
+# Sign the application if the --codesign argument is specified.
+# This part is intended to be used manually for release versions only.
+# A password prompt will appear, which you must interact with in a timely manner, otherwise the signing will fail.
+# You will need the STFC certificate referenced in the command below along with the private key in your macOS keychain.
+# You also require the following intermediate certificates (download and double click them to install into your keychain):
+# - https://www.apple.com/certificateauthority/AppleWWDRCAG3.cer
+# - https://www.apple.com/certificateauthority/AppleWWDRCAG4.cer
+# - https://www.apple.com/certificateauthority/DeveloperIDG2CA.cer
+# Without the intermediate certificates you will encounter an "errSecInternalComponent" error.
+# If using a different developer certificate, you may need different intermediate certificates from https://www.apple.com/certificateauthority/
+if [[ "$sign_code" == true ]]; then
+  echo "Signing $bundle_dirname contents..."
+  codesign_id="Developer ID Application: The Science and Technology Facilities Council (F6C2P3VQP7)"
+  codesign --deep --force --verify --verbose --sign "$codesign_id" "$BUILD_DIR"/"$bundle_dirname"
+else
+  echo "Skipping app signing"
+fi
 
 # Create DMG using `create-dmg` tool:
 # https://github.com/sindresorhus/create-dmg
