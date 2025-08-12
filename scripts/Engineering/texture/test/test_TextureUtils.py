@@ -172,6 +172,13 @@ class TextureUtilsTest(unittest.TestCase, CrystalPhaseHelperMixin):
 
     def setup_expected_fit_results(self, wsname, prefix, run_number, group, peak, num_spec, save_dir):
         expected_func = "some_fit_func"
+        expected_first_fit_kwargs = {
+            "Function": expected_func,
+            "CostFunction": "Least squares",
+            "Output": "first_fit",
+            "MaxIterations": 10,
+            "InputWorkspace": wsname,
+        }
         expected_fit_kwargs = {
             "Function": expected_func,
             "CostFunction": "Least squares",
@@ -199,6 +206,7 @@ class TextureUtilsTest(unittest.TestCase, CrystalPhaseHelperMixin):
             "num_spec": peak,
             "save_dir": save_dir,
             "expected_func": expected_func,
+            "expected_first_fit_kwargs": expected_first_fit_kwargs,
             "expected_fit_kwargs": expected_fit_kwargs,
             "expected_func_kwargs": expected_func_kwargs,
             "expected_create_tab_kwargs": expected_create_tab_kwargs,
@@ -209,7 +217,7 @@ class TextureUtilsTest(unittest.TestCase, CrystalPhaseHelperMixin):
             "expected_intensity_sub_bkg": expected_intensity_sub_bkg,
         }
 
-    def setup_fit_mocks_from_expected_results(self, repeated_expected_results, mock_peak_func_gen_cls, mock_ads):
+    def setup_fit_mocks_from_expected_results(self, repeated_expected_results, mock_peak_func_gen_cls, mock_ads, mock_intens_sigma):
         # mock ws information retrieval
         mock_ws = MagicMock()
         mock_ws.getNumberHistograms.side_effect = [er["num_spec"] for er in repeated_expected_results]
@@ -219,6 +227,7 @@ class TextureUtilsTest(unittest.TestCase, CrystalPhaseHelperMixin):
         mock_gen.get_initial_fit_function_and_kwargs_from_specs.side_effect = [
             (er["expected_func"], er["expected_func_kwargs"], er["expected_intensity_sub_bkg"]) for er in repeated_expected_results
         ]
+        mock_gen.get_final_fit_function.side_effect = [er["expected_func"] for er in repeated_expected_results]
         mock_peak_func_gen_cls.return_value = mock_gen
 
         # mock Output Parameter Table
@@ -235,17 +244,27 @@ class TextureUtilsTest(unittest.TestCase, CrystalPhaseHelperMixin):
 
         # mock ADS calls (first to get ws, then to get parameter table)
         mock_ads.retrieve.side_effect = [mock_ws, mock_param_ws] * len(repeated_expected_results)
+        mock_intens_sigma.return_value = (None, np.ones(30), None)
         return mock_ws, mock_param_ws, mock_peak_func_gen_cls, mock_ads
 
     @patch(f"{texture_utils_path}.SaveNexus")
     @patch(f"{texture_utils_path}.CreateEmptyTableWorkspace")
+    @patch(f"{texture_utils_path}.calc_intens_and_sigma_arrays")
     @patch(f"{texture_utils_path}.Fit")
     @patch(f"{texture_utils_path}._get_grouping_from_ws_log")
     @patch(f"{texture_utils_path}._get_run_and_prefix_from_ws_log")
     @patch(f"{texture_utils_path}.ADS")
     @patch(f"{texture_utils_path}.TexturePeakFunctionGenerator")
     def test_fit_all_peaks_basic_fit(
-        self, mock_peak_func_gen_cls, mock_ads, mock_get_run_prefix, mock_get_group, mock_fit, mock_create_tab_ws, mock_save_nexus
+        self,
+        mock_peak_func_gen_cls,
+        mock_ads,
+        mock_get_run_prefix,
+        mock_get_group,
+        mock_fit,
+        mock_intens_sigma,
+        mock_create_tab_ws,
+        mock_save_nexus,
     ):
         # GIVEN
         wsname = "TEST123456_ws"
@@ -260,7 +279,7 @@ class TextureUtilsTest(unittest.TestCase, CrystalPhaseHelperMixin):
         expected_results = self.setup_expected_fit_results(wsname, prefix, run_number, group, peak, num_spec, save_dir)
 
         # SETUP TEST
-        mocks = self.setup_fit_mocks_from_expected_results((expected_results,), mock_peak_func_gen_cls, mock_ads)
+        mocks = self.setup_fit_mocks_from_expected_results((expected_results,), mock_peak_func_gen_cls, mock_ads, mock_intens_sigma)
         mock_ws, mock_param_ws, mock_peak_func_gen_cls, mock_ads = mocks
         mock_get_run_prefix.return_value = (run_number, prefix)
         mock_get_group.return_value = group
@@ -278,18 +297,29 @@ class TextureUtilsTest(unittest.TestCase, CrystalPhaseHelperMixin):
 
         # CHECK
         mock_create_tab_ws.assert_called_once_with(**expected_results["expected_create_tab_kwargs"])
-        mock_fit.assert_called_once_with(**expected_results["expected_fit_kwargs"])
+        mock_fit.assert_has_calls(
+            [call(**expected_results["expected_first_fit_kwargs"]), call(**expected_results["expected_fit_kwargs"])], any_order=True
+        )
         mock_save_nexus.assert_called_once_with(**expected_results["expected_save_kwargs"])
 
     @patch(f"{texture_utils_path}.SaveNexus")
     @patch(f"{texture_utils_path}.CreateEmptyTableWorkspace")
+    @patch(f"{texture_utils_path}.calc_intens_and_sigma_arrays")
     @patch(f"{texture_utils_path}.Fit")
     @patch(f"{texture_utils_path}._get_grouping_from_ws_log")
     @patch(f"{texture_utils_path}._get_run_and_prefix_from_ws_log")
     @patch(f"{texture_utils_path}.ADS")
     @patch(f"{texture_utils_path}.TexturePeakFunctionGenerator")
     def test_fit_all_peaks_multiple_wss_and_peaks(
-        self, mock_peak_func_gen_cls, mock_ads, mock_get_run_prefix, mock_get_group, mock_fit, mock_create_tab_ws, mock_save_nexus
+        self,
+        mock_peak_func_gen_cls,
+        mock_ads,
+        mock_get_run_prefix,
+        mock_get_group,
+        mock_fit,
+        mock_intens_sigma,
+        mock_create_tab_ws,
+        mock_save_nexus,
     ):
         # GIVEN
         wss = ["TEST000101_ws", "TEST000102_ws"]
@@ -306,7 +336,7 @@ class TextureUtilsTest(unittest.TestCase, CrystalPhaseHelperMixin):
                 expected = self.setup_expected_fit_results(wsname, prefix, run_number, group, peak, num_spec, save_dir)
                 all_expected.append(expected)
 
-        mocks = self.setup_fit_mocks_from_expected_results(all_expected, mock_peak_func_gen_cls, mock_ads)
+        mocks = self.setup_fit_mocks_from_expected_results(all_expected, mock_peak_func_gen_cls, mock_ads, mock_intens_sigma)
         mock_ws, mock_param_ws, mock_peak_func_gen_cls, mock_ads = mocks
         mock_get_run_prefix.side_effect = [(run_number, prefix) for run_number in runs]
         mock_get_group.side_effect = [group for _ in runs]
@@ -315,16 +345,18 @@ class TextureUtilsTest(unittest.TestCase, CrystalPhaseHelperMixin):
         fit_all_peaks(wss=wss, peaks=peaks, peak_window=0.1, save_dir=save_dir, override_dir=True)
 
         # CHECK
-        self.assertEqual(mock_fit.call_count, len(all_expected))
+        self.assertEqual(mock_fit.call_count, len(all_expected) * 2)  # first fit and second fit
         self.assertEqual(mock_create_tab_ws.call_count, len(all_expected))
         self.assertEqual(mock_save_nexus.call_count, len(all_expected))
 
         expected_create_calls = [call(**exp["expected_create_tab_kwargs"]) for exp in all_expected]
-        expected_fit_calls = [call(**exp["expected_fit_kwargs"]) for exp in all_expected]
+        expected_fit_calls = [call(**exp["expected_first_fit_kwargs"]) for exp in all_expected] + [
+            call(**exp["expected_fit_kwargs"]) for exp in all_expected
+        ]
         expected_save_calls = [call(**exp["expected_save_kwargs"]) for exp in all_expected]
 
         mock_create_tab_ws.assert_has_calls(expected_create_calls, any_order=True)
-        mock_fit.assert_has_calls(expected_fit_calls, any_order=False)
+        mock_fit.assert_has_calls(expected_fit_calls, any_order=True)
         mock_save_nexus.assert_has_calls(expected_save_calls, any_order=False)
 
     def test_make_iterable_wraps_scalar(self):

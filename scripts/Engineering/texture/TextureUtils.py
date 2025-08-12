@@ -17,7 +17,7 @@ from mantid.api import AnalysisDataService as ADS, MultiDomainFunction, Function
 from typing import Optional, Sequence, Union, Tuple
 from mantid.dataobjects import Workspace2D
 from mantid.fitfunctions import FunctionWrapper, CompositeFunctionWrapper
-from plugins.algorithms.IntegratePeaks1DProfile import PeakFunctionGenerator
+from plugins.algorithms.IntegratePeaks1DProfile import PeakFunctionGenerator, calc_intens_and_sigma_arrays
 # -------- Utility --------------------------------
 
 
@@ -370,7 +370,47 @@ def _get_grouping_from_ws_log(ws: Workspace2D) -> str:
     return grouping
 
 
-def fit_all_peaks(wss: Sequence[str], peaks: Sequence[float], peak_window: float, save_dir: str, override_dir: bool = False) -> None:
+def get_default_values(params, no_fit_dict):
+    defaults = dict(zip(params, [np.nan for _ in params]))
+    if isinstance(no_fit_dict, dict):
+        for k, v in no_fit_dict.items():
+            defaults[k] = v
+    return defaults
+
+
+def replace_nans(vals, method: str):
+    new_vals = np.zeros_like(vals.T)  # want to iterate over table columns
+    # if method is zero, replace all nans with zero
+    if method == "zeros":
+        return np.nan_to_num(vals)
+    # otherwise, if there is at least 1 value per row that isn't nan, replace the nans with the min/max/mean of these
+    elif method == "mean":
+        func = np.mean
+    elif method == "max":
+        func = np.max
+    else:
+        func = np.min
+    for i, col in enumerate(vals.T):
+        non_nan = col[~np.isnan(col)]
+        if len(non_nan) > 0:
+            new_vals[i] = np.nan_to_num(col, nan=func(non_nan))
+        else:
+            # if the row is all nan, then we leave it as is
+            new_vals[i] = col
+    return new_vals.T
+
+
+def fit_all_peaks(
+    wss: Sequence[str],
+    peaks: Sequence[float],
+    peak_window: float,
+    save_dir: str,
+    parameters_to_tie: Optional[Sequence[str]] = ("A", "B"),
+    override_dir: bool = False,
+    i_over_sigma_thresh: float = 2.0,
+    nan_replacement: Optional[str] = "zeros",
+    no_fit_value_dict: Optional[dict] = None,
+) -> None:
     """
     Fit all the peaks given in all the spectra of all the workspaces, for use in a texture analysis workflow
 
@@ -378,7 +418,13 @@ def fit_all_peaks(wss: Sequence[str], peaks: Sequence[float], peak_window: float
     peaks: Sequence of peak positions in d-spacing
     peak_window: size of the window to create around the desired peak for purpose of fitting
     save_dir: directory to save the results in
+    parameters_to_tie: Sequence of parameters which should be tied across spectra
     override_dir: flag which, if True, will save files directly into save_dir rather than creating a folder structure
+    i_over_sigma_thresh: I/sig less than this value will be deemed as no peak and parameter values will be nan or specified value
+    nan_replacement: method options are ("zero", "min", "max", "mean") will try to replace the nan values in columns
+                     zero - will replace all nans with 0.0
+                     min/max/mean - will replace all nans in a column with the min/max/mean non-nan value (otherwise will remain nan)
+    no_fit_value_dict: allows the user to specify the unfit default value of parameters as a dict of key:value pairs
     """
     for wsname in wss:
         ws = ADS.retrieve(wsname)
@@ -398,12 +444,29 @@ def fit_all_peaks(wss: Sequence[str], peaks: Sequence[float], peak_window: float
             bg_func_name = "LinearBackground"
 
             func_generator = TexturePeakFunctionGenerator([])  # don't fix any parameters
+            parameters_to_tie = () if not parameters_to_tie else parameters_to_tie
             initial_function, md_fit_kwargs, intensity_estimates = func_generator.get_initial_fit_function_and_kwargs_from_specs(
-                ws, peak, (xmin, xmax), ("A", "B"), peak_func_name, bg_func_name
+                ws, peak, (xmin, xmax), parameters_to_tie, peak_func_name, bg_func_name
             )
 
-            Fit(
+            fit_object = Fit(
                 Function=initial_function,
+                CostFunction="Least squares",
+                Output="first_fit",
+                MaxIterations=10,  # if it hasn't fit in 10 it is likely because the texture has the peak missing
+                **md_fit_kwargs,
+            )
+
+            fit_result = {"Function": fit_object.Function.function, "OutputWorkspace": fit_object.OutputWorkspace.name()}
+
+            # update peak mask based on I/sig from fit
+            *_, i_over_sigma, _ = calc_intens_and_sigma_arrays(fit_result, "Hessian")
+            fit_mask = i_over_sigma > i_over_sigma_thresh
+
+            # fit only peak pixels and let peak centers vary independently of DIFC ratio
+            final_function = func_generator.get_final_fit_function(fit_result["Function"], fit_mask, 0.02)
+            Fit(
+                Function=final_function,
                 CostFunction="Least squares",
                 Output="fit",
                 MaxIterations=50,  # if it hasn't fit in 50 it is likely because the texture has the peak missing
@@ -427,13 +490,26 @@ def fit_all_peaks(wss: Sequence[str], peaks: Sequence[float], peak_window: float
                     out_tab.addColumn("double", param)
                     out_tab.addColumn("double", f"{param}_err")
 
+            default_vals = get_default_values(u_params, no_fit_value_dict)
+
+            table_vals = np.zeros((si.size(), 2 * len(u_params) + 1))  # intensity_est + param_1_val, param_1_err, +...
             for ispec in range(si.size()):
-                row = [ispec, intensity_estimates[ispec]]
-                for p in u_params:
-                    param_name = f"f{ispec}.f0.{p}"
-                    pind = all_params.index(param_name)
-                    row += [param_vals[pind], param_errs[pind]]
-                out_tab.addRow(row)
+                row = [intensity_estimates[ispec]]
+                if fit_mask[ispec]:
+                    for p in u_params:
+                        param_name = f"f{ispec}.f0.{p}"
+                        pind = all_params.index(param_name)
+                        row += [param_vals[pind], param_errs[pind]]
+                else:
+                    for p in u_params:
+                        row += [default_vals[p], np.nan]
+                table_vals[ispec] = row
+
+            if nan_replacement:
+                table_vals = replace_nans(table_vals, nan_replacement)
+
+            for i, row in enumerate(table_vals):
+                out_tab.addRow([i] + list(row))
             SaveNexus(InputWorkspace=out_ws, Filename=out_path)
 
 
