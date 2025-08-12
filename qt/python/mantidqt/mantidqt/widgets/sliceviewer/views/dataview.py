@@ -145,6 +145,12 @@ class SliceViewerDataView(QWidget):
         self.mpl_toolbar.nonOrthogonalClicked.connect(self.on_non_orthogonal_axes_toggle)
         self.mpl_toolbar.zoomPanClicked.connect(self.presenter.zoom_pan_clicked)
         self.mpl_toolbar.zoomPanFinished.connect(self.on_data_limits_changed)
+        self.mpl_toolbar.maskingClicked.connect(self.on_masking_clicked)
+        self.mpl_toolbar.rectMaskingClicked.connect(self.on_rect_masking_clicked)
+        self.mpl_toolbar.elliMaskingClicked.connect(self.on_elli_masking_clicked)
+        self.mpl_toolbar.polyMaskingClicked.connect(self.on_poly_masking_clicked)
+        self.mpl_toolbar.exportMaskingClicked.connect(self.on_export_masking_clicked)
+        self.mpl_toolbar.applyMaskingClicked.connect(self.on_apply_masking_clicked)
         self.toolbar_layout.addWidget(self.mpl_toolbar)
 
         # Status bar
@@ -481,6 +487,42 @@ class SliceViewerDataView(QWidget):
         React to when the data limits have changed
         """
         self.presenter.data_limits_changed()
+
+    def on_masking_clicked(self):
+        """
+        React to masking clicked
+        """
+        pass
+
+    def on_rect_masking_clicked(self):
+        """
+        React to rectangle masking selected
+        """
+        pass
+
+    def on_elli_masking_clicked(self):
+        """
+        React to elliptical masking selected
+        """
+        pass
+
+    def on_poly_masking_clicked(self):
+        """
+        React to polygon masking selected
+        """
+        pass
+
+    def on_export_masking_clicked(self):
+        """
+        React to export masking selected
+        """
+        pass
+
+    def on_apply_masking_clicked(self):
+        """
+        React to apply masking selected
+        """
+        pass
 
     def deactivate_and_disable_tool(self, tool_text):
         """Deactivate a tool as if the control had been pressed and disable the functionality"""

@@ -30,6 +30,8 @@ from mantidqt.widgets.sliceviewer.views.view import SliceViewerView
 from workbench.plotting.propertiesdialog import XAxisEditor, YAxisEditor
 
 DBLMAX = sys.float_info.max
+MASK_SHAPE_OPTIONS = [ToolItemText.RECT_MASKING, ToolItemText.ELLI_MASKING, ToolItemText.POLY_MASKING]
+MASK_PROCESS_OPTIONS = [ToolItemText.APPLY_MASKING, ToolItemText.EXPORT_MASKING]
 
 
 class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
@@ -77,6 +79,9 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
             self.view.data_view.disable_tool_button(ToolItemText.NONORTHOGONAL_AXES)
         if not self.model.can_support_non_axis_cuts():
             self.view.data_view.disable_tool_button(ToolItemText.NONAXISALIGNEDCUTS)
+
+        # disable masking options until activated
+        self.toggle_masking_options()
 
         self.view.data_view.help_button.clicked.connect(self.action_open_help_window)
 
@@ -593,6 +598,18 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
         full_point[xdim] = xdata
         full_point[ydim] = ydata
         return full_point
+
+    def toggle_masking_options(self, masking_option_selected=None):
+        if masking_option_selected:
+            self.view.data_view.enable_tool_button(masking_option_selected)
+            for p_opt in MASK_PROCESS_OPTIONS:
+                self.view.data_view.enable_tool_button(p_opt)
+        else:
+            for p_opt in MASK_PROCESS_OPTIONS:
+                self.view.data_view.disable_tool_button(p_opt)
+        for s_opt in MASK_SHAPE_OPTIONS:
+            if s_opt != masking_option_selected:
+                self.view.data_view.disable_tool_button(s_opt)
 
 
 class SliceViewXAxisEditor(XAxisEditor):
