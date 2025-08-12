@@ -41,11 +41,9 @@ public:
   // ensure that the parser will
   // never resize its buffer.  See below for why this is important
   {
-    // We know the parser's buffer is empty now and we've ensured that the
-    // address will
-    // never change.  Thus, we can verify that the buffer is empty at any time
-    // in the
-    // future by calling bufferFillAddress() and comparing it to this value.
+    // We know the parser's buffer is empty now, and we've ensured that the address will never change.
+    // Thus, we can verify that the buffer is empty at any time in the future
+    // by calling bufferFillAddress() and comparing it to this value.
     m_initialBufferAddr = bufferFillAddress();
   }
 
@@ -324,7 +322,7 @@ public:
     std::shared_ptr<ADARA::GeometryPkt> pkt =
         basicPacketTests<ADARA::GeometryPkt>(geometryPacketV0, sizeof(geometryPacketV0), 1117010859, 421225535);
     TS_ASSERT_EQUALS(pkt->info().c_str(),
-                     std::string("<?xml version='1.0' encoding='ASCII'?>\\n<instrument>VACUO</instrument>"))
+                     std::string("<?xml version='1.0' encoding='ASCII'?>\n<instrument>VACUO</instrument>"))
   }
 
   /***************************
@@ -346,6 +344,35 @@ public:
     TS_ASSERT_EQUALS(pkt->id(), "42")
     TS_ASSERT_EQUALS(pkt->shortName(), "CG3")
     TS_ASSERT_EQUALS(pkt->longName(), "BIOSANS")
+  }
+
+  /********************************
+   *   Detector Bank Sets Packets
+   *******************************/
+
+  void testDectectorBankSetPacketParserV0() {
+    std::shared_ptr<ADARA::DetectorBankSetsPkt> pkt = basicPacketTests<ADARA::DetectorBankSetsPkt>(
+        detectorBankSetPacketV0, sizeof(detectorBankSetPacketV0), 1117010859, 421225535);
+    TS_ASSERT(pkt)
+    TS_ASSERT_EQUALS(pkt->detBankSetCount(), 1)
+    TS_ASSERT_EQUALS(pkt->name(0), "front row")
+    TS_ASSERT_EQUALS(pkt->flags(0), 1)
+    TS_ASSERT_EQUALS(pkt->bankCount(0), 3)
+    TS_ASSERT_EQUALS(pkt->tofOffset(0), 420)
+    TS_ASSERT_EQUALS(pkt->tofMax(0), 16667)
+    TS_ASSERT_EQUALS(pkt->tofBin(0), 10)
+    TS_ASSERT_EQUALS(pkt->throttle(0), 0.0)
+    TS_ASSERT_EQUALS(pkt->suffix(0), "throttled")
+  }
+
+  /***********************
+   *   Data Done Packets
+   **********************/
+
+  void testDataDonePacketParserV0() {
+    std::shared_ptr<ADARA::DataDonePkt> pkt =
+        basicPacketTests<ADARA::DataDonePkt>(dataDonePacketV0, sizeof(dataDonePacketV0), 1117010859, 421225535);
+    TS_ASSERT(pkt)
   }
 
   /************************
@@ -408,8 +435,8 @@ public:
     std::shared_ptr<ADARA::SyncPkt> pkt =
         basicPacketTests<ADARA::SyncPkt>(syncPacket, sizeof(syncPacket), 728504568, 5617153);
     auto x = pkt->signature();
-    TS_ASSERT_EQUALS(pkt->signature(), std::string(reinterpret_cast<const char *>(syncPacket) + 16, 16))
-    TS_ASSERT_EQUALS(pkt->fileOffset(), packetCast<uint64_t>(syncPacket, 32, 8))
+    TS_ASSERT_EQUALS(pkt->signature().c_str(), std::string("SNSADARAORNL"))
+    TS_ASSERT_EQUALS(pkt->fileOffset(), 42)
     TS_ASSERT_EQUALS(pkt->comment().length(), 0) // empty comment
   }
 
@@ -531,8 +558,7 @@ public:
     TS_ASSERT_EQUALS(pkt->severity(), ADARA::VariableSeverity::OK)
     TS_ASSERT_EQUALS(pkt->elemCount(), 2)
     for (size_t i = 0; i < pkt->elemCount(); i++)
-      TS_ASSERT_DELTA(pkt->value()[i], static_cast<double>(i) + 5.0, 1.e-8)
-    TS_ASSERT_EQUALS(pkt->value(), std::vector<double>({5.0, 6.0}))
+      TS_ASSERT_DELTA(pkt->value()[i], static_cast<double>(i) + 8.0, 1.e-8)
   }
 
   void testMultVariableU32PacketParser() {
@@ -561,10 +587,10 @@ public:
     TS_ASSERT_EQUALS(pkt->severity(), ADARA::VariableSeverity::OK)
     TS_ASSERT_EQUALS(pkt->numValues(), 8)
     std::vector<uint32_t> tofs = {17067500, 22171400, 22172800, 22203900, 22207000, 22237400, 22240900, 22255100};
-    std::vector<uint32_t> values = {1, 2, 3, 4, 5, 6, 7, 8};
+    std::vector<double> values_expected = {1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0};
     for (size_t i = 0; i < pkt->numValues(); i++) {
       TS_ASSERT_EQUALS(pkt->tofs()[i], tofs[i])
-      TS_ASSERT_EQUALS(pkt->values()[i], values[i])
+      TS_ASSERT_DELTA(pkt->values()[i], values_expected[i], 1.e-8)
     }
   }
 
@@ -580,7 +606,7 @@ public:
     std::vector<std::string> values = {"one", "two", "three"};
     for (size_t i = 0; i < pkt->numValues(); i++) {
       TS_ASSERT_EQUALS(pkt->tofs()[i], tofs[i])
-      TS_ASSERT_EQUALS(pkt->values()[i], values[i])
+      TS_ASSERT_EQUALS(pkt->values()[i].c_str(), values[i])
     }
   }
 
@@ -594,11 +620,11 @@ public:
     TS_ASSERT_EQUALS(pkt->numValues(), 3)
     std::vector<uint32_t> tofs = {17067500, 22171400, 22172800};
     std::vector<uint32_t> element_counts = {2, 1, 2};
-    std::vector<std::vector<uint32_t>> values = {{1, 2}, {3}, {4, 5}};
+    std::vector<std::vector<uint32_t>> values_expected = {{1, 2}, {3}, {4, 5}};
     for (size_t i = 0; i < pkt->numValues(); i++) {
       TS_ASSERT_EQUALS(pkt->tofs()[i], tofs[i])
       for (size_t j = 0; j < element_counts[i]; ++j)
-        TS_ASSERT_EQUALS(pkt->values()[i][j], values[i][j])
+        TS_ASSERT_EQUALS(pkt->values()[i][j], values_expected[i][j])
     }
   }
 
@@ -612,11 +638,11 @@ public:
     TS_ASSERT_EQUALS(pkt->numValues(), 3)
     std::vector<uint32_t> tofs = {17067500, 22171400, 22172800};
     std::vector<uint32_t> element_counts = {2, 1, 2};
-    std::vector<std::vector<double>> values = {{1.0, 2.0}, {3.0}, {4.0, 5.0}};
+    std::vector<std::vector<double>> values_expected = {{1.0, 2.0}, {3.0}, {4.0, 5.0}};
     for (size_t i = 0; i < pkt->numValues(); i++) {
       TS_ASSERT_EQUALS(pkt->tofs()[i], tofs[i])
       for (size_t j = 0; j < element_counts[i]; ++j)
-        TS_ASSERT_DELTA(pkt->values()[i][j], values[i][j], 1e-8)
+        TS_ASSERT_DELTA(pkt->values()[i][j], values_expected[i][j], 1e-8)
     }
   }
 
@@ -661,6 +687,8 @@ protected:
   DEFINE_RX_PACKET(ADARA::HeartbeatPkt)
   DEFINE_RX_PACKET(ADARA::GeometryPkt)
   DEFINE_RX_PACKET(ADARA::BeamlineInfoPkt)
+  DEFINE_RX_PACKET(ADARA::DetectorBankSetsPkt)
+  DEFINE_RX_PACKET(ADARA::DataDonePkt)
   DEFINE_RX_PACKET(ADARA::DeviceDescriptorPkt)
   DEFINE_RX_PACKET(ADARA::VariableU32Pkt)
   DEFINE_RX_PACKET(ADARA::VariableDoublePkt)

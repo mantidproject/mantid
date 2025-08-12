@@ -514,7 +514,8 @@ SyncPkt::SyncPkt(const uint8_t *data, uint32_t len) : Packet(data, len), m_field
   m_comment.assign(comment, size);
 }
 
-SyncPkt::SyncPkt(const SyncPkt &pkt) : Packet(pkt) {}
+SyncPkt::SyncPkt(const SyncPkt &pkt)
+    : Packet(pkt), m_signature(pkt.signature()), m_offset(pkt.fileOffset()), m_comment(pkt.comment()) {}
 
 /* ------------------------------------------------------------------------ */
 
@@ -946,8 +947,8 @@ MultVariableDoublePkt::MultVariableDoublePkt(const uint8_t *data, uint32_t len)
   if (validate_severity(severity()))
     throw invalid_packet(" MultVariableValue (Double) packet has invalid severity: ");
 
-  m_vals = std::vector<double>(numVals);
-  m_tofs = std::vector<uint32_t>(numVals);
+  m_vals = std::vector<double>();
+  m_tofs = std::vector<uint32_t>();
   // Copy Over NumValues TOF and Double Values from Payload...
   const uint32_t *ptr = (const uint32_t *)&m_fields[4];
   for (uint32_t i = 0; i < numVals; i++) {
@@ -995,7 +996,7 @@ MultVariableStringPkt::MultVariableStringPkt(const uint8_t *data, uint32_t len)
     if (payload_remaining < (size + (2 * sizeof(uint32_t))))
       throw invalid_packet(" MultVariableValue (String) packet has Undersize String Values array");
 
-    m_vals[i].assign(str, size);
+    m_vals.push_back(std::string(str, size));
     // "roundup(N,4)" bytes of null padded chars...
     uint32_t roundup = (size + uint32_t_size - 1) / uint32_t_size;
     ptr += roundup;
@@ -1042,7 +1043,7 @@ MultVariableU32ArrayPkt::MultVariableU32ArrayPkt(const uint8_t *data, uint32_t l
     if (payload_remaining < ((size + 2) * uint32_t_size))
       throw invalid_packet(" MultVariableValue (U32 Array) packet has Undersize U32 Array Values array");
 
-    m_vals[i] = std::vector<uint32_t>(size);
+    m_vals.push_back(std::vector<uint32_t>(size));
     memcpy(const_cast<uint32_t *>(m_vals[i].data()), arr, size * uint32_t_size);
     ptr += size;
     payload_remaining -= (size + 2) * uint32_t_size;
@@ -1089,10 +1090,11 @@ MultVariableDoubleArrayPkt::MultVariableDoubleArrayPkt(const uint8_t *data, uint
     if (payload_remaining < ((size * uint32_t_size) + (2 * uint32_t_size)))
       throw invalid_packet(" MultVariableValue (Double Array) V0 packet has Undersize Double Array Values array");
 
-    m_vals[i] = std::vector<double>(size);
-    memcpy(const_cast<double *>(m_vals[i].data()), arr, size * uint32_t_size);
+    uint32_t size_of_double = static_cast<uint32_t>(sizeof(double));
+    m_vals.push_back(std::vector<double>(size));
+    memcpy(const_cast<double *>(m_vals[i].data()), arr, size * size_of_double);
     // Size of Double Array in Uint32's... ;-D
-    uint32_t dblsize = size * static_cast<uint32_t>(sizeof(double)) / uint32_t_size;
+    uint32_t dblsize = size * size_of_double / uint32_t_size;
     ptr += dblsize;
     payload_remaining -= (dblsize + 2) * uint32_t_size;
   }
