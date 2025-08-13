@@ -88,13 +88,13 @@ pipeline {
       agent { label 'linux-64' }
       steps {
         script {
-          currentBuild.setDescription(env.DESCRIPTION)
+          currentBuild.setDescription(params.DESCRIPTION)
 
-          if(env.PUBLISH_TO_ANACONDA == 'true') {
-            if(!env.ANACONDA_CHANNEL_LABEL.trim()) {
+          if(params.PUBLISH_TO_ANACONDA) {
+            if(!params.ANACONDA_CHANNEL_LABEL?.trim()) {
               error("You must specify an Anaconda label to publish packages.")
             }
-            if(!env.ANACONDA_CHANNEL.trim()) {
+            if(!params.ANACONDA_CHANNEL?.trim()) {
               error("You must specify an Anaconda channel to publish packages.")
             }
           }
@@ -137,8 +137,8 @@ pipeline {
             beforeAgent true
             beforeOptions true
               anyOf {
-                expression { env.BUILD_DEVEL == 'all' }
-                expression { env.BUILD_DEVEL == 'linux-64' }
+                expression { params.BUILD_DEVEL == 'all' }
+                expression { params.BUILD_DEVEL == 'linux-64' }
             }
           }
           agent { label 'linux-64' }
@@ -159,8 +159,8 @@ pipeline {
             beforeAgent true
             beforeOptions true
             anyOf {
-              expression { env.BUILD_DEVEL == 'all' }
-              expression { env.BUILD_DEVEL == 'win-64' }
+              expression { params.BUILD_DEVEL == 'all' }
+              expression { params.BUILD_DEVEL == 'win-64' }
             }
           }
           agent { label 'win-64' }
@@ -183,8 +183,8 @@ pipeline {
             beforeAgent true
             beforeOptions true
               anyOf {
-                expression { env.BUILD_DEVEL == 'all' }
-                expression { env.BUILD_DEVEL == 'osx-64' }
+                expression { params.BUILD_DEVEL == 'all' }
+                expression { params.BUILD_DEVEL == 'osx-64' }
             }
           }
           agent { label 'osx-64' }
@@ -205,8 +205,8 @@ pipeline {
             beforeAgent true
             beforeOptions true
               anyOf {
-                expression { env.BUILD_DEVEL == 'all' }
-                expression { env.BUILD_DEVEL == 'osx-arm64' }
+                expression { params.BUILD_DEVEL == 'all' }
+                expression { params.BUILD_DEVEL == 'osx-arm64' }
             }
           }
           agent { label 'osx-arm64' }
@@ -228,7 +228,7 @@ pipeline {
             beforeOptions true
             // The mantiddocs package is built on linux so we always need to build the linux
             // conda packages unless 'none' is specified.
-            expression { env.BUILD_PACKAGE != 'none' }
+            expression { params.BUILD_PACKAGE != 'none' }
           }
           agent { label 'linux-64' }
           options {
@@ -259,8 +259,8 @@ pipeline {
             beforeAgent true
             beforeOptions true
             anyOf {
-              expression { env.BUILD_PACKAGE == 'win-64' }
-              expression { env.BUILD_PACKAGE == 'all' }
+              expression { params.BUILD_PACKAGE == 'win-64' }
+              expression { params.BUILD_PACKAGE == 'all' }
             }
           }
           agent { label 'win-64' }
@@ -291,8 +291,8 @@ pipeline {
             beforeAgent true
             beforeOptions true
             anyOf {
-              expression { env.BUILD_PACKAGE == 'osx-64' }
-              expression { env.BUILD_PACKAGE == 'all' }
+              expression { params.BUILD_PACKAGE == 'osx-64' }
+              expression { params.BUILD_PACKAGE == 'all' }
             }
           }
           agent { label 'osx-64' }
@@ -323,8 +323,8 @@ pipeline {
             beforeAgent true
             beforeOptions true
             anyOf {
-              expression { env.BUILD_PACKAGE == 'osx-arm64' }
-              expression { env.BUILD_PACKAGE == 'all' }
+              expression { params.BUILD_PACKAGE == 'osx-arm64' }
+              expression { params.BUILD_PACKAGE == 'all' }
             }
           }
           agent { label 'osx-arm64' }
@@ -366,8 +366,8 @@ pipeline {
               beforeAgent true
               beforeOptions true
               anyOf {
-                  expression { env.BUILD_PACKAGE == "${PLATFORM}" }
-                  expression { env.BUILD_PACKAGE == 'all' }
+                  expression { params.BUILD_PACKAGE == "${PLATFORM}" }
+                  expression { params.BUILD_PACKAGE == 'all' }
               }
             }
             agent { label "${PLATFORM}" }
@@ -409,7 +409,7 @@ pipeline {
       when {
         beforeAgent true
         beforeOptions true
-        expression { env.PUBLISH_TO_ANACONDA == 'true' }
+        expression { params.PUBLISH_TO_ANACONDA }
       }
       agent { label 'linux-64' } // Use linux for simplicity with shell scripts
       options {
@@ -440,8 +440,8 @@ pipeline {
         beforeAgent true
         beforeOptions true
         allOf {
-            expression { env.PUBLISH_TO_ANACONDA == 'true' }
-            expression { env.ANACONDA_CHANNEL_LABEL.trim() == 'nightly' }
+            expression { params.PUBLISH_TO_ANACONDA }
+            expression { params.ANACONDA_CHANNEL_LABEL.trim() == 'nightly' }
         }
       }
       agent { label 'linux-64' } // Use linux for simplicity with shell scripts
@@ -459,8 +459,8 @@ pipeline {
         beforeAgent true
         beforeOptions true
         allOf {
-          expression { env.PUBLISH_TO_GITHUB == 'true' }
-          expression { env.GITHUB_RELEASES_REPO.trim() != '' }
+          expression { params.PUBLISH_TO_GITHUB }
+          expression { params.GITHUB_RELEASES_REPO.trim() != '' }
         }
       }
       agent { label 'linux-64' } // Use linux for simplicity with shell scripts
@@ -504,7 +504,7 @@ pipeline {
         script {
           // If a build has a description already, we don't want to overwrite it,
           // and can safely assume it's not a nightly run.
-          if(env.DESCRIPTION.isEmpty()) {
+          if(params.DESCRIPTION.isEmpty()) {
             // Keep this build. If it reaches this stage then it passed all other stages.
             currentBuild.keepLog = true
 
