@@ -207,7 +207,7 @@ File::File(File const &f)
   // NOTE warning to future devs
   // if you change this method, please run the systemtest VanadiumAndFocusWithSolidAngleTest
   if (m_pfile->getId() <= 0)
-    throw Mantid::Nexus::Exception("Error reopening file");
+    throw NXEXCEPTION("Error reopening file");
 }
 
 // deconstructor
