@@ -205,7 +205,7 @@ const Event *BankedEventPkt::nextEvent() const {
       }
 
       // If we still haven't found an event, check for more source sections
-      while (m_curEvent == nullptr && m_curFieldIndex < m_lastFieldIndex) {
+      while (m_curEvent == nullptr && m_curFieldIndex < m_lastFieldIndex) { // cppcheck-suppress knownConditionTrueFalse
         firstEventInSource();
       }
     }
