@@ -5,6 +5,8 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 
+// clang-format is disabled for this file because it contains large binary data arrays.
+// Disabling formatting helps preserve the readability and structure of these arrays.
 // clang-format off
 
 #pragma once

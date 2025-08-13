@@ -323,7 +323,7 @@ private:
 class MANTID_LIVEDATA_DLL PixelMappingPkt : public Packet {
 public:
   PixelMappingPkt(const PixelMappingPkt &pkt);
-  const uint8_t *mappingData() const { return ((const uint8_t *)&(m_fields[0])); }
+  const uint8_t *mappingData() const { return reinterpret_cast<const uint8_t *>(&(m_fields[0])); }
 
 private:
   const uint32_t *m_fields;
@@ -338,7 +338,7 @@ public:
   PixelMappingAltPkt(const PixelMappingAltPkt &pkt);
 
   uint32_t numBanks() const { return m_fields[0]; }
-  const uint8_t *mappingData() const { return ((const uint8_t *)&(m_fields[1])); }
+  const uint8_t *mappingData() const { return reinterpret_cast<const uint8_t *>(&(m_fields[1])); }
 
 private:
   const uint32_t *m_fields;
@@ -429,7 +429,7 @@ public:
   uint32_t scanIndex() const { return m_fields[1]; }
   const std::string &comment() const {
     if (!m_comment.length() && (m_fields[0] & 0xffff)) {
-      m_comment.assign((const char *)&m_fields[2], m_fields[0] & 0xffff);
+      m_comment.assign(reinterpret_cast<const char *>(&(m_fields[2])), m_fields[0] & 0xffff);
     }
 
     return m_comment;
@@ -448,9 +448,9 @@ class MANTID_LIVEDATA_DLL SyncPkt : public Packet {
 public:
   SyncPkt(const SyncPkt &pkt);
 
-  const std::string signature() const { return m_signature; }
+  const std::string &signature() const { return m_signature; }
   uint64_t fileOffset() const { return m_offset; }
-  const std::string comment() const { return m_comment; }
+  const std::string &comment() const { return m_comment; }
 
 private:
   const uint32_t *m_fields;
@@ -560,7 +560,9 @@ public:
     if (index < beamMonCount()) {
       const uint32_t *section = reinterpret_cast<const uint32_t *>(reinterpret_cast<const char *>(m_fields) +
                                                                    sizeof(uint32_t) + (index * m_sectionSize));
-      return *reinterpret_cast<const double *>(&(section[4]));
+      double distanceValue;
+      std::memcpy(&distanceValue, &(section[4]), sizeof(double));
+      return distanceValue;
     } else
       return (0.0);
   }
@@ -609,7 +611,7 @@ class MANTID_LIVEDATA_DLL DetectorBankSetsPkt : public Packet {
 public:
   DetectorBankSetsPkt(const DetectorBankSetsPkt &pkt);
 
-  virtual ~DetectorBankSetsPkt();
+  virtual ~DetectorBankSetsPkt() override;
 
   // Detector Bank Set Name, alphanumeric characters...
   static const size_t SET_NAME_SIZE = 16;
@@ -634,8 +636,8 @@ public:
   std::string name(uint32_t index) const {
     if (index < detBankSetCount()) {
       char name_c[SET_NAME_SIZE + 1]; // give them an inch...
-      memset((void *)name_c, '\0', SET_NAME_SIZE + 1);
-      strncpy(name_c, (const char *)&(m_fields[m_sectionOffsets[index]]), SET_NAME_SIZE);
+      memset(reinterpret_cast<void *>(name_c), '\0', SET_NAME_SIZE + 1);
+      strncpy(name_c, reinterpret_cast<const char *>(&(m_fields[m_sectionOffsets[index]])), SET_NAME_SIZE);
       return (std::string(name_c));
     } else {
       return ("<Out Of Range!>");
@@ -688,7 +690,9 @@ public:
 
   double throttle(uint32_t index) const {
     if (index < detBankSetCount()) {
-      return *reinterpret_cast<const double *>(&m_fields[m_after_banks_offset[index] + 3]);
+      double value;
+      std::memcpy(&value, &(m_fields[m_after_banks_offset[index] + 3]), sizeof(double));
+      return value;
     } else
       return (0.0);
   }
@@ -696,8 +700,9 @@ public:
   std::string suffix(uint32_t index) const {
     if (index < detBankSetCount()) {
       char suffix_c[THROTTLE_SUFFIX_SIZE + 1]; // give them an inch
-      memset((void *)suffix_c, '\0', THROTTLE_SUFFIX_SIZE + 1);
-      strncpy(suffix_c, (const char *)&(m_fields[m_after_banks_offset[index] + 5]), THROTTLE_SUFFIX_SIZE);
+      memset(reinterpret_cast<void *>(suffix_c), '\0', THROTTLE_SUFFIX_SIZE + 1);
+      strncpy(suffix_c, reinterpret_cast<const char *>(&(m_fields[m_after_banks_offset[index] + 5])),
+              THROTTLE_SUFFIX_SIZE);
       return (std::string(suffix_c));
     } else {
       std::stringstream ss;
@@ -786,7 +791,11 @@ public:
   uint32_t varId() const { return m_fields[1]; }
   VariableStatus::Enum status() const { return static_cast<VariableStatus::Enum>(m_fields[2] >> 16); }
   VariableSeverity::Enum severity() const { return static_cast<VariableSeverity::Enum>(m_fields[2] & 0xffff); }
-  double value() const { return *reinterpret_cast<const double *>(&m_fields[3]); }
+  double value() const {
+    double val;
+    std::memcpy(&val, &m_fields[3], sizeof(double));
+    return val;
+  }
 
   void remapDeviceId(uint32_t dev) {
     uint32_t *fields = reinterpret_cast<uint32_t *>(const_cast<uint8_t *>(payload()));
@@ -795,7 +804,7 @@ public:
 
   void updateValue(double value) {
     uint32_t *fields = reinterpret_cast<uint32_t *>(const_cast<uint8_t *>(payload()));
-    *reinterpret_cast<double *>(&fields[3]) = value;
+    std::memcpy(&fields[3], &value, sizeof(double));
   };
 
   VariableDoublePkt(const uint8_t *data, uint32_t len);
@@ -926,7 +935,7 @@ public:
 
   void updateValue(double value) {
     uint32_t *fields = reinterpret_cast<uint32_t *>(const_cast<uint8_t *>(payload()));
-    *((double *)&fields[3]) = value;
+    std::memcpy(&fields[3], &value, sizeof(double));
   };
 
   MultVariableDoublePkt(const uint8_t *data, uint32_t len);
@@ -978,7 +987,7 @@ public:
   uint32_t elemCount(uint32_t index) const {
     return ((index < numValues()) ? static_cast<uint32_t>(m_vals[index].size()) : 0);
   }
-  const std::vector<std::vector<uint32_t>> values() const { return m_vals; }
+  const std::vector<std::vector<uint32_t>> &values() const { return m_vals; }
   const std::vector<uint32_t> &tofs() const { return m_tofs; }
 
   void remapDeviceId(uint32_t dev) {
@@ -1008,7 +1017,7 @@ public:
   uint32_t elemCount(uint32_t index) const {
     return ((index < numValues()) ? static_cast<uint32_t>(m_vals[index].size()) : 0);
   }
-  const std::vector<std::vector<double>> values() const { return m_vals; }
+  const std::vector<std::vector<double>> &values() const { return m_vals; }
   const std::vector<uint32_t> &tofs() const { return m_tofs; }
 
   void remapDeviceId(uint32_t dev) {

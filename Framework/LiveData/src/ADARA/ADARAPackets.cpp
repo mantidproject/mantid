@@ -815,7 +815,7 @@ VariableStringPkt::VariableStringPkt(const uint8_t *data, uint32_t len)
 
   size = m_fields[3];
   if (m_payload_len < (size + (4 * sizeof(uint32_t))))
-    throw invalid_packet("VariableValue (String) V0 packet has Undersize Value string: ");
+    throw invalid_packet("VariableValue (String) V0 packet has undersize Value string");
 
   if (validate_status(status())) {
     std::string msg("VariableValue (string) packet has invalid status: ");
