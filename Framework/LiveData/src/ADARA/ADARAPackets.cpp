@@ -638,7 +638,7 @@ DetectorBankSetsPkt::DetectorBankSetsPkt(const uint8_t *data, uint32_t len)
   if (numSets < 1)
     return;
 
-  m_sectionOffsets = new uint32_t[numSets];
+  m_sectionOffsets = new uint32_t[numSets]; // cppcheck-suppress noOperatorEq
   m_after_banks_offset = new uint32_t[numSets];
 
   // Traverse Detector Bank Sets...
