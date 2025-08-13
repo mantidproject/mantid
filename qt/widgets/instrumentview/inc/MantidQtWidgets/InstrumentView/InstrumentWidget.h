@@ -212,6 +212,8 @@ public:
 
   IInstrumentDisplay *getInstrumentDisplay() const { return m_instrumentDisplay.get(); };
 
+  InstrumentWidgetMaskTab *getMaskTab() { return m_maskTab; }
+
 signals:
   void enableLighting(bool /*_t1*/);
   void plot1D(const QString & /*_t1*/, const std::set<int> & /*_t2*/, bool /*_t3*/);
