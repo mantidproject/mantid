@@ -17,7 +17,6 @@
 #include "MantidDataHandling/EventWorkspaceCollection.h"
 #include "MantidDataHandling/LoadEventNexusIndexSetup.h"
 #include "MantidDataHandling/LoadHelper.h"
-#include "MantidDataHandling/ParallelEventLoader.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
@@ -282,18 +281,6 @@ void LoadEventNexus::init() {
   declareProperty(std::make_unique<PropertyWithValue<bool>>("LoadAllLogs", false, Direction::Input),
                   "Load all the logs from the nxs, without checking or processing them; if checked, LoadLogs will be "
                   "ignored; use with caution");
-
-  std::vector<std::string> loadType{"Default"};
-
-#ifndef _WIN32
-  loadType.emplace_back("Multiprocess (experimental)");
-#endif // _WIN32
-
-  auto loadTypeValidator = std::make_shared<StringListValidator>(loadType);
-  declareProperty("LoadType", "Default", loadTypeValidator,
-                  "Set type of loader. 2 options {Default, Multiproceess},"
-                  "'Multiprocess' should work faster for big files and it is "
-                  "experimental, available only in Linux");
 
   declareProperty(std::make_unique<PropertyWithValue<bool>>("LoadNexusInstrumentXML", true, Direction::Input),
                   "Reads the embedded Instrument XML from the NeXus file "
@@ -882,8 +869,6 @@ std::shared_ptr<BankPulseTimes> LoadEventNexus::runLoadNexusLogs<EventWorkspaceC
   return ret;
 }
 
-enum class LoadEventNexus::LoaderType { MULTIPROCESS, DEFAULT };
-
 //-----------------------------------------------------------------------------
 /**
  * Load events from the file.
@@ -1179,49 +1164,13 @@ void LoadEventNexus::loadEvents(API::Progress *const prog, const bool monitors) 
   shortest_tof = static_cast<double>(std::numeric_limits<uint32_t>::max()) * 0.1;
   longest_tof = 0.;
 
-  bool loaded{false};
-  auto loaderType = defineLoaderType(haveWeights, oldNeXusFileNames, classType);
-  if (loaderType == LoaderType::MULTIPROCESS) {
-    auto ws = m_ws->getSingleHeldWorkspace();
-    m_file->close();
-
-    struct ExceptionOutput {
-      static void out(decltype(g_log) &log, const std::exception &except, int level = 0) {
-        log.warning() << std::string(level, ' ') << "exception: " << except.what() << '\n';
-        try {
-          std::rethrow_if_nested(except);
-        } catch (const std::exception &e) {
-          ExceptionOutput::out(log, e, level + 1);
-        } catch (...) {
-        }
-      }
-    };
-
-    try {
-      ParallelEventLoader::loadMultiProcess(*ws, m_filename, m_top_entry_name, bankNames, event_id_is_spec,
-                                            getProperty("Precount"));
-      g_log.information() << "Used Multiprocess ParallelEventLoader.\n";
-      loaded = true;
-      shortest_tof = 0.0;
-      longest_tof = 1e10;
-    } catch (const std::exception &e) {
-      ExceptionOutput::out(g_log, e);
-      g_log.warning() << "\nMultiprocess event loader failed, falling back "
-                         "to default loader.\n";
-    }
-
-    safeOpenFile(m_filename);
-  }
-  if (!loaded) {
-    loaderType = LoaderType::DEFAULT; // to be used later
-    bool precount = getProperty("Precount");
-    int chunk = getProperty("ChunkNumber");
-    int totalChunks = getProperty("TotalChunks");
-    const auto startTime = std::chrono::high_resolution_clock::now();
-    DefaultEventLoader::load(this, *m_ws, haveWeights, event_id_is_spec, bankNames, periodLog->valuesAsVector(),
-                             classType, bankNumEvents, oldNeXusFileNames, precount, chunk, totalChunks);
-    addTimer("loadEvents", startTime, std::chrono::high_resolution_clock::now());
-  }
+  bool precount = getProperty("Precount");
+  int chunk = getProperty("ChunkNumber");
+  int totalChunks = getProperty("TotalChunks");
+  const auto startTime = std::chrono::high_resolution_clock::now();
+  DefaultEventLoader::load(this, *m_ws, haveWeights, event_id_is_spec, bankNames, periodLog->valuesAsVector(),
+                           classType, bankNumEvents, oldNeXusFileNames, precount, chunk, totalChunks);
+  addTimer("loadEvents", startTime, std::chrono::high_resolution_clock::now());
 
   // Info reporting
   const std::size_t eventsLoaded = m_ws->getNumberEvents();
@@ -1277,19 +1226,13 @@ void LoadEventNexus::loadEvents(API::Progress *const prog, const bool monitors) 
   adjustTimeOfFlightISISLegacy(*m_file, m_ws, m_top_entry_name, classType, descriptor.get());
 
   if (m_is_time_filtered) {
-    if (loaderType == LoaderType::MULTIPROCESS) {
-      // Now filter out the run and events, using the DateAndTime type.
-      // This will sort both by pulse time
-      filterEventsByTime(m_ws, filter_time_start, filter_time_stop);
-    } else {
-      // events were filtered during read
-      // filter the logs the same way FilterByTime does
-      TimeROI timeroi(filter_time_start, filter_time_stop);
-      if (filter_bad_pulses)
-        timeroi.update_intersection(*bad_pulses_timeroi);
-      m_ws->mutableRun().setTimeROI(timeroi);
-      m_ws->mutableRun().removeDataOutsideTimeROI();
-    }
+    // events were filtered during read
+    // filter the logs the same way FilterByTime does
+    TimeROI timeroi(filter_time_start, filter_time_stop);
+    if (filter_bad_pulses)
+      timeroi.update_intersection(*bad_pulses_timeroi);
+    m_ws->mutableRun().setTimeROI(timeroi);
+    m_ws->mutableRun().removeDataOutsideTimeROI();
   } else if (filter_bad_pulses) {
     m_ws->mutableRun().setTimeROI(*bad_pulses_timeroi);
     m_ws->mutableRun().removeDataOutsideTimeROI();
@@ -1694,29 +1637,5 @@ void LoadEventNexus::safeOpenFile(const std::string &fname) {
                              "file: " +
                              fname);
   }
-}
-
-/// The parallel loader currently has no support for a series of special
-/// cases, as indicated by the return value of this method.
-LoadEventNexus::LoaderType LoadEventNexus::defineLoaderType(const bool haveWeights, const bool oldNeXusFileNames,
-                                                            const std::string &classType) const {
-  auto propVal = getPropertyValue("LoadType");
-  if (propVal == "Default")
-    return LoaderType::DEFAULT;
-
-  bool noParallelConstrictions = true;
-  noParallelConstrictions &= !(m_ws->nPeriods() != 1);
-  noParallelConstrictions &= !haveWeights;
-  noParallelConstrictions &= !oldNeXusFileNames;
-  noParallelConstrictions &= !(filter_tof_range);
-  noParallelConstrictions &= !((filter_time_start != Types::Core::DateAndTime::minimum() ||
-                                filter_time_stop != Types::Core::DateAndTime::maximum()));
-  noParallelConstrictions &= !((!isDefault(PropertyNames::COMPRESS_TOL) || !isDefault("SpectrumMin") ||
-                                !isDefault("SpectrumMax") || !isDefault("SpectrumList") || !isDefault("ChunkNumber")));
-  noParallelConstrictions &= !(classType != "NXevent_data");
-
-  if (!noParallelConstrictions)
-    return LoaderType::DEFAULT;
-  return LoaderType::MULTIPROCESS;
 }
 } // namespace Mantid::DataHandling

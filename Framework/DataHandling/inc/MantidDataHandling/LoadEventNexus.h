@@ -189,9 +189,6 @@ public:
   std::unique_ptr<Nexus::File> m_file;
 
 private:
-  /// Possible loaders types
-  enum class LoaderType;
-
   /// Intialisation code
   void init() override;
 
@@ -199,9 +196,6 @@ private:
   void execLoader() override;
 
   std::map<std::string, std::string> validateInputs() override;
-
-  LoadEventNexus::LoaderType defineLoaderType(const bool haveWeights, const bool oldNeXusFileNames,
-                                              const std::string &classType) const;
 
   DataObjects::EventWorkspace_sptr createEmptyEventWorkspace();
 
