@@ -326,6 +326,9 @@ invalidPointerCast:${CMAKE_SOURCE_DIR}/Framework/LiveData/inc/MantidLiveData/ADA
 cstyleCast:${CMAKE_SOURCE_DIR}/Framework/LiveData/inc/MantidLiveData/ADARA/ADARAPackets.h:593
 cstyleCast:${CMAKE_SOURCE_DIR}/Framework/LiveData/inc/MantidLiveData/ADARA/ADARAPackets.h:594
 invalidPointerCast:${CMAKE_SOURCE_DIR}/Framework/LiveData/inc/MantidLiveData/ADARA/ADARAPackets.h:679
+knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/LiveData/src/ADARA/ADARAPackets.cpp:178
+knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/LiveData/src/ADARA/ADARAPackets.cpp:198
+knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/LiveData/src/ADARA/ADARAPackets.cpp:200
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/LiveData/src/ADARA/ADARAPackets.cpp:208
 unsignedPositive:${CMAKE_SOURCE_DIR}/Framework/LiveData/inc/MantidLiveData/ISIS/TCPEventStreamDefs.h:61
 badBitmaskCheck:${CMAKE_SOURCE_DIR}/Framework/LiveData/inc/MantidLiveData/ISIS/TCPEventStreamDefs.h:70
