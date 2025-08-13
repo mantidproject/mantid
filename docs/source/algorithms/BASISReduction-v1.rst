@@ -138,6 +138,7 @@ both containing the dynamic susceptibility:
 - OutputSusceptibilityFrequencyASCII:  If checked the dat file contains the dynamic susceptibility as a function of frequency, in units of GHz.
 - OutputSusceptibilityEnergyASCII:  If checked the dat file contains the dynamic susceptibility as a function of energy, in units of meV.
 
+The datafiles will be stored in the "Default Save Directory" as specified in the "Manage User Directories" settings.
 
 Powder Diffraction
 ==================
