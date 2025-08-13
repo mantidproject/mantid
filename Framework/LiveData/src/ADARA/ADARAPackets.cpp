@@ -894,7 +894,7 @@ VariableDoubleArrayPkt::VariableDoubleArrayPkt(const uint8_t *data, uint32_t len
     throw invalid_packet(" VariableValue (Double Array) packet has invalid severity: ");
 
   m_val = std::vector<double>(count);
-  // cppcheck-suppress CWE-704
+  // cppcheck-suppress invalidPointerCast
   memcpy(const_cast<double *>(m_val.data()), reinterpret_cast<const double *>(&m_fields[4]), count * sizeof(double));
 }
 
@@ -1096,7 +1096,7 @@ MultVariableDoubleArrayPkt::MultVariableDoubleArrayPkt(const uint8_t *data, uint
     ptr++;
     size = *ptr; // Next Double Array Size...
     ptr++;
-    // cppcheck-suppress CWE-704
+    // cppcheck-suppress invalidPointerCast
     const double *arr = reinterpret_cast<const double *>(ptr); // Next Double Array...
 
     if (payload_remaining < ((size * uint32_t_size) + (2 * uint32_t_size)))
