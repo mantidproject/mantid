@@ -234,12 +234,12 @@ void BankedEventPkt::firstEventInSource() const {
     m_bankNum = 1; // banks are numbered from 1 to m_bankCount.
     m_curFieldIndex = m_sourceStartIndex + 4;
 
+    // cppcheck-suppress identicalInnerCondition
     while (m_bankNum <= m_bankCount && m_curEvent == nullptr) {
       firstEventInBank();
-      // cppcheck-suppress knownConditionTrueFalse
+      // cppcheck-suppress identicalInnerCondition
       if (m_curEvent == nullptr) {
-        // Increment banknum because there were no events in the bank we
-        // just tested
+        // Increment banknum because there were no events in the bank we just tested
         m_bankNum++;
       }
     }
