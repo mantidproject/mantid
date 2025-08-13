@@ -536,7 +536,7 @@ pipeline {
 // ------------------- Functions -------------------
 
 def git_branch_name() {
-  name = scm.branches[0].name
+  def name = scm.branches[0].name
   // Some jobs define a BRANCH_NAME parameter to allow customisable builds.
   // In this case the value of scm.branches[0].name will literally be
   // $BRANCH_NAME and instead we have to get it from the environment.
@@ -571,16 +571,16 @@ def checkoutSource(sha) {
 }
 
 def build_and_test(platform) {
-  buildscript_path = "${CISCRIPT_DIR}/conda-buildscript"
-  common_args = '--clean-build --clean-external-projects --enable-systemtests'
-  cmake_preset = "${platform}-ci"
+  def buildscript_path = "${CISCRIPT_DIR}/conda-buildscript"
+  def common_args = '--clean-build --clean-external-projects --enable-systemtests'
+  def cmake_preset = "${platform}-ci"
   if(platform.startsWith('win')) {
-    workspace_unix_style = toUnixStylePath("${WORKSPACE}")
+    def workspace_unix_style = toUnixStylePath("${WORKSPACE}")
     bat "\"${WIN_BASH}\" -ex -c \"${buildscript_path}\
       ${workspace_unix_style}/${CHECKOUT_DIR} ${cmake_preset} ${common_args}\""
   } else {
     // Only run doctests on Linux
-    doctests = ""
+    def doctests = ""
     if(platform.startsWith('linux')) {
       doctests = "--enable-doctests"
     }
@@ -595,9 +595,9 @@ def publish_test_reports() {
 }
 
 def package_conda(platform, base_or_workbench) {
-  packagescript_path = "${CISCRIPT_DIR}/package-conda"
+  def packagescript_path = "${CISCRIPT_DIR}/package-conda"
   if(platform.startsWith('win')) {
-    workspace_unix_style = toUnixStylePath("${WORKSPACE}")
+    def workspace_unix_style = toUnixStylePath("${WORKSPACE}")
     bat "\"${WIN_BASH}\" -ex -c \"${packagescript_path}\
       ${workspace_unix_style} ${package_conda_options(platform, base_or_workbench)}\""
   } else {
@@ -607,9 +607,9 @@ def package_conda(platform, base_or_workbench) {
 }
 
 def package_conda_options(platform, base_or_workbench) {
-  package_flags = ""
+  def package_flags = ""
   if(base_or_workbench == 'base') {
-    docs_flags = ""
+    def docs_flags = ""
     if(platform.startsWith('linux') && buildMantiddocs) {
       docs_flags = "--build-docs"
     }
@@ -623,23 +623,23 @@ def package_conda_options(platform, base_or_workbench) {
     }
   }
 
-  package_options = "${package_flags} --git-tag ${GIT_TAG} --platform ${platform}"
+  def package_options = "${package_flags} --git-tag ${GIT_TAG} --platform ${platform}"
   return package_options.trim()
 }
 
 def generate_git_tag() {
-  git_tag = ""
+  def git_tag = ""
   if(GITHUB_RELEASES_TAG.trim() != '') {
     git_tag = "${GITHUB_RELEASES_TAG}"
   }
   else {
-    versionscript_path = "${CISCRIPT_DIR}/generate-version-number"
+    def versionscript_path = "${CISCRIPT_DIR}/generate-version-number"
     if(isUnix()) {
       git_tag = sh(
         script: "${versionscript_path}", returnStdout: true
       ).trim()
     } else {
-      workspace_unix_style = toUnixStylePath("${WORKSPACE}")
+      def workspace_unix_style = toUnixStylePath("${WORKSPACE}")
       // @ suppresses the inclusion of the command itself in the output
       // https://www.jenkins.io/doc/pipeline/steps/workflow-durable-task-step/#bat-windows-batch-script
       git_tag = bat(script: "@\"${WIN_BASH}\" -ex -c \"${versionscript_path}\"", returnStdout: true).trim()
@@ -649,18 +649,18 @@ def generate_git_tag() {
 }
 
 def package_standalone(platform) {
-  packagescript_path = "${CISCRIPT_DIR}/package-standalone"
+  def packagescript_path = "${CISCRIPT_DIR}/package-standalone"
   if(isUnix()) {
     sh "${packagescript_path} ${WORKSPACE} ${package_standalone_options(platform)}"
   } else {
-    workspace_unix_style = toUnixStylePath("${WORKSPACE}")
+    def workspace_unix_style = toUnixStylePath("${WORKSPACE}")
     bat "\"${WIN_BASH}\" -ex -c \"${packagescript_path} ${workspace_unix_style}\
       ${package_standalone_options(platform)}\""
   }
 }
 
 def package_standalone_options(platform) {
-  package_options = ""
+  def package_options = ""
   if(PACKAGE_SUFFIX.trim() != '') {
     package_options += " --package-suffix ${PACKAGE_SUFFIX}"
   }
@@ -669,7 +669,7 @@ def package_standalone_options(platform) {
 
 // Determine whether this build should be marked as a prerelease on GitHub.
 def prerelease_option() {
-  prerelease_flag = ""
+  def prerelease_flag = ""
   // If a tag has not been specified, we assume it's for a prerelease version.
   if(GITHUB_RELEASES_TAG.trim() == '') {
     prerelease_flag = "--prerelease"
@@ -688,7 +688,7 @@ def archive_conda_packages(platform) {
 }
 
 def archive_standalone_package(platform) {
-  pattern = ""
+  def pattern = ""
   if(platform.startsWith('linux')) {
     pattern = '*.tar.xz'
   } else if(platform.startsWith('win')) {
@@ -712,7 +712,7 @@ def archive_test_logs(){
 }
 
 def archive_env_logs(platform) {
-  env_log_dir = "**/conda-bld/${platform}/env_logs"
+  def env_log_dir = "**/conda-bld/${platform}/env_logs"
   archiveArtifacts artifacts: env_log_dir += "/**/*.txt",
     allowEmptyArchive: false,
     fingerprint: true,
