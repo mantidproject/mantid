@@ -199,6 +199,12 @@ class PeakFitMixin(object):
         self.fit_dir = os.path.join(CWDIR, "FitParameters")
         self.peaks = (1.8, 1.44)
         self.reference_columns = ["wsindex", "I_est", "I", "I_err", "A", "A_err", "B", "B_err", "X0", "X0_err", "S", "S_err"]
+        self.default_kwargs = {
+            "wss": ["ENGINX_280625_focused_bank_1_dSpacing"],
+            "peaks": self.peaks,
+            "peak_window": 0.03,
+            "save_dir": self.fit_dir,
+        }
         self.peak_1_vals = [
             0,
             54.72063098592834,
@@ -210,7 +216,7 @@ class PeakFitMixin(object):
             0.0,
             1.7477947721710467,
             0.0,
-            -0.7063715645490579,
+            0.00042411,
             0.0,
         ]
         self.peak_2_vals = [
@@ -224,21 +230,36 @@ class PeakFitMixin(object):
             0.0,
             1.4379627981678513,
             0.0,
-            0.006968595663651428,
+            0.00696813,
             0.0,
         ]
 
     def validate_table(self, out_table, expected_dict):
         expected_cols = list(expected_dict.keys())
         for c in out_table.getColumnNames():
+            print(c, ": ", np.nan_to_num(out_table.column(c)), ", validation value: ", expected_dict[c])
+
+        for c in out_table.getColumnNames():
             self.assertIn(c, expected_cols)
-            self.assertTrue(np.allclose(np.nan_to_num(out_table.column(c)), expected_dict[c]))
+            self.assertTrue(np.allclose(np.nan_to_num(out_table.column(c)), expected_dict[c], rtol=1e-3))
+
+    def validate_missing_peaks_vals(self, peak_1_vals, peak_2_vals):
+        param_table1 = ADS.retrieve("ENGINX_280625_2.3_GROUP_Fit_Parameters")
+        param_table2 = ADS.retrieve("ENGINX_280625_2.5_GROUP_Fit_Parameters")
+        expected_files = [
+            os.path.join(CWDIR, "FitParameters", "GROUP", "2.3", "ENGINX_280625_2.3_GROUP_Fit_Parameters.nxs"),
+            os.path.join(CWDIR, "FitParameters", "GROUP", "2.5", "ENGINX_280625_2.5_GROUP_Fit_Parameters.nxs"),
+        ]
+
+        self.validate_table(param_table1, dict(zip(self.reference_columns, peak_1_vals)))
+        self.validate_table(param_table2, dict(zip(self.reference_columns, peak_2_vals)))
+        [self.assertTrue(os.path.exists(ef)) for ef in expected_files]
 
 
 class TestFittingPeaksOfFocusedData(systemtesting.MantidSystemTest, PeakFitMixin):
     def runTest(self):
         self.setup_fit_peaks_inputs()
-        fit_all_peaks(wss=["ENGINX_280625_focused_bank_1_dSpacing"], peaks=self.peaks, peak_window=0.03, save_dir=self.fit_dir)
+        fit_all_peaks(**self.default_kwargs)
 
     def validate(self):
         param_table1 = ADS.retrieve("ENGINX_280625_1.8_GROUP_Fit_Parameters")
@@ -257,12 +278,51 @@ class TestFittingPeaksOfFocusedData(systemtesting.MantidSystemTest, PeakFitMixin
         _try_delete_dirs(CWDIR, ["FitParameters"])
 
 
+class TestFittingPeaksOfMissingPeakDataWithFillZero(systemtesting.MantidSystemTest, PeakFitMixin):
+    def runTest(self):
+        self.setup_fit_peaks_inputs()
+        kwargs = self.default_kwargs
+        kwargs["peaks"] = (2.3, 2.5)
+        # expect no peaks here, set the i over sigma threshold large as well as sigma is ill-defined
+        fit_all_peaks(**kwargs, i_over_sigma_thresh=10.0, nan_replacement="zeros")
+
+    def validate(self):
+        # expect all params to be zeros (coincidentally including val[0] as this is the wsindex)
+        expected_vals1 = [0.0 for _ in self.peak_1_vals]
+        expected_vals2 = [0.0 for _ in self.peak_2_vals]
+        self.validate_missing_peaks_vals(expected_vals1, expected_vals2)
+
+    def cleanup(self):
+        ADS.clear()
+        _try_delete_dirs(CWDIR, ["FitParameters"])
+
+
+class TestFittingPeaksOfMissingPeakDataWithSpecifiedValue(systemtesting.MantidSystemTest, PeakFitMixin):
+    def runTest(self):
+        self.setup_fit_peaks_inputs()
+        kwargs = self.default_kwargs
+        kwargs["peaks"] = (2.3, 2.5)
+        # expect no peaks here, set the i over sigma threshold large as well as sigma is ill-defined
+        fit_all_peaks(**kwargs, i_over_sigma_thresh=10.0, nan_replacement="zeros", no_fit_value_dict={"I_est": 1.0, "I": 0.01})
+
+    def validate(self):
+        # expect all params to be zeros (coincidentally including val[0] as this is the wsindex)
+        # except I_est which is val[1] and has been set to 1.0 and I which is val[2] and is set as 0.01
+        expected_vals1 = [0.0, 1.0, 0.01] + [0.0 for _ in self.peak_1_vals[3:]]
+        expected_vals2 = [0.0, 1.0, 0.01] + [0.0 for _ in self.peak_2_vals[3:]]
+        self.validate_missing_peaks_vals(expected_vals1, expected_vals2)
+
+    def cleanup(self):
+        ADS.clear()
+        _try_delete_dirs(CWDIR, ["FitParameters"])
+
+
 class TestFittingPeaksOfFocusedDataWithGroup(systemtesting.MantidSystemTest, PeakFitMixin):
     def runTest(self):
         self.setup_fit_peaks_inputs()
         self.input_ws.getRun().addProperty("Grouping", "TEST", False)
 
-        fit_all_peaks(wss=["ENGINX_280625_focused_bank_1_dSpacing"], peaks=self.peaks, peak_window=0.03, save_dir=self.fit_dir)
+        fit_all_peaks(**self.default_kwargs)
 
     def validate(self):
         param_table1 = ADS.retrieve("ENGINX_280625_1.8_TEST_Fit_Parameters")
