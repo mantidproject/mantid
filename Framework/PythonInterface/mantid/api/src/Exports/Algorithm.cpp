@@ -180,6 +180,13 @@ object createChildWithProps(tuple args, dict kwargs) {
   auto childAlg = parentAlg->createChildAlgorithm(name.value(), startProgress.value_or(-1), endProgress.value_or(-1),
                                                   enableLogging.value_or(true), version.value_or(-1));
 
+  if (kwargs.has_key(reservedNames[5])) {
+    // We set StoreInADS here if it hasn't been set before and it is present in kwargs
+    std::optional<bool> storeADS = std::nullopt;
+    extractKwargs<bool>(kwargs, reservedNames[5], storeADS);
+    childAlg->setAlwaysStoreInADS(storeADS.value_or(false));
+  }
+
   const list keys = kwargs.keys();
   for (int i = 0; i < len(keys); ++i) {
     const std::string propName = extract<std::string>(keys[i]);
