@@ -175,7 +175,6 @@ BankedEventPkt::BankedEventPkt(const BankedEventPkt &pkt)
 const Event *BankedEventPkt::firstEvent() const {
   m_curEvent = nullptr;
   m_curFieldIndex = 4;
-  // cppcheck-suppress knownConditionTrueFalse
   while (m_curEvent == nullptr && m_curFieldIndex <= m_lastFieldIndex) {
     // Start of a new source
     firstEventInSource();
@@ -198,7 +197,6 @@ const Event *BankedEventPkt::nextEvent() const {
       m_bankNum++;
       while (m_bankNum <= m_bankCount && m_curEvent == nullptr) {
         firstEventInBank();
-        // cppcheck-suppress knownConditionTrueFalse
         if (m_curEvent == nullptr) {
           // Increment banknum because there were no events in the bank we
           // just tested
@@ -207,7 +205,6 @@ const Event *BankedEventPkt::nextEvent() const {
       }
 
       // If we still haven't found an event, check for more source sections
-      // cppcheck-suppress knownConditionTrueFalse
       while (m_curEvent == nullptr && m_curFieldIndex < m_lastFieldIndex) {
         firstEventInSource();
       }
@@ -234,7 +231,6 @@ void BankedEventPkt::firstEventInSource() const {
     m_bankNum = 1; // banks are numbered from 1 to m_bankCount.
     m_curFieldIndex = m_sourceStartIndex + 4;
 
-    // cppcheck-suppress identicalInnerCondition
     while (m_bankNum <= m_bankCount && m_curEvent == nullptr) {
       firstEventInBank();
       // cppcheck-suppress identicalInnerCondition
