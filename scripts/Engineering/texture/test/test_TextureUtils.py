@@ -176,8 +176,13 @@ class TextureUtilsTest(unittest.TestCase, CrystalPhaseHelperMixin):
             "Function": expected_func,
             "CostFunction": "Least squares",
             "Output": "first_fit",
-            "MaxIterations": 10,
+            "MaxIterations": 50,
             "InputWorkspace": wsname,
+            "Minimizer": "Levenberg-Marquardt",
+            "StepSizeMethod": "Sqrt epsilon",
+            "IgnoreInvalidData": True,
+            "CreateOutput": True,
+            "OutputCompositeMembers": True,
         }
         expected_fit_kwargs = {
             "Function": expected_func,
@@ -185,6 +190,11 @@ class TextureUtilsTest(unittest.TestCase, CrystalPhaseHelperMixin):
             "Output": "fit",
             "MaxIterations": 50,
             "InputWorkspace": wsname,
+            "Minimizer": "Levenberg-Marquardt",
+            "StepSizeMethod": "Sqrt epsilon",
+            "IgnoreInvalidData": True,
+            "CreateOutput": True,
+            "OutputCompositeMembers": True,
         }
         expected_tab_name = f"{prefix}{run_number}_{peak}_{group}_Fit_Parameters"
         expected_func_kwargs = {"InputWorkspace": wsname}

@@ -17,7 +17,7 @@ from mantid.api import AnalysisDataService as ADS, MultiDomainFunction, Function
 from typing import Optional, Sequence, Union, Tuple
 from mantid.dataobjects import Workspace2D
 from mantid.fitfunctions import FunctionWrapper, CompositeFunctionWrapper
-from plugins.algorithms.IntegratePeaks1DProfile import PeakFunctionGenerator, calc_sigma_from_summation
+from plugins.algorithms.IntegratePeaks1DProfile import PeakFunctionGenerator, calc_intens_and_sigma_arrays
 # -------- Utility --------------------------------
 
 
@@ -400,33 +400,33 @@ def replace_nans(vals, method: str):
     return new_vals.T
 
 
-def get_eval_ws(out_ws_name, idom, ndom):
-    if ndom > 1:
-        return ADS.retrieve(f"{out_ws_name[:-1]}_{idom}")
-    else:
-        return ADS.retrieve(out_ws_name)
+# def get_eval_ws(out_ws_name, idom, ndom):
+#    if ndom > 1:
+#        return ADS.retrieve(f"{out_ws_name[:-1]}_{idom}")
+#    else:
+#        return ADS.retrieve(out_ws_name)
 
 
-def calc_intens_and_sigma_arrays(fit_result, error_strategy):
-    function = fit_result["Function"]
-    ndom = function.nDomains()
-    intens = np.zeros(ndom)
-    sigma = np.zeros(intens.shape)
-    intens_over_sig = np.zeros(intens.shape)
-    peak_func = FunctionFactory.Instance().createPeakFunction(function[0][0].name())
-    peak_limits = np.full(intens.shape, None)
-    for idom, comp_func in enumerate(function):
-        [peak_func.setParameter(iparam, comp_func.getParameterValue(iparam)) for iparam in range(peak_func.nParams())]
-        intens[idom] = peak_func.intensity()
-        if error_strategy == "Hessian":
-            [peak_func.setError(iparam, comp_func.getError(iparam)) for iparam in range(peak_func.nParams())]
-            sigma[idom] = peak_func.intensityError()
-        else:
-            ws_fit = get_eval_ws(fit_result["OutputWorkspace"], idom, ndom)
-            sigma[idom], peak_limits[idom] = calc_sigma_from_summation(ws_fit.readX(0), ws_fit.readE(0) ** 2, ws_fit.readY(0))
-    ivalid = ~np.isclose(sigma, 0)
-    intens_over_sig[ivalid] = intens[ivalid] / sigma[ivalid]
-    return intens, sigma, intens_over_sig, peak_limits
+# def calc_intens_and_sigma_arrays(fit_result, error_strategy):
+#    function = fit_result["Function"]
+#    ndom = function.nDomains()
+#    intens = np.zeros(ndom)
+#    sigma = np.zeros(intens.shape)
+#    intens_over_sig = np.zeros(intens.shape)
+#    peak_func = FunctionFactory.Instance().createPeakFunction(function[0][0].name())
+#    peak_limits = np.full(intens.shape, None)
+#    for idom, comp_func in enumerate(function):
+#        [peak_func.setParameter(iparam, comp_func.getParameterValue(iparam)) for iparam in range(peak_func.nParams())]
+#        intens[idom] = peak_func.intensity()
+#        if error_strategy == "Hessian":
+#            [peak_func.setError(iparam, comp_func.getError(iparam)) for iparam in range(peak_func.nParams())]
+#            sigma[idom] = peak_func.intensityError()
+#        else:
+#            ws_fit = get_eval_ws(fit_result["OutputWorkspace"], idom, ndom)
+#            sigma[idom], peak_limits[idom] = calc_sigma_from_summation(ws_fit.readX(0), ws_fit.readE(0) ** 2, ws_fit.readY(0))
+#    ivalid = ~np.isclose(sigma, 0)
+#    intens_over_sig[ivalid] = intens[ivalid] / sigma[ivalid]
+#    return intens, sigma, intens_over_sig, peak_limits
 
 
 def fit_all_peaks(
@@ -456,12 +456,22 @@ def fit_all_peaks(
                      min/max/mean - will replace all nans in a column with the min/max/mean non-nan value (otherwise will remain nan)
     no_fit_value_dict: allows the user to specify the unfit default value of parameters as a dict of key:value pairs
     """
+
+    fit_kwargs = {
+        "Minimizer": "Levenberg-Marquardt",
+        "StepSizeMethod": "Sqrt epsilon",
+        "IgnoreInvalidData": True,
+        "CreateOutput": True,
+        "OutputCompositeMembers": True,
+    }
+
     for wsname in wss:
         ws = ADS.retrieve(wsname)
         run, prefix = _get_run_and_prefix_from_ws_log(ws, wsname)
         grouping = _get_grouping_from_ws_log(ws)
 
         for peak in peaks:
+            logger.information(f"Workspace: {wsname}, Peak: {peak}")
             # change peak window to fraction
             out_ws = f"{prefix}{run}_{peak}_{grouping}_Fit_Parameters"
             out_file = out_ws + ".nxs"
@@ -484,14 +494,15 @@ def fit_all_peaks(
                 Function=initial_function,
                 CostFunction="Least squares",
                 Output="first_fit",
-                MaxIterations=50,  # if it hasn't fit in 10 it is likely because the texture has the peak missing
+                MaxIterations=50,  # if it hasn't fit in 50 it is likely because the texture has the peak missing
+                **fit_kwargs,
                 **md_fit_kwargs,
             )
 
             fit_result = {"Function": fit_object.Function.function, "OutputWorkspace": fit_object.OutputWorkspace.name()}
 
             # update peak mask based on I/sig from fit
-            i, sig, i_over_sigma, _ = calc_intens_and_sigma_arrays(fit_result, "Summation")
+            *_, i_over_sigma, _ = calc_intens_and_sigma_arrays(fit_result, "Summation")
             fit_mask = i_over_sigma > i_over_sigma_thresh
 
             # fit only peak pixels and let peak centers vary independently of DIFC ratio
@@ -501,6 +512,7 @@ def fit_all_peaks(
                 CostFunction="Least squares",
                 Output="fit",
                 MaxIterations=50,  # if it hasn't fit in 50 it is likely because the texture has the peak missing
+                **fit_kwargs,
                 **md_fit_kwargs,
             )
 
