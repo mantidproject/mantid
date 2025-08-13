@@ -1,7 +1,7 @@
 // This script expects the following environment variables to be set by the Jenkins job:
 // GITHUB_USER_NAME - The name of the user, being used with pushing/pulling from git
 // GITHUB_USER_EMAIL - The email of the user, being used with pushing/pulling from git
-// GITHUB_TOKEN_CREDENTIAL_ID - The name of the credentials token in Jenkins that you want to use for cloning and pushing to the mantid repo
+// GITHUB_TOKEN_CREDENTIAL_ID - The name of the credentials token in Jenkins that you want to use for pushing to the mantid repo
 // ANACONDA_TOKEN_CREDENTIAL_ID - The name of the credentials token in Jenkins that you want to use for publishing conda packages
 
 def gitBranch = git_branch_name()
