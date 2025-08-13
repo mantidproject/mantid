@@ -4,6 +4,8 @@
 // GITHUB_TOKEN_CREDENTIAL_ID - The name of the credentials token in Jenkins that you want to use for pushing to the mantid repo
 // ANACONDA_TOKEN_CREDENTIAL_ID - The name of the credentials token in Jenkins that you want to use for publishing conda packages
 
+import groovy.transform.Field
+
 def gitBranch = git_branch_name()
 // Only Publish one of main or release-next by default. BRANCH_TO_PUBLISH is a global
 // environment variable set in the Jenkins system configuration global properties.
@@ -25,7 +27,7 @@ def defaults = [
 
 // If required, switch off the mantiddocs conda package build. This is deliberately not listed in the
 // pipeline parameters because it's only switched off for ornl-next anaconda publishing.
-def buildMantiddocs = true
+@Field Boolean buildMantiddocs = true
 
 // Restrict the parameter choices for certain named branches.
 switch(gitBranch) {
@@ -47,8 +49,8 @@ switch(gitBranch) {
 
 // conda-build can't copy a local source if the conda-bld directory is
 // also part of the source. Checkout to a subdirectory to avoid this.
-CHECKOUT_DIR = 'source'
-CISCRIPT_DIR = "${CHECKOUT_DIR}/buildconfig/Jenkins/Conda"
+@Field String CHECKOUT_DIR = 'source'
+@Field String CISCRIPT_DIR = "${CHECKOUT_DIR}/buildconfig/Jenkins/Conda"
 pipeline {
   agent none
   options { checkoutToSubdirectory(CHECKOUT_DIR) }
