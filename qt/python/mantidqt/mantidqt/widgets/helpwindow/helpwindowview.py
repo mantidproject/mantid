@@ -17,10 +17,12 @@ from qtpy.QtWidgets import (
     QFrame,
     QShortcut,
     QApplication,
+    QStyle,
 )
 from qtpy.QtWebEngineWidgets import QWebEngineView, QWebEngineSettings
 from qtpy.QtCore import QUrl, Qt, QEvent
 from qtpy.QtGui import QIcon, QKeySequence
+from pathlib import Path
 
 # Attempt to import QWebEnginePage in a way that works across different Qt bindings/versions
 try:
@@ -110,25 +112,25 @@ class HelpWindowView(QMainWindow):
         # ---------------------------------
 
         # Back
-        self.backButton.setIcon(QIcon.fromTheme("go-previous", QIcon(":/qt-project.org/styles/commonstyle/images/left-arrow-32.png")))
+        self.backButton.setIcon(self.style().standardIcon(QStyle.SP_ArrowBack))
         self.backButton.setToolTip("Go Back")
         self.backButton.clicked.connect(self.browser.back)
         self.toolbar.addWidget(self.backButton)
 
         # Forward
-        self.forwardButton.setIcon(QIcon.fromTheme("go-next", QIcon(":/qt-project.org/styles/commonstyle/images/right-arrow-32.png")))
+        self.forwardButton.setIcon(self.style().standardIcon(QStyle.SP_ArrowForward))
         self.forwardButton.setToolTip("Go Forward")
         self.forwardButton.clicked.connect(self.browser.forward)
         self.toolbar.addWidget(self.forwardButton)
 
         # Home
-        self.homeButton.setIcon(QIcon.fromTheme("go-home", QIcon(":/qt-project.org/styles/commonstyle/images/home-32.png")))
+        self.homeButton.setIcon(self.get_mantid_icon("home.png"))
         self.homeButton.setToolTip("Go to Home Page")
         self.homeButton.clicked.connect(self.on_home_clicked)
         self.toolbar.addWidget(self.homeButton)
 
         # Reload
-        self.reloadButton.setIcon(QIcon.fromTheme("view-refresh", QIcon(":/qt-project.org/styles/commonstyle/images/refresh-32.png")))
+        self.reloadButton.setIcon(self.style().standardIcon(QStyle.SP_BrowserReload))
         self.reloadButton.setToolTip("Reload Current Page")
         self.reloadButton.clicked.connect(self.browser.reload)
         self.toolbar.addWidget(self.reloadButton)
@@ -139,7 +141,7 @@ class HelpWindowView(QMainWindow):
 
         # Find button in toolbar
         self.findButton = QPushButton()
-        self.findButton.setIcon(QIcon.fromTheme("edit-find", QIcon(":/qt-project.org/styles/commonstyle/images/find-32.png")))
+        self.findButton.setIcon(self.get_mantid_icon("search.png"))
         self.findButton.setToolTip("Find in Page (Ctrl+F)")
         self.findButton.clicked.connect(self.show_find_toolbar)
         self.toolbar.addWidget(self.findButton)
@@ -167,6 +169,22 @@ class HelpWindowView(QMainWindow):
         self.update_navigation_buttons()
 
         QApplication.instance().installEventFilter(self)
+
+    def get_mantid_icon(self, filename):
+        """Get icon from mantid/images directory"""
+        current_file = Path(__file__).resolve()
+
+        # Find mantid root directory
+        for parent in current_file.parents:
+            if parent.name == "mantid":
+                images_dir = parent / "images"
+                icon_path = images_dir / filename
+
+                if icon_path.exists():
+                    return QIcon(str(icon_path))
+                break
+
+        return QIcon()  # Return empty if not found
 
     def setup_find_toolbar(self, parent_layout):
         """Create and setup the find toolbar widget."""
