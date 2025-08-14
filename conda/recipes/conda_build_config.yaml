@@ -76,6 +76,9 @@ mslice:
 ninja:
   - '>=1.10.2'
 
+# Use novtk version, otherwise a lot of extra packages are installed, including qt6-main, which can cause issues when launching on Windows
+occt:
+  - '* novtk*'
 # Fix the version to avoid updates being pulled in automatically, which might change the Reflectometry ORSO file content or layout and cause tests to fail.
 orsopy:
   - '==1.2.1'
