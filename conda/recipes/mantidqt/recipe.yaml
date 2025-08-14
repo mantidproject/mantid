@@ -82,6 +82,7 @@ requirements:
 tests:
   - python:
       imports:
+        - mantid.kernel
         - mantidqt
         - mantidqt.icons
 
