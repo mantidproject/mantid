@@ -343,8 +343,34 @@ the first two hours"""
 
         # Aditional output properties
         titleAddionalOutput = "Additional Output"
-        self.declareProperty("OutputSusceptibility", False, direction=Direction.Input, doc="Output dynamic susceptibility (Xqw)")
-        self.setPropertyGroup("OutputSusceptibility", titleAddionalOutput)
+        self.declareProperty(
+            "OutputSusceptibilityFrequencyNXS",
+            False,
+            direction=Direction.Input,
+            doc="Output dynamic susceptibility (Xqw) in nxs format (frequency)",
+        )
+        self.setPropertyGroup("OutputSusceptibilityFrequencyNXS", titleAddionalOutput)
+        self.declareProperty(
+            "OutputSusceptibilityEnergyNXS",
+            False,
+            direction=Direction.Input,
+            doc="Output dynamic susceptibility (Xqw) in nxs format (energy)",
+        )
+        self.setPropertyGroup("OutputSusceptibilityEnergyNXS", titleAddionalOutput)
+        self.declareProperty(
+            "OutputSusceptibilityFrequencyASCII",
+            False,
+            direction=Direction.Input,
+            doc="Output dynamic susceptibility (Xqw) in ascii format (frequency)",
+        )
+        self.setPropertyGroup("OutputSusceptibilityFrequencyASCII", titleAddionalOutput)
+        self.declareProperty(
+            "OutputSusceptibilityEnergyASCII",
+            False,
+            direction=Direction.Input,
+            doc="Output dynamic susceptibility (Xqw) in ascii format (energy)",
+        )
+        self.setPropertyGroup("OutputSusceptibilityEnergyASCII", titleAddionalOutput)
         self.declareProperty("OutputPowderSpectrum", False, direction=Direction.Input, doc="Output S(Q) and S(theta) powder diffraction")
         self.setPropertyGroup("OutputPowderSpectrum", titleAddionalOutput)
         self.declareProperty("RemoveTemporaryWorkspaces", True, direction=Direction.Input, doc="Remove temporary workspaces and files")
@@ -480,20 +506,46 @@ the first two hours"""
             sapi.SaveNexus(Filename=processed_filename, InputWorkspace=self._samSqwWs)
 
             # additional output
-            if self.getProperty("OutputSusceptibility").value is True:
+            s_freq_nxs = self.getProperty("OutputSusceptibilityFrequencyNXS").value
+            s_energy_nxs = self.getProperty("OutputSusceptibilityEnergyNXS").value
+            s_freq_ascii = self.getProperty("OutputSusceptibilityFrequencyASCII").value
+            s_energy_ascii = self.getProperty("OutputSusceptibilityEnergyASCII").value
+            if s_freq_nxs or s_energy_nxs or s_freq_ascii or s_energy_ascii:
                 temperature = mtd[self._samSqwWs].getRun().getProperty(TEMPERATURE_SENSOR).getStatistics().mean
-                samXqsWs = self._samSqwWs.replace("sqw", "Xqw")
-                sapi.ApplyDetailedBalance(InputWorkspace=self._samSqwWs, OutputWorkspace=samXqsWs, Temperature=str(temperature))
-                sapi.ConvertUnits(
-                    InputWorkspace=samXqsWs,
-                    OutputWorkspace=samXqsWs,
-                    Target="DeltaE_inFrequency",
-                    Emode="Indirect",
-                    Efixed=self._reflection["default_energy"],
-                )
-                self.serialize_in_log(samXqsWs)
-                susceptibility_filename = processed_filename.replace("sqw", "Xqw")
-                sapi.SaveNexus(Filename=susceptibility_filename, InputWorkspace=samXqsWs)
+                if s_freq_nxs or s_freq_ascii:
+                    samXqsWs = self._samSqwWs.replace("sqw", "Xqw_f")
+                    sapi.ApplyDetailedBalance(InputWorkspace=self._samSqwWs, OutputWorkspace=samXqsWs, Temperature=str(temperature))
+                    sapi.ConvertUnits(
+                        InputWorkspace=samXqsWs,
+                        OutputWorkspace=samXqsWs,
+                        Target="DeltaE_inFrequency",
+                        Emode="Indirect",
+                        Efixed=self._reflection["default_energy"],
+                    )
+                    self.serialize_in_log(samXqsWs)
+                    if s_freq_nxs:
+                        susceptibility_filename = processed_filename.replace("sqw", "Xqw_f")
+                        sapi.SaveNexus(Filename=susceptibility_filename, InputWorkspace=samXqsWs)
+                    if s_freq_ascii:
+                        susceptibility_filename = processed_filename.replace("sqw.nxs", "Xqw_f.dat")
+                        sapi.SaveDaveGrp(Filename=susceptibility_filename, InputWorkspace=samXqsWs)
+                if s_energy_nxs or s_energy_ascii:
+                    samXqsWs = self._samSqwWs.replace("sqw", "Xqw_e")
+                    sapi.ApplyDetailedBalance(InputWorkspace=self._samSqwWs, OutputWorkspace=samXqsWs, Temperature=str(temperature))
+                    sapi.ConvertUnits(
+                        InputWorkspace=samXqsWs,
+                        OutputWorkspace=samXqsWs,
+                        Target="DeltaE",
+                        Emode="Indirect",
+                        Efixed=self._reflection["default_energy"],
+                    )
+                    self.serialize_in_log(samXqsWs)
+                    if s_energy_nxs:
+                        susceptibility_filename = processed_filename.replace("sqw", "Xqw_e")
+                        sapi.SaveNexus(Filename=susceptibility_filename, InputWorkspace=samXqsWs)
+                    if s_energy_ascii:
+                        susceptibility_filename = processed_filename.replace("sqw.nxs", "Xqw_e.dat")
+                        sapi.SaveDaveGrp(Filename=susceptibility_filename, InputWorkspace=samXqsWs, ToMicroEV=True)
             if self.getProperty("OutputPowderSpectrum").value:
                 self.generatePowderSpectrum()
 

@@ -130,10 +130,15 @@ since this is a required property of the algorithm.
 Dynamic Susceptibility
 ======================
 
-If <i>OutputSusceptibility</i> is checked, one additional workspace and one Nexus file will be generated,
-both containing the dynamic susceptibility as a function of frequency, in units of GHz.
-The extension denoting this quantity in the workspace and file names is "Xqw"
-(the extension for the structure factor is "sqw").
+The algorithm offers 4 options that create one additional workspace (extensions ends with "sqw") and one Nexus or ASCII file
+both containing the dynamic susceptibility:
+
+- OutputSusceptibilityFrequencyNXS: If checked the Nexus file contains the dynamic susceptibility as a function of frequency, in units of GHz.
+- OutputSusceptibilityEnergyNXS:  If checked the Nexus file contains the dynamic susceptibility as a function of energy, in units of meV.
+- OutputSusceptibilityFrequencyASCII:  If checked the dat file contains the dynamic susceptibility as a function of frequency, in units of GHz.
+- OutputSusceptibilityEnergyASCII:  If checked the dat file contains the dynamic susceptibility as a function of energy, in units of meV.
+
+The datafiles will be stored in the "Default Save Directory" as specified in the "Manage User Directories" settings.
 
 Powder Diffraction
 ==================
