@@ -72,6 +72,8 @@ requirements:
 tests:
   - python:
       imports:
+        - mantid.kernel
+        - mantidqt
         - workbench
 
 about:
