@@ -195,6 +195,19 @@ enum Enum {
 };
 }
 
+/*
+ GENERIC: these are for "Annotations" or General Comments to be added to the data stream
+ SCAN_START: the start of a Scan
+ SCAN_STOP: the end of a Scan
+ PAUSE: setting  a Run to Paused mode
+ RESUME: unsetting Paused mode to Regular data collection
+ OVERALL_RUN_COMMENT: Single "Run Notes" comment for a given Run
+  - (the "Last" Run Notes entered are used for the Run Notes (/entry/notes)
+  - all preceding Run Notes comments are appended to the General Comments (/entry/DASlogs/comments)
+ SYSTEM: Special Manually-Inserted Run Replay Directives for the ADARA Test Harness
+  when activated, enables replayed data streams to automatically trigger Run Start/Stop
+  at specific historical timestamps
+ */
 namespace MarkerType {
 enum Enum {
   GENERIC,
