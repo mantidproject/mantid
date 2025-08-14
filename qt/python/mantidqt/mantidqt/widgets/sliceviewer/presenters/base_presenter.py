@@ -13,6 +13,7 @@ from mantidqt.widgets.sliceviewer.presenters.lineplots import PixelLinePlot, Rec
 from mantidqt.widgets.sliceviewer.views.dataview import SliceViewerDataView
 from mantidqt.widgets.sliceviewer.views.dataviewsubscriber import IDataViewSubscriber
 from mantidqt.widgets.sliceviewer.views.toolbar import ToolItemText
+from mantidqt.widgets.sliceviewer.presenters.masking import Masking
 
 
 class SliceViewerBasePresenter(IDataViewSubscriber, ABC):
@@ -105,10 +106,13 @@ class SliceViewerBasePresenter(IDataViewSubscriber, ABC):
         """
         data_view = self._data_view
         if state:
-            # incompatible with drag zooming/panning as they both require drag selection
+            # incompatible with drag zooming, panning and masking as they require drag selection
             data_view.deactivate_and_disable_tool(ToolItemText.ZOOM)
             data_view.deactivate_and_disable_tool(ToolItemText.PAN)
             data_view.extents_set_enabled(False)
+            data_view.toggle_masking_options(False)
+            data_view.check_masking_shape_toolbar_icons(None)
+            data_view.deactivate_and_disable_tool(ToolItemText.MASKING)
             tool = RectangleSelectionLinePlot
             if data_view.line_plots_active:
                 data_view.switch_line_plots_tool(RectangleSelectionLinePlot, self)
@@ -117,8 +121,25 @@ class SliceViewerBasePresenter(IDataViewSubscriber, ABC):
         else:
             data_view.enable_tool_button(ToolItemText.ZOOM)
             data_view.enable_tool_button(ToolItemText.PAN)
+            data_view.enable_tool_button(ToolItemText.MASKING)
             data_view.extents_set_enabled(True)
             data_view.switch_line_plots_tool(PixelLinePlot, self)
+
+    def masking(self, active) -> None:
+        self._data_view.toggle_masking_options(active)
+        if active:
+            self._data_view.deactivate_and_disable_tool(ToolItemText.ZOOM)
+            self._data_view.deactivate_and_disable_tool(ToolItemText.PAN)
+            self._data_view.deactivate_and_disable_tool(ToolItemText.REGIONSELECTION)
+            self._data_view.masking = Masking(self._data_view.ax)
+            self._data_view.masking.new_selector(ToolItemText.RECT_MASKING)  # default to rect masking
+            self._data_view.activate_tool(ToolItemText.RECT_MASKING, True)
+            return
+        self._data_view.enable_tool(ToolItemText.ZOOM)
+        self._data_view.enable_tool(ToolItemText.PAN)
+        self._data_view.enable_tool(ToolItemText.REGIONSELECTION)
+        self._data_view.clear_masking_shapes()
+        self._data_view.check_masking_shape_toolbar_icons(None)
 
     @abc.abstractmethod
     def get_extra_image_info_columns(self, xdata, ydata):

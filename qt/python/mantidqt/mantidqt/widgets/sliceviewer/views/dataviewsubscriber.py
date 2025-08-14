@@ -54,7 +54,7 @@ class IDataViewSubscriber(ABC):
         pass
 
     @abstractmethod
-    def masking_clicked(self, active) -> None:
+    def masking(self, active) -> None:
         pass
 
     @abstractmethod

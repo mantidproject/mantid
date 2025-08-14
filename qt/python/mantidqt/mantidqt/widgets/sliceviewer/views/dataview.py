@@ -41,6 +41,10 @@ DBLMAX = sys.float_info.max
 SCALENORM = "SliceViewer/scale_norm"
 POWERSCALE = "SliceViewer/scale_norm_power"
 
+MASK_SHAPE_OPTIONS = [ToolItemText.RECT_MASKING, ToolItemText.ELLI_MASKING, ToolItemText.POLY_MASKING]
+MASK_PROCESS_OPTIONS = [ToolItemText.APPLY_MASKING, ToolItemText.EXPORT_MASKING]
+MASK_OPTIONS = MASK_SHAPE_OPTIONS + MASK_PROCESS_OPTIONS
+
 
 class SliceViewerCanvas(ScrollZoomMixin, MantidFigureCanvas):
     pass
@@ -66,6 +70,8 @@ class SliceViewerDataView(QWidget):
         self._image_info_tracker = None
         self._region_selection_on = False
         self._orig_lims = None
+
+        self._masking = None
 
         self.colorbar_layout = QVBoxLayout()
         self.colorbar_layout.setContentsMargins(0, 0, 0, 0)
@@ -198,6 +204,14 @@ class SliceViewerDataView(QWidget):
     @property
     def line_plotter(self):
         return self._line_plots
+
+    @property
+    def masking(self):
+        return self._masking
+
+    @masking.setter
+    def masking(self, masking):
+        self._masking = masking
 
     @property
     def nonorthogonal_mode(self):
@@ -492,7 +506,7 @@ class SliceViewerDataView(QWidget):
         """
         React to masking clicked
         """
-        self.presenter.masking_clicked(state)
+        self.presenter.masking(state)
 
     def on_rect_masking_clicked(self, state):
         """
@@ -523,6 +537,12 @@ class SliceViewerDataView(QWidget):
         React to apply masking selected
         """
         self.presenter.apply_masking_clicked()
+
+    def clear_masking_shapes(self):
+        """
+        clear the masking shapes on the image
+        """
+        pass
 
     def deactivate_and_disable_tool(self, tool_text):
         """Deactivate a tool as if the control had been pressed and disable the functionality"""
@@ -764,3 +784,13 @@ class SliceViewerDataView(QWidget):
     def on_resize(self):
         if not self.line_plots_active and self.ax:
             self.ax.figure.tight_layout()  # tight_layout doesn't work with LinePlots enabled atm
+
+    def toggle_masking_options(self, active):
+        fn = self.enable_tool_button if active else self.disable_tool_button
+        for opt in MASK_OPTIONS:
+            fn(opt)
+
+    def check_masking_shape_toolbar_icons(self, shape):
+        for opt in MASK_SHAPE_OPTIONS:
+            fn = self.activate_tool if opt == shape else self.deactivate_tool
+            fn(opt, False)

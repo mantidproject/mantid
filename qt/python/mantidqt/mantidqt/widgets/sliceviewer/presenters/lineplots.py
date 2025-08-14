@@ -6,15 +6,11 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantidqt
 # std imports
-from collections import namedtuple
-from functools import lru_cache
-from typing import Any, Optional, Tuple
+from typing import Any, Tuple
 
 # 3rd party imports
 from matplotlib.axes import Axes
-from matplotlib.image import AxesImage
 from matplotlib.gridspec import GridSpec
-from matplotlib.transforms import Bbox, BboxTransform
 from matplotlib.widgets import RectangleSelector
 import numpy as np
 
@@ -27,6 +23,8 @@ from mantidqt.widgets.sliceviewer.views.cursor import (
     MoveMouseCursorLeft,
     MoveMouseCursorRight,
 )
+
+from .selector import make_selector_class, cursor_info
 
 # Limits for X/Y axes
 Limits = Tuple[Tuple[float, float], Tuple[float, float]]
@@ -321,16 +319,6 @@ class PixelLinePlot(CursorTracker, KeyHandler):
             self.exporter.export_pixel_cut(self._cursor_pos, key)
 
 
-class RectangleSelectorMtd(RectangleSelector):
-    def onmove(self, event):
-        """
-        Only process event if inside the axes with which the selector was init
-        This fixes bug where the x/y of the event originated from the line plot axes not the colorfill axes
-        """
-        if event.inaxes is None or self.ax == event.inaxes.axes:
-            super(RectangleSelectorMtd, self).onmove(event)
-
-
 class RectangleSelectionLinePlot(KeyHandler):
     """
     Draws X/Y line plots from a rectangular selection by summing across
@@ -347,7 +335,7 @@ class RectangleSelectionLinePlot(KeyHandler):
         super().__init__(plotter, exporter)
 
         ax = plotter.image_axes
-        self._selector = RectangleSelectorMtd(
+        self._selector = make_selector_class(RectangleSelector)(
             ax,
             self._on_rectangle_selected,
             useblit=False,  # rectangle persists on button release
@@ -405,41 +393,3 @@ class RectangleSelectionLinePlot(KeyHandler):
         plotter.plot_y_line(np.linspace(ymin, ymax, arr.shape[0])[imin:imax], np.sum(arr[imin:imax, jmin:jmax], axis=1))
         plotter.update_line_plot_limits()
         plotter.redraw()
-
-
-# Data type to store information related to a cursor over an image
-CursorInfo = namedtuple("CursorInfo", ("array", "extent", "point"))
-
-
-@lru_cache(maxsize=32)
-def cursor_info(image: AxesImage, xdata: float, ydata: float, full_bbox: Bbox = None) -> Optional[CursorInfo]:
-    """Return information on the image for the given position in
-    data coordinates.
-    :param image: An instance of an image type
-    :param xdata: X data coordinate of cursor
-    :param ydata: Y data coordinate of cursor
-    :param full_bbox: Bbox of full workspace dimension to use for transforming mouse position
-    :return: None if point is not valid on the image else return CursorInfo type
-    """
-    extent = image.get_extent()
-    xmin, xmax, ymin, ymax = extent
-    arr = image.get_array()
-    data_extent = Bbox([[ymin, xmin], [ymax, xmax]])
-    array_extent = Bbox([[0, 0], arr.shape[:2]])
-    if full_bbox is None:
-        trans = BboxTransform(boxin=data_extent, boxout=array_extent)
-    else:
-        # If the view is zoomed in and the slice is changed, then the image extents
-        # and data extents change. This causes the cursor to be transformed to the
-        # wrong point for certain MDH workspaces (since it cannot be dynamically rebinned).
-        # This will use the full WS data dimensions to do the transformation
-        trans = BboxTransform(boxin=full_bbox, boxout=array_extent)
-    point = trans.transform_point([ydata, xdata])
-    if any(np.isnan(point)):
-        return None
-
-    point = point.astype(int)
-    if 0 <= point[0] <= arr.shape[0] and 0 <= point[1] <= arr.shape[1]:
-        return CursorInfo(array=arr, extent=extent, point=point)
-    else:
-        return None

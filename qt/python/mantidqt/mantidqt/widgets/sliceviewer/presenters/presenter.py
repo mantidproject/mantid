@@ -30,9 +30,6 @@ from mantidqt.widgets.sliceviewer.views.view import SliceViewerView
 from workbench.plotting.propertiesdialog import XAxisEditor, YAxisEditor
 
 DBLMAX = sys.float_info.max
-MASK_SHAPE_OPTIONS = [ToolItemText.RECT_MASKING, ToolItemText.ELLI_MASKING, ToolItemText.POLY_MASKING]
-MASK_PROCESS_OPTIONS = [ToolItemText.APPLY_MASKING, ToolItemText.EXPORT_MASKING]
-MASK_OPTIONS = MASK_SHAPE_OPTIONS + MASK_PROCESS_OPTIONS
 
 
 class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
@@ -82,7 +79,7 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
             self.view.data_view.disable_tool_button(ToolItemText.NONAXISALIGNEDCUTS)
 
         # disable masking options until activated
-        self._toggle_masking_options(False)
+        self.view.data_view.toggle_masking_options(False)
 
         self.view.data_view.help_button.clicked.connect(self.action_open_help_window)
 
@@ -600,36 +597,25 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
         full_point[ydim] = ydata
         return full_point
 
-    def _toggle_masking_options(self, active):
-        fn = self.view.data_view.enable_tool_button if active else self.view.data_view.disable_tool_button
-        for opt in MASK_OPTIONS:
-            fn(opt)
-
-    def _check_masking_shapes(self, shape):
-        for opt in MASK_SHAPE_OPTIONS:
-            fn = self.view.data_view.activate_tool if opt == shape else self.view.data_view.deactivate_tool
-            fn(opt, False)
-
-    def masking_clicked(self, active) -> None:
-        self._toggle_masking_options(active)
-        if active:
-            self.view.data_view.activate_tool(ToolItemText.RECT_MASKING, True)  # default to rect masking
-            return
-        self._check_masking_shapes(None)
-
     def rect_masking_clicked(self, active) -> None:
-        self._check_masking_shapes(ToolItemText.RECT_MASKING)
+        self.view.data_view.check_masking_shape_toolbar_icons(ToolItemText.RECT_MASKING)
+        self.view.data_view.masking.new_selector(ToolItemText.RECT_MASKING)
 
     def elli_masking_clicked(self, active) -> None:
-        self._check_masking_shapes(ToolItemText.ELLI_MASKING)
+        self.view.data_view.check_masking_shape_toolbar_icons(ToolItemText.ELLI_MASKING)
+        self.view.data_view.masking.new_selector(ToolItemText.ELLI_MASKING)
 
     def poly_masking_clicked(self, active) -> None:
-        self._check_masking_shapes(ToolItemText.POLY_MASKING)
+        self.view.data_view.check_masking_shape_toolbar_icons(ToolItemText.POLY_MASKING)
+        self.view.data_view.masking.new_selector(ToolItemText.POLY_MASKING)
 
     def export_masking_clicked(self) -> None:
+        # export masks to table workspace in ADS
         pass
 
     def apply_masking_clicked(self) -> None:
+        # create table workspace not in ADS (model)
+        # Apply table workspace to dataset
         pass
 
 
