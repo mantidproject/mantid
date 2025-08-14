@@ -303,6 +303,25 @@ public:
     TS_ASSERT_EQUALS(eventWS->indexInfo().spectrumNumber(2), 3);
   }
 
+  void test_multiprocess_loader_does_nothing() {
+    // The experimental multiprocess loader has been removed.
+    // Make sure using it doesn't cause script failures, until it can be fully deprecated
+    std::cout << "test multiprocess loader does nothing" << std::endl;
+    Mantid::API::FrameworkManager::Instance();
+    LoadEventNexus ld;
+    ld.initialize();
+    ld.setPropertyValue("LoadType", "Multiprocess (experimental)");
+    std::string outws_name = "multiprocess";
+    ld.setPropertyValue("Filename", "SANS2D00022048.nxs");
+    ld.setPropertyValue("OutputWorkspace", outws_name);
+    ld.setProperty<bool>("LoadLogs", false); // Time-saver
+    try { // do not need to actually run algorithm, just the private validateInputs method at start
+      ld.execute();
+    } catch (...) {
+    }
+    TS_ASSERT_EQUALS(ld.getPropertyValue("LoadType"), "Default");
+  }
+
   void test_SingleBank_PixelsOnlyInThatBank() { doTestSingleBank(true, false); }
 
   void test_load_event_nexus_ornl_eqsans() {

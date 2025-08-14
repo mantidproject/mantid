@@ -282,6 +282,12 @@ void LoadEventNexus::init() {
                   "Load all the logs from the nxs, without checking or processing them; if checked, LoadLogs will be "
                   "ignored; use with caution");
 
+  std::vector<std::string> loadType{"Default", "Multiprocess (experimental)"};
+  auto loadTypeValidator = std::make_shared<StringListValidator>(loadType);
+  declareProperty(
+      "LoadType", "Default", loadTypeValidator,
+      "Deprecated feature.  This option has no effect on algorithm behavior and will be removed in a future release.");
+
   declareProperty(std::make_unique<PropertyWithValue<bool>>("LoadNexusInstrumentXML", true, Direction::Input),
                   "Reads the embedded Instrument XML from the NeXus file "
                   "(optional, default True). ");
@@ -303,6 +309,14 @@ void LoadEventNexus::init() {
 }
 
 std::map<std::string, std::string> LoadEventNexus::validateInputs() {
+
+  // Warn deprecated experimental feature, but do not throw error
+  if (!isDefault("LoadType")) {
+    g_log.warning() << "The experimental multiprocess loader has been discontinued.  The default loader will be used "
+                       "instead.  Please remove use of this property from all scripts.";
+  }
+  setProperty("LoadType", "Default");
+
   std::map<std::string, std::string> result;
 
   if (!isDefault(PropertyNames::BAD_PULSES_CUTOFF)) {
