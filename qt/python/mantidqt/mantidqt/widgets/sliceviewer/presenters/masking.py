@@ -1,6 +1,6 @@
 from matplotlib.widgets import RectangleSelector, EllipseSelector, PolygonSelector
 from matplotlib.axes import Axes
-from abc import ABC
+from abc import ABC, abstractmethod
 
 from mantidqt.widgets.sliceviewer.views.toolbar import ToolItemText
 from .selector import make_selector_class, cursor_info
@@ -38,6 +38,11 @@ class Masking:
     def apply_selectors(self):
         pass
 
+    def clear(self):
+        self._active_selector.set_active(False)
+        for selector in self._selectors:
+            selector.clear()
+
 
 class SelectionMaskingBase(ABC):
     def __init__(self, ax):
@@ -46,25 +51,16 @@ class SelectionMaskingBase(ABC):
         self.mask_drawn = False
         self._selector = None
 
+    @abstractmethod
     def _on_selected(self, eclick, erelease):
-        """
-        Callback when a shape has been draw on the axes
-        :param eclick: Event marking where the mouse was clicked
-        :param erelease: Event marking where the mouse was released
-        """
-        cinfo_click = cursor_info(self._img, eclick.xdata, eclick.ydata)
-        if cinfo_click is None:
-            return
-        cinfo_release = cursor_info(self._img, erelease.xdata, erelease.ydata)
-        if cinfo_release is None:
-            return
-
-        # Add shape object to collection
-        self._cursor_info = (cinfo_click, cinfo_release)
-        self.mask_drawn = True
+        pass
 
     def set_active(self, state):
         self._selector.set_active(state)
+
+    def clear(self):
+        for artist in self._selector.artists:
+            artist.remove()
 
 
 class RectangleSelectionMaskingBase(SelectionMaskingBase):
@@ -84,6 +80,23 @@ class RectangleSelectionMaskingBase(SelectionMaskingBase):
             spancoords="pixels",
             interactive=True,
         )
+
+    def _on_selected(self, eclick, erelease):
+        """
+        Callback when a shape has been draw on the axes
+        :param eclick: Event marking where the mouse was clicked
+        :param erelease: Event marking where the mouse was released
+        """
+        cinfo_click = cursor_info(self._img, eclick.xdata, eclick.ydata)
+        if cinfo_click is None:
+            return
+        cinfo_release = cursor_info(self._img, erelease.xdata, erelease.ydata)
+        if cinfo_release is None:
+            return
+
+        # Add shape object to collection
+        self._cursor_info = (cinfo_click, cinfo_release)
+        self.mask_drawn = True
 
 
 class RectangleSelectionMasking(RectangleSelectionMaskingBase):
@@ -116,3 +129,11 @@ class PolygonSelectionMasking(SelectionMaskingBase):
             self._on_selected,
             useblit=False,  # rectangle persists on button release
         )
+
+    def _on_selected(self, eclick, erelease=None):
+        """
+        Callback when a polgyon shape has been draw on the axes
+        :param eclick: Event marking where the mouse was clicked
+        :param erelease: None for polygon selector
+        """
+        self.mask_drawn = True

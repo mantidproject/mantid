@@ -135,11 +135,13 @@ class SliceViewerBasePresenter(IDataViewSubscriber, ABC):
             self._data_view.masking.new_selector(ToolItemText.RECT_MASKING)  # default to rect masking
             self._data_view.activate_tool(ToolItemText.RECT_MASKING, True)
             return
-        self._data_view.enable_tool(ToolItemText.ZOOM)
-        self._data_view.enable_tool(ToolItemText.PAN)
-        self._data_view.enable_tool(ToolItemText.REGIONSELECTION)
-        self._data_view.clear_masking_shapes()
+        self._data_view.enable_tool_button(ToolItemText.ZOOM)
+        self._data_view.enable_tool_button(ToolItemText.PAN)
+        self._data_view.enable_tool_button(ToolItemText.REGIONSELECTION)
+        self._data_view.masking.clear()
+        self._data_view.masking = None
         self._data_view.check_masking_shape_toolbar_icons(None)
+        self._data_view.canvas.draw_idle()
 
     @abc.abstractmethod
     def get_extra_image_info_columns(self, xdata, ydata):

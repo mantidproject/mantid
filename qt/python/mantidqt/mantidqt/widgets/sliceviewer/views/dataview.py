@@ -538,12 +538,6 @@ class SliceViewerDataView(QWidget):
         """
         self.presenter.apply_masking_clicked()
 
-    def clear_masking_shapes(self):
-        """
-        clear the masking shapes on the image
-        """
-        pass
-
     def deactivate_and_disable_tool(self, tool_text):
         """Deactivate a tool as if the control had been pressed and disable the functionality"""
         self.deactivate_tool(tool_text)
