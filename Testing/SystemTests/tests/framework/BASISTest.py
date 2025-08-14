@@ -314,31 +314,30 @@ class BASISReduction6Test(systemtesting.MantidSystemTest, PreppingMixin):
         return "BSS_90146_divided_sqw", "BASIS_90146_divided_sqw.nxs"
 
 
-class DynamicSusceptibilityTest(systemtesting.MantidSystemTest, PreppingMixin):
-    r"""Reduce in the new DAS using: (1)silicon 333 analyzers, (2) monitor
-    normalization, (3) Vanadium normalization"""
+class BASISReductionOutputSEnergyNXSTest(systemtesting.MantidSystemTest, PreppingMixin):
+    r"""Check the OutputSusceptibilityEnergyNXS that produces the nexus file"""
 
     def __init__(self):
-        super(DynamicSusceptibilityTest, self).__init__()
+        super(BASISReductionOutputSEnergyNXSTest, self).__init__()
         self.config = None
         self.prepset("BASISReduction")
 
     def requiredFiles(self):
-        return ["BASIS_Mask_default_333.xml", "BSS_90146.nxs.h5", "BSS_90175.nxs.h5", "BSS_90146_divided_Xqw.nxs"]
+        return ["BASIS_Mask_default_111.xml", "BSS_122089.nxs.h5", "BASIS_122089_divided_Xqw_e.nxs", "BASIS_122089_divided_sqw.nxs"]
 
     def runTest(self):
         try:
             BASISReduction(
-                RunNumbers="90146",
+                RunNumbers="122089",
                 DoFluxNormalization=True,
                 FluxNormalizationType="Monitor",
-                MaskFile="BASIS_Mask_default_333.xml",
-                ReflectionType="silicon_333",
-                EnergyBins=[-330, 4.0, 330],
-                MomentumTransferBins=[3.05, 4.30, 3.05],
+                MaskFile="BASIS_Mask_default_111.xml",
+                ReflectionType="silicon_111",
+                EnergyBins=[-120, 0.4, 120],
+                MomentumTransferBins=[0.3, 0.2, 1.9],
                 DivideByVanadium=True,
-                NormRunNumbers="90175",
-                OutputSusceptibility=True,
+                NormRunNumbers="122089",
+                OutputSusceptibilityEnergyNXS=True,
             )
         finally:
             self.preptear()
@@ -346,7 +345,119 @@ class DynamicSusceptibilityTest(systemtesting.MantidSystemTest, PreppingMixin):
     def validate(self):
         self.tolerance = 0.1
         self.disableChecking.extend(["SpectraMap", "Instrument"])
-        return "BSS_90146_divided_Xqw", "BSS_90146_divided_Xqw.nxs"
+        return "BSS_122089_divided_sqw", "BASIS_122089_divided_sqw.nxs", "BSS_122089_divided_Xqw_e", "BASIS_122089_divided_Xqw_e.nxs"
+
+
+class BASISReductionOutputSFrequencyNXSTest(systemtesting.MantidSystemTest, PreppingMixin):
+    r"""Check the OutputSusceptibilityFrequencyNXS that produces the nexus file"""
+
+    def __init__(self):
+        super(BASISReductionOutputSFrequencyNXSTest, self).__init__()
+        self.config = None
+        self.prepset("BASISReduction")
+
+    def requiredFiles(self):
+        return ["BASIS_Mask_default_111.xml", "BSS_122089.nxs.h5", "BASIS_122089_divided_Xqw_f.nxs", "BASIS_122089_divided_sqw.nxs"]
+
+    def runTest(self):
+        try:
+            BASISReduction(
+                RunNumbers="122089",
+                DoFluxNormalization=True,
+                FluxNormalizationType="Monitor",
+                MaskFile="BASIS_Mask_default_111.xml",
+                ReflectionType="silicon_111",
+                EnergyBins=[-120, 0.4, 120],
+                MomentumTransferBins=[0.3, 0.2, 1.9],
+                DivideByVanadium=True,
+                NormRunNumbers="122089",
+                OutputSusceptibilityFrequencyNXS=True,
+            )
+        finally:
+            self.preptear()
+
+    def validate(self):
+        self.tolerance = 0.1
+        self.disableChecking.extend(["SpectraMap", "Instrument"])
+        return "BSS_122089_divided_sqw", "BASIS_122089_divided_sqw.nxs", "BSS_122089_divided_Xqw_f", "BASIS_122089_divided_Xqw_f.nxs"
+
+
+class BASISReductionOutputSFrequencyASCIITest(systemtesting.MantidSystemTest, PreppingMixin):
+    r"""Check the OutputSusceptibilityFrequencyASCII that produces the ascii file"""
+
+    def __init__(self):
+        super(BASISReductionOutputSFrequencyASCIITest, self).__init__()
+        self.config = None
+        self.prepset("BASISReduction")
+
+    def requiredFiles(self):
+        return ["BASIS_Mask_default_111.xml", "BSS_122089.nxs.h5", "BASIS_122089_divided_Xqw_f.dat", "BASIS_122089_divided_sqw.nxs"]
+
+    def runTest(self):
+        try:
+            BASISReduction(
+                RunNumbers="122089",
+                DoFluxNormalization=True,
+                FluxNormalizationType="Monitor",
+                MaskFile="BASIS_Mask_default_111.xml",
+                ReflectionType="silicon_111",
+                EnergyBins=[-120, 0.4, 120],
+                MomentumTransferBins=[0.3, 0.2, 1.9],
+                DivideByVanadium=True,
+                NormRunNumbers="122089",
+                OutputSusceptibilityFrequencyASCII=True,
+            )
+        finally:
+            self.preptear()
+
+    def validate(self):
+        self.tolerance = 0.1
+        self.disableChecking.extend(["SpectraMap", "Instrument"])
+        return "BSS_122089_divided_sqw", "BASIS_122089_divided_sqw.nxs"
+
+    def validateASCII(self):
+        self.tolerance = 0.1
+        self.disableChecking.extend(["SpectraMap", "Instrument"])
+        return "BSS_122089_divided_Xqw_f", "BASIS_122089_divided_Xqw_f.dat"
+
+
+class BASISReductionOutputSEnergyASCIITest(systemtesting.MantidSystemTest, PreppingMixin):
+    r"""Check the OutputSusceptibilityEnergyASCII that produces the ascii file"""
+
+    def __init__(self):
+        super(BASISReductionOutputSEnergyASCIITest, self).__init__()
+        self.config = None
+        self.prepset("BASISReduction")
+
+    def requiredFiles(self):
+        return ["BASIS_Mask_default_111.xml", "BSS_122089.nxs.h5", "BASIS_122089_divided_Xqw_e.dat", "BASIS_122089_divided_sqw.nxs"]
+
+    def runTest(self):
+        try:
+            BASISReduction(
+                RunNumbers="122089",
+                DoFluxNormalization=True,
+                FluxNormalizationType="Monitor",
+                MaskFile="BASIS_Mask_default_111.xml",
+                ReflectionType="silicon_111",
+                EnergyBins=[-120, 0.4, 120],
+                MomentumTransferBins=[0.3, 0.2, 1.9],
+                DivideByVanadium=True,
+                NormRunNumbers="122089",
+                OutputSusceptibilityEnergyASCII=True,
+            )
+        finally:
+            self.preptear()
+
+    def validate(self):
+        self.tolerance = 0.1
+        self.disableChecking.extend(["SpectraMap", "Instrument"])
+        return "BSS_122089_divided_sqw", "BASIS_122089_divided_sqw.nxs"
+
+    def validateASCII(self):
+        self.tolerance = 0.1
+        self.disableChecking.extend(["SpectraMap", "Instrument"])
+        return "BSS_122089_divided_Xqw_e", "BASIS_122089_divided_Xqw_e.dat"
 
 
 class CrystalDiffractionTest(systemtesting.MantidSystemTest, PreppingMixin):
