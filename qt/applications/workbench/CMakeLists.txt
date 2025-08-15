@@ -116,7 +116,7 @@ endif()
 add_dependencies(workbench workbench_resources)
 # if we are building mantidqt we can add a dependency for workbench
 if(MANTID_QT_LIB STREQUAL "BUILD")
-  add_dependencies(workbench mantidqtinterfaces)
+  add_dependencies(workbench mantidqtinterfaces instrumentview)
 endif()
 
 # Testing
