@@ -141,7 +141,6 @@ set(SRC_FILES
     src/NXcanSASUtil.cpp
     src/ORNLDataArchive.cpp
     src/PDLoadCharacterizations.cpp
-    src/ParallelEventLoader.cpp
     src/PatchBBY.cpp
     src/ProcessBankCompressed.cpp
     src/ProcessBankData.cpp
@@ -359,7 +358,6 @@ set(INC_FILES
     inc/MantidDataHandling/NXcanSASUtil.h
     inc/MantidDataHandling/ORNLDataArchive.h
     inc/MantidDataHandling/PDLoadCharacterizations.h
-    inc/MantidDataHandling/ParallelEventLoader.h
     inc/MantidDataHandling/PatchBBY.h
     inc/MantidDataHandling/ProcessBankCompressed.h
     inc/MantidDataHandling/ProcessBankData.h
@@ -685,7 +683,6 @@ target_link_libraries(
          Mantid::Geometry
          Mantid::Kernel
          Mantid::Indexing
-         Mantid::Parallel
   PRIVATE Mantid::Json Boost::filesystem Mantid::NexusGeometry Mantid::LegacyNexus
 )
 

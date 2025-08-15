@@ -1,0 +1,1 @@
+- Removed the experimental multiprocess loader from :ref:`algm-LoadEventNexus` and deprecated the ``LoadType`` property.

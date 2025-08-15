@@ -14,7 +14,6 @@ add_subdirectory(Types)
 add_subdirectory(Json)
 add_subdirectory(LegacyNexus)
 add_subdirectory(Kernel)
-add_subdirectory(Parallel)
 # HistogramData has header-only dependency on Kernel, so Kernel comes after.
 add_subdirectory(Algorithms)
 add_subdirectory(API)

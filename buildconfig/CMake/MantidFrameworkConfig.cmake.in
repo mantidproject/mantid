@@ -32,7 +32,6 @@ set(MODULES
     Nexus
     LegacyNexus
     Kernel
-    Parallel
     HistogramData
     Indexing
     Beamline
