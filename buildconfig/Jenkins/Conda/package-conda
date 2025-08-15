@@ -120,7 +120,7 @@ export LC_ALL=C
 # copy the source to a working folder.
 export CONDA_BLD_PATH=$WORKSPACE/conda-bld
 if [[ -d $CONDA_BLD_PATH ]]; then
-    python -m conda_index $CONDA_BLD_PATH
+    rm -rf "${CONDA_BLD_PATH}"
 fi
 cd $RECIPES_DIR
 
