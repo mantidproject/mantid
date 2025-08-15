@@ -4,7 +4,7 @@ from scipy.spatial.transform import Rotation as R
 from mantid.api import PythonAlgorithm, AlgorithmFactory
 from mantid.kernel import FloatArrayProperty, FloatArrayLengthValidator, Direction, FloatBoundedValidator
 from mantid.api import IPeaksWorkspaceProperty
-from mantid.kernel import V3D
+from mantid.kernel import V3D, logger
 from scipy.optimize import minimize
 
 
@@ -13,26 +13,47 @@ class FindUBFromScatteringPlane(PythonAlgorithm):
     def category(self):
         return "Crystal\\UBMatrix"
 
+    ## put in doc args
     def PyInit(self):
         array_length_3 = FloatArrayLengthValidator(3)
         lower_lattice_parameter_limit = FloatBoundedValidator(lower=0.0)
         angle_limit = FloatBoundedValidator(lower=0.0, upper=180)
 
         # declaring intake variables to define the scattering plane,
-        self.declareProperty(FloatArrayProperty(name="vector_1", direction=Direction.Input, validator=array_length_3))
-        self.declareProperty(FloatArrayProperty(name="vector_2", direction=Direction.Input, validator=array_length_3))
+        self.declareProperty(
+            FloatArrayProperty(name="vector_1", direction=Direction.Input, validator=array_length_3),
+            doc="1st Vector defining scattering plane, provide as a list: [h,k,l]",
+        )
+        self.declareProperty(
+            FloatArrayProperty(name="vector_2", direction=Direction.Input, validator=array_length_3),
+            doc="2nd Vector defining scattering plane, provide as a list: [h,k,l] ",
+        )
         # might need it to raise an error here
 
         # declaring intake variables abc, alpha, beta, gamma, and the peak
-        self.declareProperty(IPeaksWorkspaceProperty(name="PeaksWorkspace", defaultValue="", direction=Direction.Input))
+        self.declareProperty(
+            IPeaksWorkspaceProperty(name="PeaksWorkspace", defaultValue="", direction=Direction.Input),
+            doc="PeaksWorkspace with 1 peak in the scattering plane, if more than 1 peak is provided"
+            "the first peak in the Workspace is chosen",
+        )
 
-        self.declareProperty(name="a", direction=Direction.Input, validator=lower_lattice_parameter_limit, defaultValue=1.0)
-        self.declareProperty(name="b", direction=Direction.Input, validator=lower_lattice_parameter_limit, defaultValue=1.0)
-        self.declareProperty(name="c", direction=Direction.Input, validator=lower_lattice_parameter_limit, defaultValue=1.0)
+        self.declareProperty(
+            name="a", direction=Direction.Input, validator=lower_lattice_parameter_limit, defaultValue=1.0, doc="Lattice Parameter a"
+        )
+        self.declareProperty(
+            name="b", direction=Direction.Input, validator=lower_lattice_parameter_limit, defaultValue=1.0, doc="Lattice Parameter b"
+        )
+        self.declareProperty(
+            name="c", direction=Direction.Input, validator=lower_lattice_parameter_limit, defaultValue=1.0, doc="Lattice Parameter c"
+        )
 
-        self.declareProperty(name="alpha", direction=Direction.Input, validator=angle_limit, defaultValue=90.0)
-        self.declareProperty(name="beta", direction=Direction.Input, validator=angle_limit, defaultValue=90.0)
-        self.declareProperty(name="gamma", direction=Direction.Input, validator=angle_limit, defaultValue=90.0)
+        self.declareProperty(
+            name="alpha", direction=Direction.Input, validator=angle_limit, defaultValue=90.0, doc="Lattice Parameter alpha"
+        )
+        self.declareProperty(name="beta", direction=Direction.Input, validator=angle_limit, defaultValue=90.0, doc="Lattice Parameter beta")
+        self.declareProperty(
+            name="gamma", direction=Direction.Input, validator=angle_limit, defaultValue=90.0, doc="Lattice Parameter gamma"
+        )
 
     def exec_child_alg(self, alg_name: str, **kwargs):
         alg = self.createChildAlgorithm(alg_name, enableLogging=False)
@@ -77,13 +98,13 @@ class FindUBFromScatteringPlane(PythonAlgorithm):
         hkl_peak = hkl_peak.reshape(-1, 1)
         Qscalc = np.array(np.pi * 2 * (UB_arb @ hkl_peak))
         Qscalc = V3D(float(Qscalc[0]), float(Qscalc[1]), float(Qscalc[2]))
-        Qsreal = np.array(peak_ip.getQLabFrame())
+        Qsreal = np.array(peak_ip.getQSampleFrame())
         Qsreal = V3D(float(Qsreal[0]), float(Qsreal[1]), float(Qsreal[2]))
 
         if not np.isclose(
             np.dot(np.array(Qscalc) / np.linalg.norm(Qscalc), np.array(vertical_dir) / np.linalg.norm(vertical_dir)), 0, atol=0.03
         ):
-            raise ValueError("given peak does not lie in the plane")
+            logger.warning("given peak does not lie in the plane")
 
         def rotation(theta, vertical_dir):
             axis = np.array(vertical_dir) / np.linalg.norm(vertical_dir)
