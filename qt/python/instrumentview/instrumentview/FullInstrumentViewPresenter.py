@@ -11,10 +11,24 @@ from pyvista.plotting.opts import PickerType
 from qtpy.QtCore import QThread, Signal
 from mantid import mtd
 from mantid.kernel import logger
+from qtpy.QtCore import QObject
 
 from instrumentview.FullInstrumentViewModel import FullInstrumentViewModel
 from instrumentview.FullInstrumentViewWindow import FullInstrumentViewWindow
 from instrumentview.InstrumentViewADSObserver import InstrumentViewADSObserver
+
+
+class ModelSetupWorker(QObject):
+    finished = Signal()
+    _model: FullInstrumentViewModel
+
+    def __init__(self, model):
+        super(ModelSetupWorker, self).__init__()
+        self._model = model
+
+    def run(self):
+        self._model.setup()
+        self.finished.emit()
 
 
 class FullInstrumentViewPresenter:
@@ -36,7 +50,14 @@ class FullInstrumentViewPresenter:
         self._model = model
 
         if model_setup_on_separate_thread:
-            self.thread = ModelSetupThread(self)
+            self.thread = QThread()
+            self.worker = ModelSetupWorker(self._model)
+            self.worker.moveToThread(self.thread)
+            self.thread.started.connect(self.worker.run)
+            self.worker.finished.connect(lambda: self.setup())
+            self.worker.finished.connect(self.worker.deleteLater)
+            self.thread.finished.connect(self.thread.deleteLater)
+            self.worker.finished.connect(self.thread.quit)
             self.thread.start()
         else:
             self._model.setup()
@@ -44,7 +65,6 @@ class FullInstrumentViewPresenter:
 
     def setup(self):
         self._view.subscribe_presenter(self)
-
         default_index, options = self.projection_combo_options()
         self._view.set_projection_combo_options(default_index, options)
 
@@ -75,13 +95,12 @@ class FullInstrumentViewPresenter:
         self._view.enable_point_picking(callback=self.point_picked)
         self._view.show_axes()
         self._view.reset_camera()
-        self._view.subscribe_presenter(self)
         self._view.setup_connections_to_presenter()
         self._view.set_contour_range_limits(self._contour_limits)
         self._view.set_tof_range_limits(self._bin_limits)
 
         self._view.hide_status_box()
-        self._ads_oberver = InstrumentViewADSObserver(
+        self._ads_observer = InstrumentViewADSObserver(
             delete_callback=self.delete_workspace_callback,
             rename_callback=self.rename_workspace_callback,
             clear_callback=self.clear_workspace_callback,
@@ -228,18 +247,5 @@ class FullInstrumentViewPresenter:
         # The observers are unsubscribed on object deletion, it's safer to manually
         # delete the observer rather than wait for the garbage collector, because
         # we don't want stale workspace references hanging around.
-        del self._ads_oberver
-
-
-class ModelSetupThread(QThread):
-    finished = Signal()
-
-    def __init__(self, presenter):
-        super(ModelSetupThread, self).__init__(presenter._view)
-        self.model = presenter._model
-        self.presenter = presenter
-        self.finished.connect(self.presenter.setup)
-
-    def run(self):
-        self.model.setup()
-        self.finished.emit()
+        if hasattr(self, "_ads_observer"):
+            del self._ads_observer
