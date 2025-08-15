@@ -1,77 +1,81 @@
 // This script expects the following environment variables to be set by the Jenkins job:
 // GITHUB_USER_NAME - The name of the user, being used with pushing/pulling from git
 // GITHUB_USER_EMAIL - The email of the user, being used with pushing/pulling from git
-// GITHUB_TOKEN_CREDENTIAL_ID - The name of the credentials token in Jenkins that you want to use for cloning and pushing to the mantid repo
+// GITHUB_TOKEN_CREDENTIAL_ID - The name of the credentials token in Jenkins that you want to use for pushing to the mantid repo
 // ANACONDA_TOKEN_CREDENTIAL_ID - The name of the credentials token in Jenkins that you want to use for publishing conda packages
 
-// Determine default values of parameters. Some are based on the branch.
-ANACONDA_CHANNEL_DEFAULT = 'mantid'
-GITHUB_RELEASES_REPO_DEFAULT = 'mantidproject/mantid'
-// The github tag is usually only specified for release candidates. If it's left blank
-// a nightly tag is generated.
-GITHUB_RELEASES_TAG_DEFAULT = ''
-GIT_BRANCH = git_branch_name()
+import groovy.transform.Field
+
+def gitBranch = git_branch_name()
 // Only Publish one of main or release-next by default. BRANCH_TO_PUBLISH is a global
 // environment variable set in the Jenkins system configuration global properties.
-PUBLISH_PACKAGES_DEFAULT = (GIT_BRANCH == "${BRANCH_TO_PUBLISH}")
-// Allow the freedom to specify GitHub and Anaconda publishing separately.
-PUBLISH_TO_ANACONDA_DEFAULT = PUBLISH_PACKAGES_DEFAULT
-PUBLISH_TO_GITHUB_DEFAULT = PUBLISH_PACKAGES_DEFAULT
+def publishPackages = (gitBranch == "${BRANCH_TO_PUBLISH}")
+
+// Determine default values of parameters. Some are based on the branch.
+def defaults = [
+  anacondaChannel : 'mantid',
+  githubReleasesRepo: 'mantidproject/mantid',
+  platformChoices : ['none', 'all', 'linux-64', 'win-64', 'osx-64', 'osx-arm64'],
+  publishToAnaconda : publishPackages,
+  publishToGithub   : publishPackages,
+  packageSuffix     : 'Unstable',
+  anacondaLabel     : 'unstable',
+  // The github tag is usually only specified for release candidates.
+  // If it's left blank a nightly tag is generated.
+  githubReleasesTag : ''
+]
+
 // If required, switch off the mantiddocs conda package build. This is deliberately not listed in the
 // pipeline parameters because it's only switched off for ornl-next anaconda publishing.
-BUILD_MANTIDDOCS_PACKAGE = true
+@Field Boolean buildMantiddocs = true
 
-switch(GIT_BRANCH) {
+// Restrict the parameter choices for certain named branches.
+switch(gitBranch) {
   case ['main', 'release-next']:
-    PACKAGE_SUFFIX_DEFAULT = 'Nightly'
-    ANACONDA_CHANNEL_LABEL_DEFAULT = 'nightly'
-    PLATFORM_CHOICES = ['all']
+    defaults.packageSuffix = 'Nightly'
+    defaults.anacondaLabel = 'nightly'
+    defaults.platformChoices = ['all']
     break
   case ['ornl-next', 'ornl-qa', 'ornl']:
-    PACKAGE_SUFFIX_DEFAULT = 'Nightly'
-    ANACONDA_CHANNEL_LABEL_DEFAULT = 'nightly'
-    PLATFORM_CHOICES = ['linux-64']
-    PUBLISH_TO_GITHUB_DEFAULT = false
-    PUBLISH_TO_ANACONDA_DEFAULT = true
-    ANACONDA_CHANNEL_DEFAULT = 'mantid-ornl'
-    BUILD_MANTIDDOCS_PACKAGE = false
-    break
-  default:
-    PACKAGE_SUFFIX_DEFAULT = 'Unstable'
-    ANACONDA_CHANNEL_LABEL_DEFAULT = 'unstable'
-    PLATFORM_CHOICES = ['none', 'all', 'linux-64', 'win-64', 'osx-64', 'osx-arm64']
+    defaults.packageSuffix = 'Nightly'
+    defaults.anacondaLabel = 'nightly'
+    defaults.platformChoices = ['linux-64']
+    defaults.publishToGithub = false
+    defaults.publishToAnaconda = true
+    defaults.anacondaChannel = 'mantid-ornl'
+    buildMantiddocs = false
     break
 }
 
 // conda-build can't copy a local source if the conda-bld directory is
 // also part of the source. Checkout to a subdirectory to avoid this.
-CHECKOUT_DIR = 'source'
-CISCRIPT_DIR = "${CHECKOUT_DIR}/buildconfig/Jenkins/Conda"
+@Field String CHECKOUT_DIR = 'source'
+@Field String CISCRIPT_DIR = "${CHECKOUT_DIR}/buildconfig/Jenkins/Conda"
 pipeline {
   agent none
   options { checkoutToSubdirectory(CHECKOUT_DIR) }
   parameters {
-      string(name: 'DESCRIPTION', defaultValue: '',
-             description: 'Description to be displayed on the Jenkins build page.')
-      // Check these match the PLATFORM matrix values below (without all).
-      choice(name: 'BUILD_DEVEL', choices: PLATFORM_CHOICES,
-             description: 'Choose a platform to build & test the developer configuration.')
-      choice(name: 'BUILD_PACKAGE', choices: PLATFORM_CHOICES,
-             description: 'Choose a platform to build just this standalone package')
-      string(name: 'PACKAGE_SUFFIX', defaultValue: PACKAGE_SUFFIX_DEFAULT,
-             description: 'A string to append to the standalone package name')
-      booleanParam(name: 'PUBLISH_TO_ANACONDA', defaultValue: PUBLISH_TO_ANACONDA_DEFAULT,
-                   description: 'If true, publish the packages to the specified Anaconda channel')
-      booleanParam(name: 'PUBLISH_TO_GITHUB', defaultValue: PUBLISH_TO_GITHUB_DEFAULT,
-                   description: 'If true, publish the packages to GitHub')
-      string(name: 'ANACONDA_CHANNEL', defaultValue: ANACONDA_CHANNEL_DEFAULT,
-             description: 'The Anaconda channel to accept the package')
-      string(name: 'ANACONDA_CHANNEL_LABEL', defaultValue: ANACONDA_CHANNEL_LABEL_DEFAULT,
-             description: 'The label attached to package in the Anaconda channel')
-      string(name: 'GITHUB_RELEASES_REPO', defaultValue: GITHUB_RELEASES_REPO_DEFAULT,
-             description: 'The repository to house the release')
-      string(name: 'GITHUB_RELEASES_TAG', defaultValue: GITHUB_RELEASES_TAG_DEFAULT,
-             description: 'The name of the tag for the release. Use this only for release candidate builds.')
+    string(name: 'DESCRIPTION', defaultValue: '',
+           description: 'Description to be displayed on the Jenkins build page.')
+    // Check these match the PLATFORM matrix values below (without all).
+    choice(name: 'BUILD_DEVEL', choices: defaults.platformChoices,
+           description: 'Choose a platform to build & test the developer configuration.')
+    choice(name: 'BUILD_PACKAGE', choices: defaults.platformChoices,
+           description: 'Choose a platform to build just this standalone package')
+    string(name: 'PACKAGE_SUFFIX', defaultValue: defaults.packageSuffix,
+           description: 'A string to append to the standalone package name')
+    booleanParam(name: 'PUBLISH_TO_ANACONDA', defaultValue: defaults.publishToAnaconda,
+                 description: 'If true, publish the packages to the specified Anaconda channel')
+    booleanParam(name: 'PUBLISH_TO_GITHUB', defaultValue: defaults.publishToGithub,
+                 description: 'If true, publish the packages to GitHub')
+    string(name: 'ANACONDA_CHANNEL', defaultValue: defaults.anacondaChannel,
+           description: 'The Anaconda channel to accept the package')
+    string(name: 'ANACONDA_CHANNEL_LABEL', defaultValue: defaults.anacondaLabel,
+           description: 'The label attached to package in the Anaconda channel')
+    string(name: 'GITHUB_RELEASES_REPO', defaultValue: defaults.githubReleasesRepo,
+           description: 'The repository to house the release')
+    string(name: 'GITHUB_RELEASES_TAG', defaultValue: defaults.githubReleasesTag,
+           description: 'The name of the tag for the release. Use this only for release candidate builds.')
   }
   environment {
     WIN_BASH = "C:\\Program Files\\git\\bin\\bash.exe"
@@ -86,13 +90,13 @@ pipeline {
       agent { label 'linux-64' }
       steps {
         script {
-          currentBuild.setDescription(env.DESCRIPTION)
+          currentBuild.setDescription(params.DESCRIPTION)
 
-          if(env.PUBLISH_TO_ANACONDA == 'true') {
-            if(!env.ANACONDA_CHANNEL_LABEL.trim()) {
+          if(params.PUBLISH_TO_ANACONDA) {
+            if(!params.ANACONDA_CHANNEL_LABEL?.trim()) {
               error("You must specify an Anaconda label to publish packages.")
             }
-            if(!env.ANACONDA_CHANNEL.trim()) {
+            if(!params.ANACONDA_CHANNEL?.trim()) {
               error("You must specify an Anaconda channel to publish packages.")
             }
           }
@@ -135,8 +139,8 @@ pipeline {
             beforeAgent true
             beforeOptions true
               anyOf {
-                expression { env.BUILD_DEVEL == 'all' }
-                expression { env.BUILD_DEVEL == 'linux-64' }
+                expression { params.BUILD_DEVEL == 'all' }
+                expression { params.BUILD_DEVEL == 'linux-64' }
             }
           }
           agent { label 'linux-64' }
@@ -157,8 +161,8 @@ pipeline {
             beforeAgent true
             beforeOptions true
             anyOf {
-              expression { env.BUILD_DEVEL == 'all' }
-              expression { env.BUILD_DEVEL == 'win-64' }
+              expression { params.BUILD_DEVEL == 'all' }
+              expression { params.BUILD_DEVEL == 'win-64' }
             }
           }
           agent { label 'win-64' }
@@ -181,8 +185,8 @@ pipeline {
             beforeAgent true
             beforeOptions true
               anyOf {
-                expression { env.BUILD_DEVEL == 'all' }
-                expression { env.BUILD_DEVEL == 'osx-64' }
+                expression { params.BUILD_DEVEL == 'all' }
+                expression { params.BUILD_DEVEL == 'osx-64' }
             }
           }
           agent { label 'osx-64' }
@@ -203,8 +207,8 @@ pipeline {
             beforeAgent true
             beforeOptions true
               anyOf {
-                expression { env.BUILD_DEVEL == 'all' }
-                expression { env.BUILD_DEVEL == 'osx-arm64' }
+                expression { params.BUILD_DEVEL == 'all' }
+                expression { params.BUILD_DEVEL == 'osx-arm64' }
             }
           }
           agent { label 'osx-arm64' }
@@ -226,7 +230,7 @@ pipeline {
             beforeOptions true
             // The mantiddocs package is built on linux so we always need to build the linux
             // conda packages unless 'none' is specified.
-            expression { env.BUILD_PACKAGE != 'none' }
+            expression { params.BUILD_PACKAGE != 'none' }
           }
           agent { label 'linux-64' }
           options {
@@ -257,8 +261,8 @@ pipeline {
             beforeAgent true
             beforeOptions true
             anyOf {
-              expression { env.BUILD_PACKAGE == 'win-64' }
-              expression { env.BUILD_PACKAGE == 'all' }
+              expression { params.BUILD_PACKAGE == 'win-64' }
+              expression { params.BUILD_PACKAGE == 'all' }
             }
           }
           agent { label 'win-64' }
@@ -289,8 +293,8 @@ pipeline {
             beforeAgent true
             beforeOptions true
             anyOf {
-              expression { env.BUILD_PACKAGE == 'osx-64' }
-              expression { env.BUILD_PACKAGE == 'all' }
+              expression { params.BUILD_PACKAGE == 'osx-64' }
+              expression { params.BUILD_PACKAGE == 'all' }
             }
           }
           agent { label 'osx-64' }
@@ -321,8 +325,8 @@ pipeline {
             beforeAgent true
             beforeOptions true
             anyOf {
-              expression { env.BUILD_PACKAGE == 'osx-arm64' }
-              expression { env.BUILD_PACKAGE == 'all' }
+              expression { params.BUILD_PACKAGE == 'osx-arm64' }
+              expression { params.BUILD_PACKAGE == 'all' }
             }
           }
           agent { label 'osx-arm64' }
@@ -364,8 +368,8 @@ pipeline {
               beforeAgent true
               beforeOptions true
               anyOf {
-                  expression { env.BUILD_PACKAGE == "${PLATFORM}" }
-                  expression { env.BUILD_PACKAGE == 'all' }
+                  expression { params.BUILD_PACKAGE == "${PLATFORM}" }
+                  expression { params.BUILD_PACKAGE == 'all' }
               }
             }
             agent { label "${PLATFORM}" }
@@ -407,7 +411,7 @@ pipeline {
       when {
         beforeAgent true
         beforeOptions true
-        expression { env.PUBLISH_TO_ANACONDA == 'true' }
+        expression { params.PUBLISH_TO_ANACONDA }
       }
       agent { label 'linux-64' } // Use linux for simplicity with shell scripts
       options {
@@ -438,8 +442,8 @@ pipeline {
         beforeAgent true
         beforeOptions true
         allOf {
-            expression { env.PUBLISH_TO_ANACONDA == 'true' }
-            expression { env.ANACONDA_CHANNEL_LABEL.trim() == 'nightly' }
+            expression { params.PUBLISH_TO_ANACONDA }
+            expression { params.ANACONDA_CHANNEL_LABEL.trim() == 'nightly' }
         }
       }
       agent { label 'linux-64' } // Use linux for simplicity with shell scripts
@@ -457,8 +461,8 @@ pipeline {
         beforeAgent true
         beforeOptions true
         allOf {
-          expression { env.PUBLISH_TO_GITHUB == 'true' }
-          expression { env.GITHUB_RELEASES_REPO.trim() != '' }
+          expression { params.PUBLISH_TO_GITHUB }
+          expression { params.GITHUB_RELEASES_REPO.trim() != '' }
         }
       }
       agent { label 'linux-64' } // Use linux for simplicity with shell scripts
@@ -502,17 +506,17 @@ pipeline {
         script {
           // If a build has a description already, we don't want to overwrite it,
           // and can safely assume it's not a nightly run.
-          if(env.DESCRIPTION.isEmpty()) {
+          if(params.DESCRIPTION.isEmpty()) {
             // Keep this build. If it reaches this stage then it passed all other stages.
             currentBuild.keepLog = true
 
             // Set the keep description to a known value so we know which previous builds to discard.
             // This will allow builds to be manually kept and preserved by setting a custom description.
-            keepDescription = "Automatically preserving the most recent successful nightly"
+            def keepDescription = "Automatically preserving the most recent successful nightly"
             currentBuild.setDescription(keepDescription)
 
             // Remove the "keep" status for all previous successful runs.
-            build = currentBuild.getPreviousSuccessfulBuild()
+            def build = currentBuild.getPreviousSuccessfulBuild()
             while(build != null)
             {
               if(build.build().getDescription() == keepDescription)
@@ -532,7 +536,7 @@ pipeline {
 // ------------------- Functions -------------------
 
 def git_branch_name() {
-  name = scm.branches[0].name
+  def name = scm.branches[0].name
   // Some jobs define a BRANCH_NAME parameter to allow customisable builds.
   // In this case the value of scm.branches[0].name will literally be
   // $BRANCH_NAME and instead we have to get it from the environment.
@@ -567,16 +571,16 @@ def checkoutSource(sha) {
 }
 
 def build_and_test(platform) {
-  buildscript_path = "${CISCRIPT_DIR}/conda-buildscript"
-  common_args = '--clean-build --clean-external-projects --enable-systemtests'
-  cmake_preset = "${platform}-ci"
+  def buildscript_path = "${CISCRIPT_DIR}/conda-buildscript"
+  def common_args = '--clean-build --clean-external-projects --enable-systemtests'
+  def cmake_preset = "${platform}-ci"
   if(platform.startsWith('win')) {
-    workspace_unix_style = toUnixStylePath("${WORKSPACE}")
+    def workspace_unix_style = toUnixStylePath("${WORKSPACE}")
     bat "\"${WIN_BASH}\" -ex -c \"${buildscript_path}\
       ${workspace_unix_style}/${CHECKOUT_DIR} ${cmake_preset} ${common_args}\""
   } else {
     // Only run doctests on Linux
-    doctests = ""
+    def doctests = ""
     if(platform.startsWith('linux')) {
       doctests = "--enable-doctests"
     }
@@ -591,9 +595,9 @@ def publish_test_reports() {
 }
 
 def package_conda(platform, base_or_workbench) {
-  packagescript_path = "${CISCRIPT_DIR}/package-conda"
+  def packagescript_path = "${CISCRIPT_DIR}/package-conda"
   if(platform.startsWith('win')) {
-    workspace_unix_style = toUnixStylePath("${WORKSPACE}")
+    def workspace_unix_style = toUnixStylePath("${WORKSPACE}")
     bat "\"${WIN_BASH}\" -ex -c \"${packagescript_path}\
       ${workspace_unix_style} ${package_conda_options(platform, base_or_workbench)}\""
   } else {
@@ -603,39 +607,39 @@ def package_conda(platform, base_or_workbench) {
 }
 
 def package_conda_options(platform, base_or_workbench) {
-  package_flags = ""
+  def package_flags = ""
   if(base_or_workbench == 'base') {
-    docs_flags = ""
-    if(platform.startsWith('linux') && BUILD_MANTIDDOCS_PACKAGE) {
+    def docs_flags = ""
+    if(platform.startsWith('linux') && buildMantiddocs) {
       docs_flags = "--build-docs"
     }
     package_flags = "--build-mantid-developer --build-mantid --build-qt ${docs_flags}"
   }
   else if(base_or_workbench == 'workbench') {
-    if(BUILD_MANTIDDOCS_PACKAGE) {
+    if(buildMantiddocs) {
       package_flags = "--build-workbench"
     } else {
       package_flags = "--build-workbench-without-docs"
     }
   }
 
-  package_options = "${package_flags} --git-tag ${GIT_TAG} --platform ${platform}"
+  def package_options = "${package_flags} --git-tag ${GIT_TAG} --platform ${platform}"
   return package_options.trim()
 }
 
 def generate_git_tag() {
-  git_tag = ""
+  def git_tag = ""
   if(GITHUB_RELEASES_TAG.trim() != '') {
     git_tag = "${GITHUB_RELEASES_TAG}"
   }
   else {
-    versionscript_path = "${CISCRIPT_DIR}/generate-version-number"
+    def versionscript_path = "${CISCRIPT_DIR}/generate-version-number"
     if(isUnix()) {
       git_tag = sh(
         script: "${versionscript_path}", returnStdout: true
       ).trim()
     } else {
-      workspace_unix_style = toUnixStylePath("${WORKSPACE}")
+      def workspace_unix_style = toUnixStylePath("${WORKSPACE}")
       // @ suppresses the inclusion of the command itself in the output
       // https://www.jenkins.io/doc/pipeline/steps/workflow-durable-task-step/#bat-windows-batch-script
       git_tag = bat(script: "@\"${WIN_BASH}\" -ex -c \"${versionscript_path}\"", returnStdout: true).trim()
@@ -645,18 +649,18 @@ def generate_git_tag() {
 }
 
 def package_standalone(platform) {
-  packagescript_path = "${CISCRIPT_DIR}/package-standalone"
+  def packagescript_path = "${CISCRIPT_DIR}/package-standalone"
   if(isUnix()) {
     sh "${packagescript_path} ${WORKSPACE} ${package_standalone_options(platform)}"
   } else {
-    workspace_unix_style = toUnixStylePath("${WORKSPACE}")
+    def workspace_unix_style = toUnixStylePath("${WORKSPACE}")
     bat "\"${WIN_BASH}\" -ex -c \"${packagescript_path} ${workspace_unix_style}\
       ${package_standalone_options(platform)}\""
   }
 }
 
 def package_standalone_options(platform) {
-  package_options = ""
+  def package_options = ""
   if(PACKAGE_SUFFIX.trim() != '') {
     package_options += " --package-suffix ${PACKAGE_SUFFIX}"
   }
@@ -665,7 +669,7 @@ def package_standalone_options(platform) {
 
 // Determine whether this build should be marked as a prerelease on GitHub.
 def prerelease_option() {
-  prerelease_flag = ""
+  def prerelease_flag = ""
   // If a tag has not been specified, we assume it's for a prerelease version.
   if(GITHUB_RELEASES_TAG.trim() == '') {
     prerelease_flag = "--prerelease"
@@ -675,7 +679,7 @@ def prerelease_option() {
 
 def archive_conda_packages(platform) {
   // Only archive the mantiddocs package if it was built.
-  if(platform != 'noarch' || BUILD_MANTIDDOCS_PACKAGE) {
+  if(platform != 'noarch' || buildMantiddocs) {
     archiveArtifacts artifacts: "**/conda-bld/${platform}/*.tar.bz2",
       allowEmptyArchive: false,
       fingerprint: true,
@@ -684,7 +688,7 @@ def archive_conda_packages(platform) {
 }
 
 def archive_standalone_package(platform) {
-  pattern = ""
+  def pattern = ""
   if(platform.startsWith('linux')) {
     pattern = '*.tar.xz'
   } else if(platform.startsWith('win')) {
@@ -708,7 +712,7 @@ def archive_test_logs(){
 }
 
 def archive_env_logs(platform) {
-  env_log_dir = "**/conda-bld/${platform}/env_logs"
+  def env_log_dir = "**/conda-bld/${platform}/env_logs"
   archiveArtifacts artifacts: env_log_dir += "/**/*.txt",
     allowEmptyArchive: false,
     fingerprint: true,
