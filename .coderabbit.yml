@@ -1,2 +1,11 @@
 reviews:
   review_status: false
+  auto_review:
+    enabled: false
+    ignore_title_keywords:
+      - '[skip cr]'
+      - 'skip coderabbit'
+
+tools:
+  github-checks:
+    enabled: false
