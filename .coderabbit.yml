@@ -1,1 +1,2 @@
-reviews.review_status: false
+reviews:
+  review_status: false
