@@ -283,8 +283,7 @@ public:
     std::shared_ptr<ADARA::TransCompletePkt> pkt = basicPacketTests<ADARA::TransCompletePkt>(
         translationCompletePacketV0, sizeof(translationCompletePacketV0), 1117010859, 421225535);
     TS_ASSERT_EQUALS(pkt->reason().c_str(), std::string("the meaning of the Universe"))
-    // DEBUG: this assertion fails
-    // TS_ASSERT_EQUALS(pkt->status(), 42)
+    TS_ASSERT_EQUALS(pkt->status(), 42)
   }
 
   /*************************
@@ -430,7 +429,6 @@ public:
    *   (there's only version 0)
    ************************/
 
-  // DEBUG: This test is failing
   void testSyncPacketParser() {
     std::shared_ptr<ADARA::SyncPkt> pkt =
         basicPacketTests<ADARA::SyncPkt>(syncPacket, sizeof(syncPacket), 728504568, 5617153);
@@ -536,7 +534,6 @@ public:
                                    "'sequence_id', 'sequence_number', 'sequence_total', 'SF1', 'SF2'")
   }
 
-  // DEBUG: this test is failing
   void testVariableU32ArrayPacketParser() {
     std::shared_ptr<ADARA::VariableU32ArrayPkt> pkt = basicPacketTests<ADARA::VariableU32ArrayPkt>(
         variableU32ArrayPacket, sizeof(variableU32ArrayPacket), 728281149, 0);
@@ -548,7 +545,6 @@ public:
     TS_ASSERT_EQUALS(pkt->value(), std::vector<uint32_t>({6, 7, 8, 9}))
   }
 
-  // DEBUG: this test is failing
   void testVariableDoubleArrayPacketParser() {
     std::shared_ptr<ADARA::VariableDoubleArrayPkt> pkt = basicPacketTests<ADARA::VariableDoubleArrayPkt>(
         variableDoubleArrayPacket, sizeof(variableDoubleArrayPacket), 728281149, 0);

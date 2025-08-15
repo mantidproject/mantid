@@ -444,7 +444,7 @@ TransCompletePkt::TransCompletePkt(const uint8_t *data, uint32_t len) : Packet(d
 }
 
 TransCompletePkt::TransCompletePkt(const TransCompletePkt &pkt)
-    : Packet(pkt), m_status(VariableStatus::NOT_REPORTED), m_reason(pkt.m_reason) {}
+    : Packet(pkt), m_status(pkt.m_status), m_reason(pkt.m_reason) {}
 
 /* ------------------------------------------------------------------------ */
 
