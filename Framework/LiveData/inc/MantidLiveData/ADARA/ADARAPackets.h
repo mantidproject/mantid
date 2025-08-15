@@ -10,6 +10,7 @@
 #include <cstring>
 #include <sstream>
 #include <string>
+#include <time.h>
 #include <vector>
 
 #include "ADARA.h"
@@ -27,15 +28,11 @@ public:
     m_base_type = (PacketType::Type)ADARA_BASE_PKT_TYPE(m_type);
     m_version = (PacketType::Version)ADARA_PKT_VERSION(m_type);
 
-#if 0
-// NOTE: Windows doesn't have struct timespec and Mantid doesn't really need this,
-// so for now we're just going to comment it out.
-      /* Convert EPICS epoch to Unix epoch,
-        * Jan 1, 1990 ==> Jan 1, 1970
-        */
-      m_timestamp.tv_sec = field[2] + EPICS_EPOCH_OFFSET;
-      m_timestamp.tv_nsec = field[3];
-#endif
+    /* Convert EPICS epoch to Unix epoch,
+     * Jan 1, 1990 ==> Jan 1, 1970
+     */
+    m_timestamp.tv_sec = field[2] + EPICS_EPOCH_OFFSET;
+    m_timestamp.tv_nsec = field[3];
 
     m_pulseId = ((uint64_t)field[2]) << 32;
     m_pulseId |= field[3];
@@ -45,9 +42,7 @@ public:
   PacketType::Type base_type() const { return m_base_type; }
   PacketType::Version version() const { return m_version; }
   uint32_t payload_length() const { return m_payload_len; }
-#if 0
-	const struct timespec &timestamp() const { return m_timestamp; }
-#endif
+  const struct timespec &timestamp() const { return m_timestamp; }
   uint64_t pulseId() const { return m_pulseId; }
   uint32_t packet_length() const { return m_payload_len + 16; }
 
@@ -59,9 +54,7 @@ protected:
   PacketType::Type m_base_type;
   PacketType::Version m_version;
 
-#if 0
-	struct timespec m_timestamp;
-#endif
+  struct timespec m_timestamp;
   uint64_t m_pulseId;
 
   /* Don't allow the default constructor */

@@ -28,12 +28,11 @@ public:
   /// Destructor
   virtual ~Parser();
 
-  /** NOTE: Windows doesn't have struct timespec and Mantid doesn't really need this,
-   struct timespec last_start_read_time;
-   struct timespec last_last_start_read_time;
-   struct timespec last_end_read_time;
-   struct timespec last_last_end_read_time;
-   **/
+  struct timespec last_start_read_time;
+  struct timespec last_last_start_read_time;
+
+  struct timespec last_end_read_time;
+  struct timespec last_last_end_read_time;
 
   int64_t last_bytes_read;
   int64_t last_last_bytes_read;

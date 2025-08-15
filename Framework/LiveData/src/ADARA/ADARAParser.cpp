@@ -18,7 +18,6 @@ Parser::Parser(unsigned int initial_buffer_size, unsigned int max_pkt_size)
       m_oversize_offset(0) {
   m_buffer = new uint8_t[initial_buffer_size];
 
-  /** NOTE: Windows doesn't have struct timespec and Mantid doesn't really need this,
   last_start_read_time.tv_sec = -1;
   last_start_read_time.tv_nsec = -1;
   last_last_start_read_time.tv_sec = -1;
@@ -28,7 +27,6 @@ Parser::Parser(unsigned int initial_buffer_size, unsigned int max_pkt_size)
   last_end_read_time.tv_nsec = -1;
   last_last_end_read_time.tv_sec = -1;
   last_last_end_read_time.tv_nsec = -1;
-   **/
 
   last_bytes_read = -1;
   last_last_bytes_read = -1;
