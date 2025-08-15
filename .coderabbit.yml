@@ -9,8 +9,3 @@ tools:
 
 chat:
   auto_reply: false
-
-# for our friends across the pond
-code_generation:
-  docstrings:
-    language: 'en-GB'
