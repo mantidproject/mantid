@@ -69,6 +69,7 @@ protected:
 };
 
 class MANTID_LIVEDATA_DLL Packet : public PacketHeader {
+
 public:
   Packet(const uint8_t *data, uint32_t len);
   Packet(const Packet &pkt);
@@ -87,6 +88,8 @@ private:
   /* Don't allow the default constructor or assignment operator */
   Packet();
   Packet &operator=(const Packet &pkt);
+
+  friend class DetectorBankSetsPkt; // Allow DetectorBankSetsPkt to access private operator=
 };
 
 class MANTID_LIVEDATA_DLL RawDataPkt : public Packet {
@@ -724,6 +727,8 @@ private:
   uint32_t *m_after_banks_offset;
 
   DetectorBankSetsPkt(const uint8_t *data, uint32_t len);
+
+  DetectorBankSetsPkt &operator=(const DetectorBankSetsPkt &pkt);
 
   friend class Parser;
 };

@@ -77,6 +77,28 @@ Packet::~Packet() {
     delete[] m_data;
 }
 
+Packet &ADARA::Packet::operator=(const Packet &pkt) {
+  if (this != &pkt) {
+    // If we have allocated memory, free it
+    if (m_allocated)
+      delete[] m_data;
+
+    // Copy header fields
+    m_payload_len = pkt.m_payload_len;
+    m_type = pkt.m_type;
+    m_base_type = pkt.m_base_type;
+    m_version = pkt.m_version;
+    m_pulseId = pkt.m_pulseId;
+
+    // Allocate new memory and copy data
+    m_len = pkt.m_len;
+    m_data = new uint8_t[m_len];
+    memcpy(const_cast<uint8_t *>(m_data), pkt.m_data, m_len);
+    m_allocated = true;
+  }
+  return *this;
+}
+
 /* ------------------------------------------------------------------------ */
 
 RawDataPkt::RawDataPkt(const uint8_t *data, uint32_t len)
@@ -638,7 +660,7 @@ DetectorBankSetsPkt::DetectorBankSetsPkt(const uint8_t *data, uint32_t len)
   if (numSets < 1)
     return;
 
-  m_sectionOffsets = new uint32_t[numSets]; // cppcheck-suppress noOperatorEq
+  m_sectionOffsets = new uint32_t[numSets];
   m_after_banks_offset = new uint32_t[numSets];
 
   // Traverse Detector Bank Sets...
@@ -702,6 +724,33 @@ DetectorBankSetsPkt::DetectorBankSetsPkt(const DetectorBankSetsPkt &pkt)
 
   m_after_banks_offset = new uint32_t[numSets];
   memcpy(const_cast<uint32_t *>(m_after_banks_offset), pkt.m_after_banks_offset, numSets * sizeof(uint32_t));
+}
+
+DetectorBankSetsPkt &DetectorBankSetsPkt::operator=(const DetectorBankSetsPkt &pkt) {
+  if (this != &pkt) { // Self-assignment check
+    // Call base class assignment operator
+    Packet::operator=(pkt);
+
+    // Re-initialize m_fields after the base class assignment
+    m_fields = reinterpret_cast<const uint32_t *>(payload());
+
+    // Clean up existing resources
+    delete[] m_sectionOffsets;
+    delete[] m_after_banks_offset;
+    m_sectionOffsets = nullptr;
+    m_after_banks_offset = nullptr;
+
+    // Allocate and copy new resources
+    uint32_t numSets = detBankSetCount();
+    if (numSets > 0) {
+      m_sectionOffsets = new uint32_t[numSets];
+      m_after_banks_offset = new uint32_t[numSets];
+
+      memcpy(const_cast<uint32_t *>(m_sectionOffsets), pkt.m_sectionOffsets, numSets * sizeof(uint32_t));
+      memcpy(const_cast<uint32_t *>(m_after_banks_offset), pkt.m_after_banks_offset, numSets * sizeof(uint32_t));
+    }
+  }
+  return *this;
 }
 
 DetectorBankSetsPkt::~DetectorBankSetsPkt() {

@@ -32,7 +32,7 @@
       "description": "Inherited by all Unix-like presets for debugging. Overrides conda CXX flags for debugging",
       "hidden": true,
       "cacheVariables": {
-        "CMAKE_CXX_FLAGS_DEBUG": "-g -Og",
+        "CMAKE_CXX_FLAGS_DEBUG": "-g -O0 -fno-inline",
         "CMAKE_BUILD_TYPE": "Debug",
         "CMAKE_DISABLE_PRECOMPILE_HEADERS": "ON"
       }
