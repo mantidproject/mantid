@@ -153,7 +153,8 @@ class TomlV1ParserImpl(TomlParserImplBase):
     def _parse_detector_configuration(self):
         det_config_dict = self.get_val(["detector", "configuration"])
 
-        self.scale.scale = self.get_val("rear_scale", det_config_dict)
+        self.scale.rear_scale = self.get_val("rear_scale", det_config_dict)
+        self.scale.front_scale = self.get_val("front_scale", det_config_dict)
 
         reduction_mode_key = self.get_mandatory_val(["detector", "configuration", "selected_detector"])
         # LAB/Rear was set by default in user parser, so we fall-back to this
