@@ -40,4 +40,10 @@ void export_BasicPropertyWithValueTypes() {
   // std::string
   PropertyWithValueExporter<std::string>::define("StringPropertyWithValue");
   PropertyWithValueExporter<std::vector<std::string>>::define("VectorStringPropertyWithValue");
+
+  // void pointer
+  // PropertyWithValueExporter<void *>::define("PointerPropertyWithValue");
+
+  // dictionary properties
+  PropertyWithValueExporter<std::map<int, std::vector<int>>>::define("IntVectorIntDictionaryPropertyWithValue");
 }

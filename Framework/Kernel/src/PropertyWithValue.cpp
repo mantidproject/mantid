@@ -94,4 +94,6 @@ template class PropertyWithValue<std::vector<int32_t>>;
 
 template class PropertyWithValue<std::string>;
 
+template class PropertyWithValue<std::map<int, std::vector<int>>>;
+
 } // namespace Mantid::Kernel
