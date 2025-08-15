@@ -64,6 +64,19 @@ std::string toString(const std::vector<std::vector<T>> &value, const std::string
   return result.str();
 }
 
+/// Specialization for a property of type std::map.
+template <typename K, typename V>
+std::string toString(const std::map<K, V> &value, const std::string &delimiter = ",") {
+  std::stringstream result;
+  // std::size_t vsize = value.size();
+  for (auto it = value.begin(); it != value.end(); it++) {
+    result << "(" << toString(it->first) << ":";
+    result << toString(it->second) << ")";
+    result << delimiter;
+  }
+  return result.str();
+}
+
 // --------------------- convert values to pretty strings
 /// Convert values to pretty strings.
 template <typename T> std::string toPrettyString(const T &value, size_t maxLength = 0, bool collapseLists = true) {
@@ -113,6 +126,17 @@ toPrettyString(const std::vector<T> &value, size_t maxLength = 0, bool collapseL
     retVal = Strings::join(value.begin(), value.end(), delimiter);
   }
   return Strings::shorten(retVal, maxLength);
+}
+
+template <typename K, typename V>
+std::string toPrettyString(const std::map<K, V> &value, size_t maxLength = 0, bool collapseLists = true,
+                           const std::string &delimiter = "\n", const std::string & = "+") {
+  std::stringstream retVal;
+  retVal << "{";
+  for (auto it = value.begin(); it != value.end(); it++) {
+    retVal << toString(it->first) << ":" << toPrettyString(it->second, maxLength, collapseLists) << delimiter << " ";
+  }
+  return Strings::shorten(retVal.str(), maxLength);
 }
 
 GNU_DIAG_OFF("unused-function")
@@ -208,6 +232,10 @@ template <typename T> inline void appendValue(const std::string &strvalue, std::
 template <typename T> void toValue(const std::string &strvalue, T &value) { value = boost::lexical_cast<T>(strvalue); }
 
 template <typename T> void toValue(const std::string &, std::shared_ptr<T> &) { throw boost::bad_lexical_cast(); }
+
+template <typename K, typename V> void toValue(const std::string &, std::map<K, V> &) {
+  throw boost::bad_lexical_cast();
+}
 
 /** Helper functions for setting the value of an OptionalBool property */
 template <> [[maybe_unused]] void toValue(const std::string &strValue, OptionalBool &value) {
@@ -313,6 +341,10 @@ template <typename T> inline void addingOperator(std::vector<T> &lhs, const std:
     std::vector<T> rhs_copy(rhs);
     lhs.insert(lhs.end(), rhs_copy.begin(), rhs_copy.end());
   }
+}
+
+template <typename K, typename V> inline void addingOperator(std::map<K, V> &, std::map<K, V> const &) {
+  throw Exception::NotImplementedError("PropertyWithValue.h: += operator not implemented for maps");
 }
 
 template <> inline void addingOperator(bool &, const bool &) {
