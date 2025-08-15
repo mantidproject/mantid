@@ -2,10 +2,15 @@ reviews:
   review_status: false
   auto_review:
     enabled: false
-    ignore_title_keywords:
-      - '[skip cr]'
-      - 'skip coderabbit'
 
 tools:
   github-checks:
     enabled: false
+
+chat:
+  auto_reply: false
+
+# for our friends across the pond
+code_generation:
+docstrings:
+  language: en-UK
