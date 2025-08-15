@@ -165,5 +165,8 @@ versioningit:
   - '>=2.1'
 
 pin_run_as_build:
-    boost:
-      max_pin: x.x
+  boost:
+    max_pin: x.x
+  numpy:
+    min_pin: x
+    max_pin: x.x
