@@ -1,61 +1,21 @@
 from matplotlib.widgets import RectangleSelector, EllipseSelector, PolygonSelector
-from matplotlib.axes import Axes
 from abc import ABC, abstractmethod
 
 from mantidqt.widgets.sliceviewer.views.toolbar import ToolItemText
 from .selector import make_selector_class, cursor_info
 
-
-class Masking:
-    """
-    Manages Masking
-    """
-
-    def __init__(self, ax):
-        self._selectors = []
-        self._active_selector = None
-        self._ax = ax
-
-    def _new_selector(self, selector_type):
-        if self._active_selector:
-            self._active_selector.set_active(False)
-            self._active_selector.disconnect()
-            if self._active_selector.mask_drawn:
-                self._selectors.append(self._active_selector)
-            else:
-                self._active_selector.clear()
-
-        self._active_selector = selector_type(self._ax)
-        self._active_selector.set_active(True)
-
-    def new_selector(self, text: str):
-        match text:
-            case ToolItemText.RECT_MASKING:
-                self._new_selector(RectangleSelectionMasking)
-            case ToolItemText.ELLI_MASKING:
-                self._new_selector(EllipticalSelectionMasking)
-            case ToolItemText.POLY_MASKING:
-                self._new_selector(PolygonSelectionMasking)
-
-    def export_selectors(self):
-        pass
-
-    def apply_selectors(self):
-        pass
-
-    def clear_and_disconnect(self):
-        self._active_selector.set_active(False)
-        self._active_selector.disconnect()
-        for selector in self._selectors:
-            selector.clear()
+SHAPE_STYLE = {"alpha": 0.5, "linewidth": 1.75, "color": "black", "linestyle": "-"}
+HANDLE_STYLE = {"alpha": 0.5, "markerfacecolor": "gray", "markersize": 4, "markeredgecolor": "gray"}
+INACTIVE_HANDLE_STYLE = {"alpha": 0.5, "markerfacecolor": "gray", "markersize": 4, "markeredgecolor": "gray"}
+INACTIVE_SHAPE_STYLE = {"alpha": 0.5, "linewidth": 1.75, "color": "gray", "linestyle": "-"}
 
 
 class SelectionMaskingBase(ABC):
-    def __init__(self, ax):
-        self._img = ax.images[0]
+    def __init__(self, dataview):
         self._cursor_info = None
         self.mask_drawn = False
         self._selector = None
+        self._dataview = dataview
 
     @abstractmethod
     def _on_selected(self, eclick, erelease):
@@ -71,16 +31,24 @@ class SelectionMaskingBase(ABC):
     def disconnect(self):
         self._selector.disconnect_events()
 
+    @abstractmethod
+    def set_inactive_color(self):
+        pass
+
+    @property
+    def _img(self):
+        return self._dataview.ax.images[0]
+
 
 class RectangleSelectionMaskingBase(SelectionMaskingBase):
     """
     Base class for a selector with a `RectangleSelector` base.
     """
 
-    def __init__(self, ax: Axes, selector):
-        super().__init__(ax)
+    def __init__(self, dataview, selector):
+        super().__init__(dataview)
         self._selector = make_selector_class(selector)(
-            ax,
+            dataview.ax,
             self._on_selected,
             useblit=False,  # rectangle persists on button release
             button=[1],
@@ -88,6 +56,9 @@ class RectangleSelectionMaskingBase(SelectionMaskingBase):
             minspany=5,
             spancoords="pixels",
             interactive=True,
+            props={"fill": False, **SHAPE_STYLE},
+            handle_props=HANDLE_STYLE,
+            ignore_event_outside=True,
         )
 
     def _on_selected(self, eclick, erelease):
@@ -106,6 +77,11 @@ class RectangleSelectionMaskingBase(SelectionMaskingBase):
         # Add shape object to collection
         self._cursor_info = (cinfo_click, cinfo_release)
         self.mask_drawn = True
+        self._dataview.mpl_toolbar.set_action_checked(SELECTOR_TO_TOOL_ITEM_TEXT[self.__class__], False, trigger=False)
+
+    def set_inactive_color(self):
+        self._selector.set_props(fill=False, **INACTIVE_SHAPE_STYLE)
+        self._selector.set_handle_props(**INACTIVE_HANDLE_STYLE)
 
 
 class RectangleSelectionMasking(RectangleSelectionMaskingBase):
@@ -113,8 +89,8 @@ class RectangleSelectionMasking(RectangleSelectionMaskingBase):
     Draws a mask from a rectangular selection
     """
 
-    def __init__(self, ax):
-        super().__init__(ax, RectangleSelector)
+    def __init__(self, dataview):
+        super().__init__(dataview, RectangleSelector)
 
 
 class EllipticalSelectionMasking(RectangleSelectionMaskingBase):
@@ -122,8 +98,8 @@ class EllipticalSelectionMasking(RectangleSelectionMaskingBase):
     Draws a mask from an elliptical selection
     """
 
-    def __init__(self, ax):
-        super().__init__(ax, EllipseSelector)
+    def __init__(self, dataview):
+        super().__init__(dataview, EllipseSelector)
 
 
 class PolygonSelectionMasking(SelectionMaskingBase):
@@ -131,12 +107,14 @@ class PolygonSelectionMasking(SelectionMaskingBase):
     Draws a mask from a polygon selection
     """
 
-    def __init__(self, ax: Axes):
-        super().__init__(ax)
+    def __init__(self, dataview):
+        super().__init__(dataview)
         self._selector = make_selector_class(PolygonSelector)(
-            ax,
+            dataview.ax,
             self._on_selected,
             useblit=False,  # rectangle persists on button release
+            props=SHAPE_STYLE,
+            handle_props=HANDLE_STYLE,
         )
 
     def _on_selected(self, eclick, erelease=None):
@@ -146,3 +124,57 @@ class PolygonSelectionMasking(SelectionMaskingBase):
         :param erelease: None for polygon selector
         """
         self.mask_drawn = True
+        self._dataview.mpl_toolbar.set_action_checked(SELECTOR_TO_TOOL_ITEM_TEXT[self.__class__], False, trigger=False)
+
+    def set_inactive_color(self):
+        self._selector.set_props(**INACTIVE_SHAPE_STYLE)
+        self._selector.set_handle_props(**INACTIVE_HANDLE_STYLE)
+
+
+TOOL_ITEM_TEXT_TO_SELECTOR = {
+    ToolItemText.RECT_MASKING: RectangleSelectionMasking,
+    ToolItemText.ELLI_MASKING: EllipticalSelectionMasking,
+    ToolItemText.POLY_MASKING: PolygonSelectionMasking,
+}
+SELECTOR_TO_TOOL_ITEM_TEXT = {v: k for k, v in TOOL_ITEM_TEXT_TO_SELECTOR.items()}
+
+
+class Masking:
+    """
+    Manages Masking
+    """
+
+    def __init__(self, dataview):
+        self._selectors = []
+        self._active_selector = None
+        self._dataview = dataview
+
+    def _new_selector(self, selector_type):
+        if self._active_selector:
+            self._active_selector.set_active(False)
+            self._active_selector.disconnect()
+            if self._active_selector.mask_drawn:
+                self._active_selector.set_inactive_color()
+                self._selectors.append(self._active_selector)
+            else:
+                self._active_selector.clear()
+
+        self._active_selector = selector_type(self._dataview)
+        self._active_selector.set_active(True)
+
+    def new_selector(self, text: str):
+        self._new_selector(TOOL_ITEM_TEXT_TO_SELECTOR[text])
+
+    def export_selectors(self):
+        pass
+
+    def apply_selectors(self):
+        pass
+
+    def clear_and_disconnect(self):
+        self._active_selector.set_active(False)
+        self._active_selector.disconnect()
+        if self._active_selector.mask_drawn:
+            self._active_selector.clear()
+        for selector in self._selectors:
+            selector.clear()
