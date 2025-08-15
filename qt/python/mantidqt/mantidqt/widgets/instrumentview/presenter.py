@@ -50,6 +50,7 @@ class InstrumentViewPresenter(ObservingPresenter):
         # TODO FIXME - this may not be a good design.  It violates the OO principles
         # Update the instrument view manager
         InstrumentViewManager.register(self, self.ws_name)
+        self._is_view_closed = False
 
     def current_workspace_equals(self, name):
         return self.ws_name == name
@@ -111,6 +112,10 @@ class InstrumentViewPresenter(ObservingPresenter):
         if workspace_name == self.ws_name:
             super(InstrumentViewPresenter, self).close(self.ws_name)
             InstrumentViewManager.remove(self, self.ws_name)
+            self._is_view_closed = True
+
+    def is_view_closed(self):
+        return self._is_view_closed
 
 
 class InstrumentViewManager:

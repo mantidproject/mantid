@@ -180,6 +180,17 @@ public:
 
 %End
 
+  // get Mask Tab
+  InstrumentWidgetMaskTab *getMaskTab();
+%Docstring
+  Get the handler to the 'MASK' tab inside instrument view
+
+  Returns:
+    a pointer to the InstrumentWidgetMaskTab object.
+
+%End
+
+
   // select tab
   void selectTab(Tab tab);
 %Docstring
@@ -218,9 +229,9 @@ public:
       newInstrumentWindowName The new title of the window
 %End
 
-  bool isThreadRunning();
+  bool isThreadRunning() const;
 %Docstring
-  bool isThreadRunning()
+  bool isThreadRunning() const
   ----------------------
   Return whether the instrument loading thread is still executing.
 %End
@@ -238,7 +249,6 @@ public:
   --------------------------------
   Saves the current scene as a png image to a file.
 %End
-
 };
 
 class InstrumentWidgetEncoder {
@@ -394,4 +404,39 @@ class InstrumentWidgetPickTab: InstrumentWidgetTab
         InstrumentWidgetPickTab();
         InstrumentWidgetPickTab(const InstrumentWidgetPickTab &);
 
+};
+
+
+//InstrumentWidgetMaskTab
+class InstrumentWidgetMaskTab: InstrumentWidgetTab
+{
+  %TypeHeaderCode
+#include "MantidQtWidgets/InstrumentView/InstrumentWidgetMaskTab.h"
+  %End
+
+  public:
+    enum Activity {
+      Move,
+      Select,
+      DrawEllipse,
+      DrawRectangle,
+      DrawEllipticalRing,
+      DrawRectangularRing,
+      DrawSector,
+      Pixel,
+      Tube,
+      DrawFree
+    };
+
+    void selectTool(Activity tool);
+%Docstring
+    void selectTool(Activity tool)
+    --------------------------------------------------------------
+    Select the tool in Mask tab according to the selected Activity
+%End
+
+  private:
+    // constructors made private
+    InstrumentWidgetMaskTab();
+    InstrumentWidgetMaskTab(const InstrumentWidgetMaskTab &);
 };

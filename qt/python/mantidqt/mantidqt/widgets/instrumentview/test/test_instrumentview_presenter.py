@@ -152,6 +152,7 @@ class InstrumentViewPresenterTest(unittest.TestCase):
         self.presenter.close(ws_name)
         mocked_super_close.assert_called_once_with(ws_name)
         mocked_manager.remove.assert_called_once_with(self.presenter, ws_name)
+        self.assertEqual(self.presenter.is_view_closed(), True)
 
     @mock.patch("mantidqt.widgets.instrumentview.presenter.ObservingPresenter.close")
     @mock.patch("mantidqt.widgets.instrumentview.presenter.InstrumentViewManager")
@@ -160,6 +161,9 @@ class InstrumentViewPresenterTest(unittest.TestCase):
         self.presenter.close(ws_name)
         mocked_super_close.assert_not_called()
         mocked_manager.assert_not_called()
+
+    def test_is_view_closed(self):
+        self.assertEqual(self.presenter.is_view_closed(), False)
 
 
 if __name__ == "__main__":
