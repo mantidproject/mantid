@@ -404,6 +404,17 @@ public:
     TS_ASSERT(params->getNames().size() == 3);
     TS_ASSERT(fits->getNames().size() == 3);
 
+    auto matricesNames = matrices->getNames();
+    auto paramsNames = params->getNames();
+    auto wsNames = fits->getNames();
+
+    for (int i = 0; i < matrices->getNames().size(); i++) {
+      auto specNum = std::to_string(i + 1);
+      TS_ASSERT_EQUALS(matricesNames[i], "PLOTPEAKBYLOGVALUETEST_WS_sp" + specNum + "_NormalisedCovarianceMatrix");
+      TS_ASSERT_EQUALS(paramsNames[i], "PLOTPEAKBYLOGVALUETEST_WS_sp" + specNum + "_Parameters");
+      TS_ASSERT_EQUALS(wsNames[i], "PLOTPEAKBYLOGVALUETEST_WS_sp" + specNum + "_Workspace");
+    }
+
     AnalysisDataService::Instance().clear();
   }
 
@@ -437,6 +448,19 @@ public:
     TS_ASSERT(matrices->getNames().size() == 3);
     TS_ASSERT(params->getNames().size() == 3);
     TS_ASSERT(fits->getNames().size() == 3);
+
+    auto matricesNames = matrices->getNames();
+    auto paramsNames = params->getNames();
+    auto wsNames = fits->getNames();
+
+    for (int i = 0; i < matrices->getNames().size(); i++) {
+      auto wsIdx = std::to_string(i);
+      TS_ASSERT_EQUALS(matricesNames[i], "PlotPeakGroup_" + wsIdx + "_i1_NormalisedCovarianceMatrix");
+      TS_ASSERT_EQUALS(paramsNames[i], "PlotPeakGroup_" + wsIdx + "_i1_Parameters");
+      TS_ASSERT_EQUALS(wsNames[i], "PlotPeakGroup_" + wsIdx + "_i1_Workspace");
+    }
+
+    AnalysisDataService::Instance().clear();
   }
 
   void test_createOutputWithExtraOutputOptions() {
@@ -474,7 +498,17 @@ public:
     TS_ASSERT(params->getNames().size() == 2);
     TS_ASSERT(fits->getNames().size() == 2);
 
+    auto matricesNames = matrices->getNames();
+    auto paramsNames = params->getNames();
     auto wsNames = fits->getNames();
+
+    for (int i = 0; i < matrices->getNames().size(); i++) {
+      auto vIdx = std::to_string(i);
+      TS_ASSERT_EQUALS(matricesNames[i], "PLOTPEAKBYLOGVALUETEST_WS_v" + vIdx + "_NormalisedCovarianceMatrix");
+      TS_ASSERT_EQUALS(paramsNames[i], "PLOTPEAKBYLOGVALUETEST_WS_v" + vIdx + "_Parameters");
+      TS_ASSERT_EQUALS(wsNames[i], "PLOTPEAKBYLOGVALUETEST_WS_v" + vIdx + "_Workspace");
+    }
+
     for (const auto &wsName : wsNames) {
       auto fit = AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(wsName);
       TS_ASSERT(fit);
@@ -509,7 +543,7 @@ public:
     if (fits->size() > 0) {
       auto fit = fits->getItem(0);
       TS_ASSERT_EQUALS(fit->history().size(), 0);
-      TS_ASSERT_EQUALS(fit->getName(), "PlotPeakResult_Workspaces_1");
+      TS_ASSERT_EQUALS(fit->getName(), "PlotPeakGroup_0_i1_Workspace");
     }
 
     AnalysisDataService::Instance().clear();
