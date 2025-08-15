@@ -165,7 +165,8 @@ object createChildWithProps(tuple args, dict kwargs) {
   auto enableLogging = extractArg<bool>(4, args);
   auto version = extractArg<int>(5, args);
 
-  const std::array<std::string, 5> reservedNames = {"name", "startProgress", "endProgress", "enableLogging", "version"};
+  const std::array<std::string, 6> reservedNames = {"name",          "startProgress", "endProgress",
+                                                    "enableLogging", "version",       "StoreInADS"};
 
   extractKwargs<std::string>(kwargs, reservedNames[0], name);
   extractKwargs<double>(kwargs, reservedNames[1], startProgress);
@@ -179,6 +180,13 @@ object createChildWithProps(tuple args, dict kwargs) {
   auto childAlg = parentAlg->createChildAlgorithm(name.value(), startProgress.value_or(-1), endProgress.value_or(-1),
                                                   enableLogging.value_or(true), version.value_or(-1));
 
+  if (kwargs.has_key(reservedNames[5])) {
+    // We set StoreInADS here if it hasn't been set before and it is present in kwargs
+    std::optional<bool> storeADS = std::nullopt;
+    extractKwargs<bool>(kwargs, reservedNames[5], storeADS);
+    childAlg->setAlwaysStoreInADS(storeADS.value_or(false));
+  }
+
   const list keys = kwargs.keys();
   for (int i = 0; i < len(keys); ++i) {
     const std::string propName = extract<std::string>(keys[i]);
@@ -187,7 +195,7 @@ object createChildWithProps(tuple args, dict kwargs) {
       continue;
 
     object curArg = kwargs[keys[i]];
-    if (!curArg)
+    if (curArg.is_none())
       continue;
 
     using Mantid::PythonInterface::PyNativeTypeExtractor;
