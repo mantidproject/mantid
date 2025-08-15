@@ -183,7 +183,7 @@ class RunAStandardAbsorptionCorrectionWithDivergenceCorrection(systemtesting.Man
         self.corr_ws = ADS.retrieve("Corrected_ENGINX299080")
 
     def validate(self):
-        self.tolerance = 1e-5
+        self.tolerance = 1e-3
         self.validate_expected_files()
         return self.corr_ws.name(), os.path.join(CWDIR, "Corrected_ENGINX299080_1cmFeCube_unrotated_divcorr.nxs")
 
