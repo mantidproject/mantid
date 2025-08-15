@@ -17,9 +17,14 @@ class Masking:
         self._ax = ax
 
     def _new_selector(self, selector_type):
-        if self._active_selector and self._active_selector.mask_drawn:
-            self._selectors.append(self._active_selector)
+        if self._active_selector:
             self._active_selector.set_active(False)
+            self._active_selector.disconnect()
+            if self._active_selector.mask_drawn:
+                self._selectors.append(self._active_selector)
+            else:
+                self._active_selector.clear()
+
         self._active_selector = selector_type(self._ax)
         self._active_selector.set_active(True)
 
@@ -38,8 +43,9 @@ class Masking:
     def apply_selectors(self):
         pass
 
-    def clear(self):
+    def clear_and_disconnect(self):
         self._active_selector.set_active(False)
+        self._active_selector.disconnect()
         for selector in self._selectors:
             selector.clear()
 
@@ -61,6 +67,9 @@ class SelectionMaskingBase(ABC):
     def clear(self):
         for artist in self._selector.artists:
             artist.remove()
+
+    def disconnect(self):
+        self._selector.disconnect_events()
 
 
 class RectangleSelectionMaskingBase(SelectionMaskingBase):

@@ -45,12 +45,22 @@ def cursor_info(image: AxesImage, xdata: float, ydata: float, full_bbox: Bbox = 
 
 
 def make_selector_class(base):
-    def onmove(self, event):
+    def in_axes_event(self, event):
         """
         Only process event if inside the axes with which the selector was init
         This fixes bug where the x/y of the event originated from the line plot axes not the colorfill axes
         """
-        if event.inaxes is None or self.ax == event.inaxes.axes:
+        return event.inaxes is None or self.ax == event.inaxes.axes
+
+    def invalid_first_event(self, event):
+        """
+        Do not process the first event if there is no x/ydata.
+        This fixes bug where the mpl tries to access the previous event given the lack of x/yata, which is None
+        """
+        return (not event.xdata or not event.ydata) and not self._prev_event
+
+    def onmove(self, event):
+        if in_axes_event(self, event) and not invalid_first_event(self, event):
             super(SelectorMtd, self).onmove(event)
 
     SelectorMtd = type("SelectorMtd", (base,), {})

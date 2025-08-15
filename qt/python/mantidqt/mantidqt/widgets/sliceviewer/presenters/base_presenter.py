@@ -138,10 +138,14 @@ class SliceViewerBasePresenter(IDataViewSubscriber, ABC):
         self._data_view.enable_tool_button(ToolItemText.ZOOM)
         self._data_view.enable_tool_button(ToolItemText.PAN)
         self._data_view.enable_tool_button(ToolItemText.REGIONSELECTION)
-        self._data_view.masking.clear()
-        self._data_view.masking = None
+        self._clean_up_masking()
         self._data_view.check_masking_shape_toolbar_icons(None)
         self._data_view.canvas.draw_idle()
+
+    def _clean_up_masking(self):
+        self._data_view.masking.clear_and_disconnect()
+        self._data_view.canvas.flush_events()  # flush before we set masking to None
+        self._data_view.masking = None
 
     @abc.abstractmethod
     def get_extra_image_info_columns(self, xdata, ydata):
