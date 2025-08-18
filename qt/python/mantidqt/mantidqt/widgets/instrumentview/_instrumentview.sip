@@ -415,6 +415,12 @@ class InstrumentWidgetMaskTab: InstrumentWidgetTab
   %End
 
   public:
+    enum Mode {
+      Mask,
+      Group,
+      ROI
+    };
+
     enum Activity {
       Move,
       Select,
@@ -427,6 +433,13 @@ class InstrumentWidgetMaskTab: InstrumentWidgetTab
       Tube,
       DrawFree
     };
+
+    void setMode(Mode mode);
+%Docstring
+    void setMode(Mode mode)
+    -----------------------------------------
+    Selects between Mask, Group, or ROI modes
+%End
 
     void selectTool(Activity tool);
 %Docstring
