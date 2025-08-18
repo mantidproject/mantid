@@ -126,10 +126,12 @@ pipeline {
               script: "git log --since=midnight --oneline",
               returnStdout: true
             ).trim()
-            echo changes
+            echo "${changes}"
             echo "Pretend No changes. Skipping build pipeline."
             currentBuild.result = 'SUCCESS'
             BUILD_DEVEL = ""
+            echo "${env.BUILD_DEVEL}"
+            return
           }
         }
       }
