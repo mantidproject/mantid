@@ -43,7 +43,7 @@
 
 namespace ADARA {
 
-const std::string VERSION = "1.5.1";
+const std::string VERSION = "1.10.3";
 const std::string TAG_NAME = "XXX_TAG_NAME_XXX";
 
 #define ADARA_PKT_TYPE(_base_type, _version) ((((uint32_t)(_base_type)) << 8) | (_version))
@@ -58,8 +58,10 @@ enum Type {
   SOURCE_LIST_TYPE = 0x0002,
   MAPPED_EVENT_TYPE = 0x0003,
   BANKED_EVENT_TYPE = 0x4000,
+  BANKED_EVENT_STATE_TYPE = 0x4100,
   BEAM_MONITOR_EVENT_TYPE = 0x4001,
   PIXEL_MAPPING_TYPE = 0x4002,
+  PIXEL_MAPPING_ALT_TYPE = 0x4102,
   RUN_STATUS_TYPE = 0x4003,
   RUN_INFO_TYPE = 0x4004,
   TRANS_COMPLETE_TYPE = 0x4005,
@@ -76,17 +78,26 @@ enum Type {
   VAR_VALUE_U32_TYPE = 0x8001,
   VAR_VALUE_DOUBLE_TYPE = 0x8002,
   VAR_VALUE_STRING_TYPE = 0x8003,
+  VAR_VALUE_U32_ARRAY_TYPE = 0x8004,
+  VAR_VALUE_DOUBLE_ARRAY_TYPE = 0x8005,
+  MULT_VAR_VALUE_U32_TYPE = 0x8101,
+  MULT_VAR_VALUE_DOUBLE_TYPE = 0x8102,
+  MULT_VAR_VALUE_STRING_TYPE = 0x8103,
+  MULT_VAR_VALUE_U32_ARRAY_TYPE = 0x8104,
+  MULT_VAR_VALUE_DOUBLE_ARRAY_TYPE = 0x8105,
 };
 
 enum Version {
-  RAW_EVENT_VERSION = 0x00,
-  RTDL_VERSION = 0x00,
+  RAW_EVENT_VERSION = 0x01,
+  RTDL_VERSION = 0x01,
   SOURCE_LIST_VERSION = 0x00,
-  MAPPED_EVENT_VERSION = 0x00,
+  MAPPED_EVENT_VERSION = 0x01,
   BANKED_EVENT_VERSION = 0x01,
+  BANKED_EVENT_STATE_VERSION = 0x00,
   BEAM_MONITOR_EVENT_VERSION = 0x01,
   PIXEL_MAPPING_VERSION = 0x00,
-  RUN_STATUS_VERSION = 0x00,
+  PIXEL_MAPPING_ALT_VERSION = 0x01,
+  RUN_STATUS_VERSION = 0x01,
   RUN_INFO_VERSION = 0x00,
   TRANS_COMPLETE_VERSION = 0x00,
   CLIENT_HELLO_VERSION = 0x01,
@@ -96,12 +107,19 @@ enum Version {
   GEOMETRY_VERSION = 0x00,
   BEAMLINE_INFO_VERSION = 0x01,
   DATA_DONE_VERSION = 0x00,
-  BEAM_MONITOR_CONFIG_VERSION = 0x00,
+  BEAM_MONITOR_CONFIG_VERSION = 0x01,
   DETECTOR_BANK_SETS_VERSION = 0x00,
   DEVICE_DESC_VERSION = 0x00,
   VAR_VALUE_U32_VERSION = 0x00,
   VAR_VALUE_DOUBLE_VERSION = 0x00,
   VAR_VALUE_STRING_VERSION = 0x00,
+  VAR_VALUE_U32_ARRAY_VERSION = 0x00,
+  VAR_VALUE_DOUBLE_ARRAY_VERSION = 0x00,
+  MULT_VAR_VALUE_U32_VERSION = 0x00,
+  MULT_VAR_VALUE_DOUBLE_VERSION = 0x00,
+  MULT_VAR_VALUE_STRING_VERSION = 0x00,
+  MULT_VAR_VALUE_U32_ARRAY_VERSION = 0x00,
+  MULT_VAR_VALUE_DOUBLE_ARRAY_VERSION = 0x00,
 };
 } // namespace PacketType
 
@@ -122,6 +140,10 @@ enum Enum {
 };
 }
 
+namespace DataFlags {
+enum Enum { GOT_NEUTRONS = 0x1, GOT_METADATA = 0x2 };
+}
+
 namespace RunStatus {
 enum Enum {
   NO_RUN = 0,
@@ -130,6 +152,7 @@ enum Enum {
   RUN_BOF = 3,
   END_RUN = 4,
   STATE = 5,
+  PROLOGUE = 6,
 };
 }
 
@@ -172,6 +195,19 @@ enum Enum {
 };
 }
 
+/*
+ GENERIC: these are for "Annotations" or General Comments to be added to the data stream
+ SCAN_START: the start of a Scan
+ SCAN_STOP: the end of a Scan
+ PAUSE: setting  a Run to Paused mode
+ RESUME: unsetting Paused mode to Regular data collection
+ OVERALL_RUN_COMMENT: Single "Run Notes" comment for a given Run
+  - (the "Last" Run Notes entered are used for the Run Notes (/entry/notes)
+  - all preceding Run Notes comments are appended to the General Comments (/entry/DASlogs/comments)
+ SYSTEM: Special Manually-Inserted Run Replay Directives for the ADARA Test Harness
+  when activated, enables replayed data streams to automatically trigger Run Start/Stop
+  at specific historical timestamps
+ */
 namespace MarkerType {
 enum Enum {
   GENERIC,
@@ -180,6 +216,7 @@ enum Enum {
   PAUSE,
   RESUME,
   OVERALL_RUN_COMMENT,
+  SYSTEM,
 };
 }
 

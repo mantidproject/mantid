@@ -1100,6 +1100,7 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::AnnotationPkt &pkt) {
     std::lock_guard<std::mutex> scopedLock(m_mutex);
     // We have to lock the mutex prior to calling mutableRun()
     switch (pkt.marker_type()) {
+
     case ADARA::MarkerType::GENERIC:
       // Do nothing.  We log the comment field below for all types
       break;
@@ -1129,6 +1130,10 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::AnnotationPkt &pkt) {
       break;
 
     case ADARA::MarkerType::OVERALL_RUN_COMMENT:
+      // Do nothing.  We log the comment field below for all types
+      break;
+
+    case ADARA::MarkerType::SYSTEM:
       // Do nothing.  We log the comment field below for all types
       break;
     }
