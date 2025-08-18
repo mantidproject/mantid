@@ -318,11 +318,6 @@ private:
 
   void assertOutputNames(const size_t HeFitSize = 1) {
     const auto adsNames = AnalysisDataService::Instance().getObjectNames();
-    const std::vector<std::string> expectedNamesParams = {OUTPUT_TABLE_NAME + "_decay_parameters_0",
-                                                          OUTPUT_TABLE_NAME + "_He3_polarization_parameters_0"};
-    TS_ASSERT(AnalysisDataService::Instance().doesExist(OUTPUT_TABLE_NAME));
-    TS_ASSERT(std::ranges::includes(adsNames, expectedNamesParams));
-
     std::vector<std::string> expectedNamesCurves = {OUTPUT_CURVES_NAME + "_decay_curves_0"};
     auto basenames = std::vector<std::string>(HeFitSize, OUTPUT_CURVES_NAME + "_He3_polarization_curves_");
     std::for_each(basenames.begin(), basenames.end(), [n = 0](auto &name) mutable { name += std::to_string(n++); });
@@ -344,16 +339,15 @@ private:
     }
 
     // Assert Polarization parameters
-    const auto polTable = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(OUTPUT_TABLE_NAME +
-                                                                                      "_He3_polarization_parameters_0");
-    TS_ASSERT_DELTA(polTable->getColumn("Value")->numeric_fill(HeFitSize), m_polParameters.outPolarizations, DELTA);
+    const auto polTable = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(OUTPUT_TABLE_NAME);
+    const auto values = polTable->getColumn("Value")->numeric_fill();
+    TS_ASSERT_DELTA(std::vector<double>(values.cbegin(), values.cbegin() + HeFitSize), m_polParameters.outPolarizations,
+                    DELTA);
 
     // Assert Decay Parameters
     if (HeFitSize > 1) {
-      const auto decayTable =
-          AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(OUTPUT_TABLE_NAME + "_decay_parameters_0");
-      TS_ASSERT_DELTA(decayTable->cell<double>(1, 1), m_polParameters.Tau, DELTA);
-      TS_ASSERT_DELTA(decayTable->cell<double>(0, 1), m_polParameters.polInitial, DELTA);
+      TS_ASSERT_DELTA(values.at(HeFitSize + 1), m_polParameters.polInitial, DELTA);
+      TS_ASSERT_DELTA(values.at(HeFitSize + 2), m_polParameters.Tau, DELTA);
     }
   }
 
