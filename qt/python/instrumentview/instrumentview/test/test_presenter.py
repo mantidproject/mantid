@@ -4,9 +4,12 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.simpleapi import CreateSampleWorkspace
 from instrumentview.FullInstrumentViewPresenter import FullInstrumentViewPresenter
 from instrumentview.FullInstrumentViewModel import FullInstrumentViewModel
+
+import numpy as np
+from mantid.simpleapi import CreateSampleWorkspace
+
 import unittest
 from unittest import mock
 from unittest.mock import MagicMock
@@ -52,35 +55,37 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
             mock_calculate_projection.reset_mock()
             mock_create_poly_data_mesh.reset_mock()
 
-    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.set_tof_limits")
+    @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.update_time_of_flight_range")
+    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.set_view_tof_limits")
     @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter._parse_min_max")
-    def test_on_tof_limits_updated_true(self, mock_parse_min_max, mock_set_tof_limits):
+    def test_on_tof_limits_updated_true(self, mock_parse_min_max, mock_set_view_tof_limits, mock_update_tof_range):
         mock_parse_min_max.return_value = (0, 100)
         self._presenter.on_tof_limits_updated()
         mock_parse_min_max.assert_called_once()
-        mock_set_tof_limits.assert_called_once_with(0, 100)
+        mock_update_tof_range.assert_called_with(0, 100)
+        mock_set_view_tof_limits.assert_called_once()
 
-    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.set_tof_limits")
+    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.set_view_tof_limits")
     @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter._parse_min_max")
-    def test_on_tof_limits_updated_false(self, mock_parse_min_max, mock_set_tof_limits):
+    def test_on_tof_limits_updated_false(self, mock_parse_min_max, mock_set_view_tof_limits):
         mock_parse_min_max.return_value = ()
         self._presenter.on_tof_limits_updated()
         mock_parse_min_max.assert_called_once()
-        mock_set_tof_limits.assert_not_called()
+        mock_set_view_tof_limits.assert_not_called()
 
-    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.set_contour_limits")
+    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.set_view_contour_limits")
     @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter._parse_min_max")
-    def test_on_contour_limits_updated_false(self, mock_parse_min_max, mock_set_contour_limits):
+    def test_on_contour_limits_updated_false(self, mock_parse_min_max, mock_set_view_contour_limits):
         mock_parse_min_max.return_value = ()
         self._presenter.on_contour_limits_updated()
-        mock_set_contour_limits.assert_not_called()
+        mock_set_view_contour_limits.assert_not_called()
 
-    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.set_contour_limits")
+    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.set_view_contour_limits")
     @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter._parse_min_max")
-    def test_on_contour_limits_updated_true(self, mock_parse_min_max, mock_set_contour_limits):
+    def test_on_contour_limits_updated_true(self, mock_parse_min_max, mock_set_view_contour_limits):
         mock_parse_min_max.return_value = (0, 100)
         self._presenter.on_contour_limits_updated()
-        mock_set_contour_limits.assert_called_once_with(0, 100)
+        mock_set_view_contour_limits.assert_called_once_with(0, 100)
 
     def _do_test_parse_min_max_valid(self, min: str | float, max: str | float, exp_is_valid: bool, exp_min: int, exp_max: int) -> None:
         limits = self._presenter._parse_min_max(min, max)
@@ -108,16 +113,15 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
     def test_parse_min_max_invalid_max(self):
         self._do_test_parse_min_max_valid("5", "boom", False, 0, 0)
 
-    def test_set_contour_limits(self):
-        self._presenter.set_contour_limits(0, 100)
+    def test_set_view_contour_limits(self):
+        self._presenter.set_view_contour_limits(0, 100)
         self._mock_view.set_plotter_scalar_bar_range.assert_called_once_with([0, 100], self._presenter._counts_label)
 
-    @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.update_time_of_flight_range")
-    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.set_contour_limits")
-    def test_set_tof_limits(self, mock_set_contour_limits, mock_update_time_of_flight_range):
-        self._presenter.set_tof_limits(0, 100)
-        mock_update_time_of_flight_range.assert_called_once()
-        mock_set_contour_limits.assert_called_once()
+    @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.detector_counts")
+    def test_set_view_tof_limits(self, mock_detector_counts):
+        mock_detector_counts.return_value = np.zeros(200)
+        self._presenter.set_view_tof_limits()
+        self.assertEqual(mock_detector_counts.call_count, 2)
 
     @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.update_picked_detectors")
     def test_point_picked(self, mock_update_picked_detectors):

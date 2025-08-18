@@ -120,13 +120,14 @@ class FullInstrumentViewPresenter:
         """When TOF limits are changed, read the new limits and tell the presenter to update the colours accordingly"""
         limits = self._parse_min_max(*self._view.get_tof_limits())
         if limits:
-            self.set_tof_limits(*limits)
+            self._model.update_time_of_flight_range(*limits)
+            self.set_view_tof_limits()
 
     def on_contour_limits_updated(self) -> None:
         """When contour limits are changed, read the new limits and tell the presenter to update the colours accordingly"""
         limits = self._parse_min_max(*self._view.get_contour_limits())
         if limits:
-            self.set_contour_limits(*limits)
+            self.set_view_contour_limits(*limits)
 
     def _parse_min_max(self, min: str | float, max: str | float) -> tuple:
         """Try to parse the text in the edit boxes as numbers. Return the results and whether the attempt was successful."""
@@ -139,12 +140,11 @@ class FullInstrumentViewPresenter:
             return ()
         return (min, max)
 
-    def set_tof_limits(self, min: int, max: int) -> None:
-        self._model.update_time_of_flight_range(min, max)
+    def set_view_tof_limits(self) -> None:
         self._detector_mesh[self._counts_label] = self._model.detector_counts()
-        self.set_contour_limits(*self._model.data_limits())
+        self._projection_mesh[self._counts_label] = self._model.detector_counts()
 
-    def set_contour_limits(self, min: int, max: int) -> None:
+    def set_view_contour_limits(self, min: int, max: int) -> None:
         self._contour_limits = [min, max]
         self._view.set_plotter_scalar_bar_range(self._contour_limits, self._counts_label)
 
@@ -169,9 +169,9 @@ class FullInstrumentViewPresenter:
             raise ValueError(f"Unknown projection type {projection_type}")
 
         self._model.calculate_projection(is_spherical, axis)
-        projection_mesh = self.create_poly_data_mesh(self._model.detector_projection_positions())
-        projection_mesh[self._counts_label] = self._model.detector_counts()
-        self._view.add_projection_mesh(projection_mesh, self._counts_label, clim=self._contour_limits)
+        self._projection_mesh = self.create_poly_data_mesh(self._model.detector_projection_positions())
+        self._projection_mesh[self._counts_label] = self._model.detector_counts()
+        self._view.add_projection_mesh(self._projection_mesh, self._counts_label, clim=self._contour_limits)
 
         self._pickable_projection_mesh = self.create_poly_data_mesh(self._model.detector_projection_positions())
         self._pickable_projection_mesh["visibility"] = self._model.picked_visibility()
