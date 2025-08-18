@@ -45,8 +45,6 @@ constexpr auto PXD_ERROR{"PXDError"};
 constexpr auto DECAY_TIME_INITIAL{"DecayTimeInitial"};
 constexpr auto H3_POLARIZATION_INITIAL{"H3PolarizationInitial"};
 
-constexpr auto START_WAVELENGTH{"StartWavelength"};
-constexpr auto END_WAVELENGTH{"EndWavelength"};
 constexpr auto IGNORE_FIT_QUALITY_ERROR{"IgnoreFitQualityError"};
 constexpr auto OUTPUT_FIT_CURVES{"OutputFitCurves"};
 constexpr auto OUTPUT_FIT_PARAMS{"OutputFitParameters"};
@@ -170,9 +168,9 @@ void HeliumAnalyserEfficiency::declareFitProperties() {
                   "Initial decay time for He3 Polarization decay fit");
   declareProperty(PropertyNames::H3_POLARIZATION_INITIAL, Fitting::H3_POLARIZATION_INITIAL, mustBePositive,
                   "Initial polarization for He3 Polarization decay fit");
-  declareProperty(PropertyNames::START_WAVELENGTH, Fitting::START_WAVELENGTH_INITIAL, mustBePositive,
+  declareProperty(Fitting::START_X, Fitting::START_WAVELENGTH_INITIAL, mustBePositive,
                   "Lower boundary of wavelength range to use for fitting helium polarization");
-  declareProperty(PropertyNames::END_WAVELENGTH, Fitting::END_WAVELENGTH_INITIAL, mustBePositive,
+  declareProperty(Fitting::END_X, Fitting::END_WAVELENGTH_INITIAL, mustBePositive,
                   "Upper boundary of wavelength range to use for fitting helium polarization");
   declareProperty(PropertyNames::IGNORE_FIT_QUALITY_ERROR, false,
                   "Whether the algorithm should ignore a poor chi-squared (fit cost value) of greater than 1 and "
@@ -205,8 +203,8 @@ void HeliumAnalyserEfficiency::init() {
   setPropertyGroup(PropertyNames::PXD_ERROR, PropertyNames::GROUP_FIT_OPTIONS);
   setPropertyGroup(PropertyNames::DECAY_TIME_INITIAL, PropertyNames::GROUP_FIT_OPTIONS);
   setPropertyGroup(PropertyNames::H3_POLARIZATION_INITIAL, PropertyNames::GROUP_FIT_OPTIONS);
-  setPropertyGroup(PropertyNames::START_WAVELENGTH, PropertyNames::GROUP_FIT_OPTIONS);
-  setPropertyGroup(PropertyNames::END_WAVELENGTH, PropertyNames::GROUP_FIT_OPTIONS);
+  setPropertyGroup(Fitting::START_X, PropertyNames::GROUP_FIT_OPTIONS);
+  setPropertyGroup(Fitting::END_X, PropertyNames::GROUP_FIT_OPTIONS);
   setPropertyGroup(PropertyNames::IGNORE_FIT_QUALITY_ERROR, PropertyNames::GROUP_FIT_OPTIONS);
 
   setPropertyGroup(PropertyNames::OUTPUT_FIT_PARAMS, PropertyNames::GROUP_OUTPUTS);
@@ -286,10 +284,12 @@ void HeliumAnalyserEfficiency::exec() {
 }
 
 void HeliumAnalyserEfficiency::prepareOutputs(const std::vector<MatrixWorkspace_sptr> &efficiencies) {
-  if (const auto outputCurves = getPropertyValue(PropertyNames::OUTPUT_FIT_CURVES); !outputCurves.empty()) {
-    setProperty(PropertyNames::OUTPUT_FIT_CURVES, prepareOutputGroup(m_outputCurves, outputCurves, "_curves"));
+  if (const auto outputCurvesBaseName = getPropertyValue(PropertyNames::OUTPUT_FIT_CURVES);
+      !outputCurvesBaseName.empty()) {
+    setProperty(PropertyNames::OUTPUT_FIT_CURVES, prepareOutputGroup(m_outputCurves, outputCurvesBaseName, "_curves"));
   }
-  if (const auto outputParams = getPropertyValue(PropertyNames::OUTPUT_FIT_PARAMS); !outputParams.empty()) {
+  if (const auto outputParamsBaseName = getPropertyValue(PropertyNames::OUTPUT_FIT_PARAMS);
+      !outputParamsBaseName.empty()) {
     setProperty(PropertyNames::OUTPUT_FIT_PARAMS, prepareOutputTable(m_outputParameters));
   }
   setProperty(PropertyNames::OUTPUT_WORKSPACE,
@@ -308,8 +308,8 @@ VectorPair HeliumAnalyserEfficiency::fitHe3Polarization(const double mu,
     fit->setProperty("InputWorkspace_" + std::to_string(index), efficiencies.at(index));
   }
 
-  fit->setProperty(Fitting::START_X, static_cast<double>(getProperty(PropertyNames::START_WAVELENGTH)));
-  fit->setProperty(Fitting::END_X, static_cast<double>(getProperty(PropertyNames::END_WAVELENGTH)));
+  fit->setProperty(Fitting::START_X, static_cast<double>(getProperty(Fitting::START_X)));
+  fit->setProperty(Fitting::END_X, static_cast<double>(getProperty(Fitting::END_X)));
   makeFit(fit, Fitting::OUTPUT_HE3_FIT);
 
   const auto &fitParameters = std::dynamic_pointer_cast<ITableWorkspace>(m_outputParameters.at(0));
@@ -333,8 +333,8 @@ void HeliumAnalyserEfficiency::fitDecayTime(const MatrixWorkspace_sptr &workspac
 
 void HeliumAnalyserEfficiency::makeFit(const Algorithm_sptr &fitAlgorithm, const std::string &fitOutputName) {
   const auto extractParameters =
-      !getPropertyValue(PropertyNames::OUTPUT_FIT_PARAMS).empty() || fitOutputName == Fitting::OUTPUT_HE3_FIT;
-  const auto extractCurves = !getPropertyValue(PropertyNames::OUTPUT_FIT_CURVES).empty();
+      !isDefault(PropertyNames::OUTPUT_FIT_PARAMS) || fitOutputName == Fitting::OUTPUT_HE3_FIT;
+  const auto extractCurves = !isDefault(PropertyNames::OUTPUT_FIT_CURVES);
   const bool ignoreFitQualityError = getProperty(PropertyNames::IGNORE_FIT_QUALITY_ERROR);
 
   fitAlgorithm->setProperty("CreateOutput", extractParameters || extractCurves);

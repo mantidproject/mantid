@@ -196,7 +196,9 @@ public:
     const auto groupNames = generateEfficienciesFromLifetimeAndInitialPolarization();
     AnalysisDataService::Instance().remove("T00_0");
     const auto alg = prepareAlgorithm(groupNames);
-    TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
+    TS_ASSERT_THROWS_EQUALS(alg->execute(), const std::runtime_error &e, std::string(e.what()),
+                            "Some invalid Properties found: \n InputWorkspaces: Error in workspace group_0 : The "
+                            "number of periods within the input workspace is not an allowed value.");
   }
 
   void testInvalidSpinStateFormatThrowsError() {
