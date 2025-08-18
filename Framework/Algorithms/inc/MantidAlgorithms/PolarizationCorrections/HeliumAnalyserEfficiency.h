@@ -46,6 +46,8 @@ private:
   void fitDecayTime(const MatrixWorkspace_sptr &workspace);
   void makeFit(const Algorithm_sptr &fitAlgorithm, const std::string &fitOutputName);
   void prepareOutputs(const std::vector<MatrixWorkspace_sptr> &efficiencies);
+  ITableWorkspace_sptr prepareOutputTable(const std::vector<ITableWorkspace_sptr> &tables);
+
   std::vector<MatrixWorkspace_sptr> calculateEfficiencies(const std::vector<std::string> &workspaceNames,
                                                           const std::string &spinConfiguration);
 

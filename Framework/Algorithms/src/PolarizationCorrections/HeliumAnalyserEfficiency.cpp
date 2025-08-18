@@ -16,6 +16,7 @@
 #include "MantidAPI/MultiDomainFunction.h"
 #include "MantidAPI/PolSANSWorkspaceValidator.h"
 
+#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -121,8 +122,7 @@ MatrixWorkspace_sptr calculateAnalyserEfficiency(const WorkspaceGroup_sptr &grou
 }
 
 // We template this as we expect either a vector of MatrixWorkspace_sptr or TableWorkspace_sptr
-template <typename T = MatrixWorkspace_sptr>
-WorkspaceGroup_sptr prepareOutputGroup(const std::vector<T> &workspaces, const std::string &baseName,
+WorkspaceGroup_sptr prepareOutputGroup(const std::vector<MatrixWorkspace_sptr> &workspaces, const std::string &baseName,
                                        const std::string &suffix = "") {
   // If we are extracting the names for the curves, the last workspace of the input vector will
   // always correspond to the decay fit.
@@ -141,7 +141,6 @@ WorkspaceGroup_sptr prepareOutputGroup(const std::vector<T> &workspaces, const s
   }
   return group;
 }
-
 } // unnamed namespace
 
 HeliumAnalyserEfficiency::HeliumAnalyserEfficiency()
@@ -189,9 +188,9 @@ void HeliumAnalyserEfficiency::declareOutputProperties() {
                       PropertyNames::OUTPUT_FIT_CURVES, "", Kernel::Direction::Output, PropertyMode::Optional),
                   "A group workspace containing the fit curves.");
 
-  declareProperty(std::make_unique<WorkspaceProperty<WorkspaceGroup>>(
+  declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>(
                       PropertyNames::OUTPUT_FIT_PARAMS, "", Kernel::Direction::Output, PropertyMode::Optional),
-                  "A group workspace containing the fit parameters.");
+                  "A table workspace containing the fit parameters.");
 }
 
 void HeliumAnalyserEfficiency::init() {
@@ -236,6 +235,22 @@ std::map<std::string, std::string> HeliumAnalyserEfficiency::validateInputs() {
   return errorList;
 }
 
+ITableWorkspace_sptr HeliumAnalyserEfficiency::prepareOutputTable(const std::vector<ITableWorkspace_sptr> &tables) {
+  if (tables.size() == 1) {
+    return tables.at(0);
+  }
+
+  const auto combineTableAlg = createChildAlgorithm("CombineTableWorkspaces");
+  // Tables vector only has two tables.
+  combineTableAlg->initialize();
+  combineTableAlg->setProperty("LHSWorkspace", tables.at(0));
+  combineTableAlg->setProperty("RHSWorkspace", tables.at(1));
+  combineTableAlg->execute();
+
+  const DataObjects::TableWorkspace_sptr table = combineTableAlg->getProperty("OutputWorkspace");
+  return std::dynamic_pointer_cast<ITableWorkspace>(table);
+}
+
 VectorPair HeliumAnalyserEfficiency::getTimeDifferences(const std::vector<std::string> &wsNames) {
   const auto timeDiff = createChildAlgorithm("TimeDifference");
   timeDiff->initialize();
@@ -275,7 +290,7 @@ void HeliumAnalyserEfficiency::prepareOutputs(const std::vector<MatrixWorkspace_
     setProperty(PropertyNames::OUTPUT_FIT_CURVES, prepareOutputGroup(m_outputCurves, outputCurves, "_curves"));
   }
   if (const auto outputParams = getPropertyValue(PropertyNames::OUTPUT_FIT_PARAMS); !outputParams.empty()) {
-    setProperty(PropertyNames::OUTPUT_FIT_PARAMS, prepareOutputGroup(m_outputParameters, outputParams, "_parameters"));
+    setProperty(PropertyNames::OUTPUT_FIT_PARAMS, prepareOutputTable(m_outputParameters));
   }
   setProperty(PropertyNames::OUTPUT_WORKSPACE,
               prepareOutputGroup(efficiencies, getPropertyValue(PropertyNames::OUTPUT_WORKSPACE)));
