@@ -103,6 +103,26 @@ pipeline {
         }
       }
     }
+    stage('Check for changes') {
+      agent { label 'linux-64' }
+      steps {
+        script {
+          if (env.GIT_BRANCH == "ornl-next") {
+            checkoutSource("${GIT_SHA}")
+            def changes = sh(
+              script: "git log --since=midnight --oneline",
+              returnStdout: true
+            ).trim()
+
+            if (changes == "" ) {
+              echo "No changes. Skipping build pipeline."
+              currentBuild.result = 'SUCCESS'
+              BUILD_DEVEL = ""
+            }
+          }
+        }
+      }
+    }
     // Store the git commit hash in an environment variable so that we can use
     // the same commit for all stages of the pipeline. This is performed by using
     // the following step at the start of each subsequent stage:
