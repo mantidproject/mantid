@@ -100,7 +100,7 @@ void CreateBootstrapWorkspaces::exec() {
 
       if (bootType == "ErrorSampling") {
         bootWs->mutableY(index) = sampleHistogramFromGaussian(inputWs->y(index), inputWs->e(index), gen);
-        bootWs->mutableE(index) = inputWs->e(index);
+        bootWs->mutableE(index) = 0;
 
       } else if (bootType == "SpectraSampling") {
         // Sample from spectra indices with replacement
