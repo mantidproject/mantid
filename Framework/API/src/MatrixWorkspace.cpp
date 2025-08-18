@@ -31,7 +31,6 @@
 
 #include "MantidTypes/SpectrumDefinition.h"
 
-#include "MantidPythonInterface/core/ReleaseGlobalInterpreterLock.h"
 #include <boost/algorithm/string/join.hpp>
 #include <boost/algorithm/string/regex.hpp>
 
@@ -848,8 +847,6 @@ void MatrixWorkspace::getIntegratedSpectra(std::vector<double> &out, const doubl
 std::vector<double> MatrixWorkspace::getIntegratedCountsForWorkspaceIndices(const std::vector<size_t> &workspaceIndices,
                                                                             const double minX, const double maxX,
                                                                             const bool entireRange) const {
-  // Release GIL in case it's running on separate python thread
-  PythonInterface::ReleaseGlobalInterpreterLock realeaseGIL;
   std::vector<double> integratedSpectra;
   getIntegratedSpectra(integratedSpectra, minX, maxX, entireRange);
   std::vector<double> detectorCounts;

@@ -532,7 +532,6 @@ target_link_libraries(
          Mantid::Indexing
          Mantid::Parallel
          Mantid::Nexus
-         Mantid::PythonInterfaceCore
   PRIVATE ${WINSOCK} ${BCRYPT} Mantid::Beamline Mantid::Json
 )
 
