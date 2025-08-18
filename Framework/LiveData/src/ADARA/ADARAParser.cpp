@@ -18,8 +18,20 @@ Parser::Parser(unsigned int initial_buffer_size, unsigned int max_pkt_size)
       m_oversize_offset(0) {
   m_buffer = new uint8_t[initial_buffer_size];
 
+  last_start_read_time.tv_sec = -1;
+  last_start_read_time.tv_nsec = -1;
+  last_last_start_read_time.tv_sec = -1;
+  last_last_start_read_time.tv_nsec = -1;
+
+  last_end_read_time.tv_sec = -1;
+  last_end_read_time.tv_nsec = -1;
+  last_last_end_read_time.tv_sec = -1;
+  last_last_end_read_time.tv_nsec = -1;
+
   last_bytes_read = -1;
   last_last_bytes_read = -1;
+  last_read_errno = -1;
+  last_last_read_errno = -1;
   last_pkts_parsed = -1;
   last_last_pkts_parsed = -1;
   last_total_bytes = -1;
@@ -101,8 +113,7 @@ int Parser::bufferParse(std::string &log_info, unsigned int max_packets) {
     PacketHeader hdr(p);
 
     if (hdr.payload_length() % 4)
-      throw invalid_packet("Payload length not "
-                           "multiple of 4");
+      throw invalid_packet("Payload length not multiple of 4");
 
     if (m_max_size < hdr.packet_length()) {
       /* This packet is over the maximum limit; we'll
@@ -245,8 +256,10 @@ bool Parser::rxPacket(const Packet &pkt) {
     MAP_TYPE(PacketType::RTDL_TYPE, RTDLPkt);
     MAP_TYPE(PacketType::SOURCE_LIST_TYPE, SourceListPkt);
     MAP_TYPE(PacketType::BANKED_EVENT_TYPE, BankedEventPkt);
+    MAP_TYPE(PacketType::BANKED_EVENT_STATE_TYPE, BankedEventStatePkt);
     MAP_TYPE(PacketType::BEAM_MONITOR_EVENT_TYPE, BeamMonitorPkt);
     MAP_TYPE(PacketType::PIXEL_MAPPING_TYPE, PixelMappingPkt);
+    MAP_TYPE(PacketType::PIXEL_MAPPING_ALT_TYPE, PixelMappingAltPkt);
     MAP_TYPE(PacketType::RUN_STATUS_TYPE, RunStatusPkt);
     MAP_TYPE(PacketType::RUN_INFO_TYPE, RunInfoPkt);
     MAP_TYPE(PacketType::TRANS_COMPLETE_TYPE, TransCompletePkt);
@@ -263,6 +276,13 @@ bool Parser::rxPacket(const Packet &pkt) {
     MAP_TYPE(PacketType::VAR_VALUE_U32_TYPE, VariableU32Pkt);
     MAP_TYPE(PacketType::VAR_VALUE_DOUBLE_TYPE, VariableDoublePkt);
     MAP_TYPE(PacketType::VAR_VALUE_STRING_TYPE, VariableStringPkt);
+    MAP_TYPE(PacketType::VAR_VALUE_U32_ARRAY_TYPE, VariableU32ArrayPkt);
+    MAP_TYPE(PacketType::VAR_VALUE_DOUBLE_ARRAY_TYPE, VariableDoubleArrayPkt);
+    MAP_TYPE(PacketType::MULT_VAR_VALUE_U32_TYPE, MultVariableU32Pkt);
+    MAP_TYPE(PacketType::MULT_VAR_VALUE_DOUBLE_TYPE, MultVariableDoublePkt);
+    MAP_TYPE(PacketType::MULT_VAR_VALUE_STRING_TYPE, MultVariableStringPkt);
+    MAP_TYPE(PacketType::MULT_VAR_VALUE_U32_ARRAY_TYPE, MultVariableU32ArrayPkt);
+    MAP_TYPE(PacketType::MULT_VAR_VALUE_DOUBLE_ARRAY_TYPE, MultVariableDoubleArrayPkt);
 
     /* No default handler; we want the compiler to warn about
      * the unhandled PacketType values when we add new packets.
@@ -299,8 +319,10 @@ EXPAND_HANDLER(MappedDataPkt)
 EXPAND_HANDLER(RTDLPkt)
 EXPAND_HANDLER(SourceListPkt)
 EXPAND_HANDLER(BankedEventPkt)
+EXPAND_HANDLER(BankedEventStatePkt)
 EXPAND_HANDLER(BeamMonitorPkt)
 EXPAND_HANDLER(PixelMappingPkt)
+EXPAND_HANDLER(PixelMappingAltPkt)
 EXPAND_HANDLER(RunStatusPkt)
 EXPAND_HANDLER(RunInfoPkt)
 EXPAND_HANDLER(TransCompletePkt)
@@ -317,6 +339,13 @@ EXPAND_HANDLER(DeviceDescriptorPkt)
 EXPAND_HANDLER(VariableU32Pkt)
 EXPAND_HANDLER(VariableDoublePkt)
 EXPAND_HANDLER(VariableStringPkt)
+EXPAND_HANDLER(VariableU32ArrayPkt)
+EXPAND_HANDLER(VariableDoubleArrayPkt)
+EXPAND_HANDLER(MultVariableU32Pkt)
+EXPAND_HANDLER(MultVariableDoublePkt)
+EXPAND_HANDLER(MultVariableStringPkt)
+EXPAND_HANDLER(MultVariableU32ArrayPkt)
+EXPAND_HANDLER(MultVariableDoubleArrayPkt)
 
 void Parser::getDiscardedPacketsLogString(std::string &log_info) {
   log_info = "Discarded ADARA Packet/Counts: ";
