@@ -80,7 +80,7 @@ Up to three distinct outputs can be retrieved from this algorithm:
 
 - OutputWorkspace: Efficiencies. A group workspace of MatrixWorkspaces with the calculated analytical efficiencies for each input transmission run.
 - OutputCurves: A group workspace of MatrixWorkspaces with the fitted curves from both the polarization of helium fit (suffix `He3_Polarization_curves`) and the decay in polarization fit(suffix `decay_curves`).
-- OutputParameters: A group workspace of TableWorkspaces with the parameters from both the polarization of helium fit (suffix `He3_Polarization_parameters`) and the decay in polarization fit (suffix `decay_parameters`).
+- OutputParameters: A TableWorkspace with the parameters from both the polarization of helium fit and the decay in polarization fit.
 
 If only one input group is set on the `InputWorkspaces` property, the algorithm will not do a Polarization Decay fit, and the output will only be the efficiency of the group
 and the results from the Helium Gas Polarization fit.
@@ -123,8 +123,8 @@ Usage
     out, curves, table = HeliumAnalyserEfficiency(InputWorkspaces=groups,
                                 SpinStates = "00,11,01,10")
 
-    p0, tau=mtd['table_decay_parameters_0'].column(1)[0:-1]
-    p1=mtd['table_He3_Polarization_parameters_0'].column(1)[0:-1]
+    p1 = mtd['table'].column(1)[0:3]
+    p0, tau = mtd['table'].column(1)[4:-1]
 
     print(f"Polarizations at delay times are {p1[0]:.2f}, {p1[1]:.2f}, {p1[2]:.2f}")
     print(f"Initial He3 Polarization is {p0:.2f}")
