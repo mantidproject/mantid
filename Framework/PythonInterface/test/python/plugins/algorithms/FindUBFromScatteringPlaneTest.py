@@ -6,44 +6,42 @@ from unittest.mock import patch
 
 class FindUBFromScatteringPlaneTest(unittest.TestCase):
     def setUp(self):
-        # load empty instrument so can create a peak table
+        # load instrument + empty peakworkspace table
         self.ws = LoadEmptyInstrument(Filename="SXD_Definition.xml", OutputWorkspace="empty_SXD")
         axis = self.ws.getAxis(0)
         axis.setUnit("TOF")
         self.peaks1 = CreatePeaksWorkspace(InstrumentWorkspace=self.ws, NumberOfPeaks=0, OutputWorkspace="peaks1")
 
     def assert_vector(self, ref_vector, calculated_vector, tol):
-        for i in range(0, 3):
-            self.assertAlmostEqual(ref_vector[i], calculated_vector[i], delta=tol)
+        self.assertTrue(np.allclose(ref_vector, calculated_vector, atol=tol))
 
     def index_peaks_helper(self, PeaksWorkspace, tolerance):
         nindexed, avg_hkl_er, *_ = IndexPeaks(PeaksWorkspace, tolerance, RoundHKLs=False)
-        print(avg_hkl_er)
         self.assertLessEqual(avg_hkl_er, 0.5)
         return nindexed
 
     def test_find_correct_ub_cubic(self):
         peaks1 = self.peaks1
         SetUB(peaks1, u=[1, -0.83, 0], v=[1, 0.83, 0], a=5.4, b=5.4, c=5.4, alpha=90, beta=90, gamma=90)
-
         AddPeakHKL(peaks1, [2, 2, 0])
         ClearUB(peaks1)
+
         FindUBFromScatteringPlane(
-            vector_1=[1, -1, 0], vector_2=[1, 1, 0], a=5.4, b=5.4, c=5.4, alpha=90, beta=90, gamma=90, PeaksWorkspace="peaks1"
+            Vector1=[1, -1, 0], Vector2=[1, 1, 0], a=5.4, b=5.4, c=5.4, alpha=90, beta=90, gamma=90, PeaksWorkspace="peaks1"
         )
-        nindexed = self.index_peaks_helper(peaks1, 0.5)
+        nindexed = self.index_peaks_helper(peaks1, 0.2)
         self.assertEqual(nindexed, 1)
 
     def test_find_correct_ub_orthorhombic(self):
         peaks1 = self.peaks1
         SetUB(peaks1, u=[0, 0, 1], v=[1, 0, 0])
-
         AddPeakHKL(peaks1, [1, 0, 1])
         ClearUB(peaks1)
+
         FindUBFromScatteringPlane(
-            vector_1=[0, 0, 1], vector_2=[1, 0, 0], a=5.395, b=5.451, c=20.530, alpha=90, beta=90, gamma=90, PeaksWorkspace="peaks1"
+            Vector1=[0, 0, 1], Vector2=[1, 0, 0], a=5.395, b=5.451, c=20.530, alpha=90, beta=90, gamma=90, PeaksWorkspace="peaks1"
         )
-        nindexed = self.index_peaks_helper(peaks1, 0.5)
+        nindexed = self.index_peaks_helper(peaks1, 0.45)
         self.assertEqual(nindexed, 1)
 
     def test_find_correct_ub_hexagonal(self):
@@ -57,10 +55,10 @@ class FindUBFromScatteringPlaneTest(unittest.TestCase):
 
         ClearUB(peaks1)
         FindUBFromScatteringPlane(
-            vector_1=[1, 0, 0], vector_2=[0, 0, 1], a=4.15, b=4.15, c=6.719, alpha=90, beta=90, gamma=120, PeaksWorkspace="peaks1"
+            Vector1=[1, 0, 0], Vector2=[0, 0, 1], a=4.15, b=4.15, c=6.719, alpha=90, beta=90, gamma=120, PeaksWorkspace="peaks1"
         )
         ## call index peak instead
-        nindexed = self.index_peaks_helper(self.peaks1, 0.5)
+        nindexed = self.index_peaks_helper(self.peaks1, 0.3)
         self.assertEqual(nindexed, 1)
 
     def test_multiple_peaks_provided(self):
@@ -73,13 +71,13 @@ class FindUBFromScatteringPlaneTest(unittest.TestCase):
         AddPeakHKL(peaks2, [1, 1, 1])
         ClearUB(peaks1)
         ClearUB(peaks2)
-        FindUBFromScatteringPlane(
-            vector_1=[1, -1, 0], vector_2=[1, 1, 0], a=5.4, b=5.4, c=5.4, alpha=90, beta=90, gamma=90, PeaksWorkspace="peaks1"
-        )
-        FindUBFromScatteringPlane(
-            vector_1=[1, -1, 0], vector_2=[1, 1, 0], a=5.4, b=5.4, c=5.4, alpha=90, beta=90, gamma=90, PeaksWorkspace="peaks2"
-        )
 
+        FindUBFromScatteringPlane(
+            Vector1=[1, -1, 0], Vector2=[1, 1, 0], a=5.4, b=5.4, c=5.4, alpha=90, beta=90, gamma=90, PeaksWorkspace="peaks1"
+        )
+        FindUBFromScatteringPlane(
+            Vector1=[1, -1, 0], Vector2=[1, 1, 0], a=5.4, b=5.4, c=5.4, alpha=90, beta=90, gamma=90, PeaksWorkspace="peaks2"
+        )
         u_vector_1 = abs(np.array(peaks1.sample().getOrientedLattice().getuVector()))
         u_vector_2 = abs(np.array(peaks2.sample().getOrientedLattice().getuVector()))
 
@@ -90,15 +88,15 @@ class FindUBFromScatteringPlaneTest(unittest.TestCase):
         SetUB(peaks1, u=[1, -0.83, 0], v=[0.8, 1, 0], a=5.4, b=5.4, c=5.4, alpha=90, beta=90, gamma=90)
         AddPeakHKL(peaks1, [2, 2, 0])
         FindUBFromScatteringPlane(
-            vector_1=[1, -1, 0], vector_2=[1, 1, 0], a=5.4, b=5.4, c=5.4, alpha=90, beta=90, gamma=90, PeaksWorkspace="peaks1"
+            Vector1=[1, -1, 0], Vector2=[1, 1, 0], a=5.4, b=5.4, c=5.4, alpha=90, beta=90, gamma=90, PeaksWorkspace="peaks1"
         )
         ## need to check how it's tied to output workspace in algorithm
         nindexed = self.index_peaks_helper(peaks1, 0.15)
         self.assertEqual(nindexed, 1)
-
         ClearUB(peaks1)
+
         FindUBFromScatteringPlane(
-            vector_1=[1, 1, 0], vector_2=[1, -1, 0], a=5.4, b=5.4, c=5.4, alpha=90, beta=90, gamma=90, PeaksWorkspace="peaks1"
+            Vector1=[1, 1, 0], Vector2=[1, -1, 0], a=5.4, b=5.4, c=5.4, alpha=90, beta=90, gamma=90, PeaksWorkspace="peaks1"
         )
         nindexed = self.index_peaks_helper(peaks1, 0.15)
         self.assertEqual(nindexed, 1)
@@ -110,9 +108,9 @@ class FindUBFromScatteringPlaneTest(unittest.TestCase):
         AddPeakHKL(peaks1, [2, 2, 0.004])
 
         FindUBFromScatteringPlane(
-            vector_1=[1, -1, 0], vector_2=[1, 1, 0], a=5.4, b=5.4, c=5.4, alpha=90, beta=90, gamma=90, PeaksWorkspace="peaks1"
+            Vector1=[1, -1, 0], Vector2=[1, 1, 0], a=5.4, b=5.4, c=5.4, alpha=90, beta=90, gamma=90, PeaksWorkspace="peaks1"
         )
-        ## need to check how it's tied to output workspace in algorithm
+
         nindexed = self.index_peaks_helper(peaks1, 0.15)
         self.assertEqual(nindexed, 1)
 
@@ -124,10 +122,10 @@ class FindUBFromScatteringPlaneTest(unittest.TestCase):
 
         (
             FindUBFromScatteringPlane(
-                vector_1=[1, -1, 0], vector_2=[1, 1, 0], a=5.4, b=5.4, c=5.4, alpha=90, beta=90, gamma=90, PeaksWorkspace="peaks1"
+                Vector1=[1, -1, 0], Vector2=[1, 1, 0], a=5.4, b=5.4, c=5.4, alpha=90, beta=90, gamma=90, PeaksWorkspace="peaks1"
             ),
         )
-        mock_logger_warning.assert_called_once_with("given peak does not lie in the plane")
+        mock_logger_warning.assert_called_once_with("given peak hkl does not lie in the plane")
 
 
 if __name__ == "__main__":

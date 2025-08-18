@@ -9,10 +9,9 @@
 Description
 -----------
 
-Given 2 vectors defining a scattering plane and 1 peak this algorithm calculates a UB matrix that best maps the Qs calculated from hkl and Qs measured.
-Found by minimising the angle of rotation about the vertical for mapping Qs calc to Qs observed.
-The order in which the 2 vectors defining the plane are given to the algorithm will change the resulting UB as there are 2 equivalent UBs for the peak provided
-
+Given 2 vectors defining a scattering plane, 1 peak and lattice parameters this algorithm calculates a UB matrix that best maps the Qs calculated from hkl and Qs measured.
+Angle is found by minimising the norm(qsample_predicted-qsample_observed).
+The order of the two input vectors dictates the sign of the orthogonal direction produced by the cross-product - however the resulting UB matrices are equivalent
 
 Usage
 -----
@@ -25,16 +24,16 @@ Usage
     SetUB(peaks1, u=[1, -0.83, 0], v=[0.8, 1, 0], a=5.4, b=5.4, c=5.4, alpha=90, beta=90, gamma=90)
     AddPeakHKL(peaks1, [2, 2, 0])
     ClearUB(peaks1)
-    FindUBFromScatteringPlane(
-            vector_1=[1, -1, 0], vector_2=[1, 1, 0], a=5.4, b=5.4, c=5.4, alpha=90, beta=90, gamma=90, PeaksWorkspace=peaks1)
-    print(ws.sample().getOrientedLattice().getUB())
+    FindUBFromScatteringPlane(Vector1=[1, -1, 0], Vector2=[1, 1, 0], a=5.4, b=5.4, c=5.4, alpha=90, beta=90, gamma=90, PeaksWorkspace=peaks1)
+    print(np.round(peaks1.sample().getOrientedLattice().getUB(),4))
 
 Output:
 
 .. testoutput::  ExFindUBFromScatteringPlane
-    [[ 1.18272875e-01  1.42495894e-01 -1.48323218e-18]
-    [ 0.00000000e+00  0.00000000e+00  1.85185185e-01]
-    [ 1.42495894e-01 -1.18272875e-01  1.59674819e-17]]
+    [[ 0.1183  0.1425 -0.    ]
+    [ 0.      0.      0.1852]
+    [ 0.1425 -0.1183  0.    ]]
+
 
 
 .. categories::
