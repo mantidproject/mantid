@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
-from PyQt4 import QtCore
+from qtpy import QtCore
 from mantid.api import mtd
 import numpy as n
 

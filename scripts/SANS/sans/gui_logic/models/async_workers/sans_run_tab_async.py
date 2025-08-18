@@ -7,7 +7,7 @@
 from typing import Tuple, List
 
 from qtpy import QtCore
-from PyQt5.QtCore import QObject, pyqtSignal
+from qtpy.QtCore import QObject, pyqtSignal
 
 from mantid.kernel import Logger
 from mantidqt.utils.async_qt_adaptor import qt_async_task, IQtAsync
