@@ -120,6 +120,17 @@ pipeline {
               BUILD_DEVEL = ""
             }
           }
+          if (env.GIT_BRANCH == "ornl_next_nightly_build") {
+            echo "Checking for changes in nightly build branch."
+            def changes = sh(
+              script: "git log --since=midnight --oneline",
+              returnStdout: true
+            ).trim()
+            echo changes
+            echo "Pretend No changes. Skipping build pipeline."
+            currentBuild.result = 'SUCCESS'
+            BUILD_DEVEL = ""
+          }
         }
       }
     }
