@@ -69,8 +69,8 @@ class SliceViewerNavigationToolbar(MantidNavigationToolbar):
         MantidNavigationTool(ToolItemText.RECT_MASKING, "Select rectangle mask", "mdi.square-outline", "rectMaskingClicked", False),
         MantidNavigationTool(ToolItemText.ELLI_MASKING, "Select elliptical mask", "mdi.circle-outline", "elliMaskingClicked", False),
         MantidNavigationTool(ToolItemText.POLY_MASKING, "Select polygon mask", "mdi.triangle-outline", "polyMaskingClicked", False),
-        MantidNavigationTool(ToolItemText.APPLY_MASKING, "Apply drawn mask", "mdi.checkbox-marked-outline", "applyMaskingClicked", False),
-        MantidNavigationTool(ToolItemText.EXPORT_MASKING, "Export drawn mask to table", "mdi.export", "exportMaskingClicked", False),
+        MantidNavigationTool(ToolItemText.APPLY_MASKING, "Apply drawn mask", "mdi.checkbox-marked-outline", "applyMaskingClicked", None),
+        MantidNavigationTool(ToolItemText.EXPORT_MASKING, "Export drawn mask to table", "mdi.export", "exportMaskingClicked", None),
         MantidStandardNavigationTools.SEPARATOR,
         MantidNavigationTool(ToolItemText.SAVE, "Save the figure", "mdi.content-save", "save_figure", None),
     )

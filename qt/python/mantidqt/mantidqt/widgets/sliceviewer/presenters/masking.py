@@ -3,6 +3,8 @@ from abc import ABC, abstractmethod
 
 from mantidqt.widgets.sliceviewer.views.toolbar import ToolItemText
 from .selector import make_selector_class, cursor_info
+from mantidqt.widgets.sliceviewer.models.masking import MaskingModel
+
 
 SHAPE_STYLE = {"alpha": 0.5, "linewidth": 1.75, "color": "black", "linestyle": "-"}
 HANDLE_STYLE = {"alpha": 0.5, "markerfacecolor": "gray", "markersize": 4, "markeredgecolor": "gray"}
@@ -11,11 +13,11 @@ INACTIVE_SHAPE_STYLE = {"alpha": 0.5, "linewidth": 1.75, "color": "gray", "lines
 
 
 class SelectionMaskingBase(ABC):
-    def __init__(self, dataview):
-        self._cursor_info = None
-        self.mask_drawn = False
+    def __init__(self, dataview, model):
+        self._mask_drawn = False
         self._selector = None
         self._dataview = dataview
+        self._model = model
 
     @abstractmethod
     def _on_selected(self, eclick, erelease):
@@ -39,14 +41,18 @@ class SelectionMaskingBase(ABC):
     def _img(self):
         return self._dataview.ax.images[0]
 
+    @property
+    def mask_drawn(self):
+        return self._mask_drawn
+
 
 class RectangleSelectionMaskingBase(SelectionMaskingBase):
     """
     Base class for a selector with a `RectangleSelector` base.
     """
 
-    def __init__(self, dataview, selector):
-        super().__init__(dataview)
+    def __init__(self, dataview, model, selector):
+        super().__init__(dataview, model)
         self._selector = make_selector_class(selector)(
             dataview.ax,
             self._on_selected,
@@ -75,9 +81,9 @@ class RectangleSelectionMaskingBase(SelectionMaskingBase):
             return
 
         # Add shape object to collection
-        self._cursor_info = (cinfo_click, cinfo_release)
-        self.mask_drawn = True
+        self._mask_drawn = True
         self._dataview.mpl_toolbar.set_action_checked(SELECTOR_TO_TOOL_ITEM_TEXT[self.__class__], False, trigger=False)
+        self._model.add_rect_cursor_info(click=cinfo_click, release=cinfo_release)
 
     def set_inactive_color(self):
         self._selector.set_props(fill=False, **INACTIVE_SHAPE_STYLE)
@@ -89,8 +95,8 @@ class RectangleSelectionMasking(RectangleSelectionMaskingBase):
     Draws a mask from a rectangular selection
     """
 
-    def __init__(self, dataview):
-        super().__init__(dataview, RectangleSelector)
+    def __init__(self, dataview, model):
+        super().__init__(dataview, model, RectangleSelector)
 
 
 class EllipticalSelectionMasking(RectangleSelectionMaskingBase):
@@ -98,8 +104,8 @@ class EllipticalSelectionMasking(RectangleSelectionMaskingBase):
     Draws a mask from an elliptical selection
     """
 
-    def __init__(self, dataview):
-        super().__init__(dataview, EllipseSelector)
+    def __init__(self, dataview, model):
+        super().__init__(dataview, model, EllipseSelector)
 
 
 class PolygonSelectionMasking(SelectionMaskingBase):
@@ -107,8 +113,8 @@ class PolygonSelectionMasking(SelectionMaskingBase):
     Draws a mask from a polygon selection
     """
 
-    def __init__(self, dataview):
-        super().__init__(dataview)
+    def __init__(self, dataview, model):
+        super().__init__(dataview, model)
         self._selector = make_selector_class(PolygonSelector)(
             dataview.ax,
             self._on_selected,
@@ -123,8 +129,10 @@ class PolygonSelectionMasking(SelectionMaskingBase):
         :param eclick: Event marking where the mouse was clicked
         :param erelease: None for polygon selector
         """
-        self.mask_drawn = True
+        self._mask_drawn = True
         self._dataview.mpl_toolbar.set_action_checked(SELECTOR_TO_TOOL_ITEM_TEXT[self.__class__], False, trigger=False)
+        nodes = [cursor_info(self._img, node[0], node[1]) for node in eclick]
+        self._model.add_poly_cursor_info(nodes)
 
     def set_inactive_color(self):
         self._selector.set_props(**INACTIVE_SHAPE_STYLE)
@@ -148,33 +156,46 @@ class Masking:
         self._selectors = []
         self._active_selector = None
         self._dataview = dataview
+        self._model = MaskingModel()
 
-    def _new_selector(self, selector_type):
+    def _reset_active_selector(self):
         if self._active_selector:
             self._active_selector.set_active(False)
             self._active_selector.disconnect()
             if self._active_selector.mask_drawn:
                 self._active_selector.set_inactive_color()
                 self._selectors.append(self._active_selector)
+                self._model.store_active_mask()
             else:
                 self._active_selector.clear()
+                self._model.clear_active_mask()
+            self._active_selector = None
 
-        self._active_selector = selector_type(self._dataview)
+    def _new_selector(self, selector_type):
+        self._reset_active_selector()
+        self._active_selector = selector_type(self._dataview, self._model)
         self._active_selector.set_active(True)
 
     def new_selector(self, text: str):
         self._new_selector(TOOL_ITEM_TEXT_TO_SELECTOR[text])
 
     def export_selectors(self):
-        pass
+        self._reset_active_selector()
+        self._model.export_selectors()
 
     def apply_selectors(self):
-        pass
+        self._reset_active_selector()
+        self._model.apply_selectors()
 
     def clear_and_disconnect(self):
-        self._active_selector.set_active(False)
-        self._active_selector.disconnect()
-        if self._active_selector.mask_drawn:
-            self._active_selector.clear()
+        if self._active_selector:
+            self._active_selector.set_active(False)
+            self._active_selector.disconnect()
+            if self._active_selector.mask_drawn:
+                self._active_selector.clear()
         for selector in self._selectors:
             selector.clear()
+
+    def clear_model(self):
+        self._model.clear_active_mask()
+        self._model.clear_stored_masks()

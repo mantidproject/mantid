@@ -610,13 +610,11 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
         self.view.data_view.masking.new_selector(ToolItemText.POLY_MASKING)
 
     def export_masking_clicked(self) -> None:
-        # export masks to table workspace in ADS
-        pass
+        self.view.data_view.masking.export_selectors()
 
     def apply_masking_clicked(self) -> None:
-        # create table workspace not in ADS (model)
-        # Apply table workspace to dataset
-        pass
+        # warn about mutating underlying data.
+        self.view.data_view.masking.apply_selectors()
 
 
 class SliceViewXAxisEditor(XAxisEditor):

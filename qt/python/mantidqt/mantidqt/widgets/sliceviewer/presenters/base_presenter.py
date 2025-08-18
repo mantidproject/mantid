@@ -3,8 +3,7 @@
 # Copyright &copy; 2021 ISIS Rutherford Appleton Laboratory UKRI,
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
-import abc
-from abc import ABC
+from abc import ABC, abstractmethod
 
 from mantidqt.widgets.sliceviewer.models.base_model import SliceViewerBaseModel
 from mantidqt.widgets.sliceviewer.models.dimensions import Dimensions
@@ -77,7 +76,7 @@ class SliceViewerBasePresenter(IDataViewSubscriber, ABC):
         """Tell the view to display a new plot of an MatrixWorkspace"""
         self._data_view.plot_matrix(self.model.ws, distribution=not self.normalization)
 
-    @abc.abstractmethod
+    @abstractmethod
     def new_plot(self, *args, **kwargs):
         pass
 
@@ -147,10 +146,10 @@ class SliceViewerBasePresenter(IDataViewSubscriber, ABC):
         self._data_view.canvas.flush_events()  # flush before we set masking to None
         self._data_view.masking = None
 
-    @abc.abstractmethod
+    @abstractmethod
     def get_extra_image_info_columns(self, xdata, ydata):
         pass
 
-    @abc.abstractmethod
+    @abstractmethod
     def is_integer_frame(self):
         pass
