@@ -129,7 +129,7 @@ pipeline {
             echo "${changes}"
             echo "Pretend No changes. Skipping build pipeline."
             currentBuild.result = 'SUCCESS'
-            BUILD_DEVEL = ""
+            error("Stop please")
             echo "${env.BUILD_DEVEL}"
             return
           }
