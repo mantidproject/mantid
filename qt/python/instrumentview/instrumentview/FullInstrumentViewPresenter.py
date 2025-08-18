@@ -8,27 +8,12 @@ import numpy as np
 import pyvista as pv
 from pyvista.plotting.picking import RectangleSelection
 from pyvista.plotting.opts import PickerType
-from qtpy.QtCore import QThread, Signal
 from mantid import mtd
 from mantid.kernel import logger
-from qtpy.QtCore import QObject
 
 from instrumentview.FullInstrumentViewModel import FullInstrumentViewModel
 from instrumentview.FullInstrumentViewWindow import FullInstrumentViewWindow
 from instrumentview.InstrumentViewADSObserver import InstrumentViewADSObserver
-
-
-class ModelSetupWorker(QObject):
-    finished = Signal()
-    _model: FullInstrumentViewModel
-
-    def __init__(self, model):
-        super(ModelSetupWorker, self).__init__()
-        self._model = model
-
-    def run(self):
-        self._model.setup()
-        self.finished.emit()
 
 
 class FullInstrumentViewPresenter:
@@ -42,26 +27,13 @@ class FullInstrumentViewPresenter:
     _CYLINDRICAL_Z = "Cylindrical Z"
     _PROJECTION_OPTIONS = [_SPHERICAL_X, _SPHERICAL_Y, _SPHERICAL_Z, _CYLINDRICAL_X, _CYLINDRICAL_Y, _CYLINDRICAL_Z]
 
-    def __init__(self, view: FullInstrumentViewWindow, model: FullInstrumentViewModel, model_setup_on_separate_thread=True):
+    def __init__(self, view: FullInstrumentViewWindow, model: FullInstrumentViewModel):
         """For the given workspace, use the data from the model to plot the detectors. Also include points at the origin and
         any monitors."""
-
         self._view = view
         self._model = model
-
-        if model_setup_on_separate_thread:
-            self.thread = QThread()
-            self.worker = ModelSetupWorker(self._model)
-            self.worker.moveToThread(self.thread)
-            self.thread.started.connect(self.worker.run)
-            self.worker.finished.connect(lambda: self.setup())
-            self.worker.finished.connect(self.worker.deleteLater)
-            self.thread.finished.connect(self.thread.deleteLater)
-            self.worker.finished.connect(self.thread.quit)
-            self.thread.start()
-        else:
-            self._model.setup()
-            self.setup()
+        self._model.setup()
+        self.setup()
 
     def setup(self):
         self._view.subscribe_presenter(self)
