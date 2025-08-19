@@ -111,11 +111,11 @@ pipeline {
       when {
         beforeAgent true
         beforeOptions true
-        expression { env.GIT_BRANCH == "ornl_next_nightly_build" }
+        expression { GIT_BRANCH == "ornl-next" }
       }
       steps {
         script {
-          // checkoutSource("${GIT_SHA}")
+          // checkoutSource("${GIT_COMMIT}")
           // def changes = ""
           // dir("${CHECKOUT_DIR}") {
           //   changes = sh(
@@ -134,6 +134,8 @@ pipeline {
           // }
 
           echo "Checking for changes in nightly build branch."
+          echo "git commit: ${GIT_COMMIT}"
+          checkoutSource("${GIT_COMMIT}")
           def changes = ""
           dir("${CHECKOUT_DIR}") {
             changes = sh(
