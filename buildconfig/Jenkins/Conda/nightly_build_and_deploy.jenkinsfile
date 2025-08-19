@@ -111,18 +111,24 @@ pipeline {
       steps {
         script {
           echo "Checking for changes in branch ${GIT_BRANCH}."
-          if (env.GIT_BRANCH == "ornl-next") {
+          if (GIT_BRANCH == "ornl-next") {
             checkoutSource("${GIT_SHA}")
-            def changes = sh(
-              script: "git log --since=midnight --oneline",
-              returnStdout: true
-            ).trim()
+            def changes = ""
+            dir("${CHECKOUT_DIR}") {
+              changes = sh(
+                script: "git log --since=midnight --oneline",
+                returnStdout: true
+              ).trim()
+            }
 
             if (changes == "" ) {
               echo "No changes. Skipping build pipeline."
               currentBuild.result = 'SUCCESS'
-              BUILD_DEVEL = ""
+              env.BUILD_DEVEL = ""
               SAVE_BUILD_SUCCESS = false
+            } else {
+              echo "${changes}"
+              echo "Changes found. Continuing with build pipeline."
             }
           }
           if (GIT_BRANCH == "ornl_next_nightly_build") {
@@ -136,7 +142,7 @@ pipeline {
             }
             echo "${changes}"
             echo "Pretend No changes. Skipping build pipeline."
-            currentBuild.result = 'SUCCESS'
+            // currentBuild.result = 'SUCCESS'
             env.BUILD_DEVEL = ""
             echo "BUILD_DEVEL=${env.BUILD_DEVEL}"
             SAVE_BUILD_SUCCESS = false
