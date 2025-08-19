@@ -24,6 +24,14 @@ class CursorInfoBase(ABC):
         return self._table_rows
 
 
+@dataclass
+class Line:
+    start: float
+    end: float
+    m: float
+    c: float
+
+
 class RectCursorInfoBase(CursorInfoBase, ABC):
     def __init__(self, click, release):
         super().__init__()
@@ -81,7 +89,57 @@ class PolyCursorInfo(CursorInfoBase):
         self._nodes = nodes
 
     def generate_table_rows(self):
+        lines = self._generate_lines()
+        intersecting_lines = self._check_intersecting_lines(lines)
+        if intersecting_lines > 1:
+            raise RuntimeError("Polygon shapes with more than 1 intersection point are not supported.")
         return []
+
+    def _generate_lines(self):
+        node_count = len(self._nodes)
+        lines = []
+        for i in range(node_count):
+            line = (self._nodes[i].data, self._nodes[i + 1].data) if i < node_count - 1 else (self._nodes[i].data, self._nodes[0].data)
+            lines.append(self._generate_line(*line))
+        return lines
+
+    @staticmethod
+    def _generate_line(start, end):
+        m = (start[1] - end[1]) / (start[0] - end[0])
+        c = start[1] - m * start[0]
+        return Line(start=start, end=end, m=m, c=c)
+
+    def _check_intersecting_lines(self, lines):
+        line_count = len(lines)
+        cache = []
+        intersecting_lines = 0
+        for i in range(line_count):
+            for j in range(line_count):
+                pair = [i, j]
+                pair.sort()
+                if i != j and pair not in cache:
+                    cache.append(pair)
+                    if self._intersecting_line(lines[i], lines[j]):
+                        intersecting_lines += 1
+        return intersecting_lines
+
+    @staticmethod
+    def _intersecting_line(line_1, line_2):
+        # if gradients are equal, or if lines intersect at a node
+        if line_1.m == line_2.m or (line_1.start == line_2.end or line_2.start == line_1.end):
+            return False
+        x = (line_1.c - line_2.c) / (line_2.m - line_1.m)
+        x_data = [line_1.start[0], line_1.end[0], line_2.start[0], line_2.end[0]]
+        x_data.sort()
+        if not (x_data[1] < x < x_data[2]):
+            return False
+
+        y = line_1.m * x + line_1.c
+        y_data = [line_1.start[1], line_1.end[1], line_2.start[1], line_2.end[1]]
+        y_data.sort()
+        if not (y_data[1] < y < y_data[2]):
+            return False
+        return True
 
 
 class MaskingModel:
