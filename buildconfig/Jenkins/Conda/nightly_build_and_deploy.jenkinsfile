@@ -110,7 +110,7 @@ pipeline {
       agent { label 'linux-64' }
       steps {
         script {
-          echo "Checking for changes in branch ${env.GIT_BRANCH}."
+          echo "Checking for changes in branch ${GIT_BRANCH}."
           if (env.GIT_BRANCH == "ornl-next") {
             checkoutSource("${GIT_SHA}")
             def changes = sh(
@@ -125,7 +125,7 @@ pipeline {
               SAVE_BUILD_SUCCESS = false
             }
           }
-          if (env.GIT_BRANCH == "ornl_next_nightly_build") {
+          if (GIT_BRANCH == "ornl_next_nightly_build") {
             echo "Checking for changes in nightly build branch."
             def changes = sh(
               script: "git log --since=midnight --oneline",
