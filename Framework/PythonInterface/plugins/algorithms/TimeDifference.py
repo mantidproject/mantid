@@ -6,8 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,invalid-name
 
-from __future__ import annotations
-
 from mantid.api import (
     ADSValidator,
     AlgorithmFactory,
