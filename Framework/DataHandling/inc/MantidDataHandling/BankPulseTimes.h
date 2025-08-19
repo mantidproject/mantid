@@ -63,7 +63,7 @@ public:
 
 private:
   template <typename ValueType>
-  void readData(Nexus::File &file, int64_t numValues, Mantid::Types::Core::DateAndTime &start);
+  void readData(Nexus::File &file, std::size_t numValues, Mantid::Types::Core::DateAndTime &start);
 
   /// This determines the start time by finding the minimum value in the array
   void updateStartTime();

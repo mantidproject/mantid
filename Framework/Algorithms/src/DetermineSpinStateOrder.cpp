@@ -8,6 +8,7 @@
 #include "MantidAlgorithms/DetermineSpinStateOrder.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/PolSANSWorkspaceValidator.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/Instrument.h"
@@ -50,8 +51,10 @@ const std::vector<std::string> DetermineSpinStateOrder::seeAlso() const { return
 /** Initialize the algorithm's properties.
  */
 void DetermineSpinStateOrder::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<API::WorkspaceGroup>>("InputWorkspace", "", Direction::Input),
-                  "A Polarised SANS run from either LARMOR or ZOOM (group workspace with 4 periods).");
+  declareProperty(
+      std::make_unique<WorkspaceProperty<API::WorkspaceGroup>>(
+          "InputWorkspace", "", Direction::Input, std::make_shared<Mantid::API::PolSANSWorkspaceValidator>()),
+      "A Polarised SANS run from either LARMOR or ZOOM (group workspace with 4 periods).");
   declareProperty("SpinFlipperLogName", std::string(""),
                   "Name of the log contained in the InputWorkspace which holds the flipper current (can be inferred if "
                   "data is from LARMOR or ZOOM).",
@@ -67,43 +70,15 @@ void DetermineSpinStateOrder::init() {
 
 void validateGroupItem(API::MatrixWorkspace_sptr const &workspace, std::map<std::string, std::string> &errorList,
                        const std::string &spinFlipperLogName = "") {
-  std::vector<std::string> workspaceIssues;
-  if (!workspace) {
-    errorList["InputWorkspace"] = "All input workspaces must be of type MatrixWorkspace.";
-    return;
-  }
-
-  Kernel::Unit_const_sptr unit = workspace->getAxis(0)->unit();
-  if (unit->unitID() != "Wavelength") {
-    workspaceIssues.push_back("All input workspaces must be in units of Wavelength.");
-  }
-
-  if (workspace->getNumberHistograms() != 1) {
-    workspaceIssues.push_back("All input workspaces must contain a single histogram.");
-  }
-
-  if (!workspace->isHistogramData()) {
-    workspaceIssues.push_back("All input workspaces must be histogram data.");
-  }
-
   if (spinFlipperLogName != "" && !workspace->run().hasProperty(spinFlipperLogName)) {
-    workspaceIssues.push_back("All input workspaces must contain the provided spin flipper log: " + spinFlipperLogName +
-                              ".");
-  }
-
-  if (!workspaceIssues.empty()) {
-    errorList["InputWorkspace"] = Kernel::Strings::join(workspaceIssues.cbegin(), workspaceIssues.cend(), " ");
+    errorList["InputWorkspace"] =
+        "All input workspaces must contain the provided spin flipper log: " + spinFlipperLogName + ".";
   }
 }
 
 std::map<std::string, std::string> DetermineSpinStateOrder::validateInputs() {
   std::map<std::string, std::string> helpMessages;
-
   API::WorkspaceGroup_const_sptr wsGroup = getProperty("InputWorkspace");
-  if (wsGroup->getNumberOfEntries() != 4) {
-    helpMessages["InputWorkspace"] = "Input workspace group must have 4 entries.";
-    return helpMessages;
-  }
 
   for (const API::Workspace_sptr &ws : wsGroup->getAllItems()) {
     const auto groupItem = std::dynamic_pointer_cast<API::MatrixWorkspace>(ws);

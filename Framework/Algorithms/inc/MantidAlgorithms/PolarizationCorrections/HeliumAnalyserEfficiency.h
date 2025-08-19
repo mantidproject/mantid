@@ -32,8 +32,6 @@ public:
   int version() const override { return 1; }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "SANS\\PolarizationCorrections"; }
-  /// Check that input params are valid
-  std::map<std::string, std::string> validateInputs() override;
 
 private:
   // Implement abstract Algorithm methods

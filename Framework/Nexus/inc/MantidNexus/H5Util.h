@@ -26,7 +26,7 @@ class H5Object;
 } // namespace H5
 
 namespace Mantid {
-namespace NeXus {
+namespace Nexus {
 namespace H5Util {
 /** H5Util : TODO: DESCRIPTION
  */
@@ -36,6 +36,9 @@ enum class Narrowing : bool { Allow = true, Prevent = false };
 
 /** Default file access is H5F_CLOSE_STRONG. This should be set consistently for all access of a file. */
 MANTID_NEXUS_DLL H5::FileAccPropList defaultFileAcc();
+
+/** Determine if a given file can be opened with HDF5 using the CORRECT file access level (H5F_CLOSE_STRONG)*/
+MANTID_NEXUS_DLL bool isHdf5(std::string const &filename);
 
 /// Create a 1D data-space to hold data of length.
 MANTID_NEXUS_DLL H5::DataSpace getDataSpace(const size_t length);
@@ -125,5 +128,5 @@ MANTID_NEXUS_DLL void copyGroup(H5::H5Object &dest, const std::string &destGroup
 MANTID_NEXUS_DLL void deleteObjectLink(H5::H5Object &h5, const std::string &target);
 
 } // namespace H5Util
-} // namespace NeXus
+} // namespace Nexus
 } // namespace Mantid

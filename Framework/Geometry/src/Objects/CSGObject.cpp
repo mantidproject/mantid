@@ -417,6 +417,10 @@ CSGObject::CSGObject(const CSGObject &A) : CSGObject() { *this = A; }
 CSGObject &CSGObject::operator=(const CSGObject &A) {
   if (this != &A) {
     m_topRule = (A.m_topRule) ? A.m_topRule->clone() : nullptr;
+    if (m_topRule) {
+      m_topRule->setParent(nullptr); // Top rule has no parent
+      m_topRule->makeParents();
+    }
     AABBxMax = A.AABBxMax;
     AABByMax = A.AABByMax;
     AABBzMax = A.AABBzMax;

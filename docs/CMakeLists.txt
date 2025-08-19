@@ -4,7 +4,7 @@
 option(DOCS_DOTDIAGRAMS "If enabled include workflow diagrams generated with dot" OFF)
 option(DOCS_SCREENSHOTS "If enabled include automatically generated screenshots of interfaces" OFF)
 set(DOCS_MATH_EXT
-    "sphinx.ext.imgmath"
+    "sphinx.ext.mathjax"
     CACHE STRING "Sphinx extension to be used for rendering math equations in qtassistant. mathjax is used in html."
 )
 set_property(CACHE DOCS_MATH_EXT PROPERTY STRINGS "sphinx.ext.imgmath" "sphinx.ext.mathjax")
@@ -92,7 +92,7 @@ function(add_sphinx_build_target builder math_renderer)
     COMMAND
       ${CMAKE_COMMAND} -E env SCREENSHOTS_DIR=${SCREENSHOTS_DIR} DIAGRAMS_DIR=${DIAGRAMS_DIR}
       DOT_EXECUTABLE=${DOT_EXECUTABLE} MATH_EXT=${math_renderer} ENABLE_PLOTDIRECTIVE=${ENABLE_PLOTDIRECTIVE}
-      PYTHONPATH=${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR} ${Python_EXECUTABLE} -m sphinx.cmd.build
+      PYTHONPATH=${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR} ${Python_EXECUTABLE} -m ${SPHINX_MAIN}
       ${sphinx_options} ${SPHINX_CONF_DIR} ${output_dir}
     DEPENDS ${target_dependencies} ${SPHINX_CONF_DIR}/conf.py ${conf_builder}
     COMMENT "Building ${builder} documentation using ${math_renderer}"
@@ -113,9 +113,6 @@ add_dependencies(docs-doctest DocTestData)
 
 # add target for checking external links
 add_sphinx_build_target(linkcheck ${DOCS_MATH_EXT})
-
-# The following lines related to qthelp should remain commented or removed add_sphinx_build_target(qthelp
-# ${DOCS_MATH_EXT} qthelp) add_dependencies(docs-qthelp ${QCH_FILES})
 
 # Installation settings
 option(PACKAGE_DOCS "If true the HTML documentation is bundled with the package" OFF)

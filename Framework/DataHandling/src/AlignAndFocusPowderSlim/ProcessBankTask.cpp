@@ -6,19 +6,22 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 #include "ProcessBankTask.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/Unit.h"
 #include "MantidNexus/H5Util.h"
 #include "ProcessEventsTask.h"
 #include "tbb/parallel_for.h"
 #include "tbb/parallel_reduce.h"
-#include <iostream>
 
 namespace Mantid::DataHandling::AlignAndFocusPowderSlim {
 
 namespace {
 
 const std::string MICROSEC("microseconds");
+
+// Logger for this class
+auto g_log = Kernel::Logger("ProcessBankTask");
 
 template <typename Type> class MinMax {
   const std::vector<Type> *vec;
@@ -74,7 +77,7 @@ void ProcessBankTask::operator()(const tbb::blocked_range<size_t> &range) const 
   for (size_t wksp_index = range.begin(); wksp_index < range.end(); ++wksp_index) {
     const auto &bankName = m_bankEntries[wksp_index];
     Kernel::Timer timer;
-    std::cout << bankName << " start" << std::endl;
+    g_log.debug() << bankName << " start" << std::endl;
 
     // open the bank
     auto event_group = entry.openGroup(bankName); // type=NXevent_data
@@ -109,7 +112,7 @@ void ProcessBankTask::operator()(const tbb::blocked_range<size_t> &range) const 
     // auto tof_SDS = event_group.openDataSet(NxsFieldNames::TIME_OF_FLIGHT);
     // and the units
     std::string tof_unit;
-    NeXus::H5Util::readStringAttribute(tof_SDS, "units", tof_unit);
+    Nexus::H5Util::readStringAttribute(tof_SDS, "units", tof_unit);
     const double time_conversion = Kernel::Units::timeConversionValue(tof_unit, MICROSEC);
 
     // declare arrays once so memory can be reused
@@ -158,7 +161,7 @@ void ProcessBankTask::operator()(const tbb::blocked_range<size_t> &range) const 
         oss << "[" << offsets[i] << ", " << (offsets[i] + slabsizes[i]) << "), ";
       }
       oss << "\n";
-      std::cout << oss.str();
+      g_log.debug() << oss.str();
 
       // load detid and tof at the same time
       tbb::parallel_invoke(
@@ -198,7 +201,7 @@ void ProcessBankTask::operator()(const tbb::blocked_range<size_t> &range) const 
     auto &y_values = spectrum.dataY();
     std::copy(y_temp.cbegin(), y_temp.cend(), y_values.begin());
 
-    std::cout << bankName << " stop " << timer << std::endl;
+    g_log.debug() << bankName << " stop " << timer << std::endl;
     m_progress->report();
   }
 }

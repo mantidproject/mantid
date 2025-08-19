@@ -49,7 +49,7 @@ constexpr size_t D20_NUMBER_PIXELS = 1600;
 constexpr size_t D20_NUMBER_DEAD_PIXELS = 32;
 // This defines the number of monitors in the instrument. If there are cases
 // where this is no longer one this decleration should be moved.
-constexpr int NUMBER_MONITORS = 1;
+constexpr size_t NUMBER_MONITORS = 1;
 // This is the angular size of a pixel in degrees (in low resolution mode)
 constexpr double D20_PIXEL_SIZE = 0.1;
 // The conversion factor from radian to degree
@@ -452,10 +452,9 @@ void LoadILLDiffraction::fillMovingInstrumentScan(const NXInt &data, const NXDou
   // prepare inputs, dimension orders and list of accepted IDs for exclusion of inactive detectors (D20)
   std::tuple<int, int, int> dimOrder{2, 1, 0}; // scan - tube - pixel
   std::set<int> acceptedIDs;
-  if (static_cast<int>(m_numberDetectorsActual) != data.dim1() * data.dim2()) {
-    for (auto index = static_cast<int>(NUMBER_MONITORS);
-         index < static_cast<int>(m_numberDetectorsActual + NUMBER_MONITORS); ++index)
-      acceptedIDs.insert(index);
+  if (m_numberDetectorsActual != data.dim1() * data.dim2()) {
+    for (auto index = NUMBER_MONITORS; index < m_numberDetectorsActual + NUMBER_MONITORS; ++index)
+      acceptedIDs.insert(static_cast<detid_t>(index));
   }
   std::vector<int> customDetectorIDs;
   // Assign detector counts
@@ -476,7 +475,7 @@ void LoadILLDiffraction::fillStaticInstrumentScan(const NXInt &data, const NXDou
   const std::vector<double> axis = getAxis(scan);
   const std::vector<double> monitor = getMonitor(scan);
 
-  int startIndex = static_cast<int>(NUMBER_MONITORS);
+  std::size_t startIndex = NUMBER_MONITORS;
 
   // Assign monitor counts
   m_outWorkspace->mutableX(0) = axis;
@@ -485,10 +484,10 @@ void LoadILLDiffraction::fillStaticInstrumentScan(const NXInt &data, const NXDou
 
   // prepare inputs, dimension orders and list of accepted IDs for exclusion of inactive detectors (D20)
   std::tuple<int, int, int> dimOrder{2, 1, 0}; // scan - tube - pixel
-  std::set<int> acceptedIDs;
-  if (static_cast<int>(m_numberDetectorsActual) != data.dim1() * data.dim2()) {
-    for (int i = static_cast<int>(startIndex); i < static_cast<int>(startIndex + m_numberDetectorsActual); ++i)
-      acceptedIDs.insert(i);
+  std::set<detid_t> acceptedIDs;
+  if (m_numberDetectorsActual != data.dim1() * data.dim2()) {
+    for (std::size_t i = startIndex; i < startIndex + m_numberDetectorsActual; ++i)
+      acceptedIDs.insert(static_cast<detid_t>(i));
   }
   // Assign detector counts
   LoadHelper::fillStaticWorkspace(m_outWorkspace, data, axis, startIndex, true, std::vector<int>(), acceptedIDs,
@@ -504,16 +503,16 @@ void LoadILLDiffraction::fillStaticInstrumentScan(const NXInt &data, const NXDou
  * Loads the scanned_variables/variables_names block
  */
 void LoadILLDiffraction::loadScanVars() {
-  H5File h5file(m_filename, H5F_ACC_RDONLY, NeXus::H5Util::defaultFileAcc());
+  H5File h5file(m_filename, H5F_ACC_RDONLY, Nexus::H5Util::defaultFileAcc());
 
   Group entry0 = h5file.openGroup("entry0");
   Group dataScan = entry0.openGroup("data_scan");
   Group scanVar = dataScan.openGroup("scanned_variables");
   Group varNames = scanVar.openGroup("variables_names");
 
-  const auto names = NeXus::H5Util::readStringVector(varNames, "name");
-  const auto properties = NeXus::H5Util::readStringVector(varNames, "property");
-  const auto units = NeXus::H5Util::readStringVector(varNames, "unit");
+  const auto names = Nexus::H5Util::readStringVector(varNames, "name");
+  const auto properties = Nexus::H5Util::readStringVector(varNames, "property");
+  const auto units = Nexus::H5Util::readStringVector(varNames, "unit");
 
   for (size_t i = 0; i < names.size(); ++i) {
     m_scanVar.emplace_back(ScannedVariables(names[i], properties[i], units[i]));

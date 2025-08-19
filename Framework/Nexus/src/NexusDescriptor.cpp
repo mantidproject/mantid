@@ -62,8 +62,7 @@ void getGroup(H5::Group groupID, std::map<std::string, std::set<std::string>> &a
         firstEntryNameType = std::make_pair(memberName, lf_getNxClassAttribute(subGroupID));
       getGroup(subGroupID, allEntries, firstEntryNameType, level + 1);
     } else if (type == H5G_DATASET) {
-      const std::string absoluteEntryName = groupNameStr + "/" + memberName;
-      allEntries["SDS"].insert(absoluteEntryName);
+      allEntries["SDS"].emplace(groupNameStr + "/" + memberName);
     }
   }
 }
@@ -129,11 +128,11 @@ std::map<std::string, std::set<std::string>> NexusDescriptor::initAllEntries() {
   if (std::filesystem::exists(m_filename)) {
     // if the file exists but cannot be opened, throw invalid
     // NOTE must be std::invalid_argument for expected errors to be raised in python API
-    if (!H5::H5File::isAccessible(m_filename, Mantid::NeXus::H5Util::defaultFileAcc())) {
+    if (!H5::H5File::isAccessible(m_filename, Mantid::Nexus::H5Util::defaultFileAcc())) {
       throw std::invalid_argument("ERROR: Kernel::NexusDescriptor couldn't open hdf5 file " + m_filename + "\n");
     }
 
-    H5::H5File fileID(m_filename, H5F_ACC_RDONLY, Mantid::NeXus::H5Util::defaultFileAcc());
+    H5::H5File fileID(m_filename, H5F_ACC_RDONLY, Mantid::Nexus::H5Util::defaultFileAcc());
     H5::Group groupID = fileID.openGroup("/");
 
     // get root attributes

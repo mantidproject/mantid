@@ -18,14 +18,18 @@
 #include <boost/python/register_ptr_to_python.hpp>
 
 using Mantid::API::Sample;
+using Mantid::Geometry::IObject;
 using Mantid::Geometry::OrientedLattice;
 using Mantid::Geometry::SampleEnvironment;
 using Mantid::Kernel::Material; // NOLINT
 using namespace boost::python;
+using namespace Mantid::Geometry;
 
 GET_POINTER_SPECIALIZATION(Material)
 GET_POINTER_SPECIALIZATION(OrientedLattice)
 GET_POINTER_SPECIALIZATION(Sample)
+
+bool equals_wrapper(const Sample &self, const Sample &other) { return self == other; }
 
 void export_Sample() {
   register_ptr_to_python<Sample *>();
@@ -58,14 +62,13 @@ void export_Sample() {
       .def("getHeight", &Sample::getHeight, arg("self"), "Return the height in mm")
       .def("getWidth", &Sample::getWidth, arg("self"), "Return the width in mm")
       .def("getMaterial", &Sample::getMaterial, arg("self"), "The material the sample is composed of",
-           return_value_policy<reference_existing_object>())
+           return_internal_reference<>())
       .def("setGeometryFlag", &Sample::setGeometryFlag, (arg("self"), arg("geom_id")), "Set the geometry flag.")
       .def("setThickness", &Sample::setThickness, (arg("self"), arg("thick")), "Set the thickness in mm.")
       .def("setHeight", &Sample::setHeight, (arg("self"), arg("height")), "Set the height in mm.")
       .def("setWidth", &Sample::setWidth, (arg("self"), arg("width")), "Set the width in mm.")
-      .def("getShape", &Sample::getShape, arg("self"), "Returns a shape of a Sample object.",
-           return_value_policy<reference_existing_object>())
-      .def("setShape", &Sample::setShape, arg("self"), "Set shape of Sample object.")
+      .def("getShape", &Sample::getShapePtr, return_value_policy<return_by_value>(), "Returns the shape of the Sample")
+      .def("setShape", &Sample::setShape, (arg("self"), arg("shape")), "Set shape of Sample object.")
       .def("hasEnvironment", &Sample::hasEnvironment, arg("self"),
            "Returns True if the sample has an environment defined")
       .def("hasShape", &Sample::hasShape, arg("self"), "Returns True if the sample has a shape defined")
@@ -78,5 +81,5 @@ void export_Sample() {
       .def("__getitem__", &Sample::operator[], (arg("self"), arg("index")), return_internal_reference<>())
       .def("__copy__", &Mantid::PythonInterface::generic__copy__<Sample>)
       .def("__deepcopy__", &Mantid::PythonInterface::generic__deepcopy__<Sample>)
-      .def("__eq__", &Sample::operator==, (arg("self"), arg("other")));
+      .def("__eq__", &equals_wrapper, (arg("self"), arg("other")));
 }

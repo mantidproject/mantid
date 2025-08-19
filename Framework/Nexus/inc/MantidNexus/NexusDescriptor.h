@@ -63,7 +63,7 @@ public:
 
   /**
    * Returns a const reference of the internal map holding all entries in the
-   * NeXus HDF5 file
+   * Nexus HDF5 file
    * @return map holding all entries by group class
    * <pre>
    *   key: group_class (e.g. NXentry, NXlog)
@@ -107,7 +107,7 @@ public:
   bool classTypeExists(const std::string &classType) const;
 
   /**
-   * @param name A address within a NeXus file to an entry
+   * @param name A address within a Nexus file to an entry
    * @return The class type associated with that address
    */
   std::string classTypeForName(std::string const &name) const;
@@ -130,7 +130,7 @@ private:
    */
   std::map<std::string, std::set<std::string>> initAllEntries();
 
-  /** NeXus HDF5 file name */
+  /** Nexus HDF5 file name */
   std::string m_filename;
   /// Extension
   std::string m_extension;

@@ -22,14 +22,13 @@
 namespace Mantid {
 namespace Nexus {
 
-/** C++ implementation of NeXus classes.
+/** C++ implementation of Nexus classes.
 
 @author Roman Tolchenov, Tessella plc
 @date 28/05/2009
 */
 
-typedef int64_t nxdimsize_t;
-typedef std::array<nxdimsize_t, 4> NXDimArray;
+typedef std::array<dimsize_t, 4> NXDimArray;
 
 /**
  * Structure for keeping information about a Nexus data set, such as the dimensions and the type
@@ -82,7 +81,7 @@ private:
 class NXClass;
 
 /**
- * The base abstract class for NeXus classes and data sets.
+ * The base abstract class for Nexus classes and data sets.
  * NX classes and data sets are defined at www.nexusformat.org
  */
 class MANTID_NEXUS_DLL NXObject {
@@ -92,7 +91,7 @@ class MANTID_NEXUS_DLL NXObject {
 public:
   // Constructor
   NXObject(File *fileID, NXClass const *parent, std::string const &name);
-  NXObject(std::shared_ptr<File> fileID, NXClass const *parent, std::string const &name);
+  NXObject(std::shared_ptr<File> const &fileID, NXClass const *parent, std::string const &name);
   virtual ~NXObject() = default;
   /// Return the NX class name for a class (HDF group) or "SDS" for a data set;
   virtual std::string NX_class() const = 0;
@@ -138,15 +137,15 @@ public:
   /// Returns the rank (number of dimensions) of the data. The maximum is 4
   std::size_t rank() const { return m_info.rank; }
   /// Returns the number of elements along i-th dimension
-  nxdimsize_t dims(std::size_t i) const { return i < 4 ? m_info.dims[i] : 0; }
+  dimsize_t dims(std::size_t i) const { return i < 4 ? m_info.dims[i] : 0; }
   /// Returns the number of elements along the first dimension
-  nxdimsize_t dim0() const;
+  dimsize_t dim0() const;
   /// Returns the number of elements along the second dimension
-  nxdimsize_t dim1() const;
+  dimsize_t dim1() const;
   /// Returns the number of elements along the third dimension
-  nxdimsize_t dim2() const;
+  dimsize_t dim2() const;
   /// Returns the number of elements along the fourth dimension
-  nxdimsize_t dim3() const;
+  dimsize_t dim3() const;
   /// Returns the name of the data set
   std::string name() const { return m_info.nxname; } // cppcheck-suppress returnByReference
   /// Returns the Nexus type of the data. The types are defined in NexusFile_fwd.h
@@ -177,7 +176,7 @@ protected:
    * size of the array) must be equal to the rank of the data.
    * @throw runtime_error if the operation fails.
    */
-  template <typename NumT> void getSlab(NumT *data, DimSizeVector const &start, DimSizeVector const &size) {
+  template <typename NumT> void getSlab(NumT *data, DimVector const &start, DimVector const &size) {
     m_fileID->openData(name());
     m_fileID->getSlab(data, start, size);
     m_fileID->closeData();
@@ -305,6 +304,44 @@ public:
     }
   }
 
+  void load(dimsize_t const blocksize, dimsize_t const i) {
+    if (rank() > 4) {
+      throw std::runtime_error("Cannot load dataset of rank greater than 4");
+    }
+    dimsize_t n = 0; // cppcheck-suppress variableScope
+    DimVector datastart, datasize;
+    if (rank() == 4) {
+      if (i >= dim0())
+        rangeError();
+      n = dim1() * dim2() * dim3();
+      datastart = {i, 0, 0, 0};
+      datasize = {1, dim1(), dim2(), dim2()};
+    } else if (rank() == 3) {
+      if (i >= dim0())
+        rangeError();
+      n = dim1() * dim2();
+      datastart = {i, 0, 0};
+      datasize = {1, dim1(), dim2()};
+    } else if (rank() == 2) {
+      if (i >= dim0())
+        rangeError();
+      dimsize_t m = blocksize;
+      if (i + m > dim0())
+        m = dim0() - i;
+      n = dim1() * m;
+      datastart = {i, 0};
+      datasize = {m, dim1()};
+    } else if (rank() == 1) {
+      if (i >= dim0())
+        rangeError();
+      n = 1 * blocksize;
+      datastart = {i};
+      datasize = {blocksize};
+    }
+    alloc(n);
+    getSlab(m_data.data(), datastart, datasize);
+  }
+
   /**
    * Implementation of the virtual NXDataSet::load(...) method. Internally the data are stored as a 1d array. If the
    * data are loaded in chunks the newly read in data replace the old ones. The actual rank of the loaded data is equal
@@ -317,89 +354,39 @@ public:
    * @param j :: Non-negative value makes it read a chunk of dimension rank()-2. i and j are its indeces. The rank of
    * the data must be >= 2
    */
-  void load(nxdimsize_t const blocksize, nxdimsize_t const i = -1, nxdimsize_t const j = -1) {
+  void load(dimsize_t const blocksize, dimsize_t const i, dimsize_t const j) {
     if (rank() > 4) {
       throw std::runtime_error("Cannot load dataset of rank greater than 4");
     }
-    nxdimsize_t n = 0, id(i), jd(j); // cppcheck-suppress variableScope
-    DimSizeVector datastart, datasize;
+    dimsize_t n = 0; // cppcheck-suppress variableScope
+    DimVector datastart, datasize;
     if (rank() == 4) {
-      if (i < 0) // load all data
-      {
-        n = dim0() * dim1() * dim2() * dim3();
-        alloc(static_cast<std::size_t>(n));
-        getData(m_data.data());
-        return;
-      } else if (j < 0) {
-        if (id >= dim0())
-          rangeError();
-        n = dim1() * dim2() * dim3();
-        datastart = {i, 0, 0, 0};
-        datasize = {1, dim1(), dim2(), dim2()};
-      } else {
-        if (id >= dim0() || jd >= dim1())
-          rangeError();
-        n = dim2() * dim3();
-        datastart = {i, j, 0, 0};
-        datasize = {1, 1, dim2(), dim2()};
-      }
+      if (i >= dim0() || j >= dim1())
+        rangeError();
+      n = dim2() * dim3();
+      datastart = {i, j, 0, 0};
+      datasize = {1, 1, dim2(), dim2()};
     } else if (rank() == 3) {
-      if (i < 0) {
-        n = dim0() * dim1() * dim2();
-        alloc(static_cast<std::size_t>(n));
-        getData(m_data.data());
-        return;
-      } else if (j < 0) {
-        if (id >= dim0())
-          rangeError();
-        n = dim1() * dim2();
-        datastart = {i, 0, 0};
-        datasize = {1, dim1(), dim2()};
-      } else {
-        if (id >= dim0() || jd >= dim1())
-          rangeError();
-        nxdimsize_t m = blocksize;
-        if (jd + m > dim1())
-          m = dim1() - jd;
-        n = dim2() * m;
-        datastart = {i, j, 0};
-        datasize = {1, m, dim2()};
-      }
+      if (i >= dim0() || j >= dim1())
+        rangeError();
+      dimsize_t m = blocksize;
+      if (j + m > dim1())
+        m = dim1() - j;
+      n = dim2() * m;
+      datastart = {i, j, 0};
+      datasize = {1, m, dim2()};
     } else if (rank() == 2) {
-      if (i < 0) {
-        n = dim0() * dim1();
-        alloc(static_cast<std::size_t>(n));
-        getData(m_data.data());
-        return;
-      } else if (j < 0) {
-        if (id >= dim0())
-          rangeError();
-        nxdimsize_t m = blocksize;
-        if (id + m > dim0())
-          m = dim0() - id;
-        n = dim1() * m;
-        datastart = {i, 0};
-        datasize = {m, dim1()};
-      } else {
-        if (id >= dim0() || jd >= dim1())
-          rangeError();
-        n = 1;
-        datastart = {i, j};
-        datasize = {1, 1};
-      }
+      if (i >= dim0() || j >= dim1())
+        rangeError();
+      n = 1;
+      datastart = {i, j};
+      datasize = {1, 1};
     } else if (rank() == 1) {
-      if (i < 0) {
-        n = dim0();
-        alloc(static_cast<std::size_t>(n));
-        getData(m_data.data());
-        return;
-      } else {
-        if (id >= dim0())
-          rangeError();
-        n = 1 * blocksize;
-        datastart = {i};
-        datasize = {blocksize};
-      }
+      if (i >= dim0())
+        rangeError();
+      n = 1 * blocksize;
+      datastart = {i};
+      datasize = {blocksize};
     }
     alloc(n);
     getSlab(m_data.data(), datastart, datasize);
@@ -411,14 +398,14 @@ private:
    *
    * @param new_size :: The number of elements to allocate.
    */
-  void alloc(nxdimsize_t new_size) {
-    if (new_size <= 0) {
+  void alloc(dimsize_t new_size) {
+    if (new_size == 0) {
       throw std::runtime_error("Attempt to load from an empty dataset " + address());
     }
     try {
-      if (new_size != static_cast<nxdimsize_t>(m_size)) {
+      if (new_size != m_size) {
         m_data.resize(new_size);
-        m_size = static_cast<size_t>(new_size);
+        m_size = new_size;
       }
     } catch (...) {
       std::ostringstream ostr;
@@ -451,12 +438,12 @@ using NXChar = NXDataSetTyped<char>;
 //-------------------- classes --------------------------//
 
 /**
- * The base class for a Nexus class (group). A Nexus class can contain datasets and other Nexus classes. The NeXus file
+ * The base class for a Nexus class (group). A Nexus class can contain datasets and other Nexus classes. The Nexus file
  * format (www.nexusformat.org) specifies the content of the Nexus classes.
  *
  * Derived classes have specialized methods for creating classes and datasets specific for the particular Nexus class.
  * NXClass is a conctrete C++ class so arbitrary, non-standard Nexus classes (groups) can be created and loaded from
- * NeXus files.
+ * Nexus files.
  */
 class MANTID_NEXUS_DLL NXClass : public NXObject {
   friend class NXRoot;

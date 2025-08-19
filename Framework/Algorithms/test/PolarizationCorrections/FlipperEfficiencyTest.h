@@ -11,6 +11,7 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/PolSANSWorkspaceValidator.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAlgorithms/ConvertUnits.h"
 #include "MantidAlgorithms/CreateSampleWorkspace.h"
@@ -89,6 +90,16 @@ public:
 
   /// Validation Tests
 
+  void test_input_workspace_has_correct_validator() {
+    auto alg = std::make_unique<FlipperEfficiency>();
+    alg->initialize();
+    auto prop = dynamic_cast<Mantid::API::WorkspaceProperty<Mantid::API::WorkspaceGroup> *>(
+        alg->getPointerToProperty("InputWorkspace"));
+    TS_ASSERT(prop);
+    auto validator = std::dynamic_pointer_cast<Mantid::API::PolSANSWorkspaceValidator>(prop->getValidator());
+    TS_ASSERT(validator);
+  }
+
   void test_no_workspaces_or_file_output_fails() {
     auto const &group = createTestingWorkspace("testWs");
     auto alg = initialize_alg(group, false);
@@ -96,38 +107,6 @@ public:
         alg->execute(), std::runtime_error const &e, std::string(e.what()),
         "Some invalid Properties found: \n OutputFilePath: Either an output workspace or output file must be "
         "provided.\n OutputWorkspace: Either an output workspace or output file must be provided.")
-  }
-
-  void test_invalid_group_size_is_captured() {
-    auto const &group = createTestingWorkspace("testWs");
-    group->removeItem(0);
-    auto alg = initialize_alg(group);
-    TS_ASSERT_THROWS_EQUALS(alg->execute(), std::runtime_error const &e, std::string(e.what()),
-                            "Some invalid Properties found: \n InputWorkspace: The input group must contain a "
-                            "workspace for all four spin states.")
-  }
-
-  void test_non_wavelength_workspace_is_captured() {
-    auto const &group = createTestingWorkspace("testWs", 1.0, true);
-    auto alg = initialize_alg(group);
-    TS_ASSERT_THROWS_EQUALS(
-        alg->execute(), std::runtime_error const &e, std::string(e.what()),
-        "Some invalid Properties found: \n InputWorkspace: All input workspaces must be in units of Wavelength.")
-  }
-
-  void test_non_group_workspace_is_captured() {
-    auto const &group = createTestingWorkspace("testWs", 1.0);
-    auto alg = initialize_alg(group);
-    TS_ASSERT_THROWS_EQUALS(alg->setProperty("InputWorkspace", group->getItem(0)), std::invalid_argument const &e,
-                            std::string(e.what()), "Enter a name for the Input/InOut workspace")
-  }
-
-  void test_invalid_workspace_length_is_captured() {
-    auto const &group = createTestingWorkspace("testWs", 1.0, false, 2);
-    auto alg = initialize_alg(group);
-    TS_ASSERT_THROWS_EQUALS(
-        alg->execute(), std::runtime_error const &e, std::string(e.what()),
-        "Some invalid Properties found: \n InputWorkspace: All input workspaces must contain only a single spectrum.")
   }
 
   /// Calculation Tests

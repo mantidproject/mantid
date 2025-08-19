@@ -156,7 +156,7 @@ void SaveMD2::doSaveHisto(const Mantid::DataObjects::MDHistoWorkspace_sptr &ws) 
     size[numDims - 1 - d] = int(dim->getNBins());
   }
 
-  Nexus::DimSizeVector chunks = size;
+  Nexus::DimVector chunks = size;
   chunks[0] = 1; // Drop the largest stride for chunking, I don't know
                  // if this is the best but appears to work
 

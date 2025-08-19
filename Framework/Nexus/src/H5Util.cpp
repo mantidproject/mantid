@@ -18,7 +18,7 @@
 
 using namespace H5;
 
-namespace Mantid::NeXus::H5Util {
+namespace Mantid::Nexus::H5Util {
 
 namespace {
 /// static logger object. Use Poco directly instead of Kernel::Logger so we don't need to import from Kernel
@@ -119,6 +119,24 @@ H5::FileAccPropList defaultFileAcc() {
   H5::FileAccPropList access_plist;
   access_plist.setFcloseDegree(H5F_CLOSE_STRONG);
   return access_plist;
+}
+
+bool isHdf5(std::string const &filename) {
+  // Calls C routine H5Fis_accessible to determine whether the file is in
+  // HDF5 format.  It returns positive value, 0, or negative value
+  // Copies the function in H5Cpp, but using the correct access level
+  hid_t plist = H5Pcopy(H5Util::defaultFileAcc().getId());
+  htri_t ret_value = H5Fis_accessible(filename.c_str(), plist);
+  H5Pclose(plist);
+
+  if (ret_value > 0)
+    return true;
+  else if (ret_value == 0)
+    return false;
+  else // Raise exception when H5Fis_accessible returns a negative value
+  {
+    throw H5::FileIException("H5File::isHdf5", "H5Fis_accessible returned negative value");
+  }
 }
 
 DataSpace getDataSpace(const size_t length) {
@@ -701,4 +719,4 @@ template MANTID_NEXUS_DLL void readArray1DCoerce(const DataSet &dataset, std::ve
                                                  const size_t length, const size_t offset);
 template MANTID_NEXUS_DLL void readArray1DCoerce(const DataSet &dataset, std::vector<char> &output, const size_t length,
                                                  const size_t offset);
-} // namespace Mantid::NeXus::H5Util
+} // namespace Mantid::Nexus::H5Util

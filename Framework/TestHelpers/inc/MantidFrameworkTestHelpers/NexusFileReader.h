@@ -78,7 +78,7 @@ public:
     if (!std::filesystem::exists(tmp)) {
       throw std::invalid_argument("no such file.\n");
     } else {
-      m_file.openFile(fullPath, H5F_ACC_RDONLY, NeXus::H5Util::defaultFileAcc());
+      m_file.openFile(fullPath, H5F_ACC_RDONLY, Nexus::H5Util::defaultFileAcc());
       m_open = true;
     }
   }

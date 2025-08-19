@@ -10,7 +10,7 @@
 #include <utility>
 #include <vector>
 
-/** NeXus HDF45
+/** Nexus HDF45
  * major.minor.patch
  */
 #define NEXUS_VERSION "4.4.3"
@@ -25,7 +25,7 @@ class H5Object;
 } // namespace H5
 
 /**
- * \file NexusFile.h Definition of the NeXus C++ API.
+ * \file NexusFile.h Definition of the Nexus C++ API.
  * \defgroup cpp_types C++ Types
  * \defgroup cpp_core C++ Core
  * \ingroup cpp_main
@@ -47,8 +47,10 @@ private:
   hid_t m_fid;
   // There is no reason to copy or assign a file ID
   FileID(FileID const &f) = delete;
+  FileID(FileID const &&f) = delete;
   FileID &operator=(hid_t const) = delete;
   FileID &operator=(FileID const &) = delete;
+  FileID &operator=(FileID const &&) = delete;
 
 public:
   bool operator==(int const v) const { return static_cast<int>(m_fid) == v; }
@@ -105,7 +107,7 @@ public:
    * \param filename The name of the file to open.
    * \param access How to access the file.
    */
-  File(std::string const &filename, NXaccess const access = NXaccess::READ);
+  File(std::string const &filename, NXaccess const access = NXaccess::READ) : File(filename.c_str(), access) {}
 
   /**
    * Create a new File.
@@ -166,7 +168,7 @@ public:
   // ADDRESS GET / OPEN
 
   /**
-   * Open the NeXus object with the address specified.
+   * Open the Nexus object with the address specified.
    *
    * \param address A unix like address string to a group or field. The address
    * string is a list of group names and SDS names separated with a slash,
@@ -175,7 +177,7 @@ public:
   void openAddress(std::string const &address);
 
   /**
-   * Open the group in which the NeXus object with the specified address exists.
+   * Open the group in which the Nexus object with the specified address exists.
    *
    * \param address A unix like address string to a group or field. The address
    * string is a list of group names and SDS names separated with a slash,
@@ -264,7 +266,7 @@ public:
    * Create a data field with the specified information.
    *
    * \param name The name of the field to create (i.e. "distance").
-   * \param type The primative type of the field (i.e. "NeXus::FLOAT32").
+   * \param type The primative type of the field (i.e. "Nexus::FLOAT32").
    * \param dims The dimensions of the field.
    * \param open_data Whether or not to open the data after creating it.
    */
@@ -274,7 +276,7 @@ public:
    * Create a data field with the specified information.
    *
    * \param name The name of the field to create (i.e. "distance").
-   * \param type The primative type of the field (i.e. "NeXus::FLOAT32").
+   * \param type The primative type of the field (i.e. "Nexus::FLOAT32").
    * \param length For 1D data, the length of the 1D array
    * \param open_data Whether or not to open the data after creating it.
    */
@@ -340,7 +342,7 @@ public:
    * \param open_data Whether or not to open the data after creating it.
    */
   void makeCompData(std::string const &name, NXnumtype const type, DimVector const &dims, NXcompression comp,
-                    DimSizeVector const &bufsize, bool open_data = false);
+                    DimVector const &bufsize, bool open_data = false);
 
   /**
    * Insert an array as part of a data in the final file.
@@ -349,7 +351,7 @@ public:
    * \param start The starting index to insert the data.
    * \param size The size of the array to put in the file.
    */
-  template <typename NumT> void putSlab(NumT const *data, DimSizeVector const &start, DimSizeVector const &size);
+  template <typename NumT> void putSlab(NumT const *data, DimVector const &start, DimVector const &size);
 
   /**
    * Insert an array as part of a data in the final file.
@@ -359,8 +361,7 @@ public:
    * \param size The size of the array to put in the file.
    * \tparam NumT numeric data type of \a data
    */
-  template <typename NumT>
-  void putSlab(std::vector<NumT> const &data, DimSizeVector const &start, DimSizeVector const &size);
+  template <typename NumT> void putSlab(std::vector<NumT> const &data, DimVector const &start, DimVector const &size);
 
   /**
    * Insert a number as part of a data in the final file.
@@ -380,7 +381,7 @@ public:
    * from.
    * \param size The size of the block to read from the file.
    */
-  template <typename NumT> void getSlab(NumT *data, DimSizeVector const &start, DimSizeVector const &size);
+  template <typename NumT> void getSlab(NumT *data, DimVector const &start, DimVector const &size);
 
   /** Get data and coerce into an int vector.
    *
@@ -474,7 +475,7 @@ public:
    */
   template <typename NumT>
   void writeExtendibleData(std::string const &name, std::vector<NumT> const &value, DimVector const &dims,
-                           DimSizeVector const &chunk);
+                           DimVector const &chunk);
 
   /** Updates the data written into an already-created
    * data vector. If the data was created as extendible, it will be resized.
@@ -508,7 +509,7 @@ public:
    */
   template <typename NumT>
   void writeCompData(std::string const &name, std::vector<NumT> const &value, DimVector const &dims,
-                     NXcompression const comp, DimSizeVector const &bufsize);
+                     NXcompression const comp, DimVector const &bufsize);
 
   /*----------------------------------------------------------------------*/
 

@@ -78,7 +78,7 @@ std::stack<EventROI> NexusLoader::getEventIndexRanges(H5::Group &event_group, co
 
 void NexusLoader::loadEventIndex(H5::Group &event_group, std::unique_ptr<std::vector<uint64_t>> &data) {
   auto index_SDS = event_group.openDataSet(NxsFieldNames::INDEX_ID);
-  NeXus::H5Util::readArray1DCoerce(index_SDS, *data);
+  Nexus::H5Util::readArray1DCoerce(index_SDS, *data);
 }
 
 // explict instantiation for uint32_t and float

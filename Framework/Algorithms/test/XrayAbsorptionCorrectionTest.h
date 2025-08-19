@@ -128,12 +128,10 @@ private:
 
     auto shape = ComponentCreationHelper::createSphere(1.0, {0.0, 0.0, 0.0}, "sample-shape");
 
-    inputWS->mutableSample().setShape(shape);
     if (hasXrayAttenuationProfile) {
-      auto shapeWithMaterial =
-          std::shared_ptr<Geometry::IObject>(inputWS->sample().getShape().cloneWithMaterial(sampleMaterial));
-      inputWS->mutableSample().setShape(shapeWithMaterial);
+      shape->setMaterial(sampleMaterial);
     }
+    inputWS->mutableSample().setShape(shape);
     return inputWS;
   }
 

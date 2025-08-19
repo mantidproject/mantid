@@ -27,7 +27,7 @@ std::vector<std::string> NXAttributes::names() const {
   std::vector<std::string> out;
   out.reserve(m_values.size());
   std::transform(m_values.cbegin(), m_values.cend(), std::back_inserter(out),
-                 [](const auto &value) { return value.first; });
+                 [](auto const &value) -> std::string { return value.first; });
   return out;
 }
 
@@ -35,14 +35,13 @@ std::vector<std::string> NXAttributes::values() const {
   std::vector<std::string> out;
   out.reserve(m_values.size());
   std::transform(m_values.cbegin(), m_values.cend(), std::back_inserter(out),
-                 [](const auto &value) { return value.second; });
+                 [](auto const &value) -> std::string { return value.second; });
   return out;
 }
 
 /**  Returns the value of an attribute
  *   @param name :: The name of the attribute
- *   @return The value of the attribute if it exists or an empty string
- * otherwise
+ *   @return The value of the attribute if it exists or an empty string otherwise
  */
 std::string NXAttributes::operator()(const std::string &name) const {
   auto it = m_values.find(name);
@@ -91,7 +90,7 @@ NXObject::NXObject(File *fileID, NXClass const *parent, const std::string &name)
  * containing the object.
  *   @param name :: The name of the object relative to its parent
  */
-NXObject::NXObject(std::shared_ptr<File> fileID, NXClass const *parent, const std::string &name)
+NXObject::NXObject(std::shared_ptr<File> const &fileID, NXClass const *parent, const std::string &name)
     : m_fileID(fileID), m_open(false) {
   if (parent && !name.empty()) {
     m_address = parent->address() / name;
@@ -263,7 +262,7 @@ bool NXClass::containsDataSet(const std::string &query) const { return getDataSe
  *   @param fname :: The file name to open
  */
 NXRoot::NXRoot(std::string fname) : m_filename(std::move(fname)) {
-  // Open NeXus file
+  // Open Nexus file
   try {
     m_fileID = std::make_shared<File>(m_filename, NXaccess::READ);
   } catch (Exception const &e) {
@@ -280,11 +279,17 @@ NXRoot::NXRoot(std::string fname) : m_filename(std::move(fname)) {
  */
 NXRoot::NXRoot(std::string fname, const std::string &entry) : m_filename(std::move(fname)) {
   UNUSED_ARG(entry);
-  // Open NeXus file
+  // Open Nexus file
   m_fileID = std::make_shared<File>(m_filename, NXaccess::CREATE5);
 }
 
-NXRoot::~NXRoot() { m_fileID->close(); }
+NXRoot::~NXRoot() {
+  try {
+    m_fileID->close();
+  } catch (...) {
+    // do nothing
+  }
+}
 
 bool NXRoot::isStandard() const { return true; }
 
@@ -293,14 +298,14 @@ bool NXRoot::isStandard() const { return true; }
  */
 NXEntry NXRoot::openFirstEntry() {
   if (groups().empty()) {
-    throw std::runtime_error("NeXus file has no entries");
+    throw std::runtime_error("Nexus file has no entries");
   }
   const auto it =
       std::find_if(groups().cbegin(), groups().cend(), [](const auto &group) { return group.nxclass == "NXentry"; });
   if (it != groups().cend()) {
     return openEntry(it->nxname);
   }
-  throw std::runtime_error("NeXus file has no entries");
+  throw std::runtime_error("Nexus file has no entries");
 }
 
 //---------------------------------------------------------
@@ -346,11 +351,11 @@ void NXDataSet::openLocal() {
  * @returns An integer indicating the size of the dimension.
  * @throws out_of_range error if requested on an object of rank 0
  */
-nxdimsize_t NXDataSet::dim0() const {
+dimsize_t NXDataSet::dim0() const {
   if (m_info.rank == 0UL) {
     throw std::out_of_range("NXDataSet::dim0() - Requested dimension greater than rank.");
   }
-  return static_cast<int>(m_info.dims[0]);
+  return m_info.dims[0];
 }
 
 /**
@@ -358,11 +363,11 @@ nxdimsize_t NXDataSet::dim0() const {
  * @returns An integer indicating the size of the dimension
  * @throws out_of_range error if requested on an object of rank < 2
  */
-nxdimsize_t NXDataSet::dim1() const {
+dimsize_t NXDataSet::dim1() const {
   if (m_info.rank < 2) {
     throw std::out_of_range("NXDataSet::dim1() - Requested dimension greater than rank.");
   }
-  return static_cast<int>(m_info.dims[1]);
+  return m_info.dims[1];
 }
 
 /**
@@ -370,11 +375,11 @@ nxdimsize_t NXDataSet::dim1() const {
  * @returns An integer indicating the size of the dimension
  * @throws out_of_range error if requested on an object of rank < 3
  */
-nxdimsize_t NXDataSet::dim2() const {
+dimsize_t NXDataSet::dim2() const {
   if (m_info.rank < 3) {
     throw std::out_of_range("NXDataSet::dim2() - Requested dimension greater than rank.");
   }
-  return static_cast<int>(m_info.dims[2]);
+  return m_info.dims[2];
 }
 
 /**
@@ -382,11 +387,11 @@ nxdimsize_t NXDataSet::dim2() const {
  * @returns An integer indicating the size of the dimension
  * @throws out_of_range error if requested on an object of rank < 4
  */
-nxdimsize_t NXDataSet::dim3() const {
+dimsize_t NXDataSet::dim3() const {
   if (m_info.rank < 4) {
     throw std::out_of_range("NXDataSet::dim3() - Requested dimension greater than rank.");
   }
-  return static_cast<int>(m_info.dims[3]);
+  return m_info.dims[3];
 }
 
 //---------------------------------------------------------

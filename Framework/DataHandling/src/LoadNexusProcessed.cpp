@@ -505,6 +505,7 @@ void LoadNexusProcessed::execLoader() {
     }
 
     root.close();
+    m_nexusFile->close();
   }
 
   // All file resources should be scoped to here. All previous file handles
@@ -749,8 +750,8 @@ API::MatrixWorkspace_sptr LoadNexusProcessed::loadEventEntry(NXData &wksp_cls, N
       else {
         MantidVec x(xbins.dim1());
 
-        for (int i = 0; i < xbins.dim1(); i++)
-          x[i] = xbins(static_cast<int>(wi), i);
+        for (std::size_t i = 0; i < xbins.dim1(); i++)
+          x[i] = xbins(wi, i);
 
         // for ragged workspace we need to remove all NaN value from end of vector
         const auto idx =
@@ -846,12 +847,12 @@ API::Workspace_sptr LoadNexusProcessed::loadTableEntry(const NXEntry &entry) {
         std::string columnTitle = data.attributes("name");
         if (!columnTitle.empty()) {
           workspace->addColumn("str", columnTitle);
-          nxdimsize_t nRows = info.dims[0];
+          dimsize_t nRows = info.dims[0];
           workspace->setRowCount(nRows);
 
-          nxdimsize_t const maxStr = info.dims[1];
+          dimsize_t const maxStr = info.dims[1];
           data.load();
-          for (int64_t iR = 0; iR < nRows; ++iR) {
+          for (dimsize_t iR = 0; iR < nRows; ++iR) {
             auto &cellContents = workspace->cell<std::string>(iR, columnNumber - 1);
             auto startPoint = data() + maxStr * iR;
             cellContents.assign(startPoint, startPoint + maxStr);
@@ -1174,7 +1175,7 @@ API::Workspace_sptr LoadNexusProcessed::loadLeanElasticPeaksEntry(const NXEntry 
       NXInfo info = nx_tw.getDataSetInfo(str);
       NXChar data = nx_tw.openNXChar(str);
 
-      nxdimsize_t const maxShapeJSONLength = info.dims[1];
+      dimsize_t const maxShapeJSONLength = info.dims[1];
       data.load();
       for (size_t i = 0; i < numberPeaks; ++i) {
 
@@ -1466,7 +1467,7 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(const NXEntry &entry) {
       NXInfo info = nx_tw.getDataSetInfo(str);
       NXChar data = nx_tw.openNXChar(str);
 
-      nxdimsize_t const maxShapeJSONLength = info.dims[1];
+      dimsize_t const maxShapeJSONLength = info.dims[1];
       data.load();
       for (size_t i = 0; i < numberPeaks; ++i) {
 
@@ -1532,7 +1533,7 @@ API::MatrixWorkspace_sptr LoadNexusProcessed::loadNonEventEntry(NXData &wksp_cls
                                                                 const int64_t xlength, std::string &workspaceType) {
   // Filter the list of spectra to process, applying min/max/list options
   NXDouble data = wksp_cls.openDoubleData();
-  int64_t nchannels = data.dim1();
+  dimsize_t nchannels = data.dim1();
   size_t nspectra = data.dim0();
   // process optional spectrum parameters, if set
   checkOptionalProperties(nspectra);

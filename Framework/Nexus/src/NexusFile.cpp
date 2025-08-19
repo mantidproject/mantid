@@ -5,6 +5,7 @@
 #include "MantidNexus/NexusFile.h"
 #include "MantidNexus/hdf5_type_helper.h"
 #include "MantidNexus/inverted_napi.h"
+#include "MantidTypes/Core/DateAndTime.h"
 #include <H5Cpp.h>
 #include <Poco/Logger.h>
 #include <algorithm>
@@ -41,16 +42,16 @@ const auto g_log = &Poco::Logger::get("NexusFile");
 
 /**
  * \file NexusFile.cpp
- * The implementation of the NeXus C++ API
+ * The implementation of the Nexus C++ API
  */
 
 namespace { // anonymous namespace to keep it in the file
 
-std::string const group_class_spec("NX_class");
-std::string const target_attr_name("target");
-std::string const scientific_data_set("SDS");
-std::string const unknown_group_spec("NX_UNKNOWN_GROUP");
-constexpr int default_deflate_level(6);
+std::string const GROUP_CLASS_SPEC("NX_class");
+std::string const TARGET_ATTR_NAME("target");
+std::string const SCIENTIFIC_DATA_SET("SDS");
+std::string const UNKNOWN_GROUP_SPEC("NX_UNKNOWN_GROUP");
+constexpr int DEFAULT_DEFLATE_LEVEL(6);
 
 template <typename NumT> static string toString(const vector<NumT> &data) {
   stringstream result;
@@ -119,8 +120,6 @@ namespace Mantid::Nexus {
 
 // new constructors
 
-File::File(const string &filename, const NXaccess access) : File(filename.c_str(), access) {}
-
 File::File(const char *filename, const NXaccess access)
     : m_filename(filename), m_access(access), m_address(), m_current_group_id(0), m_current_data_id(0),
       m_current_type_id(0), m_current_space_id(0), m_gid_stack{0}, m_descriptor(m_filename, m_access) {
@@ -142,11 +141,11 @@ void File::initOpenFile(std::string const &filename, NXaccess const am) {
   std::string version_str =
       std::to_string(vers_major) + "." + std::to_string(vers_minor) + "." + std::to_string(vers_release);
   // turn off the automatic HDF error handling
-  H5Eset_auto(H5E_DEFAULT, NULL, NULL);
+  H5Eset_auto(H5E_DEFAULT, nullptr, nullptr);
 
   // create file acccess property list
   hid_t fapl = -1;
-  fapl = H5Pcopy(Mantid::NeXus::H5Util::defaultFileAcc().getId());
+  fapl = H5Pcopy(H5Util::defaultFileAcc().getId());
 
   hid_t temp_fid(-1);
   if (am != NXaccess::CREATE5) {
@@ -179,10 +178,10 @@ void File::initOpenFile(std::string const &filename, NXaccess const am) {
     std::vector<Entry> attrs{{"NeXus_version", NEXUS_VERSION},
                              {"file_name", filename},
                              {"HDF5_Version", version_str},
-                             {"file_time", NXIformatNeXusTime()},
-                             {group_class_spec, "NXroot"}};
+                             {"file_time", Mantid::Types::Core::DateAndTime::getLocalTimeISO8601String()},
+                             {GROUP_CLASS_SPEC, "NXroot"}};
     for (auto const &attr : attrs) {
-      Mantid::NeXus::H5Util::writeStrAttribute(root, attr.first, attr.second);
+      H5Util::writeStrAttribute(root, attr.first, attr.second);
     }
     root.close();
     H5Gflush(root_id);
@@ -205,8 +204,10 @@ void File::initOpenFile(std::string const &filename, NXaccess const am) {
 File::File(File const &f)
     : m_filename(f.m_filename), m_access(f.m_access), m_address(), m_pfile(f.m_pfile), m_current_group_id(0),
       m_current_data_id(0), m_current_type_id(0), m_current_space_id(0), m_gid_stack{0}, m_descriptor(f.m_descriptor) {
-  if (m_pfile <= 0)
-    throw Mantid::Nexus::Exception("Error reopening file");
+  // NOTE warning to future devs
+  // if you change this method, please run the systemtest VanadiumAndFocusWithSolidAngleTest
+  if (m_pfile->getId() <= 0)
+    throw NXEXCEPTION("Error reopening file");
 }
 
 // deconstructor
@@ -234,19 +235,18 @@ File::~File() {
     gid = 0;
   }
   m_gid_stack.clear();
+  // NOTE warning to future devs
+  // if you change this part of method, please run the systemtest VanadiumAndFocusWithSolidAngleTest
   // decrease reference counts to this file
-  m_pfile.reset();
+  close();
   H5garbage_collect();
 }
 
 void File::close() {
-  /* close the file handle */
+  // NOTE warning to future devs
+  // if you change this method, please run the systemtest VanadiumAndFocusWithSolidAngleTest
   if (m_pfile != nullptr) {
-    if (m_pfile.use_count() > 1) {
-      g_log->warning("WARNING: closing file " + m_filename + " which still has open references.");
-    }
-    H5Fclose(m_pfile->getId());
-    H5garbage_collect();
+    // decrease reference counts to this file
     m_pfile.reset();
   }
 }
@@ -267,17 +267,16 @@ void File::openAddress(std::string const &address) {
   if (address.empty()) {
     throw NXEXCEPTION("Supplied empty address");
   }
-  // NOTE to support pre-existing behavior, do NOT check if the address exists first
-  // it must open as many path elements as it can until failing
-  // TODO is this behavior relied on anywhere but the tests?
-  // if (!hasAddress(absaddr)) {
-  //   throw NXEXCEPTION("Address " + address + " is not valid");
-  // }
 
   // if we are already there, do nothing
   NexusAddress absaddr(formAbsoluteAddress(address));
   if (absaddr == m_address) {
     return;
+  }
+
+  // confirm the address exists before trying to open
+  if (!hasAddress(absaddr)) {
+    throw NXEXCEPTION("Address " + address + " is not valid");
   }
 
   // if a dataset is open, close it
@@ -322,8 +321,7 @@ void File::openAddress(std::string const &address) {
         m_current_group_id = gid;
         m_address = fromroot;
       } else {
-        // failure, but return with the file in this state
-        return;
+        throw NXEXCEPTION("Failed to open " + name + " while opening " + absaddr);
       }
     }
   }
@@ -377,7 +375,7 @@ bool File::hasGroup(std::string const &name, std::string const &class_type) cons
 
 bool File::hasData(std::string const &name) const {
   std::string const address = formAbsoluteAddress(name);
-  return m_descriptor.isEntry(address, scientific_data_set);
+  return m_descriptor.isEntry(address, SCIENTIFIC_DATA_SET);
 }
 
 bool File::isDataSetOpen() const {
@@ -389,13 +387,10 @@ bool File::isDataSetOpen() const {
 }
 
 bool File::isDataInt() const {
-  if (m_current_data_id == 0) {
+  if (m_current_type_id == 0) {
     throw NXEXCEPTION("No dataset is open");
   }
-  hid_t datatype = H5Dget_type(m_current_data_id);
-  H5T_class_t dataclass = H5Tget_class(datatype);
-  H5Tclose(datatype);
-  return dataclass == H5T_INTEGER;
+  return H5Tget_class(m_current_type_id) == H5T_INTEGER;
 }
 
 NexusAddress File::formAbsoluteAddress(NexusAddress const &name) const {
@@ -456,12 +451,19 @@ void File::makeGroup(const std::string &name, const std::string &nxclass, bool o
   NexusAddress const absaddr(formAbsoluteAddress(name));
   // create group with H5Util by getting an H5File object from iFID
   H5::H5File h5file(m_pfile->getId());
-  Mantid::NeXus::H5Util::createGroupNXS(h5file, absaddr, nxclass);
+  H5::Group grp = H5Util::createGroupNXS(h5file, absaddr, nxclass);
 
   // cleanup
   registerEntry(absaddr, nxclass);
   if (open_group) {
-    this->openGroup(name, nxclass);
+    // grp will close when it goes out of scope -- open new copy
+    m_current_group_id = H5Gopen(grp.getId(), ".", H5P_DEFAULT);
+    m_gid_stack.push_back(m_current_group_id);
+    m_address = absaddr;
+    // if we are opening a new group, close whatever dataset is already open
+    if (m_current_data_id != 0) {
+      closeData();
+    }
   }
 }
 
@@ -521,12 +523,12 @@ void File::closeGroup() {
     } else {
       m_current_group_id = 0;
     }
+    m_address = m_address.parent_path();
   }
-  m_address = m_address.parent_path();
 }
 
 //------------------------------------------------------------------------------------------------------------------
-// DATA MAKE / OPEN / PUT / GET / CLOSE
+// DATA MAKE / OPEN / CLOSE / PUT / GET
 //------------------------------------------------------------------------------------------------------------------
 
 void File::makeData(const string &name, NXnumtype const type, DimVector const &dims, bool const open_data) {
@@ -537,7 +539,7 @@ void File::makeData(const string &name, NXnumtype const type, DimVector const &d
   if (dims.empty()) {
     throw NXEXCEPTION("Supplied empty dimensions");
   }
-  DimSizeVector chunk_size(dims.size());
+  DimVector chunk_size(dims.size());
   for (std::size_t i = 0; i < dims.size(); i++) {
     chunk_size[i] = (dims[i] == NX_UNLIMITED || dims[i] <= 0 ? 1 : dims[i]);
   }
@@ -567,20 +569,20 @@ void File::openData(std::string const &name) {
   hid_t newData, newType, newSpace;
   newData = H5Dopen(m_pfile->getId(), absaddr.c_str(), H5P_DEFAULT);
   if (newData < 0) {
-    throw NXEXCEPTION("dataset (" + absaddr + ") not found at this level");
+    throw NXEXCEPTION("Dataset (" + absaddr + ") not found at this level");
   }
   /* find the ID number of datatype */
   newType = H5Dget_type(newData);
   if (newType < 0) {
     H5Dclose(newData);
-    throw NXEXCEPTION("error opening dataset (" + absaddr + ")");
+    throw NXEXCEPTION("Error opening dataset (" + absaddr + ")");
   }
   /* find the ID number of dataspace */
   newSpace = H5Dget_space(newData);
   if (newSpace < 0) {
     H5Dclose(newData);
     H5Tclose(newType);
-    throw NXEXCEPTION("error opening dataset (" + absaddr + ")");
+    throw NXEXCEPTION("Error opening dataset (" + absaddr + ")");
   }
   // now maintain stack
   m_current_data_id = newData;
@@ -589,43 +591,74 @@ void File::openData(std::string const &name) {
   m_address = absaddr;
 }
 
+void File::closeData() {
+  herr_t iRet = 0;
+  if (m_current_space_id != 0) {
+    iRet = H5Sclose(m_current_space_id);
+    if (iRet < 0) {
+      throw NXEXCEPTION("Cannot end access to dataset: failed to close dataspace");
+    }
+  }
+  if (m_current_type_id != 0) {
+    iRet = H5Tclose(m_current_type_id);
+    if (iRet < 0) {
+      throw NXEXCEPTION("Cannot end access to dataset: failed to close datatype");
+    }
+  }
+  if (m_current_data_id != 0) {
+    iRet = H5Dclose(m_current_data_id);
+    if (iRet < 0) {
+      throw NXEXCEPTION("Cannot end access to dataset: failed to close dataset");
+    }
+  } else {
+    throw NXEXCEPTION("Cannot end access to dataset: no data open");
+  }
+  m_current_data_id = 0;
+  m_current_space_id = 0;
+  m_current_type_id = 0;
+  m_address = m_address.parent_path();
+}
+
+// PUT DATA
+
 template <typename NumT> void File::putData(NumT const *data) {
-  if (data == NULL) {
+  if (data == nullptr) {
     throw NXEXCEPTION("Data specified as null");
   }
-  herr_t iRet;
-  std::array<hsize_t, H5S_MAX_RANK> thedims{0}, maxdims{0};
-  int rank;
 
-  rank = H5Sget_simple_extent_ndims(m_current_space_id);
+  // get rank for proper size of dimension vectors
+  int rank = H5Sget_simple_extent_ndims(m_current_space_id);
   if (rank < 0) {
     throw NXEXCEPTION("Cannot determine dataset rank");
-  }
-  iRet = H5Sget_simple_extent_dims(m_current_space_id, thedims.data(), maxdims.data());
-  if (iRet < 0) {
-    throw NXEXCEPTION("Cannot determine dataset dimensions");
-  }
-  bool unlimiteddim = std::any_of(maxdims.cbegin(), maxdims.cend(), [](auto x) -> bool { return x == H5S_UNLIMITED; });
-  /* If we are using putdata on an unlimied dimension dataset, assume we want to append one single new slab */
-  if (unlimiteddim) {
-    std::array<int64_t, H5S_MAX_RANK> myStart{0}, mySize{0};
-    for (std::size_t i = 0; i < myStart.size(); i++) {
-      if (maxdims[i] == H5S_UNLIMITED) {
-        myStart[i] = static_cast<int64_t>(thedims[i] + 1);
-        mySize[i] = 1;
-      } else {
-        myStart[i] = 0;
-        mySize[i] = static_cast<int64_t>(thedims[i]);
-      }
-    }
-    DimSizeVector vecStart(myStart.begin(), myStart.end());
-    DimSizeVector vecSize(mySize.begin(), mySize.end());
-
-    return putSlab(data, vecStart, vecSize);
-  } else {
-    iRet = H5Dwrite(m_current_data_id, m_current_type_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
+  } else if (rank == 0) { // scalars have no extent, so cannot be unlimited
+    herr_t iRet = H5Dwrite(m_current_data_id, m_current_type_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
     if (iRet < 0) {
-      throw NXEXCEPTION("failure to write data");
+      throw NXEXCEPTION("Failure to write data");
+    }
+  } else { // check for unlimited marker in any of the data
+    DimVector thedims(rank, 0), maxdims(rank, 0);
+    herr_t iRet = H5Sget_simple_extent_dims(m_current_space_id, thedims.data(), maxdims.data());
+    if (iRet < 0) {
+      throw NXEXCEPTION("Cannot determine dataset dimensions");
+    }
+    /* If we are using putdata on an unlimited dimension dataset, assume we want to append one single new slab */
+    if (std::any_of(maxdims.cbegin(), maxdims.cend(), [](auto x) -> bool { return x == H5S_UNLIMITED; })) {
+      DimVector vecStart(rank, 0), vecSize(rank, 0);
+      for (int i = 0; i < rank; i++) {
+        if (maxdims[i] == H5S_UNLIMITED) {
+          vecStart[i] = thedims[i] + 1;
+          vecSize[i] = 1;
+        } else {
+          vecStart[i] = 0;
+          vecSize[i] = thedims[i];
+        }
+      }
+      return putSlab(data, vecStart, vecSize);
+    } else {
+      iRet = H5Dwrite(m_current_data_id, m_current_type_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
+      if (iRet < 0) {
+        throw NXEXCEPTION("Failure to write data");
+      }
     }
   }
 }
@@ -645,6 +678,8 @@ template <typename NumT> void File::putData(const vector<NumT> &data) {
   }
   this->putData(data.data());
 }
+
+// GET DATA -- STRING / CHAR
 
 template <> void File::getData<char>(char *data) {
   if (m_current_data_id == 0) {
@@ -681,6 +716,7 @@ template <> void File::getData<char>(char *data) {
     size = len;
   }
 
+  // strip whitespace
   if (rank == 0 || rank == 1) {
     if (size == 1) {
       if (isspace(buffer[0])) {
@@ -692,17 +728,18 @@ template <> void File::getData<char>(char *data) {
       }
       return;
     }
-
+    // skip over any front whitespace
     char *start = buffer.data();
     while (*start && isspace(*start))
       ++start;
-
+    // work from back until first non-whitespace char found
     int i = (int)strlen(start);
     while (--i >= 0) {
       if (!isspace(start[i])) {
         break;
       }
     }
+    // add a null terminator to the end
     start[++i] = '\0';
 
     std::memcpy(data, start, i);
@@ -712,13 +749,33 @@ template <> void File::getData<char>(char *data) {
   }
 }
 
+string File::getStrData() {
+  Info info = this->getInfo();
+  if (info.type != NXnumtype::CHAR) {
+    stringstream msg;
+    msg << "Cannot use getStrData() on non-character data. Found type=" << info.type;
+    throw NXEXCEPTION(msg.str());
+  }
+  if (info.dims.size() != 1) {
+    stringstream msg;
+    msg << "getStrData() only understand rank=1 data. Found rank=" << info.dims.size();
+    throw NXEXCEPTION(msg.str());
+  }
+  std::vector<char> value(static_cast<size_t>(info.dims[0]) + 1, '\0');
+  this->getData(value.data());
+  std::string res(value.data(), strlen(value.data()));
+  return res;
+}
+
+// GET DATA -- NUMERIC
+
 template <typename NumT> void File::getData(NumT *data) {
   if (!data) {
-    throw NXEXCEPTION("Supplied null pointer to write data to");
+    throw NXEXCEPTION("Supplied null pointer to hold data");
   }
 
   if (m_current_data_id == 0) {
-    throw NXEXCEPTION("getData ERROR: no dataset open");
+    throw NXEXCEPTION("No dataset open");
   }
 
   herr_t ret = -1;
@@ -745,7 +802,7 @@ template <typename NumT> void File::getData(NumT *data) {
   }
 
   if (ret < 0) {
-    throw NXEXCEPTION("getData ERROR: failed to transfer dataset");
+    throw NXEXCEPTION("Failed to read dataset");
   }
 }
 
@@ -770,58 +827,12 @@ template <typename NumT> void File::getData(vector<NumT> &data) {
   this->getData<NumT>(data.data());
 }
 
-string File::getStrData() {
-  Info info = this->getInfo();
-  if (info.type != NXnumtype::CHAR) {
-    stringstream msg;
-    msg << "Cannot use getStrData() on non-character data. Found type=" << info.type;
-    throw NXEXCEPTION(msg.str());
-  }
-  if (info.dims.size() != 1) {
-    stringstream msg;
-    msg << "getStrData() only understand rank=1 data. Found rank=" << info.dims.size();
-    throw NXEXCEPTION(msg.str());
-  }
-  std::vector<char> value(static_cast<size_t>(info.dims[0]) + 1, '\0');
-  this->getData(value.data());
-  std::string res(value.data(), strlen(value.data()));
-  return res;
-}
-
-void File::closeData() {
-  herr_t iRet = 0;
-  if (m_current_space_id != 0) {
-    iRet = H5Sclose(m_current_space_id);
-    if (iRet < 0) {
-      throw NXEXCEPTION("Cannot end access to dataset: failed to close dataspace");
-    }
-  }
-  if (m_current_type_id != 0) {
-    iRet = H5Tclose(m_current_type_id);
-    if (iRet < 0) {
-      throw NXEXCEPTION("Cannot end access to dataset: failed to close datatype");
-    }
-  }
-  if (m_current_data_id != 0) {
-    iRet = H5Dclose(m_current_data_id);
-    if (iRet < 0) {
-      throw NXEXCEPTION("Cannot end access to dataset: failed to close dataset");
-    }
-  } else {
-    throw NXEXCEPTION("Cannot end access to dataset: no data open");
-  }
-  m_current_data_id = 0;
-  m_current_space_id = 0;
-  m_current_type_id = 0;
-  m_address = m_address.parent_path();
-}
-
 //------------------------------------------------------------------------------------------------------------------
 // DATA MAKE COMP / PUT/GET SLAB / COERCE
 //------------------------------------------------------------------------------------------------------------------
 
 void File::makeCompData(std::string const &name, NXnumtype const type, DimVector const &dims, NXcompression comp,
-                        DimSizeVector const &chunk, bool open_data) {
+                        DimVector const &chunk, bool open_data) {
   // error check the parameters
   if (name.empty()) {
     throw NXEXCEPTION("Supplied empty name to makeCompData");
@@ -853,9 +864,9 @@ void File::makeCompData(std::string const &name, NXnumtype const type, DimVector
 
   // set the dimensions for use
   int rank = static_cast<int>(dims.size());
-  std::vector<hsize_t> mydim(dims.cbegin(), dims.cend());
-  std::vector<hsize_t> maxdims(dims.cbegin(), dims.cend());
-  std::vector<hsize_t> chunkdims(chunk.cbegin(), chunk.cend());
+  DimVector mydim(dims.cbegin(), dims.cend());
+  DimVector maxdims(dims.cbegin(), dims.cend());
+  DimVector chunkdims(chunk.cbegin(), chunk.cend());
   // handle unlimited data
   if (unlimited) {
     for (int i = 0; i < rank; i++) {
@@ -874,7 +885,7 @@ void File::makeCompData(std::string const &name, NXnumtype const type, DimVector
   hid_t dataspace;
   if (type == NXnumtype::CHAR) {
     std::size_t byte_zahl(mydim.back());
-    std::vector<hsize_t> mydim1(mydim.cbegin(), mydim.cend());
+    DimVector mydim1(mydim.cbegin(), mydim.cend());
     if (unlimited) {
       mydim1[0] = 1;
       maxdims[0] = H5S_UNLIMITED;
@@ -892,7 +903,7 @@ void File::makeCompData(std::string const &name, NXnumtype const type, DimVector
     if (unlimited) {
       dataspace = H5Screate_simple(rank, mydim.data(), maxdims.data());
     } else {
-      dataspace = H5Screate_simple(rank, mydim.data(), NULL);
+      dataspace = H5Screate_simple(rank, mydim.data(), nullptr);
     }
   }
 
@@ -908,10 +919,9 @@ void File::makeCompData(std::string const &name, NXnumtype const type, DimVector
       throw NXEXCEPTION(msg.str());
     }
     H5Pset_shuffle(cparms); // mrt: improves compression
-    H5Pset_deflate(cparms, default_deflate_level);
+    H5Pset_deflate(cparms, DEFAULT_DEFLATE_LEVEL);
   }
-  // NOTE if compression is NONE but a dimension is unlimited,
-  // then it still compresses by CHUNK.
+  // NOTE if compression is NONE but a dimension is unlimited, then it still compresses by CHUNK.
   // this behavior is inherited from napi
   else if (comp == NXcompression::NONE) {
     if (unlimited) {
@@ -963,7 +973,7 @@ void File::makeCompData(std::string const &name, NXnumtype const type, DimVector
     }
   }
   // cleanup
-  registerEntry(absaddr, scientific_data_set);
+  registerEntry(absaddr, SCIENTIFIC_DATA_SET);
   if (open_data) {
     m_current_type_id = datatype;
     m_current_space_id = dataspace;
@@ -985,8 +995,8 @@ void File::makeCompData(std::string const &name, NXnumtype const type, DimVector
   }
 }
 
-template <typename NumT> void File::putSlab(NumT const *data, DimSizeVector const &start, DimSizeVector const &size) {
-  if (data == NULL) {
+template <typename NumT> void File::putSlab(NumT const *data, DimVector const &start, DimVector const &size) {
+  if (data == nullptr) {
     throw NXEXCEPTION("Data specified as null");
   }
   if (start.empty()) {
@@ -1000,110 +1010,103 @@ template <typename NumT> void File::putSlab(NumT const *data, DimSizeVector cons
     msg << "Supplied start rank=" << start.size() << " must match supplied size rank=" << size.size();
     throw NXEXCEPTION(msg.str());
   }
-  if (start.size() > NX_MAXRANK) {
-    stringstream msg;
-    msg << "The supplied rank exceeds the max allowed rank " << start.size() << " > " << NX_MAXRANK;
-    throw NXEXCEPTION(msg.str());
-  }
-
-  int iRet, rank;
-  hsize_t myStart[H5S_MAX_RANK];
-  hsize_t mySize[H5S_MAX_RANK];
-  hsize_t dsize[H5S_MAX_RANK], thedims[H5S_MAX_RANK], maxdims[H5S_MAX_RANK];
-  hid_t dataspace;
-  bool unlimiteddim = false;
   stringstream msg;
   msg << "putSlab(data, " << toString(start) << ", " << toString(size) << ") failed: ";
 
   /* check if there is an Dataset open */
-  if (m_current_data_id == 0) {
+  if (!isDataSetOpen()) {
     msg << "no dataset open";
     throw NXEXCEPTION(msg.str());
   }
-  rank = H5Sget_simple_extent_ndims(m_current_space_id);
+
+  // copy over start, size vectors
+  DimVector myStart(start.cbegin(), start.cend());
+  DimVector mySize(size.cbegin(), size.cend());
+  DimVector dsize(size.size(), 0);
+  std::transform(start.cbegin(), start.cend(), size.cbegin(), dsize.begin(), std::plus<dimsize_t>());
+  // get rank and stored dimensions
+  int rank = H5Sget_simple_extent_ndims(m_current_space_id);
   if (rank < 0) {
     msg << "cannot get rank";
     throw NXEXCEPTION(msg.str());
   }
-  iRet = H5Sget_simple_extent_dims(m_current_space_id, thedims, maxdims);
+  DimVector thedims(rank, 0), maxdims(rank, 0);
+  int iRet = H5Sget_simple_extent_dims(m_current_space_id, thedims.data(), maxdims.data());
   if (iRet < 0) {
     msg << "cannot get dimensions";
     throw NXEXCEPTION(msg.str());
   }
 
-  for (int i = 0; i < rank; i++) {
-    myStart[i] = static_cast<hsize_t>(start[i]);
-    mySize[i] = static_cast<hsize_t>(size[i]);
-    dsize[i] = static_cast<hsize_t>(start[i] + size[i]);
-    if (maxdims[i] == H5S_UNLIMITED) {
-      unlimiteddim = true;
-    }
-  }
+  // for string data, use 1 in the final dimension
   if (H5Tget_class(m_current_type_id) == H5T_STRING) {
-    mySize[rank - 1] = 1;
-    myStart[rank - 1] = 0;
-    dsize[rank - 1] = 1;
+    mySize.back() = 1;
+    myStart.back() = 0;
+    dsize.back() = 1;
   }
-  dataspace = H5Screate_simple(rank, mySize, NULL);
-  if (unlimiteddim) {
+
+  // if any dimensions are unlimited,
+  if (std::any_of(maxdims.cbegin(), maxdims.cend(), [](auto x) -> bool { return x == H5S_UNLIMITED; })) {
     for (int i = 0; i < rank; i++) {
       if (dsize[i] < thedims[i]) {
         dsize[i] = thedims[i];
       }
     }
-    iRet = H5Dset_extent(m_current_data_id, dsize);
+    iRet = H5Dset_extent(m_current_data_id, dsize.data());
     if (iRet < 0) {
       msg << "extend slab failed";
       throw NXEXCEPTION(msg.str());
     }
 
+    // define slab
     hid_t filespace = H5Dget_space(m_current_data_id);
-
-    /* define slab */
-    iRet = H5Sselect_hyperslab(filespace, H5S_SELECT_SET, myStart, NULL, mySize, NULL);
-    /* deal with HDF errors */
+    iRet = H5Sselect_hyperslab(filespace, H5S_SELECT_SET, myStart.data(), nullptr, mySize.data(), nullptr);
     if (iRet < 0) {
+      H5Sclose(filespace);
       msg << "selecting slab failed";
       throw NXEXCEPTION(msg.str());
     }
-    /* write slab */
+    // write slab
+    hid_t dataspace = H5Screate_simple(rank, mySize.data(), nullptr);
     iRet = H5Dwrite(m_current_data_id, m_current_type_id, dataspace, filespace, H5P_DEFAULT, data);
+    H5Sclose(dataspace);
     if (iRet < 0) {
+      H5Sclose(filespace);
       msg << "writing slab failed";
       throw NXEXCEPTION(msg.str());
     }
     /* update with new size */
     iRet = H5Sclose(m_current_space_id);
     if (iRet < 0) {
+      H5Sclose(filespace);
       msg << "updating size failed";
       throw NXEXCEPTION(msg.str());
     }
     m_current_space_id = filespace;
-  } else {
-    /* define slab */
-    iRet = H5Sselect_hyperslab(m_current_space_id, H5S_SELECT_SET, myStart, NULL, mySize, NULL);
-    /* deal with HDF errors */
+  } else { // no unlimited dimensions
+    // define slab
+    iRet = H5Sselect_hyperslab(m_current_space_id, H5S_SELECT_SET, myStart.data(), nullptr, mySize.data(), nullptr);
+    // deal with HDF errors
     if (iRet < 0) {
       msg << "selecting slab failed";
       throw NXEXCEPTION(msg.str());
     }
-    /* write slab */
+    // write slab
+    hid_t dataspace = H5Screate_simple(rank, mySize.data(), nullptr);
     iRet = H5Dwrite(m_current_data_id, m_current_type_id, dataspace, m_current_space_id, H5P_DEFAULT, data);
+    H5Sclose(dataspace);
     if (iRet < 0) {
       msg << "writing slab failed";
       throw NXEXCEPTION(msg.str());
     }
   }
-  /* deal with HDF errors */
-  iRet = H5Sclose(dataspace);
+  // cleanup
   if (iRet < 0) {
     msg << "closing slab failed";
     throw NXEXCEPTION(msg.str());
   }
 }
 
-template <typename NumT>
-void File::putSlab(vector<NumT> const &data, DimSizeVector const &start, DimSizeVector const &size) {
+template <typename NumT> void File::putSlab(vector<NumT> const &data, DimVector const &start, DimVector const &size) {
   if (data.empty()) {
     throw NXEXCEPTION("Supplied empty data to putSlab");
   }
@@ -1111,14 +1114,18 @@ void File::putSlab(vector<NumT> const &data, DimSizeVector const &start, DimSize
 }
 
 template <typename NumT> void File::putSlab(vector<NumT> const &data, dimsize_t const start, dimsize_t const size) {
-  DimSizeVector start_v{start};
-  DimSizeVector size_v{size};
+  DimVector start_v{start};
+  DimVector size_v{size};
   this->putSlab(data, start_v, size_v);
 }
 
-template <typename NumT> void File::getSlab(NumT *data, DimSizeVector const &start, DimSizeVector const &size) {
-  if (data == NULL) {
+template <typename NumT> void File::getSlab(NumT *data, DimVector const &start, DimVector const &size) {
+  if (data == nullptr) {
     throw NXEXCEPTION("Supplied null pointer to getSlab");
+  }
+  // check if there is an Dataset open
+  if (!isDataSetOpen()) {
+    throw NXEXCEPTION("No dataset open");
   }
   if (start.size() == 0) {
     stringstream msg;
@@ -1131,46 +1138,32 @@ template <typename NumT> void File::getSlab(NumT *data, DimSizeVector const &sta
     throw NXEXCEPTION(msg.str());
   }
 
-  hid_t memspace, iRet;
-  H5T_class_t tclass;
-  hid_t memtype_id;
-  int iRank;
-
-  /* check if there is an Dataset open */
-  if (m_current_data_id == 0) {
-    throw NXEXCEPTION("No dataset open");
-  }
-  tclass = H5Tget_class(m_current_type_id);
   /* map datatypes of other platforms */
+  hid_t memtype;
+  H5T_class_t tclass = H5Tget_class(m_current_type_id);
   if (tclass == H5T_STRING) {
-    memtype_id = m_current_type_id;
+    memtype = m_current_type_id;
   } else {
-    memtype_id = h5MemType(m_current_type_id);
+    memtype = h5MemType(m_current_type_id);
   }
 
-  iRank = H5Sget_simple_extent_ndims(m_current_space_id);
-
-  if (iRank == 0) {
-    /* this is an unslabbale SCALAR */
+  herr_t iRet = -1;
+  int rank = H5Sget_simple_extent_ndims(m_current_space_id);
+  if (rank < 0) {
+    throw NXEXCEPTION("Failed to fetch rank for slab data");
+  } else if (rank == 0) { // this is an unslabbable SCALAR
+    hid_t memspace = H5Screate(H5S_SCALAR);
     hid_t filespace = H5Dget_space(m_current_data_id);
-    memspace = H5Screate(H5S_SCALAR);
     H5Sselect_all(filespace);
-    iRet = H5Dread(m_current_data_id, memtype_id, memspace, filespace, H5P_DEFAULT, data);
+    iRet = H5Dread(m_current_data_id, memtype, memspace, filespace, H5P_DEFAULT, data);
     H5Sclose(filespace);
+    H5Sclose(memspace);
   } else {
-    std::vector<hsize_t> myStart(iRank, 0);
-    std::vector<hsize_t> mySize(iRank, 0);
-    std::vector<hsize_t> mStart(iRank, 0);
-    for (int i = 0; i < iRank; i++) {
-      myStart[i] = static_cast<hsize_t>(start[i]);
-      mySize[i] = static_cast<hsize_t>(size[i]);
-      mStart[i] = static_cast<hsize_t>(0);
-    }
-
-    /*
-     * this does not work for multidimensional string arrays.
-     */
-    int mtype = 0;
+    DimVector myStart(start.cbegin(), start.cend());
+    DimVector mySize(size.cbegin(), size.cend());
+    DimVector mStart(rank, 0);
+    // this does not work for multidimensional string arrays.
+    NXnumtype mtype(NXnumtype::BAD);
     if (tclass == H5T_STRING) {
       mtype = NXnumtype::CHAR;
       if (mySize[0] == 1) {
@@ -1178,31 +1171,32 @@ template <typename NumT> void File::getSlab(NumT *data, DimSizeVector const &sta
       }
     }
 
-    iRet = H5Sselect_hyperslab(m_current_space_id, H5S_SELECT_SET, myStart.data(), NULL, mySize.data(), NULL);
+    iRet = H5Sselect_hyperslab(m_current_space_id, H5S_SELECT_SET, myStart.data(), nullptr, mySize.data(), nullptr);
     if (iRet < 0) {
       throw NXEXCEPTION("Selecting slab failed");
     }
 
-    memspace = H5Screate_simple(iRank, mySize.data(), NULL);
-    iRet = H5Sselect_hyperslab(memspace, H5S_SELECT_SET, mStart.data(), NULL, mySize.data(), NULL);
+    hid_t memspace = H5Screate_simple(rank, mySize.data(), nullptr);
+    iRet = H5Sselect_hyperslab(memspace, H5S_SELECT_SET, mStart.data(), nullptr, mySize.data(), nullptr);
     if (iRet < 0) {
+      H5Tclose(memtype);
+      H5Sclose(memspace);
       throw NXEXCEPTION("Selecting memspace failed");
     }
-    /* read slab */
+    // read slab
     if (mtype == NXnumtype::CHAR) {
       std::vector<char> tmp_data(mySize[0] + 1, '\0');
-      iRet = H5Dread(m_current_data_id, memtype_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, tmp_data.data());
+      iRet = H5Dread(m_current_data_id, memtype, H5S_ALL, H5S_ALL, H5P_DEFAULT, tmp_data.data());
       char const *data1;
       data1 = tmp_data.data() + myStart[0];
-      strncpy(static_cast<char *>(static_cast<void *>(data)), data1, static_cast<size_t>(size[0]));
+      strncpy(static_cast<char *>(static_cast<void *>(data)), data1, size[0]);
     } else {
-      iRet = H5Dread(m_current_data_id, memtype_id, memspace, m_current_space_id, H5P_DEFAULT, data);
+      iRet = H5Dread(m_current_data_id, memtype, memspace, m_current_space_id, H5P_DEFAULT, data);
     }
+    H5Tclose(memspace);
   }
   /* cleanup */
-  H5Sclose(memspace);
-  H5Tclose(tclass);
-
+  H5Tclose(memtype);
   if (iRet < 0) {
     throw NXEXCEPTION("Reading slab failed");
   }
@@ -1292,7 +1286,7 @@ void File::writeData(std::string const &name, std::string const &value) {
   // Allow empty strings by defaulting to a space
   if (my_value.empty())
     my_value = " ";
-  const DimVector dims{static_cast<dimsize_t>(my_value.size())};
+  const DimVector dims{my_value.size()};
   this->makeData(name, NXnumtype::CHAR, dims, true);
 
   this->putData(my_value);
@@ -1301,7 +1295,7 @@ void File::writeData(std::string const &name, std::string const &value) {
 }
 
 template <typename NumT> void File::writeData(std::string const &name, vector<NumT> const &value) {
-  DimVector const dims{static_cast<dimsize_t>(value.size())};
+  DimVector const dims{value.size()};
   this->writeData(name, value, dims);
 }
 
@@ -1320,7 +1314,7 @@ template <typename NumT> void File::writeExtendibleData(std::string const &name,
 template <typename NumT>
 void File::writeExtendibleData(std::string const &name, vector<NumT> const &value, dimsize_t const chunk) {
   DimVector dims{NX_UNLIMITED};
-  DimSizeVector chunk_dims{chunk};
+  DimVector chunk_dims{chunk};
   // Use chunking without using compression
   this->makeCompData(name, getType<NumT>(), dims, NXcompression::NONE, chunk_dims, true);
   this->putSlab(value, dimsize_t(0), dimsize_t(value.size()));
@@ -1329,14 +1323,14 @@ void File::writeExtendibleData(std::string const &name, vector<NumT> const &valu
 
 template <typename NumT>
 void File::writeExtendibleData(std::string const &name, vector<NumT> const &value, DimVector const &dims,
-                               DimSizeVector const &chunk) {
+                               DimVector const &chunk) {
   // Create the data with unlimited 0th dimensions
   DimVector unlim_dims(dims);
   unlim_dims[0] = NX_UNLIMITED;
   // Use chunking without using compression
   this->makeCompData(name, getType<NumT>(), unlim_dims, NXcompression::NONE, chunk, true);
   // And put that slab of that of that given size in there
-  DimSizeVector start(dims.size(), 0);
+  DimVector start(dims.size(), 0);
   this->putSlab(value, start, dims);
   this->closeData();
 }
@@ -1350,14 +1344,14 @@ template <typename NumT> void File::writeUpdatedData(std::string const &name, st
 template <typename NumT>
 void File::writeUpdatedData(std::string const &name, std::vector<NumT> const &value, DimVector const &dims) {
   this->openData(name);
-  DimSizeVector start(dims.size(), 0);
+  DimVector start(dims.size(), 0);
   this->putSlab(value, start, dims);
   this->closeData();
 }
 
 template <typename NumT>
 void File::writeCompData(std::string const &name, vector<NumT> const &value, DimVector const &dims,
-                         NXcompression const comp, DimSizeVector const &bufsize) {
+                         NXcompression const comp, DimVector const &bufsize) {
   this->makeCompData(name, getType<NumT>(), dims, comp, bufsize, true);
   this->putData(value);
   this->closeData();
@@ -1392,53 +1386,44 @@ void File::readData(std::string const &dataName, std::string &data) {
 Info File::getInfo() {
   Info info;
 
-  std::size_t iRank;
-  NXnumtype mType;
-  hsize_t myDim[H5S_MAX_RANK];
-  H5T_class_t tclass;
-  char *vlData = NULL;
-
-  /* check if there is an Dataset open */
-  if (m_current_data_id == 0) {
-    throw NXEXCEPTION("getInfo Error: no dataset open");
+  // check if there is an open dataset
+  if (!isDataSetOpen()) {
+    throw NXEXCEPTION("No dataset open");
   }
 
-  /* read information */
-  tclass = H5Tget_class(m_current_type_id);
-  mType = hdf5ToNXType(tclass, m_current_type_id);
-  iRank = H5Sget_simple_extent_dims(m_current_space_id, myDim, NULL);
-  if (iRank == 0) {
-    iRank = 1; /* we pretend */
-    myDim[0] = 1;
+  // read information
+  H5T_class_t tclass = H5Tget_class(m_current_type_id);
+  info.type = hdf5ToNXType(tclass, m_current_type_id);
+  int rank = H5Sget_simple_extent_ndims(m_current_space_id);
+  if (rank < 0) {
+    throw NXEXCEPTION("Cannot get rank for current dataset");
+  } else if (rank == 0) {
+    rank = 1; // we pretend
+    info.dims = {1};
+  } else {
+    info.dims.resize(rank);
+    H5Sget_simple_extent_dims(m_current_space_id, info.dims.data(), nullptr);
   }
-  /* conversion to proper ints for the platform */
-  info.type = mType;
-  if (tclass == H5T_STRING && myDim[iRank - 1] == 1) {
+  // for string data, determine size, depending on if variable length or not
+  if (tclass == H5T_STRING && info.dims.back() == 1) {
+    dimsize_t length;
     if (H5Tis_variable_str(m_current_type_id)) {
-      /* this will not work for arrays of strings */
-      hid_t memType = H5Tcopy(H5T_C_S1);
-      H5Tset_size(memType, H5T_VARIABLE);
-      H5Dread(m_current_data_id, memType, H5S_ALL, H5S_ALL, H5P_DEFAULT, &vlData);
-      if (vlData != NULL) {
-        myDim[iRank - 1] = strlen(vlData) + 1;
-        H5Dvlen_reclaim(memType, m_current_space_id, H5P_DEFAULT, &vlData);
+      // get the needed size for variable length data
+      if (H5Dvlen_get_buf_size(m_current_data_id, m_current_type_id, m_current_space_id, &length) < 0) {
+        throw NXEXCEPTION("Failed to read string length for variable-length string");
       }
-      H5Tclose(memType);
     } else {
-      myDim[iRank - 1] = H5Tget_size(m_current_type_id);
+      // the size of string data in bytes is stored in the string datatypes
+      length = H5Tget_size(m_current_type_id);
     }
-  }
-
-  info.dims.resize(iRank);
-  for (std::size_t i = 0; i < iRank; i++) {
-    info.dims[i] = myDim[i];
+    info.dims.back() = length;
   }
 
   // Trim 1D CHAR arrays to the actual string length
-  if ((info.type == NXnumtype::CHAR) && (iRank == 1)) {
+  if ((info.type == NXnumtype::CHAR) && (rank == 1)) {
     char *buf = static_cast<char *>(malloc(static_cast<size_t>((info.dims[0] + 1) * sizeof(char))));
-    if (buf == NULL) {
-      throw NXEXCEPTION("getInfo: Unable to allocate memory for CHAR buffer");
+    if (buf == nullptr) {
+      throw NXEXCEPTION("Unable to allocate memory for CHAR buffer");
     }
     memset(buf, 0, static_cast<size_t>((info.dims[0] + 1) * sizeof(char)));
     this->getData<char>(buf);
@@ -1448,36 +1433,6 @@ Info File::getInfo() {
   return info;
 }
 
-namespace {
-herr_t gr_iterate_cb(hid_t loc_id, const char *name, const H5L_info2_t *info, void *op_data) {
-  UNUSED_ARG(info);
-  Entries *entryData = static_cast<Entries *>(op_data);
-  std::string nxclass;
-
-  H5O_info_t obj_info;
-  H5Oget_info_by_name(loc_id, name, &obj_info, H5O_INFO_ALL, H5P_DEFAULT);
-  if (obj_info.type == H5O_TYPE_GROUP) {
-    hid_t grp = H5Gopen(loc_id, name, H5P_DEFAULT);
-    if (grp >= 0) {
-      H5::Group group(grp);
-      try {
-        Mantid::NeXus::H5Util::readStringAttribute(group, group_class_spec, nxclass);
-      } catch (...) {
-        nxclass = unknown_group_spec;
-      }
-      H5Gclose(grp);
-    }
-  } else if (obj_info.type == H5O_TYPE_DATASET) {
-    nxclass = scientific_data_set;
-  } else {
-    nxclass = "unknown";
-  }
-
-  (*entryData)[name] = nxclass;
-  return 0;
-}
-} // namespace
-
 Entries File::getEntries() const {
   Entries result;
   this->getEntries(result);
@@ -1486,11 +1441,24 @@ Entries File::getEntries() const {
 
 void File::getEntries(Entries &result) const {
   result.clear();
-
-  int iRet = H5Literate_by_name(m_pfile->getId(), groupAddress(m_address).c_str(), H5_INDEX_NAME, H5_ITER_NATIVE,
-                                nullptr, gr_iterate_cb, &result, H5P_DEFAULT);
-  if (iRet < 0) {
-    throw NXEXCEPTION("H5Literate failed on group: " + m_address.parent_path());
+  auto current = getCurrentObject();
+  for (size_t i = 0; i < current->getNumObjs(); i++) {
+    std::string name = current->getObjnameByIdx(i);
+    std::string className;
+    H5G_obj_t type = current->getObjTypeByIdx(i);
+    if (type == H5G_GROUP) {
+      H5::Group grp = current->openGroup(name);
+      if (grp.attrExists(GROUP_CLASS_SPEC)) {
+        H5::Attribute attr = grp.openAttribute(GROUP_CLASS_SPEC);
+        attr.read(attr.getDataType(), className);
+      } else {
+        className = UNKNOWN_GROUP_SPEC;
+      }
+    } else if (type == H5G_DATASET) {
+      className = SCIENTIFIC_DATA_SET;
+    }
+    if (!className.empty())
+      result[name] = className;
   }
 }
 
@@ -1530,17 +1498,17 @@ template <typename NumT> void File::putAttr(std::string const &name, NumT const 
     current->removeAttr(name);
   }
   try {
-    Mantid::NeXus::H5Util::writeNumAttribute<NumT>(*current, name, value);
+    H5Util::writeNumAttribute<NumT>(*current, name, value);
   } catch (H5::Exception const &e) {
     throw NXEXCEPTION(e.getDetailMsg());
   }
 }
 
 void File::putAttr(const char *name, const char *value) {
-  if (name == NULL) {
+  if (name == nullptr) {
     throw NXEXCEPTION("Specified name as null to putAttr");
   }
-  if (value == NULL) {
+  if (value == nullptr) {
     throw NXEXCEPTION("Specified value as null to putAttr");
   }
   this->putAttr(string(name), string(value));
@@ -1565,7 +1533,7 @@ void File::putAttr(const std::string &name, const string &value, const bool empt
     current->removeAttr(name);
   }
   try {
-    Mantid::NeXus::H5Util::writeStrAttribute(*current, name, my_value);
+    H5Util::writeStrAttribute(*current, name, my_value);
   } catch (H5::Exception const &e) {
     throw NXEXCEPTION(e.getDetailMsg());
   }
@@ -1584,18 +1552,17 @@ template <> MANTID_NEXUS_DLL void File::getAttr(const std::string &name, std::st
 template <typename NumT> void File::getAttr(const std::string &name, NumT &value) {
   auto current = getCurrentObject();
   try {
-    value = Mantid::NeXus::H5Util::readNumAttributeCoerce<NumT>(*current, name);
+    value = H5Util::readNumAttributeCoerce<NumT>(*current, name);
   } catch (H5::Exception const &e) {
     throw NXEXCEPTION(e.getDetailMsg());
   }
 }
 
 string File::getStrAttr(std::string const &name) {
-  // NOTE ensure the H5Cpp objects created here are properly destroyed when exiting scope
   std::string res("");
   auto current = getCurrentObject();
   try {
-    Mantid::NeXus::H5Util::readStringAttribute(*current, name, res);
+    H5Util::readStringAttribute(*current, name, res);
   } catch (H5::Exception const &e) {
     throw NXEXCEPTION(e.getDetailMsg());
   }
@@ -1617,12 +1584,13 @@ std::vector<AttrInfo> File::getAttrInfos() {
     // https://github.com/HDFGroup/hdf5/blob/51dd7758fe5d79ec61e457ff30c697ceccb32e90/c%2B%2B/src/H5Object.cpp#L192
     hid_t attr = H5Aopen_by_idx(current, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, idx, H5P_DEFAULT, H5P_DEFAULT);
     // 1. get the attribute name
-    std::size_t namelen = H5Aget_name(attr, 0, NULL);
+    std::size_t namelen = H5Aget_name(attr, 0, nullptr);
     char *cname = new char[namelen + 1];
     H5Aget_name(attr, namelen + 1, cname);
     cname[namelen] = '\0'; // ensure null termination
     // do not include the group class spec
-    if (group_class_spec == cname) {
+    if (GROUP_CLASS_SPEC == cname) {
+      H5Aclose(attr);
       continue;
     }
     // 2. get the attribute type
@@ -1633,10 +1601,13 @@ std::vector<AttrInfo> File::getAttrInfos() {
     hid_t attrspace = H5Aget_space(attr);
     int rank = H5Sget_simple_extent_ndims(attrspace);
     if (rank > 2 || (rank == 2 && type != NXnumtype::CHAR)) {
+      H5Sclose(attrspace);
+      H5Tclose(attrtype);
+      H5Aclose(attr);
       throw NXEXCEPTION("ERROR iterating through attributes found array attribute not understood by this api");
     }
-    hsize_t *dims = new hsize_t[rank];
-    H5Sget_simple_extent_dims(attrspace, dims, NULL);
+    DimVector dims(rank, 0);
+    H5Sget_simple_extent_dims(attrspace, dims.data(), nullptr);
     std::size_t length = 1;
     if (type == NXnumtype::CHAR) {
       length = getStrAttr(cname).size();
@@ -1644,7 +1615,6 @@ std::vector<AttrInfo> File::getAttrInfos() {
     for (int d = 0; d < rank; d++) {
       length *= dims[d];
     }
-    delete[] dims;
     // now add info to the vector
     infos.emplace_back(type, length, cname);
     delete[] cname;
@@ -1671,7 +1641,7 @@ NXlink File::getGroupID() {
   }
 
   try {
-    getAttr(target_attr_name, link.targetAddress);
+    getAttr(TARGET_ATTR_NAME, link.targetAddress);
   } catch (const Mantid::Nexus::Exception &) {
     link.targetAddress = getAddress();
   }
@@ -1687,7 +1657,7 @@ NXlink File::getDataID() {
   }
 
   try {
-    getAttr(target_attr_name, link.targetAddress);
+    getAttr(TARGET_ATTR_NAME, link.targetAddress);
   } catch (const Mantid::Nexus::Exception &) {
     link.targetAddress = getAddress();
   }
@@ -1705,10 +1675,7 @@ void File::makeLink(NXlink const &link) {
   NexusAddress target(link.targetAddress);
   std::string itemName(target.stem());
 
-  /*
-     build addressname to link from our current group and the name
-     of the thing to link
-   */
+  // build addressname to link from our current group and the name of the thing to link
   std::string linkTarget(groupAddress(m_address) / itemName);
   H5Lcreate_hard(m_pfile->getId(), link.targetAddress.c_str(), H5L_SAME_LOC, linkTarget.c_str(), H5P_DEFAULT,
                  H5P_DEFAULT);
@@ -1719,7 +1686,7 @@ void File::makeLink(NXlink const &link) {
   // set the target attribute
   NexusAddress here(m_address);
   openAddress(linkTarget);
-  putAttr(target_attr_name, link.targetAddress);
+  putAttr(TARGET_ATTR_NAME, link.targetAddress);
   openAddress(here);
 }
 
@@ -2004,27 +1971,27 @@ template MANTID_NEXUS_DLL void File::writeExtendibleData(std::string const &name
                                                          dimsize_t const chunk);
 
 template MANTID_NEXUS_DLL void File::writeExtendibleData(std::string const &name, std::vector<float> const &value,
-                                                         DimVector const &dims, DimSizeVector const &chunk);
+                                                         DimVector const &dims, DimVector const &chunk);
 template MANTID_NEXUS_DLL void File::writeExtendibleData(std::string const &name, std::vector<double> const &value,
-                                                         DimVector const &dims, DimSizeVector const &chunk);
+                                                         DimVector const &dims, DimVector const &chunk);
 template MANTID_NEXUS_DLL void File::writeExtendibleData(std::string const &name, std::vector<int8_t> const &value,
-                                                         DimVector const &dims, DimSizeVector const &chunk);
+                                                         DimVector const &dims, DimVector const &chunk);
 template MANTID_NEXUS_DLL void File::writeExtendibleData(std::string const &name, std::vector<uint8_t> const &value,
-                                                         DimVector const &dims, DimSizeVector const &chunk);
+                                                         DimVector const &dims, DimVector const &chunk);
 template MANTID_NEXUS_DLL void File::writeExtendibleData(std::string const &name, std::vector<int16_t> const &value,
-                                                         DimVector const &dims, DimSizeVector const &chunk);
+                                                         DimVector const &dims, DimVector const &chunk);
 template MANTID_NEXUS_DLL void File::writeExtendibleData(std::string const &name, std::vector<uint16_t> const &value,
-                                                         DimVector const &dims, DimSizeVector const &chunk);
+                                                         DimVector const &dims, DimVector const &chunk);
 template MANTID_NEXUS_DLL void File::writeExtendibleData(std::string const &name, std::vector<int32_t> const &value,
-                                                         DimVector const &dims, DimSizeVector const &chunk);
+                                                         DimVector const &dims, DimVector const &chunk);
 template MANTID_NEXUS_DLL void File::writeExtendibleData(std::string const &name, std::vector<uint32_t> const &value,
-                                                         DimVector const &dims, DimSizeVector const &chunk);
+                                                         DimVector const &dims, DimVector const &chunk);
 template MANTID_NEXUS_DLL void File::writeExtendibleData(std::string const &name, std::vector<int64_t> const &value,
-                                                         DimVector const &dims, DimSizeVector const &chunk);
+                                                         DimVector const &dims, DimVector const &chunk);
 template MANTID_NEXUS_DLL void File::writeExtendibleData(std::string const &name, std::vector<uint64_t> const &value,
-                                                         DimVector const &dims, DimSizeVector const &chunk);
+                                                         DimVector const &dims, DimVector const &chunk);
 template MANTID_NEXUS_DLL void File::writeExtendibleData(std::string const &name, std::vector<char> const &value,
-                                                         DimVector const &dims, DimSizeVector const &chunk);
+                                                         DimVector const &dims, DimVector const &chunk);
 
 template MANTID_NEXUS_DLL void File::writeUpdatedData(std::string const &name, vector<float> const &value);
 template MANTID_NEXUS_DLL void File::writeUpdatedData(std::string const &name, vector<double> const &value);
@@ -2063,89 +2030,82 @@ template MANTID_NEXUS_DLL void File::writeUpdatedData(std::string const &name, v
 
 template MANTID_NEXUS_DLL void File::writeCompData(std::string const &name, vector<float> const &value,
                                                    DimVector const &dims, NXcompression const comp,
-                                                   DimSizeVector const &bufsize);
+                                                   DimVector const &bufsize);
 template MANTID_NEXUS_DLL void File::writeCompData(std::string const &name, vector<double> const &value,
                                                    DimVector const &dims, NXcompression const comp,
-                                                   DimSizeVector const &bufsize);
+                                                   DimVector const &bufsize);
 template MANTID_NEXUS_DLL void File::writeCompData(std::string const &name, vector<int8_t> const &value,
                                                    DimVector const &dims, NXcompression const comp,
-                                                   DimSizeVector const &bufsize);
+                                                   DimVector const &bufsize);
 template MANTID_NEXUS_DLL void File::writeCompData(std::string const &name, vector<uint8_t> const &value,
                                                    DimVector const &dims, NXcompression const comp,
-                                                   DimSizeVector const &bufsize);
+                                                   DimVector const &bufsize);
 template MANTID_NEXUS_DLL void File::writeCompData(std::string const &name, vector<int16_t> const &value,
                                                    DimVector const &dims, NXcompression const comp,
-                                                   DimSizeVector const &bufsize);
+                                                   DimVector const &bufsize);
 template MANTID_NEXUS_DLL void File::writeCompData(std::string const &name, vector<uint16_t> const &value,
                                                    DimVector const &dims, NXcompression const comp,
-                                                   DimSizeVector const &bufsize);
+                                                   DimVector const &bufsize);
 template MANTID_NEXUS_DLL void File::writeCompData(std::string const &name, vector<int32_t> const &value,
                                                    DimVector const &dims, NXcompression const comp,
-                                                   DimSizeVector const &bufsize);
+                                                   DimVector const &bufsize);
 template MANTID_NEXUS_DLL void File::writeCompData(std::string const &name, vector<uint32_t> const &value,
                                                    DimVector const &dims, NXcompression const comp,
-                                                   DimSizeVector const &bufsize);
+                                                   DimVector const &bufsize);
 template MANTID_NEXUS_DLL void File::writeCompData(std::string const &name, vector<int64_t> const &value,
                                                    DimVector const &dims, NXcompression const comp,
-                                                   DimSizeVector const &bufsize);
+                                                   DimVector const &bufsize);
 template MANTID_NEXUS_DLL void File::writeCompData(std::string const &name, vector<uint64_t> const &value,
                                                    DimVector const &dims, NXcompression const comp,
-                                                   DimSizeVector const &bufsize);
+                                                   DimVector const &bufsize);
 
 // READ / WRITE DATA -- SLAB / EXTENDIBLE
 
-template MANTID_NEXUS_DLL void File::getSlab(float *data, const DimSizeVector &start, const DimSizeVector &size);
-template MANTID_NEXUS_DLL void File::getSlab(double *data, const DimSizeVector &start, const DimSizeVector &size);
-template MANTID_NEXUS_DLL void File::getSlab(int8_t *data, const DimSizeVector &start, const DimSizeVector &size);
-template MANTID_NEXUS_DLL void File::getSlab(uint8_t *data, const DimSizeVector &start, const DimSizeVector &size);
-template MANTID_NEXUS_DLL void File::getSlab(int16_t *data, const DimSizeVector &start, const DimSizeVector &size);
-template MANTID_NEXUS_DLL void File::getSlab(uint16_t *data, const DimSizeVector &start, const DimSizeVector &size);
-template MANTID_NEXUS_DLL void File::getSlab(int32_t *data, const DimSizeVector &start, const DimSizeVector &size);
-template MANTID_NEXUS_DLL void File::getSlab(uint32_t *data, const DimSizeVector &start, const DimSizeVector &size);
-template MANTID_NEXUS_DLL void File::getSlab(int64_t *data, const DimSizeVector &start, const DimSizeVector &size);
-template MANTID_NEXUS_DLL void File::getSlab(uint64_t *data, const DimSizeVector &start, const DimSizeVector &size);
-template MANTID_NEXUS_DLL void File::getSlab(char *data, const DimSizeVector &start, const DimSizeVector &size);
-template MANTID_NEXUS_DLL void File::getSlab(bool *data, const DimSizeVector &start, const DimSizeVector &size);
+template MANTID_NEXUS_DLL void File::getSlab(float *data, const DimVector &start, const DimVector &size);
+template MANTID_NEXUS_DLL void File::getSlab(double *data, const DimVector &start, const DimVector &size);
+template MANTID_NEXUS_DLL void File::getSlab(int8_t *data, const DimVector &start, const DimVector &size);
+template MANTID_NEXUS_DLL void File::getSlab(uint8_t *data, const DimVector &start, const DimVector &size);
+template MANTID_NEXUS_DLL void File::getSlab(int16_t *data, const DimVector &start, const DimVector &size);
+template MANTID_NEXUS_DLL void File::getSlab(uint16_t *data, const DimVector &start, const DimVector &size);
+template MANTID_NEXUS_DLL void File::getSlab(int32_t *data, const DimVector &start, const DimVector &size);
+template MANTID_NEXUS_DLL void File::getSlab(uint32_t *data, const DimVector &start, const DimVector &size);
+template MANTID_NEXUS_DLL void File::getSlab(int64_t *data, const DimVector &start, const DimVector &size);
+template MANTID_NEXUS_DLL void File::getSlab(uint64_t *data, const DimVector &start, const DimVector &size);
+template MANTID_NEXUS_DLL void File::getSlab(char *data, const DimVector &start, const DimVector &size);
+template MANTID_NEXUS_DLL void File::getSlab(bool *data, const DimVector &start, const DimVector &size);
 
-template MANTID_NEXUS_DLL void File::putSlab(const float *data, const DimSizeVector &start, const DimSizeVector &size);
-template MANTID_NEXUS_DLL void File::putSlab(const double *data, const DimSizeVector &start, const DimSizeVector &size);
-template MANTID_NEXUS_DLL void File::putSlab(const int8_t *data, const DimSizeVector &start, const DimSizeVector &size);
-template MANTID_NEXUS_DLL void File::putSlab(const uint8_t *data, const DimSizeVector &start,
-                                             const DimSizeVector &size);
-template MANTID_NEXUS_DLL void File::putSlab(const int16_t *data, const DimSizeVector &start,
-                                             const DimSizeVector &size);
-template MANTID_NEXUS_DLL void File::putSlab(const uint16_t *data, const DimSizeVector &start,
-                                             const DimSizeVector &size);
-template MANTID_NEXUS_DLL void File::putSlab(const int32_t *data, const DimSizeVector &start,
-                                             const DimSizeVector &size);
-template MANTID_NEXUS_DLL void File::putSlab(const uint32_t *data, const DimSizeVector &start,
-                                             const DimSizeVector &size);
-template MANTID_NEXUS_DLL void File::putSlab(const int64_t *data, const DimSizeVector &start,
-                                             const DimSizeVector &size);
-template MANTID_NEXUS_DLL void File::putSlab(const uint64_t *data, const DimSizeVector &start,
-                                             const DimSizeVector &size);
-template MANTID_NEXUS_DLL void File::putSlab(const char *data, const DimSizeVector &start, const DimSizeVector &size);
+template MANTID_NEXUS_DLL void File::putSlab(const float *data, const DimVector &start, const DimVector &size);
+template MANTID_NEXUS_DLL void File::putSlab(const double *data, const DimVector &start, const DimVector &size);
+template MANTID_NEXUS_DLL void File::putSlab(const int8_t *data, const DimVector &start, const DimVector &size);
+template MANTID_NEXUS_DLL void File::putSlab(const uint8_t *data, const DimVector &start, const DimVector &size);
+template MANTID_NEXUS_DLL void File::putSlab(const int16_t *data, const DimVector &start, const DimVector &size);
+template MANTID_NEXUS_DLL void File::putSlab(const uint16_t *data, const DimVector &start, const DimVector &size);
+template MANTID_NEXUS_DLL void File::putSlab(const int32_t *data, const DimVector &start, const DimVector &size);
+template MANTID_NEXUS_DLL void File::putSlab(const uint32_t *data, const DimVector &start, const DimVector &size);
+template MANTID_NEXUS_DLL void File::putSlab(const int64_t *data, const DimVector &start, const DimVector &size);
+template MANTID_NEXUS_DLL void File::putSlab(const uint64_t *data, const DimVector &start, const DimVector &size);
+template MANTID_NEXUS_DLL void File::putSlab(const char *data, const DimVector &start, const DimVector &size);
 
-template MANTID_NEXUS_DLL void File::putSlab(const std::vector<float> &data, const DimSizeVector &start,
-                                             const DimSizeVector &size);
-template MANTID_NEXUS_DLL void File::putSlab(const std::vector<double> &data, const DimSizeVector &start,
-                                             const DimSizeVector &size);
-template MANTID_NEXUS_DLL void File::putSlab(const std::vector<int8_t> &data, const DimSizeVector &start,
-                                             const DimSizeVector &size);
-template MANTID_NEXUS_DLL void File::putSlab(const std::vector<uint8_t> &data, const DimSizeVector &start,
-                                             const DimSizeVector &size);
-template MANTID_NEXUS_DLL void File::putSlab(const std::vector<int16_t> &data, const DimSizeVector &start,
-                                             const DimSizeVector &size);
-template MANTID_NEXUS_DLL void File::putSlab(const std::vector<uint16_t> &data, const DimSizeVector &start,
-                                             const DimSizeVector &size);
-template MANTID_NEXUS_DLL void File::putSlab(const std::vector<int32_t> &data, const DimSizeVector &start,
-                                             const DimSizeVector &size);
-template MANTID_NEXUS_DLL void File::putSlab(const std::vector<uint32_t> &data, const DimSizeVector &start,
-                                             const DimSizeVector &size);
-template MANTID_NEXUS_DLL void File::putSlab(const std::vector<int64_t> &data, const DimSizeVector &start,
-                                             const DimSizeVector &size);
-template MANTID_NEXUS_DLL void File::putSlab(const std::vector<uint64_t> &data, const DimSizeVector &start,
-                                             const DimSizeVector &size);
+template MANTID_NEXUS_DLL void File::putSlab(const std::vector<float> &data, const DimVector &start,
+                                             const DimVector &size);
+template MANTID_NEXUS_DLL void File::putSlab(const std::vector<double> &data, const DimVector &start,
+                                             const DimVector &size);
+template MANTID_NEXUS_DLL void File::putSlab(const std::vector<int8_t> &data, const DimVector &start,
+                                             const DimVector &size);
+template MANTID_NEXUS_DLL void File::putSlab(const std::vector<uint8_t> &data, const DimVector &start,
+                                             const DimVector &size);
+template MANTID_NEXUS_DLL void File::putSlab(const std::vector<int16_t> &data, const DimVector &start,
+                                             const DimVector &size);
+template MANTID_NEXUS_DLL void File::putSlab(const std::vector<uint16_t> &data, const DimVector &start,
+                                             const DimVector &size);
+template MANTID_NEXUS_DLL void File::putSlab(const std::vector<int32_t> &data, const DimVector &start,
+                                             const DimVector &size);
+template MANTID_NEXUS_DLL void File::putSlab(const std::vector<uint32_t> &data, const DimVector &start,
+                                             const DimVector &size);
+template MANTID_NEXUS_DLL void File::putSlab(const std::vector<int64_t> &data, const DimVector &start,
+                                             const DimVector &size);
+template MANTID_NEXUS_DLL void File::putSlab(const std::vector<uint64_t> &data, const DimVector &start,
+                                             const DimVector &size);
 
 template MANTID_NEXUS_DLL void File::putSlab(const std::vector<float> &data, const dimsize_t start,
                                              const dimsize_t size);

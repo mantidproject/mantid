@@ -10,6 +10,7 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/PolSANSWorkspaceValidator.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidAlgorithms/PolarizationCorrections/PolarizationCorrectionsHelpers.h"
 
@@ -56,7 +57,8 @@ constexpr size_t NUM_FIT_PARAMS = 1;
 void HeliumAnalyserEfficiency::init() {
   // Declare required input parameters for algorithm and do some validation here
   declareProperty(
-      std::make_unique<WorkspaceProperty<WorkspaceGroup>>(PropertyNames::INPUT_WORKSPACE, "", Direction::Input),
+      std::make_unique<WorkspaceProperty<WorkspaceGroup>>(PropertyNames::INPUT_WORKSPACE, "", Direction::Input,
+                                                          std::make_shared<Mantid::API::PolSANSWorkspaceValidator>()),
       "Input group workspace to use for polarization calculation");
 
   auto spinValidator = std::make_shared<SpinStateValidator>(std::unordered_set<int>{4});
@@ -97,50 +99,6 @@ void HeliumAnalyserEfficiency::init() {
   setPropertyGroup(PropertyNames::OUTPUT_WORKSPACE, PropertyNames::GROUP_OUTPUTS);
   setPropertyGroup(PropertyNames::OUTPUT_FIT_CURVES, PropertyNames::GROUP_OUTPUTS);
   setPropertyGroup(PropertyNames::OUTPUT_FIT_PARAMS, PropertyNames::GROUP_OUTPUTS);
-}
-
-void validateInputWorkspace(MatrixWorkspace_sptr const &workspace, std::map<std::string, std::string> &errorList) {
-  if (workspace == nullptr) {
-    errorList[PropertyNames::INPUT_WORKSPACE] = "All input workspaces must be of type MatrixWorkspace.";
-    return;
-  }
-
-  Kernel::Unit_const_sptr unit = workspace->getAxis(0)->unit();
-  if (unit->unitID() != "Wavelength") {
-    errorList[PropertyNames::INPUT_WORKSPACE] = "All input workspaces must be in units of Wavelength.";
-    return;
-  }
-
-  if (workspace->getNumberHistograms() != 1) {
-    errorList[PropertyNames::INPUT_WORKSPACE] = "All input workspaces must contain a single histogram.";
-    return;
-  }
-
-  if (!workspace->isHistogramData()) {
-    errorList[PropertyNames::INPUT_WORKSPACE] = "All input workspaces must be histogram data.";
-  }
-}
-/**
- * Tests that the inputs are all valid
- * @return A map containing the incorrect workspace
- * properties and an error message
- */
-std::map<std::string, std::string> HeliumAnalyserEfficiency::validateInputs() {
-  std::map<std::string, std::string> errorList;
-  const WorkspaceGroup_sptr wsGroup = getProperty(PropertyNames::INPUT_WORKSPACE);
-
-  if (wsGroup == nullptr) {
-    errorList[PropertyNames::INPUT_WORKSPACE] = "The input workspace is not a group workspace";
-  } else if (wsGroup->size() != 4) {
-    errorList[PropertyNames::INPUT_WORKSPACE] =
-        "The input group workspace must have four periods corresponding to the four spin configurations.";
-  } else {
-    for (size_t i = 0; i < wsGroup->size(); ++i) {
-      const MatrixWorkspace_sptr stateWs = std::dynamic_pointer_cast<MatrixWorkspace>(wsGroup->getItem(i));
-      validateInputWorkspace(stateWs, errorList);
-    }
-  }
-  return errorList;
 }
 
 void HeliumAnalyserEfficiency::exec() {

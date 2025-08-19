@@ -1,0 +1,2 @@
+- Fixed a potential crash when running :ref:`DiffractionFocussing <algm-DiffractionFocussing>` from the algorithm dialogue and setting ``InputWorkspace`` to a workspace group.
+- The ``InputWorkspace`` property of :ref:`DiffractionFocussing <algm-DiffractionFocussing>` can no longer take workspaces in TOF (deprecated 29/04/21).

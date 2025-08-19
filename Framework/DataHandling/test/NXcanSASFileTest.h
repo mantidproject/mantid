@@ -19,7 +19,7 @@
 #include <vector>
 
 using namespace Mantid::DataHandling::NXcanSAS;
-using namespace Mantid::NeXus;
+using namespace Mantid::Nexus;
 using namespace NXcanSASTestHelper;
 namespace {
 constexpr double DELTA = 1e-6;

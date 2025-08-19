@@ -26,7 +26,7 @@
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataHandling::NXcanSAS;
-using namespace Mantid::NeXus;
+using namespace Mantid::Nexus;
 
 namespace {
 Mantid::Kernel::Logger g_log("LoadNXcanSAS");
@@ -520,7 +520,7 @@ void LoadNXcanSAS::init() {
 void LoadNXcanSAS::exec() {
   const std::string fileName = getPropertyValue("Filename");
   const bool isLoadTransmissionChecked = getProperty("LoadTransmission");
-  H5::H5File file(fileName, H5F_ACC_RDONLY, NeXus::H5Util::defaultFileAcc());
+  H5::H5File file(fileName, H5F_ACC_RDONLY, Nexus::H5Util::defaultFileAcc());
 
   const auto entry = file.openGroup(getNameOfEntry(file));
   const auto dataGroup = entry.openGroup(sasDataGroupName);

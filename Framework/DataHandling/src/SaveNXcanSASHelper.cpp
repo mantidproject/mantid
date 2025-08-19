@@ -30,7 +30,7 @@ using namespace Mantid::Kernel::SpinStateHelpers;
 using namespace Mantid::Geometry;
 using namespace Mantid::API;
 using namespace Mantid::DataHandling::NXcanSAS;
-using namespace Mantid::NeXus;
+using namespace Mantid::Nexus;
 
 namespace {
 //=== UTILITY ===//
@@ -831,7 +831,7 @@ H5::H5File prepareFile(const std::filesystem::path &path) {
   if (!path.empty()) {
     std::filesystem::remove(path);
   }
-  return H5::H5File(path.string(), H5F_ACC_EXCL, NeXus::H5Util::defaultFileAcc());
+  return H5::H5File(path.string(), H5F_ACC_EXCL, Nexus::H5Util::defaultFileAcc());
 }
 
 } // namespace Mantid::DataHandling::NXcanSAS

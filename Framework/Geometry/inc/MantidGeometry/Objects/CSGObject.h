@@ -64,7 +64,7 @@ public:
   IObject *clone() const override { return new CSGObject(*this); }
 
   IObject *cloneWithMaterial(const Kernel::Material &material) const override {
-    auto obj = new CSGObject(*this);
+    auto obj = this->clone();
     obj->setMaterial(material);
     return obj;
   }

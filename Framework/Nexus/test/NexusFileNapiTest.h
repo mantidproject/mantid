@@ -106,7 +106,7 @@ private:
     }
     file.makeData("r8_data", NXnumtype::FLOAT64, array_dims, true);
     DimVector slab_start{4, 0};
-    DimSizeVector slab_size{1, 4};
+    DimVector slab_size{1, 4};
     file.putSlab(&(r8_array[16]), slab_start, slab_size);
     slab_start[0] = 0;
     slab_start[1] = 0;
@@ -356,7 +356,7 @@ private:
   void do_test_loadPath(const string &filename) {
     if (getenv("NX_LOAD_PATH") != NULL) {
       TS_ASSERT_THROWS_NOTHING(Mantid::Nexus::File file(filename, NXaccess::RDWR));
-      cout << "Success loading NeXus file from path" << endl;
+      cout << "Success loading Nexus file from path" << endl;
     } else {
       cout << "NX_LOAD_PATH variable not defined. Skipping testLoadPath\n";
     }
