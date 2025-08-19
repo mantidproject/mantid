@@ -46,7 +46,7 @@ class SelectionMaskingBase(ABC):
         return self._mask_drawn
 
 
-class RectangleSelectionMaskingBase(SelectionMaskingBase):
+class RectangleSelectionMaskingBase(SelectionMaskingBase, ABC):
     """
     Base class for a selector with a `RectangleSelector` base.
     """
@@ -67,6 +67,10 @@ class RectangleSelectionMaskingBase(SelectionMaskingBase):
             ignore_event_outside=True,
         )
 
+    @abstractmethod
+    def add_cursor_info(self, click, release):
+        pass
+
     def _on_selected(self, eclick, erelease):
         """
         Callback when a shape has been draw on the axes
@@ -83,7 +87,7 @@ class RectangleSelectionMaskingBase(SelectionMaskingBase):
         # Add shape object to collection
         self._mask_drawn = True
         self._dataview.mpl_toolbar.set_action_checked(SELECTOR_TO_TOOL_ITEM_TEXT[self.__class__], False, trigger=False)
-        self._model.add_rect_cursor_info(click=cinfo_click, release=cinfo_release)
+        self.add_cursor_info(cinfo_click, cinfo_release)
 
     def set_inactive_color(self):
         self._selector.set_props(fill=False, **INACTIVE_SHAPE_STYLE)
@@ -98,6 +102,9 @@ class RectangleSelectionMasking(RectangleSelectionMaskingBase):
     def __init__(self, dataview, model):
         super().__init__(dataview, model, RectangleSelector)
 
+    def add_cursor_info(self, click, release):
+        self._model.add_rect_cursor_info(click=click, release=release)
+
 
 class EllipticalSelectionMasking(RectangleSelectionMaskingBase):
     """
@@ -106,6 +113,9 @@ class EllipticalSelectionMasking(RectangleSelectionMaskingBase):
 
     def __init__(self, dataview, model):
         super().__init__(dataview, model, EllipseSelector)
+
+    def add_cursor_info(self, click, release):
+        self._model.add_elli_cursor_info(click=click, release=release)
 
 
 class PolygonSelectionMasking(SelectionMaskingBase):

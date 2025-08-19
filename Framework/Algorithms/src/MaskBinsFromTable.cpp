@@ -75,7 +75,7 @@ void MaskBinsFromTable::maskBins(const API::MatrixWorkspace_sptr &dataws) {
     maskbins->initialize();
 
     // Set properties
-    g_log.debug() << "Input to MaskBins: SpetraList = '" << m_spectraVec[ib] << "'; Xmin = " << m_xminVec[ib]
+    g_log.debug() << "Input to MaskBins: SpectraList = '" << m_spectraVec[ib] << "'; Xmin = " << m_xminVec[ib]
                   << ", Xmax = " << m_xmaxVec[ib] << ".\n";
 
     if (firstloop) {
@@ -87,7 +87,8 @@ void MaskBinsFromTable::maskBins(const API::MatrixWorkspace_sptr &dataws) {
       maskbins->setProperty("InputWorkspace", outputws);
     }
     maskbins->setProperty("OutputWorkspace", this->getPropertyValue("OutputWorkspace"));
-    maskbins->setPropertyValue("SpectraList", m_spectraVec[ib]);
+    maskbins->setPropertyValue("InputWorkspaceIndexSet", m_spectraVec[ib]);
+    maskbins->setPropertyValue("InputWorkspaceIndexType", "SpectrumNumber");
     maskbins->setProperty("XMin", m_xminVec[ib]);
     maskbins->setProperty("XMax", m_xmaxVec[ib]);
 

@@ -7,7 +7,7 @@ from matplotlib.transforms import Bbox, BboxTransform
 import numpy as np
 
 # Data type to store information related to a cursor over an image
-CursorInfo = namedtuple("CursorInfo", ("array", "extent", "point"))
+CursorInfo = namedtuple("CursorInfo", ("array", "extent", "point", "data"))
 
 
 @lru_cache(maxsize=32)
@@ -39,7 +39,7 @@ def cursor_info(image: AxesImage, xdata: float, ydata: float, full_bbox: Bbox = 
 
     point = point.astype(int)
     if 0 <= point[0] <= arr.shape[0] and 0 <= point[1] <= arr.shape[1]:
-        return CursorInfo(array=arr, extent=extent, point=point)
+        return CursorInfo(array=arr, extent=extent, point=point, data=(xdata, ydata))
     else:
         return None
 

@@ -289,7 +289,7 @@ class PixelLinePlot(CursorTracker, KeyHandler):
         cinfo = cursor_info(plotter.image, xdata, ydata)
         if cinfo is not None:
             self._cursor_pos = (xdata, ydata)
-            arr, (xmin, xmax, ymin, ymax), (i, j) = cinfo
+            arr, (xmin, xmax, ymin, ymax), (i, j), _ = cinfo
             plotter.plot_x_line(np.linspace(xmin, xmax, arr.shape[1]), arr[i, :])
             plotter.plot_y_line(np.linspace(ymin, ymax, arr.shape[0]), arr[:, j])
             plotter.sync_plot_limits_with_colorbar()
@@ -387,8 +387,8 @@ class RectangleSelectionLinePlot(KeyHandler):
         if cinfo_release is None:
             return
 
-        arr, (xmin, xmax, ymin, ymax), (imin, jmin) = cinfo_click
-        _, __, (imax, jmax) = cinfo_release
+        arr, (xmin, xmax, ymin, ymax), (imin, jmin), _ = cinfo_click
+        imax, jmax = cinfo_release.point
         plotter.plot_x_line(np.linspace(xmin, xmax, arr.shape[1])[jmin:jmax], np.sum(arr[imin:imax, jmin:jmax], axis=0))
         plotter.plot_y_line(np.linspace(ymin, ymax, arr.shape[0])[imin:imax], np.sum(arr[imin:imax, jmin:jmax], axis=1))
         plotter.update_line_plot_limits()
