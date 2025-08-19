@@ -30,7 +30,7 @@ def defaults = [
 @Field Boolean buildMantiddocs = true
 // By default we should save the build success status in the 'Keep latest successful build' stage
 // but if we skip the build due to no changes we should not save the status
-SAVE_BUILD_SUCCESS = true
+def SAVE_BUILD_SUCCESS = true
 
 // Restrict the parameter choices for certain named branches.
 switch(gitBranch) {
