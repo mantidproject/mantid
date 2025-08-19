@@ -82,9 +82,7 @@ public:
   std::string name() const override { return "IsotropicAtomBraggScatterer"; }
   BraggScatterer_sptr clone() const override;
 
-  // cppcheck-suppress returnByReference
   std::string getElement() const;
-  // cppcheck-suppress returnByReference
   PhysicalConstants::NeutronAtom getNeutronAtom() const;
 
   double getOccupancy() const;

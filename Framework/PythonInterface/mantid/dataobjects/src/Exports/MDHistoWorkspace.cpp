@@ -21,6 +21,5 @@ void export_MDHistoWorkspace() {
   class_<MDHistoWorkspace, bases<IMDHistoWorkspace>, boost::noncopyable>("MDHistoWorkspace", no_init);
 
   // register pointers
-  // cppcheck-suppress unusedScopedObject
   RegisterWorkspacePtrToPython<MDHistoWorkspace>();
 }

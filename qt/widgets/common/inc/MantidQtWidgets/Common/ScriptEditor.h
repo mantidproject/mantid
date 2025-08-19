@@ -105,8 +105,6 @@ public:
   /// Get the current zoom factor
   int getZoom() const;
 
-  // C++ does not recognise QT macros
-  // cppcheck-suppress unknownMacro
 public slots:
   /// Save the script, opening a dialog
   void saveAs();
