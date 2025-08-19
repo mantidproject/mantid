@@ -110,6 +110,7 @@ pipeline {
       agent { label 'linux-64' }
       steps {
         script {
+          echo "Checking for changes in branch ${env.GIT_BRANCH}."
           if (env.GIT_BRANCH == "ornl-next") {
             checkoutSource("${GIT_SHA}")
             def changes = sh(
