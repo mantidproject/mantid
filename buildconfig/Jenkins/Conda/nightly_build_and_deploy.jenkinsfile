@@ -115,23 +115,23 @@ pipeline {
       }
       steps {
         script {
-          // checkoutSource("${GIT_COMMIT}")
-          // def changes = ""
-          // dir("${CHECKOUT_DIR}") {
-          //   changes = sh(
-          //     script: "git log --since=midnight --oneline",
-          //     returnStdout: true
-          //   ).trim()
-          // }
+          checkoutSource("${GIT_COMMIT}")
+          def changes = ""
+          dir("${CHECKOUT_DIR}") {
+            changes = sh(
+              script: "git log --since=midnight --oneline",
+              returnStdout: true
+            ).trim()
+          }
 
-          // if (changes == "" ) {
-          //   echo "No changes. Skipping build pipeline."
-          //   env.BUILD_DEVEL = ""
-          //   SAVE_BUILD_SUCCESS = false
-          // } else {
-          //   echo "${changes}"
-          //   echo "Changes found. Continuing with build pipeline."
-          // }
+          if (changes == "" ) {
+            echo "No changes. Skipping build pipeline."
+            env.BUILD_DEVEL = ""
+            SAVE_BUILD_SUCCESS = false
+          } else {
+            echo "${changes}"
+            echo "Changes found. Continuing with build pipeline."
+          }
 
           echo "Checking for changes in nightly build branch."
           echo "git commit: ${GIT_COMMIT}"
