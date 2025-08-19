@@ -123,7 +123,6 @@ pipeline {
 
             if (changes == "" ) {
               echo "No changes. Skipping build pipeline."
-              currentBuild.result = 'SUCCESS'
               env.BUILD_DEVEL = ""
               SAVE_BUILD_SUCCESS = false
             } else {
@@ -142,8 +141,6 @@ pipeline {
             }
             echo "${changes}"
             echo "Pretend No changes. Skipping build pipeline."
-            // currentBuild.result = 'SUCCESS'
-            return
             env.BUILD_DEVEL = ""
             echo "BUILD_DEVEL=${env.BUILD_DEVEL}"
             SAVE_BUILD_SUCCESS = false
