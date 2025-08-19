@@ -32,18 +32,6 @@ EMPTY_FILENAME_ID = "<string>"
 FILE_ATTR = "__file__"
 
 
-def get_future_import_compiler_flags(code_str) -> int:
-    """
-    Get the compiler flags that can be passed to `compile` that
-    correspond to the __future__ imports inside the given code.
-
-    :param code_str: (unused) The code being executed, containing __future__ imports
-    :return int: The 'bitwise or' union of compiler flags
-    """
-    flags: int = 0
-    return flags
-
-
 def hide_warnings_in_script_editor():
     warnings.filterwarnings("ignore", message="Starting a Matplotlib GUI outside of the main thread will likely fail.")
 
@@ -115,7 +103,7 @@ class PythonCodeExecution(QObject):
             filename = EMPTY_FILENAME_ID
 
         self.globals_ns[FILE_ATTR] = filename
-        flags = get_future_import_compiler_flags(code_str)
+        flags: int = 0  # bitwise or of compiler flags
         with AddedToSysPath([os.path.dirname(filename)]):
             executor = CodeExecution(self._editor)
             hide_warnings_in_script_editor()
