@@ -263,10 +263,6 @@ constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveGSS.cpp:
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveGSS.cpp:566
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveNexusProcessed.cpp:571
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveSampleEnvironmentAndShape.cpp:62
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidDataObjects/TableColumn.h:68
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidDataObjects/TableColumn.h:71
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidDataObjects/TableColumn.h:82
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidDataObjects/TableColumn.h:85
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/CoordTransformAligned.cpp:72
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventWorkspace.cpp:665
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventWorkspace.cpp:712
@@ -319,7 +315,6 @@ comparisonOfFuncReturningBoolError:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/Mant
 comparisonOfFuncReturningBoolError:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/BoundedValidator.h:156
 missingOverride:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/ConfigPropertyObserver.h:20
 missingOverride:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/GitHubApiHelper.h:26
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/ListValidator.h:116
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/VectorHelper.h:101
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/AttenuationProfile.cpp:28
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/DateValidator.cpp:122
