@@ -571,9 +571,9 @@ std::vector<std::string> ScriptRepositoryImpl::listFiles() {
  @note Require that ::listFiles been called at least once.
 
  The download is able to download files or directories. Internally,
- it will assign the job to the ::download_diretory or ::download_file.
+ it will assign the job to the ::download_directory or ::download_file.
 
- This method, just ensure that the entry is valid (wich means,
+ This method, just ensure that the entry is valid (which means,
  it is inside the repository).
 
  @param input_path: The path for the file/folder to be downloaded.
