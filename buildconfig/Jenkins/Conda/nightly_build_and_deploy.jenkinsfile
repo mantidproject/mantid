@@ -30,7 +30,7 @@ def defaults = [
 @Field Boolean buildMantiddocs = true
 // By default we should save the build success status in the 'Keep latest successful build' stage
 // but if we skip the build due to no changes we should not save the status
-def SAVE_BUILD_SUCCESS = true
+@Field Boolean saveBuildSuccess = true
 
 // Restrict the parameter choices for certain named branches.
 switch(gitBranch) {
@@ -44,7 +44,7 @@ switch(gitBranch) {
     defaults.anacondaLabel = 'nightly'
     defaults.platformChoices = ['linux-64']
     defaults.publishToGithub = false
-    defaults.publishToAnaconda = true
+    defaults.publishToAnaconda = false
     defaults.anacondaChannel = 'mantid-ornl'
     buildMantiddocs = false
     break
@@ -120,15 +120,16 @@ pipeline {
           def changes = ""
           dir("${CHECKOUT_DIR}") {
             changes = sh(
-              script: "git log --since=midnight --oneline",
+              script: "git log --since='24 hours ago' --oneline",
               returnStdout: true
             ).trim()
           }
 
           if (changes == "" ) {
             echo "No changes. Skipping build pipeline."
-            env.BUILD_DEVEL = ""
-            SAVE_BUILD_SUCCESS = false
+            params.BUILD_DEVEL = ""
+            params.BUILD_PACKAGE = ""
+            saveBuildSuccess = false
           } else {
             echo "${changes}"
             echo "Changes found. Continuing with build pipeline."
@@ -535,7 +536,7 @@ pipeline {
       when {
         beforeAgent true
         beforeOptions true
-        expression { env.SAVE_BUILD_SUCCESS == 'true' }
+        expression { saveBuildSuccess }
       }
       options {
         timestamps ()
