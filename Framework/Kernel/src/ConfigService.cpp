@@ -1026,6 +1026,9 @@ std::string ConfigServiceImpl::getOSArchitecture() {
     size_t size = sizeof(ret);
     if (sysctlbyname("sysctl.proc_translated", &ret, &size, nullptr, 0) != -1 && ret == 1) {
       osArch = "arm64_(x86_64)";
+    } else {
+      // TODO this can be removed after the v6.14 code freeze because the feature will be dropped
+      g_log.warn("mantid v6.14 is the last version that will support intel osx");
     }
   }
 #endif
