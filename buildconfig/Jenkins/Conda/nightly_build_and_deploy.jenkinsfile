@@ -28,6 +28,9 @@ def defaults = [
 // If required, switch off the mantiddocs conda package build. This is deliberately not listed in the
 // pipeline parameters because it's only switched off for ornl-next anaconda publishing.
 @Field Boolean buildMantiddocs = true
+// By default we should save the build success status in the 'Keep latest successful build' stage
+// but if we skip the build due to no changes we should not save the status
+SAVE_BUILD_SUCCESS = true
 
 // Restrict the parameter choices for certain named branches.
 switch(gitBranch) {
@@ -118,6 +121,7 @@ pipeline {
               echo "No changes. Skipping build pipeline."
               currentBuild.result = 'SUCCESS'
               BUILD_DEVEL = ""
+              SAVE_BUILD_SUCCESS = false
             }
           }
           if (env.GIT_BRANCH == "ornl_next_nightly_build") {
@@ -131,7 +135,7 @@ pipeline {
             currentBuild.result = 'SUCCESS'
             error("Stop please")
             echo "${env.BUILD_DEVEL}"
-            return
+            SAVE_BUILD_SUCCESS = false
           }
         }
       }
@@ -532,6 +536,9 @@ pipeline {
     }
     stage ('Keep latest successful build') {
       agent { label 'linux-64' } // Use linux for simplicity with shell scripts
+      when {
+        expression { env.SAVE_BUILD_SUCCESS == 'true' }
+      }
       options {
         timestamps ()
       }
