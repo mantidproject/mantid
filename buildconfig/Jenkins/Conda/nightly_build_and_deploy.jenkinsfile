@@ -111,7 +111,7 @@ pipeline {
       when {
         beforeAgent true
         beforeOptions true
-        expression { GIT_BRANCH == "ornl-next" }
+        expression { GIT_BRANCH == "ornl_next_nightly_build" }
       }
       steps {
         script {
