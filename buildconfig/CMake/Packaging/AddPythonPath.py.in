@@ -3,7 +3,6 @@
 environment pointing to this build of mantid
 """
 
-from __future__ import print_function
 from distutils import sysconfig as sc
 import os
 import sys
