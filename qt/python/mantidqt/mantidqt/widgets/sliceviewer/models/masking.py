@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from math import floor, ceil, sqrt
 from mantid.api import WorkspaceFactory, AnalysisDataService
+from sys import float_info
 
 
 @dataclass
@@ -39,10 +40,8 @@ class RectCursorInfoBase(CursorInfoBase, ABC):
         self._release = release
 
     def get_xy_data(self):
-        y_data = [self._click.data[1], self._release.data[1]]
-        x_data = [self._click.data[0], self._release.data[0]]
-        y_data.sort()
-        x_data.sort()
+        y_data = sorted([self._click.data[1], self._release.data[1]])
+        x_data = sorted([self._click.data[0], self._release.data[0]])
         return x_data, y_data
 
 
@@ -89,11 +88,45 @@ class PolyCursorInfo(CursorInfoBase):
         self._nodes = nodes
 
     def generate_table_rows(self):
+        rows = []
         lines = self._generate_lines()
         intersecting_lines = self._check_intersecting_lines(lines)
         if intersecting_lines > 1:
+            # TODO: Remove offending shape.
             raise RuntimeError("Polygon shapes with more than 1 intersection point are not supported.")
-        return []
+        y_min, y_max = self._extract_global_y_limits(lines)
+        for y in range(floor(y_min), ceil(y_max) + 1):
+            x_val_pairs = self._calculate_relevant_x_value_pairs(lines, y)
+            for x_min, x_max in x_val_pairs:
+                rows.append(TableRow(spec_list=str(y), x_min=x_min, x_max=x_max))
+        return rows
+
+    @staticmethod
+    def _calculate_relevant_x_value_pairs(lines, y):
+        x_vals = []
+        for line in lines:
+            y_bounds = sorted([line.start[1], line.end[1]])
+            if y_bounds[1] > y > y_bounds[0]:
+                x = (y - line.c) / line.m
+                x_vals.append(x)
+        x_vals.sort()
+        if not len(x_vals) % 2 == 0:
+            raise ValueError("To form a close bounded shape, each spectra must have an even number of points.")
+        open_close_pairs = []
+        for i in range(0, len(x_vals), 2):
+            open_close_pairs.append((x_vals[i], x_vals[i + 1]))
+        return open_close_pairs
+
+    @staticmethod
+    def _extract_global_y_limits(lines):
+        y_min = float_info.max
+        y_max = float_info.min
+        for y_val in [y for line in lines for y in (line.start[1], line.end[1])]:
+            if y_val < y_min:
+                y_min = y_val
+            if y_val > y_max:
+                y_max = y_val
+        return y_min, y_max
 
     def _generate_lines(self):
         node_count = len(self._nodes)
@@ -115,8 +148,7 @@ class PolyCursorInfo(CursorInfoBase):
         intersecting_lines = 0
         for i in range(line_count):
             for j in range(line_count):
-                pair = [i, j]
-                pair.sort()
+                pair = sorted([i, j])
                 if i != j and pair not in cache:
                     cache.append(pair)
                     if self._intersecting_line(lines[i], lines[j]):
@@ -129,14 +161,12 @@ class PolyCursorInfo(CursorInfoBase):
         if line_1.m == line_2.m or (line_1.start == line_2.end or line_2.start == line_1.end):
             return False
         x = (line_1.c - line_2.c) / (line_2.m - line_1.m)
-        x_data = [line_1.start[0], line_1.end[0], line_2.start[0], line_2.end[0]]
-        x_data.sort()
+        x_data = sorted([line_1.start[0], line_1.end[0], line_2.start[0], line_2.end[0]])
         if not (x_data[1] < x < x_data[2]):
             return False
 
         y = line_1.m * x + line_1.c
-        y_data = [line_1.start[1], line_1.end[1], line_2.start[1], line_2.end[1]]
-        y_data.sort()
+        y_data = sorted([line_1.start[1], line_1.end[1], line_2.start[1], line_2.end[1]])
         if not (y_data[1] < y < y_data[2]):
             return False
         return True
@@ -193,4 +223,4 @@ class MaskingModel:
 
     def apply_selectors(self):
         mask_ws = self.generate_mask_table_ws(store_in_ads=False)
-        # apply mask ws to underlying workspace
+        # TODO: apply mask ws to underlying workspace
