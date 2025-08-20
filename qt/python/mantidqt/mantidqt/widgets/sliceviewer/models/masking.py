@@ -85,26 +85,22 @@ class ElliCursorInfo(RectCursorInfoBase):
 class PolyCursorInfo(CursorInfoBase):
     def __init__(self, nodes):
         super().__init__()
-        self._nodes = nodes
+        self._lines = self._generate_lines(nodes)
+        if not self._check_intersecting_lines():
+            raise RuntimeError("Polygon shapes with more than 1 intersection point are not supported.")
 
     def generate_table_rows(self):
         rows = []
-        lines = self._generate_lines()
-        intersecting_lines = self._check_intersecting_lines(lines)
-        if intersecting_lines > 1:
-            # TODO: Remove offending shape.
-            raise RuntimeError("Polygon shapes with more than 1 intersection point are not supported.")
-        y_min, y_max = self._extract_global_y_limits(lines)
+        y_min, y_max = self._extract_global_y_limits()
         for y in range(floor(y_min), ceil(y_max) + 1):
-            x_val_pairs = self._calculate_relevant_x_value_pairs(lines, y)
+            x_val_pairs = self._calculate_relevant_x_value_pairs(y)
             for x_min, x_max in x_val_pairs:
                 rows.append(TableRow(spec_list=str(y), x_min=x_min, x_max=x_max))
         return rows
 
-    @staticmethod
-    def _calculate_relevant_x_value_pairs(lines, y):
+    def _calculate_relevant_x_value_pairs(self, y):
         x_vals = []
-        for line in lines:
+        for line in self._lines:
             y_bounds = sorted([line.start[1], line.end[1]])
             if y_bounds[1] > y > y_bounds[0]:
                 x = (y - line.c) / line.m
@@ -117,22 +113,21 @@ class PolyCursorInfo(CursorInfoBase):
             open_close_pairs.append((x_vals[i], x_vals[i + 1]))
         return open_close_pairs
 
-    @staticmethod
-    def _extract_global_y_limits(lines):
+    def _extract_global_y_limits(self):
         y_min = float_info.max
         y_max = float_info.min
-        for y_val in [y for line in lines for y in (line.start[1], line.end[1])]:
+        for y_val in [y for line in self._lines for y in (line.start[1], line.end[1])]:
             if y_val < y_min:
                 y_min = y_val
             if y_val > y_max:
                 y_max = y_val
         return y_min, y_max
 
-    def _generate_lines(self):
-        node_count = len(self._nodes)
+    def _generate_lines(self, nodes):
+        node_count = len(nodes)
         lines = []
         for i in range(node_count):
-            line = (self._nodes[i].data, self._nodes[i + 1].data) if i < node_count - 1 else (self._nodes[i].data, self._nodes[0].data)
+            line = (nodes[i].data, nodes[i + 1].data) if i < node_count - 1 else (nodes[i].data, nodes[0].data)
             lines.append(self._generate_line(*line))
         return lines
 
@@ -142,8 +137,8 @@ class PolyCursorInfo(CursorInfoBase):
         c = start[1] - m * start[0]
         return Line(start=start, end=end, m=m, c=c)
 
-    def _check_intersecting_lines(self, lines):
-        line_count = len(lines)
+    def _check_intersecting_lines(self):
+        line_count = len(self._lines)
         cache = []
         intersecting_lines = 0
         for i in range(line_count):
@@ -151,9 +146,9 @@ class PolyCursorInfo(CursorInfoBase):
                 pair = sorted([i, j])
                 if i != j and pair not in cache:
                     cache.append(pair)
-                    if self._intersecting_line(lines[i], lines[j]):
+                    if self._intersecting_line(self._lines[i], self._lines[j]):
                         intersecting_lines += 1
-        return intersecting_lines
+        return intersecting_lines <= 1
 
     @staticmethod
     def _intersecting_line(line_1, line_2):

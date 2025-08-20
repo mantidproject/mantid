@@ -4,6 +4,7 @@ from abc import ABC, abstractmethod
 from mantidqt.widgets.sliceviewer.views.toolbar import ToolItemText
 from .selector import make_selector_class, cursor_info
 from mantidqt.widgets.sliceviewer.models.masking import MaskingModel
+from mantid.kernel import logger
 
 
 SHAPE_STYLE = {"alpha": 0.5, "linewidth": 1.75, "color": "black", "linestyle": "-"}
@@ -18,6 +19,7 @@ class SelectionMaskingBase(ABC):
         self._selector = None
         self._dataview = dataview
         self._model = model
+        self._clear = False
 
     @abstractmethod
     def _on_selected(self, eclick, erelease):
@@ -27,8 +29,11 @@ class SelectionMaskingBase(ABC):
         self._selector.set_active(state)
 
     def clear(self):
+        if self._clear:
+            return
         for artist in self._selector.artists:
             artist.remove()
+        self._clear = True
 
     def disconnect(self):
         self._selector.disconnect_events()
@@ -86,6 +91,7 @@ class RectangleSelectionMaskingBase(SelectionMaskingBase, ABC):
 
         # Add shape object to collection
         self._mask_drawn = True
+        self._clear = False
         self._dataview.mpl_toolbar.set_action_checked(SELECTOR_TO_TOOL_ITEM_TEXT[self.__class__], False, trigger=False)
         self.add_cursor_info(cinfo_click, cinfo_release)
 
@@ -140,9 +146,15 @@ class PolygonSelectionMasking(SelectionMaskingBase):
         :param erelease: None for polygon selector
         """
         self._mask_drawn = True
+        self._clear = False
         self._dataview.mpl_toolbar.set_action_checked(SELECTOR_TO_TOOL_ITEM_TEXT[self.__class__], False, trigger=False)
         nodes = [cursor_info(self._img, node[0], node[1]) for node in eclick]
-        self._model.add_poly_cursor_info(nodes)
+        try:
+            self._model.add_poly_cursor_info(nodes)
+        except RuntimeError as e:
+            self.clear()
+            self._mask_drawn = False
+            logger.error(str(e))
 
     def set_inactive_color(self):
         self._selector.set_props(**INACTIVE_SHAPE_STYLE)
