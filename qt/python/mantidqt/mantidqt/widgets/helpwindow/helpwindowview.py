@@ -22,7 +22,6 @@ from qtpy.QtWidgets import (
 from qtpy.QtWebEngineWidgets import QWebEngineView, QWebEngineSettings
 from qtpy.QtCore import QUrl, Qt, QEvent
 from qtpy.QtGui import QIcon, QKeySequence
-from pathlib import Path
 
 # Attempt to import QWebEnginePage in a way that works across different Qt bindings/versions
 try:
@@ -124,7 +123,7 @@ class HelpWindowView(QMainWindow):
         self.toolbar.addWidget(self.forwardButton)
 
         # Home
-        self.homeButton.setIcon(self.get_mantid_icon("home.png"))
+        self.homeButton.setIcon(QIcon(":/home.png"))
         self.homeButton.setToolTip("Go to Home Page")
         self.homeButton.clicked.connect(self.on_home_clicked)
         self.toolbar.addWidget(self.homeButton)
@@ -141,7 +140,7 @@ class HelpWindowView(QMainWindow):
 
         # Find button in toolbar
         self.findButton = QPushButton()
-        self.findButton.setIcon(self.get_mantid_icon("search.png"))
+        self.findButton.setIcon(QIcon(":/search.png"))
         self.findButton.setToolTip("Find in Page (Ctrl+F)")
         self.findButton.clicked.connect(self.show_find_toolbar)
         self.toolbar.addWidget(self.findButton)
@@ -169,22 +168,6 @@ class HelpWindowView(QMainWindow):
         self.update_navigation_buttons()
 
         QApplication.instance().installEventFilter(self)
-
-    def get_mantid_icon(self, filename):
-        """Get icon from mantid/images directory"""
-        current_file = Path(__file__).resolve()
-
-        # Find mantid root directory
-        for parent in current_file.parents:
-            if parent.name == "mantid":
-                images_dir = parent / "images"
-                icon_path = images_dir / filename
-
-                if icon_path.exists():
-                    return QIcon(str(icon_path))
-                break
-
-        return QIcon()  # Return empty if not found
 
     def setup_find_toolbar(self, parent_layout):
         """Create and setup the find toolbar widget."""
