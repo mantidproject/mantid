@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from math import floor, ceil, sqrt
-from mantid.api import WorkspaceFactory, AnalysisDataService
+from mantid.api import WorkspaceFactory, AnalysisDataService, AlgorithmManager
 from sys import float_info
 
 
@@ -173,9 +173,10 @@ class PolyCursorInfo(CursorInfoBase):
 
 
 class MaskingModel:
-    def __init__(self):
+    def __init__(self, ws_name):
         self._active_mask = None
         self._masks = []
+        self._ws_name = ws_name
 
     def update_active_mask(self, mask):
         self._active_mask = mask
@@ -223,4 +224,10 @@ class MaskingModel:
 
     def apply_selectors(self):
         mask_ws = self.generate_mask_table_ws(store_in_ads=False)
-        # TODO: apply mask ws to underlying workspace
+        alg = AlgorithmManager.create("MaskBinsFromTable")
+        alg.initialize()
+        alg.setChild(True)
+        alg.setProperty("InputWorkspace", self._ws_name)
+        alg.setProperty("OutputWorkspace", self._ws_name)
+        alg.setProperty("MaskingInformation", mask_ws)
+        alg.execute()

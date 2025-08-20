@@ -611,10 +611,12 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
 
     def export_masking_clicked(self) -> None:
         self.view.data_view.masking.export_selectors()
+        self.view.data_view.canvas.draw_idle()
 
     def apply_masking_clicked(self) -> None:
         # warn about mutating underlying data.
         self.view.data_view.masking.apply_selectors()
+        self.replace_workspace(self.model.ws.name(), self.model.ws)
 
 
 class SliceViewXAxisEditor(XAxisEditor):
