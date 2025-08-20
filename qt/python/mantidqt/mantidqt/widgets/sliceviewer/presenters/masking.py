@@ -154,6 +154,9 @@ class PolygonSelectionMasking(SelectionMaskingBase):
         except RuntimeError as e:
             self.clear()
             self._mask_drawn = False
+            self.disconnect()
+            self.set_active(False)
+            self._dataview.canvas.draw_idle()
             logger.error(str(e))
 
     def set_inactive_color(self):
