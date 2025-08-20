@@ -48,8 +48,8 @@ virtualCallInConstructor:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/IPowder
 virtualCallInConstructor:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/ParameterTie.h:42
 missingOverride:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/Run.h:39
 missingOverride:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/Workspace.h:32
-constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/Algorithm.cpp:405
-constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/Algorithm.cpp:1182
+constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/Algorithm.cpp:472
+constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/Algorithm.cpp:1249
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/AlgorithmHasProperty.cpp:36
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/BoxControllerSettingsAlgorithm.cpp:78
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/API/src/CatalogManager.cpp:54
