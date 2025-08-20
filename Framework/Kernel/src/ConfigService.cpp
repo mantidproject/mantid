@@ -1028,7 +1028,7 @@ std::string ConfigServiceImpl::getOSArchitecture() {
       osArch = "arm64_(x86_64)";
     } else {
       // TODO this can be removed after the v6.14 code freeze because the feature will be dropped
-      g_log.warning("mantid v6.14 is the last version that will support intel osx");
+      g_log.warning("Mantid v6.14 is the last version that will support Intel macOS.");
     }
   }
 #endif
