@@ -544,7 +544,7 @@ IAlgorithm_sptr RunsPresenter::setupLiveDataMonitorAlgorithm() {
   alg->setProperty("PostProcessingAlgorithm", liveDataReductionAlgorithm());
   alg->setProperty("PostProcessingProperties", liveDataReductionOptions(inputWorkspace, instrument));
   alg->setProperty("RunTransitionBehavior", "Restart");
-  auto errorMap = alg->validateInputs();
+  auto errorMap = alg->validate();
   if (!errorMap.empty()) {
     std::string errorString;
     for (auto const &kvp : errorMap)

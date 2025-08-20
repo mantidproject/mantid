@@ -225,7 +225,7 @@ public:
     ITableWorkspace_sptr timeZeroTable = createTimeZeroTable(5, timeZeros);
 
     auto alg = setUpAlgorithmWithTimeZeroTable(ws, timeZeroTable);
-    auto errors = alg->validateInputs();
+    auto errors = alg->validate();
     const auto expected = "TimeZeroTable must have as many rows as there are "
                           "spectra in InputWorkspace. Use TimeOffset to apply "
                           "same time correcton to all data";

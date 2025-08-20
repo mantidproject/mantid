@@ -851,8 +851,8 @@ public:
   void test_validateInputsWithInputWorkspaceSetToGroup() {
     // Test motivated by ensuring alg dialog opens in workbench UI in all cases
     // Workbench calls InterfaceManager::createdialogfromname when opening algorithm dialog. This calls
-    // setPropertyValue on all inputs and if they're all OK it then calls validateInputs - this is separate to and
-    // before the call to validateInputs that happens inside alg->execute()
+    // setPropertyValue on all inputs and if they're all OK it then calls validate- this is separate to and
+    // before the call to validate that happens inside alg->execute()
     auto alg = createAlgorithm();
     const double THICKNESS = 0.001; // metres
     auto inputWorkspace = SetupFlatPlateWorkspace(1, 1, 1.0, 1, 0.5, 1.0, 100 * THICKNESS, 100 * THICKNESS, THICKNESS);
@@ -865,9 +865,9 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("NeutronPathsSingle", "1"));
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("NeutronPathsMultiple", "1"));
     std::map<std::string, std::string> errs;
-    // Note: if validateInputs causes an access violation (as opposed to throwing an exception) then
+    // Note: if validate causes an access violation (as opposed to throwing an exception) then
     // TS_ASSERT_THROWS_NOTHING won't catch it
-    TS_ASSERT_THROWS_NOTHING(errs = alg->validateInputs());
+    TS_ASSERT_THROWS_NOTHING(errs = alg->validate());
     TS_ASSERT(!errs.empty());
     Mantid::API::AnalysisDataService::Instance().clear();
   }

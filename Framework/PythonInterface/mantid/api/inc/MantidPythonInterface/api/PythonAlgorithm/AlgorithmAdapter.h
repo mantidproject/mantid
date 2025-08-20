@@ -68,8 +68,6 @@ public:
   void cancel() override;
   /// A return of false will allow processing workspace groups as a whole
   bool checkGroups() override;
-  /// Returns the validateInputs result of the algorithm.
-  std::map<std::string, std::string> validateInputs() override;
   ///@}
 
   // -- Deprecated methods --
@@ -113,6 +111,8 @@ private:
   void init() override;
   /// Private exec for this algorithm
   void exec() override;
+  /// Returns the validateInputs result of the algorithm.
+  std::map<std::string, std::string> validateInputs() override;
 
   /// We don't want the base class versions
   using SuperClass::declareProperty;

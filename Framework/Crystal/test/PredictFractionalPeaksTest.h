@@ -285,7 +285,7 @@ public:
     alg.initialize();
     alg.setProperty("Peaks", WorkspaceCreationHelper::createPeaksWorkspace(0));
 
-    auto helpMsgs = alg.validateInputs();
+    auto helpMsgs = alg.validate();
 
     const auto valueIter = helpMsgs.find("Peaks");
     TS_ASSERT(valueIter != helpMsgs.cend())
@@ -303,7 +303,7 @@ public:
     alg.setProperty("Peaks", WorkspaceCreationHelper::createPeaksWorkspace(0));
     alg.setProperty("ModVector1", "0.5,0,0.5");
 
-    auto helpMsgs = alg.validateInputs();
+    auto helpMsgs = alg.validate();
 
     TS_ASSERT(helpMsgs.find("MaxOrder") != helpMsgs.cend())
   }
@@ -316,7 +316,7 @@ private:
     alg.setProperty(minName, 8.0);
     alg.setProperty(maxName, -8.0);
 
-    auto helpMsgs = alg.validateInputs();
+    auto helpMsgs = alg.validate();
 
     const auto minError = helpMsgs.find(minName);
     TS_ASSERT(minError != helpMsgs.cend())

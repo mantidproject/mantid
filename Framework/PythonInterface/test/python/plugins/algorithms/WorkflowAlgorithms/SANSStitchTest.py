@@ -35,7 +35,7 @@ class SANSStitchTest(unittest.TestCase):
         alg.setChild(True)
         alg.initialize()
         alg.setProperty("Mode", "None")
-        errors = alg.validateInputs()
+        errors = alg.validate()
         self.assertTrue("ScaleFactor" in errors)
         self.assertTrue("ShiftFactor" in errors)
 
@@ -44,7 +44,7 @@ class SANSStitchTest(unittest.TestCase):
         alg.setChild(True)
         alg.initialize()
         alg.setProperty("Mode", "ScaleOnly")
-        errors = alg.validateInputs()
+        errors = alg.validate()
         self.assertTrue("ShiftFactor" in errors)
 
     def test_fit_shift_requires_scale_factor(self):
@@ -52,7 +52,7 @@ class SANSStitchTest(unittest.TestCase):
         alg.setChild(True)
         alg.initialize()
         alg.setProperty("Mode", "ShiftOnly")
-        errors = alg.validateInputs()
+        errors = alg.validate()
         self.assertTrue("ScaleFactor" in errors)
 
     def test_workspace_entries_must_be_q1d_if_fitting_is_enabled(self):
@@ -77,7 +77,7 @@ class SANSStitchTest(unittest.TestCase):
         alg.setProperty("HABNormSample", multi_spectra_input)
         alg.setProperty("LABNormSample", multi_spectra_input)
 
-        errors = alg.validateInputs()
+        errors = alg.validate()
         self.assertTrue("HABCountsSample" in errors)
         self.assertTrue("LABCountsSample" in errors)
         self.assertTrue("HABNormSample" in errors)
@@ -106,7 +106,7 @@ class SANSStitchTest(unittest.TestCase):
         alg.setProperty("LABNormSample", single_spectra_input)
         alg.setProperty("ProcessCan", True)  # Now can workspaces should be provided
 
-        errors = alg.validateInputs()
+        errors = alg.validate()
         self.assertTrue("HABCountsCan" in errors)
         self.assertTrue("LABCountsCan" in errors)
         self.assertTrue("HABNormCan" in errors)
@@ -139,7 +139,7 @@ class SANSStitchTest(unittest.TestCase):
 
         # 2D inputs Should not be allowed for mode Both
         alg.setProperty("Mode", "Both")
-        errors = alg.validateInputs()
+        errors = alg.validate()
         self.assertTrue("HABCountsSample" in errors)
         self.assertTrue("LABCountsSample" in errors)
         self.assertTrue("HABNormSample" in errors)
@@ -147,7 +147,7 @@ class SANSStitchTest(unittest.TestCase):
 
         # 2D inputs Should not be allowed for mode ScaleOnly
         alg.setProperty("Mode", "ScaleOnly")
-        errors = alg.validateInputs()
+        errors = alg.validate()
         self.assertTrue("HABCountsSample" in errors)
         self.assertTrue("LABCountsSample" in errors)
         self.assertTrue("HABNormSample" in errors)
@@ -155,7 +155,7 @@ class SANSStitchTest(unittest.TestCase):
 
         # 2D inputs Should not be allowed for mode ShiftOnly
         alg.setProperty("Mode", "ShiftOnly")
-        errors = alg.validateInputs()
+        errors = alg.validate()
         self.assertTrue("HABCountsSample" in errors)
         self.assertTrue("LABCountsSample" in errors)
         self.assertTrue("HABNormSample" in errors)
@@ -163,7 +163,7 @@ class SANSStitchTest(unittest.TestCase):
 
         # With no fitting 2D inputs are allowed
         alg.setProperty("Mode", "None")
-        errors = alg.validateInputs()
+        errors = alg.validate()
         self.assertEqual(0, len(errors))
 
     def test_scale_none(self):
@@ -756,7 +756,7 @@ class SANSStitchTest(unittest.TestCase):
         alg.setProperty("Mode", "None")
         alg.setProperty("OutputWorkspace", "dummy_name")
 
-        errors = alg.validateInputs()
+        errors = alg.validate()
         self.assertEqual(0, len(errors))
 
         alg.execute()

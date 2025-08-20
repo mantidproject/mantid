@@ -25,11 +25,11 @@ using namespace Mantid::Algorithms;
 using namespace Mantid::API;
 
 /**
- * This is a test class that exists to test the method validateInputs()
+ * This is a test class that exists to test the method validate()
  */
 class TestAsymmetryCalc : public Mantid::Algorithms::AsymmetryCalc {
 public:
-  std::map<std::string, std::string> wrapValidateInputs() { return this->validateInputs(); }
+  std::map<std::string, std::string> wrapValidate() { return this->validate(); }
 };
 
 class AsymmetryCalcTest : public CxxTest::TestSuite {
@@ -158,7 +158,7 @@ public:
     calc.setPropertyValue("OutputWorkspace", "__Unused");
     calc.setPropertyValue("ForwardSpectra", "1");
     calc.setPropertyValue("BackwardSpectra", "2");
-    TS_ASSERT_THROWS_NOTHING(calc.wrapValidateInputs());
+    TS_ASSERT_THROWS_NOTHING(calc.wrapValidate());
     AnalysisDataService::Instance().clear();
   }
 

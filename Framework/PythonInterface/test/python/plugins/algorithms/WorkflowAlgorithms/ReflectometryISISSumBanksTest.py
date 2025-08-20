@@ -24,7 +24,7 @@ class ReflectometryISISSumBanksTest(unittest.TestCase):
         alg.initialize()
         alg.setProperty("InputWorkspace", test_ws)
 
-        issues = alg.validateInputs()
+        issues = alg.validate()
         self.assertEqual(len(issues), 0)
 
     def test_validate_inputs_fails_if_no_instrument(self):
@@ -34,7 +34,7 @@ class ReflectometryISISSumBanksTest(unittest.TestCase):
         alg.initialize()
         alg.setProperty("InputWorkspace", test_ws)
 
-        issues = alg.validateInputs()
+        issues = alg.validate()
         self.assertEqual(len(issues), 1)
         self.assertEqual(issues["InputWorkspace"], "The input workspace must have an instrument")
 
@@ -45,7 +45,7 @@ class ReflectometryISISSumBanksTest(unittest.TestCase):
         alg.initialize()
         alg.setProperty("InputWorkspace", test_ws)
 
-        issues = alg.validateInputs()
+        issues = alg.validate()
         self.assertEqual(len(issues), 1)
         self.assertEqual(issues["InputWorkspace"], "The input workspace must only contain one rectangular detector: multiple were found")
 
@@ -56,7 +56,7 @@ class ReflectometryISISSumBanksTest(unittest.TestCase):
         alg.initialize()
         alg.setProperty("InputWorkspace", test_ws)
 
-        issues = alg.validateInputs()
+        issues = alg.validate()
         self.assertEqual(len(issues), 1)
         self.assertEqual(issues["InputWorkspace"], "The input workspace must contain a rectangular detector")
 
@@ -67,7 +67,7 @@ class ReflectometryISISSumBanksTest(unittest.TestCase):
         alg.initialize()
         alg.setProperty("InputWorkspace", test_ws)
 
-        issues = alg.validateInputs()
+        issues = alg.validate()
         self.assertEqual(len(issues), 0)
 
     def test_no_summing_done_on_single_bank(self):

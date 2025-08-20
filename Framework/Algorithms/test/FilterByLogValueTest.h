@@ -70,13 +70,13 @@ public:
 
     // Check protest when non-existent log is set
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("LogName", "NotThere"));
-    auto errorMap = alg.validateInputs();
+    auto errorMap = alg.validate();
     TS_ASSERT_EQUALS(errorMap.size(), 1);
     TS_ASSERT_EQUALS(errorMap.begin()->first, "LogName");
 
     // Check protest when single-value log is set
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("LogName", "SingleValue"));
-    errorMap = alg.validateInputs();
+    errorMap = alg.validate();
     TS_ASSERT_EQUALS(errorMap.size(), 1);
     TS_ASSERT_EQUALS(errorMap.begin()->first, "LogName");
 
@@ -84,14 +84,14 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("LogName", "TSP"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("MinimumValue", 2.0));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("MaximumValue", 1.0));
-    errorMap = alg.validateInputs();
+    errorMap = alg.validate();
     TS_ASSERT_EQUALS(errorMap.size(), 2);
     TS_ASSERT_EQUALS(errorMap.begin()->first, "MaximumValue");
     TS_ASSERT_EQUALS(errorMap.rbegin()->first, "MinimumValue");
 
     // Check it's happy when that's been remedied
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("MaximumValue", 3.0));
-    errorMap = alg.validateInputs();
+    errorMap = alg.validate();
     TS_ASSERT(errorMap.empty());
   }
 

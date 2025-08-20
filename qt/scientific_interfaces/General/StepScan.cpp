@@ -150,7 +150,7 @@ void StepScan::startLiveListener() {
   startLiveData->setProperty("Instrument", m_instrument);
   m_inputWSName = "__live";
   startLiveData->setProperty("OutputWorkspace", m_inputWSName);
-  if (!startLiveData->validateInputs().empty()) {
+  if (!startLiveData->validate().empty()) {
     QMessageBox::critical(this, "StartLiveData failed", "Unable to start live data collection");
     m_uiForm.mWRunFiles->liveButtonSetChecked(false);
     return;

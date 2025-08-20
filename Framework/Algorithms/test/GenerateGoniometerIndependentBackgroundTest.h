@@ -79,19 +79,19 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
 
-    auto issues = alg.validateInputs();
+    auto issues = alg.validate();
     TS_ASSERT_EQUALS(issues.size(), 1)
     TS_ASSERT_EQUALS(issues["InputWorkspaces"], "Requires at least 2 input workspaces")
 
     // single input workspace
     alg.setProperty("InputWorkspaces", std::vector<std::string>({"ws1"}));
-    issues = alg.validateInputs();
+    issues = alg.validate();
     TS_ASSERT_EQUALS(issues.size(), 1)
     TS_ASSERT_EQUALS(issues["InputWorkspaces"], "Requires at least 2 input workspaces")
 
     // two workspaces should have no issues
     alg.setProperty("InputWorkspaces", std::vector<std::string>({"ws1", "ws2"}));
-    issues = alg.validateInputs();
+    issues = alg.validate();
     TS_ASSERT_EQUALS(issues.size(), 0)
   }
 
@@ -101,7 +101,7 @@ public:
     TS_ASSERT(alg.isInitialized())
     alg.setProperty("InputWorkspaces", std::vector<std::string>({"ws1", "highPC"}));
 
-    auto issues = alg.validateInputs();
+    auto issues = alg.validate();
     TS_ASSERT_EQUALS(issues.size(), 1)
     TS_ASSERT_EQUALS(issues["InputWorkspaces"], "Proton charge must not vary more than 1%")
   }
@@ -112,7 +112,7 @@ public:
     TS_ASSERT(alg.isInitialized())
     alg.setProperty("InputWorkspaces", std::vector<std::string>({"ws1", "diffNumHist"}));
 
-    auto issues = alg.validateInputs();
+    auto issues = alg.validate();
     TS_ASSERT_EQUALS(issues.size(), 1)
     TS_ASSERT_EQUALS(issues["InputWorkspaces"], "Number of spectra mismatch.")
   }
@@ -123,7 +123,7 @@ public:
     TS_ASSERT(alg.isInitialized())
     alg.setProperty("InputWorkspaces", std::vector<std::string>({"ws1", "diffNumBins"}));
 
-    auto issues = alg.validateInputs();
+    auto issues = alg.validate();
     TS_ASSERT_EQUALS(issues.size(), 1)
     TS_ASSERT_EQUALS(issues["InputWorkspaces"], "Size mismatch.")
   }
@@ -134,7 +134,7 @@ public:
     TS_ASSERT(alg.isInitialized())
     alg.setProperty("InputWorkspaces", std::vector<std::string>({"ws1", "diffInstrument"}));
 
-    auto issues = alg.validateInputs();
+    auto issues = alg.validate();
     TS_ASSERT_EQUALS(issues.size(), 1)
     TS_ASSERT_EQUALS(issues["InputWorkspaces"], "Instrument name mismatch.")
   }
@@ -145,7 +145,7 @@ public:
     TS_ASSERT(alg.isInitialized())
     alg.setProperty("InputWorkspaces", std::vector<std::string>({"ws1", "histogram"}));
 
-    auto issues = alg.validateInputs();
+    auto issues = alg.validate();
     TS_ASSERT_EQUALS(issues.size(), 1)
     TS_ASSERT_EQUALS(issues["InputWorkspaces"], "Workspace \"histogram\" is not an EventWorkspace")
   }
@@ -158,7 +158,7 @@ public:
     alg.setProperty("PercentMin", 75.);
     alg.setProperty("PercentMax", 25.);
 
-    auto issues = alg.validateInputs();
+    auto issues = alg.validate();
     TS_ASSERT_EQUALS(issues.size(), 2)
     TS_ASSERT_EQUALS(issues["PercentMin"], "PercentMin must be less than PercentMax")
     TS_ASSERT_EQUALS(issues["PercentMax"], "PercentMin must be less than PercentMax")

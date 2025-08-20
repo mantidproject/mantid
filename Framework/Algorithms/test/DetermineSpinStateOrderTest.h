@@ -94,7 +94,7 @@ public:
     alg.initialize();
     alg.setProperty("InputWorkspace", wsGroupOsiris);
 
-    auto errors = alg.validateInputs();
+    auto errors = alg.validate();
     TS_ASSERT(!errors.empty())
     TS_ASSERT_EQUALS(errors["InputWorkspace"], "Sub workspaces must be data from either LARMOR or ZOOM when "
                                                "SpinFlipperLogName or SpinFlipperAverageCurrent are not provided")

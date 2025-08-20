@@ -71,18 +71,18 @@ public:
     alg.setPropertyValue("LatticeSpacingMax", "2.0");
 
     // dMax is larger than dMin
-    std::map<std::string, std::string> errorMap = alg.validateInputs();
+    std::map<std::string, std::string> errorMap = alg.validate();
     TS_ASSERT_EQUALS(errorMap.size(), 0);
 
     alg.setPropertyValue("LatticeSpacingMax", "0.5");
     // now it's smaller - not allowed
-    errorMap = alg.validateInputs();
+    errorMap = alg.validate();
     TS_ASSERT_EQUALS(errorMap.size(), 1);
 
     errorMap.clear();
 
     alg.setPropertyValue("LatticeSpacingMax", "-0.5");
-    errorMap = alg.validateInputs();
+    errorMap = alg.validate();
     TS_ASSERT_EQUALS(errorMap.size(), 1)
   }
 

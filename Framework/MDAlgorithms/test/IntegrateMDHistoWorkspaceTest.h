@@ -56,7 +56,7 @@ public:
     std::vector<double> p1BinVec = {(0.0), (step), (1.0)};
     alg.setProperty("P1Bin", p1BinVec);
     alg.setPropertyValue("OutputWorkspace", "dummy");
-    TSM_ASSERT("Expect validation errors", alg.validateInputs().size() > 0);
+    TSM_ASSERT("Expect validation errors", alg.validate().size() > 0);
     TSM_ASSERT_THROWS("No new steps allowed", alg.execute(), std::runtime_error &);
   }
 
@@ -77,14 +77,14 @@ public:
     double max = min;
     std::vector<double> p1BinVec = {min, max};
     alg.setProperty("P1Bin", p1BinVec);
-    TSM_ASSERT("Expect validation errors", alg.validateInputs().size() > 0);
+    TSM_ASSERT("Expect validation errors", alg.validate().size() > 0);
     TSM_ASSERT_THROWS("Incorrect limits", alg.execute(), std::runtime_error &);
 
     // Test less than
     max = min - 0.01;
     p1BinVec = {min, max};
     alg.setProperty("P1Bin", p1BinVec);
-    TSM_ASSERT("Expect validation errors", alg.validateInputs().size() > 0);
+    TSM_ASSERT("Expect validation errors", alg.validate().size() > 0);
     TSM_ASSERT_THROWS("Incorrect limits", alg.execute(), std::runtime_error &);
   }
 
@@ -105,21 +105,21 @@ public:
     double max = min;
     std::vector<double> p1BinVec = {min, step, max};
     alg.setProperty("P1Bin", p1BinVec);
-    TSM_ASSERT("Expect validation errors", alg.validateInputs().size() > 0);
+    TSM_ASSERT("Expect validation errors", alg.validate().size() > 0);
     TSM_ASSERT_THROWS("Incorrect limits", alg.execute(), std::runtime_error &);
 
     // Test less than
     max = min - 0.01;
     p1BinVec = {min, max};
     alg.setProperty("P1Bin", p1BinVec);
-    TSM_ASSERT("Expect validation errors", alg.validateInputs().size() > 0);
+    TSM_ASSERT("Expect validation errors", alg.validate().size() > 0);
     TSM_ASSERT_THROWS("Incorrect limits", alg.execute(), std::runtime_error &);
 
     // Test non-zero step. ZERO means copy!
     max = min - 0.01;
     p1BinVec = {min, max};
     alg.setProperty("P1Bin", p1BinVec);
-    TSM_ASSERT("Expect validation errors", alg.validateInputs().size() > 0);
+    TSM_ASSERT("Expect validation errors", alg.validate().size() > 0);
     TSM_ASSERT_THROWS("Step has been specified", alg.execute(), std::runtime_error &);
   }
 

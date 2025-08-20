@@ -310,7 +310,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("HalfWidth", 1.0))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Start", 9.0))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("End", 2.0))
-    const auto issues = alg.validateInputs();
+    const auto issues = alg.validate();
     const auto it = issues.find("Start");
     TS_ASSERT_DIFFERS(it, issues.end())
   }

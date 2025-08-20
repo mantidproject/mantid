@@ -24,11 +24,11 @@ using namespace Mantid;
 using namespace Mantid::API;
 
 /**
- * This is a test class that exists to test the method validateInputs()
+ * This is a test class that exists to test the method validate()
  */
 class TestFFT : public Mantid::Algorithms::FFT {
 public:
-  std::map<std::string, std::string> wrapValidateInputs() { return this->validateInputs(); }
+  std::map<std::string, std::string> wrapValidate() { return this->validate(); }
 };
 
 class FFTTest : public CxxTest::TestSuite {
@@ -542,7 +542,7 @@ public:
     fft.setPropertyValue("OutputWorkspace", "__NotUsed");
     fft.setPropertyValue("Real", "0");
     fft.setPropertyValue("Imaginary", "0");
-    TS_ASSERT_THROWS_NOTHING(fft.wrapValidateInputs());
+    TS_ASSERT_THROWS_NOTHING(fft.wrapValidate());
     AnalysisDataService::Instance().clear();
   }
 

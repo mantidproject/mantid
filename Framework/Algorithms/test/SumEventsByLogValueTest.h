@@ -59,25 +59,25 @@ public:
 
     // Check protest when non-existent log is set
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("LogName", "NotThere"));
-    auto errorMap = alg.validateInputs();
+    auto errorMap = alg.validate();
     TS_ASSERT_EQUALS(errorMap.size(), 1);
     TS_ASSERT_EQUALS(errorMap.begin()->first, "LogName");
 
     // Check protest when single-value log is set
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("LogName", "SingleValue"));
-    errorMap = alg.validateInputs();
+    errorMap = alg.validate();
     TS_ASSERT_EQUALS(errorMap.size(), 1);
     TS_ASSERT_EQUALS(errorMap.begin()->first, "LogName");
 
     // Check protest when empty tsp log given
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("LogName", "emptyTSP"));
-    errorMap = alg.validateInputs();
+    errorMap = alg.validate();
     TS_ASSERT_EQUALS(errorMap.size(), 1);
     TS_ASSERT_EQUALS(errorMap.begin()->first, "LogName");
 
     // Check it's happy when a non-empty tsp is given
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("LogName", "TSP"));
-    errorMap = alg.validateInputs();
+    errorMap = alg.validate();
     TS_ASSERT(errorMap.empty());
   }
 

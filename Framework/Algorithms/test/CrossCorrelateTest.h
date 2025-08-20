@@ -192,7 +192,7 @@ public:
     alg.setProperty("WorkspaceIndexMax", 1);
     alg.setProperty("XMin", 2.0);
     alg.setProperty("XMax", 2.0);
-    auto errorMap = alg.validateInputs();
+    auto errorMap = alg.validate();
     TS_ASSERT_EQUALS(errorMap.size(), 2);
     TS_ASSERT_EQUALS(errorMap.count("XMin"), 1);
     TS_ASSERT_EQUALS(errorMap.count("XMax"), 1);
@@ -206,7 +206,7 @@ public:
     alg.setProperty("WorkspaceIndexMax", 1);
     alg.setProperty("XMin", 3.0);
     alg.setProperty("XMax", 2.0);
-    auto errorMap = alg.validateInputs();
+    auto errorMap = alg.validate();
     TS_ASSERT_EQUALS(errorMap.size(), 2);
     TS_ASSERT_EQUALS(errorMap.count("XMin"), 1);
     TS_ASSERT_EQUALS(errorMap.count("XMax"), 1);
@@ -220,7 +220,7 @@ public:
     alg.setProperty("WorkspaceIndexMax", 1);
     alg.setProperty("XMin", 2.0);
     alg.setProperty("XMax", 3.0);
-    auto errorMap = alg.validateInputs();
+    auto errorMap = alg.validate();
     TS_ASSERT_EQUALS(errorMap.size(), 2);
     TS_ASSERT_EQUALS(errorMap.count("WorkspaceIndexMin"), 1);
     TS_ASSERT_EQUALS(errorMap.count("WorkspaceIndexMax"), 1);
@@ -234,7 +234,7 @@ public:
     alg.setProperty("WorkspaceIndexMax", 1);
     alg.setProperty("XMin", 2.0);
     alg.setProperty("XMax", 3.0);
-    auto errorMap = alg.validateInputs();
+    auto errorMap = alg.validate();
     TS_ASSERT_EQUALS(errorMap.size(), 2);
     TS_ASSERT_EQUALS(errorMap.count("WorkspaceIndexMin"), 1);
     TS_ASSERT_EQUALS(errorMap.count("WorkspaceIndexMax"), 1);
@@ -249,7 +249,7 @@ public:
     alg.setProperty("WorkspaceIndexMin", 1);
     alg.setProperty("WorkspaceIndexMax", 2);
     alg.setProperty("WorkspaceIndexList", "1,2,3");
-    auto errorMap = alg.validateInputs();
+    auto errorMap = alg.validate();
     TS_ASSERT_EQUALS(errorMap.size(), 3);
     TS_ASSERT_EQUALS(errorMap.count("WorkspaceIndexMin"), 1);
     TS_ASSERT_EQUALS(errorMap.count("WorkspaceIndexMax"), 1);

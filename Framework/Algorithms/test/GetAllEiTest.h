@@ -165,11 +165,11 @@ public:
     TSM_ASSERT_THROWS("should throw runtime error on validation as no "
                       "appropriate logs are defined",
                       m_getAllEi.execute(), const std::runtime_error &);
-    auto log_messages = m_getAllEi.validateInputs();
+    auto log_messages = m_getAllEi.validate();
     TSM_ASSERT_EQUALS("Two logs should fail", log_messages.size(), 2);
     // add invalid property type
     ws->mutableRun().addLogData(new Kernel::PropertyWithValue<double>("Chopper_Speed", 10.));
-    auto log_messages2 = m_getAllEi.validateInputs();
+    auto log_messages2 = m_getAllEi.validate();
     TSM_ASSERT_EQUALS("Two logs should fail", log_messages2.size(), 2);
 
     TSM_ASSERT_DIFFERS("should fail for different reason ", log_messages["ChopperSpeedLog"],
@@ -177,18 +177,18 @@ public:
     // add correct property type:
     ws->mutableRun().clearLogs();
     ws->mutableRun().addLogData(new Kernel::TimeSeriesProperty<double>("Chopper_Speed"));
-    log_messages = m_getAllEi.validateInputs();
+    log_messages = m_getAllEi.validate();
     TSM_ASSERT_EQUALS("One log should fail", log_messages.size(), 1);
     TSM_ASSERT("Filter log is not provided ", !m_getAllEi.filterLogProvided());
     ws->mutableRun().addLogData(new Kernel::TimeSeriesProperty<double>("Chopper_Delay"));
     ws->mutableRun().addLogData(new Kernel::TimeSeriesProperty<double>("proton_charge"));
-    log_messages = m_getAllEi.validateInputs();
+    log_messages = m_getAllEi.validate();
 
     TSM_ASSERT_EQUALS("All logs are defined", log_messages.size(), 0);
     TSM_ASSERT("Filter log is provided ", m_getAllEi.filterLogProvided());
 
     m_getAllEi.setProperty("Monitor1SpecID", 3);
-    log_messages = m_getAllEi.validateInputs();
+    log_messages = m_getAllEi.validate();
     TSM_ASSERT_EQUALS("Workspace should not have spectra with ID=3", log_messages.size(), 1);
   }
   //
@@ -258,7 +258,7 @@ public:
 
     // Run validate as this will set up property, which indicates filter log
     // presence
-    auto errors = m_getAllEi.validateInputs();
+    auto errors = m_getAllEi.validate();
     TSM_ASSERT_EQUALS("All logs are defined now", errors.size(), 0);
 
     double chop_speed, chop_delay;
@@ -272,7 +272,7 @@ public:
     }
 
     ws->mutableRun().addProperty(goodFram.release(), true);
-    errors = m_getAllEi.validateInputs();
+    errors = m_getAllEi.validate();
     TSM_ASSERT_EQUALS("All logs are defined now", errors.size(), 0);
 
     m_getAllEi.find_chop_speed_and_delay(ws, chop_speed, chop_delay);
@@ -317,7 +317,7 @@ public:
 
     // Run validate as this will set up property, which indicates filter log
     // presence
-    auto errors = m_getAllEi.validateInputs();
+    auto errors = m_getAllEi.validate();
     TSM_ASSERT_EQUALS("All logs are defined now", errors.size(), 0);
 
     double chop_speed, chop_delay;

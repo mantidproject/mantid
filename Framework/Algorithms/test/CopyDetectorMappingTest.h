@@ -73,7 +73,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(copyMapping.setPropertyValue("WorkspaceToMatch", "to_match"));
     TS_ASSERT_THROWS_NOTHING(copyMapping.setPropertyValue("WorkspaceToRemap", "to_remap"));
 
-    auto validationIssues = copyMapping.validateInputs();
+    auto validationIssues = copyMapping.validate();
     TS_ASSERT_DIFFERS(validationIssues.size(), 0);
 
     TS_ASSERT_THROWS_ANYTHING(copyMapping.execute());

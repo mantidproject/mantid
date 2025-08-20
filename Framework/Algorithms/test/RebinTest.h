@@ -110,7 +110,7 @@ public:
     rebin.initialize();
     rebin.setProperty("Params", std::vector<double>{1.0, -1.0, 10.0});
     rebin.setProperty("Power", 0.5);
-    auto errmsgs = rebin.validateInputs();
+    auto errmsgs = rebin.validate();
     auto errmsg = errmsgs.find("Params");
     TS_ASSERT(errmsg != errmsgs.end());
     TS_ASSERT(errmsg->second.substr(0, 20) == "Provided width value");
@@ -837,7 +837,7 @@ public:
     rebin.initialize();
     rebin.setProperty("Params", std::vector<double>{1.2, 1.2, 12.22});
     rebin.setPropertyValue("BinningMode", "Power");
-    auto errmsgs = rebin.validateInputs();
+    auto errmsgs = rebin.validate();
     auto errmsg = errmsgs.find("Power");
     TS_ASSERT(errmsg != errmsgs.end());
     TS_ASSERT(errmsg->second.substr(0, 35) == "The binning mode was set to 'Power'");
@@ -853,7 +853,7 @@ public:
     rebin.setProperty("InputWorkspace", "ws1");
     rebin.setProperty("Params", std::vector<double>{-1.0, 1.0, 1000.0});
     rebin.setProperty("BinningMode", "Logarithmic");
-    auto errmsgs = rebin.validateInputs();
+    auto errmsgs = rebin.validate();
     TS_ASSERT(!errmsgs.empty());
     auto errmsg = errmsgs.find("Params");
     TS_ASSERT(errmsg != errmsgs.end());
@@ -928,7 +928,7 @@ public:
     rebin.setProperty("BinningMode", binMode);
     if (binMode == "Power")
       rebin.setProperty("Power", 0.5);
-    auto errmsgs = rebin.validateInputs();
+    auto errmsgs = rebin.validate();
     TS_ASSERT(errmsgs.empty());
     // exactly one of these will be true, the other false
     bool validatedRvrs = rebin.getProperty("UseReverseLogarithmic");
@@ -971,7 +971,7 @@ public:
     rebin.setProperty("Params", std::vector<double>{1.2, -1.2, 12.22});
     rebin.setProperty("UseReverseLogarithmic", true);
     rebin.setProperty("BinningMode", "ReverseLogarithmic");
-    auto errmsgs = rebin.validateInputs();
+    auto errmsgs = rebin.validate();
     TS_ASSERT(errmsgs.empty());
     // assert this is still true
     TS_ASSERT(bool(rebin.getProperty("UseReverseLogarithmic")));
@@ -1018,7 +1018,7 @@ public:
     rebin.setPropertyValue("BinningMode", binMode);
     if (binMode == "Power")
       rebin.setProperty("Power", 0.5);
-    auto errmsgs = rebin.validateInputs();
+    auto errmsgs = rebin.validate();
     TS_ASSERT(errmsgs.empty());
 
     std::vector<double> rbParams = rebin.getProperty("Params");
@@ -1065,7 +1065,7 @@ public:
     rebin.setProperty("Params", std::vector<double>{1.0, step, 10.0});
     rebin.setProperty("Power", 0.5);
     rebin.setPropertyValue("BinningMode", binMode);
-    auto errmsgs = rebin.validateInputs();
+    auto errmsgs = rebin.validate();
     TS_ASSERT(errmsgs.empty());
     // ensure that power was unset
     TS_ASSERT(double(rebin.getProperty("Power")) == 0.0);
@@ -1443,7 +1443,7 @@ public:
     rebin.setProperty("InputWorkspace", groupWsName);
     rebin.setPropertyValue("OutputWorkspace", "output");
     rebin.setProperty("Params", "1,1,10");
-    auto errors = rebin.validateInputs();
+    auto errors = rebin.validate();
     TS_ASSERT_EQUALS(0, errors.size());
     TS_ASSERT(rebin.execute());
     TS_ASSERT(rebin.isExecuted());

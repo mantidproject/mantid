@@ -27,11 +27,11 @@ using Mantid::MantidVec;
 const std::string outputName = "MuonRemoveExpDecay_Output";
 
 /**
- * This is a test class that exists to test the method validateInputs()
+ * This is a test class that exists to test the method validate()
  */
 class TestCalMuonDetectorPhases : public Mantid::Algorithms::CalMuonDetectorPhases {
 public:
-  std::map<std::string, std::string> wrapValidateInputs() { return this->validateInputs(); }
+  std::map<std::string, std::string> wrapValidate() { return this->validate(); }
 };
 
 class CalMuonDetectorPhasesTest : public CxxTest::TestSuite {
@@ -109,7 +109,7 @@ public:
     calc.setPropertyValue("DetectorTable", "tab");
     calc.setProperty("ForwardSpectra", std::vector<int>{1});
     calc.setProperty("BackwardSpectra", std::vector<int>{2});
-    TS_ASSERT_THROWS_NOTHING(calc.wrapValidateInputs());
+    TS_ASSERT_THROWS_NOTHING(calc.wrapValidate());
     AnalysisDataService::Instance().clear();
   }
 

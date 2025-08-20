@@ -510,7 +510,7 @@ public:
 
   void assert_helpmsgs_error_from_validate_inputs(std::shared_ptr<IndexPeaks> alg, std::string prop,
                                                   std::string err_substring) {
-    auto helpMsgs = alg->validateInputs();
+    auto helpMsgs = alg->validate();
 
     const auto valueIter = helpMsgs.find(prop);
     TS_ASSERT(valueIter != helpMsgs.cend())

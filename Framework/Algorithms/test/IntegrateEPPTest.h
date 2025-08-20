@@ -181,7 +181,7 @@ public:
 
     // Make sure validateInputs doesn't throw for a WorkspaceGroup input.
     Algorithm &baseAlg = alg;
-    TS_ASSERT_THROWS_NOTHING(baseAlg.validateInputs());
+    TS_ASSERT_THROWS_NOTHING(baseAlg.validate());
 
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());

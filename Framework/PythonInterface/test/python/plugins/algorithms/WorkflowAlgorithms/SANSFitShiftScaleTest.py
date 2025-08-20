@@ -34,7 +34,7 @@ class SANSFitShiftScaleTest(unittest.TestCase):
         alg.setChild(True)
         alg.initialize()
         alg.setProperty("Mode", "None")
-        errors = alg.validateInputs()
+        errors = alg.validate()
         self.assertTrue("ScaleFactor" in errors)
         self.assertTrue("ShiftFactor" in errors)
 
@@ -43,7 +43,7 @@ class SANSFitShiftScaleTest(unittest.TestCase):
         alg.setChild(True)
         alg.initialize()
         alg.setProperty("Mode", "ScaleOnly")
-        errors = alg.validateInputs()
+        errors = alg.validate()
         self.assertTrue("ShiftFactor" in errors)
 
     def test_fit_shift_requires_scale_factor(self):
@@ -51,7 +51,7 @@ class SANSFitShiftScaleTest(unittest.TestCase):
         alg.setChild(True)
         alg.initialize()
         alg.setProperty("Mode", "ShiftOnly")
-        errors = alg.validateInputs()
+        errors = alg.validate()
         self.assertTrue("ScaleFactor" in errors)
 
     def test_workspace_entries_must_be_q1d(self):
@@ -74,7 +74,7 @@ class SANSFitShiftScaleTest(unittest.TestCase):
         alg.setProperty("HABWorkspace", multi_spectra_input)
         alg.setProperty("LABWorkspace", multi_spectra_input)
 
-        errors = alg.validateInputs()
+        errors = alg.validate()
         self.assertTrue("HABWorkspace" in errors)
         self.assertTrue("LABWorkspace" in errors)
 

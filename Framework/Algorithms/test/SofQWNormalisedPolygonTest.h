@@ -386,7 +386,7 @@ public:
     auto inputWS = SofQWTest::loadTestFile();
     const auto twoThetaRanges = createTableWorkspace(dataTypes, static_cast<int>(inputWS->getNumberHistograms()));
     const IAlgorithm_sptr alg = setUpAlg(inputWS, twoThetaRanges);
-    auto results = alg->validateInputs();
+    auto results = alg->validate();
     TS_ASSERT_EQUALS(results["DetectorTwoThetaRanges"], "DetectorTwoThetaRanges requires 3 columns");
   }
 
@@ -395,7 +395,7 @@ public:
     auto inputWS = SofQWTest::loadTestFile();
     const auto twoThetaRanges = createTableWorkspace(dataTypes, static_cast<int>(inputWS->getNumberHistograms()));
     const IAlgorithm_sptr alg = setUpAlg(inputWS, twoThetaRanges);
-    auto results = alg->validateInputs();
+    auto results = alg->validate();
     TS_ASSERT_EQUALS(results["DetectorTwoThetaRanges"], "DetectorTwoThetaRanges requires 3 columns");
   }
 
@@ -404,7 +404,7 @@ public:
     auto inputWS = SofQWTest::loadTestFile();
     const auto twoThetaRanges = createTableWorkspace(dataTypes, static_cast<int>(inputWS->getNumberHistograms()));
     const IAlgorithm_sptr alg = setUpAlg(inputWS, twoThetaRanges);
-    auto results = alg->validateInputs();
+    auto results = alg->validate();
     TS_ASSERT_EQUALS(results["DetectorTwoThetaRanges"],
                      "The first column of DetectorTwoThetaRanges should be of type int");
   }
@@ -414,7 +414,7 @@ public:
     auto inputWS = SofQWTest::loadTestFile();
     const auto twoThetaRanges = createTableWorkspace(dataTypes, static_cast<int>(inputWS->getNumberHistograms()));
     const IAlgorithm_sptr alg = setUpAlg(inputWS, twoThetaRanges);
-    auto results = alg->validateInputs();
+    auto results = alg->validate();
     TS_ASSERT_EQUALS(results["DetectorTwoThetaRanges"],
                      "The second column of DetectorTwoThetaRanges should be of type double");
   }
@@ -424,7 +424,7 @@ public:
     auto inputWS = SofQWTest::loadTestFile();
     const auto twoThetaRanges = createTableWorkspace(dataTypes, static_cast<int>(inputWS->getNumberHistograms()));
     const IAlgorithm_sptr alg = setUpAlg(inputWS, twoThetaRanges);
-    auto results = alg->validateInputs();
+    auto results = alg->validate();
     TS_ASSERT_EQUALS(results["DetectorTwoThetaRanges"],
                      "The third column of DetectorTwoThetaRanges should be of type double");
   }
@@ -434,7 +434,7 @@ public:
     auto inputWS = SofQWTest::loadTestFile();
     const auto twoThetaRanges = createTableWorkspace(dataTypes, static_cast<int>(inputWS->getNumberHistograms() + 1));
     const IAlgorithm_sptr alg = setUpAlg(inputWS, twoThetaRanges);
-    auto results = alg->validateInputs();
+    auto results = alg->validate();
     TS_ASSERT_EQUALS(results["DetectorTwoThetaRanges"],
                      "The table and workspace do not have the same number of detectors");
   }

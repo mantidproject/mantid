@@ -44,7 +44,7 @@ public:
   void testValidateInputsWithDefaultsPasses() {
     Mantid::Algorithms::SumSpectra runner;
     runner.initialize();
-    auto validationErrors = runner.validateInputs();
+    auto validationErrors = runner.validate();
     TS_ASSERT(validationErrors.empty());
   }
 
@@ -53,7 +53,7 @@ public:
     runner.initialize();
     runner.setProperty("StartWorkspaceIndex", 10);
     runner.setProperty("EndWorkspaceIndex", 9);
-    auto validationErrors = runner.validateInputs();
+    auto validationErrors = runner.validate();
     TS_ASSERT_EQUALS(2, validationErrors.size());
     TSM_ASSERT_THROWS_NOTHING("Validation errors should contain a StartWorkspaceIndex entry",
                               validationErrors["StartWorkspaceIndex"]);
@@ -70,7 +70,7 @@ public:
     // bad start workspace index
     runner.setProperty("InputWorkspace", testWS);
     runner.setProperty("StartWorkspaceIndex", 3);
-    auto validationErrors = runner.validateInputs();
+    auto validationErrors = runner.validate();
     TS_ASSERT_EQUALS(1, validationErrors.size());
     TSM_ASSERT_THROWS_NOTHING("Validation errors should contain a StartWorkspaceIndex entry",
                               validationErrors["StartWorkspaceIndex"]);
@@ -78,7 +78,7 @@ public:
     // bad end workspace index
     runner.setProperty("StartWorkspaceIndex", 0);
     runner.setProperty("EndWorkspaceIndex", 5);
-    validationErrors = runner.validateInputs();
+    validationErrors = runner.validate();
     TS_ASSERT_EQUALS(1, validationErrors.size());
     TSM_ASSERT_THROWS_NOTHING("Validation errors should contain a EndWorkspaceIndex entry",
                               validationErrors["EndWorkspaceIndex"]);
@@ -92,7 +92,7 @@ public:
     auto testGroup = WorkspaceCreationHelper::createWorkspaceGroup(2, 1, 1, nameStem);
     runner.setProperty("InputWorkspace", nameStem);
 
-    auto validationErrors = runner.validateInputs();
+    auto validationErrors = runner.validate();
     TS_ASSERT(validationErrors.empty());
 
     Mantid::API::AnalysisDataService::Instance().remove(nameStem);
@@ -107,7 +107,7 @@ public:
     runner.setPropertyValue("InputWorkspace", nameStem);
     runner.setProperty("StartWorkspaceIndex", 11);
 
-    auto validationErrors = runner.validateInputs();
+    auto validationErrors = runner.validate();
     TS_ASSERT_EQUALS(1, validationErrors.size());
     TSM_ASSERT_THROWS_NOTHING("Validation errors should contain StartWorkspaceIndex",
                               validationErrors["StartWorkspaceIndex"]);

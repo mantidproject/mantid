@@ -62,7 +62,7 @@ public:
     AnalysisDataService::Instance().remove(outWSName);
   }
 
-  void test_validateInputs() {
+  void test_validate() {
     FacilityHelper::ScopedFacilities loadTESTFacility("unit_testing/UnitTestFacilities.xml", "TEST");
 
     LiveDataAlgorithmImpl alg;
@@ -72,23 +72,23 @@ public:
 
     alg.setPropertyValue("Instrument", "FakeEventDataListener");
 
-    TSM_ASSERT("No OutputWorkspace", !alg.validateInputs()["OutputWorkspace"].empty());
+    TSM_ASSERT("No OutputWorkspace", !alg.validate()["OutputWorkspace"].empty());
     alg.setPropertyValue("OutputWorkspace", "out_ws");
-    TSM_ASSERT("Is OK now", alg.validateInputs().empty());
+    TSM_ASSERT("Is OK now", alg.validate().empty());
 
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("PostProcessingScript", "Pause(1)"));
     TS_ASSERT(alg.hasPostProcessing());
 
-    TSM_ASSERT("No AccumulationWorkspace", !alg.validateInputs()["AccumulationWorkspace"].empty());
+    TSM_ASSERT("No AccumulationWorkspace", !alg.validate()["AccumulationWorkspace"].empty());
     alg.setPropertyValue("AccumulationWorkspace", "accum_ws");
-    TSM_ASSERT("Is OK now", alg.validateInputs().empty());
+    TSM_ASSERT("Is OK now", alg.validate().empty());
 
     alg.setPropertyValue("AccumulationWorkspace", "out_ws");
-    TSM_ASSERT("AccumulationWorkspace == OutputWorkspace", !alg.validateInputs()["AccumulationWorkspace"].empty());
+    TSM_ASSERT("AccumulationWorkspace == OutputWorkspace", !alg.validate()["AccumulationWorkspace"].empty());
 
     alg.setPropertyValue("Instrument", "TESTHISTOLISTENER");
     alg.setPropertyValue("AccumulationMethod", "Add");
-    TSM_ASSERT("Shouldn't add histograms", !alg.validateInputs()["AccumulationMethod"].empty());
+    TSM_ASSERT("Shouldn't add histograms", !alg.validate()["AccumulationMethod"].empty());
   }
 
   /** Test creating the processing algorithm.

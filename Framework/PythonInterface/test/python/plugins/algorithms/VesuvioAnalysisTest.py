@@ -53,7 +53,7 @@ class VesuvioAnalysisTest(unittest.TestCase):
     def test_no_elements(self):
         alg = self.set_up_alg()
         alg.setProperty("Spectra", [135, 182])
-        errors = alg.validateInputs()
+        errors = alg.validate()
         self.assertTrue("ComptonProfile" in errors)
         self.assertEqual(len(errors), 1)
 
@@ -75,7 +75,7 @@ class VesuvioAnalysisTest(unittest.TestCase):
         alg = self.set_up_alg()
         alg.setProperty("Spectra", [135, 182])
         alg.setProperty("ComptonProfile", table)
-        errors = alg.validateInputs()
+        errors = alg.validate()
         self.assertTrue("ComptonProfile" in errors)
         self.assertEqual(len(errors), 1)
 
@@ -89,7 +89,7 @@ class VesuvioAnalysisTest(unittest.TestCase):
         alg.setProperty("Spectra", [135, 182])
         alg.setProperty("ComptonProfile", table)
         alg.setProperty("ConstraintsProfile", constraints)
-        errors = alg.validateInputs()
+        errors = alg.validate()
         self.assertTrue("ConstraintsProfile" in errors)
         self.assertEqual(len(errors), 1)
 
@@ -112,7 +112,7 @@ class VesuvioAnalysisTest(unittest.TestCase):
         alg = self.set_up_alg()
         alg.setProperty("ComptonProfile", table)
         alg.setProperty("Spectra", [135, 182])
-        errors = alg.validateInputs()
+        errors = alg.validate()
         self.assertEqual(len(errors), 0)
 
     def test_case_insensitive_constraints_table(self):
@@ -130,7 +130,7 @@ class VesuvioAnalysisTest(unittest.TestCase):
         alg.setProperty("ComptonProfile", table)
         alg.setProperty("Spectra", [135, 182])
 
-        errors = alg.validateInputs()
+        errors = alg.validate()
         self.assertEqual(len(errors), 1)
         self.assertTrue("TOFRangeVector" in errors)
 
@@ -141,7 +141,7 @@ class VesuvioAnalysisTest(unittest.TestCase):
         alg.setProperty("ComptonProfile", table)
         alg.setProperty("Spectra", [135, 182])
 
-        errors = alg.validateInputs()
+        errors = alg.validate()
         self.assertEqual(len(errors), 1)
         self.assertTrue("TOFRangeVector" in errors)
 
@@ -152,7 +152,7 @@ class VesuvioAnalysisTest(unittest.TestCase):
         alg.setProperty("ComptonProfile", table)
         alg.setProperty("Spectra", [135, 182])
 
-        errors = alg.validateInputs()
+        errors = alg.validate()
         self.assertEqual(len(errors), 1)
         self.assertTrue("TOFRangeVector" in errors)
 
@@ -166,7 +166,7 @@ class VesuvioAnalysisTest(unittest.TestCase):
             alg.setProperty("ConstraintsProfile", constraints)
             alg.setProperty("ComptonProfile", table)
             alg.setProperty("Spectra", [135, 182])
-            errors = alg.validateInputs()
+            errors = alg.validate()
             self.assertEqual(len(errors), 1)
             self.assertTrue("ConstraintsProfile" in errors)
 
@@ -180,7 +180,7 @@ class VesuvioAnalysisTest(unittest.TestCase):
             alg.setProperty("ConstraintsProfile", constraints)
             alg.setProperty("ComptonProfile", table)
             alg.setProperty("Spectra", [135, 182])
-            errors = alg.validateInputs()
+            errors = alg.validate()
             self.assertEqual(len(errors), 0)
 
     def test_run_string_correct(self):
@@ -191,7 +191,7 @@ class VesuvioAnalysisTest(unittest.TestCase):
             alg.setProperty("ComptonProfile", table)
             alg.setProperty("Spectra", [135, 182])
             alg.setProperty("Runs", run)
-            errors = alg.validateInputs()
+            errors = alg.validate()
             self.assertEqual(len(errors), 0)
 
     def test_run_string_incorrect(self):
@@ -202,7 +202,7 @@ class VesuvioAnalysisTest(unittest.TestCase):
             alg.setProperty("ComptonProfile", table)
             alg.setProperty("Spectra", [135, 182])
             alg.setProperty("Runs", run)
-            errors = alg.validateInputs()
+            errors = alg.validate()
             self.assertEqual(len(errors), 1)
             self.assertTrue("Runs" in errors)
 
@@ -211,7 +211,7 @@ class VesuvioAnalysisTest(unittest.TestCase):
         alg = self.set_up_alg()
         alg.setProperty("ComptonProfile", table)
         alg.setProperty("Spectra", [3, 134])
-        errors = alg.validateInputs()
+        errors = alg.validate()
         self.assertEqual(len(errors), 1)
         self.assertTrue("Spectra" in errors)
 
@@ -221,7 +221,7 @@ class VesuvioAnalysisTest(unittest.TestCase):
         alg.setProperty("ComptonProfile", table)
         alg.setProperty("Spectra", [135, 182])
         alg.setProperty("SpectraToBeMasked", [135, 165, 182])
-        errors = alg.validateInputs()
+        errors = alg.validate()
         self.assertEqual(len(errors), 0)
 
     def test_masked_sapectra_incorrect(self):
@@ -232,7 +232,7 @@ class VesuvioAnalysisTest(unittest.TestCase):
             alg.setProperty("ComptonProfile", table)
             alg.setProperty("Spectra", [135, 182])
             alg.setProperty("SpectraToBeMasked", spec)
-            errors = alg.validateInputs()
+            errors = alg.validate()
             self.assertEqual(len(errors), 1)
             self.assertTrue("SpectraToBeMasked" in errors)
 

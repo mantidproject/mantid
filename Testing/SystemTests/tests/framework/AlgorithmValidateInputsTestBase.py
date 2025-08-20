@@ -52,7 +52,7 @@ class AlgorithmValidateInputsTestBase(MantidSystemTest, metaclass=ABCMeta):
 
         try:
             # This is the real test - does the validateInputs function run successfully
-            algorithm.validateInputs()
+            algorithm.validate()
         except Exception as ex:
             # Makes sure that an exception gets printed if it fails, and then re-raises the exception
             print(ex)

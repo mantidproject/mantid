@@ -24,11 +24,11 @@ using Mantid::HistogramData::CountStandardDeviations;
 using Mantid::HistogramData::Points;
 
 /**
- * This is a test class that exists to test the method validateInputs()
+ * This is a test class that exists to test the method validate()
  */
 class TestMaxEnt : public Mantid::Algorithms::MaxEnt {
 public:
-  std::map<std::string, std::string> wrapValidateInputs() { return this->validateInputs(); }
+  std::map<std::string, std::string> wrapValidate() { return this->validate(); }
 };
 
 class MaxEntTest : public CxxTest::TestSuite {
@@ -1000,7 +1000,7 @@ public:
     alg.setPropertyValue("ReconstructedData", "data");
     alg.setPropertyValue("EvolChi", "evolChi");
     alg.setPropertyValue("EvolAngle", "evolAngle");
-    TS_ASSERT_THROWS_NOTHING(alg.wrapValidateInputs());
+    TS_ASSERT_THROWS_NOTHING(alg.wrapValidate());
     AnalysisDataService::Instance().clear();
   }
 

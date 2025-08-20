@@ -18,7 +18,7 @@ using Mantid::Algorithms::ConvertToDistribution;
 
 class TestConvertToDistribution : public ConvertToDistribution {
 public:
-  std::map<std::string, std::string> wrapValidateInputs() { return this->validateInputs(); }
+  std::map<std::string, std::string> wrapValidate() { return this->validate(); }
 };
 
 class ConvertToDistributionTest : public CxxTest::TestSuite {
@@ -80,7 +80,7 @@ public:
     conv.initialize();
     conv.setChild(true);
     TS_ASSERT_THROWS_NOTHING(conv.setPropertyValue("Workspace", "group"));
-    TS_ASSERT_THROWS_NOTHING(conv.wrapValidateInputs());
+    TS_ASSERT_THROWS_NOTHING(conv.wrapValidate());
     AnalysisDataService::Instance().clear();
   }
 

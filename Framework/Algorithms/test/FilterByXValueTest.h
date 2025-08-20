@@ -31,17 +31,17 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", WorkspaceCreationHelper::createEventWorkspace()));
 
     // At least one of XMin & XMax must be specified
-    auto errorMap = alg.validateInputs();
+    auto errorMap = alg.validate();
     TS_ASSERT_EQUALS(errorMap.size(), 2);
     TS_ASSERT_EQUALS(errorMap.begin()->first, "XMax");
     TS_ASSERT_EQUALS(errorMap.rbegin()->first, "XMin");
 
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("XMin", 10.0));
-    TS_ASSERT(alg.validateInputs().empty());
+    TS_ASSERT(alg.validate().empty());
 
     // XMax must be > XMin
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("XMax", 9.0));
-    errorMap = alg.validateInputs();
+    errorMap = alg.validate();
     TS_ASSERT_EQUALS(errorMap.size(), 2);
     TS_ASSERT_EQUALS(errorMap.begin()->first, "XMax");
     TS_ASSERT_EQUALS(errorMap.rbegin()->first, "XMin");

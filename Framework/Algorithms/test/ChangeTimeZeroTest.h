@@ -365,7 +365,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", "group"));
     alg.setPropertyValue("OutputWorkspace", "__NoName");
     alg.setPropertyValue("AbsoluteTimeOffset", absoluteTimeShift.toISO8601String());
-    TS_ASSERT_THROWS_NOTHING(alg.validateInputs());
+    TS_ASSERT_THROWS_NOTHING(alg.validate());
     AnalysisDataService::Instance().clear();
   }
 

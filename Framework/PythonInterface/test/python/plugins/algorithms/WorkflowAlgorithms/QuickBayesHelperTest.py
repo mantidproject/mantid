@@ -115,7 +115,7 @@ class QuickBayesHelperTest(unittest.TestCase):
         self._alg.setProperty("EMin", 10)
         self._alg.setProperty("EMax", 0.2)
         self._alg.setProperty("SampleWorkspace", self._sample_ws)
-        issues = self._alg.validateInputs()
+        issues = self._alg.validate()
         keys = list(issues.keys())
         self.assertEqual(len(keys), 1)
         self.assertEqual(keys[0], "EMax")
@@ -124,7 +124,7 @@ class QuickBayesHelperTest(unittest.TestCase):
         self._alg.setProperty("EMin", -100)
         self._alg.setProperty("EMax", 0.2)
         self._alg.setProperty("SampleWorkspace", self._sample_ws)
-        issues = self._alg.validateInputs()
+        issues = self._alg.validate()
 
         keys = list(issues.keys())
         self.assertEqual(len(keys), 1)
@@ -134,7 +134,7 @@ class QuickBayesHelperTest(unittest.TestCase):
         self._alg.setProperty("EMin", -0.2)
         self._alg.setProperty("EMax", 200.0)
         self._alg.setProperty("SampleWorkspace", self._sample_ws)
-        issues = self._alg.validateInputs()
+        issues = self._alg.validate()
 
         keys = list(issues.keys())
         self.assertEqual(len(keys), 1)

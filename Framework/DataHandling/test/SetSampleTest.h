@@ -882,7 +882,7 @@ public:
     using Mantid::DataObjects::TableWorkspace;
     auto alg = createAlgorithm(std::make_shared<TableWorkspace>(0));
 
-    auto helpMessages = alg->validateInputs();
+    auto helpMessages = alg->validate();
     TS_ASSERT(helpMessages.find("InputWorkspace") != helpMessages.cend());
   }
 
@@ -1064,7 +1064,7 @@ private:
   }
 
   bool validateErrorProduced(Mantid::API::IAlgorithm &alg, const std::string &name) {
-    const auto errors = alg.validateInputs();
+    const auto errors = alg.validate();
     if (errors.find(name) != errors.end())
       return true;
     else

@@ -7,7 +7,7 @@
 
 
 def validateToErrors(alg):
-    errors = alg.validateInputs()
+    errors = alg.validate()
     if not errors:
         return
     message = "Invalid properties found: \n"

@@ -140,11 +140,11 @@ public:
     alg.initialize();
     alg.setProperty("DataWorkspace", dataWSBad);
     alg.setProperty("ShapeWorkspace", shapeWS);
-    TSM_ASSERT_EQUALS("Shape and data are the same size. Should fail.", 1, alg.validateInputs().size());
+    TSM_ASSERT_EQUALS("Shape and data are the same size. Should fail.", 1, alg.validate().size());
 
     // Try again with different property value
     alg.setProperty("DataWorkspace", dataWSGood);
-    TSM_ASSERT_EQUALS("Interated dim should not be counted.", 0, alg.validateInputs().size());
+    TSM_ASSERT_EQUALS("Interated dim should not be counted.", 0, alg.validate().size());
   }
 
   void test_basic_shape_check() {
@@ -162,7 +162,7 @@ public:
     alg.initialize();
     alg.setProperty("DataWorkspace", dataWS);
     alg.setProperty("ShapeWorkspace", shapeWS);
-    TSM_ASSERT_EQUALS("Shape and data are different shapes. Should fail.", 1, alg.validateInputs().size());
+    TSM_ASSERT_EQUALS("Shape and data are different shapes. Should fail.", 1, alg.validate().size());
   }
 
   void test_very_simple_exec() {

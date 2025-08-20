@@ -612,7 +612,7 @@ public:
     }
   }
 
-  void test_validateInputs_in_pixel_not_cal() {
+  void test_validate_in_pixel_not_cal() {
     // Ensure the algorithm will fail early if the pixels in the PixelCalibration
     // are not present in the CalibrationWorkspace
     // create workspaces with these detectors:
@@ -650,13 +650,13 @@ public:
     auto alg = setupAlg(difCalPixelCalibration, difCalGroupedCalibration, diffCalCalibrationWs);
     TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
     TS_ASSERT(!alg->isExecuted());
-    auto result = alg->validateInputs();
+    auto result = alg->validate();
     TS_ASSERT(!result.count("GroupedCalibration"));
     TS_ASSERT(result.count("PixelCalibration"));
     TS_ASSERT(result.count("CalibrationWorkspace"));
   }
 
-  void test_validateInputs_in_grouped_not_cal() {
+  void test_validate_in_grouped_not_cal() {
     // Ensure the algorithm will fail early if the pixels in the GroupedCalibration
     // are not present in the CalibrationWorkspace
     // create workspaces with these detectors:
@@ -694,7 +694,7 @@ public:
     auto alg = setupAlg(difCalPixelCalibration, difCalGroupedCalibration, diffCalCalibrationWs);
     TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
     TS_ASSERT(!alg->isExecuted());
-    auto result = alg->validateInputs();
+    auto result = alg->validate();
     TS_ASSERT(result.count("GroupedCalibration"));
     TS_ASSERT(!result.count("PixelCalibration"));
     TS_ASSERT(result.count("CalibrationWorkspace"));

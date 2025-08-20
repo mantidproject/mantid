@@ -40,7 +40,7 @@ public:
   MOCK_CONST_METHOD0(getAlgorithmID, AlgorithmID());
 
   MOCK_METHOD0(initialize, void());
-  MOCK_METHOD0(validateInputs, std::map<std::string, std::string>());
+  MOCK_METHOD0(validate, std::map<std::string, std::string>());
   MOCK_METHOD0(execute, bool());
   MOCK_METHOD0(executeAsync, Poco::ActiveResult<bool>());
   MOCK_METHOD0(executeAsChildAlg, void());

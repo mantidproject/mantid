@@ -343,8 +343,8 @@ std::string getWikiSummary(const IAlgorithm &self) {
  * @param self Reference to the calling object
  * @return validation error dictionary
  */
-boost::python::dict validateInputs(IAlgorithm &self) {
-  auto map = self.validateInputs();
+boost::python::dict validate(IAlgorithm &self) {
+  auto map = self.validate();
   using MapToPyDictionary = Mantid::PythonInterface::Converters::MapToPyDictionary<std::string, std::string>;
   return MapToPyDictionary(map)();
 }
@@ -441,8 +441,7 @@ void export_ialgorithm() {
            "should rethrow exceptions when "
            "executing.")
       .def("initialize", &initializeProxy, arg("self"), "Initializes the algorithm")
-      .def("validateInputs", &validateInputs, arg("self"),
-           "Cross-check all inputs and return any errors as a dictionary")
+      .def("validate", &validate, arg("self"), "Cross-check all inputs and return any errors as a dictionary")
       .def("execute", &executeProxy, arg("self"), "Runs the algorithm and returns whether it has been successful")
       .def("executeAsync", &executeAsync, arg("self"),
            "Starts the algorithm in a separate thread and returns immediately")

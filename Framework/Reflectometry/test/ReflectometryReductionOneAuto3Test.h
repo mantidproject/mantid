@@ -176,7 +176,7 @@ public:
     alg.setPropertyValue("InputWorkspace", "input");
     alg.setPropertyValue("FirstTransmissionRun", "trans");
     alg.setProperty("PolarizationAnalysis", false);
-    auto results = alg.validateInputs();
+    auto results = alg.validate();
     TS_ASSERT(results.count("FirstTransmissionRun"));
 
     AnalysisDataService::Instance().remove("input");
@@ -210,7 +210,7 @@ public:
     alg.setPropertyValue("FirstTransmissionRun", "first_trans");
     alg.setPropertyValue("SecondTransmissionRun", "second_trans");
     alg.setProperty("PolarizationAnalysis", false);
-    const auto results = alg.validateInputs();
+    const auto results = alg.validate();
     TS_ASSERT(!results.count("FirstTransmissionRun"));
     TS_ASSERT(results.count("SecondTransmissionRun"));
 
