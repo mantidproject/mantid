@@ -260,7 +260,7 @@ template <typename TYPE> PropertyWithValue<TYPE> &PropertyWithValue<TYPE>::opera
  */
 template <typename TYPE> PropertyWithValue<TYPE> &PropertyWithValue<TYPE>::operator=(const TYPE &value) {
   TYPE oldValue = m_value;
-  if (std::is_same<TYPE, std::string>::value) {
+  if constexpr (std::is_same<TYPE, std::string>::value) {
     std::string valueCopy = toString(value);
     if (autoTrim()) {
       boost::trim(valueCopy);
