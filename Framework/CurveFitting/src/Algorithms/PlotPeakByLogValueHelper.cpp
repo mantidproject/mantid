@@ -159,14 +159,15 @@ void appendInputSpectraToList(std::vector<InputSpectraToFit> &nameList, const st
   API::Axis *axis = ws->getAxis(1);
   if (axis->isSpectra()) {
     if (spectrumNumber < 0) {
-      for (int i = 0; i < axis->length(); ++i) {
-        auto s = double(axis->spectraNo(i));
-        if (s >= start && s <= end) {
-          nameList.emplace_back(name, i, s, -1, period, mws);
+      for (size_t i = 0; i < axis->length(); ++i) {
+        double spec = double(axis->spectraNo(i));
+        int wsIdx = static_cast<int>(i);
+        if (spec >= start && spec <= end) {
+          nameList.emplace_back(name, wsIdx, spec, -1, period, mws);
         }
       }
     } else {
-      for (int i = 0; i < axis->length(); ++i) {
+      for (size_t i = 0; i < axis->length(); ++i) {
         int j = axis->spectraNo(i);
         if (j == spectrumNumber) {
           nameList.emplace_back(name, i, j, -1, period, mws);
@@ -179,10 +180,11 @@ void appendInputSpectraToList(std::vector<InputSpectraToFit> &nameList, const st
       start = (*axis)(0);
       end = (*axis)(axis->length() - 1);
     }
-    for (int i = 0; i < axis->length(); ++i) {
-      double s = (*axis)(i);
-      if (s >= start && s <= end) {
-        nameList.emplace_back(name, i, -1, s, period, mws);
+    for (size_t i = 0; i < axis->length(); ++i) {
+      double value = (*axis)(i);
+      int wsIdx = static_cast<int>(i);
+      if (value >= start && value <= end) {
+        nameList.emplace_back(name, wsIdx, -1, value, period, mws);
       }
     }
   }

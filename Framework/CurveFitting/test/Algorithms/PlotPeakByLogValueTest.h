@@ -525,7 +525,7 @@ public:
     auto paramsNames = params->getNames();
     auto wsNames = fits->getNames();
 
-    for (int i = 0; i < matrices->getNames().size(); i++) {
+    for (size_t i = 0; i < matrices->getNames().size(); i++) {
       auto specNum = std::to_string(i + 1);
       TS_ASSERT_EQUALS(matricesNames[i], "PLOTPEAKBYLOGVALUETEST_WS_sp" + specNum + "_NormalisedCovarianceMatrix");
       TS_ASSERT_EQUALS(paramsNames[i], "PLOTPEAKBYLOGVALUETEST_WS_sp" + specNum + "_Parameters");
@@ -571,7 +571,7 @@ public:
     auto paramsNames = params->getNames();
     auto wsNames = fits->getNames();
 
-    for (int i = 0; i < matrices->getNames().size(); i++) {
+    for (size_t i = 0; i < matrices->getNames().size(); i++) {
       auto wsIdx = std::to_string(i);
       TS_ASSERT_EQUALS(matricesNames[i], "PlotPeakGroup_" + wsIdx + "_i1_NormalisedCovarianceMatrix");
       TS_ASSERT_EQUALS(paramsNames[i], "PlotPeakGroup_" + wsIdx + "_i1_Parameters");
@@ -621,7 +621,7 @@ public:
     auto paramsNames = params->getNames();
     auto wsNames = fits->getNames();
 
-    for (int i = 0; i < matrices->getNames().size(); i++) {
+    for (size_t i = 0; i < matrices->getNames().size(); i++) {
       auto vIdx = std::to_string(i);
       TS_ASSERT_EQUALS(matricesNames[i], "PLOTPEAKBYLOGVALUETEST_WS_v" + vIdx + "_NormalisedCovarianceMatrix");
       TS_ASSERT_EQUALS(paramsNames[i], "PLOTPEAKBYLOGVALUETEST_WS_v" + vIdx + "_Parameters");
@@ -679,7 +679,7 @@ public:
     auto paramsNames = params->getNames();
     auto wsNames = fits->getNames();
 
-    for (int i = 0; i < matrices->getNames().size(); i++) {
+    for (size_t i = 0; i < matrices->getNames().size(); i++) {
       auto specNum = std::to_string(i + 1);
       TS_ASSERT_EQUALS(matricesNames[i], "PLOTPEAKBYLOGVALUETEST_WS_sp" + specNum + "_NormalisedCovarianceMatrix");
       TS_ASSERT_EQUALS(paramsNames[i], "PLOTPEAKBYLOGVALUETEST_WS_sp" + specNum + "_Parameters");
