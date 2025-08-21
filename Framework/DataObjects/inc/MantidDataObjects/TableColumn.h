@@ -65,7 +65,6 @@ public:
     std::string name = std::string(typeid(Type).name());
     if ((name.find('i') != std::string::npos) || (name.find('l') != std::string::npos) ||
         (name.find('x') != std::string::npos)) {
-      // cppcheck-suppress-being knownConditionTrueFalse
       if (length == 4) {
         this->m_type = "int";
       }
@@ -87,7 +86,6 @@ public:
         this->m_type = "uint64_t";
       }
     }
-    // cppcheck-suppress-end knownConditionTrueFalse
     if (this->m_type.empty()) {
       this->m_type = name;
     }

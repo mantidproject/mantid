@@ -115,7 +115,7 @@ protected:
     } else {
       // For a generic type, isEmpty always returns false, but if TYPE is std::string,
       // then the string version of isEmpty will be used, which could be true or false.
-      if (isEmpty(value)) // cppcheck-suppress knownConditionTrueFalse
+      if (isEmpty(value))
         return "Select a value";
       if (isAlias(value))
         return "_alias";

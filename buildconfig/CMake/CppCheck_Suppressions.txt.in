@@ -41,6 +41,13 @@ class_X_Y
 // ----------- Internal cppcheck errors from cppcheck 2.18.1 -------------
 internalError:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidDataObjects/MortonIndex/BitInterleaving.h:169
 
+// ---- Known false positives, but for some reason inline suppressions do not work in 2.18.1 ----
+knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidDataObjects/TableColumn.h:68
+knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidDataObjects/TableColumn.h:71
+knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidDataObjects/TableColumn.h:82
+knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidDataObjects/TableColumn.h:85
+knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/ListValidator.h:118
+
 // ----------- New list of suppressions after updating to cppcheck 2.18.1 -------------
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/BoxController.h:405
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/EnabledWhenWorkspaceIsType.h:50
