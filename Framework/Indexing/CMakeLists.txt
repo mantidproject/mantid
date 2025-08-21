@@ -70,11 +70,7 @@ endif()
 # Add to the 'Framework' group in VS
 set_property(TARGET Indexing PROPERTY FOLDER "MantidFramework")
 
-target_link_libraries(
-  Indexing
-  PUBLIC Mantid::Kernel
-  PRIVATE Parallel
-)
+target_link_libraries(Indexing PUBLIC Mantid::Kernel)
 
 if("${UNIX_CODENAME}" STREQUAL "trusty")
   # Special linking options are required for some older Ubuntu gcc builds to use std::thread, specific options found

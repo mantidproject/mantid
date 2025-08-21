@@ -34,53 +34,6 @@ using namespace Mantid::DataHandling;
 using Mantid::Types::Core::DateAndTime;
 using Mantid::Types::Event::TofEvent;
 
-void run_multiprocess_load(const std::string &file, bool precount) {
-  Mantid::API::FrameworkManager::Instance();
-  LoadEventNexus ld;
-  ld.initialize();
-  ld.setPropertyValue("Loadtype", "Multiprocess (experimental)");
-  std::string outws_name = "multiprocess";
-  ld.setPropertyValue("Filename", file);
-  ld.setPropertyValue("OutputWorkspace", outws_name);
-  ld.setPropertyValue("Precount", std::to_string(precount));
-  ld.setProperty<bool>("LoadLogs", false); // Time-saver
-  TS_ASSERT_THROWS_NOTHING(ld.execute());
-  TS_ASSERT(ld.isExecuted())
-
-  EventWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outws_name);
-  TS_ASSERT(ws);
-
-  LoadEventNexus ldRef;
-  ldRef.initialize();
-  ldRef.setPropertyValue("Loadtype", "Default");
-  outws_name = "reference";
-  ldRef.setPropertyValue("Filename", file);
-  ldRef.setPropertyValue("OutputWorkspace", outws_name);
-  ldRef.setPropertyValue("Precount", "1");
-  ldRef.setProperty<bool>("LoadLogs", false); // Time-saver
-  TS_ASSERT_THROWS_NOTHING(ldRef.execute());
-  TS_ASSERT(ldRef.isExecuted())
-
-  EventWorkspace_sptr wsRef = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outws_name);
-  TS_ASSERT(wsRef);
-
-  TSM_ASSERT_EQUALS("Different spectrum number in reference ws.", wsRef->getNumberHistograms(),
-                    ws->getNumberHistograms());
-  if (wsRef->getNumberHistograms() != ws->getNumberHistograms())
-    return;
-  for (size_t i = 0; i < wsRef->getNumberHistograms(); ++i) {
-    auto &eventList = ws->getSpectrum(i).getEvents();
-    auto &eventListRef = wsRef->getSpectrum(i).getEvents();
-    TSM_ASSERT_EQUALS("Different events number in reference spectra", eventList.size(), eventListRef.size());
-    if (eventList.size() != eventListRef.size())
-      return;
-    for (size_t j = 0; j < eventListRef.size(); ++j) {
-      TSM_ASSERT_EQUALS("Events are not equal", eventList[j].tof(), eventListRef[j].tof());
-      TSM_ASSERT_EQUALS("Events are not equal", eventList[j].pulseTime(), eventListRef[j].pulseTime());
-    }
-  }
-}
-
 class LoadEventNexusTest : public CxxTest::TestSuite {
 private:
   void do_test_filtering_start_and_end_filtered_loading(const bool metadataonly) {
@@ -350,25 +303,23 @@ public:
     TS_ASSERT_EQUALS(eventWS->indexInfo().spectrumNumber(2), 3);
   }
 
-#ifdef _WIN32
-  bool windows = true;
-#else
-  bool windows = false;
-#endif // _WIN32
-  void test_multiprocess_loader_precount() {
-    std::cout << "test multiprocess loader precount\n" << std::flush;
-    if (!windows) {
-      run_multiprocess_load("SANS2D00022048.nxs", true);
-      run_multiprocess_load("LARMOR00003368.nxs", true);
+  void test_multiprocess_loader_does_nothing() {
+    // The experimental multiprocess loader has been removed.
+    // Make sure using it doesn't cause script failures, until it can be fully deprecated
+    std::cout << "test multiprocess loader does nothing" << std::endl;
+    Mantid::API::FrameworkManager::Instance();
+    LoadEventNexus ld;
+    ld.initialize();
+    ld.setPropertyValue("LoadType", "Multiprocess (experimental)");
+    std::string outws_name = "multiprocess";
+    ld.setPropertyValue("Filename", "SANS2D00022048.nxs");
+    ld.setPropertyValue("OutputWorkspace", outws_name);
+    ld.setProperty<bool>("LoadLogs", false); // Time-saver
+    try { // do not need to actually run algorithm, just the private validateInputs method at start
+      ld.execute();
+    } catch (...) {
     }
-  }
-
-  void test_multiprocess_loader_producer_consumer() {
-    std::cout << "test multiprocess loader consumer\n" << std::flush;
-    if (!windows) {
-      run_multiprocess_load("SANS2D00022048.nxs", false);
-      run_multiprocess_load("LARMOR00003368.nxs", false);
-    }
+    TS_ASSERT_EQUALS(ld.getPropertyValue("LoadType"), "Default");
   }
 
   void test_SingleBank_PixelsOnlyInThatBank() { doTestSingleBank(true, false); }
@@ -1800,33 +1751,6 @@ private:
 
 class LoadEventNexusTestPerformance : public CxxTest::TestSuite {
 public:
-#ifdef _WIN32
-  bool windows = true;
-#else
-  bool windows = false;
-#endif // _WIN32
-  void testMultiprocessLoadPrecount() {
-    if (!windows) {
-      LoadEventNexus loader;
-      loader.initialize();
-      loader.setPropertyValue("Filename", "SANS2D00022048.nxs");
-      loader.setPropertyValue("OutputWorkspace", "ws");
-      loader.setPropertyValue("Loadtype", "Multiprocess (experimental)");
-      loader.setPropertyValue("Precount", std::to_string(true));
-      TS_ASSERT(loader.execute());
-    }
-  }
-  void testMultiprocessLoadProducerConsumer() {
-    if (!windows) {
-      LoadEventNexus loader;
-      loader.initialize();
-      loader.setPropertyValue("Filename", "SANS2D00022048.nxs");
-      loader.setPropertyValue("OutputWorkspace", "ws");
-      loader.setPropertyValue("Loadtype", "Multiprocess (experimental)");
-      loader.setPropertyValue("Precount", std::to_string(false));
-      TS_ASSERT(loader.execute());
-    }
-  }
   void testDefaultLoad() {
     LoadEventNexus loader;
     loader.initialize();

@@ -525,13 +525,7 @@ set_property(TARGET API PROPERTY FOLDER "MantidFramework")
 
 target_link_libraries(
   API
-  PUBLIC Mantid::HistogramData
-         Mantid::Types
-         Mantid::Kernel
-         Mantid::Geometry
-         Mantid::Indexing
-         Mantid::Parallel
-         Mantid::Nexus
+  PUBLIC Mantid::HistogramData Mantid::Types Mantid::Kernel Mantid::Geometry Mantid::Indexing Mantid::Nexus
   PRIVATE ${WINSOCK} ${BCRYPT} Mantid::Beamline Mantid::Json
 )
 

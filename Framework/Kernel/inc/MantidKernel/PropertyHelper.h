@@ -123,9 +123,9 @@ GNU_DIAG_OFF("unused-function")
  */
 
 template <>
-std::string toPrettyString(const std::vector<bool> &value, size_t maxLength, bool collapseLists,
-                           const std::string &delimiter, const std::string &unusedDelimiter,
-                           typename std::enable_if<std::is_same<bool, bool>::value>::type *) {
+inline std::string toPrettyString(const std::vector<bool> &value, size_t maxLength, bool collapseLists,
+                                  const std::string &delimiter, const std::string &unusedDelimiter,
+                                  typename std::enable_if<std::is_same<bool, bool>::value>::type *) {
   UNUSED_ARG(unusedDelimiter);
   UNUSED_ARG(collapseLists);
   return Strings::shorten(Strings::join(value.begin(), value.end(), delimiter), maxLength);
