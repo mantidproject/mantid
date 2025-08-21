@@ -637,6 +637,59 @@ public:
     AnalysisDataService::Instance().clear();
   }
 
+  void test_createOutputOptionWith2DWS() {
+    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(Fun(), 3, -5.0, 5.0, 0.1, false);
+    AnalysisDataService::Instance().add("PLOTPEAKBYLOGVALUETEST_WS", ws);
+    PlotPeakByLogValue alg;
+    alg.initialize();
+    alg.setPropertyValue("Input", "PLOTPEAKBYLOGVALUETEST_WS,v1:3");
+    alg.setPropertyValue("OutputWorkspace", "PlotPeakResult");
+    alg.setProperty("PassWSIndexToFunction", true);
+    alg.setProperty("AppendIdxToOutputName", true);
+    alg.setProperty("CreateOutput", true);
+    alg.setProperty("Output2D", true);
+    alg.setPropertyValue("Function", "name=FlatBackground,ties=(A0=0.5);name=PLOTPEAKBYLOGVALUETEST_Fun");
+    alg.execute();
+
+    TS_ASSERT(alg.isExecuted());
+
+    TWS_type result = WorkspaceCreationHelper::getWS<TableWorkspace>("PlotPeakResult");
+    TS_ASSERT(result);
+
+    // each spectrum contains values equal to its spectrum number (from 1 to 3)
+    TableRow row = result->getFirstRow();
+    do {
+      TS_ASSERT_DELTA(row.Double(1), 0.5, 1e-15);
+    } while (row.next());
+
+    auto matrices = AnalysisDataService::Instance().retrieveWS<const WorkspaceGroup>(
+        "PlotPeakResult_sp1-3_NormalisedCovarianceMatrices");
+    auto params = AnalysisDataService::Instance().retrieveWS<const WorkspaceGroup>("PlotPeakResult_sp1-3_Parameters");
+    auto fits = AnalysisDataService::Instance().retrieveWS<const WorkspaceGroup>("PlotPeakResult_sp1-3_Workspaces");
+
+    TS_ASSERT(matrices);
+    TS_ASSERT(params);
+    TS_ASSERT(fits);
+
+    TS_ASSERT(matrices->getNames().size() == 3);
+    TS_ASSERT(params->getNames().size() == 3);
+    TS_ASSERT(fits->getNames().size() == 3);
+
+    auto matricesNames = matrices->getNames();
+    auto paramsNames = params->getNames();
+    auto wsNames = fits->getNames();
+
+    for (int i = 0; i < matrices->getNames().size(); i++) {
+      auto specNum = std::to_string(i + 1);
+      TS_ASSERT_EQUALS(matricesNames[i], "PLOTPEAKBYLOGVALUETEST_WS_sp" + specNum + "_NormalisedCovarianceMatrix");
+      TS_ASSERT_EQUALS(paramsNames[i], "PLOTPEAKBYLOGVALUETEST_WS_sp" + specNum + "_Parameters");
+      TS_ASSERT_EQUALS(wsNames[i], "PLOTPEAKBYLOGVALUETEST_WS_sp" + specNum + "_Workspace");
+    }
+
+    TS_ASSERT(AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("PlotPeakResult_ws"));
+
+    AnalysisDataService::Instance().clear();
+  }
   void testMinimizer() {
     createData();
 

@@ -131,11 +131,13 @@ void PlotPeakByLogValue::init() {
                   "If true and CreateOutput is true then the value of each "
                   "member of a Composite Function is also output.");
 
-  declareProperty(
-      "AppendIdxToOutputName", false,
-      "Append either spectrum index, workspace index, or numeric axis value depending on the input format.");
+  declareProperty("AppendIdxToOutputName", false,
+                  "If true and CreateOutput is true then append either spectrum index, workspace index, or numeric "
+                  "axis value depending on the input format.");
 
-  declareProperty("Output2D", false, "Output res in 2D workspace");
+  declareProperty(
+      "Output2D", false,
+      "If true and CreateOutput is true then create a new output of the result table in workspace 2D format.");
 
   declareProperty(std::make_unique<Kernel::PropertyWithValue<bool>>("ConvolveMembers", false),
                   "If true and OutputCompositeMembers is true members of any "
