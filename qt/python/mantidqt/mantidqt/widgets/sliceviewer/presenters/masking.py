@@ -50,6 +50,10 @@ class SelectionMaskingBase(ABC):
     def mask_drawn(self):
         return self._mask_drawn
 
+    def remove_mask_from_model(self):
+        if self._mask_drawn:
+            self._model.clear_active_mask()
+
 
 class RectangleSelectionMaskingBase(SelectionMaskingBase, ABC):
     """
@@ -58,7 +62,7 @@ class RectangleSelectionMaskingBase(SelectionMaskingBase, ABC):
 
     def __init__(self, dataview, model, selector):
         super().__init__(dataview, model)
-        self._selector = make_selector_class(selector)(
+        self._selector = make_selector_class(selector, self.remove_mask_from_model)(
             dataview.ax,
             self._on_selected,
             useblit=False,  # rectangle persists on button release
@@ -131,7 +135,7 @@ class PolygonSelectionMasking(SelectionMaskingBase):
 
     def __init__(self, dataview, model):
         super().__init__(dataview, model)
-        self._selector = make_selector_class(PolygonSelector)(
+        self._selector = make_selector_class(PolygonSelector, self.remove_mask_from_model)(
             dataview.ax,
             self._on_selected,
             useblit=False,  # rectangle persists on button release

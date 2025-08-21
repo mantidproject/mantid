@@ -180,8 +180,9 @@ class MaskingModel:
         self._active_mask = None
 
     def store_active_mask(self):
-        self._masks.append(self._active_mask)
-        self._active_mask = None
+        if self._active_mask:
+            self._masks.append(self._active_mask)
+            self._active_mask = None
 
     def clear_stored_masks(self):
         self._masks = []
@@ -195,7 +196,8 @@ class MaskingModel:
     def add_poly_cursor_info(self, nodes):
         self.update_active_mask(PolyCursorInfo(nodes=nodes))
 
-    def create_table_workspace_from_rows(self, table_rows, store_in_ads):
+    @staticmethod
+    def create_table_workspace_from_rows(table_rows, store_in_ads):
         # create table ws_from rows
         table_ws = WorkspaceFactory.createTable()
         table_ws.addColumn("str", "SpectraList")
