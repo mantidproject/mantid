@@ -12,6 +12,9 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/TextAxis.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidQtWidgets/Common/FitPropertyBrowser.h"
@@ -53,6 +56,7 @@ SequentialFitDialog::SequentialFitDialog(FitPropertyBrowser *fitBrowser, QObject
   connect(ui.ckbLogPlot, SIGNAL(toggled(bool)), this, SLOT(plotAgainstLog(bool)));
   connect(ui.ckCreateOutput, SIGNAL(toggled(bool)), ui.ckOutputCompMembers, SLOT(setEnabled(bool)));
   connect(ui.ckCreateOutput, SIGNAL(toggled(bool)), ui.ckConvolveMembers, SLOT(setEnabled(bool)));
+  connect(ui.ckCreateOutput, SIGNAL(toggled(bool)), ui.ckOutputSpecParams, SLOT(setEnabled(bool)));
 
   ui.cbLogValue->setEditable(true);
   ui.ckbLogPlot->setChecked(true);
@@ -315,6 +319,8 @@ void SequentialFitDialog::accept() {
   alg->setProperty("CreateOutput", ui.ckCreateOutput->isChecked());
   alg->setProperty("OutputCompositeMembers", ui.ckOutputCompMembers->isChecked());
   alg->setProperty("ConvolveMembers", ui.ckConvolveMembers->isChecked());
+  alg->setProperty("Output2D", ui.ckOutputSpecParams->isChecked());
+  alg->setProperty("AppendIdxToOutputName", true);
   if (ui.ckbLogPlot->isChecked()) {
     std::string logName = ui.cbLogValue->currentText().toStdString();
     alg->setPropertyValue("LogValue", logName);
