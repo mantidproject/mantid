@@ -78,6 +78,8 @@ if(SIP_BUILD_EXECUTABLE)
 endif()
 
 if(NOT SIP_FOUND)
+  message(STATUS "looking for sip on older system")
+
   # Python development is required for the older system
   if(NOT Python_Development_FOUND)
     message(FATAL_ERROR "FindSIP requires find_package(Python) to be called first")
@@ -102,4 +104,11 @@ if(NOT SIP_FOUND)
     REQUIRED_VARS SIP_EXECUTABLE SIP_INCLUDE_DIR
     VERSION_VAR SIP_VERSION
   )
+endif()
+
+if(NOT SIP_FOUND)
+  message(FATAL_ERROR "FindSIP failed to find sip")
+endif()
+if(NOT SIP_VERSION)
+  message(FATAL_ERROR "FindSIP failed to determine sip version")
 endif()
