@@ -4,7 +4,7 @@ set -ex
 parent_dir="$(dirname "$RECIPE_DIR")"
 bash "${parent_dir}"/archive_env_logs.sh "$BUILD_PREFIX" "$PREFIX" 'mantiddocs'
 
-mkdir build
+mkdir -p build
 cd build
 
 cmake \
@@ -17,7 +17,6 @@ cmake \
   -DMANTID_QT_LIB=SYSTEM \
   -DENABLE_WORKBENCH=OFF \
   -DENABLE_DOCS=ON \
-  -DENABLE_QTASSISTANT=OFF \
   -DDOCS_DOTDIAGRAMS=ON \
   -DDOCS_SCREENSHOTS=ON \
   -DDOCS_MATH_EXT=sphinx.ext.mathjax \

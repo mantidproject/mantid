@@ -5,7 +5,7 @@ parent_dir="$(dirname "$RECIPE_DIR")"
 bash "${parent_dir}"/archive_env_logs.sh "$BUILD_PREFIX" "$PREFIX" 'mantidworkbench'
 
 
-mkdir build
+mkdir -p build
 cd build
 
 cmake \
@@ -17,7 +17,6 @@ cmake \
   -DMANTID_FRAMEWORK_LIB=SYSTEM \
   -DMANTID_QT_LIB=SYSTEM \
   -DENABLE_WORKBENCH=ON \
-  -DENABLE_QTASSISTANT=OFF \
   -DENABLE_DOCS=OFF \
   -DWORKBENCH_SITE_PACKAGES=$SP_DIR \
   -DWORKBENCH_BIN_DIR=$PREFIX/bin \
