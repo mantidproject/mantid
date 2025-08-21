@@ -335,13 +335,6 @@ void PlotPeakByLogValue::groupResParams(const std::vector<ITableWorkspace_sptr> 
   std::map<std::string, std::vector<double>> parameterValues;
   std::map<std::string, std::vector<double>> parameterErrors;
 
-  std::vector<std::string> columnNames;
-  if (params.size() > 0) {
-    if (params[0]) {
-      columnNames = params[0]->getColumnNames();
-    }
-  }
-
   for (size_t i = 0; i < params.size(); ++i) {
     for (size_t rowNo = 0; rowNo < params[i]->rowCount(); ++rowNo) {
       TableRow row = params[i]->getRow(rowNo);
@@ -492,8 +485,6 @@ void PlotPeakByLogValue::finaliseOutputWorkspacesWithAppend(const std::vector<st
 }
 
 void PlotPeakByLogValue::finaliseMinimizerOutput() {
-  auto const groupAlg = this->createChildAlgorithm("GroupWorkspaces");
-
   for (auto &minimizerWorkspace : this->m_minimizerWorkspaces) {
     const std::string paramName = minimizerWorkspace.first;
     auto groupAlg = this->createChildAlgorithm("GroupWorkspaces");
