@@ -199,13 +199,16 @@ template <typename T> inline void appendValue(const std::string &strvalue, std::
   }
 }
 
-template <typename T> void inline toValue(const std::string &strvalue, T &value) {
+template <typename T> inline void toValue(const std::string &strvalue, T &value) {
   value = boost::lexical_cast<T>(strvalue);
 }
 
-template <typename T> void inline toValue(const std::string &, std::shared_ptr<T> &) {
+template <typename T> inline void toValue(const std::string &, std::shared_ptr<T> &) {
   throw boost::bad_lexical_cast();
 }
+
+// explicit instantiation for OptionalBool
+template <> MANTID_KERNEL_DLL void toValue(const std::string &strValue, OptionalBool &value);
 
 namespace detail {
 // vector<int> specializations

@@ -6,12 +6,12 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 #include "MantidKernel/PropertyHelper.h"
-#include "MantidKernel/IValidator.h"
+#include "MantidKernel/Strings.h"
 
 namespace Mantid::Kernel {
 
 /** Helper functions for setting the value of an OptionalBool property */
-template <> inline void MANTID_KERNEL_DLL toValue(const std::string &strValue, OptionalBool &value) {
+template <> void MANTID_KERNEL_DLL toValue(const std::string &strValue, OptionalBool &value) {
   const auto normalizedStr = Mantid::Kernel::Strings::toLower(strValue);
   if (normalizedStr == "0" || normalizedStr == "false") {
     value = OptionalBool::False;
