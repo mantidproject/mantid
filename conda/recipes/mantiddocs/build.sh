@@ -4,7 +4,7 @@ set -ex
 parent_dir="$(dirname "$RECIPE_DIR")"
 bash "${parent_dir}"/archive_env_logs.sh "$BUILD_PREFIX" "$PREFIX" 'mantiddocs'
 
-mkdir build
+mkdir -p build
 cd build
 
 cmake \
