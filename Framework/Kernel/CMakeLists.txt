@@ -576,7 +576,7 @@ set(DATADIRS
 )
 set(COLORMAPS_FOLDER ${MANTID_ROOT}/installers/colormaps/)
 set(MANTIDPUBLISHER "https://upload.mantidproject.org/scriptrepository?debug=1")
-set(HTML_ROOT ${DOCS_BUILDDIR}/html)
+set(HTML_ROOT ${DOCS_BUILDDIR}/doc/html)
 
 set(CONSOLEPATTERN "%s-[%p] %t")
 set(CONSOLECHANNELCLASS "ConsoleChannel")
