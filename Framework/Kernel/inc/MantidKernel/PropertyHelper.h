@@ -11,6 +11,7 @@
 #include <memory>
 #endif
 
+#include "MantidKernel/IValidator.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/Strings.h"
