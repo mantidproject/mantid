@@ -11,10 +11,11 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/WorkspaceGroup.h"
+
+#include "MantidAPI/ITableWorkspace_fwd.h"
+#include "MantidAPI/WorkspaceGroup_fwd.h"
+
 #include "MantidAlgorithms/DllConfig.h"
-#include "MantidKernel/cow_ptr.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -48,7 +49,7 @@ private:
   void init() override;
   void exec() override;
   std::pair<double, double> getTimeDifference();
-  MatrixWorkspace_sptr calculateEfficiency();
+  std::vector<MatrixWorkspace_sptr> calculateOutputs();
   MatrixWorkspace_sptr retrieveWorkspaceForWavelength() const;
 };
 } // namespace Algorithms
