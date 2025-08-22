@@ -1,0 +1,1 @@
+- ``jemalloc`` has been add to the conda activation/deactivation scripts to enable use when running just ``python``. Previously it was only applied in the workbench startup script. This should improve the performance of many algorithms.
