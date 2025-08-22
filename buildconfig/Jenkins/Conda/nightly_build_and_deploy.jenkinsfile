@@ -484,6 +484,7 @@ pipeline {
           target: 'standalone-packages',
           flatten: true
         // Copy conda packages and create a tarball to upload to the github release for backup.
+        sh 'rm -fr ${WORKSPACE}/conda-packages'
         copyArtifacts filter: '**/conda-bld/**/*.tar.bz2',
           fingerprintArtifacts: true,
           projectName: '${JOB_NAME}',
