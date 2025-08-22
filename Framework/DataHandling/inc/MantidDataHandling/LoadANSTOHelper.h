@@ -172,35 +172,20 @@ public:
 namespace Tar {
 
 struct EntryHeader {
-  // cppcheck-suppress unusedStructMember
   char FileName[100];
-  // cppcheck-suppress unusedStructMember
   char FileMode[8];
-  // cppcheck-suppress unusedStructMember
   char OwnerUserID[8];
-  // cppcheck-suppress unusedStructMember
   char OwnerGroupID[8];
-  // cppcheck-suppress unusedStructMember
-  char FileSize[12]; // in bytes (octal base)
-  // cppcheck-suppress unusedStructMember
+  char FileSize[12];         // in bytes (octal base)
   char LastModification[12]; // time in numeric Unix time format (octal)
-  // cppcheck-suppress unusedStructMember
   char Checksum[8];
-  // cppcheck-suppress unusedStructMember
   char TypeFlag;
-  // cppcheck-suppress unusedStructMember
   char LinkedFileName[100];
-  // cppcheck-suppress unusedStructMember
   char UStar[8];
-  // cppcheck-suppress unusedStructMember
   char OwnerUserName[32];
-  // cppcheck-suppress unusedStructMember
   char OwnerGroupName[32];
-  // cppcheck-suppress unusedStructMember
   char DeviceMajorNumber[8];
-  // cppcheck-suppress unusedStructMember
   char DeviceMinorNumber[8];
-  // cppcheck-suppress unusedStructMember
   char FilenamePrefix[155];
 
   // methods

@@ -77,6 +77,7 @@ set(SRC_FILES
     src/CorrectKiKf.cpp
     src/CorrectTOFAxis.cpp
     src/CorrectToFile.cpp
+    src/CreateBootstrapWorkspaces.cpp
     src/CreateCalFileByNames.cpp
     src/CreateDetectorTable.cpp
     src/CreateDummyCalFile.cpp
@@ -87,7 +88,6 @@ set(SRC_FILES
     src/CreateLogPropertyTable.cpp
     src/CreateLogTimeCorrection.cpp
     src/CreateMonteCarloWorkspace.cpp
-    src/CreateBootstrapWorkspaces.cpp
     src/CreatePSDBleedMask.cpp
     src/CreatePeaksWorkspace.cpp
     src/CreateSampleWorkspace.cpp
@@ -108,6 +108,7 @@ set(SRC_FILES
     src/DetectorEfficiencyCor.cpp
     src/DetectorEfficiencyCorUser.cpp
     src/DetectorEfficiencyVariation.cpp
+    src/DetermineSpinStateOrder.cpp
     src/DiffractionEventCalibrateDetectors.cpp
     src/DiffractionFocussing.cpp
     src/DiffractionFocussing2.cpp
@@ -429,6 +430,7 @@ set(INC_FILES
     inc/MantidAlgorithms/CorrectKiKf.h
     inc/MantidAlgorithms/CorrectTOFAxis.h
     inc/MantidAlgorithms/CorrectToFile.h
+    inc/MantidAlgorithms/CreateBootstrapWorkspaces.h
     inc/MantidAlgorithms/CreateCalFileByNames.h
     inc/MantidAlgorithms/CreateDetectorTable.h
     inc/MantidAlgorithms/CreateDummyCalFile.h
@@ -439,7 +441,6 @@ set(INC_FILES
     inc/MantidAlgorithms/CreateLogPropertyTable.h
     inc/MantidAlgorithms/CreateLogTimeCorrection.h
     inc/MantidAlgorithms/CreateMonteCarloWorkspace.h
-    inc/MantidAlgorithms/CreateBootstrapWorkspaces.h
     inc/MantidAlgorithms/CreatePSDBleedMask.h
     inc/MantidAlgorithms/CreatePeaksWorkspace.h
     inc/MantidAlgorithms/CreateSampleWorkspace.h
@@ -460,6 +461,7 @@ set(INC_FILES
     inc/MantidAlgorithms/DetectorEfficiencyCor.h
     inc/MantidAlgorithms/DetectorEfficiencyCorUser.h
     inc/MantidAlgorithms/DetectorEfficiencyVariation.h
+    inc/MantidAlgorithms/DetermineSpinStateOrder.h
     inc/MantidAlgorithms/DiffractionEventCalibrateDetectors.h
     inc/MantidAlgorithms/DiffractionFocussing.h
     inc/MantidAlgorithms/DiffractionFocussing2.h
@@ -788,6 +790,7 @@ set(TEST_FILES
     CorrectKiKfTest.h
     CorrectTOFAxisTest.h
     CorrectToFileTest.h
+    CreateBootstrapWorkspacesTest.h
     CreateCalFileByNamesTest.h
     CreateDetectorTableTest.h
     CreateDummyCalFileTest.h
@@ -797,7 +800,6 @@ set(TEST_FILES
     CreateLogPropertyTableTest.h
     CreateLogTimeCorrectionTest.h
     CreateMonteCarloWorkspaceTest.h
-    CreateBootstrapWorkspacesTest.h
     CreatePSDBleedMaskTest.h
     CreatePeaksWorkspaceTest.h
     CreateSampleWorkspaceTest.h
@@ -819,6 +821,7 @@ set(TEST_FILES
     DetectorEfficiencyCorUserTest.h
     DetectorEfficiencyVariationTest.h
     DetectorGridDefinitionTest.h
+    DetermineSpinStateOrderTest.h
     DiffractionEventCalibrateDetectorsTest.h
     DiffractionFocussing2Test.h
     DiffractionFocussingTest.h

@@ -12,6 +12,7 @@ set(TEST_PY_FILES
     AnstoCommonFractionalTest.py
     AnstoCommonSearchTest.py
     ApplyDetectorScanEffCorrTest.py
+    AssertSpinStateOrderTest.py
     BinWidthAtXTest.py
     CalculateEfficiencyCorrectionTest.py
     CalculateFluxTest.py

@@ -44,12 +44,6 @@ void IsotropicAtomBraggScatterer::setElement(const std::string &element) {
   m_label = element;
 }
 
-/// Returns the string representation of the contained element.
-std::string IsotropicAtomBraggScatterer::getElement() const { return m_label; }
-
-/// Returns the internally stored NeutronAtom that holds element specific data.
-PhysicalConstants::NeutronAtom IsotropicAtomBraggScatterer::getNeutronAtom() const { return m_atom; }
-
 /// Returns the occupancy.
 double IsotropicAtomBraggScatterer::getOccupancy() const { return getProperty("Occupancy"); }
 
