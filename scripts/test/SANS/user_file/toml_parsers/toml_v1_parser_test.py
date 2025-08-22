@@ -72,8 +72,8 @@ class TomlV1ParserTest(unittest.TestCase):
 
     def test_detector_configuration_parsed(self):
         supported_keys = [
-            ("rear_scale", lambda x: x.get_state_scale(file_information=None).scale),
-            # ("front_scale", lambda x: x.get_state_scale()) TODO this is issue # 27948
+            ("rear_scale", lambda x: x.get_state_scale(file_information=None).rear_scale),
+            ("front_scale", lambda x: x.get_state_scale(file_information=None).front_scale),
         ]
         self._loop_over_supported_keys(supported_keys=supported_keys, top_level_keys=["detector", "configuration"])
 

@@ -973,7 +973,7 @@ class ParsedDictConverter(IStateParser):
         if SetId.SCALES in self._input_dict:
             scales = self._input_dict[SetId.SCALES]
             scales = scales[-1]
-            state.scale = scales.s
+            state.rear_scale = scales.s
 
         # We can also have settings for the sample geometry (Note that at the moment this is not settable via the
         # user file nor the command line interface
