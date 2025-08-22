@@ -20,6 +20,7 @@ Guides
    Architecture
    BuildingOnOSX
    BuildingWithCMake
+   LocalMantidBuildWithPixi
    CMakeBestPractices
    Standards/index
    Testing/index
@@ -39,6 +40,9 @@ Guides
 
 :doc:`Architecture`
    Describes the architecture of the mantid libraries and applications.
+
+:doc:`LocalMantidBuildWithPixi`
+   How to set up a pixi environment to use a local Mantid build instead of conda packages in other projects.
 
 :doc:`Standards <Standards/index>`
    Details of coding and documentation standards for the project. Includes specifics regarding algorithms.
