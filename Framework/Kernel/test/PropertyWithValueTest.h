@@ -207,11 +207,8 @@ public:
                      "Could not set property defau1. Can not convert \"garbage\" to " + l.type());
     TS_ASSERT_EQUALS(l.getDefault(), "987987987987");
 
-    // Note that some versions of boost::lexical_cast > 1.34 give a string such
-    // as
-    // 9.9900000000000002 rather than 9.99. Converting back to a double however
-    // does
-    // still give the correct 9.99.
+    // Note that some versions of boost::lexical_cast > 1.34 give a string such as 9.9900000000000002 rather than 9.99.
+    // Converting back to a double however does still give the correct 9.99.
     PropertyWithValue<double> d("defau3.33", 3.33);
     TS_ASSERT_EQUALS(d.getDefault().substr(0, 4), "3.33");
     TS_ASSERT_EQUALS(d.setValue("1.6"), "");
