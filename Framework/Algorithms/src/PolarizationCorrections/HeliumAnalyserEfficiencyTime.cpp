@@ -6,16 +6,23 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 #include "MantidAlgorithms/PolarizationCorrections/HeliumAnalyserEfficiencyTime.h"
+#include "MantidAlgorithms/PolarizationCorrections/PolarizationCorrectionsHelpers.h"
+
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
-#include "MantidAlgorithms/PolarizationCorrections/PolarizationCorrectionsHelpers.h"
+#include "MantidAPI/Workspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/DateTimeValidator.h"
+#include "MantidKernel/LambdaValidator.h"
 #include "MantidKernel/Unit.h"
+#include "MantidKernel/UnitFactory.h"
 #include "MantidTypes/Core/DateAndTime.h"
-#include <MantidKernel/LambdaValidator.h>
-#include <MantidKernel/UnitFactory.h>
+
 #include <algorithm>
 #include <vector>
 
@@ -31,6 +38,7 @@ static const std::string INPUT_WORKSPACE{"InputWorkspace"};
 static const std::string REFERENCE_WORKSPACE{"ReferenceWorkspace"};
 static const std::string REFERENCE_TIMESTAMP{"ReferenceTimeStamp"};
 static const std::string OUTPUT_WORKSPACE{"OutputWorkspace"};
+static const std::string UNPOLARIZED_TRANSMISSION{"UnpolarizedTransmission"};
 static const std::string PXD{"PXD"};
 static const std::string PXD_ERROR{"PXDError"};
 static const std::string LIFETIME{"Lifetime"};
@@ -40,7 +48,22 @@ static const std::string INITIAL_POL_ERROR{"InitialPolarizationError"};
 } // namespace PropertyNames
 
 namespace {
+static const std::string COLUMN_STAMPS = "midtime_stamp";
+static const std::string COLUMN_HOURS = "hours";
+static const std::string COLUMN_HOURS_ERROR = "hours_error";
+
 auto constexpr LAMBDA_CONVERSION_FACTOR = 0.0733;
+
+MatrixWorkspace_sptr createWorkspaceFromVectors(const HistogramData::HistogramX &x, const std::vector<double> &y,
+                                                const std::vector<double> &e) {
+  const auto ws = WorkspaceFactory::Instance().create("Workspace2D", 1, y.size() + 1, y.size());
+  ws->mutableX(0) = x;
+  ws->mutableY(0) = HistogramData::HistogramY(y);
+  ws->mutableE(0) = HistogramData::HistogramE(e);
+  ws->setDistribution(true);
+  ws->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
+  return ws;
+}
 
 bool hasUnit(const std::string &unitToCompareWith, const MatrixWorkspace_sptr &ws) {
   if (ws->axes() == 0) {
@@ -107,6 +130,9 @@ void HeliumAnalyserEfficiencyTime::init() {
   declareProperty(PropertyNames::LIFETIME_ERROR, 0.0, mustBePositive, "Error in lifetime (in hours)");
   declareProperty(std::make_unique<WorkspaceProperty<>>(PropertyNames::OUTPUT_WORKSPACE, "", Direction::Output),
                   "Helium analyzer efficiency as a function of wavelength");
+  declareProperty(std::make_unique<WorkspaceProperty<>>(PropertyNames::UNPOLARIZED_TRANSMISSION, "", Direction::Output,
+                                                        PropertyMode::Optional),
+                  "Unpolarized beam transmission as a function of wavelength");
 }
 
 /**
@@ -126,8 +152,11 @@ std::map<std::string, std::string> HeliumAnalyserEfficiencyTime::validateInputs(
 }
 
 void HeliumAnalyserEfficiencyTime::exec() {
-  const auto outWs = calculateEfficiency();
-  setProperty(PropertyNames::OUTPUT_WORKSPACE, outWs);
+  const auto outWs = calculateOutputs();
+  setProperty(PropertyNames::OUTPUT_WORKSPACE, outWs.at(0));
+  if (outWs.size() > 1) {
+    setProperty(PropertyNames::UNPOLARIZED_TRANSMISSION, outWs.at(1));
+  }
 }
 
 MatrixWorkspace_sptr HeliumAnalyserEfficiencyTime::retrieveWorkspaceForWavelength() const {
@@ -143,10 +172,12 @@ MatrixWorkspace_sptr HeliumAnalyserEfficiencyTime::retrieveWorkspaceForWavelengt
   return std::dynamic_pointer_cast<MatrixWorkspace>(inputWs);
 }
 
-MatrixWorkspace_sptr HeliumAnalyserEfficiencyTime::calculateEfficiency() {
+std::vector<MatrixWorkspace_sptr> HeliumAnalyserEfficiencyTime::calculateOutputs() {
+  const bool doUnpolTransmission = !isDefault(PropertyNames::UNPOLARIZED_TRANSMISSION);
+
   const auto [time, timeError] = getTimeDifference();
-  const double mu = LAMBDA_CONVERSION_FACTOR * static_cast<double>(getProperty(PropertyNames::PXD));
-  const double muError = LAMBDA_CONVERSION_FACTOR * static_cast<double>(getProperty(PropertyNames::PXD_ERROR));
+  const double pxd = LAMBDA_CONVERSION_FACTOR * static_cast<double>(getProperty(PropertyNames::PXD));
+  const double pxdError = LAMBDA_CONVERSION_FACTOR * static_cast<double>(getProperty(PropertyNames::PXD_ERROR));
   const double lifetime = getProperty(PropertyNames::LIFETIME);
   const double lifetimeError = getProperty(PropertyNames::LIFETIME_ERROR);
   const double polIni = getProperty(PropertyNames::INITIAL_POL);
@@ -159,34 +190,51 @@ MatrixWorkspace_sptr HeliumAnalyserEfficiencyTime::calculateEfficiency() {
 
   auto efficiency = std::vector<double>(lambdas.size());
   auto efficiencyErrors = std::vector<double>(lambdas.size());
+
+  std::vector<double> unpolTransmission, unpolTransmissionErrors;
+  if (doUnpolTransmission) {
+    unpolTransmission = std::vector<double>(lambdas.size());
+    unpolTransmissionErrors = std::vector<double>(lambdas.size());
+  }
+
   for (size_t index = 0; index < lambdas.size(); index++) {
     const auto lambdaError = binBoundaries[index + 1] - binBoundaries[index];
     // Efficiency
     const auto lambda = lambdas.at(index);
+    const auto mu = pxd * lambda;
     const auto expTerm = std::exp(-time / lifetime);
-    const auto factor = mu * lambda * polIni * expTerm;
-    efficiency.at(index) = (1 + std::tanh(factor)) / 2;
+    const auto polHe = polIni * expTerm;
+
+    efficiency.at(index) = (1 + std::tanh(mu * polHe)) / 2;
 
     // Calculate the errors for the efficiency, covariance between variables assumed to be zero
-    const auto commonTerm = 0.5 / std::pow(std::cosh(factor), 2);
-    const double de_dmu = commonTerm * lambda * polIni * expTerm;
-    const double de_dlambda = commonTerm * mu * polIni * expTerm;
-    const double de_dpolIni = commonTerm * mu * lambda * expTerm;
-    const double de_dt = -commonTerm * factor / lifetime;
-    const double de_lifetime = commonTerm * factor * time / (lifetime * lifetime);
+    const auto muError = pxd * lambdaError + lambda * pxdError;
+    const auto polError = std::sqrt(std::pow(2, expTerm * polIniError) + std::pow(2, polHe * timeError / lifetime) +
+                                    std::pow(2, polHe * time * lifetimeError / (std::pow(2, lifetime))));
+
+    const auto commonTerm = 0.5 / std::pow(std::cosh(mu * polHe), 2);
     efficiencyErrors.at(index) =
-        std::sqrt(de_dmu * de_dmu * muError * muError + de_dlambda * de_dlambda * lambdaError * lambdaError +
-                  de_dpolIni * de_dpolIni * polIniError * polIniError + de_dt * de_dt * timeError * timeError +
-                  de_lifetime * de_lifetime * lifetimeError * lifetimeError);
+        std::sqrt(std::pow(2, commonTerm) * (std::pow(2, mu * polError) + std::pow(2, polHe * muError)));
+
+    if (doUnpolTransmission) {
+      const auto expFactor = std::exp(-mu);
+      const auto coshFactor = std::cosh(mu * polHe);
+      const auto sinhFactor = std::sinh(mu * polHe);
+      unpolTransmission.at(index) = expFactor * coshFactor;
+      unpolTransmissionErrors.at(index) =
+          std::sqrt(std::pow(2, (expFactor * (polHe * sinhFactor - coshFactor) * muError)) +
+                    std::pow(2, expFactor * sinhFactor * polError));
+    }
   }
 
-  const auto ws = WorkspaceFactory::Instance().create("Workspace2D", 1, efficiency.size() + 1, efficiency.size());
-  ws->mutableX(0) = binBoundaries;
-  ws->mutableY(0) = HistogramData::HistogramY(efficiency);
-  ws->mutableE(0) = HistogramData::HistogramE(efficiencyErrors);
-  ws->setDistribution(true);
-  ws->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
-  return ws;
+  const auto outputVec = std::vector({efficiency, efficiencyErrors, unpolTransmission, unpolTransmissionErrors});
+  std::vector<MatrixWorkspace_sptr> wsOut;
+  for (size_t index = 0; index < outputVec.size(); index += 2) {
+    if (outputVec.at(index).size() > 0) {
+      wsOut.push_back(createWorkspaceFromVectors(binBoundaries, outputVec.at(index), outputVec.at(index + 1)));
+    }
+  }
+  return wsOut;
 }
 
 std::pair<double, double> HeliumAnalyserEfficiencyTime::getTimeDifference() {
@@ -195,30 +243,32 @@ std::pair<double, double> HeliumAnalyserEfficiencyTime::getTimeDifference() {
   timeDiff->initialize();
   timeDiff->setProperty("InputWorkspaces", getPropertyValue("InputWorkspace"));
 
-  size_t rowTime = 0;
-  size_t colTime = 1;
-  constexpr size_t colTimeError = 5;
   std::string refTimeStamp;
   if (!isDefault(PropertyNames::REFERENCE_WORKSPACE)) {
     timeDiff->setProperty("ReferenceWorkspace", getPropertyValue("ReferenceWorkspace"));
-    rowTime = 1;
-    colTime = 4;
   } else {
     refTimeStamp = getPropertyValue(PropertyNames::REFERENCE_TIMESTAMP);
   }
 
   timeDiff->execute();
+
   const ITableWorkspace_sptr table = timeDiff->getProperty("OutputWorkspace");
+  // This will be always the last row on the table
+  const auto indexRow = table->rowCount() - 1;
+  const auto coltHoursErr = table->getColumn(COLUMN_HOURS_ERROR);
+  const auto tHoursErr = static_cast<double>(coltHoursErr->cell<float>(indexRow));
+
   double tHours;
-  if (!refTimeStamp.empty()) {
+  if (refTimeStamp.empty()) {
+    const auto coltHours = table->getColumn(COLUMN_HOURS);
+    tHours = static_cast<double>(coltHours->cell<float>(indexRow));
+  } else {
     // Here we can only take the time stamp of the input workspace from the table
-    const auto expTimeStamp = table->cell<std::string>(rowTime, colTime);
+    const auto colTimeStamps = table->getColumn(COLUMN_STAMPS);
+    const auto expTimeStamp = colTimeStamps->cell<std::string>(indexRow);
     const auto duration = Types::Core::DateAndTime(expTimeStamp) - Types::Core::DateAndTime(refTimeStamp);
     tHours = static_cast<double>(duration.total_seconds() / 3600);
-  } else {
-    tHours = static_cast<double>(table->cell<float>(rowTime, colTime));
   }
-  const auto tHoursErr = static_cast<double>(table->cell<float>(rowTime, colTimeError));
   return std::make_pair(std::abs(tHours), tHoursErr);
 }
 
