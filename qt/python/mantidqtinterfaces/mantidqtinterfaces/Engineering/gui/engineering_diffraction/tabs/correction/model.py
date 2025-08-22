@@ -1,0 +1,3 @@
+from Engineering.texture.correction.correction_model import TextureCorrectionModel
+
+CorrectionModel = TextureCorrectionModel
