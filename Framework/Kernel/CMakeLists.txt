@@ -80,6 +80,7 @@ set(SRC_FILES
     src/SpinStateHelpers.cpp
     src/ProgressBase.cpp
     src/Property.cpp
+    src/PropertyHelper.cpp
     src/PropertyHistory.cpp
     src/PropertyManager.cpp
     src/PropertyManagerDataService.cpp
