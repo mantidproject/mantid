@@ -130,7 +130,8 @@ class SliceViewerBasePresenter(IDataViewSubscriber, ABC):
             self._data_view.deactivate_and_disable_tool(ToolItemText.ZOOM)
             self._data_view.deactivate_and_disable_tool(ToolItemText.PAN)
             self._data_view.deactivate_and_disable_tool(ToolItemText.REGIONSELECTION)
-            self._data_view.masking = Masking(self._data_view, self.model.ws.name())
+            numeric_axis = self.model.ws.getAxis(1).extractValues() if self.model.ws.getAxis(1).isNumeric() else None
+            self._data_view.masking = Masking(self._data_view, self.model.ws.name(), numeric_axis)
             self._data_view.masking.new_selector(ToolItemText.RECT_MASKING)  # default to rect masking
             self._data_view.activate_tool(ToolItemText.RECT_MASKING, True)
             return

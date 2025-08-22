@@ -44,7 +44,7 @@ def cursor_info(image: AxesImage, xdata: float, ydata: float, full_bbox: Bbox = 
         return None
 
 
-def make_selector_class(base, remove_mask_handle):
+def make_selector_class(base, clear_handle=None):
     def in_axes_event(self, event):
         """
         Only process event if inside the axes with which the selector was init
@@ -65,7 +65,8 @@ def make_selector_class(base, remove_mask_handle):
 
     def clear(self):
         super(SelectorMtd, self).clear()
-        remove_mask_handle()
+        if clear_handle:
+            clear_handle()
 
     SelectorMtd = type("SelectorMtd", (base,), {})
     SelectorMtd.onmove = onmove
