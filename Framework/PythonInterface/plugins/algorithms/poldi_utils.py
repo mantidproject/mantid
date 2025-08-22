@@ -9,7 +9,7 @@ from mantid.api import AlgorithmManager, AnalysisDataService as ADS
 import numpy as np
 from mantid.kernel import UnitConversion, DeltaEModeType, UnitParams, UnitParametersMap
 from typing import Tuple, Sequence, Optional, TYPE_CHECKING
-
+from joblib import Parallel, delayed
 
 if TYPE_CHECKING:
     from mantid.dataobjects import Workspace2D
@@ -19,7 +19,7 @@ def exec_alg(alg_name: str, **kwargs):
     alg = AlgorithmManager.create(alg_name)
     alg.initialize()
     alg.setAlwaysStoreInADS(False)
-    alg.setLogging(True)
+    alg.setLogging(False)
     alg.setProperties(kwargs)
     alg.execute()
     out_props = tuple(alg.getProperty(prop).value for prop in alg.outputProperties())
@@ -166,8 +166,9 @@ def simulate_2d_data(
     # get instrument settings
     cycle_time, slit_offsets, t0_const, l1_chop = get_instrument_settings_from_log(ws_sim)
     si = ws_sim.spectrumInfo()
-    tths = np.array([si.twoTheta(ispec) for ispec in range(ws_sim.getNumberHistograms())])
-    l2s = [si.l2(ispec) for ispec in range(ws_sim.getNumberHistograms())]
+    nspec = ws_sim.getNumberHistograms()
+    tths = np.array([si.twoTheta(ispec) for ispec in range(nspec)])
+    l2s = np.array([si.l2(ispec) for ispec in range(nspec)])
     l1 = si.l1()
     # get npulses to include
     time_max = get_max_tof_from_chopper(l1, l1_chop, l2s, tths, lambda_max) + slit_offsets[0]
@@ -176,12 +177,16 @@ def simulate_2d_data(
     ipulses = np.arange(npulses)[:, None]
     offsets = (ipulses * cycle_time - slit_offsets).flatten()  # note different sign to auto-corr!
     tofs = ws_sim.readX(0)[:, None] + offsets - t0_const  # same for all spectra
-    params = UnitParametersMap()
-    for ispec in range(ws_sim.getNumberHistograms()):
-        params[UnitParams.l2] = l2s[ispec]
-        params[UnitParams.twoTheta] = tths[ispec]
-        tof_d1Ang = UnitConversion.run("dSpacing", "TOF", 1.0, l1 - l1_chop, DeltaEModeType.Elastic, params)
-        ds = tofs / tof_d1Ang
-        ws_sim.setY(ispec, np.interp(ds, ws_1d.readX(0), ws_1d.readY(0)).sum(axis=1))
+    path_length_ratio = (l2s + l1 - l1_chop) / (l2s + l1)
+    tof_d1Ang = np.asarray([si.diffractometerConstants(ispec)[UnitParams.difc] * path_length_ratio[ispec] for ispec in range(nspec)])
+    out = Parallel(n_jobs=-2, prefer="threads", return_as="generator")(
+        delayed(_do_interp)(tofs / tof_d1Ang[ispec], ws_1d.readX(0), ws_1d.readY(0)) for ispec in range(nspec)
+    )
+    # set y values
+    [ws_sim.setY(ispec, yvec) for ispec, yvec in enumerate(out)]
     ADS.addOrReplace(output_workspace, ws_sim)
     return ws_sim
+
+
+def _do_interp(dtarget, d, intensity):
+    return np.interp(dtarget, d, intensity).sum(axis=1)
