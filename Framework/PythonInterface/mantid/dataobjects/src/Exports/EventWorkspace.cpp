@@ -22,6 +22,5 @@ void export_EventWorkspace() {
   class_<EventWorkspace, bases<IEventWorkspace>, boost::noncopyable>("EventWorkspace", no_init);
 
   // register pointers
-  // cppcheck-suppress unusedScopedObject
   RegisterWorkspacePtrToPython<EventWorkspace>();
 }

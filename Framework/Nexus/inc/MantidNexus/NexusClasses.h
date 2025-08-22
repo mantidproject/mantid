@@ -308,7 +308,7 @@ public:
     if (rank() > 4) {
       throw std::runtime_error("Cannot load dataset of rank greater than 4");
     }
-    dimsize_t n = 0; // cppcheck-suppress variableScope
+    dimsize_t n = 0;
     DimVector datastart, datasize;
     if (rank() == 4) {
       if (i >= dim0())
@@ -358,7 +358,7 @@ public:
     if (rank() > 4) {
       throw std::runtime_error("Cannot load dataset of rank greater than 4");
     }
-    dimsize_t n = 0; // cppcheck-suppress variableScope
+    dimsize_t n = 0;
     DimVector datastart, datasize;
     if (rank() == 4) {
       if (i >= dim0() || j >= dim1())

@@ -9,26 +9,38 @@
 Description
 -----------
 
-Takes a normalised group workspace and combines this with the cell path length multiplied by the gas pressure (``PXD``)
-to calculate the efficiency of the analyser. The input workspace must be a group of four single spectrum histogram workspaces, each
-representing the transmission of a known spin state as specified by the ``SpinStates`` parameter.
+Takes a set of normalised polarized transmission runs as group workspaces. For each transmission run:
+
+- Calculates the analyzer cell efficiency (:math:`\epsilon_{cell}`) by looking at the polarization from the wanted  :math:`T_{para}` and unwanted  :math:`T_{anti}` spin states
+- Extracts the polarization of the Helium gas (:math:`p_{He}`) from a fit to : :math:`\epsilon_{cell}=\frac{1}{2}\big(1+\tanh(\mu p_{He})\big)`
+- Extract the timestamp at which the transmission measurement was realized
+
+Once polarizations and timestamps for all the input transmission runs are retrieved, the decay parameter (:math:`\Gamma`) and initial polarization (:math:`p_{He_{0}}`)
+are extracted from a fit to: :math:`p_{He}(t)=p_{He_{0}}(t) e^{-t/\Gamma}`
+
+Each of the input workspaces must be a group of four single spectrum histogram workspaces, each
+representing the transmission of a known spin state as specified by the ``SpinStates`` property.
+
+Efficiency and Polarization of Helium gas
+-----------------------------------------
 
 If the transmission of the wanted spin state is :math:`T_{para}`, and the transmission of the unwanted spin state is :math:`T_{anti}`,
-then the polarization of of an unpolarised incoming beam after the analyser cell, :math:`P_{cell}` is given by [#KRYCKA]_
+then the polarization of an unpolarized incoming beam after the analyser cell, :math:`P_{cell}` is given by [#KRYCKA]_
 
 .. math::
-    P_{cell} = \frac{T_{para} - T_{anti}}{T_{para} + T_{anti}} = \tanh(0.0733 p d \lambda p_{He})
+    P_{cell} = \frac{T_{para} - T_{anti}}{T_{para} + T_{anti}} = \tanh(\mu p_{He})
 
 The efficiency of the analyser cell is given by
 
 .. math::
-    \epsilon_{cell} = \frac{1 + P_{cell}}{2} = \frac{T_{para}}{T_{para} + T_{anti}} = \frac{1 + \tanh(0.0733 p d \lambda p_{He})}{2}
+    \epsilon_{cell} = \frac{1 + P_{cell}}{2} = \frac{T_{para}}{T_{para} + T_{anti}} = \frac{1 + \tanh(\mu \,p_{He})}{2}
 
-If our four periods are :math:`T_{00}, T_{01}, T_{10}, T_{11}`, with the subscript denoting the spin configuration, then
+Where the polarization is :math:`p_{He}` and :math:`\mu` is the opacity of the cell, defined as : :math:`\mu=0.0733pd\lambda`. Where
+:math:`pd` is the mean gas length that can be computed in :ref:`algm-DepolarizedAnalyserTransmission` algorithm, and :math:`\lambda` is the wavelength of each bin.
+
+With the four periods in each input workspace being :math:`T_{00}, T_{01}, T_{10}, T_{11}`, and the subscript denoting the spin configuration, then
 :math:`T_{para} = T_{00} + T_{11}` and :math:`T_{anti} = T_{01} + T_{10}`, and we can calculate :math:`\epsilon_{cell}` from the above equation.
-The value of :math:`pd` is given by the input ``PXD``, and :math:`\lambda` is the wavelength of each bin, so we fit
-:math:`\frac{1 + \tanh(0.0733 p d \lambda p_{He})}{2}` to our calculated :math:`\epsilon_{cell}` to give us :math:`p_{He}` and hence the
-theoretical efficiency curve.
+We fit :math:`\frac{1 + \tanh(0.0733pd\lambda p_{He})}{2}` to our calculated :math:`\epsilon_{cell}` to give us :math:`p_{He}`.
 
 To calculate the error, :math:`\sigma_{\epsilon_{cell}}`, we need the error on :math:`p_{He}`, :math:`\sigma_{p_{He}}`, and
 the error of :math:`pd`, :math:`\sigma_{pd}`, given by ``PXDError``. The covariance between :math:`pd` and :math:`p_{He}`
@@ -48,31 +60,84 @@ For a standard 68.3% (1-sigma) error the factor :math:`t_{crit}` is given by the
 
 As the number of histogram bins used in the fit increases, :math:`t_{crit} \rightarrow 1`.
 
+Helium Polarization Decay
+-------------------------
+
+After the polarizations are extracted from the transmission data {:math:`p_{He}`}, the timestamp at which each run occurred as well as the difference
+in time between the input runs is extracted using the :ref:`algm-TimeDifference-v1` algorithm, then the polarizations and times are fit
+to an exponential decay curve:
+
+.. math::
+    p_{He}(t) = p_{He_{0}}(t) e^{-t/\Gamma}
+
+From this fit, the decay time :math:`\Gamma` and initial polarization :math:`p_{He_{0}}` are obtained. These parameters can be used
+in :ref:`algm-HeliumAnalyserEfficiency` algorithm to retrieve the efficiency of the fitted helium cell at an arbitrary time.
+
+Outputs
+-------
+
+Up to three distinct outputs can be retrieved from this algorithm:
+
+- OutputWorkspace: Efficiencies. A group workspace of MatrixWorkspaces with the calculated analytical efficiencies for each input transmission run.
+- OutputCurves: A group workspace of MatrixWorkspaces with the fitted curves from both the polarization of helium fit (suffix `He3_Polarization_curves`) and the decay in polarization fit(suffix `decay_curves`).
+- OutputParameters: A TableWorkspace with the parameters from both the polarization of helium fit and the decay in polarization fit.
+
+If only one input group is set on the `InputWorkspaces` property, the algorithm will not do a Polarization Decay fit, and the output will only be the efficiency of the group
+and the results from the Helium Gas Polarization fit.
+
 Usage
 -----
 
-**Example - Calculate Analyser Efficiency**
+**Example - Calculate Analyser Polarization Decay**
 
-.. testcode:: ExHeliumAnalyserEfficiencyCalc
+.. testcode:: ExHeliumPolDecay
 
-    wsPara = CreateSampleWorkspace('Histogram', Function='User Defined', UserDefinedFunction='name=UserFunction,Formula=0.5*exp(-0.0733*12*x*(1-0.9))',XUnit='Wavelength', xMin='1',XMax='8', BinWidth='1', NumBanks='1', BankPixelWidth='1')
-    wsPara1 = CloneWorkspace(wsPara)
-    wsAnti = CreateSampleWorkspace('Histogram', Function='User Defined', UserDefinedFunction='name=UserFunction,Formula=0.5*exp(-0.0733*12*x*(1+0.9))',XUnit='Wavelength', xMin='1',XMax='8', BinWidth='1', NumBanks='1', BankPixelWidth='1')
-    wsAnti1 = CloneWorkspace(wsAnti)
+    from mantid.api import mtd
+    from mantid.kernel import DateAndTime
+    import numpy as np
 
-    grp = GroupWorkspaces([wsPara,wsAnti,wsPara1,wsAnti1])
-    eff = HeliumAnalyserEfficiency(grp, SpinStates='11,01,00,10')
+    def createWorkspaceWithTime(x,y,name,delay):
+         CreateWorkspace(DataX = x, DataY = y, OutputWorkspace = name, UnitX = 'Wavelength')
+         run = mtd[name].getRun()
+         start = np.datetime64("2025-07-01T08:00:00")
+         run.setStartAndEndTime(DateAndTime(str(start+int(3600*delay))), DateAndTime(str(start+int(3600*(delay+1)))))
+         ConvertToHistogram(InputWorkspace = name, OutputWorkspace = name)
 
-    print('Efficiency at ' + str(mtd['eff'].dataX(0)[0]) + ' Å = ' + str(mtd['eff'].dataY(0)[0]))
-    print('Error in efficiency at ' + str(mtd['eff'].dataX(0)[0]) + ' Å = ' + str(mtd['eff'].dataE(0)[0]))
+    groups = []
+    tau = 45
+    polIni = 0.6
+    delays = np.linspace(0,20,3)
+    lam = np.linspace(1.75,8,10)
+    mu = 0.0733 * 12 * lam
+    phe = polIni * np.exp(-delays/tau)
+
+    for n, delay in enumerate(delays):
+        ynsf = np.exp(- mu * (1-phe[n]))
+        ysf =  np.exp(-mu * (1 + phe[n]))
+        names = [name + f"_{n}" for name in ["T00", "T11", "T01", "T10"]]
+        [createWorkspaceWithTime(lam, ynsf, name, delay) for name in names[:2]]
+        [createWorkspaceWithTime(lam, ysf, name, delay) for name in names[2:]]
+        groups.append(f"group_{n}")
+        GroupWorkspaces(InputWorkspaces = names, OutputWorkspace = groups[-1])
+
+    out, curves, table = HeliumAnalyserEfficiency(InputWorkspaces=groups,
+                                SpinStates = "00,11,01,10")
+
+    p1 = mtd['table'].column(1)[0:3]
+    p0, tau = mtd['table'].column(1)[4:-1]
+
+    print(f"Polarizations at delay times are {p1[0]:.2f}, {p1[1]:.2f}, {p1[2]:.2f}")
+    print(f"Initial He3 Polarization is {p0:.2f}")
+    print(f"Polarization decay time is {tau:.2f}")
 
 Output:
 
-.. testoutput:: ExHeliumAnalyserEfficiencyCalc
-    :options: +ELLIPSIS +NORMALIZE_WHITESPACE
+.. testoutput:: ExHeliumPolDecay
 
-    Efficiency at 1.0 Å = ...
-    Error in efficiency at 1.0 Å = ...
+    Polarizations at delay times are 0.60, 0.48, 0.38
+    Initial He3 Polarization is 0.60
+    Polarization decay time is 45.00
+
 
 References
 ----------

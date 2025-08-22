@@ -6,7 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name,no-init
 # System test that loads short SXD numors and runs LinkedUBs.
-from __future__ import absolute_import, division, print_function
 import unittest
 from testhelpers import create_algorithm
 from mantid.simpleapi import CreateSampleWorkspace, FindGoniometerFromUB, LoadIsawUB

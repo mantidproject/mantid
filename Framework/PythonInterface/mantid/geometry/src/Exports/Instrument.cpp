@@ -47,7 +47,6 @@ void export_Instrument() {
            "represents the source")
 
       .def("getComponentByName",
-           // cppcheck-suppress cstyleCast
            (std::shared_ptr<const IComponent> (Instrument::*)(const std::string &, int) const) &
                Instrument::getComponentByName,
            (arg("self"), arg("cname"), arg("nlevels") = 0), "Returns the named :class:`~mantid.geometry.Component`")

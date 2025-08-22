@@ -4,7 +4,7 @@ set -ex
 parent_dir="$(dirname "$RECIPE_DIR")"
 bash "${parent_dir}"/archive_env_logs.sh "$BUILD_PREFIX" "$PREFIX" 'mantidqt'
 
-mkdir build
+mkdir -p build
 cd build
 
 cmake \
@@ -14,7 +14,6 @@ cmake \
   -DCMAKE_FIND_FRAMEWORK=LAST \
   -DCMAKE_CXX_SCAN_FOR_MODULES=OFF \
   -DENABLE_DOCS=OFF \
-  -DENABLE_QTASSISTANT=OFF \
   -DWORKBENCH_SITE_PACKAGES=$SP_DIR \
   -DENABLE_PRECOMMIT=OFF \
   -DCONDA_BUILD=True \

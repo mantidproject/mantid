@@ -10,9 +10,7 @@
 #include <string>
 
 /// structure to hold a dae item
-template <typename T>
-// cppcheck-suppress noConstructor
-class item_struct {
+template <typename T> class item_struct {
 public:
   /// structure to hold a dae item
   struct item_t {

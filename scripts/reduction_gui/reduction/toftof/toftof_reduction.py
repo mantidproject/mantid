@@ -540,8 +540,6 @@ class TOFTOFScriptElement(BaseScriptElement):
         # generated script
         self.script = [""]
 
-        self.add_line_to_script("from __future__ import (absolute_import, division, print_function, unicode_literals)")
-        self.add_line_to_script()
         self.add_line_to_script("# import mantid algorithms, numpy and matplotlib")
         self.add_line_to_script("from mantid.simpleapi import *")
         self.add_line_to_script("import matplotlib.pyplot as plt")
