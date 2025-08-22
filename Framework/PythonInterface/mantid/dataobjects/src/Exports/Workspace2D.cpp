@@ -174,6 +174,5 @@ void export_Workspace2D() {
       .def("__init__", boost::python::make_constructor(&makeWorkspace2D));
 
   // register pointers
-  // cppcheck-suppress unusedScopedObject
   RegisterWorkspacePtrToPython<Workspace2D>();
 }

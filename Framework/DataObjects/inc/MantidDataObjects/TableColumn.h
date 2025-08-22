@@ -65,10 +65,10 @@ public:
     std::string name = std::string(typeid(Type).name());
     if ((name.find('i') != std::string::npos) || (name.find('l') != std::string::npos) ||
         (name.find('x') != std::string::npos)) {
-      if (length == 4) { // cppcheck-suppress knownConditionTrueFalse
+      if (length == 4) {
         this->m_type = "int";
       }
-      if (length == 8) { // cppcheck-suppress knownConditionTrueFalse
+      if (length == 8) {
         this->m_type = "int64";
       }
     }
@@ -79,10 +79,10 @@ public:
       this->m_type = "double";
     }
     if (name.find('u') != std::string::npos) {
-      if (length == 4) { // cppcheck-suppress knownConditionTrueFalse
+      if (length == 4) {
         this->m_type = "uint32_t";
       }
-      if (length == 8) { // cppcheck-suppress knownConditionTrueFalse
+      if (length == 8) {
         this->m_type = "uint64_t";
       }
     }
