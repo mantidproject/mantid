@@ -132,8 +132,7 @@ if [[ $OSTYPE == "msys" ]]; then
     # Do not use build id as it makes the path too long (>260 chars) for CMake (Legacy Windows API issue)
     EXTRA_BUILD_OPTIONS+="--no-build-id --log-style=plain"
 elif [[ $PLATFORM == "osx-64" ]]; then
-    export MACOSX_DEPLOYMENT_TARGET=10.10
-    EXTRA_BUILD_OPTIONS+="--target-platform=osx-64"
+    EXTRA_BUILD_OPTIONS+="--target-platform=osx-64 -DCMAKE_OSX_DEPLOYMENT_TARGET=10.13"
 fi
 
 export CONDA_SUBDIR=$PLATFORM
