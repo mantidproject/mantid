@@ -14,6 +14,7 @@ mamba run -n base mamba list
 LD_PRELOAD="" \
   cmake \
   ${CMAKE_ARGS} \
+  -DCMAKE_OSX_DEPLOYMENT_TARGET=10.13 \
   -DCMAKE_BUILD_TYPE=Release \
   -DCMAKE_PREFIX_PATH=$PREFIX \
   -DCMAKE_FIND_FRAMEWORK=LAST \
