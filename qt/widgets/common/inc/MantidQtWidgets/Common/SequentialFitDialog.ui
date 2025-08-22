@@ -181,7 +181,7 @@
         <bool>false</bool>
        </property>
        <property name="text">
-        <string>Output spectrum vs params</string>
+        <string>Output workspace index vs params</string>
        </property>
       </widget>
      </item>
@@ -244,7 +244,7 @@
             <string>Range</string>
            </property>
            <property name="toolTip">
-            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Sets a range of values on the numeric axis (spectum number incase of a spectra axis) associated with the workspace index. The range is specfied by a start value and an end value and separated by a colon e.g. 2:5&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Sets a range of values on the numeric axis (spectrum number incase of a spectra axis) associated with the workspace index. The range is specfied by a start value and an end value and separated by a colon e.g. 2:5&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
            </property>
           </column>
          </widget>

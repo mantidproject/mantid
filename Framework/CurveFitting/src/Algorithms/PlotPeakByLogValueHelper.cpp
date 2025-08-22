@@ -169,8 +169,9 @@ void appendInputSpectraToList(std::vector<InputSpectraToFit> &nameList, const st
     } else {
       for (size_t i = 0; i < axis->length(); ++i) {
         int j = axis->spectraNo(i);
+        int wsIdx = static_cast<int>(i);
         if (j == spectrumNumber) {
-          nameList.emplace_back(name, i, j, -1, period, mws);
+          nameList.emplace_back(name, wsIdx, j, -1, period, mws);
           break;
         }
       }
