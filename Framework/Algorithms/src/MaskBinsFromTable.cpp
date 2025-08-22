@@ -87,8 +87,8 @@ void MaskBinsFromTable::maskBins(const API::MatrixWorkspace_sptr &dataws) {
       maskbins->setProperty("InputWorkspace", outputws);
     }
     maskbins->setProperty("OutputWorkspace", this->getPropertyValue("OutputWorkspace"));
-    maskbins->setPropertyValue("InputWorkspaceIndexSet", m_spectraVec[ib]);
     maskbins->setPropertyValue("InputWorkspaceIndexType", "SpectrumNumber");
+    maskbins->setPropertyValue("InputWorkspaceIndexSet", m_spectraVec[ib]);
     maskbins->setProperty("XMin", m_xminVec[ib]);
     maskbins->setProperty("XMax", m_xmaxVec[ib]);
 

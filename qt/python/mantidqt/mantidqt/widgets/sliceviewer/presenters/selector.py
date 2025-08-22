@@ -68,7 +68,11 @@ def make_selector_class(base, clear_handle=None):
         if clear_handle:
             clear_handle()
 
+    def _press(self, event):
+        super(SelectorMtd, self)._press(event)
+
     SelectorMtd = type("SelectorMtd", (base,), {})
     SelectorMtd.onmove = onmove
     SelectorMtd.clear = clear
+    SelectorMtd._press = _press
     return SelectorMtd

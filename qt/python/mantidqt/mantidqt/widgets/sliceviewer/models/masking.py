@@ -1,9 +1,11 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from math import floor, ceil, sqrt
+from math import ceil, sqrt
 from mantid.api import WorkspaceFactory, AnalysisDataService, AlgorithmManager
 from sys import float_info
 from numpy import searchsorted, where
+
+ALLOWABLE_ERROR = 8
 
 
 @dataclass
@@ -17,6 +19,7 @@ class CursorInfoBase(ABC):
     def __init__(self, numeric_axis):
         self._table_rows = None
         self._numeric_axis = numeric_axis
+        self._bin_width = 1
 
     @abstractmethod
     def generate_table_rows(self):
@@ -34,11 +37,14 @@ class CursorInfoBase(ABC):
     def numeric_axis(self):
         return self._numeric_axis is not None
 
+    def snap_to_bin_centre(self, val):
+        return ceil(val - self._bin_width / 2)
+
 
 @dataclass
 class Line:
-    start: float
-    end: float
+    start: tuple[float]
+    end: tuple[float]
     m: float
     c: float
 
@@ -64,8 +70,7 @@ class RectCursorInfo(RectCursorInfoBase):
         if self.numeric_axis:
             y_min, y_max = self.get_y_val_index(y_data[0]), self.get_y_val_index(y_data[-1]) - 1
         else:
-            bin_width = 1
-            y_min, y_max = ceil(y_data[0] - bin_width / 2), ceil(y_data[-1] - bin_width / 2)
+            y_min, y_max = self.snap_to_bin_centre(y_data[0]), self.snap_to_bin_centre(y_data[-1])
         row = TableRow(spec_list=f"{y_min}-{y_max}", x_min=x_data[0], x_max=x_data[-1])
         return [row]
 
@@ -82,10 +87,9 @@ class ElliCursorInfo(RectCursorInfoBase):
             y_range = self._numeric_axis[self.get_y_val_index(y_data[0], True) : self.get_y_val_index(y_data[1]) + 1]
             base_index = where(self._numeric_axis == y_range[0])[0][0]
         else:
-            bin_width = 1
-            y_min = ceil(y_data[0] - bin_width / 2)
-            y_max = ceil(y_data[1] - bin_width / 2)
-            y_range = [n / 2 for n in range(y_min * 2, (y_max * 2) + 1)]  # inclusive range with 0.5 step for greater resolution
+            y_min = self.snap_to_bin_centre(y_data[0])
+            y_max = self.snap_to_bin_centre(y_data[1])
+            y_range = [n / 3 for n in range(y_min * 3, (y_max * 3) + 1)]  # inclusive range with 1/3 step for greater resolution
             base_index = 0
 
         x_min, x_max = x_data[0], x_data[-1]
@@ -94,36 +98,26 @@ class ElliCursorInfo(RectCursorInfoBase):
         h = x_min + a
         k = y_min + b
 
-        mid_point = (y_max - y_min) / 2
         rows = []
         for index, y in enumerate(y_range):
             x_min, x_max = self._calc_x_val(y, a, b, h, k)
-            ws_index = self._get_ws_index(y, index, base_index, mid_point)
+            ws_index = base_index + index if self.numeric_axis else round(y)
+            x_min = x_min - 10**-ALLOWABLE_ERROR if x_min == x_max else x_min  # slightly adjust min value so x vals are different.
             rows.append(TableRow(spec_list=str(ws_index), x_min=x_min, x_max=x_max))
         return rows
-
-    def _get_ws_index(self, y, index, base_index, mid_point):
-        if self.numeric_axis:
-            return base_index + index
-        else:
-            if y > mid_point:
-                return ceil(y)
-            else:
-                return floor(y)
 
     def _calc_x_val(self, y, a, b, h, k):
         return (h - self._calc_sqrt_portion(y, a, b, k)), (h + self._calc_sqrt_portion(y, a, b, k))
 
     @staticmethod
     def _calc_sqrt_portion(y, a, b, k):
-        return sqrt(round((a**2) * (1 - ((y - k) ** 2) / (b**2)), 8))  # Round to alleviate floating point precision errors.
+        return sqrt(round((a**2) * (1 - ((y - k) ** 2) / (b**2)), ALLOWABLE_ERROR))
 
 
 class PolyCursorInfo(CursorInfoBase):
     def __init__(self, nodes, is_numeric):
         super().__init__(is_numeric)
-        self._bin_width = 1
-        self._lines = self._generate_lines(nodes, self._bin_width)
+        self._lines = self._generate_lines(nodes)
         if not self._check_intersecting_lines():
             raise RuntimeError("Polygon shapes with more than 1 intersection point are not supported.")
 
@@ -131,11 +125,11 @@ class PolyCursorInfo(CursorInfoBase):
         rows = []
         y_min, y_max = self._extract_global_y_limits()
 
-        y_range = [n / 2 for n in range(y_min * 2, (y_max * 2) + 1)]  # inclusive range with 0.5 step for greater resolution
+        y_range = [n / 3 for n in range(y_min * 3, (y_max * 3) + 1)]  # inclusive range with 1/3 step for greater resolution
         for y in y_range:
             x_val_pairs = self._calculate_relevant_x_value_pairs(y)
             for x_min, x_max in x_val_pairs:
-                rows.append(TableRow(spec_list=str(ceil(y - self._bin_width / 2)), x_min=x_min, x_max=x_max))
+                rows.append(TableRow(spec_list=str(round(y)), x_min=x_min, x_max=x_max))
         return rows
 
     def _calculate_relevant_x_value_pairs(self, y):
@@ -152,7 +146,9 @@ class PolyCursorInfo(CursorInfoBase):
             x_vals = x_vals[1:] if len(set(x_vals[:2])) == 1 else x_vals[:-1]
         open_close_pairs = []
         for i in range(0, len(x_vals), 2):
-            open_close_pairs.append((x_vals[i], x_vals[i + 1]))
+            x_min, x_max = x_vals[i], x_vals[i + 1]
+            x_min = x_min - 10**-ALLOWABLE_ERROR if x_min == x_max else x_min  # slightly adjust min value so x vals are different.
+            open_close_pairs.append((x_min, x_max))
         return open_close_pairs
 
     def _extract_global_y_limits(self):
@@ -165,7 +161,7 @@ class PolyCursorInfo(CursorInfoBase):
                 y_max = y_val
         return y_min, y_max
 
-    def _generate_lines(self, nodes, bin_width):
+    def _generate_lines(self, nodes):
         node_count = len(nodes)
         lines = []
         for i in range(node_count):
@@ -174,10 +170,10 @@ class PolyCursorInfo(CursorInfoBase):
         return lines
 
     def _generate_line(self, start, end):
-        start_y = ceil(start[1] - self._bin_width / 2)
-        end_y = ceil(end[1] - self._bin_width / 2)
-        start_x = ceil(start[0] - self._bin_width / 2)
-        end_x = ceil(end[0] - self._bin_width / 2)
+        start_y = self.snap_to_bin_centre(start[1])
+        end_y = self.snap_to_bin_centre(end[1])
+        start_x = start[0]
+        end_x = end[0]
         m = (start_y - end_y) / (start_x - end_x)
         c = start_y - m * start_x
         return Line(start=(start_x, start_y), end=(end_x, end_y), m=m, c=c)
