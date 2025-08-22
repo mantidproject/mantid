@@ -189,8 +189,7 @@ static herr_t readStringAttributeN(hid_t attr, char *data, int maxlen) {
 static void NXI5KillAttDir(pLgcyNexusFile5 self) { self->iAtt5.iCurrentIDX = 0; }
 
 /*---------------------------------------------------------------------*/
-static void buildCurrentPath(pLgcyNexusFile5 self, char *pathBuffer, // cppcheck-suppress constParameterPointer
-                             int pathBufferLen) {
+static void buildCurrentPath(pLgcyNexusFile5 self, char *pathBuffer, int pathBufferLen) {
 
   memset(pathBuffer, 0, static_cast<size_t>(pathBufferLen));
   if (self->iCurrentG != 0) {

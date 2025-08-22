@@ -47,7 +47,7 @@ signals:
   void resetScientificBounds();
   void valueChanged(double position);
 
-  // C++ does not recognise QT macros
+  // Cppcheck not recognise QT macros
   // cppcheck-suppress unknownMacro
 private slots:
   void handleMouseDown(const QPoint &point);

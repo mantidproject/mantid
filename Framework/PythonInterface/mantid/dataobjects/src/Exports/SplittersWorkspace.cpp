@@ -22,6 +22,5 @@ void export_SplittersWorkspace() {
                                                                                              no_init);
 
   // register pointers
-  // cppcheck-suppress unusedScopedObject
   RegisterWorkspacePtrToPython<SplittersWorkspace>();
 }

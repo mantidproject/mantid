@@ -81,6 +81,5 @@ void export_RebinnedOutput() {
       .def("setSqrdErrors", &RebinnedOutput::setSqrdErrors, (arg("self"), arg("value")),
            "Sets the value of the squared errors flag");
   // register pointers
-  // cppcheck-suppress unusedScopedObject
   RegisterWorkspacePtrToPython<RebinnedOutput>();
 }
