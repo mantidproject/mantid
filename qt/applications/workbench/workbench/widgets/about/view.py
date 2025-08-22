@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench
-from PyQt5.QtWidgets import QCommandLinkButton
+from qtpy.QtWidgets import QCommandLinkButton
 from qtpy.QtCore import Qt, QSize
 from qtpy.QtGui import QPixmap, QIcon, QGuiApplication, QPainter
 from qtpy.QtWidgets import (
