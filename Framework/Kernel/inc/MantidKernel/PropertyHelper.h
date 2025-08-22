@@ -11,6 +11,7 @@
 #include <memory>
 #endif
 
+#include "MantidKernel/IValidator.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/Strings.h"
@@ -22,15 +23,11 @@ namespace Mantid {
 namespace Kernel {
 
 // --------------------- convert values to strings
-namespace {
 /// Convert values to strings.
 template <typename T> std::string toString(const T &value) { return boost::lexical_cast<std::string>(value); }
 
 /// Throw an exception if a shared pointer is converted to a string.
-template <typename T> std::string toString(const std::shared_ptr<T> &value) {
-  UNUSED_ARG(value);
-  throw boost::bad_lexical_cast();
-}
+template <typename T> std::string toString(const std::shared_ptr<T> &) { throw boost::bad_lexical_cast(); }
 
 /// Specialization for a property of type std::vector.
 template <typename T> std::string toString(const std::vector<T> &value, const std::string &delimiter = ",") {
@@ -115,14 +112,13 @@ toPrettyString(const std::vector<T> &value, size_t maxLength = 0, bool collapseL
   return Strings::shorten(retVal, maxLength);
 }
 
-GNU_DIAG_OFF("unused-function")
-
 /** Explicit specialization for a property of type std::vector<bool>.
  *   This will catch Vectors of char, double, float etc.
  *   This simply concatenates the values using a delimiter
  */
 
 template <>
+[[maybe_unused]]
 inline std::string toPrettyString(const std::vector<bool> &value, size_t maxLength, bool collapseLists,
                                   const std::string &delimiter, const std::string &unusedDelimiter,
                                   typename std::enable_if<std::is_same<bool, bool>::value>::type *) {
@@ -130,8 +126,6 @@ inline std::string toPrettyString(const std::vector<bool> &value, size_t maxLeng
   UNUSED_ARG(collapseLists);
   return Strings::shorten(Strings::join(value.begin(), value.end(), delimiter), maxLength);
 }
-
-GNU_DIAG_ON("unused-function")
 
 /// Specialization for a property of type std::vector<std::vector>.
 template <typename T>
@@ -205,21 +199,16 @@ template <typename T> inline void appendValue(const std::string &strvalue, std::
   }
 }
 
-template <typename T> void toValue(const std::string &strvalue, T &value) { value = boost::lexical_cast<T>(strvalue); }
-
-template <typename T> void toValue(const std::string &, std::shared_ptr<T> &) { throw boost::bad_lexical_cast(); }
-
-/** Helper functions for setting the value of an OptionalBool property */
-template <> [[maybe_unused]] void toValue(const std::string &strValue, OptionalBool &value) {
-  const auto normalizedStr = Mantid::Kernel::Strings::toLower(strValue);
-  if (normalizedStr == "0" || normalizedStr == "false") {
-    value = OptionalBool::False;
-  } else if (normalizedStr == "1" || normalizedStr == "true") {
-    value = OptionalBool::True;
-  } else {
-    value = strValue;
-  }
+template <typename T> inline void toValue(const std::string &strvalue, T &value) {
+  value = boost::lexical_cast<T>(strvalue);
 }
+
+template <typename T> inline void toValue(const std::string &, std::shared_ptr<T> &) {
+  throw boost::bad_lexical_cast();
+}
+
+// explicit instantiation for OptionalBool
+template <> MANTID_KERNEL_DLL void toValue(const std::string &strValue, OptionalBool &value);
 
 namespace detail {
 // vector<int> specializations
@@ -339,7 +328,6 @@ template <> inline std::vector<std::string> determineAllowedValues(const Optiona
                  [](const std::pair<OptionalBool::Value, std::string> &str) { return str.second; });
   return values;
 }
-} // namespace
 
 } // namespace Kernel
 } // namespace Mantid
