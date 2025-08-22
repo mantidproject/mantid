@@ -29,8 +29,9 @@ public:
   const std::string name() const override { return "HeliumAnalyserEfficiencyTime"; }
   /// Summary of algorithms purpose
   const std::string summary() const override {
-    return "Calculates the efficiency at the time of the run the using the lifetime, initial polarization and mean gas "
-           "length of the Helium analyzer.";
+    return "Calculates the helium analyzer efficiency at the input workspace run time using the lifetime, initial "
+           "polarization and mean gas "
+           "length of the analyzer";
   }
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }

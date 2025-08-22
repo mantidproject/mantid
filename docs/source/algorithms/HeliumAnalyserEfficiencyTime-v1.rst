@@ -13,18 +13,30 @@ Takes a polarised SANS scattering run and calculates the efficiency of the Heliu
 to a reference time provided either as a time stamp in the ``ReferenceTimeStamp`` property or extracted from a ``ReferenceWorkspace``, which would typically
 be an analyzer calibration run.
 
-The efficiency is calculated from the following expression:
+The efficiency is calculated from the following expression [#KRYCKA]_:
 
 .. math::
-    \epsilon_{cell} = \frac{ 1+ \tanh(0.0733 p d \lambda p_{He}(t_{run}, t_{ref}))}{2}
+    \epsilon_{cell} = \frac{ 1+ \tanh(\mu \, p_{He}(t_{run}, t_{ref}))}{2}
 
-Where the polarization of the helium gas at the time of measurement, :math:`p_{He}(t_{run}, t_{ref})`, is calculated as follows:
+Where :math:`\mu` is the neutron attenuation length :
 
 .. math::
-    p_{He}(t_{run}, t_{ref}) = p_{He_{0}} e^{-(t_{run}- t_{ref})/\Gamma}
+    \mu = 0.0733 \, p \, d \, \lambda
+
+And the polarization of the helium gas at the time of measurement, :math:`p_{He}(t_{run}, t_{ref})`, is calculated as follows:
+
+.. math::
+    p_{He}(t_{run}, t_{ref}) = p_{He_{0}} e^{-(| t_{run}- t_{ref} |)/\Gamma}
 
 Input parameters are the pressure of the analyzer cell multiplied by cell length :math:`pd` (``PXD``), the initial polarization of Helium gas in the cell, :math:`p_{He_{0}}` (``InitialPolarization``), as
 well as the lifetime of the polarized gas, :math:`\Gamma` (``Lifetime``) . Errors are calculated using standard error propagation considering no correlation between input parameters.
+
+Optionally, the unpolarized transmission can be calculated if the  ``UnpolarizedTransmission`` parameter is set, following [#KRYCKA]_.
+
+.. math::
+    T_{{}^{3}He}^{unpol} = e^{-\mu} \cosh(\mu  p_{He})
+
+Where we have taken the approximation that :math:`T_E = 1`.
 
 The wavelength range and bins are extracted from the ``ReferenceWorkspace`` or else the ``InputWorkspace`` if a reference is not provided. These will be used to populated
 the x axes of the ``OutputWorkspace``.
@@ -58,6 +70,12 @@ Usage
     # Use plt.show() if running the script outside of Workbench
     #plt.show()
 
+
+References
+----------
+
+.. [#KRYCKA] Polarization-analyzed small-angle neutron scattering. I. Polarized data reduction using Pol-Corr, Kathryn Krycka et al, *Journal of Applied Crystallography*, **45** (2012), 546-553
+             `doi: 10.1107/S0021889812003445 <https://doi.org/10.1107/S0021889812003445>`_
 
 .. categories::
 
