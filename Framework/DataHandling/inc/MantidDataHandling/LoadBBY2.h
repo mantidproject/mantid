@@ -12,11 +12,12 @@
 
 #include "LoadANSTOHelper.h"
 #include "MantidAPI/IFileLoader.h"
-#include "MantidAPI/LogManager.h"
+#include "MantidDataHandling/DllConfig.h"
+// include "MantidAPI/LogManager.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidKernel/NexusDescriptor.h"
-#include "MantidNexus/NexusClasses.h"
+#include "MantidNexus/NexusClasses_fwd.h"
+#include "MantidNexus/NexusDescriptor.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -29,17 +30,17 @@ to recognise a file as the one containing Bilby data.
 @date 11/07/2014
 */
 
-class DLLExport LoadBBY2 : public API::IFileLoader<Kernel::NexusHDF5Descriptor> {
+class MANTID_DATAHANDLING_DLL LoadBBY2 : public API::IFileLoader<Nexus::NexusDescriptor> {
 
   struct InstrumentInfo {
     // core values or non standard conversion
     std::string sample_name;
     std::string sample_description;
     std::string start_time;
-    int32_t bm_counts;
+    int64_t bm_counts;
     int32_t att_pos;
-    int32_t master1_chopper_id;
-    int32_t master2_chopper_id;
+    int64_t master1_chopper_id;
+    int64_t master2_chopper_id;
     bool is_tof;       // tof or wavelength data
     double wavelength; // -> /nvs067/lambda
     double period_master;
@@ -49,6 +50,7 @@ class DLLExport LoadBBY2 : public API::IFileLoader<Kernel::NexusHDF5Descriptor> 
 
 public:
   // description
+  LoadBBY2();
   int version() const override { return 1; }
   const std::vector<std::string> seeAlso() const override { return {"Load", "LoadBBY"}; }
   const std::string name() const override { return "LoadBBY2"; }
@@ -56,7 +58,7 @@ public:
   const std::string summary() const override { return "Loads a Bilby data file into a workspace."; }
 
   // returns a confidence value that this algorithm can load a specified file
-  int confidence(Kernel::NexusHDF5Descriptor &descriptor) const override;
+  int confidence(Nexus::NexusDescriptor &descriptor) const override;
 
 protected:
   // initialisation
@@ -69,10 +71,10 @@ private:
   static std::vector<bool> createRoiVector(const std::string &maskfile);
 
   // instrument creation
-  void createInstrument(const NeXus::NXEntry &entry, uint64_t startTime, uint64_t endTime,
+  void createInstrument(const Nexus::NXEntry &entry, uint64_t startTime, uint64_t endTime,
                         InstrumentInfo &instrumentInfo, std::map<std::string, double> &logParams,
                         std::map<std::string, std::string> &logStrings, std::map<std::string, std::string> &allParams);
-  void loadInstrumentParameters(const NeXus::NXEntry &entry, uint64_t startTime, uint64_t endTime,
+  void loadInstrumentParameters(const Nexus::NXEntry &entry, uint64_t startTime, uint64_t endTime,
                                 std::map<std::string, double> &logParams,
                                 std::map<std::string, std::string> &logStrings,
                                 std::map<std::string, std::string> &allParams);

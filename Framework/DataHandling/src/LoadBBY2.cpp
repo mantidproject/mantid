@@ -8,6 +8,7 @@
 #include <chrono>
 #include <cmath>
 #include <cstdio>
+#include <map>
 #include <sstream>
 
 #include "MantidAPI/AnalysisDataService.h"
@@ -44,8 +45,12 @@
 
 namespace Mantid::DataHandling {
 
+using namespace Kernel;
+using namespace API;
+using namespace Nexus;
+
 // register the algorithm into the AlgorithmFactory
-DECLARE_NEXUS_HDF5_FILELOADER_ALGORITHM(LoadBBY2)
+DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadBBY2)
 
 // consts
 static const int LAST_INDEX = -1;
@@ -70,8 +75,11 @@ static char const *const UseHMScanTimeStr = "UseHMScanTime";
 using namespace ANSTO;
 using ANSTO::EventVector_pt;
 
+static const std::map<std::string, Anxs::ScanLog> ScanLogMap = {
+    {"end", Anxs::ScanLog::End}, {"mean", Anxs::ScanLog::Mean}, {"start", Anxs::ScanLog::Start}};
+
 template <typename T>
-void traceStatistics(const NeXus::NXEntry &entry, const std::string &path, uint64_t startTime, uint64_t endTime,
+void traceStatistics(const Nexus::NXEntry &entry, const std::string &path, uint64_t startTime, uint64_t endTime,
                      Kernel::Logger &log) {
 
   if (log.isDebug()) {
@@ -109,7 +117,7 @@ void AddSinglePointTimeSeriesProperty(API::LogManager &logManager, const std::st
 }
 
 template <typename EP>
-void loadEvents(API::Progress &prog, const char *progMsg, EP &eventProcessor, NeXus::NXEntry &entry,
+void loadEvents(API::Progress &prog, const char *progMsg, EP &eventProcessor, Nexus::NXEntry &entry,
                 uint64_t start_nsec, uint64_t end_nsec) {
 
   using namespace ANSTO;
@@ -124,20 +132,24 @@ void loadEvents(API::Progress &prog, const char *progMsg, EP &eventProcessor, Ne
   Anxs::ReadEventData(progTracker, entry, &eventProcessor, start_nsec, end_nsec, neutronPath, HISTO_BINS_Y);
 }
 
+LoadBBY2::LoadBBY2() : API::IFileLoader<Nexus::NexusDescriptor>() {}
+
 /**
  * Return the confidence value that this algorithm can load the file
  * @param descriptor A descriptor for the file
  * @returns An integer specifying the confidence level. 0 indicates it will not
  * be used
  */
-int LoadBBY2::confidence(Kernel::NexusHDF5Descriptor &descriptor) const {
+int LoadBBY2::confidence(Nexus::NexusDescriptor &descriptor) const {
 
   if (descriptor.isEntry("/entry1/program_name") && descriptor.isEntry("/entry1/experiment/gumtree_version") &&
-      descriptor.isEntry("/entry1/instrument/detector_events") &&
+      descriptor.isEntry("/entry1/instrument/detector_events/event_time_zero") &&
       descriptor.isEntry("/entry1/instrument/detector_events/event_id") &&
-      descriptor.isEntry("/entry1/instrument/L1") && descriptor.isEntry("/entry1/instrument/L2_curtaind") &&
-      descriptor.isEntry("/entry1/instrument/L2_curtainl") && descriptor.isEntry("/entry1/instrument/L2_curtainr") &&
-      descriptor.isEntry("/entry1/instrument/L2_curtainu") && descriptor.isEntry("/entry1/instrument/nvs067/lambda") &&
+      descriptor.isEntry("/entry1/instrument/L1/value") && descriptor.isEntry("/entry1/instrument/L2_curtaind/value") &&
+      descriptor.isEntry("/entry1/instrument/L2_curtainl/value") &&
+      descriptor.isEntry("/entry1/instrument/L2_curtainr/value") &&
+      descriptor.isEntry("/entry1/instrument/L2_curtainu/value") &&
+      descriptor.isEntry("/entry1/instrument/nvs067/lambda/value") &&
       descriptor.isEntry("/entry1/instrument/shutters/fast_shutter") &&
       descriptor.isEntry("/entry1/scan_dataset/time") && descriptor.isEntry("/entry1/scan_dataset/value")) {
     return 95;
@@ -198,7 +210,7 @@ void LoadBBY2::init() {
       "Optional: To only include events before the provided stop time, in "
       "seconds (relative to the start of the run).");
 
-  declareProperty(UseHMScanTimeStr, false, "Use hmscan time rather than scan_dataset.");
+  declareProperty(UseHMScanTimeStr, true, "Use hmscan time rather than scan_dataset.");
 
   std::string grpOptional = "Filters";
   setPropertyGroup(FilterByTofMinStr, grpOptional);
@@ -222,8 +234,8 @@ void LoadBBY2::exec() {
   useHMScanTime = getProperty(UseHMScanTimeStr);
 
   // get the root entry and time period
-  NeXus::NXRoot root(nxsFile);
-  NeXus::NXEntry nxsEntry = root.openFirstEntry();
+  Nexus::NXRoot root(nxsFile);
+  Nexus::NXEntry nxsEntry = root.openFirstEntry();
   uint64_t startTime, endTime;
   if (useHMScanTime)
     std::tie(startTime, endTime) = Anxs::getHMScanLimits(nxsEntry, 0);
@@ -464,7 +476,7 @@ std::vector<bool> LoadBBY2::createRoiVector(const std::string &maskfile) {
 }
 
 // loading instrument parameters
-void LoadBBY2::loadInstrumentParameters(const NeXus::NXEntry &entry, uint64_t startTime, uint64_t endTime,
+void LoadBBY2::loadInstrumentParameters(const Nexus::NXEntry &entry, uint64_t startTime, uint64_t endTime,
                                         std::map<std::string, double> &logParams,
                                         std::map<std::string, std::string> &logStrings,
                                         std::map<std::string, std::string> &allParams) {
@@ -512,7 +524,7 @@ void LoadBBY2::loadInstrumentParameters(const NeXus::NXEntry &entry, uint64_t st
     };
 
     std::string tmpString;
-    float tmpFloat = 0.0f;
+    double tmpDouble = 0.0f;
     uint64_t tmpTimestamp = 0;
     for (auto &x : allParams) {
       if (x.first.find("log_") == 0) {
@@ -533,18 +545,22 @@ void LoadBBY2::loadInstrumentParameters(const NeXus::NXEntry &entry, uint64_t st
           auto updateOk = false;
           if (!hdfTag.empty()) {
             if (isNumeric(details[1])) {
-              bool baseLoaded = Anxs::loadNXDataSet(entry, hdfTag, tmpFloat);
+              bool baseLoaded = Anxs::loadNXDataSet(entry, hdfTag, tmpDouble, 0);
               bool timeLoaded = false;
               if (!baseLoaded) {
-                timeLoaded = Anxs::extractTimedDataSet(entry, hdfTag, startTime, endTime, Anxs::ScanLog::Mean,
-                                                       tmpTimestamp, tmpFloat, tmpString);
+                auto key = (details.size() < 4) ? "mean" : boost::algorithm::trim_copy(details[3]);
+                auto it = ScanLogMap.find(key);
+                Anxs::ScanLog scanLogMode =
+                    (it != ScanLogMap.end()) ? it->second : Anxs::ScanLog::Mean; // default value
+                timeLoaded = Anxs::extractTimedDataSet(entry, hdfTag, startTime, endTime, scanLogMode, tmpTimestamp,
+                                                       tmpDouble, tmpString);
               }
               if (baseLoaded || timeLoaded) {
                 auto factor = std::stod(details[1]);
-                logParams[logTag] = factor * tmpFloat;
+                logParams[logTag] = factor * tmpDouble;
                 updateOk = true;
                 if (timeLoaded) {
-                  traceStatistics<float>(entry, hdfTag, startTime, endTime, g_log);
+                  traceStatistics<double>(entry, hdfTag, startTime, endTime, g_log);
                 }
               }
             } else if (Anxs::loadNXString(entry, hdfTag, tmpString)) {
@@ -578,7 +594,7 @@ void LoadBBY2::loadInstrumentParameters(const NeXus::NXEntry &entry, uint64_t st
 }
 
 // instrument creation
-void LoadBBY2::createInstrument(const NeXus::NXEntry &entry, uint64_t startTime, uint64_t endTime,
+void LoadBBY2::createInstrument(const Nexus::NXEntry &entry, uint64_t startTime, uint64_t endTime,
                                 InstrumentInfo &instrumentInfo, std::map<std::string, double> &logParams,
                                 std::map<std::string, std::string> &logStrings,
                                 std::map<std::string, std::string> &allParams) {
@@ -601,16 +617,15 @@ void LoadBBY2::createInstrument(const NeXus::NXEntry &entry, uint64_t startTime,
   instrumentInfo.period_slave = (1.0 / 50.0) * 1.0e6;
   instrumentInfo.phase_slave = 0.0;
 
-  float tmp_float = 0.0f;
-  int32_t tmp_int32 = 0;
+  double tmp_double = 0.0f;
   int64_t tmp_int64 = 0;
   uint64_t tmp_timestamp = 0;
   std::string tmp_str;
 
   if (Anxs::loadNXDataSet(entry, "monitor/bm1_counts/value", tmp_int64, LAST_INDEX))
     instrumentInfo.bm_counts = tmp_int64;
-  if (Anxs::loadNXDataSet(entry, "instrument/att_pos/value", tmp_float, LAST_INDEX))
-    instrumentInfo.att_pos = boost::math::iround(tmp_float); // [1.0, 2.0, ..., 5.0]
+  if (Anxs::loadNXDataSet(entry, "instrument/att_pos/value", tmp_double, LAST_INDEX))
+    instrumentInfo.att_pos = boost::math::iround(tmp_double); // [1.0, 2.0, ..., 5.0]
 
   if (Anxs::loadNXString(entry, "sample/name", tmp_str))
     instrumentInfo.sample_name = tmp_str;
@@ -619,42 +634,42 @@ void LoadBBY2::createInstrument(const NeXus::NXEntry &entry, uint64_t startTime,
 
   uint64_t epochStart{0};
   auto timeTag = (useHMScanTime ? "hmscan/time" : "scan_dataset/time");
-  if (Anxs::loadNXDataSet(entry, timeTag, epochStart)) {
+  if (Anxs::loadNXDataSet(entry, timeTag, epochStart, 0)) {
     Types::Core::DateAndTime startDateTime(Anxs::epochRelDateTimeBase(epochStart));
     instrumentInfo.start_time = startDateTime.toISO8601String();
   }
 
-  if (Anxs::loadNXDataSet(entry, "instrument/master1_chopper_id", tmp_int64))
+  if (Anxs::loadNXDataSet(entry, "instrument/master1_chopper_id", tmp_int64, 0))
     instrumentInfo.master1_chopper_id = tmp_int64;
-  if (Anxs::loadNXDataSet(entry, "instrument/master2_chopper_id", tmp_int64))
+  if (Anxs::loadNXDataSet(entry, "instrument/master2_chopper_id", tmp_int64, 0))
     instrumentInfo.master2_chopper_id = tmp_int64;
 
   if (Anxs::loadNXString(entry, "instrument/detector/frame_source", tmp_str))
     instrumentInfo.is_tof = tmp_str == "EXTERNAL";
 
   if (Anxs::extractTimedDataSet(entry, "instrument/nvs067/lambda", startTime, endTime, Anxs::ScanLog::Mean,
-                                tmp_timestamp, tmp_float, tmp_str))
-    instrumentInfo.wavelength = tmp_float;
+                                tmp_timestamp, tmp_double, tmp_str))
+    instrumentInfo.wavelength = tmp_double;
 
   if (Anxs::extractTimedDataSet(entry, "instrument/master_chopper_freq", startTime, endTime, Anxs::ScanLog::Mean,
-                                tmp_timestamp, tmp_float, tmp_str) &&
-      (tmp_float > 0.0f))
-    instrumentInfo.period_master = 1.0 / tmp_float * 1.0e6;
+                                tmp_timestamp, tmp_double, tmp_str) &&
+      (tmp_double > 0.0f))
+    instrumentInfo.period_master = 1.0 / tmp_double * 1.0e6;
 
   if (Anxs::extractTimedDataSet(entry, "instrument/t0_chopper_freq", startTime, endTime, Anxs::ScanLog::Mean,
-                                tmp_timestamp, tmp_float, tmp_str) &&
-      (tmp_float > 0.0f))
-    instrumentInfo.period_slave = 1.0 / tmp_float * 1.0e6;
+                                tmp_timestamp, tmp_double, tmp_str) &&
+      (tmp_double > 0.0f))
+    instrumentInfo.period_slave = 1.0 / tmp_double * 1.0e6;
 
   if (Anxs::extractTimedDataSet(entry, "instrument/t0_chopper_phase", startTime, endTime, Anxs::ScanLog::Mean,
-                                tmp_timestamp, tmp_float, tmp_str))
-    instrumentInfo.phase_slave = tmp_float < 999.0 ? tmp_float : 0.0;
+                                tmp_timestamp, tmp_double, tmp_str))
+    instrumentInfo.phase_slave = tmp_double < 999.0 ? tmp_double : 0.0;
 
   // addnl trace message if needed
-  traceStatistics<float>(entry, "instrument/nvs067/lambda", startTime, endTime, g_log);
-  traceStatistics<float>(entry, "instrument/master_chopper_freq", startTime, endTime, g_log);
-  traceStatistics<float>(entry, "instrument/t0_chopper_freq", startTime, endTime, g_log);
-  traceStatistics<float>(entry, "instrument/t0_chopper_phase", startTime, endTime, g_log);
+  traceStatistics<double>(entry, "instrument/nvs067/lambda", startTime, endTime, g_log);
+  traceStatistics<double>(entry, "instrument/master_chopper_freq", startTime, endTime, g_log);
+  traceStatistics<double>(entry, "instrument/t0_chopper_freq", startTime, endTime, g_log);
+  traceStatistics<double>(entry, "instrument/t0_chopper_phase", startTime, endTime, g_log);
 
   loadInstrumentParameters(entry, startTime, endTime, logParams, logStrings, allParams);
 
