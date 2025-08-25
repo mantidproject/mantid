@@ -497,7 +497,7 @@ bool File::append(const std::string &path, const std::string &name, const void *
 namespace Anxs {
 
 int64_t epochRelDateTimeBase(int64_t epochInNanoSeconds) {
-  auto retval = epochInNanoSeconds - static_cast<int64_t>(Types::Core::DateAndTime::EPOCH_DIFF) * 1e9;
+  auto retval = epochInNanoSeconds - static_cast<int64_t>(Types::Core::DateAndTime::EPOCH_DIFF) * 1'000'000'000;
   return retval;
 }
 
@@ -510,9 +510,9 @@ std::string extractWorkspaceTitle(std::string &nxsFile) {
 }
 
 // load nx dataset
-template <class T> bool loadNXDataSet(const NeXus::NXEntry &entry, const std::string &path, T &value, int index) {
+template <class T> bool loadNXDataSet(const Nexus::NXEntry &entry, const std::string &path, T &value, int index) {
   try {
-    NeXus::NXDataSetTyped<T> dataSet = entry.openNXDataSet<T>(path);
+    Nexus::NXDataSetTyped<T> dataSet = entry.openNXDataSet<T>(path);
     dataSet.load();
 
     // if negative index go from the end
@@ -527,9 +527,10 @@ template <class T> bool loadNXDataSet(const NeXus::NXEntry &entry, const std::st
     return false;
   }
 }
-bool loadNXString(const NeXus::NXEntry &entry, const std::string &path, std::string &value) {
+
+bool loadNXString(const Nexus::NXEntry &entry, const std::string &path, std::string &value) {
   try {
-    NeXus::NXChar dataSet = entry.openNXChar(path);
+    Nexus::NXChar dataSet = entry.openNXChar(path);
     dataSet.load();
 
     value = std::string(dataSet(), dataSet.dim0());
@@ -539,7 +540,7 @@ bool loadNXString(const NeXus::NXEntry &entry, const std::string &path, std::str
   }
 }
 
-bool isTimedDataSet(const NeXus::NXEntry &entry, const std::string &path) {
+bool isTimedDataSet(const Nexus::NXEntry &entry, const std::string &path) {
   auto newEntry = entry.openNXGroup(path);
   auto datasets = newEntry.datasets();
   auto valid = (datasets.size() == 2 && newEntry.containsDataSet("time") && newEntry.containsDataSet("value"));
@@ -551,7 +552,7 @@ bool isTimedDataSet(const NeXus::NXEntry &entry, const std::string &path) {
 //
 // The time is the start time value is duration in nsec for each dataset
 //
-std::pair<uint64_t, uint64_t> getTimeScanLimits(const NeXus::NXEntry &entry, int datasetIx) {
+std::pair<uint64_t, uint64_t> getTimeScanLimits(const Nexus::NXEntry &entry, int datasetIx) {
 
   auto timestamp = entry.openNXDataSet<uint64_t>("scan_dataset/time");
   timestamp.load();
@@ -571,7 +572,7 @@ std::pair<uint64_t, uint64_t> getTimeScanLimits(const NeXus::NXEntry &entry, int
 //
 // The time is the start time value is duration in nsec for each dataset
 //
-std::pair<uint64_t, uint64_t> getHMScanLimits(const NeXus::NXEntry &entry, int datasetIx) {
+std::pair<uint64_t, uint64_t> getHMScanLimits(const Nexus::NXEntry &entry, int datasetIx) {
 
   auto timestamp = entry.openNXDataSet<uint64_t>("hmscan/time");
   timestamp.load();
@@ -598,13 +599,13 @@ std::pair<uint64_t, uint64_t> getHMScanLimits(const NeXus::NXEntry &entry, int d
 // in the period.
 
 template <typename T>
-int extractTimedDataSet(const NeXus::NXEntry &entry, const std::string &path, uint64_t startTime, uint64_t endTime,
-                        std::vector<uint64_t> &times, std::vector<T> &events, std::string &units) {
+uint64_t extractTimedDataSet(const Nexus::NXEntry &entry, const std::string &path, uint64_t startTime, uint64_t endTime,
+                             std::vector<uint64_t> &times, std::vector<T> &events, std::string &units) {
 
   auto timeStamp = entry.openNXDataSet<uint64_t>(path + "/time");
   timeStamp.load();
-  int maxn = timeStamp.size();
-  int startIx{0}, endIx{0};
+  auto maxn = timeStamp.size();
+  uint64_t startIx{0}, endIx{0};
   auto itt = timeStamp();
   for (int i = 0; i < maxn; i++) {
     auto v = itt[i];
@@ -625,7 +626,7 @@ int extractTimedDataSet(const NeXus::NXEntry &entry, const std::string &path, ui
 }
 
 template <typename T>
-bool extractTimedDataSet(const NeXus::NXEntry &entry, const std::string &path, uint64_t startTime, uint64_t endTime,
+bool extractTimedDataSet(const Nexus::NXEntry &entry, const std::string &path, uint64_t startTime, uint64_t endTime,
                          ScanLog valueOption, uint64_t &eventTime, T &eventValue, std::string &units) {
   eventTime = 0;
   eventValue = 0;
@@ -639,7 +640,7 @@ bool extractTimedDataSet(const NeXus::NXEntry &entry, const std::string &path, u
   switch (valueOption) {
   case ScanLog::Mean:
     eventValue = std::accumulate(values.begin(), values.end(), T{0}) / n;
-    eventTime = std::accumulate(times.begin(), times.end(), T{0}) / n;
+    eventTime = std::accumulate(times.begin(), times.end(), uint64_t{0}) / n;
     break;
   case ScanLog::Start:
     eventValue = values[0];
@@ -655,7 +656,7 @@ bool extractTimedDataSet(const NeXus::NXEntry &entry, const std::string &path, u
   return retn;
 }
 
-void ReadEventData(ProgressTracker &prog, const NeXus::NXEntry &entry, EventProcessor *handler, uint64_t start_nsec,
+void ReadEventData(ProgressTracker &prog, const Nexus::NXEntry &entry, EventProcessor *handler, uint64_t start_nsec,
                    uint64_t end_nsec, const std::string &neutron_path, int tube_resolution) {
 
   // the detector event time zero is the actual chopper time and all the events are
@@ -672,8 +673,8 @@ void ReadEventData(ProgressTracker &prog, const NeXus::NXEntry &entry, EventProc
   zeroOffset.load();
   auto offsetValues = entry.openNXDataSet<uint32_t>(neutron_path + "/event_time_offset");
   offsetValues.load();
-  uint32_t numPulses = eventIndex.size();
-  uint32_t totalEvents = offsetValues.size();
+  uint32_t numPulses = static_cast<uint32_t>(eventIndex.size());
+  uint32_t totalEvents = static_cast<uint32_t>(offsetValues.size());
 
   prog.setTarget(numPulses);
 
@@ -710,16 +711,27 @@ void ReadEventData(ProgressTracker &prog, const NeXus::NXEntry &entry, EventProc
 }
 
 // template instantiation
-template bool loadNXDataSet(const NeXus::NXEntry &entry, const std::string &path, float &value, int index);
-template bool loadNXDataSet(const NeXus::NXEntry &entry, const std::string &path, int &value, int index);
-template bool loadNXDataSet(const NeXus::NXEntry &entry, const std::string &path, uint64_t &value, int index);
-template bool loadNXDataSet(const NeXus::NXEntry &entry, const std::string &path, int64_t &value, int index);
-template int extractTimedDataSet(const NeXus::NXEntry &entry, const std::string &path, uint64_t startTime,
-                                 uint64_t endTime, std::vector<uint64_t> &times, std::vector<float> &events,
-                                 std::string &units);
-template bool extractTimedDataSet(const NeXus::NXEntry &entry, const std::string &path, uint64_t startTime,
-                                  uint64_t endTime, ScanLog valueOption, uint64_t &eventTime, float &eventValue,
-                                  std::string &units);
+template bool loadNXDataSet<float>(const Nexus::NXEntry &entry, const std::string &path, float &value, int index);
+template bool loadNXDataSet<double>(const Nexus::NXEntry &entry, const std::string &path, double &value, int index);
+template bool loadNXDataSet<int>(const Nexus::NXEntry &entry, const std::string &path, int &value, int index);
+template bool loadNXDataSet<uint64_t>(const Nexus::NXEntry &entry, const std::string &path, uint64_t &value, int index);
+template bool loadNXDataSet<int64_t>(const Nexus::NXEntry &entry, const std::string &path, int64_t &value, int index);
+template uint64_t extractTimedDataSet<float>(const Nexus::NXEntry &entry, const std::string &path, uint64_t startTime,
+                                             uint64_t endTime, std::vector<uint64_t> &times, std::vector<float> &events,
+                                             std::string &units);
+template uint64_t extractTimedDataSet<double>(const Nexus::NXEntry &entry, const std::string &path, uint64_t startTime,
+                                              uint64_t endTime, std::vector<uint64_t> &times,
+                                              std::vector<double> &events, std::string &units);
+template uint64_t extractTimedDataSet<double>(const Nexus::NXEntry &entry, const std::string &path, uint64_t startTime,
+                                              uint64_t endTime, std::vector<uint64_t> &times,
+                                              std::vector<double> &events, std::string &units);
+
+template bool extractTimedDataSet<float>(const Nexus::NXEntry &entry, const std::string &path, uint64_t startTime,
+                                         uint64_t endTime, ScanLog valueOption, uint64_t &eventTime, float &eventValue,
+                                         std::string &units);
+template bool extractTimedDataSet<double>(const Nexus::NXEntry &entry, const std::string &path, uint64_t startTime,
+                                          uint64_t endTime, ScanLog valueOption, uint64_t &eventTime,
+                                          double &eventValue, std::string &units);
 
 } // namespace Anxs
 

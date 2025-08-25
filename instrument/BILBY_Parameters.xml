@@ -13,7 +13,7 @@
 
 	<!-- following parameters are saved to the run log,
 	     parameters are entered as log_[log_name] and the 
-	     and the value is: "hdf_tag,scale,def_value"
+	     and the value is: "hdf_tag,scale,def_value,[mode]"
 		the scale value determines if the value is
 		interpreted as a numeric or string-->
     <parameter name="log_sample_aperture" type="string">
@@ -96,7 +96,7 @@
     </parameter>
 
     <parameter name="log_detector_time" type="string">
-      <value val="instrument/detector/time, 1.0, 0.0" />
+      <value val="instrument/detector/time, 1.0, 0.0, end" />
     </parameter>
 
     

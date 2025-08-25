@@ -222,7 +222,7 @@ private:
 
   // not supported
   File(const File &);
-  File &operator=(const File &);
+  // File &operator=(const File &);
 
 public:
   // construction
@@ -248,30 +248,31 @@ public:
 };
 
 } // namespace Tar
+
 namespace Anxs {
-// options for capturing timeseries data
+// options to capture timeseries data
 enum class ScanLog { Start, End, Mean };
 
 std::string extractWorkspaceTitle(std::string &nxsFile);
 
 int64_t epochRelDateTimeBase(int64_t epochInNanoSeconds);
 
-template <typename T> bool loadNXDataSet(const NeXus::NXEntry &entry, const std::string &path, T &value, int index = 0);
-bool loadNXString(const NeXus::NXEntry &entry, const std::string &path, std::string &value);
+template <typename T> bool loadNXDataSet(const Nexus::NXEntry &entry, const std::string &path, T &value, int index);
+bool loadNXString(const Nexus::NXEntry &entry, const std::string &path, std::string &value);
 
-bool isTimedDataSet(NeXus::NXEntry &entry, const std::string &path);
-std::pair<uint64_t, uint64_t> getTimeScanLimits(const NeXus::NXEntry &entry, int datasetIx);
-std::pair<uint64_t, uint64_t> getHMScanLimits(const NeXus::NXEntry &entry, int datasetIx);
+bool isTimedDataSet(Nexus::NXEntry &entry, const std::string &path);
+std::pair<uint64_t, uint64_t> getTimeScanLimits(const Nexus::NXEntry &entry, int datasetIx);
+std::pair<uint64_t, uint64_t> getHMScanLimits(const Nexus::NXEntry &entry, int datasetIx);
 
 template <typename T>
-int extractTimedDataSet(const NeXus::NXEntry &entry, const std::string &path, uint64_t startTime, uint64_t endTime,
-                        std::vector<uint64_t> &times, std::vector<T> &events, std::string &units);
+uint64_t extractTimedDataSet(const Nexus::NXEntry &entry, const std::string &path, uint64_t startTime, uint64_t endTime,
+                             std::vector<uint64_t> &times, std::vector<T> &events, std::string &units);
 template <typename T>
-bool extractTimedDataSet(const NeXus::NXEntry &entry, const std::string &path, uint64_t startTime, uint64_t endTime,
+bool extractTimedDataSet(const Nexus::NXEntry &entry, const std::string &path, uint64_t startTime, uint64_t endTime,
                          ScanLog valueOption, uint64_t &eventTime, T &eventValue, std::string &units);
 
 template <typename T, typename LT>
-void logScaledTimeSeriesData(const NeXus::NXEntry &entry, const std::string &path, const std::string &name,
+void logScaledTimeSeriesData(const Nexus::NXEntry &entry, const std::string &path, const std::string &name,
                              API::LogManager &logManager, uint64_t startTime, uint64_t endTime, ScanLog valueOption,
                              LT scale, const std::string &scaledUnits) {
   // space for the data in the time period and get the data with a preload value of 1 to
@@ -294,7 +295,7 @@ void logScaledTimeSeriesData(const NeXus::NXEntry &entry, const std::string &pat
   addTimeSeriesProperty<LT>(logManager, name, logTimes, logValues, units);
 }
 
-void ReadEventData(ProgressTracker &prog, const NeXus::NXEntry &entry, EventProcessor *handler, uint64_t start_nsec,
+void ReadEventData(ProgressTracker &prog, const Nexus::NXEntry &entry, EventProcessor *handler, uint64_t start_nsec,
                    uint64_t end_nsec, const std::string &neutron_path, int tube_resolution = 1024);
 
 } // namespace Anxs
