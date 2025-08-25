@@ -5,7 +5,6 @@
 # Script is configured by CMake
 
 @PREAMBLE@
-@JEMALLOC_DEFINITIONS@
 
 @VIRTUAL_GL_WRAPPER@
 
