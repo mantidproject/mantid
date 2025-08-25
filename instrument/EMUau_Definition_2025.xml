@@ -6,8 +6,8 @@
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd"
   name="EMUau"
-  valid-from="2025-07-01 00:00:00"
-  valid-to="2100-12-31 23:59:59">
+  valid-from="1901-01-01 00:00:00"
+  valid-to="2025-06-30 23:59:59">
   <!-- DEFAULTS -->
   <defaults>
     <length unit="meter"/>

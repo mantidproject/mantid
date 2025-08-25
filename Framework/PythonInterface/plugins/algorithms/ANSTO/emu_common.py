@@ -101,14 +101,14 @@ class DopplerSupport:
             if distance[min_ix] > 0.01:
                 raise RuntimeError("Cannot find suitable doppler entry for {}, {}.".format(speed, amp))
 
-        if min_ix and self._frequency_option.lower() == "fixed":
+        if min_ix is not None and self._frequency_option.lower() == "fixed":
             freq = table[min_ix, 2]
         elif self._frequency_option.lower() == "auto":
             freq = 0.5 * speed / (math.pi * self._amplitude)
         else:
             freq = float(self._frequency_option)
 
-        if min_ix and self._phase_option.lower() == "fixed":
+        if min_ix is not None and self._phase_option.lower() == "fixed":
             phase = table[min_ix, 3]
         else:
             phase = float(self._phase_option)
