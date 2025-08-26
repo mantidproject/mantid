@@ -1,0 +1,1 @@
+- Pin build 2 of ``seekpath`` v2.1.0 which removes an eroneous dependency on the ``future`` package. ``seekpath`` is a dependency of ``euphonics``. ``future`` is not used had has a known vulnerability `CVE-2025-50817 <https://github.com/advisories/GHSA-xqrq-4mgf-ff32>`_ .

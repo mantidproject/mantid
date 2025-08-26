@@ -13,6 +13,8 @@ requirements:
     - doxygen {{ doxygen }}
     - eigen {{ eigen }}
     - euphonic {{ euphonic }}
+    # remove seekpath altogether once newer euphonic is released
+    - seekpath=2.1.0=*2
     - graphviz {{ graphviz }}
     - gsl {{ gsl }}
     - h5py

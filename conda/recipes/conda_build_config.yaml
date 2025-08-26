@@ -156,6 +156,9 @@ gsl:
 libopenblas:
   - 0.3.27
 
+# currently pinning seekpath in mantid-developer and mantid to use v2.1.0 build 2
+# which does not require future https://github.com/conda-forge/seekpath-feedstock/pull/15/
+# please remove this comment and the pins in those recipes when euphonic and seekpath release new versions
 euphonic:
   - '>=1.4.3,<2.0'
 
