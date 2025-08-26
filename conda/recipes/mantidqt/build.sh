@@ -7,11 +7,16 @@ bash "${parent_dir}"/archive_env_logs.sh "$BUILD_PREFIX" "$PREFIX" 'mantidqt'
 mkdir -p build
 cd build
 
+# sidestep incorrect flag in rattler-buid v0.46 setting wrong deploy target
+# for cross-compiled intel mac
+if [[ ${CONDA_TOOLCHAIN_HOST} == x86_64-apple-darwin* ]]; then
+    CMAKE_ARGS=("${CMAKE_ARGS}" "-DCMAKE_OSX_DEPLOYMENT_TARGET=10.13")
+fi
+
 # unset LD_PRELOAD as this causes cmake to segfault
 LD_PRELOAD="" \
   cmake \
   ${CMAKE_ARGS} \
-  -DCMAKE_OSX_DEPLOYMENT_TARGET=10.13 \
   -DCMAKE_BUILD_TYPE=Release \
   -DCMAKE_PREFIX_PATH=$PREFIX \
   -DCMAKE_FIND_FRAMEWORK=LAST \
