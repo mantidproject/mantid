@@ -8,7 +8,6 @@ requirements:
   run:
     - ccache
     - cmake {{ cmake }}
-    - conda-verify
     - conda-wrappers # [win]
     - doxygen {{ doxygen }}
     - eigen {{ eigen }}
