@@ -75,6 +75,8 @@ tests:
         - mantid.kernel
         - mantidqt
         - workbench
+  - script:
+      - mantidworkbench --version
 
 about:
   license: GPL-3.0-or-later
