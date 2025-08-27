@@ -828,10 +828,7 @@ template <typename FD> void LoadEMU<FD>::exec(const std::string &hdfFile, const 
 template <typename FD> void LoadEMU<FD>::setupDetectorMasks(const std::vector<bool> &roi) {
 
   // count total number of masked bins
-  size_t maskedBins = 0;
-  for (size_t i = 0; i != roi.size(); i++)
-    if (!roi[i])
-      maskedBins++;
+  size_t maskedBins = std::count_if(roi.begin(), roi.end(), [](bool v) { return !v; });
 
   if (maskedBins > 0) {
     // create list of masked bins
@@ -915,9 +912,7 @@ void LoadEMU<FD>::calibrateDopplerPhase(const std::vector<size_t> &eventCounts,
   // get the number of analysed events and initial doppler time
   auto startID = static_cast<size_t>(HORIZONTAL_TUBES * PIXELS_PER_TUBE);
   auto endID = static_cast<size_t>(DETECTOR_TUBES * PIXELS_PER_TUBE);
-  size_t numEvents = 0;
-  for (size_t i = startID; i < endID; i++)
-    numEvents += eventCounts[i];
+  size_t numEvents = std::accumulate(eventCounts.begin() + startID, eventCounts.begin() + endID, size_t{0});
   if (numEvents == 0)
     throw std::runtime_error("no analysed events for phase calibration");
   std::vector<double> nVel(numEvents);
