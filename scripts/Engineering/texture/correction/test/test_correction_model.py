@@ -344,16 +344,15 @@ class TextureCorrectionModelTest(unittest.TestCase):
 
     @patch(correction_model_path + ".ADS")
     @patch(correction_model_path + ".CloneWorkspace")
-    @patch(correction_model_path + ".CreateDetectorTable")
-    def test_calc_divergence(self, mock_create_det_table, mock_clone_ws, mock_ads):
+    def test_calc_divergence(self, mock_clone_ws, mock_ads):
         self.mock_ws.getNumberHistograms.return_value = 2
         self.mock_ws.readY.return_value = np.array([1.0, 2.0])
         mock_ads.retrieve.return_value = self.mock_ws
 
         # Detector table with fixed theta values
-        mock_det_table = MagicMock()
-        mock_det_table.column.return_value = [10.0, 20.0]  # degrees
-        mock_create_det_table.return_value = mock_det_table
+        mock_si = MagicMock()
+        self.mock_ws.spectrumInfo.return_value = mock_si
+        mock_si.twoTheta.side_effect = [0, 0.5]  # radians
 
         # Mock output_ws
         mock_out_ws = MagicMock()
@@ -361,8 +360,8 @@ class TextureCorrectionModelTest(unittest.TestCase):
 
         self.model.calc_divergence(self.ws_name, horz=1.0, vert=2.0, det_horz=3.0)
 
-        expected_thetas = np.deg2rad([10.0, 20.0])
-        expected_divs = 2.0 * np.sqrt(1.0**2 * 3.0**2) * np.sin(expected_thetas) ** 2
+        expected_thetas = [0, 0.5]
+        expected_divs = 2.0 * np.sqrt(1.0**2 + 3.0**2) * np.sin(expected_thetas) ** 2
 
         calls = mock_out_ws.setY.call_args_list
         self.assertEqual(len(calls), 2)
