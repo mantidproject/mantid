@@ -83,11 +83,11 @@ class FullInstrumentViewWindow(QMainWindow):
         self._detector_spherical_position_edit = self._add_detector_info_boxes(detector_info_layout, "Spherical Position")
         self._detector_pixel_counts_edit = self._add_detector_info_boxes(detector_info_layout, "Pixel Counts")
 
-        time_of_flight_group_box = QGroupBox("Time of Flight")
-        self._tof_min_edit, self._tof_max_edit, self._tof_slider = self._add_min_max_group_box(time_of_flight_group_box)
-        contour_range_group_box = QGroupBox("Contour Range")
+        self._time_of_flight_group_box = QGroupBox("Time of Flight")
+        self._tof_min_edit, self._tof_max_edit, self._tof_slider = self._add_min_max_group_box(self._time_of_flight_group_box)
+        self._contour_range_group_box = QGroupBox("Contour Range")
         self._contour_range_min_edit, self._contour_range_max_edit, self._contour_range_slider = self._add_min_max_group_box(
-            contour_range_group_box
+            self._contour_range_group_box
         )
 
         multi_select_group_box = QGroupBox("Multi-Select")
@@ -126,8 +126,8 @@ class FullInstrumentViewWindow(QMainWindow):
         options_vertical_widget = QWidget()
         options_vertical_layout = QVBoxLayout(options_vertical_widget)
         options_vertical_layout.addWidget(detector_group_box)
-        options_vertical_layout.addWidget(time_of_flight_group_box)
-        options_vertical_layout.addWidget(contour_range_group_box)
+        options_vertical_layout.addWidget(self._time_of_flight_group_box)
+        options_vertical_layout.addWidget(self._contour_range_group_box)
         options_vertical_layout.addWidget(multi_select_group_box)
         options_vertical_layout.addWidget(projection_group_box)
 
@@ -257,16 +257,26 @@ class FullInstrumentViewWindow(QMainWindow):
 
     def set_tof_range_limits(self, tof_limits: list) -> None:
         """Update the TOF edit boxes with formatted text"""
+        lower, upper = tof_limits
+        if upper <= lower:
+            self._time_of_flight_group_box.hide()
+            return
         self._tof_slider.setRange(*tof_limits)
         self._tof_slider.setValue(tof_limits)
+        return
 
     def get_contour_limits(self) -> tuple[float, float]:
         return self._contour_range_slider.value()
 
     def set_contour_range_limits(self, contour_limits: list) -> None:
         """Update the contour range edit boxes with formatted text"""
+        lower, upper = contour_limits
+        if upper <= lower:
+            self._contour_range_group_box.hide()
+            return
         self._contour_range_slider.setRange(*contour_limits)
         self._contour_range_slider.setValue(contour_limits)
+        return
 
     def set_plotter_scalar_bar_range(self, clim: list[int], label: str) -> None:
         """Set the range of the colours displayed, i.e. the legend"""
