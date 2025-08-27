@@ -9,7 +9,7 @@ mkdir -p build
 cd build
 
 # unset LD_PRELOAD as this causes cmake to segfault
-LD_PRELOAD= \
+LD_PRELOAD="" \
   cmake \
   ${CMAKE_ARGS} \
   -DCMAKE_BUILD_TYPE=Release \
