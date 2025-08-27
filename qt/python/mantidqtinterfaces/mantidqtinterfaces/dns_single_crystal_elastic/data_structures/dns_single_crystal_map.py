@@ -13,16 +13,17 @@ import numpy as np
 from matplotlib import path
 from matplotlib import tri
 from mantidqtinterfaces.dns_powder_tof.data_structures.object_dict import ObjectDict
-from mantidqtinterfaces.dns_single_crystal_elastic.plot.elastic_single_crystal_helpers import angle_to_q
+from mantidqtinterfaces.dns_single_crystal_elastic.plot.elastic_single_crystal_helpers import angle_to_q, get_hkl_float_array
 
 
-def _get_mesh(omega, two_theta, z_mesh):
+def _get_mesh(omega, two_theta, z_mesh, z_error_mesh):
     omega_mesh_no_nan, two_theta_mesh_no_nan = np.meshgrid(omega, two_theta)
     not_nan_pos = ~np.isnan(z_mesh)
     omega_mesh_no_nan = omega_mesh_no_nan[not_nan_pos]
     two_theta_mesh_no_nan = two_theta_mesh_no_nan[not_nan_pos]
     z_mesh_no_nan = z_mesh[not_nan_pos]
-    return omega_mesh_no_nan, two_theta_mesh_no_nan, z_mesh_no_nan
+    z_error_mesh_no_nan = z_error_mesh[not_nan_pos]
+    return omega_mesh_no_nan, two_theta_mesh_no_nan, z_mesh_no_nan, z_error_mesh_no_nan
 
 
 def _correct_omega_offset(omega, omega_offset):
@@ -55,7 +56,7 @@ class DNSScMap(ObjectDict):
         super().__init__()
         # non interpolated data:
         omega_corrected = _correct_omega_offset(omega, parameter["omega_offset"])
-        omega_mesh, two_theta_mesh, z_mesh = _get_mesh(omega_corrected, two_theta, z_mesh)
+        omega_mesh, two_theta_mesh, z_mesh, z_error_mesh = _get_mesh(omega_corrected, two_theta, z_mesh, error_mesh)
         omega_unique, two_theta_unique = _get_unique(omega_mesh, two_theta_mesh)
         qx_mesh, qy_mesh = _get_q_mesh(omega_mesh, two_theta_mesh, parameter["wavelength"])
         hklx_mesh, hkly_mesh = _get_hkl_mesh(qx_mesh, qy_mesh, parameter["dx"], parameter["dy"])
@@ -67,7 +68,7 @@ class DNSScMap(ObjectDict):
         self.hklx_mesh = hklx_mesh
         self.hkly_mesh = hkly_mesh
         self.z_mesh = z_mesh
-        self.error_mesh = error_mesh
+        self.error_mesh = z_error_mesh
         self.dx = parameter["dx"]
         self.dy = parameter["dy"]
         self.hkl1 = parameter["hkl1"]
@@ -115,3 +116,30 @@ class DNSScMap(ObjectDict):
         maxi = dns_path.contains_points(x_y_triangles)
         self.triangulation.set_mask(np.invert(maxi))
         return self.triangulation
+
+    def get_changing_indexes(self):
+        """
+        Keeps track of the coordinates after transformation to the horizontal
+        scattering plane and returns the list of relevant indices of (x,y)
+        crystallographic coordinates.
+        """
+        hkl1 = get_hkl_float_array(self.hkl1)
+        hkl2 = get_hkl_float_array(self.hkl2)
+        hkl = np.add(np.outer(self.hklx_mesh.flatten()[0:10], hkl1), np.outer(self.hkly_mesh.flatten()[0:10], hkl2))
+        projection_dims = [len(np.unique(hkl[:, 0])), len(np.unique(hkl[:, 1])), len(np.unique(hkl[:, 2]))]
+        basis_indexes = list(range(len(projection_dims)))
+        del basis_indexes[projection_dims.index(min(projection_dims))]
+        return basis_indexes
+
+    def get_changing_hkl_components(self):
+        index = self.get_changing_indexes()
+        hkl1 = get_hkl_float_array(self.hkl1)
+        hkl2 = get_hkl_float_array(self.hkl2)
+        # transformation to crystal axis following
+        # hkl_comp1 = a * x + b * y
+        # hkl_comp2 = c * x + d * y
+        a = hkl1[index[0]]
+        b = hkl2[index[0]]
+        c = hkl1[index[1]]
+        d = hkl2[index[1]]
+        return a, b, c, d
