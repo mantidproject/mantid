@@ -1,0 +1,1 @@
+- New Algorithm :ref:`algm-HeliumAnalyserEfficiencyTime` calculates the efficiency of a Helium analyzer at an arbitrary time when given polarization decay parameters: initial polarization, lifetime and initial or reference time.
