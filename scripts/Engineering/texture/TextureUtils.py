@@ -400,35 +400,6 @@ def replace_nans(vals, method: str):
     return new_vals.T
 
 
-# def get_eval_ws(out_ws_name, idom, ndom):
-#    if ndom > 1:
-#        return ADS.retrieve(f"{out_ws_name[:-1]}_{idom}")
-#    else:
-#        return ADS.retrieve(out_ws_name)
-
-
-# def calc_intens_and_sigma_arrays(fit_result, error_strategy):
-#    function = fit_result["Function"]
-#    ndom = function.nDomains()
-#    intens = np.zeros(ndom)
-#    sigma = np.zeros(intens.shape)
-#    intens_over_sig = np.zeros(intens.shape)
-#    peak_func = FunctionFactory.Instance().createPeakFunction(function[0][0].name())
-#    peak_limits = np.full(intens.shape, None)
-#    for idom, comp_func in enumerate(function):
-#        [peak_func.setParameter(iparam, comp_func.getParameterValue(iparam)) for iparam in range(peak_func.nParams())]
-#        intens[idom] = peak_func.intensity()
-#        if error_strategy == "Hessian":
-#            [peak_func.setError(iparam, comp_func.getError(iparam)) for iparam in range(peak_func.nParams())]
-#            sigma[idom] = peak_func.intensityError()
-#        else:
-#            ws_fit = get_eval_ws(fit_result["OutputWorkspace"], idom, ndom)
-#            sigma[idom], peak_limits[idom] = calc_sigma_from_summation(ws_fit.readX(0), ws_fit.readE(0) ** 2, ws_fit.readY(0))
-#    ivalid = ~np.isclose(sigma, 0)
-#    intens_over_sig[ivalid] = intens[ivalid] / sigma[ivalid]
-#    return intens, sigma, intens_over_sig, peak_limits
-
-
 def fit_all_peaks(
     wss: Sequence[str],
     peaks: Sequence[float],
