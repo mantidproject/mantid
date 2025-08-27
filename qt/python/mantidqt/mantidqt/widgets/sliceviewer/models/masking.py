@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from math import ceil, sqrt
 from mantid.api import WorkspaceFactory, AnalysisDataService, AlgorithmManager
 from sys import float_info
-from numpy import searchsorted, where
+from numpy import searchsorted, where, inf
 
 ALLOWABLE_ERROR = 8
 
@@ -24,6 +24,44 @@ class CursorInfoBase(ABC):
     @abstractmethod
     def generate_table_rows(self):
         pass
+
+    def consolidate_table_rows(self, table_rows):
+        @dataclass()
+        class XVal:
+            start: bool
+            val: float
+
+        def sort_fn(e):
+            return e.val
+
+        consolidated_rows = {}
+        for row in table_rows:
+            if row.spec_list not in consolidated_rows:
+                consolidated_rows[row.spec_list] = []
+            consolidated_rows[row.spec_list].extend([XVal(start=True, val=row.x_min), XVal(start=False, val=row.x_max)])
+
+        new_table_rows = []
+        for row in consolidated_rows.items():
+            row[1].sort(key=sort_fn)
+            x_mins = [row[1][0].val]
+            x_maxs = []
+            found_end = False
+            x_max = None
+            if len(row[1]) > 2:
+                for val in row[1][1:-1]:
+                    if not found_end and not val.start:
+                        found_end = True
+                        x_max = val.val
+                    elif found_end and not val.start:
+                        x_max = val.val
+                    elif found_end and val.start:
+                        x_maxs.append(x_max)
+                        x_mins.append(val.val)
+                        found_end = False
+            x_maxs.append(row[1][-1].val)
+            for i in range(len(x_mins)):
+                new_table_rows.append(TableRow(spec_list=row[0], x_min=x_mins[i], x_max=x_maxs[i]))
+        return new_table_rows
 
     @property
     def table_rows(self):
@@ -104,7 +142,7 @@ class ElliCursorInfo(RectCursorInfoBase):
             ws_index = base_index + index if self.numeric_axis else round(y)
             x_min = x_min - 10**-ALLOWABLE_ERROR if x_min == x_max else x_min  # slightly adjust min value so x vals are different.
             rows.append(TableRow(spec_list=str(ws_index), x_min=x_min, x_max=x_max))
-        return rows
+        return self.consolidate_table_rows(rows)
 
     def _calc_x_val(self, y, a, b, h, k):
         return (h - self._calc_sqrt_portion(y, a, b, k)), (h + self._calc_sqrt_portion(y, a, b, k))
@@ -130,14 +168,14 @@ class PolyCursorInfo(CursorInfoBase):
             x_val_pairs = self._calculate_relevant_x_value_pairs(y)
             for x_min, x_max in x_val_pairs:
                 rows.append(TableRow(spec_list=str(round(y)), x_min=x_min, x_max=x_max))
-        return rows
+        return self.consolidate_table_rows(rows)
 
     def _calculate_relevant_x_value_pairs(self, y):
         x_vals = []
         for line in self._lines:
             y_bounds = sorted([line.start[1], line.end[1]])
             if y_bounds[1] >= y >= y_bounds[0]:
-                x = (y - line.c) / line.m
+                x = (y - line.c) / line.m if (abs(line.m) != inf and abs(line.m) != 0) else line.start[0]
                 x_vals.append(x)
         x_vals.sort()
         if not len(x_vals) % 2 == 0:
@@ -196,14 +234,17 @@ class PolyCursorInfo(CursorInfoBase):
         # if gradients are equal, or if lines intersect at a node
         if line_1.m == line_2.m or (line_1.start == line_2.end or line_2.start == line_1.end):
             return False
+
         x = (line_1.c - line_2.c) / (line_2.m - line_1.m)
-        x_data = sorted([line_1.start[0], line_1.end[0], line_2.start[0], line_2.end[0]])
-        if not (x_data[1] < x < x_data[2]):
+        line_1_x = sorted([line_1.start[0], line_1.end[0]])
+        line_2_x = sorted([line_2.start[0], line_2.end[0]])
+        if not (line_1_x[0] < x < line_1_x[1]) or not (line_2_x[0] < x < line_2_x[1]):
             return False
 
         y = line_1.m * x + line_1.c
-        y_data = sorted([line_1.start[1], line_1.end[1], line_2.start[1], line_2.end[1]])
-        if not (y_data[1] < y < y_data[2]):
+        line_1_y = sorted([line_1.start[1], line_1.end[1]])
+        line_2_y = sorted([line_2.start[1], line_2.end[1]])
+        if not (line_1_y[0] < y < line_1_y[1]) or not (line_2_y[0] < y < line_2_y[1]):
             return False
         return True
 
