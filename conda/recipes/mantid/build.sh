@@ -12,11 +12,11 @@ cd build
 # for cross-compiled intel mac
 if [[ ${CONDA_TOOLCHAIN_HOST} == x86_64-apple-darwin* ]]; then
     echo "Overriding CMAKE_OSX_DEPLOYMENT_TARGET"
-    CMAKE_ARGS=("${CMAKE_ARGS}" "-DCMAKE_OSX_DEPLOYMENT_TARGET=10.13")
+    CMAKE_OSX_ARGS="-DCMAKE_OSX_DEPLOYMENT_TARGET=10.13"
 fi
 
 cmake \
-  ${CMAKE_ARGS} \
+  ${CMAKE_ARGS} ${CMAKE_OSX_ARGS} \
   -DCMAKE_BUILD_TYPE=Release \
   -DCMAKE_PREFIX_PATH=$PREFIX \
   -DCMAKE_FIND_FRAMEWORK=LAST \
