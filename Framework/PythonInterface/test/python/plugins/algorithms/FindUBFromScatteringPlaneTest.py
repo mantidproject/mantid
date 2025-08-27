@@ -1,5 +1,14 @@
 import unittest
-from mantid.simpleapi import SetUB, CreatePeaksWorkspace, FindUBFromScatteringPlane, LoadEmptyInstrument, AddPeakHKL, ClearUB, IndexPeaks
+from mantid.simpleapi import (
+    SetUB,
+    CreatePeaksWorkspace,
+    FindUBFromScatteringPlane,
+    LoadEmptyInstrument,
+    AddPeakHKL,
+    ClearUB,
+    IndexPeaks,
+    AnalysisDataService,
+)
 import numpy as np
 from unittest.mock import patch
 
@@ -17,49 +26,60 @@ class FindUBFromScatteringPlaneTest(unittest.TestCase):
 
     def index_peaks_helper(self, PeaksWorkspace, tolerance):
         nindexed, avg_hkl_er, *_ = IndexPeaks(PeaksWorkspace, tolerance, RoundHKLs=False)
-        self.assertLessEqual(avg_hkl_er, 0.5)
         return nindexed
+
+    def up_helper(self, vertical_dir, set_vertical, Peaksworkspace):
+        lattice = Peaksworkspace.sample().getOrientedLattice()
+        res_vertical_angle = lattice.recAngle(*set_vertical, *vertical_dir)
+        self.assertLessEqual(np.sin(np.radians(res_vertical_angle)), np.sin(np.radians(5)))
+
+    def tearDown(self):
+        AnalysisDataService.clear()
 
     def test_find_correct_ub_cubic(self):
         peaks1 = self.peaks1
         SetUB(peaks1, u=[1, -0.83, 0], v=[1, 0.83, 0], a=5.4, b=5.4, c=5.4, alpha=90, beta=90, gamma=90)
         AddPeakHKL(peaks1, [2, 2, 0])
+        set_vertical = peaks1.getInstrument().getReferenceFrame().vecPointingUp()
         ClearUB(peaks1)
 
         FindUBFromScatteringPlane(
             Vector1=[1, -1, 0], Vector2=[1, 1, 0], a=5.4, b=5.4, c=5.4, alpha=90, beta=90, gamma=90, PeaksWorkspace="peaks1"
         )
-        nindexed = self.index_peaks_helper(peaks1, 0.2)
+        vertical_dir = peaks1.getInstrument().getReferenceFrame().vecPointingUp()
+        nindexed = self.index_peaks_helper(peaks1, 0.01)
         self.assertEqual(nindexed, 1)
+        self.up_helper(vertical_dir, set_vertical, peaks1)
 
     def test_find_correct_ub_orthorhombic(self):
         peaks1 = self.peaks1
-        SetUB(peaks1, u=[0, 0, 1], v=[1, 0, 0])
+        SetUB(peaks1, u=[0, 0, 1], v=[1, 0, 0], a=5.395, b=5.451, c=20.530, alpha=90, beta=90, gamma=90)
         AddPeakHKL(peaks1, [1, 0, 1])
+        set_vertical = peaks1.getInstrument().getReferenceFrame().vecPointingUp()
         ClearUB(peaks1)
 
         FindUBFromScatteringPlane(
             Vector1=[0, 0, 1], Vector2=[1, 0, 0], a=5.395, b=5.451, c=20.530, alpha=90, beta=90, gamma=90, PeaksWorkspace="peaks1"
         )
-        nindexed = self.index_peaks_helper(peaks1, 0.45)
+        vertical_dir = peaks1.getInstrument().getReferenceFrame().vecPointingUp()
+        nindexed = self.index_peaks_helper(peaks1, 0.05)
         self.assertEqual(nindexed, 1)
+        self.up_helper(vertical_dir, set_vertical, peaks1)
 
     def test_find_correct_ub_hexagonal(self):
         peaks1 = self.peaks1
-        SetUB(
-            peaks1,
-            u=[-0.853618, -0.0212085, 6.52176],
-            v=[-3.4555, -0.0651004, -1.61601],
-        )
+        SetUB(peaks1, u=[-0.853618, 0, 6.52176], v=[-3.4555, 0, -1.61601], a=4.15, b=4.15, c=6.719, alpha=90, beta=90, gamma=120)
         AddPeakHKL(peaks1, [0, 0, 1])
-
+        set_vertical = peaks1.getInstrument().getReferenceFrame().vecPointingUp()
         ClearUB(peaks1)
         FindUBFromScatteringPlane(
             Vector1=[1, 0, 0], Vector2=[0, 0, 1], a=4.15, b=4.15, c=6.719, alpha=90, beta=90, gamma=120, PeaksWorkspace="peaks1"
         )
         ## call index peak instead
-        nindexed = self.index_peaks_helper(self.peaks1, 0.3)
+        vertical_dir = peaks1.getInstrument().getReferenceFrame().vecPointingUp()
+        nindexed = self.index_peaks_helper(self.peaks1, 0.01)
         self.assertEqual(nindexed, 1)
+        self.up_helper(vertical_dir, set_vertical, peaks1)
 
     def test_multiple_peaks_provided(self):
         peaks1 = self.peaks1
@@ -116,7 +136,7 @@ class FindUBFromScatteringPlaneTest(unittest.TestCase):
 
     @patch("mantid.kernel.logger.warning")
     def test_peak_outside_plane_outside_tolerance(self, mock_logger_warning):
-        peaks1 = CreatePeaksWorkspace(InstrumentWorkspace=self.ws, NumberOfPeaks=0, OutputWorkspace="peaks1")
+        peaks1 = self.peaks1
         SetUB(peaks1, u=[1, -0.83, 0], v=[0.8, 1, 0], a=5.4, b=5.4, c=5.4, alpha=90, beta=90, gamma=90)
         AddPeakHKL(peaks1, [1, 1, 1])
 
@@ -126,6 +146,25 @@ class FindUBFromScatteringPlaneTest(unittest.TestCase):
             ),
         )
         mock_logger_warning.assert_called_once_with("given peak hkl does not lie in the plane")
+
+    def test_collinear_vectors(self):
+        peaks1 = self.peaks1
+        SetUB(peaks1, u=[1, -0.83, 0], v=[0.8, 1, 0], a=5.4, b=5.4, c=5.4, alpha=90, beta=90, gamma=90)
+        AddPeakHKL(peaks1, [2, 2, 0])
+
+        with self.assertRaisesRegex(RuntimeError, "Vector cannot be 0"):
+            FindUBFromScatteringPlane(
+                Vector1=[0, 0, 0], Vector2=[1, -1, 0], a=5.4, b=5.4, c=5.4, alpha=90, beta=90, gamma=90, PeaksWorkspace="peaks1"
+            )
+
+    def test_vector_zero(self):
+        peaks1 = self.peaks1
+        SetUB(peaks1, u=[1, -0.83, 0], v=[0.8, 1, 0], a=5.4, b=5.4, c=5.4, alpha=90, beta=90, gamma=90)
+        AddPeakHKL(peaks1, [2, 2, 0])
+        with self.assertRaisesRegex(RuntimeError, "Vectors cannot be collinear"):
+            FindUBFromScatteringPlane(
+                Vector1=[0, 0, 0], Vector2=[1, -1, 0], a=5.4, b=5.4, c=5.4, alpha=90, beta=90, gamma=90, PeaksWorkspace="peaks1"
+            )
 
 
 if __name__ == "__main__":

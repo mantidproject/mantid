@@ -13,7 +13,6 @@ class FindUBFromScatteringPlane(PythonAlgorithm):
     def category(self):
         return "Crystal\\UBMatrix"
 
-    ## put in doc args
     def PyInit(self):
         array_length_3 = FloatArrayLengthValidator(3)
         lower_lattice_parameter_limit = FloatBoundedValidator(lower=0.0)
@@ -54,6 +53,16 @@ class FindUBFromScatteringPlane(PythonAlgorithm):
             name="gamma", direction=Direction.Input, validator=angle_limit, defaultValue=90.0, doc="Lattice Parameter gamma"
         )
 
+    def validateInputs(self):
+        issues = dict()
+        vector_1 = V3D(*self.getProperty("Vector1").value)
+        vector_2 = V3D(*self.getProperty("Vector2").value)
+        if np.isclose(vector_1.norm(), 0, atol=np.finfo(np.float64).eps) or np.isclose(vector_2.norm(), 0, rtol=1e-05):
+            issues["Unsuitable_vector"] = "Vector cannot be 0"
+        if np.isclose(np.sin(vector_1.angle(vector_2)), 0):
+            issues["Collinear"] = "Vectors cannot be collinear"
+        return issues
+
     def exec_child_alg(self, alg_name: str, **kwargs):
         alg = self.createChildAlgorithm(alg_name, enableLogging=False)
         alg.setAlwaysStoreInADS(False)
@@ -75,10 +84,8 @@ class FindUBFromScatteringPlane(PythonAlgorithm):
         gamma = self.getProperty("gamma").value
 
         # getting vectors to define the plane
-        vector_1 = np.array(self.getProperty("Vector1").value)
-        vector_1 = V3D(vector_1[0], vector_1[1], vector_1[2])
-        vector_2 = np.array(self.getProperty("Vector2").value)
-        vector_2 = V3D(vector_2[0], vector_2[1], vector_2[2])
+        vector_1 = V3D(*self.getProperty("Vector1").value)
+        vector_2 = V3D(*self.getProperty("Vector2").value)
 
         # Find a UB with the correct scattering plane (even if `u` and `v` passed to `SetUB` are not orthogonal)
 
@@ -88,30 +95,25 @@ class FindUBFromScatteringPlane(PythonAlgorithm):
         ub_arb = lattice.getUB()
 
         vertical_dir = peak_table.getInstrument().getReferenceFrame().vecPointingUp()
-        vertical_dir = vertical_dir / np.linalg.norm(np.array(vertical_dir))
-        vertical_dir = V3D(vertical_dir[0], vertical_dir[1], vertical_dir[2])
+        vertical_dir = vertical_dir * (1 / vertical_dir.norm())
 
         peak_ip = peak_table.getPeak(0)
         hkl_peak = np.array(peak_ip.getHKL())
-        hkl_peak = hkl_peak.reshape(-1, 1)
         qsample_calc = np.array(np.pi * 2 * (ub_arb @ hkl_peak))
-        qsample_calc = V3D(float(qsample_calc[0]), float(qsample_calc[1]), float(qsample_calc[2]))
+        qsample_calc = V3D(*qsample_calc)
         qsample_obs = np.array(peak_ip.getQSampleFrame())
-        qsample_obs = V3D(float(qsample_obs[0]), float(qsample_obs[1]), float(qsample_obs[2]))
+        qsample_obs = V3D(*qsample_obs)
 
-        if not np.degrees(qsample_calc.angle(vertical_dir)) < 5:
+        if not 85 < (np.degrees(qsample_calc.angle(vertical_dir))) < 95:
+            logger.debug(f"{np.degrees(qsample_calc.angle(vertical_dir))}")
             logger.warning("given peak hkl does not lie in the plane")
 
-        def rotation(theta):
+        def objective(theta):
             axis = np.array(vertical_dir)
             rotation_object = R.from_rotvec(theta * axis)
-            return rotation_object
-
-        def objective(theta):
-            rotation_object = rotation(theta)
-            rotated_vector = rotation_object.apply(qsample_calc)
-
-            cost = (np.linalg.norm(np.array(qsample_obs - rotated_vector))) ** 2
+            rotated_vector = rotation_object.apply(np.array(qsample_calc))
+            res = qsample_obs - rotated_vector
+            cost = (np.linalg.norm(res)) ** 2
             return cost
 
         result = minimize(objective, 0, bounds=[(-np.pi, np.pi)], method="Nelder-Mead")
@@ -123,13 +125,6 @@ class FindUBFromScatteringPlane(PythonAlgorithm):
         ub_final = rotation_matrix @ ub_arb
 
         self.exec_child_alg("SetUB", Workspace=peak_table, UB=ub_final)
-        logger.debug(f"Qs predicted for given hkl, {ub_final @ hkl_peak * 2 * np.pi}")
-        vertical_dir_final = peak_table.getInstrument().getReferenceFrame().vecPointingUp()
-        up_arb = np.linalg.inv(ub_arb) @ vertical_dir
-        up_final = np.linalg.inv(ub_final) @ vertical_dir_final
-        res_vertical_angle = lattice.recAngle(up_arb[0], up_arb[1], up_arb[2], up_final[0], up_final[1], up_final[2])
-        if not np.degrees(res_vertical_angle) < 5:
-            logger.warning("more than 5 degrees difference between the upward hkl vector in initial and final UB")
 
 
 AlgorithmFactory.subscribe(FindUBFromScatteringPlane)
