@@ -18,7 +18,6 @@ from mantid.simpleapi import (
     logger,
     CreateEmptyTableWorkspace,
     LoadEmptyInstrument,
-    CreateDetectorTable,
 )
 import numpy as np
 from mantid.api import AnalysisDataService as ADS
@@ -50,18 +49,17 @@ class TextureCorrectionModel:
         # J. Appl. Cryst. (2014). 47, 1337–1354 doi:10.1107/S1600576714012710
 
         ws = ADS.retrieve(ws_name)
-        # extract thetas from detector table
-        det_tab = CreateDetectorTable(InputWorkspace=ws, DetectorTableWorkspace="det_tab", StoreInADS=False)
-        thetas = np.deg2rad(det_tab.column("Theta"))
-
-        # estimate per spectra divergence
-        div = vert * np.sqrt((horz**2) * (det_horz**2)) * np.sin(thetas) ** 2
-
-        # compile data in workspace
-        _div_corr = CloneWorkspace(InputWorkspace=ws, OutputWorkspace="_div_corr")
+        spec_info = ws.spectrumInfo()
         num_spec = ws.getNumberHistograms()
+        thetas = np.array([spec_info.twoTheta(i) for i in range(num_spec)])
+
+        scale = vert * np.sqrt(horz**2 + det_horz**2)
+        div = scale * (np.sin(thetas) ** 2)
+
+        _div_corr = CloneWorkspace(InputWorkspace=ws, OutputWorkspace="_div_corr")
         y_shape = ws.readY(0).shape
-        [_div_corr.setY(i, np.ones(y_shape) * div[i]) for i in range(num_spec)]
+        for i in range(num_spec):
+            _div_corr.setY(i, np.full(y_shape, div[i]))
 
     def apply_corrections(
         self,
