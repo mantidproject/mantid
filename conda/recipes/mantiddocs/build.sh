@@ -13,7 +13,7 @@ mamba run -n base mamba list
 # unset LD_PRELOAD as this causes cmake to segfault
 LD_PRELOAD="" \
   cmake \
-  ${CMAKE_ARGS} \
+  ${CMAKE_ARGS} ${CMAKE_OSX_ARGS} \
   -DCMAKE_BUILD_TYPE=Release \
   -DCMAKE_PREFIX_PATH=$PREFIX \
   -DCMAKE_FIND_FRAMEWORK=LAST \
