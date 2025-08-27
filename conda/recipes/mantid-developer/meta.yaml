@@ -8,12 +8,13 @@ requirements:
   run:
     - ccache
     - cmake {{ cmake }}
-    - conda-verify
     - conda-wrappers # [win]
     - doxygen {{ doxygen }}
     - eigen {{ eigen }}
     - euphonic {{ euphonic }}
     - gdk-pixbuf {{ gdk_pixbuf }} # [win]
+    # remove seekpath altogether once newer euphonic is released
+    - seekpath=2.1.0=*2
     - graphviz {{ graphviz }}
     - gsl {{ gsl }}
     - h5py

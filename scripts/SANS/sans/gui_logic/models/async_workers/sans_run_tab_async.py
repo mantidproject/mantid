@@ -7,7 +7,7 @@
 from typing import Tuple, List
 
 from qtpy import QtCore
-from PyQt5.QtCore import QObject, pyqtSignal
+from qtpy.QtCore import QObject, Signal
 
 from mantid.kernel import Logger
 from mantidqt.utils.async_qt_adaptor import qt_async_task, IQtAsync
@@ -20,7 +20,7 @@ from sans.sans_batch import SANSBatchReduction
 
 class SignalNotifyProgress(QObject):
     # Since the Async task only has completed status, not incremental progress we do this manually
-    signal = pyqtSignal(int, list, list)
+    signal = Signal(int, list, list)
 
 
 class SansRunTabAsync(IQtAsync):

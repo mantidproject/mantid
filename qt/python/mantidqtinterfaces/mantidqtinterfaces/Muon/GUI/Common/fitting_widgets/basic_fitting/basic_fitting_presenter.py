@@ -24,7 +24,7 @@ from mantidqtinterfaces.Muon.GUI.Common.utilities.workspace_data_utils import (
     check_end_x_is_valid,
 )
 
-from PyQt5.QtCore import Qt
+from qtpy.QtCore import Qt
 
 
 class BasicFittingPresenter:

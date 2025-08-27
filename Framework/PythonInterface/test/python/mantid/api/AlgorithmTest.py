@@ -170,6 +170,15 @@ class AlgorithmTest(unittest.TestCase):
 
         self.assertEqual("Wavelength", ws.getAxis(0).getUnit().unitID())
 
+    def test_createChildAlgorithm_allows_to_set_numeric_properties_to_zero(self):
+        parent_alg = AlgorithmManager.createUnmanaged("Load")
+        child_alg = parent_alg.createChildAlgorithm("CreateSampleWorkspace", **{"XMax": 0.0})
+
+        self.assertTrue(child_alg.isChild())
+        xmax = child_alg.getProperty("XMax").value
+
+        self.assertEqual(xmax, 0.0)
+
     def test_createChildAlgorithm_with_named_args(self):
         parent_alg = AlgorithmManager.createUnmanaged("Load")
         child_alg = parent_alg.createChildAlgorithm("CreateSampleWorkspace", XUnit="Wavelength")
