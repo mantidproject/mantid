@@ -29,7 +29,6 @@ config.appendDataSearchSubDir(CWDIR)
 class AbsCorrMixin(object):
     def setup_absorption_correction_inputs(self):
         self.shape_xml = get_cube_xml("test_cube", 0.01)
-        print(self.shape_xml)
         LoadEmptyInstrument(InstrumentName="ENGINX", OutputWorkspace="ref_ws")
         CreateSampleShape(InputWorkspace="ref_ws", ShapeXML=self.shape_xml)
         SetSampleMaterial(InputWorkspace="ref_ws", ChemicalFormula="Fe")
