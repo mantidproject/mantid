@@ -21,6 +21,10 @@ class SliceViewerBasePresenter(IDataViewSubscriber, ABC):
         self._data_view: SliceViewerDataView = data_view
         self.normalization = False
 
+        #  For now, disable masking if y axis is numeric.
+        if self.model.ws.getAxis(1).isNumeric():
+            self._data_view.deactivate_and_disable_tool(ToolItemText.MASKING)
+
     def show_all_data_clicked(self):
         """Instructs the view to show all data"""
         if WorkspaceInfo.is_ragged_matrix_workspace(self.model.ws):
@@ -130,8 +134,7 @@ class SliceViewerBasePresenter(IDataViewSubscriber, ABC):
             self._data_view.deactivate_and_disable_tool(ToolItemText.ZOOM)
             self._data_view.deactivate_and_disable_tool(ToolItemText.PAN)
             self._data_view.deactivate_and_disable_tool(ToolItemText.REGIONSELECTION)
-            numeric_axis = self.model.ws.getAxis(1).extractValues() if self.model.ws.getAxis(1).isNumeric() else None
-            self._data_view.masking = Masking(self._data_view, self.model.ws.name(), numeric_axis)
+            self._data_view.masking = Masking(self._data_view, self.model.ws.name())
             self._data_view.masking.new_selector(ToolItemText.RECT_MASKING)  # default to rect masking
             self._data_view.activate_tool(ToolItemText.RECT_MASKING, True)
             return

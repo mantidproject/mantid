@@ -20,6 +20,7 @@ class SelectionMaskingBase(ABC):
         self._dataview = dataview
         self._model = model
         self._clear = False
+        self._transpose = dataview.dimensions.get_states() == [1, 0]
 
     @abstractmethod
     def _on_selected(self, eclick, erelease):
@@ -113,7 +114,7 @@ class RectangleSelectionMasking(RectangleSelectionMaskingBase):
         super().__init__(dataview, model, RectangleSelector)
 
     def add_cursor_info(self, click, release):
-        self._model.add_rect_cursor_info(click=click, release=release)
+        self._model.add_rect_cursor_info(click=click, release=release, transpose=self._transpose)
 
 
 class EllipticalSelectionMasking(RectangleSelectionMaskingBase):
@@ -125,7 +126,7 @@ class EllipticalSelectionMasking(RectangleSelectionMaskingBase):
         super().__init__(dataview, model, EllipseSelector)
 
     def add_cursor_info(self, click, release):
-        self._model.add_elli_cursor_info(click=click, release=release)
+        self._model.add_elli_cursor_info(click=click, release=release, transpose=self._transpose)
 
 
 class PolygonSelectionMasking(SelectionMaskingBase):
@@ -154,7 +155,7 @@ class PolygonSelectionMasking(SelectionMaskingBase):
         self._dataview.mpl_toolbar.set_action_checked(SELECTOR_TO_TOOL_ITEM_TEXT[self.__class__], False, trigger=False)
         nodes = [cursor_info(self._img, node[0], node[1]) for node in eclick]
         try:
-            self._model.add_poly_cursor_info(nodes)
+            self._model.add_poly_cursor_info(nodes=nodes, transpose=self._transpose)
         except RuntimeError as e:
             self.clear()
             self._mask_drawn = False
@@ -181,11 +182,11 @@ class Masking:
     Manages Masking
     """
 
-    def __init__(self, dataview, ws_name, is_numeric):
+    def __init__(self, dataview, ws_name):
         self._selectors = []
         self._active_selector = None
         self._dataview = dataview
-        self._model = MaskingModel(ws_name, is_numeric)
+        self._model = MaskingModel(ws_name)
 
     def _reset_active_selector(self):
         if self._active_selector:

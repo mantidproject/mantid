@@ -217,6 +217,11 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
             else:
                 data_view.disable_tool_button(ToolItemText.NONORTHOGONAL_AXES)
 
+        # Reset masking if dimensions changed
+        if self.view.data_view.masking:
+            self.view.data_view.masking.clear_and_disconnect()
+            self.view.data_view.masking.clear_model()
+
         ws_type = WorkspaceInfo.get_ws_type(self.model.ws)
         if ws_type == WS_TYPE.MDH or ws_type == WS_TYPE.MDE:
             if (

@@ -1,0 +1,1 @@
+- Added a masking feature to Sliceviewer for axis with a non-numerical y axis. This enables direct application of the mask to the underlying workspace, or the outputting of a table workspace that can be applied subsequently using ``MaskFromTableWorkspace``.
