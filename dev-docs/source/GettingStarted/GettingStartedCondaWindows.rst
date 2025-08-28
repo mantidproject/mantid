@@ -6,7 +6,6 @@ Develop with conda on Windows
 
 Install `Visual Studio 2022 Community Edition <https://visualstudio.microsoft.com/downloads/>`_
 -----------------------------------------------------------------------------------------------
-
 * When asked about installation workloads choose ``Desktop development with C++``
 * Under the "Installation details" section verify that the following are checked (they should already be checked by default):
     * The latest ``Windows 11 SDK``
@@ -16,7 +15,6 @@ Install `Visual Studio 2022 Community Edition <https://visualstudio.microsoft.co
 
 Install `Git <https://git-scm.com/>`_
 -------------------------------------
-
 * Install the latest version of Git, and ensure git bash was installed and the git executable location was added to your PATH, if you didn't do this as part of your installation you can do this `manually <https://docs.microsoft.com/en-us/previous-versions/office/developer/sharepoint-2010/ee537574(v=office.14)#to-add-a-path-to-the-path-environment-variable>`_.
 * We no longer need Git LFS as conda handles the dependencies that used to be in the third party directory.
 
@@ -29,13 +27,11 @@ Turn off Python association in Windows
 
 Install `Miniforge <https://github.com/conda-forge/miniforge/releases>`_
 -------------------------------------------------------------------------
-
 * Choose the latest version of ``Miniforge3-Windows-x86_64.exe``
 * Run your downloaded ``Miniforge3-Windows-x86_64.exe`` and work through the installer until it finishes. In order to make it easier later on, check the box that adds conda to your path.
 
 Setup the mantid conda environment
 ----------------------------------
-
 Open a terminal or powershell with conda enabled. Here are two ways to do this:
 
 * Open an Anaconda prompt (Miniforge).
@@ -45,7 +41,6 @@ Open a terminal or powershell with conda enabled. Here are two ways to do this:
 
 Configure CMake and generate build files
 ----------------------------------------
-
 * You can configure CMake using an MS Visual Studio or Ninja generator. Choose one of the following:
     * For MS Visual Studio, use the terminal or powershell prompt from the last step.
     * For Ninja, open the ``x64 Native Tools Command Prompt for VS 2019`` or ``x64 Native Tools Command Prompt for VS 2022`` from your search bar.
@@ -53,7 +48,6 @@ Configure CMake and generate build files
 * Navigate to your mantid source directory.
 * If not already activated in the previous step, run ``conda activate mantid-developer`` to activate your conda environment.
 * If you want your build directory inside your source directory, run either:
-
     * ``cmake --preset=win-vs`` for configuring with Visual Studio 2022, or
     * ``cmake --preset=win-vs-2019`` for configuring with Visual Studio 2019, or
     * ``cmake --preset=win-ninja`` for configuring with Ninja.
@@ -65,7 +59,6 @@ Configure CMake and generate build files
 
 Compile and Build using MS Visual Studio
 ----------------------------------------
-
 * Open visual studio with ``visual-studio.bat``, which is found in the build folder, and then click build.
 * It's not possible to compile in Debug on Windows with conda libraries, however Release, RelWithDebInfo, and DebugWithRelRuntime for Debugging will compile fine.
 * Once in visual studio, the correct target to use as a startup project in visual studio is ``workbench``, not ``MantidWorkbench``. You can then press F5 to start workbench.
