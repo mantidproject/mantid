@@ -59,8 +59,8 @@ requirements:
     - if: build_platform != target_platform
       then:
         - numpy ${{ numpy }}
-        # for osx-64
-        - sip 6.7.*
+        # may need to set a pin update to match other platforms
+        - sip
     - if: linux
       then:
         - libgl-devel
