@@ -8,7 +8,7 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidMuon/DllConfig.h"
-
+// test comment
 namespace Mantid {
 namespace Algorithms {
 
