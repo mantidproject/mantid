@@ -180,6 +180,94 @@ class DNSElasticSCPlotPresenter(DNSObserver):
             self._plot_param.grid_state = 0
         self._plot()
 
+    def _change_line_style(self):
+        self._plot_param.lines = (self._plot_param.lines + 1) % 3
+        self.view.single_crystal_plot.set_linecolor(self._plot_param.lines)
+        self.view.draw()
+
+    def _set_ax_formatter(self):
+        axis_type = self.view.get_axis_type()
+        format_coord = self.model.get_format_coord(axis_type)
+        self.view.single_crystal_plot.set_format_coord(format_coord)
+
+    def _manual_lim_changed(self):
+        xlim, ylim, _dummy, _dummy = self._get_current_limits(zoom=False)
+        self.view.single_crystal_plot.set_xlim(xlim)
+        self.view.single_crystal_plot.set_ylim(ylim)
+        self._change_color_bar_range(zoom=False)
+        self.view.draw()
+
+    def _change_color_bar_range(self, zoom=True):
+        xlim, ylim, zlim, _dummy = self._get_current_limits(zoom)
+        self.view.single_crystal_plot.set_zlim(zlim)
+        if zoom:  # saving zoom state to apply to all plots
+            self._plot_param.xlim = xlim
+            self._plot_param.ylim = ylim
+            self._plot_param.zlim = zlim
+            self._plot_param.sny_zoom_in = self.view.datalist.get_checked_plots()
+        if self._plot_param.projections:
+            self._toggle_projections(True)
+        if zoom:
+            self.view.draw()
+
+    def _home_button_clicked(self):
+        self.view.single_crystal_plot.disconnect_ylim_change()
+        # The color bar gets tiny if you zoom out with home button in log scale.
+        # Redrawing color bar fixes the problem.
+        own_dict = self.view.get_state()
+        if own_dict["log_scale"]:
+            self.view.single_crystal_plot.redraw_colorbar()
+        self.view.single_crystal_plot.connect_ylim_change()
+        self._change_displayed_plot_limits()
+
+    def _get_current_xy_lim(self, zoom=False):
+        own_dict = self.view.get_state()
+        axis_type = self.view.get_axis_type()
+        xlim, ylim = [[own_dict["x_min"], own_dict["x_max"]], [own_dict["y_min"], own_dict["y_max"]]]
+        if zoom:
+            dx_lim, dy_lim = self.view.single_crystal_plot.get_active_limits()
+        else:
+            dx_lim, dy_lim = self.model.get_data_xy_lim(axis_type["switch"])
+        if xlim[0] is None:
+            xlim = dx_lim
+        if ylim[0] is None:
+            ylim = dy_lim
+        return xlim, ylim
+
+    def _get_current_z_lim(self, xlim, ylim, zoom):
+        manual_z = True
+        own_dict = self.view.get_state()
+        axis_type = self.view.get_axis_type()
+        if axis_type["switch"]:
+            xlim, ylim = ylim, xlim
+        dz_min, dz_max, dpz_min = self.model.get_data_z_min_max(xlim, ylim)
+        zlim = [own_dict["z_min"], own_dict["z_max"]]
+        if zlim[0] is None:
+            zlim = [dz_min, dz_max]
+            manual_z = False
+        if own_dict["log_scale"] and zlim[0] < 0:
+            zlim[0] = dpz_min
+        return zlim, manual_z
+
+    def _get_current_limits(self, zoom=True):
+        x_lim, y_lim = self._get_current_xy_lim(zoom)
+        z_lim, manual_z = self._get_current_z_lim(x_lim, y_lim, zoom)
+        return x_lim, y_lim, z_lim, manual_z
+
+    def _save_data(self):
+        export_dir = self.param_dict["paths"]["export_dir"]
+        displayed_ws_name = self._plot_param.plot_name
+        export_file_name = f"{export_dir}/user_export_{displayed_ws_name}.csv"
+        displayed_data = self.model.prepare_data_for_saving()
+        column_headers = self._get_column_headers()
+        data_table = np.concatenate((column_headers, displayed_data), axis=0)
+        np.savetxt(export_file_name, data_table, delimiter=",", fmt="%s")
+        self.view.show_status_message(f"Displayed data have been saved to: {export_file_name}", 10, clear=True)
+
+    def _get_column_headers(self):
+        column_headers = np.array([["n_x", "n_y", "Intensity"]])
+        return column_headers
+
     def _create_grid_helper(self):
         axis_type = self.view.get_axis_type()
         a, b, c, d = self.model.get_changing_hkl_components()
