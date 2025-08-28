@@ -67,6 +67,17 @@ public:
     TS_ASSERT_EQUALS(3, outWS->size());
   }
 
+  void test_invalid_period_logs() {
+    EventWorkspaceCollection decorator;
+
+    TimeSeriesProperty<int> *p = new TimeSeriesProperty<int>("intlog");
+    p->addValue("2007-11-30T16:17:00", 1);
+    p->addValue("2007-11-30T16:17:00", 1);
+    // auto periodLog = std::make_unique<const TimeSeriesProperty<int>>(p);
+
+    // TS_ASSERT_THROWS(decorator.setNPeriods(1, periodLog);, const std::runtime_error &);
+  }
+
   void test_set_geometryFlag() {
 
     EventWorkspaceCollection_uptr decorator = makeEventWorkspaceCollection(3);

@@ -94,9 +94,10 @@ void EventWorkspaceCollection::setNPeriods(size_t nPeriods, std::unique_ptr<cons
       try {
         logCreator.addPeriodLogs(periodNumber, m_WsVec[i]->mutableRun());
       } catch (const std::runtime_error &e) {
-        // The addition of period related logs may result in a runtime error if the log filter
-        // contains two entries with identical times as duplicated entries will be removed:
+        // The addition of period related logs may result in runtime errors, for instance, if the log
+        // filter contains two entries with identical times as duplicated entries will be removed:
         // "Cannot guess ending value from a TimeSeriesProperty that contains only a single time"
+        // Under these circumstances, it is advisable to omit the period-related logs.
         std::cout << e.what() << std::endl;
       }
     }
