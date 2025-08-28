@@ -31,7 +31,7 @@ requirements:
     - matplotlib {{ matplotlib }}
     - muparser {{ muparser }}
     - ninja {{ ninja }}
-    - numpy>=2.0,<2.2 # This is intentionally different to conda_build_config.yaml, will address later.
+    - numpy {{ numpy }}
     - occt {{ occt }}
     - pip {{ pip }}
     - poco {{ poco }}

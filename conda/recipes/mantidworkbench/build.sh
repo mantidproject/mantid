@@ -8,7 +8,9 @@ bash "${parent_dir}"/archive_env_logs.sh "$BUILD_PREFIX" "$PREFIX" 'mantidworkbe
 mkdir -p build
 cd build
 
-cmake \
+# unset LD_PRELOAD as this causes cmake to segfault
+LD_PRELOAD="" \
+  cmake \
   ${CMAKE_ARGS} \
   -DCMAKE_BUILD_TYPE=Release \
   -DCMAKE_PREFIX_PATH=$PREFIX \

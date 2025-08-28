@@ -49,7 +49,6 @@ gdk_pixbuf:
 graphviz:
   - '>=2.47.0'
 
-# this must match the version in the developer dependencies
 jemalloc:
   - 5.2.0 # [linux]
   - 5.2.* # [osx]
@@ -60,13 +59,13 @@ jsoncpp:
 libglu:
   - '>=9.0'
 
-#v2.8.5 caused seg faults on Mantid conda versions and large numbers of tests failing
+#v2.3.5 caused seg faults on Mantid conda versions and large numbers of tests failing
 muparser:
   - '>=2.3.2, <2.3.5'
 
-# We follow conda-forge and build with the lowest supported version of numpy for forward compatibility.
+# Aim to build using the latest minor version, and rely on numpy's generous backward compatibility.
 numpy:
-  - 2.0.*
+  - 2.1.*
 
 matplotlib:
   - 3.9.*
@@ -174,5 +173,8 @@ versioningit:
   - '>=2.1'
 
 pin_run_as_build:
-    boost:
-      max_pin: x.x
+  boost:
+    max_pin: x.x
+  numpy:
+    min_pin: x
+    max_pin: x.x
