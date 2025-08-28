@@ -8,11 +8,9 @@ Install `Visual Studio 2022 Community Edition <https://visualstudio.microsoft.co
 -----------------------------------------------------------------------------------------------
 
 * When asked about installation workloads choose ``Desktop development with C++``
-* Under the "Installation details" section verify that the following are checked:
-
-    * ``Windows Universal CRT SDK``
-    * The latest ``Windows 10 SDK``
-    * ``MSVC v142 - VS 2019 C++ x64/x86 build tools``
+* Under the "Installation details" section verify that the following are checked (they should already be checked by default):
+    * The latest ``Windows 11 SDK``
+    * ``MSVC v143 - VS 2022 C++ x64/x86 build tools (latest)``
 
 * If your machine has less than 32GB of memory Mantid may not build. If you have problems change the maximum number of parallel project builds to 1 in Visual Studio in Tools -> Options -> Projects and Solutions -> Build And Run.
 
@@ -77,6 +75,8 @@ Compile and Build using MS Visual Studio
 * Open visual studio with ``visual-studio.bat``, which is found in the build folder, and then click build.
 * It's not possible to compile in Debug on Windows with conda libraries, however Release, RelWithDebInfo, and DebugWithRelRuntime for Debugging will compile fine.
 * Once in visual studio, the correct target to use as a startup project in visual studio is ``workbench``, not ``MantidWorkbench``. You can then press F5 to start workbench.
+* If you want to use your computer while Mantid is compiling, you can enable the following option:
+  ``Tools > Options > Projects and Solutions > Build And Run > Run build at low process priority``.
 
 Compile and Build using Ninja
 -----------------------------
