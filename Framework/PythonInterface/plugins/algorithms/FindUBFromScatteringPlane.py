@@ -55,12 +55,14 @@ class FindUBFromScatteringPlane(PythonAlgorithm):
 
     def validateInputs(self):
         issues = dict()
-        vector_1 = V3D(*self.getProperty("Vector1").value)
-        vector_2 = V3D(*self.getProperty("Vector2").value)
-        if np.isclose(vector_1.norm(), 0, atol=np.finfo(np.float64).eps) or np.isclose(vector_2.norm(), 0, rtol=1e-05):
-            issues["Unsuitable_vector"] = "Vector cannot be 0"
-        if np.isclose(np.sin(vector_1.angle(vector_2)), 0):
-            issues["Collinear"] = "Vectors cannot be collinear"
+        vecs = []
+        for ivec in range(1, 3):
+            param_name = f"Vector{ivec}"
+            vecs.append(V3D(*self.getProperty(param_name).value))
+            if np.isclose(vecs[-1].norm(), 0):
+                issues[param_name] = "Vector cannot be 0"
+        if len(issues) == 0 and np.isclose(np.sin(vecs[0].angle(vecs[1])), 0, atol=np.radians(1e-3)):
+            issues[param_name] = "Vectors cannot be collinear"
         return issues
 
     def exec_child_alg(self, alg_name: str, **kwargs):
