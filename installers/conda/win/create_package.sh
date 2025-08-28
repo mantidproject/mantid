@@ -115,7 +115,6 @@ mv $CONDA_ENV_PATH/Library/mingw-w64/bin/libgcc_s_seh*.dll $COPY_DIR/bin/
 
 echo "Copy Mantid specific files from env/Library/bin to package/bin"
 mv $CONDA_ENV_PATH/Library/bin/Mantid.properties $COPY_DIR/bin/
-mv $CONDA_ENV_PATH/Library/bin/MantidNexusParallelLoader.exe $COPY_DIR/bin/
 mv $CONDA_ENV_PATH/Library/bin/mantid-scripts.pth $COPY_DIR/bin/
 
 echo "Copy Mantid icon files from source to package/bin"
