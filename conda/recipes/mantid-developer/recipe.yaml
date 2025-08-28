@@ -76,8 +76,6 @@ requirements:
     - tbb-devel ${{ tbb }}
     - if: linux
       then: texlive-core ${{ texlive_core }}
-    - if: osx and not arm64
-      then: texlive-core ${{ texlive_core }}
     - toml ${{ toml }}
     - versioningit ${{ versioningit }}
     - if: linux
@@ -112,10 +110,6 @@ requirements:
       then:
         - clang_osx-arm64 ${{ c_compiler_version }}
         - clangxx_osx-arm64 ${{ cxx_compiler_version }}
-    - if: osx and not arm64
-      then:
-        - clang_osx-64 ${{ c_compiler_version }}
-        - clangxx_osx-64 ${{ cxx_compiler_version }}
     - if: osx
       then: llvm-openmp ${{ llvm_openmp }}
 
