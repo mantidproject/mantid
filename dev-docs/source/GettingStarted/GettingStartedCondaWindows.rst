@@ -25,13 +25,7 @@ Turn off Python association in Windows
 * Because of the way Windows associates Python files with it's Windows Store version of python we need to turn off this association. If you don't turn this off you will have issues when running the pre-commit framework.
 * Navigate to your Settings -> Manage App Execution Aliases, and turn off all Python Aliases.
 
-Clone the mantid source code
-----------------------------
-* **Important**: If you have any existing non-conda mantid development environments, do not re-use the source and build directories for your conda environment. We recommend that you clone a new instance of the source and keep separate build directories to avoid any cmake configuration problems.
-* Clone the mantid source code by either:
-
-    * Using git bash and cloning the codebase by calling ``git clone git@github.com:mantidproject/mantid.git`` in the directory you want the code to clone to. This sets you up with accessing the remote repository via SSH so make sure to setup git properly using this `startup guide <https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup>`_ and ensure your ssh key is setup using this `guide to Github with SSH <https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh>`_.
-    * Or using `GitKraken <https://www.gitkraken.com/>`_.
+.. include:: ./CloningMantid.rst
 
 Install `Miniforge <https://github.com/conda-forge/miniforge/releases>`_
 -------------------------------------------------------------------------
