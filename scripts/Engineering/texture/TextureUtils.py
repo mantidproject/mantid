@@ -20,6 +20,7 @@ from mantid.simpleapi import (
     SmoothData,
     CloneWorkspace,
     ConvertUnits,
+    RebinRagged,
 )
 from pathlib import Path
 from Engineering.EnggUtils import GROUP
@@ -532,7 +533,19 @@ def fit_all_peaks(
         if len(smooth_vals) > 0:
             for i, smooth_val in enumerate(smooth_vals):
                 tmp_ws = CloneWorkspace(InputWorkspace=ws_tof, OutputWorkspace="tmp_ws", StoreInADS=False)
-                base_fit_wss.append(SmoothData(InputWorkspace=tmp_ws, OutputWorkspace=f"smooth_ws_{smooth_val}", NPoints=smooth_val))
+                xdat = tmp_ws.extractX()
+                mins, maxes = xdat.min(axis=1), xdat.max(axis=1)
+                deltas = np.diff(xdat).mean(axis=1) * np.sqrt(smooth_val)
+                SmoothData(InputWorkspace=tmp_ws, OutputWorkspace=f"smooth_ws_{smooth_val}", NPoints=smooth_val)
+                base_fit_wss.append(
+                    RebinRagged(
+                        InputWorkspace=f"smooth_ws_{smooth_val}",
+                        OutputWorkspace=f"smooth_ws_{smooth_val}",
+                        Xmin=mins,
+                        Xmax=maxes,
+                        Delta=deltas,
+                    )
+                )
                 base_bkg_is_tied.append(tied_bkgs[i])
         else:
             # if no smoothing values are given, the initial fit should just be on the ws
