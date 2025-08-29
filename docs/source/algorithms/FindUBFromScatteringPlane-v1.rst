@@ -19,6 +19,7 @@ Usage
 **Example:**
 
 .. testcode:: ExFindUBFromScatteringPlane
+
     inst_ws = LoadEmptyInstrument(Filename="SXD_Definition.xml", OutputWorkspace="empty_SXD")
     peaks1 = CreatePeaksWorkspace(InstrumentWorkspace=inst_ws, NumberOfPeaks=0, OutputWorkspace="peaks1")
     SetUB(peaks1, u=[1, -0.83, 0], v=[0.8, 1, 0], a=5.4, b=5.4, c=5.4, alpha=90, beta=90, gamma=90)
@@ -30,6 +31,7 @@ Usage
 Output:
 
 .. testoutput::  ExFindUBFromScatteringPlane
+
     [[ 0.1183  0.1425 -0.    ]
     [ 0.      0.      0.1852]
     [ 0.1425 -0.1183  0.    ]]
