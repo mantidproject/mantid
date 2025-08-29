@@ -22,12 +22,9 @@ class FindUBFromScatteringPlaneTest(unittest.TestCase):
         self.peaks1 = CreatePeaksWorkspace(InstrumentWorkspace=self.ws, NumberOfPeaks=0, OutputWorkspace="peaks1")
         self.vertical_dir = self.ws.getInstrument().getReferenceFrame().vecPointingUp()
 
-    def assert_vector(self, ref_vector, calculated_vector, tol):
-        self.assertTrue(np.allclose(ref_vector, calculated_vector, atol=tol))
-
     def index_peaks_helper(self, peak_ws, tolerance):
         nindexed, *_ = IndexPeaks(peak_ws, tolerance, RoundHKLs=False)
-        return nindexed
+        self.assertEqual(nindexed, 1)
 
     def up_helper(self, vertical_dir, set_vertical, peak_ws, angle_tol=np.radians(5)):
         lattice = peak_ws.sample().getOrientedLattice()
@@ -47,8 +44,7 @@ class FindUBFromScatteringPlaneTest(unittest.TestCase):
             Vector1=[1, -1, 0], Vector2=[1, 1, 0], a=5.4, b=5.4, c=5.4, alpha=90, beta=90, gamma=90, PeaksWorkspace="peaks1"
         )
         vertical_dir = peaks1.getInstrument().getReferenceFrame().vecPointingUp()
-        nindexed = self.index_peaks_helper(peaks1, 0.01)
-        self.assertEqual(nindexed, 1)
+        self.index_peaks_helper(peaks1, 0.01)
         self.up_helper(vertical_dir, self.vertical_dir, peaks1)
 
     def test_find_correct_ub_orthorhombic(self):
@@ -61,8 +57,7 @@ class FindUBFromScatteringPlaneTest(unittest.TestCase):
             Vector1=[0, 0, 1], Vector2=[1, 0, 0], a=5.395, b=5.451, c=20.530, alpha=90, beta=90, gamma=90, PeaksWorkspace="peaks1"
         )
         vertical_dir = peaks1.getInstrument().getReferenceFrame().vecPointingUp()
-        nindexed = self.index_peaks_helper(peaks1, 0.05)
-        self.assertEqual(nindexed, 1)
+        self.index_peaks_helper(peaks1, 0.05)
         self.up_helper(vertical_dir, self.vertical_dir, peaks1)
 
     def test_find_correct_ub_hexagonal(self):
@@ -75,8 +70,7 @@ class FindUBFromScatteringPlaneTest(unittest.TestCase):
         )
         ## call index peak instead
         vertical_dir = peaks1.getInstrument().getReferenceFrame().vecPointingUp()
-        nindexed = self.index_peaks_helper(self.peaks1, 0.01)
-        self.assertEqual(nindexed, 1)
+        self.index_peaks_helper(self.peaks1, 0.01)
         self.up_helper(vertical_dir, self.vertical_dir, peaks1)
 
     def test_multiple_peaks_provided(self):
@@ -99,7 +93,7 @@ class FindUBFromScatteringPlaneTest(unittest.TestCase):
         u_vector_1 = abs(np.array(peaks1.sample().getOrientedLattice().getuVector()))
         u_vector_2 = abs(np.array(peaks2.sample().getOrientedLattice().getuVector()))
 
-        self.assert_vector(u_vector_1, u_vector_2, 0.5)
+        self.assertTrue(np.allclose(u_vector_1, u_vector_2, 0.1))
 
     def test_reverse_inputted_vectors(self):
         peaks1 = CreatePeaksWorkspace(InstrumentWorkspace=self.ws, NumberOfPeaks=0, OutputWorkspace="peaks1")
@@ -109,15 +103,13 @@ class FindUBFromScatteringPlaneTest(unittest.TestCase):
             Vector1=[1, -1, 0], Vector2=[1, 1, 0], a=5.4, b=5.4, c=5.4, alpha=90, beta=90, gamma=90, PeaksWorkspace="peaks1"
         )
         ## need to check how it's tied to output workspace in algorithm
-        nindexed = self.index_peaks_helper(peaks1, 0.15)
-        self.assertEqual(nindexed, 1)
+        self.index_peaks_helper(peaks1, 0.15)
         ClearUB(peaks1)
 
         FindUBFromScatteringPlane(
             Vector1=[1, 1, 0], Vector2=[1, -1, 0], a=5.4, b=5.4, c=5.4, alpha=90, beta=90, gamma=90, PeaksWorkspace="peaks1"
         )
-        nindexed = self.index_peaks_helper(peaks1, 0.15)
-        self.assertEqual(nindexed, 1)
+        self.index_peaks_helper(peaks1, 0.15)
         ClearUB(peaks1)
 
     def test_peak_outside_plane_in_tolerance(self):
@@ -129,8 +121,7 @@ class FindUBFromScatteringPlaneTest(unittest.TestCase):
             Vector1=[1, -1, 0], Vector2=[1, 1, 0], a=5.4, b=5.4, c=5.4, alpha=90, beta=90, gamma=90, PeaksWorkspace="peaks1"
         )
 
-        nindexed = self.index_peaks_helper(peaks1, 0.15)
-        self.assertEqual(nindexed, 1)
+        self.index_peaks_helper(peaks1, 0.15)
 
     @patch("mantid.kernel.logger.warning")
     def test_peak_outside_plane_outside_tolerance(self, mock_logger_warning):

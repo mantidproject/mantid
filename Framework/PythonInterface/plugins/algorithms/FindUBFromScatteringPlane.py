@@ -106,7 +106,7 @@ class FindUBFromScatteringPlane(PythonAlgorithm):
         qsample_obs = np.array(peak_ip.getQSampleFrame())
         qsample_obs = V3D(*qsample_obs)
 
-        if not 85 < (np.degrees(qsample_calc.angle(vertical_dir))) < 95:
+        if not abs(abs((np.degrees(qsample_calc.angle(vertical_dir)))) - 90) < 5:
             logger.debug(f"{np.degrees(qsample_calc.angle(vertical_dir))}")
             logger.warning("given peak hkl does not lie in the plane")
 
