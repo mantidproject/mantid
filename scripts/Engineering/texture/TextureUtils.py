@@ -323,8 +323,8 @@ class TexturePeakFunctionGenerator(PeakFunctionGenerator):
                 self.width_min + 1e-10, ((tof_end - tof_start) / 2) * scale_factor
             )  # must be at least 2 FWHM in data range
             peak_func.addConstraints(f"{self.width_min}<{self.width_par_name}<{self.width_max}")
-            peak_func.fixParameter("A")
-            peak_func.fixParameter("B")
+            # peak_func.fixParameter("A")
+            # peak_func.fixParameter("B")
             comp_func = CompositeFunctionWrapper(FunctionWrapper(peak_func), FunctionWrapper(bg_func), NumDeriv=True)
             function.add(comp_func.function)
             function.setDomainIndex(ispec, ispec)
@@ -454,12 +454,12 @@ def _rerun_fit_with_new_ws(
         bg = comp[1]
         peak.freeAll()
         # update constraints around new values
-        intens = peak.getParameterValue(intensity_parameter)
+        intens = max(peak.getParameterValue(intensity_parameter), 1)
         x0 = peak.getParameterValue(centre_parameter)
         A = peak.getParameterValue("A")
         B = peak.getParameterValue("B")
-        peak.addConstraints(f"{intens / 2}<{intensity_parameter}<{intens * 2}")
-        peak.addConstraints(f"{x0 - (x0_move)}<{centre_parameter}<{x0 + (x0_move)}")
+        peak.addConstraints(f"{max(intens / 2, 1e-6)}<{intensity_parameter}<{intens * 2}")
+        peak.addConstraints(f"{x0 - x0_move}<{centre_parameter}<{x0 + x0_move}")
         peak.addConstraints(f"{0.9 * A}<A<{1.1 * A}")
         peak.addConstraints(f"{0.9 * B}<B<{1.1 * B}")
         if tie_background and idom > 0:
@@ -515,7 +515,7 @@ def fit_all_peaks(
 
     fit_kwargs = {
         "StepSizeMethod": "Default",
-        "IgnoreInvalidData": True,
+        "IgnoreInvalidData": False,
         "CreateOutput": True,
         "OutputCompositeMembers": True,
     }
