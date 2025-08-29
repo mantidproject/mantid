@@ -77,6 +77,7 @@ class DNSElasticSCPlotPresenter(DNSObserver):
         self.view.create_subfigure(self._plot_param.grid_helper)
         self._want_plot(axis_type["plot_type"])
         self._set_plotting_grid(self._crystallographical_axes())
+        self._set_ax_formatter()
         self._set_axis_labels()
         self.view.single_crystal_plot.create_colorbar()
         self.view.single_crystal_plot.on_resize()
