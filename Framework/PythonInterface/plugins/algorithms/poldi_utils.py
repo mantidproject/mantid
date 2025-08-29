@@ -127,6 +127,28 @@ def get_final_dspac_array(bin_width: float, dspac_min: float, dspac_max: float, 
     return np.linspace(dspac_min, dspac_max, nbins_dspac)
 
 
+def get_dspac_array_from_ws(ws: Workspace2D, lambda_min: float = 1.1, lambda_max: float= 5.0) -> np.ndarray[float]:
+    """
+    Function to calculate d-spacing bins given workspace
+    :param ws_2d: MatrixWorkspace containing POLDI data (raw instrument)
+    :param lambda_min: maximum wavelength (Ang) to consider
+    :param lambda_max: maximum wavelength (Ang) to consider
+    :return np.ndarray: array of d-spacing bins
+    """
+    _, slit_offsets, _, l1_chop = get_instrument_settings_from_log(ws)
+    # get detector positions from IDF
+    si = ws.spectrumInfo()
+    nspec = ws.getNumberHistograms()
+    tths = np.array([si.twoTheta(ispec) for ispec in range(nspec)])
+    l2s = np.asarray([si.l2(ispec) for ispec in range(nspec)])
+    l1 = si.l1()
+    # determine npulses to include in calc
+    time_max = get_max_tof_from_chopper(l1, l1_chop, l2s, tths, lambda_max) + slit_offsets[0]
+    dspac_min, dspac_max = get_dspac_limits(tths.min(), tths.max(), lambda_min, lambda_max)
+    bin_width = ws.readX(0)[1] - ws.readX(0)[0]
+    return get_final_dspac_array(bin_width, dspac_min, dspac_max, time_max)
+
+
 def get_max_tof_from_chopper(l1: float, l1_chop: float, l2s: Sequence[float], tths: Sequence[float], lambda_max: float) -> float:
     """
     Function to calculate TOF of longest wavelength neutron to reach detector with the largest total path
@@ -170,16 +192,16 @@ def simulate_2d_data(
     cycle_time, slit_offsets, t0_const, l1_chop = get_instrument_settings_from_log(ws_sim)
     si = ws_sim.spectrumInfo()
     nspec = ws_sim.getNumberHistograms()
-    tths = np.array([si.twoTheta(ispec) for ispec in range(nspec)])
-    l2s = np.array([si.l2(ispec) for ispec in range(nspec)])
+    tths = np.asarray([si.twoTheta(ispec) for ispec in range(nspec)])
+    l2s = np.asarray([si.l2(ispec) for ispec in range(nspec)])
     l1 = si.l1()
     # get npulses to include
     time_max = get_max_tof_from_chopper(l1, l1_chop, l2s, tths, lambda_max) + slit_offsets[0]
     npulses = int(time_max // cycle_time)
     # simulate detected spectra
     ipulses = np.arange(npulses)[:, None]
-    offsets = (ipulses * cycle_time - slit_offsets).flatten()  # note different sign to auto-corr!
-    tofs = ws_sim.readX(0)[:, None] + offsets - t0_const  # same for all spectra
+    offsets = (ipulses * cycle_time - slit_offsets - t0_const).flatten() # note different sign to auto-corr!
+    tofs = ws_sim.readX(0)[:, None] + offsets # same for all spectra
     path_length_ratio = (l2s + l1 - l1_chop) / (l2s + l1)
     tof_d1Ang = np.asarray([si.diffractometerConstants(ispec)[UnitParams.difc] * path_length_ratio[ispec] for ispec in range(nspec)])
     out = Parallel(n_jobs=-2, prefer="threads", return_as="generator")(
@@ -189,7 +211,6 @@ def simulate_2d_data(
     [ws_sim.setY(ispec, yvec) for ispec, yvec in enumerate(out)]
     ADS.addOrReplace(output_workspace, ws_sim)
     return ws_sim
-
 
 def _do_interp(dtarget, d, intensity):
     return np.interp(dtarget, d, intensity).sum(axis=1)
