@@ -48,16 +48,26 @@ function(add_python_package pkg_name)
     set(_startup_exe ${_egg_link_dir}/${_executable_name})
   endif()
 
+  if(WIN32)
+    set(_path_sep ";")
+  else()
+    set(_path_sep ":")
+  endif()
+
   # create the developer setup which just creates a pth file rather than copying things over
+  set(_stamp "${CMAKE_CURRENT_BINARY_DIR}/${pkg_name}.pip.stamp")
   set(_outputs ${_egg_link} ${_startup_script} ${_startup_exe})
   set(_version_str ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}${VERSION_TWEAK})
   add_custom_command(
-    OUTPUT ${_outputs}
+    OUTPUT ${_stamp}
     COMMAND
-      ${CMAKE_COMMAND} -E env PYTHONPATH=${_egg_link_dir} PYTHONUSERBASE=${_egg_link_dir} PATH=${_egg_link_dir}:$PATH
-      MANTID_VERSION_STR=${_version_str} ${Python_EXECUTABLE} -m pip install --editable .
+      ${CMAKE_COMMAND} -E env PYTHONPATH=${_egg_link_dir} PYTHONUSERBASE=${_egg_link_dir}
+      PATH=${_egg_link_dir}${_path_sep}$PATH MANTID_VERSION_STR=${_version_str} ${Python_EXECUTABLE} -m pip install
+      --editable .
+    COMMAND ${CMAKE_COMMAND} -E touch ${_stamp}
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     DEPENDS ${_setup_py}
+    BYPRODUCTS ${_outputs}
   )
 
   # Generate a sitecustomize.py file in the egg link directory as setuptools no longer generates site.py for v>=49.0.0
