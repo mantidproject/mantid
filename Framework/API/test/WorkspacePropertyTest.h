@@ -123,14 +123,12 @@ public:
     TS_ASSERT_EQUALS(wsp2->setValue("ws2"), "");
     TS_ASSERT_EQUALS(wsp2->isValid(), "");
     // Setting an invalid name should make wsp6 invalid
-    const std::string illegalChars = " +-/*\\%<>&|^~=!@()[]{},:.`$'\"?";
-    AnalysisDataService::Instance().setIllegalCharacterList(illegalChars);
-    std::string error = "Invalid object name 'ws6-1'. Names cannot contain any "
-                        "of the following characters: " +
-                        illegalChars;
-    TS_ASSERT_EQUALS(wsp6->setValue("ws6-1"), error);
+    std::string invalidWorkspaceName = "ws6-1";
+    std::string error =
+        "Invalid object name '" + invalidWorkspaceName +
+        "'. Names must start with a letter or underscore and contain only alpha-numeric characters and underscores.";
+    TS_ASSERT_EQUALS(wsp6->setValue(invalidWorkspaceName), error);
     TS_ASSERT_EQUALS(wsp6->isValid(), error);
-    AnalysisDataService::Instance().setIllegalCharacterList("");
 
     // The other three need the input workspace to exist in the ADS
     Workspace_sptr space;
