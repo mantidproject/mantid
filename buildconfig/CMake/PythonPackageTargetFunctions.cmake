@@ -28,11 +28,14 @@ function(add_python_package pkg_name)
   )
 
   if(_parsed_arg_EGGLINKNAME)
-    set(_egg_link ${_egg_link_dir}/${_parsed_arg_EGGLINKNAME}.egg-link)
+    set(_egg_link_pkg_name ${_parsed_arg_EGGLINKNAME})
   else()
     # if no egg-link name is specified, then use the target name
-    set(_egg_link ${_egg_link_dir}/${pkg_name}.egg-link)
+    set(_egg_link_pkg_name ${pkg_name})
   endif()
+  set(_egg_link ${_egg_link_dir}/${_egg_link_pkg_name}.egg-link)
+
+  set(_version_str ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}${VERSION_TWEAK})
 
   if(_parsed_arg_EXECUTABLE)
     if(WIN32)
@@ -48,15 +51,39 @@ function(add_python_package pkg_name)
     set(_startup_exe ${_egg_link_dir}/${_executable_name})
   endif()
 
+  # check if this package version is already installed
+  message(STATUS "Checking for pre-existing install of ${_egg_link_pkg_name} version ${_version_str}")
+  execute_process(
+    COMMAND ${Python_EXECUTABLE} -m pip show ${_egg_link_pkg_name}
+    RESULT_VARIABLE _pip_show_result
+    OUTPUT_VARIABLE _pip_show_output
+  )
+  if(_pip_show_result EQUAL 0 AND _pip_show_output)
+    string(REGEX MATCH "Version: *([^\n/]+)" _unused "${_pip_show_output}")
+    set(_pip_show_ver "${CMAKE_MATCH_1}")
+    string(REGEX MATCH "Editable project location: *([^\n]+)" _unused "${_pip_show_output}")
+    set(_pip_show_loc "${CMAKE_MATCH_1}")
+    if(WIN32)
+      string(REPLACE "\\" "/" _pip_show_loc "${_pip_show_loc}")
+    endif()
+    string(REGEX REPLACE "\\+uncommitted" "" _version_no_tweak "${_version_str}")
+    if("${_pip_show_ver}" STREQUAL "${_version_no_tweak}" AND "${_pip_show_loc}" STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}")
+      message(STATUS "Matching version found")
+      # run no command if files already exist
+      set(_custom_command "")
+    else()
+      set(_custom_command
+          "${CMAKE_COMMAND} -E env PYTHONPATH=${_egg_link_dir} PYTHONUSERBASE=${_egg_link_dir} PATH=${_egg_link_dir}:$PATH
+      MANTID_VERSION_STR=${_version_str} ${Python_EXECUTABLE} -m pip install --editable ."
+      )
+    endif()
+  endif()
+
   # create the developer setup which just creates a pth file rather than copying things over
   set(_outputs ${_egg_link} ${_startup_script} ${_startup_exe})
-  set(_version_str ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}${VERSION_TWEAK})
   add_custom_command(
     OUTPUT ${_outputs}
-    COMMAND
-      ${CMAKE_COMMAND} -E env PYTHONPATH=${_egg_link_dir} PYTHONUSERBASE=${_egg_link_dir} PATH=${_egg_link_dir}:$PATH
-      MANTID_VERSION_STR=${_version_str} ${Python_EXECUTABLE} -m pip install --editable .
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    COMMAND "${_custom_command}"
     DEPENDS ${_setup_py}
   )
 
