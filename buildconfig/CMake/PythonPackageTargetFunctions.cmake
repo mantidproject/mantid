@@ -75,7 +75,7 @@ function(add_python_package pkg_name)
     list(APPEND _outputs ${_egg_link_dir}/sitecustomize.py)
   endif()
 
-  add_custom_target(${pkg_name} ALL DEPENDS ${_outputs})
+  add_custom_target(${pkg_name} ALL DEPENDS ${_stamp})
 
   # When running the install target, run the following code instead that defers to the `pip install` command. It assumes
   # the `${CMAKE_CURRENT_SOURCE_DIR}`, the directory where `add_python_package` was called from, contains either a
