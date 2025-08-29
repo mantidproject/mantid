@@ -48,7 +48,8 @@ function(add_python_package pkg_name)
     set(_startup_exe ${_egg_link_dir}/${_executable_name})
   endif()
 
-  # create the developer setup which just creates a pth file rather than copying things over
+  # create the developer setup which just creates a pth file rather than copying things over outputs a stamp file,
+  # preventing subsequent installs of the same package unless dependencies change
   set(_stamp "${CMAKE_CURRENT_BINARY_DIR}/${pkg_name}.pip.stamp")
   set(_outputs ${_egg_link} ${_startup_script} ${_startup_exe})
   set(_version_str ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}${VERSION_TWEAK})
