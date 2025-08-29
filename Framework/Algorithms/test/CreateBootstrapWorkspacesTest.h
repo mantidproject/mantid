@@ -103,7 +103,7 @@ public:
     TS_ASSERT_EQUALS(outputY.size(), outputE.size());
     for (size_t i = 0; i < outputY.size(); ++i) {
       TS_ASSERT_DELTA(outputY[i], expectedY[i], 1e-6);
-      TS_ASSERT_EQUALS(outputE[i], inputWS->e(0)[i]);
+      TS_ASSERT_EQUALS(outputE[i], 0);
     }
     std::cout << "\n";
 
