@@ -577,7 +577,11 @@ set(DATADIRS
 )
 set(COLORMAPS_FOLDER ${MANTID_ROOT}/installers/colormaps/)
 set(MANTIDPUBLISHER "https://upload.mantidproject.org/scriptrepository?debug=1")
-set(HTML_ROOT ${DOCS_BUILDDIR}/html)
+if(CMAKE_BUILD_TYPE STREQUAL "Release")
+  set(HTML_ROOT "") # Use runtime path for release builds as the build path is not the same as the installation path
+else()
+  set(HTML_ROOT ${DOCS_BUILDDIR}/html)
+endif()
 
 set(CONSOLEPATTERN "%s-[%p] %t")
 set(CONSOLECHANNELCLASS "ConsoleChannel")
@@ -614,7 +618,6 @@ set(CHECK_FOR_NEW_MANTID_VERSION "${ENABLE_NETWORK_ACCESS}")
 set(ENABLE_USAGE_REPORTS "${ENABLE_NETWORK_ACCESS}")
 set(DATADIRS "")
 set(MANTIDPUBLISHER "https://upload.mantidproject.org/scriptrepository")
-set(HTML_ROOT ${CMAKE_INSTALL_PREFIX}/share/doc/html)
 
 # For a framework-only (e.g. MPI) build some of these are not relevant and should be left empty to avoid warnings on
 # starting Mantid
@@ -644,17 +647,6 @@ mtd_install_files(
 # Installation settings
 set(TARGET_EXPORT_NAME "MantidKernelTargets")
 mtd_install_framework_lib(TARGETS Kernel INSTALL_EXPORT_FILE EXPORT_NAME ${TARGET_EXPORT_NAME})
-
-# For a local build using documentation built in the tree
-if(MANTID_FRAMEWORK_LIB STREQUAL "BUILD")
-  set(HTML_ROOT ${DOCS_BUILDDIR}/html)
-else()
-  if(PROJECT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
-    set(HTML_ROOT ${CMAKE_INSTALL_PREFIX}/share/doc/html)
-  else()
-    set(HTML_ROOT "\\${Mantid_HTML_ROOT}")
-  endif()
-endif()
 
 # location of the properties file
 if(NOT DEFINED PROPERTIES_FILE_LOCATION)

@@ -86,8 +86,9 @@ class HelpWindowModel:
         # Store raw online base early, needed for fallback logic below
         self._raw_online_base = online_base.rstrip("/")
 
-        # --- Step 1: Attempt to get local path from ConfigService ---
+        # --- Step 1: Attempt to get local path ---
         local_docs_path_from_config = None  # Default if lookup fails or path is empty
+        # Incase of local build the docs path will be stored in ConfigService
         try:
             # ConfigService is imported at the top level now
             config_service = ConfigService.Instance()
@@ -100,12 +101,36 @@ class HelpWindowModel:
         except Exception as e:
             # Catch potential errors during ConfigService interaction
             # This includes cases where the dummy ConfigService might be used
-            log.error(f"Error retrieving 'docs.html.root' from ConfigService: {e}. Defaulting to online mode.")
+            log.error(f"Error retrieving 'docs.html.root' from ConfigService: {e}.")
             # local_docs_path_from_config remains None
+
+        # If not found in ConfigService this means it is a release build so get the path from sys.executable path
+        if not local_docs_path_from_config:
+            local_docs_path_from_config = self._get_doc_path()
 
         # --- Step 2: Determine final mode and set ALL related state variables ---
         # This method now sets _is_local, _mode_string, _base_url, _version_string
         self._determine_mode_and_set_state(local_docs_path_from_config)
+
+    def _get_doc_path(self):
+        """Get docs path from executable dir"""
+        import sys
+
+        conda_prefix = None
+        if any(indicator in sys.prefix for indicator in ["conda", "anaconda", "miniconda", "mambaforge"]):
+            conda_prefix = sys.prefix
+
+        if conda_prefix and os.path.exists(conda_prefix):
+            # We're in a conda environment, docs path will be {conda_prefix}/share/doc/html
+            mantid_root = conda_prefix
+            return os.path.join(conda_prefix, "share", "doc", "html")
+        else:
+            # We're in a standalone installation
+            # sys.executable is in: {install_dir}/bin/python.exe
+            # So mantid_root is one level up from bin
+            executable_dir = os.path.dirname(sys.executable)
+            mantid_root = os.path.dirname(executable_dir)
+            return os.path.join(mantid_root, "share", "doc", "html")
 
     def _determine_mode_and_set_state(self, local_docs_path):
         """
@@ -116,7 +141,7 @@ class HelpWindowModel:
         log.debug(f"Determining final mode and state with local_docs_path='{local_docs_path}'")
 
         # Check if the path from config is valid and points to an existing directory
-        if local_docs_path and os.path.isdir(local_docs_path):
+        if local_docs_path and os.path.isdir(os.path.normpath(local_docs_path)):
             # --- Configure for LOCAL/OFFLINE Mode ---
             log.debug("Valid local docs path found. Configuring for Offline Mode.")
             self._is_local = True
@@ -131,9 +156,7 @@ class HelpWindowModel:
             # --- Configure for ONLINE Mode ---
             # Log reason if applicable
             if local_docs_path:  # Path was provided but invalid
-                log.warning(
-                    f"Local docs path '{local_docs_path}' from ConfigService ('docs.html.root') is invalid or not found. Falling back to Online Mode."  # noqa: E501
-                )
+                log.warning(f"Local docs path '{local_docs_path}' is invalid or not found. Falling back to Online Mode.")
             else:  # Path was None (not found in config or error during lookup)
                 log.debug("No valid local docs path found from ConfigService. Configuring for Online Mode.")
 
