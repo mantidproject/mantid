@@ -7,6 +7,7 @@ set(SRC_FILES
     src/ErrorHandling.cpp
     src/GlobalInterpreterLock.cpp
     src/NDArray.cpp
+    src/PythonObjectProperty.cpp
     src/ReleaseGlobalInterpreterLock.cpp
     src/UninstallTrace.cpp
     src/PythonLoggingChannel.cpp
@@ -36,6 +37,7 @@ set(INC_FILES
     inc/MantidPythonInterface/core/PropertyWithValueExporter.h
     inc/MantidPythonInterface/core/PythonLoggingChannel.h
     inc/MantidPythonInterface/core/PythonObjectInstantiator.h
+    inc/MantidPythonInterface/core/PythonObjectProperty.h
     inc/MantidPythonInterface/core/PythonStdoutChannel.h
     inc/MantidPythonInterface/core/ReleaseGlobalInterpreterLock.h
     inc/MantidPythonInterface/core/StlExportDefinitions.h
