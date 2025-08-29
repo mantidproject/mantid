@@ -55,8 +55,8 @@ Click Menus
 |
 |
 
-|FigureOptionsGear.png| ptions Menu
-===================================
+Options Menu
+============
 
 1D plots
 --------
