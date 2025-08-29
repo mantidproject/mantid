@@ -1,0 +1,2 @@
+- Algorithm to find UB from 1 peak and defined scattering plane.
+- New algorithm :ref:`FindUBFromScatteringPlane <algm-FindUBFromScatteringPlane>` to find UB Matrix given lattice parameters, scattering plane and 1 peak for a sample
