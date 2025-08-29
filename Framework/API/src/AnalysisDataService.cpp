@@ -8,6 +8,7 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include <iterator>
 #include <random>
+#include <regex>
 #include <sstream>
 
 namespace Mantid::API {
@@ -32,25 +33,20 @@ std::shared_ptr<const WorkspaceGroup> AnalysisDataServiceImpl::GroupUpdatedNotif
 // Public methods
 //-------------------------------------------------------------------------
 /**
- * Is the given name a valid name for an object in the ADS
+ * Is the given name a valid name for an object in the ADS?
  * @param name A string containing a possible name for an object in the ADS
  * @return An empty string if the name is valid or an error message stating the
- * problem
- * if the name is unacceptable.
+ * problem if the name is unacceptable.
  */
 const std::string AnalysisDataServiceImpl::isValid(const std::string &name) const {
-  std::string error;
-  const std::string &illegal = illegalCharacters();
-  if (illegal.empty())
-    return error; // Quick route out.
-  const size_t length = name.size();
-  for (size_t i = 0; i < length; ++i) {
-    if (illegal.find_first_of(name[i]) != std::string::npos) {
-      std::ostringstream strm;
-      strm << "Invalid object name '" << name << "'. Names cannot contain any of the following characters: " << illegal;
-      error = strm.str();
-      break;
-    }
+  std::regex validName("^[a-zA-Z_][\\w]*");
+
+  std::string error = "";
+
+  if (!std::regex_match(name, validName)) {
+    error =
+        "Invalid object name '" + name +
+        "'. Names must start with a letter or underscore and contain only alpha-numeric characters and underscores.";
   }
   return error;
 }
@@ -386,26 +382,7 @@ std::map<std::string, Workspace_sptr> AnalysisDataServiceImpl::topLevelItems() c
  * Constructor
  */
 AnalysisDataServiceImpl::AnalysisDataServiceImpl()
-    : Mantid::Kernel::DataService<Mantid::API::Workspace>("AnalysisDataService"), m_illegalChars() {}
-
-// The following is commented using /// rather than /** to stop the compiler
-// complaining
-// about the special characters in the comment fields.
-/// Return a string containing the characters not allowed in names objects
-/// within ADS
-/// @returns A n array of c strings containing the following characters: "
-/// +-/*\%<>&|^~=!@()[]{},:.`$?"
-const std::string &AnalysisDataServiceImpl::illegalCharacters() const { return m_illegalChars; }
-
-/**
- * Set the list of illegal characeters
- * @param illegalChars A string containing the characters, as one long string,
- * that are not to be accepted by the ADS
- * NOTE: This only affects further additions to the ADS
- */
-void AnalysisDataServiceImpl::setIllegalCharacterList(const std::string &illegalChars) {
-  m_illegalChars = illegalChars;
-}
+    : Mantid::Kernel::DataService<Mantid::API::Workspace>("AnalysisDataService") {}
 
 /**
  * Checks the name is valid

@@ -82,10 +82,6 @@ public:
   //@}
 
 public:
-  /// Return the list of illegal characters as one string
-  const std::string &illegalCharacters() const;
-  /// Set the list of illegal characters
-  void setIllegalCharacterList(const std::string &);
   /// Is the given name a valid name for an object in the ADS
   const std::string isValid(const std::string &name) const;
   /// Overridden add member to attach the name to the workspace when a
@@ -150,9 +146,6 @@ private:
   AnalysisDataServiceImpl &operator=(const AnalysisDataServiceImpl &) = delete;
   /// Private destructor
   ~AnalysisDataServiceImpl() override = default;
-
-  /// The string of illegal characters
-  std::string m_illegalChars;
 };
 
 using AnalysisDataService = Mantid::Kernel::SingletonHolder<AnalysisDataServiceImpl>;
