@@ -8,7 +8,9 @@
 
 import unittest
 import os
+import numpy as np
 import tempfile
+import shutil
 
 from mantid.simpleapi import LoadPLN
 
@@ -17,6 +19,7 @@ from plugins.algorithms.ANSTO.ansto_common import (
     list_to_seq,
     hdf_files_from_runs,
     replace_variants,
+    expand_directories,
     encode_run_list,
     expanded_runs,
     SingleRun,
@@ -70,12 +73,12 @@ class AnstoCommonSearchTests(unittest.TestCase):
         search_path = ["/cycle/[10-12]/data/[src,bin]"]
         tags = ["[10-12]", "[src,bin]"]
         exp_paths = [
-            "/cycle/10/data/src",
-            "/cycle/11/data/src",
-            "/cycle/12/data/src",
-            "/cycle/10/data/bin",
-            "/cycle/11/data/bin",
-            "/cycle/12/data/bin",
+            "/cycle/010/data/src",
+            "/cycle/011/data/src",
+            "/cycle/012/data/src",
+            "/cycle/010/data/bin",
+            "/cycle/011/data/bin",
+            "/cycle/012/data/bin",
         ]
         ret_paths = replace_variants(search_path, tags)
         self.assertEqual(len(ret_paths), 6)
@@ -83,12 +86,12 @@ class AnstoCommonSearchTests(unittest.TestCase):
 
     def test_replace_cycle(self):
         inp_paths = [
-            "/cycle/10/data/src",
+            "/cycle/010/data/src",
             "/cycle/NNN/data/src",
-            "/cycle/12/data/src",
-            "/cycle/10/data/bin",
+            "/cycle/012/data/src",
+            "/cycle/010/data/bin",
             "/cycle/NNN/data/bin",
-            "/cycle/12/data/bin",
+            "/cycle/012/data/bin",
         ]
         exp_paths = ["/cycle/138/data/src", "/cycle/138/data/bin"]
         ret_paths = find_cycle_folders(138, inp_paths)
@@ -105,6 +108,36 @@ class AnstoCommonSearchTests(unittest.TestCase):
             self.assertTrue(False, "Expected runtime exception for missing file")
         except RuntimeError:
             pass
+
+    def test_search_path_filter(self):
+        try:
+            tmpdir = tempfile.mkdtemp()
+
+            # add the temporary folder to the search path
+            # one folder is removed to test that the filter only returns valid folders
+            exp_paths = [
+                "/cycle/010/data/src",
+                "/cycle/011/data/src",
+                "/cycle/012/data/src",
+                "/cycle/120/data/src",
+                # "/cycle/010/data/bin",
+                "/cycle/011/data/bin",
+                "/cycle/012/data/bin",
+                "/cycle/120/data/bin",
+            ]
+            for folder in exp_paths:
+                os.makedirs(os.path.join(tmpdir, folder.lstrip("/")), exist_ok=True)
+
+            # expand the search path
+            search_path = [f"{tmpdir}/cycle/[10-12,120]/data/[src,bin]"]
+            expanded = [os.path.normpath(p) for p in expand_directories(search_path)]
+            expected = [os.path.normpath(f"{tmpdir}/{p}") for p in exp_paths]
+
+            self.assertTrue(np.array_equal(np.sort(expanded), np.sort(expected)))
+
+        finally:
+            # clean up the temporary folder
+            shutil.rmtree(tmpdir)
 
     def test_scratch_folder(self):
         # create a temp folder as the scratch folder
