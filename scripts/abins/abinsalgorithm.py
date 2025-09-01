@@ -842,7 +842,7 @@ class AbinsAlgorithm:
             # Assume any .castep_bin file is valid choice
             pass
 
-        elif suffix == ".yaml":
+        elif suffix in (".yaml", ".yml"):
             # Check .yaml files have expected keys for Phonopy force constants
             with open(filename_full_path, "r") as yaml_file:
                 phonon_data = yaml.load(yaml_file, Loader=SafeLoader)
@@ -851,8 +851,20 @@ class AbinsAlgorithm:
                 pass
 
             elif "phonopy" in phonon_data:
-                # Phonon file without force constants included: they could be in
-                # a FORCE_CONSTANTS or force_constants.hdf5 file so check if one exists
+                # Phonopy file without force constants: they must be in another file
+
+                # Check if following janus conventions:
+                # /parent/seedname-phonopy.yml -> /parent/seedname-force_constants.hdf5
+                janus_phonopy_re = "(?P<seedname>.+)-phonopy.yml"
+                if (re_match := re.match(janus_phonopy_re, path.name)):
+                    fc_file = path.parent / f"{re_match['seedname']}-force_constants.hdf5"
+                    if not fc_file.isfile():
+                        return dict(
+                            Invalid=True,
+                            Comment=f"Could not find force constants in {filename_full_path}, or find data file {fc_file}",
+                        )
+
+                # Otherwise FC could be in a FORCE_CONSTANTS or force_constants.hdf5 file
                 fc_filenames = ("FORCE_CONSTANTS", "force_constants.hdf5")
                 if not any(map(lambda fc_filename: (path.parent / fc_filename).is_file(), fc_filenames)):
                     return dict(
