@@ -856,7 +856,7 @@ class AbinsAlgorithm:
                 # Check if following janus conventions:
                 # /parent/seedname-phonopy.yml -> /parent/seedname-force_constants.hdf5
                 janus_phonopy_re = "(?P<seedname>.+)-phonopy.yml"
-                if (re_match := re.match(janus_phonopy_re, path.name)):
+                if re_match := re.match(janus_phonopy_re, path.name):
                     fc_file = path.parent / f"{re_match['seedname']}-force_constants.hdf5"
                     if not fc_file.isfile():
                         return dict(
