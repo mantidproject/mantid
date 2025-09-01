@@ -72,10 +72,12 @@ function(add_python_package pkg_name)
       WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
       DEPENDS ${_setup_py} ${CMAKE_MODULE_PATH}/WriteSiteCustomize.cmake
     )
-    list(APPEND _outputs ${_egg_link_dir}/sitecustomize.py)
+    set(_pkg_depends ${_stamp} ${_egg_link_dir}/sitecustomize.py)
+  else()
+    set(_pkg_depends ${_stamp})
   endif()
 
-  add_custom_target(${pkg_name} ALL DEPENDS ${_stamp})
+  add_custom_target(${pkg_name} ALL DEPENDS ${_pkg_depends} ${_egg_link_dir}/sitecustomize.py)
 
   # When running the install target, run the following code instead that defers to the `pip install` command. It assumes
   # the `${CMAKE_CURRENT_SOURCE_DIR}`, the directory where `add_python_package` was called from, contains either a
