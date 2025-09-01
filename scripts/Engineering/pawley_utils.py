@@ -185,6 +185,7 @@ class PawleyPattern1D:
             self.bg_params = np.array([bg_func.function.getParamValue(ipar) for ipar in range(bg_func.nParams())])
         self.bg_isfree = np.ones_like(self.bg_params, dtype=bool)
         self.make_profile_function(bg_func)
+        self.initial_params = None
 
     def make_profile_function(self, bg_func):
         self.comp_func = CompositeFunctionWrapper()
@@ -269,7 +270,12 @@ class PawleyPattern1D:
     def fit(self, **kwargs):
         default_kwargs = {"xtol": 1e-5, "diff_step": 1e-3, "x_scale": "jac"}
         kwargs = {**default_kwargs, **kwargs}
-        return least_squares(lambda p: self.eval_resids(p), self.get_free_params(), **kwargs)
+        self.initial_params = self.get_free_params()
+        return least_squares(lambda p: self.eval_resids(p), self.initial_params, **kwargs)
+
+    def undo_fit(self):
+        if self.initial_params is not None:
+            self.set_free_params(self.initial_params)
 
 
 class PawleyPattern2D(PawleyPattern1D):
