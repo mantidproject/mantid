@@ -361,8 +361,7 @@ class HelpWindowView(QMainWindow):
             <p>Sorry, the requested local documentation file could not be found.</p>
             <p>Requested: <code>{requested_url_html}</code></p>
             <p>Details: <code>{error_message_html}</code></p>
-            <p>Please check that your local documentation is correctly built
-               and the path is correctly configured in Mantid ('docs.html.root').</p>
+            <p>Please check that your local documentation is correctly built.</p>
             {home_link_html}
         </body>
         </html>
