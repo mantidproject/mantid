@@ -44,6 +44,10 @@ requirements:
     - matplotlib {{ matplotlib }}
     - python.app  # [osx]
     - pystack  # [linux]
+    - gdk-pixbuf {{ gdk_pixbuf }} # [win]
+    - pyvista
+    - pyvistaqt
+    - superqt
     - qtconsole {{ qtconsole }}
     - {{ pin_compatible("setuptools", max_pin="x.x") }}
     {% if environ.get('INCLUDE_MANTIDDOCS', 'True') != 'False' %}
