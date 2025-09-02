@@ -281,21 +281,38 @@ class PawleyPattern1D:
 
 
 class PawleyPattern2D(PawleyPattern1D):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, global_scale=True, **kwargs):
         super().__init__(*args, **kwargs)
         self.scales = None
         self.bgs = None
-        self.intens_isfree[0][0] = False  # need to fix one intensity to set global scale factor
+        self.set_global_scale(global_scale)
         # create workspace in d-spacing to contain diffraction pattern
         dspacs = get_dspac_array_from_ws(self.ws)
         self.ws_1d = CreateWorkspace(DataX=dspacs, DataY=np.zeros_like(dspacs), UnitX="dSpacing",
                                      YUnitLabel="Intensity (a.u.)", OutputWorkspace=f"{self.ws.name()}_pattern",
                                      EnableLogging=False)
 
+    def set_global_scale(self, global_scale):
+        self.global_scale = global_scale
+        if not self.global_scale:
+            # check if a peak intensity is fixed in any pahse
+            if all([all(phase_intens_isfree) for phase_intens_isfree in self.intens_isfree]):
+                # fix intensity of most intense peak in first phase to avoid perfectly correlated scales
+                self.intens_isfree[0][np.argmax(self.intens[0])] = False
+            # zero global background and fix
+            if len(self.bg_params) > 0:
+                self.bg_params[:] = 0
+                self.bg_isfree[:] = False
+
     def set_params_from_pawley1d(self, pawley1d):
         # To-Do check sizes compatible
         self.intens = pawley1d.intens
         self.profile_params = pawley1d.profile_params
+        # scale intensities
+        ws_sim = self.eval_2d(self.get_free_params())
+        ppval = np.polyfit(ws_sim.extractY().flat, self.ws.extractY().flat, 1)
+        for iphase in range(len(self.phases)):
+            self.intens[iphase] *= ppval[0]
 
     def eval_profile(self, params):
         self.set_free_params(params)
@@ -305,14 +322,15 @@ class PawleyPattern2D(PawleyPattern1D):
     def eval_2d(self, params):
         self.ws_1d.setY(0, self.eval_profile(params))
         ws_sim = simulate_2d_data(self.ws, self.ws_1d, output_workspace=f"{self.ws.name()}_sim")
-        self.scales = np.zeros(self.ws.getNumberHistograms())
-        self.bgs = np.zeros_like(self.scales)
-        for ispec in range(self.ws.getNumberHistograms()):
-            yobs = self.ws.readY(ispec)
-            ycalc = ws_sim.readY(ispec)
-            ppval = np.polyfit(ycalc, yobs, 1)
-            self.scales[ispec], self.bgs[ispec] = ppval
-            ws_sim.setY(ispec, np.polyval(ppval, ycalc))
+        if not self.global_scale:
+            self.scales = np.zeros(self.ws.getNumberHistograms())
+            self.bgs = np.zeros_like(self.scales)
+            for ispec in range(self.ws.getNumberHistograms()):
+                yobs = self.ws.readY(ispec)
+                ycalc = ws_sim.readY(ispec)
+                ppval = np.polyfit(ycalc, yobs, 1)
+                self.scales[ispec], self.bgs[ispec] = ppval
+                ws_sim.setY(ispec, np.polyval(ppval, ycalc))
         return ws_sim
 
     def eval_resids(self, params):
