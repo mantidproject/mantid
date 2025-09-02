@@ -43,7 +43,7 @@ requirements:
       then: jemalloc  ${{ jemalloc }}
     - jsoncpp ${{ jsoncpp }}
     - libboost-devel ${{ libboost }}
-    - libboost-python-devel ${{ libboost_devel }}
+    - libboost-python-devel ${{ libboost }}
     - if: osx or linux
       then: libopenblas ${{ libopenblas }}
     - librdkafka ${{ librdkafka }}
