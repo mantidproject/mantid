@@ -21,7 +21,7 @@ from qtpy.QtWidgets import (
     QPushButton,
 )
 from qtpy.QtGui import QPalette, QIntValidator, QMovie
-from qtpy.QtCore import Qt, QEvent
+from qtpy.QtCore import Qt, QEvent, QSize
 from superqt import QDoubleRangeSlider
 from pyvistaqt import BackgroundPlotter
 import matplotlib.pyplot as plt
@@ -133,6 +133,7 @@ class FullInstrumentViewWindow(QMainWindow):
 
         self._detector_spectrum_fig, self._detector_spectrum_axes = plt.subplots(subplot_kw={"projection": "mantid"})
         self._detector_figure_canvas = FigureCanvas(self._detector_spectrum_fig)
+        self._detector_figure_canvas.setMinimumSize(QSize(0, 0))
 
         plot_widget = QWidget()
         plot_layout = QVBoxLayout(plot_widget)
