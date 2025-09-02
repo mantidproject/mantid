@@ -39,8 +39,8 @@ requirements:
         - qt-main ${{ qt_main }}
         - sip
   host:
-    - libboost-devel ${{ libboost_devel }}
-    - libboost-python-devel ${{ libboost_python_devel }}
+    - libboost-devel ${{ libboost }}
+    - libboost-python-devel ${{ libboost }}
     - eigen ${{ eigen }}
     - if: osx or linux
       then: libopenblas ${{ libopenblas }}
