@@ -24,8 +24,8 @@ python:
 
 # Aim to follow conda-forge
 libboost:
-  - 1.88 # [win or linux]
-  - 1.86 # [osx]
+  - '1.88.*'  # [win or linux]
+  - '1.86.*'  # [osx]
 
 cmake:
   - '>=3.21.0'
