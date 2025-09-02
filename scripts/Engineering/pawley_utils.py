@@ -151,6 +151,8 @@ class Phase:
                 self.hkls.append(hkl_vec)
             else:
                 print(f"Reflection {hkl} not allowed by spacegroup")
+        # sort by descending d-spacing
+        self.hkls = [self.hkls[ipk] for ipk in np.argsort(self.calc_dspacings())[::-1]]
 
     def set_hkls_from_dspac_limits(self, dmin, dmax):
         xtal = CrystalStructure(" ".join([str(par) for par in self.alatt]), self.spgr.getHMSymbol(), "")
