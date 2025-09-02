@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-"""Test the exposed PropertyManagerProperty"""
+"""Tests for PythonObjectProperty"""
 
 import unittest
 from mantid.kernel import Direction, PythonObjectProperty
@@ -56,11 +56,12 @@ class PythonObjectPropertyTest(unittest.TestCase):
         fake = FakeAlgorithm()
         fake.initialize()
 
-        value = 5
+        value = object()
         fake.setProperty("PyObject", value)
 
         # It is important that both the value and address match to prove it
         # is just the same object that we got back
+        self.assertIs(value, fake.getProperty("PyObject").value)
         self.assertEqual(value, fake.getProperty("PyObject").value)
         self.assertEqual(id(value), id(fake.getProperty("PyObject").value))
 

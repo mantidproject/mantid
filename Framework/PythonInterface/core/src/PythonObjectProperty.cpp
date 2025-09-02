@@ -29,7 +29,7 @@ template <> std::string toPrettyString(PythonObject const &value, size_t /*maxLe
 /**
  * Creates a Json representation of the object
  */
-Json::Value encodeAsJson(PythonObject const &) {
+template <> Json::Value encodeAsJson(PythonObject const &) {
   throw Exception::NotImplementedError("encodeAsJson(const boost::python::object &value)");
 }
 
@@ -37,7 +37,6 @@ Json::Value encodeAsJson(PythonObject const &) {
 
 namespace Mantid::PythonInterface {
 
-using Kernel::DataItem;
 using Kernel::PropertyWithValue;
 using Kernel::Exception::NotImplementedError;
 

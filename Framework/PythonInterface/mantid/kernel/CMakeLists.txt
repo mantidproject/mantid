@@ -84,6 +84,7 @@ set(INC_FILES
     inc/MantidPythonInterface/kernel/Registry/PropertyValueHandler.h
     inc/MantidPythonInterface/kernel/Registry/PropertyManagerFactory.h
     inc/MantidPythonInterface/kernel/Registry/PropertyWithValueFactory.h
+    inc/MantidPythonInterface/kernel/Registry/PythonObjectTypeHandler.h
     inc/MantidPythonInterface/kernel/Registry/SequenceTypeHandler.h
     inc/MantidPythonInterface/kernel/Registry/TypedPropertyValueHandler.h
     inc/MantidPythonInterface/kernel/Registry/TypeRegistry.h
