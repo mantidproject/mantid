@@ -32,8 +32,8 @@ requirements:
     - jsoncpp ${{ jsoncpp }}
     - if: win
       then: lib3mf
-    - libboost-devel ${{ libboost_devel }}
-    - libboost-python-devel ${{ libboost_python_devel }}
+    - libboost-devel ${{ libboost }}
+    - libboost-python-devel ${{ libboost }}
     - if: osx or linux
       then: libopenblas ${{ libopenblas }}
     - librdkafka ${{ librdkafka }}
