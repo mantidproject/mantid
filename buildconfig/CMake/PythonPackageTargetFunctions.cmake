@@ -48,16 +48,20 @@ function(add_python_package pkg_name)
     set(_startup_exe ${_egg_link_dir}/${_executable_name})
   endif()
 
-  # create the developer setup which just creates a pth file rather than copying things over
+  # create the developer setup which just creates a pth file rather than copying things over outputs a stamp file,
+  # preventing subsequent installs of the same package unless dependencies change
+  set(_stamp "${CMAKE_CURRENT_BINARY_DIR}/${pkg_name}.pip.stamp")
   set(_outputs ${_egg_link} ${_startup_script} ${_startup_exe})
   set(_version_str ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}${VERSION_TWEAK})
   add_custom_command(
-    OUTPUT ${_outputs}
+    OUTPUT ${_stamp}
     COMMAND
       ${CMAKE_COMMAND} -E env PYTHONPATH=${_egg_link_dir} PYTHONUSERBASE=${_egg_link_dir} PATH=${_egg_link_dir}:$PATH
       MANTID_VERSION_STR=${_version_str} ${Python_EXECUTABLE} -m pip install --editable .
+    COMMAND ${CMAKE_COMMAND} -E touch ${_stamp}
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     DEPENDS ${_setup_py}
+    BYPRODUCTS ${_outputs}
   )
 
   # Generate a sitecustomize.py file in the egg link directory as setuptools no longer generates site.py for v>=49.0.0
@@ -68,10 +72,12 @@ function(add_python_package pkg_name)
       WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
       DEPENDS ${_setup_py} ${CMAKE_MODULE_PATH}/WriteSiteCustomize.cmake
     )
-    list(APPEND _outputs ${_egg_link_dir}/sitecustomize.py)
+    set(_pkg_depends ${_stamp} ${_egg_link_dir}/sitecustomize.py)
+  else()
+    set(_pkg_depends ${_stamp})
   endif()
 
-  add_custom_target(${pkg_name} ALL DEPENDS ${_outputs})
+  add_custom_target(${pkg_name} ALL DEPENDS ${_pkg_depends})
 
   # When running the install target, run the following code instead that defers to the `pip install` command. It assumes
   # the `${CMAKE_CURRENT_SOURCE_DIR}`, the directory where `add_python_package` was called from, contains either a
