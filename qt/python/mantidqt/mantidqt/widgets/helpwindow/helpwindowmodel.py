@@ -121,7 +121,6 @@ class HelpWindowModel:
 
             # Possible Windows debug build the mantid root will be the second parent of the props folder
             mantid_root = os.path.dirname(mantid_root)
-            log.warning(mantid_root)
             docs_path = os.path.join(mantid_root, "docs", "html")
             if os.path.exists(docs_path):
                 return docs_path
