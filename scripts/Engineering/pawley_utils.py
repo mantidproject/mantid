@@ -5,17 +5,16 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import annotations
-from mantid.simpleapi import CreateSingleValuedWorkspace, LoadCIF, CreateWorkspace, PoldiAutoCorrelation, CloneWorkspace
+from mantid.simpleapi import CreateSingleValuedWorkspace, LoadCIF, CreateWorkspace
 import numpy as np
 from mantid.fitfunctions import FunctionWrapper, CompositeFunctionWrapper
 from mantid.api import FunctionFactory
-from mantid.geometry import CrystalStructure, ReflectionGenerator, ReflectionConditionFilter, PointGroupFactory, \
-    PointGroup
+from mantid.geometry import CrystalStructure, ReflectionGenerator, PointGroupFactory, PointGroup
 from mantid.kernel import V3D
 from typing import Optional, List, Tuple, TYPE_CHECKING
 from itertools import chain
-from scipy.optimize import least_squares, minimize
-from plugins.algorithms.poldi_utils import  simulate_2d_data, get_dspac_array_from_ws
+from scipy.optimize import least_squares
+from plugins.algorithms.poldi_utils import simulate_2d_data, get_dspac_array_from_ws
 from abc import ABC, abstractmethod
 
 
@@ -49,17 +48,27 @@ class PVProfile(PeakProfile):
         [2] Using FullProf to analyze Time of Flight Neutron Powder Diffraction data (https://www.ill.eu/sites/fullprof/downloads/Docs/TOF_FullProf.pdf)
         """
         # calculate FWHM
-        fwhm_g = np.sqrt(8 * np.log(2) * (
-                    (self.p[0] ** 2) + ((self.p[1] ** 2) + self.p[-3] * ((1 - self.p[-2])) ** 2) * dpk ** 2 + (
-                        (self.p[2] ** 2) + self.p[-4]) * dpk ** 4))  # Panel 6 in [2]
-        fwhm_l = self.p[4] + (self.p[5] + self.p[-2] * np.sqrt(8 * np.log(2) * self.p[-3])) * dpk + (
-                    self.p[5] + self.p[-1]) * dpk ** 2
-        fwhm_pv = fwhm_g ** 5 + 2.69269 * (fwhm_g ** 4) * (fwhm_l) + 2.42843 * (fwhm_g ** 3) * (
-                    fwhm_l ** 2) + 4.47163 * (fwhm_g ** 2) * (fwhm_l ** 3) + 0.07842 * (fwhm_g) * (
-                              fwhm_l ** 4) + fwhm_l  # Eq.3.16 in [1]
+        fwhm_g = np.sqrt(
+            8
+            * np.log(2)
+            * (
+                (self.p[0] ** 2)
+                + ((self.p[1] ** 2) + self.p[-3] * ((1 - self.p[-2]) ** 2)) * dpk**2
+                + ((self.p[2] ** 2) + self.p[-4]) * dpk**4
+            )
+        )  # Panel 6 in [2] Hg**2 / (8ln2)
+        fwhm_l = self.p[3] + (self.p[4] + self.p[-2] * np.sqrt(8 * np.log(2) * self.p[-3])) * dpk + (self.p[5] + self.p[-1]) * dpk**2
+        fwhm_pv = (
+            fwhm_g**5
+            + 2.69269 * (fwhm_g**4) * (fwhm_l)
+            + 2.42843 * (fwhm_g**3) * (fwhm_l**2)
+            + 4.47163 * (fwhm_g**2) * (fwhm_l**3)
+            + 0.07842 * (fwhm_g) * (fwhm_l**4)
+            + fwhm_l**5
+        ) ** (1 / 5)  # Eq.3.16 in [1]
         # calculate mixing
         fwhm_ratio = fwhm_l / fwhm_pv
-        mixing = 1.36603 * fwhm_ratio - 0.47719 * fwhm_ratio ** 2 + 0.11116 * fwhm_ratio ** 3  # Eq.3.17 in [1]
+        mixing = 1.36603 * fwhm_ratio - 0.47719 * fwhm_ratio**2 + 0.11116 * fwhm_ratio**3  # Eq.3.17 in [1]
         return {"Mixing": mixing, "FWHM": fwhm_pv}
 
 
@@ -76,8 +85,7 @@ class GaussianProfile(PeakProfile):
         Note dst2 and gsize perfectly corralated withsig1 and sig2 respectively
         [1] Using FullProf to analyze Time of Flight Neutron Powder Diffraction data (https://www.ill.eu/sites/fullprof/downloads/Docs/TOF_FullProf.pdf)
         """
-        return {"Sigma": np.sqrt(
-            (self.p[0] ** 2) + (self.p[1] ** 2) * dpk ** 2 + (self.p[2] ** 2) * dpk ** 4)}  # Panel 6 in [1] with zeta=0
+        return {"Sigma": np.sqrt((self.p[0] ** 2) + (self.p[1] ** 2) * dpk**2 + (self.p[2] ** 2) * dpk**4)}  # Panel 6 in [1] with zeta=0
 
 
 class Phase:
@@ -135,8 +143,7 @@ class Phase:
         return len(self.ipars)
 
     def get_param_names(self) -> List[float]:
-        return [next(iter(self.param_names[ipar])) if isinstance(ipar, slice) else self.param_names[ipar] for ipar in
-                self.ipars]
+        return [next(iter(self.param_names[ipar])) if isinstance(ipar, slice) else self.param_names[ipar] for ipar in self.ipars]
 
     def set_params(self, pars: List):
         for ipar, par in enumerate(pars):
@@ -211,8 +218,7 @@ class PawleyPattern1D:
                     self.comp_func[ipk][par_name] = val
                 self.comp_func[ipk].function.setIntensity(self.intens[iphase][ipk])
         if len(self.bg_params) > 0:
-            [self.comp_func[len(self.comp_func) - 1].function.setParameter(ipar, par) for ipar, par in
-             enumerate(self.bg_params)]
+            [self.comp_func[len(self.comp_func) - 1].function.setParameter(ipar, par) for ipar, par in enumerate(self.bg_params)]
 
     def get_params(self):
         return np.array(list(chain(*self.alatt_params, *self.intens, self.profile_params, self.bg_params)))
@@ -233,12 +239,12 @@ class PawleyPattern1D:
         # set peak parameters
         for iphase, phase in enumerate(self.phases):
             npars = self.intens[iphase].size
-            self.intens[iphase] = params[istart:istart + npars]
+            self.intens[iphase] = params[istart : istart + npars]
             istart = istart + npars
         # set global profile and bg_func params
         if len(self.bg_params) > 0:
-            self.profile_params = params[istart:-len(self.bg_params)]
-            self.bg_params = params[-len(self.bg_params):]
+            self.profile_params = params[istart : -len(self.bg_params)]
+            self.bg_params = params[-len(self.bg_params) :]
         else:
             self.profile_params = params[istart:]
 
@@ -288,9 +294,14 @@ class PawleyPattern2D(PawleyPattern1D):
         self.set_global_scale(global_scale)
         # create workspace in d-spacing to contain diffraction pattern
         dspacs = get_dspac_array_from_ws(self.ws)
-        self.ws_1d = CreateWorkspace(DataX=dspacs, DataY=np.zeros_like(dspacs), UnitX="dSpacing",
-                                     YUnitLabel="Intensity (a.u.)", OutputWorkspace=f"{self.ws.name()}_pattern",
-                                     EnableLogging=False)
+        self.ws_1d = CreateWorkspace(
+            DataX=dspacs,
+            DataY=np.zeros_like(dspacs),
+            UnitX="dSpacing",
+            YUnitLabel="Intensity (a.u.)",
+            OutputWorkspace=f"{self.ws.name()}_pattern",
+            EnableLogging=False,
+        )
 
     def set_global_scale(self, global_scale):
         self.global_scale = global_scale
