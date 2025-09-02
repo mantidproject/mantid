@@ -7,7 +7,7 @@ from abc import ABC, abstractmethod
 
 from mantidqt.widgets.sliceviewer.models.base_model import SliceViewerBaseModel
 from mantidqt.widgets.sliceviewer.models.dimensions import Dimensions
-from mantidqt.widgets.sliceviewer.models.workspaceinfo import WorkspaceInfo
+from mantidqt.widgets.sliceviewer.models.workspaceinfo import WorkspaceInfo, WS_TYPE
 from mantidqt.widgets.sliceviewer.presenters.lineplots import PixelLinePlot, RectangleSelectionLinePlot
 from mantidqt.widgets.sliceviewer.views.dataview import SliceViewerDataView
 from mantidqt.widgets.sliceviewer.views.dataviewsubscriber import IDataViewSubscriber
@@ -21,8 +21,7 @@ class SliceViewerBasePresenter(IDataViewSubscriber, ABC):
         self._data_view: SliceViewerDataView = data_view
         self.normalization = False
 
-        #  For now, disable masking if y axis is numeric.
-        if self.model.ws.getAxis(1).isNumeric():
+        if self._disable_masking:
             self._data_view.deactivate_and_disable_tool(ToolItemText.MASKING)
 
     def show_all_data_clicked(self):
@@ -149,6 +148,20 @@ class SliceViewerBasePresenter(IDataViewSubscriber, ABC):
         self._data_view.masking.clear_and_disconnect()
         self._data_view.canvas.flush_events()  # flush before we set masking to None
         self._data_view.masking = None
+
+    @property
+    def _disable_masking(self):
+        #  Disable masking if not supported.
+        #  If a use case arises, we could extend support to these areas
+
+        # if not histo workspace
+        ws_type = WorkspaceInfo.get_ws_type(self.model.ws)
+        if not ws_type == WS_TYPE.MATRIX:
+            return True
+        #  If y-axis is numeric.
+        if self.model.ws.getAxis(1).isNumeric():
+            return True
+        return False
 
     @abstractmethod
     def get_extra_image_info_columns(self, xdata, ydata):
