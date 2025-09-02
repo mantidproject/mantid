@@ -46,6 +46,8 @@ def load_poldi(
     """
     ws = exec_alg("LoadEmptyInstrument", Filename=fpath_idf)
     dat = np.loadtxt(fpath_data)
+    if dat.shape[0] == 500:
+        dat = dat.T
     cycle_time = _calc_cycle_time_from_chopper_speed(chopper_speed)
     bin_width = cycle_time / dat.shape[-1]
     ws = exec_alg("Rebin", InputWorkspace=ws, Params=f"0,{bin_width},{cycle_time}")
@@ -127,7 +129,7 @@ def get_final_dspac_array(bin_width: float, dspac_min: float, dspac_max: float, 
     return np.linspace(dspac_min, dspac_max, nbins_dspac)
 
 
-def get_dspac_array_from_ws(ws: Workspace2D, lambda_min: float = 1.1, lambda_max: float= 5.0) -> np.ndarray[float]:
+def get_dspac_array_from_ws(ws: Workspace2D, lambda_min: float = 1.1, lambda_max: float = 5.0) -> np.ndarray[float]:
     """
     Function to calculate d-spacing bins given workspace
     :param ws_2d: MatrixWorkspace containing POLDI data (raw instrument)
@@ -200,8 +202,8 @@ def simulate_2d_data(
     npulses = int(time_max // cycle_time)
     # simulate detected spectra
     ipulses = np.arange(npulses)[:, None]
-    offsets = (ipulses * cycle_time - slit_offsets - t0_const).flatten() # note different sign to auto-corr!
-    tofs = ws_sim.readX(0)[:, None] + offsets # same for all spectra
+    offsets = (ipulses * cycle_time - slit_offsets - t0_const).flatten()  # note different sign to auto-corr!
+    tofs = ws_sim.readX(0)[:, None] + offsets  # same for all spectra
     path_length_ratio = (l2s + l1 - l1_chop) / (l2s + l1)
     tof_d1Ang = np.asarray([si.diffractometerConstants(ispec)[UnitParams.difc] * path_length_ratio[ispec] for ispec in range(nspec)])
     out = Parallel(n_jobs=-2, prefer="threads", return_as="generator")(
@@ -211,6 +213,7 @@ def simulate_2d_data(
     [ws_sim.setY(ispec, yvec) for ispec, yvec in enumerate(out)]
     ADS.addOrReplace(output_workspace, ws_sim)
     return ws_sim
+
 
 def _do_interp(dtarget, d, intensity):
     return np.interp(dtarget, d, intensity).sum(axis=1)
