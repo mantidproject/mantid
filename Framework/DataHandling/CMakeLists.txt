@@ -477,6 +477,7 @@ set(TEST_FILES
     LoadAsciiStlTest.h
     LoadAsciiTest.h
     LoadBBYTest.h
+    LoadBBY2Test.h
     LoadBinaryStlTest.h
     LoadCSNSNexusTest.h
     LoadCalFileTest.h
