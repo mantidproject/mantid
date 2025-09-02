@@ -856,17 +856,17 @@ class AbinsAlgorithm:
                 # Check if following janus conventions:
                 # /parent/seedname-phonopy.yml -> /parent/seedname-force_constants.hdf5
                 janus_phonopy_re = "(?P<seedname>.+)-phonopy.yml"
+                fc_filenames = ("FORCE_CONSTANTS", "force_constants.hdf5")
                 if re_match := re.match(janus_phonopy_re, path.name):
                     fc_file = path.parent / f"{re_match['seedname']}-force_constants.hdf5"
-                    if not fc_file.isfile():
+                    if not fc_file.is_file():
                         return dict(
                             Invalid=True,
                             Comment=f"Could not find force constants in {filename_full_path}, or find data file {fc_file}",
                         )
 
                 # Otherwise FC could be in a FORCE_CONSTANTS or force_constants.hdf5 file
-                fc_filenames = ("FORCE_CONSTANTS", "force_constants.hdf5")
-                if not any(map(lambda fc_filename: (path.parent / fc_filename).is_file(), fc_filenames)):
+                elif not any(map(lambda fc_filename: (path.parent / fc_filename).is_file(), fc_filenames)):
                     return dict(
                         Invalid=True,
                         Comment=f"Could not find force constants in {filename_full_path}, or find data file {' or '.join(fc_filenames)}",
