@@ -450,12 +450,12 @@ class StateGuiModel(ModelCommon):
     # ------------------------------------------------------------------------------------------------------------------
     @property
     def absolute_scale(self):
-        val = self._all_states.scale.scale
+        val = self._all_states.scale.rear_scale
         return self._get_val_or_default(val)
 
     @absolute_scale.setter
     def absolute_scale(self, value):
-        self._all_states.scale.scale = value
+        self._all_states.scale.rear_scale = value
 
     @property
     def sample_height(self):
