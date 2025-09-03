@@ -253,7 +253,7 @@ namespace Anxs {
 // options to capture timeseries data
 enum class ScanLog { Start, End, Mean };
 
-std::string extractWorkspaceTitle(std::string &nxsFile);
+std::string extractWorkspaceTitle(const std::string &nxsFile);
 
 int64_t epochRelDateTimeBase(int64_t epochInNanoSeconds);
 

@@ -309,16 +309,17 @@ bool File::select(const char *file) {
   m_bufferPosition = 0;
   m_bufferAvailable = 0;
 
-  for (size_t i = 0; i != m_fileNames.size(); i++)
-    if (m_fileNames[i] == file) {
-      const FileInfo &info = m_fileInfos[i];
+  auto it = std::find(m_fileNames.begin(), m_fileNames.end(), file);
+  if (it != m_fileNames.end()) {
+    size_t i = std::distance(m_fileNames.begin(), it);
+    const FileInfo &info = m_fileInfos[i];
 
-      m_selected = i;
-      m_position = 0;
-      m_size = info.Size;
+    m_selected = i;
+    m_position = 0;
+    m_size = info.Size;
 
-      return m_good &= m_file.seek(info.Offset, SEEK_SET);
-    }
+    return m_good &= m_file.seek(info.Offset, SEEK_SET);
+  }
 
   m_selected = static_cast<size_t>(-1);
   m_position = 0;
@@ -501,7 +502,7 @@ int64_t epochRelDateTimeBase(int64_t epochInNanoSeconds) {
   return retval;
 }
 
-std::string extractWorkspaceTitle(std::string &nxsFile) {
+std::string extractWorkspaceTitle(const std::string &nxsFile) {
   namespace fs = boost::filesystem;
   fs::path p = nxsFile;
   for (; !p.extension().empty();)

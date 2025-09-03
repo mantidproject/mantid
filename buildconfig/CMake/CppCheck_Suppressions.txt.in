@@ -227,9 +227,7 @@ constVariableReference:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/MSVesuvioH
 unsignedLessThanZero:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/ParDomain.cpp:72
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/RalNlls/TrustRegion.cpp:280
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/DefaultEventLoader.cpp:112
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadANSTOHelper.cpp:305
 constVariable:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadAscii2.cpp:787
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadBBY.cpp:310
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadCalFile.cpp:57
 uselessCallsSubstr:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadFITS.cpp:547
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadHFIRSANS.cpp:433
