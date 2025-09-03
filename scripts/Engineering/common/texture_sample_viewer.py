@@ -17,13 +17,13 @@ def is_valid_mesh(mesh: np.ndarray) -> bool:
     return len(mesh) > 3
 
 
-def has_no_valid_shape(ws_name: str) -> bool:
-    no_shape = False
+def has_valid_shape(ws_name: str) -> bool:
+    shape = True
     try:
-        no_shape = not is_valid_mesh(ADS.retrieve(ws_name).sample().getShape().getMesh())
+        shape = is_valid_mesh(ADS.retrieve(ws_name).sample().getShape().getMesh())
     except RuntimeError:
-        no_shape = True
-    return no_shape
+        shape = False
+    return shape
 
 
 def get_xml_mesh(xml: str) -> np.ndarray:

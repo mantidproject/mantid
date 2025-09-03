@@ -469,10 +469,7 @@ def focus_run(sample_paths, vanadium_path, plot_output, rb_num, calibration, sav
 
     # directories for saved focused data
     calib_is_texture = calibration.group in TEXTURE_GROUPS
-    if calib_is_texture:
-        focus_sub_dir = path.join("Focus", calibration.get_foc_ws_suffix())
-    else:
-        focus_sub_dir = "Focus"
+    focus_sub_dir = path.join("Focus", calibration.get_foc_ws_suffix()) if calib_is_texture else "Focus"
     focus_dirs = [path.join(save_dir, focus_sub_dir)]
     if rb_num:
         focus_dir = path.join(save_dir, "User", rb_num, focus_sub_dir)

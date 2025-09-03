@@ -24,7 +24,7 @@ from mantid.api import AnalysisDataService as ADS
 from os import path, makedirs
 from scipy import interpolate
 from Engineering.EnggUtils import GROUP
-from Engineering.common.texture_sample_viewer import has_no_valid_shape, plot_sample_directions, plot_gauge_vol
+from Engineering.common.texture_sample_viewer import has_valid_shape, plot_sample_directions, plot_gauge_vol
 from typing import Optional, Sequence, Union, Tuple
 from mantid.dataobjects import Workspace2D
 from matplotlib.figure import Figure
@@ -349,4 +349,4 @@ class TextureCorrectionModel:
 
     @staticmethod
     def _has_no_valid_shape(ws_name: str) -> bool:
-        return has_no_valid_shape(ws_name)
+        return not has_valid_shape(ws_name)

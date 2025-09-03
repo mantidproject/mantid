@@ -270,8 +270,8 @@ class TextureCorrectionModelTest(unittest.TestCase):
         for file in valid_file_paths:
             result = self.model._validate_file(file, ext)
             null_result = self.model._validate_file(file, ".xml")
-            self.assertEqual(result, True)
-            self.assertEqual(null_result, False)
+            self.assertTrue(result)
+            self.assertFalse(null_result)
 
     @patch(correction_model_path + ".DefineGaugeVolume")
     def test_define_gauge_vol_for_preset(self, mock_def_gauge_vol):

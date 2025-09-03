@@ -21,7 +21,7 @@ from mantid.geometry import CrystalStructure
 from os import path, makedirs
 from scipy.interpolate import griddata
 from scipy.ndimage import gaussian_filter
-from Engineering.common.texture_sample_viewer import has_no_valid_shape, plot_sample_directions
+from Engineering.common.texture_sample_viewer import has_valid_shape, plot_sample_directions
 from matplotlib.figure import Figure
 
 
@@ -233,7 +233,7 @@ class TextureProjection:
 
     @staticmethod
     def _has_no_valid_shape(ws_name: str):
-        return has_no_valid_shape(ws_name)
+        return not has_valid_shape(ws_name)
 
     # ~~~~~ Parameter Table helper functions ~~~~~~~~
 

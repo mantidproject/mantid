@@ -27,12 +27,8 @@ def find_all_files(directory):
 
     directory: directory to iterate over
     """
-    files = []
     with scandir(directory) as entries:
-        for entry in entries:
-            if entry.is_file():
-                files.append(entry.path)
-    return files
+        return [entry for entry in entries if entry.is_file()]
 
 
 def mk(dir_path: str):
@@ -170,41 +166,41 @@ def run_abs_corr(
     )
     if not valid_inputs:
         logger.error(error_msg)
+        return
     # otherwise run script
-    else:
-        if orientation_file:
-            model.load_all_orientations(wss, orientation_file, orient_file_is_euler, euler_scheme, euler_axes_sense)
+    if orientation_file:
+        model.load_all_orientations(wss, orientation_file, orient_file_is_euler, euler_scheme, euler_axes_sense)
 
-        out_wss = [f"Corrected_{ws}" for ws in wss]
+    out_wss = [f"Corrected_{ws}" for ws in wss]
 
-        if copy_ref:
-            model.copy_sample_info(ref_ws, wss)
+    if copy_ref:
+        model.copy_sample_info(ref_ws, wss)
 
-        for i, ws in enumerate(wss):
-            abs_corr = 1.0
-            div_corr = 1.0
+    for i, ws in enumerate(wss):
+        abs_corr = 1.0
+        div_corr = 1.0
 
-            if include_abs_corr:
-                model.define_gauge_volume(ws, gauge_vol_preset, gauge_vol_shape_file)
-                model.calc_absorption(ws, monte_carlo_args)
-                abs_corr = "_abs_corr"
-                if include_atten_table:
-                    atten_vals = model.read_attenuation_coefficient_at_value(abs_corr, eval_point, eval_units)
-                    model.write_atten_val_table(
-                        ws,
-                        atten_vals,
-                        eval_point,
-                        eval_units,
-                        exp_name,
-                        None,
-                        root_dir,
-                    )
+        if include_abs_corr:
+            model.define_gauge_volume(ws, gauge_vol_preset, gauge_vol_shape_file)
+            model.calc_absorption(ws, monte_carlo_args)
+            abs_corr = "_abs_corr"
+            if include_atten_table:
+                atten_vals = model.read_attenuation_coefficient_at_value(abs_corr, eval_point, eval_units)
+                model.write_atten_val_table(
+                    ws,
+                    atten_vals,
+                    eval_point,
+                    eval_units,
+                    exp_name,
+                    None,
+                    root_dir,
+                )
 
-            if include_div_corr:
-                model.calc_divergence(ws, div_hoz, div_vert, det_hoz)
-                div_corr = "_div_corr"
+        if include_div_corr:
+            model.calc_divergence(ws, div_hoz, div_vert, det_hoz)
+            div_corr = "_div_corr"
 
-            model.apply_corrections(ws, out_wss[i], None, root_dir, abs_corr, div_corr, None, clear_ads_after)
+        model.apply_corrections(ws, out_wss[i], None, root_dir, abs_corr, div_corr, None, clear_ads_after)
 
 
 def validate_abs_corr_inputs(
@@ -225,42 +221,36 @@ def validate_abs_corr_inputs(
     div_vert: Optional[float] = None,
     det_hoz: Optional[float] = None,
 ) -> Tuple[bool, str]:
-    valid_inputs = True
     error_msg = ""
     # validate inputs
     if orientation_file:
         valid_orientation_inputs = isinstance(orient_file_is_euler, bool)
         if not valid_orientation_inputs:
-            valid_inputs = False
             error_msg += r"If orientation file is specified, must flag orient_file_is_euler.\n"
         if valid_orientation_inputs and orient_file_is_euler:
             # if is euler flag, require euler_scheme and euler_axes_sense
             valid_orientation_inputs = isinstance(euler_scheme, str) and isinstance(euler_axes_sense, str)
             if not valid_orientation_inputs:
-                valid_inputs = False
                 error_msg += r"If orientation file is euler, must provide scheme and sense.\n"
 
     if copy_ref:
         if not isinstance(ref_ws, str):
-            valid_inputs = False
             error_msg += r"If copy_ref is True, must provide ref_ws.\n"
 
     if include_abs_corr:
         if gauge_vol_preset == "Custom":
             if not isinstance(gauge_vol_shape_file, str):
-                valid_inputs = False
                 error_msg += r"If custom gauge volume required, must provide shape xml as file.\n"
 
     if include_atten_table:
         if not (isinstance(eval_point, Union[str, float]) and isinstance(eval_units, str)):
-            valid_inputs = False
             error_msg += r"If attenuation table required, must provide valid point and units.\n"
 
     if include_div_corr:
         if not (isinstance(div_hoz, float) and isinstance(div_vert, float) and isinstance(det_hoz, float)):
-            valid_inputs = False
             error_msg += r"If divergence correction required, must provide valid values.\n"
-    return valid_inputs, error_msg
+    # if error_msg is still empty string, the inputs are assumed to be valid
+    return len(error_msg) == 0, error_msg
 
 
 # -------- Fitting Script Logic--------------------------------

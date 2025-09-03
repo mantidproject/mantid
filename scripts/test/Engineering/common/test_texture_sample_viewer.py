@@ -10,7 +10,7 @@ from unittest.mock import patch, MagicMock
 from mantid.api import AnalysisDataService as ADS
 
 from Engineering.common.texture_sample_viewer import (
-    has_no_valid_shape,
+    has_valid_shape,
     get_xml_mesh,
     get_mesh_vertices_in_intrinsic_sample_axes,
     get_scaled_intrinsic_sample_directions_in_lab_frame,
@@ -35,7 +35,8 @@ class TextureCorrectionModelTest(unittest.TestCase):
         if ADS.doesExist(self.ws_name):
             ADS.remove(self.ws_name)
 
-    def get_cube_mesh(self, side_len):
+    @staticmethod
+    def get_cube_mesh(side_len):
         p = side_len / 2
         return np.asarray(
             [
@@ -71,20 +72,20 @@ class TextureCorrectionModelTest(unittest.TestCase):
         )
 
     @patch(texture_sample_viewer_path + ".ADS")
-    def test_has_no_valid_shape_returns_true_on_missing_mesh(self, mock_ads):
+    def test_has_valid_shape_returns_false_on_missing_mesh(self, mock_ads):
         shape = MagicMock()
         shape.getMesh.return_value = []  # empty mesh
         self.mock_ws.sample().getShape.return_value = shape
         mock_ads.retrieve.return_value = self.mock_ws
-        self.assertTrue(has_no_valid_shape("ws"))
+        self.assertFalse(has_valid_shape("ws"))
 
     @patch(texture_sample_viewer_path + ".ADS")
-    def test_has_no_valid_shape_returns_false_with_mesh(self, mock_ads):
+    def test_has_valid_shape_returns_true_with_mesh(self, mock_ads):
         shape = MagicMock()
         shape.getMesh.return_value = np.zeros((12, 3, 3))  # mesh has some data
         self.mock_ws.sample().getShape.return_value = shape
         mock_ads.retrieve.return_value = self.mock_ws
-        self.assertTrue(not has_no_valid_shape("ws"))
+        self.assertTrue(has_valid_shape("ws"))
 
     def test_get_xml_mesh_returns_mesh(self):
         mesh = get_xml_mesh(get_cube_xml("test-cube", 2))  # create 2m cube
@@ -111,13 +112,17 @@ class TextureCorrectionModelTest(unittest.TestCase):
         expected_verts = np.array(((0, 1, 2), (2, 1, 2), (0, 3, 2), (2, 3, 2), (0, 1, 4), (2, 1, 4), (0, 3, 4), (2, 3, 4)))
         self.assertTrue(np.all(get_mesh_vertices(mesh) in expected_verts))
 
-    def test_get_mesh_vertices_in_intrinsic_sample_axes(self):
-        # set up the sample directions such that D1=y, D2=z, D3=x (see diagram)
+    @staticmethod
+    def get_default_ax_transform():
+        # set up the sample directions such that D1=y, D2=z, D3=x (see diagram in test_get_mesh_vertices_in_intrinsic_sample_axes)
         d1 = np.array((0, 1, 0))
         d2 = np.array((0, 0, 1))
         d3 = np.array((1, 0, 0))
         # combine into transform matrix
-        ax_transform = np.concatenate((d1[:, None], d2[:, None], d3[:, None]), axis=1)
+        return np.concatenate((d1[:, None], d2[:, None], d3[:, None]), axis=1)
+
+    def test_get_mesh_vertices_in_intrinsic_sample_axes(self):
+        ax_transform = self.get_default_ax_transform()
         # ax transform converts vectors in lab frame into an equivalent frame where x=D1, y=D2, and z=D3
         shape_mesh = self.get_cube_mesh(2) + np.array((0, 0, 1))  # translate cube along z in lab
         # cube in lab frame is:                  lab coords  sample directions
@@ -144,11 +149,7 @@ class TextureCorrectionModelTest(unittest.TestCase):
 
     def test_get_scaled_intrinsic_sample_directions_in_lab_frame(self):
         # set up the same sample as test_get_mesh_vertices_in_intrinsic_sample_axes but rotate it about x
-        d1 = np.array((0, 1, 0))
-        d2 = np.array((0, 0, 1))
-        d3 = np.array((1, 0, 0))
-        # combine into transform matrix
-        ax_transform = np.concatenate((d1[:, None], d2[:, None], d3[:, None]), axis=1)
+        ax_transform = self.get_default_ax_transform()
         rotation_matrix = np.array(((1, 0, 0), (0, -1, 0), (0, 0, -1)))  # 180 degrees around x
         # this time the cube needs to be displaced by -z (equivalent to applying R to the cube displaced by +z)
         sample_mesh = self.get_cube_mesh(2) + np.array((0, 0, -1))

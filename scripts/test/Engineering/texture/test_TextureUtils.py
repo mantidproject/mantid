@@ -61,7 +61,7 @@ class CrystalPhaseHelperMixin:
             self.assertFalse(self.try_make_xtal_from_args(input_type, bad_kwargs_dict))
 
 
-class TextureUtilsTest(unittest.TestCase, CrystalPhaseHelperMixin):
+class TextureUtilsTest(CrystalPhaseHelperMixin, unittest.TestCase):
     def test_find_all_files_returns_only_files(self):
         with tempfile.TemporaryDirectory() as tmpdir:
             file_path = os.path.join(tmpdir, "file1.txt")
