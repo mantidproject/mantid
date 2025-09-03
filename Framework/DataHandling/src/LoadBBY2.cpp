@@ -127,7 +127,6 @@ void loadEvents(API::Progress &prog, const char *progMsg, EP &eventProcessor, co
   // for progress notifications
   ANSTO::ProgressTracker progTracker(prog, progMsg, Progress_LoadBinFile, Progress_LoadBinFile);
 
-  // ReadEventFile(loader, eventProcessor, progTracker, 100, false);
   const std::string neutronPath{"instrument/detector_events"};
   Anxs::ReadEventData(progTracker, entry, &eventProcessor, start_nsec, end_nsec, neutronPath, HISTO_BINS_Y);
 }
