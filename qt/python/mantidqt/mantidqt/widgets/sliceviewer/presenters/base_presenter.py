@@ -155,7 +155,7 @@ class SliceViewerBasePresenter(IDataViewSubscriber, ABC):
         #  If a use case arises, we could extend support to these areas
 
         # if not histo workspace
-        ws_type = WorkspaceInfo.get_ws_type(self.model.ws)
+        ws_type = None if not self.model.ws else WorkspaceInfo.get_ws_type(self.model.ws)
         if not ws_type == WS_TYPE.MATRIX:
             return True
         #  If y-axis is numeric.

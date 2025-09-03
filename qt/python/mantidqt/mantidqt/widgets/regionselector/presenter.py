@@ -258,3 +258,21 @@ class RegionSelector(ObservingPresenter, SliceViewerBasePresenter):
 
     def is_integer_frame(self):
         return False, False
+
+    def masking(self, active):
+        pass
+
+    def rect_masking_clicked(self, active):
+        pass
+
+    def elli_masking_clicked(self, active):
+        pass
+
+    def poly_masking_clicked(self, active):
+        pass
+
+    def export_masking_clicked(self):
+        pass
+
+    def apply_masking_clicked(self):
+        pass
