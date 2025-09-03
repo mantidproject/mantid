@@ -263,18 +263,16 @@ class MaskingModel:
     def add_poly_cursor_info(self, nodes, transpose):
         self.update_active_mask(PolyCursorInfo(nodes=nodes, transpose=transpose))
 
-    @staticmethod
-    def create_table_workspace_from_rows(table_rows, store_in_ads):
+    def create_table_workspace_from_rows(self, table_rows, store_in_ads):
         # create table ws_from rows
         table_ws = WorkspaceFactory.createTable()
         table_ws.addColumn("str", "SpectraList")
         table_ws.addColumn("double", "XMin")
         table_ws.addColumn("double", "XMax")
         for row in table_rows:
-            # if not row.x_min == row.x_max:  # the min and max of the ellipse
             table_ws.addRow([row.spec_list, row.x_min, row.x_max])
         if store_in_ads:
-            AnalysisDataService.addOrReplace("svmask_ws", table_ws)
+            AnalysisDataService.addOrReplace(f"{self._ws_name}_sv_mask_tbl", table_ws)
         return table_ws
 
     def generate_mask_table_ws(self, store_in_ads=True):

@@ -276,7 +276,7 @@ class SliceViewerTest(unittest.TestCase):
         presenter.nonorthogonal_axes(True)
 
         data_view_mock.deactivate_and_disable_tool.assert_has_calls(
-            [mock.call(ToolItemText.REGIONSELECTION)], [mock.call(ToolItemText.MASKING)]
+            [mock.call(ToolItemText.MASKING), mock.call(ToolItemText.REGIONSELECTION)]
         )
         data_view_mock.create_axes_nonorthogonal.assert_called_once()
         data_view_mock.create_axes_orthogonal.assert_not_called()
@@ -304,7 +304,7 @@ class SliceViewerTest(unittest.TestCase):
         data_view_mock.create_axes_orthogonal.assert_called_once()
         data_view_mock.create_axes_nonorthogonal.assert_not_called()
         data_view_mock.plot_MDH.assert_called_once()
-        data_view_mock.enable_tool_button.assert_has_calls((mock.call(ToolItemText.LINEPLOTS), mock.call(ToolItemText.REGIONSELECTION)))
+        data_view_mock.enable_tool_button.assert_has_calls([mock.call(ToolItemText.LINEPLOTS), mock.call(ToolItemText.REGIONSELECTION)])
 
     @mock.patch("mantidqt.widgets.sliceviewer.presenters.presenter.SliceInfo")
     def test_non_orthogonal_axes_toggled_off_not_enable_non_axis_cuts_if_not_supported(self, mock_sliceinfo_cls):
