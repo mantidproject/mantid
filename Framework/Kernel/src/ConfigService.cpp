@@ -1027,7 +1027,8 @@ std::string ConfigServiceImpl::getOSArchitecture() {
     if (sysctlbyname("sysctl.proc_translated", &ret, &size, nullptr, 0) != -1 && ret == 1) {
       osArch = "arm64_(x86_64)";
       g_log.warning("You are running an Intel build of Mantid on Apple silicon, which will be significantly slower and "
-                    "use more power. For best performance, install the Arm version of Mantid.");
+                    "use more power. For best performance, install the Arm version of Mantid. This version is "
+                    "available here: https://downloads.mantidproject.org");
     } else {
       // TODO this can be removed after the v6.14 code freeze because the feature will be dropped
       g_log.warning("Mantid v6.14 is the last version that will support Intel macOS.");
