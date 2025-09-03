@@ -389,31 +389,38 @@ def rerun_fit_with_new_ws(
         if "InputWorkspace" in k:
             md_fit_kwargs[k] = new_ws.name()
 
-    # mdf.freeAll()
     bg_ties = []
+    new_func = MultiDomainFunction()
     for idom in range(mdf.nFunctions()):
         comp = mdf[idom]
         peak = comp[0]
         bg = comp[1]
-        peak.freeAll()
+        # create fresh peak as ties are causing problems
+        new_peak = FunctionFactory.Instance().createPeakFunction(peak.name())
+        [new_peak.setParameter(param, peak.getParameterValue(param)) for param in ("I", "X0", "A", "B", "S")]
         # update constraints around new values
         intens = max(peak.getParameterValue("I"), 1)
         x0 = peak.getParameterValue("X0")
-        peak.addConstraints(f"{max(intens / 2, 1e-6)}<I<{intens * 2}")
-        peak.addConstraints(f"{x0 - x0_move}<X0<{x0 + x0_move}")
+        new_peak.addConstraints(f"{max(intens / 2, 1e-6)}<I<{intens * 2}")
+        new_peak.addConstraints(f"{x0 - x0_move}<X0<{x0 + x0_move}")
         if tie_background and idom > 0:
             for ipar_bg in range(bg.nParams()):
                 par = bg.getParamName(ipar_bg)
                 bg_ties.append(f"f{idom}.f1.{par}=f0.f1.{par}")
         for param in parameters_to_fix:
-            peak.fixParameter(param)
+            new_peak.fixParameter(param)
+
+        comp_func = CompositeFunctionWrapper(FunctionWrapper(new_peak), FunctionWrapper(bg), NumDeriv=True)
+        new_func.add(comp_func.function)
+        new_func.setDomainIndex(idom, idom)
+        key_suffix = f"_{idom}" if idom > 0 else ""
+        new_func.setMatrixWorkspace(new_ws, idom, md_fit_kwargs["StartX" + key_suffix], md_fit_kwargs["EndX" + key_suffix])
 
     # if ties are required add them
-    func = f"{str(mdf)};ties=({','.join(bg_ties)})" if tie_background else mdf
+    func = f"{str(new_func)};ties=({','.join(bg_ties)})" if tie_background else new_func
 
     return Fit(
         Function=func,
-        CostFunction="Unweighted least squares",
         Output=f"fit_{new_ws.name()}",
         MaxIterations=iters,
         **fit_kwargs,
@@ -430,8 +437,8 @@ def fit_all_peaks(
     i_over_sigma_thresh: float = 2.0,
     nan_replacement: Optional[str] = "zeros",
     no_fit_value_dict: Optional[dict] = None,
-    smooth_vals: Sequence[int] = (15, 5),
-    tied_bkgs: Sequence[bool] = (False, False),
+    smooth_vals: Sequence[int] = (3, 2),
+    tied_bkgs: Sequence[bool] = (False, True),
     final_fit_raw: bool = False,
     parameters_to_tie: Sequence[str] = ("A", "B"),
     subsequent_fit_param_fix: Sequence[str] = ("A", "B"),
@@ -529,7 +536,7 @@ def fit_all_peaks(
             )
 
             # perform subsequent fits
-            while len(fit_wss) > 0:
+            while len(fit_wss) - 1 > fit_num:
                 fit_num += 1
                 mdf = fit_object.Function.function
                 fit_ws = fit_wss[fit_num]
@@ -595,7 +602,6 @@ def fit_all_peaks(
                         row += [default_vals[p], np.nan]
                 table_vals[ispec] = row
             if nan_replacement:
-                print("Nan replaced")
                 table_vals = replace_nans(table_vals, nan_replacement)
             for i, row in enumerate(table_vals):
                 out_tab.addRow([i] + list(row))
