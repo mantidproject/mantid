@@ -91,10 +91,10 @@ void traceStatistics(const Nexus::NXEntry &entry, const std::string &path, uint6
 
     // log stats on the parameter variation
     if (n > 0) {
-      auto meanX = std::accumulate(values.begin(), values.end(), 0.0) / n;
+      auto meanX = std::accumulate(values.begin(), values.end(), 0.0) / static_cast<T>(n);
       T accum{0};
       std::for_each(values.begin(), values.end(), [&](const double d) { accum += (d - meanX) * (d - meanX); });
-      auto stdX = sqrt(accum / n);
+      auto stdX = sqrt(accum / static_cast<T>(n));
       auto result = std::minmax_element(values.begin(), values.end());
       log.debug() << "Log parameter " << path << ": " << meanX << " +- " << stdX << ", " << *result.first << " ... "
                   << *result.second << ", pts " << n << std::endl;
