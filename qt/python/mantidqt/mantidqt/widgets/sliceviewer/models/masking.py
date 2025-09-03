@@ -5,7 +5,7 @@ from mantid.api import WorkspaceFactory, AnalysisDataService, AlgorithmManager
 from sys import float_info
 from numpy import inf
 
-ALLOWABLE_ERROR = 8
+ALLOWABLE_ERROR_SIG_FIGS = 8
 
 
 @dataclass
@@ -99,7 +99,7 @@ class RectCursorInfo(RectCursorInfoBase):
     def generate_table_rows(self):
         x_data, y_data = self.get_xy_data()
         y_min, y_max = self.snap_to_bin_centre(y_data[0]), self.snap_to_bin_centre(y_data[-1])
-        row = TableRow(spec_list=f"{y_min}-{y_max}", x_min=x_data[0], x_max=x_data[-1])
+        row = TableRow(spec_list=f"{y_min - 1}-{y_max - 1}", x_min=x_data[0], x_max=x_data[-1])
         return [row]
 
 
@@ -122,8 +122,8 @@ class ElliCursorInfo(RectCursorInfoBase):
         rows = []
         for index, y in enumerate(y_range):
             x_min, x_max = self._calc_x_val(y, a, b, h, k)
-            x_min = x_min - 10**-ALLOWABLE_ERROR if x_min == x_max else x_min  # slightly adjust min value so x vals are different.
-            rows.append(TableRow(spec_list=str(round(y)), x_min=x_min, x_max=x_max))
+            x_min = x_min - 10**-ALLOWABLE_ERROR_SIG_FIGS if x_min == x_max else x_min  # slightly adjust min value so x vals are different.
+            rows.append(TableRow(spec_list=str(round(y - 1)), x_min=x_min, x_max=x_max))
         return self.consolidate_table_rows(rows)
 
     def _calc_x_val(self, y, a, b, h, k):
@@ -131,7 +131,7 @@ class ElliCursorInfo(RectCursorInfoBase):
 
     @staticmethod
     def _calc_sqrt_portion(y, a, b, k):
-        return sqrt(round((a**2) * (1 - ((y - k) ** 2) / (b**2)), ALLOWABLE_ERROR))
+        return sqrt(round((a**2) * (1 - ((y - k) ** 2) / (b**2)), ALLOWABLE_ERROR_SIG_FIGS))
 
 
 class PolyCursorInfo(CursorInfoBase):
@@ -150,7 +150,7 @@ class PolyCursorInfo(CursorInfoBase):
         for y in y_range:
             x_val_pairs = self._calculate_relevant_x_value_pairs(y)
             for x_min, x_max in x_val_pairs:
-                rows.append(TableRow(spec_list=str(round(y)), x_min=x_min, x_max=x_max))
+                rows.append(TableRow(spec_list=str(round(y - 1)), x_min=x_min, x_max=x_max))
         return self.consolidate_table_rows(rows)
 
     def _calculate_relevant_x_value_pairs(self, y):
@@ -168,7 +168,7 @@ class PolyCursorInfo(CursorInfoBase):
         open_close_pairs = []
         for i in range(0, len(x_vals), 2):
             x_min, x_max = x_vals[i], x_vals[i + 1]
-            x_min = x_min - 10**-ALLOWABLE_ERROR if x_min == x_max else x_min  # slightly adjust min value so x vals are different.
+            x_min = x_min - 10**-ALLOWABLE_ERROR_SIG_FIGS if x_min == x_max else x_min  # slightly adjust min value so x vals are different.
             open_close_pairs.append((x_min, x_max))
         return open_close_pairs
 
