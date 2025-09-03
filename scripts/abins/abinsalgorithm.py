@@ -840,39 +840,45 @@ class AbinsAlgorithm:
 
         if (suffix := path.suffix) == ".castep_bin":
             # Assume any .castep_bin file is valid choice
-            pass
+            return dict(Invalid=False, Comment="")
 
-        elif suffix in (".yaml", ".yml"):
-            # Check .yaml files have expected keys for Phonopy force constants
-            with open(filename_full_path, "r") as yaml_file:
-                phonon_data = yaml.load(yaml_file, Loader=SafeLoader)
+        if suffix not in (".yaml", ".yml"):
+            return dict(Invalid=True, Comment="Invalid extension: FORCECONSTANTS requires .castep_bin, .yaml or .yml")
 
-            if {"phonopy", "force_constants"}.issubset(phonon_data):
-                pass
+        # Check .yaml files have expected keys for Phonopy force constants
+        with open(filename_full_path, "r") as yaml_file:
+            phonon_data = yaml.load(yaml_file, Loader=SafeLoader)
 
-            elif "phonopy" in phonon_data:
-                # Phonopy file without force constants: they must be in another file
+        if {"phonopy", "force_constants"}.issubset(phonon_data):
+            # Force constants are in the yaml file: good
+            return dict(Invalid=False, Comment="")
 
-                # Check if following janus conventions:
-                # /parent/seedname-phonopy.yml -> /parent/seedname-force_constants.hdf5
-                janus_phonopy_re = "(?P<seedname>.+)-phonopy.yml"
-                fc_filenames = ("FORCE_CONSTANTS", "force_constants.hdf5")
-                if re_match := re.match(janus_phonopy_re, path.name):
-                    fc_file = path.parent / f"{re_match['seedname']}-force_constants.hdf5"
-                    if not fc_file.is_file():
-                        return dict(
-                            Invalid=True,
-                            Comment=f"Could not find force constants in {filename_full_path}, or find data file {fc_file}",
-                        )
+        if "phonopy" not in phonon_data:
+            # Not a Phonopy file: can't use this
+            return dict(Invalid=True, Comment=f"No 'phonopy' section found in {filename_full_path}")
 
-                # Otherwise FC could be in a FORCE_CONSTANTS or force_constants.hdf5 file
-                elif not any(map(lambda fc_filename: (path.parent / fc_filename).is_file(), fc_filenames)):
-                    return dict(
-                        Invalid=True,
-                        Comment=f"Could not find force constants in {filename_full_path}, or find data file {' or '.join(fc_filenames)}",
-                    )
+        # Phonopy file without force constants: they must be in another file
 
-        # Did not return already: No problems found
+        # Check if following janus conventions:
+        # /parent/seedname-phonopy.yml -> /parent/seedname-force_constants.hdf5
+        janus_phonopy_re = "(?P<seedname>.+)-phonopy.yml"
+        fc_filenames = ("FORCE_CONSTANTS", "force_constants.hdf5")
+        if re_match := re.match(janus_phonopy_re, path.name):
+            fc_file = path.parent / f"{re_match['seedname']}-force_constants.hdf5"
+            if not fc_file.is_file():
+                return dict(
+                    Invalid=True,
+                    Comment=f"Could not find force constants in {filename_full_path}, or find data file {fc_file}",
+                )
+
+        # Otherwise FC could be in a FORCE_CONSTANTS or force_constants.hdf5 file
+        elif not any(map(lambda fc_filename: (path.parent / fc_filename).is_file(), fc_filenames)):
+            return dict(
+                Invalid=True,
+                Comment=f"Could not find force constants in {filename_full_path}, or find data file {' or '.join(fc_filenames)}",
+            )
+
+        # Phonopy YAML with available force constants
         return dict(Invalid=False, Comment="")
 
     @classmethod
