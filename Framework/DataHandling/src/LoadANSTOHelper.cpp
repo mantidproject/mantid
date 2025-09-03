@@ -605,10 +605,10 @@ uint64_t extractTimedDataSet(const Nexus::NXEntry &entry, const std::string &pat
 
   auto timeStamp = entry.openNXDataSet<uint64_t>(path + "/time");
   timeStamp.load();
-  auto maxn = timeStamp.size();
+  size_t maxn = timeStamp.size();
   uint64_t startIx{0}, endIx{0};
   auto itt = timeStamp();
-  for (int i = 0; i < maxn; i++) {
+  for (size_t i = 0; i < maxn; i++) {
     auto v = itt[i];
     if (v <= startTime)
       startIx = i;
@@ -640,7 +640,7 @@ bool extractTimedDataSet(const Nexus::NXEntry &entry, const std::string &path, u
   bool retn = true;
   switch (valueOption) {
   case ScanLog::Mean:
-    eventValue = std::accumulate(values.begin(), values.end(), T{0}) / n;
+    eventValue = std::accumulate(values.begin(), values.end(), T{0}) / static_cast<T>(n);
     eventTime = std::accumulate(times.begin(), times.end(), uint64_t{0}) / n;
     break;
   case ScanLog::Start:
@@ -720,9 +720,6 @@ template bool loadNXDataSet<int64_t>(const Nexus::NXEntry &entry, const std::str
 template uint64_t extractTimedDataSet<float>(const Nexus::NXEntry &entry, const std::string &path, uint64_t startTime,
                                              uint64_t endTime, std::vector<uint64_t> &times, std::vector<float> &events,
                                              std::string &units);
-template uint64_t extractTimedDataSet<double>(const Nexus::NXEntry &entry, const std::string &path, uint64_t startTime,
-                                              uint64_t endTime, std::vector<uint64_t> &times,
-                                              std::vector<double> &events, std::string &units);
 template uint64_t extractTimedDataSet<double>(const Nexus::NXEntry &entry, const std::string &path, uint64_t startTime,
                                               uint64_t endTime, std::vector<uint64_t> &times,
                                               std::vector<double> &events, std::string &units);
