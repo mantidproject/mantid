@@ -339,21 +339,29 @@ public:
     TS_ASSERT_EQUALS(p1.value(), "");
   }
 
-  void test_trimmming() {
-    // trimming on
-    Workspace_sptr ws1 = WorkspaceFactory::Instance().create("WorkspacePropertyTest", 1, 1, 1);
-    AnalysisDataService::Instance().add("space1", ws1);
-    WorkspaceProperty<Workspace> p1("workspace1", "", Direction::Input);
-    p1.setValue("  space1\t\n");
-    TS_ASSERT_EQUALS(p1.value(), "space1");
+  void test_trimmming_on() {
+    Workspace_sptr ws = WorkspaceFactory::Instance().create("WorkspacePropertyTest", 1, 1, 1);
+    AnalysisDataService::Instance().add("space1", ws);
+    WorkspaceProperty<Workspace> p("workspace1", "", Direction::Input);
+    p.setValue("  space1\t\n");
+    TS_ASSERT_EQUALS(p.value(), "space1");
+    AnalysisDataService::Instance().clear();
+  }
 
+  void test_trimmming_off() {
+    Workspace_sptr ws = WorkspaceFactory::Instance().create("WorkspacePropertyTest", 1, 1, 1);
+    std::string wsNameWithWhitespace = "  space1\t\n";
+    AnalysisDataService::Instance().add("space1", ws);
+    WorkspaceProperty<Workspace> p("workspace1", "", Direction::Input);
     // turn trimming off
-    Workspace_sptr ws2 = WorkspaceFactory::Instance().create("WorkspacePropertyTest", 1, 1, 1);
-    AnalysisDataService::Instance().add("  space1\t\n", ws2);
-    WorkspaceProperty<Workspace> p2("workspace1", "", Direction::Input);
-    p2.setAutoTrim(false);
-    p2.setValue("  space1\t\n");
-    TS_ASSERT_EQUALS(p2.value(), "  space1\t\n");
+    p.setAutoTrim(false);
+
+    std::string expectedError =
+        "Invalid object name '" + wsNameWithWhitespace +
+        "'. Names must start with a letter or underscore and contain only alpha-numeric characters and underscores.";
+
+    // setValue() should return an error string if illegal workspace name is provided.
+    TS_ASSERT_EQUALS(p.setValue(wsNameWithWhitespace), "expectedError");
 
     AnalysisDataService::Instance().clear();
   }
