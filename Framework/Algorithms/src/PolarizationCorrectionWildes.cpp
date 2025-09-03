@@ -659,6 +659,7 @@ PolarizationCorrectionWildes::directBeamCorrections(const WorkspaceMap &inputs, 
   WorkspaceMap outputs;
   outputs.ppWS = createWorkspaceWithHistory(inputs.ppWS);
   const size_t nHisto = inputs.ppWS->getNumberHistograms();
+  // cppcheck-suppress unreadVariable
   const bool threadSafe = Kernel::threadSafe(*inputs.ppWS, *outputs.ppWS);
   PARALLEL_FOR_IF(threadSafe)
   for (int wsIndex = 0; wsIndex < static_cast<int>(nHisto); ++wsIndex) {
@@ -704,6 +705,7 @@ PolarizationCorrectionWildes::analyzerlessCorrections(const WorkspaceMap &inputs
   outputs.mmWS = createWorkspaceWithHistory(inputs.mmWS);
   outputs.ppWS = createWorkspaceWithHistory(inputs.ppWS);
   const size_t nHisto = inputs.mmWS->getNumberHistograms();
+  // cppcheck-suppress unreadVariable
   const bool threadSafe = Kernel::threadSafe(*inputs.mmWS, *inputs.ppWS, *outputs.mmWS, *outputs.ppWS);
   PARALLEL_FOR_IF(threadSafe)
   for (int wsIndex = 0; wsIndex < static_cast<int>(nHisto); ++wsIndex) {
@@ -830,6 +832,7 @@ PolarizationCorrectionWildes::fullCorrections(const WorkspaceMap &inputs, const 
   const auto P2 = efficiencies.P2->y();
   const auto P2E = efficiencies.P2->e();
   const size_t nHisto = inputs.mmWS->getNumberHistograms();
+  // cppcheck-suppress unreadVariable
   const bool threadSafe = Kernel::threadSafe(*inputs.mmWS, *inputs.mpWS, *inputs.pmWS, *inputs.ppWS, *outputs.mmWS,
                                              *outputs.mpWS, *outputs.pmWS, *outputs.ppWS);
   PARALLEL_FOR_IF(threadSafe)
@@ -917,6 +920,7 @@ void PolarizationCorrectionWildes::threeInputsSolve01(WorkspaceMap &inputs, cons
   const auto &P1 = efficiencies.P1->y();
   const auto &P2 = efficiencies.P2->y();
   const auto nHisto = inputs.pmWS->getNumberHistograms();
+  // cppcheck-suppress unreadVariable
   const bool threadSafe = Kernel::threadSafe(*inputs.mmWS, *inputs.mpWS, *inputs.pmWS, *inputs.ppWS);
   PARALLEL_FOR_IF(threadSafe)
   for (int wsIndex = 0; wsIndex < static_cast<int>(nHisto); ++wsIndex) {
@@ -957,6 +961,7 @@ void PolarizationCorrectionWildes::threeInputsSolve10(WorkspaceMap &inputs, cons
   const auto &P1 = efficiencies.P1->y();
   const auto &P2 = efficiencies.P2->y();
   const auto nHisto = inputs.mpWS->getNumberHistograms();
+  // cppcheck-suppress unreadVariable
   const bool threadSafe = Kernel::threadSafe(*inputs.mmWS, *inputs.mpWS, *inputs.pmWS, *inputs.ppWS);
   PARALLEL_FOR_IF(threadSafe)
   for (int wsIndex = 0; wsIndex < static_cast<int>(nHisto); ++wsIndex) {
@@ -1003,6 +1008,7 @@ void PolarizationCorrectionWildes::twoInputsSolve01And10(WorkspaceMap &fullInput
   const auto &P2 = efficiencies.P2->y();
   const auto &P2E = efficiencies.P2->e();
   const auto nHisto = inputs.mmWS->getNumberHistograms();
+  // cppcheck-suppress unreadVariable
   const bool threadSafe = Kernel::threadSafe(*inputs.mmWS, *inputs.ppWS, *fullInputs.pmWS, *fullInputs.mpWS);
   PARALLEL_FOR_IF(threadSafe)
   for (int wsIndex = 0; wsIndex < static_cast<int>(nHisto); ++wsIndex) {
