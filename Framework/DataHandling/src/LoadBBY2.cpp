@@ -49,7 +49,7 @@ using namespace Kernel;
 using namespace API;
 using namespace Nexus;
 
-// register the algorithm into the AlgorithmFactory
+// register the algorithm
 DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadBBY2)
 
 // consts
