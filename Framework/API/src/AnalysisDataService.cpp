@@ -9,7 +9,6 @@
 #include <iterator>
 #include <random>
 #include <regex>
-#include <sstream>
 
 namespace Mantid::API {
 
