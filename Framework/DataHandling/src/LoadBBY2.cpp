@@ -117,7 +117,7 @@ void AddSinglePointTimeSeriesProperty(API::LogManager &logManager, const std::st
 }
 
 template <typename EP>
-void loadEvents(API::Progress &prog, const char *progMsg, EP &eventProcessor, Nexus::NXEntry &entry,
+void loadEvents(API::Progress &prog, const char *progMsg, EP &eventProcessor, const Nexus::NXEntry &entry,
                 uint64_t start_nsec, uint64_t end_nsec) {
 
   using namespace ANSTO;
@@ -355,10 +355,7 @@ void LoadBBY2::exec() {
   }
 
   // count total number of masked bins
-  size_t maskedBins = 0;
-  for (size_t i = 0; i != roi.size(); i++)
-    if (!roi[i])
-      maskedBins++;
+  size_t maskedBins = std::count_if(roi.begin(), roi.end(), [](bool v) { return !v; });
 
   if (maskedBins > 0) {
     // create list of masked bins
@@ -549,9 +546,9 @@ void LoadBBY2::loadInstrumentParameters(const Nexus::NXEntry &entry, uint64_t st
               bool timeLoaded = false;
               if (!baseLoaded) {
                 auto key = (details.size() < 4) ? "mean" : boost::algorithm::trim_copy(details[3]);
-                auto it = ScanLogMap.find(key);
+                auto imap = ScanLogMap.find(key);
                 Anxs::ScanLog scanLogMode =
-                    (it != ScanLogMap.end()) ? it->second : Anxs::ScanLog::Mean; // default value
+                    (imap != ScanLogMap.end()) ? imap->second : Anxs::ScanLog::Mean; // default value
                 timeLoaded = Anxs::extractTimedDataSet(entry, hdfTag, startTime, endTime, scanLogMode, tmpTimestamp,
                                                        tmpDouble, tmpString);
               }
@@ -598,8 +595,6 @@ void LoadBBY2::createInstrument(const Nexus::NXEntry &entry, uint64_t startTime,
                                 InstrumentInfo &instrumentInfo, std::map<std::string, double> &logParams,
                                 std::map<std::string, std::string> &logStrings,
                                 std::map<std::string, std::string> &allParams) {
-
-  const double toMeters = 1.0 / 1000;
 
   instrumentInfo.sample_name = "UNKNOWN";
   instrumentInfo.sample_description = "UNKNOWN";
