@@ -1206,4 +1206,13 @@ const Mantid::Geometry::DetectorInfo &InstrumentActor::detectorInfo() const {
   else
     return getWorkspace()->detectorInfo();
 }
+
+bool InstrumentActor::canPlotBlocksize() const {
+  Mantid::API::MatrixWorkspace_const_sptr inputWs = getWorkspace();
+  if (inputWs->blocksize() > 1) {
+    return true;
+  }
+  return false;
+}
+
 } // namespace MantidQt::MantidWidgets

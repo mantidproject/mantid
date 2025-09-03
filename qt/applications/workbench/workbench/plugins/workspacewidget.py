@@ -282,11 +282,6 @@ class WorkspaceWidget(PluginWidget):
         parent, flags = get_window_config()
         for ws in self._ads.retrieveWorkspaces(names, unrollGroups=True):
             if ws.getInstrument().getName():
-                if ws.blocksize() == 1:
-                    logger.warning(
-                        f"Could not show instrument for workspace '{ws.name()}' with blocksize=1.\nPlease rebin the workspace first."
-                    )
-                    continue
                 try:
                     presenter = InstrumentViewPresenter(ws, parent=parent, window_flags=flags)
                     presenter.show_view()

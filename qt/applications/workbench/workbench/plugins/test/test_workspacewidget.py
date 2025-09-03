@@ -21,7 +21,6 @@ from mantid.simpleapi import (
     ConjoinWorkspaces,
     GroupWorkspaces,
     LoadNexus,
-    Rebin,
 )
 from mantidqt.utils.qt.testing import start_qapplication
 from mantidqt.utils.qt.testing.qt_widget_finder import QtWidgetFinder
@@ -206,20 +205,6 @@ class WorkspaceWidgetTest(unittest.TestCase, QtWidgetFinder):
         self.assertEqual(self.ws_widget.empty_of_workspaces(), True)
         CreateSampleWorkspace(OutputWorkspace="ws")
         self.assertEqual(self.ws_widget.empty_of_workspaces(), False)
-
-    def test_instrument_view_blocksize_one(self):
-        """
-        Test that the instrument view is not shown for workspaces with blocksize 1.
-        """
-        ws_name = "ws_blocksize_1"
-        CreateSampleWorkspace(XMin=0, XMax=10, BinWidth=10, OutputWorkspace=ws_name)
-        with mock.patch("workbench.plugins.workspacewidget.InstrumentViewPresenter.show_view") as mock_show_view:
-            self.ws_widget._do_show_instrument([ws_name])
-            mock_show_view.assert_not_called()
-
-            Rebin(InputWorkspace=ws_name, OutputWorkspace=ws_name, Params="1")
-            self.ws_widget._do_show_instrument([ws_name])
-            mock_show_view.assert_called_once()
 
 
 if __name__ == "__main__":
