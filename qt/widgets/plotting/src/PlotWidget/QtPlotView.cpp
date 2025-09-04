@@ -48,7 +48,6 @@ void QtPlotView::setScale(const AxisID axisID, const std::string &scale,
 }
 
 void QtPlotView::setAxisLimit(const AxisID axisID, double axMin, double axMax) {
-  ;
   switch (axisID) {
   case AxisID::XBottom:
     m_axisProperties[QString("xlim")] = QList<QVariant>{axMin, axMax};

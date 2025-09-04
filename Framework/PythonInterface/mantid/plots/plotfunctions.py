@@ -370,7 +370,7 @@ def get_plot_fig(overplot=None, ax_properties=None, window_title=None, axes_num=
     if ax_properties:
         scales_to_amend = [scale for scale in ["x", "y"] if f"{scale}scale" in ax_properties]
         for axis in fig.axes:
-            mod_ax_properties = None
+            mod_ax_properties = ax_properties
             for scale_id in scales_to_amend:
                 mod_ax_properties = _apply_scale_properties(ax_properties, scale_id, axis)
             if mod_ax_properties:
@@ -604,8 +604,8 @@ def _post_process_props(ax_properties):
     :param ax_properties:
     """
     for k, v in ax_properties.items():
-        match k:
-            case "limits":  # Convert list to tuple
-                if isinstance(v, list):
-                    ax_properties[k] = tuple(v)
+        if k == "limits":  # Convert list to tuple
+            if isinstance(v, list):
+                ax_properties[k] = tuple(v)
+        # elif k == ... # Add further cases to process additional props
     return ax_properties
