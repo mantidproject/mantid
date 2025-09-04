@@ -1,7 +1,7 @@
 import unittest
-from numpy import allclose
+from numpy import allclose, sqrt, log
 from mantid.geometry import CrystalStructure
-from Engineering.pawley_utils import Phase
+from Engineering.pawley_utils import Phase, GaussianProfile, PVProfile
 
 
 class PhaseTest(unittest.TestCase):
@@ -41,6 +41,23 @@ class PhaseTest(unittest.TestCase):
         self.assertEqual(
             str(phase.unit_cell), "UnitCell with lattice parameters: a = 5.43094 b = 5.43094 c = 5.43094 alpha = 90 beta = 90 gamma = 90"
         )
+
+
+class ProfileTest(unittest.TestCase):
+    DSPAC = 1.5
+    GAUSS_SIGMA = 0.00158  # at d=1.5 Ang
+
+    def test_gaussian_profile(self):
+        profile = GaussianProfile()
+        self.assertAlmostEqual(profile.get_mantid_peak_params(self.DSPAC)["Sigma"], self.GAUSS_SIGMA, delta=1e-5)
+        self.assertEqual(profile.func_name, "Gaussian")
+
+    def test_pvoigt_profile(self):
+        profile = PVProfile()
+        param_dict = profile.get_mantid_peak_params(self.DSPAC)
+        self.assertAlmostEqual(param_dict["FWHM"], 2 * sqrt(2 * log(2)) * self.GAUSS_SIGMA, delta=1e-5)
+        self.assertAlmostEqual(param_dict["Mixing"], 0, delta=1e-8)
+        self.assertEqual(profile.func_name, "PseudoVoigt")
 
 
 if __name__ == "__main__":
