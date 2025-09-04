@@ -20,9 +20,7 @@
 namespace Mantid {
 namespace Algorithms {
 using namespace API;
-/*
-Docs
-*/
+
 class MANTID_ALGORITHMS_DLL HeliumAnalyserEfficiencyTime final : public API::Algorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
@@ -30,8 +28,7 @@ public:
   /// Summary of algorithms purpose
   const std::string summary() const override {
     return "Calculates the helium analyzer efficiency at the input workspace run time using the lifetime, initial "
-           "polarization and mean gas "
-           "length of the analyzer";
+           "polarization and mean gas length of the analyzer";
   }
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
@@ -46,9 +43,9 @@ public:
   bool checkGroups() override { return false; }
 
 private:
-  // Implement abstract Algorithm methods
   void init() override;
   void exec() override;
+
   std::pair<double, double> getTimeDifference();
   std::vector<MatrixWorkspace_sptr> calculateOutputs();
   MatrixWorkspace_sptr retrieveWorkspaceForWavelength() const;

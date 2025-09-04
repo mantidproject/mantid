@@ -241,18 +241,18 @@ std::pair<double, double> HeliumAnalyserEfficiencyTime::getTimeDifference() {
   //  The reference workspace takes precedence in case a timestamp is also provided.
   const auto timeDiff = createChildAlgorithm("TimeDifference");
   timeDiff->initialize();
-  timeDiff->setProperty("InputWorkspaces", getPropertyValue("InputWorkspace"));
+  timeDiff->setProperty("InputWorkspaces", getPropertyValue(PropertyNames::INPUT_WORKSPACE));
 
   std::string refTimeStamp;
   if (!isDefault(PropertyNames::REFERENCE_WORKSPACE)) {
-    timeDiff->setProperty("ReferenceWorkspace", getPropertyValue("ReferenceWorkspace"));
+    timeDiff->setProperty("ReferenceWorkspace", getPropertyValue(PropertyNames::REFERENCE_WORKSPACE));
   } else {
     refTimeStamp = getPropertyValue(PropertyNames::REFERENCE_TIMESTAMP);
   }
 
   timeDiff->execute();
 
-  const ITableWorkspace_sptr table = timeDiff->getProperty("OutputWorkspace");
+  const ITableWorkspace_sptr table = timeDiff->getProperty(PropertyNames::OUTPUT_WORKSPACE);
   // This will be always the last row on the table
   const auto indexRow = table->rowCount() - 1;
   const auto coltHoursErr = table->getColumn(COLUMN_HOURS_ERROR);
