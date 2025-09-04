@@ -86,15 +86,8 @@ def curve_in_ax(ax):
 
 
 def line_in_ax(ax):
-    """Return True if there are any lines in the Axes object, ignoring any lines with the _nolegend_ label (e.g. the crosshair)."""
-
-    def safe_get_label(line):
-        if hasattr(line, "get_label"):
-            return line.get_label()
-        return ""
-
-    filtered_lines = [line for line in ax.get_lines() if not safe_get_label(line) == "_nolegend_"]
-    return len(filtered_lines) > 0
+    """Return True if there are any lines in the Axes object"""
+    return len(ax.get_lines()) > 0
 
 
 def errorbars_in_ax(ax):

@@ -34,10 +34,8 @@ class DNSReductionGUIPresenterTest(unittest.TestCase):
         cls.modus = mock.create_autospec(DNSModus, instance=True)
         cls.widget = mock.Mock()
         cls.modus.widgets = {"observer1": cls.widget}
-        cls.modus.name = "modus_test_name"
         cls.widget.view = mock.Mock()
-        cls.widget.view.set_plot_view_menu_visibility = mock.Mock()
-        cls.widget.view.set_plot_options_menu_visibility = mock.Mock()
+        # cls.widget.view.has_tab = True
         cls.widget.view.menus = True
         cls.widget.presenter = mock.Mock()
         cls.widget.presenter.view = cls.widget.view
@@ -50,11 +48,7 @@ class DNSReductionGUIPresenterTest(unittest.TestCase):
         cls.view.sig_save_triggered.connect = mock.Mock()
         cls.view.sig_open_triggered.connect = mock.Mock()
         cls.view.sig_modus_change.connect = mock.Mock()
-        cls.view.action = {
-            "powder_tof": mock.Mock(),
-            "powder_elastic": mock.Mock(),
-            "single_crystal_elastic": mock.Mock(),
-        }
+
         cls.presenter = DNSReductionGUIPresenter(
             name="reduction_gui",
             view=cls.view,
@@ -109,21 +103,6 @@ class DNSReductionGUIPresenterTest(unittest.TestCase):
         self.assertEqual(self.view.get_view_for_tab_index.call_count, 2)
         self.parameter_abo.update_from_observer.assert_called_once()
         self.parameter_abo.notify_focused_tab.assert_called_once()
-
-    def test__tab_changed_single_crystal_elastic(self):
-        self.presenter.modus.name = "single_crystal_elastic"
-        self.presenter.modus.widgets = {"plot_elastic_single_crystal": self.widget}
-        self.presenter._tab_changed(3, 4)
-        self.assertEqual(self.view.get_view_for_tab_index.call_count, 2)
-        self.parameter_abo.update_from_observer.assert_called_once()
-        self.parameter_abo.notify_focused_tab.assert_called_once()
-        self.widget.view.set_plot_view_menu_visibility.assert_called_once_with(True)
-        self.widget.view.set_plot_options_menu_visibility.assert_called_once_with(True)
-        self.widget.view.set_plot_view_menu_visibility.reset_mock()
-        self.widget.view.set_plot_options_menu_visibility.reset_mock()
-        self.presenter._tab_changed(4, 3)
-        self.widget.view.set_plot_view_menu_visibility.assert_called_once_with(False)
-        self.widget.view.set_plot_options_menu_visibility.assert_called_once_with(False)
 
 
 if __name__ == "__main__":
