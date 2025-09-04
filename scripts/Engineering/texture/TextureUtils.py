@@ -28,7 +28,7 @@ def find_all_files(directory):
     directory: directory to iterate over
     """
     with scandir(directory) as entries:
-        return [entry for entry in entries if entry.is_file()]
+        return [entry.path for entry in entries if entry.is_file()]
 
 
 def mk(dir_path: str):
