@@ -55,6 +55,7 @@ class TexturePresenter:
 
         self.view.set_on_calc_pf_clicked(self.on_calc_pf_clicked)
 
+        self.view.sig_selection_state_changed.connect(self.update_readout_column_list)
         self.update_readout_column_list()
 
     def load_ws_files(self):
@@ -324,7 +325,9 @@ class TexturePresenter:
         self.view.update_col_select_visibility(show_col)
 
     def all_wss_have_params(self):
-        return len(self.get_assigned_params()) == len(self.ws_names)
+        selected_wss, selected_params = self.view.get_selected_workspaces()
+        valid_params = [p for p in selected_params if p != "Not set"]
+        return len(selected_wss) == len(valid_params) and len(selected_wss) > 0
 
     def at_least_one_param_assigned(self):
         return len(self.get_assigned_params()) > 0
