@@ -184,8 +184,8 @@ class PawleyPattern1D:
         self.alatt_params = [phase.get_params() for phase in self.phases]
         self.alatt_isfree = [np.ones_like(alatt, dtype=bool) for alatt in self.alatt_params]
         self.profile = profile
-        self.profile_params = self.profile.p
-        self.profile_isfree = self.profile.default_isfree
+        self.profile_params = [self.profile.p.copy() for _ in self.phases]
+        self.profile_isfree = [self.profile.default_isfree.copy() for _ in self.phases]
         self.peak_func = FunctionFactory.Instance().createPeakFunction(self.profile.func_name)
         self.intens = [np.ones(len(phase.hkls), dtype=float) for phase in self.phases]
         self.intens_isfree = [np.ones_like(pars, dtype=bool) for pars in self.intens]
@@ -209,6 +209,7 @@ class PawleyPattern1D:
     def update_profile_function(self):
         self.profile.p = self.profile_params
         for iphase, phase in enumerate(self.phases):
+            self.profile.p = self.profile_params[iphase]
             # set alatt for phase
             phase.set_params(self.alatt_params[iphase])
             dpks = phase.calc_dspacings()
@@ -221,13 +222,13 @@ class PawleyPattern1D:
             [self.comp_func[len(self.comp_func) - 1].function.setParameter(ipar, par) for ipar, par in enumerate(self.bg_params)]
 
     def get_params(self):
-        return np.array(list(chain(*self.alatt_params, *self.intens, self.profile_params, self.bg_params)))
+        return np.array(list(chain(*self.alatt_params, *self.intens, *self.profile_params, self.bg_params)))
 
     def get_free_params(self):
         return self.get_params()[self.get_isfree()]
 
     def get_isfree(self):
-        return np.array(list(chain(*self.alatt_isfree, *self.intens_isfree, self.profile_isfree, self.bg_isfree)))
+        return np.array(list(chain(*self.alatt_isfree, *self.intens_isfree, *self.profile_isfree, self.bg_isfree)))
 
     def set_params(self, params):
         # set alatt
@@ -241,12 +242,14 @@ class PawleyPattern1D:
             npars = self.intens[iphase].size
             self.intens[iphase] = params[istart : istart + npars]
             istart = istart + npars
+        # set profile parameters
+        for iphase, phase in enumerate(self.phases):
+            npars = self.profile_params[iphase].size
+            self.profile_params[iphase] = params[istart : istart + npars]
+            istart = istart + npars
         # set global profile and bg_func params
         if len(self.bg_params) > 0:
-            self.profile_params = params[istart : -len(self.bg_params)]
-            self.bg_params = params[-len(self.bg_params) :]
-        else:
-            self.profile_params = params[istart:]
+            self.bg_params = params[istart:]
 
     def set_free_params(self, free_params):
         params = self.get_params()
