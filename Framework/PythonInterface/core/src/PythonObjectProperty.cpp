@@ -33,6 +33,12 @@ template <> Json::Value encodeAsJson(PythonObject const &) {
   throw Exception::NotImplementedError("encodeAsJson(const boost::python::object &value)");
 }
 
+#ifdef __APPLE__
+// NOTE for mac builds, it is necessary the DLL export occur here
+// Instantiate a copy of the class with our template type so we generate the symbols for the methods in the hxx header.
+template class MANTID_PYTHONINTERFACE_CORE_DLL PropertyWithValue<PythonObject>;
+#endif
+
 } // namespace Mantid::Kernel
 
 namespace Mantid::PythonInterface {
@@ -62,6 +68,10 @@ std::string PythonObjectProperty::setValue(std::string const &) {
  */
 std::string PythonObjectProperty::setValueFromJson(const Json::Value &) {
   throw NotImplementedError("PythonObjectProperty::setValueFromJson(const Json::Value &value)");
+}
+
+std::string PythonObjectProperty::setDataItem(const std::shared_ptr<Kernel::DataItem> &) {
+  throw NotImplementedError("PythonObjectProperty::setDataItem(const std::shared_ptr<Kernel::DataItem> &)");
 }
 
 /** Indicates if the value matches the default, in this case if the value is None

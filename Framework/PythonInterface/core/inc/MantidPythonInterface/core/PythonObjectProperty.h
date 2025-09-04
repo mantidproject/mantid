@@ -19,8 +19,11 @@
 
 namespace Mantid::Kernel {
 using PythonObject = boost::python::object;
+#ifndef __APPLE__
+// NOTE for Linux builds, it is necessary the DLL export occur here
 // Instantiate a copy of the class with our template type so we generate the symbols for the methods in the hxx header.
-template class MANTID_KERNEL_DLL PropertyWithValue<PythonObject>;
+template class MANTID_PYTHONINTERFACE_CORE_DLL PropertyWithValue<PythonObject>;
+#endif
 } // namespace Mantid::Kernel
 
 namespace Mantid::PythonInterface {
@@ -28,7 +31,7 @@ namespace Mantid::PythonInterface {
 using Mantid::Kernel::Direction;
 using Mantid::Kernel::IValidator_sptr;
 using Mantid::Kernel::NullValidator;
-using PythonObject = boost::python::object;
+using Mantid::Kernel::PythonObject;
 
 class MANTID_PYTHONINTERFACE_CORE_DLL PythonObjectProperty : public Mantid::Kernel::PropertyWithValue<PythonObject> {
 public:
@@ -109,6 +112,7 @@ public:
   std::string getDefault() const override;
   std::string setValue(const std::string &value) override;
   std::string setValueFromJson(const Json::Value &value) override;
+  std::string setDataItem(const std::shared_ptr<Kernel::DataItem> &value) override;
   bool isDefault() const override;
 };
 
