@@ -50,7 +50,7 @@ requirements:
     - superqt
     - pyyaml {{ pyyaml }}
     - qscintilla2 {{ qscintilla2 }}
-    - qt {{ qt_main }}
+    - qt-main {{ qt_main }}
     - qtconsole {{ qtconsole }}
     - qtpy {{ qtpy }}
     - qt-gtk-platformtheme # [linux]
@@ -66,6 +66,7 @@ requirements:
     - texlive-core {{ texlive_core }} # [osx and not arm64]
     - toml {{ toml }}
     - versioningit {{ versioningit }}
+    - vtk {{ vtk }}
     - zlib
     - joblib
     - orsopy {{ orsopy }}
