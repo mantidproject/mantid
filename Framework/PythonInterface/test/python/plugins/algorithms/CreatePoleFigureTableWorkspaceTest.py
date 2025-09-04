@@ -545,7 +545,6 @@ class CreatePoleFigureTableTest(unittest.TestCase):
         )
         self.assertRaises(ValueError, alg.setProperty, "Reflection", "1 and 1 and 1")
 
-
     def test_error_if_axes_transform_wrong_size(self):
         # Wrong-sized transform should be rejected at property set time
         alg = _init_alg(
@@ -614,6 +613,8 @@ class CreatePoleFigureTableTest(unittest.TestCase):
             OutputWorkspace="outws",
         )
         self.assertRaises(ValueError, alg.setProperty, "Reflection", [1, 1])
+
+
 def _init_alg(**kwargs):
     alg = AlgorithmManager.create("CreatePoleFigureTableWorkspace")
     alg.initialize()

@@ -132,9 +132,7 @@ class IntegratePeaks1DProfileTest(unittest.TestCase):
             )
 
     def test_no_peaks_returns_empty(self):
-        empty = CreatePeaksWorkspace(
-            InstrumentWorkspace=self.ws, NumberOfPeaks=0, OutputWorkspace="peaks_empty"
-        )
+        empty = CreatePeaksWorkspace(InstrumentWorkspace=self.ws, NumberOfPeaks=0, OutputWorkspace="peaks_empty")
         out = IntegratePeaks1DProfile(
             InputWorkspace=self.ws,
             PeaksWorkspace=empty,
@@ -154,9 +152,7 @@ class IntegratePeaks1DProfileTest(unittest.TestCase):
             **self.profile_kwargs,
         )
         self.assertEqual(len(out), 2)
-        mock_delete.assert_has_calls(
-            [mock.call(mock_fit.return_value), mock.call(mock_fit.return_value)]
-        )
+        mock_delete.assert_has_calls([mock.call(mock_fit.return_value), mock.call(mock_fit.return_value)])
 
     def test_output_workspace_name_respected(self):
         name = "custom_peaks_int"
