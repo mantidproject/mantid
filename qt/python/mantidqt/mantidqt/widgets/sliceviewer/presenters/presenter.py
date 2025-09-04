@@ -628,10 +628,8 @@ class SliceViewXAxisEditor(XAxisEditor):
     def __init__(self, canvas, axes, dimensions_changed):
         super(SliceViewXAxisEditor, self).__init__(canvas, axes)
         self.dimensions_changed = dimensions_changed
-        self.ui.scaleBox.hide()
-        self.ui.scaleLabel.hide()
+        self.ui.logBox.hide()
         self.ui.gridBox.hide()
-        self.ui.gridLabel.hide()
 
     def on_ok(self):
         super(SliceViewXAxisEditor, self).on_ok()
@@ -642,10 +640,8 @@ class SliceViewYAxisEditor(YAxisEditor):
     def __init__(self, canvas, axes, dimensions_changed):
         super(SliceViewYAxisEditor, self).__init__(canvas, axes)
         self.dimensions_changed = dimensions_changed
-        self.ui.scaleBox.hide()
-        self.ui.scaleLabel.hide()
+        self.ui.logBox.hide()
         self.ui.gridBox.hide()
-        self.ui.gridLabel.hide()
 
     def on_ok(self):
         super(SliceViewYAxisEditor, self).on_ok()

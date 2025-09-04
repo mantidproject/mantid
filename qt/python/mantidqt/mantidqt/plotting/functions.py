@@ -291,8 +291,6 @@ def pcolormesh(workspaces, fig=None, color_norm=None, normalize_by_bin_width=Non
     size = fig.get_size_inches()
     if (size[0] <= COLORPLOT_MIN_WIDTH) or (size[1] <= COLORPLOT_MIN_HEIGHT):
         fig.set_size_inches(COLORPLOT_MIN_WIDTH, COLORPLOT_MIN_HEIGHT, forward=True)
-    if fig.canvas.manager.toolbar:
-        fig.canvas.manager.toolbar.push_current()  # push current nav stack to record original color bar state
     fig.canvas.draw()
     fig.show()
     return fig

@@ -8,7 +8,7 @@
 
 from matplotlib.axes import Axes
 from matplotlib.collections import QuadMesh
-from matplotlib.colors import LogNorm, SymLogNorm
+from matplotlib.colors import LogNorm
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 
 
@@ -44,8 +44,6 @@ class ImageProperties(dict):
             props["interpolation"] = image.get_interpolation()
         if type(image.norm) is LogNorm:
             props["scale"] = "Logarithmic"
-        elif type(image.norm) is SymLogNorm:
-            props["scale"] = "SymLog"
         else:
             props["scale"] = "Linear"
         return cls(props)

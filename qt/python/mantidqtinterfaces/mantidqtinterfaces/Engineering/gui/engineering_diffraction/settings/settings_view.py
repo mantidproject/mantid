@@ -74,6 +74,24 @@ class SettingsView(QtWidgets.QDialog, Ui_settings):
     def get_save_location(self):
         return self.finder_save.getFirstFilename()
 
+    def get_rd_name(self):
+        return self.lineedit_RD.text()
+
+    def get_nd_name(self):
+        return self.lineedit_ND.text()
+
+    def get_td_name(self):
+        return self.lineedit_TD.text()
+
+    def get_rd_dir(self):
+        return ",".join([self.lineedit_RD0.text(), self.lineedit_RD1.text(), self.lineedit_RD2.text()])
+
+    def get_td_dir(self):
+        return ",".join([self.lineedit_TD0.text(), self.lineedit_TD1.text(), self.lineedit_TD2.text()])
+
+    def get_nd_dir(self):
+        return ",".join([self.lineedit_ND0.text(), self.lineedit_ND1.text(), self.lineedit_ND2.text()])
+
     def get_full_calibration(self):
         return self.finder_fullCalib.getFirstFilename()
 
@@ -104,12 +122,66 @@ class SettingsView(QtWidgets.QDialog, Ui_settings):
     def get_dSpacing_min(self):
         return self.dSpacing_min_lineedit.text()
 
+    def get_monte_carlo_params(self):
+        return self.monte_carlo_lineedit.text()
+
+    def get_remove_corr_ws_after_processing(self):
+        return self.abs_corr_checkBox.isChecked()
+
+    def get_cost_func_thresh(self):
+        return self.cost_func_thresh_lineedit.text()
+
+    def get_peak_pos_thresh(self):
+        return self.peak_pos_thresh_lineedit.text()
+
+    def get_use_euler_angles(self):
+        return self.eulerAngles_checkBox.isChecked()
+
+    def get_euler_angles_scheme(self):
+        return self.eulerAngles_lineedit.text()
+
+    def get_euler_angles_sense(self):
+        return self.eulerAnglesSense_lineedit.text()
+
+    def get_plot_exp_pf(self):
+        return self.expPF_checkBox.isChecked()
+
+    def get_contour_kernel(self):
+        return self.contourKernel_lineedit.text()
+
     # =================
     # Component Setters
     # =================
 
     def set_save_location(self, text):
         self.finder_save.setText(text)
+
+    def set_rd_name(self, text):
+        self.lineedit_RD.setText(text)
+
+    def set_nd_name(self, text):
+        self.lineedit_ND.setText(text)
+
+    def set_td_name(self, text):
+        self.lineedit_TD.setText(text)
+
+    def set_rd_dir(self, text):
+        vec = text.split(",")
+        self.lineedit_RD0.setText(vec[0])
+        self.lineedit_RD1.setText(vec[1])
+        self.lineedit_RD2.setText(vec[2])
+
+    def set_td_dir(self, text):
+        vec = text.split(",")
+        self.lineedit_TD0.setText(vec[0])
+        self.lineedit_TD1.setText(vec[1])
+        self.lineedit_TD2.setText(vec[2])
+
+    def set_nd_dir(self, text):
+        vec = text.split(",")
+        self.lineedit_ND0.setText(vec[0])
+        self.lineedit_ND1.setText(vec[1])
+        self.lineedit_ND2.setText(vec[2])
 
     def set_full_calibration(self, text):
         self.finder_fullCalib.setText(text)
@@ -161,6 +233,33 @@ class SettingsView(QtWidgets.QDialog, Ui_settings):
 
     def set_dSpacing_min(self, text):
         self.dSpacing_min_lineedit.setText(text)
+
+    def set_monte_carlo_params(self, text):
+        self.monte_carlo_lineedit.setText(text)
+
+    def set_remove_corr_ws_after_processing(self, val):
+        self.abs_corr_checkBox.setChecked(val)
+
+    def set_cost_func_thresh(self, text):
+        self.cost_func_thresh_lineedit.setText(text)
+
+    def set_peak_pos_thresh(self, text):
+        self.peak_pos_thresh_lineedit.setText(text)
+
+    def set_use_euler_angles(self, val):
+        self.eulerAngles_checkBox.setChecked(val)
+
+    def set_euler_angles_scheme(self, text):
+        self.eulerAngles_lineedit.setText(text)
+
+    def set_euler_angles_sense(self, text):
+        self.eulerAnglesSense_lineedit.setText(text)
+
+    def set_plot_exp_pf(self, val):
+        self.expPF_checkBox.setChecked(val)
+
+    def set_contour_kernel(self, text):
+        self.contourKernel_lineedit.setText(text)
 
     # =================
     # Force Actions
