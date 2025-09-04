@@ -127,6 +127,7 @@ set(PYTHON_WIDGET_QT5_ONLY_TESTS
     mantidqt/widgets/sliceviewer/test/test_sliceviewer_cursortracker.py
     mantidqt/widgets/sliceviewer/test/test_sliceviewer_imageinfowidget.py
     mantidqt/widgets/sliceviewer/test/test_sliceviewer_lineplots.py
+    mantidqt/widgets/sliceviewer/test/test_sliceviewer_maskingpresenter.py
     mantidqt/widgets/sliceviewer/test/test_sliceviewer_model.py
     mantidqt/widgets/sliceviewer/test/test_sliceviewer_movemousecursor.py
     mantidqt/widgets/sliceviewer/test/test_sliceviewer_presenter.py
