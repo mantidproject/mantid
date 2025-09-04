@@ -107,12 +107,12 @@ public:
 
   // Unhide the base class assignment operator
   using PropertyWithValue<PythonObject>::operator=;
-  PythonObjectProperty &operator=(const PythonObjectProperty &right) = default;
+  PythonObjectProperty &operator=(PythonObjectProperty const &right) = default;
 
   std::string getDefault() const override;
-  std::string setValue(const std::string &value) override;
-  std::string setValueFromJson(const Json::Value &value) override;
-  std::string setDataItem(const std::shared_ptr<Kernel::DataItem> &value) override;
+  std::string setValue(std::string const &value) override;
+  std::string setValueFromJson(Json::Value const &value) override;
+  std::string setDataItem(std::shared_ptr<Kernel::DataItem> const &value) override;
   bool isDefault() const override;
 };
 

@@ -65,6 +65,102 @@ class PythonObjectPropertyTest(unittest.TestCase):
         self.assertEqual(value, fake.getProperty("PyObject").value)
         self.assertEqual(id(value), id(fake.getProperty("PyObject").value))
 
+    def test_set_property_on_algorithm_class(self):
+        fake = FakeAlgorithm()
+        fake.initialize()
+
+        class FakeClass:
+            def __init__(self, x, y):
+                self.x = x
+                self.y = y
+
+        value = FakeClass(16, "NXshorts")
+        fake.setProperty("PyObject", value)
+
+        # It is important that both the value and address match to prove it
+        # is just the same object that we got back
+        self.assertIs(value, fake.getProperty("PyObject").value)
+        self.assertEqual(value, fake.getProperty("PyObject").value)
+        self.assertEqual(id(value), id(fake.getProperty("PyObject").value))
+        # check individual properties
+        ret = fake.getProperty("PyObject").value
+        self.assertEqual(ret.x, value.x)
+        self.assertEqual(ret.y, value.y)
+
+    def test_value_int(self):
+        fake = FakeAlgorithm()
+        fake.initialize()
+
+        # check for int
+        a_int = 100001000000001
+        fake.setProperty("PyObject", a_int)
+        self.assertEqual(str(a_int), fake.getPropertyValue("PyObject"))
+        fake.setProperty("PyObject", str(a_int))
+        self.assertEqual(a_int, fake.getProperty("PyObject").value)
+
+    def test_value_float(self):
+        fake = FakeAlgorithm()
+        fake.initialize()
+
+        # check for float
+        a_float = 3.141592
+        fake.setProperty("PyObject", a_float)
+        self.assertEqual(str(a_float), fake.getPropertyValue("PyObject"))
+        fake.setProperty("PyObject", str(a_float))
+        self.assertEqual(a_float, fake.getProperty("PyObject").value)
+
+    def test_value_list(self):
+        fake = FakeAlgorithm()
+        fake.initialize()
+
+        # check for list
+        a_list = [3.4, 5]
+        fake.setProperty("PyObject", a_list)
+        self.assertEqual(str(a_list), fake.getPropertyValue("PyObject"))
+        fake.setProperty("PyObject", str(a_list))
+        self.assertEqual(a_list, fake.getProperty("PyObject").value)
+
+    def test_value_dict(self):
+        import json
+
+        fake = FakeAlgorithm()
+        fake.initialize()
+
+        # check for dict
+        a_dict = {"key1": 12, "key2": -14}
+        fake.setProperty("PyObject", a_dict)
+        self.assertEqual(json.dumps(a_dict), fake.getPropertyValue("PyObject"))
+        fake.setProperty("PyObject", json.dumps(a_dict))
+        self.assertEqual(a_dict, fake.getProperty("PyObject").value)
+
+    # TODO make work
+    def xtest_value_class(self):
+        fake = FakeAlgorithm()
+        fake.initialize()
+
+        class FakeClass:
+            def __init__(self, x, y):
+                self.x = x
+                self.y = y
+
+        # check for dict
+        a_class = FakeClass(7, "frnakling")
+        fake.setProperty("PyObject", a_class)
+        self.assertEqual(a_class, fake.getPropertyValue("PyObject"))
+        fake.setProperty("PyObject", a_class)
+        self.assertEqual(a_class, fake.getProperty("PyObject").value)
+
+    # TODO make work
+    def xtest_value_string(self):
+        fake = FakeAlgorithm()
+        fake.initialize()
+
+        # check for string
+        a_string = "hello world"
+        fake.setProperty("PyObject", a_string)
+        self.assertEqual(a_string, fake.getPropertyValue("PyObject"))
+        self.assertEqual(a_string, fake.getProperty("PyObject").value)
+
 
 if __name__ == "__main__":
     unittest.main()
