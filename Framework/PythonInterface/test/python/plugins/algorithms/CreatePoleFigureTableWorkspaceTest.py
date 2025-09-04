@@ -546,6 +546,74 @@ class CreatePoleFigureTableTest(unittest.TestCase):
         self.assertRaises(ValueError, alg.setProperty, "Reflection", "1 and 1 and 1")
 
 
+    def test_error_if_axes_transform_wrong_size(self):
+        # Wrong-sized transform should be rejected at property set time
+        alg = _init_alg(
+            InputWorkspace=AnalysisDataService.retrieve("ws"),
+            PeakParameterWorkspace=AnalysisDataService.retrieve("PeakParameterWS"),
+            OutputWorkspace="outws",
+        )
+        self.assertRaises(ValueError, alg.setProperty, "AxesTransform", np.ones(8))
+
+    def test_error_if_scattering_volume_position_cannot_be_parsed(self):
+        # Invalid string format for V3D-like property should raise
+        alg = _init_alg(
+            InputWorkspace=AnalysisDataService.retrieve("ws"),
+            PeakParameterWorkspace=AnalysisDataService.retrieve("PeakParameterWS"),
+            OutputWorkspace="outws",
+        )
+        self.assertRaises(ValueError, alg.setProperty, "ScatteringVolumePosition", "0 and 0 and 0")
+
+    def test_invalid_readout_column_name_reports_issue(self):
+        # ReadoutColumn must exist on PeakParameterWorkspace
+        alg = _init_alg(
+            InputWorkspace=AnalysisDataService.retrieve("ws"),
+            PeakParameterWorkspace=AnalysisDataService.retrieve("PeakParameterWS"),
+            OutputWorkspace="outws",
+            ReadoutColumn="JUNK",
+        )
+        issues = alg.validateInputs()
+        self.assertEqual(len(issues), 1)
+        self.assertEqual(issues["PeakParameterWorkspace"], "PeakParameterWorkspace must have column: 'JUNK'")
+
+    def test_no_I_column_ok_when_readout_is_chi2_and_thresholds_zero(self):
+        # If we read out 'chi2', an 'I' column is not required; thresholds set to 0 to include all rows.
+        peak_param_table = AnalysisDataService.retrieve("PeakParameterWS")
+        peak_param_table.removeColumn("I")
+
+        alg = _init_alg(
+            InputWorkspace=AnalysisDataService.retrieve("ws"),
+            PeakParameterWorkspace=peak_param_table,
+            OutputWorkspace="outws",
+            ReadoutColumn="chi2",
+            Chi2Threshold=0.0,
+            PeakPositionThreshold=0.0,
+        )
+        issues = alg.validateInputs()
+        self.assertEqual(len(issues), 0)
+
+        outws = CreatePoleFigureTableWorkspace(
+            InputWorkspace="ws",
+            PeakParameterWorkspace=peak_param_table,
+            OutputWorkspace="outws",
+            ReadoutColumn="chi2",
+            Chi2Threshold=0.0,
+        )
+        self.assertEqual(outws.rowCount(), 4)
+        # Geometry checks unchanged
+        self.eval_arrays(outws.column("Alpha"), self.default_alphas)
+        self.eval_arrays(outws.column("Beta"), self.default_betas)
+        # Readout column should be chi2 with all detectors included
+        self.eval_arrays(outws.column("chi2"), np.array((0.0, 1.0, 2.0, 3.0)))
+
+    def test_error_if_hkl_wrong_length(self):
+        # HKL must be length-3; wrong length should raise on setProperty
+        alg = _init_alg(
+            InputWorkspace=AnalysisDataService.retrieve("ws"),
+            PeakParameterWorkspace=AnalysisDataService.retrieve("PeakParameterWS"),
+            OutputWorkspace="outws",
+        )
+        self.assertRaises(ValueError, alg.setProperty, "Reflection", [1, 1])
 def _init_alg(**kwargs):
     alg = AlgorithmManager.create("CreatePoleFigureTableWorkspace")
     alg.initialize()
