@@ -154,9 +154,11 @@ class TextureProjectionTest(unittest.TestCase):
     @patch(correction_model_path + ".ADS")
     def test_read_param_cols_returns_names_and_index(self, mock_ads):
         mock_ws = MagicMock()
-        mock_ws.getColumnNames.return_value = ["I", "A", "B"]
+        mock_ws.getColumnNames.return_value = ["bank", "I", "A", "B"]
+        mock_ws.columnTypes.return_value = ["str", "double", "double", "double"]
         mock_ads.retrieve.return_value = mock_ws
         names, index = self.model.read_param_cols("ws1", "I")
+        # the bank (string data) column should not be a valid option
         self.assertEqual(names, ["I", "A", "B"])
         self.assertEqual(index, 0)
 

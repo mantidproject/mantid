@@ -13,6 +13,7 @@ class TextureView(QtWidgets.QWidget, Ui_texture):
     sig_enable_controls = QtCore.Signal(bool)
     sig_view_requested = QtCore.Signal(str)
     sig_view_shape_requested = QtCore.Signal(str)
+    sig_selection_state_changed = QtCore.Signal()
 
     def __init__(self, parent=None):
         super(TextureView, self).__init__(parent)
@@ -71,6 +72,10 @@ class TextureView(QtWidgets.QWidget, Ui_texture):
     def set_on_set_all_crystal_clicked(self, slot):
         self.btn_setAllCrystal.clicked.connect(slot)
 
+    @QtCore.Slot(bool)
+    def _on_any_checkbox_toggled(self):
+        self.sig_selection_state_changed.emit()
+
     # ========== Table Handling ==========
     def populate_workspace_table(self, workspace_info_list):
         self.table_loaded_data.setColumnCount(5)
@@ -92,6 +97,7 @@ class TextureView(QtWidgets.QWidget, Ui_texture):
             # selection box
             checkbox = QtWidgets.QCheckBox()
             checkbox.setChecked(metadata["select"])
+            checkbox.toggled.connect(self._on_any_checkbox_toggled)
             cell_widget = QtWidgets.QWidget()
             layout = QtWidgets.QHBoxLayout(cell_widget)
             layout.addWidget(checkbox)

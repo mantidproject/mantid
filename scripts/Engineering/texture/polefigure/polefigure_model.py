@@ -266,6 +266,8 @@ class TextureProjection:
     def read_param_cols(ws_name: str, target_default: str = "I") -> Tuple[str, int]:
         ws = ADS.retrieve(ws_name)
         col_names = ws.getColumnNames()
+        col_types = ws.columnTypes()
+        col_names = [c for i, c in enumerate(col_names) if col_types[i] in ("double", "int", "float", "bool")]
         index = col_names.index(target_default) if target_default in col_names else 0
         return col_names, index
 
