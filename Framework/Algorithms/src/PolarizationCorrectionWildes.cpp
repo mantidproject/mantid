@@ -22,8 +22,6 @@
 #include <Eigen/Dense>
 #include <boost/math/special_functions/pow.hpp>
 
-#include <execution>
-
 namespace {
 /// Property names.
 namespace Prop {
