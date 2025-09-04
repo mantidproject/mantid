@@ -33,7 +33,7 @@ create_and_activate_env() {
   local env_name=$1
   local conda_subdir_str=$2
   CONDA_SUBDIR=$conda_subdir_str mamba create --yes --name $env_name
-  mamba activate $env_name
+  conda activate $env_name
 
   if [[ -n "$conda_subdir_str" ]]; then
     conda config --env --set subdir "$conda_subdir_str"
