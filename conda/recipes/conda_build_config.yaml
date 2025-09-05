@@ -172,6 +172,11 @@ librdkafka:
 versioningit:
   - '>=2.1'
 
+# Pin to version 9.4.2 because previous versions were crashing new instrument view on Ubuntu
+# Newer version 9.5.0 does not yet work with pyvista
+vtk:
+  - '9.4.2'
+
 pin_run_as_build:
   boost:
     max_pin: x.x
