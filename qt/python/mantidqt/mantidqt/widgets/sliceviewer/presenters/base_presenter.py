@@ -16,12 +16,13 @@ from mantidqt.widgets.sliceviewer.presenters.masking import Masking
 
 
 class SliceViewerBasePresenter(IDataViewSubscriber, ABC):
-    def __init__(self, ws, data_view: SliceViewerDataView, model: SliceViewerBaseModel = None):
+    def __init__(self, ws, data_view: SliceViewerDataView, model: SliceViewerBaseModel = None, disable_masking_override=False):
         self.model = model if model else SliceViewerBaseModel(ws)
         self._data_view: SliceViewerDataView = data_view
         self.normalization = False
+        self._disable_masking_override = disable_masking_override
 
-        if self._disable_masking:
+        if self._is_masking_disabled:
             self._data_view.deactivate_and_disable_tool(ToolItemText.MASKING)
 
     def show_all_data_clicked(self):
@@ -123,12 +124,13 @@ class SliceViewerBasePresenter(IDataViewSubscriber, ABC):
         else:
             data_view.enable_tool_button(ToolItemText.ZOOM)
             data_view.enable_tool_button(ToolItemText.PAN)
-            data_view.enable_tool_button(ToolItemText.MASKING)
+            if not self._is_masking_disabled:
+                data_view.enable_tool_button(ToolItemText.MASKING)
             data_view.extents_set_enabled(True)
             data_view.switch_line_plots_tool(PixelLinePlot, self)
 
     def masking(self, active) -> None:
-        self._data_view.toggle_masking_options(active)
+        self._toggle_masking_options(active)
         if active:
             self._data_view.deactivate_and_disable_tool(ToolItemText.ZOOM)
             self._data_view.deactivate_and_disable_tool(ToolItemText.PAN)
@@ -150,9 +152,11 @@ class SliceViewerBasePresenter(IDataViewSubscriber, ABC):
         self._data_view.masking = None
 
     @property
-    def _disable_masking(self):
+    def _is_masking_disabled(self):
         #  Disable masking if not supported.
         #  If a use case arises, we could extend support to these areas
+        if self._disable_masking_override:
+            return True
 
         # if not histo workspace
         ws_type = None if not self.model.ws else WorkspaceInfo.get_ws_type(self.model.ws)
@@ -162,6 +166,9 @@ class SliceViewerBasePresenter(IDataViewSubscriber, ABC):
         if self.model.ws.getAxis(1).isNumeric():
             return True
         return False
+
+    def _toggle_masking_options(self, active):
+        self._data_view.toggle_masking_options(active)
 
     @abstractmethod
     def get_extra_image_info_columns(self, xdata, ydata):
