@@ -41,6 +41,10 @@ void MaskBinsFromTable::init() {
       std::make_unique<WorkspaceProperty<DataObjects::TableWorkspace>>("MaskingInformation", "", Direction::Input),
       "Input TableWorkspace containing parameters, XMin and "
       "XMax and either SpectraList or DetectorIDsList");
+  this->declareProperty(
+      std::make_unique<IndexTypeProperty>("InputWorkspaceIndexType", static_cast<int>(IndexType::SpectrumNum) |
+                                                                         static_cast<int>(IndexType::WorkspaceIndex)),
+      "Identity input index list as spectra or index numbers");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -87,6 +91,8 @@ void MaskBinsFromTable::maskBins(const API::MatrixWorkspace_sptr &dataws) {
       maskbins->setProperty("InputWorkspace", outputws);
     }
     maskbins->setProperty("OutputWorkspace", this->getPropertyValue("OutputWorkspace"));
+    const std::string &indexType = getProperty("InputWorkspaceIndexType");
+    maskbins->setPropertyValue("InputWorkspaceIndexType", indexType);
     maskbins->setPropertyValue("InputWorkspaceIndexSet", m_spectraVec[ib]);
     maskbins->setProperty("XMin", m_xminVec[ib]);
     maskbins->setProperty("XMax", m_xmaxVec[ib]);
