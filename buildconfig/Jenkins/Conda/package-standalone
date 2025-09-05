@@ -65,7 +65,7 @@ done
 
 # Mamba
 setup_mamba $WORKSPACE/miniforge "" true $PLATFORM
-mamba activate base
+conda activate base
 # Pin conda in the base environment to avoid post-link.bat problems
 mamba install --yes conda-index conda=24.7
 
