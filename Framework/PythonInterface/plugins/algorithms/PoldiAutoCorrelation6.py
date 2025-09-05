@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.api import AlgorithmFactory, MatrixWorkspaceProperty, PythonAlgorithm, Progress
-from mantid.kernel import Direction, FloatBoundedValidator, UnitConversion, DeltaEModeType, UnitParams, UnitParametersMap
+from mantid.kernel import Direction, FloatBoundedValidator, UnitParams, StringListValidator
 import numpy as np
 from plugins.algorithms.poldi_utils import (
     get_instrument_settings_from_log,
@@ -13,6 +13,9 @@ from plugins.algorithms.poldi_utils import (
     get_dspac_limits,
     get_final_dspac_array,
 )
+from joblib import Parallel, delayed
+from functools import reduce
+from operator import iadd
 
 
 class PoldiAutoCorrelation(PythonAlgorithm):
@@ -51,6 +54,14 @@ class PoldiAutoCorrelation(PythonAlgorithm):
             validator=positive_float_validator,
             doc="Maximum wavelength to consider.",
         )
+        self.declareProperty(
+            "InterpolationMethod",
+            defaultValue="Linear",
+            direction=Direction.Input,
+            validator=StringListValidator(["Linear", "Nearest"]),
+            doc="Interpolation used when adding intensity to a given bin in correlation function - "
+            "'Nearest' is quicker but potentially less accurate.",
+        )
 
     def validateInputs(self):
         issues = dict()
@@ -80,7 +91,7 @@ class PoldiAutoCorrelation(PythonAlgorithm):
         # get detector positions from IDF
         si = ws.spectrumInfo()
         tths = np.array([si.twoTheta(ispec) for ispec in range(ws.getNumberHistograms())])
-        l2s = [si.l2(ispec) for ispec in range(ws.getNumberHistograms())]
+        l2s = np.asarray([si.l2(ispec) for ispec in range(ws.getNumberHistograms())])
         l1 = si.l1()
         # determine npulses to include in calc
         time_max = get_max_tof_from_chopper(l1, l1_chop, l2s, tths, lambda_max) + slit_offsets[0]
@@ -90,35 +101,29 @@ class PoldiAutoCorrelation(PythonAlgorithm):
         # but this is a small effect as detector doesn't cover much two-theta range
         dspac_min, dspac_max = get_dspac_limits(tths.min(), tths.max(), lambda_min, lambda_max)
         bin_width = ws.readX(0)[1] - ws.readX(0)[0]
-        dspacs = get_final_dspac_array(bin_width, dspac_min, dspac_max, time_max)
+        dspacs = get_final_dspac_array(bin_width, dspac_min, dspac_max, time_max)[:, None]
         # perform auto-correlation (Eq. 7 in POLDI concept paper)
         ipulses = np.arange(npulses)[:, None]
-        offsets = (ipulses * cycle_time + slit_offsets).flatten()
-        inter_corr = np.zeros((len(dspacs), len(offsets)), dtype=float)  # npulses*nslits
-        # sum over all spectra
-        params = UnitParametersMap()
+        offsets = (ipulses * cycle_time + slit_offsets).flatten() + t0_const
+        # get time-of-flight from chopper to detector for neutron corresponding to d=1Ang
         nspec = ws.getNumberHistograms()
+        path_length_ratio = (l2s + l1 - l1_chop) / (l2s + l1)
+        tof_d1Ang = np.asarray([si.diffractometerConstants(ispec)[UnitParams.difc] * path_length_ratio[ispec] for ispec in range(nspec)])
+        # loop over spectra and add to intermediate correlation
         progress = Progress(self, start=0.0, end=1.0, nreports=nspec)
-        for ispec in range(nspec):
-            params[UnitParams.l2] = l2s[ispec]
-            params[UnitParams.twoTheta] = tths[ispec]
-            # TOF from chopper to detector for wavelength corresponding to d=1Ang
-            # equivalent to DIFC * (Ltot - L1_source-chop) / Ltot
-            tof_d1Ang = UnitConversion.run("dSpacing", "TOF", 1.0, l1 - l1_chop, DeltaEModeType.Elastic, params)
-            arrival_time = tof_d1Ang * dspacs[:, None] + offsets + t0_const
-            # detector clock reset for each pulse
-            # equivalent to np.mod(arrival_time, cycle_time) but order of magnitude quicker
-            time_in_cycle_period = arrival_time - cycle_time * np.floor(arrival_time / cycle_time)
-            itimes = (time_in_cycle_period / bin_width) - 0.5  # correct for first time bin center at bin_width / 2
-            ibins = np.floor(itimes).astype(int)
-            ibins_plus = ibins + 1
-            ibins_plus[ibins_plus > ws.blocksize() - 1] = 0
-            y = ws.readY(ispec)
-            inter_corr += (ibins + 1 - itimes) * y[ibins] + (itimes - ibins) * y[ibins_plus]
-            progress.report()
+        if self.getProperty("InterpolationMethod").value == "Linear":
+            do_autocorr = _autocorr_spec_linear
+        else:
+            do_autocorr = _autocorr_spec_nearest
+        inter_corr = reduce(
+            iadd,
+            Parallel(n_jobs=-2, prefer="threads", return_as="generator_unordered")(
+                delayed(do_autocorr)(ws.readY(ispec), tof_d1Ang[ispec], dspacs, offsets, bin_width, progress) for ispec in range(nspec)
+            ),
+        )  # npulses*nslits
         # average of inverse intermediate correlation func (Eq.8 in POLDI concept paper)
         with np.errstate(divide="ignore", invalid="ignore"):
-            corr = 1 / np.sum(1 / inter_corr, axis=1)
+            corr = 1 / np.nansum(1 / inter_corr, axis=1)
         ws_corr = self.exec_child_alg("CreateWorkspace", DataX=dspacs, DataY=corr, UnitX="dSpacing", YUnitLabel="Intensity (a.u.)")
         ws_corr = self.exec_child_alg("ConvertUnits", InputWorkspace=ws_corr, Target="MomentumTransfer")
         self.setProperty("OutputWorkspace", ws_corr)
@@ -131,6 +136,25 @@ class PoldiAutoCorrelation(PythonAlgorithm):
         alg.execute()
         out_props = tuple(alg.getProperty(prop).value for prop in alg.outputProperties())
         return out_props[0] if len(out_props) == 1 else out_props
+
+
+def _autocorr_spec_linear(y, tof_d1Ang, dspacs, offsets, bin_width, progress):
+    arrival_time = tof_d1Ang * dspacs + offsets
+    itimes = (arrival_time / bin_width) - 0.5  # correct for first time bin center at bin_width / 2
+    ibins = itimes.astype(int)  # quicker than np.floor
+    frac_bin = ibins + 1 - itimes
+    progress.report()
+    return frac_bin * np.take(y, ibins, mode="wrap") + (1 - frac_bin) * np.take(y, ibins + 1, mode="wrap")
+
+
+def _autocorr_spec_nearest(y, tof_d1Ang, dspacs, offsets, bin_width, progress):
+    arrival_time = tof_d1Ang * dspacs + offsets
+    # round to nearest bin - note this truncation is not equivalent to floor as
+    # implicitly subtracting -0.5 as first time bin center at bin_width / 2 then
+    # add 0.5 so that truncation results in rounding of input
+    ibins = (arrival_time / bin_width).astype(int)
+    progress.report()
+    return np.take(y, ibins, mode="wrap")
 
 
 AlgorithmFactory.subscribe(PoldiAutoCorrelation)
