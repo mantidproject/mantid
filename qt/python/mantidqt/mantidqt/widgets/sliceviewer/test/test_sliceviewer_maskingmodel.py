@@ -8,8 +8,10 @@ import unittest
 
 from unittest.mock import patch, Mock, call
 from collections import namedtuple
+from functools import partial
 
-from mantidqt.widgets.sliceviewer.models.masking import MaskingModel
+from mantidqt.widgets.sliceviewer.models.masking import MaskingModel, RectCursorInfo, TableRow, ElliCursorInfo, PolyCursorInfo
+from numpy import float64
 
 
 class SliceViewerMaskingModelTest(unittest.TestCase):
@@ -122,17 +124,110 @@ class SliceViewerMaskingModelTest(unittest.TestCase):
 
 
 class CursorInfoTest(unittest.TestCase):
-    Click = namedtuple("Click", ["xdata", "ydata"])
+    Click = namedtuple("Click", ["data"])
 
     @staticmethod
     def _set_up_model_test(text, transpose=False, images=None):
         pass
 
-    def test_clear_active_mask(self):
-        pass
+    def _assert_table_rows_delta(self, actual, expected, delta):
+        for i in range(len(expected)):
+            expected_row = expected[i]
+            for j in range(len(expected_row.__dict__)):
+                expected_val = list(expected_row.__dict__.values())[j]
+                actual_val = list(actual[i].__dict__.values())[j]
+                assert_fn = (
+                    self.assertEqual
+                    if (isinstance(actual_val, str) or isinstance(expected_val, str))
+                    else partial(self.assertAlmostEqual, delta=delta)
+                )
+                assert_fn(expected_val, actual_val, msg=f"Error in Row index {i}")
 
-    def test_store_active_mask(self):
-        pass
+    def test_rect_cursor_info_generate_table_rows(self):
+        cursor_info = RectCursorInfo(self.Click((-5.2, 0.8)), self.Click((5.6, 10.8)), False)
+        row = cursor_info.generate_table_rows()
+        self.assertEqual(row, [TableRow(spec_list="1-11", x_min=-5.2, x_max=5.6)])
+
+    def test_elli_cursor_info_generate_table_rows(self):
+        cursor_info = ElliCursorInfo(self.Click((-5, 0)), self.Click((5, 10)), False)
+        actual_rows = cursor_info.generate_table_rows()
+        expected_table_rows = [
+            TableRow(spec_list="0", x_min=-1.795, x_max=1.795),
+            TableRow(spec_list="1", x_min=-3.399, x_max=3.399),
+            TableRow(spec_list="2", x_min=-4.229, x_max=4.229),
+            TableRow(spec_list="3", x_min=-4.714, x_max=4.714),
+            TableRow(spec_list="4", x_min=-4.955, x_max=4.955),
+            TableRow(spec_list="5", x_min=-5.0, x_max=5.0),
+            TableRow(spec_list="6", x_min=-4.955, x_max=4.955),
+            TableRow(spec_list="7", x_min=-4.714, x_max=4.714),
+            TableRow(spec_list="8", x_min=-4.229, x_max=4.229),
+            TableRow(spec_list="9", x_min=-3.399, x_max=3.399),
+            TableRow(spec_list="10", x_min=-1.795, x_max=1.795),
+        ]
+        self._assert_table_rows_delta(expected_table_rows, actual_rows, delta=0.001)
+
+    def test_poly_cursor_info_generate_table_rows(self):
+        # Actual alg uses float64. This is important as divide by 0 returns inf rather than an exception.
+        cursor_info = PolyCursorInfo(
+            [self.Click((float64(0), float64(0))), self.Click((float64(10), float64(5))), self.Click((float64(0), float64(10)))], False
+        )
+        actual_rows = cursor_info.generate_table_rows()
+        expected_table_rows = [
+            TableRow(spec_list="0", x_min=0, x_max=0),
+            TableRow(spec_list="0", x_min=0, x_max=0.666),
+            TableRow(spec_list="1", x_min=0, x_max=2.666),
+            TableRow(spec_list="2", x_min=0, x_max=4.666),
+            TableRow(spec_list="3", x_min=0, x_max=6.666),
+            TableRow(spec_list="4", x_min=0, x_max=8.666),
+            TableRow(spec_list="5", x_min=0, x_max=10.0),
+            TableRow(spec_list="6", x_min=0, x_max=8.666),
+            TableRow(spec_list="7", x_min=0, x_max=6.666),
+            TableRow(spec_list="8", x_min=0, x_max=4.666),
+            TableRow(spec_list="9", x_min=0, x_max=2.666),
+            TableRow(spec_list="10", x_min=0, x_max=0.666),
+        ]
+        self._assert_table_rows_delta(expected_table_rows, actual_rows, delta=0.001)
+
+    def test_poly_cursor_info_intersecting_line_once(self):
+        cursor_info = PolyCursorInfo(
+            [
+                self.Click((float64(0), float64(0))),
+                self.Click((float64(10), float64(10))),
+                self.Click((float64(0), float64(10))),
+                self.Click((float64(10), float64(0))),
+            ],
+            False,
+        )
+        actual_rows = cursor_info.generate_table_rows()
+        expected_table_rows = [
+            TableRow(spec_list="0", x_min=0.0, x_max=10.0),
+            TableRow(spec_list="1", x_min=0.666, x_max=9.333),
+            TableRow(spec_list="2", x_min=1.666, x_max=8.333),
+            TableRow(spec_list="3", x_min=2.666, x_max=7.333),
+            TableRow(spec_list="4", x_min=3.666, x_max=6.333),
+            TableRow(spec_list="5", x_min=4.666, x_max=5.333),
+            TableRow(spec_list="6", x_min=3.666, x_max=6.333),
+            TableRow(spec_list="7", x_min=2.666, x_max=7.333),
+            TableRow(spec_list="8", x_min=1.666, x_max=8.333),
+            TableRow(spec_list="9", x_min=0.666, x_max=9.333),
+            TableRow(spec_list="10", x_min=0.0, x_max=10.0),
+        ]
+        self._assert_table_rows_delta(expected_table_rows, actual_rows, delta=0.001)
+
+    def test_poly_cursor_info_intersecting_line_twice(self):
+        with self.assertRaisesRegex(
+            expected_exception=RuntimeError, expected_regex="Polygon shapes with more than 1 intersection point are not supported."
+        ):
+            _ = PolyCursorInfo(
+                [
+                    self.Click((float64(0), float64(0))),
+                    self.Click((float64(10), float64(10))),
+                    self.Click((float64(0), float64(10))),
+                    self.Click((float64(10), float64(0))),
+                    self.Click((float64(10), float64(5))),
+                ],
+                False,
+            )
 
 
 if __name__ == "__main__":
