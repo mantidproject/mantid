@@ -1,0 +1,2 @@
+- Minor bug fix to increase the speed of masking in DGSPlanner
+- DGSPlanner will now warn if the crystallographic convention is used
