@@ -155,7 +155,19 @@ class TextureProjection:
         eq = np.concatenate((x[None, :], y[None, :], z[None, :]), axis=0)
 
         fig = plt.figure() if not fig else fig
-        ax = fig.add_subplot(1, 1, 1)
+        gs = fig.add_gridspec(
+            1,
+            3,
+            width_ratios=[1, 30, 1],  # tweak 30 to control plot vs cbar width
+            left=0.05,
+            right=0.98,
+            top=0.98,
+            bottom=0.06,
+            wspace=0.05,
+        )
+        # left spacer: gs[0, 0] (we don't use it)
+        ax = fig.add_subplot(gs[0, 1])
+        cax = fig.add_subplot(gs[0, 2])
         scat_plot = ax.scatter(pfi[:, 1], pfi[:, 0], c=pfi[:, 2], s=20, cmap="jet", **kwargs)
         ax.plot(eq[0], eq[1], c="grey")
         ax.set_aspect("equal")
@@ -164,7 +176,7 @@ class TextureProjection:
         ax.quiver(-1, -1, 0, 0.2, color="red", scale=1)
         ax.text(-0.8, -0.95, ax_labels[-1], fontsize=10)
         ax.text(-0.95, -0.8, ax_labels[0], fontsize=10)
-        fig.colorbar(scat_plot, ax=ax, shrink=0.8, pad=0.05)
+        fig.colorbar(scat_plot, cax=cax)
         return fig
 
     @staticmethod
@@ -188,7 +200,19 @@ class TextureProjection:
 
         # Plotting
         fig = plt.figure() if not fig else fig
-        ax = fig.add_subplot(1, 1, 1)
+        gs = fig.add_gridspec(
+            1,
+            3,
+            width_ratios=[1, 30, 1],  # tweak 30 to control plot vs cbar width
+            left=0.05,
+            right=0.98,
+            top=0.98,
+            bottom=0.06,
+            wspace=0.05,
+        )
+        # left spacer: gs[0, 0] (we don't use it)
+        ax = fig.add_subplot(gs[0, 1])
+        cax = fig.add_subplot(gs[0, 2])
         contour_plot = ax.contourf(grid_x, grid_y, grid_z, levels=10, cmap="jet", **kwargs)
         circle = plt.Circle((0, 0), R, color="grey", fill=False, linestyle="-")
         ax.add_patch(circle)
@@ -198,7 +222,7 @@ class TextureProjection:
         ax.quiver(-1, -1, 0, 0.2, color="red", scale=1)
         ax.text(-0.8, -0.95, ax_labels[-1], fontsize=10)
         ax.text(-0.95, -0.8, ax_labels[0], fontsize=10)
-        fig.colorbar(contour_plot, ax=ax, shrink=0.8, pad=0.05)
+        fig.colorbar(contour_plot, cax=cax)
         return fig
 
     @staticmethod
