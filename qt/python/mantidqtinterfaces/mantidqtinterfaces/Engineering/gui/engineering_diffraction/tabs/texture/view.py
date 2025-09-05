@@ -176,7 +176,7 @@ class TextureView(QtWidgets.QWidget, Ui_texture):
         return self.finder_corr.isSearching()
 
     def _setup_plot(self):
-        self.figure = Figure()
+        self.figure = Figure(layout="constrained")
         self.canvas = FigureCanvas(self.figure)
         self.canvas.setMinimumHeight(400)
 
