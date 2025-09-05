@@ -361,10 +361,8 @@ soap_get__ns1__login_credentials_entry(struct soap *, _ns1__login_credentials_en
    soap->error)
 #endif
 
-SOAP_FMAC1 _ns1__login_credentials_entry *SOAP_FMAC2 soap_instantiate__ns1__login_credentials_entry(struct soap *, int,
-                                                                                                    const char *,
-                                                                                                    const char *,
-                                                                                                    size_t *);
+SOAP_FMAC1 _ns1__login_credentials_entry *
+    SOAP_FMAC2 soap_instantiate__ns1__login_credentials_entry(struct soap *, int, const char *, const char *, size_t *);
 
 inline _ns1__login_credentials_entry *soap_new__ns1__login_credentials_entry(struct soap *soap, int n = -1) {
   return soap_instantiate__ns1__login_credentials_entry(soap, n, nullptr, nullptr, nullptr);
@@ -413,9 +411,8 @@ SOAP_FMAC3 _ns1__login_credentials *SOAP_FMAC4 soap_in__ns1__login_credentials(s
    soap_begin_send(soap) || (data)->soap_put(soap, "ns1:login-credentials", NULL) || soap_end_send(soap), soap->error)
 #endif
 
-SOAP_FMAC3 _ns1__login_credentials *SOAP_FMAC4 soap_get__ns1__login_credentials(struct soap *,
-                                                                                _ns1__login_credentials *, const char *,
-                                                                                const char *);
+SOAP_FMAC3 _ns1__login_credentials *
+    SOAP_FMAC4 soap_get__ns1__login_credentials(struct soap *, _ns1__login_credentials *, const char *, const char *);
 
 #ifndef soap_read__ns1__login_credentials
 #define soap_read__ns1__login_credentials(soap, data)                                                                  \
@@ -423,9 +420,8 @@ SOAP_FMAC3 _ns1__login_credentials *SOAP_FMAC4 soap_get__ns1__login_credentials(
    soap->error)
 #endif
 
-SOAP_FMAC1 _ns1__login_credentials *SOAP_FMAC2 soap_instantiate__ns1__login_credentials(struct soap *, int,
-                                                                                        const char *, const char *,
-                                                                                        size_t *);
+SOAP_FMAC1 _ns1__login_credentials *
+    SOAP_FMAC2 soap_instantiate__ns1__login_credentials(struct soap *, int, const char *, const char *, size_t *);
 
 inline _ns1__login_credentials *soap_new__ns1__login_credentials(struct soap *soap, int n = -1) {
   return soap_instantiate__ns1__login_credentials(soap, n, nullptr, nullptr, nullptr);
@@ -575,9 +571,8 @@ SOAP_FMAC3 ns1__parameterValueType_ *SOAP_FMAC4 soap_in_ns1__parameterValueType_
    soap->error)
 #endif
 
-SOAP_FMAC3 ns1__parameterValueType_ *SOAP_FMAC4 soap_get_ns1__parameterValueType_(struct soap *,
-                                                                                  ns1__parameterValueType_ *,
-                                                                                  const char *, const char *);
+SOAP_FMAC3 ns1__parameterValueType_ *
+    SOAP_FMAC4 soap_get_ns1__parameterValueType_(struct soap *, ns1__parameterValueType_ *, const char *, const char *);
 
 #ifndef soap_read_ns1__parameterValueType_
 #define soap_read_ns1__parameterValueType_(soap, data)                                                                 \
@@ -585,9 +580,8 @@ SOAP_FMAC3 ns1__parameterValueType_ *SOAP_FMAC4 soap_get_ns1__parameterValueType
    soap->error)
 #endif
 
-SOAP_FMAC1 ns1__parameterValueType_ *SOAP_FMAC2 soap_instantiate_ns1__parameterValueType_(struct soap *, int,
-                                                                                          const char *, const char *,
-                                                                                          size_t *);
+SOAP_FMAC1 ns1__parameterValueType_ *
+    SOAP_FMAC2 soap_instantiate_ns1__parameterValueType_(struct soap *, int, const char *, const char *, size_t *);
 
 inline ns1__parameterValueType_ *soap_new_ns1__parameterValueType_(struct soap *soap, int n = -1) {
   return soap_instantiate_ns1__parameterValueType_(soap, n, nullptr, nullptr, nullptr);
@@ -691,9 +685,8 @@ SOAP_FMAC3 ns1__icatExceptionType_ *SOAP_FMAC4 soap_in_ns1__icatExceptionType_(s
    soap_begin_send(soap) || (data)->soap_put(soap, "ns1:icatExceptionType", NULL) || soap_end_send(soap), soap->error)
 #endif
 
-SOAP_FMAC3 ns1__icatExceptionType_ *SOAP_FMAC4 soap_get_ns1__icatExceptionType_(struct soap *,
-                                                                                ns1__icatExceptionType_ *, const char *,
-                                                                                const char *);
+SOAP_FMAC3 ns1__icatExceptionType_ *
+    SOAP_FMAC4 soap_get_ns1__icatExceptionType_(struct soap *, ns1__icatExceptionType_ *, const char *, const char *);
 
 #ifndef soap_read_ns1__icatExceptionType_
 #define soap_read_ns1__icatExceptionType_(soap, data)                                                                  \
@@ -701,9 +694,8 @@ SOAP_FMAC3 ns1__icatExceptionType_ *SOAP_FMAC4 soap_get_ns1__icatExceptionType_(
    soap->error)
 #endif
 
-SOAP_FMAC1 ns1__icatExceptionType_ *SOAP_FMAC2 soap_instantiate_ns1__icatExceptionType_(struct soap *, int,
-                                                                                        const char *, const char *,
-                                                                                        size_t *);
+SOAP_FMAC1 ns1__icatExceptionType_ *
+    SOAP_FMAC2 soap_instantiate_ns1__icatExceptionType_(struct soap *, int, const char *, const char *, size_t *);
 
 inline ns1__icatExceptionType_ *soap_new_ns1__icatExceptionType_(struct soap *soap, int n = -1) {
   return soap_instantiate_ns1__icatExceptionType_(soap, n, nullptr, nullptr, nullptr);
@@ -752,8 +744,9 @@ soap_in_ns1__getRemainingMinutesResponse(struct soap *, const char *, ns1__getRe
    soap->error)
 #endif
 
-SOAP_FMAC3 ns1__getRemainingMinutesResponse *SOAP_FMAC4 soap_get_ns1__getRemainingMinutesResponse(
-    struct soap *, ns1__getRemainingMinutesResponse *, const char *, const char *);
+SOAP_FMAC3 ns1__getRemainingMinutesResponse *
+    SOAP_FMAC4 soap_get_ns1__getRemainingMinutesResponse(struct soap *, ns1__getRemainingMinutesResponse *,
+                                                         const char *, const char *);
 
 #ifndef soap_read_ns1__getRemainingMinutesResponse
 #define soap_read_ns1__getRemainingMinutesResponse(soap, data)                                                         \
@@ -816,9 +809,8 @@ SOAP_FMAC3 ns1__getRemainingMinutes *SOAP_FMAC4 soap_in_ns1__getRemainingMinutes
    soap->error)
 #endif
 
-SOAP_FMAC3 ns1__getRemainingMinutes *SOAP_FMAC4 soap_get_ns1__getRemainingMinutes(struct soap *,
-                                                                                  ns1__getRemainingMinutes *,
-                                                                                  const char *, const char *);
+SOAP_FMAC3 ns1__getRemainingMinutes *
+    SOAP_FMAC4 soap_get_ns1__getRemainingMinutes(struct soap *, ns1__getRemainingMinutes *, const char *, const char *);
 
 #ifndef soap_read_ns1__getRemainingMinutes
 #define soap_read_ns1__getRemainingMinutes(soap, data)                                                                 \
@@ -826,9 +818,8 @@ SOAP_FMAC3 ns1__getRemainingMinutes *SOAP_FMAC4 soap_get_ns1__getRemainingMinute
    soap->error)
 #endif
 
-SOAP_FMAC1 ns1__getRemainingMinutes *SOAP_FMAC2 soap_instantiate_ns1__getRemainingMinutes(struct soap *, int,
-                                                                                          const char *, const char *,
-                                                                                          size_t *);
+SOAP_FMAC1 ns1__getRemainingMinutes *
+    SOAP_FMAC2 soap_instantiate_ns1__getRemainingMinutes(struct soap *, int, const char *, const char *, size_t *);
 
 inline ns1__getRemainingMinutes *soap_new_ns1__getRemainingMinutes(struct soap *soap, int n = -1) {
   return soap_instantiate_ns1__getRemainingMinutes(soap, n, nullptr, nullptr, nullptr);
@@ -1093,10 +1084,8 @@ soap_get_ns1__isAccessAllowedResponse(struct soap *, ns1__isAccessAllowedRespons
    soap->error)
 #endif
 
-SOAP_FMAC1 ns1__isAccessAllowedResponse *SOAP_FMAC2 soap_instantiate_ns1__isAccessAllowedResponse(struct soap *, int,
-                                                                                                  const char *,
-                                                                                                  const char *,
-                                                                                                  size_t *);
+SOAP_FMAC1 ns1__isAccessAllowedResponse *
+    SOAP_FMAC2 soap_instantiate_ns1__isAccessAllowedResponse(struct soap *, int, const char *, const char *, size_t *);
 
 inline ns1__isAccessAllowedResponse *soap_new_ns1__isAccessAllowedResponse(struct soap *soap, int n = -1) {
   return soap_instantiate_ns1__isAccessAllowedResponse(soap, n, nullptr, nullptr, nullptr);
@@ -1306,9 +1295,8 @@ SOAP_FMAC3 ns1__searchTextResponse *SOAP_FMAC4 soap_in_ns1__searchTextResponse(s
    soap->error)
 #endif
 
-SOAP_FMAC3 ns1__searchTextResponse *SOAP_FMAC4 soap_get_ns1__searchTextResponse(struct soap *,
-                                                                                ns1__searchTextResponse *, const char *,
-                                                                                const char *);
+SOAP_FMAC3 ns1__searchTextResponse *
+    SOAP_FMAC4 soap_get_ns1__searchTextResponse(struct soap *, ns1__searchTextResponse *, const char *, const char *);
 
 #ifndef soap_read_ns1__searchTextResponse
 #define soap_read_ns1__searchTextResponse(soap, data)                                                                  \
@@ -1316,9 +1304,8 @@ SOAP_FMAC3 ns1__searchTextResponse *SOAP_FMAC4 soap_get_ns1__searchTextResponse(
    soap->error)
 #endif
 
-SOAP_FMAC1 ns1__searchTextResponse *SOAP_FMAC2 soap_instantiate_ns1__searchTextResponse(struct soap *, int,
-                                                                                        const char *, const char *,
-                                                                                        size_t *);
+SOAP_FMAC1 ns1__searchTextResponse *
+    SOAP_FMAC2 soap_instantiate_ns1__searchTextResponse(struct soap *, int, const char *, const char *, size_t *);
 
 inline ns1__searchTextResponse *soap_new_ns1__searchTextResponse(struct soap *soap, int n = -1) {
   return soap_instantiate_ns1__searchTextResponse(soap, n, nullptr, nullptr, nullptr);
@@ -1433,9 +1420,8 @@ SOAP_FMAC3 ns1__luceneCommitResponse *SOAP_FMAC4 soap_get_ns1__luceneCommitRespo
    soap->error)
 #endif
 
-SOAP_FMAC1 ns1__luceneCommitResponse *SOAP_FMAC2 soap_instantiate_ns1__luceneCommitResponse(struct soap *, int,
-                                                                                            const char *, const char *,
-                                                                                            size_t *);
+SOAP_FMAC1 ns1__luceneCommitResponse *
+    SOAP_FMAC2 soap_instantiate_ns1__luceneCommitResponse(struct soap *, int, const char *, const char *, size_t *);
 
 inline ns1__luceneCommitResponse *soap_new_ns1__luceneCommitResponse(struct soap *soap, int n = -1) {
   return soap_instantiate_ns1__luceneCommitResponse(soap, n, nullptr, nullptr, nullptr);
@@ -1718,9 +1704,8 @@ SOAP_FMAC3 ns1__getEntityInfoResponse *SOAP_FMAC4 soap_get_ns1__getEntityInfoRes
    soap->error)
 #endif
 
-SOAP_FMAC1 ns1__getEntityInfoResponse *SOAP_FMAC2 soap_instantiate_ns1__getEntityInfoResponse(struct soap *, int,
-                                                                                              const char *,
-                                                                                              const char *, size_t *);
+SOAP_FMAC1 ns1__getEntityInfoResponse *
+    SOAP_FMAC2 soap_instantiate_ns1__getEntityInfoResponse(struct soap *, int, const char *, const char *, size_t *);
 
 inline ns1__getEntityInfoResponse *soap_new_ns1__getEntityInfoResponse(struct soap *soap, int n = -1) {
   return soap_instantiate_ns1__getEntityInfoResponse(soap, n, nullptr, nullptr, nullptr);
@@ -2453,9 +2438,8 @@ SOAP_FMAC3 ns1__permissibleStringValue *SOAP_FMAC4 soap_get_ns1__permissibleStri
    soap->error)
 #endif
 
-SOAP_FMAC1 ns1__permissibleStringValue *SOAP_FMAC2 soap_instantiate_ns1__permissibleStringValue(struct soap *, int,
-                                                                                                const char *,
-                                                                                                const char *, size_t *);
+SOAP_FMAC1 ns1__permissibleStringValue *
+    SOAP_FMAC2 soap_instantiate_ns1__permissibleStringValue(struct soap *, int, const char *, const char *, size_t *);
 
 inline ns1__permissibleStringValue *soap_new_ns1__permissibleStringValue(struct soap *soap, int n = -1) {
   return soap_instantiate_ns1__permissibleStringValue(soap, n, nullptr, nullptr, nullptr);
@@ -2523,9 +2507,8 @@ SOAP_FMAC3 ns1__investigationParameter *SOAP_FMAC4 soap_get_ns1__investigationPa
    soap->error)
 #endif
 
-SOAP_FMAC1 ns1__investigationParameter *SOAP_FMAC2 soap_instantiate_ns1__investigationParameter(struct soap *, int,
-                                                                                                const char *,
-                                                                                                const char *, size_t *);
+SOAP_FMAC1 ns1__investigationParameter *
+    SOAP_FMAC2 soap_instantiate_ns1__investigationParameter(struct soap *, int, const char *, const char *, size_t *);
 
 inline ns1__investigationParameter *soap_new_ns1__investigationParameter(struct soap *soap, int n = -1) {
   return soap_instantiate_ns1__investigationParameter(soap, n, nullptr, nullptr, nullptr);
@@ -2803,10 +2786,8 @@ soap_get_ns1__dataCollectionParameter(struct soap *, ns1__dataCollectionParamete
    soap->error)
 #endif
 
-SOAP_FMAC1 ns1__dataCollectionParameter *SOAP_FMAC2 soap_instantiate_ns1__dataCollectionParameter(struct soap *, int,
-                                                                                                  const char *,
-                                                                                                  const char *,
-                                                                                                  size_t *);
+SOAP_FMAC1 ns1__dataCollectionParameter *
+    SOAP_FMAC2 soap_instantiate_ns1__dataCollectionParameter(struct soap *, int, const char *, const char *, size_t *);
 
 inline ns1__dataCollectionParameter *soap_new_ns1__dataCollectionParameter(struct soap *soap, int n = -1) {
   return soap_instantiate_ns1__dataCollectionParameter(soap, n, nullptr, nullptr, nullptr);
@@ -3046,10 +3027,8 @@ soap_get_ns1__investigationInstrument(struct soap *, ns1__investigationInstrumen
    soap->error)
 #endif
 
-SOAP_FMAC1 ns1__investigationInstrument *SOAP_FMAC2 soap_instantiate_ns1__investigationInstrument(struct soap *, int,
-                                                                                                  const char *,
-                                                                                                  const char *,
-                                                                                                  size_t *);
+SOAP_FMAC1 ns1__investigationInstrument *
+    SOAP_FMAC2 soap_instantiate_ns1__investigationInstrument(struct soap *, int, const char *, const char *, size_t *);
 
 inline ns1__investigationInstrument *soap_new_ns1__investigationInstrument(struct soap *soap, int n = -1) {
   return soap_instantiate_ns1__investigationInstrument(soap, n, nullptr, nullptr, nullptr);
@@ -3280,9 +3259,8 @@ SOAP_FMAC3 ns1__studyInvestigation *SOAP_FMAC4 soap_in_ns1__studyInvestigation(s
    soap->error)
 #endif
 
-SOAP_FMAC3 ns1__studyInvestigation *SOAP_FMAC4 soap_get_ns1__studyInvestigation(struct soap *,
-                                                                                ns1__studyInvestigation *, const char *,
-                                                                                const char *);
+SOAP_FMAC3 ns1__studyInvestigation *
+    SOAP_FMAC4 soap_get_ns1__studyInvestigation(struct soap *, ns1__studyInvestigation *, const char *, const char *);
 
 #ifndef soap_read_ns1__studyInvestigation
 #define soap_read_ns1__studyInvestigation(soap, data)                                                                  \
@@ -3290,9 +3268,8 @@ SOAP_FMAC3 ns1__studyInvestigation *SOAP_FMAC4 soap_get_ns1__studyInvestigation(
    soap->error)
 #endif
 
-SOAP_FMAC1 ns1__studyInvestigation *SOAP_FMAC2 soap_instantiate_ns1__studyInvestigation(struct soap *, int,
-                                                                                        const char *, const char *,
-                                                                                        size_t *);
+SOAP_FMAC1 ns1__studyInvestigation *
+    SOAP_FMAC2 soap_instantiate_ns1__studyInvestigation(struct soap *, int, const char *, const char *, size_t *);
 
 inline ns1__studyInvestigation *soap_new_ns1__studyInvestigation(struct soap *soap, int n = -1) {
   return soap_instantiate_ns1__studyInvestigation(soap, n, nullptr, nullptr, nullptr);
@@ -3538,9 +3515,8 @@ SOAP_FMAC3 ns1__instrumentScientist *SOAP_FMAC4 soap_in_ns1__instrumentScientist
    soap->error)
 #endif
 
-SOAP_FMAC3 ns1__instrumentScientist *SOAP_FMAC4 soap_get_ns1__instrumentScientist(struct soap *,
-                                                                                  ns1__instrumentScientist *,
-                                                                                  const char *, const char *);
+SOAP_FMAC3 ns1__instrumentScientist *
+    SOAP_FMAC4 soap_get_ns1__instrumentScientist(struct soap *, ns1__instrumentScientist *, const char *, const char *);
 
 #ifndef soap_read_ns1__instrumentScientist
 #define soap_read_ns1__instrumentScientist(soap, data)                                                                 \
@@ -3548,9 +3524,8 @@ SOAP_FMAC3 ns1__instrumentScientist *SOAP_FMAC4 soap_get_ns1__instrumentScientis
    soap->error)
 #endif
 
-SOAP_FMAC1 ns1__instrumentScientist *SOAP_FMAC2 soap_instantiate_ns1__instrumentScientist(struct soap *, int,
-                                                                                          const char *, const char *,
-                                                                                          size_t *);
+SOAP_FMAC1 ns1__instrumentScientist *
+    SOAP_FMAC2 soap_instantiate_ns1__instrumentScientist(struct soap *, int, const char *, const char *, size_t *);
 
 inline ns1__instrumentScientist *soap_new_ns1__instrumentScientist(struct soap *soap, int n = -1) {
   return soap_instantiate_ns1__instrumentScientist(soap, n, nullptr, nullptr, nullptr);
@@ -4244,9 +4219,8 @@ SOAP_FMAC3 ns1__dataCollectionDataset *SOAP_FMAC4 soap_get_ns1__dataCollectionDa
    soap->error)
 #endif
 
-SOAP_FMAC1 ns1__dataCollectionDataset *SOAP_FMAC2 soap_instantiate_ns1__dataCollectionDataset(struct soap *, int,
-                                                                                              const char *,
-                                                                                              const char *, size_t *);
+SOAP_FMAC1 ns1__dataCollectionDataset *
+    SOAP_FMAC2 soap_instantiate_ns1__dataCollectionDataset(struct soap *, int, const char *, const char *, size_t *);
 
 inline ns1__dataCollectionDataset *soap_new_ns1__dataCollectionDataset(struct soap *soap, int n = -1) {
   return soap_instantiate_ns1__dataCollectionDataset(soap, n, nullptr, nullptr, nullptr);
@@ -4380,9 +4354,8 @@ SOAP_FMAC3 ns1__dataCollectionDatafile *SOAP_FMAC4 soap_get_ns1__dataCollectionD
    soap->error)
 #endif
 
-SOAP_FMAC1 ns1__dataCollectionDatafile *SOAP_FMAC2 soap_instantiate_ns1__dataCollectionDatafile(struct soap *, int,
-                                                                                                const char *,
-                                                                                                const char *, size_t *);
+SOAP_FMAC1 ns1__dataCollectionDatafile *
+    SOAP_FMAC2 soap_instantiate_ns1__dataCollectionDatafile(struct soap *, int, const char *, const char *, size_t *);
 
 inline ns1__dataCollectionDatafile *soap_new_ns1__dataCollectionDatafile(struct soap *soap, int n = -1) {
   return soap_instantiate_ns1__dataCollectionDatafile(soap, n, nullptr, nullptr, nullptr);
@@ -4808,9 +4781,8 @@ SOAP_FMAC3 ns1__getUserNameResponse *SOAP_FMAC4 soap_in_ns1__getUserNameResponse
    soap->error)
 #endif
 
-SOAP_FMAC3 ns1__getUserNameResponse *SOAP_FMAC4 soap_get_ns1__getUserNameResponse(struct soap *,
-                                                                                  ns1__getUserNameResponse *,
-                                                                                  const char *, const char *);
+SOAP_FMAC3 ns1__getUserNameResponse *
+    SOAP_FMAC4 soap_get_ns1__getUserNameResponse(struct soap *, ns1__getUserNameResponse *, const char *, const char *);
 
 #ifndef soap_read_ns1__getUserNameResponse
 #define soap_read_ns1__getUserNameResponse(soap, data)                                                                 \
@@ -4818,9 +4790,8 @@ SOAP_FMAC3 ns1__getUserNameResponse *SOAP_FMAC4 soap_get_ns1__getUserNameRespons
    soap->error)
 #endif
 
-SOAP_FMAC1 ns1__getUserNameResponse *SOAP_FMAC2 soap_instantiate_ns1__getUserNameResponse(struct soap *, int,
-                                                                                          const char *, const char *,
-                                                                                          size_t *);
+SOAP_FMAC1 ns1__getUserNameResponse *
+    SOAP_FMAC2 soap_instantiate_ns1__getUserNameResponse(struct soap *, int, const char *, const char *, size_t *);
 
 inline ns1__getUserNameResponse *soap_new_ns1__getUserNameResponse(struct soap *soap, int n = -1) {
   return soap_instantiate_ns1__getUserNameResponse(soap, n, nullptr, nullptr, nullptr);
@@ -4921,9 +4892,8 @@ SOAP_FMAC3 ns1__deleteManyResponse *SOAP_FMAC4 soap_in_ns1__deleteManyResponse(s
    soap->error)
 #endif
 
-SOAP_FMAC3 ns1__deleteManyResponse *SOAP_FMAC4 soap_get_ns1__deleteManyResponse(struct soap *,
-                                                                                ns1__deleteManyResponse *, const char *,
-                                                                                const char *);
+SOAP_FMAC3 ns1__deleteManyResponse *
+    SOAP_FMAC4 soap_get_ns1__deleteManyResponse(struct soap *, ns1__deleteManyResponse *, const char *, const char *);
 
 #ifndef soap_read_ns1__deleteManyResponse
 #define soap_read_ns1__deleteManyResponse(soap, data)                                                                  \
@@ -4931,9 +4901,8 @@ SOAP_FMAC3 ns1__deleteManyResponse *SOAP_FMAC4 soap_get_ns1__deleteManyResponse(
    soap->error)
 #endif
 
-SOAP_FMAC1 ns1__deleteManyResponse *SOAP_FMAC2 soap_instantiate_ns1__deleteManyResponse(struct soap *, int,
-                                                                                        const char *, const char *,
-                                                                                        size_t *);
+SOAP_FMAC1 ns1__deleteManyResponse *
+    SOAP_FMAC2 soap_instantiate_ns1__deleteManyResponse(struct soap *, int, const char *, const char *, size_t *);
 
 inline ns1__deleteManyResponse *soap_new_ns1__deleteManyResponse(struct soap *soap, int n = -1) {
   return soap_instantiate_ns1__deleteManyResponse(soap, n, nullptr, nullptr, nullptr);
@@ -5136,8 +5105,9 @@ soap_in_ns1__luceneGetPopulatingResponse(struct soap *, const char *, ns1__lucen
    soap->error)
 #endif
 
-SOAP_FMAC3 ns1__luceneGetPopulatingResponse *SOAP_FMAC4 soap_get_ns1__luceneGetPopulatingResponse(
-    struct soap *, ns1__luceneGetPopulatingResponse *, const char *, const char *);
+SOAP_FMAC3 ns1__luceneGetPopulatingResponse *
+    SOAP_FMAC4 soap_get_ns1__luceneGetPopulatingResponse(struct soap *, ns1__luceneGetPopulatingResponse *,
+                                                         const char *, const char *);
 
 #ifndef soap_read_ns1__luceneGetPopulatingResponse
 #define soap_read_ns1__luceneGetPopulatingResponse(soap, data)                                                         \
@@ -5198,9 +5168,8 @@ SOAP_FMAC3 ns1__luceneGetPopulating *SOAP_FMAC4 soap_in_ns1__luceneGetPopulating
    soap->error)
 #endif
 
-SOAP_FMAC3 ns1__luceneGetPopulating *SOAP_FMAC4 soap_get_ns1__luceneGetPopulating(struct soap *,
-                                                                                  ns1__luceneGetPopulating *,
-                                                                                  const char *, const char *);
+SOAP_FMAC3 ns1__luceneGetPopulating *
+    SOAP_FMAC4 soap_get_ns1__luceneGetPopulating(struct soap *, ns1__luceneGetPopulating *, const char *, const char *);
 
 #ifndef soap_read_ns1__luceneGetPopulating
 #define soap_read_ns1__luceneGetPopulating(soap, data)                                                                 \
@@ -5208,9 +5177,8 @@ SOAP_FMAC3 ns1__luceneGetPopulating *SOAP_FMAC4 soap_get_ns1__luceneGetPopulatin
    soap->error)
 #endif
 
-SOAP_FMAC1 ns1__luceneGetPopulating *SOAP_FMAC2 soap_instantiate_ns1__luceneGetPopulating(struct soap *, int,
-                                                                                          const char *, const char *,
-                                                                                          size_t *);
+SOAP_FMAC1 ns1__luceneGetPopulating *
+    SOAP_FMAC2 soap_instantiate_ns1__luceneGetPopulating(struct soap *, int, const char *, const char *, size_t *);
 
 inline ns1__luceneGetPopulating *soap_new_ns1__luceneGetPopulating(struct soap *soap, int n = -1) {
   return soap_instantiate_ns1__luceneGetPopulating(soap, n, nullptr, nullptr, nullptr);
@@ -5270,9 +5238,8 @@ SOAP_FMAC3 ns1__getApiVersionResponse *SOAP_FMAC4 soap_get_ns1__getApiVersionRes
    soap->error)
 #endif
 
-SOAP_FMAC1 ns1__getApiVersionResponse *SOAP_FMAC2 soap_instantiate_ns1__getApiVersionResponse(struct soap *, int,
-                                                                                              const char *,
-                                                                                              const char *, size_t *);
+SOAP_FMAC1 ns1__getApiVersionResponse *
+    SOAP_FMAC2 soap_instantiate_ns1__getApiVersionResponse(struct soap *, int, const char *, const char *, size_t *);
 
 inline ns1__getApiVersionResponse *soap_new_ns1__getApiVersionResponse(struct soap *soap, int n = -1) {
   return soap_instantiate_ns1__getApiVersionResponse(soap, n, nullptr, nullptr, nullptr);
@@ -5384,9 +5351,8 @@ SOAP_FMAC3 ns1__getEntityNamesResponse *SOAP_FMAC4 soap_get_ns1__getEntityNamesR
    soap->error)
 #endif
 
-SOAP_FMAC1 ns1__getEntityNamesResponse *SOAP_FMAC2 soap_instantiate_ns1__getEntityNamesResponse(struct soap *, int,
-                                                                                                const char *,
-                                                                                                const char *, size_t *);
+SOAP_FMAC1 ns1__getEntityNamesResponse *
+    SOAP_FMAC2 soap_instantiate_ns1__getEntityNamesResponse(struct soap *, int, const char *, const char *, size_t *);
 
 inline ns1__getEntityNamesResponse *soap_new_ns1__getEntityNamesResponse(struct soap *soap, int n = -1) {
   return soap_instantiate_ns1__getEntityNamesResponse(soap, n, nullptr, nullptr, nullptr);
@@ -5603,9 +5569,8 @@ SOAP_FMAC3 ns1__lucenePopulateResponse *SOAP_FMAC4 soap_get_ns1__lucenePopulateR
    soap->error)
 #endif
 
-SOAP_FMAC1 ns1__lucenePopulateResponse *SOAP_FMAC2 soap_instantiate_ns1__lucenePopulateResponse(struct soap *, int,
-                                                                                                const char *,
-                                                                                                const char *, size_t *);
+SOAP_FMAC1 ns1__lucenePopulateResponse *
+    SOAP_FMAC2 soap_instantiate_ns1__lucenePopulateResponse(struct soap *, int, const char *, const char *, size_t *);
 
 inline ns1__lucenePopulateResponse *soap_new_ns1__lucenePopulateResponse(struct soap *soap, int n = -1) {
   return soap_instantiate_ns1__lucenePopulateResponse(soap, n, nullptr, nullptr, nullptr);
@@ -5717,9 +5682,8 @@ SOAP_FMAC3 ns1__luceneSearchResponse *SOAP_FMAC4 soap_get_ns1__luceneSearchRespo
    soap->error)
 #endif
 
-SOAP_FMAC1 ns1__luceneSearchResponse *SOAP_FMAC2 soap_instantiate_ns1__luceneSearchResponse(struct soap *, int,
-                                                                                            const char *, const char *,
-                                                                                            size_t *);
+SOAP_FMAC1 ns1__luceneSearchResponse *
+    SOAP_FMAC2 soap_instantiate_ns1__luceneSearchResponse(struct soap *, int, const char *, const char *, size_t *);
 
 inline ns1__luceneSearchResponse *soap_new_ns1__luceneSearchResponse(struct soap *soap, int n = -1) {
   return soap_instantiate_ns1__luceneSearchResponse(soap, n, nullptr, nullptr, nullptr);
@@ -5837,9 +5801,8 @@ SOAP_FMAC3 ns1__getPropertiesResponse *SOAP_FMAC4 soap_get_ns1__getPropertiesRes
    soap->error)
 #endif
 
-SOAP_FMAC1 ns1__getPropertiesResponse *SOAP_FMAC2 soap_instantiate_ns1__getPropertiesResponse(struct soap *, int,
-                                                                                              const char *,
-                                                                                              const char *, size_t *);
+SOAP_FMAC1 ns1__getPropertiesResponse *
+    SOAP_FMAC2 soap_instantiate_ns1__getPropertiesResponse(struct soap *, int, const char *, const char *, size_t *);
 
 inline ns1__getPropertiesResponse *soap_new_ns1__getPropertiesResponse(struct soap *soap, int n = -1) {
   return soap_instantiate_ns1__getPropertiesResponse(soap, n, nullptr, nullptr, nullptr);
@@ -6045,9 +6008,8 @@ SOAP_FMAC3 ns1__createManyResponse *SOAP_FMAC4 soap_in_ns1__createManyResponse(s
    soap->error)
 #endif
 
-SOAP_FMAC3 ns1__createManyResponse *SOAP_FMAC4 soap_get_ns1__createManyResponse(struct soap *,
-                                                                                ns1__createManyResponse *, const char *,
-                                                                                const char *);
+SOAP_FMAC3 ns1__createManyResponse *
+    SOAP_FMAC4 soap_get_ns1__createManyResponse(struct soap *, ns1__createManyResponse *, const char *, const char *);
 
 #ifndef soap_read_ns1__createManyResponse
 #define soap_read_ns1__createManyResponse(soap, data)                                                                  \
@@ -6055,9 +6017,8 @@ SOAP_FMAC3 ns1__createManyResponse *SOAP_FMAC4 soap_get_ns1__createManyResponse(
    soap->error)
 #endif
 
-SOAP_FMAC1 ns1__createManyResponse *SOAP_FMAC2 soap_instantiate_ns1__createManyResponse(struct soap *, int,
-                                                                                        const char *, const char *,
-                                                                                        size_t *);
+SOAP_FMAC1 ns1__createManyResponse *
+    SOAP_FMAC2 soap_instantiate_ns1__createManyResponse(struct soap *, int, const char *, const char *, size_t *);
 
 inline ns1__createManyResponse *soap_new_ns1__createManyResponse(struct soap *soap, int n = -1) {
   return soap_instantiate_ns1__createManyResponse(soap, n, nullptr, nullptr, nullptr);
@@ -6275,9 +6236,8 @@ SOAP_FMAC3 ns1__luceneClearResponse *SOAP_FMAC4 soap_in_ns1__luceneClearResponse
    soap->error)
 #endif
 
-SOAP_FMAC3 ns1__luceneClearResponse *SOAP_FMAC4 soap_get_ns1__luceneClearResponse(struct soap *,
-                                                                                  ns1__luceneClearResponse *,
-                                                                                  const char *, const char *);
+SOAP_FMAC3 ns1__luceneClearResponse *
+    SOAP_FMAC4 soap_get_ns1__luceneClearResponse(struct soap *, ns1__luceneClearResponse *, const char *, const char *);
 
 #ifndef soap_read_ns1__luceneClearResponse
 #define soap_read_ns1__luceneClearResponse(soap, data)                                                                 \
@@ -6285,9 +6245,8 @@ SOAP_FMAC3 ns1__luceneClearResponse *SOAP_FMAC4 soap_get_ns1__luceneClearRespons
    soap->error)
 #endif
 
-SOAP_FMAC1 ns1__luceneClearResponse *SOAP_FMAC2 soap_instantiate_ns1__luceneClearResponse(struct soap *, int,
-                                                                                          const char *, const char *,
-                                                                                          size_t *);
+SOAP_FMAC1 ns1__luceneClearResponse *
+    SOAP_FMAC2 soap_instantiate_ns1__luceneClearResponse(struct soap *, int, const char *, const char *, size_t *);
 
 inline ns1__luceneClearResponse *soap_new_ns1__luceneClearResponse(struct soap *soap, int n = -1) {
   return soap_instantiate_ns1__luceneClearResponse(soap, n, nullptr, nullptr, nullptr);
@@ -7048,9 +7007,8 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_put___ns1__getEntityInfo(struct soap *, const str
    soap->error)
 #endif
 
-SOAP_FMAC3 struct __ns1__getEntityInfo *SOAP_FMAC4 soap_get___ns1__getEntityInfo(struct soap *,
-                                                                                 struct __ns1__getEntityInfo *,
-                                                                                 const char *, const char *);
+SOAP_FMAC3 struct __ns1__getEntityInfo *
+    SOAP_FMAC4 soap_get___ns1__getEntityInfo(struct soap *, struct __ns1__getEntityInfo *, const char *, const char *);
 
 #ifndef soap_read___ns1__getEntityInfo
 #define soap_read___ns1__getEntityInfo(soap, data)                                                                     \
@@ -7058,9 +7016,8 @@ SOAP_FMAC3 struct __ns1__getEntityInfo *SOAP_FMAC4 soap_get___ns1__getEntityInfo
    soap->error)
 #endif
 
-SOAP_FMAC1 struct __ns1__getEntityInfo *SOAP_FMAC2 soap_instantiate___ns1__getEntityInfo(struct soap *, int,
-                                                                                         const char *, const char *,
-                                                                                         size_t *);
+SOAP_FMAC1 struct __ns1__getEntityInfo *
+    SOAP_FMAC2 soap_instantiate___ns1__getEntityInfo(struct soap *, int, const char *, const char *, size_t *);
 
 inline struct __ns1__getEntityInfo *soap_new___ns1__getEntityInfo(struct soap *soap, int n = -1) {
   return soap_instantiate___ns1__getEntityInfo(soap, n, nullptr, nullptr, nullptr);
@@ -7180,10 +7137,8 @@ soap_get___ns1__deleteManyResponse(struct soap *, struct __ns1__deleteManyRespon
    soap->error)
 #endif
 
-SOAP_FMAC1 struct __ns1__deleteManyResponse *SOAP_FMAC2 soap_instantiate___ns1__deleteManyResponse(struct soap *, int,
-                                                                                                   const char *,
-                                                                                                   const char *,
-                                                                                                   size_t *);
+SOAP_FMAC1 struct __ns1__deleteManyResponse *
+    SOAP_FMAC2 soap_instantiate___ns1__deleteManyResponse(struct soap *, int, const char *, const char *, size_t *);
 
 inline struct __ns1__deleteManyResponse *soap_new___ns1__deleteManyResponse(struct soap *soap, int n = -1) {
   return soap_instantiate___ns1__deleteManyResponse(soap, n, nullptr, nullptr, nullptr);
@@ -7307,10 +7262,8 @@ soap_get___ns1__luceneGetPopulating(struct soap *, struct __ns1__luceneGetPopula
    soap->error)
 #endif
 
-SOAP_FMAC1 struct __ns1__luceneGetPopulating *SOAP_FMAC2 soap_instantiate___ns1__luceneGetPopulating(struct soap *, int,
-                                                                                                     const char *,
-                                                                                                     const char *,
-                                                                                                     size_t *);
+SOAP_FMAC1 struct __ns1__luceneGetPopulating *
+    SOAP_FMAC2 soap_instantiate___ns1__luceneGetPopulating(struct soap *, int, const char *, const char *, size_t *);
 
 inline struct __ns1__luceneGetPopulating *soap_new___ns1__luceneGetPopulating(struct soap *soap, int n = -1) {
   return soap_instantiate___ns1__luceneGetPopulating(soap, n, nullptr, nullptr, nullptr);
@@ -7365,9 +7318,8 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_put___ns1__luceneSearch(struct soap *, const stru
    soap->error)
 #endif
 
-SOAP_FMAC3 struct __ns1__luceneSearch *SOAP_FMAC4 soap_get___ns1__luceneSearch(struct soap *,
-                                                                               struct __ns1__luceneSearch *,
-                                                                               const char *, const char *);
+SOAP_FMAC3 struct __ns1__luceneSearch *
+    SOAP_FMAC4 soap_get___ns1__luceneSearch(struct soap *, struct __ns1__luceneSearch *, const char *, const char *);
 
 #ifndef soap_read___ns1__luceneSearch
 #define soap_read___ns1__luceneSearch(soap, data)                                                                      \
@@ -7426,9 +7378,8 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_put___ns1__luceneCommit(struct soap *, const stru
    soap->error)
 #endif
 
-SOAP_FMAC3 struct __ns1__luceneCommit *SOAP_FMAC4 soap_get___ns1__luceneCommit(struct soap *,
-                                                                               struct __ns1__luceneCommit *,
-                                                                               const char *, const char *);
+SOAP_FMAC3 struct __ns1__luceneCommit *
+    SOAP_FMAC4 soap_get___ns1__luceneCommit(struct soap *, struct __ns1__luceneCommit *, const char *, const char *);
 
 #ifndef soap_read___ns1__luceneCommit
 #define soap_read___ns1__luceneCommit(soap, data)                                                                      \
@@ -7501,8 +7452,8 @@ soap_get___ns1__luceneCommitResponse(struct soap *, struct __ns1__luceneCommitRe
    soap->error)
 #endif
 
-SOAP_FMAC1 struct __ns1__luceneCommitResponse *SOAP_FMAC2
-soap_instantiate___ns1__luceneCommitResponse(struct soap *, int, const char *, const char *, size_t *);
+SOAP_FMAC1 struct __ns1__luceneCommitResponse *
+    SOAP_FMAC2 soap_instantiate___ns1__luceneCommitResponse(struct soap *, int, const char *, const char *, size_t *);
 
 inline struct __ns1__luceneCommitResponse *soap_new___ns1__luceneCommitResponse(struct soap *soap, int n = -1) {
   return soap_instantiate___ns1__luceneCommitResponse(soap, n, nullptr, nullptr, nullptr);
@@ -7627,10 +7578,8 @@ soap_get___ns1__luceneClearResponse(struct soap *, struct __ns1__luceneClearResp
    soap->error)
 #endif
 
-SOAP_FMAC1 struct __ns1__luceneClearResponse *SOAP_FMAC2 soap_instantiate___ns1__luceneClearResponse(struct soap *, int,
-                                                                                                     const char *,
-                                                                                                     const char *,
-                                                                                                     size_t *);
+SOAP_FMAC1 struct __ns1__luceneClearResponse *
+    SOAP_FMAC2 soap_instantiate___ns1__luceneClearResponse(struct soap *, int, const char *, const char *, size_t *);
 
 inline struct __ns1__luceneClearResponse *soap_new___ns1__luceneClearResponse(struct soap *soap, int n = -1) {
   return soap_instantiate___ns1__luceneClearResponse(soap, n, nullptr, nullptr, nullptr);
@@ -7695,9 +7644,8 @@ SOAP_FMAC3 struct __ns1__lucenePopulate *SOAP_FMAC4 soap_get___ns1__lucenePopula
    soap->error)
 #endif
 
-SOAP_FMAC1 struct __ns1__lucenePopulate *SOAP_FMAC2 soap_instantiate___ns1__lucenePopulate(struct soap *, int,
-                                                                                           const char *, const char *,
-                                                                                           size_t *);
+SOAP_FMAC1 struct __ns1__lucenePopulate *
+    SOAP_FMAC2 soap_instantiate___ns1__lucenePopulate(struct soap *, int, const char *, const char *, size_t *);
 
 inline struct __ns1__lucenePopulate *soap_new___ns1__lucenePopulate(struct soap *soap, int n = -1) {
   return soap_instantiate___ns1__lucenePopulate(soap, n, nullptr, nullptr, nullptr);
@@ -7754,8 +7702,9 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_put___ns1__lucenePopulateResponse(struct soap *,
    soap->error)
 #endif
 
-SOAP_FMAC3 struct __ns1__lucenePopulateResponse *SOAP_FMAC4 soap_get___ns1__lucenePopulateResponse(
-    struct soap *, struct __ns1__lucenePopulateResponse *, const char *, const char *);
+SOAP_FMAC3 struct __ns1__lucenePopulateResponse *
+    SOAP_FMAC4 soap_get___ns1__lucenePopulateResponse(struct soap *, struct __ns1__lucenePopulateResponse *,
+                                                      const char *, const char *);
 
 #ifndef soap_read___ns1__lucenePopulateResponse
 #define soap_read___ns1__lucenePopulateResponse(soap, data)                                                            \
@@ -7764,8 +7713,8 @@ SOAP_FMAC3 struct __ns1__lucenePopulateResponse *SOAP_FMAC4 soap_get___ns1__luce
    soap->error)
 #endif
 
-SOAP_FMAC1 struct __ns1__lucenePopulateResponse *SOAP_FMAC2
-soap_instantiate___ns1__lucenePopulateResponse(struct soap *, int, const char *, const char *, size_t *);
+SOAP_FMAC1 struct __ns1__lucenePopulateResponse *
+    SOAP_FMAC2 soap_instantiate___ns1__lucenePopulateResponse(struct soap *, int, const char *, const char *, size_t *);
 
 inline struct __ns1__lucenePopulateResponse *soap_new___ns1__lucenePopulateResponse(struct soap *soap, int n = -1) {
   return soap_instantiate___ns1__lucenePopulateResponse(soap, n, nullptr, nullptr, nullptr);
@@ -7831,9 +7780,8 @@ SOAP_FMAC3 struct __ns1__isAccessAllowed *SOAP_FMAC4 soap_get___ns1__isAccessAll
    soap->error)
 #endif
 
-SOAP_FMAC1 struct __ns1__isAccessAllowed *SOAP_FMAC2 soap_instantiate___ns1__isAccessAllowed(struct soap *, int,
-                                                                                             const char *, const char *,
-                                                                                             size_t *);
+SOAP_FMAC1 struct __ns1__isAccessAllowed *
+    SOAP_FMAC2 soap_instantiate___ns1__isAccessAllowed(struct soap *, int, const char *, const char *, size_t *);
 
 inline struct __ns1__isAccessAllowed *soap_new___ns1__isAccessAllowed(struct soap *soap, int n = -1) {
   return soap_instantiate___ns1__isAccessAllowed(soap, n, nullptr, nullptr, nullptr);
@@ -7955,10 +7903,8 @@ soap_get___ns1__getRemainingMinutes(struct soap *, struct __ns1__getRemainingMin
    soap->error)
 #endif
 
-SOAP_FMAC1 struct __ns1__getRemainingMinutes *SOAP_FMAC2 soap_instantiate___ns1__getRemainingMinutes(struct soap *, int,
-                                                                                                     const char *,
-                                                                                                     const char *,
-                                                                                                     size_t *);
+SOAP_FMAC1 struct __ns1__getRemainingMinutes *
+    SOAP_FMAC2 soap_instantiate___ns1__getRemainingMinutes(struct soap *, int, const char *, const char *, size_t *);
 
 inline struct __ns1__getRemainingMinutes *soap_new___ns1__getRemainingMinutes(struct soap *soap, int n = -1) {
   return soap_instantiate___ns1__getRemainingMinutes(soap, n, nullptr, nullptr, nullptr);
@@ -8079,9 +8025,8 @@ SOAP_FMAC3 struct __ns1__logoutResponse *SOAP_FMAC4 soap_get___ns1__logoutRespon
    soap->error)
 #endif
 
-SOAP_FMAC1 struct __ns1__logoutResponse *SOAP_FMAC2 soap_instantiate___ns1__logoutResponse(struct soap *, int,
-                                                                                           const char *, const char *,
-                                                                                           size_t *);
+SOAP_FMAC1 struct __ns1__logoutResponse *
+    SOAP_FMAC2 soap_instantiate___ns1__logoutResponse(struct soap *, int, const char *, const char *, size_t *);
 
 inline struct __ns1__logoutResponse *soap_new___ns1__logoutResponse(struct soap *soap, int n = -1) {
   return soap_instantiate___ns1__logoutResponse(soap, n, nullptr, nullptr, nullptr);
@@ -8189,9 +8134,8 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_put___ns1__dummyResponse(struct soap *, const str
    soap->error)
 #endif
 
-SOAP_FMAC3 struct __ns1__dummyResponse *SOAP_FMAC4 soap_get___ns1__dummyResponse(struct soap *,
-                                                                                 struct __ns1__dummyResponse *,
-                                                                                 const char *, const char *);
+SOAP_FMAC3 struct __ns1__dummyResponse *
+    SOAP_FMAC4 soap_get___ns1__dummyResponse(struct soap *, struct __ns1__dummyResponse *, const char *, const char *);
 
 #ifndef soap_read___ns1__dummyResponse
 #define soap_read___ns1__dummyResponse(soap, data)                                                                     \
@@ -8199,9 +8143,8 @@ SOAP_FMAC3 struct __ns1__dummyResponse *SOAP_FMAC4 soap_get___ns1__dummyResponse
    soap->error)
 #endif
 
-SOAP_FMAC1 struct __ns1__dummyResponse *SOAP_FMAC2 soap_instantiate___ns1__dummyResponse(struct soap *, int,
-                                                                                         const char *, const char *,
-                                                                                         size_t *);
+SOAP_FMAC1 struct __ns1__dummyResponse *
+    SOAP_FMAC2 soap_instantiate___ns1__dummyResponse(struct soap *, int, const char *, const char *, size_t *);
 
 inline struct __ns1__dummyResponse *soap_new___ns1__dummyResponse(struct soap *soap, int n = -1) {
   return soap_instantiate___ns1__dummyResponse(soap, n, nullptr, nullptr, nullptr);
@@ -8320,9 +8263,8 @@ SOAP_FMAC3 struct __ns1__refreshResponse *SOAP_FMAC4 soap_get___ns1__refreshResp
    soap->error)
 #endif
 
-SOAP_FMAC1 struct __ns1__refreshResponse *SOAP_FMAC2 soap_instantiate___ns1__refreshResponse(struct soap *, int,
-                                                                                             const char *, const char *,
-                                                                                             size_t *);
+SOAP_FMAC1 struct __ns1__refreshResponse *
+    SOAP_FMAC2 soap_instantiate___ns1__refreshResponse(struct soap *, int, const char *, const char *, size_t *);
 
 inline struct __ns1__refreshResponse *soap_new___ns1__refreshResponse(struct soap *soap, int n = -1) {
   return soap_instantiate___ns1__refreshResponse(soap, n, nullptr, nullptr, nullptr);
@@ -8385,9 +8327,8 @@ SOAP_FMAC3 struct __ns1__getEntityNames *SOAP_FMAC4 soap_get___ns1__getEntityNam
    soap->error)
 #endif
 
-SOAP_FMAC1 struct __ns1__getEntityNames *SOAP_FMAC2 soap_instantiate___ns1__getEntityNames(struct soap *, int,
-                                                                                           const char *, const char *,
-                                                                                           size_t *);
+SOAP_FMAC1 struct __ns1__getEntityNames *
+    SOAP_FMAC2 soap_instantiate___ns1__getEntityNames(struct soap *, int, const char *, const char *, size_t *);
 
 inline struct __ns1__getEntityNames *soap_new___ns1__getEntityNames(struct soap *soap, int n = -1) {
   return soap_instantiate___ns1__getEntityNames(soap, n, nullptr, nullptr, nullptr);
@@ -8440,9 +8381,8 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_put___ns1__getApiVersion(struct soap *, const str
    soap->error)
 #endif
 
-SOAP_FMAC3 struct __ns1__getApiVersion *SOAP_FMAC4 soap_get___ns1__getApiVersion(struct soap *,
-                                                                                 struct __ns1__getApiVersion *,
-                                                                                 const char *, const char *);
+SOAP_FMAC3 struct __ns1__getApiVersion *
+    SOAP_FMAC4 soap_get___ns1__getApiVersion(struct soap *, struct __ns1__getApiVersion *, const char *, const char *);
 
 #ifndef soap_read___ns1__getApiVersion
 #define soap_read___ns1__getApiVersion(soap, data)                                                                     \
@@ -8450,9 +8390,8 @@ SOAP_FMAC3 struct __ns1__getApiVersion *SOAP_FMAC4 soap_get___ns1__getApiVersion
    soap->error)
 #endif
 
-SOAP_FMAC1 struct __ns1__getApiVersion *SOAP_FMAC2 soap_instantiate___ns1__getApiVersion(struct soap *, int,
-                                                                                         const char *, const char *,
-                                                                                         size_t *);
+SOAP_FMAC1 struct __ns1__getApiVersion *
+    SOAP_FMAC2 soap_instantiate___ns1__getApiVersion(struct soap *, int, const char *, const char *, size_t *);
 
 inline struct __ns1__getApiVersion *soap_new___ns1__getApiVersion(struct soap *soap, int n = -1) {
   return soap_instantiate___ns1__getApiVersion(soap, n, nullptr, nullptr, nullptr);
@@ -8571,9 +8510,8 @@ SOAP_FMAC3 struct __ns1__updateResponse *SOAP_FMAC4 soap_get___ns1__updateRespon
    soap->error)
 #endif
 
-SOAP_FMAC1 struct __ns1__updateResponse *SOAP_FMAC2 soap_instantiate___ns1__updateResponse(struct soap *, int,
-                                                                                           const char *, const char *,
-                                                                                           size_t *);
+SOAP_FMAC1 struct __ns1__updateResponse *
+    SOAP_FMAC2 soap_instantiate___ns1__updateResponse(struct soap *, int, const char *, const char *, size_t *);
 
 inline struct __ns1__updateResponse *soap_new___ns1__updateResponse(struct soap *soap, int n = -1) {
   return soap_instantiate___ns1__updateResponse(soap, n, nullptr, nullptr, nullptr);
@@ -8804,9 +8742,8 @@ SOAP_FMAC3 struct __ns1__deleteResponse *SOAP_FMAC4 soap_get___ns1__deleteRespon
    soap->error)
 #endif
 
-SOAP_FMAC1 struct __ns1__deleteResponse *SOAP_FMAC2 soap_instantiate___ns1__deleteResponse(struct soap *, int,
-                                                                                           const char *, const char *,
-                                                                                           size_t *);
+SOAP_FMAC1 struct __ns1__deleteResponse *
+    SOAP_FMAC2 soap_instantiate___ns1__deleteResponse(struct soap *, int, const char *, const char *, size_t *);
 
 inline struct __ns1__deleteResponse *soap_new___ns1__deleteResponse(struct soap *soap, int n = -1) {
   return soap_instantiate___ns1__deleteResponse(soap, n, nullptr, nullptr, nullptr);
@@ -8859,9 +8796,8 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_put___ns1__getProperties(struct soap *, const str
    soap->error)
 #endif
 
-SOAP_FMAC3 struct __ns1__getProperties *SOAP_FMAC4 soap_get___ns1__getProperties(struct soap *,
-                                                                                 struct __ns1__getProperties *,
-                                                                                 const char *, const char *);
+SOAP_FMAC3 struct __ns1__getProperties *
+    SOAP_FMAC4 soap_get___ns1__getProperties(struct soap *, struct __ns1__getProperties *, const char *, const char *);
 
 #ifndef soap_read___ns1__getProperties
 #define soap_read___ns1__getProperties(soap, data)                                                                     \
@@ -8869,9 +8805,8 @@ SOAP_FMAC3 struct __ns1__getProperties *SOAP_FMAC4 soap_get___ns1__getProperties
    soap->error)
 #endif
 
-SOAP_FMAC1 struct __ns1__getProperties *SOAP_FMAC2 soap_instantiate___ns1__getProperties(struct soap *, int,
-                                                                                         const char *, const char *,
-                                                                                         size_t *);
+SOAP_FMAC1 struct __ns1__getProperties *
+    SOAP_FMAC2 soap_instantiate___ns1__getProperties(struct soap *, int, const char *, const char *, size_t *);
 
 inline struct __ns1__getProperties *soap_new___ns1__getProperties(struct soap *soap, int n = -1) {
   return soap_instantiate___ns1__getProperties(soap, n, nullptr, nullptr, nullptr);
@@ -9448,8 +9383,9 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__luceneGetPopulatingResponse(str
    soap->error)
 #endif
 
-SOAP_FMAC3 ns1__luceneGetPopulatingResponse **SOAP_FMAC4 soap_get_PointerTons1__luceneGetPopulatingResponse(
-    struct soap *, ns1__luceneGetPopulatingResponse **, const char *, const char *);
+SOAP_FMAC3 ns1__luceneGetPopulatingResponse **
+    SOAP_FMAC4 soap_get_PointerTons1__luceneGetPopulatingResponse(struct soap *, ns1__luceneGetPopulatingResponse **,
+                                                                  const char *, const char *);
 
 #ifndef soap_read_PointerTons1__luceneGetPopulatingResponse
 #define soap_read_PointerTons1__luceneGetPopulatingResponse(soap, data)                                                \
@@ -9695,8 +9631,9 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__lucenePopulateResponse(struct s
    soap->error)
 #endif
 
-SOAP_FMAC3 ns1__lucenePopulateResponse **SOAP_FMAC4 soap_get_PointerTons1__lucenePopulateResponse(
-    struct soap *, ns1__lucenePopulateResponse **, const char *, const char *);
+SOAP_FMAC3 ns1__lucenePopulateResponse **
+    SOAP_FMAC4 soap_get_PointerTons1__lucenePopulateResponse(struct soap *, ns1__lucenePopulateResponse **,
+                                                             const char *, const char *);
 
 #ifndef soap_read_PointerTons1__lucenePopulateResponse
 #define soap_read_PointerTons1__lucenePopulateResponse(soap, data)                                                     \
@@ -9757,8 +9694,9 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__isAccessAllowedResponse(struct 
    soap->error)
 #endif
 
-SOAP_FMAC3 ns1__isAccessAllowedResponse **SOAP_FMAC4 soap_get_PointerTons1__isAccessAllowedResponse(
-    struct soap *, ns1__isAccessAllowedResponse **, const char *, const char *);
+SOAP_FMAC3 ns1__isAccessAllowedResponse **
+    SOAP_FMAC4 soap_get_PointerTons1__isAccessAllowedResponse(struct soap *, ns1__isAccessAllowedResponse **,
+                                                              const char *, const char *);
 
 #ifndef soap_read_PointerTons1__isAccessAllowedResponse
 #define soap_read_PointerTons1__isAccessAllowedResponse(soap, data)                                                    \
@@ -9883,8 +9821,9 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__getRemainingMinutesResponse(str
    soap->error)
 #endif
 
-SOAP_FMAC3 ns1__getRemainingMinutesResponse **SOAP_FMAC4 soap_get_PointerTons1__getRemainingMinutesResponse(
-    struct soap *, ns1__getRemainingMinutesResponse **, const char *, const char *);
+SOAP_FMAC3 ns1__getRemainingMinutesResponse **
+    SOAP_FMAC4 soap_get_PointerTons1__getRemainingMinutesResponse(struct soap *, ns1__getRemainingMinutesResponse **,
+                                                                  const char *, const char *);
 
 #ifndef soap_read_PointerTons1__getRemainingMinutesResponse
 #define soap_read_PointerTons1__getRemainingMinutesResponse(soap, data)                                                \
@@ -10120,8 +10059,9 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__getEntityNamesResponse(struct s
    soap->error)
 #endif
 
-SOAP_FMAC3 ns1__getEntityNamesResponse **SOAP_FMAC4 soap_get_PointerTons1__getEntityNamesResponse(
-    struct soap *, ns1__getEntityNamesResponse **, const char *, const char *);
+SOAP_FMAC3 ns1__getEntityNamesResponse **
+    SOAP_FMAC4 soap_get_PointerTons1__getEntityNamesResponse(struct soap *, ns1__getEntityNamesResponse **,
+                                                             const char *, const char *);
 
 #ifndef soap_read_PointerTons1__getEntityNamesResponse
 #define soap_read_PointerTons1__getEntityNamesResponse(soap, data)                                                     \
@@ -10763,8 +10703,9 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__permissibleStringValue(struct s
    soap->error)
 #endif
 
-SOAP_FMAC3 ns1__permissibleStringValue **SOAP_FMAC4 soap_get_PointerTons1__permissibleStringValue(
-    struct soap *, ns1__permissibleStringValue **, const char *, const char *);
+SOAP_FMAC3 ns1__permissibleStringValue **
+    SOAP_FMAC4 soap_get_PointerTons1__permissibleStringValue(struct soap *, ns1__permissibleStringValue **,
+                                                             const char *, const char *);
 
 #ifndef soap_read_PointerTons1__permissibleStringValue
 #define soap_read_PointerTons1__permissibleStringValue(soap, data)                                                     \
@@ -10871,8 +10812,9 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__investigationParameter(struct s
    soap->error)
 #endif
 
-SOAP_FMAC3 ns1__investigationParameter **SOAP_FMAC4 soap_get_PointerTons1__investigationParameter(
-    struct soap *, ns1__investigationParameter **, const char *, const char *);
+SOAP_FMAC3 ns1__investigationParameter **
+    SOAP_FMAC4 soap_get_PointerTons1__investigationParameter(struct soap *, ns1__investigationParameter **,
+                                                             const char *, const char *);
 
 #ifndef soap_read_PointerTons1__investigationParameter
 #define soap_read_PointerTons1__investigationParameter(soap, data)                                                     \
@@ -10904,8 +10846,9 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__investigationInstrument(struct 
    soap->error)
 #endif
 
-SOAP_FMAC3 ns1__investigationInstrument **SOAP_FMAC4 soap_get_PointerTons1__investigationInstrument(
-    struct soap *, ns1__investigationInstrument **, const char *, const char *);
+SOAP_FMAC3 ns1__investigationInstrument **
+    SOAP_FMAC4 soap_get_PointerTons1__investigationInstrument(struct soap *, ns1__investigationInstrument **,
+                                                              const char *, const char *);
 
 #ifndef soap_read_PointerTons1__investigationInstrument
 #define soap_read_PointerTons1__investigationInstrument(soap, data)                                                    \
@@ -11233,8 +11176,9 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__dataCollectionDatafile(struct s
    soap->error)
 #endif
 
-SOAP_FMAC3 ns1__dataCollectionDatafile **SOAP_FMAC4 soap_get_PointerTons1__dataCollectionDatafile(
-    struct soap *, ns1__dataCollectionDatafile **, const char *, const char *);
+SOAP_FMAC3 ns1__dataCollectionDatafile **
+    SOAP_FMAC4 soap_get_PointerTons1__dataCollectionDatafile(struct soap *, ns1__dataCollectionDatafile **,
+                                                             const char *, const char *);
 
 #ifndef soap_read_PointerTons1__dataCollectionDatafile
 #define soap_read_PointerTons1__dataCollectionDatafile(soap, data)                                                     \
@@ -11299,8 +11243,9 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__dataCollectionParameter(struct 
    soap->error)
 #endif
 
-SOAP_FMAC3 ns1__dataCollectionParameter **SOAP_FMAC4 soap_get_PointerTons1__dataCollectionParameter(
-    struct soap *, ns1__dataCollectionParameter **, const char *, const char *);
+SOAP_FMAC3 ns1__dataCollectionParameter **
+    SOAP_FMAC4 soap_get_PointerTons1__dataCollectionParameter(struct soap *, ns1__dataCollectionParameter **,
+                                                              const char *, const char *);
 
 #ifndef soap_read_PointerTons1__dataCollectionParameter
 #define soap_read_PointerTons1__dataCollectionParameter(soap, data)                                                    \
@@ -11408,9 +11353,8 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__studyStatus(struct soap *, enum
    soap->error)
 #endif
 
-SOAP_FMAC3 enum ns1__studyStatus **SOAP_FMAC4 soap_get_PointerTons1__studyStatus(struct soap *,
-                                                                                 enum ns1__studyStatus **, const char *,
-                                                                                 const char *);
+SOAP_FMAC3 enum ns1__studyStatus **
+    SOAP_FMAC4 soap_get_PointerTons1__studyStatus(struct soap *, enum ns1__studyStatus **, const char *, const char *);
 
 #ifndef soap_read_PointerTons1__studyStatus
 #define soap_read_PointerTons1__studyStatus(soap, data)                                                                \
