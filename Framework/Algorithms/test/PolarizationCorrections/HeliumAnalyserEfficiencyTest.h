@@ -11,14 +11,10 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
-
-#include "MantidAPI/Run.h"
-#include "MantidAPI/TableRow.h"
-
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAlgorithms/PolarizationCorrections/HeliumAnalyserEfficiency.h"
-#include "MantidKernel/ArrayProperty.h"
+
+#include "AnalyserEfficiencyTestHelpers.h"
 
 #include <cmath>
 #include <cxxtest/TestSuite.h>
@@ -26,142 +22,7 @@
 using namespace Mantid;
 using namespace Mantid::Algorithms;
 using namespace Mantid::API;
-
-namespace HePolDecayTest {
-
-static const std::string GROUP_NAME = "group";
-static const std::string OUTPUT_NAME = "groupOut";
-static const std::string OUTPUT_TABLE_NAME = "tableOut";
-static const std::string OUTPUT_CURVES_NAME = "curvesOut";
-static const std::string TEST_SPIN_STATE = "00,01,10,11";
-static const std::string TEST_ALGORITHM = "HeliumAnalyserEfficiency";
-static const auto TIME_ORIGIN = DateAndTime("2025-07-01T08:00:00");
-constexpr double DELTA = 0.01;
-
-struct PolarizationTestParameters {
-  PolarizationTestParameters() = default;
-  PolarizationTestParameters(const double tauIni, const double polIni, const double pxdIni)
-      : Tau(tauIni), polInitial(polIni), pxd(pxdIni), pxdError(), outPolarizations(), outEfficiencies() {}
-  double Tau{45};
-  double polInitial{0.6};
-  double pxd{12};
-  double pxdError{0};
-  std::vector<double> outPolarizations{};
-  std::vector<std::vector<double>> outEfficiencies{};
-};
-
-struct InputTestParameters {
-  InputTestParameters() = default;
-  InputTestParameters(const int spec, const int bins, const std::string &group, const std::string &wsName,
-                      const std::string &units)
-      : nSpec(spec), nBins(bins), groupName(group), testName(wsName), xUnit(units) {}
-  int nSpec{1};
-  int nBins{5};
-  std::string groupName{GROUP_NAME};
-  std::string testName{OUTPUT_NAME};
-  std::string xUnit{"Wavelength"};
-};
-
-IAlgorithm_sptr prepareAlgorithm(const std::vector<std::string> &inputWorkspaces,
-                                 const std::string &outputName = OUTPUT_NAME,
-                                 const std::string &spinState = TEST_SPIN_STATE,
-                                 const std::string &outputFitParameters = "", const std::string &outputFitCurves = "") {
-  const auto heAlgorithm = AlgorithmManager::Instance().create(TEST_ALGORITHM);
-  heAlgorithm->initialize();
-  heAlgorithm->setProperty("InputWorkspaces", inputWorkspaces);
-  heAlgorithm->setProperty("SpinStates", spinState);
-  heAlgorithm->setProperty("OutputWorkspace", outputName);
-
-  heAlgorithm->setProperty("OutputFitParameters", outputFitParameters);
-  heAlgorithm->setProperty("OutputFitCurves", outputFitCurves);
-  return heAlgorithm;
-}
-
-MatrixWorkspace_sptr generateWorkspace(const std::string &name, const std::vector<double> &x,
-                                       const std::vector<double> &y, const std::string &xUnit = "Wavelength",
-                                       const int nSpec = 1, const double delay = 1) {
-  const auto createWorkspace = AlgorithmManager::Instance().create("CreateWorkspace");
-  createWorkspace->initialize();
-  createWorkspace->setProperty("DataX", x);
-  createWorkspace->setProperty("DataY", y);
-  createWorkspace->setProperty("UnitX", xUnit);
-  createWorkspace->setProperty("NSpec", nSpec);
-  createWorkspace->setProperty("OutputWorkspace", name);
-  createWorkspace->execute();
-
-  const auto convertToHistogram = AlgorithmManager::Instance().create("ConvertToHistogram");
-  convertToHistogram->initialize();
-  convertToHistogram->setProperty("InputWorkspace", name);
-  convertToHistogram->setProperty("OutputWorkspace", name);
-  convertToHistogram->execute();
-
-  MatrixWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(name);
-  // We are working with delays in hours but DateAndTime overloads + operator with seconds for type double, thus factor
-  // 3600
-  const auto start = TIME_ORIGIN + 3600 * delay;
-  ws->mutableRun().setStartAndEndTime(start, start + 1.0);
-  return ws;
-}
-
-void groupWorkspaces(const std::string &name, const std::vector<MatrixWorkspace_sptr> &wsToGroup) {
-  const auto groupWorkspace = AlgorithmManager::Instance().create("GroupWorkspaces");
-  groupWorkspace->initialize();
-  std::vector<std::string> wsToGroupNames(wsToGroup.size());
-  std::transform(wsToGroup.cbegin(), wsToGroup.cend(), wsToGroupNames.begin(),
-                 [](const MatrixWorkspace_sptr &w) { return w->getName(); });
-  groupWorkspace->setProperty("InputWorkspaces", wsToGroupNames);
-  groupWorkspace->setProperty("OutputWorkspace", name);
-  groupWorkspace->execute();
-}
-
-// TimeDifference is a python algorithm. This is a simple mock for running the tests.
-class TimeDifference final : public Algorithm {
-public:
-  const std::string name() const override { return "TimeDifference"; }
-  int version() const override { return 1; }
-  const std::string summary() const override { return "TimeDifference Mock Algorithm"; }
-
-private:
-  void init() override {
-    declareProperty(std::make_unique<Kernel::ArrayProperty<std::string>>("InputWorkspaces"));
-    declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>("OutputWorkspace", "out",
-                                                                         Mantid::Kernel::Direction::Output),
-                    "");
-    declareProperty("ReferenceWorkspace", "");
-  };
-
-  void exec() override {
-    const ITableWorkspace_sptr outputTable = WorkspaceFactory::Instance().createTable();
-    const std::vector<std::string> workspaces = getProperty("InputWorkspaces");
-
-    outputTable->addColumn("str", "ws_name");
-    outputTable->addColumn("str", "midtime_stamp");
-    outputTable->addColumn("float", "seconds");
-    outputTable->addColumn("float", "seconds_error");
-    outputTable->addColumn("float", "hours");
-    outputTable->addColumn("float", "hours_error");
-
-    for (const auto &wsName : workspaces) {
-      const WorkspaceGroup_sptr group = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(wsName);
-      const auto ws = std::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
-      const auto timeStart = ws->mutableRun().getPropertyValueAsType<std::string>("start_time");
-      const auto delay = static_cast<float>(DateAndTime::secondsFromDuration(DateAndTime(timeStart) - TIME_ORIGIN));
-
-      TableRow newRow = outputTable->appendRow();
-      // Set error to 2 seconds (this will be a duration of 1 second).
-      constexpr float sError = 2.0;
-      constexpr float hError = sError / 3600;
-      newRow << wsName << timeStart << delay << sError << delay / 3600 << hError;
-    }
-    setProperty("OutputWorkspace", outputTable);
-  }
-};
-
-DECLARE_ALGORITHM(TimeDifference)
-
-} // namespace HePolDecayTest
-
-using namespace HePolDecayTest;
+using namespace HeAnalyserTest;
 
 class HeliumAnalyserEfficiencyTest : public CxxTest::TestSuite {
 public:
@@ -187,7 +48,7 @@ public:
     std::vector<double> x{1};
     std::vector<double> y{1};
     MatrixWorkspace_sptr test = generateWorkspace("test", x, y);
-    const auto alg = prepareAlgorithm({"test"});
+    const auto alg = prepareHeEffAlgorithm({"test"});
     TSM_ASSERT_THROWS("InputWorkspaces has to be a group", alg->execute(), const std::runtime_error &);
   }
 
@@ -195,7 +56,7 @@ public:
     // The units of the input workspace should be wavelength
     const auto groupNames = generateEfficienciesFromLifetimeAndInitialPolarization();
     AnalysisDataService::Instance().remove("T00_0");
-    const auto alg = prepareAlgorithm(groupNames);
+    const auto alg = prepareHeEffAlgorithm(groupNames);
     TS_ASSERT_THROWS_EQUALS(alg->execute(), const std::runtime_error &e, std::string(e.what()),
                             "Some invalid Properties found: \n InputWorkspaces: Error in workspace group_0 : The "
                             "number of periods within the input workspace is not an allowed value.");
@@ -212,7 +73,7 @@ public:
   void testInputWorkspaceDoesntFitTauIfOnlyOneInput() {
     // Fitting with one input workspace is equivalent to calculating helium efficiency at t=0
     const auto groupNames = generateEfficienciesFromLifetimeAndInitialPolarization();
-    const auto alg = prepareAlgorithm(groupNames);
+    const auto alg = prepareHeEffAlgorithm(groupNames);
 
     alg->execute();
     TS_ASSERT(alg->isExecuted());
@@ -226,7 +87,7 @@ public:
     // number of parameters exceeds the number of data points.
     m_inputParameters.nBins = 2;
     const auto groupNames = generateEfficienciesFromLifetimeAndInitialPolarization();
-    const auto alg = prepareAlgorithm(groupNames);
+    const auto alg = prepareHeEffAlgorithm(groupNames);
 
     alg->execute();
     TS_ASSERT(alg->isExecuted());
@@ -236,7 +97,7 @@ public:
 
   void testChildAlgorithmExecutesSuccessfully() {
     const auto groupNames = generateEfficienciesFromLifetimeAndInitialPolarization();
-    const auto alg = prepareAlgorithm(groupNames);
+    const auto alg = prepareHeEffAlgorithm(groupNames);
     alg->setChild(true);
 
     alg->execute();
@@ -253,7 +114,7 @@ public:
     for (const auto &delayVec : delays) {
       const auto groupNames = generateEfficienciesFromLifetimeAndInitialPolarization(delayVec);
       const auto alg =
-          prepareAlgorithm(groupNames, OUTPUT_NAME, TEST_SPIN_STATE, OUTPUT_TABLE_NAME, OUTPUT_CURVES_NAME);
+          prepareHeEffAlgorithm(groupNames, OUTPUT_NAME, SPIN_STATE, OUTPUT_TABLE_NAME, OUTPUT_CURVES_NAME);
 
       alg->execute();
       TS_ASSERT(alg->isExecuted());
@@ -269,7 +130,7 @@ public:
       m_polParameters.Tau = tau;
       const auto groupNames = generateEfficienciesFromLifetimeAndInitialPolarization(delays);
       const auto alg =
-          prepareAlgorithm(groupNames, OUTPUT_NAME, TEST_SPIN_STATE, OUTPUT_TABLE_NAME, OUTPUT_CURVES_NAME);
+          prepareHeEffAlgorithm(groupNames, OUTPUT_NAME, SPIN_STATE, OUTPUT_TABLE_NAME, OUTPUT_CURVES_NAME);
 
       alg->execute();
       TS_ASSERT(alg->isExecuted());
