@@ -11,6 +11,7 @@
 //---------------------------------------------------
 
 #include "MantidAPI/IFileLoader.h"
+#include "MantidAPI/LogManager.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidNexus/NexusClasses_fwd.h"
@@ -55,6 +56,7 @@ public:
   // methods
   void update(int64_t position);
   void complete();
+  void setTarget(int64_t target);
 };
 
 class EventProcessor {
@@ -220,7 +222,7 @@ private:
 
   // not supported
   File(const File &);
-  File &operator=(const File &);
+  // File &operator=(const File &);
 
 public:
   // construction
@@ -246,6 +248,58 @@ public:
 };
 
 } // namespace Tar
+
+namespace Anxs {
+// options to capture timeseries data
+enum class ScanLog { Start, End, Mean };
+
+std::string extractWorkspaceTitle(const std::string &nxsFile);
+
+int64_t epochRelDateTimeBase(int64_t epochInNanoSeconds);
+
+template <typename T> bool loadNXDataSet(const Nexus::NXEntry &entry, const std::string &path, T &value, int index);
+bool loadNXString(const Nexus::NXEntry &entry, const std::string &path, std::string &value);
+
+bool isTimedDataSet(Nexus::NXEntry &entry, const std::string &path);
+std::pair<uint64_t, uint64_t> getTimeScanLimits(const Nexus::NXEntry &entry, int datasetIx);
+std::pair<uint64_t, uint64_t> getHMScanLimits(const Nexus::NXEntry &entry, int datasetIx);
+
+template <typename T>
+uint64_t extractTimedDataSet(const Nexus::NXEntry &entry, const std::string &path, uint64_t startTime, uint64_t endTime,
+                             std::vector<uint64_t> &times, std::vector<T> &events, std::string &units);
+template <typename T>
+bool extractTimedDataSet(const Nexus::NXEntry &entry, const std::string &path, uint64_t startTime, uint64_t endTime,
+                         ScanLog valueOption, uint64_t &eventTime, T &eventValue, std::string &units);
+
+template <typename T, typename LT>
+void logScaledTimeSeriesData(const Nexus::NXEntry &entry, const std::string &path, const std::string &name,
+                             API::LogManager &logManager, uint64_t startTime, uint64_t endTime, ScanLog valueOption,
+                             LT scale, const std::string &scaledUnits) {
+  // space for the data in the time period and get the data with a preload value of 1 to
+  // get the value going into the period.
+  std::vector<uint64_t> logTimes;
+  std::vector<LT> logValues;
+  std::string units;
+
+  auto n = extractTimedDataSet(entry, path, startTime, endTime, valueOption, logTimes, logValues, units);
+  if (n == 0) // nothing to do
+    return;
+
+  // scale the logged value if necessary
+  if (scale != 1) {
+    std::transform(logValues.begin(), logValues.end(), logValues.begin(), [scale](LT x) { return x * scale; });
+    units = scaledUnits;
+  }
+
+  // get the units if available
+  addTimeSeriesProperty<LT>(logManager, name, logTimes, logValues, units);
+}
+
+void ReadEventData(ProgressTracker &prog, const Nexus::NXEntry &entry, EventProcessor *handler, uint64_t start_nsec,
+                   uint64_t end_nsec, const std::string &neutron_path, int tube_resolution = 1024);
+
+} // namespace Anxs
+
 } // namespace ANSTO
 } // namespace DataHandling
 } // namespace Mantid
