@@ -21,24 +21,39 @@ QtPlotView::QtPlotView(QWidget *parent) : QWidget(parent), m_canvas(new FigureCa
   createLayout();
 }
 
-void QtPlotView::setScaleLinear(const AxisID axisID) {
+void QtPlotView::setScaleLinear(const AxisID axisID) { setScale(axisID, "linear"); }
+
+void QtPlotView::setScaleLog(const AxisID axisID) { setScale(axisID, "log"); }
+
+void QtPlotView::setScaleSymLog(const AxisID axisID, const double linthresh) {
+  setScale(axisID, "symlog", {std::pair{QString("linthresh"), QVariant(linthresh)}});
+}
+
+void QtPlotView::setScale(const AxisID axisID, const std::string &scale,
+                          const QHash<QString, QVariant> &additionalProperties) {
+  QString addPropID;
   switch (axisID) {
   case AxisID::XBottom:
-    m_axisProperties[QString("xscale")] = QVariant("linear");
+    addPropID = "xscale_opts";
+    m_axisProperties[QString("xscale")] = QVariant(scale.c_str());
     break;
   case AxisID::YLeft:
-    m_axisProperties[QString("yscale")] = QVariant("linear");
+    addPropID = "yscale_opts";
+    m_axisProperties[QString("yscale")] = QVariant(scale.c_str());
     break;
+  }
+  if (!additionalProperties.empty()) {
+    m_axisProperties[addPropID] = additionalProperties;
   }
 }
 
-void QtPlotView::setScaleLog(const AxisID axisID) {
+void QtPlotView::setAxisLimit(const AxisID axisID, double axMin, double axMax) {
   switch (axisID) {
   case AxisID::XBottom:
-    m_axisProperties[QString("xscale")] = QVariant("log");
+    m_axisProperties[QString("xlim")] = QList<QVariant>{axMin, axMax};
     break;
   case AxisID::YLeft:
-    m_axisProperties[QString("yscale")] = QVariant("log");
+    m_axisProperties[QString("ylim")] = QList<QVariant>{axMin, axMax};
     break;
   }
 }
