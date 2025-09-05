@@ -282,7 +282,7 @@ class MaskingModel:
         return self.create_table_workspace_from_rows(table_rows, store_in_ads)
 
     def export_selectors(self):
-        _ = self.generate_mask_table_ws()
+        _ = self.generate_mask_table_ws(store_in_ads=True)
 
     def apply_selectors(self):
         mask_ws = self.generate_mask_table_ws(store_in_ads=False)

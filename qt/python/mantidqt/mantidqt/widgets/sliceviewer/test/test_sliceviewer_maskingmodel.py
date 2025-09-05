@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-from unittest.mock import patch
+from unittest.mock import patch, Mock, call
 from collections import namedtuple
 
 from mantidqt.widgets.sliceviewer.models.masking import MaskingModel
@@ -16,7 +16,7 @@ class SliceViewerMaskingModelTest(unittest.TestCase):
     TableRow = namedtuple("TableRow", ["spec_list", "x_min", "x_max"])
 
     def setUp(self):
-        self.model = MaskingModel("test_ws")
+        self.model = MaskingModel("test_ws_name")
 
     @staticmethod
     def _set_up_model_test(text, transpose=False, images=None):
@@ -62,12 +62,14 @@ class SliceViewerMaskingModelTest(unittest.TestCase):
         CursorInfo_mock.assert_called_once_with(**kwargs)
 
     def test_create_table_workspace_from_rows(self):
-        table_ws = self.model.create_table_workspace_from_rows(
-            [self.TableRow("1", 5, 8), self.TableRow("2", 6, 9), self.TableRow("3-10", 7, 10)], False
-        )
-        self.assertEqual(table_ws.column("SpectraList"), ["1", "2", "3-10"])
-        self.assertEqual(table_ws.column("XMin"), [5, 6, 7])
-        self.assertEqual(table_ws.column("XMax"), [8, 9, 10])
+        with patch("mantidqt.widgets.sliceviewer.models.masking.AnalysisDataService") as ads_mock:
+            table_ws = self.model.create_table_workspace_from_rows(
+                [self.TableRow("1", 5, 8), self.TableRow("2", 6, 9), self.TableRow("3-10", 7, 10)], False
+            )
+            self.assertEqual(table_ws.column("SpectraList"), ["1", "2", "3-10"])
+            self.assertEqual(table_ws.column("XMin"), [5, 6, 7])
+            self.assertEqual(table_ws.column("XMax"), [8, 9, 10])
+            ads_mock.addOrReplace.assert_not_called()
 
     def test_create_table_workspace_from_rows_store_in_ads(self):
         with patch("mantidqt.widgets.sliceviewer.models.masking.AnalysisDataService") as ads_mock:
@@ -77,16 +79,46 @@ class SliceViewerMaskingModelTest(unittest.TestCase):
             self.assertEqual(table_ws.column("SpectraList"), ["1", "2", "3-10"])
             self.assertEqual(table_ws.column("XMin"), [5, 6, 7])
             self.assertEqual(table_ws.column("XMax"), [8, 9, 10])
-            ads_mock.addOrReplace.called_once_with("test_ws_sv_mask_tbl", table_ws)
+            ads_mock.addOrReplace.assert_called_once_with("test_ws_name_sv_mask_tbl", table_ws)
 
     def test_generate_mask_table_ws(self):
-        pass
+        mock_masks = [Mock(generate_table_rows=Mock(return_value=[f"test_{i}"])) for i in range(3)]
+        self.model._masks = mock_masks
+        with patch("mantidqt.widgets.sliceviewer.models.masking.MaskingModel.create_table_workspace_from_rows") as create_tbl_mock:
+            self.model.generate_mask_table_ws(store_in_ads=False)
+            create_tbl_mock.assert_called_once_with(["test_0", "test_1", "test_2"], False)
 
     def test_export_selectors(self):
-        pass
+        with (
+            patch("mantidqt.widgets.sliceviewer.models.masking.AnalysisDataService") as ads_mock,
+            patch("mantidqt.widgets.sliceviewer.models.masking.MaskingModel.generate_mask_table_ws") as gen_mask_tbl_mock,
+        ):
+            self.model.export_selectors()
+            ads_mock.assert_not_called()
+            gen_mask_tbl_mock.assert_called_once_with(store_in_ads=True)
 
     def test_apply_selectors(self):
-        pass
+        with (
+            patch("mantidqt.widgets.sliceviewer.models.masking.AnalysisDataService") as ads_mock,
+            patch(
+                "mantidqt.widgets.sliceviewer.models.masking.MaskingModel.generate_mask_table_ws", return_value="test_ws"
+            ) as gen_mask_tbl_mock,
+            patch("mantidqt.widgets.sliceviewer.models.masking.AlgorithmManager") as alg_manager_mock,
+        ):
+            alg_mock = alg_manager_mock.create.return_value
+            self.model.apply_selectors()
+            ads_mock.assert_not_called()
+            gen_mask_tbl_mock.assert_called_once_with(store_in_ads=False)
+            alg_mock.create.called_once_with("MaksBinsFromTable")
+            alg_mock.setProperty.assert_has_calls(
+                [
+                    call("InputWorkspace", "test_ws_name"),
+                    call("OutputWorkspace", "test_ws_name"),
+                    call("MaskingInformation", "test_ws"),
+                    call("InputWorkspaceIndexType", "SpectrumNumber"),
+                ]
+            )
+            alg_mock.execute.assert_called_once()
 
 
 class CursorInfoTest(unittest.TestCase):
