@@ -11,7 +11,7 @@ import sys
 import unittest
 from unittest import mock
 from unittest.mock import patch, call
-from mantid.api import IMDHistoWorkspace
+from mantid.api import IMDHistoWorkspace, MatrixWorkspace
 from mantid.kernel import SpecialCoordinateSystem
 from mantidqt.utils.qt.testing import start_qapplication
 
@@ -39,7 +39,7 @@ from mantidqt.widgets.sliceviewer.views.dataview import SliceViewerDataView  # n
 def _create_presenter(model: SliceViewerModel, view, mock_sliceinfo_cls, enable_nonortho_axes, supports_nonortho):
     data_view_mock = view.data_view
     data_view_mock.plot_MDH = mock.Mock()
-    presenter = SliceViewer(None, model=model, view=view)
+    presenter = SliceViewer(ws=model.ws, model=model, view=view)
     # Patch out things from the base presenter
     presenter.show_all_data_clicked = mock.Mock()
 
@@ -122,7 +122,10 @@ class SliceViewerTest(unittest.TestCase):
         data_view4D.dimensions = dimensions4D
         self.view4D.data_view = data_view4D
 
+        mock_ws = mock.Mock(spec=MatrixWorkspace)
         self.model = mock.Mock(spec=SliceViewerModel)
+        # self.model._ws = mock_ws - May need this
+        self.model.ws = mock_ws
         self.model.get_ws = mock.Mock()
         self.model.get_data = mock.Mock()
         self.model.rebin = mock.Mock()
@@ -148,13 +151,17 @@ class SliceViewerTest(unittest.TestCase):
         self._ws_info_patcher.stop()
 
     def test_on_close(self):
-        pres = SliceViewer(mock.Mock(), model=mock.MagicMock(), view=mock.MagicMock())
+        mock_model = mock.MagicMock()
+        mock_model.ws = mock.Mock(spec=MatrixWorkspace)
+        pres = SliceViewer(mock.Mock(), model=mock_model, view=mock.MagicMock())
         self.assertIsNotNone(pres.ads_observer)
         pres.clear_observer()
         self.assertEqual(pres.ads_observer, None)
 
     def test_notify_close_from_qt(self):
-        pres = SliceViewer(mock.Mock(), model=mock.MagicMock(), view=mock.MagicMock())
+        mock_model = mock.MagicMock()
+        mock_model.ws = mock.Mock(spec=MatrixWorkspace)
+        pres = SliceViewer(mock.Mock(), model=mock_model, view=mock.MagicMock())
         pres.notify_close()
         self.assertIsNone(pres.view)
 
@@ -268,7 +275,9 @@ class SliceViewerTest(unittest.TestCase):
 
         presenter.nonorthogonal_axes(True)
 
-        data_view_mock.deactivate_and_disable_tool.assert_called_once_with(ToolItemText.REGIONSELECTION)
+        data_view_mock.deactivate_and_disable_tool.assert_has_calls(
+            [mock.call(ToolItemText.MASKING), mock.call(ToolItemText.REGIONSELECTION)]
+        )
         data_view_mock.create_axes_nonorthogonal.assert_called_once()
         data_view_mock.create_axes_orthogonal.assert_not_called()
         data_view_mock.disable_tool_button.assert_has_calls([mock.call(ToolItemText.LINEPLOTS)])
@@ -295,7 +304,7 @@ class SliceViewerTest(unittest.TestCase):
         data_view_mock.create_axes_orthogonal.assert_called_once()
         data_view_mock.create_axes_nonorthogonal.assert_not_called()
         data_view_mock.plot_MDH.assert_called_once()
-        data_view_mock.enable_tool_button.assert_has_calls((mock.call(ToolItemText.LINEPLOTS), mock.call(ToolItemText.REGIONSELECTION)))
+        data_view_mock.enable_tool_button.assert_has_calls([mock.call(ToolItemText.LINEPLOTS), mock.call(ToolItemText.REGIONSELECTION)])
 
     @mock.patch("mantidqt.widgets.sliceviewer.presenters.presenter.SliceInfo")
     def test_non_orthogonal_axes_toggled_off_not_enable_non_axis_cuts_if_not_supported(self, mock_sliceinfo_cls):
@@ -539,6 +548,7 @@ class SliceViewerTest(unittest.TestCase):
 
     def test_delete_workspace(self):
         mock_model = mock.MagicMock()
+        mock_model.ws = mock.Mock(spec=MatrixWorkspace)
         mock_view = mock.MagicMock()
         pres = SliceViewer(mock.Mock(), model=mock_model, view=mock_view)
         mock_model.workspace_equals.return_value = True
@@ -548,6 +558,7 @@ class SliceViewerTest(unittest.TestCase):
 
     def test_workspace_not_deleted_with_different_name(self):
         mock_model = mock.MagicMock()
+        mock_model.ws = mock.Mock(spec=MatrixWorkspace)
         mock_view = mock.MagicMock()
         pres = SliceViewer(mock.Mock(), model=mock_model, view=mock_view)
         mock_model.workspace_equals.return_value = False
@@ -557,6 +568,7 @@ class SliceViewerTest(unittest.TestCase):
 
     def test_delete_original_workspace(self):
         mock_model = mock.MagicMock()
+        mock_model.ws = mock.Mock(spec=MatrixWorkspace)
         mock_view = mock.MagicMock()
         pres = SliceViewer(mock.Mock(), model=mock_model, view=mock_view)
         mock_model.workspace_equals.return_value = False
@@ -566,6 +578,7 @@ class SliceViewerTest(unittest.TestCase):
 
     def test_delete_not_original_workspace(self):
         mock_model = mock.MagicMock()
+        mock_model.ws = mock.Mock(spec=MatrixWorkspace)
         mock_view = mock.MagicMock()
         pres = SliceViewer(mock.Mock(), model=mock_model, view=mock_view)
         mock_model.workspace_equals.return_value = False
@@ -575,6 +588,7 @@ class SliceViewerTest(unittest.TestCase):
 
     def test_replace_original_workspace(self):
         mock_model = mock.MagicMock()
+        mock_model.ws = mock.Mock(spec=MatrixWorkspace)
         mock_view = mock.MagicMock()
         pres = SliceViewer(mock.Mock(), model=mock_model, view=mock_view)
         mock_model.check_for_removed_original_workspace.return_value = True
@@ -585,6 +599,7 @@ class SliceViewerTest(unittest.TestCase):
 
     def test_replace_checking_original_workspace_fail(self):
         mock_model = mock.MagicMock()
+        mock_model.ws = mock.Mock(spec=MatrixWorkspace)
         mock_view = mock.MagicMock()
         pres = SliceViewer(mock.Mock(), model=mock_model, view=mock_view)
         mock_model.check_for_removed_original_workspace = mock.Mock(side_effect=RuntimeError)
@@ -595,6 +610,7 @@ class SliceViewerTest(unittest.TestCase):
 
     def test_replace_workspace_does_nothing_if_workspace_is_unchanged(self):
         mock_model = mock.MagicMock()
+        mock_model.ws = mock.Mock(spec=MatrixWorkspace)
         mock_view = mock.MagicMock()
         pres = SliceViewer(mock.Mock(), model=mock_model, view=mock_view)
         # TODO The return value here should be True but there is a bug in the
@@ -611,6 +627,7 @@ class SliceViewerTest(unittest.TestCase):
 
     def test_replace_workspace_replaces_model(self):
         mock_model = mock.MagicMock()
+        mock_model.ws = mock.Mock(spec=MatrixWorkspace)
         mock_view = mock.MagicMock()
         pres = SliceViewer(mock.Mock(), model=mock_model, view=mock_view)
         mock_model.check_for_removed_original_workspace.return_value = False
@@ -621,6 +638,7 @@ class SliceViewerTest(unittest.TestCase):
 
     def test_rename_workspace(self):
         mock_model = mock.MagicMock()
+        mock_model.ws = mock.Mock(spec=MatrixWorkspace)
         mock_view = mock.MagicMock()
         pres = SliceViewer(mock.Mock(), model=mock_model, view=mock_view)
         mock_model.workspace_equals.return_value = True
@@ -630,6 +648,7 @@ class SliceViewerTest(unittest.TestCase):
 
     def test_rename_workspace_not_renamed_with_different_name(self):
         mock_model = mock.MagicMock()
+        mock_model.ws = mock.Mock(spec=MatrixWorkspace)
         mock_view = mock.MagicMock()
         pres = SliceViewer(mock.Mock(), model=mock_model, view=mock_view)
         mock_model.workspace_equals.return_value = False
@@ -639,7 +658,9 @@ class SliceViewerTest(unittest.TestCase):
 
     def test_clear_ADS(self):
         mock_view = mock.MagicMock()
-        pres = SliceViewer(mock.Mock(), model=mock.MagicMock(), view=mock_view)
+        model_mock = mock.MagicMock()
+        model_mock.ws = mock.Mock(spec=MatrixWorkspace)
+        pres = SliceViewer(mock.Mock(), model=model_mock, view=mock_view)
         pres.ADS_cleared()
         mock_view.emit_close.assert_called_once()
 
