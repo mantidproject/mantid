@@ -1,0 +1,2 @@
+- Texture Analysis can now be performed using the logic included in ``TextureUtils`` and a collection of scripts that can be found in ``diffraction/ENGINX/Texture`` within the :ref:`mantid script repository <WorkbenchScriptRepository>`.
+- Focusing using the ``focus_run`` method in ``EnggUtils`` will now save a combined workspace with all detector groups' spectra, rather than just saving each individual spectra in a separate workspace.

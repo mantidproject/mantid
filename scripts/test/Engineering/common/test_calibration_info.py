@@ -71,12 +71,12 @@ class TestCalibrationInfo(unittest.TestCase, SetCalibrationMixin):
                 mock_create_bank_grouping_workspace.assert_called_once()
                 mock_create_bank_grouping_workspace.reset_mock()
 
-    @patch.object(CalibrationInfo, "create_grouping_workspace_from_calfile")
-    def test_get_group_ws_custom_cal(self, mock_create_grouping_workspace_from_calfile):
+    @patch.object(CalibrationInfo, "create_grouping_workspace_from_file")
+    def test_get_group_ws_custom_cal(self, mock_create_grouping_workspace_from_file):
         self.setup_get_group_ws(GROUP.CUSTOM, "3x5_group.cal")
 
-        mock_create_grouping_workspace_from_calfile.assert_called_once()
-        mock_create_grouping_workspace_from_calfile.reset_mock()
+        mock_create_grouping_workspace_from_file.assert_called_once()
+        mock_create_grouping_workspace_from_file.reset_mock()
 
     @patch(eng_common + ".LoadDetectorsGroupingFile")
     def test_get_group_ws_custom_xml(self, mock_LoadDetectorsGroupingFile):
