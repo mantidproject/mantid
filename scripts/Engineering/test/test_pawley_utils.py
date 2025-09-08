@@ -1,6 +1,7 @@
 import unittest
+from unittest.mock import patch, create_autospec
 from numpy import allclose, sqrt, log, linspace, zeros_like, array, ones, trapezoid
-from numpy.testing import assert_array_equal
+from numpy.testing import assert_array_equal, assert_array_almost_equal
 from mantid.api import AnalysisDataService
 from mantid.simpleapi import CreateWorkspace, FlatBackground
 from mantid.geometry import CrystalStructure
@@ -183,11 +184,58 @@ class PawleyPattern2DTest(unittest.TestCase):
         # sum of resids should be much smaller than global-scale=True (as background optimised)
         self.assertAlmostEqual(sum(resids), 2e-10, delta=1e-10)
 
-    def test_fit(self):
-        pawley = PawleyPattern1D(self.ws, [self.phase], profile=GaussianProfile())
-        # run fit with 1 func eval to check no error and result returned
-        result = pawley.fit(max_nfev=1)
-        self.assertEqual(result.nfev, 1)
+    @patch("Engineering.pawley_utils.PawleyPattern2D._estimate_intensities")
+    @patch("Engineering.pawley_utils.logger")
+    def test_set_params_from_pawley1d_different_number_phases(self, mock_log, mock_estimate_intens):
+        mock_pawley1d = self._make_mock_pawley1d()
+        mock_pawley1d.phases = 2 * mock_pawley1d.phases
+        pawley = PawleyPattern2D(self.ws, [self.phase], global_scale=False, profile=GaussianProfile())
+        initial_profile = pawley.profile_params[0].copy()
+        intial_intens = pawley.intens[0].copy()
+        pawley.set_params_from_pawley1d(mock_pawley1d)
+
+        mock_log.error.assert_called_once()
+        assert_array_almost_equal(pawley.intens[0], intial_intens)
+        assert_array_almost_equal(pawley.profile_params[0], initial_profile)
+        mock_estimate_intens.assert_not_called()
+
+    @patch("Engineering.pawley_utils.PawleyPattern2D._estimate_intensities")
+    @patch("Engineering.pawley_utils.logger")
+    def test_set_params_from_pawley1d_different_nhkls(self, mock_log, mock_estimate_intens):
+        mock_pawley1d = self._make_mock_pawley1d()
+        pawley = PawleyPattern2D(self.ws, [self.phase], global_scale=False, profile=GaussianProfile())
+        intial_intens = pawley.intens[0].copy()
+
+        pawley.set_params_from_pawley1d(mock_pawley1d)
+
+        mock_log.error.assert_not_called()
+        assert_array_almost_equal(pawley.intens[0], intial_intens)
+        assert_array_almost_equal(pawley.profile_params[0], mock_pawley1d.profile_params[0])
+        mock_estimate_intens.assert_not_called()
+
+    @patch("Engineering.pawley_utils.PawleyPattern2D._estimate_intensities")
+    @patch("Engineering.pawley_utils.logger")
+    def test_set_params_from_pawley1d_successful(self, mock_log, mock_estimate_intens):
+        mock_pawley1d = self._make_mock_pawley1d()
+        mock_pawley1d.phases[0].nhkls.return_value = self.phase.nhkls()
+        mock_pawley1d.intens[0] = 2 * ones(self.phase.nhkls())  # non-default value
+        pawley = PawleyPattern2D(self.ws, [self.phase], global_scale=False, profile=GaussianProfile())
+
+        pawley.set_params_from_pawley1d(mock_pawley1d)
+
+        mock_log.error.assert_not_called()
+        assert_array_almost_equal(pawley.intens[0], mock_pawley1d.intens[0])
+        assert_array_almost_equal(pawley.profile_params[0], mock_pawley1d.profile_params[0])
+        mock_estimate_intens.assert_called_once()
+
+    def _make_mock_pawley1d(self):
+        mock_pawley1d = create_autospec(PawleyPattern1D)
+        mock_pawley1d.profile = GaussianProfile()
+        mock_pawley1d.profile_params = [ones(3)]  # non-default values
+        mock_pawley1d.phases = [create_autospec(Phase)]
+        mock_pawley1d.phases[0].nhkls.return_value = 1
+        mock_pawley1d.intens = [ones(1)]
+        return mock_pawley1d
 
 
 if __name__ == "__main__":

@@ -10,7 +10,7 @@ import numpy as np
 from mantid.fitfunctions import FunctionWrapper, CompositeFunctionWrapper
 from mantid.api import FunctionFactory
 from mantid.geometry import CrystalStructure, ReflectionGenerator, PointGroupFactory, PointGroup
-from mantid.kernel import V3D
+from mantid.kernel import V3D, logger
 from typing import Optional, List, Tuple, TYPE_CHECKING
 from itertools import chain
 from scipy.optimize import least_squares
@@ -319,14 +319,21 @@ class PawleyPattern2D(PawleyPattern1D):
                 self.bg_isfree[:] = False
 
     def set_params_from_pawley1d(self, pawley1d):
-        # To-Do check sizes compatible
-        self.intens = pawley1d.intens
-        self.profile_params = pawley1d.profile_params
-        # scale intensities
-        ws_sim = self.eval_2d(self.get_free_params())
-        ppval = np.polyfit(ws_sim.extractY().flat, self.ws.extractY().flat, 1)
-        for iphase in range(len(self.phases)):
-            self.intens[iphase] *= ppval[0]
+        if len(pawley1d.phases) != len(self.phases):
+            logger.error("PawleyPattern1D object has a different number of phases.")
+            return
+        if pawley1d.profile.func_name == self.profile.func_name:
+            self.profile_params = pawley1d.profile_params.copy()
+        intens_changed = False
+        for iphase, phase in enumerate(self.phases):
+            if phase.nhkls() == pawley1d.phases[iphase].nhkls():
+                self.intens[iphase] = pawley1d.intens[iphase].copy()
+                intens_changed = True
+        if intens_changed:
+            self._estimate_intensities()
+
+    def estimate_initial_params(self):
+        self._estimate_intensities()
 
     def eval_profile(self, params):
         self.set_free_params(params)
@@ -350,3 +357,10 @@ class PawleyPattern2D(PawleyPattern1D):
     def eval_resids(self, params):
         ws_sim = self.eval_2d(params)
         return (self.ws.extractY() - ws_sim.extractY()).flat
+
+    def _estimate_intensities(self):
+        # scale intensities
+        ws_sim = self.eval_2d(self.get_free_params())
+        ppval = np.polyfit(ws_sim.extractY().flat, self.ws.extractY().flat, 1)
+        for iphase in range(len(self.phases)):
+            self.intens[iphase] *= ppval[0]
