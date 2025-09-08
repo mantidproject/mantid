@@ -18,6 +18,7 @@ from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.outp
 from mantid.api import CompositeFunction
 from mantid.fitfunctions import FunctionWrapper
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import output_settings
+from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import wsname_in_instr_run_ceria_group_ispec_unit_format
 from os import path, makedirs
 
 
@@ -199,20 +200,28 @@ class FittingPlotModel(object):
         run_to_group = {}
 
         for wsname in active_ws_list:
-            try:
-                ws = ADS.retrieve(wsname)
-                run_number = str(ws.getRun().getLogData("run_number").value)
-                prefix = wsname.split(run_number)[0]
-                bank_id = int(ws.getRun().getLogData("bankid").value.split()[-1])  # e.g., "group 1"
-            except Exception:
-                run_number = "unknown"
-                prefix = ""
-                bank_id = 9999
-            try:
-                ws = ADS.retrieve(wsname)
-                grouping = str(ws.getRun().getLogData("Grouping").value)
-            except RuntimeError:
-                grouping = ""
+            if wsname_in_instr_run_ceria_group_ispec_unit_format(wsname):
+                # ws generated through the GUI pipeline should have names with all the metadata present
+                # (due to shared run objects for ws of extracted single spectra this is more reliable than the logs)
+                prefix, run_number, _, grouping, bank_id, *_ = wsname.split("_")
+                prefix += "_"
+            else:
+                # if the name isn't in expected format, try and extract the metadata from the logs
+                # failing that, just set defaults
+                try:
+                    ws = ADS.retrieve(wsname)
+                    run_number = str(ws.getRun().getLogData("run_number").value)
+                    prefix = wsname.split(run_number)[0]
+                    bank_id = int(ws.getRun().getLogData("bankid").value.split()[-1])  # e.g., "group 1"
+                except Exception:
+                    run_number = "unknown"
+                    prefix = ""
+                    bank_id = 9999
+                try:
+                    ws = ADS.retrieve(wsname)
+                    grouping = str(ws.getRun().getLogData("Grouping").value)
+                except RuntimeError:
+                    grouping = ""
 
             run_to_banks[run_number].append((bank_id, wsname))
             run_to_prefix[run_number] = prefix
@@ -221,8 +230,9 @@ class FittingPlotModel(object):
         summary_tables = {}
 
         for run, bank_ws_pairs in run_to_banks.items():
-            bank_ws_pairs.sort(key=lambda x: x[0])
+            bank_ws_pairs.sort(key=lambda x: int(x[0]))
             banks_sorted = [ws for _, ws in bank_ws_pairs]
+            print(banks_sorted)
 
             all_params = sorted(set(param for ws in banks_sorted if ws in fit_results for param in fit_results[ws]["results"].keys()))
 
