@@ -631,11 +631,11 @@ class FittingPlotModelTest(unittest.TestCase):
     @patch(f"{plot_model_path}.output_settings.get_output_path", return_value=os.path.join("mock", "output"))
     def test_save_files_with_group_creates_dirs_and_saves(self, mock_output_path, mock_exists, mock_makedirs, mock_save):
         self.model.rb_num = "RB123"
-        self.model._save_files("param_ws", "FitParameters", grouping="Texture20")
+        self.model._save_files("param_ws", "FitParameters", "1.00", grouping="Texture20")
 
         expected_dirs = [
-            os.path.join("mock", "output", "FitParameters"),
-            os.path.join("mock", "output", "User", "RB123", "FitParameters", "Texture20"),
+            os.path.join("mock", "output", "FitParameters", "1.00"),
+            os.path.join("mock", "output", "User", "RB123", "FitParameters", "Texture20", "1.00"),
         ]
 
         self.run_the_save_tests(expected_dirs, mock_makedirs, mock_save)
@@ -646,9 +646,12 @@ class FittingPlotModelTest(unittest.TestCase):
     @patch(f"{plot_model_path}.output_settings.get_output_path", return_value=os.path.join("mock", "output"))
     def test_save_files_with_no_group_creates_dirs_and_saves(self, mock_output_path, mock_exists, mock_makedirs, mock_save):
         self.model.rb_num = "RB123"
-        self.model._save_files("param_ws", "FitParameters", grouping="")
+        self.model._save_files("param_ws", "FitParameters", "1.00", grouping="")
 
-        expected_dirs = [os.path.join("mock", "output", "FitParameters"), os.path.join("mock", "output", "User", "RB123", "FitParameters")]
+        expected_dirs = [
+            os.path.join("mock", "output", "FitParameters", "1.00"),
+            os.path.join("mock", "output", "User", "RB123", "FitParameters", "1.00"),
+        ]
 
         self.run_the_save_tests(expected_dirs, mock_makedirs, mock_save)
 
@@ -658,10 +661,10 @@ class FittingPlotModelTest(unittest.TestCase):
     @patch(f"{plot_model_path}.output_settings.get_output_path", return_value=os.path.join("mock", "output"))
     def test_save_files_with_no_RB_creates_dirs_and_saves(self, mock_output_path, mock_exists, mock_makedirs, mock_save):
         self.model.rb_num = None
-        self.model._save_files("param_ws", "FitParameters", grouping="")
+        self.model._save_files("param_ws", "FitParameters", "1.00", grouping="")
 
         expected_dirs = [
-            os.path.join("mock", "output", "FitParameters"),
+            os.path.join("mock", "output", "FitParameters", "1.00"),
         ]
 
         self.run_the_save_tests(expected_dirs, mock_makedirs, mock_save)
