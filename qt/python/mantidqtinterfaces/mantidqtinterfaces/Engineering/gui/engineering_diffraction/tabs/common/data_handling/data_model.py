@@ -6,14 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from numpy import array, argsort
 
-from mantid.simpleapi import (
-    Load,
-    logger,
-    DeleteWorkspace,
-    EnggEstimateFocussedBackground,
-    SetUncertainties,
-    Minus,
-)
+from mantid.simpleapi import Load, logger, DeleteWorkspace, EnggEstimateFocussedBackground, SetUncertainties, Minus, ExtractSingleSpectrum
 
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import output_settings
@@ -70,7 +63,14 @@ class FittingDataModel(object):
                         self._last_added.append(ws_name)
                         self._data_workspaces.add(ws_name, loaded_ws=ws)
                     else:
-                        logger.warning(f"Invalid number of spectra in workspace {ws_name}. Skipping loading of file.")
+                        for ispec in range(ws.getNumberHistograms()):
+                            # expect the spec number in front of unit, these should be the only two permitted units
+                            spec_ws_name = ws_name.replace("dSpacing", f"{ispec}_dSpacing").replace("TOF", f"{ispec}_TOF")
+                            if spec_ws_name.index(f"_{ispec}_") == -1:
+                                logger.error("Expect unit: dSpacing/TOF in the workspace name for subsequent extraction of bank id")
+                            spec_ws = ExtractSingleSpectrum(InputWorkspace=ws, OutputWorkspace=spec_ws_name, WorkspaceIndex=ispec)
+                            self._last_added.append(spec_ws_name)
+                            self._data_workspaces.add(spec_ws_name, loaded_ws=spec_ws)
                 except RuntimeError as e:
                     logger.error(f"Failed to load file: {filename}. Error: {e}. \n Continuing loading of other files.")
             else:
