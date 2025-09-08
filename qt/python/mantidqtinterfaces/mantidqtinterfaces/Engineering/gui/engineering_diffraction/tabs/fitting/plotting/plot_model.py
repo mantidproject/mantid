@@ -286,16 +286,16 @@ class FittingPlotModel(object):
 
         return summary_tables
 
-    def _save_files(self, ws, dir_name, grouping=""):
+    def _save_files(self, ws, dir_name, peak, grouping=""):
         root_dir = output_settings.get_output_path()
         save_dirs = [path.join(root_dir, dir_name)]
         if self.rb_num:
             if grouping == "":
                 # grouping is "" if we can't read group from log data - in this case we don't provide separate dir
-                save_dirs.append(path.join(root_dir, "User", self.rb_num, dir_name))
+                save_dirs.append(path.join(root_dir, "User", self.rb_num, dir_name, peak))
             else:
                 # otherwise it is convenient for the user to have separate directories
-                save_dirs.append(path.join(root_dir, "User", self.rb_num, dir_name, grouping))
+                save_dirs.append(path.join(root_dir, "User", self.rb_num, dir_name, grouping, peak))
         for save_dir in save_dirs:
             if not path.exists(save_dir):
                 makedirs(save_dir)
