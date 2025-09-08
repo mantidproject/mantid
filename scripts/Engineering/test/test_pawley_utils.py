@@ -4,7 +4,8 @@ from numpy.testing import assert_array_equal
 from mantid.api import AnalysisDataService
 from mantid.simpleapi import CreateWorkspace, FlatBackground
 from mantid.geometry import CrystalStructure
-from Engineering.pawley_utils import Phase, GaussianProfile, PVProfile, PawleyPattern1D
+from Engineering.pawley_utils import Phase, GaussianProfile, PVProfile, PawleyPattern1D, PawleyPattern2D
+from plugins.algorithms.poldi_utils import load_poldi
 
 
 class PhaseTest(unittest.TestCase):
@@ -127,6 +128,60 @@ class PawleyPattern1DTest(unittest.TestCase):
         resids = pawley.eval_resids(pawley.get_free_params())
         # total intensity = 1 and data are 0 so integrated residuals = -1
         self.assertAlmostEqual(trapezoid(resids, self.ws.readX(0)), -1.0, delta=1e-5)
+
+    def test_fit(self):
+        pawley = PawleyPattern1D(self.ws, [self.phase], profile=GaussianProfile())
+        # run fit with 1 func eval to check no error and result returned
+        result = pawley.fit(max_nfev=1)
+        self.assertEqual(result.nfev, 1)
+
+
+class PawleyPattern2DTest(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.ws = load_poldi(
+            "poldi_448x500_chopper5k_silicon.txt", "POLDI_Definition_448_calibrated.xml", chopper_speed=5000, t0=5.855e-02, t0_const=-9.00
+        )
+
+    @classmethod
+    def tearDownClass(cls):
+        AnalysisDataService.clear()
+
+    def setUp(self):
+        self.phase = Phase.from_alatt(3 * [5.43094], "F d -3 m")  # can be changed by the class
+        # need all HKL in range otherwise polyfit doesn't work when global_scale=False
+        self.phase.set_hkls_from_dspac_limits(0.7, 3.5)
+
+    def test_set_global_scale_false_no_bg(self):
+        pawley = PawleyPattern2D(self.ws, [self.phase], global_scale=True, profile=GaussianProfile())
+        pawley.set_global_scale(False)
+        self.assertFalse(pawley.intens_isfree[0][0])  # fixed so as not to be perfectly correlated with global scale
+        self.assertEqual(len(pawley.bg_params), 0)
+
+    def test_set_global_scale_false_with_bg(self):
+        pawley = PawleyPattern2D(self.ws, [self.phase], global_scale=True, profile=GaussianProfile(), bg_func=FlatBackground(A0=2))
+        pawley.set_global_scale(False)
+        self.assertFalse(pawley.intens_isfree[0][0])  # fixed so as not to be perfectly correlated with global scale
+        self.assertTrue(allclose(pawley.bg_params, 0))  # zero global bg (optimised with scale for each spectrum)
+        self.assertFalse(pawley.bg_isfree.any(), 0)  # background fixed
+
+    def test_eval_profile(self):
+        pawley = PawleyPattern2D(self.ws, [self.phase], global_scale=True, profile=GaussianProfile())
+        ycalc = pawley.eval_profile(pawley.get_free_params())
+        # assert total intensity = 1 (default peak intensity is 1, there is only 1 peak and no background)
+        self.assertAlmostEqual(trapezoid(ycalc, pawley.ws_1d.readX(0)), self.phase.nhkls(), delta=1e-1)
+
+    def test_eval_resids_global_scale_true(self):
+        pawley = PawleyPattern2D(self.ws, [self.phase], global_scale=True, profile=GaussianProfile())
+        resids = pawley.eval_resids(pawley.get_free_params())
+        # sum of resids should be much smaller than global-scale=True (as background optimised)
+        self.assertAlmostEqual(sum(resids), -5e7, delta=1e7)
+
+    def test_eval_resids_global_scale_false(self):
+        pawley = PawleyPattern2D(self.ws, [self.phase], global_scale=False, profile=GaussianProfile())
+        resids = pawley.eval_resids(pawley.get_free_params())
+        # sum of resids should be much smaller than global-scale=True (as background optimised)
+        self.assertAlmostEqual(sum(resids), 2e-10, delta=1e-10)
 
     def test_fit(self):
         pawley = PawleyPattern1D(self.ws, [self.phase], profile=GaussianProfile())

@@ -309,7 +309,7 @@ class PawleyPattern2D(PawleyPattern1D):
     def set_global_scale(self, global_scale):
         self.global_scale = global_scale
         if not self.global_scale:
-            # check if a peak intensity is fixed in any pahse
+            # check if a peak intensity is fixed in any phase
             if all([all(phase_intens_isfree) for phase_intens_isfree in self.intens_isfree]):
                 # fix intensity of most intense peak in first phase to avoid perfectly correlated scales
                 self.intens_isfree[0][np.argmax(self.intens[0])] = False
