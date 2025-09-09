@@ -162,6 +162,12 @@ class SettingsPresenter(object):
         self.view.set_on_check_ascending_changed(self.ascending_changed)
         self.view.set_on_check_descending_changed(self.descending_changed)
         self.view.set_on_gsas2_path_edited(self.validate_gsas2_path)
+        self.view.on_orientation_type_toggled(self.set_euler_options_enabled)
+        self.view.on_scatter_pf_toggled(self.set_contour_option_enabled)
+
+        # ensure the initial state of enabled settings is correct
+        self.set_euler_options_enabled()
+        self.set_contour_option_enabled()
 
     def show(self):
         self._show_settings_in_view()
@@ -378,6 +384,13 @@ class SettingsPresenter(object):
         self.check_and_populate_with_default("plot_exp_pf")
         self.check_and_populate_with_default("contour_kernel")
         self._validate_convert_to_float("contour_kernel")
+
+    def set_euler_options_enabled(self):
+        self.view.eulerAngles_lineedit.setEnabled(self.view.get_use_euler_angles())
+        self.view.eulerAnglesSense_lineedit.setEnabled(self.view.get_use_euler_angles())
+
+    def set_contour_option_enabled(self):
+        self.view.contourKernel_lineedit.setEnabled(not self.view.get_plot_exp_pf())
 
     # -----------------------
     # Observers / Observables

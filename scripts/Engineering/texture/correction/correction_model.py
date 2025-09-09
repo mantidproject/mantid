@@ -145,6 +145,16 @@ class TextureCorrectionModel:
                 goniometer_strings = [line.strip().replace("\t", ",") for line in f.readlines()]
                 goniometer_lists = [[float(x) for x in gs.split(",")] for gs in goniometer_strings]
             try:
+                n_ws, n_gl = len(wss), len(goniometer_lists)
+                if n_ws == 0:
+                    logger.warning(
+                        "No workspaces have been provided - if you are using the UI, ensure you have selected all desired workspaces"
+                    )
+                if n_ws < n_gl:
+                    logger.notice(
+                        f"Fewer Workspaces ({n_ws}) provided than lines of orientation data ({n_gl}). "
+                        f"The last {n_gl - n_ws} lines of the orientation file will be ignored"
+                    )
                 if not use_euler:
                     # if use euler angles not selected then assumes it is a scans output matrix
                     for iws, ws in enumerate(wss):

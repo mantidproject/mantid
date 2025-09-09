@@ -55,7 +55,13 @@ class TexturePresenter:
 
         self.view.set_on_calc_pf_clicked(self.on_calc_pf_clicked)
 
+        self.view.on_lattice_changed(self.check_set_crystal_enabled)
+        self.view.on_spacegroup_changed(self.check_set_crystal_enabled)
+        self.view.on_basis_changed(self.check_set_crystal_enabled)
+
         self.view.sig_selection_state_changed.connect(self.update_readout_column_list)
+
+        self.check_set_crystal_enabled()
         self.update_readout_column_list()
 
     def load_ws_files(self):
@@ -312,6 +318,18 @@ class TexturePresenter:
         instrument = INSTRUMENT_DICT[instrument]
         self.view.set_instrument_override(instrument)
         self.instrument = instrument
+
+    def check_set_crystal_enabled(self):
+        enabled = (
+            len(self.view.get_lattice()) > 0
+            and len(self.view.get_spacegroup()) > 0
+            and len(self.view.get_basis()) > 0
+            and len(self.view.get_crystal_ws_prop()) > 0
+        )
+        self.view.btn_setCrystal.setEnabled(enabled)
+        selected_wss, selected_params = self.view.get_selected_workspaces()
+        if len(selected_wss) > 0:
+            self.view.btn_setAllCrystal.setEnabled(enabled)
 
     def update_readout_column_list(self):
         params = self.get_assigned_params()

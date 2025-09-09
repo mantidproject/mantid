@@ -29,6 +29,42 @@ class TextureView(QtWidgets.QWidget, Ui_texture):
 
         self._setup_plot()
 
+        # ========== Tool Tips ==========
+        self.btn_loadWSFiles.setToolTip("Loads the selected sample runs into the table")
+        self.btn_loadParamFiles.setToolTip(
+            "Loads the selected table workspaces into the table, assigning them to each row currently without an assigned table, in turn"
+        )
+        self.btn_selectAll.setToolTip("Sets all the rows of the table as selected")
+        self.btn_deselectAll.setToolTip("Sets all the rows of the table as unselected")
+        self.btn_deleteSelected.setToolTip("Deletes all rows of the table which are set as selected")
+        self.btn_deleteSelectedParams.setToolTip("Removes all the set parameter files for the rows of the table that have been selected")
+        self.btn_loadCif.setToolTip("Opens dialog for LoadCIF, allows loading of crystal structure information onto a specified workspace")
+        self.combo_workspaceListCIF.setToolTip("Workspace to copy structure from using 'Copy Crystal Structure to All' button")
+        self.btn_copyXtalToAll.setToolTip(
+            "Takes the crystal structure defined on the workspace selected in the drop down menu and copies it to all selected workspaces"
+        )
+        self.lattice_lineedit.setToolTip(
+            "Tab separated string representation of the crystal lattice (eg. 'a   b   c    alpha   beta    gamma')"
+        )
+        self.spacegroup_lineedit.setToolTip("String representation of the crystal space group (eg. 'I m -3 m')")
+        self.basis_lineedit.setToolTip("String representation of the crystal basis (eg. 'Fe 0 0 0 1.0 0.05; Fe 0.5 0.5 0.5 1.0 0.05')")
+        self.combo_workspaceListProp.setToolTip("Workspace to set crystal structure on using 'Set Crystal' button")
+        self.btn_setCrystal.setToolTip(
+            "Takes the crystal structure defined in the lattice/space group/basis inputs and "
+            "applies it to the workspace in the drop down menu"
+        )
+        self.btn_setAllCrystal.setToolTip(
+            "Takes the crystal structure defined in the lattice/space group/basis inputs and applies it to all the selected workspaces"
+        )
+        self.h_lineedit.setToolTip("H index")
+        self.k_lineedit.setToolTip("K index")
+        self.l_lineedit.setToolTip("L index")
+        self.combo_projMethod.setToolTip("The 2D projection method of displaying the Pole Figure Table data")
+        self.combo_param.setToolTip(
+            "Which column of the parameter table workspaces to read to find the values which will be included in the pole figure table"
+        )
+        self.btn_calc_pf.setToolTip("Creates the pole figure tables and plots the corresponding pole figure")
+
     # ========== Signal Connectors ==========
     def set_on_load_ws_clicked(self, slot):
         self.btn_loadWSFiles.clicked.connect(slot)
@@ -75,6 +111,15 @@ class TextureView(QtWidgets.QWidget, Ui_texture):
     @QtCore.Slot(bool)
     def _on_any_checkbox_toggled(self):
         self.sig_selection_state_changed.emit()
+
+    def on_lattice_changed(self, slot):
+        self.lattice_lineedit.textChanged.connect(slot)
+
+    def on_spacegroup_changed(self, slot):
+        self.spacegroup_lineedit.textChanged.connect(slot)
+
+    def on_basis_changed(self, slot):
+        self.basis_lineedit.textChanged.connect(slot)
 
     # ========== Table Handling ==========
     def populate_workspace_table(self, workspace_info_list):

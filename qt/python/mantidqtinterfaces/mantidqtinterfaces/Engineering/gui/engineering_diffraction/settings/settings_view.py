@@ -42,6 +42,58 @@ class SettingsView(QtWidgets.QDialog, Ui_settings):
         )
         self.peak_list_label.setText("Default Peak Function")
 
+        # Tool Tips
+        self.lineedit_RD.setToolTip("Label for the first (PF: in-plane) intrinsic sample direction")
+        self.lineedit_RD0.setToolTip("X component of the first intrinsic sample direction")
+        self.lineedit_RD1.setToolTip("Y component of the first intrinsic sample direction")
+        self.lineedit_RD2.setToolTip("Z component of the first intrinsic sample direction")
+        self.lineedit_ND.setToolTip("Label for the second (PF: normal) intrinsic sample direction")
+        self.lineedit_ND0.setToolTip("X component of the second intrinsic sample direction")
+        self.lineedit_ND1.setToolTip("Y component of the second intrinsic sample direction")
+        self.lineedit_ND2.setToolTip("Z component of the second intrinsic sample direction")
+        self.lineedit_TD.setToolTip("Label for the third (PF: in-plane) intrinsic sample direction")
+        self.lineedit_TD0.setToolTip("X component of the third intrinsic sample direction")
+        self.lineedit_TD1.setToolTip("Y component of the third intrinsic sample direction")
+        self.lineedit_TD2.setToolTip("Z component of the third intrinsic sample direction")
+
+        self.monte_carlo_lineedit.setToolTip(
+            "Python dictionary-style string for input parameters to the MonteCarloAbsorption algorithm, "
+            "where keywords and values are given as 'keyword1:value1, keyword2, value2'"
+        )
+        self.abs_corr_checkBox.setToolTip(
+            "Flag for whether the calculated corrected workspaces need to be kept in the ADS "
+            "(flagging them for removal frees up system memory)"
+        )
+        self.eulerAngles_checkBox.setToolTip(
+            "Flag for notifying whether the orientation file which will be provided in the correction tab"
+            "is a text file with euler angles (checked) "
+            "or whether each line is a flattened matrix (unchecked)"
+        )
+        self.eulerAngles_lineedit.setToolTip(
+            "Lab-frame axes that the euler angles are defined along, when in neutral position"
+            "- expect a string of axis letters, one per goniometer axis eg. XYX"
+        )
+        self.eulerAnglesSense_lineedit.setToolTip(
+            "The sense of the rotation around each euler axis "
+            "where 1 is counter clockwise and -1 is clockwise "
+            "- expect string of comma separated values, one value per axis, eg."
+            "'1,-1,-1' "
+        )
+
+        self.cost_func_thresh_lineedit.setToolTip(
+            "The maximum cost function value for a given spectra's fit to be plotted in the pole figure"
+        )
+        self.peak_pos_thresh_lineedit.setToolTip(
+            "The maximum deviation in peak position from the expected position "
+            "for a given spectra's fit to be plotted in the pole figure."
+            " Expected position is either mean of all peaks or, if provided, peak position of given HKL"
+        )
+        self.expPF_checkBox.setToolTip(
+            "Flag for whether the experimental pole figure should have individual detector groups plotted "
+            "as scatter points (checked), or should be interpolated and given as a contour plot (unchecked)"
+        )
+        self.contourKernel_lineedit.setToolTip("Sigma value of the gaussian smoothing kernel applied before the interpolation")
+
     # ===============
     # Slot Connectors
     # ===============
@@ -273,3 +325,13 @@ class SettingsView(QtWidgets.QDialog, Ui_settings):
 
     def find_path_to_gsas2(self):
         self.finder_path_to_gsas2.findFiles(True)
+
+    # ======================
+    # Toggle Active Options
+    # ======================
+
+    def on_orientation_type_toggled(self, slot):
+        self.eulerAngles_checkBox.toggled.connect(slot)
+
+    def on_scatter_pf_toggled(self, slot):
+        self.expPF_checkBox.toggled.connect(slot)

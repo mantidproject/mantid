@@ -40,6 +40,68 @@ class TextureCorrectionView(QtWidgets.QWidget, Ui_texture):
         self.populate_unit_list()
         self.set_default_unit("dSpacing")
 
+        # ========== Tool Tips ==========
+        self.btn_loadFiles.setToolTip("Loads the selected sample runs into the table")
+        self.btn_selectAll.setToolTip("Sets all of the loaded workspaces in the table to selected")
+        self.btn_deselectAll.setToolTip("Sets all of the loaded workspaces in the table to unselected")
+        self.btn_deleteSelected.setToolTip("Deletes all of the loaded files, whcih are set as selected, from the table")
+        self.btn_viewRefShape.setToolTip(
+            "Pops up a plot of the sample shape on a given workspace, "
+            "along with the relative orientation of sample axes (defined in the settings)"
+        )
+        self.btn_createRefWS.setToolTip(
+            "Creates an empty workspace that can hold the reference sample information "
+            "that can then be copied onto each experimental workspace"
+        )
+        self.btn_setRefOrientation.setToolTip(
+            "Allows an initial orientation to be applied to the reference shape to "
+            "align it correctly with the experimental sample upon a "
+            "positioner with neutral/default/homed motor values "
+        )
+        self.btn_saveRefWS.setToolTip("Saves the reference workspace into the experimental data folder")
+        self.btn_loadRef.setToolTip("Loads a reference workspace from provided file path")
+        self.btn_loadSampleShape.setToolTip(
+            "Opens dialog for LoadSampleShape, allows loading of STL sample shape onto the reference/experimental workspaces"
+        )
+        self.btn_setSampleShape.setToolTip(
+            "Opens dialog for CreateSampleShape, "
+            "allows defining sample shape onto the reference/experimental workspaces using "
+            "constructive solid geometry XML string"
+        )
+        self.btn_setSampleMaterial.setToolTip(
+            "Opens dialog for SetSampleMaterial, allows definition of sample material properties onto the reference/experimental workspaces"
+        )
+        self.btn_setOrientation.setToolTip(
+            "Opens dialog for SetGoniometer, allows definition of sample orientation onto individual experimental workspaces"
+        )
+        self.btn_loadOrientation.setToolTip(
+            "Reads the provided orientation file and sets the orientation provided in each line onto the selected workspaces in turn"
+        )
+        self.btn_copyRefSample.setToolTip("Copies the sample information from the reference workspace onto all of the selected workspaces")
+        self.combo_workspaceList.setToolTip("Workspace who's sample should be copied to all selected workspaces")
+        self.btn_copySampleToAll.setToolTip(
+            "Copies the sample information from the workspace in the dropdown menu onto all of the selected workspaces"
+        )
+        self.combo_shapeMethod.setToolTip(
+            "Gauge Volume to use for correction, select either: the preset 4mm x 4mm x 4mm cube; "
+            "No Gauge Volume; or Custom Shape (to be provided as an XML file)"
+        )
+        self.line_evalVal.setToolTip(
+            "Position along the spectra x-axis where the attenuation value saved into the table should be evaluated"
+        )
+        self.combo_Units.setToolTip("Unit the x-axis should be in when getting the attenuation at the evaluation point")
+        self.line_divHorz.setToolTip("The horizontal component of the divergence of the incident beam (in radians)")
+        self.line_divVert.setToolTip("The vertical component of the divergence of the incident beam (in radians)")
+        self.line_detHorz.setToolTip(
+            "The horizontal component of the divergence of the scattered beam (in radians) - "
+            "currently this correction assumes this is the same for all detector groups"
+        )
+        self.btn_applyCorrections.setToolTip(
+            "Applies all the flagged corrections according to the provided parameters "
+            "onto each selected workspace in turn, saving the resulting workspaces "
+            "in the indicated save directory"
+        )
+
     # ========== Signal Connectors ==========
     def set_on_apply_clicked(self, slot):
         self.btn_applyCorrections.clicked.connect(slot)
