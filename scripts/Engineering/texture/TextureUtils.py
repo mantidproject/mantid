@@ -250,7 +250,7 @@ def validate_abs_corr_inputs(
         if not (isinstance(div_hoz, float) and isinstance(div_vert, float) and isinstance(det_hoz, float)):
             error_msg += r"If divergence correction required, must provide valid values.\n"
     # if error_msg is still empty string, the inputs are assumed to be valid
-    return len(error_msg) == 0, error_msg
+    return error_msg == "", error_msg
 
 
 # -------- Fitting Script Logic--------------------------------

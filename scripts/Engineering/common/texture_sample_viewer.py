@@ -18,12 +18,10 @@ def is_valid_mesh(mesh: np.ndarray) -> bool:
 
 
 def has_valid_shape(ws_name: str) -> bool:
-    shape = True
     try:
-        shape = is_valid_mesh(ADS.retrieve(ws_name).sample().getShape().getMesh())
+        return is_valid_mesh(ADS.retrieve(ws_name).sample().getShape().getMesh())
     except RuntimeError:
-        shape = False
-    return shape
+        return False
 
 
 def get_xml_mesh(xml: str) -> np.ndarray:
