@@ -45,14 +45,9 @@ class FullInstrumentViewModel:
         self._detector_projection_positions = np.zeros_like(self._detector_positions)
         self._detector_is_picked = np.full(len(self._detector_ids[self._is_valid]), False)
 
-        self._bin_min = math.inf
-        self._bin_max = -math.inf
-        for workspace_index in range(self._workspace.getNumberHistograms()):
-            x_data = self._workspace.dataX(workspace_index)
-            self._union_with_current_bin_min_max(x_data[0])
-            self._union_with_current_bin_min_max(x_data[-1])
-
-        self.update_time_of_flight_range(self._bin_min, self._bin_max, True)
+        x_data = self._workspace.extractX()
+        self._tof_limits = (float(np.min(x_data[:, 0], axis=None)), float(np.max(x_data[:, -1], axis=None)))
+        self.update_time_of_flight_range(self._tof_limits, True)
 
     def _union_with_current_bin_min_max(self, bin_edge: float) -> None:
         """Expand current bin limits to include new bin edge"""
@@ -62,7 +57,8 @@ class FullInstrumentViewModel:
             elif bin_edge > self._bin_max:
                 self._bin_max = bin_edge
 
-    def update_time_of_flight_range(self, tof_min: float, tof_max: float, entire_range: bool = False) -> None:
+    def update_time_of_flight_range(self, tof_limits: tuple[float, float], entire_range: bool = False) -> None:
+        tof_min, tof_max = tof_limits
         workspace_indices = self._workspace_indices[self._is_valid]
         new_detector_counts = np.array(
             self._workspace.getIntegratedCountsForWorkspaceIndices(
@@ -70,8 +66,7 @@ class FullInstrumentViewModel:
             ),
             dtype=int,
         )
-        self._data_max = max(new_detector_counts)
-        self._data_min = min(new_detector_counts)
+        self._counts_limits = (np.min(new_detector_counts), np.max(new_detector_counts))
         self._counts[self._is_valid] = new_detector_counts
 
     def workspace(self) -> Workspace2D:
@@ -110,11 +105,33 @@ class FullInstrumentViewModel:
     def detector_ids(self) -> np.ndarray:
         return self._detector_ids[self._is_valid]
 
-    def data_limits(self) -> list:
-        return [self._data_min, self._data_max]
+    @property
+    def counts_limits(self) -> tuple[int, int]:
+        return self._counts_limits
 
-    def bin_limits(self) -> list:
-        return [self._bin_min, self._bin_max]
+    @counts_limits.setter
+    def counts_limits(self, limits) -> None:
+        try:
+            min, max = limits
+            assert int(max) > int(min)
+        except (ValueError, AssertionError):
+            return
+        self._counts_limits = limits
+
+    @property
+    def tof_limits(self) -> tuple[float, float]:
+        return self._tof_limits
+
+    @tof_limits.setter
+    def tof_limits(self, limits) -> None:
+        try:
+            min, max = limits
+            assert float(max) > float(min)
+        except (ValueError, AssertionError):
+            return
+        self._tof_limits = limits
+        # Update the counts
+        self.update_time_of_flight_range(self._tof_limits)
 
     def monitor_positions(self) -> np.ndarray:
         return self._detector_positions[[self._detector_info.isMonitor(i) for i in range(len(self._detector_ids))]]
