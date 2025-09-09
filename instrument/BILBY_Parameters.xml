@@ -100,10 +100,10 @@
     </parameter>
 
     
-	<!-- parameter to be added to log that is not in the hdf file
+	<!-- parameter to be added to log that is not in the hdf file -->
 	<parameter name="log_curtain_rotation" type="string">
       <value val=",,10.0"/>
-    </parameter> -->
+    </parameter>
 	
 	<!-- dummy parameter to support unit testing,
 		the parameter is not present in the data file and does not
