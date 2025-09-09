@@ -49,6 +49,15 @@ chopper_system:
           tjit: 0.0             # Jitter time (us)
           fluxcorr: 3.0         # (Empirical/Fudge) factor to scale calculated flux by
           isPi: False           # Should the PI pulse (at 180 deg rotation) be transmitted by this package?
+        SEQ-1000-1.5-AST:
+          name: SEQUOIA 1000 meV Fine resolution
+          pslit: 1.524           # Neutron transparent slit width (mm)
+          pslat: 0.356           # Neutron absorbing slat width (mm)
+          radius: 50.0          # Chopper package radius (mm)
+          rho: 1834.5           # Chopper package curvature (mm)
+          tjit: 0.0             # Jitter time (us)
+          fluxcorr: 3.0         # (Empirical/Fudge) factor to scale calculated flux by
+          isPi: False           # Should the PI pulse (at 180 deg rotation) be transmitted by this package?
         ARCS-100-1.5-AST:
           name: ARCS 100 meV Sloppy
           pslit: 1.52           # Neutron transparent slit width (mm)
