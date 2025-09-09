@@ -335,10 +335,11 @@ void AlignAndFocusPowderSlim::exec() {
   H5::H5File h5file(filename, H5F_ACC_RDONLY, Nexus::H5Util::defaultFileAcc());
   if (itClassEntries != allEntries.end()) {
     this->progress(.17, "Reading events");
-    const std::set<std::string> &classEntries = itClassEntries->second;
+    // const std::set<std::string> &classEntries = itClassEntries->second;
 
     // filter out the diagnostic entries
     std::vector<std::string> bankEntryNames;
+    /*
     {
       const std::regex classRegex("(/entry/)([^/]*)");
       std::smatch groups;
@@ -355,6 +356,12 @@ void AlignAndFocusPowderSlim::exec() {
           }
         }
       }
+    }
+    */
+
+    // hard coded for VULCAN 6 banks
+    for (size_t i = 1; i <= NUM_HIST; ++i) {
+      bankEntryNames.push_back("bank" + std::to_string(i) + "_events");
     }
 
     // each NXevent_data is a step

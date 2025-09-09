@@ -24,6 +24,8 @@ public:
 
   virtual void setScaleLinear(const AxisID axisID);
   virtual void setScaleLog(const AxisID axisID);
+  virtual void setScaleSymLog(const AxisID axisID, const double linthresh);
+  virtual void setAxisLimit(const AxisID axisID, const double axMin, const double axMax);
 
   virtual void setPlotErrorBars(const bool plotErrorBars);
 

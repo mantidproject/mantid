@@ -34,8 +34,10 @@ class AxesTabWidgetView(QWidget):
 
         self.lower_limit_validator = LineEditDoubleValidator(self.lower_limit_line_edit, 0.0)
         self.upper_limit_validator = LineEditDoubleValidator(self.upper_limit_line_edit, 1.0)
+        self.linthresh_validator = LineEditDoubleValidator(self.linear_threshold_line_edit, 2.0)
         self.lower_limit_line_edit.setValidator(self.lower_limit_validator)
         self.upper_limit_line_edit.setValidator(self.upper_limit_validator)
+        self.linear_threshold_line_edit.setValidator(self.linthresh_validator)
 
     def populate_select_axes_combo_box(self, axes_names):
         self.select_axes_combo_box.addItems(axes_names)
@@ -109,9 +111,9 @@ class AxesTabWidgetView(QWidget):
         self.upper_limit_validator.last_valid_value = str(limit)
         self.upper_limit_line_edit.setText(str(limit))
 
-    def set_symlog_linear_threshold(self, limit):
-        # ADD VALIDATOR - self.lower_limit_validator.last_valid_value = str(limit)
-        self.linear_threshold_line_edit.setText(str(limit))
+    def set_symlog_linear_threshold(self, linthresh):
+        self.linthresh_validator.last_valid_value = str(linthresh)
+        self.linear_threshold_line_edit.setText(str(linthresh))
 
     def set_label(self, label):
         self.label_line_edit.setText(label)
@@ -146,4 +148,4 @@ class AxesTabWidgetView(QWidget):
         return "xyz"[self.axis_tab_bar.currentIndex()]
 
     def get_symlog_linear_threshold(self):
-        return self.linear_threshold_line_edit.text()
+        return str(abs(float(self.linear_threshold_line_edit.text())))

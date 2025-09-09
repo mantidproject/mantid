@@ -232,7 +232,8 @@ def get_variants(tag: str) -> List[str]:
     for value in values[0].split(","):
         try:
             numerics = seq_to_list(value)
-            variants = variants + [str(i) for i in numerics]
+            # ansto uses 3 digit cycle numbers with a leading zero
+            variants = variants + [f"{i:03d}" for i in numerics]
         except RuntimeError:
             # catches non numeric variants
             variants = variants + [value]

@@ -226,7 +226,7 @@ class SANSBeamCentreFinderCore(DataProcessorAlgorithm):
         # 7. Multiply by volume and absolute scale
         # --------------------------------------------------------------------------------------------------------------
         progress.report("Multiplying by volume and absolute scale ...")
-        scatter_data = self._scale(state=state, workspace=scatter_data)
+        scatter_data = self._scale(state=state, workspace=scatter_data, component=component_as_string)
 
         # --------------------------------------------------------------------------------------------------------------
         # 8. Create adjustment workspaces, those are
@@ -349,9 +349,9 @@ class SANSBeamCentreFinderCore(DataProcessorAlgorithm):
         grouped_ws = wavelength_alg.getProperty("OutputWorkspace").value
         return grouped_ws.getItem(0)
 
-    def _scale(self, state, workspace):
+    def _scale(self, state, workspace, component: str):
         instrument = state.data.instrument
-        output_ws = scale_workspace(workspace=workspace, instrument=instrument, state_scale=state.scale)
+        output_ws = scale_workspace(workspace=workspace, instrument=instrument, state_scale=state.scale, component=DetectorType(component))
 
         return output_ws
 

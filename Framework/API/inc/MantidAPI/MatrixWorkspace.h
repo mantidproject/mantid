@@ -363,6 +363,10 @@ public:
   virtual void getIntegratedSpectra(std::vector<double> &out, const double minX, const double maxX,
                                     const bool entireRange) const;
 
+  std::vector<double> getIntegratedCountsForWorkspaceIndices(const std::vector<size_t> &workspaceIndices,
+                                                             const double minX, const double maxX,
+                                                             const bool entireRange) const;
+
   /// Return an index in the X vector for an x-value close to a given value
   std::pair<size_t, double> getXIndex(size_t i, double x, bool isLeft = true, size_t start = 0) const;
 
@@ -389,7 +393,7 @@ public:
   /// Returns true if the workspace has common, integer X bins
   virtual bool isIntegerBins() const;
 
-  const std::string &YUnit() const;
+  const std::string &YUnit() const { return m_YUnit; }
   void setYUnit(const std::string &newUnit);
   std::string YUnitLabel(bool useLatex = false, bool plotAsDistribution = false) const;
   void setYUnitLabel(const std::string &newLabel);

@@ -1,0 +1,1 @@
+- Corrected the EMU loader to be able to support the new chopper installed July-2025 (:ref:`LoadEMU <algm-LoadEMU>`).

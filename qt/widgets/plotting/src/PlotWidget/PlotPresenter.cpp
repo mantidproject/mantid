@@ -27,6 +27,14 @@ void PlotPresenter::setScaleLinear(const AxisID axisID) { m_view->setScaleLinear
 
 void PlotPresenter::setScaleLog(const AxisID axisID) { m_view->setScaleLog(axisID); }
 
+void PlotPresenter::setScaleSymLog(const AxisID axisID, const double linthresh) {
+  m_view->setScaleSymLog(axisID, linthresh);
+}
+
+void PlotPresenter::setAxisLimit(const AxisID axisID, const double axMin, const double axMax) {
+  m_view->setAxisLimit(axisID, axMin, axMax);
+}
+
 void PlotPresenter::setPlotErrorBars(const bool plotErrorBars) { m_model->setPlotErrorBars(plotErrorBars); }
 
 void PlotPresenter::plot() {

@@ -22,14 +22,13 @@ c_stdlib_version:            # [linux]
 python:
   - 3.11
 
-libboost_devel:
-  - 1.88 # Aim to follow conda-forge
-
-libboost_python_devel:
-  - 1.88 # Aim to follow conda-forge
+# Aim to follow conda-forge
+libboost:
+  - 1.88 # [win or linux]
+  - 1.86 # [osx]
 
 cmake:
-  - '>=4.0.2'
+  - '>=3.21.0'
 
 # 1.10.0 Produces a warning in Framework/Geometry/src/Crystal/HKLFilter.cpp
 doxygen:
@@ -44,10 +43,12 @@ hdf4:
 hdf5: # this is to move to libcurl>=8.4
   - '>1.14.0,<1.15'
 
+gdk_pixbuf:
+  - '=2.42.12=hed59a49_0' # [win]
+
 graphviz:
   - '>=2.47.0'
 
-# this must match the version in the developer dependencies
 jemalloc:
   - 5.2.0 # [linux]
   - 5.2.* # [osx]
@@ -58,13 +59,13 @@ jsoncpp:
 libglu:
   - '>=9.0'
 
-#v2.8.5 caused seg faults on Mantid conda versions and large numbers of tests failing
+#v2.3.5 caused seg faults on Mantid conda versions and large numbers of tests failing
 muparser:
   - '>=2.3.2, <2.3.5'
 
-# We follow conda-forge and build with the lowest supported version of numpy for forward compatibility.
+# Aim to build using the latest minor version, and rely on numpy's generous backward compatibility.
 numpy:
-  - 2.0.*
+  - 2.1.*
 
 matplotlib:
   - 3.9.*
@@ -109,6 +110,9 @@ pip:
 pyqt:
   - '>=5.15,<6'
 
+pyqt5_sip:
+  - '<12.13'
+
 python_dateutil:
   - '>=2.8.1'
 
@@ -117,7 +121,7 @@ pyyaml:
 
 # Pins qt to a specific version to avoid gui rendering problems in certain versions
 qt_main:
-  - 5.15.8
+  - 5.15
 
 # 5.4.2 crashes the jupyter console. 5.5.0 raises a TypeError when using tab completion.
 qtconsole:
@@ -169,5 +173,8 @@ versioningit:
   - '>=2.1'
 
 pin_run_as_build:
-    boost:
-      max_pin: x.x
+  boost:
+    max_pin: x.x
+  numpy:
+    min_pin: x
+    max_pin: x.x
