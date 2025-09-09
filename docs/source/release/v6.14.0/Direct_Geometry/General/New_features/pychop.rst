@@ -1,0 +1,1 @@
+- Extended PyChop calculations by adding a chopper for SEQUOIA spectrometer.

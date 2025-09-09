@@ -1,0 +1,1 @@
+- macOS users with Apple silicon (Arm-based architecture) are now warned if they have installed the Intel-based Mantid package.

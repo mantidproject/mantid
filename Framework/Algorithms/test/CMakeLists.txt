@@ -9,6 +9,7 @@ if(CXXTEST_FOUND)
     add_definitions(-DHAVE_STDINT_H)
   endif()
 
+  set(TESTHELPER_SRCS PolarizationCorrections/AnalyserEfficiencyTestHelpers.cpp)
   # Generate the MultiplyTest.h and DivideTest.h
   set(MULTIPLYDIVIDETEST_CLASS MultiplyTest)
   set(MULTIPLYDIVIDETEST_DO_DIVIDE false)

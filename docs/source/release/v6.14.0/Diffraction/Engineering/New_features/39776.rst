@@ -1,0 +1,2 @@
+- Performance improvements to :ref:`algm-PoldiAutoCorrelation-v6` and function to simulate POLDI 2D workspace.
+- New parameter ``InterpolationMethod`` in :ref:`algm-PoldiAutoCorrelation-v6`. The default value ``Linear`` preserves existing behaviour (linear interpolation), an additonal option method ``Nearest`` has been added for faster execution.
