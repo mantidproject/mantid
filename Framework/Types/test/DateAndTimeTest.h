@@ -297,41 +297,6 @@ public:
     TS_ASSERT(current->tm_year >= 110); // Wrote this in 2010, so the year must be > 110
   }
 
-  void test_time_zone_s() {
-    time_t rawtime = time(NULL);
-    struct tm timeinfo;
-    char buffer[50];
-
-    gmtime_s(&timeinfo, &rawtime);
-    asctime_s(buffer, 50, &timeinfo);
-    std::string utc_string = "UTC time and date: " + std::string(buffer);
-    localtime_s(&timeinfo, &rawtime);
-    asctime_s(buffer, 50, &timeinfo);
-    std::string local_string = "Local time and date: " + std::string(buffer);
-    TS_ASSERT_EQUALS(local_string, "UTC");
-  }
-
-  void test_system_timezone() {
-
-    time_t rawtime;
-    struct tm *timeinfo;
-
-    time(&rawtime);
-    timeinfo = gmtime(&rawtime);
-    std::string utc_string = "UTC time and date: " + std::string(asctime(timeinfo));
-    timeinfo = localtime(&rawtime);
-    std::string local_string = "Local time and date: " + std::string(asctime(timeinfo));
-
-    auto time = DateAndTime::getCurrentTime();
-    std::tm localTime_t = time.to_tm();
-    utc_string = "UTC: " + std::string(asctime(&localTime_t));
-    TS_ASSERT_EQUALS(utc_string, "UTC");
-
-    std::tm localTime_tm = time.to_localtime_tm();
-    local_string = "Local: " + std::string(asctime(&localTime_tm));
-    TS_ASSERT_EQUALS(local_string, "UTC");
-  }
-
   void test_timezones() {
     int hour = 12;
 
