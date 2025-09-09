@@ -48,7 +48,8 @@ list(APPEND ExternalData_URL_TEMPLATES "https://testdata.mantidproject.org/ftp/e
 
 # Increase network timeout defaults to avoid our slow server connection but don't override what a user provides
 if(NOT ExternalData_TIMEOUT_INACTIVITY)
-  set(ExternalData_TIMEOUT_INACTIVITY 120)
+  # Temporary increase the timeout duration to resolve an issue with the packaging pipeline
+  set(ExternalData_TIMEOUT_INACTIVITY 1200)
 endif()
 if(NOT ExternalData_TIMEOUT_ABSOLUTE)
   set(ExternalData_TIMEOUT_ABSOLUTE 1200)
