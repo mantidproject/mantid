@@ -31,6 +31,7 @@ class FocusModelTest(unittest.TestCase):
         self.calibration.get_instrument.return_value = "ENGINX"
         self.calibration.get_group_suffix.return_value = "all_banks"
         self.calibration.get_foc_ws_suffix.return_value = "bank"
+        self.calibration.group = GROUP.BOTH
 
     def tearDown(self):
         shutil.rmtree(self.test_dir)
@@ -195,13 +196,14 @@ class FocusModelTest(unittest.TestCase):
         mock_apply_van.return_value = sample_foc_ws  # xunit = dSpacing
         mock_conv_units.return_value = sample_foc_ws  # xunit = TOF
         self.calibration.group = GROUP.TEXTURE20
+        self.calibration.get_foc_ws_suffix.return_value = "Texture20"
         mock_save_out.return_value = ["Nexus files"], ["GSS files"]
 
         # plotting focused runs
         self.model.focus_run(["305761"], "fake/van/path", plot_output=False, rb_num=rb_num, calibration=self.calibration, save_dir="dir")
 
         self.assertEqual(mock_save_out.call_count, 2)  # once for dSpacing and once for TOF
-        save_calls = 2 * [call([path.join("dir", "User", rb_num, "Focus")], sample_foc_ws, self.calibration, van_run, rb_num)]
+        save_calls = 2 * [call([path.join("dir", "User", rb_num, "Focus", "Texture20")], sample_foc_ws, self.calibration, van_run, rb_num)]
         mock_save_out.assert_has_calls(save_calls)
 
     @patch(enggutils_path + ".mantid.DeleteWorkspace")
@@ -234,13 +236,14 @@ class FocusModelTest(unittest.TestCase):
         mock_apply_van.return_value = sample_foc_ws  # xunit = dSpacing
         mock_conv_units.return_value = sample_foc_ws  # xunit = TOF
         self.calibration.group = GROUP.TEXTURE30
+        self.calibration.get_foc_ws_suffix.return_value = "Texture30"
         mock_save_out.return_value = ["Nexus files"], ["GSS files"]
 
         # plotting focused runs
         self.model.focus_run(["305761"], "fake/van/path", plot_output=False, rb_num=rb_num, calibration=self.calibration, save_dir="dir")
 
         self.assertEqual(mock_save_out.call_count, 2)  # once for dSpacing and once for TOF
-        save_calls = 2 * [call([path.join("dir", "User", rb_num, "Focus")], sample_foc_ws, self.calibration, van_run, rb_num)]
+        save_calls = 2 * [call([path.join("dir", "User", rb_num, "Focus", "Texture30")], sample_foc_ws, self.calibration, van_run, rb_num)]
         mock_save_out.assert_has_calls(save_calls)
 
     @patch(enggutils_path + ".mantid.DeleteWorkspace")

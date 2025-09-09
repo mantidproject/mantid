@@ -12,6 +12,7 @@ from Engineering.EnggUtils import (
     _load_run_and_convert_to_dSpacing,
     process_vanadium,
     GROUP,
+    focus_run,
 )
 
 enggutils_path = "Engineering.EnggUtils"
@@ -307,6 +308,95 @@ INS  2 ICONS  18497.75    -29.68    -26.50"""
         ]
         mock_add_log.assert_has_calls(add_log_calls)
         mock_save_nxs.assert_called_once_with(InputWorkspace=ws_foc, Filename=focused_files[0][0], WorkspaceIndexList=[0])
+
+    def _setup_focus_run_test(self, calibration_group, rb_num, mock_load, mock_focus, mock_check, mock_apply, mock_convert, mock_save):
+        # Create calibration mock with appropriate group
+        calib = create_autospec(CalibrationInfo(), instance=True)
+        calib.is_valid.return_value = True
+        calib.get_instrument.return_value = "ENGINX"
+        calib.get_group_suffix.return_value = calibration_group.value
+        calib.get_foc_ws_suffix.return_value = calibration_group.value
+        calib.group = calibration_group
+        calib.get_group_ws.return_value = "grp"
+        calib.get_calibration_table.return_value = "cal_table"
+
+        # Setup focused sample workspace mock
+        ws = MagicMock()
+        ws.name.return_value = "focused_ws"
+        ws.getRun().get.return_value = MagicMock(value="123456")
+        ws.getNumberHistograms.return_value = 1
+        dim = MagicMock()
+        dim.name = "Time-of-flight"
+        ws.getDimension.return_value = dim
+
+        # setup mock return values
+        mock_load.return_value = ws
+        mock_focus.return_value = ws
+        mock_check.return_value = True
+        mock_apply.return_value = ws
+        mock_convert.return_value = ws
+        mock_save.return_value = (["nxs_path"], ["gss_path"])
+
+        return calib, ws
+
+    @patch(f"{enggutils_path}._save_output_files")
+    @patch(f"{enggutils_path}.process_vanadium", return_value=("ws_van_foc", "123456"))
+    @patch(f"{enggutils_path}._load_run_and_convert_to_dSpacing")
+    @patch(f"{enggutils_path}._focus_run_and_apply_roi_calibration")
+    @patch(f"{enggutils_path}._apply_vanadium_norm")
+    @patch(f"{enggutils_path}._check_ws_foc_and_ws_van_foc")
+    @patch(f"{enggutils_path}.mantid.ConvertUnits")
+    @patch(f"{enggutils_path}.ADS")
+    @patch(f"{enggutils_path}.mantid.DeleteWorkspace")
+    def test_focus_run_non_texture_no_rb(
+        self, mock_delete, mock_ads, mock_convert, mock_check, mock_apply, mock_focus, mock_load, mock_process, mock_save
+    ):
+        calib, ws = self._setup_focus_run_test(GROUP.NORTH, None, mock_load, mock_focus, mock_check, mock_apply, mock_convert, mock_save)
+
+        focus_run(["sample.nxs"], "van.nxs", plot_output=False, rb_num=None, calibration=calib, save_dir="/mock", full_calib="full")
+
+        expected_dirs = [path.join("/mock", "Focus")]
+        mock_save.assert_called_with(expected_dirs, ws, calib, "123456", None)
+
+    @patch(f"{enggutils_path}._save_output_files")
+    @patch(f"{enggutils_path}.process_vanadium", return_value=("ws_van_foc", "123456"))
+    @patch(f"{enggutils_path}._load_run_and_convert_to_dSpacing")
+    @patch(f"{enggutils_path}._focus_run_and_apply_roi_calibration")
+    @patch(f"{enggutils_path}._apply_vanadium_norm")
+    @patch(f"{enggutils_path}._check_ws_foc_and_ws_van_foc")
+    @patch(f"{enggutils_path}.mantid.ConvertUnits")
+    @patch(f"{enggutils_path}.ADS")
+    @patch(f"{enggutils_path}.mantid.DeleteWorkspace")
+    def test_focus_run_non_texture_with_rb(
+        self, mock_delete, mock_ads, mock_convert, mock_check, mock_apply, mock_focus, mock_load, mock_process, mock_save
+    ):
+        calib, ws = self._setup_focus_run_test(GROUP.SOUTH, "RB123", mock_load, mock_focus, mock_check, mock_apply, mock_convert, mock_save)
+
+        focus_run(["sample.nxs"], "van.nxs", plot_output=False, rb_num="RB123", calibration=calib, save_dir="/mock", full_calib="full")
+
+        expected_dirs = [path.join("/mock", "Focus"), path.join("/mock", "User", "RB123", "Focus")]
+        mock_save.assert_called_with(expected_dirs, ws, calib, "123456", "RB123")
+
+    @patch(f"{enggutils_path}._save_output_files")
+    @patch(f"{enggutils_path}.process_vanadium", return_value=("ws_van_foc", "123456"))
+    @patch(f"{enggutils_path}._load_run_and_convert_to_dSpacing")
+    @patch(f"{enggutils_path}._focus_run_and_apply_roi_calibration")
+    @patch(f"{enggutils_path}._apply_vanadium_norm")
+    @patch(f"{enggutils_path}._check_ws_foc_and_ws_van_foc")
+    @patch(f"{enggutils_path}.mantid.ConvertUnits")
+    @patch(f"{enggutils_path}.ADS")
+    @patch(f"{enggutils_path}.mantid.DeleteWorkspace")
+    def test_focus_run_texture_group_with_rb_only_rb_dir(
+        self, mock_delete, mock_ads, mock_convert, mock_check, mock_apply, mock_focus, mock_load, mock_process, mock_save
+    ):
+        calib, ws = self._setup_focus_run_test(
+            GROUP.TEXTURE20, "RB123", mock_load, mock_focus, mock_check, mock_apply, mock_convert, mock_save
+        )
+
+        focus_run(["sample.nxs"], "van.nxs", plot_output=False, rb_num="RB123", calibration=calib, save_dir="/mock", full_calib="full")
+
+        expected_dirs = [path.join("/mock", "User", "RB123", "Focus", "Texture20")]
+        mock_save.assert_called_with(expected_dirs, ws, calib, "123456", "RB123")
 
 
 if __name__ == "__main__":
