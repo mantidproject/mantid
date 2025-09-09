@@ -40,14 +40,16 @@ mark_as_advanced(ExternalData_URL_TEMPLATES)
 # places on local disk
 list(APPEND ExternalData_URL_TEMPLATES "file:///home/builder/MantidExternalData-readonly/%(algo)/%(hash)")
 list(APPEND ExternalData_URL_TEMPLATES "file:///Users/builder/MantidExternalData-readonly/%(algo)/%(hash)")
-# facility based mirrors list(APPEND ExternalData_URL_TEMPLATES "http://130.246.80.136/external-data/%(algo)/%(hash)") #
-# RAL list(APPEND ExternalData_URL_TEMPLATES "https://mantid-cache.sns.gov/testdata/%(algo)/%(hash)") # ORNL This should
-# always be last as it's the main read/write cache
+# facility based mirrors
+list(APPEND ExternalData_URL_TEMPLATES "http://130.246.80.136/external-data/%(algo)/%(hash)") # RAL
+list(APPEND ExternalData_URL_TEMPLATES "https://mantid-cache.sns.gov/testdata/%(algo)/%(hash)") # ORNL
+# This should always be last as it's the main read/write cache
 list(APPEND ExternalData_URL_TEMPLATES "https://testdata.mantidproject.org/ftp/external-data/%(algo)/%(hash)")
 
 # Increase network timeout defaults to avoid our slow server connection but don't override what a user provides
 if(NOT ExternalData_TIMEOUT_INACTIVITY)
-  set(ExternalData_TIMEOUT_INACTIVITY 120)
+  # Temporary increase the timeout duration to resolve an issue with the packaging pipeline
+  set(ExternalData_TIMEOUT_INACTIVITY 1200)
 endif()
 if(NOT ExternalData_TIMEOUT_ABSOLUTE)
   set(ExternalData_TIMEOUT_ABSOLUTE 1200)
