@@ -66,7 +66,7 @@ requirements:
     - texlive-core {{ texlive_core }} # [osx and not arm64]
     - toml {{ toml }}
     - versioningit {{ versioningit }}
-    - vtk {{ vtk }}
+    - vtk {{ vtk }} # [linux]
     - zlib
     - joblib
     - orsopy {{ orsopy }}
