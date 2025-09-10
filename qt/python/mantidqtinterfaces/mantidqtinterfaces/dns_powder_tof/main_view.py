@@ -15,7 +15,7 @@ from mantidqt.utils.qt import load_ui
 from mantidqt.gui_helper import show_interface_help
 
 from qtpy.QtCore import Signal
-from qtpy.QtWidgets import QMainWindow
+from qtpy.QtWidgets import QMainWindow, QAction, QActionGroup
 from qtpy.QtCore import QProcess
 
 
@@ -43,13 +43,13 @@ class DNSReductionGUIView(QMainWindow):
         self.ui.actionDNS_website.triggered.connect(self._open_dns_webpage)
         # connect mode switching signals
         self.modus_mapping = {
-            self.ui.actionPowder_Elastic: "powder_elastic",
             self.ui.actionPowder_TOF: "powder_tof",
+            self.ui.actionPowder_Elastic: "powder_elastic",
             self.ui.actionSingle_Crystal_Elastic: "single_crystal_elastic",
         }
         self.modus_titles = {
-            "powder_elastic": "DNS Reduction GUI - Powder Elastic",
             "powder_tof": "DNS Reduction GUI - Powder TOF",
+            "powder_elastic": "DNS Reduction GUI - Powder Elastic",
             "single_crystal_elastic": "DNS Reduction GUI - Single Crystal Elastic",
         }
         for key in self.modus_mapping:
@@ -59,6 +59,21 @@ class DNSReductionGUIView(QMainWindow):
         self.last_index = 0
         # connect signals
         self.ui.tabWidget.currentChanged.connect(self._tab_changed)
+
+        # Create an exclusive action group with radio button like behavior
+        self.action_group = QActionGroup(self)
+        self.action_group.setExclusive(True)
+
+        self.action = {}
+        self.modus_actions = {
+            "powder_tof": "actionPowder_TOF",
+            "powder_elastic": "actionPowder_Elastic",
+            "single_crystal_elastic": "actionSingle_Crystal_Elastic",
+        }
+        for modus_name, modus_action in self.modus_actions.items():
+            self.action[modus_name] = self.findChild(QAction, modus_action)
+            self.action[modus_name].setCheckable(True)
+            self.action_group.addAction(self.action[modus_name])
 
     # signals
     sig_tab_changed = Signal(int, int)
@@ -104,7 +119,7 @@ class DNSReductionGUIView(QMainWindow):
 
     def add_submenu(self, subview):
         for menu in subview.menus:
-            submenu = self.menu.insertMenu(self.ui.menuHelp.menuAction(), menu)
+            submenu = self.menu.insertMenu(None, menu)
             self.subview_menus.append(submenu)
 
     def clear_submenus(self):
