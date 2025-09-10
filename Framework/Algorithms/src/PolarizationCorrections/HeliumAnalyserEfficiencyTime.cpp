@@ -227,7 +227,8 @@ std::vector<MatrixWorkspace_sptr> HeliumAnalyserEfficiencyTime::calculateOutputs
     }
   }
 
-  const auto outputVec = std::vector({efficiency, efficiencyErrors, unpolTransmission, unpolTransmissionErrors});
+  const auto outputVec = std::vector({std::move(efficiency), std::move(efficiencyErrors), std::move(unpolTransmission),
+                                      std::move(unpolTransmissionErrors)});
   std::vector<MatrixWorkspace_sptr> wsOut;
   for (size_t index = 0; index < outputVec.size(); index += 2) {
     if (outputVec.at(index).size() > 0) {
@@ -265,7 +266,7 @@ std::pair<double, double> HeliumAnalyserEfficiencyTime::getTimeDifference() {
   } else {
     // Here we can only take the time stamp of the input workspace from the table
     const auto colTimeStamps = table->getColumn(COLUMN_STAMPS);
-    const auto expTimeStamp = colTimeStamps->cell<std::string>(indexRow);
+    const auto &expTimeStamp = colTimeStamps->cell<std::string>(indexRow);
     const auto duration = Types::Core::DateAndTime(expTimeStamp) - Types::Core::DateAndTime(refTimeStamp);
     tHours = static_cast<double>(duration.total_seconds() / 3600);
   }
