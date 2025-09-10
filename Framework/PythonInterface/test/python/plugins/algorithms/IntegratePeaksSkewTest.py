@@ -6,7 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 import tempfile
-import shutil
 from os import path
 from mantid.simpleapi import (
     IntegratePeaksSkew,
@@ -57,13 +56,9 @@ class IntegratePeaksSkewTest(unittest.TestCase):
             AddPeak(PeaksWorkspace=cls.peaks_comp_arr, RunWorkspace=cls.ws_comp_arr, TOF=1e4, DetectorID=detid)
             cls.peaks_comp_arr.getPeak(ipk).setHKL(ipk, ipk, ipk)
 
-        # output file dir
-        cls._test_dir = tempfile.mkdtemp()
-
     @classmethod
     def tearDownClass(cls):
         AnalysisDataService.clear()
-        shutil.rmtree(cls._test_dir)
 
     def test_integrate_on_edge_option(self):
         out = IntegratePeaksSkew(
@@ -213,18 +208,19 @@ class IntegratePeaksSkewTest(unittest.TestCase):
             self.assertEqual(out.getPeak(out.getNumberPeaks() - 1).getIntensity(), 0)
 
     def test_print_output_file(self):
-        out_file = path.join(self._test_dir, "out.pdf")
-        IntegratePeaksSkew(
-            InputWorkspace=self.ws,
-            PeaksWorkspace=self.peaks,
-            ThetaWidth=0,
-            BackscatteringTOFResolution=0.3,
-            IntegrateIfOnEdge=False,
-            OutputWorkspace="out4",
-            OutputFile=out_file,
-        )
-        # check output file saved
-        self.assertTrue(path.exists(out_file))
+        with tempfile.TemporaryDirectory() as temp_dir:
+            out_file = path.join(temp_dir, "out.pdf")
+            IntegratePeaksSkew(
+                InputWorkspace=self.ws,
+                PeaksWorkspace=self.peaks,
+                ThetaWidth=0,
+                BackscatteringTOFResolution=0.3,
+                IntegrateIfOnEdge=False,
+                OutputWorkspace="out4",
+                OutputFile=out_file,
+            )
+            # check output file saved
+            self.assertTrue(path.exists(out_file))
 
     def test_peak_mask_validation_with_ncol_max(self):
         out = IntegratePeaksSkew(

@@ -18,7 +18,6 @@ from mantid.simpleapi import (
 from testhelpers import WorkspaceCreationHelper
 from numpy import array, sqrt
 import tempfile
-import shutil
 from os import path
 import json
 
@@ -68,13 +67,10 @@ class IntegratePeaksShoeboxTOFTest(unittest.TestCase):
         [cls.peaks.getPeak(ipk).setHKL(ipk, ipk, ipk) for ipk in range(cls.peaks.getNumberPeaks())]
         # Add back-to-back exponential params
         LoadParameterFile(cls.ws, ParameterXML=XML_PARAMS)
-        # output file dir
-        cls._test_dir = tempfile.mkdtemp()
 
     @classmethod
     def tearDownClass(cls):
         AnalysisDataService.clear()
-        shutil.rmtree(cls._test_dir)
 
     def _assert_found_correct_peaks(self, peak_ws, i_over_sigs=[6.4407, 4.0207]):
         self.assertEqual(peak_ws.getNumberPeaks(), 2)
@@ -194,22 +190,23 @@ class IntegratePeaksShoeboxTOFTest(unittest.TestCase):
         self._assert_found_correct_peaks(out, i_over_sigs=[4.4631, 2.3966])
 
     def test_exec_OutputFile(self):
-        out_file = path.join(self._test_dir, "out.pdf")
-        IntegratePeaksShoeboxTOF(
-            InputWorkspace=self.ws,
-            PeaksWorkspace=self.peaks,
-            OutputWorkspace="peaks1",
-            GetNBinsFromBackToBackParams=False,
-            NRows=3,
-            NCols=3,
-            NBins=3,
-            WeakPeakThreshold=0.0,
-            OptimiseShoebox=False,
-            IntegrateIfOnEdge=False,
-            OutputFile=out_file,
-        )
-        # check output file saved
-        self.assertTrue(path.exists(out_file))
+        with tempfile.TemporaryDirectory() as temp_dir:
+            out_file = path.join(temp_dir, "out.pdf")
+            IntegratePeaksShoeboxTOF(
+                InputWorkspace=self.ws,
+                PeaksWorkspace=self.peaks,
+                OutputWorkspace="peaks1",
+                GetNBinsFromBackToBackParams=False,
+                NRows=3,
+                NCols=3,
+                NBins=3,
+                WeakPeakThreshold=0.0,
+                OptimiseShoebox=False,
+                IntegrateIfOnEdge=False,
+                OutputFile=out_file,
+            )
+            # check output file saved
+            self.assertTrue(path.exists(out_file))
 
     @mock.patch("IntegratePeaksShoeboxTOF.find_nearest_peak_in_data_window")
     def test_exec_no_peak(self, mock_find_ipos):

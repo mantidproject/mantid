@@ -20,7 +20,6 @@ from mantid.dataobjects import Workspace2D
 from mantid.kernel import V3D
 from Diffraction.single_crystal.base_sx import BaseSX
 import tempfile
-import shutil
 from os import path
 import numpy as np
 from scipy.spatial.transform import Rotation
@@ -34,12 +33,10 @@ class BaseSXTest(unittest.TestCase):
         cls.ws = LoadEmptyInstrument(Filename="SXD_Definition.xml", OutputWorkspace="empty")
         axis = cls.ws.getAxis(0)
         axis.setUnit("TOF")
-        cls._test_dir = tempfile.mkdtemp()
 
     @classmethod
     def tearDownClass(cls):
         AnalysisDataService.clear()
-        shutil.rmtree(cls._test_dir)
 
     def test_retrieve(self):
         self.assertTrue(isinstance(BaseSX.retrieve("empty"), Workspace2D))  # ADS name of self.ws is "empty"
@@ -200,11 +197,12 @@ class BaseSXTest(unittest.TestCase):
         )
 
         # plot
-        out_file = path.join(self._test_dir, "out_plot_MD.pdf")
-        BaseSX.plot_integrated_peaks_MD(ws, peaks_int, out_file, nbins_max=21, extent=1.5, log_norm=True)
+        with tempfile.TemporaryDirectory() as temp_dir:
+            out_file = path.join(temp_dir, "out_plot_MD.pdf")
+            BaseSX.plot_integrated_peaks_MD(ws, peaks_int, out_file, nbins_max=21, extent=1.5, log_norm=True)
 
-        # check output file saved
-        self.assertTrue(path.exists(out_file))
+            # check output file saved
+            self.assertTrue(path.exists(out_file))
 
     def test_optimize_goniometer_axis_fix_angles_True_apply_False(self):
         phis = [0, 15, 45]
