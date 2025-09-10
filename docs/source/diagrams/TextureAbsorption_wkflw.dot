@@ -1,0 +1,91 @@
+digraph TextureAbsorptionTabWorkflow {
+  label = "Absorption Correction tab workflow for Texture GUI";
+  $global_style
+
+  // ---- data/parameters (ellipses) ----
+  subgraph params {
+    $param_style
+    raw_ws        [label="Raw Workspaces"]
+    orient_data   [label="Orientation Data"]
+    euler_axes    [label="Euler Axes and\nSense"]
+    workspaces    [label="Workspaces"]
+
+    xml_file      [label="XML File"]
+    gauge_custom  [label="Custom Shape"]
+    gauge_none    [label="No Gauge Volume"]
+    gauge_cube    [label="4mmCube"]
+
+    eval_point    [label="Evaluation Point"]
+    div_values    [label="Divergence Values"]
+
+    init_ref_ws   [label="Reference\nWorkspace"]
+    ref_ws        [label="Reference\nWorkspace"]
+  }
+
+  // ---- algorithms/actions (rounded boxes) ----
+  subgraph algorithms {
+    $algorithm_style
+    load_orient     [label="Load Orientation File"]
+    create_ref      [label="Create Reference Workspace"]
+    load_shape      [label="Load Shape onto Single WS"]
+    set_shape       [label="Set Shape onto Single WS"]
+    set_material    [label="Set Sample Material"]
+    set_ref_orient  [label="Set Reference Orientation"]
+    copy_ref        [label="Copy Reference Sample"]
+    apply_corr      [label="Apply Corrections"]
+  }
+
+  // ---- decisions (diamonds) ----
+  subgraph decisions {
+    $decision_style
+    orient_type     [label="Orientation Data\nType"]
+    ac_q            [label="Absorption\nCorrection?"]
+    shape_q         [label="Shape Data?"]
+    need_reorient_q [label="Shape needs\nreorientating?"]
+    gauge_q         [label="Gauge Volume?"]
+    atten_q         [label="Create Attenuation\nTable?"]
+    div_q           [label="Include Divergence\nCalculation?"]
+  }
+
+  // ---- orientation branch ----
+  orient_data -> orient_type
+  orient_type  -> euler_axes          [label="Euler Angles"]
+  euler_axes   -> load_orient
+  orient_type  -> load_orient         [label="Rotation Matrices"]
+  load_orient  -> workspaces
+  raw_ws       -> load_orient
+
+  // ---- absorption/reference sample branch ----
+  ac_q        -> create_ref          [label="Yes"]
+  create_ref  -> init_ref_ws
+  init_ref_ws -> shape_q
+  init_ref_ws -> set_material
+
+  shape_q     -> load_shape          [label="STL"]
+  shape_q     -> set_shape           [label="XML"]
+  load_shape  -> ref_ws
+  set_shape   -> ref_ws
+  set_material-> ref_ws
+  need_reorient_q -> set_ref_orient  [label="Yes"]
+  set_ref_orient  -> ref_ws
+  ref_ws      -> copy_ref
+  raw_ws      -> copy_ref
+  copy_ref    -> workspaces
+
+  // ---- gauge / attenuation / divergence ----
+  gauge_q     -> gauge_custom        [label="Custom"]
+  gauge_q     -> gauge_cube          [label="4mm cube"]
+  gauge_q     -> gauge_none          [label="None"]
+  xml_file    -> gauge_custom
+
+  eval_point  -> atten_q
+  div_values  -> div_q
+
+  // ---- final application of corrections ----
+  workspaces  -> apply_corr
+  gauge_custom -> apply_corr
+  gauge_cube   -> apply_corr
+  gauge_none   -> apply_corr
+  atten_q      -> apply_corr      [label = "Yes"]
+  div_q        -> apply_corr      [label = "Yes"]
+}
