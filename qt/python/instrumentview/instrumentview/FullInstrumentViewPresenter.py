@@ -44,9 +44,9 @@ class FullInstrumentViewPresenter:
         self._view.set_contour_range_limits(self._model.counts_limits)
         self._view.set_tof_range_limits(self._model.tof_limits)
 
-        if len(self._model.monitor_positions()) > 0:
-            monitor_point_cloud = self.create_poly_data_mesh(self._model.monitor_positions())
-            monitor_point_cloud["colours"] = self.generate_single_colour(len(self._model.monitor_positions()), 1, 0, 0, 1)
+        if len(self._model.monitor_positions) > 0:
+            monitor_point_cloud = self.create_poly_data_mesh(self._model.monitor_positions)
+            monitor_point_cloud["colours"] = self.generate_single_colour(len(self._model.monitor_positions), 1, 0, 0, 1)
             self._view.add_rgba_mesh(monitor_point_cloud, scalars="colours")
 
         self._counts_label = "Integrated Counts"
@@ -65,7 +65,7 @@ class FullInstrumentViewPresenter:
 
     # TODO: Sort out view names and return names all in one place
     def projection_combo_options(self) -> tuple[int, list[str]]:
-        default_projection = self._model.default_projection()
+        default_projection = self._model.default_projection
         try:
             possible_returns = ["3D", "SPHERICAL_X", "SPHERICAL_Y", "SPHERICAL_Z", "CYLINDRICAL_X", "CYLINDRICAL_Y", "CYLINDRICAL_Z"]
             default_index = possible_returns.index(default_projection)
@@ -79,7 +79,7 @@ class FullInstrumentViewPresenter:
         self.set_view_tof_limits()
 
     def set_view_tof_limits(self) -> None:
-        self._detector_mesh[self._counts_label] = self._model.detector_counts()
+        self._detector_mesh[self._counts_label] = self._model.detector_counts
 
     def on_contour_limits_updated(self) -> None:
         """When contour limits are changed, read the new limits and tell the presenter to update the colours accordingly"""
@@ -97,7 +97,7 @@ class FullInstrumentViewPresenter:
             # Plot orange sphere at the origin
             # origin = pv.Sphere(radius=0.1, center=[0, 0, 0])
             # self._view.add_simple_shape(origin, colour="orange", pickable=False)
-            self._update_view_main_plotter(self._model.detector_positions(), is_projection=False)
+            self._update_view_main_plotter(self._model.detector_positions, is_projection=False)
             return
 
         is_spherical = True
@@ -118,15 +118,15 @@ class FullInstrumentViewPresenter:
             raise ValueError(f"Unknown projection type {projection_type}")
 
         self._model.calculate_projection(is_spherical, axis)
-        self._update_view_main_plotter(self._model.detector_projection_positions(), is_projection=True)
+        self._update_view_main_plotter(self._model.detector_projection_positions, is_projection=True)
 
     def _update_view_main_plotter(self, positions: np.ndarray, is_projection: bool):
         self._detector_mesh = self.create_poly_data_mesh(positions)
-        self._detector_mesh[self._counts_label] = self._model.detector_counts()
+        self._detector_mesh[self._counts_label] = self._model.detector_counts
         self._view.add_main_mesh(self._detector_mesh, is_projection=is_projection, scalars=self._counts_label)
 
         self._pickable_main_mesh = self.create_poly_data_mesh(positions)
-        self._pickable_main_mesh[self._visible_label] = self._model.picked_visibility()
+        self._pickable_main_mesh[self._visible_label] = self._model.picked_visibility
         self._view.add_pickable_main_mesh(self._pickable_main_mesh, scalars=self._visible_label)
 
         self._view.enable_point_picking(callback=self.point_picked)
@@ -161,9 +161,9 @@ class FullInstrumentViewPresenter:
             self._model.negate_picked_visibility(point_indices)
 
         # Update to visibility shows up in real time
-        self._pickable_main_mesh[self._visible_label] = self._model.picked_visibility()
+        self._pickable_main_mesh[self._visible_label] = self._model.picked_visibility
 
-        self._view.set_plot_for_detectors(self._model.workspace(), self._model.picked_workspace_indices())
+        self._view.set_plot_for_detectors(self._model.workspace, self._model.picked_workspace_indices)
         self._view.set_selected_detector_info(self._model.picked_detectors_info_text())
 
     def on_clear_selected_detectors_clicked(self) -> None:

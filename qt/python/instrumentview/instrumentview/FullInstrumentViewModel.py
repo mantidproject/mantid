@@ -9,8 +9,8 @@ import instrumentview.Projections.SphericalProjection as iv_spherical
 import instrumentview.Projections.CylindricalProjection as iv_cylindrical
 
 from mantid.dataobjects import Workspace2D
+from mantid.simpleapi import CreateDetectorTable
 import numpy as np
-import math
 
 
 class FullInstrumentViewModel:
@@ -28,82 +28,80 @@ class FullInstrumentViewModel:
         self._workspace = workspace
 
     def setup(self):
-        self._detector_info = self._workspace.detectorInfo()
-        self._component_info = self._workspace.componentInfo()
-        self._sample_position = np.array(self._component_info.samplePosition()) if self._component_info.hasSample() else np.zeros(3)
+        component_info = self._workspace.componentInfo()
+        self._sample_position = np.array(component_info.samplePosition()) if component_info.hasSample() else np.zeros(3)
         has_source = self._workspace.getInstrument().getSource() is not None
-        self._source_position = np.array(self._component_info.sourcePosition()) if has_source else np.array([0, 0, 0])
-        self._detector_ids = np.array(self._detector_info.detectorIDs())
-        self._detector_positions = np.array([self._detector_info.position(i) for i in range(len(self._detector_ids))])
-        self._spherical_positions = np.array([self._detector_info.position(i).getSpherical() for i in range(len(self._detector_ids))])
+        self._source_position = np.array(component_info.sourcePosition()) if has_source else np.array([0, 0, 0])
+        self._root_position = np.array(component_info.position(0))
+
+        detector_info_table = CreateDetectorTable(self._workspace, IncludeDetectorPosition=True, StoreInADS=False)
+
+        # Might have comma-separated multiple detectors, choose first one in the string in that case
+        first_numbers = np.char.split(detector_info_table.column("Detector ID(s)"), sep=",")
+        self._detector_ids = np.array([int(x[0]) for x in first_numbers])
+        detector_positions = detector_info_table.column("Position")
+        self._spherical_positions = np.array([pos.getSpherical() for pos in detector_positions])
+        self._detector_positions = np.array(detector_positions)
+        self._workspace_indices = np.array(detector_info_table.column("Index")).astype(int)
+        self._is_monitor = np.array(detector_info_table.column("Monitor"))
+        spectrum_number = np.array(detector_info_table.column("Spectrum No"))
+        self._is_valid = (self._is_monitor == "no") & (spectrum_number != -1)
+        self._monitor_positions = self._detector_positions[self._is_monitor == "yes"]
+
+        # Initialise with zeros
         self._counts = np.zeros_like(self._detector_ids)
-        workspace_map = self._workspace.getDetectorIDToWorkspaceIndexMap(False, False)
-        self._workspace_indices = np.array([workspace_map.get(int(i), -1) for i in self._detector_ids])
-        self._is_valid = np.array(
-            [not self._detector_info.isMonitor(i) and self._workspace_indices[i] != -1 for i in range(len(self._detector_ids))]
-        )
+        self._counts_limits = (0, 0)
         self._detector_projection_positions = np.zeros_like(self._detector_positions)
         self._detector_is_picked = np.full(len(self._detector_ids[self._is_valid]), False)
 
         x_data = self._workspace.extractX()
         self._tof_limits = (float(np.min(x_data[:, 0], axis=None)), float(np.max(x_data[:, -1], axis=None)))
+        # Update counts with default total range
         self.update_time_of_flight_range(self._tof_limits, True)
 
-    def _union_with_current_bin_min_max(self, bin_edge: float) -> None:
-        """Expand current bin limits to include new bin edge"""
-        if not math.isinf(bin_edge):
-            if bin_edge < self._bin_min:
-                self._bin_min = bin_edge
-            elif bin_edge > self._bin_max:
-                self._bin_max = bin_edge
-
-    def update_time_of_flight_range(self, tof_limits: tuple[float, float], entire_range: bool = False) -> None:
-        tof_min, tof_max = tof_limits
-        workspace_indices = self._workspace_indices[self._is_valid]
-        new_detector_counts = np.array(
-            self._workspace.getIntegratedCountsForWorkspaceIndices(
-                workspace_indices, len(workspace_indices), float(tof_min), float(tof_max), entire_range
-            ),
-            dtype=int,
-        )
-        self._counts_limits = (np.min(new_detector_counts), np.max(new_detector_counts))
-        self._counts[self._is_valid] = new_detector_counts
-
+    @property
     def workspace(self) -> Workspace2D:
         return self._workspace
 
+    @property
     def default_projection(self) -> str:
         return self._workspace.getInstrument().getDefaultView()
 
+    @property
     def sample_position(self) -> np.ndarray:
         return self._sample_position
 
+    @property
     def detector_positions(self) -> np.ndarray:
         return self._detector_positions[self._is_valid]
 
+    @property
     def detector_projection_positions(self) -> np.ndarray:
         return self._detector_projection_positions[self._is_valid]
 
-    def negate_picked_visibility(self, indices: list[int] | np.ndarray) -> None:
-        self._detector_is_picked[indices] = ~self._detector_is_picked[indices]
+    @property
+    def detector_ids(self) -> np.ndarray:
+        return self._detector_ids[self._is_valid]
 
-    def clear_all_picked_detectors(self) -> None:
-        self._detector_is_picked.fill(False)
+    @property
+    def monitor_positions(self) -> np.ndarray:
+        return self._monitor_positions
 
+    @property
     def picked_visibility(self) -> np.ndarray:
         return self._detector_is_picked.astype(int)
 
+    @property
     def picked_detector_ids(self) -> np.ndarray:
         return self._detector_ids[self._is_valid][self._detector_is_picked]
 
+    @property
     def picked_workspace_indices(self) -> np.ndarray:
         return self._workspace_indices[self._is_valid][self._detector_is_picked]
 
+    @property
     def detector_counts(self) -> np.ndarray:
         return self._counts[self._is_valid]
-
-    def detector_ids(self) -> np.ndarray:
-        return self._detector_ids[self._is_valid]
 
     @property
     def counts_limits(self) -> tuple[int, int]:
@@ -133,8 +131,23 @@ class FullInstrumentViewModel:
         # Update the counts
         self.update_time_of_flight_range(self._tof_limits)
 
-    def monitor_positions(self) -> np.ndarray:
-        return self._detector_positions[[self._detector_info.isMonitor(i) for i in range(len(self._detector_ids))]]
+    def update_time_of_flight_range(self, tof_limits: tuple[float, float], entire_range: bool = False) -> None:
+        tof_min, tof_max = tof_limits
+        workspace_indices = self._workspace_indices[self._is_valid]
+        new_detector_counts = np.array(
+            self._workspace.getIntegratedCountsForWorkspaceIndices(
+                workspace_indices, len(workspace_indices), float(tof_min), float(tof_max), entire_range
+            ),
+            dtype=int,
+        )
+        self._counts_limits = (np.min(new_detector_counts), np.max(new_detector_counts))
+        self._counts[self._is_valid] = new_detector_counts
+
+    def negate_picked_visibility(self, indices: list[int] | np.ndarray) -> None:
+        self._detector_is_picked[indices] = ~self._detector_is_picked[indices]
+
+    def clear_all_picked_detectors(self) -> None:
+        self._detector_is_picked.fill(False)
 
     def picked_detectors_info_text(self) -> list[DetectorInfo]:
         """For the specified detector, extract info that can be displayed in the View, and wrap it all up in a DetectorInfo class"""
@@ -158,11 +171,10 @@ class FullInstrumentViewModel:
 
     def calculate_projection(self, is_spherical: bool, axis: list[int]):
         """Calculate the 2D projection with the specified axis. Can be either cylindrical or spherical."""
-        root_position = np.array(self._component_info.position(0))
         projection = (
-            iv_spherical.SphericalProjection(self._sample_position, root_position, self._detector_positions, np.array(axis))
+            iv_spherical.SphericalProjection(self._sample_position, self._root_position, self._detector_positions, np.array(axis))
             if is_spherical
-            else iv_cylindrical.CylindricalProjection(self._sample_position, root_position, self._detector_positions, np.array(axis))
+            else iv_cylindrical.CylindricalProjection(self._sample_position, self._root_position, self._detector_positions, np.array(axis))
         )
         self._detector_projection_positions[:, :2] = projection.positions()  # Assign only x and y coordinate
         return self._detector_projection_positions
