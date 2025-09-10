@@ -60,6 +60,12 @@ Usage
 
        pixi run --environment local-mantid your-command
 
+3. Run Local Workbench in your application's context:
+
+   .. code-block:: bash
+
+       pixi run --environment local-mantid python -m workbench
+
 Troubleshooting
 ###############
 
