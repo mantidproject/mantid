@@ -24,14 +24,14 @@ namespace Algorithms {
 struct InputSpectraToFit {
   /// Constructor
   InputSpectraToFit(const std::string &nam, int ix, double isp, double iv, int p, API::MatrixWorkspace_sptr mws)
-      : name(nam), i(ix), sp(isp), v(iv), period(p), ws(mws) {}
+      : name(nam), wsIdx(ix), spectrumNum(isp), numericValue(iv), period(p), ws(mws) {}
   /// Copy constructor
   InputSpectraToFit(const InputSpectraToFit &data) = default;
 
   std::string name;             ///< Name of a workspace or file
-  int i;                        ///< Workspace index of the spectra to fit
-  double sp;                    ///< Spectrum number of the spectra to fit
-  double v;                     ///< Numerix axis value associated with the spectra to fit
+  int wsIdx;                    ///< Workspace index of the spectra to fit
+  double spectrumNum;           ///< Spectrum number of the spectra to fit
+  double numericValue;          ///< Numerix axis value associated with the spectra to fit
   int period;                   ///< Period, needed if a file contains several periods
   API::MatrixWorkspace_sptr ws; ///< shared pointer to the workspace
 };

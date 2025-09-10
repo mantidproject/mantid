@@ -250,7 +250,7 @@ void PlotPeakByLogValue::exec() {
       continue;
     }
 
-    if (data.i < 0) {
+    if (data.wsIdx < 0) {
       g_log.warning() << "Zero spectra selected for fitting in workspace " << wsNames[i].name << '\n';
       continue;
     }
@@ -409,7 +409,7 @@ IFunction_sptr PlotPeakByLogValue::setupFunction(bool individual, bool passWSInd
     ifun = inputFunction;
   }
   if (passWSIndexToFunction) {
-    this->setWorkspaceIndexAttribute(ifun, data.i);
+    this->setWorkspaceIndexAttribute(ifun, data.wsIdx);
   }
 
   if (individual && !isMultiDomainFunction) {
@@ -459,15 +459,17 @@ void PlotPeakByLogValue::finaliseOutputWorkspacesWithAppend(const std::vector<st
 
   auto start = wsNames[0];
   auto end = wsNames[wsNames.size() - 1];
-  if (start.sp != -1) {
-    range = wsNames.size() > 1 && start.sp != end.sp ? std::format("sp{:g}-{:g}", start.sp, end.sp)
-                                                     : std::format("sp{:g}", start.sp);
-  } else if (start.v != -1) {
-    range = wsNames.size() > 1 && start.v != end.v ? std::format("v{:g}-{:g}", start.v, end.v)
-                                                   : std::format("v{:g}", start.v);
+  if (start.spectrumNum != -1) {
+    range = wsNames.size() > 1 && start.spectrumNum != end.spectrumNum
+                ? std::format("sp{:g}-{:g}", start.spectrumNum, end.spectrumNum)
+                : std::format("sp{:g}", start.spectrumNum);
+  } else if (start.numericValue != -1) {
+    range = wsNames.size() > 1 && start.numericValue != end.numericValue
+                ? std::format("v{:g}-{:g}", start.numericValue, end.numericValue)
+                : std::format("v{:g}", start.numericValue);
   } else {
-    range =
-        wsNames.size() > 1 && start.i != end.i ? std::format("i{}-{}", start.i, end.i) : "i" + std::to_string(start.i);
+    range = wsNames.size() > 1 && start.wsIdx != end.wsIdx ? std::format("i{}-{}", start.wsIdx, end.wsIdx)
+                                                           : "i" + std::to_string(start.wsIdx);
   }
 
   // collect output of fit for each spectrum into workspace groups
@@ -592,7 +594,7 @@ std::shared_ptr<Algorithm> PlotPeakByLogValue::runSingleFit(bool createFitOutput
                                                             bool outputConvolvedMembers, bool appendIdx,
                                                             const IFunction_sptr &ifun, const InputSpectraToFit &data,
                                                             double startX, double endX, const std::string &exclude) {
-  g_log.debug() << "Fitting " << data.ws->getName() << " index " << data.i << " with \n";
+  g_log.debug() << "Fitting " << data.ws->getName() << " index " << data.wsIdx << " with \n";
   g_log.debug() << ifun->asString() << '\n';
 
   std::string wsBaseName;
@@ -600,12 +602,12 @@ std::shared_ptr<Algorithm> PlotPeakByLogValue::runSingleFit(bool createFitOutput
   if (createFitOutput) {
     wsBaseName = data.name;
     if (appendIdx) {
-      if (data.sp != -1) {
-        wsBaseName += "_" + std::format("sp{:g}", data.sp);
-      } else if (data.v != -1) {
-        wsBaseName += "_" + std::format("v{:g}", data.v);
+      if (data.spectrumNum != -1) {
+        wsBaseName += "_" + std::format("sp{:g}", data.spectrumNum);
+      } else if (data.numericValue != -1) {
+        wsBaseName += "_" + std::format("v{:g}", data.numericValue);
       } else {
-        wsBaseName += "_i" + std::to_string(data.i);
+        wsBaseName += "_i" + std::to_string(data.wsIdx);
       }
     }
   }
@@ -619,11 +621,11 @@ std::shared_ptr<Algorithm> PlotPeakByLogValue::runSingleFit(bool createFitOutput
   fit->setPropertyValue("EvaluationType", this->getPropertyValue("EvaluationType"));
   fit->setProperty("Function", ifun);
   fit->setProperty("InputWorkspace", data.ws);
-  fit->setProperty("WorkspaceIndex", data.i);
+  fit->setProperty("WorkspaceIndex", data.wsIdx);
   fit->setProperty("StartX", startX);
   fit->setProperty("EndX", endX);
   fit->setProperty("IgnoreInvalidData", ignoreInvalidData);
-  fit->setPropertyValue("Minimizer", this->getMinimizerString(data.name, std::to_string(data.i)));
+  fit->setPropertyValue("Minimizer", this->getMinimizerString(data.name, std::to_string(data.wsIdx)));
   fit->setPropertyValue("CostFunction", this->getPropertyValue("CostFunction"));
   fit->setPropertyValue("MaxIterations", this->getPropertyValue("MaxIterations"));
   fit->setPropertyValue("PeakRadius", this->getPropertyValue("PeakRadius"));
@@ -646,11 +648,11 @@ double PlotPeakByLogValue::calculateLogValue(const std::string &logName, const I
   if (logName.empty() || logName == "axis-1") {
     API::Axis *axis = data.ws->getAxis(1);
     if (dynamic_cast<BinEdgeAxis *>(axis)) {
-      double lowerEdge((*axis)(data.i));
-      double upperEdge((*axis)(data.i + 1));
+      double lowerEdge((*axis)(data.wsIdx));
+      double upperEdge((*axis)(data.wsIdx + 1));
       logValue = lowerEdge + (upperEdge - lowerEdge) / 2;
     } else
-      logValue = (*axis)(data.i);
+      logValue = (*axis)(data.wsIdx);
   } else if (logName != "SourceName") {
     Kernel::Property *prop = data.ws->run().getLogData(logName);
     if (!prop) {
