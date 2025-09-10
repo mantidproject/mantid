@@ -284,21 +284,17 @@ the parameter files. If, instead, you would like peak to be the HKL indices, you
 * *CIF*:
 
 #. Select ``Include Scattering Power Correction``
-#. Under the ``Set Crystal Structure from CIF`` section, click ``Load CIF``
-#. Set ``Workspace`` to ``ENGINX_364901_361838_Texture30_dSpacing``
-#. Click ``Browse`` next to ``InputFile``
+#. Click ``Browse`` next to the ``CIF File`` input box
 #. Navigate to ``Fe.cif`` in the ``CIF`` folder of the tutorial data
-#. Click ``Run``
-#. In the box next to the ``Load CIF`` button select ``ENGINX_364901_361838_Texture30_dSpacing``
-#. Click ``Copy Crystal Structure to All``
+#. Click ``Set Crystal to All`` (or for individual structures: select specific workspaces in the drop down box and click ``Set Crystal``)
 
 * *Input*:
 
 #. Select ``Include Scattering Power Correction``
 #. Under the ``Set Crystal Structure Properties`` section, set ``Lattice`` to ``2.8665  2.8665  2.8665``, ``Space Group`` to ``I m -3 m``, and ``Basis`` to ``Fe 0 0 0 1.0 0.05; Fe 0.5 0.5 0.5 1.0 0.05``
-#. Click ``Set Crystal to All`` (or for individual structures: select specific workspaces in the drop down box below these input boxes and click ``Set Crystal``)
+#. Click ``Set Crystal to All`` (or for individual structures: select specific workspaces in the drop down box and click ``Set Crystal``)
 
-Now the HKL indices ``(2,0,0)`` can be specified in the provided input section. Rerunning ``Calculate Pole Figure`` the HKL indices should now be in the output table.
+Now the HKL indices ``(1,1,0)`` can be specified in the provided input section. Rerunning ``Calculate Pole Figure`` the HKL indices should now be in the output table.
 
 Modifying Sample Axes
 ---------------------

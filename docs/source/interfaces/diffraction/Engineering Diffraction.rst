@@ -428,17 +428,11 @@ View Shape
     :width: 500px
     :align: center
 
-Load CIF
-    Opens dialog for :ref:`algm-LoadCIF`, allows loading of crystal structure information onto a specified workspace
-
-Copy Crystal Structure to All
-    Takes the crystal structure defined on the workspace selected in the drop down menu and copies it to all selected workspaces
-
 Set Crystal
-    Takes the crystal structure defined in the lattice/space group/basis inputs and applies it to the workspace in the drop down menu
+    Takes the crystal structure defined in either the CIF or the lattice/space group/basis inputs and applies it to the workspace in the drop down menu
 
 Set Crystal to All
-    Takes the crystal structure defined in the lattice/space group/basis inputs and applies it to all the selected workspaces
+    Takes the crystal structure defined in either the CIF or the lattice/space group/basis inputs and applies it to all the selected workspaces
 
 Calculate Pole Figure
     Creates the pole figure tables and plots the corresponding pole figure
