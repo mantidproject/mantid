@@ -3,10 +3,8 @@ from mantidqt.utils.observer_pattern import GenericObservable
 from mantid.kernel import logger
 from mantid.api import AnalysisDataService as ADS
 from mantid.simpleapi import Load
-from qtpy.QtCore import QTimer
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import output_settings
-from mantidqt.interfacemanager import InterfaceManager
 from Engineering.common.calibration_info import CalibrationInfo
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import (
     INSTRUMENT_DICT,
@@ -48,20 +46,19 @@ class TexturePresenter:
         self.view.set_on_check_inc_scatt_corr_state_changed(self.view.update_crystal_section_visibility)
         self.view.set_include_scatter_corr(False)
         self.view.set_crystal_section_visibility(False)
-        self.view.set_on_load_cif_clicked(self._open_load_cif_dialog)
-        self.view.set_on_copy_all_xtal_clicked(self.on_copy_all_crystal_clicked)
         self.view.set_on_set_crystal_clicked(self.on_set_crystal_clicked)
         self.view.set_on_set_all_crystal_clicked(self.on_set_all_crystal_clicked)
 
         self.view.set_on_calc_pf_clicked(self.on_calc_pf_clicked)
 
-        self.view.on_lattice_changed(self.check_set_crystal_enabled)
-        self.view.on_spacegroup_changed(self.check_set_crystal_enabled)
-        self.view.on_basis_changed(self.check_set_crystal_enabled)
+        self.view.on_lattice_changed(self.set_crystal_inputs_enabled)
+        self.view.on_spacegroup_changed(self.set_crystal_inputs_enabled)
+        self.view.on_basis_changed(self.set_crystal_inputs_enabled)
+        self.view.on_cif_changed(self.set_crystal_inputs_enabled)
 
-        self.view.sig_selection_state_changed.connect(self.update_readout_column_list)
+        self.view.sig_selection_state_changed.connect(self.on_selection_change)
 
-        self.check_set_crystal_enabled()
+        self.set_crystal_inputs_enabled()
         self.update_readout_column_list()
 
     def load_ws_files(self):
@@ -149,9 +146,11 @@ class TexturePresenter:
 
     def select_all(self):
         self.view.set_all_workspaces_selected(True)
+        self.set_crystal_inputs_enabled()
 
     def deselect_all(self):
         self.view.set_all_workspaces_selected(False)
+        self.set_crystal_inputs_enabled()
 
     def redraw_table(self):
         self.assign_unpaired_wss_and_params()
@@ -159,6 +158,7 @@ class TexturePresenter:
         self.view.populate_workspace_table(self.ws_info)
         self.view.populate_workspace_list(self.ws_names)
         self.update_readout_column_list()
+        self.set_crystal_inputs_enabled()
 
     def update_ws_info(self):
         ws_info = {}
@@ -169,17 +169,14 @@ class TexturePresenter:
         self.ws_info = ws_info
 
     def on_set_crystal_clicked(self):
-        self.model.set_ws_xtal(self.view.get_crystal_ws_prop(), self.view.get_lattice(), self.view.get_spacegroup(), self.view.get_basis())
+        self.model.set_ws_xtal(
+            self.view.get_crystal_ws_prop(), self.view.get_lattice(), self.view.get_spacegroup(), self.view.get_basis(), self.view.get_cif()
+        )
         self.redraw_table()
 
     def on_set_all_crystal_clicked(self):
         wss, _ = self.view.get_selected_workspaces()
-        self.model.set_all_ws_xtal(wss, self.view.get_lattice(), self.view.get_spacegroup(), self.view.get_basis())
-        self.redraw_table()
-
-    def on_copy_all_crystal_clicked(self):
-        wss, _ = self.view.get_selected_workspaces()
-        self.model.copy_xtal_to_all(self.view.get_crystal_ws_cif(), wss)
+        self.model.set_all_ws_xtal(wss, self.view.get_lattice(), self.view.get_spacegroup(), self.view.get_basis(), self.view.get_cif())
         self.redraw_table()
 
     def on_calc_pf_clicked(self):
@@ -259,27 +256,17 @@ class TexturePresenter:
         contour_kernel,
     ):
         root_dir = output_settings.get_output_path()
-        save_dirs = self.model.get_save_dirs("PoleFigureTables", root_dir, rb_num, grouping)
+        save_dirs = self.model.get_save_dirs(root_dir, "PoleFigureTables", rb_num, grouping)
         self.model.make_pole_figure_tables(
             wss, params, out_ws, hkl, inc_scatt, scat_vol_pos, chi2_thresh, peak_thresh, save_dirs, ax_transform, readout_col
         )
         self.plot_pf(out_ws, projection_method, readout_col, save_dirs, plot_exp, ax_labels, contour_kernel)
 
     def _on_worker_success(self):
-        self.correction_notifier.notify_subscribers("Corrections Applied")
+        self.correction_notifier.notify_subscribers("Pole Figure Created")
 
     def _on_worker_error(self, error_info):
         logger.error(str(error_info))
-
-    def _redraw_on_alg_exec(self):
-        QTimer.singleShot(200, self.redraw_table)
-
-    def _open_load_cif_dialog(self, alg_str):
-        manager = InterfaceManager()
-        dialog = manager.createDialogFromName("LoadCIF", -1)
-        if dialog is not None:
-            dialog.finished.connect(self._redraw_on_alg_exec)
-            dialog.open()
 
     def plot_pf(self, pf_ws, proj, readout_col, save_dirs, plot_exp, ax_labels, contour_kernel):
         # Get figure and canvas from view
@@ -319,17 +306,41 @@ class TexturePresenter:
         self.view.set_instrument_override(instrument)
         self.instrument = instrument
 
-    def check_set_crystal_enabled(self):
-        enabled = (
-            len(self.view.get_lattice()) > 0
-            and len(self.view.get_spacegroup()) > 0
-            and len(self.view.get_basis()) > 0
-            and len(self.view.get_crystal_ws_prop()) > 0
-        )
+    def _has_latt(self):
+        return self.view.get_lattice() != "" and self.view.get_spacegroup() != "" and self.view.get_basis() != ""
+
+    def _has_any_latt(self):
+        return self.view.get_lattice() != "" or self.view.get_spacegroup() != "" or self.view.get_basis() != ""
+
+    def _has_cif(self):
+        return self.view.get_cif() != ""
+
+    def _has_selected_wss(self):
+        selected_wss, _ = self.view.get_selected_workspaces()
+        return len(selected_wss) > 0
+
+    def set_crystal_inputs_enabled(self):
+        # inputs:
+        has_cif = self._has_cif()
+        has_any_latt = self._has_any_latt()
+
+        # if any input in the lattice parameters field, disable the cif file search
+        self.view.finder_cif_file.setEnabled(not has_any_latt)
+
+        # if there is a cif file, disable the lattice inputs
+        self.view.lattice_lineedit.setEnabled(not has_cif)
+        self.view.spacegroup_lineedit.setEnabled(not has_cif)
+        self.view.basis_lineedit.setEnabled(not has_cif)
+
+        # buttons:
+        # to set crystal need either a cif OR lattice params AND a ws to apply it to
+        enabled = (self._has_latt() or has_cif) and self.view.get_crystal_ws_prop() != ""
         self.view.btn_setCrystal.setEnabled(enabled)
-        selected_wss, selected_params = self.view.get_selected_workspaces()
-        if len(selected_wss) > 0:
-            self.view.btn_setAllCrystal.setEnabled(enabled)
+        self.view.btn_setAllCrystal.setEnabled(enabled)
+
+        # additionally, to set to all, must be some selected wss
+        if enabled:
+            self.view.btn_setAllCrystal.setEnabled(self._has_selected_wss())
 
     def update_readout_column_list(self):
         params = self.get_assigned_params()
@@ -352,3 +363,7 @@ class TexturePresenter:
 
     def _get_setting(self, setting_name, return_type=str):
         return get_setting(output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX, setting_name, return_type)
+
+    def on_selection_change(self):
+        self.update_readout_column_list()
+        self.set_crystal_inputs_enabled()

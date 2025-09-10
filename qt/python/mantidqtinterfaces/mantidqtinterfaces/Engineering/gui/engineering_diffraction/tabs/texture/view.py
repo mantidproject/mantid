@@ -23,9 +23,15 @@ class TextureView(QtWidgets.QWidget, Ui_texture):
 
         self.finder_texture_ws.setLabelText("Sample Run(s)")
         self.finder_texture_ws.allowMultipleFiles(True)
+        self.finder_texture_ws.setFileExtensions([".nxs"])
 
         self.finder_texture_tables.setLabelText("Fit Parameters")
         self.finder_texture_tables.allowMultipleFiles(True)
+        self.finder_texture_tables.setFileExtensions([".nxs"])
+
+        self.finder_cif_file.setLabelText("CIF File")
+        self.finder_cif_file.allowMultipleFiles(False)
+        self.finder_cif_file.setFileExtensions([".cif"])
 
         self._setup_plot()
 
@@ -38,11 +44,6 @@ class TextureView(QtWidgets.QWidget, Ui_texture):
         self.btn_deselectAll.setToolTip("Sets all the rows of the table as unselected")
         self.btn_deleteSelected.setToolTip("Deletes all rows of the table which are set as selected")
         self.btn_deleteSelectedParams.setToolTip("Removes all the set parameter files for the rows of the table that have been selected")
-        self.btn_loadCif.setToolTip("Opens dialog for LoadCIF, allows loading of crystal structure information onto a specified workspace")
-        self.combo_workspaceListCIF.setToolTip("Workspace to copy structure from using 'Copy Crystal Structure to All' button")
-        self.btn_copyXtalToAll.setToolTip(
-            "Takes the crystal structure defined on the workspace selected in the drop down menu and copies it to all selected workspaces"
-        )
         self.lattice_lineedit.setToolTip(
             "Tab separated string representation of the crystal lattice (eg. 'a   b   c    alpha   beta    gamma')"
         )
@@ -50,11 +51,12 @@ class TextureView(QtWidgets.QWidget, Ui_texture):
         self.basis_lineedit.setToolTip("String representation of the crystal basis (eg. 'Fe 0 0 0 1.0 0.05; Fe 0.5 0.5 0.5 1.0 0.05')")
         self.combo_workspaceListProp.setToolTip("Workspace to set crystal structure on using 'Set Crystal' button")
         self.btn_setCrystal.setToolTip(
-            "Takes the crystal structure defined in the lattice/space group/basis inputs and "
+            "Takes the crystal structure defined either in the lattice/space group/basis inputs or CIF file and "
             "applies it to the workspace in the drop down menu"
         )
         self.btn_setAllCrystal.setToolTip(
-            "Takes the crystal structure defined in the lattice/space group/basis inputs and applies it to all the selected workspaces"
+            "Takes the crystal structure defined either in the lattice/space group/basis inputs or CIF file"
+            " and applies it to all the selected workspaces"
         )
         self.h_lineedit.setToolTip("H index")
         self.k_lineedit.setToolTip("K index")
@@ -96,12 +98,6 @@ class TextureView(QtWidgets.QWidget, Ui_texture):
     def set_on_check_inc_scatt_corr_state_changed(self, slot):
         self.check_scatt.stateChanged.connect(slot)
 
-    def set_on_load_cif_clicked(self, slot):
-        self.btn_loadCif.clicked.connect(slot)
-
-    def set_on_copy_all_xtal_clicked(self, slot):
-        self.btn_copyXtalToAll.clicked.connect(slot)
-
     def set_on_set_crystal_clicked(self, slot):
         self.btn_setCrystal.clicked.connect(slot)
 
@@ -120,6 +116,9 @@ class TextureView(QtWidgets.QWidget, Ui_texture):
 
     def on_basis_changed(self, slot):
         self.basis_lineedit.textChanged.connect(slot)
+
+    def on_cif_changed(self, slot):
+        self.finder_cif_file.fileFindingFinished.connect(slot)
 
     # ========== Table Handling ==========
     def populate_workspace_table(self, workspace_info_list):
@@ -173,11 +172,12 @@ class TextureView(QtWidgets.QWidget, Ui_texture):
     def get_basis(self):
         return self.basis_lineedit.text()
 
+    def get_cif(self):
+        fnames = self.finder_cif_file.getFilenames()
+        return fnames[0] if len(fnames) > 0 else ""
+
     def get_crystal_ws_prop(self):
         return self.combo_workspaceListProp.currentText()
-
-    def get_crystal_ws_cif(self):
-        return self.combo_workspaceListCIF.currentText()
 
     def get_readout_column(self):
         return self.combo_param.currentText()
@@ -185,8 +185,6 @@ class TextureView(QtWidgets.QWidget, Ui_texture):
     def populate_workspace_list(self, workspace_names):
         self.combo_workspaceListProp.clear()
         self.combo_workspaceListProp.addItems(sorted(workspace_names))
-        self.combo_workspaceListCIF.clear()
-        self.combo_workspaceListCIF.addItems(sorted(workspace_names))
 
     def populate_readout_column_list(self, cols, starting_index):
         self.combo_param.clear()

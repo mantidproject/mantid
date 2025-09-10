@@ -144,15 +144,9 @@ class CreatePoleFigureTableWorkspace(PythonAlgorithm):
                 check_col("chi2")
 
         if not self.getProperty("Reflection").isDefault:
-            # if a hkl is given, scattering power will be calculated, check that both a sample and CrystalStructure have
-            # been defined
-            try:
-                ws.sample().getShape().volume()  # python api hasShape doesn't work as expected
-                # this will check if there is a valid sample
-                if not ws.sample().hasCrystalStructure():
-                    issues["InputWorkspace"] = "If reflection is specified: InputWorkspace sample must have a CrystalStructure"
-            except RuntimeError:
-                issues["InputWorkspace"] = "If reflection is specified: InputWorkspace must have a sample"
+            # if a hkl is given, scattering power will be calculated, check that CrystalStructure has been defined
+            if not ws.sample().hasCrystalStructure():
+                issues["InputWorkspace"] = "If reflection is specified: InputWorkspace sample must have a CrystalStructure"
         return issues
 
     def PyExec(self):

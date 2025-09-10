@@ -17,12 +17,12 @@ import numpy as np
 from mantid.api import AnalysisDataService as ADS
 from typing import Optional, Sequence, Tuple
 import matplotlib.pyplot as plt
-from mantid.geometry import CrystalStructure
 from os import path, makedirs
 from scipy.interpolate import griddata
 from scipy.ndimage import gaussian_filter
 from Engineering.common.texture_sample_viewer import has_valid_shape, plot_sample_directions
 from matplotlib.figure import Figure
+from Engineering.texture.xtal_helper import get_xtal_structure
 
 
 class TextureProjection:
@@ -126,7 +126,7 @@ class TextureProjection:
         projection: str,
         fig: Optional[Figure] = None,
         readout_col: str = "I",
-        save_dirs: Optional[str] = None,
+        save_dirs: Optional[Sequence[str] | str] = None,
         plot_exp: bool = True,
         ax_labels: Sequence[str] = ("Dir1", "Dir2"),
         contour_kernel: Optional[float] = 2.0,
@@ -316,20 +316,21 @@ class TextureProjection:
         return f"{scatts}: {sg}"
 
     @staticmethod
-    def set_ws_xtal(ws: str, lattice: str, space_group: str, basis: str) -> None:
+    def set_ws_xtal(ws: str, lattice: str, space_group: str, basis: str, cif: str) -> None:
         ws = ADS.retrieve(ws)
-        ws.sample().setCrystalStructure(CrystalStructure(lattice, space_group, basis))
+        has_cif = cif != ""
+        has_latt_prop = lattice != "" and space_group != "" and basis != ""
+
+        input = "cif" if has_cif else "string" if has_latt_prop else None
+        args = (cif,) if has_cif else (lattice, space_group, basis) if has_latt_prop else None
+
+        xtal = get_xtal_structure(input, *args)
+        ws.sample().setCrystalStructure(xtal)
         logger.notice("Crystal Structure Set")
 
-    def set_all_ws_xtal(self, wss: Sequence[str], lattice: str, space_group: str, basis: str) -> None:
+    def set_all_ws_xtal(self, wss: Sequence[str], lattice: str, space_group: str, basis: str, cif: str) -> None:
         for ws in wss:
-            self.set_ws_xtal(ws, lattice, space_group, basis)
-
-    @staticmethod
-    def copy_xtal_to_all(ref_ws: str, wss: Sequence[str]) -> None:
-        xtal = ADS.retrieve(ref_ws).sample().getCrystalStructure()
-        for ws in wss:
-            ADS.retrieve(ws).sample().setCrystalStructure(xtal)
+            self.set_ws_xtal(ws, lattice, space_group, basis, cif)
 
 
 def ster_proj(alphas: np.ndarray, betas: np.ndarray, i: np.ndarray) -> np.ndarray:

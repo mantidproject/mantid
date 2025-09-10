@@ -9,16 +9,16 @@ from os import path, scandir
 import sys
 from Engineering.texture.polefigure.polefigure_model import TextureProjection
 from Engineering.texture.correction.correction_model import TextureCorrectionModel
-from mantid.simpleapi import SaveNexus, logger, CreateEmptyTableWorkspace, LoadCIF, Fit, CreateSingleValuedWorkspace
+from mantid.simpleapi import SaveNexus, logger, CreateEmptyTableWorkspace, Fit
 from pathlib import Path
 from Engineering.EnggUtils import GROUP
 from Engineering.EnginX import EnginX
-from mantid.geometry import CrystalStructure
 from mantid.api import AnalysisDataService as ADS, MultiDomainFunction, FunctionFactory
 from typing import Optional, Sequence, Union, Tuple
 from mantid.dataobjects import Workspace2D
 from mantid.fitfunctions import FunctionWrapper, CompositeFunctionWrapper
 from plugins.algorithms.IntegratePeaks1DProfile import PeakFunctionGenerator, calc_intens_and_sigma_arrays
+from xtal_helper import get_xtal_structure
 # -------- Utility --------------------------------
 
 
@@ -525,43 +525,6 @@ def fit_all_peaks(
 
 
 # -------- Pole Figure Script Logic--------------------------------
-
-
-class CrystalPhase:
-    def __init__(self, crystal_structure: CrystalStructure):
-        self.xtal = crystal_structure
-
-    @classmethod
-    def from_cif(cls, cif_file: str):
-        ws = CreateSingleValuedWorkspace(StoreInADS=False, EnableLogging=False)
-        LoadCIF(ws, cif_file, StoreInADS=False)
-        return CrystalPhase(ws.sample().getCrystalStructure())
-
-    @classmethod
-    def from_alatt(cls, alatt: np.ndarray, space_group: str = "P 1", basis: str = ""):
-        alatt_str = " ".join([str(par) for par in alatt])
-        xtal = CrystalStructure(alatt_str, space_group, basis)
-        return CrystalPhase(xtal)
-
-    @classmethod
-    def from_string(cls, lattice: str, space_group: str, basis: str):
-        xtal = CrystalStructure(lattice, space_group, basis)
-        return CrystalPhase(xtal)
-
-
-def get_xtal_structure(input_method: str, *args, **kwargs) -> CrystalStructure:
-    match input_method:
-        case "cif":
-            phase = CrystalPhase.from_cif(*args, **kwargs)
-            return phase.xtal
-        case "array":
-            phase = CrystalPhase.from_alatt(*args, **kwargs)
-            return phase.xtal
-        case "string":
-            phase = CrystalPhase.from_string(*args, **kwargs)
-            return phase.xtal
-        case _:
-            raise ValueError(f"input_method must be: 'cif', 'array', or 'string', '{input_method}' was provided")
 
 
 def create_pf(
