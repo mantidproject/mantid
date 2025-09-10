@@ -1,0 +1,1 @@
+- Algorithm :ref:`algm-PolarizationEfficiencyCor` no longer crashes Mantid when using workspace groups in the ``InputWorkspaces`` property list.
