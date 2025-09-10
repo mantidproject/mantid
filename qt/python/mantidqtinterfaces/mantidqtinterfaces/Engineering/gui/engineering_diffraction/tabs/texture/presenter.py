@@ -16,11 +16,13 @@ from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.show
 
 class TexturePresenter:
     def __init__(self, model, view):
+        # set up mvp components
         self.model = model
         self.view = view
         self.worker = None
         self.show_sample_presenter = ShowSamplePresenter(model, view, False)
 
+        # some internal data structures
         self.ws_names = []
         self.ws_assignments = {}
         self.param_assignments = {}
@@ -28,38 +30,45 @@ class TexturePresenter:
         self.unassigned_wss = []
         self.ws_info = {}
 
+        # set up some observers
         self.correction_notifier = GenericObservable()
-
         self.calibration_observer = CalibrationObserver(self)
+
+        # set some metadata
         self.current_calibration = CalibrationInfo()
         self.instrument = "ENGINX"
         self.rb_num = None
 
+        # connect view slots
+        # loader slots
         self.view.set_on_load_ws_clicked(self.load_ws_files)
         self.view.set_on_load_param_clicked(self.load_param_files)
-
+        # table slots
         self.view.set_on_select_all_clicked(self.select_all)
         self.view.set_on_deselect_all_clicked(self.deselect_all)
         self.view.set_on_delete_clicked(self.delete_selected_files)
         self.view.set_on_delete_param_clicked(self.delete_selected_param_files)
-
+        # xtal slots
         self.view.set_on_check_inc_scatt_corr_state_changed(self.view.update_crystal_section_visibility)
         self.view.set_include_scatter_corr(False)
         self.view.set_crystal_section_visibility(False)
         self.view.set_on_set_crystal_clicked(self.on_set_crystal_clicked)
         self.view.set_on_set_all_crystal_clicked(self.on_set_all_crystal_clicked)
-
+        # pf slots
         self.view.set_on_calc_pf_clicked(self.on_calc_pf_clicked)
-
+        # enable/disable options
         self.view.on_lattice_changed(self.set_crystal_inputs_enabled)
         self.view.on_spacegroup_changed(self.set_crystal_inputs_enabled)
         self.view.on_basis_changed(self.set_crystal_inputs_enabled)
         self.view.on_cif_changed(self.set_crystal_inputs_enabled)
-
+        # handle changes to UI when updating selected workspace
         self.view.sig_selection_state_changed.connect(self.on_selection_change)
 
+        # ensure initial state is correct
         self.set_crystal_inputs_enabled()
         self.update_readout_column_list()
+
+    # ------- File Loaders ------------------
 
     def load_ws_files(self):
         filenames = self.view.finder_texture_ws.getFilenames()
@@ -80,15 +89,6 @@ class TexturePresenter:
                 self.unassigned_wss.append(ws_name)
 
         self.redraw_table()
-
-    def ws_has_param(self, ws):
-        return ws in self.ws_assignments.keys()
-
-    def param_has_ws(self, param):
-        return param in self.param_assignments.keys()
-
-    def get_assigned_params(self):
-        return list(self.param_assignments.keys())
 
     def load_param_files(self):
         filenames = self.view.finder_texture_tables.getFilenames()
@@ -120,10 +120,16 @@ class TexturePresenter:
                 self.unassigned_wss.pop(self.unassigned_wss.index(ws))
         self.redraw_table()
 
-    def delete_selected_param_files(self):
-        selected_wss, selected_params = self.view.get_selected_workspaces()
-        self.unassign_params(selected_params)
-        self.redraw_table()
+    # ---- Internal data structure logic for tracking parameter table assignments -------
+
+    def ws_has_param(self, ws):
+        return ws in self.ws_assignments.keys()
+
+    def param_has_ws(self, param):
+        return param in self.param_assignments.keys()
+
+    def get_assigned_params(self):
+        return list(self.param_assignments.keys())
 
     def unassign_params(self, params):
         for param in params:
@@ -144,6 +150,25 @@ class TexturePresenter:
         # don't want to keep an unseen stack of unassigned parameter files
         self.unassigned_params = []
 
+    def all_wss_have_params(self):
+        selected_wss, selected_params = self.view.get_selected_workspaces()
+        valid_params = [p for p in selected_params if p != "Not set"]
+        return len(selected_wss) == len(valid_params) and len(selected_wss) > 0
+
+    def at_least_one_param_assigned(self):
+        return len(self.get_assigned_params()) > 0
+
+    def _has_selected_wss(self):
+        selected_wss, _ = self.view.get_selected_workspaces()
+        return len(selected_wss) > 0
+
+    # ----- Table logic -----------------
+
+    def delete_selected_param_files(self):
+        selected_wss, selected_params = self.view.get_selected_workspaces()
+        self.unassign_params(selected_params)
+        self.redraw_table()
+
     def select_all(self):
         self.view.set_all_workspaces_selected(True)
         self.set_crystal_inputs_enabled()
@@ -152,21 +177,7 @@ class TexturePresenter:
         self.view.set_all_workspaces_selected(False)
         self.set_crystal_inputs_enabled()
 
-    def redraw_table(self):
-        self.assign_unpaired_wss_and_params()
-        self.update_ws_info()
-        self.view.populate_workspace_table(self.ws_info)
-        self.view.populate_workspace_list(self.ws_names)
-        self.update_readout_column_list()
-        self.set_crystal_inputs_enabled()
-
-    def update_ws_info(self):
-        ws_info = {}
-        selected_ws, _ = self.view.get_selected_workspaces()
-        for pos_ind, ws_name in enumerate(self.ws_names):
-            param = self.ws_assignments[ws_name] if self.ws_has_param(ws_name) else "Not set"
-            ws_info[ws_name] = self.model.get_ws_info(ws_name, param, ws_name in selected_ws)  # maintain state of selected boxes
-        self.ws_info = ws_info
+    # --------- Xtal Logic -------------------------------
 
     def on_set_crystal_clicked(self):
         self.model.set_ws_xtal(
@@ -178,6 +189,17 @@ class TexturePresenter:
         wss, _ = self.view.get_selected_workspaces()
         self.model.set_all_ws_xtal(wss, self.view.get_lattice(), self.view.get_spacegroup(), self.view.get_basis(), self.view.get_cif())
         self.redraw_table()
+
+    def _has_latt(self):
+        return self.view.get_lattice() != "" and self.view.get_spacegroup() != "" and self.view.get_basis() != ""
+
+    def _has_any_latt(self):
+        return self.view.get_lattice() != "" or self.view.get_spacegroup() != "" or self.view.get_basis() != ""
+
+    def _has_cif(self):
+        return self.view.get_cif() != ""
+
+    # --------- Pole Figure Logic --------------------------
 
     def on_calc_pf_clicked(self):
         wss, params = self.view.get_selected_workspaces()
@@ -291,6 +313,8 @@ class TexturePresenter:
 
         canvas.draw()
 
+    # --------- Metadata handling --------------------
+
     def set_rb_num(self, rb_num):
         self.rb_num = rb_num
 
@@ -306,18 +330,41 @@ class TexturePresenter:
         self.view.set_instrument_override(instrument)
         self.instrument = instrument
 
-    def _has_latt(self):
-        return self.view.get_lattice() != "" and self.view.get_spacegroup() != "" and self.view.get_basis() != ""
+    def _get_setting(self, setting_name, return_type=str):
+        return get_setting(output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX, setting_name, return_type)
 
-    def _has_any_latt(self):
-        return self.view.get_lattice() != "" or self.view.get_spacegroup() != "" or self.view.get_basis() != ""
+    # ------- UI state tracking ----------------------
 
-    def _has_cif(self):
-        return self.view.get_cif() != ""
+    def on_selection_change(self):
+        self.update_readout_column_list()
+        self.set_crystal_inputs_enabled()
 
-    def _has_selected_wss(self):
-        selected_wss, _ = self.view.get_selected_workspaces()
-        return len(selected_wss) > 0
+    def redraw_table(self):
+        self.assign_unpaired_wss_and_params()
+        self.update_ws_info()
+        self.view.populate_workspace_table(self.ws_info)
+        self.view.populate_workspace_list(self.ws_names)
+        self.update_readout_column_list()
+        self.set_crystal_inputs_enabled()
+
+    def update_ws_info(self):
+        ws_info = {}
+        selected_ws, _ = self.view.get_selected_workspaces()
+        for pos_ind, ws_name in enumerate(self.ws_names):
+            param = self.ws_assignments[ws_name] if self.ws_has_param(ws_name) else "Not set"
+            ws_info[ws_name] = self.model.get_ws_info(ws_name, param, ws_name in selected_ws)  # maintain state of selected boxes
+        self.ws_info = ws_info
+
+    def update_readout_column_list(self):
+        params = self.get_assigned_params()
+        show_col = False
+        # only if all wss have param files should plotting with a column readout be an option
+        if self.all_wss_have_params() and self.at_least_one_param_assigned():
+            col_list, starting_index = self.model.read_param_cols(params[0])
+            self.view.populate_readout_column_list(col_list, starting_index)
+            # only have the option to pick a column if columns are present
+            show_col = len(col_list) > 0
+        self.view.update_col_select_visibility(show_col)
 
     def set_crystal_inputs_enabled(self):
         # inputs:
@@ -341,29 +388,3 @@ class TexturePresenter:
         # additionally, to set to all, must be some selected wss
         if enabled:
             self.view.btn_setAllCrystal.setEnabled(self._has_selected_wss())
-
-    def update_readout_column_list(self):
-        params = self.get_assigned_params()
-        show_col = False
-        # only if all wss have param files should plotting with a column readout be an option
-        if self.all_wss_have_params() and self.at_least_one_param_assigned():
-            col_list, starting_index = self.model.read_param_cols(params[0])
-            self.view.populate_readout_column_list(col_list, starting_index)
-            # only have the option to pick a column if columns are present
-            show_col = len(col_list) > 0
-        self.view.update_col_select_visibility(show_col)
-
-    def all_wss_have_params(self):
-        selected_wss, selected_params = self.view.get_selected_workspaces()
-        valid_params = [p for p in selected_params if p != "Not set"]
-        return len(selected_wss) == len(valid_params) and len(selected_wss) > 0
-
-    def at_least_one_param_assigned(self):
-        return len(self.get_assigned_params()) > 0
-
-    def _get_setting(self, setting_name, return_type=str):
-        return get_setting(output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX, setting_name, return_type)
-
-    def on_selection_change(self):
-        self.update_readout_column_list()
-        self.set_crystal_inputs_enabled()

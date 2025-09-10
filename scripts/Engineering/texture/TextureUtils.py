@@ -18,7 +18,7 @@ from typing import Optional, Sequence, Union, Tuple
 from mantid.dataobjects import Workspace2D
 from mantid.fitfunctions import FunctionWrapper, CompositeFunctionWrapper
 from plugins.algorithms.IntegratePeaks1DProfile import PeakFunctionGenerator, calc_intens_and_sigma_arrays
-from xtal_helper import get_xtal_structure
+from Engineering.texture.xtal_helper import get_xtal_structure
 # -------- Utility --------------------------------
 
 
