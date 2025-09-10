@@ -1,6 +1,6 @@
 import unittest
 from unittest.mock import patch, create_autospec
-from numpy import allclose, sqrt, log, linspace, zeros_like, array, ones, trapezoid
+from numpy import allclose, sqrt, log, linspace, zeros_like, ones, trapezoid, array
 from numpy.testing import assert_array_equal, assert_array_almost_equal
 from mantid.api import AnalysisDataService
 from mantid.simpleapi import CreateWorkspace, FlatBackground
@@ -37,12 +37,16 @@ class PhaseTest(unittest.TestCase):
         self.assertTrue(allclose(si.hkls, 1))
         self.assertEqual(si.nhkls(), 1)
 
+    def test_get_params_noncubic(self):
+        tetrag_phase = Phase.from_alatt(3 * [self.SI_LATT_PAR], "P 4")
+        assert_array_almost_equal(tetrag_phase.get_params(), array(2 * [self.SI_LATT_PAR]))
+
     def _assert_si_phase(self, phase):
         pars = phase.get_params()
         self.assertEqual(len(pars), 1)  # only 1 lattice parameter in cubic system (a)
         self.assertAlmostEqual(pars[0], self.SI_LATT_PAR, delta=1e-5)
         self.assertEqual(phase.spgr.getHMSymbol(), self.SI_SPGR)
-        self.assertListEqual(phase.get_param_names(), ["a"])
+        self.assertEqual(phase.get_param_names()[0], "a")
         self.assertEqual(
             str(phase.unit_cell), "UnitCell with lattice parameters: a = 5.43094 b = 5.43094 c = 5.43094 alpha = 90 beta = 90 gamma = 90"
         )

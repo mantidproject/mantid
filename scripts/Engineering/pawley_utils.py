@@ -11,7 +11,7 @@ from mantid.fitfunctions import FunctionWrapper, CompositeFunctionWrapper
 from mantid.api import FunctionFactory
 from mantid.geometry import CrystalStructure, ReflectionGenerator, PointGroupFactory, PointGroup
 from mantid.kernel import V3D, logger
-from typing import Optional, List, Tuple, TYPE_CHECKING
+from typing import Optional, Tuple, TYPE_CHECKING, Sequence
 from itertools import chain
 from scipy.optimize import least_squares
 from plugins.algorithms.poldi_utils import simulate_2d_data, get_dspac_array_from_ws
@@ -20,17 +20,18 @@ from abc import ABC, abstractmethod
 
 if TYPE_CHECKING:
     from mantid.dataobjects import Workspace2D
+    from scipy.optimize import OptimizeResult
 
 
 class PeakProfile(ABC):
     def __init__(self):
         self.func_name: str
-        self.labels: Tuple["str"]
+        self.labels: Tuple[str]
         self.p: np.ndarray
         self.default_isfree: np.ndarray
 
     @abstractmethod
-    def get_mantid_peak_params(self):
+    def get_mantid_peak_params(self, dpk: float):
         pass
 
 
@@ -41,7 +42,7 @@ class PVProfile(PeakProfile):
         self.p: np.ndarray = np.array([5.0e-4, 1.0e-3, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
         self.default_isfree: np.ndarray = np.array([1, 1, 0, 0, 0, 0, 0, 0, 0, 0], dtype=bool)
 
-    def get_mantid_peak_params(self, dpk) -> dict:
+    def get_mantid_peak_params(self, dpk: float) -> dict:
         """
         TCH pseudo-voigt profile used in Fullprof (typically convoluted with back-to-back exponentials for TOF)
         [1] FullProf Manual (http://psi.ch/sites/default/files/import/sinq/dmc/ManualsEN/fullprof.pdf)
@@ -79,7 +80,7 @@ class GaussianProfile(PeakProfile):
         self.p: np.ndarray = np.array([5.0e-4, 1.0e-3, 0.0])
         self.default_isfree: np.ndarray = np.array([1, 1, 0], dtype=bool)
 
-    def get_mantid_peak_params(self, dpk) -> dict:
+    def get_mantid_peak_params(self, dpk: float) -> dict:
         """
         Gasusian profile from pseudo-voigt profile used in Fullprof with zeta=0
         Note dst2 and gsize perfectly corralated withsig1 and sig2 respectively
@@ -99,7 +100,7 @@ class Phase:
         if hkls is not None:
             self.set_hkls(hkls)
         # set free parameters beased on lattice system
-        self.param_names = ["a", "b", "c", "alpha", "beta", "gamma"]
+        self.param_names = np.array(["a", "b", "c", "alpha", "beta", "gamma"])
         self.alatt = self._get_alatt()
         ptgr = PointGroupFactory.createPointGroupFromSpaceGroup(self.spgr)
         match ptgr.getLatticeSystem():
@@ -133,24 +134,21 @@ class Phase:
         xtal = CrystalStructure(alatt_str, spgr, basis)
         return Phase(xtal)
 
-    def _get_alatt(self) -> List[float]:
+    def _get_alatt(self) -> np.ndarray[float]:
         return np.array([getattr(self.unit_cell, method)() for method in self.param_names])
 
-    def get_params(self) -> List[float]:
-        return [next(iter(self.alatt[ipar])) if isinstance(ipar, slice) else self.alatt[ipar] for ipar in self.ipars]
+    def get_params(self) -> np.ndarray[float]:
+        return np.array([self.alatt[ipar][0] if isinstance(ipar, slice) else self.alatt[ipar] for ipar in self.ipars])
 
-    def get_nparams(self) -> int:
-        return len(self.ipars)
+    def get_param_names(self) -> np.ndarray[str]:
+        return np.array([self.param_names[ipar][0] if isinstance(ipar, slice) else self.param_names[ipar] for ipar in self.ipars])
 
-    def get_param_names(self) -> List[float]:
-        return [next(iter(self.param_names[ipar])) if isinstance(ipar, slice) else self.param_names[ipar] for ipar in self.ipars]
-
-    def set_params(self, pars: List):
+    def set_params(self, pars: np.ndarray[float]):
         for ipar, par in enumerate(pars):
             self.alatt[self.ipars[ipar]] = par
         self.unit_cell.set(*self.alatt)
 
-    def set_hkls(self, hkls):
+    def set_hkls(self, hkls: Sequence[np.ndarray]):
         self.hkls = []
         for hkl in hkls:
             hkl_vec = V3D(*hkl)
@@ -161,24 +159,24 @@ class Phase:
         # sort by descending d-spacing
         self.hkls = [self.hkls[ipk] for ipk in np.argsort(self.calc_dspacings())[::-1]]
 
-    def set_hkls_from_dspac_limits(self, dmin, dmax):
+    def set_hkls_from_dspac_limits(self, dmin: float, dmax: float):
         xtal = CrystalStructure(" ".join([str(par) for par in self.alatt]), self.spgr.getHMSymbol(), "")
         generator = ReflectionGenerator(xtal)
         self.set_hkls(generator.getUniqueHKLs(dmin, dmax))
 
-    def calc_dspacings(self):
-        return [self.unit_cell.d(hkl) for hkl in self.hkls]
+    def calc_dspacings(self) -> np.ndarray[float]:
+        return np.array([self.unit_cell.d(hkl) for hkl in self.hkls])
 
-    def nhkls(self):
+    def nhkls(self) -> int:
         return len(self.hkls)
 
-    def nparams(self):
+    def nparams(self) -> int:
         return len(self.ipars)
 
 
 # make this abstract base class?
 class PawleyPattern1D:
-    def __init__(self, ws: Workspace2D, phases, profile: PeakProfile, bg_func: Optional[FunctionWrapper] = None):
+    def __init__(self, ws: Workspace2D, phases: Phase, profile: PeakProfile, bg_func: Optional[FunctionWrapper] = None):
         self.ws = ws
         self.phases = phases
         self.alatt_params = [phase.get_params() for phase in self.phases]
@@ -196,7 +194,7 @@ class PawleyPattern1D:
         self.make_profile_function(bg_func)
         self.initial_params = None
 
-    def make_profile_function(self, bg_func):
+    def make_profile_function(self, bg_func: Optional[FunctionWrapper] = None):
         self.comp_func = CompositeFunctionWrapper()
         for iphase, phase in enumerate(self.phases):
             for ipk in range(phase.nhkls()):
@@ -221,16 +219,16 @@ class PawleyPattern1D:
         if len(self.bg_params) > 0:
             [self.comp_func[len(self.comp_func) - 1].function.setParameter(ipar, par) for ipar, par in enumerate(self.bg_params)]
 
-    def get_params(self):
+    def get_params(self) -> np.ndarray[float]:
         return np.array(list(chain(*self.alatt_params, *self.intens, *self.profile_params, self.bg_params)))
 
-    def get_free_params(self):
+    def get_free_params(self) -> np.ndarray[float]:
         return self.get_params()[self.get_isfree()]
 
-    def get_isfree(self):
+    def get_isfree(self) -> np.ndarray[bool]:
         return np.array(list(chain(*self.alatt_isfree, *self.intens_isfree, *self.profile_isfree, self.bg_isfree)))
 
-    def set_params(self, params):
+    def set_params(self, params: np.ndarray[float]):
         # set alatt
         istart = 0
         for iphase, phase in enumerate(self.phases):
@@ -251,17 +249,17 @@ class PawleyPattern1D:
         if len(self.bg_params) > 0:
             self.bg_params = params[istart:]
 
-    def set_free_params(self, free_params):
+    def set_free_params(self, free_params: np.ndarray[float]):
         params = self.get_params()
         params[self.get_isfree()] = free_params
         self.set_params(params)
 
-    def eval_profile(self, params):
+    def eval_profile(self, params: np.ndarray[float]) -> np.ndarray[float]:
         self.set_free_params(params)
         self.update_profile_function()
         return self.comp_func(self.ws.readX(0))
 
-    def eval_resids(self, params):
+    def eval_resids(self, params: np.ndarray[float]) -> np.ndarray[float]:
         return self.ws.readY(0) - self.eval_profile(params)
 
     def estimate_initial_params(self):
@@ -278,7 +276,7 @@ class PawleyPattern1D:
         for iphase in range(len(self.phases)):
             self.intens[iphase] *= scale
 
-    def fit(self, **kwargs):
+    def fit(self, **kwargs) -> OptimizeResult:
         default_kwargs = {"xtol": 1e-5, "diff_step": 1e-3, "x_scale": "jac"}
         kwargs = {**default_kwargs, **kwargs}
         self.initial_params = self.get_free_params()
@@ -290,7 +288,7 @@ class PawleyPattern1D:
 
 
 class PawleyPattern2D(PawleyPattern1D):
-    def __init__(self, *args, global_scale=True, **kwargs):
+    def __init__(self, *args, global_scale: bool = True, **kwargs):
         super().__init__(*args, **kwargs)
         self.scales = None
         self.bgs = None
@@ -306,7 +304,7 @@ class PawleyPattern2D(PawleyPattern1D):
             EnableLogging=False,
         )
 
-    def set_global_scale(self, global_scale):
+    def set_global_scale(self, global_scale: bool):
         self.global_scale = global_scale
         if not self.global_scale:
             # check if a peak intensity is fixed in any phase
@@ -318,7 +316,7 @@ class PawleyPattern2D(PawleyPattern1D):
                 self.bg_params[:] = 0
                 self.bg_isfree[:] = False
 
-    def set_params_from_pawley1d(self, pawley1d):
+    def set_params_from_pawley1d(self, pawley1d: PawleyPattern1D):
         if len(pawley1d.phases) != len(self.phases):
             logger.error("PawleyPattern1D object has a different number of phases.")
             return
@@ -335,12 +333,12 @@ class PawleyPattern2D(PawleyPattern1D):
     def estimate_initial_params(self):
         self._estimate_intensities()
 
-    def eval_profile(self, params):
+    def eval_profile(self, params: np.ndarray[float]) -> np.ndarray[float]:
         self.set_free_params(params)
         self.update_profile_function()
         return self.comp_func(self.ws_1d.readX(0))
 
-    def eval_2d(self, params):
+    def eval_2d(self, params: np.ndarray[float]) -> Workspace2D:
         self.ws_1d.setY(0, self.eval_profile(params))
         ws_sim = simulate_2d_data(self.ws, self.ws_1d, output_workspace=f"{self.ws.name()}_sim")
         if not self.global_scale:
@@ -354,7 +352,7 @@ class PawleyPattern2D(PawleyPattern1D):
                 ws_sim.setY(ispec, np.polyval(ppval, ycalc))
         return ws_sim
 
-    def eval_resids(self, params):
+    def eval_resids(self, params: np.ndarray[float]) -> np.ndarray[float]:
         ws_sim = self.eval_2d(params)
         return (self.ws.extractY() - ws_sim.extractY()).flat
 
