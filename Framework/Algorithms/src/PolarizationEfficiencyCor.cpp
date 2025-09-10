@@ -227,6 +227,9 @@ void PolarizationEfficiencyCor::checkWorkspaces() const {
     throw std::invalid_argument("Input workspaces must be given either as a "
                                 "workspace group or a list of names.");
   }
+
+  if (!isDefault(Prop::INPUT_WORKSPACES) && isDefault(Prop::INPUT_WORKSPACE_GROUP)) {
+  }
 }
 
 //----------------------------------------------------------------------------------------------
@@ -269,6 +272,14 @@ std::vector<std::string> PolarizationEfficiencyCor::getWorkspaceNameList() const
   std::vector<std::string> wsNames;
   if (!isDefault(Prop::INPUT_WORKSPACES)) {
     wsNames = getProperty(Prop::INPUT_WORKSPACES);
+    const auto wsVec = AnalysisDataService::Instance().retrieveWorkspaces(wsNames);
+    if (std::any_of(wsNames.cbegin(), wsNames.cend(), [](const auto &wsName) {
+          return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName) == nullptr;
+        })) {
+      throw std::invalid_argument(
+          "Only Matrix Workspaces can be added in InputWorkspace property list. If the input is a group, "
+          "use the InputWorkspaceGroup property");
+    }
   } else {
     WorkspaceGroup_sptr group = getProperty(Prop::INPUT_WORKSPACE_GROUP);
     auto const n = group->size();
