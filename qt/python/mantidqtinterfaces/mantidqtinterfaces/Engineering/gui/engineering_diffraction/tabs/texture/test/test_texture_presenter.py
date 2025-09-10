@@ -10,6 +10,7 @@ class TestTexturePresenter(unittest.TestCase):
     def setUp(self):
         self.model = MagicMock()
         self.view = MagicMock()
+        self.view.get_selected_workspaces.return_value = ([], [])
         self.presenter = TexturePresenter(self.model, self.view)
 
     @patch(dir_path + ".TexturePresenter.redraw_table")
@@ -156,13 +157,6 @@ class TestTexturePresenter(unittest.TestCase):
         self.model.set_all_ws_xtal.assert_called_once()
         self.presenter.redraw_table.assert_called_once()
 
-    def test_copy_all_crystal_calls_model_and_redraw(self):
-        self.view.get_selected_workspaces.return_value = (["ws1", "ws2"], [])
-        self.presenter.redraw_table = MagicMock()
-        self.presenter.on_copy_all_crystal_clicked()
-        self.model.copy_xtal_to_all.assert_called_once()
-        self.presenter.redraw_table.assert_called_once()
-
     @patch(dir_path + ".output_settings.get_texture_axes_transform")
     @patch(dir_path + ".TexturePresenter._get_setting")
     @patch(dir_path + ".TexturePresenter.calc_pf")
@@ -198,7 +192,7 @@ class TestTexturePresenter(unittest.TestCase):
     def test_on_worker_success_triggers_notifier(self):
         self.presenter.correction_notifier.notify_subscribers = MagicMock()
         self.presenter._on_worker_success()
-        self.presenter.correction_notifier.notify_subscribers.assert_called_once_with("Corrections Applied")
+        self.presenter.correction_notifier.notify_subscribers.assert_called_once_with("Pole Figure Created")
 
     @patch(dir_path + ".logger")
     def test_on_worker_error_logs(self, mock_logger):
@@ -271,6 +265,7 @@ class TestTexturePresenter(unittest.TestCase):
     def test_all_wss_have_params_and_at_least_one(self):
         self.presenter.ws_names = ["ws1", "ws2"]
         self.presenter.param_assignments = {"p1": "ws1", "p2": "ws2"}
+        self.view.get_selected_workspaces.return_value = (["ws1", "ws2"], ["p1", "p2"])
         self.assertTrue(self.presenter.all_wss_have_params())
         self.assertTrue(self.presenter.at_least_one_param_assigned())
 
@@ -291,6 +286,153 @@ class TestTexturePresenter(unittest.TestCase):
 
         self.view.populate_readout_column_list.assert_called_once_with(["I", "A", "B"], 0)
         self.view.update_col_select_visibility.assert_called_once_with(True)
+
+
+class TestTextureXtalUIElementEnabling(unittest.TestCase):
+    def setUp(self):
+        self.model = MagicMock()
+        self.view = MagicMock()
+        self.view.get_selected_workspaces.return_value = ([], [])
+        self.view.get_crystal_ws_prop.return_value = ""
+
+        # inputs
+        self.view.finder_cif_file = MagicMock()
+        self.view.lattice_lineedit = MagicMock()
+        self.view.spacegroup_lineedit = MagicMock()
+        self.view.basis_lineedit = MagicMock()
+        self.inputs = (self.view.finder_cif_file, self.view.lattice_lineedit, self.view.spacegroup_lineedit, self.view.basis_lineedit)
+
+        # buttons
+        self.view.btn_setCrystal = MagicMock()
+        self.view.btn_setAllCrystal = MagicMock()
+        self.buttons = (self.view.btn_setCrystal, self.view.btn_setAllCrystal)
+
+        self.presenter = TexturePresenter(self.model, self.view)
+        self.presenter._has_selected_wss = MagicMock()
+
+    # ------ utility funcs ------------
+
+    def set_getter_return_values(self, cif="", lattice="", spacegroup="", basis=""):
+        self.view.get_cif.return_value = cif
+        self.view.get_lattice.return_value = lattice
+        self.view.get_spacegroup.return_value = spacegroup
+        self.view.get_basis.return_value = basis
+
+    def assert_expected_states(self, expected_states_inputs, expected_states_buttons):
+        for i, inp in enumerate(self.inputs):
+            inp.setEnabled.assert_called_with(expected_states_inputs[i])
+        for i, button in enumerate(self.buttons):
+            button.setEnabled.assert_called_with(expected_states_buttons[i])
+
+    # -------- tests ------------
+
+    def test_no_ws_no_inputs_all_inputs_enabled_all_buttons_disabled(self):
+        # set view state
+        self.set_getter_return_values()
+
+        # call the method to set what is enabled
+        self.presenter.set_crystal_inputs_enabled()
+
+        # check element setter calls
+        expected_states_inputs = [True, True, True, True]  # cif, lattice, space group, basis
+        expected_states_buttons = [False, False]  # Set Crystal, Set Crystal to All
+        self.assert_expected_states(expected_states_inputs, expected_states_buttons)
+
+    def test_cif_set_disables_lattice_no_wss_still_have_buttons_off(self):
+        # set view state
+        self.presenter._has_selected_wss.return_value = False
+        self.set_getter_return_values(cif="test.cif")
+
+        # call the method to set what is enabled
+        self.presenter.set_crystal_inputs_enabled()
+
+        # check element setter calls
+        expected_states_inputs = [True, False, False, False]  # cif, lattice, space group, basis
+        expected_states_buttons = [False, False]  # Set Crystal, Set Crystal to All
+        self.assert_expected_states(expected_states_inputs, expected_states_buttons)
+
+    def test_just_lattice_set_disables_cif_no_wss_still_have_buttons_off(self):
+        # set view state
+        self.presenter._has_selected_wss.return_value = False
+        self.set_getter_return_values(lattice="1.0    1.0    1.0")
+
+        # call the method to set what is enabled
+        self.presenter.set_crystal_inputs_enabled()
+
+        # check element setter calls
+        expected_states_inputs = [False, True, True, True]  # cif, lattice, space group, basis
+        expected_states_buttons = [False, False]  # Set Crystal, Set Crystal to All
+        self.assert_expected_states(expected_states_inputs, expected_states_buttons)
+
+    def test_cif_set_disables_lattice_but_ref_ws_and_no_selected_wss_only_enables_set_xtal_not_set_xtal_to_all(self):
+        # set view state
+        self.presenter._has_selected_wss.return_value = False
+        self.set_getter_return_values(cif="test.cif")
+        self.view.get_crystal_ws_prop.return_value = "ref_ws"
+
+        # call the method to set what is enabled
+        self.presenter.set_crystal_inputs_enabled()
+
+        # check element setter calls
+        expected_states_inputs = [True, False, False, False]  # cif, lattice, space group, basis
+        expected_states_buttons = [True, False]  # Set Crystal, Set Crystal to All
+        self.assert_expected_states(expected_states_inputs, expected_states_buttons)
+
+    def test_only_lattice_set_disables_cif_but_ref_ws_and_no_selected_wss_doesnt_enable_set_xtal_nor_set_xtal_to_all(self):
+        # set view state
+        self.presenter._has_selected_wss.return_value = False
+        self.set_getter_return_values(lattice="1.0    1.0    1.0")
+        self.view.get_crystal_ws_prop.return_value = "ref_ws"
+
+        # call the method to set what is enabled
+        self.presenter.set_crystal_inputs_enabled()
+
+        # check element setter calls
+        expected_states_inputs = [False, True, True, True]  # cif, lattice, space group, basis
+        expected_states_buttons = [False, False]  # Set Crystal, Set Crystal to All
+        self.assert_expected_states(expected_states_inputs, expected_states_buttons)
+
+    def test_all_lattice_inps_set_disables_cif_but_ref_ws_and_no_selected_wss_only_enables_set_xtal_not_set_xtal_to_all(self):
+        # set view state
+        self.presenter._has_selected_wss.return_value = False
+        self.set_getter_return_values(lattice="1.0    1.0    1.0", spacegroup="P1", basis="Fe 0 0 0 1 1")
+        self.view.get_crystal_ws_prop.return_value = "ref_ws"
+
+        # call the method to set what is enabled
+        self.presenter.set_crystal_inputs_enabled()
+
+        # check element setter calls
+        expected_states_inputs = [False, True, True, True]  # cif, lattice, space group, basis
+        expected_states_buttons = [True, False]  # Set Crystal, Set Crystal to All
+        self.assert_expected_states(expected_states_inputs, expected_states_buttons)
+
+    def test_all_lattice_inps_set_disables_cif_with_ref_ws_and_selected_wss_enables_set_xtal_and_set_xtal_to_all(self):
+        # set view state
+        self.presenter._has_selected_wss.return_value = True
+        self.set_getter_return_values(lattice="1.0    1.0    1.0", spacegroup="P1", basis="Fe 0 0 0 1 1")
+        self.view.get_crystal_ws_prop.return_value = "ref_ws"
+
+        # call the method to set what is enabled
+        self.presenter.set_crystal_inputs_enabled()
+
+        # check element setter calls
+        expected_states_inputs = [False, True, True, True]  # cif, lattice, space group, basis
+        expected_states_buttons = [True, True]  # Set Crystal, Set Crystal to All
+        self.assert_expected_states(expected_states_inputs, expected_states_buttons)
+
+    def test_cif_set_disables_lattice_with_ref_ws_and_selected_wss_enables_set_xtal_and_set_xtal_to_all(self):
+        # set view state
+        self.presenter._has_selected_wss.return_value = True
+        self.set_getter_return_values(cif="test.cif")
+        self.view.get_crystal_ws_prop.return_value = "ref_ws"
+
+        # call the method to set what is enabled
+        self.presenter.set_crystal_inputs_enabled()
+
+        # check element setter calls
+        expected_states_inputs = [True, False, False, False]  # cif, lattice, space group, basis
+        expected_states_buttons = [True, True]  # Set Crystal, Set Crystal to All
+        self.assert_expected_states(expected_states_inputs, expected_states_buttons)
 
 
 if __name__ == "__main__":
