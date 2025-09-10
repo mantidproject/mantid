@@ -807,6 +807,7 @@ class SliceViewerTest(unittest.TestCase):
 
         mock_axes = mock.MagicMock()
         mock_axes.get_xlim = mock.MagicMock(return_value=[0, 1])
+        mock_axes.get_xscale.return_value = "linear"
         xaxes_edit = SliceViewXAxisEditor(canvas=mock.MagicMock(), axes=mock_axes, dimensions_changed=presenter.dimensions_changed)
 
         xaxes_edit.on_ok()
@@ -819,6 +820,7 @@ class SliceViewerTest(unittest.TestCase):
 
         mock_axes = mock.MagicMock()
         mock_axes.get_ylim = mock.MagicMock(return_value=[0, 1])
+        mock_axes.get_yscale.return_value = "linear"
         yaxes_edit = SliceViewYAxisEditor(canvas=mock.MagicMock(), axes=mock_axes, dimensions_changed=presenter.dimensions_changed)
 
         yaxes_edit.on_ok()
