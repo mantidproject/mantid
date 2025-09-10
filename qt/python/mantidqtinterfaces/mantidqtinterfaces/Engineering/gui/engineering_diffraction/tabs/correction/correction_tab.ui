@@ -25,6 +25,8 @@ QGroupBox:title {
       <string>Load Data</string>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_load">
+         <item>
+                 <layout class="QHBoxLayout" name="horizLayout_loadFiles">
       <item>
        <widget class="FileFinderWidget" name="finder_corr" native="true"/>
       </item>
@@ -35,6 +37,8 @@ QGroupBox:title {
     </property>
    </widget>
   </item>
+                 </layout>
+         </item>
       <item>
        <widget class="QTableWidget" name="table_loaded_data"/>
       </item>
