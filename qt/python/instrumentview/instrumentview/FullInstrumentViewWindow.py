@@ -147,6 +147,14 @@ class FullInstrumentViewWindow(QMainWindow):
         left_column_layout.addWidget(options_vertical_widget)
         left_column_layout.addStretch()
 
+    def disable_rectangle_picking_checkbox(self) -> None:
+        self._multi_select_check.setChecked(False)
+        self._multi_select_check.setEnabled(False)
+
+    def enable_rectangle_picking_checkbox(self) -> None:
+        self._multi_select_check.setChecked(False)
+        self._multi_select_check.setEnabled(True)
+
     def hide_status_box(self) -> None:
         self.status_group_box.hide()
 
@@ -234,6 +242,7 @@ class FullInstrumentViewWindow(QMainWindow):
     def setup_connections_to_presenter(self) -> None:
         self._projection_combo_box.currentIndexChanged.connect(self._presenter.on_projection_option_selected)
         self._multi_select_check.stateChanged.connect(self._presenter.on_multi_select_detectors_clicked)
+        self._multi_select_check.clicked.connect(self._cleanup_rectangle_picking)
         self._clear_selection_button.clicked.connect(self._presenter.on_clear_selected_detectors_clicked)
         self._contour_range_slider.sliderReleased.connect(self._presenter.on_contour_limits_updated)
         self._tof_slider.sliderReleased.connect(self._presenter.on_tof_limits_updated)
@@ -247,6 +256,16 @@ class FullInstrumentViewWindow(QMainWindow):
         self._add_connections_to_edits_and_slider(
             self._tof_min_edit, self._tof_max_edit, self._tof_slider, self._presenter.on_tof_limits_updated
         )
+
+    def _cleanup_rectangle_picking(self, is_clicked: bool) -> None:
+        # TODO: Fix this workaround for reseting rectangle picking
+        # Issue happens because if user is in selecting more (pressed 'r') and unticks box
+        # means that some interactor events like mouse presses will be stuck in selecting mode
+        if is_clicked:
+            return
+        self.main_plotter.disable_picking()
+        self.main_plotter.enable_rectangle_picking(callback=lambda *_: None, show_message=False)
+        self.main_plotter.disable_picking()
 
     def get_tof_limits(self) -> tuple[float, float]:
         return self._tof_slider.value()
