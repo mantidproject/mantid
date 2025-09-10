@@ -89,3 +89,7 @@ class TextureUtilsTest(CrystalPhaseHelperMixin, unittest.TestCase):
     def test_get_xtal_structure_invalid_input_method_raises(self):
         with self.assertRaises(ValueError):
             get_xtal_structure("invalid_method")
+
+
+if __name__ == "__main__":
+    unittest.main()
