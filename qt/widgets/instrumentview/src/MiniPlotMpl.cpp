@@ -95,6 +95,13 @@ MiniPlotMpl::MiniPlotMpl(QWidget *parent)
   // for exceptions
   m_zoomTool.enableZoom(true);
   connect(m_homeBtn, SIGNAL(clicked()), this, SLOT(zoomOutOnPlot()));
+  m_overlayLabel = new QLabel(this);
+  m_overlayLabel->setAlignment(Qt::AlignCenter);
+  m_overlayLabel->setStyleSheet("background-color: rgba(255, 255, 255, 200);"
+                                "color: red; font-size: 14pt; font-weight: bold;"
+                                "border: 2px solid #a00; border-radius: 6px;");
+  m_overlayLabel->setWordWrap(true);
+  m_overlayLabel->hide();
 }
 
 /**
@@ -337,5 +344,27 @@ bool MiniPlotMpl::handleMouseReleaseEvent(QMouseEvent *evt) {
  * Wire to the home button click
  */
 void MiniPlotMpl::zoomOutOnPlot() { m_zoomTool.zoomOut(); }
+
+/**
+ * Show an overlay message on the plot - Used if plotting is unavailable for the workspace
+ * @param message The message to display
+ */
+void MiniPlotMpl::showOverlayMessage(const std::string &message) {
+  if (!m_overlayLabel)
+    return;
+
+  m_overlayLabel->setText(QString::fromStdString(message));
+  m_overlayLabel->setGeometry(this->rect());
+  m_overlayLabel->raise();
+  m_overlayLabel->show();
+}
+
+/**
+ * Clear the overlay message from the plot
+ */
+void MiniPlotMpl::clearOverlayMessage() {
+  if (m_overlayLabel)
+    m_overlayLabel->hide();
+}
 
 } // namespace MantidQt::MantidWidgets

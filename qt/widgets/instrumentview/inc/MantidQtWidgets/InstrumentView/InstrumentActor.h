@@ -247,6 +247,8 @@ public:
   /// Returns indices of all non-detector components in Instrument.
   const std::vector<size_t> &components() const override { return m_components; }
 
+  bool canPlotBlocksize() const;
+
   bool hasGridBank() const;
   size_t getNumberOfGridLayers() const;
   void setGridLayer(bool isUsingLayer, int layer) const;
