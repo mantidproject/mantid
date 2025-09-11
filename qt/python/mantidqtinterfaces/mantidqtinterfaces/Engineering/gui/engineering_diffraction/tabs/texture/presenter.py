@@ -119,8 +119,7 @@ class TexturePresenter:
             self.ws_names.pop(self.ws_names.index(ws))
             if self.ws_has_param(ws):
                 # remove assignment between ws and param
-                param = self.ws_assignments[ws]
-                self.ws_assignments.pop(ws)
+                param = self.ws_assignments.pop(ws)
                 self.param_assignments.pop(param)
                 # do not add either back to the unassigned piles
             else:
@@ -142,8 +141,7 @@ class TexturePresenter:
         for param in params:
             if self.param_has_ws(param):
                 # remove assignment between ws and param
-                assigned_ws = self.param_assignments[param]
-                self.param_assignments.pop(param)
+                assigned_ws = self.param_assignments.pop(param)
                 self.ws_assignments.pop(assigned_ws)
                 # add ws to the unassigned pile
                 self.unassigned_wss.append(assigned_ws)
