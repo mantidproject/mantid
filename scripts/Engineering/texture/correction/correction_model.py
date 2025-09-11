@@ -24,10 +24,9 @@ from mantid.api import AnalysisDataService as ADS
 from os import path, makedirs
 from scipy import interpolate
 from Engineering.EnggUtils import GROUP
-from Engineering.common.texture_sample_viewer import has_valid_shape, plot_sample_directions, plot_gauge_vol
+from Engineering.common.texture_sample_viewer import has_valid_shape
 from typing import Optional, Sequence, Union, Tuple
 from mantid.dataobjects import Workspace2D
-from matplotlib.figure import Figure
 from Engineering.common.calibration_info import CalibrationInfo
 
 
@@ -346,16 +345,6 @@ class TextureCorrectionModel:
         return self.reference_ws, shape_enabled, material
 
     # ~~~~~ Plotting Functions ~~~~~~~~~~~~~
-
-    def plot_gauge_vol(self, preset: str, custom_shape: Optional[str], fig: Figure) -> None:
-        gauge_vol_str = self.get_gauge_vol_str(preset, custom_shape)
-        plot_gauge_vol(gauge_vol_str, fig)
-
-    @staticmethod
-    def plot_sample_directions(
-        fig: Figure, ws_name: str, ax_transform: np.ndarray, ax_labels: Sequence[str], fix_axes_to_sample: bool
-    ) -> None:
-        plot_sample_directions(fig, ws_name, ax_transform, ax_labels, fix_axes_to_sample)
 
     @staticmethod
     def _has_no_valid_shape(ws_name: str) -> bool:
