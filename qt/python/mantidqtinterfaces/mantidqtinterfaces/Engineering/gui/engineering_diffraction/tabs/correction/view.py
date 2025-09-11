@@ -22,6 +22,7 @@ class TextureCorrectionView(QtWidgets.QWidget, Ui_texture):
     def __init__(self, parent=None, instrument="ENGINX"):
         super(TextureCorrectionView, self).__init__(parent)
         self.setupUi(self)
+        self.init_tool_tips()
 
         self.show_sample_view = ShowSampleView()
 
@@ -49,7 +50,9 @@ class TextureCorrectionView(QtWidgets.QWidget, Ui_texture):
         self.populate_unit_list()
         self.set_default_unit("dSpacing")
 
-        # ========== Tool Tips ==========
+    # ========== Setup Tool Tips ==========
+
+    def init_tool_tips(self):
         self.btn_loadFiles.setToolTip("Loads the selected sample runs into the table")
         self.btn_selectAll.setToolTip("Sets all of the loaded workspaces in the table to selected")
         self.btn_deselectAll.setToolTip("Sets all of the loaded workspaces in the table to unselected")
