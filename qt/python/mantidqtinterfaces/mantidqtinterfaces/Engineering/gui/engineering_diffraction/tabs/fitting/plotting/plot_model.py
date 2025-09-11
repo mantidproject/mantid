@@ -195,6 +195,89 @@ class FittingPlotModel(object):
         :param active_ws_list: List of active workspace names
         :return: Dict of {run_number: TableWorkspace}
         """
+        # get dictionary correspondence between runs and banks/prefix/group with k:v structures defined below
+        # run: [(one_spec, ws name), (another_spec, ws name)...]
+        # run: prefix_string
+        # run: group
+        run_to_banks, run_to_prefix, run_to_group = self._create_metadata_dicts(active_ws_list)
+
+        # create a dict to store summary tables
+        summary_tables = {}
+        for run, bank_ws_pairs in run_to_banks.items():
+            # sort the spectra in order of ispec
+            bank_ws_pairs.sort(key=lambda x: int(x[0]))
+            banks_sorted = [ws for _, ws in bank_ws_pairs]
+
+            # extract fit parameters
+            all_params = sorted(set(param for ws in banks_sorted if ws in fit_results for param in fit_results[ws]["results"].keys()))
+
+            # determine if there are any duplicate functions (if there aren't just use eg. X0 rather than f1_X0)
+            func_names = {param.split("_")[0] for param in all_params if "_" in param}
+            use_short_names = len(func_names) == 1
+
+            # make a list of parameter labels and get a unique "peak" label
+            param_labels, fit_peak = self._get_param_labels_and_peak_label(all_params, use_short_names, fit_results, banks_sorted)
+
+            # read metadata for run
+            prefix = run_to_prefix[run]
+            grouping = run_to_group[run]
+            table_name = f"{prefix}{run}_{fit_peak}_{grouping}_Fit_Parameters"
+
+            # create a table with the correct columns and data types
+            table = self.create_texture_output_table(table_name, param_labels)
+
+            # populate table
+            for ws in banks_sorted:
+                row = [ws]
+                for param in all_params:
+                    if param in fit_results.get(ws, {}).get("results", {}):
+                        val_err = fit_results[ws]["results"][param][0]
+                        row.extend(val_err)
+                    else:
+                        row.extend([nan, nan])
+
+                chi2 = fit_results.get(ws, {}).get("costFunction", nan)
+                row.append(chi2)
+
+                table.addRow(row)
+
+            self._save_files(table_name, "FitParameters", grouping)
+            summary_tables[run] = table
+
+        return summary_tables
+
+    @staticmethod
+    def create_texture_output_table(table_name, param_labels):
+        table = CreateEmptyTableWorkspace(OutputWorkspace=table_name)
+        table.addColumn("str", "Bank")
+
+        for param_label in param_labels:
+            table.addColumn("double", param_label)
+            table.addColumn("double", f"{param_label}_Error")
+
+        # Add chi2 column
+        table.addColumn("double", "chi2")
+
+        return table
+
+    @staticmethod
+    def _get_param_labels_and_peak_label(all_params, use_short_names, fit_results, banks_sorted):
+        param_labels = []
+        fit_peak = ""
+        for param in all_params:
+            if use_short_names and "_" in param:
+                param_label = param.split("_", 1)[1]
+                param_labels.append(param_label)
+                # if we only have one X0 in the table, we would like a unique file name
+                if param_label == "X0":
+                    x0s = [fit_results[ws]["results"][param][0][0] for ws in banks_sorted]
+                    fit_peak = str(round(mean(x0s), 2))
+            else:
+                param_labels.append(param)
+        return param_labels, fit_peak
+
+    @staticmethod
+    def _create_metadata_dicts(active_ws_list):
         run_to_banks = defaultdict(list)
         run_to_prefix = {}
         run_to_group = {}
@@ -227,64 +310,7 @@ class FittingPlotModel(object):
             run_to_prefix[run_number] = prefix
             run_to_group[run_number] = grouping
 
-        summary_tables = {}
-
-        for run, bank_ws_pairs in run_to_banks.items():
-            bank_ws_pairs.sort(key=lambda x: int(x[0]))
-            banks_sorted = [ws for _, ws in bank_ws_pairs]
-            print(banks_sorted)
-
-            all_params = sorted(set(param for ws in banks_sorted if ws in fit_results for param in fit_results[ws]["results"].keys()))
-
-            func_names = {param.split("_")[0] for param in all_params if "_" in param}
-            use_short_names = len(func_names) == 1
-
-            param_labels = []
-
-            fit_peak = ""
-
-            for param in all_params:
-                if use_short_names and "_" in param:
-                    param_label = param.split("_", 1)[1]
-                    param_labels.append(param_label)
-                    # if we only have one X0 in the table, we would like a unique file name
-                    if param_label == "X0":
-                        x0s = [fit_results[ws]["results"][param][0][0] for ws in banks_sorted]
-                        fit_peak = str(round(mean(x0s), 2))
-                else:
-                    param_labels.append(param)
-
-            prefix = run_to_prefix[run]
-            grouping = run_to_group[run]
-            table_name = f"{prefix}{run}_{fit_peak}_{grouping}_Fit_Parameters"
-
-            table = CreateEmptyTableWorkspace(OutputWorkspace=table_name)
-            table.addColumn("str", "Bank")
-
-            for param_label in param_labels:
-                table.addColumn("double", param_label)
-                table.addColumn("double", f"{param_label}_Error")
-
-            # Add chi2 column
-            table.addColumn("double", "chi2")
-            for ws in banks_sorted:
-                row = [ws]
-                for param in all_params:
-                    if param in fit_results.get(ws, {}).get("results", {}):
-                        val_err = fit_results[ws]["results"][param][0]
-                        row.extend(val_err)
-                    else:
-                        row.extend([nan, nan])
-
-                chi2 = fit_results.get(ws, {}).get("costFunction", nan)
-                row.append(chi2)
-
-                table.addRow(row)
-
-            self._save_files(table_name, "FitParameters", grouping)
-            summary_tables[run] = table
-
-        return summary_tables
+        return run_to_banks, run_to_prefix, run_to_group
 
     def _save_files(self, ws, dir_name, peak, grouping=""):
         root_dir = output_settings.get_output_path()
