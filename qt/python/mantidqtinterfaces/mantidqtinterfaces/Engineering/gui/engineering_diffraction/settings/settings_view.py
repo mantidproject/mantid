@@ -18,6 +18,7 @@ class SettingsView(QtWidgets.QDialog, Ui_settings):
         self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowContextHelpButtonHint)
         self.setupUi(self)
         self.setModal(True)
+        self.init_tool_tips()
 
         self.finder_save.setLabelText("Save Location")
         self.finder_save.isForRunFiles(False)
@@ -42,7 +43,9 @@ class SettingsView(QtWidgets.QDialog, Ui_settings):
         )
         self.peak_list_label.setText("Default Peak Function")
 
-        # Tool Tips
+        # Setup Tool Tips
+
+    def init_tool_tips(self):
         self.lineedit_RD.setToolTip("Label for the first (PF: in-plane) intrinsic sample direction")
         self.lineedit_RD0.setToolTip("X component of the first intrinsic sample direction")
         self.lineedit_RD1.setToolTip("Y component of the first intrinsic sample direction")

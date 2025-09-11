@@ -25,6 +25,7 @@ class TextureView(QtWidgets.QWidget, Ui_texture):
     def __init__(self, parent=None, instrument="ENGINX"):
         super(TextureView, self).__init__(parent)
         self.setupUi(self)
+        self.init_tool_tips()
 
         self.show_sample_view = ShowSampleView()
 
@@ -43,7 +44,9 @@ class TextureView(QtWidgets.QWidget, Ui_texture):
 
         self._setup_plot()
 
-        # ========== Tool Tips ==========
+    # ========== Setup Tool Tips ==========
+
+    def init_tool_tips(self):
         self.btn_loadWSFiles.setToolTip("Loads the selected sample runs into the table")
         self.btn_loadParamFiles.setToolTip(
             "Loads the selected table workspaces into the table, assigning them to each row currently without an assigned table, in turn"
