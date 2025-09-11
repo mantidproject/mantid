@@ -18,6 +18,7 @@ dir_path = "mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.
 class SettingsPresenterTest(unittest.TestCase):
     def setUp(self):
         self.model = MagicMock()
+        self.model.validate_gsas2_path.return_value = (True, "")
         self.view = MagicMock()
         self.view.set_euler_options_enabled = MagicMock()
         self.view.set_contour_option_enabled = MagicMock()
@@ -80,6 +81,7 @@ class SettingsPresenterTest(unittest.TestCase):
     def test_load_existing_settings(self, mock_isfile):
         mock_isfile.return_value = True
         self.model.get_settings_dict.return_value = self.settings.copy()
+        self.model.validate_settings.return_value = self.settings.copy()
 
         self.presenter.load_settings_from_file_or_default()
 
@@ -88,67 +90,18 @@ class SettingsPresenterTest(unittest.TestCase):
 
     def test_file_searched_on_opening(self):
         self.model.get_settings_dict.return_value = self.settings.copy()
+        self.model.validate_settings.return_value = self.settings.copy()
 
         self.presenter.load_settings_from_file_or_default()
 
         self.assertEqual(1, self.view.find_full_calibration.call_count)
         self.assertEqual(1, self.view.find_save.call_count)
 
-    def test_load_invalid_settings(self):
-        def return_value(self):
-            return {"foo": "dud", "bar": "result"}
-
-        self.model.get_settings_dict.side_effect = return_value
-        self.presenter.savedir_notifier = mock.MagicMock()
-
-        self.presenter.load_settings_from_file_or_default()
-
-        self.assertEqual(self.presenter.settings, settings_presenter.DEFAULT_SETTINGS)
-        self.model.set_settings_dict.assert_called_once()  # called to replace invalid settings
-
-    def test_load_invalid_settings_correct_keys(self):
-        def return_value(self):
-            return {
-                "clear_absorption_ws_after_processing": True,
-                "contour_kernel": "2.0",
-                "cost_func_thresh": "100",
-                "dSpacing_min": 1.0,
-                "default_peak": "BackToBackExponential",
-                "euler_angles_scheme": "YZY",
-                "euler_angles_sense": "1,-1,1",
-                "full_calibration": "",  # invalid
-                "logs": "some,logs",
-                "monte_carlo_params": "SparseInstrument:True",
-                "nd_dir": "0,1,0",
-                "nd_name": "ND",
-                "path_to_gsas2": "/opt/gsas2/",
-                "peak_pos_thresh": "0.1",
-                "plot_exp_pf": True,
-                "primary_log": "some",
-                "rd_dir": "1,0,0",
-                "rd_name": "RD",
-                "save_location": "save",
-                "sort_ascending": True,
-                "td_dir": "0,0,1",
-                "td_name": "TD",
-                "timeout": 10,
-                "use_euler_angles": False,
-            }
-
-        self.model.get_settings_dict.side_effect = return_value
-        self.presenter.savedir_notifier = mock.MagicMock()
-
-        self.presenter.load_settings_from_file_or_default()
-
-        expected_dict = return_value(self)
-        expected_dict["full_calibration"] = settings_presenter.DEFAULT_SETTINGS["full_calibration"]
-        self.assertEqual(self.presenter.settings, expected_dict)
-        self.model.set_settings_dict.assert_called_once()  # called to replace invalid settings
-
     @patch(dir_path + ".path.isfile")
     def test_save_new_settings(self, mock_isfile):
         mock_isfile.return_value = True
         self.setup_view_getters()
+        self.model.validate_settings.return_value = self.settings.copy()
         self.presenter.savedir_notifier = mock.MagicMock()
 
         self.presenter.save_new_settings()
@@ -159,22 +112,10 @@ class SettingsPresenterTest(unittest.TestCase):
         self.assertEqual(self.presenter.savedir_notifier.notify_subscribers.call_count, 1)
 
     @patch(dir_path + ".path.isfile")
-    def test_save_blank_primary_log_settings(self, mock_isfile):
-        mock_isfile.return_value = True
-        self.setup_view_getters(blank_log=True)
-        self.presenter.savedir_notifier = mock.MagicMock()
-
-        self.presenter.save_new_settings()
-
-        self.assertEqual(self.view.close.call_count, 0)
-        self.assertEqual(self.presenter.settings["primary_log"], "")
-        self.model.set_settings_dict.assert_called_with(self.presenter.settings)
-        self.assertEqual(self.presenter.savedir_notifier.notify_subscribers.call_count, 1)
-
-    @patch(dir_path + ".path.isfile")
     def test_show(self, mock_isfile):
         mock_isfile.return_value = True
         self.presenter.settings = self.settings.copy()
+        self.model.validate_settings.return_value = self.settings.copy()
 
         self.presenter.show()
 
@@ -190,6 +131,7 @@ class SettingsPresenterTest(unittest.TestCase):
     def test_save_settings_and_close(self, mock_isfile):
         mock_isfile.return_value = True
         self.setup_view_getters()
+        self.model.validate_settings.return_value = self.settings.copy()
         self.presenter.savedir_notifier = mock.MagicMock()
 
         self.presenter.save_and_close_dialog()

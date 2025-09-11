@@ -237,3 +237,6 @@ class TextureView(QtWidgets.QWidget, Ui_texture):
     def update_col_select_visibility(self, vis):
         self.label_param.setVisible(vis)
         self.combo_param.setVisible(vis)
+
+    def set_instrument_override(self, instrument):
+        self.finder_texture_ws.setInstrumentOverride(instrument)
