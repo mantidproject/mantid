@@ -21,7 +21,7 @@
 namespace {
 namespace bp = boost::python;
 
-std::set<std::string> jsonAllowedTypes{"int", "float", "str", "dict", "list", "tuple", "NoneType", "bool"};
+std::set<std::string> const jsonAllowedTypes{"int", "float", "str", "dict", "list", "tuple", "NoneType", "bool"};
 
 bp::object iterativeDictDump(bp::object obj) {
   bp::dict d = bp::extract<bp::dict>(obj.attr("__dict__"));
@@ -64,10 +64,10 @@ template <> std::string toString(PythonObject const &obj) {
       rep = json.attr("dumps")(obj);
     }
     // if json doesn't work, then iteratively dump its dict as a json
-    catch (boost::python::error_already_set const &e) {
+    catch (boost::python::error_already_set const &) {
       PyErr_Clear(); // NOTE must clear error registry, or bizarre errors will occur at unexpected lines
       boost::python::object dict = iterativeDictDump(obj);
-      rep = (json.attr("dumps")(dict)).attr("encode")("utf-8");
+      rep = json.attr("dumps")(dict);
     }
   }
   return boost::python::extract<std::string>(rep);
@@ -91,7 +91,7 @@ template <> Json::Value encodeAsJson(PythonObject const &) {
 #ifdef __APPLE__
 // NOTE for mac builds, it is necessary the DLL export occur here.
 // This declaration normally lives in Framework/Kernel/PropertyWithValue.cpp.  However, because the boost library is
-// not linked in Kernel, this declarationcan only occur in a file inside the PythonInterface layer
+// not linked in Kernel, this declaration can only occur in a file inside the PythonInterface layer
 // Instantiate a copy of the class with our template type so we generate the symbols for the methods in the hxx header.
 template class MANTID_PYTHONINTERFACE_CORE_DLL PropertyWithValue<PythonObject>;
 #endif
@@ -122,7 +122,7 @@ std::string PythonObjectProperty::setValue(PythonObject const &value) {
   return ret;
 }
 
-/** Set the propety value.
+/** Set the property value.
  *  @param value :: The value of the property as a string.
  *  @return Error message, or "" on success.
  */
@@ -164,7 +164,7 @@ std::string PythonObjectProperty::setValue(std::string const &value) {
  */
 std::string PythonObjectProperty::setValueFromJson(const Json::Value &json) {
   std::string jsonstr = JsonHelpers::jsonToString(json);
-  setValue(jsonstr);
+  return setValue(jsonstr);
 }
 
 std::string PythonObjectProperty::setDataItem(const std::shared_ptr<Kernel::DataItem> &) {
