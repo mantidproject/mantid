@@ -10,6 +10,7 @@
 #include "MantidQtWidgets/MplCpp/Cycler.h"
 #include "MantidQtWidgets/MplCpp/Line2D.h"
 #include "MantidQtWidgets/MplCpp/PanZoomTool.h"
+#include <QLabel>
 #include <QWidget>
 #include <list>
 
@@ -42,6 +43,8 @@ public:
   QColor getCurveColor(const QString &label) const;
   bool isYLogScale() const;
   void replot();
+  void showOverlayMessage(const std::string &message);
+  void clearOverlayMessage();
 
   // cppcheck-suppress unknownMacro
 public slots:
@@ -72,6 +75,7 @@ private:
   QStringList m_storedCurveLabels;
   Widgets::MplCpp::PanZoomTool m_zoomTool;
   QPoint m_mousePressPt;
+  QLabel *m_overlayLabel = nullptr;
 };
 } // namespace MantidWidgets
 } // namespace MantidQt
