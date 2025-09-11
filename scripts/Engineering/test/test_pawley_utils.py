@@ -37,6 +37,14 @@ class PhaseTest(unittest.TestCase):
         self.assertTrue(allclose(si.hkls, 1))
         self.assertEqual(si.nhkls(), 1)
 
+    @patch("Engineering.pawley_utils.logger")
+    def test_set_hkls_forbidden(self, mock_log):
+        si = Phase.from_alatt(3 * [self.SI_LATT_PAR], self.SI_SPGR)
+        si.set_hkls([[1, 1, 1], [1, 1, 0]])
+        self.assertTrue(allclose(si.hkls, 1))
+        self.assertEqual(si.nhkls(), 1)
+        mock_log.warning.assert_called_once()
+
     def test_get_params_noncubic(self):
         tetrag_phase = Phase.from_alatt(3 * [self.SI_LATT_PAR], "P 4")
         assert_array_almost_equal(tetrag_phase.get_params(), array(2 * [self.SI_LATT_PAR]))
