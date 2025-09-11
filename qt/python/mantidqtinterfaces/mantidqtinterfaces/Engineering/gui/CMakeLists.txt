@@ -27,6 +27,7 @@ set(TEST_PY_FILES
     engineering_diffraction/tabs/focus/test/test_focus_presenter.py
     # Pole Figure
     engineering_diffraction/tabs/texture/test/test_texture_presenter.py
+    engineering_diffraction/tabs/texture/test/test_texture_model.py
     # GSAS2
     engineering_diffraction/tabs/gsas2/test/test_gsas2_model.py
     engineering_diffraction/tabs/gsas2/test/test_gsas2_presenter.py

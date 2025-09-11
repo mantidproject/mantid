@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #
 import unittest
-from unittest.mock import patch, MagicMock, call
+from unittest.mock import patch, MagicMock
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.texture.presenter import TexturePresenter
 import numpy as np
 
@@ -16,29 +16,72 @@ dir_path = "mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.text
 class TestTexturePresenter(unittest.TestCase):
     def setUp(self):
         self.model = MagicMock()
+        self.model.all_wss_have_params.return_value = False
+        self.model.at_least_one_param_assigned.return_value = False
         self.view = MagicMock()
         self.view.get_selected_workspaces.return_value = ([], [])
         self.presenter = TexturePresenter(self.model, self.view)
 
+        self.pf_default_inputs = {
+            "wss": ["test_ws"],
+            "params": ["test_params"],
+            "projection_method": "stereographic",
+            "inc_scatter": True,
+            "hkl": ["1", "1", "0"],
+            "readout_col": "I",
+            "ax_transform": np.eye(3),
+            "ax_labels": ["RD", "ND", "TD"],
+            "plot_exp": True,
+            "contour_kernel": 2.0,
+            "scat_vol_pos": (0.0, 0.0, 0.0),
+            "chi2_thresh": 0.0,
+            "peak_thresh": 0.0,
+        }
+
+    def _setup_default_pf_input(self):
+        mock_get_setting = self.presenter._get_setting = MagicMock()
+        mock_setting_data = {"plot_exp_pf": True, "contour_kernel": "2.0", "cost_func_thresh": 0.0, "peak_pos_thresh": 0.0}
+        mock_get_setting.side_effect = lambda k, *a, **kw: mock_setting_data[k]
+
+        # set all the parameters from the view onto the model
+        self.view.get_selected_workspaces.return_value = (self.pf_default_inputs["wss"], self.pf_default_inputs["params"])
+        self.view.get_projection_method.return_value = self.pf_default_inputs["projection_method"]
+        self.view.get_inc_scatt_power.return_value = self.pf_default_inputs["inc_scatter"]
+        self.view.get_hkl.return_value = self.pf_default_inputs["hkl"]
+        self.view.get_readout_column.return_value = self.pf_default_inputs["readout_col"]
+        self.presenter._get_ax_data = MagicMock(return_value=(self.pf_default_inputs["ax_transform"], self.pf_default_inputs["ax_labels"]))
+        self.presenter.all_wss_have_params = MagicMock(return_value=True)
+        self.presenter.at_least_one_param_assigned = MagicMock(return_value=True)
+        self.presenter.model.check_param_ws_for_columns.return_value = (True, True)
+
+    def _assert_pf_inputs_set_on_model(self):
+        self.model.set_projection_method.assert_called_once_with(self.pf_default_inputs["projection_method"])
+        self.model.set_inc_scatt.assert_called_once_with(self.pf_default_inputs["inc_scatter"])
+        self.model.set_hkl.assert_called_once_with(self.pf_default_inputs["hkl"])
+        self.model.set_readout_col.assert_called_once_with(self.pf_default_inputs["readout_col"])
+        self.model.set_out_ws_and_grouping.assert_called_once_with(self.pf_default_inputs["wss"], self.pf_default_inputs["params"])
+        self.model.set_ax_trans.assert_called_once_with(self.pf_default_inputs["ax_transform"])
+        self.model.set_ax_labels.assert_called_once_with(self.pf_default_inputs["ax_labels"])
+        self.model.set_plot_exp.assert_called_once_with(self.pf_default_inputs["plot_exp"])
+        self.model.set_contour_kernel.assert_called_once_with(self.pf_default_inputs["contour_kernel"])
+        self.model.set_scat_vol_pos.assert_called_once_with(self.pf_default_inputs["scat_vol_pos"])
+        self.model.set_chi2_thresh.assert_called_once_with(self.pf_default_inputs["chi2_thresh"])
+        self.model.set_peak_thresh.assert_called_once_with(self.pf_default_inputs["peak_thresh"])
+
     @patch(dir_path + ".TexturePresenter.redraw_table")
-    @patch(dir_path + ".logger")
-    @patch(dir_path + ".ADS")
-    @patch(dir_path + ".Load")
-    def test_load_ws_files(self, mock_load, mock_ads, mock_logger, mock_redraw_table):
+    def test_load_ws_files(self, mock_redraw_table):
         # set up file list
-        self.view.finder_texture_ws.getFilenames.return_value = ["path/to/existing_ws.nxs", "path/to/new_ws.nxs"]
-        mock_ads.doesExist.side_effect = lambda ws: ws == "existing_ws"
+        files = ["path/to/existing_ws.nxs", "path/to/new_ws.nxs"]
+        loaded_wss = ["existing_ws", "new_ws"]
+        self.presenter.ws_names = ["existing_ws"]
+        self.view.finder_texture_ws.getFilenames.return_value = files
         self.presenter.ws_assignments = {"existing_ws": "existing_param"}
+        self.model.load_files.return_value = loaded_wss
 
         # run load files
         self.presenter.load_ws_files()
-        # existing file should give notice that it will not be reloaded
-        mock_logger.notice.assert_called_once_with(
-            'A workspace "existing_ws" already exists, loading path/to/existing_ws.nxs has been skipped'
-        )
-        # new file should be loaded
-        mock_load.called_once_with("path/to/new_ws.nxs", "new_ws")
 
+        self.model.load_files.assert_called_once_with(files)
         mock_redraw_table.assert_called_once()
 
         self.assertTrue(np.all((self.presenter.ws_names, ["existing_ws", "new_ws"])))
@@ -46,78 +89,22 @@ class TestTexturePresenter(unittest.TestCase):
         self.assertNotIn("existing_ws", self.presenter.unassigned_wss)
 
     @patch(dir_path + ".TexturePresenter.redraw_table")
-    @patch(dir_path + ".logger")
-    @patch(dir_path + ".ADS")
-    @patch(dir_path + ".Load")
-    def test_load_param_files(self, mock_load, mock_ads, mock_logger, mock_redraw_table):
+    def test_load_param_files(self, mock_redraw_table):
         # set up file list
-        self.view.finder_texture_tables.getFilenames.return_value = ["path/to/existing_param.nxs", "path/to/new_param.nxs"]
+        files = ["path/to/existing_param.nxs", "path/to/new_param.nxs"]
+        loaded_wss = ["existing_param", "new_param"]
+        self.view.finder_texture_tables.getFilenames.return_value = files
         self.presenter.param_assignments = {"existing_param": "existing_ws"}
+        self.model.load_files.return_value = loaded_wss
 
-        # load the parameter files
+        # run load files
         self.presenter.load_param_files()
 
-        # no warnings
-        mock_logger.warning.assert_not_called()
-
-        # new file should be loaded
-        expected_calls = [
-            call(Filename="path/to/existing_param.nxs", OutputWorkspace="existing_param"),
-            call(Filename="path/to/new_param.nxs", OutputWorkspace="new_param"),
-        ]
-
-        mock_load.assert_has_calls(expected_calls)
-
+        self.model.load_files.assert_called_once_with(files)
         mock_redraw_table.assert_called_once()
 
         self.assertIn("new_param", self.presenter.unassigned_params)
         self.assertNotIn("existing_param", self.presenter.unassigned_params)
-
-    @patch(dir_path + ".TexturePresenter.update_readout_column_list")
-    @patch(dir_path + ".TexturePresenter.update_ws_info")
-    @patch(dir_path + ".logger")
-    @patch(dir_path + ".ADS")
-    @patch(dir_path + ".Load")
-    def test_loading_new_param_adds_it_to_an_unassigned_ws_but_extras_are_removed(
-        self, mock_load, mock_ads, mock_logger, mock_update_ws_info, mock_read_col
-    ):
-        # set up file list
-        self.view.finder_texture_tables.getFilenames.return_value = ["path/to/new_param.nxs", "path/to/extra_param.nxs"]
-        self.presenter.param_assignments = {"param1": "ws1"}
-        self.presenter.ws_assignments = {"ws1": "param1"}
-        self.presenter.unassigned_wss = ["ws2"]
-
-        # load the parameter files
-        self.presenter.load_param_files()
-
-        # no warnings
-        mock_logger.warning.assert_not_called()
-
-        # new file should be loaded
-        expected_calls = [
-            call(Filename="path/to/new_param.nxs", OutputWorkspace="new_param"),
-            call(Filename="path/to/extra_param.nxs", OutputWorkspace="extra_param"),
-        ]
-
-        mock_load.assert_has_calls(expected_calls)
-
-        mock_update_ws_info.assert_called_once()
-        mock_read_col.assert_called_once()
-
-        self.assertTrue(len(self.presenter.unassigned_wss) == 0)
-        self.assertTrue(len(self.presenter.unassigned_params) == 0)  # don't want extra param to be waiting
-        self.assertTrue(self.presenter.ws_assignments["ws2"] == "new_param")
-        self.assertTrue(self.presenter.param_assignments["new_param"] == "ws2")
-
-    def test_assign_unpaired_wss_and_params_pairs_correctly(self):
-        self.presenter.unassigned_wss = ["ws1", "ws2"]
-        self.presenter.unassigned_params = ["param1", "param2", "param3"]  # extra param
-        self.presenter.assign_unpaired_wss_and_params()
-
-        self.assertEqual(self.presenter.ws_assignments, {"ws1": "param1", "ws2": "param2"})
-        self.assertEqual(self.presenter.param_assignments, {"param1": "ws1", "param2": "ws2"})
-        self.assertEqual(self.presenter.unassigned_params, [])  # cleared after pairing
-        self.assertEqual(self.presenter.unassigned_wss, [])  # all used
 
     def setup_selection_testing(self):
         self.presenter.ws_names = ["ws1", "ws2"]
@@ -164,33 +151,16 @@ class TestTexturePresenter(unittest.TestCase):
         self.model.set_all_ws_xtal.assert_called_once()
         self.presenter.redraw_table.assert_called_once()
 
-    @patch(dir_path + ".output_settings.get_texture_axes_transform")
-    @patch(dir_path + ".TexturePresenter._get_setting")
-    @patch(dir_path + ".TexturePresenter.calc_pf")
-    def test_on_calc_pf_clicked_starts_worker(self, mock_calc_pf, mock_get_setting, mock_get_tex_ax):
-        self.view.get_selected_workspaces.return_value = (["ws1"], ["param1"])
-        self.view.get_projection_method.return_value = "Stereographic"
-        self.view.get_inc_scatt_power.return_value = True
-        self.presenter.model.parse_hkl.return_value = [1, 1, 1]
-        self.view.get_hkl.return_value = (1, 1, 1)
-        self.view.get_readout_column.return_value = "I"
-        self.presenter.model.get_pf_table_name.return_value = ("output_ws", "GROUP")
-        mock_get_tex_ax.return_value = (np.eye(3), ("d1", "d2"))
-
-        mock_setting_data = {"plot_exp_pf": True, "contour_kernel": "2.0", "cost_func_thresh": 0.1, "peak_pos_thresh": 0.1}
-        mock_get_setting.side_effect = lambda k, *a, **kw: mock_setting_data[k]
-
-        self.presenter.all_wss_have_params = MagicMock(return_value=True)
-        self.presenter.at_least_one_param_assigned = MagicMock(return_value=True)
-        self.presenter.model.check_param_ws_for_columns.return_value = (True, True)
-
-        # Setup mocks for instance methods
-        mock_worker = MagicMock()
+    def test_on_calc_pf_clicked_starts_worker(self):
         self.presenter.set_worker = MagicMock()
+        mock_worker = MagicMock()
         self.presenter.get_worker = MagicMock(return_value=mock_worker)
+        self._setup_default_pf_input()
 
         self.presenter.on_calc_pf_clicked()
 
+        # assert the model values are set
+        self._assert_pf_inputs_set_on_model()
         # Assert set_worker was called with an AsyncTask instance
         self.presenter.set_worker.assert_called_once()
         # Now check the worker.start was called
@@ -206,29 +176,23 @@ class TestTexturePresenter(unittest.TestCase):
         self.presenter._on_worker_error("Something went wrong")
         mock_logger.error.assert_called_once_with("Something went wrong")
 
-    @patch(dir_path + ".output_settings.get_output_path", return_value="/tmp")
+    @patch(dir_path + ".output_settings.get_output_path")
     def test_calc_pf_executes_model_and_plot(self, mock_outpath):
         self.presenter.plot_pf = MagicMock()
         self.presenter.model.make_pole_figure_tables = MagicMock()
-        self.presenter.calc_pf(
-            ["ws1"],
-            ["param1"],
-            "out_ws",
-            [1, 1, 1],
-            "stereographic",
-            True,
-            (0, 0, 0),
-            0.1,
-            0.1,
-            "RB123",
-            [[1, 0, 0], [0, 1, 0], [0, 0, 1]],
-            ("A", "B"),
-            "I",
-            "GROUP",
-            True,
-            2.0,
-        )
-        self.presenter.model.make_pole_figure_tables.assert_called_once()
+        wss = ["test_ws"]
+        params = ["test_params"]
+        save_dirs = ["dir/example"]
+        root_dir, rb, group = "dir", "rb123", "GROUP"
+        mock_outpath.return_value = root_dir
+        self.model.get_rb_num.return_value = rb
+        self.model.get_grouping.return_value = group
+        self.model.get_save_dirs.return_value = save_dirs
+
+        self.presenter.calc_pf(wss, params)
+
+        self.model.get_save_dirs.assert_called_once_with(root_dir, "PoleFigureTables", rb, group)
+        self.model.make_pole_figure_tables.assert_called_once_with(wss, params, save_dirs)
         self.presenter.plot_pf.assert_called_once()
 
     def test_plot_pf_calls_model_and_draws(self):
@@ -237,7 +201,7 @@ class TestTexturePresenter(unittest.TestCase):
         self.view.get_plot_axis.return_value = (fig, canvas)
         self.presenter.model.plot_pole_figure = MagicMock()
 
-        self.presenter.plot_pf("ws", "proj", "", ["/tmp"], True, ("A", "B"), 2.0)
+        self.presenter.plot_pf(["/tmp"])
 
         self.presenter.model.plot_pole_figure.assert_called_once()
         canvas.draw.assert_called_once()
@@ -269,13 +233,6 @@ class TestTexturePresenter(unittest.TestCase):
             mock_get.assert_called_once()
             self.assertEqual(val, "abc")
 
-    def test_all_wss_have_params_and_at_least_one(self):
-        self.presenter.ws_names = ["ws1", "ws2"]
-        self.presenter.param_assignments = {"p1": "ws1", "p2": "ws2"}
-        self.view.get_selected_workspaces.return_value = (["ws1", "ws2"], ["p1", "p2"])
-        self.assertTrue(self.presenter.all_wss_have_params())
-        self.assertTrue(self.presenter.at_least_one_param_assigned())
-
     def test_ws_param_helpers(self):
         self.presenter.ws_assignments = {"ws1": "param1"}
         self.presenter.param_assignments = {"param1": "ws1"}
@@ -289,157 +246,43 @@ class TestTexturePresenter(unittest.TestCase):
         self.presenter.at_least_one_param_assigned = MagicMock(return_value=True)
 
         self.model.read_param_cols.return_value = (["I", "A", "B"], 0)
+        self.model.has_at_least_one_col.return_value = True
         self.presenter.update_readout_column_list()
 
         self.view.populate_readout_column_list.assert_called_once_with(["I", "A", "B"], 0)
         self.view.update_col_select_visibility.assert_called_once_with(True)
 
-
-class TestTextureXtalUIElementEnabling(unittest.TestCase):
-    def setUp(self):
-        self.model = MagicMock()
-        self.view = MagicMock()
-        self.view.get_selected_workspaces.return_value = ([], [])
-        self.view.get_crystal_ws_prop.return_value = ""
-
-        # inputs
-        self.view.finder_cif_file = MagicMock()
-        self.view.lattice_lineedit = MagicMock()
-        self.view.spacegroup_lineedit = MagicMock()
-        self.view.basis_lineedit = MagicMock()
-        self.inputs = (self.view.finder_cif_file, self.view.lattice_lineedit, self.view.spacegroup_lineedit, self.view.basis_lineedit)
-
-        # buttons
-        self.view.btn_setCrystal = MagicMock()
-        self.view.btn_setAllCrystal = MagicMock()
-        self.buttons = (self.view.btn_setCrystal, self.view.btn_setAllCrystal)
-
-        self.presenter = TexturePresenter(self.model, self.view)
-        self.presenter._has_selected_wss = MagicMock()
-
-    # ------ utility funcs ------------
-
-    def set_getter_return_values(self, cif="", lattice="", spacegroup="", basis=""):
+    def test_set_crystal_inputs_enabled(self):
+        # inputs:
+        cif, lattice, spacegroup, basis, ws = "a", "b", "c", "d", "e"  # just give unique strings so we can check methods
         self.view.get_cif.return_value = cif
         self.view.get_lattice.return_value = lattice
         self.view.get_spacegroup.return_value = spacegroup
         self.view.get_basis.return_value = basis
+        self.view.get_crystal_ws_prop.return_value = ws
 
-    def assert_expected_states(self, expected_states_inputs, expected_states_buttons):
-        for i, inp in enumerate(self.inputs):
-            inp.setEnabled.assert_called_with(expected_states_inputs[i])
-        for i, button in enumerate(self.buttons):
-            button.setEnabled.assert_called_with(expected_states_buttons[i])
+        # model mocks
+        has_cif, has_any_latt, has_xtal_and_ws, set_all_enabled = MagicMock(), MagicMock(), MagicMock(), MagicMock()
+        self.model.has_cif.return_value = has_cif
+        self.model.has_any_latt.return_value = has_any_latt
+        self.model.has_xtal_and_ws.return_value = has_xtal_and_ws
+        self.model.can_set_all_crystal.return_value = set_all_enabled
 
-    # -------- tests ------------
-
-    def test_no_ws_no_inputs_all_inputs_enabled_all_buttons_disabled(self):
-        # set view state
-        self.set_getter_return_values()
-
-        # call the method to set what is enabled
+        # run method
         self.presenter.set_crystal_inputs_enabled()
 
-        # check element setter calls
-        expected_states_inputs = [True, True, True, True]  # cif, lattice, space group, basis
-        expected_states_buttons = [False, False]  # Set Crystal, Set Crystal to All
-        self.assert_expected_states(expected_states_inputs, expected_states_buttons)
+        # assert func calls
+        self.model.has_cif.assert_called_with(cif)
+        self.model.has_any_latt.assert_called_with(lattice, spacegroup, basis)
+        self.model.has_xtal_and_ws.assert_called_with(lattice, spacegroup, basis, cif, ws)
 
-    def test_cif_set_disables_lattice_no_wss_still_have_buttons_off(self):
-        # set view state
-        self.presenter._has_selected_wss.return_value = False
-        self.set_getter_return_values(cif="test.cif")
-
-        # call the method to set what is enabled
-        self.presenter.set_crystal_inputs_enabled()
-
-        # check element setter calls
-        expected_states_inputs = [True, False, False, False]  # cif, lattice, space group, basis
-        expected_states_buttons = [False, False]  # Set Crystal, Set Crystal to All
-        self.assert_expected_states(expected_states_inputs, expected_states_buttons)
-
-    def test_just_lattice_set_disables_cif_no_wss_still_have_buttons_off(self):
-        # set view state
-        self.presenter._has_selected_wss.return_value = False
-        self.set_getter_return_values(lattice="1.0    1.0    1.0")
-
-        # call the method to set what is enabled
-        self.presenter.set_crystal_inputs_enabled()
-
-        # check element setter calls
-        expected_states_inputs = [False, True, True, True]  # cif, lattice, space group, basis
-        expected_states_buttons = [False, False]  # Set Crystal, Set Crystal to All
-        self.assert_expected_states(expected_states_inputs, expected_states_buttons)
-
-    def test_cif_set_disables_lattice_but_ref_ws_and_no_selected_wss_only_enables_set_xtal_not_set_xtal_to_all(self):
-        # set view state
-        self.presenter._has_selected_wss.return_value = False
-        self.set_getter_return_values(cif="test.cif")
-        self.view.get_crystal_ws_prop.return_value = "ref_ws"
-
-        # call the method to set what is enabled
-        self.presenter.set_crystal_inputs_enabled()
-
-        # check element setter calls
-        expected_states_inputs = [True, False, False, False]  # cif, lattice, space group, basis
-        expected_states_buttons = [True, False]  # Set Crystal, Set Crystal to All
-        self.assert_expected_states(expected_states_inputs, expected_states_buttons)
-
-    def test_only_lattice_set_disables_cif_but_ref_ws_and_no_selected_wss_doesnt_enable_set_xtal_nor_set_xtal_to_all(self):
-        # set view state
-        self.presenter._has_selected_wss.return_value = False
-        self.set_getter_return_values(lattice="1.0    1.0    1.0")
-        self.view.get_crystal_ws_prop.return_value = "ref_ws"
-
-        # call the method to set what is enabled
-        self.presenter.set_crystal_inputs_enabled()
-
-        # check element setter calls
-        expected_states_inputs = [False, True, True, True]  # cif, lattice, space group, basis
-        expected_states_buttons = [False, False]  # Set Crystal, Set Crystal to All
-        self.assert_expected_states(expected_states_inputs, expected_states_buttons)
-
-    def test_all_lattice_inps_set_disables_cif_but_ref_ws_and_no_selected_wss_only_enables_set_xtal_not_set_xtal_to_all(self):
-        # set view state
-        self.presenter._has_selected_wss.return_value = False
-        self.set_getter_return_values(lattice="1.0    1.0    1.0", spacegroup="P1", basis="Fe 0 0 0 1 1")
-        self.view.get_crystal_ws_prop.return_value = "ref_ws"
-
-        # call the method to set what is enabled
-        self.presenter.set_crystal_inputs_enabled()
-
-        # check element setter calls
-        expected_states_inputs = [False, True, True, True]  # cif, lattice, space group, basis
-        expected_states_buttons = [True, False]  # Set Crystal, Set Crystal to All
-        self.assert_expected_states(expected_states_inputs, expected_states_buttons)
-
-    def test_all_lattice_inps_set_disables_cif_with_ref_ws_and_selected_wss_enables_set_xtal_and_set_xtal_to_all(self):
-        # set view state
-        self.presenter._has_selected_wss.return_value = True
-        self.set_getter_return_values(lattice="1.0    1.0    1.0", spacegroup="P1", basis="Fe 0 0 0 1 1")
-        self.view.get_crystal_ws_prop.return_value = "ref_ws"
-
-        # call the method to set what is enabled
-        self.presenter.set_crystal_inputs_enabled()
-
-        # check element setter calls
-        expected_states_inputs = [False, True, True, True]  # cif, lattice, space group, basis
-        expected_states_buttons = [True, True]  # Set Crystal, Set Crystal to All
-        self.assert_expected_states(expected_states_inputs, expected_states_buttons)
-
-    def test_cif_set_disables_lattice_with_ref_ws_and_selected_wss_enables_set_xtal_and_set_xtal_to_all(self):
-        # set view state
-        self.presenter._has_selected_wss.return_value = True
-        self.set_getter_return_values(cif="test.cif")
-        self.view.get_crystal_ws_prop.return_value = "ref_ws"
-
-        # call the method to set what is enabled
-        self.presenter.set_crystal_inputs_enabled()
-
-        # check element setter calls
-        expected_states_inputs = [True, False, False, False]  # cif, lattice, space group, basis
-        expected_states_buttons = [True, True]  # Set Crystal, Set Crystal to All
-        self.assert_expected_states(expected_states_inputs, expected_states_buttons)
+        # assert setEnabled calls
+        self.view.finder_cif_file.setEnabled.assert_called_with(not has_any_latt)
+        self.view.lattice_lineedit.setEnabled.assert_called_with(not has_cif)
+        self.view.spacegroup_lineedit.setEnabled.assert_called_with(not has_cif)
+        self.view.basis_lineedit.setEnabled.assert_called_with(not has_cif)
+        self.view.btn_setCrystal.setEnabled.assert_called_with(has_xtal_and_ws)
+        self.view.btn_setAllCrystal.setEnabled.assert_called_with(set_all_enabled)
 
 
 if __name__ == "__main__":
