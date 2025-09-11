@@ -43,7 +43,8 @@ public:
                                      const std::string binningUnits = "dSpacing", const double timeMin = -1.,
                                      const double timeMax = -1., const bool should_throw = false,
                                      TableWorkspace_sptr tablesplitter = nullptr, const bool relativeTime = false,
-                                     const int splitterTarget = -1, const bool filterBadPulses = false) {
+                                     const int splitterTarget = -1, const bool filterBadPulses = false,
+                                     const std::string blockLogList = "") {
     const std::string wksp_name("VULCAN");
 
     std::cout << "==================> " << filename << '\n';
@@ -63,6 +64,8 @@ public:
       TS_ASSERT_THROWS_NOTHING(alg.setProperty("XMax", xmax));
     if (!xdelta.empty())
       TS_ASSERT_THROWS_NOTHING(alg.setProperty("XDelta", xdelta));
+    if (!blockLogList.empty())
+      TS_ASSERT_THROWS_NOTHING(alg.setProperty("LogBlockList", blockLogList));
     if (timeMin > 0.)
       TS_ASSERT_THROWS_NOTHING(alg.setProperty("FilterByTimeStart", timeMin));
     if (timeMax > 0.)
@@ -259,6 +262,28 @@ public:
       TS_ASSERT_DELTA(outputWS->readX(i).front(), 13000., 1e-5);
       TS_ASSERT_DELTA(outputWS->readX(i).back(), 36000., 1e-5);
     }
+  }
+
+  void test_load_nexus_logs() {
+    const double xmin{0.};
+    const double xmax{50000.};
+    MatrixWorkspace_sptr outputWS =
+        run_algorithm("VULCAN_218062.nxs.h5", std::vector<double>{xmin}, std::vector<double>{xmax},
+                      std::vector<double>{xmax}, "Linear", "TOF", 0, 300, false, nullptr, false, -1, false, "skf*");
+
+    // verify the output
+    TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 6);
+    TS_ASSERT(outputWS->isCommonBins());
+    TS_ASSERT_EQUALS(outputWS->blocksize(), 1);
+    TS_ASSERT_EQUALS(outputWS->getAxis(0)->unit()->unitID(), "TOF");
+    for (size_t i = 0; i < outputWS->getNumberHistograms(); ++i) {
+      TS_ASSERT_DELTA(outputWS->readX(i).front(), xmin, 1e-5);
+      TS_ASSERT_DELTA(outputWS->readX(i).back(), xmax, 1e-5);
+    }
+    // check some logs
+    TS_ASSERT(outputWS->run().hasProperty("run_number"));
+    TS_ASSERT(!outputWS->run().hasProperty("skf2"));
+    TS_ASSERT(!outputWS->run().hasProperty("skf3"));
   }
 
   void test_start_stop_time_filtering() {

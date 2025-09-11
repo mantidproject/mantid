@@ -35,6 +35,7 @@
 #include <H5Cpp.h>
 #include <numbers>
 #include <regex>
+#include <vector>
 
 namespace Mantid::DataHandling::AlignAndFocusPowderSlim {
 using Mantid::API::FileProperty;
@@ -70,6 +71,8 @@ const std::string BINMODE("BinningMode");
 const std::string OUTPUT_WKSP("OutputWorkspace");
 const std::string READ_SIZE_FROM_DISK("ReadSizeFromDisk");
 const std::string EVENTS_PER_THREAD("EventsPerThread");
+const std::string ALLOW_LOGS("LogAllowList");
+const std::string BLOCK_LOGS("LogBlockList");
 } // namespace PropertyNames
 
 const std::string LOG_CHARGE_NAME("proton_charge");
@@ -194,6 +197,10 @@ void AlignAndFocusPowderSlim::init() {
                   "The units of the input X min, max and delta values. Output will always be TOF");
   declareProperty(std::make_unique<EnumeratedStringProperty<BinningMode, &binningModeNames>>(PropertyNames::BINMODE),
                   "Specify binning behavior ('Logarithmic')");
+  declareProperty(std::make_unique<ArrayProperty<std::string>>(PropertyNames::ALLOW_LOGS),
+                  "If specified, only these logs will be loaded from the file");
+  declareProperty(std::make_unique<ArrayProperty<std::string>>(PropertyNames::BLOCK_LOGS),
+                  "If specified, these logs will not be loaded from the file");
   declareProperty(
       std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(PropertyNames::OUTPUT_WKSP, "", Direction::Output),
       "An output workspace.");
@@ -225,6 +232,7 @@ std::map<std::string, std::string> AlignAndFocusPowderSlim::validateInputs() {
     errors[PropertyNames::EVENTS_PER_THREAD] = msg;
   }
 
+  // validate binning information is consistent with each other
   const std::vector<double> xmins = getProperty(PropertyNames::X_MIN);
   const std::vector<double> xmaxs = getProperty(PropertyNames::X_MAX);
   const std::vector<double> deltas = getProperty(PropertyNames::X_DELTA);
@@ -243,6 +251,12 @@ std::map<std::string, std::string> AlignAndFocusPowderSlim::validateInputs() {
 
   if (!(numMax == 1 || numMax == NUM_HIST))
     errors[PropertyNames::X_MAX] = "Must have 1 or 6 values";
+
+  // only specify allow or block list for logs
+  if ((!isDefault(PropertyNames::ALLOW_LOGS)) && (!isDefault(PropertyNames::BLOCK_LOGS))) {
+    errors[PropertyNames::ALLOW_LOGS] = "Cannot specify both allow and block lists";
+    errors[PropertyNames::BLOCK_LOGS] = "Cannot specify both allow and block lists";
+  }
 
   return errors;
 }
@@ -320,8 +334,11 @@ void AlignAndFocusPowderSlim::exec() {
   // load logs
   this->progress(.12, "Loading logs");
   auto periodLog = std::make_unique<const TimeSeriesProperty<int>>("period_log"); // not used
+  const std::vector<std::string> &allow_logs = getProperty(PropertyNames::ALLOW_LOGS);
+  const std::vector<std::string> &block_logs = getProperty(PropertyNames::BLOCK_LOGS);
   int nPeriods{1};
-  LoadEventNexus::runLoadNexusLogs<MatrixWorkspace_sptr>(filename, wksp, *this, false, nPeriods, periodLog);
+  LoadEventNexus::runLoadNexusLogs<MatrixWorkspace_sptr>(filename, wksp, *this, false, nPeriods, periodLog, allow_logs,
+                                                         block_logs);
 
   // determine the pulse indices from the time and splitter workspace
   this->progress(.15, "Determining pulse indices");
