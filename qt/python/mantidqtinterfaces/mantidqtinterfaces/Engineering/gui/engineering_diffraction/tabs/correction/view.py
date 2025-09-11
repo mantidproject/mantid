@@ -288,6 +288,9 @@ class TextureCorrectionView(QtWidgets.QWidget, Ui_texture):
     def include_atten_tab(self):
         return self.check_attenTab.isChecked()
 
+    def set_instrument_override(self, instrument):
+        self.finder_corr.setInstrumentOverride(instrument)
+
     def setup_tabbing_order(self):
         self.finder_corr.focusProxy().setFocusPolicy(QtCore.Qt.StrongFocus)
         self.setTabOrder(self.finder_corr, self.line_orientationFile)

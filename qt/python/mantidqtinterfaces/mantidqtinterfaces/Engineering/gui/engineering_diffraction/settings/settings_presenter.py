@@ -8,9 +8,6 @@
 from os import path
 from mantidqt.utils.observer_pattern import Observable
 from Engineering.EnggUtils import CALIB_DIR
-from mantid.kernel import logger
-from numpy import all, array, concatenate, eye, abs, isclose
-from numpy.linalg import det
 
 DEFAULT_FULL_INST_CALIB = "ENGINX_full_instrument_calibration_193749.nxs"
 GSAS2_PATH_ON_IDAAAS = "/opt/gsas2"
@@ -189,76 +186,6 @@ class SettingsPresenter(object):
     def descending_changed(self, state):
         self.view.set_ascending_checked(not bool(state))
 
-    def validate_gsas2_path(self):
-        # FileFinderWidget doesn't validate that the directory exists if isForDirectory=true (probably to support save
-        # locations where directory gets created on save). So check the GSAS2 path is valid here
-        if not self.validate_path_empty_or_valid(self.view.get_path_to_gsas2()):
-            self.view.finder_path_to_gsas2.setFileProblem("Path does not exist")
-
-    def validate_reference_frame(self):
-        trans_mat = eye(3)
-        try:
-            rd = array([float(x) for x in self.settings["rd_dir"].split(",")])[:, None]
-            nd = array([float(x) for x in self.settings["nd_dir"].split(",")])[:, None]
-            td = array([float(x) for x in self.settings["td_dir"].split(",")])[:, None]
-            trans_mat = concatenate([rd, nd, td], axis=1)
-        except Exception as e:
-            logger.error("Invalid Reference Axes, values must all be able to be converted to floats. " + str(e))
-        if not isclose(abs(det(trans_mat)), 1):
-            logger.warning(
-                "The reference frame defined is not a volume preserving transformation from the standard "
-                "reference frame. This sort of reference frame is not anticipated so may lead to unexpected results"
-            )
-
-    def validate_euler_settings(self):
-        if self.view.get_use_euler_angles():
-            error_msg = ""
-            euler_scheme = self.settings["euler_angles_scheme"]
-            euler_sense = self.settings["euler_angles_sense"]
-            # check sense is comma separated
-            euler_sense_valid, sense_vals, sense_msg = self._validate_euler_sense_string(euler_sense)
-            if not euler_sense_valid:
-                error_msg += sense_msg
-
-            # validate euler_scheme
-            euler_scheme_valid = all([v in ("x", "y", "z") for v in euler_scheme.lower()])
-            if not euler_scheme_valid:
-                error_msg += "Euler Scheme should be defined in terms of X, Y and Z (eg. XYZ or YZY). "
-
-            # check euler_scheme has correct number of corresponding senses
-            sense_scheme_valid = len(euler_scheme) == len(sense_vals)
-            if not sense_scheme_valid:
-                error_msg += "Should be an equal number of Rotation Axes defined as euler senses. "
-            valid = euler_sense_valid and euler_scheme_valid and sense_scheme_valid
-            if not valid:
-                logger.error(error_msg)
-
-    def _validate_euler_sense_string(self, euler_sense):
-        try:
-            sense_vals = [int(x) for x in euler_sense.split(",")]
-            valid = all([v in (1, -1) for v in sense_vals])
-            error_msg = ""
-        except Exception as e:
-            error_msg = "Euler Senses should be comma separated +/-1s. " + str(e)
-            sense_vals = []
-            valid = False
-        return valid, sense_vals, error_msg
-
-    def _validate_convert_to_float(self, setting_name):
-        val = ""
-        try:
-            val = self.settings[setting_name]
-            float(val)
-        except ValueError:
-            logger.error(f"Could not convert {setting_name} value of {val} to a float")
-
-    @staticmethod
-    def validate_path_empty_or_valid(path_to_check):
-        if path_to_check:
-            if not path.exists(path_to_check):
-                return False
-        return True
-
     def save_new_settings(self):
         self._collect_new_settings_from_view()
         self._save_settings_to_file(set_nullables_to_default=False)
@@ -338,52 +265,22 @@ class SettingsPresenter(object):
             self._save_settings_to_file()
         self._find_files()
 
-    def check_and_populate_with_default(self, name):
-        if name not in self.settings or self.settings[name] == "":
-            self.settings[name] = DEFAULT_SETTINGS[name]
+    # def validation intermediates
+
+    def validate_gsas2_path(self):
+        valid, msg = self.model.validate_gsas2_path(self.view.get_path_to_gsas2())
+        if not valid:
+            self.view.finder_path_to_gsas2.setFileProblem(msg)
+
+    def validate_reference_frame(self):
+        self.model.validate_reference_frame(self.settings)
+
+    def validate_euler_settings(self):
+        self.model.validate_euler_settings(self.settings, self.view.get_use_euler_angles())
 
     def _validate_settings(self, set_nullables_to_default=True):
-        for key in list(self.settings):
-            if key not in DEFAULT_SETTINGS.keys():
-                del self.settings[key]
-        self.check_and_populate_with_default("rd_name")
-        self.check_and_populate_with_default("nd_name")
-        self.check_and_populate_with_default("td_name")
-        self.check_and_populate_with_default("rd_dir")
-        self.check_and_populate_with_default("nd_dir")
-        self.check_and_populate_with_default("td_dir")
-        self.validate_reference_frame()
-        self.check_and_populate_with_default("default_peak")
-        if self.settings["default_peak"] not in ALL_PEAKS:
-            self.settings["default_peak"] = DEFAULT_SETTINGS["default_peak"]
-        self.check_and_populate_with_default("full_calibration")
-        if not path.isfile(self.settings["full_calibration"]):
-            self.settings["full_calibration"] = DEFAULT_SETTINGS["full_calibration"]
-        self.check_and_populate_with_default("save_location")
-        self.check_and_populate_with_default("logs")
-
-        if set_nullables_to_default:
-            self.check_and_populate_with_default("primary_log")
-
-        self.check_and_populate_with_default("sort_ascending")
-        self.check_and_populate_with_default("path_to_gsas2")
-        self.check_and_populate_with_default("timeout")
-        self._validate_convert_to_float("timeout")
-        self.check_and_populate_with_default("dSpacing_min")
-        self._validate_convert_to_float("dSpacing_min")
-        self.check_and_populate_with_default("monte_carlo_params")
-        self.check_and_populate_with_default("clear_absorption_ws_after_processing")
-        self.check_and_populate_with_default("cost_func_thresh")
-        self._validate_convert_to_float("cost_func_thresh")
-        self.check_and_populate_with_default("peak_pos_thresh")
-        self._validate_convert_to_float("peak_pos_thresh")
-        self.check_and_populate_with_default("use_euler_angles")
-        self.check_and_populate_with_default("euler_angles_scheme")
-        self.check_and_populate_with_default("euler_angles_sense")
+        self.settings = self.model.validate_settings(self.settings, DEFAULT_SETTINGS, ALL_PEAKS, set_nullables_to_default)
         self.validate_euler_settings()
-        self.check_and_populate_with_default("plot_exp_pf")
-        self.check_and_populate_with_default("contour_kernel")
-        self._validate_convert_to_float("contour_kernel")
 
     def set_euler_options_enabled(self):
         self.view.eulerAngles_lineedit.setEnabled(self.view.get_use_euler_angles())
