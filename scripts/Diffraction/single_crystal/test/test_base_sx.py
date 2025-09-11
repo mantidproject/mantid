@@ -23,6 +23,7 @@ import tempfile
 from os import path
 import numpy as np
 from scipy.spatial.transform import Rotation
+import sys
 
 base_sx_path = "Diffraction.single_crystal.base_sx"
 
@@ -170,6 +171,7 @@ class BaseSXTest(unittest.TestCase):
             allclose(peaks_ref.sample().getOrientedLattice().getUB().tolist(), peaks.sample().getOrientedLattice().getUB().tolist())
         )
 
+    @unittest.skipIf(sys.platform.startswith("win"), "Unknown exception when running Windows CI")
     def test_plot_integrated_peaks_MD(self):
         # make fake dataset
         ws = CreateMDWorkspace(

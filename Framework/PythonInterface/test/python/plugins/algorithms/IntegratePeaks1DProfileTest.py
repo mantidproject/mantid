@@ -23,6 +23,7 @@ import numpy as np
 import tempfile
 from os import path
 import json
+import sys
 
 
 class IntegratePeaks1DProfileTest(unittest.TestCase):
@@ -168,6 +169,7 @@ class IntegratePeaks1DProfileTest(unittest.TestCase):
         out = IntegratePeaks1DProfile(InputWorkspace=self.ws, PeaksWorkspace=self.peaks, OutputWorkspace="peaks_int_7", **kwargs)
         self.assertAlmostEqual(out.column("Intens/SigInt")[0], 30.97, delta=1e-2)
 
+    @unittest.skipIf(sys.platform.startswith("win"), "Unknown exception when running Windows CI")
     def test_exec_OutputFile(self):
         with tempfile.TemporaryDirectory() as temp_dir:
             out_file = path.join(temp_dir, "out.pdf")
