@@ -10,6 +10,7 @@ from mantidqt.utils.qt import load_ui
 from mantid.api import AnalysisDataService as ADS
 from mantid.kernel import UnitFactory
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.show_sample.show_sample_view import ShowSampleView
+from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.data_handling.data_view import create_workspace_table
 
 Ui_texture, _ = load_ui(__file__, "correction_tab.ui")
 
@@ -49,6 +50,8 @@ class TextureCorrectionView(QtWidgets.QWidget, Ui_texture):
         self.populate_workspace_list()
         self.populate_unit_list()
         self.set_default_unit("dSpacing")
+
+        self.table_column_headers = ["Run", "Shape", "Material", "Orientation", "Select"]
 
     # ========== Setup Tool Tips ==========
 
@@ -171,39 +174,34 @@ class TextureCorrectionView(QtWidgets.QWidget, Ui_texture):
 
     # ========== Table Handling ==========
     def populate_workspace_table(self, workspace_info_list):
-        self.table_loaded_data.setColumnCount(5)
-        self.table_loaded_data.setHorizontalHeaderLabels(["Run", "Shape", "Material", "Orientation", "Select"])
-        self.table_loaded_data.setRowCount(len(workspace_info_list))
-
-        header = self.table_loaded_data.horizontalHeader()
-        [header.setSectionResizeMode(ind, QtWidgets.QHeaderView.Stretch) for ind in range(4)]
-        header.setSectionResizeMode(4, QtWidgets.QHeaderView.ResizeToContents)
-
-        # table is formatted with indices Run (0) / Shape (1) / Material (2) / Orientation (3) / Select (4)
+        create_workspace_table(self.table_column_headers, self.table_loaded_data, len(workspace_info_list))
         for row, (ws, metadata) in enumerate(workspace_info_list.items()):
-            # run names:
-            self.table_loaded_data.setItem(row, 0, QtWidgets.QTableWidgetItem(ws))
+            self._add_table_row(row, ws, metadata)
 
-            # shapes:
-            self.show_sample_view.add_show_button_to_table_if_shape(
-                self.sig_view_shape_requested, self.table_loaded_data, ws, row, 1, metadata.get("shape", "Not set") != "Not set"
-            )
+    def _add_table_row(self, row, ws, metadata):
+        # run names:
+        self.table_loaded_data.setItem(row, 0, QtWidgets.QTableWidgetItem(ws))
 
-            # materials:
-            self.table_loaded_data.setItem(row, 2, QtWidgets.QTableWidgetItem(metadata.get("material", "Not set")))
+        # shapes:
+        self.show_sample_view.add_show_button_to_table_if_shape(
+            self.sig_view_shape_requested, self.table_loaded_data, ws, row, 1, metadata.get("shape", "Not set") != "Not set"
+        )
 
-            # orientations:
-            self.table_loaded_data.setItem(row, 3, QtWidgets.QTableWidgetItem(metadata.get("orient", "default")))
+        # materials:
+        self.table_loaded_data.setItem(row, 2, QtWidgets.QTableWidgetItem(metadata.get("material", "Not set")))
 
-            # selected:
-            checkbox = QtWidgets.QCheckBox()
-            checkbox.setChecked(metadata["select"])
-            cell_widget = QtWidgets.QWidget()
-            layout = QtWidgets.QHBoxLayout(cell_widget)
-            layout.addWidget(checkbox)
-            layout.setAlignment(QtCore.Qt.AlignCenter)
-            layout.setContentsMargins(0, 0, 0, 0)
-            self.table_loaded_data.setCellWidget(row, 4, cell_widget)
+        # orientations:
+        self.table_loaded_data.setItem(row, 3, QtWidgets.QTableWidgetItem(metadata.get("orient", "default")))
+
+        # selected:
+        checkbox = QtWidgets.QCheckBox()
+        checkbox.setChecked(metadata["select"])
+        cell_widget = QtWidgets.QWidget()
+        layout = QtWidgets.QHBoxLayout(cell_widget)
+        layout.addWidget(checkbox)
+        layout.setAlignment(QtCore.Qt.AlignCenter)
+        layout.setContentsMargins(0, 0, 0, 0)
+        self.table_loaded_data.setCellWidget(row, 4, cell_widget)
 
     def populate_workspace_list(self):
         workspace_names = list(ADS.getObjectNames())

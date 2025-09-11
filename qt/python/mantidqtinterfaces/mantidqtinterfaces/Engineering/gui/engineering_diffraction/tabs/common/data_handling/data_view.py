@@ -268,3 +268,14 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
         # make TOF default for combo_xunit
         index = self.combo_xunit.findText("TOF")
         self.combo_xunit.setCurrentIndex(index)
+
+
+def create_workspace_table(table_column_headers, table_loaded_data, row_count):
+    n_col = len(table_column_headers)
+    table_loaded_data.setColumnCount(n_col)
+    table_loaded_data.setHorizontalHeaderLabels(table_column_headers)
+    table_loaded_data.setRowCount(row_count)
+
+    header = table_loaded_data.horizontalHeader()
+    [header.setSectionResizeMode(ind, QtWidgets.QHeaderView.Stretch) for ind in range(n_col - 1)]
+    header.setSectionResizeMode(n_col - 1, QtWidgets.QHeaderView.ResizeToContents)
