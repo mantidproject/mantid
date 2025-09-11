@@ -24,6 +24,7 @@ ALG_BAD_PARAMS = {
     "ConvertToMDMinMaxLocal(v1)": ("dEAnalysisMode"),
     "ConvertToMDMinMaxGlobal(v1)": ("dEAnalysisMode"),
     "EstimateDivergence(v1)": ("alpha", "beta0", "beta1"),
+    "FindUBFromScatteringPlane(v1)": ("a", "b", "c", "alpha", "beta", "gamma"),
     "FindUBUsingLatticeParameters(v1)": ("a", "b", "c", "alpha", "beta", "gamma"),
     "FindGlobalBMatrix(v1)": ("a", "b", "c", "alpha", "beta", "gamma"),
     "FindMultipleUMatrices(v1)": ("a", "b", "c", "alpha", "beta", "gamma"),
