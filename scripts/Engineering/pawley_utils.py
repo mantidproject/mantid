@@ -155,7 +155,7 @@ class Phase:
             if self.spgr.isAllowedReflection(hkl_vec):
                 self.hkls.append(hkl_vec)
             else:
-                print(f"Reflection {hkl} not allowed by spacegroup")
+                logger.warning(f"Reflection {hkl} not allowed by spacegroup")
         # sort by descending d-spacing
         self.hkls = [self.hkls[ipk] for ipk in np.argsort(self.calc_dspacings())[::-1]]
 
@@ -206,16 +206,18 @@ class PawleyPattern1D:
 
     def update_profile_function(self):
         self.profile.p = self.profile_params
+        istart = 0
         for iphase, phase in enumerate(self.phases):
             self.profile.p = self.profile_params[iphase]
             # set alatt for phase
             phase.set_params(self.alatt_params[iphase])
             dpks = phase.calc_dspacings()
             for ipk, dpk in enumerate(dpks):
-                self.comp_func[ipk].function.setCentre(dpk)
+                self.comp_func[istart + ipk].function.setCentre(dpk)
                 for par_name, val in self.profile.get_mantid_peak_params(dpk).items():
-                    self.comp_func[ipk][par_name] = val
-                self.comp_func[ipk].function.setIntensity(self.intens[iphase][ipk])
+                    self.comp_func[istart + ipk][par_name] = val
+                self.comp_func[istart + ipk].function.setIntensity(self.intens[iphase][ipk])
+            istart += phase.nhkls()
         if len(self.bg_params) > 0:
             [self.comp_func[len(self.comp_func) - 1].function.setParameter(ipar, par) for ipar, par in enumerate(self.bg_params)]
 
@@ -233,7 +235,7 @@ class PawleyPattern1D:
         istart = 0
         for iphase, phase in enumerate(self.phases):
             npars = phase.nparams()
-            self.alatt_params[iphase] = params[istart:npars]
+            self.alatt_params[iphase] = params[istart : istart + npars]
             istart = istart + npars
         # set peak parameters
         for iphase, phase in enumerate(self.phases):

@@ -128,6 +128,14 @@ class PawleyPattern1DTest(unittest.TestCase):
         # assert total intensity = 1 (default peak intensity is 1, there is only 1 peak and no background)
         self.assertAlmostEqual(trapezoid(ycalc, self.ws.readX(0)), 1.0, delta=1e-5)
 
+    def test_eval_profile_multiple_phases(self):
+        phase2 = Phase.from_alatt(3 * [10.86188], "F d -3 m")  # twice lattice param of silicon
+        phase2.set_hkls([[3, 3, 3], [4, 0, 0]])
+        pawley = PawleyPattern1D(self.ws, [self.phase, phase2], profile=GaussianProfile())
+        ycalc = pawley.eval_profile(pawley.get_free_params())
+        # assert total intensity = 3 (three peaks each of intensity 1)
+        self.assertAlmostEqual(trapezoid(ycalc, self.ws.readX(0)), 3.0, delta=1e-5)
+
     def test_eval_resids(self):
         pawley = PawleyPattern1D(self.ws, [self.phase], profile=GaussianProfile())
         resids = pawley.eval_resids(pawley.get_free_params())
