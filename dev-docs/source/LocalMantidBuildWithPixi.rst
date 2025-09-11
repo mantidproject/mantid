@@ -43,6 +43,10 @@ Add a new pixi environment to your project's ``pyproject.toml`` file:
     DYLD_LIBRARY_PATH = "${MANTID_BUILD_DIR}/bin"      # macOS
     MANTIDPATH = "${MANTID_BUILD_DIR}/bin"
 
+    [tool.pixi.feature.local-mantid.tasks]
+    # Launch local Mantid Workbench with your application
+    launch-local-workbench = { cmd = "cd $MANTID_BUILD_DIR/bin && ./launch_mantidworkbench.sh", description = "Launch local Mantid Workbench with your application available" }
+
 Replace the paths with your actual Mantid build and source directories.
 
 Usage
@@ -64,7 +68,7 @@ Usage
 
    .. code-block:: bash
 
-       pixi run --environment local-mantid python -m workbench
+       pixi run --environment local-mantid launch-local-workbench
 
 Troubleshooting
 ###############
