@@ -62,7 +62,7 @@ void export_PythonObjectProperty() {
 
       // name, default, validator, and direction
       .def(init<const std::string &, const boost::python::object &, IValidator_sptr, const unsigned int>(
-          (arg("self"), arg("name"), arg("defaultValue"), arg("validator") = IValidator_sptr(new NullValidator),
+          (arg("self"), arg("name"), arg("defaultValue"), arg("validator") = std::make_shared<NullValidator>(),
            arg("direction") = Direction::Input),
           "Construct a PythonObjectProperty with a default value and validator"))
 

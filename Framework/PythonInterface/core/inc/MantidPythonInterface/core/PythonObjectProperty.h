@@ -88,12 +88,6 @@ public:
       : BaseClass(name, PythonObject(), std::make_shared<NullValidator>(), direction) {}
 
   /** Constructor from which you can set the property's values through a string:
-   *
-   * Inherits from the constructor of PropertyWithValue specifically made to
-   * handle a list
-   * of numeric values in a string format so that initial value is set
-   * correctly.
-   *
    *  @param name ::      The name to assign to the property
    *  @param strvalue ::     A string which will set the property being stored
    *  @param validator :: The validator to use for this property, if required

@@ -3,23 +3,20 @@
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
-// SPDX - License - Identifier: GPL - 3.0 +
+// SPDX - License - Identifier: GPL-3.0 +
 #include "MantidPythonInterface/core/PythonObjectProperty.h"
+#include "MantidJson/Json.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/PropertyWithValue.hxx"
 #include "MantidKernel/PropertyWithValueJSON.h"
 #include "MantidPythonInterface/core/GlobalInterpreterLock.h"
 #include "MantidPythonInterface/core/IsNone.h"
 
-#include <boost/python/call_method.hpp>
 #include <boost/python/dict.hpp>
 #include <boost/python/errors.hpp>
-#include <boost/python/exec.hpp>
 #include <boost/python/extract.hpp>
 #include <boost/python/import.hpp>
 #include <boost/python/list.hpp>
-
-#include <iostream>
 
 namespace {
 namespace bp = boost::python;
@@ -112,8 +109,7 @@ using Kernel::Exception::NotImplementedError;
 std::string PythonObjectProperty::getDefault() const { return ""; }
 
 /** Set the property value.
- *  Also tries to create the function with FunctionFactory.
- *  @param value :: The function definition string.
+ *  @param value :: The object definition string.
  *  @return Error message, or "" on success.
  */
 std::string PythonObjectProperty::setValue(PythonObject const &value) {
@@ -126,7 +122,7 @@ std::string PythonObjectProperty::setValue(PythonObject const &value) {
   return ret;
 }
 
-/** Set the propety value..
+/** Set the propety value.
  *  @param value :: The value of the property as a string.
  *  @return Error message, or "" on success.
  */
@@ -154,20 +150,21 @@ std::string PythonObjectProperty::setValue(std::string const &value) {
   // use the assignment operator, which also calls the validator
   try {
     *this = newVal;
-  } catch (std::invalid_argument &except) {
+  } catch (std::invalid_argument const &except) {
     ret = except.what();
   }
   return ret;
 }
 
 /**
- * Assumes the Json object is a string and parses it to create the function
+ * Assumes the Json object is a string and parses it to create the object
  * @param value A Json::Value containing a string
  * @return An empty string indicating success otherwise the string will contain
  * the value of the error.
  */
-std::string PythonObjectProperty::setValueFromJson(const Json::Value &) {
-  throw NotImplementedError("PythonObjectProperty::setValueFromJson(const Json::Value &value)");
+std::string PythonObjectProperty::setValueFromJson(const Json::Value &json) {
+  std::string jsonstr = JsonHelpers::jsonToString(json);
+  setValue(jsonstr);
 }
 
 std::string PythonObjectProperty::setDataItem(const std::shared_ptr<Kernel::DataItem> &) {

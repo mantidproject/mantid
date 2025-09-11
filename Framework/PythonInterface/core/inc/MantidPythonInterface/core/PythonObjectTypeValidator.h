@@ -1,6 +1,6 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
-// Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
+// Copyright &copy; 2025 ISIS Rutherford Appleton Laboratory UKRI,
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
@@ -24,7 +24,7 @@ class Value;
 
 namespace {
 using namespace boost::python;
-object const &validate_python_class(object const &pyclass) {
+static inline object const &validate_python_class(object const &pyclass) {
   if (PyType_Check(pyclass.ptr())) {
     return pyclass;
   } else {
@@ -41,7 +41,7 @@ using Mantid::Kernel::IValidator_sptr;
 class MANTID_PYTHONINTERFACE_CORE_DLL PythonObjectTypeValidator : public Mantid::Kernel::IValidator {
 
 public:
-  PythonObjectTypeValidator() : pythonClass() {};
+  PythonObjectTypeValidator() : pythonClass(object()) {};
 
   PythonObjectTypeValidator(object const &pyclass) : pythonClass(validate_python_class(pyclass)) {}
 
@@ -59,13 +59,18 @@ private:
     } catch (...) {
       return "Attempting to run a python type validator on an object that is not a python object";
     }
-    if (PyObject_IsInstance(obj.ptr(), pythonClass.ptr())) {
-      return "";
-    } else {
+    std::string ret();
+    int check = PyObject_IsInstance(obj.ptr(), pythonClass.ptr());
+    if (check < 0) {
+      // this represents an internal error while checking type
+      PyErr_Clear();
+      ret = "Failed to check instance type";
+    } else if (check == 0) {
       std::string objclassname = extract<std::string>(obj.attr("__class__").attr("__name__"));
       std::string classname = extract<std::string>(pythonClass.attr("__name__"));
-      return std::string("The passed object is of type ") + objclassname + std::string(" and not of type ") + classname;
+      ret = std::string("The passed object is of type ") + objclassname + std::string(" and not of type ") + classname;
     }
+    return ret;
   }
 };
 
