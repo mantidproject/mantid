@@ -2,7 +2,7 @@ import unittest
 from unittest.mock import patch, create_autospec
 from numpy import allclose, sqrt, log, linspace, zeros_like, ones, trapezoid, array
 from numpy.testing import assert_array_equal, assert_array_almost_equal
-from mantid.api import AnalysisDataService
+from mantid.api import AnalysisDataService, FileFinder
 from mantid.simpleapi import CreateWorkspace, FlatBackground
 from mantid.geometry import CrystalStructure
 from Engineering.pawley_utils import Phase, GaussianProfile, PVProfile, PawleyPattern1D, PawleyPattern2D
@@ -152,9 +152,8 @@ class PawleyPattern1DTest(unittest.TestCase):
 class PawleyPattern2DTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.ws = load_poldi(
-            "poldi_448x500_chopper5k_silicon.txt", "POLDI_Definition_448_calibrated.xml", chopper_speed=5000, t0=5.855e-02, t0_const=-9.00
-        )
+        fpath_data = FileFinder.getFullPath("poldi_448x500_chopper5k_silicon.txt")  # for np.loadtxt so need full path
+        cls.ws = load_poldi(fpath_data, "POLDI_Definition_448_calibrated.xml", chopper_speed=5000, t0=5.855e-02, t0_const=-9.00)
 
     @classmethod
     def tearDownClass(cls):
