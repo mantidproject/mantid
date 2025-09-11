@@ -176,21 +176,26 @@ class TextureCorrectionView(QtWidgets.QWidget, Ui_texture):
         self.table_loaded_data.setRowCount(len(workspace_info_list))
 
         header = self.table_loaded_data.horizontalHeader()
-        header.setSectionResizeMode(0, QtWidgets.QHeaderView.Stretch)
-        header.setSectionResizeMode(1, QtWidgets.QHeaderView.Stretch)
-        header.setSectionResizeMode(2, QtWidgets.QHeaderView.Stretch)
-        header.setSectionResizeMode(3, QtWidgets.QHeaderView.Stretch)
+        [header.setSectionResizeMode(ind, QtWidgets.QHeaderView.Stretch) for ind in range(4)]
         header.setSectionResizeMode(4, QtWidgets.QHeaderView.ResizeToContents)
 
+        # table is formatted with indices Run (0) / Shape (1) / Material (2) / Orientation (3) / Select (4)
         for row, (ws, metadata) in enumerate(workspace_info_list.items()):
+            # run names:
             self.table_loaded_data.setItem(row, 0, QtWidgets.QTableWidgetItem(ws))
-            self.table_loaded_data.setItem(row, 2, QtWidgets.QTableWidgetItem(metadata.get("material", "Not set")))
-            self.table_loaded_data.setItem(row, 3, QtWidgets.QTableWidgetItem(metadata.get("orient", "default")))
 
+            # shapes:
             self.show_sample_view.add_show_button_to_table_if_shape(
                 self.sig_view_shape_requested, self.table_loaded_data, ws, row, 1, metadata.get("shape", "Not set") != "Not set"
             )
 
+            # materials:
+            self.table_loaded_data.setItem(row, 2, QtWidgets.QTableWidgetItem(metadata.get("material", "Not set")))
+
+            # orientations:
+            self.table_loaded_data.setItem(row, 3, QtWidgets.QTableWidgetItem(metadata.get("orient", "default")))
+
+            # selected:
             checkbox = QtWidgets.QCheckBox()
             checkbox.setChecked(metadata["select"])
             cell_widget = QtWidgets.QWidget()
