@@ -8,8 +8,6 @@
 from mantidqt.utils.asynchronous import AsyncTask
 from mantidqt.utils.observer_pattern import GenericObservable
 from mantid.kernel import logger
-from mantid.api import AnalysisDataService as ADS
-from mantid.simpleapi import Load
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import output_settings
 from Engineering.common.calibration_info import CalibrationInfo
@@ -17,7 +15,6 @@ from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common impo
     INSTRUMENT_DICT,
     CalibrationObserver,
 )
-import os
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.show_sample.show_sample_presenter import ShowSamplePresenter
 
 
@@ -79,37 +76,20 @@ class TexturePresenter:
 
     def load_ws_files(self):
         filenames = self.view.finder_texture_ws.getFilenames()
-
-        for path in filenames:
-            ws_name = os.path.splitext(os.path.basename(path))[0]
-            if ADS.doesExist(ws_name):
-                logger.notice(f'A workspace "{ws_name}" already exists, loading {path} has been skipped')
-            else:
-                try:
-                    Load(Filename=path, OutputWorkspace=ws_name)
-                except Exception as e:
-                    logger.warning(f"Failed to load {path}: {e}")
-                    continue
+        ws_names = self.model.load_files(filenames)
+        for ws_name in ws_names:
             if ws_name not in self.ws_names:
                 self.ws_names.append(ws_name)
             if not self.ws_has_param(ws_name):
                 self.unassigned_wss.append(ws_name)
-
         self.redraw_table()
 
     def load_param_files(self):
         filenames = self.view.finder_texture_tables.getFilenames()
-
-        for path in filenames:
-            param = os.path.splitext(os.path.basename(path))[0]
-            try:
-                Load(Filename=path, OutputWorkspace=param)
-            except Exception as e:
-                logger.warning(f"Failed to load {path}: {e}")
-                continue
+        params = self.model.load_files(filenames)
+        for param in params:
             if not self.param_has_ws(param):
                 self.unassigned_params.append(param)
-
         self.redraw_table()
 
     def delete_selected_files(self):
@@ -147,25 +127,21 @@ class TexturePresenter:
                 self.unassigned_wss.append(assigned_ws)
 
     def assign_unpaired_wss_and_params(self):
-        while (len(self.unassigned_params) > 0) and (len(self.unassigned_wss) > 0):
-            ws = self.unassigned_wss.pop(0)
-            param = self.unassigned_params.pop(0)
-            self.ws_assignments[ws] = param
-            self.param_assignments[param] = ws
-        # don't want to keep an unseen stack of unassigned parameter files
-        self.unassigned_params = []
+        (self.unassigned_wss, self.unassigned_params, self.ws_assignments, self.param_assignments) = (
+            self.model.assign_unpaired_wss_and_params(
+                self.unassigned_wss, self.unassigned_params, self.ws_assignments, self.param_assignments
+            )
+        )
 
     def all_wss_have_params(self):
-        selected_wss, selected_params = self.view.get_selected_workspaces()
-        valid_params = [p for p in selected_params if p != "Not set"]
-        return len(selected_wss) == len(valid_params) and len(selected_wss) > 0
+        return self.model.all_wss_have_params(*self.view.get_selected_workspaces())
 
     def at_least_one_param_assigned(self):
-        return len(self.get_assigned_params()) > 0
+        return self.model.at_least_one_param_assigned(self.get_assigned_params())
 
     def _has_selected_wss(self):
         selected_wss, _ = self.view.get_selected_workspaces()
-        return len(selected_wss) > 0
+        return self.model.has_selected_wss(selected_wss)
 
     # ----- Table logic -----------------
 
@@ -195,15 +171,6 @@ class TexturePresenter:
         self.model.set_all_ws_xtal(wss, self.view.get_lattice(), self.view.get_spacegroup(), self.view.get_basis(), self.view.get_cif())
         self.redraw_table()
 
-    def _has_latt(self):
-        return self.view.get_lattice() != "" and self.view.get_spacegroup() != "" and self.view.get_basis() != ""
-
-    def _has_any_latt(self):
-        return self.view.get_lattice() != "" or self.view.get_spacegroup() != "" or self.view.get_basis() != ""
-
-    def _has_cif(self):
-        return self.view.get_cif() != ""
-
     # --------- Pole Figure Logic --------------------------
 
     def on_calc_pf_clicked(self):
@@ -212,22 +179,31 @@ class TexturePresenter:
         if len(wss) > 0:
             # remove any 'not set' parameters workspaces from the list
             params = [p for p in params if p != "Not set"]
-            projection_method = self.view.get_projection_method()
-            inc_scatt = self.view.get_inc_scatt_power()
-            hkl = self.model.parse_hkl(*self.view.get_hkl()) if inc_scatt else None
-            readout_col = self.view.get_readout_column()
-            out_ws, grouping = self.model.get_pf_table_name(wss, params, hkl, readout_col)
-            ax_transform, ax_labels = output_settings.get_texture_axes_transform()
-            plot_exp = self._get_setting("plot_exp_pf", bool)
-            contour_kernel = float(self._get_setting("contour_kernel", str))
 
-            # default for now
-            scat_vol_pos = (0.0, 0.0, 0.0)
+            # set all the parameters from the view onto the model
+            self.model.set_projection_method(self.view.get_projection_method())
+            self.model.set_inc_scatt(self.view.get_inc_scatt_power())
+            self.model.set_hkl(self.view.get_hkl())
+            self.model.set_readout_col(self.view.get_readout_column())
+            self.model.set_out_ws_and_grouping(wss, params)
+            ax_transform, ax_labels = self._get_ax_data()
+            self.model.set_ax_trans(ax_transform)
+            self.model.set_ax_labels(ax_labels)
+            self.model.set_plot_exp(self._get_setting("plot_exp_pf", bool))
+            self.model.set_contour_kernel(float(self._get_setting("contour_kernel", str)))
+
+            # default scattering pos for now
+            self.model.set_scat_vol_pos((0.0, 0.0, 0.0))
+
+            # get the threshold values from the view
             has_chi2_col, has_x0_col = False, False
             if self.all_wss_have_params() and self.at_least_one_param_assigned():
                 has_chi2_col, has_x0_col = self.model.check_param_ws_for_columns(params)
             chi2_thresh = self._get_setting("cost_func_thresh") if has_chi2_col else 0.0
             peak_thresh = self._get_setting("peak_pos_thresh") if has_x0_col else 0.0
+
+            self.model.set_chi2_thresh(chi2_thresh)
+            self.model.set_peak_thresh(peak_thresh)
 
             self.set_worker(
                 AsyncTask(
@@ -235,20 +211,6 @@ class TexturePresenter:
                     (
                         wss,
                         params,
-                        out_ws,
-                        hkl,
-                        projection_method,
-                        inc_scatt,
-                        scat_vol_pos,
-                        chi2_thresh,
-                        peak_thresh,
-                        self.rb_num,
-                        ax_transform,
-                        ax_labels,
-                        readout_col,
-                        grouping,
-                        plot_exp,
-                        contour_kernel,
                     ),
                     error_cb=self._on_worker_error,
                     finished_cb=self._on_worker_success,
@@ -256,6 +218,9 @@ class TexturePresenter:
             )
             self.worker = self.get_worker()
             self.worker.start()
+
+    def _get_ax_data(self):
+        return output_settings.get_texture_axes_transform()
 
     def set_worker(self, worker):
         self.worker = worker
@@ -267,27 +232,11 @@ class TexturePresenter:
         self,
         wss,
         params,
-        out_ws,
-        hkl,
-        projection_method,
-        inc_scatt,
-        scat_vol_pos,
-        chi2_thresh,
-        peak_thresh,
-        rb_num,
-        ax_transform,
-        ax_labels,
-        readout_col,
-        grouping,
-        plot_exp,
-        contour_kernel,
     ):
         root_dir = output_settings.get_output_path()
-        save_dirs = self.model.get_save_dirs(root_dir, "PoleFigureTables", rb_num, grouping)
-        self.model.make_pole_figure_tables(
-            wss, params, out_ws, hkl, inc_scatt, scat_vol_pos, chi2_thresh, peak_thresh, save_dirs, ax_transform, readout_col
-        )
-        self.plot_pf(out_ws, projection_method, readout_col, save_dirs, plot_exp, ax_labels, contour_kernel)
+        save_dirs = self.model.get_save_dirs(root_dir, "PoleFigureTables", self.model.get_rb_num(), self.model.get_grouping())
+        self.model.make_pole_figure_tables(wss, params, save_dirs)
+        self.plot_pf(save_dirs)
 
     def _on_worker_success(self):
         self.correction_notifier.notify_subscribers("Pole Figure Created")
@@ -295,25 +244,22 @@ class TexturePresenter:
     def _on_worker_error(self, error_info):
         logger.error(str(error_info))
 
-    def plot_pf(self, pf_ws, proj, readout_col, save_dirs, plot_exp, ax_labels, contour_kernel):
+    def plot_pf(self, save_dirs):
         # Get figure and canvas from view
         fig, canvas = self.view.get_plot_axis()
 
         # Clear existing figure
         fig.clf()
 
-        # if no column specified, should default to I
-        readout_col = "I" if readout_col == "" else readout_col
-
         self.model.plot_pole_figure(
-            pf_ws,
-            proj,
+            self.model.out_ws,
+            self.model.projection_method,
             fig=fig,
-            readout_col=readout_col,
+            readout_col=self.model.readout_col,
             save_dirs=save_dirs,
-            plot_exp=plot_exp,
-            ax_labels=ax_labels,
-            contour_kernel=contour_kernel,
+            plot_exp=self.model.plot_exp,
+            ax_labels=self.model.ax_labels,
+            contour_kernel=self.model.contour_kernel,
         )
 
         canvas.draw()
@@ -356,25 +302,25 @@ class TexturePresenter:
         ws_info = {}
         selected_ws, _ = self.view.get_selected_workspaces()
         for pos_ind, ws_name in enumerate(self.ws_names):
-            param = self.ws_assignments[ws_name] if self.ws_has_param(ws_name) else "Not set"
+            param = self.model.get_param_from_ws(ws_name, self.ws_assignments)
             ws_info[ws_name] = self.model.get_ws_info(ws_name, param, ws_name in selected_ws)  # maintain state of selected boxes
         self.ws_info = ws_info
 
     def update_readout_column_list(self):
         params = self.get_assigned_params()
         show_col = False
-        # only if all wss have param files should plotting with a column readout be an option
+        # only if all wss have param files plotting with a column readout should be an option
         if self.all_wss_have_params() and self.at_least_one_param_assigned():
             col_list, starting_index = self.model.read_param_cols(params[0])
             self.view.populate_readout_column_list(col_list, starting_index)
             # only have the option to pick a column if columns are present
-            show_col = len(col_list) > 0
+            show_col = self.model.has_at_least_one_col(col_list)
         self.view.update_col_select_visibility(show_col)
 
     def set_crystal_inputs_enabled(self):
         # inputs:
-        has_cif = self._has_cif()
-        has_any_latt = self._has_any_latt()
+        has_cif = self.model.has_cif(self.view.get_cif())
+        has_any_latt = self.model.has_any_latt(self.view.get_lattice(), self.view.get_spacegroup(), self.view.get_basis())
 
         # if any input in the lattice parameters field, disable the cif file search
         self.view.finder_cif_file.setEnabled(not has_any_latt)
@@ -386,10 +332,8 @@ class TexturePresenter:
 
         # buttons:
         # to set crystal need either a cif OR lattice params AND a ws to apply it to
-        enabled = (self._has_latt() or has_cif) and self.view.get_crystal_ws_prop() != ""
+        enabled = self.model.has_xtal_and_ws(
+            self.view.get_lattice(), self.view.get_spacegroup(), self.view.get_basis(), self.view.get_cif(), self.view.get_crystal_ws_prop()
+        )
         self.view.btn_setCrystal.setEnabled(enabled)
-        self.view.btn_setAllCrystal.setEnabled(enabled)
-
-        # additionally, to set to all, must be some selected wss
-        if enabled:
-            self.view.btn_setAllCrystal.setEnabled(self._has_selected_wss())
+        self.view.btn_setAllCrystal.setEnabled(self.model.can_set_all_crystal(enabled, self._has_selected_wss()))
