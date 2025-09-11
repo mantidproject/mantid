@@ -38,6 +38,7 @@ set(INC_FILES
     inc/MantidPythonInterface/core/PythonLoggingChannel.h
     inc/MantidPythonInterface/core/PythonObjectInstantiator.h
     inc/MantidPythonInterface/core/PythonObjectProperty.h
+    inc/MantidPythonInterface/core/PythonObjectTypeValidator.h
     inc/MantidPythonInterface/core/PythonStdoutChannel.h
     inc/MantidPythonInterface/core/ReleaseGlobalInterpreterLock.h
     inc/MantidPythonInterface/core/StlExportDefinitions.h

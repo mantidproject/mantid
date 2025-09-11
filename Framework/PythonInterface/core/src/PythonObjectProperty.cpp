@@ -55,11 +55,13 @@ template <> std::string toPrettyString(PythonObject const &value, size_t /*maxLe
  * Creates a Json representation of the object
  */
 template <> Json::Value encodeAsJson(PythonObject const &) {
-  throw Exception::NotImplementedError("encodeAsJson(const boost::python::object &value)");
+  throw Exception::NotImplementedError("encodeAsJson(const boost::python::object &)");
 }
 
 #ifdef __APPLE__
-// NOTE for mac builds, it is necessary the DLL export occur here
+// NOTE for mac builds, it is necessary the DLL export occur here.
+// This declaration normally lives in Framework/Kernel/PropertyWithValue.cpp.  However, because the boost library is
+// not linked in Kernel, this declarationcan only occur in a file inside the PythonInterface layer
 // Instantiate a copy of the class with our template type so we generate the symbols for the methods in the hxx header.
 template class MANTID_PYTHONINTERFACE_CORE_DLL PropertyWithValue<PythonObject>;
 #endif
@@ -76,27 +78,53 @@ using Kernel::Exception::NotImplementedError;
  */
 std::string PythonObjectProperty::getDefault() const { return ""; }
 
-/** Set the function definition.
+/** Set the property value.
  *  Also tries to create the function with FunctionFactory.
  *  @param value :: The function definition string.
- *  @return Error message from FunctionFactory or "" on success.
+ *  @return Error message, or "" on success.
  */
-std::string PythonObjectProperty::setValue(std::string const &val) {
+std::string PythonObjectProperty::setValue(PythonObject const &value) {
+  std::string ret;
+  try {
+    *this = value;
+  } catch (std::invalid_argument const &except) {
+    ret = except.what();
+  }
+  return ret;
+}
+
+/** Set the propety value..
+ *  @param value :: The value of the property as a string.
+ *  @return Error message, or "" on success.
+ */
+std::string PythonObjectProperty::setValue(std::string const &value) {
   Mantid::PythonInterface::GlobalInterpreterLock gil;
+
+  std::string ret;
+  boost::python::object newVal;
+  // try to load as a json object
   try {
     boost::python::object json = boost::python::import("json");
-    boost::python::str strval(val);
-    m_value = boost::python::extract<PythonObject>(json.attr("loads")(strval));
-  } catch (boost::python::error_already_set const &) {
-    boost::python::str strval(val);
-    try {
-      m_value = boost::python::eval(strval);
-    } catch (boost::python::error_already_set const &) {
-      m_value = strval;
-    }
-    // m_value = PythonObject(val);
+    newVal = json.attr("loads")(value);
   }
-  return "";
+  // if it cannot be loaded as a json then it is probably a string
+  catch (boost::python::error_already_set const &) {
+    PyErr_Clear(); // NOTE must clear error registry, or bizarre errors will occur
+    try {
+      newVal = boost::python::str(value.c_str());
+    } catch (boost::python::error_already_set const &) {
+      PyErr_Clear(); // NOTE must clear error registry, or bizarre errors will occur
+      return "Failed to interpret string as JSON or string property: " + value;
+    }
+  }
+
+  // use the assignment operator, which also calls the validator
+  try {
+    *this = newVal;
+  } catch (std::invalid_argument &except) {
+    ret = except.what();
+  }
+  return ret;
 }
 
 /**

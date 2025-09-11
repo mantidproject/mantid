@@ -50,6 +50,7 @@ set(EXPORT_FILES
     src/Exports/PropertyManagerDataService.cpp
     src/Exports/PropertyManagerProperty.cpp
     src/Exports/PythonObjectProperty.cpp
+    src/Exports/PythonObjectTypeValidator.cpp
     src/Exports/PropertyHistory.cpp
     src/Exports/Memory.cpp
     src/Exports/ProgressBase.cpp
