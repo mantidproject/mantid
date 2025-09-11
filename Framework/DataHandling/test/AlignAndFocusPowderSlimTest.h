@@ -45,6 +45,9 @@ public:
                                      TableWorkspace_sptr tablesplitter = nullptr, const bool relativeTime = false,
                                      const int splitterTarget = -1, const bool filterBadPulses = false,
                                      const std::string blockLogList = "") {
+    // simplify setting property names
+    using namespace Mantid::DataHandling::AlignAndFocusPowderSlim::PropertyNames;
+
     const std::string wksp_name("VULCAN");
 
     std::cout << "==================> " << filename << '\n';
@@ -54,30 +57,30 @@ public:
     alg.setChild(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", filename));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", wksp_name));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("BinningMode", binning));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("BinningUnits", binningUnits));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty(FILENAME, filename));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue(OUTPUT_WKSP, wksp_name));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty(BINMODE, binning));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue(BIN_UNITS, binningUnits));
     if (!xmin.empty())
-      TS_ASSERT_THROWS_NOTHING(alg.setProperty("XMin", xmin));
+      TS_ASSERT_THROWS_NOTHING(alg.setProperty(X_MIN, xmin));
     if (!xmax.empty())
-      TS_ASSERT_THROWS_NOTHING(alg.setProperty("XMax", xmax));
+      TS_ASSERT_THROWS_NOTHING(alg.setProperty(X_MAX, xmax));
     if (!xdelta.empty())
-      TS_ASSERT_THROWS_NOTHING(alg.setProperty("XDelta", xdelta));
+      TS_ASSERT_THROWS_NOTHING(alg.setProperty(X_DELTA, xdelta));
     if (!blockLogList.empty())
-      TS_ASSERT_THROWS_NOTHING(alg.setProperty("LogBlockList", blockLogList));
+      TS_ASSERT_THROWS_NOTHING(alg.setProperty(BLOCK_LOGS, blockLogList));
     if (timeMin > 0.)
-      TS_ASSERT_THROWS_NOTHING(alg.setProperty("FilterByTimeStart", timeMin));
+      TS_ASSERT_THROWS_NOTHING(alg.setProperty(FILTER_TIMESTART, timeMin));
     if (timeMax > 0.)
-      TS_ASSERT_THROWS_NOTHING(alg.setProperty("FilterByTimeStop", timeMax));
+      TS_ASSERT_THROWS_NOTHING(alg.setProperty(FILTER_TIMESTOP, timeMax));
     if (tablesplitter != nullptr) {
-      TS_ASSERT_THROWS_NOTHING(alg.setProperty("SplitterWorkspace", tablesplitter));
-      TS_ASSERT_THROWS_NOTHING(alg.setProperty("RelativeTime", relativeTime));
+      TS_ASSERT_THROWS_NOTHING(alg.setProperty(SPLITTER_WS, tablesplitter));
+      TS_ASSERT_THROWS_NOTHING(alg.setProperty(SPLITTER_RELATIVE, relativeTime));
     }
     if (splitterTarget >= 0)
-      TS_ASSERT_THROWS_NOTHING(alg.setProperty("SplitterTarget", splitterTarget));
+      TS_ASSERT_THROWS_NOTHING(alg.setProperty(SPLITTER_TARGET, splitterTarget));
     if (filterBadPulses) {
-      TS_ASSERT_THROWS_NOTHING(alg.setProperty("FilterBadPulses", filterBadPulses));
+      TS_ASSERT_THROWS_NOTHING(alg.setProperty(FILTER_BAD_PULSES, filterBadPulses));
     }
 
     if (should_throw) {
@@ -89,7 +92,7 @@ public:
     TS_ASSERT(alg.isExecuted());
     std::cout << "==================> " << timer << '\n';
 
-    MatrixWorkspace_sptr outputWS = alg.getProperty("OutputWorkspace");
+    MatrixWorkspace_sptr outputWS = alg.getProperty(OUTPUT_WKSP);
     TS_ASSERT(outputWS);
     return outputWS;
   }

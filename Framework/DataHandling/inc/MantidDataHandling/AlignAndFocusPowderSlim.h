@@ -51,4 +51,28 @@ private:
   std::vector<int64_t> loadSize;
   std::vector<std::pair<size_t, size_t>> pulse_indices;
 };
+
+// these properties are public to simplify testing - do not make them public
+namespace PropertyNames {
+const std::string FILENAME("Filename");
+const std::string CAL_FILE("CalFileName");
+const std::string FILTER_TIMESTART("FilterByTimeStart");
+const std::string FILTER_TIMESTOP("FilterByTimeStop");
+const std::string SPLITTER_WS("SplitterWorkspace");
+const std::string SPLITTER_RELATIVE("RelativeTime");
+const std::string SPLITTER_TARGET("SplitterTarget");
+const std::string FILTER_BAD_PULSES("FilterBadPulses");
+const std::string FILTER_BAD_PULSES_LOWER_CUTOFF("BadPulsesLowerCutoff");
+const std::string X_MIN("XMin");
+const std::string X_MAX("XMax");
+const std::string X_DELTA("XDelta");
+const std::string BIN_UNITS("BinningUnits");
+const std::string BINMODE("BinningMode");
+const std::string OUTPUT_WKSP("OutputWorkspace");
+const std::string READ_SIZE_FROM_DISK("ReadSizeFromDisk");
+const std::string EVENTS_PER_THREAD("EventsPerThread");
+const std::string ALLOW_LOGS("LogAllowList");
+const std::string BLOCK_LOGS("LogBlockList");
+} // namespace PropertyNames
+
 } // namespace Mantid::DataHandling::AlignAndFocusPowderSlim
