@@ -20,7 +20,7 @@ import matplotlib.pyplot as plt
 from os import path, makedirs
 from scipy.interpolate import griddata
 from scipy.ndimage import gaussian_filter
-from Engineering.common.texture_sample_viewer import has_valid_shape, plot_sample_directions
+from Engineering.common.texture_sample_viewer import has_valid_shape
 from matplotlib.figure import Figure
 from Engineering.texture.xtal_helper import get_xtal_structure
 
@@ -224,10 +224,6 @@ class TextureProjection:
         ax.text(-0.95, -0.8, ax_labels[0], fontsize=10)
         fig.colorbar(contour_plot, cax=cax)
         return fig
-
-    @staticmethod
-    def plot_sample_directions(fig: Figure, ws_name: str, ax_transform: np.ndarray, ax_labels: Sequence[str], fix_axes_to_sample: bool):
-        plot_sample_directions(fig, ws_name, ax_transform, ax_labels, fix_axes_to_sample)
 
     # ~~~~~ General Utility functions ~~~~~~~~
 

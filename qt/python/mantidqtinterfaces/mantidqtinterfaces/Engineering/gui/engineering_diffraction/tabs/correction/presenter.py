@@ -120,10 +120,6 @@ class TextureCorrectionPresenter:
     def deselect_all(self):
         self.view.set_all_workspaces_selected(False)
 
-    def _add_gauge_vol_view(self, fig):
-        if self.view.include_absorption():
-            self.model.plot_gauge_vol(self.view.get_shape_method(), self.view.get_custom_shape(), fig)
-
     def _on_save_ref_clicked(self):
         self.model.save_reference_file(self.rb_num, self.current_calibration, output_settings.get_output_path())
 
