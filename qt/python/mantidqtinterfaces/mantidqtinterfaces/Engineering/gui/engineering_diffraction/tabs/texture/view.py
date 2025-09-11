@@ -12,6 +12,7 @@ from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as Navigatio
 from matplotlib.figure import Figure
 from qtpy.QtWidgets import QVBoxLayout
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.show_sample.show_sample_view import ShowSampleView
+from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.data_handling.data_view import create_workspace_table
 
 Ui_texture, _ = load_ui(__file__, "texture_tab.ui")
 
@@ -43,6 +44,8 @@ class TextureView(QtWidgets.QWidget, Ui_texture):
         self.finder_cif_file.setFileExtensions([".cif"])
 
         self._setup_plot()
+
+        self.table_column_headers = ["Run", "Fit Parameters", "Crystal Structure", "Sample", "Select"]
 
     # ========== Setup Tool Tips ==========
 
@@ -132,38 +135,37 @@ class TextureView(QtWidgets.QWidget, Ui_texture):
         self.finder_cif_file.fileFindingFinished.connect(slot)
 
     # ========== Table Handling ==========
+
     def populate_workspace_table(self, workspace_info_list):
-        self.table_loaded_data.setColumnCount(5)
-        self.table_loaded_data.setHorizontalHeaderLabels(["Run", "Fit Parameters", "Crystal Structure", "Sample", "Select"])
-        self.table_loaded_data.setRowCount(len(workspace_info_list))
-
-        header = self.table_loaded_data.horizontalHeader()
-        header.setSectionResizeMode(0, QtWidgets.QHeaderView.Stretch)
-        header.setSectionResizeMode(1, QtWidgets.QHeaderView.Stretch)
-        header.setSectionResizeMode(2, QtWidgets.QHeaderView.Stretch)
-        header.setSectionResizeMode(3, QtWidgets.QHeaderView.Stretch)
-        header.setSectionResizeMode(4, QtWidgets.QHeaderView.ResizeToContents)
-
+        create_workspace_table(self.table_column_headers, self.table_loaded_data, len(workspace_info_list))
         for row, (ws, metadata) in enumerate(workspace_info_list.items()):
-            self.table_loaded_data.setItem(row, 0, QtWidgets.QTableWidgetItem(ws))
-            self.table_loaded_data.setItem(row, 1, QtWidgets.QTableWidgetItem(metadata.get("fit_parameters", "Not set")))
-            self.table_loaded_data.setItem(row, 2, QtWidgets.QTableWidgetItem(metadata.get("crystal", "Not set")))
+            self._add_table_row(row, ws, metadata)
 
-            # selection box
-            checkbox = QtWidgets.QCheckBox()
-            checkbox.setChecked(metadata["select"])
-            checkbox.toggled.connect(self._on_any_checkbox_toggled)
-            cell_widget = QtWidgets.QWidget()
-            layout = QtWidgets.QHBoxLayout(cell_widget)
-            layout.addWidget(checkbox)
-            layout.setAlignment(QtCore.Qt.AlignCenter)
-            layout.setContentsMargins(0, 0, 0, 0)
-            self.table_loaded_data.setCellWidget(row, 4, cell_widget)
+    def _add_table_row(self, row, ws, metadata):
+        # run:
+        self.table_loaded_data.setItem(row, 0, QtWidgets.QTableWidgetItem(ws))
 
-            # shape_view
-            self.show_sample_view.add_show_button_to_table_if_shape(
-                self.sig_view_shape_requested, self.table_loaded_data, ws, row, 3, metadata.get("shape", "Not set") != "Not set"
-            )
+        # table ws:
+        self.table_loaded_data.setItem(row, 1, QtWidgets.QTableWidgetItem(metadata.get("fit_parameters", "Not set")))
+
+        # xtal structure:
+        self.table_loaded_data.setItem(row, 2, QtWidgets.QTableWidgetItem(metadata.get("crystal", "Not set")))
+
+        # shape_view
+        self.show_sample_view.add_show_button_to_table_if_shape(
+            self.sig_view_shape_requested, self.table_loaded_data, ws, row, 3, metadata.get("shape", "Not set") != "Not set"
+        )
+
+        # selection box
+        checkbox = QtWidgets.QCheckBox()
+        checkbox.setChecked(metadata["select"])
+        checkbox.toggled.connect(self._on_any_checkbox_toggled)
+        cell_widget = QtWidgets.QWidget()
+        layout = QtWidgets.QHBoxLayout(cell_widget)
+        layout.addWidget(checkbox)
+        layout.setAlignment(QtCore.Qt.AlignCenter)
+        layout.setContentsMargins(0, 0, 0, 0)
+        self.table_loaded_data.setCellWidget(row, 4, cell_widget)
 
     def get_projection_method(self):
         return self.combo_projMethod.currentText()
