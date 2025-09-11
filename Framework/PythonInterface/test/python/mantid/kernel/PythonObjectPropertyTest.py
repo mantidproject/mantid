@@ -217,8 +217,7 @@ class PythonObjectPropertyTest(unittest.TestCase):
         fake.setProperty("PyObject", json.dumps(a_dict))
         self.assertEqual(a_dict, fake.getProperty("PyObject").value)
 
-    # TODO make work
-    def xtest_value_string(self):
+    def test_value_string(self):
         fake = FakeAlgorithm()
         fake.initialize()
 
@@ -228,20 +227,20 @@ class PythonObjectPropertyTest(unittest.TestCase):
         self.assertEqual(a_string, fake.getPropertyValue("PyObject"))
         self.assertEqual(a_string, fake.getProperty("PyObject").value)
 
-    # TODO make work
-    def xtest_value_class(self):
+    def test_value_class(self):
         fake = FakeAlgorithm()
         fake.initialize()
 
         # check for class
         obj = FakeClass(7, "frnakling")
         fake.setProperty("PyObject", obj)
+        self.assertIs(obj, fake.getProperty("PyObject").value)
 
         # take the string, set the property from the string, ensure same
         propVal = fake.getPropertyValue("PyObject")
-        print(propVal)
         fake.setPropertyValue("PyObject", propVal)
-        self.assertEqual(obj, fake.getProperty("PyObject").value)
+        objAsJson = {"x": 7, "y": {"a": "frnakling"}}
+        self.assertEqual(objAsJson, fake.getProperty("PyObject").value)
 
 
 if __name__ == "__main__":

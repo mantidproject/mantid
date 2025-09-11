@@ -21,6 +21,26 @@
 
 #include <iostream>
 
+namespace {
+namespace bp = boost::python;
+
+std::set<std::string> jsonAllowedTypes{"int", "float", "str", "dict", "list", "tuple", "NoneType", "bool"};
+
+bp::object iterativeDictDump(bp::object obj) {
+  bp::dict d = bp::extract<bp::dict>(obj.attr("__dict__"));
+  bp::list keyvals = d.items();
+  for (bp::ssize_t i = 0; i < bp::len(keyvals); i++) {
+    bp::object key = keyvals[i][0];
+    bp::object val = keyvals[i][1];
+    std::string valtype = bp::extract<std::string>(val.attr("__class__").attr("__name__"));
+    if (!jsonAllowedTypes.count(valtype)) {
+      d[key] = iterativeDictDump(val);
+    }
+  }
+  return bp::object(d);
+}
+} // namespace
+
 namespace Mantid::Kernel {
 
 /**
@@ -29,18 +49,31 @@ namespace Mantid::Kernel {
 template <> std::string toString(PythonObject const &obj) {
   Mantid::PythonInterface::GlobalInterpreterLock gil;
 
+  // std::string ret;
+  boost::python::object rep;
+  // if the object is None type, return an empty string
   if (Mantid::PythonInterface::isNone(obj)) {
-    throw Exception::NullPointerException("toString", boost::python::call_method<std::string>(obj.ptr(), "name"));
-  } else {
-    std::string ret;
-    try {
-      boost::python::object json = boost::python::import("json");
-      ret = boost::python::extract<std::string>(json.attr("dumps")(obj));
-    } catch (boost::python::error_already_set const &) {
-      ret = boost::python::extract<std::string>(obj.attr("__repr__")());
-    }
-    return ret;
+    rep = boost::python::str("");
   }
+  // if the object can be read as a string, then return the object itself
+  else if (boost::python::extract<std::string>(obj).check()) {
+    rep = obj;
+  }
+  // otherwise, use either json to return a string representation of the class
+  else {
+    // try loading as a json -- will work for most 'built-in' types
+    boost::python::object json = boost::python::import("json");
+    try {
+      rep = json.attr("dumps")(obj);
+    }
+    // if json doesn't work, then iteratively dump its dict as a json
+    catch (boost::python::error_already_set const &e) {
+      PyErr_Clear(); // NOTE must clear error registry, or bizarre errors will occur at unexpected lines
+      boost::python::object dict = iterativeDictDump(obj);
+      rep = (json.attr("dumps")(dict)).attr("encode")("utf-8");
+    }
+  }
+  return boost::python::extract<std::string>(rep);
 }
 
 /**
