@@ -20,6 +20,7 @@ from workbench.config import APPNAME
 
 file_path = "mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.focus.model"
 enggutils_path = "Engineering.EnggUtils"
+setting_path = "mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.settings_presenter.SettingsPresenter"
 
 
 class FocusModelTest(unittest.TestCase):
@@ -87,10 +88,14 @@ class FocusModelTest(unittest.TestCase):
 
         mock_plot.assert_not_called()
 
+    @patch(setting_path + ".set_contour_option_enabled")
+    @patch(setting_path + ".set_euler_options_enabled")
     @patch(file_path + ".output_settings.get_output_path")
     @patch(enggutils_path + ".focus_run")
     @patch(file_path + ".load_full_instrument_calibration")
-    def test_first_time_focus_uses_correct_default_save_directory(self, mock_load_cal, mock_enggutils_focus_run, mock_get_output_path):
+    def test_first_time_focus_uses_correct_default_save_directory(
+        self, mock_load_cal, mock_enggutils_focus_run, mock_get_output_path, mock_euler_settings_enabled, mock_contour_setting
+    ):
         default_save_location = path.join(path.expanduser("~"), "Engineering_Mantid")
         QCoreApplication.setApplicationName("Engineering_Diffraction_test_calib_model")
         presenter = settings_presenter.SettingsPresenter(

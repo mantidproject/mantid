@@ -18,6 +18,7 @@ from workbench.config import APPNAME
 
 file_path = "mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.calibration.model"
 enggutils_path = "Engineering.EnggUtils"
+setting_path = "mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.settings_presenter.SettingsPresenter"
 
 
 class CalibrationModelTest(unittest.TestCase):
@@ -39,12 +40,20 @@ class CalibrationModelTest(unittest.TestCase):
         self.calibration_info.load_relevant_calibration_files.assert_called_once()
         self.assertEqual(self.calibration_info.prm_filepath, self.model._saved_prm_file)
 
+    @patch(setting_path + ".set_contour_option_enabled")
+    @patch(setting_path + ".set_euler_options_enabled")
     @patch(file_path + ".output_settings.get_output_path")
     @patch(enggutils_path + ".create_new_calibration")
     @patch(enggutils_path + ".run_calibration")
     @patch(file_path + ".load_full_instrument_calibration")
     def test_first_time_create_uses_correct_default_save_directory(
-        self, mock_load_cal, mock_run_cal, mock_enggutils_create_new_calibration, mock_get_output_path
+        self,
+        mock_load_cal,
+        mock_run_cal,
+        mock_enggutils_create_new_calibration,
+        mock_get_output_path,
+        mock_euler_settings_enabled,
+        mock_contour_setting,
     ):
         default_save_location = path.join(path.expanduser("~"), "Engineering_Mantid")
         QCoreApplication.setApplicationName("Engineering_Diffraction_test_calib_model")

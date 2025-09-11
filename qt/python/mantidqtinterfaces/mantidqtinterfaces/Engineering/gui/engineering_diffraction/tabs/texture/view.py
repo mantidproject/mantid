@@ -15,7 +15,7 @@ class TextureView(QtWidgets.QWidget, Ui_texture):
     sig_view_shape_requested = QtCore.Signal(str)
     sig_selection_state_changed = QtCore.Signal()
 
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, instrument="ENGINX"):
         super(TextureView, self).__init__(parent)
         self.setupUi(self)
 
@@ -24,6 +24,7 @@ class TextureView(QtWidgets.QWidget, Ui_texture):
         self.finder_texture_ws.setLabelText("Sample Run(s)")
         self.finder_texture_ws.allowMultipleFiles(True)
         self.finder_texture_ws.setFileExtensions([".nxs"])
+        self.finder_texture_ws.setInstrumentOverride(instrument)
 
         self.finder_texture_tables.setLabelText("Fit Parameters")
         self.finder_texture_tables.allowMultipleFiles(True)
@@ -211,12 +212,6 @@ class TextureView(QtWidgets.QWidget, Ui_texture):
                 checkbox = cell_widget.findChild(QtWidgets.QCheckBox)
                 if checkbox:
                     checkbox.setChecked(selected)
-
-    def get_file_paths(self):
-        return self.finder_corr.getFilenames()
-
-    def is_searching(self):
-        return self.finder_corr.isSearching()
 
     def _setup_plot(self):
         self.figure = Figure(layout="constrained")

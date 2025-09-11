@@ -66,7 +66,7 @@ class FittingDataModel(object):
                         for ispec in range(ws.getNumberHistograms()):
                             # expect the spec number in front of unit, these should be the only two permitted units
                             spec_ws_name = ws_name.replace("dSpacing", f"{ispec}_dSpacing").replace("TOF", f"{ispec}_TOF")
-                            if spec_ws_name.index(f"_{ispec}_") == -1:
+                            if spec_ws_name.find(f"_{ispec}_") == -1:
                                 logger.error("Expect unit: dSpacing/TOF in the workspace name for subsequent extraction of bank id")
                             spec_ws = ExtractSingleSpectrum(InputWorkspace=ws, OutputWorkspace=spec_ws_name, WorkspaceIndex=ispec)
                             self._last_added.append(spec_ws_name)

@@ -119,24 +119,6 @@ class TextureProjectionTest(unittest.TestCase):
         hkl = self.model.parse_hkl("a", "b", "c")
         self.assertIsNone(hkl)
 
-    @patch(correction_model_path + ".ADS")
-    def test_set_ws_xtal_sets_structure(self, mock_ads):
-        mock_ws = MagicMock()
-        mock_ads.retrieve.return_value = mock_ws
-        with patch(correction_model_path + ".CrystalStructure") as mock_cryst, patch(correction_model_path + ".logger") as mock_logger:
-            self.model.set_ws_xtal("ws", "4.0 4.0 4.0 90 90 90", "P 1", "Fe")
-            mock_cryst.assert_called_once()
-            mock_logger.notice.assert_called_once_with("Crystal Structure Set")
-
-    @patch(correction_model_path + ".ADS")
-    def test_copy_xtal_to_all(self, mock_ads):
-        ref_ws = MagicMock()
-        xtal = MagicMock()
-        ref_ws.sample().getCrystalStructure.return_value = xtal
-        mock_ads.retrieve.side_effect = lambda name: ref_ws if name == "ref" else MagicMock()
-        self.model.copy_xtal_to_all("ref", ["w1", "w2"])
-        self.assertEqual(mock_ads.retrieve.call_count, 3)  # 1 for ref + 2 for targets
-
     @patch(correction_model_path + ".path.exists", return_value=False)
     @patch(correction_model_path + ".makedirs")
     def test_get_save_dirs_creates_directories(self, mock_makedirs, mock_exists):

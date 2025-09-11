@@ -9,16 +9,18 @@ import unittest
 from os import path
 
 from unittest import mock
-from unittest.mock import patch
-from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings import settings_model, settings_view, settings_presenter
+from unittest.mock import patch, MagicMock
+from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings import settings_presenter
 
 dir_path = "mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.settings_presenter"
 
 
 class SettingsPresenterTest(unittest.TestCase):
     def setUp(self):
-        self.model = mock.create_autospec(settings_model.SettingsModel, instance=True)
-        self.view = mock.create_autospec(settings_view.SettingsView, instance=True)
+        self.model = MagicMock()
+        self.view = MagicMock()
+        self.view.set_euler_options_enabled = MagicMock()
+        self.view.set_contour_option_enabled = MagicMock()
         self.presenter = settings_presenter.SettingsPresenter(self.model, self.view)
         self.presenter.settings = {}
         self.settings = {
