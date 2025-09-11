@@ -59,7 +59,7 @@ private:
     } catch (...) {
       return "Attempting to run a python type validator on an object that is not a python object";
     }
-    std::string ret();
+    std::string ret;
     int check = PyObject_IsInstance(obj.ptr(), pythonClass.ptr());
     if (check < 0) {
       // this represents an internal error while checking type
