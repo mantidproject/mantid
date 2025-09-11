@@ -33,6 +33,12 @@ from Engineering.common.calibration_info import CalibrationInfo
 class TextureCorrectionModel:
     def __init__(self):
         self.reference_ws = None
+        self.include_abs = False
+        self.include_div = False
+        self.include_atten = False
+        self.rb_num = None
+        self.calibration = None
+        self.remove_ws_after_processing = False
 
     # ~~~~~ Correction Functions ~~~~~~~~~~~~~
 
@@ -60,16 +66,49 @@ class TextureCorrectionModel:
         for i in range(num_spec):
             _div_corr.setY(i, np.full(y_shape, div[i]))
 
+    def calc_all_corrections(
+        self,
+        wss: Sequence[Workspace2D],
+        out_wss: Sequence[str],
+        root_dir: Optional[str] = None,
+        abs_args: Optional[dict] = None,
+        atten_args: Optional[dict] = None,
+        div_args: Optional[dict] = None,
+    ):
+        for i, ws in enumerate(wss):
+            abs_corr = 1.0
+            div_corr = 1.0
+
+            if self.include_abs:
+                self.define_gauge_volume(ws, abs_args["gauge_vol_preset"], abs_args["gauge_vol_file"])
+                self.calc_absorption(ws, abs_args["mc_param_str"])
+                abs_corr = "_abs_corr"
+                if self.include_atten:
+                    val, units = atten_args["atten_val"], atten_args["atten_units"]
+                    atten_vals = self.read_attenuation_coefficient_at_value(abs_corr, val, units)
+                    self.write_atten_val_table(
+                        ws,
+                        atten_vals,
+                        val,
+                        units,
+                        self.rb_num,
+                        self.calibration,
+                        root_dir,
+                    )
+
+            if self.include_div:
+                self.calc_divergence(ws, div_args["hoz"], div_args["vert"], div_args["det_hoz"])
+                div_corr = "_div_corr"
+
+            self.apply_corrections(ws, out_wss[i], root_dir, abs_corr, div_corr)
+
     def apply_corrections(
         self,
         ws: str,
         out_ws: str,
-        calibration_group: Optional[GROUP],
         root_dir: str,
         abs_corr: Union[float, str] = 1.0,
         div_corr: Union[float, str] = 1.0,
-        rb_num: Optional[str] = None,
-        remove_ws_after_processing: bool = False,
     ) -> None:
         ws = ADS.retrieve(ws)
         temp_ws = ConvertUnits(ws, Target="dSpacing", StoreInADS=False)
@@ -94,10 +133,10 @@ class TextureCorrectionModel:
 
         # save files
         CloneWorkspace(temp_ws, OutputWorkspace=out_ws, StoreInADS=True)
-        self._save_corrected_files(out_ws, root_dir, "AbsorptionCorrection", rb_num, calibration_group)
+        self._save_corrected_files(out_ws, root_dir, "AbsorptionCorrection", self.rb_num, self.calibration.group)
 
         # optionally remove extra files
-        if remove_ws_after_processing:
+        if self.remove_ws_after_processing:
             logger.notice("removing saved and temporary workspaces from ADS")
             # remove output ws from ADS to free up memory
             ADS.remove(out_ws)
@@ -128,6 +167,24 @@ class TextureCorrectionModel:
             if not path.exists(save_dir):
                 makedirs(save_dir)
             SaveNexus(InputWorkspace=ws, Filename=path.join(save_dir, ws + ".nxs"))
+
+    def set_include_abs(self, inc: bool):
+        self.include_abs = inc
+
+    def set_include_atten(self, inc: bool):
+        self.include_atten = inc
+
+    def set_include_div(self, inc: bool):
+        self.include_div = inc
+
+    def set_rb_num(self, rb: str):
+        self.rb_num = rb
+
+    def set_calibration(self, calib: CalibrationInfo):
+        self.calibration = calib
+
+    def set_remove_after_processing(self, flag: bool):
+        self.remove_ws_after_processing = flag
 
     # ~~~~~ Sample Definition and Orientation Functions ~~~~~~~~~~~~~
 

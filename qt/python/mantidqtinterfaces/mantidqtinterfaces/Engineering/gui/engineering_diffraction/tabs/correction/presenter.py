@@ -148,42 +148,31 @@ class TextureCorrectionPresenter:
         self.worker.start()
 
     def _apply_all_corrections(self, wss, out_wss):
-        include_atten_table = self.view.include_atten_tab()
+        self.model.set_include_abs(self.view.include_absorption())
+        self.model.set_include_atten(self.view.include_atten_tab())
+        self.model.set_include_div(self.view.include_divergence())
+        self.model.set_rb_num(self.rb_num)
+        self.model.set_calibration(self.current_calibration)
+        self.model.set_remove_after_processing(self._get_setting("clear_absorption_ws_after_processing", bool))
 
-        root_dir = output_settings.get_output_path()
+        abs_args = self.get_abs_args()
+        atten_args = self.get_atten_args()
+        div_args = self.get_div_args()
 
-        for i, ws in enumerate(wss):
-            abs_corr = 1.0
-            div_corr = 1.0
+        self.model.calc_all_corrections(wss, out_wss, output_settings.get_output_path(), abs_args, atten_args, div_args)
 
-            if self.view.include_absorption():
-                mc_param_str = self._get_setting("monte_carlo_params")
+    def get_abs_args(self):
+        return {
+            "gauge_vol_preset": self.view.get_shape_method(),
+            "gauge_vol_file": self.view.get_custom_shape(),
+            "mc_param_str": self._get_setting("monte_carlo_params"),
+        }
 
-                self.model.define_gauge_volume(ws, self.view.get_shape_method(), self.view.get_custom_shape())
-                self.model.calc_absorption(ws, mc_param_str)
-                abs_corr = "_abs_corr"
-                if include_atten_table:
-                    atten_vals = self.model.read_attenuation_coefficient_at_value(
-                        abs_corr, self.view.get_evaluation_value(), self.view.get_evaluation_units()
-                    )
-                    self.model.write_atten_val_table(
-                        ws,
-                        atten_vals,
-                        self.view.get_evaluation_value(),
-                        self.view.get_evaluation_units(),
-                        self.rb_num,
-                        self.current_calibration,
-                        root_dir,
-                    )
+    def get_atten_args(self):
+        return {"atten_val": self.view.get_evaluation_value(), "atten_units": self.view.get_evaluation_units()}
 
-            if self.view.include_divergence():
-                self.model.calc_divergence(ws, self.view.get_div_horz(), self.view.get_div_vert(), self.view.get_div_det_horz())
-                div_corr = "_div_corr"
-
-            remove_ws_after_processing = self._get_setting("clear_absorption_ws_after_processing", bool)
-            self.model.apply_corrections(
-                ws, out_wss[i], self.current_calibration.group, root_dir, abs_corr, div_corr, self.rb_num, remove_ws_after_processing
-            )
+    def get_div_args(self):
+        return {"hoz": self.view.get_div_horz(), "vert": self.view.get_div_vert(), "det_hoz": self.view.get_div_det_horz()}
 
     def _copy_sample_to_all_selected(self):
         ref_ws = self.view.get_sample_reference_ws()
