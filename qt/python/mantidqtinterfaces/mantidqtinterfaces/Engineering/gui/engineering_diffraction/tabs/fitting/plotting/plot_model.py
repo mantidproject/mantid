@@ -288,7 +288,7 @@ class FittingPlotModel(object):
 
     def _save_files(self, ws, dir_name, peak, grouping=""):
         root_dir = output_settings.get_output_path()
-        save_dirs = [path.join(root_dir, dir_name)]
+        save_dirs = [path.join(root_dir, dir_name, peak)]
         if self.rb_num:
             if grouping == "":
                 # grouping is "" if we can't read group from log data - in this case we don't provide separate dir

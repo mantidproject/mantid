@@ -12,7 +12,7 @@ class TextureCorrectionView(QtWidgets.QWidget, Ui_texture):
     sig_view_requested = QtCore.Signal(str)
     sig_view_shape_requested = QtCore.Signal(str)
 
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, instrument="ENGINX"):
         super(TextureCorrectionView, self).__init__(parent)
         self.setupUi(self)
 
@@ -20,6 +20,8 @@ class TextureCorrectionView(QtWidgets.QWidget, Ui_texture):
 
         self.finder_corr.setLabelText("Sample Run(s)")
         self.finder_corr.allowMultipleFiles(True)
+        self.finder_corr.findFiles(True)
+        self.finder_corr.setInstrumentOverride(instrument)
 
         self.finder_reference.setLabelText("Reference Workspace")
         self.finder_reference.allowMultipleFiles(False)
