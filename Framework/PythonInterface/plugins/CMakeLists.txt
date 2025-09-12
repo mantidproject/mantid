@@ -331,6 +331,7 @@ set(PYTHON_PLUGINS
     algorithms/WorkflowAlgorithms/SANSILLParameterScan.py
     algorithms/WorkflowAlgorithms/SANSILLReduction.py
     algorithms/WorkflowAlgorithms/SANSILLReduction2.py
+    algorithms/WorkflowAlgorithms/SANSISISPolarizationCorrections.py
     algorithms/WorkflowAlgorithms/SANSMask.py
     algorithms/WorkflowAlgorithms/SANSPatchSensitivity.py
     algorithms/WorkflowAlgorithms/SANSReduction.py
