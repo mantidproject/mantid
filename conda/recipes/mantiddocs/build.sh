@@ -27,6 +27,8 @@ cmake \
   -DUSE_PYTHON_DYNAMIC_LIB=OFF \
   -DPython_EXECUTABLE=$PYTHON \
   -DExternalData_SHOW_PROGRESS=ON \
+  -DCMAKE_MESSAGE_LOG_LEVEL=DEBUG \
+  -DExternalData_DEBUG_DOWNLOAD=1 \
   -GNinja \
   ../
 
@@ -34,4 +36,4 @@ cmake --build .
 
 # Build the StandardTestData target.
 # This might not be strictly necessary if docs-qthelp target is not built due to DOCS_QTHELP=OFF
-cmake --build . --target StandardTestData
+cmake --build . --target StandardTestData --verbose
