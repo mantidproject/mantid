@@ -133,7 +133,25 @@ fi
 
 export CONDA_SUBDIR=$PLATFORM
 
-bash ./mantiddocs/build.sh
+# Run conda build.
+if [[ $ENABLE_BUILD_MANTID_DEVELOPER == true ]]; then
+    conda mambabuild ./mantid-developer/ $EXTRA_BUILD_OPTIONS
+fi
+if [[ $ENABLE_BUILD_MANTID == true ]]; then
+    conda mambabuild ./mantid/ $EXTRA_BUILD_OPTIONS
+fi
+if [[ $ENABLE_BUILD_QT == true ]]; then
+    conda mambabuild ./mantidqt/ $EXTRA_BUILD_OPTIONS
+fi
+if [[ $ENABLE_BUILD_DOCS == true ]]; then
+    conda mambabuild ./mantiddocs/ $EXTRA_BUILD_OPTIONS
+fi
+if [[ $ENABLE_BUILD_WORKBENCH == true ]]; then
+    if [[ $BUILD_WORKBENCH_WITH_DOCS == false ]]; then
+	export INCLUDE_MANTIDDOCS=False
+    fi
+    conda mambabuild ./mantidworkbench/ -c mantid/label/main $EXTRA_BUILD_OPTIONS
+fi
 
 # elapsed time with second resolution
 end_time=$(date +%s)

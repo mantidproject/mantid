@@ -29,7 +29,6 @@ requirements:
     - setuptools
     - sphinx {{ sphinx }}
     - sphinx_bootstrap_theme {{ sphinx_bootstrap_theme }}
-    - mantidqt {{ version }}
     - versioningit {{ versioningit }}
     - graphviz {{ graphviz }}
     - texlive-core {{ texlive_core }}
@@ -37,13 +36,6 @@ requirements:
     - xorg-libxxf86vm  # [linux]
     - xorg-libx11  # [linux]
     - xorg-xorgproto  # [linux]
-
-# there are no run requirements as it's just pure html
-
-test:
-  files:
-    - share/doc/html/index.html
-    - share/doc/html/mantid.png
 
 about:
   home: https://github.com/mantidproject/mantid
