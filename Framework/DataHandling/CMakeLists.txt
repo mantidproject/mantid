@@ -38,6 +38,7 @@ set(SRC_FILES
     src/LoadAscii2.cpp
     src/LoadAsciiStl.cpp
     src/LoadBBY.cpp
+    src/LoadBBY2.cpp
     src/LoadBankFromDiskTask.cpp
     src/LoadBinaryStl.cpp
     src/LoadCSNSNexus.cpp
@@ -258,6 +259,7 @@ set(INC_FILES
     inc/MantidDataHandling/LoadAscii2.h
     inc/MantidDataHandling/LoadAsciiStl.h
     inc/MantidDataHandling/LoadBBY.h
+    inc/MantidDataHandling/LoadBBY2.h
     inc/MantidDataHandling/LoadBankFromDiskTask.h
     inc/MantidDataHandling/LoadBinaryStl.h
     inc/MantidDataHandling/LoadCSNSNexus.h
@@ -475,6 +477,7 @@ set(TEST_FILES
     LoadAsciiStlTest.h
     LoadAsciiTest.h
     LoadBBYTest.h
+    LoadBBY2Test.h
     LoadBinaryStlTest.h
     LoadCSNSNexusTest.h
     LoadCalFileTest.h
