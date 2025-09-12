@@ -183,16 +183,30 @@ class TestTexturePresenter(unittest.TestCase):
         wss = ["test_ws"]
         params = ["test_params"]
         save_dirs = ["dir/example"]
-        root_dir, rb, group = "dir", "rb123", "GROUP"
+        root_dir, rb, group, out_ws = "dir", "rb123", "GROUP", "out_ws"
+        hkl, inc_scatt, scat_vol_pos = None, False, (0.0, 0.0, 0.0)
+        chi2_thresh, peak_thresh = 0.0, 0.0
+        ax_trans, readout_col = None, "I"
+
         mock_outpath.return_value = root_dir
         self.model.get_rb_num.return_value = rb
         self.model.get_grouping.return_value = group
         self.model.get_save_dirs.return_value = save_dirs
+        self.model.get_out_ws.return_value = out_ws
+        self.model.get_hkl.return_value = hkl
+        self.model.get_inc_scatt.return_value = inc_scatt
+        self.model.get_scat_vol_pos.return_value = scat_vol_pos
+        self.model.get_chi2_thresh.return_value = chi2_thresh
+        self.model.get_peak_thresh.return_value = peak_thresh
+        self.model.get_ax_trans.return_value = ax_trans
+        self.model.get_readout_col.return_value = readout_col
 
         self.presenter.calc_pf(wss, params)
 
         self.model.get_save_dirs.assert_called_once_with(root_dir, "PoleFigureTables", rb, group)
-        self.model.make_pole_figure_tables.assert_called_once_with(wss, params, save_dirs)
+        self.model.make_pole_figure_tables.assert_called_once_with(
+            wss, params, out_ws, hkl, inc_scatt, scat_vol_pos, chi2_thresh, peak_thresh, save_dirs, ax_trans, readout_col
+        )
         self.presenter.plot_pf.assert_called_once()
 
     def test_plot_pf_calls_model_and_draws(self):

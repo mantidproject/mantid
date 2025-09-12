@@ -147,7 +147,7 @@ class ProjectionModel(TextureProjection):
         self.ax_labels = ax_labels
 
     def set_readout_col(self, readout_col):
-        self.readout_col = readout_col
+        self.readout_col = readout_col if readout_col != "" else "I"
 
     def set_plot_exp(self, plot_exp):
         self.plot_exp = plot_exp

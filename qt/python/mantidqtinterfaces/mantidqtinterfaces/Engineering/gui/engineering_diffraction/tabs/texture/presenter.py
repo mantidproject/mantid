@@ -235,7 +235,19 @@ class TexturePresenter:
     ):
         root_dir = output_settings.get_output_path()
         save_dirs = self.model.get_save_dirs(root_dir, "PoleFigureTables", self.model.get_rb_num(), self.model.get_grouping())
-        self.model.make_pole_figure_tables(wss, params, save_dirs)
+        self.model.make_pole_figure_tables(
+            wss,
+            params,
+            self.model.get_out_ws(),
+            self.model.get_hkl(),
+            self.model.get_inc_scatt(),
+            self.model.get_scat_vol_pos(),
+            self.model.get_chi2_thresh(),
+            self.model.get_peak_thresh(),
+            save_dirs,
+            self.model.get_ax_trans(),
+            self.model.get_readout_col(),
+        )
         self.plot_pf(save_dirs)
 
     def _on_worker_success(self):
