@@ -90,8 +90,9 @@ class PoldiAutoCorrelation(PythonAlgorithm):
         cycle_time, slit_offsets, t0_const, l1_chop = get_instrument_settings_from_log(ws)
         # get detector positions from IDF
         si = ws.spectrumInfo()
-        tths = np.array([si.twoTheta(ispec) for ispec in range(ws.getNumberHistograms())])
-        l2s = np.asarray([si.l2(ispec) for ispec in range(ws.getNumberHistograms())])
+        nspec = ws.getNumberHistograms()
+        tths = np.array([si.twoTheta(ispec) for ispec in range(nspec)])
+        l2s = np.asarray([si.l2(ispec) for ispec in range(nspec)])
         l1 = si.l1()
         # determine npulses to include in calc
         time_max = get_max_tof_from_chopper(l1, l1_chop, l2s, tths, lambda_max) + slit_offsets[0]
@@ -104,9 +105,8 @@ class PoldiAutoCorrelation(PythonAlgorithm):
         dspacs = get_final_dspac_array(bin_width, dspac_min, dspac_max, time_max)[:, None]
         # perform auto-correlation (Eq. 7 in POLDI concept paper)
         ipulses = np.arange(npulses)[:, None]
-        offsets = (ipulses * cycle_time + slit_offsets).flatten() + t0_const
+        offsets = (ipulses * cycle_time + slit_offsets + t0_const).flatten()
         # get time-of-flight from chopper to detector for neutron corresponding to d=1Ang
-        nspec = ws.getNumberHistograms()
         path_length_ratio = (l2s + l1 - l1_chop) / (l2s + l1)
         tof_d1Ang = np.asarray([si.diffractometerConstants(ispec)[UnitParams.difc] * path_length_ratio[ispec] for ispec in range(nspec)])
         # loop over spectra and add to intermediate correlation
