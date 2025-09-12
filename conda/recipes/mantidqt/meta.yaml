@@ -49,6 +49,7 @@ requirements:
     - tbb-devel {{ tbb }}
     - versioningit {{ versioningit }}
     - numpy {{ numpy }}                      # [build_platform != target_platform]
+    - vtk {{ vtk }} # [linux]
     - libgl-devel  # [linux]
     - xorg-libxxf86vm  # [linux]
     - xorg-libx11  # [linux]
