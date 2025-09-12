@@ -368,7 +368,7 @@ class SANSISISPolarizationCorrections(DataProcessorAlgorithm):
     transmission_runs: list[str] = None
 
     def category(self):
-        return "SANS/PolarizationCorrections"
+        return "SANS\\PolarizationCorrections"
 
     def name(self):
         return "SANSISISPolarizationCorrections"
