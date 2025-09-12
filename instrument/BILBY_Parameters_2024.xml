@@ -1,5 +1,5 @@
-﻿<?xml version="1.0" encoding="UTF-8" ?>
-<parameter-file instrument = "BILBY" valid-from = "2024-10-01 00:00:00"  valid-to = "2100-01-01 00:00:00"> 
+<?xml version="1.0" encoding="UTF-8" ?>
+<parameter-file instrument = "BILBY" valid-from = "1901-01-01 00:00:00"  valid-to = "2024-09-30 23:59:59">
 
   <component-link name = "BILBY">
   

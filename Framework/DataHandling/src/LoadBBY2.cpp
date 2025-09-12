@@ -4,8 +4,12 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
+#include <algorithm>
+#include <chrono>
 #include <cmath>
 #include <cstdio>
+#include <map>
+#include <sstream>
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
@@ -13,7 +17,8 @@
 #include "MantidAPI/LogManager.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/Run.h"
-#include "MantidDataHandling/LoadBBY.h"
+#include "MantidDataHandling/LoadANSTOHelper.h"
+#include "MantidDataHandling/LoadBBY2.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
@@ -40,10 +45,15 @@
 
 namespace Mantid::DataHandling {
 
-// register the algorithm into the AlgorithmFactory
-DECLARE_FILELOADER_ALGORITHM(LoadBBY)
+using namespace Kernel;
+using namespace API;
+using namespace Nexus;
+
+// register the algorithm
+DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadBBY2)
 
 // consts
+static const int LAST_INDEX = -1;
 static const size_t HISTO_BINS_X = 240;
 static const size_t HISTO_BINS_Y = 256;
 // 100 = 40 + 20 + 40
@@ -60,9 +70,40 @@ static char const *const FilterByTofMaxStr = "FilterByTofMax";
 static char const *const FilterByTimeStartStr = "FilterByTimeStart";
 static char const *const FilterByTimeStopStr = "FilterByTimeStop";
 
-static int64_t constexpr NanoSecondsInSecond{1'000'000'000};
+static char const *const UseHMScanTimeStr = "UseHMScanTime";
 
+using namespace ANSTO;
 using ANSTO::EventVector_pt;
+
+static const std::map<std::string, Anxs::ScanLog> ScanLogMap = {
+    {"end", Anxs::ScanLog::End}, {"mean", Anxs::ScanLog::Mean}, {"start", Anxs::ScanLog::Start}};
+
+template <typename T>
+void traceStatistics(const Nexus::NXEntry &entry, const std::string &path, uint64_t startTime, uint64_t endTime,
+                     Kernel::Logger &log) {
+
+  if (log.isDebug()) {
+
+    std::vector<uint64_t> times;
+    std::vector<T> values;
+    std::string units;
+    auto n = Anxs::extractTimedDataSet<T>(entry, path, startTime, endTime, times, values, units);
+
+    // log stats on the parameter variation
+    if (n > 0) {
+      auto meanX = std::accumulate(values.begin(), values.end(), 0.0) / static_cast<T>(n);
+      T accum{0};
+      std::for_each(values.begin(), values.end(), [&](const double d) { accum += (d - meanX) * (d - meanX); });
+      auto stdX = sqrt(accum / static_cast<T>(n));
+      auto result = std::minmax_element(values.begin(), values.end());
+      log.debug() << "Log parameter " << path << ": " << meanX << " +- " << stdX << ", " << *result.first << " ... "
+                  << *result.second << ", pts " << n << std::endl;
+    } else {
+      log.debug() << "Cannot find : " << path << std::endl;
+      return;
+    }
+  }
+}
 
 template <typename TYPE>
 void AddSinglePointTimeSeriesProperty(API::LogManager &logManager, const std::string &time, const std::string &name,
@@ -75,48 +116,59 @@ void AddSinglePointTimeSeriesProperty(API::LogManager &logManager, const std::st
   logManager.addProperty(p);
 }
 
+template <typename EP>
+void loadEvents(API::Progress &prog, const char *progMsg, EP &eventProcessor, const Nexus::NXEntry &entry,
+                uint64_t start_nsec, uint64_t end_nsec) {
+
+  using namespace ANSTO;
+
+  prog.doReport(progMsg);
+
+  // for progress notifications
+  ANSTO::ProgressTracker progTracker(prog, progMsg, Progress_LoadBinFile, Progress_LoadBinFile);
+
+  const std::string neutronPath{"instrument/detector_events"};
+  Anxs::ReadEventData(progTracker, entry, &eventProcessor, start_nsec, end_nsec, neutronPath, HISTO_BINS_Y);
+}
+
+LoadBBY2::LoadBBY2() : API::IFileLoader<Nexus::NexusDescriptor>() {}
+
 /**
  * Return the confidence value that this algorithm can load the file
  * @param descriptor A descriptor for the file
  * @returns An integer specifying the confidence level. 0 indicates it will not
  * be used
  */
-int LoadBBY::confidence(Kernel::FileDescriptor &descriptor) const {
-  if (descriptor.extension() != ".tar")
-    return 0;
+int LoadBBY2::confidence(Nexus::NexusDescriptor &descriptor) const {
 
-  ANSTO::Tar::File file(descriptor.filename());
-  if (!file.good())
+  if (descriptor.isEntry("/entry1/program_name") && descriptor.isEntry("/entry1/experiment/gumtree_version") &&
+      descriptor.isEntry("/entry1/instrument/detector_events/event_time_zero") &&
+      descriptor.isEntry("/entry1/instrument/detector_events/event_id") &&
+      descriptor.isEntry("/entry1/instrument/L1/value") && descriptor.isEntry("/entry1/instrument/L2_curtaind/value") &&
+      descriptor.isEntry("/entry1/instrument/L2_curtainl/value") &&
+      descriptor.isEntry("/entry1/instrument/L2_curtainr/value") &&
+      descriptor.isEntry("/entry1/instrument/L2_curtainu/value") &&
+      descriptor.isEntry("/entry1/instrument/nvs067/lambda/value") &&
+      descriptor.isEntry("/entry1/instrument/shutters/fast_shutter") &&
+      descriptor.isEntry("/entry1/scan_dataset/time") && descriptor.isEntry("/entry1/scan_dataset/value")) {
+    return 95;
+  } else {
     return 0;
-
-  size_t hdfFiles = 0;
-  size_t binFiles = 0;
-  const std::vector<std::string> &subFiles = file.files();
-  for (const auto &subFile : subFiles) {
-    auto len = subFile.length();
-    if ((len > 4) && (subFile.find_first_of("\\/", 0, 2) == std::string::npos)) {
-      if ((subFile.rfind(".hdf") == len - 4) && (subFile.compare(0, 3, "BBY") == 0))
-        hdfFiles++;
-      else if (subFile.rfind(".bin") == len - 4)
-        binFiles++;
-    }
   }
-
-  return (hdfFiles == 1) && (binFiles == 1) ? 50 : 0;
 }
 /**
  * Initialise the algorithm. Declare properties which can be set before
  * execution (input) or
  * read from after the execution (output).
  */
-void LoadBBY::init() {
+void LoadBBY2::init() {
   // Specify file extensions which can be associated with a specific file.
   std::vector<std::string> exts;
 
   // Declare the Filename algorithm property. Mandatory. Sets the path to the
   // file to load.
   exts.clear();
-  exts.emplace_back(".tar");
+  exts.emplace_back(".nxs");
   declareProperty(std::make_unique<API::FileProperty>(FilenameStr, "", API::FileProperty::Load, exts),
                   "The input filename of the stored data");
 
@@ -157,6 +209,8 @@ void LoadBBY::init() {
       "Optional: To only include events before the provided stop time, in "
       "seconds (relative to the start of the run).");
 
+  declareProperty(UseHMScanTimeStr, true, "Use hmscan time rather than scan_dataset.");
+
   std::string grpOptional = "Filters";
   setPropertyGroup(FilterByTofMinStr, grpOptional);
   setPropertyGroup(FilterByTofMaxStr, grpOptional);
@@ -166,17 +220,26 @@ void LoadBBY::init() {
 /**
  * Execute the algorithm.
  */
-void LoadBBY::exec() {
+void LoadBBY2::exec() {
+
   // Delete the output workspace name if it existed
   std::string outName = getPropertyValue("OutputWorkspace");
   if (API::AnalysisDataService::Instance().doesExist(outName))
     API::AnalysisDataService::Instance().remove(outName);
 
   // Get the name of the data file.
-  std::string filename = getPropertyValue(FilenameStr);
-  ANSTO::Tar::File tarFile(filename);
-  if (!tarFile.good())
-    throw std::invalid_argument("invalid BBY file");
+  std::string nxsFile = getPropertyValue(FilenameStr);
+
+  useHMScanTime = getProperty(UseHMScanTimeStr);
+
+  // get the root entry and time period
+  Nexus::NXRoot root(nxsFile);
+  Nexus::NXEntry nxsEntry = root.openFirstEntry();
+  uint64_t startTime, endTime;
+  if (useHMScanTime)
+    std::tie(startTime, endTime) = Anxs::getHMScanLimits(nxsEntry, 0);
+  else
+    std::tie(startTime, endTime) = Anxs::getTimeScanLimits(nxsEntry, 0);
 
   // region of intreset
   std::vector<bool> roi = createRoiVector(getPropertyValue(MaskStr));
@@ -207,7 +270,7 @@ void LoadBBY::exec() {
   std::map<std::string, double> logParams;
   std::map<std::string, std::string> logStrings;
   std::map<std::string, std::string> allParams;
-  createInstrument(tarFile, instrumentInfo, logParams, logStrings, allParams);
+  createInstrument(nxsEntry, startTime, endTime, instrumentInfo, logParams, logStrings, allParams);
 
   // set the units
   if (instrumentInfo.is_tof)
@@ -216,22 +279,7 @@ void LoadBBY::exec() {
     eventWS->getAxis(0)->unit() = Kernel::UnitFactory::Instance().create("Wavelength");
 
   eventWS->setYUnit("Counts");
-
-  // set title
-  const std::vector<std::string> &subFiles = tarFile.files();
-  const auto it = std::find_if(subFiles.cbegin(), subFiles.cend(),
-                               [](const auto &subFile) { return subFile.compare(0, 3, "BBY") == 0; });
-  if (it != subFiles.cend()) {
-    std::string title = *it;
-
-    if (title.rfind(".hdf") == title.length() - 4)
-      title.resize(title.length() - 4);
-
-    if (title.rfind(".nx") == title.length() - 3)
-      title.resize(title.length() - 3);
-
-    eventWS->setTitle(title);
-  }
+  eventWS->setTitle(Anxs::extractWorkspaceTitle(nxsFile));
 
   // load events
   size_t numberHistograms = eventWS->getNumberHistograms();
@@ -249,14 +297,14 @@ void LoadBBY::exec() {
   double shift = -1.0 / 6.0 * periodMaster - periodSlave * phaseSlave / 360.0;
 
   // get the start time from the file
-  Types::Core::DateAndTime startTime(instrumentInfo.start_time);
-  auto startInNanosec = startTime.totalNanoseconds();
+  Types::Core::DateAndTime startDateTime(instrumentInfo.start_time);
+  auto startInNanosec = startDateTime.totalNanoseconds();
 
   // count total events per pixel to reserve necessary memory
   ANSTO::EventCounter eventCounter(roi, HISTO_BINS_Y, period, shift, startInNanosec, tofMinBoundary, tofMaxBoundary,
                                    timeMinBoundary, timeMaxBoundary, eventCounts);
 
-  loadEvents(prog, "loading neutron counts", tarFile, eventCounter);
+  loadEvents<ANSTO::EventCounter>(prog, "loading neutron counts", eventCounter, nxsEntry, startTime, endTime);
 
   // prepare event storage
   ANSTO::ProgressTracker progTracker(prog, "creating neutron event lists", numberHistograms, Progress_ReserveMemory);
@@ -280,13 +328,13 @@ void LoadBBY::exec() {
     ANSTO::EventAssigner eventAssigner(roi, HISTO_BINS_Y, period, shift, startInNanosec, tofMinBoundary, tofMaxBoundary,
                                        timeMinBoundary, timeMaxBoundary, eventVectors);
 
-    loadEvents(prog, "loading neutron events (TOF)", tarFile, eventAssigner);
+    loadEvents(prog, "loading neutron events (TOF)", eventAssigner, nxsEntry, startTime, endTime);
   } else {
     ANSTO::EventAssignerFixedWavelength eventAssigner(roi, HISTO_BINS_Y, instrumentInfo.wavelength, period, shift,
                                                       startInNanosec, tofMinBoundary, tofMaxBoundary, timeMinBoundary,
                                                       timeMaxBoundary, eventVectors);
 
-    loadEvents(prog, "loading neutron events (Wavelength)", tarFile, eventAssigner);
+    loadEvents(prog, "loading neutron events (Wavelength)", eventAssigner, nxsEntry, startTime, endTime);
   }
 
   auto getParam = [&allParams](const std::string &tag, double defValue) {
@@ -328,7 +376,7 @@ void LoadBBY::exec() {
 
   auto frame_count = static_cast<int>(eventCounter.numFrames());
 
-  logManager.addProperty("filename", filename);
+  logManager.addProperty("filename", nxsFile);
   logManager.addProperty("att_pos", static_cast<int>(instrumentInfo.att_pos));
   logManager.addProperty("frame_count", frame_count);
   logManager.addProperty("period", period);
@@ -374,7 +422,7 @@ void LoadBBY::exec() {
 }
 
 // region of intreset
-std::vector<bool> LoadBBY::createRoiVector(const std::string &maskfile) {
+std::vector<bool> LoadBBY2::createRoiVector(const std::string &maskfile) {
   std::vector<bool> result(HISTO_BINS_Y * HISTO_BINS_X, true);
 
   if (maskfile.length() == 0)
@@ -424,9 +472,10 @@ std::vector<bool> LoadBBY::createRoiVector(const std::string &maskfile) {
 }
 
 // loading instrument parameters
-void LoadBBY::loadInstrumentParameters(const Nexus::NXEntry &entry, std::map<std::string, double> &logParams,
-                                       std::map<std::string, std::string> &logStrings,
-                                       std::map<std::string, std::string> &allParams) {
+void LoadBBY2::loadInstrumentParameters(const Nexus::NXEntry &entry, uint64_t startTime, uint64_t endTime,
+                                        std::map<std::string, double> &logParams,
+                                        std::map<std::string, std::string> &logStrings,
+                                        std::map<std::string, std::string> &allParams) {
   using namespace Poco::XML;
   std::string idfDirectory = Mantid::Kernel::ConfigService::Instance().getString("instrumentDefinition.directory");
 
@@ -471,7 +520,8 @@ void LoadBBY::loadInstrumentParameters(const Nexus::NXEntry &entry, std::map<std
     };
 
     std::string tmpString;
-    float tmpFloat = 0.0f;
+    double tmpDouble = 0.0f;
+    uint64_t tmpTimestamp = 0;
     for (auto &x : allParams) {
       if (x.first.find("log_") == 0) {
         auto logTag = boost::algorithm::trim_copy(x.first.substr(4));
@@ -491,12 +541,25 @@ void LoadBBY::loadInstrumentParameters(const Nexus::NXEntry &entry, std::map<std
           auto updateOk = false;
           if (!hdfTag.empty()) {
             if (isNumeric(details[1])) {
-              if (loadNXDataSet(entry, hdfTag, tmpFloat)) {
-                auto factor = std::stod(details[1]);
-                logParams[logTag] = factor * tmpFloat;
-                updateOk = true;
+              bool baseLoaded = Anxs::loadNXDataSet(entry, hdfTag, tmpDouble, 0);
+              bool timeLoaded = false;
+              if (!baseLoaded) {
+                auto key = (details.size() < 4) ? "mean" : boost::algorithm::trim_copy(details[3]);
+                auto imap = ScanLogMap.find(key);
+                Anxs::ScanLog scanLogMode =
+                    (imap != ScanLogMap.end()) ? imap->second : Anxs::ScanLog::Mean; // default value
+                timeLoaded = Anxs::extractTimedDataSet(entry, hdfTag, startTime, endTime, scanLogMode, tmpTimestamp,
+                                                       tmpDouble, tmpString);
               }
-            } else if (loadNXString(entry, hdfTag, tmpString)) {
+              if (baseLoaded || timeLoaded) {
+                auto factor = std::stod(details[1]);
+                logParams[logTag] = factor * tmpDouble;
+                updateOk = true;
+                if (timeLoaded) {
+                  traceStatistics<double>(entry, hdfTag, startTime, endTime, g_log);
+                }
+              }
+            } else if (Anxs::loadNXString(entry, hdfTag, tmpString)) {
               logStrings[logTag] = tmpString;
               updateOk = true;
             }
@@ -527,11 +590,10 @@ void LoadBBY::loadInstrumentParameters(const Nexus::NXEntry &entry, std::map<std
 }
 
 // instrument creation
-void LoadBBY::createInstrument(ANSTO::Tar::File &tarFile, InstrumentInfo &instrumentInfo,
-                               std::map<std::string, double> &logParams, std::map<std::string, std::string> &logStrings,
-                               std::map<std::string, std::string> &allParams) {
-
-  const double toMeters = 1.0 / 1000;
+void LoadBBY2::createInstrument(const Nexus::NXEntry &entry, uint64_t startTime, uint64_t endTime,
+                                InstrumentInfo &instrumentInfo, std::map<std::string, double> &logParams,
+                                std::map<std::string, std::string> &logStrings,
+                                std::map<std::string, std::string> &allParams) {
 
   instrumentInfo.sample_name = "UNKNOWN";
   instrumentInfo.sample_description = "UNKNOWN";
@@ -549,257 +611,71 @@ void LoadBBY::createInstrument(ANSTO::Tar::File &tarFile, InstrumentInfo &instru
   instrumentInfo.period_slave = (1.0 / 50.0) * 1.0e6;
   instrumentInfo.phase_slave = 0.0;
 
-  // extract log and hdf file
-  const std::vector<std::string> &files = tarFile.files();
-  auto file_it = std::find_if(files.cbegin(), files.cend(),
-                              [](const std::string &file) { return file.rfind(".hdf") == file.length() - 4; });
-  if (file_it != files.end()) {
-    tarFile.select(file_it->c_str());
-    // extract hdf file into tmp file
-    Poco::TemporaryFile hdfFile;
-    std::shared_ptr<FILE> handle(fopen(hdfFile.path().c_str(), "wb"), fclose);
-    if (handle) {
-      // copy content
-      char buffer[4096];
-      size_t bytesRead;
-      while (0 != (bytesRead = tarFile.read(buffer, sizeof(buffer))))
-        fwrite(buffer, bytesRead, 1, handle.get());
-      handle.reset();
+  double tmp_double = 0.0f;
+  int64_t tmp_int64 = 0;
+  uint64_t tmp_timestamp = 0;
+  std::string tmp_str;
 
-      Nexus::NXRoot root(hdfFile.path());
-      Nexus::NXEntry entry = root.openFirstEntry();
+  if (Anxs::loadNXDataSet(entry, "monitor/bm1_counts/value", tmp_int64, LAST_INDEX))
+    instrumentInfo.bm_counts = tmp_int64;
+  if (Anxs::loadNXDataSet(entry, "instrument/att_pos/value", tmp_double, LAST_INDEX))
+    instrumentInfo.att_pos = boost::math::iround(tmp_double); // [1.0, 2.0, ..., 5.0]
 
-      float tmp_float = 0.0f;
-      int32_t tmp_int32 = 0;
-      std::string tmp_str;
+  if (Anxs::loadNXString(entry, "sample/name", tmp_str))
+    instrumentInfo.sample_name = tmp_str;
+  if (Anxs::loadNXString(entry, "sample/description", tmp_str))
+    instrumentInfo.sample_description = tmp_str;
 
-      if (loadNXDataSet(entry, "monitor/bm1_counts", tmp_int32))
-        instrumentInfo.bm_counts = tmp_int32;
-      if (loadNXDataSet(entry, "instrument/att_pos", tmp_float))
-        instrumentInfo.att_pos = boost::math::iround(tmp_float); // [1.0, 2.0, ..., 5.0]
-
-      if (loadNXString(entry, "sample/name", tmp_str))
-        instrumentInfo.sample_name = tmp_str;
-      if (loadNXString(entry, "sample/description", tmp_str))
-        instrumentInfo.sample_description = tmp_str;
-      if (loadNXString(entry, "start_time", tmp_str))
-        instrumentInfo.start_time = tmp_str;
-
-      if (loadNXDataSet(entry, "instrument/master1_chopper_id", tmp_int32))
-        instrumentInfo.master1_chopper_id = tmp_int32;
-      if (loadNXDataSet(entry, "instrument/master2_chopper_id", tmp_int32))
-        instrumentInfo.master2_chopper_id = tmp_int32;
-
-      if (loadNXString(entry, "instrument/detector/frame_source", tmp_str))
-        instrumentInfo.is_tof = tmp_str == "EXTERNAL";
-      if (loadNXDataSet(entry, "instrument/nvs067/lambda", tmp_float))
-        instrumentInfo.wavelength = tmp_float;
-
-      if (loadNXDataSet(entry, "instrument/master_chopper_freq", tmp_float) && (tmp_float > 0.0f))
-        instrumentInfo.period_master = 1.0 / tmp_float * 1.0e6;
-      if (loadNXDataSet(entry, "instrument/t0_chopper_freq", tmp_float) && (tmp_float > 0.0f))
-        instrumentInfo.period_slave = 1.0 / tmp_float * 1.0e6;
-      if (loadNXDataSet(entry, "instrument/t0_chopper_phase", tmp_float))
-        instrumentInfo.phase_slave = tmp_float < 999.0 ? tmp_float : 0.0;
-
-      loadInstrumentParameters(entry, logParams, logStrings, allParams);
-
-      // Ltof_det_value is not present for monochromatic data so check
-      // and replace with default
-      auto findLtof = logParams.find("Ltof_det_value");
-      if (findLtof != logParams.end()) {
-        logParams["L1_chopper_value"] = logParams["Ltof_det_value"] - logParams["L2_det_value"];
-      } else {
-        logParams["L1_chopper_value"] = 18.4726;
-        g_log.warning() << "Cannot recover parameter 'L1_chopper_value'"
-                        << ", using default.\n";
-      }
-    }
+  uint64_t epochStart{0};
+  auto timeTag = (useHMScanTime ? "hmscan/time" : "scan_dataset/time");
+  if (Anxs::loadNXDataSet(entry, timeTag, epochStart, 0)) {
+    Types::Core::DateAndTime startDateTime(Anxs::epochRelDateTimeBase(epochStart));
+    instrumentInfo.start_time = startDateTime.toISO8601String();
   }
 
-  // patching
-  file_it = std::find(files.cbegin(), files.cend(), "History.log");
-  if (file_it != files.cend()) {
-    tarFile.select(file_it->c_str());
-    std::string logContent;
-    logContent.resize(tarFile.selected_size());
-    tarFile.read(&logContent[0], logContent.size());
-    std::istringstream data(logContent);
-    Poco::AutoPtr<Poco::Util::PropertyFileConfiguration> conf(new Poco::Util::PropertyFileConfiguration(data));
+  if (Anxs::loadNXDataSet(entry, "instrument/master1_chopper_id", tmp_int64, 0))
+    instrumentInfo.master1_chopper_id = tmp_int64;
+  if (Anxs::loadNXDataSet(entry, "instrument/master2_chopper_id", tmp_int64, 0))
+    instrumentInfo.master2_chopper_id = tmp_int64;
 
-    if (conf->hasProperty("Bm1Counts"))
-      instrumentInfo.bm_counts = conf->getInt("Bm1Counts");
-    if (conf->hasProperty("AttPos"))
-      instrumentInfo.att_pos = boost::math::iround(conf->getDouble("AttPos"));
+  if (Anxs::loadNXString(entry, "instrument/detector/frame_source", tmp_str))
+    instrumentInfo.is_tof = tmp_str == "EXTERNAL";
 
-    if (conf->hasProperty("SampleName"))
-      instrumentInfo.sample_name = conf->getString("SampleName");
+  if (Anxs::extractTimedDataSet(entry, "instrument/nvs067/lambda", startTime, endTime, Anxs::ScanLog::Mean,
+                                tmp_timestamp, tmp_double, tmp_str))
+    instrumentInfo.wavelength = tmp_double;
 
-    if (conf->hasProperty("MasterChopperFreq")) {
-      auto tmp = conf->getDouble("MasterChopperFreq");
-      if (tmp > 0.0f)
-        instrumentInfo.period_master = 1.0 / tmp * 1.0e6;
-    }
-    if (conf->hasProperty("T0ChopperFreq")) {
-      auto tmp = conf->getDouble("T0ChopperFreq");
-      if (tmp > 0.0f)
-        instrumentInfo.period_slave = 1.0 / tmp * 1.0e6;
-    }
-    if (conf->hasProperty("T0ChopperPhase")) {
-      auto tmp = conf->getDouble("T0ChopperPhase");
-      instrumentInfo.phase_slave = tmp < 999.0 ? tmp : 0.0;
-    }
+  if (Anxs::extractTimedDataSet(entry, "instrument/master_chopper_freq", startTime, endTime, Anxs::ScanLog::Mean,
+                                tmp_timestamp, tmp_double, tmp_str) &&
+      (tmp_double > 0.0f))
+    instrumentInfo.period_master = 1.0 / tmp_double * 1.0e6;
 
-    if (conf->hasProperty("FrameSource"))
-      instrumentInfo.is_tof = conf->getString("FrameSource") == "EXTERNAL";
-    if (conf->hasProperty("Wavelength"))
-      instrumentInfo.wavelength = conf->getDouble("Wavelength");
+  if (Anxs::extractTimedDataSet(entry, "instrument/t0_chopper_freq", startTime, endTime, Anxs::ScanLog::Mean,
+                                tmp_timestamp, tmp_double, tmp_str) &&
+      (tmp_double > 0.0f))
+    instrumentInfo.period_slave = 1.0 / tmp_double * 1.0e6;
 
-    if (conf->hasProperty("SampleAperture"))
-      logParams["sample_aperture"] = conf->getDouble("SampleAperture");
-    if (conf->hasProperty("SourceAperture"))
-      logParams["source_aperture"] = conf->getDouble("SourceAperture");
-    if (conf->hasProperty("L1"))
-      logParams["L1_source_value"] = conf->getDouble("L1") * toMeters;
-    if (conf->hasProperty("LTofDet"))
-      logParams["L1_chopper_value"] = conf->getDouble("LTofDet") * toMeters - logParams["L2_det_value"];
-    if (conf->hasProperty("L2Det"))
-      logParams["L2_det_value"] = conf->getDouble("L2Det") * toMeters;
+  if (Anxs::extractTimedDataSet(entry, "instrument/t0_chopper_phase", startTime, endTime, Anxs::ScanLog::Mean,
+                                tmp_timestamp, tmp_double, tmp_str))
+    instrumentInfo.phase_slave = tmp_double < 999.0 ? tmp_double : 0.0;
 
-    if (conf->hasProperty("L2CurtainL"))
-      logParams["L2_curtainl_value"] = conf->getDouble("L2CurtainL") * toMeters;
-    if (conf->hasProperty("L2CurtainR"))
-      logParams["L2_curtainr_value"] = conf->getDouble("L2CurtainR") * toMeters;
-    if (conf->hasProperty("L2CurtainU"))
-      logParams["L2_curtainu_value"] = conf->getDouble("L2CurtainU") * toMeters;
-    if (conf->hasProperty("L2CurtainD"))
-      logParams["L2_curtaind_value"] = conf->getDouble("L2CurtainD") * toMeters;
+  // addnl trace message if needed
+  traceStatistics<double>(entry, "instrument/nvs067/lambda", startTime, endTime, g_log);
+  traceStatistics<double>(entry, "instrument/master_chopper_freq", startTime, endTime, g_log);
+  traceStatistics<double>(entry, "instrument/t0_chopper_freq", startTime, endTime, g_log);
+  traceStatistics<double>(entry, "instrument/t0_chopper_phase", startTime, endTime, g_log);
 
-    if (conf->hasProperty("CurtainL"))
-      logParams["D_curtainl_value"] = conf->getDouble("CurtainL") * toMeters;
-    if (conf->hasProperty("CurtainR"))
-      logParams["D_curtainr_value"] = conf->getDouble("CurtainR") * toMeters;
-    if (conf->hasProperty("CurtainU"))
-      logParams["D_curtainu_value"] = conf->getDouble("CurtainU") * toMeters;
-    if (conf->hasProperty("CurtainD"))
-      logParams["D_curtaind_value"] = conf->getDouble("CurtainD") * toMeters;
-  }
-}
+  loadInstrumentParameters(entry, startTime, endTime, logParams, logStrings, allParams);
 
-// load nx dataset
-template <class T> bool LoadBBY::loadNXDataSet(const Nexus::NXEntry &entry, const std::string &address, T &value) {
-  try {
-    Nexus::NXDataSetTyped<T> dataSet = entry.openNXDataSet<T>(address);
-    dataSet.load();
-
-    value = *dataSet();
-    return true;
-  } catch (std::runtime_error &) {
-    return false;
-  }
-}
-bool LoadBBY::loadNXString(const Nexus::NXEntry &entry, const std::string &address, std::string &value) {
-  try {
-    value = entry.getString(address);
-    return true;
-  } catch (const std::runtime_error &) {
-    return false;
-  }
-}
-
-// read counts/events from binary file
-template <class EventProcessor>
-void LoadBBY::loadEvents(API::Progress &prog, const char *progMsg, ANSTO::Tar::File &tarFile,
-                         EventProcessor &eventProcessor) {
-  prog.doReport(progMsg);
-
-  // select bin file
-  int64_t fileSize = 0;
-  const std::vector<std::string> &files = tarFile.files();
-  const auto found = std::find_if(files.cbegin(), files.cend(),
-                                  [](const auto &file) { return file.rfind(".bin") == file.length() - 4; });
-  if (found != files.cend()) {
-    tarFile.select(found->c_str());
-    fileSize = tarFile.selected_size();
-  }
-
-  // for progress notifications
-  ANSTO::ProgressTracker progTracker(prog, progMsg, fileSize, Progress_LoadBinFile);
-
-  uint32_t x = 0; // 9 bits [0-239] tube number
-  uint32_t y = 0; // 8 bits [0-255] position along tube
-
-  // uint v = 0; // 0 bits [     ]
-  // uint w = 0; // 0 bits [     ] energy
-  uint32_t dt = 0;
-  double tof = 0.0;
-
-  if ((fileSize == 0) || !tarFile.skip(128))
-    return;
-
-  int state = 0;
-  int invalidEvents = 0;
-  uint32_t c;
-  while ((c = static_cast<uint32_t>(tarFile.read_byte())) != static_cast<uint32_t>(-1)) {
-
-    bool event_ended = false;
-    switch (state) {
-    case 0:
-      x = (c & 0xFF) >> 0; // set bit 1-8
-      break;
-
-    case 1:
-      x |= (c & 0x01) << 8; // set bit 9
-      y = (c & 0xFE) >> 1;  // set bit 1-7
-      break;
-
-    case 2:
-      event_ended = (c & 0xC0) != 0xC0;
-      if (!event_ended)
-        c &= 0x3F;
-
-      y |= (c & 0x01) << 7; // set bit 8
-      dt = (c & 0xFE) >> 1; // set bit 1-5(7)
-      break;
-
-    case 3:
-    case 4:
-    case 5:
-    case 6:
-    case 7:
-      event_ended = (c & 0xC0) != 0xC0;
-      if (!event_ended)
-        c &= 0x3F;
-
-      // state is either 3, 4, 5, 6 or 7
-      dt |= (c & 0xFF) << (5 + 6 * (state - 3)); // set bit 6...
-      break;
-    }
-    state++;
-
-    if (event_ended || (state == 8)) {
-      state = 0;
-
-      if ((x == 0) && (y == 0) && (dt == 0xFFFFFFFF)) {
-        tof = 0.0;
-        eventProcessor.newFrame();
-      } else if ((x >= HISTO_BINS_X) || (y >= HISTO_BINS_Y)) {
-        // cannot ignore the dt contrbition even if the event
-        // is out of bounds as it is used in the encoding process
-        tof += static_cast<int>(dt) * 0.1;
-        invalidEvents++;
-      } else {
-        // conversion from 100 nanoseconds to 1 microsecond
-        tof += static_cast<int>(dt) * 0.1;
-
-        eventProcessor.addEvent(x, y, tof);
-      }
-
-      progTracker.update(tarFile.selected_position());
-    }
-  }
-  if (invalidEvents > 0) {
-    g_log.warning() << "BILBY loader dropped " << invalidEvents << " invalid event(s)" << std::endl;
+  // Ltof_det_value is not present for monochromatic data so check
+  // and replace with default
+  auto findLtof = logParams.find("Ltof_det_value");
+  if (findLtof != logParams.end()) {
+    logParams["L1_chopper_value"] = logParams["Ltof_det_value"] - logParams["L2_det_value"];
+  } else {
+    logParams["L1_chopper_value"] = 18.4726;
+    g_log.warning() << "Cannot recover parameter 'L1_chopper_value'"
+                    << ", using default.\n";
   }
 }
 
