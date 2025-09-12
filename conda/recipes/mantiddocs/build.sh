@@ -28,7 +28,6 @@ LD_PRELOAD="" \
   -DCONDA_BUILD=True \
   -DUSE_PYTHON_DYNAMIC_LIB=OFF \
   -DPython_EXECUTABLE=$PYTHON \
-  -DMANTID_DATA_STORE="/mantid_data" \
   -GNinja \
   ../
 

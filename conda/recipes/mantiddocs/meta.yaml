@@ -24,8 +24,6 @@ requirements:
     - cross-python_{{ target_platform }}     # [build_platform != target_platform]
     - setuptools                             # [build_platform != target_platform]
     - numpy {{ numpy }}                      # [build_platform != target_platform]
-    script_env:
-      - MANTID_DATA_STORE # [linux]
   host:
     - python {{ python }}
     - setuptools
@@ -57,3 +55,7 @@ extra:
     - thomashampson
     - sf1919
     - martyngigg
+
+build:
+script_env:
+  - MANTID_DATA_STORE=/mantid_data
