@@ -25,7 +25,11 @@ using Mantid::DataHandling::AlignAndFocusPowderSlim::AlignAndFocusPowderSlim;
 using Mantid::DataObjects::TableWorkspace_sptr;
 
 namespace {
+// used in most tests
+const std::string VULCAN_218062("VULCAN_218062.nxs.h5");
+
 // place where the disabled tests at the bottom are
+// test_exec1GB, test_exec10GB, test_exec18GB
 const std::string DATA_LOCATION{"/home/pf9/build/mantid/vulcanperf/"};
 
 /// struct to make it easier to configure the test
@@ -117,8 +121,7 @@ public:
   }
 
   void test_defaults() {
-    const std::string filename("VULCAN_218062.nxs.h5");
-    MatrixWorkspace_sptr outputWS = run_algorithm(filename, TestConfig());
+    MatrixWorkspace_sptr outputWS = run_algorithm(VULCAN_218062, TestConfig());
 
     constexpr size_t NUM_Y{1874}; // observed value
 
@@ -144,7 +147,7 @@ public:
     alg.setChild(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized());
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", filename));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", VULCAN_218062));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "unused"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("ReadSizeFromDisk", 1000000));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
@@ -162,13 +165,8 @@ public:
   }
 
   void test_common_x() {
-    TestConfig configuration;
-    configuration.xmin = {13000.};
-    configuration.xmax = {36000.};
-    configuration.binning = "Logarithmic";
-    configuration.binningUnits = "TOF";
-    const std::string filename("VULCAN_218062.nxs.h5");
-    MatrixWorkspace_sptr outputWS = run_algorithm(filename, configuration);
+    TestConfig configuration({13000.}, {36000.}, {}, "Logarithmic", "TOF");
+    MatrixWorkspace_sptr outputWS = run_algorithm(VULCAN_218062, configuration);
 
     constexpr size_t NUM_Y{637}; // observed value
 
@@ -191,13 +189,9 @@ public:
   }
 
   void test_ragged_bins_x_min_max() {
-    TestConfig configuration;
-    configuration.xmin = {13000., 14000., 15000., 16000., 17000., 18000.};
-    configuration.xmax = {36000., 37000., 38000., 39000., 40000., 41000.};
-    configuration.binning = "Logarithmic";
-    configuration.binningUnits = "TOF";
-    const std::string filename("VULCAN_218062.nxs.h5");
-    MatrixWorkspace_sptr outputWS = run_algorithm(filename, configuration);
+    TestConfig configuration({13000., 14000., 15000., 16000., 17000., 18000.},
+                             {36000., 37000., 38000., 39000., 40000., 41000.}, {}, "Logarithmic", "TOF");
+    MatrixWorkspace_sptr outputWS = run_algorithm(VULCAN_218062, configuration);
 
     // verify the output
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 6);
@@ -213,15 +207,8 @@ public:
   }
 
   void test_ragged_bins_x_delta() {
-    TestConfig configuration;
-    configuration.xmin = {13000.};
-    configuration.xmax = {36000.};
-    configuration.xdelta = {1000., 2000., 3000., 4000., 5000., 6000.};
-    configuration.binning = "Linear";
-    configuration.binningUnits = "TOF";
-    // this will create
-    const std::string filename("VULCAN_218062.nxs.h5");
-    MatrixWorkspace_sptr outputWS = run_algorithm(filename, configuration);
+    TestConfig configuration({13000.}, {36000.}, {1000., 2000., 3000., 4000., 5000., 6000.}, "Linear", "TOF");
+    MatrixWorkspace_sptr outputWS = run_algorithm(VULCAN_218062, configuration);
 
     // verify the output
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 6);
@@ -279,15 +266,8 @@ public:
 
   void run_test_with_different_units(std::vector<double> xmin, std::vector<double> xmax, std::vector<double> xdelta,
                                      std::string units) {
-    TestConfig configuration;
-    configuration.xmin = xmin;
-    configuration.xmax = xmax;
-    configuration.xdelta = xdelta;
-    configuration.binning = "Linear";
-    configuration.binningUnits = units;
-    const std::string filename("VULCAN_218062.nxs.h5");
-
-    MatrixWorkspace_sptr outputWS = run_algorithm(filename, configuration);
+    TestConfig configuration(xmin, xmax, xdelta, "Linear", units);
+    MatrixWorkspace_sptr outputWS = run_algorithm(VULCAN_218062, configuration);
 
     // verify the output
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 6);
@@ -301,16 +281,11 @@ public:
   }
 
   void test_load_nexus_logs() {
-    TestConfig configuration;
-    configuration.xmin = {0.};
-    configuration.xmax = {50000.};
-    configuration.xdelta = {50000.};
-    configuration.binning = "Linear";
-    configuration.binningUnits = "TOF";
+    TestConfig configuration({0.}, {50000.}, {50000.}, "Linear", "TOF");
     configuration.timeMin = 0.;
     configuration.timeMax = 300.;
     configuration.logListBlock = "skf*";
-    MatrixWorkspace_sptr outputWS = run_algorithm("VULCAN_218062.nxs.h5", configuration);
+    MatrixWorkspace_sptr outputWS = run_algorithm(VULCAN_218062, configuration);
 
     // verify the output
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 6);
@@ -328,20 +303,14 @@ public:
   }
 
   void test_start_stop_time_filtering() {
-    TestConfig configuration;
-    configuration.xmin = {0.};
-    configuration.xmax = {50000.};
-    configuration.xdelta = {50000.};
-    configuration.binning = "Linear";
-    configuration.binningUnits = "TOF";
+    TestConfig configuration({0.}, {50000.}, {50000.}, "Linear", "TOF");
     configuration.timeMin = 200.;
     configuration.timeMax = 300.;
-
-    MatrixWorkspace_sptr outputWS = run_algorithm("VULCAN_218062.nxs.h5", configuration);
+    MatrixWorkspace_sptr outputWS = run_algorithm(VULCAN_218062, configuration);
 
     /* expected results came from running
 
-    ws = LoadEventNexus("VULCAN_218062.nxs.h5", FilterByTimeStart=200, FilterByTimeStop=300, NumberOfBins=1)
+    ws = LoadEventNexus(VULCAN_218062, FilterByTimeStart=200, FilterByTimeStop=300, NumberOfBins=1)
     grp = CreateGroupingWorkspace(ws, GroupDetectorsBy='bank')
     ws = GroupDetectors(ws, CopyGroupingFromWorkspace="grp")
     print(ws.extractY())
@@ -368,18 +337,13 @@ public:
   }
 
   void test_start_time_filtering() {
-    TestConfig configuration;
-    configuration.xmin = {0.};
-    configuration.xmax = {50000.};
-    configuration.xdelta = {50000.};
-    configuration.binning = "Linear";
-    configuration.binningUnits = "TOF";
+    TestConfig configuration({0.}, {50000.}, {50000.}, "Linear", "TOF");
     configuration.timeMin = 200.;
-    MatrixWorkspace_sptr outputWS = run_algorithm("VULCAN_218062.nxs.h5", configuration);
+    MatrixWorkspace_sptr outputWS = run_algorithm(VULCAN_218062, configuration);
 
     /* expected results came from running
 
-    ws = LoadEventNexus("VULCAN_218062.nxs.h5", FilterByTimeStart=200, NumberOfBins=1)
+    ws = LoadEventNexus(VULCAN_218062, FilterByTimeStart=200, NumberOfBins=1)
     grp = CreateGroupingWorkspace(ws, GroupDetectorsBy='bank')
     ws = GroupDetectors(ws, CopyGroupingFromWorkspace="grp")
     print(ws.extractY())
@@ -394,18 +358,13 @@ public:
   }
 
   void test_stop_time_filtering() {
-    TestConfig configuration;
-    configuration.xmin = {0.};
-    configuration.xmax = {50000.};
-    configuration.xdelta = {50000.};
-    configuration.binning = "Linear";
-    configuration.binningUnits = "TOF";
+    TestConfig configuration({0.}, {50000.}, {50000.}, "Linear", "TOF");
     configuration.timeMax = 300.;
-    MatrixWorkspace_sptr outputWS = run_algorithm("VULCAN_218062.nxs.h5", configuration);
+    MatrixWorkspace_sptr outputWS = run_algorithm(VULCAN_218062, configuration);
 
     /* expected results came from running
 
-    ws = LoadEventNexus("VULCAN_218062.nxs.h5", FilterByTimeStop=300, NumberOfBins=1)
+    ws = LoadEventNexus(VULCAN_218062, FilterByTimeStop=300, NumberOfBins=1)
     grp = CreateGroupingWorkspace(ws, GroupDetectorsBy='bank')
     ws = GroupDetectors(ws, CopyGroupingFromWorkspace="grp")
     print(ws.extractY())
@@ -421,18 +380,13 @@ public:
 
   void test_all_time_filtering() {
     // run is only ~600 seconds long so this include all events
-    TestConfig configuration;
-    configuration.xmin = {0.};
-    configuration.xmax = {50000.};
-    configuration.xdelta = {50000.};
-    configuration.binning = "Linear";
-    configuration.binningUnits = "TOF";
+    TestConfig configuration({0.}, {50000.}, {50000.}, "Linear", "TOF");
     configuration.timeMax = 3000.;
-    MatrixWorkspace_sptr outputWS = run_algorithm("VULCAN_218062.nxs.h5", configuration);
+    MatrixWorkspace_sptr outputWS = run_algorithm(VULCAN_218062, configuration);
 
     /* expected results came from running
 
-    ws = LoadEventNexus("VULCAN_218062.nxs.h5", NumberOfBins=1)
+    ws = LoadEventNexus(VULCAN_218062, NumberOfBins=1)
     grp = CreateGroupingWorkspace(ws, GroupDetectorsBy='bank')
     ws = GroupDetectors(ws, CopyGroupingFromWorkspace="grp")
     print(ws.extractY())
@@ -448,33 +402,23 @@ public:
 
   void test_invalid_time_filtering() {
     // start time > stop time
-    TestConfig configuration;
-    configuration.xmin = {0.};
-    configuration.xmax = {50000.};
-    configuration.xdelta = {50000.};
-    configuration.binning = "Linear";
-    configuration.binningUnits = "TOF";
+    TestConfig configuration({0.}, {50000.}, {50000.}, "Linear", "TOF");
     configuration.timeMin = 300.;
     configuration.timeMax = 200.;
-    run_algorithm("VULCAN_218062.nxs.h5", configuration, true);
+    run_algorithm(VULCAN_218062, configuration, true);
     // start time longer than run time of ~600 seconds
     configuration.timeMin = 1000.;
     configuration.timeMax = 2000.;
-    run_algorithm("VULCAN_218062.nxs.h5", configuration, true);
+    run_algorithm(VULCAN_218062, configuration, true);
   }
 
   void test_splitter_table() {
     Mantid::DataObjects::TableWorkspace_sptr tablesplitter = create_splitter_table();
-    TestConfig configuration;
-    configuration.xmin = {0.};
-    configuration.xmax = {50000.};
-    configuration.xdelta = {50000.};
-    configuration.binning = "Linear";
-    configuration.binningUnits = "TOF";
+    TestConfig configuration({0.}, {50000.}, {50000.}, "Linear", "TOF");
     configuration.relativeTime = true;
     configuration.tablesplitter = create_splitter_table(configuration.relativeTime);
     configuration.relativeTime = true;
-    MatrixWorkspace_sptr outputWS = run_algorithm("VULCAN_218062.nxs.h5", configuration);
+    MatrixWorkspace_sptr outputWS = run_algorithm(VULCAN_218062, configuration);
 
     /* expected results came from running
 
@@ -486,7 +430,7 @@ public:
     splitter.addRow((200,210, '0'))
     splitter.addRow((400,410, '0'))
 
-    ws = LoadEventNexus("VULCAN_218062.nxs.h5", NumberOfBins=1)
+    ws = LoadEventNexus(VULCAN_218062, NumberOfBins=1)
     grp = CreateGroupingWorkspace(ws, GroupDetectorsBy='bank')
     ws = GroupDetectors(ws, CopyGroupingFromWorkspace="grp")
 
@@ -504,15 +448,10 @@ public:
   }
 
   void test_splitter_table_absolute_time() {
-    TestConfig configuration;
-    configuration.xmin = {0.};
-    configuration.xmax = {50000.};
-    configuration.xdelta = {50000.};
-    configuration.binning = "Linear";
-    configuration.binningUnits = "TOF";
+    TestConfig configuration({0.}, {50000.}, {50000.}, "Linear", "TOF");
     configuration.relativeTime = false;
     configuration.tablesplitter = create_splitter_table(configuration.relativeTime);
-    MatrixWorkspace_sptr outputWS = run_algorithm("VULCAN_218062.nxs.h5", configuration);
+    MatrixWorkspace_sptr outputWS = run_algorithm(VULCAN_218062, configuration);
 
     /* expected results should be the same as test_splitter_table but produced with absolute time */
 
@@ -525,20 +464,15 @@ public:
   }
 
   void test_splitter_table_multiple_targets() {
-    TestConfig configuration;
-    configuration.xmin = {0.};
-    configuration.xmax = {50000.};
-    configuration.xdelta = {50000.};
-    configuration.binning = "Linear";
-    configuration.binningUnits = "TOF";
+    TestConfig configuration({0.}, {50000.}, {50000.}, "Linear", "TOF");
     configuration.relativeTime = true;
     configuration.tablesplitter = create_splitter_table(configuration.relativeTime, false);
     configuration.splitterTarget = 0;
-    MatrixWorkspace_sptr outputWS0 = run_algorithm("VULCAN_218062.nxs.h5", configuration);
+    MatrixWorkspace_sptr outputWS0 = run_algorithm(VULCAN_218062, configuration);
 
     /* expected results came from running
 
-    ws = LoadEventNexus("VULCAN_218062.nxs.h5", NumberOfBins=1, FilterByTimeStart=10, FilterByTimeStop=20)
+    ws = LoadEventNexus(VULCAN_218062, NumberOfBins=1, FilterByTimeStart=10, FilterByTimeStop=20)
     grp = CreateGroupingWorkspace(ws, GroupDetectorsBy='bank')
     ws = GroupDetectors(ws, CopyGroupingFromWorkspace="grp")
     print(ws.extractY())
@@ -552,11 +486,11 @@ public:
     TS_ASSERT_EQUALS(outputWS0->readY(5).front(), 43843);
 
     configuration.splitterTarget = 1; // next index
-    MatrixWorkspace_sptr outputWS1 = run_algorithm("VULCAN_218062.nxs.h5", configuration);
+    MatrixWorkspace_sptr outputWS1 = run_algorithm(VULCAN_218062, configuration);
 
     /* expected results came from running
 
-    ws = LoadEventNexus("VULCAN_218062.nxs.h5", NumberOfBins=1, FilterByTimeStart=200, FilterByTimeStop=210)
+    ws = LoadEventNexus(VULCAN_218062, NumberOfBins=1, FilterByTimeStart=200, FilterByTimeStop=210)
     grp = CreateGroupingWorkspace(ws, GroupDetectorsBy='bank')
     ws = GroupDetectors(ws, CopyGroupingFromWorkspace="grp")
     print(ws.extractY())
@@ -570,11 +504,11 @@ public:
     TS_ASSERT_EQUALS(outputWS1->readY(5).front(), 273072);
 
     configuration.splitterTarget = 2; // next index
-    MatrixWorkspace_sptr outputWS2 = run_algorithm("VULCAN_218062.nxs.h5", configuration);
+    MatrixWorkspace_sptr outputWS2 = run_algorithm(VULCAN_218062, configuration);
 
     /* expected results came from running
 
-    ws = LoadEventNexus("VULCAN_218062.nxs.h5", NumberOfBins=1, FilterByTimeStart=400, FilterByTimeStop=410)
+    ws = LoadEventNexus(VULCAN_218062, NumberOfBins=1, FilterByTimeStart=400, FilterByTimeStop=410)
     grp = CreateGroupingWorkspace(ws, GroupDetectorsBy='bank')
     ws = GroupDetectors(ws, CopyGroupingFromWorkspace="grp")
     print(ws.extractY())
@@ -589,21 +523,16 @@ public:
 
     // target out of range, should throw
     configuration.splitterTarget = 3;
-    run_algorithm("VULCAN_218062.nxs.h5", configuration, true);
+    run_algorithm(VULCAN_218062, configuration, true);
   }
 
   void test_splitter_table_and_time_start_stop() {
-    TestConfig configuration;
-    configuration.xmin = {0.};
-    configuration.xmax = {50000.};
-    configuration.xdelta = {50000.};
-    configuration.binning = "Linear";
-    configuration.binningUnits = "TOF";
+    TestConfig configuration({0.}, {50000.}, {50000.}, "Linear", "TOF");
     configuration.timeMin = 15;
     configuration.timeMax = 300;
     configuration.relativeTime = true;
     configuration.tablesplitter = create_splitter_table(configuration.relativeTime);
-    MatrixWorkspace_sptr outputWS = run_algorithm("VULCAN_218062.nxs.h5", configuration);
+    MatrixWorkspace_sptr outputWS = run_algorithm(VULCAN_218062, configuration);
 
     /* expected results came from running
 
@@ -614,7 +543,7 @@ public:
     splitter.addRow((15,20, '0'))
     splitter.addRow((200,210, '0'))
 
-    ws = LoadEventNexus("VULCAN_218062.nxs.h5", NumberOfBins=1)
+    ws = LoadEventNexus(VULCAN_218062, NumberOfBins=1)
     grp = CreateGroupingWorkspace(ws, GroupDetectorsBy='bank')
     ws = GroupDetectors(ws, CopyGroupingFromWorkspace="grp")
 
@@ -659,18 +588,13 @@ public:
   }
 
   void test_filter_bad_pulses() {
-    TestConfig configuration;
-    configuration.xmin = {0.};
-    configuration.xmax = {50000.};
-    configuration.xdelta = {50000.};
-    configuration.binning = "Linear";
-    configuration.binningUnits = "TOF";
+    TestConfig configuration({0.}, {50000.}, {50000.}, "Linear", "TOF");
     configuration.filterBadPulses = true;
-    MatrixWorkspace_sptr outputWS = run_algorithm("VULCAN_218062.nxs.h5", configuration);
+    MatrixWorkspace_sptr outputWS = run_algorithm(VULCAN_218062, configuration);
 
     /* expected results came from running
 
-    ws = LoadEventNexus("VULCAN_218062.nxs.h5", NumberOfBins=1)
+    ws = LoadEventNexus(VULCAN_218062, NumberOfBins=1)
     grp = CreateGroupingWorkspace(ws, GroupDetectorsBy='bank')
     ws = GroupDetectors(ws, CopyGroupingFromWorkspace="grp")
     ws = FilterBadPulses(ws)
@@ -686,20 +610,15 @@ public:
   }
 
   void test_filter_bad_pulses_and_time_start_stop() {
-    TestConfig configuration;
-    configuration.xmin = {0.};
-    configuration.xmax = {50000.};
-    configuration.xdelta = {50000.};
-    configuration.binning = "Linear";
-    configuration.binningUnits = "TOF";
+    TestConfig configuration({0.}, {50000.}, {50000.}, "Linear", "TOF");
     configuration.filterBadPulses = true;
     configuration.timeMin = 200.;
     configuration.timeMax = 300.;
-    MatrixWorkspace_sptr outputWS = run_algorithm("VULCAN_218062.nxs.h5", configuration);
+    MatrixWorkspace_sptr outputWS = run_algorithm(VULCAN_218062, configuration);
 
     /* expected results came from running
 
-    ws = LoadEventNexus("VULCAN_218062.nxs.h5", NumberOfBins=1, FilterByTimeStart=200, FilterByTimeStop=300)
+    ws = LoadEventNexus(VULCAN_218062, NumberOfBins=1, FilterByTimeStart=200, FilterByTimeStop=300)
     grp = CreateGroupingWorkspace(ws, GroupDetectorsBy='bank')
     ws = GroupDetectors(ws, CopyGroupingFromWorkspace="grp")
     ws = FilterBadPulses(ws)
