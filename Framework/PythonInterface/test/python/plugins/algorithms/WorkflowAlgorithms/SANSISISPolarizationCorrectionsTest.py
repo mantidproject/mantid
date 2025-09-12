@@ -36,6 +36,7 @@ class SANSISISPolarizationCorrectionsTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.user_file = NamedTemporaryFile(mode="r+", suffix=".toml", delete=False)
+        ConfigService["MantidOptions.InvisibleWorkspaces"] = "1"
         cls._MANDATORY_PROPS_CAL = {
             MAIN_PROPERTIES.reduction: cls._RED_TYPE,
             MAIN_PROPERTIES.transmission: "1",
@@ -47,6 +48,7 @@ class SANSISISPolarizationCorrectionsTest(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         if os.path.exists(cls.user_file.name):
+            cls.user_file.close()
             os.remove(cls.user_file.name)
 
     def setUp(self):
