@@ -70,8 +70,21 @@ class FullInstrumentViewWindow(QMainWindow):
 
         self.main_plotter = BackgroundPlotter(show=False, menu_bar=False, toolbar=False, off_screen=off_screen)
         pyvista_vertical_layout.addWidget(self.main_plotter.app_window)
-        self.projection_plotter = BackgroundPlotter(show=False, menu_bar=False, toolbar=False, off_screen=off_screen)
-        pyvista_vertical_layout.addWidget(self.projection_plotter.app_window)
+
+        self._detector_spectrum_fig, self._detector_spectrum_axes = plt.subplots(subplot_kw={"projection": "mantid"})
+        self._detector_figure_canvas = FigureCanvas(self._detector_spectrum_fig)
+        self._detector_figure_canvas.setMinimumSize(QSize(0, 0))
+        plot_widget = QWidget()
+        plot_layout = QVBoxLayout(plot_widget)
+        plot_layout.addWidget(self._detector_figure_canvas)
+
+        vsplitter = QSplitter(Qt.Vertical)
+        vsplitter.addWidget(self.main_plotter.app_window)
+        vsplitter.addWidget(plot_widget)
+        vsplitter.setStretchFactor(0, 0)
+        vsplitter.setStretchFactor(1, 1)
+
+        pyvista_vertical_layout.addWidget(vsplitter)
 
         detector_group_box = QGroupBox("Detector Info")
         detector_info_layout = QVBoxLayout(detector_group_box)
@@ -105,7 +118,7 @@ class FullInstrumentViewWindow(QMainWindow):
         self._projection_combo_box = QComboBox(self)
         self._reset_projection = QPushButton("Reset Projection")
         self._reset_projection.setToolTip("Resets the projection to default.")
-        self._reset_projection.clicked.connect(self.reset_projection)
+        self._reset_projection.clicked.connect(self.reset_camera)
         projection_layout.addWidget(self._projection_combo_box)
         projection_layout.addWidget(self._reset_projection)
 
@@ -130,22 +143,17 @@ class FullInstrumentViewWindow(QMainWindow):
         options_vertical_layout.addWidget(self._contour_range_group_box)
         options_vertical_layout.addWidget(multi_select_group_box)
         options_vertical_layout.addWidget(projection_group_box)
+        options_vertical_layout.addWidget(self.status_group_box)
+        left_column_layout.addWidget(options_vertical_widget)
+        left_column_layout.addStretch()
 
-        self._detector_spectrum_fig, self._detector_spectrum_axes = plt.subplots(subplot_kw={"projection": "mantid"})
-        self._detector_figure_canvas = FigureCanvas(self._detector_spectrum_fig)
-        self._detector_figure_canvas.setMinimumSize(QSize(0, 0))
+    def disable_rectangle_picking_checkbox(self) -> None:
+        self._multi_select_check.setChecked(False)
+        self._multi_select_check.setEnabled(False)
 
-        plot_widget = QWidget()
-        plot_layout = QVBoxLayout(plot_widget)
-        plot_layout.addWidget(self._detector_figure_canvas)
-        plot_layout.addWidget(self.status_group_box)
-
-        vsplitter = QSplitter(Qt.Vertical)
-        vsplitter.addWidget(options_vertical_widget)
-        vsplitter.addWidget(plot_widget)
-        vsplitter.setStretchFactor(0, 0)
-        vsplitter.setStretchFactor(1, 1)
-        left_column_layout.addWidget(vsplitter)
+    def enable_rectangle_picking_checkbox(self) -> None:
+        self._multi_select_check.setChecked(False)
+        self._multi_select_check.setEnabled(True)
 
     def hide_status_box(self) -> None:
         self.status_group_box.hide()
@@ -153,11 +161,6 @@ class FullInstrumentViewWindow(QMainWindow):
     def reset_camera(self) -> None:
         if not self._off_screen:
             self.main_plotter.reset_camera()
-            self.projection_plotter.reset_camera()
-
-    def reset_projection(self) -> None:
-        if not self._off_screen:
-            self.projection_plotter.reset_camera()
 
     def _add_min_max_group_box(self, parent_box: QGroupBox) -> tuple[QLineEdit, QLineEdit, QDoubleRangeSlider]:
         """Creates a minimum and a maximum box (with labels) inside the given group box. The callbacks will be attached to textEdited
@@ -217,7 +220,7 @@ class FullInstrumentViewWindow(QMainWindow):
         min_edit.editingFinished.connect(set_slider(callled_from_min=True))
         max_edit.editingFinished.connect(set_slider(callled_from_min=False))
 
-    def _add_detector_info_boxes(self, parent_box: QVBoxLayout, label: str) -> QHBoxLayout:
+    def _add_detector_info_boxes(self, parent_box: QVBoxLayout, label: str) -> QTextEdit:
         """Adds a text box to the given parent that is designed to show read-only information about the selected detector"""
         hbox = QHBoxLayout()
         hbox.addWidget(QLabel(label))
@@ -239,6 +242,7 @@ class FullInstrumentViewWindow(QMainWindow):
     def setup_connections_to_presenter(self) -> None:
         self._projection_combo_box.currentIndexChanged.connect(self._presenter.on_projection_option_selected)
         self._multi_select_check.stateChanged.connect(self._presenter.on_multi_select_detectors_clicked)
+        self._multi_select_check.clicked.connect(self._cleanup_rectangle_picking)
         self._clear_selection_button.clicked.connect(self._presenter.on_clear_selected_detectors_clicked)
         self._contour_range_slider.sliderReleased.connect(self._presenter.on_contour_limits_updated)
         self._tof_slider.sliderReleased.connect(self._presenter.on_tof_limits_updated)
@@ -253,10 +257,20 @@ class FullInstrumentViewWindow(QMainWindow):
             self._tof_min_edit, self._tof_max_edit, self._tof_slider, self._presenter.on_tof_limits_updated
         )
 
+    def _cleanup_rectangle_picking(self, is_clicked: bool) -> None:
+        # TODO: Fix this workaround for reseting rectangle picking
+        # Issue happens because if user is in selecting more (pressed 'r') and unticks box
+        # means that some interactor events like mouse presses will be stuck in selecting mode
+        if is_clicked:
+            return
+        self.main_plotter.disable_picking()
+        self.main_plotter.enable_rectangle_picking(callback=lambda *_: None, show_message=False)
+        self.main_plotter.disable_picking()
+
     def get_tof_limits(self) -> tuple[float, float]:
         return self._tof_slider.value()
 
-    def set_tof_range_limits(self, tof_limits: list) -> None:
+    def set_tof_range_limits(self, tof_limits: tuple[float, float]) -> None:
         """Update the TOF edit boxes with formatted text"""
         lower, upper = tof_limits
         if upper <= lower:
@@ -269,7 +283,7 @@ class FullInstrumentViewWindow(QMainWindow):
     def get_contour_limits(self) -> tuple[float, float]:
         return self._contour_range_slider.value()
 
-    def set_contour_range_limits(self, contour_limits: list) -> None:
+    def set_contour_range_limits(self, contour_limits: tuple[int, int]) -> None:
         """Update the contour range edit boxes with formatted text"""
         lower, upper = contour_limits
         if upper <= lower:
@@ -279,16 +293,14 @@ class FullInstrumentViewWindow(QMainWindow):
         self._contour_range_slider.setValue(contour_limits)
         return
 
-    def set_plotter_scalar_bar_range(self, clim: list[int], label: str) -> None:
+    def set_plotter_scalar_bar_range(self, clim: tuple[int, int], label: str) -> None:
         """Set the range of the colours displayed, i.e. the legend"""
         self.main_plotter.update_scalar_bar_range(clim, label)
-        self.projection_plotter.update_scalar_bar_range(clim, label)
 
     def closeEvent(self, QCloseEvent: QEvent) -> None:
         """When closing, make sure to close the plotters and figure correctly to prevent errors"""
         super().closeEvent(QCloseEvent)
         self.main_plotter.close()
-        self.projection_plotter.close()
         if self._detector_spectrum_fig is not None:
             plt.close(self._detector_spectrum_fig.get_label())
         self._presenter.handle_close()
@@ -301,9 +313,18 @@ class FullInstrumentViewWindow(QMainWindow):
         """Draw the given mesh in the main plotter window"""
         self.main_plotter.add_mesh(mesh, color=colour, pickable=pickable)
 
-    def add_main_mesh(self, mesh: PolyData, scalars=None, clim=None) -> None:
+    def add_main_mesh(self, mesh: PolyData, is_projection: bool, scalars=None) -> None:
         """Draw the given mesh in the main plotter window"""
-        self.main_plotter.add_mesh(mesh, pickable=False, scalars=scalars, clim=clim, render_points_as_spheres=True, point_size=14)
+        self.main_plotter.clear()
+        self.main_plotter.add_mesh(mesh, pickable=False, scalars=scalars, render_points_as_spheres=True, point_size=15)
+
+        if not self.main_plotter.off_screen:
+            self.main_plotter.enable_trackball_style()
+
+        if is_projection:
+            self.main_plotter.view_xy()
+            if not self.main_plotter.off_screen:
+                self.main_plotter.enable_zoom_style()
 
     def add_pickable_main_mesh(self, point_cloud: PolyData, scalars: np.ndarray | str) -> None:
         self.main_plotter.add_mesh(
@@ -336,44 +357,11 @@ class FullInstrumentViewWindow(QMainWindow):
                 tolerance=picking_tolerance,
             )
 
-        self.projection_plotter.disable_picking()
-        if not self.projection_plotter.off_screen:
-            self.projection_plotter.enable_point_picking(
-                show_message=False,
-                use_picker=True,
-                callback=callback,
-                show_point=False,
-                pickable_window=False,
-                picker="point",
-                tolerance=picking_tolerance,
-            )
-
     def enable_rectangle_picking(self, callback: Callable) -> None:
         """Switch on rectangle picking, i.e. draw a rectangle to select all detectors within the rectangle"""
         self.main_plotter.disable_picking()
         if not self.main_plotter.off_screen:
             self.main_plotter.enable_rectangle_picking(callback=callback, use_picker=callback is not None, font_size=12)
-
-    def add_projection_mesh(self, mesh: PolyData, scalars=None, clim=None) -> None:
-        """Draw the given mesh in the projection plotter. This is a 2D plot so we set options accordingly on the plotter"""
-        self.projection_plotter.clear()
-        self.projection_plotter.add_mesh(mesh, scalars=scalars, clim=clim, render_points_as_spheres=True, point_size=14, pickable=False)
-        self.projection_plotter.view_xy()
-        if not self.projection_plotter.off_screen:
-            self.projection_plotter.enable_zoom_style()
-
-    def add_pickable_projection_mesh(self, mesh: PolyData, scalars=None) -> None:
-        """Draw the given mesh in the projection plotter. This is a 2D plot so we set options accordingly on the plotter"""
-        self.projection_plotter.add_mesh(
-            mesh,
-            scalars=scalars,
-            opacity=[0.0, 0.5],
-            show_scalar_bar=False,
-            pickable=True,
-            cmap="Oranges",
-            point_size=30,
-            render_points_as_spheres=True,
-        )
 
     def show_axes(self) -> None:
         """Show axes on the main plotter"""
