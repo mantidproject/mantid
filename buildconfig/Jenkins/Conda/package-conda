@@ -55,7 +55,7 @@ ENABLE_BUILD_MANTID=false
 ENABLE_BUILD_QT=false
 ENABLE_BUILD_WORKBENCH=false
 ENABLE_BUILD_DOCS=false
-BUILD_WORKBENCH_WITH_DOCS=true
+BUILD_WORKBENCH_WITH_DOCS=false
 PLATFORM=""
 
 # Handle flag inputs
@@ -133,25 +133,7 @@ fi
 
 export CONDA_SUBDIR=$PLATFORM
 
-# Run conda build.
-if [[ $ENABLE_BUILD_MANTID_DEVELOPER == true ]]; then
-    conda mambabuild ./mantid-developer/ $EXTRA_BUILD_OPTIONS
-fi
-if [[ $ENABLE_BUILD_MANTID == true ]]; then
-    conda mambabuild ./mantid/ $EXTRA_BUILD_OPTIONS
-fi
-if [[ $ENABLE_BUILD_QT == true ]]; then
-    conda mambabuild ./mantidqt/ $EXTRA_BUILD_OPTIONS
-fi
-if [[ $ENABLE_BUILD_DOCS == true ]]; then
-    conda mambabuild ./mantiddocs/ $EXTRA_BUILD_OPTIONS
-fi
-if [[ $ENABLE_BUILD_WORKBENCH == true ]]; then
-    if [[ $BUILD_WORKBENCH_WITH_DOCS == false ]]; then
-	export INCLUDE_MANTIDDOCS=False
-    fi
-    conda mambabuild ./mantidworkbench/ -c mantid/label/main $EXTRA_BUILD_OPTIONS
-fi
+bash ./mantiddocs/build.sh
 
 # elapsed time with second resolution
 end_time=$(date +%s)
