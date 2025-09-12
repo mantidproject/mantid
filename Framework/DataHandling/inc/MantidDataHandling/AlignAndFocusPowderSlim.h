@@ -52,7 +52,7 @@ private:
   std::vector<std::pair<size_t, size_t>> pulse_indices;
 };
 
-// these properties are public to simplify testing - do not make them public
+// these properties are public to simplify testing and calling from other code
 namespace PropertyNames {
 const std::string FILENAME("Filename");
 const std::string CAL_FILE("CalFileName");
