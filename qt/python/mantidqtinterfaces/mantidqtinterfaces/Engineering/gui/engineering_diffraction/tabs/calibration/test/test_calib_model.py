@@ -6,12 +6,12 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 from unittest import mock
-from unittest.mock import call, patch, create_autospec
+from unittest.mock import call, patch, create_autospec, MagicMock
 from os import path
 from Engineering.EnggUtils import GROUP
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.calibration.model import CalibrationModel
 from Engineering.common.calibration_info import CalibrationInfo
-from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings import settings_model, settings_view, settings_presenter
+from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings import settings_presenter
 from testhelpers import assert_any_call_partial
 from qtpy.QtCore import QCoreApplication
 from workbench.config import APPNAME
@@ -57,10 +57,9 @@ class CalibrationModelTest(unittest.TestCase):
     ):
         default_save_location = path.join(path.expanduser("~"), "Engineering_Mantid")
         QCoreApplication.setApplicationName("Engineering_Diffraction_test_calib_model")
-        presenter = settings_presenter.SettingsPresenter(
-            mock.create_autospec(settings_model.SettingsModel, instance=True),
-            mock.create_autospec(settings_view.SettingsView, instance=True),
-        )
+        settings_model, settings_view = MagicMock(), MagicMock()
+        presenter = settings_presenter.SettingsPresenter(settings_model, settings_view)
+        settings_model.validate_settings.return_value = {"save_location": default_save_location}
         presenter.settings = {  # "save_location" is not defined
             "full_calibration": "cal",
             "logs": "some,logs",

@@ -393,6 +393,9 @@ class TextureCorrectionModel:
     def set_reference_ws(self, ws_name: str) -> None:
         self.reference_ws = ws_name
 
+    def get_reference_ws(self):
+        return self.reference_ws
+
     def get_reference_info(self) -> Tuple[str, bool, str]:
         material = "Not set"
         shape_enabled = False

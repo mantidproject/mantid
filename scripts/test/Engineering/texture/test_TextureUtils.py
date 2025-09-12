@@ -58,11 +58,18 @@ class TextureUtilsTest(unittest.TestCase):
         mock_model.main.assert_called_once()
         mock_mk.assert_called_once_with("focus")
 
+    @patch(f"{texture_utils_path}.logger")
+    @patch(f"{texture_utils_path}.validate_abs_corr_inputs")
     @patch(f"{texture_utils_path}.TextureCorrectionModel")
-    def test_run_abs_corr_executes_full_pipeline(self, mock_model_class):
+    def test_run_abs_corr_executes_full_pipeline(self, mock_model_class, mock_validate, mock_logger):
+        # Arrange
         mock_model = MagicMock()
         mock_model_class.return_value = mock_model
+        mock_validate.return_value = (True, "")
+
         wss = ["ws1", "ws2"]
+
+        # Act
         run_abs_corr(
             wss=wss,
             ref_ws="ref",
@@ -87,14 +94,54 @@ class TextureUtilsTest(unittest.TestCase):
             clear_ads_after=True,
         )
 
+        mock_validate.assert_called_once_with(
+            "ref",
+            "orient.txt",
+            True,
+            "xyz",
+            "right",
+            True,
+            True,
+            "4mmCube",
+            "shape.xml",
+            True,
+            "1.54",
+            "Angstrom",
+            True,
+            1.0,
+            1.0,
+            0.5,
+        )
+        mock_logger.error.assert_not_called()
+
+        # Orientation file triggers a load
         mock_model.load_all_orientations.assert_called_once_with(wss, "orient.txt", True, "xyz", "right")
+
+        # Copy ref when requested
         mock_model.copy_sample_info.assert_called_once_with("ref", wss)
-        self.assertEqual(mock_model.define_gauge_volume.call_count, 2)
-        self.assertEqual(mock_model.calc_absorption.call_count, 2)
-        self.assertEqual(mock_model.read_attenuation_coefficient_at_value.call_count, 2)
-        self.assertEqual(mock_model.write_atten_val_table.call_count, 2)
-        self.assertEqual(mock_model.calc_divergence.call_count, 2)
-        self.assertEqual(mock_model.apply_corrections.call_count, 2)
+
+        # Set processing flags / metadata
+        mock_model.set_include_abs.assert_called_once_with(True)
+        mock_model.set_include_atten.assert_called_once_with(True)
+        mock_model.set_include_div.assert_called_once_with(True)
+        mock_model.set_rb_num.assert_called_once_with("exp1")
+        mock_model.set_remove_after_processing.assert_called_once_with(True)
+
+        # corrections call: check args and kwargs
+        mock_model.calc_all_corrections.assert_called_once()
+        args, kwargs = mock_model.calc_all_corrections.call_args
+
+        # Positional args
+        self.assertEqual(args[0], ["ws1", "ws2"])
+        self.assertEqual(args[1], ["Corrected_ws1", "Corrected_ws2"])
+
+        # Keyword args
+        self.assertEqual(
+            kwargs["abs_args"],
+            {"gauge_vol_preset": "4mmCube", "gauge_vol_file": "shape.xml", "mc_param_str": "Arg: Val"},
+        )
+        self.assertEqual(kwargs["atten_args"], {"atten_val": "1.54", "atten_units": "Angstrom"})
+        self.assertEqual(kwargs["div_args"], {"hoz": 1.0, "vert": 1.0, "det_hoz": 0.5})
 
     @patch(f"{texture_utils_path}.logger")
     @patch(f"{texture_utils_path}.TextureCorrectionModel")

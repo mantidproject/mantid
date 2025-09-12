@@ -8,8 +8,6 @@
 from mantidqt.utils.asynchronous import AsyncTask
 from mantidqt.utils.observer_pattern import GenericObservable
 from mantid.kernel import logger
-from mantid.api import AnalysisDataService as ADS
-from mantid.simpleapi import Load
 from mantidqt.interfacemanager import InterfaceManager
 from qtpy.QtCore import QTimer
 from Engineering.common.calibration_info import CalibrationInfo
@@ -20,7 +18,6 @@ from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common impo
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import output_settings
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting
 
-import os
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.show_sample.show_sample_presenter import ShowSamplePresenter
 
 
@@ -78,17 +75,8 @@ class TextureCorrectionPresenter:
 
     def load_files_into_table(self):
         filenames = self.view.finder_corr.getFilenames()
-
-        for path in filenames:
-            ws_name = os.path.splitext(os.path.basename(path))[0]
-            if ADS.doesExist(ws_name):
-                logger.notice(f'A workspace "{ws_name}" already exists, loading {path} has been skipped')
-            else:
-                try:
-                    Load(Filename=path, OutputWorkspace=ws_name)
-                except Exception as e:
-                    logger.warning(f"Failed to load {path}: {e}")
-                    continue
+        wss = self.model.load_files(filenames)
+        for ws_name in wss:
             if ws_name not in self.ws_names:
                 self.ws_names.append(ws_name)
 
@@ -131,23 +119,12 @@ class TextureCorrectionPresenter:
         self.model.save_reference_file(self.rb_num, self.current_calibration, output_settings.get_output_path())
 
     def _on_load_ref_clicked(self):
-        path = self.view.get_reference_file()
-        if path:
-            ws_name = os.path.splitext(os.path.basename(path))[0]
-            if ADS.doesExist(ws_name):
-                logger.notice(f'A workspace "{ws_name}" already exists, loading {path} has been skipped')
-                self.model.set_reference_ws(ws_name)
-            else:
-                try:
-                    Load(Filename=path, OutputWorkspace=ws_name)
-                    self.model.set_reference_ws(ws_name)
-                except Exception as e:
-                    logger.warning(f"Failed to load {path}: {e}")
-            self.update_reference_info()
+        self.model.load_ref(self.view.get_reference_file())
+        self.update_reference_info()
 
     def on_apply_clicked(self):
         wss = self.view.get_selected_workspaces()
-        out_wss = [f"Corrected_{ws}" for ws in wss]
+        out_wss = self.model.get_out_ws_names(wss)
 
         self.worker = AsyncTask(
             self._apply_all_corrections, (wss, out_wss), error_cb=self._on_worker_error, finished_cb=self._on_worker_success
@@ -239,10 +216,7 @@ class TextureCorrectionPresenter:
         self.instrument = instrument
 
     def update_custom_shape_finder_vis(self):
-        if self.view.get_shape_method() == "Custom Shape":
-            self.view.finder_gauge_vol.setVisible(True)
-        else:
-            self.view.finder_gauge_vol.setVisible(False)
+        self.view.finder_gauge_vol.setVisible(self.view.get_shape_method() == "Custom Shape")
 
     def on_create_ref_sample_clicked(self):
         self.model.create_reference_ws(self.rb_num, self.instrument)

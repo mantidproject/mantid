@@ -28,8 +28,6 @@ from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.fitting.plo
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.fitting.plotting.EngDiff_fitpropertybrowser import (
     EngDiffFitPropertyBrowser,
 )
-from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.settings_model import SettingsModel
-from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.settings_view import SettingsView
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.settings_presenter import SettingsPresenter
 
 IO_VERSION = 2
@@ -131,10 +129,11 @@ class EngineeringDiffractionEncoderTest(unittest.TestCase):
         self.presenter.fitting_presenter.plot_widget.view = fitting_plot_view
 
     def create_test_settings_presenter(self):
-        settings_model = mock.create_autospec(SettingsModel, instance=True)
-        settings_view = mock.create_autospec(SettingsView, instance=True)
+        settings_model = MagicMock()
+        settings_view = MagicMock()
         settings_presenter = SettingsPresenter(settings_model, settings_view)
         self.presenter.settings_presenter = settings_presenter
+        settings_model.validate_settings.return_value = SETTINGS_DICT
         settings_presenter.settings = SETTINGS_DICT
         settings_presenter._save_settings_to_file()
 
