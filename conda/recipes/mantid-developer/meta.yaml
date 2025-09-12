@@ -42,6 +42,7 @@ requirements:
     - pyqt5-sip {{ pyqt5_sip }}
     - pyqtwebengine
     - pystack # [linux]
+    - pystog {{ pystog }}
     - python-dateutil {{ python_dateutil }}
     - python {{ python }}
     - python.app # [osx]

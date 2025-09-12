@@ -8,8 +8,6 @@
 from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspace, MatrixWorkspaceProperty, WorkspaceProperty, WorkspaceFactory
 from mantid.kernel import Direction, StringListValidator, logger
 
-from pystog.converter import Converter
-
 Gr = "G(r)"
 GKr = "GK(r)"
 gr = "g(r)"
@@ -104,5 +102,9 @@ class PDConvertRealSpace(PythonAlgorithm):
             output_ws.setE(sp_num, new_e)
 
 
-# Register algorithm with Mantid.
-AlgorithmFactory.subscribe(PDConvertRealSpace)
+try:
+    from pystog.converter import Converter
+
+    AlgorithmFactory.subscribe(PDConvertRealSpace)
+except ImportError:
+    logger.debug("Failed to subscribe algorithm PDConvertRealSpace; cannot import Converter from pystog.converter")

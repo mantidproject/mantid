@@ -15,8 +15,6 @@ from mantid.api import (
 )
 from mantid.kernel import Direction, StringListValidator, logger
 
-from pystog.converter import Converter
-
 SQ = "S(Q)"
 FQ = "F(Q)"
 FKQ = "FK(Q)"
@@ -129,5 +127,9 @@ class PDConvertReciprocalSpace(PythonAlgorithm):
             output_ws.setE(sp_num, new_e)
 
 
-# Register algorithm with Mantid.
-AlgorithmFactory.subscribe(PDConvertReciprocalSpace)
+try:
+    from pystog.converter import Converter
+
+    AlgorithmFactory.subscribe(PDConvertReciprocalSpace)
+except ImportError:
+    logger.debug("Failed to subscribe algorithm PDConvertReciprocalSpace; cannot import Converter from pystog.converter")

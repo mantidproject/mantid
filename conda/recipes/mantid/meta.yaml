@@ -83,6 +83,7 @@ requirements:
 
   run_constrained:
     - matplotlib-base {{ matplotlib }}
+    - pystog {{ pystog }}
 
 test:
   imports:
