@@ -135,7 +135,7 @@ export CONDA_SUBDIR=$PLATFORM
 
 # Run conda build.
 if [[ $ENABLE_BUILD_MANTID_DEVELOPER == true ]]; then
-    conda mambabuild ./mantid-developer/ $EXTRA_BUILD_OPTIONS
+    conda mambabuild ./mantid-developer/ $EXTRA_BUILD_OPTIONS -c neutrons
 fi
 if [[ $ENABLE_BUILD_MANTID == true ]]; then
     conda mambabuild ./mantid/ $EXTRA_BUILD_OPTIONS
