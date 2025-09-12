@@ -23,6 +23,5 @@ cmake ^
 
 if errorlevel 1 exit 1
 ninja
-ninja docs-qthelp
 ninja install
 if errorlevel 1 exit 1
