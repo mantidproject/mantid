@@ -52,26 +52,7 @@ public:
 private:
   object pythonClass;
 
-  std::string check(boost::any const &value) const override {
-    boost::python::object obj;
-    try {
-      obj = *(boost::any_cast<boost::python::object const *>(value));
-    } catch (...) {
-      return "Attempting to run a python type validator on an object that is not a python object";
-    }
-    std::string ret;
-    int check = PyObject_IsInstance(obj.ptr(), pythonClass.ptr());
-    if (check < 0) {
-      // this represents an internal error while checking type
-      PyErr_Clear();
-      ret = "Failed to check instance type";
-    } else if (check == 0) {
-      std::string objclassname = extract<std::string>(obj.attr("__class__").attr("__name__"));
-      std::string classname = extract<std::string>(pythonClass.attr("__name__"));
-      ret = std::string("The passed object is of type ") + objclassname + std::string(" and not of type ") + classname;
-    }
-    return ret;
-  }
+  std::string check(boost::any const &value) const override;
 };
 
 } // namespace Mantid::PythonInterface

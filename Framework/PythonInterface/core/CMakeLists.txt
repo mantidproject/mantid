@@ -8,6 +8,7 @@ set(SRC_FILES
     src/GlobalInterpreterLock.cpp
     src/NDArray.cpp
     src/PythonObjectProperty.cpp
+    src/PythonObjectTypeValidator.cpp
     src/ReleaseGlobalInterpreterLock.cpp
     src/UninstallTrace.cpp
     src/PythonLoggingChannel.cpp
