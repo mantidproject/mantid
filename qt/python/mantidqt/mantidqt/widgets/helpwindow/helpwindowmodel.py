@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import os
+import sys
 
 # --- Logger and ConfigService Setup ---
 try:
@@ -86,26 +87,45 @@ class HelpWindowModel:
         # Store raw online base early, needed for fallback logic below
         self._raw_online_base = online_base.rstrip("/")
 
-        # --- Step 1: Attempt to get local path from ConfigService ---
-        local_docs_path_from_config = None  # Default if lookup fails or path is empty
-        try:
-            # ConfigService is imported at the top level now
-            config_service = ConfigService.Instance()
-            raw_path = config_service.getString("docs.html.root", True)  # pathAbsolute=True
-            if raw_path:  # Only assign if not empty
-                local_docs_path_from_config = raw_path
-                log.debug(f"Retrieved 'docs.html.root' from ConfigService: '{local_docs_path_from_config}'")
-            else:
-                log.debug("'docs.html.root' property is empty or not found in ConfigService.")
-        except Exception as e:
-            # Catch potential errors during ConfigService interaction
-            # This includes cases where the dummy ConfigService might be used
-            log.error(f"Error retrieving 'docs.html.root' from ConfigService: {e}. Defaulting to online mode.")
-            # local_docs_path_from_config remains None
+        # --- Step 1: Attempt to get local path ---
+        local_docs_path_from_config = self._get_doc_path()
 
         # --- Step 2: Determine final mode and set ALL related state variables ---
         # This method now sets _is_local, _mode_string, _base_url, _version_string
         self._determine_mode_and_set_state(local_docs_path_from_config)
+
+    def _get_doc_path(self):
+        """Try to get docs path"""
+
+        if any(indicator in sys.prefix for indicator in ["conda", "anaconda", "miniconda", "mambaforge"]):
+            # Possible conda environment installation, docs path will be {conda_prefix}/share/doc/html
+            mantid_root = sys.prefix  # eq to conda prefix
+            docs_path = os.path.join(mantid_root, "share", "doc", "html")
+            if os.path.exists(docs_path):
+                return docs_path
+
+        props_dir = os.path.dirname(ConfigService.getPropertiesDir())
+        if props_dir:
+            # Use properties dir to determine the root dir of the project incase of standalone
+            mantid_root = os.path.dirname(props_dir)
+
+            # Possible standalone installation the docs path will be {mantid_root}/share/doc/ (all platforms)
+            docs_path = os.path.join(mantid_root, "share", "doc", "html")
+            if os.path.exists(docs_path):
+                return docs_path
+
+            # Possible Linux debug build installation, the docs will be {mantid_root}/docs/html/
+            docs_path = os.path.join(mantid_root, "docs", "html")
+            if os.path.exists(docs_path):
+                return docs_path
+
+            # Possible Windows debug build the mantid root will be the second parent of the props folder
+            mantid_root = os.path.dirname(mantid_root)
+            docs_path = os.path.join(mantid_root, "docs", "html")
+            if os.path.exists(docs_path):
+                return docs_path
+
+        return ""
 
     def _determine_mode_and_set_state(self, local_docs_path):
         """
@@ -116,7 +136,7 @@ class HelpWindowModel:
         log.debug(f"Determining final mode and state with local_docs_path='{local_docs_path}'")
 
         # Check if the path from config is valid and points to an existing directory
-        if local_docs_path and os.path.isdir(local_docs_path):
+        if local_docs_path and os.path.isdir(os.path.normpath(local_docs_path)):
             # --- Configure for LOCAL/OFFLINE Mode ---
             log.debug("Valid local docs path found. Configuring for Offline Mode.")
             self._is_local = True
@@ -131,11 +151,9 @@ class HelpWindowModel:
             # --- Configure for ONLINE Mode ---
             # Log reason if applicable
             if local_docs_path:  # Path was provided but invalid
-                log.warning(
-                    f"Local docs path '{local_docs_path}' from ConfigService ('docs.html.root') is invalid or not found. Falling back to Online Mode."  # noqa: E501
-                )
+                log.warning(f"Local docs path '{local_docs_path}' is invalid or not found. Falling back to Online Mode.")
             else:  # Path was None (not found in config or error during lookup)
-                log.debug("No valid local docs path found from ConfigService. Configuring for Online Mode.")
+                log.debug("No valid local docs path found. Configuring for Online Mode.")
 
             self._is_local = False
             self._mode_string = self.MODE_ONLINE
