@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import numpy as np
 from os import path, scandir
+import sys
 from Engineering.texture.polefigure.polefigure_model import TextureProjection
 from Engineering.texture.correction.correction_model import TextureCorrectionModel
 from mantid.simpleapi import SaveNexus, logger, CreateEmptyTableWorkspace, LoadCIF, Fit, CreateSingleValuedWorkspace
@@ -390,6 +391,10 @@ def replace_nans(vals, method: str):
     return new_vals.T
 
 
+def is_macOS():
+    return sys.platform == "darwin"
+
+
 def fit_all_peaks(
     wss: Sequence[str],
     peaks: Sequence[float],
@@ -417,6 +422,9 @@ def fit_all_peaks(
                      min/max/mean - will replace all nans in a column with the min/max/mean non-nan value (otherwise will remain nan)
     no_fit_value_dict: allows the user to specify the unfit default value of parameters as a dict of key:value pairs
     """
+
+    if is_macOS():
+        logger.warning("Fitting can be unreliable on MacOS, this is being worked on")
 
     fit_kwargs = {
         "Minimizer": "Levenberg-Marquardt",
