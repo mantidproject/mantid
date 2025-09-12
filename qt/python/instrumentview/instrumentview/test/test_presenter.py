@@ -100,12 +100,13 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._presenter._pickable_main_mesh = {}
         self._presenter._pickable_projection_mesh = {}
         self._mock_view.current_selected_unit.return_value = "TOF"
+        self._mock_view.sum_spectra_selected.return_value = True
 
         self._presenter.update_picked_detectors([])
         np.testing.assert_allclose(self._presenter._pickable_main_mesh[self._presenter._visible_label], self._model._detector_is_picked)
-        self._mock_view.set_plot_for_detectors.assert_called_once_with(mock_model.line_plot_workspace)
+        self._mock_view.show_plot_for_detectors.assert_called_once_with(mock_model.line_plot_workspace)
         self._mock_view.set_selected_detector_info.assert_called_once_with(["a", "a"])
-        mock_model.extract_spectra_for_line_plot.assert_called_once_with("TOF")
+        mock_model.extract_spectra_for_line_plot.assert_called_once_with("TOF", True)
 
     def test_generate_single_colour(self):
         green_vector = self._presenter.generate_single_colour(2, 0, 1, 0, 0)
@@ -124,7 +125,19 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
 
     @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.extract_spectra_for_line_plot")
     def test_unit_option_selected(self, mock_extract_spectra):
-        self._presenter.unit_option_selected("Wavelength")
+        self._mock_view.sum_spectra_selected.return_value = True
+        self._presenter.on_unit_option_selected(1)
         self._mock_view.show_plot_for_detectors.assert_called_once()
-        self._mock_view.update_selected_detector_info.assert_called_once()
-        mock_extract_spectra.assert_called_once_with("Wavelength")
+        self._mock_view.set_selected_detector_info.assert_called_once()
+        mock_extract_spectra.assert_called_once_with(self._presenter._UNIT_OPTIONS[1], True)
+
+    @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.save_line_plot_workspace_to_ads")
+    def test_export_workspace_clicked(self, mock_save_line_plot_workspace_to_ads):
+        self._presenter.on_export_workspace_clicked()
+        mock_save_line_plot_workspace_to_ads.assert_called_once()
+
+    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter._update_line_plot_ws_and_draw")
+    def test_on_sum_spectra_checkbox_clicked(self, mock_update_line_plot_ws_and_draw):
+        self._mock_view.current_selected_unit.return_value = "dSpacing"
+        self._presenter.on_sum_spectra_checkbox_clicked()
+        mock_update_line_plot_ws_and_draw.assert_called_once_with("dSpacing")

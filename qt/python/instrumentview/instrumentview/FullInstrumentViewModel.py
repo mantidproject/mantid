@@ -9,7 +9,7 @@ import instrumentview.Projections.SphericalProjection as iv_spherical
 import instrumentview.Projections.CylindricalProjection as iv_cylindrical
 
 from mantid.dataobjects import Workspace2D
-from mantid.simpleapi import CreateDetectorTable, ExtractSpectra, ConvertUnits
+from mantid.simpleapi import CreateDetectorTable, ExtractSpectra, ConvertUnits, AnalysisDataService, SumSpectra
 import numpy as np
 
 
@@ -190,13 +190,35 @@ class FullInstrumentViewModel:
         self._detector_projection_positions[:, :2] = projection.positions()  # Assign only x and y coordinate
         return self._detector_projection_positions
 
-    def extract_spectra_for_line_plot(self, unit: str) -> None:
+    def extract_spectra_for_line_plot(self, unit: str, sum_spectra: bool) -> None:
         workspace_indices = self.picked_workspace_indices()
         if len(workspace_indices) == 0:
             self.line_plot_workspace = None
             return
 
         ws = ExtractSpectra(InputWorkspace=self._workspace, WorkspaceIndexList=workspace_indices, EnableLogging=False, StoreInADS=False)
-        ws = ConvertUnits(InputWorkspace=ws, target=unit, EMode="Elastic", EnableLogging=False, StoreInADS=False)
 
+        if sum_spectra and len(workspace_indices) > 1:
+            # Sum in d-Spacing to avoid blurring peaks
+            ws = ConvertUnits(InputWorkspace=ws, target="dSpacing", EMode="Elastic", EnableLogging=False, StoreInADS=False)
+            # Converting to d-Spacing will give spectra with different bin edges
+            # Find the spectra with the widest range and use that to rebin the other selected spectra
+            index_of_spectra_with_widest_range = 0
+            for ws_index in range(1, len(workspace_indices)):
+                if max(ws.dataX(ws_index)) > max(ws.dataX(index_of_spectra_with_widest_range)):
+                    index_of_spectra_with_widest_range = ws_index
+            # Now we rebin all the other spectra
+            for ws_index in range(len(workspace_indices)):
+                if ws_index == index_of_spectra_with_widest_range:
+                    continue
+                ws.applyBinEdgesFromAnotherWorkspace(ws, index_of_spectra_with_widest_range, ws_index)
+            ws = SumSpectra(InputWorkspace=ws, EnableLogging=False, StoreInADS=False)
+
+        ws = ConvertUnits(InputWorkspace=ws, target=unit, EMode="Elastic", EnableLogging=False, StoreInADS=False)
         self.line_plot_workspace = ws
+
+    def save_line_plot_workspace_to_ads(self) -> None:
+        if self.line_plot_workspace is None or len(self.picked_workspace_indices()) == 0:
+            return
+        name_exported_ws = f"instrument_view_selected_spectra_{self._workspace.name()}"
+        AnalysisDataService.addOrReplace(name_exported_ws, self.line_plot_workspace)

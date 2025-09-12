@@ -60,7 +60,13 @@ class FullInstrumentViewPresenter:
         self._view.show_axes()
 
         self.on_projection_option_selected(default_index)
+        self._view.enable_point_picking(callback=self.point_picked)
+        self._view.show_axes()
+        self._view.reset_camera()
+        self._view.set_contour_range_limits(self._contour_limits)
+        self._view.set_tof_range_limits(self._bin_limits)
 
+        self._view.hide_status_box()
         self._ads_observer = InstrumentViewADSObserver(
             delete_callback=self.delete_workspace_callback,
             rename_callback=self.rename_workspace_callback,
@@ -78,8 +84,11 @@ class FullInstrumentViewPresenter:
             default_index = 0
         return default_index, self._PROJECTION_OPTIONS
 
-    def _on_unit_option_selected(self, value):
-        self.unit_option_selected(self._UNIT_OPTIONS[value])
+    def on_export_workspace_clicked(self) -> None:
+        self._model.save_line_plot_workspace_to_ads()
+
+    def on_sum_spectra_checkbox_clicked(self) -> None:
+        self._update_line_plot_ws_and_draw(self._view.current_selected_unit())
 
     def on_tof_limits_updated(self) -> None:
         """When TOF limits are changed, read the new limits and tell the presenter to update the colours accordingly"""
@@ -176,7 +185,7 @@ class FullInstrumentViewPresenter:
         self._update_line_plot_ws_and_draw(self._view.current_selected_unit())
 
     def _update_line_plot_ws_and_draw(self, unit: str) -> None:
-        self._model.extract_spectra_for_line_plot(unit)
+        self._model.extract_spectra_for_line_plot(unit, self._view.sum_spectra_selected())
         self._view.show_plot_for_detectors(self._model.line_plot_workspace)
         self._view.set_selected_detector_info(self._model.picked_detectors_info_text())
 
