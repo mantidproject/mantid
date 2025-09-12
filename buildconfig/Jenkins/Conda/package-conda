@@ -89,7 +89,7 @@ done
 # Mamba
 setup_mamba $WORKSPACE/miniforge "" true $PLATFORM
 mamba activate base
-mamba install --yes boa versioningit python=3.11 -c neutrons
+mamba install --yes boa versioningit python=3.11
 
 # Clean up any legacy conda-recipes git clones
 cd $WORKSPACE
@@ -135,7 +135,7 @@ export CONDA_SUBDIR=$PLATFORM
 
 # Run conda build.
 if [[ $ENABLE_BUILD_MANTID_DEVELOPER == true ]]; then
-    conda mambabuild ./mantid-developer/ -c neutrons $EXTRA_BUILD_OPTIONS
+    conda mambabuild ./mantid-developer/ $EXTRA_BUILD_OPTIONS
 fi
 if [[ $ENABLE_BUILD_MANTID == true ]]; then
     conda mambabuild ./mantid/ $EXTRA_BUILD_OPTIONS
