@@ -24,15 +24,22 @@ class TestTextureCorrectionPresenter(unittest.TestCase):
         self.presenter.deselect_all()
         self.view.set_all_workspaces_selected.assert_called_with(False)
 
-    @patch(presenter_path + ".logger")
-    @patch(presenter_path + ".ADS")
-    @patch(presenter_path + ".Load")
-    def test_load_files_into_table(self, mock_load, mock_ads, mock_logger):
-        self.view.finder_corr.getFilenames.return_value = ["file1.nxs", "file2.nxs"]
-        mock_ads.doesExist.side_effect = lambda name: name == "file1"
+    @patch(presenter_path + ".TextureCorrectionPresenter.redraw_table")
+    def test_load_ws_files(self, mock_redraw_table):
+        # set up file list
+        files = ["path/to/existing_ws.nxs", "path/to/new_ws.nxs"]
+        loaded_wss = ["existing_ws", "new_ws"]
+        self.presenter.ws_names = ["existing_ws"]
+        self.view.finder_corr.getFilenames.return_value = files
+        self.model.load_files.return_value = loaded_wss
+
+        # run load files
         self.presenter.load_files_into_table()
-        mock_logger.notice.assert_called_once()
-        self.assertIn("file2", self.presenter.ws_names)
+
+        self.model.load_files.assert_called_once_with(files)
+        mock_redraw_table.assert_called_once()
+
+        self.assertEqual(self.presenter.ws_names, ["existing_ws", "new_ws"])
 
     def test_delete_selected_files(self):
         self.presenter.ws_names = ["ws1", "ws2"]
@@ -67,15 +74,12 @@ class TestTextureCorrectionPresenter(unittest.TestCase):
         self.presenter._on_save_ref_clicked()
         self.model.save_reference_file.assert_called_once()
 
-    @patch("os.path.splitext", side_effect=lambda x: (x, ""))
-    @patch("os.path.basename", side_effect=lambda x: x)
-    @patch(presenter_path + ".Load")
-    def test_on_load_ref_clicked_loads_and_sets_ws(self, mock_load, mock_basename, mock_splitext):
+    def test_load_ref(self):
         self.view.get_reference_file.return_value = "ref_file.nxs"
-        self.model.set_reference_ws = MagicMock()
+        self.model.load_ref = MagicMock()
         self.presenter.update_reference_info = MagicMock()
         self.presenter._on_load_ref_clicked()
-        self.model.set_reference_ws.assert_called_once()
+        self.model.load_ref.assert_called_once_with("ref_file.nxs")
         self.presenter.update_reference_info.assert_called_once()
 
     def test_update_reference_info_calls_view_update(self):

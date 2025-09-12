@@ -28,7 +28,7 @@ class ShowSamplePresenter(object):
         self._view_shape(ws_name, True)
 
     def on_view_reference_shape_clicked(self):
-        self._view_shape(self.tab_model.reference_ws, False)
+        self._view_shape(self.tab_model.get_reference_ws(), False)
 
     def _set_gauge_vol_str(self):
         if self.include_gauge_volume:
