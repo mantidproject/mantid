@@ -31,6 +31,8 @@ set(ExternalData_BINARY_ROOT
     CACHE STRING "A directory holding the links (copies on windows) to the real content files."
 )
 
+set(ExternalData_SHOW_PROGRESS ON)
+
 set(ExternalData_URL_TEMPLATES
     ""
     CACHE STRING "Additional URL templates for the ExternalData CMake script to look for testing data. E.g.

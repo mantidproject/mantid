@@ -26,6 +26,7 @@ cmake \
   -DCONDA_BUILD=True \
   -DUSE_PYTHON_DYNAMIC_LIB=OFF \
   -DPython_EXECUTABLE=$PYTHON \
+  -DExternalData_SHOW_PROGRESS=ON \
   -GNinja \
   ../
 

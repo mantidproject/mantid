@@ -15,7 +15,7 @@ function(_create_data_target _targetname _content_link_patterns)
     )
     foreach(link ${_content_links})
       string(REGEX REPLACE "\\.md5$" "" link ${link})
-      externaldata_expand_arguments(${_targetname} link_location DATA{${link}})
+      externaldata_expand_arguments(${_targetname} link_location DATA{${link}} SHOW_PROGRESS ON)
     endforeach()
   endforeach()
   # Create target to download data from the StandardTestData group.  This must come after all tests have been added that
