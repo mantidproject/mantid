@@ -4,6 +4,8 @@ set -ex
 mkdir tbuild
 cd tbuild
 
+# unset LD_PRELOAD as this causes cmake to segfault
+LD_PRELOAD="" \
 cmake \
   ${CMAKE_ARGS} \
   -DCMAKE_BUILD_TYPE=Release \
