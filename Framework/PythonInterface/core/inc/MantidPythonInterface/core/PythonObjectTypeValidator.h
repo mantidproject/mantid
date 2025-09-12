@@ -45,7 +45,7 @@ public:
 
   PythonObjectTypeValidator(object const &pyclass) : pythonClass(validate_python_class(pyclass)) {}
 
-  ~PythonObjectTypeValidator() = default;
+  ~PythonObjectTypeValidator() override = default;
 
   IValidator_sptr clone() const override { return std::make_shared<PythonObjectTypeValidator>(*this); };
 
