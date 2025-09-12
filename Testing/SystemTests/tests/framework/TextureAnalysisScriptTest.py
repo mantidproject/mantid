@@ -242,7 +242,7 @@ class PeakFitMixin(object):
             self.assertIn(c, expected_cols)
             if not is_macOS():
                 # fitting results currently flaky on mac os
-                self.assertTrue(np.allclose(np.nan_to_num(out_table.column(c)), expected_dict[c], rtol=1e-3))
+                np.testing.assert_allclose(np.nan_to_num(out_table.column(c)), expected_dict[c], rtol=1e-3)
 
     def validate_missing_peaks_vals(self, peak_1_vals, peak_2_vals):
         param_table1 = ADS.retrieve("ENGINX_280625_2.3_GROUP_Fit_Parameters")
