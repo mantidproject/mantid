@@ -23,18 +23,23 @@ namespace Algorithms {
 
 struct InputSpectraToFit {
   /// Constructor
-  InputSpectraToFit(const std::string &nam, int ix, int p) : name(nam), i(ix), period(p) {}
+  InputSpectraToFit(const std::string &nam, int ix, double isp, double iv, int p, API::MatrixWorkspace_sptr mws)
+      : name(nam), wsIdx(ix), spectrumNum(isp), numericValue(iv), period(p), ws(mws) {}
   /// Copy constructor
   InputSpectraToFit(const InputSpectraToFit &data) = default;
 
   std::string name;             ///< Name of a workspace or file
-  int i;                        ///< Workspace index of the spectra to fit
+  int wsIdx;                    ///< Workspace index of the spectra to fit
+  double spectrumNum;           ///< Spectrum number of the spectra to fit
+  double numericValue;          ///< Numerix axis value associated with the spectra to fit
   int period;                   ///< Period, needed if a file contains several periods
   API::MatrixWorkspace_sptr ws; ///< shared pointer to the workspace
 };
 /// Get a workspace
-MANTID_CURVEFITTING_DLL std::vector<int> getWorkspaceIndicesFromAxes(const API::MatrixWorkspace &ws, int workspaceIndex,
-                                                                     int spectrumNumber, double start, double end);
+MANTID_CURVEFITTING_DLL void appendInputSpectraToList(std::vector<InputSpectraToFit> &nameList, const std::string &name,
+                                                      const std::shared_ptr<API::MatrixWorkspace> &ws,
+                                                      int workspaceIndex, int spectrumNumber, double start, double end,
+                                                      int period, const bool &workspaceOptional);
 MANTID_CURVEFITTING_DLL std::optional<API::Workspace_sptr> getWorkspace(const std::string &name, int period);
 
 /// Create a list of input workspace names

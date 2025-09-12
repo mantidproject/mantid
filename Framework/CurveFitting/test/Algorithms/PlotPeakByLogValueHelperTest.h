@@ -29,7 +29,9 @@ public:
     auto inputWithWorkspace = namesList[0];
 
     TS_ASSERT_EQUALS(namesList.size(), 1);
-    TS_ASSERT_EQUALS(inputWithWorkspace.i, 0);
+    TS_ASSERT_EQUALS(inputWithWorkspace.wsIdx, 0);
+    TS_ASSERT_EQUALS(inputWithWorkspace.spectrumNum, -1);
+    TS_ASSERT_EQUALS(inputWithWorkspace.numericValue, -1);
     TS_ASSERT(inputWithWorkspace.ws);
     TS_ASSERT_EQUALS(inputWithWorkspace.name, "irs26176_graphite002_red.nxs");
   }
@@ -41,7 +43,9 @@ public:
     auto inputWithWorkspace = namesList[0];
 
     TS_ASSERT_EQUALS(namesList.size(), 1);
-    TS_ASSERT_EQUALS(inputWithWorkspace.i, 0);
+    TS_ASSERT_EQUALS(inputWithWorkspace.wsIdx, 0);
+    TS_ASSERT_EQUALS(inputWithWorkspace.spectrumNum, 1);
+    TS_ASSERT_EQUALS(inputWithWorkspace.numericValue, -1);
     TS_ASSERT(inputWithWorkspace.ws);
     TS_ASSERT_EQUALS(inputWithWorkspace.name, "irs26176_graphite002_red.nxs");
   }
@@ -53,8 +57,10 @@ public:
     auto inputWithWorkspace = namesList[0];
 
     TS_ASSERT_EQUALS(namesList.size(), 2);
-    TS_ASSERT_EQUALS(inputWithWorkspace.i, 1);
-    TS_ASSERT_EQUALS(namesList[1].i, 2);
+    TS_ASSERT_EQUALS(inputWithWorkspace.wsIdx, 1);
+    TS_ASSERT_EQUALS(inputWithWorkspace.spectrumNum, 2);
+    TS_ASSERT_EQUALS(inputWithWorkspace.numericValue, -1);
+    TS_ASSERT_EQUALS(namesList[1].wsIdx, 2);
     TS_ASSERT(inputWithWorkspace.ws);
     TS_ASSERT_EQUALS(inputWithWorkspace.name, "irs26176_graphite002_red.nxs");
   }
@@ -66,7 +72,10 @@ public:
     auto inputWithWorkspace = namesList[0];
 
     TS_ASSERT_EQUALS(namesList.size(), 1);
-    TS_ASSERT_EQUALS(inputWithWorkspace.i, 0);
+    TS_ASSERT_EQUALS(inputWithWorkspace.wsIdx, 0);
+    TS_ASSERT_EQUALS(inputWithWorkspace.spectrumNum, -1);
+    TS_ASSERT_EQUALS(inputWithWorkspace.numericValue, -1);
+
     TS_ASSERT(inputWithWorkspace.ws);
     TS_ASSERT_EQUALS(inputWithWorkspace.name, "saveNISTDAT_data.nxs");
   }
@@ -78,7 +87,9 @@ public:
     auto inputWithWorkspace = namesList[0];
 
     TS_ASSERT_EQUALS(namesList.size(), 1);
-    TS_ASSERT_EQUALS(inputWithWorkspace.i, 160);
+    TS_ASSERT_EQUALS(inputWithWorkspace.wsIdx, 160);
+    TS_ASSERT_EQUALS(inputWithWorkspace.spectrumNum, -1);
+    TS_ASSERT_EQUALS(inputWithWorkspace.numericValue, 0);
     TS_ASSERT(inputWithWorkspace.ws);
     TS_ASSERT_EQUALS(inputWithWorkspace.name, "saveNISTDAT_data.nxs");
   }
@@ -90,8 +101,10 @@ public:
     auto inputWithWorkspace = namesList[0];
 
     TS_ASSERT_EQUALS(namesList.size(), 321);
-    TS_ASSERT_EQUALS(inputWithWorkspace.i, 0);
-    TS_ASSERT_EQUALS(namesList[200].i, 200);
+    TS_ASSERT_EQUALS(inputWithWorkspace.wsIdx, 0);
+    TS_ASSERT_EQUALS(inputWithWorkspace.spectrumNum, -1);
+    TS_ASSERT_DELTA(inputWithWorkspace.numericValue, -0.16, 1e-3);
+    TS_ASSERT_EQUALS(namesList[200].wsIdx, 200);
     TS_ASSERT(inputWithWorkspace.ws);
     TS_ASSERT_EQUALS(inputWithWorkspace.name, "saveNISTDAT_data.nxs");
   }
@@ -103,8 +116,10 @@ public:
     auto inputWithWorkspace = namesList[0];
 
     TS_ASSERT_EQUALS(namesList.size(), 19);
-    TS_ASSERT_EQUALS(inputWithWorkspace.i, 151);
-    TS_ASSERT_EQUALS(namesList[15].i, 166);
+    TS_ASSERT_EQUALS(inputWithWorkspace.wsIdx, 151);
+    TS_ASSERT_EQUALS(inputWithWorkspace.spectrumNum, -1);
+    TS_ASSERT_DELTA(inputWithWorkspace.numericValue, -0.01, 1e-3);
+    TS_ASSERT_EQUALS(namesList[15].wsIdx, 166);
     TS_ASSERT(inputWithWorkspace.ws);
     TS_ASSERT_EQUALS(inputWithWorkspace.name, "saveNISTDAT_data.nxs");
   }

@@ -67,7 +67,7 @@ private:
   void setWorkspaceIndexAttribute(const API::IFunction_sptr &fun, int wsIndex) const;
 
   std::shared_ptr<Algorithm> runSingleFit(bool createFitOutput, bool outputCompositeMembers,
-                                          bool outputConvolvedMembers, const API::IFunction_sptr &ifun,
+                                          bool outputConvolvedMembers, bool appendIdx, const API::IFunction_sptr &ifun,
                                           const InputSpectraToFit &data, double startX, double endX,
                                           const std::string &exclude);
 
@@ -79,9 +79,19 @@ private:
   void appendTableRow(bool isDataName, API::ITableWorkspace_sptr &result, const API::IFunction_sptr &ifun,
                       const InputSpectraToFit &data, double logValue, double chi2) const;
 
-  void finaliseOutputWorkspaces(bool createFitOutput, const std::vector<API::MatrixWorkspace_sptr> &fitWorkspaces,
+  void finaliseOutputWorkspacesWithAppend(const std::vector<std::string> &fitWorkspaces,
+                                          const std::vector<std::string> &parameterWorkspaces,
+                                          const std::vector<std::string> &covarianceWorkspaces,
+                                          const std::vector<InputSpectraToFit> &wsNames);
+
+  void finaliseOutputWorkspaces(const std::vector<API::MatrixWorkspace_sptr> &fitWorkspaces,
                                 const std::vector<API::ITableWorkspace_sptr> &parameterWorkspaces,
                                 const std::vector<API::ITableWorkspace_sptr> &covarianceWorkspaces);
+
+  void groupResParams(const std::vector<API::ITableWorkspace_sptr> &paramsWs,
+                      const std::vector<std::string> &paramsNames);
+
+  void finaliseMinimizerOutput();
 
   API::IFunction_sptr setupFunction(bool individual, bool passWSIndexToFunction,
                                     const API::IFunction_sptr &inputFunction, const std::vector<double> &initialParams,
