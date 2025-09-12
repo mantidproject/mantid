@@ -1,5 +1,3 @@
-include(ExternalProject)
-
 set(_PyStoG_VERSION 7b5492d98817024f2b62867bc2a82fc23184b777) # v0.5.0
 set(_PyStoG_download_dir ${CMAKE_CURRENT_BINARY_DIR}/../PyStoG-download)
 set(_PyStoG_source_dir ${_PyStoG_download_dir}/src/PyStoG/src/pystog)
@@ -7,18 +5,6 @@ set(_PyStoG_source_test_dir ${_PyStoG_download_dir}/src/PyStoG/tests)
 set(_PyStoG_scripts_dir ${CMAKE_CURRENT_BINARY_DIR}/pystog)
 set(_PyStoG_test_root_dir ${CMAKE_CURRENT_BINARY_DIR}/test/pystog)
 set(_PyStoG_test_dir ${_PyStoG_test_root_dir}/tests)
-
-externalproject_add(
-  PyStoG
-  PREFIX ${_PyStoG_download_dir}
-  GIT_REPOSITORY "https://github.com/neutrons/pystog.git"
-  GIT_TAG ${_PyStoG_VERSION}
-  EXCLUDE_FROM_ALL 1
-  CONFIGURE_COMMAND ""
-  BUILD_COMMAND ""
-  TEST_COMMAND ""
-  INSTALL_COMMAND ""
-)
 
 # clone the git repository
 message(STATUS "Fetching/updating PyStoG")
