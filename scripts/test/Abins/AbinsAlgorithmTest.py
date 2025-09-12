@@ -42,6 +42,30 @@ class AtomInfoTest(unittest.TestCase):
             species.neutron_data
 
 
+class AbinsAlgorithmValidatorsTest(unittest.TestCase):
+    """Test input validators"""
+
+    def test_validate_euphonic_yml(self):
+        """Check that force constants are located for .yml input"""
+        # with open(abins.test_helpers.find_file(seedname + "_data.txt")) as data_file:
+        # def _validate_euphonic_input_file(cls, filename_full_path: str) -> dict:
+        from abins.test_helpers import find_file
+
+        issues = AbinsAlgorithm._validate_euphonic_input_file(find_file("Al_LoadPhonopy.yaml"))
+        self.assertEqual(issues, {"Invalid": False, "Comment": ""})
+
+        issues = AbinsAlgorithm._validate_euphonic_input_file(find_file("Ge-phonopy.yml"))
+        self.assertEqual(issues, {"Invalid": False, "Comment": ""})
+
+        issues = AbinsAlgorithm._validate_euphonic_input_file(find_file("Si2-phonon_LoadCASTEP.phonon"))
+        self.assertEqual(issues, {"Invalid": True, "Comment": "Invalid extension: FORCECONSTANTS requires .castep_bin, .yaml or .yml"})
+
+        # Non-phonopy yaml from another test
+        wrong_yaml = find_file("ISISPowderRunDetailsTestCallable.yaml")
+        issues = AbinsAlgorithm._validate_euphonic_input_file(wrong_yaml)
+        self.assertEqual(issues, {"Invalid": True, "Comment": f"No 'phonopy' section found in {wrong_yaml}"})
+
+
 class AbinsAlgorithmMethodsTest(unittest.TestCase):
     """Test static methods on AbinsAlgorithm"""
 
