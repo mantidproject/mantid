@@ -80,6 +80,7 @@ set(TEST_PY_FILES
     SANSILLReductionTest.py
     SANSILLReduction2Test.py
     SANSILLParameterScanTest.py
+    SANSISISPolarizationCorrectionsTest.py
     SANSMaskTest.py
     SANSStitchTest.py
     SavePlot1DTest.py
