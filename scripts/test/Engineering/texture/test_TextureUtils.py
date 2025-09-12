@@ -6,8 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #
 import unittest
-from unittest.mock import patch, MagicMock, call
-
+from unittest.mock import patch, MagicMock
+from os import path
 import numpy as np
 import tempfile
 from Engineering.texture.TextureUtils import (
@@ -17,11 +17,10 @@ from Engineering.texture.TextureUtils import (
     run_abs_corr,
     validate_abs_corr_inputs,
     fit_all_peaks,
-    make_iterable,
+    get_initial_fit_function_and_kwargs_from_specs,
     create_pf_loop,
     _get_run_and_prefix_from_ws_log,
     _get_grouping_from_ws_log,
-    TexturePeakFunctionGenerator,
 )
 from numpy import ones
 import os
@@ -183,246 +182,250 @@ class TextureUtilsTest(unittest.TestCase):
         out_group = _get_grouping_from_ws_log(mock_ws)
         self.assertEqual(out_group, "GROUP")
 
-    def setup_expected_fit_results(self, wsname, prefix, run_number, group, peak, num_spec, save_dir):
-        expected_func = "some_fit_func"
-        expected_first_fit_kwargs = {
-            "Function": expected_func,
-            "CostFunction": "Least squares",
-            "Output": "first_fit",
-            "MaxIterations": 50,
-            "InputWorkspace": wsname,
-            "Minimizer": "Levenberg-Marquardt",
-            "StepSizeMethod": "Sqrt epsilon",
-            "IgnoreInvalidData": True,
-            "CreateOutput": True,
-            "OutputCompositeMembers": True,
-        }
-        expected_fit_kwargs = {
-            "Function": expected_func,
-            "CostFunction": "Least squares",
-            "Output": "fit",
-            "MaxIterations": 50,
-            "InputWorkspace": wsname,
-            "Minimizer": "Levenberg-Marquardt",
-            "StepSizeMethod": "Sqrt epsilon",
-            "IgnoreInvalidData": True,
-            "CreateOutput": True,
-            "OutputCompositeMembers": True,
-        }
-        expected_tab_name = f"{prefix}{run_number}_{peak}_{group}_Fit_Parameters"
-        expected_func_kwargs = {"InputWorkspace": wsname}
-        expected_create_tab_kwargs = {"OutputWorkspace": expected_tab_name}
-        expected_save_kwargs = {"InputWorkspace": expected_tab_name, "Filename": os.path.join(save_dir, f"{expected_tab_name}.nxs")}
-        expected_intensity_sub_bkg = ones(num_spec)
-        # expect a row for each parameter of each function for each spectra - here we just have the one func f0 with param P
-        # also expect a final cost function
-        expected_name_col = [f"f{i}.f0.P" for i in range(num_spec)] + ["Cost Function"]
-        expected_val_col = np.ones(len(expected_name_col))
-        expected_err_col = np.zeros_like(expected_val_col)
+    # --- helpers for current fitting flow ---
 
-        return {
-            "wsname": wsname,
-            "prefix": prefix,
-            "run_number": run_number,
-            "group": group,
-            "peak": peak,
-            "num_spec": peak,
-            "save_dir": save_dir,
-            "expected_func": expected_func,
-            "expected_first_fit_kwargs": expected_first_fit_kwargs,
-            "expected_fit_kwargs": expected_fit_kwargs,
-            "expected_func_kwargs": expected_func_kwargs,
-            "expected_create_tab_kwargs": expected_create_tab_kwargs,
-            "expected_save_kwargs": expected_save_kwargs,
-            "expected_name_col": expected_name_col,
-            "expected_val_col": expected_val_col,
-            "expected_err_col": expected_err_col,
-            "expected_intensity_sub_bkg": expected_intensity_sub_bkg,
-        }
+    def _make_param_table_mock(self, num_spec: int, params=("A", "B", "S", "X0")):
+        names = [f"f{ispec}.f0.{p}" for ispec in range(num_spec) for p in params] + ["Cost Function"]
+        vals = np.arange(1, len(names) + 1, dtype=float)  # just distinct values
+        errs = np.full_like(vals, 0.1)
+        param_ws = MagicMock()
 
-    def setup_fit_mocks_from_expected_results(self, repeated_expected_results, mock_peak_func_gen_cls, mock_ads, mock_intens_sigma):
-        # mock ws information retrieval
-        mock_ws = MagicMock()
-        mock_ws.getNumberHistograms.side_effect = [er["num_spec"] for er in repeated_expected_results]
+        def _col(which):
+            if which == "Name":
+                return names
+            if which == "Value":
+                return vals
+            return errs
 
-        # mock Peak Function Generator
-        mock_gen = MagicMock()
-        mock_gen.get_initial_fit_function_and_kwargs_from_specs.side_effect = [
-            (er["expected_func"], er["expected_func_kwargs"], er["expected_intensity_sub_bkg"]) for er in repeated_expected_results
-        ]
-        mock_gen.get_final_fit_function.side_effect = [er["expected_func"] for er in repeated_expected_results]
-        mock_peak_func_gen_cls.return_value = mock_gen
-
-        # mock Output Parameter Table
-        mock_param_ws = MagicMock()
-        mock_get_name = MagicMock()
-        mock_get_val = MagicMock()
-        mock_get_err = MagicMock()
-        mock_get_name.side_effect = [er["expected_name_col"] for er in repeated_expected_results]
-        mock_get_val.side_effect = [er["expected_val_col"] for er in repeated_expected_results]
-        mock_get_err.side_effect = [er["expected_err_col"] for er in repeated_expected_results]
-        mock_param_ws.column.side_effect = lambda name: (
-            mock_get_name() if name == "Name" else mock_get_val() if name == "Value" else mock_get_err()
-        )
-
-        # mock ADS calls (first to get ws, then to get parameter table)
-        mock_ads.retrieve.side_effect = [mock_ws, mock_param_ws] * len(repeated_expected_results)
-        mock_intens_sigma.return_value = (None, np.ones(30), None)
-        return mock_ws, mock_param_ws, mock_peak_func_gen_cls, mock_ads
+        param_ws.column.side_effect = _col
+        return param_ws, names, vals, errs
 
     @patch(f"{texture_utils_path}.SaveNexus")
     @patch(f"{texture_utils_path}.CreateEmptyTableWorkspace")
-    @patch(f"{texture_utils_path}.calc_intens_and_sigma_arrays")
+    @patch(
+        f"{texture_utils_path}.calc_intens_and_sigma_arrays",
+        return_value=(None, None, np.array([3.5, 5.0]), None),
+    )
+    @patch(f"{texture_utils_path}._convert_TOFerror_to_derror")
+    @patch(f"{texture_utils_path}.UnitConversion")
+    @patch(f"{texture_utils_path}.rerun_fit_with_new_ws")
+    @patch(f"{texture_utils_path}.get_initial_fit_function_and_kwargs_from_specs")
     @patch(f"{texture_utils_path}.Fit")
+    @patch(f"{texture_utils_path}.Rebunch")
+    @patch(f"{texture_utils_path}.ConvertUnits")
     @patch(f"{texture_utils_path}._get_grouping_from_ws_log")
     @patch(f"{texture_utils_path}._get_run_and_prefix_from_ws_log")
     @patch(f"{texture_utils_path}.ADS")
-    @patch(f"{texture_utils_path}.TexturePeakFunctionGenerator")
     def test_fit_all_peaks_basic_fit(
         self,
-        mock_peak_func_gen_cls,
         mock_ads,
         mock_get_run_prefix,
         mock_get_group,
+        mock_convert_units,
+        mock_rebunch,
         mock_fit,
-        mock_intens_sigma,
+        mock_get_initial,
+        mock_rerun_with_new,
+        mock_unitconv,
+        mock_convert_toferr_to_derr,
+        _mock_calc_i_over_sig,
         mock_create_tab_ws,
         mock_save_nexus,
     ):
-        # GIVEN
+        mock_unitconv.run.return_value = 1.2345
+        mock_convert_toferr_to_derr.return_value = 0.01
+
         wsname = "TEST123456_ws"
-        prefix = "TEST"
-        run_number = "123456"
-        group = "TestGroup"
-        peak = 1.0
-        save_dir = "save"
-        num_spec = 2
+        prefix, run_number, group = "TEST", "123456", "TestGroup"
+        peak, save_dir, num_spec = 1.0, "save", 2
 
-        # EXPECT
-        expected_results = self.setup_expected_fit_results(wsname, prefix, run_number, group, peak, num_spec, save_dir)
+        ws = MagicMock()
+        si = MagicMock()
+        si.size.return_value = num_spec
+        ws.spectrumInfo.return_value = si
 
-        # SETUP TEST
-        mocks = self.setup_fit_mocks_from_expected_results((expected_results,), mock_peak_func_gen_cls, mock_ads, mock_intens_sigma)
-        mock_ws, mock_param_ws, mock_peak_func_gen_cls, mock_ads = mocks
+        mock_convert_units.return_value = "ws_tof"
+        mock_rebunch.side_effect = ["smooth_ws_3", "smooth_ws_2"]
+
+        md_fit_kwargs = {"InputWorkspace": "ws_tof", "StartX": 0.9, "EndX": 1.1, "WorkspaceIndex": 0}
+        mock_get_initial.return_value = ("FUNC", md_fit_kwargs, [10.0, 20.0], 0.1)
+
+        fit_obj = MagicMock()
+        fit_obj.Function.function = "md_function"
+        fit_obj.OutputWorkspace.name.return_value = "fit_out_ws"
+        mock_fit.return_value = fit_obj
+
+        fit_obj2 = MagicMock()
+        fit_obj2.Function.function = "md_function_final"
+        fit_obj2.OutputWorkspace.name.return_value = "fit_out_ws_final"
+        mock_rerun_with_new.return_value = (fit_obj2, md_fit_kwargs)
+
+        param_ws, *_ = self._make_param_table_mock(num_spec, params=())
+        mock_ads.retrieve.side_effect = [ws, param_ws]
+
         mock_get_run_prefix.return_value = (run_number, prefix)
         mock_get_group.return_value = group
 
-        # TEST
+        tab_ws = MagicMock()
+        mock_create_tab_ws.return_value = tab_ws
+
         fit_all_peaks(
-            wss=[
-                wsname,
-            ],
+            wss=[wsname],
             peaks=[peak],
             peak_window=0.1,
             save_dir=save_dir,
             override_dir=True,
         )
 
-        # CHECK
-        mock_create_tab_ws.assert_called_once_with(**expected_results["expected_create_tab_kwargs"])
-        mock_fit.assert_has_calls(
-            [call(**expected_results["expected_first_fit_kwargs"]), call(**expected_results["expected_fit_kwargs"])], any_order=True
+        expected_tab_name = f"{prefix}{run_number}_{peak}_{group}_Fit_Parameters"
+        expected_out_path = path.join(save_dir, f"{expected_tab_name}.nxs")
+        mock_create_tab_ws.assert_called_once_with(OutputWorkspace=expected_tab_name)
+        mock_save_nexus.assert_called_once_with(InputWorkspace=expected_tab_name, Filename=expected_out_path)
+
+        mock_get_initial.assert_called_once_with(
+            ws,
+            "smooth_ws_3",
+            peak,
+            (peak - 0.1, peak + 0.1),
+            ("A", "B"),
+            "BackToBackExponential",
+            "LinearBackground",
+            False,
         )
-        mock_save_nexus.assert_called_once_with(**expected_results["expected_save_kwargs"])
+
+        _, fit_call_kwargs = mock_fit.call_args
+        self.assertEqual(fit_call_kwargs["Function"], "FUNC")
+        self.assertEqual(fit_call_kwargs["Output"], "fit_smooth_ws_3")
+        self.assertEqual(fit_call_kwargs["MaxIterations"], 50)
+        self.assertEqual(fit_call_kwargs["CostFunction"], "Unweighted least squares")
+
+        mock_rerun_with_new.assert_called_once()
+        rerun_args, _ = mock_rerun_with_new.call_args
+        self.assertEqual(rerun_args[3], "smooth_ws_2")
+        self.assertEqual(tab_ws.addRow.call_count, num_spec)
+
+    # -------- MULTIPLE wss & peaks --------
 
     @patch(f"{texture_utils_path}.SaveNexus")
     @patch(f"{texture_utils_path}.CreateEmptyTableWorkspace")
-    @patch(f"{texture_utils_path}.calc_intens_and_sigma_arrays")
+    @patch(
+        f"{texture_utils_path}.calc_intens_and_sigma_arrays",
+        return_value=(None, None, np.array([3.0, 3.0]), None),
+    )
+    @patch(f"{texture_utils_path}._convert_TOFerror_to_derror")
+    @patch(f"{texture_utils_path}.UnitConversion")
+    @patch(f"{texture_utils_path}.rerun_fit_with_new_ws")
+    @patch(f"{texture_utils_path}.get_initial_fit_function_and_kwargs_from_specs")
     @patch(f"{texture_utils_path}.Fit")
+    @patch(f"{texture_utils_path}.Rebunch")
+    @patch(f"{texture_utils_path}.ConvertUnits")
     @patch(f"{texture_utils_path}._get_grouping_from_ws_log")
     @patch(f"{texture_utils_path}._get_run_and_prefix_from_ws_log")
     @patch(f"{texture_utils_path}.ADS")
-    @patch(f"{texture_utils_path}.TexturePeakFunctionGenerator")
     def test_fit_all_peaks_multiple_wss_and_peaks(
         self,
-        mock_peak_func_gen_cls,
         mock_ads,
         mock_get_run_prefix,
         mock_get_group,
+        mock_convert_units,
+        mock_rebunch,
         mock_fit,
-        mock_intens_sigma,
+        mock_get_initial,
+        mock_rerun_with_new,
+        mock_unitconv,
+        mock_convert_toferr_to_derr,
+        _mock_calc_i_over_sig,
         mock_create_tab_ws,
         mock_save_nexus,
     ):
-        # GIVEN
+        mock_unitconv.run.return_value = 1.2345
+        mock_convert_toferr_to_derr.return_value = 0.01
+
         wss = ["TEST000101_ws", "TEST000102_ws"]
         runs = ["000101", "000102"]
-        prefix = "TEST"
-        group = "TestGroup"
-        peaks = [1.0, 2.0]
-        save_dir = "save"
-        num_spec = 2
+        prefix, group, peaks, num_spec = "TEST", "TestGroup", [1.0, 2.0], 2
 
-        all_expected = []
-        for wsname, run_number in zip(wss, runs):
-            for peak in peaks:
-                expected = self.setup_expected_fit_results(wsname, prefix, run_number, group, peak, num_spec, save_dir)
-                all_expected.append(expected)
+        ws1, ws2 = MagicMock(), MagicMock()
+        si1, si2 = MagicMock(), MagicMock()
+        si1.size.return_value = num_spec
+        si2.size.return_value = num_spec
+        ws1.spectrumInfo.return_value = si1
+        ws2.spectrumInfo.return_value = si2
 
-        mocks = self.setup_fit_mocks_from_expected_results(all_expected, mock_peak_func_gen_cls, mock_ads, mock_intens_sigma)
-        mock_ws, mock_param_ws, mock_peak_func_gen_cls, mock_ads = mocks
-        mock_get_run_prefix.side_effect = [(run_number, prefix) for run_number in runs]
-        mock_get_group.side_effect = [group for _ in runs]
+        mock_convert_units.side_effect = ["ws_tof_1", "ws_tof_2"]
+        mock_rebunch.side_effect = ["smooth_ws_3_1", "smooth_ws_2_1", "smooth_ws_3_2", "smooth_ws_2_2"]
 
-        # TEST
-        fit_all_peaks(wss=wss, peaks=peaks, peak_window=0.1, save_dir=save_dir, override_dir=True)
+        md_fit_kwargs = {"InputWorkspace": "ws_tof", "StartX": 0.9, "EndX": 1.1, "WorkspaceIndex": 0}
+        mock_get_initial.return_value = ("FUNC", md_fit_kwargs, [10.0, 20.0], 0.1)
 
-        # CHECK
-        self.assertEqual(mock_fit.call_count, len(all_expected) * 2)  # first fit and second fit
-        self.assertEqual(mock_create_tab_ws.call_count, len(all_expected))
-        self.assertEqual(mock_save_nexus.call_count, len(all_expected))
+        fit_obj = MagicMock()
+        fit_obj.Function.function = "md_function"
+        fit_obj.OutputWorkspace.name.return_value = "fit_out_ws"
+        mock_fit.return_value = fit_obj
+        mock_rerun_with_new.return_value = (fit_obj, md_fit_kwargs)
 
-        expected_create_calls = [call(**exp["expected_create_tab_kwargs"]) for exp in all_expected]
-        expected_fit_calls = [call(**exp["expected_first_fit_kwargs"]) for exp in all_expected] + [
-            call(**exp["expected_fit_kwargs"]) for exp in all_expected
-        ]
-        expected_save_calls = [call(**exp["expected_save_kwargs"]) for exp in all_expected]
+        # param tables with only cost row
+        param_ws, *_ = self._make_param_table_mock(num_spec, params=())
+        mock_ads.retrieve.side_effect = [ws1, param_ws, param_ws, ws2, param_ws, param_ws]
 
-        mock_create_tab_ws.assert_has_calls(expected_create_calls, any_order=True)
-        mock_fit.assert_has_calls(expected_fit_calls, any_order=True)
-        mock_save_nexus.assert_has_calls(expected_save_calls, any_order=False)
+        mock_get_run_prefix.side_effect = [(runs[0], prefix), (runs[1], prefix)]
+        mock_get_group.side_effect = [group, group]
 
-    def test_make_iterable_wraps_scalar(self):
-        self.assertEqual(make_iterable("val"), ["val"])
-        self.assertEqual(make_iterable(42), [42])
-        self.assertEqual(make_iterable(["already", "list"]), ["already", "list"])
-        self.assertEqual(make_iterable((1, 2)), (1, 2))
+        fit_all_peaks(
+            wss=wss,
+            peaks=peaks,
+            peak_window=0.1,
+            save_dir="save",
+            override_dir=True,
+        )
 
-    @patch(f"{texture_utils_path}.TexturePeakFunctionGenerator._estimate_intensity_and_background")
+        expected_calls = len(wss) * len(peaks)
+        self.assertEqual(mock_fit.call_count, expected_calls)
+        self.assertEqual(mock_rerun_with_new.call_count, expected_calls)
+        self.assertEqual(mock_create_tab_ws.call_count, expected_calls)
+        self.assertEqual(mock_save_nexus.call_count, expected_calls)
+
+    # -------- invalid tie parameter --------
+
     @patch(f"{texture_utils_path}.FunctionFactory")
-    @patch(f"{texture_utils_path}.ADS")
-    def test_get_initial_fit_function_and_kwargs_from_specs_raises_on_invalid_tie_param(self, mock_ads, mock_factory, mock_estimate):
-        mock_ws = MagicMock()
+    @patch(f"{texture_utils_path}.MultiDomainFunction")
+    def test_get_initial_fit_function_and_kwargs_from_specs_raises_on_invalid_tie_param(self, mock_mdf, mock_factory):
+        ws = MagicMock()
         si = MagicMock()
-        si.size.return_value = 1
-        mock_ws.spectrumInfo.return_value = si
-        mock_ws.name.return_value = "test_ws"
-        mock_ws.yIndexOfX.side_effect = lambda x: 0
-        mock_ads.retrieve.return_value = mock_ws
+        si.size.return_value = 0  # skip per-spectrum loop
+        ws.spectrumInfo.return_value = si
+        ws_tof = MagicMock()
 
-        mock_estimate.return_value = ((1, 2), 0, 0)
+        # peak function with known available params
+        peak_func = MagicMock()
+        peak_func.nParams.return_value = 3
+        peak_func.getParamName.side_effect = lambda i: ["I", "X0", "S"][i]
+        peak_func.isExplicitlySet.side_effect = lambda i: i == 0  # "I" is intensity parameter
+        peak_func.getCentreParameterName.return_value = "X0"
+        peak_func.getWidthParameterName.return_value = "S"
 
-        mock_peak_func = MagicMock()
-        mock_peak_func.getCentreParameterName.return_value = "X0"
-        mock_peak_func.getWidthParameterName.return_value = "Sig"
-        mock_peak_func.getParamName.side_effect = lambda i: ["A", "B", "X0", "Sig"][i]
-        mock_peak_func.nParams.return_value = 4
-        mock_peak_func.isExplicitlySet.side_effect = lambda i: i == 0
-
-        mock_factory.Instance().createPeakFunction.return_value = mock_peak_func
+        # factory wiring
+        mock_factory.Instance().createPeakFunction.return_value = peak_func
         mock_factory.createFunction.return_value = MagicMock()
 
-        gen = TexturePeakFunctionGenerator([])
+        # MDF minimal behavior
+        mdf = MagicMock()
+        mdf.nDomains.return_value = 0
+        mock_mdf.return_value = mdf
+
+        # invalid parameter name
         with self.assertRaises(ValueError) as ctx:
-            gen.get_initial_fit_function_and_kwargs_from_specs(
-                mock_ws,
+            get_initial_fit_function_and_kwargs_from_specs(
+                ws=ws,
+                ws_tof=ws_tof,
                 peak=1.0,
                 x_window=(0.9, 1.1),
                 parameters_to_tie=["NotAParam"],
                 peak_func_name="BackToBackExponential",
                 bg_func_name="LinearBackground",
+                tie_bkg=False,
             )
-            self.assertIn("Invalid parameter(s) to tie", str(ctx.exception))
+        self.assertIn("Invalid parameter(s) to tie", str(ctx.exception))
 
     def get_default_pf_kwargs(self):
         return {
