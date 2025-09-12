@@ -1,0 +1,1 @@
+- Add new algorithm :ref:`algm-SANSISISPolarizationCorrections` to calibrate and correct spin leakage in polarized runs for ISIS instruments ZOOM and LARMOR
