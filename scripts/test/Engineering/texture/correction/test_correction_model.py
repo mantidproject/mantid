@@ -377,9 +377,10 @@ class TextureCorrectionModelTest(unittest.TestCase):
     @patch(correction_model_path + ".ADS")
     def test_apply_corrections_applies_default_normalisation_with_default_vals(self, mock_ads, mock_clone, mock_convert, mock_save):
         mock_calib = mock.MagicMock()
+        self.model.set_calibration(mock_calib)
         mock_ads.retrieve.return_value = self.mock_ws
         mock_convert.return_value = mock.MagicMock()
-        self.model.apply_corrections("ws1", "out_ws", mock_calib.group, "dir", abs_corr=1.0, div_corr=1.0)
+        self.model.apply_corrections("ws1", "out_ws", "dir", abs_corr=1.0, div_corr=1.0)
 
         mock_convert.assert_called_once_with(self.mock_ws, Target="dSpacing", StoreInADS=False)
         mock_clone.assert_called()
@@ -392,6 +393,7 @@ class TextureCorrectionModelTest(unittest.TestCase):
     def test_apply_corrections_with_abs_and_div_workspaces(self, mock_ads, mock_clone, mock_convert, mock_save):
         # Arrange
         mock_calib = MagicMock()
+        self.model.set_calibration(mock_calib)
         ws = MagicMock()
         abs_ws = MagicMock()
         div_ws = MagicMock()
@@ -403,7 +405,7 @@ class TextureCorrectionModelTest(unittest.TestCase):
         mock_ads.retrieve.side_effect = retrieve_mock
         mock_convert.side_effect = lambda x, Target, StoreInADS: temp_ws if x is ws else x
 
-        self.model.apply_corrections("ws1", "out_ws", mock_calib.group, "dir", abs_corr="abs_ws", div_corr="div_ws")
+        self.model.apply_corrections("ws1", "out_ws", "dir", abs_corr="abs_ws", div_corr="div_ws")
 
         # Assert
         self.assertEqual(mock_convert.call_count, 3)
@@ -417,11 +419,13 @@ class TextureCorrectionModelTest(unittest.TestCase):
     @patch(correction_model_path + ".ADS")
     def test_apply_corrections_with_remove_ws_flag(self, mock_ads, mock_clone, mock_convert, mock_save):
         mock_calib = MagicMock()
+        self.model.set_calibration(mock_calib)
         ws = MagicMock()
         mock_ads.retrieve.return_value = ws
         mock_convert.return_value = ws
+        self.model.set_remove_after_processing(True)
 
-        self.model.apply_corrections("ws1", "out_ws", mock_calib.group, "dir", abs_corr=1.0, div_corr=1.0, remove_ws_after_processing=True)
+        self.model.apply_corrections("ws1", "out_ws", "dir", abs_corr=1.0, div_corr=1.0)
 
         mock_ads.remove.assert_any_call("out_ws")
 
@@ -431,12 +435,14 @@ class TextureCorrectionModelTest(unittest.TestCase):
     @patch(correction_model_path + ".ADS")
     def test_apply_corrections_with_rb_number(self, mock_ads, mock_clone, mock_convert, mock_save):
         mock_calib = MagicMock()
+        self.model.set_calibration(mock_calib)
+        self.model.set_rb_num("rb123")
         ws = MagicMock()
         mock_ads.retrieve.return_value = ws
         mock_convert.return_value = ws
         mock_clone.return_value = None
 
-        self.model.apply_corrections("ws1", "out_ws", mock_calib.group, "dir", abs_corr=1.0, div_corr=1.0, rb_num="rb123")
+        self.model.apply_corrections("ws1", "out_ws", "dir", abs_corr=1.0, div_corr=1.0)
 
         mock_save.assert_called_once_with("out_ws", "dir", "AbsorptionCorrection", "rb123", mock_calib.group)
 
@@ -466,6 +472,60 @@ class TextureCorrectionModelTest(unittest.TestCase):
         self.model.create_reference_ws("RB123")
         self.assertEqual(self.model.reference_ws, "RB123_reference_workspace")
         mock_load_instr.assert_called_once_with(InstrumentName="ENGINX", OutputWorkspace="RB123_reference_workspace")
+
+    @patch(correction_model_path + ".TextureCorrectionModel.apply_corrections")
+    @patch(correction_model_path + ".TextureCorrectionModel.calc_divergence")
+    @patch(correction_model_path + ".TextureCorrectionModel.write_atten_val_table")
+    @patch(correction_model_path + ".TextureCorrectionModel.read_attenuation_coefficient_at_value")
+    @patch(correction_model_path + ".TextureCorrectionModel.calc_absorption")
+    @patch(correction_model_path + ".TextureCorrectionModel.define_gauge_volume")
+    def test_calc_all_corrections(
+        self,
+        mock_define_gauge_volume,
+        mock_calc_absorption,
+        mock_read_attenuation_coefficient_at_value,
+        mock_write_atten_val_table,
+        mock_calc_divergence,
+        mock_apply_corrections,
+    ):
+        wss = [self.mock_ws]
+        out_wss = ["Corrected_test1"]
+
+        abs_args = {"gauge_vol_preset": "4mmCube", "gauge_vol_file": None, "mc_param_str": "SparseInstrument:True"}
+
+        atten_args = {"atten_val": 2.0, "atten_units": "dSpacing"}
+
+        div_args = {"hoz": 1.0, "vert": 1.0, "det_hoz": 1.0}
+
+        rb = "rb123"
+        root_dir = "dir"
+        mock_calib = MagicMock()
+        mock_atten_vals = MagicMock()
+        mock_read_attenuation_coefficient_at_value.return_value = mock_atten_vals
+
+        self.model.set_include_abs(True)
+        self.model.set_include_atten(True)
+        self.model.set_include_div(True)
+        self.model.set_rb_num(rb)
+        self.model.set_calibration(mock_calib)
+        self.model.set_remove_after_processing(True)
+
+        self.model.calc_all_corrections(wss, out_wss, root_dir, abs_args, atten_args, div_args)
+
+        mock_define_gauge_volume.assert_called_once_with(self.mock_ws, abs_args["gauge_vol_preset"], abs_args["gauge_vol_file"])
+        mock_calc_absorption.assert_called_once_with(self.mock_ws, abs_args["mc_param_str"])
+        mock_read_attenuation_coefficient_at_value.assert_called_once_with("_abs_corr", atten_args["atten_val"], atten_args["atten_units"])
+        mock_write_atten_val_table.assert_called_once_with(
+            self.mock_ws,
+            mock_atten_vals,
+            atten_args["atten_val"],
+            atten_args["atten_units"],
+            rb,
+            mock_calib,
+            root_dir,
+        )
+        mock_calc_divergence.assert_called_once_with(self.mock_ws, div_args["hoz"], div_args["vert"], div_args["det_hoz"])
+        mock_apply_corrections.assert_called_once_with(self.mock_ws, out_wss[0], root_dir, "_abs_corr", "_div_corr")
 
 
 if __name__ == "__main__":

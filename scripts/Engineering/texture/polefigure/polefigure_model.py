@@ -17,12 +17,12 @@ import numpy as np
 from mantid.api import AnalysisDataService as ADS
 from typing import Optional, Sequence, Tuple
 import matplotlib.pyplot as plt
-from mantid.geometry import CrystalStructure
 from os import path, makedirs
 from scipy.interpolate import griddata
 from scipy.ndimage import gaussian_filter
-from Engineering.common.texture_sample_viewer import has_valid_shape, plot_sample_directions
+from Engineering.common.texture_sample_viewer import has_valid_shape
 from matplotlib.figure import Figure
+from Engineering.texture.xtal_helper import get_xtal_structure
 
 
 class TextureProjection:
@@ -126,7 +126,7 @@ class TextureProjection:
         projection: str,
         fig: Optional[Figure] = None,
         readout_col: str = "I",
-        save_dirs: Optional[str] = None,
+        save_dirs: Optional[Sequence[str] | str] = None,
         plot_exp: bool = True,
         ax_labels: Sequence[str] = ("Dir1", "Dir2"),
         contour_kernel: Optional[float] = 2.0,
@@ -155,7 +155,19 @@ class TextureProjection:
         eq = np.concatenate((x[None, :], y[None, :], z[None, :]), axis=0)
 
         fig = plt.figure() if not fig else fig
-        ax = fig.add_subplot(1, 1, 1)
+        gs = fig.add_gridspec(
+            1,
+            3,
+            width_ratios=[1, 30, 1],  # tweak 30 to control plot vs cbar width
+            left=0.05,
+            right=0.98,
+            top=0.98,
+            bottom=0.06,
+            wspace=0.05,
+        )
+        # left spacer: gs[0, 0] (we don't use it)
+        ax = fig.add_subplot(gs[0, 1])
+        cax = fig.add_subplot(gs[0, 2])
         scat_plot = ax.scatter(pfi[:, 1], pfi[:, 0], c=pfi[:, 2], s=20, cmap="jet", **kwargs)
         ax.plot(eq[0], eq[1], c="grey")
         ax.set_aspect("equal")
@@ -164,7 +176,7 @@ class TextureProjection:
         ax.quiver(-1, -1, 0, 0.2, color="red", scale=1)
         ax.text(-0.8, -0.95, ax_labels[-1], fontsize=10)
         ax.text(-0.95, -0.8, ax_labels[0], fontsize=10)
-        fig.colorbar(scat_plot, ax=ax, shrink=0.8, pad=0.05)
+        fig.colorbar(scat_plot, cax=cax)
         return fig
 
     @staticmethod
@@ -188,7 +200,19 @@ class TextureProjection:
 
         # Plotting
         fig = plt.figure() if not fig else fig
-        ax = fig.add_subplot(1, 1, 1)
+        gs = fig.add_gridspec(
+            1,
+            3,
+            width_ratios=[1, 30, 1],  # tweak 30 to control plot vs cbar width
+            left=0.05,
+            right=0.98,
+            top=0.98,
+            bottom=0.06,
+            wspace=0.05,
+        )
+        # left spacer: gs[0, 0] (we don't use it)
+        ax = fig.add_subplot(gs[0, 1])
+        cax = fig.add_subplot(gs[0, 2])
         contour_plot = ax.contourf(grid_x, grid_y, grid_z, levels=10, cmap="jet", **kwargs)
         circle = plt.Circle((0, 0), R, color="grey", fill=False, linestyle="-")
         ax.add_patch(circle)
@@ -198,12 +222,8 @@ class TextureProjection:
         ax.quiver(-1, -1, 0, 0.2, color="red", scale=1)
         ax.text(-0.8, -0.95, ax_labels[-1], fontsize=10)
         ax.text(-0.95, -0.8, ax_labels[0], fontsize=10)
-        fig.colorbar(contour_plot, ax=ax, shrink=0.8, pad=0.05)
+        fig.colorbar(contour_plot, cax=cax)
         return fig
-
-    @staticmethod
-    def plot_sample_directions(fig: Figure, ws_name: str, ax_transform: np.ndarray, ax_labels: Sequence[str], fix_axes_to_sample: bool):
-        plot_sample_directions(fig, ws_name, ax_transform, ax_labels, fix_axes_to_sample)
 
     # ~~~~~ General Utility functions ~~~~~~~~
 
@@ -266,6 +286,8 @@ class TextureProjection:
     def read_param_cols(ws_name: str, target_default: str = "I") -> Tuple[str, int]:
         ws = ADS.retrieve(ws_name)
         col_names = ws.getColumnNames()
+        col_types = ws.columnTypes()
+        col_names = [c for i, c in enumerate(col_names) if col_types[i] in ("double", "int", "float", "bool")]
         index = col_names.index(target_default) if target_default in col_names else 0
         return col_names, index
 
@@ -290,20 +312,21 @@ class TextureProjection:
         return f"{scatts}: {sg}"
 
     @staticmethod
-    def set_ws_xtal(ws: str, lattice: str, space_group: str, basis: str) -> None:
+    def set_ws_xtal(ws: str, lattice: str, space_group: str, basis: str, cif: str) -> None:
         ws = ADS.retrieve(ws)
-        ws.sample().setCrystalStructure(CrystalStructure(lattice, space_group, basis))
+        has_cif = cif != ""
+        has_latt_prop = lattice != "" and space_group != "" and basis != ""
+
+        input = "cif" if has_cif else "string" if has_latt_prop else None
+        args = (cif,) if has_cif else (lattice, space_group, basis) if has_latt_prop else None
+
+        xtal = get_xtal_structure(input, *args)
+        ws.sample().setCrystalStructure(xtal)
         logger.notice("Crystal Structure Set")
 
-    def set_all_ws_xtal(self, wss: Sequence[str], lattice: str, space_group: str, basis: str) -> None:
+    def set_all_ws_xtal(self, wss: Sequence[str], lattice: str, space_group: str, basis: str, cif: str) -> None:
         for ws in wss:
-            self.set_ws_xtal(ws, lattice, space_group, basis)
-
-    @staticmethod
-    def copy_xtal_to_all(ref_ws: str, wss: Sequence[str]) -> None:
-        xtal = ADS.retrieve(ref_ws).sample().getCrystalStructure()
-        for ws in wss:
-            ADS.retrieve(ws).sample().setCrystalStructure(xtal)
+            self.set_ws_xtal(ws, lattice, space_group, basis, cif)
 
 
 def ster_proj(alphas: np.ndarray, betas: np.ndarray, i: np.ndarray) -> np.ndarray:

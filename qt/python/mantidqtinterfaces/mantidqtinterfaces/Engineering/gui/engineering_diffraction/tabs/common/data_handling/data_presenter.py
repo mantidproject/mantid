@@ -4,7 +4,10 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import create_error_message
+from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import (
+    create_error_message,
+    wsname_in_instr_run_ceria_group_ispec_unit_format,
+)
 from mantid.simpleapi import logger
 from mantidqt.utils.asynchronous import AsyncTask
 from mantidqt.utils.observer_pattern import GenericObservable, GenericObserverWithArgPassing
@@ -282,12 +285,19 @@ class FittingDataPresenter(object):
         if run_no is not None and bank is not None:
             self.view.add_table_row(run_no, bank, plotted, bgsub, niter, xwindow, SG)
         elif len(words) == 4 and words[2] == "bank":
+            # this seems to now be obsolete - common file name format is now:
+            # INSTR_RUNNUM_CERIANUM_GROUP_ispec_UNIT?
+            # will maintain this path for legacy data?
             logger.notice("No sample logs present, determining information from workspace name.")
             self.view.add_table_row(words[1], words[3], plotted, bgsub, niter, xwindow, SG)
+        elif wsname_in_instr_run_ceria_group_ispec_unit_format(ws_name):
+            logger.notice("No sample logs present, determining information from workspace name.")
+            self.view.add_table_row(words[2], f"{words[3]} {words[4]}", plotted, bgsub, niter, xwindow, SG)
         else:
             logger.warning(
-                "The workspace '{}' was not in the correct naming format. Files should be named in the following way: "
-                "INSTRUMENT_RUNNUMBER_bank_BANK. Using workspace name as identifier.".format(ws_name)
+                "The workspace '{}' was not in the correct naming format. Files should be named in either of these ways: "
+                "INSTRUMENT_RUNNUMBER_bank_BANK or INSTR_CERIANUM_RUNNUM_GROUP_ispec_UNIT."
+                "Using workspace name as identifier.".format(ws_name)
             )
             self.view.add_table_row(ws_name, "N/A", plotted, bgsub, niter, xwindow, SG)
 
