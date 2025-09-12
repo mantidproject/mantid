@@ -55,3 +55,7 @@ extra:
     - thomashampson
     - sf1919
     - martyngigg
+
+build:
+  script_env:
+   - MANTID_DATA_STORE=/mantid_data
