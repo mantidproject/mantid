@@ -158,16 +158,16 @@ void appendInputSpectraToList(std::vector<InputSpectraToFit> &nameList, const st
 
   API::Axis *axis = ws->getAxis(1);
   if (axis->isSpectra()) {
-    double specStart = axis->spectraNo(0);
-    double specEnd = axis->spectraNo(axis->length() - 1);
-
-    if (start < specStart || end > specEnd) {
-      // Invalid input range append dummy spectra
-      nameList.emplace_back("", -1, -1, -1, -1, nullptr);
-      return;
-    }
-
     if (spectrumNumber < 0) {
+      double specStart = axis->spectraNo(0);
+      double specEnd = axis->spectraNo(axis->length() - 1);
+
+      if (start < specStart || end > specEnd) {
+        // Invalid input range append dummy spectra
+        nameList.emplace_back("", -1, -1, -1, -1, nullptr);
+        return;
+      }
+
       for (size_t i = 0; i < axis->length(); ++i) {
         double spec = double(axis->spectraNo(i));
         int wsIdx = static_cast<int>(i);
