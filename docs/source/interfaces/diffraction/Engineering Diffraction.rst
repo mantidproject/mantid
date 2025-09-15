@@ -475,7 +475,7 @@ Refine Sigma_1
 
 Refine Gamma
 
-.. image:: figure:: ../../images/EngDiff_GSASII.png
+.. image:: ../../images/EngDiff_GSASII.png
     :align: center
     :width: 600px
 
