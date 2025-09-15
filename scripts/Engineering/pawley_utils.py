@@ -279,7 +279,7 @@ class PawleyPattern1D:
             self.intens[iphase] *= scale
 
     def fit(self, **kwargs) -> OptimizeResult:
-        default_kwargs = {"xtol": 1e-5, "diff_step": 1e-3, "x_scale": "jac"}
+        default_kwargs = {"xtol": 1e-5, "diff_step": 1e-3, "x_scale": "jac", "verbose": 2}
         kwargs = {**default_kwargs, **kwargs}
         self.initial_params = self.get_free_params()
         return least_squares(lambda p: self.eval_resids(p), self.initial_params, **kwargs)
