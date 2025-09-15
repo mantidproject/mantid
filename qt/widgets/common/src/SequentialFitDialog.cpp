@@ -238,7 +238,7 @@ bool SequentialFitDialog::isFile(int row) const {
   return !item || item->flags().testFlag(Qt::ItemIsEnabled) == false;
 }
 
-bool isValidRangeFormat(const QString &range) {
+bool SequentialFitDialog::isValidRangeFormat(const QString &range) const {
   // Check if range contains exactly one colon
   int colonCount = range.count(':');
   if (colonCount != 1) {
@@ -388,6 +388,15 @@ void SequentialFitDialog::accept() {
 
   bool passWSIndexToFunction = ui.ckbPassWS->isChecked();
   alg->setProperty("PassWSIndexToFunction", passWSIndexToFunction);
+
+  auto errors = alg->validateInputs();
+
+  if (!errors.empty()) {
+    for (const auto &[key, error] : errors) {
+      g_log.error() << error << std::endl;
+    }
+    return;
+  }
 
   alg->executeAsync();
   QDialog::accept();
