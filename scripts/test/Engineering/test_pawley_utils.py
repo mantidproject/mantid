@@ -200,8 +200,14 @@ class PawleyPattern2DTest(unittest.TestCase):
     def test_eval_resids_global_scale_true(self):
         pawley = PawleyPattern2D(self.ws, [self.phase], global_scale=True, profile=GaussianProfile())
         resids = pawley.eval_resids(pawley.get_free_params())
-        # sum of resids should be much smaller than global-scale=True (as background optimised)
         self.assertAlmostEqual(sum(resids), -5e7, delta=1e7)
+
+    def test_eval2D_respects_lambda_max(self):
+        pawley = PawleyPattern2D(self.ws, [self.phase], global_scale=True, profile=GaussianProfile())
+        ysum = pawley.eval_2d(pawley.get_free_params()).extractY().sum()
+        pawley.lambda_max = 2.0
+        ysum_cropped = pawley.eval_2d(pawley.get_free_params()).extractY().sum()
+        self.assertLess(ysum_cropped, ysum)
 
     def test_eval_resids_global_scale_false(self):
         pawley = PawleyPattern2D(self.ws, [self.phase], global_scale=False, profile=GaussianProfile())

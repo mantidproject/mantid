@@ -292,6 +292,7 @@ class PawleyPattern1D:
 class PawleyPattern2D(PawleyPattern1D):
     def __init__(self, *args, global_scale: bool = True, **kwargs):
         super().__init__(*args, **kwargs)
+        self.lambda_max = 5.0  # same default as PoldiAutoCorrelation
         self.scales = None
         self.bgs = None
         self.set_global_scale(global_scale)
@@ -342,7 +343,7 @@ class PawleyPattern2D(PawleyPattern1D):
 
     def eval_2d(self, params: np.ndarray[float]) -> Workspace2D:
         self.ws_1d.setY(0, self.eval_profile(params))
-        ws_sim = simulate_2d_data(self.ws, self.ws_1d, output_workspace=f"{self.ws.name()}_sim")
+        ws_sim = simulate_2d_data(self.ws, self.ws_1d, output_workspace=f"{self.ws.name()}_sim", lambda_max=self.lambda_max)
         if not self.global_scale:
             self.scales = np.zeros(self.ws.getNumberHistograms())
             self.bgs = np.zeros_like(self.scales)
