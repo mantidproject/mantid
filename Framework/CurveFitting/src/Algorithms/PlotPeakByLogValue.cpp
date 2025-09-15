@@ -171,6 +171,11 @@ std::map<std::string, std::string> PlotPeakByLogValue::validateInputs() {
   int default_wi = getProperty("WorkspaceIndex");
   int default_spec = getProperty("Spectrum");
   const std::vector<InputSpectraToFit> wsNames = makeNames(inputList, default_wi, default_spec);
+  for (auto &wsName : wsNames) {
+    if (wsName.wsIdx == -1 && wsName.spectrumNum == -1 && wsName.numericValue == -1) {
+      errors["InvalidRange"] = "Range is out of bounds. Please make sure the selected range is within the boundaries.";
+    }
+  }
   std::vector<std::string> excludeList = getProperty("ExcludeMultiple");
   if (!excludeList.empty() && excludeList.size() != wsNames.size()) {
     errors["ExcludeMultiple"] = "ExcludeMultiple must be the same size has the number of spectra.";
