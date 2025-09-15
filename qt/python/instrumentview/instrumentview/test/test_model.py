@@ -53,6 +53,8 @@ class TestFullInstrumentViewModel(unittest.TestCase):
 
     def _create_mock_workspace(self, detector_ids: list[int]):
         mock_workspace = mock.MagicMock()
+        mock_workspace.isRaggedWorkspace.return_value = False
+        mock_workspace.isCommonBins.return_value = False
         mock_workspace.detectorInfo.return_value = mock.MagicMock()
         mock_workspace.componentInfo.return_value = mock.MagicMock()
         mock_workspace.getNumberHistograms.return_value = len(detector_ids)
@@ -211,15 +213,33 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         self.assertEqual(model.counts_limits[0], 100)
         self.assertEqual(model.counts_limits[1], 300)
 
-    def test_tof_limits(self):
-        bins = [0, 1, 2]
+    def test_tof_limits_ws_with_common_bins(self):
         self._mock_detector_table([1, 2, 3])
         mock_workspace = self._create_mock_workspace([1, 2, 3])
-        mock_workspace.dataX.return_value = bins
+        mock_workspace.isCommonBins.return_value = True
+        mock_workspace.dataX.return_value = np.array([1, 2, 3])
         model = FullInstrumentViewModel(mock_workspace)
         model.setup()
-        self.assertEqual(model.tof_limits[0], bins[0])
-        self.assertEqual(model.tof_limits[1], bins[-1])
+        self.assertEqual(model.tof_limits, (1, 3))
+
+    def test_tof_limits_on_ragged_workspace(self):
+        self._mock_detector_table([1, 2, 3])
+        mock_workspace = self._create_mock_workspace([1, 2, 3])
+        mock_workspace.isRaggedWorkspace.return_value = True
+        data_x = {0: np.array([1, 2, 3]), 1: np.array([10, 20, 30, 40]), 2: np.array([10, 20, 30, 40, 50])}
+        mock_workspace.readX.side_effect = lambda i: data_x[i]
+        model = FullInstrumentViewModel(mock_workspace)
+        model.setup()
+        self.assertEqual(model.tof_limits, (1, 50))
+
+    def test_tof_limits_on_non_ragged_workspace(self):
+        self._mock_detector_table([1, 2, 3])
+        mock_workspace = self._create_mock_workspace([1, 2, 3])
+        mock_workspace.isRaggedWorkspace.return_value = False
+        mock_workspace.extractX.return_value = np.array([[1, 2, 3], [10, 20, 30], [10, 20, 50]])
+        model = FullInstrumentViewModel(mock_workspace)
+        model.setup()
+        self.assertEqual(model.tof_limits, (1, 50))
 
     def test_monitor_positions(self):
         self._mock_detector_table([1, 2, 3], monitors=["yes", "no", "yes"])

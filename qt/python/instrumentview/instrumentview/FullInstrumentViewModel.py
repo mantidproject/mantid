@@ -54,15 +54,18 @@ class FullInstrumentViewModel:
         self._detector_projection_positions = np.zeros_like(self._detector_positions)
         self._detector_is_picked = np.full(len(self._detector_ids[self._is_valid]), False)
 
-        # Get min and max tof values, loop required because of ragged workspaces
-        first_values = np.zeros(self._workspace.getNumberHistograms())
-        last_values = np.zeros_like(first_values)
-        for i in range(self._workspace.getNumberHistograms()):
-            data_x = self._workspace.dataX(i)
-            first_values[i] = data_x[0]
-            last_values[i] = data_x[-1]
+        # Get min and max tof values
+        if self._workspace.isRaggedWorkspace():
+            first_last = np.array([self._workspace.readX(i)[[0, -1]] for i in range(self._workspace.getNumberHistograms())])
+            self._tof_limits = (np.min(first_last[:, 0]), np.max(first_last[:, 1]))
 
-        self._tof_limits = (float(np.min(first_values)), float(np.max(last_values)))
+        elif self._workspace.isCommonBins():
+            self._tof_limits = tuple(self._workspace.dataX(0)[[0, -1]])
+
+        else:
+            data_x = self._workspace.extractX()
+            self._tof_limits = (np.min(data_x[:, 0]), np.max(data_x[:, -1]))
+
         # Update counts with default total range
         self.update_time_of_flight_range(self._tof_limits, True)
 
