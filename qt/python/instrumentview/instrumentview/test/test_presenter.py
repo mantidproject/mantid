@@ -34,7 +34,7 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
 
     def test_projection_option_selected(self):
         self._presenter.on_projection_option_selected(1)
-        self._mock_view.add_projection_mesh.assert_called()
+        self._mock_view.add_main_mesh.assert_called()
 
     @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.create_poly_data_mesh")
     @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.calculate_projection")
@@ -57,71 +57,29 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
 
     @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.update_time_of_flight_range")
     @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.set_view_tof_limits")
-    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter._parse_min_max")
-    def test_on_tof_limits_updated_true(self, mock_parse_min_max, mock_set_view_tof_limits, mock_update_tof_range):
-        mock_parse_min_max.return_value = (0, 100)
+    def test_on_tof_limits_updated_true(self, mock_set_view_tof_limits, mock_update_tof_range):
+        self._mock_view.get_tof_limits.return_value = (0, 100)
         self._presenter.on_tof_limits_updated()
-        mock_parse_min_max.assert_called_once()
-        mock_update_tof_range.assert_called_with(0, 100)
+        mock_update_tof_range.assert_called_with((0, 100))
         mock_set_view_tof_limits.assert_called_once()
 
-    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.set_view_tof_limits")
-    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter._parse_min_max")
-    def test_on_tof_limits_updated_false(self, mock_parse_min_max, mock_set_view_tof_limits):
-        mock_parse_min_max.return_value = ()
-        self._presenter.on_tof_limits_updated()
-        mock_parse_min_max.assert_called_once()
-        mock_set_view_tof_limits.assert_not_called()
-
     @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.set_view_contour_limits")
-    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter._parse_min_max")
-    def test_on_contour_limits_updated_false(self, mock_parse_min_max, mock_set_view_contour_limits):
-        mock_parse_min_max.return_value = ()
+    def test_on_contour_limits_updated_true(self, mock_set_view_contour_limits):
+        self._mock_view.get_contour_limits.return_value = (0, 100)
         self._presenter.on_contour_limits_updated()
-        mock_set_view_contour_limits.assert_not_called()
-
-    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.set_view_contour_limits")
-    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter._parse_min_max")
-    def test_on_contour_limits_updated_true(self, mock_parse_min_max, mock_set_view_contour_limits):
-        mock_parse_min_max.return_value = (0, 100)
-        self._presenter.on_contour_limits_updated()
-        mock_set_view_contour_limits.assert_called_once_with(0, 100)
-
-    def _do_test_parse_min_max_valid(self, min: str | float, max: str | float, exp_is_valid: bool, exp_min: int, exp_max: int) -> None:
-        limits = self._presenter._parse_min_max(min, max)
-        self.assertEqual(exp_is_valid, bool(limits))
-        if limits:
-            min, max = limits
-            self.assertEqual(exp_min, min)
-            self.assertEqual(exp_max, max)
-
-    def test_parse_min_max_valid(self):
-        self._do_test_parse_min_max_valid("1", "200", True, 1, 200)
-
-    def test_parse_min_max_int_valid(self):
-        self._do_test_parse_min_max_valid(1, 200, True, 1, 200)
-
-    def test_parse_min_max_float_valid(self):
-        self._do_test_parse_min_max_valid(1.6, 200.8, True, 1, 200)
-
-    def test_parse_min_max_reverse(self):
-        self._do_test_parse_min_max_valid("100", "5", False, 0, 0)
-
-    def test_parse_min_max_invalid_min(self):
-        self._do_test_parse_min_max_valid("boom", "5", False, 0, 0)
-
-    def test_parse_min_max_invalid_max(self):
-        self._do_test_parse_min_max_valid("5", "boom", False, 0, 0)
+        self.assertEqual(self._model._counts_limits, (0, 100))
+        mock_set_view_contour_limits.assert_called_once()
 
     def test_set_view_contour_limits(self):
-        self._presenter.set_view_contour_limits(0, 100)
-        self._mock_view.set_plotter_scalar_bar_range.assert_called_once_with([0, 100], self._presenter._counts_label)
+        self._model._counts_limits = (0, 100)
+        self._presenter.set_view_contour_limits()
+        self._mock_view.set_plotter_scalar_bar_range.assert_called_once_with((0, 100), self._presenter._counts_label)
 
-    @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.detector_counts")
-    def test_set_view_tof_limits(self, mock_detector_counts):
-        mock_detector_counts.return_value = np.zeros(200)
+    def test_set_view_tof_limits(self):
+        self._model._counts = np.zeros(200)
+        self._presenter._detector_mesh = {}
         self._presenter.set_view_tof_limits()
-        self.assertEqual(mock_detector_counts.call_count, 2)
+        np.testing.assert_allclose(self._presenter._detector_mesh[self._presenter._counts_label], self._model.detector_counts)
 
     @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.update_picked_detectors")
     def test_point_picked(self, mock_update_picked_detectors):
@@ -135,33 +93,13 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         mock_update_picked_detectors.assert_called_with([1])
 
     def test_update_picked_detectors(self):
-        mock_model = MagicMock()
-        self._presenter._model = mock_model
-
-        def picked_visibility():
-            return [True, True, False]
-
-        def picked_workspace_indices():
-            return [0, 1]
-
-        def picked_detectors_info_text():
-            return ["a", "a"]
-
-        mock_model.picked_visibility = picked_visibility
-        mock_model.picked_workspace_indices = picked_workspace_indices
-        mock_model.picked_detectors_info_text = picked_detectors_info_text
-
+        self._model._workspace_indices = np.array([0, 1, 2])
+        self._model._is_valid = np.array([True, True, True])
+        self._model._detector_is_picked = np.array([True, True, False])
+        self._model.picked_detectors_info_text = MagicMock(return_value=["a", "a"])
         self._presenter._pickable_main_mesh = {}
-        self._presenter._pickable_projection_mesh = {}
-
-        self._presenter._model = mock_model
-
         self._presenter.update_picked_detectors([])
-
-        self.assertEqual(self._presenter._pickable_main_mesh["visibility"], [True, True, False])
-        self.assertEqual(self._presenter._pickable_projection_mesh["visibility"], [True, True, False])
-
-        self._mock_view.set_plot_for_detectors.assert_called_once_with(mock_model.workspace(), [0, 1])
+        np.testing.assert_allclose(self._presenter._pickable_main_mesh[self._presenter._visible_label], self._model._detector_is_picked)
         self._mock_view.set_selected_detector_info.assert_called_once_with(["a", "a"])
 
     def test_generate_single_colour(self):
