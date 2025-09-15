@@ -144,10 +144,6 @@ if [[ $ENABLE_BUILD_QT == true ]]; then
     conda mambabuild ./mantidqt/ $EXTRA_BUILD_OPTIONS
 fi
 if [[ $ENABLE_BUILD_DOCS == true ]]; then
-    create_and_activate_mantid_developer_env $WORKSPACE $PLATFORM
-    pwd
-    cmake --build $REPO_ROOT_DIR/build --target StandardTestData
-    mamba activate base
     conda mambabuild ./mantiddocs/ $EXTRA_BUILD_OPTIONS
 fi
 if [[ $ENABLE_BUILD_WORKBENCH == true ]]; then
