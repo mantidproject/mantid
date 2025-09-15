@@ -198,7 +198,7 @@ def simulate_2d_data(
     l2s = np.asarray([si.l2(ispec) for ispec in range(nspec)])
     l1 = si.l1()
     # get npulses to include
-    time_max = get_max_tof_from_chopper(l1, l1_chop, l2s, tths, lambda_max) + slit_offsets[0]
+    time_max = get_max_tof_from_chopper(l1, l1_chop, l2s, tths, lambda_max) + slit_offsets[-1]
     npulses = int(time_max // cycle_time)
     # simulate detected spectra
     ipulses = np.arange(npulses)[:, None]

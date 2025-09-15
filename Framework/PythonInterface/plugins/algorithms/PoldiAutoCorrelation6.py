@@ -95,7 +95,7 @@ class PoldiAutoCorrelation(PythonAlgorithm):
         l2s = np.asarray([si.l2(ispec) for ispec in range(nspec)])
         l1 = si.l1()
         # determine npulses to include in calc
-        time_max = get_max_tof_from_chopper(l1, l1_chop, l2s, tths, lambda_max) + slit_offsets[0]
+        time_max = get_max_tof_from_chopper(l1, l1_chop, l2s, tths, lambda_max) + slit_offsets[-1]
         npulses = int(time_max // cycle_time)
         # get final d-spacing array based on detector limits and wavelength range
         # in actuality not all d-spacings will be measured within the wavelength range in every pixel
