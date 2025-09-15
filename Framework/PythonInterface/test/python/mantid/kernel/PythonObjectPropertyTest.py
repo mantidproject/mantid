@@ -259,6 +259,21 @@ class PythonObjectPropertyTest(unittest.TestCase):
         objAsJson = {"x": 7, "y": {"a": "frnakling"}}
         self.assertEqual(objAsJson, fake.getProperty("PyObject").value)
 
+    def test_value_class_recursion_stops(self):
+        fake = FakeAlgorithm()
+        fake.initialize()
+
+        # create a self-referential object
+        obj = [1]
+        obj[0] = obj
+        fake.setProperty("PyObject", obj)
+        self.assertIs(obj, fake.getProperty("PyObject").value)
+
+        # take the string, ensure it terminates
+        propVal = fake.getPropertyValue("PyObject")
+        fake.setPropertyValue("PyObject", propVal)
+        self.assertIn("...", fake.getPropertyValue("PyObject"))
+
 
 if __name__ == "__main__":
     unittest.main()

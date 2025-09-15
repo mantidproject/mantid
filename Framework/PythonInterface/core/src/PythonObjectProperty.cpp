@@ -21,33 +21,61 @@
 namespace {
 namespace bp = boost::python;
 
-/** Types which can be handled by python's json.dumps */
-std::set<std::string> const jsonAllowedTypes{"int", "float", "str", "dict", "list", "tuple", "NoneType", "bool"};
+/** Atomic types which can be serialized by python's json.dumps */
+std::set<std::string> const jsonAllowedTypes{"int", "float", "str", "NoneType", "bool"};
 
 /** Recurisvely JSONify the object's internal __dict__ property
  * At each stage of the dictionary, will check if the value is one of the above types
  * If so, it remains.
- * If not, the value is replaced with its internal __dict__ property, recurisvely
+ * If not, the value is replaced with its internal __dict__ property, recursively
  * @param obj the object to be recursively written
  * @return a python object which is a dictionary corresponding to `obj`
  */
-bp::object recursiveDictDump(bp::object obj) {
-  // fetch the internal __dict__ property of this object
-  bp::dict d = bp::extract<bp::dict>(obj.attr("__dict__"));
-  // iterate over every elementof the dictionary
-  bp::list keyvals = d.items();
-  for (bp::ssize_t i = 0; i < bp::len(keyvals); i++) {
-    bp::object key = keyvals[i][0];
-    bp::object val = keyvals[i][1];
-    // if the value is not in a type that can be serialized with json.dumps, then replace it with
-    // its own internal __dict__ property
-    std::string valtype = bp::extract<std::string>(val.attr("__class__").attr("__name__"));
-    if (!jsonAllowedTypes.count(valtype)) {
-      d[key] = recursiveDictDump(val);
-    }
+bp::object recursiveDictDump(bp::object obj, unsigned char depth = 0) {
+  static unsigned char const max_depth(10);
+  bp::object ret;
+  std::string const objname = bp::extract<std::string>(obj.attr("__class__").attr("__name__"));
+  // limit recursion depth, to avoid infinity loops or possible segfaults
+  if (depth >= max_depth) {
+    ret = bp::str("...");
   }
-  // return this dictionary as a python object
-  return bp::object(d);
+  // if the object can be json-ified already, return this object
+  else if (jsonAllowedTypes.count(objname)) {
+    ret = obj;
+  }
+  // if the object is a list, json-ify each element of the list
+  else if (PyList_Check(obj.ptr()) || PyTuple_Check(obj.ptr())) {
+    bp::list ls;
+    for (bp::ssize_t i = 0; i < bp::len(obj); i++) {
+      ls.append(recursiveDictDump(obj[i], depth + 1));
+    }
+    ret = ls;
+  }
+  // if the object is a dictionary, json-ify all of the values
+  else if (PyDict_Check(obj.ptr())) {
+    bp::dict d = bp::extract<bp::dict>(obj);
+    bp::list keyvals = d.items();
+    for (bp::ssize_t i = 0; i < bp::len(keyvals); i++) {
+      bp::object key = keyvals[i][0];
+      bp::object val = keyvals[i][1];
+      d[key] = recursiveDictDump(val, depth + 1);
+    }
+    ret = d;
+  }
+  // if the object is not one of the above types, then extract its __dict__ method and repeat the above
+  else if (PyObject_HasAttrString(obj.ptr(), "__dict__")) {
+    bp::dict d = bp::extract<bp::dict>(obj.attr("__dict__"));
+    bp::list keyvals = d.items();
+    for (bp::ssize_t i = 0; i < bp::len(keyvals); i++) {
+      bp::object key = keyvals[i][0];
+      bp::object val = keyvals[i][1];
+      d[key] = recursiveDictDump(val, depth + 1);
+    }
+    ret = d;
+  } else {
+    ret = bp::str(obj);
+  }
+  return ret;
 }
 } // namespace
 
@@ -69,14 +97,14 @@ template <> std::string toString(PythonObject const &obj) {
   else if (boost::python::extract<std::string>(obj).check()) {
     rep = obj;
   }
-  // otherwise, use either json to return a string representation of the class
+  // otherwise, use json to return a string representation of the class
   else {
     // try loading as a json -- will work for most 'built-in' types
     boost::python::object json = boost::python::import("json");
     try {
       rep = json.attr("dumps")(obj);
     }
-    // if json doesn't work, then iteratively dump its dict as a json
+    // if json doesn't work, then build a json-like dictionary representation of the object and dump that
     catch (boost::python::error_already_set const &) {
       PyErr_Clear(); // NOTE must clear error registry, or bizarre errors will occur at unexpected lines
       boost::python::object dict = recursiveDictDump(obj);
