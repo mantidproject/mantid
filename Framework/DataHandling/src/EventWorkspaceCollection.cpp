@@ -13,6 +13,7 @@
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidIndexing/IndexInfo.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/UnitFactory.h"
 
 #include <algorithm>
@@ -28,6 +29,9 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
 namespace {
+
+// Logger for this class
+auto g_log = Kernel::Logger("EventWorkspaceCollection");
 
 /**
  * Copy all logData properties from the 'from' workspace to the 'to'
@@ -98,7 +102,8 @@ void EventWorkspaceCollection::setNPeriods(size_t nPeriods, std::unique_ptr<cons
         // filter contains two entries with identical times as duplicated entries will be removed:
         // "Cannot guess ending value from a TimeSeriesProperty that contains only a single time"
         // Under these circumstances, it is advisable to omit the period-related logs.
-        std::cout << e.what() << std::endl;
+
+        g_log.warning(e.what());
       }
     }
     copyLogs(temp,
