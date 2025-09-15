@@ -77,9 +77,21 @@ To add a sample shape to the reference workspace you can have two options depend
 
 #. Click ``Set Shape onto single WS``
 #. Set ``InputWorkspace`` as ``TextureTutorial_reference_workspace``
-#. Copy the contents of ``example_sample_shape.xml`` into the ``ShapeXML`` box
+#. Copy the contents of ``example_sample_shape.xml`` (or copy below) into the ``ShapeXML`` box
 #. Again for this example nothing else is required, but for more complex use cases ``Set Reference Orientation`` can be used *before* clicking ``Set Shape onto single WS`` to rotate the shape defined in XML (currently translations must be made in the shape definition)
 #. Click ``Run``
+
+XML data:
+
+..testcode::
+
+   <cuboid id='some-cuboid'> \
+   <height val='0.015'  /> \
+   <width val='0.012' />  \
+   <depth  val='0.012' />  \
+   <centre x='0.0' y='0.0' z='0.0'  />  \
+   </cuboid>  \
+   <algebra val='some-cuboid' /> \
 
 Adding Material to Reference Workspace
 --------------------------------------
@@ -96,7 +108,7 @@ Setting Sample Axes
 -------------------
 
 At this point is is also worth considering the sample directions that you would like use for plotting the final pole figure. Clicking the ``View`` button in the
-``Reference Workspace Information`` section, you can see the three sample axes that will be used, with the pole figure projected into the plane of the red and blue vectors.
+``Reference Workspace Information`` section, you can see the three sample axes that will be used, where the pole figure will be projected into the plane of the red and blue vectors.
 To change the directions or labels of these axes:
 
 #. Click the ``Settings`` menu (gear icon, in the bottom left of the interface)
@@ -116,6 +128,7 @@ To set the orientation of the experimental runs there are three options: set eac
 #. Click ``Set Single Orientation``
 #. Select desired workspace
 #. Input the rotation either using the euler axes or the ``GoniometerMatrix`` field
+#. Click ``Run``, you should see the row in the table belonging to the chosen workspace has the ``Orientation`` change from ``default`` to ``set``
 
 * *From Rotation Matrices*:
 
@@ -124,6 +137,7 @@ To set the orientation of the experimental runs there are three options: set eac
 #. Click ``OK`` to return to the main Interface Window
 #. Click ``Browse`` next to the ``Orientation File`` box and navigate to ``matrix_orientation_file.txt``
 #. Again ensuring all the experimental runs have been selected, Click ``Load Orientation File``
+#. You should see all the rows in the table now have ``Orientation`` as ``set``
 
 * *From Euler Angles*:
 
@@ -134,6 +148,7 @@ To set the orientation of the experimental runs there are three options: set eac
 #. Click ``OK`` to return to the main Interface Window
 #. Click ``Browse`` next to the ``Orientation File`` box and navigate to ``euler_angles_orientation_file.txt``
 #. Again ensuring all the experimental runs have been selected, Click ``Load Orientation File``
+#. You should see all the rows in the table now have ``Orientation`` as ``set``
 
 Transferring Sample Info onto Workspaces
 ----------------------------------------
@@ -142,7 +157,7 @@ Once you have set the orientations on the workspaces you need to then define the
 
 #. Click ``Copy Reference Sample``
 
-*Alternatively, this can be done on an individual workspace by workspace basis, using the above steps for setting up the sample on the reference workspace but onto each workspace in turn -- this is not recommended*
+*Alternatively, this can be done on an individual workspace-by-workspace basis, using the above steps for setting up the sample on the reference workspace, but instead using each workspace in turn -- this is not recommended*
 
 Setting the Gauge Volume
 ------------------------
@@ -217,7 +232,7 @@ Step 4: Fitting Data
 *Here, especially, we will not cover a comprehensive tutorial on how to fit general spectra, but this provides an example of how it can be done*
 
 #. Click on the ``Fitting`` tab
-#. In the ``Browse Filters`` drop down box, select ``dSpacing``
+#. Where ``TOF`` is in the ``Browse Filters`` drop down box, select ``dSpacing``
 #. Click ``Browse`` next to the initial search box
 #. Navigate to your save directory and under ``User/TextureTutorial/Focus/Texture30/CombinedFiles`` select all of the seven focused data files
 #. Ensure ``Add to Plot`` is unchecked (this saves time plotting 210 spectra)

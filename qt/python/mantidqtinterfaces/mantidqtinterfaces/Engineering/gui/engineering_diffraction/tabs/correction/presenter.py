@@ -146,17 +146,20 @@ class TextureCorrectionPresenter:
         self.model.calc_all_corrections(wss, out_wss, output_settings.get_output_path(), abs_args, atten_args, div_args)
 
     def get_abs_args(self):
-        return {
-            "gauge_vol_preset": self.view.get_shape_method(),
-            "gauge_vol_file": self.view.get_custom_shape(),
-            "mc_param_str": self._get_setting("monte_carlo_params"),
-        }
+        if self.view.include_absorption():
+            return {
+                "gauge_vol_preset": self.view.get_shape_method(),
+                "gauge_vol_file": self.view.get_custom_shape(),
+                "mc_param_str": self._get_setting("monte_carlo_params"),
+            }
 
     def get_atten_args(self):
-        return {"atten_val": self.view.get_evaluation_value(), "atten_units": self.view.get_evaluation_units()}
+        if self.view.include_atten_tab():
+            return {"atten_val": self.view.get_evaluation_value(), "atten_units": self.view.get_evaluation_units()}
 
     def get_div_args(self):
-        return {"hoz": self.view.get_div_horz(), "vert": self.view.get_div_vert(), "det_hoz": self.view.get_div_det_horz()}
+        if self.view.include_divergence():
+            return {"hoz": self.view.get_div_horz(), "vert": self.view.get_div_vert(), "det_hoz": self.view.get_div_det_horz()}
 
     def _copy_sample_to_all_selected(self):
         ref_ws = self.view.get_sample_reference_ws()
