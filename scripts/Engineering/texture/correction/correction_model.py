@@ -133,7 +133,8 @@ class TextureCorrectionModel:
 
         # save files
         CloneWorkspace(temp_ws, OutputWorkspace=out_ws, StoreInADS=True)
-        self._save_corrected_files(out_ws, root_dir, "AbsorptionCorrection", self.rb_num, self.calibration.group)
+        group = self.calibration.group if self.calibration else None
+        self._save_corrected_files(out_ws, root_dir, "AbsorptionCorrection", self.rb_num, group)
 
         # optionally remove extra files
         if self.remove_ws_after_processing:

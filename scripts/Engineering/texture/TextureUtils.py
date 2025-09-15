@@ -189,7 +189,7 @@ def run_abs_corr(
 
     div_args = {"hoz": div_hoz, "vert": div_vert, "det_hoz": det_hoz}
 
-    model.calc_all_corrections(wss, out_wss, abs_args=abs_args, atten_args=atten_args, div_args=div_args)
+    model.calc_all_corrections(wss, out_wss, root_dir=root_dir, abs_args=abs_args, atten_args=atten_args, div_args=div_args)
 
 
 def validate_abs_corr_inputs(
