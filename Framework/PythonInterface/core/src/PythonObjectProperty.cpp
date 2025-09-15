@@ -21,19 +21,32 @@
 namespace {
 namespace bp = boost::python;
 
+/** Types which can be handled by python's json.dumps */
 std::set<std::string> const jsonAllowedTypes{"int", "float", "str", "dict", "list", "tuple", "NoneType", "bool"};
 
-bp::object iterativeDictDump(bp::object obj) {
+/** Recurisvely JSONify the object's internal __dict__ property
+ * At each stage of the dictionary, will check if the value is one of the above types
+ * If so, it remains.
+ * If not, the value is replaced with its internal __dict__ property, recurisvely
+ * @param obj the object to be recursively written
+ * @return a python object which is a dictionary corresponding to `obj`
+ */
+bp::object recursiveDictDump(bp::object obj) {
+  // fetch the internal __dict__ property of this object
   bp::dict d = bp::extract<bp::dict>(obj.attr("__dict__"));
+  // iterate over every elementof the dictionary
   bp::list keyvals = d.items();
   for (bp::ssize_t i = 0; i < bp::len(keyvals); i++) {
     bp::object key = keyvals[i][0];
     bp::object val = keyvals[i][1];
+    // if the value is not in a type that can be serialized with json.dumps, then replace it with
+    // its own internal __dict__ property
     std::string valtype = bp::extract<std::string>(val.attr("__class__").attr("__name__"));
     if (!jsonAllowedTypes.count(valtype)) {
-      d[key] = iterativeDictDump(val);
+      d[key] = recursiveDictDump(val);
     }
   }
+  // return this dictionary as a python object
   return bp::object(d);
 }
 } // namespace
@@ -66,7 +79,7 @@ template <> std::string toString(PythonObject const &obj) {
     // if json doesn't work, then iteratively dump its dict as a json
     catch (boost::python::error_already_set const &) {
       PyErr_Clear(); // NOTE must clear error registry, or bizarre errors will occur at unexpected lines
-      boost::python::object dict = iterativeDictDump(obj);
+      boost::python::object dict = recursiveDictDump(obj);
       rep = json.attr("dumps")(dict);
     }
   }
@@ -89,9 +102,12 @@ template <> Json::Value encodeAsJson(PythonObject const &) {
 }
 
 #ifdef __APPLE__
-// NOTE for mac builds, it is necessary the DLL export occur here.
-// This declaration normally lives in Framework/Kernel/PropertyWithValue.cpp.  However, because the boost library is
-// not linked in Kernel, this declaration can only occur in a file inside the PythonInterface layer
+/** NOTE:
+ *  For mac builds, it is necessary the DLL export occur here.
+ *  This declaration normally lives in Framework/Kernel/PropertyWithValue.cpp.  However, because the boost library is
+ *  not linked in Kernel, this declaration can only occur in a file inside the PythonInterface layer
+ *  For mac builds, this MUST occur inside a source file, and not in the header
+ */
 // Instantiate a copy of the class with our template type so we generate the symbols for the methods in the hxx header.
 template class MANTID_PYTHONINTERFACE_CORE_DLL PropertyWithValue<PythonObject>;
 #endif
@@ -102,11 +118,6 @@ namespace Mantid::PythonInterface {
 
 using Kernel::PropertyWithValue;
 using Kernel::Exception::NotImplementedError;
-
-/**
- *  @return An empty string to indicate a default
- */
-std::string PythonObjectProperty::getDefault() const { return ""; }
 
 /** Set the property value.
  *  @param value :: The object definition string.
@@ -170,10 +181,5 @@ std::string PythonObjectProperty::setValueFromJson(const Json::Value &json) {
 std::string PythonObjectProperty::setDataItem(const std::shared_ptr<Kernel::DataItem> &) {
   throw NotImplementedError("PythonObjectProperty::setDataItem(const std::shared_ptr<Kernel::DataItem> &)");
 }
-
-/** Indicates if the value matches the default, in this case if the value is None
- *  @return true if the value is None
- */
-bool PythonObjectProperty::isDefault() const { return m_value.is_none(); }
 
 } // namespace Mantid::PythonInterface

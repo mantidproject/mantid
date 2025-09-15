@@ -68,7 +68,7 @@ class PythonObjectPropertyTest(unittest.TestCase):
         self.assertEqual(prop.direction, Direction.Input)
         self.assertEqual(prop.value, default_value)
 
-    def test_construction_with_validator_int(self):
+    def test_python_validator(self):
         # make sure a validator cannot be created from a non-class-type object
         x = 7
         with self.assertRaises(Exception):
@@ -78,7 +78,24 @@ class PythonObjectPropertyTest(unittest.TestCase):
         with self.assertRaises(Exception):
             PythonObjectTypeValidator(x)
 
-        # not create a type validator and init a property with it
+        # make sure it can be created from a standard type
+        intValidator = PythonObjectTypeValidator(int)
+        self.assertEqual(intValidator.isValid(12), "")
+        self.assertEqual(intValidator.isValid(3.141592), "The passed object is of type float and not of type int")
+        self.assertEqual(intValidator.isValid(None), "The passed object is of type NoneType and not of type int")
+
+        # make sure it can be created from a custom type
+        class A:
+            pass
+
+        a = A()
+
+        classValidator = PythonObjectTypeValidator(A)
+        self.assertEqual(classValidator.isValid(a), "")
+        self.assertEqual(classValidator.isValid(12), "The passed object is of type int and not of type A")
+
+    def test_construction_with_validator_int(self):
+        # create a type validator and init a property with it
         validator = PythonObjectTypeValidator(int)
         prop = PythonObjectProperty("PyObjectProperty", None, validator)
 
@@ -98,25 +115,25 @@ class PythonObjectPropertyTest(unittest.TestCase):
         self.assertEqual(a_int, prop.value)
 
     def test_construction_with_validator_classes(self):
-        # make sure a validator cannot be created from a non-class-type object
+        # two stub classes for the check
         class A:
             pass
 
         class B:
             pass
 
-        # not create a type validator and init a property with it
+        # not create a type validator for A and init a property with it
         validator = PythonObjectTypeValidator(A)
         prop = PythonObjectProperty("PyObjectProperty", None, validator)
 
-        # check success
+        # check success with A objects
         a = A()
         res = prop.setValue(a)
         # successful setting will register as an empty string being returned
         self.assertEqual(res, "")
         self.assertEqual(a, prop.value)
 
-        # try setting with a float
+        # check failure with B objects
         b = B()
         res = prop.setValue(b)
         # an error condition will register as a string message being returned

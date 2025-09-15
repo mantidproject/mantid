@@ -29,7 +29,7 @@ struct DLLExport PythonObjectTypeHandler : public TypedPropertyValueHandler<boos
     alg->setProperty(name, value);
   }
 
-  /// Call to create a name property where the value is some container type
+  /// Call to create a named property where the value is some container type
   std::unique_ptr<Kernel::Property> create(std::string const &name, boost::python::object const &defaultValue,
                                            boost::python::object const &validator,
                                            unsigned int const direction) const override;

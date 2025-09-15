@@ -23,5 +23,6 @@ void export_PythonObjectTypeValidator() {
   class_<PythonObjectTypeValidator, bases<IValidator>, boost::noncopyable>("PythonObjectTypeValidator")
       .def("__init__",
            make_constructor(&createPythonObjectTypeValidator, default_call_policies(), (arg("PythonClass"))),
-           "Constructs a validator verifying that objects passed to this property are of the given class");
+           "Constructs a validator verifying that objects passed to this property are of the given class")
+      .def("isValid", &PythonObjectTypeValidator::isValid<boost::python::object>);
 }

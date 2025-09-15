@@ -24,10 +24,14 @@ class Value;
 
 namespace Mantid::Kernel {
 using PythonObject = boost::python::object;
+
 #ifndef __APPLE__
-// NOTE for Linux builds (and maybe Windows), it is necessary the DLL export occur here.
-// This declaration normally lives in Framework/Kernel/PropertyWithValue.cpp.  However, because the boost library is
-// not linked in Kernel, this declarationcan only occur in a file inside the PythonInterface layer
+/** NOTE:
+ *  For Linux builds (and maybe Windows), it is necessary that the below DLL export occur here.
+ *  This declaration normally lives in Framework/Kernel/PropertyWithValue.cpp.  However, because the boost library is
+ *  not linked in Kernel, this declaration can only occur inside the PythonInterface layer
+ *  For Linux builds, this MUST be instantiated BEFORE the declaration of PythonObjectProperty
+ */
 // Instantiate a copy of the class with our template type so we generate the symbols for the methods in the hxx header.
 template class MANTID_PYTHONINTERFACE_CORE_DLL PropertyWithValue<PythonObject>;
 #endif
@@ -92,8 +96,7 @@ public:
    *  @param strvalue ::     A string which will set the property being stored
    *  @param validator :: The validator to use for this property, if required
    *  @param direction :: The direction (Input/Output/InOut) of this property
-   *  @throw std::invalid_argument if the string passed is not compatible with
-   * the array type
+   *  @throw std::invalid_argument if the string passed is not compatible with a python object
    */
   PythonObjectProperty(std::string const &name, std::string const &strvalue,
                        IValidator_sptr const &validator = std::make_shared<NullValidator>(),
@@ -109,12 +112,10 @@ public:
   // Unhide the base class assignment operator
   using BaseClass::operator=;
 
-  std::string getDefault() const override;
   std::string setValue(PythonObject const &obj);
   std::string setValue(std::string const &value) override;
   std::string setValueFromJson(Json::Value const &value) override;
   std::string setDataItem(std::shared_ptr<Kernel::DataItem> const &value) override;
-  bool isDefault() const override;
 };
 
 } // namespace Mantid::PythonInterface
