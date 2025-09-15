@@ -292,7 +292,7 @@ class FittingDataPresenter(object):
             self.view.add_table_row(words[1], words[3], plotted, bgsub, niter, xwindow, SG)
         elif wsname_in_instr_run_ceria_group_ispec_unit_format(ws_name):
             logger.notice("No sample logs present, determining information from workspace name.")
-            self.view.add_table_row(words[2], f"{words[3]} {words[4]}", plotted, bgsub, niter, xwindow, SG)
+            self.view.add_table_row(words[1], f"{words[3]} {words[4]}", plotted, bgsub, niter, xwindow, SG)
         else:
             logger.warning(
                 "The workspace '{}' was not in the correct naming format. Files should be named in either of these ways: "

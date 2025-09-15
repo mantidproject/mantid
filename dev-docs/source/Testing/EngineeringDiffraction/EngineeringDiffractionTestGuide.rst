@@ -150,7 +150,7 @@ Test 4
 
 This test covers the sample setting functionality in the ``Absorption Correction`` tab.
 
-1. Change the ``RB Number`` to ``Corr``.
+1. Change the ``RB Number`` to ``ManualTesting``.
 
 2. Go to the ``Absorption Correction`` tab, in ``Sample Run(s)`` enter ``305738`` and click ``Load Files``
 
@@ -171,7 +171,7 @@ This test covers the sample setting functionality in the ``Absorption Correction
 10. If you have used the example STL you should get the following:
 
 .. image:: /images/EngineeringDiffractionTest/EnggDiffSamplePlot.png
-    :width: 900px
+    :width: 600px
 
 11. Now click ``Set Shape onto single WS`` and set ``InputWorkspace`` again to ``ManualTesting_reference_workspace``
 
@@ -205,8 +205,8 @@ This test covers the sample setting functionality in the ``Absorption Correction
 
 21. Clicking ``View Shape`` again, the shape should now look like:
 
-.. image:: /images/EngineeringDiffractionTest/EnggDiffSamplePlot.png
-    :width: 900px
+.. image:: /images/EngineeringDiffractionTest/EnggDiffSamplePlot2.png
+    :width: 600px
 
 22. Click ``Apply Correction`` at the bottom of the tab
 
@@ -383,7 +383,7 @@ This test will check the Pole Figure plotting in the Texture Tab
 8. Click ``Calculate Pole Figure``, you should get a plot like the one below
 
 .. image:: /images/EngineeringDiffractionTest/EnggDiffPF1.png
-    :width: 900px
+    :width: 600px
 
 9. Now click ``Browse`` next to ``Load Parameter Files`` and navigate to ``<mantidBuildDir>/ExternalData/Testing/Data/SystemTest/Texture/ValidationFiles/FitParameters``
 
@@ -394,7 +394,7 @@ This test will check the Pole Figure plotting in the Texture Tab
 12. Click ``Calculate Pole Figure``, you should get a plot like the one below
 
 .. image:: /images/EngineeringDiffractionTest/EnggDiffPF2.png
-    :width: 900px
+    :width: 600px
 
 13. Open the settings menu and set ``Scatter Plot Experimental Pole Figure`` to unchecked
 
@@ -403,7 +403,7 @@ This test will check the Pole Figure plotting in the Texture Tab
 15. Click ``Calculate Pole Figure``, you should get a plot like the one below
 
 .. image:: /images/EngineeringDiffractionTest/EnggDiffPF3.png
-    :width: 900px
+    :width: 600px
 
 16. Try changing options around in the interface, see if you can break it (some things you can try if you are short ideas):
 
