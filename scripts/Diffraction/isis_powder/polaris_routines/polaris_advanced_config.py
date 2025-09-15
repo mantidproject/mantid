@@ -29,11 +29,11 @@ file_names = {
 script_params = {"raw_data_cropping_values": (750, 20000), "spline_coefficient": 100, "spline_coeff_per_detector": 10}
 
 pdf_focused_cropping_values = [
-    (700, 30000),  # Bank 1
-    (1200, 24900),  # Bank 2
-    (1100, 19950),  # Bank 3
-    (1100, 19950),  # Bank 4
-    (1100, 19950),  # Bank 5
+    (600, 31000),  # Bank 1
+    (1000, 24950),  # Bank 2
+    (1000, 19975),  # Bank 3
+    (900, 19975),  # Bank 4
+    (800, 19975),  # Bank 5
 ]
 
 rietveld_focused_cropping_values = [
