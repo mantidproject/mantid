@@ -60,7 +60,7 @@ requirements:
       then: python.app
     - pyyaml ${{ pyyaml }}
     - qscintilla2 ${{ qscintilla2 }}
-    - qt ${{ qt_main }}
+    - qt-main ${{ qt_main }}
     - qtconsole ${{ qtconsole }}
     - qtpy ${{ qtpy }}
     - if: linux
@@ -79,7 +79,7 @@ requirements:
     - toml ${{ toml }}
     - versioningit ${{ versioningit }}
     - if: linux
-      then: vtk {{ vtk }}
+      then: vtk ${{ vtk }}
     - zlib
     - joblib
     - orsopy ${{ orsopy }}

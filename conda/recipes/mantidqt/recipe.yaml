@@ -72,7 +72,7 @@ requirements:
     - mantid == ${{ version }}
     - matplotlib ${{ matplotlib }}
     - ${{ pin_compatible("qscintilla2", upper_bound="x.x") }}
-    - ${{ pin_compatible("qt-main", upper_bound="5.15.9") }}
+    - ${{ pin_compatible("qt-main", upper_bound="x.x") }}
     - qtpy ${{ qtpy }}
     - python
     - if: linux
