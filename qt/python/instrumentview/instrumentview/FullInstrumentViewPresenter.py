@@ -18,7 +18,7 @@ from instrumentview.InstrumentViewADSObserver import InstrumentViewADSObserver
 
 class FullInstrumentViewPresenter:
     """Presenter for the Instrument View window"""
-    
+
     def __init__(self, view: FullInstrumentViewWindow, model: FullInstrumentViewModel):
         """For the given workspace, use the data from the model to plot the detectors. Also include points at the origin and
         any monitors."""
@@ -58,7 +58,7 @@ class FullInstrumentViewPresenter:
     def projection_combo_options(self) -> tuple[int, list[str]]:
         default_projection = self._model.default_projection
         try:
-            possible_returns = ["3D", "SPHERICAL_X", "SPHERICAL_Y", "SPHERICAL_Z", "CYLINDRICAL_X", "CYLINDRICAL_Y", "CYLINDRICAL_Z"]
+            possible_returns = self._model._PROJECTION_OPTIONS
             default_index = possible_returns.index(default_projection)
         except ValueError:
             default_index = 0
@@ -91,14 +91,6 @@ class FullInstrumentViewPresenter:
             self._view.enable_rectangle_picking_checkbox()
             self._update_view_main_plotter(self._model.detector_positions, is_projection=False)
             return
-
-        is_spherical = True
-        if projection_type.startswith("Spherical"):
-            is_spherical = True
-        elif projection_type.startswith("Cylindrical"):
-            is_spherical = False
-        else:
-            raise ValueError(f"Unknown projection type: {projection_type}")
 
         if projection_type.endswith("X"):
             axis = [1, 0, 0]

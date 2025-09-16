@@ -125,13 +125,13 @@ class TestFullInstrumentViewModel(unittest.TestCase):
 
     @mock.patch("instrumentview.Projections.SphericalProjection.SphericalProjection")
     def test_calculate_spherical_projection(self, mock_spherical_projection):
-        self._run_projection_test(mock_spherical_projection, True)
+        self._run_projection_test(mock_spherical_projection, FullInstrumentViewModel._SPHERICAL_Y)
 
     @mock.patch("instrumentview.Projections.CylindricalProjection.CylindricalProjection")
     def test_calculate_cylindrical_projection(self, mock_cylindrical_projection):
-        self._run_projection_test(mock_cylindrical_projection, False)
+        self._run_projection_test(mock_cylindrical_projection, FullInstrumentViewModel._CYLINDRICAL_Y)
 
-    def _run_projection_test(self, mock_projection_constructor, is_spherical):
+    def _run_projection_test(self, mock_projection_constructor, projection_option):
         self._mock_detector_table([1, 2, 3])
         mock_workspace = self._create_mock_workspace([1, 2, 3])
         model = FullInstrumentViewModel(mock_workspace)
@@ -139,7 +139,7 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         mock_projection = mock.MagicMock()
         mock_projection.positions.return_value = [[1, 2], [1, 2], [1, 2]]
         mock_projection_constructor.return_value = mock_projection
-        points = model.calculate_projection(is_spherical, axis=[0, 1, 0])
+        points = model.calculate_projection(projection_option, axis=[0, 1, 0])
         mock_projection_constructor.assert_called_once()
         self.assertTrue(all(all(point == [1, 2, 0]) for point in points))
 

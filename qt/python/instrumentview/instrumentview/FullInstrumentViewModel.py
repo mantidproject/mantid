@@ -24,7 +24,16 @@ class FullInstrumentViewModel:
     _CYLINDRICAL_Y = "Cylindrical Y"
     _CYLINDRICAL_Z = "Cylindrical Z"
     _SIDE_BY_SIDE = "Side by Side"
-    _PROJECTION_OPTIONS = [_SPHERICAL_X, _SPHERICAL_Y, _SPHERICAL_Z, _CYLINDRICAL_X, _CYLINDRICAL_Y, _CYLINDRICAL_Z, _SIDE_BY_SIDE]
+    _PROJECTION_OPTIONS = [
+        _FULL_3D,
+        _SPHERICAL_X,
+        _SPHERICAL_Y,
+        _SPHERICAL_Z,
+        _CYLINDRICAL_X,
+        _CYLINDRICAL_Y,
+        _CYLINDRICAL_Z,
+        _SIDE_BY_SIDE,
+    ]
 
     _sample_position = np.array([0, 0, 0])
     _source_position = np.array([0, 0, 0])
@@ -196,7 +205,9 @@ class FullInstrumentViewModel:
                 self._workspace, self._detector_ids, self._sample_position, self._root_position, self._detector_positions, np.array(axis)
             )
         elif projection_option.startswith("Spherical"):
-            projection = iv_spherical.SphericalProjection(self._sample_position, self._root_position, self._detector_positions, np.array(axis))
+            projection = iv_spherical.SphericalProjection(
+                self._sample_position, self._root_position, self._detector_positions, np.array(axis)
+            )
         elif projection_option.startswith("Cylindrical"):
             projection = iv_cylindrical.CylindricalProjection(
                 self._sample_position, self._root_position, self._detector_positions, np.array(axis)
