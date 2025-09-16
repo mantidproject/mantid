@@ -53,7 +53,7 @@ class FullInstrumentViewModel:
         self._source_position = np.array(component_info.sourcePosition()) if has_source else np.array([0, 0, 0])
         self._root_position = np.array(component_info.position(0))
 
-        detector_info_table = CreateDetectorTable(self._workspace, IncludeDetectorPosition=True, StoreInADS=False)
+        detector_info_table = CreateDetectorTable(self._workspace, IncludeDetectorPosition=True, StoreInADS=False, EnableLogging=False)
 
         # Might have comma-separated multiple detectors, choose first one in the string in that case
         first_numbers = np.char.split(detector_info_table.column("Detector ID(s)"), sep=",")
