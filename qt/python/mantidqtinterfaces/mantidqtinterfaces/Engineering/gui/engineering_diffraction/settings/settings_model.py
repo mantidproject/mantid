@@ -8,8 +8,8 @@ from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.setting
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import output_settings
 from os import path
 from mantid.kernel import logger
-from numpy import all, array, concatenate, abs
-from numpy.linalg import det
+from numpy import all, array, concatenate, abs, eye
+from numpy.linalg import det, norm
 
 
 class SettingsModel(object):
@@ -51,6 +51,8 @@ class SettingsModel(object):
             td = array([float(x) for x in settings["td_dir"].split(",")])[:, None]
             trans_mat = concatenate([rd, nd, td], axis=1)
             _ = abs(det(trans_mat))  # ensure a determinant can be calculated
+            if not is_approx_orthonormal(trans_mat):
+                logger.warning("Currently only orthonormal sample axes are properly supported")
         except Exception as e:
             logger.error("Invalid Reference Axes, values must all be able to be converted to floats. " + str(e))
 
@@ -157,3 +159,10 @@ class SettingsModel(object):
         self._validate_convert_to_float(settings, "peak_pos_thresh")
         self._validate_convert_to_float(settings, "contour_kernel")
         return self.settings_to_validate
+
+
+def is_approx_orthonormal(mat, tol=1e-5):
+    n = mat.shape[1]
+    identity = eye(n)
+    error = norm(mat.T @ mat - identity, ord="fro")
+    return error < tol
