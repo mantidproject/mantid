@@ -7,8 +7,9 @@
 """Tests for PythonObjectProperty"""
 
 import unittest
+from mantid.simpleapi import CreateWorkspace, mtd
 from mantid.kernel import Direction, PythonObjectProperty, PythonObjectTypeValidator
-from mantid.api import Algorithm
+from mantid.api import Algorithm, WorkspaceProperty
 
 
 class FakeAlgorithm(Algorithm):
@@ -259,7 +260,37 @@ class PythonObjectPropertyTest(unittest.TestCase):
         objAsJson = {"x": 7, "y": {"a": "frnakling"}}
         self.assertEqual(objAsJson, fake.getProperty("PyObject").value)
 
-    def test_value_class_recursion_stops(self):
+    def test_value_list_of_class(self):
+        fake = FakeAlgorithm()
+        fake.initialize()
+
+        # check for class
+        obj = [FakeClass(1, 2), FakeClass(3, 4)]
+        fake.setProperty("PyObject", obj)
+        self.assertIs(obj, fake.getProperty("PyObject").value)
+
+        # take the string, set the property from the string, ensure same
+        propVal = fake.getPropertyValue("PyObject")
+        fake.setPropertyValue("PyObject", propVal)
+        objAsJson = [{"x": 1, "y": {"a": 2}}, {"x": 3, "y": {"a": 4}}]
+        self.assertEqual(objAsJson, fake.getProperty("PyObject").value)
+
+    def test_value_dict_of_class(self):
+        fake = FakeAlgorithm()
+        fake.initialize()
+
+        # check for class
+        obj = {"key1": FakeClass(1, 2), "key2": FakeClass(3, 4)}
+        fake.setProperty("PyObject", obj)
+        self.assertIs(obj, fake.getProperty("PyObject").value)
+
+        # take the string, set the property from the string, ensure same
+        propVal = fake.getPropertyValue("PyObject")
+        fake.setPropertyValue("PyObject", propVal)
+        objAsJson = {"key1": {"x": 1, "y": {"a": 2}}, "key2": {"x": 3, "y": {"a": 4}}}
+        self.assertEqual(objAsJson, fake.getProperty("PyObject").value)
+
+    def test_value_class_recursion_stops_list(self):
         fake = FakeAlgorithm()
         fake.initialize()
 
@@ -271,8 +302,59 @@ class PythonObjectPropertyTest(unittest.TestCase):
 
         # take the string, ensure it terminates
         propVal = fake.getPropertyValue("PyObject")
-        fake.setPropertyValue("PyObject", propVal)
-        self.assertIn("...", fake.getPropertyValue("PyObject"))
+        self.assertIn("...", propVal)
+
+    def test_value_class_recursion_stops_dict(self):
+        fake = FakeAlgorithm()
+        fake.initialize()
+
+        # create a self-referential object
+        obj = {"key": "value"}
+        obj["key"] = obj
+        fake.setProperty("PyObject", obj)
+        self.assertIs(obj, fake.getProperty("PyObject").value)
+
+        # take the string, ensure it terminates
+        propVal = fake.getPropertyValue("PyObject")
+        self.assertIn("...", propVal)
+
+    def test_value_class_recursion_stops_class(self):
+        fake = FakeAlgorithm()
+        fake.initialize()
+
+        # create a self-referential object
+        obj = {"key": [FakeClass(1, 2), FakeClass(3, 4)]}
+        obj["key"][1] = obj
+        fake.setProperty("PyObject", obj)
+        self.assertIs(obj, fake.getProperty("PyObject").value)
+
+        # take the string, ensure it terminates
+        propVal = fake.getPropertyValue("PyObject")
+        self.assertIn("...", propVal)
+
+    def test_value_in_ws_history(self):
+        class FakeWsAlgorithm(Algorithm):
+            def PyInit(self):
+                self.declareProperty(PythonObjectProperty("PyObject"))
+                self.declareProperty(WorkspaceProperty("InputWorkspace", "", Direction.Input))
+                self.declareProperty(WorkspaceProperty("OutputWorkspace", "", Direction.Output))
+
+            def PyExec(self):
+                self.setProperty("OutputWorkspace", self.getProperty("InputWorkspace").value)
+
+        # run the fake algorithm with a FakeClass and a Workspace property
+        ws = CreateWorkspace([1], [1])
+        value = FakeClass(16, "NXShorts")
+
+        fake = FakeWsAlgorithm()
+        fake.initialize()
+        fake.setProperty("PyObject", value)
+        fake.setProperty("InputWorkspace", ws)
+        fake.setProperty("OutputWorkspace", "outws")
+        fake.execute()
+
+        historyValue = mtd["outws"].getHistory().getAlgorithmHistory(1).getPropertyValue("PyObject")
+        self.assertEqual(historyValue, '{"x": 16, "y": {"a": "NXShorts"}}')
 
 
 if __name__ == "__main__":

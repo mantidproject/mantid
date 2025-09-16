@@ -24,15 +24,16 @@ namespace bp = boost::python;
 /** Atomic types which can be serialized by python's json.dumps */
 std::set<std::string> const jsonAllowedTypes{"int", "float", "str", "NoneType", "bool"};
 
-/** Recurisvely JSONify the object's internal __dict__ property
- * At each stage of the dictionary, will check if the value is one of the above types
- * If so, it remains.
- * If not, the value is replaced with its internal __dict__ property, recursively
+/** Recurisvely JSONify the object, including replacing custom class objects with a dictionary representation
+ * At each stage in the process, will check if the value is one of the above types, or a list-like object.
+ * If the object is one of the atomic types, it remains.  If it is a list-like, the below is run on each individual
+ * element. If not, the object is replaced with a dictionary, run recursively on each individual value
  * @param obj the object to be recursively written
+ * @param depth the current recursion depth, which is limited to ten; beyond this, ellipses will be printed
  * @return a python object which is a dictionary corresponding to `obj`
  */
 bp::object recursiveDictDump(bp::object obj, unsigned char depth = 0) {
-  static unsigned char const max_depth(10);
+  static unsigned char constexpr max_depth(10);
   bp::object ret;
   std::string const objname = bp::extract<std::string>(obj.attr("__class__").attr("__name__"));
   // limit recursion depth, to avoid infinity loops or possible segfaults
@@ -53,8 +54,8 @@ bp::object recursiveDictDump(bp::object obj, unsigned char depth = 0) {
   }
   // if the object is a dictionary, json-ify all of the values
   else if (PyDict_Check(obj.ptr())) {
-    bp::dict d = bp::extract<bp::dict>(obj);
-    bp::list keyvals = d.items();
+    bp::dict d;
+    bp::list keyvals = bp::extract<bp::dict>(obj)().items();
     for (bp::ssize_t i = 0; i < bp::len(keyvals); i++) {
       bp::object key = keyvals[i][0];
       bp::object val = keyvals[i][1];
@@ -65,13 +66,7 @@ bp::object recursiveDictDump(bp::object obj, unsigned char depth = 0) {
   // if the object is not one of the above types, then extract its __dict__ method and repeat the above
   else if (PyObject_HasAttrString(obj.ptr(), "__dict__")) {
     bp::dict d = bp::extract<bp::dict>(obj.attr("__dict__"));
-    bp::list keyvals = d.items();
-    for (bp::ssize_t i = 0; i < bp::len(keyvals); i++) {
-      bp::object key = keyvals[i][0];
-      bp::object val = keyvals[i][1];
-      d[key] = recursiveDictDump(val, depth + 1);
-    }
-    ret = d;
+    ret = recursiveDictDump(d, depth); // NOTE re-run at same depth
   } else {
     ret = bp::str(obj);
   }
