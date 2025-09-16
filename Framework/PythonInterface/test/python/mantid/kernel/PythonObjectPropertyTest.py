@@ -205,9 +205,10 @@ class PythonObjectPropertyTest(unittest.TestCase):
         fake.initialize()
 
         # check for float
-        a_float = 3.141592
+        a_float = 3.141592 / 2.718281828
         fake.setProperty("PyObject", a_float)
         self.assertEqual(str(a_float), fake.getPropertyValue("PyObject"))
+        self.assertEqual("1.1557271095438455", fake.getPropertyValue("PyObject"))  # NOTE 16 digits
         fake.setProperty("PyObject", str(a_float))
         self.assertEqual(a_float, fake.getProperty("PyObject").value)
 
