@@ -323,8 +323,8 @@ class PythonObjectPropertyTest(unittest.TestCase):
         fake.initialize()
 
         # create a self-referential object
-        obj = {"key": [FakeClass(1, 2), FakeClass(3, 4)]}
-        obj["key"][1] = obj
+        obj = FakeClass(1, 2)
+        obj.y = obj
         fake.setProperty("PyObject", obj)
         self.assertIs(obj, fake.getProperty("PyObject").value)
 

@@ -32,7 +32,7 @@ std::set<std::string> const jsonAllowedTypes{"int", "float", "str", "NoneType", 
  * @param depth the current recursion depth, which is limited to ten; beyond this, ellipses will be printed
  * @return a python object which is a dictionary corresponding to `obj`
  */
-bp::object recursiveDictDump(bp::object obj, unsigned char depth = 0) {
+bp::object recursiveDictDump(bp::object const &obj, unsigned char depth = 0) {
   static unsigned char constexpr max_depth(10);
   bp::object ret;
   std::string const objname = bp::extract<std::string>(obj.attr("__class__").attr("__name__"));
