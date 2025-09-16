@@ -59,6 +59,7 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         mock_workspace.componentInfo.return_value = mock.MagicMock()
         mock_workspace.getNumberHistograms.return_value = len(detector_ids)
         mock_workspace.extractX.return_value = np.arange(len(detector_ids))[np.newaxis, :]
+        mock_workspace.dataX.return_value = np.arange(len(detector_ids))
         mock_workspace.getIntegratedCountsForWorkspaceIndices.return_value = [100 * i for i in detector_ids]
         return mock_workspace
 
@@ -252,7 +253,7 @@ class TestFullInstrumentViewModel(unittest.TestCase):
 
     @mock.patch("instrumentview.FullInstrumentViewModel.ExtractSpectra")
     @mock.patch("instrumentview.FullInstrumentViewModel.ConvertUnits")
-    @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.picked_workspace_indices")
+    @mock.patch.object(FullInstrumentViewModel, "picked_workspace_indices", new_callable=mock.PropertyMock)
     def test_extract_spectra_for_picked_detectors(self, mock_picked_workspace_indices, mock_convert_units, mock_extract_spectra):
         mock_workspace = self._create_mock_workspace([1, 2, 3])
         mock_picked_workspace_indices.return_value = [1, 2]
@@ -268,7 +269,7 @@ class TestFullInstrumentViewModel(unittest.TestCase):
 
     @mock.patch("instrumentview.FullInstrumentViewModel.ExtractSpectra")
     @mock.patch("instrumentview.FullInstrumentViewModel.ConvertUnits")
-    @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.picked_workspace_indices")
+    @mock.patch.object(FullInstrumentViewModel, "picked_workspace_indices", new_callable=mock.PropertyMock)
     def test_extract_spectra_no_picked_detectors(self, mock_picked_workspace_indices, mock_convert_units, mock_extract_spectra):
         mock_workspace = self._create_mock_workspace([1, 2, 3])
         mock_picked_workspace_indices.return_value = []
@@ -281,7 +282,7 @@ class TestFullInstrumentViewModel(unittest.TestCase):
     @mock.patch("instrumentview.FullInstrumentViewModel.SumSpectra")
     @mock.patch("instrumentview.FullInstrumentViewModel.ExtractSpectra")
     @mock.patch("instrumentview.FullInstrumentViewModel.ConvertUnits")
-    @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.picked_workspace_indices")
+    @mock.patch.object(FullInstrumentViewModel, "picked_workspace_indices", new_callable=mock.PropertyMock)
     def test_extract_spectra_sum(self, mock_picked_workspace_indices, mock_convert_units, mock_extract_spectra, mock_sum_spectra):
         mock_workspace = self._create_mock_workspace([1, 2, 3])
         mock_picked_workspace_indices.return_value = [1, 2]
@@ -305,7 +306,7 @@ class TestFullInstrumentViewModel(unittest.TestCase):
     @mock.patch("instrumentview.FullInstrumentViewModel.SumSpectra")
     @mock.patch("instrumentview.FullInstrumentViewModel.ExtractSpectra")
     @mock.patch("instrumentview.FullInstrumentViewModel.ConvertUnits")
-    @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.picked_workspace_indices")
+    @mock.patch.object(FullInstrumentViewModel, "picked_workspace_indices", new_callable=mock.PropertyMock)
     def test_extract_spectra_sum_one_spectra(
         self, mock_picked_workspace_indices, mock_convert_units, mock_extract_spectra, mock_sum_spectra
     ):
@@ -327,7 +328,7 @@ class TestFullInstrumentViewModel(unittest.TestCase):
 
     @mock.patch("instrumentview.FullInstrumentViewModel.ExtractSpectra")
     @mock.patch("instrumentview.FullInstrumentViewModel.ConvertUnits")
-    @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.picked_workspace_indices")
+    @mock.patch.object(FullInstrumentViewModel, "picked_workspace_indices", new_callable=mock.PropertyMock)
     @mock.patch("instrumentview.FullInstrumentViewModel.AnalysisDataService")
     def test_save_line_plot_workspace_to_ads(self, mock_ads, mock_picked_workspace_indices, mock_convert_units, mock_extract_spectra):
         mock_workspace = self._create_mock_workspace([1, 2, 3])

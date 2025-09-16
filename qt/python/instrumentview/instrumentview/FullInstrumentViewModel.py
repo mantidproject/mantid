@@ -191,7 +191,7 @@ class FullInstrumentViewModel:
         return self._detector_projection_positions
 
     def extract_spectra_for_line_plot(self, unit: str, sum_spectra: bool) -> None:
-        workspace_indices = self.picked_workspace_indices()
+        workspace_indices = self.picked_workspace_indices
         if len(workspace_indices) == 0:
             self.line_plot_workspace = None
             return
@@ -218,7 +218,7 @@ class FullInstrumentViewModel:
         self.line_plot_workspace = ws
 
     def save_line_plot_workspace_to_ads(self) -> None:
-        if self.line_plot_workspace is None or len(self.picked_workspace_indices()) == 0:
+        if self.line_plot_workspace is None or len(self.picked_workspace_indices) == 0:
             return
         name_exported_ws = f"instrument_view_selected_spectra_{self._workspace.name()}"
         AnalysisDataService.addOrReplace(name_exported_ws, self.line_plot_workspace)

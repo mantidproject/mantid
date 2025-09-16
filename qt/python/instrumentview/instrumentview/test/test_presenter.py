@@ -97,6 +97,7 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._model._is_valid = np.array([True, True, True])
         self._model._detector_is_picked = np.array([True, True, False])
         self._model.picked_detectors_info_text = MagicMock(return_value=["a", "a"])
+        self._model.extract_spectra_for_line_plot = MagicMock()
         self._presenter._pickable_main_mesh = {}
         self._presenter._pickable_projection_mesh = {}
         self._mock_view.current_selected_unit.return_value = "TOF"
@@ -104,9 +105,9 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
 
         self._presenter.update_picked_detectors([])
         np.testing.assert_allclose(self._presenter._pickable_main_mesh[self._presenter._visible_label], self._model._detector_is_picked)
-        self._mock_view.show_plot_for_detectors.assert_called_once_with(mock_model.line_plot_workspace)
+        self._mock_view.show_plot_for_detectors.assert_called_once_with(self._model.line_plot_workspace)
         self._mock_view.set_selected_detector_info.assert_called_once_with(["a", "a"])
-        mock_model.extract_spectra_for_line_plot.assert_called_once_with("TOF", True)
+        self._model.extract_spectra_for_line_plot.assert_called_once_with("TOF", True)
 
     def test_generate_single_colour(self):
         green_vector = self._presenter.generate_single_colour(2, 0, 1, 0, 0)

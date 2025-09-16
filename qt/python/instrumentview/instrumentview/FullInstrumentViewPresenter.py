@@ -58,13 +58,7 @@ class FullInstrumentViewPresenter:
         self._visible_label = "Visible Picked"
 
         self._view.show_axes()
-
         self.on_projection_option_selected(default_index)
-        self._view.enable_point_picking(callback=self.point_picked)
-        self._view.show_axes()
-        self._view.reset_camera()
-        self._view.set_contour_range_limits(self._contour_limits)
-        self._view.set_tof_range_limits(self._bin_limits)
 
         self._view.hide_status_box()
         self._ads_observer = InstrumentViewADSObserver(
