@@ -35,13 +35,8 @@ LD_PRELOAD="" \
   -GNinja \
   ../
 
-cmake --build .
-
-# Build the DocTestData target. This might not be strictly necessary.
-cmake --build . --target DocTestData
-
 # Configure the 'datasearch.directories' in the Mantid.properties file so the test data is found
-# Docs should only require DocTest data
+# Docs should only require DocTestData
 export STANDARD_TEST_DATA_DIR=$SRC_DIR/build/ExternalData/Testing/Data
 echo 'datasearch.directories = '$STANDARD_TEST_DATA_DIR'/DocTest/' >> $PREFIX/bin/Mantid.properties
 
