@@ -24,7 +24,7 @@ namespace bp = boost::python;
 /** Atomic types which can be serialized by python's json.dumps */
 std::set<std::string> const jsonAllowedTypes{"int", "float", "str", "NoneType", "bool"};
 
-inline bool isJsonAtomic(bp::object obj) {
+inline bool isJsonAtomic(bp::object const &obj) {
   std::string const objname = bp::extract<std::string>(obj.attr("__class__").attr("__name__"));
   return jsonAllowedTypes.count(objname) > 0;
 }
@@ -40,7 +40,6 @@ inline bool isJsonAtomic(bp::object obj) {
 bp::object recursiveDictDump(bp::object const &obj, unsigned char depth = 0) {
   static unsigned char constexpr max_depth(10);
   bp::object ret;
-  std::string const objname = bp::extract<std::string>(obj.attr("__class__").attr("__name__"));
   // limit recursion depth, to avoid infinity loops or possible segfaults
   if (depth >= max_depth) {
     ret = bp::str("...");
