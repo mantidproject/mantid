@@ -68,7 +68,7 @@ class TestFullInstrumentViewWindow(unittest.TestCase):
             scalars=mock_scalars,
             render_points_as_spheres=True,
             point_size=15,
-            scalar_bar_args={"interactive": True, "vertical": True},
+            scalar_bar_args={"interactive": True, "vertical": True, "title_font_size": 15, "label_font_size": 12},
         )
 
     def test_add_pickable_main_mesh(self):
