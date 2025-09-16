@@ -479,8 +479,10 @@ class TextureCorrectionModelTest(unittest.TestCase):
     @patch(correction_model_path + ".TextureCorrectionModel.read_attenuation_coefficient_at_value")
     @patch(correction_model_path + ".TextureCorrectionModel.calc_absorption")
     @patch(correction_model_path + ".TextureCorrectionModel.define_gauge_volume")
+    @patch(correction_model_path + ".TextureCorrectionModel._remove_monitors")
     def test_calc_all_corrections(
         self,
+        mock_remove_monitors,
         mock_define_gauge_volume,
         mock_calc_absorption,
         mock_read_attenuation_coefficient_at_value,
