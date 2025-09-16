@@ -279,22 +279,26 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         mock_extract_spectra.assert_not_called()
         mock_convert_units.assert_not_called()
 
+    @mock.patch("instrumentview.FullInstrumentViewModel.Rebin")
     @mock.patch("instrumentview.FullInstrumentViewModel.SumSpectra")
     @mock.patch("instrumentview.FullInstrumentViewModel.ExtractSpectra")
     @mock.patch("instrumentview.FullInstrumentViewModel.ConvertUnits")
     @mock.patch.object(FullInstrumentViewModel, "picked_workspace_indices", new_callable=mock.PropertyMock)
-    def test_extract_spectra_sum(self, mock_picked_workspace_indices, mock_convert_units, mock_extract_spectra, mock_sum_spectra):
+    def test_extract_spectra_sum(
+        self, mock_picked_workspace_indices, mock_convert_units, mock_extract_spectra, mock_sum_spectra, mock_rebin
+    ):
         mock_workspace = self._create_mock_workspace([1, 2, 3])
         mock_picked_workspace_indices.return_value = [1, 2]
         mock_extract_spectra.return_value = mock_workspace
         mock_convert_units.return_value = mock_workspace
         mock_sum_spectra.return_value = mock_workspace
+        mock_rebin.return_value = mock_workspace
         model = FullInstrumentViewModel(mock_workspace)
         model.extract_spectra_for_line_plot("TOF", True)
         mock_extract_spectra.assert_called_once_with(
             InputWorkspace=mock_workspace, WorkspaceIndexList=[1, 2], EnableLogging=False, StoreInADS=False
         )
-        mock_workspace.applyBinEdgesFromAnotherWorkspace.assert_called_once_with(mock_workspace, 0, 1)
+        mock_rebin.assert_called_once_with(InputWorkspace=mock_workspace, Params=[0, 1, 2], EnableLogging=False, StoreInADS=False)
         mock_sum_spectra.assert_called_once_with(InputWorkspace=mock_workspace, EnableLogging=False, StoreInADS=False)
         mock_convert_units.assert_has_calls(
             [

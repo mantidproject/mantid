@@ -9,7 +9,7 @@ import instrumentview.Projections.SphericalProjection as iv_spherical
 import instrumentview.Projections.CylindricalProjection as iv_cylindrical
 
 from mantid.dataobjects import Workspace2D
-from mantid.simpleapi import CreateDetectorTable, ExtractSpectra, ConvertUnits, AnalysisDataService, SumSpectra
+from mantid.simpleapi import CreateDetectorTable, ExtractSpectra, ConvertUnits, AnalysisDataService, SumSpectra, Rebin
 import numpy as np
 
 
@@ -202,16 +202,13 @@ class FullInstrumentViewModel:
             # Sum in d-Spacing to avoid blurring peaks
             ws = ConvertUnits(InputWorkspace=ws, target="dSpacing", EMode="Elastic", EnableLogging=False, StoreInADS=False)
             # Converting to d-Spacing will give spectra with different bin edges
-            # Find the spectra with the widest range and use that to rebin the other selected spectra
-            index_of_spectra_with_widest_range = 0
-            for ws_index in range(1, len(workspace_indices)):
-                if max(ws.dataX(ws_index)) > max(ws.dataX(index_of_spectra_with_widest_range)):
-                    index_of_spectra_with_widest_range = ws_index
-            # Now we rebin all the other spectra
-            for ws_index in range(len(workspace_indices)):
-                if ws_index == index_of_spectra_with_widest_range:
-                    continue
-                ws.applyBinEdgesFromAnotherWorkspace(ws, index_of_spectra_with_widest_range, ws_index)
+            # Find the spectrum with the widest range, and the one with the smallest bin width and use that
+            # combo to rebin the selected spectra
+            bin_edges = ws.extractX()
+            min_bin_edge = np.min(bin_edges)
+            max_bin_edge = np.max(bin_edges)
+            min_bin_width = np.min(np.diff(bin_edges))
+            ws = Rebin(InputWorkspace=ws, Params=[min_bin_edge, min_bin_width, max_bin_edge], EnableLogging=False, StoreInADS=False)
             ws = SumSpectra(InputWorkspace=ws, EnableLogging=False, StoreInADS=False)
 
         ws = ConvertUnits(InputWorkspace=ws, target=unit, EMode="Elastic", EnableLogging=False, StoreInADS=False)
