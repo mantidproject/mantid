@@ -147,6 +147,11 @@ namespace Mantid::PythonInterface {
 using Kernel::PropertyWithValue;
 using Kernel::Exception::NotImplementedError;
 
+/**
+ *  @return A string representati on of the default value
+ */
+std::string PythonObjectProperty::getDefault() const { return Mantid::Kernel::toString(m_initialValue); }
+
 /** Set the property value.
  *  @param value :: The object definition string.
  *  @return Error message, or "" on success.
@@ -209,5 +214,11 @@ std::string PythonObjectProperty::setValueFromJson(const Json::Value &json) {
 std::string PythonObjectProperty::setDataItem(const std::shared_ptr<Kernel::DataItem> &) {
   throw NotImplementedError("PythonObjectProperty::setDataItem(const std::shared_ptr<Kernel::DataItem> &)");
 }
+
+/** Indicates if the value matches the value None
+ *  @return true if the value is None
+ *  NOTE: For reasons (surely good ones), trying to compare m_value to m_initialValue raises a segfault
+ */
+bool PythonObjectProperty::isDefault() const { return m_value.is_none(); }
 
 } // namespace Mantid::PythonInterface

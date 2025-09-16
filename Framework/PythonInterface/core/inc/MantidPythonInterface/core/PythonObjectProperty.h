@@ -112,10 +112,12 @@ public:
   // Unhide the base class assignment operator
   using BaseClass::operator=;
 
+  std::string getDefault() const override;
   std::string setValue(PythonObject const &obj);
   std::string setValue(std::string const &value) override;
   std::string setValueFromJson(Json::Value const &value) override;
   std::string setDataItem(std::shared_ptr<Kernel::DataItem> const &value) override;
+  bool isDefault() const override;
 };
 
 } // namespace Mantid::PythonInterface
