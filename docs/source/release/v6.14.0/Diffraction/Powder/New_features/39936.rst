@@ -1,0 +1,1 @@
+- :ref:`PDConvertRealSapce <algm-PDConvertRealSapce>` and :ref:`PDConvertReciprocalSpace <algm-PDConvertReciprocalSpace>` will not get added to the algorithm factory if PyStoG is not installed. This package is now an optional dependency of Mantid.
