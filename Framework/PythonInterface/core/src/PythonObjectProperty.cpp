@@ -24,6 +24,11 @@ namespace bp = boost::python;
 /** Atomic types which can be serialized by python's json.dumps */
 std::set<std::string> const jsonAllowedTypes{"int", "float", "str", "NoneType", "bool"};
 
+inline bool isJsonAtomic(bp::object obj) {
+  std::string const objname = bp::extract<std::string>(obj.attr("__class__").attr("__name__"));
+  return jsonAllowedTypes.count(objname) > 0;
+}
+
 /** Recurisvely JSONify the object, including replacing custom class objects with a dictionary representation
  * At each stage in the process, will check if the value is one of the above types, or a list-like object.
  * If the object is one of the atomic types, it remains.  If it is a list-like, the below is run on each individual
@@ -41,7 +46,7 @@ bp::object recursiveDictDump(bp::object const &obj, unsigned char depth = 0) {
     ret = bp::str("...");
   }
   // if the object can be json-ified already, return this object
-  else if (jsonAllowedTypes.count(objname)) {
+  else if (isJsonAtomic(obj)) {
     ret = obj;
   }
   // if the object is a list, json-ify each element of the list
@@ -103,7 +108,12 @@ template <> std::string toString(PythonObject const &obj) {
     catch (boost::python::error_already_set const &) {
       PyErr_Clear(); // NOTE must clear error registry, or bizarre errors will occur at unexpected lines
       boost::python::object dict = recursiveDictDump(obj);
-      rep = json.attr("dumps")(dict);
+      try {
+        rep = json.attr("dumps")(dict);
+      } catch (boost::python::error_already_set const &) {
+        PyErr_Clear();
+        rep = boost::python::str("<unrepresentable object>");
+      }
     }
   }
   return boost::python::extract<std::string>(rep);

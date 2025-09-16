@@ -5,7 +5,7 @@
 =======================
 
 This is a Python binding to the C++ class Mantid::PythonInterface::PythonObjectProperty.
-It is meant to hold a generic python object as a property for use in algorithms defined form python.
+It is meant to hold a generic python object as a property for use in algorithms defined from python.
 
 *bases:* :py:obj:`mantid.kernel.PropertyWithValue`
 
@@ -51,6 +51,7 @@ Notes
 -----
 
 When string values are required, this will first attempt to write them using ``json.dumps``.
-If that does not work then serialization will build a json-like object by recursive calls to `__dict__`.
+If that does not work then serialization will recursively build a json-like object, including replacing custom classes with `__dict__` property.
 Note that for very complicated objects, this can result in enormous string outputs.  It is recommended to stick to
-simpler python types, or classes made from simple python types.
+simpler python types, or classes made from simple python types.  This will not work on objects that use python tuples for dictionary keys.
+If the recursive serialization fails, the string value will be set to ``"<unrepresentable object>"``.

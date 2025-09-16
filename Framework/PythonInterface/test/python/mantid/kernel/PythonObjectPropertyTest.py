@@ -236,6 +236,15 @@ class PythonObjectPropertyTest(unittest.TestCase):
         fake.setProperty("PyObject", json.dumps(a_dict))
         self.assertEqual(a_dict, fake.getProperty("PyObject").value)
 
+    def test_value_failure_tuple_keys(self):
+        fake = FakeAlgorithm()
+        fake.initialize()
+
+        # check for list
+        a_dict = {(1, 2): 1, (3, 4): 4}
+        fake.setProperty("PyObject", a_dict)
+        self.assertEqual("<unrepresentable object>", fake.getPropertyValue("PyObject"))
+
     def test_value_string(self):
         fake = FakeAlgorithm()
         fake.initialize()
