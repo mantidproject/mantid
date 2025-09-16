@@ -195,6 +195,14 @@ class TextureCorrectionModel:
     def set_remove_after_processing(self, flag: bool):
         self.remove_ws_after_processing = flag
 
+    def get_alg_preset_values(self):
+        if self.reference_ws:
+            return {"InputWorkspace": self.reference_ws}
+        current_workspaces = ADS.getObjectNames()
+        if len(current_workspaces) > 0:
+            return {"InputWorkspace": current_workspaces[0]}
+        return {}
+
     # ~~~~~ Sample Definition and Orientation Functions ~~~~~~~~~~~~~
 
     def load_all_orientations(
@@ -250,6 +258,9 @@ class TextureCorrectionModel:
     @staticmethod
     def copy_sample_info(ref_ws_name: str, wss: Sequence[Workspace2D], is_ref: bool = False) -> None:
         # currently copy shape bakes the orientation matrix into the sample shape
+        if not ADS.doesExist(ref_ws_name):
+            logger.error(f"Workspace: {ref_ws_name} could not be found to copy the sample - has it been deleted?")
+            return None  # saves wrapping the rest of the function in an else block
         if not is_ref:
             # need to create a ws with an unorientated sample to copy over
             ref_ws = ADS.retrieve(ref_ws_name)
