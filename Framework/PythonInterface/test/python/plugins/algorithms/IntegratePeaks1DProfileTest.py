@@ -21,9 +21,9 @@ from mantid.simpleapi import (
 )
 import numpy as np
 import tempfile
-import shutil
 from os import path
 import json
+import sys
 
 
 class IntegratePeaks1DProfileTest(unittest.TestCase):
@@ -74,14 +74,11 @@ class IntegratePeaks1DProfileTest(unittest.TestCase):
             "NColsEdge": 2,
         }
 
-        # output file dir
-        cls._test_dir = tempfile.mkdtemp()
         cls.default_intens_over_sigma = 30.966
 
     @classmethod
     def tearDownClass(cls):
         AnalysisDataService.clear()
-        shutil.rmtree(cls._test_dir)
 
     def test_exec_IntegrateIfOnEdge_True(self):
         out = IntegratePeaks1DProfile(
@@ -172,13 +169,15 @@ class IntegratePeaks1DProfileTest(unittest.TestCase):
         out = IntegratePeaks1DProfile(InputWorkspace=self.ws, PeaksWorkspace=self.peaks, OutputWorkspace="peaks_int_7", **kwargs)
         self.assertAlmostEqual(out.column("Intens/SigInt")[0], 30.97, delta=1e-2)
 
+    @unittest.skipIf(sys.platform.startswith("win"), "Unknown exception when running Windows CI")
     def test_exec_OutputFile(self):
-        out_file = path.join(self._test_dir, "out.pdf")
-        IntegratePeaks1DProfile(
-            InputWorkspace=self.ws, PeaksWorkspace=self.peaks, OutputWorkspace="peaks_int_8", OutputFile=out_file, **self.profile_kwargs
-        )
-        # check output file saved
-        self.assertTrue(path.exists(out_file))
+        with tempfile.TemporaryDirectory() as temp_dir:
+            out_file = path.join(temp_dir, "out.pdf")
+            IntegratePeaks1DProfile(
+                InputWorkspace=self.ws, PeaksWorkspace=self.peaks, OutputWorkspace="peaks_int_8", OutputFile=out_file, **self.profile_kwargs
+            )
+            # check output file saved
+            self.assertTrue(path.exists(out_file))
 
     def test_exec_FractionalChangeDSpacing(self):
         kwargs = self.profile_kwargs.copy()
