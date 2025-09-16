@@ -194,7 +194,17 @@ class TextureCorrectionPresenter:
 
     def _open_alg_dialog(self, alg_str):
         manager = InterfaceManager()
-        dialog = manager.createDialogFromName(alg_str, -1)
+        dialog = manager.createDialogFromName(
+            alg_str,
+            -1,
+            None,
+            False,
+            self.model.get_alg_preset_values(),
+            "",
+            [
+                "InputWorkspace",
+            ],
+        )
         if dialog is not None:
             dialog.finished.connect(self._redraw_on_alg_exec)
             dialog.open()
