@@ -4,7 +4,6 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-# pylint: disable=no-init,invalid-name
 from mantid.api import (
     AlgorithmFactory,
     AnalysisDataService as ADS,
@@ -424,7 +423,7 @@ class SANSISISPolarizationCorrections(DataProcessorAlgorithm):
             name=MAIN_PROPERTIES.suffix,
             defaultValue="",
             doc="Suffix to identify processed efficiencies. "
-            "This is useful, for example,  if a set of different cells or samples "
+            "This is useful, for example, if a set of different cells or samples "
             "are used as inputs.",
         )
         self.declareProperty(
@@ -883,6 +882,11 @@ class SANSISISPolarizationCorrections(DataProcessorAlgorithm):
     def _load_and_process_groups(
         self, run_list: Union[str, list[str]], prefix: str, average_group: bool, move_instrument: bool, convert_units: bool, rebin: bool
     ) -> list[str]:
+        """
+        This method loads a polarized run, which should be a workspace group. The group will be given a name for the ads and processed
+        depending on the type of run. Generally we can average the group periods, convert units, rebin or move instrument.  Transmission
+        runs (prefix=='transmission') will have additional processing.
+        """
         run_list = _str_to_list(run_list)
         names = self._create_run_list(run_list, prefix)
         for run, name in zip(run_list, names):

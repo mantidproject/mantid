@@ -14,7 +14,7 @@ This is a wrapper algorithm that calculates the spin leakage calibration and cor
 To process the data, it combines several Mantid ``PolarizationCorrections`` algorithms.
 
 The reduction is split in two separate steps, first; a calibration of transmission runs that generates the efficiency workspaces for the polarizing components of the setup, namely: Polarizer, Flippers and Helium Analyzer.
-The second step corrects the spin leakage contribution on the scattering runs using the previously calculated efficiencies with the Wildes formalism [#WILDES]_.
+The second step corrects the spin leakage contribution on the scattering runs using the previously calculated efficiencies with the Wildes method [#WILDES]_.
 
 The type of reduction; calibration or correction, can be set through  the ``ReductionType`` property, which selects from a list of values: ``Calibration``, ``Correction`` and ``CalibrationAndCorrection``.
 If either ``Calibration`` or ``Correction`` are selected, only the respective reduction process will be processed. If ``CalibrationAndCorrection`` is selected, both the calibration and the correction
@@ -26,9 +26,9 @@ fields for polarization settings. The user file will be used to extract informat
 A save path can be set with the ``SavePath`` property, which will save the efficiencies, fitting tables and processed transmission workspaces to nexus files.
 If no output path is chosen, the produced workspaces will be kept on memory at Mantid's Analysis Data Service (ADS).
 
-A suffix can be appended to the names of the efficiency workspaces and fitting tables by filling the ``OutputSuffix`` property.
+A suffix can be appended to the names of the efficiency workspaces and fitting tables by setting the ``OutputSuffix`` property.
 
-The property ``KeepWSOnADS`` allows to delete the workspaces published to the ADS when the reduction is completed, but it is only enabled when a valid path is chosen in ``SavePath``.
+The property ``KeepWSOnADS``, when set to :code:`False`, will delete the workspaces published to the ADS when the reduction is completed. It is only enabled when a valid path is chosen in ``SavePath``.
 The wrapper can be called sequentially and the processed transmission and scattering workspaces, as well as the depolarized and direct runs won't be reloaded and reprocessed
 if they are found on the ADS.
 
@@ -38,7 +38,7 @@ Calibration
 For calibration, a list of transmission runs must be specified in the ``TransmissionRuns`` property, as well as a direct run in ``DirectBeamRun`` and a depolarized run in ``DepolarizedCellRun``.
 The following steps are part of a calibration sequence [#KRYCKA]_:
 
-- Load and normalize the direct (``DirectBeamRun``), depolarized (``DepolarizedCellRun``), empty cell (Loaded from path in user file) and transmission runs (``TransmissionRuns``).
+- Load and normalize the direct (``DirectBeamRun``), depolarized (``DepolarizedCellRun``), empty cell (loaded from path in user file) and transmission runs (``TransmissionRuns``).
 - Fit the :ref:`cell opacity <algm-DepolarizedAnalyserTransmission>` from the transmission between the depolarized and empty cell runs.
 - Calculate the :ref:`Helium Analyser Efficiency <algm-HeliumAnalyserEfficiency>` for each transmission run and fit to an exponential decay to extract the initial polarization and decay rate of the analyzer cell.
 - Calculate the :ref:`Flipper <algm-FlipperEfficiency>` and :ref:`Polarizer<algm-PolarizerEfficiency>` efficiencies for each transmission run. The flipper configuration is expected to be the same for all input transmission runs, and
@@ -54,7 +54,7 @@ The following steps are part of a correction sequence:
 
 - Load scattering runs (``ScatteringRuns``) as well as efficiencies and polarization decay parameters if necessary.
 - For each scattering run, calculate the Helium Analyzer Efficiency at the time of the experiment using the analyzer cell polarization decay parameters [#KRYCKA]_.
-- Join the polarizer, flippers and analyzer efficiencies with :ref:`algm-JoinISISPolarizationEfficiencies` algorithm.
+- Join the polarizer, flippers and analyzer efficiencies with the :ref:`algm-JoinISISPolarizationEfficiencies` algorithm.
 - Correct the scattering data using the :ref:`algm-PolarizationEfficiencyCor` algorithm.
 - Save the results in the path chosen in ``SavePath``.
 
