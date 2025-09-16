@@ -53,13 +53,17 @@ class TextureCorrectionView(QtWidgets.QWidget, Ui_texture):
 
         self.table_column_headers = ["Run", "Shape", "Material", "Orientation", "Select"]
 
+        self.line_divHorz.setText("0.02")
+        self.line_divVert.setText("0.02")
+        self.line_detHorz.setText("0.012")
+
     # ========== Setup Tool Tips ==========
 
     def init_tool_tips(self):
         self.btn_loadFiles.setToolTip("Loads the selected sample runs into the table")
         self.btn_selectAll.setToolTip("Sets all of the loaded workspaces in the table to selected")
         self.btn_deselectAll.setToolTip("Sets all of the loaded workspaces in the table to unselected")
-        self.btn_deleteSelected.setToolTip("Deletes all of the loaded files, whcih are set as selected, from the table")
+        self.btn_deleteSelected.setToolTip("Deletes all of the loaded files, which are set as selected, from the table")
         self.btn_viewRefShape.setToolTip(
             "Pops up a plot of the sample shape on a given workspace, "
             "along with the relative orientation of sample axes (defined in the settings)"
