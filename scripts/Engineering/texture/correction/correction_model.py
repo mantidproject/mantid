@@ -18,6 +18,7 @@ from mantid.simpleapi import (
     logger,
     CreateEmptyTableWorkspace,
     LoadEmptyInstrument,
+    ExtractMonitors,
 )
 import numpy as np
 from mantid.api import AnalysisDataService as ADS
@@ -78,7 +79,9 @@ class TextureCorrectionModel:
         for i, ws in enumerate(wss):
             abs_corr = 1.0
             div_corr = 1.0
-
+            if self.include_div:
+                logger.notice("Cannot correct monitors for beam divergence, monitors will be removed from the workspace")
+                self._remove_monitors(ws)
             if self.include_abs:
                 self.define_gauge_volume(ws, abs_args["gauge_vol_preset"], abs_args["gauge_vol_file"])
                 self.calc_absorption(ws, abs_args["mc_param_str"])
@@ -146,6 +149,11 @@ class TextureCorrectionModel:
             if isinstance(div_corr, str):
                 ADS.remove(div_corr)
 
+    @staticmethod
+    def _remove_monitors(ws):
+        ExtractMonitors(InputWorkspace=ws, DetectorWorkspace=ws, MonitorWorkspace="__monitor_ws")
+        ADS.remove("__monitor_ws")
+
     # ~~~~~ General Utility Functions ~~~~~~~~~~~~~
 
     @staticmethod
@@ -208,7 +216,7 @@ class TextureCorrectionModel:
                         "No workspaces have been provided - if you are using the UI, ensure you have selected all desired workspaces"
                     )
                 if n_ws < n_gonios:
-                    logger.notice(
+                    logger.warning(
                         f"Fewer Workspaces ({n_ws}) provided than lines of orientation data ({n_gonios}). "
                         f"The last {n_gonios - n_ws} lines of the orientation file will be ignored"
                     )
