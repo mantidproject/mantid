@@ -290,9 +290,9 @@ class PawleyPattern1D:
 
 
 class PawleyPattern2D(PawleyPattern1D):
-    def __init__(self, *args, global_scale: bool = True, **kwargs):
+    def __init__(self, *args, global_scale: bool = True, lambda_max: float = 5.0, **kwargs):
         super().__init__(*args, **kwargs)
-        self.lambda_max = 5.0  # same default as PoldiAutoCorrelation
+        self.lambda_max = lambda_max
         self.scales = None
         self.bgs = None
         self.set_global_scale(global_scale)
