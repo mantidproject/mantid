@@ -36,7 +36,7 @@ cmake --build .
 
 # Build the StandardTestData target.
 # This might not be strictly necessary if docs-qthelp target is not built due to DOCS_QTHELP=OFF
-cmake --build . --target DocTestData
+cmake --build . --target StandardTestData
 
 # Configure the 'datasearch.directories' in the Mantid.properties file so the test data is found
 export STANDARD_TEST_DATA_DIR=$SRC_DIR/build/ExternalData/Testing/Data
