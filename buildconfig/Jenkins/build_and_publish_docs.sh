@@ -31,11 +31,8 @@ cmake -G Ninja \
   -DDOCS_SCREENSHOTS=ON \
   ${WORKSPACE}/source
 
-# Build the StandardTestData target. We need this test data to build docs-html
-cmake --build . --target DocTestData
-
 # Configure the 'datasearch.directories' in the Mantid.properties file so the test data is found
-# Docs should only require DocTest data
+# Docs should only require DocTestData which is a dependency of the target
 export STANDARD_TEST_DATA_DIR=$PWD/ExternalData/Testing/Data
 echo 'datasearch.directories = '$STANDARD_TEST_DATA_DIR'/DocTest/' >> $WORKSPACE/miniforge/envs/docs-build/bin/Mantid.properties
 
