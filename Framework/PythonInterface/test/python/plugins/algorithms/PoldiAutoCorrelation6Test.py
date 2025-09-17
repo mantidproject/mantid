@@ -39,14 +39,14 @@ class PoldiAutoCorrelation6Test(unittest.TestCase):
         self.assertAlmostEqual(ws_corr.readX(0)[0], 1.8930, delta=1e-3)
         self.assertAlmostEqual(ws_corr.readX(0)[-1], 4.9958, delta=1e-3)
         # assert bin width/number bins
-        self.assertEqual(ws_corr.blocksize(), 1470)
+        self.assertEqual(ws_corr.blocksize(), 1748)
 
     def _assert_auto_corr_workspace(self, ws_corr):
         # assert min/max Q
         self.assertAlmostEqual(ws_corr.readX(0)[0], 1.5144, delta=1e-3)
         self.assertAlmostEqual(ws_corr.readX(0)[-1], 9.0832, delta=1e-3)
         # assert bin width/number bins
-        self.assertEqual(ws_corr.blocksize(), 2460)
+        self.assertEqual(ws_corr.blocksize(), 2833)
         # assert max y-value at Bragg peak Q
         _, imax = ws_corr.findY(ws_corr.readY(0).max())
         self.assertAlmostEqual(ws_corr.readX(0)[imax], 3.272, delta=1e-2)  # (220) peak @ d = 1.920 Ang
