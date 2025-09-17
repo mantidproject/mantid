@@ -20,7 +20,6 @@ from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.calibration
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.calibration.view import CalibrationView
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.calibration.presenter import CalibrationPresenter
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.focus.model import FocusModel
-from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.focus.view import FocusView
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.focus.presenter import FocusPresenter
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.fitting.view import FittingView
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.fitting.presenter import FittingPresenter
@@ -111,7 +110,7 @@ class EngineeringDiffractionEncoderTest(unittest.TestCase):
 
     def create_test_focus_presenter(self):
         focus_model = FocusModel()
-        focus_view = mock.create_autospec(FocusView, instance=True)
+        focus_view = MagicMock()
         self.presenter.focus_presenter = FocusPresenter(focus_model, focus_view)
 
     def create_test_calibration_presenter(self):
