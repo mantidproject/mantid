@@ -91,7 +91,7 @@
   </instrument>
 
   <instrument name="GEM">
-    <zeropadding size="8" startRunNumber="97480"/>
+    <zeropadding size="8" startRunNumber="97479"/>
     <technique>Neutron Diffraction</technique>
     <livedata>
       <connection name="histo" address="NDXGEM:6789" listener="ISISHistoDataListener" />
