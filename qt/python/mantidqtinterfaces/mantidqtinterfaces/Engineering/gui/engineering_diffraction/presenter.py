@@ -96,6 +96,7 @@ class EngineeringDiffractionPresenter(object):
         texture_model = ProjectionModel()
         texture_view = TextureView()
         self.texture_presenter = TexturePresenter(texture_model, texture_view)
+        self.focus_presenter.add_focus_texture_subscriber(self.texture_presenter.focus_run_observer)
         view.tabs.addTab(texture_view, "Texture")
 
     def setup_settings(self, view):

@@ -225,6 +225,13 @@ class TextureView(QtWidgets.QWidget, Ui_texture):
                 if checkbox:
                     checkbox.setChecked(selected)
 
+    def set_default_files(self, filepaths, directory):
+        if not filepaths:
+            return
+        self.finder_texture_ws.setUserInput(",".join(filepaths))
+        if directory:
+            self.finder_texture_ws.setLastDirectory(directory)
+
     def _setup_plot(self):
         self.figure = Figure(layout="constrained")
         self.canvas = FigureCanvas(self.figure)

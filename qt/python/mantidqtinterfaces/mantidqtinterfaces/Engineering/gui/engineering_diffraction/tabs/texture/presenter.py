@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #
 from mantidqt.utils.asynchronous import AsyncTask
-from mantidqt.utils.observer_pattern import GenericObservable
+from mantidqt.utils.observer_pattern import GenericObservable, GenericObserverWithArgPassing
 from mantid.kernel import logger
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import output_settings
@@ -37,6 +37,8 @@ class TexturePresenter:
         # set up some observers
         self.correction_notifier = GenericObservable()
         self.calibration_observer = CalibrationObserver(self)
+        # Observers
+        self.focus_run_observer = GenericObserverWithArgPassing(self.set_default_files)
 
         # set some metadata
         self.current_calibration = CalibrationInfo()
@@ -105,6 +107,10 @@ class TexturePresenter:
             else:
                 self.unassigned_wss.pop(self.unassigned_wss.index(ws))
         self.redraw_table()
+
+    def set_default_files(self, filepaths):
+        directory = self.model.get_last_directory(filepaths)
+        self.view.set_default_files(filepaths, directory)
 
     # ---- Internal data structure logic for tracking parameter table assignments -------
 

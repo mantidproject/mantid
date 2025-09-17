@@ -114,6 +114,16 @@ class ProjectionModel(TextureProjection):
     def has_at_least_one_col(cols):
         return len(cols) > 0
 
+    @staticmethod
+    def get_last_directory(filepaths):
+        directories = set()
+        directory = None
+        for filepath in filepaths:
+            directory, discard = os.path.split(filepath)
+            directories.add(directory)
+        if len(directories) == 1:
+            return directory
+
     # setters
 
     def set_out_ws_and_grouping(self, wss, params):
