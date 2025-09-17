@@ -18,6 +18,7 @@
 namespace std {
 #define CT(x)                                                                                                          \
   std::common_type_t<std::decay_t<decltype(rhs)>, std::decay_t<decltype(lhs)>> { x }
+#define _SILENCE_CXX23_DENORM_DEPRECATION_WARNING
 
 // numeric limits
 template <size_t Bits, typename Signed> class numeric_limits<wide_integer<Bits, Signed>> {
