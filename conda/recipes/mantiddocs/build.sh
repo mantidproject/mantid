@@ -7,6 +7,9 @@ bash "${parent_dir}"/archive_env_logs.sh "$BUILD_PREFIX" "$PREFIX" 'mantiddocs'
 mkdir -p build
 cd build
 
+echo "CONDA BASE ENVIRONMENT (mantiddocs build.sh):"
+mamba run -n base mamba list
+
 # unset LD_PRELOAD as this causes cmake to segfault
 LD_PRELOAD="" \
   cmake \
@@ -28,6 +31,7 @@ LD_PRELOAD="" \
   -DCONDA_BUILD=True \
   -DUSE_PYTHON_DYNAMIC_LIB=OFF \
   -DPython_EXECUTABLE=$PYTHON \
+  -DMANTID_DATA_STORE=${MANTID_DATA_STORE} \
   -GNinja \
   ../
 
