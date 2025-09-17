@@ -268,19 +268,19 @@ class TextureCorrectionView(QtWidgets.QWidget, Ui_texture):
         return self.combo_workspaceList.currentText()
 
     def get_div_horz(self):
-        return float(self.line_divHorz.text())
+        return self.line_divHorz.text()
 
     def get_div_vert(self):
-        return float(self.line_divVert.text())
+        return self.line_divVert.text()
 
     def get_div_det_horz(self):
-        return float(self.line_detHorz.text())
+        return self.line_detHorz.text()
 
     def get_shape_method(self):
         return self.combo_shapeMethod.currentText()
 
     def get_evaluation_value(self):
-        return float(self.line_evalVal.text())
+        return self.line_evalVal.text()
 
     def get_evaluation_units(self):
         return self.combo_Units.currentText()

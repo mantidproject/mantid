@@ -45,3 +45,27 @@ class CorrectionModel(TextureCorrectionModel):
     @staticmethod
     def get_out_ws_names(wss):
         return [f"Corrected_{ws}" for ws in wss]
+
+    def get_atten_args(self, eval_point, eval_unit):
+        msg, eval_point = self.try_convert_float(eval_point, "Attenuation Evaluation Point")
+        if msg != "":
+            logger.error(msg)
+            return
+        return {"atten_val": eval_point, "atten_units": eval_unit}
+
+    def get_div_args(self, div_hoz, div_vert, det_hoz):
+        div_hoz_msg, div_hoz = self.try_convert_float(div_hoz, "Horizontal Divergence")
+        div_vert_msg, div_vert = self.try_convert_float(div_vert, "Vertical Divergence")
+        det_hoz_msg, det_hoz = self.try_convert_float(det_hoz, "Detector Divergence")
+        msg = div_hoz_msg + div_vert_msg + det_hoz_msg
+        if msg != "":
+            logger.error(msg)
+            return
+        return {"hoz": div_hoz, "vert": div_vert, "det_hoz": det_hoz}
+
+    @staticmethod
+    def try_convert_float(val, param):
+        try:
+            return "", float(val)
+        except ValueError:
+            return f"{param} must be interpretable as a float. \n", 0.0
