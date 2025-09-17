@@ -73,6 +73,7 @@ class TexturePresenter:
         # ensure initial state is correct
         self.set_crystal_inputs_enabled()
         self.update_readout_column_list()
+        self.set_default_directories()
 
     # ------- File Loaders ------------------
 
@@ -298,6 +299,11 @@ class TexturePresenter:
         instrument = INSTRUMENT_DICT[instrument]
         self.view.set_instrument_override(instrument)
         self.instrument = instrument
+
+    def set_default_directories(self):
+        save_dir = output_settings.get_output_path()
+        self.view.finder_texture_ws.setLastDirectory(save_dir)
+        self.view.finder_texture_tables.setLastDirectory(save_dir)
 
     def _get_setting(self, setting_name, return_type=str):
         return get_setting(output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX, setting_name, return_type)
