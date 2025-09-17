@@ -18,7 +18,7 @@ from mantid.simpleapi import (
     logger,
     CreateEmptyTableWorkspace,
     LoadEmptyInstrument,
-    ExtractMonitors,
+    CreateDetectorTable,
 )
 import numpy as np
 from mantid.api import AnalysisDataService as ADS
@@ -58,10 +58,15 @@ class TextureCorrectionModel:
         ws = ADS.retrieve(ws_name)
         spec_info = ws.spectrumInfo()
         num_spec = ws.getNumberHistograms()
-        thetas = np.array([spec_info.twoTheta(i) for i in range(num_spec)])
+        # no 2theta for monitors, we set them as nans and then replace these with 1 at the end of the calc
+        # essentially resulting in no correction for monitors when ws/div_ws
+        det_tab = CreateDetectorTable(ws)
+        good_spectra = np.asarray(det_tab.column("Monitor")) == "no"
+        thetas = np.array([spec_info.twoTheta(i) if good_spectra[i] else np.nan for i in range(num_spec)])
 
         scale = vert * np.sqrt(horz**2 + det_horz**2)
         div = scale * (np.sin(thetas) ** 2)
+        div = np.nan_to_num(div, nan=1.0)
 
         _div_corr = CloneWorkspace(InputWorkspace=ws, OutputWorkspace="_div_corr")
         y_shape = ws.readY(0).shape
@@ -82,8 +87,7 @@ class TextureCorrectionModel:
             abs_corr = 1.0
             div_corr = 1.0
             if self.include_div:
-                logger.notice("Cannot correct monitors for beam divergence, monitors will be removed from the workspace")
-                self._remove_monitors(ws)
+                logger.notice("Cannot correct monitors for beam divergence, monitor spectra will be ignored")
             if self.include_abs:
                 self.define_gauge_volume(ws, abs_args["gauge_vol_preset"], abs_args["gauge_vol_file"])
                 self.calc_absorption(ws, abs_args["mc_param_str"])
@@ -132,8 +136,10 @@ class TextureCorrectionModel:
         # if a divergence correction calculation has been run expect this to be "_div_corr" (the output workspace)
         # otherwise it will just be 1.0
         if isinstance(div_corr, str):
-            div_ws = ConvertUnits(ADS.retrieve(div_corr), Target="dSpacing", StoreInADS=False)
-            temp_ws = temp_ws / div_ws
+            div_ws = ADS.retrieve(div_corr)
+            # modify the intensity counts directly as the units of div_ws are arbitrary
+            for i in range(temp_ws.getNumberHistograms()):
+                temp_ws.setY(i, temp_ws.readY(i) / div_ws.readY(i))
             ADS.remove("div_ws")
         else:
             temp_ws = temp_ws / div_corr
@@ -154,11 +160,6 @@ class TextureCorrectionModel:
                 ADS.remove(div_corr)
 
         return save_filepath
-
-    @staticmethod
-    def _remove_monitors(ws):
-        ExtractMonitors(InputWorkspace=ws, DetectorWorkspace=ws, MonitorWorkspace="__monitor_ws")
-        ADS.remove("__monitor_ws")
 
     # ~~~~~ General Utility Functions ~~~~~~~~~~~~~
 
