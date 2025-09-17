@@ -10,6 +10,7 @@ from os import path
 from mantid.kernel import logger
 from numpy import all, array, concatenate, abs, eye
 from numpy.linalg import det, norm
+from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.settings_presenter import SETTINGS_DICT
 
 
 class SettingsModel(object):
@@ -121,32 +122,10 @@ class SettingsModel(object):
                 del self.settings_to_validate[key]
 
         # check and populate calls
-        self._check_and_populate_with_default("rd_name")
-        self._check_and_populate_with_default("nd_name")
-        self._check_and_populate_with_default("td_name")
-        self._check_and_populate_with_default("rd_dir")
-        self._check_and_populate_with_default("nd_dir")
-        self._check_and_populate_with_default("td_dir")
-        self._check_and_populate_with_default("default_peak")
-        self._check_and_populate_with_default("save_location")
-        self._check_and_populate_with_default("logs")
-        self._check_and_populate_with_default("sort_ascending")
-        self._check_and_populate_with_default("path_to_gsas2")
-        self._check_and_populate_with_default("timeout")
-        self._check_and_populate_with_default("dSpacing_min")
-        self._check_and_populate_with_default("monte_carlo_params")
-        self._check_and_populate_with_default("clear_absorption_ws_after_processing")
-        self._check_and_populate_with_default("cost_func_thresh")
-        self._check_and_populate_with_default("peak_pos_thresh")
-        self._check_and_populate_with_default("use_euler_angles")
-        self._check_and_populate_with_default("euler_angles_scheme")
-        self._check_and_populate_with_default("euler_angles_sense")
-        self._check_and_populate_with_default("plot_exp_pf")
-        self._check_and_populate_with_default("contour_kernel")
-        self._check_and_populate_with_default("auto_pop_texture")
-        self._check_and_populate_with_default("full_calibration")
-        if set_nullables_to_default:
-            self._check_and_populate_with_default("primary_log")
+        settings_to_check = list(SETTINGS_DICT.keys())
+        if not set_nullables_to_default:
+            settings_to_check.pop(settings_to_check.index("primary_log"))
+        [self._check_and_populate_with_default(name) for name in settings_to_check]
 
         # value validations
         self.validate_reference_frame(settings)
