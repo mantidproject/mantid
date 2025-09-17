@@ -13,6 +13,8 @@ build:
   ignore_run_exports_from:
       - {{ compiler('cxx') }}
       - python
+  script_env:
+      - MANTID_DATA_STORE={{ environ.get('MANTID_DATA_STORE', '~/MantidExternalData') }}
 
 requirements:
   build:
@@ -55,7 +57,3 @@ extra:
     - thomashampson
     - sf1919
     - martyngigg
-
-build:
-  script_env:
-   - MANTID_DATA_STORE=/mantid_data
