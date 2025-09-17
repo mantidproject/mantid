@@ -174,8 +174,8 @@ class DNSElasticSCPlotView(DNSView):
     def create_subfigure(self, grid_helper=None):
         self.single_crystal_plot = DNSScPlot(self, self.canvas.figure, grid_helper)
 
-    def get_axis_type(self):
-        return self.views_menu.get_value()
+    def get_plotting_settings_dict(self):
+        return self.views_menu.get_plot_view_settings()
 
     def connect_resize(self):
         self.canvas.mpl_connect("resize_event", self.single_crystal_plot.on_resize)

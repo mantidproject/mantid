@@ -52,7 +52,7 @@ class DNSElasticSCPlotPresenterTest(unittest.TestCase):
     def setUp(self):
         self.view.reset_mock()
         self.model.reset_mock()
-        self.view.get_axis_type.return_value = {
+        self.view.get_plotting_settings_dict.return_value = {
             "plot_type": "quasmesh",
             "type": "hkl",
             "switch": False,
@@ -108,7 +108,7 @@ class DNSElasticSCPlotPresenterTest(unittest.TestCase):
         mock_calculate_proj.return_value = (1, 2)
         # self.view.get_axis_type.return_value = {'switch': False}
         self.presenter._toggle_projections(False)
-        self.view.get_axis_type.assert_called_once()
+        self.view.get_plotting_settings_dict.assert_called_once()
         self.view.single_crystal_plot.remove_projections.assert_called_once()
         mock_plot.assert_called_once()
 
@@ -119,7 +119,7 @@ class DNSElasticSCPlotPresenterTest(unittest.TestCase):
         self.view.draw.assert_called_once()
         self.view.single_crystal_plot.set_projections.assert_called_once_with(1, 2)
 
-        self.view.get_axis_type.return_value = {"switch": True}
+        self.view.get_plotting_settings_dict.return_value = {"switch": True}
         self.view.reset_mock()
         self.presenter._toggle_projections(True)
         self.view.single_crystal_plot.set_projections.assert_called_once_with(2, 1)
@@ -150,7 +150,7 @@ class DNSElasticSCPlotPresenterTest(unittest.TestCase):
         self.assertTrue(test_v)
 
     def test__plot(self):
-        self.view.get_axis_type.return_value = {"plot_type": "type1"}
+        self.view.get_plotting_settings_dict.return_value = {"plot_type": "type1"}
         self.view.datalist.get_checked_plots.return_value = ["plot1"]
         self.presenter.param_dict = {
             "elastic_single_crystal_script_generator": {"data_arrays": {"plot1": [1, 2, 3]}},
@@ -357,7 +357,7 @@ class DNSElasticSCPlotPresenterTest(unittest.TestCase):
         self.presenter._plot_param.grid_state = 0
         self.model.get_changing_hkl_components.return_value = 1, 2, 3, 4
         self.presenter._create_grid_helper()
-        self.view.get_axis_type.assert_called_once()
+        self.view.get_plotting_settings_dict.assert_called_once()
         mock_get_grid_helper.assert_called_once_with(None, 0, 1, 2, 3, 4, False)
 
     @patch(
@@ -406,7 +406,7 @@ class DNSElasticSCPlotPresenterTest(unittest.TestCase):
     def test__set_ax_formatter(self):
         self.model.get_format_coord.return_value = 123
         self.presenter._set_ax_formatter()
-        self.view.get_axis_type.assert_called_once()
+        self.view.get_plotting_settings_dict.assert_called_once()
         self.model.get_format_coord.assert_called_once()
         self.view.single_crystal_plot.set_format_coord.assert_called_once_with(123)
 
@@ -490,7 +490,7 @@ class DNSElasticSCPlotPresenterTest(unittest.TestCase):
         self.view.get_state.return_value["y_max"] = 13
         test_v = self.presenter._get_current_xy_lim(zoom=False)
         self.view.get_state.assert_called_once()
-        self.view.get_axis_type.assert_called_once()
+        self.view.get_plotting_settings_dict.assert_called_once()
         self.model.get_data_xy_lim.assert_called_once_with(False)
         self.assertEqual(test_v, ([10, 11], [12, 13]))
 
@@ -516,12 +516,12 @@ class DNSElasticSCPlotPresenterTest(unittest.TestCase):
         self.view.get_state.return_value["z_max"] = 5
         test_v = self.presenter._get_current_z_lim([0, 1], [2, 3], False)
         self.view.get_state.assert_called_once()
-        self.view.get_axis_type.assert_called_once()
+        self.view.get_plotting_settings_dict.assert_called_once()
         self.model.get_data_z_min_max.assert_called_once_with([0, 1], [2, 3])
         self.assertEqual(test_v, ([4, 5], True))
 
         self.model.reset_mock()
-        self.view.get_axis_type.return_value["switch"] = True
+        self.view.get_plotting_settings_dict.return_value["switch"] = True
         self.view.get_state.return_value["z_min"] = None
         self.view.get_state.return_value["z_max"] = 5
         test_v = self.presenter._get_current_z_lim([0, 1], [2, 3], False)
