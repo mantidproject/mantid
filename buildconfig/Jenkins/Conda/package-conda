@@ -133,6 +133,9 @@ fi
 
 export CONDA_SUBDIR=$PLATFORM
 
+echo "CONDA BASE ENVIRONMENT (package-conda):"
+mamba run -n base mamba list
+
 # Run conda build.
 if [[ $ENABLE_BUILD_MANTID_DEVELOPER == true ]]; then
     conda mambabuild ./mantid-developer/ $EXTRA_BUILD_OPTIONS -c neutrons
