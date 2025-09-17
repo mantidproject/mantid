@@ -50,19 +50,13 @@ class TextureCorrectionModel:
         method_dict["OutputWorkspace"] = "_abs_corr"
         MonteCarloAbsorption(temp_ws, **method_dict)
 
-    @staticmethod
-    def calc_divergence(ws_name: str, horz: float, vert: float, det_horz: float) -> None:
+    def calc_divergence(self, ws_name: str, horz: float, vert: float, det_horz: float) -> None:
         # estimate of divergence taken from divergence component of equation 3 in
         # J. Appl. Cryst. (2014). 47, 1337–1354 doi:10.1107/S1600576714012710
 
         ws = ADS.retrieve(ws_name)
-        spec_info = ws.spectrumInfo()
         num_spec = ws.getNumberHistograms()
-        # no 2theta for monitors, we set them as nans and then replace these with 1 at the end of the calc
-        # essentially resulting in no correction for monitors when ws/div_ws
-        det_tab = CreateDetectorTable(ws)
-        good_spectra = np.asarray(det_tab.column("Monitor")) == "no"
-        thetas = np.array([spec_info.twoTheta(i) if good_spectra[i] else np.nan for i in range(num_spec)])
+        thetas = self.get_thetas(ws)
 
         scale = vert * np.sqrt(horz**2 + det_horz**2)
         div = scale * (np.sin(thetas) ** 2)
@@ -72,6 +66,16 @@ class TextureCorrectionModel:
         y_shape = ws.readY(0).shape
         for i in range(num_spec):
             _div_corr.setY(i, np.full(y_shape, div[i]))
+
+    @staticmethod
+    def get_thetas(ws):
+        spec_info = ws.spectrumInfo()
+        num_spec = ws.getNumberHistograms()
+        # no 2theta for monitors, we set them as nans and then replace these with 1 at the end of the calc
+        # essentially resulting in no correction for monitors when ws/div_ws
+        det_tab = CreateDetectorTable(ws)
+        good_spectra = np.asarray(det_tab.column("Monitor")) == "no"
+        return np.array([spec_info.twoTheta(i) if good_spectra[i] else np.nan for i in range(num_spec)])
 
     def calc_all_corrections(
         self,

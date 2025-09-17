@@ -342,17 +342,18 @@ class TextureCorrectionModelTest(unittest.TestCase):
         mock_mc.assert_called_once()
         self.assertEqual(mock_mc.call_args[1]["OutputWorkspace"], "_abs_corr")
 
+    @patch(correction_model_path + ".TextureCorrectionModel.get_thetas")
     @patch(correction_model_path + ".ADS")
     @patch(correction_model_path + ".CloneWorkspace")
-    def test_calc_divergence(self, mock_clone_ws, mock_ads):
+    def test_calc_divergence(self, mock_clone_ws, mock_ads, mock_get_thetas):
         self.mock_ws.getNumberHistograms.return_value = 2
         self.mock_ws.readY.return_value = np.array([1.0, 2.0])
+        mock_get_thetas.return_value = np.array([0, 0.5])  # radians
         mock_ads.retrieve.return_value = self.mock_ws
 
         # Detector table with fixed theta values
         mock_si = MagicMock()
         self.mock_ws.spectrumInfo.return_value = mock_si
-        mock_si.twoTheta.side_effect = [0, 0.5]  # radians
 
         # Mock output_ws
         mock_out_ws = MagicMock()
@@ -408,7 +409,7 @@ class TextureCorrectionModelTest(unittest.TestCase):
         self.model.apply_corrections("ws1", "out_ws", "dir", abs_corr="abs_ws", div_corr="div_ws")
 
         # Assert
-        self.assertEqual(mock_convert.call_count, 3)
+        self.assertEqual(mock_convert.call_count, 2)
         mock_save.assert_called_once_with("out_ws", "dir", "AbsorptionCorrection", None, mock_calib.group)
         mock_ads.remove.assert_any_call("abs_ws")
         mock_ads.remove.assert_any_call("div_ws")
@@ -479,10 +480,8 @@ class TextureCorrectionModelTest(unittest.TestCase):
     @patch(correction_model_path + ".TextureCorrectionModel.read_attenuation_coefficient_at_value")
     @patch(correction_model_path + ".TextureCorrectionModel.calc_absorption")
     @patch(correction_model_path + ".TextureCorrectionModel.define_gauge_volume")
-    @patch(correction_model_path + ".TextureCorrectionModel._remove_monitors")
     def test_calc_all_corrections(
         self,
-        mock_remove_monitors,
         mock_define_gauge_volume,
         mock_calc_absorption,
         mock_read_attenuation_coefficient_at_value,
