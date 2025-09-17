@@ -49,6 +49,7 @@ class SettingsPresenterTest(unittest.TestCase):
             "td_name": "TD",
             "timeout": 10,
             "use_euler_angles": False,
+            "auto_pop_texture": False,
         }
 
     def setup_view_getters(self, blank_log=False):
@@ -76,6 +77,7 @@ class SettingsPresenterTest(unittest.TestCase):
         self.view.get_euler_angles_sense.return_value = self.settings["euler_angles_sense"]
         self.view.get_plot_exp_pf.return_value = self.settings["plot_exp_pf"]
         self.view.get_contour_kernel.return_value = self.settings["contour_kernel"]
+        self.view.get_auto_populate_texture.return_value = self.settings["auto_pop_texture"]
 
     @patch(dir_path + ".path.isfile")
     def test_load_existing_settings(self, mock_isfile):
