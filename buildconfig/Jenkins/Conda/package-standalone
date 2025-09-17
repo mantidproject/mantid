@@ -69,6 +69,9 @@ mamba activate base
 # Pin conda in the base environment to avoid post-link.bat problems
 mamba install --yes conda-index conda=24.7
 
+echo "CONDA BASE ENVIRONMENT (package-standalone):"
+mamba run -n base mamba list
+
 # Build packages
 # Setup a local conda channel to find our locally built packages package. It is
 # assumed the raw .bz2 artefacts have been copied into the directory below
