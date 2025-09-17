@@ -57,7 +57,7 @@ public:
     // check that all required log values are there
     auto run = output->run();
 
-    // test some data properties
+    // test some data properties as well
     auto logpm = [&run](const std::string &tag) {
       TS_ASSERT(run.hasProperty(tag));
       auto *p = dynamic_cast<TimeSeriesProperty<double> *>(run.getProperty(tag));
