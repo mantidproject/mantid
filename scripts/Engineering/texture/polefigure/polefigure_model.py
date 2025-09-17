@@ -136,10 +136,10 @@ class TextureProjection:
 
         if plot_exp:
             suffix = "scatter"
-            fig = self.plot_exp_pf(pfi, ax_labels, fig, **kwargs)
+            fig = self.plot_exp_pf(pfi, ax_labels, readout_col, fig, **kwargs)
         else:
             suffix = f"contour_{contour_kernel}"
-            fig = self.plot_contour_pf(pfi, ax_labels, fig, contour_kernel, **kwargs)
+            fig = self.plot_contour_pf(pfi, ax_labels, readout_col, fig, contour_kernel, **kwargs)
         if save_dirs:
             for save_dir in save_dirs:
                 fig.savefig(str(path.join(save_dir, ws_name + f"_{suffix}.png")))
@@ -147,7 +147,7 @@ class TextureProjection:
         return fig
 
     @staticmethod
-    def plot_exp_pf(pfi: np.ndarray, ax_labels: Sequence[str], fig: Optional[Figure] = None, **kwargs) -> Figure:
+    def plot_exp_pf(pfi: np.ndarray, ax_labels: Sequence[str], column_label: str, fig: Optional[Figure] = None, **kwargs) -> Figure:
         u = np.linspace(0, 2 * np.pi, 100)
         x = np.cos(u)
         y = np.sin(u)
@@ -176,12 +176,13 @@ class TextureProjection:
         ax.quiver(-1, -1, 0, 0.2, color="red", scale=1)
         ax.text(-0.8, -0.95, ax_labels[-1], fontsize=10)
         ax.text(-0.95, -0.8, ax_labels[0], fontsize=10)
-        fig.colorbar(scat_plot, cax=cax)
+        cbar = fig.colorbar(scat_plot, cax=cax)
+        cbar.set_label(column_label, rotation=0, labelpad=15)
         return fig
 
     @staticmethod
     def plot_contour_pf(
-        pfi: np.ndarray, ax_labels: Sequence[str], fig: Optional[Figure] = None, contour_kernel: float = 2.0, **kwargs
+        pfi: np.ndarray, ax_labels: Sequence[str], column_label: str, fig: Optional[Figure] = None, contour_kernel: float = 2.0, **kwargs
     ) -> Figure:
         x, y, z = pfi[:, 1], pfi[:, 0], pfi[:, 2]
         # Grid definition
@@ -222,7 +223,8 @@ class TextureProjection:
         ax.quiver(-1, -1, 0, 0.2, color="red", scale=1)
         ax.text(-0.8, -0.95, ax_labels[-1], fontsize=10)
         ax.text(-0.95, -0.8, ax_labels[0], fontsize=10)
-        fig.colorbar(contour_plot, cax=cax)
+        cbar = fig.colorbar(contour_plot, cax=cax)
+        cbar.set_label(column_label, rotation=0, labelpad=15)
         return fig
 
     # ~~~~~ General Utility functions ~~~~~~~~
