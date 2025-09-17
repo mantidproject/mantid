@@ -63,6 +63,18 @@ class ProjectionModel(TextureProjection):
             self.get_readout_col(),
         )
 
+    def exec_plot_pf(self, fig, save_dirs):
+        self.plot_pole_figure(
+            self.get_out_ws(),
+            self.get_projection_method(),
+            fig=fig,
+            readout_col=self.get_readout_col(),
+            save_dirs=save_dirs,
+            plot_exp=self.get_plot_exp(),
+            ax_labels=self.get_ax_labels(),
+            contour_kernel=self.get_contour_kernel(),
+        )
+
     # xtal logic
 
     def has_latt(self, latt, spacegroup, basis):

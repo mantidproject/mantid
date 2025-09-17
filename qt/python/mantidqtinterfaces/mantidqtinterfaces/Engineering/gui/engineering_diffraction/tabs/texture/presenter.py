@@ -183,48 +183,49 @@ class TexturePresenter:
     def on_calc_pf_clicked(self):
         wss, params = self.view.get_selected_workspaces()
         # require at least one wss to be selected
-        if len(wss) > 0:
-            # remove any 'not set' parameters workspaces from the list
-            params = [p for p in params if p != "Not set"]
+        if len(wss) == 0:
+            return
+        # remove any 'not set' parameters workspaces from the list
+        params = [p for p in params if p != "Not set"]
 
-            # set all the parameters from the view onto the model
-            self.model.set_projection_method(self.view.get_projection_method())
-            self.model.set_inc_scatt(self.view.get_inc_scatt_power())
-            self.model.set_hkl(self.view.get_hkl())
-            self.model.set_readout_col(self.view.get_readout_column())
-            self.model.set_out_ws_and_grouping(wss, params)
-            ax_transform, ax_labels = self._get_ax_data()
-            self.model.set_ax_trans(ax_transform)
-            self.model.set_ax_labels(ax_labels)
-            self.model.set_plot_exp(self._get_setting("plot_exp_pf", bool))
-            self.model.set_contour_kernel(float(self._get_setting("contour_kernel", str)))
+        # set all the parameters from the view onto the model
+        self.model.set_projection_method(self.view.get_projection_method())
+        self.model.set_inc_scatt(self.view.get_inc_scatt_power())
+        self.model.set_hkl(self.view.get_hkl())
+        self.model.set_readout_col(self.view.get_readout_column())
+        self.model.set_out_ws_and_grouping(wss, params)
+        ax_transform, ax_labels = self._get_ax_data()
+        self.model.set_ax_trans(ax_transform)
+        self.model.set_ax_labels(ax_labels)
+        self.model.set_plot_exp(self._get_setting("plot_exp_pf", bool))
+        self.model.set_contour_kernel(float(self._get_setting("contour_kernel", str)))
 
-            # default scattering pos for now
-            self.model.set_scat_vol_pos((0.0, 0.0, 0.0))
+        # default scattering pos for now
+        self.model.set_scat_vol_pos((0.0, 0.0, 0.0))
 
-            # get the threshold values from the view
-            has_chi2_col, has_x0_col = False, False
-            if self.all_wss_have_params() and self.at_least_one_param_assigned():
-                has_chi2_col, has_x0_col = self.model.check_param_ws_for_columns(params)
-            chi2_thresh = self._get_setting("cost_func_thresh") if has_chi2_col else 0.0
-            peak_thresh = self._get_setting("peak_pos_thresh") if has_x0_col else 0.0
+        # get the threshold values from the view
+        has_chi2_col, has_x0_col = False, False
+        if self.all_wss_have_params() and self.at_least_one_param_assigned():
+            has_chi2_col, has_x0_col = self.model.check_param_ws_for_columns(params)
+        chi2_thresh = self._get_setting("cost_func_thresh") if has_chi2_col else 0.0
+        peak_thresh = self._get_setting("peak_pos_thresh") if has_x0_col else 0.0
 
-            self.model.set_chi2_thresh(chi2_thresh)
-            self.model.set_peak_thresh(peak_thresh)
+        self.model.set_chi2_thresh(chi2_thresh)
+        self.model.set_peak_thresh(peak_thresh)
 
-            self.set_worker(
-                AsyncTask(
-                    self.calc_pf,
-                    (
-                        wss,
-                        params,
-                    ),
-                    error_cb=self._on_worker_error,
-                    finished_cb=self._on_worker_success,
-                )
+        self.set_worker(
+            AsyncTask(
+                self.calc_pf,
+                (
+                    wss,
+                    params,
+                ),
+                error_cb=self._on_worker_error,
+                finished_cb=self._on_worker_success,
             )
-            self.worker = self.get_worker()
-            self.worker.start()
+        )
+        self.worker = self.get_worker()
+        self.worker.start()
 
     def _get_ax_data(self):
         return output_settings.get_texture_axes_transform()
@@ -242,19 +243,7 @@ class TexturePresenter:
     ):
         root_dir = output_settings.get_output_path()
         save_dirs = self.model.get_save_dirs(root_dir, "PoleFigureTables", self.model.get_rb_num(), self.model.get_grouping())
-        self.model.make_pole_figure_tables(
-            wss,
-            params,
-            self.model.get_out_ws(),
-            self.model.get_hkl(),
-            self.model.get_inc_scatt(),
-            self.model.get_scat_vol_pos(),
-            self.model.get_chi2_thresh(),
-            self.model.get_peak_thresh(),
-            save_dirs,
-            self.model.get_ax_trans(),
-            self.model.get_readout_col(),
-        )
+        self.model.exec_make_pf_tables(wss, params, save_dirs)
         self.plot_pf(save_dirs)
 
     def _on_worker_success(self):
@@ -270,16 +259,7 @@ class TexturePresenter:
         # Clear existing figure
         fig.clf()
 
-        self.model.plot_pole_figure(
-            self.model.out_ws,
-            self.model.projection_method,
-            fig=fig,
-            readout_col=self.model.readout_col,
-            save_dirs=save_dirs,
-            plot_exp=self.model.plot_exp,
-            ax_labels=self.model.ax_labels,
-            contour_kernel=self.model.contour_kernel,
-        )
+        self.model.exec_plot_pf(fig, save_dirs)
 
         canvas.draw()
 
