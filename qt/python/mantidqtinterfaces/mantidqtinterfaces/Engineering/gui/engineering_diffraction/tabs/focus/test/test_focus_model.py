@@ -64,7 +64,7 @@ class FocusModelTest(unittest.TestCase):
         sample_foc_ws = MagicMock()
         sample_foc_ws.name.return_value = "foc_name"
         mock_conv_units.return_value = sample_foc_ws  # last alg called before ws name appended to plotting list
-        mock_save_out.return_value = ["Nexus files"], ["GSS files"]
+        mock_save_out.return_value = ["Nexus files"], ["GSS files"], ["Combined files"]
 
         # plotting focused runs
         self.model.focus_run(["305761"], "fake/van/path", plot_output=True, rb_num=None, calibration=self.calibration)
@@ -76,6 +76,8 @@ class FocusModelTest(unittest.TestCase):
         self.assertEqual(self.model._last_focused_files[0], "Nexus files")
         self.assertEqual(len(self.model._last_focused_files_gsas2), 1)
         self.assertEqual(self.model._last_focused_files_gsas2[0], "GSS files")
+        self.assertEqual(len(self.model._last_focused_files_combined), 1)
+        self.assertEqual(self.model._last_focused_files_combined[0], "Combined files")
         mock_del_ws.assert_called_once_with("van_ws_foc_rb")
 
         # no plotting
@@ -116,7 +118,7 @@ class FocusModelTest(unittest.TestCase):
 
         mock_load_cal.return_value = "full_calibration"
         self.calibration.group = GROUP.BOTH
-        mock_enggutils_focus_run.return_value = ["Nexus files"], ["GSS files"]
+        mock_enggutils_focus_run.return_value = ["Nexus files"], ["GSS files"], ["Combined files"]
 
         self.model.focus_run(
             ["305761"], "fake/van/path", plot_output=False, rb_num=None, calibration=self.calibration
@@ -158,7 +160,7 @@ class FocusModelTest(unittest.TestCase):
         mock_apply_van.return_value = sample_foc_ws  # xunit = dSpacing
         mock_conv_units.return_value = sample_foc_ws  # xunit = TOF
         self.calibration.group = GROUP.BOTH
-        mock_save_out.return_value = ["Nexus files"], ["GSS files"]
+        mock_save_out.return_value = ["Nexus files"], ["GSS files"], ["Combined files"]
 
         # plotting focused runs
         self.model.focus_run(["305761"], "fake/van/path", plot_output=False, rb_num=rb_num, calibration=self.calibration, save_dir="dir")
@@ -200,7 +202,7 @@ class FocusModelTest(unittest.TestCase):
         mock_conv_units.return_value = sample_foc_ws  # xunit = TOF
         self.calibration.group = GROUP.TEXTURE20
         self.calibration.get_foc_ws_suffix.return_value = "Texture20"
-        mock_save_out.return_value = ["Nexus files"], ["GSS files"]
+        mock_save_out.return_value = ["Nexus files"], ["GSS files"], ["Combined files"]
 
         # plotting focused runs
         self.model.focus_run(["305761"], "fake/van/path", plot_output=False, rb_num=rb_num, calibration=self.calibration, save_dir="dir")
@@ -240,7 +242,7 @@ class FocusModelTest(unittest.TestCase):
         mock_conv_units.return_value = sample_foc_ws  # xunit = TOF
         self.calibration.group = GROUP.TEXTURE30
         self.calibration.get_foc_ws_suffix.return_value = "Texture30"
-        mock_save_out.return_value = ["Nexus files"], ["GSS files"]
+        mock_save_out.return_value = ["Nexus files"], ["GSS files"], ["Combined files"]
 
         # plotting focused runs
         self.model.focus_run(["305761"], "fake/van/path", plot_output=False, rb_num=rb_num, calibration=self.calibration, save_dir="dir")
