@@ -46,6 +46,8 @@ class FocusPresenter(object):
         if last_van_path:
             self.view.set_van_file_text_with_search(last_van_path)
 
+        self.set_default_directories()
+
     def set_default_files(self, filepaths):
         directory = self.model.get_last_directory(filepaths)
         self.view.set_default_files(filepaths, directory)
@@ -96,6 +98,9 @@ class FocusPresenter(object):
         instrument = INSTRUMENT_DICT[instrument]
         self.view.set_instrument_override(instrument)
         self.instrument = instrument
+
+    def set_default_directories(self):
+        self.view.finder_focus.setLastDirectory(output_settings.get_output_path())
 
     def set_rb_num(self, rb_num):
         self.rb_num = rb_num

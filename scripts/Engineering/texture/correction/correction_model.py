@@ -173,6 +173,7 @@ class TextureCorrectionModel:
 
     @staticmethod
     def _save_corrected_files(ws: str, root_dir: str, dir_name: str, rb_num: Optional[str], calibration_group: GROUP) -> str:
+        filepath = ""
         save_dirs = [path.join(root_dir, dir_name)]
         if rb_num:
             save_dirs.append(path.join(root_dir, "User", rb_num, dir_name))
@@ -183,7 +184,7 @@ class TextureCorrectionModel:
                 makedirs(save_dir)
             filepath = path.join(save_dir, ws + ".nxs")
             SaveNexus(InputWorkspace=ws, Filename=path.join(save_dir, ws + ".nxs"))
-            return filepath
+        return filepath
 
     def get_corrected_files(self):
         return self.corrected_files
