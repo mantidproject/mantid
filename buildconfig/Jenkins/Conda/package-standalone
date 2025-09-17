@@ -68,6 +68,9 @@ setup_mamba $WORKSPACE/miniforge "" true $PLATFORM
 mamba activate base
 mamba install --yes conda-index
 
+echo "CONDA BASE ENVIRONMENT (package-standalone):"
+mamba run -n base mamba list
+
 # Build packages
 # Setup a local conda channel to find our locally built packages package. It is
 # assumed the raw .bz2 artefacts have been copied into the directory below
