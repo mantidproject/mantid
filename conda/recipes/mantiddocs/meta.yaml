@@ -39,6 +39,7 @@ requirements:
     - xorg-libxxf86vm  # [linux]
     - xorg-libx11  # [linux]
     - xorg-xorgproto  # [linux]
+    - pystog {{ pystog }}
 
 # there are no run requirements as it's just pure html
 

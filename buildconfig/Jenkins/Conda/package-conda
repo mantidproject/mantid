@@ -138,7 +138,7 @@ mamba run -n base mamba list
 
 # Run conda build.
 if [[ $ENABLE_BUILD_MANTID_DEVELOPER == true ]]; then
-    conda mambabuild ./mantid-developer/ $EXTRA_BUILD_OPTIONS
+    conda mambabuild ./mantid-developer/ $EXTRA_BUILD_OPTIONS -c neutrons
 fi
 if [[ $ENABLE_BUILD_MANTID == true ]]; then
     conda mambabuild ./mantid/ $EXTRA_BUILD_OPTIONS
@@ -147,7 +147,7 @@ if [[ $ENABLE_BUILD_QT == true ]]; then
     conda mambabuild ./mantidqt/ $EXTRA_BUILD_OPTIONS
 fi
 if [[ $ENABLE_BUILD_DOCS == true ]]; then
-    conda mambabuild ./mantiddocs/ $EXTRA_BUILD_OPTIONS
+    conda mambabuild ./mantiddocs/ $EXTRA_BUILD_OPTIONS -c neutrons
 fi
 if [[ $ENABLE_BUILD_WORKBENCH == true ]]; then
     if [[ $BUILD_WORKBENCH_WITH_DOCS == false ]]; then

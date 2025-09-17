@@ -38,6 +38,8 @@ operating systems as it only contains static HTML.
 All mantid conda packages are available to users through Mantid's
 `conda organization <mantid-conda-org_>`_.
 
+PyStoG is now an optional dependency, so the neutrons conda channel is required when using PyStoG.
+
 .. _building-conda-packages:
 
 Building Conda Packages
