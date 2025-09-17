@@ -10,9 +10,9 @@
 // Includes
 //---------------------------------------------------
 
-#include "LoadANSTOHelper.h"
 #include "MantidAPI/IFileLoader.h"
 #include "MantidDataHandling/DllConfig.h"
+#include "MantidDataHandling/LoadANSTOHelper.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidNexus/NexusClasses_fwd.h"
@@ -66,7 +66,7 @@ protected:
   void exec() override;
 
 private:
-  // region of intreset
+  // region of interest
   static std::vector<bool> createRoiVector(const std::string &maskfile);
 
   // instrument creation

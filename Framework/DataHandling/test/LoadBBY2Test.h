@@ -59,11 +59,15 @@ public:
 
     // test some data properties
     auto logpm = [&run](const std::string &tag) {
-      return dynamic_cast<TimeSeriesProperty<double> *>(run.getProperty(tag))->firstValue();
+      TS_ASSERT(run.hasProperty(tag));
+      auto *p = dynamic_cast<TimeSeriesProperty<double> *>(run.getProperty(tag));
+      TS_ASSERT(p != nullptr);
+      return p ? p->firstValue() : 0.0;
     };
     TS_ASSERT_DELTA(logpm("L1"), 6.756, 1.0e-3);
     TS_ASSERT_DELTA(logpm("detector_time"), 299.4, 1.0e-1);
     TS_ASSERT_DELTA(logpm("L2_det_value"), 7.023, 1.0e-3);
     TS_ASSERT_DELTA(logpm("Ltof_det_value"), 25.444, 1.0e-3);
+    AnalysisDataService::Instance().remove(outputSpace);
   }
 };

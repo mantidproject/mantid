@@ -240,6 +240,10 @@ void LoadBBY2::exec() {
     std::tie(startTime, endTime) = Anxs::getHMScanLimits(nxsEntry, 0);
   else
     std::tie(startTime, endTime) = Anxs::getTimeScanLimits(nxsEntry, 0);
+  if (startTime >= endTime) {
+    g_log.error() << "Invalid time window from " << (useHMScanTime ? "hmscan" : "scan_dataset") << "\n";
+    throw std::runtime_error("LoadBBY2: invalid or missing scan time range.");
+  }
 
   // region of intreset
   std::vector<bool> roi = createRoiVector(getPropertyValue(MaskStr));

@@ -4,6 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
+#include <algorithm>
 #include <cmath>
 #include <cstdio>
 
@@ -59,8 +60,6 @@ static char const *const FilterByTofMaxStr = "FilterByTofMax";
 
 static char const *const FilterByTimeStartStr = "FilterByTimeStart";
 static char const *const FilterByTimeStopStr = "FilterByTimeStop";
-
-static int64_t constexpr NanoSecondsInSecond{1'000'000'000};
 
 using ANSTO::EventVector_pt;
 
@@ -487,7 +486,7 @@ void LoadBBY::loadInstrumentParameters(const Nexus::NXEntry &entry, std::map<std
         auto hdfTag = boost::algorithm::trim_copy(details[0]);
         try {
           // extract the parameter and add it to the parameter dictionary,
-          // check the scale factor for numeric and string
+          // get the scale factor for numeric values
           auto updateOk = false;
           if (!hdfTag.empty()) {
             if (isNumeric(details[1])) {

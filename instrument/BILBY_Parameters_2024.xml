@@ -13,7 +13,7 @@
 
 	<!-- following parameters are saved to the run log,
 	     parameters are entered as log_[log_name] and the 
-	     and the value is: "hdf_tag,scale,def_value,[mode]"
+	     and the value is: "hdf_tag,scale,def_value"
 		the scale value determines if the value is
 		interpreted as a numeric or string-->
     <parameter name="log_sample_aperture" type="string">
@@ -90,15 +90,6 @@
 	<parameter name="log_rough_100" type="string">
       <value val="instrument/shutters/rough_100, na, in"/>
     </parameter>
-	
-    <parameter name="log_nguide" type="string">
-      <value val="instrument/nguide, 1.0, 0.0" />
-    </parameter>
-
-    <parameter name="log_detector_time" type="string">
-      <value val="instrument/detector/time, 1.0, 0.0, end" />
-    </parameter>
-
     
 	<!-- parameter to be added to log that is not in the hdf file -->
 	<parameter name="log_curtain_rotation" type="string">

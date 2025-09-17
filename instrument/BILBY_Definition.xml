@@ -18,27 +18,24 @@
 
     Changes 5 April 2016:
     - separation between 8-packs in curtains implemented, keeping rotation axis as a middle of panels
-      Changes 5 April 2016:
+
+    Changes 5 April 2016:
     - rotation around edge tube + shift including extra 4mm - because wire is 4mm away from the edge
-      Changes 7 April 2016:
+    
+    Changes 7 April 2016:
     - shift 0 to the first inner tube, hence extra shifts by sin and cos are not needed anymore;
     - separation between Left & Right rear panels (measured in January, 2016) is hard coded in the initial x-shift;
     - separations between 8-packs (measured in January, 2016) are hard-coded in the description of the panels;
 
-      Changes 7 April 2016:
-    - shift 0 to the first inner tube, hence extra shifts by sin and cos are not needed anymore;
-    - separation between Left & Right rear panels (measured in January, 2016) is hard coded in the initial x-shift;
-    - separations between 8-packs (measured in January, 2016) are hard-coded in the description of the panels;
-    
-      Changes 18 October 2024:
+    Changes 18 October 2024:
     - new electronics: separation between 8-packs; better measured angles (not always precisely 10deg);
     - tubes pixelation is updated.
      
-      Changes 15 January 2025:
+    Changes 15 January 2025:
     - added 24.4mm shift for the curtains in the side-by-side view
     - order of panels changes to the left-right-top-bottom-rear_lift-rear_right
   
-      Changes 18 January 2025:
+    Changes 18 January 2025:
     - Pixel size 0.003093
     - Comment lines moved in the tubes separation section
     - Rear panels separation & rotations: reduced number of decimal points  

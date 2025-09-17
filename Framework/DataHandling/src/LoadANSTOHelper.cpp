@@ -69,7 +69,12 @@ void ProgressTracker::complete() {
 }
 
 void ProgressTracker::setTarget(int64_t target) {
-  m_step = target / m_count;
+  if (m_count == 0) {
+    m_step = target;
+    m_next = m_step;
+    return;
+  }
+  m_step = std::max<int64_t>(1, target / m_count);
   m_next = m_step;
 }
 
@@ -106,7 +111,7 @@ void EventProcessor::addEvent(size_t x, size_t y, double tof) {
     return;
 
   // ToF boundary
-  if ((tof < m_tofMinBoundary) && (tof > m_tofMaxBoundary))
+  if ((tof < m_tofMinBoundary) || (tof > m_tofMaxBoundary))
     return;
 
   // detector id

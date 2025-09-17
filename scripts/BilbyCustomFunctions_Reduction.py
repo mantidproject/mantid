@@ -234,13 +234,13 @@ def output_header(
 ##############################################################################
 
 
-def get_pixel_size():  # reads current IDF and get pixelsize from there
+def get_pixel_size(run_start):  # reads current IDF and get pixelsize from there
     """To get pixel size for Bilby detectors from the Bilby_Definition.xml file"""
 
     from mantid.api import ExperimentInfo
     import xml.etree.cElementTree as ET
 
-    currentIDF = ExperimentInfo.getInstrumentFilename("Bilby")
+    currentIDF = ExperimentInfo.getInstrumentFilename("Bilby", run_start)
     # print currentIDF
     tree = ET.parse(currentIDF)
     for node in tree.iter():
@@ -340,7 +340,7 @@ def correction_tubes_shift(ws_to_correct, path_to_shifts_file):
     shifts = read_csv(path_to_shifts_file)
     # shall be precisely sevel lines; shifts for rear left, rear right, left, right, top, bottom curtains
     # [calculated from 296_Cd_lines_setup1 file] + value for symmetrical shift for entire rear panels
-    pixelsize = get_pixel_size()
+    pixelsize = get_pixel_size(ws_to_correct.run().getProperty("run_start").value)
 
     correct_element_one_stripe("BackDetectorLeft", pixelsize, shifts[0], ws_to_correct)
     correct_element_one_stripe("BackDetectorRight", pixelsize, shifts[1], ws_to_correct)
