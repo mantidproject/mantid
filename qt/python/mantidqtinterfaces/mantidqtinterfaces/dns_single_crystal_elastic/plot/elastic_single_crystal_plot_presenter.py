@@ -28,6 +28,7 @@ class DNSElasticSCPlotPresenter(DNSObserver):
         self._plot_param.colormap_name = "jet"
         self._plot_param.font_size = 1
         self._plot_param.lines = 0
+        self._plot_param.pointsize = 2
         self._plot_param.xlim = [None, None]
         self._plot_param.ylim = [None, None]
         self._plot_param.zlim = [None, None]
@@ -77,14 +78,21 @@ class DNSElasticSCPlotPresenter(DNSObserver):
         self.view.create_subfigure(self._plot_param.grid_helper)
         self._want_plot(axis_type["plot_type"])
         self._set_plotting_grid(self._crystallographical_axes())
+        self._set_aspect_ratio()
         self._set_ax_formatter()
         self._set_axis_labels()
         self.view.single_crystal_plot.create_colorbar()
+        self.view.connect_resize()
         self.view.single_crystal_plot.on_resize()
+        self._manual_lim_changed()
         self._set_initial_omega_offset_dx_dy()
+        self.view.single_crystal_plot.connect_ylim_change()
         self._change_displayed_plot_limits(include_zlim=True)
         self.view.canvas.figure.tight_layout()
         self.view.draw()
+
+    def process_auto_reduction_request(self):
+        self.view.single_crystal_plot.clear_plot()
 
     def tab_got_focus(self):
         workspaces = sorted(self.param_dict["elastic_single_crystal_script_generator"]["plot_list"])
@@ -120,6 +128,20 @@ class DNSElasticSCPlotPresenter(DNSObserver):
         self.view.initial_values["dy"] = default_dy
         self._plot(self.view.initial_values)
 
+    def _plot_quadmesh(self, interpolate, axis_type, switch):
+        cmap, edge_colors, shading = self._get_plot_styles()
+        if shading == "flat":  # prevents dropping of line
+            shading = "nearest"
+        x, y, z = self.model.get_interpolated_quadmesh(interpolate, axis_type)
+        x, y, z = self.model.switch_axis(x, y, z, switch)
+        self.view.single_crystal_plot.plot_quadmesh(x, y, z, cmap, edge_colors, shading)
+
+    def _plot_scatter(self, axis_type, switch):
+        cmap = self._get_plot_styles()[0]
+        x, y, z = self.model.get_interpolated_quadmesh(False, axis_type)
+        x, y, z = self.model.switch_axis(x, y, z, switch)
+        self.view.single_crystal_plot.plot_scatter(x, y, z, cmap)
+
     def _plot_triangulation(self, interpolate, axis_type, switch):
         color_map, edge_colors, shading = self._get_plot_styles()
         triangulation, z = self.model.get_interpolated_triangulation(interpolate, axis_type, switch)
@@ -127,11 +149,17 @@ class DNSElasticSCPlotPresenter(DNSObserver):
 
     def _want_plot(self, plot_type):
         axis_type = self.view.get_axis_type()
-        self._plot_triangulation(axis_type["interpolate"], axis_type["type"], axis_type["switch"])
+        if plot_type == "quadmesh":
+            self._plot_quadmesh(axis_type["interpolate"], axis_type["type"], axis_type["switch"])
+        if plot_type == "triangulation":
+            self._plot_triangulation(axis_type["interpolate"], axis_type["type"], axis_type["switch"])
+        if plot_type == "scatter":
+            self._plot_scatter(axis_type["type"], axis_type["switch"])
 
     def _get_plot_styles(self):
         own_dict = self.view.get_state()
-        shading = "flat"
+        axis_type = self.view.get_axis_type()
+        shading = axis_type["shading"]
         edge_colors = ["face", "white", "black"][self._plot_param.lines]
         colormap_name = own_dict["colormap"]
         if own_dict["invert_cb"]:
@@ -142,7 +170,14 @@ class DNSElasticSCPlotPresenter(DNSObserver):
     def _set_axis_labels(self):
         axis_type = self.view.get_axis_type()
         x_label, y_label = self.model.get_axis_labels(axis_type["type"], self._crystallographical_axes())
+        if axis_type["switch"]:
+            x_label, y_label = y_label, x_label
         self.view.single_crystal_plot.set_axis_labels(x_label, y_label)
+
+    def _set_aspect_ratio(self):
+        axis_type = self.view.get_axis_type()
+        ratio = self.model.get_aspect_ratio(axis_type)
+        self.view.single_crystal_plot.set_aspect_ratio(ratio)
 
     def _change_crystal_axes_grid(self):
         current_state = self._plot_param.grid_state % 4
@@ -182,8 +217,13 @@ class DNSElasticSCPlotPresenter(DNSObserver):
         self._plot()
 
     def _change_line_style(self):
-        self._plot_param.lines = (self._plot_param.lines + 1) % 3
-        self.view.single_crystal_plot.set_linecolor(self._plot_param.lines)
+        axis_type = self.view.get_axis_type()
+        if axis_type["plot_type"] == "scatter":
+            self._plot_param.pointsize = (self._plot_param.pointsize + 1) % 5
+            self.view.single_crystal_plot.set_pointsize(self._plot_param.pointsize)
+        else:
+            self._plot_param.lines = (self._plot_param.lines + 1) % 3
+            self.view.single_crystal_plot.set_linecolor(self._plot_param.lines)
         self.view.draw()
 
     def _set_ax_formatter(self):
@@ -212,15 +252,22 @@ class DNSElasticSCPlotPresenter(DNSObserver):
             self.view.draw()
 
     def _home_button_clicked(self):
+        self.view.single_crystal_plot.disconnect_ylim_change()
+        # The color bar gets tiny if you zoom out with home button in log scale.
+        # Redrawing color bar fixes the problem.
+        own_dict = self.view.get_state()
         axis_type = self.view.get_axis_type()
-        x_lim, y_lim = self.model.get_data_xy_lim(axis_type["switch"])
-        z_min, z_max, _dummy = self.model.get_data_z_min_max(x_lim, y_lim)
-        self.view._map["x_min"].setValue(x_lim[0])
-        self.view._map["x_max"].setValue(x_lim[1])
-        self.view._map["y_min"].setValue(y_lim[0])
-        self.view._map["y_max"].setValue(y_lim[1])
-        self.view._map["z_min"].setValue(z_min)
-        self.view._map["z_max"].setValue(z_max)
+        if own_dict["log_scale"]:
+            self.view.single_crystal_plot.redraw_colorbar()
+        if axis_type["zoom"]["fix_xy"]:
+            dx_lim, dy_lim = self.model.get_data_xy_lim(axis_type["switch"])
+            self.view.single_crystal_plot.set_xlim(dx_lim)
+            self.view.single_crystal_plot.set_ylim(dy_lim)
+            self._plot_param.xlim = dx_lim
+            self._plot_param.ylim = dy_lim
+            self._change_color_bar_range(zoom=True)
+        self.view.single_crystal_plot.connect_ylim_change()
+        self._change_displayed_plot_limits()
 
     def _get_current_xy_lim(self, zoom=False):
         own_dict = self.view.get_state()
@@ -234,6 +281,11 @@ class DNSElasticSCPlotPresenter(DNSObserver):
             xlim = dx_lim
         if ylim[0] is None:
             ylim = dy_lim
+        if axis_type["zoom"]["fix_xy"] and not zoom:
+            if self._plot_param.xlim[0] is not None:
+                xlim = self._plot_param.xlim
+            if self._plot_param.ylim[0] is not None:
+                ylim = self._plot_param.ylim
         return xlim, ylim
 
     def _get_current_z_lim(self, xlim, ylim, zoom):
@@ -249,6 +301,9 @@ class DNSElasticSCPlotPresenter(DNSObserver):
             manual_z = False
         if own_dict["log_scale"] and zlim[0] < 0:
             zlim[0] = dpz_min
+        if axis_type["zoom"]["fix_z"] and not zoom:
+            if self._plot_param.zlim[0] is not None:
+                zlim = self._plot_param.zlim
         return zlim, manual_z
 
     def _get_current_limits(self, zoom=True):
@@ -267,7 +322,13 @@ class DNSElasticSCPlotPresenter(DNSObserver):
         self.view.show_status_message(f"Displayed data have been saved to: {export_file_name}", 10, clear=True)
 
     def _get_column_headers(self):
-        column_headers = np.array([["n_x", "n_y", "Intensity"]])
+        axis_labels = self.view.get_axis_type()["type"]
+        if axis_labels == "qxqy":
+            column_headers = np.array([["q_x (1/A)", "q_y (1/A)", "Intensity"]])
+        elif axis_labels == "hkl":
+            column_headers = np.array([["n_x", "n_y", "Intensity"]])
+        elif axis_labels == "angular":
+            column_headers = np.array([["2\u03b8 (deg)", "\u03c9 (deg)", "Intensity"]])
         return column_headers
 
     def _create_grid_helper(self):

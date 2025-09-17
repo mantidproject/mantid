@@ -177,6 +177,9 @@ class DNSElasticSCPlotView(DNSView):
     def get_axis_type(self):
         return self.views_menu.get_value()
 
+    def connect_resize(self):
+        self.canvas.mpl_connect("resize_event", self.single_crystal_plot.on_resize)
+
     def set_initial_omega_offset_dx_dy(self, off, dx, dy):
         self.initial_values = {"omega_offset": off, "dx": dx, "dy": dy}
 

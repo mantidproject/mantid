@@ -9,6 +9,7 @@
 DNS single crystal elastic plot tab of DNS reduction GUI.
 """
 
+import numpy as np
 import matplotlib
 from matplotlib.ticker import AutoMinorLocator, NullLocator
 from mpl_toolkits.axes_grid1 import make_axes_locatable
@@ -58,6 +59,12 @@ class DNSScPlot:
         lines = ["face", "white", "black"][lines]
         if self._plot is not None:
             self._plot.set_edgecolors(lines)
+
+    def set_pointsize(self, lines):
+        if self._plot is not None:
+            a = np.ones(len(self._plot.get_sizes()))
+            size = a * [10, 50, 100, 500, 1000][lines]
+            self._plot.set_sizes(size)
 
     def set_shading(self, shading):
         if self._plot is not None:
@@ -130,8 +137,20 @@ class DNSScPlot:
         ylim = self._ax.get_ylim()
         return xlim, ylim
 
+    # plotting
+    def clear_plot(self):
+        if self._ax:
+            self._ax.figure.clear()
+
     def plot_triangulation(self, triang, z, cmap, edge_colors, shading):
         self._ax.set_visible(True)
         self._plot = self._ax.tripcolor(triang, z, cmap=cmap, edgecolors=edge_colors, shading=shading)
-        self._ax.set_xmargin(0)
-        self._ax.set_ymargin(0)
+
+    def plot_quadmesh(self, x, y, z, cmap, edgecolors, shading):
+        # pylint: disable=too-many-arguments
+        self._ax.set_visible(True)
+        self._plot = self._ax.pcolormesh(x, y, z, cmap=cmap, edgecolors=edgecolors, shading=shading)
+
+    def plot_scatter(self, x, y, z, cmap):
+        self._ax.set_visible(True)
+        self._plot = self._ax.scatter(x, y, c=z, s=100, cmap=cmap, zorder=100)

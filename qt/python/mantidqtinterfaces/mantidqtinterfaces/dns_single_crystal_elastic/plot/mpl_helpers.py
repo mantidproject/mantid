@@ -17,3 +17,7 @@ def get_log_norm(log, zlim):
 
 def get_cmap(colormap_name):
     return mpl.colormaps[colormap_name]
+
+
+def get_shading(axis_type):
+    return axis_type["shading"]
