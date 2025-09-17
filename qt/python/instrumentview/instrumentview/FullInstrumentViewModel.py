@@ -70,7 +70,7 @@ class FullInstrumentViewModel:
         # Initialise with zeros
         self._counts = np.zeros_like(self._detector_ids)
         self._counts_limits = (0, 0)
-        self._detector_projection_positions = np.zeros_like(self._detector_positions)
+        self._detector_projection_positions = np.zeros_like(self.detector_positions)
         self._detector_is_picked = np.full(len(self._detector_ids[self._is_valid]), False)
 
         # Get min and max tof values
@@ -106,7 +106,7 @@ class FullInstrumentViewModel:
 
     @property
     def detector_projection_positions(self) -> np.ndarray:
-        return self._detector_projection_positions[self._is_valid]
+        return self._detector_projection_positions
 
     @property
     def detector_ids(self) -> np.ndarray:
@@ -202,15 +202,15 @@ class FullInstrumentViewModel:
         """Calculate the 2D projection with the specified axis. Can be cylindrical, spherical, or side-by-side."""
         if projection_option == self._SIDE_BY_SIDE:
             projection = iv_side_by_side.SideBySide(
-                self._workspace, self._detector_ids, self._sample_position, self._root_position, self._detector_positions, np.array(axis)
+                self._workspace, self.detector_ids, self.sample_position, self._root_position, self.detector_positions, np.array(axis)
             )
         elif projection_option.startswith("Spherical"):
             projection = iv_spherical.SphericalProjection(
-                self._sample_position, self._root_position, self._detector_positions, np.array(axis)
+                self.sample_position, self._root_position, self.detector_positions, np.array(axis)
             )
         elif projection_option.startswith("Cylindrical"):
             projection = iv_cylindrical.CylindricalProjection(
-                self._sample_position, self._root_position, self._detector_positions, np.array(axis)
+                self.sample_position, self._root_position, self.detector_positions, np.array(axis)
             )
         else:
             raise ValueError(f"Unknown projection type: {projection_option}")
