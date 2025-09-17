@@ -26,6 +26,7 @@
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidCurveFitting/Algorithms/PlotPeakByLogValue.h"
@@ -130,6 +131,14 @@ void PlotPeakByLogValue::init() {
                   "If true and CreateOutput is true then the value of each "
                   "member of a Composite Function is also output.");
 
+  declareProperty("AppendIdxToOutputName", false,
+                  "If true and CreateOutput is true then append either spectrum index, workspace index, or numeric "
+                  "axis value depending on the input format.");
+
+  declareProperty(
+      "Output2D", false,
+      "If true and CreateOutput is true then create a new output of the result table in workspace 2D format.");
+
   declareProperty(std::make_unique<Kernel::PropertyWithValue<bool>>("ConvolveMembers", false),
                   "If true and OutputCompositeMembers is true members of any "
                   "Convolution are output convolved\n"
@@ -162,6 +171,11 @@ std::map<std::string, std::string> PlotPeakByLogValue::validateInputs() {
   int default_wi = getProperty("WorkspaceIndex");
   int default_spec = getProperty("Spectrum");
   const std::vector<InputSpectraToFit> wsNames = makeNames(inputList, default_wi, default_spec);
+  for (const auto &wsName : wsNames) {
+    if (wsName.wsIdx == -1 && wsName.spectrumNum == -1 && wsName.numericValue == -1) {
+      errors["InvalidRange"] = "Range is out of bounds. Please make sure the selected range is within the boundaries.";
+    }
+  }
   std::vector<std::string> excludeList = getProperty("ExcludeMultiple");
   if (!excludeList.empty() && excludeList.size() != wsNames.size()) {
     errors["ExcludeMultiple"] = "ExcludeMultiple must be the same size has the number of spectra.";
@@ -184,6 +198,8 @@ void PlotPeakByLogValue::exec() {
   bool individual = getPropertyValue("FitType") == "Individual";
   bool passWSIndexToFunction = getProperty("PassWSIndexToFunction");
   bool createFitOutput = getProperty("CreateOutput");
+  bool appendIdxToOutput = getProperty("AppendIdxToOutputName");
+  bool output2D = getProperty("Output2D");
   bool outputCompositeMembers = getProperty("OutputCompositeMembers");
   bool outputConvolvedMembers = getProperty("ConvolveMembers");
   bool outputFitStatus = getProperty("OutputFitStatus");
@@ -213,14 +229,12 @@ void PlotPeakByLogValue::exec() {
   }
   ITableWorkspace_sptr result = createResultsTable(logName, ifunSingle, isDataName);
 
+  std::vector<std::string> fitNames;
+  std::vector<std::string> parameterNames;
+  std::vector<std::string> covarianceNames;
   std::vector<MatrixWorkspace_sptr> fitWorkspaces;
   std::vector<ITableWorkspace_sptr> parameterWorkspaces;
   std::vector<ITableWorkspace_sptr> covarianceWorkspaces;
-  if (createFitOutput) {
-    covarianceWorkspaces.reserve(wsNames.size());
-    fitWorkspaces.reserve(wsNames.size());
-    parameterWorkspaces.reserve(wsNames.size());
-  }
 
   std::vector<std::string> fitStatus;
   std::vector<double> fitChiSquared;
@@ -241,7 +255,7 @@ void PlotPeakByLogValue::exec() {
       continue;
     }
 
-    if (data.i < 0) {
+    if (data.wsIdx < 0) {
       g_log.warning() << "Zero spectra selected for fitting in workspace " << wsNames[i].name << '\n';
       continue;
     }
@@ -250,26 +264,29 @@ void PlotPeakByLogValue::exec() {
         setupFunction(individual, passWSIndexToFunction, inputFunction, initialParams, isMultiDomainFunction, i, data);
     std::shared_ptr<Algorithm> fit;
     if (startX.size() == 0) {
-      fit = runSingleFit(createFitOutput, outputCompositeMembers, outputConvolvedMembers, ifun, data, EMPTY_DBL(),
-                         EMPTY_DBL(), exclude[i]);
+      fit = runSingleFit(createFitOutput, outputCompositeMembers, outputConvolvedMembers, appendIdxToOutput, ifun, data,
+                         EMPTY_DBL(), EMPTY_DBL(), exclude[i]);
     } else if (startX.size() == 1) {
-      fit = runSingleFit(createFitOutput, outputCompositeMembers, outputConvolvedMembers, ifun, data, startX[0],
-                         endX[0], exclude[i]);
+      fit = runSingleFit(createFitOutput, outputCompositeMembers, outputConvolvedMembers, appendIdxToOutput, ifun, data,
+                         startX[0], endX[0], exclude[i]);
     } else {
-      fit = runSingleFit(createFitOutput, outputCompositeMembers, outputConvolvedMembers, ifun, data, startX[i],
-                         endX[i], exclude[i]);
+      fit = runSingleFit(createFitOutput, outputCompositeMembers, outputConvolvedMembers, appendIdxToOutput, ifun, data,
+                         startX[i], endX[i], exclude[i]);
     }
 
     ifun = fit->getProperty("Function");
     double chi2 = fit->getProperty("OutputChi2overDoF");
 
     if (createFitOutput) {
-      MatrixWorkspace_sptr outputFitWorkspace = fit->getProperty("OutputWorkspace");
-      ITableWorkspace_sptr outputParamWorkspace = fit->getProperty("OutputParameters");
-      ITableWorkspace_sptr outputCovarianceWorkspace = fit->getProperty("OutputNormalisedCovarianceMatrix");
-      fitWorkspaces.emplace_back(outputFitWorkspace);
-      parameterWorkspaces.emplace_back(outputParamWorkspace);
-      covarianceWorkspaces.emplace_back(outputCovarianceWorkspace);
+      if (appendIdxToOutput) {
+        fitNames.emplace_back(fit->getPropertyValue("OutputWorkspace"));
+        parameterNames.emplace_back(fit->getPropertyValue("OutputParameters"));
+        covarianceNames.emplace_back(fit->getPropertyValue("OutputNormalisedCovarianceMatrix"));
+      } else {
+        fitWorkspaces.emplace_back(fit->getProperty("OutputWorkspace"));
+        parameterWorkspaces.emplace_back(fit->getProperty("OutputParameters"));
+        covarianceWorkspaces.emplace_back(fit->getProperty("OutputNormalisedCovarianceMatrix"));
+      }
     }
     if (outputFitStatus) {
       fitStatus.push_back(fit->getProperty("OutputStatus"));
@@ -294,7 +311,89 @@ void PlotPeakByLogValue::exec() {
     setProperty("OutputChiSquared", fitChiSquared);
   }
 
-  finaliseOutputWorkspaces(createFitOutput, fitWorkspaces, parameterWorkspaces, covarianceWorkspaces);
+  if (createFitOutput) {
+    if (output2D) {
+      groupResParams(parameterWorkspaces, parameterNames);
+    }
+
+    if (appendIdxToOutput) {
+      finaliseOutputWorkspacesWithAppend(fitNames, parameterNames, covarianceNames, wsNames);
+    } else {
+      finaliseOutputWorkspaces(fitWorkspaces, parameterWorkspaces, covarianceWorkspaces);
+    }
+  }
+
+  finaliseMinimizerOutput();
+}
+
+void PlotPeakByLogValue::groupResParams(const std::vector<ITableWorkspace_sptr> &paramsWs,
+                                        const std::vector<std::string> &paramsNames) {
+  std::vector<ITableWorkspace_sptr> params;
+
+  if (paramsWs.size() > 0) {
+    params = paramsWs;
+  } else if (paramsNames.size() > 0) {
+    std::transform(paramsNames.cbegin(), paramsNames.cend(), std::back_inserter(params),
+                   [](std::string name) { return AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(name); });
+  } else {
+    return;
+  }
+
+  std::map<std::string, std::vector<double>> parameterValues;
+  std::map<std::string, std::vector<double>> parameterErrors;
+
+  for (size_t i = 0; i < params.size(); ++i) {
+    for (size_t rowNo = 0; rowNo < params[i]->rowCount(); ++rowNo) {
+      TableRow row = params[i]->getRow(rowNo);
+
+      auto paramName = row.String(0);
+      auto value = row.Double(1);
+      auto error = row.Double(2);
+
+      parameterValues[paramName].push_back(value);
+      parameterErrors[paramName].push_back(error);
+    }
+  }
+
+  if (!parameterValues.empty()) {
+    size_t numParams = parameterValues.size();
+    size_t numDataPoints = parameterValues.begin()->second.size();
+
+    auto matrixWs =
+        Mantid::API::WorkspaceFactory::Instance().create("Workspace2D", numParams, numDataPoints, numDataPoints);
+
+    auto textAxis = std::make_unique<Mantid::API::TextAxis>(numParams);
+
+    size_t spectrumIndex = 0;
+    for (const auto &paramPair : parameterValues) {
+      const std::string &paramName = paramPair.first;
+      const std::vector<double> &values = paramPair.second;
+      const std::vector<double> &errors = parameterErrors[paramName];
+
+      auto &xData = matrixWs->mutableX(spectrumIndex);
+      for (size_t i = 0; i < numDataPoints; ++i) {
+        xData[i] = static_cast<double>(i);
+      }
+
+      auto &yData = matrixWs->mutableY(spectrumIndex);
+      std::copy(values.begin(), values.end(), yData.begin());
+
+      auto &eData = matrixWs->mutableE(spectrumIndex);
+      std::copy(errors.begin(), errors.end(), eData.begin());
+
+      textAxis->setLabel(spectrumIndex, paramName);
+
+      ++spectrumIndex;
+    }
+
+    matrixWs->replaceAxis(1, std::move(textAxis));
+    matrixWs->setTitle("Grouped Parameter Results");
+    matrixWs->getAxis(0)->setUnit("Empty");
+    matrixWs->setYUnitLabel("Parameter Value");
+
+    std::string outputWsName = this->m_baseName + "_ws";
+    Mantid::API::AnalysisDataService::Instance().addOrReplace(outputWsName, matrixWs);
+  }
 }
 
 IFunction_sptr PlotPeakByLogValue::setupFunction(bool individual, bool passWSIndexToFunction,
@@ -315,7 +414,7 @@ IFunction_sptr PlotPeakByLogValue::setupFunction(bool individual, bool passWSInd
     ifun = inputFunction;
   }
   if (passWSIndexToFunction) {
-    this->setWorkspaceIndexAttribute(ifun, data.i);
+    this->setWorkspaceIndexAttribute(ifun, data.wsIdx);
   }
 
   if (individual && !isMultiDomainFunction) {
@@ -326,28 +425,75 @@ IFunction_sptr PlotPeakByLogValue::setupFunction(bool individual, bool passWSInd
   return ifun;
 }
 
-void PlotPeakByLogValue::finaliseOutputWorkspaces(bool createFitOutput,
-                                                  const std::vector<MatrixWorkspace_sptr> &fitWorkspaces,
-                                                  const std::vector<ITableWorkspace_sptr> &parameterWorkspaces,
+void PlotPeakByLogValue::finaliseOutputWorkspaces(const std::vector<MatrixWorkspace_sptr> &fitWorkspaces,
+                                                  const std::vector<ITableWorkspace_sptr> &paramsWorkspaces,
                                                   const std::vector<ITableWorkspace_sptr> &covarianceWorkspaces) {
-  if (createFitOutput) {
-    // collect output of fit for each spectrum into workspace groups
-    WorkspaceGroup_sptr covarianceGroup = std::make_shared<WorkspaceGroup>();
-    for (auto const &workspace : covarianceWorkspaces)
-      covarianceGroup->addWorkspace(workspace);
-    AnalysisDataService::Instance().addOrReplace(this->m_baseName + "_NormalisedCovarianceMatrices", covarianceGroup);
 
-    WorkspaceGroup_sptr parameterGroup = std::make_shared<WorkspaceGroup>();
-    for (auto const &workspace : parameterWorkspaces)
-      parameterGroup->addWorkspace(workspace);
-    AnalysisDataService::Instance().addOrReplace(this->m_baseName + "_Parameters", parameterGroup);
+  // collect output of fit for each spectrum into workspace groups
+  WorkspaceGroup_sptr covarianceGroup = std::make_shared<WorkspaceGroup>();
+  for (auto const &workspace : covarianceWorkspaces)
+    covarianceGroup->addWorkspace(workspace);
+  AnalysisDataService::Instance().addOrReplace(this->m_baseName + "_NormalisedCovarianceMatrices", covarianceGroup);
 
-    WorkspaceGroup_sptr fitGroup = std::make_shared<WorkspaceGroup>();
-    for (auto const &workspace : fitWorkspaces)
-      fitGroup->addWorkspace(workspace);
-    AnalysisDataService::Instance().addOrReplace(this->m_baseName + "_Workspaces", fitGroup);
+  WorkspaceGroup_sptr parameterGroup = std::make_shared<WorkspaceGroup>();
+  for (auto const &workspace : paramsWorkspaces)
+    parameterGroup->addWorkspace(workspace);
+  AnalysisDataService::Instance().addOrReplace(this->m_baseName + "_Parameters", parameterGroup);
+
+  WorkspaceGroup_sptr fitGroup = std::make_shared<WorkspaceGroup>();
+  for (auto const &workspace : fitWorkspaces)
+    fitGroup->addWorkspace(workspace);
+  AnalysisDataService::Instance().addOrReplace(this->m_baseName + "_Workspaces", fitGroup);
+
+  for (auto &minimizerWorkspace : this->m_minimizerWorkspaces) {
+    const std::string paramName = minimizerWorkspace.first;
+    auto groupAlg = this->createChildAlgorithm("GroupWorkspaces");
+    groupAlg->initialize();
+    groupAlg->setProperty("InputWorkspaces", minimizerWorkspace.second);
+    groupAlg->setProperty("OutputWorkspace", this->m_baseName + "_" + paramName);
+    groupAlg->execute();
+  }
+}
+
+void PlotPeakByLogValue::finaliseOutputWorkspacesWithAppend(const std::vector<std::string> &fitNames,
+                                                            const std::vector<std::string> &paramsNames,
+                                                            const std::vector<std::string> &covarianceNames,
+                                                            const std::vector<InputSpectraToFit> &wsNames) {
+
+  std::string range;
+
+  auto start = wsNames[0];
+  auto end = wsNames[wsNames.size() - 1];
+  if (start.spectrumNum != -1) {
+    range = wsNames.size() > 1 && start.spectrumNum != end.spectrumNum
+                ? std::format("sp{:g}-{:g}", start.spectrumNum, end.spectrumNum)
+                : std::format("sp{:g}", start.spectrumNum);
+  } else if (start.numericValue != -1) {
+    range = wsNames.size() > 1 && start.numericValue != end.numericValue
+                ? std::format("v{:g}-{:g}", start.numericValue, end.numericValue)
+                : std::format("v{:g}", start.numericValue);
+  } else {
+    range = wsNames.size() > 1 && start.wsIdx != end.wsIdx ? std::format("i{}-{}", start.wsIdx, end.wsIdx)
+                                                           : "i" + std::to_string(start.wsIdx);
   }
 
+  // collect output of fit for each spectrum into workspace groups
+  auto const groupAlg = this->createChildAlgorithm("GroupWorkspaces");
+  std::vector<std::pair<std::vector<std::string>, std::string>> groupingOperations = {
+      {covarianceNames, std::format("{}_{}_NormalisedCovarianceMatrices", m_baseName, range)},
+      {paramsNames, std::format("{}_{}_Parameters", m_baseName, range)},
+      {fitNames, std::format("{}_{}_Workspaces", m_baseName, range)}};
+
+  for (const auto &[inputWorkspaces, outputName] : groupingOperations) {
+    groupAlg->initialize();
+    groupAlg->setProperty("InputWorkspaces", inputWorkspaces);
+    groupAlg->setProperty("OutputWorkspace", outputName);
+    groupAlg->setAlwaysStoreInADS(true);
+    groupAlg->execute();
+  }
+}
+
+void PlotPeakByLogValue::finaliseMinimizerOutput() {
   for (auto &minimizerWorkspace : this->m_minimizerWorkspaces) {
     const std::string paramName = minimizerWorkspace.first;
     auto groupAlg = this->createChildAlgorithm("GroupWorkspaces");
@@ -450,17 +596,27 @@ ITableWorkspace_sptr PlotPeakByLogValue::createResultsTable(const std::string &l
 }
 
 std::shared_ptr<Algorithm> PlotPeakByLogValue::runSingleFit(bool createFitOutput, bool outputCompositeMembers,
-                                                            bool outputConvolvedMembers, const IFunction_sptr &ifun,
-                                                            const InputSpectraToFit &data, double startX, double endX,
-                                                            const std::string &exclude) {
-  g_log.debug() << "Fitting " << data.ws->getName() << " index " << data.i << " with \n";
+                                                            bool outputConvolvedMembers, bool appendIdx,
+                                                            const IFunction_sptr &ifun, const InputSpectraToFit &data,
+                                                            double startX, double endX, const std::string &exclude) {
+  g_log.debug() << "Fitting " << data.ws->getName() << " index " << data.wsIdx << " with \n";
   g_log.debug() << ifun->asString() << '\n';
 
-  const std::string spectrum_index = std::to_string(data.i);
   std::string wsBaseName;
 
-  if (createFitOutput)
-    wsBaseName = data.name + "_" + spectrum_index;
+  if (createFitOutput) {
+    wsBaseName = data.name;
+    if (appendIdx) {
+      if (data.spectrumNum != -1) {
+        wsBaseName += "_" + std::format("sp{:g}", data.spectrumNum);
+      } else if (data.numericValue != -1) {
+        wsBaseName += "_" + std::format("v{:g}", data.numericValue);
+      } else {
+        wsBaseName += "_i" + std::to_string(data.wsIdx);
+      }
+    }
+  }
+
   bool histogramFit = this->getPropertyValue("EvaluationType") == "Histogram";
   bool ignoreInvalidData = this->getProperty("IgnoreInvalidData");
 
@@ -470,16 +626,17 @@ std::shared_ptr<Algorithm> PlotPeakByLogValue::runSingleFit(bool createFitOutput
   fit->setPropertyValue("EvaluationType", this->getPropertyValue("EvaluationType"));
   fit->setProperty("Function", ifun);
   fit->setProperty("InputWorkspace", data.ws);
-  fit->setProperty("WorkspaceIndex", data.i);
+  fit->setProperty("WorkspaceIndex", data.wsIdx);
   fit->setProperty("StartX", startX);
   fit->setProperty("EndX", endX);
   fit->setProperty("IgnoreInvalidData", ignoreInvalidData);
-  fit->setPropertyValue("Minimizer", this->getMinimizerString(data.name, spectrum_index));
+  fit->setPropertyValue("Minimizer", this->getMinimizerString(data.name, std::to_string(data.wsIdx)));
   fit->setPropertyValue("CostFunction", this->getPropertyValue("CostFunction"));
   fit->setPropertyValue("MaxIterations", this->getPropertyValue("MaxIterations"));
   fit->setPropertyValue("PeakRadius", this->getPropertyValue("PeakRadius"));
   fit->setProperty("CalcErrors", true);
   fit->setProperty("CreateOutput", createFitOutput);
+  fit->setAlwaysStoreInADS(createFitOutput && appendIdx);
   if (!histogramFit) {
     fit->setProperty("OutputCompositeMembers", outputCompositeMembers);
     fit->setProperty("ConvolveMembers", outputConvolvedMembers);
@@ -496,11 +653,11 @@ double PlotPeakByLogValue::calculateLogValue(const std::string &logName, const I
   if (logName.empty() || logName == "axis-1") {
     API::Axis *axis = data.ws->getAxis(1);
     if (dynamic_cast<BinEdgeAxis *>(axis)) {
-      double lowerEdge((*axis)(data.i));
-      double upperEdge((*axis)(data.i + 1));
+      double lowerEdge((*axis)(data.wsIdx));
+      double upperEdge((*axis)(data.wsIdx + 1));
       logValue = lowerEdge + (upperEdge - lowerEdge) / 2;
     } else
-      logValue = (*axis)(data.i);
+      logValue = (*axis)(data.wsIdx);
   } else if (logName != "SourceName") {
     Kernel::Property *prop = data.ws->run().getLogData(logName);
     if (!prop) {

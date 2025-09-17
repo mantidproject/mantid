@@ -12,6 +12,9 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/TextAxis.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidQtWidgets/Common/FitPropertyBrowser.h"
@@ -53,6 +56,7 @@ SequentialFitDialog::SequentialFitDialog(FitPropertyBrowser *fitBrowser, QObject
   connect(ui.ckbLogPlot, SIGNAL(toggled(bool)), this, SLOT(plotAgainstLog(bool)));
   connect(ui.ckCreateOutput, SIGNAL(toggled(bool)), ui.ckOutputCompMembers, SLOT(setEnabled(bool)));
   connect(ui.ckCreateOutput, SIGNAL(toggled(bool)), ui.ckConvolveMembers, SLOT(setEnabled(bool)));
+  connect(ui.ckCreateOutput, SIGNAL(toggled(bool)), ui.ckOutputSpecParams, SLOT(setEnabled(bool)));
 
   ui.cbLogValue->setEditable(true);
   ui.ckbLogPlot->setChecked(true);
@@ -234,6 +238,44 @@ bool SequentialFitDialog::isFile(int row) const {
   return !item || item->flags().testFlag(Qt::ItemIsEnabled) == false;
 }
 
+bool SequentialFitDialog::isValidRangeFormat(const QString &range) const {
+  // Check if range contains exactly one colon
+  int colonCount = range.count(':');
+  if (colonCount != 1) {
+    return false;
+  }
+
+  // Split by colon and validate both parts
+  QStringList parts = range.split(':');
+  if (parts.size() != 2) {
+    return false;
+  }
+
+  QString start = parts[0].trimmed();
+  QString end = parts[1].trimmed();
+
+  // Check that both parts are not empty
+  if (start.isEmpty() || end.isEmpty()) {
+    return false;
+  }
+
+  // Validate that both parts are numeric
+  bool startOk, endOk;
+  double startVal = start.toDouble(&startOk);
+  double endVal = end.toDouble(&endOk);
+
+  if (!startOk || !endOk) {
+    return false;
+  }
+
+  // Check that start <= end
+  if (startVal > endVal) {
+    return false;
+  }
+
+  return true;
+}
+
 /**
  * Returns index for the data source in row row to be used in "Input" property
  * of PlotPeakByLogValue.
@@ -244,6 +286,11 @@ QString SequentialFitDialog::getIndex(int row) const {
   QString spectrum = ui.tWorkspaces->model()->data(ui.tWorkspaces->model()->index(row, 2)).toString();
   QString wsIndex = ui.tWorkspaces->model()->data(ui.tWorkspaces->model()->index(row, 3)).toString();
   QString range = ui.tWorkspaces->model()->data(ui.tWorkspaces->model()->index(row, 4)).toString();
+
+  if (!isValidRangeFormat(range)) {
+    g_log.error() << "Invaild range please use the format start:end." << std::endl;
+    return "";
+  }
 
   if (isFile(row)) {
     // if it is a file the ndex can be either spectrum or a range of values
@@ -278,7 +325,10 @@ void SequentialFitDialog::accept() {
   QStringList inputStr;
   for (int i = 0; i < ui.tWorkspaces->rowCount(); ++i) {
     QString wsName = ui.tWorkspaces->model()->data(ui.tWorkspaces->model()->index(i, 0)).toString();
-    QString parStr = wsName + "," + getIndex(i);
+    auto index = getIndex(i);
+    if (index.isEmpty())
+      return;
+    QString parStr = wsName + "," + index;
     if (isFile(i)) { // add the period
       parStr += QString(",") + ui.tWorkspaces->model()->data(ui.tWorkspaces->model()->index(i, 1)).toString();
     }
@@ -315,6 +365,8 @@ void SequentialFitDialog::accept() {
   alg->setProperty("CreateOutput", ui.ckCreateOutput->isChecked());
   alg->setProperty("OutputCompositeMembers", ui.ckOutputCompMembers->isChecked());
   alg->setProperty("ConvolveMembers", ui.ckConvolveMembers->isChecked());
+  alg->setProperty("Output2D", ui.ckOutputSpecParams->isChecked());
+  alg->setProperty("AppendIdxToOutputName", true);
   if (ui.ckbLogPlot->isChecked()) {
     std::string logName = ui.cbLogValue->currentText().toStdString();
     alg->setPropertyValue("LogValue", logName);
@@ -336,6 +388,15 @@ void SequentialFitDialog::accept() {
 
   bool passWSIndexToFunction = ui.ckbPassWS->isChecked();
   alg->setProperty("PassWSIndexToFunction", passWSIndexToFunction);
+
+  auto errors = alg->validateInputs();
+
+  if (!errors.empty()) {
+    for (const auto &[key, error] : errors) {
+      g_log.error() << error << std::endl;
+    }
+    return;
+  }
 
   alg->executeAsync();
   QDialog::accept();
