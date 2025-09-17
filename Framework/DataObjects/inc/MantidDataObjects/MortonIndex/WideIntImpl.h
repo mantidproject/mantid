@@ -18,7 +18,6 @@
 namespace std {
 #define CT(x)                                                                                                          \
   std::common_type_t<std::decay_t<decltype(rhs)>, std::decay_t<decltype(lhs)>> { x }
-#define _SILENCE_CXX23_DENORM_DEPRECATION_WARNING
 
 // numeric limits
 template <size_t Bits, typename Signed> class numeric_limits<wide_integer<Bits, Signed>> {
@@ -30,6 +29,10 @@ public:
   static constexpr bool has_infinity = false;
   static constexpr bool has_quiet_NaN = false;
   static constexpr bool has_signaling_NaN = true;
+#if defined(_WIN32)
+// disable warning about std::float_denorm_style has_denorm
+#pragma warning(disable : 4996)
+#endif
   static constexpr std::float_denorm_style has_denorm = std::denorm_absent;
   static constexpr bool has_denorm_loss = false;
   static constexpr std::float_round_style round_style = std::round_toward_zero;
