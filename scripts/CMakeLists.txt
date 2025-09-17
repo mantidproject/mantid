@@ -1,6 +1,3 @@
-# External projects
-include(PyStoG)
-
 # .pth files
 set(_pth_dirs
     .
