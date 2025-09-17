@@ -38,10 +38,12 @@ class TextureView(QtWidgets.QWidget, Ui_texture):
         self.finder_texture_tables.setLabelText("Fit Parameters")
         self.finder_texture_tables.allowMultipleFiles(True)
         self.finder_texture_tables.setFileExtensions([".nxs"])
+        self.finder_texture_tables.isOptional(True)
 
         self.finder_cif_file.setLabelText("CIF File")
         self.finder_cif_file.allowMultipleFiles(False)
         self.finder_cif_file.setFileExtensions([".cif"])
+        self.finder_cif_file.isOptional(True)
 
         self._setup_plot()
 
