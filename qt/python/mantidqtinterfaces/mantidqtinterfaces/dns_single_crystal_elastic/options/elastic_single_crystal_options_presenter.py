@@ -91,6 +91,8 @@ class DNSElasticSCOptionsPresenter(DNSCommonOptionsPresenter):
         if self.view is not None:
             self.own_dict.update(self.view.get_state())
             o_dic = self.own_dict
+            print("TEST", o_dic["hkl1"])
+            # o_dic["hkl1"] = self.model.convert_hkl_string(o_dic["hkl1"])
             if not self.own_dict.get("use_dx_dy", False):
                 o_dic["dx"], o_dic["dy"] = self.model.get_dx_dy(o_dic)
         return self.own_dict
