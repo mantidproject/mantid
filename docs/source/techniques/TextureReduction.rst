@@ -329,7 +329,7 @@ Customizing the plot
 
 By clicking on the ``Customize Plot`` button (second last icon in the toolbar: a zig-zaging, upwards trending arrow), it is possible to change some aspects of the plot, like colour map and colour limits (which can be found under the ``Images etc.`` tab once the axes have been selected).
 
-*Note: When changing colourbar settings, do this via the "Pole Figure Plot" axes rather than the axes with the plot parameter title
+*Note: When changing colourbar settings, do this via the "Pole Figure Plot" axes rather than the axes with the plot parameter title*
 
 
 Extra - Plotting Attenuation Pole Figure
