@@ -204,6 +204,9 @@ class SettingsView(QtWidgets.QDialog, Ui_settings):
     def get_contour_kernel(self):
         return self.contourKernel_lineedit.text()
 
+    def get_auto_populate_texture(self):
+        return self.textureAutoPopulate.isChecked()
+
     # =================
     # Component Setters
     # =================
@@ -315,6 +318,9 @@ class SettingsView(QtWidgets.QDialog, Ui_settings):
 
     def set_contour_kernel(self, text):
         self.contourKernel_lineedit.setText(text)
+
+    def set_auto_populate_texture(self, val):
+        self.textureAutoPopulate.setChecked(val)
 
     # =================
     # Force Actions

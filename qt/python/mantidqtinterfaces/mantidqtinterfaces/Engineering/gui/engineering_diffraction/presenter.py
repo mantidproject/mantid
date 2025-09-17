@@ -66,22 +66,24 @@ class EngineeringDiffractionPresenter(object):
         self.calibration_presenter.calibration_notifier.add_subscriber(self.focus_presenter.calibration_observer)
         self.calibration_presenter.calibration_notifier.add_subscriber(self.calibration_observer)
 
-    def setup_focus(self, view):
-        focus_model = FocusModel()
-        focus_view = FocusView()
-        self.focus_presenter = FocusPresenter(focus_model, focus_view)
-        view.tabs.addTab(focus_view, "Focus")
-
     def setup_correction(self, view):
         correction_model = CorrectionModel()
         correction_view = TextureCorrectionView()
         self.correction_presenter = TextureCorrectionPresenter(correction_model, correction_view)
         view.tabs.addTab(correction_view, "Absorption Correction")
 
+    def setup_focus(self, view):
+        focus_model = FocusModel()
+        focus_view = FocusView()
+        self.focus_presenter = FocusPresenter(focus_model, focus_view)
+        self.correction_presenter.add_correction_subscriber(self.focus_presenter.correction_observer)
+        view.tabs.addTab(focus_view, "Focus")
+
     def setup_fitting(self, view):
         fitting_view = FittingView()
         self.fitting_presenter = FittingPresenter(fitting_view)
         self.focus_presenter.add_focus_subscriber(self.fitting_presenter.data_widget.presenter.focus_run_observer)
+        self.focus_presenter.add_focus_texture_subscriber(self.fitting_presenter.data_widget.presenter.focus_combined_observer)
         view.tabs.addTab(fitting_view, "Fitting")
 
     def setup_gsas2(self, view):

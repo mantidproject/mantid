@@ -175,7 +175,7 @@ class TextureCorrectionPresenter:
             self.redraw_table()
 
     def _on_worker_success(self):
-        self.correction_notifier.notify_subscribers("Corrections Applied")
+        self.correction_notifier.notify_subscribers(self.model.get_corrected_files())
 
     def _on_worker_error(self, error_info):
         logger.error(str(error_info))
@@ -240,3 +240,6 @@ class TextureCorrectionPresenter:
 
     def _get_setting(self, setting_name, return_type=str):
         return get_setting(output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX, setting_name, return_type)
+
+    def add_correction_subscriber(self, obs):
+        self.correction_notifier.add_subscriber(obs)

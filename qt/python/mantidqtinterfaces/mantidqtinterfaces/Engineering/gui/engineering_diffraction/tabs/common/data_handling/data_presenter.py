@@ -40,7 +40,22 @@ class FittingDataPresenter(object):
         self.plot_removed_notifier = GenericObservable()
         self.all_plots_removed_notifier = GenericObservable()
         # Observers
-        self.focus_run_observer = GenericObserverWithArgPassing(self.view.set_default_files)
+        self.focus_run_observer = GenericObserverWithArgPassing(self.set_default_files_tof)
+        self.focus_combined_observer = GenericObserverWithArgPassing(self.set_default_files_texture)
+
+    def set_default_files_tof(self, filepaths):
+        if not self.model.texture_auto_populate():
+            self._set_default_files(filepaths)
+
+    def set_default_files_texture(self, filepaths):
+        if self.model.texture_auto_populate():
+            index = self.view.combo_xunit.findText("dSpacing")
+            self.view.combo_xunit.setCurrentIndex(index)
+            self._set_default_files(filepaths)
+
+    def _set_default_files(self, filepaths):
+        directory = self.model.get_last_directory(filepaths)
+        self.view.set_default_files(filepaths, directory)
 
     def get_sorted_active_ws_list(self):
         return self.model.get_active_ws_sorted_by_primary_log()

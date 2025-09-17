@@ -143,6 +143,7 @@ class SettingsModel(object):
         self._check_and_populate_with_default("euler_angles_sense")
         self._check_and_populate_with_default("plot_exp_pf")
         self._check_and_populate_with_default("contour_kernel")
+        self._check_and_populate_with_default("auto_pop_texture")
         self._check_and_populate_with_default("full_calibration")
         if set_nullables_to_default:
             self._check_and_populate_with_default("primary_log")
