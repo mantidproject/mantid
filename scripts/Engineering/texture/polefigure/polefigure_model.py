@@ -169,7 +169,7 @@ class TextureProjection:
         ax = fig.add_subplot(gs[0, 1])
         cax = fig.add_subplot(gs[0, 2])
         scat_plot = ax.scatter(pfi[:, 1], pfi[:, 0], c=pfi[:, 2], s=20, cmap="jet", **kwargs)
-        ax.plot(eq[0], eq[1], c="grey")
+        ax.plot(eq[0], eq[1], c="grey", label="plot bounding circle")
         ax.set_aspect("equal")
         ax.set_axis_off()
         ax.quiver(-1, -1, 0.2, 0, color="blue", scale=1)
@@ -177,6 +177,8 @@ class TextureProjection:
         ax.text(-0.8, -0.95, ax_labels[-1], fontsize=10)
         ax.text(-0.95, -0.8, ax_labels[0], fontsize=10)
         cbar = fig.colorbar(scat_plot, cax=cax)
+        ax.set_label("Pole Figure Plot")
+        scat_plot.set_label("pole figure data")
         cbar.set_label(column_label, rotation=0, labelpad=15)
         return fig
 
@@ -215,7 +217,7 @@ class TextureProjection:
         ax = fig.add_subplot(gs[0, 1])
         cax = fig.add_subplot(gs[0, 2])
         contour_plot = ax.contourf(grid_x, grid_y, grid_z, levels=10, cmap="jet", **kwargs)
-        circle = plt.Circle((0, 0), R, color="grey", fill=False, linestyle="-")
+        circle = plt.Circle((0, 0), R, color="grey", fill=False, linestyle="-", label="plot bounding circle")
         ax.add_patch(circle)
         ax.set_aspect("equal")
         ax.set_axis_off()
@@ -223,6 +225,8 @@ class TextureProjection:
         ax.quiver(-1, -1, 0, 0.2, color="red", scale=1)
         ax.text(-0.8, -0.95, ax_labels[-1], fontsize=10)
         ax.text(-0.95, -0.8, ax_labels[0], fontsize=10)
+        ax.set_label("Pole Figure Plot")
+        contour_plot.set_label("pole figure data")
         cbar = fig.colorbar(contour_plot, cax=cax)
         cbar.set_label(column_label, rotation=0, labelpad=15)
         return fig
