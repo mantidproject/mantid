@@ -115,6 +115,52 @@ class TestCorrectionModel(unittest.TestCase):
         self.assertIn("Failed to load /data/bad_ref.nxs: boom", mock_logger.warning.call_args[0][0])
         self.model.set_reference_ws.assert_not_called()
 
+    # --- try_convert_float -------------------------------------------------
+
+    def test_try_convert_float_success(self):
+        msg, val = self.model.try_convert_float("3.14", "Pi-ish")
+        self.assertEqual(msg, "")
+        self.assertIsInstance(val, float)
+        self.assertAlmostEqual(val, 3.14)
+
+    def test_try_convert_float_failure(self):
+        msg, val = self.model.try_convert_float("not-a-number", "Field X")
+        self.assertEqual(msg, "Field X must be interpretable as a float. \n")
+        self.assertEqual(val, 0.0)
+
+    # --- get_atten_args ----------------------------------------------------
+
+    @patch(model_path + ".logger")
+    def test_get_atten_args_success(self, mock_logger):
+        out = self.model.get_atten_args("1.5", "cm")
+        self.assertEqual(out, {"atten_val": 1.5, "atten_units": "cm"})
+        mock_logger.error.assert_not_called()
+
+    @patch(model_path + ".logger")
+    def test_get_atten_args_invalid_logs_and_returns_none(self, mock_logger):
+        out = self.model.get_atten_args("bad", "m")
+        self.assertIsNone(out)
+        mock_logger.error.assert_called_once_with("Attenuation Evaluation Point must be interpretable as a float. \n")
+
+    # --- get_div_args ------------------------------------------------------
+
+    @patch(model_path + ".logger")
+    def test_get_div_args_all_valid_returns_converted_values(self, mock_logger):
+        out = self.model.get_div_args("0.1", "0.2", "0.3")
+        self.assertEqual(out["hoz"], 0.1)
+        self.assertEqual(out["vert"], 0.2)
+        self.assertEqual(out["det_hoz"], 0.3)
+        mock_logger.error.assert_not_called()
+
+    @patch(model_path + ".logger")
+    def test_get_div_args_any_invalid_logs_and_returns_none(self, mock_logger):
+        # Make div_vert invalid
+        out = self.model.get_div_args("1.0", "oops", "2.0")
+        self.assertIsNone(out)
+        # Expect concatenated error messages to include only the failing param text
+        args, _ = mock_logger.error.call_args
+        self.assertIn("Vertical Divergence must be interpretable as a float.", args[0])
+
 
 if __name__ == "__main__":
     unittest.main()

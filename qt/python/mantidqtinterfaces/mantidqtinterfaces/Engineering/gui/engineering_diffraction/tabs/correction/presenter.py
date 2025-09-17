@@ -155,11 +155,11 @@ class TextureCorrectionPresenter:
 
     def get_atten_args(self):
         if self.view.include_atten_tab():
-            return {"atten_val": self.view.get_evaluation_value(), "atten_units": self.view.get_evaluation_units()}
+            return self.model.get_atten_args(self.view.get_evaluation_value(), self.view.get_evaluation_units())
 
     def get_div_args(self):
         if self.view.include_divergence():
-            return {"hoz": self.view.get_div_horz(), "vert": self.view.get_div_vert(), "det_hoz": self.view.get_div_det_horz()}
+            return self.model.get_div_args(self.view.get_div_horz(), self.view.get_div_vert(), self.view.get_div_det_horz())
 
     def _copy_sample_to_all_selected(self):
         ref_ws = self.view.get_sample_reference_ws()
