@@ -40,6 +40,7 @@ class TextureCorrectionModel:
         self.rb_num = None
         self.calibration = None
         self.remove_ws_after_processing = False
+        self.corrected_files = []
 
     # ~~~~~ Correction Functions ~~~~~~~~~~~~~
 
@@ -76,6 +77,7 @@ class TextureCorrectionModel:
         atten_args: Optional[dict] = None,
         div_args: Optional[dict] = None,
     ):
+        corrected_file_paths = []
         for i, ws in enumerate(wss):
             abs_corr = 1.0
             div_corr = 1.0
@@ -103,7 +105,9 @@ class TextureCorrectionModel:
                 self.calc_divergence(ws, div_args["hoz"], div_args["vert"], div_args["det_hoz"])
                 div_corr = "_div_corr"
 
-            self.apply_corrections(ws, out_wss[i], root_dir, abs_corr, div_corr)
+            corrected_file_path = self.apply_corrections(ws, out_wss[i], root_dir, abs_corr, div_corr)
+            corrected_file_paths.append(corrected_file_path)
+        self.corrected_files = corrected_file_paths
 
     def apply_corrections(
         self,
@@ -112,7 +116,7 @@ class TextureCorrectionModel:
         root_dir: str,
         abs_corr: Union[float, str] = 1.0,
         div_corr: Union[float, str] = 1.0,
-    ) -> None:
+    ) -> str:
         ws = ADS.retrieve(ws)
         temp_ws = ConvertUnits(ws, Target="dSpacing", StoreInADS=False)
 
@@ -137,7 +141,7 @@ class TextureCorrectionModel:
         # save files
         CloneWorkspace(temp_ws, OutputWorkspace=out_ws, StoreInADS=True)
         group = self.calibration.group if self.calibration else None
-        self._save_corrected_files(out_ws, root_dir, "AbsorptionCorrection", self.rb_num, group)
+        save_filepath = self._save_corrected_files(out_ws, root_dir, "AbsorptionCorrection", self.rb_num, group)
 
         # optionally remove extra files
         if self.remove_ws_after_processing:
@@ -148,6 +152,8 @@ class TextureCorrectionModel:
                 ADS.remove(abs_corr)
             if isinstance(div_corr, str):
                 ADS.remove(div_corr)
+
+        return save_filepath
 
     @staticmethod
     def _remove_monitors(ws):
@@ -166,7 +172,7 @@ class TextureCorrectionModel:
         return valid
 
     @staticmethod
-    def _save_corrected_files(ws: str, root_dir: str, dir_name: str, rb_num: Optional[str], calibration_group: GROUP) -> None:
+    def _save_corrected_files(ws: str, root_dir: str, dir_name: str, rb_num: Optional[str], calibration_group: GROUP) -> str:
         save_dirs = [path.join(root_dir, dir_name)]
         if rb_num:
             save_dirs.append(path.join(root_dir, "User", rb_num, dir_name))
@@ -175,7 +181,12 @@ class TextureCorrectionModel:
         for save_dir in save_dirs:
             if not path.exists(save_dir):
                 makedirs(save_dir)
+            filepath = path.join(save_dir, ws + ".nxs")
             SaveNexus(InputWorkspace=ws, Filename=path.join(save_dir, ws + ".nxs"))
+            return filepath
+
+    def get_corrected_files(self):
+        return self.corrected_files
 
     def set_include_abs(self, inc: bool):
         self.include_abs = inc

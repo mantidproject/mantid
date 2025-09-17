@@ -36,6 +36,7 @@ SETTINGS_DICT = {
     "euler_angles_sense": str,
     "plot_exp_pf": bool,
     "contour_kernel": str,
+    "auto_pop_texture": bool,
 }
 
 DEFAULT_SETTINGS = {
@@ -63,6 +64,7 @@ DEFAULT_SETTINGS = {
     "euler_angles_sense": "1,-1,1",
     "plot_exp_pf": True,
     "contour_kernel": "2.0",
+    "auto_pop_texture": False,
 }
 
 ALL_LOGS = ",".join(
@@ -215,6 +217,7 @@ class SettingsPresenter(object):
         self.settings["euler_angles_sense"] = self.view.get_euler_angles_sense()
         self.settings["plot_exp_pf"] = self.view.get_plot_exp_pf()
         self.settings["contour_kernel"] = self.view.get_contour_kernel()
+        self.settings["auto_pop_texture"] = self.view.get_auto_populate_texture()
         self._validate_settings(set_nullables_to_default=False)
 
     def _show_settings_in_view(self):
@@ -243,6 +246,7 @@ class SettingsPresenter(object):
         self.view.set_euler_angles_sense(self.settings["euler_angles_sense"])
         self.view.set_plot_exp_pf(self.settings["plot_exp_pf"])
         self.view.set_contour_kernel(self.settings["contour_kernel"])
+        self.view.set_auto_populate_texture(self.settings["auto_pop_texture"])
         self._find_files()
 
     def _find_files(self):

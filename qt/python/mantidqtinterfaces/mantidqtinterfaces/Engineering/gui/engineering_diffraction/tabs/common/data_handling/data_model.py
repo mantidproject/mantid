@@ -17,6 +17,7 @@ from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.outp
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.workspace_record import FittingWorkspaceRecordContainer
 from mantid.api import AnalysisDataService as ADS
 from matplotlib.pyplot import subplots
+import os
 
 
 class FittingDataModel(object):
@@ -79,6 +80,16 @@ class FittingDataModel(object):
 
     def get_last_added(self):
         return self._last_added
+
+    @staticmethod
+    def get_last_directory(filepaths):
+        directories = set()
+        directory = None
+        for filepath in filepaths:
+            directory, discard = os.path.split(filepath)
+            directories.add(directory)
+        if len(directories) == 1:
+            return directory
 
     def get_loaded_ws_list(self):
         return list(self._data_workspaces.get_loaded_ws_dict().keys())
@@ -283,3 +294,7 @@ class FittingDataModel(object):
             # settings can only be saved as text
             ws_list_tof = ws_list_tof[::-1]
         return ws_list_tof
+
+    @staticmethod
+    def texture_auto_populate():
+        return get_setting(output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX, "auto_pop_texture", bool)

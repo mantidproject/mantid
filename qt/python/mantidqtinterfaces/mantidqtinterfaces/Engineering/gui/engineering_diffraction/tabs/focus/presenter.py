@@ -14,7 +14,7 @@ from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.setting
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import output_settings
 from Engineering.common.calibration_info import CalibrationInfo
 from mantidqt.utils.asynchronous import AsyncTask
-from mantidqt.utils.observer_pattern import GenericObservable
+from mantidqt.utils.observer_pattern import GenericObservable, GenericObserverWithArgPassing
 from mantid.kernel import logger
 
 from qtpy.QtWidgets import QMessageBox
@@ -26,6 +26,7 @@ class FocusPresenter(object):
         self.view = view
         self.worker = None
         self.calibration_observer = CalibrationObserver(self)
+        self.correction_observer = GenericObserverWithArgPassing(self.set_default_files)
 
         # Observable Setup
         self.focus_run_notifier = GenericObservable()
@@ -44,6 +45,10 @@ class FocusPresenter(object):
         last_van_path = get_setting(output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX, "last_vanadium_run")
         if last_van_path:
             self.view.set_van_file_text_with_search(last_van_path)
+
+    def set_default_files(self, filepaths):
+        directory = self.model.get_last_directory(filepaths)
+        self.view.set_default_files(filepaths, directory)
 
     def add_focus_subscriber(self, obs):
         self.focus_run_notifier.add_subscriber(obs)
