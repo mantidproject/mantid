@@ -5,7 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 
-#include "AnalyserEfficiencyTestHelpers.h"
+#include "PolarizationCorrectionsTestUtils.h"
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ITableWorkspace.h"
@@ -21,7 +21,7 @@
 using namespace Mantid;
 using namespace Mantid::API;
 
-namespace HeAnalyserTest {
+namespace PolCorrTestUtils {
 std::pair<std::vector<double>, std::vector<double>> createXYFromParams(double Xmin, double Xmax, double step,
                                                                        double Y) {
   const auto boundaries = static_cast<int>((Xmax - Xmin) / step);
@@ -71,15 +71,67 @@ MatrixWorkspace_sptr getMatrixWorkspaceFromInput(const std::string &wsName) {
   return ws;
 }
 
-void groupWorkspaces(const std::string &name, const std::vector<MatrixWorkspace_sptr> &wsToGroup) {
+MatrixWorkspace_sptr generateFunctionDefinedWorkspace(const TestWorkspaceParameters &parameters) {
+  const auto createSampleWorkspace = AlgorithmManager::Instance().create("CreateSampleWorkspace");
+  createSampleWorkspace->initialize();
+  createSampleWorkspace->setProperty("WorkspaceType", "Histogram");
+  createSampleWorkspace->setProperty("OutputWorkspace", parameters.testName);
+  createSampleWorkspace->setProperty("Function", "User Defined");
+  createSampleWorkspace->setProperty("UserDefinedFunction", parameters.funcStr);
+  createSampleWorkspace->setProperty("XUnit", parameters.xUnit);
+  createSampleWorkspace->setProperty("XMin", parameters.xMin);
+  createSampleWorkspace->setProperty("XMax", parameters.xMax);
+  createSampleWorkspace->setProperty("BinWidth", parameters.binWidth);
+  createSampleWorkspace->setProperty("NumBanks", parameters.numBanks);
+  createSampleWorkspace->setProperty("BankPixelWidth", 1);
+  createSampleWorkspace->execute();
+
+  MatrixWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(parameters.testName);
+  ws->setYUnit("");
+  ws->setDistribution(true);
+
+  if (parameters.delay != 0) {
+    // Only needed for analyser eff tests. We are working with delays in hours but DateAndTime overloads + operator
+    // with seconds for type double, thus factor 3600
+    const auto timeOrigin = Types::Core::DateAndTime(parameters.refTimeStamp);
+    const auto start = timeOrigin + 3600 * parameters.delay;
+    ws->mutableRun().setStartAndEndTime(start, start + 1.0);
+  }
+  return ws;
+}
+
+WorkspaceGroup_sptr createPolarizedTestGroup(std::string const &outName, TestWorkspaceParameters &parameters,
+                                             const std::optional<std::vector<double>> &amplitudes,
+                                             const bool isFullPolarized) {
+  const auto &inputNames = isFullPolarized
+                               ? std::vector({outName + "_11", outName + "_10", outName + "_01", outName + "_00"})
+                               : std::vector({outName + "_00", outName + "_01"});
+  const std::string defaultUserFunc = "name=UserFunction, Formula=x*0+";
+  for (size_t index = 0; index < inputNames.size(); index++) {
+    parameters.testName = inputNames.at(index);
+    if (amplitudes.has_value()) {
+      parameters.funcStr = defaultUserFunc + std::to_string(amplitudes->at(index));
+    }
+    generateFunctionDefinedWorkspace(parameters);
+  }
+  return groupWorkspaces(outName, inputNames);
+}
+
+WorkspaceGroup_sptr groupWorkspaces(const std::string &name, const std::vector<std::string> &wsToGroup) {
   const auto groupWorkspace = AlgorithmManager::Instance().create("GroupWorkspaces");
   groupWorkspace->initialize();
+  groupWorkspace->setProperty("InputWorkspaces", wsToGroup);
+  groupWorkspace->setProperty("OutputWorkspace", name);
+  groupWorkspace->execute();
+  WorkspaceGroup_sptr group = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(name);
+  return group;
+}
+
+WorkspaceGroup_sptr groupWorkspaces(const std::string &name, const std::vector<MatrixWorkspace_sptr> &wsToGroup) {
   std::vector<std::string> wsToGroupNames(wsToGroup.size());
   std::transform(wsToGroup.cbegin(), wsToGroup.cend(), wsToGroupNames.begin(),
                  [](const MatrixWorkspace_sptr &w) { return w->getName(); });
-  groupWorkspace->setProperty("InputWorkspaces", wsToGroupNames);
-  groupWorkspace->setProperty("OutputWorkspace", name);
-  groupWorkspace->execute();
+  return groupWorkspaces(name, wsToGroupNames);
 }
 
 IAlgorithm_sptr prepareHeEffAlgorithm(const std::vector<std::string> &inputWorkspaces, const std::string &outputName,
@@ -158,4 +210,4 @@ void TimeDifference::exec() {
   setProperty("OutputWorkspace", outputTable);
 }
 
-} // namespace HeAnalyserTest
+} // namespace PolCorrTestUtils

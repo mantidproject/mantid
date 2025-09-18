@@ -9,11 +9,12 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAPI/WorkspaceGroup_fwd.h"
 
 using namespace Mantid;
 using namespace Mantid::API;
 
-namespace HeAnalyserTest {
+namespace PolCorrTestUtils {
 static const std::string REFERENCE_NAME = "reference";
 static const std::string INPUT_NAME = "input";
 static const std::string GROUP_NAME = "group";
@@ -30,6 +31,8 @@ constexpr double DEFAULT_LIFETIME = 45;
 constexpr double DEFAULT_INI_POL = 0.9;
 constexpr double DEFAULT_PXD = 12;
 constexpr double LAMBDA_CONVERSION_FACTOR = 0.0733;
+constexpr std::array<double, 4> NON_MAG_Y_VALS = {12.0, 1.0, 2.0, 10.0};
+constexpr std::array<double, 4> MAG_Y_VALS = {6.0, 0.2, 0.3, 1.0};
 
 static const std::string HE_ANALYZER_FIT_ALG = "HeliumAnalyserEfficiency";
 static const std::string HE_ANALYZER_TIME_ALG = "HeliumAnalyserEfficiencyTime";
@@ -61,6 +64,41 @@ struct InputTestParameters {
   std::string xUnit{X_UNIT};
 };
 
+struct TestWorkspaceParameters {
+  TestWorkspaceParameters() = default;
+  TestWorkspaceParameters(const std::string &name, const std::string &func, const std::string &xUnit = X_UNIT,
+                          const int numBanks = 1, const double min = 1, const double max = 8, const double binWidth = 1,
+                          const double delay = 0, const std::string &refTimeStamp = REF_TIMESTAMP)
+
+      : testName(name), funcStr(func), xUnit(xUnit), refTimeStamp(refTimeStamp), xMin(min), xMax(max),
+        binWidth(binWidth), delay(delay), numBanks(numBanks) {}
+
+  void updateNameAndFunc(const std::string &name, const std::string &func) {
+    testName = name;
+    funcStr = func;
+  }
+  void updateSpectra(const int numSpec, const double min, const double max, const double width) {
+    numBanks = numSpec;
+    xMin = min;
+    xMax = max;
+    binWidth = width;
+  }
+  void updateTimeStamp(const double timeDelay, const std::string &timeStamp) {
+    delay = timeDelay;
+    refTimeStamp = timeStamp;
+  }
+
+  std::string testName{OUTPUT_NAME};
+  std::string funcStr{""};
+  std::string xUnit{X_UNIT};
+  std::string refTimeStamp{REF_TIMESTAMP};
+  double xMin{1.0};
+  double xMax{8.0};
+  double binWidth{1.0};
+  double delay{0.0};
+  int numBanks{1};
+};
+
 double createFunctionArgument(const double lifetime = DEFAULT_LIFETIME, const double time = 1,
                               const double iniPol = DEFAULT_INI_POL, const double pxd = DEFAULT_PXD);
 
@@ -70,8 +108,12 @@ std::pair<std::vector<double>, std::vector<double>> createXYFromParams(double Xm
 std::vector<double> generateOutputFunc(const std::vector<double> &x, const double factor = 1, const double mu = 0,
                                        const bool efficiency = true);
 
-void groupWorkspaces(const std::string &name, const std::vector<MatrixWorkspace_sptr> &wsToGroup);
-
+WorkspaceGroup_sptr groupWorkspaces(const std::string &name, const std::vector<std::string> &wsToGroup);
+WorkspaceGroup_sptr groupWorkspaces(const std::string &name, const std::vector<MatrixWorkspace_sptr> &wsToGroup);
+WorkspaceGroup_sptr createPolarizedTestGroup(std::string const &outName, TestWorkspaceParameters &parameters,
+                                             const std::optional<std::vector<double>> &amplitudes = std::nullopt,
+                                             const bool isFullPolarized = true);
+MatrixWorkspace_sptr generateFunctionDefinedWorkspace(const TestWorkspaceParameters &parameters);
 MatrixWorkspace_sptr generateWorkspace(const std::string &name, const std::vector<double> &x,
                                        const std::vector<double> &y, const std::string &xUnit = X_UNIT,
                                        const int nSpec = 1, const double delay = 0,
@@ -111,4 +153,4 @@ private:
   void init() override;
   void exec() override;
 };
-} // namespace HeAnalyserTest
+} // namespace PolCorrTestUtils
