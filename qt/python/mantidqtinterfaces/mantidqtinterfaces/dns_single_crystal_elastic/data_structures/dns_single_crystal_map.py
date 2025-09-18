@@ -138,8 +138,8 @@ class DNSScMap(ObjectDict):
 
     def triangulate(self, mesh_name, switch=False):
         plot_x, plot_y, _z = getattr(self, mesh_name)
-        # if switch:
-        #     plot_x, plot_y = plot_y, plot_x
+        if switch:
+            plot_x, plot_y = plot_y, plot_x
         self.triangulation = tri.Triangulation(plot_x.flatten(), plot_y.flatten())
         return self.triangulation
 

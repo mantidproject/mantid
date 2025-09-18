@@ -233,9 +233,9 @@ class DNSElasticSCPlotPresenterTest(unittest.TestCase):
     )
     def test_plot_triangulation(self, mock_get_plot_styles):
         mock_get_plot_styles.return_value = ("jet", False, "flat")
-        self.model.get_interpolated_triangulation.return_value = (1, 2)
+        self.model.generate_triangulation_mesh.return_value = (1, 2)
         self.presenter._plot_triangulation(False, {}, True)
-        self.model.get_interpolated_triangulation.assert_called_once_with(False, {}, True)
+        self.model.generate_triangulation_mesh.assert_called_once_with(False, {}, True)
         self.view.single_crystal_plot.plot_triangulation.assert_called_once_with(1, 2, "jet", False, "flat")
 
     @patch(

@@ -67,7 +67,7 @@ class DNSElasticSCPlotModel(DNSObsModel):
         y_projection = helper.get_projection(y, z)
         return x_projection, y_projection
 
-    def get_interpolated_triangulation(self, interpolate, axis_type, switch):
+    def generate_triangulation_mesh(self, interpolate, axis_type, switch):
         mesh_name = axis_type + "_mesh"
         self._single_crystal_map.triangulate(mesh_name=mesh_name, switch=switch)
         self._single_crystal_map.mask_triangles(mesh_name=mesh_name)
@@ -76,12 +76,10 @@ class DNSElasticSCPlotModel(DNSObsModel):
         self._data.z_triang = z_refiner
         # this is important to get the limits
         x, y, z = getattr(self._single_crystal_map, mesh_name)
-        self._data.x = x
-        self._data.y = y
-        self._data.z = z
+        self.set_mesh_data(x, y, z)
         return triangulator_refiner, z_refiner
 
-    def get_interpolated_quadmesh(self, interpolate, axis_type):
+    def generate_quad_mesh(self, interpolate, axis_type):
         new_mesh_name = axis_type + "_mesh_interpolated"
         old_mesh_name = axis_type + "_mesh"
         if interpolate:
@@ -89,9 +87,12 @@ class DNSElasticSCPlotModel(DNSObsModel):
             x, y, z = getattr(self._single_crystal_map, new_mesh_name)
         else:
             x, y, z = getattr(self._single_crystal_map, old_mesh_name)
-        self._data.x = x
-        self._data.y = y
-        self._data.z = z
+        self.set_mesh_data(x, y, z)
+        return x, y, z
+
+    def generate_scatter_mesh(self, axis_type):
+        x, y, z = getattr(self._single_crystal_map, axis_type + "_mesh")
+        self.set_mesh_data(x, y, z)
         return x, y, z
 
     def get_xy_dy_ratio(self):
@@ -161,3 +162,8 @@ class DNSElasticSCPlotModel(DNSObsModel):
         z = self._data.z.flatten()
         data_combined = np.array(list(zip(x, y, z)))
         return data_combined
+
+    def set_mesh_data(self, x, y, z):
+        self._data.x = x
+        self._data.y = y
+        self._data.z = z

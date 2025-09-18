@@ -68,7 +68,7 @@ class DNSElasticSCPlotModelTest(unittest.TestCase):
 
     def test_get_interpolated_triangulation(self):
         self.model._single_crystal_map.interpolate_triangulation.return_value = [1, 2]
-        test_v = self.model.get_interpolated_triangulation(True, "hkl", False)
+        test_v = self.model.generate_triangulation_mesh(True, "hkl", False)
         self.assertEqual(self.model._data.x, 0)
         self.assertEqual(self.model._data.y, 1)
         self.assertEqual(self.model._data.z, 2)
@@ -78,7 +78,7 @@ class DNSElasticSCPlotModelTest(unittest.TestCase):
         self.assertEqual(test_v, (1, 2))
         self.model._single_crystal_map.triangulate.reset_mock()
         self.model._single_crystal_map.interpolate_triangulation.reset_mock()
-        self.model.get_interpolated_triangulation(False, "hkl", True)
+        self.model.generate_triangulation_mesh(False, "hkl", True)
         self.model._single_crystal_map.triangulate.assert_called_once_with(mesh_name="hkl_mesh", switch=True)
         self.model._single_crystal_map.interpolate_triangulation.assert_called_once_with(False)
 
