@@ -19,6 +19,7 @@ using Mantid::Kernel::V3D;
 namespace Mantid::API {
 /**
  * Given the z axis, define the x and y ones.
+ *
  * @param zaxis :: A given vector in 3d space to become the z axis of a
  * coordinate system.
  * @param xaxis :: An output arbitrary vector perpendicular to zaxis.
@@ -41,6 +42,13 @@ void PanelsSurfaceCalculator::setupBasisAxes(const Mantid::Kernel::V3D &zaxis, M
   xaxis = yaxis.cross_prod(zaxis);
 }
 
+/**
+ * Returns the four corners of the specified panel
+ *
+ * @param componentInfo :: ComponentInfo object from the workspace
+ * @param rootIndex :: Index of panel
+ * @returns :: Panel Corners
+ */
 std::vector<Mantid::Kernel::V3D>
 PanelsSurfaceCalculator::retrievePanelCorners(const Mantid::Geometry::ComponentInfo &componentInfo,
                                               const size_t rootIndex) const {
@@ -97,6 +105,12 @@ PanelsSurfaceCalculator::retrievePanelCorners(const Mantid::Geometry::ComponentI
   return corners;
 }
 
+/**
+ * Calculate the normal vector to a panel
+ *
+ * @param panelCorners :: The four panel corner locations
+ * @returns :: Normal vector
+ */
 Mantid::Kernel::V3D
 PanelsSurfaceCalculator::calculatePanelNormal(const std::vector<Mantid::Kernel::V3D> &panelCorners) const {
   // find the normal
@@ -106,6 +120,15 @@ PanelsSurfaceCalculator::calculatePanelNormal(const std::vector<Mantid::Kernel::
   return normal;
 }
 
+/**
+ * Do all the detectors lie in a plane?
+ *
+ * @param componentInfo :: ComponentInfo object from the workspace
+ * @param bankIndex :: Component index of bank
+ * @param tubes :: Tube component indices
+ * @param normal :: Panel normal vector
+ * @returns Do the detectors lie flat in a plane?
+ */
 bool PanelsSurfaceCalculator::isBankFlat(const ComponentInfo &componentInfo, size_t bankIndex,
                                          const std::vector<size_t> &tubes, const Mantid::Kernel::V3D &normal) {
   for (auto tube : tubes) {
@@ -119,6 +142,13 @@ bool PanelsSurfaceCalculator::isBankFlat(const ComponentInfo &componentInfo, siz
   return true;
 }
 
+/**
+ * Calculate the normal vector of a bank of detectors
+ *
+ * @param componentInfo :: ComponentInfo object from the workspace
+ * @param tubes :: Component indices of the tubes in the bank
+ * @returns Bank normal vector
+ */
 Mantid::Kernel::V3D PanelsSurfaceCalculator::calculateBankNormal(const ComponentInfo &componentInfo,
                                                                  const std::vector<size_t> &tubes) {
   // calculate normal from first two tubes in bank as before
@@ -146,7 +176,13 @@ Mantid::Kernel::V3D PanelsSurfaceCalculator::calculateBankNormal(const Component
   return normal;
 }
 
-// Recursively set all detectors and subcomponents of a bank as visited
+/**
+ * Recursively set all detectors and subcomponents of a bank as visited
+ *
+ * @param componentInfo :: ComponentInfo object from the workspace
+ * @param bankIndex :: Component index of the bank
+ * @param visitedComponents :: Vector keeping track of which components have been visited
+ */
 void PanelsSurfaceCalculator::setBankVisited(const ComponentInfo &componentInfo, size_t bankIndex,
                                              std::vector<bool> &visitedComponents) const {
   const auto &children = componentInfo.children(bankIndex);
@@ -160,6 +196,13 @@ void PanelsSurfaceCalculator::setBankVisited(const ComponentInfo &componentInfo,
   }
 }
 
+/**
+ * How many detectors are there in the given list of component indices?
+ *
+ * @param componentInfo :: ComponentInfo object from the workspace
+ * @param components :: Component indices to check
+ * @return :: Number of detectors
+ */
 size_t PanelsSurfaceCalculator::findNumDetectors(const ComponentInfo &componentInfo,
                                                  const std::vector<size_t> &components) const {
   return std::accumulate(
@@ -173,6 +216,10 @@ size_t PanelsSurfaceCalculator::findNumDetectors(const ComponentInfo &componentI
  *
  * @param detPos :: Position of a detector of the bank.
  * @param normal :: Normal to the bank's plane.
+ * @param zAxis ::  Direction to the viewer
+ * @param yAxis ::  Perpendicular axis
+ * @param samplePosition :: Sample position
+ * @returns :: Rotation
  */
 Mantid::Kernel::Quat PanelsSurfaceCalculator::calcBankRotation(const V3D &detPos, V3D normal, const V3D &zAxis,
                                                                const V3D &yAxis, const V3D &samplePosition) const {
@@ -213,6 +260,17 @@ Mantid::Kernel::Quat PanelsSurfaceCalculator::calcBankRotation(const V3D &detPos
   return requiredRotation;
 }
 
+/**
+ * Transforms bounding box of a detector
+ *
+ * @param componentInfo :: ComponentInfo object from the workspace
+ * @param detectorIndex :: Component index of the detector
+ * @param refPos :: Reference position
+ * @param rotation :: Rotation to apply
+ * @param xaxis :: X axis
+ * @param yaxis :: Y axis
+ * @returns Transformed bounding box points
+ */
 std::vector<Mantid::Kernel::V2D>
 PanelsSurfaceCalculator::transformedBoundingBoxPoints(const ComponentInfo &componentInfo, size_t detectorIndex,
                                                       const V3D &refPos, const Mantid::Kernel::Quat &rotation,
@@ -229,6 +287,13 @@ PanelsSurfaceCalculator::transformedBoundingBoxPoints(const ComponentInfo &compo
   return {bb0, bb1};
 }
 
+/**
+ * Perform a specified operation on all the components
+ *
+ * @param componentInfo :: ComponentInfo object from the workspace
+ * @param operation :: Operation to perform on each component
+ * @returns Detector IDs for each component
+ */
 std::vector<std::vector<size_t>> PanelsSurfaceCalculator::examineAllComponents(
     const ComponentInfo &componentInfo,
     std::function<std::vector<size_t>(const ComponentInfo &, size_t, std::vector<bool> &)> operation) {
@@ -248,6 +313,14 @@ std::vector<std::vector<size_t>> PanelsSurfaceCalculator::examineAllComponents(
   return detectorIDs;
 }
 
+/**
+ * Parent indices of tubes
+ *
+ * @param componentInfo :: ComponentInfo object from the workspace
+ * @param rootIndex :: Component index to check
+ * @param visited :: Vector tracking which components have been checked
+ * @returns Parent IDs
+ */
 std::vector<size_t> PanelsSurfaceCalculator::tubeDetectorParentIDs(const ComponentInfo &componentInfo, size_t rootIndex,
                                                                    std::vector<bool> &visited) {
   const auto componentType = componentInfo.componentType(rootIndex);
@@ -307,6 +380,14 @@ std::vector<size_t> PanelsSurfaceCalculator::tubeDetectorParentIDs(const Compone
   return tubes;
 }
 
+/**
+ * Gives the specified side-by-side view position from the IDF
+ *
+ * @param componentInfo :: ComponentInfo object from the workspace
+ * @param instrument :: Instrument object from the workspace
+ * @param componentIndex :: Component index to check
+ * @returns :: Side-by-side position from the IDF
+ */
 std::optional<Kernel::V2D> PanelsSurfaceCalculator::getSideBySideViewPos(const ComponentInfo &componentInfo,
                                                                          const Instrument_const_sptr instrument,
                                                                          const size_t componentIndex) const {
