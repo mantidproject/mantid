@@ -7,7 +7,6 @@
 
 #pragma once
 
-#include "AnalyserEfficiencyTestHelpers.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -15,12 +14,14 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAlgorithms/PolarizationCorrections/HeliumAnalyserEfficiencyTime.h"
 
+#include "PolarizationCorrectionsTestUtils.h"
+
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
 using namespace Mantid::Algorithms;
 using namespace Mantid::API;
-using namespace HeAnalyserTest;
+using namespace PolCorrTestUtils;
 
 class HeliumAnalyserEfficiencyTimeTest : public CxxTest::TestSuite {
 public:

@@ -14,7 +14,7 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAlgorithms/PolarizationCorrections/HeliumAnalyserEfficiency.h"
 
-#include "AnalyserEfficiencyTestHelpers.h"
+#include "PolarizationCorrectionsTestUtils.h"
 
 #include <cmath>
 #include <cxxtest/TestSuite.h>
@@ -22,7 +22,7 @@
 using namespace Mantid;
 using namespace Mantid::Algorithms;
 using namespace Mantid::API;
-using namespace HeAnalyserTest;
+using namespace PolCorrTestUtils;
 
 class HeliumAnalyserEfficiencyTest : public CxxTest::TestSuite {
 public:
