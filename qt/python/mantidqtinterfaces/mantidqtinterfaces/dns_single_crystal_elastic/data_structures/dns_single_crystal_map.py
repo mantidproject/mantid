@@ -136,6 +136,25 @@ class DNSScMap(ObjectDict):
         f = scipy.interpolate.RectBivariateSpline(self.two_theta, self.omega, self.z_mesh, kx=1, ky=1)
         return f(self.two_theta_interpolated, self.omega_interpolated)
 
+    def triangulate(self, mesh_name, switch=False):
+        plot_x, plot_y, _z = getattr(self, mesh_name)
+        # if switch:
+        #     plot_x, plot_y = plot_y, plot_x
+        self.triangulation = tri.Triangulation(plot_x.flatten(), plot_y.flatten())
+        return self.triangulation
+
+    def interpolate_triangulation(self, interpolation=0):
+        if self.triangulation is None:
+            return None
+        z = self.z_mesh
+        triangulator = self.triangulation
+        interpolator = LinearTriInterpolator(triangulator, z.flatten())
+        refiner = UniformTriRefiner(triangulator)
+        triangulator_refiner, z_test_refiner = refiner.refine_field(z, subdiv=interpolation, triinterpolator=interpolator)
+        if interpolation <= 0:
+            return [triangulator, z.flatten()]
+        return [triangulator_refiner, z_test_refiner.flatten()]
+
     def interpolate_quad_mesh(self, interpolation=3):
         if not self.rectangular_grid or interpolation <= 0:
             return
@@ -154,25 +173,6 @@ class DNSScMap(ObjectDict):
         self.angular_mesh_interpolated = [self.two_theta_mesh_interpolated, self.omega_mesh_interpolated, self.z_mesh_interpolated]
         self.hkl_mesh_interpolated = [self.hklx_mesh_interpolated, self.hkly_mesh_interpolated, self.z_mesh_interpolated]
         self.qxqy_mesh_interpolated = [self.qx_mesh_interpolated, self.qy_mesh_interpolated, self.z_mesh_interpolated]
-
-    def triangulate(self, mesh_name, switch=False):
-        plot_x, plot_y, _z = getattr(self, mesh_name)
-        if switch:
-            plot_x, plot_y = plot_y, plot_x
-        self.triangulation = tri.Triangulation(plot_x.flatten(), plot_y.flatten())
-        return self.triangulation
-
-    def interpolate_triangulation(self, interpolation=0):
-        if self.triangulation is None:
-            return None
-        z = self.z_mesh
-        triangulator = self.triangulation
-        interpolator = LinearTriInterpolator(triangulator, z.flatten())
-        refiner = UniformTriRefiner(triangulator)
-        triangulator_refiner, z_test_refiner = refiner.refine_field(z, subdiv=interpolation, triinterpolator=interpolator)
-        if interpolation <= 0:
-            return [triangulator, z.flatten()]
-        return [triangulator_refiner, z_test_refiner.flatten()]
 
     def get_dns_map_border(self, mesh_name):
         two_theta = self.two_theta

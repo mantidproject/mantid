@@ -177,6 +177,9 @@ class DNSElasticSCPlotView(DNSView):
     def get_plotting_settings_dict(self):
         return self.views_menu.get_plot_view_settings()
 
+    def get_plotting_setting(self, setting_key):
+        return self.views_menu.get_plot_view_settings()[setting_key]
+
     def connect_resize(self):
         self.canvas.mpl_connect("resize_event", self.single_crystal_plot.on_resize)
 

@@ -58,7 +58,7 @@ class DNSScPlot:
     def set_linecolor(self, lines):
         lines = ["face", "white", "black"][lines]
         if self._plot is not None:
-            self._plot.set_edgecolors(lines)
+            self._plot.set_edgecolor(lines)
 
     def set_pointsize(self, lines):
         if self._plot is not None:
@@ -108,6 +108,9 @@ class DNSScPlot:
         else:
             self._ax.grid(0)
 
+    def set_aspect_ratio(self, aspect_ratio):
+        self._ax.set_aspect(aspect_ratio, anchor="NW")
+
     # projections
     def set_projections(self, x_proj, y_proj):
         self.remove_projections()
@@ -146,10 +149,10 @@ class DNSScPlot:
         self._ax.set_visible(True)
         self._plot = self._ax.tripcolor(triang, z, cmap=cmap, edgecolors=edge_colors, shading=shading)
 
-    def plot_quadmesh(self, x, y, z, cmap, edgecolors, shading):
+    def plot_quadmesh(self, x, y, z, cmap, edge_colors, shading):
         # pylint: disable=too-many-arguments
         self._ax.set_visible(True)
-        self._plot = self._ax.pcolormesh(x, y, z, cmap=cmap, edgecolors=edgecolors, shading=shading)
+        self._plot = self._ax.pcolormesh(x, y, z, cmap=cmap, edgecolors=edge_colors, shading=shading)
 
     def plot_scatter(self, x, y, z, cmap):
         self._ax.set_visible(True)

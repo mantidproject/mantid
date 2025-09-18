@@ -67,19 +67,6 @@ class DNSElasticSCPlotModel(DNSObsModel):
         y_projection = helper.get_projection(y, z)
         return x_projection, y_projection
 
-    def get_interpolated_quadmesh(self, interpolate, axis_type):
-        new_mesh_name = axis_type + "_mesh_interpolated"
-        old_mesh_name = axis_type + "_mesh"
-        if interpolate:
-            self._single_crystal_map.interpolate_quad_mesh(interpolate)
-            x, y, z = getattr(self._single_crystal_map, new_mesh_name)
-        else:
-            x, y, z = getattr(self._single_crystal_map, old_mesh_name)
-        self._data.x = x
-        self._data.y = y
-        self._data.z = z
-        return x, y, z
-
     def get_interpolated_triangulation(self, interpolate, axis_type, switch):
         mesh_name = axis_type + "_mesh"
         self._single_crystal_map.triangulate(mesh_name=mesh_name, switch=switch)
@@ -93,6 +80,19 @@ class DNSElasticSCPlotModel(DNSObsModel):
         self._data.y = y
         self._data.z = z
         return triangulator_refiner, z_refiner
+
+    def get_interpolated_quadmesh(self, interpolate, axis_type):
+        new_mesh_name = axis_type + "_mesh_interpolated"
+        old_mesh_name = axis_type + "_mesh"
+        if interpolate:
+            self._single_crystal_map.interpolate_quad_mesh(interpolate)
+            x, y, z = getattr(self._single_crystal_map, new_mesh_name)
+        else:
+            x, y, z = getattr(self._single_crystal_map, old_mesh_name)
+        self._data.x = x
+        self._data.y = y
+        self._data.z = z
+        return x, y, z
 
     def get_xy_dy_ratio(self):
         return self._single_crystal_map.dx / self._single_crystal_map.dy
@@ -130,14 +130,6 @@ class DNSElasticSCPlotModel(DNSObsModel):
             return f"x={x:2.3f}, y={y:2.3f}, hkl=({h:2.2f}, {k:2.2f}, {l:2.2f}), Intensity={z:6.4f}±{error:6.4f}"
 
         return format_coord
-
-    @staticmethod
-    def get_m_limits(*args):
-        return [helper.string_range_to_float(arg) for arg in args]
-
-    @staticmethod
-    def get_mz_limit(arg):
-        return helper.string_range_to_float(arg)
 
     def get_data_z_min_max(self, xlim=None, ylim=None):
         return helper.get_z_min_max(self._data.z, xlim, ylim, self._data.x, self._data.y)

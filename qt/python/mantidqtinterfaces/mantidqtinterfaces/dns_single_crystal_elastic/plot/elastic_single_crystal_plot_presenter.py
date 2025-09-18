@@ -14,6 +14,7 @@ from mantidqtinterfaces.dns_powder_tof.data_structures.dns_observer import DNSOb
 from mantidqtinterfaces.dns_powder_tof.data_structures.object_dict import ObjectDict
 from mantidqtinterfaces.dns_single_crystal_elastic.plot import mpl_helpers
 from mantidqtinterfaces.dns_single_crystal_elastic.plot.grid_locator import get_grid_helper
+from mantid.simpleapi import logger
 
 
 class DNSElasticSCPlotPresenter(DNSObserver):
@@ -46,7 +47,7 @@ class DNSElasticSCPlotPresenter(DNSObserver):
             self.view.draw()
         else:
             self.view.single_crystal_plot.remove_projections()
-            self._plot()
+            self._plot(self.view.initial_values)
         self.view.sig_change_cb_range_on_zoom.connect(self._change_color_bar_range)
 
     def _calculate_projections(self, switch=False):
@@ -64,7 +65,6 @@ class DNSElasticSCPlotPresenter(DNSObserver):
         )  # check is necessary for simulation
 
     def _plot(self, initial_values=None):
-        axis_type = self.view.get_plotting_settings_dict()
         plot_list = self.view.datalist.get_checked_plots()
         if not plot_list:
             return
@@ -73,10 +73,12 @@ class DNSElasticSCPlotPresenter(DNSObserver):
         generated_dict = self.param_dict["elastic_single_crystal_script_generator"]
         data_array = generated_dict["data_arrays"][self._plot_param.plot_name]
         options = self.param_dict["elastic_single_crystal_options"]
-        self.model.create_single_crystal_map(data_array, options, initial_values)
+        single_crystal_map = self.model.create_single_crystal_map(data_array, options, initial_values)
+        self._determine_plot_type_options(single_crystal_map)
         self._change_grid_state(draw=False, change=False)
         self.view.create_subfigure(self._plot_param.grid_helper)
-        self._want_plot(axis_type["plot_type"])
+        plot_type = self.view.get_plotting_setting("plot_type")
+        self._want_plot(plot_type)
         self._set_plotting_grid(self._crystallographical_axes())
         self._set_aspect_ratio()
         self._set_ax_formatter()
@@ -84,7 +86,6 @@ class DNSElasticSCPlotPresenter(DNSObserver):
         self.view.single_crystal_plot.create_colorbar()
         self.view.connect_resize()
         self.view.single_crystal_plot.on_resize()
-        self._manual_lim_changed()
         self._set_initial_omega_offset_dx_dy()
         self.view.single_crystal_plot.connect_ylim_change()
         self._change_displayed_plot_limits(include_zlim=True)
@@ -128,44 +129,43 @@ class DNSElasticSCPlotPresenter(DNSObserver):
         self.view.initial_values["dy"] = default_dy
         self._plot(self.view.initial_values)
 
-    def _plot_quadmesh(self, interpolate, axis_type, switch):
-        cmap, edge_colors, shading = self._get_plot_styles()
-        if shading == "flat":  # prevents dropping of line
-            shading = "nearest"
-        x, y, z = self.model.get_interpolated_quadmesh(interpolate, axis_type)
-        x, y, z = self.model.switch_axis(x, y, z, switch)
-        self.view.single_crystal_plot.plot_quadmesh(x, y, z, cmap, edge_colors, shading)
-
-    def _plot_scatter(self, axis_type, switch):
-        cmap = self._get_plot_styles()[0]
-        x, y, z = self.model.get_interpolated_quadmesh(False, axis_type)
-        x, y, z = self.model.switch_axis(x, y, z, switch)
-        self.view.single_crystal_plot.plot_scatter(x, y, z, cmap)
-
     def _plot_triangulation(self, interpolate, axis_type, switch):
         color_map, edge_colors, shading = self._get_plot_styles()
         triangulation, z = self.model.get_interpolated_triangulation(interpolate, axis_type, switch)
         self.view.single_crystal_plot.plot_triangulation(triangulation, z, color_map, edge_colors, shading)
 
+    def _plot_quadmesh(self, interpolate, axis_type, switch):
+        color_map, edge_colors, shading = self._get_plot_styles()
+        if shading == "flat":  # prevents dropping of line
+            shading = "nearest"
+        x, y, z = self.model.get_interpolated_quadmesh(interpolate, axis_type)
+        x, y, z = self.model.switch_axis(x, y, z, switch)
+        self.view.single_crystal_plot.plot_quadmesh(x, y, z, color_map, edge_colors, shading)
+
+    def _plot_scatter(self, axis_type, switch):
+        color_map = self._get_plot_styles()[0]
+        x, y, z = self.model.get_interpolated_quadmesh(False, axis_type)
+        x, y, z = self.model.switch_axis(x, y, z, switch)
+        self.view.single_crystal_plot.plot_scatter(x, y, z, color_map)
+
     def _want_plot(self, plot_type):
-        axis_type = self.view.get_plotting_settings_dict()
-        if plot_type == "quadmesh":
-            self._plot_quadmesh(axis_type["interpolate"], axis_type["type"], axis_type["switch"])
+        plot_settings = self.view.get_plotting_settings_dict()
         if plot_type == "triangulation":
-            self._plot_triangulation(axis_type["interpolate"], axis_type["type"], axis_type["switch"])
+            self._plot_triangulation(plot_settings["interpolate"], plot_settings["type"], plot_settings["switch"])
+        if plot_type == "quadmesh":
+            self._plot_quadmesh(plot_settings["interpolate"], plot_settings["type"], plot_settings["switch"])
         if plot_type == "scatter":
-            self._plot_scatter(axis_type["type"], axis_type["switch"])
+            self._plot_scatter(plot_settings["type"], plot_settings["switch"])
 
     def _get_plot_styles(self):
         own_dict = self.view.get_state()
-        axis_type = self.view.get_plotting_settings_dict()
-        shading = axis_type["shading"]
+        shading = self.view.get_plotting_setting("shading")
         edge_colors = ["face", "white", "black"][self._plot_param.lines]
         colormap_name = own_dict["colormap"]
         if own_dict["invert_cb"]:
             colormap_name += "_r"
-        cmap = mpl_helpers.get_cmap(colormap_name)
-        return cmap, edge_colors, shading
+        color_map = mpl_helpers.get_cmap(colormap_name)
+        return color_map, edge_colors, shading
 
     def _set_axis_labels(self):
         axis_type = self.view.get_plotting_settings_dict()
@@ -214,7 +214,7 @@ class DNSElasticSCPlotPresenter(DNSObserver):
             self._plot_param.grid_state = 1
         else:
             self._plot_param.grid_state = 0
-        self._plot()
+        self._plot(self.view.initial_values)
 
     def _change_line_style(self):
         axis_type = self.view.get_plotting_settings_dict()
@@ -355,7 +355,7 @@ class DNSElasticSCPlotPresenter(DNSObserver):
             self._plot_param.font_size = font_size
             self.view.single_crystal_plot.set_fontsize(font_size)
             if draw:
-                self._plot()
+                self._plot(self.view.initial_values)
 
     def _crystallographical_axes(self):
         own_dict = self.view.get_state()
@@ -372,6 +372,18 @@ class DNSElasticSCPlotPresenter(DNSObserver):
             self.view._map["z_min"].setValue(zlim[0])
             self.view._map["z_max"].setValue(zlim[1])
             self._change_color_bar_range(zoom=False)
+
+    def _determine_plot_type_options(self, sc_map):
+        if not sc_map.rectangular_grid:
+            self.view.views_menu.menus[0].action_quad_mesh.setEnabled(False)
+            if self.view.views_menu.menus[0].action_quad_mesh.isChecked():
+                logger.warning(
+                    "Warning: quadmesh only possible on a rectangular grid. Selected data do not compose "
+                    "a rectangular grid. The selected plot type is changed to triangulation."
+                )
+                self.view.views_menu.menus[0].action_triangulation_mesh.setChecked(True)
+        else:
+            self.view.views_menu.menus[0].action_quad_mesh.setEnabled(True)
 
     def _attach_signal_slots(self):
         self.view.sig_plot.connect(self._plot)
