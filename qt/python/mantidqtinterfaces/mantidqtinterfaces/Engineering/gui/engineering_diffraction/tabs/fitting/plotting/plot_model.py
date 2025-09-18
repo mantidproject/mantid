@@ -199,7 +199,7 @@ class FittingPlotModel(object):
         # run: [(one_spec, ws name), (another_spec, ws name)...]
         # run: prefix_string
         # run: group
-        run_to_banks, run_to_prefix, run_to_group = self._create_metadata_dicts(active_ws_list)
+        run_to_banks, run_to_prefix, run_to_group = self._create_metadata_dicts(active_ws_list, fit_results)
 
         # create a dict to store summary tables
         summary_tables = {}
@@ -277,38 +277,40 @@ class FittingPlotModel(object):
         return param_labels, fit_peak
 
     @staticmethod
-    def _create_metadata_dicts(active_ws_list):
+    def _create_metadata_dicts(active_ws_list, fit_results):
+        print(active_ws_list)
         run_to_banks = defaultdict(list)
         run_to_prefix = {}
         run_to_group = {}
 
         for wsname in active_ws_list:
-            if wsname_in_instr_run_ceria_group_ispec_unit_format(wsname):
-                # ws generated through the GUI pipeline should have names with all the metadata present
-                # (due to shared run objects for ws of extracted single spectra this is more reliable than the logs)
-                prefix, run_number, _, grouping, bank_id, *_ = wsname.split("_")
-                prefix += "_"
-            else:
-                # if the name isn't in expected format, try and extract the metadata from the logs
-                # failing that, just set defaults
-                try:
-                    ws = ADS.retrieve(wsname)
-                    run_number = str(ws.getRun().getLogData("run_number").value)
-                    prefix = wsname.split(run_number)[0]
-                    bank_id = int(ws.getRun().getLogData("bankid").value.split()[-1])  # e.g., "group 1"
-                except Exception:
-                    run_number = "unknown"
-                    prefix = ""
-                    bank_id = 9999
-                try:
-                    ws = ADS.retrieve(wsname)
-                    grouping = str(ws.getRun().getLogData("Grouping").value)
-                except RuntimeError:
-                    grouping = ""
+            if wsname in fit_results.keys():
+                if wsname_in_instr_run_ceria_group_ispec_unit_format(wsname):
+                    # ws generated through the GUI pipeline should have names with all the metadata present
+                    # (due to shared run objects for ws of extracted single spectra this is more reliable than the logs)
+                    prefix, run_number, _, grouping, bank_id, *_ = wsname.split("_")
+                    prefix += "_"
+                else:
+                    # if the name isn't in expected format, try and extract the metadata from the logs
+                    # failing that, just set defaults
+                    try:
+                        ws = ADS.retrieve(wsname)
+                        run_number = str(ws.getRun().getLogData("run_number").value)
+                        prefix = wsname.split(run_number)[0]
+                        bank_id = int(ws.getRun().getLogData("bankid").value.split()[-1])  # e.g., "group 1"
+                    except Exception:
+                        run_number = "unknown"
+                        prefix = ""
+                        bank_id = 9999
+                    try:
+                        ws = ADS.retrieve(wsname)
+                        grouping = str(ws.getRun().getLogData("Grouping").value)
+                    except RuntimeError:
+                        grouping = ""
 
-            run_to_banks[run_number].append((bank_id, wsname))
-            run_to_prefix[run_number] = prefix
-            run_to_group[run_number] = grouping
+                run_to_banks[run_number].append((bank_id, wsname))
+                run_to_prefix[run_number] = prefix
+                run_to_group[run_number] = grouping
 
         return run_to_banks, run_to_prefix, run_to_group
 
