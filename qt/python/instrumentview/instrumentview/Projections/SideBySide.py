@@ -77,8 +77,11 @@ class SideBySide(Projection):
         self._calculator = PanelsSurfaceCalculator()
         self._detector_ids = detector_ids
         self._workspace = workspace
-        component_info = workspace.componentInfo()
-        detector_component_indices = np.array(component_info.detectorsInSubtree(component_info.root()))
+        all_detector_ids = np.array(workspace.detectorInfo().detectorIDs())
+        # We can have a subset of all detector IDs, so we need to know the index of the given detectors
+        # in the list of all the detectors, since this will give us the component index, which we
+        # will need later. If there are N detectors, then 0,..., N-1 are their component indices
+        detector_component_indices = np.where(np.isin(all_detector_ids, detector_ids))[0]
         self._component_index_detector_id_map = dict(zip(detector_component_indices, detector_ids))
         self._detector_id_component_index_map = {id: c for c, id in self._component_index_detector_id_map.items()}
         super().__init__(sample_position, root_position, detector_positions, axis)
@@ -151,7 +154,9 @@ class SideBySide(Projection):
                 continue
             detector_component_indices = np.concatenate([component_info.children(p) for p in group])
             detector_component_indices.sort()
-            detectors = [self._component_index_detector_id_map[i] for i in detector_component_indices]
+            detectors = [
+                self._component_index_detector_id_map[i] for i in detector_component_indices if i in self._component_index_detector_id_map
+            ]
             flat_bank = FlatBankInfo()
             flat_bank.detector_id_position_map.clear()
             flat_bank.reference_position = np.array(component_info.position(int(detector_component_indices[0])))
