@@ -305,7 +305,7 @@ void LoadBBY::exec() {
   }
 
   // count total number of masked bins
-  size_t maskedBins = std::count_if(roi.begin(), roi.end(), [](bool v) { return !v; });
+  size_t maskedBins = std::count_if(roi.cbegin(), roi.cend(), [](bool v) { return !v; });
 
   if (maskedBins > 0) {
     // create list of masked bins

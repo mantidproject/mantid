@@ -175,9 +175,7 @@ EventAssignerFixedWavelength::EventAssignerFixedWavelength(const std::vector<boo
     : EventAssigner(roi, stride, period, phase, startTime, tofMinBoundary, tofMaxBoundary, timeMinBoundary,
                     timeMaxBoundary, eventVectors),
       m_wavelength(wavelength) {}
-void EventAssignerFixedWavelength::addEventImpl(size_t id, int64_t pulse, double tof) {
-  // UNUSED_ARG(pulse);
-  UNUSED_ARG(tof);
+void EventAssignerFixedWavelength::addEventImpl(size_t id, int64_t pulse, double /*tof*/) {
   m_eventVectors[id]->emplace_back(m_wavelength, Types::Core::DateAndTime(pulse));
 }
 
@@ -314,9 +312,9 @@ bool File::select(const char *file) {
   m_bufferPosition = 0;
   m_bufferAvailable = 0;
 
-  auto it = std::find(m_fileNames.begin(), m_fileNames.end(), file);
-  if (it != m_fileNames.end()) {
-    size_t i = std::distance(m_fileNames.begin(), it);
+  auto it = std::find(m_fileNames.cbegin(), m_fileNames.cend(), file);
+  if (it != m_fileNames.cend()) {
+    size_t i = std::distance(m_fileNames.cbegin(), it);
     const FileInfo &info = m_fileInfos[i];
 
     m_selected = i;
@@ -645,8 +643,8 @@ bool extractTimedDataSet(const Nexus::NXEntry &entry, const std::string &path, u
   bool retn = true;
   switch (valueOption) {
   case ScanLog::Mean:
-    eventValue = std::accumulate(values.begin(), values.end(), T{0}) / static_cast<T>(n);
-    eventTime = std::accumulate(times.begin(), times.end(), uint64_t{0}) / n;
+    eventValue = std::accumulate(values.cbegin(), values.cend(), T{0}) / static_cast<T>(n);
+    eventTime = std::accumulate(times.cbegin(), times.cend(), uint64_t{0}) / n;
     break;
   case ScanLog::Start:
     eventValue = values[0];

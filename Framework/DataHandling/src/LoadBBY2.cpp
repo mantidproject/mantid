@@ -106,7 +106,7 @@ void traceStatistics(const Nexus::NXEntry &entry, const std::string &path, uint6
 }
 
 template <typename TYPE>
-void AddSinglePointTimeSeriesProperty(API::LogManager &logManager, const std::string &time, const std::string &name,
+void addSinglePointTimeSeriesProperty(API::LogManager &logManager, const std::string &time, const std::string &name,
                                       const TYPE value) {
   // create time series property and add single value
   auto p = new Kernel::TimeSeriesProperty<TYPE>(name);
@@ -131,7 +131,8 @@ void loadEvents(API::Progress &prog, const char *progMsg, EP &eventProcessor, co
   Anxs::ReadEventData(progTracker, entry, &eventProcessor, start_nsec, end_nsec, neutronPath, HISTO_BINS_Y);
 }
 
-LoadBBY2::LoadBBY2() : API::IFileLoader<Nexus::NexusDescriptor>() {}
+/// Empty default constructor
+LoadBBY2::LoadBBY2() {}
 
 /**
  * Return the confidence value that this algorithm can load the file
@@ -141,16 +142,22 @@ LoadBBY2::LoadBBY2() : API::IFileLoader<Nexus::NexusDescriptor>() {}
  */
 int LoadBBY2::confidence(Nexus::NexusDescriptor &descriptor) const {
 
-  if (descriptor.isEntry("/entry1/program_name") && descriptor.isEntry("/entry1/experiment/gumtree_version") &&
-      descriptor.isEntry("/entry1/instrument/detector_events/event_time_zero") &&
-      descriptor.isEntry("/entry1/instrument/detector_events/event_id") &&
-      descriptor.isEntry("/entry1/instrument/L1/value") && descriptor.isEntry("/entry1/instrument/L2_curtaind/value") &&
-      descriptor.isEntry("/entry1/instrument/L2_curtainl/value") &&
-      descriptor.isEntry("/entry1/instrument/L2_curtainr/value") &&
-      descriptor.isEntry("/entry1/instrument/L2_curtainu/value") &&
-      descriptor.isEntry("/entry1/instrument/nvs067/lambda/value") &&
-      descriptor.isEntry("/entry1/instrument/shutters/fast_shutter") &&
-      descriptor.isEntry("/entry1/scan_dataset/time") && descriptor.isEntry("/entry1/scan_dataset/value")) {
+  static const std::set<std::string> requiredEntries = {"/entry1/program_name",
+                                                        "/entry1/experiment/gumtree_version",
+                                                        "/entry1/instrument/detector_events/event_time_zero",
+                                                        "/entry1/instrument/detector_events/event_id",
+                                                        "/entry1/instrument/L1/value",
+                                                        "/entry1/instrument/L2_curtaind/value",
+                                                        "/entry1/instrument/L2_curtainl/value",
+                                                        "/entry1/instrument/L2_curtainr/value",
+                                                        "/entry1/instrument/L2_curtainu/value",
+                                                        "/entry1/instrument/nvs067/lambda/value",
+                                                        "/entry1/instrument/shutters/fast_shutter",
+                                                        "/entry1/scan_dataset/time",
+                                                        "/entry1/scan_dataset/value"};
+
+  if (std::all_of(requiredEntries.cbegin(), requiredEntries.cend(),
+                  [&descriptor](const std::string &entry) { return descriptor.isEntry(entry); })) {
     return 95;
   } else {
     return 0;
@@ -220,7 +227,7 @@ void LoadBBY2::init() {
 /**
  * Execute the algorithm.
  */
-void LoadBBY2::exec() {
+void LoadBBY2::execLoader() {
 
   // Delete the output workspace name if it existed
   std::string outName = getPropertyValue("OutputWorkspace");
@@ -405,15 +412,15 @@ void LoadBBY2::exec() {
 
   logManager.addProperty("sample_name", instrumentInfo.sample_name);
   logManager.addProperty("sample_description", instrumentInfo.sample_description);
-  AddSinglePointTimeSeriesProperty(logManager, time_str, "wavelength", instrumentInfo.wavelength);
-  AddSinglePointTimeSeriesProperty(logManager, time_str, "master1_chopper_id", instrumentInfo.master1_chopper_id);
-  AddSinglePointTimeSeriesProperty(logManager, time_str, "master2_chopper_id", instrumentInfo.master2_chopper_id);
+  addSinglePointTimeSeriesProperty(logManager, time_str, "wavelength", instrumentInfo.wavelength);
+  addSinglePointTimeSeriesProperty(logManager, time_str, "master1_chopper_id", instrumentInfo.master1_chopper_id);
+  addSinglePointTimeSeriesProperty(logManager, time_str, "master2_chopper_id", instrumentInfo.master2_chopper_id);
 
   for (auto &x : logStrings) {
     logManager.addProperty(x.first, x.second);
   }
   for (auto &x : logParams) {
-    AddSinglePointTimeSeriesProperty(logManager, time_str, x.first, x.second);
+    addSinglePointTimeSeriesProperty(logManager, time_str, x.first, x.second);
   }
 
   auto loadInstrumentAlg = createChildAlgorithm("LoadInstrument");

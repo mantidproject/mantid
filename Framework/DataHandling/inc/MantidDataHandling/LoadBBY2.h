@@ -10,7 +10,8 @@
 // Includes
 //---------------------------------------------------
 
-#include "MantidAPI/IFileLoader.h"
+// #include "MantidAPI/IFileLoader.h"
+#include "MantidAPI/NexusFileLoader.h"
 #include "MantidDataHandling/DllConfig.h"
 #include "MantidDataHandling/LoadANSTOHelper.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -29,7 +30,7 @@ to recognise a file as the one containing Bilby data.
 @date 11/07/2014
 */
 
-class MANTID_DATAHANDLING_DLL LoadBBY2 : public API::IFileLoader<Nexus::NexusDescriptor> {
+class MANTID_DATAHANDLING_DLL LoadBBY2 : public API::NexusFileLoader {
 
   struct InstrumentInfo {
     // core values or non standard conversion
@@ -63,7 +64,7 @@ protected:
   // initialisation
   void init() override;
   // execution
-  void exec() override;
+  void execLoader() override;
 
 private:
   // region of interest
