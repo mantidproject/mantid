@@ -1133,11 +1133,6 @@ bool Instrument::isMonitorViaIndex(const size_t index) const {
 
 bool Instrument::isEmptyInstrument() const { return this->nelements() == 0; }
 
-int Instrument::add(IComponent *component) {
-  // invalidate cache
-  return CompAssembly::add(component);
-}
-
 /// Returns the index for a detector ID. Used for accessing DetectorInfo.
 size_t Instrument::detectorIndex(const detid_t detID) const {
   const auto &baseInstr = m_map ? *m_instr : *this;

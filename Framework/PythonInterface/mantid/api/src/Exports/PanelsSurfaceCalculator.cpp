@@ -25,7 +25,7 @@ V3D pythonListToV3D(const object &pyList) {
   return {extract<double>(pyList[0]), extract<double>(pyList[1]), extract<double>(pyList[2])};
 }
 
-void setupBasisAxes(PanelsSurfaceCalculator &self, list &xAxis, list &yAxis, const list &zAxis) {
+void setupBasisAxes(const PanelsSurfaceCalculator &self, list &xAxis, list &yAxis, const list &zAxis) {
   auto x = pythonListToV3D(xAxis);
   auto y = pythonListToV3D(yAxis);
   const auto z = pythonListToV3D(zAxis);
@@ -36,7 +36,7 @@ void setupBasisAxes(PanelsSurfaceCalculator &self, list &xAxis, list &yAxis, con
   }
 }
 
-list retrievePanelCorners(PanelsSurfaceCalculator &self, const object &componentInfo, const size_t rootIndex) {
+list retrievePanelCorners(const PanelsSurfaceCalculator &self, const object &componentInfo, const size_t rootIndex) {
   const std::shared_ptr<ComponentInfo> cInfoSharedPtr = extract<std::shared_ptr<ComponentInfo>>(componentInfo);
   const auto panelCorners = self.retrievePanelCorners(*(cInfoSharedPtr.get()), rootIndex);
   list panelCornersList;
@@ -47,7 +47,7 @@ list retrievePanelCorners(PanelsSurfaceCalculator &self, const object &component
   return panelCornersList;
 }
 
-list calculatePanelNormal(PanelsSurfaceCalculator &self, const list &panelCorners) {
+list calculatePanelNormal(const PanelsSurfaceCalculator &self, const list &panelCorners) {
   if (len(panelCorners) != 4) {
     throw std::invalid_argument("Must be 4 panel corners");
   }
@@ -83,7 +83,7 @@ list calculateBankNormal(PanelsSurfaceCalculator &self, const object &componentI
   return normalList;
 }
 
-void setBankVisited(PanelsSurfaceCalculator &self, const object &componentInfo, const size_t bankIndex,
+void setBankVisited(const PanelsSurfaceCalculator &self, const object &componentInfo, const size_t bankIndex,
                     list &visitedComponents) {
   const std::shared_ptr<ComponentInfo> cInfoSharedPtr = extract<std::shared_ptr<ComponentInfo>>(componentInfo);
   std::vector<bool> visitedComponentsVector;
@@ -100,7 +100,7 @@ void setBankVisited(PanelsSurfaceCalculator &self, const object &componentInfo, 
   }
 }
 
-size_t findNumDetectors(PanelsSurfaceCalculator &self, const object &componentInfo, const list &components) {
+size_t findNumDetectors(const PanelsSurfaceCalculator &self, const object &componentInfo, const list &components) {
   const std::shared_ptr<ComponentInfo> cInfoSharedPtr = extract<std::shared_ptr<ComponentInfo>>(componentInfo);
   std::vector<size_t> componentsVector;
   for (size_t i = 0; i < len(components); i++) {
@@ -109,7 +109,7 @@ size_t findNumDetectors(PanelsSurfaceCalculator &self, const object &componentIn
   return self.findNumDetectors(*(cInfoSharedPtr.get()), componentsVector);
 }
 
-list calcBankRotation(PanelsSurfaceCalculator &self, const list &detPos, list normal, const list &zAxis,
+list calcBankRotation(const PanelsSurfaceCalculator &self, const list &detPos, list normal, const list &zAxis,
                       const list &yAxis, const list &samplePosition) {
   const auto bankRotation =
       self.calcBankRotation(pythonListToV3D(detPos), pythonListToV3D(normal), pythonListToV3D(zAxis),
@@ -123,8 +123,9 @@ list calcBankRotation(PanelsSurfaceCalculator &self, const list &detPos, list no
   return quat;
 }
 
-list transformedBoundingBoxPoints(PanelsSurfaceCalculator &self, const object &componentInfo, size_t detectorIndex,
-                                  const list &refPos, const list &rotation, const list &xaxis, const list &yaxis) {
+list transformedBoundingBoxPoints(const PanelsSurfaceCalculator &self, const object &componentInfo,
+                                  size_t detectorIndex, const list &refPos, const list &rotation, const list &xaxis,
+                                  const list &yaxis) {
   const std::shared_ptr<ComponentInfo> cInfoSharedPtr = extract<std::shared_ptr<ComponentInfo>>(componentInfo);
   Mantid::Kernel::Quat quatRotation{extract<double>(rotation[0]), extract<double>(rotation[1]),
                                     extract<double>(rotation[2]), extract<double>(rotation[3])};
@@ -162,7 +163,7 @@ list getAllTubeDetectorFlatGroupParents(PanelsSurfaceCalculator &self, const obj
   return pyAllTubeGroupParents;
 }
 
-tuple getSideBySideViewPos(PanelsSurfaceCalculator &self, const object &componentInfo, const object &instrument,
+tuple getSideBySideViewPos(const PanelsSurfaceCalculator &self, const object &componentInfo, const object &instrument,
                            const size_t componentIndex) {
   const std::shared_ptr<ComponentInfo> cInfoSharedPtr = extract<std::shared_ptr<ComponentInfo>>(componentInfo);
   const std::shared_ptr<Instrument> instrumentSharedPtr = extract<std::shared_ptr<Instrument>>(instrument);

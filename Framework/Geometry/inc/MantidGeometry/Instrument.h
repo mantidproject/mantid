@@ -216,9 +216,6 @@ public:
 
   bool isEmptyInstrument() const;
 
-  /// Add a component to the instrument
-  virtual int add(IComponent *component) override;
-
   void parseTreeAndCacheBeamline();
   std::pair<std::unique_ptr<ComponentInfo>, std::unique_ptr<DetectorInfo>>
   makeBeamline(ParameterMap &pmap, const ParameterMap *source = nullptr) const;
@@ -271,11 +268,11 @@ private:
 
   /// Purpose to hold copy of source component. For now assumed to be just one
   /// component
-  const IComponent *m_sourceCache;
+  const IComponent *m_sourceCache = nullptr;
 
   /// Purpose to hold copy of samplePos component. For now assumed to be just
   /// one component
-  const IComponent *m_sampleCache;
+  const IComponent *m_sampleCache = nullptr;
 
   /// To store info about the parameters defined in IDF. Indexed according to
   /// logfile-IDs, which equals logfile filename minus the run number and file
