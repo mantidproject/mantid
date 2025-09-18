@@ -132,31 +132,35 @@ class TestCorrectionModel(unittest.TestCase):
 
     @patch(model_path + ".logger")
     def test_get_atten_args_success(self, mock_logger):
-        out = self.model.get_atten_args("1.5", "cm")
-        self.assertEqual(out, {"atten_val": 1.5, "atten_units": "cm"})
+        out, err = self.model.get_atten_args(True, "1.5", "dSpacing")
+        self.assertEqual(out, {"atten_val": 1.5, "atten_units": "dSpacing"})
+        self.assertFalse(err)
         mock_logger.error.assert_not_called()
 
     @patch(model_path + ".logger")
     def test_get_atten_args_invalid_logs_and_returns_none(self, mock_logger):
-        out = self.model.get_atten_args("bad", "m")
-        self.assertIsNone(out)
+        out, err = self.model.get_atten_args(True, "bad", "m")
+        self.assertEqual(out, {})
+        self.assertTrue(err)
         mock_logger.error.assert_called_once_with("Attenuation Evaluation Point must be interpretable as a float. \n")
 
     # --- get_div_args ------------------------------------------------------
 
     @patch(model_path + ".logger")
     def test_get_div_args_all_valid_returns_converted_values(self, mock_logger):
-        out = self.model.get_div_args("0.1", "0.2", "0.3")
+        out, err = self.model.get_div_args(True, "0.1", "0.2", "0.3")
         self.assertEqual(out["hoz"], 0.1)
         self.assertEqual(out["vert"], 0.2)
         self.assertEqual(out["det_hoz"], 0.3)
+        self.assertFalse(err)
         mock_logger.error.assert_not_called()
 
     @patch(model_path + ".logger")
     def test_get_div_args_any_invalid_logs_and_returns_none(self, mock_logger):
         # Make div_vert invalid
-        out = self.model.get_div_args("1.0", "oops", "2.0")
-        self.assertIsNone(out)
+        out, err = self.model.get_div_args(True, "1.0", "oops", "2.0")
+        self.assertEqual(out, {})
+        self.assertTrue(err)
         # Expect concatenated error messages to include only the failing param text
         args, _ = mock_logger.error.call_args
         self.assertIn("Vertical Divergence must be interpretable as a float.", args[0])

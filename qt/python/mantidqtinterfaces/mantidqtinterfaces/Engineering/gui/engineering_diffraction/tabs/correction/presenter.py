@@ -140,10 +140,11 @@ class TextureCorrectionPresenter:
         self.model.set_remove_after_processing(self._get_setting("clear_absorption_ws_after_processing", bool))
 
         abs_args = self.get_abs_args()
-        atten_args = self.get_atten_args()
-        div_args = self.get_div_args()
+        atten_args, atten_err = self.get_atten_args()
+        div_args, div_err = self.get_div_args()
 
-        self.model.calc_all_corrections(wss, out_wss, output_settings.get_output_path(), abs_args, atten_args, div_args)
+        if not div_err and not atten_err:
+            self.model.calc_all_corrections(wss, out_wss, output_settings.get_output_path(), abs_args, atten_args, div_args)
 
     def get_abs_args(self):
         if self.view.include_absorption():
@@ -154,12 +155,12 @@ class TextureCorrectionPresenter:
             }
 
     def get_atten_args(self):
-        if self.view.include_atten_tab():
-            return self.model.get_atten_args(self.view.get_evaluation_value(), self.view.get_evaluation_units())
+        return self.model.get_atten_args(self.view.include_atten_tab(), self.view.get_evaluation_value(), self.view.get_evaluation_units())
 
     def get_div_args(self):
-        if self.view.include_divergence():
-            return self.model.get_div_args(self.view.get_div_horz(), self.view.get_div_vert(), self.view.get_div_det_horz())
+        return self.model.get_div_args(
+            self.view.include_divergence(), self.view.get_div_horz(), self.view.get_div_vert(), self.view.get_div_det_horz()
+        )
 
     def _copy_sample_to_all_selected(self):
         ref_ws = self.view.get_sample_reference_ws()
