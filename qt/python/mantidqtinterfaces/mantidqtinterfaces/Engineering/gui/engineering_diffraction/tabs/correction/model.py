@@ -46,22 +46,26 @@ class CorrectionModel(TextureCorrectionModel):
     def get_out_ws_names(wss):
         return [f"Corrected_{ws}" for ws in wss]
 
-    def get_atten_args(self, eval_point, eval_unit):
+    def get_atten_args(self, inc_atten, eval_point, eval_unit):
+        if not inc_atten:
+            return {}, False
         msg, eval_point = self.try_convert_float(eval_point, "Attenuation Evaluation Point")
         if msg != "":
             logger.error(msg)
-            return
-        return {"atten_val": eval_point, "atten_units": eval_unit}
+            return {}, True
+        return {"atten_val": eval_point, "atten_units": eval_unit}, False
 
-    def get_div_args(self, div_hoz, div_vert, det_hoz):
+    def get_div_args(self, inc_div, div_hoz, div_vert, det_hoz):
+        if not inc_div:
+            return {}, False
         div_hoz_msg, div_hoz = self.try_convert_float(div_hoz, "Horizontal Divergence")
         div_vert_msg, div_vert = self.try_convert_float(div_vert, "Vertical Divergence")
         det_hoz_msg, det_hoz = self.try_convert_float(det_hoz, "Detector Divergence")
         msg = div_hoz_msg + div_vert_msg + det_hoz_msg
         if msg != "":
             logger.error(msg)
-            return
-        return {"hoz": div_hoz, "vert": div_vert, "det_hoz": det_hoz}
+            return {}, True
+        return {"hoz": div_hoz, "vert": div_vert, "det_hoz": det_hoz}, False
 
     @staticmethod
     def try_convert_float(val, param):
