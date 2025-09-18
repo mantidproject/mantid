@@ -97,12 +97,8 @@ void ProcessBankTask::operator()(const tbb::blocked_range<size_t> &range) const 
 
     // std::atomic allows for multi-threaded accumulation and who cares about floats when you are just
     // counting things
-    std::vector<std::atomic_uint32_t> y_temp(spectrum.dataY().size());
-    // std::vector<uint32_t> y_temp(spectrum.dataY().size());
-
-    // task group allows for separate of disk read from processing
-    tbb::task_group_context tgroupcontext; // needed by parallel_reduce
-    tbb::task_group tgroup(tgroupcontext);
+    // std::vector<std::atomic_uint32_t> y_temp(spectrum.dataY().size())
+    std::vector<uint32_t> y_temp(spectrum.dataY().size());
 
     // create object so bank calibration can be re-used
     std::unique_ptr<BankCalibration> calibration = nullptr;
@@ -187,15 +183,11 @@ void ProcessBankTask::operator()(const tbb::blocked_range<size_t> &range) const 
 
       // Non-blocking processing of the events
       const tbb::blocked_range<size_t> range_info(0, event_time_of_flight->size(), m_grainsize_event);
-      tbb::parallel_reduce(range_info, task, tgroupcontext);
+      tbb::parallel_reduce(range_info, task);
 
-      // Atomically accumulate results into shared y_temp to combine local histograms
-      for (size_t i = 0; i < y_temp.size(); ++i) {
-        y_temp[i].fetch_add(task.y_temp[i], std::memory_order_relaxed);
-      }
+      // Accumulate results into shared y_temp to combine local histograms
+      std::transform(y_temp.begin(), y_temp.end(), task.y_temp.begin(), y_temp.begin(), std::plus<uint32_t>());
     }
-
-    tgroup.wait();
 
     // copy the data out into the correct spectrum
     auto &y_values = spectrum.dataY();
