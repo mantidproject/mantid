@@ -131,20 +131,20 @@ class DNSElasticSCPlotPresenter(DNSObserver):
 
     def _plot_triangulation(self, interpolate, axis_type, switch):
         color_map, edge_colors, shading = self._get_plot_styles()
-        triangulation, z = self.model.get_interpolated_triangulation(interpolate, axis_type, switch)
+        triangulation, z = self.model.generate_triangulation_mesh(interpolate, axis_type, switch)
         self.view.single_crystal_plot.plot_triangulation(triangulation, z, color_map, edge_colors, shading)
 
     def _plot_quadmesh(self, interpolate, axis_type, switch):
         color_map, edge_colors, shading = self._get_plot_styles()
         if shading == "flat":  # prevents dropping of line
             shading = "nearest"
-        x, y, z = self.model.get_interpolated_quadmesh(interpolate, axis_type)
+        x, y, z = self.model.generate_quad_mesh(interpolate, axis_type)
         x, y, z = self.model.switch_axis(x, y, z, switch)
         self.view.single_crystal_plot.plot_quadmesh(x, y, z, color_map, edge_colors, shading)
 
     def _plot_scatter(self, axis_type, switch):
         color_map = self._get_plot_styles()[0]
-        x, y, z = self.model.get_interpolated_quadmesh(False, axis_type)
+        x, y, z = self.model.generate_scatter_mesh(axis_type)
         x, y, z = self.model.switch_axis(x, y, z, switch)
         self.view.single_crystal_plot.plot_scatter(x, y, z, color_map)
 
