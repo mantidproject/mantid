@@ -39,15 +39,29 @@ std::shared_ptr<const WorkspaceGroup> AnalysisDataServiceImpl::GroupUpdatedNotif
  */
 const std::string AnalysisDataServiceImpl::isValid(const std::string &name) const {
   std::regex validName("^[a-zA-Z_][\\w]*");
-
   std::string error = "";
 
   if (!std::regex_match(name, validName)) {
     error =
         "Invalid object name '" + name +
         "'. Names must start with a letter or underscore and contain only alpha-numeric characters and underscores.";
+
+    // Log a warning message to let user know we will stop allowing invalid variable names in the future.
+    const std::string warningMessage =
+        error + "\n"
+                "Currently this is only a warning, but in a future version of Mantid this will raise an exception and "
+                "the operation will fail.\n"
+                "Please update your scripts to use valid Python identifiers for workspace names.";
+    Kernel::Logger log("AnalaysisDataService");
+    log.warning(warningMessage);
   }
+
+  // Fail in debug mode if name is not valid.
+#ifndef NDEBUG
   return error;
+#endif
+
+  return "";
 }
 
 /**
