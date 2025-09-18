@@ -5,7 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import os
-import sys
 
 # --- Logger and ConfigService Setup ---
 try:
@@ -95,33 +94,55 @@ class HelpWindowModel:
         self._determine_mode_and_set_state(local_docs_path_from_config)
 
     def _get_doc_path(self):
-        """Try to get docs path"""
+        """
+        Locate the documentation directory for Mantid installations.
 
-        if any(indicator in sys.prefix for indicator in ["conda", "anaconda", "miniconda", "mambaforge"]):
-            # Possible conda environment installation, docs path will be {conda_prefix}/share/doc/html
-            mantid_root = sys.prefix  # eq to conda prefix
-            docs_path = os.path.join(mantid_root, "share", "doc", "html")
-            if os.path.exists(docs_path):
-                return docs_path
+        Searches for docs in various installation patterns:
+        - Standalone installations: {installation_dir}/share/doc/html/
+        - Conda installations: {env_dir}/share/doc/html/
+        - Debug builds: {build_dir}/docs/html/
 
-        props_dir = os.path.dirname(ConfigService.getPropertiesDir())
-        if props_dir:
-            # Use properties dir to determine the root dir of the project incase of standalone
-            mantid_root = os.path.dirname(props_dir)
+        Returns:
+            str: Path to the documentation directory, or empty string if not found
+        """
 
-            # Possible standalone installation the docs path will be {mantid_root}/share/doc/ (all platforms)
-            docs_path = os.path.join(mantid_root, "share", "doc", "html")
-            if os.path.exists(docs_path):
-                return docs_path
+        # Get the bin directory from the properties dir, we move one level up becase the return strings ends with /
+        bin_dir = os.path.dirname(ConfigService.getPropertiesDir())
+        if not bin_dir:
+            return ""
 
-            # Possible Linux debug build installation, the docs will be {mantid_root}/docs/html/
-            docs_path = os.path.join(mantid_root, "docs", "html")
-            if os.path.exists(docs_path):
-                return docs_path
+        doc_paths_to_try = []
+        if os.name == "posix":
+            # On Unix-like systems the parent of the bin dir will always be either installation/env/build dir
+            project_dir = os.path.dirname(bin_dir)
 
-            # Possible Windows debug build the mantid root will be the second parent of the props folder
-            mantid_root = os.path.dirname(mantid_root)
-            docs_path = os.path.join(mantid_root, "docs", "html")
+            doc_paths_to_try = [
+                # Standard standalone/conda installation path
+                os.path.join(project_dir, "share", "doc", "html"),
+                # Debug build installation path
+                os.path.join(project_dir, "docs", "html"),
+            ]
+        else:
+            # On Windows the parent of the bin dir will be the installation dir
+            installation_dir = os.path.dirname(bin_dir)
+            # On Windows the second parent of the bin dir will be the conda env dir
+            # because there is additional /Library/ in windows conda envs path structure
+            env_dir = os.path.dirname(os.path.dirname(bin_dir))
+            # On Windows the second parent of the bin dir will be the debuig build dir
+            # becaue tehre is additional level for the configuration (i.e. /DebugWithRelRuntime)
+            build_dir = os.path.dirname(os.path.dirname(bin_dir))
+
+            doc_paths_to_try = [
+                # Standard Windows installation path
+                os.path.join(installation_dir, "share", "doc", "html"),
+                # Windows debug build
+                os.path.join(build_dir, "docs", "html"),
+                # Windows conda installation
+                os.path.join(env_dir, "share", "doc", "html"),
+            ]
+
+        # Try each potential path until we find one that exists
+        for docs_path in doc_paths_to_try:
             if os.path.exists(docs_path):
                 return docs_path
 

@@ -178,29 +178,8 @@ class TestHelpWindowModelDocPathDiscovery(unittest.TestCase):
             f.write("<html><body>Test Docs</body></html>")
         return docs_path
 
-    @patch("sys.prefix")
     @patch(CONFIG_SERVICE_LOOKUP_PATH)
-    def test_conda_environment_docs_discovery(self, mock_ConfigService, mock_sys_prefix):
-        """Test discovery of docs in conda environment installation"""
-        # Set up conda-like sys.prefix
-        conda_prefix = os.path.join(self.temp_dir, "conda_env")
-        mock_sys_prefix.__str__ = lambda: conda_prefix  # For string operations
-        mock_sys_prefix.__contains__ = lambda self, item: "conda" in conda_prefix
-        mock_ConfigService.getPropertiesDir.return_value = ""
-
-        # Create the expected conda docs structure
-        docs_path = self._create_docs_structure(conda_prefix, "share/doc/html")
-
-        with patch("sys.prefix", conda_prefix):
-            model_path = HelpWindowModel._get_doc_path(HelpWindowModel())
-
-        print(model_path)
-        print(docs_path)
-
-        self.assertEqual(os.path.normpath(model_path), os.path.normpath(docs_path), "Should find conda docs path")
-
-    @patch(CONFIG_SERVICE_LOOKUP_PATH)
-    def test_standalone_installation_docs_discovery(self, mock_ConfigService):
+    def test_standalone_and_unix_conda_installation_docs_discovery(self, mock_ConfigService):
         """Test discovery of docs in standalone installation"""
         # Create a mock properties directory structure
         props_dir = os.path.join(self.temp_dir, "mantid", "bin", "")
@@ -219,6 +198,7 @@ class TestHelpWindowModelDocPathDiscovery(unittest.TestCase):
 
         self.assertEqual(os.path.normpath(discovered_path), os.path.normpath(docs_path), "Should find standalone installation docs path")
 
+    @unittest.skipIf(os.name != "posix", "Unix-specific test")
     @patch(CONFIG_SERVICE_LOOKUP_PATH)
     def test_linux_debug_build_docs_discovery(self, mock_ConfigService):
         """Test discovery of docs in Linux debug build"""
@@ -238,6 +218,7 @@ class TestHelpWindowModelDocPathDiscovery(unittest.TestCase):
 
         self.assertEqual(os.path.normpath(discovered_path), os.path.normpath(docs_path), "Should find Linux debug build docs path")
 
+    @unittest.skipIf(os.name == "posix", "Windows-specific test")
     @patch(CONFIG_SERVICE_LOOKUP_PATH)
     def test_windows_debug_build_docs_discovery(self, mock_ConfigService):
         """Test discovery of docs in Windows debug build (double parent lookup)"""
@@ -257,6 +238,27 @@ class TestHelpWindowModelDocPathDiscovery(unittest.TestCase):
         discovered_path = model._get_doc_path()
 
         self.assertEqual(os.path.normpath(discovered_path), os.path.normpath(docs_path), "Should find Windows debug build docs path")
+
+    @unittest.skipIf(os.name == "posix", "Windows-specific test")
+    @patch(CONFIG_SERVICE_LOOKUP_PATH)
+    def test_windows_conda_build_docs_discovery(self, mock_ConfigService):
+        """Test discovery of docs in Windows conda installation (double parent lookup)"""
+        # Create a more nested properties directory structure for Windows
+        props_dir = os.path.join(self.temp_dir, "env_name", "Library", "bin", "properties")
+        os.makedirs(props_dir, exist_ok=True)
+
+        # For Windows conda, mantid root is two parents up from props folder parent
+        mantid_root = os.path.join(self.temp_dir, "env_name")
+
+        # Create the expected Windows debug docs structure
+        docs_path = self._create_docs_structure(mantid_root, "share/doc/html")
+
+        mock_ConfigService.getPropertiesDir.return_value = props_dir
+
+        model = HelpWindowModel()
+        discovered_path = model._get_doc_path()
+
+        self.assertEqual(os.path.normpath(discovered_path), os.path.normpath(docs_path), "Should find Windows conda build docs path")
 
     @patch(CONFIG_SERVICE_LOOKUP_PATH)
     def test_no_docs_found_returns_empty_string(self, mock_ConfigService):
