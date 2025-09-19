@@ -200,15 +200,24 @@ class FullInstrumentViewModel:
 
         if sum_spectra and len(workspace_indices) > 1:
             # Sum in d-Spacing to avoid blurring peaks
-            ws = ConvertUnits(InputWorkspace=ws, target="dSpacing", EMode="Elastic", EnableLogging=False, StoreInADS=False)
+            if ws.getAxis(0).getUnit().unitID() != "dSpacing":
+                ws = ConvertUnits(InputWorkspace=ws, target="dSpacing", EMode="Elastic", EnableLogging=False, StoreInADS=False)
             # Converting to d-Spacing will give spectra with different bin edges
             # Find the spectrum with the widest range, and the one with the smallest bin width and use that
-            # combo to rebin the selected spectra
-            bin_edges = ws.extractX()
-            min_bin_edge = np.min(bin_edges)
-            max_bin_edge = np.max(bin_edges)
-            min_bin_width = np.min(np.diff(bin_edges))
-            ws = Rebin(InputWorkspace=ws, Params=[min_bin_edge, min_bin_width, max_bin_edge], EnableLogging=False, StoreInADS=False)
+            # combo to rebin the selected spectra. We have to loop over the spectra because otherwise ragged
+            # workspaces will have their bin edge vector truncated
+            if not ws.isCommonBins():
+                min_bin_edge = np.inf
+                max_bin_edge = 0
+                min_bin_width = np.inf
+                for ws_index_i in range(len(workspace_indices)):
+                    bin_edges = ws.readX(ws_index_i)
+                    min_bin_edge = min(min_bin_edge, bin_edges[0])
+                    max_bin_edge = max(max_bin_edge, bin_edges[-1])
+                    min_bin_width = min(min_bin_width, np.min(np.diff(bin_edges)))
+
+                ws = Rebin(InputWorkspace=ws, Params=[min_bin_edge, min_bin_width, max_bin_edge], EnableLogging=False, StoreInADS=False)
+
             ws = SumSpectra(InputWorkspace=ws, EnableLogging=False, StoreInADS=False)
 
         ws = ConvertUnits(InputWorkspace=ws, target=unit, EMode="Elastic", EnableLogging=False, StoreInADS=False)
