@@ -43,6 +43,21 @@ class SliceViewerBasePresenterShim(SliceViewerBasePresenter):
     def is_integer_frame(self):
         return False, False
 
+    def apply_masking_clicked(self):
+        pass
+
+    def elli_masking_clicked(self, active):
+        pass
+
+    def export_masking_clicked(self):
+        pass
+
+    def poly_masking_clicked(self, active):
+        pass
+
+    def rect_masking_clicked(self, active):
+        pass
+
 
 class SliceViewerBasePresenterTest(unittest.TestCase):
     def setUp(self):
