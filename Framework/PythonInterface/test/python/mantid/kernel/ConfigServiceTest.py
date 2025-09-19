@@ -155,7 +155,6 @@ class ConfigServiceTest(unittest.TestCase):
             "CheckMantidVersion.DownloadURL",  # shouldn't be changed by users
             "CheckMantidVersion.GitHubReleaseURL",  # shouldn't be changed by users
             "UpdateInstrumentDefinitions.URL",  # shouldn't be changed by users
-            "docs.html.root",  # shouldn't be changed by users
             "errorreports.rooturl",  # shouldn't be changed by users
             "errorreports.core_dumps",
             "usagereports.rooturl",  # shouldn't be changed by users
@@ -217,7 +216,6 @@ class ConfigServiceTest(unittest.TestCase):
             raise AssertionError("{} undocumented properties: {}".format(len(undocumented), undocumented))
 
     def test_contains(self):
-        assert "docs.html.root" in ConfigService
         # verify check against None
         self.assertFalse(None in ConfigService)
         # verify check against things that bool to False
