@@ -25,44 +25,24 @@ static const std::string X_UNIT = "Wavelength";
 static const std::string REF_TIMESTAMP = "2025-07-01T08:00:00";
 
 constexpr double WAV_MIN = 1;
-constexpr double WAV_MAX = 9;
-constexpr double WAV_STEP = 1;
+constexpr double WAV_MAX = 8;
+constexpr double BIN_WIDTH = 1;
+constexpr int N_SPECS = 1;
 constexpr double DEFAULT_LIFETIME = 45;
 constexpr double DEFAULT_INI_POL = 0.9;
 constexpr double DEFAULT_PXD = 12;
 constexpr double LAMBDA_CONVERSION_FACTOR = 0.0733;
-constexpr std::array<double, 4> NON_MAG_Y_VALS = {12.0, 1.0, 2.0, 10.0};
-constexpr std::array<double, 4> MAG_Y_VALS = {6.0, 0.2, 0.3, 1.0};
 
-static const std::string HE_ANALYZER_FIT_ALG = "HeliumAnalyserEfficiency";
-static const std::string HE_ANALYZER_TIME_ALG = "HeliumAnalyserEfficiencyTime";
-static const std::string SPIN_STATE = "00,01,10,11";
+static const std::string DEFAULT_FUNC_STR = "name=UserFunction, Formula=x*0 + #";
+static const std::string EFFICIENCY_FUNC_STR = "name=UserFunction,Formula=0.5 * (1 + tanh(x * #))";
+static const std::string UNPOL_FUNC_STR = "name=UserFunction,Formula=exp(- # * x) * cosh(x * #)";
+static const std::string SPIN_TEST_FUNC_STR = "name=UserFunction,Formula=0.9 * exp(- x * # )";
+
+static const std::string SPIN_STATE = "11,10,01,00";
 
 constexpr double DELTA = 0.01;
 
-struct PolarizationTestParameters {
-  PolarizationTestParameters() = default;
-  PolarizationTestParameters(const double tauIni, const double polIni, const double pxdIni)
-      : Tau(tauIni), polInitial(polIni), pxd(pxdIni), pxdError(), outPolarizations(), outEfficiencies() {}
-  double Tau{DEFAULT_LIFETIME};
-  double polInitial{DEFAULT_INI_POL};
-  double pxd{DEFAULT_PXD};
-  double pxdError{0};
-  std::vector<double> outPolarizations{};
-  std::vector<std::vector<double>> outEfficiencies{};
-};
-
-struct InputTestParameters {
-  InputTestParameters() = default;
-  InputTestParameters(const int spec, const int bins, const std::string &group, const std::string &wsName,
-                      const std::string &units)
-      : nSpec(spec), nBins(bins), groupName(group), testName(wsName), xUnit(units) {}
-  int nSpec{1};
-  int nBins{5};
-  std::string groupName{GROUP_NAME};
-  std::string testName{OUTPUT_NAME};
-  std::string xUnit{X_UNIT};
-};
+std::string fillFuncStr(const std::vector<double> &number, const std::string &funcStr = DEFAULT_FUNC_STR);
 
 struct TestWorkspaceParameters {
   TestWorkspaceParameters() = default;
@@ -83,64 +63,29 @@ struct TestWorkspaceParameters {
     xMax = max;
     binWidth = width;
   }
-  void updateTimeStamp(const double timeDelay, const std::string &timeStamp) {
-    delay = timeDelay;
-    refTimeStamp = timeStamp;
-  }
-
-  std::string testName{OUTPUT_NAME};
-  std::string funcStr{""};
+  std::string testName{INPUT_NAME};
+  std::string funcStr{fillFuncStr({1.0})};
   std::string xUnit{X_UNIT};
   std::string refTimeStamp{REF_TIMESTAMP};
-  double xMin{1.0};
-  double xMax{8.0};
-  double binWidth{1.0};
+  double xMin{WAV_MIN};
+  double xMax{WAV_MAX};
+  double binWidth{BIN_WIDTH};
   double delay{0.0};
-  int numBanks{1};
+  int numBanks{N_SPECS};
 };
 
-double createFunctionArgument(const double lifetime = DEFAULT_LIFETIME, const double time = 1,
-                              const double iniPol = DEFAULT_INI_POL, const double pxd = DEFAULT_PXD);
-
-std::pair<std::vector<double>, std::vector<double>> createXYFromParams(double Xmin = WAV_MIN, double Xmax = WAV_MAX,
-                                                                       double step = WAV_STEP, double Y = 1.0);
-
-std::vector<double> generateOutputFunc(const std::vector<double> &x, const double factor = 1, const double mu = 0,
-                                       const bool efficiency = true);
+MatrixWorkspace_sptr generateFunctionDefinedWorkspace(const TestWorkspaceParameters &parameters,
+                                                      const std::string &name = "", const std::string &func = "");
 
 WorkspaceGroup_sptr groupWorkspaces(const std::string &name, const std::vector<std::string> &wsToGroup);
 WorkspaceGroup_sptr groupWorkspaces(const std::string &name, const std::vector<MatrixWorkspace_sptr> &wsToGroup);
-WorkspaceGroup_sptr createPolarizedTestGroup(std::string const &outName, TestWorkspaceParameters &parameters,
-                                             const std::optional<std::vector<double>> &amplitudes = std::nullopt,
+WorkspaceGroup_sptr createPolarizedTestGroup(std::string const &outName, const TestWorkspaceParameters &parameters,
+                                             const std::vector<double> &amplitudes, const bool isFullPolarized = true);
+WorkspaceGroup_sptr createPolarizedTestGroup(std::string const &outName, const TestWorkspaceParameters &parameters,
+                                             const std::vector<std::string> &funcs, const bool isFullPolarized = true);
+WorkspaceGroup_sptr createPolarizedTestGroup(std::string const &outName, const TestWorkspaceParameters &parameters,
                                              const bool isFullPolarized = true);
-MatrixWorkspace_sptr generateFunctionDefinedWorkspace(const TestWorkspaceParameters &parameters);
-MatrixWorkspace_sptr generateWorkspace(const std::string &name, const std::vector<double> &x,
-                                       const std::vector<double> &y, const std::string &xUnit = X_UNIT,
-                                       const int nSpec = 1, const double delay = 0,
-                                       const std::string &refTimeStamp = REF_TIMESTAMP);
-
 MatrixWorkspace_sptr getMatrixWorkspaceFromInput(const std::string &wsName);
-
-IAlgorithm_sptr prepareHeEffAlgorithm(const std::vector<std::string> &inputWorkspaces,
-                                      const std::string &outputName = OUTPUT_NAME,
-                                      const std::string &spinState = SPIN_STATE,
-                                      const std::string &outputFitParameters = "",
-                                      const std::string &outputFitCurves = "");
-
-template <typename T = MatrixWorkspace>
-IAlgorithm_sptr prepareHeTimeAlgorithm(const std::shared_ptr<T> &inputWorkspace, const std::string &refTimeStamp = "",
-                                       const std::shared_ptr<T> &referenceWorkspace = nullptr) {
-  const auto heAlgorithm = AlgorithmManager::Instance().create("HeliumAnalyserEfficiencyTime");
-  heAlgorithm->initialize();
-  heAlgorithm->setProperty("InputWorkspace", inputWorkspace);
-  if (referenceWorkspace) {
-    heAlgorithm->setProperty("ReferenceWorkspace", referenceWorkspace);
-  }
-  heAlgorithm->setProperty("ReferenceTimeStamp", refTimeStamp);
-  heAlgorithm->setProperty("OutputWorkspace", OUTPUT_NAME);
-
-  return heAlgorithm;
-}
 
 // TimeDifference is a python algorithm. This is a basic mock for running the tests.
 class TimeDifference final : public Algorithm {
