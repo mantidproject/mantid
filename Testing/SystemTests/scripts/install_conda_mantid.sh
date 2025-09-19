@@ -9,6 +9,7 @@ CONDA_DEFAULT_ENV_PREFIX=${CONDA_PREFIX}
 
 conda config --add channels conda-forge
 conda config --add channels mantid
+conda config --add channels neutrons
 conda config --set always_yes true
 
 # checking

@@ -13,6 +13,8 @@ build:
   ignore_run_exports_from:
       - {{ compiler('cxx') }}
       - python
+  script_env:
+      - MANTID_DATA_STORE={{ environ.get('MANTID_DATA_STORE', '~/MantidExternalData') }}
 
 requirements:
   build:
@@ -37,6 +39,7 @@ requirements:
     - xorg-libxxf86vm  # [linux]
     - xorg-libx11  # [linux]
     - xorg-xorgproto  # [linux]
+    - pystog {{ pystog }}
 
 # there are no run requirements as it's just pure html
 
