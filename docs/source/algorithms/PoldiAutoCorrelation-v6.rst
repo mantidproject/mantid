@@ -78,7 +78,7 @@ Output:
 .. testoutput:: POLDI_silicon_autocorr
 
     The workspace contains 448 spectra.
-    The correlation spectrum has 2460 bins.
+    The correlation spectrum has 2833 bins.
 
 References
 ----------
