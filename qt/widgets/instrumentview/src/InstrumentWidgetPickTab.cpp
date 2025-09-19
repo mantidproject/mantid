@@ -85,6 +85,9 @@ void rebin(const T &inputWorkspace, const std::string &rebinString, const bool p
   rebinAlgorithm->execute();
 }
 
+const std::string PLOT_BLOCKSIZE_ERROR =
+    "Cannot plot for workspace with only one bin. Rebin workspace to enable plotting.";
+
 } // namespace
 
 /**
@@ -559,6 +562,9 @@ void InstrumentWidgetPickTab::setSelectionType() {
   ProjectionSurface::InteractionMode surfaceMode = ProjectionSurface::PickSingleMode;
   auto plotType = m_plotController->getPlotType();
   auto surface = m_instrWidget->getSurface();
+  if (!m_instrWidget->getInstrumentActor().canPlotBlocksize()) {
+    m_plot->showOverlayMessage(PLOT_BLOCKSIZE_ERROR);
+  }
   if (m_zoom->isChecked()) {
     m_selectionType = Single;
     m_activeTool->setText("Tool: Navigation");
@@ -919,6 +925,10 @@ void InstrumentWidgetPickTab::updatePlotMultipleDetectors() {
   } else if (m_selectionType == InstrumentWidgetPickTab::WholeInstrument) {
     std::vector<Mantid::detid_t> dets;
     const auto &actor = m_instrWidget->getInstrumentActor();
+    if (!actor.canPlotBlocksize()) {
+      m_plot->showOverlayMessage(PLOT_BLOCKSIZE_ERROR);
+      return;
+    }
     const auto &detInfo = actor.detectorInfo();
     dets = detInfo.detectorIDs();
 
@@ -1295,6 +1305,10 @@ void DetectorPlotController::setPlotData(size_t pickID) {
   }
 
   const auto &actor = m_instrWidget->getInstrumentActor();
+  if (!actor.canPlotBlocksize()) {
+    m_plot->showOverlayMessage(PLOT_BLOCKSIZE_ERROR);
+    return;
+  }
   const auto &componentInfo = actor.componentInfo();
   if (componentInfo.isDetector(pickID)) {
     if (m_plotType == IWPickPlotType::SINGLE) {
@@ -1324,7 +1338,11 @@ void DetectorPlotController::setPlotData(const std::vector<size_t> &detIndices) 
   std::vector<double> x, y;
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
   const auto &actor = m_instrWidget->getInstrumentActor();
-  actor.sumDetectors(detIndices, x, y, static_cast<size_t>(m_plot->width()));
+  if (actor.canPlotBlocksize()) {
+    actor.sumDetectors(detIndices, x, y, static_cast<size_t>(m_plot->width()));
+  } else {
+    m_plot->showOverlayMessage(PLOT_BLOCKSIZE_ERROR);
+  }
   QApplication::restoreOverrideCursor();
   if (!x.empty()) {
     m_plot->setData(std::move(x), std::move(y),
@@ -1363,6 +1381,7 @@ void DetectorPlotController::updatePlot() { m_plot->replot(); }
 void DetectorPlotController::clear() {
   m_plot->clearCurve();
   m_plot->clearPeakLabels();
+  m_plot->clearOverlayMessage();
 }
 
 /**
@@ -1377,6 +1396,10 @@ void DetectorPlotController::plotSingle(size_t detindex) {
     return;
 
   const auto &actor = m_instrWidget->getInstrumentActor();
+  if (!actor.canPlotBlocksize()) {
+    m_plot->showOverlayMessage(PLOT_BLOCKSIZE_ERROR);
+    return;
+  }
   // set the data
   auto detid = actor.getDetID(detindex);
   m_plot->setData(std::move(x), std::move(y),
@@ -1409,6 +1432,10 @@ void DetectorPlotController::plotSingle(size_t detindex) {
  */
 void DetectorPlotController::plotTube(size_t detindex) {
   const auto &actor = m_instrWidget->getInstrumentActor();
+  if (!actor.canPlotBlocksize()) {
+    m_plot->showOverlayMessage(PLOT_BLOCKSIZE_ERROR);
+    return;
+  }
   const auto &componentInfo = actor.componentInfo();
 
   if (!componentInfo.hasParent(detindex)) {
@@ -1445,6 +1472,10 @@ void DetectorPlotController::plotTubeSums(size_t detindex) {
     return;
   }
   const auto &actor = m_instrWidget->getInstrumentActor();
+  if (!actor.canPlotBlocksize()) {
+    m_plot->showOverlayMessage(PLOT_BLOCKSIZE_ERROR);
+    return;
+  }
   const auto &componentInfo = actor.componentInfo();
   auto parent = componentInfo.parent(detindex);
   auto detid = actor.getDetID(detindex);
@@ -1465,6 +1496,10 @@ void DetectorPlotController::plotTubeSums(size_t detindex) {
  */
 void DetectorPlotController::plotTubeIntegrals(size_t detindex) {
   const auto &actor = m_instrWidget->getInstrumentActor();
+  if (!actor.canPlotBlocksize()) {
+    m_plot->showOverlayMessage(PLOT_BLOCKSIZE_ERROR);
+    return;
+  }
   const auto &componentInfo = actor.componentInfo();
   std::vector<double> x, y;
   prepareDataForIntegralsPlot(detindex, x, y);
