@@ -35,6 +35,8 @@ std::shared_ptr<const WorkspaceGroup> AnalysisDataServiceImpl::GroupUpdatedNotif
  * Check whether the name is valid for the ADS. In release mode, issue a warning but do not return the error.
  * In debug mode, return the error string.
  * @param name A string containing a possible name for an object in the ADS
+ * @param printWarning Whether to print a warning if the workspace name is invalid. Default is false. Used to
+ *                     avoid the warning printing multiple times per operation.
  * @return An empty string if the name is valid or an error message stating the
  * problem if the name is unacceptable.
  */
