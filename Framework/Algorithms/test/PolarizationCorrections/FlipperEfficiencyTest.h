@@ -32,8 +32,6 @@ using namespace PolCorrTestUtils;
 class FlipperEfficiencyTest : public CxxTest::TestSuite {
 public:
   void setUp() override {
-    //  default flipper configuration on alg: 11, 10, 01, 00
-    const std::vector<double> m_flipperAmps = {4.0, 1.0, 1.0, 4.0};
     m_defaultSaveDirectory = ConfigService::Instance().getString("defaultsave.directory");
     m_parameters = TestWorkspaceParameters();
   }
@@ -62,7 +60,7 @@ public:
 
   void test_saving_absolute() {
     auto const temp_filename = std::filesystem::temp_directory_path() /= "something.nxs";
-    auto const &group = createPolarizedTestGroup("testWs", m_parameters, m_flipperAmps);
+    auto const &group = createPolarizedTestGroup("testWs", m_parameters, FLIPPER_AMPS);
     auto alg = initialize_alg(group, false);
     alg->setPropertyValue("OutputFilePath", temp_filename.string());
     alg->execute();
@@ -74,7 +72,7 @@ public:
     auto tempDir = std::filesystem::temp_directory_path();
     ConfigService::Instance().setString("defaultsave.directory", tempDir.string());
     std::string const &filename = "something.nxs";
-    auto const &group = createPolarizedTestGroup("testWs", m_parameters, m_flipperAmps);
+    auto const &group = createPolarizedTestGroup("testWs", m_parameters, FLIPPER_AMPS);
     auto alg = initialize_alg(group, false);
     alg->setPropertyValue("OutputFilePath", filename);
     alg->execute();
@@ -85,7 +83,7 @@ public:
 
   void test_saving_no_ext() {
     auto const temp_filename = std::filesystem::temp_directory_path() /= "something";
-    auto const &group = createPolarizedTestGroup("testWs", m_parameters, m_flipperAmps);
+    auto const &group = createPolarizedTestGroup("testWs", m_parameters, FLIPPER_AMPS);
     auto alg = initialize_alg(group, false);
     alg->setPropertyValue("OutputFilePath", temp_filename.string());
     alg->execute();
@@ -107,7 +105,7 @@ public:
   }
 
   void test_no_workspaces_or_file_output_fails() {
-    auto const &group = createPolarizedTestGroup("testWs", m_parameters, m_flipperAmps);
+    auto const &group = createPolarizedTestGroup("testWs", m_parameters, FLIPPER_AMPS);
     auto alg = initialize_alg(group, false);
     TS_ASSERT_THROWS_EQUALS(
         alg->execute(), std::runtime_error const &e, std::string(e.what()),
@@ -118,7 +116,7 @@ public:
   /// Calculation Tests
 
   void test_normal_perfect_calculation_occurs() {
-    auto const &group = createPolarizedTestGroup("testWs", m_parameters, m_flipperAmps);
+    auto const &group = createPolarizedTestGroup("testWs", m_parameters, FLIPPER_AMPS);
     auto alg = initialize_alg(group);
     alg->execute();
 
@@ -135,8 +133,9 @@ public:
   }
 
   void test_normal_typical_calculation_occurs() {
-    m_flipperAmps[0] *= 0.9;
-    auto const &group = createPolarizedTestGroup("testWs", m_parameters, m_flipperAmps);
+    auto flipAmps{FLIPPER_AMPS};
+    flipAmps[0] *= 0.9;
+    auto const &group = createPolarizedTestGroup("testWs", m_parameters, flipAmps);
     auto alg = initialize_alg(group);
     alg->execute();
 
@@ -153,9 +152,10 @@ public:
   }
 
 private:
+  //  default flipper configuration on alg: 11, 10, 01, 00
+  const std::vector<double> FLIPPER_AMPS = {4.0, 1.0, 1.0, 4.0};
   std::string m_defaultSaveDirectory;
   TestWorkspaceParameters m_parameters;
-  std::vector<double> m_flipperAmps;
 
   std::unique_ptr<FlipperEfficiency> initialize_alg(Mantid::API::WorkspaceGroup_sptr const &inputWorkspace,
                                                     bool const setOutput = true) {
