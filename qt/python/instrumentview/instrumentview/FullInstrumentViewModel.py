@@ -22,11 +22,13 @@ class FullInstrumentViewModel:
     _data_min = 0.0
     _data_max = 0.0
     line_plot_workspace = None
+    _workspace_x_unit: str
 
     def __init__(self, workspace: Workspace2D):
         """For the given workspace, calculate detector positions, the map from detector indices to workspace indices, and integrated
         counts. Optionally will draw detector geometry, e.g. rectangular bank or tube instead of points."""
         self._workspace = workspace
+        self._workspace_x_unit = workspace.getAxis(0).getUnit().unitID()
 
     def setup(self):
         component_info = self._workspace.componentInfo()
@@ -73,6 +75,10 @@ class FullInstrumentViewModel:
     @property
     def workspace(self) -> Workspace2D:
         return self._workspace
+
+    @property
+    def has_unit(self) -> bool:
+        return self._workspace_x_unit != "Empty"
 
     @property
     def default_projection(self) -> str:
@@ -200,7 +206,7 @@ class FullInstrumentViewModel:
 
         if sum_spectra and len(workspace_indices) > 1:
             # Sum in d-Spacing to avoid blurring peaks
-            if ws.getAxis(0).getUnit().unitID() != "dSpacing":
+            if self._workspace_x_unit != "dSpacing" and self.has_unit:
                 ws = ConvertUnits(InputWorkspace=ws, target="dSpacing", EMode="Elastic", EnableLogging=False, StoreInADS=False)
             # Converting to d-Spacing will give spectra with different bin edges
             # Find the spectrum with the widest range, and the one with the smallest bin width and use that
@@ -220,7 +226,8 @@ class FullInstrumentViewModel:
 
             ws = SumSpectra(InputWorkspace=ws, EnableLogging=False, StoreInADS=False)
 
-        ws = ConvertUnits(InputWorkspace=ws, target=unit, EMode="Elastic", EnableLogging=False, StoreInADS=False)
+        if self.has_unit:
+            ws = ConvertUnits(InputWorkspace=ws, target=unit, EMode="Elastic", EnableLogging=False, StoreInADS=False)
         self.line_plot_workspace = ws
 
     def save_line_plot_workspace_to_ads(self) -> None:

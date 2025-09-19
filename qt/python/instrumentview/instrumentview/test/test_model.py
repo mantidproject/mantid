@@ -373,3 +373,19 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         mock_extract_spectra.assert_called_once()
         model.save_line_plot_workspace_to_ads()
         mock_ads.addOrReplace.assert_called_once()
+
+    def test_has_no_unit(self):
+        mock_workspace = self._create_mock_workspace([1, 2, 3])
+        mock_workspace.getAxis.return_value = mock.MagicMock()
+        mock_workspace.getAxis(0).getUnit.return_value = mock.MagicMock()
+        mock_workspace.getAxis(0).getUnit().unitID.return_value = "Empty"
+        model = FullInstrumentViewModel(mock_workspace)
+        self.assertEqual(False, model.has_unit)
+
+    def test_has_unit(self):
+        mock_workspace = self._create_mock_workspace([1, 2, 3])
+        mock_workspace.getAxis.return_value = mock.MagicMock()
+        mock_workspace.getAxis(0).getUnit.return_value = mock.MagicMock()
+        mock_workspace.getAxis(0).getUnit().unitID.return_value = "Wavelength"
+        model = FullInstrumentViewModel(mock_workspace)
+        self.assertEqual(True, model.has_unit)

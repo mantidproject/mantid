@@ -250,7 +250,7 @@ class FullInstrumentViewWindow(QMainWindow):
 
     def subscribe_presenter(self, presenter) -> None:
         self._presenter = presenter
-        for unit in self._presenter._UNIT_OPTIONS:
+        for unit in self._presenter.available_unit_options():
             self._units_combo_box.addItem(unit)
 
     def setup_connections_to_presenter(self) -> None:

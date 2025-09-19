@@ -85,6 +85,11 @@ class FullInstrumentViewPresenter:
     def on_sum_spectra_checkbox_clicked(self) -> None:
         self._update_line_plot_ws_and_draw(self._view.current_selected_unit())
 
+    def available_unit_options(self) -> list[str]:
+        if self._model.has_unit:
+            return self._UNIT_OPTIONS
+        return ["No units"]
+
     def on_tof_limits_updated(self) -> None:
         """When TOF limits are changed, read the new limits and tell the presenter to update the colours accordingly"""
         self._model.tof_limits = self._view.get_tof_limits()

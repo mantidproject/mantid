@@ -142,3 +142,17 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._mock_view.current_selected_unit.return_value = "dSpacing"
         self._presenter.on_sum_spectra_checkbox_clicked()
         mock_update_line_plot_ws_and_draw.assert_called_once_with("dSpacing")
+
+    @mock.patch.object(FullInstrumentViewModel, "has_unit", new_callable=mock.PropertyMock)
+    def test_available_units_no_units(self, mock_has_unit):
+        mock_has_unit.return_value = False
+        units = self._presenter.available_unit_options()
+        mock_has_unit.assert_called_once()
+        self.assertEquals(["No units"], units)
+
+    @mock.patch.object(FullInstrumentViewModel, "has_unit", new_callable=mock.PropertyMock)
+    def test_available_units_has_units(self, mock_has_unit):
+        mock_has_unit.return_value = True
+        units = self._presenter.available_unit_options()
+        mock_has_unit.assert_called_once()
+        self.assertEquals(self._presenter._UNIT_OPTIONS, units)
