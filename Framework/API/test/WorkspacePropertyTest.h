@@ -122,11 +122,15 @@ public:
     // valid
     TS_ASSERT_EQUALS(wsp2->setValue("ws2"), "");
     TS_ASSERT_EQUALS(wsp2->isValid(), "");
-    // Setting an invalid name should make wsp6 invalid
+
+    // Setting an invalid name should make wsp6 invalid but currently only in debug mode.
     std::string invalidWorkspaceName = "ws6-1";
-    std::string error =
+    std::string error = "";
+#ifndef NDEBUG
+    error =
         "Invalid object name '" + invalidWorkspaceName +
         "'. Names must start with a letter or underscore and contain only alpha-numeric characters and underscores.";
+#endif
     TS_ASSERT_EQUALS(wsp6->setValue(invalidWorkspaceName), error);
     TS_ASSERT_EQUALS(wsp6->isValid(), error);
 
@@ -351,17 +355,19 @@ public:
   void test_trimmming_off() {
     Workspace_sptr ws = WorkspaceFactory::Instance().create("WorkspacePropertyTest", 1, 1, 1);
     std::string wsNameWithWhitespace = "  space1\t\n";
-    AnalysisDataService::Instance().add("space1", ws);
+    AnalysisDataService::Instance().add(wsNameWithWhitespace, ws);
     WorkspaceProperty<Workspace> p("workspace1", "", Direction::Input);
     // turn trimming off
     p.setAutoTrim(false);
 
-    std::string expectedError =
+    std::string expectedError = "";
+#ifndef NDEBUG
+    expectedError =
         "Invalid object name '" + wsNameWithWhitespace +
         "'. Names must start with a letter or underscore and contain only alpha-numeric characters and underscores.";
-
-    // setValue() should return an error string if illegal workspace name is provided.
-    TS_ASSERT_EQUALS(p.setValue(wsNameWithWhitespace), "expectedError");
+#endif
+    // setValue() should return an error string in debug mode if illegal workspace name is provided.
+    TS_ASSERT_EQUALS(p.setValue(wsNameWithWhitespace), expectedError);
 
     AnalysisDataService::Instance().clear();
   }
