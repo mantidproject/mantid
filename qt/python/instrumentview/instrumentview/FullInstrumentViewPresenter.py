@@ -31,7 +31,8 @@ class FullInstrumentViewPresenter:
     _TIME_OF_FLIGHT = "TOF"
     _D_SPACING = "dSpacing"
     _WAVELENGTH = "Wavelength"
-    _UNIT_OPTIONS = [_TIME_OF_FLIGHT, _D_SPACING, _WAVELENGTH]
+    _MOMENTUM_TRANSFER = "MomentumTransfer"
+    _UNIT_OPTIONS = [_TIME_OF_FLIGHT, _D_SPACING, _WAVELENGTH, _MOMENTUM_TRANSFER]
 
     def __init__(self, view: FullInstrumentViewWindow, model: FullInstrumentViewModel):
         """For the given workspace, use the data from the model to plot the detectors. Also include points at the origin and
