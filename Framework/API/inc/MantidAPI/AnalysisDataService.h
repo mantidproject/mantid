@@ -82,8 +82,10 @@ public:
   //@}
 
 public:
-  /// Is the given name a valid name for an object in the ADS
-  const std::string isValid(const std::string &name) const;
+  /// Validate the name and issue a warning in release mode, only return error string in debug mode.
+  const std::string isValid(const std::string &name, const bool printWarning = false) const;
+  //// Check whether the name is a valid python variable name and return an error message if not.
+  const std::string validateName(const std::string &name) const;
   /// Overridden add member to attach the name to the workspace when a
   /// workspace object is added to the service
   void add(const std::string &name, const std::shared_ptr<API::Workspace> &workspace) override;

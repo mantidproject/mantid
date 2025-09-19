@@ -32,28 +32,26 @@ std::shared_ptr<const WorkspaceGroup> AnalysisDataServiceImpl::GroupUpdatedNotif
 // Public methods
 //-------------------------------------------------------------------------
 /**
- * Is the given name a valid name for an object in the ADS?
+ * Check whether the name is valid for the ADS. In release mode, issue a warning but do not return the error.
+ * In debug mode, return the error string.
  * @param name A string containing a possible name for an object in the ADS
  * @return An empty string if the name is valid or an error message stating the
  * problem if the name is unacceptable.
  */
-const std::string AnalysisDataServiceImpl::isValid(const std::string &name) const {
-  std::regex validName("^[a-zA-Z_][\\w]*");
-
-  if (!std::regex_match(name, validName)) {
-    const std::string error =
-        "Invalid object name '" + name +
-        "'. Names must start with a letter or underscore and contain only alpha-numeric characters and underscores.";
-
-    // Log a warning message to let user know we will stop allowing invalid variable names in the future.
-    const std::string warningMessage =
-        error + "\n"
-                "Currently this is only a warning, but in a future version of Mantid this will raise an exception and "
-                "the operation will fail.\n"
-                "Please update your scripts to use valid Python identifiers for workspace names.";
-    Kernel::Logger log("AnalaysisDataService");
-    log.warning(warningMessage);
-
+const std::string AnalysisDataServiceImpl::isValid(const std::string &name, const bool printWarning) const {
+  const auto error = validateName(name);
+  if (!error.empty()) {
+    if (printWarning) {
+      // Log a warning message to let user know we will stop allowing invalid variable names in the future.
+      const std::string warningMessage =
+          error +
+          "\n"
+          "Currently this is only a warning, but in a future version of Mantid this will raise an exception and "
+          "the operation will fail.\n"
+          "Please update your scripts to use valid Python identifiers for workspace names.";
+      Kernel::Logger log("AnalaysisDataService");
+      log.warning(warningMessage);
+    }
     // Fail in debug mode if name is not valid.
 #ifndef NDEBUG
     return error;
@@ -61,6 +59,23 @@ const std::string AnalysisDataServiceImpl::isValid(const std::string &name) cons
   }
 
   return "";
+}
+
+/**
+ * Check whether the name is a valid python variable name, i.e. starts with underscore or letter, and contains
+ * only "word" characters (numbers, letters, underscores).
+ * @param name A string containing the name to validate
+ * @return An empty string if the name is valid or an error message describing the problem with the name.
+ */
+const std::string AnalysisDataServiceImpl::validateName(const std::string &name) const {
+  std::regex validName("^[a-zA-Z_][\\w]*");
+  std::string error = "";
+  if (!std::regex_match(name, validName)) {
+    error =
+        "Invalid object name '" + name +
+        "'. Names must start with a letter or underscore and contain only alpha-numeric characters and underscores.";
+  }
+  return error;
 }
 
 /**
@@ -404,9 +419,8 @@ AnalysisDataServiceImpl::AnalysisDataServiceImpl()
  * valid then it will check it's container for the same name that is passed if
  * true throws std::runtime_error else nothing.
  */
-
 void AnalysisDataServiceImpl::verifyName(const std::string &name, const std::shared_ptr<API::WorkspaceGroup> &group) {
-  const std::string error = isValid(name);
+  const std::string error = isValid(name, true);
   if (!error.empty()) {
     throw std::invalid_argument(error);
   }
