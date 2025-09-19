@@ -1,0 +1,1 @@
+- Update default TOF cropping values for focussed banks for ``mode="pdf"`` in POLARIS :ref:`Polaris diffraction <isis-powder-diffraction-polaris-ref>`)
