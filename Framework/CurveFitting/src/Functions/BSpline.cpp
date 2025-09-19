@@ -144,7 +144,7 @@ size_t BSpline::getSpanIndex(const double x, const size_t currentBBase, const bo
   const auto it = std::find_if(m_knots.begin() + currentBBase + clampedKnots, m_knots.cend(),
                                [&x](const size_t knot) { return x < knot; });
   if (it != m_knots.cend()) {
-    return std::distance((m_knots.begin() + currentBBase + clampedKnots, it) - clampedKnots;
+    return std::distance(m_knots.begin() + currentBBase + clampedKnots, it) - clampedKnots;
   }
   return m_knots.size() - clampedKnots * 2;
 }
