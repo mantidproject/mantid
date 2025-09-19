@@ -18,6 +18,7 @@ class SettingsView(QtWidgets.QDialog, Ui_settings):
         self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowContextHelpButtonHint)
         self.setupUi(self)
         self.setModal(True)
+        self.init_tool_tips()
 
         self.finder_save.setLabelText("Save Location")
         self.finder_save.isForRunFiles(False)
@@ -41,6 +42,60 @@ class SettingsView(QtWidgets.QDialog, Ui_settings):
             "If the box below is empty the workspaces will be fitted in the order they appear in the table."
         )
         self.peak_list_label.setText("Default Peak Function")
+
+        # Setup Tool Tips
+
+    def init_tool_tips(self):
+        self.lineedit_RD.setToolTip("Label for the first (PF: in-plane) intrinsic sample direction")
+        self.lineedit_RD0.setToolTip("X component of the first intrinsic sample direction")
+        self.lineedit_RD1.setToolTip("Y component of the first intrinsic sample direction")
+        self.lineedit_RD2.setToolTip("Z component of the first intrinsic sample direction")
+        self.lineedit_ND.setToolTip("Label for the second (PF: normal) intrinsic sample direction")
+        self.lineedit_ND0.setToolTip("X component of the second intrinsic sample direction")
+        self.lineedit_ND1.setToolTip("Y component of the second intrinsic sample direction")
+        self.lineedit_ND2.setToolTip("Z component of the second intrinsic sample direction")
+        self.lineedit_TD.setToolTip("Label for the third (PF: in-plane) intrinsic sample direction")
+        self.lineedit_TD0.setToolTip("X component of the third intrinsic sample direction")
+        self.lineedit_TD1.setToolTip("Y component of the third intrinsic sample direction")
+        self.lineedit_TD2.setToolTip("Z component of the third intrinsic sample direction")
+
+        self.monte_carlo_lineedit.setToolTip(
+            "Python dictionary-style string for input parameters to the MonteCarloAbsorption algorithm, "
+            "where keywords and values are given as 'keyword1:value1, keyword2, value2'"
+        )
+        self.abs_corr_checkBox.setToolTip(
+            "Flag for whether the calculated corrected workspaces need to be kept in the ADS "
+            "(flagging them for removal frees up system memory)"
+        )
+        self.eulerAngles_checkBox.setToolTip(
+            "Flag for notifying whether the orientation file which will be provided in the correction tab"
+            "is a text file with euler angles (checked) "
+            "or whether each line is a flattened matrix (unchecked)"
+        )
+        self.eulerAngles_lineedit.setToolTip(
+            "Lab-frame axes that the euler angles are defined along, when in neutral position"
+            "- expect a string of axis letters, one per goniometer axis eg. XYX"
+        )
+        self.eulerAnglesSense_lineedit.setToolTip(
+            "The sense of the rotation around each euler axis "
+            "where 1 is counter clockwise and -1 is clockwise "
+            "- expect string of comma separated values, one value per axis, eg."
+            "'1,-1,-1' "
+        )
+
+        self.cost_func_thresh_lineedit.setToolTip(
+            "The maximum cost function value for a given spectra's fit to be plotted in the pole figure"
+        )
+        self.peak_pos_thresh_lineedit.setToolTip(
+            "The maximum deviation in peak position from the expected position "
+            "for a given spectra's fit to be plotted in the pole figure."
+            " Expected position is either mean of all peaks or, if provided, peak position of given HKL"
+        )
+        self.expPF_checkBox.setToolTip(
+            "Flag for whether the experimental pole figure should have individual detector groups plotted "
+            "as scatter points (checked), or should be interpolated and given as a contour plot (unchecked)"
+        )
+        self.contourKernel_lineedit.setToolTip("Sigma value of the gaussian smoothing kernel applied before the interpolation")
 
     # ===============
     # Slot Connectors
@@ -74,6 +129,24 @@ class SettingsView(QtWidgets.QDialog, Ui_settings):
     def get_save_location(self):
         return self.finder_save.getFirstFilename()
 
+    def get_rd_name(self):
+        return self.lineedit_RD.text()
+
+    def get_nd_name(self):
+        return self.lineedit_ND.text()
+
+    def get_td_name(self):
+        return self.lineedit_TD.text()
+
+    def get_rd_dir(self):
+        return ",".join([self.lineedit_RD0.text(), self.lineedit_RD1.text(), self.lineedit_RD2.text()])
+
+    def get_td_dir(self):
+        return ",".join([self.lineedit_TD0.text(), self.lineedit_TD1.text(), self.lineedit_TD2.text()])
+
+    def get_nd_dir(self):
+        return ",".join([self.lineedit_ND0.text(), self.lineedit_ND1.text(), self.lineedit_ND2.text()])
+
     def get_full_calibration(self):
         return self.finder_fullCalib.getFirstFilename()
 
@@ -104,12 +177,69 @@ class SettingsView(QtWidgets.QDialog, Ui_settings):
     def get_dSpacing_min(self):
         return self.dSpacing_min_lineedit.text()
 
+    def get_monte_carlo_params(self):
+        return self.monte_carlo_lineedit.text()
+
+    def get_remove_corr_ws_after_processing(self):
+        return self.abs_corr_checkBox.isChecked()
+
+    def get_cost_func_thresh(self):
+        return self.cost_func_thresh_lineedit.text()
+
+    def get_peak_pos_thresh(self):
+        return self.peak_pos_thresh_lineedit.text()
+
+    def get_use_euler_angles(self):
+        return self.eulerAngles_checkBox.isChecked()
+
+    def get_euler_angles_scheme(self):
+        return self.eulerAngles_lineedit.text()
+
+    def get_euler_angles_sense(self):
+        return self.eulerAnglesSense_lineedit.text()
+
+    def get_plot_exp_pf(self):
+        return self.expPF_checkBox.isChecked()
+
+    def get_contour_kernel(self):
+        return self.contourKernel_lineedit.text()
+
+    def get_auto_populate_texture(self):
+        return self.textureAutoPopulate.isChecked()
+
     # =================
     # Component Setters
     # =================
 
     def set_save_location(self, text):
         self.finder_save.setText(text)
+
+    def set_rd_name(self, text):
+        self.lineedit_RD.setText(text)
+
+    def set_nd_name(self, text):
+        self.lineedit_ND.setText(text)
+
+    def set_td_name(self, text):
+        self.lineedit_TD.setText(text)
+
+    def set_rd_dir(self, text):
+        vec = text.split(",")
+        self.lineedit_RD0.setText(vec[0])
+        self.lineedit_RD1.setText(vec[1])
+        self.lineedit_RD2.setText(vec[2])
+
+    def set_td_dir(self, text):
+        vec = text.split(",")
+        self.lineedit_TD0.setText(vec[0])
+        self.lineedit_TD1.setText(vec[1])
+        self.lineedit_TD2.setText(vec[2])
+
+    def set_nd_dir(self, text):
+        vec = text.split(",")
+        self.lineedit_ND0.setText(vec[0])
+        self.lineedit_ND1.setText(vec[1])
+        self.lineedit_ND2.setText(vec[2])
 
     def set_full_calibration(self, text):
         self.finder_fullCalib.setText(text)
@@ -162,6 +292,36 @@ class SettingsView(QtWidgets.QDialog, Ui_settings):
     def set_dSpacing_min(self, text):
         self.dSpacing_min_lineedit.setText(text)
 
+    def set_monte_carlo_params(self, text):
+        self.monte_carlo_lineedit.setText(text)
+
+    def set_remove_corr_ws_after_processing(self, val):
+        self.abs_corr_checkBox.setChecked(val)
+
+    def set_cost_func_thresh(self, text):
+        self.cost_func_thresh_lineedit.setText(text)
+
+    def set_peak_pos_thresh(self, text):
+        self.peak_pos_thresh_lineedit.setText(text)
+
+    def set_use_euler_angles(self, val):
+        self.eulerAngles_checkBox.setChecked(val)
+
+    def set_euler_angles_scheme(self, text):
+        self.eulerAngles_lineedit.setText(text)
+
+    def set_euler_angles_sense(self, text):
+        self.eulerAnglesSense_lineedit.setText(text)
+
+    def set_plot_exp_pf(self, val):
+        self.expPF_checkBox.setChecked(val)
+
+    def set_contour_kernel(self, text):
+        self.contourKernel_lineedit.setText(text)
+
+    def set_auto_populate_texture(self, val):
+        self.textureAutoPopulate.setChecked(val)
+
     # =================
     # Force Actions
     # =================
@@ -174,3 +334,13 @@ class SettingsView(QtWidgets.QDialog, Ui_settings):
 
     def find_path_to_gsas2(self):
         self.finder_path_to_gsas2.findFiles(True)
+
+    # ======================
+    # Toggle Active Options
+    # ======================
+
+    def on_orientation_type_toggled(self, slot):
+        self.eulerAngles_checkBox.toggled.connect(slot)
+
+    def on_scatter_pf_toggled(self, slot):
+        self.expPF_checkBox.toggled.connect(slot)

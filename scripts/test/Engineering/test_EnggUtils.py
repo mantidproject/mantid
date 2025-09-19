@@ -352,6 +352,7 @@ INS  2 ICONS  18497.75    -29.68    -26.50"""
         self, mock_delete, mock_ads, mock_convert, mock_check, mock_apply, mock_focus, mock_load, mock_process, mock_save
     ):
         calib, ws = self._setup_focus_run_test(GROUP.NORTH, None, mock_load, mock_focus, mock_check, mock_apply, mock_convert, mock_save)
+        mock_save.return_value = (["TOF/path.nxs"], ["gss/path.nxs"], ["combined/path.nxs"])
 
         focus_run(["sample.nxs"], "van.nxs", plot_output=False, rb_num=None, calibration=calib, save_dir="/mock", full_calib="full")
 
@@ -371,6 +372,7 @@ INS  2 ICONS  18497.75    -29.68    -26.50"""
         self, mock_delete, mock_ads, mock_convert, mock_check, mock_apply, mock_focus, mock_load, mock_process, mock_save
     ):
         calib, ws = self._setup_focus_run_test(GROUP.SOUTH, "RB123", mock_load, mock_focus, mock_check, mock_apply, mock_convert, mock_save)
+        mock_save.return_value = (["TOF/path.nxs"], ["gss/path.nxs"], ["combined/path.nxs"])
 
         focus_run(["sample.nxs"], "van.nxs", plot_output=False, rb_num="RB123", calibration=calib, save_dir="/mock", full_calib="full")
 
@@ -392,6 +394,7 @@ INS  2 ICONS  18497.75    -29.68    -26.50"""
         calib, ws = self._setup_focus_run_test(
             GROUP.TEXTURE20, "RB123", mock_load, mock_focus, mock_check, mock_apply, mock_convert, mock_save
         )
+        mock_save.return_value = (["TOF/path.nxs"], ["gss/path.nxs"], ["combined/path.nxs"])
 
         focus_run(["sample.nxs"], "van.nxs", plot_output=False, rb_num="RB123", calibration=calib, save_dir="/mock", full_calib="full")
 
