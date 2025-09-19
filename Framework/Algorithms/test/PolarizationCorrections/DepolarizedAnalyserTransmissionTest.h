@@ -22,10 +22,8 @@ constexpr double PXD_ERROR = 7.92860;
 constexpr double COST_FUNC_MAX = 3.3e-5;
 
 constexpr double FIT_DELTA = 1e-6;
-constexpr double N_SPECS = 1;
 constexpr double X_MIN = 3.5;
 constexpr double X_MAX = 16.5;
-constexpr double BIN_WIDTH = 0.1;
 } // namespace
 
 using Mantid::Algorithms::CreateSampleWorkspace;
@@ -38,7 +36,7 @@ class DepolarizedAnalyserTransmissionTest : public CxxTest::TestSuite {
 public:
   void setUp() override {
     m_parameters = TestWorkspaceParameters("__mt", "name=LinearBackground, A0=0.112, A1=-0.004397", "Wavelength",
-                                           N_SPECS, X_MIN, X_MAX, BIN_WIDTH);
+                                           N_SPECS, X_MIN, X_MAX, 0.1);
     auto const &mtWs = generateFunctionDefinedWorkspace(m_parameters);
     m_parameters.updateNameAndFunc("__dep", "name=ExpDecay, Height=0.1239, Lifetime=1.338");
     auto const &depWs = generateFunctionDefinedWorkspace(m_parameters);
@@ -150,9 +148,9 @@ public:
 
   void test_invalid_workspace_lengths() {
     // GIVEN
-    m_parameters.updateSpectra(12, X_MIN, X_MAX, BIN_WIDTH);
+    m_parameters.updateSpectra(12, X_MIN, X_MAX, 0.1);
     MatrixWorkspace_sptr const &mtWs = generateFunctionDefinedWorkspace(m_parameters);
-    m_parameters.updateSpectra(2, X_MIN, X_MAX, BIN_WIDTH);
+    m_parameters.updateSpectra(2, X_MIN, X_MAX, 0.1);
     MatrixWorkspace_sptr const &depWs = generateFunctionDefinedWorkspace(m_parameters);
     auto alg = createAlgorithm(mtWs, depWs);
 
@@ -166,7 +164,7 @@ public:
 
   void test_invalid_empty_cell_workspace_length_from_file() {
     // GIVEN
-    m_parameters.updateSpectra(12, X_MIN, X_MAX, BIN_WIDTH);
+    m_parameters.updateSpectra(12, X_MIN, X_MAX, 0.1);
     MatrixWorkspace_sptr const &mtWs = generateFunctionDefinedWorkspace(m_parameters);
     auto const &depWs = m_testWs.second;
     auto alg = createAlgorithmUsingFilename(mtWs, depWs);
