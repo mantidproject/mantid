@@ -141,12 +141,13 @@ size_t BSpline::evaluateBasisFunctions(EigenVector &B, const double x, size_t cu
  */
 size_t BSpline::getSpanIndex(const double x, const size_t currentBBase, const bool clamped) const {
   const size_t clampedKnots = clamped ? static_cast<size_t>(getClampedKnots()) : 1u;
-  const auto it = std::find_if(m_knots.begin() + currentBBase + clampedKnots, m_knots.cend(),
-                               [&x](const size_t knot) { return x < knot; });
-  if (it != m_knots.cend()) {
-    return std::distance(m_knots.cbegin(), it) - clampedKnots;
+  size_t nKnots = m_knots.size();
+  for (size_t i = currentBBase + clampedKnots; i < nKnots; i++) {
+    if (x < m_knots[i]) {
+      return i - clampedKnots;
+    }
   }
-  return m_knots.size() - clampedKnots * 2;
+  return nKnots - clampedKnots * 2;
 }
 
 /** Calculate the derivatives for a set of points on the spline
