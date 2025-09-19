@@ -240,7 +240,17 @@ def plot(axes, workspace, *args, **kwargs):
     roi = kwargs.pop("roi", np.zeros(0, dtype=bool))
     if roi.size > 0:
         axes.fill_between(x, min(y), max(y), where=roi, color="grey", alpha=0.5)
-    return axes.plot(x, y, *args, **kwargs)
+    p = axes.plot(x, y, *args, **kwargs)
+
+    # set artist label for workspace
+    for artist in p:
+        # matplotlib does not display legends starting with _
+        # so we add a hidden character to the start U+206A
+        hiddenChar = "⁪"
+        if workspace.name().startswith("_"):
+            artist.set_label(hiddenChar + workspace.name())
+
+    return p
 
 
 def errorbar(axes, workspace, *args, **kwargs):

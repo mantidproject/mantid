@@ -1743,4 +1743,9 @@ class _WorkspaceArtists(object):
         for artist in self._artists:
             old_workspace_name = self.workspace_name
             prev_label = artist.get_label()
+            if new_workspace_name.startswith("_"):
+                # matplotlib does not display legends starting with _
+                # so we add a hidden character to the start U+206A
+                hiddenChar = "⁪"
+                new_workspace_name = hiddenChar + new_workspace_name
             artist.set_label(re.sub(rf"\b{old_workspace_name}\b", new_workspace_name, prev_label))
