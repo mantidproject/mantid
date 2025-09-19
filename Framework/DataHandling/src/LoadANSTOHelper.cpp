@@ -318,7 +318,6 @@ bool File::select(const char *file) {
     const FileInfo &info = m_fileInfos[i];
 
     m_selected = i;
-
     m_position = 0;
     m_size = info.Size;
 
