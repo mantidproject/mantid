@@ -66,6 +66,7 @@ class FullInstrumentViewWindow(QMainWindow):
         hsplitter.addWidget(left_column_widget)
         hsplitter.addWidget(pyvista_vertical_widget)
         hsplitter.setSizes([100, 200])
+        hsplitter.splitterMoved.connect(self._on_splitter_moved)
         parent_horizontal_layout.addWidget(hsplitter)
 
         self.main_plotter = BackgroundPlotter(show=False, menu_bar=False, toolbar=False, off_screen=off_screen)
@@ -83,6 +84,7 @@ class FullInstrumentViewWindow(QMainWindow):
         vsplitter.addWidget(plot_widget)
         vsplitter.setStretchFactor(0, 0)
         vsplitter.setStretchFactor(1, 1)
+        vsplitter.splitterMoved.connect(self._on_splitter_moved)
 
         pyvista_vertical_layout.addWidget(vsplitter)
 
@@ -153,6 +155,9 @@ class FullInstrumentViewWindow(QMainWindow):
         options_vertical_layout.addWidget(self.status_group_box)
         left_column_layout.addWidget(options_vertical_widget)
         left_column_layout.addStretch()
+
+    def _on_splitter_moved(self, pos, index) -> None:
+        self._detector_spectrum_fig.tight_layout()
 
     def disable_rectangle_picking_checkbox(self) -> None:
         self._multi_select_check.setChecked(False)
@@ -419,6 +424,7 @@ class FullInstrumentViewWindow(QMainWindow):
             if not sum_spectra:
                 self._detector_spectrum_axes.legend(fontsize=8.0).set_draggable(True)
 
+        self._detector_spectrum_fig.tight_layout()
         self._detector_figure_canvas.draw()
 
     def set_selected_detector_info(self, detector_infos: list[DetectorInfo]) -> None:
