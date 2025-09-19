@@ -43,10 +43,7 @@ const int NFINE_Y = 1000;
 double trapzf(const std::vector<double> &xv, const std::vector<double> &yv) {
   const double stepsize = xv[1] - xv[0];
   const size_t endpoint = xv.size() - 1;
-  double area(0.0);
-  for (size_t i = 1; i < endpoint; i++) {
-    area += yv[i];
-  }
+  double area = std::accumulate(yv.cbegin() + 1, yv.cbegin() + endpoint, 0.0);
   area = stepsize / 2 * (yv[0] + 2 * area + yv[endpoint]); // final step
   return area;
 }
