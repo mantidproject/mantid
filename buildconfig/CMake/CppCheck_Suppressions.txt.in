@@ -78,7 +78,6 @@ constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/IPeaksWorkspace.cpp:5
 operatorEqVarError:${CMAKE_SOURCE_DIR}/Framework/API/src/ISpectrum.cpp:156
 operatorEqVarError:${CMAKE_SOURCE_DIR}/Framework/API/src/ISpectrum.cpp:167
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/ITableWorkspace.cpp:118
-constParameterReference:${CMAKE_SOURCE_DIR}/Framework/API/src/MDGeometry.cpp:395
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/MatrixWorkspaceMDIterator.cpp:100
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/API/src/MultiDomainFunction.cpp:135
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/API/src/MultiDomainFunction.cpp:174
@@ -120,7 +119,6 @@ constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/ExportTimeSeri
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/ExportTimeSeriesLog.cpp:330
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/FilterByLogValue.cpp:82
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/FilterEvents.cpp:304
-constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/FindPeakBackground.cpp:272
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/FindPeaks.cpp:892
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/FindPeaks.cpp:999
 shadowVariable:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/FitPeak.cpp:1399

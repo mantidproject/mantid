@@ -396,7 +396,7 @@ void MDGeometry::setOriginalWorkspace(std::shared_ptr<Workspace> ws, size_t inde
  * @param scaling :: multiply each coordinate by this value.
  * @param offset :: after multiplying, add this offset.
  */
-void MDGeometry::transformDimensions(std::vector<double> &scaling, std::vector<double> &offset) {
+void MDGeometry::transformDimensions(const std::vector<double> &scaling, const std::vector<double> &offset) {
   if (scaling.size() != m_dimensions.size())
     throw std::invalid_argument("MDGeometry::transformDimensions(): "
                                 "scaling.size() must be equal to number of "
