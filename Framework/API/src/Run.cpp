@@ -359,15 +359,11 @@ void Run::integrateProtonCharge(const std::string &logname) const {
       const std::vector<double> logValues = log->valuesAsVector();
       total = std::accumulate(logValues.begin(), logValues.end(), 0.0);
     } else {
-      const auto &values = log->valuesAsVector();
       const auto &times = log->timesAsVector();
-      const auto NUM_VALUES = values.size();
 
-      total = 0.;
-      for (std::size_t i = 0; i < NUM_VALUES; ++i) {
-        if (timeroi.valueAtTime(times[i]))
-          total += values[i];
-      }
+      total = std::accumulate(times.cbegin(), times.cend(), 0., [&](double valueTotal, DateAndTime &time) {
+        return timeroi.valueAtTime(time) ? total + log->getSingleValue(time) : total;
+      });
     }
 
     const std::string &unit = log->units();

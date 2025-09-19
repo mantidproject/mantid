@@ -301,16 +301,18 @@ bool File::select(const char *file) {
   m_bufferPosition = 0;
   m_bufferAvailable = 0;
 
-  for (size_t i = 0; i != m_fileNames.size(); i++)
-    if (m_fileNames[i] == file) {
-      const FileInfo &info = m_fileInfos[i];
+  const auto it =
+      std::find_if(m_fileNames.cbegin(), m_fileNames.cend(), [&file](const auto &name) { return name == file; });
+  if (it != m_fileNames.cend()) {
+    const size_t index = std::distance(m_fileNames.cbegin(), it);
+    const FileInfo &info = m_fileInfos[index];
 
-      m_selected = i;
-      m_position = 0;
-      m_size = info.Size;
+    m_selected = index;
+    m_position = 0;
+    m_size = info.Size;
 
-      return m_good &= m_file.seek(info.Offset, SEEK_SET);
-    }
+    return m_good &= m_file.seek(info.Offset, SEEK_SET);
+  }
 
   m_selected = static_cast<size_t>(-1);
   m_position = 0;

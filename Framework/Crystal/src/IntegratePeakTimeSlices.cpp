@@ -1636,10 +1636,11 @@ std::string IntegratePeakTimeSlices::CalculateFunctionProperty_Fit() {
 int IntegratePeakTimeSlices::findNameInVector(std::string const &oneName, std::vector<std::string> const &nameList)
 
 {
-  for (size_t i = 0; i < nameList.size(); i++)
-    if (oneName == nameList[i])
-      return static_cast<int>(i);
-
+  const auto it =
+      std::find_if(nameList.cbegin(), nameList.cend(), [&oneName](const auto &name) { return oneName == name; });
+  if (it != nameList.cend()) {
+    return std::distance(nameList.cbegin(), it);
+  }
   return -1;
 }
 

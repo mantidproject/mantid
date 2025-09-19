@@ -304,10 +304,8 @@ void LoadBBY::exec() {
   }
 
   // count total number of masked bins
-  size_t maskedBins = 0;
-  for (size_t i = 0; i != roi.size(); i++)
-    if (!roi[i])
-      maskedBins++;
+  size_t maskedBins =
+      std::accumulate(roi.cbegin(), roi.cend(), 0, [](size_t total, bool roi) { return !roi ? total++ : total; });
 
   if (maskedBins > 0) {
     // create list of masked bins
