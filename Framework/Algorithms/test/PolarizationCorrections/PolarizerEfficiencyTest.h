@@ -22,6 +22,7 @@ using namespace Mantid;
 using namespace Mantid::Algorithms;
 using namespace Mantid::API;
 using namespace PolCorrTestUtils;
+
 namespace {
 const std::string ANALYSER_EFFICIENCY_WS_NAME = "effAnalyser";
 }
@@ -31,8 +32,7 @@ public:
   void setUp() override {
     m_parameters = TestWorkspaceParameters();
     // Use an analyser efficiency of 1 to make test calculations simpler
-    (void)generateFunctionDefinedWorkspace(
-        TestWorkspaceParameters(ANALYSER_EFFICIENCY_WS_NAME, "name=UserFunction, Formula=1 + x*0"));
+    (void)generateFunctionDefinedWorkspace(TestWorkspaceParameters(ANALYSER_EFFICIENCY_WS_NAME, fillFuncStr({1.0})));
     m_defaultSaveDirectory = Kernel::ConfigService::Instance().getString("defaultsave.directory");
   }
 
@@ -79,8 +79,8 @@ public:
   }
 
   void test_non_matching_bins_fails() {
-    (void)generateFunctionDefinedWorkspace(TestWorkspaceParameters(
-        ANALYSER_EFFICIENCY_WS_NAME, "name=UserFunction, Formula=1 + x*0", X_UNIT, 1, 1, 8, 0.1));
+    (void)generateFunctionDefinedWorkspace(
+        TestWorkspaceParameters(ANALYSER_EFFICIENCY_WS_NAME, fillFuncStr({1.0}), X_UNIT, 1, 1, 8, 0.1));
     auto polariserEfficiency = createPolarizerEfficiencyAlgorithm();
 
     TS_ASSERT_THROWS(polariserEfficiency->execute(), const std::runtime_error &);
@@ -88,7 +88,7 @@ public:
 
   void test_invalid_analyzer_ws_fails() {
     (void)generateFunctionDefinedWorkspace(
-        TestWorkspaceParameters(ANALYSER_EFFICIENCY_WS_NAME, "name=UserFunction, Formula=1 + x*0", X_UNIT, 2));
+        TestWorkspaceParameters(ANALYSER_EFFICIENCY_WS_NAME, fillFuncStr({1.0}), X_UNIT, 2));
     auto polariserEfficiency = createPolarizerEfficiencyAlgorithm();
     TS_ASSERT_THROWS(polariserEfficiency->execute(), const std::runtime_error &);
   }
