@@ -1,1 +1,0 @@
-- The dependency on MSlice for mantidworkbench became optional. Nevertheless, MSlice would still be directly installed in IDAaaS and within self-contained packages. The quickstart guide for MSlice has been updated to match the changes.
