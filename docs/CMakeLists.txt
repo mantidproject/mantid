@@ -108,6 +108,7 @@ endfunction()
 
 # Documentation types
 add_sphinx_build_target(html "sphinx.ext.mathjax")
+add_dependencies(docs-html DocTestData)
 add_sphinx_build_target(doctest "sphinx.ext.mathjax")
 add_dependencies(docs-doctest DocTestData)
 
