@@ -308,6 +308,12 @@ class WorkspaceWidget(PluginWidget):
                     view.show()
                     model = FullInstrumentViewModel(ws)
                     FullInstrumentViewPresenter(view, model)
+                    logger.warning(
+                        "This Instrument View interface is available for testing purposes and evaluation, but is still "
+                        "under active development. There may be bugs, and several features from the older Instrument View "
+                        "('Show Instrument') are not currently implemented. If you have any feedback about this interface "
+                        "then the Mantid team would be happy to receive it."
+                    )
                 except Exception as exception:
                     logger.warning("Could not show instrument for workspace '{}':\n{}\n".format(ws.name(), exception))
             else:
