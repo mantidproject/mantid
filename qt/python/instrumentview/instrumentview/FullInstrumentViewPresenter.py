@@ -61,6 +61,9 @@ class FullInstrumentViewPresenter:
         self._view.show_axes()
         self.on_projection_option_selected(default_index)
 
+        if self._model.workspace_x_unit in self._UNIT_OPTIONS:
+            self._view.set_unit_combo_box_index(self._UNIT_OPTIONS.index(self._model.workspace_x_unit))
+
         self._view.hide_status_box()
         self._ads_observer = InstrumentViewADSObserver(
             delete_callback=self.delete_workspace_callback,

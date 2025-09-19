@@ -301,6 +301,9 @@ class FullInstrumentViewWindow(QMainWindow):
         hBox.addWidget(self._sum_spectra_checkbox)
         parent.addLayout(hBox)
 
+    def set_unit_combo_box_index(self, index: int) -> None:
+        self._units_combo_box.setCurrentIndex(index)
+
     def current_selected_unit(self) -> str:
         """Get the currently selected unit from the combo box"""
         return self._units_combo_box.currentText()

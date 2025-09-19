@@ -81,6 +81,10 @@ class FullInstrumentViewModel:
         return self._workspace_x_unit != "Empty"
 
     @property
+    def workspace_x_unit(self) -> str:
+        return self._workspace_x_unit
+
+    @property
     def default_projection(self) -> str:
         return self._workspace.getInstrument().getDefaultView()
 
