@@ -7,6 +7,7 @@
 
 #include "ProcessBankTask.h"
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/ParallelMinMax.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/Unit.h"
 #include "MantidNexus/H5Util.h"
@@ -22,45 +23,6 @@ const std::string MICROSEC("microseconds");
 
 // Logger for this class
 auto g_log = Kernel::Logger("ProcessBankTask");
-
-template <typename Type> class MinMax {
-  const std::vector<Type> *vec;
-
-public:
-  Type minval;
-  Type maxval;
-  void operator()(const tbb::blocked_range<size_t> &range) {
-    const auto [minele, maxele] = std::minmax_element(vec->cbegin() + range.begin(), vec->cbegin() + range.end());
-    if (*minele < minval)
-      minval = *minele;
-    if (*maxele > maxval)
-      maxval = *maxele;
-  }
-
-  // copy min/max from the other. we're all friends
-  MinMax(MinMax &other, tbb::split) : vec(other.vec), minval(other.minval), maxval(other.maxval) {}
-
-  // set the min=max=first element supplied
-  MinMax(const std::vector<Type> *vec) : vec(vec), minval(vec->front()), maxval(vec->front()) {}
-
-  void join(const MinMax &other) {
-    if (other.minval < minval)
-      minval = other.minval;
-    if (other.maxval > maxval)
-      maxval = other.maxval;
-  }
-};
-
-template <typename Type> std::pair<Type, Type> parallel_minmax(const std::vector<Type> *vec, const size_t grainsize) {
-  if (vec->size() < grainsize) {
-    const auto [minval, maxval] = std::minmax_element(vec->cbegin(), vec->cend());
-    return std::make_pair(*minval, *maxval);
-  } else {
-    MinMax<Type> finder(vec);
-    tbb::parallel_reduce(tbb::blocked_range<size_t>(0, vec->size(), grainsize), finder);
-    return std::make_pair(finder.minval, finder.maxval);
-  }
-}
 
 } // namespace
 ProcessBankTask::ProcessBankTask(std::vector<std::string> &bankEntryNames, H5::H5File &h5file,
@@ -169,7 +131,7 @@ void ProcessBankTask::operator()(const tbb::blocked_range<size_t> &range) const 
             // event_detid->clear();
             m_loader.loadData(detID_SDS, event_detid, offsets, slabsizes);
             // immediately find min/max to allow for other things to read disk
-            const auto [minval, maxval] = parallel_minmax(event_detid.get(), m_grainsize_event);
+            const auto [minval, maxval] = Mantid::Kernel::parallel_minmax(event_detid.get(), m_grainsize_event);
             // only recreate calibration if it doesn't already have the useful information
             if ((!calibration) || (calibration->idmin() > static_cast<detid_t>(minval)) ||
                 (calibration->idmax() < static_cast<detid_t>(maxval))) {
