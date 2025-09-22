@@ -25,10 +25,8 @@ namespace PolCorrTestUtils {
 
 std::string fillFuncStr(const std::vector<double> &number, const std::string &funcStr) {
   auto outStr(funcStr);
-  size_t pos(0);
   for (const auto &num : number) {
-    pos = outStr.find("#");
-    outStr.replace(pos, 1, std::to_string(num));
+    outStr.replace(outStr.find("#"), 1, std::to_string(num));
   }
   return outStr;
 }
