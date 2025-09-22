@@ -69,7 +69,7 @@ public:
   };
 
   // ----------------------------------------- pulse indexer class start
-  PulseIndexer(std::shared_ptr<std::vector<uint64_t>> event_index, const std::size_t firstEventIndex,
+  PulseIndexer(std::shared_ptr<std::vector<uint64_t> const> const &event_index, const std::size_t firstEventIndex,
                const std::size_t numEvents, const std::string &entry_name, const std::vector<size_t> &pulse_roi);
 
   /// Which element in the event_index array is the first one to use
@@ -104,7 +104,7 @@ private:
   bool includedPulse(const size_t pulseIndex) const;
 
   /// vector of indices (length of # of pulses) into the event arrays
-  const std::shared_ptr<std::vector<uint64_t>> m_event_index;
+  const std::shared_ptr<std::vector<uint64_t> const> m_event_index;
 
   /**
    * How far into the array of events the tof/detid are already. This is used when data is read in chunks.
