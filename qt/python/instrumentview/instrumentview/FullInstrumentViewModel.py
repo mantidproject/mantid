@@ -207,12 +207,10 @@ class FullInstrumentViewModel:
             return
 
         ws = ExtractSpectra(InputWorkspace=self._workspace, WorkspaceIndexList=workspace_indices, EnableLogging=False, StoreInADS=False)
+        if self.has_unit and unit != self.workspace_x_unit:
+            ws = ConvertUnits(InputWorkspace=ws, target=unit, EMode="Elastic", EnableLogging=False, StoreInADS=False)
 
         if sum_spectra and len(workspace_indices) > 1:
-            # Sum in d-Spacing to avoid blurring peaks
-            if self._workspace_x_unit != "dSpacing" and self.has_unit:
-                ws = ConvertUnits(InputWorkspace=ws, target="dSpacing", EMode="Elastic", EnableLogging=False, StoreInADS=False)
-            # Converting to d-Spacing will give spectra with different bin edges
             # Find the spectrum with the widest range, and the one with the smallest bin width and use that
             # combo to rebin the selected spectra. We have to loop over the spectra because otherwise ragged
             # workspaces will have their bin edge vector truncated
@@ -230,8 +228,6 @@ class FullInstrumentViewModel:
 
             ws = SumSpectra(InputWorkspace=ws, EnableLogging=False, StoreInADS=False)
 
-        if self.has_unit:
-            ws = ConvertUnits(InputWorkspace=ws, target=unit, EMode="Elastic", EnableLogging=False, StoreInADS=False)
         self.line_plot_workspace = ws
 
     def save_line_plot_workspace_to_ads(self) -> None:

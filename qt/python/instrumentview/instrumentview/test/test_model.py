@@ -301,11 +301,8 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         )
         mock_rebin.assert_called_once_with(InputWorkspace=mock_workspace, Params=[0, 1, 2], EnableLogging=False, StoreInADS=False)
         mock_sum_spectra.assert_called_once_with(InputWorkspace=mock_workspace, EnableLogging=False, StoreInADS=False)
-        mock_convert_units.assert_has_calls(
-            [
-                mock.call(InputWorkspace=mock_workspace, target="dSpacing", EMode="Elastic", EnableLogging=False, StoreInADS=False),
-                mock.call(InputWorkspace=mock_workspace, target="TOF", EMode="Elastic", EnableLogging=False, StoreInADS=False),
-            ]
+        mock_convert_units.assert_called_once_with(
+            InputWorkspace=mock_workspace, target="TOF", EMode="Elastic", EnableLogging=False, StoreInADS=False
         )
 
     @mock.patch("instrumentview.FullInstrumentViewModel.Rebin")
@@ -330,11 +327,8 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         )
         mock_rebin.assert_not_called()
         mock_sum_spectra.assert_called_once_with(InputWorkspace=mock_workspace, EnableLogging=False, StoreInADS=False)
-        mock_convert_units.assert_has_calls(
-            [
-                mock.call(InputWorkspace=mock_workspace, target="dSpacing", EMode="Elastic", EnableLogging=False, StoreInADS=False),
-                mock.call(InputWorkspace=mock_workspace, target="TOF", EMode="Elastic", EnableLogging=False, StoreInADS=False),
-            ]
+        mock_convert_units.assert_called_once_with(
+            InputWorkspace=mock_workspace, target="TOF", EMode="Elastic", EnableLogging=False, StoreInADS=False
         )
 
     @mock.patch("instrumentview.FullInstrumentViewModel.SumSpectra")
