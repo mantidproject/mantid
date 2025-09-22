@@ -51,8 +51,7 @@ void ProcessBankData::preCountAndReserveMem() {
       counts[thisId - m_min_detid]++;
   }
 
-  // Now we pre-allocate (reserve) the vectors of events in each pixel
-  // counted
+  // Now we pre-allocate (reserve) the vectors of events in each pixel counted
   auto &outputWS = m_loader.m_ws;
   const auto *alg = m_loader.alg;
   const size_t numEventLists = outputWS.getNumberHistograms();

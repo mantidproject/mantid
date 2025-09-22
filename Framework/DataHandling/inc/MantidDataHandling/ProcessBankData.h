@@ -57,8 +57,7 @@ private:
   DefaultEventLoader &m_loader;
   /// NXS address to bank
   std::string entry_name;
-  /// Vector where (index = pixel ID+pixelID_to_wi_offset), value = workspace
-  /// index)
+  /// Vector where (index = pixel ID+pixelID_to_wi_offset), value = workspace index)
   const std::vector<size_t> &pixelID_to_wi_vector;
   /// Offset in the pixelID_to_wi_vector to use.
   detid_t pixelID_to_wi_offset;

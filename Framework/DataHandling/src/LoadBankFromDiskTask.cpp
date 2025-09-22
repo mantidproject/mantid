@@ -59,9 +59,8 @@ LoadBankFromDiskTask::LoadBankFromDiskTask(DefaultEventLoader &loader, std::stri
   m_max_id = 0;
 }
 
-/** Load the pulse times, if needed. This sets
- * thisBankPulseTimes to the right pointer.
- * */
+/** Load the pulse times, if needed. This sets thisBankPulseTimes to the right pointer.
+ */
 void LoadBankFromDiskTask::loadPulseTimes(Nexus::File &file) {
   try {
     // First, get info about the event_time_zero field in this bank
@@ -102,8 +101,7 @@ void LoadBankFromDiskTask::loadPulseTimes(Nexus::File &file) {
 }
 
 /** Load the event_index field
- * (a list of size of # of pulses giving the index in the event list for that
-    pulse)
+ * (a list of size of # of pulses giving the index in the event list for that pulse)
  * @param file :: File handle for the NeXus file
  */
 std::unique_ptr<std::vector<uint64_t>> LoadBankFromDiskTask::loadEventIndex(Nexus::File &file) {
