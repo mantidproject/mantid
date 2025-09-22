@@ -5,20 +5,40 @@
 
 namespace Mantid::Kernel {
 
-template <typename T> void MinMaxFinder<T>::operator()(tbb::blocked_range<size_t> const &range) {
-  const auto [minele, maxele] = std::minmax_element(vec->cbegin() + range.begin(), vec->cbegin() + range.end());
-  if (*minele < minval)
-    minval = *minele;
-  if (*maxele > maxval)
-    maxval = *maxele;
-}
+namespace {
+/** MinMaxFinder
+ * A templated functor for use in parallel_minmax, which will search a vector to find a min/max over a subrange.
+ * These are then joined together for total min/max values
+ */
+template <typename T> class MANTID_KERNEL_DLL MinMaxFinder {
+  std::vector<T> const *vec;
 
-template <typename T> void MinMaxFinder<T>::join(MinMaxFinder<T> const &other) {
-  if (other.minval < minval)
-    minval = other.minval;
-  if (other.maxval > maxval)
-    maxval = other.maxval;
-}
+public:
+  T minval;
+  T maxval;
+
+  // copy min/max from the other. we're all friends
+  MinMaxFinder(MinMaxFinder<T> &other, tbb::split) : vec(other.vec), minval(other.minval), maxval(other.maxval) {}
+
+  // set the min=max=first element supplied
+  MinMaxFinder(std::vector<T> const *vec) : vec(vec), minval(vec->front()), maxval(vec->front()) {}
+
+  void operator()(tbb::blocked_range<size_t> const &range) {
+    const auto [minele, maxele] = std::minmax_element(vec->cbegin() + range.begin(), vec->cbegin() + range.end());
+    if (*minele < minval)
+      minval = *minele;
+    if (*maxele > maxval)
+      maxval = *maxele;
+  }
+
+  void join(MinMaxFinder<T> const &other) {
+    if (other.minval < minval)
+      minval = other.minval;
+    if (other.maxval > maxval)
+      maxval = other.maxval;
+  }
+};
+} // namespace
 
 template <typename T> std::pair<T, T> parallel_minmax(std::vector<T> const *const vec, size_t const grainsize) {
   if (vec->size() < grainsize) {
