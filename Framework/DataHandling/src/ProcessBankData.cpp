@@ -18,16 +18,16 @@ namespace Mantid::DataHandling {
 
 ProcessBankData::ProcessBankData(DefaultEventLoader &m_loader, const std::string &entry_name, API::Progress *prog,
                                  std::shared_ptr<std::vector<uint32_t>> const &event_id,
-                                 std::shared_ptr<std::vector<float>> const &event_time_of_flight, size_t numEvents,
-                                 size_t startAt, std::shared_ptr<std::vector<uint64_t>> const &event_index,
+                                 std::shared_ptr<std::vector<float>> const &tevent_time_of_flight, size_t numEvents,
+                                 size_t startAt, std::shared_ptr<std::vector<uint64_t>> const &tevent_index,
                                  std::shared_ptr<BankPulseTimes> const &thisBankPulseTimes, bool have_weight,
-                                 std::shared_ptr<std::vector<float>> const &event_weight, detid_t min_event_id,
+                                 std::shared_ptr<std::vector<float>> const &tevent_weight, detid_t min_event_id,
                                  detid_t max_event_id)
     : Task(), m_loader(m_loader), entry_name(std::move(entry_name)),
       pixelID_to_wi_vector(m_loader.pixelID_to_wi_vector), pixelID_to_wi_offset(m_loader.pixelID_to_wi_offset),
-      prog(prog), event_detid(event_id), event_time_of_flight(event_time_of_flight), numEvents(numEvents),
-      startAt(startAt), event_index(event_index), thisBankPulseTimes(thisBankPulseTimes), have_weight(have_weight),
-      event_weight(event_weight), m_min_detid(min_event_id), m_max_detid(max_event_id) {
+      prog(prog), event_detid(event_id), event_time_of_flight(tevent_time_of_flight), numEvents(numEvents),
+      startAt(startAt), event_index(tevent_index), thisBankPulseTimes(thisBankPulseTimes), have_weight(have_weight),
+      event_weight(tevent_weight), m_min_detid(min_event_id), m_max_detid(max_event_id) {
   // Cost is approximately proportional to the number of events to process.
   m_cost = static_cast<double>(numEvents);
 
