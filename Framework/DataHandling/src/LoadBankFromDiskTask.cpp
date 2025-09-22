@@ -10,6 +10,7 @@
 #include "MantidDataHandling/LoadEventNexus.h"
 #include "MantidDataHandling/ProcessBankCompressed.h"
 #include "MantidDataHandling/ProcessBankData.h"
+#include "MantidKernel/ParallelMinMax.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/VectorHelper.h"
@@ -96,7 +97,7 @@ void LoadBankFromDiskTask::loadPulseTimes(Nexus::File &file) {
   }
 
   // Not found? Need to load and add it
-  thisBankPulseTimes = std::make_shared<BankPulseTimes>(boost::ref(file), m_framePeriodNumbers);
+  thisBankPulseTimes = std::make_shared<BankPulseTimes>(file, m_framePeriodNumbers);
   m_loader.m_bankPulseTimes.emplace_back(thisBankPulseTimes);
 }
 
@@ -189,9 +190,9 @@ std::unique_ptr<std::vector<uint32_t>> LoadBankFromDiskTask::loadEventId(Nexus::
 
     // determine the range of pixel ids
     {
-      const auto [min_id, max_id] = std::minmax_element(event_id->cbegin(), event_id->cend());
-      m_min_id = *min_id;
-      m_max_id = *max_id;
+      const auto [min_id, max_id] = Mantid::Kernel::parallel_minmax<uint32_t>(event_id);
+      m_min_id = min_id;
+      m_max_id = max_id;
     }
 
     if (m_min_id > static_cast<uint32_t>(m_loader.eventid_max)) {
@@ -225,9 +226,6 @@ std::unique_ptr<std::vector<float>> LoadBankFromDiskTask::loadTof(Nexus::File &f
   file.openData(m_timeOfFlightFieldName);
 
   // This is the data size
-  Nexus::Info id_info = file.getInfo();
-  const uint64_t dim0 = recalculateDataSize(id_info.dims[0]);
-
   // Check that the required space is there in the file.
   Nexus::Info tof_info = file.getInfo();
   uint64_t tof_dim0 = recalculateDataSize(tof_info.dims[0]);
@@ -239,7 +237,7 @@ std::unique_ptr<std::vector<float>> LoadBankFromDiskTask::loadTof(Nexus::File &f
   }
 
   // Allocate the array
-  auto event_time_of_flight = std::make_unique<std::vector<float>>(dim0);
+  auto event_time_of_flight = std::make_unique<std::vector<float>>(tof_dim0);
 
   // Mantid assumes event_time_offset to be float.
   // Nexus only requires event_time_offset to be a NXNumber.
@@ -380,7 +378,7 @@ void LoadBankFromDiskTask::run() {
 
         // for compression the number of events needs to come from elsewhere
         if (!event_index)
-          m_loadSize[0] = static_cast<int64_t>(event_id->size());
+          m_loadSize[0] = event_id->size();
 
         if (m_loader.alg->getCancel()) {
           m_loader.alg->getLogger().error() << "Loading bank " << entry_name << " is cancelled.\n";
@@ -472,14 +470,13 @@ void LoadBankFromDiskTask::run() {
     // this method is for unweighted events that the user wants compressed on load
 
     // TODO should this be created elsewhere?
-    const auto [tof_min, tof_max] =
-        std::minmax_element(event_time_of_flight_shrd->cbegin(), event_time_of_flight_shrd->cend());
+    const auto [tof_min, tof_max] = Mantid::Kernel::parallel_minmax(event_time_of_flight_shrd);
 
     const bool log_compression = (m_loader.alg->compressTolerance < 0);
 
     // reduce tof range if filtering was requested
-    auto tof_min_fixed = *tof_min;
-    auto tof_max_fixed = *tof_max;
+    auto tof_min_fixed = tof_min;
+    auto tof_max_fixed = tof_max;
     if (m_loader.alg->filter_tof_range) {
       if (m_loader.alg->filter_tof_max != EMPTY_DBL())
         tof_max_fixed = std::min<float>(tof_max_fixed, static_cast<float>(m_loader.alg->filter_tof_max));

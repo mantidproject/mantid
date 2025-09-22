@@ -78,6 +78,7 @@ set(SRC_FILES
     src/NullValidator.cpp
     src/OptionalBool.cpp
     src/SpinStateHelpers.cpp
+    src/ParallelMinMax.cpp
     src/ProgressBase.cpp
     src/Property.cpp
     src/PropertyHelper.cpp
@@ -237,6 +238,7 @@ set(INC_FILES
     inc/MantidKernel/NeutronAtom.h
     inc/MantidKernel/NullValidator.h
     inc/MantidKernel/OptionalBool.h
+    inc/MantidKernel/ParallelMinMax.h
     inc/MantidKernel/PhysicalConstants.h
     inc/MantidKernel/PocoVersion.h
     inc/MantidKernel/ProgressBase.h
