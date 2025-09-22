@@ -102,7 +102,7 @@ class SideBySide(Projection):
         grids = self._construct_rectangles_and_grids(workspace)
         tubes = self._construct_tube_banks(workspace.componentInfo())
         self._flat_banks = grids + tubes
-        detectors_in_banks = np.array([d.detector_ids for d in self._flat_banks]).flatten()
+        detectors_in_banks = np.empty(0) if len(self._flat_banks) == 0 else np.concatenate([d.detector_ids for d in self._flat_banks])
         remaining_detectors_bank = self._create_flat_bank_with_missing_detectors(detectors_in_banks)
         if remaining_detectors_bank:
             self._flat_banks.append(remaining_detectors_bank)
