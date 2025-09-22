@@ -66,6 +66,7 @@ class FullInstrumentViewWindow(QMainWindow):
         hsplitter.addWidget(left_column_widget)
         hsplitter.addWidget(pyvista_vertical_widget)
         hsplitter.setSizes([100, 200])
+        hsplitter.splitterMoved.connect(self._on_splitter_moved)
         parent_horizontal_layout.addWidget(hsplitter)
 
         self.main_plotter = BackgroundPlotter(show=False, menu_bar=False, toolbar=False, off_screen=off_screen)
@@ -83,6 +84,7 @@ class FullInstrumentViewWindow(QMainWindow):
         vsplitter.addWidget(plot_widget)
         vsplitter.setStretchFactor(0, 0)
         vsplitter.setStretchFactor(1, 1)
+        vsplitter.splitterMoved.connect(self._on_splitter_moved)
 
         pyvista_vertical_layout.addWidget(vsplitter)
 
@@ -143,9 +145,19 @@ class FullInstrumentViewWindow(QMainWindow):
         options_vertical_layout.addWidget(self._contour_range_group_box)
         options_vertical_layout.addWidget(multi_select_group_box)
         options_vertical_layout.addWidget(projection_group_box)
+        units_group_box = QGroupBox("Units")
+        units_vbox = QVBoxLayout()
+        self._setup_units_options(units_vbox)
+        units_group_box.setLayout(units_vbox)
+        options_vertical_layout.addWidget(units_group_box)
+        options_vertical_layout.addWidget(QSplitter(Qt.Horizontal))
+
         options_vertical_layout.addWidget(self.status_group_box)
         left_column_layout.addWidget(options_vertical_widget)
         left_column_layout.addStretch()
+
+    def _on_splitter_moved(self, pos, index) -> None:
+        self._detector_spectrum_fig.tight_layout()
 
     def disable_rectangle_picking_checkbox(self) -> None:
         self._multi_select_check.setChecked(False)
@@ -238,6 +250,8 @@ class FullInstrumentViewWindow(QMainWindow):
 
     def subscribe_presenter(self, presenter) -> None:
         self._presenter = presenter
+        for unit in self._presenter.available_unit_options():
+            self._units_combo_box.addItem(unit)
 
     def setup_connections_to_presenter(self) -> None:
         self._projection_combo_box.currentIndexChanged.connect(self._presenter.on_projection_option_selected)
@@ -246,6 +260,9 @@ class FullInstrumentViewWindow(QMainWindow):
         self._clear_selection_button.clicked.connect(self._presenter.on_clear_selected_detectors_clicked)
         self._contour_range_slider.sliderReleased.connect(self._presenter.on_contour_limits_updated)
         self._tof_slider.sliderReleased.connect(self._presenter.on_tof_limits_updated)
+        self._units_combo_box.currentIndexChanged.connect(self._presenter.on_unit_option_selected)
+        self._export_workspace_button.clicked.connect(self._presenter.on_export_workspace_clicked)
+        self._sum_spectra_checkbox.clicked.connect(self._presenter.on_sum_spectra_checkbox_clicked)
 
         self._add_connections_to_edits_and_slider(
             self._contour_range_min_edit,
@@ -266,6 +283,33 @@ class FullInstrumentViewWindow(QMainWindow):
         self.main_plotter.disable_picking()
         self.main_plotter.enable_rectangle_picking(callback=lambda *_: None, show_message=False)
         self.main_plotter.disable_picking()
+
+    def _setup_units_options(self, parent: QVBoxLayout):
+        """Add widgets for the units options"""
+        self._units_combo_box = QComboBox(self)
+        self._units_combo_box.setToolTip("Select the units for the spectra line plot")
+        parent.addWidget(self._units_combo_box)
+        hBox = QHBoxLayout()
+        self._export_workspace_button = QPushButton("Export Spectra to ADS", self)
+        hBox.addWidget(self._export_workspace_button)
+        self._sum_spectra_checkbox = QCheckBox(self)
+        self._sum_spectra_checkbox.setChecked(True)
+        self._sum_spectra_checkbox.setText("Sum Selected Spectra")
+        self._sum_spectra_checkbox.setToolTip(
+            "Selected spectra will be converted to d-Spacing, summed, then converted back to the desired unit."
+        )
+        hBox.addWidget(self._sum_spectra_checkbox)
+        parent.addLayout(hBox)
+
+    def set_unit_combo_box_index(self, index: int) -> None:
+        self._units_combo_box.setCurrentIndex(index)
+
+    def current_selected_unit(self) -> str:
+        """Get the currently selected unit from the combo box"""
+        return self._units_combo_box.currentText()
+
+    def sum_spectra_selected(self) -> bool:
+        return self._sum_spectra_checkbox.isChecked()
 
     def get_tof_limits(self) -> tuple[float, float]:
         return self._tof_slider.value()
@@ -372,15 +416,18 @@ class FullInstrumentViewWindow(QMainWindow):
         """Set the camera focal point on the main plotter"""
         self.main_plotter.camera.focal_point = focal_point
 
-    def set_plot_for_detectors(self, workspace: Workspace2D, workspace_indices: list | np.ndarray) -> None:
+    def show_plot_for_detectors(self, workspace: Workspace2D) -> None:
         """Plot all the given spectra, where they are defined by their workspace indices, not the spectra numbers"""
         self._detector_spectrum_axes.clear()
-        for d in workspace_indices:
-            self._detector_spectrum_axes.plot(workspace, label=workspace.name() + "Workspace Index " + str(d), wkspIndex=int(d))
+        sum_spectra = self.sum_spectra_selected()
+        if workspace is not None and workspace.getNumberHistograms() > 0:
+            spectra = workspace.getSpectrumNumbers()
+            for spec in spectra:
+                self._detector_spectrum_axes.plot(workspace, specNum=spec, label=f"Spectrum {spec}" if not sum_spectra else None)
+            if not sum_spectra:
+                self._detector_spectrum_axes.legend(fontsize=8.0).set_draggable(True)
 
-        if len(workspace_indices) > 0:
-            self._detector_spectrum_axes.legend(fontsize=8.0).set_draggable(True)
-
+        self._detector_spectrum_fig.tight_layout()
         self._detector_figure_canvas.draw()
 
     def set_selected_detector_info(self, detector_infos: list[DetectorInfo]) -> None:
