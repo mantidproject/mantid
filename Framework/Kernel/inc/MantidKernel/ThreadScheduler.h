@@ -57,10 +57,7 @@ public:
    * @param task :: the Task that was completed.
    * @param threadnum :: Thread ID that launched the task
    */
-  virtual void finished(Task *task, size_t threadnum) {
-    UNUSED_ARG(task);
-    UNUSED_ARG(threadnum);
-  }
+  virtual void finished(Task *, size_t) {}
 
   //-----------------------------------------------------------------------------------
   /** Signal to the scheduler that a task is complete. The

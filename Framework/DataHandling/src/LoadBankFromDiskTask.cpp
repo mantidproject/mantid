@@ -97,7 +97,7 @@ void LoadBankFromDiskTask::loadPulseTimes(Nexus::File &file) {
   }
 
   // Not found? Need to load and add it
-  thisBankPulseTimes = std::make_shared<BankPulseTimes>(boost::ref(file), m_framePeriodNumbers);
+  thisBankPulseTimes = std::make_shared<BankPulseTimes>(file, m_framePeriodNumbers);
   m_loader.m_bankPulseTimes.emplace_back(thisBankPulseTimes);
 }
 
@@ -190,7 +190,7 @@ std::unique_ptr<std::vector<uint32_t>> LoadBankFromDiskTask::loadEventId(Nexus::
 
     // determine the range of pixel ids
     {
-      const auto [min_id, max_id] = Mantid::Kernel::parallel_minmax<uint32_t>(event_id.get(), 1);
+      const auto [min_id, max_id] = Mantid::Kernel::parallel_minmax<uint32_t>(event_id.get());
       m_min_id = min_id;
       m_max_id = max_id;
     }
@@ -470,14 +470,13 @@ void LoadBankFromDiskTask::run() {
     // this method is for unweighted events that the user wants compressed on load
 
     // TODO should this be created elsewhere?
-    const auto [tof_min, tof_max] =
-        std::minmax_element(event_time_of_flight_shrd->cbegin(), event_time_of_flight_shrd->cend());
+    const auto [tof_min, tof_max] = Mantid::Kernel::parallel_minmax(event_time_of_flight.get());
 
     const bool log_compression = (m_loader.alg->compressTolerance < 0);
 
     // reduce tof range if filtering was requested
-    auto tof_min_fixed = *tof_min;
-    auto tof_max_fixed = *tof_max;
+    auto tof_min_fixed = tof_min;
+    auto tof_max_fixed = tof_max;
     if (m_loader.alg->filter_tof_range) {
       if (m_loader.alg->filter_tof_max != EMPTY_DBL())
         tof_max_fixed = std::min<float>(tof_max_fixed, static_cast<float>(m_loader.alg->filter_tof_max));

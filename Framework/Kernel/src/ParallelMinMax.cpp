@@ -34,6 +34,7 @@ template <typename T> std::pair<T, T> parallel_minmax(std::vector<T> const *cons
 #define EXPORTPARALLELMINMAX(type)                                                                                     \
   template std::pair<type, type> MANTID_KERNEL_DLL parallel_minmax(std::vector<type> const *const, size_t);
 
+EXPORTPARALLELMINMAX(float)
 EXPORTPARALLELMINMAX(double)
 EXPORTPARALLELMINMAX(uint32_t)
 
