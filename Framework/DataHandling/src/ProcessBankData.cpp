@@ -235,11 +235,6 @@ void ProcessBankData::run() {
   if (alg->getLogger().isDebug())
     alg->getLogger().debug() << "Time to ProcessBankData " << entry_name << " " << timer << "\n";
 #endif
-  event_detid.reset();
-  event_time_of_flight.reset();
-  event_index.reset();
-  event_weight.reset();
-  thisBankPulseTimes.reset();
 } // END-OF-RUN()
 
 /**
