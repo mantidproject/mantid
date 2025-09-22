@@ -31,8 +31,21 @@ template <typename T> std::pair<T, T> parallel_minmax(std::vector<T> const *cons
   }
 }
 
+template <typename T>
+std::pair<T, T> parallel_minmax(std::shared_ptr<std::vector<T> const> const vec, size_t const grainsize) {
+  return parallel_minmax<T>(vec.get(), grainsize);
+}
+
+template <typename T>
+std::pair<T, T> parallel_minmax(std::unique_ptr<std::vector<T> const> const vec, size_t const grainsize) {
+  return parallel_minmax<T>(vec.get(), grainsize);
+}
+
 #define EXPORTPARALLELMINMAX(type)                                                                                     \
-  template std::pair<type, type> MANTID_KERNEL_DLL parallel_minmax(std::vector<type> const *const, size_t);
+  template std::pair<type, type> MANTID_KERNEL_DLL parallel_minmax(std::shared_ptr<std::vector<type> const> const,     \
+                                                                   size_t);                                            \
+  template std::pair<type, type> MANTID_KERNEL_DLL parallel_minmax(std::unique_ptr<std::vector<type> const> const,     \
+                                                                   size_t);
 
 EXPORTPARALLELMINMAX(float)
 EXPORTPARALLELMINMAX(double)

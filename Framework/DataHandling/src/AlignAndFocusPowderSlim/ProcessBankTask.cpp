@@ -131,7 +131,7 @@ void ProcessBankTask::operator()(const tbb::blocked_range<size_t> &range) const 
             // event_detid->clear();
             m_loader.loadData(detID_SDS, event_detid, offsets, slabsizes);
             // immediately find min/max to allow for other things to read disk
-            const auto [minval, maxval] = Mantid::Kernel::parallel_minmax(event_detid.get(), m_grainsize_event);
+            const auto [minval, maxval] = Mantid::Kernel::parallel_minmax(event_detid, m_grainsize_event);
             // only recreate calibration if it doesn't already have the useful information
             if ((!calibration) || (calibration->idmin() > static_cast<detid_t>(minval)) ||
                 (calibration->idmax() < static_cast<detid_t>(maxval))) {

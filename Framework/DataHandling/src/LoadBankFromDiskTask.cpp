@@ -190,7 +190,7 @@ std::unique_ptr<std::vector<uint32_t>> LoadBankFromDiskTask::loadEventId(Nexus::
 
     // determine the range of pixel ids
     {
-      const auto [min_id, max_id] = Mantid::Kernel::parallel_minmax<uint32_t>(event_id.get());
+      const auto [min_id, max_id] = Mantid::Kernel::parallel_minmax<uint32_t>(event_id);
       m_min_id = min_id;
       m_max_id = max_id;
     }
@@ -470,7 +470,7 @@ void LoadBankFromDiskTask::run() {
     // this method is for unweighted events that the user wants compressed on load
 
     // TODO should this be created elsewhere?
-    const auto [tof_min, tof_max] = Mantid::Kernel::parallel_minmax(event_time_of_flight_shrd.get());
+    const auto [tof_min, tof_max] = Mantid::Kernel::parallel_minmax(event_time_of_flight_shrd);
 
     const bool log_compression = (m_loader.alg->compressTolerance < 0);
 
