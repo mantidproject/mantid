@@ -109,6 +109,7 @@ class Polaris(AbstractInst):
             per_detector=self._inst_settings.per_detector_vanadium,
             debug=self._inst_settings.debug,
             pdf_output_name=self._inst_settings.pdf_output_name,
+            wavelength_lims=self._inst_settings.wavelength_lims,
         )
         return pdf_output
 

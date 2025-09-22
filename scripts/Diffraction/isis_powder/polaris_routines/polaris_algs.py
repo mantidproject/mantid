@@ -86,6 +86,7 @@ def generate_ts_pdf(
     per_detector=False,
     debug=False,
     pdf_output_name=None,
+    wavelength_lims=None,
 ):
     if sample_details is None:
         raise RuntimeError(
@@ -115,6 +116,12 @@ def generate_ts_pdf(
 
     if delta_q:
         focused_ws = mantid.Rebin(InputWorkspace=focused_ws, Params=delta_q)
+
+    if wavelength_lims is not None:
+        focused_ws = mantid.ConvertUnits(InputWorkspace=focused_ws, Target="Wavelength", EMode="Elastic")
+        focused_ws = mantid.CropWorkspaceRagged(InputWorkspace=focused_ws, XMin=wavelength_lims[0], XMax=wavelength_lims[1])
+        focused_ws = mantid.ConvertUnits(InputWorkspace=focused_ws, Target="MomentumTransfer", EMode="Elastic")
+
     if merge_banks:
         q_min, q_max = _load_qlims(q_lims)
         merged_ws = mantid.MatchAndMergeWorkspaces(InputWorkspaces=focused_ws, XMin=q_min, XMax=q_max, CalculateScale=False)
