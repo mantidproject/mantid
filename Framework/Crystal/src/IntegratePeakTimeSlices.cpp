@@ -1638,7 +1638,7 @@ int IntegratePeakTimeSlices::findNameInVector(std::string const &oneName, std::v
 {
   const auto it = std::find(nameList.cbegin(), nameList.cend(), oneName);
   if (it != nameList.cend()) {
-    return std::distance(nameList.cbegin(), it);
+    return static_cast<int>(std::distance(nameList.cbegin(), it));
   }
   return -1;
 }
