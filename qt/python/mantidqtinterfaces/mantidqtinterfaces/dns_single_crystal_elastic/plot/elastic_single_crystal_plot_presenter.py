@@ -83,12 +83,14 @@ class DNSElasticSCPlotPresenter(DNSObserver):
         self._set_aspect_ratio()
         self._set_ax_formatter()
         self._set_axis_labels()
+        self._set_log()
         self.view.single_crystal_plot.create_colorbar()
         self.view.connect_resize()
         self.view.single_crystal_plot.on_resize()
         self._set_initial_omega_offset_dx_dy()
         self.view.single_crystal_plot.connect_ylim_change()
-        self._change_displayed_plot_limits(include_zlim=True)
+        self._set_plotting_range()
+        self._set_plot_limits_spinners(include_zlim=True)
         self.view.canvas.figure.tight_layout()
         self.view.draw()
 
@@ -102,6 +104,11 @@ class DNSElasticSCPlotPresenter(DNSObserver):
             self._plotted_script_number = self.param_dict["elastic_single_crystal_script_generator"]["script_number"]
             self.view.process_events()
             self.view.datalist.check_first()
+
+    def _set_plotting_range(self):
+        self.view.single_crystal_plot.set_xlim(self._plot_param.xlim)
+        self.view.single_crystal_plot.set_ylim(self._plot_param.ylim)
+        self.view.single_crystal_plot.set_zlim(self._plot_param.zlim)
 
     def _set_initial_omega_offset_dx_dy(self):
         omega_offset = self.model.get_omega_offset()
@@ -138,14 +145,12 @@ class DNSElasticSCPlotPresenter(DNSObserver):
         color_map, edge_colors, shading = self._get_plot_styles()
         if shading == "flat":  # prevents dropping of line
             shading = "nearest"
-        x, y, z = self.model.generate_quad_mesh(interpolate, axis_type)
-        x, y, z = self.model.switch_axis(x, y, z, switch)
+        x, y, z = self.model.generate_quad_mesh(interpolate, axis_type, switch)
         self.view.single_crystal_plot.plot_quadmesh(x, y, z, color_map, edge_colors, shading)
 
     def _plot_scatter(self, axis_type, switch):
         color_map = self._get_plot_styles()[0]
-        x, y, z = self.model.generate_scatter_mesh(axis_type)
-        x, y, z = self.model.switch_axis(x, y, z, switch)
+        x, y, z = self.model.generate_scatter_mesh(axis_type, switch)
         self.view.single_crystal_plot.plot_scatter(x, y, z, color_map)
 
     def _want_plot(self, plot_type):
@@ -267,7 +272,10 @@ class DNSElasticSCPlotPresenter(DNSObserver):
             self._plot_param.ylim = dy_lim
             self._change_color_bar_range(zoom=True)
         self.view.single_crystal_plot.connect_ylim_change()
-        self._change_displayed_plot_limits()
+        self._plot_param.xlim, self._plot_param.ylim, self._plot_param.zlim = self.model.get_default_data_lims()
+        self._set_plotting_range()
+        self._set_plot_limits_spinners(include_zlim=True)
+        self.view.draw()
 
     def _get_current_xy_lim(self, zoom=False):
         own_dict = self.view.get_state()
@@ -361,8 +369,9 @@ class DNSElasticSCPlotPresenter(DNSObserver):
         own_dict = self.view.get_state()
         return own_dict["crystal_axes"]
 
-    def _change_displayed_plot_limits(self, include_zlim=False):
+    def _set_plot_limits_spinners(self, include_zlim=False):
         xlim, ylim = self.view.single_crystal_plot.get_active_limits()
+        zlim = None
         self.view._map["x_min"].setValue(xlim[0])
         self.view._map["x_max"].setValue(xlim[1])
         self.view._map["y_min"].setValue(ylim[0])
@@ -372,6 +381,13 @@ class DNSElasticSCPlotPresenter(DNSObserver):
             self.view._map["z_min"].setValue(zlim[0])
             self.view._map["z_max"].setValue(zlim[1])
             self._change_color_bar_range(zoom=False)
+        self._save_plot_lims(xlim, ylim, zlim)
+
+    def _save_plot_lims(self, lim_x, lim_y, lim_z):
+        self._plot_param.xlim = lim_x
+        self._plot_param.ylim = lim_y
+        if lim_z is not None:
+            self._plot_param.zlim = lim_z
 
     def _determine_plot_type_options(self, sc_map):
         if not sc_map.rectangular_grid:
@@ -403,4 +419,4 @@ class DNSElasticSCPlotPresenter(DNSObserver):
         self.view.sig_change_crystal_axes.connect(self._change_crystal_axes)
         self.view.sig_change_font_size.connect(self._change_font_size)
         self.view.sig_home_button_clicked.connect(self._home_button_clicked)
-        self.view.sig_plot_zoom_updated.connect(self._change_displayed_plot_limits)
+        self.view.sig_plot_zoom_updated.connect(self._set_plot_limits_spinners)
