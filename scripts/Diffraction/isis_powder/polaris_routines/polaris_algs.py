@@ -87,6 +87,7 @@ def generate_ts_pdf(
     debug=False,
     pdf_output_name=None,
     wavelength_lims=None,
+    r_lims=None,
 ):
     if sample_details is None:
         raise RuntimeError(
@@ -122,32 +123,27 @@ def generate_ts_pdf(
         focused_ws = mantid.CropWorkspaceRagged(InputWorkspace=focused_ws, XMin=wavelength_lims[0], XMax=wavelength_lims[1])
         focused_ws = mantid.ConvertUnits(InputWorkspace=focused_ws, Target="MomentumTransfer", EMode="Elastic")
 
+    pdf_kwargs = {
+        "InputSofQType": "S(Q)-1",
+        "PDFType": pdf_type,
+        "Filter": lorch_filter,
+        "DeltaR": delta_r,
+        "rho0": sample_details.material_object.number_density,
+    }
+    if r_lims is not None:
+        pdf_kwargs.update({"RMin": r_lims[0], "RMax": r_lims[-1]})
     if merge_banks:
         q_min, q_max = _load_qlims(q_lims)
         merged_ws = mantid.MatchAndMergeWorkspaces(InputWorkspaces=focused_ws, XMin=q_min, XMax=q_max, CalculateScale=False)
         mantid.CloneWorkspace(
             InputWorkspace=merged_ws, OutputWorkspace="merged_S_of_Q_minus_one"
         )  # merged S(Q)-1 before applying Fourier filter
-        fast_fourier_filter(merged_ws, rho0=sample_details.material_object.number_density, freq_params=freq_params)
-        pdf_output = mantid.PDFFourierTransform(
-            Inputworkspace="merged_ws",
-            InputSofQType="S(Q)-1",
-            PDFType=pdf_type,
-            Filter=lorch_filter,
-            DeltaR=delta_r,
-            rho0=sample_details.material_object.number_density,
-        )
+        fast_fourier_filter(merged_ws, rho0=pdf_kwargs["rho0"], freq_params=freq_params)
+        pdf_output = mantid.PDFFourierTransform(Inputworkspace="merged_ws", **pdf_kwargs)
     else:
         for ws in focused_ws:
             fast_fourier_filter(ws, rho0=sample_details.material_object.number_density, freq_params=freq_params)
-        pdf_output = mantid.PDFFourierTransform(
-            Inputworkspace="focused_ws",
-            InputSofQType="S(Q)-1",
-            PDFType=pdf_type,
-            Filter=lorch_filter,
-            DeltaR=delta_r,
-            rho0=sample_details.material_object.number_density,
-        )
+        pdf_output = mantid.PDFFourierTransform(Inputworkspace="focused_ws", **pdf_kwargs)
         pdf_output = mantid.RebinToWorkspace(WorkspaceToRebin=pdf_output, WorkspaceToMatch=pdf_output[4], PreserveEvents=True)
     if not per_detector and not debug:
         common.remove_intermediate_workspace("self_scattering_correction")

@@ -110,6 +110,7 @@ class Polaris(AbstractInst):
             debug=self._inst_settings.debug,
             pdf_output_name=self._inst_settings.pdf_output_name,
             wavelength_lims=self._inst_settings.wavelength_lims,
+            r_lims=self._inst_settings.r_lims,
         )
         return pdf_output
 
