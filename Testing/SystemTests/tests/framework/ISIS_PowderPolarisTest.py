@@ -574,35 +574,11 @@ class TotalScatteringTestRLimits(systemtesting.MantidSystemTest):
         self.assertAlmostEqual(self.pdf_output.dataX(0)[-1], self.r_lims[-1], delta=2e-2)
 
 
-def run_total_scattering(
-    run_number,
-    merge_banks,
-    q_lims=None,
-    delta_q=None,
-    delta_r=None,
-    pdf_type="G(r)",
-    freq_params=None,
-    lorch_filter=True,
-    per_detector=False,
-    pdf_output_name=None,
-    wavelength_lims=None,
-    r_lims=None,
-):
+def run_total_scattering(run_number, merge_banks, **kwargs):
+    default_kwargs = {"pdf_type": "G(r)", "lorch_filter": True, "per_detector": False}
+    kwargs = {**default_kwargs, **kwargs}  # overwrite defaults with kwargs passed
     pdf_inst_obj = setup_inst_object(mode="PDF")
-    return pdf_inst_obj.create_total_scattering_pdf(
-        run_number=run_number,
-        merge_banks=merge_banks,
-        q_lims=q_lims,
-        delta_q=delta_q,
-        delta_r=delta_r,
-        pdf_type=pdf_type,
-        lorch_filter=lorch_filter,
-        freq_params=freq_params,
-        per_detector_vanadium=per_detector,
-        pdf_output_name=pdf_output_name,
-        wavelength_lims=wavelength_lims,
-        r_lims=r_lims,
-    )
+    return pdf_inst_obj.create_total_scattering_pdf(run_number=run_number, merge_banks=merge_banks, **kwargs)
 
 
 def _gen_required_files():
