@@ -1,0 +1,1 @@
+- In Polaris reduction, output `Merged S(Q)-1` workspace before applying Fourier filter to the PDF. To differntiate this from resultant workspace after applying the Fourier filter and reverse transformed, the corresponding workspace was renamed from `*_merged_Q` to `*_merged_Q_r-FT`.
