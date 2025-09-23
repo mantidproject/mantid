@@ -1,1 +1,1 @@
-- Resolved an issue that prevented scripts from being generated.
+- Resolved an error, caused by a bug when the width of a cut was ``None``, that prevented scripts from being generated.
