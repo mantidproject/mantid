@@ -1,1 +1,1 @@
-- Resolved an error, caused by a bug when the width of a cut was ``None``, that prevented scripts from being generated.
+- Setting the width of a cut to ``None`` will no longer prevent scripts from being generated.
