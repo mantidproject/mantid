@@ -20,5 +20,6 @@ class SphericalProjection(Projection):
         r = np.sqrt(x * x + y * y + v * v)
 
         u = -np.atan2(y, x)
-        v = -np.acos(v / r)
+        vr = np.divide(v, r, out=np.zeros_like(v), where=r > 0)
+        v = -np.acos(np.clip(vr, -1.0, 1.0))
         return (u, v)

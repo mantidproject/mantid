@@ -4,8 +4,6 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#pragma once
-
 #include "MantidAPI/PanelsSurfaceCalculator.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include <boost/python.hpp>
@@ -214,7 +212,7 @@ void export_PanelsSurfaceCalculator() {
            (arg("self"), arg("componentInfo"), arg("detectorIndex"), arg("refPos"), arg("rotation"), arg("xaxis"),
             arg("yaxis")),
            "Transforms a component's bounding box based on reference position and rotation. The rotation should be "
-           "provided as a list containing the real and imaginary parts of a quarternion (w, i, j, k).")
+           "provided as a list containing the real and imaginary parts of a quaternion (w, i, j, k).")
       .def("getAllTubeDetectorFlatGroupParents", &getAllTubeDetectorFlatGroupParents,
            (arg("self"), arg("componentInfo")),
            "Returns the parent component indices of detectors of all groups of tubes arranged in flat banks")

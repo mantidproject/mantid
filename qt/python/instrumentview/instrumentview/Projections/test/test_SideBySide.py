@@ -19,10 +19,10 @@ class TestSideBySideProjection(unittest.TestCase):
         cls.sample_position = np.array([0, 0, 0])
         cls.detector_positions = np.array([[0, 1, 0], [2, 1, 0], [-2, 1, 0]])
 
-    def _create_flat_bank_info(self, use_relative_positions: bool, detector_ids: list[int] = [5, 10, 15]) -> FlatBankInfo:
+    def _create_flat_bank_info(self, use_relative_positions: bool, detector_ids: list[int] | None = None) -> FlatBankInfo:
         flat_bank = FlatBankInfo()
         flat_bank.reference_position = np.zeros(3)
-        flat_bank.detector_ids = detector_ids
+        flat_bank.detector_ids = detector_ids if detector_ids is not None else [5, 10, 15]
         if use_relative_positions:
             flat_bank.relative_projected_positions = self.detector_positions.copy()
         else:

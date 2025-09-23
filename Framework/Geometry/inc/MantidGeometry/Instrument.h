@@ -9,6 +9,7 @@
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"
+#include "MantidGeometry/Instrument/GridDetector.h"
 #include "MantidGeometry/Instrument/ObjComponent.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Instrument_fwd.h"

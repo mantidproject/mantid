@@ -17,7 +17,8 @@ class CylindricalProjection(Projection):
         x = detector_relative_positions.dot(self._x_axis)
         y = detector_relative_positions.dot(self._y_axis)
 
-        v_scale = 1.0 / np.sqrt(x * x + y * y + z * z)
+        norm = np.sqrt(x * x + y * y + z * z)
+        v_scale = np.divide(1.0, norm, out=np.zeros_like(norm), where=norm > 0)
 
         v = z * v_scale
         u = -np.atan2(y, x)

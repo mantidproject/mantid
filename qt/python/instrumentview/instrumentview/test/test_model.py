@@ -132,6 +132,10 @@ class TestFullInstrumentViewModel(unittest.TestCase):
     def test_calculate_cylindrical_projection(self, mock_cylindrical_projection):
         self._run_projection_test(mock_cylindrical_projection, FullInstrumentViewModel._CYLINDRICAL_Y)
 
+    @mock.patch("instrumentview.Projections.SideBySide.SideBySide")
+    def test_calculate_side_by_side_projection(self, mock_side_by_side):
+        self._run_projection_test(mock_side_by_side, FullInstrumentViewModel._SIDE_BY_SIDE)
+
     def _run_projection_test(self, mock_projection_constructor, projection_option):
         self._mock_detector_table([1, 2, 3])
         mock_workspace = self._create_mock_workspace([1, 2, 3])

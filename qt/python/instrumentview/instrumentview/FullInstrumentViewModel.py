@@ -11,20 +11,21 @@ import instrumentview.Projections.SideBySide as iv_side_by_side
 from mantid.dataobjects import Workspace2D
 from mantid.simpleapi import CreateDetectorTable, ExtractSpectra, ConvertUnits, AnalysisDataService, SumSpectra, Rebin
 import numpy as np
+from typing import ClassVar
 
 
 class FullInstrumentViewModel:
     """Model for the Instrument View Window. Will calculate detector positions, indices, and integrated counts that give the colours"""
 
-    _FULL_3D = "3D"
-    _SPHERICAL_X = "Spherical X"
-    _SPHERICAL_Y = "Spherical Y"
-    _SPHERICAL_Z = "Spherical Z"
-    _CYLINDRICAL_X = "Cylindrical X"
-    _CYLINDRICAL_Y = "Cylindrical Y"
-    _CYLINDRICAL_Z = "Cylindrical Z"
-    _SIDE_BY_SIDE = "Side by Side"
-    _PROJECTION_OPTIONS = [
+    _FULL_3D: ClassVar[str] = "3D"
+    _SPHERICAL_X: ClassVar[str] = "Spherical X"
+    _SPHERICAL_Y: ClassVar[str] = "Spherical Y"
+    _SPHERICAL_Z: ClassVar[str] = "Spherical Z"
+    _CYLINDRICAL_X: ClassVar[str] = "Cylindrical X"
+    _CYLINDRICAL_Y: ClassVar[str] = "Cylindrical Y"
+    _CYLINDRICAL_Z: ClassVar[str] = "Cylindrical Z"
+    _SIDE_BY_SIDE: ClassVar[str] = "Side by Side"
+    _PROJECTION_OPTIONS: ClassVar[list[str]] = [
         _FULL_3D,
         _SPHERICAL_X,
         _SPHERICAL_Y,

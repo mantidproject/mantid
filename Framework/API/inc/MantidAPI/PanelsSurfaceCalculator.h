@@ -47,7 +47,7 @@ public:
       const ComponentInfo &componentInfo,
       std::function<std::vector<size_t>(const ComponentInfo &, size_t, std::vector<bool> &)> operation);
   std::optional<Kernel::V2D> getSideBySideViewPos(const ComponentInfo &componentInfo,
-                                                  const Instrument_const_sptr instrument,
+                                                  const Instrument_const_sptr &instrument,
                                                   const size_t componentIndex) const;
 
 private:

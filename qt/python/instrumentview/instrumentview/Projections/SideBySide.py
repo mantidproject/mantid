@@ -99,9 +99,13 @@ class SideBySide(Projection):
         grids = self._construct_rectangles_and_grids(workspace)
         tubes = self._construct_tube_banks(workspace.componentInfo())
         self._flat_banks = grids + tubes
-        detectors_in_banks = np.empty(0) if len(self._flat_banks) == 0 else np.concatenate([d.detector_ids for d in self._flat_banks])
+        detectors_in_banks = (
+            np.empty(0, dtype=int)
+            if len(self._flat_banks) == 0
+            else np.concatenate([np.array(d.detector_ids, dtype=int) for d in self._flat_banks])
+        )
         remaining_detectors_bank = self._create_flat_bank_with_missing_detectors(detectors_in_banks)
-        if remaining_detectors_bank:
+        if remaining_detectors_bank is not None:
             self._flat_banks.append(remaining_detectors_bank)
 
         if len(self._flat_banks) == 0:
@@ -192,7 +196,7 @@ class SideBySide(Projection):
         v_plane = np.cross(u_plane, normal)
         return np.array([[np.dot(p, u_plane), np.dot(p, v_plane), 0] for p in positions])
 
-    def _create_flat_bank_with_missing_detectors(self, detectors_already_in_banks: np.ndarray) -> FlatBankInfo:
+    def _create_flat_bank_with_missing_detectors(self, detectors_already_in_banks: np.ndarray) -> Optional[FlatBankInfo]:
         detectors = np.array(self._detector_ids)
         missing_detectors = np.setdiff1d(detectors, detectors_already_in_banks)
         number_of_detectors = len(missing_detectors)

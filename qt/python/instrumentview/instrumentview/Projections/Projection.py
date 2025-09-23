@@ -21,10 +21,10 @@ class Projection(ABC):
     ):
         """For the given workspace and detectors, calculate 2D points with specified projection axis"""
 
-        self._sample_position = sample_position
-        self._root_position = root_position
-        self._detector_positions = np.array(detector_positions)
-        self._projection_axis = np.array(axis, dtype=np.float64)
+        self._sample_position = np.asarray(sample_position, dtype=np.float64)
+        self._root_position = np.asarray(root_position, dtype=np.float64)
+        self._detector_positions = np.asarray(detector_positions, dtype=np.float64)
+        self._projection_axis = np.asarray(axis, dtype=np.float64)
 
         self._x_axis = np.zeros_like(self._projection_axis, dtype=np.float64)
         self._y_axis = np.zeros_like(self._projection_axis, dtype=np.float64)
