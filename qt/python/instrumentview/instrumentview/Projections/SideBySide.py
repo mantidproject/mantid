@@ -11,19 +11,22 @@ from mantid.api import PanelsSurfaceCalculator
 from mantid.dataobjects import Workspace2D
 from mantid.geometry import ComponentInfo
 from scipy.spatial.transform import Rotation
+from dataclasses import dataclass, field
+from typing import List, Dict, Optional
 
 
+@dataclass
 class FlatBankInfo:
     """Information about a flat bank detector."""
 
-    rotation: Rotation
-    detector_ids: list[int]
-    reference_position: np.ndarray
-    detector_id_position_map: dict[int, np.ndarray] = {}
-    dimensions: np.ndarray
-    steps: list[int]
-    pixels: list[int]
-    relative_projected_positions: np.ndarray = np.array([])
+    rotation: Optional[Rotation] = None
+    detector_ids: List[int] = field(default_factory=list)
+    reference_position: np.ndarray = field(default_factory=lambda: np.zeros(3))
+    detector_id_position_map: Dict[int, np.ndarray] = field(default_factory=dict)
+    dimensions: np.ndarray = field(default_factory=lambda: np.zeros(3))
+    steps: List[float] = field(default_factory=list)
+    pixels: List[int] = field(default_factory=list)
+    relative_projected_positions: np.ndarray = field(default_factory=lambda: np.empty((0, 3)))
     has_position_in_idf: bool = False
 
     def translate(self, shift: np.ndarray):
@@ -58,13 +61,6 @@ class FlatBankInfo:
 
 
 class SideBySide(Projection):
-    _detector_id_to_flat_bank_map: dict[int, FlatBankInfo] = {}
-    _flat_banks: list[FlatBankInfo] = []
-    _calculator: PanelsSurfaceCalculator
-    _workspace: Workspace2D
-    _component_index_detector_id_map: dict[int, int]
-    _detector_id_component_index_map: dict[int, int]
-
     def __init__(
         self,
         workspace: Workspace2D,
@@ -75,6 +71,8 @@ class SideBySide(Projection):
         axis: np.ndarray,
     ):
         self._calculator = PanelsSurfaceCalculator()
+        self._detector_id_to_flat_bank_map: dict[int, FlatBankInfo] = {}
+        self._flat_banks: list[FlatBankInfo] = []
         self._detector_ids = detector_ids
         self._workspace = workspace
         all_detector_ids = np.array(workspace.detectorInfo().detectorIDs())
@@ -98,7 +96,6 @@ class SideBySide(Projection):
         self._y_axis = y
 
     def _construct_flat_panels(self, workspace: Workspace2D) -> None:
-        self._detector_id_to_flat_bank_map.clear()
         grids = self._construct_rectangles_and_grids(workspace)
         tubes = self._construct_tube_banks(workspace.componentInfo())
         self._flat_banks = grids + tubes
@@ -131,7 +128,7 @@ class SideBySide(Projection):
             flat_bank.detector_id_position_map.clear()
             flat_bank.reference_position = np.array(bank.getPos())
             rotation = bank.getRotation()
-            flat_bank.rotation = Rotation.from_quat([rotation.real(), rotation.imagI(), rotation.imagJ(), rotation.imagK()])
+            flat_bank.rotation = Rotation.from_quat([rotation.imagI(), rotation.imagJ(), rotation.imagK(), rotation.real()])
             flat_bank.detector_ids = list(range(bank.minDetectorID(), bank.maxDetectorID() + 1))
             flat_bank.dimensions = np.abs([bank.xsize(), bank.ysize(), bank.zsize()])
             flat_bank.steps = np.abs([bank.xstep(), bank.ystep(), bank.zstep()])
@@ -168,7 +165,8 @@ class SideBySide(Projection):
                 list(self._y_axis),
                 list(self._sample_position),
             )
-            flat_bank.rotation = Rotation.from_quat([rotation[0], rotation[1], rotation[2], rotation[3]])
+            # SciPy from_quat expects (x, y, z, w)
+            flat_bank.rotation = Rotation.from_quat([rotation[1], rotation[2], rotation[3], rotation[0]])
             flat_bank.detector_ids = detectors
             flat_bank.relative_projected_positions = self._calculate_projected_positions(
                 np.array([component_info.position(int(d)) for d in detector_component_indices]), normal, flat_bank
@@ -189,7 +187,7 @@ class SideBySide(Projection):
         x_axis = np.array([1, 0, 0])
         if np.allclose(x_axis, normal):  # if v and normal are parallel
             x_axis = np.array([0, 1, 0])
-        u_plane = x_axis + (x_axis.dot(normal)) * normal
+        u_plane = x_axis - (x_axis.dot(normal)) * normal
         u_plane = u_plane / np.linalg.norm(u_plane)
         v_plane = np.cross(u_plane, normal)
         return np.array([[np.dot(p, u_plane), np.dot(p, v_plane), 0] for p in positions])
@@ -239,7 +237,7 @@ class SideBySide(Projection):
     def _arrange_panels(self) -> None:
         max_dims = np.max([b.dimensions for b in self._flat_banks], axis=0)
         number_banks = len(self._flat_banks)
-        banks_per_row = np.ceil(np.sqrt(number_banks))
+        banks_per_row = int(np.ceil(np.sqrt(number_banks)))
         position = np.zeros(3)
         banks_arranged = 0
         space_factor = 1.2

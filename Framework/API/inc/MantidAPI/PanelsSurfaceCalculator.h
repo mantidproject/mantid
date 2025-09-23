@@ -16,6 +16,7 @@
 
 #include <functional>
 #include <optional>
+#include <vector>
 
 using Mantid::Geometry::ComponentInfo;
 using Mantid::Geometry::Instrument;

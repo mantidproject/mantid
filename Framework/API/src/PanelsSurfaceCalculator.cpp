@@ -12,6 +12,9 @@
 #include "MantidGeometry/Rendering/GeometryHandler.h"
 #include "MantidGeometry/Rendering/ShapeInfo.h"
 
+#include <cmath>
+#include <numeric>
+
 using namespace Mantid::Geometry;
 using Mantid::Beamline::ComponentType;
 using Mantid::Kernel::V3D;
@@ -134,7 +137,7 @@ bool PanelsSurfaceCalculator::isBankFlat(const ComponentInfo &componentInfo, siz
   for (auto tube : tubes) {
     const auto &children = componentInfo.children(tube);
     const auto vector = normalize(componentInfo.position(children[0]) - componentInfo.position(children[1]));
-    if (fabs(vector.scalar_prod(normal)) > Mantid::Kernel::Tolerance) {
+    if (std::abs(vector.scalar_prod(normal)) > Mantid::Kernel::Tolerance) {
       this->g_log.warning() << "Assembly " << componentInfo.name(bankIndex) << " isn't flat.\n";
       return false;
     }
@@ -348,10 +351,10 @@ std::vector<size_t> PanelsSurfaceCalculator::tubeDetectorParentIDs(const Compone
   // Try grandparent of the tube supplied tube initially
   if (componentInfo.hasParent(bankIndex0)) {
     bankIndex = componentInfo.parent(bankIndex0);
-    auto bankChildren = &componentInfo.children(bankIndex);
+    const auto &bankChildren = componentInfo.children(bankIndex);
 
     // Go down the tree to find all the tubes.
-    for (auto index : *bankChildren)
+    for (const auto index : bankChildren)
       addTubes(index, tubes);
     if (tubes.empty()) {
       this->setBankVisited(componentInfo, bankIndex, visited);
