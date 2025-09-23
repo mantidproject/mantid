@@ -33,6 +33,9 @@ class DNSElasticSCPlotModel(DNSObsModel):
         self._data.x = None
         self._data.y = None
         self._data.z = None
+        self._data.x_lims = None
+        self._data.y_lims = None
+        self._data.z_lims = None
         self._data.z_min = None
         self._data.z_max = None
         self._data.pz_min = None
@@ -79,7 +82,7 @@ class DNSElasticSCPlotModel(DNSObsModel):
         self.set_mesh_data(x, y, z)
         return triangulator_refiner, z_refiner
 
-    def generate_quad_mesh(self, interpolate, axis_type):
+    def generate_quad_mesh(self, interpolate, axis_type, switch):
         new_mesh_name = axis_type + "_mesh_interpolated"
         old_mesh_name = axis_type + "_mesh"
         if interpolate:
@@ -87,11 +90,13 @@ class DNSElasticSCPlotModel(DNSObsModel):
             x, y, z = getattr(self._single_crystal_map, new_mesh_name)
         else:
             x, y, z = getattr(self._single_crystal_map, old_mesh_name)
+        x, y, z = self.switch_axis(x, y, z, switch)
         self.set_mesh_data(x, y, z)
         return x, y, z
 
-    def generate_scatter_mesh(self, axis_type):
+    def generate_scatter_mesh(self, axis_type, switch):
         x, y, z = getattr(self._single_crystal_map, axis_type + "_mesh")
+        x, y, z = self.switch_axis(x, y, z, switch)
         self.set_mesh_data(x, y, z)
         return x, y, z
 
@@ -167,3 +172,19 @@ class DNSElasticSCPlotModel(DNSObsModel):
         self._data.x = x
         self._data.y = y
         self._data.z = z
+        self.save_data_lims()
+
+    def save_data_lims(self):
+        x_lims, y_lims = self.get_data_xy_lim(switch=False)
+        z_min, z_max, pos_z_min = self.get_data_z_min_max()
+        # add 5% padding to comply with default plotting settings
+        x0, x1 = x_lims[0], x_lims[1]
+        y0, y1 = y_lims[0], y_lims[1]
+        dx = (x1 - x0) * 0.05
+        dy = (y1 - y0) * 0.05
+        self._data.x_lims = [x0 - dx, x1 + dx]
+        self._data.y_lims = [y0 - dy, y1 + dy]
+        self._data.z_lims = [z_min, z_max]
+
+    def get_default_data_lims(self):
+        return self._data.x_lims, self._data.y_lims, self._data.z_lims
