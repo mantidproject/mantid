@@ -731,7 +731,7 @@ void DiscusMultipleScatteringCorrection::exec() {
   if (outputWSs.size() > 1) {
     // create sum of multiple scatter workspaces for use in subtraction method
     auto summedMScatOutput = createOutputWorkspace(*inputWS);
-    summedMScatOutput = std::accumulate(outputWSs.cbegin(), outputWSs.cend(), summedMScatOutput);
+    summedMScatOutput = std::accumulate(outputWSs.cbegin() + 1, outputWSs.cend(), summedMScatOutput);
     wsName = wsNamePrefix + "2_" + std::to_string(outputWSs.size()) + "_Summed";
     setWorkspaceName(summedMScatOutput, wsName);
     wsgroup->addWorkspace(summedMScatOutput);
