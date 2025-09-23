@@ -59,6 +59,7 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         mock_workspace.componentInfo.return_value = mock.MagicMock()
         mock_workspace.getNumberHistograms.return_value = len(detector_ids)
         mock_workspace.extractX.return_value = np.arange(len(detector_ids))[np.newaxis, :]
+        mock_workspace.readX.return_value = np.arange(len(detector_ids))
         mock_workspace.getIntegratedCountsForWorkspaceIndices.return_value = [100 * i for i in detector_ids]
         return mock_workspace
 
@@ -249,3 +250,136 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         model.setup()
         monitor_positions = model.monitor_positions
         self.assertEqual(len(monitor_positions), 2)
+
+    @mock.patch("instrumentview.FullInstrumentViewModel.ExtractSpectra")
+    @mock.patch("instrumentview.FullInstrumentViewModel.ConvertUnits")
+    @mock.patch.object(FullInstrumentViewModel, "picked_workspace_indices", new_callable=mock.PropertyMock)
+    def test_extract_spectra_for_picked_detectors(self, mock_picked_workspace_indices, mock_convert_units, mock_extract_spectra):
+        mock_workspace = self._create_mock_workspace([1, 2, 3])
+        mock_picked_workspace_indices.return_value = [1, 2]
+        model = FullInstrumentViewModel(mock_workspace)
+        model.extract_spectra_for_line_plot("TOF", False)
+        mock_extract_spectra.assert_called_once_with(
+            InputWorkspace=mock_workspace, WorkspaceIndexList=[1, 2], EnableLogging=False, StoreInADS=False
+        )
+        mock_convert_units.assert_called_once_with(
+            InputWorkspace=mock_extract_spectra.return_value, target="TOF", EMode="Elastic", EnableLogging=False, StoreInADS=False
+        )
+        self.assertEqual(mock_convert_units.return_value, model.line_plot_workspace)
+
+    @mock.patch("instrumentview.FullInstrumentViewModel.ExtractSpectra")
+    @mock.patch("instrumentview.FullInstrumentViewModel.ConvertUnits")
+    @mock.patch.object(FullInstrumentViewModel, "picked_workspace_indices", new_callable=mock.PropertyMock)
+    def test_extract_spectra_no_picked_detectors(self, mock_picked_workspace_indices, mock_convert_units, mock_extract_spectra):
+        mock_workspace = self._create_mock_workspace([1, 2, 3])
+        mock_picked_workspace_indices.return_value = []
+        model = FullInstrumentViewModel(mock_workspace)
+        model.extract_spectra_for_line_plot("Wavelength", True)
+        self.assertIsNone(model.line_plot_workspace)
+        mock_extract_spectra.assert_not_called()
+        mock_convert_units.assert_not_called()
+
+    @mock.patch("instrumentview.FullInstrumentViewModel.Rebin")
+    @mock.patch("instrumentview.FullInstrumentViewModel.SumSpectra")
+    @mock.patch("instrumentview.FullInstrumentViewModel.ExtractSpectra")
+    @mock.patch("instrumentview.FullInstrumentViewModel.ConvertUnits")
+    @mock.patch.object(FullInstrumentViewModel, "picked_workspace_indices", new_callable=mock.PropertyMock)
+    def test_extract_spectra_sum(
+        self, mock_picked_workspace_indices, mock_convert_units, mock_extract_spectra, mock_sum_spectra, mock_rebin
+    ):
+        mock_workspace = self._create_mock_workspace([1, 2, 3])
+        mock_workspace.isCommonBins.return_value = False
+        mock_picked_workspace_indices.return_value = [1, 2]
+        mock_extract_spectra.return_value = mock_workspace
+        mock_convert_units.return_value = mock_workspace
+        mock_sum_spectra.return_value = mock_workspace
+        mock_rebin.return_value = mock_workspace
+        model = FullInstrumentViewModel(mock_workspace)
+        model.extract_spectra_for_line_plot("TOF", True)
+        mock_extract_spectra.assert_called_once_with(
+            InputWorkspace=mock_workspace, WorkspaceIndexList=[1, 2], EnableLogging=False, StoreInADS=False
+        )
+        mock_rebin.assert_called_once_with(InputWorkspace=mock_workspace, Params=[0, 1, 2], EnableLogging=False, StoreInADS=False)
+        mock_sum_spectra.assert_called_once_with(InputWorkspace=mock_workspace, EnableLogging=False, StoreInADS=False)
+        mock_convert_units.assert_called_once_with(
+            InputWorkspace=mock_workspace, target="TOF", EMode="Elastic", EnableLogging=False, StoreInADS=False
+        )
+
+    @mock.patch("instrumentview.FullInstrumentViewModel.Rebin")
+    @mock.patch("instrumentview.FullInstrumentViewModel.SumSpectra")
+    @mock.patch("instrumentview.FullInstrumentViewModel.ExtractSpectra")
+    @mock.patch("instrumentview.FullInstrumentViewModel.ConvertUnits")
+    @mock.patch.object(FullInstrumentViewModel, "picked_workspace_indices", new_callable=mock.PropertyMock)
+    def test_extract_spectra_sum_common_bins(
+        self, mock_picked_workspace_indices, mock_convert_units, mock_extract_spectra, mock_sum_spectra, mock_rebin
+    ):
+        mock_workspace = self._create_mock_workspace([1, 2, 3])
+        mock_workspace.isCommonBins.return_value = True
+        mock_picked_workspace_indices.return_value = [1, 2]
+        mock_extract_spectra.return_value = mock_workspace
+        mock_convert_units.return_value = mock_workspace
+        mock_sum_spectra.return_value = mock_workspace
+        mock_rebin.return_value = mock_workspace
+        model = FullInstrumentViewModel(mock_workspace)
+        model.extract_spectra_for_line_plot("TOF", True)
+        mock_extract_spectra.assert_called_once_with(
+            InputWorkspace=mock_workspace, WorkspaceIndexList=[1, 2], EnableLogging=False, StoreInADS=False
+        )
+        mock_rebin.assert_not_called()
+        mock_sum_spectra.assert_called_once_with(InputWorkspace=mock_workspace, EnableLogging=False, StoreInADS=False)
+        mock_convert_units.assert_called_once_with(
+            InputWorkspace=mock_workspace, target="TOF", EMode="Elastic", EnableLogging=False, StoreInADS=False
+        )
+
+    @mock.patch("instrumentview.FullInstrumentViewModel.SumSpectra")
+    @mock.patch("instrumentview.FullInstrumentViewModel.ExtractSpectra")
+    @mock.patch("instrumentview.FullInstrumentViewModel.ConvertUnits")
+    @mock.patch.object(FullInstrumentViewModel, "picked_workspace_indices", new_callable=mock.PropertyMock)
+    def test_extract_spectra_sum_one_spectra(
+        self, mock_picked_workspace_indices, mock_convert_units, mock_extract_spectra, mock_sum_spectra
+    ):
+        mock_workspace = self._create_mock_workspace([1, 2, 3])
+        mock_picked_workspace_indices.return_value = [2]
+        mock_extract_spectra.return_value = mock_workspace
+        mock_convert_units.return_value = mock_workspace
+        mock_sum_spectra.return_value = mock_workspace
+        model = FullInstrumentViewModel(mock_workspace)
+        model.extract_spectra_for_line_plot("Wavelength", True)
+        mock_extract_spectra.assert_called_once_with(
+            InputWorkspace=mock_workspace, WorkspaceIndexList=[2], EnableLogging=False, StoreInADS=False
+        )
+        mock_workspace.applyBinEdgesFromAnotherWorkspace.assert_not_called()
+        mock_sum_spectra.assert_not_called()
+        mock_convert_units.assert_called_once_with(
+            InputWorkspace=mock_workspace, target="Wavelength", EMode="Elastic", EnableLogging=False, StoreInADS=False
+        )
+
+    @mock.patch("instrumentview.FullInstrumentViewModel.ExtractSpectra")
+    @mock.patch("instrumentview.FullInstrumentViewModel.ConvertUnits")
+    @mock.patch.object(FullInstrumentViewModel, "picked_workspace_indices", new_callable=mock.PropertyMock)
+    @mock.patch("instrumentview.FullInstrumentViewModel.AnalysisDataService")
+    def test_save_line_plot_workspace_to_ads(self, mock_ads, mock_picked_workspace_indices, mock_convert_units, mock_extract_spectra):
+        mock_workspace = self._create_mock_workspace([1, 2, 3])
+        mock_picked_workspace_indices.return_value = [1, 2]
+        model = FullInstrumentViewModel(mock_workspace)
+        model.extract_spectra_for_line_plot("TOF", False)
+        mock_convert_units.assert_called_once()
+        mock_extract_spectra.assert_called_once()
+        model.save_line_plot_workspace_to_ads()
+        mock_ads.addOrReplace.assert_called_once()
+
+    def test_has_no_unit(self):
+        mock_workspace = self._create_mock_workspace([1, 2, 3])
+        mock_workspace.getAxis.return_value = mock.MagicMock()
+        mock_workspace.getAxis(0).getUnit.return_value = mock.MagicMock()
+        mock_workspace.getAxis(0).getUnit().unitID.return_value = "Empty"
+        model = FullInstrumentViewModel(mock_workspace)
+        self.assertEqual(False, model.has_unit)
+
+    def test_has_unit(self):
+        mock_workspace = self._create_mock_workspace([1, 2, 3])
+        mock_workspace.getAxis.return_value = mock.MagicMock()
+        mock_workspace.getAxis(0).getUnit.return_value = mock.MagicMock()
+        mock_workspace.getAxis(0).getUnit().unitID.return_value = "Wavelength"
+        model = FullInstrumentViewModel(mock_workspace)
+        self.assertEqual(True, model.has_unit)

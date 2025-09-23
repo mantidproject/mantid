@@ -9,7 +9,7 @@ import instrumentview.Projections.SphericalProjection as iv_spherical
 import instrumentview.Projections.CylindricalProjection as iv_cylindrical
 import instrumentview.Projections.SideBySide as iv_side_by_side
 from mantid.dataobjects import Workspace2D
-from mantid.simpleapi import CreateDetectorTable
+from mantid.simpleapi import CreateDetectorTable, ExtractSpectra, ConvertUnits, AnalysisDataService, SumSpectra, Rebin
 import numpy as np
 
 
@@ -40,11 +40,14 @@ class FullInstrumentViewModel:
     _invalid_index = -1
     _data_min = 0.0
     _data_max = 0.0
+    line_plot_workspace = None
+    _workspace_x_unit: str
 
     def __init__(self, workspace: Workspace2D):
         """For the given workspace, calculate detector positions, the map from detector indices to workspace indices, and integrated
         counts. Optionally will draw detector geometry, e.g. rectangular bank or tube instead of points."""
         self._workspace = workspace
+        self._workspace_x_unit = workspace.getAxis(0).getUnit().unitID()
 
     def setup(self):
         component_info = self._workspace.componentInfo()
@@ -91,6 +94,14 @@ class FullInstrumentViewModel:
     @property
     def workspace(self) -> Workspace2D:
         return self._workspace
+
+    @property
+    def has_unit(self) -> bool:
+        return self._workspace_x_unit != "Empty"
+
+    @property
+    def workspace_x_unit(self) -> str:
+        return self._workspace_x_unit
 
     @property
     def default_projection(self) -> str:
@@ -217,3 +228,39 @@ class FullInstrumentViewModel:
 
         self._detector_projection_positions[:, :2] = projection.positions()  # Assign only x and y coordinate
         return self._detector_projection_positions
+
+    def extract_spectra_for_line_plot(self, unit: str, sum_spectra: bool) -> None:
+        workspace_indices = self.picked_workspace_indices
+        if len(workspace_indices) == 0:
+            self.line_plot_workspace = None
+            return
+
+        ws = ExtractSpectra(InputWorkspace=self._workspace, WorkspaceIndexList=workspace_indices, EnableLogging=False, StoreInADS=False)
+        if self.has_unit and unit != self.workspace_x_unit:
+            ws = ConvertUnits(InputWorkspace=ws, target=unit, EMode="Elastic", EnableLogging=False, StoreInADS=False)
+
+        if sum_spectra and len(workspace_indices) > 1:
+            # Find the spectrum with the widest range, and the one with the smallest bin width and use that
+            # combo to rebin the selected spectra. We have to loop over the spectra because otherwise ragged
+            # workspaces will have their bin edge vector truncated
+            if not ws.isCommonBins():
+                min_bin_edge = np.inf
+                max_bin_edge = 0
+                min_bin_width = np.inf
+                for ws_index_i in range(len(workspace_indices)):
+                    bin_edges = ws.readX(ws_index_i)
+                    min_bin_edge = min(min_bin_edge, bin_edges[0])
+                    max_bin_edge = max(max_bin_edge, bin_edges[-1])
+                    min_bin_width = min(min_bin_width, np.min(np.diff(bin_edges)))
+
+                ws = Rebin(InputWorkspace=ws, Params=[min_bin_edge, min_bin_width, max_bin_edge], EnableLogging=False, StoreInADS=False)
+
+            ws = SumSpectra(InputWorkspace=ws, EnableLogging=False, StoreInADS=False)
+
+        self.line_plot_workspace = ws
+
+    def save_line_plot_workspace_to_ads(self) -> None:
+        if self.line_plot_workspace is None or len(self.picked_workspace_indices) == 0:
+            return
+        name_exported_ws = f"instrument_view_selected_spectra_{self._workspace.name()}"
+        AnalysisDataService.addOrReplace(name_exported_ws, self.line_plot_workspace)

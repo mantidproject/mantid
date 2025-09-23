@@ -72,21 +72,6 @@ const std::string BAD_PULSES_CUTOFF("FilterBadPulsesLowerCutoff");
 } // namespace PropertyNames
 } // namespace
 
-/**
- * Based on the current group in the file, does the named sub-entry exist?
- * @param file : File handle. This is not modified, but cannot be const
- * @param name : sub entry name to look for
- * @return true only if it exists
- */
-bool exists(Nexus::File const &file, const std::string &name) {
-  const auto entries = file.getEntries();
-  return exists(entries, name);
-}
-
-bool exists(const std::map<std::string, std::string> &entries, const std::string &name) {
-  return entries.find(name) != entries.end();
-}
-
 //----------------------------------------------------------------------------------------------
 /** Empty default constructor
  */
@@ -887,11 +872,9 @@ std::shared_ptr<BankPulseTimes> LoadEventNexus::runLoadNexusLogs<EventWorkspaceC
 /**
  * Load events from the file.
  * @param prog :: A pointer to the progress reporting object
- * @param monitors :: If true the events from the monitors are loaded and not
- *the main banks
+ * @param monitors :: If true the events from the monitors are loaded and not the main banks
  *
- * This also loads the instrument, but only if it has not been set in the
- *workspace
+ * This also loads the instrument, but only if it has not been set in the workspace
  * being used as input (m_ws data member). Same applies to the logs.
  */
 void LoadEventNexus::loadEvents(API::Progress *const prog, const bool monitors) {
@@ -992,8 +975,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog, const bool monitors) 
     m_instrument_loaded_correctly = loadInstrument(m_filename, m_ws, m_top_entry_name, this, descriptor.get());
 
     if (!m_instrument_loaded_correctly)
-      throw std::runtime_error("Instrument was not initialized correctly! "
-                               "Loading cannot continue.");
+      throw std::runtime_error("Instrument was not initialized correctly! Loading cannot continue.");
     // reopen file
     safeOpenFile(m_filename);
   }
