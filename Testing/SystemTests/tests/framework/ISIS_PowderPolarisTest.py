@@ -538,6 +538,23 @@ class TotalScatteringLorchFilterTest(systemtesting.MantidSystemTest):
         self.assertAlmostEqual(self.pdf_output.dataY(0)[idx], 8.7571, places=3)
 
 
+class TotalScatteringTestWavelengthLimits(systemtesting.MantidSystemTest):
+    pdf_output = None
+
+    def runTest(self):
+        setup_mantid_paths()
+        # Load Focused ws
+        mantid.LoadNexus(Filename=total_scattering_input_file, OutputWorkspace="98533-ResultTOF")
+        q_lims = np.array([2.5, 3, 4, 6, 7, 3.5, 5, 7, 11, 40]).reshape((2, 5))
+        self.pdf_output = run_total_scattering("98533", True, q_lims=q_lims, lorch_filter=False, wavelength_lims=[1, 6])
+
+    def validate(self):
+        # Whilst total scattering is in development, the validation will avoid using reference files as they will have
+        # to be updated very frequently. In the meantime, the expected peak in the PDF at ~3.85 Angstrom will be checked.
+        idx = get_bin_number_at_given_r(self.pdf_output.dataX(0), 3.85)
+        self.assertAlmostEqual(self.pdf_output.dataY(0)[idx], 4.10094, places=3)  # less than in TotalScatteringLorchFilterTest
+
+
 def run_total_scattering(
     run_number,
     merge_banks,
@@ -549,6 +566,7 @@ def run_total_scattering(
     lorch_filter=True,
     per_detector=False,
     pdf_output_name=None,
+    wavelength_lims=None,
 ):
     pdf_inst_obj = setup_inst_object(mode="PDF")
     return pdf_inst_obj.create_total_scattering_pdf(
@@ -562,6 +580,7 @@ def run_total_scattering(
         freq_params=freq_params,
         per_detector_vanadium=per_detector,
         pdf_output_name=pdf_output_name,
+        wavelength_lims=wavelength_lims,
     )
 
 
