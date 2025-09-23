@@ -532,7 +532,6 @@ private:
   /// If replace=true then usea addOrReplace
   void doAddingOnInvalidNameTests(bool replace) {
     const std::string illegalChars = " +-/*\\%<>&|^~=!@()[]{},:.`$'\"?";
-    const size_t nchars(illegalChars.size());
     const std::string allowed("WsName");
 
     for (const char &illegalChar : illegalChars) {
