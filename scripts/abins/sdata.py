@@ -6,7 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from functools import partial
 from itertools import chain, groupby
-from multiprocessing import Pool
 from operator import itemgetter
 from typing import (
     Dict,
@@ -34,10 +33,6 @@ import abins.parameters
 import pint
 
 pint.set_application_registry(ureg)
-
-
-# Parallel threads for autoconvolution
-N_THREADS = abins.parameters.performance.get("threads")
 
 
 def _iter_check_thresholds(items: Iterable[Tuple[int, int, np.ndarray]]) -> Generator[Tuple[int, int, float], None, None]:
@@ -149,7 +144,6 @@ def add_autoconvolution_spectra(
         output_bins: if provided, output spectra are re-binned to these x-values.
 
     """
-
     if max_order is None:
         max_order = abins.parameters.autoconvolution["max_order"]
 
@@ -167,11 +161,10 @@ def add_autoconvolution_spectra(
     # create new spectra using first and last spectra in initial group, iterating until order = max_order
     x_data = spectra.x_data
 
-    with Pool(N_THREADS) as p:
-        output_spectra = p.map(partial(_autoconvolve_atom_spectra, x_data=x_data, max_order=max_order), spectra_by_atom)
+    output_spectra = map(partial(_autoconvolve_atom_spectra, x_data=x_data, max_order=max_order), spectra_by_atom)
 
-        if output_bins is not None:
-            output_spectra = p.map(partial(_resample_spectra, input_bins=x_data, output_bins=output_bins), output_spectra)
+    if output_bins is not None:
+        output_spectra = map(partial(_resample_spectra, input_bins=x_data, output_bins=output_bins), output_spectra)
 
     return Spectrum1DCollection.from_spectra(list(chain(*output_spectra)), unsafe=True)
 

@@ -11,7 +11,7 @@ from unittest import TestCase
 import numpy as np
 from numpy.testing import assert_allclose
 
-from abins.atomsdata import _AtomData
+from abins.atomsdata import AtomData
 from abins.kpointsdata import KpointData
 
 
@@ -56,7 +56,7 @@ def dict_arrays_to_lists(mydict: Mapping[str, Any]) -> Dict[str, Any]:
     return clean_dict
 
 
-def assert_atom_almost_equal(ref_atom: _AtomData, atom: _AtomData, tester: TestCase = None) -> None:
+def assert_atom_almost_equal(ref_atom: AtomData, atom: AtomData, tester: TestCase = None) -> None:
     """Compare two items from AtomsData, raise AssertionError if different"""
 
     if tester is None:
