@@ -86,26 +86,67 @@ class HelpWindowModel:
         # Store raw online base early, needed for fallback logic below
         self._raw_online_base = online_base.rstrip("/")
 
-        # --- Step 1: Attempt to get local path from ConfigService ---
-        local_docs_path_from_config = None  # Default if lookup fails or path is empty
-        try:
-            # ConfigService is imported at the top level now
-            config_service = ConfigService.Instance()
-            raw_path = config_service.getString("docs.html.root", True)  # pathAbsolute=True
-            if raw_path:  # Only assign if not empty
-                local_docs_path_from_config = raw_path
-                log.debug(f"Retrieved 'docs.html.root' from ConfigService: '{local_docs_path_from_config}'")
-            else:
-                log.debug("'docs.html.root' property is empty or not found in ConfigService.")
-        except Exception as e:
-            # Catch potential errors during ConfigService interaction
-            # This includes cases where the dummy ConfigService might be used
-            log.error(f"Error retrieving 'docs.html.root' from ConfigService: {e}. Defaulting to online mode.")
-            # local_docs_path_from_config remains None
+        # --- Step 1: Attempt to get local path ---
+        local_docs_path_from_config = self._get_doc_path()
 
         # --- Step 2: Determine final mode and set ALL related state variables ---
         # This method now sets _is_local, _mode_string, _base_url, _version_string
         self._determine_mode_and_set_state(local_docs_path_from_config)
+
+    def _get_doc_path(self):
+        """
+        Locate the documentation directory for Mantid installations.
+
+        Searches for docs in various installation patterns:
+        - Standalone installations: {installation_dir}/share/doc/html/
+        - Conda installations: {env_dir}/share/doc/html/
+        - Debug builds: {build_dir}/docs/html/
+
+        Returns:
+            str: Path to the documentation directory, or empty string if not found
+        """
+
+        # Get the bin directory from the properties dir, we move one level up becase the return strings ends with /
+        bin_dir = os.path.dirname(ConfigService.getPropertiesDir())
+        if not bin_dir:
+            return ""
+
+        doc_paths_to_try = []
+        if os.name == "posix":
+            # On Unix-like systems the parent of the bin dir will always be either installation/env/build dir
+            project_dir = os.path.dirname(bin_dir)
+
+            doc_paths_to_try = [
+                # Standard standalone/conda installation path
+                os.path.join(project_dir, "share", "doc", "html"),
+                # Debug build installation path
+                os.path.join(project_dir, "docs", "html"),
+            ]
+        else:
+            # On Windows the parent of the bin dir will be the installation dir
+            installation_dir = os.path.dirname(bin_dir)
+            # On Windows the second parent of the bin dir will be the conda env dir
+            # because there is additional /Library/ in windows conda envs path structure
+            env_dir = os.path.dirname(os.path.dirname(bin_dir))
+            # On Windows the second parent of the bin dir will be the debuig build dir
+            # becaue tehre is additional level for the configuration (i.e. /DebugWithRelRuntime)
+            build_dir = os.path.dirname(os.path.dirname(bin_dir))
+
+            doc_paths_to_try = [
+                # Standard Windows installation path
+                os.path.join(installation_dir, "share", "doc", "html"),
+                # Windows debug build
+                os.path.join(build_dir, "docs", "html"),
+                # Windows conda installation
+                os.path.join(env_dir, "share", "doc", "html"),
+            ]
+
+        # Try each potential path until we find one that exists
+        for docs_path in doc_paths_to_try:
+            if os.path.exists(docs_path):
+                return docs_path
+
+        return ""
 
     def _determine_mode_and_set_state(self, local_docs_path):
         """
@@ -116,7 +157,7 @@ class HelpWindowModel:
         log.debug(f"Determining final mode and state with local_docs_path='{local_docs_path}'")
 
         # Check if the path from config is valid and points to an existing directory
-        if local_docs_path and os.path.isdir(local_docs_path):
+        if local_docs_path and os.path.isdir(os.path.normpath(local_docs_path)):
             # --- Configure for LOCAL/OFFLINE Mode ---
             log.debug("Valid local docs path found. Configuring for Offline Mode.")
             self._is_local = True
@@ -131,11 +172,9 @@ class HelpWindowModel:
             # --- Configure for ONLINE Mode ---
             # Log reason if applicable
             if local_docs_path:  # Path was provided but invalid
-                log.warning(
-                    f"Local docs path '{local_docs_path}' from ConfigService ('docs.html.root') is invalid or not found. Falling back to Online Mode."  # noqa: E501
-                )
+                log.warning(f"Local docs path '{local_docs_path}' is invalid or not found. Falling back to Online Mode.")
             else:  # Path was None (not found in config or error during lookup)
-                log.debug("No valid local docs path found from ConfigService. Configuring for Online Mode.")
+                log.debug("No valid local docs path found. Configuring for Online Mode.")
 
             self._is_local = False
             self._mode_string = self.MODE_ONLINE
