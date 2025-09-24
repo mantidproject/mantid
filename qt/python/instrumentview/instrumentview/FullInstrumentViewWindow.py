@@ -405,7 +405,7 @@ class FullInstrumentViewWindow(QMainWindow):
                 self.interactor_style.set_interactor(self.main_plotter.iren.interactor)
                 self.main_plotter.iren.style = self.interactor_style
             else:
-                self.main_plotter.iren.style = CustomInteractorStyleRubberBand3D(self.main_plotter.iren)
+                self.main_plotter.iren.style = CustomInteractorStyleRubberBand3D()
 
             def _end_pick_helper(picker, *_):
                 callback(RectangleSelection(frustum=picker.GetFrustum(), viewport=(-1, -1, -1, -1)))

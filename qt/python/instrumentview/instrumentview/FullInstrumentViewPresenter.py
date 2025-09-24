@@ -120,9 +120,7 @@ class FullInstrumentViewPresenter:
             # Plot orange sphere at the origin
             # origin = pv.Sphere(radius=0.1, center=[0, 0, 0])
             # self._view.add_simple_shape(origin, colour="orange", pickable=False)
-            self._is_projection_selected = False
-            self._update_view_main_plotter(self._model.detector_positions, is_projection=self._is_projection_selected)
-            self.on_multi_select_detectors_clicked()
+            self._apply_projection_state(False, self._model.detector_positions)
             return
 
         is_spherical = True
@@ -143,8 +141,11 @@ class FullInstrumentViewPresenter:
             raise ValueError(f"Unknown projection type {projection_type}")
 
         self._model.calculate_projection(is_spherical, axis)
-        self._is_projection_selected = True
-        self._update_view_main_plotter(self._model.detector_projection_positions, is_projection=self._is_projection_selected)
+        self._apply_projection_state(True, self._model.detector_projection_positions)
+
+    def _apply_projection_state(self, is_projection: bool, positions: np.ndarray) -> None:
+        self._is_projection_selected = is_projection
+        self._update_view_main_plotter(positions, is_projection=self._is_projection_selected)
         self.on_multi_select_detectors_clicked()
 
     def _update_view_main_plotter(self, positions: np.ndarray, is_projection: bool):

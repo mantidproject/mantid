@@ -5,7 +5,7 @@ from vtk import vtkCommand
 class CustomInteractorStyleRubberBand3D(vtkInteractorStyleRubberBand3D):
     """Wrapper for RubberBand3D style"""
 
-    def __init__(self, render_window_interactor):
+    def __init__(self):
         super().__init__()
         self.AddObserver(vtkCommand.RightButtonPressEvent, lambda *_: self.OnLeftButtonDown())
         self.AddObserver(vtkCommand.RightButtonReleaseEvent, lambda *_: self.OnLeftButtonUp())
@@ -52,16 +52,19 @@ def on_selection_changed(caller, *_):
     max_x = max(start_position[0], end_position[0])
     max_y = max(start_position[1], end_position[1])
 
-    min_x = 0 if min_x < 0 else min_x
-    min_y = 0 if min_y < 0 else min_y
-    max_x = 0 if max_x < 0 else max_x
-    max_y = 0 if max_y < 0 else max_y
+    min_x = max(0, min_x)
+    min_y = max(0, min_y)
+    max_x = max(0, max_x)
+    max_y = max(0, max_y)
 
-    # NOTE: Copied this from VTK C++ code, not sure if it's needed
-    min_x = windows_size[0] - 2 if min_x >= windows_size[0] else min_x
-    min_y = windows_size[1] - 2 if min_y >= windows_size[1] else min_y
-    max_x = windows_size[0] - 2 if max_x >= windows_size[0] else max_x
-    max_y = windows_size[1] - 2 if max_y >= windows_size[0] else max_y
+    def _clamp_to_window(coord, window_size):
+        return min(coord, window_size - 2)
+
+    # Clamp to window boundaries (from VTK C++ source)
+    min_x = _clamp_to_window(min_x, windows_size[0])
+    min_y = _clamp_to_window(min_y, windows_size[1])
+    max_x = _clamp_to_window(max_x, windows_size[0])
+    max_y = _clamp_to_window(max_y, windows_size[1])
 
     # Trigger picker
     render_window_interactor.StartPickCallback()
