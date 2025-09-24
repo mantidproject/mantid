@@ -59,6 +59,9 @@ class FullInstrumentViewPresenter:
         self._visible_label = "Visible Picked"
 
         self._view.show_axes()
+
+        self._is_projection_selected = False
+
         self.on_projection_option_selected(default_index)
 
         if self._model.workspace_x_unit in self._UNIT_OPTIONS:
@@ -117,7 +120,7 @@ class FullInstrumentViewPresenter:
             # Plot orange sphere at the origin
             # origin = pv.Sphere(radius=0.1, center=[0, 0, 0])
             # self._view.add_simple_shape(origin, colour="orange", pickable=False)
-            self._view.enable_rectangle_picking_checkbox()
+            self._is_projection_selected = False
             self._update_view_main_plotter(self._model.detector_positions, is_projection=False)
             return
 
@@ -139,7 +142,7 @@ class FullInstrumentViewPresenter:
             raise ValueError(f"Unknown projection type {projection_type}")
 
         self._model.calculate_projection(is_spherical, axis)
-        self._view.disable_rectangle_picking_checkbox()
+        self._is_projection_selected = True
         self._update_view_main_plotter(self._model.detector_projection_positions, is_projection=True)
 
     def _update_view_main_plotter(self, positions: np.ndarray, is_projection: bool):
@@ -151,7 +154,7 @@ class FullInstrumentViewPresenter:
         self._pickable_main_mesh[self._visible_label] = self._model.picked_visibility
         self._view.add_pickable_main_mesh(self._pickable_main_mesh, scalars=self._visible_label)
 
-        self._view.enable_point_picking(callback=self.point_picked)
+        self._view.enable_point_picking(self._is_projection_selected, callback=self.point_picked)
         self.set_view_contour_limits()
         self.set_view_tof_limits()
         self._view.reset_camera()
@@ -159,9 +162,9 @@ class FullInstrumentViewPresenter:
     def on_multi_select_detectors_clicked(self, state: int) -> None:
         """Change between single and multi point picking"""
         if state == 2:
-            self._view.enable_rectangle_picking(callback=self.rectangle_picked)
+            self._view.enable_rectangle_picking(self._is_projection_selected, callback=self.rectangle_picked)
         else:
-            self._view.enable_point_picking(callback=self.point_picked)
+            self._view.enable_point_picking(self._is_projection_selected, callback=self.point_picked)
 
     def point_picked(self, point_position: np.ndarray | None, picker: PickerType) -> None:
         if point_position is None:
