@@ -118,6 +118,9 @@ def generate_ts_pdf(
     if merge_banks:
         q_min, q_max = _load_qlims(q_lims)
         merged_ws = mantid.MatchAndMergeWorkspaces(InputWorkspaces=focused_ws, XMin=q_min, XMax=q_max, CalculateScale=False)
+        mantid.CloneWorkspace(
+            InputWorkspace=merged_ws, OutputWorkspace="merged_S_of_Q_minus_one"
+        )  # merged S(Q)-1 before applying Fourier filter
         fast_fourier_filter(merged_ws, rho0=sample_details.material_object.number_density, freq_params=freq_params)
         pdf_output = mantid.PDFFourierTransform(
             Inputworkspace="merged_ws",
@@ -143,7 +146,7 @@ def generate_ts_pdf(
         common.remove_intermediate_workspace("self_scattering_correction")
     # Rename output ws
     if "merged_ws" in locals():
-        mantid.RenameWorkspace(InputWorkspace="merged_ws", OutputWorkspace=run_number + "_merged_Q")
+        mantid.RenameWorkspace(InputWorkspace="merged_ws", OutputWorkspace=run_number + "_merged_Q_r_FT")
 
     mantid.RenameWorkspace(InputWorkspace="focused_ws", OutputWorkspace=run_number + "_focused_Q")
     if isinstance(focused_ws, WorkspaceGroup):
