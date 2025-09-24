@@ -103,7 +103,7 @@ class AbinsCRYSTALTestT(AbinsTestingMixin, systemtesting.MantidSystemTest):
     parameters are identical across calculations. In the third run the required
     data /should/ be read from the hdf file.
 
-    We only check that here that the results are correct, we cannot tell if the
+    We only check here that the results are correct, we cannot tell if the
     cache was used.
     """
 
