@@ -173,7 +173,6 @@ class CursorInfoTest(unittest.TestCase):
         )
         actual_rows = cursor_info.generate_table_rows()
         expected_table_rows = [
-            TableRow(spec_list="0", x_min=0, x_max=0),
             TableRow(spec_list="0", x_min=0, x_max=0.666),
             TableRow(spec_list="1", x_min=0, x_max=2.666),
             TableRow(spec_list="2", x_min=0, x_max=4.666),
@@ -200,7 +199,7 @@ class CursorInfoTest(unittest.TestCase):
         )
         actual_rows = cursor_info.generate_table_rows()
         expected_table_rows = [
-            TableRow(spec_list="0", x_min=0.0, x_max=10.0),
+            TableRow(spec_list="0", x_min=0.333, x_max=9.666),
             TableRow(spec_list="1", x_min=0.666, x_max=9.333),
             TableRow(spec_list="2", x_min=1.666, x_max=8.333),
             TableRow(spec_list="3", x_min=2.666, x_max=7.333),

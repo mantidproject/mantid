@@ -163,6 +163,7 @@ class PolyCursorInfo(CursorInfoBase):
                 x = (y - line.c) / line.m if (abs(line.m) != inf and abs(line.m) != 0) else line.start[0]
                 x_vals.append(x)
         x_vals.sort()
+
         open_close_pairs = []
         for i in range(0, len(x_vals), 2):
             x_min, x_max = x_vals[i], x_vals[i + 1]
