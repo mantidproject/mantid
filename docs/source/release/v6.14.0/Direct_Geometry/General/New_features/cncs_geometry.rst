@@ -1,0 +1,1 @@
+- Added a new instrument geometry file for the CNCS spectrometer
