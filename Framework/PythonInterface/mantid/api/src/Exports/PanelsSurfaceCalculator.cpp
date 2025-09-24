@@ -6,9 +6,13 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/PanelsSurfaceCalculator.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include <boost/python.hpp>
 #include <boost/python/class.hpp>
 #include <boost/python/list.hpp>
+
+// boost::python generates this warning in gcc
+GNU_DIAG_OFF("maybe-uninitialized")
 
 using namespace boost::python;
 
@@ -63,7 +67,8 @@ bool isBankFlat(PanelsSurfaceCalculator &self, const object &componentInfo, cons
                 const list &normal) {
   const std::shared_ptr<ComponentInfo> cInfoSharedPtr = extract<std::shared_ptr<ComponentInfo>>(componentInfo);
   std::vector<size_t> tubesVector;
-  for (size_t i = 0; i < len(tubes); i++) {
+  const size_t lenTubes = len(tubes);
+  for (size_t i = 0; i < lenTubes; i++) {
     tubesVector.push_back(extract<size_t>(tubes[i]));
   }
   const auto normalV3D = pythonListToV3D(normal);
@@ -73,7 +78,8 @@ bool isBankFlat(PanelsSurfaceCalculator &self, const object &componentInfo, cons
 list calculateBankNormal(PanelsSurfaceCalculator &self, const object &componentInfo, const list &tubes) {
   const std::shared_ptr<ComponentInfo> cInfoSharedPtr = extract<std::shared_ptr<ComponentInfo>>(componentInfo);
   std::vector<size_t> tubesVector;
-  for (size_t i = 0; i < len(tubes); i++) {
+  const size_t lenTubes = len(tubes);
+  for (size_t i = 0; i < lenTubes; i++) {
     tubesVector.push_back(extract<size_t>(tubes[i]));
   }
   const auto normal = self.calculateBankNormal(*(cInfoSharedPtr.get()), tubesVector);
@@ -85,11 +91,12 @@ void setBankVisited(const PanelsSurfaceCalculator &self, const object &component
                     list &visitedComponents) {
   const std::shared_ptr<ComponentInfo> cInfoSharedPtr = extract<std::shared_ptr<ComponentInfo>>(componentInfo);
   std::vector<bool> visitedComponentsVector;
-  for (size_t i = 0; i < len(visitedComponents); i++) {
+  const size_t lenVisitedComponents = len(visitedComponents);
+  for (size_t i = 0; i < lenVisitedComponents; i++) {
     visitedComponentsVector.push_back(extract<bool>(visitedComponents[i]));
   }
   self.setBankVisited(*(cInfoSharedPtr.get()), bankIndex, visitedComponentsVector);
-  for (size_t i = 0; i < len(visitedComponents); i++) {
+  for (size_t i = 0; i < lenVisitedComponents; i++) {
     // A bool is 8 bytes because a byte is the smallest addressable unit of memory, but
     // an std::vector<bool> uses bits to store bools as a memory optimisation. Hence
     // the objects in a vector<bool> are not actually bools, and boost::python
@@ -101,7 +108,8 @@ void setBankVisited(const PanelsSurfaceCalculator &self, const object &component
 size_t findNumDetectors(const PanelsSurfaceCalculator &self, const object &componentInfo, const list &components) {
   const std::shared_ptr<ComponentInfo> cInfoSharedPtr = extract<std::shared_ptr<ComponentInfo>>(componentInfo);
   std::vector<size_t> componentsVector;
-  for (size_t i = 0; i < len(components); i++) {
+  const size_t lenComponents = len(components);
+  for (size_t i = 0; i < lenComponents; i++) {
     componentsVector.push_back(extract<size_t>(components[i]));
   }
   return self.findNumDetectors(*(cInfoSharedPtr.get()), componentsVector);
