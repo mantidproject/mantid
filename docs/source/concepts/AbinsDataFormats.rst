@@ -91,6 +91,9 @@ It is also permitted to use a phonopy YAML file which does not contain the force
 We recommend using the *force_constants.hdf5* file where practical as the read/write performance is significantly better.
 (With the power and flexibility of *.yaml* comes a lot of computational overhead to read simple arrays!)
 
+Machine-learned interatomic potential calculations with `janus-core <https://stfc.github.io/janus-core/>`_ can use Phonopy to produce phonon outputs with filenames *PREFIX-phonopy.yml* and *PREFIX-force_constants.hdf5*.
+This filename convention can be used with Abins: again, the force constants file should be in the same directory as the YAML file.
+
 VASP
 ----
 Abins can read the frequencies and displacements from Gamma-point vibration calculations performed with the ``IBRION=5,6,7,8`` tags.

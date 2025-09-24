@@ -1,0 +1,5 @@
+- *<prefix>-phonopy.yml* and *<prefix>-force_constants.hdf5* files
+  from `janus-core <https://stfc.github.io/janus-core>`_ are now
+  supported as input to Abins/Abins2D Algorithms. Use the
+  FORCE_CONSTANTS "AbInitioProgram" as for regular *phonopy.yaml*
+  files.
