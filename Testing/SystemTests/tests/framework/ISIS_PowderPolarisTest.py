@@ -463,7 +463,7 @@ class TotalScatteringMergedRebinTest(systemtesting.MantidSystemTest):
         # to be updated very frequently. In the meantime, the rebin test will be done by testing the histogram size in
         # a truncated WS
         self.assertAlmostEqual(self.pdf_output.dataX(0).size, 255, places=3)
-        self.assertTrue(AnalysisDataService.retrieve("merged S(Q)-1") is not None)
+        self.assertTrue(AnalysisDataService.doesExist("merged_S_of_Q_minus_one"))
 
 
 class TotalScatteringPdfTypeTest(systemtesting.MantidSystemTest):
