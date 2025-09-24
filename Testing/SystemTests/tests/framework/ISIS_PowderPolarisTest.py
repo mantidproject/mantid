@@ -422,7 +422,7 @@ class TotalScatteringMergedPerDetTest(systemtesting.MantidSystemTest):
         # Load Focused ws
         mantid.LoadNexus(Filename=total_scattering_input_file_per_det, OutputWorkspace="98533-ResultTOF")
         q_lims = np.array([2.5, 3, 4, 6, 7, 3.5, 5, 7, 11, 40]).reshape((2, 5))
-        self.pdf_output = run_total_scattering("98533", True, q_lims=q_lims, per_detector=True)
+        self.pdf_output = run_total_scattering("98533", True, q_lims=q_lims, per_detector_vanadium=True)
 
     def validate(self):
         # Whilst total scattering is in development, the validation will avoid using reference files as they will have
@@ -575,7 +575,7 @@ class TotalScatteringTestRLimits(systemtesting.MantidSystemTest):
 
 
 def run_total_scattering(run_number, merge_banks, **kwargs):
-    default_kwargs = {"pdf_type": "G(r)", "lorch_filter": True, "per_detector": False}
+    default_kwargs = {"pdf_type": "G(r)", "lorch_filter": True, "per_detector_vanadium": False}
     kwargs = {**default_kwargs, **kwargs}  # overwrite defaults with kwargs passed
     pdf_inst_obj = setup_inst_object(mode="PDF")
     return pdf_inst_obj.create_total_scattering_pdf(run_number=run_number, merge_banks=merge_banks, **kwargs)
