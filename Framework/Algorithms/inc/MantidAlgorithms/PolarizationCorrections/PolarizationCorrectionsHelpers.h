@@ -18,7 +18,7 @@
 
 namespace Mantid::Algorithms {
 namespace PolarizationCorrectionsHelpers {
-MANTID_ALGORITHMS_DLL API::MatrixWorkspace_sptr workspaceForSpinState(API::WorkspaceGroup_sptr group,
+MANTID_ALGORITHMS_DLL API::MatrixWorkspace_sptr workspaceForSpinState(const API::WorkspaceGroup_sptr &group,
                                                                       const std::string &spinStateOrder,
                                                                       const std::string &targetSpinState);
 } // namespace PolarizationCorrectionsHelpers
