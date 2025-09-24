@@ -164,6 +164,9 @@ class FullInstrumentViewWindow(QMainWindow):
     def _on_splitter_moved(self, pos, index) -> None:
         self._detector_spectrum_fig.tight_layout()
 
+    def is_multi_picking_checkbox_checked(self) -> bool:
+        return self._multi_select_check.isChecked()
+
     def hide_status_box(self) -> None:
         self.status_group_box.hide()
 
@@ -375,10 +378,11 @@ class FullInstrumentViewWindow(QMainWindow):
     def enable_point_picking(self, is_projection: bool, callback: Callable) -> None:
         """Switch on point picking, i.e. picking a single point with right-click"""
         self.main_plotter.disable_picking()
+        # NOTE: Need to remove interactor to avoid artifacts in 2D or 3D
+        self.interactor_style.remove_interactor()
         picking_tolerance = 0.01
         if not self.main_plotter.off_screen:
             if is_projection:
-                self.interactor_style.remove_interactor()
                 self.main_plotter.enable_zoom_style()
             else:
                 self.main_plotter.enable_trackball_style()
