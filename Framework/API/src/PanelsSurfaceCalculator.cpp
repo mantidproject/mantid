@@ -396,6 +396,10 @@ std::optional<Kernel::V2D> PanelsSurfaceCalculator::getSideBySideViewPos(const C
                                                                          const size_t componentIndex) const {
   const auto *componentID = componentInfo.componentID(componentIndex);
   const auto component = instrument->getComponentByID(componentID);
+  if (!component) {
+    return std::optional<Kernel::V2D>();
+  }
+
   return component->getSideBySideViewPos();
 }
 

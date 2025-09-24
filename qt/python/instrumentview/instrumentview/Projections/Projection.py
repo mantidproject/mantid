@@ -35,7 +35,7 @@ class Projection(ABC):
 
         self._u_period = 2 * np.pi
 
-        self._calculate_axes(root_position)
+        self._calculate_axes(self._root_position)
         self._calculate_detector_coordinates()
         self._find_and_correct_x_gap()
 

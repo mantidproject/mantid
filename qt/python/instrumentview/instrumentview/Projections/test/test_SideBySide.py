@@ -120,7 +120,7 @@ class TestSideBySideProjection(unittest.TestCase):
         side_by_side = self._create_side_by_side([5, 10, 15, 20, 25], True)
         mock_construct_rectangles.return_value = [self._create_flat_bank_info(True, detector_ids=[5, 10, 15])]
         mock_construct_tube_banks.return_value = [self._create_flat_bank_info(True, detector_ids=[20, 25])]
-        mock_create_flat_bank.return_value = []
+        mock_create_flat_bank.return_value = None
         side_by_side._construct_flat_panels(side_by_side._workspace)
         detector_map = side_by_side._detector_id_to_flat_bank_map
         self.assertEqual([5, 10, 15, 20, 25], list(detector_map.keys()))
