@@ -103,9 +103,9 @@ class DNSElasticSCPlotModel(DNSObsModel):
     def get_xy_dy_ratio(self):
         return self._single_crystal_map.dx / self._single_crystal_map.dy
 
-    def get_aspect_ratio(self, axis_type):
-        if axis_type["fix_aspect"]:
-            if axis_type["type"] == "hkl":
+    def get_aspect_ratio(self, plot_settings_dict):
+        if plot_settings_dict["fix_aspect"]:
+            if plot_settings_dict["type"] == "hkl":
                 ratio = self.get_xy_dy_ratio()
                 return ratio
             return 1
@@ -129,11 +129,16 @@ class DNSElasticSCPlotModel(DNSObsModel):
     def get_changing_hkl_components(self):
         return self._single_crystal_map.get_changing_hkl_components()
 
-    def get_format_coord(self, axis_type):
+    def get_format_coord(self, plot_settings_dict):
         # adds z and hkl label to cursor position
         def format_coord(x, y):
-            h, k, l, z, error = get_hkl_intensity_from_cursor(self._single_crystal_map, axis_type, x, y)
-            return f"x={x:2.3f}, y={y:2.3f}, hkl=({h:2.2f}, {k:2.2f}, {l:2.2f}), Intensity={z:6.4f}±{error:6.4f}"
+            mesh_name = plot_settings_dict["type"] + "_mesh"
+            border_path = self._single_crystal_map.get_dns_map_border(mesh_name)
+            h, k, l, z, error = get_hkl_intensity_from_cursor(self._single_crystal_map, plot_settings_dict, x, y)
+            # ensures empty hover in the region outside the data boundary
+            if border_path.contains_point((x, y)):
+                return f"x={x:2.3f}, y={y:2.3f}, hkl=({h:2.2f}, {k:2.2f}, {l:2.2f}), Intensity={z:6.4f}±{error:6.4f}"
+            return ""
 
         return format_coord
 

@@ -38,10 +38,10 @@ class DNSElasticSCPlotPresenter(DNSObserver):
     def _toggle_projections(self, set_proj):
         self.view.sig_change_cb_range_on_zoom.disconnect()
         self._plot_param.projections = set_proj
-        axis_type = self.view.get_plotting_settings_dict()
+        switch = self.view.get_plotting_setting("switch")
         if set_proj and self.model.has_data():
-            x_proj, y_proj = self._calculate_projections(axis_type["switch"])
-            if axis_type["switch"]:
+            x_proj, y_proj = self._calculate_projections(switch)
+            if switch:
                 x_proj, y_proj = y_proj, x_proj
             self.view.single_crystal_plot.set_projections(x_proj, y_proj)
             self.view.draw()
@@ -173,15 +173,16 @@ class DNSElasticSCPlotPresenter(DNSObserver):
         return color_map, edge_colors, shading
 
     def _set_axis_labels(self):
-        axis_type = self.view.get_plotting_settings_dict()
-        x_label, y_label = self.model.get_axis_labels(axis_type["type"], self._crystallographical_axes())
-        if axis_type["switch"]:
+        axis_type = self.view.get_plotting_setting("type")
+        switch = self.view.get_plotting_setting("switch")
+        x_label, y_label = self.model.get_axis_labels(axis_type, self._crystallographical_axes())
+        if switch:
             x_label, y_label = y_label, x_label
         self.view.single_crystal_plot.set_axis_labels(x_label, y_label)
 
     def _set_aspect_ratio(self):
-        axis_type = self.view.get_plotting_settings_dict()
-        ratio = self.model.get_aspect_ratio(axis_type)
+        plot_settings = self.view.get_plotting_settings_dict()
+        ratio = self.model.get_aspect_ratio(plot_settings)
         self.view.single_crystal_plot.set_aspect_ratio(ratio)
 
     def _change_crystal_axes_grid(self):
@@ -222,8 +223,8 @@ class DNSElasticSCPlotPresenter(DNSObserver):
         self._plot(self.view.initial_values)
 
     def _change_line_style(self):
-        axis_type = self.view.get_plotting_settings_dict()
-        if axis_type["plot_type"] == "scatter":
+        plot_type = self.view.get_plotting_setting("plot_type")
+        if plot_type == "scatter":
             self._plot_param.pointsize = (self._plot_param.pointsize + 1) % 5
             self.view.single_crystal_plot.set_pointsize(self._plot_param.pointsize)
         else:
@@ -232,8 +233,8 @@ class DNSElasticSCPlotPresenter(DNSObserver):
         self.view.draw()
 
     def _set_ax_formatter(self):
-        axis_type = self.view.get_plotting_settings_dict()
-        format_coord = self.model.get_format_coord(axis_type)
+        plot_settings = self.view.get_plotting_settings_dict()
+        format_coord = self.model.get_format_coord(plot_settings)
         self.view.single_crystal_plot.set_format_coord(format_coord)
 
     def _manual_lim_changed(self):
@@ -261,11 +262,11 @@ class DNSElasticSCPlotPresenter(DNSObserver):
         # The color bar gets tiny if you zoom out with home button in log scale.
         # Redrawing color bar fixes the problem.
         own_dict = self.view.get_state()
-        axis_type = self.view.get_plotting_settings_dict()
+        plot_settings = self.view.get_plotting_settings_dict()
         if own_dict["log_scale"]:
             self.view.single_crystal_plot.redraw_colorbar()
-        if axis_type["zoom"]["fix_xy"]:
-            dx_lim, dy_lim = self.model.get_data_xy_lim(axis_type["switch"])
+        if plot_settings["zoom"]["fix_xy"]:
+            dx_lim, dy_lim = self.model.get_data_xy_lim(plot_settings["switch"])
             self.view.single_crystal_plot.set_xlim(dx_lim)
             self.view.single_crystal_plot.set_ylim(dy_lim)
             self._plot_param.xlim = dx_lim
@@ -279,17 +280,17 @@ class DNSElasticSCPlotPresenter(DNSObserver):
 
     def _get_current_xy_lim(self, zoom=False):
         own_dict = self.view.get_state()
-        axis_type = self.view.get_plotting_settings_dict()
+        plot_settings = self.view.get_plotting_settings_dict()
         xlim, ylim = [[own_dict["x_min"], own_dict["x_max"]], [own_dict["y_min"], own_dict["y_max"]]]
         if zoom:
             dx_lim, dy_lim = self.view.single_crystal_plot.get_active_limits()
         else:
-            dx_lim, dy_lim = self.model.get_data_xy_lim(axis_type["switch"])
+            dx_lim, dy_lim = self.model.get_data_xy_lim(plot_settings["switch"])
         if xlim[0] is None:
             xlim = dx_lim
         if ylim[0] is None:
             ylim = dy_lim
-        if axis_type["zoom"]["fix_xy"] and not zoom:
+        if plot_settings["zoom"]["fix_xy"] and not zoom:
             if self._plot_param.xlim[0] is not None:
                 xlim = self._plot_param.xlim
             if self._plot_param.ylim[0] is not None:
@@ -299,8 +300,8 @@ class DNSElasticSCPlotPresenter(DNSObserver):
     def _get_current_z_lim(self, xlim, ylim, zoom):
         manual_z = True
         own_dict = self.view.get_state()
-        axis_type = self.view.get_plotting_settings_dict()
-        if axis_type["switch"]:
+        plot_settings = self.view.get_plotting_settings_dict()
+        if plot_settings["switch"]:
             xlim, ylim = ylim, xlim
         dz_min, dz_max, dpz_min = self.model.get_data_z_min_max(xlim, ylim)
         zlim = [own_dict["z_min"], own_dict["z_max"]]
@@ -309,7 +310,7 @@ class DNSElasticSCPlotPresenter(DNSObserver):
             manual_z = False
         if own_dict["log_scale"] and zlim[0] < 0:
             zlim[0] = dpz_min
-        if axis_type["zoom"]["fix_z"] and not zoom:
+        if plot_settings["zoom"]["fix_z"] and not zoom:
             if self._plot_param.zlim[0] is not None:
                 zlim = self._plot_param.zlim
         return zlim, manual_z
@@ -340,9 +341,9 @@ class DNSElasticSCPlotPresenter(DNSObserver):
         return column_headers
 
     def _create_grid_helper(self):
-        axis_type = self.view.get_plotting_settings_dict()
+        switch = self.view.get_plotting_setting("switch")
         a, b, c, d = self.model.get_changing_hkl_components()
-        return get_grid_helper(self._plot_param.grid_helper, self._plot_param.grid_state, a, b, c, d, axis_type["switch"])
+        return get_grid_helper(self._plot_param.grid_helper, self._plot_param.grid_state, a, b, c, d, switch)
 
     def _set_colormap(self):
         cmap = self._get_plot_styles()[0]
