@@ -157,14 +157,12 @@ class PolyCursorInfo(CursorInfoBase):
         x_vals = []
         for line in self._lines:
             y_bounds = sorted([line.start[1], line.end[1]])
-            if y_bounds[1] >= y >= y_bounds[0]:
+            # if line is horizontal at value y.
+            if y_bounds[1] >= y > y_bounds[0]:
+                # if line is not vertical, else just use the line start x pos
                 x = (y - line.c) / line.m if (abs(line.m) != inf and abs(line.m) != 0) else line.start[0]
                 x_vals.append(x)
         x_vals.sort()
-        if not len(x_vals) % 2 == 0:
-            # To form a close bounded shape, each spectra must have an even number of points.
-            # Drop either the first or last x value, as this must correspond to a node in a line-node pair.
-            x_vals = x_vals[1:] if len(set(x_vals[:2])) == 1 else x_vals[:-1]
         open_close_pairs = []
         for i in range(0, len(x_vals), 2):
             x_min, x_max = x_vals[i], x_vals[i + 1]
