@@ -53,70 +53,63 @@ class GSAS2ViewTest(unittest.TestCase):
         add_phases(self.project, phase_files)
         self.project.add_phase.assert_has_calls([mock.call("file_1"), mock.call("file_2")])
 
-    def test_add_histograms_with_single_datafile(self):
+    def test_add_histograms_with_single_datafile_multiple_banks(self):
         data_filenames = ["data_file_1"]
         instruments = ["instr_1"]
         number_of_regions = 3
-        add_histograms(data_filenames, self.project, instruments, number_of_regions)
+        banks_per_file = 3
+        add_histograms(data_filenames, self.project, instruments, number_of_regions, banks_per_file)
         self.project.add_powder_histogram.assert_called()
+        self.assertEqual(self.project.add_powder_histogram.call_count, 3)
 
-    def test_add_histograms_same_number_of_instruments_and_datafiles(self):
-        self.project.phases.return_value = ["phase_1"]
-        data_filenames = ["data_file_1", "data_file_2"]
-        instruments = ["instr_1", "instr_2"]
-        number_of_regions = 2
-        add_histograms(data_filenames, self.project, instruments, number_of_regions)
-        expected_calls = [
-            mock.call(datafile="data_file_1", iparams="instr_1", phases=["phase_1"]),
-            mock.call(datafile="data_file_2", iparams="instr_2", phases=["phase_1"]),
-        ]
-        self.project.add_powder_histogram.assert_has_calls(expected_calls)
-
-    def test_add_histograms_more_datafiles_than_instruments(self):
+    def test_add_histograms_more_datafiles_one_instrument(self):
         self.project.phases.return_value = ["phase_1"]
         data_filenames = ["data_file_1", "data_file_2"]
         instruments = ["instr_1"]
-        number_of_regions = 2
-        add_histograms(data_filenames, self.project, instruments, number_of_regions)
-        expected_calls = [
-            mock.call(datafile="data_file_1", iparams="instr_1", phases=["phase_1"], instbank=1),
-            mock.call(datafile="data_file_2", iparams="instr_1", phases=["phase_1"], instbank=2),
-        ]
-        self.project.add_powder_histogram.assert_has_calls(expected_calls)
+        number_of_regions = 6  # 2 files * 3 banks each
+        banks_per_file = 3
+        add_histograms(data_filenames, self.project, instruments, number_of_regions, banks_per_file)
 
-    def test_add_histograms_multiple_regions_for_single_datafile(self):
-        self.project.phases.return_value = ["phase_1"]
-        data_filenames = ["data_file_1"]
-        instruments = ["instr_1", "instr_2"]
-        number_of_regions = 3
-        add_histograms(data_filenames, self.project, instruments, number_of_regions)
         expected_calls = [
+            # File 1, banks 1-3
             mock.call(datafile="data_file_1", iparams="instr_1", phases=["phase_1"], databank=1, instbank=1),
             mock.call(datafile="data_file_1", iparams="instr_1", phases=["phase_1"], databank=2, instbank=2),
             mock.call(datafile="data_file_1", iparams="instr_1", phases=["phase_1"], databank=3, instbank=3),
+            # File 2, banks 1-3
+            mock.call(datafile="data_file_2", iparams="instr_1", phases=["phase_1"], databank=1, instbank=1),
+            mock.call(datafile="data_file_2", iparams="instr_1", phases=["phase_1"], databank=2, instbank=2),
+            mock.call(datafile="data_file_2", iparams="instr_1", phases=["phase_1"], databank=3, instbank=3),
         ]
         self.project.add_powder_histogram.assert_has_calls(expected_calls)
 
-    def test_add_histograms_throws_for_more_datafiles_than_number_of_regions(self):
-        data_filenames = ["data_file_1", "data_file_2"]
+    def test_add_histograms_throws_for_single_bank_per_file(self):
+        """Test that single bank per file is rejected"""
+        data_filenames = ["data_file_1"]
+        instruments = ["instr_1"]
+        number_of_regions = 1
+        banks_per_file = 1
+        with self.assertRaises(ValueError) as context:
+            add_histograms(data_filenames, self.project, instruments, number_of_regions, banks_per_file)
+        self.assertIn("Each data file must contain multiple banks", str(context.exception))
+
+    def test_add_histograms_throws_for_multiple_instruments_for_single_datafile(self):
+        self.project.phases.return_value = ["phase_1"]
+        data_filenames = ["data_file_1"]
         instruments = ["instr_1", "instr_2"]
         number_of_regions = 3
+        banks_per_file = 3
         with self.assertRaises(ValueError):
-            add_histograms(data_filenames, self.project, instruments, number_of_regions)
+            add_histograms(data_filenames, self.project, instruments, number_of_regions, banks_per_file)
 
-    def test_add_histograms_throws_for_less_datafiles_than_number_of_regions(self):
+    def test_add_histograms_throws_for_inconsistent_region_count(self):
+        """Test that inconsistent total region count is rejected"""
         data_filenames = ["data_file_1", "data_file_2"]
-        instruments = ["instr_1", "instr_2"]
-        number_of_regions = 1
-        with self.assertRaises(ValueError):
-            add_histograms(data_filenames, self.project, instruments, number_of_regions)
-
-    def test_add_histograms_throws_for_less_datafiles_than_instruments(self):
-        data_filenames = ["data_file_1", "data_file_2"]
-        instruments = ["instr_1", "instr_2", "instr_3"]
-        number_of_regions = 2
-        with self.assertRaises(ValueError):
-            add_histograms(data_filenames, self.project, instruments, number_of_regions)
+        instruments = ["instr_1"]
+        number_of_regions = 5  # Should be 6 for 2 files * 3 banks
+        banks_per_file = 3
+        with self.assertRaises(ValueError) as context:
+            add_histograms(data_filenames, self.project, instruments, number_of_regions, banks_per_file)
+        self.assertIn("Expected 6 total regions, but found 5", str(context.exception))
 
     def test_add_pawley_reflections(self):
         phase_1 = mock.Mock()

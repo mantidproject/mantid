@@ -132,6 +132,17 @@ class TestGSAS2Model(unittest.TestCase):
 
     @patch("mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.gsas2.model.LoadCIF")
     @patch("mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.gsas2.model.GSAS2Model.validate_x_limits")
+    def test_run_model_with_multiple_datafiles(self, mock_validate_x_limits, mock_load_cif):
+        self._setup_crystal_structure_and_mocks(mock_load_cif)
+
+        load_parameters = ["mock_instrument", ["mock_phase.cif"], ["mock_data.gss", "mock_data2.gss", "mock_data3.gss"]]
+        refinement_parameters = ["Pawley", None, False, False, False]
+        user_x_limits = [[10000.0, 20000.0], [30000.0, 40000.0]]
+
+        self.model.run_model(load_parameters, refinement_parameters, "test_project", user_x_limits=user_x_limits)
+
+    @patch("mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.gsas2.model.LoadCIF")
+    @patch("mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.gsas2.model.GSAS2Model.validate_x_limits")
     def test_run_model_with_unformatted_user_x_limits(self, mock_validate_x_limits, mock_load_cif):
         self._setup_crystal_structure_and_mocks(mock_load_cif)
 
