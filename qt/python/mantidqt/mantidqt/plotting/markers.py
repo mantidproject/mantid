@@ -141,7 +141,7 @@ class HorizontalMarker(QObject):
             return False
         if self.x1 is not None and x > self.x1:
             return False
-        return abs(self.get_y_in_pixels() - y_pixels) < MARKER_SENSITIVITY
+        return True if abs(self.get_y_in_pixels() - y_pixels) < MARKER_SENSITIVITY else False
 
     def mouse_move_start(self, x, y):
         """
@@ -319,12 +319,11 @@ class VerticalMarker(QObject):
         :return: True or False.
         """
         x_pixels, _ = self.patch.get_transform().transform((x, y))
-
         if self.y0 is not None and y < self.y0:
             return False
         if self.y1 is not None and y > self.y1:
             return False
-        return abs(self.get_x_in_pixels() - x_pixels) < MARKER_SENSITIVITY
+        return True if abs(self.get_x_in_pixels() - x_pixels) < MARKER_SENSITIVITY else False
 
     def mouse_move_start(self, x, y):
         """
@@ -991,10 +990,7 @@ class SingleMarker(QObject):
 
     def is_above(self, x, y):
         """Check if the cursor is above the marker"""
-        if self.marker.is_above(x, y):
-            return True
-        else:
-            return False
+        return self.marker.is_above(x, y)
 
     def relative(self, value, lower, upper):
         if not lower <= value <= upper:
