@@ -62,14 +62,14 @@ class FullInstrumentViewModel:
 
         # Get min and max tof values
         if self._workspace.isRaggedWorkspace():
-            first_last = np.array([self._workspace.readX(i)[[0, -1]] for i in range(self._workspace.getNumberHistograms())])
+            first_last = np.array([self._workspace.readX(i)[[0, -1]] for i in self._workspace_indices[self._is_valid]])
             self._tof_limits = (np.min(first_last[:, 0]), np.max(first_last[:, 1]))
 
         elif self._workspace.isCommonBins():
             self._tof_limits = tuple(self._workspace.dataX(0)[[0, -1]])
 
         else:
-            data_x = self._workspace.extractX()
+            data_x = self._workspace.extractX()[self._is_valid]
             self._tof_limits = (np.min(data_x[:, 0]), np.max(data_x[:, -1]))
 
         # Update counts with default total range
