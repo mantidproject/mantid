@@ -79,7 +79,6 @@ class GSAS2Config:
         override_cell_lengths: A list of cell length overrides.
         d_spacing_min: The minimum d-spacing value.
         number_of_regions: The number of regions to configure.
-        banks_per_file: Number of banks per file.
     """
 
     limits: Optional[List[Union[int, float]]] = field(default_factory=list)
@@ -87,7 +86,6 @@ class GSAS2Config:
     override_cell_lengths: Optional[List[List[float]]] = None
     d_spacing_min: float = 1.0
     number_of_regions: int = 1
-    banks_per_file: int = 0
 
 
 class GSAS2Handler(object):
@@ -325,7 +323,6 @@ class GSAS2Handler(object):
             "override_cell_lengths": self.config.override_cell_lengths,
             "d_spacing_min": self.config.d_spacing_min,
             "number_of_regions": self.config.number_of_regions,
-            "banks_per_file": self.config.banks_per_file,
             "gsasii_scriptable_path": str(self.gsasii_scriptable_path),
         }
         return json.dumps(inputs_dict, separators=(",", ":"))

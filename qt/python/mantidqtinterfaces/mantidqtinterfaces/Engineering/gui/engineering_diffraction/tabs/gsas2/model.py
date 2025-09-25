@@ -12,7 +12,7 @@ import shutil
 import subprocess
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import List, Optional, Union, Tuple, TypeAlias
+from typing import Dict, List, Optional, Union, Tuple, TypeAlias
 
 import matplotlib.pyplot as plt
 from matplotlib.axes import Axes
@@ -125,13 +125,11 @@ class GSAS2RuntimeState:
     Attributes:
         number_of_regions: Number of regions in the model.
         number_histograms: Number of histograms in the model.
-        banks_per_file: Number of banks per file.
         d_spacing_min: The minimum d-spacing value.
     """
 
     number_of_regions: int = 0
     number_histograms: int = 0
-    banks_per_file: int = 0
     d_spacing_min: float = 1.0
 
 
@@ -197,6 +195,41 @@ class GSAS2Model:
             setattr(self, attr, default)
 
     def run_model(
+        self,
+        load_parameters: list,
+        refinement_parameters: list,
+        project_name: str,
+        rb_num: Optional[str] = None,
+        user_x_limits: Optional[List[List[float]]] = None,
+    ) -> Optional[Dict[str, int]]:
+        """
+        Returns a dictionary mapping data file names to their result counts
+        """
+        data_files = load_parameters[2]  # Extract data files list
+        num_hist = None
+
+        for data_file in data_files:
+            # Create unique project name for each file
+            file_basename = os.path.splitext(os.path.basename(data_file))[0]
+            individual_project_name = f"{project_name}_{file_basename}"
+
+            # Create modified load_parameters for single file
+            single_file_load_params = [
+                load_parameters[0],  # instrument_files (reuse same)
+                load_parameters[1],  # phase_filepaths (reuse same)
+                [data_file],  # single data file
+            ]
+
+            num_hist = self._run_single_refinement(
+                single_file_load_params, refinement_parameters, individual_project_name, rb_num, user_x_limits
+            )
+
+            if not num_hist:
+                return
+
+        return num_hist
+
+    def _run_single_refinement(
         self,
         load_parameters: list,
         refinement_parameters: list,
@@ -340,7 +373,6 @@ class GSAS2Model:
             override_cell_lengths=self.get_override_lattice_parameters(),
             d_spacing_min=self.dSpacing_min,
             number_of_regions=self.state.number_of_regions,
-            banks_per_file=self.state.banks_per_file,
         )
 
     def _initialize_gsas2_handler(
@@ -572,10 +604,6 @@ class GSAS2Model:
 
     def understand_data_structure(self) -> None:
         if len(self.file_paths.instrument_files) != 1:
-            logger.error("* The number of instrument files must be one.")
-            return False
-
-        if len(self.file_paths.instrument_files) != 1:
             logger.error("* You must provide exactly one instrument file.")
             return False
 
@@ -605,7 +633,6 @@ class GSAS2Model:
             return False
 
         self.state.number_of_regions = number_of_regions
-        self.state.banks_per_file = banks_per_file[0] if banks_per_file else 0
         return True
 
     def validate_x_limits(self, users_limits: Optional[List[List[float]]]) -> bool:
