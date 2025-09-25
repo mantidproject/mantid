@@ -804,3 +804,4 @@ class SliceViewerDataView(QWidget):
 
     def close(self):
         self._apply_masking_msgBox.close()
+        self._apply_masking_msgBox = None
