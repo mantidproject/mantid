@@ -33,6 +33,7 @@ class DNSElasticSCPlotModel(DNSObsModel):
         self._data.x = None
         self._data.y = None
         self._data.z = None
+        # x_, y_, and z_lims are used for storing full data (default) lims for plotting
         self._data.x_lims = None
         self._data.y_lims = None
         self._data.z_lims = None
@@ -79,6 +80,7 @@ class DNSElasticSCPlotModel(DNSObsModel):
         self._data.z_triang = z_refiner
         # this is important to get the limits
         x, y, z = getattr(self._single_crystal_map, mesh_name)
+        x, y, z = self.switch_axis(x, y, z, switch)
         self.set_mesh_data(x, y, z)
         return triangulator_refiner, z_refiner
 
@@ -138,7 +140,7 @@ class DNSElasticSCPlotModel(DNSObsModel):
             # ensures empty hover in the region outside the data boundary
             if border_path.contains_point((x, y)):
                 return f"x={x:2.3f}, y={y:2.3f}, hkl=({h:2.2f}, {k:2.2f}, {l:2.2f}), Intensity={z:6.4f}±{error:6.4f}"
-            return ""
+            return f"x={x:2.3f}, y={y:2.3f}, hkl=({h:2.2f}, {k:2.2f}, {l:2.2f})"
 
         return format_coord
 
@@ -177,9 +179,9 @@ class DNSElasticSCPlotModel(DNSObsModel):
         self._data.x = x
         self._data.y = y
         self._data.z = z
-        self.save_data_lims()
+        self.save_default_data_lims()
 
-    def save_data_lims(self):
+    def save_default_data_lims(self):
         x_lims, y_lims = self.get_data_xy_lim(switch=False)
         z_min, z_max, pos_z_min = self.get_data_z_min_max()
         # add 5% padding to comply with default plotting settings
