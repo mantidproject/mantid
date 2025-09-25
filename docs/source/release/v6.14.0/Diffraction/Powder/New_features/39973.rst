@@ -1,0 +1,2 @@
+- Add parameter ``wavelength_lims`` to :ref:`Polaris diffraction <isis-powder-diffraction-polaris-ref>`) to crop focussed data by wavelength before calculating the pair distribution function (pdf).
+- Add parameter ``r_lims`` to :ref:`Polaris diffraction <isis-powder-diffraction-polaris-ref>`) to specify min and max r-value in output pdf.
