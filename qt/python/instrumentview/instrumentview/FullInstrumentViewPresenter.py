@@ -165,6 +165,7 @@ class FullInstrumentViewPresenter:
     def on_multi_select_detectors_clicked(self) -> None:
         """Change between single and multi point picking"""
         if self._view.is_multi_picking_checkbox_checked():
+            self._view.check_sum_spectra_checkbox()
             self._view.enable_rectangle_picking(self._is_projection_selected, callback=self.rectangle_picked)
         else:
             self._view.enable_point_picking(self._is_projection_selected, callback=self.point_picked)
