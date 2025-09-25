@@ -20,7 +20,7 @@ from qtpy.QtWidgets import (
     QTextEdit,
     QPushButton,
 )
-from qtpy.QtGui import QPalette, QIntValidator, QMovie
+from qtpy.QtGui import QPalette, QDoubleValidator, QMovie
 from qtpy.QtCore import Qt, QEvent, QSize
 from superqt import QDoubleRangeSlider
 from pyvistaqt import BackgroundPlotter
@@ -183,13 +183,13 @@ class FullInstrumentViewWindow(QMainWindow):
         min_hbox = QHBoxLayout()
         min_hbox.addWidget(QLabel("Min"))
         min_edit = QLineEdit()
-        max_int_32 = np.iinfo(np.int32).max
-        min_edit.setValidator(QIntValidator(0, max_int_32, self))
+        max_float_64 = np.finfo(np.float64).max
+        min_edit.setValidator(QDoubleValidator(0, max_float_64, 5, self))
         min_hbox.addWidget(min_edit)
         max_hbox = QHBoxLayout()
         max_hbox.addWidget(QLabel("Max"))
         max_edit = QLineEdit()
-        max_edit.setValidator(QIntValidator(0, max_int_32, self))
+        max_edit.setValidator(QDoubleValidator(0, max_float_64, 5, self))
         max_hbox.addWidget(max_edit)
 
         slider = QDoubleRangeSlider(Qt.Orientation.Horizontal, parent=parent_box)
@@ -211,13 +211,13 @@ class FullInstrumentViewWindow(QMainWindow):
     def _add_connections_to_edits_and_slider(self, min_edit: QLineEdit, max_edit: QLineEdit, slider, presenter_callback: Callable):
         def set_edits(limits):
             min, max = limits
-            min_edit.setText(f"{min:.0f}")
-            max_edit.setText(f"{max:.0f}")
+            min_edit.setText(f"{min}")
+            max_edit.setText(f"{max}")
 
         def set_slider(callled_from_min):
             def wrapped():
                 try:
-                    min, max = int(float(min_edit.text())), int(float(max_edit.text()))
+                    min, max = float(min_edit.text()), float(max_edit.text())
                 except ValueError:
                     return
                 if callled_from_min:
