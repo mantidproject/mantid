@@ -48,7 +48,7 @@ class FullInstrumentViewPresenter:
         self._view.set_projection_combo_options(default_index, options)
         self._view.setup_connections_to_presenter()
         self._view.set_contour_range_limits(self._model.counts_limits)
-        self._view.set_tof_range_limits(self._model.tof_limits)
+        self._view.set_integration_range_limits(self._model.integration_limits)
 
         if len(self._model.monitor_positions) > 0:
             monitor_point_cloud = self.create_poly_data_mesh(self._model.monitor_positions)
@@ -100,12 +100,12 @@ class FullInstrumentViewPresenter:
             return self._model.workspace_x_unit_display
         return ""
 
-    def on_tof_limits_updated(self) -> None:
-        """When TOF limits are changed, read the new limits and tell the presenter to update the colours accordingly"""
-        self._model.tof_limits = self._view.get_tof_limits()
-        self.set_view_tof_limits()
+    def on_integration_limits_updated(self) -> None:
+        """When integration limits are changed, read the new limits and tell the presenter to update the colours accordingly"""
+        self._model.integration_limits = self._view.get_integration_limits()
+        self.set_view_integration_limits()
 
-    def set_view_tof_limits(self) -> None:
+    def set_view_integration_limits(self) -> None:
         self._detector_mesh[self._counts_label] = self._model.detector_counts
 
     def on_contour_limits_updated(self) -> None:
@@ -160,7 +160,7 @@ class FullInstrumentViewPresenter:
 
         self._view.enable_point_picking(callback=self.point_picked)
         self.set_view_contour_limits()
-        self.set_view_tof_limits()
+        self.set_view_integration_limits()
         self._view.reset_camera()
 
     def on_multi_select_detectors_clicked(self, state: int) -> None:
