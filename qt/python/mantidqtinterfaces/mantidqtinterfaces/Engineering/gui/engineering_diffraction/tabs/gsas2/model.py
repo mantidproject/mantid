@@ -460,7 +460,14 @@ class GSAS2Model:
             shell_output = shell_process.communicate(timeout=self.config.timeout)
 
             if shell_process.returncode != 0:
-                logger.error(f"GSAS-II call failed with error: {shell_output[-1]}")
+                if "not enough values to unpack (expected 2, got 0)" in shell_output[-1]:
+                    # The error message happens when it fails to read inst param file with the same number of histograms
+                    logger.error(
+                        "* Incorrect instrument file. please use the instrument filewith the same number of histograms as the focused data."
+                    )
+                else:
+                    logger.error(f"GSAS-II call failed with error: {shell_output[-1]}")
+
                 return None
             return shell_output
         except subprocess.TimeoutExpired:
