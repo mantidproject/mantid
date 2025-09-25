@@ -203,10 +203,8 @@ void LoadNexusMonitors2::exec() {
   // this gets the ids from the "isis_vms_compat" group
   fixUDets(file);
 
-  if (numPeriods > 1) {
-    m_multiPeriodCounts.resize(m_monitor_count);
-    m_multiPeriodBinEdges.resize(m_monitor_count);
-  }
+  m_multiPeriodCounts.resize(m_monitor_count);
+  m_multiPeriodBinEdges.resize(m_monitor_count);
 
   // Nothing to do
   if (0 == m_monitor_count) {
@@ -349,8 +347,7 @@ void LoadNexusMonitors2::exec() {
   // add filename
   m_workspace->mutableRun().addProperty("Filename", m_filename);
 
-  // if multiperiod histogram data
-  if ((numPeriods > 1) && (!useEventMon)) {
+  if (!useEventMon) {
     splitMutiPeriodHistrogramData(numPeriods);
   } else {
     this->setProperty("OutputWorkspace", m_workspace);
@@ -465,14 +462,6 @@ bool LoadNexusMonitors2::canOpenAsNeXus(const std::string &fname) {
  * @param numPeriods :: number of periods
  **/
 void LoadNexusMonitors2::splitMutiPeriodHistrogramData(const size_t numPeriods) {
-  // protection - we should not have entered the routine if these are not true
-  // More than 1 period
-  if (numPeriods < 2) {
-    g_log.warning() << "Attempted to split multiperiod histogram workspace with " << numPeriods
-                    << "periods, aborted.\n";
-    return;
-  }
-
   // Y array should be divisible by the number of periods
   if (m_multiPeriodCounts[0].size() % numPeriods != 0) {
     g_log.warning() << "Attempted to split multiperiod histogram workspace with " << m_multiPeriodCounts[0].size()
@@ -482,7 +471,6 @@ void LoadNexusMonitors2::splitMutiPeriodHistrogramData(const size_t numPeriods) 
     return;
   }
 
-  WorkspaceGroup_sptr wsGroup(new WorkspaceGroup);
   size_t yLength = m_multiPeriodCounts[0].size() / numPeriods;
   size_t xLength = yLength + 1;
   size_t numSpectra = m_workspace->getNumberHistograms();
@@ -506,12 +494,15 @@ void LoadNexusMonitors2::splitMutiPeriodHistrogramData(const size_t numPeriods) 
     monLogCreator.addStatusLog(wsPeriod->mutableRun());
     monLogCreator.addPeriodLogs(static_cast<int>(i + 1), wsPeriod->mutableRun());
 
-    // add to workspace group
-    wsGroup->addWorkspace(wsPeriod);
+    // add to workspace group if multi period and set the output property
+    if (numPeriods > 1) {
+      WorkspaceGroup_sptr wsGroup(new WorkspaceGroup);
+      wsGroup->addWorkspace(wsPeriod);
+      this->setProperty("OutputWorkspace", wsGroup);
+    } else {
+      this->setProperty("OutputWorkspace", wsPeriod);
+    }
   }
-
-  // set the output workspace
-  this->setProperty("OutputWorkspace", wsGroup);
 }
 
 size_t LoadNexusMonitors2::getMonitorInfo(Nexus::File &file, size_t &numPeriods) {
@@ -747,12 +738,8 @@ void LoadNexusMonitors2::readHistoMonitorEntry(Nexus::File &file, size_t ws_inde
   file.getDataCoerce(tof);
   file.closeData();
 
-  if (numPeriods > 1) {
-    m_multiPeriodBinEdges[ws_index] = std::move(tof);
-    m_multiPeriodCounts[ws_index] = std::move(data);
-  } else {
-    m_workspace->setHistogram(ws_index, Histogram(BinEdges(std::move(tof)), Counts(std::move(data))));
-  }
+  m_multiPeriodBinEdges[ws_index] = std::move(tof);
+  m_multiPeriodCounts[ws_index] = std::move(data);
 }
 
 } // namespace Mantid::DataHandling
