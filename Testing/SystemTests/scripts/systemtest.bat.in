@@ -53,13 +53,9 @@ if "%MULTI_CONFIG_GENERATOR%" == "true" (
 :: Update testing data
 echo Updating testing data...
 if "%MULTI_CONFIG_GENERATOR%" == "true" (
-  cmake --build . --target StandardTestData --config %2
-  if ERRORLEVEL 1 exit /b %ERRORLEVEL%
   cmake --build . --target SystemTestData --config %2
   if ERRORLEVEL 1 exit /b %ERRORLEVEL%
 ) else (
-  cmake --build . --target StandardTestData
-  if ERRORLEVEL 1 exit /b %ERRORLEVEL%
   cmake --build . --target SystemTestData
   if ERRORLEVEL 1 exit /b %ERRORLEVEL%
 )
