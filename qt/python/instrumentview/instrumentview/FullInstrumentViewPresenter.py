@@ -235,7 +235,6 @@ class FullInstrumentViewPresenter:
         self._view.close()
 
     def handle_close(self):
-        del self._model
         # The observers are unsubscribed on object deletion, it's safer to manually
         # delete the observer rather than wait for the garbage collector, because
         # we don't want stale workspace references hanging around.
