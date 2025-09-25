@@ -1,0 +1,2 @@
+- Support batch refinement of multi-run datasets using a single instrument parameter file in :ref:`GSASII tab <ui engineering gsas>` tab of :ref:`Engineering Diffraction interface<Engineering_Diffraction-ref>` GUI.
+- Removed support for mixed single-region and multi-instrument file configurations in :ref:`GSASII tab <ui engineering gsas>` tab of :ref:`Engineering Diffraction interface<Engineering_Diffraction-ref>` GUI.

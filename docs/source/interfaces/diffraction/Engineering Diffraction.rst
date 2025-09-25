@@ -230,14 +230,14 @@ Project Name
     Name of the GSAS project file.
 
 Instrument Group
-    Path to .prm file produced by the Calibration tab
+    Path to .prm file produced by the Calibration tab (only one instrument file is supported and will be applied to each data file)
 
 Phase
     Path to the .cif file defining the initial crystal structure (more than one path can be supplied, the lattice
     parameters will be overridden for the first phase only).
 
 Focused Data
-    Path to focused .gss files (note it should have the same number of spectra as in .prm file)
+    Path to focused .gss files (note it should have the same number of spectra as in .prm file and contains multiple banks)
 
 Refinement Method
     Only Pawley refinement currently supported
