@@ -69,6 +69,7 @@ class FullInstrumentViewPresenter:
             delete_callback=self.delete_workspace_callback,
             rename_callback=self.rename_workspace_callback,
             clear_callback=self.clear_workspace_callback,
+            replace_callback=self.replace_workspace_callback,
         )
         self._view.hide_status_box()
 
@@ -228,6 +229,9 @@ class FullInstrumentViewPresenter:
         logger.warning("Workspace renamed, updated Experimental Instrument View.")
 
     def clear_workspace_callback(self):
+        self._view.close()
+
+    def replace_workspace_callback(self, ws_name, ws):
         self._view.close()
 
     def handle_close(self):
