@@ -29,6 +29,7 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from instrumentview.Detectors import DetectorInfo
 from typing import Callable
 from mantid.dataobjects import Workspace2D
+from mantidqt.plotting.mantid_navigation_toolbar import MantidNavigationToolbar
 import numpy as np
 import pyvista as pv
 import os
@@ -75,9 +76,11 @@ class FullInstrumentViewWindow(QMainWindow):
         self._detector_spectrum_fig, self._detector_spectrum_axes = plt.subplots(subplot_kw={"projection": "mantid"})
         self._detector_figure_canvas = FigureCanvas(self._detector_spectrum_fig)
         self._detector_figure_canvas.setMinimumSize(QSize(0, 0))
+        plot_toolbar = MantidNavigationToolbar(self._detector_figure_canvas, self)
         plot_widget = QWidget()
         plot_layout = QVBoxLayout(plot_widget)
         plot_layout.addWidget(self._detector_figure_canvas)
+        plot_layout.addWidget(plot_toolbar)
 
         vsplitter = QSplitter(Qt.Vertical)
         vsplitter.addWidget(self.main_plotter.app_window)
