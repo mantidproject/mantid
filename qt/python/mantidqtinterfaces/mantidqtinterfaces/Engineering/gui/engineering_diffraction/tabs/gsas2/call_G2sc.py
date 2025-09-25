@@ -25,37 +25,30 @@ def add_phases(project, phase_files):
         project.add_phase(os.path.join(phase_file))
 
 
-def add_histograms(data_filenames, project, instruments, number_regions):
-    if number_regions > len(data_filenames):  # many regions in one data and one instrument file
-        if len(data_filenames) != 1:
-            raise ValueError("There must be one region/bank per focused data file or many regions/banks in one focused data file")
-        for loop_region_index in range(1, number_regions + 1):
+def add_histograms(data_filenames, project, instruments, number_regions, banks_per_file):
+    # Validation checks
+    if len(data_filenames) < 1:
+        raise ValueError("You must provide at least one data file.")
+
+    if len(instruments) != 1:
+        raise ValueError("You must provide exactly one instrument file.")
+
+    if banks_per_file <= 1:
+        raise ValueError("Each data file must contain multiple banks.")
+
+    expected_total_regions = len(data_filenames) * banks_per_file
+    if number_regions != expected_total_regions:
+        raise ValueError(f"Expected {expected_total_regions} total regions, but found {number_regions}.")
+
+    # Add histograms for each file and each bank within that file
+    for file_index, data_filename in enumerate(data_filenames):
+        for bank_index in range(1, banks_per_file + 1):  # GSAS-II uses 1-based indexing
             project.add_powder_histogram(
-                datafile=os.path.join(data_filenames[0]),
-                iparams=os.path.join(instruments[0]),
+                datafile=os.path.join(data_filename),
+                iparams=os.path.join(instruments[0]),  # Use the single instrument file
                 phases=project.phases(),
-                databank=loop_region_index,  # indexing starts at 1
-                instbank=loop_region_index,  # indexing starts at 1
-            )
-    else:  # one region in each data file
-        if len(data_filenames) != number_regions:
-            raise ValueError("There must be one region/bank per focused data file or many regions/banks in one focused data file")
-        if len(instruments) == len(data_filenames):
-            for loop_index, loop_data_filename in enumerate(data_filenames):
-                project.add_powder_histogram(
-                    datafile=os.path.join(loop_data_filename), iparams=os.path.join(instruments[loop_index]), phases=project.phases()
-                )
-        elif 1 == len(instruments) < len(data_filenames):
-            for loop_index, loop_data_filename in enumerate(data_filenames):
-                project.add_powder_histogram(
-                    datafile=os.path.join(loop_data_filename),
-                    iparams=os.path.join(instruments[0]),
-                    phases=project.phases(),
-                    instbank=loop_index + 1,  # indexing starts at 1
-                )
-        else:
-            raise ValueError(
-                "Calling GSASII from Mantid with multiple instrument files and one focused data file is currently not supported"
+                databank=bank_index,  # Bank within this data file
+                instbank=bank_index,  # Corresponding bank in instrument file
             )
 
 
@@ -232,6 +225,7 @@ def main():
     mantid_pawley_reflections = inputs_dict["mantid_pawley_reflections"]
     d_spacing_min = inputs_dict["d_spacing_min"]
     number_of_regions = inputs_dict["number_of_regions"]
+    banks_per_file = inputs_dict["banks_per_file"]
     gsasii_scriptable_path = inputs_dict["gsasii_scriptable_path"]
 
     # Call GSASIIscriptable
@@ -241,7 +235,7 @@ def main():
     gsas_project = G2sc.G2Project(filename=project_path)
 
     add_phases(gsas_project, phase_files)
-    add_histograms(data_files, gsas_project, instrument_files, number_of_regions)
+    add_histograms(data_files, gsas_project, instrument_files, number_of_regions, banks_per_file)
 
     if refinement_method == "Pawley" and mantid_pawley_reflections:
         add_pawley_reflections(mantid_pawley_reflections, gsas_project, d_spacing_min)
