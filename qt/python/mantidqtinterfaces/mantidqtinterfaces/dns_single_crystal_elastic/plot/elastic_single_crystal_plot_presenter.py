@@ -34,6 +34,7 @@ class DNSElasticSCPlotPresenter(DNSObserver):
         self._plot_param.ylim = [None, None]
         self._plot_param.zlim = [None, None]
         self._plot_param.projections = False
+        self._plot_param.use_default_lims = True
 
     def _toggle_projections(self, set_proj):
         self.view.sig_change_cb_range_on_zoom.disconnect()
@@ -65,6 +66,10 @@ class DNSElasticSCPlotPresenter(DNSObserver):
         )  # check is necessary for simulation
 
     def _plot(self, initial_values=None):
+        """
+        It is called every time any of the plot view options is changed
+        or another polarization channel is selected for plotting.
+        """
         plot_list = self.view.datalist.get_checked_plots()
         if not plot_list:
             return
@@ -89,10 +94,34 @@ class DNSElasticSCPlotPresenter(DNSObserver):
         self.view.single_crystal_plot.on_resize()
         self._set_initial_omega_offset_dx_dy()
         self.view.single_crystal_plot.connect_ylim_change()
-        self._set_plotting_range()
-        self._set_plot_limits_spinners(include_zlim=True)
+        def_xlim, def_ylim, def_zlim = self.model.get_default_data_lims()
+        xlim, ylim, zlim = self._get_current_spinners_lims()
+        if self._plot_param.use_default_lims:
+            self._set_plot_param_lims(def_xlim, def_ylim, def_zlim)
+        else:
+            self._set_plot_param_lims(xlim, ylim, zlim)
+        self._set_spinners_lims(include_zlim=True)
+        self._set_plotting_lims()
         self.view.canvas.figure.tight_layout()
         self.view.draw()
+
+    def _set_plot_param_lims(self, xlim, ylim, zlim):
+        self._plot_param.xlim = xlim
+        self._plot_param.ylim = ylim
+        self._plot_param.zlim = zlim
+
+    def _update_plot_param_lims(self, include_zlim=False):
+        xlim, ylim = self.view.single_crystal_plot.get_active_limits()
+        self._plot_param.xlim = xlim
+        self._plot_param.ylim = ylim
+        if include_zlim:
+            zlim = self.model.get_data_z_min_max(xlim, ylim)
+            self._plot_param.zlim = zlim
+
+    def _set_plotting_lims(self):
+        self.view.single_crystal_plot.set_xlim(self._plot_param.xlim)
+        self.view.single_crystal_plot.set_ylim(self._plot_param.ylim)
+        self.view.single_crystal_plot.set_zlim(self._plot_param.zlim)
 
     def process_auto_reduction_request(self):
         self.view.single_crystal_plot.clear_plot()
@@ -105,10 +134,12 @@ class DNSElasticSCPlotPresenter(DNSObserver):
             self.view.process_events()
             self.view.datalist.check_first()
 
-    def _set_plotting_range(self):
-        self.view.single_crystal_plot.set_xlim(self._plot_param.xlim)
-        self.view.single_crystal_plot.set_ylim(self._plot_param.ylim)
-        self.view.single_crystal_plot.set_zlim(self._plot_param.zlim)
+    def _set_zooming_data(self, include_zlim=False):
+        self._update_plot_param_lims(include_zlim)
+        self._set_spinners_lims(include_zlim)
+        self._set_plotting_lims()
+        # set this flag to false, not to update plot lims on a subsequent call of _plot()
+        self._plot_param.use_default_lims = False
 
     def _set_initial_omega_offset_dx_dy(self):
         omega_offset = self.model.get_omega_offset()
@@ -238,11 +269,12 @@ class DNSElasticSCPlotPresenter(DNSObserver):
         self.view.single_crystal_plot.set_format_coord(format_coord)
 
     def _manual_lim_changed(self):
-        xlim, ylim, _dummy, _dummy = self._get_current_limits(zoom=False)
-        self.view.single_crystal_plot.set_xlim(xlim)
-        self.view.single_crystal_plot.set_ylim(ylim)
-        self._change_color_bar_range(zoom=False)
+        xlim, ylim, zlim = self._get_current_spinners_lims()
+        self._set_plot_param_lims(xlim, ylim, zlim)
+        self._set_plotting_lims()
         self.view.draw()
+        # set this flag to false, not to update plot lims on a subsequent call of _plot()
+        self._plot_param.use_default_lims = False
 
     def _change_color_bar_range(self, zoom=True):
         xlim, ylim, zlim, _dummy = self._get_current_limits(zoom)
@@ -273,9 +305,10 @@ class DNSElasticSCPlotPresenter(DNSObserver):
             self._plot_param.ylim = dy_lim
             self._change_color_bar_range(zoom=True)
         self.view.single_crystal_plot.connect_ylim_change()
-        self._plot_param.xlim, self._plot_param.ylim, self._plot_param.zlim = self.model.get_default_data_lims()
-        self._set_plotting_range()
-        self._set_plot_limits_spinners(include_zlim=True)
+        def_xlim, def_ylim, def_zlim = self.model.get_default_data_lims()
+        self._set_plot_param_lims(def_xlim, def_ylim, def_zlim)
+        self._set_spinners_lims(include_zlim=True)
+        self._set_plotting_lims()
         self.view.draw()
 
     def _get_current_xy_lim(self, zoom=False):
@@ -370,26 +403,6 @@ class DNSElasticSCPlotPresenter(DNSObserver):
         own_dict = self.view.get_state()
         return own_dict["crystal_axes"]
 
-    def _set_plot_limits_spinners(self, include_zlim=False):
-        xlim, ylim = self.view.single_crystal_plot.get_active_limits()
-        zlim = None
-        self.view._map["x_min"].setValue(xlim[0])
-        self.view._map["x_max"].setValue(xlim[1])
-        self.view._map["y_min"].setValue(ylim[0])
-        self.view._map["y_max"].setValue(ylim[1])
-        if include_zlim:
-            zlim = self.model.get_data_z_min_max(xlim, ylim)
-            self.view._map["z_min"].setValue(zlim[0])
-            self.view._map["z_max"].setValue(zlim[1])
-            self._change_color_bar_range(zoom=False)
-        self._save_plot_lims(xlim, ylim, zlim)
-
-    def _save_plot_lims(self, lim_x, lim_y, lim_z):
-        self._plot_param.xlim = lim_x
-        self._plot_param.ylim = lim_y
-        if lim_z is not None:
-            self._plot_param.zlim = lim_z
-
     def _determine_plot_type_options(self, sc_map):
         if not sc_map.rectangular_grid:
             self.view.views_menu.menus[0].action_quad_mesh.setEnabled(False)
@@ -401,6 +414,30 @@ class DNSElasticSCPlotPresenter(DNSObserver):
                 self.view.views_menu.menus[0].action_triangulation_mesh.setChecked(True)
         else:
             self.view.views_menu.menus[0].action_quad_mesh.setEnabled(True)
+
+    def _get_current_spinners_lims(self):
+        own_dict = self.view.get_state()
+        xlim = [own_dict["x_min"], own_dict["x_max"]]
+        ylim = [own_dict["y_min"], own_dict["y_max"]]
+        zlim = [own_dict["z_min"], own_dict["z_max"]]
+        return xlim, ylim, zlim
+
+    def _set_spinners_lims(self, include_zlim=False):
+        self.view._map["x_min"].setValue(self._plot_param.xlim[0])
+        self.view._map["x_max"].setValue(self._plot_param.xlim[1])
+        self.view._map["y_min"].setValue(self._plot_param.ylim[0])
+        self.view._map["y_max"].setValue(self._plot_param.ylim[1])
+        if include_zlim:
+            self.view._map["z_min"].setValue(self._plot_param.zlim[0])
+            self.view._map["z_max"].setValue(self._plot_param.zlim[1])
+
+    def _switch_spinners_lims(self):
+        xlim, ylim, dummy = self._get_current_spinners_lims()
+        self.view._map["x_min"].setValue(ylim[0])
+        self.view._map["x_max"].setValue(ylim[1])
+        self.view._map["y_min"].setValue(xlim[0])
+        self.view._map["y_max"].setValue(xlim[1])
+        self._plot()
 
     def _attach_signal_slots(self):
         self.view.sig_plot.connect(self._plot)
@@ -420,4 +457,5 @@ class DNSElasticSCPlotPresenter(DNSObserver):
         self.view.sig_change_crystal_axes.connect(self._change_crystal_axes)
         self.view.sig_change_font_size.connect(self._change_font_size)
         self.view.sig_home_button_clicked.connect(self._home_button_clicked)
-        self.view.sig_plot_zoom_updated.connect(self._set_plot_limits_spinners)
+        self.view.sig_plot_zoom_updated.connect(self._set_zooming_data)
+        self.view.sig_switch_changed.connect(self._switch_spinners_lims)

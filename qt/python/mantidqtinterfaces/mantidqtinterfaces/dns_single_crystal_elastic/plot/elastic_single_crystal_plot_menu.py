@@ -68,6 +68,7 @@ class DNSElasticSCPlotViewMenu(QMenu):
         self._action_gouraud.triggered.connect(self._gouraud_changed)
 
     sig_replot = Signal(str)
+    sig_switch_state_changed = Signal()
 
     def _get_shading(self):
         if self._action_gouraud.isChecked():
@@ -75,7 +76,8 @@ class DNSElasticSCPlotViewMenu(QMenu):
         return "flat"
 
     def get_plot_view_settings(self):
-        plot_view_dict = self._menu_axes.get_axis_settings()
+        axis_dict = self._menu_axes.get_axis_settings()
+        plot_view_dict = axis_dict
         plot_view_dict["shading"] = self._get_shading()
         plot_view_dict["plot_type"] = self._menu_plot_type.get_plot_type()
         plot_view_dict["interpolate"] = self._menu_interpolation.get_interpolation_setting_index()
@@ -156,18 +158,18 @@ class AxesMenu(QMenu):
         self.axes_action_group = axes_action_group
         self.action_switch_axis = action_switch_axis
         self.action_fix_aspect = action_fix_aspect
-        self.axes_action_group.triggered.connect(self._axis_changed)
-        self.action_fix_aspect.triggered.connect(self._axis_changed)
-        self.action_switch_axis.triggered.connect(self._axis_changed)
+        self.axes_action_group.triggered.connect(self._axis_type_changed)
+        self.action_fix_aspect.triggered.connect(self._fix_aspect_changed)
+        self.action_switch_axis.triggered.connect(self._switch_axis_changed)
 
-    def _axis_changed(self):
-        sender = self.sender()
-        if sender == self.axes_action_group:
-            self.parent.sig_replot.emit("axis_type")
-        if sender == self.action_switch_axis:
-            self.parent.sig_replot.emit("switch_axis")
-        if sender == self.action_fix_aspect:
-            self.parent.sig_replot.emit("fix_aspect")
+    def _axis_type_changed(self):
+        self.parent.sig_replot.emit("axis_type")
+
+    def _fix_aspect_changed(self):
+        self.parent.sig_replot.emit("fix_aspect")
+
+    def _switch_axis_changed(self):
+        self.parent.sig_switch_state_changed.emit()
 
     def get_axis_settings(self):
         axis_list = {0: "angular", 1: "qxqy", 2: "hkl"}

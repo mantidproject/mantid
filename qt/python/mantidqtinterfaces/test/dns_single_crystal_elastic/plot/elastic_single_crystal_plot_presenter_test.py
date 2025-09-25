@@ -163,7 +163,7 @@ class DNSElasticSCPlotPresenterTest(unittest.TestCase):
         self.presenter._crystallographical_axes = mock.Mock(return_value="grid_axes")
         self.presenter._set_axis_labels = mock.Mock()
         self.presenter._set_initial_omega_offset_dx_dy = mock.Mock()
-        self.presenter._set_plot_limits_spinners = mock.Mock()
+        self.presenter._manual_lim_changed = mock.Mock()
 
         self.view.single_crystal_plot.create_colorbar = mock.Mock()
         self.view.single_crystal_plot.on_resize = mock.Mock()

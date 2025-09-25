@@ -80,6 +80,7 @@ class DNSElasticSCPlotView(DNSView):
         self.menus = []
         self.menus.append(self.views_menu)
         self.menus.append(self.options_menu)
+        self.views_menu.sig_switch_state_changed.connect(self._switch_changed)
         self.views_menu.sig_replot.connect(self._plot)
         self.canvas = FigureCanvas(Figure())
         self.canvas.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
@@ -109,8 +110,12 @@ class DNSElasticSCPlotView(DNSView):
     sig_change_cb_range_on_zoom = Signal()
     sig_home_button_clicked = Signal()
     sig_plot_zoom_updated = Signal()
+    sig_switch_changed = Signal()
 
     # emitting custom signals for presenter
+    def _switch_changed(self):
+        self.sig_switch_changed.emit()
+
     def _home_button_clicked(self):
         self.sig_home_button_clicked.emit()
 
