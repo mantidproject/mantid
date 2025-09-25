@@ -23,12 +23,15 @@ class FullInstrumentViewModel:
     _data_max = 0.0
     line_plot_workspace = None
     _workspace_x_unit: str
+    _workspace_x_unit_display: str
 
     def __init__(self, workspace: Workspace2D):
         """For the given workspace, calculate detector positions, the map from detector indices to workspace indices, and integrated
         counts. Optionally will draw detector geometry, e.g. rectangular bank or tube instead of points."""
         self._workspace = workspace
-        self._workspace_x_unit = workspace.getAxis(0).getUnit().unitID()
+        x_unit = workspace.getAxis(0).getUnit()
+        self._workspace_x_unit = x_unit.unitID()
+        self._workspace_x_unit_display = f"{str(x_unit.caption())} ({str(x_unit.symbol())})"
 
     def setup(self):
         component_info = self._workspace.componentInfo()
@@ -83,6 +86,10 @@ class FullInstrumentViewModel:
     @property
     def workspace_x_unit(self) -> str:
         return self._workspace_x_unit
+
+    @property
+    def workspace_x_unit_display(self) -> str:
+        return self._workspace_x_unit_display
 
     @property
     def default_projection(self) -> str:

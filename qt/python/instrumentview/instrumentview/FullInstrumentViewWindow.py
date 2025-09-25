@@ -255,6 +255,7 @@ class FullInstrumentViewWindow(QMainWindow):
         self._presenter = presenter
         for unit in self._presenter.available_unit_options():
             self._units_combo_box.addItem(unit)
+        self._time_of_flight_group_box.setTitle(self._presenter.workspace_display_unit)
 
     def setup_connections_to_presenter(self) -> None:
         self._projection_combo_box.currentIndexChanged.connect(self._presenter.on_projection_option_selected)

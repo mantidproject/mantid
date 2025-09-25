@@ -93,6 +93,12 @@ class FullInstrumentViewPresenter:
             return self._UNIT_OPTIONS
         return ["No units"]
 
+    @property
+    def workspace_display_unit(self) -> str:
+        if self._model.has_unit:
+            return self._model.workspace_x_unit_display
+        return ""
+
     def on_tof_limits_updated(self) -> None:
         """When TOF limits are changed, read the new limits and tell the presenter to update the colours accordingly"""
         self._model.tof_limits = self._view.get_tof_limits()
