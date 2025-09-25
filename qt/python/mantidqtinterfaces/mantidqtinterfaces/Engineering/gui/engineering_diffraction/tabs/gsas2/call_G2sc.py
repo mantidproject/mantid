@@ -33,9 +33,6 @@ def add_histograms(data_filenames, project, instruments, number_regions):
     if len(instruments) != 1:
         raise ValueError("You must provide only one instrument file.")
 
-    if number_regions <= 1:
-        raise ValueError("The data file must contain multiple banks.")
-
     # Add histograms for each bank within that file
     for bank_index in range(1, number_regions + 1):  # GSAS-II uses 1-based indexing
         project.add_powder_histogram(

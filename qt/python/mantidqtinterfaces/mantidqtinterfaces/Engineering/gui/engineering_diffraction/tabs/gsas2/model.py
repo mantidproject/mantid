@@ -460,13 +460,7 @@ class GSAS2Model:
             shell_output = shell_process.communicate(timeout=self.config.timeout)
 
             if shell_process.returncode != 0:
-                if "not enough values to unpack (expected 2, got 0)" in shell_output[-1]:
-                    # The error message happens when it fails to read inst param file with the same number of histograms
-                    logger.error(
-                        "* Incorrect instrument file. please use the instrument filewith the same number of histograms as the focused data."
-                    )
-                else:
-                    logger.error(f"GSAS-II call failed with error: {shell_output[-1]}")
+                logger.error(f"GSAS-II call failed with error: {shell_output[-1]}")
 
                 return None
             return shell_output
@@ -609,6 +603,14 @@ class GSAS2Model:
     # X Limits
     # =========
 
+    def get_no_banks(self, prm_file):
+        with open(prm_file) as f:
+            for line in f.readlines():
+                if "BANK" in line and len(line.split()) == 3:
+                    return int(line.split()[-1])
+
+        return -1
+
     def understand_data_structure(self) -> None:
         if len(self.file_paths.instrument_files) != 1:
             logger.error("* You must provide exactly one instrument file.")
@@ -624,8 +626,10 @@ class GSAS2Model:
             file_bank_count = loop_focused_workspace.getNumberHistograms()
             banks_per_file.append(file_bank_count)
 
-            if file_bank_count <= 1:
-                logger.error("* Each data file must contain multiple banks.")
+            no_banks = self.get_no_banks(self.file_paths.instrument_files[0])
+
+            if file_bank_count != no_banks:
+                logger.error("* All data files should have the same number of banks as the instrument file.")
                 return False
 
             for workspace_index in range(file_bank_count):
