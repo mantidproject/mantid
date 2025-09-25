@@ -161,11 +161,19 @@ class FullInstrumentViewWindow(QMainWindow):
 
         self.interactor_style = CustomInteractorStyleZoomAndSelect()
 
-    def _on_splitter_moved(self, pos, index) -> None:
-        self._detector_spectrum_fig.tight_layout()
+    def disable_rectangle_picking_checkbox(self) -> None:
+        self._multi_select_check.setChecked(False)
+        self._multi_select_check.setEnabled(False)
+
+    def enable_rectangle_picking_checkbox(self) -> None:
+        self._multi_select_check.setChecked(False)
+        self._multi_select_check.setEnabled(True)
 
     def is_multi_picking_checkbox_checked(self) -> bool:
         return self._multi_select_check.isChecked()
+
+    def _on_splitter_moved(self, pos, index) -> None:
+        self._detector_spectrum_fig.tight_layout()
 
     def hide_status_box(self) -> None:
         self.status_group_box.hide()

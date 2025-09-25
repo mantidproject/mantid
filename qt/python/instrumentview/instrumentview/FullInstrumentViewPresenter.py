@@ -90,6 +90,10 @@ class FullInstrumentViewPresenter:
 
     def on_sum_spectra_checkbox_clicked(self) -> None:
         self._update_line_plot_ws_and_draw(self._view.current_selected_unit())
+        if self._view.sum_spectra_selected():
+            self._view.enable_rectangle_picking_checkbox()
+        else:
+            self._view.disable_rectangle_picking_checkbox()
 
     def available_unit_options(self) -> list[str]:
         if self._model.has_unit:
