@@ -203,8 +203,10 @@ void LoadNexusMonitors2::exec() {
   // this gets the ids from the "isis_vms_compat" group
   fixUDets(file);
 
-  m_multiPeriodCounts.resize(m_monitor_count);
-  m_multiPeriodBinEdges.resize(m_monitor_count);
+  if (numPeriods > 0) {
+    m_multiPeriodCounts.resize(m_monitor_count);
+    m_multiPeriodBinEdges.resize(m_monitor_count);
+  }
 
   // Nothing to do
   if (0 == m_monitor_count) {
@@ -347,7 +349,7 @@ void LoadNexusMonitors2::exec() {
   // add filename
   m_workspace->mutableRun().addProperty("Filename", m_filename);
 
-  if (!useEventMon) {
+  if ((numPeriods > 0) && (!useEventMon)) {
     splitMutiPeriodHistrogramData(numPeriods);
   } else {
     this->setProperty("OutputWorkspace", m_workspace);
@@ -738,8 +740,12 @@ void LoadNexusMonitors2::readHistoMonitorEntry(Nexus::File &file, size_t ws_inde
   file.getDataCoerce(tof);
   file.closeData();
 
-  m_multiPeriodBinEdges[ws_index] = std::move(tof);
-  m_multiPeriodCounts[ws_index] = std::move(data);
+  if (numPeriods > 0) {
+    m_multiPeriodBinEdges[ws_index] = std::move(tof);
+    m_multiPeriodCounts[ws_index] = std::move(data);
+  } else {
+    m_workspace->setHistogram(ws_index, Histogram(BinEdges(std::move(tof)), Counts(std::move(data))));
+  }
 }
 
 } // namespace Mantid::DataHandling
