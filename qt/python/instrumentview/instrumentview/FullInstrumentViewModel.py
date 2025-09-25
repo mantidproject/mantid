@@ -23,12 +23,15 @@ class FullInstrumentViewModel:
     _data_max = 0.0
     line_plot_workspace = None
     _workspace_x_unit: str
+    _workspace_x_unit_display: str
 
     def __init__(self, workspace: Workspace2D):
         """For the given workspace, calculate detector positions, the map from detector indices to workspace indices, and integrated
         counts. Optionally will draw detector geometry, e.g. rectangular bank or tube instead of points."""
         self._workspace = workspace
-        self._workspace_x_unit = workspace.getAxis(0).getUnit().unitID()
+        x_unit = workspace.getAxis(0).getUnit()
+        self._workspace_x_unit = x_unit.unitID()
+        self._workspace_x_unit_display = f"{str(x_unit.caption())} ({str(x_unit.symbol())})"
 
     def setup(self):
         component_info = self._workspace.componentInfo()
@@ -59,14 +62,14 @@ class FullInstrumentViewModel:
 
         # Get min and max tof values
         if self._workspace.isRaggedWorkspace():
-            first_last = np.array([self._workspace.readX(i)[[0, -1]] for i in range(self._workspace.getNumberHistograms())])
+            first_last = np.array([self._workspace.readX(i)[[0, -1]] for i in self._workspace_indices[self._is_valid]])
             self._tof_limits = (np.min(first_last[:, 0]), np.max(first_last[:, 1]))
 
         elif self._workspace.isCommonBins():
             self._tof_limits = tuple(self._workspace.dataX(0)[[0, -1]])
 
         else:
-            data_x = self._workspace.extractX()
+            data_x = self._workspace.extractX()[self._is_valid]
             self._tof_limits = (np.min(data_x[:, 0]), np.max(data_x[:, -1]))
 
         # Update counts with default total range
@@ -83,6 +86,10 @@ class FullInstrumentViewModel:
     @property
     def workspace_x_unit(self) -> str:
         return self._workspace_x_unit
+
+    @property
+    def workspace_x_unit_display(self) -> str:
+        return self._workspace_x_unit_display
 
     @property
     def default_projection(self) -> str:

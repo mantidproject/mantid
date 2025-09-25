@@ -69,6 +69,7 @@ class FullInstrumentViewPresenter:
             delete_callback=self.delete_workspace_callback,
             rename_callback=self.rename_workspace_callback,
             clear_callback=self.clear_workspace_callback,
+            replace_callback=self.replace_workspace_callback,
         )
         self._view.hide_status_box()
 
@@ -92,6 +93,12 @@ class FullInstrumentViewPresenter:
         if self._model.has_unit:
             return self._UNIT_OPTIONS
         return ["No units"]
+
+    @property
+    def workspace_display_unit(self) -> str:
+        if self._model.has_unit:
+            return self._model.workspace_x_unit_display
+        return ""
 
     def on_tof_limits_updated(self) -> None:
         """When TOF limits are changed, read the new limits and tell the presenter to update the colours accordingly"""
@@ -224,8 +231,10 @@ class FullInstrumentViewPresenter:
     def clear_workspace_callback(self):
         self._view.close()
 
+    def replace_workspace_callback(self, ws_name, ws):
+        self._view.close()
+
     def handle_close(self):
-        del self._model
         # The observers are unsubscribed on object deletion, it's safer to manually
         # delete the observer rather than wait for the garbage collector, because
         # we don't want stale workspace references hanging around.
