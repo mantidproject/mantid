@@ -184,12 +184,12 @@ class FullInstrumentViewWindow(QMainWindow):
         min_hbox.addWidget(QLabel("Min"))
         min_edit = QLineEdit()
         max_float_64 = np.finfo(np.float64).max
-        min_edit.setValidator(QDoubleValidator(0, max_float_64, 5, self))
+        min_edit.setValidator(QDoubleValidator(0, max_float_64, 4, self))
         min_hbox.addWidget(min_edit)
         max_hbox = QHBoxLayout()
         max_hbox.addWidget(QLabel("Max"))
         max_edit = QLineEdit()
-        max_edit.setValidator(QDoubleValidator(0, max_float_64, 5, self))
+        max_edit.setValidator(QDoubleValidator(0, max_float_64, 4, self))
         max_hbox.addWidget(max_edit)
 
         slider = QDoubleRangeSlider(Qt.Orientation.Horizontal, parent=parent_box)
@@ -209,10 +209,13 @@ class FullInstrumentViewWindow(QMainWindow):
         return (min_edit, max_edit, slider)
 
     def _add_connections_to_edits_and_slider(self, min_edit: QLineEdit, max_edit: QLineEdit, slider, presenter_callback: Callable):
+        def format_float(value):
+            return f"{value:.4f}".rstrip("0").rstrip(".") if "." in f"{value:.4f}" else f"{value:.4f}"
+
         def set_edits(limits):
             min, max = limits
-            min_edit.setText(f"{min}")
-            max_edit.setText(f"{max}")
+            min_edit.setText(format_float(min))
+            max_edit.setText(format_float(max))
 
         def set_slider(callled_from_min):
             def wrapped():
