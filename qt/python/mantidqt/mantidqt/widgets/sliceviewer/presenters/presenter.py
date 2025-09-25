@@ -11,7 +11,6 @@ import sys
 from mantid.kernel import Logger, SpecialCoordinateSystem
 from qtpy.QtCore import Qt
 from qtpy.QtGui import QCursor
-from qtpy.QtWidgets import QMessageBox
 
 from mantidqt.interfacemanager import InterfaceManager
 from mantidqt.widgets.observers.observing_presenter import ObservingPresenter
@@ -100,12 +99,6 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
         #       projectroot.qt.python.mantidqt_qt5.test_sliceviewer_presenter.test_sliceviewer_presenter
         #       Given that this issue is not of high priority, we are leaving it as is for now.
         # self.show_all_data_clicked()
-
-        self._apply_masking_msgBox = QMessageBox()
-        self._apply_masking_msgBox.setWindowTitle("Apply Mask to Workspace?")
-        self._apply_masking_msgBox.setText("This action will mutate the underlying workspace. This cannot be undone.")
-        self._apply_masking_msgBox.setStandardButtons(QMessageBox.Apply | QMessageBox.Cancel)
-        self._apply_masking_msgBox.setDefaultButton(QMessageBox.Cancel)
 
     def new_plot(self, *args, **kwargs):
         self._new_plot_method(*args, **kwargs)
@@ -626,8 +619,7 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
         self.view.data_view.canvas.draw_idle()
 
     def apply_masking_clicked(self) -> None:
-        ret = self._apply_masking_msgBox.exec()
-        if ret == QMessageBox.Apply:
+        if self.view.data_view.evaluate_apply_masking_msg_box():
             self.view.data_view.masking.apply_selectors()
             self.replace_workspace(self.model.ws.name(), self.model.ws)
 

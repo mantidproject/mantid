@@ -20,6 +20,7 @@ from qtpy.QtWidgets import (
     QToolButton,
     QSizePolicy,
     QDoubleSpinBox,
+    QMessageBox,
 )
 from matplotlib.figure import Figure
 from mpl_toolkits.axisartist import Subplot as CurveLinearSubPlot, GridHelperCurveLinear
@@ -170,6 +171,13 @@ class SliceViewerDataView(QWidget):
 
         # min/max extents
         self.extents = self.create_extents_layout() if add_extents else None
+
+        # Masking MessageBox
+        self._apply_masking_msgBox = QMessageBox()
+        self._apply_masking_msgBox.setWindowTitle("Apply Mask to Workspace?")
+        self._apply_masking_msgBox.setText("This action will mutate the underlying workspace. This cannot be undone.")
+        self._apply_masking_msgBox.setStandardButtons(QMessageBox.Apply | QMessageBox.Cancel)
+        self._apply_masking_msgBox.setDefaultButton(QMessageBox.Cancel)
 
         # layout
         layout = QGridLayout(self)
@@ -788,3 +796,11 @@ class SliceViewerDataView(QWidget):
         for opt in MASK_SHAPE_OPTIONS:
             fn = self.activate_tool if opt == shape else self.deactivate_tool
             fn(opt, False)
+
+    def evaluate_apply_masking_msg_box(self):
+        if self._apply_masking_msgBox.exec() == QMessageBox.Apply:
+            return True
+        return False
+
+    def close(self):
+        self._apply_masking_msgBox.close()
