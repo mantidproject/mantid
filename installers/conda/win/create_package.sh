@@ -84,6 +84,7 @@ echo "Creating conda env from mantidworkbench and jq"
 "$CONDA_EXE" create --prefix $CONDA_ENV_PATH \
   --copy --channel $CONDA_CHANNEL --channel conda-forge --channel $MANTID_CHANNEL -y \
   mantidworkbench \
+  mantiddocs \
   mslice \
   m2w64-jq
 echo "Conda env created"
