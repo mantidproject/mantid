@@ -479,6 +479,8 @@ void LoadNexusMonitors2::splitMutiPeriodHistrogramData(const size_t numPeriods) 
   API::ISISRunLogs monLogCreator(m_workspace->run());
 
   BinEdges edges = m_multiPeriodBinEdges[0];
+  std::vector<API::MatrixWorkspace_sptr> outputWorkspaces;
+  outputWorkspaces.reserve(numPeriods);
 
   for (size_t i = 0; i < numPeriods; i++) {
     // create the period workspace
@@ -497,13 +499,19 @@ void LoadNexusMonitors2::splitMutiPeriodHistrogramData(const size_t numPeriods) 
     monLogCreator.addPeriodLogs(static_cast<int>(i + 1), wsPeriod->mutableRun());
 
     // add to workspace group if multi period and set the output property
-    if (numPeriods > 1) {
-      WorkspaceGroup_sptr wsGroup(new WorkspaceGroup);
-      wsGroup->addWorkspace(wsPeriod);
-      this->setProperty("OutputWorkspace", wsGroup);
-    } else {
-      this->setProperty("OutputWorkspace", wsPeriod);
+    outputWorkspaces.push_back(wsPeriod);
+  }
+
+  if (outputWorkspaces.size() > 1) {
+    WorkspaceGroup_sptr wsGroup(new WorkspaceGroup);
+    for (const auto ws : outputWorkspaces) {
+      wsGroup->addWorkspace(ws);
     }
+    this->setProperty("OutputWorkspace", wsGroup);
+  } else if (outputWorkspaces.size() == 1) {
+    this->setProperty("OutputWorkspace", outputWorkspaces[0]);
+  } else {
+    g_log.error() << "No period workspaces generated to output.";
   }
 }
 
