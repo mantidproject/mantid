@@ -36,25 +36,19 @@ class DNSElasticSCPlotPresenter(DNSObserver):
         self._plot_param.projections = False
         self._plot_param.use_default_lims = True
 
-    def _toggle_projections(self, set_proj):
-        self.view.sig_change_cb_range_on_zoom.disconnect()
-        self._plot_param.projections = set_proj
-        switch = self.view.get_plotting_setting("switch")
-        if set_proj and self.model.has_data():
-            x_proj, y_proj = self._calculate_projections(switch)
-            if switch:
-                x_proj, y_proj = y_proj, x_proj
-            self.view.single_crystal_plot.set_projections(x_proj, y_proj)
+    def _toggle_projections(self, proj_on):
+        self._plot_param.projections = proj_on
+        if proj_on and self.model.has_data():
+            x_proj, y_proj = self._calculate_projections()
+            xlim, ylim, dummy_z = self._get_current_spinners_lims()
+            self.view.single_crystal_plot.set_projections(x_proj, y_proj, xlim, ylim)
             self.view.draw()
         else:
             self.view.single_crystal_plot.remove_projections()
             self._plot(self.view.initial_values)
-        self.view.sig_change_cb_range_on_zoom.connect(self._change_color_bar_range)
 
-    def _calculate_projections(self, switch=False):
+    def _calculate_projections(self):
         xlim, ylim = self.view.single_crystal_plot.get_active_limits()
-        if switch:
-            xlim, ylim = ylim, xlim
         x_proj, y_proj = self.model.get_projections(xlim, ylim)
         return x_proj, y_proj
 
@@ -102,6 +96,8 @@ class DNSElasticSCPlotPresenter(DNSObserver):
             self._set_plot_param_lims(xlim, ylim, zlim)
         self._set_spinners_lims(include_zlim=True)
         self._set_plotting_lims()
+        if self._plot_param.projections:
+            self._toggle_projections(proj_on=True)
         self.view.canvas.figure.tight_layout()
         self.view.draw()
 
@@ -138,6 +134,8 @@ class DNSElasticSCPlotPresenter(DNSObserver):
         self._update_plot_param_lims(include_zlim)
         self._set_spinners_lims(include_zlim)
         self._set_plotting_lims()
+        if self._plot_param.projections:
+            self._toggle_projections(proj_on=True)
         # set this flag to false, not to update plot lims on a subsequent call of _plot()
         self._plot_param.use_default_lims = False
 
@@ -284,8 +282,6 @@ class DNSElasticSCPlotPresenter(DNSObserver):
             self._plot_param.ylim = ylim
             self._plot_param.zlim = zlim
             self._plot_param.sny_zoom_in = self.view.datalist.get_checked_plots()
-        if self._plot_param.projections:
-            self._toggle_projections(True)
         if zoom:
             self.view.draw()
 
@@ -309,6 +305,8 @@ class DNSElasticSCPlotPresenter(DNSObserver):
         self._set_plot_param_lims(def_xlim, def_ylim, def_zlim)
         self._set_spinners_lims(include_zlim=True)
         self._set_plotting_lims()
+        if self._plot_param.projections:
+            self._toggle_projections(proj_on=True)
         self.view.draw()
 
     def _get_current_xy_lim(self, zoom=False):
@@ -438,6 +436,8 @@ class DNSElasticSCPlotPresenter(DNSObserver):
         self.view._map["y_min"].setValue(xlim[0])
         self.view._map["y_max"].setValue(xlim[1])
         self._plot()
+        if self._plot_param.projections:
+            self._toggle_projections(proj_on=True)
 
     def _attach_signal_slots(self):
         self.view.sig_plot.connect(self._plot)

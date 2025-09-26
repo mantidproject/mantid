@@ -129,12 +129,10 @@ class DNSElasticSCPlotPresenterTest(unittest.TestCase):
     def test__calculate_projections(self):
         self.view.single_crystal_plot.get_active_limits.return_value = (1, 2)
         self.model.get_projections.return_value = (3, 4)
-        test_v = self.presenter._calculate_projections(False)
+        test_v = self.presenter._calculate_projections()
         self.model.get_projections.assert_called_once_with(1, 2)
         self.assertEqual(test_v, (3, 4))
         self.model.get_projections.reset_mock()
-        self.presenter._calculate_projections(True)
-        self.model.get_projections.assert_called_once_with(2, 1)
 
     def test__datalist_updated(self):
         self.view.datalist.get_datalist.return_value = None
