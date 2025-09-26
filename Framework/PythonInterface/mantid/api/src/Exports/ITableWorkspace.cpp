@@ -16,6 +16,7 @@
 #include "MantidPythonInterface/core/Converters/CloneToNDArray.h"
 #include "MantidPythonInterface/core/Converters/NDArrayToVector.h"
 #include "MantidPythonInterface/core/Converters/PySequenceToVector.h"
+#include "MantidPythonInterface/core/Converters/WrapWithNDArray.h"
 #include "MantidPythonInterface/core/GetPointer.h"
 #include "MantidPythonInterface/core/NDArray.h"
 #include "MantidPythonInterface/core/Policies/VectorToNumpy.h"
@@ -31,6 +32,7 @@
 #include <boost/python/overloads.hpp>
 
 #include <cstring>
+#include <pytypedefs.h>
 #include <vector>
 
 // See
@@ -313,6 +315,66 @@ PyObject *column(const ITableWorkspace &self, const object &value) {
   }
 
   return result;
+}
+
+PyObject *positionsArray(const ITableWorkspace &self) {
+  const npy_intp numHist = static_cast<npy_intp>(self.rowCount());
+  npy_intp stride = 3;
+  npy_intp arrayDims[2] = {numHist, stride};
+  auto *nparray =
+      reinterpret_cast<PyArrayObject *>(PyArray_NewFromDescr(&PyArray_Type, PyArray_DescrFromType(NPY_DOUBLE),
+                                                             2,         // rank 2
+                                                             arrayDims, // Length in each dimension
+                                                             nullptr, nullptr, 0, nullptr));
+  auto *dest = reinterpret_cast<double *>(PyArray_DATA(nparray)); // HEAD of the contiguous numpy data array
+
+  // PARALLEL_FOR_IF(threadSafe(workspace))
+  Mantid::API::Column_const_sptr colptr = self.getColumn("Position");
+  for (npy_intp i = 0; i < numHist; ++i) {
+    const std::vector<double> src = std::vector<double>(colptr->cell<Mantid::Kernel::V3D>(i));
+    std::copy(src.begin(), src.end(), std::next(dest, i * stride));
+  }
+  return reinterpret_cast<PyObject *>(nparray);
+}
+
+PyObject *sphericalPositionsArray(const ITableWorkspace &self) {
+  const npy_intp numHist = static_cast<npy_intp>(self.rowCount());
+  npy_intp stride = 3;
+  npy_intp arrayDims[2] = {numHist, stride};
+  auto *nparray =
+      reinterpret_cast<PyArrayObject *>(PyArray_NewFromDescr(&PyArray_Type, PyArray_DescrFromType(NPY_DOUBLE),
+                                                             2,         // rank 2
+                                                             arrayDims, // Length in each dimension
+                                                             nullptr, nullptr, 0, nullptr));
+  auto *dest = reinterpret_cast<double *>(PyArray_DATA(nparray)); // HEAD of the contiguous numpy data array
+
+  // PARALLEL_FOR_IF(threadSafe(workspace))
+  Mantid::API::Column_const_sptr colptr = self.getColumn("Position");
+  for (size_t i = 0; i < static_cast<size_t>(numHist); ++i) {
+    std::vector<double> src(3);
+    colptr->cell<Mantid::Kernel::V3D>(i).getSpherical(src[0], src[1], src[2]);
+    std::copy(src.begin(), src.end(), std::next(dest, i * stride));
+  }
+  return reinterpret_cast<PyObject *>(nparray);
+}
+
+PyObject *detIDArray(const ITableWorkspace &self) {
+  const npy_intp numHist = static_cast<npy_intp>(self.rowCount());
+  npy_intp arrayDims[1] = {numHist};
+  auto *nparray =
+      reinterpret_cast<PyArrayObject *>(PyArray_NewFromDescr(&PyArray_Type, PyArray_DescrFromType(NPY_INT32),
+                                                             1,         // rank 2
+                                                             arrayDims, // Length in each dimension
+                                                             nullptr, nullptr, 0, nullptr));
+  auto *dest = reinterpret_cast<int *>(PyArray_DATA(nparray)); // HEAD of the contiguous numpy data array
+
+  Mantid::API::Column_const_sptr colptr = self.getColumn("Detector ID(s)");
+  for (size_t i = 0; i < static_cast<size_t>(numHist); ++i) {
+    std::string dets = colptr->cell<std::string>(i);
+    int detID = std::stoi(dets.substr(0, dets.find(',')));
+    dest[i] = detID;
+  }
+  return reinterpret_cast<PyObject *>(nparray);
 }
 
 /**
@@ -719,6 +781,10 @@ void export_ITableWorkspace() {
            "Return a list of the column names.")
 
       .def("column", &column, (arg("self"), arg("column")), "Return all values of a specific column as a list.")
+
+      .def("positionsArray", &positionsArray, arg("self"), "in progress")
+      .def("sphericalPositionsArray", &sphericalPositionsArray, arg("self"), "in progress")
+      .def("detIDArray", &detIDArray, arg("self"), "in progress")
 
       .def("row", &row, (arg("self"), arg("row")), "Return all values of a specific row as a dict.")
 
