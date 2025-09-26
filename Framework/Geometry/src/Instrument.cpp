@@ -1082,31 +1082,6 @@ Instrument::ContainsState Instrument::containsRectDetectors() const {
     return Instrument::ContainsState::None;
 }
 
-std::vector<RectangularDetector_const_sptr> Instrument::findRectDetectors() const {
-  std::queue<IComponent_const_sptr> compQueue; // Search queue
-  addInstrumentChildrenToQueue(compQueue);
-
-  std::vector<RectangularDetector_const_sptr> detectors;
-
-  IComponent_const_sptr comp;
-
-  while (!compQueue.empty()) {
-    comp = compQueue.front();
-    compQueue.pop();
-
-    if (!validateComponentProperties(comp))
-      continue;
-
-    if (auto const detector = std::dynamic_pointer_cast<const RectangularDetector>(comp)) {
-      detectors.push_back(detector);
-    } else {
-      // If component is a ComponentAssembly, we add its children to the queue to check if they're Rectangular Detectors
-      addAssemblyChildrenToQueue(compQueue, comp);
-    }
-  }
-  return detectors;
-}
-
 bool Instrument::validateComponentProperties(IComponent_const_sptr component) const {
   // Skip source, if has one
   if (m_sourceCache && m_sourceCache->getComponentID() == component->getComponentID())
@@ -1157,11 +1132,6 @@ bool Instrument::isMonitorViaIndex(const size_t index) const {
 }
 
 bool Instrument::isEmptyInstrument() const { return this->nelements() == 0; }
-
-int Instrument::add(IComponent *component) {
-  // invalidate cache
-  return CompAssembly::add(component);
-}
 
 /// Returns the index for a detector ID. Used for accessing DetectorInfo.
 size_t Instrument::detectorIndex(const detid_t detID) const {
