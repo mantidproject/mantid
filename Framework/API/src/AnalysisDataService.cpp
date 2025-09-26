@@ -8,7 +8,7 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include <iterator>
 #include <random>
-#include <sstream>
+#include <regex>
 
 namespace Mantid::API {
 
@@ -32,25 +32,50 @@ std::shared_ptr<const WorkspaceGroup> AnalysisDataServiceImpl::GroupUpdatedNotif
 // Public methods
 //-------------------------------------------------------------------------
 /**
- * Is the given name a valid name for an object in the ADS
+ * Check whether the name is valid for the ADS. In release mode, issue a warning but do not return the error.
+ * In debug mode, return the error string.
  * @param name A string containing a possible name for an object in the ADS
+ * @param printWarning Whether to print a warning if the workspace name is invalid. Default is false. Used to
+ *                     avoid the warning printing multiple times per operation.
  * @return An empty string if the name is valid or an error message stating the
- * problem
- * if the name is unacceptable.
+ * problem if the name is unacceptable.
  */
-const std::string AnalysisDataServiceImpl::isValid(const std::string &name) const {
-  std::string error;
-  const std::string &illegal = illegalCharacters();
-  if (illegal.empty())
-    return error; // Quick route out.
-  const size_t length = name.size();
-  for (size_t i = 0; i < length; ++i) {
-    if (illegal.find_first_of(name[i]) != std::string::npos) {
-      std::ostringstream strm;
-      strm << "Invalid object name '" << name << "'. Names cannot contain any of the following characters: " << illegal;
-      error = strm.str();
-      break;
+const std::string AnalysisDataServiceImpl::isValid(const std::string &name, const bool printWarning) const {
+  const auto error = validateName(name);
+  if (!error.empty()) {
+    if (printWarning) {
+      // Log a warning message to let user know we will stop allowing invalid variable names in the future.
+      const std::string warningMessage =
+          error +
+          "\n"
+          "Currently this is only a warning, but in a future version of Mantid this will raise an exception and "
+          "the operation will fail.\n"
+          "Please update your scripts to use valid Python identifiers for workspace names.";
+      Kernel::Logger log("AnalaysisDataService");
+      log.warning(warningMessage);
     }
+    // Fail in debug mode if name is not valid.
+#ifndef NDEBUG
+    return error;
+#endif
+  }
+
+  return "";
+}
+
+/**
+ * Check whether the name is a valid python variable name, i.e. starts with underscore or letter, and contains
+ * only "word" characters (numbers, letters, underscores).
+ * @param name A string containing the name to validate
+ * @return An empty string if the name is valid or an error message describing the problem with the name.
+ */
+const std::string AnalysisDataServiceImpl::validateName(const std::string &name) const {
+  std::regex validName("^[a-zA-Z_][\\w]*");
+  std::string error = "";
+  if (!std::regex_match(name, validName)) {
+    error =
+        "Invalid object name '" + name +
+        "'. Names must start with a letter or underscore and contain only alpha-numeric characters and underscores.";
   }
   return error;
 }
@@ -386,26 +411,7 @@ std::map<std::string, Workspace_sptr> AnalysisDataServiceImpl::topLevelItems() c
  * Constructor
  */
 AnalysisDataServiceImpl::AnalysisDataServiceImpl()
-    : Mantid::Kernel::DataService<Mantid::API::Workspace>("AnalysisDataService"), m_illegalChars() {}
-
-// The following is commented using /// rather than /** to stop the compiler
-// complaining
-// about the special characters in the comment fields.
-/// Return a string containing the characters not allowed in names objects
-/// within ADS
-/// @returns A n array of c strings containing the following characters: "
-/// +-/*\%<>&|^~=!@()[]{},:.`$?"
-const std::string &AnalysisDataServiceImpl::illegalCharacters() const { return m_illegalChars; }
-
-/**
- * Set the list of illegal characeters
- * @param illegalChars A string containing the characters, as one long string,
- * that are not to be accepted by the ADS
- * NOTE: This only affects further additions to the ADS
- */
-void AnalysisDataServiceImpl::setIllegalCharacterList(const std::string &illegalChars) {
-  m_illegalChars = illegalChars;
-}
+    : Mantid::Kernel::DataService<Mantid::API::Workspace>("AnalysisDataService") {}
 
 /**
  * Checks the name is valid
@@ -415,9 +421,8 @@ void AnalysisDataServiceImpl::setIllegalCharacterList(const std::string &illegal
  * valid then it will check it's container for the same name that is passed if
  * true throws std::runtime_error else nothing.
  */
-
 void AnalysisDataServiceImpl::verifyName(const std::string &name, const std::shared_ptr<API::WorkspaceGroup> &group) {
-  const std::string error = isValid(name);
+  const std::string error = isValid(name, true);
   if (!error.empty()) {
     throw std::invalid_argument(error);
   }
