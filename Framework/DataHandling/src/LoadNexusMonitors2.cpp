@@ -504,7 +504,7 @@ void LoadNexusMonitors2::splitMutiPeriodHistrogramData(const size_t numPeriods) 
   // set output workspace to either single period ws, or group ws.
   if (outputWorkspaces.size() > 1) {
     WorkspaceGroup_sptr wsGroup(new WorkspaceGroup);
-    for (const auto ws : outputWorkspaces) {
+    for (const auto &ws : outputWorkspaces) {
       wsGroup->addWorkspace(ws);
     }
     this->setProperty("OutputWorkspace", wsGroup);
