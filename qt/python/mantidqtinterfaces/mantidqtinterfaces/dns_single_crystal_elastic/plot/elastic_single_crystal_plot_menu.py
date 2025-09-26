@@ -69,6 +69,7 @@ class DNSElasticSCPlotViewMenu(QMenu):
 
     sig_replot = Signal(str)
     sig_switch_state_changed = Signal()
+    sig_axes_changed = Signal()
 
     def _get_shading(self):
         if self._action_gouraud.isChecked():
@@ -163,7 +164,7 @@ class AxesMenu(QMenu):
         self.action_switch_axis.triggered.connect(self._switch_axis_changed)
 
     def _axis_type_changed(self):
-        self.parent.sig_replot.emit("axis_type")
+        self.parent.sig_axes_changed.emit()
 
     def _fix_aspect_changed(self):
         self.parent.sig_replot.emit("fix_aspect")

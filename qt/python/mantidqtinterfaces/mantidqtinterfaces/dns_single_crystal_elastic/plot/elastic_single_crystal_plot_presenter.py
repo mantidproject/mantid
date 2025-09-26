@@ -439,6 +439,12 @@ class DNSElasticSCPlotPresenter(DNSObserver):
         if self._plot_param.projections:
             self._toggle_projections(proj_on=True)
 
+    def _change_axes(self):
+        self._plot_param.use_default_lims = True
+        self._plot()
+        if self._plot_param.projections:
+            self._toggle_projections(proj_on=True)
+
     def _attach_signal_slots(self):
         self.view.sig_plot.connect(self._plot)
         self.view.sig_update_omega_offset.connect(self._update_omega_offset)
@@ -459,3 +465,4 @@ class DNSElasticSCPlotPresenter(DNSObserver):
         self.view.sig_home_button_clicked.connect(self._home_button_clicked)
         self.view.sig_plot_zoom_updated.connect(self._set_zooming_data)
         self.view.sig_switch_changed.connect(self._switch_spinners_lims)
+        self.view.sig_axes_changed.connect(self._change_axes)
