@@ -112,11 +112,13 @@ class DNSScPlot:
         self._ax.set_aspect(aspect_ratio, anchor="NW")
 
     # projections
-    def set_projections(self, x_proj, y_proj):
+    def set_projections(self, x_proj, y_proj, xlim, ylim):
         self.remove_projections()
         divider = make_axes_locatable(self._ax)
         self._ax_hist[0] = divider.append_axes("top", 1.2, pad=0.1, sharex=self._ax)
         self._ax_hist[1] = divider.append_axes("right", 1.2, pad=0.1, sharey=self._ax)
+        self._ax.set_xlim(xlim[0], xlim[1])
+        self._ax.set_ylim(ylim[0], ylim[1])
         self._ax.set_xmargin(0)
         self._ax.set_ymargin(0)
         self._ax_hist[0].set_xmargin(0)

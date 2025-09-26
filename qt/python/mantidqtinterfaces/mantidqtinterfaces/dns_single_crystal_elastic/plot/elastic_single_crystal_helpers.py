@@ -114,9 +114,10 @@ def q_to_hkl_xy(q, d):
 
 
 def get_projection(x, z):
-    numpoints = min(int(np.sqrt(len(x))) + 1, len(np.unique(x)) + 1)
-    projection, _dummy = np.histogram(x, numpoints, weights=z)
-    counts, px = np.histogram(x, numpoints)
-    px = (px[:-1] + px[1:]) / 2.0
-    py = projection / counts
-    return px, py
+    # use numpy's implementation of the optimal bin width calculation
+    bin_edges = np.histogram_bin_edges(x, bins="auto")
+    numpoints = bin_edges.size - 1
+    # use weights to sum up intensity values corresponding to the same bin
+    i_projection, x_bin_edges = np.histogram(x, numpoints, weights=z)
+    x_bin_centers = (x_bin_edges[:-1] + x_bin_edges[1:]) / 2.0
+    return x_bin_centers, i_projection
