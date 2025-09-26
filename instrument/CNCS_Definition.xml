@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='ASCII'?>
-<instrument xmlns="http://www.mantidproject.org/IDF/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="CNCS" valid-from="2025-08-07 10:00:00" valid-to="2100-01-31 23:59:59" last-modified="2025-09-24 14:44:51.180255" xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd">
+<instrument xmlns="http://www.mantidproject.org/IDF/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="CNCS" valid-from="2025-08-07 10:00:00" valid-to="2100-01-31 23:59:59" last-modified="2025-09-25 16:14:10.060328" xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd">
   <!--Created by Andrei Savici-->
   <defaults>
     <length unit="metre"/>
@@ -28,6 +28,7 @@
       <location z="-29.949" name="monitor1"/>
       <location z="-28.706" name="monitor2"/>
       <location z="-1.416" name="monitor3"/>
+      <location z="3.7338" name="monitor4"/>
     </component>
   </type>
   <component type="detectors" idlist="detectors">
@@ -713,6 +714,7 @@
     <id val="-1"/>
     <id val="-2"/>
     <id val="-3"/>
+    <id val="-4"/>
   </idlist>
   <!--DETECTOR PARAMETERS-->
   <component-link name="detectors">
