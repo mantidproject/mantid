@@ -28,7 +28,7 @@ def _patch_qtwebengine_files(prefix: str):
     if src_exe.exists() and not dst_exe.exists():
         shutil.copy2(src_exe, dst_exe)
 
-    # Copy resources directory
+    # Copy the contents of the resources directory
     src_resources = library / "resources"
     for f in src_resources.glob("*"):
         dst = env_root / f.name
