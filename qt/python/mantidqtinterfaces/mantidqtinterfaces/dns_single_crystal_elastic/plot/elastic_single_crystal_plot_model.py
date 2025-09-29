@@ -74,7 +74,7 @@ class DNSElasticSCPlotModel(DNSObsModel):
     def generate_triangulation_mesh(self, interpolate, axis_type, switch):
         mesh_name = axis_type + "_mesh"
         self._single_crystal_map.triangulate(mesh_name=mesh_name, switch=switch)
-        self._single_crystal_map.mask_triangles(mesh_name=mesh_name)
+        self._single_crystal_map.mask_triangles(mesh_name=mesh_name, switch=switch)
         triangulator_refiner, z_refiner = self._single_crystal_map.interpolate_triangulation(interpolate)
         self._data.triang = triangulator_refiner
         self._data.z_triang = z_refiner
@@ -131,11 +131,11 @@ class DNSElasticSCPlotModel(DNSObsModel):
     def get_changing_hkl_components(self):
         return self._single_crystal_map.get_changing_hkl_components()
 
-    def get_format_coord(self, plot_settings_dict):
+    def get_format_coord(self, plot_settings_dict, switch=False):
         # adds z and hkl label to cursor position
         def format_coord(x, y):
             mesh_name = plot_settings_dict["type"] + "_mesh"
-            border_path = self._single_crystal_map.get_dns_map_border(mesh_name)
+            border_path = self._single_crystal_map.get_dns_map_border(mesh_name, switch)
             h, k, l, z, error = get_hkl_intensity_from_cursor(self._single_crystal_map, plot_settings_dict, x, y)
             # ensures empty hover in the region outside the data boundary
             if border_path.contains_point((x, y)):
