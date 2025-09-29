@@ -410,7 +410,11 @@
       <technique>Triple Axis Spectroscopy</technique>
    </instrument>
 
-   <instrument name="MIDAS" shortname="HB2A">
+   <instrument name="HB2A">
+      <technique>Powder Diffraction</technique>
+   </instrument>
+
+   <instrument name="MIDAS">
      <technique>Neutron Diffraction</technique>
      <technique>Powder Diffraction</technique>
    </instrument>
