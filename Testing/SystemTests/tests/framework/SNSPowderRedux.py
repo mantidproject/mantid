@@ -122,6 +122,7 @@ class PG3Analysis(systemtesting.MantidSystemTest):
             SaveAs="gsas and fullprof and pdfgetn",
             OutputDirectory=savedir,
             FinalDataUnits="dSpacing",
+            StripVanadiumPeaks=False,
         )
 
         # load output gsas file and the golden one
@@ -130,7 +131,7 @@ class PG3Analysis(systemtesting.MantidSystemTest):
 
     def validateMethod(self):
         self.tolerance = 2.0e-2
-        self.tolerance_is_rel_err = True
+        self.tolerance_is_rel_err = False
         return "ValidateWorkspaceToWorkspace"
 
     def validate(self):
