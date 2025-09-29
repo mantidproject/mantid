@@ -51,7 +51,7 @@ class loggingTest(unittest.TestCase):
         py_logger.addHandler(handler)
 
         with temporary_config():
-            log_to_python()
+            log_to_python(level="%t")
             logger.information("[[info]]")
             logger.warning("[[warning]]")
             logger.error("[[error]]")

@@ -72,7 +72,7 @@ def log_to_python(level=None, pattern=None) -> None:
         to forward all potentially relevant messages to Python and let *Python's* logger
         filter out undesired messages. Possible values: 'trace', 'debug',
         'information', 'notice', 'warning', 'error', 'critical', 'fatal'.
-    @param str pattern: A logging pattern to format messages before forwarding them (example: %t)
+    @param str pattern: A logging pattern to format messages before forwarding them (example: '[%s] %t')
         See https://github.com/pocoproject/poco/wiki/Poco::Util::Application-Logging-Configuration#logging-format-placeholders
     """
     config = ConfigService.Instance()
@@ -80,7 +80,6 @@ def log_to_python(level=None, pattern=None) -> None:
         config["logging.loggers.root.level"] = level
     if pattern is not None:
         config["logging.channels.consoleChannel.formatter"] = "f1"
-        # Output only the message text and let Python take care of formatting.
         config["logging.formatters.f1.class"] = "PatternFormatter"
         config["logging.formatters.f1.pattern"] = pattern
     # Important: Do this one last because it triggers re-init of logging system!
