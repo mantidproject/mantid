@@ -174,29 +174,49 @@ class DNSScMap(ObjectDict):
         self.hkl_mesh_interpolated = [self.hklx_mesh_interpolated, self.hkly_mesh_interpolated, self.z_mesh_interpolated]
         self.qxqy_mesh_interpolated = [self.qx_mesh_interpolated, self.qy_mesh_interpolated, self.z_mesh_interpolated]
 
-    def get_dns_map_border(self, mesh_name):
+    def get_dns_map_border(self, mesh_name, switch):
         two_theta = self.two_theta
         omega = self.omega
         dns_path = np.zeros((2 * two_theta.size + 2 * omega.size, 2))
-        hkl_path = np.zeros((2 * two_theta.size + 2 * omega.size, 2))
-        dns_path[:, 0] = np.concatenate(
+        angular_border = np.zeros((2 * two_theta.size + 2 * omega.size, 2))
+        hkl_border = np.zeros((2 * two_theta.size + 2 * omega.size, 2))
+        qxqy_border = np.zeros((2 * two_theta.size + 2 * omega.size, 2))
+        # In two_theta-omega plane we set borders of the rectangle, specifying edge sides of the rectangle.
+        # For a typical measurement at the DNS (two theta: 5...124, omega: 135...304 deg) it would be:
+        # a) left side two_theta=5; omega=135, 136, ... ,304
+        # b) bottom side two_theta=5, 6, ..., 124; omega=135
+        # c) right side two_theta=124, omega=135, 136, ... ,304
+        # d) upper side two_theta=5, 6, ..., 124; omega=304
+        # set first column values (two theta)
+        angular_border[:, 0] = np.concatenate(
             (two_theta[0] * np.ones(omega.size), two_theta, two_theta[-1] * np.ones(omega.size), np.flip(two_theta))
+        )  # [5,5,..,5(170), 5,6,7,...,124(120), 124,124,..,124(170), 124,123,...,5(120)]
+        # set second column values (omega)
+        angular_border[:, 1] = np.concatenate(
+            (np.flip(omega), omega[0] * np.ones(two_theta.size), omega, omega[-1] * np.ones(two_theta.size))
         )
-        dns_path[:, 1] = np.concatenate((np.flip(omega), omega[0] * np.ones(two_theta.size), omega, omega[-1] * np.ones(two_theta.size)))
-        dns_path[:, 0], dns_path[:, 1] = angle_to_q(dns_path[:, 0], dns_path[:, 1], self.wavelength)
-        if "hkl" in mesh_name:
-            hkl_path[:, 0] = dns_path[:, 0] * self.dx / 2.0 / np.pi
-            hkl_path[:, 1] = dns_path[:, 1] * self.dy / 2.0 / np.pi
-            return path.Path(hkl_path)
+        # [304,303,...,135(170), 135,135,...,135(120), 135,136,...,304(170), 304,304,..,304(120)]
+        qxqy_border[:, 0], qxqy_border[:, 1] = angle_to_q(angular_border[:, 0], angular_border[:, 1], self.wavelength)
+        hkl_border[:, 0], hkl_border[:, 1] = qxqy_border[:, 0] * self.dx / 2.0 / np.pi, qxqy_border[:, 1] * self.dy / 2.0 / np.pi
+        if "angular" in mesh_name:
+            dns_path = angular_border
+        elif "qxqy" in mesh_name:
+            dns_path = qxqy_border
+        elif "hkl" in mesh_name:
+            dns_path = hkl_border
+        if switch:
+            dns_path = dns_path[::-1, ::-1]
         return path.Path(dns_path)
 
-    def mask_triangles(self, mesh_name):
+    def mask_triangles(self, mesh_name, switch):
         if "angular" in mesh_name:
             return self.triangulation
         x, y, _z = getattr(self, mesh_name)
+        if switch:
+            x, y = y, x
         x = x.flatten()
         y = y.flatten()
-        dns_path = self.get_dns_map_border(mesh_name)
+        dns_path = self.get_dns_map_border(mesh_name, switch)
         triangles = self.triangulation.triangles
         x_y_triangles = np.zeros((len(x[triangles]), 2))
         x_y_triangles[:, 0] = np.mean(x[triangles], axis=1)

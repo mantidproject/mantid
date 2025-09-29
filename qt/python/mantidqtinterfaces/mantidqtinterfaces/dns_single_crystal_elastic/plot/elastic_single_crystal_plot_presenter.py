@@ -262,8 +262,9 @@ class DNSElasticSCPlotPresenter(DNSObserver):
         self.view.draw()
 
     def _set_ax_formatter(self):
+        switch = self.view.get_plotting_setting("switch")
         plot_settings = self.view.get_plotting_settings_dict()
-        format_coord = self.model.get_format_coord(plot_settings)
+        format_coord = self.model.get_format_coord(plot_settings, switch)
         self.view.single_crystal_plot.set_format_coord(format_coord)
 
     def _manual_lim_changed(self):
