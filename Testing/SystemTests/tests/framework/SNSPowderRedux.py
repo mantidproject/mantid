@@ -131,7 +131,7 @@ class PG3Analysis(systemtesting.MantidSystemTest):
 
     def validateMethod(self):
         self.tolerance = 2.0e-2
-        self.tolerance_is_rel_err = False
+        self.tolerance_is_rel_err = True
         return "ValidateWorkspaceToWorkspace"
 
     def validate(self):
