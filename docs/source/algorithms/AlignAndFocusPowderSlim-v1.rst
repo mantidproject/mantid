@@ -69,7 +69,8 @@ This algorithm accepts the same ``SplitterWorkspace`` inputs as :ref:`FilterEven
     FilterEvents(ws2,
                  SplitterWorkspace=splitter, RelativeTime=True,
                  FilterByPulseTime=True,
-                 OutputWorkspaceBaseName="filtered")
+                 OutputWorkspaceBaseName="filtered",
+                 GroupWorkspaces=True)
     out = Rebin("filtered_0", "0,50000,50000", PreserveEvents=False)
 
     CompareWorkspaces(ws, out, CheckUncertainty=False, CheckSpectraMap=False, CheckInstrument=False)
@@ -89,10 +90,12 @@ This algorithm accepts the same ``SplitterWorkspace`` inputs as :ref:`FilterEven
                          InformationWorkspace='info',
                          LogName='CaveTemperature',
                          MinimumLogValue=70.10,
-                         MaximumLogValue=70.15)
+                         MaximumLogValue=70.15,
+                         LogValueInterval=0.01)
 
-    # Use the splitter table to filter the events during loading
+    # Use the splitter table to filter the events during loading and output to workspace group
     ws = AlignAndFocusPowderSlim("VULCAN_218062.nxs.h5", SplitterWorkspace='splitter')
+    print(ws.getNumberOfEntries())  # should be 6 workspaces in the group
 
 
 **Example - filter bad pulses**
@@ -117,7 +120,7 @@ This algorithm accepts the same ``SplitterWorkspace`` inputs as :ref:`FilterEven
 
 .. note::
 
-    While we currently only support a single output workspace when filtering events from a splitter table but the output target can be selected with the ``SplitterTarget`` property and you can run the algorithm multiple times with different targets. We also can currently only filter based on the pulse time, not the event time-of-flight.
+    We also can currently only filter based on the pulse time, not the event time-of-flight.
 
 .. categories::
 
