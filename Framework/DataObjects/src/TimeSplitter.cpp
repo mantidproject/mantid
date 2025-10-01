@@ -195,14 +195,14 @@ std::string TimeSplitter::debugPrint() const {
 const std::map<DateAndTime, int> &TimeSplitter::getSplittersMap() const { return m_roi_map; }
 
 // Get the target name from the target index.
-std::string TimeSplitter::getWorkspaceIndexName(const int workspaceIndex, const int numericalShift) {
+std::string TimeSplitter::getWorkspaceIndexName(const int workspaceIndex, const int numericalShift) const {
   if (m_index_name_map.count(workspaceIndex) == 0) {
     std::stringstream msg;
     msg << "Invalid target index " << workspaceIndex << " when calling TimeSplitter::getWorkspaceIndexName";
     throw std::runtime_error(msg.str());
   }
 
-  std::string target_name = m_index_name_map[workspaceIndex];
+  std::string target_name = m_index_name_map.at(workspaceIndex);
 
   // If numericalShift is not zero, the "_index" suffix of the name will be shifted.
   // This is needed to support FilterEvents property OutputWorkspaceIndexedFrom1.
@@ -218,7 +218,7 @@ std::string TimeSplitter::getWorkspaceIndexName(const int workspaceIndex, const 
           "FilterEvents property \"OutputWorkspaceIndexedFrom1\" is not compatible with non-numeric targets.");
     }
 
-    assert(target_index == m_name_index_map[target_name]);
+    assert(target_index == m_name_index_map.at(target_name));
     std::stringstream s;
     s << target_index + numericalShift;
     return s.str();
