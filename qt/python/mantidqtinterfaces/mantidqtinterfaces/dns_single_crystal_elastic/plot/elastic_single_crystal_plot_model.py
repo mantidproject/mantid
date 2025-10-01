@@ -102,13 +102,13 @@ class DNSElasticSCPlotModel(DNSObsModel):
         self.set_mesh_data(x, y, z)
         return x, y, z
 
-    def get_xy_dy_ratio(self):
+    def get_dx_dy_ratio(self):
         return self._single_crystal_map.dx / self._single_crystal_map.dy
 
     def get_aspect_ratio(self, plot_settings_dict):
         if plot_settings_dict["fix_aspect"]:
             if plot_settings_dict["type"] == "hkl":
-                ratio = self.get_xy_dy_ratio()
+                ratio = self.get_dx_dy_ratio()
                 return ratio
             return 1
         return "auto"

@@ -29,25 +29,10 @@ class DNSScPlot:
         self._plot = None
         self._colorbar = None
         self._ax_hist = [None, None]
-        self._cid = None
-
-    def disconnect_ylim_change(self):
-        if self._cid is not None:
-            self._ax.callbacks.disconnect(self._cid)
-
-    def connect_ylim_change(self):
-        self._cid = self._ax.callbacks.connect("ylim_changed", self._parent.change_cb_range_on_zoom)
-
-    def on_resize(self, _dummy=None):  # connected to canvas resize
-        self._fig.tight_layout(pad=0.3)
 
     @staticmethod
     def set_fontsize(fontsize):
         matplotlib.rcParams.update({"font.size": fontsize})
-
-    def redraw_colorbar(self):
-        # called by home button clicked
-        self._colorbar._draw_all()
 
     def create_colorbar(self):
         self._colorbar = self._fig.colorbar(self._plot, ax=self._ax, extend="max", pad=0.01)
