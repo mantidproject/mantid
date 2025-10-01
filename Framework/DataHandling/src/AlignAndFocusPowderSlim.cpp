@@ -43,6 +43,7 @@ using Mantid::API::ITableWorkspace_sptr;
 using Mantid::API::MatrixWorkspace_sptr;
 using Mantid::API::WorkspaceProperty;
 using Mantid::DataObjects::MaskWorkspace_sptr;
+using Mantid::DataObjects::TimeSplitter;
 using Mantid::DataObjects::Workspace2D;
 using Mantid::Kernel::ArrayBoundedValidator;
 using Mantid::Kernel::ArrayProperty;
@@ -324,9 +325,24 @@ void AlignAndFocusPowderSlim::exec() {
   LoadEventNexus::runLoadNexusLogs<MatrixWorkspace_sptr>(filename, wksp, *this, false, nPeriods, periodLog, allow_logs,
                                                          block_logs);
 
+  const auto timeSplitter = this->timeSplitterFromSplitterWorkspace(wksp->run().startTime());
+  auto roi = this->getStartingTimeROI(wksp);
   // determine the pulse indices from the time and splitter workspace
   this->progress(.15, "Determining pulse indices");
-  this->determinePulseIndices(wksp);
+
+  if (!timeSplitter.empty()) {
+    const int splitter_target = this->getProperty(PropertyNames::SPLITTER_TARGET);
+    if (!timeSplitter.outputWorkspaceIndices().contains(splitter_target)) {
+      throw std::invalid_argument("Selected splitter target is out of range.");
+    }
+    auto splitter_roi = timeSplitter.getTimeROI(splitter_target);
+    if (roi.useAll())
+      roi = splitter_roi; // use the splitter ROI if no time filtering is specified
+    else if (!splitter_roi.useAll())
+      roi.update_intersection(splitter_roi); // otherwise intersect with the splitter ROI
+  }
+
+  const auto pulse_indices = this->determinePulseIndices(wksp, roi);
 
   // Now we want to go through all the bankN_event entries
   const std::map<std::string, std::set<std::string>> &allEntries = descriptor.getAllEntries();
@@ -534,8 +550,8 @@ API::MatrixWorkspace_sptr AlignAndFocusPowderSlim::convertToTOF(API::MatrixWorks
   return wksp;
 }
 
-void AlignAndFocusPowderSlim::determinePulseIndices(const API::MatrixWorkspace_sptr &wksp) {
-  TimeROI roi;
+Kernel::TimeROI AlignAndFocusPowderSlim::getStartingTimeROI(const API::MatrixWorkspace_sptr &wksp) {
+  Kernel::TimeROI roi;
   const auto startOfRun = wksp->run().startTime();
 
   // filter by time
@@ -572,15 +588,13 @@ void AlignAndFocusPowderSlim::determinePulseIndices(const API::MatrixWorkspace_s
                                    0.0, true, &roi);
     }
   }
+  return roi;
+}
 
-  // filter by splitter workspace
-  const auto splitter_roi = timeROIFromSplitterWorkspace(startOfRun);
+std::vector<std::pair<size_t, size_t>>
+AlignAndFocusPowderSlim::determinePulseIndices(const API::MatrixWorkspace_sptr &wksp, const TimeROI &roi) {
 
-  if (roi.useAll())
-    roi = splitter_roi; // use the splitter ROI if no time filtering is specified
-  else if (!splitter_roi.useAll())
-    roi.update_intersection(splitter_roi); // otherwise intersect with the splitter ROI
-
+  std::vector<std::pair<size_t, size_t>> pulse_indices;
   if (roi.useAll()) {
     pulse_indices.emplace_back(0, std::numeric_limits<size_t>::max());
   } else {
@@ -602,9 +616,12 @@ void AlignAndFocusPowderSlim::determinePulseIndices(const API::MatrixWorkspace_s
   // update the run TimeROI and remove log data outside the time ROI
   wksp->mutableRun().setTimeROI(roi);
   wksp->mutableRun().removeDataOutsideTimeROI();
+
+  return pulse_indices;
 }
 
-TimeROI AlignAndFocusPowderSlim::timeROIFromSplitterWorkspace(const Types::Core::DateAndTime &filterStartTime) {
+TimeSplitter
+AlignAndFocusPowderSlim::timeSplitterFromSplitterWorkspace(const Types::Core::DateAndTime &filterStartTime) {
   API::Workspace_sptr tempws = this->getProperty("SplitterWorkspace");
   DataObjects::SplittersWorkspace_sptr splittersWorkspace =
       std::dynamic_pointer_cast<DataObjects::SplittersWorkspace>(tempws);
@@ -613,27 +630,21 @@ TimeROI AlignAndFocusPowderSlim::timeROIFromSplitterWorkspace(const Types::Core:
   API::MatrixWorkspace_sptr matrixSplitterWS = std::dynamic_pointer_cast<API::MatrixWorkspace>(tempws);
 
   if (!splittersWorkspace && !splitterTableWorkspace && !matrixSplitterWS)
-    return TimeROI();
+    return {};
 
   const bool isSplittersRelativeTime = this->getProperty("RelativeTime");
 
-  DataObjects::TimeSplitter timeSplitter;
+  TimeSplitter time_splitter;
   if (splittersWorkspace) {
-    timeSplitter = DataObjects::TimeSplitter{splittersWorkspace};
+    time_splitter = TimeSplitter{splittersWorkspace};
   } else if (splitterTableWorkspace) {
-    timeSplitter = DataObjects::TimeSplitter(splitterTableWorkspace,
-                                             isSplittersRelativeTime ? filterStartTime : DateAndTime::GPS_EPOCH);
+    time_splitter =
+        TimeSplitter(splitterTableWorkspace, isSplittersRelativeTime ? filterStartTime : DateAndTime::GPS_EPOCH);
   } else {
-    timeSplitter =
-        DataObjects::TimeSplitter(matrixSplitterWS, isSplittersRelativeTime ? filterStartTime : DateAndTime::GPS_EPOCH);
+    time_splitter = TimeSplitter(matrixSplitterWS, isSplittersRelativeTime ? filterStartTime : DateAndTime::GPS_EPOCH);
   }
 
-  const int splitter_target = this->getProperty(PropertyNames::SPLITTER_TARGET);
-  if (!timeSplitter.outputWorkspaceIndices().contains(splitter_target)) {
-    throw std::invalid_argument("Selected splitter target is out of range.");
-  }
-
-  return timeSplitter.getTimeROI(splitter_target);
+  return time_splitter;
 }
 
 } // namespace Mantid::DataHandling::AlignAndFocusPowderSlim
