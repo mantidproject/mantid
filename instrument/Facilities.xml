@@ -411,7 +411,12 @@
    </instrument>
 
    <instrument name="HB2A">
-      <technique>technique</technique>
+      <technique>Powder Diffraction</technique>
+   </instrument>
+
+   <instrument name="MIDAS">
+     <technique>Neutron Diffraction</technique>
+     <technique>Powder Diffraction</technique>
    </instrument>
 
    <instrument name="HB2B">
