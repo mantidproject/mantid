@@ -40,7 +40,7 @@ public:
   TimeSplitter(const SplittersWorkspace_sptr &sws);
 
   const std::map<DateAndTime, int> &getSplittersMap() const;
-  std::string getWorkspaceIndexName(const int workspaceIndex, const int numericalShift = 0);
+  std::string getWorkspaceIndexName(const int workspaceIndex, const int numericalShift = 0) const;
   /// Find the destination index for an event with a given time
   int valueAtTime(const DateAndTime &time) const;
   void addROI(const DateAndTime &start, const DateAndTime &stop, const int value);

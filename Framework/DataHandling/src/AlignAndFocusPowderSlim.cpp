@@ -7,6 +7,7 @@
 
 #include "MantidDataHandling/AlignAndFocusPowderSlim.h"
 #include "AlignAndFocusPowderSlim/ProcessBankTask.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -38,6 +39,7 @@
 #include <vector>
 
 namespace Mantid::DataHandling::AlignAndFocusPowderSlim {
+using Mantid::API::AnalysisDataService;
 using Mantid::API::FileProperty;
 using Mantid::API::ITableWorkspace_sptr;
 using Mantid::API::MatrixWorkspace_sptr;
@@ -154,7 +156,6 @@ void AlignAndFocusPowderSlim::init() {
                   "relative. If true, they are relative to the run start time.");
   auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(0);
-  declareProperty(PropertyNames::SPLITTER_TARGET, 0, mustBePositive, "The target workspace index for the splitter.");
   declareProperty(PropertyNames::FILTER_BAD_PULSES, false,
                   "Filter bad pulses in the same way that :ref:`algm-FilterBadPulses` does.");
   auto range = std::make_shared<BoundedValidator<double>>();
@@ -182,7 +183,7 @@ void AlignAndFocusPowderSlim::init() {
   declareProperty(std::make_unique<ArrayProperty<std::string>>(PropertyNames::BLOCK_LOGS),
                   "If specified, these logs will not be loaded from the file");
   declareProperty(
-      std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(PropertyNames::OUTPUT_WKSP, "", Direction::Output),
+      std::make_unique<WorkspaceProperty<API::Workspace>>(PropertyNames::OUTPUT_WKSP, "", Direction::Output),
       "An output workspace.");
 
   // parameters for chunking options - consider removing these later
@@ -326,23 +327,9 @@ void AlignAndFocusPowderSlim::exec() {
                                                          block_logs);
 
   const auto timeSplitter = this->timeSplitterFromSplitterWorkspace(wksp->run().startTime());
-  auto roi = this->getStartingTimeROI(wksp);
+  const auto roi = this->getStartingTimeROI(wksp);
   // determine the pulse indices from the time and splitter workspace
   this->progress(.15, "Determining pulse indices");
-
-  if (!timeSplitter.empty()) {
-    const int splitter_target = this->getProperty(PropertyNames::SPLITTER_TARGET);
-    if (!timeSplitter.outputWorkspaceIndices().contains(splitter_target)) {
-      throw std::invalid_argument("Selected splitter target is out of range.");
-    }
-    auto splitter_roi = timeSplitter.getTimeROI(splitter_target);
-    if (roi.useAll())
-      roi = splitter_roi; // use the splitter ROI if no time filtering is specified
-    else if (!splitter_roi.useAll())
-      roi.update_intersection(splitter_roi); // otherwise intersect with the splitter ROI
-  }
-
-  const auto pulse_indices = this->determinePulseIndices(wksp, roi);
 
   // Now we want to go through all the bankN_event entries
   const std::map<std::string, std::set<std::string>> &allEntries = descriptor.getAllEntries();
@@ -350,55 +337,63 @@ void AlignAndFocusPowderSlim::exec() {
 
   // load the events
   H5::H5File h5file(filename, H5F_ACC_RDONLY, Nexus::H5Util::defaultFileAcc());
-  if (itClassEntries != allEntries.end()) {
-    this->progress(.17, "Reading events");
-    // const std::set<std::string> &classEntries = itClassEntries->second;
+  if (itClassEntries == allEntries.end()) {
+    h5file.close();
+    throw std::runtime_error("No NXevent_data entries found in file");
+  }
 
-    // filter out the diagnostic entries
-    std::vector<std::string> bankEntryNames;
-    /*
-    {
-      const std::regex classRegex("(/entry/)([^/]*)");
-      std::smatch groups;
+  this->progress(.17, "Reading events");
+  // const std::set<std::string> &classEntries = itClassEntries->second;
 
-      for (const std::string &classEntry : classEntries) {
-        if (std::regex_match(classEntry, groups, classRegex)) {
-          const std::string entry_name(groups[2].str());
-          if (classEntry.ends_with("bank_error_events")) {
-            // do nothing
-          } else if (classEntry.ends_with("bank_unmapped_events")) {
-            // do nothing
-          } else {
-            bankEntryNames.push_back(entry_name);
-          }
+  // filter out the diagnostic entries
+  std::vector<std::string> bankEntryNames;
+  /*
+  {
+    const std::regex classRegex("(/entry/)([^/]*)");
+    std::smatch groups;
+
+    for (const std::string &classEntry : classEntries) {
+      if (std::regex_match(classEntry, groups, classRegex)) {
+        const std::string entry_name(groups[2].str());
+        if (classEntry.ends_with("bank_error_events")) {
+          // do nothing
+        } else if (classEntry.ends_with("bank_unmapped_events")) {
+          // do nothing
+        } else {
+          bankEntryNames.push_back(entry_name);
         }
       }
     }
-    */
+  }
+  */
 
-    // hard coded for VULCAN 6 banks
-    std::size_t num_banks_to_read;
-    int outputSpecNum = getProperty(PropertyNames::OUTPUT_SPEC_NUM);
-    if (outputSpecNum == EMPTY_INT()) {
-      for (size_t i = 1; i <= NUM_HIST; ++i) {
-        bankEntryNames.push_back("bank" + std::to_string(i) + "_events");
-      }
-      num_banks_to_read = NUM_HIST;
-    } else {
-      // fill this vector with blanks -- this is for the ProcessBankTask to correctly access it
-      for (size_t i = 1; i <= NUM_HIST; ++i) {
-        bankEntryNames.push_back("");
-      }
-      // the desired bank gets the correct entry name
-      bankEntryNames[outputSpecNum - 1] = "bank" + std::to_string(outputSpecNum) + "_events";
-      num_banks_to_read = 1;
+  // hard coded for VULCAN 6 banks
+  std::size_t num_banks_to_read;
+  int outputSpecNum = getProperty(PropertyNames::OUTPUT_SPEC_NUM);
+  if (outputSpecNum == EMPTY_INT()) {
+    for (size_t i = 1; i <= NUM_HIST; ++i) {
+      bankEntryNames.push_back("bank" + std::to_string(i) + "_events");
     }
+    num_banks_to_read = NUM_HIST;
+  } else {
+    // fill this vector with blanks -- this is for the ProcessBankTask to correctly access it
+    for (size_t i = 1; i <= NUM_HIST; ++i) {
+      bankEntryNames.push_back("");
+    }
+    // the desired bank gets the correct entry name
+    bankEntryNames[outputSpecNum - 1] = "bank" + std::to_string(outputSpecNum) + "_events";
+    num_banks_to_read = 1;
+  }
 
-    // threaded processing of the banks
-    const int DISK_CHUNK = getProperty(PropertyNames::READ_SIZE_FROM_DISK);
-    const int GRAINSIZE_EVENTS = getProperty(PropertyNames::EVENTS_PER_THREAD);
-    auto progress = std::make_shared<API::Progress>(this, .17, .9, num_banks_to_read);
-    g_log.debug() << (DISK_CHUNK / GRAINSIZE_EVENTS) << " threads per chunk\n";
+  // threaded processing of the banks
+  const int DISK_CHUNK = getProperty(PropertyNames::READ_SIZE_FROM_DISK);
+  const int GRAINSIZE_EVENTS = getProperty(PropertyNames::EVENTS_PER_THREAD);
+  auto progress = std::make_shared<API::Progress>(this, .17, .9, num_banks_to_read);
+  g_log.debug() << (DISK_CHUNK / GRAINSIZE_EVENTS) << " threads per chunk\n";
+
+  if (timeSplitter.empty()) {
+    const auto pulse_indices = this->determinePulseIndices(wksp, roi);
+
     ProcessBankTask task(bankEntryNames, h5file, is_time_filtered, wksp, m_calibration, m_masked,
                          static_cast<size_t>(DISK_CHUNK), static_cast<size_t>(GRAINSIZE_EVENTS), pulse_indices,
                          progress);
@@ -409,12 +404,58 @@ void AlignAndFocusPowderSlim::exec() {
       // a "range" of 1; note -1 to match 0-indexed array with 1-indexed bank labels
       task(tbb::blocked_range<size_t>(outputSpecNum - 1, outputSpecNum));
     }
+
+    // close the file so child algorithms can do their thing
+    h5file.close();
+
+    setProperty(PropertyNames::OUTPUT_WKSP, std::move(wksp));
+
+  } else {
+    std::string ws_basename = this->getPropertyValue(PropertyNames::OUTPUT_WKSP);
+    std::vector<std::string> wsNames;
+    for (const int &splitter_target : timeSplitter.outputWorkspaceIndices()) {
+
+      auto splitter_roi = timeSplitter.getTimeROI(splitter_target);
+      // copy the roi so we can modify it just for this target
+      auto target_roi = roi;
+      if (target_roi.useAll())
+        target_roi = splitter_roi; // use the splitter ROI if no time filtering is specified
+      else if (!splitter_roi.useAll())
+        target_roi.update_intersection(splitter_roi); // otherwise intersect with the splitter ROI
+
+      // clone wksp for this target
+      MatrixWorkspace_sptr target_wksp = wksp->clone();
+
+      const auto pulse_indices = this->determinePulseIndices(target_wksp, target_roi);
+
+      ProcessBankTask task(bankEntryNames, h5file, is_time_filtered, target_wksp, m_calibration, m_masked,
+                           static_cast<size_t>(DISK_CHUNK), static_cast<size_t>(GRAINSIZE_EVENTS), pulse_indices,
+                           progress);
+      // generate threads only if appropriate
+      if (num_banks_to_read > 1) {
+        tbb::parallel_for(tbb::blocked_range<size_t>(0, num_banks_to_read), task);
+      } else {
+        task(tbb::blocked_range<size_t>(outputSpecNum - 1, outputSpecNum));
+      }
+
+      std::string ws_name = ws_basename + "_" + timeSplitter.getWorkspaceIndexName(splitter_target);
+      wsNames.push_back(ws_name);
+      AnalysisDataService::Instance().addOrReplace(ws_name, target_wksp);
+    }
+    // close the file so child algorithms can do their thing
+    h5file.close();
+
+    // group the workspaces
+    auto groupws = createChildAlgorithm("GroupWorkspaces", 0.95, 1.00, true);
+    groupws->setAlwaysStoreInADS(true);
+    groupws->setProperty("InputWorkspaces", wsNames);
+    groupws->setProperty("OutputWorkspace", ws_basename);
+    groupws->execute();
+
+    API::Workspace_sptr outputWorkspace = AnalysisDataService::Instance().retrieveWS<API::Workspace>(ws_basename);
+
+    setProperty(PropertyNames::OUTPUT_WKSP, outputWorkspace);
   }
-
-  // close the file so child algorithms can do their thing
-  h5file.close();
-
-  setProperty(PropertyNames::OUTPUT_WKSP, std::move(wksp));
 }
 
 MatrixWorkspace_sptr AlignAndFocusPowderSlim::createOutputWorkspace() {
