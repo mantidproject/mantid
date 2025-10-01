@@ -156,3 +156,15 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         units = self._presenter.available_unit_options()
         mock_has_unit.assert_called_once()
         self.assertEquals(self._presenter._UNIT_OPTIONS, units)
+
+    def test_only_close_on_correct_ws_replace(self):
+        ws_name = self._model.workspace.name()
+        self._presenter.replace_workspace_callback(ws_name, None)
+        self._mock_view.close.assert_called_once()
+        self._mock_view.close.reset_mock()
+        self._presenter.replace_workspace_callback("not_my_workspace", None)
+        self._mock_view.close.assert_not_called()
+
+
+if __name__ == "__main__":
+    unittest.main()
