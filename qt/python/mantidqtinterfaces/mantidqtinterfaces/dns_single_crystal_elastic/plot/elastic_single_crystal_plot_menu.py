@@ -240,26 +240,16 @@ class ZoomMenu(QMenu):
         self.zoom = {"fix_xy": False, "fix_z": False}
         self.action_xy_zoom = self.addAction("x and y")
         self.action_xy_zoom.setCheckable(True)
-        self.action_z_zoom = self.addAction("z")
+        self.action_z_zoom = self.addAction("z (intensity)")
         self.action_z_zoom.setCheckable(True)
-        self.action_xyz_zoom = self.addAction("x and y and z")
-        self.action_xyz_zoom.setCheckable(True)
         # connect Signals
-        self.action_z_zoom.triggered.connect(self._synch_zoom)
-        self.action_xy_zoom.triggered.connect(self._synch_zoom)
-        self.action_xyz_zoom.triggered.connect(self._synch_zoom)
+        self.action_xy_zoom.triggered.connect(self._sync_zoom_changed)
+        self.action_z_zoom.triggered.connect(self._sync_zoom_changed)
 
-    def _synch_zoom(self):
+    def _sync_zoom_changed(self):
         xy = self.action_xy_zoom.isChecked()
         z = self.action_z_zoom.isChecked()
         self.zoom = {"fix_xy": xy, "fix_z": z}
-        xyz = self.action_xyz_zoom.isChecked()
-        if self.sender() == self.action_xyz_zoom:
-            self.action_z_zoom.setChecked(xyz)
-            self.action_xy_zoom.setChecked(xyz)
-            self.zoom = {"fix_xy": xyz, "fix_z": xyz}
-        else:
-            self.action_xyz_zoom.setChecked(xy and z)
         self.parent.sig_replot.emit("zoom")
 
     def get_value(self):
