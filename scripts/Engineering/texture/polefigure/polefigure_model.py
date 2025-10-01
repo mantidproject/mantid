@@ -112,7 +112,7 @@ class TextureProjection:
         try:
             # try and get a peak reference either from hkl or from the X0 column of param
             peak = "".join([str(ind) for ind in hkl]) if hkl else str(np.round(np.mean(ADS.retrieve(fit_params[0]).column("X0")), 2))
-            table_name = f"{instr}_{run_range}_{peak}_{grouping}_pf_table_{readout_column}"
+            table_name = f"{peak}_{instr}_{run_range}_{grouping}_pf_table_{readout_column}"
         except Exception:
             # if no param table given, no peak reference
             table_name = f"{instr}_{run_range}_{grouping}_pf_table_{readout_column}"
@@ -186,7 +186,7 @@ class TextureProjection:
     def plot_contour_pf(
         pfi: np.ndarray, ax_labels: Sequence[str], column_label: str, fig: Optional[Figure] = None, contour_kernel: float = 2.0, **kwargs
     ) -> Figure:
-        x, y, z = pfi[:, 1], pfi[:, 0], pfi[:, 2]
+        x, y, z = pfi[:, 1], pfi[:, 0], np.nan_to_num(pfi[:, 2])
         # Grid definition
         R = 1
         grid_x, grid_y = np.mgrid[-R:R:200j, -R:R:200j]
