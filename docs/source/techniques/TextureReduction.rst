@@ -31,10 +31,31 @@ orientation of the sample in each run; some calibration runs; and some diffracti
 We will now step through the procedure of performing a reduction, loosely following the structure of this pipeline. We will touch on some of the choices available when running through a similar workflow on
 your own data, but will not explain in detail what each option entails, for this please refer to the :ref:`interface documentation<Engineering_Diffraction-ref>`
 
+
+.. _initial_setup:
+
 Step 0: Initial Set Up
 ======================
 
-To begin you will require the `Training Course Data <https://sourceforge.net/projects/mantid/files/Sample%20Data/TrainingCourseData.zip/download>`_ with the revelant files to be found within the texture folder.
+To follow along with example data you will require the `Training Course Data <https://sourceforge.net/projects/mantid/files/Sample%20Data/TrainingCourseData.zip/download>`_ with the revelant files to be found within the texture folder.
+
+If you would like to follow along with all the below steps using your own experimental data you will require the following data/experimental information:
+
+#. Raw Diffraction Data for each experimental run (this would ideally be nexus files or, if data search directories and priviledges are setup correctly, just the run numbers may suffice)
+#. Calibration Run Data files, for ENGINX this is a Ceria run for diffraction parameter calibration and a vanadium run for intensity normalisation (see :ref:`interface documentation<Engineering_Diffraction-ref>` for more information)
+#. Sample Shape information, either as an ``STL`` file that you have created/obtained already or as a Constructive Solid Geometry shape definition ``XML`` string (see :ref:`HowToDefineGeometricShape` for more info)
+#. Sample Material Information, this is solely for attenuation correction and so the accuracy of the information will be determined by the accuracy required by your experiment (see :ref:`Materials` for more info)
+#. Correct definition of the Sample Shape in its initial state when the goniometer is homed/default (this would ideally be how the sample shape information is provided above, but the shape definition could be defined in a different orientation and transformed to the initial state if necessary)
+#. Orientation Information for each experimental run, either provided as transformation matrices or euler angles (if using euler angles you must know the axes of rotation for the goniometer and the sense of these rotations - *take care to get this correct*)
+#. Sample Directions relative to sample shape (texture can be defined relative to intrinsic directions of the sample, for example the Rolling, Normal and Tranverse Directions)
+#. The Shape of the experimental Gauge Volume
+#. The Beam Diveregence Parameters
+#. Crystal Structure either as lattice definition (see :ref:`Crystal structure and reflections`) or a ``CIF`` file
+#. Diffraction peaks of interest and their corresponding HKLs
+
+Note: Not all of this information will be required to to perform a texture reduction *in some capacity* but absences will impose capability limits to greater or lesser extents.
+
+Once you have gathered the required data/info:
 
 #. Open the Engineering Diffraction Interface (From the home screen this can be found under ``Interfaces/Diffraction`` on the main taskbar)
 #. Set an RB Number at the top of the interface (This acts as the root directory, to keep the work done for different experiments separate), for now, let's use ``TextureTutorial``
@@ -62,7 +83,7 @@ This should populate the table below with the seven experimental datasets. Shape
 Adding Sample Shape to Reference Workspace
 ------------------------------------------
 
-To add a sample shape to the reference workspace you can have two options depending upon whether the shape is defined as an STL file or an XML file:
+To add a sample shape to the reference workspace you can have two options depending upon whether the shape is defined as an STL file or an XML file (see :ref:`initial_setup` if using your own data):
 
 * *STL*:
 
@@ -96,7 +117,7 @@ XML data:
 Adding Material to Reference Workspace
 --------------------------------------
 
-To add the material of the sample:
+To add the material of the sample (see :ref:`initial_setup` if using your own data):
 
 #. Click ``Set Sample Material``
 #. Set ``InputWorkspace`` as ``TextureTutorial_reference_workspace``
@@ -107,7 +128,7 @@ To add the material of the sample:
 Setting Sample Axes
 -------------------
 
-At this point is is also worth considering the sample directions that you would like use for plotting the final pole figure. Clicking the ``View`` button in the
+At this point is is also worth considering the sample directions that you would like use for plotting the final pole figure (see :ref:`initial_setup` if using your own data). Clicking the ``View`` button in the
 ``Reference Workspace Information`` section, you can see the three sample axes that will be used, where the pole figure will be projected into the plane of the red and blue vectors.
 To change the directions or labels of these axes:
 
@@ -121,7 +142,7 @@ To change the directions or labels of these axes:
 Setting the Sample Orientations
 -------------------------------
 
-To set the orientation of the experimental runs there are three options: set each run individually; set runs from rotation matrices; or set runs from euler angles
+To set the orientation of the experimental runs there are three options: set each run individually; set runs from rotation matrices; or set runs from euler angles (see :ref:`initial_setup` if using your own data)
 
 * *Individually*:
 
@@ -163,7 +184,7 @@ Setting the Gauge Volume
 ------------------------
 
 Now ensure you have the ``Include Absorption Correction`` selected and you can set a gauge volume on the experiment. Here your options are to use: the preset gauge volume (a 4mm cube);
-a custom gauge volume; or no gauge volume.
+a custom gauge volume; or no gauge volume (see :ref:`initial_setup` if using your own data).
 
 * *4mmCube*:
 
@@ -202,13 +223,14 @@ Running Corrections
 Finally to run the correction for all selected workspaces:
 
 #. Click ``Apply Corrections``
+#. This will take some time, you should see some ``Corrected_ENGINX00XXXXXX`` files appear in the Workspace List *if* the Setting ``Remove Files from ADS after processing`` is UNSELECTED
 
 Step 2: Setting Calibration Info
 ================================
 
 #. Click on the ``Calibration`` tab
 #. Select ``Create New Calibration``
-#. Click ``Browse`` next to ``Calibration Sample #`` box
+#. Click ``Browse`` next to ``Calibration Sample #`` box (Note: here sample number is that of the instruments latest ceria run, see :ref:`interface documentation<Engineering_Diffraction-ref>` for more information)
 #. Navigate to ``ENGINX00305738`` in tutorial data ``CalibrationData`` folder (alternatively typing ``305738`` should work if your search directories have been correctly set up)
 #. Click ``Set Calibration Region of Interest``
 #. In ``Select Region of Interest`` select ``Texture30`` (this groups each detector bank into 3x5{x2 banks} spatial bins)
@@ -217,19 +239,22 @@ Step 2: Setting Calibration Info
 
 Step 3: Focusing Data
 =====================
-Before starting this section it is worth making a mental note of your file save directory displayed at the bottom of the interface, and configurable in the settings tab (gear icon)
+Before starting this section it is worth making a mental note of your file save directory displayed at the bottom of the interface, and configurable in the settings tab (gear icon). It is also worth mentioning that if
+absorption correction has already been performed within this session, the ``Sample Run #`` box should already be populated with the correct file paths
 
 #. Click on the ``Focus`` tab
-#. Click ``Browse`` next to ``Sample Run #`` box
+#. If the ``Sample Run #`` box is empty, or different files are desired: Click ``Browse`` next to the ``Sample Run #`` box (Note: here sample run number are the experimental data to be focused)
 #. Navigate to your save directory and under ``User/TextureTutorial/AbsorptionCorrection`` select all of the seven corrected data files
 #. Click ``Browse`` next to ``Vanadium #`` box
-#. Navigate to ``ENGINX00361838`` in tutorial data ``CalibrationData`` folder
+#. Navigate to ``ENGINX00361838`` in tutorial data ``CalibrationData`` folder (if using own data, see :ref:`interface documentation<Engineering_Diffraction-ref>` for more information)
 #. If you would like to see plots of the focusing, ensure ``Plot Focused Workspace`` is selected, otherwise deselect this option
 #. Click ``Focus``
 
 Step 4: Fitting Data
 ====================
 *Here, especially, we will not cover a comprehensive tutorial on how to fit general spectra, but this provides an example of how it can be done*
+
+As with the focusing tab, if focused data has been produced in this session, some of the following steps may have been automatically applied (setting ``Browse Filter`` and file paths)
 
 #. Click on the ``Fitting`` tab
 #. Where ``TOF`` is in the ``Browse Filters`` drop down box, select ``dSpacing``
@@ -240,7 +265,7 @@ Step 4: Fitting Data
 
 After the loading has completed, you should see the table populated with all the spectra from the focused data
 
-#. For a few of the spectra, check the ``Plot`` checkbox in the table (these spectra should now appear in the plot below)
+#. For a few of the spectra, check the ``Plot`` checkbox in the table (these spectra should now appear in the plot below, Note: spectra will be fit based on SG selected, not whether they are plotted or not, see :ref:`interface documentation<Engineering_Diffraction-ref>` for more info)
 #. In the plot toolbar below, click ``Fit``
 #. On the plot itself, two green, vertical dotted lines should have appeared, these are the fit window bounds, drag them to surround the peak at 2.03 (alternatively, in the ``Fit Function`` panel, set ``StartX = 1.98`` and ``EndX = 2.10``)
 #. In the ``Fit Function`` panel, right click on the Functions dropdown title (the title not the arrow) and select the ``Add function`` option
@@ -252,6 +277,8 @@ After the loading has completed, you should see the table populated with all the
 
 Step 5: Plotting Pole Figures
 =============================
+
+As with some of the previous tabs, if focused data has been produced in this session, the ``Sample Run(s)`` paths should be auto-populated
 
 Basic Pole Figure Setup
 -----------------------
@@ -330,15 +357,6 @@ Customizing the plot
 By clicking on the ``Customize Plot`` button (second last icon in the toolbar: a zig-zaging, upwards trending arrow), it is possible to change some aspects of the plot, like colour map and colour limits (which can be found under the ``Images etc.`` tab once the axes have been selected).
 
 *Note: When changing colourbar settings, do this via the "Pole Figure Plot" axes rather than the axes with the plot parameter title*
-
-
-Extra - Plotting Attenuation Pole Figure
-========================================
-
-In order to plot an attenuation pole figure, assuming the attenuation table was generated with the initial correction, you must load the *Corrected* data (under ``User/TextureTutorial/AbsorptionCorrection``) into the ``Texture`` tab
-rather than the focused data. You should then be able to load the attenuation tables in place of the fit parameters (under ``User/TextureTutorial/AttenuationTables``) and select ``mu`` for the ``Parameter Readout Column``.
-
-
 
 
 
