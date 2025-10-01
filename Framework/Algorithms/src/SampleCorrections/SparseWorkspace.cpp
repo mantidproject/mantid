@@ -30,7 +30,7 @@ namespace {
  */
 bool constantIndirectEFixed(const Mantid::API::ExperimentInfo &info, const std::vector<Mantid::detid_t> &detIDs) {
   const auto e = info.getEFixed(detIDs[0]);
-  return std::all_of(detIDs.cbegin(), detIDs.cend(), [&](const auto &detID) { return e == info.getEFixed(detID); });
+  return std::all_of(detIDs.cbegin() + 1, detIDs.cend(), [&](const auto &detID) { return e == info.getEFixed(detID); });
 }
 
 constexpr double R = 1.0; // This will be the default L2 distance.

@@ -16,6 +16,7 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/Statistics.h"
 
+#include <cmath>
 #include <sstream>
 
 using namespace Mantid;
@@ -269,10 +270,9 @@ void FindPeakBackground::estimateBackground(const HistogramData::Histogram &hist
  * @param n :: length of vector
  * @param mean :: mean of X
  */
-double FindPeakBackground::moment4(MantidVec &X, size_t n, double mean) {
-  double sum = std::accumulate(X.cbegin(), X.cbegin() + n, 0.0, [&mean](double total, double x) {
-    return total + (x - mean) * (x - mean) * (x - mean) * (x - mean);
-  });
+double FindPeakBackground::moment4(const MantidVec &X, const size_t n, const double mean) const {
+  double sum = std::accumulate(X.cbegin(), X.cbegin() + n, 0.0,
+                               [&mean](double total, double x) { return total + std::pow(x - mean, 4); });
   sum /= static_cast<double>(n);
   return sum;
 }
