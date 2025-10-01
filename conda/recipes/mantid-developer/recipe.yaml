@@ -50,6 +50,7 @@ requirements:
     - pycifrw
     - pydantic ${{ pydantic }}
     - pyqt ${{ pyqt }}
+    - pyqt5-sip ${{ pyqt5_sip }}
     - pyqtwebengine
     - if: linux
       then: pystack
@@ -58,6 +59,9 @@ requirements:
     - python ${{ python }}
     - if: osx
       then: python.app
+    - pyvista
+    - pyvistaqt
+    - superqt
     - pyyaml ${{ pyyaml }}
     - qscintilla2 ${{ qscintilla2 }}
     - qt-main ${{ qt_main }}
