@@ -195,7 +195,7 @@ class TextureView(QtWidgets.QWidget, Ui_texture):
         return self.combo_workspaceListProp.currentText()
 
     def get_readout_column(self):
-        return self.combo_param.currentText()
+        return self.combo_param.currentText() if self.combo_param.isVisible else ""
 
     def populate_workspace_list(self, workspace_names):
         self.combo_workspaceListProp.clear()
