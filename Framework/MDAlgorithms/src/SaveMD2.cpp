@@ -153,7 +153,7 @@ void SaveMD2::doSaveHisto(const Mantid::DataObjects::MDHistoWorkspace_sptr &ws) 
   for (size_t d = 0; d < numDims; d++) {
     IMDDimension_const_sptr dim = ws->getDimension(d);
     // Size in each dimension (reverse order for RANK)
-    size[numDims - 1 - d] = int(dim->getNBins());
+    size[numDims - 1 - d] = dim->getNBins();
   }
 
   Nexus::DimVector chunks = size;

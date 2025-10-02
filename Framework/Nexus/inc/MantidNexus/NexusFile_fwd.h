@@ -148,4 +148,4 @@ class File;
 } // namespace Mantid::Nexus
 
 constexpr std::size_t NX_MAXRANK(32);
-constexpr Mantid::Nexus::dimsize_t NX_UNLIMITED(-1); // 0xffffffffffffffffUL; // AKA max of unsigned long
+constexpr Mantid::Nexus::dimsize_t NX_UNLIMITED(-1); // AKA max of unsigned long, equivalent to H5S_UNLIMITED

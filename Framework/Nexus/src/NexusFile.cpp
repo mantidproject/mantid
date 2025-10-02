@@ -872,7 +872,6 @@ void File::makeCompData(std::string const &name, NXnumtype const type, DimVector
     for (int i = 0; i < rank; i++) {
       if (dims[i] <= 0 || dims[i] == NX_UNLIMITED) {
         mydim[i] = 1;
-        chunkdims[i] = 1;
         maxdims[i] = H5S_UNLIMITED;
       }
     }

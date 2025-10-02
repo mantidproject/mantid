@@ -268,14 +268,14 @@ public:
     // see https://github.com/nexusformat/code/blob/master/test/test_nxunlimited.c
     constexpr std::size_t DATA_SIZE(200);
     double d[DATA_SIZE];
-    Mantid::Nexus::DimVector dims{NX_UNLIMITED, DATA_SIZE};
+    Mantid::Nexus::DimVector dims{NX_UNLIMITED, DATA_SIZE}, chunk{DATA_SIZE, DATA_SIZE};
 
     FileResource resource("test_nxunlimited.nx5");
     std::string filename = resource.fullPath();
     File fileid = do_prep_files(filename);
 
     // make and open compressed data
-    TS_ASSERT_THROWS_NOTHING(fileid.makeCompData("data", NXnumtype::FLOAT64, dims, NXcompression::NONE, dims, true));
+    TS_ASSERT_THROWS_NOTHING(fileid.makeCompData("data", NXnumtype::FLOAT64, dims, NXcompression::NONE, chunk, true));
 
     Mantid::Nexus::DimVector slab_start{0, 0}, slab_size{1, DATA_SIZE};
     for (Mantid::Nexus::dimsize_t i = 0; i < 2; i++) {
