@@ -69,10 +69,10 @@ public:
 
   void test_create() {
 
-    auto directions = {V3D(1, 0, 0), V3D(0, 1, 0), V3D(0, 0, 1)};
-    const MantidVec abcRadii = {2, 3, 4};
-    const MantidVec abcInnerRadii = {5, 6, 7};
-    const MantidVec abcOuterRadii = {8, 9, 10};
+    std::array<Mantid::Kernel::V3D, 3> directions{V3D(1, 0, 0), V3D(0, 1, 0), V3D(0, 0, 1)};
+    const std::array<double, 3> abcRadii{2, 3, 4};
+    const std::array<double, 3> abcInnerRadii{5, 6, 7};
+    const std::array<double, 3> abcOuterRadii{8, 9, 10};
     const SpecialCoordinateSystem frame = Mantid::Kernel::HKL;
     const std::string algorithmName = "foo";
     const int algorithmVersion = 3;
