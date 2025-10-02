@@ -10,9 +10,7 @@ cd build
 echo "CONDA BASE ENVIRONMENT (mantiddocs build.sh):"
 mamba run -n base mamba list
 
-# unset LD_PRELOAD as this causes cmake to segfault
-LD_PRELOAD="" \
-  cmake \
+cmake \
   ${CMAKE_ARGS} \
   -DCMAKE_BUILD_TYPE=Release \
   -DCMAKE_PREFIX_PATH=$PREFIX \
