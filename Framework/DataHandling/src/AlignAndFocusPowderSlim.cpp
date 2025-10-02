@@ -388,12 +388,12 @@ void AlignAndFocusPowderSlim::exec() {
   // threaded processing of the banks
   const int DISK_CHUNK = getProperty(PropertyNames::READ_SIZE_FROM_DISK);
   const int GRAINSIZE_EVENTS = getProperty(PropertyNames::EVENTS_PER_THREAD);
-  auto progress = std::make_shared<API::Progress>(this, .17, .9, num_banks_to_read);
   g_log.debug() << (DISK_CHUNK / GRAINSIZE_EVENTS) << " threads per chunk\n";
 
   if (timeSplitter.empty()) {
     const auto pulse_indices = this->determinePulseIndices(wksp, roi);
 
+    auto progress = std::make_shared<API::Progress>(this, .17, .9, num_banks_to_read);
     ProcessBankTask task(bankEntryNames, h5file, is_time_filtered, wksp, m_calibration, m_masked,
                          static_cast<size_t>(DISK_CHUNK), static_cast<size_t>(GRAINSIZE_EVENTS), pulse_indices,
                          progress);
@@ -413,6 +413,10 @@ void AlignAndFocusPowderSlim::exec() {
   } else {
     std::string ws_basename = this->getPropertyValue(PropertyNames::OUTPUT_WKSP);
     std::vector<std::string> wsNames;
+
+    auto progress = std::make_shared<API::Progress>(this, .17, .9,
+                                                    num_banks_to_read * timeSplitter.outputWorkspaceIndices().size());
+
     for (const int &splitter_target : timeSplitter.outputWorkspaceIndices()) {
 
       auto splitter_roi = timeSplitter.getTimeROI(splitter_target);
