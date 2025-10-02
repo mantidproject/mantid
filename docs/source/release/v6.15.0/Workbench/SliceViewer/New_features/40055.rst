@@ -1,0 +1,1 @@
+- SliceViewer now supports "Asinh" colormap, similar to log but valid for zero values.
