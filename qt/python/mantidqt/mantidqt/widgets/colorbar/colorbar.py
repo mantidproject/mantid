@@ -22,7 +22,7 @@ from qtpy.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLineEdit, QComboB
 from qtpy.QtCore import Signal
 from qtpy.QtGui import QDoubleValidator
 
-NORM_OPTS = ["Linear", "Log", "SymmetricLog10", "Power"]
+NORM_OPTS = ["Linear", "Log", "SymmetricLog10", "Power", "Asinh"]
 AUTO_SCALE_OPTS = ["Min/Max", "3-Sigma", "1.5-Interquartile Range", "1.5-Median Absolute Deviation"]
 
 
