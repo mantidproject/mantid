@@ -44,6 +44,7 @@ class AxProperties(dict):
             props["zlabel"] = ax.get_zlabel()
             props["zscale"] = ax.get_zscale().title()
             props["zautoscale"] = ax.get_autoscalez_on()
+            props["linthreshz"] = ax.zaxis.get_transform().linthresh if props["zscale"] == "Symlog" else 2
         else:
             props["minor_ticks"] = not isinstance(ax.xaxis.minor.locator, NullLocator)
             props["minor_gridlines"] = ax.show_minor_gridlines if hasattr(ax, "show_minor_gridlines") else False
