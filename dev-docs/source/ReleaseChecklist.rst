@@ -418,8 +418,8 @@ Code Freeze
 
 **Create the Release Branch (once most PRs are merged)**
 
-* Ensure the latest `main nightly deployment pipeline
-  <https://builds.mantidproject.org/view/Nightly%20Pipelines/job/main_nightly_deployment/>`__
+* Ensure the latest `main nightly pipeline
+  <https://builds.mantidproject.org/view/Nightly%20Pipelines/job/main_nightly/>`__
   has passed for all build environments. If it fails, decide if a fix is needed before moving on to
   the next steps.
 * Ask a mantid gatekeeper or administrator to update the ``release-next`` branch so that it's up to
