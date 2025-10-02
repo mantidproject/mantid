@@ -13,7 +13,7 @@ from unittest import TestCase, mock
 
 from mantidqt.utils.qt.testing import start_qapplication
 from mantidqt.widgets.colorbar.colorbar import ColorbarWidget, NORM_OPTS
-from matplotlib.colors import LogNorm, Normalize, SymLogNorm, ListedColormap
+from matplotlib.colors import LogNorm, Normalize, SymLogNorm, AsinhNorm, ListedColormap
 
 
 @start_qapplication
@@ -181,6 +181,19 @@ class ColorbarWidgetTest(TestCase):
         self.widget.autoscale.setChecked(True)
         self.widget.autotype.setCurrentIndex(0)
         self.widget.norm.setCurrentIndex(3)
+
+        vmin, vmax = self.widget._calculate_auto_color_limits(self.data)
+
+        self.assertEqual(vmin, 0.0)
+        self.assertEqual(vmax, 99.0)
+
+    def test_colorbar_limits_asinh(self):
+        image = plt.imshow(self.data * np.nan, cmap="plasma", norm=AsinhNorm(vmin=None, vmax=None))
+
+        self.widget.set_mappable(image)
+        self.widget.autoscale.setChecked(True)
+        self.widget.autotype.setCurrentIndex(0)
+        self.widget.norm.setCurrentIndex(4)
 
         vmin, vmax = self.widget._calculate_auto_color_limits(self.data)
 
