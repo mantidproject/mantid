@@ -204,6 +204,7 @@ class InterpolationMenu(QMenu):
         interpolation_action_group.addAction(action_interpolation_2)
         interpolation_action_group.addAction(action_interpolation_3)
         interpolation_action_group.setExclusive(True)
+        self.action_interpolation_off = action_interpolation_off
         self.action_interpolation_1 = action_interpolation_1
         self.action_interpolation_2 = action_interpolation_2
         self.action_interpolation_3 = action_interpolation_3
@@ -217,6 +218,8 @@ class InterpolationMenu(QMenu):
         getattr(self, f"action_interpolation_{interpolation}").setChecked(True)
 
     def change_interpolation_menu(self, plot_type):
+        if plot_type == "scatter":
+            self.action_interpolation_off.setChecked(True)
         self.setEnabled(plot_type != "scatter")
         self._set_interpolation_options(plot_type)
 

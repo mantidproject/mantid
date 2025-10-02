@@ -85,13 +85,9 @@ class DNSElasticSCPlotModel(DNSObsModel):
         return triangulator_refiner, z_refiner
 
     def generate_quad_mesh(self, interpolate, axis_type, switch):
-        new_mesh_name = axis_type + "_mesh_interpolated"
-        old_mesh_name = axis_type + "_mesh"
         if interpolate:
             self._single_crystal_map.interpolate_quad_mesh(interpolate)
-            x, y, z = getattr(self._single_crystal_map, new_mesh_name)
-        else:
-            x, y, z = getattr(self._single_crystal_map, old_mesh_name)
+        x, y, z = getattr(self._single_crystal_map, axis_type + "_mesh")
         x, y, z = self.switch_axis(x, y, z, switch)
         self.set_mesh_data(x, y, z)
         return x, y, z
@@ -139,6 +135,8 @@ class DNSElasticSCPlotModel(DNSObsModel):
             h, k, l, z, error = get_hkl_intensity_from_cursor(self._single_crystal_map, plot_settings_dict, x, y)
             # ensures empty hover in the region outside the data boundary
             if border_path.contains_point((x, y)):
+                if error is None:
+                    return f"x={x:2.3f}, y={y:2.3f}, hkl=({h:2.2f}, {k:2.2f}, {l:2.2f}), Intensity={z:6.4f}"
                 return f"x={x:2.3f}, y={y:2.3f}, hkl=({h:2.2f}, {k:2.2f}, {l:2.2f}), Intensity={z:6.4f}±{error:6.4f}"
             return f"x={x:2.3f}, y={y:2.3f}, hkl=({h:2.2f}, {k:2.2f}, {l:2.2f})"
 
