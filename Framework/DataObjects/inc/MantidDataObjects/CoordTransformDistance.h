@@ -42,6 +42,9 @@ public:
                          const std::vector<Kernel::V3D> &eigenvects = std::vector<Kernel::V3D>(0),
                          const std::vector<double> &eigenvals = std::vector<double>(0, 0.0));
 
+  CoordTransformDistance(const size_t inD, const coord_t *center, const bool *dimensionsUsed, const size_t outD,
+                         const std::array<Kernel::V3D, 3> &eigenvects, const std::array<double, 3> &eigenvals);
+
   CoordTransform *clone() const override;
   std::string toXMLString() const override;
   std::string id() const override;

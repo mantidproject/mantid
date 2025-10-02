@@ -557,8 +557,8 @@ template <typename MDE, size_t nd> void IntegratePeaksMD2::integrate(typename MD
       if (isEllipse) {
         // flat bg to subtract
         const auto bgDensity = bgSignal / (4 * M_PI * pow(PeakRadiusVector[i], 3) / 3);
-        std::vector<V3D> eigenvects;
-        std::vector<double> eigenvals;
+        std::array<V3D, 3> eigenvects;
+        std::array<double, 3> eigenvals;
         V3D translation(0.0, 0.0, 0.0); // translation from peak pos to centroid
         if (PeakRadius.size() == 1) {
           V3D mean(0.0, 0.0, 0.0); // vector to hold centroid
@@ -582,11 +582,11 @@ template <typename MDE, size_t nd> void IntegratePeaksMD2::integrate(typename MD
         } else {
           // Use the manually specified radii instead of finding them via
           // findEllipsoid
-          std::transform(PeakRadius.begin(), PeakRadius.end(), std::back_inserter(eigenvals),
+          std::transform(PeakRadius.cbegin(), PeakRadius.cend(), eigenvals.begin(),
                          [](double r) { return std::pow(r, 2.0); });
-          eigenvects.push_back(V3D(1.0, 0.0, 0.0));
-          eigenvects.push_back(V3D(0.0, 1.0, 0.0));
-          eigenvects.push_back(V3D(0.0, 0.0, 1.0));
+          eigenvects[0] = V3D(1.0, 0.0, 0.0);
+          eigenvects[1] = V3D(0.0, 1.0, 0.0);
+          eigenvects[2] = V3D(0.0, 0.0, 1.0);
         }
         // transform ellispoid onto sphere of radius = R
         getRadiusSq = CoordTransformDistance(nd, center, dimensionsUsed, 1, /* outD */
@@ -608,9 +608,9 @@ template <typename MDE, size_t nd> void IntegratePeaksMD2::integrate(typename MD
           // set peak shape
           // get radii in same proprtion as eigenvalues
           auto max_stdev = pow(*std::max_element(eigenvals.begin(), eigenvals.end()), 0.5);
-          std::vector<double> peakRadii(3, 0.0);
-          std::vector<double> backgroundInnerRadii(3, 0.0);
-          std::vector<double> backgroundOuterRadii(3, 0.0);
+          std::array<double, 3> peakRadii{0., 0., 0.};
+          std::array<double, 3> backgroundInnerRadii{0., 0., 0.};
+          std::array<double, 3> backgroundOuterRadii{0., 0., 0.};
           for (size_t irad = 0; irad < peakRadii.size(); irad++) {
             auto scale = pow(eigenvals[irad], 0.5) / max_stdev;
             peakRadii[irad] = PeakRadiusVector[i] * scale;
@@ -624,12 +624,12 @@ template <typename MDE, size_t nd> void IntegratePeaksMD2::integrate(typename MD
         } else {
           // Use the manually specified radii instead of finding them via
           // findEllipsoid
-          std::vector<double> eigenvals_background_inner;
-          std::vector<double> eigenvals_background_outer;
-          std::transform(BackgroundInnerRadius.begin(), BackgroundInnerRadius.end(),
-                         std::back_inserter(eigenvals_background_inner), [](double r) { return std::pow(r, 2.0); });
-          std::transform(BackgroundOuterRadius.begin(), BackgroundOuterRadius.end(),
-                         std::back_inserter(eigenvals_background_outer), [](double r) { return std::pow(r, 2.0); });
+          std::array<double, 3> eigenvals_background_inner;
+          std::array<double, 3> eigenvals_background_outer;
+          std::transform(BackgroundInnerRadius.cbegin(), BackgroundInnerRadius.cend(),
+                         eigenvals_background_inner.begin(), [](double r) { return std::pow(r, 2.0); });
+          std::transform(BackgroundOuterRadius.cbegin(), BackgroundOuterRadius.cend(),
+                         eigenvals_background_outer.begin(), [](double r) { return std::pow(r, 2.0); });
 
           if (BackgroundOuterRadiusVector[0] > PeakRadiusVector[0]) {
             // transform ellispoid onto sphere of radius = R
@@ -668,9 +668,9 @@ template <typename MDE, size_t nd> void IntegratePeaksMD2::integrate(typename MD
               pow(*std::max_element(eigenvals_background_inner.begin(), eigenvals_background_inner.end()), 0.5);
           auto max_stdev_outer =
               pow(*std::max_element(eigenvals_background_outer.begin(), eigenvals_background_outer.end()), 0.5);
-          std::vector<double> peakRadii(3, 0.0);
-          std::vector<double> backgroundInnerRadii(3, 0.0);
-          std::vector<double> backgroundOuterRadii(3, 0.0);
+          std::array<double, 3> peakRadii{0., 0., 0.};
+          std::array<double, 3> backgroundInnerRadii{0., 0., 0.};
+          std::array<double, 3> backgroundOuterRadii{0., 0., 0.};
           for (size_t irad = 0; irad < peakRadii.size(); irad++) {
             peakRadii[irad] = PeakRadiusVector[i] * pow(eigenvals[irad], 0.5) / max_stdev;
             backgroundInnerRadii[irad] =
@@ -933,7 +933,7 @@ template <typename MDE, size_t nd>
 void IntegratePeaksMD2::findEllipsoid(const typename MDEventWorkspace<MDE, nd>::sptr ws,
                                       const CoordTransform &getRadiusSq, const V3D &pos, const coord_t &radiusSquared,
                                       const bool &qAxisIsFixed, const bool &useCentroid, const double &bgDensity,
-                                      std::vector<V3D> &eigenvects, std::vector<double> &eigenvals, V3D &mean,
+                                      std::array<V3D, 3> &eigenvects, std::array<double, 3> &eigenvals, V3D &mean,
                                       const int maxIter) {
 
   // get leaf-only iterators over all boxes in ws
@@ -1007,26 +1007,26 @@ void IntegratePeaksMD2::findEllipsoid(const typename MDEventWorkspace<MDE, nd>::
  */
 void IntegratePeaksMD2::calcCovar(const std::vector<std::pair<V3D, double>> &peak_events, const V3D &pos,
                                   const coord_t &radiusSquared, const bool &qAxisIsFixed, const bool &useCentroid,
-                                  std::vector<V3D> &eigenvects, std::vector<double> &eigenvals, V3D &mean,
+                                  std::array<V3D, 3> &eigenvects, std::array<double, 3> &eigenvals, V3D &mean,
                                   const int maxIter) {
 
-  size_t nd = 3;
+  constexpr size_t num_dimensions = 3;
 
   // to calc threshold mdsq to exclude events over 3 stdevs away
-  boost::math::chi_squared chisq(static_cast<double>(nd));
+  boost::math::chi_squared chisq(static_cast<double>(num_dimensions));
   auto mdsq_max = boost::math::quantile(chisq, 0.997);
   Matrix<double> invCov; // required to calc mdsq
   double prev_cov_det = DBL_MAX;
 
   // initialise mean with pos
   mean = pos;
-  Matrix<double> Pinv(nd, nd);
+  Matrix<double> Pinv(num_dimensions, num_dimensions);
   if (qAxisIsFixed) {
     // transformation from Qlab to Qhat, vhat and uhat,
     getPinv(pos, Pinv);
     mean = Pinv * mean;
   }
-  Matrix<double> cov_mat(nd, nd);
+  Matrix<double> cov_mat(num_dimensions, num_dimensions);
 
   for (int nIter = 0; nIter < maxIter; nIter++) {
 
@@ -1125,7 +1125,7 @@ void IntegratePeaksMD2::calcCovar(const std::vector<std::pair<V3D, double>> &pea
   cov_mat.Diagonalise(evecs, evals);
 
   auto min_eval = evals[0][0];
-  for (size_t d = 1; d < nd; ++d) {
+  for (size_t d = 1; d < num_dimensions; ++d) {
     min_eval = std::min(min_eval, evals[d][d]);
   }
   if (min_eval > static_cast<double>(radiusSquared / 9)) {
@@ -1138,14 +1138,13 @@ void IntegratePeaksMD2::calcCovar(const std::vector<std::pair<V3D, double>> &pea
   }
 
   // convert to vectors for output
-  eigenvals = evals.Diagonal();
+  std::copy_n(evals.Diagonal().cbegin(), num_dimensions, eigenvals.begin());
   // set min eigenval to be small but non-zero (1e-6)
   // when no discernible peak above background
   std::replace_if(eigenvals.begin(), eigenvals.end(), [&](auto x) { return x < 1e-6; }, 1e-6);
 
   // populate V3D vector of eigenvects (needed for ellipsoid shape)
-  eigenvects = std::vector<V3D>(nd);
-  for (size_t ivect = 0; ivect < nd; ++ivect) {
+  for (size_t ivect = 0; ivect < num_dimensions; ++ivect) {
     eigenvects[ivect] = V3D(evecs[0][ivect], evecs[1][ivect], evecs[2][ivect]);
   }
 }

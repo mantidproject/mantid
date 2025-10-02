@@ -146,7 +146,7 @@ public:
    * @param backi : (output) collects background intensity subtracted from inti and sigi */
   PeakShape_const_sptr ellipseIntegrateEvents(const std::vector<V3D> &E1Vec, V3D const &peak_q, bool specify_size,
                                               double peak_radius, double back_inner_radius, double back_outer_radius,
-                                              std::vector<double> &axes_radii, double &inti, double &sigi,
+                                              std::array<double, 3> &axes_radii, double &inti, double &sigi,
                                               std::pair<double, double> &backi);
 
   /**
@@ -169,8 +169,8 @@ private:
    * @param sizes : List of three values a,b,c giving half the length
    * of the three axes of the ellisoid.
    * @return number of events and estimated error */
-  static std::pair<double, double> numInEllipsoid(SlimEvents const &events, std::vector<V3D> const &directions,
-                                                  std::vector<double> const &sizes);
+  static std::pair<double, double> numInEllipsoid(SlimEvents const &events, std::array<V3D, 3> const &directions,
+                                                  std::array<double, 3> const &sizes);
 
   /**
    * @brief Number of events in an ellipsoid with background correction.
@@ -187,9 +187,9 @@ private:
    * @param useOnePercentBackgroundCorrection : flag if one percent background
    * correction should be used.
    * @return number of events and estimated error */
-  static std::pair<double, double> numInEllipsoidBkg(SlimEvents const &events, std::vector<V3D> const &directions,
-                                                     std::vector<double> const &sizes,
-                                                     std::vector<double> const &sizesIn,
+  static std::pair<double, double> numInEllipsoidBkg(SlimEvents const &events, std::array<V3D, 3> const &directions,
+                                                     std::array<double, 3> const &sizes,
+                                                     std::array<double, 3> const &sizesIn,
                                                      const bool useOnePercentBackgroundCorrection);
 
   /**
@@ -219,8 +219,8 @@ private:
    * @param eigen_vectors : (output) returned eigen vectors
    * @param eigen_values : (output) three eigenvalues
    */
-  static void getEigenVectors(Kernel::DblMatrix const &cov_matrix, std::vector<V3D> &eigen_vectors,
-                              std::vector<double> &eigen_values);
+  static void getEigenVectors(Kernel::DblMatrix const &cov_matrix, std::array<V3D, 3> &eigen_vectors,
+                              std::array<double, 3> &eigen_values);
 
   /**
    * @brief assign an event to one cell of the partitioned QLab space.
@@ -258,10 +258,10 @@ private:
    * @param sigi : (output) estimate of the standard deviation the intensity
    * @param backi : (output) background intensity subtracted from inti and sigi */
   PeakShapeEllipsoid_const_sptr ellipseIntegrateEvents(const std::vector<V3D> &E1Vec, V3D const &peak_q,
-                                                       SlimEvents const &ev_list, std::vector<V3D> const &directions,
-                                                       std::vector<double> const &sigmas, bool specify_size,
+                                                       SlimEvents const &ev_list, std::array<V3D, 3> const &directions,
+                                                       std::array<double, 3> const &sigmas, bool specify_size,
                                                        double peak_radius, double back_inner_radius,
-                                                       double back_outer_radius, std::vector<double> &axes_radii,
+                                                       double back_outer_radius, std::array<double, 3> &axes_radii,
                                                        double &inti, double &sigi, std::pair<double, double> &backi);
 
   /**
@@ -275,7 +275,7 @@ private:
    * @param QLabFrame: The Peak center.
    * @param r: Peak radius.
    */
-  double detectorQ(const std::vector<V3D> &E1Vec, const V3D &QLabFrame, const std::vector<double> &r);
+  double detectorQ(const std::vector<V3D> &E1Vec, const V3D &QLabFrame, const std::array<double, 3> &r);
 
   // Private data members
   double m_radius; // size of sphere to use for events around a peak
