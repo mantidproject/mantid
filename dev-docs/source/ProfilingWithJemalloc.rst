@@ -60,7 +60,7 @@ There are several flags that can be set to *optimize* a Mantid build for ``jemal
 
 
 Viewing and analyzing memory-allocation profiles
-------------------------------------------------
+================================================
 
 **The next examples assume that you have already generated a profile using MALLOC_CONF, or by modifying the code and running a script, as discussed above.**
 
@@ -119,7 +119,7 @@ This specific example shows the *huge* allocation associated with a grid detecto
 
 
 More advanced techniques: in-depth profiling of algorithm steps
----------------------------------------------------------------
+===============================================================
 
 The most direct way to profile the allocation details associated with step-wise execution of any algorithm is to use the ``jemalloc`` ``mallctl`` entry point.  We still need to use ``MALLOC_CONF`` to enable profiling::
 
