@@ -494,8 +494,8 @@ have been fixed. Then:
 
 We are now ready to create the release candidates for Smoke testing.
 
-* Build the `release-next_nightly_deployment Jenkins pipeline
-  <https://builds.mantidproject.org/view/Nightly%20Pipelines/job/release-next_nightly_deployment/>`__
+* Build the `release-next_nightly Jenkins pipeline
+  <https://builds.mantidproject.org/view/Nightly%20Pipelines/job/release-next_nightly/>`__
   with the following parameters (most are already defaulted to the correct values):
 
   * set ``BUILD_DEVEL`` to ``all``
@@ -526,8 +526,8 @@ Check with the Quality Assurance Manager that the Smoke testing has been complet
 have been fixed. Additionally, ensure that the version of the ``mslice`` package in ``conda_build_config.yaml`` is correct.
 If there have been any updates to MSlice since the last release, it must be released first. The release candidates must
 now be recreated with their final version numbers. To do this, build the
-`release-next_nightly_deployment Jenkins pipeline
-<https://builds.mantidproject.org/view/Nightly%20Pipelines/job/release-next_nightly_deployment/>`__
+`release-next_nightly Jenkins pipeline
+<https://builds.mantidproject.org/view/Nightly%20Pipelines/job/release-next_nightly/>`__
 with the following parameters (most are already defaulted to the correct values):
 
 * set ``BUILD_DEVEL`` to ``all``
