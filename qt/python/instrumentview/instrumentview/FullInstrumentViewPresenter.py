@@ -232,7 +232,8 @@ class FullInstrumentViewPresenter:
         self._view.close()
 
     def replace_workspace_callback(self, ws_name, ws):
-        self._view.close()
+        if ws_name == self._model.workspace.name():
+            self._view.close()
 
     def handle_close(self):
         # The observers are unsubscribed on object deletion, it's safer to manually
