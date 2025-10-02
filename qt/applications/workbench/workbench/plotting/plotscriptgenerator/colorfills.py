@@ -12,6 +12,7 @@ from matplotlib.colors import LogNorm, SymLogNorm
 from matplotlib.collections import QuadMesh
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 from workbench.plotting.plotscriptgenerator.utils import convert_args_to_string, clean_variable_name
+from workbench.plotting.propertiesdialog import LINTHRESH_DEFAULT
 
 BASE_IMSHOW_COMMAND = "imshow"
 BASE_PCOLORMESH_COMMAND = "pcolormesh"
@@ -52,7 +53,7 @@ def get_colorbar(artist, image_name, ax_object_var):
                 scale_str = "SymLogNorm"
                 linthresh_str = ", linthresh=2"
                 loglocator_import_str = "SymmetricalLogLocator"
-                loglocator_args_str = "subs=np.arange(1, 10), base=10, linthresh=2"
+                loglocator_args_str = f"subs=np.arange(1, 10), base=10, linthresh={LINTHRESH_DEFAULT}"
 
             headers.append("import numpy as np")
             headers.append(f"from matplotlib.colors import {scale_str}")

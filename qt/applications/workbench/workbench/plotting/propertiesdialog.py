@@ -27,6 +27,7 @@ SCIENTIFIC_FORMAT = "Scientific Format"
 SCALE_MODES = ["linear", "log", "symlog"]
 STR_TO_COLOR_NORMALIZATION = {"linear": Normalize, "log": LogNorm, "symlog": SymLogNorm}
 COLOR_NORMALIZATION_TO_STR = {v: k for k, v in STR_TO_COLOR_NORMALIZATION.items()}
+LINTHRESH_DEFAULT = 2  # Set to default mpl linthresh
 
 
 class PropertiesEditorBase(QDialog):
@@ -281,7 +282,7 @@ class ColorbarAxisEditor(AxisEditor):
         scale = STR_TO_COLOR_NORMALIZATION[self.ui.scaleBox.currentText()]
         update_args = {"figure": self.canvas.figure, "scale": scale, "vmin": limit_min, "vmax": limit_max}
         if scale == SymLogNorm:
-            update_args["linthresh"] = 2.0  # Set to default mpl linthresh
+            update_args["linthresh"] = LINTHRESH_DEFAULT
 
         for img in self.images:
             update_colorbar_scale(image=img, **update_args)
