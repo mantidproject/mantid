@@ -154,8 +154,7 @@ bool BoxControllerNeXusIO::openFile(const std::string &fileName, const std::stri
     CreateEventGroup();
   // we are in MDEvent group now (either created or opened)
 
-  // read if exist and create if not the group, which is responsible for saving
-  // DiskBuffer information;
+  // read if exist and create if not the group, which is responsible for saving DiskBuffer information;
   getDiskBufferFileData();
 
   if (m_ReadOnly)
