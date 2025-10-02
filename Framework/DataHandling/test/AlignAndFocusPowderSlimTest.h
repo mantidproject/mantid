@@ -8,6 +8,8 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
@@ -21,6 +23,8 @@
 #include <gtest/gtest.h>
 #include <numbers>
 
+using Mantid::API::AlgorithmManager;
+using Mantid::API::AnalysisDataService;
 using Mantid::API::MatrixWorkspace;
 using Mantid::API::MatrixWorkspace_sptr;
 using Mantid::API::Workspace;
@@ -590,6 +594,83 @@ public:
     tablesplitter->cell<double>(2, 1) = 410.0 + offset;
     tablesplitter->cell<std::string>(2, 2) = sameTarget ? "0" : "2";
     return tablesplitter;
+  }
+
+  void test_splitter_from_GenerateEventsFilter() {
+    // load only the CaveTemperature log from the nexus file
+    auto load = AlgorithmManager::Instance().createUnmanaged("LoadEventNexus");
+    load->initialize();
+    load->setProperty("Filename", "VULCAN_218062.nxs.h5");
+    load->setProperty("MetaDataOnly", true);
+    load->setProperty("AllowList", std::vector<std::string>{"CaveTemperature"});
+    load->setProperty("OutputWorkspace", "logs");
+    load->execute();
+
+    // GenereateEventsFilter should create 3 different output targets
+    auto gen = AlgorithmManager::Instance().createUnmanaged("GenerateEventsFilter");
+    gen->initialize();
+    gen->setProperty("InputWorkspace", "logs");
+    gen->setProperty("LogName", "CaveTemperature");
+    gen->setProperty("MinimumLogValue", 70.1);
+    gen->setProperty("MaximumLogValue", 70.15);
+    gen->setProperty("LogValueInterval", 0.025);
+    gen->setProperty("OutputWorkspace", "splitter");
+    gen->setProperty("InformationWorkspace", "info");
+    gen->execute();
+
+    auto tablesplitter = std::dynamic_pointer_cast<Mantid::DataObjects::SplittersWorkspace>(
+        AnalysisDataService::Instance().retrieve("splitter"));
+
+    TestConfig configuration({0.}, {50000.}, {50000.}, "Linear", "TOF");
+    configuration.relativeTime = true;
+    configuration.tablesplitter = tablesplitter;
+    auto outputWS = std::dynamic_pointer_cast<WorkspaceGroup>(run_algorithm(VULCAN_218062, configuration));
+
+    /* expected results came from running
+
+    ws = LoadEventNexus("VULCAN_218062.nxs.h5")
+    GenerateEventsFilter(ws,
+                         OutputWorkspace='splitter',
+                         InformationWorkspace='info',
+                         LogName='CaveTemperature',
+                         LogValueInterval=0.025,
+                         MinimumLogValue=70.10,
+                         MaximumLogValue=70.15)
+    grp = CreateGroupingWorkspace(ws, GroupDetectorsBy='bank')
+    ws = GroupDetectors(ws, CopyGroupingFromWorkspace="grp")
+    FilterEvents(ws, SplitterWorkspace='splitter',
+                 InformationWorkspace='info',
+                 OutputWorkspaceBaseName="eventFiltered",
+                 FilterByPulseTime=True,
+                 GroupWorkspaces=True)
+    Rebin("eventFiltered", "0,50000,50000", PreserveEvents=False, OutputWorkspace="eventFiltered")
+    for ws in mtd['eventFiltered']:
+        print(str(ws), ws.extractY())
+    */
+
+    auto outputWS0 = std::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(0));
+    TS_ASSERT_EQUALS(outputWS0->readY(0).front(), 2729042);
+    TS_ASSERT_EQUALS(outputWS0->readY(1).front(), 2726901);
+    TS_ASSERT_EQUALS(outputWS0->readY(2).front(), 3133867);
+    TS_ASSERT_EQUALS(outputWS0->readY(3).front(), 3098887);
+    TS_ASSERT_EQUALS(outputWS0->readY(4).front(), 1045181);
+    TS_ASSERT_EQUALS(outputWS0->readY(5).front(), 1997189);
+
+    auto outputWS1 = std::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(1));
+    TS_ASSERT_EQUALS(outputWS1->readY(0).front(), 2567255);
+    TS_ASSERT_EQUALS(outputWS1->readY(1).front(), 2566070);
+    TS_ASSERT_EQUALS(outputWS1->readY(2).front(), 2947152);
+    TS_ASSERT_EQUALS(outputWS1->readY(3).front(), 2913240);
+    TS_ASSERT_EQUALS(outputWS1->readY(4).front(), 983897);
+    TS_ASSERT_EQUALS(outputWS1->readY(5).front(), 1877851);
+
+    auto outputWS2 = std::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(2));
+    TS_ASSERT_EQUALS(outputWS2->readY(0).front(), 1346290);
+    TS_ASSERT_EQUALS(outputWS2->readY(1).front(), 1343588);
+    TS_ASSERT_EQUALS(outputWS2->readY(2).front(), 1541892);
+    TS_ASSERT_EQUALS(outputWS2->readY(3).front(), 1526538);
+    TS_ASSERT_EQUALS(outputWS2->readY(4).front(), 516351);
+    TS_ASSERT_EQUALS(outputWS2->readY(5).front(), 984359);
   }
 
   void test_filter_bad_pulses() {
