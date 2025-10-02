@@ -27,12 +27,16 @@
 #include <boost/python/class.hpp>
 #include <boost/python/converter/builtin_converters.hpp>
 #include <boost/python/dict.hpp>
+#include <boost/python/extract.hpp>
 #include <boost/python/list.hpp>
 #include <boost/python/make_constructor.hpp>
 #include <boost/python/overloads.hpp>
 
 #include <cstring>
+#include <numpy/ndarraytypes.h>
+#include <numpy/npy_common.h>
 #include <pytypedefs.h>
+#include <typeinfo>
 #include <vector>
 
 // See
@@ -317,64 +321,133 @@ PyObject *column(const ITableWorkspace &self, const object &value) {
   return result;
 }
 
-PyObject *positionsArray(const ITableWorkspace &self) {
-  const npy_intp numHist = static_cast<npy_intp>(self.rowCount());
-  npy_intp stride = 3;
-  npy_intp arrayDims[2] = {numHist, stride};
-  auto *nparray =
-      reinterpret_cast<PyArrayObject *>(PyArray_NewFromDescr(&PyArray_Type, PyArray_DescrFromType(NPY_DOUBLE),
-                                                             2,         // rank 2
-                                                             arrayDims, // Length in each dimension
-                                                             nullptr, nullptr, 0, nullptr));
-  auto *dest = reinterpret_cast<double *>(PyArray_DATA(nparray)); // HEAD of the contiguous numpy data array
-
-  // PARALLEL_FOR_IF(threadSafe(workspace))
-  Mantid::API::Column_const_sptr colptr = self.getColumn("Position");
-  for (npy_intp i = 0; i < numHist; ++i) {
-    const std::vector<double> src = std::vector<double>(colptr->cell<Mantid::Kernel::V3D>(i));
-    std::copy(src.begin(), src.end(), std::next(dest, i * stride));
+PyArray_Descr *numpy_descr_from_typeid(const std::type_info &typeID) {
+  if (false) {
+  } else if (typeID.hash_code() == typeid(int).hash_code()) {
+    return PyArray_DescrFromType(NPY_INT);
+  } else if (typeID.hash_code() == typeid(int32_t).hash_code()) {
+    return PyArray_DescrFromType(NPY_INT32);
+  } else if (typeID.hash_code() == typeid(int64_t).hash_code()) {
+    return PyArray_DescrFromType(NPY_INT64);
+  } else if (typeID.hash_code() == typeid(uint32_t).hash_code()) {
+    return PyArray_DescrFromType(NPY_UINT32);
+  } else if (typeID.hash_code() == typeid(uint64_t).hash_code()) {
+    return PyArray_DescrFromType(NPY_UINT64);
+  } else if (typeID.hash_code() == typeid(double).hash_code()) {
+    return PyArray_DescrFromType(NPY_DOUBLE);
+  } else if (typeID.hash_code() == typeid(float).hash_code()) {
+    return PyArray_DescrFromType(NPY_FLOAT);
+  } else if (typeID.hash_code() == typeid(size_t).hash_code()) {
+    return PyArray_DescrFromType((sizeof(size_t) == 4) ? NPY_UINT : NPY_ULONGLONG);
+  } else if (typeID.hash_code() == typeid(std::vector<int>).hash_code()) {
+    return PyArray_DescrFromType(NPY_INT);
+  } else if (typeID.hash_code() == typeid(std::vector<double>).hash_code()) {
+    return PyArray_DescrFromType(NPY_DOUBLE);
+  } else if (typeID.hash_code() == typeid(Mantid::Kernel::V3D).hash_code()) {
+    return PyArray_DescrFromType(NPY_DOUBLE);
   }
-  return reinterpret_cast<PyObject *>(nparray);
+  throw std::invalid_argument("ColumnArray does not yet support strings.");
 }
 
-PyObject *sphericalPositionsArray(const ITableWorkspace &self) {
-  const npy_intp numHist = static_cast<npy_intp>(self.rowCount());
-  npy_intp stride = 3;
-  npy_intp arrayDims[2] = {numHist, stride};
-  auto *nparray =
-      reinterpret_cast<PyArrayObject *>(PyArray_NewFromDescr(&PyArray_Type, PyArray_DescrFromType(NPY_DOUBLE),
-                                                             2,         // rank 2
-                                                             arrayDims, // Length in each dimension
-                                                             nullptr, nullptr, 0, nullptr));
-  auto *dest = reinterpret_cast<double *>(PyArray_DATA(nparray)); // HEAD of the contiguous numpy data array
+size_t getSecondDim(Mantid::API::Column_const_sptr column) {
+  const std::type_info &typeID = column->get_type_info();
 
-  // PARALLEL_FOR_IF(threadSafe(workspace))
-  Mantid::API::Column_const_sptr colptr = self.getColumn("Position");
-  for (size_t i = 0; i < static_cast<size_t>(numHist); ++i) {
-    std::vector<double> src(3);
-    colptr->cell<Mantid::Kernel::V3D>(i).getSpherical(src[0], src[1], src[2]);
-    std::copy(src.begin(), src.end(), std::next(dest, i * stride));
+  if (typeID.hash_code() == typeid(Mantid::Kernel::V3D).hash_code()) {
+    return std::vector<double>(column->cell<Mantid::Kernel::V3D>(0)).size();
   }
-  return reinterpret_cast<PyObject *>(nparray);
+  if (typeID.hash_code() == typeid(std::vector<int>).hash_code()) {
+    return column->cell<std::vector<int>>(0).size();
+  }
+  if (typeID.hash_code() == typeid(std::vector<double>).hash_code()) {
+    return column->cell<std::vector<double>>(0).size();
+  }
+  return 1;
 }
 
-PyObject *detIDArray(const ITableWorkspace &self) {
-  const npy_intp numHist = static_cast<npy_intp>(self.rowCount());
-  npy_intp arrayDims[1] = {numHist};
-  auto *nparray =
-      reinterpret_cast<PyArrayObject *>(PyArray_NewFromDescr(&PyArray_Type, PyArray_DescrFromType(NPY_INT32),
-                                                             1,         // rank 2
-                                                             arrayDims, // Length in each dimension
-                                                             nullptr, nullptr, 0, nullptr));
-  auto *dest = reinterpret_cast<int *>(PyArray_DATA(nparray)); // HEAD of the contiguous numpy data array
+template <typename T>
+void copyToArrayWithType(void *dest, Mantid::API::Column_const_sptr column, int numRows, npy_intp secondDim) {
 
-  Mantid::API::Column_const_sptr colptr = self.getColumn("Detector ID(s)");
-  for (size_t i = 0; i < static_cast<size_t>(numHist); ++i) {
-    std::string dets = colptr->cell<std::string>(i);
-    int detID = std::stoi(dets.substr(0, dets.find(',')));
-    dest[i] = detID;
+  if (typeid(T).hash_code() == typeid(Mantid::Kernel::V3D).hash_code()) {
+    auto dest_p = static_cast<double *>(dest);
+    for (npy_intp i = 0; i < numRows; ++i) {
+      const std::vector<double> src = std::vector<double>(column->cell<Mantid::Kernel::V3D>(i));
+      std::copy(src.begin(), src.end(), std::next(dest_p, i * secondDim));
+    }
+    return;
   }
-  return reinterpret_cast<PyObject *>(nparray);
+  if (typeid(T).hash_code() == typeid(std::vector<int>).hash_code()) {
+    auto dest_p = static_cast<int *>(dest);
+    for (npy_intp i = 0; i < numRows; ++i) {
+      const auto src = column->cell<std::vector<int>>(i);
+      std::copy(src.begin(), src.end(), std::next(dest_p, i * secondDim));
+    }
+  }
+
+  if (typeid(T).hash_code() == typeid(std::vector<double>).hash_code()) {
+    auto dest_p = static_cast<double *>(dest);
+    for (npy_intp i = 0; i < numRows; ++i) {
+      const auto src = column->cell<std::vector<double>>(i);
+      std::copy(src.begin(), src.end(), std::next(dest_p, i * secondDim));
+    }
+  }
+
+  auto dest_p = static_cast<T *>(dest);
+  for (npy_intp i = 0; i < numRows; ++i) {
+    dest_p[i] = column->cell<T>(i);
+  }
+}
+
+void copyToArray(void *dest, Mantid::API::Column_const_sptr column, npy_intp secondDim) {
+  const std::type_info &typeID = column->get_type_info();
+  const int numRows = static_cast<npy_intp>(column->size());
+  if (false) {
+  } else if (typeID.hash_code() == typeid(int).hash_code()) {
+    return copyToArrayWithType<int>(dest, column, numRows, secondDim);
+  } else if (typeID.hash_code() == typeid(int32_t).hash_code()) {
+    return copyToArrayWithType<int32_t>(dest, column, numRows, secondDim);
+  } else if (typeID.hash_code() == typeid(int64_t).hash_code()) {
+    return copyToArrayWithType<int64_t>(dest, column, numRows, secondDim);
+  } else if (typeID.hash_code() == typeid(uint32_t).hash_code()) {
+    return copyToArrayWithType<uint32_t>(dest, column, numRows, secondDim);
+  } else if (typeID.hash_code() == typeid(uint64_t).hash_code()) {
+    return copyToArrayWithType<uint64_t>(dest, column, numRows, secondDim);
+  } else if (typeID.hash_code() == typeid(double).hash_code()) {
+    return copyToArrayWithType<double>(dest, column, numRows, secondDim);
+  } else if (typeID.hash_code() == typeid(float).hash_code()) {
+    return copyToArrayWithType<float>(dest, column, numRows, secondDim);
+  } else if (typeID.hash_code() == typeid(size_t).hash_code()) {
+    return copyToArrayWithType<size_t>(dest, column, numRows, secondDim);
+  } else if (typeID.hash_code() == typeid(std::vector<int>).hash_code()) {
+    return copyToArrayWithType<std::vector<int>>(dest, column, numRows, secondDim);
+  } else if (typeID.hash_code() == typeid(std::vector<double>).hash_code()) {
+    return copyToArrayWithType<std::vector<double>>(dest, column, numRows, secondDim);
+  } else if (typeID.hash_code() == typeid(Mantid::Kernel::V3D).hash_code()) {
+    return copyToArrayWithType<Mantid::Kernel::V3D>(dest, column, numRows, secondDim);
+  }
+  return;
+}
+
+PyObject *columnArray(const ITableWorkspace &self, const object &value) {
+  // Find the column and row
+  Mantid::API::Column_const_sptr column;
+  if (STR_CHECK(value.ptr())) {
+    column = self.getColumn(extract<std::string>(value)());
+  } else {
+    column = self.getColumn(extract<int>(value)());
+  }
+  const std::type_info &typeID = column->get_type_info();
+
+  PyArray_Descr *descr = numpy_descr_from_typeid(typeID);
+  const npy_intp numRows = static_cast<npy_intp>(self.rowCount());
+  npy_intp secondDim = getSecondDim(column);
+  int nDims = (secondDim > 1) ? 2 : 1;
+  npy_intp arrayDims[2] = {numRows, secondDim};
+
+  auto *nparray = PyArray_NewFromDescr(&PyArray_Type, descr, nDims, arrayDims, nullptr, nullptr, 0, nullptr);
+  void *dest = PyArray_DATA((PyArrayObject *)nparray); // HEAD of the contiguous numpy data array
+
+  copyToArray(dest, column, secondDim);
+  return nparray;
 }
 
 /**
@@ -782,9 +855,8 @@ void export_ITableWorkspace() {
 
       .def("column", &column, (arg("self"), arg("column")), "Return all values of a specific column as a list.")
 
-      .def("positionsArray", &positionsArray, arg("self"), "in progress")
-      .def("sphericalPositionsArray", &sphericalPositionsArray, arg("self"), "in progress")
-      .def("detIDArray", &detIDArray, arg("self"), "in progress")
+      .def("columnArray", &columnArray, (arg("self"), arg("column")),
+           "Return all values of a specific column as a numpy array.")
 
       .def("row", &row, (arg("self"), arg("row")), "Return all values of a specific row as a dict.")
 
