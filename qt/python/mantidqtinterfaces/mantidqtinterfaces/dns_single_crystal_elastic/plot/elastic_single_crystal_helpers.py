@@ -62,30 +62,52 @@ def get_z_min_max(z, xlim=None, ylim=None, plot_x=None, plot_y=None):
     return z_min, z_max, pz_min
 
 
-def get_hkl_intensity_from_cursor(single_crystal_map, axis_type, x, y):
-    if axis_type["switch"]:  # switch axes
+def get_hkl_intensity_from_cursor(single_crystal_map, plot_settings, x, y):
+    if plot_settings["switch"]:  # switch axes
         x, y = y, x
     hkl1 = single_crystal_map.hkl1.split(",")
     hkl2 = single_crystal_map.hkl2.split(",")
     dx = single_crystal_map.dx
     dy = single_crystal_map.dy
-    if axis_type["type"] == "angular":  # two_theta omega
+    interpolation_on = bool(plot_settings["interpolate"])
+    plot_type = plot_settings["plot_type"]
+
+    if plot_settings["type"] == "angular":  # two_theta omega
         qx, qy = angle_to_q(two_theta=x, omega=y, wavelength=single_crystal_map.wavelength)
         hklx = hkl_to_hklx(hkl1, qx, dx)
         hkly = hkl_to_hklx(hkl2, qy, dy)
-        pos_q = closest_mesh_point(single_crystal_map.two_theta_mesh, single_crystal_map.omega_mesh, x, y)
-    elif axis_type["type"] == "qxqy":  # qx qy
+    elif plot_settings["type"] == "qxqy":  # qx qy
         qx, qy = x, y
         hklx = hkl_to_hklx(hkl1, qx, dx)
         hkly = hkl_to_hklx(hkl2, qy, dy)
-        pos_q = closest_mesh_point(single_crystal_map.qx_mesh, single_crystal_map.qy_mesh, qx, qy)
-    elif axis_type["type"] == "hkl":  # hkl
+    elif plot_settings["type"] == "hkl":  # hkl
         hklx = hkl_to_hklx(hkl1, x=x)
         hkly = hkl_to_hklx(hkl2, x=y)
-        pos_q = closest_mesh_point(single_crystal_map.hklx_mesh, single_crystal_map.hkly_mesh, x, y)
-    z = single_crystal_map.z_mesh.flatten()[pos_q]
-    error = single_crystal_map.error_mesh.flatten()[pos_q]
     hkl = hkl_xy_to_hkl(hklx, hkly)
+
+    if plot_type == "triangulation":
+        z_per_triangle = single_crystal_map.z_face
+        trifinder = single_crystal_map.triangulation.get_trifinder()
+        pos_q = trifinder(x, y)
+        z = z_per_triangle.flatten()[pos_q]
+    else:  # quadmesh or scatterplot
+        if plot_settings["type"] == "angular":  # two_theta omega
+            pos_q = closest_mesh_point(single_crystal_map.angular_mesh[0], single_crystal_map.angular_mesh[1], x, y)
+            z = single_crystal_map.angular_mesh[2].flatten()[pos_q]
+        elif plot_settings["type"] == "qxqy":  # qx qy
+            pos_q = closest_mesh_point(single_crystal_map.qxqy_mesh[0], single_crystal_map.qxqy_mesh[1], x, y)
+            z = single_crystal_map.qxqy_mesh[2].flatten()[pos_q]
+        elif plot_settings["type"] == "hkl":  # hkl
+            pos_q = closest_mesh_point(single_crystal_map.hkl_mesh[0], single_crystal_map.hkl_mesh[1], x, y)
+            z = single_crystal_map.hkl_mesh[2].flatten()[pos_q]
+
+    if interpolation_on or plot_type == "triangulation":
+        # Errors are undefined on interpolated points. In addition, when triangulation is on
+        # then the original points are not used and the errors cannot be assigned.
+        error = None
+    else:
+        error = single_crystal_map.error_mesh.flatten()[pos_q]
+
     return [hkl[0], hkl[1], hkl[2], z, error]
 
 
