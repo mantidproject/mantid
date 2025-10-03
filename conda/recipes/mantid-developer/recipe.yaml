@@ -15,13 +15,14 @@ requirements:
     - conda-index
     - if: win
       then: conda-wrappers
-    - if: win
-      then: gdk-pixbuf ${{ gdk_pixbuf }}
+
     - doxygen ${{ doxygen }}
     - eigen ${{ eigen }}
     - euphonic ${{ euphonic }}
     # remove seekpath altogether once newer euphonic is released
     - seekpath ==2.1.0 *2
+    - if: win
+      then: gdk-pixbuf ${{ gdk_pixbuf }}
     - graphviz ${{ graphviz }}
     - gsl ${{ gsl }}
     - h5py
@@ -110,12 +111,11 @@ requirements:
       then: libcxx
     # Use conda version of clang to get matching CXXFLAGS.
     # Pinned to same version as conda forge: https://github.com/conda-forge/conda-forge-pinning-feedstock/blob/main/recipe/conda_build_config.yaml
-    - if: osx and arm64
+    - if: osx
       then:
         - clang_osx-arm64 ${{ c_compiler_version }}
         - clangxx_osx-arm64 ${{ cxx_compiler_version }}
-    - if: osx
-      then: llvm-openmp ${{ llvm_openmp }}
+        - llvm-openmp ${{ llvm_openmp }}
 
 about:
   license: GPL-3.0-or-later
