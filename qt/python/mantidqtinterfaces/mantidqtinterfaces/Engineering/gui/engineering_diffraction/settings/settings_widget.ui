@@ -33,10 +33,253 @@ QGroupBox:title {
      <property name="title">
       <string>General</string>
      </property>
-     <layout class="QGridLayout" name="gridLayout">
-      <item row="0" column="0">
+     <layout class="QVBoxLayout" name="generalVBox">
+      <item>
        <widget class="FileFinderWidget" name="finder_save" native="true"/>
       </item>
+      <item>
+    <widget class="QGroupBox" name="groupBox_textureVectors">
+     <property name="title">
+      <string>Texture Directions</string>
+     </property>
+ <property name="styleSheet">
+  <string notr="true">
+   QGroupBox {
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-top: 10px;
+   }
+   QGroupBox::title {
+    subcontrol-origin: margin;
+    subcontrol-position: top left;
+    padding: 0 5px;
+    font-weight: normal;
+    color: #555;
+   }
+  </string>
+ </property>
+     <layout class="QGridLayout">
+      <item row="0" column="0">
+   <spacer name="spacer_left">
+    <property name="orientation">
+     <enum>Qt::Horizontal</enum>
+    </property>
+    <property name="sizeHint" stdset="0">
+     <size>
+      <width>40</width>
+      <height>20</height>
+     </size>
+    </property>
+   </spacer>
+  </item>
+         <item row="0" column="1">
+       <widget class="QLineEdit" name="lineedit_RD">
+               <property name="text">
+           <string/>
+          </property>
+        <property name="maximumWidth">
+      <number>30</number>
+    </property>
+    <property name="sizePolicy">
+      <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+      </sizepolicy>
+    </property>
+         </widget>
+      </item>
+      <item row="0" column="2">
+       <widget class="QLineEdit" name="lineedit_RD0">
+               <property name="text">
+           <string/>
+          </property>
+        <property name="maximumWidth">
+      <number>30</number>
+    </property>
+    <property name="sizePolicy">
+      <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+      </sizepolicy>
+    </property>
+         </widget>
+      </item>
+      <item row="0" column="3">
+       <widget class="QLineEdit" name="lineedit_RD1">
+               <property name="text">
+           <string/>
+          </property>
+        <property name="maximumWidth">
+      <number>30</number>
+    </property>
+    <property name="sizePolicy">
+      <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+      </sizepolicy>
+    </property>
+         </widget>
+      </item>
+      <item row="0" column="4">
+       <widget class="QLineEdit" name="lineedit_RD2">
+               <property name="text">
+           <string/>
+          </property>
+        <property name="maximumWidth">
+      <number>30</number>
+    </property>
+    <property name="sizePolicy">
+      <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+      </sizepolicy>
+    </property>
+         </widget>
+      </item>
+         <item row="1" column="1">
+       <widget class="QLineEdit" name="lineedit_ND">
+               <property name="text">
+           <string/>
+          </property>
+        <property name="maximumWidth">
+      <number>30</number>
+    </property>
+    <property name="sizePolicy">
+      <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+      </sizepolicy>
+    </property>
+         </widget>
+      </item>
+      <item row="1" column="2">
+       <widget class="QLineEdit" name="lineedit_ND0">
+               <property name="text">
+           <string/>
+          </property>
+        <property name="maximumWidth">
+      <number>30</number>
+    </property>
+    <property name="sizePolicy">
+      <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+      </sizepolicy>
+    </property>
+         </widget>
+      </item>
+      <item row="1" column="3">
+       <widget class="QLineEdit" name="lineedit_ND1">
+               <property name="text">
+           <string/>
+          </property>
+        <property name="maximumWidth">
+      <number>30</number>
+    </property>
+    <property name="sizePolicy">
+      <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+      </sizepolicy>
+    </property>
+         </widget>
+      </item>
+      <item row="1" column="4">
+       <widget class="QLineEdit" name="lineedit_ND2">
+               <property name="text">
+           <string/>
+          </property>
+        <property name="maximumWidth">
+      <number>30</number>
+    </property>
+    <property name="sizePolicy">
+      <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+      </sizepolicy>
+    </property>
+         </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QLineEdit" name="lineedit_TD">
+               <property name="text">
+           <string/>
+          </property>
+        <property name="maximumWidth">
+      <number>30</number>
+    </property>
+    <property name="sizePolicy">
+      <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+      </sizepolicy>
+    </property>
+         </widget>
+      </item>
+      <item row="2" column="2">
+       <widget class="QLineEdit" name="lineedit_TD0">
+               <property name="text">
+           <string/>
+          </property>
+        <property name="maximumWidth">
+      <number>30</number>
+    </property>
+    <property name="sizePolicy">
+      <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+      </sizepolicy>
+    </property>
+         </widget>
+      </item>
+      <item row="2" column="3">
+       <widget class="QLineEdit" name="lineedit_TD1">
+               <property name="text">
+           <string/>
+          </property>
+        <property name="maximumWidth">
+      <number>30</number>
+    </property>
+    <property name="sizePolicy">
+      <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+      </sizepolicy>
+    </property>
+         </widget>
+      </item>
+      <item row="2" column="4">
+       <widget class="QLineEdit" name="lineedit_TD2">
+               <property name="text">
+           <string/>
+          </property>
+        <property name="maximumWidth">
+      <number>30</number>
+    </property>
+    <property name="sizePolicy">
+      <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+      </sizepolicy>
+    </property>
+         </widget>
+      </item>
+      <item row="2" column="5">
+   <spacer name="spacer_left">
+    <property name="orientation">
+     <enum>Qt::Horizontal</enum>
+    </property>
+    <property name="sizeHint" stdset="0">
+     <size>
+      <width>40</width>
+      <height>20</height>
+     </size>
+    </property>
+   </spacer>
+  </item>
+     </layout>
+    </widget>
+   </item>
      </layout>
     </widget>
    </item>
@@ -53,28 +296,117 @@ QGroupBox:title {
     </widget>
    </item>
    <item>
+    <widget class="QGroupBox" name="group_calib">
+     <property name="title">
+      <string>Absorption Correction</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_2">
+      <item row="1" column="2">
+         <widget class="QLineEdit" name="monte_carlo_lineedit">
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QLabel" name="label_10">
+          <property name="text">
+           <string>Monte-Carlo Parameters</string>
+          </property>
+         </widget>
+        </item>
+      <item row="2" column="2">
+         <widget class="QCheckBox" name="abs_corr_checkBox">
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="1">
+         <widget class="QLabel" name="label_10">
+          <property name="text">
+           <string>Remove Files From ADS after processing</string>
+          </property>
+         </widget>
+        </item>
+         <item row="3" column="2">
+         <widget class="QCheckBox" name="eulerAngles_checkBox">
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="1">
+         <widget class="QLabel" name="label_10">
+          <property name="text">
+           <string>Orientation File is Euler Angles</string>
+          </property>
+         </widget>
+        </item>
+         <item row="4" column="2">
+         <widget class="QLineEdit" name="eulerAngles_lineedit">
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="1">
+         <widget class="QLabel" name="label_10">
+          <property name="text">
+           <string>Euler Angle Scheme</string>
+          </property>
+         </widget>
+        </item>
+         <item row="5" column="2">
+         <widget class="QLineEdit" name="eulerAnglesSense_lineedit">
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
+        </item>
+        <item row="5" column="1">
+         <widget class="QLabel" name="label_10">
+          <property name="text">
+           <string>Euler Angles Sense</string>
+          </property>
+         </widget>
+        </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
     <widget class="QGroupBox" name="fitting">
      <property name="title">
       <string>Sample Logs - Fitting / GSAS II</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_3">
-      <item row="0" column="0">
-       <widget class="QLabel" name="log_list_label"/>
+         <item row="0" column="0">
+         <widget class="QLabel" name="label_10">
+          <property name="text">
+           <string>Auto-populate file browser with Texture Files</string>
+          </property>
+         </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QCheckBox" name="textureAutoPopulate"/>
       </item>
       <item row="1" column="0">
+       <widget class="QLabel" name="log_list_label"/>
+      </item>
+      <item row="2" column="0">
        <widget class="QListWidget" name="log_list">
         <property name="verticalScrollBarPolicy">
          <enum>Qt::ScrollBarAlwaysOn</enum>
         </property>
        </widget>
       </item>
-      <item row="2" column="0">
+      <item row="3" column="0">
        <widget class="QLabel" name="primary_log_label"/>
       </item>
-      <item row="3" column="0">
+      <item row="4" column="0">
        <widget class="QComboBox" name="primary_log"/>
       </item>
-      <item row="3" column="1">
+      <item row="4" column="1">
        <layout class="QVBoxLayout" name="SeqFitOrder_layout">
         <item>
          <widget class="QCheckBox" name="check_ascending">
@@ -125,6 +457,103 @@ QGroupBox:title {
       <item row="1" column="0">
        <widget class="QComboBox" name="peak_list"/>
       </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="group_calib">
+     <property name="title">
+      <string>Texture</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_2">
+      <item row="0" column="0">
+         <widget class="QLabel" name="label_10">
+          <property name="text">
+           <string>Cost Function Threshold</string>
+          </property>
+         </widget>
+        </item>
+      <item row="0" column="1">
+         <widget class="QLineEdit" name="cost_func_thresh_lineedit">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>50</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
+        </item>
+      <item row="1" column="0">
+         <widget class="QLabel" name="label_10">
+          <property name="text">
+           <string>Peak Position Threshold</string>
+          </property>
+         </widget>
+        </item>
+      <item row="1" column="1">
+         <widget class="QLineEdit" name="peak_pos_thresh_lineedit">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>50</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
+        </item>
+          <item row="2" column="0">
+         <widget class="QCheckBox" name="expPF_checkBox">
+          <property name="text">
+           <string>Scatter Plot Experimental Pole Figure</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+         <item row="3" column="0">
+         <widget class="QLabel" name="label_10">
+          <property name="text">
+           <string>Contour Kernel Size</string>
+          </property>
+         </widget>
+        </item>
+      <item row="3" column="1">
+         <widget class="QLineEdit" name="contourKernel_lineedit">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>50</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
+        </item>
      </layout>
     </widget>
    </item>

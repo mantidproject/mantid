@@ -66,10 +66,8 @@ class FittingPlotView(QtWidgets.QWidget, Ui_plot):
         # hide unnecessary properties of browser
         hide_props = [
             "Minimizer",
-            "Cost function",
             "Max Iterations",
             "Output",
-            "Ignore invalid data",
             "Peak Radius",
             "Plot Composite Members",
             "Convolve Composite Members",
