@@ -55,13 +55,13 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
             mock_calculate_projection.reset_mock()
             mock_create_poly_data_mesh.reset_mock()
 
-    @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.update_time_of_flight_range")
-    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.set_view_tof_limits")
-    def test_on_tof_limits_updated_true(self, mock_set_view_tof_limits, mock_update_tof_range):
-        self._mock_view.get_tof_limits.return_value = (0, 100)
-        self._presenter.on_tof_limits_updated()
-        mock_update_tof_range.assert_called_with((0, 100))
-        mock_set_view_tof_limits.assert_called_once()
+    @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.update_integration_range")
+    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.set_view_integration_limits")
+    def test_on_integration_limits_updated_true(self, mock_set_view_integration_limits, mock_update_integration_range):
+        self._mock_view.get_integration_limits.return_value = (0, 100)
+        self._presenter.on_integration_limits_updated()
+        mock_update_integration_range.assert_called_with((0, 100))
+        mock_set_view_integration_limits.assert_called_once()
 
     @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.set_view_contour_limits")
     def test_on_contour_limits_updated_true(self, mock_set_view_contour_limits):
@@ -75,10 +75,10 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._presenter.set_view_contour_limits()
         self._mock_view.set_plotter_scalar_bar_range.assert_called_once_with((0, 100), self._presenter._counts_label)
 
-    def test_set_view_tof_limits(self):
+    def test_set_view_integration_limits(self):
         self._model._counts = np.zeros(200)
         self._presenter._detector_mesh = {}
-        self._presenter.set_view_tof_limits()
+        self._presenter.set_view_integration_limits()
         np.testing.assert_allclose(self._presenter._detector_mesh[self._presenter._counts_label], self._model.detector_counts)
 
     @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.update_picked_detectors")
