@@ -14,9 +14,9 @@
 namespace Mantid::DataObjects {
 
 PeakShapeEllipsoid::PeakShapeEllipsoid(const std::array<Kernel::V3D, 3> &directions,
-                                       const std::array<double, 3> &abcRadii,
-                                       const std::array<double, 3> &abcRadiiBackgroundInner,
-                                       const std::array<double, 3> &abcRadiiBackgroundOuter,
+                                       const PeakEllipsoidExtent &abcRadii,
+                                       const PeakEllipsoidExtent &abcRadiiBackgroundInner,
+                                       const PeakEllipsoidExtent &abcRadiiBackgroundOuter,
                                        Kernel::SpecialCoordinateSystem frame, std::string algorithmName,
                                        int algorithmVersion, const Kernel::V3D &translation)
     : PeakShapeBase(frame, std::move(algorithmName), algorithmVersion), m_directions(directions), m_abc_radii(abcRadii),
@@ -30,11 +30,11 @@ bool PeakShapeEllipsoid::operator==(const PeakShapeEllipsoid &other) const {
          other.translation() == this->translation();
 }
 
-const std::array<double, 3> &PeakShapeEllipsoid::abcRadii() const { return m_abc_radii; }
+const PeakEllipsoidExtent &PeakShapeEllipsoid::abcRadii() const { return m_abc_radii; }
 
-const std::array<double, 3> &PeakShapeEllipsoid::abcRadiiBackgroundInner() const { return m_abc_radiiBackgroundInner; }
+const PeakEllipsoidExtent &PeakShapeEllipsoid::abcRadiiBackgroundInner() const { return m_abc_radiiBackgroundInner; }
 
-const std::array<double, 3> &PeakShapeEllipsoid::abcRadiiBackgroundOuter() const { return m_abc_radiiBackgroundOuter; }
+const PeakEllipsoidExtent &PeakShapeEllipsoid::abcRadiiBackgroundOuter() const { return m_abc_radiiBackgroundOuter; }
 
 const std::array<Kernel::V3D, 3> &PeakShapeEllipsoid::directions() const { return m_directions; }
 
