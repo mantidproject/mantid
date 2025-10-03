@@ -26,6 +26,7 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/EnumeratedString.h"
 #include "MantidKernel/EnumeratedStringProperty.h"
+#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/Unit.h"
@@ -196,6 +197,13 @@ void AlignAndFocusPowderSlim::init() {
       std::make_unique<Kernel::PropertyWithValue<int>>(PropertyNames::EVENTS_PER_THREAD, 1000000, positiveIntValidator),
       "Number of events to read in a single thread. Higher means less threads are created.");
   setPropertyGroup(PropertyNames::EVENTS_PER_THREAD, CHUNKING_PARAM_GROUP);
+
+  // load single spectrum
+  std::array<int, 7> vulcan_banks = {{1, 2, 3, 4, 5, 6, EMPTY_INT()}};
+  auto bankValidator = std::make_shared<Mantid::Kernel::ListValidator<int>>(vulcan_banks);
+  declareProperty(
+      std::make_unique<Kernel::PropertyWithValue<int>>(PropertyNames::OUTPUT_SPEC_NUM, EMPTY_INT(), bankValidator),
+      "The bank for which to read data; if specified, others will be blank");
 }
 
 std::map<std::string, std::string> AlignAndFocusPowderSlim::validateInputs() {
@@ -356,12 +364,22 @@ void AlignAndFocusPowderSlim::exec() {
     */
 
     // hard coded for VULCAN 6 banks
-    for (size_t i = 1; i <= NUM_HIST; ++i) {
-      bankEntryNames.push_back("bank" + std::to_string(i) + "_events");
+    std::size_t num_banks_to_read;
+    int outputSpecNum = getProperty(PropertyNames::OUTPUT_SPEC_NUM);
+    if (outputSpecNum == EMPTY_INT()) {
+      for (size_t i = 1; i <= NUM_HIST; ++i) {
+        bankEntryNames.push_back("bank" + std::to_string(i) + "_events");
+      }
+      num_banks_to_read = NUM_HIST;
+    } else {
+      // fill this vector with blanks -- this is for the ProcessBankTask to correctly access it
+      for (size_t i = 1; i <= NUM_HIST; ++i) {
+        bankEntryNames.push_back("");
+      }
+      // the desired bank gets the correct entry name
+      bankEntryNames[outputSpecNum - 1] = "bank" + std::to_string(outputSpecNum) + "_events";
+      num_banks_to_read = 1;
     }
-
-    // each NXevent_data is a step
-    const auto num_banks_to_read = bankEntryNames.size();
 
     // threaded processing of the banks
     const int DISK_CHUNK = getProperty(PropertyNames::READ_SIZE_FROM_DISK);
@@ -375,7 +393,8 @@ void AlignAndFocusPowderSlim::exec() {
     if (num_banks_to_read > 1) {
       tbb::parallel_for(tbb::blocked_range<size_t>(0, num_banks_to_read), task);
     } else {
-      task(tbb::blocked_range<size_t>(0, num_banks_to_read));
+      // a "range" of 1; note -1 to match 0-indexed array with 1-indexed bank labels
+      task(tbb::blocked_range<size_t>(outputSpecNum - 1, outputSpecNum));
     }
   }
 

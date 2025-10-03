@@ -47,6 +47,7 @@ struct TestConfig {
   bool filterBadPulses = false;
   std::string logListBlock = "";
   std::string logListAllow = "";
+  int outputSpecNum = -10;
 };
 } // namespace
 
@@ -104,6 +105,9 @@ public:
       TS_ASSERT_THROWS_NOTHING(alg.setProperty(SPLITTER_TARGET, configuration.splitterTarget));
     if (configuration.filterBadPulses) {
       TS_ASSERT_THROWS_NOTHING(alg.setProperty(FILTER_BAD_PULSES, configuration.filterBadPulses));
+    }
+    if (configuration.outputSpecNum != -10) {
+      TS_ASSERT_THROWS_NOTHING(alg.setProperty(OUTPUT_SPEC_NUM, configuration.outputSpecNum));
     }
 
     if (should_throw) {
@@ -632,6 +636,49 @@ public:
     TS_ASSERT_EQUALS(outputWS->readY(3).front(), 4237608);
     TS_ASSERT_EQUALS(outputWS->readY(4).front(), 1433200);
     TS_ASSERT_EQUALS(outputWS->readY(5).front(), 2729481);
+  }
+
+  void test_output_specnum_validation() {
+    using namespace Mantid::DataHandling::AlignAndFocusPowderSlim::PropertyNames;
+    AlignAndFocusPowderSlim alg;
+    // Don't put output in ADS by default
+    alg.setChild(true);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS(alg.setProperty(OUTPUT_SPEC_NUM, -1), std::invalid_argument const &);
+    TS_ASSERT_THROWS(alg.setProperty(OUTPUT_SPEC_NUM, 0), std::invalid_argument const &);
+    TS_ASSERT_THROWS(alg.setProperty(OUTPUT_SPEC_NUM, 7), std::invalid_argument const &);
+    for (int i = 1; i <= 6; i++) {
+      TS_ASSERT_THROWS_NOTHING(alg.setProperty(OUTPUT_SPEC_NUM, i));
+    }
+  }
+
+  void test_output_specnum() {
+    TestConfig configuration({0.}, {50000.}, {50000.}, "Linear", "TOF"); // bins set for single bin
+    constexpr int NUM_HIST{6};
+    for (int i = 1; i <= NUM_HIST; i++) {
+      configuration.outputSpecNum = i;
+      MatrixWorkspace_sptr outputWS = run_algorithm(VULCAN_218062, configuration);
+
+      // verify the output -- all spectra exist
+      TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), NUM_HIST);
+      for (int j = 0; j < NUM_HIST; j++) {
+        // check all epectra have bins
+        TS_ASSERT_EQUALS(outputWS->readX(j).front(), 0.);
+        TS_ASSERT_EQUALS(outputWS->readX(j).back(), 50000.);
+        if (j == i - 1) {
+          // the indicated spectra has values
+          const auto y_values = outputWS->y(j);
+          TS_ASSERT_EQUALS(y_values.size(), 1);
+          TS_ASSERT_DIFFERS(y_values.front(), 0); // NONZERO
+        } else {
+          // non-specified spectra should have all-zero values
+          const auto y_values = outputWS->y(j);
+          TS_ASSERT_EQUALS(y_values.size(), 1);
+          TS_ASSERT_EQUALS(y_values.front(), 0); // ZERO
+        }
+      }
+    }
   }
 
   // ==================================
