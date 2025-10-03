@@ -31,7 +31,7 @@ def defaults = [
 
 // Restrict the parameter choices for certain named branches.
 switch(gitBranch) {
-  case ['main', 'release-next']:
+  case ['release-next']:
     defaults.packageSuffix = 'Nightly'
     defaults.anacondaLabel = 'nightly'
     defaults.platformChoices = ['all']
