@@ -27,11 +27,14 @@ from pyvistaqt import BackgroundPlotter
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from instrumentview.Detectors import DetectorInfo
+from instrumentview.InteractorStyles import CustomInteractorStyleZoomAndSelect, CustomInteractorStyleRubberBand3D
 from typing import Callable
 from mantid.dataobjects import Workspace2D
 from mantidqt.plotting.mantid_navigation_toolbar import MantidNavigationToolbar
 import numpy as np
 import pyvista as pv
+from pyvista.plotting.picking import RectangleSelection
+from pyvista.plotting.opts import PickerType
 import os
 
 
@@ -159,16 +162,17 @@ class FullInstrumentViewWindow(QMainWindow):
         left_column_layout.addWidget(options_vertical_widget)
         left_column_layout.addStretch()
 
+        self.interactor_style = CustomInteractorStyleZoomAndSelect()
+
+    def check_sum_spectra_checkbox(self) -> None:
+        self._sum_spectra_checkbox.setChecked(True)
+        self._presenter.on_sum_spectra_checkbox_clicked()
+
+    def is_multi_picking_checkbox_checked(self) -> bool:
+        return self._multi_select_check.isChecked()
+
     def _on_splitter_moved(self, pos, index) -> None:
         self._detector_spectrum_fig.tight_layout()
-
-    def disable_rectangle_picking_checkbox(self) -> None:
-        self._multi_select_check.setChecked(False)
-        self._multi_select_check.setEnabled(False)
-
-    def enable_rectangle_picking_checkbox(self) -> None:
-        self._multi_select_check.setChecked(False)
-        self._multi_select_check.setEnabled(True)
 
     def hide_status_box(self) -> None:
         self.status_group_box.hide()
@@ -263,7 +267,6 @@ class FullInstrumentViewWindow(QMainWindow):
     def setup_connections_to_presenter(self) -> None:
         self._projection_combo_box.currentIndexChanged.connect(self._presenter.on_projection_option_selected)
         self._multi_select_check.stateChanged.connect(self._presenter.on_multi_select_detectors_clicked)
-        self._multi_select_check.clicked.connect(self._cleanup_rectangle_picking)
         self._clear_selection_button.clicked.connect(self._presenter.on_clear_selected_detectors_clicked)
         self._contour_range_slider.sliderReleased.connect(self._presenter.on_contour_limits_updated)
         self._tof_slider.sliderReleased.connect(self._presenter.on_tof_limits_updated)
@@ -280,16 +283,6 @@ class FullInstrumentViewWindow(QMainWindow):
         self._add_connections_to_edits_and_slider(
             self._tof_min_edit, self._tof_max_edit, self._tof_slider, self._presenter.on_tof_limits_updated
         )
-
-    def _cleanup_rectangle_picking(self, is_clicked: bool) -> None:
-        # TODO: Fix this workaround for reseting rectangle picking
-        # Issue happens because if user is in selecting more (pressed 'r') and unticks box
-        # means that some interactor events like mouse presses will be stuck in selecting mode
-        if is_clicked:
-            return
-        self.main_plotter.disable_picking()
-        self.main_plotter.enable_rectangle_picking(callback=lambda *_: None, show_message=False)
-        self.main_plotter.disable_picking()
 
     def _setup_units_options(self, parent: QVBoxLayout):
         """Add widgets for the units options"""
@@ -393,11 +386,17 @@ class FullInstrumentViewWindow(QMainWindow):
         """Draw the given mesh in the main plotter window, and set the colours manually with RGBA numbers"""
         self.main_plotter.add_mesh(mesh, scalars=scalars, rgba=True, pickable=False, render_points_as_spheres=True, point_size=10)
 
-    def enable_point_picking(self, callback: Callable) -> None:
+    def enable_point_picking(self, is_projection: bool, callback: Callable) -> None:
         """Switch on point picking, i.e. picking a single point with right-click"""
         self.main_plotter.disable_picking()
+        # NOTE: Need to remove interactor to avoid artifacts in 2D or 3D
+        self.interactor_style.remove_interactor()
         picking_tolerance = 0.01
         if not self.main_plotter.off_screen:
+            if is_projection:
+                self.main_plotter.enable_zoom_style()
+            else:
+                self.main_plotter.enable_trackball_style()
             self.main_plotter.enable_surface_point_picking(
                 show_message=False,
                 use_picker=True,
@@ -408,11 +407,23 @@ class FullInstrumentViewWindow(QMainWindow):
                 tolerance=picking_tolerance,
             )
 
-    def enable_rectangle_picking(self, callback: Callable) -> None:
+    def enable_rectangle_picking(self, is_projection: bool, callback: Callable) -> None:
         """Switch on rectangle picking, i.e. draw a rectangle to select all detectors within the rectangle"""
         self.main_plotter.disable_picking()
+
         if not self.main_plotter.off_screen:
-            self.main_plotter.enable_rectangle_picking(callback=callback, use_picker=callback is not None, font_size=12)
+            if is_projection:
+                self.interactor_style.set_interactor(self.main_plotter.iren.interactor)
+                self.main_plotter.iren.style = self.interactor_style
+            else:
+                self.main_plotter.iren.style = CustomInteractorStyleRubberBand3D()
+
+            def _end_pick_helper(picker, *_):
+                callback(RectangleSelection(frustum=picker.GetFrustum(), viewport=(-1, -1, -1, -1)))
+
+            self.main_plotter.iren.picker = PickerType.RENDERED
+            self.main_plotter.iren.add_pick_observer(_end_pick_helper)
+            self.main_plotter._picker_in_use = True
 
     def show_axes(self) -> None:
         """Show axes on the main plotter"""
