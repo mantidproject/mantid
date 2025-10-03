@@ -332,7 +332,7 @@ class LoadWANDSCD(PythonAlgorithm):
 
         time_ns_array = _tmp_ws.run().startTime().totalNanoseconds() + np.append(0, np.cumsum(duration_array) * 1e9)[:-1]
 
-        # Get the UB matrix from, if it doesn't exist use the identity matrix
+        # Get the UB matrix from the workspace, if it doesn't exist use the identity matrix
         try:
             UB = np.array(
                 re.findall(r"-?\d+\.*\d*", _tmp_ws.run().getProperty("HB2C:CS:CrystalAlign:UBMatrix").value[0]), dtype=float
@@ -387,7 +387,7 @@ class LoadWANDSCD(PythonAlgorithm):
         add_time_series_property("HB2C:Mot:sgu", run, time_ns_array, sgu_array)
         run.getProperty("HB2C:Mot:sgu").units = "deg"
 
-        # Log the dureation, run number, and monitor count for each run as time series
+        # Log the duration, run number, and monitor count for each run as time series
         add_time_series_property("duration", run, time_ns_array, duration_array)
         run.getProperty("duration").units = "second"
         run.addProperty("run_number", run_number_array, True)
