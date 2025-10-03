@@ -1242,13 +1242,6 @@
                     </property>
                    </widget>
                   </item>
-                  <item>
-                   <widget class="QCheckBox" name="checkBox_splitLog">
-                    <property name="text">
-                     <string>Split Sample Logs</string>
-                    </property>
-                   </widget>
-                  </item>
                  </layout>
                 </item>
                </layout>
@@ -1346,7 +1339,6 @@
   <tabstop>checkBox_filterByPulse</tabstop>
   <tabstop>checkBox_from1</tabstop>
   <tabstop>checkBox_groupWS</tabstop>
-  <tabstop>checkBox_splitLog</tabstop>
   <tabstop>lineEdit</tabstop>
  </tabstops>
  <resources/>
