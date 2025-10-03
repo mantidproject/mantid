@@ -19,6 +19,8 @@ from qtpy.QtWidgets import (
     QCheckBox,
     QTextEdit,
     QPushButton,
+    QListWidget,
+    QListWidgetItem,
 )
 from qtpy.QtGui import QPalette, QDoubleValidator, QMovie
 from qtpy.QtCore import Qt, QEvent, QSize
@@ -132,6 +134,12 @@ class FullInstrumentViewWindow(QMainWindow):
         projection_layout.addWidget(self._projection_combo_box)
         projection_layout.addWidget(self._reset_projection)
 
+        peak_ws_group_box = QGroupBox("Peaks Workspaces")
+        peak_v_layout = QVBoxLayout(peak_ws_group_box)
+        self._peak_ws_list = QListWidget(self)
+        self._peak_ws_list.setSizeAdjustPolicy(QListWidget.AdjustToContents)
+        peak_v_layout.addWidget(self._peak_ws_list)
+
         self.status_group_box = QGroupBox("Status")
         status_layout = QHBoxLayout(self.status_group_box)
         status_label = QLabel("Loading ...")
@@ -158,6 +166,7 @@ class FullInstrumentViewWindow(QMainWindow):
         self._setup_units_options(units_vbox)
         units_group_box.setLayout(units_vbox)
         options_vertical_layout.addWidget(units_group_box)
+        options_vertical_layout.addWidget(peak_ws_group_box)
         options_vertical_layout.addWidget(QSplitter(Qt.Horizontal))
 
         options_vertical_layout.addWidget(self.status_group_box)
@@ -165,6 +174,7 @@ class FullInstrumentViewWindow(QMainWindow):
         left_column_layout.addStretch()
 
         self.interactor_style = CustomInteractorStyleZoomAndSelect()
+        self._overlay_meshes = []
 
     def check_sum_spectra_checkbox(self) -> None:
         self._sum_spectra_checkbox.setChecked(True)
@@ -265,6 +275,11 @@ class FullInstrumentViewWindow(QMainWindow):
         for unit in self._presenter.available_unit_options():
             self._units_combo_box.addItem(unit)
         self._integration_limit_group_box.setTitle(self._presenter.workspace_display_unit)
+        for peaks_ws in self._presenter.peaks_workspaces_in_ads():
+            list_item = QListWidgetItem(peaks_ws, self._peak_ws_list)
+            list_item.setCheckState(Qt.Unchecked)
+            self._peak_ws_list.addItem(list_item)
+        self._peak_ws_list.adjustSize()
 
     def setup_connections_to_presenter(self) -> None:
         self._projection_combo_box.currentIndexChanged.connect(self._presenter.on_projection_option_selected)
@@ -275,6 +290,7 @@ class FullInstrumentViewWindow(QMainWindow):
         self._units_combo_box.currentIndexChanged.connect(self._presenter.on_unit_option_selected)
         self._export_workspace_button.clicked.connect(self._presenter.on_export_workspace_clicked)
         self._sum_spectra_checkbox.clicked.connect(self._presenter.on_sum_spectra_checkbox_clicked)
+        self._peak_ws_list.itemChanged.connect(self._presenter.on_peaks_workspace_selected)
 
         self._add_connections_to_edits_and_slider(
             self._contour_range_min_edit,
@@ -357,6 +373,9 @@ class FullInstrumentViewWindow(QMainWindow):
     def set_projection_combo_options(self, default_index: int, options: list[str]) -> None:
         self._projection_combo_box.addItems(options)
         self._projection_combo_box.setCurrentIndex(default_index)
+
+    def current_selected_projection(self) -> str:
+        return self._projection_combo_box.currentText()
 
     def add_simple_shape(self, mesh: PolyData, colour=None, pickable=False) -> None:
         """Draw the given mesh in the main plotter window"""
@@ -476,3 +495,23 @@ class FullInstrumentViewWindow(QMainWindow):
     ) -> None:
         """Set the text in one of the detector info boxes"""
         edit_box.setPlainText(",".join(property_lambda(d) for d in detector_infos))
+
+    def selected_peaks_workspaces(self) -> list[str]:
+        return [
+            self._peak_ws_list.item(row_index).text()
+            for row_index in range(self._peak_ws_list.count())
+            if self._peak_ws_list.item(row_index).checkState() > 0
+        ]
+
+    def clear_overlay_meshes(self) -> None:
+        for mesh in self._overlay_meshes:
+            self.main_plotter.remove_actor(mesh[0])
+            self.main_plotter.remove_actor(mesh[1])
+        self._overlay_meshes.clear()
+
+    def plot_overlay_mesh(self, positions: np.ndarray, labels: list[str], point_colour: str) -> None:
+        points_actor = self.main_plotter.add_points(positions, color=point_colour, point_size=20, render_points_as_spheres=True)
+        labels_actor = self.main_plotter.add_point_labels(
+            positions, labels, font_size=15, show_points=False, always_visible=True, fill_shape=False, shape_opacity=0
+        )
+        self._overlay_meshes.append((points_actor, labels_actor))

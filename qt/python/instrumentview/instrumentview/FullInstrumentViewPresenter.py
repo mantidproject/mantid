@@ -130,6 +130,13 @@ class FullInstrumentViewPresenter:
             self._apply_projection_state(False, self._model.detector_positions)
             return
 
+        projected_points = self._adjust_points_for_selected_projection(self._model.detector_positions, projection_type)
+        self._apply_projection_state(True, projected_points)
+
+    def _adjust_points_for_selected_projection(self, points: np.ndarray, projection_type: str) -> np.ndarray:
+        if projection_type.startswith("3D"):
+            return points
+
         is_spherical = True
         if projection_type.startswith("Spherical"):
             is_spherical = True
@@ -147,8 +154,7 @@ class FullInstrumentViewPresenter:
         else:
             raise ValueError(f"Unknown projection type {projection_type}")
 
-        self._model.calculate_projection(is_spherical, axis)
-        self._apply_projection_state(True, self._model.detector_projection_positions)
+        return self._model.calculate_projection(is_spherical, axis, points)
 
     def _apply_projection_state(self, is_projection: bool, positions: np.ndarray) -> None:
         self._is_projection_selected = is_projection
@@ -251,3 +257,18 @@ class FullInstrumentViewPresenter:
 
     def on_unit_option_selected(self, value) -> None:
         self._update_line_plot_ws_and_draw(self._UNIT_OPTIONS[value])
+
+    def peaks_workspaces_in_ads(self) -> list[str]:
+        return [ws.name() for ws in self._model.peaks_workspaces_in_ads()]
+
+    def on_peaks_workspace_selected(self) -> None:
+        self._model.set_peaks_workspaces(self._view.selected_peaks_workspaces())
+        self._view.clear_overlay_meshes()
+        peaks = self._model.peak_overlay_points()
+        if len(peaks) == 0:
+            return
+        projected_points = self._adjust_points_for_selected_projection(
+            np.asarray([p.location for p in peaks]), self._view.current_selected_projection()
+        )
+        labels = [p.label for p in peaks]
+        self._view.plot_overlay_mesh(projected_points, labels, "blue")
