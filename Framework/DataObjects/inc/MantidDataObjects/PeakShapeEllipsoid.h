@@ -13,24 +13,26 @@
 namespace Mantid {
 namespace DataObjects {
 
+typedef std::array<double, 3> PeakEllipsoidExtent;
+
 /** PeakShapeEllipsoid : PeakShape representing a 3D ellipsoid
  */
 class MANTID_DATAOBJECTS_DLL PeakShapeEllipsoid : public PeakShapeBase {
 public:
   /// Constructor
-  PeakShapeEllipsoid(const std::array<Mantid::Kernel::V3D, 3> &directions, const std::array<double, 3> &abcRadii,
-                     const std::array<double, 3> &abcRadiiBackgroundInner,
-                     const std::array<double, 3> &abcRadiiBackgroundOuter, Kernel::SpecialCoordinateSystem frame,
+  PeakShapeEllipsoid(const std::array<Mantid::Kernel::V3D, 3> &directions, const PeakEllipsoidExtent &abcRadii,
+                     const PeakEllipsoidExtent &abcRadiiBackgroundInner,
+                     const PeakEllipsoidExtent &abcRadiiBackgroundOuter, Kernel::SpecialCoordinateSystem frame,
                      std::string algorithmName = std::string(), int algorithmVersion = -1,
                      const Mantid::Kernel::V3D &translation = {0.0, 0.0, 0.0});
   /// Equals operator
   bool operator==(const PeakShapeEllipsoid &other) const;
   /// Get radii
-  const std::array<double, 3> &abcRadii() const;
+  const PeakEllipsoidExtent &abcRadii() const;
   /// Get background inner radii
-  const std::array<double, 3> &abcRadiiBackgroundInner() const;
+  const PeakEllipsoidExtent &abcRadiiBackgroundInner() const;
   /// Get background outer radii
-  const std::array<double, 3> &abcRadiiBackgroundOuter() const;
+  const PeakEllipsoidExtent &abcRadiiBackgroundOuter() const;
   /// Get ellipsoid directions
   const std::array<Mantid::Kernel::V3D, 3> &directions() const;
   /// Get translation of center
@@ -53,11 +55,11 @@ private:
   /// principle axis
   std::array<Mantid::Kernel::V3D, 3> m_directions;
   /// radii
-  std::array<double, 3> m_abc_radii;
+  PeakEllipsoidExtent m_abc_radii;
   /// inner radii
-  std::array<double, 3> m_abc_radiiBackgroundInner;
+  PeakEllipsoidExtent m_abc_radiiBackgroundInner;
   /// outer radii
-  std::array<double, 3> m_abc_radiiBackgroundOuter;
+  PeakEllipsoidExtent m_abc_radiiBackgroundOuter;
   /// translation of center
   Mantid::Kernel::V3D m_translation;
 };
