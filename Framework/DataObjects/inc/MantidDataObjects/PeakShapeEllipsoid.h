@@ -13,30 +13,32 @@
 namespace Mantid {
 namespace DataObjects {
 
+typedef std::array<double, 3> PeakEllipsoidExtent;
+
 /** PeakShapeEllipsoid : PeakShape representing a 3D ellipsoid
  */
 class MANTID_DATAOBJECTS_DLL PeakShapeEllipsoid : public PeakShapeBase {
 public:
   /// Constructor
-  PeakShapeEllipsoid(const std::vector<Mantid::Kernel::V3D> &directions, const std::vector<double> &abcRadii,
-                     const std::vector<double> &abcRadiiBackgroundInner,
-                     const std::vector<double> &abcRadiiBackgroundOuter, Kernel::SpecialCoordinateSystem frame,
+  PeakShapeEllipsoid(const std::array<Mantid::Kernel::V3D, 3> &directions, const PeakEllipsoidExtent &abcRadii,
+                     const PeakEllipsoidExtent &abcRadiiBackgroundInner,
+                     const PeakEllipsoidExtent &abcRadiiBackgroundOuter, Kernel::SpecialCoordinateSystem frame,
                      std::string algorithmName = std::string(), int algorithmVersion = -1,
                      const Mantid::Kernel::V3D &translation = {0.0, 0.0, 0.0});
   /// Equals operator
   bool operator==(const PeakShapeEllipsoid &other) const;
   /// Get radii
-  const std::vector<double> &abcRadii() const;
+  const PeakEllipsoidExtent &abcRadii() const;
   /// Get background inner radii
-  const std::vector<double> &abcRadiiBackgroundInner() const;
+  const PeakEllipsoidExtent &abcRadiiBackgroundInner() const;
   /// Get background outer radii
-  const std::vector<double> &abcRadiiBackgroundOuter() const;
+  const PeakEllipsoidExtent &abcRadiiBackgroundOuter() const;
   /// Get ellipsoid directions
-  const std::vector<Mantid::Kernel::V3D> &directions() const;
+  const std::array<Mantid::Kernel::V3D, 3> &directions() const;
   /// Get translation of center
   const Kernel::V3D &translation() const;
   /// Get ellipsoid directions in a specified frame
-  std::vector<Kernel::V3D> getDirectionInSpecificFrame(Kernel::Matrix<double> &invertedGoniometerMatrix) const;
+  std::array<Kernel::V3D, 3> getDirectionInSpecificFrame(Kernel::Matrix<double> &invertedGoniometerMatrix) const;
 
   /// PeakShape interface
   std::string toJSON() const override;
@@ -51,13 +53,13 @@ public:
 
 private:
   /// principle axis
-  std::vector<Mantid::Kernel::V3D> m_directions;
+  std::array<Mantid::Kernel::V3D, 3> m_directions;
   /// radii
-  std::vector<double> m_abc_radii;
+  PeakEllipsoidExtent m_abc_radii;
   /// inner radii
-  std::vector<double> m_abc_radiiBackgroundInner;
+  PeakEllipsoidExtent m_abc_radiiBackgroundInner;
   /// outer radii
-  std::vector<double> m_abc_radiiBackgroundOuter;
+  PeakEllipsoidExtent m_abc_radiiBackgroundOuter;
   /// translation of center
   Mantid::Kernel::V3D m_translation;
 };

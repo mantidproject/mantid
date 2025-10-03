@@ -66,12 +66,12 @@ private:
   void findEllipsoid(const typename DataObjects::MDEventWorkspace<MDE, nd>::sptr ws,
                      const Mantid::API::CoordTransform &getRadiusSq, const Mantid::Kernel::V3D &pos,
                      const coord_t &radiusSquared, const bool &qAxisBool, const bool &useCentroid,
-                     const double &bgDensity, std::vector<Mantid::Kernel::V3D> &eigenvects,
-                     std::vector<double> &eigenvals, Mantid::Kernel::V3D &mean, const int maxIter = 1);
+                     const double &bgDensity, std::array<Mantid::Kernel::V3D, 3> &eigenvects,
+                     std::array<double, 3> &eigenvals, Mantid::Kernel::V3D &mean, const int maxIter = 1);
 
   void calcCovar(const std::vector<std::pair<Mantid::Kernel::V3D, double>> &peak_events, const Mantid::Kernel::V3D &pos,
                  const coord_t &radiusSquared, const bool &qAxisIsFixed, const bool &useCentroid,
-                 std::vector<Mantid::Kernel::V3D> &eigenvects, std::vector<double> &eigenvals,
+                 std::array<Mantid::Kernel::V3D, 3> &eigenvects, std::array<double, 3> &eigenvals,
                  Mantid::Kernel::V3D &mean, const int maxIter);
 
   // get matrix to transform from Qlab to plane perp to Q
