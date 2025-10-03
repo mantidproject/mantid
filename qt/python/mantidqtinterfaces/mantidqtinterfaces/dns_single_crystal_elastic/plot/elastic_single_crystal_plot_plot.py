@@ -132,9 +132,12 @@ class DNSScPlot:
         if self._ax:
             self._ax.figure.clear()
 
-    def plot_triangulation(self, triang, z, cmap, edge_colors, shading):
+    def plot_triangulation(self, triang, z, z_face, cmap, edge_colors, shading):
         self._ax.set_visible(True)
-        self._plot = self._ax.tripcolor(triang, z, cmap=cmap, edgecolors=edge_colors, shading=shading)
+        if shading == "flat":
+            self._plot = self._ax.tripcolor(triang, facecolors=z_face, cmap=cmap, edgecolors=edge_colors, shading=shading)
+        else:  # "gouraud" shading
+            self._plot = self._ax.tripcolor(triang, z, cmap=cmap, edgecolors=edge_colors, shading=shading)
 
     def plot_quadmesh(self, x, y, z, cmap, edge_colors, shading):
         # pylint: disable=too-many-arguments

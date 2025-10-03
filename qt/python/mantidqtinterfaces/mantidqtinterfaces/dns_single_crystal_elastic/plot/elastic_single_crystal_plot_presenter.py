@@ -171,8 +171,8 @@ class DNSElasticSCPlotPresenter(DNSObserver):
 
     def _plot_triangulation(self, interpolate, axis_type, switch):
         color_map, edge_colors, shading = self._get_plot_styles()
-        triangulation, z = self.model.generate_triangulation_mesh(interpolate, axis_type, switch)
-        self.view.single_crystal_plot.plot_triangulation(triangulation, z, color_map, edge_colors, shading)
+        triangulation, z, z_face = self.model.generate_triangulation_mesh(interpolate, axis_type, switch)
+        self.view.single_crystal_plot.plot_triangulation(triangulation, z, z_face, color_map, edge_colors, shading)
 
     def _plot_quadmesh(self, interpolate, axis_type, switch):
         color_map, edge_colors, shading = self._get_plot_styles()

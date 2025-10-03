@@ -110,8 +110,12 @@ class DNSScMap(ObjectDict):
         self.qxqy_mesh = [self.qx_mesh, self.qy_mesh, self.z_mesh]
         self.angular_mesh = [self.two_theta_mesh, self.omega_mesh, self.z_mesh]
         self.triangulation = None
-        self.triangulator = None
-        self.z_triangulated = None
+        self.x_tri = None  # shape (n_triangles, 3)
+        self.x_face = None  # shape (n_triangles,)
+        self.y_tri = None
+        self.y_face = None
+        self.z_tri = None
+        self.z_face = None
 
     def _get_z_mesh_interpolation(self, two_theta_interp, omega_interp):
         f = scipy.interpolate.RectBivariateSpline(self.two_theta, self.omega, self.z_mesh, kx=1, ky=1)
@@ -122,28 +126,30 @@ class DNSScMap(ObjectDict):
         if switch:
             plot_x, plot_y = plot_y, plot_x
         self.triangulation = tri.Triangulation(plot_x.flatten(), plot_y.flatten())
-        return self.triangulation
 
     def interpolate_triangulation(self, interpolation=0):
         if self.triangulation is None:
-            return None
-        z = self.z_mesh
-        triangulator = self.triangulation
-        interpolator = LinearTriInterpolator(triangulator, z.flatten())
-        refiner = UniformTriRefiner(triangulator)
-        triangulator_refiner, z_test_refiner = refiner.refine_field(z, subdiv=interpolation, triinterpolator=interpolator)
-        if interpolation:
-            self.triangulator = triangulator_refiner
-            self.z_triangulated = z_test_refiner.flatten()
-        else:
-            self.triangulator = triangulator
-            self.z_triangulated = z.flatten()
-        if interpolation <= 0:
-            return [triangulator, z.flatten()]
-        return [triangulator_refiner, z_test_refiner.flatten()]
+            return
+        z = self.z_mesh.flatten()
+        triangulation = self.triangulation
+        interpolator = LinearTriInterpolator(triangulation, z)
+        refiner = UniformTriRefiner(triangulation)
+        triangulation_refined, z_refined = refiner.refine_field(z, subdiv=interpolation, triinterpolator=interpolator)
+        triangles = triangulation_refined.triangles
+        self.triangulation = triangulation_refined
+        self.z_mesh = z_refined
+        self.z_tri = z_refined[triangles]
+        self.z_face = self.z_tri.mean(axis=1)
+        # record x,y locations of the centers of interpolated triangles
+        x = triangulation_refined.x
+        y = triangulation_refined.y
+        self.x_tri = x[triangles]
+        self.y_tri = y[triangles]
+        self.x_face = self.x_tri.mean(axis=1)
+        self.y_face = self.y_tri.mean(axis=1)
 
     def interpolate_quad_mesh(self, interpolation=3):
-        if not self.rectangular_grid or interpolation <= 0:
+        if not self.rectangular_grid:
             return
         two_theta_interpolated = _get_interpolated(self.two_theta, interpolation)
         omega_interpolated = _get_interpolated(self.omega, interpolation)
@@ -190,8 +196,6 @@ class DNSScMap(ObjectDict):
         return path.Path(dns_path)
 
     def mask_triangles(self, mesh_name, switch):
-        if "angular" in mesh_name:
-            return self.triangulation
         x, y, _z = getattr(self, mesh_name)
         if switch:
             x, y = y, x
@@ -204,7 +208,6 @@ class DNSScMap(ObjectDict):
         x_y_triangles[:, 1] = np.mean(y[triangles], axis=1)
         maxi = dns_path.contains_points(x_y_triangles)
         self.triangulation.set_mask(np.invert(maxi))
-        return self.triangulation
 
     def get_changing_indexes(self):
         """
