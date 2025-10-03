@@ -35,15 +35,10 @@ LD_PRELOAD="" \
   -GNinja \
   ../
 
-cmake --build .
-
-# Build the StandardTestData target.
-# This might not be strictly necessary if docs-qthelp target is not built due to DOCS_QTHELP=OFF
-cmake --build . --target StandardTestData
-
 # Configure the 'datasearch.directories' in the Mantid.properties file so the test data is found
+# Docs should only require DocTestData
 export STANDARD_TEST_DATA_DIR=$SRC_DIR/build/ExternalData/Testing/Data
-echo 'datasearch.directories = '$STANDARD_TEST_DATA_DIR'/UnitTest/;'$STANDARD_TEST_DATA_DIR'/DocTest/' >> $PREFIX/bin/Mantid.properties
+echo 'datasearch.directories = '$STANDARD_TEST_DATA_DIR'/DocTest/' >> $PREFIX/bin/Mantid.properties
 
 # Use QT_QPA_PLATFORM instead of Xvfb because Xvfb hides a lot of the useful output
 QT_QPA_PLATFORM=offscreen cmake --build . --target docs-html
