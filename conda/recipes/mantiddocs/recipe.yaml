@@ -16,7 +16,7 @@ build:
   number: 0
   noarch: generic
   script_env:
-      - MANTID_DATA_STORE={{ environ.get('MANTID_DATA_STORE', '~/MantidExternalData') }}
+      - MANTID_DATA_STORE=${{ env.get('MANTID_DATA_STORE', '~/MantidExternalData') }}
 
 requirements:
   build:
@@ -41,10 +41,10 @@ requirements:
     - versioningit ${{ versioningit }}
     - graphviz ${{ graphviz }}
     - pystog ${{ pystog }}
-    - texlive-core ${{ texlive_core }}
     - if: linux
       then:
         - libgl-devel
+        - texlive-core ${{ texlive_core }}
         - xorg-libxxf86vm
         - xorg-libx11
         - xorg-xorgproto
