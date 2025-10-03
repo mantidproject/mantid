@@ -171,7 +171,7 @@ class GeneralSettings(SettingsPresenterBase):
         use_notifications_setting = "on" == self._model.get_use_notifications().lower()
         crystallography_convention = "Crystallography" == self._model.get_crystallography_convention()
         use_open_gl = "on" == self._model.get_use_opengl().lower()
-        invisible_workspaces = "true" == self._model.get_show_invisible_workspaces().lower()
+        invisible_workspaces = "1" == self._model.get_show_invisible_workspaces().lower()
         completion_enabled = self._model.get_completion_enabled()
 
         self._view.project_recovery_enabled.setChecked(pr_enabled)

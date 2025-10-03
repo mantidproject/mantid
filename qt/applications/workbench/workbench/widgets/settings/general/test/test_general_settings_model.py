@@ -391,7 +391,7 @@ class GeneralSettingsModelTest(BaseSettingsModelTest):
     @patch(ADD_CHANGE_PATCH_PATH)
     def test_set_show_invisible_workspaces(self, add_change_mock: MagicMock):
         self._assert_setter_with_different_values(
-            add_change_mock, self.model.set_show_invisible_workspaces, ["Off", "On"], GeneralProperties.SHOW_INVISIBLE_WORKSPACES.value
+            add_change_mock, self.model.set_show_invisible_workspaces, ["0", "1"], GeneralProperties.SHOW_INVISIBLE_WORKSPACES.value
         )
 
     @patch(ADD_CHANGE_PATCH_PATH)
