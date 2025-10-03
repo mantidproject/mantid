@@ -1,0 +1,69 @@
+digraph LoadWANDSCD {
+label = "\n"
+$global_style
+
+subgraph params {
+ $param_style
+  param_data      [label="Data File(s), IPTS+run(s)"]
+  param_vanadium  [label="Vanadium IPTS+run(s), File(s), Workspace"]
+}
+
+subgraph decisions {
+ $decision_style
+  query_normalization  [label="Normalization required?"]
+}
+
+subgraph algorithms {
+ $algorithm_style
+  create_mdworkspace  [label="CreateMDHistoWorkspace"]
+  load_first_run      [label="LoadEventNexus (first run)"]
+  remove_logs         [label="RemoveLogs (keep essential ones)"]
+  normalize           [label="Normalize by vanadium"]
+  set_ub              [label="SetUB"]
+  group_detectors     [label="GroupDetectors (if required)"]
+  set_goniometer      [label="SetGoniometer"]
+  divide_md           [label="DivideMD"]
+}
+
+subgraph processes {
+ $process_style
+  load_and_group        [label="Load and Group"]
+  collect_intensities   [label="Collect pixel/group Intensities"]
+  determine_ub          [label="Determine UB matrix"]
+  goniometer_tilt       [label="Goniometer tilt correction"]
+  detector_orientation  [label="log detectors theta, phi"]
+  experiment_info       [label="extract Experiment info"]
+  goniometer_axes       [label="log goniometer axes"]
+  scale_signal          [label="Scale by time, monitor, total counts"]
+}
+
+subgraph values {
+ $value_style
+  output_workspace [label="OutputWorkspace"]
+}
+
+// Main workflow
+param_data           ->  load_and_group
+load_and_group       ->  collect_intensities
+collect_intensities  ->  create_mdworkspace
+create_mdworkspace   ->  query_normalization
+query_normalization  ->  param_vanadium [label="yes"]
+query_normalization  ->  output_workspace [label="no"]
+param_vanadium       ->  normalize
+normalize            ->  output_workspace
+
+// Expanded steps of 'Load and Group'
+load_first_run       ->  remove_logs
+remove_logs          ->  determine_ub
+determine_ub         ->  goniometer_tilt
+goniometer_tilt      ->  set_ub
+set_ub               ->  group_detectors
+group_detectors      ->  detector_orientation
+detector_orientation ->  experiment_info
+experiment_info      ->  goniometer_axes
+goniometer_axes      ->  set_goniometer
+
+// Expanded steps of 'Normalize by vanadium'
+divide_md  ->  scale_signal
+
+}
