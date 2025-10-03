@@ -413,39 +413,45 @@ void AlignAndFocusPowderSlim::exec() {
   } else {
     std::string ws_basename = this->getPropertyValue(PropertyNames::OUTPUT_WKSP);
     std::vector<std::string> wsNames;
-
-    auto progress = std::make_shared<API::Progress>(this, .17, .9,
-                                                    num_banks_to_read * timeSplitter.outputWorkspaceIndices().size());
-
+    std::vector<int> workspaceIndices;
     for (const int &splitter_target : timeSplitter.outputWorkspaceIndices()) {
-
-      auto splitter_roi = timeSplitter.getTimeROI(splitter_target);
-      // copy the roi so we can modify it just for this target
-      auto target_roi = roi;
-      if (target_roi.useAll())
-        target_roi = splitter_roi; // use the splitter ROI if no time filtering is specified
-      else if (!splitter_roi.useAll())
-        target_roi.update_intersection(splitter_roi); // otherwise intersect with the splitter ROI
-
-      // clone wksp for this target
-      MatrixWorkspace_sptr target_wksp = wksp->clone();
-
-      const auto pulse_indices = this->determinePulseIndices(target_wksp, target_roi);
-
-      ProcessBankTask task(bankEntryNames, h5file, is_time_filtered, target_wksp, m_calibration, m_masked,
-                           static_cast<size_t>(DISK_CHUNK), static_cast<size_t>(GRAINSIZE_EVENTS), pulse_indices,
-                           progress);
-      // generate threads only if appropriate
-      if (num_banks_to_read > 1) {
-        tbb::parallel_for(tbb::blocked_range<size_t>(0, num_banks_to_read), task);
-      } else {
-        task(tbb::blocked_range<size_t>(outputSpecNum - 1, outputSpecNum));
-      }
-
       std::string ws_name = ws_basename + "_" + timeSplitter.getWorkspaceIndexName(splitter_target);
       wsNames.push_back(ws_name);
-      AnalysisDataService::Instance().addOrReplace(ws_name, target_wksp);
+      workspaceIndices.push_back(splitter_target);
     }
+
+    auto progress = std::make_shared<API::Progress>(this, .17, .9, num_banks_to_read * workspaceIndices.size());
+
+    tbb::parallel_for(tbb::blocked_range<size_t>(0, workspaceIndices.size()), [&](const tbb::blocked_range<size_t> &r) {
+      for (size_t idx = r.begin(); idx != r.end(); ++idx) {
+        const int splitter_target = workspaceIndices[idx];
+
+        auto splitter_roi = timeSplitter.getTimeROI(splitter_target);
+        // copy the roi so we can modify it just for this target
+        auto target_roi = roi;
+        if (target_roi.useAll())
+          target_roi = splitter_roi; // use the splitter ROI if no time filtering is specified
+        else if (!splitter_roi.useAll())
+          target_roi.update_intersection(splitter_roi); // otherwise intersect with the splitter ROI
+
+        // clone wksp for this target
+        MatrixWorkspace_sptr target_wksp = wksp->clone();
+
+        const auto pulse_indices = this->determinePulseIndices(target_wksp, target_roi);
+
+        ProcessBankTask task(bankEntryNames, h5file, is_time_filtered, target_wksp, m_calibration, m_masked,
+                             static_cast<size_t>(DISK_CHUNK), static_cast<size_t>(GRAINSIZE_EVENTS), pulse_indices,
+                             progress);
+        // generate threads only if appropriate
+        if (num_banks_to_read > 1) {
+          tbb::parallel_for(tbb::blocked_range<size_t>(0, num_banks_to_read), task);
+        } else {
+          task(tbb::blocked_range<size_t>(0, num_banks_to_read));
+        }
+
+        AnalysisDataService::Instance().addOrReplace(wsNames[idx], target_wksp);
+      }
+    });
     // close the file so child algorithms can do their thing
     h5file.close();
 
