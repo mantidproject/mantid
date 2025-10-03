@@ -44,6 +44,7 @@ from workbench.plotting.propertiesdialog import (
     ColorbarAxisEditor,
     ZAxisEditor,
     LegendEditor,
+    LINTHRESH_DEFAULT,
 )
 from workbench.plotting.style import VALID_LINE_STYLE, VALID_COLORS
 from workbench.plotting.toolbar import ToolbarStateManager
@@ -942,7 +943,8 @@ class FigureInteraction(object):
         # set_xscale/set_yscale only autoscale the view
 
         scale_args = [
-            {"value": scale_type, "linthresh": 2} if scale_type == "symlog" else {"value": scale_type} for scale_type in scale_types
+            {"value": scale_type, "linthresh": LINTHRESH_DEFAULT} if scale_type == "symlog" else {"value": scale_type}
+            for scale_type in scale_types
         ]
 
         xlim = copy(ax.get_xlim())
@@ -967,7 +969,7 @@ class FigureInteraction(object):
                         "vmax": image.norm.vmax,
                     }
                     if scale_type == SymLogNorm:
-                        update_args["linthresh"] = 2.0  # Set to default mpl linthresh
+                        update_args["linthresh"] = LINTHRESH_DEFAULT
                     datafunctions.update_colorbar_scale(**update_args)
         self.canvas.draw_idle()
 
