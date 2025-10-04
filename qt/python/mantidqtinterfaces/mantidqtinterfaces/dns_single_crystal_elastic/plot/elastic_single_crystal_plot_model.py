@@ -40,8 +40,6 @@ class DNSElasticSCPlotModel(DNSObsModel):
         self._data.z_min = None
         self._data.z_max = None
         self._data.pz_min = None
-        self._data.triang = None
-        self._data.z_triang = None
 
     def create_single_crystal_map(self, data_array, options, initial_values=None):
         two_theta = data_array["two_theta_array"]
@@ -81,8 +79,7 @@ class DNSElasticSCPlotModel(DNSObsModel):
         z_face = self._single_crystal_map.z_face
         x_face = self._single_crystal_map.x_face
         y_face = self._single_crystal_map.y_face
-        x, y, z = self.switch_axis(x_face, y_face, z_face, switch)
-        self.set_mesh_data(x.flatten(), y.flatten(), z.flatten())
+        self.set_mesh_data(x_face.flatten(), y_face.flatten(), z_face.flatten())
         return triangulation_refined, z_refined, z_face
 
     def generate_quad_mesh(self, interpolate, axis_type, switch):
