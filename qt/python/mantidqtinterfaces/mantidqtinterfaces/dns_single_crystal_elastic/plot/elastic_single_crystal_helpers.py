@@ -54,7 +54,7 @@ def get_z_min_max(z, xlim=None, ylim=None, plot_x=None, plot_y=None):
     if flatten_z.size != 0:
         z_max = flatten_z.max()
         z_min = flatten_z.min()
-        pz_min = min(i for i in flatten_z if i > 0)
+        pz_min = min((i for i in flatten_z if i > 0), default=0)
     else:
         z_max = 0
         z_min = 0
@@ -63,8 +63,6 @@ def get_z_min_max(z, xlim=None, ylim=None, plot_x=None, plot_y=None):
 
 
 def get_hkl_intensity_from_cursor(single_crystal_map, plot_settings, x, y):
-    if plot_settings["switch"]:  # switch axes
-        x, y = y, x
     hkl1 = single_crystal_map.hkl1.split(",")
     hkl2 = single_crystal_map.hkl2.split(",")
     dx = single_crystal_map.dx
@@ -91,6 +89,9 @@ def get_hkl_intensity_from_cursor(single_crystal_map, plot_settings, x, y):
         pos_q = trifinder(x, y)
         z = z_per_triangle.flatten()[pos_q]
     else:  # quadmesh or scatterplot
+        # in case of triangulation, axis switch is already included when mesh is created
+        if plot_settings["switch"]:
+            x, y = y, x
         if plot_settings["type"] == "angular":  # two_theta omega
             pos_q = closest_mesh_point(single_crystal_map.angular_mesh[0], single_crystal_map.angular_mesh[1], x, y)
             z = single_crystal_map.angular_mesh[2].flatten()[pos_q]

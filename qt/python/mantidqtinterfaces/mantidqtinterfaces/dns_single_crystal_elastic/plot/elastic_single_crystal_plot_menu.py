@@ -105,7 +105,7 @@ class PlotTypeMenu(QMenu):
         action_triangulation_mesh.setCheckable(True)
         action_quad_mesh.setCheckable(True)
         action_scatter_mesh.setCheckable(True)
-        action_triangulation_mesh.setChecked(True)
+        action_quad_mesh.setChecked(True)
         # action group
         plot_type_action_group = QActionGroup(self)
         plot_type_action_group.addAction(action_triangulation_mesh)
@@ -188,15 +188,15 @@ class InterpolationMenu(QMenu):
         # adding actions
         action_interpolation_off = self.addAction("Off")
         # default values for triangulation interpolation
-        action_interpolation_1 = self.addAction("1 -> 4 (like in dnsplot)")
-        action_interpolation_2 = self.addAction("1 -> 16 (slow)")
-        action_interpolation_3 = self.addAction("1 -> 64 (very slow)")
+        action_interpolation_1 = self.addAction("1 -> 4")
+        action_interpolation_2 = self.addAction("1 -> 9 (like in dnsplot)")
+        action_interpolation_3 = self.addAction("1 -> 16")
         # setting checkable and check standard option
         action_interpolation_off.setCheckable(True)
         action_interpolation_1.setCheckable(True)
         action_interpolation_2.setCheckable(True)
         action_interpolation_3.setCheckable(True)
-        action_interpolation_off.setChecked(True)
+        action_interpolation_2.setChecked(True)
         # action group
         interpolation_action_group = QActionGroup(self)
         interpolation_action_group.addAction(action_interpolation_off)

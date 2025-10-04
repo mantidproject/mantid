@@ -324,8 +324,7 @@ class DNSElasticSCPlotPresenter(DNSObserver):
         log = self.view.get_state()["log_scale"]
         xlim, ylim, zlim = self._get_current_spinners_lims()
         dz_min, dz_max, dpz_min = self.model.get_data_z_min_max(xlim, ylim)
-        own_dict = self.view.get_state()
-        if own_dict["log_scale"] and zlim[0] < 0:
+        if log and zlim[0] < 0:
             zlim[0] = dpz_min
         norm = mpl_helpers.get_log_norm(log, zlim)
         self.view.single_crystal_plot.set_norm(norm)
