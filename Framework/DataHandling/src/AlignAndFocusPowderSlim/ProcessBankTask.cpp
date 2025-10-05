@@ -38,6 +38,10 @@ void ProcessBankTask::operator()(const tbb::blocked_range<size_t> &range) const 
   auto entry = m_h5file.openGroup("entry"); // type=NXentry
   for (size_t wksp_index = range.begin(); wksp_index < range.end(); ++wksp_index) {
     const auto &bankName = m_bankEntries[wksp_index];
+    // empty bank names indicate spectra to skip; control should never get here, but just in case
+    if (bankName.empty()) {
+      continue;
+    }
     Kernel::Timer timer;
     g_log.debug() << bankName << " start" << std::endl;
 

@@ -663,7 +663,7 @@ public:
       // verify the output -- all spectra exist
       TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), NUM_HIST);
       for (int j = 0; j < NUM_HIST; j++) {
-        // check all epectra have bins
+        // check all spectra have bins
         TS_ASSERT_EQUALS(outputWS->readX(j).front(), 0.);
         TS_ASSERT_EQUALS(outputWS->readX(j).back(), 50000.);
         if (j == i - 1) {
