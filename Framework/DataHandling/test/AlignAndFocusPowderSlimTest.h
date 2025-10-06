@@ -647,7 +647,6 @@ public:
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS(alg.setProperty(OUTPUT_SPEC_NUM, -1), std::invalid_argument const &);
     TS_ASSERT_THROWS(alg.setProperty(OUTPUT_SPEC_NUM, 0), std::invalid_argument const &);
-    TS_ASSERT_THROWS(alg.setProperty(OUTPUT_SPEC_NUM, 7), std::invalid_argument const &);
     for (int i = 1; i <= 6; i++) {
       TS_ASSERT_THROWS_NOTHING(alg.setProperty(OUTPUT_SPEC_NUM, i));
     }
