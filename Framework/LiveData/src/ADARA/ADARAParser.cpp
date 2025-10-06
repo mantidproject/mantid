@@ -63,7 +63,7 @@ void Parser::reset() {
   m_len = 0;
   m_oversize_len = 0;
   m_restart_offset = 0;
-
+  m_oversize_offset = 0;
   m_discarded_packets.clear();
 }
 
@@ -314,38 +314,38 @@ bool Parser::rxOversizePkt(const PacketHeader *hdr, const uint8_t * /*unused*/, 
     return false;                                                                                                      \
   }
 
-EXPAND_HANDLER(RawDataPkt)
-EXPAND_HANDLER(MappedDataPkt)
-EXPAND_HANDLER(RTDLPkt)
-EXPAND_HANDLER(SourceListPkt)
+EXPAND_HANDLER(AnnotationPkt)
 EXPAND_HANDLER(BankedEventPkt)
 EXPAND_HANDLER(BankedEventStatePkt)
-EXPAND_HANDLER(BeamMonitorPkt)
-EXPAND_HANDLER(PixelMappingPkt)
-EXPAND_HANDLER(PixelMappingAltPkt)
-EXPAND_HANDLER(RunStatusPkt)
-EXPAND_HANDLER(RunInfoPkt)
-EXPAND_HANDLER(TransCompletePkt)
-EXPAND_HANDLER(ClientHelloPkt)
-EXPAND_HANDLER(AnnotationPkt)
-EXPAND_HANDLER(SyncPkt)
-EXPAND_HANDLER(HeartbeatPkt)
-EXPAND_HANDLER(GeometryPkt)
 EXPAND_HANDLER(BeamlineInfoPkt)
 EXPAND_HANDLER(BeamMonitorConfigPkt)
-EXPAND_HANDLER(DetectorBankSetsPkt)
+EXPAND_HANDLER(BeamMonitorPkt)
+EXPAND_HANDLER(ClientHelloPkt)
 EXPAND_HANDLER(DataDonePkt)
+EXPAND_HANDLER(DetectorBankSetsPkt)
 EXPAND_HANDLER(DeviceDescriptorPkt)
-EXPAND_HANDLER(VariableU32Pkt)
-EXPAND_HANDLER(VariableDoublePkt)
-EXPAND_HANDLER(VariableStringPkt)
-EXPAND_HANDLER(VariableU32ArrayPkt)
-EXPAND_HANDLER(VariableDoubleArrayPkt)
-EXPAND_HANDLER(MultVariableU32Pkt)
+EXPAND_HANDLER(GeometryPkt)
+EXPAND_HANDLER(HeartbeatPkt)
+EXPAND_HANDLER(MappedDataPkt)
 EXPAND_HANDLER(MultVariableDoublePkt)
+EXPAND_HANDLER(MultVariableDoubleArrayPkt)
 EXPAND_HANDLER(MultVariableStringPkt)
 EXPAND_HANDLER(MultVariableU32ArrayPkt)
-EXPAND_HANDLER(MultVariableDoubleArrayPkt)
+EXPAND_HANDLER(MultVariableU32Pkt)
+EXPAND_HANDLER(PixelMappingAltPkt)
+EXPAND_HANDLER(PixelMappingPkt)
+EXPAND_HANDLER(RawDataPkt)
+EXPAND_HANDLER(RTDLPkt)
+EXPAND_HANDLER(RunInfoPkt)
+EXPAND_HANDLER(RunStatusPkt)
+EXPAND_HANDLER(SourceListPkt)
+EXPAND_HANDLER(SyncPkt)
+EXPAND_HANDLER(TransCompletePkt)
+EXPAND_HANDLER(VariableDoublePkt)
+EXPAND_HANDLER(VariableDoubleArrayPkt)
+EXPAND_HANDLER(VariableStringPkt)
+EXPAND_HANDLER(VariableU32ArrayPkt)
+EXPAND_HANDLER(VariableU32Pkt)
 
 void Parser::getDiscardedPacketsLogString(std::string &log_info) {
   log_info = "Discarded ADARA Packet/Counts: ";

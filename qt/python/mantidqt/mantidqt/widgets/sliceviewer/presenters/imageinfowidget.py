@@ -79,7 +79,8 @@ class ImageInfoTracker(CursorTracker):
             return
         cinfo = cursor_info(self._image, xdata, ydata, full_bbox=self._cursor_transform)
         if cinfo is not None:
-            arr, _, (i, j) = cinfo
+            arr = cinfo.array
+            i, j = cinfo.point
             if (0 <= i < arr.shape[0]) and (0 <= j < arr.shape[1]) and not np.ma.is_masked(arr[i, j]):
                 extra_cols = self._presenter.get_extra_image_info_columns(xdata, ydata)
                 if (not self._cursor_transform) and self._image.transpose:

@@ -85,9 +85,6 @@ datasearch.directories = @DATADIRS@
 # Directory where data cache is stored, default IDaaS path
 datacachesearch.directory = /data/instrument
 
-# Root of html documentation (kept as unix-style path)
-docs.html.root = @HTML_ROOT@
-
 # Setting this to On enables searching the facilitie's archive automatically
 datasearch.searcharchive = Off
 

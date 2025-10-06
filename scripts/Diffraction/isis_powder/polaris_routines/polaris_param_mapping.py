@@ -62,5 +62,7 @@ attr_mapping = [
     ParamMapEntry(ext_name="keep_raw_workspace", int_name="keep_raw_workspace", optional=True),
     ParamMapEntry(ext_name="mayers_mult_scat_events", int_name="mayers_mult_scat_events", optional=True),
     ParamMapEntry(ext_name="pdf_output_name", int_name="pdf_output_name", optional=True),
+    ParamMapEntry(ext_name="wavelength_lims", int_name="wavelength_lims", optional=True),
+    ParamMapEntry(ext_name="r_lims", int_name="r_lims", optional=True),
 ]
 attr_mapping.extend(COMMON_PARAM_MAPPING)

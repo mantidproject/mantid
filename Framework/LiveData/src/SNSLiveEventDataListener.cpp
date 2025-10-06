@@ -442,13 +442,12 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::BankedEventPkt &pkt) {
 /// Parse a beam monitor event packet
 
 /** Overrides the default function defined in ADARA::Parser and processes data from ADARA::BeamMonitorPkt packets.
- * Parsed events are counted and the counts are accumulated in the temporary workspace until the forground thread
+ * Parsed events are counted and the counts are accumulated in the temporary workspace until the foreground thread
  * retrieves them.
  *
  * @see extractData()
  * @param pkt The packet to be parsed
- * @return Returns false if there were no problems.  Returns true if there was an error and packet parsing should be
- * interrupted
+ * @return false if no problems, true if error occurred and packet parsing should be interrupted
  */
 bool SNSLiveEventDataListener::rxPacket(const ADARA::BeamMonitorPkt &pkt) {
   // Check to see if we should process this packet (depending on what the user selected for start up options, the SMS
@@ -1517,20 +1516,16 @@ ILiveListener::RunStatus SNSLiveEventDataListener::runStatus() {
   return rv;
 }
 
-// Called by the rxPacket() functions to determine if the packet should be
-// processed
-// (Depending on when it last indexed its data, SMS might send us packets that
-// are
-// older than we requested.)
-// Returns false if the packet should be processed, true if is should be ignored
+// Called by the rxPacket() functions to determine if the packet should be processed
+// (Depending on when it last indexed its data, SNS might send us packets that are older than we requested)
+// Returns false if the packet should be processed, true if it should be ignored
 bool SNSLiveEventDataListener::ignorePacket(const ADARA::PacketHeader &hdr, const ADARA::RunStatus::Enum status) {
-  // Since we're filtering based on time (either the absolute timestamp or
-  // nothing
-  // before the start of the most recent run), once we've determined a given
-  // packet should be processed, we know all packets after that should also be
-  // processed.  Thus, we can reduce most calls to this function to a simple
-  // boolean test...
-  if (!m_ignorePackets)
+  // Since we're filtering based on time (either the absolute timestamp or nothing
+  // before the start of the most recent run),
+  // once we've determined a given packet should be processed,
+  // we know all packets after that should also be processed.
+  // Thus, we can reduce most calls to this function to a simple boolean test
+  if (!m_ignorePackets) // don't ignore
     return false;
 
   // Are we looking for the start of the run?
@@ -1548,7 +1543,7 @@ bool SNSLiveEventDataListener::ignorePacket(const ADARA::PacketHeader &hdr, cons
 
   // If we've just hit our start-up condition, then process
   // all the variable value packets we've been hanging on to.
-  if (!m_ignorePackets) {
+  if (!m_ignorePackets) { // don't ignore
     replayVariableCache();
   }
 
@@ -1557,12 +1552,9 @@ bool SNSLiveEventDataListener::ignorePacket(const ADARA::PacketHeader &hdr, cons
 
 // Process all the variable value packets stored in m_variableMap
 void SNSLiveEventDataListener::replayVariableCache() {
-  auto it = m_variableMap.begin();
-  while (it != m_variableMap.end()) {
-    rxPacket(*(*it).second); // call rxPacket() on the stored packet
-    it++;
+  for (const auto &varPacketPair : m_variableMap) {
+    rxPacket(*varPacketPair.second); // call rxPacket() on the stored packet
   }
-
   m_variableMap.clear(); // empty the map to save a little ram
 }
 

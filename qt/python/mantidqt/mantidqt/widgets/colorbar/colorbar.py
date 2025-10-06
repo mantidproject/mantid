@@ -15,14 +15,14 @@ from mantid.plots.utility import get_current_cmap
 from mantidqt.MPLwidgets import FigureCanvas
 from matplotlib.colorbar import Colorbar
 from matplotlib.figure import Figure
-from matplotlib.colors import ListedColormap, Normalize, SymLogNorm, PowerNorm, LogNorm
+from matplotlib.colors import ListedColormap, Normalize, SymLogNorm, PowerNorm, LogNorm, AsinhNorm
 from matplotlib import colormaps
 import numpy as np
 from qtpy.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLineEdit, QComboBox, QCheckBox, QLabel
 from qtpy.QtCore import Signal
 from qtpy.QtGui import QDoubleValidator
 
-NORM_OPTS = ["Linear", "Log", "SymmetricLog10", "Power"]
+NORM_OPTS = ["Linear", "Log", "SymmetricLog10", "Power", "Asinh"]
 AUTO_SCALE_OPTS = ["Min/Max", "3-Sigma", "1.5-Interquartile Range", "1.5-Median Absolute Deviation"]
 
 
@@ -280,6 +280,8 @@ class ColorbarWidget(QWidget):
             return SymLogNorm(1e-8 if cmin is None else max(1e-8, abs(cmin) * 1e-3), vmin=cmin, vmax=cmax)
         elif NORM_OPTS[idx] == "Log":
             return LogNorm(vmin=cmin, vmax=cmax)
+        elif NORM_OPTS[idx] == "Asinh":
+            return AsinhNorm(vmin=cmin, vmax=cmax)
         else:
             return Normalize(vmin=cmin, vmax=cmax)
 
@@ -291,6 +293,8 @@ class ColorbarWidget(QWidget):
             scale = "symlog"
         elif isinstance(norm, LogNorm):
             scale = "log"
+        elif isinstance(norm, AsinhNorm):
+            scale = "asinh"
         elif isinstance(norm, PowerNorm):
             scale = "function"
             kwargs = {"functions": (lambda x: np.power(x, norm.gamma), lambda x: np.power(x, 1 / norm.gamma))}

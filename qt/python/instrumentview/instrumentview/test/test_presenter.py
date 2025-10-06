@@ -115,12 +115,14 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self.assertTrue(green_vector.all(where=[0, 1, 0, 0]))
 
     def test_set_multi_select_enabled(self):
-        self._presenter.on_multi_select_detectors_clicked(2)
+        self._mock_view.is_multi_picking_checkbox_checked.return_value = True
+        self._presenter.on_multi_select_detectors_clicked()
         self._mock_view.enable_rectangle_picking.assert_called_once()
         self._mock_view.enable_point_picking.assert_not_called()
 
     def test_set_multi_select_disabled(self):
-        self._presenter.on_multi_select_detectors_clicked(1)
+        self._mock_view.is_multi_picking_checkbox_checked.return_value = False
+        self._presenter.on_multi_select_detectors_clicked()
         self._mock_view.enable_rectangle_picking.assert_not_called()
         self._mock_view.enable_point_picking.assert_called_once()
 
@@ -156,3 +158,15 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         units = self._presenter.available_unit_options()
         mock_has_unit.assert_called_once()
         self.assertEquals(self._presenter._UNIT_OPTIONS, units)
+
+    def test_only_close_on_correct_ws_replace(self):
+        ws_name = self._model.workspace.name()
+        self._presenter.replace_workspace_callback(ws_name, None)
+        self._mock_view.close.assert_called_once()
+        self._mock_view.close.reset_mock()
+        self._presenter.replace_workspace_callback("not_my_workspace", None)
+        self._mock_view.close.assert_not_called()
+
+
+if __name__ == "__main__":
+    unittest.main()

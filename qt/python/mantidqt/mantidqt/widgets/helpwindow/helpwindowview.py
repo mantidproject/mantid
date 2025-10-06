@@ -17,6 +17,7 @@ from qtpy.QtWidgets import (
     QFrame,
     QShortcut,
     QApplication,
+    QStyle,
 )
 from qtpy.QtWebEngineWidgets import QWebEngineView, QWebEngineSettings
 from qtpy.QtCore import QUrl, Qt, QEvent
@@ -110,25 +111,25 @@ class HelpWindowView(QMainWindow):
         # ---------------------------------
 
         # Back
-        self.backButton.setIcon(QIcon.fromTheme("go-previous", QIcon(":/qt-project.org/styles/commonstyle/images/left-arrow-32.png")))
+        self.backButton.setIcon(self.style().standardIcon(QStyle.SP_ArrowBack))
         self.backButton.setToolTip("Go Back")
         self.backButton.clicked.connect(self.browser.back)
         self.toolbar.addWidget(self.backButton)
 
         # Forward
-        self.forwardButton.setIcon(QIcon.fromTheme("go-next", QIcon(":/qt-project.org/styles/commonstyle/images/right-arrow-32.png")))
+        self.forwardButton.setIcon(self.style().standardIcon(QStyle.SP_ArrowForward))
         self.forwardButton.setToolTip("Go Forward")
         self.forwardButton.clicked.connect(self.browser.forward)
         self.toolbar.addWidget(self.forwardButton)
 
         # Home
-        self.homeButton.setIcon(QIcon.fromTheme("go-home", QIcon(":/qt-project.org/styles/commonstyle/images/home-32.png")))
+        self.homeButton.setIcon(QIcon(":/home.png"))
         self.homeButton.setToolTip("Go to Home Page")
         self.homeButton.clicked.connect(self.on_home_clicked)
         self.toolbar.addWidget(self.homeButton)
 
         # Reload
-        self.reloadButton.setIcon(QIcon.fromTheme("view-refresh", QIcon(":/qt-project.org/styles/commonstyle/images/refresh-32.png")))
+        self.reloadButton.setIcon(self.style().standardIcon(QStyle.SP_BrowserReload))
         self.reloadButton.setToolTip("Reload Current Page")
         self.reloadButton.clicked.connect(self.browser.reload)
         self.toolbar.addWidget(self.reloadButton)
@@ -139,7 +140,7 @@ class HelpWindowView(QMainWindow):
 
         # Find button in toolbar
         self.findButton = QPushButton()
-        self.findButton.setIcon(QIcon.fromTheme("edit-find", QIcon(":/qt-project.org/styles/commonstyle/images/find-32.png")))
+        self.findButton.setIcon(QIcon(":/search.png"))
         self.findButton.setToolTip("Find in Page (Ctrl+F)")
         self.findButton.clicked.connect(self.show_find_toolbar)
         self.toolbar.addWidget(self.findButton)
@@ -360,8 +361,7 @@ class HelpWindowView(QMainWindow):
             <p>Sorry, the requested local documentation file could not be found.</p>
             <p>Requested: <code>{requested_url_html}</code></p>
             <p>Details: <code>{error_message_html}</code></p>
-            <p>Please check that your local documentation is correctly built
-               and the path is correctly configured in Mantid ('docs.html.root').</p>
+            <p>Please check that your local documentation is correctly built.</p>
             {home_link_html}
         </body>
         </html>

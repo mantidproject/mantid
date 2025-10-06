@@ -58,7 +58,7 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         mock_workspace.detectorInfo.return_value = mock.MagicMock()
         mock_workspace.componentInfo.return_value = mock.MagicMock()
         mock_workspace.getNumberHistograms.return_value = len(detector_ids)
-        mock_workspace.extractX.return_value = np.arange(len(detector_ids))[np.newaxis, :]
+        mock_workspace.extractX.return_value = np.tile(np.arange(len(detector_ids)), (len(detector_ids), 1))
         mock_workspace.readX.return_value = np.arange(len(detector_ids))
         mock_workspace.getIntegratedCountsForWorkspaceIndices.return_value = [100 * i for i in detector_ids]
         return mock_workspace
@@ -387,3 +387,7 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         mock_workspace.getAxis(0).getUnit().unitID.return_value = "Wavelength"
         model = FullInstrumentViewModel(mock_workspace)
         self.assertEqual(True, model.has_unit)
+
+
+if __name__ == "__main__":
+    unittest.main()

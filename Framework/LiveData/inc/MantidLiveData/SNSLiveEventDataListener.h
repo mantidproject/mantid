@@ -21,9 +21,8 @@
 namespace Mantid {
 namespace LiveData {
 
-/** An implementation of ILiveListener for use at SNS.  Connects to the Stream
-   Management
-    Service and receives events from it.
+/** An implementation of ILiveListener for use at SNS.
+ * Connects to the Stream Management Service and receives events from it.
  */
 class SNSLiveEventDataListener : public API::LiveListener, public Poco::Runnable, public ADARA::Parser {
 public:
@@ -53,18 +52,17 @@ public:
 protected:
   using ADARA::Parser::rxPacket;
   // virtual bool rxPacket( const ADARA::Packet &pkt);
-  // virtual bool rxPacket( const ADARA::RawDataPkt &pkt);
+  bool rxPacket(const ADARA::AnnotationPkt &pkt) override;
   bool rxPacket(const ADARA::BankedEventPkt &pkt) override;
-  bool rxPacket(const ADARA::BeamMonitorPkt &pkt) override;
-  bool rxPacket(const ADARA::GeometryPkt &pkt) override;
   bool rxPacket(const ADARA::BeamlineInfoPkt &pkt) override;
+  bool rxPacket(const ADARA::BeamMonitorPkt &pkt) override;
+  bool rxPacket(const ADARA::DeviceDescriptorPkt &pkt) override;
+  bool rxPacket(const ADARA::GeometryPkt &pkt) override;
+  bool rxPacket(const ADARA::RunInfoPkt &pkt) override;
   bool rxPacket(const ADARA::RunStatusPkt &pkt) override;
   bool rxPacket(const ADARA::VariableU32Pkt &pkt) override;
   bool rxPacket(const ADARA::VariableDoublePkt &pkt) override;
   bool rxPacket(const ADARA::VariableStringPkt &pkt) override;
-  bool rxPacket(const ADARA::DeviceDescriptorPkt &pkt) override;
-  bool rxPacket(const ADARA::AnnotationPkt &pkt) override;
-  bool rxPacket(const ADARA::RunInfoPkt &pkt) override;
 
 private:
   // Workspace initialization needs to happen in 2 steps.  Part 1 must happen
@@ -117,11 +115,11 @@ private:
   detid2index_map m_indexMap;        // maps pixel id's to workspace indexes
   detid2index_map m_monitorIndexMap; // Same as above for the monitor workspace
 
-  // We need these 2 strings to initialize m_buffer
+  // We need these 2 strings to initialize m_eventBuffer
   std::string m_instrumentName;
   std::string m_instrumentXML;
 
-  // Names of log values that we need before we can initialize m_buffer.
+  // Names of log values that we need before we can initialize m_eventBuffer.
   // We get the names by parsing m_instrumentXML;
   std::vector<std::string> m_requiredLogs;
 
@@ -133,7 +131,7 @@ private:
   bool m_isConnected{false};
 
   Poco::Thread m_thread;
-  std::mutex m_mutex; // protects m_buffer & m_status
+  std::mutex m_mutex; // protects m_eventBuffer & m_status
   bool m_pauseNetRead{false};
   bool m_stopThread{false}; // background thread checks this periodically.
                             // If true, the thread exits
@@ -161,7 +159,7 @@ private:
   // --- Data structures necessary for handling all the process variable info
   // ---
 
-  // maps <device id, variable id> to variable name
+  // maps a pair<device id, variable id> to its Processing Variable's name
   // (variable names are unique, so we don't need to worry about device names.)
   using NameMapType = std::map<std::pair<unsigned int, unsigned int>, std::string>;
   NameMapType m_nameMap;
@@ -176,12 +174,15 @@ private:
   // need to parse whatever variable value packets we have in order to set the
   // state of the system properly.
 
-  // Maps the device ID / variable ID pair to the actual packet.  Using a map
+  // Maps the pair<device ID, variable ID> to the actual packet. Using a map
   // means we will only keep one packet (the most recent one) for each variable
   using VariableMapType = std::map<std::pair<unsigned int, unsigned int>, std::shared_ptr<ADARA::Packet>>;
   VariableMapType m_variableMap;
 
-  // Process all the variable value packets stored in m_variableMap
+  /// Process all the variable value packets stored in m_variableMap and then clear this cache
+  ///
+  /// The method is triggered through the packet processing chain:
+  /// - rxPacket() → ignorePacket() → replayVariableCache()
   void replayVariableCache();
 
   // ---------------------------------------------------------------------------

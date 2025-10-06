@@ -78,6 +78,9 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
         if not self.model.can_support_non_axis_cuts():
             self.view.data_view.disable_tool_button(ToolItemText.NONAXISALIGNEDCUTS)
 
+        # disable masking options until activated
+        self.view.data_view.toggle_masking_options(False)
+
         self.view.data_view.help_button.clicked.connect(self.action_open_help_window)
 
         self.refresh_view()
@@ -213,6 +216,11 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
                 data_view.enable_tool_button(ToolItemText.NONORTHOGONAL_AXES)
             else:
                 data_view.disable_tool_button(ToolItemText.NONORTHOGONAL_AXES)
+
+        # Reset masking if dimensions changed
+        if self.view.data_view.masking:
+            self.view.data_view.masking.clear_and_disconnect()
+            self.view.data_view.masking.clear_model()
 
         ws_type = WorkspaceInfo.get_ws_type(self.model.ws)
         if ws_type == WS_TYPE.MDH or ws_type == WS_TYPE.MDE:
@@ -593,6 +601,27 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
         full_point[xdim] = xdata
         full_point[ydim] = ydata
         return full_point
+
+    def rect_masking_clicked(self, active) -> None:
+        self.view.data_view.check_masking_shape_toolbar_icons(ToolItemText.RECT_MASKING)
+        self.view.data_view.masking.new_selector(ToolItemText.RECT_MASKING)
+
+    def elli_masking_clicked(self, active) -> None:
+        self.view.data_view.check_masking_shape_toolbar_icons(ToolItemText.ELLI_MASKING)
+        self.view.data_view.masking.new_selector(ToolItemText.ELLI_MASKING)
+
+    def poly_masking_clicked(self, active) -> None:
+        self.view.data_view.check_masking_shape_toolbar_icons(ToolItemText.POLY_MASKING)
+        self.view.data_view.masking.new_selector(ToolItemText.POLY_MASKING)
+
+    def export_masking_clicked(self) -> None:
+        self.view.data_view.masking.export_selectors()
+        self.view.data_view.canvas.draw_idle()
+
+    def apply_masking_clicked(self) -> None:
+        if self.view.data_view.evaluate_apply_masking_msg_box():
+            self.view.data_view.masking.apply_selectors()
+            self.replace_workspace(self.model.ws.name(), self.model.ws)
 
 
 class SliceViewXAxisEditor(XAxisEditor):

@@ -22,6 +22,12 @@ class ToolItemText:
     NONORTHOGONAL_AXES = "NonOrthogonalAxes"
     SAVE = "Save"
     NONAXISALIGNEDCUTS = "NonAxisAlignedCuts"
+    MASKING = "Masking"
+    RECT_MASKING = "RectangleMasking"
+    ELLI_MASKING = "EllipticalMasking"
+    POLY_MASKING = "PolygonMasking"
+    APPLY_MASKING = "ApplyMasking"
+    EXPORT_MASKING = "ExportMasking"
 
 
 class SliceViewerNavigationToolbar(MantidNavigationToolbar):
@@ -34,6 +40,12 @@ class SliceViewerNavigationToolbar(MantidNavigationToolbar):
     nonAlignedCutsClicked = Signal(bool)
     zoomPanClicked = Signal(bool)
     zoomPanFinished = Signal()
+    maskingClicked = Signal(bool)
+    rectMaskingClicked = Signal(bool)
+    elliMaskingClicked = Signal(bool)
+    polyMaskingClicked = Signal(bool)
+    applyMaskingClicked = Signal(bool)
+    exportMaskingClicked = Signal(bool)
 
     toolitems = (
         MantidNavigationTool(ToolItemText.HOME, "Reset original view", "mdi.home", "homeClicked", None),
@@ -52,6 +64,13 @@ class SliceViewerNavigationToolbar(MantidNavigationToolbar):
         MantidNavigationTool(
             ToolItemText.NONORTHOGONAL_AXES, "Toggle nonorthogonal axes on/off", "mdi.axis", "nonOrthogonalClicked", False
         ),
+        MantidStandardNavigationTools.SEPARATOR,
+        MantidNavigationTool(ToolItemText.MASKING, "Toggle masking on/off", "mdi.transition-masked", "maskingClicked", False),
+        MantidNavigationTool(ToolItemText.RECT_MASKING, "Select rectangle mask", "mdi.square-outline", "rectMaskingClicked", False),
+        MantidNavigationTool(ToolItemText.ELLI_MASKING, "Select elliptical mask", "mdi.circle-outline", "elliMaskingClicked", False),
+        MantidNavigationTool(ToolItemText.POLY_MASKING, "Select polygon mask", "mdi.triangle-outline", "polyMaskingClicked", False),
+        MantidNavigationTool(ToolItemText.APPLY_MASKING, "Apply drawn mask", "mdi.checkbox-marked-outline", "applyMaskingClicked", None),
+        MantidNavigationTool(ToolItemText.EXPORT_MASKING, "Export drawn mask to table", "mdi.export", "exportMaskingClicked", None),
         MantidStandardNavigationTools.SEPARATOR,
         MantidNavigationTool(ToolItemText.SAVE, "Save the figure", "mdi.content-save", "save_figure", None),
     )

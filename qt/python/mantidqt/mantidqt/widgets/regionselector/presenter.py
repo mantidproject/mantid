@@ -53,9 +53,12 @@ class RegionSelector(ObservingPresenter, SliceViewerBasePresenter):
 
         self.notifyee = None
         self.view = view if view else RegionSelectorView(self, parent, image_info_widget=image_info_widget)
-        super().__init__(ws, self.view.data_view)
+        super().__init__(ws, self.view.data_view, disable_masking_override=True)
         self._selectors: list[Selector] = []
         self._drawing_region = False
+
+        # For now, disable masking - not implemented for regionselector
+        self._toggle_masking_options(False)
 
         if ws:
             self._initialise_dimensions(ws)
@@ -258,3 +261,21 @@ class RegionSelector(ObservingPresenter, SliceViewerBasePresenter):
 
     def is_integer_frame(self):
         return False, False
+
+    def masking(self, active):
+        pass
+
+    def rect_masking_clicked(self, active):
+        pass
+
+    def elli_masking_clicked(self, active):
+        pass
+
+    def poly_masking_clicked(self, active):
+        pass
+
+    def export_masking_clicked(self):
+        pass
+
+    def apply_masking_clicked(self):
+        pass

@@ -50,6 +50,9 @@ class FullInstrumentViewPresenter:
         self._visible_label = "Visible Picked"
 
         self._view.show_axes()
+
+        self._is_projection_selected = False
+
         self.on_projection_option_selected(default_index)
 
         if self._model.workspace_x_unit in self._UNIT_OPTIONS:
@@ -60,6 +63,7 @@ class FullInstrumentViewPresenter:
             delete_callback=self.delete_workspace_callback,
             rename_callback=self.rename_workspace_callback,
             clear_callback=self.clear_workspace_callback,
+            replace_callback=self.replace_workspace_callback,
         )
         self._view.hide_status_box()
 
@@ -83,6 +87,12 @@ class FullInstrumentViewPresenter:
         if self._model.has_unit:
             return self._UNIT_OPTIONS
         return ["No units"]
+
+    @property
+    def workspace_display_unit(self) -> str:
+        if self._model.has_unit:
+            return self._model.workspace_x_unit_display
+        return ""
 
     def on_tof_limits_updated(self) -> None:
         """When TOF limits are changed, read the new limits and tell the presenter to update the colours accordingly"""
@@ -108,8 +118,7 @@ class FullInstrumentViewPresenter:
             # Plot orange sphere at the origin
             # origin = pv.Sphere(radius=0.1, center=[0, 0, 0])
             # self._view.add_simple_shape(origin, colour="orange", pickable=False)
-            self._view.enable_rectangle_picking_checkbox()
-            self._update_view_main_plotter(self._model.detector_positions, is_projection=False)
+            self._apply_projection_state(False, self._model.detector_positions)
             return
 
         if projection_type.endswith("X"):
@@ -124,8 +133,12 @@ class FullInstrumentViewPresenter:
             raise ValueError(f"Unknown projection type {projection_type}")
 
         self._model.calculate_projection(projection_type, axis)
-        self._view.disable_rectangle_picking_checkbox()
-        self._update_view_main_plotter(self._model.detector_projection_positions, is_projection=True)
+        self._apply_projection_state(True, self._model.detector_projection_positions)
+
+    def _apply_projection_state(self, is_projection: bool, positions: np.ndarray) -> None:
+        self._is_projection_selected = is_projection
+        self._update_view_main_plotter(positions, is_projection=self._is_projection_selected)
+        self.on_multi_select_detectors_clicked()
 
     def _update_view_main_plotter(self, positions: np.ndarray, is_projection: bool):
         self._detector_mesh = self.create_poly_data_mesh(positions)
@@ -136,17 +149,18 @@ class FullInstrumentViewPresenter:
         self._pickable_main_mesh[self._visible_label] = self._model.picked_visibility
         self._view.add_pickable_main_mesh(self._pickable_main_mesh, scalars=self._visible_label)
 
-        self._view.enable_point_picking(callback=self.point_picked)
+        self._view.enable_point_picking(self._is_projection_selected, callback=self.point_picked)
         self.set_view_contour_limits()
         self.set_view_tof_limits()
         self._view.reset_camera()
 
-    def on_multi_select_detectors_clicked(self, state: int) -> None:
+    def on_multi_select_detectors_clicked(self) -> None:
         """Change between single and multi point picking"""
-        if state == 2:
-            self._view.enable_rectangle_picking(callback=self.rectangle_picked)
+        if self._view.is_multi_picking_checkbox_checked():
+            self._view.check_sum_spectra_checkbox()
+            self._view.enable_rectangle_picking(self._is_projection_selected, callback=self.rectangle_picked)
         else:
-            self._view.enable_point_picking(callback=self.point_picked)
+            self._view.enable_point_picking(self._is_projection_selected, callback=self.point_picked)
 
     def point_picked(self, point_position: np.ndarray | None, picker: PickerType) -> None:
         if point_position is None:
@@ -209,8 +223,11 @@ class FullInstrumentViewPresenter:
     def clear_workspace_callback(self):
         self._view.close()
 
+    def replace_workspace_callback(self, ws_name, ws):
+        if ws_name == self._model.workspace.name():
+            self._view.close()
+
     def handle_close(self):
-        del self._model
         # The observers are unsubscribed on object deletion, it's safer to manually
         # delete the observer rather than wait for the garbage collector, because
         # we don't want stale workspace references hanging around.
