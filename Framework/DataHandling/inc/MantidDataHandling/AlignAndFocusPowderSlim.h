@@ -73,6 +73,7 @@ const std::string READ_SIZE_FROM_DISK("ReadSizeFromDisk");
 const std::string EVENTS_PER_THREAD("EventsPerThread");
 const std::string ALLOW_LOGS("LogAllowList");
 const std::string BLOCK_LOGS("LogBlockList");
+const std::string OUTPUT_SPEC_NUM("OutputSpectrumNumber");
 } // namespace PropertyNames
 
 } // namespace Mantid::DataHandling::AlignAndFocusPowderSlim
