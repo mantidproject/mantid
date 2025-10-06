@@ -7,7 +7,7 @@
 #pragma once
 
 #include "MantidDataObjects/Peak.h"
-#include "MantidDataObjects/PeakShapeEllipsoid.h"
+#include "MantidDataObjects/PeakShapeEllipsoid_fwd.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/V3D.h"
 #include "MantidMDAlgorithms/DllConfig.h"
@@ -21,9 +21,6 @@
 namespace Mantid {
 namespace Geometry {
 class PeakShape;
-}
-namespace DataObjects {
-class PeakShapeEllipsoid;
 }
 namespace MDAlgorithms {
 
@@ -74,7 +71,7 @@ public:
   std::shared_ptr<const Mantid::Geometry::PeakShape>
   ellipseIntegrateEvents(const std::vector<Kernel::V3D> &E1Vec, Mantid::Kernel::V3D const &peak_q, bool specify_size,
                          double peak_radius, double back_inner_radius, double back_outer_radius,
-                         std::array<double, 3> &axes_radii, double &inti, double &sigi);
+                         DataObjects::PeakEllipsoidExtent &axes_radii, double &inti, double &sigi);
 
   /// Find the net integrated intensity of a modulated peak, using ellipsoidal
   /// volumes
@@ -82,7 +79,7 @@ public:
   ellipseIntegrateModEvents(const std::vector<Kernel::V3D> &E1Vec, Mantid::Kernel::V3D const &peak_q,
                             Mantid::Kernel::V3D const &hkl, Mantid::Kernel::V3D const &mnp, bool specify_size,
                             double peak_radius, double back_inner_radius, double back_outer_radius,
-                            std::array<double, 3> &axes_radii, double &inti, double &sigi);
+                            DataObjects::PeakEllipsoidExtent &axes_radii, double &inti, double &sigi);
 
   /// Find the net integrated intensity of a peak, using ellipsoidal volumes
   std::pair<std::shared_ptr<const Mantid::Geometry::PeakShape>, std::tuple<double, double, double>>
@@ -104,19 +101,20 @@ private:
 
   bool correctForDetectorEdges(std::tuple<double, double, double> &radii,
                                const std::vector<Mantid::Kernel::V3D> &E1Vecs, const Mantid::Kernel::V3D &peak_q,
-                               const std::array<double, 3> &axesRadii, const std::array<double, 3> &bkgInnerRadii,
-                               const std::array<double, 3> &bkgOuterRadii);
+                               const DataObjects::PeakEllipsoidExtent &axesRadii,
+                               const DataObjects::PeakEllipsoidExtent &bkgInnerRadii,
+                               const DataObjects::PeakEllipsoidExtent &bkgOuterRadii);
 
   /// Calculate the number of events in an ellipsoid centered at 0,0,0
   static std::pair<double, double>
   numInEllipsoid(std::vector<std::pair<std::pair<double, double>, Mantid::Kernel::V3D>> const &events,
-                 std::array<Mantid::Kernel::V3D, 3> const &directions, std::array<double, 3> const &sizes);
+                 DataObjects::PeakEllipsoidFrame const &directions, DataObjects::PeakEllipsoidExtent const &sizes);
 
   /// Calculate the number of events in an ellipsoid centered at 0,0,0
   static std::pair<double, double>
   numInEllipsoidBkg(std::vector<std::pair<std::pair<double, double>, Mantid::Kernel::V3D>> const &events,
-                    std::array<Mantid::Kernel::V3D, 3> const &directions, std::array<double, 3> const &sizes,
-                    std::array<double, 3> const &sizesIn, const bool useOnePercentBackgroundCorrection);
+                    DataObjects::PeakEllipsoidFrame const &directions, DataObjects::PeakEllipsoidExtent const &sizes,
+                    DataObjects::PeakEllipsoidExtent const &sizesIn, const bool useOnePercentBackgroundCorrection);
 
   /// Calculate the 3x3 covariance matrix of a list of Q-vectors at 0,0,0
   static void makeCovarianceMatrix(std::vector<std::pair<std::pair<double, double>, Mantid::Kernel::V3D>> const &events,
@@ -124,7 +122,7 @@ private:
 
   /// Calculate the eigen vectors of a 3x3 real symmetric matrix
   static void getEigenVectors(Kernel::DblMatrix const &cov_matrix, std::array<Mantid::Kernel::V3D, 3> &eigen_vectors,
-                              std::array<double, 3> &eigen_values);
+                              DataObjects::PeakEllipsoidExtent &eigen_values);
 
   /// Form a map key as 10^12*h + 10^6*k + l from the integers h, k, l
   static int64_t getHklKey(int h, int k, int l);
@@ -145,13 +143,14 @@ private:
   std::shared_ptr<const Mantid::DataObjects::PeakShapeEllipsoid>
   ellipseIntegrateEvents(const std::vector<Kernel::V3D> &E1Vec, Kernel::V3D const &peak_q,
                          std::vector<std::pair<std::pair<double, double>, Mantid::Kernel::V3D>> const &ev_list,
-                         std::array<Mantid::Kernel::V3D, 3> const &directions, std::array<double, 3> const &sigmas,
-                         bool specify_size, double peak_radius, double back_inner_radius, double back_outer_radius,
-                         std::array<double, 3> &axes_radii, double &inti, double &sigi);
+                         DataObjects::PeakEllipsoidFrame const &directions,
+                         DataObjects::PeakEllipsoidExtent const &sigmas, bool specify_size, double peak_radius,
+                         double back_inner_radius, double back_outer_radius,
+                         DataObjects::PeakEllipsoidExtent &axes_radii, double &inti, double &sigi);
 
   /// Compute if a particular Q falls on the edge of a detector
   double detectorQ(const std::vector<Kernel::V3D> &E1Vec, const Mantid::Kernel::V3D &QLabFrame,
-                   const std::array<double, 3> &r);
+                   const DataObjects::PeakEllipsoidExtent &r);
 
   std::tuple<double, double, double> calculateRadiusFactors(const IntegrationParameters &params,
                                                             double max_sigma) const;

@@ -31,24 +31,14 @@ Mantid::Geometry::PeakShape *PeakShapeEllipsoidFactory::create(const std::string
       const std::string algorithmName(root["algorithm_name"].asString());
       const int algorithmVersion(root["algorithm_version"].asInt());
       const auto frame(static_cast<SpecialCoordinateSystem>(root["frame"].asInt()));
-      std::array<double, 3> abcRadii{root["radius0"].asDouble(), root["radius1"].asDouble(),
-                                     root["radius2"].asDouble()};
-      std::array<double, 3> abcRadiiBackgroundInner{root["background_inner_radius0"].asDouble(),
-                                                    root["background_inner_radius1"].asDouble(),
-                                                    root["background_inner_radius2"].asDouble()};
-      std::array<double, 3> abcRadiiBackgroundOuter{root["background_outer_radius0"].asDouble(),
-                                                    root["background_outer_radius1"].asDouble(),
-                                                    root["background_outer_radius2"].asDouble()};
-      /*
-      std::vector<double> abcRadii, abcRadiiBackgroundInner, abcRadiiBackgroundOuter;
-      abcRadiiBackgroundInner.emplace_back(root["background_inner_radius0"].asDouble());
-      abcRadiiBackgroundInner.emplace_back(root["background_inner_radius1"].asDouble());
-      abcRadiiBackgroundInner.emplace_back(root["background_inner_radius2"].asDouble());
-      abcRadiiBackgroundOuter.emplace_back(root["background_outer_radius0"].asDouble());
-      abcRadiiBackgroundOuter.emplace_back(root["background_outer_radius1"].asDouble());
-      abcRadiiBackgroundOuter.emplace_back(root["background_outer_radius2"].asDouble());
-      */
-      std::array<V3D, 3> directions;
+      PeakEllipsoidExtent abcRadii{root["radius0"].asDouble(), root["radius1"].asDouble(), root["radius2"].asDouble()};
+      PeakEllipsoidExtent abcRadiiBackgroundInner{root["background_inner_radius0"].asDouble(),
+                                                  root["background_inner_radius1"].asDouble(),
+                                                  root["background_inner_radius2"].asDouble()};
+      PeakEllipsoidExtent abcRadiiBackgroundOuter{root["background_outer_radius0"].asDouble(),
+                                                  root["background_outer_radius1"].asDouble(),
+                                                  root["background_outer_radius2"].asDouble()};
+      PeakEllipsoidFrame directions;
       directions[0].fromString(root["direction0"].asString());
       directions[1].fromString(root["direction1"].asString());
       directions[2].fromString(root["direction2"].asString());

@@ -16,6 +16,8 @@
 #include <json/json.h>
 #include <vector>
 
+using Mantid::DataObjects::PeakEllipsoidExtent;
+using Mantid::DataObjects::PeakEllipsoidFrame;
 using Mantid::DataObjects::PeakShapeEllipsoid;
 using Mantid::Kernel::SpecialCoordinateSystem;
 using namespace Mantid;
@@ -29,10 +31,10 @@ public:
   static void destroySuite(PeakShapeEllipsoidTest *suite) { delete suite; }
 
   void test_constructor() {
-    std::array<V3D, 3> directions = {(V3D(1, 0, 0)), (V3D(0, 1, 0)), (V3D(0, 0, 1))};
-    const std::array<double, 3> abcRadii = {2, 3, 4};
-    const std::array<double, 3> abcInnerRadii = {5, 6, 7};
-    const std::array<double, 3> abcOuterRadii = {8, 9, 10};
+    PeakEllipsoidFrame directions = {(V3D(1, 0, 0)), (V3D(0, 1, 0)), (V3D(0, 0, 1))};
+    const PeakEllipsoidExtent abcRadii = {2, 3, 4};
+    const PeakEllipsoidExtent abcInnerRadii = {5, 6, 7};
+    const PeakEllipsoidExtent abcOuterRadii = {8, 9, 10};
     const SpecialCoordinateSystem frame = Mantid::Kernel::HKL;
     const std::string algorithmName = "foo";
     const int algorithmVersion = 3;
@@ -51,10 +53,10 @@ public:
   }
 
   void test_copy_constructor() {
-    std::array<V3D, 3> directions = {V3D(1, 0, 0), V3D(0, 1, 0), V3D(0, 0, 1)};
-    const std::array<double, 3> abcRadii = {2, 3, 4};
-    const std::array<double, 3> abcInnerRadii = {5, 6, 7};
-    const std::array<double, 3> abcOuterRadii = {8, 9, 10};
+    PeakEllipsoidFrame directions = {V3D(1, 0, 0), V3D(0, 1, 0), V3D(0, 0, 1)};
+    const PeakEllipsoidExtent abcRadii = {2, 3, 4};
+    const PeakEllipsoidExtent abcInnerRadii = {5, 6, 7};
+    const PeakEllipsoidExtent abcOuterRadii = {8, 9, 10};
     const SpecialCoordinateSystem frame = Mantid::Kernel::HKL;
     const std::string algorithmName = "foo";
     const int algorithmVersion = 3;
@@ -91,7 +93,7 @@ public:
 
   void test_radius() {
 
-    std::array<double, 3> radius = {1, 2, 3};
+    PeakEllipsoidExtent radius = {1, 2, 3};
 
     PeakShapeEllipsoid shape({V3D(1, 0, 0), V3D(0, 1, 0), V3D(0, 0, 1)}, radius, radius, radius, Mantid::Kernel::HKL);
 
@@ -115,10 +117,10 @@ public:
 
   void test_toJSON() {
 
-    std::array<V3D, 3> directions = {V3D(1, 0, 0), V3D(0, 1, 0), V3D(0, 0, 1)};
-    const std::array<double, 3> abcRadii = {2, 3, 4};
-    const std::array<double, 3> abcInnerRadii = {5, 6, 7};
-    const std::array<double, 3> abcOuterRadii = {8, 9, 10};
+    PeakEllipsoidFrame directions = {V3D(1, 0, 0), V3D(0, 1, 0), V3D(0, 0, 1)};
+    const PeakEllipsoidExtent abcRadii = {2, 3, 4};
+    const PeakEllipsoidExtent abcInnerRadii = {5, 6, 7};
+    const PeakEllipsoidExtent abcOuterRadii = {8, 9, 10};
     const SpecialCoordinateSystem frame = Mantid::Kernel::HKL;
     const std::string algorithmName = "foo";
     const int algorithmVersion = 3;
@@ -147,10 +149,10 @@ public:
   }
 
   void test_directionsInSpecificFrameThrowsForMatrixWithInvalidDimensions() {
-    std::array<V3D, 3> directions = {V3D(1, 0, 0), V3D(0, 1, 0), V3D(0, 0, 1)};
-    const std::array<double, 3> abcRadii = {2, 3, 4};
-    const std::array<double, 3> abcInnerRadii = {5, 6, 7};
-    const std::array<double, 3> abcOuterRadii = {8, 9, 10};
+    PeakEllipsoidFrame directions = {V3D(1, 0, 0), V3D(0, 1, 0), V3D(0, 0, 1)};
+    const PeakEllipsoidExtent abcRadii = {2, 3, 4};
+    const PeakEllipsoidExtent abcInnerRadii = {5, 6, 7};
+    const PeakEllipsoidExtent abcOuterRadii = {8, 9, 10};
     const SpecialCoordinateSystem frame = Mantid::Kernel::QLab;
     const std::string algorithmName = "foo";
     const int algorithmVersion = 3;
@@ -175,10 +177,10 @@ public:
   }
 
   void test_directionsInSepcificFrame() {
-    std::array<V3D, 3> directions = {V3D(1, 0, 0), V3D(0, 1, 0), V3D(0, 0, 1)};
-    const std::array<double, 3> abcRadii = {2, 3, 4};
-    const std::array<double, 3> abcInnerRadii = {5, 6, 7};
-    const std::array<double, 3> abcOuterRadii = {8, 9, 10};
+    PeakEllipsoidFrame directions = {V3D(1, 0, 0), V3D(0, 1, 0), V3D(0, 0, 1)};
+    const PeakEllipsoidExtent abcRadii = {2, 3, 4};
+    const PeakEllipsoidExtent abcInnerRadii = {5, 6, 7};
+    const PeakEllipsoidExtent abcOuterRadii = {8, 9, 10};
     const SpecialCoordinateSystem frame = Mantid::Kernel::QLab;
     const std::string algorithmName = "foo";
     const int algorithmVersion = 3;

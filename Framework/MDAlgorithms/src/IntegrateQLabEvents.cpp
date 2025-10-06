@@ -81,7 +81,7 @@ void IntegrateQLabEvents::addEvents(SlimEvents const &event_qs) {
 Mantid::Geometry::PeakShape_const_sptr
 IntegrateQLabEvents::ellipseIntegrateEvents(const std::vector<V3D> &E1Vec, V3D const &peak_q, bool specify_size,
                                             double peak_radius, double back_inner_radius, double back_outer_radius,
-                                            std::array<double, 3> &axes_radii, double &inti, double &sigi,
+                                            PeakEllipsoidExtent &axes_radii, double &inti, double &sigi,
                                             std::pair<double, double> &backi) {
   inti = 0.0; // default values, in case something
   sigi = 0.0; // is wrong with the peak.
@@ -119,8 +119,8 @@ IntegrateQLabEvents::ellipseIntegrateEvents(const std::vector<V3D> &E1Vec, V3D c
 }
 
 std::pair<double, double> IntegrateQLabEvents::numInEllipsoid(SlimEvents const &events,
-                                                              std::array<V3D, 3> const &directions,
-                                                              std::array<double, 3> const &sizes) {
+                                                              PeakEllipsoidFrame const &directions,
+                                                              PeakEllipsoidExtent const &sizes) {
   std::pair<double, double> count(0, 0);
   for (const auto &event : events) {
     double sum = 0;
@@ -137,9 +137,9 @@ std::pair<double, double> IntegrateQLabEvents::numInEllipsoid(SlimEvents const &
 }
 
 std::pair<double, double> IntegrateQLabEvents::numInEllipsoidBkg(SlimEvents const &events,
-                                                                 std::array<V3D, 3> const &directions,
-                                                                 std::array<double, 3> const &sizes,
-                                                                 std::array<double, 3> const &sizesIn,
+                                                                 PeakEllipsoidFrame const &directions,
+                                                                 PeakEllipsoidExtent const &sizes,
+                                                                 PeakEllipsoidExtent const &sizesIn,
                                                                  const bool useOnePercentBackgroundCorrection) {
   std::pair<double, double> count(0, 0);
   std::vector<std::pair<double, double>> eventVec;
@@ -246,9 +246,9 @@ void IntegrateQLabEvents::addEvent(const SlimEvent event) {
 
 PeakShapeEllipsoid_const_sptr
 IntegrateQLabEvents::ellipseIntegrateEvents(const std::vector<V3D> &E1Vec, V3D const &peak_q, SlimEvents const &ev_list,
-                                            std::array<V3D, 3> const &directions, std::array<double, 3> const &sigmas,
+                                            PeakEllipsoidFrame const &directions, std::array<double, 3> const &sigmas,
                                             bool specify_size, double peak_radius, double back_inner_radius,
-                                            double back_outer_radius, std::array<double, 3> &axes_radii, double &inti,
+                                            double back_outer_radius, PeakEllipsoidExtent &axes_radii, double &inti,
                                             double &sigi, std::pair<double, double> &backi) {
   /* r1, r2 and r3 will give the sizes of the major axis of the peak
    * ellipsoid, and of the inner and outer surface of the background
@@ -286,9 +286,9 @@ IntegrateQLabEvents::ellipseIntegrateEvents(const std::vector<V3D> &E1Vec, V3D c
     }
   }
 
-  std::array<double, 3> abcBackgroundOuterRadii;
-  std::array<double, 3> abcBackgroundInnerRadii;
-  std::array<double, 3> abcRadii;
+  PeakEllipsoidExtent abcBackgroundOuterRadii;
+  PeakEllipsoidExtent abcBackgroundInnerRadii;
+  PeakEllipsoidExtent abcRadii;
   for (int i = 0; i < 3; i++) {
     abcBackgroundOuterRadii[i] = r3 * sigmas[i];
     abcBackgroundInnerRadii[i] = r2 * sigmas[i];
@@ -359,7 +359,7 @@ IntegrateQLabEvents::ellipseIntegrateEvents(const std::vector<V3D> &E1Vec, V3D c
                                                     "IntegrateEllipsoids");
 }
 double IntegrateQLabEvents::detectorQ(const std::vector<Mantid::Kernel::V3D> &E1Vec,
-                                      const Mantid::Kernel::V3D &QLabFrame, const std::array<double, 3> &r) {
+                                      const Mantid::Kernel::V3D &QLabFrame, const PeakEllipsoidExtent &r) {
   double quot = 1.0;
   for (const auto &E1 : E1Vec) {
     V3D distv = QLabFrame - E1 * (QLabFrame.scalar_prod(E1)); // distance to the trajectory as a vector

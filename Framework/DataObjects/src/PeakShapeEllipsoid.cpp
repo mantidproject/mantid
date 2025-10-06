@@ -13,8 +13,7 @@
 
 namespace Mantid::DataObjects {
 
-PeakShapeEllipsoid::PeakShapeEllipsoid(const std::array<Kernel::V3D, 3> &directions,
-                                       const PeakEllipsoidExtent &abcRadii,
+PeakShapeEllipsoid::PeakShapeEllipsoid(const PeakEllipsoidFrame &directions, const PeakEllipsoidExtent &abcRadii,
                                        const PeakEllipsoidExtent &abcRadiiBackgroundInner,
                                        const PeakEllipsoidExtent &abcRadiiBackgroundOuter,
                                        Kernel::SpecialCoordinateSystem frame, std::string algorithmName,
@@ -36,11 +35,11 @@ const PeakEllipsoidExtent &PeakShapeEllipsoid::abcRadiiBackgroundInner() const {
 
 const PeakEllipsoidExtent &PeakShapeEllipsoid::abcRadiiBackgroundOuter() const { return m_abc_radiiBackgroundOuter; }
 
-const std::array<Kernel::V3D, 3> &PeakShapeEllipsoid::directions() const { return m_directions; }
+const PeakEllipsoidFrame &PeakShapeEllipsoid::directions() const { return m_directions; }
 
 const Kernel::V3D &PeakShapeEllipsoid::translation() const { return m_translation; }
 
-std::array<Kernel::V3D, 3>
+PeakEllipsoidFrame
 PeakShapeEllipsoid::getDirectionInSpecificFrame(Kernel::Matrix<double> &invertedGoniometerMatrix) const {
 
   if ((invertedGoniometerMatrix.numCols() != m_directions.size()) ||
@@ -49,7 +48,7 @@ PeakShapeEllipsoid::getDirectionInSpecificFrame(Kernel::Matrix<double> &inverted
                                 "compatible with the direction vector");
   }
 
-  std::array<Kernel::V3D, 3> directionsInFrame;
+  PeakEllipsoidFrame directionsInFrame;
   std::transform(m_directions.cbegin(), m_directions.cend(), directionsInFrame.begin(),
                  [&invertedGoniometerMatrix](const auto &direction) { return invertedGoniometerMatrix * direction; });
   return directionsInFrame;

@@ -7,20 +7,19 @@
 #pragma once
 
 #include "MantidDataObjects/PeakShapeBase.h"
+#include "MantidDataObjects/PeakShapeEllipsoid_fwd.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/V3D.h"
 
 namespace Mantid {
 namespace DataObjects {
 
-typedef std::array<double, 3> PeakEllipsoidExtent;
-
 /** PeakShapeEllipsoid : PeakShape representing a 3D ellipsoid
  */
 class MANTID_DATAOBJECTS_DLL PeakShapeEllipsoid : public PeakShapeBase {
 public:
   /// Constructor
-  PeakShapeEllipsoid(const std::array<Mantid::Kernel::V3D, 3> &directions, const PeakEllipsoidExtent &abcRadii,
+  PeakShapeEllipsoid(const PeakEllipsoidFrame &directions, const PeakEllipsoidExtent &abcRadii,
                      const PeakEllipsoidExtent &abcRadiiBackgroundInner,
                      const PeakEllipsoidExtent &abcRadiiBackgroundOuter, Kernel::SpecialCoordinateSystem frame,
                      std::string algorithmName = std::string(), int algorithmVersion = -1,
@@ -34,11 +33,11 @@ public:
   /// Get background outer radii
   const PeakEllipsoidExtent &abcRadiiBackgroundOuter() const;
   /// Get ellipsoid directions
-  const std::array<Mantid::Kernel::V3D, 3> &directions() const;
+  const PeakEllipsoidFrame &directions() const;
   /// Get translation of center
   const Kernel::V3D &translation() const;
   /// Get ellipsoid directions in a specified frame
-  std::array<Kernel::V3D, 3> getDirectionInSpecificFrame(Kernel::Matrix<double> &invertedGoniometerMatrix) const;
+  PeakEllipsoidFrame getDirectionInSpecificFrame(Kernel::Matrix<double> &invertedGoniometerMatrix) const;
 
   /// PeakShape interface
   std::string toJSON() const override;
@@ -53,7 +52,7 @@ public:
 
 private:
   /// principle axis
-  std::array<Mantid::Kernel::V3D, 3> m_directions;
+  PeakEllipsoidFrame m_directions;
   /// radii
   PeakEllipsoidExtent m_abc_radii;
   /// inner radii

@@ -162,8 +162,8 @@ Integrate3DEvents::integrateStrongPeak(const IntegrationParameters &params, cons
   auto rValues = calculateRadiusFactors(params, max_sigma);
   auto &r1 = std::get<0>(rValues), r2 = std::get<1>(rValues), r3 = std::get<2>(rValues);
 
-  std::array<double, 3> abcBackgroundOuterRadii, abcBackgroundInnerRadii;
-  std::array<double, 3> peakRadii;
+  DataObjects::PeakEllipsoidExtent abcBackgroundOuterRadii, abcBackgroundInnerRadii;
+  DataObjects::PeakEllipsoidExtent peakRadii;
   for (int i = 0; i < 3; i++) {
     abcBackgroundOuterRadii[i] = r3 * sigmas[i];
     abcBackgroundInnerRadii[i] = r2 * sigmas[i];
@@ -291,8 +291,8 @@ double Integrate3DEvents::estimateSignalToNoiseRatio(const IntegrationParameters
 
   auto rValues = calculateRadiusFactors(params, max_sigma);
   auto &r1 = std::get<0>(rValues), r2 = std::get<1>(rValues), r3 = std::get<2>(rValues);
-  std::array<double, 3> abcBackgroundOuterRadii, abcBackgroundInnerRadii;
-  std::array<double, 3> peakRadii;
+  DataObjects::PeakEllipsoidExtent abcBackgroundOuterRadii, abcBackgroundInnerRadii;
+  DataObjects::PeakEllipsoidExtent peakRadii;
   if (forceSpherical) {
     // test for spherically symmeteric peak (within tolerance)
     if ((max_sigma - min_sigma) / max_sigma > sphericityTol)
@@ -344,9 +344,9 @@ const std::vector<std::pair<std::pair<double, double>, V3D>> *Integrate3DEvents:
 
 bool Integrate3DEvents::correctForDetectorEdges(std::tuple<double, double, double> &radii,
                                                 const std::vector<V3D> &E1Vecs, const V3D &peak_q,
-                                                const std::array<double, 3> &axesRadii,
-                                                const std::array<double, 3> &bkgInnerRadii,
-                                                const std::array<double, 3> &bkgOuterRadii) {
+                                                const DataObjects::PeakEllipsoidExtent &axesRadii,
+                                                const DataObjects::PeakEllipsoidExtent &bkgInnerRadii,
+                                                const DataObjects::PeakEllipsoidExtent &bkgOuterRadii) {
 
   if (E1Vecs.empty())
     return true;
@@ -412,7 +412,7 @@ bool Integrate3DEvents::correctForDetectorEdges(std::tuple<double, double, doubl
 Mantid::Geometry::PeakShape_const_sptr
 Integrate3DEvents::ellipseIntegrateEvents(const std::vector<V3D> &E1Vec, V3D const &peak_q, bool specify_size,
                                           double peak_radius, double back_inner_radius, double back_outer_radius,
-                                          std::array<double, 3> &axes_radii, double &inti, double &sigi) {
+                                          DataObjects::PeakEllipsoidExtent &axes_radii, double &inti, double &sigi) {
   inti = 0.0; // default values, in case something
   sigi = 0.0; // is wrong with the peak.
 
@@ -462,7 +462,7 @@ Mantid::Geometry::PeakShape_const_sptr
 Integrate3DEvents::ellipseIntegrateModEvents(const std::vector<V3D> &E1Vec, V3D const &peak_q, V3D const &hkl,
                                              V3D const &mnp, bool specify_size, double peak_radius,
                                              double back_inner_radius, double back_outer_radius,
-                                             std::array<double, 3> &axes_radii, double &inti, double &sigi) {
+                                             DataObjects::PeakEllipsoidExtent &axes_radii, double &inti, double &sigi) {
   inti = 0.0; // default values, in case something
   sigi = 0.0; // is wrong with the peak.
 
@@ -526,7 +526,8 @@ Integrate3DEvents::ellipseIntegrateModEvents(const std::vector<V3D> &E1Vec, V3D 
  */
 std::pair<double, double>
 Integrate3DEvents::numInEllipsoid(std::vector<std::pair<std::pair<double, double>, V3D>> const &events,
-                                  std::array<V3D, 3> const &directions, std::array<double, 3> const &sizes) {
+                                  DataObjects::PeakEllipsoidFrame const &directions,
+                                  DataObjects::PeakEllipsoidExtent const &sizes) {
 
   std::pair<double, double> count(0, 0);
   for (const auto &event : events) {
@@ -560,11 +561,10 @@ Integrate3DEvents::numInEllipsoid(std::vector<std::pair<std::pair<double, double
  correction should be used.
  * @return Then number of events that are in or on the specified ellipsoid.
  */
-std::pair<double, double>
-Integrate3DEvents::numInEllipsoidBkg(std::vector<std::pair<std::pair<double, double>, V3D>> const &events,
-                                     std::array<V3D, 3> const &directions, std::array<double, 3> const &sizes,
-                                     std::array<double, 3> const &sizesIn,
-                                     const bool useOnePercentBackgroundCorrection) {
+std::pair<double, double> Integrate3DEvents::numInEllipsoidBkg(
+    std::vector<std::pair<std::pair<double, double>, V3D>> const &events,
+    DataObjects::PeakEllipsoidFrame const &directions, DataObjects::PeakEllipsoidExtent const &sizes,
+    DataObjects::PeakEllipsoidExtent const &sizesIn, const bool useOnePercentBackgroundCorrection) {
   std::pair<double, double> count(0, 0);
   std::vector<std::pair<double, double>> eventVec;
   for (const auto &event : events) {
@@ -1052,8 +1052,9 @@ void Integrate3DEvents::addModEvent(std::pair<std::pair<double, double>, V3D> ev
 PeakShapeEllipsoid_const_sptr Integrate3DEvents::ellipseIntegrateEvents(
     const std::vector<V3D> &E1Vec, V3D const &peak_q,
     std::vector<std::pair<std::pair<double, double>, Mantid::Kernel::V3D>> const &ev_list,
-    std::array<V3D, 3> const &directions, std::array<double, 3> const &sigmas, bool specify_size, double peak_radius,
-    double back_inner_radius, double back_outer_radius, std::array<double, 3> &axes_radii, double &inti, double &sigi) {
+    DataObjects::PeakEllipsoidFrame const &directions, std::array<double, 3> const &sigmas, bool specify_size,
+    double peak_radius, double back_inner_radius, double back_outer_radius,
+    DataObjects::PeakEllipsoidExtent &axes_radii, double &inti, double &sigi) {
   // r1, r2 and r3 will give the sizes of the major axis of
   // the peak ellipsoid, and of the inner and outer surface
   // of the background ellipsoidal shell, respectively.
@@ -1089,9 +1090,9 @@ PeakShapeEllipsoid_const_sptr Integrate3DEvents::ellipseIntegrateEvents(
     }
   }
 
-  std::array<double, 3> abcBackgroundOuterRadii;
-  std::array<double, 3> abcBackgroundInnerRadii;
-  std::array<double, 3> abcRadii;
+  DataObjects::PeakEllipsoidExtent abcBackgroundOuterRadii;
+  DataObjects::PeakEllipsoidExtent abcBackgroundInnerRadii;
+  DataObjects::PeakEllipsoidExtent abcRadii;
   for (int i = 0; i < 3; i++) {
     abcBackgroundOuterRadii[i] = r3 * sigmas[i];
     abcBackgroundInnerRadii[i] = r2 * sigmas[i];
@@ -1145,7 +1146,7 @@ PeakShapeEllipsoid_const_sptr Integrate3DEvents::ellipseIntegrateEvents(
  * @param r: Peak radius.
  */
 double Integrate3DEvents::detectorQ(const std::vector<V3D> &E1Vec, const V3D &QLabFrame,
-                                    const std::array<double, 3> &r) {
+                                    const DataObjects::PeakEllipsoidExtent &r) {
   double quot = 1.0;
   for (const auto &E1 : E1Vec) {
     V3D distv = QLabFrame - E1 * (QLabFrame.scalar_prod(E1)); // distance to the trajectory as a vector

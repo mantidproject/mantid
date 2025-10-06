@@ -608,9 +608,9 @@ template <typename MDE, size_t nd> void IntegratePeaksMD2::integrate(typename MD
           // set peak shape
           // get radii in same proprtion as eigenvalues
           auto max_stdev = pow(*std::max_element(eigenvals.begin(), eigenvals.end()), 0.5);
-          std::array<double, 3> peakRadii{0., 0., 0.};
-          std::array<double, 3> backgroundInnerRadii{0., 0., 0.};
-          std::array<double, 3> backgroundOuterRadii{0., 0., 0.};
+          PeakEllipsoidExtent peakRadii{0., 0., 0.};
+          PeakEllipsoidExtent backgroundInnerRadii{0., 0., 0.};
+          PeakEllipsoidExtent backgroundOuterRadii{0., 0., 0.};
           for (size_t irad = 0; irad < peakRadii.size(); irad++) {
             auto scale = pow(eigenvals[irad], 0.5) / max_stdev;
             peakRadii[irad] = PeakRadiusVector[i] * scale;
@@ -668,9 +668,9 @@ template <typename MDE, size_t nd> void IntegratePeaksMD2::integrate(typename MD
               pow(*std::max_element(eigenvals_background_inner.begin(), eigenvals_background_inner.end()), 0.5);
           auto max_stdev_outer =
               pow(*std::max_element(eigenvals_background_outer.begin(), eigenvals_background_outer.end()), 0.5);
-          std::array<double, 3> peakRadii{0., 0., 0.};
-          std::array<double, 3> backgroundInnerRadii{0., 0., 0.};
-          std::array<double, 3> backgroundOuterRadii{0., 0., 0.};
+          PeakEllipsoidExtent peakRadii{0., 0., 0.};
+          PeakEllipsoidExtent backgroundInnerRadii{0., 0., 0.};
+          PeakEllipsoidExtent backgroundOuterRadii{0., 0., 0.};
           for (size_t irad = 0; irad < peakRadii.size(); irad++) {
             peakRadii[irad] = PeakRadiusVector[i] * pow(eigenvals[irad], 0.5) / max_stdev;
             backgroundInnerRadii[irad] =

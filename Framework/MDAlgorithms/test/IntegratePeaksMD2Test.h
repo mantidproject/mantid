@@ -43,7 +43,7 @@ using Mantid::Kernel::Logger;
 using Mantid::Kernel::V3D;
 
 namespace {
-void assert_radii_delta(const std::array<double, 3> &observed, const std::vector<double> &expected,
+void assert_radii_delta(const PeakEllipsoidExtent &observed, const std::vector<double> &expected,
                         const double tolerance) {
   TS_ASSERT_EQUALS(expected.size(), 3);
   for (size_t i = 0; i < 3; ++i) {
