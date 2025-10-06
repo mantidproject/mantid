@@ -45,7 +45,6 @@ requirements:
     - if: osx or linux
       then: libopenblas ${{ libopenblas }}
     - mantid == ${{ version }}
-    - pip ${{ pip }}
     - python ${{ python }}
     - pyqt ${{ pyqt }}
     - pyqt5-sip ${{ pyqt5_sip }}

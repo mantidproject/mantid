@@ -15,7 +15,6 @@ requirements:
     - conda-index
     - if: win
       then: conda-wrappers
-
     - doxygen ${{ doxygen }}
     - eigen ${{ eigen }}
     - euphonic ${{ euphonic }}
@@ -94,8 +93,6 @@ requirements:
         - libgl-devel
         - gxx_linux-64 ${{ cxx_compiler_version }}
         - libglu ${{ libglu }}
-        # Needed for test suite on Linux
-        - ${{ cdt('pciutils-libs') }}
         - xorg-libxcomposite>=0.4.5
         - xorg-libxcursor>=1.2.0
         - xorg-libxdamage>=1.1.5
@@ -126,3 +123,4 @@ about:
 extra:
   recipe-maintainers:
     - thomashampson
+    - peterfpeterson
