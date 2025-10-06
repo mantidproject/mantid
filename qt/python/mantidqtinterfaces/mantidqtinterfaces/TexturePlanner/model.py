@@ -23,7 +23,10 @@ class TexturePlannerModel(object):
         # probably static
         self.wsname = "__texture_planning_ws"
         self.sense_vals = {"Clockwise": -1, "Counterclockwise": 1}  # mantid convention
+        self.sense_names = {"-1": "Clockwise", "1": "Counterclockwise"}
         self.supported_groups = ("Texture20", "Texture30", "banks")
+        self.gon_colors = ("hotpink", "orange", "purple", "goldenrod", "plum", "saddlebrown")
+        self.dir_cols = ("red", "green", "blue")
 
         # properties which will be updated
         self.ws = None
@@ -32,15 +35,15 @@ class TexturePlannerModel(object):
         self.group = None
         self.ax_transform = np.eye(3)
         self.dir_names = ["D1", "D2", "D3"]
-        self.dir_cols = ["red", "green", "blue"]
         self.gRs = []
         self.R = Rotation.identity()
         self.detQs_lab = None
         self.projection = projection
         self.gonio_index = 0
+        self.orientation_index = 0
 
         # data structure
-        self.saved_orientations = []
+        self.saved_orientations = {0: {}}
 
         # init func calls
         self.update_ws()
@@ -72,8 +75,11 @@ class TexturePlannerModel(object):
     def get_default_texture_directions():
         return ("RD", "ND", "TD"), ((1, 0, 0), (0, 1, 0), (0, 0, 1))
 
-    def get_num_orientations(self):
-        return len(self.saved_orientations) + 1
+    def get_orientation_index(self):
+        return self.orientation_index
+
+    def set_orientation_index(self, index):
+        self.orientation_index = index
 
     def get_vecs(self, all_vec_strings, num_gonios):
         vec_strings = all_vec_strings[:num_gonios]
@@ -89,7 +95,7 @@ class TexturePlannerModel(object):
         max_ind = num_gonios - 1
         return self.gonio_index if self.gonio_index <= max_ind else max_ind
 
-    def get_gRs(self, vecs, senses, angles):
+    def update_gRs(self, vecs, senses, angles, current_index):
         gRs = [Rotation.identity()]
         R = Rotation.identity()
         for i, vec in enumerate(vecs):
@@ -97,8 +103,47 @@ class TexturePlannerModel(object):
             r_step = Rotation.from_davenport(vec, "extrinsic", sense * angles[i], degrees=True)
             R = R * r_step
             gRs.append(R)
-        self.gRs = gRs
-        self.R = R
+        self.saved_orientations[current_index]["gRs"] = gRs
+        self.saved_orientations[current_index]["R"] = R
+
+    def get_goniometer_string(self, vec, sense, angle):
+        return f"{angle},{np.round(vec[0], 3)},{np.round(vec[1], 3)},{np.round(vec[2], 3)},{sense}"
+
+    def update_gonio_string(self, vecs, senses, angles, index):
+        for i, vec in enumerate(vecs):
+            self.saved_orientations[index][f"g{i}"] = self.get_goniometer_string(vec, senses[i], angles[i])
+        for i in range(len(vecs), 6):
+            # for the extra goniometers, just set to default axis and null transformations
+            self.saved_orientations[index][f"g{i}"] = self.get_goniometer_string((1, 0, 0), 1, 0)
+
+    def read_goniometer_string(self, goniometer_string):
+        angle, v1, v2, v3, sense = goniometer_string.split(",")
+        return f"{v1},{v2},{v3}", self.sense_names[sense], float(angle)
+
+    def get_goniometer_values(self, index):
+        info = self.saved_orientations[index]
+        if "g0" not in info.keys():
+            return (
+                [
+                    "1,0,0",
+                ]
+                * 6,
+                [
+                    "Clockwise",
+                ]
+                * 6,
+                [
+                    0.0,
+                ]
+                * 6,
+            )
+        vecs, senses, angles = [], [], []
+        for i in range(6):
+            vec, sense, angle = self.read_goniometer_string(info[f"g{i}"])
+            vecs.append(vec)
+            senses.append(sense)
+            angles.append(angle)
+        return vecs, senses, angles
 
     def get_detQ_lab(self):
         group_ws = GroupDetectors(
@@ -114,16 +159,42 @@ class TexturePlannerModel(object):
         detQs_lab = det_pos - np.array((0, 0, 1))
         self.detQs_lab = detQs_lab / np.linalg.norm(detQs_lab, axis=1)[:, None]
 
-    def update_plot(self, vecs, senses, angles, fig, lab_ax, proj_ax):
+    def update_all_projected_data(self):
+        for i in self.saved_orientations.keys():
+            self.update_projected_data(i)
+
+    def update_projected_data(self, index):
+        R = self.saved_orientations[index]["R"]
+
+        rot_pos = R.inv().apply(self.detQs_lab) @ self.ax_transform
+
+        cart_pos = get_alpha_beta_from_cart(rot_pos.T)
+        self.saved_orientations[index]["pf_points"] = ster_proj(*cart_pos.T) if self.projection == "ster" else azim_proj(*cart_pos.T)
+
+    def add_orientation(self):
+        # create a new orientation, initially just as a copy of the current orientation
+        self.saved_orientations[self.get_num_orientations()] = self.saved_orientations[self.orientation_index].copy()
+
+    def get_num_orientations(self):
+        return len(self.saved_orientations.keys())
+
+    def get_table_info(self):
+        table_info = []
+        for index, val in self.saved_orientations.items():
+            row_info = []
+            row_info.append([val[f"g{x}"] for x in range(6)])
+            row_info.append(val.get("include", True))
+            row_info.append(val.get("select", True))
+            table_info.append(row_info)
+        return table_info
+
+    def update_plot(self, vecs, senses, angles, fig, lab_ax, proj_ax, current_index):
         lab_ax.clear()
         proj_ax.clear()
 
-        gRs = self.gRs
-        R = self.R
+        gRs = self.saved_orientations[current_index]["gRs"]
+        R = self.saved_orientations[current_index]["R"]
         nGon = len(gRs)
-
-        gon_colors = ["hotpink", "orange", "purple", "goldenrod", "plum", "saddlebrown"]
-        ge = ((nGon / 2) + 1) * 0.866
 
         gVecs = []
 
@@ -136,10 +207,6 @@ class TexturePlannerModel(object):
         extent = (np.linalg.norm(shape_mesh, axis=(1, 2)).max() / 2) * 1.2
 
         rot_mesh = R.apply(shape_mesh.reshape((-1, 3))).reshape(shape_mesh.shape)
-        rot_pos = R.inv().apply(detQs_lab) @ ax_transform
-
-        cart_pos = get_alpha_beta_from_cart(rot_pos.T)
-        pf_xy = ster_proj(*cart_pos.T) if self.projection == "ster" else azim_proj(*cart_pos.T)
 
         for i, vec in enumerate(vecs):
             gR = gRs[i]
@@ -153,21 +220,16 @@ class TexturePlannerModel(object):
             if angle <= 0:
                 gon_ring = np.flip(gon_ring, axis=1)  # reverse the ring if the angle is negative
             pos_ind = int(np.abs(angle))
-            lab_ax.plot(*gon_ring[:, : pos_ind + 1], color=gon_colors[i])
+            lab_ax.plot(*gon_ring[:, : pos_ind + 1], color=self.gon_colors[i])
             lab_ax.plot(*gon_ring[:, pos_ind:], color="grey")
 
             gVec = gRs[i].apply(vec)
             gVecs.append(gVec)
-            lab_ax.quiver(*np.zeros(3), *gVec * extent * 2, color=gon_colors[i], ls=("-", "--")[int(i != self.gonio_index)])
+            lab_ax.quiver(*np.zeros(3), *gVec * extent * 2, color=self.gon_colors[i], ls=("-", "--")[int(i != self.gonio_index)])
 
         gPole = R.inv().apply(np.array(gVecs)) @ ax_transform
         cart_gPole = get_alpha_beta_from_cart(gPole.T)
         gPole_xy = ster_proj(*cart_gPole.T) if self.projection == "ster" else azim_proj(*cart_gPole.T)
-
-        lab_ax.set_xlim([-ge, ge])
-        lab_ax.set_ylim([-ge, ge])
-        lab_ax.set_zlim([-ge, ge])
-        lab_ax.set_axis_off()
 
         # 3D plot
         sample_model = ShowSampleModel()
@@ -176,9 +238,10 @@ class TexturePlannerModel(object):
         fig.sca(lab_ax)
         plot_sample_only(fig, rot_mesh * 0.5, 0.5, "grey")
         sample_model.plot_sample_directions(ax_transform, self.dir_names)
-        lab_ax.set_xlim([-extent * nGon / 2, extent * nGon / 2])
-        lab_ax.set_ylim([-extent * nGon / 2, extent * nGon / 2])
-        lab_ax.set_zlim([-extent * nGon / 2, extent * nGon / 2])
+        lab_ax.set_xlim([-extent * nGon / 1.5, extent * nGon / 1.5])
+        lab_ax.set_ylim([-extent * nGon / 1.5, extent * nGon / 1.5])
+        lab_ax.set_zlim([-extent * nGon / 1.5, extent * nGon / 1.5])
+        lab_ax.set_aspect("equal")
         [lab_ax.quiver(*np.zeros(3), *dQ * 1.25 * extent, arrow_length_ratio=0.05, color="grey", alpha=0.25) for dQ in detQs_lab]
         [
             lab_ax.scatter(
@@ -192,17 +255,19 @@ class TexturePlannerModel(object):
 
         # 2D plot
         for i, gP in enumerate(gPole_xy):
-            pc = gon_colors[i]
+            pc = self.gon_colors[i]
             fc = "None" if i != self.gonio_index else pc
             if np.isclose(np.linalg.norm(gP), 1):
                 proj_ax.plot((gP[1], -gP[1]), (gP[0], -gP[0]), color=pc, ls=("-", "--")[int(i != self.gonio_index)])
             else:
                 proj_ax.scatter(gP[1], gP[0], s=30, edgecolor=pc, facecolor=fc)
-        proj_ax.scatter(pf_xy[:, 1], pf_xy[:, 0], s=20, c="dodgerblue")
 
-        # for i, tpf in enumerate(temp_arr_points):
-        #    fc = "None" if i != temp_ind[0] else "dodgerblue"
-        #    proj_ax.scatter(tpf[:, 1], tpf[:, 0], s=20, facecolor=fc, edgecolor='dodgerblue', alpha=0.2)
+        for i in self.saved_orientations.keys():
+            pf_xy = self.saved_orientations[i]["pf_points"]
+            if i == current_index:
+                proj_ax.scatter(pf_xy[:, 1], pf_xy[:, 0], s=20, c="dodgerblue")
+            else:
+                proj_ax.scatter(pf_xy[:, 1], pf_xy[:, 0], s=20, facecolor="None", edgecolor="dodgerblue")
 
         proj_ax.set_aspect("equal")
         proj_ax.set_xlim(-1.1, 1.1)
@@ -216,7 +281,6 @@ class TexturePlannerModel(object):
 
         fig.canvas.draw_idle()
         proj_ax.figure.canvas.draw_idle()
-        return pf_xy
 
 
 def ring(axis, r=1, res=100, offset=(0, 0, 0)):
