@@ -26,7 +26,6 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/EnumeratedString.h"
 #include "MantidKernel/EnumeratedStringProperty.h"
-#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/Unit.h"
@@ -199,11 +198,9 @@ void AlignAndFocusPowderSlim::init() {
   setPropertyGroup(PropertyNames::EVENTS_PER_THREAD, CHUNKING_PARAM_GROUP);
 
   // load single spectrum
-  std::array<int, 7> vulcan_banks = {{1, 2, 3, 4, 5, 6, EMPTY_INT()}};
-  auto bankValidator = std::make_shared<Mantid::Kernel::ListValidator<int>>(vulcan_banks);
-  declareProperty(
-      std::make_unique<Kernel::PropertyWithValue<int>>(PropertyNames::OUTPUT_SPEC_NUM, EMPTY_INT(), bankValidator),
-      "The bank for which to read data; if specified, others will be blank");
+  declareProperty(std::make_unique<Kernel::PropertyWithValue<int>>(PropertyNames::OUTPUT_SPEC_NUM, EMPTY_INT(),
+                                                                   positiveIntValidator),
+                  "The bank for which to read data; if specified, others will be blank");
 }
 
 std::map<std::string, std::string> AlignAndFocusPowderSlim::validateInputs() {
