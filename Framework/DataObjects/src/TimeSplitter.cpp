@@ -678,5 +678,48 @@ void TimeSplitter::splitEventVec(const std::function<const DateAndTime(const Eve
   }
 }
 
+std::vector<std::pair<int, std::pair<size_t, size_t>>>
+TimeSplitter::calculate_target_indices(const std::vector<DateAndTime> &times) const {
+  std::vector<std::pair<int, std::pair<size_t, size_t>>> indices;
+  if (this->empty()) {
+    // if the TimeSplitter is empty, then we just return the whole range with NO_TARGET
+    indices.emplace_back(NO_TARGET, std::make_pair(0, times.size()));
+    return indices;
+  }
+  indices.reserve(m_roi_map.size());
+
+  auto it = m_roi_map.cbegin();
+  for (; it != std::prev(m_roi_map.cend()); it++) {
+    DateAndTime intervalStart = it->first;
+    DateAndTime intervalStop = std::next(it)->first;
+    int target = it->second;
+    if (target == NO_TARGET)
+      continue;
+
+    const auto startIdx = std::lower_bound(times.cbegin(), times.cend(), intervalStart);
+    if (startIdx != times.cend()) {
+      const auto stopIdx = std::lower_bound(times.cbegin(), times.cend(), intervalStop);
+      if (stopIdx != times.cend()) {
+        if (startIdx != stopIdx) {
+          indices.emplace_back(
+              target, std::make_pair(std::distance(times.cbegin(), startIdx), std::distance(times.cbegin(), stopIdx)));
+        }
+      } else {
+        indices.emplace_back(
+            target, std::make_pair(std::distance(times.cbegin(), startIdx), std::numeric_limits<size_t>::max()));
+      }
+    }
+  }
+
+  if (it->second != NO_TARGET) {
+    std::ostringstream err;
+    err << "Open-ended time interval is invalid in event filtering: " << it->first << " - ?,"
+        << " target index: " << it->second << std::endl;
+    throw std::runtime_error(err.str());
+  }
+
+  return indices;
+}
+
 } // namespace DataObjects
 } // namespace Mantid

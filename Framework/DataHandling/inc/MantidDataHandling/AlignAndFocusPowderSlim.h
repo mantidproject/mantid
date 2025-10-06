@@ -42,6 +42,9 @@ private:
                    const std::vector<double> &difc_focus);
   std::vector<std::pair<size_t, size_t>> determinePulseIndices(const API::MatrixWorkspace_sptr &wksp,
                                                                const Kernel::TimeROI &roi);
+  std::vector<std::pair<int, std::pair<size_t, size_t>>>
+  determinePulseIndicesTargets(const API::MatrixWorkspace_sptr &wksp, const Kernel::TimeROI &roi,
+                               const DataObjects::TimeSplitter &timeSplitter);
   Kernel::TimeROI getStartingTimeROI(const API::MatrixWorkspace_sptr &wksp);
   DataObjects::TimeSplitter timeSplitterFromSplitterWorkspace(const Types::Core::DateAndTime &);
 

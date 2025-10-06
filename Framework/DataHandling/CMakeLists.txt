@@ -212,7 +212,7 @@ set(SRC_FILES
     src/RotateSampleShape.cpp
     src/AlignAndFocusPowderSlim/NexusLoader.cpp
     src/AlignAndFocusPowderSlim/ProcessBankTask.cpp
-    src/AlignAndFocusPowderSlim/ProcessEventsTask.cpp
+    src/AlignAndFocusPowderSlim/ProcessBankSplitTask.cpp
     src/AlignAndFocusPowderSlim/BankCalibration.cpp
 )
 
@@ -433,6 +433,7 @@ set(INC_FILES
     src/LoadRaw/vms_convert.h
     src/AlignAndFocusPowderSlim/NexusLoader.h
     src/AlignAndFocusPowderSlim/ProcessBankTask.h
+    src/AlignAndFocusPowderSlim/ProcessBankSplitTask.h
     src/AlignAndFocusPowderSlim/ProcessEventsTask.h
     src/AlignAndFocusPowderSlim/BankCalibration.h
     inc/MantidDataHandling/RotateSampleShape.h
