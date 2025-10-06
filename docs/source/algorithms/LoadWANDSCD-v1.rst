@@ -160,6 +160,18 @@ Output:
 
 .. figure:: /images/LoadWANDSCD.png
 
+
+Workflow
+--------
+
+From left to right:
+
+- main workflow
+- Expanded steps of 'Load and Group'
+- Expanded steps of 'Normalize by vanadium'
+
+.. diagram:: LoadWANDSCD-v1_wkflw.dot
+
 .. categories::
 
 .. sourcelink::
