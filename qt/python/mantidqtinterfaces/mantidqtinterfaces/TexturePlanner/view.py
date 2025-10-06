@@ -5,9 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
-from qtpy.QtWidgets import (
-    QMainWindow,
-)
+from qtpy.QtWidgets import QMainWindow, QHeaderView, QTableWidgetItem, QCheckBox, QWidget, QHBoxLayout
+from qtpy import QtCore
 from mantidqt.utils.qt import load_ui
 from mantid.kernel import FeatureType
 from mantid import UsageService
@@ -22,6 +21,9 @@ Ui_texplan, _ = load_ui(__file__, "texture_planner.ui")
 
 
 class TexturePlannerView(QMainWindow, Ui_texplan):
+    sig_select_state_changed = QtCore.Signal()
+    sig_include_state_changed = QtCore.Signal()
+
     def __init__(self, parent=None, presenter=None):
         super().__init__(parent)
         self.setupUi(self)
@@ -51,6 +53,9 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
         self._setup_lab_plot()
 
         self.set_angle_limits()
+
+        self.create_workspace_table()
+        self.hide_axis_columns()
 
         # register startup
         UsageService.registerFeatureUsage(FeatureType.Interface, "TexturePlanner", False)
@@ -92,6 +97,20 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
 
     def set_on_group_changed(self, slot):
         self.cmbGroup.currentTextChanged.connect(slot)
+
+    def set_on_add_orientation_clicked(self, slot):
+        self.addOrientation.clicked.connect(slot)
+
+    def set_on_current_index_changed(self, slot):
+        self.spnIndex.valueChanged.connect(slot)
+
+    @QtCore.Slot(bool)
+    def _on_any_include_toggled(self):
+        self.sig_include_state_changed.emit()
+
+    @QtCore.Slot(bool)
+    def _on_any_select_toggled(self):
+        self.sig_select_state_changed.emit()
 
     # getters
 
@@ -140,6 +159,9 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
     def get_group(self):
         return self.cmbGroup.currentText()
 
+    def get_current_index(self):
+        return int(self.spnIndex.value()) - 1
+
     # setters
 
     def set_rd_name(self, text):
@@ -174,6 +196,18 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
         for ang in self.gonio_angles:
             ang.setSingleStep(step_size)
 
+    def set_vecs(self, vecs):
+        for i in range(6):
+            self.gonio_vecs[i].setText(vecs[i])
+
+    def set_senses(self, senses):
+        for i in range(6):
+            self.gonio_senses[i].setCurrentText(senses[i])
+
+    def set_angles(self, angles):
+        for i in range(6):
+            self.gonio_angles[i].setValue(angles[i])
+
     def _setup_pf_plot(self):
         self.pf_figure = Figure(layout="constrained")
         self.pf_canvas = FigureCanvas(self.pf_figure)
@@ -201,6 +235,10 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
     def set_gonio_axis_enabled(gonio, val):
         gonio.setEnabled(val)
 
+    def hide_axis_columns(self):
+        for i in range(6):
+            self.tableWidget.setColumnHidden(i, not i < self.get_num_gonios())
+
     def set_angle_limits(self):
         for angs in self.gonio_angles:
             angs.setMinimum(-360)
@@ -208,3 +246,37 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
 
     def setup_group_options(self, groups):
         self.cmbGroup.addItems(groups)
+
+    def create_workspace_table(self):
+        table_column_headers = ("Axis0", "Axis1", "Axis2", "Axis3", "Axis4", "Axis5", "Include", "Select")
+        n_col = len(table_column_headers)
+        self.tableWidget.setColumnCount(n_col)
+        self.tableWidget.setHorizontalHeaderLabels(table_column_headers)
+        self.tableWidget.setRowCount(1)
+
+        header = self.tableWidget.horizontalHeader()
+        [header.setSectionResizeMode(ind, QHeaderView.Stretch) for ind in range(n_col - 2)]
+        header.setSectionResizeMode(n_col - 1, QHeaderView.ResizeToContents)
+
+    def add_table_row(self, row, axes_strings, include, select):
+        # axes:
+        for i in range(6):
+            self.tableWidget.setItem(row, i, QTableWidgetItem(axes_strings[i]))
+
+        # include box
+        inc_checkbox = QCheckBox()
+        self.add_checkbox(inc_checkbox, include, self._on_any_include_toggled, row, 6)
+
+        # select box
+        select_checkbox = QCheckBox()
+        self.add_checkbox(select_checkbox, select, self._on_any_select_toggled, row, 7)
+
+    def add_checkbox(self, checkbox, val, slot, row, col):
+        checkbox.setChecked(val)
+        checkbox.toggled.connect(slot)
+        cell_widget = QWidget()
+        layout = QHBoxLayout(cell_widget)
+        layout.addWidget(checkbox)
+        layout.setAlignment(QtCore.Qt.AlignCenter)
+        layout.setContentsMargins(0, 0, 0, 0)
+        self.tableWidget.setCellWidget(row, col, cell_widget)
