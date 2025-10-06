@@ -5,7 +5,7 @@ DNS Single Crystal Elastic - Plotting Tab
 
 The **Plotting** tab offers basic plotting functionality for reduced datasets.
 
-.. image::  ../../../images/DNS_interface_single_crystal_elastic_plotting_tab.png
+.. image::  ../../../images/DNS_interface_single_crystal_elastic_plotting_tab_updated.png
    :align: center
    :height: 400px
 
@@ -36,7 +36,7 @@ The buttons below the **Plotting** tab have the following functionality (from le
 |                                                | scattering plane. It works only if two principle axes change in the        |
 |                                                | horizontal plane.                                                          |
 +------------------------------------------------+----------------------------------------------------------------------------+
-| |exp-projections| Projection selector          | Turn on/off projections of the intensity function averaged along           |
+| |exp-projections| Projection selector          | Turn on/off projections of the intensity function along                    |
 |                                                | :math:`x` and :math:`y` directions.                                        |
 +------------------------------------------------+----------------------------------------------------------------------------+
 | |exp-edge-control| Data                        | Toggle through drawing of borders of the triangles or quadrilaterals of the|
@@ -52,20 +52,21 @@ The buttons below the **Plotting** tab have the following functionality (from le
 
 The rest of the buttons have the same functionality as in matplotlib's navigation toolbar.
 
-When the mouse cursor is hovered over the plot, the cursor's :math:`(x, y)` coordinates together with the coresponding
-:math:`hkl` values (in relative lattice units, r.l.u.) will be displayed on the right hand side of matplotlib's control buttons.
-In addition, the correponding value of intensity (with an error-bar) of the closest measured data point will be displayed as well.
-(This does not give the intensity of the quadrilateral, which could involve interpolation.)
+When the mouse cursor hovers over the plot, the cursor's :math:`(x, y)` coordinates together with the corresponding
+:math:`hkl` values (in relative lattice units, r.l.u.) will be displayed to the right of matplotlib's control buttons.
+In addition, the intensity value (with an error-bar) of the closest measured data point will also be shown. Note that when
+interpolation is enabled (either in triangulation or quadrilateral mode), the displayed intensity value will not include the
+error estimate. Furthermore, since triangulation does not create triangles centered at the measured data points, the error
+estimate is not displayed in this mode either.
 
-The **X**, **Y** and **Z** input lines below the navigation buttons allow to manually specify the region to zoom into. The
-syntax to be used inside these lines is similar to the python's list slicing (or dnsplot's range). For example, **0:2** in the
-**X** input line would imply that the displayed values of X should be in the range from 0 to 2. When the desired ranges of
-**X**, **Y** and **Z** are specified, pressing the Enter key inside an input line will update the plot.
+The input fields labeled :math:`\mathbf{X_{min}/X_{max}}`, :math:`\mathbf{Y_{min}/Y_{max}}` and :math:`\mathbf{I_{min}/I_{max}}`,
+located below the navigation buttons, allow you to manually specify the region to zoom into. Once the desired values are entered,
+pressing the Enter key in any input field will update the plot.
 
-The **log** button next to **X, Y, Z** turns on/off the logarithmic intensity scale. The dropdown list nearby to the **log**
-button allows to select different colormaps for visualisation. The button next to the dropdown list inverts the colormap color
-scale. The **FontSize** dialog allows to change the fontsize of the legend (the Enter key has to be pressed inside the fontsize
-box for the change to have an effect).
+The **log** button next to :math:`\mathbf{I_{max}}` turns on/off the logarithmic intensity scale. The dropdown list nearby to the
+**log** button allows to select different colormaps for visualisation. The button next to the dropdown list inverts the colormap
+color scale. The **FontSize** dialog allows to change the fontsize of the legend (the Enter key has to be pressed inside the
+fontsize box for the change to have an effect).
 
 The **Plot View** menu, which can be accessed from the main menu of the "DNS Reduction" GUI, offers control over the style of
 the plot.
@@ -81,6 +82,7 @@ The **Axes** menu of **Plot View** allows to change the plot axes between (:math
 **Options**, or (:math:`q_x, q_x`), or (:math:`2 \theta, \omega`). In addition, **Fix Aspect Ratio** can be selected to fix
 the aspect ratio between the :math:`x` and :math:`y` axis of the plot. This is especially usefull if crystallographic axes
 are used since then the shown angles will be correct. **Switch Axes** will switch :math:`x` and :math:`y` axes in the plot.
+**Fix Aspect Ratio** is not available in (:math:`2 \theta, \omega`) mode.
 
 The **Interpolation** menu of **Plot View** allows to generate additional triangles/quadrilaterals in order to make the plot
 look smoother. For example, if **1->9** option is selected, each quadrilateral will be replaced by 9 quadrilaterals, and so
