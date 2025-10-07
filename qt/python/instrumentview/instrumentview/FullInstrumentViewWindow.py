@@ -175,6 +175,7 @@ class FullInstrumentViewWindow(QMainWindow):
 
         self.interactor_style = CustomInteractorStyleZoomAndSelect()
         self._overlay_meshes = []
+        self._lineplot_overlays = []
 
     def check_sum_spectra_checkbox(self) -> None:
         self._sum_spectra_checkbox.setChecked(True)
@@ -468,9 +469,11 @@ class FullInstrumentViewWindow(QMainWindow):
                 self._detector_spectrum_axes.plot(workspace, specNum=spec, label=f"Spectrum {spec}" if not sum_spectra else None)
             if not sum_spectra:
                 self._detector_spectrum_axes.legend(fontsize=8.0).set_draggable(True)
+            for line in self._lineplot_overlays:
+                self._detector_spectrum_axes.add_line(line)
 
         self._detector_spectrum_fig.tight_layout()
-        self._detector_figure_canvas.draw()
+        self.redraw_lineplot()
 
     def set_selected_detector_info(self, detector_infos: list[DetectorInfo]) -> None:
         """For a list of detectors, with their info wrapped up in a class, update all of the info text boxes"""
@@ -509,9 +512,26 @@ class FullInstrumentViewWindow(QMainWindow):
             self.main_plotter.remove_actor(mesh[1])
         self._overlay_meshes.clear()
 
+    def clear_lineplot_overlays(self) -> None:
+        for line in self._lineplot_overlays:
+            line.remove()
+        self._lineplot_overlays.clear()
+        for text in self._detector_spectrum_axes.texts:
+            text.remove()
+
     def plot_overlay_mesh(self, positions: np.ndarray, labels: list[str], point_colour: str) -> None:
         points_actor = self.main_plotter.add_points(positions, color=point_colour, point_size=20, render_points_as_spheres=True)
         labels_actor = self.main_plotter.add_point_labels(
             positions, labels, font_size=15, show_points=False, always_visible=True, fill_shape=False, shape_opacity=0
         )
         self._overlay_meshes.append((points_actor, labels_actor))
+
+    def plot_lineplot_overlay(self, x_values: list[float], labels: list[str]) -> None:
+        for x, label in zip(x_values, labels):
+            self._lineplot_overlays.append(self._detector_spectrum_axes.axvline(x, color="red", linestyle="--"))
+            self._detector_spectrum_axes.text(
+                x, -0.1, label, transform=self._detector_spectrum_axes.get_xaxis_transform(), color="red", ha="center", va="top", fontsize=8
+            )
+
+    def redraw_lineplot(self) -> None:
+        self._detector_figure_canvas.draw()

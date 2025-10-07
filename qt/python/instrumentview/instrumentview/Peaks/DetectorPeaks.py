@@ -9,7 +9,7 @@ from instrumentview.Peaks.Peak import Peak
 
 class DetectorPeaks:
     def __init__(self, peaks: list[Peak]) -> None:
-        self._peaks = peaks
-        self._detector_id = peaks[0].detector_id
+        self.peaks = peaks
+        self.detector_id = peaks[0].detector_id
         self.location = peaks[0].location
-        self.label = ",".join([p.label for p in self._peaks])
+        self.label = ",".join([p.label for p in self.peaks])

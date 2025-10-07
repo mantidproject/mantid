@@ -16,8 +16,8 @@ class Peak:
         self.location = location
         self._hkl = hkl
         self.detector_id = detector_id
-        self._tof = tof
-        self._dspacing = dspacing
+        self.tof = tof
+        self.dspacing = dspacing
 
     @property
     def label(self) -> str:
