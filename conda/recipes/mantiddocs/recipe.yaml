@@ -16,7 +16,7 @@ build:
   number: 0
   noarch: generic
   script_env:
-      - MANTID_DATA_STORE=${{ env.get('MANTID_DATA_STORE', '~/MantidExternalData') }}
+      - MANTID_DATA_STORE=${{ env.get('MANTID_DATA_STORE', default='~/MantidExternalData') }}
 
 requirements:
   build:
