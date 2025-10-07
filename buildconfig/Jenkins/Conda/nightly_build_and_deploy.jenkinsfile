@@ -15,7 +15,7 @@ def publishPackages = (gitBranch == "${BRANCH_TO_PUBLISH}")
 def defaults = [
   anacondaChannel : 'mantid',
   githubReleasesRepo: 'mantidproject/mantid',
-  platformChoices : ['none', 'all', 'linux-64', 'win-64', 'osx-64', 'osx-arm64', 'all_ARM'],
+  platformChoices : ['none', 'all', 'linux-64', 'win-64', 'osx-64', 'osx-arm64'],
   publishToAnaconda : publishPackages,
   publishToGithub   : publishPackages,
   packageSuffix     : 'Unstable',
@@ -39,7 +39,7 @@ switch(gitBranch) {
   case ['main']:
     defaults.packageSuffix = 'Nightly'
     defaults.anacondaLabel = 'nightly'
-    defaults.platformChoices = ['all_ARM']
+    defaults.platformChoices = ['linux-64', 'win-64', 'osx-arm64']
     break
   case ['ornl-next', 'ornl-qa', 'ornl']:
     defaults.packageSuffix = 'Nightly'
@@ -145,7 +145,6 @@ pipeline {
             beforeOptions true
               anyOf {
                 expression { params.BUILD_DEVEL == 'all' }
-				expression { params.BUILD_DEVEL == 'all_ARM' }
                 expression { params.BUILD_DEVEL == 'linux-64' }
             }
           }
@@ -168,7 +167,6 @@ pipeline {
             beforeOptions true
             anyOf {
               expression { params.BUILD_DEVEL == 'all' }
-			  expression { params.BUILD_DEVEL == 'all_ARM' }
               expression { params.BUILD_DEVEL == 'win-64' }
             }
           }
@@ -215,7 +213,6 @@ pipeline {
             beforeOptions true
               anyOf {
                 expression { params.BUILD_DEVEL == 'all' }
-				expression { params.BUILD_DEVEL == 'all_ARM' }
                 expression { params.BUILD_DEVEL == 'osx-arm64' }
             }
           }
@@ -271,7 +268,6 @@ pipeline {
             anyOf {
               expression { params.BUILD_PACKAGE == 'win-64' }
               expression { params.BUILD_PACKAGE == 'all' }
-			  expression { params.BUILD_PACKAGE == 'all_ARM' }
             }
           }
           agent { label 'win-64' }
@@ -336,7 +332,6 @@ pipeline {
             anyOf {
               expression { params.BUILD_PACKAGE == 'osx-arm64' }
               expression { params.BUILD_PACKAGE == 'all' }
-			  expression { params.BUILD_PACKAGE == 'all_ARM' }
             }
           }
           agent { label 'osx-arm64' }
@@ -379,7 +374,6 @@ pipeline {
               beforeOptions true
               anyOf {
                   expression { params.BUILD_PACKAGE == "${PLATFORM}" }
-				  expression { params.BUILD_PACKAGE == 'all_ARM' }
                   expression { params.BUILD_PACKAGE == 'all' }
               }
             }
