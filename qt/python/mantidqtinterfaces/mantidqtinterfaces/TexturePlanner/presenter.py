@@ -21,7 +21,12 @@ class TexturePlannerPresenter(object):
         self.on_goniometer_updated(0)
 
         # connect slots
-
+        self.view.set_on_stl_file_changed(self.enable_load_stl)
+        self.view.set_on_xml_file_changed(self.enable_load_xml)
+        self.view.set_on_orient_file_changed(self.enable_load_orient)
+        self.view.set_on_load_stl_clicked(self.load_stl)
+        self.view.set_on_load_xml_clicked(self.load_xml)
+        self.view.set_on_load_orient_clicked(self.load_orientation_file)
         self.view.set_on_update_dirs(self.on_directions_updated)
         self.view.set_on_gonio_vec_updated(self.on_goniometer_updated)
         self.view.set_on_gonio_sense_updated(self.on_goniometer_updated)
@@ -31,6 +36,11 @@ class TexturePlannerPresenter(object):
         self.view.set_on_group_changed(self.on_group_changed)
         self.view.set_on_add_orientation_clicked(self.add_orientation)
         self.view.set_on_current_index_changed(self.on_index_changed)
+        self.view.sig_select_state_changed.connect(self.update_selected)
+        self.view.sig_include_state_changed.connect(self.update_included)
+        self.view.set_on_select_all_clicked(self.select_all)
+        self.view.set_on_deselect_all_clicked(self.deselect_all)
+        self.view.set_on_delete_selected_clicked(self.delete_selected)
 
     def set_view_texture_directions(self, names, vecs):
         self.view.set_rd_name(names[0])
@@ -83,6 +93,7 @@ class TexturePlannerPresenter(object):
 
     def on_num_gonio_updated(self):
         num_gonios = self.view.get_num_gonios()
+        self.model.set_n_gonio(num_gonios)
         self.update_enabled_gonios(num_gonios)
         self.on_goniometer_updated(self.model.update_gonio_index(num_gonios))
         self.view.hide_axis_columns()
@@ -95,6 +106,7 @@ class TexturePlannerPresenter(object):
 
     def on_group_changed(self):
         self.set_model_group()
+        self.model.update_all_projected_data()
         self.update_plots()
 
     def update_plots(self):
@@ -125,20 +137,75 @@ class TexturePlannerPresenter(object):
 
     def update_orientation_selector(self, new_index):
         self.view.spnIndex.setMaximum(self.model.get_num_orientations())
-        self.view.spnIndex.setValue(new_index)
+        self.view.set_current_index(new_index)
 
     def setup_group_options(self):
         self.view.setup_group_options(self.model.supported_groups)
 
+    def update_goniometer_values_from_index(self, index):
+        vecs, senses, angles = self.model.get_goniometer_values(index)
+        self.view.set_vecs(vecs)
+        self.view.set_senses(senses)
+        self.view.set_angles(angles)
+
     def on_index_changed(self):
-        # need to save the state of the old orientation index, so we rely on the value that exists on the model
-        self.model.update_gonio_string(self.get_vecs(), self.get_senses(), self.get_angles(), self.model.get_orientation_index())
-        # we then update this value to match the new current index, so it is ready for the next call of this function
         updated_index = self.view.get_current_index()
         self.model.set_orientation_index(updated_index)
 
         # we now update the goniometer fields with the saved values
-        vecs, senses, angles = self.model.get_goniometer_values(updated_index)
-        self.view.set_vecs(vecs)
-        self.view.set_senses(senses)
-        self.view.set_angles(angles)
+        self.update_goniometer_values_from_index(updated_index)
+
+    def enable_load_stl(self):
+        self.view.set_load_stl_enabled(self.view.get_stl_string() != "")
+
+    def enable_load_xml(self):
+        self.view.set_load_xml_enabled(self.view.get_xml_string() != "")
+
+    def enable_load_orient(self):
+        self.view.set_load_orientation_enabled(self.view.get_orientation_file() != "")
+
+    def load_stl(self):
+        self.model.load_stl(self.view.get_stl_string())
+        self.update_plots()
+
+    def load_xml(self):
+        self.model.load_xml(self.view.get_xml_string())
+        self.update_plots()
+
+    def load_orientation_file(self):
+        num_gonios = self.model.load_orientation_file(self.view.get_orientation_file())
+        # update selected number of goniometers to match
+        self.view.set_num_gonios(num_gonios)
+        # update the orientation selector
+        self.view.set_current_index(self.model.get_num_orientations() - 1)
+        self.update_orientation_selector(self.model.get_num_orientations())
+        # update table and plot
+        self.model.update_all_projected_data()
+        self.update_table()
+        self.update_plots()
+
+    def update_selected(self):
+        self.model.update_selected(self.view.get_select_indices())
+
+    def update_included(self):
+        self.model.update_included(self.view.get_include_indices())
+        self.update_plots()
+
+    def select_all(self):
+        self.model.select_all()
+        self.update_table()
+
+    def deselect_all(self):
+        self.model.deselect_all()
+        self.update_table()
+
+    def delete_selected(self):
+        self.model.delete_selected()
+        self.view.set_current_index(self.model.get_orientation_index())
+        # call on index change, just in case the index happens to remain, we still need the same update
+        self.on_index_changed()
+        self.update_orientation_selector(self.model.get_orientation_index())
+        # update table and plot
+        self.model.update_all_projected_data()
+        self.update_table()
+        self.update_plots()
