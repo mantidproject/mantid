@@ -10,7 +10,7 @@ import numpy as np
 from mantid.fitfunctions import FunctionWrapper, CompositeFunctionWrapper
 from mantid.api import FunctionFactory
 from mantid.geometry import CrystalStructure, ReflectionGenerator, PointGroupFactory, PointGroup
-from mantid.kernel import V3D, logger
+from mantid.kernel import V3D, logger, UnitConversion, DeltaEModeType
 from typing import Optional, Tuple, TYPE_CHECKING, Sequence
 from itertools import chain
 from scipy.optimize import least_squares
@@ -148,7 +148,7 @@ class Phase:
             self.alatt[self.ipars[ipar]] = par
         self.unit_cell.set(*self.alatt)
 
-    def set_hkls(self, hkls: Sequence[np.ndarray]):
+    def set_hkls(self, hkls: Sequence[np.ndarray], do_sort: bool = True):
         self.hkls = []
         for hkl in hkls:
             hkl_vec = V3D(*hkl)
@@ -156,8 +156,9 @@ class Phase:
                 self.hkls.append(hkl_vec)
             else:
                 logger.warning(f"Reflection {hkl} not allowed by spacegroup")
-        # sort by descending d-spacing
-        self.hkls = [self.hkls[ipk] for ipk in np.argsort(self.calc_dspacings())[::-1]]
+        if do_sort:
+            # sort by descending d-spacing
+            self.hkls = [self.hkls[ipk] for ipk in np.argsort(self.calc_dspacings())[::-1]]
 
     def set_hkls_from_dspac_limits(self, dmin: float, dmax: float):
         xtal = CrystalStructure(" ".join([str(par) for par in self.alatt]), self.spgr.getHMSymbol(), "")
@@ -173,11 +174,18 @@ class Phase:
     def nparams(self) -> int:
         return len(self.ipars)
 
+    def merge_reflections(self, decimal_places=4):
+        _, ihkls = np.unique((self.calc_dspacings() * (10**decimal_places)).astype(int), return_index=True)
+        self.hkls = [self.hkls[ipk] for ipk in np.sort(ihkls)]
+
 
 # make this abstract base class?
 class PawleyPattern1D:
     def __init__(self, ws: Workspace2D, phases: Phase, profile: PeakProfile, bg_func: Optional[FunctionWrapper] = None):
         self.ws = ws
+        self.xunit = self.ws.getAxis(0).getUnit().unitID()
+        if self.xunit not in ["TOF", "dSpacing"]:
+            logger.error("Workspace must have x-axis of TOF or d-spacing.")
         self.phases = phases
         self.alatt_params = [phase.get_params() for phase in self.phases]
         self.alatt_isfree = [np.ones_like(alatt, dtype=bool) for alatt in self.alatt_params]
@@ -207,13 +215,18 @@ class PawleyPattern1D:
     def update_profile_function(self):
         self.profile.p = self.profile_params
         istart = 0
+        diff_consts = self.ws.spectrumInfo().diffractometerConstants(0)  # for conversion to TOF if requried
         for iphase, phase in enumerate(self.phases):
             self.profile.p = self.profile_params[iphase]
             # set alatt for phase
             phase.set_params(self.alatt_params[iphase])
             dpks = phase.calc_dspacings()
+            if self.xunit == "TOF":
+                pk_cens = [UnitConversion.run("dSpacing", "TOF", dpk, 0, DeltaEModeType.Elastic, diff_consts) for dpk in dpks]
+            else:
+                pk_cens = dpks
             for ipk, dpk in enumerate(dpks):
-                self.comp_func[istart + ipk].function.setCentre(dpk)
+                self.comp_func[istart + ipk].function.setCentre(pk_cens[ipk])
                 for par_name, val in self.profile.get_mantid_peak_params(dpk).items():
                     self.comp_func[istart + ipk][par_name] = val
                 self.comp_func[istart + ipk].function.setIntensity(self.intens[iphase][ipk])
@@ -228,7 +241,7 @@ class PawleyPattern1D:
         return self.get_params()[self.get_isfree()]
 
     def get_isfree(self) -> np.ndarray[bool]:
-        return np.array(list(chain(*self.alatt_isfree, *self.intens_isfree, *self.profile_isfree, self.bg_isfree)))
+        return np.array(list(chain(*self.alatt_isfree, *self.intens_isfree, *self.profile_isfree, self.bg_isfree)), dtype=bool)
 
     def set_params(self, params: np.ndarray[float]):
         # set alatt
@@ -306,6 +319,7 @@ class PawleyPattern2D(PawleyPattern1D):
             OutputWorkspace=f"{self.ws.name()}_pattern",
             EnableLogging=False,
         )
+        self.xunit = self.ws_1d.getAxis(0).getUnit()
 
     def set_global_scale(self, global_scale: bool):
         self.global_scale = global_scale
