@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
-from mantid.simpleapi import LoadEmptyInstrument, GroupDetectors, SetSampleShape
+from mantid.simpleapi import LoadEmptyInstrument, GroupDetectors, SetSampleShape, LoadSampleShape
 from Engineering.EnggUtils import GROUP, CALIB_DIR
 from Engineering.common.calibration_info import CalibrationInfo
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.show_sample.show_sample_model import ShowSampleModel
@@ -27,6 +27,7 @@ class TexturePlannerModel(object):
         self.supported_groups = ("Texture20", "Texture30", "banks")
         self.gon_colors = ("hotpink", "orange", "purple", "goldenrod", "plum", "saddlebrown")
         self.dir_cols = ("red", "green", "blue")
+        self.axis_dict = {"x": (1, 0, 0), "y": (0, 1, 0), "z": (0, 0, 1)}
 
         # properties which will be updated
         self.ws = None
@@ -40,10 +41,17 @@ class TexturePlannerModel(object):
         self.detQs_lab = None
         self.projection = projection
         self.gonio_index = 0
+        self.n_gonio = 2
         self.orientation_index = 0
 
+        # stl_settings
+        self.stl_kwargs = {"Scale": "cm", "XDegrees": 0, "YDegrees": 0, "ZDegrees": "0", "TranslationVector": "0,0,0"}
+
+        # euler_file_settings
+        self.orientation_kwargs = {"Axes": "YXY", "Senses": "-1,-1,-1"}
+
         # data structure
-        self.saved_orientations = {0: {}}
+        self.saved_orientations = {0: self.get_default_info_dict()}
 
         # init func calls
         self.update_ws()
@@ -53,6 +61,57 @@ class TexturePlannerModel(object):
             self.ws = LoadEmptyInstrument(InstrumentName=self.instr, OutputWorkspace=self.wsname)
             SetSampleShape(self.ws, get_cube_xml("default_cube", 0.01))
         # add handling here for copying over sample shape if the instrument is changed
+
+    def load_stl(self, stl_file):
+        LoadSampleShape(InputWorkspace=self.ws, Filename=stl_file, OutputWorkspace=self.ws, **self.stl_kwargs)
+
+    def load_xml(self, xml_file):
+        with open(xml_file, "r") as f:
+            xml_string = f.read()
+        SetSampleShape(self.ws, xml_string)
+
+    def load_orientation_file(self, txt_file):
+        logger.notice("Loading Orientations from file")
+        with open(txt_file, "r") as f:
+            goniometer_strings = [line.strip().replace("\t", ",") for line in f.readlines()]
+            goniometer_lists = [[float(x) for x in gs.split(",")] for gs in goniometer_strings]
+        print(goniometer_lists)
+        if len(goniometer_lists) == 0:
+            logger.warning("No orientations found in file provided")
+            return 3
+        num_entries = len(goniometer_lists[0])
+        euler_angles = num_entries <= 6
+        if not euler_angles:
+            for goniometer_list in goniometer_lists:
+                R_mat = np.asarray(goniometer_list[:9]).reshape((3, 3))
+                R = Rotation.from_matrix(R_mat)
+                vecs = [(0, 1, 0), (1, 0, 0), (0, 1, 0)]
+                senses = [1, 1, 1]
+                angles = R.as_euler("YXY", degrees=True)
+                self.add_orientation()
+                self.update_gonio_string(vecs, senses, np.round(angles, 2), self.get_num_orientations() - 1)
+                self.update_gRs(vecs, senses, np.round(angles, 2), self.get_num_orientations() - 1)
+            return 3
+        msg = ""
+        axes, senses = self.orientation_kwargs["Axes"], self.orientation_kwargs["Senses"].split(",")
+        num_ax, num_senses = len(axes), len(senses)
+        if num_entries != num_ax:
+            msg += f"Number of Angles ({num_entries}) does not match number of goniometer axes ({num_ax} \n"
+        if num_entries != num_senses:
+            msg += f"Number of Angles ({num_entries}) does not match number of goniometer senses ({num_senses} \n"
+        if msg != "":
+            logger.error(msg)
+            return 3
+        vecs = [self.axis_dict[ax.lower()] for ax in axes]
+        senses = [int(sense) for sense in senses]
+        for angles in goniometer_lists:
+            self.add_orientation()
+            self.update_gonio_string(vecs, senses, angles, self.get_num_orientations() - 1)
+            self.update_gRs(vecs, senses, np.round(angles, 2), self.get_num_orientations() - 1)
+        return num_ax
+
+    def set_n_gonio(self, val):
+        self.n_gonio = val
 
     def set_group(self, group_str):
         self.group = GROUP(group_str)
@@ -95,7 +154,7 @@ class TexturePlannerModel(object):
         max_ind = num_gonios - 1
         return self.gonio_index if self.gonio_index <= max_ind else max_ind
 
-    def update_gRs(self, vecs, senses, angles, current_index):
+    def calc_gRs(self, vecs, senses, angles):
         gRs = [Rotation.identity()]
         R = Rotation.identity()
         for i, vec in enumerate(vecs):
@@ -103,8 +162,72 @@ class TexturePlannerModel(object):
             r_step = Rotation.from_davenport(vec, "extrinsic", sense * angles[i], degrees=True)
             R = R * r_step
             gRs.append(R)
+        return gRs, R
+
+    def update_gRs(self, vecs, senses, angles, current_index):
+        gRs, R = self.calc_gRs(vecs, senses, angles)
         self.saved_orientations[current_index]["gRs"] = gRs
         self.saved_orientations[current_index]["R"] = R
+
+    def update_selected(self, selected_inds):
+        for k, v in self.saved_orientations.items():
+            v["select"] = k in selected_inds
+
+    def update_included(self, included_inds):
+        for k, v in self.saved_orientations.items():
+            v["include"] = k in included_inds
+
+    def select_all(self):
+        for k, v in self.saved_orientations.items():
+            v["select"] = True
+
+    def deselect_all(self):
+        for k, v in self.saved_orientations.items():
+            v["select"] = False
+
+    def delete_selected(self):
+        # iterate through the table and find which orientations are being kept
+        to_keep = []
+        new_orientations = {}
+        for k, v in self.saved_orientations.items():
+            if not v.get("select", True):
+                to_keep.append(k)
+        # if nothing is kept instantiate new table
+        if len(to_keep) == 0:
+            self.saved_orientations = {0: self.get_default_info_dict()}
+        # otherwise copy across
+        else:
+            for i, k in enumerate(to_keep):
+                new_orientations[i] = self.saved_orientations[k]
+            self.saved_orientations = new_orientations
+        # if the orientation corresponding to the current index has been kept, update the index, otherwise 0
+        new_orientation_index = to_keep.index(self.orientation_index) if self.orientation_index in to_keep else 0
+        self.set_orientation_index(new_orientation_index)
+
+    def get_default_info_dict(self):
+        info = {}
+        vecs, senses, angles = (
+            [
+                (1, 0, 0),
+            ]
+            * 6,
+            [
+                -1,
+            ]
+            * 6,
+            [
+                0.0,
+            ]
+            * 6,
+        )
+        gRs, R = self.calc_gRs(vecs[: self.n_gonio], senses[: self.n_gonio], angles[: self.n_gonio])  # number of GRs controls the plot size
+        for i, vec in enumerate(vecs):
+            info[f"g{i}"] = self.get_goniometer_string(vec, senses[i], angles[i])
+        info["gRs"] = gRs
+        info["R"] = R
+        info["include"] = True
+        info["select"] = True
+        return info
 
     def get_goniometer_string(self, vec, sense, angle):
         return f"{angle},{np.round(vec[0], 3)},{np.round(vec[1], 3)},{np.round(vec[2], 3)},{sense}"
@@ -263,11 +386,15 @@ class TexturePlannerModel(object):
                 proj_ax.scatter(gP[1], gP[0], s=30, edgecolor=pc, facecolor=fc)
 
         for i in self.saved_orientations.keys():
-            pf_xy = self.saved_orientations[i]["pf_points"]
-            if i == current_index:
-                proj_ax.scatter(pf_xy[:, 1], pf_xy[:, 0], s=20, c="dodgerblue")
-            else:
-                proj_ax.scatter(pf_xy[:, 1], pf_xy[:, 0], s=20, facecolor="None", edgecolor="dodgerblue")
+            if self.saved_orientations[i].get("include", True):
+                pf_xy = self.saved_orientations[i]["pf_points"]
+                if i == current_index:
+                    proj_ax.scatter(pf_xy[:, 1], pf_xy[:, 0], s=20, c="dodgerblue")
+                else:
+                    proj_ax.scatter(pf_xy[:, 1], pf_xy[:, 0], s=20, facecolor="None", edgecolor="dodgerblue")
+            elif i == current_index:
+                pf_xy = self.saved_orientations[i]["pf_points"]
+                proj_ax.scatter(pf_xy[:, 1], pf_xy[:, 0], s=20, facecolor="None", edgecolor="grey", alpha=0.5)
 
         proj_ax.set_aspect("equal")
         proj_ax.set_xlim(-1.1, 1.1)

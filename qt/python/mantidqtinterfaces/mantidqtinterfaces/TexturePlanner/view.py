@@ -51,6 +51,9 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
 
         self._setup_pf_plot()
         self._setup_lab_plot()
+        self.set_load_stl_enabled(False)
+        self.set_load_xml_enabled(False)
+        self.set_load_orientation_enabled(False)
 
         self.set_angle_limits()
 
@@ -104,6 +107,33 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
     def set_on_current_index_changed(self, slot):
         self.spnIndex.valueChanged.connect(slot)
 
+    def set_on_stl_file_changed(self, slot):
+        self.finder_stl.fileFindingFinished.connect(slot)
+
+    def set_on_xml_file_changed(self, slot):
+        self.finder_xml.fileFindingFinished.connect(slot)
+
+    def set_on_orient_file_changed(self, slot):
+        self.finder_orient.fileFindingFinished.connect(slot)
+
+    def set_on_load_stl_clicked(self, slot):
+        self.btnSTL.clicked.connect(slot)
+
+    def set_on_load_xml_clicked(self, slot):
+        self.btnXML.clicked.connect(slot)
+
+    def set_on_load_orient_clicked(self, slot):
+        self.btnOrient.clicked.connect(slot)
+
+    def set_on_select_all_clicked(self, slot):
+        self.selectAll.clicked.connect(slot)
+
+    def set_on_deselect_all_clicked(self, slot):
+        self.deselectAll.clicked.connect(slot)
+
+    def set_on_delete_selected_clicked(self, slot):
+        self.deleteSelected.clicked.connect(slot)
+
     @QtCore.Slot(bool)
     def _on_any_include_toggled(self):
         self.sig_include_state_changed.emit()
@@ -113,6 +143,17 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
         self.sig_select_state_changed.emit()
 
     # getters
+    def get_stl_string(self):
+        fnames = self.finder_stl.getFilenames()
+        return fnames[0] if len(fnames) > 0 else ""
+
+    def get_xml_string(self):
+        fnames = self.finder_xml.getFilenames()
+        return fnames[0] if len(fnames) > 0 else ""
+
+    def get_orientation_file(self):
+        fnames = self.finder_orient.getFilenames()
+        return fnames[0] if len(fnames) > 0 else ""
 
     def get_rd_name(self):
         return self.lineedit_RD.text()
@@ -162,6 +203,12 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
     def get_current_index(self):
         return int(self.spnIndex.value()) - 1
 
+    def get_include_indices(self):
+        return self._read_checkbox_column_states(6)
+
+    def get_select_indices(self):
+        return self._read_checkbox_column_states(7)
+
     # setters
 
     def set_rd_name(self, text):
@@ -195,6 +242,12 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
         step_size = self.get_step_size()
         for ang in self.gonio_angles:
             ang.setSingleStep(step_size)
+
+    def set_num_gonios(self, val):
+        self.spnNumAxes.setValue(val)
+
+    def set_current_index(self, val):
+        self.spnIndex.setValue(val + 1)
 
     def set_vecs(self, vecs):
         for i in range(6):
@@ -280,3 +333,22 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
         layout.setAlignment(QtCore.Qt.AlignCenter)
         layout.setContentsMargins(0, 0, 0, 0)
         self.tableWidget.setCellWidget(row, col, cell_widget)
+
+    def set_load_stl_enabled(self, enabled):
+        self.btnSTL.setEnabled(enabled)
+
+    def set_load_xml_enabled(self, enabled):
+        self.btnXML.setEnabled(enabled)
+
+    def set_load_orientation_enabled(self, enabled):
+        self.btnOrient.setEnabled(enabled)
+
+    def _read_checkbox_column_states(self, col):
+        checked = []
+        for row in range(self.tableWidget.rowCount()):
+            cell_widget = self.tableWidget.cellWidget(row, col)
+            if cell_widget:
+                checkbox = cell_widget.findChild(QCheckBox)
+                if checkbox and checkbox.isChecked():
+                    checked.append(row)
+        return checked
