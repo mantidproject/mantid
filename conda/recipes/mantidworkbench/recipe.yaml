@@ -35,6 +35,7 @@ requirements:
     - setuptools
     - mantidqt == ${{ version }}
     - python ${{ python }}
+    - pip ${{ pip }}
     - versioningit ${{ versioningit }}
     - if: linux
       then:
