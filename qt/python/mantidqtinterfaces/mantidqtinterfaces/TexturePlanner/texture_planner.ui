@@ -949,6 +949,31 @@
         <property name="title">
          <string>Output Options</string>
         </property>
+
+           <layout class = "QVBoxLayout">
+               <item>
+               <layout class="QHBoxLayout">
+                   <item>
+       <widget class="FileFinderWidget" name="finder_save_dir" native="true"/>
+      </item>
+                   <item>
+                       <widget class="QLabel" name="lblSaveFile">
+                  <property name="text">
+                   <string>Filename:</string>
+                  </property>
+                 </widget>
+                   </item>
+                   <item>
+            <widget class="QLineEdit" name="saveFileLine">
+             <property name="placeholderText">
+              <string>example-filename</string>
+             </property>
+            </widget>
+           </item>
+               </layout>
+           </item>
+
+           <item>
         <layout class="QHBoxLayout" name="outputButtons">
          <item>
           <widget class="QPushButton" name="toSscanss">
@@ -965,13 +990,17 @@
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="toMatrices">
+          <widget class="QPushButton" name="toMatrix">
            <property name="text">
             <string>Output As Matrix Orientation File</string>
            </property>
           </widget>
          </item>
         </layout>
+           </item>
+           </layout>
+
+
        </widget>
       </item>
      </layout>

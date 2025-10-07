@@ -44,6 +44,7 @@ class TexturePlannerModel(object):
         self.gonio_index = 0
         self.n_gonio = 2
         self.orientation_index = 0
+        self.n_output_points = 1
 
         # stl_settings
         self.stl_kwargs = {"Scale": "cm", "XDegrees": 0, "YDegrees": 0, "ZDegrees": "0", "TranslationVector": "0,0,0"}
@@ -334,21 +335,24 @@ class TexturePlannerModel(object):
 
         for i, vec in enumerate(vecs):
             gR = gRs[i]
+            gVec = gR.apply(vec)
+            gVecs.append(gVec)
+
             gon_ring = gR.apply(ring(vec, 1 + ((nGon - i) / 2), res=360).T).T
             gon_ring = gon_ring * extent  # scale to sample
-            # lab_ax.plot(*gon_ring, color="grey")
 
             sense = -senses[i]  # mantid convention is that ccw = 1, we need cw = 1
             angle = angles[i] * sense
 
             if angle <= 0:
                 gon_ring = np.flip(gon_ring, axis=1)  # reverse the ring if the angle is negative
+
             pos_ind = int(np.abs(angle))
+
+            # 3D goniometer plot
+
             lab_ax.plot(*gon_ring[:, : pos_ind + 1], color=self.gon_colors[i])
             lab_ax.plot(*gon_ring[:, pos_ind:], color="grey")
-
-            gVec = gRs[i].apply(vec)
-            gVecs.append(gVec)
             lab_ax.quiver(*np.zeros(3), *gVec * extent * 2, color=self.gon_colors[i], ls=("-", "--")[int(i != self.gonio_index)])
 
         gPole = R.inv().apply(np.array(gVecs)) @ ax_transform
@@ -410,39 +414,49 @@ class TexturePlannerModel(object):
         fig.canvas.draw_idle()
         proj_ax.figure.canvas.draw_idle()
 
-    def output_as_sscanss(self, save_file, n_points=1):
+    def output_as_sscanss(self, save_dir, filename):
+        header = [
+            "xyz\n",
+        ]
+        sscanss_lines = []
+        save_file = os.path.join(save_dir, filename + ".angles")
         for i in self.saved_orientations.keys():
-            header = [
-                "xyz\n",
-            ]
-            sscanss_lines = []
             if self.saved_orientations[i].get("include", True):
                 angs = convert_to_sscanss_frame(self.saved_orientations[i]["R"].as_matrix())
-                for _ in range(n_points):
+                for _ in range(self.n_output_points):
                     sscanss_lines.append(f"{np.round(angs[0], 2)}\t{np.round(angs[1], 2)}\t{np.round(angs[2], 2)}\n")
 
-            with open(save_file, "w") as f:
-                f.writelines(header + sscanss_lines)
+        with open(save_file, "w") as f:
+            f.writelines(header + sscanss_lines)
+        logger.notice(f"Orientation data written to '{save_file}' as Sscanss2 Angles")
 
-    def output_as_matrix(self, save_file, n_points=1):
+    def output_as_matrix(self, save_dir, filename):
+        lines = []
+        save_file = os.path.join(save_dir, filename + ".txt")
         for i in self.saved_orientations.keys():
-            lines = []
             if self.saved_orientations[i].get("include", True):
                 rot_mat = self.saved_orientations[i]["R"].as_matrix().reshape(-1)
-                for _ in range(n_points):
-                    lines.append("\t".join(rot_mat) + "\n")
-            with open(save_file, "w") as f:
-                f.writelines(lines)
+                for _ in range(self.n_output_points):
+                    lines.append("\t".join([str(x) for x in rot_mat]) + "\n")
+        with open(save_file, "w") as f:
+            f.writelines(lines)
+        logger.notice(f"Orientation data written to '{save_file}' as Rotation Matrices")
 
-    def output_as_euler(self, save_file, n_points=1):
+    def output_as_euler(self, save_dir, filename):
+        lines = []
+        save_file = os.path.join(save_dir, filename + ".txt")
         for i in self.saved_orientations.keys():
-            lines = []
             if self.saved_orientations[i].get("include", True):
-                rot_mat = self.saved_orientations[i]["R"].as_matrix().reshape(-1)
-                for _ in range(n_points):
-                    lines.append("\t".join(rot_mat) + "\n")
-            with open(save_file, "w") as f:
-                f.writelines(lines)
+                angles = self.saved_orientations[i]["R"].as_euler(self.orientation_kwargs["Axes"], degrees=True)
+                angles = [str(float(sense) * angles[i]) for i, sense in enumerate(self.orientation_kwargs["Senses"].split(","))]
+                for _ in range(self.n_output_points):
+                    lines.append("\t".join(angles) + "\n")
+        with open(save_file, "w") as f:
+            f.writelines(lines)
+        logger.notice(
+            f"Orientation data written to '{save_file}' as Euler Angles with "
+            f"Scheme ({self.orientation_kwargs['Axes']}) and Senses ({self.orientation_kwargs['Senses']})"
+        )
 
 
 def ring(axis, r=1, res=100, offset=(0, 0, 0)):
