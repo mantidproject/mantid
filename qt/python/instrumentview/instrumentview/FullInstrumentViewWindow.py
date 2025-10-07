@@ -106,8 +106,10 @@ class FullInstrumentViewWindow(QMainWindow):
         self._detector_spherical_position_edit = self._add_detector_info_boxes(detector_info_layout, "Spherical Position")
         self._detector_pixel_counts_edit = self._add_detector_info_boxes(detector_info_layout, "Pixel Counts")
 
-        self._time_of_flight_group_box = QGroupBox("Time of Flight")
-        self._tof_min_edit, self._tof_max_edit, self._tof_slider = self._add_min_max_group_box(self._time_of_flight_group_box)
+        self._integration_limit_group_box = QGroupBox("Time of Flight")
+        self._integration_limit_min_edit, self._integration_limit_max_edit, self._integration_limit_slider = self._add_min_max_group_box(
+            self._integration_limit_group_box
+        )
         self._contour_range_group_box = QGroupBox("Contour Range")
         self._contour_range_min_edit, self._contour_range_max_edit, self._contour_range_slider = self._add_min_max_group_box(
             self._contour_range_group_box
@@ -149,7 +151,7 @@ class FullInstrumentViewWindow(QMainWindow):
         options_vertical_widget = QWidget()
         options_vertical_layout = QVBoxLayout(options_vertical_widget)
         options_vertical_layout.addWidget(detector_group_box)
-        options_vertical_layout.addWidget(self._time_of_flight_group_box)
+        options_vertical_layout.addWidget(self._integration_limit_group_box)
         options_vertical_layout.addWidget(self._contour_range_group_box)
         options_vertical_layout.addWidget(multi_select_group_box)
         options_vertical_layout.addWidget(projection_group_box)
@@ -266,14 +268,14 @@ class FullInstrumentViewWindow(QMainWindow):
         self._presenter = presenter
         for unit in self._presenter.available_unit_options():
             self._units_combo_box.addItem(unit)
-        self._time_of_flight_group_box.setTitle(self._presenter.workspace_display_unit)
+        self._integration_limit_group_box.setTitle(self._presenter.workspace_display_unit)
 
     def setup_connections_to_presenter(self) -> None:
         self._projection_combo_box.currentIndexChanged.connect(self._presenter.on_projection_option_selected)
         self._multi_select_check.stateChanged.connect(self._presenter.on_multi_select_detectors_clicked)
         self._clear_selection_button.clicked.connect(self._presenter.on_clear_selected_detectors_clicked)
         self._contour_range_slider.sliderReleased.connect(self._presenter.on_contour_limits_updated)
-        self._tof_slider.sliderReleased.connect(self._presenter.on_tof_limits_updated)
+        self._integration_limit_slider.sliderReleased.connect(self._presenter.on_integration_limits_updated)
         self._units_combo_box.currentIndexChanged.connect(self._presenter.on_unit_option_selected)
         self._export_workspace_button.clicked.connect(self._presenter.on_export_workspace_clicked)
         self._sum_spectra_checkbox.clicked.connect(self._presenter.on_sum_spectra_checkbox_clicked)
@@ -285,7 +287,10 @@ class FullInstrumentViewWindow(QMainWindow):
             self._presenter.on_contour_limits_updated,
         )
         self._add_connections_to_edits_and_slider(
-            self._tof_min_edit, self._tof_max_edit, self._tof_slider, self._presenter.on_tof_limits_updated
+            self._integration_limit_min_edit,
+            self._integration_limit_max_edit,
+            self._integration_limit_slider,
+            self._presenter.on_integration_limits_updated,
         )
 
     def _setup_units_options(self, parent: QVBoxLayout):
@@ -315,17 +320,17 @@ class FullInstrumentViewWindow(QMainWindow):
     def sum_spectra_selected(self) -> bool:
         return self._sum_spectra_checkbox.isChecked()
 
-    def get_tof_limits(self) -> tuple[float, float]:
-        return self._tof_slider.value()
+    def get_integration_limits(self) -> tuple[float, float]:
+        return self._integration_limit_slider.value()
 
-    def set_tof_range_limits(self, tof_limits: tuple[float, float]) -> None:
-        """Update the TOF edit boxes with formatted text"""
-        lower, upper = tof_limits
+    def set_integration_range_limits(self, integration_limits: tuple[float, float]) -> None:
+        """Update the integration limit edit boxes with formatted text"""
+        lower, upper = integration_limits
         if upper <= lower:
-            self._time_of_flight_group_box.hide()
+            self._integration_limit_group_box.hide()
             return
-        self._tof_slider.setRange(*tof_limits)
-        self._tof_slider.setValue(tof_limits)
+        self._integration_limit_slider.setRange(*integration_limits)
+        self._integration_limit_slider.setValue(integration_limits)
         return
 
     def get_contour_limits(self) -> tuple[float, float]:

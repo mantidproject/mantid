@@ -66,7 +66,7 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         mock_workspace.getIntegratedCountsForWorkspaceIndices.return_value = [100 * i for i in detector_ids]
         return mock_workspace
 
-    def test_update_time_of_flight_range(self):
+    def test_update_integration_range(self):
         self._mock_detector_table(list(range(self._ws.getNumberHistograms())))
         model = FullInstrumentViewModel(self._ws)
         model.setup()
@@ -74,7 +74,7 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         mock_workspace = mock.MagicMock()
         mock_workspace.getIntegratedCountsForWorkspaceIndices.return_value = integrated_spectra
         model._workspace = mock_workspace
-        model.update_time_of_flight_range((200, 10000), False)
+        model.update_integration_range((200, 10000), False)
         model._workspace.getIntegratedCountsForWorkspaceIndices.assert_called_once()
         self.assertEqual(min(integrated_spectra), model._counts_limits[0])
         self.assertEqual(max(integrated_spectra), model._counts_limits[1])
@@ -217,16 +217,16 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         self.assertEqual(model.counts_limits[0], 100)
         self.assertEqual(model.counts_limits[1], 300)
 
-    def test_tof_limits_ws_with_common_bins(self):
+    def test_integration_limits_ws_with_common_bins(self):
         self._mock_detector_table([1, 2, 3])
         mock_workspace = self._create_mock_workspace([1, 2, 3])
         mock_workspace.isCommonBins.return_value = True
         mock_workspace.dataX.return_value = np.array([1, 2, 3])
         model = FullInstrumentViewModel(mock_workspace)
         model.setup()
-        self.assertEqual(model.tof_limits, (1, 3))
+        self.assertEqual(model.integration_limits, (1, 3))
 
-    def test_tof_limits_on_ragged_workspace(self):
+    def test_integration_limits_on_ragged_workspace(self):
         self._mock_detector_table([1, 2, 3])
         mock_workspace = self._create_mock_workspace([1, 2, 3])
         mock_workspace.isRaggedWorkspace.return_value = True
@@ -234,16 +234,16 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         mock_workspace.readX.side_effect = lambda i: data_x[i]
         model = FullInstrumentViewModel(mock_workspace)
         model.setup()
-        self.assertEqual(model.tof_limits, (1, 50))
+        self.assertEqual(model.integration_limits, (1, 50))
 
-    def test_tof_limits_on_non_ragged_workspace(self):
+    def test_integration_limits_on_non_ragged_workspace(self):
         self._mock_detector_table([1, 2, 3])
         mock_workspace = self._create_mock_workspace([1, 2, 3])
         mock_workspace.isRaggedWorkspace.return_value = False
         mock_workspace.extractX.return_value = np.array([[1, 2, 3], [10, 20, 30], [10, 20, 50]])
         model = FullInstrumentViewModel(mock_workspace)
         model.setup()
-        self.assertEqual(model.tof_limits, (1, 50))
+        self.assertEqual(model.integration_limits, (1, 50))
 
     def test_monitor_positions(self):
         self._mock_detector_table([1, 2, 3], monitors=np.array(["yes", "no", "yes"]))
