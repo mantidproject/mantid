@@ -97,6 +97,7 @@ set(SRC_FILES
     src/RebinParamsValidator.cpp
     src/RegexStrings.cpp
     src/SetValueWhenProperty.cpp
+    src/SetDefaultWhenProperty.cpp
     src/SingletonHolder.cpp
     src/SobolSequence.cpp
     src/SpinStateValidator.cpp
@@ -262,6 +263,7 @@ set(INC_FILES
     inc/MantidKernel/RegexStrings.h
     inc/MantidKernel/RegistrationHelper.h
     inc/MantidKernel/SetValueWhenProperty.h
+    inc/MantidKernel/SetDefaultWhenProperty.h
     inc/MantidKernel/SingletonHolder.h
     inc/MantidKernel/SobolSequence.h
     inc/MantidKernel/SpecialCoordinateSystem.h

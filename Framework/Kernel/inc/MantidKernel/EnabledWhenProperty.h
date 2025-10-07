@@ -94,8 +94,13 @@ public:
   /// Return true always
   bool isVisible(const IPropertyManager *algo) const override;
 
+  /// Other properties that this property depends on.
+  std::vector<std::string> dependsOn(const std::string &thisProp) const override;
+
+#if 0 // *** DEBUG *** => this seems deprecated?
   /// Stub function to satisfy the interface.
   void modify_allowed_values(Property *const);
+#endif
 
   /// Make a copy of the present type of validator
   IPropertySettings *clone() const override;

@@ -363,23 +363,33 @@ bool AlgorithmPropertiesWidget::isWidgetEnabled(Property *property, const QStrin
 //-------------------------------------------------------------------------------------------------
 /** Go through all the properties, and check their validators to determine
  * whether they should be made disabled/invisible.
- * It also shows/hids the validators.
+ * It also shows/hides the validators.
  * All properties' values should be set already, otherwise the validators
  * will be running on old data.
  * @param changedPropName :: name of the property that was changed
  */
 void AlgorithmPropertiesWidget::hideOrDisableProperties(const QString &changedPropName) {
-  // SetValueWhenProperty as appropriate
+
+  // Apply `SetValueWhenProperty` or other `IPropertySettings` as appropriate.
   for (auto &widget : m_propWidgets) {
     Mantid::Kernel::Property *prop = widget->getProperty();
-    IPropertySettings *settings = prop->getSettings();
+    const QString propName = QString::fromStdString(prop->name());
 
+    if (propName == changedPropName)
+      // Record the changed property's dynamic-default state:
+      //   when required, this may be overridden by the `IPropertySettings::applyChanges` below.
+      prop->setIsDynamicDefault(false);
+
+    IPropertySettings *settings = prop->getSettings();
     if (settings) {
       // Dynamic PropertySettings objects allow a property to change
       // validators. This removes the old widget and creates a new one
       // instead.
+
       if (settings->isConditionChanged(m_algo.get(), changedPropName.toStdString())) {
-        settings->applyChanges(m_algo.get(), prop);
+        settings->applyChanges(m_algo.get(), prop->name());
+        // WARNING: allow for the possibility that the current property has been replaced inside of `applyChanges`!
+        prop = m_algo->getPointerToProperty(propName.toStdString());
 
         // Delete the old widget
         int row = widget->getGridRow();
@@ -387,7 +397,8 @@ void AlgorithmPropertiesWidget::hideOrDisableProperties(const QString &changedPr
         widget->setVisible(false);
         widget->deleteLater();
 
-        // Create the appropriate widget at this row in the grid.
+        // Create the appropriate widget at this row in the grid:
+        //   since widget is a reference, this also replaces the `widget*` in `m_propWidgets`.
         widget = PropertyWidgetFactory::createWidget(prop, this, layout, row);
 
         // Whenever the value changes in the widget, this fires

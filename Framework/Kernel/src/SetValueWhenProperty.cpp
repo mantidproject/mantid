@@ -21,11 +21,11 @@ using namespace Mantid::Kernel;
 namespace Mantid::Kernel {
 
 /**
- * Checks the algorithm given is in a valid state and the property
- * exists then proceeds to try to get the value associated
+ * Checks the validity of the algorithm and the property:
+ * returns the value of the watched property.
  *
  * @param algo :: The pointer to the algorithm to process
- * @return :: The value contained by said property
+ * @return :: The value of the watched property
  * @throw :: Throws if anything is wrong with the property or algorithm
  */
 std::string SetValueWhenProperty::getPropertyValue(const IPropertyManager *algo) const {
@@ -45,11 +45,10 @@ std::string SetValueWhenProperty::getPropertyValue(const IPropertyManager *algo)
 }
 
 /**
- * Always returns true as SetValueWhenProperty always wants to check
- * if the property it depends on has changed
+ * Return true if the `changedPropName` matches the `watchedPropName`.
  *
  * @param algo :: Pointer to the algorithm containing the property
- * @param changedPropName :: Name of the property that has just been changed by the user
+ * @param changedPropName :: Name of the property that has just been changed
  * @return  :: True if the Property we are watching is the property that just changed, otherwise False
  */
 bool SetValueWhenProperty::isConditionChanged(const IPropertyManager *algo, const std::string &changedPropName) const {
@@ -58,19 +57,28 @@ bool SetValueWhenProperty::isConditionChanged(const IPropertyManager *algo, cons
   if (watchedProp->name() == changedPropName) {
     hasWatchedPropChanged = true;
   }
-
   return hasWatchedPropChanged;
 }
 
-void SetValueWhenProperty::applyChanges(const IPropertyManager *algo, Kernel::Property *const currentProperty) {
+void SetValueWhenProperty::applyChanges(const IPropertyManager *algo, const std::string &currentPropName) {
+  const auto currentProperty = algo->getPointerToProperty(currentPropName);
   const std::string watchedPropertyValue = getPropertyValue(algo);
 
   std::string newValue = m_changeCriterion(currentProperty->value(), watchedPropertyValue);
   currentProperty->setValue(newValue);
 }
 
+/// Other properties that this property depends on.
+std::vector<std::string> SetValueWhenProperty::dependsOn(const std::string &thisProp) const {
+  if (m_watchedPropName == thisProp)
+    throw std::runtime_error("SetValueWhenProperty: circular dependency detected");
+  return std::vector<std::string>{m_watchedPropName};
+}
+
+#if 0 // *** DEBUG *** => this seems deprecated?
 /// Does nothing in this case and put here to satisfy the interface.
 void SetValueWhenProperty::modify_allowed_values(Property *const /*unused*/) {}
+#endif
 
 IPropertySettings *SetValueWhenProperty::clone() const { return new SetValueWhenProperty(*this); }
 
