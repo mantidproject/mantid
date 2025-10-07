@@ -186,13 +186,33 @@ bool EnabledWhenProperty::isEnabled(const IPropertyManager *algo) const {
  * @return :: True always
  */
 bool EnabledWhenProperty::isVisible(const IPropertyManager *algo) const {
-  // VisisbleWhenProperty uses algo so we have to keep it to match interface
+  // VisibleWhenProperty uses algo so we have to keep it to match interface
   UNUSED_ARG(algo);
   return true;
 }
 
+/// Other properties that this property depends on.
+std::vector<std::string> EnabledWhenProperty::dependsOn(const std::string &thisProp) const {
+  if (m_propertyDetails) {
+    const std::string &otherProp = m_propertyDetails->otherPropName;
+    if (otherProp == thisProp)
+      throw std::runtime_error("EnabledWhenProperty: circular dependency detected");
+    return std::vector<std::string>{otherProp};
+  } else if (m_comparisonDetails) {
+    std::set<std::string> ps;
+    const auto ps1 = m_comparisonDetails->conditionOne->dependsOn(thisProp);
+    const auto ps2 = m_comparisonDetails->conditionTwo->dependsOn(thisProp);
+    ps.insert(ps1.cbegin(), ps1.cend());
+    ps.insert(ps2.cbegin(), ps2.cend());
+    return std::vector<std::string>(ps.cbegin(), ps.cend());
+  } else
+    return std::vector<std::string>{};
+}
+
+#if 0 // *** DEBUG *** => this seems deprecated?
 /// Does nothing in this case and put here to satisfy the interface.
 void EnabledWhenProperty::modify_allowed_values(Property *const /*unused*/) {}
+#endif
 
 /**
  * Clones the current EnabledWhenProperty object and returns

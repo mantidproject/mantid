@@ -178,5 +178,11 @@ void export_Property() {
       .def("setAutoTrim", &Property::setAutoTrim, (arg("setting")), "Setting automatic trimming of whitespaces.")
       .def("getAutoTrim", &Property::autoTrim, "Gets the setting of automatic trimming of whitespaces.")
       .def("setDisableReplaceWSButton", &Property::setDisableReplaceWSButton, (arg("disable")),
-           "Disable the creation of the Replace Workspace button.");
+           "Disable the creation of the Replace Workspace button.")
+
+      .add_property("isDynamicDefault", make_function(&Property::isDynamicDefault),
+                    "A flag indicating that the property's value has been set programmatically:"
+                    "  for example, if the property's default value depends on an upstream property")
+      .def("setIsDynamicDefault", &Property::setIsDynamicDefault, (arg("flag")),
+           "Set or clear the flag indicating that the property's value has been set programmatically.");
 }

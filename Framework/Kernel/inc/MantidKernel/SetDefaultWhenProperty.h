@@ -18,16 +18,16 @@ namespace Kernel {
 class IPropertyManager;
 class Property;
 
-class MANTID_KERNEL_DLL SetValueWhenProperty : public IPropertySettings {
+class MANTID_KERNEL_DLL SetDefaultWhenProperty : public IPropertySettings {
 public:
-  /// Constructs an SetValueWhenProperty object which checks the
-  /// watched property with name given and uses the given
-  /// function to check if changes should be applied
-  SetValueWhenProperty(const std::string &watchedPropName,
-                       const std::function<std::string(std::string, std::string)> &changeCriterion)
+  /// Constructs an `SetDefaultWhenProperty` instance which sets the dynamic-default value of a
+  /// property when the `changeCriterion` function is satisfied.
+  SetDefaultWhenProperty(
+      const std::string &watchedPropName,
+      const std::function<bool(const Mantid::Kernel::IPropertyManager *, Property *, Property *)> &changeCriterion)
       : IPropertySettings(), m_watchedPropName{watchedPropName}, m_changeCriterion{changeCriterion} {}
 
-  /// Return true always
+  /// Return true when change criterion should be tested.
   bool isConditionChanged(const IPropertyManager *algo, const std::string &changedPropName) const override;
 
   /// If a new value should be set, the change is applied here
@@ -36,24 +36,17 @@ public:
   /// Other properties that this property depends on.
   std::vector<std::string> dependsOn(const std::string &thisProp) const override;
 
-#if 0 // *** DEBUG *** => this seems deprecated?
-  /// Stub function to satisfy the interface.
-  void modify_allowed_values(Property *const);
-#endif
-
-  /// Checks the algorithm and property are both valid and attempts
-  /// to get the value associated with the property
-  std::string getPropertyValue(const IPropertyManager *algo) const;
-
   /// Make a copy of the present type of IPropertySettings
   IPropertySettings *clone() const override;
 
 private:
-  /// Name of the watched property, based on which we may
-  /// set the value of the current property
+  /// Name of the watched property.
   std::string m_watchedPropName;
-  /// Function to check if changes should be applied
-  std::function<std::string(std::string, std::string)> m_changeCriterion;
+
+  /// Criterion to determine if a new dynamic-default value should be set:
+  ///   in which case this function should modify the current property's value and return True,
+  ///   otherwise it should return False.
+  std::function<bool(const Mantid::Kernel::IPropertyManager *, Property *, Property *)> m_changeCriterion;
 };
 
 } // namespace Kernel
