@@ -90,7 +90,8 @@ done
 # make sure versions specified here are compatible with the developer meta-package
 setup_mamba $WORKSPACE/miniforge "" true $PLATFORM
 mamba activate base
-mamba install --yes rattler-build\>=0.46,\<1.0 versioningit python=3.11
+# something is wrong with versioningit and rattler-build 0.48
+mamba install --yes rattler-build=0.47 versioningit python=3.11
 
 # Set the version to inject into the recipe file
 export MANTID_VERSION=$(versioningit "${REPO_ROOT_DIR}")
@@ -131,9 +132,6 @@ EXTRA_BUILD_OPTIONS=" "
 if [[ $OSTYPE == "msys" ]]; then
     # Do not use build id as it makes the path too long (>260 chars) for CMake (Legacy Windows API issue)
     EXTRA_BUILD_OPTIONS+="--no-build-id --log-style=plain"
-elif [[ $PLATFORM == "osx-64" ]]; then
-    echo "osx-64 / intel mac builds are no longer supported"
-    exit 127 # this is an error and stop here
 fi
 
 export CONDA_SUBDIR=$PLATFORM
