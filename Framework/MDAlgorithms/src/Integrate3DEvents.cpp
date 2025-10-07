@@ -1049,12 +1049,13 @@ void Integrate3DEvents::addModEvent(std::pair<std::pair<double, double>, V3D> ev
  *                            of the net integrated intensity
  *
  */
-PeakShapeEllipsoid_const_sptr Integrate3DEvents::ellipseIntegrateEvents(
-    const std::vector<V3D> &E1Vec, V3D const &peak_q,
-    std::vector<std::pair<std::pair<double, double>, Mantid::Kernel::V3D>> const &ev_list,
-    DataObjects::PeakEllipsoidFrame const &directions, std::array<double, 3> const &sigmas, bool specify_size,
-    double peak_radius, double back_inner_radius, double back_outer_radius,
-    DataObjects::PeakEllipsoidExtent &axes_radii, double &inti, double &sigi) {
+PeakShapeEllipsoid_const_sptr
+Integrate3DEvents::ellipseIntegrateEvents(const std::vector<Kernel::V3D> &E1Vec, Kernel::V3D const &peak_q,
+                                          std::vector<std::pair<std::pair<double, double>, Kernel::V3D>> const &ev_list,
+                                          DataObjects::PeakEllipsoidFrame const &directions,
+                                          std::array<double, 3> const &sigmas, bool specify_size, double peak_radius,
+                                          double back_inner_radius, double back_outer_radius,
+                                          DataObjects::PeakEllipsoidExtent &axes_radii, double &inti, double &sigi) {
   // r1, r2 and r3 will give the sizes of the major axis of
   // the peak ellipsoid, and of the inner and outer surface
   // of the background ellipsoidal shell, respectively.

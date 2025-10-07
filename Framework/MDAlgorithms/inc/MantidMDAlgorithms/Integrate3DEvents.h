@@ -140,12 +140,11 @@ private:
   void addModEvent(std::pair<std::pair<double, double>, Mantid::Kernel::V3D> event_Q, bool hkl_integ);
 
   /// Find the net integrated intensity of a list of Q's using ellipsoids
-  std::shared_ptr<const Mantid::DataObjects::PeakShapeEllipsoid>
+  DataObjects::PeakShapeEllipsoid_const_sptr
   ellipseIntegrateEvents(const std::vector<Kernel::V3D> &E1Vec, Kernel::V3D const &peak_q,
-                         std::vector<std::pair<std::pair<double, double>, Mantid::Kernel::V3D>> const &ev_list,
-                         DataObjects::PeakEllipsoidFrame const &directions,
-                         DataObjects::PeakEllipsoidExtent const &sigmas, bool specify_size, double peak_radius,
-                         double back_inner_radius, double back_outer_radius,
+                         std::vector<std::pair<std::pair<double, double>, Kernel::V3D>> const &ev_list,
+                         DataObjects::PeakEllipsoidFrame const &directions, std::array<double, 3> const &sigmas,
+                         bool specify_size, double peak_radius, double back_inner_radius, double back_outer_radius,
                          DataObjects::PeakEllipsoidExtent &axes_radii, double &inti, double &sigi);
 
   /// Compute if a particular Q falls on the edge of a detector
