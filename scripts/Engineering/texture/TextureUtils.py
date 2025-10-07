@@ -27,6 +27,7 @@ from mantid.dataobjects import Workspace2D
 from mantid.fitfunctions import FunctionWrapper, CompositeFunctionWrapper
 from plugins.algorithms.IntegratePeaks1DProfile import calc_intens_and_sigma_arrays
 from Engineering.texture.xtal_helper import get_xtal_structure
+from scipy.spatial.transform import Rotation
 from Engineering.EnggUtils import convert_TOFerror_to_derror
 from Engineering.common.instrument_config import get_instr_config
 
@@ -57,6 +58,26 @@ def mk(dir_path: str):
     p = Path(dir_path)
     if not p.exists():
         p.mkdir()
+
+
+
+
+def convert_to_sscanss_frame(rot_mat):
+    # Define M: matrix to convert vectors from XYZ to ZXY
+    M = np.array(
+        [
+            [0, 0, 1],  # X in ZXY = Z in XYZ
+            [1, 0, 0],  # Y in ZXY = X in XYZ
+            [0, 1, 0],  # Z in ZXY = Y in XYZ
+        ]
+    )
+
+    # Apply the similarity transform to express R in XYZ frame
+    r_xyz = Rotation.from_matrix(M @ rot_mat @ M.T)
+
+    # Now extract Euler angles in XYZ axes (extrinsic or intrinsic as needed)
+    # minus is because the sense of rotation is the other way in sscanss
+    return -r_xyz.as_euler("xyz", degrees=True)
 
 
 # -------- Focus Script Logic--------------------------------
