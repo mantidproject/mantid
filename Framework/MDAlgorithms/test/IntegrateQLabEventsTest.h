@@ -81,7 +81,7 @@ public:
     double peak_radius = 1.2;
     double back_inner_radius = 1.2;
     double back_outer_radius = 1.3;
-    std::vector<double> new_sigma;
+    std::array<double, 3> new_sigma;
     std::vector<Kernel::V3D> E1Vec;
     double inti;
     double sigi;

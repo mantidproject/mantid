@@ -424,7 +424,7 @@ void IntegrateEllipsoidsV2::exec() {
       // Integrate peak properly
       double inti;
       double sigi;
-      std::vector<double> axes_radii;
+      DataObjects::PeakEllipsoidExtent axes_radii;
 
       // calculate adaptive background inner and outer radius
       // compute adaptive background radius
@@ -716,7 +716,7 @@ void IntegrateEllipsoidsV2::integratePeaksCutoffISigI(const double &meanMax, con
     const bool isSatellitePeak = (peaks[i].getIntMNP().norm2() > 0);
     //
     const V3D peak_q = peaks[i].getQLabFrame();
-    std::vector<double> axes_radii;
+    DataObjects::PeakEllipsoidExtent axes_radii;
 
     double inti{0.}, sigi{0.};
     std::pair<double, double> backi;
