@@ -8,9 +8,12 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataHandling/AlignAndFocusPowderSlim.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidKernel/TimeROI.h"
@@ -20,7 +23,14 @@
 #include <gtest/gtest.h>
 #include <numbers>
 
+using Mantid::API::AlgorithmManager;
+using Mantid::API::AnalysisDataService;
+using Mantid::API::MatrixWorkspace;
 using Mantid::API::MatrixWorkspace_sptr;
+using Mantid::API::Workspace;
+using Mantid::API::Workspace_sptr;
+using Mantid::API::WorkspaceGroup;
+using Mantid::API::WorkspaceGroup_sptr;
 using Mantid::DataHandling::AlignAndFocusPowderSlim::AlignAndFocusPowderSlim;
 using Mantid::DataObjects::TableWorkspace_sptr;
 
@@ -43,7 +53,6 @@ struct TestConfig {
   double timeMax = -1.;
   TableWorkspace_sptr tablesplitter = nullptr;
   bool relativeTime = false;
-  int splitterTarget = -1;
   bool filterBadPulses = false;
   std::string logListBlock = "";
   std::string logListAllow = "";
@@ -65,8 +74,8 @@ public:
   }
 
   // run the algorithm do some common checks and return output workspace name
-  MatrixWorkspace_sptr run_algorithm(const std::string &filename, const TestConfig &configuration,
-                                     const bool should_throw = false) {
+  Workspace_sptr run_algorithm(const std::string &filename, const TestConfig &configuration,
+                               const bool should_throw = false) {
     // simplify setting property names
     using namespace Mantid::DataHandling::AlignAndFocusPowderSlim::PropertyNames;
 
@@ -101,8 +110,6 @@ public:
       TS_ASSERT_THROWS_NOTHING(alg.setProperty(SPLITTER_WS, configuration.tablesplitter));
       TS_ASSERT_THROWS_NOTHING(alg.setProperty(SPLITTER_RELATIVE, configuration.relativeTime));
     }
-    if (configuration.splitterTarget >= 0)
-      TS_ASSERT_THROWS_NOTHING(alg.setProperty(SPLITTER_TARGET, configuration.splitterTarget));
     if (configuration.filterBadPulses) {
       TS_ASSERT_THROWS_NOTHING(alg.setProperty(FILTER_BAD_PULSES, configuration.filterBadPulses));
     }
@@ -112,20 +119,20 @@ public:
 
     if (should_throw) {
       TS_ASSERT_THROWS(alg.execute(), const std::invalid_argument &);
-      return MatrixWorkspace_sptr();
+      return Workspace_sptr();
     }
 
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
     std::cout << "==================> " << timer << '\n';
 
-    MatrixWorkspace_sptr outputWS = alg.getProperty(OUTPUT_WKSP);
+    Workspace_sptr outputWS = alg.getProperty(OUTPUT_WKSP);
     TS_ASSERT(outputWS);
     return outputWS;
   }
 
   void test_defaults() {
-    MatrixWorkspace_sptr outputWS = run_algorithm(VULCAN_218062, TestConfig());
+    auto outputWS = std::dynamic_pointer_cast<MatrixWorkspace>(run_algorithm(VULCAN_218062, TestConfig()));
 
     constexpr size_t NUM_Y{1874}; // observed value
 
@@ -156,7 +163,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("ReadSizeFromDisk", 1000000));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
 
-    MatrixWorkspace_sptr outputWS2 = alg.getProperty("OutputWorkspace");
+    Workspace_sptr outputWS2 = alg.getProperty("OutputWorkspace");
     TS_ASSERT(outputWS2);
 
     // Run CompareWorkspaces algorithm to verify the output
@@ -170,7 +177,7 @@ public:
 
   void test_common_x() {
     TestConfig configuration({13000.}, {36000.}, {}, "Logarithmic", "TOF");
-    MatrixWorkspace_sptr outputWS = run_algorithm(VULCAN_218062, configuration);
+    auto outputWS = std::dynamic_pointer_cast<MatrixWorkspace>(run_algorithm(VULCAN_218062, configuration));
 
     constexpr size_t NUM_Y{637}; // observed value
 
@@ -195,7 +202,7 @@ public:
   void test_ragged_bins_x_min_max() {
     TestConfig configuration({13000., 14000., 15000., 16000., 17000., 18000.},
                              {36000., 37000., 38000., 39000., 40000., 41000.}, {}, "Logarithmic", "TOF");
-    MatrixWorkspace_sptr outputWS = run_algorithm(VULCAN_218062, configuration);
+    auto outputWS = std::dynamic_pointer_cast<MatrixWorkspace>(run_algorithm(VULCAN_218062, configuration));
 
     // verify the output
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 6);
@@ -212,7 +219,7 @@ public:
 
   void test_ragged_bins_x_delta() {
     TestConfig configuration({13000.}, {36000.}, {1000., 2000., 3000., 4000., 5000., 6000.}, "Linear", "TOF");
-    MatrixWorkspace_sptr outputWS = run_algorithm(VULCAN_218062, configuration);
+    auto outputWS = std::dynamic_pointer_cast<MatrixWorkspace>(run_algorithm(VULCAN_218062, configuration));
 
     // verify the output
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 6);
@@ -271,7 +278,7 @@ public:
   void run_test_with_different_units(std::vector<double> xmin, std::vector<double> xmax, std::vector<double> xdelta,
                                      std::string units) {
     TestConfig configuration(xmin, xmax, xdelta, "Linear", units);
-    MatrixWorkspace_sptr outputWS = run_algorithm(VULCAN_218062, configuration);
+    auto outputWS = std::dynamic_pointer_cast<MatrixWorkspace>(run_algorithm(VULCAN_218062, configuration));
 
     // verify the output
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 6);
@@ -289,7 +296,7 @@ public:
     configuration.timeMin = 0.;
     configuration.timeMax = 300.;
     configuration.logListBlock = "skf*";
-    MatrixWorkspace_sptr outputWS = run_algorithm(VULCAN_218062, configuration);
+    auto outputWS = std::dynamic_pointer_cast<MatrixWorkspace>(run_algorithm(VULCAN_218062, configuration));
 
     // verify the output
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 6);
@@ -310,7 +317,7 @@ public:
     TestConfig configuration({0.}, {50000.}, {50000.}, "Linear", "TOF");
     configuration.timeMin = 200.;
     configuration.timeMax = 300.;
-    MatrixWorkspace_sptr outputWS = run_algorithm(VULCAN_218062, configuration);
+    auto outputWS = std::dynamic_pointer_cast<MatrixWorkspace>(run_algorithm(VULCAN_218062, configuration));
 
     /* expected results came from running
 
@@ -343,7 +350,7 @@ public:
   void test_start_time_filtering() {
     TestConfig configuration({0.}, {50000.}, {50000.}, "Linear", "TOF");
     configuration.timeMin = 200.;
-    MatrixWorkspace_sptr outputWS = run_algorithm(VULCAN_218062, configuration);
+    auto outputWS = std::dynamic_pointer_cast<MatrixWorkspace>(run_algorithm(VULCAN_218062, configuration));
 
     /* expected results came from running
 
@@ -364,7 +371,7 @@ public:
   void test_stop_time_filtering() {
     TestConfig configuration({0.}, {50000.}, {50000.}, "Linear", "TOF");
     configuration.timeMax = 300.;
-    MatrixWorkspace_sptr outputWS = run_algorithm(VULCAN_218062, configuration);
+    auto outputWS = std::dynamic_pointer_cast<MatrixWorkspace>(run_algorithm(VULCAN_218062, configuration));
 
     /* expected results came from running
 
@@ -386,7 +393,7 @@ public:
     // run is only ~600 seconds long so this include all events
     TestConfig configuration({0.}, {50000.}, {50000.}, "Linear", "TOF");
     configuration.timeMax = 3000.;
-    MatrixWorkspace_sptr outputWS = run_algorithm(VULCAN_218062, configuration);
+    auto outputWS = std::dynamic_pointer_cast<MatrixWorkspace>(run_algorithm(VULCAN_218062, configuration));
 
     /* expected results came from running
 
@@ -421,8 +428,7 @@ public:
     TestConfig configuration({0.}, {50000.}, {50000.}, "Linear", "TOF");
     configuration.relativeTime = true;
     configuration.tablesplitter = create_splitter_table(configuration.relativeTime);
-    configuration.relativeTime = true;
-    MatrixWorkspace_sptr outputWS = run_algorithm(VULCAN_218062, configuration);
+    auto outputWS = std::dynamic_pointer_cast<WorkspaceGroup>(run_algorithm(VULCAN_218062, configuration));
 
     /* expected results came from running
 
@@ -443,36 +449,38 @@ public:
 
     print(mtd["filtered_0"].extractY())
     */
-    TS_ASSERT_EQUALS(outputWS->readY(0).front(), 807206);
-    TS_ASSERT_EQUALS(outputWS->readY(1).front(), 805367);
-    TS_ASSERT_EQUALS(outputWS->readY(2).front(), 920983);
-    TS_ASSERT_EQUALS(outputWS->readY(3).front(), 909955);
-    TS_ASSERT_EQUALS(outputWS->readY(4).front(), 310676);
-    TS_ASSERT_EQUALS(outputWS->readY(5).front(), 590230);
+
+    auto outputWS0 = std::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(0));
+    TS_ASSERT_EQUALS(outputWS0->readY(0).front(), 807206);
+    TS_ASSERT_EQUALS(outputWS0->readY(1).front(), 805367);
+    TS_ASSERT_EQUALS(outputWS0->readY(2).front(), 920983);
+    TS_ASSERT_EQUALS(outputWS0->readY(3).front(), 909955);
+    TS_ASSERT_EQUALS(outputWS0->readY(4).front(), 310676);
+    TS_ASSERT_EQUALS(outputWS0->readY(5).front(), 590230);
   }
 
   void test_splitter_table_absolute_time() {
     TestConfig configuration({0.}, {50000.}, {50000.}, "Linear", "TOF");
     configuration.relativeTime = false;
     configuration.tablesplitter = create_splitter_table(configuration.relativeTime);
-    MatrixWorkspace_sptr outputWS = run_algorithm(VULCAN_218062, configuration);
+    auto outputWS = std::dynamic_pointer_cast<WorkspaceGroup>(run_algorithm(VULCAN_218062, configuration));
 
     /* expected results should be the same as test_splitter_table but produced with absolute time */
 
-    TS_ASSERT_EQUALS(outputWS->readY(0).front(), 807206);
-    TS_ASSERT_EQUALS(outputWS->readY(1).front(), 805367);
-    TS_ASSERT_EQUALS(outputWS->readY(2).front(), 920983);
-    TS_ASSERT_EQUALS(outputWS->readY(3).front(), 909955);
-    TS_ASSERT_EQUALS(outputWS->readY(4).front(), 310676);
-    TS_ASSERT_EQUALS(outputWS->readY(5).front(), 590230);
+    auto outputWS0 = std::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(0));
+    TS_ASSERT_EQUALS(outputWS0->readY(0).front(), 807206);
+    TS_ASSERT_EQUALS(outputWS0->readY(1).front(), 805367);
+    TS_ASSERT_EQUALS(outputWS0->readY(2).front(), 920983);
+    TS_ASSERT_EQUALS(outputWS0->readY(3).front(), 909955);
+    TS_ASSERT_EQUALS(outputWS0->readY(4).front(), 310676);
+    TS_ASSERT_EQUALS(outputWS0->readY(5).front(), 590230);
   }
 
   void test_splitter_table_multiple_targets() {
     TestConfig configuration({0.}, {50000.}, {50000.}, "Linear", "TOF");
     configuration.relativeTime = true;
     configuration.tablesplitter = create_splitter_table(configuration.relativeTime, false);
-    configuration.splitterTarget = 0;
-    MatrixWorkspace_sptr outputWS0 = run_algorithm(VULCAN_218062, configuration);
+    auto outputWS = std::dynamic_pointer_cast<WorkspaceGroup>(run_algorithm(VULCAN_218062, configuration));
 
     /* expected results came from running
 
@@ -482,15 +490,14 @@ public:
     print(ws.extractY())
     */
 
+    auto outputWS0 = std::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(0));
+
     TS_ASSERT_EQUALS(outputWS0->readY(0).front(), 59561);
     TS_ASSERT_EQUALS(outputWS0->readY(1).front(), 59358);
     TS_ASSERT_EQUALS(outputWS0->readY(2).front(), 63952);
     TS_ASSERT_EQUALS(outputWS0->readY(3).front(), 63299);
     TS_ASSERT_EQUALS(outputWS0->readY(4).front(), 22917);
     TS_ASSERT_EQUALS(outputWS0->readY(5).front(), 43843);
-
-    configuration.splitterTarget = 1; // next index
-    MatrixWorkspace_sptr outputWS1 = run_algorithm(VULCAN_218062, configuration);
 
     /* expected results came from running
 
@@ -500,15 +507,14 @@ public:
     print(ws.extractY())
     */
 
+    auto outputWS1 = std::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(1));
+
     TS_ASSERT_EQUALS(outputWS1->readY(0).front(), 373262);
     TS_ASSERT_EQUALS(outputWS1->readY(1).front(), 372186);
     TS_ASSERT_EQUALS(outputWS1->readY(2).front(), 428220);
     TS_ASSERT_EQUALS(outputWS1->readY(3).front(), 423472);
     TS_ASSERT_EQUALS(outputWS1->readY(4).front(), 143703);
     TS_ASSERT_EQUALS(outputWS1->readY(5).front(), 273072);
-
-    configuration.splitterTarget = 2; // next index
-    MatrixWorkspace_sptr outputWS2 = run_algorithm(VULCAN_218062, configuration);
 
     /* expected results came from running
 
@@ -518,16 +524,13 @@ public:
     print(ws.extractY())
     */
 
+    auto outputWS2 = std::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(2));
     TS_ASSERT_EQUALS(outputWS2->readY(0).front(), 374383);
     TS_ASSERT_EQUALS(outputWS2->readY(1).front(), 373823);
     TS_ASSERT_EQUALS(outputWS2->readY(2).front(), 428811);
     TS_ASSERT_EQUALS(outputWS2->readY(3).front(), 423184);
     TS_ASSERT_EQUALS(outputWS2->readY(4).front(), 144056);
     TS_ASSERT_EQUALS(outputWS2->readY(5).front(), 273315);
-
-    // target out of range, should throw
-    configuration.splitterTarget = 3;
-    run_algorithm(VULCAN_218062, configuration, true);
   }
 
   void test_splitter_table_and_time_start_stop() {
@@ -536,7 +539,7 @@ public:
     configuration.timeMax = 300;
     configuration.relativeTime = true;
     configuration.tablesplitter = create_splitter_table(configuration.relativeTime);
-    MatrixWorkspace_sptr outputWS = run_algorithm(VULCAN_218062, configuration);
+    auto outputWS = std::dynamic_pointer_cast<WorkspaceGroup>(run_algorithm(VULCAN_218062, configuration));
 
     /* expected results came from running
 
@@ -556,12 +559,14 @@ public:
 
     print(mtd["filtered_0"].extractY())
     */
-    TS_ASSERT_EQUALS(outputWS->readY(0).front(), 415525);
-    TS_ASSERT_EQUALS(outputWS->readY(1).front(), 414435);
-    TS_ASSERT_EQUALS(outputWS->readY(2).front(), 476903);
-    TS_ASSERT_EQUALS(outputWS->readY(3).front(), 471846);
-    TS_ASSERT_EQUALS(outputWS->readY(4).front(), 160000);
-    TS_ASSERT_EQUALS(outputWS->readY(5).front(), 304167);
+
+    auto outputWS0 = std::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(0));
+    TS_ASSERT_EQUALS(outputWS0->readY(0).front(), 415525);
+    TS_ASSERT_EQUALS(outputWS0->readY(1).front(), 414435);
+    TS_ASSERT_EQUALS(outputWS0->readY(2).front(), 476903);
+    TS_ASSERT_EQUALS(outputWS0->readY(3).front(), 471846);
+    TS_ASSERT_EQUALS(outputWS0->readY(4).front(), 160000);
+    TS_ASSERT_EQUALS(outputWS0->readY(5).front(), 304167);
   }
 
   TableWorkspace_sptr create_splitter_table(const bool relativeTime = true, const bool sameTarget = true) {
@@ -591,10 +596,87 @@ public:
     return tablesplitter;
   }
 
+  void test_splitter_from_GenerateEventsFilter() {
+    // load only the CaveTemperature log from the nexus file
+    auto load = AlgorithmManager::Instance().createUnmanaged("LoadEventNexus");
+    load->initialize();
+    load->setProperty("Filename", "VULCAN_218062.nxs.h5");
+    load->setProperty("MetaDataOnly", true);
+    load->setProperty("AllowList", std::vector<std::string>{"CaveTemperature"});
+    load->setProperty("OutputWorkspace", "logs");
+    load->execute();
+
+    // GenereateEventsFilter should create 3 different output targets
+    auto gen = AlgorithmManager::Instance().createUnmanaged("GenerateEventsFilter");
+    gen->initialize();
+    gen->setProperty("InputWorkspace", "logs");
+    gen->setProperty("LogName", "CaveTemperature");
+    gen->setProperty("MinimumLogValue", 70.1);
+    gen->setProperty("MaximumLogValue", 70.15);
+    gen->setProperty("LogValueInterval", 0.025);
+    gen->setProperty("OutputWorkspace", "splitter");
+    gen->setProperty("InformationWorkspace", "info");
+    gen->execute();
+
+    auto tablesplitter = std::dynamic_pointer_cast<Mantid::DataObjects::SplittersWorkspace>(
+        AnalysisDataService::Instance().retrieve("splitter"));
+
+    TestConfig configuration({0.}, {50000.}, {50000.}, "Linear", "TOF");
+    configuration.relativeTime = true;
+    configuration.tablesplitter = tablesplitter;
+    auto outputWS = std::dynamic_pointer_cast<WorkspaceGroup>(run_algorithm(VULCAN_218062, configuration));
+
+    /* expected results came from running
+
+    ws = LoadEventNexus("VULCAN_218062.nxs.h5")
+    GenerateEventsFilter(ws,
+                         OutputWorkspace='splitter',
+                         InformationWorkspace='info',
+                         LogName='CaveTemperature',
+                         LogValueInterval=0.025,
+                         MinimumLogValue=70.10,
+                         MaximumLogValue=70.15)
+    grp = CreateGroupingWorkspace(ws, GroupDetectorsBy='bank')
+    ws = GroupDetectors(ws, CopyGroupingFromWorkspace="grp")
+    FilterEvents(ws, SplitterWorkspace='splitter',
+                 InformationWorkspace='info',
+                 OutputWorkspaceBaseName="eventFiltered",
+                 FilterByPulseTime=True,
+                 GroupWorkspaces=True)
+    Rebin("eventFiltered", "0,50000,50000", PreserveEvents=False, OutputWorkspace="eventFiltered")
+    for ws in mtd['eventFiltered']:
+        print(str(ws), ws.extractY())
+    */
+
+    auto outputWS0 = std::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(0));
+    TS_ASSERT_EQUALS(outputWS0->readY(0).front(), 2729042);
+    TS_ASSERT_EQUALS(outputWS0->readY(1).front(), 2726901);
+    TS_ASSERT_EQUALS(outputWS0->readY(2).front(), 3133867);
+    TS_ASSERT_EQUALS(outputWS0->readY(3).front(), 3098887);
+    TS_ASSERT_EQUALS(outputWS0->readY(4).front(), 1045181);
+    TS_ASSERT_EQUALS(outputWS0->readY(5).front(), 1997189);
+
+    auto outputWS1 = std::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(1));
+    TS_ASSERT_EQUALS(outputWS1->readY(0).front(), 2567255);
+    TS_ASSERT_EQUALS(outputWS1->readY(1).front(), 2566070);
+    TS_ASSERT_EQUALS(outputWS1->readY(2).front(), 2947152);
+    TS_ASSERT_EQUALS(outputWS1->readY(3).front(), 2913240);
+    TS_ASSERT_EQUALS(outputWS1->readY(4).front(), 983897);
+    TS_ASSERT_EQUALS(outputWS1->readY(5).front(), 1877851);
+
+    auto outputWS2 = std::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(2));
+    TS_ASSERT_EQUALS(outputWS2->readY(0).front(), 1346290);
+    TS_ASSERT_EQUALS(outputWS2->readY(1).front(), 1343588);
+    TS_ASSERT_EQUALS(outputWS2->readY(2).front(), 1541892);
+    TS_ASSERT_EQUALS(outputWS2->readY(3).front(), 1526538);
+    TS_ASSERT_EQUALS(outputWS2->readY(4).front(), 516351);
+    TS_ASSERT_EQUALS(outputWS2->readY(5).front(), 984359);
+  }
+
   void test_filter_bad_pulses() {
     TestConfig configuration({0.}, {50000.}, {50000.}, "Linear", "TOF");
     configuration.filterBadPulses = true;
-    MatrixWorkspace_sptr outputWS = run_algorithm(VULCAN_218062, configuration);
+    auto outputWS = std::dynamic_pointer_cast<MatrixWorkspace>(run_algorithm(VULCAN_218062, configuration));
 
     /* expected results came from running
 
@@ -618,7 +700,7 @@ public:
     configuration.filterBadPulses = true;
     configuration.timeMin = 200.;
     configuration.timeMax = 300.;
-    MatrixWorkspace_sptr outputWS = run_algorithm(VULCAN_218062, configuration);
+    auto outputWS = std::dynamic_pointer_cast<MatrixWorkspace>(run_algorithm(VULCAN_218062, configuration));
 
     /* expected results came from running
 
@@ -657,7 +739,7 @@ public:
     constexpr int NUM_HIST{6};
     for (int i = 1; i <= NUM_HIST; i++) {
       configuration.outputSpecNum = i;
-      MatrixWorkspace_sptr outputWS = run_algorithm(VULCAN_218062, configuration);
+      auto outputWS = std::dynamic_pointer_cast<MatrixWorkspace>(run_algorithm(VULCAN_218062, configuration));
 
       // verify the output -- all spectra exist
       TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), NUM_HIST);
@@ -685,14 +767,15 @@ public:
   // ==================================
 
   void run_test(const std::string &filename) {
-    MatrixWorkspace_sptr outputWS = run_algorithm(filename, TestConfig());
+    Workspace_sptr outputWS = run_algorithm(filename, TestConfig());
+    auto WS = std::dynamic_pointer_cast<MatrixWorkspace>(outputWS);
 
     // LoadEventNexus 4 seconds
     // tof 6463->39950
 
     // verify the output
-    TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 6);
-    TS_ASSERT_EQUALS(outputWS->blocksize(), 3349); // observed value
+    TS_ASSERT_EQUALS(WS->getNumberHistograms(), 6);
+    TS_ASSERT_EQUALS(WS->blocksize(), 3349); // observed value
 
     // do not need to cleanup because workspace did not go into the ADS
   }
