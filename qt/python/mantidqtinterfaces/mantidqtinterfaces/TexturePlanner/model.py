@@ -16,6 +16,7 @@ import numpy as np
 from scipy.spatial.transform import Rotation
 import matplotlib.pyplot as plt
 from mantid.kernel import logger
+from Engineering.texture.TextureUtils import convert_to_sscanss_frame
 
 
 class TexturePlannerModel(object):
@@ -73,7 +74,7 @@ class TexturePlannerModel(object):
     def load_orientation_file(self, txt_file):
         logger.notice("Loading Orientations from file")
         with open(txt_file, "r") as f:
-            goniometer_strings = [line.strip().replace("\t", ",") for line in f.readlines()]
+            goniometer_strings = [line.strip().replace("\t", ",") for line in f]
             goniometer_lists = [[float(x) for x in gs.split(",")] for gs in goniometer_strings]
         print(goniometer_lists)
         if len(goniometer_lists) == 0:
@@ -152,7 +153,7 @@ class TexturePlannerModel(object):
 
     def update_gonio_index(self, num_gonios):
         max_ind = num_gonios - 1
-        return self.gonio_index if self.gonio_index <= max_ind else max_ind
+        return min(self.gonio_index, max_ind)
 
     def calc_gRs(self, vecs, senses, angles):
         gRs = [Rotation.identity()]
@@ -408,6 +409,40 @@ class TexturePlannerModel(object):
 
         fig.canvas.draw_idle()
         proj_ax.figure.canvas.draw_idle()
+
+    def output_as_sscanss(self, save_file, n_points=1):
+        for i in self.saved_orientations.keys():
+            header = [
+                "xyz\n",
+            ]
+            sscanss_lines = []
+            if self.saved_orientations[i].get("include", True):
+                angs = convert_to_sscanss_frame(self.saved_orientations[i]["R"].as_matrix())
+                for _ in range(n_points):
+                    sscanss_lines.append(f"{np.round(angs[0], 2)}\t{np.round(angs[1], 2)}\t{np.round(angs[2], 2)}\n")
+
+            with open(save_file, "w") as f:
+                f.writelines(header + sscanss_lines)
+
+    def output_as_matrix(self, save_file, n_points=1):
+        for i in self.saved_orientations.keys():
+            lines = []
+            if self.saved_orientations[i].get("include", True):
+                rot_mat = self.saved_orientations[i]["R"].as_matrix().reshape(-1)
+                for _ in range(n_points):
+                    lines.append("\t".join(rot_mat) + "\n")
+            with open(save_file, "w") as f:
+                f.writelines(lines)
+
+    def output_as_euler(self, save_file, n_points=1):
+        for i in self.saved_orientations.keys():
+            lines = []
+            if self.saved_orientations[i].get("include", True):
+                rot_mat = self.saved_orientations[i]["R"].as_matrix().reshape(-1)
+                for _ in range(n_points):
+                    lines.append("\t".join(rot_mat) + "\n")
+            with open(save_file, "w") as f:
+                f.writelines(lines)
 
 
 def ring(axis, r=1, res=100, offset=(0, 0, 0)):
