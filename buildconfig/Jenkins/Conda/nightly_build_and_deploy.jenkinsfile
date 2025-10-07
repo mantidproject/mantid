@@ -15,7 +15,7 @@ def publishPackages = (gitBranch == "${BRANCH_TO_PUBLISH}")
 def defaults = [
   anacondaChannel : 'mantid',
   githubReleasesRepo: 'mantidproject/mantid',
-  platformChoices : ['none', 'all', 'linux-64', 'win-64', 'osx-64', 'osx-arm64'],
+  platformChoices : ['none', 'all', 'linux-64', 'win-64', 'osx-arm64'],
   publishToAnaconda : publishPackages,
   publishToGithub   : publishPackages,
   packageSuffix     : 'Unstable',
@@ -180,28 +180,6 @@ pipeline {
             }
           }
         }
-        stage('build and test: osx-64') {
-          when {
-            beforeAgent true
-            beforeOptions true
-              anyOf {
-                expression { params.BUILD_DEVEL == 'all' }
-                expression { params.BUILD_DEVEL == 'osx-64' }
-            }
-          }
-          agent { label 'osx-64' }
-          options { timestamps () }
-          steps {
-            checkoutSource("${GIT_SHA}")
-            build_and_test('osx-64')
-          }
-          post {
-            always {
-              archive_test_logs()
-              publish_test_reports()
-            }
-          }
-        }
         stage('build and test: osx-arm64') {
           when {
             beforeAgent true
@@ -288,38 +266,6 @@ pipeline {
             }
           }
         }
-        stage('package conda: osx-64') {
-          when {
-            beforeAgent true
-            beforeOptions true
-            anyOf {
-              expression { params.BUILD_PACKAGE == 'osx-64' }
-              expression { params.BUILD_PACKAGE == 'all' }
-            }
-          }
-          agent { label 'osx-64' }
-          options {
-              timestamps ()
-              retry(3)
-          }
-          steps {
-            // Clean up conda-bld before we start to avoid any
-            // confusion with old packages
-            dir('conda-bld') {
-              deleteDir()
-            }
-            checkoutSource("${GIT_SHA}")
-            // Build the base set of packages (ones not required for mantidworkbench)
-            // in parallel
-            package_conda('osx-64', 'base')
-            archive_conda_packages('osx-64')
-          }
-          post {
-            always {
-              archive_env_logs('osx-64')
-            }
-          }
-        }
         stage('package conda: osx-arm64') {
           when {
             beforeAgent true
@@ -359,7 +305,7 @@ pipeline {
         axes {
           axis {
             name 'PLATFORM'
-            values 'linux-64', 'win-64', 'osx-64', 'osx-arm64'
+            values 'linux-64', 'win-64', 'osx-arm64'
           }
         }
         stages {
