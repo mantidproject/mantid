@@ -28,8 +28,11 @@ class DNSElasticSCPlotModelTest(unittest.TestCase):
 
     def setUp(self):
         self.model._single_crystal_map = mock.Mock()
-        self.model._single_crystal_map.hkl_mesh_intp = [1, 2, 3]
-        self.model._single_crystal_map.hkl_mesh = [0, 1, 2]
+        self.model._single_crystal_map.triangulation = mock.Mock()
+        self.model._single_crystal_map.x_face = np.array([10, 11, 12])
+        self.model._single_crystal_map.y_face = np.array([13, 14, 15])
+        self.model._single_crystal_map.z_face = np.array([7, 8, 9])
+        self.model._single_crystal_map.z_mesh = np.array([4, 5, 6])
 
     def test___init__(self):
         self.assertIsInstance(self.model, DNSElasticSCPlotModel)
@@ -39,11 +42,12 @@ class DNSElasticSCPlotModelTest(unittest.TestCase):
         self.assertTrue(hasattr(self.model._data, "x"))
         self.assertTrue(hasattr(self.model._data, "y"))
         self.assertTrue(hasattr(self.model._data, "z"))
+        self.assertTrue(hasattr(self.model._data, "x_lims"))
+        self.assertTrue(hasattr(self.model._data, "y_lims"))
+        self.assertTrue(hasattr(self.model._data, "z_lims"))
         self.assertTrue(hasattr(self.model._data, "z_min"))
         self.assertTrue(hasattr(self.model._data, "z_max"))
         self.assertTrue(hasattr(self.model._data, "pz_min"))
-        self.assertTrue(hasattr(self.model._data, "triang"))
-        self.assertTrue(hasattr(self.model._data, "z_triang"))
 
     @patch("mantidqtinterfaces.dns_single_crystal_elastic.plot.elastic_single_crystal_plot_model.DNSScMap")
     def test_create_single_crystal_map(self, mock_dns_scd_map):
@@ -66,21 +70,24 @@ class DNSElasticSCPlotModelTest(unittest.TestCase):
         self.assertEqual(test_v[1], 2)
         self.assertEqual(test_v[0], 2)
 
-    def test_get_interpolated_triangulation(self):
-        self.model._single_crystal_map.interpolate_triangulation.return_value = [1, 2]
-        test_v = self.model.generate_triangulation_mesh(True, "hkl", False)
-        self.assertEqual(self.model._data.x, 0)
-        self.assertEqual(self.model._data.y, 1)
-        self.assertEqual(self.model._data.z, 2)
-        self.model._single_crystal_map.triangulate.assert_called_once_with(mesh_name="hkl_mesh", switch=False)
-        self.model._single_crystal_map.mask_triangles.assert_called_once_with(mesh_name="hkl_mesh")
-        self.model._single_crystal_map.interpolate_triangulation.assert_called_once_with(True)
-        self.assertEqual(test_v, (1, 2))
-        self.model._single_crystal_map.triangulate.reset_mock()
-        self.model._single_crystal_map.interpolate_triangulation.reset_mock()
-        self.model.generate_triangulation_mesh(False, "hkl", True)
-        self.model._single_crystal_map.triangulate.assert_called_once_with(mesh_name="hkl_mesh", switch=True)
-        self.model._single_crystal_map.interpolate_triangulation.assert_called_once_with(False)
+    def test_generate_triangulation_mesh(self):
+        result = self.model.generate_triangulation_mesh(True, "hkl", True)
+        self.assertIsNotNone(result)
+        self.assertIsInstance(result, tuple)
+        self.assertEqual(len(result), 3)
+        self.assertIsInstance(result[0], type(self.model._single_crystal_map.triangulation))
+        self.assertTrue(np.all(result[1] == np.array([4, 5, 6])))
+        self.assertTrue(np.all(result[2] == np.array([7, 8, 9])))
+
+    def test_generate_quad_mesh(self):
+        self.model._single_crystal_map.interpolate_quad_mesh = mock.Mock()
+        self.model._single_crystal_map.test_mesh = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
+        self.model.switch_axis = mock.Mock(return_value=np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]]))
+        self.model.set_mesh_data = mock.Mock()
+        self.model.generate_quad_mesh(2, "test", False)
+        self.model._single_crystal_map.interpolate_quad_mesh.assert_called_once_with(2)
+        self.model.switch_axis.assert_called_once()
+        self.model.set_mesh_data.assert_called_once()
 
     def test_get_axis_labels(self):
         self.model._single_crystal_map.hkl1 = "abc"
