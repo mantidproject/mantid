@@ -125,6 +125,7 @@ Tools
    ProfilingOverview
    Timers
    ProfilingWithPerf
+   ProfilingWithJemalloc
    ProfilingWithValgrind
    FlowchartCreation
    VisualStudioBuildImpact
