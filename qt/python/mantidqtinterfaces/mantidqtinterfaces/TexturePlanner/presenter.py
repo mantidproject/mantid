@@ -41,6 +41,11 @@ class TexturePlannerPresenter(object):
         self.view.set_on_select_all_clicked(self.select_all)
         self.view.set_on_deselect_all_clicked(self.deselect_all)
         self.view.set_on_delete_selected_clicked(self.delete_selected)
+        self.view.set_on_output_sscanss_clicked(self.to_sscanss)
+        self.view.set_on_output_euler_clicked(self.to_euler)
+        self.view.set_on_output_matrix_clicked(self.to_matrix)
+        self.view.set_on_save_dir_changed(self.enable_outputs)
+        self.view.set_on_save_file_changed(self.enable_outputs)
 
     def set_view_texture_directions(self, names, vecs):
         self.view.set_rd_name(names[0])
@@ -164,6 +169,9 @@ class TexturePlannerPresenter(object):
     def enable_load_orient(self):
         self.view.set_load_orientation_enabled(self.view.get_orientation_file() != "")
 
+    def enable_outputs(self):
+        self.view.set_outputs_enabled(self.view.get_save_dir() != "" and self.view.get_save_filename() != "")
+
     def load_stl(self):
         self.model.load_stl(self.view.get_stl_string())
         self.update_plots()
@@ -209,3 +217,12 @@ class TexturePlannerPresenter(object):
         self.model.update_all_projected_data()
         self.update_table()
         self.update_plots()
+
+    def to_sscanss(self):
+        self.model.output_as_sscanss(self.view.get_save_dir(), self.view.get_save_filename())
+
+    def to_euler(self):
+        self.model.output_as_euler(self.view.get_save_dir(), self.view.get_save_filename())
+
+    def to_matrix(self):
+        self.model.output_as_matrix(self.view.get_save_dir(), self.view.get_save_filename())

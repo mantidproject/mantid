@@ -44,6 +44,10 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
         self.finder_orient.setFileExtensions([".txt"])
         self.finder_orient.isOptional(True)
 
+        self.finder_save_dir.setLabelText("Save Directory")
+        self.finder_save_dir.isForDirectory(True)
+        self.finder_save_dir.setFileExtensions([".txt"])
+
         self.gonio_axes = (self.axis0, self.axis1, self.axis2, self.axis3, self.axis4, self.axis5)
         self.gonio_angles = (self.spnAngle0, self.spnAngle1, self.spnAngle2, self.spnAngle3, self.spnAngle4, self.spnAngle5)
         self.gonio_senses = (self.cmbSense0, self.cmbSense1, self.cmbSense2, self.cmbSense3, self.cmbSense4, self.cmbSense5)
@@ -54,6 +58,7 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
         self.set_load_stl_enabled(False)
         self.set_load_xml_enabled(False)
         self.set_load_orientation_enabled(False)
+        self.set_outputs_enabled(False)
 
         self.set_angle_limits()
 
@@ -116,6 +121,12 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
     def set_on_orient_file_changed(self, slot):
         self.finder_orient.fileFindingFinished.connect(slot)
 
+    def set_on_save_dir_changed(self, slot):
+        self.finder_save_dir.fileFindingFinished.connect(slot)
+
+    def set_on_save_file_changed(self, slot):
+        self.saveFileLine.textEdited.connect(slot)
+
     def set_on_load_stl_clicked(self, slot):
         self.btnSTL.clicked.connect(slot)
 
@@ -133,6 +144,15 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
 
     def set_on_delete_selected_clicked(self, slot):
         self.deleteSelected.clicked.connect(slot)
+
+    def set_on_output_sscanss_clicked(self, slot):
+        self.toSscanss.clicked.connect(slot)
+
+    def set_on_output_euler_clicked(self, slot):
+        self.toEuler.clicked.connect(slot)
+
+    def set_on_output_matrix_clicked(self, slot):
+        self.toMatrix.clicked.connect(slot)
 
     @QtCore.Slot(bool)
     def _on_any_include_toggled(self):
@@ -154,6 +174,13 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
     def get_orientation_file(self):
         fnames = self.finder_orient.getFilenames()
         return fnames[0] if len(fnames) > 0 else ""
+
+    def get_save_dir(self):
+        fnames = self.finder_save_dir.getFilenames()
+        return fnames[0] if len(fnames) > 0 else ""
+
+    def get_save_filename(self):
+        return self.saveFileLine.text()
 
     def get_rd_name(self):
         return self.lineedit_RD.text()
@@ -279,6 +306,7 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
         self.lab_canvas = FigureCanvas(self.lab_figure)
         self.lab_canvas.setMinimumHeight(400)
         self.lab_ax = self.lab_figure.add_subplot(projection="3d")
+        self.lab_ax.view_init(vertical_axis="y")
 
         layout = QVBoxLayout()
         self.labCanvas.setLayout(layout)
@@ -342,6 +370,11 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
 
     def set_load_orientation_enabled(self, enabled):
         self.btnOrient.setEnabled(enabled)
+
+    def set_outputs_enabled(self, enabled):
+        self.toSscanss.setEnabled(enabled)
+        self.toEuler.setEnabled(enabled)
+        self.toMatrix.setEnabled(enabled)
 
     def _read_checkbox_column_states(self, col):
         checked = []
