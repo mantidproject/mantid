@@ -55,7 +55,7 @@ requirements:
   run:
     - matplotlib {{ matplotlib }}
     - {{ pin_compatible("qscintilla2", max_pin="x.x") }}
-    - {{ pin_compatible("qt-main", upper_bound="5.15.9") }}
+    - {{ pin_compatible("qt-main", max_pin="x.x") }}
     - qtpy {{ qtpy }}
     - python
     - qt-gtk-platformtheme # [linux]
