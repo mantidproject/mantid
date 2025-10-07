@@ -15,7 +15,7 @@ def publishPackages = (gitBranch == "${BRANCH_TO_PUBLISH}")
 def defaults = [
   anacondaChannel : 'mantid',
   githubReleasesRepo: 'mantidproject/mantid',
-  platformChoices : ['none', 'all', 'linux-64', 'win-64', 'osx-64', 'osx-arm64', 'all_ARM'],
+  platformChoices : ['none', 'all', 'linux-64', 'win-64', 'osx-arm64'],
   publishToAnaconda : publishPackages,
   publishToGithub   : publishPackages,
   packageSuffix     : 'Unstable',
@@ -31,15 +31,10 @@ def defaults = [
 
 // Restrict the parameter choices for certain named branches.
 switch(gitBranch) {
-  case ['release-next']:
+  case ['main', 'release-next']:
     defaults.packageSuffix = 'Nightly'
     defaults.anacondaLabel = 'nightly'
     defaults.platformChoices = ['all']
-    break
-  case ['main']:
-    defaults.packageSuffix = 'Nightly'
-    defaults.anacondaLabel = 'nightly'
-    defaults.platformChoices = ['all_ARM']
     break
   case ['ornl-next', 'ornl-qa', 'ornl']:
     defaults.packageSuffix = 'Nightly'
@@ -145,7 +140,6 @@ pipeline {
             beforeOptions true
               anyOf {
                 expression { params.BUILD_DEVEL == 'all' }
-				expression { params.BUILD_DEVEL == 'all_ARM' }
                 expression { params.BUILD_DEVEL == 'linux-64' }
             }
           }
@@ -168,7 +162,6 @@ pipeline {
             beforeOptions true
             anyOf {
               expression { params.BUILD_DEVEL == 'all' }
-			  expression { params.BUILD_DEVEL == 'all_ARM' }
               expression { params.BUILD_DEVEL == 'win-64' }
             }
           }
@@ -187,35 +180,12 @@ pipeline {
             }
           }
         }
-        stage('build and test: osx-64') {
-          when {
-            beforeAgent true
-            beforeOptions true
-              anyOf {
-                expression { params.BUILD_DEVEL == 'all' }
-                expression { params.BUILD_DEVEL == 'osx-64' }
-            }
-          }
-          agent { label 'osx-64' }
-          options { timestamps () }
-          steps {
-            checkoutSource("${GIT_SHA}")
-            build_and_test('osx-64')
-          }
-          post {
-            always {
-              archive_test_logs()
-              publish_test_reports()
-            }
-          }
-        }
         stage('build and test: osx-arm64') {
           when {
             beforeAgent true
             beforeOptions true
               anyOf {
                 expression { params.BUILD_DEVEL == 'all' }
-				expression { params.BUILD_DEVEL == 'all_ARM' }
                 expression { params.BUILD_DEVEL == 'osx-arm64' }
             }
           }
@@ -271,7 +241,6 @@ pipeline {
             anyOf {
               expression { params.BUILD_PACKAGE == 'win-64' }
               expression { params.BUILD_PACKAGE == 'all' }
-			  expression { params.BUILD_PACKAGE == 'all_ARM' }
             }
           }
           agent { label 'win-64' }
@@ -297,38 +266,6 @@ pipeline {
             }
           }
         }
-        stage('package conda: osx-64') {
-          when {
-            beforeAgent true
-            beforeOptions true
-            anyOf {
-              expression { params.BUILD_PACKAGE == 'osx-64' }
-              expression { params.BUILD_PACKAGE == 'all' }
-            }
-          }
-          agent { label 'osx-64' }
-          options {
-              timestamps ()
-              retry(3)
-          }
-          steps {
-            // Clean up conda-bld before we start to avoid any
-            // confusion with old packages
-            dir('conda-bld') {
-              deleteDir()
-            }
-            checkoutSource("${GIT_SHA}")
-            // Build the base set of packages (ones not required for mantidworkbench)
-            // in parallel
-            package_conda('osx-64', 'base')
-            archive_conda_packages('osx-64')
-          }
-          post {
-            always {
-              archive_env_logs('osx-64')
-            }
-          }
-        }
         stage('package conda: osx-arm64') {
           when {
             beforeAgent true
@@ -336,7 +273,6 @@ pipeline {
             anyOf {
               expression { params.BUILD_PACKAGE == 'osx-arm64' }
               expression { params.BUILD_PACKAGE == 'all' }
-			  expression { params.BUILD_PACKAGE == 'all_ARM' }
             }
           }
           agent { label 'osx-arm64' }
@@ -369,7 +305,7 @@ pipeline {
         axes {
           axis {
             name 'PLATFORM'
-            values 'linux-64', 'win-64', 'osx-64', 'osx-arm64'
+            values 'linux-64', 'win-64', 'osx-arm64'
           }
         }
         stages {
@@ -379,7 +315,6 @@ pipeline {
               beforeOptions true
               anyOf {
                   expression { params.BUILD_PACKAGE == "${PLATFORM}" }
-				  expression { params.BUILD_PACKAGE == 'all_ARM' }
                   expression { params.BUILD_PACKAGE == 'all' }
               }
             }
