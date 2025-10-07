@@ -9,6 +9,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidDataHandling/DllConfig.h"
+#include "MantidDataObjects/TimeSplitter.h"
 #include "MantidGeometry/IDTypes.h"
 #include "MantidKernel/TimeROI.h"
 
@@ -39,8 +40,10 @@ private:
   void initCalibrationConstants(API::MatrixWorkspace_sptr &wksp, const std::vector<double> &difc_focus);
   void loadCalFile(const API::Workspace_sptr &inputWS, const std::string &filename,
                    const std::vector<double> &difc_focus);
-  void determinePulseIndices(const API::MatrixWorkspace_sptr &wksp);
-  Kernel::TimeROI timeROIFromSplitterWorkspace(const Types::Core::DateAndTime &);
+  std::vector<std::pair<size_t, size_t>> determinePulseIndices(const API::MatrixWorkspace_sptr &wksp,
+                                                               const Kernel::TimeROI &roi);
+  Kernel::TimeROI getStartingTimeROI(const API::MatrixWorkspace_sptr &wksp);
+  DataObjects::TimeSplitter timeSplitterFromSplitterWorkspace(const Types::Core::DateAndTime &);
 
   std::map<detid_t, double> m_calibration; // detid: 1/difc
   std::set<detid_t> m_masked;
@@ -49,7 +52,6 @@ private:
   std::vector<int64_t> loadStart;
   /// How much to load in the file
   std::vector<int64_t> loadSize;
-  std::vector<std::pair<size_t, size_t>> pulse_indices;
 };
 
 // these properties are public to simplify testing and calling from other code
@@ -60,7 +62,6 @@ const std::string FILTER_TIMESTART("FilterByTimeStart");
 const std::string FILTER_TIMESTOP("FilterByTimeStop");
 const std::string SPLITTER_WS("SplitterWorkspace");
 const std::string SPLITTER_RELATIVE("RelativeTime");
-const std::string SPLITTER_TARGET("SplitterTarget");
 const std::string FILTER_BAD_PULSES("FilterBadPulses");
 const std::string FILTER_BAD_PULSES_LOWER_CUTOFF("BadPulsesLowerCutoff");
 const std::string X_MIN("XMin");

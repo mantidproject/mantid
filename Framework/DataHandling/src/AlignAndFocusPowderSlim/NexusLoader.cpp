@@ -67,7 +67,8 @@ std::stack<EventROI> NexusLoader::getEventIndexRanges(H5::Group &event_group, co
       uint64_t start_event = event_index->at(pair.first);
       uint64_t stop_event =
           (pair.second == std::numeric_limits<size_t>::max()) ? number_events : event_index->at(pair.second);
-      ranges.emplace(start_event, stop_event);
+      if (start_event < stop_event)
+        ranges.emplace(start_event, stop_event);
     }
   } else {
     constexpr uint64_t START_DEFAULT = 0;
