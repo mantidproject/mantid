@@ -343,31 +343,9 @@ void AlignAndFocusPowderSlim::exec() {
   }
 
   this->progress(.17, "Reading events");
-  // const std::set<std::string> &classEntries = itClassEntries->second;
-
-  // filter out the diagnostic entries
-  std::vector<std::string> bankEntryNames;
-  /*
-  {
-    const std::regex classRegex("(/entry/)([^/]*)");
-    std::smatch groups;
-
-    for (const std::string &classEntry : classEntries) {
-      if (std::regex_match(classEntry, groups, classRegex)) {
-        const std::string entry_name(groups[2].str());
-        if (classEntry.ends_with("bank_error_events")) {
-          // do nothing
-        } else if (classEntry.ends_with("bank_unmapped_events")) {
-          // do nothing
-        } else {
-          bankEntryNames.push_back(entry_name);
-        }
-      }
-    }
-  }
-  */
 
   // hard coded for VULCAN 6 banks
+  std::vector<std::string> bankEntryNames;
   std::size_t num_banks_to_read;
   int outputSpecNum = getProperty(PropertyNames::OUTPUT_SPEC_NUM);
   if (outputSpecNum == EMPTY_INT()) {
@@ -422,36 +400,39 @@ void AlignAndFocusPowderSlim::exec() {
 
     auto progress = std::make_shared<API::Progress>(this, .17, .9, num_banks_to_read * workspaceIndices.size());
 
-    tbb::parallel_for(tbb::blocked_range<size_t>(0, workspaceIndices.size()), [&](const tbb::blocked_range<size_t> &r) {
-      for (size_t idx = r.begin(); idx != r.end(); ++idx) {
-        const int splitter_target = workspaceIndices[idx];
+    // loop over the targets in the splitter workspace, each target gets its own output workspace
+    tbb::parallel_for(
+        tbb::blocked_range<size_t>(0, workspaceIndices.size()), [&](const tbb::blocked_range<size_t> &target_indices) {
+          for (size_t target_index = target_indices.begin(); target_index != target_indices.end(); ++target_index) {
+            const int splitter_target = workspaceIndices[target_index];
 
-        auto splitter_roi = timeSplitter.getTimeROI(splitter_target);
-        // copy the roi so we can modify it just for this target
-        auto target_roi = roi;
-        if (target_roi.useAll())
-          target_roi = splitter_roi; // use the splitter ROI if no time filtering is specified
-        else if (!splitter_roi.useAll())
-          target_roi.update_intersection(splitter_roi); // otherwise intersect with the splitter ROI
+            auto splitter_roi = timeSplitter.getTimeROI(splitter_target);
+            // copy the roi so we can modify it just for this target
+            auto target_roi = roi;
+            if (target_roi.useAll())
+              target_roi = splitter_roi; // use the splitter ROI if no time filtering is specified
+            else if (!splitter_roi.useAll())
+              target_roi.update_intersection(splitter_roi); // otherwise intersect with the splitter ROI
 
-        // clone wksp for this target
-        MatrixWorkspace_sptr target_wksp = wksp->clone();
+            // clone wksp for this target
+            MatrixWorkspace_sptr target_wksp = wksp->clone();
 
-        const auto pulse_indices = this->determinePulseIndices(target_wksp, target_roi);
+            const auto pulse_indices = this->determinePulseIndices(target_wksp, target_roi);
 
-        ProcessBankTask task(bankEntryNames, h5file, is_time_filtered, target_wksp, m_calibration, m_masked,
-                             static_cast<size_t>(DISK_CHUNK), static_cast<size_t>(GRAINSIZE_EVENTS), pulse_indices,
-                             progress);
-        // generate threads only if appropriate
-        if (num_banks_to_read > 1) {
-          tbb::parallel_for(tbb::blocked_range<size_t>(0, num_banks_to_read), task);
-        } else {
-          task(tbb::blocked_range<size_t>(0, num_banks_to_read));
-        }
+            ProcessBankTask task(bankEntryNames, h5file, is_time_filtered, target_wksp, m_calibration, m_masked,
+                                 static_cast<size_t>(DISK_CHUNK), static_cast<size_t>(GRAINSIZE_EVENTS), pulse_indices,
+                                 progress);
+            // generate threads only if appropriate
+            if (num_banks_to_read > 1) {
+              tbb::parallel_for(tbb::blocked_range<size_t>(0, num_banks_to_read), task);
+            } else {
+              // a "range" of 1; note -1 to match 0-indexed array with 1-indexed bank labels
+              task(tbb::blocked_range<size_t>(outputSpecNum - 1, outputSpecNum));
+            }
 
-        AnalysisDataService::Instance().addOrReplace(wsNames[idx], target_wksp);
-      }
-    });
+            AnalysisDataService::Instance().addOrReplace(wsNames[target_index], target_wksp);
+          }
+        });
     // close the file so child algorithms can do their thing
     h5file.close();
 
@@ -461,6 +442,10 @@ void AlignAndFocusPowderSlim::exec() {
     groupws->setProperty("InputWorkspaces", wsNames);
     groupws->setProperty("OutputWorkspace", ws_basename);
     groupws->execute();
+
+    if (!groupws->isExecuted()) {
+      throw std::runtime_error("Failed to group output workspaces");
+    }
 
     API::Workspace_sptr outputWorkspace = AnalysisDataService::Instance().retrieveWS<API::Workspace>(ws_basename);
 

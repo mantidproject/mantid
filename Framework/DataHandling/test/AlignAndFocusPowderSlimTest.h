@@ -739,7 +739,7 @@ public:
     constexpr int NUM_HIST{6};
     for (int i = 1; i <= NUM_HIST; i++) {
       configuration.outputSpecNum = i;
-      MatrixWorkspace_sptr outputWS = run_algorithm(VULCAN_218062, configuration);
+      auto outputWS = std::dynamic_pointer_cast<MatrixWorkspace>(run_algorithm(VULCAN_218062, configuration));
 
       // verify the output -- all spectra exist
       TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), NUM_HIST);
