@@ -57,8 +57,8 @@ DEFAULT_SETTINGS = {
     "dSpacing_min": "1.0",  # angstroms
     "monte_carlo_params": "SparseInstrument:True",
     "clear_absorption_ws_after_processing": True,
-    "cost_func_thresh": "100",
-    "peak_pos_thresh": "0.1",
+    "cost_func_thresh": "0.0",
+    "peak_pos_thresh": "0.0",
     "use_euler_angles": False,
     "euler_angles_scheme": "YZY",
     "euler_angles_sense": "1,-1,1",
