@@ -110,7 +110,7 @@ class PawleyPattern1DTest(unittest.TestCase):
 
     def test_get_params(self):
         pawley = PawleyPattern1D(self.ws, [self.phase], profile=GaussianProfile())
-        self.assertEqual(len(pawley.get_params()), 5)
+        self.assertEqual(len(pawley.get_params()), 7)
 
     def test_get_free_params(self):
         pawley = PawleyPattern1D(self.ws, [self.phase], profile=GaussianProfile())
@@ -118,7 +118,7 @@ class PawleyPattern1DTest(unittest.TestCase):
 
     def test_get_isfree(self):
         pawley = PawleyPattern1D(self.ws, [self.phase], profile=GaussianProfile())
-        assert_array_equal(pawley.get_isfree(), array([True, True, True, True, False]))
+        assert_array_equal(pawley.get_isfree(), array([True, True, True, True, False, False, False]))
 
     def test_set_params(self):
         pawley = PawleyPattern1D(self.ws, [self.phase], profile=GaussianProfile())
@@ -129,7 +129,7 @@ class PawleyPattern1DTest(unittest.TestCase):
     def test_set_free_params(self):
         pawley = PawleyPattern1D(self.ws, [self.phase], profile=GaussianProfile())
         pawley.set_free_params(ones(4))
-        assert_array_equal(pawley.get_params().astype(int), array([1, 1, 1, 1, 0]))
+        assert_array_equal(pawley.get_params().astype(int), array([1, 1, 1, 1, 0, 1, 0]))
 
     def test_estimate_initial_params(self):
         pawley = PawleyPattern1D(self.ws, [self.phase], profile=GaussianProfile())

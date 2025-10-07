@@ -23,6 +23,15 @@ if TYPE_CHECKING:
     from scipy.optimize import OptimizeResult
 
 
+class InstrumentParams:
+    def __init__(self):
+        self.p: np.ndarray = np.array([1.0, 0.0])
+        self.default_isfree: np.ndarray = np.zeros_like(self.p, dtype=bool)
+
+    def get_peak_centre(self, dpk: float) -> float:
+        return self.p[0] * dpk + self.p[1]
+
+
 class PeakProfile(ABC):
     def __init__(self):
         self.func_name: str
@@ -184,8 +193,13 @@ class PawleyPattern1D:
     def __init__(self, ws: Workspace2D, phases: Phase, profile: PeakProfile, bg_func: Optional[FunctionWrapper] = None):
         self.ws = ws
         self.xunit = self.ws.getAxis(0).getUnit().unitID()
-        if self.xunit not in ["TOF", "dSpacing"]:
-            logger.error("Workspace must have x-axis of TOF or d-spacing.")
+        self.diff_consts = None
+
+        if self.xunit == "TOF":
+            si = self.ws.spectrumInfo()
+            if not si.hasDetectors(0):
+                raise RuntimeError("Workspace has no detectors - cannot convert between TOF and d-spacing.")
+            self.diff_consts = si.diffractometerConstants(0)  # for conversion to TOF if required
         self.phases = phases
         self.alatt_params = [phase.get_params() for phase in self.phases]
         self.alatt_isfree = [np.ones_like(alatt, dtype=bool) for alatt in self.alatt_params]
@@ -195,6 +209,9 @@ class PawleyPattern1D:
         self.peak_func = FunctionFactory.Instance().createPeakFunction(self.profile.func_name)
         self.intens = [np.ones(len(phase.hkls), dtype=float) for phase in self.phases]
         self.intens_isfree = [np.ones_like(pars, dtype=bool) for pars in self.intens]
+        self.inst = InstrumentParams()
+        self.inst_params = self.inst.p.copy()
+        self.inst_isfree = self.inst.default_isfree.copy()
         self.bg_params = []
         if bg_func is not None:
             self.bg_params = np.array([bg_func.function.getParamValue(ipar) for ipar in range(bg_func.nParams())])
@@ -214,15 +231,15 @@ class PawleyPattern1D:
 
     def update_profile_function(self):
         self.profile.p = self.profile_params
+        self.inst.p = self.inst_params
         istart = 0
-        diff_consts = self.ws.spectrumInfo().diffractometerConstants(0)  # for conversion to TOF if requried
         for iphase, phase in enumerate(self.phases):
             self.profile.p = self.profile_params[iphase]
             # set alatt for phase
             phase.set_params(self.alatt_params[iphase])
-            dpks = phase.calc_dspacings()
+            dpks = self.inst.get_peak_centre(phase.calc_dspacings())  # apply scale and shift to calculated d
             if self.xunit == "TOF":
-                pk_cens = [UnitConversion.run("dSpacing", "TOF", dpk, 0, DeltaEModeType.Elastic, diff_consts) for dpk in dpks]
+                pk_cens = [UnitConversion.run("dSpacing", "TOF", dpk, 0, DeltaEModeType.Elastic, self.diff_consts) for dpk in dpks]
             else:
                 pk_cens = dpks
             for ipk, dpk in enumerate(dpks):
@@ -235,13 +252,15 @@ class PawleyPattern1D:
             [self.comp_func[len(self.comp_func) - 1].function.setParameter(ipar, par) for ipar, par in enumerate(self.bg_params)]
 
     def get_params(self) -> np.ndarray[float]:
-        return np.array(list(chain(*self.alatt_params, *self.intens, *self.profile_params, self.bg_params)))
+        return np.array(list(chain(*self.alatt_params, *self.intens, *self.profile_params, self.inst_params, self.bg_params)))
 
     def get_free_params(self) -> np.ndarray[float]:
         return self.get_params()[self.get_isfree()]
 
     def get_isfree(self) -> np.ndarray[bool]:
-        return np.array(list(chain(*self.alatt_isfree, *self.intens_isfree, *self.profile_isfree, self.bg_isfree)), dtype=bool)
+        return np.array(
+            list(chain(*self.alatt_isfree, *self.intens_isfree, *self.profile_isfree, self.inst_isfree, self.bg_isfree)), dtype=bool
+        )
 
     def set_params(self, params: np.ndarray[float]):
         # set alatt
@@ -260,9 +279,12 @@ class PawleyPattern1D:
             npars = self.profile_params[iphase].size
             self.profile_params[iphase] = params[istart : istart + npars]
             istart = istart + npars
+        # set instrument params
+        iend = istart + len(self.inst_params)
+        self.inst_params = params[istart:iend]
         # set global profile and bg_func params
         if len(self.bg_params) > 0:
-            self.bg_params = params[istart:]
+            self.bg_params = params[iend:]
 
     def set_free_params(self, free_params: np.ndarray[float]):
         params = self.get_params()
