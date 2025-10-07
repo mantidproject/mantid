@@ -46,6 +46,7 @@ requirements:
       then: libopenblas ${{ libopenblas }}
     - mantid == ${{ version }}
     - python ${{ python }}
+    - pip ${{ pip }}
     - pyqt ${{ pyqt }}
     - pyqt5-sip ${{ pyqt5_sip }}
     - pyqtwebengine
