@@ -78,8 +78,7 @@ For example, in :code:`python`:
 
 .. code-block:: python
 
-  cfg = ConfigService.Instance()
-  cfg.setConsoleLogLevel(5) # notice
+  ConfigService.setLogLevel(7) # debug
 
 Note, that this affects the current session only; to change the level permanently, one needs to save the configuration to the file.
 
