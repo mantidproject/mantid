@@ -7,6 +7,7 @@ CALL "%VSINSTALLDIR%\VC\Auxiliary\Build\vcvarsall.bat" x64 -vcvars_ver=14.38.17.
 mkdir -p build && cd build
 
 cmake ^
+    %CMAKE_ARGS% ^
     -DCMAKE_INSTALL_PREFIX=%LIBRARY_PREFIX% ^
     -DCMAKE_INSTALL_LIBDIR=%LIBRARY_LIB% ^
     -DCMAKE_PREFIX_PATH=%LIBRARY_PREFIX% ^
