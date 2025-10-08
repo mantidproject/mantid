@@ -764,9 +764,9 @@ class MainWindow(QMainWindow):
 
         def calculate_limit(data):
             min_lim, max_lim = min(data), max(data)
-            if (abs(max_lim - min_lim)) < 0.1:  # to avoid matplotlib warning and for visibility
-                min_lim = min_lim - 0.1 * min_lim
-                max_lim = max_lim + 0.1 * max_lim
+            if (abs(max_lim - min_lim)) < 1e-4:  # to avoid matplotlib warning and for visibility
+                min_lim = min_lim - 0.001 * min_lim
+                max_lim = max_lim + 0.001 * max_lim
             return [min_lim, max_lim]
 
         xlim = calculate_limit(x_data) if not xlim else xlim
