@@ -295,7 +295,7 @@ class MainWindow(QMainWindow):
 
         vecreltimes = (vectimes - t0) / np.timedelta64(1, "s")
         samunit = samplelog.units
-        self.update_plot(vecreltimes, vecvalue, "", logname if len(samunit) == 0 else "%s (%s)" % (logname, samunit))
+        self.update_plot(vecreltimes, vecvalue, y_label=logname if len(samunit) == 0 else "%s (%s)" % (logname, samunit))
 
         # Load property's statistic and give suggestion on parallel and fast log
         timeavg = self._dataWS.getRun().getTimeAveragedValue(logname)
