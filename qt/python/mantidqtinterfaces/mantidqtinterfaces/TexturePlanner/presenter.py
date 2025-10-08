@@ -47,6 +47,7 @@ class TexturePlannerPresenter(object):
         self.view.set_on_save_dir_changed(self.enable_outputs)
         self.view.set_on_save_file_changed(self.enable_outputs)
         self.view.set_on_show_mu_toggled(self.set_show_mu)
+        self.view.set_on_material_changed(self.set_material)
 
     def set_view_texture_directions(self, names, vecs):
         self.view.set_rd_name(names[0])
@@ -229,6 +230,12 @@ class TexturePlannerPresenter(object):
         self.model.output_as_matrix(self.view.get_save_dir(), self.view.get_save_filename())
 
     def set_show_mu(self):
+        self.view.set_material_visible(self.view.get_show_mu())
         self.model.set_plot_attenuation(self.view.get_show_mu())
+        self.model.update_all_projected_data()
+        self.update_plots()
+
+    def set_material(self):
+        self.model.set_material_string(self.view.get_material())
         self.model.update_all_projected_data()
         self.update_plots()

@@ -60,6 +60,7 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
         self.set_load_orientation_enabled(False)
         self.set_outputs_enabled(False)
         self.set_show_mu(False)
+        self.set_material_visible(False)
 
         self.set_angle_limits()
 
@@ -158,6 +159,9 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
     def set_on_show_mu_toggled(self, slot):
         self.chkMu.toggled.connect(slot)
 
+    def set_on_material_changed(self, slot):
+        self.edtMaterial.editingFinished.connect(slot)
+
     @QtCore.Slot(bool)
     def _on_any_include_toggled(self):
         self.sig_include_state_changed.emit()
@@ -243,6 +247,9 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
     def get_show_mu(self):
         return self.chkMu.isChecked()
 
+    def get_material(self):
+        return self.edtMaterial.text()
+
     # setters
 
     def set_rd_name(self, text):
@@ -297,6 +304,9 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
 
     def set_show_mu(self, val):
         return self.chkMu.setChecked(val)
+
+    def set_material(self):
+        return self.edtMaterial.setText()
 
     def _setup_pf_plot(self):
         self.pf_figure = Figure(layout="constrained")
@@ -395,3 +405,7 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
                 if checkbox and checkbox.isChecked():
                     checked.append(row)
         return checked
+
+    def set_material_visible(self, vis):
+        self.edtMaterial.setVisible(vis)
+        self.lblMaterial.setVisible(vis)
