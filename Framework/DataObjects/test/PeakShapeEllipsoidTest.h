@@ -16,6 +16,8 @@
 #include <json/json.h>
 #include <vector>
 
+using Mantid::DataObjects::PeakEllipsoidExtent;
+using Mantid::DataObjects::PeakEllipsoidFrame;
 using Mantid::DataObjects::PeakShapeEllipsoid;
 using Mantid::Kernel::SpecialCoordinateSystem;
 using namespace Mantid;
@@ -29,10 +31,10 @@ public:
   static void destroySuite(PeakShapeEllipsoidTest *suite) { delete suite; }
 
   void test_constructor() {
-    auto directions = {(V3D(1, 0, 0)), (V3D(0, 1, 0)), (V3D(0, 0, 1))};
-    const MantidVec abcRadii = {2, 3, 4};
-    const MantidVec abcInnerRadii = {5, 6, 7};
-    const MantidVec abcOuterRadii = {8, 9, 10};
+    PeakEllipsoidFrame directions = {(V3D(1, 0, 0)), (V3D(0, 1, 0)), (V3D(0, 0, 1))};
+    const PeakEllipsoidExtent abcRadii = {2, 3, 4};
+    const PeakEllipsoidExtent abcInnerRadii = {5, 6, 7};
+    const PeakEllipsoidExtent abcOuterRadii = {8, 9, 10};
     const SpecialCoordinateSystem frame = Mantid::Kernel::HKL;
     const std::string algorithmName = "foo";
     const int algorithmVersion = 3;
@@ -50,36 +52,11 @@ public:
     TS_ASSERT_EQUALS(algorithmVersion, shape.algorithmVersion());
   }
 
-  void test_constructor_throws() {
-    auto directions = {V3D(1, 0, 0), V3D(0, 1, 0), V3D(0, 0, 1)};
-    auto bad_directions = {V3D(1, 0, 0)};
-    const MantidVec abcRadii = {2, 3, 4};
-    const MantidVec bad_abcRadii = {2, 3, 4, 5};
-    const MantidVec abcInnerRadii = {5, 6, 7};
-    const MantidVec bad_abcInnerRadii = {5, 6};
-    const MantidVec abcOuterRadii = {8, 9, 10};
-    const MantidVec bad_abcOuterRadii = {8, 9, 10, 11};
-    const SpecialCoordinateSystem frame = Mantid::Kernel::HKL;
-
-    TSM_ASSERT_THROWS("Should throw, bad directions",
-                      PeakShapeEllipsoid(bad_directions, abcRadii, abcInnerRadii, abcOuterRadii, frame),
-                      std::invalid_argument &);
-    TSM_ASSERT_THROWS("Should throw, bad radii",
-                      PeakShapeEllipsoid(directions, bad_abcRadii, abcInnerRadii, abcOuterRadii, frame),
-                      std::invalid_argument &);
-    TSM_ASSERT_THROWS("Should throw, bad inner radii",
-                      PeakShapeEllipsoid(directions, abcRadii, bad_abcInnerRadii, abcOuterRadii, frame),
-                      std::invalid_argument &);
-    TSM_ASSERT_THROWS("Should throw, bad outer radii",
-                      PeakShapeEllipsoid(directions, abcRadii, abcInnerRadii, bad_abcOuterRadii, frame),
-                      std::invalid_argument &);
-  }
-
   void test_copy_constructor() {
-    auto directions = {V3D(1, 0, 0), V3D(0, 1, 0), V3D(0, 0, 1)};
-    const MantidVec abcRadii = {2, 3, 4};
-    const MantidVec abcInnerRadii = {5, 6, 7};
-    const MantidVec abcOuterRadii = {8, 9, 10};
+    PeakEllipsoidFrame directions = {V3D(1, 0, 0), V3D(0, 1, 0), V3D(0, 0, 1)};
+    const PeakEllipsoidExtent abcRadii = {2, 3, 4};
+    const PeakEllipsoidExtent abcInnerRadii = {5, 6, 7};
+    const PeakEllipsoidExtent abcOuterRadii = {8, 9, 10};
     const SpecialCoordinateSystem frame = Mantid::Kernel::HKL;
     const std::string algorithmName = "foo";
     const int algorithmVersion = 3;
@@ -116,7 +93,7 @@ public:
 
   void test_radius() {
 
-    std::vector<double> radius = {1, 2, 3};
+    PeakEllipsoidExtent radius = {1, 2, 3};
 
     PeakShapeEllipsoid shape({V3D(1, 0, 0), V3D(0, 1, 0), V3D(0, 0, 1)}, radius, radius, radius, Mantid::Kernel::HKL);
 
@@ -140,10 +117,10 @@ public:
 
   void test_toJSON() {
 
-    std::vector<V3D> directions = {V3D(1, 0, 0), V3D(0, 1, 0), V3D(0, 0, 1)};
-    const MantidVec abcRadii = {2, 3, 4};
-    const MantidVec abcInnerRadii = {5, 6, 7};
-    const MantidVec abcOuterRadii = {8, 9, 10};
+    PeakEllipsoidFrame directions = {V3D(1, 0, 0), V3D(0, 1, 0), V3D(0, 0, 1)};
+    const PeakEllipsoidExtent abcRadii = {2, 3, 4};
+    const PeakEllipsoidExtent abcInnerRadii = {5, 6, 7};
+    const PeakEllipsoidExtent abcOuterRadii = {8, 9, 10};
     const SpecialCoordinateSystem frame = Mantid::Kernel::HKL;
     const std::string algorithmName = "foo";
     const int algorithmVersion = 3;
@@ -172,10 +149,10 @@ public:
   }
 
   void test_directionsInSpecificFrameThrowsForMatrixWithInvalidDimensions() {
-    auto directions = {V3D(1, 0, 0), V3D(0, 1, 0), V3D(0, 0, 1)};
-    const MantidVec abcRadii = {2, 3, 4};
-    const MantidVec abcInnerRadii = {5, 6, 7};
-    const MantidVec abcOuterRadii = {8, 9, 10};
+    PeakEllipsoidFrame directions = {V3D(1, 0, 0), V3D(0, 1, 0), V3D(0, 0, 1)};
+    const PeakEllipsoidExtent abcRadii = {2, 3, 4};
+    const PeakEllipsoidExtent abcInnerRadii = {5, 6, 7};
+    const PeakEllipsoidExtent abcOuterRadii = {8, 9, 10};
     const SpecialCoordinateSystem frame = Mantid::Kernel::QLab;
     const std::string algorithmName = "foo";
     const int algorithmVersion = 3;
@@ -200,10 +177,10 @@ public:
   }
 
   void test_directionsInSepcificFrame() {
-    auto directions = {V3D(1, 0, 0), V3D(0, 1, 0), V3D(0, 0, 1)};
-    const MantidVec abcRadii = {2, 3, 4};
-    const MantidVec abcInnerRadii = {5, 6, 7};
-    const MantidVec abcOuterRadii = {8, 9, 10};
+    PeakEllipsoidFrame directions = {V3D(1, 0, 0), V3D(0, 1, 0), V3D(0, 0, 1)};
+    const PeakEllipsoidExtent abcRadii = {2, 3, 4};
+    const PeakEllipsoidExtent abcInnerRadii = {5, 6, 7};
+    const PeakEllipsoidExtent abcOuterRadii = {8, 9, 10};
     const SpecialCoordinateSystem frame = Mantid::Kernel::QLab;
     const std::string algorithmName = "foo";
     const int algorithmVersion = 3;
@@ -231,7 +208,7 @@ public:
     matrix.setColumn(1, column2);
     matrix.setColumn(2, column3);
 
-    std::vector<Mantid::Kernel::V3D> directionInNewFrame(3);
+    std::array<Mantid::Kernel::V3D, 3> directionInNewFrame;
     TSM_ASSERT_THROWS_NOTHING("Should throw nothing, valid goniometer matrix",
                               directionInNewFrame = a.getDirectionInSpecificFrame(matrix));
 

@@ -37,7 +37,7 @@ public:
   const std::string category() const override;
 
 private:
-  using PrincipleAxes = std::array<std::vector<double>, 3>;
+  using PrincipleAxes = DataObjects::PeakEllipsoidExtent;
 
   void init() override;
   void exec() override;
