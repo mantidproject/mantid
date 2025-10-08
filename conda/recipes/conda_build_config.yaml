@@ -71,7 +71,7 @@ matplotlib:
   - 3.9.*
 
 mslice:
-  - '2.12'
+  - '>=2.12'
 
 
 ninja:

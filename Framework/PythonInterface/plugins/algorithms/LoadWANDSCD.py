@@ -4,6 +4,12 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+import re
+from typing import List, Optional
+
+import numpy as np
+import h5py
+
 from mantid.api import (
     AlgorithmFactory,
     FileAction,
@@ -35,10 +41,6 @@ from mantid.simpleapi import (
     GroupDetectors,
     SetUB,
 )
-from typing import List
-import numpy as np
-import h5py
-import re
 
 
 class LoadWANDSCD(PythonAlgorithm):
@@ -163,9 +165,15 @@ class LoadWANDSCD(PythonAlgorithm):
         # cleanup
         DeleteWorkspace(data)
 
-    def get_intput_filenames(self) -> List:
+    def get_intput_filenames(self) -> List[str]:
         """
-        Get the input filenames via either the input or the IPTS + run number
+        Retrieves the list of input file paths based on the provided properties.
+
+        This method determines the input file paths either directly from the
+        ``Filename`` property or constructs them using the ``IPTS`` and ``RunNumbers``
+        properties. If only one dataset is loaded, it ensures the result is a list.
+
+        :returns: A list of input file paths to be processed.
         """
         ws_filenames = self.getProperty("Filename").value
         if not ws_filenames:
@@ -178,9 +186,15 @@ class LoadWANDSCD(PythonAlgorithm):
         # return the list of workspaces names
         return ws_filenames
 
-    def get_va_filename(self) -> str:
+    def get_va_filename(self) -> Optional[str]:
         """
-        get the va filename
+        Retrieves the filename for the Vanadium normalization data.
+
+        This method determines the Vanadium filename based on the following priority:
+        1. IPTS and RunNumber properties.
+        2. VanadiumFile property.
+
+        :returns: The file path of the Vanadium normalization data or `None` if no vanadium is required.
         """
         # check order
         # IPTS + run number > file name > memory
@@ -199,7 +213,15 @@ class LoadWANDSCD(PythonAlgorithm):
 
     def load_and_group(self, runs: List[str]) -> IMDHistoWorkspace:  # noqa: C901
         """
-        Load the data with given grouping
+        Loads and groups data from the provided list of run files.
+
+        This method processes the input run files, applies grouping based on the
+        specified configuration, and creates an MDHistoWorkspace. It also extracts
+        relevant metadata and logs from the input files and adds them to the output
+        workspace.
+
+        :param runs: A list of file paths to the run files to be loaded and grouped.
+        :returns: An MDHistoWorkspace containing the grouped data and associated metadata.
         """
         # grouping config
         grouping = self.getProperty("Grouping").value
@@ -214,9 +236,11 @@ class LoadWANDSCD(PythonAlgorithm):
 
         data_array = np.empty((number_of_runs, x_dim, y_dim), dtype=np.float64)
 
+        # Goniometer axes for each run
         s1_array = []
         sgl_array = []
         sgu_array = []
+
         duration_array = []
         run_number_array = []
         monitor_count_array = []
@@ -281,6 +305,8 @@ class LoadWANDSCD(PythonAlgorithm):
                     else:
                         SE_logs[log].append(np.nan)
 
+        # create the MDHistoWorkspace
+        # TODO: consider removing or truncating "SignalInput" and "ErrorInput" from the algorithm history if too large
         progress.report("Creating MDHistoWorkspace")
         createWS_alg = self.createChildAlgorithm("CreateMDHistoWorkspace", enableLogging=False)
         createWS_alg.setProperty("SignalInput", data_array)
@@ -306,14 +332,15 @@ class LoadWANDSCD(PythonAlgorithm):
 
         time_ns_array = _tmp_ws.run().startTime().totalNanoseconds() + np.append(0, np.cumsum(duration_array) * 1e9)[:-1]
 
+        # Get the UB matrix from the workspace, if it doesn't exist use the identity matrix
         try:
             UB = np.array(
                 re.findall(r"-?\d+\.*\d*", _tmp_ws.run().getProperty("HB2C:CS:CrystalAlign:UBMatrix").value[0]), dtype=float
             ).reshape(3, 3)
-            SetUB(_tmp_ws, UB=UB, EnableLogging=False)
         except (RuntimeError, ValueError):
             UB = np.array([[0, 1, 0], [0, 0, 1], [1, 0, 0]])
 
+        # Apply the Goniometer tilts to the UB matrix if requested
         if self.getProperty("ApplyGoniometerTilt").value:
             sgl = np.deg2rad(np.mean(sgl_array))  # 'HB2C:Mot:sgl.RBV,1,0,0,-1'
             sgu = np.deg2rad(np.mean(sgu_array))  # 'HB2C:Mot:sgu.RBV,0,0,1,-1'
@@ -341,6 +368,7 @@ class LoadWANDSCD(PythonAlgorithm):
         _tmp_ws = Rebin(_tmp_ws, "0,1,2", EnableLogging=False)
         _tmp_ws = ConvertToMD(_tmp_ws, dEAnalysisMode="Elastic", EnableLogging=False, PreprocDetectorsWS="__PreprocessedDetectorsWS")
 
+        # Collect detector/group orientation to speed up future calculations
         preprocWS = mtd["__PreprocessedDetectorsWS"]
         twotheta = preprocWS.column(2)
         azimuthal = preprocWS.column(3)
@@ -350,6 +378,7 @@ class LoadWANDSCD(PythonAlgorithm):
         DeleteWorkspace("__PreprocessedDetectorsWS", EnableLogging=False)
         # end Hack
 
+        # Log the goniometer anges for each run as a time series
         run = outWS.getExperimentInfo(0).run()
         add_time_series_property("HB2C:Mot:s1", run, time_ns_array, s1_array)
         run.getProperty("HB2C:Mot:s1").units = "deg"
@@ -358,10 +387,13 @@ class LoadWANDSCD(PythonAlgorithm):
         add_time_series_property("HB2C:Mot:sgu", run, time_ns_array, sgu_array)
         run.getProperty("HB2C:Mot:sgu").units = "deg"
 
+        # Log the duration, run number, and monitor count for each run as time series
         add_time_series_property("duration", run, time_ns_array, duration_array)
         run.getProperty("duration").units = "second"
         run.addProperty("run_number", run_number_array, True)
         add_time_series_property("monitor_count", run, time_ns_array, monitor_count_array)
+
+        # Log the detector/group orientations with respect to the sample's position
         run.addProperty("twotheta", twotheta, True)
         run.addProperty("azimuthal", azimuthal, True)
 
@@ -371,6 +403,7 @@ class LoadWANDSCD(PythonAlgorithm):
             if log_name in SE_units:
                 run.getProperty(log_name).units = SE_units[log_name]
 
+        # Set Goniometer's axes as the log's names
         setGoniometer_alg = self.createChildAlgorithm("SetGoniometer", enableLogging=False)
         setGoniometer_alg.setProperty("Workspace", outWS)
         setGoniometer_alg.setProperty("Axis0", "HB2C:Mot:s1,0,1,0,1")

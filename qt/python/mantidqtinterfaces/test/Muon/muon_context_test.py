@@ -56,7 +56,7 @@ def divide_side_effect(LHS, RHS, name):
 class MuonContextTest(unittest.TestCase):
     def setUp(self):
         AnalysisDataService.clear()
-        ConfigService["MantidOptions.InvisibleWorkspaces"] = "True"
+        ConfigService["MantidOptions.InvisibleWorkspaces"] = "1"
         self.filepath = FileFinder.findRuns("EMU00019489.nxs")[0]
 
         self.load_result, self.run_number, self.filename, psi_data = load_workspace_from_filename(self.filepath)
@@ -81,7 +81,7 @@ class MuonContextTest(unittest.TestCase):
         self.pairs = [MuonPair("long", "bwd", "fwd")]
 
     def tearDown(self):
-        ConfigService["MantidOptions.InvisibleWorkspaces"] = "False"
+        ConfigService["MantidOptions.InvisibleWorkspaces"] = "0"
         self.context.ads_observer.unsubscribe()
 
     def add_group_diff(self):

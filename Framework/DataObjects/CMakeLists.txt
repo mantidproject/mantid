@@ -117,6 +117,7 @@ set(INC_FILES
     inc/MantidDataObjects/PeakNoShapeFactory.h
     inc/MantidDataObjects/PeakShapeBase.h
     inc/MantidDataObjects/PeakShapeEllipsoid.h
+    inc/MantidDataObjects/PeakShapeEllipsoid_fwd.h
     inc/MantidDataObjects/PeakShapeEllipsoidFactory.h
     inc/MantidDataObjects/PeakShapeFactory.h
     inc/MantidDataObjects/PeakShapeSpherical.h

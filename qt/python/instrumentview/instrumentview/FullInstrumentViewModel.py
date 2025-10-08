@@ -80,20 +80,20 @@ class FullInstrumentViewModel:
         self._detector_projection_positions = np.zeros_like(self.detector_positions)
         self._detector_is_picked = np.full(len(self._detector_ids[self._is_valid]), False)
 
-        # Get min and max tof values
+        # Get min and max integration values
         if self._workspace.isRaggedWorkspace():
             first_last = np.array([self._workspace.readX(i)[[0, -1]] for i in self._workspace_indices[self._is_valid]])
-            self._tof_limits = (np.min(first_last[:, 0]), np.max(first_last[:, 1]))
+            self._integration_limits = (np.min(first_last[:, 0]), np.max(first_last[:, 1]))
 
         elif self._workspace.isCommonBins():
-            self._tof_limits = tuple(self._workspace.dataX(0)[[0, -1]])
+            self._integration_limits = tuple(self._workspace.dataX(0)[[0, -1]])
 
         else:
             data_x = self._workspace.extractX()[self._is_valid]
-            self._tof_limits = (np.min(data_x[:, 0]), np.max(data_x[:, -1]))
+            self._integration_limits = (np.min(data_x[:, 0]), np.max(data_x[:, -1]))
 
         # Update counts with default total range
-        self.update_time_of_flight_range(self._tof_limits, True)
+        self.update_integration_range(self._integration_limits, True)
 
     @property
     def workspace(self) -> Workspace2D:
@@ -165,26 +165,26 @@ class FullInstrumentViewModel:
         self._counts_limits = limits
 
     @property
-    def tof_limits(self) -> tuple[float, float]:
-        return self._tof_limits
+    def integration_limits(self) -> tuple[float, float]:
+        return self._integration_limits
 
-    @tof_limits.setter
-    def tof_limits(self, limits) -> None:
+    @integration_limits.setter
+    def integration_limits(self, limits) -> None:
         try:
             min, max = limits
             assert float(max) > float(min)
         except (ValueError, AssertionError):
             return
-        self._tof_limits = limits
+        self._integration_limits = limits
         # Update the counts
-        self.update_time_of_flight_range(self._tof_limits)
+        self.update_integration_range(self._integration_limits)
 
-    def update_time_of_flight_range(self, tof_limits: tuple[float, float], entire_range: bool = False) -> None:
-        tof_min, tof_max = tof_limits
+    def update_integration_range(self, integration_limits: tuple[float, float], entire_range: bool = False) -> None:
+        integration_min, integration_max = integration_limits
         workspace_indices = self._workspace_indices[self._is_valid]
         new_detector_counts = np.array(
             self._workspace.getIntegratedCountsForWorkspaceIndices(
-                workspace_indices, len(workspace_indices), float(tof_min), float(tof_max), entire_range
+                workspace_indices, len(workspace_indices), float(integration_min), float(integration_max), entire_range
             ),
             dtype=int,
         )

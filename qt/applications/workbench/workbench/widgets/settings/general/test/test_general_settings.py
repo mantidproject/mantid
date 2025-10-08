@@ -69,6 +69,7 @@ class MockGeneralSettingsModel:
 class GeneralSettingsTest(unittest.TestCase):
     MOUSEWHEEL_EVENT_FILTER_PATH = "workbench.widgets.settings.general.presenter.filter_out_mousewheel_events_from_combo_or_spin_box"
     NOTIFY_CHANGES_PATH = "workbench.widgets.settings.general.presenter.GeneralSettings.notify_changes"
+    SETTINGS_VIEW_PATH = "workbench.widgets.settings.general.view.GeneralSettingsView"
 
     def setUp(self) -> None:
         self.mock_model = MockGeneralSettingsModel()
@@ -238,9 +239,19 @@ class GeneralSettingsTest(unittest.TestCase):
         self.mock_model.set_prompt_on_deleting_workspace.assert_called_once_with(False)
         mock_notify_changes.assert_called_once()
 
-    def test_load_current_setting_values(self):
-        # load current setting is called automatically in the constructor
-        GeneralSettings(None, model=self.mock_model)
+    @patch(MOUSEWHEEL_EVENT_FILTER_PATH)
+    @patch(SETTINGS_VIEW_PATH)
+    def test_load_settings_values_from_model_into_view(self, mock_view: MagicMock, _):
+        self.mock_model.get_project_recovery_enabled.return_value = "true"
+        self.mock_model.get_project_recovery_time_between_recoveries.return_value = 60
+        self.mock_model.get_project_recovery_number_of_checkpoints.return_value = 5
+        self.mock_model.get_crystallography_convention.return_value = "Crystallography"
+        self.mock_model.get_use_notifications.return_value = "off"  # different from default
+        self.mock_model.get_use_opengl.return_value = "123"  # wrong, therefore false
+        self.mock_model.get_show_invisible_workspaces.return_value = "1"
+        self.mock_model.get_completion_enabled.return_value = True
+
+        GeneralSettings(None, model=self.mock_model, view=mock_view)
 
         self.mock_model.get_prompt_save_on_close.assert_called_once()
         self.mock_model.get_prompt_on_save_editor_modified.assert_called_once()
@@ -253,6 +264,16 @@ class GeneralSettingsTest(unittest.TestCase):
         self.mock_model.get_use_opengl.assert_called_once()
         self.mock_model.get_show_invisible_workspaces.assert_called_once()
         self.mock_model.get_completion_enabled.assert_called_once()
+
+        mock_view.project_recovery_enabled.setChecked.assert_called_once_with(True)
+        mock_view.total_number_checkpoints.setValue.assert_called_once_with(5)
+        mock_view.time_between_recovery.setValue.assert_called_once_with(60)
+        mock_view.project_recovery_enabled.setChecked.assert_called_once_with(True)
+        mock_view.use_notifications.setChecked.assert_called_once_with(False)
+        mock_view.crystallography_convention.setChecked.assert_called_once_with(True)
+        mock_view.use_open_gl.setChecked.assert_called_once_with(False)
+        mock_view.show_invisible_workspaces.setChecked.assert_called_once_with(True)
+        mock_view.completion_enabled.setChecked.assert_called_once_with(True)
 
     @patch(NOTIFY_CHANGES_PATH)
     def test_action_project_recovery_enabled(self, mock_notify_changes: MagicMock):

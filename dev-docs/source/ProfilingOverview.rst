@@ -78,6 +78,8 @@ Linux
 
 -  Takes snapshot of run and prints percentage of calls in functions
 
+:doc:`ProfilingWithJemalloc` for details on using ``jemalloc``'s built-in profiling hooks
+
 See here for a list of other tools:
 http://www.pixelbeat.org/programming/profiling/
 
