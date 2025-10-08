@@ -94,6 +94,13 @@ class TexturePlannerModel(object):
     def set_material(self):
         SetSampleMaterial(self.ws, self.attenuation_kwargs["material"])
 
+    def set_material_string(self, material):
+        try:
+            self.attenuation_kwargs["material"] = material
+            self.set_material()
+        except Exception:
+            logger.error("Invalid Material 'ChemicalFormula' - see SetSampleMaterial docs for more info")
+
     def load_stl(self, stl_file):
         LoadSampleShape(InputWorkspace=self.ws, Filename=stl_file, OutputWorkspace=self.ws, **self.stl_kwargs)
         self.set_material()
@@ -318,10 +325,13 @@ class TexturePlannerModel(object):
             OutputWorkspace=self.wsname,
         )
         spec_info = group_ws.spectrumInfo()
+        comp_info = group_ws.componentInfo()
         det_pos = np.asarray(
             [spec_info.position(i) / np.linalg.norm(spec_info.position(i)) for i in range(1, group_ws.getNumberHistograms())]
         )
-        detQs_lab = det_pos - np.array((0, 0, 1))
+        ki = -np.array(comp_info.sourcePosition())
+        ki_norm = ki / np.linalg.norm(ki)
+        detQs_lab = det_pos - ki_norm
         self.detQs_lab = detQs_lab / np.linalg.norm(detQs_lab, axis=1)[:, None]
 
     def update_all_projected_data(self):
@@ -402,8 +412,9 @@ class TexturePlannerModel(object):
             gVec = gR.apply(vec)
             gVecs.append(gVec)
 
-            gon_ring = gR.apply(ring(vec, 1 + ((nGon - i) / 2), res=360).T).T
-            gon_ring = gon_ring * extent  # scale to sample
+            gon_scale = (1 + ((nGon - i) / 2)) * extent
+
+            gon_ring = gR.apply(ring(vec, gon_scale, res=360).T).T
 
             sense = -senses[i]  # mantid convention is that ccw = 1, we need cw = 1
             angle = angles[i] * sense
@@ -417,7 +428,11 @@ class TexturePlannerModel(object):
 
             lab_ax.plot(*gon_ring[:, : pos_ind + 1], color=self.gon_colors[i])
             lab_ax.plot(*gon_ring[:, pos_ind:], color="grey")
-            lab_ax.quiver(*np.zeros(3), *gVec * extent * 2, color=self.gon_colors[i], ls=("-", "--")[int(i != self.gonio_index)])
+            lab_ax.quiver(
+                *np.zeros(3), *gVec * extent * 2, color=self.gon_colors[i], ls=("-", "--")[int(i != self.gonio_index)], label=f"Axis {i}"
+            )
+
+        lab_ax.legend()
 
         gPole = R.inv().apply(np.array(gVecs)) @ ax_transform
         cart_gPole = get_alpha_beta_from_cart(gPole.T)
@@ -434,6 +449,16 @@ class TexturePlannerModel(object):
         lab_ax.set_ylim([-extent * nGon / 1.5, extent * nGon / 1.5])
         lab_ax.set_zlim([-extent * nGon / 1.5, extent * nGon / 1.5])
         lab_ax.set_aspect("equal")
+
+        # plot incident beam
+        comp_info = self.ws.componentInfo()
+        ki = -np.array(comp_info.sourcePosition())
+        ki_norm = ki / np.linalg.norm(ki)
+        ki = ki_norm * extent * nGon / 0.75
+        beam = -ki
+        lab_ax.quiver(*beam, *ki, arrow_length_ratio=0.05, color="black", alpha=0.25)
+
+        # plot detector Qs
         [lab_ax.quiver(*np.zeros(3), *dQ * 1.25 * extent, arrow_length_ratio=0.05, color="grey", alpha=0.25) for dQ in detQs_lab]
         [
             lab_ax.scatter(
