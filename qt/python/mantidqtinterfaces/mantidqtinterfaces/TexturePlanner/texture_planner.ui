@@ -895,15 +895,33 @@
     </item>
     <item row="0" column="2">
      <layout class="QVBoxLayout" name="rightColumn">
+
       <item>
        <widget class="QGroupBox" name="grpPoleFigure">
         <property name="title">
          <string>Pole Figure Display</string>
         </property>
         <layout class="QVBoxLayout" name="layPoleFigure">
+
          <item>
         <widget class="QWidget" name="projCanvas" native="true"/>
       </item>
+
+            <item>
+               <layout class="QHBoxLayout">
+                   <item>
+                       <widget class="QLabel" name="lblSaveFile">
+                  <property name="text">
+                   <string>Show Attenuation Values (demo):</string>
+                  </property>
+                 </widget>
+                   </item>
+                   <item>
+            <widget class="QCheckBox" name="chkMu"/>
+           </item>
+               </layout>
+           </item>
+
         </layout>
        </widget>
       </item>
