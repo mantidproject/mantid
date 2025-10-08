@@ -612,7 +612,6 @@ class MainWindow(QMainWindow):
         dogroupws = self.ui.checkBox_groupWS.isChecked()
         filterbypulse = self.ui.checkBox_filterByPulse.isChecked()
         startfrom1 = self.ui.checkBox_from1.isChecked()
-        splitsamplelog = self.ui.checkBox_splitLog.isChecked()
 
         corr2sample = str(self.ui.comboBox_tofCorr.currentText())
         how2skip = str(self.ui.comboBox_skipSpectrum.currentText())
@@ -642,7 +641,6 @@ class MainWindow(QMainWindow):
             FilterByPulseTime=filterbypulse,
             CorrectionToSample=corr2sample,
             SpectrumWithoutDetector=how2skip,
-            SplitSampleLogs=splitsamplelog,
             OutputWorkspaceIndexedFrom1=startfrom1,
             OutputTOFCorrectionWorkspace="TOFCorrTable",
             **kwargs,
@@ -744,7 +742,6 @@ class MainWindow(QMainWindow):
         self.ui.checkBox_filterByPulse.setCheckState(False)
         self.ui.checkBox_from1.setCheckState(False)
         self.ui.checkBox_groupWS.setCheckState(True)
-        self.ui.checkBox_splitLog.setCheckState(False)
 
         self.canvas.draw()
 
