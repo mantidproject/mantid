@@ -910,7 +910,7 @@
             <item>
                <layout class="QHBoxLayout">
                    <item>
-                       <widget class="QLabel" name="lblSaveFile">
+                       <widget class="QLabel" name="lblShowMu">
                   <property name="text">
                    <string>Show Attenuation Values (demo):</string>
                   </property>
@@ -919,8 +919,38 @@
                    <item>
             <widget class="QCheckBox" name="chkMu"/>
            </item>
+                   <item>
+            <spacer name="spGroupStretch">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+
+                   <item>
+                       <widget class="QLabel" name="lblMaterial">
+                  <property name="text">
+                   <string>Material:</string>
+                  </property>
+                 </widget>
+                   </item>
+                   <item>
+            <widget class="QLineEdit" name="edtMaterial">
+                       <property name="text">
+                   <string>Fe</string>
+                  </property>
+            </widget>
+           </item>
                </layout>
            </item>
+
+
 
         </layout>
        </widget>
