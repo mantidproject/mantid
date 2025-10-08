@@ -643,10 +643,9 @@ def archive_test_logs(){
 }
 
 def archive_env_logs(platform) {
-  // -- rattler-build doesn't write the log to files
-  //def env_log_dir = "**/conda-bld/${platform}/env_logs"
-  //archiveArtifacts artifacts: env_log_dir += "/**/*.txt",
-  //  allowEmptyArchive: false,
-  //  fingerprint: true,
-  //  onlyIfSuccessful: false
+  def env_log_dir = "**/env_logs/${platform}"
+  archiveArtifacts artifacts: env_log_dir += "/**/*.txt",
+    allowEmptyArchive: false,
+    fingerprint: true,
+    onlyIfSuccessful: false
 }
