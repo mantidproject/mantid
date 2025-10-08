@@ -20,6 +20,7 @@ cmake ^
     -DWORKBENCH_SITE_PACKAGES=%SP_DIR% ^
     -GNinja ^
     -DCMAKE_BUILD_TYPE=Release ^
+    -DCMAKE_OBJECT_PATH_MAX=350 ^
     ..
 
 if errorlevel 1 exit 1
