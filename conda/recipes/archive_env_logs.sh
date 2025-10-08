@@ -25,5 +25,9 @@ fi
 echo "$build_prefix"
 echo "$prefix"
 
+echo "$build_prefix $prefix" > $log_directory/prefix_output.txt
+
 conda list --explicit --prefix "$build_prefix" > $log_directory/"${package_name}"_build_environment.txt 2>&1
 conda list --explicit --prefix "$prefix" > $log_directory/"${package_name}"_host_environment.txt 2>&1
+
+echo "archive script end"
