@@ -21,5 +21,9 @@ fi
 if [ "$package_name" == mantid ] ; then
   conda list --explicit --prefix ../../../miniforge/envs/package-conda > $log_directory/package-conda_environment.txt 2>&1 || echo "Failed to write package-conda conda list output to file"
 fi
-conda list --explicit --prefix "$build_prefix" > $log_directory/"${package_name}"_build_environment.txt 2>&1 || echo "Failed to write build conda list output to file"
-conda list --explicit --prefix "$prefix" > $log_directory/"${package_name}"_host_environment.txt 2>&1 || echo "Failed to write host conda list output to file"
+
+echo "$build_prefix"
+echo "$prefix"
+
+conda list --explicit --prefix "$build_prefix" > $log_directory/"${package_name}"_build_environment.txt 2>&1
+conda list --explicit --prefix "$prefix" > $log_directory/"${package_name}"_host_environment.txt 2>&1
