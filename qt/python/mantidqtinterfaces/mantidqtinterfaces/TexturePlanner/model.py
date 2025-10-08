@@ -5,7 +5,17 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
-from mantid.simpleapi import LoadEmptyInstrument, GroupDetectors, SetSampleShape, LoadSampleShape
+from mantid.simpleapi import (
+    LoadEmptyInstrument,
+    GroupDetectors,
+    SetSampleShape,
+    LoadSampleShape,
+    MonteCarloAbsorption,
+    SetSampleMaterial,
+    CreateSimulationWorkspace,
+    ConvertUnits,
+    CopySample,
+)
 from Engineering.EnggUtils import GROUP, CALIB_DIR
 from Engineering.common.calibration_info import CalibrationInfo
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.show_sample.show_sample_model import ShowSampleModel
@@ -17,12 +27,14 @@ from scipy.spatial.transform import Rotation
 import matplotlib.pyplot as plt
 from mantid.kernel import logger
 from Engineering.texture.TextureUtils import convert_to_sscanss_frame
+from Engineering.texture.correction.correction_model import read_attenuation_coefficient_at_value
 
 
 class TexturePlannerModel(object):
     def __init__(self, instrument="ENGINX", projection="azimuthal"):
         # probably static
         self.wsname = "__texture_planning_ws"
+        self.instr_wsname = "__texture_planning_instr"
         self.sense_vals = {"Clockwise": -1, "Counterclockwise": 1}  # mantid convention
         self.sense_names = {"-1": "Clockwise", "1": "Counterclockwise"}
         self.supported_groups = ("Texture20", "Texture30", "banks")
@@ -32,6 +44,7 @@ class TexturePlannerModel(object):
 
         # properties which will be updated
         self.ws = None
+        self.instr_ws = None
         self.instr = instrument
         self.calib_info = None
         self.group = None
@@ -45,12 +58,24 @@ class TexturePlannerModel(object):
         self.n_gonio = 2
         self.orientation_index = 0
         self.n_output_points = 1
+        self.plot_attenuation = False
 
         # stl_settings
         self.stl_kwargs = {"Scale": "cm", "XDegrees": 0, "YDegrees": 0, "ZDegrees": "0", "TranslationVector": "0,0,0"}
 
         # euler_file_settings
         self.orientation_kwargs = {"Axes": "YXY", "Senses": "-1,-1,-1"}
+
+        self.mc_kwargs = {
+            "InputWorkspace": "__mc_ws",
+            "OutputWorkspace": "__abs_ws",
+            "EventsPerPoint": 50,
+            "MaxScatterPtAttempts": 1000,
+            "SimulateScatteringPointIn": "SampleOnly",
+            "ResimulateTracksForDifferentWavelengths": True,
+        }
+
+        self.attenuation_kwargs = {"point": 1.5, "unit": "dSpacing", "material": "Fe"}
 
         # data structure
         self.saved_orientations = {0: self.get_default_info_dict()}
@@ -60,17 +85,24 @@ class TexturePlannerModel(object):
 
     def update_ws(self):
         if not self.ws:
-            self.ws = LoadEmptyInstrument(InstrumentName=self.instr, OutputWorkspace=self.wsname)
+            self.instr_ws = LoadEmptyInstrument(InstrumentName=self.instr, OutputWorkspace=self.instr_wsname)
+            self.ws = CreateSimulationWorkspace(Instrument=self.instr, BinParams="1,0.5,2", OutputWorkspace=self.wsname, UnitX="dSpacing")
             SetSampleShape(self.ws, get_cube_xml("default_cube", 0.01))
+            self.set_material()
         # add handling here for copying over sample shape if the instrument is changed
+
+    def set_material(self):
+        SetSampleMaterial(self.ws, self.attenuation_kwargs["material"])
 
     def load_stl(self, stl_file):
         LoadSampleShape(InputWorkspace=self.ws, Filename=stl_file, OutputWorkspace=self.ws, **self.stl_kwargs)
+        self.set_material()
 
     def load_xml(self, xml_file):
         with open(xml_file, "r") as f:
             xml_string = f.read()
         SetSampleShape(self.ws, xml_string)
+        self.set_material()
 
     def load_orientation_file(self, txt_file):
         logger.notice("Loading Orientations from file")
@@ -128,6 +160,9 @@ class TexturePlannerModel(object):
 
     def set_gonio_index(self, index):
         self.gonio_index = index
+
+    def set_plot_attenuation(self, val):
+        self.plot_attenuation = val
 
     def update_calib_info(self):
         self.calib_info = CalibrationInfo(group=self.group)
@@ -272,10 +307,15 @@ class TexturePlannerModel(object):
 
     def get_detQ_lab(self):
         group_ws = GroupDetectors(
-            InputWorkspace=self.ws,
+            InputWorkspace=self.instr_ws,
             MapFile=os.path.join(CALIB_DIR, self.calib_info.get_group_file()),
             OutputWorkspace="group_ws",
             StoreInADS=False,
+        )
+        self.ws = GroupDetectors(
+            InputWorkspace=self.ws,
+            MapFile=os.path.join(CALIB_DIR, self.calib_info.get_group_file()),
+            OutputWorkspace=self.wsname,
         )
         spec_info = group_ws.spectrumInfo()
         det_pos = np.asarray(
@@ -295,6 +335,8 @@ class TexturePlannerModel(object):
 
         cart_pos = get_alpha_beta_from_cart(rot_pos.T)
         self.saved_orientations[index]["pf_points"] = ster_proj(*cart_pos.T) if self.projection == "ster" else azim_proj(*cart_pos.T)
+        if self.plot_attenuation:
+            self.calc_monte_carlo_absorption_val_for_index(index)
 
     def add_orientation(self):
         # create a new orientation, initially just as a copy of the current orientation
@@ -312,6 +354,28 @@ class TexturePlannerModel(object):
             row_info.append(val.get("select", True))
             table_info.append(row_info)
         return table_info
+
+    def calc_monte_carlo_absorption_val_for_index(self, index):
+        R = self.saved_orientations[index]["R"]
+        mc_ws = ConvertUnits(InputWorkspace=self.wsname, Target="Wavelength", OutputWorkspace="__mc_ws")
+        mc_ws.run().getGoniometer().setR(R.as_matrix())
+        self.ws.run().getGoniometer().setR(np.eye(3))
+        CopySample(
+            InputWorkspace=self.wsname,
+            OutputWorkspace="__mc_ws",
+            CopyShape=True,
+            CopyMaterial=True,
+            CopyEnvironment=False,
+            CopyLattice=False,
+        )
+        MonteCarloAbsorption(**self.mc_kwargs)
+        # first entry is null group so we can ignore it
+        mu = read_attenuation_coefficient_at_value("__abs_ws", self.attenuation_kwargs["point"], self.attenuation_kwargs["unit"])[1:]
+        self.saved_orientations[index]["mu"] = mu
+
+    def calc_all_monte_carlo_absorption_vals(self):
+        for i in self.saved_orientations.keys():
+            self.calc_monte_carlo_absorption_val_for_index(i)
 
     def update_plot(self, vecs, senses, angles, fig, lab_ax, proj_ax, current_index):
         lab_ax.clear()
@@ -390,20 +454,29 @@ class TexturePlannerModel(object):
             else:
                 proj_ax.scatter(gP[1], gP[0], s=30, edgecolor=pc, facecolor=fc)
 
-        for i in self.saved_orientations.keys():
-            if self.saved_orientations[i].get("include", True):
-                pf_xy = self.saved_orientations[i]["pf_points"]
-                if i == current_index:
-                    proj_ax.scatter(pf_xy[:, 1], pf_xy[:, 0], s=20, c="dodgerblue")
-                else:
-                    proj_ax.scatter(pf_xy[:, 1], pf_xy[:, 0], s=20, facecolor="None", edgecolor="dodgerblue")
-            elif i == current_index:
-                pf_xy = self.saved_orientations[i]["pf_points"]
-                proj_ax.scatter(pf_xy[:, 1], pf_xy[:, 0], s=20, facecolor="None", edgecolor="grey", alpha=0.5)
+        if not self.plot_attenuation:
+            for i in self.saved_orientations.keys():
+                if self.saved_orientations[i].get("include", True):
+                    pf_xy = self.saved_orientations[i]["pf_points"]
+                    if i == current_index:
+                        proj_ax.scatter(pf_xy[:, 1], pf_xy[:, 0], s=20, c="dodgerblue")
+                    else:
+                        proj_ax.scatter(pf_xy[:, 1], pf_xy[:, 0], s=20, facecolor="None", edgecolor="dodgerblue")
+                elif i == current_index:
+                    pf_xy = self.saved_orientations[i]["pf_points"]
+                    proj_ax.scatter(pf_xy[:, 1], pf_xy[:, 0], s=20, facecolor="None", edgecolor="grey", alpha=0.5)
+        else:
+            all_pf_xy = np.concatenate(
+                [info["pf_points"] for info in self.saved_orientations.values() if info.get("include", True)], axis=0
+            )
+            all_mus = np.concatenate([info["mu"] for info in self.saved_orientations.values() if info.get("include", True)], axis=0)
+            scatt = proj_ax.scatter(all_pf_xy[:, 1], all_pf_xy[:, 0], s=20, c=all_mus, vmin=0, vmax=1, cmap="jet")
+            cax = proj_ax.inset_axes([0.9, 0.15, 0.05, 0.7])
+            proj_ax.figure.colorbar(scatt, cax=cax)
 
         proj_ax.set_aspect("equal")
-        proj_ax.set_xlim(-1.1, 1.1)
-        proj_ax.set_ylim(-1.1, 1.1)
+        proj_ax.set_xlim(-1.5, 1.5)
+        proj_ax.set_ylim(-1.5, 1.5)
         [proj_ax.quiver(*np.array((-1, -1)), *bv, color=self.dir_cols[-1 + i], scale=5) for i, bv in enumerate(np.eye(2))]
         circle = plt.Circle((0, 0), 1, color="grey", fill=False, linestyle="-")
         proj_ax.add_patch(circle)

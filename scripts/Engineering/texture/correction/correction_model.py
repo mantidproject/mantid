@@ -306,17 +306,7 @@ class TextureCorrectionModel:
 
     @staticmethod
     def read_attenuation_coefficient_at_value(ws: str, val: float, unit: str) -> Sequence[float]:
-        conv_ws = ConvertUnits(ADS.retrieve(ws), Target=unit)
-        coefs = []
-        xbins = conv_ws.readX(0)
-        xdat = np.convolve(xbins, np.ones(2), "valid") / 2  # this gets the bin centres
-        for r in range(conv_ws.getNumberHistograms()):
-            ydat = conv_ws.readY(r)
-            f = interpolate.interp1d(xdat, ydat)
-            interp_val = f([val])[0]
-            coefs.append(interp_val)
-        ADS.remove("conv_ws")
-        return coefs
+        return read_attenuation_coefficient_at_value(ws, val, unit)
 
     @staticmethod
     def get_atten_table_name(ws_str: str, eval_val: float, unit: str) -> str:
@@ -377,3 +367,17 @@ class TextureCorrectionModel:
     @staticmethod
     def _has_no_valid_shape(ws_name: str) -> bool:
         return not has_valid_shape(ws_name)
+
+
+def read_attenuation_coefficient_at_value(ws: str, val: float, unit: str) -> Sequence[float]:
+    conv_ws = ConvertUnits(ADS.retrieve(ws), Target=unit)
+    coefs = []
+    xbins = conv_ws.readX(0)
+    xdat = np.convolve(xbins, np.ones(2), "valid") / 2  # this gets the bin centres
+    for r in range(conv_ws.getNumberHistograms()):
+        ydat = conv_ws.readY(r)
+        f = interpolate.interp1d(xdat, ydat)
+        interp_val = f([val])[0]
+        coefs.append(interp_val)
+    ADS.remove("conv_ws")
+    return coefs

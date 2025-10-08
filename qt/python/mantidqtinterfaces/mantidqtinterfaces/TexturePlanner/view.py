@@ -59,6 +59,7 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
         self.set_load_xml_enabled(False)
         self.set_load_orientation_enabled(False)
         self.set_outputs_enabled(False)
+        self.set_show_mu(False)
 
         self.set_angle_limits()
 
@@ -154,6 +155,9 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
     def set_on_output_matrix_clicked(self, slot):
         self.toMatrix.clicked.connect(slot)
 
+    def set_on_show_mu_toggled(self, slot):
+        self.chkMu.toggled.connect(slot)
+
     @QtCore.Slot(bool)
     def _on_any_include_toggled(self):
         self.sig_include_state_changed.emit()
@@ -236,6 +240,9 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
     def get_select_indices(self):
         return self._read_checkbox_column_states(7)
 
+    def get_show_mu(self):
+        return self.chkMu.isChecked()
+
     # setters
 
     def set_rd_name(self, text):
@@ -287,6 +294,9 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
     def set_angles(self, angles):
         for i in range(6):
             self.gonio_angles[i].setValue(angles[i])
+
+    def set_show_mu(self, val):
+        return self.chkMu.setChecked(val)
 
     def _setup_pf_plot(self):
         self.pf_figure = Figure(layout="constrained")
