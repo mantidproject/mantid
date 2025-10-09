@@ -11,7 +11,7 @@ function(PYUNITTEST_ADD_TEST _test_src_dir _testname_prefix)
     set(_test_runner_module ${PYUNITTEST_RUNNER})
   endif()
 
-  py_add_test("UnitTest" ${_test_runner_module} ${ARGV})
+  py_add_test("UnitTest" ${_test_runner_module} "" ${ARGV})
 
 endfunction()
 
@@ -23,13 +23,19 @@ function(PYSYSTEMTEST_ADD_TEST _test_src_dir _testname_prefix)
   else()
     set(_systest_runner ${PYSYSTEMTEST_RUNNER})
   endif()
-  py_add_test("SystemTest" ${_systest_runner} ${ARGV})
+  # Check if this is a PR build.
+  if(PR_JOB)
+    set(_pr_flag "True")
+  else()
+    set(_pr_flag "False")
+  endif()
+  py_add_test("SystemTest" ${_systest_runner} ${_pr_flag} ${ARGV})
 
 endfunction()
 
 # PY_ADD_TEST is used by the above test-adding methods. It SHOULD NOT be used directly in CMakeLists.txt files. Use
 # PYSYSTEMTEST_ADD_TEST or PYUNITTEST_ADD_TEST instead.
-function(PY_ADD_TEST _test_type _test_runner_module _test_src_dir _testname_prefix)
+function(PY_ADD_TEST _test_type _test_runner_module _additional_flags _test_src_dir _testname_prefix)
   # Property for the module directory
   if(CMAKE_GENERATOR MATCHES "Visual Studio" OR CMAKE_GENERATOR MATCHES "Xcode")
     set(_module_dir ${CMAKE_BINARY_DIR}/bin/$<CONFIG>)
@@ -69,6 +75,13 @@ function(PY_ADD_TEST _test_type _test_runner_module _test_src_dir _testname_pref
     list(APPEND _test_environment "LD_PRELOAD=${LOCAL_PRELOAD}")
   endif()
 
+  # Check if this is a PR build.
+  if(PR_JOB)
+    set(_pr_flag "True")
+  else()
+    set(_pr_flag "False")
+  endif()
+
   # Add all of the individual tests so that they can be run in parallel
   foreach(part ${ARGN})
     set(_filename ${part})
@@ -77,7 +90,7 @@ function(PY_ADD_TEST _test_type _test_runner_module _test_src_dir _testname_pref
     set(_pyunit_separate_name "${_testname_prefix}.${_suitename}.${_suitename}")
     add_test(NAME ${_pyunit_separate_name}
              COMMAND ${CMAKE_COMMAND} -E chdir "${CMAKE_BINARY_DIR}/bin/Testing" ${Python_EXECUTABLE}
-                     ${_test_runner_module} ${_test_src_dir}/${_filename}
+                     ${_test_runner_module} ${_test_src_dir}/${_filename} ${_additional_flags}
     )
     # Set the PYTHONPATH so that the built modules can be found
     set_tests_properties(

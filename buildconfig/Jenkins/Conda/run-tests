@@ -115,9 +115,5 @@ if [[ $ENABLE_SYSTEM_TESTS == true ]]; then
 
     SYSTEM_TEST_OPTIONS="-j${BUILD_THREADS_SYSTEM_TESTS} --no-compress-output --schedule-random --repeat until-pass:3 --output-on-failure"
 
-    if [[ ${JOB_NAME} == *pull_requests* ]]; then
-        SYSTEM_TEST_OPTIONS+=" --exclude-in-pull-requests"
-    fi
-
     run_with_xvfb ctest -L SystemTest --test-output-truncation middle -T Test -O test_logs/systest_$OSTYPE.log $SYSTEM_TEST_OPTIONS
 fi
