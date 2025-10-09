@@ -87,6 +87,8 @@ New features
   - Delivers a smoother and more consistent experience when navigating help and reference material.
   - Improved clarity for technical content (e.g. math and tables), more attractive and readable pages, and future potential for interactive elements in documentation.
 - macOS users with Apple Silicon (Arm-based architecture) are now warned if they have installed the Intel-based Mantid package.
+- Created :ref:`PythonObjectProperty <PythonObjectProperty>` which allows using generic python objects as inputs to algorithms defined through the python API.
+- Created :ref:`PythonObjectTypeValidator <PythonObjectTypeValidator>` for use with :ref:`PythonObjectProperty <PythonObjectProperty>`, to enforce correct typing on python objects.
 
 Bugfixes
 ############
