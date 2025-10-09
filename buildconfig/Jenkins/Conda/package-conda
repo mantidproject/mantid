@@ -93,9 +93,6 @@ mamba activate base
 # something is wrong with versioningit and rattler-build 0.48
 mamba install --yes rattler-build=0.47 versioningit python=3.11
 
-# Set the version to inject into the recipe file
-export MANTID_VERSION=$(versioningit "${REPO_ROOT_DIR}")
-
 # Clean up any legacy conda-recipes git clones
 cd $WORKSPACE
 if [[ -d conda-recipes ]]; then
@@ -111,6 +108,9 @@ if [[ -n "$GIT_TAG" ]]; then
     fi
     git tag -a $GIT_TAG -m "Tagging $GIT_TAG"
 fi
+
+# Set the version to inject into the recipe file
+export MANTID_VERSION=$(versioningit "${REPO_ROOT_DIR}")
 
 # Set locale to avoid problems building the docs
 # See https://unix.stackexchange.com/questions/87745/what-does-lc-all-c-do
