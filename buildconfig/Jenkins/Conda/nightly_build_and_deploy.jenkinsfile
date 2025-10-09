@@ -227,7 +227,11 @@ pipeline {
             package_conda('linux-64', 'base')
             archive_conda_packages('linux-64')
             archive_conda_packages('noarch')
-	    archive_env_logs('linux-64')
+          }
+          post {
+            always {
+              archive_env_logs('linux-64')
+            }
           }
         }
         stage('package conda: win-64') {
@@ -255,7 +259,11 @@ pipeline {
             // in parallel
             package_conda('win-64', 'base')
             archive_conda_packages('win-64')
-	    archive_env_logs('win-64')
+          }
+          post {
+            always {
+              archive_env_logs('win-64')
+            }
           }
         }
         stage('package conda: osx-arm64') {
@@ -283,7 +291,11 @@ pipeline {
             // in parallel
             package_conda('osx-arm64', 'base')
             archive_conda_packages('osx-arm64')
-	    archive_env_logs('osx-arm64')
+          }
+          post {
+            always {
+              archive_env_logs('osx-arm64')
+            }
           }
         }
       }
@@ -330,7 +342,11 @@ pipeline {
               archive_conda_packages("${PLATFORM}")
               package_standalone("${PLATFORM}")
               archive_standalone_package("${PLATFORM}")
-	      archive_env_logs("${PLATFORM}")
+            }
+            post {
+              always {
+                archive_env_logs("${PLATFORM}")
+              }
             }
           }
         }
