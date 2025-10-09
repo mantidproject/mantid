@@ -104,6 +104,8 @@ New features
       potential for interactive elements in documentation.
 - macOS users with Apple silicon (Arm-based architecture) are now warned if they have installed the Intel-based Mantid package.
 - Added new python algorithm, :ref:`algm-TimeDifference-v1`, for calculating the time difference between a series of runs and a reference run.
+- Created :ref:`PythonObjectProperty <PythonObjectProperty>` which allows using generic python objects as inputs to algorithms defined through the python API.
+- Created :ref:`PythonObjectTypeValidator <PythonObjectTypeValidator>` for use with :ref:`PythonObjectProperty <PythonObjectProperty>`, to enforce correct typing on python objects.
 
 Bugfixes
 ############
