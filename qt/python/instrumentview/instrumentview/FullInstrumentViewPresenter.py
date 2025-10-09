@@ -231,23 +231,33 @@ class FullInstrumentViewPresenter:
         rgba[:, 3] = alpha
         return rgba
 
+    def _reload_peaks_workspaces(self):
+        self._view.refresh_peaks_ws_list()
+        self.on_peaks_workspace_selected()
+
     def delete_workspace_callback(self, ws_name):
-        if self._model._workspace.name() != ws_name:
-            return
-        self._view.close()
-        logger.warning(f"Workspace {ws_name} deleted, closed Experimental Instrument View.")
+        if ws_name in self.peaks_workspaces_in_ads():
+            self._reload_peaks_workspaces()
+            logger.warning(f"Workspace {ws_name} deleted, reloaded peaks workspaces in Experimental Instrument View.")
+        elif self._model._workspace.name() == ws_name:
+            self._view.close()
+            logger.warning(f"Workspace {ws_name} deleted, closed Experimental Instrument View.")
 
     def rename_workspace_callback(self, ws_old_name, ws_new_name):
-        if self._model._workspace.name() != ws_old_name:
-            return
-        self._model._workspace = mtd[ws_new_name]
-        logger.warning("Workspace renamed, updated Experimental Instrument View.")
+        if ws_old_name in self.peaks_workspaces_in_ads():
+            self._reload_peaks_workspaces()
+            logger.warning(f"Workspace {ws_old_name} renamed to {ws_new_name}, reloaded peaks workspaces in Experimental Instrument View.")
+        elif self._model._workspace.name() == ws_old_name:
+            self._model._workspace = mtd[ws_new_name]
+            logger.warning(f"Workspace {ws_old_name} renamed to {ws_new_name}, updated Experimental Instrument View.")
 
     def clear_workspace_callback(self):
         self._view.close()
 
     def replace_workspace_callback(self, ws_name, ws):
-        if ws_name == self._model.workspace.name():
+        if ws_name in self.peaks_workspaces_in_ads():
+            self._reload_peaks_workspaces()
+        elif ws_name == self._model.workspace.name():
             self._view.close()
 
     def handle_close(self):

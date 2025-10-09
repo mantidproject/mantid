@@ -276,11 +276,7 @@ class FullInstrumentViewWindow(QMainWindow):
         for unit in self._presenter.available_unit_options():
             self._units_combo_box.addItem(unit)
         self._integration_limit_group_box.setTitle(self._presenter.workspace_display_unit)
-        for peaks_ws in self._presenter.peaks_workspaces_in_ads():
-            list_item = QListWidgetItem(peaks_ws, self._peak_ws_list)
-            list_item.setCheckState(Qt.Unchecked)
-            self._peak_ws_list.addItem(list_item)
-        self._peak_ws_list.adjustSize()
+        self.refresh_peaks_ws_list()
 
     def setup_connections_to_presenter(self) -> None:
         self._projection_combo_box.currentIndexChanged.connect(self._presenter.on_projection_option_selected)
@@ -322,6 +318,24 @@ class FullInstrumentViewWindow(QMainWindow):
         )
         hBox.addWidget(self._sum_spectra_checkbox)
         parent.addLayout(hBox)
+
+    def refresh_peaks_ws_list(self) -> None:
+        # Maintain any peaks workspaces that are checked
+        current_checked_peak_workspaces: list[str] = []
+        for list_i in range(self._peak_ws_list.count()):
+            list_item = self._peak_ws_list.item(list_i)
+            if list_item.checkState() > 0:
+                current_checked_peak_workspaces.append(list_item.text())
+
+        self._peak_ws_list.clear()
+        for peaks_ws in self._presenter.peaks_workspaces_in_ads():
+            list_item = QListWidgetItem(peaks_ws, self._peak_ws_list)
+            if peaks_ws in current_checked_peak_workspaces:
+                list_item.setCheckState(Qt.Checked)
+            else:
+                list_item.setCheckState(Qt.Unchecked)
+            self._peak_ws_list.addItem(list_item)
+        self._peak_ws_list.adjustSize()
 
     def set_unit_combo_box_index(self, index: int) -> None:
         self._units_combo_box.setCurrentIndex(index)
