@@ -9,7 +9,7 @@ from unittest.mock import patch, create_autospec
 from numpy import allclose, sqrt, log, linspace, zeros_like, ones, trapezoid, array
 from numpy.testing import assert_array_equal, assert_array_almost_equal
 from mantid.api import AnalysisDataService, FileFinder
-from mantid.simpleapi import CreateWorkspace, FlatBackground
+from mantid.simpleapi import CreateWorkspace, FlatBackground, EditInstrumentGeometry, ConvertUnits
 from mantid.geometry import CrystalStructure
 from Engineering.pawley_utils import Phase, GaussianProfile, PVProfile, PawleyPattern1D, PawleyPattern2D
 from plugins.algorithms.poldi_utils import load_poldi
@@ -90,6 +90,7 @@ class PawleyPattern1DTest(unittest.TestCase):
         cls.ws = CreateWorkspace(
             DataX=dspacs, DataY=zeros_like(dspacs), UnitX="dSpacing", YUnitLabel="Intensity (a.u.)", OutputWorkspace="ws"
         )
+        EditInstrumentGeometry(Workspace=cls.ws, PrimaryFlightPath=50, L2=1, Polar=90)
         cls.comp_func_str = "composite=CompositeFunction,NumDeriv=true;name=Gaussian,Height=125.644,PeakCentre=3.13555,Sigma=0.00317517"
 
     @classmethod
@@ -161,6 +162,19 @@ class PawleyPattern1DTest(unittest.TestCase):
         # run fit with 1 func eval to check no error and result returned
         result = pawley.fit(max_nfev=1)
         self.assertEqual(result.nfev, 1)
+
+    def test_inst_params(self):
+        pawley = PawleyPattern1D(self.ws, [self.phase], profile=GaussianProfile())
+        zero_shift = 0.5
+        pawley.inst_params[-1] = zero_shift
+        pawley.update_profile_function()
+        # assert peak centre shifted by zero_shift
+        self.assertAlmostEqual(pawley.comp_func[0]["PeakCentre"], self.phase.calc_dspacings()[0] + zero_shift, delta=1e-8)
+
+    def test_tof_workspace(self):
+        ws_tof = ConvertUnits(InputWorkspace=self.ws, OutputWorkspace=self.ws.name() + "_tof", Target="TOF")
+        pawley = PawleyPattern1D(ws_tof, [self.phase], profile=GaussianProfile())
+        self.assertAlmostEqual(pawley.comp_func[0]["PeakCentre"], 57166, delta=1)
 
 
 class PawleyPattern2DTest(unittest.TestCase):
