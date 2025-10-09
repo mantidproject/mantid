@@ -335,7 +335,7 @@ pipeline {
                 fingerprintArtifacts: true,
                 projectName: '${JOB_NAME}',
                 selector: specific('${BUILD_NUMBER}'),
-                target: './incoming_artifacts',
+                target: './',
                 flatten: false
 
               package_conda("${PLATFORM}", "workbench")
@@ -659,7 +659,7 @@ def archive_test_logs(){
 }
 
 def archive_env_logs(platform) {
-  def env_log_dir = "**/env_logs/${platform}"
+  def env_log_dir = "**/conda-bld/${platform}/env_logs"
   archiveArtifacts artifacts: env_log_dir += "/**/*.txt",
     allowEmptyArchive: false,
     fingerprint: true,
