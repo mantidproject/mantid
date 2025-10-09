@@ -98,6 +98,26 @@ class GaussianProfile(PeakProfile):
         return {"Sigma": np.sqrt((self.p[0] ** 2) + (self.p[1] ** 2) * dpk**2 + (self.p[2] ** 2) * dpk**4)}  # Panel 6 in [1] with zeta=0
 
 
+class BackToBackGauss(PeakProfile):
+    def __init__(self):
+        self.func_name = "BackToBackExponential"
+        self.labels = ("sig0", "sig1", "sig2", "alpha_0", "alpha_1", "beta_0", "beta_1")
+        self.p: np.ndarray = np.array([0, 9.06, 6.52, 0, 0.0968, 0.0216, 0.0123])  # for ENGIN-X North Bank
+        self.default_isfree: np.ndarray = np.zeros_like(self.p, dtype=bool)
+
+    def get_mantid_peak_params(self, dpk: float) -> dict:
+        return {"S": self._calc_sigma(dpk), "A": self._calc_alpha(dpk), "B": self._calc_beta(dpk)}
+
+    def _calc_sigma(self, dpk: float) -> float:
+        return np.sqrt((self.p[0] ** 2) + (self.p[1] * dpk) ** 2 + (self.p[2] ** 2) * dpk**4)
+
+    def _calc_alpha(self, dpk: float) -> float:
+        return self.p[3] + self.p[4] / dpk
+
+    def _calc_beta(self, dpk: float) -> float:
+        return self.p[5] + self.p[6] / (dpk**4)
+
+
 class Phase:
     def __init__(self, crystal_structure: CrystalStructure, hkls: Optional[np.ndarray] = None):
         self.unit_cell = crystal_structure.getUnitCell()

@@ -11,7 +11,7 @@ from numpy.testing import assert_array_equal, assert_array_almost_equal
 from mantid.api import AnalysisDataService, FileFinder
 from mantid.simpleapi import CreateWorkspace, FlatBackground, EditInstrumentGeometry, ConvertUnits
 from mantid.geometry import CrystalStructure
-from Engineering.pawley_utils import Phase, GaussianProfile, PVProfile, PawleyPattern1D, PawleyPattern2D
+from Engineering.pawley_utils import Phase, GaussianProfile, PVProfile, PawleyPattern1D, PawleyPattern2D, BackToBackGauss
 from plugins.algorithms.poldi_utils import load_poldi
 
 
@@ -81,6 +81,14 @@ class ProfileTest(unittest.TestCase):
         self.assertAlmostEqual(param_dict["FWHM"], 2 * sqrt(2 * log(2)) * self.GAUSS_SIGMA, delta=1e-5)
         self.assertAlmostEqual(param_dict["Mixing"], 0, delta=1e-8)
         self.assertEqual(profile.func_name, "PseudoVoigt")
+
+    def test_back_to_back_gauss(self):
+        profile = BackToBackGauss()
+        param_dict = profile.get_mantid_peak_params(self.DSPAC)
+        self.assertAlmostEqual(param_dict["A"], 0.0645, delta=1e-4)
+        self.assertAlmostEqual(param_dict["B"], 0.0240, delta=1e-4)
+        self.assertAlmostEqual(param_dict["S"], 20.0, delta=1e-1)
+        self.assertEqual(profile.func_name, "BackToBackExponential")
 
 
 class PawleyPattern1DTest(unittest.TestCase):
