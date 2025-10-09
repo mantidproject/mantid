@@ -18,13 +18,10 @@ cmake ^
     -DMANTID_QT_LIB=SYSTEM ^
     -DENABLE_WORKBENCH=ON ^
     -DWORKBENCH_SITE_PACKAGES=%SP_DIR% ^
-    -GNinja ^
-    -DCMAKE_BUILD_TYPE=Release ^
-    -DCMAKE_OBJECT_PATH_MAX=350 ^
     ..
 
 if errorlevel 1 exit 1
-ninja
-ninja docs-qthelp
-ninja install
+cmake --build . --config Release
+cmake --build . --config Release --target docs-qthelp
+cmake --build . --config Release --target install
 if errorlevel 1 exit 1
