@@ -18,12 +18,9 @@ cmake ^
     -DMANTID_FRAMEWORK_LIB=SYSTEM ^
     -DMANTID_QT_LIB=BUILD ^
     -DENABLE_WORKBENCH=OFF ^
-    -GNinja ^
-    -DCMAKE_BUILD_TYPE=Release ^
-    -DCMAKE_OBJECT_PATH_MAX=350 ^
     ..
 
 if errorlevel 1 exit 1
-ninja
-ninja install
+cmake --build . --config Release
+cmake --build . --config Release --target install
 if errorlevel 1 exit 1
