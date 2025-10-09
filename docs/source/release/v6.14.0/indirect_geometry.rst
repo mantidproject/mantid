@@ -22,6 +22,7 @@ New features
 ############
 - ``<prefix>-phonopy.yml`` and ``<prefix>-force_constants.hdf5`` files from `janus-core <https://stfc.github.io/janus-core>`_ are now supported as input to :ref:`Abins <algm-Abins>`/:ref:`Abins2D <algm-Abins2D>` Algorithms. Use the FORCE_CONSTANTS "AbInitioProgram" for regular ``phonopy.yaml`` files.
 - Four output "OutputSusceptibility" file options (``OutputSusceptibilityFrequencyNXS``, ``OutputSusceptibilityEnergyNXS``, ``OutputSusceptibilityFrequencyASCII``, ``OutputSusceptibilityEnergyASCII``) have been added in :ref:`algm-BASISReduction`, instead of one.
+- Support is added to :ref:`Abins <algm-Abins>`/:ref:`Abins2D <algm-Abins2D>` to import .mol data files for Molden. These can be output by CP2K calculations, but do not include mass/isotope information.
 
 Bugfixes
 ############
