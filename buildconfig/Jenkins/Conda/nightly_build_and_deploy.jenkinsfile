@@ -335,7 +335,7 @@ pipeline {
                 fingerprintArtifacts: true,
                 projectName: '${JOB_NAME}',
                 selector: specific('${BUILD_NUMBER}'),
-                target: './',
+                target: './incoming_artifacts',
                 flatten: false
 
               package_conda("${PLATFORM}", "workbench")
