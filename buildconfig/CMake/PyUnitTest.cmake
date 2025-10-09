@@ -69,6 +69,13 @@ function(PY_ADD_TEST _test_type _test_runner_module _test_src_dir _testname_pref
     list(APPEND _test_environment "LD_PRELOAD=${LOCAL_PRELOAD}")
   endif()
 
+  # Check if this is a PR build.
+  if(PR_JOB)
+    set(_pr_flag "True")
+  else()
+    set(_pr_flag "False")
+  endif()
+
   # Add all of the individual tests so that they can be run in parallel
   foreach(part ${ARGN})
     set(_filename ${part})
@@ -77,7 +84,7 @@ function(PY_ADD_TEST _test_type _test_runner_module _test_src_dir _testname_pref
     set(_pyunit_separate_name "${_testname_prefix}.${_suitename}.${_suitename}")
     add_test(NAME ${_pyunit_separate_name}
              COMMAND ${CMAKE_COMMAND} -E chdir "${CMAKE_BINARY_DIR}/bin/Testing" ${Python_EXECUTABLE}
-                     ${_test_runner_module} ${_test_src_dir}/${_filename}
+                     ${_test_runner_module} ${_test_src_dir}/${_filename} ${_pr_flag}
     )
     # Set the PYTHONPATH so that the built modules can be found
     set_tests_properties(

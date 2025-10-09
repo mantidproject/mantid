@@ -100,7 +100,7 @@ def main(argv):
 
     results = OrderedDict()
     for test_class_name in test_class_names:
-        script_obj = systemtesting.TestScript(test_dir_name, test_module_name, test_class_name, False)
+        script_obj = systemtesting.TestScript(test_dir_name, test_module_name, test_class_name, bool(argv[2]))
         results[test_class_name] = runner.start_in_current_process(script_obj)
 
     #########################################################################
