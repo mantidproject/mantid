@@ -20,7 +20,7 @@ class TestShowSamplePresenter(unittest.TestCase):
         self.presenter = ShowSamplePresenter(self.model, self.view, self.include_gv)
 
     def test_init_connects_signal(self):
-        self.view.sig_view_shape_requested.connect.assert_called_once_with(self.presenter._on_view_shape_clicked)
+        self.view.set_on_view_shape_requested.assert_called_once_with(self.presenter._on_view_shape_clicked)
 
     @patch(dir_path + ".ShowSamplePresenter._view_shape")
     def test_on_view_shape_clicked(self, mock_view_shape):

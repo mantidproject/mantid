@@ -176,6 +176,9 @@ class TextureCorrectionView(QtWidgets.QWidget, Ui_texture):
     def set_on_copy_sample_clicked(self, slot):
         self.btn_copySampleToAll.clicked.connect(slot)
 
+    def set_on_view_shape_requested(self, slot):
+        self.sig_view_shape_requested.connect(slot)
+
     # ========== Table Handling ==========
     def populate_workspace_table(self, workspace_info_list):
         create_workspace_table(self.table_column_headers, self.table_loaded_data, len(workspace_info_list))

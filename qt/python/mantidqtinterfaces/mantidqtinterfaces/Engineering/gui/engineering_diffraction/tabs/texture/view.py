@@ -120,6 +120,9 @@ class TextureView(QtWidgets.QWidget, Ui_texture):
     def set_on_set_all_crystal_clicked(self, slot):
         self.btn_setAllCrystal.clicked.connect(slot)
 
+    def set_on_view_shape_requested(self, slot):
+        self.sig_view_shape_requested.connect(slot)
+
     @QtCore.Slot(bool)
     def _on_any_checkbox_toggled(self):
         self.sig_selection_state_changed.emit()

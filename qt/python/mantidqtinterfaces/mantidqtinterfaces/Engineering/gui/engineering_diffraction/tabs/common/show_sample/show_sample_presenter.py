@@ -15,7 +15,7 @@ class ShowSamplePresenter(object):
         self.sample_model = ShowSampleModel(inc_gauge_vol=include_gauge_volume)
         self.view = view
         self.include_gauge_volume = include_gauge_volume
-        self.view.sig_view_shape_requested.connect(self._on_view_shape_clicked)
+        self.view.set_on_view_shape_requested(self._on_view_shape_clicked)
 
     def _view_shape(self, ws_name, fix_axes):
         self.sample_model.set_ws_name(ws_name)
