@@ -102,4 +102,7 @@ class FocusView(QtWidgets.QWidget, Ui_focus):
             return
         self.finder_focus.setUserInput(",".join(filepaths))
         if directory:
-            self.finder_focus.setLastDirectory(directory)
+            self.set_finder_last_directory(directory)
+
+    def set_finder_last_directory(self, directory):
+        self.finder_focus.setLastDirectory(directory)

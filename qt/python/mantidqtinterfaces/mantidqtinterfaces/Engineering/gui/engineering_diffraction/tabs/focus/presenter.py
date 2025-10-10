@@ -100,7 +100,7 @@ class FocusPresenter(object):
         self.instrument = instrument
 
     def set_default_directories(self):
-        self.view.finder_focus.setLastDirectory(output_settings.get_output_path())
+        self.view.set_finder_last_directory(output_settings.get_output_path())
 
     def set_rb_num(self, rb_num):
         self.rb_num = rb_num
