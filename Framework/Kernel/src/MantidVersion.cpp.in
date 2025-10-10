@@ -61,7 +61,7 @@ std::string MantidVersion::versionForReleaseNotes(const VersionInfo& version) {
 
 std::string MantidVersion::releaseNotes()
 {
-  const std::string STEM = "qthelp://org.mantidproject/doc/release/v";
+  const std::string STEM = "release/v";
   const std::string END = "/index.html";
 
   std::stringstream url;
