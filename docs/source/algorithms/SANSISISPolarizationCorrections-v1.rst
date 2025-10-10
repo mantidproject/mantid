@@ -42,7 +42,8 @@ The following steps are part of a calibration sequence [#KRYCKA]_:
 - Fit the :ref:`cell opacity <algm-DepolarizedAnalyserTransmission>` from the transmission between the depolarized and empty cell runs.
 - Calculate the :ref:`Helium Analyser Efficiency <algm-HeliumAnalyserEfficiency>` for each transmission run and fit to an exponential decay to extract the initial polarization and decay rate of the analyzer cell.
 - Calculate the :ref:`Flipper <algm-FlipperEfficiency>` and :ref:`Polarizer<algm-PolarizerEfficiency>` efficiencies for each transmission run. The flipper configuration is expected to be the same for all input transmission runs, and
-  it is retrieved from the user file or calculated using :ref:`algm-DetermineSpinStateOrder` if the configuration is missing in the file.
+  it is retrieved from the user file or calculated using :ref:`algm-DetermineSpinStateOrder` if the configuration is missing in the file. If the property ``AssertSpinState`` is set to :code:`False`, the spin state set on `FlipperConfiguration` field
+  of the user file will be used in all runs without any further check.
 - Average the calculated efficiencies for all transmission runs.
 - Save the results in the path chosen in ``SavePath``. Additionally, the cell opacity and analyzer decay parameters are also stored in a table workspace at this location.
 
