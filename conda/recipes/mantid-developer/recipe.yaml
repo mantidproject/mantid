@@ -59,7 +59,7 @@ requirements:
     - python ${{ python }}
     - if: osx
       then: python.app
-    - pyvista {{ pyvista }}
+    - pyvista ${{ pyvista }}
     - pyvistaqt
     - superqt
     - pyyaml ${{ pyyaml }}

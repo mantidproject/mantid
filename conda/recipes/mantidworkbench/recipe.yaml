@@ -59,7 +59,7 @@ requirements:
       then: pystack
     - if: win
       then: gdk-pixbuf ${{ gdk_pixbuf }}
-    - pyvista {{ pyvista }}
+    - pyvista ${{ pyvista }}
     - pyvistaqt
     - superqt
     - qtconsole ${{ qtconsole }}
