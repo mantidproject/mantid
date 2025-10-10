@@ -1,4 +1,4 @@
-- `DirectBeamRun` property of algorithm :ref:`algm-SANSISISPolarizationCorrections` is no longer required to be a group of 4 periods.
-- Added `AssertSpinState` property to :ref:`algm-SANSISISPolarizationCorrections`, to select if the spin state configuration will be determined and asserted for each transmission run.
-- Added `PxDInitialValue`, `LifetimeInitialValue` and `HePolInitialValue` input properties to :ref:`algm-SANSISISPolarizationCorrections` to change the initial values for efficiencies fit.
-- Added `DeletePartialWsOnFail` property to :ref:`algm-SANSISISPolarizationCorrections` to avoid deleting partial workspaces if the algorithm fails.
+- ``DirectBeamRun`` property of algorithm :ref:`algm-SANSISISPolarizationCorrections` is no longer required to be a group of 4 periods.
+- Added ``AssertSpinState`` property to :ref:`algm-SANSISISPolarizationCorrections`, to select if the spin state configuration will be determined and asserted for each transmission run.
+- Added ``PxDInitialValue``, ``LifetimeInitialValue`` and ``HePolInitialValue`` input properties to :ref:`algm-SANSISISPolarizationCorrections` to change the initial values for efficiencies fit.
+- Added ``DeletePartialWsOnFail`` property to :ref:`algm-SANSISISPolarizationCorrections` to avoid deleting partial workspaces if the algorithm fails.
