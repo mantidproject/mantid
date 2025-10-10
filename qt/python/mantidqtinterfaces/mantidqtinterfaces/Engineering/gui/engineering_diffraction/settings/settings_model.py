@@ -106,9 +106,8 @@ class SettingsModel(object):
 
     @staticmethod
     def _check_and_populate_with_default(name, settings, default_settings):
-        # note that self.settings and self.default settings should be set from presenter before using this method
         if name not in settings or settings[name] == "":
-            settings = default_settings[name]
+            settings[name] = default_settings[name]
         return settings
 
     def validate_settings(self, settings, default_settings, all_peaks, set_nullables_to_default=True):

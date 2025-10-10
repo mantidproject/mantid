@@ -20,6 +20,18 @@ from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.setting
 
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.show_sample.show_sample_presenter import ShowSamplePresenter
 
+from functools import wraps
+
+
+def redraws_table(func):
+    @wraps(func)
+    def wrapper(self):
+        func(self)
+        self.redraw_table()
+        return
+
+    return wrapper
+
 
 class TextureCorrectionPresenter:
     def __init__(self, model, view):
@@ -73,6 +85,7 @@ class TextureCorrectionPresenter:
         self.update_custom_shape_finder_vis()
         self.update_reference_info()
 
+    @redraws_table
     def load_files_into_table(self):
         filenames = self.view.finder_corr.getFilenames()
         wss = self.model.load_files(filenames)
@@ -80,13 +93,11 @@ class TextureCorrectionPresenter:
             if ws_name not in self.ws_names:
                 self.ws_names.append(ws_name)
 
-        self.redraw_table()
-
+    @redraws_table
     def delete_selected_files(self):
         wss = self.view.get_selected_workspaces()
         for ws in wss:
             self.ws_names.pop(self.ws_names.index(ws))
-        self.redraw_table()
 
     def redraw_table(self):
         self.update_ws_info()
@@ -100,6 +111,7 @@ class TextureCorrectionPresenter:
             ws_info[ws_name] = self.model.get_ws_info(ws_name, ws_name in selected)  # maintain state of selected boxes
         self.ws_info = ws_info
 
+    @redraws_table
     def load_all_orientations(self):
         wss = self.view.get_selected_workspaces()
         orientation_file = self.view.get_orientation_file()
@@ -107,7 +119,6 @@ class TextureCorrectionPresenter:
         euler_scheme = self._get_setting("euler_angles_scheme")
         euler_sense = self._get_setting("euler_angles_sense")
         self.model.load_all_orientations(wss, orientation_file, use_euler, euler_scheme, euler_sense)
-        self.redraw_table()
 
     def select_all(self):
         self.view.set_all_workspaces_selected(True)
@@ -162,18 +173,18 @@ class TextureCorrectionPresenter:
             self.view.include_divergence(), self.view.get_div_horz(), self.view.get_div_vert(), self.view.get_div_det_horz()
         )
 
+    @redraws_table
     def _copy_sample_to_all_selected(self):
         ref_ws = self.view.get_sample_reference_ws()
         wss = self.view.get_selected_workspaces()
         self.model.copy_sample_info(ref_ws, wss)
-        self.redraw_table()
 
+    @redraws_table
     def _copy_ref_sample_to_all_selected(self):
         ref_ws = self.model.reference_ws
         if ref_ws:
             wss = self.view.get_selected_workspaces()
             self.model.copy_sample_info(ref_ws, wss, True)
-            self.redraw_table()
 
     def _on_worker_success(self):
         self.correction_notifier.notify_subscribers(self.model.get_corrected_files())

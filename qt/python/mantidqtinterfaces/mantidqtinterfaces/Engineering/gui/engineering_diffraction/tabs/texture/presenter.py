@@ -18,6 +18,15 @@ from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common impo
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.show_sample.show_sample_presenter import ShowSamplePresenter
 
 
+def redraws_table(func):
+    def wrapper(self):
+        func(self)
+        self.redraw_table()
+        return
+
+    return wrapper
+
+
 class TexturePresenter:
     def __init__(self, model, view):
         # set up mvp components
@@ -77,6 +86,7 @@ class TexturePresenter:
 
     # ------- File Loaders ------------------
 
+    @redraws_table
     def load_ws_files(self):
         filenames = self.view.finder_texture_ws.getFilenames()
         ws_names = self.model.load_files(filenames)
@@ -85,16 +95,16 @@ class TexturePresenter:
                 self.ws_names.append(ws_name)
             if not self.ws_has_param(ws_name):
                 self.unassigned_wss.append(ws_name)
-        self.redraw_table()
 
+    @redraws_table
     def load_param_files(self):
         filenames = self.view.finder_texture_tables.getFilenames()
         params = self.model.load_files(filenames)
         for param in params:
             if not self.param_has_ws(param):
                 self.unassigned_params.append(param)
-        self.redraw_table()
 
+    @redraws_table
     def delete_selected_files(self):
         selected_wss, selected_params = self.view.get_selected_workspaces()
         for ws in selected_wss:
@@ -107,7 +117,6 @@ class TexturePresenter:
                 # do not add either back to the unassigned piles
             else:
                 self.unassigned_wss.pop(self.unassigned_wss.index(ws))
-        self.redraw_table()
 
     def set_default_files(self, filepaths):
         directory = self.model.get_last_directory(filepaths)
@@ -152,10 +161,10 @@ class TexturePresenter:
 
     # ----- Table logic -----------------
 
+    @redraws_table
     def delete_selected_param_files(self):
         selected_wss, selected_params = self.view.get_selected_workspaces()
         self.unassign_params(selected_params)
-        self.redraw_table()
 
     def select_all(self):
         self.view.set_all_workspaces_selected(True)
@@ -167,16 +176,16 @@ class TexturePresenter:
 
     # --------- Xtal Logic -------------------------------
 
+    @redraws_table
     def on_set_crystal_clicked(self):
         self.model.set_ws_xtal(
             self.view.get_crystal_ws_prop(), self.view.get_lattice(), self.view.get_spacegroup(), self.view.get_basis(), self.view.get_cif()
         )
-        self.redraw_table()
 
+    @redraws_table
     def on_set_all_crystal_clicked(self):
         wss, _ = self.view.get_selected_workspaces()
         self.model.set_all_ws_xtal(wss, self.view.get_lattice(), self.view.get_spacegroup(), self.view.get_basis(), self.view.get_cif())
-        self.redraw_table()
 
     # --------- Pole Figure Logic --------------------------
 
