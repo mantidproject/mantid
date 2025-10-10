@@ -42,6 +42,7 @@ class FittingPlotPresenter(object):
         self.worker = None
         self.fitprop_list = None
         self.is_waiting_convolve_peaks = False
+        self._rb_num = None
         self.view.set_subscriber_for_function_changed(self.handle_convolve_peaks_added)
 
     def setup_toolbar(self):
@@ -230,3 +231,8 @@ class FittingPlotPresenter(object):
         if self.is_waiting_convolve_peaks:
             self.is_waiting_convolve_peaks = False
             self.find_peaks_convolve_done_notifier.notify_subscribers(True)
+
+    def set_rb_num(self, rb_num):
+        self._rb_num = rb_num
+        # store a record of rb_num on the model for saving
+        self.model.set_rb_num(rb_num)

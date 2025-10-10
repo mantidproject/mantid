@@ -9,17 +9,17 @@ import tempfile
 import shutil
 from os import path
 
-from unittest import mock
 from unittest.mock import patch, MagicMock, call, create_autospec
 from Engineering.EnggUtils import GROUP
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.focus import model
 from Engineering.common.calibration_info import CalibrationInfo
-from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings import settings_model, settings_view, settings_presenter
+from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings import settings_presenter
 from qtpy.QtCore import QCoreApplication
 from workbench.config import APPNAME
 
 file_path = "mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.focus.model"
 enggutils_path = "Engineering.EnggUtils"
+setting_path = "mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.settings_presenter.SettingsPresenter"
 
 
 class FocusModelTest(unittest.TestCase):
@@ -64,7 +64,7 @@ class FocusModelTest(unittest.TestCase):
         sample_foc_ws = MagicMock()
         sample_foc_ws.name.return_value = "foc_name"
         mock_conv_units.return_value = sample_foc_ws  # last alg called before ws name appended to plotting list
-        mock_save_out.return_value = ["Nexus files"], ["GSS files"]
+        mock_save_out.return_value = ["Nexus files"], ["GSS files"], ["Combined files"]
 
         # plotting focused runs
         self.model.focus_run(["305761"], "fake/van/path", plot_output=True, rb_num=None, calibration=self.calibration)
@@ -76,6 +76,8 @@ class FocusModelTest(unittest.TestCase):
         self.assertEqual(self.model._last_focused_files[0], "Nexus files")
         self.assertEqual(len(self.model._last_focused_files_gsas2), 1)
         self.assertEqual(self.model._last_focused_files_gsas2[0], "GSS files")
+        self.assertEqual(len(self.model._last_focused_files_combined), 1)
+        self.assertEqual(self.model._last_focused_files_combined[0], "Combined files")
         mock_del_ws.assert_called_once_with("van_ws_foc_rb")
 
         # no plotting
@@ -87,16 +89,19 @@ class FocusModelTest(unittest.TestCase):
 
         mock_plot.assert_not_called()
 
+    @patch(setting_path + ".set_contour_option_enabled")
+    @patch(setting_path + ".set_euler_options_enabled")
     @patch(file_path + ".output_settings.get_output_path")
     @patch(enggutils_path + ".focus_run")
     @patch(file_path + ".load_full_instrument_calibration")
-    def test_first_time_focus_uses_correct_default_save_directory(self, mock_load_cal, mock_enggutils_focus_run, mock_get_output_path):
+    def test_first_time_focus_uses_correct_default_save_directory(
+        self, mock_load_cal, mock_enggutils_focus_run, mock_get_output_path, mock_euler_settings_enabled, mock_contour_setting
+    ):
         default_save_location = path.join(path.expanduser("~"), "Engineering_Mantid")
         QCoreApplication.setApplicationName("Engineering_Diffraction_test_calib_model")
-        presenter = settings_presenter.SettingsPresenter(
-            mock.create_autospec(settings_model.SettingsModel, instance=True),
-            mock.create_autospec(settings_view.SettingsView, instance=True),
-        )
+        settings_model, settings_view = MagicMock(), MagicMock()
+        presenter = settings_presenter.SettingsPresenter(settings_model, settings_view)
+        settings_model.validate_settings.return_value = {"save_location": default_save_location}
         presenter.settings = {  # "save_location" is not defined
             "full_calibration": "cal",
             "logs": "some,logs",
@@ -113,7 +118,7 @@ class FocusModelTest(unittest.TestCase):
 
         mock_load_cal.return_value = "full_calibration"
         self.calibration.group = GROUP.BOTH
-        mock_enggutils_focus_run.return_value = ["Nexus files"], ["GSS files"]
+        mock_enggutils_focus_run.return_value = ["Nexus files"], ["GSS files"], ["Combined files"]
 
         self.model.focus_run(
             ["305761"], "fake/van/path", plot_output=False, rb_num=None, calibration=self.calibration
@@ -155,7 +160,7 @@ class FocusModelTest(unittest.TestCase):
         mock_apply_van.return_value = sample_foc_ws  # xunit = dSpacing
         mock_conv_units.return_value = sample_foc_ws  # xunit = TOF
         self.calibration.group = GROUP.BOTH
-        mock_save_out.return_value = ["Nexus files"], ["GSS files"]
+        mock_save_out.return_value = ["Nexus files"], ["GSS files"], ["Combined files"]
 
         # plotting focused runs
         self.model.focus_run(["305761"], "fake/van/path", plot_output=False, rb_num=rb_num, calibration=self.calibration, save_dir="dir")
@@ -197,7 +202,7 @@ class FocusModelTest(unittest.TestCase):
         mock_conv_units.return_value = sample_foc_ws  # xunit = TOF
         self.calibration.group = GROUP.TEXTURE20
         self.calibration.get_foc_ws_suffix.return_value = "Texture20"
-        mock_save_out.return_value = ["Nexus files"], ["GSS files"]
+        mock_save_out.return_value = ["Nexus files"], ["GSS files"], ["Combined files"]
 
         # plotting focused runs
         self.model.focus_run(["305761"], "fake/van/path", plot_output=False, rb_num=rb_num, calibration=self.calibration, save_dir="dir")
@@ -237,7 +242,7 @@ class FocusModelTest(unittest.TestCase):
         mock_conv_units.return_value = sample_foc_ws  # xunit = TOF
         self.calibration.group = GROUP.TEXTURE30
         self.calibration.get_foc_ws_suffix.return_value = "Texture30"
-        mock_save_out.return_value = ["Nexus files"], ["GSS files"]
+        mock_save_out.return_value = ["Nexus files"], ["GSS files"], ["Combined files"]
 
         # plotting focused runs
         self.model.focus_run(["305761"], "fake/van/path", plot_output=False, rb_num=rb_num, calibration=self.calibration, save_dir="dir")
