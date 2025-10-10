@@ -17,6 +17,7 @@ from mantid.api import (
 from mantid.kernel import (
     ConfigService,
     Direction,
+    FloatBoundedValidator,
     StringArrayProperty,
     StringListValidator,
     SpinStateValidator,
@@ -64,6 +65,7 @@ class Parameter:
     name: str = ""
     value: float = float("nan")
     error: float = 0.0
+    initial: float = 0.0
     timestamp: str = ""
 
 
@@ -73,10 +75,31 @@ class WsInfo:
     path: str = None  # path loaded from toml file
 
 
+FIT_PROPERTIES = ["pxd", "lifetime", "pol"]
+FIT_TABLE_COLUMN_NAMES = ["name", "value", "error", "initial", "timestamp"]
+FIT_TABLE_COLUMN_TYPES = ["str", *["float"] * 3, "str"]
+FIT_PROPERTIES_GROUP_NAME = "Fitting Initial Values"
+AUX_WS_BASENAMES_CALIBRATION = ["analyzer_table", "direct", "depolarized", "depolarized_transmission", "empty_cell"]
+AUX_WS_BASENAMES_CORRECTION = ["analyzer_time", "unpolarized_transmission"]
+ALLOWED_NON_GROUPS = ["direct"]
+
 _inst_nt = namedtuple("CompatibleInstruments", ["zoom", "larmor"], defaults=["ZOOM", "LARMOR"])
 _prop_nt = namedtuple(
     "MainProperties",
-    ["scattering", "transmission", "direct", "cell", "user", "path", "reduction", "suffix", "ads"],
+    [
+        "scattering",
+        "transmission",
+        "direct",
+        "cell",
+        "user",
+        "path",
+        "reduction",
+        "suffix",
+        "ads",
+        "sp_assert",
+        "delete_partial",
+        *FIT_PROPERTIES,
+    ],
     defaults=[
         "ScatteringRuns",
         "TransmissionRuns",
@@ -87,12 +110,17 @@ _prop_nt = namedtuple(
         "ReductionType",
         "OutputSuffix",
         "KeepWsOnADS",
+        "AssertSpinState",
+        "DeletePartialWsOnFail",
+        "PxDInitialValue",
+        "LifetimeInitialValue",
+        "HePolInitialValue",
     ],
 )
 _reduction_nt = namedtuple(
     "ReductionTypes", ["calibration", "both", "correction"], defaults=["Calibration", "CalibrationAndCorrection", "Correction"]
 )
-_parameter_nt = namedtuple("FitParameters", ["pxd", "lifetime", "pol"], defaults=["PXD", "Lifetime", "InitialPolarization"])
+_parameter_nt = namedtuple("FitParameters", [*FIT_PROPERTIES], defaults=["PXD", "Lifetime", "InitialPolarization"])
 
 _algs_nt = namedtuple(
     "ReductionAlgorithms",
@@ -176,11 +204,6 @@ EFF_KEYS_USER = dict(
     polarizer_eff=["polarization", "polarizer", "efficiency"],
     empty_cell=["polarization", "analyzer", "empty_cell"],
 )
-
-FIT_TABLE_COLUMN_NAMES = ["name", "value", "error", "timestamp"]
-FIT_TABLE_COLUMN_TYPES = ["str", *["float"] * 2, "str"]
-AUX_WS_BASENAMES_CALIBRATION = ["analyzer_table", "direct", "depolarized", "depolarized_transmission", "empty_cell"]
-AUX_WS_BASENAMES_CORRECTION = ["analyzer_time", "unpolarized_transmission"]
 
 # If we retrieve this property from child algs:
 OUT_WS = "OutputWorkspace"
@@ -328,7 +351,7 @@ def _add_or_replace(ws_name: str, workspace: Union["MatrixWorkspace", WorkspaceG
 
 
 @contextmanager
-def _manage_temps(inst_name: str, initial_temp_names: dict[str, WsInfo]):
+def _manage_temps(inst_name: str, initial_temp_names: dict[str, WsInfo], delete_on_fail: bool = False):
     """
     Context manager to handle temporary workspace deletion and settings of ConfigService
     """
@@ -349,7 +372,8 @@ def _manage_temps(inst_name: str, initial_temp_names: dict[str, WsInfo]):
     try:
         yield temp_names
     except RuntimeError as e:
-        _clean_temporary_ws(additional_names=[v.ads_name for v in temp_names.values()])
+        if delete_on_fail:
+            _clean_temporary_ws(additional_names=[v.ads_name for v in temp_names.values()])
         raise RuntimeError(e)
     finally:
         set_config(current_conf)
@@ -360,6 +384,8 @@ class SANSISISPolarizationCorrections(DataProcessorAlgorithm):
     parameters: dict[str, Parameter] = None
     aux_ws: dict[str, WsInfo] = None
     delete_ads_ws: bool = False
+    delete_partial: bool = True
+    assert_spin: bool = True
     reduction_type: str = None
     suffix: str = None
     progress: Progress = None
@@ -437,6 +463,54 @@ class SANSISISPolarizationCorrections(DataProcessorAlgorithm):
             doc="Whether to keep reduced files on the ADS. Can't be unchecked unless a save path is provided in SavePath.",
         )
 
+        self.declareProperty(
+            name=MAIN_PROPERTIES.sp_assert,
+            defaultValue=True,
+            doc=(
+                "Whether to use AssertSpinStateOrder to determine that the expected spin state order is the same for all transmission "
+                "runs. Set to False if there is no confidence that the spin can be determined accurately "
+                "from the DetermineSpinStateOrder algorithm"
+            ),
+        )
+
+        self.declareProperty(
+            name=MAIN_PROPERTIES.delete_partial,
+            defaultValue=True,
+            doc=(
+                "If the algorithm fails due to poor fitting or some other reason, partial workspaces are automatically deleted"
+                "unless this property is set to False. Useful for diagnostics."
+            ),
+        )
+
+        always_positive = FloatBoundedValidator(lower=0)
+
+        self.declareProperty(
+            name=MAIN_PROPERTIES.pxd,
+            direction=Direction.Input,
+            validator=always_positive,
+            defaultValue=12.6,
+            doc="Initial value of mean path length (pxd) for fitting in DepolarizedAnalyserTransmission algorithm",
+        )
+
+        self.declareProperty(
+            name=MAIN_PROPERTIES.lifetime,
+            direction=Direction.Input,
+            validator=always_positive,
+            defaultValue=54.0,
+            doc="Initial value of lifetime (in hours) for fitting in HeliumAnalyserEfficiency algorithm",
+        )
+
+        self.declareProperty(
+            name=MAIN_PROPERTIES.pol,
+            direction=Direction.Input,
+            validator=always_positive,
+            defaultValue=0.6,
+            doc="Initial value of helium gas polarization for fitting in HeliumAnalyserEfficiency algorithm",
+        )
+
+        for prop_name in [MAIN_PROPERTIES.pxd, MAIN_PROPERTIES.lifetime, MAIN_PROPERTIES.pol]:
+            self.setPropertyGroup(prop_name, FIT_PROPERTIES_GROUP_NAME)
+
         self.setPropertySettings(MAIN_PROPERTIES.ads, EnabledWhenProperty(MAIN_PROPERTIES.path, PropertyCriterion.IsNotDefault))
 
     def validateInputs(self):
@@ -461,7 +535,7 @@ class SANSISISPolarizationCorrections(DataProcessorAlgorithm):
 
     def PyExec(self):
         self._init_reduction_settings()
-        with _manage_temps(self.instrument.name, self.aux_ws) as self.aux_ws:
+        with _manage_temps(self.instrument.name, self.aux_ws, self.delete_partial) as self.aux_ws:
             if self.reduction_type != REDUCTION.correction:
                 self._polarization_calibration()
 
@@ -477,12 +551,18 @@ class SANSISISPolarizationCorrections(DataProcessorAlgorithm):
         self.scattering_runs = self.getProperty(MAIN_PROPERTIES.scattering).value
         self.transmission_runs = self.getProperty(MAIN_PROPERTIES.transmission).value
         self.delete_ads_ws = not self.getProperty(MAIN_PROPERTIES.ads).value
+        self.delete_partial = self.getProperty(MAIN_PROPERTIES.delete_partial).value
+        self.assert_spin = self.getProperty(MAIN_PROPERTIES.sp_assert).value
 
         # We add efficiency auxiliary names here. We'll only delete those in the ADS at the end in case of error.
         self.aux_ws = {
             name: WsInfo(ads_name=_add_suffix(name, self.suffix)) for name in [*EFF_KEYS_USER.keys(), *AUX_WS_BASENAMES_CALIBRATION]
         }
-        self.parameters = {k: Parameter(name=k) for k in FIT[:]}
+
+        self.parameters = {
+            (fit_name := getattr(FIT, k)): Parameter(name=fit_name, initial=self.getProperty(getattr(MAIN_PROPERTIES, k)).value)
+            for k in FIT_PROPERTIES
+        }
         self.instrument = _user_file_reader(self.getPropertyValue(MAIN_PROPERTIES.user), self.aux_ws)
 
         # We report at the beginning of the main steps in calibration and correction and in the bottlenecks, which are
@@ -524,7 +604,7 @@ class SANSISISPolarizationCorrections(DataProcessorAlgorithm):
         Calculates the efficiency of the polarizer, flipper and analyzer elements.
         """
         self._calculate_cell_opacity()
-        transmission_runs_list = self._load_and_process_groups(
+        transmission_runs_list = self._load_and_process_runs(
             self.transmission_runs, "transmission", average_group=False, move_instrument=False, convert_units=True, rebin=True
         )
         self._process_efficiencies(transmission_runs_list)
@@ -541,7 +621,7 @@ class SANSISISPolarizationCorrections(DataProcessorAlgorithm):
             self._load_workspace_from_path([key for key in EFF_KEYS_USER.keys() if key not in ["empty_cell"]])
             self.parameters = _build_parameters_from_table(self.aux_ws["pol_fit_table"].ads_name)
 
-        scattering_runs_list = self._load_and_process_groups(
+        scattering_runs_list = self._load_and_process_runs(
             self.scattering_runs, "scattering", average_group=False, move_instrument=False, convert_units=True, rebin=False
         )
         self._apply_corrections(scattering_runs_list)
@@ -584,7 +664,10 @@ class SANSISISPolarizationCorrections(DataProcessorAlgorithm):
         An error is raised is the workspace is not a group.
         """
         self._load_child_algorithm(ALGS.load, Filename=run, OutputWorkspace=group_name, LoadMonitors=str(int(load_monitors)))
-        if not isinstance(ADS.retrieve(group_name), WorkspaceGroup):
+        if not (
+            any([group_name.startswith(excluded) for excluded in ALLOWED_NON_GROUPS])
+            or isinstance(ADS.retrieve(group_name), WorkspaceGroup)
+        ):
             raise RuntimeError(f"Run {run} is not compatible with the polarization reduction")
 
     def _average_workspaces(self, ws_list: list[str], out_name: str, ungroup: bool = False):
@@ -630,7 +713,7 @@ class SANSISISPolarizationCorrections(DataProcessorAlgorithm):
         # Load depolarized cell and direct runs
         runs = [self.getProperty(prop).value for prop in [MAIN_PROPERTIES.cell, MAIN_PROPERTIES.direct]]
         for run, name in zip(runs, ["depolarized", "direct"]):
-            self._load_and_process_groups(run, name, average_group=True, move_instrument=True, convert_units=True, rebin=True)
+            self._load_and_process_runs(run, name, average_group=True, move_instrument=True, convert_units=True, rebin=True)
 
         depol_norm, direct_norm = self._calculate_transmission(
             self.aux_ws["depolarized"].ads_name, self.aux_ws["depolarized_transmission"].ads_name, extract_normalized_spectra=True
@@ -697,6 +780,8 @@ class SANSISISPolarizationCorrections(DataProcessorAlgorithm):
             PXDError=self.parameters[FIT.pxd].error,
             StartX=self.instrument.wav_min,
             EndX=self.instrument.wav_max,
+            DecayTimeInitial=self.parameters[FIT.lifetime].initial,
+            H3PolarizationInitial=self.parameters[FIT.pol].initial,
             OutputFitParameters=self.aux_ws["analyzer_table"].ads_name,
             OutputWorkspace=self.aux_ws["analyzer_eff"].ads_name,
         )
@@ -743,6 +828,7 @@ class SANSISISPolarizationCorrections(DataProcessorAlgorithm):
             EmptyCellWorkspace=self.aux_ws["empty_cell"].ads_name,
             StartX=self.instrument.wav_min,
             EndX=self.instrument.wav_max,
+            PxDStartingValue=self.parameters[FIT.pxd].initial,
             IgnoreFitQualityError=True,
         )
 
@@ -762,7 +848,11 @@ class SANSISISPolarizationCorrections(DataProcessorAlgorithm):
             else:
                 raise RuntimeError(f"Failed to retrieve a valid spin configuration for run {ws_name} with determined spin {spin}: {msg}")
         else:
-            if not self._load_child_algorithm(
+            if not self.assert_spin:
+                # We check at least that the number of periods in the group is the same as the number of spins
+                if ADS.retrieve(ws_name).getNumberOfEntries() != (sp_len := len(self.instrument.spin_state_str.split(","))):
+                    raise RuntimeError(f"The number of periods in {ws_name} differs from the expected: {sp_len}")
+            elif not self._load_child_algorithm(
                 ALGS.assert_spin, "Result", InputWorkspace=ws_name, ExpectedSpinStates=self.instrument.spin_state_str
             ):
                 raise RuntimeError(
@@ -879,7 +969,7 @@ class SANSISISPolarizationCorrections(DataProcessorAlgorithm):
 
         return ws_norm_name, ws_direct_name if extract_normalized_spectra else None
 
-    def _load_and_process_groups(
+    def _load_and_process_runs(
         self, run_list: Union[str, list[str]], prefix: str, average_group: bool, move_instrument: bool, convert_units: bool, rebin: bool
     ) -> list[str]:
         """
@@ -936,12 +1026,12 @@ class SANSISISPolarizationCorrections(DataProcessorAlgorithm):
         """
         Calculates the average transmission across all periods in a workspace group using a weighted mean.
         """
-        temp_name = ADS.unique_hidden_name()
-        self._load_child_algorithm(ALGS.clone, InputWorkspace=ADS.retrieve(ws_name), OutputWorkspace=temp_name)
-
-        group = ADS.retrieve(temp_name)
-        if not isinstance(group, WorkspaceGroup):
+        if not isinstance(group_in := ADS.retrieve(ws_name), WorkspaceGroup):
             return
+
+        temp_name = TMP_NAME + ADS.unique_hidden_name()
+        self._load_child_algorithm(ALGS.clone, InputWorkspace=group_in, OutputWorkspace=temp_name)
+        group = ADS.retrieve(temp_name)
 
         mean = group.getItem(0)
         for index in range(1, group.getNumberOfEntries()):

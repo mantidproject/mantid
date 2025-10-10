@@ -145,13 +145,21 @@ class SANSISISPolarizationCorrectionsTest(unittest.TestCase):
         self.assertEqual(filtered_names, [*names[0:2], names[4]])
 
     @patch("plugins.algorithms.WorkflowAlgorithms.SANSISISPolarizationCorrections.SANSISISPolarizationCorrections._load_child_algorithm")
-    def test_load_runs_raises_runtime_error_for_non_groups(self, mock_alg_child):
+    def test_load_runs_raises_runtime_error_for_non_groups_if_not_direct_run(self, mock_alg_child):
         self._create_test_workspace(out_name=self._WS_NAME)
         alg = self._setup_algorithm()
 
         self.assertRaisesRegex(
             RuntimeError, "Run run_number is not compatible with the polarization reduction", alg._load_run, "run_number", self._WS_NAME
         )
+        mock_alg_child.assert_called_once()
+
+    @patch("plugins.algorithms.WorkflowAlgorithms.SANSISISPolarizationCorrections.SANSISISPolarizationCorrections._load_child_algorithm")
+    def test_load_runs_accepts_a_non_group_for_direct_runs(self, mock_alg_child):
+        self._create_test_workspace(out_name="direct")
+        alg = self._setup_algorithm()
+
+        assertRaisesNothing(self, alg._load_run, "run_number", "direct")
         mock_alg_child.assert_called_once()
 
     @patch("plugins.algorithms.WorkflowAlgorithms.SANSISISPolarizationCorrections.SANSISISPolarizationCorrections._load_child_algorithm")
@@ -212,7 +220,7 @@ class SANSISISPolarizationCorrectionsTest(unittest.TestCase):
 
     @patch("plugins.algorithms.WorkflowAlgorithms.SANSISISPolarizationCorrections.SANSISISPolarizationCorrections._load_run")
     @patch("plugins.algorithms.WorkflowAlgorithms.SANSISISPolarizationCorrections.SANSISISPolarizationCorrections._prepare_workspace")
-    def test_load_and_process_groups_doesnt_do_anything_if_ws_on_ads(self, mock_prepare, mock_load):
+    def test_load_and_process_runs_doesnt_do_anything_if_ws_on_ads(self, mock_prepare, mock_load):
         alg = self._setup_algorithm()
         alg.aux_ws = dict()
         for key in self._EFF_NAMES:
@@ -220,9 +228,52 @@ class SANSISISPolarizationCorrectionsTest(unittest.TestCase):
             self._create_test_workspace(out_name=test_name)
             alg.aux_ws[key] = WsInfo(test_name, key)
 
-        assertRaisesNothing(self, alg._load_and_process_groups, self._EFF_NAMES, "test", *[True] * 4)
+        assertRaisesNothing(self, alg._load_and_process_runs, self._EFF_NAMES, "test", *[True] * 4)
         mock_load.assert_not_called()
         mock_prepare.assert_not_called()
+
+    @patch("plugins.algorithms.WorkflowAlgorithms.SANSISISPolarizationCorrections.SANSISISPolarizationCorrections._load_child_algorithm")
+    def test_assert_spin_alg_not_called_if_assert_spin_states_property_false(self, mock_load_child_alg):
+        self._create_test_group()
+        alg = self._setup_algorithm()
+        alg.instrument = self.inst
+
+        alg.instrument.spin_state_str = "00,01,10,11"
+        alg.assert_spin = False
+        assertRaisesNothing(self, alg._check_spin_states, self._GROUP_NAME)
+        mock_load_child_alg.assert_not_called()
+
+    @patch("plugins.algorithms.WorkflowAlgorithms.SANSISISPolarizationCorrections.SANSISISPolarizationCorrections._load_child_algorithm")
+    def test_check_spin_state_raises_error_if_not_assert_spin_and_group_size_different_than_spin_states(self, mock_load_child_alg):
+        self._create_test_group()
+        alg = self._setup_algorithm()
+        alg.instrument = self.inst
+
+        alg.instrument.spin_state_str = "00,11"
+        alg.assert_spin = False
+        self.assertRaisesRegex(
+            RuntimeError,
+            f"The number of periods in {self._GROUP_NAME} differs from the expected: 2",
+            alg._check_spin_states,
+            self._GROUP_NAME,
+        )
+        mock_load_child_alg.assert_not_called()
+
+    @patch("plugins.algorithms.WorkflowAlgorithms.SANSISISPolarizationCorrections.SANSISISPolarizationCorrections._load_child_algorithm")
+    def test_check_spin_state_raises_error_for_wrong_spin_assertion(self, mock_load_child_alg):
+        alg = self._setup_algorithm()
+        alg.instrument = self.inst
+        alg.instrument.spin_state_str = "00,11"
+
+        alg.assert_spin = True
+        mock_load_child_alg.return_value = False
+        self.assertRaisesRegex(
+            RuntimeError,
+            f"The spin configuration for workspace {self._GROUP_NAME} differs from the expected: {alg.instrument.spin_state_str}",
+            alg._check_spin_states,
+            self._GROUP_NAME,
+        )
+        mock_load_child_alg.assert_called_once()
 
     @patch("plugins.algorithms.WorkflowAlgorithms.SANSISISPolarizationCorrections.SANSISISPolarizationCorrections.createChildAlgorithm")
     def test_load_child_algorithm_when_output_param_is_not_set(self, mock_create_child_alg):
@@ -293,6 +344,35 @@ class SANSISISPolarizationCorrectionsTest(unittest.TestCase):
         mock_init.assert_called_once()
         mock_calibration.assert_called_once()
         self.assertEqual(0, len(ads.getObjectNames()))
+
+    @patch("plugins.algorithms.WorkflowAlgorithms.SANSISISPolarizationCorrections.SANSISISPolarizationCorrections._init_reduction_settings")
+    @patch(
+        "plugins.algorithms.WorkflowAlgorithms.SANSISISPolarizationCorrections.SANSISISPolarizationCorrections._polarization_calibration"
+    )
+    def test_context_manager_does_not_deletes_partial_ads_names_on_error_if_delete_partial_property_set_to_false(
+        self, mock_calibration, mock_init
+    ):
+        alg = self._setup_algorithm()
+        # add test workspaces to ads
+        prefix = "__polsans_"
+        names = []
+        for i in range(2):
+            names.append(f"{prefix}_{i}")
+            self._create_test_workspace(out_name=names[-1])
+        member_names = self._create_test_group(group_name=self._GROUP_NAME, return_member_names=True)
+        names.extend([self._GROUP_NAME, *member_names])
+        names.sort()
+        alg.instrument = self.inst
+        alg.delete_partial = False
+        alg.aux_ws = {name: WsInfo(ads_name=name) for name in names}
+
+        mock_calibration.side_effect = RuntimeError("test")
+
+        self.assertEqual(names, ads.getObjectNames())
+        alg.execute()
+        mock_init.assert_called_once()
+        mock_calibration.assert_called_once()
+        self.assertEqual(len(names), len(ads.getObjectNames()))
 
     @patch("plugins.algorithms.WorkflowAlgorithms.SANSISISPolarizationCorrections.SANSISISPolarizationCorrections._init_reduction_settings")
     @patch(
