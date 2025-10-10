@@ -14,6 +14,7 @@ from mantid.kernel import logger
 from instrumentview.FullInstrumentViewModel import FullInstrumentViewModel
 from instrumentview.FullInstrumentViewWindow import FullInstrumentViewWindow
 from instrumentview.InstrumentViewADSObserver import InstrumentViewADSObserver
+from instrumentview.Peaks.DetectorPeaks import DetectorPeaks
 
 
 class FullInstrumentViewPresenter:
@@ -130,6 +131,13 @@ class FullInstrumentViewPresenter:
             self._apply_projection_state(False, self._model.detector_positions)
             return
 
+        projected_points = self._adjust_points_for_selected_projection(self._model.detector_positions, projection_type)
+        self._apply_projection_state(True, projected_points)
+
+    def _adjust_points_for_selected_projection(self, points: np.ndarray, projection_type: str) -> np.ndarray:
+        if projection_type.startswith("3D"):
+            return points
+
         is_spherical = True
         if projection_type.startswith("Spherical"):
             is_spherical = True
@@ -147,8 +155,7 @@ class FullInstrumentViewPresenter:
         else:
             raise ValueError(f"Unknown projection type {projection_type}")
 
-        self._model.calculate_projection(is_spherical, axis)
-        self._apply_projection_state(True, self._model.detector_projection_positions)
+        return self._model.calculate_projection(is_spherical, axis, points)
 
     def _apply_projection_state(self, is_projection: bool, positions: np.ndarray) -> None:
         self._is_projection_selected = is_projection
@@ -205,6 +212,7 @@ class FullInstrumentViewPresenter:
         self._model.extract_spectra_for_line_plot(unit, self._view.sum_spectra_selected())
         self._view.show_plot_for_detectors(self._model.line_plot_workspace)
         self._view.set_selected_detector_info(self._model.picked_detectors_info_text())
+        self.refresh_lineplot_peaks()
 
     def on_clear_selected_detectors_clicked(self) -> None:
         self.update_picked_detectors([])
@@ -223,23 +231,33 @@ class FullInstrumentViewPresenter:
         rgba[:, 3] = alpha
         return rgba
 
+    def _reload_peaks_workspaces(self):
+        self._view.refresh_peaks_ws_list()
+        self.on_peaks_workspace_selected()
+
     def delete_workspace_callback(self, ws_name):
-        if self._model._workspace.name() != ws_name:
-            return
-        self._view.close()
-        logger.warning(f"Workspace {ws_name} deleted, closed Experimental Instrument View.")
+        if ws_name in self.peaks_workspaces_in_ads():
+            self._reload_peaks_workspaces()
+            logger.warning(f"Workspace {ws_name} deleted, reloaded peaks workspaces in Experimental Instrument View.")
+        elif self._model._workspace.name() == ws_name:
+            self._view.close()
+            logger.warning(f"Workspace {ws_name} deleted, closed Experimental Instrument View.")
 
     def rename_workspace_callback(self, ws_old_name, ws_new_name):
-        if self._model._workspace.name() != ws_old_name:
-            return
-        self._model._workspace = mtd[ws_new_name]
-        logger.warning("Workspace renamed, updated Experimental Instrument View.")
+        if ws_old_name in self.peaks_workspaces_in_ads():
+            self._reload_peaks_workspaces()
+            logger.warning(f"Workspace {ws_old_name} renamed to {ws_new_name}, reloaded peaks workspaces in Experimental Instrument View.")
+        elif self._model._workspace.name() == ws_old_name:
+            self._model._workspace = mtd[ws_new_name]
+            logger.warning(f"Workspace {ws_old_name} renamed to {ws_new_name}, updated Experimental Instrument View.")
 
     def clear_workspace_callback(self):
         self._view.close()
 
     def replace_workspace_callback(self, ws_name, ws):
-        if ws_name == self._model.workspace.name():
+        if ws_name in self.peaks_workspaces_in_ads():
+            self._reload_peaks_workspaces()
+        elif ws_name == self._model.workspace.name():
             self._view.close()
 
     def handle_close(self):
@@ -251,3 +269,40 @@ class FullInstrumentViewPresenter:
 
     def on_unit_option_selected(self, value) -> None:
         self._update_line_plot_ws_and_draw(self._UNIT_OPTIONS[value])
+
+    def peaks_workspaces_in_ads(self) -> list[str]:
+        return [ws.name() for ws in self._model.peaks_workspaces_in_ads()]
+
+    def on_peaks_workspace_selected(self) -> None:
+        self._model.set_peaks_workspaces(self._view.selected_peaks_workspaces())
+        self._view.clear_overlay_meshes()
+        peaks = self._model.peak_overlay_points()
+        self.refresh_lineplot_peaks(peaks)
+        if len(peaks) == 0:
+            return
+        projected_points = self._adjust_points_for_selected_projection(
+            np.asarray([p.location for p in peaks]), self._view.current_selected_projection()
+        )
+        labels = [p.label for p in peaks]
+        # Plot the peaks and their labels on the projection
+        self._view.plot_overlay_mesh(projected_points, labels, "blue")
+
+    def refresh_lineplot_peaks(self, peaks: list[DetectorPeaks] = None) -> None:
+        # Plot vertical lines on the lineplot if the peak detector is selected
+        self._view.clear_lineplot_overlays()
+        if peaks is None:
+            peaks = self._model.peak_overlay_points()
+        if self._view.current_selected_unit() == self._TIME_OF_FLIGHT or self._view.current_selected_unit() == self._D_SPACING:
+            x_values = []
+            labels = []
+            for peak in peaks:
+                if peak.detector_id in self._model.picked_detector_ids:
+                    x_values += (
+                        [p.tof for p in peak.peaks]
+                        if self._view.current_selected_unit() == self._TIME_OF_FLIGHT
+                        else [p.dspacing for p in peak.peaks]
+                    )
+                    labels += [p.label for p in peak.peaks]
+            if len(x_values) > 0:
+                self._view.plot_lineplot_overlay(x_values, labels)
+        self._view.redraw_lineplot()
