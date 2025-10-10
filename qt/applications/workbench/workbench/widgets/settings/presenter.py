@@ -127,7 +127,7 @@ class SettingsPresenter(object):
         self.current.show()
 
     def action_open_help_window(self):
-        InterfaceManager().showHelpPage("qthelp://org.mantidproject/doc/workbench/settings.html")
+        InterfaceManager().showHelpPage("workbench/settings.html")
 
     def view_closing(self):
         """
