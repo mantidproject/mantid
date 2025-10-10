@@ -31,7 +31,7 @@ public:
 
   void test_name() {
     HeliumAnalyserEfficiencyTime alg;
-    TS_ASSERT_EQUALS(alg.name(), "HeliumAnalyserEfficiencyTime");
+    TS_ASSERT_EQUALS(alg.name(), HE_EFF_TIME_ALG);
   }
 
   void test_init() {
@@ -42,7 +42,7 @@ public:
   void test_algorithm_throws_for_non_wavelength_workspace() {
     m_parameters.xUnit = "TOF";
     const auto ws = generateFunctionDefinedWorkspace(m_parameters);
-    const auto heAlgorithm = AlgorithmManager::Instance().create("HeliumAnalyserEfficiencyTime");
+    const auto heAlgorithm = AlgorithmManager::Instance().create(HE_EFF_TIME_ALG);
     heAlgorithm->initialize();
 
     TS_ASSERT_THROWS_EQUALS(heAlgorithm->setProperty("InputWorkspace", ws), std::invalid_argument const &e,
@@ -57,7 +57,7 @@ public:
     run.removeProperty("end_time");
     run.removeProperty("run_end");
 
-    const auto heAlgorithm = AlgorithmManager::Instance().create("HeliumAnalyserEfficiencyTime");
+    const auto heAlgorithm = AlgorithmManager::Instance().create(HE_EFF_TIME_ALG);
     heAlgorithm->initialize();
 
     TS_ASSERT_THROWS_EQUALS(heAlgorithm->setProperty("InputWorkspace", ws), std::invalid_argument const &e,
@@ -163,7 +163,7 @@ private:
   template <typename T = MatrixWorkspace>
   IAlgorithm_sptr prepareHeTimeAlgorithm(const std::shared_ptr<T> &inputWorkspace, const std::string &refTimeStamp = "",
                                          const std::shared_ptr<T> &referenceWorkspace = nullptr) {
-    const auto heAlgorithm = AlgorithmManager::Instance().create("HeliumAnalyserEfficiencyTime");
+    const auto heAlgorithm = AlgorithmManager::Instance().create(HE_EFF_TIME_ALG);
     heAlgorithm->initialize();
     heAlgorithm->setProperty("InputWorkspace", inputWorkspace);
     if (referenceWorkspace) {

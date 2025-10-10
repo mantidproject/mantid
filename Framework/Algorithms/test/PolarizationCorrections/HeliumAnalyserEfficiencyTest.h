@@ -44,7 +44,7 @@ public:
 
   void test_name() {
     HeliumAnalyserEfficiency alg;
-    TS_ASSERT_EQUALS(alg.name(), "HeliumAnalyserEfficiency");
+    TS_ASSERT_EQUALS(alg.name(), HE_EFF_ALG);
   }
 
   void test_init() {
@@ -71,7 +71,7 @@ public:
   }
 
   void test_invalid_spin_throws() {
-    auto heliumAnalyserEfficiency = AlgorithmManager::Instance().create("HeliumAnalyserEfficiency");
+    auto heliumAnalyserEfficiency = AlgorithmManager::Instance().create(HE_EFF_ALG);
     TS_ASSERT_THROWS(heliumAnalyserEfficiency->setProperty("SpinStates", "bad"), std::invalid_argument &);
     TS_ASSERT_THROWS(heliumAnalyserEfficiency->setProperty("SpinStates", "10,01"), std::invalid_argument &);
     TS_ASSERT_THROWS(heliumAnalyserEfficiency->setProperty("SpinStates", "00,00,11,11"), std::invalid_argument &);
@@ -140,7 +140,7 @@ private:
                                         const std::string &spinState = SPIN_STATE,
                                         const std::string &outputFitParameters = "",
                                         const std::string &outputFitCurves = "") {
-    const auto heAlgorithm = AlgorithmManager::Instance().create("HeliumAnalyserEfficiency");
+    const auto heAlgorithm = AlgorithmManager::Instance().create(HE_EFF_ALG);
     heAlgorithm->initialize();
     heAlgorithm->setProperty("InputWorkspaces", inputWorkspaces);
     heAlgorithm->setProperty("SpinStates", spinState);

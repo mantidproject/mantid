@@ -15,12 +15,16 @@ using namespace Mantid;
 using namespace Mantid::API;
 
 namespace PolCorrTestUtils {
+static const std::string HE_EFF_TIME_ALG = "HeliumAnalyserEfficiencyTime";
+static const std::string HE_EFF_ALG = "HeliumAnalyserEfficiency";
+
 static const std::string REFERENCE_NAME = "reference";
 static const std::string INPUT_NAME = "input";
 static const std::string GROUP_NAME = "group";
 static const std::string OUTPUT_NAME = "groupOut";
 static const std::string OUTPUT_TABLE_NAME = "tableOut";
 static const std::string OUTPUT_CURVES_NAME = "curvesOut";
+static const std::string ANALYSER_EFFICIENCY_WS_NAME = "effAnalyser";
 static const std::string X_UNIT = "Wavelength";
 static const std::string REF_TIMESTAMP = "2025-07-01T08:00:00";
 

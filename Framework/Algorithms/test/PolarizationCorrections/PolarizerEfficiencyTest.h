@@ -23,10 +23,6 @@ using namespace Mantid::Algorithms;
 using namespace Mantid::API;
 using namespace PolCorrTestUtils;
 
-namespace {
-const std::string ANALYSER_EFFICIENCY_WS_NAME = "effAnalyser";
-}
-
 class PolarizerEfficiencyTest : public CxxTest::TestSuite {
 public:
   void setUp() override {
