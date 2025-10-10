@@ -241,7 +241,7 @@ class TextureCorrectionPresenter:
         self.instrument = instrument
 
     def update_custom_shape_finder_vis(self):
-        self.view.finder_gauge_vol.setVisible(self.view.get_shape_method() == "Custom Shape")
+        self.view.set_finder_gauge_vol_visible(self.view.get_shape_method() == "Custom Shape")
 
     def on_create_ref_sample_clicked(self):
         self.model.create_reference_ws(self.rb_num, self.instrument)

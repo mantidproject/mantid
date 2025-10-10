@@ -107,10 +107,10 @@ class TestTextureCorrectionPresenter(unittest.TestCase):
     def test_update_custom_shape_finder_vis(self):
         self.view.get_shape_method.return_value = "Custom Shape"
         self.presenter.update_custom_shape_finder_vis()
-        self.view.finder_gauge_vol.setVisible.assert_called_with(True)
+        self.view.set_finder_gauge_vol_visible.assert_called_with(True)
         self.view.get_shape_method.return_value = "4mmCube"
         self.presenter.update_custom_shape_finder_vis()
-        self.view.finder_gauge_vol.setVisible.assert_called_with(False)
+        self.view.set_finder_gauge_vol_visible.assert_called_with(False)
 
     def test_load_all_orientations_calls_model_and_redraws(self):
         self.view.get_selected_workspaces.return_value = ["ws1", "ws2"]

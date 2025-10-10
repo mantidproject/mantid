@@ -341,6 +341,9 @@ class TextureCorrectionView(QtWidgets.QWidget, Ui_texture):
     def set_atten_tab_visibility(self, vis):
         self.widget_attenuationTableContainer.setVisible(vis)
 
+    def set_finder_gauge_vol_visible(self, vis):
+        self.finder_gauge_vol.setVisible(vis)
+
     def set_on_check_inc_abs_corr_state_changed(self, slot):
         self.check_absorption.stateChanged.connect(slot)
 
