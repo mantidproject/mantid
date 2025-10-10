@@ -10,14 +10,13 @@ General
 
 New features
 ############
-- Extended PyChop calculations by adding a chopper for SEQUOIA spectrometer.
-- Added a new instrument geometry file for the CNCS spectrometer
+- Extended PyChop calculations by adding a chopper for the SEQUOIA spectrometer.
+- Added a new instrument geometry file for the CNCS spectrometer.
 
 Bugfixes
 ############
-- Previously, Mantid could crash if the material set on a sample already existed rather than being created from scratch, improvements have now been made in an attempt to rectify the issues.
-- Minor bug fix to increase the speed of masking in DGSPlanner
-- DGSPlanner will now warn if the crystallographic convention is used
+- Minor bug fix to increase the speed of masking in :ref:`DGSPlanner <dgsplanner-ref>`.
+- :ref:`DGSPlanner <dgsplanner-ref>` will now warn if the crystallographic convention is used.
 
 
 CrystalField
