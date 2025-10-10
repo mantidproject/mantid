@@ -10,6 +10,7 @@ from unittest.mock import call, DEFAULT, Mock, patch, MagicMock
 
 from mantidqt.widgets.regionselector.presenter import RegionSelector
 from mantidqt.widgets.sliceviewer.models.workspaceinfo import WS_TYPE
+from mantid.api import MatrixWorkspace
 
 
 class RegionSelectorTest(unittest.TestCase):
@@ -24,10 +25,10 @@ class RegionSelectorTest(unittest.TestCase):
         self._ws_info_patcher.stop()
 
     def test_matrix_workspaces_allowed(self):
-        self.assertIsNotNone(RegionSelector(Mock(), view=Mock()))
+        self.assertIsNotNone(RegionSelector(ws=Mock(spec=MatrixWorkspace), view=Mock()))
 
     def test_show_all_data_not_called_on_creation(self):
-        region_selector = RegionSelector(ws=Mock(), view=Mock())
+        region_selector = RegionSelector(ws=Mock(spec=MatrixWorkspace), view=Mock())
         region_selector.show_all_data_clicked = Mock()
 
         region_selector.show_all_data_clicked.assert_not_called()
@@ -49,7 +50,7 @@ class RegionSelectorTest(unittest.TestCase):
     def test_update_workspace_updates_model(self):
         region_selector = RegionSelector(view=Mock())
         region_selector.show_all_data_clicked = Mock()
-        mock_ws = Mock()
+        mock_ws = Mock(spec=MatrixWorkspace)
 
         region_selector.update_workspace(mock_ws)
 
@@ -57,7 +58,7 @@ class RegionSelectorTest(unittest.TestCase):
 
     def test_update_workspace_with_invalid_workspaces_fails(self):
         invalid_types = [WS_TYPE.MDH, WS_TYPE.MDE, None]
-        mock_ws = Mock()
+        mock_ws = Mock(spec=MatrixWorkspace)
         region_selector = RegionSelector(view=Mock())
 
         for ws_type in invalid_types:
@@ -69,7 +70,7 @@ class RegionSelectorTest(unittest.TestCase):
         mock_view = Mock()
         region_selector = RegionSelector(view=mock_view)
         region_selector.show_all_data_clicked = Mock()
-        mock_ws = Mock()
+        mock_ws = Mock(spec=MatrixWorkspace)
 
         region_selector.update_workspace(mock_ws)
 
@@ -77,7 +78,7 @@ class RegionSelectorTest(unittest.TestCase):
         region_selector.show_all_data_clicked.assert_called_once()
 
     def test_add_rectangular_region_creates_selector(self):
-        region_selector = RegionSelector(ws=Mock(), view=self.mock_view)
+        region_selector = RegionSelector(ws=Mock(spec=MatrixWorkspace), view=self.mock_view)
 
         region_selector.add_rectangular_region("test", "black", "/")
 
@@ -86,7 +87,7 @@ class RegionSelectorTest(unittest.TestCase):
         self.assertEqual("test", region_selector._selectors[0].region_type())
 
     def test_add_second_rectangular_region_deactivates_first_selector(self):
-        region_selector = RegionSelector(ws=Mock(), view=self.mock_view)
+        region_selector = RegionSelector(ws=Mock(spec=MatrixWorkspace), view=self.mock_view)
 
         region_selector.add_rectangular_region("test", "black", "/")
         region_selector._drawing_region = False
@@ -100,7 +101,7 @@ class RegionSelectorTest(unittest.TestCase):
     def test_clear_workspace_will_clear_all_the_selectors_and_model_workspace(self):
         region_selector = RegionSelector(view=self.mock_view)
         region_selector.show_all_data_clicked = Mock()
-        mock_ws = Mock()
+        mock_ws = Mock(spec=MatrixWorkspace)
 
         region_selector.update_workspace(mock_ws)
         region_selector.add_rectangular_region("test", "black", "/")
@@ -176,7 +177,7 @@ class RegionSelectorTest(unittest.TestCase):
         selector_two.set_active.assert_called_once_with(False)
 
     def test_delete_key_pressed_will_do_nothing_if_no_selectors_exist(self):
-        region_selector = RegionSelector(ws=Mock(), view=Mock())
+        region_selector = RegionSelector(ws=Mock(spec=MatrixWorkspace), view=Mock())
 
         event = Mock()
         event.key = "delete"
@@ -228,7 +229,7 @@ class RegionSelectorTest(unittest.TestCase):
         mock_observer.notifyRegionChanged.assert_called_once()
 
     def test_mouse_moved_will_not_set_override_cursor_if_no_selectors_exist(self):
-        region_selector = RegionSelector(ws=Mock(), view=Mock())
+        region_selector = RegionSelector(ws=Mock(spec=MatrixWorkspace), view=Mock())
         region_selector.view.set_override_cursor = Mock()
 
         event = Mock()
@@ -275,7 +276,7 @@ class RegionSelectorTest(unittest.TestCase):
         region_selector.view.set_override_cursor.assert_called_once_with(True)
 
     def test_on_rectangle_selected_notifies_observer(self):
-        region_selector = RegionSelector(ws=Mock(), view=self.mock_view)
+        region_selector = RegionSelector(ws=Mock(spec=MatrixWorkspace), view=self.mock_view)
         mock_observer = Mock()
         region_selector.subscribe(mock_observer)
 
@@ -285,7 +286,7 @@ class RegionSelectorTest(unittest.TestCase):
         mock_observer.notifyRegionChanged.assert_called_once()
 
     def test_cancel_drawing_region_will_remove_last_selector(self):
-        region_selector = RegionSelector(ws=Mock(), view=self.mock_view)
+        region_selector = RegionSelector(ws=Mock(spec=MatrixWorkspace), view=self.mock_view)
         region_selector.add_rectangular_region("test", "black", "/")
         self.assertEqual(1, len(region_selector._selectors))
         region_selector.cancel_drawing_region()
@@ -293,7 +294,7 @@ class RegionSelectorTest(unittest.TestCase):
 
     def test_when_multiple_region_adds_are_requested_only_one_region_is_added(self):
         # Given
-        region_selector = RegionSelector(ws=Mock(), view=self.mock_view)
+        region_selector = RegionSelector(ws=Mock(spec=MatrixWorkspace), view=self.mock_view)
         region_selector.add_rectangular_region("test", "black", "/")
         self.assertEqual(1, len(region_selector._selectors))
 
@@ -305,11 +306,11 @@ class RegionSelectorTest(unittest.TestCase):
         self.assertEqual(region_selector._selectors[0]._region_type, "test2")
 
     def test_cancel_drawing_region_with_no_selectors_does_not_crash(self):
-        region_selector = RegionSelector(ws=Mock(), view=Mock())
+        region_selector = RegionSelector(ws=Mock(spec=MatrixWorkspace), view=Mock())
         region_selector.cancel_drawing_region()
 
     def test_display_rectangular_region_creates_selector(self):
-        region_selector = RegionSelector(ws=Mock(), view=self._mock_view_with_axes_limits((2000, 10000), (0, 500)))
+        region_selector = RegionSelector(ws=Mock(spec=MatrixWorkspace), view=self._mock_view_with_axes_limits((2000, 10000), (0, 500)))
         # The expected extents should be within the axes x and y limits
         expected_extents = (4000, 6000, 100, 300)
         region_type = "test"
@@ -321,7 +322,7 @@ class RegionSelectorTest(unittest.TestCase):
 
     def test_display_rectangular_region_y1_out_of_bounds_does_not_add_selector(self):
         y_limits = (200, 500)
-        region_selector = RegionSelector(ws=Mock(), view=self._mock_view_with_axes_limits((2000, 10000), y_limits))
+        region_selector = RegionSelector(ws=Mock(spec=MatrixWorkspace), view=self._mock_view_with_axes_limits((2000, 10000), y_limits))
 
         region_selector.display_rectangular_region("test", "black", "/", y_limits[0] - 50, y_limits[1])
 
@@ -329,14 +330,14 @@ class RegionSelectorTest(unittest.TestCase):
 
     def test_display_rectangular_region_y2_out_of_bounds_does_not_add_selector(self):
         y_limits = (200, 500)
-        region_selector = RegionSelector(ws=Mock(), view=self._mock_view_with_axes_limits((2000, 10000), y_limits))
+        region_selector = RegionSelector(ws=Mock(spec=MatrixWorkspace), view=self._mock_view_with_axes_limits((2000, 10000), y_limits))
 
         region_selector.display_rectangular_region("test", "black", "/", y_limits[0], y_limits[1] + 50)
 
         self.assertEqual(0, len(region_selector._selectors))
 
     def test_display_rectangular_region_does_not_add_duplicate_selector(self):
-        region_selector = RegionSelector(ws=Mock(), view=self._mock_view_with_axes_limits((2000, 10000), (0, 500)))
+        region_selector = RegionSelector(ws=Mock(spec=MatrixWorkspace), view=self._mock_view_with_axes_limits((2000, 10000), (0, 500)))
         # The expected extents should be within the axes x and y limits
         expected_extents = (4000, 6000, 100, 300)
         region_type = "test"
@@ -351,7 +352,7 @@ class RegionSelectorTest(unittest.TestCase):
         self._check_rectangular_region(region_selector._selectors[0], region_type, expected_extents)
 
     def test_display_rectangular_region_adds_second_different_selector(self):
-        region_selector = RegionSelector(ws=Mock(), view=self._mock_view_with_axes_limits((2000, 10000), (0, 500)))
+        region_selector = RegionSelector(ws=Mock(spec=MatrixWorkspace), view=self._mock_view_with_axes_limits((2000, 10000), (0, 500)))
         # The expected extents should be within the axes x and y limits
         expected_x_values = (4000, 6000)
         first_y_values = (100, 200)
@@ -376,7 +377,7 @@ class RegionSelectorTest(unittest.TestCase):
         selector_one.extents = [1, 2, 3, 4]
         selector_two.extents = [5, 6, 7, 8]
 
-        region_selector = RegionSelector(ws=Mock(), view=Mock())
+        region_selector = RegionSelector(ws=Mock(spec=MatrixWorkspace), view=Mock())
         region_selector._selectors.append(selector_one)
         region_selector._selectors.append(selector_two)
 

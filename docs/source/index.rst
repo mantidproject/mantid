@@ -37,7 +37,7 @@ Mantid can be used though several Graphical User Interfaces (GUI) and programmin
 
 * :ref:`MantidWorkbench <workbench>`, A modern general-purpose interface supporting a wide range of techniques and visualisation approaches.
 * Autoreduction services at specific facilities, including ISIS and the `SNS <https://monitor.sns.gov>`_.
-* API's for :ref:`Python <pythonapi>` and `C++ <http://doxygen.mantidproject.org/>`_.
+* APIs for :ref:`Python <pythonapi>` and `C++ <http://doxygen.mantidproject.org/>`_.
 
 Documentation
 =============
@@ -62,7 +62,7 @@ This is the documentation for Mantid |release|.
   * :ref:`interfaces contents`, descriptions of the bespoke technique interfaces available.
   * :ref:`fitting contents`, details of all the supported fitting functions and minimization approaches.
   * :ref:`techniques contents`, with further information relevant to some of the specific scientific techniques.
-  * API's for :ref:`Python <pythonapi>` and `C++ <http://doxygen.mantidproject.org/>`_.
+  * APIs for :ref:`Python <pythonapi>` and `C++ <http://doxygen.mantidproject.org/>`_.
   * :ref:`release_notes`, a catalog of all of the release notes since v3.5.2.
   * :ref:`deprecation_policy`, our current policy for deprecating algorithms, interfaces and other parts of Mantid.
 

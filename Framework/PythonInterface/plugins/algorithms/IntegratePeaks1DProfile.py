@@ -679,10 +679,12 @@ class LineProfileResult:
 
     def _init_foc_data(self, fit_result, fit_mask):
         ndoms = fit_result["Function"].nDomains()
-        ydat = np.array([get_eval_ws(fit_result["OutputWorkspace"], idom).readY(0) for idom in range(ndoms) if fit_mask[idom]])
-        edat_sq = np.array([get_eval_ws(fit_result["OutputWorkspace"], idom).readE(0) for idom in range(ndoms) if fit_mask[idom]]) ** 2
-        yfit = np.array([get_eval_ws(fit_result["OutputWorkspace"], idom).readY(1) for idom in range(ndoms) if fit_mask[idom]])
-        self.tofs = get_eval_ws(fit_result["OutputWorkspace"], 0).readX(0)
+        ydat = np.array([get_eval_ws(fit_result["OutputWorkspace"], idom, ndoms).readY(0) for idom in range(ndoms) if fit_mask[idom]])
+        edat_sq = (
+            np.array([get_eval_ws(fit_result["OutputWorkspace"], idom, ndoms).readE(0) for idom in range(ndoms) if fit_mask[idom]]) ** 2
+        )
+        yfit = np.array([get_eval_ws(fit_result["OutputWorkspace"], idom, ndoms).readY(1) for idom in range(ndoms) if fit_mask[idom]])
+        self.tofs = get_eval_ws(fit_result["OutputWorkspace"], 0, ndoms).readX(0)
         self.tofs = 0.5 * (self.tofs[1:] + self.tofs[:-1])
         self.yfoc = ydat.sum(axis=0)
         self.efoc = np.sqrt(edat_sq.sum(axis=0))
@@ -750,7 +752,8 @@ def calc_sigma_from_summation(xdat, edat_sq, ypeak, cutoff=0.025):
 
 def calc_intens_and_sigma_arrays(fit_result, error_strategy):
     function = fit_result["Function"]
-    intens = np.zeros(function.nDomains())
+    ndoms = function.nDomains()
+    intens = np.zeros(ndoms)
     sigma = np.zeros(intens.shape)
     intens_over_sig = np.zeros(intens.shape)
     peak_func = FunctionFactory.Instance().createPeakFunction(function[0][0].name())
@@ -762,15 +765,18 @@ def calc_intens_and_sigma_arrays(fit_result, error_strategy):
             [peak_func.setError(iparam, comp_func.getError(iparam)) for iparam in range(peak_func.nParams())]
             sigma[idom] = peak_func.intensityError()
         else:
-            ws_fit = get_eval_ws(fit_result["OutputWorkspace"], idom)
+            ws_fit = get_eval_ws(fit_result["OutputWorkspace"], idom, ndoms)
             sigma[idom], peak_limits[idom] = calc_sigma_from_summation(ws_fit.readX(0), ws_fit.readE(0) ** 2, ws_fit.readY(3))
     ivalid = ~np.isclose(sigma, 0)
     intens_over_sig[ivalid] = intens[ivalid] / sigma[ivalid]
     return intens, sigma, intens_over_sig, peak_limits
 
 
-def get_eval_ws(out_ws_name, idom):
-    return ADS.retrieve(f"{out_ws_name[:-1]}_{idom}")
+def get_eval_ws(out_ws_name, idom, ndoms):
+    if ndoms > 1:
+        return ADS.retrieve(f"{out_ws_name[:-1]}_{idom}")
+    else:
+        return ADS.retrieve(out_ws_name)
 
 
 # register algorithm with mantid

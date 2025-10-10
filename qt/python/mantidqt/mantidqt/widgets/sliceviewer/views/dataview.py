@@ -20,6 +20,7 @@ from qtpy.QtWidgets import (
     QToolButton,
     QSizePolicy,
     QDoubleSpinBox,
+    QMessageBox,
 )
 from matplotlib.figure import Figure
 from mpl_toolkits.axisartist import Subplot as CurveLinearSubPlot, GridHelperCurveLinear
@@ -40,6 +41,10 @@ from workbench.plotting.mantidfigurecanvas import MantidFigureCanvas
 DBLMAX = sys.float_info.max
 SCALENORM = "SliceViewer/scale_norm"
 POWERSCALE = "SliceViewer/scale_norm_power"
+
+MASK_SHAPE_OPTIONS = [ToolItemText.RECT_MASKING, ToolItemText.ELLI_MASKING, ToolItemText.POLY_MASKING]
+MASK_PROCESS_OPTIONS = [ToolItemText.APPLY_MASKING, ToolItemText.EXPORT_MASKING]
+MASK_OPTIONS = MASK_SHAPE_OPTIONS + MASK_PROCESS_OPTIONS
 
 
 class SliceViewerCanvas(ScrollZoomMixin, MantidFigureCanvas):
@@ -66,6 +71,8 @@ class SliceViewerDataView(QWidget):
         self._image_info_tracker = None
         self._region_selection_on = False
         self._orig_lims = None
+
+        self._masking = None
 
         self.colorbar_layout = QVBoxLayout()
         self.colorbar_layout.setContentsMargins(0, 0, 0, 0)
@@ -145,6 +152,12 @@ class SliceViewerDataView(QWidget):
         self.mpl_toolbar.nonOrthogonalClicked.connect(self.on_non_orthogonal_axes_toggle)
         self.mpl_toolbar.zoomPanClicked.connect(self.presenter.zoom_pan_clicked)
         self.mpl_toolbar.zoomPanFinished.connect(self.on_data_limits_changed)
+        self.mpl_toolbar.maskingClicked.connect(self.on_masking_clicked)
+        self.mpl_toolbar.rectMaskingClicked.connect(self.on_rect_masking_clicked)
+        self.mpl_toolbar.elliMaskingClicked.connect(self.on_elli_masking_clicked)
+        self.mpl_toolbar.polyMaskingClicked.connect(self.on_poly_masking_clicked)
+        self.mpl_toolbar.exportMaskingClicked.connect(self.on_export_masking_clicked)
+        self.mpl_toolbar.applyMaskingClicked.connect(self.on_apply_masking_clicked)
         self.toolbar_layout.addWidget(self.mpl_toolbar)
 
         # Status bar
@@ -158,6 +171,13 @@ class SliceViewerDataView(QWidget):
 
         # min/max extents
         self.extents = self.create_extents_layout() if add_extents else None
+
+        # Masking MessageBox
+        self._apply_masking_msgBox = QMessageBox()
+        self._apply_masking_msgBox.setWindowTitle("Apply Mask to Workspace?")
+        self._apply_masking_msgBox.setText("This action will mutate the underlying workspace. This cannot be undone.")
+        self._apply_masking_msgBox.setStandardButtons(QMessageBox.Apply | QMessageBox.Cancel)
+        self._apply_masking_msgBox.setDefaultButton(QMessageBox.Cancel)
 
         # layout
         layout = QGridLayout(self)
@@ -192,6 +212,14 @@ class SliceViewerDataView(QWidget):
     @property
     def line_plotter(self):
         return self._line_plots
+
+    @property
+    def masking(self):
+        return self._masking
+
+    @masking.setter
+    def masking(self, masking):
+        self._masking = masking
 
     @property
     def nonorthogonal_mode(self):
@@ -482,18 +510,54 @@ class SliceViewerDataView(QWidget):
         """
         self.presenter.data_limits_changed()
 
+    def on_masking_clicked(self, state):
+        """
+        React to masking clicked
+        """
+        self.presenter.masking(state)
+
+    def on_rect_masking_clicked(self, state):
+        """
+        React to rectangle masking selected
+        """
+        self.presenter.rect_masking_clicked(state)
+
+    def on_elli_masking_clicked(self, state):
+        """
+        React to elliptical masking selected
+        """
+        self.presenter.elli_masking_clicked(state)
+
+    def on_poly_masking_clicked(self, state):
+        """
+        React to polygon masking selected
+        """
+        self.presenter.poly_masking_clicked(state)
+
+    def on_export_masking_clicked(self):
+        """
+        React to export masking selected
+        """
+        self.presenter.export_masking_clicked()
+
+    def on_apply_masking_clicked(self):
+        """
+        React to apply masking selected
+        """
+        self.presenter.apply_masking_clicked()
+
     def deactivate_and_disable_tool(self, tool_text):
         """Deactivate a tool as if the control had been pressed and disable the functionality"""
         self.deactivate_tool(tool_text)
         self.disable_tool_button(tool_text)
 
-    def activate_tool(self, tool_text):
+    def activate_tool(self, tool_text, trigger=True):
         """Activate a given tool as if the control had been pressed"""
-        self.mpl_toolbar.set_action_checked(tool_text, True)
+        self.mpl_toolbar.set_action_checked(tool_text, True, trigger)
 
-    def deactivate_tool(self, tool_text):
+    def deactivate_tool(self, tool_text, trigger=True):
         """Deactivate a given tool as if the tool button had been pressed"""
-        self.mpl_toolbar.set_action_checked(tool_text, False)
+        self.mpl_toolbar.set_action_checked(tool_text, False, trigger)
 
     def enable_tool_button(self, tool_text):
         """Set a given tool button enabled so it can be interacted with"""
@@ -722,3 +786,22 @@ class SliceViewerDataView(QWidget):
     def on_resize(self):
         if not self.line_plots_active and self.ax:
             self.ax.figure.tight_layout()  # tight_layout doesn't work with LinePlots enabled atm
+
+    def toggle_masking_options(self, active):
+        fn = self.enable_tool_button if active else self.disable_tool_button
+        for opt in MASK_OPTIONS:
+            fn(opt)
+
+    def check_masking_shape_toolbar_icons(self, shape):
+        for opt in MASK_SHAPE_OPTIONS:
+            fn = self.activate_tool if opt == shape else self.deactivate_tool
+            fn(opt, False)
+
+    def evaluate_apply_masking_msg_box(self):
+        if self._apply_masking_msgBox.exec() == QMessageBox.Apply:
+            return True
+        return False
+
+    def close(self):
+        self._apply_masking_msgBox.close()
+        self._apply_masking_msgBox = None

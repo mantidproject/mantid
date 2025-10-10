@@ -263,7 +263,6 @@ API::MatrixWorkspace_sptr PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr 
       const double phi = phase->Double(h, phaseIndex);
       const double X = n0[h] * asym * cos(phi);
       const double Y = n0[h] * asym * sin(phi);
-      Eigen::Vector<eigenDataType, 2> n0vec;
       n0Vectors[h] = {X, Y};
       sxx += X * X;
       syy += Y * Y;

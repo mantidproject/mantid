@@ -18,8 +18,9 @@ import matplotlib
 
 matplotlib.use("AGG")
 import matplotlib.pyplot as plt
-from matplotlib.colors import LogNorm
+from matplotlib.colors import SymLogNorm
 from matplotlib.ticker import LogFormatterSciNotation, ScalarFormatter
+from matplotlib.scale import LogTransform
 import numpy as np
 
 from mantid.api import WorkspaceFactory
@@ -61,8 +62,9 @@ class PropertiesDialogTest(unittest.TestCase):
         self.assertEqual(xEditor._memento.formatter, "Decimal Format")
         self.assertEqual(yEditor._memento.formatter, "Scientific Format")
         # test scale
-        self.assertEqual(xEditor._memento.log, False)
-        self.assertEqual(yEditor._memento.log, True)
+        self.assertEqual(xEditor._memento.scale_mode, "linear")
+        self.assertEqual(yEditor._memento.scale_mode, "log")
+        self.assertTrue(isinstance(fig.axes[0].get_yaxis().get_transform(), LogTransform))
 
     def test_axis_editor_initialised_with_correct_values_3d(self):
         a = np.array([[1]])
@@ -107,14 +109,14 @@ class PropertiesDialogTest(unittest.TestCase):
         max_value = 2.0
         colorbarEditor.ui.editor_min.text = MagicMock(return_value=min_value)
         colorbarEditor.ui.editor_max.text = MagicMock(return_value=max_value)
-        colorbarEditor.ui.logBox.isChecked = MagicMock(return_value=True)
+        colorbarEditor.ui.scaleBox.currentText = MagicMock(return_value="symlog")
 
         colorbarEditor.changes_accepted()
 
         for ax in range(2):
             self.assertEqual(min_value, fig.axes[ax].collections[0].norm.vmin)
             self.assertEqual(max_value, fig.axes[ax].collections[0].norm.vmax)
-            self.assertTrue(isinstance(fig.axes[ax].collections[0].norm, LogNorm))
+            self.assertTrue(isinstance(fig.axes[ax].collections[0].norm, SymLogNorm))
 
     def test_legend_editor_correctly_updates_axis_legend(self):
         # make figure

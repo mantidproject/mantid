@@ -315,3 +315,29 @@ Please test this on IDAaaS: an ENGINX instance should have MantidWorkbenchNightl
 11. Set the ``Override Unit Cell Length`` to ``3.65`` and click ``Refine in GSAS II``, the fit should be better.
 
 12. Tick all the checkboxes: ``Microstrain``, ``Sigma-1`` and ``Gamma (Y)``. An asterisk should appear with an advice tooltip.
+
+Test 12
+^^^^^^^
+This test covers the multiple data files functionality with multiple banks per file in the ``GSASII`` tab.
+
+Note this test will only work if ``GSASII`` is also installed.
+Please test this on IDAaaS: an ENGINX instance should have MantidWorkbenchNightly and ``GSASII`` installed in the expected location.
+
+1. Close and re-open the Engineering Diffraction interface.
+
+2. Go to the ``Calibration`` tab, select ``Create New Calibration`` and un-tick the ``Set Calibration Region of Interest`` option.
+
+3. For the ``Calibration Sample`` # enter ``305738`` and click the ``Calibrate`` button.
+
+4. On the ``Focus`` tab, enter Sample Run # ``305793-305795`` and Vanadium # ``307521`` and click the Focus button. This will generate multiple focused data files.
+Change to the GSASII tab. Clear any pre-filled paths.
+
+5. For the ``Instrument Group`` filepath, browse and select the single .prm file output by the calibration (should be ENGINX_305738_all_banks.prm).
+
+6. For the ``Focused Data`` filepath, browse and select multiple .gss files that each contain multiple banks. Ensure all selected files have the same number of banks (e.g., select the all_banks files: ENGINX_305738_305793_all_banks_dSpacing.gss, ENGINX_305738_305794_all_banks_dSpacing.gss, ENGINX_305738_305795_all_banks_dSpacing.gss).
+
+7. For the ``Phase`` filepath, browse to MANTID_INSTALL_DIRECTORY/scripts/Engineering/ENGINX/phase_info/FE_GAMMA.cif. For the ``Project Name`` at the top, enter a string of your choice.
+
+8. Click Refine in ``GSAS II``. After a few seconds, the output fit should be plotted. In the top right of the plot widget, verify that the refined spectrum combobox shows entries for the banks of the last refined data file.
+
+9. Test Error Cases: Try selecting multiple instrument .prm files (should show error message about requiring exactly one instrument file). Try selecting .gss files with different numbers of banks (should show error about inconsistent bank counts). Try selecting single-bank .gss files (should show error about requiring multiple banks per file).

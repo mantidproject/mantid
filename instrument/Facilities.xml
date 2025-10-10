@@ -31,6 +31,7 @@
    <timezone>Europe/London</timezone>
 
   <instrument name="ALF">
+    <zeropadding size="8" startRunNumber="90565"/>
     <technique>Single Crystal Diffraction</technique>
     <livedata>
       <connection name="histo" address="NDXALF:6789" listener="ISISHistoDataListener" />
@@ -90,6 +91,7 @@
   </instrument>
 
   <instrument name="GEM">
+    <zeropadding size="8" startRunNumber="97479"/>
     <technique>Neutron Diffraction</technique>
     <livedata>
       <connection name="histo" address="NDXGEM:6789" listener="ISISHistoDataListener" />
@@ -409,7 +411,12 @@
    </instrument>
 
    <instrument name="HB2A">
-      <technique>technique</technique>
+      <technique>Powder Diffraction</technique>
+   </instrument>
+
+   <instrument name="MIDAS">
+     <technique>Neutron Diffraction</technique>
+     <technique>Powder Diffraction</technique>
    </instrument>
 
    <instrument name="HB2B">
@@ -456,6 +463,11 @@
      <livedata>
        <connection name="event" address="cg3-daq1.ornl.gov:31415" listener="SNSLiveEventDataListener" />
      </livedata>
+   </instrument>
+   
+   <instrument name="CG4D" shortname="CG4D">
+     <technique>Neutron Diffraction</technique>
+     <technique>Single Crystal Diffraction</technique>
    </instrument>
 
    <instrument name="HIRESSANS">

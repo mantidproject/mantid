@@ -62,7 +62,6 @@ requirements:
     - if: linux
       then:
         - libgl-devel
-        - vtk ${{ vtk }}
         - xorg-libxxf86vm
         - xorg-libx11
         - xorg-xorgproto

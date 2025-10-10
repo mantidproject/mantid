@@ -18,6 +18,8 @@ build:
       - workbench = workbench.app.mantidworkbench_launch_wrapper:launch
       - mantidworkbench = workbench.app.mantidworkbench_launch_wrapper:launch
 
+    use_python_app_entrypoint: true
+
 requirements:
   build:
     - ${{ compiler("cxx") }}
@@ -57,7 +59,7 @@ requirements:
       then: pystack
     - if: win
       then: gdk-pixbuf ${{ gdk_pixbuf }}
-    - pyvista
+    - pyvista {{ pyvista }}
     - pyvistaqt
     - superqt
     - qtconsole ${{ qtconsole }}

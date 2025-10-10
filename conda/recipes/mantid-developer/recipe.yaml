@@ -12,7 +12,7 @@ requirements:
   run:
     - ccache
     - cmake ${{ cmake }}
-    - conda-index
+    - rattler-index
     - if: win
       then: conda-wrappers
     - doxygen ${{ doxygen }}
@@ -59,7 +59,7 @@ requirements:
     - python ${{ python }}
     - if: osx
       then: python.app
-    - pyvista
+    - pyvista {{ pyvista }}
     - pyvistaqt
     - superqt
     - pyyaml ${{ pyyaml }}
@@ -83,8 +83,6 @@ requirements:
       then: texlive-core ${{ texlive_core }}
     - toml ${{ toml }}
     - versioningit ${{ versioningit }}
-    - if: linux
-      then: vtk ${{ vtk }}
     - zlib
     - joblib
     - orsopy ${{ orsopy }}

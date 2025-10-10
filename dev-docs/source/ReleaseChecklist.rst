@@ -418,8 +418,8 @@ Code Freeze
 
 **Create the Release Branch (once most PRs are merged)**
 
-* Ensure the latest `main nightly deployment pipeline
-  <https://builds.mantidproject.org/view/Nightly%20Pipelines/job/main_nightly_deployment/>`__
+* Ensure the latest `main nightly pipeline
+  <https://builds.mantidproject.org/view/Nightly%20Pipelines/job/main_nightly/>`__
   has passed for all build environments. If it fails, decide if a fix is needed before moving on to
   the next steps.
 * Ask a mantid gatekeeper or administrator to update the ``release-next`` branch so that it's up to
@@ -494,8 +494,8 @@ have been fixed. Then:
 
 We are now ready to create the release candidates for Smoke testing.
 
-* Build the `release-next_nightly_deployment Jenkins pipeline
-  <https://builds.mantidproject.org/view/Nightly%20Pipelines/job/release-next_nightly_deployment/>`__
+* Build the `release-next_nightly Jenkins pipeline
+  <https://builds.mantidproject.org/view/Nightly%20Pipelines/job/release-next_nightly/>`__
   with the following parameters (most are already defaulted to the correct values):
 
   * set ``BUILD_DEVEL`` to ``all``
@@ -526,8 +526,8 @@ Check with the Quality Assurance Manager that the Smoke testing has been complet
 have been fixed. Additionally, ensure that the version of the ``mslice`` package in ``conda_build_config.yaml`` is correct.
 If there have been any updates to MSlice since the last release, it must be released first. The release candidates must
 now be recreated with their final version numbers. To do this, build the
-`release-next_nightly_deployment Jenkins pipeline
-<https://builds.mantidproject.org/view/Nightly%20Pipelines/job/release-next_nightly_deployment/>`__
+`release-next_nightly Jenkins pipeline
+<https://builds.mantidproject.org/view/Nightly%20Pipelines/job/release-next_nightly/>`__
 with the following parameters (most are already defaulted to the correct values):
 
 * set ``BUILD_DEVEL`` to ``all``
@@ -595,8 +595,6 @@ publish a new `release <https://github.com/mantidproject/mantid/releases>`__ on 
 Open a PR updating the software ``doi``, ``date-released`` and ``version`` in the ``CITATION.cff`` file
 at the root of the repository.
 
-Notify the Release Manager when you complete all your tasks.
-
 **Deploy Versioned Documentation**
 
 Versioned documentation is accessible at https://docs.mantidproject.org/vX.Y.Z/.
@@ -613,3 +611,5 @@ To do this:
 * Copy the built documentation into this new directory. The built documentation will be in your mantid build directory at ``<build directory>/docs/html``.
 * Stage the newly created directory and commit it to your branch.
 * After double-checking that these instructions have been followed correctly, push your branch to the main repository to deploy.
+
+Notify the Release Manager when you complete all your tasks.

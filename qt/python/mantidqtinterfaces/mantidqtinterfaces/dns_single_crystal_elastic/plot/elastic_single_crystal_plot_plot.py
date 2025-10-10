@@ -10,6 +10,7 @@ DNS single crystal elastic plot tab of DNS reduction GUI.
 """
 
 import matplotlib
+from matplotlib.ticker import AutoMinorLocator, NullLocator
 from mpl_toolkits.axisartist import Subplot
 
 
@@ -43,6 +44,16 @@ class DNSScPlot:
     def set_shading(self, shading):
         if self._plot is not None:
             self._plot.set_shading(shading)
+
+    def set_grid(self, major=False, minor=False):
+        if minor:
+            self._ax.xaxis.set_minor_locator(AutoMinorLocator(5))
+        else:
+            self._ax.xaxis.set_minor_locator(NullLocator())
+        if major:
+            self._ax.grid(True, which="both", zorder=1000, linestyle="--")
+        else:
+            self._ax.grid(0)
 
     def set_zlim(self, zlim):
         if self._plot is not None:

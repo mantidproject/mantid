@@ -1,0 +1,1 @@
+- Add module of classes in ``Engineering.pawley_utils`` to perform Pawley refinements for focussed spectra and 2D Pawley refinements for POLDI (frame overlap diffractometer).

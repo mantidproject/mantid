@@ -72,6 +72,7 @@ set(PYTHON_PLUGINS
     algorithms/FindGlobalBMatrix.py
     algorithms/FindSatellitePeaks.py
     algorithms/FindSXPeaksConvolve.py
+    algorithms/FindUBFromScatteringPlane.py
     algorithms/FindMultipleUMatrices.py
     algorithms/FitGaussian.py
     algorithms/FitIncidentSpectrum.py
@@ -330,6 +331,7 @@ set(PYTHON_PLUGINS
     algorithms/WorkflowAlgorithms/SANSILLParameterScan.py
     algorithms/WorkflowAlgorithms/SANSILLReduction.py
     algorithms/WorkflowAlgorithms/SANSILLReduction2.py
+    algorithms/WorkflowAlgorithms/SANSISISPolarizationCorrections.py
     algorithms/WorkflowAlgorithms/SANSMask.py
     algorithms/WorkflowAlgorithms/SANSPatchSensitivity.py
     algorithms/WorkflowAlgorithms/SANSReduction.py

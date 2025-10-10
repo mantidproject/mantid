@@ -1,1 +1,0 @@
-- The crosshair button is now enabled in tiled plots(subplots).

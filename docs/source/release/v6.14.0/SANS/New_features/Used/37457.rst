@@ -1,0 +1,1 @@
+- Added ``EmptyCellFilename`` as an optional property of :ref:`algm-DepolarizedAnalyserTransmission` to be used instead of ``EmptyCellWorkspace``. :ref:`algm-DepolarizedAnalyserTransmission` will load the provided file with :ref:`algm-LoadNexus` and then use it the same as ``EmptyCellWorkspace``.

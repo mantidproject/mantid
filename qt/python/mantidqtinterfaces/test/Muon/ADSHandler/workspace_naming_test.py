@@ -103,7 +103,7 @@ class WorkspaceNamingTest(unittest.TestCase):
 
     def test_get_pair_phasequad_name(self):
         AnalysisDataService.clear()
-        ConfigService["MantidOptions.InvisibleWorkspaces"] = "True"
+        ConfigService["MantidOptions.InvisibleWorkspaces"] = "1"
         filepath = FileFinder.findRuns("EMU00019489.nxs")[0]
 
         load_result, run_number, filename, psi_data = load_workspace_from_filename(filepath)

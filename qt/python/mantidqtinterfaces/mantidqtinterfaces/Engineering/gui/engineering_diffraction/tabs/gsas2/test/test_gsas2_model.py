@@ -112,7 +112,7 @@ class TestGSAS2Model(unittest.TestCase):
     @patch("mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.gsas2.model.GSAS2Model.validate_x_limits")
     def test_run_model_with_user_x_limits_none(self, mock_validate_x_limits, mock_load_cif):
         self._setup_crystal_structure_and_mocks(mock_load_cif)
-        load_parameters = ["mock_instrument", ["mock_phase.cif"], ["mock_data.gss"]]
+        load_parameters = [["mock_instrument"], ["mock_phase.cif"], ["mock_data.gss"]]
         refinement_parameters = ["Pawley", None, False, False, False]
 
         self.model.run_model(load_parameters, refinement_parameters, "test_project", user_x_limits=None)
@@ -123,7 +123,7 @@ class TestGSAS2Model(unittest.TestCase):
     def test_run_model_with_correctly_formatted_user_x_limits(self, mock_validate_x_limits, mock_load_cif):
         self._setup_crystal_structure_and_mocks(mock_load_cif)
 
-        load_parameters = ["mock_instrument", ["mock_phase.cif"], ["mock_data.gss"]]
+        load_parameters = [["mock_instrument"], ["mock_phase.cif"], ["mock_data.gss"]]
         refinement_parameters = ["Pawley", None, False, False, False]
         formatted_user_x_limits = [[10000.0, 20000.0], [30000.0, 40000.0]]
 
@@ -132,10 +132,21 @@ class TestGSAS2Model(unittest.TestCase):
 
     @patch("mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.gsas2.model.LoadCIF")
     @patch("mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.gsas2.model.GSAS2Model.validate_x_limits")
+    def test_run_model_with_multiple_datafiles(self, mock_validate_x_limits, mock_load_cif):
+        self._setup_crystal_structure_and_mocks(mock_load_cif)
+
+        load_parameters = [[["mock_instrument"]], ["mock_phase.cif"], ["mock_data.gss", "mock_data2.gss", "mock_data3.gss"]]
+        refinement_parameters = ["Pawley", None, False, False, False]
+        user_x_limits = [[10000.0, 20000.0], [30000.0, 40000.0]]
+
+        self.model.run_model(load_parameters, refinement_parameters, "test_project", user_x_limits=user_x_limits)
+
+    @patch("mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.gsas2.model.LoadCIF")
+    @patch("mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.gsas2.model.GSAS2Model.validate_x_limits")
     def test_run_model_with_unformatted_user_x_limits(self, mock_validate_x_limits, mock_load_cif):
         self._setup_crystal_structure_and_mocks(mock_load_cif)
 
-        load_parameters = ["mock_instrument", ["mock_phase.cif"], ["mock_data.gss"]]
+        load_parameters = [["mock_instrument"], ["mock_phase.cif"], ["mock_data.gss"]]
         refinement_parameters = ["Pawley", None, False, False, False]
         unformatted_user_x_limits = [17522.26, 42558.08]
 
@@ -222,14 +233,19 @@ class TestGSAS2Model(unittest.TestCase):
             [3.5, 3.5, 3.5, 90.0, 90.0, 90.0],
         )
 
-    def test_understand_data_structure(self):
+    @patch("mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.gsas2.model.LoadGSS")
+    def test_understand_data_structure_mutliple_inst_fails(self, mock_gss):
+        self.model.file_paths.data_files = ["data.gss"]
+        self.model.file_paths.instrument_files = ["first", "second"]
+        self.assertEqual(self.model.understand_data_structure(), False)
+
+    @patch("mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.gsas2.model.LoadGSS")
+    def test_understand_data_structure_one_banks_fails(self, mock_gss):
         # note this gss-ExtendedHeader.gsa test file is not widely relevant for this interface
         gsa_file_path = FileFinder.getFullPath("gss-ExtendedHeader.gsa")
         self.model.file_paths.data_files = [gsa_file_path]
         self.model.understand_data_structure()
-        self.assertEqual(self.model.state.number_of_regions, 1)
-        self.assertEqual(self.model.x_limits.data_x_min, [41.7276698840232])
-        self.assertEqual(self.model.x_limits.data_x_max, [41.82791649202319])
+        self.assertEqual(self.model.understand_data_structure(), False)
 
     @patch(model_path + ".GSAS2Model.find_in_file")
     def test_crystal_params_from_instrument_split_on_spaces(self, mock_find_in_file):
@@ -244,7 +260,7 @@ class TestGSAS2Model(unittest.TestCase):
     @patch(model_path + ".GSAS2Model.find_in_file")
     def test_crystal_params_from_instrument_split_on_tabs(self, mock_find_in_file):
         mock_find_in_file.return_value = "18000\t3.0\t14.0"
-        self.assertEqual(self.model.get_crystal_params_from_instrument("mock_instrument"), [18017.0])
+        self.assertEqual(self.model.get_crystal_params_from_instrument(["mock_instrument"]), [18017.0])
 
     @patch(model_path + ".GSAS2Model.find_in_file")
     def test_determine_tof_min(self, mock_find_in_file):
@@ -252,21 +268,21 @@ class TestGSAS2Model(unittest.TestCase):
         mock_find_in_file.return_value = "18000\t3.0\t14.0"
         self.model.file_paths.instrument_files = ["first", "second"]
         self.model.state.number_of_regions = 2
-        self.assertEqual(self.model.get_crystal_params_from_instrument("mock_instrument"), [18017.0, 18017.0])
+        self.assertEqual(self.model.get_crystal_params_from_instrument(["mock_instrument"]), [18017.0, 18017.0])
 
         # 1 instrument file
         self.model.file_paths.instrument_files = ["first file containing 2 banks"]
         self.model.state.number_of_regions = 2
-        self.assertEqual(self.model.get_crystal_params_from_instrument("mock_instrument"), [18017.0, 18017.0])
+        self.assertEqual(self.model.get_crystal_params_from_instrument(["mock_instrument"]), [18017.0, 18017.0])
 
     @patch(model_path + ".GSAS2Model.understand_data_structure")
     def test_validate_x_limits(self, mock_understand_data):
         self.model.state.number_of_regions = 1
-        self.model.file_paths.instrument_files = ["inst1", "inst2"]
+        self.model.file_paths.instrument_files = ["inst1"]
         self.model.file_paths.data_files = ["data1", "data2", "data3"]
 
         two_inst_three_histograms = self.model.validate_x_limits([[18000], [50000]])
-        self.assertEqual(two_inst_three_histograms, False)
+        self.assertEqual(two_inst_three_histograms, True)
 
         self.model.file_paths.instrument_files = ["inst1"]
         one_inst_three_histograms = self.model.validate_x_limits([[18000], [50000]])

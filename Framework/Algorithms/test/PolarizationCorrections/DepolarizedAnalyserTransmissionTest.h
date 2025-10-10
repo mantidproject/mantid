@@ -7,9 +7,12 @@
 #pragma once
 
 #include <cxxtest/TestSuite.h>
+#include <filesystem>
 
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAlgorithms/CreateSampleWorkspace.h"
 #include "MantidAlgorithms/PolarizationCorrections/DepolarizedAnalyserTransmission.h"
+#include "MantidKernel/Strings.h"
 
 namespace {
 constexpr double PXD_VALUE = 9.32564;
@@ -41,6 +44,20 @@ public:
     auto const &[mtWs, depWs] = createDefaultWorkspaces();
 
     auto alg = createAlgorithm(mtWs, depWs);
+    alg->execute();
+
+    // THEN
+    TS_ASSERT(alg->isExecuted());
+    ITableWorkspace_sptr const &outputWs = alg->getProperty("OutputWorkspace");
+    MatrixWorkspace_sptr const &fitWs = alg->getProperty("OutputFitCurves");
+    validateOutputParameters(outputWs);
+    TS_ASSERT_EQUALS(fitWs, nullptr)
+  }
+
+  void test_normal_exec_with_file() {
+    // GIVEN
+    auto const &[mtWs, depWs] = createDefaultWorkspaces();
+    auto alg = createAlgorithmUsingFilename(mtWs, depWs);
     alg->execute();
 
     // THEN
@@ -129,6 +146,20 @@ public:
     TS_ASSERT(!alg->isExecuted());
   }
 
+  void test_invalid_empty_cell_workspace_length_from_file() {
+    // GIVEN
+    MatrixWorkspace_sptr const &mtWs =
+        createTestingWorkspace("__mt", "name=LinearBackground, A0=0.112, A1=-0.004397", 12);
+    auto const &depWs = createTestingWorkspace("__dep", "name=ExpDecay, Height=0.1239, Lifetime=1.338", 1);
+    auto alg = createAlgorithmUsingFilename(mtWs, depWs);
+
+    // THEN
+    TS_ASSERT_THROWS_EQUALS(alg->execute(), std::runtime_error const &e, std::string(e.what()),
+                            "Some invalid Properties found: \n EmptyCellFilename: EmptyCellFilename "
+                            "must contain a single spectrum. Contains 12 spectra.");
+    TS_ASSERT(!alg->isExecuted());
+  }
+
   void test_non_matching_workspace_bins() {
     // GIVEN
     MatrixWorkspace_sptr const &mtWs =
@@ -140,6 +171,24 @@ public:
     TS_ASSERT_THROWS_EQUALS(alg->execute(), std::runtime_error const &e, std::string(e.what()),
                             "Some invalid Properties found: \n DepolarizedWorkspace: The bins in the "
                             "DepolarizedWorkspace and EmptyCellWorkspace do not match.");
+    TS_ASSERT(!alg->isExecuted());
+  }
+
+  void test_error_if_neither_empty_cell_workspace_or_file_are_set() {
+    // GIVEN
+    auto const &depWs = createTestingWorkspace("__dep", "name=ExpDecay, Height=0.1239, Lifetime=1.338");
+
+    auto alg = std::make_shared<DepolarizedAnalyserTransmission>();
+    alg->setChild(true);
+    alg->initialize();
+    TS_ASSERT(alg->isInitialized());
+    alg->setProperty("DepolarizedWorkspace", depWs);
+    alg->setPropertyValue("OutputWorkspace", "__unused_for_child");
+
+    // THEN
+    TS_ASSERT_THROWS_EQUALS(alg->execute(), std::runtime_error const &e, std::string(e.what()),
+                            "Some invalid Properties found: \n EmptyCellWorkspace: Must set either EmptyCellWorkspace "
+                            "or EmptyCellFilename.");
     TS_ASSERT(!alg->isExecuted());
   }
 
@@ -182,6 +231,29 @@ private:
     TS_ASSERT(alg->isInitialized());
     alg->setProperty("DepolarizedWorkspace", depWs);
     alg->setProperty("EmptyCellWorkspace", mtWs);
+    alg->setPropertyValue("OutputWorkspace", "__unused_for_child");
+    return alg;
+  }
+
+  std::shared_ptr<DepolarizedAnalyserTransmission> createAlgorithmUsingFilename(MatrixWorkspace_sptr const &mtWs,
+                                                                                MatrixWorkspace_sptr const &depWs) {
+
+    std::filesystem::path filePath = std::filesystem::temp_directory_path() / Mantid::Kernel::Strings::randomString(8);
+
+    auto saveAlg = Mantid::API::AlgorithmManager::Instance().create("SaveNexus");
+    saveAlg->setChild(true);
+    saveAlg->initialize();
+    saveAlg->setProperty("Filename", filePath.string());
+    saveAlg->setProperty("InputWorkspace", mtWs);
+    saveAlg->execute();
+    TS_ASSERT(std::filesystem::exists(filePath));
+
+    auto alg = std::make_shared<DepolarizedAnalyserTransmission>();
+    alg->setChild(true);
+    alg->initialize();
+    TS_ASSERT(alg->isInitialized());
+    alg->setProperty("DepolarizedWorkspace", depWs);
+    alg->setProperty("EmptyCellFilename", filePath.string());
     alg->setPropertyValue("OutputWorkspace", "__unused_for_child");
     return alg;
   }

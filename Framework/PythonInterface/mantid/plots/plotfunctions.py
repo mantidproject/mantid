@@ -11,6 +11,7 @@ from typing import List
 
 import numpy as np
 from collections.abc import Sequence
+from copy import copy
 
 # 3rd party imports
 from matplotlib.gridspec import GridSpec
@@ -326,7 +327,7 @@ def raise_if_not_sequence(value, seq_name, element_type=None):
         list(map(raise_if_not_type, value))
 
 
-def get_plot_fig(overplot=None, ax_properties=None, window_title=None, axes_num=1, fig=None):
+def get_plot_fig(overplot=None, ax_properties=None, window_title=None, axes_num=1, fig=None):  # noqa: C901
     """
     Create a blank figure and axes, with configurable properties.
     :param overplot: If true then plotting on figure will plot over previous plotting. If an axis object the overplotting
@@ -365,9 +366,16 @@ def get_plot_fig(overplot=None, ax_properties=None, window_title=None, axes_num=
             ax_properties["yscale"] = "log"
         else:
             ax_properties["yscale"] = "linear"
+
     if ax_properties:
+        scales_to_amend = [scale for scale in ["x", "y"] if f"{scale}scale" in ax_properties]
         for axis in fig.axes:
-            axis.set(**ax_properties)
+            mod_ax_properties = ax_properties
+            for scale_id in scales_to_amend:
+                mod_ax_properties = _apply_scale_properties(ax_properties, scale_id, axis)
+            if mod_ax_properties:
+                axis.set(**_post_process_props(mod_ax_properties))
+
     if window_title and fig.canvas.manager is not None:
         fig.canvas.manager.set_window_title(window_title)
 
@@ -577,3 +585,27 @@ def _do_single_plot(ax, workspaces, errors, set_title, nums, kw, plot_kwargs, lo
             title += f" ({log_name})"
 
         ax.set_title(title)
+
+
+def _apply_scale_properties(ax_properties, scale_id, axis):
+    mod_ax_properties = copy(ax_properties)
+    scale_properties = {"value": mod_ax_properties.pop(f"{scale_id}scale")}
+    add_prop_key = f"{scale_id}scale_opts"
+    if add_prop_key in mod_ax_properties:
+        scale_properties.update(mod_ax_properties.pop(add_prop_key))
+    getattr(axis, f"set_{scale_id}scale")(**scale_properties)
+    return mod_ax_properties
+
+
+def _post_process_props(ax_properties):
+    """
+    ax_properties can be passed from c++, converted from Q objects into python objects.
+    post-processing can be necessary, if SIP does not convert Q objects into the required form.
+    :param ax_properties:
+    """
+    for k, v in ax_properties.items():
+        if k == "limits":  # Convert list to tuple
+            if isinstance(v, list):
+                ax_properties[k] = tuple(v)
+        # elif k == ... # Add further cases to process additional props
+    return ax_properties

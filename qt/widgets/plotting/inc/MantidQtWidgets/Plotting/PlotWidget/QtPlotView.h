@@ -22,9 +22,12 @@ public:
 
   void setScaleLinear(const AxisID axisID) override;
   void setScaleLog(const AxisID axisID) override;
-
+  void setScaleSymLog(const AxisID axisID, const double linthresh) override;
+  void setScale(const AxisID axisID, const std::string &scale,
+                const QHash<QString, QVariant> &additionalProperties = {}) override;
   void plot(const std::vector<Mantid::API::MatrixWorkspace_sptr> &workspaces, const std::vector<int> &workspaceIndices,
             const bool plotErrorBars) override;
+  void setAxisLimit(const AxisID axisID, const double axMin, const double axMax) override;
 
 private:
   Widgets::MplCpp::FigureCanvasQt *m_canvas;
