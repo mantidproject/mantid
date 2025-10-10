@@ -13,7 +13,6 @@ from mantid.kernel import (
 from mantid.simpleapi import (
     plotSpectrum,
     DeleteWorkspace,
-    Integration,
     GroupWorkspaces,
     Plus,
     PoldiAnalyseResiduals,
@@ -23,7 +22,6 @@ from mantid.simpleapi import (
     PoldiPeakSearch,
     PoldiAutoCorrelation,
     RenameWorkspace,
-    SumSpectra,
 )
 
 
@@ -219,15 +217,7 @@ class PoldiDataAnalysis(PythonAlgorithm):
         self.setProperty("OutputWorkspace", outputWs)
 
     def workspaceHasCounts(self, workspace):
-        integrated = Integration(workspace)
-        summed = SumSpectra(integrated)
-
-        counts = summed.readY(0)[0]
-
-        DeleteWorkspace(integrated)
-        DeleteWorkspace(summed)
-
-        return counts > 0
+        return workspace.extractY().sum() > 0
 
     def runCorrelation(self):
         correlationName = self.baseName + "_correlation"
