@@ -38,12 +38,11 @@ class ProjectionModel(TextureProjection):
             ws_names.append(ws_name)
             if ADS.doesExist(ws_name):
                 logger.notice(f'A workspace "{ws_name}" already exists, loading {path} has been skipped')
-            else:
-                try:
-                    Load(Filename=path, OutputWorkspace=ws_name)
-                except Exception as e:
-                    logger.warning(f"Failed to load {path}: {e}")
-                    continue
+                continue
+            try:
+                Load(Filename=path, OutputWorkspace=ws_name)
+            except Exception as e:
+                logger.warning(f"Failed to load {path}: {e}")
         return ws_names
 
     # pf logic
