@@ -273,6 +273,8 @@ class FullInstrumentViewModel:
             ]
         # Combine peaks on the same detector
         detector_peaks = []
+        # groupby groups consecutive matches, so must be sorted
+        peaks.sort(key=lambda x: x.detector_id)
         for det_id, peaks_for_id in groupby(peaks, lambda x: x.detector_id):
             detector_peaks.append(DetectorPeaks(list(peaks_for_id)))
         return detector_peaks

@@ -9,10 +9,10 @@ from dataclasses import dataclass
 
 
 def _format_hkl(value):
-    return f"{value:.2f}".rstrip("0").rstrip(".") if "." in f"{value:.2f}" else f"{value:.2f}"
+    return f"{value:.2f}".rstrip("0").rstrip(".")
 
 
-@dataclass
+@dataclass(frozen=True)
 class Peak:
     detector_id: int
     location: np.ndarray

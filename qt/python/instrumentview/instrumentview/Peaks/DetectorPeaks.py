@@ -9,6 +9,8 @@ from instrumentview.Peaks.Peak import Peak
 
 class DetectorPeaks:
     def __init__(self, peaks: list[Peak]) -> None:
+        if not peaks:
+            raise ValueError("peaks list cannot be empty")
         self.peaks = peaks
         self.detector_id = peaks[0].detector_id
         self.location = peaks[0].location

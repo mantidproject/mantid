@@ -227,7 +227,7 @@ class FullInstrumentViewWindow(QMainWindow):
 
     def _add_connections_to_edits_and_slider(self, min_edit: QLineEdit, max_edit: QLineEdit, slider, presenter_callback: Callable):
         def format_float(value):
-            return f"{value:.4f}".rstrip("0").rstrip(".") if "." in f"{value:.4f}" else f"{value:.4f}"
+            return f"{value:.4f}".rstrip("0").rstrip(".")
 
         def set_edits(limits):
             min, max = limits
@@ -327,6 +327,7 @@ class FullInstrumentViewWindow(QMainWindow):
             if list_item.checkState() > 0:
                 current_checked_peak_workspaces.append(list_item.text())
 
+        self._peak_ws_list.blockSignals(True)
         self._peak_ws_list.clear()
         for peaks_ws in self._presenter.peaks_workspaces_in_ads():
             list_item = QListWidgetItem(peaks_ws, self._peak_ws_list)
@@ -334,7 +335,7 @@ class FullInstrumentViewWindow(QMainWindow):
                 list_item.setCheckState(Qt.Checked)
             else:
                 list_item.setCheckState(Qt.Unchecked)
-            self._peak_ws_list.addItem(list_item)
+        self._peak_ws_list.blockSignals(False)
         self._peak_ws_list.adjustSize()
 
     def set_unit_combo_box_index(self, index: int) -> None:

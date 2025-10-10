@@ -18,7 +18,7 @@ class TestDetectorPeaks(unittest.TestCase):
         detector_peaks = DetectorPeaks([peak1, peak2])
         self.assertEqual(1, detector_peaks.detector_id)
         np.testing.assert_almost_equal(location, detector_peaks.location)
-        self.assertTrue("[4, 4, 4],[20, 4, 4]", detector_peaks.label)
+        self.assertEqual("[4, 4, 4],[20, 4, 4]", detector_peaks.label)
 
 
 if __name__ == "__main__":

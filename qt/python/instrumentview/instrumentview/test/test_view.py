@@ -157,7 +157,6 @@ class TestFullInstrumentViewWindow(unittest.TestCase):
         self._view.refresh_peaks_ws_list()
         mock_list.clear.assert_called_once()
         mock_list.adjustSize.assert_called_once()
-        mock_list.addItem.assert_called_once()
         mock_qlist_widget_item.assert_called_once()
 
     def test_clear_overlay_meshes(self):
