@@ -138,8 +138,7 @@
       "inherits": [
         "conda"
       ],
-      "generator": "Visual Studio 17 2022",
-      "toolset": "v143"
+      "generator": "Visual Studio 17 2022"
     },
     {
       "name": "win-ninja",
