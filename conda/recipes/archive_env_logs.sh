@@ -19,15 +19,8 @@ fi
 
 #Just for first package (mantid), archive the base environment
 if [ "$package_name" == mantid ] ; then
-  conda list --explicit --prefix ../../../miniforge/envs/base > $log_directory/base.txt 2>&1 || echo "Failed to write base conda list output to file"
-fi
+  conda list --explicit base > $log_directory/base_environment.txt 2>&1 || echo "Failed to write base conda list output to file"
 
-echo "$build_prefix"
-echo "$prefix"
-
-echo "$build_prefix $prefix" > $log_directory/prefix_output.txt
 
 conda list --explicit --prefix "$build_prefix" > $log_directory/"${package_name}"_build_environment.txt 2>&1
 conda list --explicit --prefix "$prefix" > $log_directory/"${package_name}"_host_environment.txt 2>&1
-
-echo "archive script end"
