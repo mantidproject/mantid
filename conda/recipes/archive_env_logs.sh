@@ -4,7 +4,7 @@ build_prefix=$1
 prefix=$2
 package_name=$3
 
-log_directory=../../$target_platform/env_logs
+log_directory=../../../env_logs/$target_platform
 mkdir -p $log_directory
 
 if [ ! $(command -v conda) ]; then
