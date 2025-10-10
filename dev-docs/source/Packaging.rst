@@ -138,8 +138,8 @@ for a given branch of mantid. The branch can be from the main mantid repo or fro
 Options
 #######
 
-- ``BUILD_DEVEL`` [``none``, ``all``, ``linux-64``, ``win-64``, ``osx-64``]: Run the system tests for this OS.
-- ``BUILD_PACKAGE`` [``none``, ``all``, ``linux-64``, ``win-64``, ``osx-64``]: Build a package on this OS.
+- ``BUILD_DEVEL`` [``none``, ``all``, ``linux-64``, ``win-64``, ``osx-arm64``]: Run the system tests for this OS.
+- ``BUILD_PACKAGE`` [``none``, ``all``, ``linux-64``, ``win-64``, ``osx-arm64``]: Build a package on this OS.
 - ``PACKAGE_SUFFIX``: String to append onto the standalone package name, useful for distinguishing builds. By default this is ``Unstable``.
 - ``PUBLISH_TO_ANACONDA``: Set true to publish to the given Anaconda channel and label.
 - ``PUBLISH_TO_GITHUB``: Set true to publish to the Github repository using the specified tag.

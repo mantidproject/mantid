@@ -47,19 +47,12 @@
       }
     },
     {
-      "name": "osx-64-ci",
-      "description": "Build options for a CI build on macOS",
+      "name": "osx-arm64-ci",
+      "description": "Build options for a CI build on an Arm macOS machine",
       "inherits": [
         "osx-default",
         "ci-default",
         "conda"
-      ]
-    },
-    {
-      "name": "osx-arm64-ci",
-      "description": "Build options for a CI build on an Arm macOS machine",
-      "inherits": [
-        "osx-64-ci"
       ]
     },
     {
