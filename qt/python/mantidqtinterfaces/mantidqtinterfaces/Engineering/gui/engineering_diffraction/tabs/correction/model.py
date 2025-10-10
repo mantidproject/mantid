@@ -30,17 +30,18 @@ class CorrectionModel(TextureCorrectionModel):
         return wss
 
     def load_ref(self, path):
-        if path:
-            ws_name = os.path.splitext(os.path.basename(path))[0]
-            if ADS.doesExist(ws_name):
-                logger.notice(f'A workspace "{ws_name}" already exists, loading {path} has been skipped')
-                self.set_reference_ws(ws_name)
-            else:
-                try:
-                    Load(Filename=path, OutputWorkspace=ws_name)
-                    self.set_reference_ws(ws_name)
-                except Exception as e:
-                    logger.warning(f"Failed to load {path}: {e}")
+        if not path:
+            return
+        ws_name = os.path.splitext(os.path.basename(path))[0]
+        if ADS.doesExist(ws_name):
+            logger.notice(f'A workspace "{ws_name}" already exists, loading {path} has been skipped')
+            self.set_reference_ws(ws_name)
+            return
+        try:
+            Load(Filename=path, OutputWorkspace=ws_name)
+            self.set_reference_ws(ws_name)
+        except Exception as e:
+            logger.warning(f"Failed to load {path}: {e}")
 
     @staticmethod
     def get_out_ws_names(wss):
