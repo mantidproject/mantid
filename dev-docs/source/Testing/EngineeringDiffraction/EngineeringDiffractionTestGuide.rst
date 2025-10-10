@@ -162,7 +162,7 @@ This test covers the sample setting functionality in the ``Absorption Correction
 
 6. Make sure ``InputWorkspace`` and ``OutputWorkspace`` are set to ``ManualTesting_reference_workspace``
 
-7. Set Filename to a suitable file (``<mantidBuildDir>/ExternalData/Testing/Data/UnitTest/cube.stl``) and ``Scale`` to ``mm``
+7. Set ``Filename`` to a suitable file (``<mantidBuildDir>/ExternalData/Testing/Data/UnitTest/cube.stl``) and ``Scale`` to ``mm``
 
 8. There should now be a ``View`` button next to ``Shape`` in the ``Reference Workspace Information``
 

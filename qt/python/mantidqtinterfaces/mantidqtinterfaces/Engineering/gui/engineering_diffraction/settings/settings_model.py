@@ -14,10 +14,6 @@ from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.setting
 
 
 class SettingsModel(object):
-    def __init__(self):
-        self.settings_to_validate = {}
-        self.default_settings = {}
-
     def get_settings_dict(self, names_and_types):
         settings = {}
         for setting_name in names_and_types.keys():
@@ -108,37 +104,39 @@ class SettingsModel(object):
                 return False
         return True
 
-    def _check_and_populate_with_default(self, name):
+    @staticmethod
+    def _check_and_populate_with_default(name, settings, default_settings):
         # note that self.settings and self.default settings should be set from presenter before using this method
-        if name not in self.settings_to_validate or self.settings_to_validate[name] == "":
-            self.settings_to_validate[name] = self.default_settings[name]
+        if name not in settings or settings[name] == "":
+            settings = default_settings[name]
+        return settings
 
     def validate_settings(self, settings, default_settings, all_peaks, set_nullables_to_default=True):
         # set to class attributes to save duplicating arguments and passing settings dict around too much
-        self.settings_to_validate = settings
-        self.default_settings = default_settings
-        for key in list(self.settings_to_validate):
+
+        for key in list(settings):
             if key not in default_settings.keys():
-                del self.settings_to_validate[key]
+                del settings[key]
 
         # check and populate calls
         settings_to_check = list(SETTINGS_DICT.keys())
         if not set_nullables_to_default:
             settings_to_check.pop(settings_to_check.index("primary_log"))
-        [self._check_and_populate_with_default(name) for name in settings_to_check]
+        for name in settings_to_check:
+            settings = self._check_and_populate_with_default(name, settings, default_settings)
 
         # value validations
         self.validate_reference_frame(settings)
-        if self.settings_to_validate["default_peak"] not in all_peaks:
-            self.settings_to_validate["default_peak"] = default_settings["default_peak"]
+        if settings["default_peak"] not in all_peaks:
+            settings["default_peak"] = default_settings["default_peak"]
         if not path.isfile(settings["full_calibration"]):
-            self.settings_to_validate["full_calibration"] = default_settings["full_calibration"]
+            settings["full_calibration"] = default_settings["full_calibration"]
         self._validate_convert_to_float(settings, "timeout")
         self._validate_convert_to_float(settings, "dSpacing_min")
         self._validate_convert_to_float(settings, "cost_func_thresh")
         self._validate_convert_to_float(settings, "peak_pos_thresh")
         self._validate_convert_to_float(settings, "contour_kernel")
-        return self.settings_to_validate
+        return settings
 
 
 def is_approx_orthonormal(mat, tol=1e-5):
