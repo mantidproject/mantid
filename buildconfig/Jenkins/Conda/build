@@ -41,10 +41,16 @@ cmake --preset=${CMAKE_PRESET} ${MANTID_DATA_STORE_CMAKE} ${EXTRA_CMAKE_FLAGS} $
 # Run the actual builds for the code, unit tests, and system tests.
 cd $WORKSPACE/build
 
+# Remove this following switch to ninja. Currently only used on Windows.
+BUILD_OPTIONS=""
+if [ ! -f build.ninja ]; then
+    BUILD_OPTIONS="-j20 --config Release"
+fi
+
 if [[ $ENABLE_COVERITY == true ]]; then
     conda install -y jq curl
 
-    ${COVERITY_DIR}/cov-build --dir cov-int cmake --build .
+    ${COVERITY_DIR}/cov-build --dir cov-int cmake --build . $BUILD_OPTIONS
     tar czvf mantid.tgz cov-int
 
     curl --fail-with-body -X POST -d version=$GIT_COMMIT -d email=mantidproject@gmail.com -d token=$COVERITY_TOKEN -d file_name="mantid.tgz" https://scan.coverity.com/projects/335/builds/init > response
@@ -58,7 +64,7 @@ if [[ $ENABLE_COVERITY == true ]]; then
 fi
 
 if [[ $ENABLE_BUILD_CODE == true ]]; then
-    cmake --build .
+    cmake --build . $BUILD_OPTIONS
 fi
 
 # create a collection of targets to run all at once during main build
