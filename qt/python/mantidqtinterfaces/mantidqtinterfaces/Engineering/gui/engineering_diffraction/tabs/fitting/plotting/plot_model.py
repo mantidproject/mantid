@@ -27,7 +27,7 @@ class FittingPlotModel(object):
         self.plotted_workspaces = set()
         self._fit_results = {}  # {WorkspaceName: fit_result_dict}
         self._fit_workspaces = None
-        self.rb_num = None
+        self._rb_num = None
 
     # ===============
     # Plotting
@@ -317,13 +317,13 @@ class FittingPlotModel(object):
     def _save_files(self, ws, dir_name, peak, grouping=""):
         root_dir = output_settings.get_output_path()
         save_dirs = [path.join(root_dir, dir_name, peak)]
-        if self.rb_num:
+        if self._rb_num:
             if grouping == "":
                 # grouping is "" if we can't read group from log data - in this case we don't provide separate dir
-                save_dirs.append(path.join(root_dir, "User", self.rb_num, dir_name, peak))
+                save_dirs.append(path.join(root_dir, "User", self._rb_num, dir_name, peak))
             else:
                 # otherwise it is convenient for the user to have separate directories
-                save_dirs.append(path.join(root_dir, "User", self.rb_num, dir_name, grouping, peak))
+                save_dirs.append(path.join(root_dir, "User", self._rb_num, dir_name, grouping, peak))
         for save_dir in save_dirs:
             if not path.exists(save_dir):
                 makedirs(save_dir)
@@ -399,3 +399,6 @@ class FittingPlotModel(object):
 
     def _ws_is_tof(self, wsname):
         return ADS.retrieve(wsname).getXDimension().getUnits() == "microsecond"
+
+    def set_rb_num(self, rb_num):
+        self._rb_num = rb_num

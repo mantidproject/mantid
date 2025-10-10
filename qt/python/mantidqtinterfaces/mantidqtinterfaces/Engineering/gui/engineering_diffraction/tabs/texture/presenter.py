@@ -52,7 +52,6 @@ class TexturePresenter:
         # set some metadata
         self.current_calibration = CalibrationInfo()
         self.instrument = "ENGINX"
-        self.rb_num = None
 
         # connect view slots
         # loader slots
@@ -273,9 +272,6 @@ class TexturePresenter:
         canvas.draw()
 
     # --------- Metadata handling --------------------
-
-    def set_rb_num(self, rb_num):
-        self.rb_num = rb_num
 
     def update_calibration(self, calibration):
         """
