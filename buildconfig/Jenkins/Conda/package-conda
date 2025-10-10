@@ -91,7 +91,7 @@ done
 setup_mamba $WORKSPACE/miniforge "" true $PLATFORM
 mamba activate base
 # something is wrong with versioningit and rattler-build 0.48
-mamba install --yes rattler-build=0.47 versioningit python=3.11
+mamba install --yes rattler-build=0.47 versioningit python=3.11 rattler-index
 
 # Clean up any legacy conda-recipes git clones
 cd $WORKSPACE
@@ -122,7 +122,7 @@ export LC_ALL=C
 # copy the source to a working folder.
 export CONDA_BLD_PATH=$WORKSPACE/conda-bld
 if [[ -d $CONDA_BLD_PATH ]]; then
-    python -m conda_index $CONDA_BLD_PATH
+    rattler-index fs $CONDA_BLD_PATH
 fi
 cd $RECIPES_DIR
 
