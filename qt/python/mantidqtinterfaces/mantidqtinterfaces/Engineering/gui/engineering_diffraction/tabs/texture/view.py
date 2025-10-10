@@ -123,6 +123,9 @@ class TextureView(QtWidgets.QWidget, Ui_texture):
     def set_on_view_shape_requested(self, slot):
         self.sig_view_shape_requested.connect(slot)
 
+    def set_on_selection_state_changed(self, slot):
+        self.sig_selection_state_changed.connect(slot)
+
     @QtCore.Slot(bool)
     def _on_any_checkbox_toggled(self):
         self.sig_selection_state_changed.emit()

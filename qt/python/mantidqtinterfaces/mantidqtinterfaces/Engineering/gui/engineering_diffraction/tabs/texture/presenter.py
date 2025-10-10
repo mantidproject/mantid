@@ -76,7 +76,7 @@ class TexturePresenter:
         self.view.on_basis_changed(self.set_crystal_inputs_enabled)
         self.view.on_cif_changed(self.set_crystal_inputs_enabled)
         # handle changes to UI when updating selected workspace
-        self.view.sig_selection_state_changed.connect(self.on_selection_change)
+        self.view.set_on_selection_state_changed(self.on_selection_change)
 
         # ensure initial state is correct
         self.set_crystal_inputs_enabled()

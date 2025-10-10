@@ -209,9 +209,7 @@ class TestTexturePresenter(unittest.TestCase):
         self.presenter.model.exec_plot_pf.assert_called_once()
         canvas.draw.assert_called_once()
 
-    def test_set_rb_num_and_calibration_update(self):
-        self.presenter.set_rb_num("RB1234")
-        self.assertEqual(self.presenter.rb_num, "RB1234")
+    def test_set_calibration_update(self):
         mock_cal = MagicMock()
         self.presenter.update_calibration(mock_cal)
         self.assertEqual(self.presenter.current_calibration, mock_cal)
