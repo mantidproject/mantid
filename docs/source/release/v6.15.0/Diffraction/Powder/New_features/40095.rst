@@ -1,0 +1,2 @@
+- Support Pawley refinement of TOF workspaces in ``PawleyPattern1D`` class and added TOF peak profile ``BackToBackGauss`` for back-to-back exponential convoluted with a Gaussian.
+- Support zero shift and scale factor for reflection d-spacings in ``PawleyPattern1D`` class (equivalent to modifying TZERO and DIFC).
