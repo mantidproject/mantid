@@ -630,7 +630,7 @@ class FittingPlotModelTest(unittest.TestCase):
     @patch(f"{plot_model_path}.path.exists", return_value=False)
     @patch(f"{plot_model_path}.output_settings.get_output_path", return_value=os.path.join("mock", "output"))
     def test_save_files_with_group_creates_dirs_and_saves(self, mock_output_path, mock_exists, mock_makedirs, mock_save):
-        self.model.rb_num = "RB123"
+        self.model._rb_num = "RB123"
         self.model._save_files("param_ws", "FitParameters", "1.00", grouping="Texture20")
 
         expected_dirs = [
@@ -645,7 +645,7 @@ class FittingPlotModelTest(unittest.TestCase):
     @patch(f"{plot_model_path}.path.exists", return_value=False)
     @patch(f"{plot_model_path}.output_settings.get_output_path", return_value=os.path.join("mock", "output"))
     def test_save_files_with_no_group_creates_dirs_and_saves(self, mock_output_path, mock_exists, mock_makedirs, mock_save):
-        self.model.rb_num = "RB123"
+        self.model._rb_num = "RB123"
         self.model._save_files("param_ws", "FitParameters", "1.00", grouping="")
 
         expected_dirs = [
@@ -660,7 +660,7 @@ class FittingPlotModelTest(unittest.TestCase):
     @patch(f"{plot_model_path}.path.exists", return_value=False)
     @patch(f"{plot_model_path}.output_settings.get_output_path", return_value=os.path.join("mock", "output"))
     def test_save_files_with_no_RB_creates_dirs_and_saves(self, mock_output_path, mock_exists, mock_makedirs, mock_save):
-        self.model.rb_num = None
+        self.model._rb_num = None
         self.model._save_files("param_ws", "FitParameters", "1.00", grouping="")
 
         expected_dirs = [

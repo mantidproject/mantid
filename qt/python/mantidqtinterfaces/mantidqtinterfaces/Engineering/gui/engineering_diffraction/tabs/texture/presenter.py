@@ -52,6 +52,7 @@ class TexturePresenter:
         # set some metadata
         self.current_calibration = CalibrationInfo()
         self.instrument = "ENGINX"
+        self.rb_num = None
 
         # connect view slots
         # loader slots
@@ -346,3 +347,6 @@ class TexturePresenter:
         )
         self.view.btn_setCrystal.setEnabled(enabled)
         self.view.btn_setAllCrystal.setEnabled(self.model.can_set_all_crystal(enabled, self._has_selected_wss()))
+
+    def set_rb_num(self, rb_num):
+        self.rb_num = rb_num
