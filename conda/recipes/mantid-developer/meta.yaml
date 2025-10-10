@@ -46,7 +46,7 @@ requirements:
     - python-dateutil {{ python_dateutil }}
     - python {{ python }}
     - python.app # [osx]
-    - pyvista
+    - pyvista {{ pyvista }}
     - pyvistaqt
     - superqt
     - pyyaml {{ pyyaml }}
@@ -67,7 +67,6 @@ requirements:
     - texlive-core {{ texlive_core }} # [osx and not arm64]
     - toml {{ toml }}
     - versioningit {{ versioningit }}
-    - vtk {{ vtk }} # [linux]
     - zlib
     - joblib
     - orsopy {{ orsopy }}
