@@ -122,8 +122,7 @@ public:
 
 private:
   void compareTwoV3Ds(const V3D &a, const V3D &b, const double tol) {
-    for (size_t i = 0; i < 3; i++) {
-      TS_ASSERT_DELTA(a[i], b[i], tol);
-    }
+    const auto diff = a - b;
+    TS_ASSERT_DELTA(diff.norm(), 0.0, tol)
   }
 };
