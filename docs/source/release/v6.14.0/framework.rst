@@ -10,8 +10,8 @@ Algorithms
 
 New features
 ############
-- :ref:`PlotPeakByLogValue <algm-PlotPeakByLogValue>` has the new option ``AppendIdxToOutputName`` that when enabled with the ``CreateOutput`` option will append indices of output workspace names (spectrum, workspace or numeric) based on the input format.
-- :ref:`PlotPeakByLogValue <algm-PlotPeakByLogValue>` has the new option ``Output2D`` that when enabled with the ``CreateOutput`` option will create a 2D workspace of the results table that could be plotted.
+- :ref:`PlotPeakByLogValue <algm-PlotPeakByLogValue>` has the new option ``AppendIdxToOutputName`` that, when enabled with the ``CreateOutput`` option, will append indices of output workspace names (spectrum, workspace or numeric) based on the input format.
+- :ref:`PlotPeakByLogValue <algm-PlotPeakByLogValue>` has the new option ``Output2D`` that, when enabled with the ``CreateOutput`` option, will create a 2D workspace of the results table that could be plotted.
 - New algorithm :ref:`algm-EstimateScatteringVolumeCentreOfMass`, estimates the centre of mass of the intersection between an illumination volume and a sample shape.
 - ``jemalloc`` has been added to the conda activation/deactivation scripts to enable use when running using the python interface (and not Workbench). Previously it was only applied in the Workbench startup script. This should improve the performance of many algorithms.
 - Add ``UpdateUB`` option to :ref:`algm-IndexPeaks` that saves the optimized UB matrix in the case where there is a single run and ``CommonUBForAll=False``.
@@ -60,7 +60,7 @@ New features
 
 Bugfixes
 ############
-- When loading monitors with period data using :ref:`LoadNexusMonitors v2 <algm-LoadNexusMonitors-v2>`, period sample logs are now added to the resultant workspace; This is in line with the creation of Event Workspaces. This fixes a bug that occurred when :ref:`algm-NormaliseByCurrent` was used on the monitor workspace.
+- When loading monitors with period data using :ref:`LoadNexusMonitors v2 <algm-LoadNexusMonitors-v2>`, period sample logs are now added to the resultant workspace; this is in line with the creation of Event Workspaces. This fixes a bug that occurred when :ref:`algm-NormaliseByCurrent` was used on the monitor workspace.
 - Inconsistencies sometimes occur in period-related logs within Event NeXus files, such as duplicated entries with the same timestamps. Therefore, these repeated entries are reduced to a single entry. This can lead to runtime errors when loading the file which, in the past, have lead to crashes. In order to prevent this, the event workspace is now created without the period logs if issues are detected.
 
 Live Data
