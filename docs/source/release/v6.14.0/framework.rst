@@ -10,32 +10,33 @@ Algorithms
 
 New features
 ############
-- :ref:`PlotPeakByLogValue <algm-PlotPeakByLogValue>` has new "AppendIdxToOutputName" that when enabled with "CreateOutput" option will append indices of output workspaces (spectrum, workspace or numeric) based on the input format.
-- :ref:`PlotPeakByLogValue <algm-PlotPeakByLogValue>` has new "Output2D" that when enabled with "CreateOutput" option will create a 2D workspace of the results table that could be plotted.
-- :ref:`SNSPowderReduction<algm-SNSPowderReduction>` has been updated to more correctly apply absorption corrections.
-- New algorithm :ref:`algm-EstimateScatteringVolumeCentreOfMass`, allows user to estimate the centre of mass of the intersection between an illumination volume and a sample shape.
-- ``jemalloc`` has been add to the conda activation/deactivation scripts to enable use when running just ``python``. Previously it was only applied in the workbench startup script. This should improve the performance of many algorithms.
-- Add UpdateUB option to :ref:`algm-IndexPeaks` that enables saving the optimized UB matrix in the case where there is a single run and CommonUBForAll=False.
+- :ref:`PlotPeakByLogValue <algm-PlotPeakByLogValue>` has the new option ``AppendIdxToOutputName`` that, when enabled with the ``CreateOutput`` option, will append indices of output workspace names (spectrum, workspace or numeric) based on the input format.
+- :ref:`PlotPeakByLogValue <algm-PlotPeakByLogValue>` has the new option ``Output2D`` that, when enabled with the ``CreateOutput`` option, will create a 2D workspace of the results table that could be plotted.
+- New algorithm :ref:`algm-EstimateScatteringVolumeCentreOfMass`, estimates the centre of mass of the intersection between an illumination volume and a sample shape.
+- ``jemalloc`` has been added to the conda activation/deactivation scripts to enable use when running using the python interface (and not Workbench). Previously it was only applied in the Workbench startup script. This should improve the performance of many algorithms.
+- Add ``UpdateUB`` option to :ref:`algm-IndexPeaks` that saves the optimized UB matrix in the case where there is a single run and ``CommonUBForAll=False``.
+- Added new algorithm, :ref:`algm-TimeDifference-v1`, for calculating the time difference between a series of runs and a reference run.
 
 Bugfixes
 ############
-- fixed a performance regression in :ref:`SaveMD <algm-SaveMD>` that led to dramatically increased save times in release 6.13.1.1.
+- Fixed a performance regression in :ref:`SaveMD <algm-SaveMD>` that was leading to dramatically increased save times.
 
 Deprecated
 ############
 - :ref:`LoadPreNexusLive <algm-LoadPreNexusLive>` has been deprecated. There is no replacement.
 - :ref:`algm-SCDCalibratePanels-v1` has been deprecated, use :ref:`algm-SCDCalibratePanels-v2` instead.
+- Removed the experimental multiprocess loader from :ref:`algm-LoadEventNexus` and deprecated the ``LoadType`` property.
 
 Removed
 ############
-- - The algorithm `ConvertUnitsUsingDetectorTable` was deprecated in :ref:`Release 3.9.0 <v3.9.0>` and has now been removed.
+- The algorithm ``ConvertUnitsUsingDetectorTable``, deprecated in :ref:`Release 3.9.0 <v3.9.0>`, has now been removed.
 
 Fit Functions
 -------------
 
 New features
 ############
-- Optimize the addTies function by implementing a single sort operation after all ties are added, rather than sorting the ties after each individual addition
+- Performance optimisations have been made to the process of adding ties to a fit function.
 
 Bugfixes
 ############
@@ -59,51 +60,33 @@ New features
 
 Bugfixes
 ############
-- When loading monitors with period data (``LoadNexusMonitors2``), period sample logs are now added to the resultant workspace; This is in line with the creation of Event Workspaces. This fixes a bug that occurred when ``NormaliseByCurrent`` was used on the monitor workspace.
-- Inconsistencies sometimes occur in period-related logs within Event NeXus files, such as duplicated entries with the same timestamps. Therefore, these repeated entries are reduced to a single entry. This can lead to runtime errors when loading the file because it is not possible to determine the ending value from a TimeSeriesProperty with a single time entry. In the past, this has resulted in Mantid crashes. In order to prevent this, the related event workspace is now created without the period logs if issues are detected.
+- When loading monitors with period data using :ref:`LoadNexusMonitors v2 <algm-LoadNexusMonitors-v2>`, period sample logs are now added to the resultant workspace; this is in line with the creation of Event Workspaces. This fixes a bug that occurred when :ref:`algm-NormaliseByCurrent` was used on the monitor workspace.
+- Inconsistencies sometimes occur in period-related logs within Event NeXus files, such as duplicated entries with the same timestamps. Therefore, these repeated entries are reduced to a single entry. This can lead to runtime errors when loading the file which, in the past, have lead to crashes. In order to prevent this, the event workspace is now created without the period logs if issues are detected.
 
 Live Data
 ---------
 
 New features
 ############
-- updated header and source files for ADARA packets from v1.5.1 to v1.10.3
 
 Python
 ------
 
 New features
 ############
-- Makes the large offline documentation an optional rather than a mandatory install, reducing installer/download size
-  significantly.
+- The large offline documentation is now an optional install, reducing installer/download size significantly.
 
-  - Improvements:
+  - For users who frequently access online docs or have bandwidth constraints, this saves considerable disk space (potentially hundreds of MB).
+  - Those who prefer local/offline usage can still opt to install the documentation package and continue working without internet access.
+  - A clear indicator has been added to the Help Window's toolbar to show whether Mantid is displaying ``Local Docs`` or ``Online Docs``.
+  - Greater flexibility in how Mantid is set up — you choose whether to save space or have full local, offline docs.
+- Introduced a prototype "side-by-side" help system that includes both the legacy QtHelp-based viewer and a new Python-based Help Window using an embedded web browser (QWebEngine) to display documentation within Mantid Workbench.
 
-    - For users who frequently access online docs or have bandwidth constraints, this saves considerable disk space
-      (potentially hundreds of MB).
-    - Those who prefer local/offline usage can still opt to install the documentation package and continue working
-      without internet access.
-    - A clear indicator has been added to the Help Window’s toolbar to show whether Mantid is displaying ``Local Docs``
-      or ``Online Docs``.
-
-  - Key benefits:
-
-    - Greater flexibility in how Mantid is set up — you choose whether to save space or have full local, offline docs.
-- Introduced a prototype "side-by-side" help system that includes both the legacy QtHelp-based viewer and a new
-  Python-based Help Window using an embedded web browser (QWebEngine) to display documentation within Mantid Workbench.
-
-  - Improvements:
-
-    - Enhances the visual appearance and usability of in-app documentation.
-    - Supports richer HTML content and modern formatting, including MathJax for rendering mathematical equations.
-    - Delivers a smoother and more consistent experience when navigating help and reference material.
-
-  - Key benefits:
-
-    - Improved clarity for technical content (e.g. math and tables), more attractive and readable pages, and future
-      potential for interactive elements in documentation.
-- macOS users with Apple silicon (Arm-based architecture) are now warned if they have installed the Intel-based Mantid package.
-- Added new python algorithm, :ref:`algm-TimeDifference-v1`, for calculating the time difference between a series of runs and a reference run.
+  - Enhances the visual appearance and usability of in-app documentation.
+  - Supports richer HTML content and modern formatting, including MathJax for rendering mathematical equations.
+  - Delivers a smoother and more consistent experience when navigating help and reference material.
+  - Improved clarity for technical content (e.g. math and tables), more attractive and readable pages, and future potential for interactive elements in documentation.
+- macOS users with Apple Silicon (Arm-based architecture) are now warned if they have installed the Intel-based Mantid package.
 
 Bugfixes
 ############
@@ -115,7 +98,6 @@ Dependencies
 
 New features
 ############
-- Removed the experimental multiprocess loader from :ref:`algm-LoadEventNexus` and deprecated the ``LoadType`` property.
 - This release has removed all reliance on the `NeXus API <https://github.com/nexusformat/code>`_ .  Instead the ``File`` class was rewritten to use direct calls to the `HDF5 API <https://github.com/HDFGroup/hdf5/tree/4f1c3b6a4c7f2af6b617aede8dfb0ff1a6c58850>`_. In some places the C++ API (``H5Cpp``) is used for compatibility with other Mantid packages that also use the C++ API, but otherwise the low-level C API (``hdf5``) is used.  This decision was made because:
 
   1. The C++ API is unsupported by the HDF Group (in private correspondence they suggested we use a 3rd party API).
@@ -134,6 +116,7 @@ New features
   Those interested in the details of the changes can see them in the (developer centric)
   `github issue <https://github.com/mantidproject/mantid/issues/38332>`_ or by following the `Nexus tag <https://github.com/mantidproject/mantid/pulls?q=is%3Apr+is%3Aclosed+label%3ANexus>`_.
 - Pin build 2 of ``seekpath`` v2.1.0 which removes an erroneous dependency on the ``future`` package. ``seekpath`` is a dependency of ``euphonic``. ``future`` is not used and has a known vulnerability `CVE-2025-50817 <https://github.com/advisories/GHSA-xqrq-4mgf-ff32>`_ .
+- Updated header and source files for ADARA packets from v1.5.1 to v1.10.3
 
 Bugfixes
 ############
