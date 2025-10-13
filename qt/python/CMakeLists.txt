@@ -1,3 +1,2 @@
 add_subdirectory(mantidqt)
 add_subdirectory(mantidqtinterfaces)
-add_subdirectory(instrumentview)
