@@ -30,7 +30,7 @@ Default Settings
 ----------------
 
 #. In the ``Options`` menu, change ``Default Energy Units`` from ``meV`` to ``cm-1`` and ``Cut algorithm default`` from ``Rebin (Averages Counts)`` to ``Integration (Sum Counts)``.
-#. The ``en`` setting on the ``Slice`` tab changes from ``meV`` to ``cm-1`` and the values in the row labelled ``y`` change. Please note that the ``Slice`` and ``Cut`` tabs are not enabled before at least one data set was loaded.
+#. The ``en`` setting on the ``Slice`` tab changes from ``meV`` to ``cm-1`` and the values in the row labelled ``y`` change. Please note that the ``Slice`` and ``Cut`` tabs are not enabled before at least one data set has been loaded.
 #. Navigate to the ``Cut`` tab
 #. Verify that ``en`` is set to ``cm-1`` and ``Cut Algorithm`` to ``Integration (Sum Counts)``
 #. Change both settings back to their original values, ``Default Energy Units`` to ``meV`` and ``Cut algorithm default`` to ``Rebin (Averages Counts)``.
