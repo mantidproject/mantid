@@ -55,6 +55,12 @@ class FlatBankInfo:
             y_offset = iy * self.steps[1]
             for ix in range(x_pixels):
                 x_offset = ix * self.steps[0]
+                index = iy * x_pixels + ix
+                # Masked workspaces can have fewer detectors
+                # than the number of pixels specified in the
+                # bank
+                if index >= len(self.detector_ids):
+                    return
                 id = self.detector_ids[iy * x_pixels + ix]
                 detector_position = np.add(origin, [x_offset, y_offset, 0])
                 self.detector_id_position_map[id] = detector_position
@@ -64,7 +70,7 @@ class SideBySide(Projection):
     def __init__(
         self,
         workspace: Workspace2D,
-        detector_ids: list[int] | np.ndarray,
+        detector_ids: np.ndarray,
         sample_position: np.ndarray,
         root_position: np.ndarray,
         detector_positions: list[DetectorPosition] | np.ndarray,
@@ -128,12 +134,16 @@ class SideBySide(Projection):
             return flat_banks
 
         for bank in rectangular_banks:
+            bank_detector_ids = np.array(range(bank.minDetectorID(), bank.maxDetectorID() + 1))
+            valid_detector_ids = self._detector_ids[np.isin(self._detector_ids, bank_detector_ids)]
+            if len(valid_detector_ids) == 0:
+                continue
             flat_bank = FlatBankInfo()
             flat_bank.detector_id_position_map.clear()
             flat_bank.reference_position = np.array(bank.getPos())
             rotation = bank.getRotation()
             flat_bank.rotation = Rotation.from_quat([rotation.imagI(), rotation.imagJ(), rotation.imagK(), rotation.real()])
-            flat_bank.detector_ids = list(range(bank.minDetectorID(), bank.maxDetectorID() + 1))
+            flat_bank.detector_ids = list(valid_detector_ids)
             flat_bank.dimensions = np.abs([bank.xsize(), bank.ysize(), bank.zsize()])
             flat_bank.steps = np.abs([bank.xstep(), bank.ystep(), bank.zstep()])
             flat_bank.pixels = [bank.xpixels(), bank.ypixels(), bank.zpixels()]

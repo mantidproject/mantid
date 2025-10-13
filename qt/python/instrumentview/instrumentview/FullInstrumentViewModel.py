@@ -5,9 +5,9 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from instrumentview.Detectors import DetectorInfo
-import instrumentview.Projections.SphericalProjection as iv_spherical
-import instrumentview.Projections.CylindricalProjection as iv_cylindrical
-import instrumentview.Projections.SideBySide as iv_side_by_side
+from instrumentview.Projections.SphericalProjection import SphericalProjection
+from instrumentview.Projections.CylindricalProjection import CylindricalProjection
+from instrumentview.Projections.SideBySide import SideBySide
 from mantid.dataobjects import Workspace2D
 from mantid.simpleapi import CreateDetectorTable, ExtractSpectra, ConvertUnits, AnalysisDataService, SumSpectra, Rebin
 import numpy as np
@@ -220,17 +220,13 @@ class FullInstrumentViewModel:
     def calculate_projection(self, projection_option: str, axis: list[int]):
         """Calculate the 2D projection with the specified axis. Can be cylindrical, spherical, or side-by-side."""
         if projection_option == self._SIDE_BY_SIDE:
-            projection = iv_side_by_side.SideBySide(
+            projection = SideBySide(
                 self._workspace, self.detector_ids, self.sample_position, self._root_position, self.detector_positions, np.array(axis)
             )
         elif projection_option.startswith("Spherical"):
-            projection = iv_spherical.SphericalProjection(
-                self.sample_position, self._root_position, self.detector_positions, np.array(axis)
-            )
+            projection = SphericalProjection(self.sample_position, self._root_position, self.detector_positions, np.array(axis))
         elif projection_option.startswith("Cylindrical"):
-            projection = iv_cylindrical.CylindricalProjection(
-                self.sample_position, self._root_position, self.detector_positions, np.array(axis)
-            )
+            projection = CylindricalProjection(self.sample_position, self._root_position, self.detector_positions, np.array(axis))
         else:
             raise ValueError(f"Unknown projection type: {projection_option}")
 
