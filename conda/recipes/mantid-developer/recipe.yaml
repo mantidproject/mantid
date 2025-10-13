@@ -13,32 +13,20 @@ requirements:
     - ccache
     - cmake ${{ cmake }}
     - rattler-index
-    - if: win
-      then: conda-wrappers
     - doxygen ${{ doxygen }}
     - eigen ${{ eigen }}
     - euphonic ${{ euphonic }}
     # remove seekpath altogether once newer euphonic is released
     - seekpath ==2.1.0 *2
-    - if: win
-      then: gdk-pixbuf ${{ gdk_pixbuf }}
     - graphviz ${{ graphviz }}
     - gsl ${{ gsl }}
     - h5py
     - hdf4 ${{ hdf4 }}
     - hdf5 ${{ hdf5 }}
-    - if: linux
-      then: jemalloc ${{ jemalloc }}
     - jsoncpp ${{ jsoncpp }}
-    - if: win
-      then: lib3mf
     - libboost-devel ${{ libboost }}
     - libboost-python-devel ${{ libboost }}
-    - if: osx or linux
-      then: libopenblas ${{ libopenblas }}
     - librdkafka ${{ librdkafka }}
-    - if: linux
-      then: lz4
     - matplotlib ${{ matplotlib }}
     - muparser ${{ muparser }}
     - ninja ${{ ninja }}
@@ -52,13 +40,9 @@ requirements:
     - pyqt ${{ pyqt }}
     - pyqt5-sip ${{ pyqt5_sip }}
     - pyqtwebengine
-    - if: linux
-      then: pystack
     - pystog ${{ pystog }}
     - python-dateutil ${{ python_dateutil }}
     - python ${{ python }}
-    - if: osx
-      then: python.app
     - pyvista ${{ pyvista }}
     - pyvistaqt
     - superqt
@@ -67,8 +51,6 @@ requirements:
     - qt-main ${{ qt_main }}
     - qtconsole ${{ qtconsole }}
     - qtpy ${{ qtpy }}
-    - if: linux
-      then: qt-gtk-platformtheme
     - quasielasticbayes ${{ quasielasticbayes }}
     - quickbayes ${{ quickbayes }}
     # something is wrong with versioningit and rattler-build 0.48
@@ -79,16 +61,23 @@ requirements:
     - sphinx ${{ sphinx }}
     - sphinx_bootstrap_theme ${{ sphinx_bootstrap_theme }}
     - tbb-devel ${{ tbb }}
-    - if: linux
-      then: texlive-core ${{ texlive_core }}
     - toml ${{ toml }}
     - versioningit ${{ versioningit }}
     - zlib
     - joblib
     - orsopy ${{ orsopy }}
-    # Not Windows, OpenGL implementation:
+    # Development tooling
+    - cppcheck==2.18.1
+    - pre-commit>=4.0
+
     - if: linux
       then:
+        - jemalloc ${{ jemalloc }}
+        - lz4
+        - pystack
+        - qt-gtk-platformtheme
+        - texlive-core ${{ texlive_core }}
+        # OpenGL implementation:
         - libgl-devel
         - gxx_linux-64 ${{ cxx_compiler_version }}
         - libglu ${{ libglu }}
@@ -98,20 +87,29 @@ requirements:
         - xorg-libxi>=1.7.10
         - xorg-libxscrnsaver>=1.2.3
         - xorg-libxtst>=1.2.3
-    # Development tooling
-    - cppcheck==2.18.1
-    - if: linux
-      then: gcovr>=4.2
-    - pre-commit>=4.0
-    - if: osx
-      then: libcxx
-    # Use conda version of clang to get matching CXXFLAGS.
-    # Pinned to same version as conda forge: https://github.com/conda-forge/conda-forge-pinning-feedstock/blob/main/recipe/conda_build_config.yaml
+        # Development tooling:
+        - gcovr>=4.2
+
+    - if: win
+      then:
+        - conda-wrappers
+        - gdk-pixbuf ${{ gdk_pixbuf }}
+        - lib3mf
+
     - if: osx
       then:
+        - python.app
+        # Use conda version of clang to get matching CXXFLAGS.
+        # Pinned to same version as conda forge: https://github.com/conda-forge/conda-forge-pinning-feedstock/blob/main/recipe/conda_build_config.yaml
         - clang_osx-arm64 ${{ c_compiler_version }}
         - clangxx_osx-arm64 ${{ cxx_compiler_version }}
         - llvm-openmp ${{ llvm_openmp }}
+        # Development tooling:
+        - libcxx
+
+    - if: osx or linux
+      then:
+        - libopenblas ${{ libopenblas }}
 
 about:
   license: GPL-3.0-or-later
