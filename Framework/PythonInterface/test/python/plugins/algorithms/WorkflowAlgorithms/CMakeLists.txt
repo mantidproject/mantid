@@ -99,6 +99,7 @@ set(TEST_PY_FILES
     WANDPowderReductionTest.py
     InterpolateBackgroundTest.py
     HFIRGoniometerIndependentBackgroundTest.py
+    HFIRPowderReductionTest.py
 )
 check_tests_valid(${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES})
 
