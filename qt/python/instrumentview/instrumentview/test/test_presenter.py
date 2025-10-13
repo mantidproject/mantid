@@ -167,6 +167,12 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._presenter.replace_workspace_callback("not_my_workspace", None)
         self._mock_view.close.assert_not_called()
 
+    @mock.patch.object(FullInstrumentViewModel, "default_projection", new_callable=mock.PropertyMock)
+    def test_default_projection(self, mock_default_projection):
+        mock_default_projection.return_value = "SPHERICAL_Z"
+        default_index, _ = self._presenter.projection_combo_options()
+        self.assertEqual(3, default_index)
+
 
 if __name__ == "__main__":
     unittest.main()
