@@ -17,7 +17,6 @@ build:
     entry_points:
       - workbench = workbench.app.mantidworkbench_launch_wrapper:launch
       - mantidworkbench = workbench.app.mantidworkbench_launch_wrapper:launch
-
     use_python_app_entrypoint: true
 
 requirements:
@@ -26,13 +25,6 @@ requirements:
     - ninja ${{ ninja }}
     - cmake ${{ cmake }}
     - git
-    - if: build_platform != target_platform
-      then:
-        - python ${{ python }}
-        - cross-python_${{ target_platform }}
-        - setuptools
-        - numpy ${{ numpy }}
-        - pyqt ${{ pyqt }}
   host:
     - setuptools
     - mantidqt == ${{ version }}
@@ -47,23 +39,25 @@ requirements:
         - xorg-xorgproto
   run:
     - ipykernel
-    - if: linux
-      then: lz4
     - mantidqt == ${{ version }}
     - psutil ${{ psutil }}
     - ${{ pin_compatible("python", upper_bound="x.x") }}
     - matplotlib ${{ matplotlib }}
-    - if: osx
-      then: python.app
-    - if: linux
-      then: pystack
-    - if: win
-      then: gdk-pixbuf ${{ gdk_pixbuf }}
     - pyvista ${{ pyvista }}
     - pyvistaqt
     - superqt
     - qtconsole ${{ qtconsole }}
     - ${{ pin_compatible("setuptools", upper_bound="x.x") }}
+    - if: linux
+      then:
+        - pystack
+        - lz4
+    - if: osx
+      then:
+        - python.app
+    - if: win
+      then:
+        - gdk-pixbuf ${{ gdk_pixbuf }}
   run_constraints:
     - mslice ${{ mslice }}
     - mantiddocs == ${{ version }}

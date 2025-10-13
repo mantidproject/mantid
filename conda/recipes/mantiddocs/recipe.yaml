@@ -19,16 +19,11 @@ build:
 requirements:
   build:
     - ${{ compiler("cxx") }}
-    - if: osx or linux
-      then: ninja ${{ ninja }}
     - cmake ${{ cmake }}
     - git
-    - if: build_platform != target_platform
+    - if: osx or linux
       then:
-        - python ${{ python }}
-        - cross-python_${{ target_platform }}
-        - setuptools
-        - numpy ${{ numpy }}
+        - ninja ${{ ninja }}
   host:
     - mantid == ${{ version }}
     - mantidqt == ${{ version }}
@@ -46,7 +41,6 @@ requirements:
         - xorg-libxxf86vm
         - xorg-libx11
         - xorg-xorgproto
-
   ignore_run_exports:
     from_package:
       - ${{ compiler('cxx') }}

@@ -17,38 +17,27 @@ build:
 requirements:
   build:
     - ${{ compiler("c") }}
-    - if: linux
-      then: ${{ stdlib("c") }}
     - ${{ compiler("cxx") }}
-    - if: osx
-      then: llvm-openmp ${{ llvm_openmp }}
-    - if: linux
-      then: libgomp
     - ninja ${{ ninja }}
     - cmake ${{ cmake }}
     - git
-    - if: build_platform != target_platform
+    - if: linux
       then:
-        - python ${{ python }}
-        - cross-python_${{ target_platform }}
-        - setuptools
-        - numpy ${{ numpy }}
+        - ${{ stdlib("c") }}
+        - libgomp
+    - if: osx
+      then:
+        - llvm-openmp ${{ llvm_openmp }}
   host:
     - eigen ${{ eigen }}
     - gsl ${{ gsl }}
     - hdf4 ${{ hdf4 }}
     - h5py
     - hdf5 ${{ hdf5 }}
-    - if: osx or linux
-      then: jemalloc  ${{ jemalloc }}
     - jsoncpp ${{ jsoncpp }}
     - libboost-devel ${{ libboost }}
     - libboost-python-devel ${{ libboost }}
-    - if: osx or linux
-      then: libopenblas ${{ libopenblas }}
     - librdkafka ${{ librdkafka }}
-    - if: win
-      then: lib3mf
     - muparser ${{ muparser }}
     - numpy ${{ numpy }}
     - occt ${{ occt }}
@@ -66,15 +55,18 @@ requirements:
         - xorg-libxxf86vm
         - xorg-libx11
         - xorg-xorgproto
+    - if: win
+      then:
+        - lib3mf
+    - if: osx or linux
+      then:
+        - jemalloc  ${{ jemalloc }}
+        - libopenblas ${{ libopenblas }}
   run:
     - ${{ pin_compatible("gsl", upper_bound="x.x") }}
     - ${{ pin_compatible("hdf4", upper_bound="x.x") }}
     - h5py
     - ${{ pin_compatible("hdf5", upper_bound="x.x") }}
-    - if: osx or linux
-      then: jemalloc ${{ jemalloc }}
-    - if: win
-      then: lib3mf
     - muparser ${{ muparser }}
     - occt ${{ occt }}
     - pycifrw
@@ -87,13 +79,20 @@ requirements:
     # remove seekpath altogether once newer euphonic is released
     - seekpath ==2.1.0 *2
     - toml ${{ toml }}
-    - if: linux
-      then: libglu ${{ libglu }}
     - joblib
     - orsopy ${{ orsopy }}
     - quasielasticbayes ${{ quasielasticbayes }}
     - quickbayes ${{ quickbayes }}
     - zlib
+    - if: linux
+      then:
+        - libglu ${{ libglu }}
+    - if: win
+      then:
+        - lib3mf
+    - if: osx or linux
+      then:
+        - jemalloc ${{ jemalloc }}
   run_exports:
     - ${{ pin_subpackage('mantid', upper_bound='x.x.x') }}
   run_constraints:
@@ -116,5 +115,4 @@ extra:
   recipe-maintainers:
     - thomashampson
     - sf1919
-    - martyngigg
     - peterfpeterson

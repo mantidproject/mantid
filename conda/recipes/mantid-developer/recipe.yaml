@@ -69,7 +69,6 @@ requirements:
     # Development tooling
     - cppcheck==2.18.1
     - pre-commit>=4.0
-
     - if: linux
       then:
         - jemalloc ${{ jemalloc }}
@@ -89,13 +88,11 @@ requirements:
         - xorg-libxtst>=1.2.3
         # Development tooling:
         - gcovr>=4.2
-
     - if: win
       then:
         - conda-wrappers
         - gdk-pixbuf ${{ gdk_pixbuf }}
         - lib3mf
-
     - if: osx
       then:
         - python.app
@@ -106,7 +103,6 @@ requirements:
         - llvm-openmp ${{ llvm_openmp }}
         # Development tooling:
         - libcxx
-
     - if: osx or linux
       then:
         - libopenblas ${{ libopenblas }}

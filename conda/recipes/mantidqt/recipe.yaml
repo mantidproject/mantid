@@ -17,33 +17,18 @@ build:
 requirements:
   build:
     - ${{ compiler("c") }}
-    - if: linux
-      then: ${{ stdlib("c") }}
     - ${{ compiler("cxx") }}
-    - if: osx
-      then: llvm-openmp ${{ llvm_openmp }}
-    - if: linux
-      then: libgomp
     - ninja ${{ ninja }}
     - cmake ${{ cmake }}
     - git
-    - if: build_platform != target_platform
+    - if: linux
       then:
-        - python ${{ python }}
-        - cross-python_${{ target_platform }}
-        - setuptools
-        - numpy ${{ numpy }}
-        - pyqt ${{ pyqt }}
-        - pyqt5-sip ${{ pyqt5_sip }}
-        - pyqtwebengine
-        - qt-main ${{ qt_main }}
-        - sip
+        - ${{ stdlib("c") }}
+        - libgomp
   host:
     - libboost-devel ${{ libboost }}
     - libboost-python-devel ${{ libboost }}
     - eigen ${{ eigen }}
-    - if: osx or linux
-      then: libopenblas ${{ libopenblas }}
     - mantid == ${{ version }}
     - python ${{ python }}
     - pip ${{ pip }}
@@ -56,15 +41,15 @@ requirements:
     - setuptools
     - tbb-devel ${{ tbb }}
     - versioningit ${{ versioningit }}
-    - if: build_platform != target_platform
-      then:
-        - numpy ${{ numpy }}
     - if: linux
       then:
         - libgl-devel
         - xorg-libxxf86vm
         - xorg-libx11
         - xorg-xorgproto
+    - if: osx or linux
+      then:
+        - libopenblas ${{ libopenblas }}
   run:
     - mantid == ${{ version }}
     - matplotlib ${{ matplotlib }}
@@ -73,7 +58,8 @@ requirements:
     - qtpy ${{ qtpy }}
     - python
     - if: linux
-      then: qt-gtk-platformtheme
+      then:
+        - qt-gtk-platformtheme
   run_exports:
     - ${{ pin_subpackage('mantidqt', upper_bound='x.x.x') }}
 
