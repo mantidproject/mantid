@@ -229,7 +229,9 @@ class HelpWindowModel:
         # Some help urls may end with a paragraph section denoted by a hash (called a fragment).
         # We need to remove this before executing the logic for checking whether the file exists etc.
         # It is then re-added to the QUrl at the end.
-        relative_url, fragment = relative_url.split("#")
+        fragment = ""
+        if "#" in relative_url:
+            relative_url, fragment = relative_url.split("#", 1)
 
         # Default page logic
         if not relative_url or not relative_url.lower().endswith((".html", ".htm")):
