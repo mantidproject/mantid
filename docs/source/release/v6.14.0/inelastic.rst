@@ -7,12 +7,12 @@ Inelastic Changes
 
 New Features
 ------------
-.. amalgamate:: Inelastic/New_features
+
 
 
 Bugfixes
 --------
-.. amalgamate:: Inelastic/Bugfixes
+
 
 
 Algorithms
@@ -20,10 +20,9 @@ Algorithms
 
 New features
 ############
-.. amalgamate:: Inelastic/Algorithms/New_features
 
 Bugfixes
 ############
-.. amalgamate:: Inelastic/Algorithms/Bugfixes
+
 
 :ref:`Release 6.14.0 <v6.14.0>`

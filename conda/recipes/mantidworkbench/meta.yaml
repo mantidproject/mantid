@@ -45,7 +45,7 @@ requirements:
     - python.app  # [osx]
     - pystack  # [linux]
     - gdk-pixbuf {{ gdk_pixbuf }} # [win]
-    - pyvista
+    - pyvista {{ pyvista }}
     - pyvistaqt
     - superqt
     - qtconsole {{ qtconsole }}
