@@ -556,7 +556,7 @@ class SANSDataProcessorGui(QMainWindow, Ui_SansDataProcessorWindow):
 
     @staticmethod
     def _on_help_button_clicked():
-        InterfaceManager().showHelpPage("interfaces/isis_sans/ISIS%20SANS.html")
+        InterfaceManager().showHelpPage("interfaces/isis_sans/ISIS SANS.html")
 
     def _on_output_mode_clicked(self):
         """This method is called when an output mode is clicked on the gui"""
