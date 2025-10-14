@@ -82,6 +82,12 @@ fi
 # Skip Windows and macOS builds if target branch is not main
 TARGET_BRANCH="${CHANGE_TARGET:-$(git rev-parse --abbrev-ref HEAD)}"
 
+echo "DEBUG: CHANGE_TARGET=$CHANGE_TARGET"
+echo "DEBUG: CHANGE_BRANCH=$CHANGE_BRANCH"
+echo "DEBUG: BRANCH_NAME=$BRANCH_NAME"
+echo "DEBUG: TARGET_BRANCH=$TARGET_BRANCH"
+echo "DEBUG: PLATFORM=$PLATFORM"
+
 if [[ "$PLATFORM" == win-* || "$PLATFORM" == osx-* ]]; then
     if [[ "$TARGET_BRANCH" == "ornl-next" ]]; then
         echo "Skipping $PLATFORM build: target branch is '$TARGET_BRANCH' (not 'main')."
