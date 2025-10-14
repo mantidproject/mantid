@@ -107,7 +107,7 @@ class PlotConfigDialogPresenter:
             # If the dialog has the images tab then go to the section on image plots.
             InterfaceManager().showHelpPage(HELP_URL + "#image-plots")
         else:
-            InterfaceManager().showHelpPage(HELP_URL + "#figureoptionsgear-png-ptions-menu")
+            InterfaceManager().showHelpPage(HELP_URL + "#options-menu")
 
     def forget_tab_from_presenter(self, tab_presenter):
         """Given the presenter of a tab, forgets the tab's presenter and view
