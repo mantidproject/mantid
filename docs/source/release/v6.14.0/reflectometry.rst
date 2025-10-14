@@ -7,7 +7,7 @@ Reflectometry Changes
 
 New Features
 ------------
-- The line plot in the ``Reduction Preview`` tab of the ``Reflectometry`` GUI now has a symlog Y axis.
+- The line plot in the :ref:`Reduction Preview <refl_preview>` tab of the :ref:`ISIS Reflectometry <interface-isis-refl>` GUI now has a symlog Y axis.
 
 Bugfixes
 --------
