@@ -79,6 +79,16 @@ if [ "$is_allowed" == false ]; then
     PLATFORM=""
 fi
 
+# Skip Windows and macOS builds if target branch is not main
+TARGET_BRANCH="${CHANGE_TARGET:-$(git rev-parse --abbrev-ref HEAD)}"
+
+if [[ "$PLATFORM" == win-* || "$PLATFORM" == osx-* ]]; then
+    if [[ "$TARGET_BRANCH" == "ornl-next" ]]; then
+        echo "Skipping $PLATFORM build: target branch is '$TARGET_BRANCH' (not 'main')."
+        exit 0
+    fi
+fi
+
 # Handle flag inputs
 while [ ! $# -eq 0 ]
 do
