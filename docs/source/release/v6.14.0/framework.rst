@@ -90,8 +90,7 @@ New features
 
 Bugfixes
 ############
-
-
+- Previously, Mantid could crash if the material set on a sample already existed, rather than being created from scratch. Improvements have now been made in an attempt to rectify the issues.
 
 Dependencies
 ------------------
