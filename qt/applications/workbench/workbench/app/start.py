@@ -9,7 +9,7 @@ import argparse
 import subprocess
 import sys
 
-from mantid.kernel.environment import is_linux, is_windows
+from mantid.kernel.environment import is_linux
 from mantid.kernel import Logger
 
 if is_linux():
@@ -38,17 +38,28 @@ def start_error_reporter(workbench_pid):
     )
 
 
-def setup_core_dump_files():
+def _setup_core_dump_files():
     """
     This is done so that the error reporter can locate and read any core files produced.
     This allows us to recover traces from c++ based crashes.
     """
-    if is_linux():
-        try:
-            resource.setrlimit(resource.RLIMIT_CORE, (resource.RLIM_INFINITY, resource.getrlimit(resource.RLIMIT_CORE)[1]))
-        except ValueError as e:
-            log = Logger("Mantid Start")
-            log.warning(f"Problem when enabling core dumps\n{str(e)}")
+    try:
+        resource.setrlimit(resource.RLIMIT_CORE, (resource.RLIM_INFINITY, resource.getrlimit(resource.RLIMIT_CORE)[1]))
+    except ValueError as e:
+        log = Logger("Mantid Start")
+        log.warning(f"Problem when enabling core dumps\n{str(e)}")
+
+
+def _raise_open_file_descriptor_limit():
+    """
+    Done to avoid the limit being reached when running pystack in the error reporter
+    """
+    try:
+        nofile_max = resource.getrlimit(resource.RLIMIT_NOFILE)[1]
+        resource.setrlimit(resource.RLIMIT_NOFILE, (nofile_max, nofile_max))
+    except ValueError as e:
+        log = Logger("Mantid Start")
+        log.warning(f"Problem when raising limit for number of open file descriptors\n{str(e)}")
 
 
 def start(options: argparse.ArgumentParser):
@@ -74,9 +85,10 @@ def start(options: argparse.ArgumentParser):
         if options.quit:
             launch_command += " --quit"
 
-        if not is_windows():
-            # preexec_fn is not supported on Windows
-            workbench_process = subprocess.Popen(launch_command, shell=True, preexec_fn=setup_core_dump_files)
+        if is_linux():
+            # currently, reading coredump files for error reports is only supported on linux
+            _raise_open_file_descriptor_limit()
+            workbench_process = subprocess.Popen(launch_command, shell=True, preexec_fn=_setup_core_dump_files)
         else:
             workbench_process = subprocess.Popen(launch_command, shell=True)
 
