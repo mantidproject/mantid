@@ -61,29 +61,37 @@ This is shown in the first of the two graphics below.
 The second graphic then shows the same intensity plot, but with the intensity values convolved into the radial coordinate,
 which gives another spatial representation of the intensity of the bragg reflection as a function of direction around the sample.
 
-.. figure:: /images/texture-direction-sphere.gif
-   :alt: GIF showing how the set of direction vectors trace out the surface of a sphere
+.. list-table::
+   :widths: 50 50
+   :header-rows: 0
+   :align: center
 
-   Figure 2 - Animation showing how the complete set of direction vectors around a sample trace out the surface of a sphere.
+   * - .. figure:: /images/texture-direction-sphere.gif
+          :alt: Direction vectors trace out sphere
+          :width: 90%
 
-.. figure:: /images/texture-direction-peaks.gif
-   :alt: GIF showing how the set of direction vectors trace out the surface of a sphere, with intensity convolved into position
+          Figure 2 - Direction vectors around a sample.
 
-   Figure 3 - Animation showing the complete set of direction vectors convolved with the intensity of a bragg reflection.
+     - .. figure:: /images/texture-direction-peaks.gif
+          :alt: Direction vectors with intensity
+          :width: 90%
+
+          Figure 3 - Directions convolved with intensity.
 
 Much like how maps of the world provide 2D representations of the 3D globe, we can do the same thing by projecting this 3D pole figure down into a 2D pole figure.
 The below graphic shows the relationship between the 2D pole figure which are commonly encountered and that 3D sphere which defines all unique directions around a sample.
 
 .. figure:: /images/texture-pole-figure-interpretation.gif
    :alt: GIF showing the relationship between the 3D and 2D representations of the pole figure
+   :width: 500px
 
    Figure 4 - Animation showing how the relationship between the 3D and 2D representations of the pole figure.
 
 The surface of this sphere is again coloured by the intensity of a selected bragg peak, giving a 3D pole figure.
 Additionally, the graphic shows the distortion between this spherical representation and the intensity convolved representation.
 
-Depending upon the exact transformation chosen, the 2D pole figure can be chosen to maintain/highlight a desired geometric relation in the 3D surface
-(e.g. the azimuthal and stereographic projections provided maintain some aspects of the angular relationships, which can be useful for viewing the symmetry of poles).
+The way the 3D pole figure is projected into the plane matters, as different transformations compromise on which geometric properties of the 3D surface are preseverved in the 2D representation
+(e.g. the azimuthal and stereographic projections provided maintain angular relationships, which can be useful for viewing the symmetry relationships of poles).
 
 In reality, we cannot sample every possible point on this sphere -- we are experimentally confined by our detector geometries and finite time, to only sample a subset of these points.
 These are the points which are displayed in the experimental pole figure scatter plot.
@@ -132,9 +140,9 @@ for what sample orientations data is collected.
 
 In mantid, the first of these -- the detector groupings, can be decided after the experiment has been run.
 The reality here (at least for ENGIN-X), is that although it is possible to generate an experimental pole figure using each individual detector pixel as a unique point,
-the confidence in the metric being extracted from peak fit will be a product of the signal-to-noise-ratio of those individual signals. This signal-to-noise-ratio can be improved by
-grouping neighbouring pixels together, thus obtaining cleaner spectra to fit, at the trade off of spatial resolution. Alternatively, beam access permitting, longer collection times
-can be used, allowing finer pixel groupings to be accessible and improve the spatial resolution. The below figure shows the same runs processed using
+the spectra collected from these may suffer as a result of poor signal-to-noise-ratio of those individual signals. This signal-to-noise-ratio can be improved by
+grouping neighbouring pixels together, thus obtaining cleaner spectra to fit, at the trade off of angular resolution. Alternatively, beam access permitting, longer collection times
+can be used to improve signal-to-noise, theoretically allowing these finer pixel groupings to be feasible. The below figure shows the same runs processed using
 different detector groupings, and the effect this has on the pole figure coverage.
 
 .. figure:: /images/texture-pole-figure-groupings.png
@@ -150,7 +158,7 @@ and you aim to do this in a time efficient manner, by minimising overlap of succ
 is that you will likely end up with an experimental pole figure which has fewer data points around the actual regions of interest.
 As such, again time permitting, a dual approach may prove advantageous for unknown textures, where a preliminary full coverage dataset is collect and, upon subsequent
 inspection, addition runs are collected targeting the identified regions of interest.
-A discussion of possible exploratory coverage schemes is given by Malamud [#detBanks]_.
+A discussion of possible exploratory coverage schemes is given in [#detBanks]_.
 
 Producing Pole Figures within Mantid
 ====================================
@@ -252,7 +260,7 @@ axes of each goniometer axis. The sense of the rotation around these axes are th
 one for each axis, where rotations are counter-clockwise (1) or clockwise (-1).
 
 If ``orient_file_is_euler`` is ``False``, the orientation file is expected to be a text file with a row for each run and, within each row the first 9 values are expected to
-be a flattened 3x3 transformation matrix. It is anticipated that this matrix would be extracted from the `SscansS2 <https://isisneutronmuon.github.io/SScanSS-2>` software, and a script is provided below for converted
+be a "C-style" (row-major) flattened 3x3 transformation matrix. It is anticipated that this matrix would be extracted from the `SscansS2` software [#sscanss]_, and a script is provided below for converted
 the transformation matrices from SscansS2 reference frame into mantid. In principle, a flattened matrix from any sample positioner could be given here instead.
 
 .. code:: python
@@ -767,6 +775,7 @@ of pole figures over a set of different peaks and parameters.
 References
 ==========
 
-.. [#detBanks] J. Appl. Cryst. (2014). 47, 1337–1354 doi:10.1107/S1600576714012710
+.. [#detBanks] Malamud, F., Santisteban, J. R., Vicente Alvarez, M. A., Bolmaro, R., Kelleher, J., Kabra, S. & Kockelmann, W. (2014). Texture analysis with a time-of-flight neutron strain scanner. J. Appl. Cryst. 47, 1337–1354 doi:10.1107/S1600576714012710
+.. [#sscanss] `<https://isisneutronmuon.github.io/SScanSS-2>`
 
 .. categories:: Concepts
