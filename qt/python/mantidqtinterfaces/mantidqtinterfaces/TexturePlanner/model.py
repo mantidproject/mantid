@@ -329,7 +329,7 @@ class TexturePlannerModel(object):
         det_pos = np.asarray(
             [spec_info.position(i) / np.linalg.norm(spec_info.position(i)) for i in range(1, group_ws.getNumberHistograms())]
         )
-        ki = -np.array(comp_info.sourcePosition())
+        ki = np.zeros(3) - np.array(comp_info.sourcePosition())
         ki_norm = ki / np.linalg.norm(ki)
         detQs_lab = det_pos - ki_norm
         self.detQs_lab = detQs_lab / np.linalg.norm(detQs_lab, axis=1)[:, None]
