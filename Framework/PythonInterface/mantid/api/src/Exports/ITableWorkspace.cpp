@@ -34,8 +34,11 @@
 
 #include <cstdint>
 #include <cstring>
+#include <iostream>
+#include <numpy/ndarrayobject.h>
 #include <numpy/ndarraytypes.h>
 #include <numpy/npy_common.h>
+#include <pylifecycle.h>
 #include <pytypedefs.h>
 #include <tuple>
 #include <typeinfo>
@@ -323,37 +326,8 @@ PyObject *column(const ITableWorkspace &self, const object &value) {
   return result;
 }
 
-// PyArray_Descr *numpy_descr_from_typeid(const std::type_info &typeID) {
-//   if (false) {
-//   } else if (typeID.hash_code() == typeid(int).hash_code()) {
-//     return PyArray_DescrFromType(NPY_INT);
-//   } else if (typeID.hash_code() == typeid(int32_t).hash_code()) {
-//     return PyArray_DescrFromType(NPY_INT32);
-//   } else if (typeID.hash_code() == typeid(int64_t).hash_code()) {
-//     return PyArray_DescrFromType(NPY_INT64);
-//   } else if (typeID.hash_code() == typeid(uint32_t).hash_code()) {
-//     return PyArray_DescrFromType(NPY_UINT32);
-//   } else if (typeID.hash_code() == typeid(uint64_t).hash_code()) {
-//     return PyArray_DescrFromType(NPY_UINT64);
-//   } else if (typeID.hash_code() == typeid(double).hash_code()) {
-//     return PyArray_DescrFromType(NPY_DOUBLE);
-//   } else if (typeID.hash_code() == typeid(float).hash_code()) {
-//     return PyArray_DescrFromType(NPY_FLOAT);
-//   } else if (typeID.hash_code() == typeid(size_t).hash_code()) {
-//     return PyArray_DescrFromType((sizeof(size_t) == 4) ? NPY_UINT : NPY_ULONGLONG);
-//   } else if (typeID.hash_code() == typeid(std::vector<int>).hash_code()) {
-//     return PyArray_DescrFromType(NPY_INT);
-//   } else if (typeID.hash_code() == typeid(std::vector<double>).hash_code()) {
-//     return PyArray_DescrFromType(NPY_DOUBLE);
-//   } else if (typeID.hash_code() == typeid(Mantid::Kernel::V3D).hash_code()) {
-//     return PyArray_DescrFromType(NPY_DOUBLE);
-//   }
-//   throw std::invalid_argument("ColumnArray does not yet support strings.");
-// }
-
-size_t getSecondDim(Mantid::API::Column_const_sptr column) {
+size_t getStride(Mantid::API::Column_const_sptr column) {
   const std::type_info &typeID = column->get_type_info();
-
   if (typeID.hash_code() == typeid(Mantid::Kernel::V3D).hash_code()) {
     return std::vector<double>(column->cell<Mantid::Kernel::V3D>(0)).size();
   }
@@ -373,128 +347,53 @@ template <typename T> void copyTo1DArray(void *dest, const Mantid::API::Column_c
   }
 }
 
-template <typename T> void copyTo2DArray(void *dest, const Mantid::API::Column_const_sptr &column) {
+template <typename T, typename U> void copyTo2DArray(void *dest, const Mantid::API::Column_const_sptr &column) {
   auto dest_p = static_cast<T *>(dest);
-  int stride = column->cell<std::vector<T>>(0).size();
+  size_t stride = static_cast<std::vector<T>>(column->cell<U>(0)).size();
   for (size_t i = 0; i < column->size(); ++i) {
-    const std::vector<T> src = column->cell<std::vector<T>>(i);
+    const auto src = static_cast<std::vector<T>>(column->cell<U>(i));
     std::copy(src.begin(), src.end(), std::next(dest_p, i * stride));
   }
   return;
 }
 
-const std::unordered_map<size_t,
-                         std::tuple<PyArray_Descr *, std::function<void(void *, Mantid::API::Column_const_sptr)>>>
-    handlers = {{typeid(int).hash_code(), {PyArray_DescrFromType(NPY_INT), copyTo1DArray<int>}},
-                {typeid(int32_t).hash_code(), {PyArray_DescrFromType(NPY_INT32), copyTo1DArray<int32_t>}},
-                {typeid(uint32_t).hash_code(), {PyArray_DescrFromType(NPY_UINT32), copyTo1DArray<uint32_t>}},
-                {typeid(int64_t).hash_code(), {PyArray_DescrFromType(NPY_INT64), copyTo1DArray<int64_t>}},
-                {typeid(uint64_t).hash_code(), {PyArray_DescrFromType(NPY_UINT64), copyTo1DArray<uint64_t>}},
-                {typeid(double).hash_code(), {PyArray_DescrFromType(NPY_DOUBLE), copyTo1DArray<double>}},
-                {typeid(float).hash_code(), {PyArray_DescrFromType(NPY_FLOAT), copyTo1DArray<float>}},
+const std::unordered_map<size_t, std::tuple<int, std::function<void(void *, Mantid::API::Column_const_sptr)>>>
+    handlers = {{typeid(int).hash_code(), {NPY_INT, copyTo1DArray<int>}},
+                {typeid(int32_t).hash_code(), {NPY_INT32, copyTo1DArray<int32_t>}},
+                {typeid(uint32_t).hash_code(), {NPY_UINT32, copyTo1DArray<uint32_t>}},
+                {typeid(int64_t).hash_code(), {NPY_INT64, copyTo1DArray<int64_t>}},
+                {typeid(uint64_t).hash_code(), {NPY_UINT64, copyTo1DArray<uint64_t>}},
+                {typeid(double).hash_code(), {NPY_DOUBLE, copyTo1DArray<double>}},
+                {typeid(float).hash_code(), {NPY_FLOAT, copyTo1DArray<float>}},
                 {typeid(size_t).hash_code(),
-                 {(sizeof(size_t) == 4) ? PyArray_DescrFromType(NPY_UINT32) : PyArray_DescrFromType(NPY_UINT64),
+                 {(sizeof(size_t) == 4) ? NPY_UINT32 : NPY_UINT64,
                   (sizeof(size_t) == 4) ? copyTo1DArray<uint32_t> : copyTo1DArray<uint64_t>}},
-                {typeid(std::vector<int>).hash_code(), {PyArray_DescrFromType(NPY_INT), copyTo2DArray<int>}},
-                {typeid(std::vector<double>).hash_code(), {PyArray_DescrFromType(NPY_DOUBLE), copyTo2DArray<double>}},
-                {typeid(Mantid::Kernel::V3D).hash_code(), {PyArray_DescrFromType(NPY_DOUBLE), copyTo2DArray<double>}}};
-
-// void copyColumnArray(void* dest, const Mantid::API::Column_const_sptr &column, const std::type_info &typeID, int
-// numRows, npy_intp secondDim) {
-//
-//     if (auto it = handlers.find(typeID.hash_code()); it != handlers.end()) {
-//       it->second(dest, column);
-//     } else {
-//       throw std::invalid_argument("Column type not recognised.");
-//     }
-//   return;
-// }
-
-// template <typename T>
-// void copyToArrayWithType(void *dest, Mantid::API::Column_const_sptr column, int numRows, npy_intp secondDim) {
-//
-//   if (typeid(T).hash_code() == typeid(Mantid::Kernel::V3D).hash_code()) {
-//     auto dest_p = static_cast<double *>(dest);
-//     for (npy_intp i = 0; i < numRows; ++i) {
-//       const std::vector<double> src = std::vector<double>(column->cell<Mantid::Kernel::V3D>(i));
-//       std::copy(src.begin(), src.end(), std::next(dest_p, i * secondDim));
-//     }
-//     return;
-//   }
-//   if (typeid(T).hash_code() == typeid(std::vector<int>).hash_code()) {
-//     auto dest_p = static_cast<int *>(dest);
-//     for (npy_intp i = 0; i < numRows; ++i) {
-//       const auto src = column->cell<std::vector<int>>(i);
-//       std::copy(src.begin(), src.end(), std::next(dest_p, i * secondDim));
-//     }
-//   }
-//
-//   if (typeid(T).hash_code() == typeid(std::vector<double>).hash_code()) {
-//     auto dest_p = static_cast<double *>(dest);
-//     for (npy_intp i = 0; i < numRows; ++i) {
-//       const auto src = column->cell<std::vector<double>>(i);
-//       std::copy(src.begin(), src.end(), std::next(dest_p, i * secondDim));
-//     }
-//   }
-//
-//   auto dest_p = static_cast<T *>(dest);
-//   for (npy_intp i = 0; i < numRows; ++i) {
-//     dest_p[i] = column->cell<T>(i);
-//   }
-// }
-
-// void copyToArray(void *dest, Mantid::API::Column_const_sptr column, npy_intp secondDim) {
-//   const std::type_info &typeID = column->get_type_info();
-//   const int numRows = static_cast<npy_intp>(column->size());
-//   if (false) {
-//   } else if (typeID.hash_code() == typeid(int).hash_code()) {
-//     return copyToArrayWithType<int>(dest, column, numRows, secondDim);
-//   } else if (typeID.hash_code() == typeid(int32_t).hash_code()) {
-//     return copyToArrayWithType<int32_t>(dest, column, numRows, secondDim);
-//   } else if (typeID.hash_code() == typeid(int64_t).hash_code()) {
-//     return copyToArrayWithType<int64_t>(dest, column, numRows, secondDim);
-//   } else if (typeID.hash_code() == typeid(uint32_t).hash_code()) {
-//     return copyToArrayWithType<uint32_t>(dest, column, numRows, secondDim);
-//   } else if (typeID.hash_code() == typeid(uint64_t).hash_code()) {
-//     return copyToArrayWithType<uint64_t>(dest, column, numRows, secondDim);
-//   } else if (typeID.hash_code() == typeid(double).hash_code()) {
-//     return copyToArrayWithType<double>(dest, column, numRows, secondDim);
-//   } else if (typeID.hash_code() == typeid(float).hash_code()) {
-//     return copyToArrayWithType<float>(dest, column, numRows, secondDim);
-//   } else if (typeID.hash_code() == typeid(size_t).hash_code()) {
-//     return copyToArrayWithType<size_t>(dest, column, numRows, secondDim);
-//   } else if (typeID.hash_code() == typeid(std::vector<int>).hash_code()) {
-//     return copyToArrayWithType<std::vector<int>>(dest, column, numRows, secondDim);
-//   } else if (typeID.hash_code() == typeid(std::vector<double>).hash_code()) {
-//     return copyToArrayWithType<std::vector<double>>(dest, column, numRows, secondDim);
-//   } else if (typeID.hash_code() == typeid(Mantid::Kernel::V3D).hash_code()) {
-//     return copyToArrayWithType<Mantid::Kernel::V3D>(dest, column, numRows, secondDim);
-//   }
-//   return;
-// }
+                {typeid(std::vector<int>).hash_code(), {NPY_INT, copyTo2DArray<int, std::vector<int>>}},
+                {typeid(std::vector<double>).hash_code(), {NPY_DOUBLE, copyTo2DArray<double, std::vector<double>>}},
+                {typeid(Mantid::Kernel::V3D).hash_code(), {NPY_DOUBLE, copyTo2DArray<double, Mantid::Kernel::V3D>}}};
 
 PyObject *columnArray(const ITableWorkspace &self, const object &value) {
-  // Find the column and row
+  import_array();
   Mantid::API::Column_const_sptr column;
   if (STR_CHECK(value.ptr())) {
     column = self.getColumn(extract<std::string>(value)());
   } else {
-    column = self.getColumn(extract<int>(value)());
+    column = self.getColumn(extract<size_t>(value)());
   }
   const std::type_info &typeID = column->get_type_info();
 
-  const npy_intp numRows = static_cast<npy_intp>(self.rowCount());
-  npy_intp secondDim = getSecondDim(column);
-  int nDims = (secondDim > 1) ? 2 : 1;
-  npy_intp arrayDims[2] = {numRows, secondDim};
-
   auto it = handlers.find(typeID.hash_code());
   if (it == handlers.end()) {
-    throw std::invalid_argument("Column type not recognised.");
+    throw std::invalid_argument(std::string("Column type not yet supported: ") + std::string(typeID.name()));
   }
-  auto &[descr, copy_func] = it->second;
-  auto *nparray = PyArray_NewFromDescr(&PyArray_Type, descr, nDims, arrayDims, nullptr, nullptr, 0, nullptr);
-  void *dest = PyArray_DATA((PyArrayObject *)nparray); // HEAD of the contiguous numpy data array
+  size_t numRows = self.rowCount();
+  size_t stride = getStride(column);
+  npy_intp arrayDims[2] = {static_cast<npy_int>(numRows), static_cast<npy_int>(stride)};
+  int nDims = (stride > 1) ? 2 : 1;
+  auto &[npy_type, copy_func] = it->second;
+  auto *nparray = PyArray_NewFromDescr(&PyArray_Type, PyArray_DescrFromType(npy_type), nDims, arrayDims, nullptr,
+                                       nullptr, 0, nullptr);
+  void *dest = PyArray_DATA(reinterpret_cast<PyArrayObject *>(nparray)); // HEAD of the contiguous numpy data array
   copy_func(dest, column);
   return nparray;
 }
