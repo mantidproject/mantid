@@ -7,7 +7,7 @@ Mantid Workbench Changes
 
 New Features
 ------------
-- The ability to scale axis and colorbars to ``symlog`` has been added to plots. An option to specify the extent of the linear portion of the ``symlog`` axis (``linthresh``) has been added to the axes tab widget in the plot config dialog.
+- The ability to scale axes and colorbars to ``symlog`` has been added to plots. An option to specify the extent of the linear portion of the ``symlog`` axis (``linthresh``) has been added to the axes tab widget in the plot config dialog.
 - Sequential fit output workspace names now include the numeric (spectra) axis to distinguish between different results.
 - The sequential fit interface now has an option to create the results output in a workspace 2D format.
 - The crosshair button is enabled in tiled plots (subplots).
@@ -18,8 +18,8 @@ Bugfixes
 --------
 - Opening the help window will no longer cause a crash in Windows conda installs of ``mantidworkbench``.
 - ``Show Invisible Workspaces`` settings can now be updated from the settings menu.
-- Fixed a bug where workspaces starting with "_" were not populating the legend of plots.
-- Python warning for `np.bool` scalars interpreted as index is no longer present when using the MantidPlot widget.
+- Workspaces starting with "_" will now appear in plot legends.
+- Moving a range selector on a plot (especially in indirect/inelastic interfaces) will no longer cause a deprecation warning about ``np.bool`` scalars being interpreted as an index.
 
 
 InstrumentViewer
@@ -40,7 +40,7 @@ SliceViewer
 
 New features
 ############
-- Added a masking feature for Matrix Workspaces with a non numeric y-axis. This enables direct application of the mask to the underlying workspace, or the outputting of a table workspace that can be applied subsequently using ``MaskFromTableWorkspace``.
+- Added a masking feature for Matrix Workspaces with a non-numeric y-axis. This enables direct application of the mask to the underlying workspace, or the outputting of a table workspace that can be applied subsequently using ``MaskFromTableWorkspace``.
 
 Bugfixes
 ############
