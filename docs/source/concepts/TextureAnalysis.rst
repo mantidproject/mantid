@@ -8,7 +8,7 @@ Texture Analysis Theory
 Introduction to Texture Analysis
 ################################
 
-For argument's sake, lets say you have some sample and you are interested in knowing the crystallographic texture -- that is to say, you want to know what
+For argument's sake, let's say you have some sample and you are interested in knowing it's crystallographic texture -- that is to say, you want to know what
 the relationship is between the macroscopic dimensions of your sample and some given crystallographic plane e.g. :math:`(100)`?
 
 .. figure:: /images/texture-example-sample.png
@@ -17,34 +17,34 @@ the relationship is between the macroscopic dimensions of your sample and some g
    Figure 1 - An example cuboid sample and a corresponding mantid representation, the intrinsic directions corresponding to: the Rolling Direction (RD);
    the Traverse Direction (TD); and the Normal Direction (ND), are shown with the red, blue and green arrows.
 
-Taking this sample as an example, you can see that, by virtue of being a cuboid, the sample has a unique height, width and length.
+Taking the above sample as example, you can see that, by virtue of being a cuboid, the sample has a unique height, width and length.
 These directions may or may not also be correlated with some processing procedure (e.g. in this case: the length is the Rolling Direction;
 The width is the Traverse Direction and the height is the Normal Direction).
 
-Some questions you might have about your sample are:
+Some subsequent questions you might have about your sample are:
 
 - How is the underlying crystal structure orientated in relation to these macroscopic directions?
 - Does this relationship change when looking at different points within the sample?
 - Is this relationship a product of the processing?
 
-These might be especially of interest to you if critical mechanical properties of the material are related to the orientation/size of crystal grains and
-these are the questions which the texture analysis pipeline in Mantid seeks to help you answer.
+These might be especially of interest to you if critical mechanical properties of the material are related to the orientation/size of crystal grains.
+These are the questions which the texture analysis pipeline in Mantid seeks to help you answer.
 
-Within the software are able to produce Pole Figures for different Bragg reflections.
-The experimental pole figure plot will typically show the intensity of the peak associated with that reflection along different macroscopic sample directions.
-As each bragg reflection corresponds to a specific set of crystallographic planes with defined orientations relative to the crystal structure, the intensity
-of a given bragg peak in different macroscopic directions provides information on the alignment of that set of atomic planes to that sample direction
-(within the volume of sample illuminated by the beam and visible by the detectors).
+Within Mantid, you are able to produce Pole Figures for different Bragg reflections.
+The experimental pole figure plot will typically show the fitted intensity parameter of the peak associated with that reflection, along different macroscopic sample directions.
+As each Bragg reflection corresponds to a specific set of crystallographic planes with defined orientations relative to the crystal structure, the intensity
+of a given Bragg peak in different macroscopic directions provides information on the alignment of that set of atomic planes to that sample direction
+(within the volume of sample both: illuminated by the beam and; visible by the detectors).
 
 By moving this illuminated volume (gauge volume) within the sample and observing the change to the reflection intensities, it is further possible to investigate how
-the crystallographic texture changes throughout a sample. If you then repeat these experiments with different sample processing, you can then determine the extent to
-which the observed texture is a product of the specific processes used. Additionally, you are able to produce similar plots but looking at other features of the bragg peak,
+the crystallographic texture changes throughout a sample. If you then repeat these experiments with different sample processing, you could then determine the extent to
+which the observed texture is a product of the specific processes used. Additionally, you are able to produce similar plots but looking at other features of the Bragg peak,
 such as peak position for strain mapping.
 
 Once these experimental pole figures have been produced within Mantid, the onus is on the user to take the experimental pole figure data and perform the rigorous
 analysis elsewhere, to generate theoretical pole figures and/or orientation distribution functions, to draw ultimate conclusions regarding crystallographic texture.
 
-Below, we will first attempt to explain what you are looking at when you see a pole figure and why that is of interest. From here, we will cover a basic overview of
+Below, we will first provide an explanation as to what you are looking at when you see a pole figure and why that is of interest. From here, we will cover a basic overview of
 how the experimental data collection is done and how this data is processed to create the pole figure. We will then finally provide some examples of how this can be done
 within Mantid using some scripts as example.
 
@@ -52,11 +52,11 @@ within Mantid using some scripts as example.
 Interpreting Pole Figures
 #########################
 
-A way to interpret the pole figure is to imagine that your sample is within a sphere.
+A way to interpret the pole figure is to imagine that your sample is placed within a sphere.
 Each unique direction relative to your sample will intercept the sphere at a unique point -- these points are the poles (like the North and South Poles of the Earth).
 
 If we imagine being able to sample the intensity of your given reflection peak in every possible direction, this would correspond to sampling the surface of the sphere.
-Plotting the intensity associated with a bragg peak in each of these direction onto this sphere, we would get a complete 3D representation of how the intensity changes along all macroscopic sample directions.
+Plotting the intensity associated with a Bragg peak in each of these direction onto this sphere, we would get a complete 3D representation of how the intensity changes along all macroscopic sample directions.
 This is shown in the first of the two graphics below.
 The second graphic then shows the same intensity plot, but with the intensity values convolved into the radial coordinate,
 which gives another spatial representation of the intensity of the bragg reflection as a function of direction around the sample.
@@ -142,7 +142,7 @@ different detector groupings, and the effect this has on the pole figure coverag
 
    Figure 8 - Image showing pole figures using different detector groupings.
 
-The second factor -- sample orientations, is something which perhaps requires more consideration before hitting go on data collection. The factors to weigh up here are
+The second factor -- sample orientations, is something which perhaps requires more consideration before hitting *GO* on data collection. The factors to weigh up here are
 optimising your balance of time vs uncertainty. If you are quite confident in some aspect of your texture (such as a known symmetry), you may be able to target your data
 collection to obtain datasets with the detectors covering only a few key sectors in the pole figure, saving time by reducing the number of experimental runs.
 In contrast, if the texture is unknown, the optimal strategy is most likely to be one where you obtain even coverage across the entire pole figure,
@@ -193,8 +193,7 @@ to aid in the setup of :ref:`reference workspaces<ReferenceWorkspaceSection>` an
 Reference Workspace
 -------------------
 
-The following script will allow the setup of the reference workspace, alternatively this functionality is available interactively within Absorption Correction Tab
-of the user interface.
+The following script will allow the setup of the reference workspace.
 
 .. code:: python
 
@@ -206,28 +205,33 @@ of the user interface.
 
    # Create an example Reference Workspace
 
+   # set experiment name
    exp_name = "Example"
-   root_dir = fr"C:\Users\Name\Engineering_Mantid\User\{exp_name}"
+
+   # set the directory where your workflow files should be saved
+   save_root = r"C:\Users\fedid12345\Engineering_Mantid"
+   root_dir = fr"{save_root}\User\{exp_name}"
    instr = "ENGINX"
+
+   # set shape info to either be a shape xml string or a file to an stl
+   example_shape_info = """
+   <hollow-cylinder id="A">
+   <centre-of-bottom-base x="-0.01315" y="-0.01315" z="-0.00756" />
+   <axis x="0.0" y="0.0" z="1.0" />
+   <inner-radius val="0.0145" />
+   <outer-radius val="0.0223" />
+   <height val="0.01512" />
+   </hollow-cylinder>
+   """
+
+   sample_material = "Zr"
 
 
    model = TextureCorrectionModel()
-   LoadEmptyInstrument(InstrumentName=instr, OutputWorkspace="")
+   model.create_reference_ws(exp_name, instr)
 
-   model.create_reference_ws(exp_name)
-
-   # either set or load sample shape
-   #set:
-   shape_xml = ""
-   SetSampleShape(model.reference_ws, shape_xml)
-
-   #load:
-   shape_file = ""
-   LoadSampleShape(model.reference_ws, shape_file)
-
-   # Now set the sample material
-   # set material
-   SetSampleMaterial(model.reference_ws, "Fe")
+   # if it ends with .stl assume we have been given the file path
+   model.set_sample_info(model.reference_ws, example_shape_info, sample_material)
 
    # save reference file
    model.save_reference_file(exp_name, None, root_dir) # just set group as None here
@@ -248,7 +252,7 @@ axes of each goniometer axis. The sense of the rotation around these axes are th
 one for each axis, where rotations are counter-clockwise (1) or clockwise (-1).
 
 If ``orient_file_is_euler`` is ``False``, the orientation file is expected to be a text file with a row for each run and, within each row the first 9 values are expected to
-be a flattened 3x3 transformation matrix. It is anticipated that this matrix would be extracted from the `SscansS2<https://isisneutronmuon.github.io/SScanSS-2>` software, and a script is provided below for converted
+be a flattened 3x3 transformation matrix. It is anticipated that this matrix would be extracted from the `SscansS2 <https://isisneutronmuon.github.io/SScanSS-2>` software, and a script is provided below for converted
 the transformation matrices from SscansS2 reference frame into mantid. In principle, a flattened matrix from any sample positioner could be given here instead.
 
 .. code:: python
@@ -258,9 +262,21 @@ the transformation matrices from SscansS2 reference frame into mantid. In princi
    import matplotlib.pyplot as plt
    import numpy as np
 
-   txt_file = r"path\to\sscanss_output_matrices.txt"
-   NUM_POINTS = 3 # sscanss allows matrices to be calculated at multiple points for the same desired orientation
-   # for mantid, we want these as separate experiments so we separate them out into different orientation files
+   # script to covert a file with flattened matrices that have been generated in sscanss (and
+   # thus us in the sscanss reference frame where beam = X, detector = Y, roof = Z) into a
+   # matrix that is in the mantid reference frame
+
+   # Just set the txt file path and the tell it the number of scan points there were and you
+   # will get a _mantid_point_n.txt file created for each point
+
+
+   #~~~~~~~~~~~~~~~~~ Setup ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+   txt_file = r"path\to\file\Zirc_ring_pose_matrices.txt"
+   NUM_POINTS = 3
+
+
+   #~~~~~~~~~~~~~~~~~~ Script Execution ~~~~~~~~~~~~~~~~~~~~~~~~
 
    with open(txt_file, "r") as f:
       goniometer_strings = [line.replace("\t", ",") for line in f.readlines()]
@@ -268,17 +284,29 @@ the transformation matrices from SscansS2 reference frame into mantid. In princi
    transformed_strings = []
 
 
+   def convert_from_sscanss_frame(r_zxy):
+      # Define M: matrix to convert vectors from XYZ to ZXY
+      M = np.array([
+         [0, 0, 1],  # X in ZXY = Z in XYZ
+         [1, 0, 0],  # Y in ZXY = X in XYZ
+         [0, 1, 0]   # Z in ZXY = Y in XYZ
+      ])
+      M_inv = M.T  # since M is orthonormal
+
+      # Apply the similarity transform in reverse express R in XYZ frame
+      return M.T @ r_zxy @ M
+
+
    for gs in goniometer_strings:
       or_vals = gs.split(",")
       trans_vals = or_vals[9:]
       run_mat = np.asarray(or_vals[:9], dtype=float).reshape((3, 3)).T
-      mantid_mat = run_mat[[1, 2, 0], :][:, [1, 2, 0]]
+
+      mantid_mat = convert_from_sscanss_frame(run_mat)
       new_string = ",".join([str(x) for x in mantid_mat.reshape(-1)]+trans_vals)
       transformed_strings.append(new_string)
 
    num_scans = len(goniometer_strings)//NUM_POINTS
-
-   # saves the output in the same location as the initial file, just with _mantid_point_{point index} on the end of each file name
 
    for scan_ind in range(NUM_POINTS):
       save_file = txt_file.replace(".txt", f"_mantid_point_{scan_ind}.txt")
@@ -316,15 +344,15 @@ the user interface while providing more repeatable processing.
 
    # First, you need to specify your file directories, If you are happy to use the same root, from experiment
    # to experiment, you can just change this experiment name.
-   exp_name = "ExampleExperiment"
+   exp_name = "PostExp-ZrRingDiagScript"
 
    # otherwise set root directory here:
-   root_dir = fr"C:\Users\Name\Engineering_Mantid\User\{exp_name}"
+   root_dir = fr"C:\Users\kcd17618\Engineering_Mantid\User\{exp_name}"
 
    # next, specify the folder with the files you would like to apply the absorption correction to
-   corr_dir = fr"C:\Users\Name\Documents\Example\DataFiles"
+   corr_dir = r"C:\Users\kcd17618\Documents\dev\TextureCommisioning\Day3\ZrRing\DataFiles\Point2"
 
-   # For texture, it is expected that you have a single sample shape, that is reorientated between runs.
+   # For texture, it is expected that you have a single ssmple shape, that is reorientated between runs.
    # this is handled by having a reference workspace with the shape in its neutral position
    # (position in the beamline when the goniometer is home)
    # This reference workspace probably requires you to do some interacting and validating, so should be setup in the UI
@@ -345,7 +373,7 @@ the user interface while providing more repeatable processing.
    # Matrix Orientation (orient_file_is_euler = False)
    # for this the first 9 values in each row of the files are assumed to be flattened rotation matrix.
    # These are used to directly reorientate the samples
-   orientation_file = r"C:\Users\Name\Documents\Example\DataFiles\pose_matrices_mantid.txt"
+   orientation_file = r"C:\Users\kcd17618\Documents\dev\TextureCommisioning\Day3\ZrRing\Sscanss\Split\Zirc_ring_pose_matrices_mantid_point_1.txt"
    orient_file_is_euler = False
    euler_scheme = "YXY"
    euler_axes_sense = "1,-1,1"
@@ -412,7 +440,7 @@ Focusing
 Regardless of whether absorption correction has been applied (at the very least the absorption correction script should probably be run with ``include_abs_corr = False``,
 in order to apply the sample shape and orientations), some focusing of data is likely required for creating pole figures. In principle, unfocussed data could be used,
 but this would be rather slow due to the fitting of peaks on each spectra, and this would not necessarily provide meaningful improvement in spatial resolution. As far as
-ENGIX is concerned, grouping any more finely than the block level is mostly diminishing returns. The below script can be used to generate some custom groupings at
+ENGINX is concerned, grouping any more finely than the block level is mostly diminishing returns. The below script can be used to generate some custom groupings at
 the module or block level, and could be modified for more exotic groupings beyond this, but there are standard groupings available as well.
 
 .. code:: python
@@ -523,6 +551,7 @@ If using a standard grouping, no ``grouping_filepath`` or ``prm_filepath`` is re
                   prm_path = prm_path,
                   groupingfile_path = groupingfile_path)
 
+
 Fitting
 #######
 
@@ -538,7 +567,9 @@ Additionally to fitting the peak, the table will also contain a numerical integr
    import numpy as np
    from mantid.api import AnalysisDataService as ADS
    from os import path, makedirs, scandir
-   from Engineering.texture.TextureUtils import find_all_files, fit_all_peaks
+   from Engineering.texture.TextureUtils import find_all_files, fit_all_peaks, mk
+   from Engineering.common.calibration_info import CalibrationInfo
+   from Engineering.EnggUtils import GROUP
 
    ############### ENGINEERING DIFFRACTION INTERFACE FITTING ANALOGUE #######################
 
@@ -549,7 +580,7 @@ Additionally to fitting the peak, the table will also contain a numerical integr
    exp_name = "Example"
 
    # otherwise set root directory here:
-   root_dir = fr"C:\Users\Name\Engineering_Mantid\User\{exp_name}"
+   root_dir = fr"path\to\User\{exp_name}"
 
    # Next the folder contraining the workspaces you want to fit
    file_folder = "Focus"
@@ -559,11 +590,22 @@ Additionally to fitting the peak, the table will also contain a numerical integr
    groupingfile_path = None
 
    # You also need to specify a name for the folder the fit parameters will be saved in
-   fit_save_folder = "ScriptFitParameters"
+   fit_save_folder = "ScriptFitParameters-FitTest"
 
-   # Finally, provide a list of peaks that you want to be fit within the spectra
-   #peaks = [2.03,1.44, 1.17, 0.91] # steel
-   peaks = [2.8, 2.575, 2.455, 1.89, 1.62, 1.46] # zr
+   # Provide a list of peaks that you want to be fit within the spectra
+   peaks = [2.03,1.44, 1.17, 0.91] # steel
+
+   # The fitting has a couple of parameters that deal with when peaks are missing as a result of the texture
+   # The first parameter is 1_over_sigma_thresh - this determines the minimum value of I/sigma for a fit to be considered as for a valid peak
+   # any invalid peak will have parameters set to nan by default, but these nans can be overwritten by no_fit_value_dicts and nan_replacement
+   # no_fit_value_dict takes fitted parameter names and allows you to specify what the unfit value should be eg. {"I":0.0} - if you can't fit intensity
+   # set the value directly to 0.0
+   # nan_replacement then happens after this, if a nan_replacement method is given any parameters without an unfit_value provided will have nans replaced
+   # either with "zeros", or with the min/max/mean value of that parameter (Note: if all the values are nan, the value will remain nan)
+
+   i_over_sigma_thresh = 3.0
+   no_fit_value_dict = {"I": 0.0, "I_est": 0.0}
+   nan_replacement = "mean"
 
    ######################### RUN SCRIPT ########################################
 
@@ -581,14 +623,17 @@ Additionally to fitting the peak, the table will also contain a numerical integr
       calib_info.set_prm_filepath(prm_path)
    group_folder = calib_info.get_group_suffix()
    focussed_data_dir = path.join(root_dir, file_folder, group_folder, "CombinedFiles")
-   focus_ws_paths = find_all_files(focussed_data_dir)
+   focus_ws_paths = find_all_files(focussed_data_dir)[:3]
    focus_wss = [path.splitext(path.basename(fp))[0] for fp in focus_ws_paths]
    for iws, ws in enumerate(focus_wss):
       if not ADS.doesExist(ws):
          Load(Filename = focus_ws_paths[iws], OutputWorkspace= ws)
 
+
    # execute the fitting
-   fit_all_peaks(focus_wss, peaks, 0.02, fit_save_dir)
+   fit_all_peaks(focus_wss, peaks, 0.02, fit_save_dir, i_over_sigma_thresh = i_over_sigma_thresh, nan_replacement = nan_replacement, no_fit_value_dict = no_fit_value_dict)
+
+
 
 Pole Figure creation
 ####################
@@ -603,26 +648,29 @@ of pole figures over a set of different peaks and parameters.
    import matplotlib.pyplot as plt
    import numpy as np
    from mantid.api import AnalysisDataService as ADS
-   from Engineering.texture.TextureUtils import find_all_files, create_pf_loop
+   from Engineering.texture.TextureUtils import find_all_files, create_pf_loop, get_xtal_structure
+   from Engineering.common.calibration_info import CalibrationInfo
+   from Engineering.EnggUtils import GROUP
+   import os
 
    ############### ENGINEERING DIFFRACTION INTERFACE POLE FIGURE ANALOGUE #######################
 
    ######################### EXPERIMENTAL INFORMATION ########################################
    # First, you need to specify your file directories, If you are happy to use the same root, from experiment
    # to experiment, you can just change this experiment name.
-   exp_name = "PostExp-ZrRingDiagScript"
+   exp_name = "PostExp-SteelCentre"
 
    # otherwise set root directory here:
-   save_root = r"C:\Users\Name\Engineering_Mantid"
+   save_root = r"C:\Users\kcd17618\Engineering_Mantid"
    root_dir = fr"{save_root}\User\{exp_name}"
 
 
    ws_folder = "Focus"
-   fit_folder = "ScriptFitParameters"
+   fit_save_folder = "ScriptFitParameters-New"
    # define the peaks of interest, NOTE these must correspond to sub folders in the fit directory
-   peaks = [2.8, 2.575, 2.455, 1.89, 1.62, 1.46]
+   peaks = [2.03,1.44, 1.17]
    # define the columns you would like to create pole figures for
-   readout_columns = ["I", "I_est", "X0"]
+   readout_columns = ["I", "X0"]
    # you need to specify the detector grouping
    grouping = "Texture30"
    # and some grouping path if not using a standard
@@ -633,30 +681,30 @@ of pole figures over a set of different peaks and parameters.
 
    # you need to define the orientation of the intrinsic sample directions when the sample orientation matrix == I (no rotation)
    # this should be the same as the reference state used in the absorption correction
-   r2 = np.sqrt(2)/2
-   dir1 = np.array((0,0,1))
-   dir2 = np.array((r2,r2,0)) # projection axis
-   dir3 = np.array((r2,-r2,0))
+   #r2 = np.sqrt(2)/2
+   dir1 = np.array((1,0,0))
+   dir2 = np.array((0,1,0)) # projection axis
+   dir3 = np.array((0,0,1))
    # you can also supply names for these three directions
-   dir_names = ["AD", "HD", "RD"]
+   dir_names = ["RD", "ND", "TD"]
 
    # set whether you would like the plotted pole figure to be a scatter of experimental points or whether you would like to apply gaussian smoothing and
    # plot a contour representation
-   scatter = True
+   scatter = "both"
    # if contour, what should the kernel size of the gaussian be
    kernel = 6.0
 
    # do you want to include a scattering power correction
    include_scatt_power = False
    # if so what is the crystal structure, defined either by giving a cif file or supplying the lattice, space group and basis
-   cif = None
-   lattice = None #"2.8665  2.8665  2.8665"
-   space_group = None #"I m -3 m"
-   basis = None # "Fe 0 0 0 1.0 0.05; Fe 0.5 0.5 0.5 1.0 0.05"
-   # if you have set a crystal, you can also provide a set of hkls, the hkl_peaks dictionary is a useful way of assigning the peaks
-   hkl_peaks = {1.17: (1,1,2),1.43: (2,0,0),2.03: (1,1,0)} #Fe
+   xtal_input = None # "cif"/"array"/"string"
+   xtal_args = [] # for input "cif", require the cif filepath, for "array" array of lattice parameters, space group, basis
+   # for "string" lattice parameter string, space group and basis
 
-   chi2_thresh = 0.4   # max value of Chi^2 to be included as a point in the table
+   # if you have set a crystal, you can also provide a set of hkls, the hkl_peaks dictionary is a useful way of assigning the peaks
+   hkl_peaks = {1.17: (1,1,2),1.44: (2,0,0),2.03: (1,1,0)} #Fe
+
+   chi2_thresh = 0.0   # max value of Chi^2 to be included as a point in the table
    peak_thresh = 0.01   # max difference from either the HKL specified or the mean X0
    scat_vol_pos = (0.0,0.0,0.0) # for now, can assume the gauge vol will be centred on origin
 
@@ -670,23 +718,23 @@ of pole figures over a set of different peaks and parameters.
    elif prm_path:
       calib_info.set_prm_filepath(prm_path)
    group_folder = calib_info.get_group_suffix()
-   focussed_data_dir = path.join(root_dir, file_folder, group_folder, "CombinedFiles")
+   focussed_data_dir = os.path.join(root_dir, ws_folder, group_folder, "CombinedFiles")
    focus_ws_paths = find_all_files(focussed_data_dir)
-   focus_wss = [path.splitext(path.basename(fp))[0] for fp in focus_ws_paths]
+   focus_wss = [os.path.splitext(os.path.basename(fp))[0] for fp in focus_ws_paths]
    for iws, ws in enumerate(focus_wss):
       if not ADS.doesExist(ws):
          Load(Filename = focus_ws_paths[iws], OutputWorkspace= ws)
 
-   fit_load_dirs = [path.join(root_dir, fit_save_folder, group_folder, str(peak)) for peak in peaks]
+   fit_load_dirs = [os.path.join(root_dir, fit_save_folder, group_folder, str(peak)) for peak in peaks]
 
-   hkls = [hkl_peaks[peak] if include_scatt_power else None for peak in peaks]
+   hkls = [hkl_peaks[peak] for peak in peaks]
 
    fit_param_wss = []
    for ifit, fit_folder in enumerate(fit_load_dirs):
       # get fit params
-      fit_dir = path.join(root_dir, fit_folder)
+      fit_dir = os.path.join(root_dir, fit_folder)
       fit_wss = find_all_files(fit_dir)
-      param_wss = [path.splitext(path.basename(fp))[0] for fp in fit_wss]
+      param_wss = [os.path.splitext(os.path.basename(fp))[0] for fp in fit_wss]
       fit_param_wss.append(param_wss)
       for iparam, param in enumerate(param_wss):
          if not ADS.doesExist(param):
@@ -695,12 +743,10 @@ of pole figures over a set of different peaks and parameters.
    create_pf_loop(wss = focus_wss,
                   param_wss = fit_param_wss,
                   include_scatt_power = include_scatt_power,
-                  cif = cif,
-                  lattice = lattice,
-                  space_group = space_group,
-                  basis = basis,
-                  hkls = hkls,
+                  xtal_input = xtal_input,
+                  xtal_args = xtal_args,
                   readout_columns = readout_columns,
+                  hkls = hkls,
                   dir1 = dir1,
                   dir2 = dir2,
                   dir3 = dir3,
@@ -713,6 +759,7 @@ of pole figures over a set of different peaks and parameters.
                   save_root = save_root,
                   exp_name = exp_name,
                   projection_method = projection_method)
+
 
 
 
