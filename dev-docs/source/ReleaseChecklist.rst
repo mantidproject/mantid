@@ -509,6 +509,7 @@ We are now ready to create the release candidates for Smoke testing.
   * set ``GITHUB_RELEASES_REPO`` to ``mantidproject/mantid``
   * set ``GITHUB_RELEASES_TAG`` to ``vX.Y.ZrcN``, where ``X.Y.Z`` is the release number,
     and ``N`` is an incremental build number for release candidates, starting at ``1``.
+  * On Anaconda, add the ``vX.Y.ZrcN`` label to the release candidate Conda package for MSlice
 
 * Once the packages have been published to GitHub and Anaconda, ask someone in the ISIS core or DevOps
   team to manually sign the Windows binary and re-upload it to the GitHub
