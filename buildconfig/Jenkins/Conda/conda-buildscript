@@ -83,7 +83,7 @@ fi
 pushd $WORKSPACE
 echo $(git status)
 echo $(git log --oneline -5)
-ORNL_NEXT_COMMIT=$(git rev-parse ref/heads/ornl-next)
+ORNL_NEXT_COMMIT=$(git rev-parse refs/heads/ornl-next)
 CURRENT_COMMIT=$(git rev-parse HEAD)
 TARGET_BRANCH=""
 
