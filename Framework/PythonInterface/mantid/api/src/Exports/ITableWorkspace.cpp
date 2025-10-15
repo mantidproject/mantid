@@ -38,6 +38,7 @@
 #include <numpy/ndarrayobject.h>
 #include <numpy/ndarraytypes.h>
 #include <numpy/npy_common.h>
+#include <object.h>
 #include <pylifecycle.h>
 #include <pytypedefs.h>
 #include <tuple>
@@ -326,6 +327,37 @@ PyObject *column(const ITableWorkspace &self, const object &value) {
   return result;
 }
 
+/**
+ * Exception for creating array of strings, since std::string has variable length
+ * @param self A reference to the column to be copied into a numpy array
+ */
+PyObject *stringNumpyArray(const Mantid::API::Column_const_sptr &column) {
+  // Find maximum string length in the column cells
+  size_t maxlen = 0;
+  for (size_t i = 0; i < column->size(); ++i) {
+    maxlen = std::max(maxlen, column->cell<std::string>(i).size());
+  }
+  // Create array descriptor
+  std::string dtype_str = "<U" + std::to_string(maxlen);
+  PyObject *dtype = Py_BuildValue("s", dtype_str.c_str());
+  PyArray_Descr *descr = nullptr;
+  if (!PyArray_DescrConverter(dtype, &descr)) {
+    Py_DECREF(dtype);
+    throw std::runtime_error("Failed to create Unicode dtype");
+  }
+  Py_DECREF(dtype);
+  npy_intp arrayDims[1] = {static_cast<npy_intp>(column->size())};
+  PyObject *nparray = PyArray_NewFromDescr(&PyArray_Type, descr, 1, arrayDims, nullptr, nullptr, 0, nullptr);
+  auto *dest = reinterpret_cast<PyArrayObject *>(nparray);
+  for (size_t i = 0; i < column->size(); ++i) {
+    // Create python string object and place it into array
+    PyObject *pystr = PyUnicode_FromString(column->cell<std::string>(i).c_str());
+    PyArray_SETITEM(dest, static_cast<char *>(PyArray_GETPTR1(dest, i)), pystr);
+    Py_DECREF(pystr);
+  }
+  return nparray;
+}
+
 size_t getStride(Mantid::API::Column_const_sptr column) {
   const std::type_info &typeID = column->get_type_info();
   if (typeID.hash_code() == typeid(Mantid::Kernel::V3D).hash_code()) {
@@ -340,10 +372,10 @@ size_t getStride(Mantid::API::Column_const_sptr column) {
   return 1;
 }
 
-template <typename T> void copyTo1DArray(void *dest, const Mantid::API::Column_const_sptr &column) {
+template <typename T, typename U> void copyTo1DArray(void *dest, const Mantid::API::Column_const_sptr &column) {
   auto dest_p = static_cast<T *>(dest);
   for (size_t i = 0; i < column->size(); ++i) {
-    dest_p[i] = column->cell<T>(i);
+    dest_p[i] = column->cell<U>(i);
   }
 }
 
@@ -358,20 +390,28 @@ template <typename T, typename U> void copyTo2DArray(void *dest, const Mantid::A
 }
 
 const std::unordered_map<size_t, std::tuple<int, std::function<void(void *, Mantid::API::Column_const_sptr)>>>
-    handlers = {{typeid(int).hash_code(), {NPY_INT, copyTo1DArray<int>}},
-                {typeid(int32_t).hash_code(), {NPY_INT32, copyTo1DArray<int32_t>}},
-                {typeid(uint32_t).hash_code(), {NPY_UINT32, copyTo1DArray<uint32_t>}},
-                {typeid(int64_t).hash_code(), {NPY_INT64, copyTo1DArray<int64_t>}},
-                {typeid(uint64_t).hash_code(), {NPY_UINT64, copyTo1DArray<uint64_t>}},
-                {typeid(double).hash_code(), {NPY_DOUBLE, copyTo1DArray<double>}},
-                {typeid(float).hash_code(), {NPY_FLOAT, copyTo1DArray<float>}},
-                {typeid(size_t).hash_code(),
-                 {(sizeof(size_t) == 4) ? NPY_UINT32 : NPY_UINT64,
-                  (sizeof(size_t) == 4) ? copyTo1DArray<uint32_t> : copyTo1DArray<uint64_t>}},
-                {typeid(std::vector<int>).hash_code(), {NPY_INT, copyTo2DArray<int, std::vector<int>>}},
-                {typeid(std::vector<double>).hash_code(), {NPY_DOUBLE, copyTo2DArray<double, std::vector<double>>}},
-                {typeid(Mantid::Kernel::V3D).hash_code(), {NPY_DOUBLE, copyTo2DArray<double, Mantid::Kernel::V3D>}}};
+    array_handlers = {
+        {typeid(int).hash_code(), {NPY_INT, copyTo1DArray<int, int>}},
+        {typeid(Mantid::API::Boolean).hash_code(), {NPY_BOOL, copyTo1DArray<bool, Mantid::API::Boolean>}},
+        {typeid(int32_t).hash_code(), {NPY_INT32, copyTo1DArray<int32_t, int32_t>}},
+        {typeid(uint32_t).hash_code(), {NPY_UINT32, copyTo1DArray<uint32_t, uint32_t>}},
+        {typeid(int64_t).hash_code(), {NPY_INT64, copyTo1DArray<int64_t, int64_t>}},
+        {typeid(uint64_t).hash_code(), {NPY_UINT64, copyTo1DArray<uint64_t, uint64_t>}},
+        {typeid(double).hash_code(), {NPY_DOUBLE, copyTo1DArray<double, double>}},
+        {typeid(float).hash_code(), {NPY_FLOAT, copyTo1DArray<float, float>}},
+        {typeid(size_t).hash_code(),
+         {(sizeof(size_t) == 4) ? NPY_UINT32 : NPY_UINT64,
+          (sizeof(size_t) == 4) ? copyTo1DArray<uint32_t, uint32_t> : copyTo1DArray<uint64_t, uint64_t>}},
+        {typeid(std::vector<int>).hash_code(), {NPY_INT, copyTo2DArray<int, std::vector<int>>}},
+        {typeid(std::vector<double>).hash_code(), {NPY_DOUBLE, copyTo2DArray<double, std::vector<double>>}},
+        {typeid(Mantid::Kernel::V3D).hash_code(), {NPY_DOUBLE, copyTo2DArray<double, Mantid::Kernel::V3D>}}};
 
+/**
+ * Convert column into numpy array
+ * @param self A reference to the TableWorkspace python object that we were
+ * called on
+ * @param value A python object containing a column name or index
+ */
 PyObject *columnArray(const ITableWorkspace &self, const object &value) {
   import_array();
   Mantid::API::Column_const_sptr column;
@@ -381,18 +421,21 @@ PyObject *columnArray(const ITableWorkspace &self, const object &value) {
     column = self.getColumn(extract<size_t>(value)());
   }
   const std::type_info &typeID = column->get_type_info();
+  if (typeID.hash_code() == typeid(std::string).hash_code()) {
+    return stringNumpyArray(column);
+  }
 
-  auto it = handlers.find(typeID.hash_code());
-  if (it == handlers.end()) {
-    throw std::invalid_argument(std::string("Column type not yet supported: ") + std::string(typeID.name()));
+  auto it = array_handlers.find(typeID.hash_code());
+  if (it == array_handlers.end()) {
+    throw std::invalid_argument(std::string("Column type not yet supported for array: ") + std::string(typeID.name()));
   }
   size_t numRows = self.rowCount();
   size_t stride = getStride(column);
   npy_intp arrayDims[2] = {static_cast<npy_int>(numRows), static_cast<npy_int>(stride)};
   int nDims = (stride > 1) ? 2 : 1;
   auto &[npy_type, copy_func] = it->second;
-  auto *nparray = PyArray_NewFromDescr(&PyArray_Type, PyArray_DescrFromType(npy_type), nDims, arrayDims, nullptr,
-                                       nullptr, 0, nullptr);
+  PyObject *nparray = PyArray_NewFromDescr(&PyArray_Type, PyArray_DescrFromType(npy_type), nDims, arrayDims, nullptr,
+                                           nullptr, 0, nullptr);
   void *dest = PyArray_DATA(reinterpret_cast<PyArrayObject *>(nparray)); // HEAD of the contiguous numpy data array
   copy_func(dest, column);
   return nparray;
