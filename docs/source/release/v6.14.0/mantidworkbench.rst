@@ -27,7 +27,7 @@ InstrumentViewer
 
 New features
 ############
-- An experimenal version of the new Instrument View has been made available in this release. To access this, right-click on a workspace in the ADS in Workbench, then click ``(Experimental) Show Instrument``. This feature is still in an early stage of development with further functionality being added over the v6.15 development period.
+- An experimental version of the new Instrument View has been made available in this release. To access this, right-click on a workspace in the ADS in Workbench, then click ``(Experimental) Show Instrument``. This feature is still in an early stage of development with further functionality being added over the v6.15 development period.
 
 
 Bugfixes
