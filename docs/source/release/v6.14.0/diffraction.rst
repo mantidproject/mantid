@@ -40,10 +40,9 @@ New features
 - Removed support for specifying multiple focussed .gss files (e.g. one for each bank in ENGINX) for a single instrument group (.prm) file in :ref:`GSASII tab <ui engineering gsas>` of the :ref:`Engineering Diffraction interface<Engineering_Diffraction-ref>` GUI.
 - :ref:`Texture Analysis <TextureAnalysis>` can now be performed using the logic included in ``Engineering.texture.TextureUtils`` and a collection of scripts that can be found in ``diffraction/ENGINX/Texture`` within the :ref:`mantid script repository <WorkbenchScriptRepository>`.
 
-.. image:: ../../images/texture-pole-figure-displays.png
-   :class: screenshot
-   :width: 500px
-   :align: right
+  .. image:: ../../images/texture-pole-figure-displays.png
+     :class: screenshot
+     :width: 500px
 
 - Focusing using the ``focus_run`` method in ``Engineering.EnggUtils`` will now save a combined workspace with all detector groups' spectra, rather than saving each spectra in a separate workspace.
 - Performance improvements have been made to :ref:`algm-PoldiAutoCorrelation-v6` and a function to simulate POLDI 2D workspace.

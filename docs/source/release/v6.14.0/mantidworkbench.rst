@@ -45,7 +45,6 @@ New features
 .. image:: ../../images/6_14_release/sliceviewer_masking.png
    :class: screenshot
    :width: 500px
-   :align: right
 
 Bugfixes
 ############
