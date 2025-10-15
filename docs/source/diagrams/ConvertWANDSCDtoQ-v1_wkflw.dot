@@ -1,0 +1,64 @@
+digraph ConvertWANDSCDtoQ {
+label = "\n"
+$global_style
+
+subgraph params {
+$param_style
+  set_keep_temp   [label="Keep Temporary Workspaces is True"]
+  scalings          [label="Data scaling factors"]
+  scalings_background          [label="Background scaling factors"]
+
+}
+
+subgraph decisions {
+$decision_style
+  temp_workspaces  [label="Temporary* Workspaces?"]
+  keep_temp_workspaces  [label="Keep Temporary Workspaces?"]
+  flux_normalise_data [label="Scale Data by Monitor counts or Elapsed time?"]
+  flux_normalise_background [label="Scale Background by Monitor counts or Elapsed time?"]
+  iterate_over_symops [label="Iterate over all symmetry operations"]
+  iterate_over_goniometers [label="Iterate over all goniometer matrices"]
+  mapping [label="Mapping Q-lab of each pixel to Q-sample or HKL-frame"]
+  histogram [label="Add the Q-sample or HKL-frame indexes to MDHistogram of counts"]
+}
+
+subgraph algorithms {
+$algorithm_style
+  save_normalized_data  [label="CreateMDHistoWorkspaceave(Normalized Data)"]
+  save_addtional_workspaces  [label="CreateMDHistoWorkspace(Additional Workspaces)"]
+  aggregate_to_temporary_workspaces  [label="PlusMD (Aggregate to Temporary Workspaces)"]
+}
+
+subgraph processes {
+$process_style
+  sym_ops               [label="Generate Symmetry Operations"]
+  scale_normalization  [label="Scale Normalization (if required)"]
+  collect_UB_matrix   [label="Collect UB matrix from input sources"]
+  collect_q_vectors  [label="Collect Q Vector of each pixel"]
+  collect_goniometer_matrixes  [label="Collect set of Goniometer Matrices"]
+  reference_goniometer_matrix  [label="Transform Matrix to nominal Goniometer"]
+  transform_matrix  [label="Transform Matrix to Lab frame"]
+}
+
+
+// Main workflow
+temp_workspaces ->  set_keep_temp [label="yes"]
+temp_workspaces ->  sym_ops [label="no"]
+set_keep_temp -> sym_ops
+sym_ops -> flux_normalise_data
+flux_normalise_data -> scalings [label="yes"]
+sym_ops -> flux_normalise_background
+flux_normalise_background -> scalings_background [label="yes"]
+sym_ops -> scale_normalization -> collect_UB_matrix -> collect_q_vectors -> collect_goniometer_matrixes
+collect_goniometer_matrixes -> iterate_over_symops -> reference_goniometer_matrix -> iterate_over_goniometers
+iterate_over_goniometers -> transform_matrix -> mapping -> histogram
+scalings -> histogram
+scalings_background -> histogram
+histogram -> keep_temp_workspaces
+
+keep_temp_workspaces -> save_normalized_data [label="no"]
+keep_temp_workspaces -> save_addtional_workspaces [label="yes"]
+save_addtional_workspaces -> aggregate_to_temporary_workspaces
+aggregate_to_temporary_workspaces -> save_normalized_data
+
+}
