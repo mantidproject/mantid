@@ -136,7 +136,7 @@ function usage() {
   echo "Options:"
   echo "  -c Optional conda channel overriding the default mantid"
   echo "  -s Optional Add a suffix to the output mantid file, has to be Unstable, or Nightly or not used"
-  echo "  -p Target platform, e.g. osx-64 or osx-arm64"
+  echo "  -p Target platform, e.g. osx-arm64"
   exit $exitcode
 }
 

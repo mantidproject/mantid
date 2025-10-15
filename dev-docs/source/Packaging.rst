@@ -202,7 +202,7 @@ This is useful if you need to change a pinned version of one of Mantid's depende
 
    .. code-block:: sh
 
-       mamba create -n test -c /home/me/tmp/rattler/ mantid-developer
+       mamba create -n test -c /home/me/tmp/rattler/ -c neutrons mantid-developer
 
 7. You will need to re-run ``cmake --fresh ...`` with this new environment.
 
