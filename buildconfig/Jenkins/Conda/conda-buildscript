@@ -84,6 +84,10 @@ pushd $WORKSPACE
 echo "===== ENVIRONMENT VARIABLES ====="
 printenv | sort
 echo "================================="
+
+TARGET_BRANCH=$(curl -s https://api.github.com/repos/mantidproject/mantid/pulls/40115 | jq -r .base.ref)
+echo "Target branch is: $TARGET_BRANCH"
+
 ORNL_NEXT_COMMIT=$(git rev-parse remotes/origin/ornl-next)
 CURRENT_COMMIT=$(git rev-parse HEAD)
 
