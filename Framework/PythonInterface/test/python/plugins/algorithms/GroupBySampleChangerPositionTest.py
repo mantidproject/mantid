@@ -16,7 +16,7 @@ class GroupBySampleChangerPositionTest(unittest.TestCase):
         """
 
         wks = ISISIndirectEnergyTransfer(
-            InputFiles="IRS26176.RAW", Instrument="IRIS", Analyser="graphite", Reflection="002", SpectraRange=[3, 53]
+            InputFiles="IRS26176.raw", Instrument="IRIS", Analyser="graphite", Reflection="002", SpectraRange=[3, 53]
         )
         GroupBySampleChangerPosition(InputWorkspace=wks, OutputGroupPrefix="Prefix", OutputGroupSuffix="Suffix")
         ads = AnalysisDataServiceImpl.Instance()

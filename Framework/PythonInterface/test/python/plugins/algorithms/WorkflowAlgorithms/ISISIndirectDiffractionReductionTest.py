@@ -28,7 +28,7 @@ class ISISIndirectDiffractionReductionTest(unittest.TestCase):
         Sanity test to ensure the most basic reduction actually completes.
         """
 
-        wks = ISISIndirectDiffractionReduction(InputFiles=["IRS26176.RAW"], Instrument="IRIS", Mode="diffspec", SpectraRange=[105, 112])
+        wks = ISISIndirectDiffractionReduction(InputFiles=["IRS26176.raw"], Instrument="IRIS", Mode="diffspec", SpectraRange=[105, 112])
 
         self.assertTrue(isinstance(wks, WorkspaceGroup), "Result workspace should be a workspace group.")
         self.assertEqual(len(wks), 1)
@@ -44,7 +44,7 @@ class ISISIndirectDiffractionReductionTest(unittest.TestCase):
         """
 
         wks = ISISIndirectDiffractionReduction(
-            InputFiles=["IRS26176.RAW"], Instrument="IRIS", Mode="diffspec", SpectraRange=[105, 112], RebinParam="3,0.1,4"
+            InputFiles=["IRS26176.raw"], Instrument="IRIS", Mode="diffspec", SpectraRange=[105, 112], RebinParam="3,0.1,4"
         )
 
         self.assertTrue(isinstance(wks, WorkspaceGroup), "Result workspace should be a workspace group.")
@@ -66,7 +66,7 @@ class ISISIndirectDiffractionReductionTest(unittest.TestCase):
         """
 
         wks = ISISIndirectDiffractionReduction(
-            InputFiles=["IRS26176.RAW", "IRS26173.RAW"], Instrument="IRIS", Mode="diffspec", SpectraRange=[105, 112]
+            InputFiles=["IRS26176.raw", "IRS26173.raw"], Instrument="IRIS", Mode="diffspec", SpectraRange=[105, 112]
         )
 
         self.assertTrue(isinstance(wks, WorkspaceGroup), "Result workspace should be a workspace group.")
@@ -107,7 +107,7 @@ class ISISIndirectDiffractionReductionTest(unittest.TestCase):
         """
 
         wks = ISISIndirectDiffractionReduction(
-            InputFiles=["IRS26176.RAW"], ContainerFiles=["IRS26173.RAW"], Instrument="IRIS", Mode="diffspec", SpectraRange=[105, 112]
+            InputFiles=["IRS26176.raw"], ContainerFiles=["IRS26173.raw"], Instrument="IRIS", Mode="diffspec", SpectraRange=[105, 112]
         )
 
         self.assertTrue(isinstance(wks, WorkspaceGroup), "Result workspace should be a workspace group.")
@@ -124,8 +124,8 @@ class ISISIndirectDiffractionReductionTest(unittest.TestCase):
         """
 
         wks = ISISIndirectDiffractionReduction(
-            InputFiles=["IRS26176.RAW"],
-            ContainerFiles=["IRS26173.RAW"],
+            InputFiles=["IRS26176.raw"],
+            ContainerFiles=["IRS26173.raw"],
             ContainerScaleFactor=0.1,
             Instrument="IRIS",
             Mode="diffspec",
@@ -161,7 +161,7 @@ class ISISIndirectDiffractionReductionTest(unittest.TestCase):
         Test to ensure that reduction with normalisation by vanadium works
         """
         wks = ISISIndirectDiffractionReduction(
-            InputFiles=["IRS26176.RAW"], VanadiumFiles=["IRS26173.RAW"], Instrument="IRIS", Mode="diffspec", SpectraRange=[105, 112]
+            InputFiles=["IRS26176.raw"], VanadiumFiles=["IRS26173.raw"], Instrument="IRIS", Mode="diffspec", SpectraRange=[105, 112]
         )
 
         self.assertTrue(isinstance(wks, WorkspaceGroup), "Result workspace should be a workspace group.")
@@ -310,7 +310,7 @@ class ISISIndirectDiffractionReductionTest(unittest.TestCase):
             RuntimeError,
             "Cal Files are currently only available for use in OSIRIS diffspec mode",
             ISISIndirectDiffractionReduction,
-            InputFiles=["IRS26176.RAW"],
+            InputFiles=["IRS26176.raw"],
             Instrument="IRIS",
             Mode="diffspec",
             CalFile="osi_041_RES10.cal",
