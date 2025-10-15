@@ -20,7 +20,7 @@ Bugfixes
 - ``Show Invisible Workspaces`` settings can now be updated from the settings menu.
 - Workspaces starting with "_" will now appear in plot legends.
 - Moving a range selector on a plot (especially in indirect/inelastic interfaces) will no longer cause a deprecation warning about ``np.bool`` scalars being interpreted as an index.
-
+- Standalone Windows installations of MantidWorkbench (using the .exe installer) now ignore the user ``site-packages`` directory (``%APPDATA%\Python\Python311\site-packages``), preventing conflicts with packages from other Python installations.
 
 InstrumentViewer
 ----------------
