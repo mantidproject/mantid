@@ -85,7 +85,7 @@ echo "===== ENVIRONMENT VARIABLES ====="
 printenv | sort
 echo "================================="
 
-TARGET_BRANCH=$(curl -s "https://api.github.com/repos/mantidproject/mantid/pulls/40115" \
+TARGET_BRANCH=$(curl -s "https://api.github.com/repos/mantidproject/mantid/pulls/$PR" \
   | grep '"base":' -A 10 \
   | grep '"ref":' \
   | head -n 1 \
