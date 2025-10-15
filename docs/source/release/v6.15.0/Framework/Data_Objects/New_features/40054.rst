@@ -1,0 +1,1 @@
+- :py:obj:`Table Workspaces <mantid.api.ITableWorkspace>` now support new method `columnArray` for retrieving the column of a `TableWorkspace` as a numpy array. For example `table_ws.columnArray("Index")` will return `np.array([0, 1, 2, 3])`
