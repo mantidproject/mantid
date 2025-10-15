@@ -80,15 +80,11 @@ if [ "$is_allowed" == false ]; then
 fi
 
 # Skip Windows and macOS builds if target branch is ornl-next
-pushd $WORKSPACE
-ORNL_NEXT_COMMIT=$(git rev-parse remotes/origin/ornl-next)
-CURRENT_COMMIT=$(git rev-parse HEAD)
-
-TARGET_BRANCH=""
-if git merge-base --is-ancestor $ORNL_NEXT_COMMIT $CURRENT_COMMIT; then
-    TARGET_BRANCH="ornl-next"
-fi
-popd
+TARGET_BRANCH=$(curl -s "https://api.github.com/repos/mantidproject/mantid/pulls/$PR" \
+  | grep '"base":' -A 10 \
+  | grep '"ref":' \
+  | head -n 1 \
+  | sed -E 's/.*"ref": "(.*)".*/\1/')
 
 if [[ "$PLATFORM" == win-* || "$PLATFORM" == osx-* ]]; then
     if [[ "$TARGET_BRANCH" == "ornl-next" ]]; then
