@@ -42,6 +42,11 @@ New features
 ############
 - Added a masking feature for Matrix Workspaces with a non-numeric y-axis. This enables direct application of the mask to the underlying workspace, or the outputting of a table workspace that can be applied subsequently using ``MaskFromTableWorkspace``.
 
+.. image:: ../../images/6_14_release/sliceviewer_masking.png
+   :class: screenshot
+   :width: 500px
+   :align: right
+
 Bugfixes
 ############
 
