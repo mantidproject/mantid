@@ -22,7 +22,6 @@ from mantidqt.widgets.plotconfigdialog.axestabwidget.presenter import AxesTabWid
 class AxesTabWidgetPresenterTstBase(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.ax.plot([0, 1], [10, 12], "rx")
         cls.title = "My Axes"
         cls.ax.set_title(cls.title)
         cls.x_label = "X"
@@ -48,6 +47,7 @@ class AxesTabWidgetPresenterTest(AxesTabWidgetPresenterTstBase):
     def setUpClass(cls):
         cls.fig = figure()
         cls.ax = cls.fig.add_subplot(211)
+        cls.ax.plot([0, 1], [10, 12], "rx")
         super().setUpClass()
 
     def test_generate_ax_name_returns_correct_name(self):
