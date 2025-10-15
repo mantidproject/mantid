@@ -34,7 +34,7 @@ MAXTIMEBINSIZE = 3000
 
 
 class DoubleValidator(QDoubleValidator):
-    def __init__(self, line_edit, initial_value):
+    def __init__(self, line_edit, initial_value, allow_empty_edits=False):
         locale = QLocale.c()
         locale.setNumberOptions(QLocale.RejectGroupSeparator)
         super().__init__()
@@ -42,7 +42,8 @@ class DoubleValidator(QDoubleValidator):
         super().setDecimals(6)
         self._line_edit = line_edit
         self._line_edit.editingFinished.connect(self.on_editing_finished)
-        self._last_value = initial_value
+        self._last_value = None if not initial_value else initial_value
+        self._allow_empty = allow_empty_edits
 
     @property
     def last_value(self):
@@ -53,11 +54,18 @@ class DoubleValidator(QDoubleValidator):
         self._last_value = value
 
     def on_editing_finished(self):
-        self._last_value = f"{float(self._line_edit.text()):.6f}"
-        self._line_edit.setText(self._last_value)
+        txt = self._line_edit.text()
+        self._last_value = float(txt) if txt else None
+        self.set_txt()
 
-    def fixup(self, _):
-        self._line_edit.setText(self._last_value)
+    def set_txt(self):
+        self._line_edit.setText(f"{self._last_value:.6f}" if self._last_value else "")
+
+    def fixup(self, txt):
+        if txt == "" and self._allow_empty:
+            self._line_edit.clear()
+        else:
+            self.set_txt()
 
 
 class MainWindow(QMainWindow):
@@ -94,34 +102,38 @@ class MainWindow(QMainWindow):
         self.canvas.mpl_connect("button_release_event", self.on_mouse_release)
         self.canvas.mpl_connect("motion_notify_event", self.on_mouse_move)
 
-        vertical_marker = RangeMarker(self.canvas, "green", 0.0, 1.0, line_style="--")
-        horizontal_marker = RangeMarker(self.canvas, "blue", 0.0, 1.0, range_type="YMinMax", line_style="-.")
-        self.markers = [vertical_marker, horizontal_marker]
-        for marker in self.markers:
-            marker.set_range(0.1, 0.9)
-        self.marker_line_edits = [(self.ui.leStartTime, self.ui.leStopTime), (self.ui.leMinimumValue, self.ui.leMaximumValue)]
+        initial_plot_lims = [0.0, 1.0]
+        initial_marker_pos = [0.1, 0.9]
+        vertical_marker = RangeMarker(self.canvas, "green", *initial_plot_lims, line_style="--")
+        horizontal_marker = RangeMarker(self.canvas, "blue", *initial_plot_lims, range_type="YMinMax", line_style="-.")
 
         # Do initialize plotting
-        self.mainline = self.ui.mainplot.plot([0, 1], [0.5, 0.5], "r-")
-        self.ui.mainplot.set_xlim(0, 1)
-        self.ui.mainplot.set_ylim(0, 1)
+        self.mainline = self.ui.mainplot.plot(initial_plot_lims, [0.5] * 2, "r-")
+        self.ui.mainplot.set_xlim(*initial_plot_lims)
+        self.ui.mainplot.set_ylim(*initial_plot_lims)
 
         # Set up validators for numeric edits
         self.doubleLineEdits = [
-            (self.ui.leStartTime, 0.1),
-            (self.ui.leStopTime, 0.9),
-            (self.ui.leMinimumValue, 0.1),
-            (self.ui.leMaximumValue, 0.9),
+            (self.ui.leStartTime, initial_marker_pos[0]),
+            (self.ui.leStopTime, initial_marker_pos[1]),
+            (self.ui.leMinimumValue, initial_marker_pos[0]),
+            (self.ui.leMaximumValue, initial_marker_pos[1]),
             (self.ui.leStepSize, None),
             (self.ui.leValueTolerance, None),
             (self.ui.leTimeTolerance, None),
             (self.ui.leIncidentEnergy, None),
         ]
         for line_edit, ini_value in self.doubleLineEdits:
-            line_edit.setValidator(DoubleValidator(line_edit, ini_value))
+            line_edit.setValidator(DoubleValidator(line_edit, ini_value, ini_value is None))
             if ini_value:
                 line_edit.setText(f"{ini_value:.6f}")
                 line_edit.editingFinished.connect(self.update_marker_range)
+
+        self.markers = [vertical_marker, horizontal_marker]
+        self.marker_line_edits = [(self.ui.leStartTime, self.ui.leStopTime), (self.ui.leMinimumValue, self.ui.leMaximumValue)]
+        for (min_edit, max_edit), marker in zip(self.marker_line_edits, self.markers):
+            marker.set_range(*initial_marker_pos)
+            self.update_line_edits(min_edit, max_edit, initial_marker_pos, marker)
 
         # File loader
         self.scanEventWorkspaces()
@@ -707,14 +719,6 @@ class MainWindow(QMainWindow):
             url = "http://docs.mantidproject.org/nightly/interfaces/{}.html".format("Filter Events")
             QDesktopServices.openUrl(QUrl(url))
 
-    def connect_signals(self):
-        for edit in self.doubleLineEdits[:3]:
-            edit[0].editingFinished.connect(self.set_range)
-
-    def disconnect_signals(self):
-        for edit in self.doubleLineEdits[:3]:
-            edit[0].editingFinished.disconnect(self.set_range)
-
     def _resetGUI(self, resetfilerun=False):
         """Reset GUI elements."""
         if resetfilerun is True:
@@ -747,14 +751,14 @@ class MainWindow(QMainWindow):
 
     def update_line_edits(self, min_edit, max_edit, lims, marker):
         min_edit.validator().setRange(lims[0], marker.get_maximum(), 6)
-        min_txt = f"{marker.get_minimum():.6f}"
-        min_edit.validator().last_value = min_txt
-        min_edit.setText(min_txt)
+        min_marker = marker.get_minimum()
+        min_edit.validator().last_value = min_marker
+        min_edit.setText(f"{min_marker:.6f}")
 
         max_edit.validator().setRange(marker.get_minimum(), lims[1], 6)
-        max_txt = f"{marker.get_maximum():.6f}"
-        max_edit.validator().last_value = max_txt
-        max_edit.setText(max_txt)
+        max_marker = marker.get_maximum()
+        max_edit.validator().last_value = max_marker
+        max_edit.setText(f"{max_marker:.6f}")
 
     def update_plot(self, x_data, y_data, x_label="Time(s)", y_label="Counts", xlim=None, ylim=None):
         """Updates the plot line, the marker positions and the edits linked to the markers"""
