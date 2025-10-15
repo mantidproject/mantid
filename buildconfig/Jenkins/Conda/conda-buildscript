@@ -81,28 +81,18 @@ fi
 
 # Skip Windows and macOS builds if target branch is not main
 pushd $WORKSPACE
-echo $(git status)
-echo $(git log --oneline -5)
-echo $(git branch -a)
 ORNL_NEXT_COMMIT=$(git rev-parse remotes/origin/ornl-next)
-MAIN_COMMIT=$(git rev-parse remotes/origin/main)
 CURRENT_COMMIT=$(git rev-parse HEAD)
 
 TARGET_BRANCH=""
-
-
 if git merge-base --is-ancestor $ORNL_NEXT_COMMIT $CURRENT_COMMIT; then
     TARGET_BRANCH="ornl-next"
-fi
-
-if git merge-base --is-ancestor $MAIN_COMMIT $CURRENT_COMMIT; then
-    echo "Dang we found main!"
 fi
 popd
 
 if [[ "$PLATFORM" == win-* || "$PLATFORM" == osx-* ]]; then
     if [[ "$TARGET_BRANCH" == "ornl-next" ]]; then
-        echo "Skipping $PLATFORM build: target branch is '$TARGET_BRANCH' (not 'main')."
+        echo "Skipping $PLATFORM build: target branch is '$TARGET_BRANCH'."
         exit 0
     fi
 fi
