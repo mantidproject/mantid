@@ -79,12 +79,20 @@ if [ "$is_allowed" == false ]; then
     PLATFORM=""
 fi
 
-# Skip Windows and macOS builds if target branch is not main
-TARGET_BRANCH="${CHANGE_TARGET:-$(git rev-parse --abbrev-ref HEAD)}"
+# Skip Windows and macOS builds if target branch is ornl-next
+pushd $WORKSPACE
+ORNL_NEXT_COMMIT=$(git rev-parse remotes/origin/ornl-next)
+CURRENT_COMMIT=$(git rev-parse HEAD)
+
+TARGET_BRANCH=""
+if git merge-base --is-ancestor $ORNL_NEXT_COMMIT $CURRENT_COMMIT; then
+    TARGET_BRANCH="ornl-next"
+fi
+popd
 
 if [[ "$PLATFORM" == win-* || "$PLATFORM" == osx-* ]]; then
     if [[ "$TARGET_BRANCH" == "ornl-next" ]]; then
-        echo "Skipping $PLATFORM build: target branch is '$TARGET_BRANCH' (not 'main')."
+        echo "Skipping $PLATFORM build: target branch is '$TARGET_BRANCH'."
         exit 0
     fi
 fi
