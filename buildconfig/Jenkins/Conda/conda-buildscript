@@ -84,6 +84,9 @@ pushd $WORKSPACE
 ORNL_NEXT_COMMIT=$(git rev-parse remotes/origin/ornl-next)
 CURRENT_COMMIT=$(git rev-parse HEAD)
 
+echo $GITHUB_BASE_REF
+echo $(git log --oneline --decorate | grep 'origin/ornl-next')
+
 TARGET_BRANCH=""
 if git merge-base --is-ancestor $ORNL_NEXT_COMMIT $CURRENT_COMMIT; then
     TARGET_BRANCH="ornl-next"
@@ -97,6 +100,7 @@ if [[ "$PLATFORM" == win-* || "$PLATFORM" == osx-* ]]; then
     fi
 fi
 
+exit 0
 # Handle flag inputs
 while [ ! $# -eq 0 ]
 do
