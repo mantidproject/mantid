@@ -14,8 +14,8 @@ class IndirectTransmissionMonitorTest(unittest.TestCase):
         self._sample_workspace = "IndirectTransmissionMonitorTest_sample"
         self._can_workspace = "IndirectTransmissionMonitorTest_can"
 
-        Load(Filename="IRS26176.RAW", OutputWorkspace=self._sample_workspace)
-        Load(Filename="IRS26173.RAW", OutputWorkspace=self._can_workspace)
+        Load(Filename="IRS26176.raw", OutputWorkspace=self._sample_workspace)
+        Load(Filename="IRS26173.raw", OutputWorkspace=self._can_workspace)
 
         self.kwargs = {}
         self.kwargs["SampleWorkspace"] = self._sample_workspace
