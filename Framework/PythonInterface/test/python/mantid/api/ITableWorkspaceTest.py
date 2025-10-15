@@ -221,6 +221,112 @@ class ITableWorkspaceTest(unittest.TestCase):
         self.assertEqual(types[1], "str")
         self.assertEqual(types[2], "V3D")
 
+    def test_array_column_int(self):
+        table = WorkspaceFactory.createTable()
+        table.addColumn(type="int", name="index")
+        table.addRow([1])
+        table.addRow([2])
+        table.addRow([3])
+
+        arr = table.columnArray("index")
+        self.assertTrue(numpy.array_equal(arr, numpy.array([1, 2, 3])))
+        self.assertEqual(arr.dtype, numpy.dtype("int32"))
+
+    def test_array_column_float(self):
+        table = WorkspaceFactory.createTable()
+        table.addColumn(type="float", name="value")
+        table.addRow([1.1])
+        table.addRow([2.2])
+        table.addRow([3.3])
+
+        arr = table.columnArray("value")
+        numpy.testing.assert_array_almost_equal(arr, numpy.array([1.1, 2.2, 3.3]))
+        self.assertEqual(arr.dtype, numpy.dtype("float32"))
+
+    def test_array_column_double(self):
+        table = WorkspaceFactory.createTable()
+        table.addColumn(type="double", name="value")
+        table.addRow([1.1])
+        table.addRow([2.2])
+        table.addRow([3.3])
+
+        arr = table.columnArray("value")
+        self.assertTrue(numpy.array_equal(arr, numpy.array([1.1, 2.2, 3.3])))
+        self.assertEqual(arr.dtype, numpy.dtype("double"))
+
+    def test_array_column_bool(self):
+        table = WorkspaceFactory.createTable()
+        table.addColumn(type="bool", name="value")
+        table.addRow([False])
+        table.addRow([True])
+        table.addRow([True])
+
+        arr = table.columnArray("value")
+        self.assertTrue(numpy.array_equal(arr, numpy.array([False, True, True])))
+        self.assertEqual(arr.dtype, numpy.dtype("bool"))
+
+    def test_array_column_string(self):
+        table = WorkspaceFactory.createTable()
+        table.addColumn(type="str", name="values")
+
+        table.addRow(["1"])
+        table.addRow(["12"])
+        table.addRow(["123"])
+        table.addRow(["yes"])
+        table.addRow(["n/a"])
+
+        arr = table.columnArray("values")
+        numpy.testing.assert_array_equal(arr, numpy.array(["1", "12", "123", "yes", "n/a"], dtype=numpy.dtype("<U3")))
+        self.assertEqual(arr.dtype, numpy.dtype("<U3"))
+
+    def test_array_column_v3d(self):
+        from mantid.kernel import V3D
+
+        table = WorkspaceFactory.createTable()
+        table.addColumn(type="V3D", name="pos")
+        table.addRow([V3D(1, 1, 1)])
+        table.addRow([V3D(2, 2, 2)])
+
+        arr = table.columnArray("pos")
+        self.assertTrue(numpy.array_equal(arr, numpy.array([[1, 1, 1], [2, 2, 2]])))
+
+    def test_array_column_long(self):
+        table = WorkspaceFactory.createTable()
+        table.addColumn(type="long64", name="index")
+        table.addRow([1])
+        table.addRow([2])
+        table.addRow([3])
+
+        arr = table.columnArray("index")
+        self.assertTrue(numpy.array_equal(arr, numpy.array([1, 2, 3])))
+        self.assertEqual(arr.dtype, numpy.dtype("long"))
+
+    def test_array_column_vector_ints(self):
+        table = WorkspaceFactory.createTable()
+        table.addColumn(type="vector_int", name="values")
+
+        # Settings from general Python list
+        table.addRow([[1, 2, 3, 4, 5]])
+        # Setting from numpy array
+        table.addRow([numpy.array([6, 7, 8, 9, 10])])
+
+        arr = table.columnArray("values")
+        self.assertTrue(numpy.array_equal(arr, numpy.array([[1, 2, 3, 4, 5], [6, 7, 8, 9, 10]])))
+        self.assertEqual(arr.dtype, numpy.dtype("int32"))
+
+    def test_array_column_vector_doubles(self):
+        table = WorkspaceFactory.createTable()
+        table.addColumn(type="vector_double", name="values")
+
+        # Settings from general Python list
+        table.addRow([[1.0, 2.0, 3.0]])
+        # Setting from numpy array
+        table.addRow([numpy.array([6.0, 7.0, 8.0])])
+
+        arr = table.columnArray("values")
+        self.assertTrue(numpy.array_equal(arr, numpy.array([[1.0, 2.0, 3.0], [6.0, 7.0, 8.0]])))
+        self.assertEqual(arr.dtype, numpy.dtype("double"))
+
     def test_convert_to_dict(self):
         from mantid.kernel import V3D
 
