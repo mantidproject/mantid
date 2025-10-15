@@ -7,42 +7,48 @@
 #  This file is part of the mantid workbench.
 
 import unittest
+from unittest import mock
 
 from matplotlib import use as mpl_use
 
 mpl_use("Agg")
 from matplotlib.pyplot import figure
 
-from unittest import mock
 from mantidqt.widgets.plotconfigdialog import generate_ax_name, get_axes_names_dict
 from mantidqt.widgets.plotconfigdialog.axestabwidget import AxProperties
 from mantidqt.widgets.plotconfigdialog.axestabwidget.presenter import AxesTabWidgetPresenter as Presenter
 
 
-class AxesTabWidgetPresenterTest(unittest.TestCase):
+class AxesTabWidgetPresenterTstBase(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.fig = figure()
-        ax = cls.fig.add_subplot(211)
-        ax.plot([0, 1], [10, 12], "rx")
+        cls.ax.plot([0, 1], [10, 12], "rx")
         cls.title = "My Axes"
-        ax.set_title(cls.title)
+        cls.ax.set_title(cls.title)
         cls.x_label = "X"
-        ax.set_xlabel(cls.x_label)
+        cls.ax.set_xlabel(cls.x_label)
         cls.x_scale = "linear"
-        ax.set_xscale(cls.x_scale)
+        cls.ax.set_xscale(cls.x_scale)
         cls.y_label = "Y"
-        ax.set_ylabel(cls.y_label)
+        cls.ax.set_ylabel(cls.y_label)
         cls.y_scale = "log"
-        ax.set_yscale(cls.y_scale)
+        cls.ax.set_yscale(cls.y_scale)
         cls.canvas_color = (1.0, 1.0, 0.0, 1.0)
-        ax.set_facecolor(cls.canvas_color)
+        cls.ax.set_facecolor(cls.canvas_color)
         ax2 = cls.fig.add_subplot(212)
         ax2.plot([-1000000, 10000], [10, 12], "rx")
 
     def _generate_presenter(self):
         mock_view = mock.Mock(get_selected_ax_name=lambda: "My Axes: (0, 0)", get_axis=lambda: "x", get_properties=lambda: {})
         return Presenter(self.fig, view=mock_view)
+
+
+class AxesTabWidgetPresenterTest(AxesTabWidgetPresenterTstBase):
+    @classmethod
+    def setUpClass(cls):
+        cls.fig = figure()
+        cls.ax = cls.fig.add_subplot(211)
+        super().setUpClass()
 
     def test_generate_ax_name_returns_correct_name(self):
         ax0_name = generate_ax_name(self.fig.get_axes()[0])
@@ -185,14 +191,25 @@ class AxesTabWidgetPresenterTest(unittest.TestCase):
         presenter = self._generate_presenter()
         actual_props = presenter.get_selected_ax_properties()
         self.assertIsInstance(actual_props, AxProperties)
-        self.assertEqual("My Axes", actual_props.title)
-        self.assertEqual("X", actual_props.xlabel)
-        self.assertEqual("Linear", actual_props.xscale)
-        self.assertEqual("Y", actual_props.ylabel)
-        self.assertEqual("Log", actual_props.yscale)
-        self.assertEqual(False, actual_props.minor_ticks)
-        self.assertEqual(False, actual_props.minor_gridlines)
-        self.assertEqual(self.canvas_color, actual_props.canvas_color)
+        for key in ("xlim", "ylim"):
+            actual_props[key] = tuple([round(n, 2) for n in actual_props[key]])  # No need to be precise here in comparison
+        expected_props = {
+            "title": self.title,
+            "xlim": (-0.05, 1.05),
+            "xlabel": self.x_label,
+            "xscale": self.x_scale.capitalize(),
+            "xautoscale": True,
+            "ylim": (9.91, 12.11),
+            "ylabel": self.y_label,
+            "yscale": self.y_scale.capitalize(),
+            "yautoscale": True,
+            "canvas_color": self.canvas_color,
+            "linthreshx": 2,
+            "linthreshy": 2,
+            "minor_ticks": False,
+            "minor_gridlines": False,
+        }
+        self.assertEqual(expected_props, actual_props)
 
     def test_populate_select_axes_combo_box_called_once_on_construction(self):
         presenter = self._generate_presenter()
@@ -285,6 +302,46 @@ class AxesTabWidgetPresenterTest(unittest.TestCase):
 
         mock_success_callback.assert_called()
         mock_error_callback.assert_not_called()
+
+
+class AxesTabWidgetPresenterTest3D(AxesTabWidgetPresenterTstBase):
+    @classmethod
+    def setUpClass(cls):
+        cls.fig = figure()
+        cls.ax = cls.fig.add_subplot(211, projection="mantid3d")
+        cls.ax.plot([0, 1], [10, 12], [0, 10], "rx")
+        cls.z_scale = "linear"
+        cls.ax.set_zscale(cls.z_scale)
+        cls.z_label = "Z"
+        cls.ax.set_zlabel(cls.z_label)
+        super().setUpClass()
+
+    def test_get_selected_ax_properties_3d(self):
+        presenter = self._generate_presenter()
+        actual_props = presenter.get_selected_ax_properties()
+        self.assertIsInstance(actual_props, AxProperties)
+        for key in ("xlim", "ylim", "zlim"):
+            actual_props[key] = tuple([round(n, 2) for n in actual_props[key]])  # No need to be precise here in comparison
+        expected_props = {
+            "title": self.title,
+            "xlim": (-0.07, 1.07),
+            "xlabel": self.x_label,
+            "xscale": self.x_scale.capitalize(),
+            "xautoscale": True,
+            "ylim": (9.85, 12.15),
+            "ylabel": self.y_label,
+            "yscale": self.y_scale.capitalize(),
+            "yautoscale": True,
+            "zlim": (-0.21, 10.21),
+            "zlabel": self.z_label,
+            "zscale": self.z_scale.capitalize(),
+            "zautoscale": True,
+            "canvas_color": self.canvas_color,
+            "linthreshx": 2,
+            "linthreshy": 2,
+            "linthreshz": 2,
+        }
+        self.assertEqual(expected_props, actual_props)
 
 
 if __name__ == "__main__":
