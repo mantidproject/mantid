@@ -331,7 +331,7 @@ pipeline {
               }
               checkoutSource("${GIT_SHA}")
               // Copy base packages to build workbench
-              copyArtifacts filter: "**/conda-bld/noarch/*., **/conda-bld/${PLATFORM}/*.conda",
+              copyArtifacts filter: "**/conda-bld/noarch/*.conda, **/conda-bld/${PLATFORM}/*.conda",
                 fingerprintArtifacts: true,
                 projectName: '${JOB_NAME}',
                 selector: specific('${BUILD_NUMBER}'),
