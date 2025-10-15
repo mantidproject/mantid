@@ -130,7 +130,7 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
             "OutputNormalizationWorkspace",
             "",
             direction=Direction.Input,
-            doc="Name for the Output Normalization Workspace"
+            doc="Name for the Output Normalization Workspace."
             "If unspecified, the name will that of the OutputWorkspace plus suffix '_normalization', "
             "and only when option KeepTemporaryWorkspaces is True",
         )
@@ -138,7 +138,7 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
             "OutputBackgroundDataWorkspace",
             "",
             direction=Direction.Input,
-            doc="Name for the Output Background Workspace"
+            doc="Name for the Output Background Workspace. "
             "If unspecified, the name will that of the OutputWorkspace plus suffix '_background_data', "
             "and only when option KeepTemporaryWorkspaces is True",
         )
@@ -146,7 +146,7 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
             "OutputBackgroundNormalizationWorkspace",
             "",
             direction=Direction.Input,
-            doc="Name for the Output Background Normalization Workspace"
+            doc="Name for the Output Background Normalization Workspace. "
             "If unspecified, the name will that of the OutputWorkspace plus suffix '_background_normalization', "
             "and only when option KeepTemporaryWorkspaces is True",
         )
@@ -401,7 +401,7 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
             polar = np.array(inWS.getExperimentInfo(0).run().getProperty("twotheta").value)
         else:
             # Assumption: inWS was generated with no detector-pixel grouping,
-            # so that the first tow dimensions of inWS correspond to the extent of the individual detector pixels
+            # so that the first two dimensions of inWS correspond to the extent of the individual detector pixels
             di = inWS.getExperimentInfo(0).detectorInfo()
             polar = np.array([di.twoTheta(i) for i in range(di.size()) if not di.isMonitor(i)])
             if inWS.getExperimentInfo(0).getInstrument().getName() == "HB3A":
@@ -499,11 +499,11 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
                 # Note that bin_indices[mask].shape = (unmasked_pixel_count, 3),
                 # example: bin_indices[mask] = [5, 20,..] indicates the first unmasked pixel has a 1D bin index of 5,
                 # and the second unmasked-pixel has a 1D bin index of 20, etc.
-                # Thus, `inverse_indices` specify the unmaksed-pixel indexes for each 1D bin index
+                # Thus, `inverse_indices` specify the unmasked-pixel indexes for each 1D bin index
                 unique_indices, inverse_indices = np.unique(bin_indices, return_inverse=True)
 
                 # data_array_flat[i_gon][mask].shape is (unmasked_pixel_count, )
-                # count occurrences of each index of inverse_indices and weightsthem by corresponding values
+                # count occurrences of each index of inverse_indices and weights them by corresponding values
                 # from data_array_flat[i_gon][mask], which is the number of events for each unmasked pixel
                 data_hist[unique_indices] += np.bincount(inverse_indices, data_array_flat[i_gon][mask])
                 norm_hist[unique_indices] += np.bincount(inverse_indices, norm_array_flat[mask]) * scale[i_gon]
