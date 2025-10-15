@@ -24,7 +24,7 @@ $decision_style
 
 subgraph algorithms {
 $algorithm_style
-  save_normalized_data  [label="CreateMDHistoWorkspaceave(Normalized Data)"]
+  save_normalized_data  [label="CreateMDHistoWorkspace(Normalized Data)"]
   save_addtional_workspaces  [label="CreateMDHistoWorkspace(Additional Workspaces)"]
   aggregate_to_temporary_workspaces  [label="PlusMD (Aggregate to Temporary Workspaces)"]
 }
