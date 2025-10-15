@@ -81,10 +81,12 @@ fi
 
 # Skip Windows and macOS builds if target branch is not main
 pushd $WORKSPACE
-ORNL_NEXT_COMMIT=$(git rev-parse ornl-next)
+echo $(git status)
+echo $(git log --oneline -5)
+ORNL_NEXT_COMMIT=$(git rev-parse ref/heads/ornl-next)
 CURRENT_COMMIT=$(git rev-parse HEAD)
 TARGET_BRANCH=""
-echo $(git status)
+
 
 if git merge-base --is-ancestor $ORNL_NEXT_COMMIT $CURRENT_COMMIT; then
     TARGET_BRANCH="ornl-next"
