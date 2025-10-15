@@ -148,7 +148,7 @@ class LagrangeILLReductionTest(unittest.TestCase):
 
     def check_result(self, ws, expected_unit, expected_bins, first_bin, last_bin):
         self.assertEqual(ws.getNumberHistograms(), 1)
-        self.assertEqual(ws.getNumberBins(), expected_bins)
+        self.assertEqual(ws.blocksize(), expected_bins)
         self.assertEqual(ws.getAxis(0).getUnit().unitID(), expected_unit)
         self.assertAlmostEqual(ws.getAxis(0).extractValues()[0], first_bin, 4)
         self.assertAlmostEqual(ws.getAxis(0).extractValues()[-1], last_bin, 4)
