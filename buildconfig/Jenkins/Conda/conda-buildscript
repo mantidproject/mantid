@@ -85,7 +85,12 @@ echo "===== ENVIRONMENT VARIABLES ====="
 printenv | sort
 echo "================================="
 
-TARGET_BRANCH=$(curl -s https://api.github.com/repos/mantidproject/mantid/pulls/40115 | jq -r .base.ref)
+TARGET_BRANCH=$(curl -s "https://api.github.com/repos/mantidproject/mantid/pulls/40115" \
+  | grep '"base":' -A 10 \
+  | grep '"ref":' \
+  | head -n 1 \
+  | sed -E 's/.*"ref": "(.*)".*/\1/')
+
 echo "Target branch is: $TARGET_BRANCH"
 
 ORNL_NEXT_COMMIT=$(git rev-parse remotes/origin/ornl-next)
