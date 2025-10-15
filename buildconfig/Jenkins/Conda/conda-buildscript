@@ -67,7 +67,7 @@ EXTRA_CMAKE_FLAGS="-DENABLE_PRECOMMIT=OFF"
 # This removes '-ci' from the end of the cmake preset to get the target platform
 # We check that it's not e.g. cppcheck or doxygen
 PLATFORM="${CMAKE_PRESET%-ci}"
-allowed_platforms=("win-64" "linux-64" "osx-64" "osx-arm64")
+allowed_platforms=("win-64" "linux-64" "osx-arm64")
 is_allowed=false
 for item in "${allowed_platforms[@]}"; do
     if [ "$PLATFORM" == "$item" ]; then
