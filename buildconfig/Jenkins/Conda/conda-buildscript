@@ -81,6 +81,9 @@ fi
 
 # Skip Windows and macOS builds if target branch is ornl-next
 pushd $WORKSPACE
+echo "===== ENVIRONMENT VARIABLES ====="
+printenv | sort
+echo "================================="
 ORNL_NEXT_COMMIT=$(git rev-parse remotes/origin/ornl-next)
 CURRENT_COMMIT=$(git rev-parse HEAD)
 
