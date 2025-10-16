@@ -184,7 +184,7 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
             issues["InputWorkspace"] = "goniometers not set correctly, did you run SetGoniometer with Average=False"
 
         instrument = experiment_info.getInstrument().getName()
-        if instrument == "HB3A":  # DEMAND
+        if instrument in ("HB3A", "DEMAND"):
             for prop in ["monitor", "time"]:
                 if run.hasProperty(prop):
                     p = run.getProperty(prop).value
@@ -192,7 +192,7 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
                         issues["InputWorkspace"] = "log {} is of incorrect length".format(prop)
                 else:
                     issues["InputWorkspace"] = "missing log {}".format(prop)
-        elif instrument == "HB2C":  # WAND
+        elif instrument in ("HB2C", "WAND"):
             for prop in ["duration", "monitor_count"]:
                 if run.hasProperty(prop):
                     p = run.getProperty(prop).value
@@ -308,17 +308,17 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
         normaliseBy = self.getProperty("NormaliseBy").value
 
         instrument_name = inWS.getExperimentInfo(0).getInstrument().getName()
-        assert instrument_name in ["HB3A", "HB2C"], "Supported instruments are HB3A and HB2C"
+        assert instrument_name in ["HB3A", "DEMAND", "HB2C", "WAND"], "Supported instruments are HB3A and HB2C"
 
         if normaliseBy == "Monitor":
-            if instrument_name == "HB3A":
+            if instrument_name in ("HB3A", "DEMAND"):
                 scale = np.asarray(inWS.getExperimentInfo(0).run().getProperty("monitor").value)
-            else:
+            else:  # ("HB2C", "WAND")
                 scale = np.asarray(inWS.getExperimentInfo(0).run().getProperty("monitor_count").value)
         elif normaliseBy == "Time":
-            if instrument_name == "HB3A":
+            if instrument_name in ("HB3A", "DEMAND"):
                 scale = np.asarray(inWS.getExperimentInfo(0).run().getProperty("time").value)
-            else:
+            else:  # ("HB2C", "WAND")
                 scale = np.asarray(inWS.getExperimentInfo(0).run().getProperty("duration").value)
         else:
             scale = np.ones(number_of_runs)
