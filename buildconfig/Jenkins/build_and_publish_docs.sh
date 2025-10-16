@@ -18,6 +18,8 @@ mamba install -c ${CONDA_LABEL} -c neutrons --yes mantid-developer mantidqt rsyn
 rm -rf build
 mkdir build && cd build
 
+# unset LD_PRELOAD as this causes cmake to segfault
+LD_PRELOAD="" \
 # Generate build files
 cmake -G Ninja \
   -DMANTID_FRAMEWORK_LIB=SYSTEM \
