@@ -27,6 +27,9 @@ class TexturePlannerPresenter(object):
         self.view.set_on_load_stl_clicked(self.load_stl)
         self.view.set_on_load_xml_clicked(self.load_xml)
         self.view.set_on_load_orient_clicked(self.load_orientation_file)
+        self.view.set_on_init_x_changed(self.set_initial_shape)
+        self.view.set_on_init_y_changed(self.set_initial_shape)
+        self.view.set_on_init_z_changed(self.set_initial_shape)
         self.view.set_on_update_dirs(self.on_directions_updated)
         self.view.set_on_gonio_vec_updated(self.on_goniometer_updated)
         self.view.set_on_gonio_sense_updated(self.on_goniometer_updated)
@@ -237,5 +240,10 @@ class TexturePlannerPresenter(object):
 
     def set_material(self):
         self.model.set_material_string(self.view.get_material())
+        self.model.update_all_projected_data()
+        self.update_plots()
+
+    def set_initial_shape(self):
+        self.model.update_initial_shape(self.view.get_init_x(), self.view.get_init_y(), self.view.get_init_z())
         self.model.update_all_projected_data()
         self.update_plots()

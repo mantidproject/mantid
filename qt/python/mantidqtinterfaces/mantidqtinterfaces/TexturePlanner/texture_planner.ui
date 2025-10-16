@@ -107,6 +107,61 @@
            </item>
           </layout>
          </item>
+
+            <item>
+              <widget class="QGroupBox" name="initOrientation">
+               <property name="title">
+                <string>Initial Shape Orientation</string>
+               </property>
+               <layout class="QGridLayout" name="layInitAxis">
+                <item row="0" column="0">
+                 <widget class="QLabel" name="lblInitX">
+                  <property name="text">
+                   <string>Rotate Around X:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="0" column="1" colspan="2">
+                 <widget class="QDoubleSpinBox" name="spnInitX">
+                  <property name="decimals">
+                   <number>3</number>
+                  </property>
+                 </widget>
+                </item>
+                <item row="1" column="0">
+                 <widget class="QLabel" name="lblInitY">
+                  <property name="text">
+                   <string>Rotate Around Y:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="1" column="1" colspan="2">
+                 <widget class="QDoubleSpinBox" name="spnInitY">
+                  <property name="decimals">
+                   <number>3</number>
+                  </property>
+                 </widget>
+                </item>
+
+                   <item row="2" column="0">
+                 <widget class="QLabel" name="lblInitZ">
+                  <property name="text">
+                   <string>Rotate Around Z:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="2" column="1" colspan="2">
+                 <widget class="QDoubleSpinBox" name="spnInitZ">
+                  <property name="decimals">
+                   <number>3</number>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
+             </item>
+
+
         </layout>
        </widget>
       </item>

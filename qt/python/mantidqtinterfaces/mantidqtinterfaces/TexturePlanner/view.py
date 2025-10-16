@@ -162,6 +162,15 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
     def set_on_material_changed(self, slot):
         self.edtMaterial.editingFinished.connect(slot)
 
+    def set_on_init_x_changed(self, slot):
+        self.spnInitX.valueChanged.connect(slot)
+
+    def set_on_init_y_changed(self, slot):
+        self.spnInitY.valueChanged.connect(slot)
+
+    def set_on_init_z_changed(self, slot):
+        self.spnInitZ.valueChanged.connect(slot)
+
     @QtCore.Slot(bool)
     def _on_any_include_toggled(self):
         self.sig_include_state_changed.emit()
@@ -249,6 +258,15 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
 
     def get_material(self):
         return self.edtMaterial.text()
+
+    def get_init_x(self):
+        return self.spnInitX.value()
+
+    def get_init_y(self):
+        return self.spnInitY.value()
+
+    def get_init_z(self):
+        return self.spnInitZ.value()
 
     # setters
 
