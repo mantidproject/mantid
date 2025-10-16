@@ -90,7 +90,7 @@ if [[ "$PLATFORM" == win-* || "$PLATFORM" == osx-* ]]; then
     if [[ "$TARGET_BRANCH" == "ornl-next" ]]; then
         echo "Skipping $PLATFORM build: target branch is '$TARGET_BRANCH'."
         # Remove test logs from previous builds
-        rm -rf  $BUILD_DIR/test_logs
+        rm -rf  ${BUILD_DIR}/test_logs ${BUILD_DIR}/Testing
         exit 0
     fi
 fi
