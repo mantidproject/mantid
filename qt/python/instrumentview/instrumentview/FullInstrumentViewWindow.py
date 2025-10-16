@@ -546,7 +546,7 @@ class FullInstrumentViewWindow(QMainWindow):
         for x, label in zip(x_values, labels):
             self._lineplot_overlays.append(self._detector_spectrum_axes.axvline(x, color="red", linestyle="--"))
             self._detector_spectrum_axes.text(
-                x, -0.1, label, transform=self._detector_spectrum_axes.get_xaxis_transform(), color="red", ha="center", va="top", fontsize=8
+                x, 1.1, label, transform=self._detector_spectrum_axes.get_xaxis_transform(), color="red", ha="center", va="top", fontsize=8
             )
 
     def redraw_lineplot(self) -> None:
