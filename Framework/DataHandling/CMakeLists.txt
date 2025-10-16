@@ -208,6 +208,7 @@ set(SRC_FILES
     src/SinglePeriodLoadMuonStrategy.cpp
     src/SortTableWorkspace.cpp
     src/StartAndEndTimeFromNexusFileExtractor.cpp
+    src/TranslateSampleShape.cpp
     src/UpdateInstrumentFromFile.cpp
     src/XmlHandler.cpp
     src/RotateSampleShape.cpp
@@ -427,6 +428,7 @@ set(INC_FILES
     inc/MantidDataHandling/SinglePeriodLoadMuonStrategy.h
     inc/MantidDataHandling/SortTableWorkspace.h
     inc/MantidDataHandling/StartAndEndTimeFromNexusFileExtractor.h
+    inc/MantidDataHandling/TranslateSampleShape.h
     inc/MantidDataHandling/UpdateInstrumentFromFile.h
     inc/MantidDataHandling/XmlHandler.h
     src/LoadRaw/byte_rel_comp.h
