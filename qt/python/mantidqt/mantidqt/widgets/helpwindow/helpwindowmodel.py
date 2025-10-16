@@ -106,7 +106,7 @@ class HelpWindowModel:
             str: Path to the documentation directory, or empty string if not found
         """
 
-        # Get the bin directory from the properties dir, we move one level up becase the return strings ends with /
+        # Get the bin directory from the properties dir, we move one level up because the return strings ends with /
         bin_dir = os.path.dirname(ConfigService.getPropertiesDir())
         if not bin_dir:
             return ""
@@ -226,6 +226,13 @@ class HelpWindowModel:
         Returns a QUrl pointing to the determined doc source for the given relative URL.
         Raises FileNotFoundError if building a URL for local mode and the target file doesn't exist.
         """
+        # Some help urls may end with a paragraph section denoted by a hash (called a fragment).
+        # We need to remove this before executing the logic for checking whether the file exists etc.
+        # It is then re-added to the QUrl at the end.
+        fragment = ""
+        if "#" in relative_url:
+            relative_url, fragment = relative_url.split("#", 1)
+
         # Default page logic
         if not relative_url or not relative_url.lower().endswith((".html", ".htm")):
             relative_url = "index.html"
@@ -260,12 +267,18 @@ class HelpWindowModel:
             else:
                 # File exists, return the QUrl for the local file
                 log.debug(f"Local file found. Returning URL: file:///{norm_full_path}")
-                return QUrl.fromLocalFile(norm_full_path)
+
+                url = QUrl.fromLocalFile(norm_full_path)
+                if fragment:
+                    url.setFragment(fragment)
+                return url
         # -------------------------------------------------
         else:  # Online mode
             # Construct the full online URL string
             full_url_str = f"{base}{relative_url}"
             url = QUrl(full_url_str)
+            if fragment:
+                url.setFragment(fragment)
             # Basic validation check
             if not url.isValid():
                 log.warning(f"Constructed invalid Online URL: {full_url_str} from base '{base}' and relative '{relative_url}'")

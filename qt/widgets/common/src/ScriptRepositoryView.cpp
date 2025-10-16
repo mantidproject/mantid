@@ -297,9 +297,7 @@ void ScriptRepositoryView::currentChanged(const QModelIndex &in) {
 }
 
 /** Open the ScriptRepository Page on Web Browser*/
-void ScriptRepositoryView::helpClicked() {
-  HelpWindow::showPage(QStringLiteral("qthelp://org.mantidproject/doc/workbench/scriptrepository.html"));
-}
+void ScriptRepositoryView::helpClicked() { HelpWindow::showPage(QStringLiteral("workbench/scriptrepository.html")); }
 
 //////////////////////////////////////////////////
 // DELEGATE : Allow to display and interact with the View in a nicer way.
