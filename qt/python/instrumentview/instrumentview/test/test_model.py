@@ -421,7 +421,7 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         self.assertEqual(1, len(peaks))
         detector_peak = peaks[0][0]
         self.assertEqual(100, detector_peak.detector_id)
-        self.assertEqual("[0, 0, 0],[0, 0, 0]", detector_peak.label)
+        self.assertEqual("[0, 0, 0] x 2", detector_peak.label)
         np.testing.assert_almost_equal(np.array([0, 0, 5.0]), detector_peak.location)
 
 

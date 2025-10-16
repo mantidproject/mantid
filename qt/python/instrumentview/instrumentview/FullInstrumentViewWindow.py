@@ -561,7 +561,14 @@ class FullInstrumentViewWindow(QMainWindow):
         multi_block_mesh = pv.MultiBlock([pv.PolyData(p) for p in position_groups])
         points_actor = self.main_plotter.add_points(multi_block_mesh, multi_colors=True, point_size=15, render_points_as_spheres=True)
         labels_actor = self.main_plotter.add_point_labels(
-            np.concatenate(position_groups), labels, font_size=15, show_points=False, always_visible=True, fill_shape=False, shape_opacity=0
+            np.concatenate(position_groups),
+            labels,
+            font_size=15,
+            font_family="times",
+            show_points=False,
+            always_visible=True,
+            fill_shape=False,
+            shape_opacity=0,
         )
         self._overlay_meshes.append((points_actor, labels_actor))
 

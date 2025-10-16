@@ -14,4 +14,7 @@ class DetectorPeaks:
         self.peaks = peaks
         self.detector_id = peaks[0].detector_id
         self.location = peaks[0].location
-        self.label = ",".join([p.label for p in self.peaks])
+        if len(self.peaks) > 1:
+            self.label = peaks[0].label.replace("(", "[").replace(")", "]") + f" x {len(self.peaks)}"
+        else:
+            self.label = peaks[0].label

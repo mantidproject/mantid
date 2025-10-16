@@ -22,4 +22,4 @@ class Peak:
 
     @property
     def label(self) -> str:
-        return f"[{_format_hkl(self.hkl[0])}, {_format_hkl(self.hkl[1])}, {_format_hkl(self.hkl[2])}]"
+        return f"({_format_hkl(self.hkl[0])}, {_format_hkl(self.hkl[1])}, {_format_hkl(self.hkl[2])})"

@@ -210,7 +210,7 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._mock_view.plot_lineplot_overlay.assert_called_once()
         overlay_call_args = self._mock_view.plot_lineplot_overlay.call_args[0]
         self.assertEqual([100], overlay_call_args[0])
-        self.assertEqual(["[1, 1, 1]"], overlay_call_args[1])
+        self.assertEqual(["(1, 1, 1)"], overlay_call_args[1])
 
     @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.peak_overlay_points")
     @mock.patch.object(FullInstrumentViewModel, "picked_detector_ids", new_callable=mock.PropertyMock)
