@@ -179,7 +179,8 @@ class TestFullInstrumentViewWindow(unittest.TestCase):
         mock_text.remove.assert_called_once()
 
     def test_plot_overlay_mesh(self):
-        self._view.plot_overlay_mesh(MagicMock(), MagicMock(), MagicMock())
+        position_groups = [[0, 0, 0]]
+        self._view.plot_overlay_mesh(position_groups, MagicMock())
         self._view.main_plotter.add_points.assert_called_once()
         self._view.main_plotter.add_point_labels.assert_called_once()
         self.assertEqual(1, len(self._view._overlay_meshes))

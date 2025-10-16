@@ -419,9 +419,10 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         model._selected_peaks_workspaces = [peaks_ws]
         peaks = model.peak_overlay_points()
         self.assertEqual(1, len(peaks))
-        self.assertEqual(100, peaks[0].detector_id)
-        self.assertEqual("[0, 0, 0],[0, 0, 0]", peaks[0].label)
-        np.testing.assert_almost_equal(np.array([0, 0, 5.0]), peaks[0].location)
+        detector_peak = peaks[0][0]
+        self.assertEqual(100, detector_peak.detector_id)
+        self.assertEqual("[0, 0, 0],[0, 0, 0]", detector_peak.label)
+        np.testing.assert_almost_equal(np.array([0, 0, 5.0]), detector_peak.location)
 
 
 if __name__ == "__main__":

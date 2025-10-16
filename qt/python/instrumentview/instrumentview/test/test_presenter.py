@@ -189,8 +189,8 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
     def test_on_peaks_workspace_selected(
         self, mock_peak_overlay_points, mock_adjust_points_projection, mock_refresh_lineplot_peaks, mock_set_peaks_workspaces
     ):
-        mock_peak_overlay_points.return_value = [DetectorPeaks([Peak(50, np.zeros(3), (1, 1, 1), 100, 1000)])]
-        mock_adjust_points_projection.return_value = [mock_peak_overlay_points()[0].location]
+        mock_peak_overlay_points.return_value = [[DetectorPeaks([Peak(50, np.zeros(3), (1, 1, 1), 100, 1000)])]]
+        mock_adjust_points_projection.return_value = [mock_peak_overlay_points()[0][0].location]
         self._presenter.on_peaks_workspace_selected()
         mock_refresh_lineplot_peaks.assert_called_once()
         self._mock_view.clear_overlay_meshes.assert_called_once()
@@ -200,7 +200,7 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
     @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.peak_overlay_points")
     @mock.patch.object(FullInstrumentViewModel, "picked_detector_ids", new_callable=mock.PropertyMock)
     def test_refresh_lineplot_peaks(self, mock_picked_detector_ids, mock_peak_overlay_points):
-        mock_peak_overlay_points.return_value = [DetectorPeaks([Peak(50, np.zeros(3), (1, 1, 1), 100, 1000)])]
+        mock_peak_overlay_points.return_value = [[DetectorPeaks([Peak(50, np.zeros(3), (1, 1, 1), 100, 1000)])]]
         mock_picked_detector_ids.return_value = [50]
         self._mock_view.current_selected_unit.return_value = self._presenter._TIME_OF_FLIGHT
         self._presenter.refresh_lineplot_peaks()
@@ -215,7 +215,7 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
     @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.peak_overlay_points")
     @mock.patch.object(FullInstrumentViewModel, "picked_detector_ids", new_callable=mock.PropertyMock)
     def test_refresh_lineplot_peaks_no_detector(self, mock_picked_detector_ids, mock_peak_overlay_points):
-        mock_peak_overlay_points.return_value = [DetectorPeaks([Peak(50, np.zeros(3), (1, 1, 1), 100, 1000)])]
+        mock_peak_overlay_points.return_value = [[DetectorPeaks([Peak(50, np.zeros(3), (1, 1, 1), 100, 1000)])]]
         mock_picked_detector_ids.return_value = []
         self._mock_view.current_selected_unit.return_value = self._presenter._TIME_OF_FLIGHT
         self._presenter.refresh_lineplot_peaks()
@@ -227,11 +227,11 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
     @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.peak_overlay_points")
     @mock.patch.object(FullInstrumentViewModel, "picked_detector_ids", new_callable=mock.PropertyMock)
     def test_refresh_lineplot_peaks_wrong_unit(self, mock_picked_detector_ids, mock_peak_overlay_points):
-        mock_peak_overlay_points.return_value = [DetectorPeaks([Peak(50, np.zeros(3), (1, 1, 1), 100, 1000)])]
+        mock_peak_overlay_points.return_value = [[DetectorPeaks([Peak(50, np.zeros(3), (1, 1, 1), 100, 1000)])]]
         mock_picked_detector_ids.return_value = [50]
         self._mock_view.current_selected_unit.return_value = "Light Years"
         self._presenter.refresh_lineplot_peaks()
-        mock_peak_overlay_points.assert_called_once()
+        mock_peak_overlay_points.assert_not_called()
         self._mock_view.clear_lineplot_overlays.assert_called_once()
         self._mock_view.redraw_lineplot.assert_called_once()
         self._mock_view.plot_lineplot_overlay.assert_not_called()

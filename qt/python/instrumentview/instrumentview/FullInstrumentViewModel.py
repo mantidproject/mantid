@@ -257,10 +257,11 @@ class FullInstrumentViewModel:
     def set_peaks_workspaces(self, peaks_workspace_names: list[str]) -> None:
         self._selected_peaks_workspaces = AnalysisDataService.Instance().retrieveWorkspaces(peaks_workspace_names)
 
-    def peak_overlay_points(self) -> list[DetectorPeaks]:
-        peaks = []
+    def peak_overlay_points(self) -> list[list[DetectorPeaks]]:
         detector_info = self._workspace.detectorInfo()
+        peaks_grouped_by_ws = []
         for pws in self._selected_peaks_workspaces:
+            peaks = []
             peaks_dict = pws.toDict()
             detector_ids = peaks_dict["DetID"]
             hkls = zip(peaks_dict["h"], peaks_dict["k"], peaks_dict["l"])
@@ -271,10 +272,11 @@ class FullInstrumentViewModel:
                 Peak(det_id, v, hkl, tof, dspacing)
                 for (det_id, v, hkl, tof, dspacing) in zip(detector_ids, positions, hkls, tofs, dspacings)
             ]
-        # Combine peaks on the same detector
-        detector_peaks = []
-        # groupby groups consecutive matches, so must be sorted
-        peaks.sort(key=lambda x: x.detector_id)
-        for det_id, peaks_for_id in groupby(peaks, lambda x: x.detector_id):
-            detector_peaks.append(DetectorPeaks(list(peaks_for_id)))
-        return detector_peaks
+            # Combine peaks on the same detector
+            detector_peaks = []
+            # groupby groups consecutive matches, so must be sorted
+            peaks.sort(key=lambda x: x.detector_id)
+            for det_id, peaks_for_id in groupby(peaks, lambda x: x.detector_id):
+                detector_peaks.append(DetectorPeaks(list(peaks_for_id)))
+            peaks_grouped_by_ws.append(detector_peaks)
+        return peaks_grouped_by_ws

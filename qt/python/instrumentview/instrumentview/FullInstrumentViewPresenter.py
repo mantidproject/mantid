@@ -276,33 +276,41 @@ class FullInstrumentViewPresenter:
     def on_peaks_workspace_selected(self) -> None:
         self._model.set_peaks_workspaces(self._view.selected_peaks_workspaces())
         self._view.clear_overlay_meshes()
-        peaks = self._model.peak_overlay_points()
-        self.refresh_lineplot_peaks(peaks)
-        if len(peaks) == 0:
+        peaks_grouped_by_ws = self._model.peak_overlay_points()
+        self.refresh_lineplot_peaks(peaks_grouped_by_ws)
+        if len(peaks_grouped_by_ws) == 0:
             return
-        projected_points = self._adjust_points_for_selected_projection(
-            np.asarray([p.location for p in peaks]), self._view.current_selected_projection()
-        )
-        labels = [p.label for p in peaks]
+        # Keeping the points from each workspace separate so we can colour them differently
+        projected_points = [
+            self._adjust_points_for_selected_projection(
+                np.asarray([p.location for p in ws_peaks]), self._view.current_selected_projection()
+            )
+            for ws_peaks in peaks_grouped_by_ws
+        ]
+        labels = [p.label for p in sum(peaks_grouped_by_ws, [])]
         # Plot the peaks and their labels on the projection
-        self._view.plot_overlay_mesh(projected_points, labels, "blue")
+        self._view.plot_overlay_mesh(projected_points, labels)
 
-    def refresh_lineplot_peaks(self, peaks: list[DetectorPeaks] = None) -> None:
+    def refresh_lineplot_peaks(self, peaks: list[list[DetectorPeaks]] = None) -> None:
         # Plot vertical lines on the lineplot if the peak detector is selected
         self._view.clear_lineplot_overlays()
+        if self._view.current_selected_unit() != self._TIME_OF_FLIGHT and self._view.current_selected_unit() != self._D_SPACING:
+            self._view.redraw_lineplot()
+            return
+
         if peaks is None:
             peaks = self._model.peak_overlay_points()
-        if self._view.current_selected_unit() == self._TIME_OF_FLIGHT or self._view.current_selected_unit() == self._D_SPACING:
-            x_values = []
-            labels = []
-            for peak in peaks:
-                if peak.detector_id in self._model.picked_detector_ids:
-                    x_values += (
-                        [p.tof for p in peak.peaks]
-                        if self._view.current_selected_unit() == self._TIME_OF_FLIGHT
-                        else [p.dspacing for p in peak.peaks]
-                    )
-                    labels += [p.label for p in peak.peaks]
-            if len(x_values) > 0:
-                self._view.plot_lineplot_overlay(x_values, labels)
+        peaks_concat = sum(peaks, [])
+        x_values = []
+        labels = []
+        for peak in peaks_concat:
+            if peak.detector_id in self._model.picked_detector_ids:
+                x_values += (
+                    [p.tof for p in peak.peaks]
+                    if self._view.current_selected_unit() == self._TIME_OF_FLIGHT
+                    else [p.dspacing for p in peak.peaks]
+                )
+                labels += [p.label for p in peak.peaks]
+        if len(x_values) > 0:
+            self._view.plot_lineplot_overlay(x_values, labels)
         self._view.redraw_lineplot()
