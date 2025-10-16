@@ -34,7 +34,7 @@ MAXTIMEBINSIZE = 3000
 
 
 class DoubleValidator(QDoubleValidator):
-    def __init__(self, line_edit, initial_value, allow_empty_edits=False):
+    def __init__(self, line_edit, initial_value=None, allow_empty_edits=False):
         locale = QLocale.c()
         locale.setNumberOptions(QLocale.RejectGroupSeparator)
         super().__init__()
@@ -42,7 +42,7 @@ class DoubleValidator(QDoubleValidator):
         super().setDecimals(6)
         self._line_edit = line_edit
         self._line_edit.editingFinished.connect(self.on_editing_finished)
-        self._last_value = None if not initial_value else initial_value
+        self._last_value = initial_value
         self._allow_empty = allow_empty_edits
 
     @property
@@ -59,7 +59,7 @@ class DoubleValidator(QDoubleValidator):
         self.set_txt()
 
     def set_txt(self):
-        self._line_edit.setText(f"{self._last_value:.6f}" if self._last_value else "")
+        self._line_edit.setText(f"{self._last_value:.6f}" if self._last_value is not None else "")
 
     def fixup(self, txt):
         if txt == "" and self._allow_empty:
@@ -124,7 +124,7 @@ class MainWindow(QMainWindow):
             (self.ui.leIncidentEnergy, None),
         ]
         for line_edit, ini_value in self.doubleLineEdits:
-            line_edit.setValidator(DoubleValidator(line_edit, ini_value, ini_value is None))
+            line_edit.setValidator(DoubleValidator(line_edit, initial_value=None, allow_empty_edits=ini_value is None))
             if ini_value:
                 line_edit.setText(f"{ini_value:.6f}")
                 line_edit.editingFinished.connect(self.update_marker_range)
@@ -765,9 +765,11 @@ class MainWindow(QMainWindow):
 
         def calculate_limit(data):
             min_lim, max_lim = min(data), max(data)
-            if (abs(max_lim - min_lim)) < 1e-4:  # to avoid matplotlib warning and for visibility
-                min_lim = min_lim - 0.001 * min_lim
-                max_lim = max_lim + 0.001 * max_lim
+            delta = 1e-4
+            if (abs(max_lim - min_lim)) < delta:  # to avoid matplotlib warning and for visibility
+                padding = max(delta, delta * abs(max_lim - min_lim))
+                min_lim -= padding
+                max_lim += padding
             return [min_lim, max_lim]
 
         xlim = calculate_limit(x_data) if not xlim else xlim

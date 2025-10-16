@@ -1,1 +1,0 @@
-- Removed `Split Sample Logs` checkbox from the `Filter Events` interface, since that option is deprecated, and all logs will be split.
