@@ -127,8 +127,6 @@ EXTRA_BUILD_OPTIONS="--debug "
 if [[ $OSTYPE == "msys" ]]; then
     # Do not use build id as it makes the path too long (>260 chars) for CMake (Legacy Windows API issue)
     EXTRA_BUILD_OPTIONS+="--no-build-id"
-elif [[ $PLATFORM == "osx-64" ]]; then
-    EXTRA_BUILD_OPTIONS+="-m ./osx_64.yaml"
 fi
 
 export CONDA_SUBDIR=$PLATFORM

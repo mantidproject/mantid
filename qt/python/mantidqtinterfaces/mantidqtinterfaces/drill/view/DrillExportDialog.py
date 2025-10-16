@@ -73,9 +73,7 @@ class DrillExportDialog(QDialog):
             helpButton = QToolButton(self)
             helpButton.setText("...")
             helpButton.setIcon(icons.get_icon("mdi.help"))
-            helpButton.clicked.connect(
-                lambda _, a=name: InterfaceManager().showHelpPage("qthelp://org.mantidproject/doc/algorithms/{}.html".format(a))
-            )
+            helpButton.clicked.connect(lambda _, a=name: InterfaceManager().showHelpPage(f"algorithms/{a}.html"))
             self.algoList.addWidget(helpButton, i, 1, Qt.AlignRight)
             i += 1
 

@@ -12,7 +12,7 @@ GIT_USER_EMAIL="mantid-buildserver@mantidproject.org"
 
 # Install conda and environment
 setup_mamba $WORKSPACE/miniforge "docs-build" true ""
-mamba install -c ${CONDA_LABEL} --yes mantid-developer mantidqt rsync
+mamba install -c ${CONDA_LABEL} -c neutrons --yes mantid-developer mantidqt rsync
 
 # Configure a clean build directory
 rm -rf build
