@@ -123,10 +123,9 @@ class FigureInteractionTest(unittest.TestCase):
         mocked_figure_type.return_value = FigureType.Image
 
         # Expect the following calls to QMenu():
-        # - outer menu
-        # - 3x calls for the Axes, Normalization and Colorbar menus
-        # - 3x calls for the lin x, log x, symlog x menus.
-        mock_list = [MagicMock() for x in range(7)]
+        # - 1x call for the outer menu
+        # - 4x calls for the X-Axis, Y-Axis, Normalization and Colorbar menus
+        mock_list = [MagicMock() for x in range(5)]
         mocked_qmenu.side_effect = mock_list
 
         with patch("workbench.plotting.figureinteraction.QActionGroup", autospec=True):
@@ -135,26 +134,20 @@ class FigureInteractionTest(unittest.TestCase):
                 self.assertEqual(0, mock_list[0].addAction.call_count)
                 expected_qmenu_calls = [
                     call(),
-                    call("Axes", mock_list[0]),
-                    call("linear x", mock_list[1]),
-                    call("log x", mock_list[1]),
-                    call("symlog x", mock_list[1]),
+                    call("X-Axis Scale", mock_list[0]),
+                    call("Y-Axis Scale", mock_list[0]),
                     call("Normalization", mock_list[0]),
                     call("Color bar", mock_list[0]),
                 ]
                 self.assertEqual(expected_qmenu_calls, mocked_qmenu.call_args_list)
-                # 0 actions in Axes submenu
-                self.assertEqual(0, mock_list[1].addAction.call_count)
-                # 3 actions in linear x submenu
+                # 3 actions in X-Axis submenu
+                self.assertEqual(3, mock_list[1].addAction.call_count)
+                # 3 actions in Y-Axis submenu
                 self.assertEqual(3, mock_list[2].addAction.call_count)
-                # 3 actions in log x submenu
-                self.assertEqual(3, mock_list[3].addAction.call_count)
-                # 3 actions in log y submenu
-                self.assertEqual(3, mock_list[4].addAction.call_count)
                 # 2 actions in Normalization submenu
-                self.assertEqual(2, mock_list[5].addAction.call_count)
+                self.assertEqual(2, mock_list[3].addAction.call_count)
                 # 3 actions in Colorbar submenu
-                self.assertEqual(3, mock_list[6].addAction.call_count)
+                self.assertEqual(3, mock_list[4].addAction.call_count)
 
     @patch("workbench.plotting.figureinteraction.QMenu", autospec=True)
     @patch("workbench.plotting.figureinteraction.figure_type", autospec=True)
@@ -169,10 +162,9 @@ class FigureInteractionTest(unittest.TestCase):
         mocked_figure_type.return_value = FigureType.Line
 
         # Expect the following calls to QMenu():
-        # - outer menu
-        # - 3x calls for the Axes, Normalization and Markers menus
-        # - 3x calls for the lin x, log x, symlog x menus.
-        mock_list = [MagicMock() for x in range(7)]
+        # - 1x call for the outer menu
+        # - 4x calls for the X-Axis, Y-Axis, Normalization and Colorbar menus
+        mock_list = [MagicMock() for x in range(5)]
         mocked_qmenu.side_effect = mock_list
 
         with patch("workbench.plotting.figureinteraction.QActionGroup", autospec=True):
@@ -184,26 +176,20 @@ class FigureInteractionTest(unittest.TestCase):
                         self.assertEqual(1, mock_list[0].addAction.call_count)  # Show/hide legend action
                         expected_qmenu_calls = [
                             call(),
-                            call("Axes", mock_list[0]),
-                            call("linear x", mock_list[1]),
-                            call("log x", mock_list[1]),
-                            call("symlog x", mock_list[1]),
+                            call("X-Axis Scale", mock_list[0]),
+                            call("Y-Axis Scale", mock_list[0]),
                             call("Normalization", mock_list[0]),
                             call("Markers", mock_list[0]),
                         ]
                         self.assertEqual(expected_qmenu_calls, mocked_qmenu.call_args_list)
-                        # 0 actions in Axes submenu
-                        self.assertEqual(0, mock_list[1].addAction.call_count)
-                        # 3 actions in linear x submenu
+                        # 3 actions in X-Axis submenu
+                        self.assertEqual(3, mock_list[1].addAction.call_count)
+                        # 3 actions in Y-Axis submenu
                         self.assertEqual(3, mock_list[2].addAction.call_count)
-                        # 3 actions in log x submenu
-                        self.assertEqual(3, mock_list[3].addAction.call_count)
-                        # 3 actions in log y submenu
-                        self.assertEqual(3, mock_list[4].addAction.call_count)
                         # 2 actions in Normalization submenu
-                        self.assertEqual(2, mock_list[5].addAction.call_count)
+                        self.assertEqual(2, mock_list[3].addAction.call_count)
                         # 3 actions in Colorbar submenu
-                        self.assertEqual(3, mock_list[6].addAction.call_count)
+                        self.assertEqual(3, mock_list[4].addAction.call_count)
 
     def test_toggle_normalization_no_errorbars(self):
         self._test_toggle_normalization(errorbars_on=False, plot_kwargs={"distribution": True})
@@ -375,7 +361,6 @@ class FigureInteractionTest(unittest.TestCase):
         mock_canvas = MagicMock(figure=fig)
         fig_manager_mock = MagicMock(canvas=mock_canvas)
         fig_interactor = FigureInteraction(fig_manager_mock)
-        scale_types = ("log", "log")
 
         ax = fig.axes[0]
         ax1 = fig.axes[1]
@@ -383,7 +368,7 @@ class FigureInteractionTest(unittest.TestCase):
         current_scale_types1 = (ax1.get_xscale(), ax1.get_yscale())
         self.assertEqual(current_scale_types, current_scale_types1)
 
-        fig_interactor._quick_change_axes(scale_types, ax)
+        fig_interactor._quick_change_axes(ax, "log", "log")
         current_scale_types2 = (ax.get_xscale(), ax.get_yscale())
         self.assertNotEqual(current_scale_types2, current_scale_types1)
 
