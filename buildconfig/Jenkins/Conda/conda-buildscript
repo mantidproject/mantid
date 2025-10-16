@@ -89,6 +89,8 @@ TARGET_BRANCH=$(curl -s "https://api.github.com/repos/mantidproject/mantid/pulls
 if [[ "$PLATFORM" == win-* || "$PLATFORM" == osx-* ]]; then
     if [[ "$TARGET_BRANCH" == "ornl-next" ]]; then
         echo "Skipping $PLATFORM build: target branch is '$TARGET_BRANCH'."
+        # Remove test logs from previous builds
+        rm -rf  $BUILD_DIR/test_logs
         exit 0
     fi
 fi
