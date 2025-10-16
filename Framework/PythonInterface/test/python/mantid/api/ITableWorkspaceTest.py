@@ -229,8 +229,7 @@ class ITableWorkspaceTest(unittest.TestCase):
         table.addRow([3])
 
         arr = table.columnArray("index")
-        self.assertTrue(numpy.array_equal(arr, numpy.array([1, 2, 3])))
-        self.assertEqual(arr.dtype, numpy.dtype("int32"))
+        numpy.testing.assert_array_equal(arr, numpy.array([1, 2, 3], dtype="int32"))
 
     def test_array_column_float(self):
         table = WorkspaceFactory.createTable()
@@ -251,8 +250,7 @@ class ITableWorkspaceTest(unittest.TestCase):
         table.addRow([3.3])
 
         arr = table.columnArray("value")
-        self.assertTrue(numpy.array_equal(arr, numpy.array([1.1, 2.2, 3.3])))
-        self.assertEqual(arr.dtype, numpy.dtype("double"))
+        numpy.testing.assert_array_equal(arr, numpy.array([1.1, 2.2, 3.3], dtype="double"))
 
     def test_array_column_bool(self):
         table = WorkspaceFactory.createTable()
@@ -262,8 +260,7 @@ class ITableWorkspaceTest(unittest.TestCase):
         table.addRow([True])
 
         arr = table.columnArray("value")
-        self.assertTrue(numpy.array_equal(arr, numpy.array([False, True, True])))
-        self.assertEqual(arr.dtype, numpy.dtype("bool"))
+        numpy.testing.assert_array_equal(arr, numpy.array([False, True, True], dtype="bool"))
 
     def test_array_column_string(self):
         table = WorkspaceFactory.createTable()
@@ -277,7 +274,6 @@ class ITableWorkspaceTest(unittest.TestCase):
 
         arr = table.columnArray("values")
         numpy.testing.assert_array_equal(arr, numpy.array(["1", "12", "123", "yes", "n/a"], dtype=numpy.dtype("<U3")))
-        self.assertEqual(arr.dtype, numpy.dtype("<U3"))
 
     def test_array_column_v3d(self):
         from mantid.kernel import V3D
@@ -288,7 +284,7 @@ class ITableWorkspaceTest(unittest.TestCase):
         table.addRow([V3D(2, 2, 2)])
 
         arr = table.columnArray("pos")
-        self.assertTrue(numpy.array_equal(arr, numpy.array([[1, 1, 1], [2, 2, 2]])))
+        numpy.testing.assert_array_equal(arr, numpy.array([[1, 1, 1], [2, 2, 2]], dtype="double"))
 
     def test_array_column_long(self):
         table = WorkspaceFactory.createTable()
@@ -298,8 +294,7 @@ class ITableWorkspaceTest(unittest.TestCase):
         table.addRow([3])
 
         arr = table.columnArray("index")
-        self.assertTrue(numpy.array_equal(arr, numpy.array([1, 2, 3])))
-        self.assertEqual(arr.dtype, numpy.dtype("long"))
+        numpy.testing.assert_array_equal(arr, numpy.array([1, 2, 3], dtype="int64"))
 
     def test_array_column_vector_ints(self):
         table = WorkspaceFactory.createTable()
@@ -311,8 +306,7 @@ class ITableWorkspaceTest(unittest.TestCase):
         table.addRow([numpy.array([6, 7, 8, 9, 10])])
 
         arr = table.columnArray("values")
-        self.assertTrue(numpy.array_equal(arr, numpy.array([[1, 2, 3, 4, 5], [6, 7, 8, 9, 10]])))
-        self.assertEqual(arr.dtype, numpy.dtype("int32"))
+        numpy.testing.assert_array_equal(arr, numpy.array([[1, 2, 3, 4, 5], [6, 7, 8, 9, 10]], dtype="int32"))
 
     def test_array_column_vector_doubles(self):
         table = WorkspaceFactory.createTable()
@@ -324,8 +318,44 @@ class ITableWorkspaceTest(unittest.TestCase):
         table.addRow([numpy.array([6.0, 7.0, 8.0])])
 
         arr = table.columnArray("values")
-        self.assertTrue(numpy.array_equal(arr, numpy.array([[1.0, 2.0, 3.0], [6.0, 7.0, 8.0]])))
-        self.assertEqual(arr.dtype, numpy.dtype("double"))
+        numpy.testing.assert_array_equal(arr, numpy.array([[1.0, 2.0, 3.0], [6.0, 7.0, 8.0]], dtype="double"))
+
+    def test_array_column_vector_variable_len(self):
+        table = WorkspaceFactory.createTable()
+        table.addColumn(type="vector_int", name="values")
+
+        table.addRow([[1, 2, 3, 4, 5]])
+        table.addRow([[1, 2, 3]])
+
+        self.assertRaises(RuntimeError, table.columnArray, "values")
+
+    def test_array_column_1d_empty(self):
+        table = WorkspaceFactory.createTable()
+        table.addColumn(type="int", name="values")
+        arr = table.columnArray("values")
+        numpy.testing.assert_array_equal(arr, numpy.array([], dtype="int32"))
+
+    def test_array_column_2d_empty(self):
+        table = WorkspaceFactory.createTable()
+        table.addColumn(type="vector_int", name="values")
+        table.addRow([[]])
+        table.addRow([[]])
+        arr = table.columnArray("values")
+        numpy.testing.assert_array_equal(arr, numpy.array([[], []], dtype="int32"))
+
+    def test_array_column_string_empty(self):
+        table = WorkspaceFactory.createTable()
+        table.addColumn(type="str", name="values")
+        arr = table.columnArray("values")
+        numpy.testing.assert_array_equal(arr, numpy.array([], dtype="<U1"))
+
+    def test_array_column_empty_strings(self):
+        table = WorkspaceFactory.createTable()
+        table.addColumn(type="str", name="values")
+        table.addRow([""])
+        table.addRow([""])
+        arr = table.columnArray("values")
+        numpy.testing.assert_array_equal(arr, numpy.array(["", ""], dtype="<U1"))
 
     def test_convert_to_dict(self):
         from mantid.kernel import V3D
