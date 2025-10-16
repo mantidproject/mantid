@@ -21,8 +21,9 @@ from qtpy.QtWidgets import (
     QPushButton,
     QListWidget,
     QListWidgetItem,
+    QAbstractItemView,
 )
-from qtpy.QtGui import QPalette, QDoubleValidator, QMovie
+from qtpy.QtGui import QPalette, QDoubleValidator, QMovie, QDragEnterEvent, QDropEvent, QDragMoveEvent
 from qtpy.QtCore import Qt, QEvent, QSize
 from superqt import QDoubleRangeSlider
 from pyvistaqt import BackgroundPlotter
@@ -38,6 +39,28 @@ import pyvista as pv
 from pyvista.plotting.picking import RectangleSelection
 from pyvista.plotting.opts import PickerType
 import os
+
+
+class PeaksWorkspaceListWidget(QListWidget):
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.setDragDropMode(QAbstractItemView.DropOnly)
+
+    def dragEnterEvent(self, event: QDragEnterEvent):
+        if event.mimeData().hasText():
+            event.acceptProposedAction()
+
+    def dragMoveEvent(self, event: QDragMoveEvent):
+        if event.mimeData().hasText():
+            event.acceptProposedAction()
+
+    def dropEvent(self, event: QDropEvent):
+        drop_text = event.mimeData().text()
+        for i in range(self.count()):
+            item = self.item(i)
+            if item.text() == drop_text:
+                item.setCheckState(Qt.Checked)
+        event.acceptProposedAction()
 
 
 class FullInstrumentViewWindow(QMainWindow):
@@ -136,7 +159,7 @@ class FullInstrumentViewWindow(QMainWindow):
 
         peak_ws_group_box = QGroupBox("Peaks Workspaces")
         peak_v_layout = QVBoxLayout(peak_ws_group_box)
-        self._peak_ws_list = QListWidget(self)
+        self._peak_ws_list = PeaksWorkspaceListWidget(self)
         self._peak_ws_list.setSizeAdjustPolicy(QListWidget.AdjustToContents)
         peak_v_layout.addWidget(self._peak_ws_list)
 
