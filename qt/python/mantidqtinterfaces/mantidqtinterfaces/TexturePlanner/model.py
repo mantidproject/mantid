@@ -15,6 +15,8 @@ from mantid.simpleapi import (
     CreateSimulationWorkspace,
     ConvertUnits,
     CopySample,
+    CloneWorkspace,
+    RotateSampleShape,
 )
 from Engineering.EnggUtils import GROUP, CALIB_DIR
 from Engineering.common.calibration_info import CalibrationInfo
@@ -87,12 +89,18 @@ class TexturePlannerModel(object):
         if not self.ws:
             self.instr_ws = LoadEmptyInstrument(InstrumentName=self.instr, OutputWorkspace=self.instr_wsname)
             self.ws = CreateSimulationWorkspace(Instrument=self.instr, BinParams="1,0.5,2", OutputWorkspace=self.wsname, UnitX="dSpacing")
+            self.mesh_ws = CloneWorkspace(InputWorkspace=self.wsname, OutputWorkspace="__texture_planning_raw_sample_mesh")
+            self.updated_mesh_ws = CloneWorkspace(InputWorkspace=self.wsname, OutputWorkspace="__texture_planning_neutral_sample_mesh")
             SetSampleShape(self.ws, get_cube_xml("default_cube", 0.01))
+            SetSampleShape(self.mesh_ws, get_cube_xml("default_cube", 0.01))
+            SetSampleShape(self.updated_mesh_ws, get_cube_xml("default_cube", 0.01))
             self.set_material()
         # add handling here for copying over sample shape if the instrument is changed
 
     def set_material(self):
         SetSampleMaterial(self.ws, self.attenuation_kwargs["material"])
+        SetSampleMaterial(self.mesh_ws, self.attenuation_kwargs["material"])
+        SetSampleMaterial(self.updated_mesh_ws, self.attenuation_kwargs["material"])
 
     def set_material_string(self, material):
         try:
@@ -103,12 +111,16 @@ class TexturePlannerModel(object):
 
     def load_stl(self, stl_file):
         LoadSampleShape(InputWorkspace=self.ws, Filename=stl_file, OutputWorkspace=self.ws, **self.stl_kwargs)
+        LoadSampleShape(InputWorkspace=self.mesh_ws, Filename=stl_file, OutputWorkspace=self.mesh_ws, **self.stl_kwargs)
+        LoadSampleShape(InputWorkspace=self.updated_mesh_ws, Filename=stl_file, OutputWorkspace=self.updated_mesh_ws, **self.stl_kwargs)
         self.set_material()
 
     def load_xml(self, xml_file):
         with open(xml_file, "r") as f:
             xml_string = f.read()
         SetSampleShape(self.ws, xml_string)
+        SetSampleShape(self.mesh_ws, xml_string)
+        SetSampleShape(self.updated_mesh_ws, xml_string)
         self.set_material()
 
     def load_orientation_file(self, txt_file):
@@ -193,6 +205,39 @@ class TexturePlannerModel(object):
 
     def get_angles(self, angles, num_gonios):
         return [float(x) for x in angles[:num_gonios]]
+
+    def update_initial_shape(self, x_rot, y_rot, z_rot):
+        # currently copy shape bakes the orientation matrix into the sample shape
+
+        # need to create a ws with an unorientated sample to copy over
+
+        if x_rot == 0.0 and y_rot == 0.0 and z_rot == 0.0:
+            CopySample(InputWorkspace=self.mesh_ws, OutputWorkspace=self.wsname, CopyName=False, CopyEnvironment=False, CopyLattice=False)
+            CopySample(
+                InputWorkspace=self.mesh_ws, OutputWorkspace=self.updated_mesh_ws, CopyName=False, CopyEnvironment=False, CopyLattice=False
+            )
+            return None
+
+        rotvec = Rotation.from_euler("xyz", (x_rot, y_rot, z_rot), degrees=True).as_rotvec(degrees=True)
+
+        ang = np.linalg.norm(rotvec)
+        vec = rotvec / ang
+
+        # _tmp_ws = CloneWorkspace(self.wsname, OutputWorkspace="_tmp_ws")
+        # _tmp_ws.getRun().getGoniometer().setR(mat)
+
+        CopySample(InputWorkspace=self.mesh_ws, OutputWorkspace=self.wsname, CopyName=False, CopyEnvironment=False, CopyLattice=False)
+        CopySample(
+            InputWorkspace=self.mesh_ws, OutputWorkspace=self.updated_mesh_ws, CopyName=False, CopyEnvironment=False, CopyLattice=False
+        )
+
+        RotateSampleShape(self.wsname, f"{ang},{vec[0]},{vec[1]},{vec[2]},1")
+        RotateSampleShape(self.updated_mesh_ws, f"{ang},{vec[0]},{vec[1]},{vec[2]},1")
+
+        # CopySample(InputWorkspace=_tmp_ws, OutputWorkspace=self.wsname, CopyName=False, CopyEnvironment=False,
+        #           CopyLattice=False)
+
+        # ADS.remove("_tmp_ws")
 
     def update_gonio_index(self, num_gonios):
         max_ind = num_gonios - 1
@@ -402,7 +447,7 @@ class TexturePlannerModel(object):
 
         self.ws.run().getGoniometer().setR(R.as_matrix())
 
-        shape_mesh = self.ws.sample().getShape().getMesh()
+        shape_mesh = self.updated_mesh_ws.sample().getShape().getMesh()
         extent = (np.linalg.norm(shape_mesh, axis=(1, 2)).max() / 2) * 1.2
 
         rot_mesh = R.apply(shape_mesh.reshape((-1, 3))).reshape(shape_mesh.shape)
