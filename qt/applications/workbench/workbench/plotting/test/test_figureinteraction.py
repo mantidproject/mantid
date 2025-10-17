@@ -191,6 +191,60 @@ class FigureInteractionTest(unittest.TestCase):
                         # 3 actions in Colorbar submenu
                         self.assertEqual(3, mock_list[4].addAction.call_count)
 
+    def _quick_change_setup(self):
+        fig_manager = self._create_mock_fig_manager_to_accept_right_click()
+        interactor = FigureInteraction(fig_manager)
+        ax = MagicMock(
+            spec=["get_xscale", "get_yscale", "get_xlim", "get_ylim", "set_xscale", "set_yscale", "set_xlim", "set_ylim"],
+            **{
+                "get_xscale.return_value": "test_logx",
+                "get_yscale.return_value": "test_logy",
+                "get_xlim.return_value": "test_xlim",
+                "get_ylim.return_value": "test_ylim",
+            },
+        )
+        return interactor, ax
+
+    def test_quick_change_axes_x_scale(self):
+        interactor, ax = self._quick_change_setup()
+        x_scale_type = "test_linearx"
+        interactor._quick_change_axes(ax, x_scale_type=x_scale_type)
+        ax.get_xscale.assert_not_called()
+        ax.get_yscale.assert_called_once()
+        ax.get_xlim.assert_called_once()
+        ax.get_ylim.assert_called_once()
+        ax.set_xscale.assert_called_once_with(value=x_scale_type)
+        ax.set_yscale.assert_called_once_with(value="test_logy")
+        ax.set_xlim.assert_called_once_with("test_xlim")
+        ax.set_ylim.assert_called_once_with("test_ylim")
+
+    def test_quick_change_axes_y_scale(self):
+        interactor, ax = self._quick_change_setup()
+        y_scale_type = "test_lineary"
+        interactor._quick_change_axes(ax, y_scale_type=y_scale_type)
+        ax.get_xscale.assert_called_once()
+        ax.get_yscale.assert_not_called()
+        ax.get_xlim.assert_called_once()
+        ax.get_ylim.assert_called_once()
+        ax.set_xscale.assert_called_once_with(value="test_logx")
+        ax.set_yscale.assert_called_once_with(value=y_scale_type)
+        ax.set_xlim.assert_called_once_with("test_xlim")
+        ax.set_ylim.assert_called_once_with("test_ylim")
+
+    def test_quick_change_axes_both(self):
+        interactor, ax = self._quick_change_setup()
+        x_scale_type = "test_linearx"
+        y_scale_type = "test_logy"
+        interactor._quick_change_axes(ax, x_scale_type=x_scale_type, y_scale_type=y_scale_type)
+        ax.get_xscale.assert_not_called()
+        ax.get_yscale.assert_not_called()
+        ax.get_xlim.assert_called_once()
+        ax.get_ylim.assert_called_once()
+        ax.set_xscale.assert_called_once_with(value=x_scale_type)
+        ax.set_yscale.assert_called_once_with(value=y_scale_type)
+        ax.set_xlim.assert_called_once_with("test_xlim")
+        ax.set_ylim.assert_called_once_with("test_ylim")
+
     def test_toggle_normalization_no_errorbars(self):
         self._test_toggle_normalization(errorbars_on=False, plot_kwargs={"distribution": True})
 
