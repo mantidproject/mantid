@@ -347,7 +347,7 @@ PyObject *stringNumpyArray(const Mantid::API::Column_const_sptr &column) {
 size_t getStride(const Mantid::API::Column_const_sptr &column) {
   const std::type_info &typeID = column->get_type_info();
   if (typeID.hash_code() == typeid(Mantid::Kernel::V3D).hash_code()) {
-    return static_cast<std::vector<double>>(column->cell<Mantid::Kernel::V3D>(0)).size();
+    return column->cell<Mantid::Kernel::V3D>(0).size();
   }
   if (typeID.hash_code() == typeid(std::vector<int>).hash_code()) {
     return column->cell<std::vector<int>>(0).size();
@@ -840,7 +840,7 @@ void export_ITableWorkspace() {
       .def("column", &column, (arg("self"), arg("column")), "Return all values of a specific column as a list.")
 
       .def("columnArray", &columnArray, (arg("self"), arg("column")),
-           "Return all values of a specific column as a numpy array.")
+           "Return all values of a specific column (either index or name) as a numpy array.")
 
       .def("row", &row, (arg("self"), arg("row")), "Return all values of a specific row as a dict.")
 
