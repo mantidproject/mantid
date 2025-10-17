@@ -55,7 +55,7 @@ bool isPointLike(const std::string &tag) {
   return false;
 }
 
-void shiftAttribute(Element *e, const std::string attr, double d) {
+void shiftAttribute(Element *e, const std::string &attr, double d) {
   if (!e)
     return;
   if (!e->hasAttribute(attr))
