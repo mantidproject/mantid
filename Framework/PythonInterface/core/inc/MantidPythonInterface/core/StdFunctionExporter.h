@@ -1,3 +1,5 @@
+#include "MantidPythonInterface/core/ErrorHandling.h"
+
 #include <boost/python.hpp>
 #include <boost/python/converter/registry.hpp>
 #include <functional>
@@ -51,8 +53,7 @@ template <typename R, typename... Args> struct std_function_from_python {
         return out;
       } catch (boost::python::error_already_set &) {
         PyGILState_Release(gstate);
-        PyErr_Print();
-        throw std::runtime_error("Exception raised in Python code: please check the stderr logs.");
+        throw PythonException();
       }
     });
 

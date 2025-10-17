@@ -30,8 +30,9 @@ public:
   /// Return true when change criterion should be tested.
   bool isConditionChanged(const IPropertyManager *algo, const std::string &changedPropName) const override;
 
-  /// If a new value should be set, the change is applied here
-  void applyChanges(const Mantid::Kernel::IPropertyManager *algo, const std::string &currentPropName) override;
+  /// If a new value should be set, the change is applied here.
+  /// Return true if current property was changed.
+  bool applyChanges(const Mantid::Kernel::IPropertyManager *algo, const std::string &currentPropName) override;
 
   /// Other properties that this property depends on.
   std::vector<std::string> dependsOn(const std::string &thisProp) const override;

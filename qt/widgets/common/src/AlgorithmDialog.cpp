@@ -163,7 +163,8 @@ void AlgorithmDialog::saveInput() {
     const Mantid::Kernel::Property *p = getAlgorithmProperty(*pitr);
     if (p->remember()) {
       QString pName = *pitr;
-      QString value = m_propertyValueMap.value(pName);
+      // normalize default (or default-derived) values to empty string.
+      QString value = p->isDefault() || p->isDynamicDefault() ? "" : m_propertyValueMap.value(pName);
       AlgorithmInputHistory::Instance().storeNewValue(m_algName, QPair<QString, QString>(pName, value));
     }
   }
@@ -940,8 +941,17 @@ void AlgorithmDialog::setPreviousValue(QWidget *widget, const QString &propName)
     return;
 
   QString value = getPreviousValue(propName);
-
   Mantid::Kernel::Property *property = getAlgorithmProperty(propName);
+
+  if (!isInitialized() && property->isDynamicDefault() && value == "")
+    // The property initialization order is non-deterministic: upstream properties may or may
+    //   not be initialized prior to dependent properties.
+    // For this reason, we do not allow resetting a value derived from an upstream property
+    //   back to default.  Setting it to a non-default value indicates it actually had a
+    //   previously-saved value that was not derived.
+    // (In present usage, `isInitialized()` will always be `false` here, but there's no harm
+    //  in generalizing this method's applicability!)
+    return;
 
   // Do the right thing for the widget type
   if (QComboBox *opts = qobject_cast<QComboBox *>(widget)) {
@@ -995,8 +1005,10 @@ void AlgorithmDialog::setPreviousValue(QWidget *widget, const QString &propName)
 
   PropertyWidget *propWidget = qobject_cast<PropertyWidget *>(widget);
   if (propWidget) {
+    // Only non dynamic-default values reach this clause:
+    //   dynamic-default values are set in `AlgorithmPropertiesWidget::hideOrDisableProperties`.
+    propWidget->setPrevious_isDynamicDefault(false);
     propWidget->setPreviousValue(value);
-
     return;
   }
 

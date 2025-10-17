@@ -7,6 +7,7 @@
 #include "MantidKernel/VisibleWhenProperty.h"
 
 #include <memory>
+#include <set>
 #include <stdexcept>
 
 namespace Mantid::Kernel {
@@ -121,7 +122,6 @@ std::vector<std::string> VisibleWhenProperty::dependsOn(const std::string &thisP
     return std::vector<std::string>{otherProp};
   } else if (m_comparisonDetails) {
     std::set<std::string> ps;
-    const auto &comparison = m_comparisonDetails;
     const auto ps1 = m_comparisonDetails->conditionOne->dependsOn(thisProp);
     const auto ps2 = m_comparisonDetails->conditionTwo->dependsOn(thisProp);
     ps.insert(ps1.cbegin(), ps1.cend());
