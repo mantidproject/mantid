@@ -52,12 +52,8 @@ std::string SetValueWhenProperty::getPropertyValue(const IPropertyManager *algo)
  * @return  :: True if the Property we are watching is the property that just changed, otherwise False
  */
 bool SetValueWhenProperty::isConditionChanged(const IPropertyManager *algo, const std::string &changedPropName) const {
-  auto watchedProp = algo->getPointerToProperty(m_watchedPropName);
-  bool hasWatchedPropChanged = false;
-  if (watchedProp->name() == changedPropName) {
-    hasWatchedPropChanged = true;
-  }
-  return hasWatchedPropChanged;
+  const auto watchedProp = algo->getPointerToProperty(m_watchedPropName);
+  return watchedProp->name() == changedPropName;
 }
 
 void SetValueWhenProperty::applyChanges(const IPropertyManager *algo, const std::string &currentPropName) {
