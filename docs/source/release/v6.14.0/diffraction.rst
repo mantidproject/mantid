@@ -48,10 +48,6 @@ New features
 - Performance improvements have been made to :ref:`algm-PoldiAutoCorrelation-v6` and a function to simulate POLDI 2D workspace.
 - New property ``InterpolationMethod`` added to :ref:`algm-PoldiAutoCorrelation-v6`. The default value ``"Linear"`` preserves existing behaviour (linear interpolation), and ``"Nearest"`` can be used for faster execution.
 
-Bugfixes
-############
-
-
 
 Single Crystal Diffraction
 --------------------------
@@ -61,9 +57,6 @@ New features
 - :ref:`LoadWANDSCD <algm-LoadWANDSCD>` will now load the sample environment logs.
 - New algorithm :ref:`FindUBFromScatteringPlane <algm-FindUBFromScatteringPlane>` to find UB Matrix given lattice parameters, scattering plane and 1 peak for a sample.
 - Add ``UpdateUB`` option to :ref:`algm-IndexPeaks` that saves the optimized UB matrix in the case where there is a single run and ``CommonUBForAll=False``.
-
-Bugfixes
-############
 
 
 :ref:`Release 6.14.0 <v6.14.0>`

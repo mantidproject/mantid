@@ -38,36 +38,15 @@ New features
 ############
 - Performance optimisations have been made to the process of adding ties to a fit function.
 
-Bugfixes
-############
-
-
-Deprecated
-############
-
-
-Removed
-############
-
-
 
 Data Objects
 ------------
-
-New features
-############
-
 
 Bugfixes
 ############
 - When loading monitors with period data using :ref:`LoadNexusMonitors v2 <algm-LoadNexusMonitors-v2>`, period sample logs are now added to the resultant workspace; this is in line with the creation of Event Workspaces. This fixes a bug that occurred when :ref:`algm-NormaliseByCurrent` was used on the monitor workspace.
 - Inconsistencies sometimes occur in period-related logs within Event NeXus files, such as duplicated entries with the same timestamps. Therefore, these repeated entries are reduced to a single entry. This can lead to runtime errors when loading the file which, in the past, have lead to crashes. In order to prevent this, the event workspace is now created without the period logs if issues are detected.
 
-Live Data
----------
-
-New features
-############
 
 Python
 ------
@@ -108,10 +87,6 @@ New features
   `github issue <https://github.com/mantidproject/mantid/issues/38332>`_ or by following the `Nexus tag <https://github.com/mantidproject/mantid/pulls?q=is%3Apr+is%3Aclosed+label%3ANexus>`_.
 - Pin build 2 of ``seekpath`` v2.1.0 which removes an erroneous dependency on the ``future`` package. ``seekpath`` is a dependency of ``euphonic``. ``future`` is not used and has a known vulnerability `CVE-2025-50817 <https://github.com/advisories/GHSA-xqrq-4mgf-ff32>`_ .
 - Updated header and source files for ADARA packets from v1.5.1 to v1.10.3
-
-Bugfixes
-############
-
 
 
 MantidWorkbench

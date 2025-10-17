@@ -19,18 +19,6 @@ Bugfixes
 - :ref:`DGSPlanner <dgsplanner-ref>` will now warn if the crystallographic convention is used.
 
 
-CrystalField
--------------
-
-New features
-############
-
-
-Bugfixes
-############
-
-
-
 MSlice
 ------
 

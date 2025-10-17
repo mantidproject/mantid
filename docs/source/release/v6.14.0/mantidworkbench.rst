@@ -48,8 +48,5 @@ New features
    :class: screenshot
    :width: 500px
 
-Bugfixes
-############
-
 
 :ref:`Release 6.14.0 <v6.14.0>`

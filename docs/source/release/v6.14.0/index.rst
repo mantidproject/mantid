@@ -65,7 +65,6 @@ Changes
 - :doc:`Framework <framework>`
 - :doc:`Mantid Workbench <mantidworkbench>`
 - :doc:`Diffraction <diffraction>`
-- :doc:`Muon Analysis <muon>`
 - Low Q
 
   - :doc:`Reflectometry <reflectometry>`
@@ -76,8 +75,6 @@ Changes
   - :doc:`Direct Geometry <direct_geometry>`
 
   - :doc:`Indirect Geometry <indirect_geometry>`
-
-  - :doc:`Inelastic <inelastic>`
 
 Full Change Listings
 --------------------
