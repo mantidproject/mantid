@@ -1,1 +1,0 @@
-- The line plot in the ``Reduction Preview`` tab of the ``Reflectometry`` GUI now has a symlog Y axis.

@@ -1,1 +1,0 @@
-- ``Show Invisible Workspaces`` settings can now be updated from the settings menu.

@@ -1,1 +1,0 @@
-- Fixed workspaces starting with "_" not populating the legend of plots.

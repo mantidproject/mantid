@@ -1,1 +1,0 @@
-- :ref:`LoadWANDSCD <algm-LoadWANDSCD>` will now load the sample environment logs

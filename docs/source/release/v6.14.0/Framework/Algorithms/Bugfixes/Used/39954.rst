@@ -1,1 +1,0 @@
-- fixed a performance regression in :ref:`SaveMD <algm-SaveMD>` that led to dramatically increased save times in release 6.13.1.1.

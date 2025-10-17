@@ -1,1 +1,0 @@
-- :ref:`AlignAndFocusPowderSlim <algm-AlignAndFocusPowderSlim>` can do event filtering with a Splitter Workspace but only with a single output workspace and filtering on pulse time only.
