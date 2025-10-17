@@ -13,6 +13,7 @@ New Features
 - The crosshair button is enabled in tiled plots (subplots).
 - The crosshair has been optimised using matplotlib's blitting function for fast rendering. It very closely tracks mouse movement with minimal lag.
 - MantidWorkbench now features a new, integrated HTML-based help viewer, replacing the previous Qt Assistant-based system. This modernization provides a more streamlined user experience and aligns with current web standards.
+- In the :ref:`Filter Events Interface <Filter_Events_Interface>`, horizontal and vertical range markers have been added in lieu of sliders to simplify range filtering with the mouse.
 
 Bugfixes
 --------
@@ -21,6 +22,7 @@ Bugfixes
 - Workspaces starting with "_" will now appear in plot legends.
 - Moving a range selector on a plot (especially in indirect/inelastic interfaces) will no longer cause a deprecation warning about ``np.bool`` scalars being interpreted as an index.
 - Standalone Windows installations of MantidWorkbench (using the .exe installer) now ignore the user ``site-packages`` directory (``%APPDATA%\Python\Python311\site-packages``), preventing conflicts with packages from other Python installations.
+- Input validation errors have been corrected for numerical text boxes of the :ref:`Filter Events Interface <Filter_Events_Interface>`.
 
 InstrumentViewer
 ----------------
