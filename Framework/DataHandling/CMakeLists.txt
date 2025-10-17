@@ -631,6 +631,7 @@ set(TEST_FILES
     SetScalingPSDTest.h
     SortTableWorkspaceTest.h
     StartAndEndTimeFromNexusFileExtractorTest.h
+    TranslateSampleShapeTest.h
     UpdateInstrumentFromFileTest.h
     XMLInstrumentParameterTest.h
     RotateSampleShapeTest.h
