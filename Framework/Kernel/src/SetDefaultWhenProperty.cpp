@@ -18,6 +18,12 @@
 
 using namespace Mantid::Kernel;
 
+namespace {
+
+Mantid::Kernel::Logger g_log("SetDefaultWhenProperty");
+
+} // namespace
+
 namespace Mantid::Kernel {
 
 /**
@@ -33,7 +39,7 @@ bool SetDefaultWhenProperty::isConditionChanged(const IPropertyManager *algo,
   return changedPropName == m_watchedPropName;
 }
 
-void SetDefaultWhenProperty::applyChanges(const IPropertyManager *algo, const std::string &currentPropName) {
+bool SetDefaultWhenProperty::applyChanges(const IPropertyManager *algo, const std::string &currentPropName) {
   try {
     auto currentProperty = algo->getPointerToProperty(currentPropName);
     auto watchedProperty = algo->getPointerToProperty(m_watchedPropName);
@@ -41,17 +47,25 @@ void SetDefaultWhenProperty::applyChanges(const IPropertyManager *algo, const st
     // For this `IPropertySettings`: only apply changes if the property still has its default value,
     //   or its value has been set programmatically.
     if (!(currentProperty->isDefault() || currentProperty->isDynamicDefault()))
-      return;
+      return false;
 
-    if (m_changeCriterion(algo, currentProperty, watchedProperty))
+    if (m_changeCriterion(algo, currentProperty, watchedProperty)) {
       currentProperty->setIsDynamicDefault(true);
-  } catch (const Exception::NotFoundError &e) {
-    std::ostringstream msg;
-    msg << "`SetDefaultWhenProperty::applyChanges`: one of the properies '" << currentPropName << "' or '"
-        << m_watchedPropName << "\n"
-        << "   is not present on the algorithm.";
-    throw std::runtime_error(msg.str());
+      return true;
+    }
+  } catch (const Exception::NotFoundError &) {
+    g_log.warning() << "`SetDefaultWhenProperty::applyChanges`: one of the properies '" << currentPropName << "' or '"
+                    << m_watchedPropName << "\n"
+                    << "   is not present on the algorithm.\n";
+  } catch (const std::runtime_error &e) {
+    // Note: the exception might be a `PythonException`, but `MantidPythonInterface/core`
+    //   is not accessible at this level.
+    g_log.warning() << "`SetDefaultWhenProperty::applyChanges`: exception thrown within provided callback.\n"
+                    << "If the callback was a Python `Callable`, the stack trace follows:\n"
+                    << "-------------------------------------------------------------------------\n"
+                    << e.what() << "\n-------------------------------------------------------------------------\n";
   }
+  return false;
 }
 
 /// Other properties that this property depends on.

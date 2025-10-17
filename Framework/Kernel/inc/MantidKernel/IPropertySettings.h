@@ -8,6 +8,7 @@
 
 #include "MantidKernel/DllConfig.h"
 #include <string>
+#include <vector>
 
 namespace Mantid {
 namespace Kernel {
@@ -54,10 +55,13 @@ public:
 
   /** Overload this virtual function in order to modify the
    *  current property based on changes to other properties.
+   *
+   *  @return: whether or not the current property was changed.
    */
-  virtual void applyChanges(const IPropertyManager *algo, const std::string &currentPropName) {
+  virtual bool applyChanges(const IPropertyManager *algo, const std::string &currentPropName) {
     UNUSED_ARG(algo);
     UNUSED_ARG(currentPropName);
+    return false;
   }
 
   /// Other properties that this property depends on.

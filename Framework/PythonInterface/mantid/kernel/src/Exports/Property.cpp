@@ -26,6 +26,7 @@
 #include <boost/python/return_value_policy.hpp>
 
 using Mantid::Kernel::Direction;
+using Mantid::Kernel::IPropertySettings;
 using Mantid::Kernel::Property;
 using Mantid::PythonInterface::std_vector_exporter;
 using namespace boost::python;
@@ -168,7 +169,9 @@ void export_Property() {
                     "Return the 'group' of the property, that is, the header "
                     "in the algorithm's list of properties.")
 
-      .add_property("settings", make_function(&Property::getSettings, return_value_policy<return_by_value>()),
+      .add_property("settings",
+                    make_function(static_cast<IPropertySettings *(Property::*)()>(&Property::getSettings),
+                                  return_value_policy<return_by_value>()),
                     "Return the object managing this property's settings")
 
       .add_static_property("EMPTY_DBL", emptyDouble)

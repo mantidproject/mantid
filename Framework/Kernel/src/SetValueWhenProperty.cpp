@@ -18,31 +18,13 @@
 
 using namespace Mantid::Kernel;
 
+namespace {
+
+Mantid::Kernel::Logger g_log("SetValueWhenProperty");
+
+} // namespace
+
 namespace Mantid::Kernel {
-
-/**
- * Checks the validity of the algorithm and the property:
- * returns the value of the watched property.
- *
- * @param algo :: The pointer to the algorithm to process
- * @return :: The value of the watched property
- * @throw :: Throws if anything is wrong with the property or algorithm
- */
-std::string SetValueWhenProperty::getPropertyValue(const IPropertyManager *algo) const {
-  // Find the property
-  if (algo == nullptr)
-    throw std::runtime_error("Algorithm properties passed to SetValueWhenProperty was null");
-
-  Property const *prop = nullptr;
-  try {
-    prop = algo->getPointerToProperty(m_watchedPropName);
-  } catch (Exception::NotFoundError &) {
-    prop = nullptr; // Ensure we still have null pointer
-  }
-  if (!prop)
-    throw std::runtime_error("Property " + m_watchedPropName + " was not found in SetValueWhenProperty");
-  return prop->value();
-}
 
 /**
  * Return true if the `changedPropName` matches the `watchedPropName`.
@@ -52,20 +34,36 @@ std::string SetValueWhenProperty::getPropertyValue(const IPropertyManager *algo)
  * @return  :: True if the Property we are watching is the property that just changed, otherwise False
  */
 bool SetValueWhenProperty::isConditionChanged(const IPropertyManager *algo, const std::string &changedPropName) const {
-  auto const *watchedProp = algo->getPointerToProperty(m_watchedPropName);
-  bool hasWatchedPropChanged = false;
-  if (watchedProp->name() == changedPropName) {
-    hasWatchedPropChanged = true;
-  }
-  return hasWatchedPropChanged;
+  const auto *watchedProp = algo->getPointerToProperty(m_watchedPropName);
+  return watchedProp->name() == changedPropName;
 }
 
-void SetValueWhenProperty::applyChanges(const IPropertyManager *algo, const std::string &currentPropName) {
-  const auto currentProperty = algo->getPointerToProperty(currentPropName);
-  const std::string watchedPropertyValue = getPropertyValue(algo);
+bool SetValueWhenProperty::applyChanges(const IPropertyManager *algo, const std::string &currentPropName) {
+  try {
+    auto *currentProperty = algo->getPointerToProperty(currentPropName);
+    const auto *watchedProperty = algo->getPointerToProperty(m_watchedPropName);
+    const std::string currentValue = currentProperty->value();
+    const std::string watchedValue = watchedProperty->value();
 
-  std::string newValue = m_changeCriterion(currentProperty->value(), watchedPropertyValue);
-  currentProperty->setValue(newValue);
+    std::string newValue = m_changeCriterion(currentValue, watchedValue);
+    if (newValue != currentValue) {
+      currentProperty->setValue(newValue);
+      return true;
+    }
+    return false;
+  } catch (const Exception::NotFoundError &) {
+    g_log.warning() << "`SetValueWhenProperty::applyChanges`: one of the properies '" << currentPropName << "' or '"
+                    << m_watchedPropName << "\n"
+                    << "   is not present on the algorithm.\n";
+  } catch (const std::runtime_error &e) {
+    // Note: the exception might be a `PythonException`, but `MantidPythonInterface/core`
+    //   is not accessible at this level.
+    g_log.warning() << "`SetValueWhenProperty::applyChanges`: exception thrown within provided callback.\n"
+                    << "If the callback was a Python `Callable`, the stack trace follows:\n"
+                    << "-------------------------------------------------------------------------\n"
+                    << e.what() << "\n-------------------------------------------------------------------------\n";
+  }
+  return false;
 }
 
 /// Other properties that this property depends on.
@@ -74,11 +72,6 @@ std::vector<std::string> SetValueWhenProperty::dependsOn(const std::string &this
     throw std::runtime_error("SetValueWhenProperty: circular dependency detected");
   return std::vector<std::string>{m_watchedPropName};
 }
-
-#if 0 // *** DEBUG *** => this seems deprecated?
-/// Does nothing in this case and put here to satisfy the interface.
-void SetValueWhenProperty::modify_allowed_values(Property *const /*unused*/) {}
-#endif
 
 IPropertySettings *SetValueWhenProperty::clone() const { return new SetValueWhenProperty(*this); }
 

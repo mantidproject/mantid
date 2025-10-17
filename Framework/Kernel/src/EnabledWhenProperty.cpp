@@ -14,6 +14,7 @@
 
 #include <exception>
 #include <memory>
+#include <set>
 #include <stdexcept>
 
 using namespace Mantid::Kernel;
@@ -108,7 +109,7 @@ bool EnabledWhenProperty::checkCriterion(const IPropertyManager *algo) const {
   const std::string propValue = getPropertyValue(algo);
   // This is safe as long as getPropertyValue (which checks) has been called
   // already
-  auto const *prop = algo->getPointerToProperty(m_propertyDetails->otherPropName);
+  const auto *prop = algo->getPointerToProperty(m_propertyDetails->otherPropName);
 
   // OK, we have the property. Check the condition
   switch (m_propertyDetails->criterion) {
@@ -208,11 +209,6 @@ std::vector<std::string> EnabledWhenProperty::dependsOn(const std::string &thisP
   } else
     return std::vector<std::string>{};
 }
-
-#if 0 // *** DEBUG *** => this seems deprecated?
-/// Does nothing in this case and put here to satisfy the interface.
-void EnabledWhenProperty::modify_allowed_values(Property *const /*unused*/) {}
-#endif
 
 /**
  * Clones the current EnabledWhenProperty object and returns

@@ -106,6 +106,7 @@ void Property::setSettings(std::unique_ptr<IPropertySettings> settings) { m_sett
  *
  * @return the PropertySettings for this property
  */
+const IPropertySettings *Property::getSettings() const { return m_settings.get(); }
 IPropertySettings *Property::getSettings() { return m_settings.get(); }
 
 /**

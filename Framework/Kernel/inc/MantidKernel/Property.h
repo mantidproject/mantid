@@ -112,8 +112,11 @@ public:
 
   /// Set the PropertySettings object
   void setSettings(std::unique_ptr<IPropertySettings> settings);
+
   /** @return the PropertySettings for this property */
+  const IPropertySettings *getSettings() const;
   IPropertySettings *getSettings();
+
   /** Deletes the PropertySettings object contained */
   void clearSettings();
 
