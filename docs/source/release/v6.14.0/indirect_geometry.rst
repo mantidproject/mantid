@@ -5,16 +5,6 @@ Indirect Geometry Changes
 .. contents:: Table of Contents
    :local:
 
-New Features
-------------
-
-
-
-Bugfixes
---------
-
-
-
 Algorithms
 ----------
 

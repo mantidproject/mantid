@@ -1,2 +1,0 @@
-- Created :ref:`PythonObjectProperty <PythonObjectProperty>` which allows using generic python objects as inputs to algorithms defined through the python API
-- Created :ref:`PythonObjectTypeValidator <PythonObjectTypeValidator>` for use with :ref:`PythonObjectProperty <PythonObjectProperty>`, to enforce correct typing on python objects

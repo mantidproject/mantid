@@ -1,1 +1,0 @@
-- Algorithm :ref:`algm-HeliumAnalyserEfficiency` accepts now multiple transmission runs. It calculates for each one the analyser efficiency and fits the helium polarization. It fits all runs to a decay curve to obtain the lifetime of the analyzer.

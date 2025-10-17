@@ -1,6 +1,0 @@
-- Euphonic dependency is updated to 1.4.5. Notably, this includes a
-  bugfix when importing force constants with dipole-dipole corrections
-  from Phonopy: if the supercell matrix was non-symmetric, the long-range
-  subtraction was done incorrectly. Calculations with "diagonal"
-  supercells (e.g. 2×3×4) are unaffected, and primitive-FCC or
-  primitive-BCC transformations should also use a symmetric matrix.

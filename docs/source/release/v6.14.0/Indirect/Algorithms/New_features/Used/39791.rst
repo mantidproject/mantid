@@ -1,1 +1,0 @@
-- Four output OutputSusceptibility file options (OutputSusceptibilityFrequencyNXS, OutputSusceptibilityEnergyNXS, OutputSusceptibilityFrequencyASCII, OutputSusceptibilityEnergyASCII) have been added in BASISReduction, instead of one.

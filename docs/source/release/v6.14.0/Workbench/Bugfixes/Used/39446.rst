@@ -1,1 +1,0 @@
-- Python warning for `np.bool` scalars interpreted as index is no longer present when using the MantidPlot widget.

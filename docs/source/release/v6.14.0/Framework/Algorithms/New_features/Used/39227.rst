@@ -1,1 +1,0 @@
-- New algorithm :ref:`algm-EstimateScatteringVolumeCentreOfMass`, allows user to estimate the centre of mass of the intersection between an illumination volume and a sample shape.

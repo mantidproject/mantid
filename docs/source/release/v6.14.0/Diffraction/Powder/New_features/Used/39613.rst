@@ -1,1 +1,0 @@
-- :ref:`AlignAndFocusPowderSlim <algm-AlignAndFocusPowderSlim>` now allows different binning units, the default being d-spacing. The output will always be in time-of-flight.
