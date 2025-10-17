@@ -17,7 +17,7 @@ We are proud to announce version 6.14.0 of Mantid.
 Key features of this release include:
 
 - This is the final release of Mantid to include a package built for Intel Macs. There will continue to be packages built for Apple Silicon (M series processors).
-- The ``mslice`` package is not an optional dependency of ``mantidworkbench``. To install it alongside ``mantidworkbench`` run ``mamba install -c mantid mantidworkbench mslice``. Full/standalone installers and IDAaaS installations remain unchanged; mslice will be automatically provided there.
+- The ``mslice`` package is now an optional dependency of ``mantidworkbench``. To install it alongside ``mantidworkbench`` run ``mamba install -c mantid mantidworkbench mslice``. Full/standalone installers and IDAaaS installations remain unchanged; mslice will be automatically provided there.
 - An experimental version of the new Instrument View has been made available in this release. To access this, right-click on a workspace in the ADS in Workbench, then click ``(Experimental) Show Instrument``. This feature is still in an early stage of development with further functionality being added over the v6.15 development period.
 - The final pieces of work to support the polarised SANS technique at ISIS have been finished, see :doc:`the SANS release notes <sans>` for more details.
 - In the :ref:`SliceViewer <sliceviewer>`, a masking feature for Matrix Workspaces with a non-numeric y-axis has been added.

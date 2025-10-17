@@ -53,7 +53,7 @@ Python
 
 New features
 ############
-- The large offline documentation is now an optional install, reducing installer/download size significantly. For users prefer online docs, this saves considerable disk space (potentially hundreds of MB). Those who prefer local/offline usage can still opt to install the documentation package and continue working without internet access. A clear indicator has been added to the Help Window's toolbar to show whether Mantid is displaying ``Local Docs`` or ``Online Docs``.
+- The large offline documentation is now an optional install, reducing installer/download size significantly. For users that prefer online docs, this saves considerable disk space (potentially hundreds of MB). Those who prefer local/offline usage can still opt to install the documentation package and continue working without internet access. A clear indicator has been added to the Help Window's toolbar to show whether Mantid is displaying ``Local Docs`` or ``Online Docs``.
 - Introduced a prototype "side-by-side" help system that includes both the legacy QtHelp-based viewer and a new Python-based Help Window using an embedded web browser (QWebEngine) to display documentation within Mantid Workbench.
 - macOS users with Apple Silicon (Arm-based architecture) are now warned if they have installed the Intel-based Mantid package.
 - Created :ref:`PythonObjectProperty <PythonObjectProperty>`, which allows using generic python objects as inputs to algorithms defined through the python API.

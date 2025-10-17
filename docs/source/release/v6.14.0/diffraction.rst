@@ -10,7 +10,7 @@ Powder Diffraction
 
 New features
 ############
-- :ref:`AlignAndFocusPowderSlim <algm-AlignAndFocusPowderSlim>` can skip loading particular logs using the (mutually exclisive) ``LogAllowList`` and ``LogBlockList`` properties.
+- :ref:`AlignAndFocusPowderSlim <algm-AlignAndFocusPowderSlim>` can skip loading particular logs using the (mutually exclusive) ``LogAllowList`` and ``LogBlockList`` properties.
 - :ref:`AlignAndFocusPowderSlim <algm-AlignAndFocusPowderSlim>` can now filter out bad pulses during loading by setting the ``FilterBadPulses`` to ``True`` (cutoff can be adjusted with ``BadPulsesLowerCutoff``).
 - :ref:`AlignAndFocusPowderSlim <algm-AlignAndFocusPowderSlim>` now allows different binning to be specified for each output spectra by setting ``XMin`` or ``XMax`` to a list of values.
 - :ref:`AlignAndFocusPowderSlim <algm-AlignAndFocusPowderSlim>` now allows different input binning units by setting the ``BinningUnits`` property to one of ``"dSpacing"``, ``"TOF"`` or ``"MomentumTransfer"``, the default being d-spacing. The output will always be in time-of-flight.
