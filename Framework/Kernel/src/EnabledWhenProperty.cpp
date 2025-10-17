@@ -109,7 +109,7 @@ bool EnabledWhenProperty::checkCriterion(const IPropertyManager *algo) const {
   const std::string propValue = getPropertyValue(algo);
   // This is safe as long as getPropertyValue (which checks) has been called
   // already
-  auto prop = algo->getPointerToProperty(m_propertyDetails->otherPropName);
+  const auto *prop = algo->getPointerToProperty(m_propertyDetails->otherPropName);
 
   // OK, we have the property. Check the condition
   switch (m_propertyDetails->criterion) {
@@ -149,7 +149,7 @@ std::string EnabledWhenProperty::getPropertyValue(const IPropertyManager *algo) 
   if (algo == nullptr)
     throw std::runtime_error("Algorithm properties passed to EnabledWhenProperty was null");
 
-  Property *prop = nullptr;
+  const Property *prop = nullptr;
   try {
     prop = algo->getPointerToProperty(m_propertyDetails->otherPropName);
   } catch (Exception::NotFoundError &) {
