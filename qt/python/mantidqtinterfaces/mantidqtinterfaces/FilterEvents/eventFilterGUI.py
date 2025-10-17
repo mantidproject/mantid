@@ -7,7 +7,7 @@
 # pylint: disable=invalid-name, too-many-lines, too-many-instance-attributes
 import numpy as np
 
-from qtpy.QtWidgets import QFileDialog, QMainWindow, QMessageBox, QSlider, QVBoxLayout, QWidget
+from qtpy.QtWidgets import QFileDialog, QMainWindow, QMessageBox, QVBoxLayout, QWidget
 from qtpy.QtGui import QDoubleValidator, QDesktopServices
 from qtpy.QtCore import QUrl, QLocale
 
@@ -15,10 +15,10 @@ import mantid
 import mantid.simpleapi as api
 import mantid.kernel
 from mantid.kernel import Logger
-from mantid.simpleapi import AnalysisDataService
-
 from mantid.kernel import ConfigService
 from mantidqt.MPLwidgets import FigureCanvasQTAgg as FigureCanvas
+from mantid.simpleapi import AnalysisDataService
+from mantidqt.plotting.markers import RangeMarker
 from matplotlib.pyplot import Figure, setp
 import os
 
@@ -31,6 +31,41 @@ except ImportError:
 HUGE_FAST = 10000
 HUGE_PARALLEL = 100000
 MAXTIMEBINSIZE = 3000
+
+
+class DoubleValidator(QDoubleValidator):
+    def __init__(self, line_edit, initial_value=None, allow_empty_edits=False):
+        locale = QLocale.c()
+        locale.setNumberOptions(QLocale.RejectGroupSeparator)
+        super().__init__()
+        super().setLocale(locale)
+        super().setDecimals(6)
+        self._line_edit = line_edit
+        self._line_edit.editingFinished.connect(self.on_editing_finished)
+        self._last_value = initial_value
+        self._allow_empty = allow_empty_edits
+
+    @property
+    def last_value(self):
+        return self._last_value
+
+    @last_value.setter
+    def last_value(self, value):
+        self._last_value = value
+
+    def on_editing_finished(self):
+        txt = self._line_edit.text()
+        self._last_value = float(txt) if txt else None
+        self.set_txt()
+
+    def set_txt(self):
+        self._line_edit.setText(f"{self._last_value:.6f}" if self._last_value is not None else "")
+
+    def fixup(self, txt):
+        if txt == "" and self._allow_empty:
+            self._line_edit.clear()
+        else:
+            self.set_txt()
 
 
 class MainWindow(QMainWindow):
@@ -54,7 +89,7 @@ class MainWindow(QMainWindow):
         self.centralwidget = QWidget(self)
 
         # UI Window (from Qt Designer)
-        self.ui = load_ui(__file__, "MainWindow.ui", baseinstance=self)
+        self.ui = load_ui(__file__, "eventFilterGUI.ui", baseinstance=self)
         mpl_layout = QVBoxLayout()
         self.ui.graphicsView.setLayout(mpl_layout)
         self.fig = Figure(figsize=(4, 3), layout="constrained")
@@ -62,41 +97,43 @@ class MainWindow(QMainWindow):
         self.ui.mainplot = self.fig.add_subplot(111, projection="mantid", xlabel="x-units", ylabel="y-units")
         mpl_layout.addWidget(self.canvas)
 
+        self.canvas.mpl_connect("button_press_event", self.on_mouse_press)
+        self.canvas.mpl_connect("draw_event", self.draw_callback)
+        self.canvas.mpl_connect("button_release_event", self.on_mouse_release)
+        self.canvas.mpl_connect("motion_notify_event", self.on_mouse_move)
+
+        initial_plot_lims = [0.0, 1.0]
+        initial_marker_pos = [0.1, 0.9]
+        vertical_marker = RangeMarker(self.canvas, "green", *initial_plot_lims, line_style="--")
+        horizontal_marker = RangeMarker(self.canvas, "blue", *initial_plot_lims, range_type="YMinMax", line_style="-.")
+
         # Do initialize plotting
-        vecx, vecy, xlim, ylim = self.computeMock()
+        self.mainline = self.ui.mainplot.plot(initial_plot_lims, [0.5] * 2, "r-")
+        self.ui.mainplot.set_xlim(*initial_plot_lims)
+        self.ui.mainplot.set_ylim(*initial_plot_lims)
 
-        self.mainline = self.ui.mainplot.plot(vecx, vecy, "r-")
+        # Set up validators for numeric edits
+        self.doubleLineEdits = [
+            (self.ui.leStartTime, initial_marker_pos[0]),
+            (self.ui.leStopTime, initial_marker_pos[1]),
+            (self.ui.leMinimumValue, initial_marker_pos[0]),
+            (self.ui.leMaximumValue, initial_marker_pos[1]),
+            (self.ui.leStepSize, None),
+            (self.ui.leValueTolerance, None),
+            (self.ui.leTimeTolerance, None),
+            (self.ui.leIncidentEnergy, None),
+        ]
+        for line_edit, ini_value in self.doubleLineEdits:
+            line_edit.setValidator(DoubleValidator(line_edit, initial_value=None, allow_empty_edits=ini_value is None))
+            if ini_value:
+                line_edit.setText(f"{ini_value:.6f}")
+                line_edit.editingFinished.connect(self.update_marker_range)
 
-        leftx = [xlim[0], xlim[0]]
-        lefty = [ylim[0], ylim[1]]
-        self.leftslideline = self.ui.mainplot.plot(leftx, lefty, "b--")
-        rightx = [xlim[1], xlim[1]]
-        righty = [ylim[0], ylim[1]]
-        self.rightslideline = self.ui.mainplot.plot(rightx, righty, "g--")
-        upperx = [xlim[0], xlim[1]]
-        uppery = [ylim[1], ylim[1]]
-        self.upperslideline = self.ui.mainplot.plot(upperx, uppery, "b--")
-        lowerx = [xlim[0], xlim[1]]
-        lowery = [ylim[0], ylim[0]]
-        self.lowerslideline = self.ui.mainplot.plot(lowerx, lowery, "g--")
-
-        self.canvas.mpl_connect("button_press_event", self.on_mouseDownEvent)
-
-        # Set up horizontal slide (integer) and string value
-        self._leftSlideValue = 0
-        self._rightSlideValue = 100
-
-        self.ui.horizontalSlider.setRange(0, 100)
-        self.ui.horizontalSlider.setValue(self._leftSlideValue)
-        self.ui.horizontalSlider.setTracking(True)
-        self.ui.horizontalSlider.setTickPosition(QSlider.NoTicks)
-        self.ui.horizontalSlider.valueChanged.connect(self.move_leftSlider)
-
-        self.ui.horizontalSlider_2.setRange(0, 100)
-        self.ui.horizontalSlider_2.setValue(self._rightSlideValue)
-        self.ui.horizontalSlider_2.setTracking(True)
-        self.ui.horizontalSlider_2.setTickPosition(QSlider.NoTicks)
-        self.ui.horizontalSlider_2.valueChanged.connect(self.move_rightSlider)
+        self.markers = [vertical_marker, horizontal_marker]
+        self.marker_line_edits = [(self.ui.leStartTime, self.ui.leStopTime), (self.ui.leMinimumValue, self.ui.leMaximumValue)]
+        for (min_edit, max_edit), marker in zip(self.marker_line_edits, self.markers):
+            marker.set_range(*initial_marker_pos)
+            self.update_line_edits(min_edit, max_edit, initial_marker_pos, marker)
 
         # File loader
         self.scanEventWorkspaces()
@@ -109,55 +146,14 @@ class MainWindow(QMainWindow):
         self.ui.pushButton_filterTime.clicked.connect(self.filterByTime)
         self.ui.lineEdit_timeInterval.returnPressed.connect(self.filterByTime)
 
-        dirchangeops = ["Both", "Increase", "Decrease"]
-        self.ui.comboBox_4.addItems(dirchangeops)
-
-        logboundops = ["Centre", "Left"]
-        self.ui.comboBox_5.addItems(logboundops)
+        self.ui.comboBox_4.addItems(["Both", "Increase", "Decrease"])
+        self.ui.comboBox_5.addItems(["Centre", "Left"])
 
         self.ui.pushButton_4.clicked.connect(self.plotLogValue)
-
         self.ui.pushButton_filterLog.clicked.connect(self.filterByLogValue)
 
         # Set up help button
         self.ui.helpBtn.clicked.connect(self.helpClicked)
-
-        # Set up vertical slide
-        self._upperSlideValue = 99
-        self._lowerSlideValue = 0
-
-        self.ui.verticalSlider.setRange(0, 100)
-        self.ui.verticalSlider.setValue(self._upperSlideValue)
-        self.ui.verticalSlider.setTracking(True)
-        self.ui.verticalSlider.valueChanged.connect(self.move_upperSlider)
-
-        self.ui.verticalSlider_2.setRange(0, 100)
-        self.ui.verticalSlider_2.setValue(self._lowerSlideValue)
-        self.ui.verticalSlider_2.setTracking(True)
-        self.ui.verticalSlider_2.valueChanged.connect(self.move_lowerSlider)
-
-        # Set up validators for numeric edits
-        self.dvalidator = QDoubleValidator()
-        locale = QLocale.c()
-        locale.setNumberOptions(QLocale.RejectGroupSeparator)
-        self.dvalidator.setLocale(locale)
-        self.dvalidator.setDecimals(6)
-        self.populate_line_edits_default()
-        self.doubleLineEdits = [
-            (self.ui.leStartTime, self.set_startTime),
-            (self.ui.leStopTime, self.set_stopTime),
-            (self.ui.leMinimumValue, self.set_minLogValue),
-            (self.ui.leMaximumValue, self.set_maxLogValue),
-            (self.ui.leStepSize, None),
-            (self.ui.leValueTolerance, None),
-            (self.ui.leTimeTolerance, None),
-            (self.ui.leIncidentEnergy, None),
-        ]
-
-        for edit in self.doubleLineEdits:
-            edit[0].setValidator(self.dvalidator)
-            edit[0].callback = edit[1]
-        self.connect_signals()
 
         # Set up for filtering (advanced setup)
         self._tofcorrection = False
@@ -198,298 +194,51 @@ class MainWindow(QMainWindow):
         # register startup
         mantid.UsageService.registerFeatureUsage(mantid.kernel.FeatureType.Interface, "EventFilter", False)
 
-    def on_mouseDownEvent(self, event):
+    def draw_callback(self, _):
+        for marker in self.markers:
+            marker.redraw()
+
+    def on_mouse_press(self, event):
         """Respond to pick up a value with mouse down event"""
-        x = event.xdata
-        y = event.ydata
+        x, y = event.xdata, event.ydata
+        for marker in self.markers:
+            marker.mouse_move_start(x, y)
 
-        if x is not None and y is not None:
-            msg = "You've clicked on a bar with coords:\n %f, %f" % (x, y)
-            QMessageBox.information(self, "Click!", msg)
+    def on_mouse_move(self, event):
+        x, y = event.xdata, event.ydata
+        if x and y:
+            self.ui.label_xy.setText(f"(x,y)=({x:.3f},{y:.3f})")
+        for marker, (min_edit, max_edit) in zip(self.markers, self.marker_line_edits):
+            if marker.mouse_move(x, y):
+                val_min, val_max = marker.get_range()
+                min_edit.setText(f"{val_min:.6f}")
+                max_edit.setText(f"{val_max:.6f}")
+        self.canvas.draw_idle()
 
-    def reformat(self):
-        self.sender().setText(f"{float(self.sender().text()):.6f}")
+    def on_mouse_release(self, _):
+        """Respond to release mouse event"""
+        for marker, line_edits, lim_func in zip(
+            self.markers, self.marker_line_edits, [self.ui.mainplot.get_xlim, self.ui.mainplot.get_ylim]
+        ):
+            if marker.is_marker_moving():
+                marker.mouse_move_stop()
+                self.update_line_edits(*line_edits, lim_func(), marker)
 
-    def callback(self):
-        sender_edit = getattr(self.ui, self.sender().objectName())
-        if sender_edit.callback is not None:
-            sender_edit.callback()
+    def update_marker_range(self):
+        """Update marker range based on new values on connected line edits"""
+        try:
+            idx = int(self.sender().objectName() in ["leMinimumValue", "leMaximumValue"])
+            marker = self.markers[idx]
+            min_edit, max_edit = self.marker_line_edits[idx]
 
-    def populate_line_edits_default(self):
-        ylim = self.ui.mainplot.get_ylim()
-        xlim = self.ui.mainplot.get_xlim()
+            start = float(min_edit.text())
+            stop = float(max_edit.text())
 
-        self.ui.leStartTime.setText(f"{xlim[0]:.6f}")
-        self.ui.leStopTime.setText(f"{xlim[1]:.6f}")
-        self.ui.leMinimumValue.setText(f"{ylim[0]:.6f}")
-        self.ui.leMaximumValue.setText(f"{ylim[1]:.6f}")
-
-    def computeMock(self):
-        """Compute vecx and vecy as mocking"""
-        x0 = 0.0
-        xf = 1.0
-        dx = 0.1
-
-        vecx = []
-        vecy = []
-
-        x = x0
-        while x < xf:
-            y = 0.0
-            vecx.append(x)
-            vecy.append(y)
-            x += dx
-
-        xlim = [x0, xf]
-        ylim = [-1.0, 1]
-
-        return (vecx, vecy, xlim, ylim)
-
-    def move_leftSlider(self):
-        """Re-setup left range line in figure.
-        Triggered by a change in Qt Widget.  NO EVENT is required.
-        """
-        newx = self.ui.horizontalSlider.value()
-
-        if newx <= self._rightSlideValue and newx != self._leftSlideValue:
-            # Allowed value: move the value bar
-            self._leftSlideValue = newx
-
-            # Move the vertical line
-            xlim = self.ui.mainplot.get_xlim()
-
-            if self.ui.leStopTime.text():
-                newx = min(xlim[0] + newx * (xlim[1] - xlim[0]) * 0.01, float(self.ui.leStopTime.text()))
-            else:
-                newx = xlim[0] + newx * (xlim[1] - xlim[0]) * 0.01
-
-            leftx = [newx, newx]
-            lefty = self.ui.mainplot.get_ylim()
-            setp(self.leftslideline, xdata=leftx, ydata=lefty)
-            self.canvas.draw()
-
-            # Change value
-            self.ui.leStartTime.setText(f"{newx:.6f}")
-
-        else:
-            # Reset the value to original value
-            self.ui.horizontalSlider.setValue(self._leftSlideValue)
-
-    def set_startTime(self):
-        """Set the starting time and left slide bar"""
-        inps = float(self.ui.leStartTime.text())
-        info_msg = "Starting time = %s" % inps
-        Logger("Filter_Events").information(info_msg)
-
-        xlim = self.ui.mainplot.get_xlim()
-        # Set value to valid range
-        newtime0 = np.clip(inps, xlim[0], float(self.ui.leStopTime.text()))
-        # Convert to integer slide value
-        ileftvalue = np.clip(int((newtime0 - xlim[0]) / (xlim[1] - xlim[0]) * 100), 0, self._rightSlideValue)
-        debug_msg = "iLeftSlide = %s" % str(ileftvalue)
-        Logger("Filter_Events").debug(debug_msg)
-
-        info_msg = "Corrected iLeftSlide = {} (vs. right = {})".format(ileftvalue, self._rightSlideValue)
-        Logger("Filter_Events").information(info_msg)
-
-        # Move the slide bar (left)
-        self._leftSlideValue = ileftvalue
-
-        # Move the vertical line
-        leftx = [newtime0, newtime0]
-        lefty = self.ui.mainplot.get_ylim()
-        setp(self.leftslideline, xdata=leftx, ydata=lefty)
-        self.canvas.draw()
-
-        # Set the value to left slider
-        self.ui.horizontalSlider.setValue(self._leftSlideValue)
-        # Reset the value of line edit
-        if newtime0 != inps:
-            self.ui.leStartTime.setText(f"{newtime0:.6f}")
-
-    def move_rightSlider(self):
-        """Re-setup left range line in figure.
-        Triggered by a change in Qt Widget.  NO EVENT is required.
-        """
-        newx = self.ui.horizontalSlider_2.value()
-        if newx >= self._leftSlideValue and newx != self._rightSlideValue:
-            # Allowed value: move the value bar
-            self._rightSlideValue = newx
-
-            xlim = self.ui.mainplot.get_xlim()
-
-            if self.ui.leStartTime.text():
-                # that is not entirely fool proof, as the user could still remove the value in the field after putting
-                # a non round percent, but this a) is unlikely and b) will not crash mantid, only show an artifact
-                newx = max(xlim[0] + newx * (xlim[1] - xlim[0]) * 0.01, float(self.ui.leStartTime.text()))
-            else:
-                newx = xlim[0] + newx * (xlim[1] - xlim[0]) * 0.01
-
-            leftx = [newx, newx]
-            lefty = self.ui.mainplot.get_ylim()
-            setp(self.rightslideline, xdata=leftx, ydata=lefty)
-            self.canvas.draw()
-
-            # Change value
-            self.ui.leStopTime.setText(f"{newx:.6f}")
-
-        else:
-            # Reset the value
-            self.ui.horizontalSlider_2.setValue(self._rightSlideValue)
-
-    def set_stopTime(self):
-        """Set the stopping time and right slide bar"""
-        inps = float(self.ui.leStopTime.text())
-        Logger("Filter_Events").information("Stopping time = {}".format(inps))
-
-        xlim = self.ui.mainplot.get_xlim()
-        # Set value to valid range
-        newtimef = np.clip(inps, float(self.ui.leStartTime.text()), xlim[1])
-        # Convert to integer slide value
-        irightvalue = np.clip(int((newtimef - xlim[0]) / (xlim[1] - xlim[0]) * 100), self._leftSlideValue, 100)
-        Logger("Filter_Events").information("iRightSlide = {}".format(irightvalue))
-
-        # Move the slide bar (right)
-        self._rightSlideValue = irightvalue
-
-        # Move the vertical line
-        rightx = [newtimef, newtimef]
-        righty = self.ui.mainplot.get_ylim()
-        setp(self.rightslideline, xdata=rightx, ydata=righty)
-        self.canvas.draw()
-
-        # Set the value to left slider
-        self.ui.horizontalSlider_2.setValue(self._rightSlideValue)
-
-        # Reset to line edit
-        if newtimef != inps:
-            self.ui.leStopTime.setText(f"{newtimef:.6f}")
-
-    def move_lowerSlider(self):
-        """Re-setup upper range line in figure.
-        Triggered by a change in Qt Widget.  NO EVENT is required.
-        """
-        inewy = self.ui.verticalSlider_2.value()
-        debug_msg = "LowerSlFider is set with value {} vs. class variable {}".format(inewy, self._lowerSlideValue)
-        Logger("Filter_Events").debug(debug_msg)
-
-        # Return with no change
-        if inewy == self._lowerSlideValue:
-            # No change
-            return
-
-        if inewy >= self._upperSlideValue:
-            # Out of upper range
-            inewy = self._upperSlideValue - 1
-
-        setLineEdit = inewy != 0 or self._lowerSlideValue >= 0
-
-        # Move the lower vertical bar
-        ylim = self.ui.mainplot.get_ylim()
-        newy = ylim[0] + inewy * (ylim[1] - ylim[0]) * 0.01
-        lowerx = self.ui.mainplot.get_xlim()
-        lowery = [newy, newy]
-        setp(self.lowerslideline, xdata=lowerx, ydata=lowery)
-        self.canvas.draw()
-
-        # Set line edit input
-        if setLineEdit is True:
-            # Change value to line edit (5)
-            self.ui.leMinimumValue.setText(f"{newy:.6f}")
-            # Reset the class variable
-            self._lowerSlideValue = inewy
-
-    def set_minLogValue(self):
-        """Set the starting time and left slide bar"""
-        inps = float(self.ui.leMinimumValue.text())
-        debug_msg = "Minimum Log Value = {}".format(self.ui.leMinimumValue.text())
-        Logger("Filter_Events").debug(debug_msg)
-
-        ylim = self.ui.mainplot.get_ylim()
-        # Set value to valid range
-        newminY = np.clip(inps, ylim[0], float(self.ui.leMaximumValue.text()))
-        # Convert to integer slide value
-        iminlogval = np.clip(int((newminY - ylim[0]) / (ylim[1] - ylim[0]) * 100), 0, self._upperSlideValue)
-        Logger("Filter_Events").debug("ilowerSlide = {}".format(iminlogval))
-
-        # Move the vertical line
-        lowerx = self.ui.mainplot.get_xlim()
-        lowery = [newminY, newminY]
-        setp(self.lowerslideline, xdata=lowerx, ydata=lowery)
-        self.canvas.draw()
-
-        # Move the slide bar (lower)
-        self._lowerSlideValue = iminlogval
-        debug_msg = "LineEdit5 set slide to {}".format(self._lowerSlideValue)
-        Logger("Filter_Events").debug(debug_msg)
-        self.ui.verticalSlider_2.setValue(self._lowerSlideValue)
-
-        # Reset line Edit if using default
-        if newminY != inps:
-            self.ui.leMinimumValue.setText(f"{newminY:.6f}")
-
-    def move_upperSlider(self):
-        """Re-setup upper range line in figure.
-        Triggered by a change in Qt Widget.  NO EVENT is required.
-        """
-        inewy = self.ui.verticalSlider.value()
-
-        # Return w/o change
-        if inewy == self._upperSlideValue:
-            return
-
-        # Set to boundary value
-        if inewy <= self._lowerSlideValue:
-            inewy = self._lowerSlideValue + 1
-
-        # Reset line editor?
-        if inewy == 100 and self._upperSlideValue > 100:
-            setLineEdit = False
-        else:
-            setLineEdit = True
-
-        # Move the upper value bar: upperx and uppery are
-        # real value (float but not (0,100)) of the figure
-        ylim = self.ui.mainplot.get_ylim()
-        newy = ylim[0] + inewy * (ylim[1] - ylim[0]) * 0.01
-        upperx = self.ui.mainplot.get_xlim()
-        uppery = [newy, newy]
-        setp(self.upperslideline, xdata=upperx, ydata=uppery)
-        self.canvas.draw()
-
-        # Change value
-        if setLineEdit:
-            self.ui.leMaximumValue.setText(f"{newy:.6f}")
-            self._upperSlideValue = inewy
-
-    def set_maxLogValue(self):
-        """Set maximum log value from line-edit"""
-        inps = float(self.ui.leMaximumValue.text())
-        debug_msg = "Maximum Log Value = {}".format(inps)
-        Logger("Filter_Events").debug(debug_msg)
-
-        ylim = self.ui.mainplot.get_ylim()
-        # Set value to valid range
-        newmaxY = np.clip(inps, float(self.ui.leMinimumValue.text()), ylim[1])
-        # Convert to integer slide value
-        imaxlogval = np.clip(int((newmaxY - ylim[0]) / (ylim[1] - ylim[0]) * 100), self._lowerSlideValue, 100)
-
-        debug_msg = "iUpperSlide = {}".format(imaxlogval)
-        Logger("Filter_Events").debug(debug_msg)
-
-        # Move the vertical line
-        upperx = self.ui.mainplot.get_xlim()
-        uppery = [newmaxY, newmaxY]
-        setp(self.upperslideline, xdata=upperx, ydata=uppery)
-        self.canvas.draw()
-
-        # Set the value to upper slider
-        self._upperSlideValue = imaxlogval
-        self.ui.verticalSlider.setValue(self._upperSlideValue)
-
-        # Set the value to editor if necessary
-        if newmaxY != inps:
-            self.ui.leMaximumValue.setText(f"{newmaxY:.6f}")
+            # Set value to valid range
+            marker.set_range(start, stop)
+            self.canvas.draw_idle()
+        except ValueError:
+            Logger("Filter_Events").information("Incorrect value in start or stop time")
 
     def browse_File(self):
         """Open a file dialog to get file"""
@@ -557,38 +306,8 @@ class MainWindow(QMainWindow):
         vecvalue = np.append(vecvalue, vecvalue[-1])
 
         vecreltimes = (vectimes - t0) / np.timedelta64(1, "s")
-
-        # Set to plot
-        self.disconnect_signals()
-        xlim = [vecreltimes.min(), vecreltimes.max()]
-        ylim = [vecvalue.min(), vecvalue.max()]
-        self.ui.mainplot.set_xlim(xlim[0], xlim[1])
-        self.ui.mainplot.set_ylim(ylim[0], ylim[1])
-
-        setp(self.mainline, xdata=vecreltimes, ydata=vecvalue)
-
         samunit = samplelog.units
-        if len(samunit) == 0:
-            ylabel = logname
-        else:
-            ylabel = "%s (%s)" % (logname, samunit)
-        self.ui.mainplot.set_ylabel(ylabel, fontsize=13)
-
-        # assume that all logs are on almost same X-range.  Only Y need to be reset
-        setp(self.leftslideline, ydata=ylim)
-        setp(self.rightslideline, ydata=ylim)
-
-        # reset the log value limit as previous one does not make any sense
-        setp(self.lowerslideline, xdata=xlim, ydata=[ylim[0], ylim[0]])
-        self._lowerSlideValue = 0
-        self.ui.verticalSlider_2.setValue(self._lowerSlideValue)
-
-        setp(self.upperslideline, xdata=xlim, ydata=[ylim[1], ylim[1]])
-        self._upperSlideValue = 100
-        self.ui.verticalSlider.setValue(self._upperSlideValue)
-        self.populate_line_edits_default()
-        self.connect_signals()
-        self.canvas.draw()
+        self.update_plot(vecreltimes, vecvalue, y_label=logname if len(samunit) == 0 else "%s (%s)" % (logname, samunit))
 
         # Load property's statistic and give suggestion on parallel and fast log
         timeavg = self._dataWS.getRun().getTimeAveragedValue(logname)
@@ -794,37 +513,10 @@ class MainWindow(QMainWindow):
         vecx = sumws.readX(0)
         vecy = sumws.readY(0)
 
-        # if there is only one xbin in the summed workspace, that means we have an evetn file without pulse,
+        # if there is only one xbin in the summed workspace, that means we have an event file without pulse,
         # and in this case we use the original workspace time limits
-        if len(vecx) == 1:
-            xmin = min(wksp.readX(0)) / 1000000
-            xmax = max(wksp.readX(0)) / 1000000
-        else:
-            xmin = min(vecx)
-            xmax = max(vecx)
-
-        ymin = min(vecy)
-        ymax = max(vecy)
-
-        # Reset graph
-        self.ui.mainplot.set_xlim(xmin, xmax)
-        self.ui.mainplot.set_ylim(ymin, ymax)
-
-        self.ui.mainplot.set_xlabel("Time (seconds)")
-        self.ui.mainplot.set_ylabel("Counts")
-
-        # Set up main line
-        setp(self.mainline, xdata=vecx, ydata=vecy)
-
-        # Reset slide
-        newslidery = [min(vecy), max(vecy)]
-
-        newleftx = xmin + (xmax - xmin) * self._leftSlideValue * 0.01
-        setp(self.leftslideline, xdata=[newleftx, newleftx], ydata=newslidery)
-
-        newrightx = xmin + (xmax - xmin) * self._rightSlideValue * 0.01
-        setp(self.rightslideline, xdata=[newrightx, newrightx], ydata=newslidery)
-        self.canvas.draw()
+        xlim = [min(wksp.readX(0) / 1000000), max(wksp.readX(0) / 1000000)] if len(vecx) == 1 else [min(vecx), max(vecx)]
+        self.update_plot(vecx, vecy, "Time(s)", "Counts", xlim)
 
     def filterByTime(self):
         """Filter by time"""
@@ -1027,39 +719,14 @@ class MainWindow(QMainWindow):
             url = "http://docs.mantidproject.org/nightly/interfaces/{}.html".format("Filter Events")
             QDesktopServices.openUrl(QUrl(url))
 
-    def connect_signals(self):
-        for edit in self.doubleLineEdits:
-            edit[0].editingFinished.connect(self.reformat)
-            edit[0].editingFinished.connect(self.callback)
-
-    def disconnect_signals(self):
-        for edit in self.doubleLineEdits:
-            edit[0].editingFinished.disconnect(self.reformat)
-            edit[0].editingFinished.disconnect(self.callback)
-
     def _resetGUI(self, resetfilerun=False):
-        """Reset GUI including all text edits and etc."""
+        """Reset GUI elements."""
         if resetfilerun is True:
             self.ui.lineEdit.clear()
 
         # Plot related
-        self.disconnect_signals()
-        self.ui.horizontalSlider.setValue(0)
-        self.ui.horizontalSlider_2.setValue(100)
-        self.ui.verticalSlider_2.setValue(0)
-        self.ui.verticalSlider.setValue(100)
-        self.populate_line_edits_default()
         self.ui.lineEdit_outwsname.clear()
         self.ui.lineEdit_title.clear()
-        self.connect_signals()
-
-        ylim = self.ui.mainplot.get_ylim()
-        miny = ylim[0]
-        maxy = ylim[1]
-        xlim = self.ui.mainplot.get_xlim()
-        setp(self.lowerslideline, xdata=xlim, ydata=[miny, miny])
-        setp(self.upperslideline, xdata=xlim, ydata=[maxy, maxy])
-
         self.ui.leStepSize.clear()
         self.ui.leValueTolerance.clear()
         self.ui.leTimeTolerance.clear()
@@ -1079,5 +746,45 @@ class MainWindow(QMainWindow):
         self.ui.checkBox_filterByPulse.setCheckState(False)
         self.ui.checkBox_from1.setCheckState(False)
         self.ui.checkBox_groupWS.setCheckState(True)
+
+        self.canvas.draw()
+
+    def update_line_edits(self, min_edit, max_edit, lims, marker):
+        min_edit.validator().setRange(lims[0], marker.get_maximum(), 6)
+        min_marker = marker.get_minimum()
+        min_edit.validator().last_value = min_marker
+        min_edit.setText(f"{min_marker:.6f}")
+
+        max_edit.validator().setRange(marker.get_minimum(), lims[1], 6)
+        max_marker = marker.get_maximum()
+        max_edit.validator().last_value = max_marker
+        max_edit.setText(f"{max_marker:.6f}")
+
+    def update_plot(self, x_data, y_data, x_label="Time(s)", y_label="Counts", xlim=None, ylim=None):
+        """Updates the plot line, the marker positions and the edits linked to the markers"""
+
+        def calculate_limit(data):
+            min_lim, max_lim = min(data), max(data)
+            delta = 1e-4
+            if (abs(max_lim - min_lim)) < delta:  # to avoid matplotlib warning and for visibility
+                padding = max(delta, delta * abs(max_lim - min_lim))
+                min_lim -= padding
+                max_lim += padding
+            return [min_lim, max_lim]
+
+        xlim = calculate_limit(x_data) if not xlim else xlim
+        ylim = calculate_limit(y_data) if not ylim else ylim
+
+        setp(self.mainline, xdata=x_data, ydata=y_data)
+        self.ui.mainplot.set_xlim(*xlim)
+        self.ui.mainplot.set_ylim(*ylim)
+        self.ui.mainplot.set_ylabel(y_label, fontsize=10)
+        self.ui.mainplot.set_xlabel(x_label, fontsize=10)
+        for marker, edits, lims in zip(self.markers, self.marker_line_edits, [xlim, ylim]):
+            min_marker_pos = lims[0] + 0.1 * (abs(lims[1] - lims[0]))
+            max_marker_pos = lims[1] - 0.1 * (abs(lims[1] - lims[0]))
+            marker.set_bounds(lims[0], lims[1])
+            marker.set_range(min_marker_pos, max_marker_pos)
+            self.update_line_edits(*edits, lims, marker)
 
         self.canvas.draw()

@@ -1034,9 +1034,7 @@ void InstrumentWidget::saveSettings() {
   settings.endGroup();
 }
 
-void InstrumentWidget::helpClicked() {
-  HelpWindow::showPage(std::string("qthelp://org.mantidproject/doc/workbench/instrumentviewer.html"));
-}
+void InstrumentWidget::helpClicked() { HelpWindow::showPage(std::string("workbench/instrumentviewer.html")); }
 
 void InstrumentWidget::set3DAxesState(bool on) {
   auto p3d = std::dynamic_pointer_cast<Projection3D>(getSurface());

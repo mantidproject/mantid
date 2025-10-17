@@ -12,12 +12,14 @@ GIT_USER_EMAIL="mantid-buildserver@mantidproject.org"
 
 # Install conda and environment
 setup_mamba $WORKSPACE/miniforge "docs-build" true ""
-mamba install -c ${CONDA_LABEL} --yes mantid-developer mantidqt rsync
+mamba install -c ${CONDA_LABEL} -c neutrons --yes mantid-developer mantidqt rsync
 
 # Configure a clean build directory
 rm -rf build
 mkdir build && cd build
 
+# unset LD_PRELOAD as this causes cmake to segfault
+LD_PRELOAD="" \
 # Generate build files
 cmake -G Ninja \
   -DMANTID_FRAMEWORK_LIB=SYSTEM \

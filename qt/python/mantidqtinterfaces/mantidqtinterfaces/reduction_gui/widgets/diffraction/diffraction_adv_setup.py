@@ -262,7 +262,7 @@ class AdvancedSetupWidget(BaseWidget):
         dialog.exec_()
 
     def _show_concept_help(self, concept):
-        InterfaceManager().showHelpPage(f"qthelp://org.sphinx.mantidproject/doc/concepts/{concept}.html")
+        InterfaceManager().showHelpPage(f"concepts/{concept}.html")
 
     def _syncStripVanPeakWidgets(self, stripvanpeak):
         """Synchronize the other widgets with vanadium peak"""
