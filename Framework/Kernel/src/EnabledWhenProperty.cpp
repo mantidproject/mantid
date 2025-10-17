@@ -14,6 +14,7 @@
 
 #include <exception>
 #include <memory>
+#include <set>
 #include <stdexcept>
 
 using namespace Mantid::Kernel;

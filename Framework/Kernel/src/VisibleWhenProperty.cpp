@@ -7,6 +7,7 @@
 #include "MantidKernel/VisibleWhenProperty.h"
 
 #include <memory>
+#include <set>
 #include <stdexcept>
 
 namespace Mantid::Kernel {
