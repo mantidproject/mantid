@@ -203,6 +203,7 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         mock_peak_overlay_points.return_value = [[DetectorPeaks([Peak(50, np.zeros(3), (1, 1, 1), 100, 1000)])]]
         mock_picked_detector_ids.return_value = [50]
         self._mock_view.current_selected_unit.return_value = self._presenter._TIME_OF_FLIGHT
+        self._presenter._update_peaks_workspaces()
         self._presenter.refresh_lineplot_peaks()
         mock_peak_overlay_points.assert_called_once()
         self._mock_view.clear_lineplot_overlays.assert_called_once()
@@ -218,6 +219,7 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         mock_peak_overlay_points.return_value = [[DetectorPeaks([Peak(50, np.zeros(3), (1, 1, 1), 100, 1000)])]]
         mock_picked_detector_ids.return_value = []
         self._mock_view.current_selected_unit.return_value = self._presenter._TIME_OF_FLIGHT
+        self._presenter._update_peaks_workspaces()
         self._presenter.refresh_lineplot_peaks()
         mock_peak_overlay_points.assert_called_once()
         self._mock_view.clear_lineplot_overlays.assert_called_once()

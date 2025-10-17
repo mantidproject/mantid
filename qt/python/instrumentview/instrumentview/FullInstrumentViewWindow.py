@@ -23,7 +23,7 @@ from qtpy.QtWidgets import (
     QListWidgetItem,
     QAbstractItemView,
 )
-from qtpy.QtGui import QPalette, QDoubleValidator, QMovie, QDragEnterEvent, QDropEvent, QDragMoveEvent
+from qtpy.QtGui import QDoubleValidator, QMovie, QDragEnterEvent, QDropEvent, QDragMoveEvent, QColor, QPalette
 from qtpy.QtCore import Qt, QEvent, QSize
 from superqt import QDoubleRangeSlider
 from pyvistaqt import BackgroundPlotter
@@ -299,6 +299,7 @@ class FullInstrumentViewWindow(QMainWindow):
         for unit in self._presenter.available_unit_options():
             self._units_combo_box.addItem(unit)
         self._integration_limit_group_box.setTitle(self._presenter.workspace_display_unit)
+        self.main_plotter.set_color_cycler(self._presenter._COLOURS)
         self.refresh_peaks_ws_list()
 
     def setup_connections_to_presenter(self) -> None:
@@ -352,7 +353,9 @@ class FullInstrumentViewWindow(QMainWindow):
 
         self._peak_ws_list.blockSignals(True)
         self._peak_ws_list.clear()
-        for peaks_ws in self._presenter.peaks_workspaces_in_ads():
+        peaks_workspaces = self._presenter.peaks_workspaces_in_ads()
+        for peaks_ws_index in range(len(peaks_workspaces)):
+            peaks_ws = peaks_workspaces[peaks_ws_index]
             list_item = QListWidgetItem(peaks_ws, self._peak_ws_list)
             if peaks_ws in current_checked_peak_workspaces:
                 list_item.setCheckState(Qt.Checked)
@@ -360,6 +363,16 @@ class FullInstrumentViewWindow(QMainWindow):
                 list_item.setCheckState(Qt.Unchecked)
         self._peak_ws_list.blockSignals(False)
         self._peak_ws_list.adjustSize()
+
+    def refresh_peaks_ws_list_colours(self) -> None:
+        picked_index = 0
+        for list_i in range(self._peak_ws_list.count()):
+            list_item = self._peak_ws_list.item(list_i)
+            if list_item.checkState() > 0:
+                list_item.setForeground(QColor(self._presenter._COLOURS[picked_index % len(self._presenter._COLOURS)]))
+                picked_index += 1
+            else:
+                list_item.setForeground(self._peak_ws_list.palette().color(QPalette.Text))
 
     def set_unit_combo_box_index(self, index: int) -> None:
         self._units_combo_box.setCurrentIndex(index)
@@ -557,11 +570,10 @@ class FullInstrumentViewWindow(QMainWindow):
         for text in self._detector_spectrum_axes.texts:
             text.remove()
 
-    def plot_overlay_mesh(self, position_groups: np.ndarray, labels: list[str]) -> None:
-        multi_block_mesh = pv.MultiBlock([pv.PolyData(p) for p in position_groups])
-        points_actor = self.main_plotter.add_points(multi_block_mesh, multi_colors=True, point_size=15, render_points_as_spheres=True)
+    def plot_overlay_mesh(self, positions: np.ndarray, labels: list[str], colour: str) -> None:
+        points_actor = self.main_plotter.add_points(positions, color=colour, point_size=15, render_points_as_spheres=True)
         labels_actor = self.main_plotter.add_point_labels(
-            np.concatenate(position_groups),
+            positions,
             labels,
             font_size=15,
             font_family="times",
@@ -572,11 +584,11 @@ class FullInstrumentViewWindow(QMainWindow):
         )
         self._overlay_meshes.append((points_actor, labels_actor))
 
-    def plot_lineplot_overlay(self, x_values: list[float], labels: list[str]) -> None:
+    def plot_lineplot_overlay(self, x_values: list[float], labels: list[str], colour: str) -> None:
         for x, label in zip(x_values, labels):
-            self._lineplot_overlays.append(self._detector_spectrum_axes.axvline(x, color="red", linestyle="--"))
+            self._lineplot_overlays.append(self._detector_spectrum_axes.axvline(x, color=colour, linestyle="--"))
             self._detector_spectrum_axes.text(
-                x, 1.1, label, transform=self._detector_spectrum_axes.get_xaxis_transform(), color="red", ha="center", va="top", fontsize=8
+                x, 1.1, label, transform=self._detector_spectrum_axes.get_xaxis_transform(), color=colour, ha="center", va="top", fontsize=8
             )
 
     def redraw_lineplot(self) -> None:

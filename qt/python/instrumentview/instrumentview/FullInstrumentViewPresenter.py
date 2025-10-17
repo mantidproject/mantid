@@ -14,7 +14,7 @@ from mantid.kernel import logger
 from instrumentview.FullInstrumentViewModel import FullInstrumentViewModel
 from instrumentview.FullInstrumentViewWindow import FullInstrumentViewWindow
 from instrumentview.InstrumentViewADSObserver import InstrumentViewADSObserver
-from instrumentview.Peaks.DetectorPeaks import DetectorPeaks
+from instrumentview.Peaks.WorkspaceDetectorPeaks import WorkspaceDetectorPeaks
 
 
 class FullInstrumentViewPresenter:
@@ -34,6 +34,8 @@ class FullInstrumentViewPresenter:
     _WAVELENGTH = "Wavelength"
     _MOMENTUM_TRANSFER = "MomentumTransfer"
     _UNIT_OPTIONS = [_TIME_OF_FLIGHT, _D_SPACING, _WAVELENGTH, _MOMENTUM_TRANSFER]
+
+    _COLOURS = ["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf"]
 
     def __init__(self, view: FullInstrumentViewWindow, model: FullInstrumentViewModel):
         """For the given workspace, use the data from the model to plot the detectors. Also include points at the origin and
@@ -58,11 +60,8 @@ class FullInstrumentViewPresenter:
 
         self._counts_label = "Integrated Counts"
         self._visible_label = "Visible Picked"
-
         self._view.show_axes()
-
         self._is_projection_selected = False
-
         self.on_projection_option_selected(default_index)
 
         if self._model.workspace_x_unit in self._UNIT_OPTIONS:
@@ -212,6 +211,7 @@ class FullInstrumentViewPresenter:
         self._model.extract_spectra_for_line_plot(unit, self._view.sum_spectra_selected())
         self._view.show_plot_for_detectors(self._model.line_plot_workspace)
         self._view.set_selected_detector_info(self._model.picked_detectors_info_text())
+        self._update_peaks_workspaces()
         self.refresh_lineplot_peaks()
 
     def on_clear_selected_detectors_clicked(self) -> None:
@@ -273,44 +273,48 @@ class FullInstrumentViewPresenter:
     def peaks_workspaces_in_ads(self) -> list[str]:
         return [ws.name() for ws in self._model.peaks_workspaces_in_ads()]
 
+    def _update_peaks_workspaces(self) -> None:
+        peaks_grouped_by_ws = []
+        points_from_model = self._model.peak_overlay_points()
+        for ws_index in range(len(points_from_model)):
+            peaks_grouped_by_ws.append(WorkspaceDetectorPeaks(points_from_model[ws_index], self._COLOURS[ws_index % len(self._COLOURS)]))
+        self._peaks_grouped_by_ws = peaks_grouped_by_ws
+
     def on_peaks_workspace_selected(self) -> None:
         self._model.set_peaks_workspaces(self._view.selected_peaks_workspaces())
         self._view.clear_overlay_meshes()
-        peaks_grouped_by_ws = self._model.peak_overlay_points()
-        self.refresh_lineplot_peaks(peaks_grouped_by_ws)
-        if len(peaks_grouped_by_ws) == 0:
+        self._update_peaks_workspaces()
+        self.refresh_lineplot_peaks()
+        self._view.refresh_peaks_ws_list_colours()
+        if len(self._peaks_grouped_by_ws) == 0:
             return
         # Keeping the points from each workspace separate so we can colour them differently
-        projected_points = [
-            self._adjust_points_for_selected_projection(
-                np.asarray([p.location for p in ws_peaks]), self._view.current_selected_projection()
+        for ws_peaks in self._peaks_grouped_by_ws:
+            projected_points = self._adjust_points_for_selected_projection(
+                np.asarray([p.location for p in ws_peaks.detector_peaks]), self._view.current_selected_projection()
             )
-            for ws_peaks in peaks_grouped_by_ws
-        ]
-        labels = [p.label for p in sum(peaks_grouped_by_ws, [])]
-        # Plot the peaks and their labels on the projection
-        self._view.plot_overlay_mesh(projected_points, labels)
+            labels = [p.label for p in ws_peaks.detector_peaks]
+            # Plot the peaks and their labels on the projection
+            self._view.plot_overlay_mesh(projected_points, labels, ws_peaks.colour)
 
-    def refresh_lineplot_peaks(self, peaks: list[list[DetectorPeaks]] = None) -> None:
+    def refresh_lineplot_peaks(self) -> None:
         # Plot vertical lines on the lineplot if the peak detector is selected
         self._view.clear_lineplot_overlays()
         if self._view.current_selected_unit() != self._TIME_OF_FLIGHT and self._view.current_selected_unit() != self._D_SPACING:
             self._view.redraw_lineplot()
             return
 
-        if peaks is None:
-            peaks = self._model.peak_overlay_points()
-        peaks_concat = sum(peaks, [])
-        x_values = []
-        labels = []
-        for peak in peaks_concat:
-            if peak.detector_id in self._model.picked_detector_ids:
-                x_values += (
-                    [p.tof for p in peak.peaks]
-                    if self._view.current_selected_unit() == self._TIME_OF_FLIGHT
-                    else [p.dspacing for p in peak.peaks]
-                )
-                labels += [p.label for p in peak.peaks]
-        if len(x_values) > 0:
-            self._view.plot_lineplot_overlay(x_values, labels)
+        for ws_peaks in self._peaks_grouped_by_ws:
+            x_values = []
+            labels = []
+            for peak in ws_peaks.detector_peaks:
+                if peak.detector_id in self._model.picked_detector_ids:
+                    x_values += (
+                        [p.tof for p in peak.peaks]
+                        if self._view.current_selected_unit() == self._TIME_OF_FLIGHT
+                        else [p.dspacing for p in peak.peaks]
+                    )
+                    labels += [p.label for p in peak.peaks]
+            if len(x_values) > 0:
+                self._view.plot_lineplot_overlay(x_values, labels, ws_peaks.colour)
         self._view.redraw_lineplot()

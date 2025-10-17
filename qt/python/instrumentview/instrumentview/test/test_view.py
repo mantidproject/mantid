@@ -180,7 +180,7 @@ class TestFullInstrumentViewWindow(unittest.TestCase):
 
     def test_plot_overlay_mesh(self):
         position_groups = [[0, 0, 0]]
-        self._view.plot_overlay_mesh(position_groups, MagicMock())
+        self._view.plot_overlay_mesh(position_groups, MagicMock(), "colour")
         self._view.main_plotter.add_points.assert_called_once()
         self._view.main_plotter.add_point_labels.assert_called_once()
         self.assertEqual(1, len(self._view._overlay_meshes))
@@ -189,7 +189,7 @@ class TestFullInstrumentViewWindow(unittest.TestCase):
         x_values = [1.0, 2.0]
         labels = ["a", "b"]
         self._view._detector_spectrum_axes = MagicMock()
-        self._view.plot_lineplot_overlay(x_values, labels)
+        self._view.plot_lineplot_overlay(x_values, labels, "colour")
         self.assertEqual(2, self._view._detector_spectrum_axes.text.call_count)
         self.assertEqual(2, len(self._view._lineplot_overlays))
 
