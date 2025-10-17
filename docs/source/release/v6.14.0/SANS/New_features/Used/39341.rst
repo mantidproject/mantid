@@ -1,2 +1,0 @@
-- The option to specify a separate scale factor for the High Angle Bank on compatible instruments (such as LOQ and
-  SANS2D) has been added to the :ref:`sans_toml_v1-ref`.

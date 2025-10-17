@@ -1,1 +1,0 @@
-- ``mslice`` is now an optional dependancy of the ``mantidworkbench`` conda package and must be explicitly installed when required in a conda environment. Full/standalone installers and IDAaaS installations remain unchanged; mslice will be automatically provided there.

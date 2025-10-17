@@ -1,2 +1,0 @@
-- The crosshair button is now enabled in tiled plots(subplots).
-- The crosshair has now been optimized using matplotlib's blitting function for fast rendering. It can very closely tracks mouse movement with minimal lag now.

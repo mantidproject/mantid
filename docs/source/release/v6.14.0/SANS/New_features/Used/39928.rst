@@ -1,1 +1,0 @@
-- A new ANSTO :ref:Bilby loader `LoadBBY <algm-LoadBBY2>` for the new Bilby file format that supports time stamped events.

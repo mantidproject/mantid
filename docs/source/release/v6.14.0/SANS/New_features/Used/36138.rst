@@ -1,1 +1,0 @@
-- New algorithm :ref:`algm-DetermineSpinStateOrder` which takes a Polarised SANS transmission run and attempts to determine the spin state for each run period.

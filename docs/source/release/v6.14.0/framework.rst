@@ -38,54 +38,23 @@ New features
 ############
 - Performance optimisations have been made to the process of adding ties to a fit function.
 
-Bugfixes
-############
-
-
-Deprecated
-############
-
-
-Removed
-############
-
-
 
 Data Objects
 ------------
-
-New features
-############
-
 
 Bugfixes
 ############
 - When loading monitors with period data using :ref:`LoadNexusMonitors v2 <algm-LoadNexusMonitors-v2>`, period sample logs are now added to the resultant workspace; this is in line with the creation of Event Workspaces. This fixes a bug that occurred when :ref:`algm-NormaliseByCurrent` was used on the monitor workspace.
 - Inconsistencies sometimes occur in period-related logs within Event NeXus files, such as duplicated entries with the same timestamps. Therefore, these repeated entries are reduced to a single entry. This can lead to runtime errors when loading the file which, in the past, have lead to crashes. In order to prevent this, the event workspace is now created without the period logs if issues are detected.
 
-Live Data
----------
-
-New features
-############
 
 Python
 ------
 
 New features
 ############
-- The large offline documentation is now an optional install, reducing installer/download size significantly.
-
-  - For users who frequently access online docs or have bandwidth constraints, this saves considerable disk space (potentially hundreds of MB).
-  - Those who prefer local/offline usage can still opt to install the documentation package and continue working without internet access.
-  - A clear indicator has been added to the Help Window's toolbar to show whether Mantid is displaying ``Local Docs`` or ``Online Docs``.
-  - Greater flexibility in how Mantid is set up — you choose whether to save space or have full local, offline docs.
+- The large offline documentation is now an optional install, reducing installer/download size significantly. For users that prefer online docs, this saves considerable disk space (potentially hundreds of MB). Those who prefer local/offline usage can still opt to install the documentation package and continue working without internet access. A clear indicator has been added to the Help Window's toolbar to show whether Mantid is displaying ``Local Docs`` or ``Online Docs``.
 - Introduced a prototype "side-by-side" help system that includes both the legacy QtHelp-based viewer and a new Python-based Help Window using an embedded web browser (QWebEngine) to display documentation within Mantid Workbench.
-
-  - Enhances the visual appearance and usability of in-app documentation.
-  - Supports richer HTML content and modern formatting, including MathJax for rendering mathematical equations.
-  - Delivers a smoother and more consistent experience when navigating help and reference material.
-  - Improved clarity for technical content (e.g. math and tables), more attractive and readable pages, and future potential for interactive elements in documentation.
 - macOS users with Apple Silicon (Arm-based architecture) are now warned if they have installed the Intel-based Mantid package.
 - Created :ref:`PythonObjectProperty <PythonObjectProperty>`, which allows using generic python objects as inputs to algorithms defined through the python API.
 - Created :ref:`PythonObjectTypeValidator <PythonObjectTypeValidator>` for use with :ref:`PythonObjectProperty <PythonObjectProperty>`, to enforce correct typing on python objects.
@@ -118,10 +87,6 @@ New features
   `github issue <https://github.com/mantidproject/mantid/issues/38332>`_ or by following the `Nexus tag <https://github.com/mantidproject/mantid/pulls?q=is%3Apr+is%3Aclosed+label%3ANexus>`_.
 - Pin build 2 of ``seekpath`` v2.1.0 which removes an erroneous dependency on the ``future`` package. ``seekpath`` is a dependency of ``euphonic``. ``future`` is not used and has a known vulnerability `CVE-2025-50817 <https://github.com/advisories/GHSA-xqrq-4mgf-ff32>`_ .
 - Updated header and source files for ADARA packets from v1.5.1 to v1.10.3
-
-Bugfixes
-############
-
 
 
 MantidWorkbench

@@ -1,1 +1,0 @@
-- When loading monitors with period data (``LoadNexusMonitors2``), period sample logs are now added to the resultant workspace; This is in line with the creation of Event Workspaces. This fixes a bug that occurred when ``NormaliseByCurrent`` was used on the monitor workspace.
