@@ -73,6 +73,7 @@ class FullInstrumentViewPresenter:
             rename_callback=self.rename_workspace_callback,
             clear_callback=self.clear_workspace_callback,
             replace_callback=self.replace_workspace_callback,
+            add_callback=self.add_workspace_callback,
         )
         self._view.hide_status_box()
 
@@ -236,20 +237,17 @@ class FullInstrumentViewPresenter:
         self.on_peaks_workspace_selected()
 
     def delete_workspace_callback(self, ws_name):
-        if ws_name in self.peaks_workspaces_in_ads():
-            self._reload_peaks_workspaces()
-            logger.warning(f"Workspace {ws_name} deleted, reloaded peaks workspaces in Experimental Instrument View.")
-        elif self._model._workspace.name() == ws_name:
+        if self._model._workspace.name() == ws_name:
             self._view.close()
             logger.warning(f"Workspace {ws_name} deleted, closed Experimental Instrument View.")
+        else:
+            self._reload_peaks_workspaces()
 
     def rename_workspace_callback(self, ws_old_name, ws_new_name):
-        if ws_old_name in self.peaks_workspaces_in_ads():
-            self._reload_peaks_workspaces()
-            logger.warning(f"Workspace {ws_old_name} renamed to {ws_new_name}, reloaded peaks workspaces in Experimental Instrument View.")
-        elif self._model._workspace.name() == ws_old_name:
+        if self._model._workspace.name() == ws_old_name:
             self._model._workspace = mtd[ws_new_name]
             logger.warning(f"Workspace {ws_old_name} renamed to {ws_new_name}, updated Experimental Instrument View.")
+        self._reload_peaks_workspaces()
 
     def clear_workspace_callback(self):
         self._view.close()
@@ -259,6 +257,9 @@ class FullInstrumentViewPresenter:
             self._reload_peaks_workspaces()
         elif ws_name == self._model.workspace.name():
             self._view.close()
+
+    def add_workspace_callback(self, ws_name, ws):
+        self._reload_peaks_workspaces()
 
     def handle_close(self):
         # The observers are unsubscribed on object deletion, it's safer to manually

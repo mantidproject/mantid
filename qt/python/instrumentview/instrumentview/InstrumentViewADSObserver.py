@@ -30,17 +30,19 @@ def _catch_exceptions(func):
 
 
 class InstrumentViewADSObserver(AnalysisDataServiceObserver):
-    def __init__(self, delete_callback, clear_callback, rename_callback, replace_callback):
+    def __init__(self, delete_callback, clear_callback, rename_callback, replace_callback, add_callback):
         super(InstrumentViewADSObserver, self).__init__()
         self.delete_callback = QAppThreadCall(delete_callback)
         self.clear_callback = QAppThreadCall(clear_callback)
         self.rename_callback = QAppThreadCall(rename_callback)
         self.replace_callback = QAppThreadCall(replace_callback)
+        self.add_callback = QAppThreadCall(add_callback)
 
         self.observeDelete(True)
         self.observeRename(True)
         self.observeClear(True)
         self.observeReplace(True)
+        self.observeAdd(True)
 
     @_catch_exceptions
     def deleteHandle(self, workspace_name, workspace):
@@ -75,3 +77,10 @@ class InstrumentViewADSObserver(AnalysisDataServiceObserver):
         Called when the ADS has been cleared, removes all data.
         """
         self.clear_callback()
+
+    @_catch_exceptions
+    def addHandle(self, wsName, ws):
+        """
+        Called when a workspace is added to the ADS
+        """
+        self.add_callback(wsName, ws)
