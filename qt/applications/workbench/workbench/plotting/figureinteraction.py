@@ -150,12 +150,12 @@ class FigureInteraction(object):
         if event.key == "k":
             current_xscale = ax.get_xscale()
             next_xscale = self._get_next_axis_scale(current_xscale)
-            self._quick_change_axes((next_xscale, ax.get_yscale()), ax)
+            self._quick_change_axes(ax, next_xscale, ax.get_yscale())
 
         if event.key == "l":
             current_yscale = ax.get_yscale()
             next_yscale = self._get_next_axis_scale(current_yscale)
-            self._quick_change_axes((ax.get_xscale(), next_yscale), ax)
+            self._quick_change_axes(ax, ax.get_xscale(), next_yscale)
 
     def _get_next_axis_scale(self, current_scale):
         next_index = AXES_SCALE_MENU_OPTS.index(current_scale) + 1
@@ -446,7 +446,7 @@ class FigureInteraction(object):
 
         if fig_type == FigureType.Image or fig_type == FigureType.Contour:
             if isinstance(event.inaxes, MantidAxes):
-                self._add_axes_scale_menu(menu, event.inaxes)
+                self._add_axis_scale_menus(menu, event.inaxes)
                 self._add_normalization_option_menu(menu, event.inaxes)
                 self._add_colorbar_axes_scale_menu(menu, event.inaxes)
         elif fig_type == FigureType.Surface:
@@ -456,7 +456,7 @@ class FigureInteraction(object):
             if self.fit_browser.tool is not None:
                 self.fit_browser.add_to_menu(menu)
                 menu.addSeparator()
-            self._add_axes_scale_menu(menu, event.inaxes)
+            self._add_axis_scale_menus(menu, event.inaxes)
             if isinstance(event.inaxes, MantidAxes):
                 self._add_normalization_option_menu(menu, event.inaxes)
             self.add_error_bars_menu(menu, event.inaxes)
@@ -466,22 +466,18 @@ class FigureInteraction(object):
 
         menu.exec_(QCursor.pos())
 
-    def _add_axes_scale_menu(self, menu, ax):
-        """Add the Axes scale options menu to the given menu"""
-        axes_menu = QMenu("Axes", menu)
-        for x_scale_type in AXES_SCALE_MENU_OPTS:
-            sub_axes_menu = QMenu(f"{x_scale_type} x", axes_menu)
-            axes_actions = QActionGroup(sub_axes_menu)
-            for y_scale_type in AXES_SCALE_MENU_OPTS:
-                action = sub_axes_menu.addAction(f"{y_scale_type} y", partial(self._quick_change_axes, (x_scale_type, y_scale_type), ax))
-                if x_scale_type == ax.get_xscale() and y_scale_type == ax.get_yscale():
-                    action.setCheckable(True)
+    def _add_axis_scale_menus(self, menu, ax):
+        """Add the Axis scale options menus to the given menu"""
+        for axis in ("X", "Y"):
+            axes_menu = QMenu(f"{axis}-Axis Scale", menu)
+            axes_actions = QActionGroup(axes_menu)
+            for scale_type in AXES_SCALE_MENU_OPTS:
+                action = axes_menu.addAction(scale_type, partial(self._quick_change_axes, ax, **{f"{axis.lower()}_scale_type": scale_type}))
+                action.setCheckable(True)
+                if scale_type == getattr(ax, f"get_{axis.lower()}scale")():
                     action.setChecked(True)
-                    sub_axes_menu.menuAction().setCheckable(True)
-                    sub_axes_menu.menuAction().setChecked(True)
                 axes_actions.addAction(action)
-            axes_menu.addMenu(sub_axes_menu)
-        menu.addMenu(axes_menu)
+            menu.addMenu(axes_menu)
 
     def _add_normalization_option_menu(self, menu, ax):
         # Check if toggling normalization makes sense
@@ -931,7 +927,7 @@ class FigureInteraction(object):
             return True
         return False
 
-    def _quick_change_axes(self, scale_types, ax):
+    def _quick_change_axes(self, ax, x_scale_type=None, y_scale_type=None):
         """
         Perform a change of axes on the figure to that given by the option
         :param scale_types: A 2-tuple of strings giving matplotlib axes scale types
@@ -942,9 +938,12 @@ class FigureInteraction(object):
         # included in the last computation of the data limits and
         # set_xscale/set_yscale only autoscale the view
 
+        x_scale_type = ax.get_xscale() if not x_scale_type else x_scale_type
+        y_scale_type = ax.get_yscale() if not y_scale_type else y_scale_type
+
         scale_args = [
             {"value": scale_type, "linthresh": LINTHRESH_DEFAULT} if scale_type == "symlog" else {"value": scale_type}
-            for scale_type in scale_types
+            for scale_type in (x_scale_type, y_scale_type)
         ]
 
         xlim = copy(ax.get_xlim())
