@@ -12,7 +12,6 @@ from mantid.api import FunctionFactory
 from mantid.geometry import CrystalStructure, ReflectionGenerator, PointGroupFactory, PointGroup
 from mantid.kernel import V3D, logger, UnitConversion, DeltaEModeType
 from typing import Optional, Tuple, TYPE_CHECKING, Sequence
-from itertools import chain
 from scipy.optimize import least_squares
 from plugins.algorithms.poldi_utils import simulate_2d_data, get_dspac_array_from_ws
 from abc import ABC, abstractmethod
@@ -26,6 +25,7 @@ if TYPE_CHECKING:
 class InstrumentParams:
     def __init__(self):
         self.p: np.ndarray = np.array([1.0, 0.0])
+        self.labels = ("scale", "shift")
         self.default_isfree: np.ndarray = np.zeros_like(self.p, dtype=bool)
 
     def get_peak_centre(self, dpk: float) -> float:
@@ -272,14 +272,14 @@ class PawleyPattern1D:
             [self.comp_func[len(self.comp_func) - 1].function.setParameter(ipar, par) for ipar, par in enumerate(self.bg_params)]
 
     def get_params(self) -> np.ndarray[float]:
-        return np.array(list(chain(*self.alatt_params, *self.intens, *self.profile_params, self.inst_params, self.bg_params)))
+        return np.concatenate((*self.alatt_params, *self.intens, *self.profile_params, self.inst_params, self.bg_params))
 
     def get_free_params(self) -> np.ndarray[float]:
         return self.get_params()[self.get_isfree()]
 
     def get_isfree(self) -> np.ndarray[bool]:
-        return np.array(
-            list(chain(*self.alatt_isfree, *self.intens_isfree, *self.profile_isfree, self.inst_isfree, self.bg_isfree)), dtype=bool
+        return np.concatenate((*self.alatt_isfree, *self.intens_isfree, *self.profile_isfree, self.inst_isfree, self.bg_isfree)).astype(
+            bool
         )
 
     def set_params(self, params: np.ndarray[float]):
