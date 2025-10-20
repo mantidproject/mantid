@@ -523,7 +523,6 @@ class FullInstrumentViewWindow(QMainWindow):
             for line in self._lineplot_overlays:
                 self._detector_spectrum_axes.add_line(line)
 
-        self._detector_spectrum_fig.tight_layout()
         self.redraw_lineplot()
 
     def set_selected_detector_info(self, detector_infos: list[DetectorInfo]) -> None:
@@ -571,7 +570,7 @@ class FullInstrumentViewWindow(QMainWindow):
             text.remove()
 
     def plot_overlay_mesh(self, positions: np.ndarray, labels: list[str], colour: str) -> None:
-        points_actor = self.main_plotter.add_points(positions, color=colour, point_size=15, render_points_as_spheres=True)
+        points_actor = self.main_plotter.add_points(positions, color=colour, point_size=15, render_points_as_spheres=True, opacity=0.2)
         labels_actor = self.main_plotter.add_point_labels(
             positions,
             labels,
@@ -581,6 +580,7 @@ class FullInstrumentViewWindow(QMainWindow):
             always_visible=True,
             fill_shape=False,
             shape_opacity=0,
+            text_color=colour,
         )
         self._overlay_meshes.append((points_actor, labels_actor))
 
@@ -588,8 +588,18 @@ class FullInstrumentViewWindow(QMainWindow):
         for x, label in zip(x_values, labels):
             self._lineplot_overlays.append(self._detector_spectrum_axes.axvline(x, color=colour, linestyle="--"))
             self._detector_spectrum_axes.text(
-                x, 1.1, label, transform=self._detector_spectrum_axes.get_xaxis_transform(), color=colour, ha="center", va="top", fontsize=8
+                x,
+                0.99,
+                label,
+                transform=self._detector_spectrum_axes.get_xaxis_transform(),
+                color=colour,
+                ha="right",
+                va="top",
+                fontsize=8,
+                rotation=90,
             )
+        self.redraw_lineplot()
 
     def redraw_lineplot(self) -> None:
+        self._detector_spectrum_fig.tight_layout()
         self._detector_figure_canvas.draw()
