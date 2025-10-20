@@ -629,6 +629,13 @@ Kernel::TimeROI AlignAndFocusPowderSlim::getStartingTimeROI(const API::MatrixWor
   return roi;
 }
 
+/**
+ * @brief Determine the pulse indices for a given workspace and time ROI.
+ *
+ * @param wksp The workspace to get the pulse times from.
+ * @param roi The time ROI to use for filtering.
+ * @return std::vector<PulseROI> A vector of PulseROI representing the pulse indices to include.
+ */
 std::vector<PulseROI> AlignAndFocusPowderSlim::determinePulseIndices(const API::MatrixWorkspace_sptr &wksp,
                                                                      const TimeROI &roi) {
 
@@ -654,6 +661,15 @@ std::vector<PulseROI> AlignAndFocusPowderSlim::determinePulseIndices(const API::
   return pulse_indices;
 }
 
+/**
+ * @brief Determine the pulse indices for a given workspace, time ROI, and time splitter.
+ *
+ * @param wksp The workspace to get the pulse times from.
+ * @param roi The time ROI to use for filtering.
+ * @param timeSplitter The time splitter to use for determining target indices and additional time ROIs.
+ * @return std::vector<std::pair<int, PulseROI>> A vector of pairs, where each pair contains a target index and a
+ * PulseROI representing the pulse indices to include.
+ */
 std::vector<std::pair<int, PulseROI>>
 AlignAndFocusPowderSlim::determinePulseIndicesTargets(const API::MatrixWorkspace_sptr &wksp, const TimeROI &roi,
                                                       const TimeSplitter &timeSplitter) {

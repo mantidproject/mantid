@@ -678,6 +678,16 @@ void TimeSplitter::splitEventVec(const std::function<const DateAndTime(const Eve
   }
 }
 
+/**
+ * @brief Calculate the target indices for a given set of times.
+  Returns a vector of pairs, where each pair contains a target index and a pair of size_t representing the start and
+ stop indices in the input times vector that correspond to that target.
+
+  If the TimeSplitter is empty, the entire range of times is returned with NO_TARGET.
+ *
+ * @param times
+ * @return std::vector<std::pair<int, std::pair<size_t, size_t>>>
+ */
 std::vector<std::pair<int, std::pair<size_t, size_t>>>
 TimeSplitter::calculate_target_indices(const std::vector<DateAndTime> &times) const {
   std::vector<std::pair<int, std::pair<size_t, size_t>>> indices;
