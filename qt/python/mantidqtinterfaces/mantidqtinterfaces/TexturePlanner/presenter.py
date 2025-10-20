@@ -30,6 +30,9 @@ class TexturePlannerPresenter(object):
         self.view.set_on_init_x_changed(self.set_initial_shape)
         self.view.set_on_init_y_changed(self.set_initial_shape)
         self.view.set_on_init_z_changed(self.set_initial_shape)
+        self.view.set_on_init_px_changed(self.set_initial_shape)
+        self.view.set_on_init_py_changed(self.set_initial_shape)
+        self.view.set_on_init_pz_changed(self.set_initial_shape)
         self.view.set_on_update_dirs(self.on_directions_updated)
         self.view.set_on_gonio_vec_updated(self.on_goniometer_updated)
         self.view.set_on_gonio_sense_updated(self.on_goniometer_updated)
@@ -244,6 +247,13 @@ class TexturePlannerPresenter(object):
         self.update_plots()
 
     def set_initial_shape(self):
-        self.model.update_initial_shape(self.view.get_init_x(), self.view.get_init_y(), self.view.get_init_z())
+        self.model.update_initial_shape(
+            self.view.get_init_x(),
+            self.view.get_init_y(),
+            self.view.get_init_z(),
+            self.view.get_init_px(),
+            self.view.get_init_py(),
+            self.view.get_init_pz(),
+        )
         self.model.update_all_projected_data()
         self.update_plots()
