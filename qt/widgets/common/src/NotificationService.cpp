@@ -71,6 +71,11 @@ bool NotificationService::isEnabled() {
   return retVal;
 }
 
-bool NotificationService::isSupportedByOS() { return QSystemTrayIcon::supportsMessages(); }
+bool NotificationService::isSupportedByOS() {
+#if defined(__APPLE__) && defined(__arm64__)
+  return false;
+#endif
+  return QSystemTrayIcon::supportsMessages();
+}
 
 } // namespace MantidQt::MantidWidgets
