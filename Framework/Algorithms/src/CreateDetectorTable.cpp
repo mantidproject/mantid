@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/CreateDetectorTable.h"
+#include "MantidAPI/Workspace_fwd.h"
 #include <memory>
 
 using namespace Mantid::API;
@@ -46,38 +47,40 @@ void CreateDetectorTable::init() {
 }
 
 void CreateDetectorTable::exec() {
-  ws = getProperty("InputWorkspace");
+  API::Workspace_sptr inputWs = getProperty("InputWorkspace");
   includeData = getProperty("IncludeData");
   workspaceIndices = getProperty("WorkspaceIndices");
   includeDetectorPosition = getProperty("IncludeDetectorPosition");
   PickOneDetectorID = getProperty("DetectorIDAsIntegers");
 
-  ITableWorkspace_sptr detectorTable;
-
-  if (auto matrix = std::dynamic_pointer_cast<MatrixWorkspace>(ws)) {
-    IComponent_const_sptr sample = matrix->getInstrument()->getSample();
-    if (sample == nullptr) {
+  if ((ws = std::dynamic_pointer_cast<MatrixWorkspace>(inputWs))) {
+    if (ws->getInstrument()->getSample() == nullptr) {
       throw std::runtime_error("Matrix workspace has no instrument information");
     }
-    detectorTable = createDetectorTableWorkspace();
-
-    if (detectorTable == nullptr) {
-      throw std::runtime_error("Unknown error while creating detector table for matrix workspace");
-    }
-  } else if (auto peaks = std::dynamic_pointer_cast<IPeaksWorkspace>(ws)) {
-    detectorTable = peaks->createDetectorTable();
-    if (detectorTable == nullptr) {
-      throw std::runtime_error("Unknown error while creating detector table for peak workspace");
-    }
-  } else {
-    throw std::runtime_error("Detector table can only be created for matrix and peaks workspaces.");
+    createDetectorTableWorkspace();
+    setTableToOutput();
+    return;
   }
 
+  if (auto peaks = std::dynamic_pointer_cast<IPeaksWorkspace>(inputWs)) {
+    table = peaks->createDetectorTable();
+    setTableToOutput();
+    return;
+  }
+
+  throw std::runtime_error("Detector table can only be created for matrix and peaks workspaces.");
+  return;
+}
+
+void CreateDetectorTable::setTableToOutput() {
+  if (table == nullptr) {
+    throw std::runtime_error("Unknown error while creating detector table for peak workspace");
+  }
+  API::Workspace_sptr inputWs = getProperty("InputWorkspace");
   if (getPropertyValue("DetectorTableWorkspace") == "") {
-    setPropertyValue("DetectorTableWorkspace", ws->getName() + "-Detectors");
+    setPropertyValue("DetectorTableWorkspace", inputWs->getName() + "-Detectors");
   }
-
-  setProperty("DetectorTableWorkspace", detectorTable);
+  setProperty("DetectorTableWorkspace", table);
 }
 
 /*
@@ -119,20 +122,19 @@ std::map<std::string, std::string> CreateDetectorTable::validateInputs() {
  * @return A pointer to the table workspace of detector information
  */
 ITableWorkspace_sptr CreateDetectorTable::createDetectorTableWorkspace() {
-  matrixWs = std::dynamic_pointer_cast<MatrixWorkspace>(ws);
-  IComponent_const_sptr sample = matrixWs->getInstrument()->getSample();
+  IComponent_const_sptr sample = ws->getInstrument()->getSample();
 
   // check if efixed value is available
   calcQ = true;
 
   // check if we have a scanning workspace
-  isScanning = matrixWs->detectorInfo().isScanning();
+  isScanning = ws->detectorInfo().isScanning();
 
-  spectrumInfo = &matrixWs->spectrumInfo();
+  spectrumInfo = &ws->spectrumInfo();
   if (spectrumInfo->hasDetectors(0)) {
     try {
       std::shared_ptr<const IDetector> detector(&spectrumInfo->detector(0), Mantid::NoDeleting());
-      matrixWs->getEFixed(detector);
+      ws->getEFixed(detector);
     } catch (std::invalid_argument &) {
       calcQ = false;
     } catch (std::runtime_error &) {
@@ -144,7 +146,7 @@ ITableWorkspace_sptr CreateDetectorTable::createDetectorTableWorkspace() {
   }
 
   hasDiffConstants = false;
-  auto emode = matrixWs->getEMode();
+  auto emode = ws->getEMode();
   if (emode == DeltaEMode::Elastic) {
     hasDiffConstants = true;
   }
@@ -153,7 +155,7 @@ ITableWorkspace_sptr CreateDetectorTable::createDetectorTableWorkspace() {
   auto colNames = createColumns();
 
   const int ncols = static_cast<int>(colNames.size());
-  nrows = workspaceIndices.empty() ? static_cast<int>(matrixWs->getNumberHistograms())
+  nrows = workspaceIndices.empty() ? static_cast<int>(ws->getNumberHistograms())
                                    : static_cast<int>(workspaceIndices.size());
 
   table = WorkspaceFactory::Instance().createTable("TableWorkspace");
@@ -167,7 +169,7 @@ ITableWorkspace_sptr CreateDetectorTable::createDetectorTableWorkspace() {
   table->setRowCount(nrows);
 
   // Cache some frequently used values
-  beamAxisIndex = matrixWs->getInstrument()->getReferenceFrame()->pointingAlongBeam();
+  beamAxisIndex = ws->getInstrument()->getReferenceFrame()->pointingAlongBeam();
   sampleDist = sample->getPos()[beamAxisIndex];
   signedThetaParamRetrieved = false;
   showSignedTwoTheta = false; // If true, signedVersion of the two theta
@@ -219,9 +221,9 @@ void CreateDetectorTable::populateTable() {
     TableRow colValues = table->getRow(row);
     size_t wsIndex = workspaceIndices.empty() ? static_cast<size_t>(row) : workspaceIndices[row];
     colValues << static_cast<double>(wsIndex);
-    const double dataY0{matrixWs->y(wsIndex)[0]}, dataE0{matrixWs->e(wsIndex)[0]};
+    const double dataY0{ws->y(wsIndex)[0]}, dataE0{ws->e(wsIndex)[0]};
     try {
-      auto &spectrum = matrixWs->getSpectrum(wsIndex);
+      auto &spectrum = ws->getSpectrum(wsIndex);
       Mantid::specnum_t specNo = spectrum.getSpectrumNo();
       const auto &ids = dynamic_cast<const std::set<int> &>(spectrum.getDetectorIDs());
       int detId = static_cast<int>(*ids.begin());
@@ -298,7 +300,7 @@ void CreateDetectorTable::populateTable() {
 
             // Get unsigned theta and efixed value
             IDetector_const_sptr det{&spectrumInfo->detector(wsIndex), Mantid::NoDeleting()};
-            double efixed = matrixWs->getEFixed(det);
+            double efixed = ws->getEFixed(det);
             double usignTheta = spectrumInfo->twoTheta(wsIndex) * 0.5;
 
             double q = UnitConversion::convertToElasticQ(usignTheta, efixed);

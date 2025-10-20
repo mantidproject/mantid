@@ -48,10 +48,10 @@ public:
   API::ITableWorkspace_sptr createDetectorTableWorkspace();
   std::vector<std::pair<std::string, std::string>> createColumns();
   void populateTable();
+  void setTableToOutput();
 
 private:
-  API::Workspace_sptr ws;
-  API::MatrixWorkspace_sptr matrixWs;
+  API::MatrixWorkspace_sptr ws;
   std::vector<int> workspaceIndices;
   bool includeData;
   bool includeDetectorPosition;
