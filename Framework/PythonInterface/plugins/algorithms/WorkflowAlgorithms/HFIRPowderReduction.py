@@ -16,7 +16,7 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
         return "DataHandling\\Nexus"
 
     def summary(self):
-        return "powder reduction for HFIR instruments"
+        return "Powder reduction for HFIR instruments"
 
     def PyInit(self):
         self.declareProperty(
@@ -54,17 +54,17 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
         fileNameBool = self.getProperty("SampleFilename").value
         IPTSBool = self.getProperty("SampleIPTS").value
         runNumbersBool = len(self.getProperty("SampleRunNumbers").value)
-        if (IPTSBool != Property.EMPTY_INT or runNumbersBool != 0) and fileNameBool:
-            issues["SampleFilename"] = "Too many fields filled: Must specify either SampleFilename or SampleIPTS AND SampleRunNumbers"
-            issues["SampleIPTS"] = "Too many fields filled: Must specify either SampleFilename or SampleIPTS AND SampleRunNumbers"
-            issues["SampleRunNumbers"] = "Too many fields filled: Must specify either SampleFilename or SampleIPTS AND SampleRunNumbers"
+        # if (IPTSBool != Property.EMPTY_INT or runNumbersBool != 0) and fileNameBool:
+        #     issues["SampleFilename"] = "Too many fields filled: Must specify either SampleFilename or SampleIPTS AND SampleRunNumbers"
+        #     issues["SampleIPTS"] = "Too many fields filled: Must specify either SampleFilename or SampleIPTS AND SampleRunNumbers"
+        #     issues["SampleRunNumbers"] = "Too many fields filled: Must specify either SampleFilename or SampleIPTS AND SampleRunNumbers"
         if IPTSBool == Property.EMPTY_INT and runNumbersBool == 0 and not fileNameBool:
             issues["SampleFilename"] = "Missing required field: Must specify either SampleFilename or SampleIPTS AND SampleRunNumbers"
             issues["SampleIPTS"] = "Missing required field: Must specify either SampleFilename or SampleIPTS AND SampleRunNumbers"
             issues["SampleRunNumbers"] = "Missing required field: Must specify either SampleFilename or SampleIPTS AND SampleRunNumbers"
 
-        optionalFields = ["Vanadium", "VanadiumBackground", "SampleBackground"]
-        for field in optionalFields:
+        allFields = ["Sample", "Vanadium", "VanadiumBackground", "SampleBackground"]
+        for field in allFields:
             fileNameBool = self.getProperty(f"{field}Filename").value
             IPTSBool = self.getProperty(f"{field}IPTS").value
             runNumbersBool = len(self.getProperty(f"{field}RunNumbers").value)
@@ -76,6 +76,11 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
                 issues[f"{field}RunNumbers"] = (
                     f"Too many fields filled: Must specify either {field}Filename or {field}IPTS AND {field}RunNumbers"
                 )
+            if not (IPTSBool == Property.EMPTY_INT and runNumbersBool == 0):
+                if IPTSBool != Property.EMPTY_INT:
+                    issues[f"{field}RunNumbers"] = f"{field}RunNumbers must be provided if {field}IPTS is provided"
+                if runNumbersBool:
+                    issues[f"{field}IPTS"] = f"{field}IPTS must be provided if {field}RunNumbers is provided"
 
         return issues
 

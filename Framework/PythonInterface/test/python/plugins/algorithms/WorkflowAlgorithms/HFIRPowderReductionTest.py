@@ -32,9 +32,9 @@ class LoadInputErrorMessages(unittest.TestCase):
 
     def test_validate_optional_fields_too_many(self):
         # Test each optional field (Vanadium, VanadiumBackground, SampleBackground)
-        optional_fields = ["Vanadium", "VanadiumBackground", "SampleBackground"]
+        all_fields = ["Sample", "Vanadium", "VanadiumBackground", "SampleBackground"]
 
-        for field in optional_fields:
+        for field in all_fields:
             # Test that providing both filename and IPTS/RunNumbers for optional fields raises a RuntimeError
             kwargs = {
                 "SampleFilename": "HB2C_7000.nxs.h5",  # Valid sample input
@@ -50,6 +50,32 @@ class LoadInputErrorMessages(unittest.TestCase):
             error_msg = str(cm.exception)
             self.assertIn(f"{field}Filename", error_msg)
             self.assertIn(f"Too many fields filled: Must specify either {field}Filename or {field}IPTS AND {field}RunNumbers", error_msg)
+
+    def test_validate_missing_ipts_or_runnumbers(self):
+        # Test each optional field (Vanadium, VanadiumBackground, SampleBackground)
+        all_fields = ["Sample", "Vanadium", "VanadiumBackground", "SampleBackground"]
+
+        for field in all_fields:
+            # Test that missing IPTS or RunNumbers when the other is filled out for optional fields raises a RuntimeError
+            kwargs = {f"{field}IPTS": 123}
+
+            with self.assertRaises(RuntimeError) as cm:
+                HFIRPowderReduction(**kwargs)
+
+            # Check the error message
+            error_msg = str(cm.exception)
+            self.assertIn(f"{field}RunNumbers", error_msg)
+            self.assertIn(f"{field}RunNumbers must be provided if {field}IPTS is provided", error_msg)
+
+            kwargs = {f"{field}RunNumbers": [456]}
+
+            with self.assertRaises(RuntimeError) as cm:
+                HFIRPowderReduction(**kwargs)
+
+            # Check the error message
+            error_msg = str(cm.exception)
+            self.assertIn(f"{field}IPTS", error_msg)
+            self.assertIn(f"{field}IPTS must be provided if {field}RunNumbers is provided", error_msg)
 
     def test_valid_sample_input_combinations(self):
         # Test filename only - should not raise
