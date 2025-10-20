@@ -161,6 +161,7 @@ class FullInstrumentViewPresenter:
         self._is_projection_selected = is_projection
         self._update_view_main_plotter(positions, is_projection=self._is_projection_selected)
         self.on_multi_select_detectors_clicked()
+        self.on_peaks_workspace_selected()
 
     def _update_view_main_plotter(self, positions: np.ndarray, is_projection: bool):
         self._detector_mesh = self.create_poly_data_mesh(positions)
