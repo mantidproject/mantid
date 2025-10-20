@@ -207,7 +207,12 @@ class FullInstrumentViewModel:
 
         projected_positions = np.zeros_like(positions)
         projected_positions[:, :2] = projection.positions()  # Assign only x and y coordinate
-        return projected_positions
+        self._current_projected_positions = projected_positions
+        return self._current_projected_positions
+
+    def projected_positions_for_detector_ids(self, ids: list[int]) -> np.ndarray:
+        indices = np.where(np.isin(self.detector_ids, ids))[0]
+        return self._current_projected_positions[indices]
 
     def extract_spectra_for_line_plot(self, unit: str, sum_spectra: bool) -> None:
         workspace_indices = self.picked_workspace_indices

@@ -22,7 +22,8 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._mock_view = MagicMock()
         self._ws = CreateSampleWorkspace(OutputWorkspace="TestFullInstrumentViewPresenter")
         self._model = FullInstrumentViewModel(self._ws)
-        self._presenter = FullInstrumentViewPresenter(self._mock_view, self._model)
+        with mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.set_peaks_workspaces"):
+            self._presenter = FullInstrumentViewPresenter(self._mock_view, self._model)
         self._mock_view.reset_mock()
 
     def tearDown(self):
@@ -34,9 +35,11 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self.assertGreater(len(projections), 0)
         self.assertTrue("Spherical X" in projections)
 
-    def test_projection_option_selected(self):
+    @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.set_peaks_workspaces")
+    def test_projection_option_selected(self, mock_set_peaks_ws):
         self._presenter.on_projection_option_selected(1)
         self._mock_view.add_main_mesh.assert_called()
+        mock_set_peaks_ws.assert_called_once()
 
     @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.create_poly_data_mesh")
     @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.calculate_projection")
@@ -182,12 +185,18 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         mock_peaks_workspaces_in_ads.assert_called_once()
         self.assertEqual([self._ws.name(), self._ws.name()], workspaces)
 
+    @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.projected_positions_for_detector_ids")
     @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.set_peaks_workspaces")
     @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.refresh_lineplot_peaks")
     @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter._adjust_points_for_selected_projection")
     @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.peak_overlay_points")
     def test_on_peaks_workspace_selected(
-        self, mock_peak_overlay_points, mock_adjust_points_projection, mock_refresh_lineplot_peaks, mock_set_peaks_workspaces
+        self,
+        mock_peak_overlay_points,
+        mock_adjust_points_projection,
+        mock_refresh_lineplot_peaks,
+        mock_set_peaks_workspaces,
+        mock_projected_positions,
     ):
         mock_peak_overlay_points.return_value = [[DetectorPeaks([Peak(50, np.zeros(3), (1, 1, 1), 100, 1000)])]]
         mock_adjust_points_projection.return_value = [mock_peak_overlay_points()[0][0].location]
@@ -195,6 +204,7 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         mock_refresh_lineplot_peaks.assert_called_once()
         self._mock_view.clear_overlay_meshes.assert_called_once()
         mock_set_peaks_workspaces.assert_called_once()
+        mock_projected_positions.assert_called_once()
         self._mock_view.plot_overlay_mesh.assert_called_once()
 
     @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.peak_overlay_points")
