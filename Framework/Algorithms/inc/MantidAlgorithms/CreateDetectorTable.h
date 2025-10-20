@@ -44,32 +44,36 @@ public:
   }
   std::map<std::string, std::string> validateInputs() override;
 
+  /// Creates table workspace of detector information from a given workspace
+  API::ITableWorkspace_sptr createDetectorTableWorkspace();
+  std::vector<std::pair<std::string, std::string>> createColumns();
+  void populateTable();
+
 private:
+  API::Workspace_sptr ws;
+  API::MatrixWorkspace_sptr matrixWs;
+  std::vector<int> workspaceIndices;
+  bool includeData;
+  bool includeDetectorPosition;
+  bool PickOneDetectorID;
+  bool isScanning;
+  bool calcQ;
+  bool hasDiffConstants;
+  API::ITableWorkspace_sptr table;
+  const API::SpectrumInfo *spectrumInfo;
+  bool signedThetaParamRetrieved;
+  bool showSignedTwoTheta; // If true, signedVersion of the two theta
+  Geometry::PointingAlong beamAxisIndex;
+  double sampleDist;
+  int nrows;
   /// Initialisation code
   void init() override;
   /// Execution code
   void exec() override;
 };
 
-/// Creates table workspace of detector information from a given workspace
-API::ITableWorkspace_sptr createDetectorTableWorkspace(const API::MatrixWorkspace_sptr &ws,
-                                                       const std::vector<int> &indices, const bool includeData,
-                                                       const bool includeDetectorPosition, const bool pickOneDetectorID,
-                                                       Kernel::Logger &logger);
-
 /// Converts a list to a string, shortened if necessary
 std::string createTruncatedList(const std::set<int> &elements);
-
-void populateTable(Mantid::API::ITableWorkspace_sptr &t, const Mantid::API::MatrixWorkspace_sptr &ws, const int nrows,
-                   const std::vector<int> &indices, const Mantid::API::SpectrumInfo &spectrumInfo,
-                   bool signedThetaParamRetrieved, bool showSignedTwoTheta,
-                   const Mantid::Geometry::PointingAlong &beamAxisIndex, const double sampleDist, const bool isScanning,
-                   const bool include_data, const bool calcQ, const bool includeDiffConstants,
-                   const bool includeDetectorPosition, const bool pickOneDetectorID, Kernel::Logger &logger);
-std::vector<std::pair<std::string, std::string>> createColumns(const bool isScanning, const bool includeData,
-                                                               const bool calcQ, const bool hasDiffConstants,
-                                                               const bool includeDetectorPosition,
-                                                               const bool pickOneDetectorID);
 
 } // namespace Algorithms
 } // namespace Mantid
