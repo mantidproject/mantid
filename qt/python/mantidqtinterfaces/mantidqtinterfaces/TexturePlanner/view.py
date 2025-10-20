@@ -63,9 +63,15 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
         self.set_material_visible(False)
 
         self.set_angle_limits()
+        self.set_translation_step(0.001)  # setup 1mm translational steps
 
         self.create_workspace_table()
         self.hide_axis_columns()
+
+        self.make_box_toggleable(self.initOrientation, self.set_init_rotations_visible)
+        self.make_box_toggleable(self.initPosition, self.set_init_position_visible)
+        self.make_box_toggleable(self.grpDirectionWidgets, self.set_sample_directions_visible)
+        self.make_box_toggleable(self.grpOrientationFile)  # finder widget has some hidden features that toggling messes with
 
         # register startup
         UsageService.registerFeatureUsage(FeatureType.Interface, "TexturePlanner", False)
@@ -171,6 +177,15 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
     def set_on_init_z_changed(self, slot):
         self.spnInitZ.valueChanged.connect(slot)
 
+    def set_on_init_px_changed(self, slot):
+        self.spnInitPX.valueChanged.connect(slot)
+
+    def set_on_init_py_changed(self, slot):
+        self.spnInitPY.valueChanged.connect(slot)
+
+    def set_on_init_pz_changed(self, slot):
+        self.spnInitPZ.valueChanged.connect(slot)
+
     @QtCore.Slot(bool)
     def _on_any_include_toggled(self):
         self.sig_include_state_changed.emit()
@@ -268,6 +283,15 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
     def get_init_z(self):
         return self.spnInitZ.value()
 
+    def get_init_px(self):
+        return self.spnInitPX.value()
+
+    def get_init_py(self):
+        return self.spnInitPY.value()
+
+    def get_init_pz(self):
+        return self.spnInitPZ.value()
+
     # setters
 
     def set_rd_name(self, text):
@@ -363,6 +387,11 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
             angs.setMinimum(-360)
             angs.setMaximum(360)
 
+    def set_translation_step(self, step_size):
+        self.spnInitPX.setSingleStep(step_size)
+        self.spnInitPY.setSingleStep(step_size)
+        self.spnInitPZ.setSingleStep(step_size)
+
     def setup_group_options(self, groups):
         self.cmbGroup.addItems(groups)
 
@@ -423,6 +452,29 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
                 if checkbox and checkbox.isChecked():
                     checked.append(row)
         return checked
+
+    @staticmethod
+    def make_box_toggleable(box, slot=None, initial_state=False):
+        box.setCheckable(True)
+        box.setChecked(initial_state)
+        if slot:
+            slot(initial_state)
+            box.toggled.connect(slot)
+
+    def set_init_rotations_visible(self, vis):
+        self.set_box_children_visible(self.initOrientation, vis)
+
+    def set_init_position_visible(self, vis):
+        self.set_box_children_visible(self.initPosition, vis)
+
+    def set_sample_directions_visible(self, vis):
+        self.set_box_children_visible(self.grpDirectionWidgets, vis)
+
+    @staticmethod
+    def set_box_children_visible(box, vis):
+        children = box.findChildren(QWidget)
+        for widget in children:
+            widget.setVisible(vis)
 
     def set_material_visible(self, vis):
         self.edtMaterial.setVisible(vis)

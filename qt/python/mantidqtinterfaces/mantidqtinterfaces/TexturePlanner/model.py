@@ -18,6 +18,7 @@ from mantid.simpleapi import (
     CloneWorkspace,
     RotateSampleShape,
 )
+from mantid.api import AnalysisDataService as ADS
 from Engineering.EnggUtils import GROUP, CALIB_DIR
 from Engineering.common.calibration_info import CalibrationInfo
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.show_sample.show_sample_model import ShowSampleModel
@@ -203,18 +204,23 @@ class TexturePlannerModel(object):
     def get_senses(self, senses, num_gonios):
         return [self.sense_vals[x] for x in senses[:num_gonios]]
 
-    def get_angles(self, angles, num_gonios):
+    @staticmethod
+    def get_angles(angles, num_gonios):
         return [float(x) for x in angles[:num_gonios]]
 
-    def update_initial_shape(self, x_rot, y_rot, z_rot):
-        # currently copy shape bakes the orientation matrix into the sample shape
+    @staticmethod
+    def translate_shape(ws, x_pos, y_pos, z_pos):
+        if not (x_pos == 0.0 and y_pos == 0.0 and z_pos == 0.0):
+            TranslateSampleShape(InputWorkspace=ws, TranslationVector=f"{x_pos},{y_pos},{z_pos}")
 
-        # need to create a ws with an unorientated sample to copy over
+    def update_initial_shape(self, x_rot, y_rot, z_rot, x_pos, y_pos, z_pos):
+        _tmp_ws = CloneWorkspace(self.mesh_ws, OutputWorkspace="__tmp_ws")
+        self.translate_shape(_tmp_ws, x_pos, y_pos, z_pos)
 
         if x_rot == 0.0 and y_rot == 0.0 and z_rot == 0.0:
-            CopySample(InputWorkspace=self.mesh_ws, OutputWorkspace=self.wsname, CopyName=False, CopyEnvironment=False, CopyLattice=False)
+            CopySample(InputWorkspace=_tmp_ws, OutputWorkspace=self.wsname, CopyName=False, CopyEnvironment=False, CopyLattice=False)
             CopySample(
-                InputWorkspace=self.mesh_ws, OutputWorkspace=self.updated_mesh_ws, CopyName=False, CopyEnvironment=False, CopyLattice=False
+                InputWorkspace=_tmp_ws, OutputWorkspace=self.updated_mesh_ws, CopyName=False, CopyEnvironment=False, CopyLattice=False
             )
             return None
 
@@ -223,21 +229,13 @@ class TexturePlannerModel(object):
         ang = np.linalg.norm(rotvec)
         vec = rotvec / ang
 
-        # _tmp_ws = CloneWorkspace(self.wsname, OutputWorkspace="_tmp_ws")
-        # _tmp_ws.getRun().getGoniometer().setR(mat)
-
-        CopySample(InputWorkspace=self.mesh_ws, OutputWorkspace=self.wsname, CopyName=False, CopyEnvironment=False, CopyLattice=False)
-        CopySample(
-            InputWorkspace=self.mesh_ws, OutputWorkspace=self.updated_mesh_ws, CopyName=False, CopyEnvironment=False, CopyLattice=False
-        )
+        CopySample(InputWorkspace=_tmp_ws, OutputWorkspace=self.wsname, CopyName=False, CopyEnvironment=False, CopyLattice=False)
+        CopySample(InputWorkspace=_tmp_ws, OutputWorkspace=self.updated_mesh_ws, CopyName=False, CopyEnvironment=False, CopyLattice=False)
 
         RotateSampleShape(self.wsname, f"{ang},{vec[0]},{vec[1]},{vec[2]},1")
         RotateSampleShape(self.updated_mesh_ws, f"{ang},{vec[0]},{vec[1]},{vec[2]},1")
 
-        # CopySample(InputWorkspace=_tmp_ws, OutputWorkspace=self.wsname, CopyName=False, CopyEnvironment=False,
-        #           CopyLattice=False)
-
-        # ADS.remove("_tmp_ws")
+        ADS.remove("_tmp_ws")
 
     def update_gonio_index(self, num_gonios):
         max_ind = num_gonios - 1
@@ -666,3 +664,9 @@ def vec_string_to_norm_array(vec_string):
         # from the auto plot updates
         return np.array((1, 0, 0))
     return vec / np.linalg.norm(vec)
+
+
+# place holder for Alg until it gets merged in
+def TranslateSampleShape(InputWorkspace="ws", TranslationVector="0,0,0"):
+    print(f"Shape Translated from initial position to: {TranslationVector}")
+    return None

@@ -111,7 +111,7 @@
             <item>
               <widget class="QGroupBox" name="initOrientation">
                <property name="title">
-                <string>Initial Shape Orientation</string>
+                <string>Update Initial Shape Orientation</string>
                </property>
                <layout class="QGridLayout" name="layInitAxis">
                 <item row="0" column="0">
@@ -161,6 +161,88 @@
               </widget>
              </item>
 
+            <item>
+              <widget class="QGroupBox" name="initPosition">
+               <property name="title">
+                <string>Update Initial Shape Position</string>
+               </property>
+               <layout class="QGridLayout" name="layInitAxis">
+                <item row="0" column="0">
+                 <widget class="QLabel" name="lblInitPX">
+                  <property name="text">
+                   <string>X:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="0" column="1" colspan="1">
+                 <widget class="QDoubleSpinBox" name="spnInitPX">
+                  <property name="decimals">
+                   <number>4</number>
+                  </property>
+                 </widget>
+                </item>
+
+                   <item row="0" column="2">
+   <spacer name="spacer_left">
+    <property name="orientation">
+     <enum>Qt::Horizontal</enum>
+    </property>
+    <property name="sizeHint" stdset="0">
+     <size>
+      <width>40</width>
+      <height>20</height>
+     </size>
+    </property>
+   </spacer>
+  </item>
+
+                <item row="0" column="3">
+                 <widget class="QLabel" name="lblInitPY">
+                  <property name="text">
+                   <string>Y:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="0" column="4" colspan="1">
+                 <widget class="QDoubleSpinBox" name="spnInitPY">
+                  <property name="decimals">
+                   <number>4</number>
+                  </property>
+                 </widget>
+                </item>
+
+                   <item row="0" column="5">
+   <spacer name="spacer_left">
+    <property name="orientation">
+     <enum>Qt::Horizontal</enum>
+    </property>
+    <property name="sizeHint" stdset="0">
+     <size>
+      <width>40</width>
+      <height>20</height>
+     </size>
+    </property>
+   </spacer>
+  </item>
+
+                   <item row="0" column="6">
+                 <widget class="QLabel" name="lblInitPZ">
+                  <property name="text">
+                   <string>Z:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="0" column="7" colspan="1">
+                 <widget class="QDoubleSpinBox" name="spnInitPZ">
+                  <property name="decimals">
+                   <number>4</number>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
+             </item>
+
 
         </layout>
        </widget>
@@ -168,7 +250,7 @@
       <item>
        <widget class="QGroupBox" name="grpDirectionWidgets">
         <property name="title">
-         <string>Direction Setup</string>
+         <string>Update Sample Directions</string>
         </property>
         <layout class="QVBoxLayout" name="vboxDirectionWidgets">
          <item>
@@ -457,7 +539,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QGroupBox" name="grpDirectionWidgets">
+       <widget class="QGroupBox" name="grpOrientationFile">
         <property name="title">
          <string>Load Orientation File</string>
         </property>
