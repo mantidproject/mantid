@@ -55,7 +55,7 @@ public:
     TS_ASSERT_EQUALS(props[3]->name(), "IncludeDetectorPosition");
     TS_ASSERT(props[3]->isDefault());
 
-    TS_ASSERT_EQUALS(props[4]->name(), "DetectorIDAsIntegers");
+    TS_ASSERT_EQUALS(props[4]->name(), "PickOneDetectorID");
     TS_ASSERT(props[4]->isDefault());
 
     TS_ASSERT_EQUALS(props[5]->name(), "DetectorTableWorkspace");
@@ -282,7 +282,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", std::dynamic_pointer_cast<MatrixWorkspace>(inputWS)));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("DetectorIDAsIntegers", true));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PickOneDetectorID", true));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("DetectorTableWorkspace", outWSName));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
