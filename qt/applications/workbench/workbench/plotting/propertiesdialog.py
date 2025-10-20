@@ -157,14 +157,13 @@ class AxisEditor(PropertiesEditorBase):
         # Ensure that only floats can be entered
         self.ui.editor_min.setValidator(QDoubleValidator())
         self.ui.editor_max.setValidator(QDoubleValidator())
+        for mode in SCALE_MODES:
+            self.ui.scaleBox.addItem(mode)
         if figure_type(canvas.figure) in [FigureType.Surface, FigureType.Wireframe, FigureType.Mesh]:
             self.ui.scaleBox.hide()
             self.ui.scaleLabel.hide()
             self.ui.gridBox.hide()
             self.ui.gridLabel.hide()
-        else:
-            for mode in SCALE_MODES:
-                self.ui.scaleBox.addItem(mode)
         self.ui.editor_format.addItem(DECIMAL_FORMAT)
         self.ui.editor_format.addItem(SCIENTIFIC_FORMAT)
         self.axes = axes
@@ -253,6 +252,10 @@ class ColorbarAxisEditor(AxisEditor):
 
         self.ui.gridBox.hide()
         self.ui.gridLabel.hide()
+
+        # Turn on axis scaling for color bars on 3D plots, contrary to base class shared by other axes.
+        self.ui.scaleLabel.show()
+        self.ui.scaleBox.show()
 
         self.images = []
 
