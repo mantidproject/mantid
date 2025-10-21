@@ -294,9 +294,20 @@ class FullInstrumentViewPresenter:
             return
         # Keeping the points from each workspace separate so we can colour them differently
         for ws_peaks in self._peaks_grouped_by_ws:
-            detector_indices = np.where(np.isin(self._model.detector_ids, [p.detector_id for p in ws_peaks.detector_peaks]))[0]
-            projected_points = self._model.current_projected_positions[detector_indices]
-            labels = [p.label for p in ws_peaks.detector_peaks]
+            peaks_detector_ids = np.array([p.detector_id for p in ws_peaks.detector_peaks])
+            detector_ids = self._model.detector_ids
+            # Use argsort + searchsorted for fast lookup. Using np.where(np.isin) does not
+            # maintain the original order. It is faster to sort then search the sorted
+            # array for matching detector IDs
+            sorted_idx = np.argsort(detector_ids)
+            sorted_detector_ids = detector_ids[sorted_idx]
+            positions = np.searchsorted(sorted_detector_ids, peaks_detector_ids)
+            # Map back to original indices
+            ordered_indices = sorted_idx[positions]
+            valid = sorted_detector_ids[positions] == peaks_detector_ids
+            ordered_indices = ordered_indices[valid]
+            labels = [p.label for i, p in enumerate(ws_peaks.detector_peaks) if valid[i]]
+            projected_points = self._model.current_projected_positions[ordered_indices]
             # Plot the peaks and their labels on the projection
             if len(projected_points) > 0:
                 self._view.plot_overlay_mesh(projected_points, labels, ws_peaks.colour)
