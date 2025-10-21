@@ -37,7 +37,7 @@ Open a terminal or powershell with conda enabled. Here are two ways to do this:
 * Open an Anaconda prompt (Miniforge).
 * Add the path of your Miniforge installation to your system path, if you didn't do it during installation (Follow the answers in the `FAQ <https://docs.anaconda.com/anaconda/user-guide/faq/#installing-anaconda>`_). Then you can use conda from the Command Prompt and Powershell.
 
-.. include:: ./MantidDeveloperSetup.rst
+.. include:: ./MantidDeveloperCondaSetup.rst
 
 Configure CMake and generate build files
 ----------------------------------------
