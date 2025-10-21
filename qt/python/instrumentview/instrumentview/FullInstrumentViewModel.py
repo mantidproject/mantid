@@ -145,6 +145,10 @@ class FullInstrumentViewModel:
         self._counts_limits = limits
 
     @property
+    def current_projected_positions(self) -> np.ndarray:
+        return self._current_projected_positions
+
+    @property
     def integration_limits(self) -> tuple[float, float]:
         return self._integration_limits
 
@@ -209,10 +213,6 @@ class FullInstrumentViewModel:
         projected_positions[:, :2] = projection.positions()  # Assign only x and y coordinate
         self._current_projected_positions = projected_positions
         return self._current_projected_positions
-
-    def projected_positions_for_detector_ids(self, ids: list[int]) -> np.ndarray:
-        indices = np.where(np.isin(self.detector_ids, ids))[0]
-        return self._current_projected_positions[indices]
 
     def extract_spectra_for_line_plot(self, unit: str, sum_spectra: bool) -> None:
         workspace_indices = self.picked_workspace_indices
@@ -282,6 +282,7 @@ class FullInstrumentViewModel:
             # groupby groups consecutive matches, so must be sorted
             peaks.sort(key=lambda x: x.detector_id)
             for det_id, peaks_for_id in groupby(peaks, lambda x: x.detector_id):
-                detector_peaks.append(DetectorPeaks(list(peaks_for_id)))
+                if det_id in self.detector_ids:
+                    detector_peaks.append(DetectorPeaks(list(peaks_for_id)))
             peaks_grouped_by_ws.append(detector_peaks)
         return peaks_grouped_by_ws

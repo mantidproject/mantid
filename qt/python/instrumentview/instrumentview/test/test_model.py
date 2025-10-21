@@ -417,6 +417,8 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         model = FullInstrumentViewModel(self._ws)
         peaks_ws = CreatePeaksWorkspace(self._ws, 2)
         model._selected_peaks_workspaces = [peaks_ws]
+        model._detector_ids = np.array([100])
+        model._is_valid = np.array([True])
         peaks = model.peak_overlay_points()
         self.assertEqual(1, len(peaks))
         detector_peak = peaks[0][0]

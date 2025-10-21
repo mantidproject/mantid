@@ -292,10 +292,12 @@ class FullInstrumentViewPresenter:
             return
         # Keeping the points from each workspace separate so we can colour them differently
         for ws_peaks in self._peaks_grouped_by_ws:
-            projected_points = self._model.projected_positions_for_detector_ids([p.detector_id for p in ws_peaks.detector_peaks])
+            detector_indices = np.where(np.isin(self._model.detector_ids, [p.detector_id for p in ws_peaks.detector_peaks]))[0]
+            projected_points = self._model.current_projected_positions[detector_indices]
             labels = [p.label for p in ws_peaks.detector_peaks]
             # Plot the peaks and their labels on the projection
-            self._view.plot_overlay_mesh(projected_points, labels, ws_peaks.colour)
+            if len(projected_points) > 0:
+                self._view.plot_overlay_mesh(projected_points, labels, ws_peaks.colour)
 
     def refresh_lineplot_peaks(self) -> None:
         # Plot vertical lines on the lineplot if the peak detector is selected

@@ -185,26 +185,22 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         mock_peaks_workspaces_in_ads.assert_called_once()
         self.assertEqual([self._ws.name(), self._ws.name()], workspaces)
 
-    @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.projected_positions_for_detector_ids")
     @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.set_peaks_workspaces")
     @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.refresh_lineplot_peaks")
     @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter._adjust_points_for_selected_projection")
     @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.peak_overlay_points")
     def test_on_peaks_workspace_selected(
-        self,
-        mock_peak_overlay_points,
-        mock_adjust_points_projection,
-        mock_refresh_lineplot_peaks,
-        mock_set_peaks_workspaces,
-        mock_projected_positions,
+        self, mock_peak_overlay_points, mock_adjust_points_projection, mock_refresh_lineplot_peaks, mock_set_peaks_workspaces
     ):
         mock_peak_overlay_points.return_value = [[DetectorPeaks([Peak(50, np.zeros(3), (1, 1, 1), 100, 1000)])]]
         mock_adjust_points_projection.return_value = [mock_peak_overlay_points()[0][0].location]
+        self._model._current_projected_positions = np.array([np.zeros(3)])
+        self._model._detector_ids = np.array([50, 52])
+        self._model._is_valid = np.array([True, True])
         self._presenter.on_peaks_workspace_selected()
         mock_refresh_lineplot_peaks.assert_called_once()
         self._mock_view.clear_overlay_meshes.assert_called_once()
         mock_set_peaks_workspaces.assert_called_once()
-        mock_projected_positions.assert_called_once()
         self._mock_view.plot_overlay_mesh.assert_called_once()
 
     @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.peak_overlay_points")
