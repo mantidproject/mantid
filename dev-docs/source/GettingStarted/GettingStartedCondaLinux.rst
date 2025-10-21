@@ -34,6 +34,10 @@ Setup the mantid conda environment
 ----------------------------------
 .. include:: ./MantidDeveloperCondaSetup.rst
 
+Setup the mantid pixi environment
+---------------------------------
+.. include:: ./MantidDeveloperPixiSetup.rst
+
 Configure CMake and generate build files
 ----------------------------------------
 * Still using the terminal.

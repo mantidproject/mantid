@@ -39,6 +39,10 @@ Open a terminal or powershell with conda enabled. Here are two ways to do this:
 
 .. include:: ./MantidDeveloperCondaSetup.rst
 
+Setup the mantid pixi environment
+---------------------------------
+.. include:: ./MantidDeveloperPixiSetup.rst
+
 Configure CMake and generate build files
 ----------------------------------------
 * You can configure CMake using an MS Visual Studio or Ninja generator. Choose one of the following:
