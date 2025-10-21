@@ -128,6 +128,7 @@ class FullInstrumentViewPresenter:
             # Plot orange sphere at the origin
             # origin = pv.Sphere(radius=0.1, center=[0, 0, 0])
             # self._view.add_simple_shape(origin, colour="orange", pickable=False)
+            self._model.reset_cached_projection_positions()
             self._apply_projection_state(False, self._model.detector_positions)
             return
 
@@ -136,6 +137,7 @@ class FullInstrumentViewPresenter:
 
     def _adjust_points_for_selected_projection(self, points: np.ndarray, projection_type: str) -> np.ndarray:
         if projection_type.startswith("3D"):
+            self._model.reset_cached_projection_positions()
             return points
 
         is_spherical = True

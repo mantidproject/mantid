@@ -58,6 +58,7 @@ class FullInstrumentViewModel:
         spectrum_number = np.array(detector_info_table.column("Spectrum No"))
         self._is_valid = (self._is_monitor == "no") & (spectrum_number != -1)
         self._monitor_positions = self._detector_positions[self._is_monitor == "yes"]
+        self._current_projected_positions = self.detector_positions
 
         # Initialise with zeros
         self._counts = np.zeros_like(self._detector_ids)
@@ -200,6 +201,9 @@ class FullInstrumentViewModel:
             )
             picked_info.append(det_info)
         return picked_info
+
+    def reset_cached_projection_positions(self) -> None:
+        self._current_projected_positions = self.detector_positions
 
     def calculate_projection(self, is_spherical: bool, axis: list[int], positions: np.ndarray) -> np.ndarray:
         """Calculate the 2D projection with the specified axis. Can be either cylindrical or spherical."""

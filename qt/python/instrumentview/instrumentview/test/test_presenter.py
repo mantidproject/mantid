@@ -41,6 +41,14 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._mock_view.add_main_mesh.assert_called()
         mock_set_peaks_ws.assert_called_once()
 
+    @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.reset_cached_projection_positions")
+    @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.set_peaks_workspaces")
+    def test_3d_projection_resets_cache(self, mock_set_peaks_ws, mock_reset_cache):
+        self.assertEquals("3D", self._presenter._PROJECTION_OPTIONS[0])
+        self._presenter.on_projection_option_selected(0)
+        mock_reset_cache.assert_called_once()
+        self._mock_view.add_main_mesh.assert_called()
+
     @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.create_poly_data_mesh")
     @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.calculate_projection")
     def test_projection_option_axis(self, mock_calculate_projection, mock_create_poly_data_mesh):
