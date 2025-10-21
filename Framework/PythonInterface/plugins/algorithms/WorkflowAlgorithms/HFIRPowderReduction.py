@@ -54,10 +54,6 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
         fileNameBool = self.getProperty("SampleFilename").value
         IPTSBool = self.getProperty("SampleIPTS").value
         runNumbersBool = len(self.getProperty("SampleRunNumbers").value)
-        # if (IPTSBool != Property.EMPTY_INT or runNumbersBool != 0) and fileNameBool:
-        #     issues["SampleFilename"] = "Too many fields filled: Must specify either SampleFilename or SampleIPTS AND SampleRunNumbers"
-        #     issues["SampleIPTS"] = "Too many fields filled: Must specify either SampleFilename or SampleIPTS AND SampleRunNumbers"
-        #     issues["SampleRunNumbers"] = "Too many fields filled: Must specify either SampleFilename or SampleIPTS AND SampleRunNumbers"
         if IPTSBool == Property.EMPTY_INT and runNumbersBool == 0 and not fileNameBool:
             issues["SampleFilename"] = "Missing required field: Must specify either SampleFilename or SampleIPTS AND SampleRunNumbers"
             issues["SampleIPTS"] = "Missing required field: Must specify either SampleFilename or SampleIPTS AND SampleRunNumbers"
@@ -72,11 +68,15 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
                 issues[f"{field}Filename"] = (
                     f"Too many fields filled: Must specify either {field}Filename or {field}IPTS AND {field}RunNumbers"
                 )
-                issues[f"{field}IPTS"] = f"Too many fields filled: Must specify either {field}Filename or {field}IPTS AND {field}RunNumbers"
-                issues[f"{field}RunNumbers"] = (
-                    f"Too many fields filled: Must specify either {field}Filename or {field}IPTS AND {field}RunNumbers"
-                )
-            if not (IPTSBool == Property.EMPTY_INT and runNumbersBool == 0):
+                if IPTSBool != Property.EMPTY_INT:
+                    issues[f"{field}IPTS"] = (
+                        f"Too many fields filled: Must specify either {field}Filename or {field}IPTS AND {field}RunNumbers"
+                    )
+                if runNumbersBool:
+                    issues[f"{field}RunNumbers"] = (
+                        f"Too many fields filled: Must specify either {field}Filename or {field}IPTS AND {field}RunNumbers"
+                    )
+            elif not (IPTSBool == Property.EMPTY_INT and runNumbersBool == 0):
                 if IPTSBool != Property.EMPTY_INT:
                     issues[f"{field}RunNumbers"] = f"{field}RunNumbers must be provided if {field}IPTS is provided"
                 if runNumbersBool:
