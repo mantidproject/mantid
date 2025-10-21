@@ -19,7 +19,7 @@ Install `Miniforge <https://github.com/conda-forge/miniforge/releases>`_
 
 Setup the mantid conda environment
 ----------------------------------
-.. include:: ./MantidDeveloperSetup.rst
+.. include:: ./MantidDeveloperCondaSetup.rst
 
 Configure CMake and generate build files
 ----------------------------------------
