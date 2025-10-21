@@ -328,7 +328,7 @@ void AlignAndFocusPowderSlim::exec() {
                                                          block_logs);
 
   const auto timeSplitter = this->timeSplitterFromSplitterWorkspace(wksp->run().startTime());
-  const auto roi = this->getStartingTimeROI(wksp);
+  const auto filterROI = this->getFilterROI(wksp);
   // determine the pulse indices from the time and splitter workspace
   this->progress(.15, "Determining pulse indices");
 
@@ -370,7 +370,7 @@ void AlignAndFocusPowderSlim::exec() {
   g_log.debug() << (DISK_CHUNK / GRAINSIZE_EVENTS) << " threads per chunk\n";
 
   if (timeSplitter.empty()) {
-    const auto pulse_indices = this->determinePulseIndices(wksp, roi);
+    const auto pulse_indices = this->determinePulseIndices(wksp, filterROI);
 
     auto progress = std::make_shared<API::Progress>(this, .17, .9, num_banks_to_read);
     ProcessBankTask task(bankEntryNames, h5file, is_time_filtered, wksp, m_calibration, m_masked,
@@ -388,7 +388,7 @@ void AlignAndFocusPowderSlim::exec() {
     h5file.close();
 
     // update the run TimeROI and remove log data outside the time ROI
-    wksp->mutableRun().setTimeROI(roi);
+    wksp->mutableRun().setTimeROI(filterROI);
     wksp->mutableRun().removeDataOutsideTimeROI();
 
     setProperty(PropertyNames::OUTPUT_WKSP, std::move(wksp));
@@ -406,7 +406,7 @@ void AlignAndFocusPowderSlim::exec() {
     }
 
     // determine the pulse indices from the time and splitter workspace
-    const auto target_to_pulse_indices = this->determinePulseIndicesTargets(wksp, roi, timeSplitter);
+    const auto target_to_pulse_indices = this->determinePulseIndicesTargets(wksp, filterROI, timeSplitter);
 
     auto progress = std::make_shared<API::Progress>(this, .17, .9, num_banks_to_read * workspaceIndices.size());
 
@@ -426,11 +426,12 @@ void AlignAndFocusPowderSlim::exec() {
 
     // add the workspaces to the ADS
     for (size_t idx = 0; idx < workspaceIndices.size(); ++idx) {
+      // create the target time ROI combining the splitter and filter ROIs
       auto target_roi = timeSplitter.getTimeROI(workspaceIndices[idx]);
       if (target_roi.useAll())
-        target_roi = roi; // use the splitter ROI if no time filtering is specified
-      else if (!roi.useAll())
-        target_roi.update_intersection(roi); // otherwise intersect with the splitter ROI
+        target_roi = filterROI; // use the splitter ROI if no time filtering is specified
+      else if (!filterROI.useAll())
+        target_roi.update_intersection(filterROI); // otherwise intersect with the splitter ROI
 
       // update the run TimeROI and remove log data outside the time ROI
       workspaces[idx]->mutableRun().setTimeROI(target_roi);
@@ -588,7 +589,14 @@ API::MatrixWorkspace_sptr AlignAndFocusPowderSlim::convertToTOF(API::MatrixWorks
   return wksp;
 }
 
-Kernel::TimeROI AlignAndFocusPowderSlim::getStartingTimeROI(const API::MatrixWorkspace_sptr &wksp) {
+/**
+ * @brief Create a TimeROI based on the filtering properties set in the algorithm. FilterByTimeStart, FilterByTimeStop
+ * and FilterBadPulses
+ *
+ * @param wksp The workspace to get the run start time and logs from.
+ * @return Kernel::TimeROI The constructed TimeROI for filtering.
+ */
+Kernel::TimeROI AlignAndFocusPowderSlim::getFilterROI(const API::MatrixWorkspace_sptr &wksp) {
   Kernel::TimeROI roi;
   const auto startOfRun = wksp->run().startTime();
 
@@ -633,14 +641,14 @@ Kernel::TimeROI AlignAndFocusPowderSlim::getStartingTimeROI(const API::MatrixWor
  * @brief Determine the pulse indices for a given workspace and time ROI.
  *
  * @param wksp The workspace to get the pulse times from.
- * @param roi The time ROI to use for filtering.
+ * @param filterROI The time ROI to use for filtering.
  * @return std::vector<PulseROI> A vector of PulseROI representing the pulse indices to include.
  */
 std::vector<PulseROI> AlignAndFocusPowderSlim::determinePulseIndices(const API::MatrixWorkspace_sptr &wksp,
-                                                                     const TimeROI &roi) {
+                                                                     const TimeROI &filterROI) {
 
   std::vector<PulseROI> pulse_indices;
-  if (roi.useAll()) {
+  if (filterROI.useAll()) {
     pulse_indices.emplace_back(0, std::numeric_limits<size_t>::max());
   } else {
     is_time_filtered = true;
@@ -653,7 +661,7 @@ std::vector<PulseROI> AlignAndFocusPowderSlim::determinePulseIndices(const API::
     const auto pulse_times =
         std::make_unique<std::vector<Mantid::Types::Core::DateAndTime>>(frequency_log->timesAsVector());
 
-    pulse_indices = roi.calculate_indices(*pulse_times);
+    pulse_indices = filterROI.calculate_indices(*pulse_times);
     if (pulse_indices.empty())
       throw std::invalid_argument("No valid pulse time indices found for filtering");
   }
@@ -665,13 +673,13 @@ std::vector<PulseROI> AlignAndFocusPowderSlim::determinePulseIndices(const API::
  * @brief Determine the pulse indices for a given workspace, time ROI, and time splitter.
  *
  * @param wksp The workspace to get the pulse times from.
- * @param roi The time ROI to use for filtering.
+ * @param filterROI The time ROI to use for filtering.
  * @param timeSplitter The time splitter to use for determining target indices and additional time ROIs.
  * @return std::vector<std::pair<int, PulseROI>> A vector of pairs, where each pair contains a target index and a
  * PulseROI representing the pulse indices to include.
  */
 std::vector<std::pair<int, PulseROI>>
-AlignAndFocusPowderSlim::determinePulseIndicesTargets(const API::MatrixWorkspace_sptr &wksp, const TimeROI &roi,
+AlignAndFocusPowderSlim::determinePulseIndicesTargets(const API::MatrixWorkspace_sptr &wksp, const TimeROI &filterROI,
                                                       const TimeSplitter &timeSplitter) {
   // get pulse times from frequency log on workspace
   const auto frequency_log = dynamic_cast<const TimeSeriesProperty<double> *>(wksp->run().getProperty("frequency"));
@@ -682,17 +690,17 @@ AlignAndFocusPowderSlim::determinePulseIndicesTargets(const API::MatrixWorkspace
       std::make_unique<std::vector<Mantid::Types::Core::DateAndTime>>(frequency_log->timesAsVector());
 
   std::vector<PulseROI> pulse_indices;
-  if (roi.useAll()) {
+  if (filterROI.useAll()) {
     pulse_indices.emplace_back(0, std::numeric_limits<size_t>::max());
   } else {
-    pulse_indices = roi.calculate_indices(*pulse_times);
+    pulse_indices = filterROI.calculate_indices(*pulse_times);
     if (pulse_indices.empty())
       throw std::invalid_argument("No valid pulse time indices found for filtering");
   }
 
   const auto target_to_pulse_indices = timeSplitter.calculate_target_indices(*pulse_times);
 
-  // calculate intersection of target pulse indices with overall pulse indices, create new vector
+  // calculate intersection of target pulse indices and time filter pulse indices (removes pulses outside filterROI)
   std::vector<std::pair<int, PulseROI>> intersected_target_pulse_indices;
   auto pulse_it = pulse_indices.cbegin();
   for (const auto &target_pair : target_to_pulse_indices) {

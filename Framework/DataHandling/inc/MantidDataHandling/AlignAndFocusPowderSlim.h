@@ -41,11 +41,11 @@ private:
   void loadCalFile(const API::Workspace_sptr &inputWS, const std::string &filename,
                    const std::vector<double> &difc_focus);
   std::vector<std::pair<size_t, size_t>> determinePulseIndices(const API::MatrixWorkspace_sptr &wksp,
-                                                               const Kernel::TimeROI &roi);
+                                                               const Kernel::TimeROI &filterROI);
   static std::vector<std::pair<int, std::pair<size_t, size_t>>>
-  determinePulseIndicesTargets(const API::MatrixWorkspace_sptr &wksp, const Kernel::TimeROI &roi,
+  determinePulseIndicesTargets(const API::MatrixWorkspace_sptr &wksp, const Kernel::TimeROI &filterROI,
                                const DataObjects::TimeSplitter &timeSplitter);
-  Kernel::TimeROI getStartingTimeROI(const API::MatrixWorkspace_sptr &wksp);
+  Kernel::TimeROI getFilterROI(const API::MatrixWorkspace_sptr &wksp);
   DataObjects::TimeSplitter timeSplitterFromSplitterWorkspace(const Types::Core::DateAndTime &);
 
   std::map<detid_t, double> m_calibration; // detid: 1/difc
