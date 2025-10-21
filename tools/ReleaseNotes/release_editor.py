@@ -83,25 +83,26 @@ def gather_release_note_directories(path: pathlib.Path) -> List[pathlib.Path]:
 
 
 def get_pr_number_and_link(release_note_path: pathlib.Path, git_token: str) -> Tuple[str, str]:
-    commit_hash = get_file_creation_commit(release_note_path)
-    headers = {"Authorization": f"token {git_token}", "Accept": "application/vnd.github.groot-preview+json"}
-    url = f"https://api.github.com/repos/{GIT_REPO}/commits/{commit_hash}/pulls"
-    response = requests.get(url, headers=headers)
-    if response.status_code == 200:
-        pulls = response.json()
-        if pulls:
-            pr = pulls[0]
+    commit_hashes = get_file_creation_commits(release_note_path)
+    for commit_hash in commit_hashes:
+        headers = {"Authorization": f"token {git_token}", "Accept": "application/vnd.github.groot-preview+json"}
+        url = f"https://api.github.com/repos/{GIT_REPO}/commits/{commit_hash}/pulls"
+        response = requests.get(url, headers=headers)
+        if response.status_code != 200:
+            continue
+
+        pr = response.json()[0]
+        if pr["base"]["ref"] == "main":
             return pr["number"], pr["html_url"]
 
     return "", ""
 
 
-def get_file_creation_commit(release_note_path: pathlib.Path) -> str:
+def get_file_creation_commits(release_note_path: pathlib.Path) -> List[str]:
     result = subprocess.run(
         ["git", "log", "--diff-filter=A", "--pretty=format:%H", "--", release_note_path], capture_output=True, text=True
     )
-
-    return result.stdout.split("\n")[-1].strip()
+    return result.stdout.split("\n")
 
 
 # This is the method for iterating through release notes in a folder and collating the notes into one object
