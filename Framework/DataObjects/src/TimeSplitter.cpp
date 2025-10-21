@@ -683,49 +683,31 @@ void TimeSplitter::splitEventVec(const std::function<const DateAndTime(const Eve
   Returns a vector of pairs, where each pair contains a target index and a pair of size_t representing the start and
  stop indices in the input times vector that correspond to that target.
 
-  If the TimeSplitter is empty, the entire range of times is returned with NO_TARGET.
  *
  * @param times
  * @return std::vector<std::pair<int, std::pair<size_t, size_t>>>
  */
 std::vector<std::pair<int, std::pair<size_t, size_t>>>
 TimeSplitter::calculate_target_indices(const std::vector<DateAndTime> &times) const {
+  const auto splittingIntervals = this->getSplittingIntervals(false);
+
   std::vector<std::pair<int, std::pair<size_t, size_t>>> indices;
-  if (this->empty()) {
-    // if the TimeSplitter is empty, then we just return the whole range with NO_TARGET
-    indices.emplace_back(NO_TARGET, std::make_pair(0, times.size()));
-    return indices;
-  }
-  indices.reserve(m_roi_map.size());
+  indices.reserve(splittingIntervals.size());
 
-  auto it = m_roi_map.cbegin();
-  for (; it != std::prev(m_roi_map.cend()); it++) {
-    DateAndTime intervalStart = it->first;
-    DateAndTime intervalStop = std::next(it)->first;
-    int target = it->second;
-    if (target == NO_TARGET)
-      continue;
-
-    const auto startIdx = std::lower_bound(times.cbegin(), times.cend(), intervalStart);
+  for (const auto &it : splittingIntervals) {
+    const auto startIdx = std::lower_bound(times.cbegin(), times.cend(), it.start());
     if (startIdx != times.cend()) {
-      const auto stopIdx = std::lower_bound(times.cbegin(), times.cend(), intervalStop);
+      const auto stopIdx = std::lower_bound(times.cbegin(), times.cend(), it.stop());
       if (stopIdx != times.cend()) {
         if (startIdx != stopIdx) {
-          indices.emplace_back(
-              target, std::make_pair(std::distance(times.cbegin(), startIdx), std::distance(times.cbegin(), stopIdx)));
+          indices.emplace_back(it.index(), std::make_pair(std::distance(times.cbegin(), startIdx),
+                                                          std::distance(times.cbegin(), stopIdx)));
         }
       } else {
         indices.emplace_back(
-            target, std::make_pair(std::distance(times.cbegin(), startIdx), std::numeric_limits<size_t>::max()));
+            it.index(), std::make_pair(std::distance(times.cbegin(), startIdx), std::numeric_limits<size_t>::max()));
       }
     }
-  }
-
-  if (it->second != NO_TARGET) {
-    std::ostringstream err;
-    err << "Open-ended time interval is invalid in event filtering: " << it->first << " - ?,"
-        << " target index: " << it->second << std::endl;
-    throw std::runtime_error(err.str());
   }
 
   return indices;
