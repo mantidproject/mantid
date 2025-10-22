@@ -1,5 +1,5 @@
 from vtkmodules.vtkInteractionStyle import vtkInteractorStyleRubberBand3D, vtkInteractorStyleRubberBand2D, vtkInteractorStyleRubberBandZoom
-from vtk import vtkCommand
+from vtkmodules.vtkCommonCore import vtkCommand
 
 
 class CustomInteractorStyleRubberBand3D(vtkInteractorStyleRubberBand3D):
