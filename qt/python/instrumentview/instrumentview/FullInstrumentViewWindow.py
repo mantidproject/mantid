@@ -19,8 +19,11 @@ from qtpy.QtWidgets import (
     QCheckBox,
     QTextEdit,
     QPushButton,
+    QListWidget,
+    QListWidgetItem,
+    QAbstractItemView,
 )
-from qtpy.QtGui import QPalette, QDoubleValidator, QMovie
+from qtpy.QtGui import QDoubleValidator, QMovie, QDragEnterEvent, QDropEvent, QDragMoveEvent, QColor, QPalette
 from qtpy.QtCore import Qt, QEvent, QSize
 from superqt import QDoubleRangeSlider
 from pyvistaqt import BackgroundPlotter
@@ -36,6 +39,28 @@ import pyvista as pv
 from pyvista.plotting.picking import RectangleSelection
 from pyvista.plotting.opts import PickerType
 import os
+
+
+class PeaksWorkspaceListWidget(QListWidget):
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.setDragDropMode(QAbstractItemView.DropOnly)
+
+    def dragEnterEvent(self, event: QDragEnterEvent):
+        if event.mimeData().hasText():
+            event.acceptProposedAction()
+
+    def dragMoveEvent(self, event: QDragMoveEvent):
+        if event.mimeData().hasText():
+            event.acceptProposedAction()
+
+    def dropEvent(self, event: QDropEvent):
+        drop_text = event.mimeData().text()
+        for i in range(self.count()):
+            item = self.item(i)
+            if item.text() == drop_text:
+                item.setCheckState(Qt.Checked)
+        event.acceptProposedAction()
 
 
 class FullInstrumentViewWindow(QMainWindow):
@@ -132,6 +157,12 @@ class FullInstrumentViewWindow(QMainWindow):
         projection_layout.addWidget(self._projection_combo_box)
         projection_layout.addWidget(self._reset_projection)
 
+        peak_ws_group_box = QGroupBox("Peaks Workspaces")
+        peak_v_layout = QVBoxLayout(peak_ws_group_box)
+        self._peak_ws_list = PeaksWorkspaceListWidget(self)
+        self._peak_ws_list.setSizeAdjustPolicy(QListWidget.AdjustToContents)
+        peak_v_layout.addWidget(self._peak_ws_list)
+
         self.status_group_box = QGroupBox("Status")
         status_layout = QHBoxLayout(self.status_group_box)
         status_label = QLabel("Loading ...")
@@ -158,6 +189,7 @@ class FullInstrumentViewWindow(QMainWindow):
         self._setup_units_options(units_vbox)
         units_group_box.setLayout(units_vbox)
         options_vertical_layout.addWidget(units_group_box)
+        options_vertical_layout.addWidget(peak_ws_group_box)
         options_vertical_layout.addWidget(QSplitter(Qt.Horizontal))
 
         options_vertical_layout.addWidget(self.status_group_box)
@@ -165,6 +197,8 @@ class FullInstrumentViewWindow(QMainWindow):
         left_column_layout.addStretch()
 
         self.interactor_style = CustomInteractorStyleZoomAndSelect()
+        self._overlay_meshes = []
+        self._lineplot_overlays = []
 
     def check_sum_spectra_checkbox(self) -> None:
         self._sum_spectra_checkbox.setChecked(True)
@@ -216,7 +250,7 @@ class FullInstrumentViewWindow(QMainWindow):
 
     def _add_connections_to_edits_and_slider(self, min_edit: QLineEdit, max_edit: QLineEdit, slider, presenter_callback: Callable):
         def format_float(value):
-            return f"{value:.4f}".rstrip("0").rstrip(".") if "." in f"{value:.4f}" else f"{value:.4f}"
+            return f"{value:.4f}".rstrip("0").rstrip(".")
 
         def set_edits(limits):
             min, max = limits
@@ -265,6 +299,8 @@ class FullInstrumentViewWindow(QMainWindow):
         for unit in self._presenter.available_unit_options():
             self._units_combo_box.addItem(unit)
         self._integration_limit_group_box.setTitle(self._presenter.workspace_display_unit)
+        self.main_plotter.set_color_cycler(self._presenter._COLOURS)
+        self.refresh_peaks_ws_list()
 
     def setup_connections_to_presenter(self) -> None:
         self._projection_combo_box.currentIndexChanged.connect(self._presenter.on_projection_option_selected)
@@ -275,6 +311,7 @@ class FullInstrumentViewWindow(QMainWindow):
         self._units_combo_box.currentIndexChanged.connect(self._presenter.on_unit_option_selected)
         self._export_workspace_button.clicked.connect(self._presenter.on_export_workspace_clicked)
         self._sum_spectra_checkbox.clicked.connect(self._presenter.on_sum_spectra_checkbox_clicked)
+        self._peak_ws_list.itemChanged.connect(self._presenter.on_peaks_workspace_selected)
 
         self._add_connections_to_edits_and_slider(
             self._contour_range_min_edit,
@@ -305,6 +342,37 @@ class FullInstrumentViewWindow(QMainWindow):
         )
         hBox.addWidget(self._sum_spectra_checkbox)
         parent.addLayout(hBox)
+
+    def refresh_peaks_ws_list(self) -> None:
+        # Maintain any peaks workspaces that are checked
+        current_checked_peak_workspaces: list[str] = []
+        for list_i in range(self._peak_ws_list.count()):
+            list_item = self._peak_ws_list.item(list_i)
+            if list_item.checkState() > 0:
+                current_checked_peak_workspaces.append(list_item.text())
+
+        self._peak_ws_list.blockSignals(True)
+        self._peak_ws_list.clear()
+        peaks_workspaces = self._presenter.peaks_workspaces_in_ads()
+        for peaks_ws_index in range(len(peaks_workspaces)):
+            peaks_ws = peaks_workspaces[peaks_ws_index]
+            list_item = QListWidgetItem(peaks_ws, self._peak_ws_list)
+            if peaks_ws in current_checked_peak_workspaces:
+                list_item.setCheckState(Qt.Checked)
+            else:
+                list_item.setCheckState(Qt.Unchecked)
+        self._peak_ws_list.blockSignals(False)
+        self._peak_ws_list.adjustSize()
+
+    def refresh_peaks_ws_list_colours(self) -> None:
+        picked_index = 0
+        for list_i in range(self._peak_ws_list.count()):
+            list_item = self._peak_ws_list.item(list_i)
+            if list_item.checkState() > 0:
+                list_item.setForeground(QColor(self._presenter._COLOURS[picked_index % len(self._presenter._COLOURS)]))
+                picked_index += 1
+            else:
+                list_item.setForeground(self._peak_ws_list.palette().color(QPalette.Text))
 
     def set_unit_combo_box_index(self, index: int) -> None:
         self._units_combo_box.setCurrentIndex(index)
@@ -357,6 +425,9 @@ class FullInstrumentViewWindow(QMainWindow):
     def set_projection_combo_options(self, default_index: int, options: list[str]) -> None:
         self._projection_combo_box.addItems(options)
         self._projection_combo_box.setCurrentIndex(default_index)
+
+    def current_selected_projection(self) -> str:
+        return self._projection_combo_box.currentText()
 
     def add_simple_shape(self, mesh: PolyData, colour=None, pickable=False) -> None:
         """Draw the given mesh in the main plotter window"""
@@ -449,9 +520,10 @@ class FullInstrumentViewWindow(QMainWindow):
                 self._detector_spectrum_axes.plot(workspace, specNum=spec, label=f"Spectrum {spec}" if not sum_spectra else None)
             if not sum_spectra:
                 self._detector_spectrum_axes.legend(fontsize=8.0).set_draggable(True)
+            for line in self._lineplot_overlays:
+                self._detector_spectrum_axes.add_line(line)
 
-        self._detector_spectrum_fig.tight_layout()
-        self._detector_figure_canvas.draw()
+        self.redraw_lineplot()
 
     def set_selected_detector_info(self, detector_infos: list[DetectorInfo]) -> None:
         """For a list of detectors, with their info wrapped up in a class, update all of the info text boxes"""
@@ -476,3 +548,58 @@ class FullInstrumentViewWindow(QMainWindow):
     ) -> None:
         """Set the text in one of the detector info boxes"""
         edit_box.setPlainText(",".join(property_lambda(d) for d in detector_infos))
+
+    def selected_peaks_workspaces(self) -> list[str]:
+        return [
+            self._peak_ws_list.item(row_index).text()
+            for row_index in range(self._peak_ws_list.count())
+            if self._peak_ws_list.item(row_index).checkState() > 0
+        ]
+
+    def clear_overlay_meshes(self) -> None:
+        for mesh in self._overlay_meshes:
+            self.main_plotter.remove_actor(mesh[0])
+            self.main_plotter.remove_actor(mesh[1])
+        self._overlay_meshes.clear()
+
+    def clear_lineplot_overlays(self) -> None:
+        for line in self._lineplot_overlays:
+            line.remove()
+        self._lineplot_overlays.clear()
+        for text in self._detector_spectrum_axes.texts:
+            text.remove()
+
+    def plot_overlay_mesh(self, positions: np.ndarray, labels: list[str], colour: str) -> None:
+        points_actor = self.main_plotter.add_points(positions, color=colour, point_size=15, render_points_as_spheres=True, opacity=0.2)
+        labels_actor = self.main_plotter.add_point_labels(
+            positions,
+            labels,
+            font_size=15,
+            font_family="times",
+            show_points=False,
+            always_visible=True,
+            fill_shape=False,
+            shape_opacity=0,
+            text_color=colour,
+        )
+        self._overlay_meshes.append((points_actor, labels_actor))
+
+    def plot_lineplot_overlay(self, x_values: list[float], labels: list[str], colour: str) -> None:
+        for x, label in zip(x_values, labels):
+            self._lineplot_overlays.append(self._detector_spectrum_axes.axvline(x, color=colour, linestyle="--"))
+            self._detector_spectrum_axes.text(
+                x,
+                0.99,
+                label,
+                transform=self._detector_spectrum_axes.get_xaxis_transform(),
+                color=colour,
+                ha="right",
+                va="top",
+                fontsize=8,
+                rotation=90,
+            )
+        self.redraw_lineplot()
+
+    def redraw_lineplot(self) -> None:
+        self._detector_spectrum_fig.tight_layout()
+        self._detector_figure_canvas.draw()

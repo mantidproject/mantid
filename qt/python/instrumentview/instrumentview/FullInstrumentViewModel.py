@@ -7,9 +7,12 @@
 from instrumentview.Detectors import DetectorInfo
 import instrumentview.Projections.SphericalProjection as iv_spherical
 import instrumentview.Projections.CylindricalProjection as iv_cylindrical
+from instrumentview.Peaks.Peak import Peak
+from instrumentview.Peaks.DetectorPeaks import DetectorPeaks
 
-from mantid.dataobjects import Workspace2D
+from mantid.dataobjects import Workspace2D, PeaksWorkspace
 from mantid.simpleapi import CreateDetectorTable, ExtractSpectra, ConvertUnits, AnalysisDataService, SumSpectra, Rebin
+from itertools import groupby
 import numpy as np
 
 
@@ -24,6 +27,7 @@ class FullInstrumentViewModel:
     line_plot_workspace = None
     _workspace_x_unit: str
     _workspace_x_unit_display: str
+    _selected_peaks_workspaces: list[PeaksWorkspace]
 
     def __init__(self, workspace: Workspace2D):
         """For the given workspace, calculate detector positions, the map from detector indices to workspace indices, and integrated
@@ -32,6 +36,7 @@ class FullInstrumentViewModel:
         x_unit = workspace.getAxis(0).getUnit()
         self._workspace_x_unit = x_unit.unitID()
         self._workspace_x_unit_display = f"{str(x_unit.caption())} ({str(x_unit.symbol())})"
+        self._selected_peaks_workspaces = []
 
     def setup(self):
         component_info = self._workspace.componentInfo()
@@ -53,11 +58,11 @@ class FullInstrumentViewModel:
         spectrum_number = np.array(detector_info_table.column("Spectrum No"))
         self._is_valid = (self._is_monitor == "no") & (spectrum_number != -1)
         self._monitor_positions = self._detector_positions[self._is_monitor == "yes"]
+        self._current_projected_positions = self.detector_positions
 
         # Initialise with zeros
         self._counts = np.zeros_like(self._detector_ids)
         self._counts_limits = (0, 0)
-        self._detector_projection_positions = np.zeros_like(self._detector_positions)
         self._detector_is_picked = np.full(len(self._detector_ids[self._is_valid]), False)
 
         # Get min and max integration values
@@ -104,10 +109,6 @@ class FullInstrumentViewModel:
         return self._detector_positions[self._is_valid]
 
     @property
-    def detector_projection_positions(self) -> np.ndarray:
-        return self._detector_projection_positions[self._is_valid]
-
-    @property
     def detector_ids(self) -> np.ndarray:
         return self._detector_ids[self._is_valid]
 
@@ -143,6 +144,10 @@ class FullInstrumentViewModel:
         except (ValueError, AssertionError):
             return
         self._counts_limits = limits
+
+    @property
+    def current_projected_positions(self) -> np.ndarray:
+        return self._current_projected_positions
 
     @property
     def integration_limits(self) -> tuple[float, float]:
@@ -197,15 +202,21 @@ class FullInstrumentViewModel:
             picked_info.append(det_info)
         return picked_info
 
-    def calculate_projection(self, is_spherical: bool, axis: list[int]):
+    def reset_cached_projection_positions(self) -> None:
+        self._current_projected_positions = self.detector_positions
+
+    def calculate_projection(self, is_spherical: bool, axis: list[int], positions: np.ndarray) -> np.ndarray:
         """Calculate the 2D projection with the specified axis. Can be either cylindrical or spherical."""
         projection = (
-            iv_spherical.SphericalProjection(self._sample_position, self._root_position, self._detector_positions, np.array(axis))
+            iv_spherical.SphericalProjection(self._sample_position, self._root_position, positions, np.array(axis))
             if is_spherical
-            else iv_cylindrical.CylindricalProjection(self._sample_position, self._root_position, self._detector_positions, np.array(axis))
+            else iv_cylindrical.CylindricalProjection(self._sample_position, self._root_position, positions, np.array(axis))
         )
-        self._detector_projection_positions[:, :2] = projection.positions()  # Assign only x and y coordinate
-        return self._detector_projection_positions
+
+        projected_positions = np.zeros_like(positions)
+        projected_positions[:, :2] = projection.positions()  # Assign only x and y coordinate
+        self._current_projected_positions = projected_positions
+        return self._current_projected_positions
 
     def extract_spectra_for_line_plot(self, unit: str, sum_spectra: bool) -> None:
         workspace_indices = self.picked_workspace_indices
@@ -242,3 +253,41 @@ class FullInstrumentViewModel:
             return
         name_exported_ws = f"instrument_view_selected_spectra_{self._workspace.name()}"
         AnalysisDataService.addOrReplace(name_exported_ws, self.line_plot_workspace)
+
+    def peaks_workspaces_in_ads(self) -> list[PeaksWorkspace]:
+        ads = AnalysisDataService.Instance()
+        workspaces_in_ads = ads.retrieveWorkspaces(ads.getObjectNames())
+        return [
+            pws
+            for pws in workspaces_in_ads
+            if "PeaksWorkspace" in str(type(pws)) and pws.getInstrument().getFullName() == self._workspace.getInstrument().getFullName()
+        ]
+
+    def set_peaks_workspaces(self, peaks_workspace_names: list[str]) -> None:
+        self._selected_peaks_workspaces = AnalysisDataService.Instance().retrieveWorkspaces(peaks_workspace_names)
+
+    def peak_overlay_points(self) -> list[list[DetectorPeaks]]:
+        detector_info = self._workspace.detectorInfo()
+        peaks_grouped_by_ws = []
+        for pws in self._selected_peaks_workspaces:
+            peaks = []
+            peaks_dict = pws.toDict()
+            detector_ids = peaks_dict["DetID"]
+            hkls = zip(peaks_dict["h"], peaks_dict["k"], peaks_dict["l"])
+            positions = [np.array(detector_info.position(detector_info.indexOf(id))) for id in detector_ids]
+            tofs = peaks_dict["TOF"]
+            dspacings = peaks_dict["DSpacing"]
+            wavelengths = peaks_dict["Wavelength"]
+            peaks += [
+                Peak(det_id, v, hkl, tof, dspacing, wavelength, 2 * np.pi / dspacing)
+                for (det_id, v, hkl, tof, dspacing, wavelength) in zip(detector_ids, positions, hkls, tofs, dspacings, wavelengths)
+            ]
+            # Combine peaks on the same detector
+            detector_peaks = []
+            # groupby groups consecutive matches, so must be sorted
+            peaks.sort(key=lambda x: x.detector_id)
+            for det_id, peaks_for_id in groupby(peaks, lambda x: x.detector_id):
+                if det_id in self.detector_ids:
+                    detector_peaks.append(DetectorPeaks(list(peaks_for_id)))
+            peaks_grouped_by_ws.append(detector_peaks)
+        return peaks_grouped_by_ws

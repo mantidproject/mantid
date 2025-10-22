@@ -6,6 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from instrumentview.FullInstrumentViewPresenter import FullInstrumentViewPresenter
 from instrumentview.FullInstrumentViewModel import FullInstrumentViewModel
+from instrumentview.Peaks.DetectorPeaks import DetectorPeaks
+from instrumentview.Peaks.Peak import Peak
 
 import numpy as np
 from mantid.simpleapi import CreateSampleWorkspace
@@ -20,20 +22,34 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._mock_view = MagicMock()
         self._ws = CreateSampleWorkspace(OutputWorkspace="TestFullInstrumentViewPresenter")
         self._model = FullInstrumentViewModel(self._ws)
-        self._presenter = FullInstrumentViewPresenter(self._mock_view, self._model)
+        with mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.set_peaks_workspaces"):
+            self._presenter = FullInstrumentViewPresenter(self._mock_view, self._model)
         self._mock_view.reset_mock()
 
     def tearDown(self):
+        self._presenter.handle_close()
         self._ws.delete()
-        pass
+
+    def _create_detector_peaks(self, det_id: int, location: np.ndarray) -> DetectorPeaks:
+        return DetectorPeaks([Peak(det_id, location, (1, 1, 1), 100, 1000, 100, 100)])
 
     def test_projection_combo_options(self):
         _, projections = self._presenter.projection_combo_options()
         self.assertGreater(len(projections), 0)
         self.assertTrue("Spherical X" in projections)
 
-    def test_projection_option_selected(self):
+    @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.set_peaks_workspaces")
+    def test_projection_option_selected(self, mock_set_peaks_ws):
         self._presenter.on_projection_option_selected(1)
+        self._mock_view.add_main_mesh.assert_called()
+        mock_set_peaks_ws.assert_called_once()
+
+    @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.reset_cached_projection_positions")
+    @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.set_peaks_workspaces")
+    def test_3d_projection_resets_cache(self, mock_set_peaks_ws, mock_reset_cache):
+        self.assertEquals("3D", self._presenter._PROJECTION_OPTIONS[0])
+        self._presenter.on_projection_option_selected(0)
+        mock_reset_cache.assert_called_once()
         self._mock_view.add_main_mesh.assert_called()
 
     @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.create_poly_data_mesh")
@@ -166,6 +182,94 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._mock_view.close.reset_mock()
         self._presenter.replace_workspace_callback("not_my_workspace", None)
         self._mock_view.close.assert_not_called()
+
+    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.on_peaks_workspace_selected")
+    def test_reload_peaks_workspaces(self, mock_on_peaks_workspace_selected):
+        self._presenter._reload_peaks_workspaces()
+        self._mock_view.refresh_peaks_ws_list.assert_called_once()
+        mock_on_peaks_workspace_selected.assert_called_once()
+
+    @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.peaks_workspaces_in_ads")
+    def test_peaks_workspaces_in_ads(self, mock_peaks_workspaces_in_ads):
+        mock_peaks_workspaces_in_ads.return_value = [self._ws, self._ws]
+        workspaces = self._presenter.peaks_workspaces_in_ads()
+        mock_peaks_workspaces_in_ads.assert_called_once()
+        self.assertEqual([self._ws.name(), self._ws.name()], workspaces)
+
+    @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.set_peaks_workspaces")
+    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.refresh_lineplot_peaks")
+    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter._adjust_points_for_selected_projection")
+    @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.peak_overlay_points")
+    def test_on_peaks_workspace_selected(
+        self, mock_peak_overlay_points, mock_adjust_points_projection, mock_refresh_lineplot_peaks, mock_set_peaks_workspaces
+    ):
+        mock_peak_overlay_points.return_value = [[self._create_detector_peaks(50, np.zeros(3))]]
+        mock_adjust_points_projection.return_value = [mock_peak_overlay_points()[0][0].location]
+        self._model._current_projected_positions = np.array([np.zeros(3)])
+        self._model._detector_ids = np.array([50, 52])
+        self._model._is_valid = np.array([True, True])
+        self._presenter.on_peaks_workspace_selected()
+        mock_refresh_lineplot_peaks.assert_called_once()
+        self._mock_view.clear_overlay_meshes.assert_called_once()
+        mock_set_peaks_workspaces.assert_called_once()
+        self._mock_view.plot_overlay_mesh.assert_called_once()
+
+    @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.peak_overlay_points")
+    @mock.patch.object(FullInstrumentViewModel, "picked_detector_ids", new_callable=mock.PropertyMock)
+    def test_refresh_lineplot_peaks(self, mock_picked_detector_ids, mock_peak_overlay_points):
+        mock_peak_overlay_points.return_value = [[self._create_detector_peaks(50, np.zeros(3))]]
+        mock_picked_detector_ids.return_value = [50]
+        self._mock_view.current_selected_unit.return_value = self._presenter._TIME_OF_FLIGHT
+        self._presenter._update_peaks_workspaces()
+        self._presenter.refresh_lineplot_peaks()
+        mock_peak_overlay_points.assert_called_once()
+        self._mock_view.clear_lineplot_overlays.assert_called_once()
+        self._mock_view.redraw_lineplot.assert_called_once()
+        self._mock_view.plot_lineplot_overlay.assert_called_once()
+        overlay_call_args = self._mock_view.plot_lineplot_overlay.call_args[0]
+        self.assertEqual([100], overlay_call_args[0])
+        self.assertEqual(["(1, 1, 1)"], overlay_call_args[1])
+
+    @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.peak_overlay_points")
+    @mock.patch.object(FullInstrumentViewModel, "picked_detector_ids", new_callable=mock.PropertyMock)
+    def test_refresh_lineplot_peaks_q(self, mock_picked_detector_ids, mock_peak_overlay_points):
+        mock_peak_overlay_points.return_value = [[self._create_detector_peaks(50, np.zeros(3))]]
+        mock_picked_detector_ids.return_value = [50]
+        self._mock_view.current_selected_unit.return_value = self._presenter._MOMENTUM_TRANSFER
+        self._presenter._update_peaks_workspaces()
+        self._presenter.refresh_lineplot_peaks()
+        mock_peak_overlay_points.assert_called_once()
+        self._mock_view.clear_lineplot_overlays.assert_called_once()
+        self._mock_view.redraw_lineplot.assert_called_once()
+        self._mock_view.plot_lineplot_overlay.assert_called_once()
+        overlay_call_args = self._mock_view.plot_lineplot_overlay.call_args[0]
+        self.assertEqual([100], overlay_call_args[0])
+        self.assertEqual(["(1, 1, 1)"], overlay_call_args[1])
+
+    @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.peak_overlay_points")
+    @mock.patch.object(FullInstrumentViewModel, "picked_detector_ids", new_callable=mock.PropertyMock)
+    def test_refresh_lineplot_peaks_no_detector(self, mock_picked_detector_ids, mock_peak_overlay_points):
+        mock_peak_overlay_points.return_value = [[self._create_detector_peaks(50, np.zeros(3))]]
+        mock_picked_detector_ids.return_value = []
+        self._mock_view.current_selected_unit.return_value = self._presenter._TIME_OF_FLIGHT
+        self._presenter._update_peaks_workspaces()
+        self._presenter.refresh_lineplot_peaks()
+        mock_peak_overlay_points.assert_called_once()
+        self._mock_view.clear_lineplot_overlays.assert_called_once()
+        self._mock_view.redraw_lineplot.assert_called_once()
+        self._mock_view.plot_lineplot_overlay.assert_not_called()
+
+    @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.peak_overlay_points")
+    @mock.patch.object(FullInstrumentViewModel, "picked_detector_ids", new_callable=mock.PropertyMock)
+    def test_refresh_lineplot_peaks_wrong_unit(self, mock_picked_detector_ids, mock_peak_overlay_points):
+        mock_peak_overlay_points.return_value = [[self._create_detector_peaks(50, np.zeros(3))]]
+        mock_picked_detector_ids.return_value = [50]
+        self._mock_view.current_selected_unit.return_value = "Light Years"
+        self._presenter.refresh_lineplot_peaks()
+        mock_peak_overlay_points.assert_not_called()
+        self._mock_view.clear_lineplot_overlays.assert_called_once()
+        self._mock_view.redraw_lineplot.assert_called_once()
+        self._mock_view.plot_lineplot_overlay.assert_not_called()
 
 
 if __name__ == "__main__":
