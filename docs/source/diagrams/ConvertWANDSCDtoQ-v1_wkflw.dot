@@ -7,7 +7,9 @@ $param_style
   set_keep_temp   [label="Keep Temporary Workspaces is True"]
   scalings          [label="Data scaling factors"]
   scalings_background          [label="Background scaling factors"]
-
+  input_workspace  [label="InputWorkspace"]
+  bkg_workspace  [label="BackgroundWorkspace"]
+  norm_workspace  [label="NormalisationWorkspace"]
 }
 
 subgraph decisions {
@@ -46,10 +48,10 @@ temp_workspaces ->  set_keep_temp [label="yes"]
 temp_workspaces ->  sym_ops [label="no"]
 set_keep_temp -> sym_ops
 sym_ops -> flux_normalise_data
-flux_normalise_data -> scalings [label="yes"]
+input_workspace -> flux_normalise_data -> scalings [label="yes"]
 sym_ops -> flux_normalise_background
-flux_normalise_background -> scalings_background [label="yes"]
-sym_ops -> scale_normalization -> collect_UB_matrix -> collect_q_vectors -> collect_goniometer_matrixes
+bkg_workspace -> flux_normalise_background -> scalings_background [label="yes"]
+sym_ops -> norm_workspace -> scale_normalization -> collect_UB_matrix -> collect_q_vectors -> collect_goniometer_matrixes
 collect_goniometer_matrixes -> iterate_over_symops -> reference_goniometer_matrix -> iterate_over_goniometers
 iterate_over_goniometers -> transform_matrix -> mapping -> histogram
 scalings -> histogram
