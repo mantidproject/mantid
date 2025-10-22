@@ -5,10 +5,17 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/CreateDetectorTable.h"
-#include "MantidAPI/ColumnFactory.h"
-#include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/EnabledWhenWorkspaceIsType.h"
+#include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/Workspace_fwd.h"
-#include <memory>
+#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidGeometry/IComponent.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/DeltaEMode.h"
+#include "MantidKernel/UnitConversion.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -78,7 +85,7 @@ void CreateDetectorTable::exec() {
 
 void CreateDetectorTable::setTableToOutput() {
   if (table == nullptr) {
-    throw std::runtime_error("Unknown error while creating detector table for peak workspace");
+    throw std::runtime_error("Unknown error while creating detector table workspace");
   }
   API::Workspace_sptr inputWs = getProperty("InputWorkspace");
   if (getPropertyValue("DetectorTableWorkspace") == "") {
@@ -134,11 +141,7 @@ void CreateDetectorTable::setup() {
     calcQ = false;
   }
 
-  hasDiffConstants = false;
-  auto emode = ws->getEMode();
-  if (emode == DeltaEMode::Elastic) {
-    hasDiffConstants = true;
-  }
+  hasDiffConstants = (ws->getEMode() == DeltaEMode::Elastic);
 
   nrows = workspaceIndices.empty() ? static_cast<int>(ws->getNumberHistograms())
                                    : static_cast<int>(workspaceIndices.size());
@@ -203,9 +206,6 @@ void CreateDetectorTable::populateTable() {
     try {
       auto &spectrum = ws->getSpectrum(wsIndex);
       Mantid::specnum_t specNo = spectrum.getSpectrumNo();
-      const auto &ids = dynamic_cast<const std::set<int> &>(spectrum.getDetectorIDs());
-      int detId = static_cast<int>(*ids.begin());
-      std::string detIds = createTruncatedList(ids);
 
       // Geometry
       if (!spectrumInfo->hasDetectors(wsIndex))
@@ -243,11 +243,16 @@ void CreateDetectorTable::populateTable() {
         theta = sampleDist > dist ? 180.0 : 0.0;
       }
       const std::string isMonitorDisplay = isMonitor ? "yes" : "no";
+
       colValues << static_cast<int>(specNo);
+
+      const auto &ids = dynamic_cast<const std::set<int> &>(spectrum.getDetectorIDs());
       if (PickOneDetectorID) {
-        colValues << detId;
+        // Populate detector column with first det id in set
+        colValues << static_cast<int>(*ids.begin());
       } else {
-        colValues << detIds;
+        // Populate detector column with a truncated string of all det ids
+        colValues << createTruncatedList(ids);
       }
       if (isScanning) {
         std::set<int> timeIndexSet;

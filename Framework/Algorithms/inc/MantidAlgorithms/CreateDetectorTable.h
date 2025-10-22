@@ -7,22 +7,12 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/EnabledWhenWorkspaceIsType.h"
 #include "MantidAPI/ExperimentInfo.h"
-#include "MantidAPI/IPeaksWorkspace.h"
-#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectrumInfo.h"
-#include "MantidAPI/TableRow.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAlgorithms/DllConfig.h"
-#include "MantidDataObjects/TableWorkspace.h"
-#include "MantidGeometry/IComponent.h"
-#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/UnitConversion.h"
 
 namespace Mantid {
 namespace Algorithms {
