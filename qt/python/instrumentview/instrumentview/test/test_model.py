@@ -2,7 +2,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.simpleapi import CreateSampleWorkspace
+from mantid.simpleapi import CreateSampleWorkspace, CreatePeaksWorkspace
 from instrumentview.FullInstrumentViewModel import FullInstrumentViewModel
 import unittest
 from unittest import mock
@@ -20,6 +20,10 @@ class MockPosition:
 
     def __array__(self):
         return np.array([self.x, self.y, self.z])
+
+
+class PeaksWorkspaceMock(mock.MagicMock):
+    pass
 
 
 class TestFullInstrumentViewModel(unittest.TestCase):
@@ -143,7 +147,7 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         mock_projection = mock.MagicMock()
         mock_projection.positions.return_value = [[1, 2], [1, 2], [1, 2]]
         mock_projection_constructor.return_value = mock_projection
-        points = model.calculate_projection(is_spherical, axis=[0, 1, 0])
+        points = model.calculate_projection(is_spherical, axis=[0, 1, 0], positions=model.detector_positions)
         mock_projection_constructor.assert_called_once()
         self.assertTrue(all(all(point == [1, 2, 0]) for point in points))
 
@@ -386,6 +390,44 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         mock_workspace.getAxis(0).getUnit().unitID.return_value = "Wavelength"
         model = FullInstrumentViewModel(mock_workspace)
         self.assertEqual(True, model.has_unit)
+
+    @mock.patch("instrumentview.FullInstrumentViewModel.AnalysisDataService")
+    def test_peaks_workspaces_in_ads(self, mock_ads):
+        mock_ads_instance = mock_ads.Instance()
+        mock_peaks_workspace = PeaksWorkspaceMock()
+        instrument = "MyFirstInstrument"
+        mock_workspace = self._create_mock_workspace([1, 2, 3])
+        mock_workspace.getInstrument().getFullName.return_value = instrument
+        mock_peaks_workspace.getInstrument().getFullName.return_value = instrument
+        mock_ads_instance.retrieveWorkspaces.return_value = [mock_peaks_workspace, mock_workspace]
+        model = FullInstrumentViewModel(mock_workspace)
+        peaks_workspaces = model.peaks_workspaces_in_ads()
+        self.assertEqual(1, len(peaks_workspaces))
+        self.assertEqual(mock_peaks_workspace, peaks_workspaces[0])
+
+    @mock.patch("instrumentview.FullInstrumentViewModel.AnalysisDataService")
+    def test_set_peaks_workspaces(self, mock_ads):
+        mock_ads_instance = mock_ads.Instance()
+        mock_peaks_workspace = PeaksWorkspaceMock()
+        mock_ads_instance.retrieveWorkspaces.return_value = [mock_peaks_workspace]
+        model = FullInstrumentViewModel(self._ws)
+        names = ["a", "b"]
+        model.set_peaks_workspaces(names)
+        mock_ads_instance.retrieveWorkspaces.assert_called_once_with(names)
+        self.assertEqual(mock_peaks_workspace, model._selected_peaks_workspaces[0])
+
+    def test_peak_overlay_points(self):
+        model = FullInstrumentViewModel(self._ws)
+        peaks_ws = CreatePeaksWorkspace(self._ws, 2)
+        model._selected_peaks_workspaces = [peaks_ws]
+        model._detector_ids = np.array([100])
+        model._is_valid = np.array([True])
+        peaks = model.peak_overlay_points()
+        self.assertEqual(1, len(peaks))
+        detector_peak = peaks[0][0]
+        self.assertEqual(100, detector_peak.detector_id)
+        self.assertEqual("[0, 0, 0] x 2", detector_peak.label)
+        np.testing.assert_almost_equal(np.array([0, 0, 5.0]), detector_peak.location)
 
 
 if __name__ == "__main__":
