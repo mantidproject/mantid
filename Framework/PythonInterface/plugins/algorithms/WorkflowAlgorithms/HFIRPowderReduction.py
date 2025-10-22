@@ -85,7 +85,7 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
         return issues
 
     def PyExec(self):
-        pass
+        raise NotImplementedError("HFIRPowderReduction algorithm is not yet implemented.")
 
 
 AlgorithmFactory.subscribe(HFIRPowderReduction)
