@@ -277,9 +277,10 @@ class FullInstrumentViewModel:
             positions = [np.array(detector_info.position(detector_info.indexOf(id))) for id in detector_ids]
             tofs = peaks_dict["TOF"]
             dspacings = peaks_dict["DSpacing"]
+            wavelengths = peaks_dict["Wavelength"]
             peaks += [
-                Peak(det_id, v, hkl, tof, dspacing)
-                for (det_id, v, hkl, tof, dspacing) in zip(detector_ids, positions, hkls, tofs, dspacings)
+                Peak(det_id, v, hkl, tof, dspacing, wavelength, 2 * np.pi / dspacing)
+                for (det_id, v, hkl, tof, dspacing, wavelength) in zip(detector_ids, positions, hkls, tofs, dspacings, wavelengths)
             ]
             # Combine peaks on the same detector
             detector_peaks = []

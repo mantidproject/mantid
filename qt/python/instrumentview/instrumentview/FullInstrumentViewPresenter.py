@@ -315,20 +315,23 @@ class FullInstrumentViewPresenter:
     def refresh_lineplot_peaks(self) -> None:
         # Plot vertical lines on the lineplot if the peak detector is selected
         self._view.clear_lineplot_overlays()
-        if self._view.current_selected_unit() != self._TIME_OF_FLIGHT and self._view.current_selected_unit() != self._D_SPACING:
-            self._view.redraw_lineplot()
-            return
 
         for ws_peaks in self._peaks_grouped_by_ws:
             x_values = []
             labels = []
             for peak in ws_peaks.detector_peaks:
                 if peak.detector_id in self._model.picked_detector_ids:
-                    x_values += (
-                        [p.tof for p in peak.peaks]
-                        if self._view.current_selected_unit() == self._TIME_OF_FLIGHT
-                        else [p.dspacing for p in peak.peaks]
-                    )
+                    match self._view.current_selected_unit():
+                        case self._TIME_OF_FLIGHT:
+                            x_values += [p.tof for p in peak.peaks]
+                        case self._D_SPACING:
+                            x_values += [p.dspacing for p in peak.peaks]
+                        case self._WAVELENGTH:
+                            x_values += [p.wavelength for p in peak.peaks]
+                        case self._MOMENTUM_TRANSFER:
+                            x_values += [p.q for p in peak.peaks]
+                        case _:
+                            raise RuntimeError("Unknown unit for drawing peak overlays")
                     labels += [p.label for p in peak.peaks]
             if len(x_values) > 0:
                 self._view.plot_lineplot_overlay(x_values, labels, ws_peaks.colour)

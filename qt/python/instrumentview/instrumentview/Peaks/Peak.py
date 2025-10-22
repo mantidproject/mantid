@@ -19,6 +19,8 @@ class Peak:
     hkl: tuple[float, float, float]
     tof: float
     dspacing: float
+    wavelength: float
+    q: float
 
     @property
     def label(self) -> str:
