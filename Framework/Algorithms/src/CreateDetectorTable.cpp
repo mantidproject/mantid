@@ -80,7 +80,6 @@ void CreateDetectorTable::exec() {
   }
 
   throw std::runtime_error("Detector table can only be created for matrix and peaks workspaces.");
-  return;
 }
 
 void CreateDetectorTable::setTableToOutput() {
