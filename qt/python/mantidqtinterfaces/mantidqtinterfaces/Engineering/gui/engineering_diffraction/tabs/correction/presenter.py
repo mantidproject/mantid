@@ -6,10 +6,10 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #
 from mantidqt.utils.asynchronous import AsyncTask
+from mantid.api import AlgorithmObserver
 from mantidqt.utils.observer_pattern import GenericObservable
 from mantid.kernel import logger
 from mantidqt.interfacemanager import InterfaceManager
-from qtpy.QtCore import QTimer
 from Engineering.common.calibration_info import CalibrationInfo
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import (
     INSTRUMENT_DICT,
@@ -33,8 +33,9 @@ def redraws_table(func):
     return wrapper
 
 
-class TextureCorrectionPresenter:
+class TextureCorrectionPresenter(AlgorithmObserver):
     def __init__(self, model, view):
+        super(TextureCorrectionPresenter, self).__init__()
         self.model = model
         self.view = view
         self.worker = None
@@ -59,7 +60,7 @@ class TextureCorrectionPresenter:
         self.view.set_on_delete_clicked(self.delete_selected_files)
 
         self.view.set_on_create_ref_ws_clicked(self.on_create_ref_sample_clicked)
-        self.view.set_on_set_ref_ws_orientation_clicked(self.open_goniometer_dialog)
+        self.view.set_on_set_ref_ws_orientation_clicked(self.open_ref_goniometer_dialog)
         self.view.set_on_save_ref_clicked(self._on_save_ref_clicked)
         self.view.set_on_view_reference_shape_clicked(self.show_sample_presenter.on_view_reference_shape_clicked)
         self.view.set_on_load_ref_clicked(self._on_load_ref_clicked)
@@ -84,6 +85,8 @@ class TextureCorrectionPresenter:
 
         self.update_custom_shape_finder_vis()
         self.update_reference_info()
+
+        self.view.alg_ui_finished.connect(self._on_alg_finished)
 
     @redraws_table
     def load_files_into_table(self):
@@ -195,6 +198,9 @@ class TextureCorrectionPresenter:
     def open_goniometer_dialog(self):
         self._open_alg_dialog("SetGoniometer")
 
+    def open_ref_goniometer_dialog(self):
+        self._open_alg_dialog("SetGoniometer", disabled=("Workspace",))
+
     def open_load_sample_shape_dialog(self):
         self._open_alg_dialog("LoadSampleShape")
 
@@ -204,26 +210,23 @@ class TextureCorrectionPresenter:
     def open_set_material_dialog(self):
         self._open_alg_dialog("SetSampleMaterial")
 
-    def _open_alg_dialog(self, alg_str):
+    def _open_alg_dialog(self, alg_str, enabled=("InputWorkspace",), disabled=("",)):
         manager = InterfaceManager()
-        dialog = manager.createDialogFromName(
-            alg_str,
-            -1,
-            None,
-            False,
-            self.model.get_alg_preset_values(),
-            "",
-            [
-                "InputWorkspace",
-            ],
-        )
-        if dialog is not None:
-            dialog.finished.connect(self._redraw_on_alg_exec)
-            dialog.open()
+        dialog = manager.createDialogFromName(alg_str, -1, self.view, False, self.model.get_alg_preset_values(), "", enabled, disabled)
+        dialog.addAlgorithmObserver(self)
+        dialog.setModal(True)
+        dialog.show()
 
-    def _redraw_on_alg_exec(self):
-        QTimer.singleShot(200, self.redraw_table)
-        QTimer.singleShot(200, self.update_reference_info)
+    def finishHandle(self):
+        # this finishHandle is called whenever a dialog created in _open_alg_dialog finishes
+        # when such an alg finishes, we get our UI view to emit a signal
+        self.view.alg_ui_finished.emit()
+        # this signal is then connected to on_alg_finished back here on the presenter
+        # this ensures the _on_alg_finished call happens on the Qt GUI thread rather than the alg worker thread
+
+    def _on_alg_finished(self):
+        self.redraw_table()
+        self.update_reference_info()
 
     def set_rb_num(self, rb_num):
         self.rb_num = rb_num

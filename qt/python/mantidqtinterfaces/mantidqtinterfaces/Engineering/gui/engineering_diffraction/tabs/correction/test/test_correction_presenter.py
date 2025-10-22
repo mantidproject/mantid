@@ -141,13 +141,13 @@ class TestTextureCorrectionPresenter(unittest.TestCase):
         self.view.set_instrument_override.assert_called_with("ENGINX")
         self.assertEqual(self.presenter.instrument, "ENGINX")
 
-    def test_open_dialog_triggers_exec_and_redraw(self):
+    def test_open_dialog_triggers_exec(self):
         mock_dialog = MagicMock()
         manager_mock = MagicMock()
         manager_mock.createDialogFromName.return_value = mock_dialog
-        with patch(presenter_path + ".InterfaceManager", return_value=manager_mock), patch(presenter_path + ".QTimer.singleShot"):
+        with patch(presenter_path + ".InterfaceManager", return_value=manager_mock):
             self.presenter._open_alg_dialog("SetGoniometer")
-            mock_dialog.open.assert_called_once()
+            mock_dialog.show.assert_called_once()
 
     @patch(presenter_path + ".get_setting", return_value="default")
     def test_get_setting_returns_value(self, mock_get):

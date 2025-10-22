@@ -19,6 +19,7 @@ class TextureCorrectionView(QtWidgets.QWidget, Ui_texture):
     sig_enable_controls = QtCore.Signal(bool)
     sig_view_requested = QtCore.Signal(str)
     sig_view_shape_requested = QtCore.Signal(str)
+    alg_ui_finished = QtCore.Signal()
 
     def __init__(self, parent=None, instrument="ENGINX"):
         super(TextureCorrectionView, self).__init__(parent)
