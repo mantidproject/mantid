@@ -6,6 +6,7 @@ set(PYTHON_PLUGINS
     algorithms/Abins.py
     algorithms/Abins2D.py
     algorithms/AlignAndFocusPowderFromFiles.py
+    algorithms/WorkflowAlgorithms/HFIRPowderReduction.py
     algorithms/AlignComponents.py
     algorithms/AngularAutoCorrelationsSingleAxis.py
     algorithms/AngularAutoCorrelationsTwoAxes.py
