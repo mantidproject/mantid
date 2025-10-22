@@ -5,6 +5,8 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/CreateDetectorTable.h"
+#include "MantidAPI/ColumnFactory.h"
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/Workspace_fwd.h"
 #include <memory>
 
@@ -51,19 +53,21 @@ void CreateDetectorTable::exec() {
   includeData = getProperty("IncludeData");
   workspaceIndices = getProperty("WorkspaceIndices");
   includeDetectorPosition = getProperty("IncludeDetectorPosition");
-  PickOneDetectorID = getProperty("DetectorIDAsIntegers");
+  PickOneDetectorID = getProperty("PickOneDetectorID");
+
+  if (auto peaks = std::dynamic_pointer_cast<IPeaksWorkspace>(inputWs)) {
+    table = peaks->createDetectorTable();
+    setTableToOutput();
+    return;
+  }
 
   if ((ws = std::dynamic_pointer_cast<MatrixWorkspace>(inputWs))) {
     if (ws->getInstrument()->getSample() == nullptr) {
       throw std::runtime_error("Matrix workspace has no instrument information");
     }
-    createDetectorTableWorkspace();
-    setTableToOutput();
-    return;
-  }
-
-  if (auto peaks = std::dynamic_pointer_cast<IPeaksWorkspace>(inputWs)) {
-    table = peaks->createDetectorTable();
+    setup();
+    createColumns();
+    populateTable();
     setTableToOutput();
     return;
   }
@@ -108,29 +112,14 @@ std::map<std::string, std::string> CreateDetectorTable::validateInputs() {
   return validationOutput;
 }
 
-/**
- * Create the instrument detector table workspace from a MatrixWorkspace
- * @param ws :: A pointer to a MatrixWorkspace
- * @param indices :: Limit the table to these workspace indices
- * @param includeData :: If true then first value from the each spectrum is
- * displayed
- * @param includeDetectorPosition :: If true then include the absolute position of
- * the detector group for each spectrum
- * @param pickOneDetectorID :: If true then picks only the first detector ID per row
- * @param logger: The Mantid logger so errors can be written to it.
- *
- * @return A pointer to the table workspace of detector information
- */
-ITableWorkspace_sptr CreateDetectorTable::createDetectorTableWorkspace() {
-  IComponent_const_sptr sample = ws->getInstrument()->getSample();
+void CreateDetectorTable::setup() {
 
-  // check if efixed value is available
-  calcQ = true;
-
-  // check if we have a scanning workspace
   isScanning = ws->detectorInfo().isScanning();
 
   spectrumInfo = &ws->spectrumInfo();
+
+  // check if efixed value is available
+  calcQ = true;
   if (spectrumInfo->hasDetectors(0)) {
     try {
       std::shared_ptr<const IDetector> detector(&spectrumInfo->detector(0), Mantid::NoDeleting());
@@ -151,36 +140,19 @@ ITableWorkspace_sptr CreateDetectorTable::createDetectorTableWorkspace() {
     hasDiffConstants = true;
   }
 
-  // Prepare column names
-  auto colNames = createColumns();
-
-  const int ncols = static_cast<int>(colNames.size());
   nrows = workspaceIndices.empty() ? static_cast<int>(ws->getNumberHistograms())
                                    : static_cast<int>(workspaceIndices.size());
 
-  table = WorkspaceFactory::Instance().createTable("TableWorkspace");
-
-  // Set the column names
-  for (int col = 0; col < ncols; ++col) {
-    auto column = table->addColumn(colNames.at(col).first, colNames.at(col).second);
-    column->setPlotType(0);
-  }
-
-  table->setRowCount(nrows);
-
-  // Cache some frequently used values
   beamAxisIndex = ws->getInstrument()->getReferenceFrame()->pointingAlongBeam();
-  sampleDist = sample->getPos()[beamAxisIndex];
+  sampleDist = ws->getInstrument()->getSample()->getPos()[beamAxisIndex];
   signedThetaParamRetrieved = false;
   showSignedTwoTheta = false; // If true, signedVersion of the two theta
                               // value should be displayed
-
-  populateTable();
-
-  return table;
+  table = WorkspaceFactory::Instance().createTable("TableWorkspace");
+  table->setRowCount(nrows);
 }
 
-std::vector<std::pair<std::string, std::string>> CreateDetectorTable::createColumns() {
+void CreateDetectorTable::createColumns() {
   std::vector<std::pair<std::string, std::string>> colNames;
   colNames.emplace_back("double", "Index");
   colNames.emplace_back("int", "Spectrum No");
@@ -212,7 +184,13 @@ std::vector<std::pair<std::string, std::string>> CreateDetectorTable::createColu
   if (includeDetectorPosition) {
     colNames.emplace_back("V3D", "Position");
   }
-  return colNames;
+
+  // Set the column names
+  for (size_t col = 0; col < colNames.size(); ++col) {
+    auto column = table->addColumn(colNames.at(col).first, colNames.at(col).second);
+    column->setPlotType(0);
+  }
+  return;
 }
 
 void CreateDetectorTable::populateTable() {

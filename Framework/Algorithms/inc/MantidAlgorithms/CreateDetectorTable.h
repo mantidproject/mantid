@@ -45,8 +45,8 @@ public:
   std::map<std::string, std::string> validateInputs() override;
 
   /// Creates table workspace of detector information from a given workspace
-  API::ITableWorkspace_sptr createDetectorTableWorkspace();
-  std::vector<std::pair<std::string, std::string>> createColumns();
+  void setup();
+  void createColumns();
   void populateTable();
   void setTableToOutput();
 
