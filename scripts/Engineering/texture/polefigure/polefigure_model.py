@@ -22,6 +22,7 @@ from scipy.interpolate import griddata
 from scipy.ndimage import gaussian_filter
 from Engineering.common.texture_sample_viewer import has_valid_shape
 from matplotlib.figure import Figure
+from matplotlib.axes import Axes
 from Engineering.texture.xtal_helper import get_xtal_structure
 
 
@@ -136,25 +137,25 @@ class TextureProjection:
 
         if plot_exp:
             suffix = "scatter"
-            fig = self.plot_exp_pf(pfi, ax_labels, readout_col, fig, **kwargs)
+            fig, ax = self.plot_exp_pf(pfi, ax_labels, readout_col, fig, **kwargs)
         else:
             suffix = f"contour_{contour_kernel}"
-            fig = self.plot_contour_pf(pfi, ax_labels, readout_col, fig, contour_kernel, **kwargs)
+            fig, ax = self.plot_contour_pf(pfi, ax_labels, readout_col, fig, contour_kernel, **kwargs)
         if save_dirs:
             for save_dir in save_dirs:
                 fig.savefig(str(path.join(save_dir, ws_name + f"_{suffix}.png")))
 
-        return fig
+        return fig, ax
 
     @staticmethod
-    def plot_exp_pf(pfi: np.ndarray, ax_labels: Sequence[str], column_label: str, fig: Optional[Figure] = None, **kwargs) -> Figure:
+    def plot_exp_pf(pfi: np.ndarray, ax_labels: Sequence[str], column_label: str, fig: Optional[Figure] = None, **kwargs) -> [Figure, Axes]:
         u = np.linspace(0, 2 * np.pi, 100)
         x = np.cos(u)
         y = np.sin(u)
         z = np.zeros_like(x)
         eq = np.concatenate((x[None, :], y[None, :], z[None, :]), axis=0)
 
-        fig = plt.figure() if not fig else fig
+        fig = plt.figure(layout="constrained") if not fig else fig
         gs = fig.add_gridspec(
             1,
             3,
@@ -168,7 +169,7 @@ class TextureProjection:
         # left spacer: gs[0, 0] (we don't use it)
         ax = fig.add_subplot(gs[0, 1])
         cax = fig.add_subplot(gs[0, 2])
-        scat_plot = ax.scatter(pfi[:, 1], pfi[:, 0], c=pfi[:, 2], s=20, cmap="jet", **kwargs)
+        scat_plot = ax.scatter(pfi[:, 1], pfi[:, 0], c=pfi[:, 2], s=20, cmap="jet", label="poles", **kwargs)
         ax.plot(eq[0], eq[1], c="grey", label="plot bounding circle")
         ax.set_aspect("equal")
         ax.set_axis_off()
@@ -180,12 +181,12 @@ class TextureProjection:
         ax.set_label("Pole Figure Plot")
         scat_plot.set_label("pole figure data")
         cbar.set_label(column_label, rotation=0, labelpad=15)
-        return fig
+        return fig, ax
 
     @staticmethod
     def plot_contour_pf(
         pfi: np.ndarray, ax_labels: Sequence[str], column_label: str, fig: Optional[Figure] = None, contour_kernel: float = 2.0, **kwargs
-    ) -> Figure:
+    ) -> [Figure, Axes]:
         x, y, z = pfi[:, 1], pfi[:, 0], np.nan_to_num(pfi[:, 2])
         # Grid definition
         R = 1
@@ -229,7 +230,7 @@ class TextureProjection:
         contour_plot.set_label("pole figure data")
         cbar = fig.colorbar(contour_plot, cax=cax)
         cbar.set_label(column_label, rotation=0, labelpad=15)
-        return fig
+        return fig, ax
 
     # ~~~~~ General Utility functions ~~~~~~~~
 

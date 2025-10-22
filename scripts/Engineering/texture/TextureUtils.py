@@ -591,7 +591,7 @@ def create_pf(
         wss, params, out_ws, pf_hkl, include_scatt_power, scat_vol_pos, chi2_thresh, peak_thresh, save_dirs, ax_transform, readout_column
     )
 
-    fig = model.plot_pole_figure(
+    fig, ax = model.plot_pole_figure(
         out_ws,
         projection_method,
         fig=None,
@@ -601,7 +601,7 @@ def create_pf(
         ax_labels=ax_labels,
         contour_kernel=kernel,
     )
-    fig.gca().set_title(out_ws)
+    ax.set_title(out_ws)
     try:
         fig.show()
     except IndexError:
