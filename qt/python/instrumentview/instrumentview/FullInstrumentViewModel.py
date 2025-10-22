@@ -45,18 +45,19 @@ class FullInstrumentViewModel:
         self._source_position = np.array(component_info.sourcePosition()) if has_source else np.array([0, 0, 0])
         self._root_position = np.array(component_info.position(0))
 
-        detector_info_table = CreateDetectorTable(self._workspace, IncludeDetectorPosition=True, StoreInADS=False)
+        detector_info_table = CreateDetectorTable(self._workspace, IncludeDetectorPosition=True, PickOneDetectorID=True, StoreInADS=False)
 
         # Might have comma-separated multiple detectors, choose first one in the string in that case
-        first_numbers = np.char.split(detector_info_table.column("Detector ID(s)"), sep=",")
-        self._detector_ids = np.array([int(x[0]) for x in first_numbers])
-        detector_positions = detector_info_table.column("Position")
-        self._spherical_positions = np.array([pos.getSpherical() for pos in detector_positions])
-        self._detector_positions = np.array(detector_positions)
-        self._workspace_indices = np.array(detector_info_table.column("Index")).astype(int)
-        self._is_monitor = np.array(detector_info_table.column("Monitor"))
-        spectrum_number = np.array(detector_info_table.column("Spectrum No"))
-        self._is_valid = (self._is_monitor == "no") & (spectrum_number != -1)
+        self._detector_ids = detector_info_table.columnArray("Detector ID(s)")
+        r = detector_info_table.columnArray("R")
+        theta = detector_info_table.columnArray("Theta")
+        phi = detector_info_table.columnArray("Phi")
+        self._spherical_positions = np.transpose(np.vstack([r, theta, phi]))
+        self._detector_positions = detector_info_table.columnArray("Position")
+        self._workspace_indices = detector_info_table.columnArray("Index")
+        # Array of strings 'yes', 'no' and 'n/a'
+        self._is_monitor = detector_info_table.columnArray("Monitor")
+        self._is_valid = self._is_monitor == "no"
         self._monitor_positions = self._detector_positions[self._is_monitor == "yes"]
         self._current_projected_positions = self.detector_positions
 
