@@ -34,21 +34,24 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         self._mock_table = mock.MagicMock()
         mock_create_det_table.return_value = self._mock_table
 
-    def _mock_detector_table(self, detector_ids: list[int], spectrum_no: list[int] = [], monitors: list[str] = []):
-        if not monitors:
-            monitors = ["no" for _ in detector_ids]
+    def _mock_detector_table(self, detector_ids: list[int], spectrum_no: np.ndarray = np.array([]), monitors: np.ndarray = np.array([])):
+        if monitors.size == 0:
+            monitors = np.array(["no" for _ in detector_ids])
 
-        if not spectrum_no:
-            spectrum_no = [i for i in range(len(detector_ids))]
+        if spectrum_no.size == 0:
+            spectrum_no = np.array([i for i in range(len(detector_ids))])
 
         table_columns = {
-            "Detector ID(s)": [str(id) for id in detector_ids],
-            "Position": [MockPosition(i, i, i) for i in range(len(detector_ids))],
-            "Index": [i for i in range(len(detector_ids))],
+            "Detector ID(s)": np.array([int(id) for id in detector_ids]),
+            "Position": np.array([[i, i, i] for i in range(len(detector_ids))]),
+            "R": np.array([i for i in range(len(detector_ids))]),
+            "Theta": np.array([i for i in range(len(detector_ids))]),
+            "Phi": np.array([i for i in range(len(detector_ids))]),
+            "Index": np.array([i for i in range(len(detector_ids))]),
             "Monitor": monitors,
             "Spectrum No": spectrum_no,
         }
-        self._mock_table.column.side_effect = lambda x: table_columns[x]
+        self._mock_table.columnArray.side_effect = lambda x: table_columns[x]
         return
 
     def _create_mock_workspace(self, detector_ids: list[int]):
@@ -115,14 +118,14 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         np.testing.assert_equal(model._detector_is_picked, [False, False, False])
 
     def test_detectors_with_no_spectra(self):
-        self._mock_detector_table([1, 20, 300], spectrum_no=[1, 1, -1])
-        mock_workspace = self._create_mock_workspace([1, 20, 300])
+        self._mock_detector_table([1, 20, 300, 400], monitors=np.array(["no", "no", "n/a", "yes"]))
+        mock_workspace = self._create_mock_workspace([1, 20, 300, 400])
         mock_workspace.getIntegratedCountsForWorkspaceIndices.return_value = [100, 200]
         model = FullInstrumentViewModel(mock_workspace)
         model.setup()
-        np.testing.assert_array_equal(model._detector_ids, [1, 20, 300])
-        np.testing.assert_array_equal(model._is_valid, [True, True, False])
-        np.testing.assert_array_equal(model._counts, [100, 200, 0])
+        np.testing.assert_array_equal(model._detector_ids, [1, 20, 300, 400])
+        np.testing.assert_array_equal(model._is_valid, [True, True, False, False])
+        np.testing.assert_array_equal(model._counts, [100, 200, 0, 0])
 
     @mock.patch("instrumentview.Projections.SphericalProjection.SphericalProjection")
     def test_calculate_spherical_projection(self, mock_spherical_projection):
@@ -243,7 +246,7 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         self.assertEqual(model.integration_limits, (1, 50))
 
     def test_monitor_positions(self):
-        self._mock_detector_table([1, 2, 3], monitors=["yes", "no", "yes"])
+        self._mock_detector_table([1, 2, 3], monitors=np.array(["yes", "no", "yes"]))
         mock_workspace = self._create_mock_workspace([1, 2, 3])
         mock_workspace.getIntegratedCountsForWorkspaceIndices.return_value = [100]
         model = FullInstrumentViewModel(mock_workspace)
