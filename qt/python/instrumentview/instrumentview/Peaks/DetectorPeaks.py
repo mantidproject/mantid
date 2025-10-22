@@ -15,6 +15,8 @@ class DetectorPeaks:
         self.detector_id = peaks[0].detector_id
         self.location = peaks[0].location
         if len(self.peaks) > 1:
-            self.label = peaks[0].label.replace("(", "[").replace(")", "]") + f" x {len(self.peaks)}"
+            # Find peak with highest d-spacing for label
+            peak_d = max(self.peaks, key=lambda p: p.dspacing)
+            self.label = peak_d.label.replace("(", "[").replace(")", "]") + f" x {len(self.peaks)}"
         else:
             self.label = peaks[0].label

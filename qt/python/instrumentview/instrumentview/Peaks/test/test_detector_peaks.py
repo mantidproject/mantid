@@ -20,6 +20,15 @@ class TestDetectorPeaks(unittest.TestCase):
         np.testing.assert_almost_equal(location, detector_peaks.location)
         self.assertEqual("[4, 4, 4] x 2", detector_peaks.label)
 
+    def test_highest_d_spacing_used_for_label(self):
+        location = np.array([1, 2, 3.0])
+        peak1 = Peak(1, location, (4, 4, 4), 100, 10)
+        peak2 = Peak(1, location, (20, 4, 4), 1000, 50)
+        detector_peaks = DetectorPeaks([peak1, peak2])
+        self.assertEqual(1, detector_peaks.detector_id)
+        np.testing.assert_almost_equal(location, detector_peaks.location)
+        self.assertEqual("[20, 4, 4] x 2", detector_peaks.label)
+
 
 if __name__ == "__main__":
     unittest.main()
