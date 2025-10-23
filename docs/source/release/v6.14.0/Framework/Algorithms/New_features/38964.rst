@@ -1,1 +1,0 @@
-- Add UpdateUB option to :ref:`algm-IndexPeaks` that enables saving the optimized UB matrix in the case where there is a single run and CommonUBForAll=False.

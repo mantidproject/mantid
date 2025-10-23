@@ -47,7 +47,7 @@ public:
     lei.initialize();
     lei.setChild(true);
     lei.setRethrows(true);
-    lei.setPropertyValue("Filename", "CNCS_Definition.xml");
+    lei.setPropertyValue("Filename", "CNCS_Definition_20190602_20250806.xml");
     lei.setPropertyValue("OutputWorkspace", "unused_for_child");
     lei.execute();
     m_emptyInstrument = lei.getProperty("OutputWorkspace");

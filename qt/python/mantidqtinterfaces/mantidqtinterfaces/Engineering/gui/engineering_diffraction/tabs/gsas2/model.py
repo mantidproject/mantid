@@ -12,7 +12,7 @@ import shutil
 import subprocess
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import List, Optional, Union, Tuple, TypeAlias
+from typing import Dict, List, Optional, Union, Tuple, TypeAlias
 
 import matplotlib.pyplot as plt
 from matplotlib.axes import Axes
@@ -201,6 +201,41 @@ class GSAS2Model:
         project_name: str,
         rb_num: Optional[str] = None,
         user_x_limits: Optional[List[List[float]]] = None,
+    ) -> Optional[Dict[str, int]]:
+        """
+        Returns a dictionary mapping data file names to their result counts
+        """
+        data_files = load_parameters[2]  # Extract data files list
+        num_hist = None
+
+        for data_file in data_files:
+            # Create unique project name for each file
+            file_basename = os.path.splitext(os.path.basename(data_file))[0]
+            individual_project_name = f"{project_name}_{file_basename}"
+
+            # Create modified load_parameters for single file
+            single_file_load_params = [
+                load_parameters[0],  # instrument_files (reuse same)
+                load_parameters[1],  # phase_filepaths (reuse same)
+                [data_file],  # single data file
+            ]
+
+            num_hist = self._run_single_refinement(
+                single_file_load_params, refinement_parameters, individual_project_name, rb_num, user_x_limits
+            )
+
+            if not num_hist:
+                return
+
+        return num_hist
+
+    def _run_single_refinement(
+        self,
+        load_parameters: list,
+        refinement_parameters: list,
+        project_name: str,
+        rb_num: Optional[str] = None,
+        user_x_limits: Optional[List[List[float]]] = None,
     ) -> Optional[int]:
         self.clear_input_components()
         if not self.initial_validation(project_name, load_parameters):
@@ -217,7 +252,8 @@ class GSAS2Model:
                 user_x_limits[1] if isinstance(user_x_limits[1], list) else [user_x_limits[1]],
             ]
 
-        self.validate_x_limits(formatted_limits)
+        if not self.validate_x_limits(formatted_limits):
+            return None
         if not self.further_validation():
             return None
 
@@ -236,9 +272,7 @@ class GSAS2Model:
             return None
         self.load_basic_outputs(gsas_result)
 
-        if self.state.number_of_regions > self.state.number_histograms:
-            return self.state.number_of_regions
-        return self.state.number_histograms
+        return self.state.number_of_regions
 
     # ===============
     # Prepare Inputs
@@ -427,6 +461,7 @@ class GSAS2Model:
 
             if shell_process.returncode != 0:
                 logger.error(f"GSAS-II call failed with error: {shell_output[-1]}")
+
                 return None
             return shell_output
         except subprocess.TimeoutExpired:
@@ -568,32 +603,57 @@ class GSAS2Model:
     # X Limits
     # =========
 
+    def get_no_banks(self, prm_file):
+        with open(prm_file) as f:
+            for line in f.readlines():
+                if "BANK" in line and len(line.split()) == 3:
+                    return int(line.split()[-1])
+
+        return -1
+
     def understand_data_structure(self) -> None:
+        if len(self.file_paths.instrument_files) != 1:
+            logger.error("* You must provide exactly one instrument file.")
+            return False
+
         self.x_limits.data_x_min = []
         self.x_limits.data_x_max = []
         number_of_regions = 0
+        banks_per_file = []  # Track banks per file for validation
+
         for input_file in self.file_paths.data_files:
             loop_focused_workspace = LoadGSS(Filename=input_file, OutputWorkspace="GSASII_input_data", EnableLogging=False)
-            for workspace_index in range(loop_focused_workspace.getNumberHistograms()):
+            file_bank_count = loop_focused_workspace.getNumberHistograms()
+            banks_per_file.append(file_bank_count)
+
+            no_banks = self.get_no_banks(self.file_paths.instrument_files[0])
+
+            if file_bank_count != no_banks:
+                logger.error("* All data files should have the same number of banks as the instrument file.")
+                return False
+
+            for workspace_index in range(file_bank_count):
                 self.x_limits.data_x_min.append(loop_focused_workspace.readX(workspace_index)[0])
                 self.x_limits.data_x_max.append(loop_focused_workspace.readX(workspace_index)[-1])
                 number_of_regions += 1
             DeleteWorkspace(loop_focused_workspace)
+
+        expected_total_regions = len(self.file_paths.data_files) * banks_per_file[0]
+        if number_of_regions != expected_total_regions:
+            logger.error(f"* Expected {expected_total_regions} total regions, but found {number_of_regions}.")
+            return False
+
         self.state.number_of_regions = number_of_regions
+        return True
 
     def validate_x_limits(self, users_limits: Optional[List[List[float]]]) -> bool:
-        self.understand_data_structure()
+        if not self.understand_data_structure():
+            return False
         if users_limits:
             if len(users_limits[0]) != self.state.number_of_regions:
                 users_limits[0] *= self.state.number_of_regions
                 users_limits[1] *= self.state.number_of_regions
         self.state.number_histograms = len(self.file_paths.data_files)
-        if len(self.file_paths.instrument_files) != 1 and len(self.file_paths.instrument_files) != self.state.number_histograms:
-            logger.error(
-                f"The number of instrument files ({len(self.file_paths.instrument_files)}) must be 1 "
-                f"or equal to the number of input histograms {self.state.number_histograms}"
-            )
-            return False
         if users_limits:
             self.x_limits.x_min = [float(k) for k in users_limits[0]]
             self.x_limits.x_max = [float(k) for k in users_limits[1]]
@@ -912,9 +972,13 @@ class GSAS2Model:
     # ===========
 
     def load_focused_nxs_for_logs(self, filenames: List[str]) -> None:
-        if len(filenames) == 1 and "all_banks" in filenames[0]:
-            filenames = [filenames[0].replace("all_banks", "bank_1"), filenames[0].replace("all_banks", "bank_2")]
+        banks_filenames = []
         for filename in filenames:
+            if "all_banks" in filename:
+                banks_filenames.extend([filename.replace("all_banks", "bank_1"), filename.replace("all_banks", "bank_2")])
+            else:
+                banks_filenames.append(filename)
+        for filename in banks_filenames:
             filename = filename.replace(".gss", ".nxs")
             ws_name = _generate_workspace_name(filename, self._suffix)
             if ws_name not in self._data_workspaces.get_loaded_workpace_names():

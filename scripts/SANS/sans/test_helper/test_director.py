@@ -148,7 +148,7 @@ class TestDirector(object):
             scale_builder.set_width(1.0)
             scale_builder.set_height(2.0)
             scale_builder.set_thickness(3.0)
-            scale_builder.set_scale(4.0)
+            scale_builder.set_rear_scale(4.0)
             self.scale_state = scale_builder.build()
 
         instrument = self.data_state.instrument

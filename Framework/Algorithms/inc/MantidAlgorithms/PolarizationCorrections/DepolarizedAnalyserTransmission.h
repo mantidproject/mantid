@@ -41,5 +41,7 @@ private:
 
   /// Fit using UserFunction1D to find the pxd and transmission values.
   void calcWavelengthDependentTransmission(API::MatrixWorkspace_sptr const &inputWs, std::string const &outputWsName);
+
+  API::MatrixWorkspace_sptr m_mtWs;
 };
 } // namespace Mantid::Algorithms

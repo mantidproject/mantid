@@ -484,6 +484,212 @@ public:
     AnalysisDataService::Instance().clear();
   }
 
+  void test_createOutputOptionWithAppend() {
+    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(Fun(), 3, -5.0, 5.0, 0.1, false);
+    AnalysisDataService::Instance().add("PLOTPEAKBYLOGVALUETEST_WS", ws);
+    PlotPeakByLogValue alg;
+    alg.initialize();
+    alg.setPropertyValue("Input", "PLOTPEAKBYLOGVALUETEST_WS,v1:3");
+    alg.setPropertyValue("OutputWorkspace", "PlotPeakResult");
+    alg.setProperty("PassWSIndexToFunction", true);
+    alg.setProperty("AppendIdxToOutputName", true);
+    alg.setProperty("CreateOutput", true);
+    alg.setPropertyValue("Function", "name=FlatBackground,ties=(A0=0.5);name=PLOTPEAKBYLOGVALUETEST_Fun");
+    alg.execute();
+
+    TS_ASSERT(alg.isExecuted());
+
+    TWS_type result = WorkspaceCreationHelper::getWS<TableWorkspace>("PlotPeakResult");
+    TS_ASSERT(result);
+
+    // each spectrum contains values equal to its spectrum number (from 1 to 3)
+    TableRow row = result->getFirstRow();
+    do {
+      TS_ASSERT_DELTA(row.Double(1), 0.5, 1e-15);
+    } while (row.next());
+
+    auto matrices = AnalysisDataService::Instance().retrieveWS<const WorkspaceGroup>(
+        "PlotPeakResult_sp1-3_NormalisedCovarianceMatrices");
+    auto params = AnalysisDataService::Instance().retrieveWS<const WorkspaceGroup>("PlotPeakResult_sp1-3_Parameters");
+    auto fits = AnalysisDataService::Instance().retrieveWS<const WorkspaceGroup>("PlotPeakResult_sp1-3_Workspaces");
+
+    TS_ASSERT(matrices);
+    TS_ASSERT(params);
+    TS_ASSERT(fits);
+
+    TS_ASSERT(matrices->getNames().size() == 3);
+    TS_ASSERT(params->getNames().size() == 3);
+    TS_ASSERT(fits->getNames().size() == 3);
+
+    auto matricesNames = matrices->getNames();
+    auto paramsNames = params->getNames();
+    auto wsNames = fits->getNames();
+
+    for (size_t i = 0; i < matrices->getNames().size(); i++) {
+      auto specNum = std::to_string(i + 1);
+      TS_ASSERT_EQUALS(matricesNames[i], "PLOTPEAKBYLOGVALUETEST_WS_sp" + specNum + "_NormalisedCovarianceMatrix");
+      TS_ASSERT_EQUALS(paramsNames[i], "PLOTPEAKBYLOGVALUETEST_WS_sp" + specNum + "_Parameters");
+      TS_ASSERT_EQUALS(wsNames[i], "PLOTPEAKBYLOGVALUETEST_WS_sp" + specNum + "_Workspace");
+    }
+
+    AnalysisDataService::Instance().clear();
+  }
+
+  void test_createOutputOptionMultipleWorkspacesWithAppend() {
+    createData();
+
+    PlotPeakByLogValue alg;
+    alg.initialize();
+    alg.setPropertyValue("Input", "PlotPeakGroup_0;PlotPeakGroup_1;PlotPeakGroup_2");
+    alg.setPropertyValue("OutputWorkspace", "PlotPeakResult");
+    alg.setPropertyValue("WorkspaceIndex", "1");
+    alg.setPropertyValue("LogValue", "var");
+    alg.setProperty("CreateOutput", true);
+    alg.setProperty("AppendIdxToOutputName", true);
+    alg.setPropertyValue("Function", "name=LinearBackground,A0=1,A1=0.3;name="
+                                     "Gaussian,PeakCentre=5,Height=2,Sigma=0."
+                                     "1");
+    TS_ASSERT(alg.execute());
+
+    TWS_type result = WorkspaceCreationHelper::getWS<TableWorkspace>("PlotPeakResult");
+    TS_ASSERT_EQUALS(result->columnCount(), 14);
+
+    auto matrices = AnalysisDataService::Instance().retrieveWS<const WorkspaceGroup>(
+        "PlotPeakResult_i1_NormalisedCovarianceMatrices");
+    auto params = AnalysisDataService::Instance().retrieveWS<const WorkspaceGroup>("PlotPeakResult_i1_Parameters");
+    auto fits = AnalysisDataService::Instance().retrieveWS<const WorkspaceGroup>("PlotPeakResult_i1_Workspaces");
+
+    TS_ASSERT(matrices);
+    TS_ASSERT(params);
+    TS_ASSERT(fits);
+
+    TS_ASSERT(matrices->getNames().size() == 3);
+    TS_ASSERT(params->getNames().size() == 3);
+    TS_ASSERT(fits->getNames().size() == 3);
+
+    auto matricesNames = matrices->getNames();
+    auto paramsNames = params->getNames();
+    auto wsNames = fits->getNames();
+
+    for (size_t i = 0; i < matrices->getNames().size(); i++) {
+      auto wsIdx = std::to_string(i);
+      TS_ASSERT_EQUALS(matricesNames[i], "PlotPeakGroup_" + wsIdx + "_i1_NormalisedCovarianceMatrix");
+      TS_ASSERT_EQUALS(paramsNames[i], "PlotPeakGroup_" + wsIdx + "_i1_Parameters");
+      TS_ASSERT_EQUALS(wsNames[i], "PlotPeakGroup_" + wsIdx + "_i1_Workspace");
+    }
+
+    AnalysisDataService::Instance().clear();
+  }
+
+  void test_createOutputWithExtraOutputOptionsWithAppend() {
+    auto ws = createTestWorkspace();
+    AnalysisDataService::Instance().add("PLOTPEAKBYLOGVALUETEST_WS", ws);
+    PlotPeakByLogValue alg;
+    alg.initialize();
+    alg.setPropertyValue("Input", "PLOTPEAKBYLOGVALUETEST_WS,v0:2");
+    alg.setPropertyValue("OutputWorkspace", "PlotPeakResult");
+    alg.setProperty("PassWSIndexToFunction", true);
+    alg.setProperty("CreateOutput", true);
+    alg.setProperty("AppendIdxToOutputName", true);
+    alg.setProperty("OutputCompositeMembers", true);
+    alg.setProperty("ConvolveMembers", true);
+    alg.setPropertyValue("Function", "name=LinearBackground,A0=0,A1=0;"
+                                     "(composite=Convolution,FixResolution=true,NumDeriv=true;"
+                                     "name=Resolution,Workspace=PLOTPEAKBYLOGVALUETEST_WS,WorkspaceIndex=0;"
+                                     "name=Gaussian,Height=3000,PeakCentre=6493,Sigma=50;);");
+    alg.execute();
+
+    TS_ASSERT(alg.isExecuted());
+
+    TWS_type result = WorkspaceCreationHelper::getWS<TableWorkspace>("PlotPeakResult");
+    TS_ASSERT(result);
+
+    auto matrices = AnalysisDataService::Instance().retrieveWS<const WorkspaceGroup>(
+        "PlotPeakResult_v0-1_NormalisedCovarianceMatrices");
+    auto params = AnalysisDataService::Instance().retrieveWS<const WorkspaceGroup>("PlotPeakResult_v0-1_Parameters");
+    auto fits = AnalysisDataService::Instance().retrieveWS<const WorkspaceGroup>("PlotPeakResult_v0-1_Workspaces");
+
+    TS_ASSERT(matrices);
+    TS_ASSERT(params);
+    TS_ASSERT(fits);
+
+    TS_ASSERT(matrices->getNames().size() == 2);
+    TS_ASSERT(params->getNames().size() == 2);
+    TS_ASSERT(fits->getNames().size() == 2);
+
+    auto matricesNames = matrices->getNames();
+    auto paramsNames = params->getNames();
+    auto wsNames = fits->getNames();
+
+    for (size_t i = 0; i < matrices->getNames().size(); i++) {
+      auto vIdx = std::to_string(i);
+      TS_ASSERT_EQUALS(matricesNames[i], "PLOTPEAKBYLOGVALUETEST_WS_v" + vIdx + "_NormalisedCovarianceMatrix");
+      TS_ASSERT_EQUALS(paramsNames[i], "PLOTPEAKBYLOGVALUETEST_WS_v" + vIdx + "_Parameters");
+      TS_ASSERT_EQUALS(wsNames[i], "PLOTPEAKBYLOGVALUETEST_WS_v" + vIdx + "_Workspace");
+    }
+
+    for (const auto &wsName : wsNames) {
+      auto fit = AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(wsName);
+      TS_ASSERT(fit);
+      TS_ASSERT(fit->getNumberHistograms() == 5);
+    }
+
+    AnalysisDataService::Instance().clear();
+  }
+
+  void test_createOutputOptionWith2DWS() {
+    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(Fun(), 3, -5.0, 5.0, 0.1, false);
+    AnalysisDataService::Instance().add("PLOTPEAKBYLOGVALUETEST_WS", ws);
+    PlotPeakByLogValue alg;
+    alg.initialize();
+    alg.setPropertyValue("Input", "PLOTPEAKBYLOGVALUETEST_WS,v1:3");
+    alg.setPropertyValue("OutputWorkspace", "PlotPeakResult");
+    alg.setProperty("PassWSIndexToFunction", true);
+    alg.setProperty("AppendIdxToOutputName", true);
+    alg.setProperty("CreateOutput", true);
+    alg.setProperty("Output2D", true);
+    alg.setPropertyValue("Function", "name=FlatBackground,ties=(A0=0.5);name=PLOTPEAKBYLOGVALUETEST_Fun");
+    alg.execute();
+
+    TS_ASSERT(alg.isExecuted());
+
+    TWS_type result = WorkspaceCreationHelper::getWS<TableWorkspace>("PlotPeakResult");
+    TS_ASSERT(result);
+
+    // each spectrum contains values equal to its spectrum number (from 1 to 3)
+    TableRow row = result->getFirstRow();
+    do {
+      TS_ASSERT_DELTA(row.Double(1), 0.5, 1e-15);
+    } while (row.next());
+
+    auto matrices = AnalysisDataService::Instance().retrieveWS<const WorkspaceGroup>(
+        "PlotPeakResult_sp1-3_NormalisedCovarianceMatrices");
+    auto params = AnalysisDataService::Instance().retrieveWS<const WorkspaceGroup>("PlotPeakResult_sp1-3_Parameters");
+    auto fits = AnalysisDataService::Instance().retrieveWS<const WorkspaceGroup>("PlotPeakResult_sp1-3_Workspaces");
+
+    TS_ASSERT(matrices);
+    TS_ASSERT(params);
+    TS_ASSERT(fits);
+
+    TS_ASSERT(matrices->getNames().size() == 3);
+    TS_ASSERT(params->getNames().size() == 3);
+    TS_ASSERT(fits->getNames().size() == 3);
+
+    auto matricesNames = matrices->getNames();
+    auto paramsNames = params->getNames();
+    auto wsNames = fits->getNames();
+
+    for (size_t i = 0; i < matrices->getNames().size(); i++) {
+      auto specNum = std::to_string(i + 1);
+      TS_ASSERT_EQUALS(matricesNames[i], "PLOTPEAKBYLOGVALUETEST_WS_sp" + specNum + "_NormalisedCovarianceMatrix");
+      TS_ASSERT_EQUALS(paramsNames[i], "PLOTPEAKBYLOGVALUETEST_WS_sp" + specNum + "_Parameters");
+      TS_ASSERT_EQUALS(wsNames[i], "PLOTPEAKBYLOGVALUETEST_WS_sp" + specNum + "_Workspace");
+    }
+
+    TS_ASSERT(AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("PlotPeakResult_ws"));
+
+    AnalysisDataService::Instance().clear();
+  }
   void testMinimizer() {
     createData();
 

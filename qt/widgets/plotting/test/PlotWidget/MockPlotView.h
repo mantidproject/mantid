@@ -18,8 +18,11 @@ public:
 
   MOCK_METHOD(void, setScaleLinear, (const AxisID), (override));
   MOCK_METHOD(void, setScaleLog, (const AxisID), (override));
+  MOCK_METHOD(void, setScaleSymLog, (const AxisID, const double), (override));
+  MOCK_METHOD(void, setScale, (const AxisID, const std::string &, (const QHash<QString, QVariant> &)), (override));
   MOCK_METHOD(void, plot,
               (const std::vector<Mantid::API::MatrixWorkspace_sptr> &, const std::vector<int> &, const bool),
               (override));
+  MOCK_METHOD(void, setAxisLimit, (const AxisID, const double, const double), (override));
 };
 } // namespace MantidQt::MantidWidgets

@@ -25,7 +25,7 @@ from mantidqtinterfaces.Muon.GUI.Common.test_helpers.context_setup import setup_
 class MuonContextWithFrequencyTest(unittest.TestCase):
     def setUp(self):
         AnalysisDataService.clear()
-        ConfigService["MantidOptions.InvisibleWorkspaces"] = "True"
+        ConfigService["MantidOptions.InvisibleWorkspaces"] = "1"
         self.filepath = FileFinder.findRuns("EMU00019489.nxs")[0]
 
         self.load_result, self.run_number, self.filename, psi_data = load_workspace_from_filename(self.filepath)
@@ -50,7 +50,7 @@ class MuonContextWithFrequencyTest(unittest.TestCase):
         self.pairs = [MuonPair("long", "bwd", "fwd")]
 
     def tearDown(self):
-        ConfigService["MantidOptions.InvisibleWorkspaces"] = "False"
+        ConfigService["MantidOptions.InvisibleWorkspaces"] = "0"
 
     def _calculate_all_data(self):
         self.context.calculate_all_counts()

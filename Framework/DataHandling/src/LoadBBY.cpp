@@ -4,6 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
+#include <algorithm>
 #include <cmath>
 #include <cstdio>
 
@@ -304,10 +305,7 @@ void LoadBBY::exec() {
   }
 
   // count total number of masked bins
-  size_t maskedBins = 0;
-  for (size_t i = 0; i != roi.size(); i++)
-    if (!roi[i])
-      maskedBins++;
+  size_t maskedBins = std::count_if(roi.cbegin(), roi.cend(), [](bool v) { return !v; });
 
   if (maskedBins > 0) {
     // create list of masked bins
@@ -488,7 +486,7 @@ void LoadBBY::loadInstrumentParameters(const Nexus::NXEntry &entry, std::map<std
         auto hdfTag = boost::algorithm::trim_copy(details[0]);
         try {
           // extract the parameter and add it to the parameter dictionary,
-          // check the scale factor for numeric and string
+          // get the scale factor for numeric values
           auto updateOk = false;
           if (!hdfTag.empty()) {
             if (isNumeric(details[1])) {

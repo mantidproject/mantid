@@ -8,10 +8,11 @@
 
 from matplotlib import rcParams
 from matplotlib.image import AxesImage
-from matplotlib.colors import LogNorm
+from matplotlib.colors import LogNorm, SymLogNorm
 from matplotlib.collections import QuadMesh
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 from workbench.plotting.plotscriptgenerator.utils import convert_args_to_string, clean_variable_name
+from workbench.plotting.propertiesdialog import LINTHRESH_DEFAULT
 
 BASE_IMSHOW_COMMAND = "imshow"
 BASE_PCOLORMESH_COMMAND = "pcolormesh"
@@ -40,13 +41,28 @@ def get_colorbar(artist, image_name, ax_object_var):
     lines = []
     headers = []
     if artist.colorbar:
-        if isinstance(artist.colorbar.norm, LogNorm):
+        is_log_norm = isinstance(artist.colorbar.norm, LogNorm)
+        is_sym_log_norm = isinstance(artist.colorbar.norm, SymLogNorm)
+        if is_log_norm or is_sym_log_norm:
+            if is_log_norm:
+                scale_str = "LogNorm"
+                linthresh_str = ""
+                loglocator_import_str = "LogLocator"
+                loglocator_args_str = "subs=np.arange(1, 10)"
+            else:
+                scale_str = "SymLogNorm"
+                linthresh_str = ", linthresh=2"
+                loglocator_import_str = "SymmetricalLogLocator"
+                loglocator_args_str = f"subs=np.arange(1, 10), base=10, linthresh={LINTHRESH_DEFAULT}"
+
             headers.append("import numpy as np")
-            headers.append("from matplotlib.colors import LogNorm")
-            headers.append("from matplotlib.ticker import LogLocator")
-            lines.append(f"{CFILL_NAME}.set_norm(LogNorm(vmin={artist.colorbar.vmin}, vmax={artist.colorbar.vmax}))")
+            headers.append(f"from matplotlib.colors import {scale_str}")
+            headers.append(f"from matplotlib.ticker import {loglocator_import_str}")
+            lines.append(f"{CFILL_NAME}.set_norm({scale_str}(vmin={artist.colorbar.vmin}, vmax={artist.colorbar.vmax}{linthresh_str}))")
             lines.append("# If no ticks appear on the color bar remove the subs argument inside the LogLocator below")
-            lines.append(f"cbar = fig.colorbar({image_name}, ax=[{ax_object_var}], ticks=LogLocator(subs=np.arange(1, 10)), pad=0.06)")
+            lines.append(
+                f"cbar = fig.colorbar({image_name}, ax=[{ax_object_var}], ticks={loglocator_import_str}({loglocator_args_str}), pad=0.06)"
+            )
         else:
             lines.append(f"{CFILL_NAME}.set_norm(plt.Normalize(vmin={artist.colorbar.vmin}, vmax={artist.colorbar.vmax}))")
             lines.append(f"cbar = fig.colorbar({image_name}, ax=[{ax_object_var}], pad=0.06)")

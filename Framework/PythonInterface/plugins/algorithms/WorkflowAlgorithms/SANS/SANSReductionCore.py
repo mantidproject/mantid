@@ -100,7 +100,7 @@ class SANSReductionCore(SANSReductionCoreBase):
         # 7. Multiply by volume and absolute scale
         # --------------------------------------------------------------------------------------------------------------
         progress.report("Multiplying by volume and absolute scale ...")
-        workspaces = self._scale(state=state, ws_list=workspaces)
+        workspaces = self._scale(state=state, ws_list=workspaces, component=component_as_string)
 
         # --------------------------------------------------------------------------------------------------------------
         # 8. Create adjustment workspaces, those are

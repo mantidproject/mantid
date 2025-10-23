@@ -13,6 +13,9 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidNexus/NexusClasses.h"
 
+#include <boost/filesystem.hpp>
+
+#include <algorithm>
 #include <numeric>
 
 namespace Mantid::DataHandling::ANSTO {
@@ -65,6 +68,16 @@ void ProgressTracker::complete() {
   }
 }
 
+void ProgressTracker::setTarget(int64_t target) {
+  if (m_count == 0) {
+    m_step = target;
+    m_next = m_step;
+    return;
+  }
+  m_step = std::max<int64_t>(1, target / m_count);
+  m_next = m_step;
+}
+
 // EventProcessor
 EventProcessor::EventProcessor(const std::vector<bool> &roi, const size_t stride, const double period,
                                const double phase, const int64_t startTime, const double tofMinBoundary,
@@ -98,7 +111,7 @@ void EventProcessor::addEvent(size_t x, size_t y, double tof) {
     return;
 
   // ToF boundary
-  if ((tof < m_tofMinBoundary) && (tof > m_tofMaxBoundary))
+  if ((tof < m_tofMinBoundary) || (tof > m_tofMaxBoundary))
     return;
 
   // detector id
@@ -162,10 +175,8 @@ EventAssignerFixedWavelength::EventAssignerFixedWavelength(const std::vector<boo
     : EventAssigner(roi, stride, period, phase, startTime, tofMinBoundary, tofMaxBoundary, timeMinBoundary,
                     timeMaxBoundary, eventVectors),
       m_wavelength(wavelength) {}
-void EventAssignerFixedWavelength::addEventImpl(size_t id, int64_t pulse, double tof) {
-  UNUSED_ARG(pulse);
-  UNUSED_ARG(tof);
-  m_eventVectors[id]->emplace_back(m_wavelength);
+void EventAssignerFixedWavelength::addEventImpl(size_t id, int64_t pulse, double /*tof*/) {
+  m_eventVectors[id]->emplace_back(m_wavelength, Types::Core::DateAndTime(pulse));
 }
 
 // ISISRawOnlyFile
@@ -301,16 +312,17 @@ bool File::select(const char *file) {
   m_bufferPosition = 0;
   m_bufferAvailable = 0;
 
-  for (size_t i = 0; i != m_fileNames.size(); i++)
-    if (m_fileNames[i] == file) {
-      const FileInfo &info = m_fileInfos[i];
+  auto it = std::find(m_fileNames.cbegin(), m_fileNames.cend(), file);
+  if (it != m_fileNames.cend()) {
+    size_t i = std::distance(m_fileNames.cbegin(), it);
+    const FileInfo &info = m_fileInfos[i];
 
-      m_selected = i;
-      m_position = 0;
-      m_size = info.Size;
+    m_selected = i;
+    m_position = 0;
+    m_size = info.Size;
 
-      return m_good &= m_file.seek(info.Offset, SEEK_SET);
-    }
+    return m_good &= m_file.seek(info.Offset, SEEK_SET);
+  }
 
   m_selected = static_cast<size_t>(-1);
   m_position = 0;
@@ -485,4 +497,243 @@ bool File::append(const std::string &path, const std::string &name, const void *
 }
 
 } // namespace Tar
+
+namespace Anxs {
+
+int64_t epochRelDateTimeBase(int64_t epochInNanoSeconds) {
+  auto retval = epochInNanoSeconds - static_cast<int64_t>(Types::Core::DateAndTime::EPOCH_DIFF) * 1'000'000'000;
+  return retval;
+}
+
+std::string extractWorkspaceTitle(const std::string &nxsFile) {
+  namespace fs = boost::filesystem;
+  fs::path p = nxsFile;
+  for (; !p.extension().empty();)
+    p = p.stem();
+  return p.generic_string();
+}
+
+// load nx dataset
+template <class T> bool loadNXDataSet(const Nexus::NXEntry &entry, const std::string &path, T &value, int index) {
+  try {
+    Nexus::NXDataSetTyped<T> dataSet = entry.openNXDataSet<T>(path);
+    dataSet.load();
+
+    // if negative index go from the end
+    if (index < 0) {
+      auto N = dataSet.dim0();
+      value = dataSet[N + index];
+    } else {
+      value = dataSet[index];
+    }
+    return true;
+  } catch (std::runtime_error &) {
+    return false;
+  }
+}
+
+bool loadNXString(const Nexus::NXEntry &entry, const std::string &path, std::string &value) {
+  try {
+    Nexus::NXChar dataSet = entry.openNXChar(path);
+    dataSet.load();
+
+    value = std::string(dataSet(), dataSet.dim0());
+    return true;
+  } catch (std::runtime_error &) {
+    return false;
+  }
+}
+
+bool isTimedDataSet(const Nexus::NXEntry &entry, const std::string &path) {
+  auto newEntry = entry.openNXGroup(path);
+  auto datasets = newEntry.datasets();
+  auto valid = (datasets.size() == 2 && newEntry.containsDataSet("time") && newEntry.containsDataSet("value"));
+  return valid;
+}
+
+// Extract the start and end time in nsecs from the nexus file
+// based on entry/scan_dataset/[time, value]
+//
+// The time is the start time value is duration in nsec for each dataset
+//
+std::pair<uint64_t, uint64_t> getTimeScanLimits(const Nexus::NXEntry &entry, int datasetIx) {
+
+  auto timestamp = entry.openNXDataSet<uint64_t>("scan_dataset/time");
+  timestamp.load();
+  auto offset = entry.openNXDataSet<int64_t>("scan_dataset/value");
+  offset.load();
+  try {
+    auto start = timestamp[datasetIx];
+    auto end = start + offset[datasetIx];
+    return {start, end};
+  } catch (std::runtime_error &) {
+    return {0, 0};
+  }
+}
+
+// Extract the start and end time in nsecs from the nexus file
+// based on entry/scan_dataset/[time, value]
+//
+// The time is the start time value is duration in nsec for each dataset
+//
+std::pair<uint64_t, uint64_t> getHMScanLimits(const Nexus::NXEntry &entry, int datasetIx) {
+
+  auto timestamp = entry.openNXDataSet<uint64_t>("hmscan/time");
+  timestamp.load();
+  auto offset = entry.openNXDataSet<int64_t>("hmscan/value");
+  offset.load();
+  try {
+    auto start = timestamp[datasetIx];
+    auto end = start + offset[datasetIx];
+    return {start, end};
+  } catch (std::runtime_error &) {
+    return {0, 0};
+  }
+}
+
+// Extract the relevant timestamped data. Get the timestamp first to
+// determine the index limits (it assumed the timestamp is ordered).
+// Then extract the value from that range.
+// The start index is the first entry where the timestamp is less than
+// or equal to to the start time. The start index may occur before the
+// startT time but it is the parameter value at the start time as all
+// subsequenet values occur after the start time. This logic is needed
+// as the recorded value is only captured on the change in value an if
+// the value did not change in the window there would no logged value
+// in the period.
+
+template <typename T>
+uint64_t extractTimedDataSet(const Nexus::NXEntry &entry, const std::string &path, uint64_t startTime, uint64_t endTime,
+                             std::vector<uint64_t> &times, std::vector<T> &events, std::string &units) {
+
+  auto timeStamp = entry.openNXDataSet<uint64_t>(path + "/time");
+  timeStamp.load();
+  size_t maxn = timeStamp.size();
+  uint64_t startIx{0}, endIx{0};
+  auto itt = timeStamp();
+  for (size_t i = 0; i < maxn; i++) {
+    auto v = itt[i];
+    if (v <= startTime)
+      startIx = i;
+    if (v < endTime)
+      endIx = i + 1;
+  }
+  times.assign(itt + startIx, itt + endIx);
+
+  auto values = entry.openNXDataSet<T>(path + "/value");
+  units = values.attributes("units");
+  values.load();
+  auto itv = values();
+  events.assign(itv + startIx, itv + endIx);
+
+  return endIx - startIx;
+}
+
+template <typename T>
+bool extractTimedDataSet(const Nexus::NXEntry &entry, const std::string &path, uint64_t startTime, uint64_t endTime,
+                         ScanLog valueOption, uint64_t &eventTime, T &eventValue, std::string &units) {
+  eventTime = 0;
+  eventValue = 0;
+  std::vector<uint64_t> times;
+  std::vector<T> values;
+  auto n = extractTimedDataSet<T>(entry, path, startTime, endTime, times, values, units);
+  if (n == 0)
+    return false;
+
+  bool retn = true;
+  switch (valueOption) {
+  case ScanLog::Mean:
+    eventValue = std::accumulate(values.cbegin(), values.cend(), T{0}) / static_cast<T>(n);
+    eventTime = std::accumulate(times.cbegin(), times.cend(), uint64_t{0}) / n;
+    break;
+  case ScanLog::Start:
+    eventValue = values[0];
+    eventTime = times[0];
+    break;
+  case ScanLog::End:
+    eventValue = values[n - 1];
+    eventTime = times[n - 1];
+    break;
+  default:
+    retn = false;
+  }
+  return retn;
+}
+
+void ReadEventData(ProgressTracker &prog, const Nexus::NXEntry &entry, EventProcessor *handler, uint64_t start_nsec,
+                   uint64_t end_nsec, const std::string &neutron_path, int tube_resolution) {
+
+  // the detector event time zero is the actual chopper time and all the events are
+  // relative to this base
+
+  // Get the event index, base values and values but check if there is data available
+  auto eventID = entry.openNXDataSet<uint32_t>(neutron_path + "/event_id");
+  if (eventID.dim0() == 0)
+    return;
+  eventID.load();
+  auto eventIndex = entry.openNXDataSet<uint32_t>(neutron_path + "/event_time_zero_index");
+  eventIndex.load();
+  auto zeroOffset = entry.openNXDataSet<uint64_t>(neutron_path + "/event_time_zero");
+  zeroOffset.load();
+  auto offsetValues = entry.openNXDataSet<uint32_t>(neutron_path + "/event_time_offset");
+  offsetValues.load();
+  uint32_t numPulses = static_cast<uint32_t>(eventIndex.size());
+  uint32_t totalEvents = static_cast<uint32_t>(offsetValues.size());
+
+  prog.setTarget(numPulses);
+
+  // The chopper times are monotonically increasing but there may be duplicate
+  // pulse times when a 'efu' buffer is full mid pulse. In this case the buffer
+  // is sent but the next buffer uses the same pulse time. Only send the frame
+  // event when it changes.
+
+  uint64_t lastFrameTS{0};
+
+  // Run through the data and forward the event data if the pulse time occurs between
+  // start and end time. To be clear the start and end time relates to the pulse times.
+  for (uint32_t ix = 0; ix < numPulses; ix++) {
+    auto pulseTime = zeroOffset[ix];
+    if (start_nsec <= pulseTime && pulseTime < end_nsec) {
+      if (pulseTime > lastFrameTS) {
+        handler->newFrame();
+        lastFrameTS = pulseTime;
+      }
+      auto baseIndex = eventIndex[ix];
+      auto lastIndex = (ix + 1 < numPulses ? eventIndex[ix + 1] : totalEvents);
+      for (uint32_t j = baseIndex; j < lastIndex; j++) {
+        // convert tof to microseconds as double and pixel as (x,y)
+        // and send to handler
+        double tof = offsetValues[j] * 1.0e-3;
+        auto pixel = eventID[j];
+        size_t y = pixel % tube_resolution;
+        size_t x = (pixel - y) / tube_resolution;
+        handler->addEvent(x, y, tof);
+      }
+    }
+    prog.update(ix);
+  }
+}
+
+// template instantiation
+template bool loadNXDataSet<float>(const Nexus::NXEntry &entry, const std::string &path, float &value, int index);
+template bool loadNXDataSet<double>(const Nexus::NXEntry &entry, const std::string &path, double &value, int index);
+template bool loadNXDataSet<int>(const Nexus::NXEntry &entry, const std::string &path, int &value, int index);
+template bool loadNXDataSet<uint64_t>(const Nexus::NXEntry &entry, const std::string &path, uint64_t &value, int index);
+template bool loadNXDataSet<int64_t>(const Nexus::NXEntry &entry, const std::string &path, int64_t &value, int index);
+template uint64_t extractTimedDataSet<float>(const Nexus::NXEntry &entry, const std::string &path, uint64_t startTime,
+                                             uint64_t endTime, std::vector<uint64_t> &times, std::vector<float> &events,
+                                             std::string &units);
+template uint64_t extractTimedDataSet<double>(const Nexus::NXEntry &entry, const std::string &path, uint64_t startTime,
+                                              uint64_t endTime, std::vector<uint64_t> &times,
+                                              std::vector<double> &events, std::string &units);
+
+template bool extractTimedDataSet<float>(const Nexus::NXEntry &entry, const std::string &path, uint64_t startTime,
+                                         uint64_t endTime, ScanLog valueOption, uint64_t &eventTime, float &eventValue,
+                                         std::string &units);
+template bool extractTimedDataSet<double>(const Nexus::NXEntry &entry, const std::string &path, uint64_t startTime,
+                                          uint64_t endTime, ScanLog valueOption, uint64_t &eventTime,
+                                          double &eventValue, std::string &units);
+
+} // namespace Anxs
+
 } // namespace Mantid::DataHandling::ANSTO

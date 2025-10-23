@@ -476,7 +476,6 @@ class ElasticEMUauReduction(PythonAlgorithm):
             params=params,
             filter=self._filter_ws,
             scratch=self._scratch,
-            check_file=self._doppler.check_doppler_settings,
             progress=self._progress,
         )
 

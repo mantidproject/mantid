@@ -108,6 +108,9 @@ private:
   /// Return true if data source in a row is a file (rather than a workspace)
   bool isFile(int row) const;
 
+  /// Return true if the range format is valid
+  bool isValidRangeFormat(const QString &range) const;
+
   int rowCount() const;
 
   int defaultSpectrum() const;

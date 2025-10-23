@@ -148,6 +148,6 @@ WorkspaceGroup containing the filtered and unfiltered data.
 
 For more information on the other functionalities of this interface see: :ref:`Filter_Events_Interface`.
 
-.. figure:: /images/FilterEventsInterface.png
+.. figure:: /images/FilterEventsGUISampleTemp.png
    :alt: FilterEvents Interface
    :align: center

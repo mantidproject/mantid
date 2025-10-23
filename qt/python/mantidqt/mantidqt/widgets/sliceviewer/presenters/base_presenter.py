@@ -3,23 +3,27 @@
 # Copyright &copy; 2021 ISIS Rutherford Appleton Laboratory UKRI,
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
-import abc
-from abc import ABC
+from abc import ABC, abstractmethod
 
 from mantidqt.widgets.sliceviewer.models.base_model import SliceViewerBaseModel
 from mantidqt.widgets.sliceviewer.models.dimensions import Dimensions
-from mantidqt.widgets.sliceviewer.models.workspaceinfo import WorkspaceInfo
+from mantidqt.widgets.sliceviewer.models.workspaceinfo import WorkspaceInfo, WS_TYPE
 from mantidqt.widgets.sliceviewer.presenters.lineplots import PixelLinePlot, RectangleSelectionLinePlot
 from mantidqt.widgets.sliceviewer.views.dataview import SliceViewerDataView
 from mantidqt.widgets.sliceviewer.views.dataviewsubscriber import IDataViewSubscriber
 from mantidqt.widgets.sliceviewer.views.toolbar import ToolItemText
+from mantidqt.widgets.sliceviewer.presenters.masking import Masking
 
 
 class SliceViewerBasePresenter(IDataViewSubscriber, ABC):
-    def __init__(self, ws, data_view: SliceViewerDataView, model: SliceViewerBaseModel = None):
+    def __init__(self, ws, data_view: SliceViewerDataView, model: SliceViewerBaseModel = None, disable_masking_override=False):
         self.model = model if model else SliceViewerBaseModel(ws)
         self._data_view: SliceViewerDataView = data_view
         self.normalization = False
+        self._disable_masking_override = disable_masking_override
+
+        if self._is_masking_disabled:
+            self._data_view.deactivate_and_disable_tool(ToolItemText.MASKING)
 
     def show_all_data_clicked(self):
         """Instructs the view to show all data"""
@@ -76,7 +80,7 @@ class SliceViewerBasePresenter(IDataViewSubscriber, ABC):
         """Tell the view to display a new plot of an MatrixWorkspace"""
         self._data_view.plot_matrix(self.model.ws, distribution=not self.normalization)
 
-    @abc.abstractmethod
+    @abstractmethod
     def new_plot(self, *args, **kwargs):
         pass
 
@@ -105,10 +109,13 @@ class SliceViewerBasePresenter(IDataViewSubscriber, ABC):
         """
         data_view = self._data_view
         if state:
-            # incompatible with drag zooming/panning as they both require drag selection
+            # incompatible with drag zooming, panning and masking as they require drag selection
             data_view.deactivate_and_disable_tool(ToolItemText.ZOOM)
             data_view.deactivate_and_disable_tool(ToolItemText.PAN)
             data_view.extents_set_enabled(False)
+            data_view.toggle_masking_options(False)
+            data_view.check_masking_shape_toolbar_icons(None)
+            data_view.deactivate_and_disable_tool(ToolItemText.MASKING)
             tool = RectangleSelectionLinePlot
             if data_view.line_plots_active:
                 data_view.switch_line_plots_tool(RectangleSelectionLinePlot, self)
@@ -117,13 +124,56 @@ class SliceViewerBasePresenter(IDataViewSubscriber, ABC):
         else:
             data_view.enable_tool_button(ToolItemText.ZOOM)
             data_view.enable_tool_button(ToolItemText.PAN)
+            if not self._is_masking_disabled:
+                data_view.enable_tool_button(ToolItemText.MASKING)
             data_view.extents_set_enabled(True)
             data_view.switch_line_plots_tool(PixelLinePlot, self)
 
-    @abc.abstractmethod
+    def masking(self, active) -> None:
+        self._toggle_masking_options(active)
+        if active:
+            self._data_view.deactivate_and_disable_tool(ToolItemText.ZOOM)
+            self._data_view.deactivate_and_disable_tool(ToolItemText.PAN)
+            self._data_view.deactivate_and_disable_tool(ToolItemText.REGIONSELECTION)
+            self._data_view.masking = Masking(self._data_view, self.model.ws.name())
+            self._data_view.masking.new_selector(ToolItemText.RECT_MASKING)  # default to rect masking
+            self._data_view.activate_tool(ToolItemText.RECT_MASKING, True)
+            return
+        self._data_view.enable_tool_button(ToolItemText.ZOOM)
+        self._data_view.enable_tool_button(ToolItemText.PAN)
+        self._data_view.enable_tool_button(ToolItemText.REGIONSELECTION)
+        self._clean_up_masking()
+        self._data_view.check_masking_shape_toolbar_icons(None)
+        self._data_view.canvas.draw_idle()
+
+    def _clean_up_masking(self):
+        self._data_view.masking.clear_and_disconnect()
+        self._data_view.canvas.flush_events()  # flush before we set masking to None
+        self._data_view.masking = None
+
+    @property
+    def _is_masking_disabled(self):
+        #  Disable masking if not supported.
+        #  If a use case arises, we could extend support to these areas
+        if self._disable_masking_override:
+            return True
+
+        # if not histo workspace
+        ws_type = None if not self.model.ws else WorkspaceInfo.get_ws_type(self.model.ws)
+        if not ws_type == WS_TYPE.MATRIX:
+            return True
+        #  If y-axis is numeric.
+        if self.model.ws.getAxis(1).isNumeric():
+            return True
+        return False
+
+    def _toggle_masking_options(self, active):
+        self._data_view.toggle_masking_options(active)
+
+    @abstractmethod
     def get_extra_image_info_columns(self, xdata, ydata):
         pass
 
-    @abc.abstractmethod
+    @abstractmethod
     def is_integer_frame(self):
         pass

@@ -7,7 +7,7 @@
 #  This file is part of the mantid workbench.
 
 import numpy as np
-from matplotlib.colors import LogNorm, Normalize
+from matplotlib.colors import LogNorm, Normalize, SymLogNorm
 from matplotlib import colormaps
 from qtpy.QtCore import Qt
 from qtpy.QtGui import QPixmap, QIcon, QImage
@@ -37,7 +37,7 @@ INTERPOLATIONS = [
     "Sinc",
     "Lanczos",
 ]
-SCALES = {"Linear": Normalize, "Logarithmic": LogNorm}
+SCALES = {"Linear": Normalize, "Logarithmic": LogNorm, "SymLog": SymLogNorm}
 
 
 def create_colormap_img(cmap_name, width=50, height=20):

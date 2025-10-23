@@ -9,6 +9,8 @@
 from matplotlib.ticker import NullLocator
 from mpl_toolkits.mplot3d import Axes3D
 
+from workbench.plotting.propertiesdialog import LINTHRESH_DEFAULT
+
 
 class AxProperties(dict):
     """
@@ -36,11 +38,15 @@ class AxProperties(dict):
         props["yautoscale"] = ax.get_autoscaley_on()
         props["canvas_color"] = ax.get_facecolor()
 
+        props["linthreshx"] = ax.xaxis.get_transform().linthresh if props["xscale"] == "Symlog" else LINTHRESH_DEFAULT
+        props["linthreshy"] = ax.yaxis.get_transform().linthresh if props["yscale"] == "Symlog" else LINTHRESH_DEFAULT
+
         if isinstance(ax, Axes3D):
             props["zlim"] = ax.get_zlim()
             props["zlabel"] = ax.get_zlabel()
             props["zscale"] = ax.get_zscale().title()
             props["zautoscale"] = ax.get_autoscalez_on()
+            props["linthreshz"] = ax.zaxis.get_transform().linthresh if props["zscale"] == "Symlog" else LINTHRESH_DEFAULT
         else:
             props["minor_ticks"] = not isinstance(ax.xaxis.minor.locator, NullLocator)
             props["minor_gridlines"] = ax.show_minor_gridlines if hasattr(ax, "show_minor_gridlines") else False
@@ -59,5 +65,6 @@ class AxProperties(dict):
         props[f"{ax}lim"] = (view.get_lower_limit(), view.get_upper_limit())
         props[f"{ax}label"] = view.get_label()
         props[f"{ax}scale"] = view.get_scale()
+        props[f"linthresh{ax}"] = view.get_symlog_linear_threshold()
 
         return cls(props)

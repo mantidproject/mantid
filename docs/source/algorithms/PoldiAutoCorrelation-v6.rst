@@ -34,6 +34,11 @@ d-spacing is the inverse of the sum of the inverse intensities at each possible 
 A high correlation intensity implies a consistently high intensity was measured at all arrival times due to all
 possible chopper openings/pulses.
 
+In general the arrival time of a neutron for a given d-spacing will not coincide with a bin-center in the data -
+some interpolation is required. There are two interpolation methods which can be specified with the
+``InterpolationMethod`` parameter: ``Linear`` (default - as in [1]_) and ``Nearest``. The ``Nearest`` method is a
+roughly a factor of 2-3 quicker but is potentially less accurate.
+
 Note by convention the correlation spectrum is converted from d-spacing into momentum transfer.
 
 Further details of the POLDI instrument and the reduction can be found in [1]_.
@@ -73,7 +78,7 @@ Output:
 .. testoutput:: POLDI_silicon_autocorr
 
     The workspace contains 448 spectra.
-    The correlation spectrum has 2460 bins.
+    The correlation spectrum has 2833 bins.
 
 References
 ----------

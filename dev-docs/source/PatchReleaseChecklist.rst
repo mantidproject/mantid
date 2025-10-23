@@ -107,7 +107,7 @@ updated to the patch milestone.
 Nightly Builds
 ##############
 
-The `release-next nightly pipeline <https://builds.mantidproject.org/view/Nightly%20Pipelines/job/release-next_nightly_deployment>`__
+The `release-next nightly pipeline <https://builds.mantidproject.org/view/Nightly%20Pipelines/job/release-next_nightly>`__
 job checks for changes on the current release branch each night (00:00 GMT) and should
 be monitored during the patch release period to check for any failures.
 

@@ -12,6 +12,7 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/InstrumentFileFinder.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataHandling/LoadEMU.h"
@@ -28,6 +29,7 @@
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
+using namespace Mantid::Types::Core;
 using namespace Mantid::DataHandling;
 using namespace Mantid::DataObjects;
 
@@ -46,14 +48,14 @@ public:
     if (!algToBeTested.isInitialized())
       algToBeTested.initialize();
 
-    std::string outputSpace = "LoadEMUauTest";
+    const std::string outputSpace = "LoadEMUauTest";
     algToBeTested.setPropertyValue("OutputWorkspace", outputSpace);
 
     // should fail because mandatory parameter has not been set
     TS_ASSERT_THROWS(algToBeTested.execute(), const std::runtime_error &);
 
     // should succeed now
-    std::string inputFile = "EMU0006330.tar";
+    const std::string inputFile = "EMU0006330.tar";
     algToBeTested.setPropertyValue("Filename", inputFile);
     algToBeTested.setPropertyValue("SelectDetectorTubes", "16-50");
     TS_ASSERT_THROWS_NOTHING(algToBeTested.execute());
@@ -114,7 +116,7 @@ public:
     // total counts are the same regardless of the BM spectrum and that the
     // spectrum data is available when the flag is set.
 
-    std::string inputFile = "EMU0020493.tar";
+    const std::string inputFile = "EMU0020493.tar";
     algToBeTested.setPropertyValue("Filename", inputFile);
     algToBeTested.setPropertyValue("SelectDetectorTubes", "16-50");
     TS_ASSERT_THROWS_NOTHING(algToBeTested.execute());
@@ -154,5 +156,20 @@ public:
     TS_ASSERT_DELTA(logpm("BeamMonitorRate"), 1482.76, 1.0e-2);
     TS_ASSERT_DELTA(logpm("BeamMonitorBkgRate"), 1.01, 1.0e-2);
     TS_ASSERT_EQUALS(logpmi("MonitorCounts"), 27510);
+  }
+
+  void test_find_definition_file() {
+    const std::string instname = "EMUau";
+    const std::string preMod("2018-07-26 10:13:12");
+    auto filename = InstrumentFileFinder::getInstrumentFilename(instname, preMod);
+
+    // confirm that file "EMUau_definition_2025.xml" is returned but ignore the file path
+    Poco::Path prePath(filename);
+    TS_ASSERT_EQUALS(prePath.getFileName(), "EMUau_Definition_2025.xml");
+
+    std::string postMod("2025-07-26 10:13:12");
+    filename = InstrumentFileFinder::getInstrumentFilename(instname, postMod);
+    Poco::Path postPath(filename);
+    TS_ASSERT_EQUALS(postPath.getFileName(), "EMUau_Definition.xml");
   }
 };

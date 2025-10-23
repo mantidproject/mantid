@@ -1,1 +1,0 @@
-- The Qt Assistant-based help window has been removed from MantidWorkbench. This is part of an ongoing effort to modernize the help system and remove unmaintained components.

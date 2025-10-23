@@ -59,9 +59,8 @@ LoadBankFromDiskTask::LoadBankFromDiskTask(DefaultEventLoader &loader, std::stri
   m_max_id = 0;
 }
 
-/** Load the pulse times, if needed. This sets
- * thisBankPulseTimes to the right pointer.
- * */
+/** Load the pulse times, if needed. This sets thisBankPulseTimes to the right pointer.
+ */
 void LoadBankFromDiskTask::loadPulseTimes(Nexus::File &file) {
   try {
     // First, get info about the event_time_zero field in this bank
@@ -102,8 +101,7 @@ void LoadBankFromDiskTask::loadPulseTimes(Nexus::File &file) {
 }
 
 /** Load the event_index field
- * (a list of size of # of pulses giving the index in the event list for that
-    pulse)
+ * (a list of size of # of pulses giving the index in the event list for that pulse)
  * @param file :: File handle for the NeXus file
  */
 std::unique_ptr<std::vector<uint64_t>> LoadBankFromDiskTask::loadEventIndex(Nexus::File &file) {
@@ -319,10 +317,10 @@ void LoadBankFromDiskTask::run() {
   prog->report(entry_name + ": load from disk");
 
   // arrays to load into
-  std::unique_ptr<std::vector<uint32_t>> event_id;
-  std::unique_ptr<std::vector<float>> event_time_of_flight;
-  std::unique_ptr<std::vector<float>> event_weight;
-  std::unique_ptr<std::vector<uint64_t>> event_index;
+  std::shared_ptr<std::vector<uint32_t>> event_id;
+  std::shared_ptr<std::vector<float>> event_time_of_flight;
+  std::shared_ptr<std::vector<float>> event_weight;
+  std::shared_ptr<std::vector<uint64_t>> event_index;
 
   // Open the file
   Nexus::File file(m_loader.alg->m_filename);
@@ -460,17 +458,11 @@ void LoadBankFromDiskTask::run() {
   const auto numEvents = static_cast<size_t>(m_loadSize[0]);
   const auto startAt = static_cast<size_t>(m_loadStart[0]);
 
-  // convert things to shared_arrays to share between tasks
-  std::shared_ptr<std::vector<uint32_t>> event_id_shrd(std::move(event_id));
-  std::shared_ptr<std::vector<float>> event_time_of_flight_shrd(std::move(event_time_of_flight));
-  std::shared_ptr<std::vector<float>> event_weight_shrd(std::move(event_weight));
-  std::shared_ptr<std::vector<uint64_t>> event_index_shrd(std::move(event_index));
-
-  if ((m_loader.alg->compressEvents) && (!event_weight_shrd) && (m_loader.alg->compressTolerance != 0)) {
+  if ((m_loader.alg->compressEvents) && (!event_weight) && (m_loader.alg->compressTolerance != 0)) {
     // this method is for unweighted events that the user wants compressed on load
 
     // TODO should this be created elsewhere?
-    const auto [tof_min, tof_max] = Mantid::Kernel::parallel_minmax(event_time_of_flight_shrd);
+    const auto [tof_min, tof_max] = Mantid::Kernel::parallel_minmax(event_time_of_flight);
 
     const bool log_compression = (m_loader.alg->compressTolerance < 0);
 
@@ -514,25 +506,25 @@ void LoadBankFromDiskTask::run() {
 
     // create the tasks
     std::shared_ptr<Task> newTask1 = std::make_shared<ProcessBankCompressed>(
-        m_loader, entry_name, prog, event_id_shrd, event_time_of_flight_shrd, startAt, event_index_shrd,
-        thisBankPulseTimes, m_min_id, mid_id, histogram_bin_edges, m_loader.alg->compressTolerance);
+        m_loader, entry_name, prog, event_id, event_time_of_flight, startAt, event_index, thisBankPulseTimes, m_min_id,
+        mid_id, histogram_bin_edges, m_loader.alg->compressTolerance);
     scheduler.push(newTask1);
     if (m_loader.splitProcessing && (mid_id < m_max_id)) {
       std::shared_ptr<Task> newTask2 = std::make_shared<ProcessBankCompressed>(
-          m_loader, entry_name, prog, event_id_shrd, event_time_of_flight_shrd, startAt, event_index_shrd,
-          thisBankPulseTimes, (mid_id + 1), m_max_id, histogram_bin_edges, m_loader.alg->compressTolerance);
+          m_loader, entry_name, prog, event_id, event_time_of_flight, startAt, event_index, thisBankPulseTimes,
+          (mid_id + 1), m_max_id, histogram_bin_edges, m_loader.alg->compressTolerance);
       scheduler.push(newTask2);
     }
   } else {
     // create all events using traditional method
     std::shared_ptr<Task> newTask1 = std::make_shared<ProcessBankData>(
-        m_loader, entry_name, prog, event_id_shrd, event_time_of_flight_shrd, numEvents, startAt, event_index_shrd,
-        thisBankPulseTimes, m_have_weight, event_weight_shrd, m_min_id, mid_id);
+        m_loader, entry_name, prog, event_id, event_time_of_flight, numEvents, startAt, event_index, thisBankPulseTimes,
+        m_have_weight, event_weight, m_min_id, mid_id);
     scheduler.push(newTask1);
     if (m_loader.splitProcessing && (mid_id < m_max_id)) {
       std::shared_ptr<Task> newTask2 = std::make_shared<ProcessBankData>(
-          m_loader, entry_name, prog, event_id_shrd, event_time_of_flight_shrd, numEvents, startAt, event_index_shrd,
-          thisBankPulseTimes, m_have_weight, event_weight_shrd, (mid_id + 1), m_max_id);
+          m_loader, entry_name, prog, event_id, event_time_of_flight, numEvents, startAt, event_index,
+          thisBankPulseTimes, m_have_weight, event_weight, (mid_id + 1), m_max_id);
       scheduler.push(newTask2);
     }
   }
@@ -541,6 +533,7 @@ void LoadBankFromDiskTask::run() {
   if (m_loader.alg->getLogger().isDebug())
     m_loader.alg->getLogger().debug() << "Time to LoadBankFromDisk " << entry_name << " " << timer << "\n";
 #endif
+  thisBankPulseTimes.reset();
 }
 
 /**

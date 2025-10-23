@@ -24,24 +24,22 @@ Filter Events
 #. Click ``Load``. After a few seconds, plot should be updated with a graph of summed up Counts vs.Time.
 #. ``_Summed_..`` workspace should be generated on the ADS, as well as ``CNCS_7860_Event`` workspace.
 #. Clicking on the ``Refresh`` button should update the drop-down list with the name of the loaded workspace.
-#. Check Vertical Range Sliders work properly. You can't cross the sliders.
-#. Check Horizontal Range Sliders work properly. You can't cross the sliders.
-#. Check that the Text Edits for ``Starting Time`` and ``Stopping Time`` work correctly:
+#. Check the vertical dashed green range markers on the plot work properly when dragging: ``Starting Time`` and ``Stopping Time`` Text Edits are updated accordingly.
+#. Check the horizontal dot-dashed blue range markers on the plot work properly when dragging: ``Minimum Value`` and ``Maximum Value`` Text Edits are updated accordingly.
+#. Check that the Text Edits for ``Starting Time`` and ``Stopping Time`` (similarly with ``Minimum Value`` and ``Maximum Value``) work correctly:
 
-   - Position of vertical bars on the plot are updated appropriately when changing the numerical value of the edits and pressing `Enter`.
-   - Setting a value on ``Starting Time`` larger than the current value on ``Stopping Time`` is not allowed, and viceversa.
+   - Position of markers on the plot are updated appropriately when changing the numerical value of the edits and pressing `Enter`.
+   - Setting a value on ``Starting Time`` larger than the current value on ``Stopping Time`` is not allowed, and vice versa.
    - Data Validation is working, you can't set non-numeric characters on the edits.
-   - A red label with information is displayed on top of the plot whenever the input validation is wrong.
 
-#. Clicking anywhere on the plot raises a dialog with the `(x,y)` position clicked on the graph.
+#. Moving the mouse on the plot updates a label in the top left corner with the `(x,y)` position on the graph.
 #. On ``Output Name`` write `FilteredTemp`.
 #. On ``Sample Log`` drop-down menu select ``SampleTemp`` and hit on ``Plot`` button. Plot should update with the temperature log for the run vs. time.
-#. Moving vertical range sliders updates ``Minimum Value`` and ``Maximum Value`` text edits.
-#. Move the upper vertical range slider to be at approximately ``279.95`` degrees and the lower vertical range slider to be at approximately ``279.91`` degrees.
+#. Move the upper vertical range marker to be at approximately ``279.95`` degrees and the lower vertical range marker to be at approximately ``279.91`` degrees.
 #. Click on ``Filter`` button. That should generate several workspaces in the ADS. Two table workspaces ending with ``_info``, ``_splitters`` and a group workspace named ``FilteredTemp`` containing one
    event workspace named ``FilteredTemp_0``, as well as a ``TOFCorrTable`` 2D workspace.
 #. Right-click on ``FilteredTemp_0`` and select ``Show Sample Logs``. On Sample Log Window, check the ``SampleTemp`` entry and make sure the temperature range is approximately
-   the same as selected with the sliders in the interface.
+   the same as selected with the markers in the interface.
 #. Back to the filter events interface, click on the ``Refresh`` button. The drop-down list should refresh with the available event workspaces on the ADS (``CNCS_7860_Event`` and ``FilteredTemp_0``).
 #. Select ``FilteredTemp_0`` and click on ``Use`` button. Plot should update accordingly.
 #. On output name write `FilteredTime`, on ``Starting Time`` text edit write ``80`` and then press ``Enter``. On ``Stopping Time`` text edit write ``100`` and press ``Enter``.
@@ -52,6 +50,6 @@ Filter Events
    on ``Filter`` button again. Workspace ending in ``_splitters`` should be a 2D workspace, all other workspaces should remain the same.
 #. Now on ``Algorithms`` select ``FilterEvents`` algorithm and click on ``Execute``. As ``InputWorkspace`` select ``FilteredTemp_0`` workspace. On Splitter workspace select ``FilteredTemp_0_splitters``,
    and on ``Information Workspace`` select ``FilteredTemp_0_info``. Tick on ``GroupWorkspaces`` checkbox. And name the ``OutputWorkspaceBaseName`` as ``FilteredTimeRedux``.
-#. ``Run`` the algorithm  with ``Group Workspaces`` checked. On the ADS, a new group event workspace named ``FilteredTimeRedux`` should appear. The two event workspaces that it contains should be equal to the two event workspace previuosly generated
+#. ``Run`` the algorithm with ``Group Workspaces`` checked. On the ADS, a new group event workspace named ``FilteredTimeRedux`` should appear. The two event workspaces that it contains should be equal to the two event workspace previously generated
    through the interface, ``FilteredTime_0`` and ``FilteredTime_1``.
 #. Back to the Filter Events interface. Click on ``Refresh`` button again, and make sure it updates with the list of all event workspaces on the ADS.

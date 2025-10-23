@@ -32,9 +32,8 @@ The buttons below the **Plotting** tab have the following functionality (from le
 +------------------------------------------------+----------------------------------------------------------------------------+
 | |exp-grid| Grid selector                       | Toggle through different grid sizes.                                       |
 +------------------------------------------------+----------------------------------------------------------------------------+
-| |exp-crystal-axes| Grid style selector         | Switch between a) orthogonal axes defined by :math:`n_x` and :math:`n_y`,  |
-|                                                | or b) crystalographic principal axes lying in the horizontal scattering    |
-|                                                | plane. The latter works only if two principle axes change in the           |
+| |exp-crystal-axes| Grid style selector         | Enable/disable crystalographic principal axes laying in the horizontal     |
+|                                                | scattering plane. It works only if two principle axes change in the        |
 |                                                | horizontal plane.                                                          |
 +------------------------------------------------+----------------------------------------------------------------------------+
 | |exp-projections| Projection selector          | Turn on/off projections of the intensity function averaged along           |

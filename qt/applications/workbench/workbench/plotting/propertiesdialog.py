@@ -14,15 +14,20 @@ from mantid.plots.datafunctions import update_colorbar_scale, get_images_from_fi
 from mantidqt.plotting.figuretype import FigureType, figure_type
 from mantidqt.utils.qt import load_ui
 
-from matplotlib.colors import LogNorm, Normalize
+from matplotlib.colors import LogNorm, Normalize, SymLogNorm
 from matplotlib.ticker import ScalarFormatter, LogFormatterSciNotation
 from mpl_toolkits.mplot3d.axes3d import Axes3D
 from qtpy.QtGui import QDoubleValidator, QIcon
 from qtpy.QtWidgets import QDialog, QWidget
 
+
 TREAT_LOG_NEGATIVE_VALUES = "clip"
 DECIMAL_FORMAT = "Decimal Format"
 SCIENTIFIC_FORMAT = "Scientific Format"
+SCALE_MODES = ["linear", "log", "symlog"]
+STR_TO_COLOR_NORMALIZATION = {"linear": Normalize, "log": LogNorm, "symlog": SymLogNorm}
+COLOR_NORMALIZATION_TO_STR = {v: k for k, v in STR_TO_COLOR_NORMALIZATION.items()}
+LINTHRESH_DEFAULT = 2  # Set to default mpl linthresh
 
 
 class PropertiesEditorBase(QDialog):
@@ -133,7 +138,7 @@ class LegendEditor(PropertiesEditorBase):
 class AxisEditorModel(object):
     min = None
     max = None
-    log = None
+    scale_mode = None
     grid = None
     formatter = None
 
@@ -152,32 +157,35 @@ class AxisEditor(PropertiesEditorBase):
         # Ensure that only floats can be entered
         self.ui.editor_min.setValidator(QDoubleValidator())
         self.ui.editor_max.setValidator(QDoubleValidator())
+        for mode in SCALE_MODES:
+            self.ui.scaleBox.addItem(mode)
         if figure_type(canvas.figure) in [FigureType.Surface, FigureType.Wireframe, FigureType.Mesh]:
-            self.ui.logBox.hide()
+            self.ui.scaleBox.hide()
+            self.ui.scaleLabel.hide()
             self.ui.gridBox.hide()
+            self.ui.gridLabel.hide()
         self.ui.editor_format.addItem(DECIMAL_FORMAT)
         self.ui.editor_format.addItem(SCIENTIFIC_FORMAT)
         self.axes = axes
         self.axis_id = axis_id
-        self.lim_getter = getattr(axes, "get_{}lim".format(axis_id))
 
         if isinstance(axes, Axes3D):
-            self.lim_setter = getattr(axes, "set_{}lim3d".format(axis_id))
+            self.lim_setter = getattr(axes, f"set_{axis_id}lim3d")
         else:
-            self.lim_setter = getattr(axes, "set_{}lim".format(axis_id))
+            self.lim_setter = getattr(axes, f"set_{axis_id}lim")
 
-        self.scale_setter = getattr(axes, "set_{}scale".format(axis_id))
+        self.scale_setter = getattr(axes, f"set_{axis_id}scale")
         self.nonposkw = "nonpositive"
 
         # Store the axis for attributes that can't be directly accessed
         # from axes object (e.g. grid and tick parameters).
-        self.axis = getattr(axes, "{}axis".format(axis_id))
+        self.axis = getattr(axes, f"{axis_id}axis")
 
     def create_model(self):
         memento = AxisEditorModel()
         self._memento = memento
-        memento.min, memento.max = getattr(self.axes, "get_{}lim".format(self.axis_id))()
-        memento.log = getattr(self.axes, "get_{}scale".format(self.axis_id))() != "linear"
+        memento.min, memento.max = getattr(self.axes, f"get_{self.axis_id}lim")()
+        memento.scale_mode = getattr(self.axes, f"get_{self.axis_id}scale")()
         memento.grid = self.axis.grid_on() if hasattr(self.axis, "grid_on") else self.axis._major_tick_kw.get("gridOn", False)
         if type(self.axis.get_major_formatter()) is ScalarFormatter:
             memento.formatter = DECIMAL_FORMAT
@@ -189,13 +197,8 @@ class AxisEditor(PropertiesEditorBase):
         self.ui.errors.hide()
         # apply properties
         axes = self.axes
-
+        self.scale_setter(self.ui.scaleBox.currentText())
         self.limit_min, self.limit_max = float(self.ui.editor_min.text()), float(self.ui.editor_max.text())
-        if self.ui.logBox.isChecked():
-            self.scale_setter("log", **{self.nonposkw: TREAT_LOG_NEGATIVE_VALUES})
-            self.limit_min, self.limit_max = self._check_log_limits(self.limit_min, self.limit_max)
-        else:
-            self.scale_setter("linear")
         self.lim_setter(self.limit_min, self.limit_max)
         self._set_tick_format()
         which = "both" if hasattr(axes, "show_minor_gridlines") and axes.show_minor_gridlines else "major"
@@ -211,19 +214,9 @@ class AxisEditor(PropertiesEditorBase):
     def _fill(self, model):
         self.ui.editor_min.setText(str(model.min))
         self.ui.editor_max.setText(str(model.max))
-        self.ui.logBox.setChecked(model.log)
+        self.ui.scaleBox.setCurrentText(model.scale_mode)
         self.ui.gridBox.setChecked(model.grid)
         self.ui.editor_format.setCurrentText(model.formatter)
-
-    def _check_log_limits(self, editor_min, editor_max):
-        # Check that the limits from the editor are sensible for a log graph
-        # These limits are not necessarily in numeric order we have to check both
-        lim_min, lim_max = self.lim_getter()
-        if editor_min <= 0:
-            editor_min = lim_min
-        if editor_max <= 0:
-            editor_max = lim_max
-        return editor_min, editor_max
 
     def _set_tick_format(self):
         formatter = self.ui.editor_format.currentText()
@@ -231,7 +224,7 @@ class AxisEditor(PropertiesEditorBase):
             fmt = ScalarFormatter(useOffset=True)
         elif formatter == SCIENTIFIC_FORMAT:
             fmt = LogFormatterSciNotation()
-        getattr(self.axes, "{}axis".format(self.axis_id)).set_major_formatter(fmt)
+        getattr(self.axes, f"{self.axis_id}axis").set_major_formatter(fmt)
         return
 
 
@@ -258,6 +251,11 @@ class ColorbarAxisEditor(AxisEditor):
         super(ColorbarAxisEditor, self).__init__(canvas, axes, "y")
 
         self.ui.gridBox.hide()
+        self.ui.gridLabel.hide()
+
+        # Turn on axis scaling for color bars on 3D plots, contrary to base class shared by other axes.
+        self.ui.scaleLabel.show()
+        self.ui.scaleBox.show()
 
         self.images = []
 
@@ -282,22 +280,22 @@ class ColorbarAxisEditor(AxisEditor):
             raise RuntimeError("Cannot find any plot linked to this colorbar")
 
         limit_min, limit_max = float(self.ui.editor_min.text()), float(self.ui.editor_max.text())
-
-        scale = LogNorm if self.ui.logBox.isChecked() else Normalize
-
-        if scale == LogNorm and (limit_min <= 0 or limit_max <= 0):
-            raise ValueError("Limits must be positive\nwhen scale is logarithmic.")
-
         self.lim_setter(limit_min, limit_max)
+
+        scale = STR_TO_COLOR_NORMALIZATION[self.ui.scaleBox.currentText()]
+        update_args = {"figure": self.canvas.figure, "scale": scale, "vmin": limit_min, "vmax": limit_max}
+        if scale == SymLogNorm:
+            update_args["linthresh"] = LINTHRESH_DEFAULT
+
         for img in self.images:
-            update_colorbar_scale(self.canvas.figure, img, scale, limit_min, limit_max)
+            update_colorbar_scale(image=img, **update_args)
 
     def create_model(self):
         memento = AxisEditorModel()
         self._memento = memento
         if len(self.images) > 0:
             memento.min, memento.max = self.images[0].get_clim()
-            memento.log = isinstance(self.images[0].norm, LogNorm)
+            memento.scale_mode = COLOR_NORMALIZATION_TO_STR[self.images[0].norm.__class__]
         else:
             memento.log = False
         memento.grid = False
@@ -352,12 +350,12 @@ class MarkerEditor(QWidget):
         if new_name == "":
             raise RuntimeError("Marker names cannot be empty")
         if new_name in self.used_names and new_name != old_name:
-            raise RuntimeError("Marker names cannot be duplicated.\n Another marker is named '{}'".format(new_name))
+            raise RuntimeError(f"Marker names cannot be duplicated.\n Another marker is named '{new_name}'")
         try:
             marker.set_name(new_name)
         except:
             marker.set_name(old_name)
-            raise RuntimeError("Invalid label '{}'".format(new_name))
+            raise RuntimeError(f"Invalid label '{new_name}'")
 
         marker.set_position(float(self.widget.position.text()))
         marker.draggable = not self.widget.fixed_marker.isChecked()

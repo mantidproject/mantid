@@ -345,8 +345,8 @@ std::string Goniometer::getConventionFromMotorAxes() const {
 /// Private function to recalculate the rotation matrix of the goniometer
 void Goniometer::recalculateR() {
   if (m_initFromR) {
-    g_log.warning() << "Goniometer was initialized from a rotation matrix. No "
-                    << "recalculation from motors will be done.\n";
+    g_log.information() << "Goniometer was initialized from a rotation matrix. No "
+                        << "recalculation from motors will be done.\n";
     return;
   }
 

@@ -203,7 +203,7 @@ void LoadNexusMonitors2::exec() {
   // this gets the ids from the "isis_vms_compat" group
   fixUDets(file);
 
-  if (numPeriods > 1) {
+  if (numPeriods > 0) {
     m_multiPeriodCounts.resize(m_monitor_count);
     m_multiPeriodBinEdges.resize(m_monitor_count);
   }
@@ -349,8 +349,7 @@ void LoadNexusMonitors2::exec() {
   // add filename
   m_workspace->mutableRun().addProperty("Filename", m_filename);
 
-  // if multiperiod histogram data
-  if ((numPeriods > 1) && (!useEventMon)) {
+  if ((numPeriods > 0) && (!useEventMon)) {
     splitMutiPeriodHistrogramData(numPeriods);
   } else {
     this->setProperty("OutputWorkspace", m_workspace);
@@ -465,14 +464,6 @@ bool LoadNexusMonitors2::canOpenAsNeXus(const std::string &fname) {
  * @param numPeriods :: number of periods
  **/
 void LoadNexusMonitors2::splitMutiPeriodHistrogramData(const size_t numPeriods) {
-  // protection - we should not have entered the routine if these are not true
-  // More than 1 period
-  if (numPeriods < 2) {
-    g_log.warning() << "Attempted to split multiperiod histogram workspace with " << numPeriods
-                    << "periods, aborted.\n";
-    return;
-  }
-
   // Y array should be divisible by the number of periods
   if (m_multiPeriodCounts[0].size() % numPeriods != 0) {
     g_log.warning() << "Attempted to split multiperiod histogram workspace with " << m_multiPeriodCounts[0].size()
@@ -482,13 +473,14 @@ void LoadNexusMonitors2::splitMutiPeriodHistrogramData(const size_t numPeriods) 
     return;
   }
 
-  WorkspaceGroup_sptr wsGroup(new WorkspaceGroup);
   size_t yLength = m_multiPeriodCounts[0].size() / numPeriods;
   size_t xLength = yLength + 1;
   size_t numSpectra = m_workspace->getNumberHistograms();
   API::ISISRunLogs monLogCreator(m_workspace->run());
 
   BinEdges edges = m_multiPeriodBinEdges[0];
+  std::vector<API::MatrixWorkspace_sptr> outputWorkspaces;
+  outputWorkspaces.reserve(numPeriods);
 
   for (size_t i = 0; i < numPeriods; i++) {
     // create the period workspace
@@ -506,12 +498,21 @@ void LoadNexusMonitors2::splitMutiPeriodHistrogramData(const size_t numPeriods) 
     monLogCreator.addStatusLog(wsPeriod->mutableRun());
     monLogCreator.addPeriodLogs(static_cast<int>(i + 1), wsPeriod->mutableRun());
 
-    // add to workspace group
-    wsGroup->addWorkspace(wsPeriod);
+    outputWorkspaces.push_back(wsPeriod);
   }
 
-  // set the output workspace
-  this->setProperty("OutputWorkspace", wsGroup);
+  // set output workspace to either single period ws, or group ws.
+  if (outputWorkspaces.size() > 1) {
+    WorkspaceGroup_sptr wsGroup(new WorkspaceGroup);
+    for (const auto &ws : outputWorkspaces) {
+      wsGroup->addWorkspace(ws);
+    }
+    this->setProperty("OutputWorkspace", wsGroup);
+  } else if (outputWorkspaces.size() == 1) {
+    this->setProperty("OutputWorkspace", outputWorkspaces[0]);
+  } else {
+    g_log.error() << "No period workspaces generated to output.";
+  }
 }
 
 size_t LoadNexusMonitors2::getMonitorInfo(Nexus::File &file, size_t &numPeriods) {
@@ -747,7 +748,7 @@ void LoadNexusMonitors2::readHistoMonitorEntry(Nexus::File &file, size_t ws_inde
   file.getDataCoerce(tof);
   file.closeData();
 
-  if (numPeriods > 1) {
+  if (numPeriods > 0) {
     m_multiPeriodBinEdges[ws_index] = std::move(tof);
     m_multiPeriodCounts[ws_index] = std::move(data);
   } else {

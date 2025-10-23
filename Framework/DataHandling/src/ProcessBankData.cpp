@@ -17,18 +17,17 @@ using namespace Mantid::DataObjects;
 namespace Mantid::DataHandling {
 
 ProcessBankData::ProcessBankData(DefaultEventLoader &m_loader, const std::string &entry_name, API::Progress *prog,
-                                 std::shared_ptr<std::vector<uint32_t>> event_id,
-                                 std::shared_ptr<std::vector<float>> event_time_of_flight, size_t numEvents,
-                                 size_t startAt, std::shared_ptr<std::vector<uint64_t>> event_index,
-                                 std::shared_ptr<BankPulseTimes> thisBankPulseTimes, bool have_weight,
-                                 std::shared_ptr<std::vector<float>> event_weight, detid_t min_event_id,
+                                 std::shared_ptr<std::vector<uint32_t>> const &event_id,
+                                 std::shared_ptr<std::vector<float>> const &tevent_time_of_flight, size_t numEvents,
+                                 size_t startAt, std::shared_ptr<std::vector<uint64_t>> const &tevent_index,
+                                 std::shared_ptr<BankPulseTimes> const &thisBankPulseTimes, bool have_weight,
+                                 std::shared_ptr<std::vector<float>> const &tevent_weight, detid_t min_event_id,
                                  detid_t max_event_id)
     : Task(), m_loader(m_loader), entry_name(std::move(entry_name)),
       pixelID_to_wi_vector(m_loader.pixelID_to_wi_vector), pixelID_to_wi_offset(m_loader.pixelID_to_wi_offset),
-      prog(prog), event_detid(std::move(event_id)), event_time_of_flight(std::move(event_time_of_flight)),
-      numEvents(numEvents), startAt(startAt), event_index(std::move(event_index)),
-      thisBankPulseTimes(std::move(thisBankPulseTimes)), have_weight(have_weight),
-      event_weight(std::move(event_weight)), m_min_detid(min_event_id), m_max_detid(max_event_id) {
+      prog(prog), event_detid(event_id), event_time_of_flight(tevent_time_of_flight), numEvents(numEvents),
+      startAt(startAt), event_index(tevent_index), thisBankPulseTimes(thisBankPulseTimes), have_weight(have_weight),
+      event_weight(tevent_weight), m_min_detid(min_event_id), m_max_detid(max_event_id) {
   // Cost is approximately proportional to the number of events to process.
   m_cost = static_cast<double>(numEvents);
 
@@ -51,8 +50,7 @@ void ProcessBankData::preCountAndReserveMem() {
       counts[thisId - m_min_detid]++;
   }
 
-  // Now we pre-allocate (reserve) the vectors of events in each pixel
-  // counted
+  // Now we pre-allocate (reserve) the vectors of events in each pixel counted
   auto &outputWS = m_loader.m_ws;
   const auto *alg = m_loader.alg;
   const size_t numEventLists = outputWS.getNumberHistograms();
@@ -235,6 +233,11 @@ void ProcessBankData::run() {
   if (alg->getLogger().isDebug())
     alg->getLogger().debug() << "Time to ProcessBankData " << entry_name << " " << timer << "\n";
 #endif
+  event_detid.reset();
+  event_time_of_flight.reset();
+  event_index.reset();
+  event_weight.reset();
+  thisBankPulseTimes.reset();
 } // END-OF-RUN()
 
 /**
