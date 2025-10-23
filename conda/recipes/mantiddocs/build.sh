@@ -1,14 +1,16 @@
 #!/usr/bin/env bash
 set -ex
 
+if [ -z "${MANTID_DATA_STORE}" ]; then
+    MANTID_DATA_STORE="${HOME}"/MantidExternalData
+fi
+echo "Using MANTID_DATA_STORE=${MANTID_DATA_STORE}"
+
 parent_dir="$(dirname "$RECIPE_DIR")"
 bash "${parent_dir}"/archive_env_logs.sh "$BUILD_PREFIX" "$PREFIX" 'mantiddocs'
 
 mkdir -p build
 cd build
-
-echo "CONDA BASE ENVIRONMENT (mantiddocs build.sh):"
-mamba run -n base mamba list
 
 # unset LD_PRELOAD as this causes cmake to segfault
 LD_PRELOAD="" \
@@ -37,10 +39,18 @@ LD_PRELOAD="" \
 
 # Configure the 'datasearch.directories' in the Mantid.properties file so the test data is found
 # Docs should only require DocTestData
-export STANDARD_TEST_DATA_DIR=$SRC_DIR/build/ExternalData/Testing/Data
-echo 'datasearch.directories = '$STANDARD_TEST_DATA_DIR'/DocTest/' >> $PREFIX/bin/Mantid.properties
+if [ -f "${PREFIX}"/bin/Mantid.properties ]; then
+    echo "Adding data directories to ${PREFIX}/bin/Mantid.properties"
+    export STANDARD_TEST_DATA_DIR=$SRC_DIR/build/ExternalData/Testing/Data
+    echo 'datasearch.directories = '$STANDARD_TEST_DATA_DIR'/DocTest/' >> $PREFIX/bin/Mantid.properties
+else
+    echo "Failed to find properties file at ${PREFIX}/bin/Mantid.properties"
+    exit 1
+fi
 
+# Use MANTIDPROPERTIES to pick up the properties file that was modified
 # Use QT_QPA_PLATFORM instead of Xvfb because Xvfb hides a lot of the useful output
-QT_QPA_PLATFORM=offscreen cmake --build . --target docs-html
+MANTIDPROPERTIES="${PREFIX}"/bin/Mantid.properties QT_QPA_PLATFORM=offscreen cmake --build . --target docs-html
 
+# install the docs into the final location
 cmake --build . --target install
