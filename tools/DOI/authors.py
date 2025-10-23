@@ -22,7 +22,7 @@ RELEASE_TAG_RE = re.compile(r"^v?\d+.\d+(.\d)?$")
 # prefer multiple translations over blacklist entries in case users log back on
 # to machines and start using old aliases again.
 _translations = {
-    # Name in Git.             :  Preferred name for DOI.
+    # Name in Git : Preferred name for DOI.
     "Freddie Akeroyd": "Akeroyd, Freddie",
     "Stuart Ansell": "Ansell, Stuart",
     "Sofia Antony": "Antony, Sofia",
@@ -213,6 +213,7 @@ _translations = {
     "Samuel Jones": "Jones, Sam",
     "Harry Saunders": "Saunders, Harry",
     "Geish Miladinovic": "Miladinovic, Geish",
+    "geishm-ansto": "Miladinovic, Geish",
     "Harrietbrown": "Brown, Harriet",
     "Harriet Brown": "Brown, Harriet",
     "Adam J. Jackson": "Jackson, Adam J.",
@@ -352,6 +353,8 @@ _translations = {
     "Daniel Caballero": "Caballero, Daniel",
     "Darsh": "Dinger, Darsh",
     "Darsh Dinger": "Dinger, Darsh",
+    "Ian Gibbs": "Gibbs, Ian",
+    "Victoria-Hawkins": "Hawkins, Victoria",
 }
 
 # Used to ensure a Git author does not appear in any of the DOIs.  This is NOT
