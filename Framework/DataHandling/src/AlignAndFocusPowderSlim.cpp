@@ -155,6 +155,10 @@ void AlignAndFocusPowderSlim::init() {
   declareProperty(PropertyNames::SPLITTER_RELATIVE, false,
                   "Flag indicating whether in SplitterWorkspace the times are absolute or "
                   "relative. If true, they are relative to the run start time.");
+  declareProperty(
+      PropertyNames::PROCESS_BANK_SPLIT_TASK, false,
+      "For development testing. Changes how the splitters are processed. If true then use ProcessBankSplitTask "
+      "otherwise loop over ProcessBankTask.");
   auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(0);
   declareProperty(PropertyNames::FILTER_BAD_PULSES, false,
@@ -405,20 +409,57 @@ void AlignAndFocusPowderSlim::exec() {
       workspaces.emplace_back(wksp->clone());
     }
 
-    // determine the pulse indices from the time and splitter workspace
-    const auto target_to_pulse_indices = this->determinePulseIndicesTargets(wksp, filterROI, timeSplitter);
-
     auto progress = std::make_shared<API::Progress>(this, .17, .9, num_banks_to_read * workspaceIndices.size());
 
-    ProcessBankSplitTask task(bankEntryNames, h5file, true, workspaceIndices, workspaces, m_calibration, m_masked,
-                              static_cast<size_t>(DISK_CHUNK), static_cast<size_t>(GRAINSIZE_EVENTS),
-                              target_to_pulse_indices, progress);
-    // generate threads only if appropriate
-    if (num_banks_to_read > 1) {
-      tbb::parallel_for(tbb::blocked_range<size_t>(0, num_banks_to_read), task);
+    if (this->getProperty(PropertyNames::PROCESS_BANK_SPLIT_TASK)) {
+      g_log.information() << "Using ProcessBankSplitTask for splitter processing\n";
+      // determine the pulse indices from the time and splitter workspace
+      const auto target_to_pulse_indices = this->determinePulseIndicesTargets(wksp, filterROI, timeSplitter);
+
+      ProcessBankSplitTask task(bankEntryNames, h5file, true, workspaceIndices, workspaces, m_calibration, m_masked,
+                                static_cast<size_t>(DISK_CHUNK), static_cast<size_t>(GRAINSIZE_EVENTS),
+                                target_to_pulse_indices, progress);
+      // generate threads only if appropriate
+      if (num_banks_to_read > 1) {
+        tbb::parallel_for(tbb::blocked_range<size_t>(0, num_banks_to_read), task);
+      } else {
+        // a "range" of 1; note -1 to match 0-indexed array with 1-indexed bank labels
+        task(tbb::blocked_range<size_t>(outputSpecNum - 1, outputSpecNum));
+      }
     } else {
-      // a "range" of 1; note -1 to match 0-indexed array with 1-indexed bank labels
-      task(tbb::blocked_range<size_t>(outputSpecNum - 1, outputSpecNum));
+      g_log.information() << "Using ProcessBankTask for splitter processing\n";
+      // loop over the targets in the splitter workspace, each target gets its own output workspace
+      tbb::parallel_for(tbb::blocked_range<size_t>(0, workspaceIndices.size()),
+                        [&](const tbb::blocked_range<size_t> &target_indices) {
+                          for (size_t target_index = target_indices.begin(); target_index != target_indices.end();
+                               ++target_index) {
+                            const int splitter_target = workspaceIndices[target_index];
+
+                            auto splitter_roi = timeSplitter.getTimeROI(splitter_target);
+                            // copy the roi so we can modify it just for this target
+                            auto target_roi = filterROI;
+                            if (target_roi.useAll())
+                              target_roi = splitter_roi; // use the splitter ROI if no time filtering is specified
+                            else if (!splitter_roi.useAll())
+                              target_roi.update_intersection(splitter_roi); // otherwise intersect with the splitter ROI
+
+                            // clone wksp for this target
+                            MatrixWorkspace_sptr target_wksp = workspaces[target_index];
+
+                            const auto pulse_indices = this->determinePulseIndices(target_wksp, target_roi);
+
+                            ProcessBankTask task(bankEntryNames, h5file, is_time_filtered, target_wksp, m_calibration,
+                                                 m_masked, static_cast<size_t>(DISK_CHUNK),
+                                                 static_cast<size_t>(GRAINSIZE_EVENTS), pulse_indices, progress);
+                            // generate threads only if appropriate
+                            if (num_banks_to_read > 1) {
+                              tbb::parallel_for(tbb::blocked_range<size_t>(0, num_banks_to_read), task);
+                            } else {
+                              // a "range" of 1; note -1 to match 0-indexed array with 1-indexed bank labels
+                              task(tbb::blocked_range<size_t>(outputSpecNum - 1, outputSpecNum));
+                            }
+                          }
+                        });
     }
 
     // close the file so child algorithms can do their thing
@@ -726,7 +767,7 @@ AlignAndFocusPowderSlim::determinePulseIndicesTargets(const API::MatrixWorkspace
 
 TimeSplitter
 AlignAndFocusPowderSlim::timeSplitterFromSplitterWorkspace(const Types::Core::DateAndTime &filterStartTime) {
-  API::Workspace_sptr tempws = this->getProperty("SplitterWorkspace");
+  API::Workspace_sptr tempws = this->getProperty(PropertyNames::SPLITTER_WS);
   DataObjects::SplittersWorkspace_sptr splittersWorkspace =
       std::dynamic_pointer_cast<DataObjects::SplittersWorkspace>(tempws);
   DataObjects::TableWorkspace_sptr splitterTableWorkspace =
@@ -736,7 +777,7 @@ AlignAndFocusPowderSlim::timeSplitterFromSplitterWorkspace(const Types::Core::Da
   if (!splittersWorkspace && !splitterTableWorkspace && !matrixSplitterWS)
     return {};
 
-  const bool isSplittersRelativeTime = this->getProperty("RelativeTime");
+  const bool isSplittersRelativeTime = this->getProperty(PropertyNames::SPLITTER_RELATIVE);
 
   TimeSplitter time_splitter;
   if (splittersWorkspace) {
