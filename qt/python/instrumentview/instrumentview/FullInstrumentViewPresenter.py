@@ -14,6 +14,7 @@ from mantid.kernel import logger
 from instrumentview.FullInstrumentViewModel import FullInstrumentViewModel
 from instrumentview.FullInstrumentViewWindow import FullInstrumentViewWindow
 from instrumentview.InstrumentViewADSObserver import InstrumentViewADSObserver
+from instrumentview.Peaks.WorkspaceDetectorPeaks import WorkspaceDetectorPeaks
 
 
 class FullInstrumentViewPresenter:
@@ -24,6 +25,8 @@ class FullInstrumentViewPresenter:
     _WAVELENGTH = "Wavelength"
     _MOMENTUM_TRANSFER = "MomentumTransfer"
     _UNIT_OPTIONS = [_TIME_OF_FLIGHT, _D_SPACING, _WAVELENGTH, _MOMENTUM_TRANSFER]
+
+    _COLOURS = ["#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf"]
 
     def __init__(self, view: FullInstrumentViewWindow, model: FullInstrumentViewModel):
         """For the given workspace, use the data from the model to plot the detectors. Also include points at the origin and
@@ -48,11 +51,8 @@ class FullInstrumentViewPresenter:
 
         self._counts_label = "Integrated Counts"
         self._visible_label = "Visible Picked"
-
         self._view.show_axes()
-
         self._is_projection_selected = False
-
         self.on_projection_option_selected(default_index)
 
         if self._model.workspace_x_unit in self._UNIT_OPTIONS:
@@ -64,6 +64,7 @@ class FullInstrumentViewPresenter:
             rename_callback=self.rename_workspace_callback,
             clear_callback=self.clear_workspace_callback,
             replace_callback=self.replace_workspace_callback,
+            add_callback=self.add_workspace_callback,
         )
         self._view.hide_status_box()
 
@@ -118,8 +119,17 @@ class FullInstrumentViewPresenter:
             # Plot orange sphere at the origin
             # origin = pv.Sphere(radius=0.1, center=[0, 0, 0])
             # self._view.add_simple_shape(origin, colour="orange", pickable=False)
+            self._model.reset_cached_projection_positions()
             self._apply_projection_state(False, self._model.detector_positions)
             return
+
+        projected_points = self._adjust_points_for_selected_projection(self._model.detector_positions, projection_type)
+        self._apply_projection_state(True, projected_points)
+
+    def _adjust_points_for_selected_projection(self, points: np.ndarray, projection_type: str) -> np.ndarray:
+        if projection_type.startswith("3D"):
+            self._model.reset_cached_projection_positions()
+            return points
 
         if projection_type.endswith("X"):
             axis = [1, 0, 0]
@@ -132,13 +142,13 @@ class FullInstrumentViewPresenter:
         else:
             raise ValueError(f"Unknown projection type {projection_type}")
 
-        self._model.calculate_projection(projection_type, axis)
-        self._apply_projection_state(True, self._model.detector_projection_positions)
+        return self._model.calculate_projection(projection_type, axis, points)
 
     def _apply_projection_state(self, is_projection: bool, positions: np.ndarray) -> None:
         self._is_projection_selected = is_projection
         self._update_view_main_plotter(positions, is_projection=self._is_projection_selected)
         self.on_multi_select_detectors_clicked()
+        self.on_peaks_workspace_selected()
 
     def _update_view_main_plotter(self, positions: np.ndarray, is_projection: bool):
         self._detector_mesh = self.create_poly_data_mesh(positions)
@@ -190,6 +200,8 @@ class FullInstrumentViewPresenter:
         self._model.extract_spectra_for_line_plot(unit, self._view.sum_spectra_selected())
         self._view.show_plot_for_detectors(self._model.line_plot_workspace)
         self._view.set_selected_detector_info(self._model.picked_detectors_info_text())
+        self._update_peaks_workspaces()
+        self.refresh_lineplot_peaks()
 
     def on_clear_selected_detectors_clicked(self) -> None:
         self.update_picked_detectors([])
@@ -208,24 +220,34 @@ class FullInstrumentViewPresenter:
         rgba[:, 3] = alpha
         return rgba
 
+    def _reload_peaks_workspaces(self):
+        self._view.refresh_peaks_ws_list()
+        self.on_peaks_workspace_selected()
+
     def delete_workspace_callback(self, ws_name):
-        if self._model._workspace.name() != ws_name:
-            return
-        self._view.close()
-        logger.warning(f"Workspace {ws_name} deleted, closed Experimental Instrument View.")
+        if self._model._workspace.name() == ws_name:
+            self._view.close()
+            logger.warning(f"Workspace {ws_name} deleted, closed Experimental Instrument View.")
+        else:
+            self._reload_peaks_workspaces()
 
     def rename_workspace_callback(self, ws_old_name, ws_new_name):
-        if self._model._workspace.name() != ws_old_name:
-            return
-        self._model._workspace = mtd[ws_new_name]
-        logger.warning("Workspace renamed, updated Experimental Instrument View.")
+        if self._model._workspace.name() == ws_old_name:
+            self._model._workspace = mtd[ws_new_name]
+            logger.warning(f"Workspace {ws_old_name} renamed to {ws_new_name}, updated Experimental Instrument View.")
+        self._reload_peaks_workspaces()
 
     def clear_workspace_callback(self):
         self._view.close()
 
     def replace_workspace_callback(self, ws_name, ws):
-        if ws_name == self._model.workspace.name():
+        if ws_name in self.peaks_workspaces_in_ads():
+            self._reload_peaks_workspaces()
+        elif ws_name == self._model.workspace.name():
             self._view.close()
+
+    def add_workspace_callback(self, ws_name, ws):
+        self._reload_peaks_workspaces()
 
     def handle_close(self):
         # The observers are unsubscribed on object deletion, it's safer to manually
@@ -236,3 +258,66 @@ class FullInstrumentViewPresenter:
 
     def on_unit_option_selected(self, value) -> None:
         self._update_line_plot_ws_and_draw(self._UNIT_OPTIONS[value])
+
+    def peaks_workspaces_in_ads(self) -> list[str]:
+        return [ws.name() for ws in self._model.peaks_workspaces_in_ads()]
+
+    def _update_peaks_workspaces(self) -> None:
+        peaks_grouped_by_ws = []
+        points_from_model = self._model.peak_overlay_points()
+        for ws_index in range(len(points_from_model)):
+            peaks_grouped_by_ws.append(WorkspaceDetectorPeaks(points_from_model[ws_index], self._COLOURS[ws_index % len(self._COLOURS)]))
+        self._peaks_grouped_by_ws = peaks_grouped_by_ws
+
+    def on_peaks_workspace_selected(self) -> None:
+        self._model.set_peaks_workspaces(self._view.selected_peaks_workspaces())
+        self._view.clear_overlay_meshes()
+        self._update_peaks_workspaces()
+        self.refresh_lineplot_peaks()
+        self._view.refresh_peaks_ws_list_colours()
+        if len(self._peaks_grouped_by_ws) == 0:
+            return
+        # Keeping the points from each workspace separate so we can colour them differently
+        for ws_peaks in self._peaks_grouped_by_ws:
+            peaks_detector_ids = np.array([p.detector_id for p in ws_peaks.detector_peaks])
+            detector_ids = self._model.detector_ids
+            # Use argsort + searchsorted for fast lookup. Using np.where(np.isin) does not
+            # maintain the original order. It is faster to sort then search the sorted
+            # array for matching detector IDs
+            sorted_idx = np.argsort(detector_ids)
+            sorted_detector_ids = detector_ids[sorted_idx]
+            positions = np.searchsorted(sorted_detector_ids, peaks_detector_ids)
+            # Map back to original indices
+            ordered_indices = sorted_idx[positions]
+            valid = sorted_detector_ids[positions] == peaks_detector_ids
+            ordered_indices = ordered_indices[valid]
+            labels = [p.label for i, p in enumerate(ws_peaks.detector_peaks) if valid[i]]
+            projected_points = self._model.current_projected_positions[ordered_indices]
+            # Plot the peaks and their labels on the projection
+            if len(projected_points) > 0:
+                self._view.plot_overlay_mesh(projected_points, labels, ws_peaks.colour)
+
+    def refresh_lineplot_peaks(self) -> None:
+        # Plot vertical lines on the lineplot if the peak detector is selected
+        self._view.clear_lineplot_overlays()
+
+        for ws_peaks in self._peaks_grouped_by_ws:
+            x_values = []
+            labels = []
+            for peak in ws_peaks.detector_peaks:
+                if peak.detector_id in self._model.picked_detector_ids:
+                    match self._view.current_selected_unit():
+                        case self._TIME_OF_FLIGHT:
+                            x_values += [p.tof for p in peak.peaks]
+                        case self._D_SPACING:
+                            x_values += [p.dspacing for p in peak.peaks]
+                        case self._WAVELENGTH:
+                            x_values += [p.wavelength for p in peak.peaks]
+                        case self._MOMENTUM_TRANSFER:
+                            x_values += [p.q for p in peak.peaks]
+                        case _:
+                            raise RuntimeError("Unknown unit for drawing peak overlays")
+                    labels += [p.label for p in peak.peaks]
+            if len(x_values) > 0:
+                self._view.plot_lineplot_overlay(x_values, labels, ws_peaks.colour)
+        self._view.redraw_lineplot()

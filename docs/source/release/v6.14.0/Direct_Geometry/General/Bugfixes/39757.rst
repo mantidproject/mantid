@@ -1,1 +1,0 @@
-- Previously, Mantid could crash if the material set on a sample already existed rather than being created from scratch, improvements have now been made in an attempt to rectify the issues.

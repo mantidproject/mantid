@@ -73,7 +73,7 @@ class TestSideBySideProjection(unittest.TestCase):
         mock_workspace.detectorInfo.return_value = mock_detector_info
         side_by_side = SideBySide(
             workspace=mock_workspace,
-            detector_ids=detector_ids,
+            detector_ids=np.array(detector_ids),
             sample_position=np.zeros(3),
             root_position=np.zeros(3),
             detector_positions=np.array([[1, 1, 1], [0, 1, 0], [0, 0, 1]]),

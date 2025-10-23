@@ -138,8 +138,8 @@ for a given branch of mantid. The branch can be from the main mantid repo or fro
 Options
 #######
 
-- ``BUILD_DEVEL`` [``none``, ``all``, ``linux-64``, ``win-64``, ``osx-64``]: Run the system tests for this OS.
-- ``BUILD_PACKAGE`` [``none``, ``all``, ``linux-64``, ``win-64``, ``osx-64``]: Build a package on this OS.
+- ``BUILD_DEVEL`` [``none``, ``all``, ``linux-64``, ``win-64``, ``osx-arm64``]: Run the system tests for this OS.
+- ``BUILD_PACKAGE`` [``none``, ``all``, ``linux-64``, ``win-64``, ``osx-arm64``]: Build a package on this OS.
 - ``PACKAGE_SUFFIX``: String to append onto the standalone package name, useful for distinguishing builds. By default this is ``Unstable``.
 - ``PUBLISH_TO_ANACONDA``: Set true to publish to the given Anaconda channel and label.
 - ``PUBLISH_TO_GITHUB``: Set true to publish to the Github repository using the specified tag.
@@ -184,9 +184,9 @@ This is useful if you need to change a pinned version of one of Mantid's depende
 1. Create a conda environment and install ``boa`` and ``versioningit`` into it. For this example, called ``mantid_dev_builder``.
 2. Make your changes to the conda recipe files.
 3. Change directory to ``mantid/conda/recipes``
-4. With ``mantid_dev_builder`` active, run ``conda mambabuild ./mantid-developer/``. This will build a local version of ``mantid-developer`` with your changes and place it in ``mantid_dev_builder``'s ``conda-bld`` folder. The output from ``conda mambabuild`` should tell you the location.
+4. With ``mantid_dev_builder`` active, run ``conda mambabuild ./mantid-developer/ -c neutrons``. This will build a local version of ``mantid-developer`` with your changes and place it in ``mantid_dev_builder``'s ``conda-bld`` folder. The output from ``conda mambabuild`` should tell you the location.
 5. Deactivate ``mantid_dev_builder`` and create a new environment to install the custom ``mantid-developer`` package into (e.g if you were testing a new version of numpy you might call it ``mantid_dev_numpy_test``)
-6. ``mamba install -c <path to mantid_dev_builder's conda-bld folder> mantid-developer`` to install the package.
+6. ``mamba install -c <path to mantid_dev_builder's conda-bld folder> -c neutrons mantid-developer`` to install the package.
 7. You will need to re-run cmake with this new environment.
 
 Note: If you have ``boa`` installed in your base environment it seems ``conda mambabuild`` will use it over your activated environment. In this case you will likely get an error that you don't have ``versioningit`` installed. One way to fix this is to install ``versioningit`` into your base environment and just use that instead of making a new environment.

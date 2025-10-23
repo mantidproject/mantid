@@ -12,12 +12,14 @@ GIT_USER_EMAIL="mantid-buildserver@mantidproject.org"
 
 # Install conda and environment
 setup_mamba $WORKSPACE/miniforge "docs-build" true ""
-mamba install -c ${CONDA_LABEL} --yes mantid-developer mantidqt rsync
+mamba install -c ${CONDA_LABEL} -c neutrons --yes mantid-developer mantidqt rsync
 
 # Configure a clean build directory
 rm -rf build
 mkdir build && cd build
 
+# unset LD_PRELOAD as this causes cmake to segfault
+LD_PRELOAD="" \
 # Generate build files
 cmake -G Ninja \
   -DMANTID_FRAMEWORK_LIB=SYSTEM \
@@ -31,12 +33,10 @@ cmake -G Ninja \
   -DDOCS_SCREENSHOTS=ON \
   ${WORKSPACE}/source
 
-# Build the StandardTestData target. We need this test data to build docs-html
-cmake --build . --target StandardTestData
-
 # Configure the 'datasearch.directories' in the Mantid.properties file so the test data is found
+# Docs should only require DocTestData which is a dependency of the target
 export STANDARD_TEST_DATA_DIR=$PWD/ExternalData/Testing/Data
-echo 'datasearch.directories = '$STANDARD_TEST_DATA_DIR'/UnitTest/;'$STANDARD_TEST_DATA_DIR'/DocTest/' >> $WORKSPACE/miniforge/envs/docs-build/bin/Mantid.properties
+echo 'datasearch.directories = '$STANDARD_TEST_DATA_DIR'/DocTest/' >> $WORKSPACE/miniforge/envs/docs-build/bin/Mantid.properties
 
 # Build the html docs
 export LC_ALL=C

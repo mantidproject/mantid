@@ -149,3 +149,59 @@ class TestFullInstrumentViewWindow(unittest.TestCase):
         self._view.enable_rectangle_picking(False, mock_callback)
         self._view.main_plotter.disable_picking.assert_called_once()
         self._view.main_plotter.enable_rectangle_picking.assert_not_called()
+
+    @mock.patch("instrumentview.FullInstrumentViewWindow.QListWidgetItem")
+    def test_refresh_peaks_ws_list(self, mock_qlist_widget_item):
+        mock_list = MagicMock()
+        mock_item = MagicMock()
+        mock_list.item.return_value = mock_item
+        mock_list.count.return_value = 1
+        mock_item.checkState.return_value = 0
+        self._view._peak_ws_list = mock_list
+        self._view._presenter.peaks_workspaces_in_ads.return_value = [MagicMock()]
+        self._view.refresh_peaks_ws_list()
+        mock_list.clear.assert_called_once()
+        mock_list.adjustSize.assert_called_once()
+        mock_qlist_widget_item.assert_called_once()
+
+    def test_clear_overlay_meshes(self):
+        mock_meshes = (MagicMock(), MagicMock())
+        self._view._overlay_meshes = [mock_meshes]
+        self._view.clear_overlay_meshes()
+        self._view.main_plotter.remove_actor.assert_has_calls([mock.call(mock_meshes[0]), mock.call(mock_meshes[1])])
+        self.assertEqual(0, len(self._view._overlay_meshes))
+
+    def test_clear_lineplot_overlays(self):
+        mock_line = MagicMock()
+        mock_text = MagicMock()
+        self._view._detector_spectrum_axes = MagicMock()
+        self._view._detector_spectrum_axes.texts = [mock_text]
+        self.assertEqual(0, len(self._view._lineplot_overlays))
+        self._view._lineplot_overlays.append(mock_line)
+        self._view.clear_lineplot_overlays()
+        mock_line.remove.assert_called_once()
+        self.assertEqual(0, len(self._view._lineplot_overlays))
+        mock_text.remove.assert_called_once()
+
+    def test_plot_overlay_mesh(self):
+        position_groups = [[0, 0, 0]]
+        self._view.plot_overlay_mesh(position_groups, MagicMock(), "colour")
+        self._view.main_plotter.add_points.assert_called_once()
+        self._view.main_plotter.add_point_labels.assert_called_once()
+        self.assertEqual(1, len(self._view._overlay_meshes))
+
+    def test_plot_lineplot_overlay(self):
+        x_values = [1.0, 2.0]
+        labels = ["a", "b"]
+        self._view._detector_spectrum_axes = MagicMock()
+        self._view.plot_lineplot_overlay(x_values, labels, "colour")
+        self.assertEqual(2, self._view._detector_spectrum_axes.text.call_count)
+        self.assertEqual(2, len(self._view._lineplot_overlays))
+
+    def test_redraw_lineplot(self):
+        self._view.redraw_lineplot()
+        self._view._detector_figure_canvas.draw.assert_called_once()
+
+
+if __name__ == "__main__":
+    unittest.main()

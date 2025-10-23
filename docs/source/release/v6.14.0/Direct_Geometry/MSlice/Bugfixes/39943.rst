@@ -1,1 +1,0 @@
-- Setting the width of a cut to ``None`` will no longer prevent scripts from being generated.

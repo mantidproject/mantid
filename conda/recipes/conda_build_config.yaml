@@ -71,8 +71,7 @@ matplotlib:
   - 3.9.*
 
 mslice:
-  - '>=2.12'
-
+  - 2.13
 
 ninja:
   - '>=1.10.2'
@@ -118,6 +117,10 @@ pyqt5_sip:
 
 python_dateutil:
   - '>=2.8.1'
+
+# v0.45 and above addresses vtk compatibility issues by pinning in the pyvista feedstock.
+pyvista:
+  - '>=0.45'
 
 pyyaml:
   - '>=5.4.1'
@@ -174,11 +177,6 @@ librdkafka:
 
 versioningit:
   - '>=2.1'
-
-# Pin to version 9.4.2 because previous versions were crashing new instrument view on Ubuntu
-# Newer version 9.5.0 does not yet work with pyvista
-vtk:
-  - '9.4.2'
 
 pin_run_as_build:
   boost:

@@ -1,2 +1,0 @@
-- :ref:`PlotPeakByLogValue <algm-PlotPeakByLogValue>` has new "AppendIdxToOutputName" that when enabled with "CreateOutput" option will append indices of output workspaces (spectrum, workspace or numeric) based on the input format.
-- :ref:`PlotPeakByLogValue <algm-PlotPeakByLogValue>` has new "Output2D" that when enabled with "CreateOutput" option will create a 2D workspace of the results table that could be plotted.

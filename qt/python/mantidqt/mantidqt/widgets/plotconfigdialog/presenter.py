@@ -14,7 +14,7 @@ from mantidqt.widgets.plotconfigdialog.curvestabwidget.presenter import CurvesTa
 from mantidqt.widgets.plotconfigdialog.imagestabwidget.presenter import ImagesTabWidgetPresenter
 from mantidqt.widgets.plotconfigdialog.legendtabwidget.presenter import LegendTabWidgetPresenter
 
-HELP_URL = "qthelp://org.mantidproject/doc/tutorials/mantid_basic_course/loading_and_displaying_data/06_formatting_plots.html"
+HELP_URL = "tutorials/mantid_basic_course/loading_and_displaying_data/06_formatting_plots.html"
 
 
 class PlotConfigDialogPresenter:
@@ -107,7 +107,7 @@ class PlotConfigDialogPresenter:
             # If the dialog has the images tab then go to the section on image plots.
             InterfaceManager().showHelpPage(HELP_URL + "#image-plots")
         else:
-            InterfaceManager().showHelpPage(HELP_URL + "#figureoptionsgear-png-ptions-menu")
+            InterfaceManager().showHelpPage(HELP_URL + "#options-menu")
 
     def forget_tab_from_presenter(self, tab_presenter):
         """Given the presenter of a tab, forgets the tab's presenter and view

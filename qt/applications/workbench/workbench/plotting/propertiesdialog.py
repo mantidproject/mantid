@@ -27,6 +27,7 @@ SCIENTIFIC_FORMAT = "Scientific Format"
 SCALE_MODES = ["linear", "log", "symlog"]
 STR_TO_COLOR_NORMALIZATION = {"linear": Normalize, "log": LogNorm, "symlog": SymLogNorm}
 COLOR_NORMALIZATION_TO_STR = {v: k for k, v in STR_TO_COLOR_NORMALIZATION.items()}
+LINTHRESH_DEFAULT = 2  # Set to default mpl linthresh
 
 
 class PropertiesEditorBase(QDialog):
@@ -156,14 +157,13 @@ class AxisEditor(PropertiesEditorBase):
         # Ensure that only floats can be entered
         self.ui.editor_min.setValidator(QDoubleValidator())
         self.ui.editor_max.setValidator(QDoubleValidator())
+        for mode in SCALE_MODES:
+            self.ui.scaleBox.addItem(mode)
         if figure_type(canvas.figure) in [FigureType.Surface, FigureType.Wireframe, FigureType.Mesh]:
             self.ui.scaleBox.hide()
             self.ui.scaleLabel.hide()
             self.ui.gridBox.hide()
             self.ui.gridLabel.hide()
-        else:
-            for mode in SCALE_MODES:
-                self.ui.scaleBox.addItem(mode)
         self.ui.editor_format.addItem(DECIMAL_FORMAT)
         self.ui.editor_format.addItem(SCIENTIFIC_FORMAT)
         self.axes = axes
@@ -253,6 +253,10 @@ class ColorbarAxisEditor(AxisEditor):
         self.ui.gridBox.hide()
         self.ui.gridLabel.hide()
 
+        # Turn on axis scaling for color bars on 3D plots, contrary to base class shared by other axes.
+        self.ui.scaleLabel.show()
+        self.ui.scaleBox.show()
+
         self.images = []
 
         images = get_images_from_figure(canvas.figure)
@@ -281,7 +285,7 @@ class ColorbarAxisEditor(AxisEditor):
         scale = STR_TO_COLOR_NORMALIZATION[self.ui.scaleBox.currentText()]
         update_args = {"figure": self.canvas.figure, "scale": scale, "vmin": limit_min, "vmax": limit_max}
         if scale == SymLogNorm:
-            update_args["linthresh"] = 2.0  # Set to default mpl linthresh
+            update_args["linthresh"] = LINTHRESH_DEFAULT
 
         for img in self.images:
             update_colorbar_scale(image=img, **update_args)
