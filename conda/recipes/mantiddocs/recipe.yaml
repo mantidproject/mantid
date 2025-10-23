@@ -1,0 +1,65 @@
+# there are no run requirements as it's just pure html
+schema_version: 1
+
+context:
+  # Version is injected via an environment variable
+  version: ${{ env.get('MANTID_VERSION', default='0.0.0') }}
+
+package:
+  name: mantiddocs
+  version: ${{ version }}
+
+source:
+  path: ../../../
+
+build:
+  number: 0
+  noarch: generic
+
+requirements:
+  build:
+    - ${{ compiler("cxx") }}
+    - cmake ${{ cmake }}
+    - git
+    - if: osx or linux
+      then:
+        - ninja ${{ ninja }}
+  host:
+    - mantid == ${{ version }}
+    - mantidqt == ${{ version }}
+    - python ${{ python }}
+    - setuptools
+    - sphinx ${{ sphinx }}
+    - sphinx_bootstrap_theme ${{ sphinx_bootstrap_theme }}
+    - versioningit ${{ versioningit }}
+    - graphviz ${{ graphviz }}
+    - pystog ${{ pystog }}
+    - if: linux
+      then:
+        - libgl-devel
+        - texlive-core ${{ texlive_core }}
+        - xorg-libxxf86vm
+        - xorg-libx11
+        - xorg-xorgproto
+  ignore_run_exports:
+    from_package:
+      - ${{ compiler('cxx') }}
+      - python
+
+tests:
+  - package_contents:
+      files:
+        - share/doc/html/index.html
+        - share/doc/html/_images/mantid.png
+
+about:
+  license: GPL-3.0-or-later
+  summary: HTML Documentation for Mantid
+  homepage: https://github.com/mantidproject/mantid
+
+extra:
+  recipe-maintainers:
+    - thomashampson
+    - sf1919
+    - martyngigg
+    - peterfpeterson

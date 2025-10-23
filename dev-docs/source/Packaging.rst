@@ -181,21 +181,70 @@ Building a custom ``mantid-developer`` environment
 
 This is useful if you need to change a pinned version of one of Mantid's dependencies and test the change locally.
 
-1. Create a conda environment and install ``boa`` and ``versioningit`` into it. For this example, called ``mantid_dev_builder``.
+1. One can create a new environment specifically for building the package (with ``conda-build``, ``conda-index``, ``rattler-build``, and ``versioningit``), but the build itself happens in a separate sandbox which makes this unneccesary.
 2. Make your changes to the conda recipe files.
 3. Change directory to ``mantid/conda/recipes``
-4. With ``mantid_dev_builder`` active, run ``conda mambabuild ./mantid-developer/ -c neutrons``. This will build a local version of ``mantid-developer`` with your changes and place it in ``mantid_dev_builder``'s ``conda-bld`` folder. The output from ``conda mambabuild`` should tell you the location.
-5. Deactivate ``mantid_dev_builder`` and create a new environment to install the custom ``mantid-developer`` package into (e.g if you were testing a new version of numpy you might call it ``mantid_dev_numpy_test``)
-6. ``mamba install -c <path to mantid_dev_builder's conda-bld folder> -c neutrons mantid-developer`` to install the package.
-7. You will need to re-run cmake with this new environment.
+4. With ``mantid_dev_builder`` active, run
 
-Note: If you have ``boa`` installed in your base environment it seems ``conda mambabuild`` will use it over your activated environment. In this case you will likely get an error that you don't have ``versioningit`` installed. One way to fix this is to install ``versioningit`` into your base environment and just use that instead of making a new environment.
+   .. code-block:: sh
 
+       MANTID_VERSION=$(versioningit ../../) rattler-build build -r ./mantid-developer -m ./conda_build_config.yaml --output-dir=/home/me/tmp/rattler
+
+   This will build a local version of ``mantid-developer`` with your changes and place it in the directory ``/home/me/tmp/rattler``. **This must be outside of the buildtree** because rattler will recursively copy everything.
+5. Index the new packages
+
+   .. code-block:: sh
+
+       python -m conda_index /home/me/tmp/rattler/
+
+   This will allow conda to install the package by name rather than by file. At this time, creating an environment using the filename will skip installing the dependencies and not use any channels.
+6. Create a new environment with the new developer package
+
+   .. code-block:: sh
+
+       mamba create -n test -c /home/me/tmp/rattler/ -c neutrons mantid-developer
+
+7. You will need to re-run ``cmake --fresh ...`` with this new environment.
+
+Exploring package contents
+--------------------------
+For this example, assume that the package is named ``mantid`` and the version number is ``1.2.3`` and that one is using linux.
+After creating the package there will be a file named ``mantid-1.2.3-<buildinfo>.conda``.
+Since this is actually a zip file, it can be unpacked
+
+.. code-block:: sh
+
+    mkdir tmp && cd tmp
+    unzip ../<mantid-1.2.3-<buildinfo>.conda
+
+This will unpack 3 files
+
+.. code-block:: sh
+
+    info-mantid-1.2.3-<buildinfo>.tar.zst
+    metadata.json
+    pkg-mantid-1.2.3-<buildinfo>.tar.zst
+
+The ``info-mantid-1.2.3-<buildinfo>.tar.zst`` file contains all of the metadata and can be unpacked using
+
+.. code-block:: sh
+
+    tar --zstd -xf info-mantid-1.2.3-<buildinfo>.tar.zst
+    ls info
+    recipe  about.json  git         hash_input.json  paths.json
+    test    files       has_prefix  index.json       run_exports.json
+
+Similarly, ``pkg-mantid-1.2.3-<buildinfo>.tar.zst`` contains all of the actual files to be installed.
+Generally a listing of the contents is what is desired
+
+.. code-block:: sh
+
+    tar --zstd -tf pkg-mantid-1.2.3-<buildinfo>.tar.zst
 
 .. _conda: https://conda.io
 .. _mantid-conda-recipes: https://github.com/mantidproject/mantid/tree/main/conda
 .. _mantid-conda-org: https://anaconda.org/mantid
-.. _conda-recipes-docs: https://docs.conda.io/projects/conda-build/en/stable/concepts/recipe.html
+.. _conda-recipes-docs: https://rattler.build/latest/reference/recipe_file/
 .. _mantid-conda-recipes: https://github.com/mantidproject/mantid/tree/main/conda
 .. _ci-pipeline: https://github.com/mantidproject/mantid/blob/main/buildconfig/Jenkins/Conda/nightly_build_and_deploy.jenkinsfile
 .. _package-conda: https://github.com/mantidproject/mantid/blob/main/buildconfig/Jenkins/Conda/package-conda

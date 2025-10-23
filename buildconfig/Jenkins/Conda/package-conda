@@ -1,6 +1,6 @@
 #!/bin/bash -ex
 
-# This script expects to be in a POSIX environment. Uses boa to build the suite of
+# This script expects to be in a POSIX environment. Uses rattler to build the suite of
 # mantid packages. You must pass flags to specify which packages to build. If building
 # a package dependent on another one it will either install a locally built package
 # (if present from a previous build step) or build and produce that package too.
@@ -87,9 +87,11 @@ done
 
 
 # Mamba
+# make sure versions specified here are compatible with the developer meta-package
 setup_mamba $WORKSPACE/miniforge "" true $PLATFORM
 mamba activate base
-mamba install --yes boa versioningit python=3.11
+# something is wrong with versioningit and rattler-build 0.48
+mamba install --yes rattler-build=0.47 versioningit python=3.11 rattler-index
 
 # Clean up any legacy conda-recipes git clones
 cd $WORKSPACE
@@ -107,6 +109,9 @@ if [[ -n "$GIT_TAG" ]]; then
     git tag -a $GIT_TAG -m "Tagging $GIT_TAG"
 fi
 
+# Set the version to inject into the recipe file
+export MANTID_VERSION=$(versioningit "${REPO_ROOT_DIR}")
+
 # Set locale to avoid problems building the docs
 # See https://unix.stackexchange.com/questions/87745/what-does-lc-all-c-do
 export LC_ALL=C
@@ -117,16 +122,16 @@ export LC_ALL=C
 # copy the source to a working folder.
 export CONDA_BLD_PATH=$WORKSPACE/conda-bld
 if [[ -d $CONDA_BLD_PATH ]]; then
-    python -m conda_index $CONDA_BLD_PATH
+    rattler-index fs $CONDA_BLD_PATH
 fi
 cd $RECIPES_DIR
 
 # Add the '--debug' option to EXTRA_BUILD_OPTIONS if you want conda build to provide verbose debug info
-EXTRA_BUILD_OPTIONS="--debug "
+EXTRA_BUILD_OPTIONS=" "
 
 if [[ $OSTYPE == "msys" ]]; then
     # Do not use build id as it makes the path too long (>260 chars) for CMake (Legacy Windows API issue)
-    EXTRA_BUILD_OPTIONS+="--no-build-id"
+    EXTRA_BUILD_OPTIONS+="--no-build-id --log-style=plain"
 fi
 
 export CONDA_SUBDIR=$PLATFORM
@@ -136,22 +141,19 @@ mamba run -n base mamba list
 
 # Run conda build.
 if [[ $ENABLE_BUILD_MANTID_DEVELOPER == true ]]; then
-    conda mambabuild ./mantid-developer/ $EXTRA_BUILD_OPTIONS -c neutrons
+    rattler-build build -r ./mantid-developer/ -m ./conda_build_config.yaml --output-dir $CONDA_BLD_PATH -c neutrons $EXTRA_BUILD_OPTIONS
 fi
 if [[ $ENABLE_BUILD_MANTID == true ]]; then
-    conda mambabuild ./mantid/ $EXTRA_BUILD_OPTIONS
+    rattler-build build -r ./mantid/ -m ./conda_build_config.yaml --output-dir $CONDA_BLD_PATH $EXTRA_BUILD_OPTIONS
 fi
 if [[ $ENABLE_BUILD_QT == true ]]; then
-    conda mambabuild ./mantidqt/ $EXTRA_BUILD_OPTIONS
+    rattler-build build -r ./mantidqt/ -m ./conda_build_config.yaml --output-dir $CONDA_BLD_PATH $EXTRA_BUILD_OPTIONS
 fi
 if [[ $ENABLE_BUILD_DOCS == true ]]; then
-    conda mambabuild ./mantiddocs/ $EXTRA_BUILD_OPTIONS -c neutrons
+    rattler-build build -r ./mantiddocs/ -m ./conda_build_config.yaml --output-dir $CONDA_BLD_PATH -c conda-forge -c neutrons $EXTRA_BUILD_OPTIONS
 fi
 if [[ $ENABLE_BUILD_WORKBENCH == true ]]; then
-    if [[ $BUILD_WORKBENCH_WITH_DOCS == false ]]; then
-	export INCLUDE_MANTIDDOCS=False
-    fi
-    conda mambabuild ./mantidworkbench/ -c mantid/label/main $EXTRA_BUILD_OPTIONS
+    rattler-build build -r ./mantidworkbench/ -m ./conda_build_config.yaml --output-dir $CONDA_BLD_PATH $EXTRA_BUILD_OPTIONS
 fi
 
 # elapsed time with second resolution

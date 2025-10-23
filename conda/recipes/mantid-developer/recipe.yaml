@@ -1,0 +1,119 @@
+schema_version: 1
+
+context:
+  # Version is injected via an environment variable
+  version: ${{ env.get('MANTID_VERSION', default='0.0.0') }}
+
+package:
+  name: mantid-developer
+  version: ${{ version }}
+
+requirements:
+  run:
+    - ccache
+    - cmake ${{ cmake }}
+    - rattler-index
+    - doxygen ${{ doxygen }}
+    - eigen ${{ eigen }}
+    - euphonic ${{ euphonic }}
+    # remove seekpath altogether once newer euphonic is released
+    - seekpath ==2.1.0 *2
+    - graphviz ${{ graphviz }}
+    - gsl ${{ gsl }}
+    - h5py
+    - hdf4 ${{ hdf4 }}
+    - hdf5 ${{ hdf5 }}
+    - jsoncpp ${{ jsoncpp }}
+    - libboost-devel ${{ libboost }}
+    - libboost-python-devel ${{ libboost }}
+    - librdkafka ${{ librdkafka }}
+    - matplotlib ${{ matplotlib }}
+    - muparser ${{ muparser }}
+    - ninja ${{ ninja }}
+    - numpy ${{ numpy }}
+    - occt ${{ occt }}
+    - pip ${{ pip }}
+    - poco ${{ poco }}
+    - psutil ${{ psutil }}
+    - pycifrw
+    - pydantic ${{ pydantic }}
+    - pyqt ${{ pyqt }}
+    - pyqt5-sip ${{ pyqt5_sip }}
+    - pyqtwebengine
+    - pystog ${{ pystog }}
+    - python-dateutil ${{ python_dateutil }}
+    - python ${{ python }}
+    - pyvista ${{ pyvista }}
+    - pyvistaqt
+    - superqt
+    - pyyaml ${{ pyyaml }}
+    - qscintilla2 ${{ qscintilla2 }}
+    - qt-main ${{ qt_main }}
+    - qtconsole ${{ qtconsole }}
+    - qtpy ${{ qtpy }}
+    - quasielasticbayes ${{ quasielasticbayes }}
+    - quickbayes ${{ quickbayes }}
+    # something is wrong with versioningit and rattler-build 0.48
+    - rattler-build =0.47
+    - requests>=2.32.4
+    - scipy ${{ scipy }}
+    - setuptools
+    - sphinx ${{ sphinx }}
+    - sphinx_bootstrap_theme ${{ sphinx_bootstrap_theme }}
+    - tbb-devel ${{ tbb }}
+    - toml ${{ toml }}
+    - versioningit ${{ versioningit }}
+    - zlib
+    - joblib
+    - orsopy ${{ orsopy }}
+    # Development tooling
+    - cppcheck==2.18.1
+    - pre-commit>=4.0
+    - if: linux
+      then:
+        - jemalloc ${{ jemalloc }}
+        - lz4
+        - pystack
+        - qt-gtk-platformtheme
+        - texlive-core ${{ texlive_core }}
+        # OpenGL implementation:
+        - libgl-devel
+        - gxx_linux-64 ${{ cxx_compiler_version }}
+        - libglu ${{ libglu }}
+        - xorg-libxcomposite>=0.4.5
+        - xorg-libxcursor>=1.2.0
+        - xorg-libxdamage>=1.1.5
+        - xorg-libxi>=1.7.10
+        - xorg-libxscrnsaver>=1.2.3
+        - xorg-libxtst>=1.2.3
+        # Development tooling:
+        - gcovr>=4.2
+    - if: win
+      then:
+        - conda-wrappers
+        - gdk-pixbuf ${{ gdk_pixbuf }}
+        - lib3mf
+    - if: osx
+      then:
+        - python.app
+        # Use conda version of clang to get matching CXXFLAGS.
+        # Pinned to same version as conda forge: https://github.com/conda-forge/conda-forge-pinning-feedstock/blob/main/recipe/conda_build_config.yaml
+        - clang_osx-arm64 ${{ c_compiler_version }}
+        - clangxx_osx-arm64 ${{ cxx_compiler_version }}
+        - llvm-openmp ${{ llvm_openmp }}
+        # Development tooling:
+        - libcxx
+    - if: osx or linux
+      then:
+        - libopenblas ${{ libopenblas }}
+
+about:
+  license: GPL-3.0-or-later
+  summary: A metapackage for mantid developers
+  description: A metapackage containing the dependencies required for building, testing and developing mantid.
+  homepage: https://github.com/mantidproject/mantid
+
+extra:
+  recipe-maintainers:
+    - thomashampson
+    - peterfpeterson
