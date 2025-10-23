@@ -23,7 +23,7 @@ from matplotlib.contour import QuadContourSet
 from qtpy.QtCore import Qt
 from qtpy.QtGui import QCursor
 from qtpy.QtWidgets import QActionGroup, QMenu, QApplication, QAction
-from matplotlib.colors import LogNorm, Normalize
+from matplotlib.colors import LogNorm, Normalize, SymLogNorm
 from matplotlib.collections import Collection
 from mpl_toolkits.mplot3d.axes3d import Axes3D
 
@@ -44,20 +44,14 @@ from workbench.plotting.propertiesdialog import (
     ColorbarAxisEditor,
     ZAxisEditor,
     LegendEditor,
+    LINTHRESH_DEFAULT,
 )
 from workbench.plotting.style import VALID_LINE_STYLE, VALID_COLORS
 from workbench.plotting.toolbar import ToolbarStateManager
 
 # Map canvas context-menu string labels to a pair of matplotlib scale-type strings
-AXES_SCALE_MENU_OPTS = OrderedDict(
-    [
-        ("Lin x/Lin y", ("linear", "linear")),
-        ("Log x/Log y", ("log", "log")),
-        ("Lin x/Log y", ("linear", "log")),
-        ("Log x/Lin y", ("log", "linear")),
-    ]
-)
-COLORBAR_SCALE_MENU_OPTS = OrderedDict([("Linear", Normalize), ("Log", LogNorm)])
+AXES_SCALE_MENU_OPTS = ["linear", "log", "symlog"]
+COLORBAR_SCALE_MENU_OPTS = OrderedDict([("Linear", Normalize), ("Log", LogNorm), ("SymLog", SymLogNorm)])
 
 
 @contextmanager
@@ -156,17 +150,16 @@ class FigureInteraction(object):
         if event.key == "k":
             current_xscale = ax.get_xscale()
             next_xscale = self._get_next_axis_scale(current_xscale)
-            self._quick_change_axes((next_xscale, ax.get_yscale()), ax)
+            self._quick_change_axes(ax, next_xscale, ax.get_yscale())
 
         if event.key == "l":
             current_yscale = ax.get_yscale()
             next_yscale = self._get_next_axis_scale(current_yscale)
-            self._quick_change_axes((ax.get_xscale(), next_yscale), ax)
+            self._quick_change_axes(ax, ax.get_xscale(), next_yscale)
 
     def _get_next_axis_scale(self, current_scale):
-        if current_scale == "linear":
-            return "log"
-        return "linear"
+        next_index = AXES_SCALE_MENU_OPTS.index(current_scale) + 1
+        return AXES_SCALE_MENU_OPTS[next_index] if next_index < len(AXES_SCALE_MENU_OPTS) else AXES_SCALE_MENU_OPTS[0]
 
     def _correct_for_scroll_event_on_legend(self, event):
         # Corrects default behaviour in Matplotlib where legend is picked up by scroll event
@@ -453,7 +446,7 @@ class FigureInteraction(object):
 
         if fig_type == FigureType.Image or fig_type == FigureType.Contour:
             if isinstance(event.inaxes, MantidAxes):
-                self._add_axes_scale_menu(menu, event.inaxes)
+                self._add_axis_scale_menus(menu, event.inaxes)
                 self._add_normalization_option_menu(menu, event.inaxes)
                 self._add_colorbar_axes_scale_menu(menu, event.inaxes)
         elif fig_type == FigureType.Surface:
@@ -463,7 +456,7 @@ class FigureInteraction(object):
             if self.fit_browser.tool is not None:
                 self.fit_browser.add_to_menu(menu)
                 menu.addSeparator()
-            self._add_axes_scale_menu(menu, event.inaxes)
+            self._add_axis_scale_menus(menu, event.inaxes)
             if isinstance(event.inaxes, MantidAxes):
                 self._add_normalization_option_menu(menu, event.inaxes)
             self.add_error_bars_menu(menu, event.inaxes)
@@ -473,18 +466,18 @@ class FigureInteraction(object):
 
         menu.exec_(QCursor.pos())
 
-    def _add_axes_scale_menu(self, menu, ax):
-        """Add the Axes scale options menu to the given menu"""
-        axes_menu = QMenu("Axes", menu)
-        axes_actions = QActionGroup(axes_menu)
-        current_scale_types = (ax.get_xscale(), ax.get_yscale())
-        for label, scale_types in AXES_SCALE_MENU_OPTS.items():
-            action = axes_menu.addAction(label, partial(self._quick_change_axes, scale_types, ax))
-            if current_scale_types == scale_types:
+    def _add_axis_scale_menus(self, menu, ax):
+        """Add the Axis scale options menus to the given menu"""
+        for axis in ("X", "Y"):
+            axes_menu = QMenu(f"{axis}-Axis Scale", menu)
+            axes_actions = QActionGroup(axes_menu)
+            for scale_type in AXES_SCALE_MENU_OPTS:
+                action = axes_menu.addAction(scale_type, partial(self._quick_change_axes, ax, **{f"{axis.lower()}_scale_type": scale_type}))
                 action.setCheckable(True)
-                action.setChecked(True)
-            axes_actions.addAction(action)
-        menu.addMenu(axes_menu)
+                if scale_type == getattr(ax, f"get_{axis.lower()}scale")():
+                    action.setChecked(True)
+                axes_actions.addAction(action)
+            menu.addMenu(axes_menu)
 
     def _add_normalization_option_menu(self, menu, ax):
         # Check if toggling normalization makes sense
@@ -835,7 +828,8 @@ class FigureInteraction(object):
             # to duplicate the handling.
             colorbar_log = False
             if ax.images:
-                colorbar_log = isinstance(ax.images[-1].norm, LogNorm)
+                colorbar_scale = ax.images[-1].norm.__class__
+                colorbar_log = isinstance(colorbar_scale, LogNorm) or isinstance(colorbar_scale, SymLogNorm)
                 if colorbar_log:
                     self._change_colorbar_axes(Normalize)
 
@@ -856,7 +850,7 @@ class FigureInteraction(object):
                     if cb:
                         datafunctions.add_colorbar_label(cb, ax.get_figure().axes)
                 if colorbar_log:  # If it had a log scaled colorbar before, put it back.
-                    self._change_colorbar_axes(LogNorm)
+                    self._change_colorbar_axes(colorbar_scale)
 
                 axesfunctions.update_colorplot_datalimits(ax, ax.images)
 
@@ -933,7 +927,7 @@ class FigureInteraction(object):
             return True
         return False
 
-    def _quick_change_axes(self, scale_types, ax):
+    def _quick_change_axes(self, ax, x_scale_type=None, y_scale_type=None):
         """
         Perform a change of axes on the figure to that given by the option
         :param scale_types: A 2-tuple of strings giving matplotlib axes scale types
@@ -943,10 +937,19 @@ class FigureInteraction(object):
         # not rescaled properly because the vertical marker artists were
         # included in the last computation of the data limits and
         # set_xscale/set_yscale only autoscale the view
+
+        x_scale_type = ax.get_xscale() if not x_scale_type else x_scale_type
+        y_scale_type = ax.get_yscale() if not y_scale_type else y_scale_type
+
+        scale_args = [
+            {"value": scale_type, "linthresh": LINTHRESH_DEFAULT} if scale_type == "symlog" else {"value": scale_type}
+            for scale_type in (x_scale_type, y_scale_type)
+        ]
+
         xlim = copy(ax.get_xlim())
         ylim = copy(ax.get_ylim())
-        ax.set_xscale(scale_types[0])
-        ax.set_yscale(scale_types[1])
+        ax.set_xscale(**scale_args[0])
+        ax.set_yscale(**scale_args[1])
         ax.set_xlim(xlim)
         ax.set_ylim(ylim)
 
@@ -957,8 +960,16 @@ class FigureInteraction(object):
             images = ax.get_images() + [col for col in ax.collections if isinstance(col, Collection)]
             for image in images:
                 if image.norm.vmin is not None and image.norm.vmax is not None:
-                    datafunctions.update_colorbar_scale(self.canvas.figure, image, scale_type, image.norm.vmin, image.norm.vmax)
-
+                    update_args = {
+                        "figure": self.canvas.figure,
+                        "image": image,
+                        "scale": scale_type,
+                        "vmin": image.norm.vmin,
+                        "vmax": image.norm.vmax,
+                    }
+                    if scale_type == SymLogNorm:
+                        update_args["linthresh"] = LINTHRESH_DEFAULT
+                    datafunctions.update_colorbar_scale(**update_args)
         self.canvas.draw_idle()
 
     def _toggle_legend_and_redraw(self, ax):

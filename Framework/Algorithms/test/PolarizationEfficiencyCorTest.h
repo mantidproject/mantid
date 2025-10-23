@@ -95,6 +95,15 @@ public:
     alg->execute();
     checkOutputWorkspaceGroupSize(4);
   }
+
+  void test_input_ws_wildes_list_with_group_throws_error() {
+    auto alg = createAlgorithm(WILDES_METHOD, WILDES_METHOD);
+    (void)createWorkspaceGroup(4);
+    alg->setProperty("InputWorkspaces", "WS_GROUP_1");
+    // Error: InputWorkspaces property does not accept groups
+    TS_ASSERT_THROWS(alg->execute(), const std::invalid_argument &);
+  }
+
   void test_input_ws_frederikze_needs_group() {
     auto alg = createAlgorithm(FREDRIKZE_METHOD, FREDRIKZE_METHOD);
     alg->setProperty("InputWorkspaces", createWorkspacesInADS(4));

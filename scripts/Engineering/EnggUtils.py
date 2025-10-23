@@ -48,6 +48,9 @@ class GROUP(Enum):
     TEXTURE30 = "Texture30", [1, 2]
 
 
+TEXTURE_GROUPS = (GROUP.TEXTURE20, GROUP.TEXTURE30, GROUP.CUSTOM)  # lookup table for some texture specific behaviour
+
+
 def plot_tof_vs_d_from_calibration(diag_ws, ws_foc, dspacing, calibration):
     """
     Plot fitted TOF vs expected d-spacing from diagnostic workspaces output from mantid.PDCalibration
@@ -211,7 +214,7 @@ def create_new_calibration(calibration, rb_num, plot_output, save_dir, full_cali
     calib_dirs = [path.join(save_dir, "Calibration", "")]
     if rb_num:
         calib_dirs.append(path.join(save_dir, "User", rb_num, "Calibration", ""))
-        if calibration.group == GROUP.TEXTURE20 or calibration.group == GROUP.TEXTURE30:
+        if calibration.group in TEXTURE_GROUPS:
             calib_dirs.pop(0)  # only save to RB directory to limit number files saved
 
     for calib_dir in calib_dirs:
@@ -465,11 +468,14 @@ def focus_run(sample_paths, vanadium_path, plot_output, rb_num, calibration, sav
     ws_van_foc, van_run = process_vanadium(vanadium_path, calibration, full_calib)
 
     # directories for saved focused data
-    focus_dirs = [path.join(save_dir, "Focus")]
+    calib_is_texture = calibration.group in TEXTURE_GROUPS
+    focus_sub_dir = path.join("Focus", calibration.get_foc_ws_suffix()) if calib_is_texture else "Focus"
+    focus_dirs = [path.join(save_dir, focus_sub_dir)]
     if rb_num:
-        focus_dirs.append(path.join(save_dir, "User", rb_num, "Focus"))
-        if calibration.group == GROUP.TEXTURE20 or calibration.group == GROUP.TEXTURE30:
+        focus_dir = path.join(save_dir, "User", rb_num, focus_sub_dir)
+        if calib_is_texture:
             focus_dirs.pop(0)  # only save to RB directory to limit number files saved
+        focus_dirs.append(focus_dir)
 
     # Loop over runs and focus
     focused_files_list = []
@@ -482,6 +488,9 @@ def focus_run(sample_paths, vanadium_path, plot_output, rb_num, calibration, sav
             ws_foc = _focus_run_and_apply_roi_calibration(ws_sample, calibration)
             _check_ws_foc_and_ws_van_foc(ws_foc, ws_van_foc)
             ws_foc = _apply_vanadium_norm(ws_foc, ws_van_foc)
+            # add grouping to log data
+            ws_foc.getRun().addProperty("Grouping", calibration.get_foc_ws_suffix(), False)
+            # save files
             _save_output_files(focus_dirs, ws_foc, calibration, van_run, rb_num)
             # convert units to TOF and save again
             ws_foc = mantid.ConvertUnits(InputWorkspace=ws_foc, OutputWorkspace=ws_foc.name(), Target="TOF")
@@ -626,6 +635,14 @@ def _save_output_files(focus_dirs, sample_ws_foc, calibration, van_run, rb_num=N
         mantid.SaveFocusedXYE(
             InputWorkspace=sample_ws_foc, Filename=path.join(focus_dir, ascii_fname + ".abc"), SplitFiles=False, Format="TOPAS"
         )
+        # for dSpacing save all spectra in single nxs
+        if xunit_suffix == "dSpacing":
+            combined_dir = path.join(focus_dir, "CombinedFiles")
+            filename = _generate_output_file_name(
+                calibration.get_instrument(), sample_run_no, van_run, foc_suffix, xunit_suffix, ext=".nxs"
+            )
+            mantid.SaveNexus(InputWorkspace=sample_ws_foc, Filename=path.join(combined_dir, filename))
+
         # Save nxs per spectrum
         nxs_paths = []
         mantid.AddSampleLog(Workspace=sample_ws_foc, LogName="Vanadium Run", LogText=van_run)

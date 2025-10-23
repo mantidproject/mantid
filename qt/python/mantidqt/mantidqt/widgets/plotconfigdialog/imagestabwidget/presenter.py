@@ -14,6 +14,8 @@ from mantidqt.widgets.plotconfigdialog import generate_ax_name, get_images_from_
 from mantidqt.widgets.plotconfigdialog.imagestabwidget import ImageProperties
 from mantidqt.widgets.plotconfigdialog.imagestabwidget.view import ImagesTabWidgetView, SCALES
 
+from workbench.plotting.propertiesdialog import LINTHRESH_DEFAULT
+
 
 class ImagesTabWidgetPresenter:
     def __init__(self, fig, view=None, parent=None):
@@ -44,8 +46,8 @@ class ImagesTabWidgetPresenter:
             image.set_cmap(props.colormap)
             if props.interpolation and not (isinstance(image, QuadMesh) or isinstance(image, Poly3DCollection)):
                 image.set_interpolation(props.interpolation)
-
-            update_colorbar_scale(self.fig, image, SCALES[props.scale], props.vmin, props.vmax)
+            kwargs = {"linthresh": LINTHRESH_DEFAULT} if props.scale == "SymLog" else {}
+            update_colorbar_scale(self.fig, image, SCALES[props.scale], props.vmin, props.vmax, **kwargs)
 
         if props.vmin > props.vmax:
             self.view.max_min_value_warning.setVisible(True)

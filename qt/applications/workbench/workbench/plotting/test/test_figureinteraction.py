@@ -122,35 +122,36 @@ class FigureInteractionTest(unittest.TestCase):
         mouse_event = self._create_mock_right_click()
         mocked_figure_type.return_value = FigureType.Image
 
-        # Expect a call to QMenu() for the outer menu followed by three more calls
-        # for the Axes, Normalization and Colorbar menus
-        qmenu_call1 = MagicMock()
-        qmenu_call2 = MagicMock()
-        qmenu_call3 = MagicMock()
-        qmenu_call4 = MagicMock()
-        mocked_qmenu.side_effect = [qmenu_call1, qmenu_call2, qmenu_call3, qmenu_call4]
+        # Expect the following calls to QMenu():
+        # - 1x call for the outer menu
+        # - 4x calls for the X-Axis, Y-Axis, Normalization and Colorbar menus
+        mock_list = [MagicMock() for x in range(5)]
+        mocked_qmenu.side_effect = mock_list
 
         with patch("workbench.plotting.figureinteraction.QActionGroup", autospec=True):
             with patch.object(interactor.toolbar_manager, "is_tool_active", lambda: False):
                 interactor.on_mouse_button_press(mouse_event)
-                self.assertEqual(0, qmenu_call1.addAction.call_count)
+                self.assertEqual(0, mock_list[0].addAction.call_count)
                 expected_qmenu_calls = [
                     call(),
-                    call("Axes", qmenu_call1),
-                    call("Normalization", qmenu_call1),
-                    call("Color bar", qmenu_call1),
+                    call("X-Axis Scale", mock_list[0]),
+                    call("Y-Axis Scale", mock_list[0]),
+                    call("Normalization", mock_list[0]),
+                    call("Color bar", mock_list[0]),
                 ]
                 self.assertEqual(expected_qmenu_calls, mocked_qmenu.call_args_list)
-                # 4 actions in Axes submenu
-                self.assertEqual(4, qmenu_call2.addAction.call_count)
+                # 3 actions in X-Axis submenu
+                self.assertEqual(3, mock_list[1].addAction.call_count)
+                # 3 actions in Y-Axis submenu
+                self.assertEqual(3, mock_list[2].addAction.call_count)
                 # 2 actions in Normalization submenu
-                self.assertEqual(2, qmenu_call3.addAction.call_count)
-                # 2 actions in Colorbar submenu
-                self.assertEqual(2, qmenu_call4.addAction.call_count)
+                self.assertEqual(2, mock_list[3].addAction.call_count)
+                # 3 actions in Colorbar submenu
+                self.assertEqual(3, mock_list[4].addAction.call_count)
 
     @patch("workbench.plotting.figureinteraction.QMenu", autospec=True)
     @patch("workbench.plotting.figureinteraction.figure_type", autospec=True)
-    def test_right_click_gives_context_menu_for_plot_without_fit_enabled(self, mocked_figure_type, mocked_qmenu_cls):
+    def test_right_click_gives_context_menu_for_plot_without_fit_enabled(self, mocked_figure_type, mocked_qmenu):
         fig_manager = self._create_mock_fig_manager_to_accept_right_click()
         fig_manager.fit_browser.tool = None
         interactor = FigureInteraction(fig_manager)
@@ -160,34 +161,89 @@ class FigureInteractionTest(unittest.TestCase):
         mouse_event.inaxes.lines = []
         mocked_figure_type.return_value = FigureType.Line
 
-        # Expect a call to QMenu() for the outer menu followed by two more calls
-        # for the Axes, Normalization, and Markers menus
-        outer_qmenu_call = MagicMock()
-        qmenu_call2 = MagicMock()
-        qmenu_call3 = MagicMock()
-        qmenu_call4 = MagicMock()
-        mocked_qmenu_cls.side_effect = [outer_qmenu_call, qmenu_call2, qmenu_call3, qmenu_call4]
+        # Expect the following calls to QMenu():
+        # - 1x call for the outer menu
+        # - 4x calls for the X-Axis, Y-Axis, Normalization and Colorbar menus
+        mock_list = [MagicMock() for x in range(5)]
+        mocked_qmenu.side_effect = mock_list
 
         with patch("workbench.plotting.figureinteraction.QActionGroup", autospec=True):
             with patch("workbench.plotting.figureinteraction.QAction"):
                 with patch.object(interactor.toolbar_manager, "is_tool_active", lambda: False):
                     with patch.object(interactor, "add_error_bars_menu", MagicMock()):
                         interactor.on_mouse_button_press(mouse_event)
-                        self.assertEqual(0, outer_qmenu_call.addSeparator.call_count)
-                        self.assertEqual(1, outer_qmenu_call.addAction.call_count)  # Show/hide legend action
+                        self.assertEqual(0, mock_list[0].addSeparator.call_count)
+                        self.assertEqual(1, mock_list[0].addAction.call_count)  # Show/hide legend action
                         expected_qmenu_calls = [
                             call(),
-                            call("Axes", outer_qmenu_call),
-                            call("Normalization", outer_qmenu_call),
-                            call("Markers", outer_qmenu_call),
+                            call("X-Axis Scale", mock_list[0]),
+                            call("Y-Axis Scale", mock_list[0]),
+                            call("Normalization", mock_list[0]),
+                            call("Markers", mock_list[0]),
                         ]
-                        self.assertEqual(expected_qmenu_calls, mocked_qmenu_cls.call_args_list)
-                        # 4 actions in Axes submenu
-                        self.assertEqual(4, qmenu_call2.addAction.call_count)
+                        self.assertEqual(expected_qmenu_calls, mocked_qmenu.call_args_list)
+                        # 3 actions in X-Axis submenu
+                        self.assertEqual(3, mock_list[1].addAction.call_count)
+                        # 3 actions in Y-Axis submenu
+                        self.assertEqual(3, mock_list[2].addAction.call_count)
                         # 2 actions in Normalization submenu
-                        self.assertEqual(2, qmenu_call3.addAction.call_count)
-                        # 3 actions in Markers submenu
-                        self.assertEqual(3, qmenu_call4.addAction.call_count)
+                        self.assertEqual(2, mock_list[3].addAction.call_count)
+                        # 3 actions in Colorbar submenu
+                        self.assertEqual(3, mock_list[4].addAction.call_count)
+
+    def _quick_change_setup(self):
+        fig_manager = self._create_mock_fig_manager_to_accept_right_click()
+        interactor = FigureInteraction(fig_manager)
+        ax = MagicMock(
+            spec=["get_xscale", "get_yscale", "get_xlim", "get_ylim", "set_xscale", "set_yscale", "set_xlim", "set_ylim"],
+            **{
+                "get_xscale.return_value": "test_logx",
+                "get_yscale.return_value": "test_logy",
+                "get_xlim.return_value": "test_xlim",
+                "get_ylim.return_value": "test_ylim",
+            },
+        )
+        return interactor, ax
+
+    def test_quick_change_axes_x_scale(self):
+        interactor, ax = self._quick_change_setup()
+        x_scale_type = "test_linearx"
+        interactor._quick_change_axes(ax, x_scale_type=x_scale_type)
+        ax.get_xscale.assert_not_called()
+        ax.get_yscale.assert_called_once()
+        ax.get_xlim.assert_called_once()
+        ax.get_ylim.assert_called_once()
+        ax.set_xscale.assert_called_once_with(value=x_scale_type)
+        ax.set_yscale.assert_called_once_with(value="test_logy")
+        ax.set_xlim.assert_called_once_with("test_xlim")
+        ax.set_ylim.assert_called_once_with("test_ylim")
+
+    def test_quick_change_axes_y_scale(self):
+        interactor, ax = self._quick_change_setup()
+        y_scale_type = "test_lineary"
+        interactor._quick_change_axes(ax, y_scale_type=y_scale_type)
+        ax.get_xscale.assert_called_once()
+        ax.get_yscale.assert_not_called()
+        ax.get_xlim.assert_called_once()
+        ax.get_ylim.assert_called_once()
+        ax.set_xscale.assert_called_once_with(value="test_logx")
+        ax.set_yscale.assert_called_once_with(value=y_scale_type)
+        ax.set_xlim.assert_called_once_with("test_xlim")
+        ax.set_ylim.assert_called_once_with("test_ylim")
+
+    def test_quick_change_axes_both(self):
+        interactor, ax = self._quick_change_setup()
+        x_scale_type = "test_linearx"
+        y_scale_type = "test_logy"
+        interactor._quick_change_axes(ax, x_scale_type=x_scale_type, y_scale_type=y_scale_type)
+        ax.get_xscale.assert_not_called()
+        ax.get_yscale.assert_not_called()
+        ax.get_xlim.assert_called_once()
+        ax.get_ylim.assert_called_once()
+        ax.set_xscale.assert_called_once_with(value=x_scale_type)
+        ax.set_yscale.assert_called_once_with(value=y_scale_type)
+        ax.set_xlim.assert_called_once_with("test_xlim")
+        ax.set_ylim.assert_called_once_with("test_ylim")
 
     def test_toggle_normalization_no_errorbars(self):
         self._test_toggle_normalization(errorbars_on=False, plot_kwargs={"distribution": True})
@@ -359,7 +415,6 @@ class FigureInteractionTest(unittest.TestCase):
         mock_canvas = MagicMock(figure=fig)
         fig_manager_mock = MagicMock(canvas=mock_canvas)
         fig_interactor = FigureInteraction(fig_manager_mock)
-        scale_types = ("log", "log")
 
         ax = fig.axes[0]
         ax1 = fig.axes[1]
@@ -367,7 +422,7 @@ class FigureInteractionTest(unittest.TestCase):
         current_scale_types1 = (ax1.get_xscale(), ax1.get_yscale())
         self.assertEqual(current_scale_types, current_scale_types1)
 
-        fig_interactor._quick_change_axes(scale_types, ax)
+        fig_interactor._quick_change_axes(ax, "log", "log")
         current_scale_types2 = (ax.get_xscale(), ax.get_yscale())
         self.assertNotEqual(current_scale_types2, current_scale_types1)
 
@@ -764,8 +819,8 @@ class FigureInteractionTest(unittest.TestCase):
         fig_manager.canvas = MagicMock()
         interactor = FigureInteraction(fig_manager)
         interactor.on_key_press(key_press_event)
-        key_press_event.inaxes.set_xscale.assert_called_once_with("log")
-        key_press_event.inaxes.set_yscale.assert_called_once_with("log")
+        key_press_event.inaxes.set_xscale.assert_called_once_with(value="log")
+        key_press_event.inaxes.set_yscale.assert_called_once_with(value="log")
         key_press_event.inaxes.set_xlim.assert_called_once_with((0, 100))
         key_press_event.inaxes.set_ylim.assert_called_once_with((5, 10))
 
@@ -780,8 +835,8 @@ class FigureInteractionTest(unittest.TestCase):
         fig_manager.canvas = MagicMock()
         interactor = FigureInteraction(fig_manager)
         interactor.on_key_press(key_press_event)
-        key_press_event.inaxes.set_xscale.assert_called_once_with("linear")
-        key_press_event.inaxes.set_yscale.assert_called_once_with("linear")
+        key_press_event.inaxes.set_xscale.assert_called_once_with(value="linear")
+        key_press_event.inaxes.set_yscale.assert_called_once_with(value="symlog", linthresh=2)
         key_press_event.inaxes.set_xlim.assert_called_once_with((0, 100))
         key_press_event.inaxes.set_ylim.assert_called_once_with((5, 10))
 

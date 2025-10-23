@@ -13,6 +13,7 @@ import mantid.simpleapi as mantid
 from mantid import config
 
 from isis_powder import Polaris, SampleDetails
+from mantid.api import AnalysisDataService
 
 DIRS = config["datasearch.directories"].split(";")
 
@@ -421,7 +422,7 @@ class TotalScatteringMergedPerDetTest(systemtesting.MantidSystemTest):
         # Load Focused ws
         mantid.LoadNexus(Filename=total_scattering_input_file_per_det, OutputWorkspace="98533-ResultTOF")
         q_lims = np.array([2.5, 3, 4, 6, 7, 3.5, 5, 7, 11, 40]).reshape((2, 5))
-        self.pdf_output = run_total_scattering("98533", True, q_lims=q_lims, per_detector=True)
+        self.pdf_output = run_total_scattering("98533", True, q_lims=q_lims, per_detector_vanadium=True)
 
     def validate(self):
         # Whilst total scattering is in development, the validation will avoid using reference files as they will have
@@ -462,6 +463,7 @@ class TotalScatteringMergedRebinTest(systemtesting.MantidSystemTest):
         # to be updated very frequently. In the meantime, the rebin test will be done by testing the histogram size in
         # a truncated WS
         self.assertAlmostEqual(self.pdf_output.dataX(0).size, 255, places=3)
+        self.assertTrue(AnalysisDataService.doesExist("merged_S_of_Q_minus_one"))
 
 
 class TotalScatteringPdfTypeTest(systemtesting.MantidSystemTest):
@@ -536,31 +538,47 @@ class TotalScatteringLorchFilterTest(systemtesting.MantidSystemTest):
         self.assertAlmostEqual(self.pdf_output.dataY(0)[idx], 8.7571, places=3)
 
 
-def run_total_scattering(
-    run_number,
-    merge_banks,
-    q_lims=None,
-    delta_q=None,
-    delta_r=None,
-    pdf_type="G(r)",
-    freq_params=None,
-    lorch_filter=True,
-    per_detector=False,
-    pdf_output_name=None,
-):
+class TotalScatteringTestWavelengthLimits(systemtesting.MantidSystemTest):
+    pdf_output = None
+
+    def runTest(self):
+        setup_mantid_paths()
+        # Load Focused ws
+        mantid.LoadNexus(Filename=total_scattering_input_file, OutputWorkspace="98533-ResultTOF")
+        q_lims = np.array([2.5, 3, 4, 6, 7, 3.5, 5, 7, 11, 40]).reshape((2, 5))
+        self.pdf_output = run_total_scattering("98533", True, q_lims=q_lims, lorch_filter=False, wavelength_lims=[1, 6])
+
+    def validate(self):
+        # Whilst total scattering is in development, the validation will avoid using reference files as they will have
+        # to be updated very frequently. In the meantime, the expected peak in the PDF at ~3.85 Angstrom will be checked.
+        idx = get_bin_number_at_given_r(self.pdf_output.dataX(0), 3.85)
+        self.assertAlmostEqual(self.pdf_output.dataY(0)[idx], 4.10094, places=3)  # less than in TotalScatteringLorchFilterTest
+
+
+class TotalScatteringTestRLimits(systemtesting.MantidSystemTest):
+    pdf_output = None
+    r_lims = [None, 10]
+
+    def runTest(self):
+        setup_mantid_paths()
+        # Load Focused ws
+        mantid.LoadNexus(Filename=total_scattering_input_file, OutputWorkspace="98533-ResultTOF")
+        q_lims = np.array([2.5, 3, 4, 6, 7, 3.5, 5, 7, 11, 40]).reshape((2, 5))
+        self.pdf_output = run_total_scattering("98533", True, q_lims=q_lims, lorch_filter=False, r_lims=self.r_lims)
+
+    def validate(self):
+        # Whilst total scattering is in development, the validation will avoid using reference files as they will have
+        # to be updated very frequently. In the meantime, the expected peak in the PDF at ~3.85 Angstrom will be checked.
+        idx = get_bin_number_at_given_r(self.pdf_output.dataX(0), 3.85)
+        self.assertAlmostEqual(self.pdf_output.dataY(0)[idx], 8.7571, places=3)
+        self.assertAlmostEqual(self.pdf_output.dataX(0)[-1], self.r_lims[-1], delta=2e-2)
+
+
+def run_total_scattering(run_number, merge_banks, **kwargs):
+    default_kwargs = {"pdf_type": "G(r)", "lorch_filter": True, "per_detector_vanadium": False}
+    kwargs = {**default_kwargs, **kwargs}  # overwrite defaults with kwargs passed
     pdf_inst_obj = setup_inst_object(mode="PDF")
-    return pdf_inst_obj.create_total_scattering_pdf(
-        run_number=run_number,
-        merge_banks=merge_banks,
-        q_lims=q_lims,
-        delta_q=delta_q,
-        delta_r=delta_r,
-        pdf_type=pdf_type,
-        lorch_filter=lorch_filter,
-        freq_params=freq_params,
-        per_detector_vanadium=per_detector,
-        pdf_output_name=pdf_output_name,
-    )
+    return pdf_inst_obj.create_total_scattering_pdf(run_number=run_number, merge_banks=merge_banks, **kwargs)
 
 
 def _gen_required_files():

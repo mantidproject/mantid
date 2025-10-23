@@ -57,7 +57,6 @@ mtd_install_files(
 add_subdirectory(test)
 add_subdirectory(Diffraction/isis_powder)
 add_subdirectory(Diffraction/single_crystal)
-add_subdirectory(Engineering)
 
 # Ensure we don't get stale pyc files around
 clean_orphaned_pyc_files(${CMAKE_CURRENT_SOURCE_DIR})

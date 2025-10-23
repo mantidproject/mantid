@@ -124,6 +124,7 @@ class SliceViewerView(QWidget, ObservingView):
 
     def close(self):
         self.presenter.notify_close()
+        self._data_view.close()
         super().close()
 
     def _run_close(self):

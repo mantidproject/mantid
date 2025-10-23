@@ -1,1 +1,0 @@
-- :ref:`AlignAndFocusPowderSlim <algm-AlignAndFocusPowderSlim>` can skip loading particular logs using the (mutually exclisive) ``LogAllowList`` and ``LogBlockList`` properties

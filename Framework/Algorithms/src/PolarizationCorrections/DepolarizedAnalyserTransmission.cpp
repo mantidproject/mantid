@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/PolarizationCorrections/DepolarizedAnalyserTransmission.h"
+#include "MantidAPI/FileProperty.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -16,6 +17,7 @@ namespace {
 namespace PropNames {
 auto constexpr DEP_WORKSPACE{"DepolarizedWorkspace"};
 auto constexpr MT_WORKSPACE{"EmptyCellWorkspace"};
+auto constexpr MT_FILE{"EmptyCellFilename"};
 auto constexpr DEPOL_OPACITY_START{"PxDStartingValue"};
 auto constexpr START_X = "StartX";
 auto constexpr END_X = "EndX";
@@ -50,6 +52,10 @@ std::shared_ptr<IFunction> createFunction(std::string const &depolOpacStart) {
 
 inline void validateWorkspace(Mantid::API::MatrixWorkspace_sptr const &workspace, std::string const &prop,
                               std::map<std::string, std::string> &result) {
+  if (!workspace) {
+    result[prop] = prop + " must be a MatrixWorkspace.";
+    return;
+  }
   if (workspace->getNumberHistograms() != 1) {
     result[prop] = prop + " must contain a single spectrum. Contains " +
                    std::to_string(workspace->getNumberHistograms()) + " spectra.";
@@ -78,9 +84,12 @@ void DepolarizedAnalyserTransmission::init() {
       std::make_unique<WorkspaceProperty<MatrixWorkspace>>(PropNames::DEP_WORKSPACE, "", Kernel::Direction::Input,
                                                            wsValidator),
       "The fully depolarized helium cell workspace. Should contain a single spectra. Units must be in wavelength.");
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(PropNames::MT_WORKSPACE, "",
-                                                                       Kernel::Direction::Input, wsValidator),
-                  "The empty cell workspace. Must contain a single spectra. Units must be in wavelength");
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      PropNames::MT_WORKSPACE, "", Kernel::Direction::Input, PropertyMode::Optional, wsValidator),
+                  "The empty cell workspace. Must contain a single spectra. Units must be in wavelength. "
+                  "Takes precedence over EmptyCellFile if both are provided.");
+  declareProperty(std::make_unique<FileProperty>(PropNames::MT_FILE, "", FileProperty::OptionalLoad, ".nxs"),
+                  "Optional: File path to load the empty cell workspace from. Use instead of EmptyCellWorkspace");
   declareProperty(PropNames::DEPOL_OPACITY_START, FitValues::DEPOL_OPACITY_START,
                   "Starting value for the depolarized cell transmission fit property " +
                       std::string(FitValues::DEPOL_OPACITY_NAME) + ".");
@@ -109,20 +118,28 @@ void DepolarizedAnalyserTransmission::init() {
 std::map<std::string, std::string> DepolarizedAnalyserTransmission::validateInputs() {
   std::map<std::string, std::string> result;
   MatrixWorkspace_sptr const &depWs = getProperty(PropNames::DEP_WORKSPACE);
-  if (depWs == nullptr) {
-    result[PropNames::DEP_WORKSPACE] = std::string(PropNames::DEP_WORKSPACE) + " must be a MatrixWorkspace.";
-    return result;
-  }
   validateWorkspace(depWs, PropNames::DEP_WORKSPACE, result);
 
-  MatrixWorkspace_sptr const &mtWs = getProperty(PropNames::MT_WORKSPACE);
-  if (mtWs == nullptr) {
-    result[PropNames::MT_WORKSPACE] = std::string(PropNames::MT_WORKSPACE) + " must be a MatrixWorkspace.";
+  if (!isDefault(PropNames::MT_WORKSPACE)) {
+    MatrixWorkspace_sptr mtWs = getProperty(PropNames::MT_WORKSPACE);
+    validateWorkspace(mtWs, PropNames::MT_WORKSPACE, result);
+    m_mtWs = mtWs;
+  } else if (!isDefault(PropNames::MT_FILE)) {
+    auto loadAlg = createChildAlgorithm("LoadNexus");
+    loadAlg->initialize();
+    loadAlg->setProperty("Filename", getPropertyValue(PropNames::MT_FILE));
+    loadAlg->execute();
+    Workspace_sptr output = loadAlg->getProperty("OutputWorkspace");
+    MatrixWorkspace_sptr mtWs = std::dynamic_pointer_cast<MatrixWorkspace>(output);
+    validateWorkspace(mtWs, PropNames::MT_FILE, result);
+    m_mtWs = mtWs;
+  } else {
+    result[PropNames::MT_WORKSPACE] =
+        "Must set either " + std::string(PropNames::MT_WORKSPACE) + " or " + std::string(PropNames::MT_FILE) + ".";
     return result;
   }
-  validateWorkspace(mtWs, PropNames::MT_WORKSPACE, result);
 
-  if (!WorkspaceHelpers::matchingBins(depWs, mtWs, true)) {
+  if (!WorkspaceHelpers::matchingBins(depWs, m_mtWs, true)) {
     result[PropNames::DEP_WORKSPACE] = "The bins in the " + std::string(PropNames::DEP_WORKSPACE) + " and " +
                                        PropNames::MT_WORKSPACE + " do not match.";
   }
@@ -136,10 +153,9 @@ void DepolarizedAnalyserTransmission::exec() {
 
 MatrixWorkspace_sptr DepolarizedAnalyserTransmission::calcDepolarizedProportion() {
   MatrixWorkspace_sptr const &depWs = getProperty(PropNames::DEP_WORKSPACE);
-  MatrixWorkspace_sptr const &mtWs = getProperty(PropNames::MT_WORKSPACE);
   auto divideAlg = createChildAlgorithm("Divide");
   divideAlg->setProperty("LHSWorkspace", depWs);
-  divideAlg->setProperty("RHSWorkspace", mtWs);
+  divideAlg->setProperty("RHSWorkspace", m_mtWs);
   divideAlg->execute();
   return divideAlg->getProperty(PropNames::OUTPUT_WORKSPACE);
 }

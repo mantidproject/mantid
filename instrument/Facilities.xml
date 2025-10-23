@@ -31,6 +31,7 @@
    <timezone>Europe/London</timezone>
 
   <instrument name="ALF">
+    <zeropadding size="8" startRunNumber="90565"/>
     <technique>Single Crystal Diffraction</technique>
     <livedata>
       <connection name="histo" address="NDXALF:6789" listener="ISISHistoDataListener" />
@@ -90,6 +91,7 @@
   </instrument>
 
   <instrument name="GEM">
+    <zeropadding size="8" startRunNumber="97479"/>
     <technique>Neutron Diffraction</technique>
     <livedata>
       <connection name="histo" address="NDXGEM:6789" listener="ISISHistoDataListener" />

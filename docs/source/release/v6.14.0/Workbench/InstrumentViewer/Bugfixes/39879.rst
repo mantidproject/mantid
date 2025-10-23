@@ -1,1 +1,0 @@
-- Add a warning to the `Pick` tab of the Instrument View for a workspace with blocksize 1. In this case, the instrument view will not provide a line plot until the workspace has been rebinned.
