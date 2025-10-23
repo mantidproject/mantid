@@ -13,13 +13,13 @@ import subprocess
 # The structure of a release tag
 RELEASE_TAG_RE = re.compile(r"^v?\d+.\d+(.\d)?$")
 
-# Authors in Git that do not have a translation listed here or that have not
-# been blacklisted will cause the DOI script to fail.
+# Authors in Git that do not have a translation listed here or who are not on the
+# blocklist will cause the DOI script to fail.
 #
 # The DOI schema asks that names be of the form "last_name, first_name(s)."
 #
-# Translations exist for Git aliases, even where users have more than one.  We
-# prefer multiple translations over blacklist entries in case users log back on
+# Translations exist for Git aliases, even where users have more than one. We
+# prefer multiple translations over blocklist entries in case users log back on
 # to machines and start using old aliases again.
 _translations = {
     # Name in Git : Preferred name for DOI.
@@ -360,7 +360,7 @@ _translations = {
 # Used to ensure a Git author does not appear in any of the DOIs.  This is NOT
 # to be used in the case where a Git user has multiple accounts; a translation
 # entry would suffice in such an instance.
-_blacklist = [
+_blocklist = [
     "",
     "unknown",
     "Yao, Marie",
@@ -380,10 +380,10 @@ _blacklist = [
     "pre-commit-ci[bot]",
 ]
 
-# The whitelist is used for sponsors / contributors who should be included,
+# The allowlist is used for sponsors / contributors who should be included,
 # but who are not listed as authors on Git.  These names will be shown in the
 # "main" DOI only.
-whitelist = [
+allowlist = [
     "Cottrell, Stephen",
     "Dillow, David",
     "Hagen, Mark",
@@ -429,12 +429,12 @@ def _get_all_release_git_tags():
 
 
 def _clean_up_author_list(author_list):
-    """Apply translations and blacklist, and get rid of duplicates."""
+    """Apply translations and blocklist, and get rid of duplicates."""
     # Double check that all names have no leading or trailing whitespace.
     result = map(str.strip, author_list)
 
-    # Remove any blacklisted names.
-    result = set(filterfalse(_blacklist.__contains__, result))
+    # Remove any names that are on the blocklist.
+    result = set(filterfalse(_blocklist.__contains__, result))
 
     # Make sure there are no names in Git without a corresponding translation.
     untranslated = set(filterfalse(_translations.keys().__contains__, result))
@@ -449,9 +449,9 @@ def _clean_up_author_list(author_list):
     # Translate all remaining names.
     result = [_translations[a] for a in result]
 
-    # Another check for any blacklisted names, in case we want to remove the
+    # Another check for any names in the blocklist, in case we want to remove the
     # translated name.
-    result = set(filterfalse(_blacklist.__contains__, result))
+    result = set(filterfalse(_blocklist.__contains__, result))
 
     # Return the unique list of translated names.
     return sorted(set(result))

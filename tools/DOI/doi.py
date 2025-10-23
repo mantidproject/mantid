@@ -421,8 +421,8 @@ def run(args):
     # is create a single, unlinked DOI to the main project page.
     if args.main:
         creator_name_list = authors.authors_up_to_git_tag(tag)
-        # In the case of the main DOI we need to add the whitelisted names too.
-        creator_name_list = sorted(set(creator_name_list + authors.whitelist))
+        # In the case of the main DOI we need to add the names from the allowlist too.
+        creator_name_list = sorted(set(creator_name_list + authors.allowlist))
 
         xml_form = build_xml_form(doi, {}, creator_name_list, None)
 
