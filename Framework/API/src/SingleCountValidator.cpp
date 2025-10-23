@@ -32,7 +32,7 @@ std::string SingleCountValidator::checkValidity(const MatrixWorkspace_sptr &ws) 
 
   if (m_mustBeSingleCount) {
     if (blockSize == 1)
-      return "";
+      return "test";
     else
       return "The workspace must contain single counts for all spectra";
   } else {
