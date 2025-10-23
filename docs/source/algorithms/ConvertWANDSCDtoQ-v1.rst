@@ -106,6 +106,8 @@ Output:
 
 .. figure:: /images/ConvertWANDSCDtoQ_HKL.png
 
+.. diagram:: ConvertWANDSCDtoQ-v1_wkflw.dot
+
 .. categories::
 
 .. sourcelink::
