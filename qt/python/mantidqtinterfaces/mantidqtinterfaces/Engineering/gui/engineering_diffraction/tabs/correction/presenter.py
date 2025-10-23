@@ -220,7 +220,7 @@ class TextureCorrectionPresenter(AlgorithmObserver):
     def finishHandle(self):
         # this finishHandle is called whenever a dialog created in _open_alg_dialog finishes
         # when such an alg finishes, we get our UI view to emit a signal
-        self.view.alg_ui_finished.emit()
+        self.view.signal_alg_finished()
         # this signal is then connected to on_alg_finished back here on the presenter
         # this ensures the _on_alg_finished call happens on the Qt GUI thread rather than the alg worker thread
 

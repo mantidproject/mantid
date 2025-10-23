@@ -255,6 +255,9 @@ class TextureCorrectionView(QtWidgets.QWidget, Ui_texture):
     def is_searching(self):
         return self.finder_corr.isSearching()
 
+    def signal_alg_finished(self):
+        self.alg_ui_finished.emit()
+
     # ========== Component Getters ==========
     def get_reference_file(self):
         fnames = self.finder_reference.getFilenames()
