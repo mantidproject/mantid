@@ -1,0 +1,1 @@
+- Created new algorithm :ref:`HFIRPowderReduction <algm-HFIRPowderReduction>`, just added UI for loading data to reduce

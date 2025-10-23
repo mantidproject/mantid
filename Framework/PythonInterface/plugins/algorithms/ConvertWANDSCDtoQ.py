@@ -79,11 +79,6 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
             "format: 'minimum,maximum,number_of_bins'.",
         )
         self.declareProperty(
-            "KeepTemporaryWorkspaces",
-            False,
-            "If True the normalization and data workspaces in addition to the normalized data will be outputted",
-        )
-        self.declareProperty(
             "ObliquityParallaxCoefficient",
             1.0,
             validator=FloatBoundedValidator(0.0),
@@ -96,50 +91,64 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
             doc="Space Group name, Point Group name, or list individual Symmetries used to perform the symmetrization",
         )
         self.declareProperty(
+            "KeepTemporaryWorkspaces",
+            False,
+            "If True, non-normalized data, normalization, non-normalized background, "
+            "and background normalization workspaces will be also outputted",
+        )
+        self.declareProperty(
             IMDHistoWorkspaceProperty("TemporaryDataWorkspace", "", optional=PropertyMode.Optional, direction=Direction.Input),
-            "An (optional) input MDHistoWorkspace used to accumulate data from multiple MDEventWorkspaces."
-            "If unspecified a blank MDHistoWorkspace will be created",
+            "An (optional) input MDHistoWorkspace to which we'll add the non-normalized data. "
+            "If specified, 'KeepTemporaryWorkspaces' will be set to True.",
         )
         self.declareProperty(
             IMDHistoWorkspaceProperty("TemporaryNormalizationWorkspace", "", optional=PropertyMode.Optional, direction=Direction.Input),
-            "An (optional) input MDHistoWorkspace used to accumulate normalization data from multiple MDEventWorkspaces."
-            "If unspecified a blank MDHistoWorkspace will be created",
+            "An (optional) input MDHistoWorkspace to which we'll add the normalization workspace. "
+            "If specified, 'KeepTemporaryWorkspaces' will be set to True.",
         )
         self.declareProperty(
             IMDHistoWorkspaceProperty("TemporaryBackgroundDataWorkspace", "", optional=PropertyMode.Optional, direction=Direction.Input),
-            "An (optional) input MDHistoWorkspace used to accumulate background data from multiple MDEventWorkspaces."
-            "If unspecified but BackgroundWorkspace is specified, a blank MDHistoWorkspace will be created",
+            "An (optional) input MDHistoWorkspace to which we'll add the non-normalized background workspace. "
+            "If specified, 'KeepTemporaryWorkspaces' will be set to True.",
         )
         self.declareProperty(
             IMDHistoWorkspaceProperty(
                 "TemporaryBackgroundNormalizationWorkspace", "", optional=PropertyMode.Optional, direction=Direction.Input
             ),
-            "An (optional) input MDHistoWorkspace used to accumulate background normalization data from multiple MDEventWorkspaces."
-            "If unspecified but BackgroundWorkspace is specified, a blank MDHistoWorkspace will be created",
+            "An (optional) input MDHistoWorkspace to which we'll add the background normalization workspace. "
+            "If specified, 'KeepTemporaryWorkspaces' will be set to True.",
         )
         self.declareProperty(
             "OutputDataWorkspace",
             "",
             direction=Direction.Input,
-            doc="Name for the Output Data Workspace",
+            doc="Name for the Output non-normalized data Workspace. "
+            "If unspecified, the name will that of the OutputWorkspace plus suffix '_data', "
+            "and only when option KeepTemporaryWorkspaces is True",
         )
         self.declareProperty(
             "OutputNormalizationWorkspace",
             "",
             direction=Direction.Input,
-            doc="Name for the Output Normalization Workspace",
+            doc="Name for the Output Normalization Workspace."
+            "If unspecified, the name will that of the OutputWorkspace plus suffix '_normalization', "
+            "and only when option KeepTemporaryWorkspaces is True",
         )
         self.declareProperty(
             "OutputBackgroundDataWorkspace",
             "",
             direction=Direction.Input,
-            doc="Name for the Output Background Workspace",
+            doc="Name for the Output Background Workspace. "
+            "If unspecified, the name will that of the OutputWorkspace plus suffix '_background_data', "
+            "and only when option KeepTemporaryWorkspaces is True",
         )
         self.declareProperty(
             "OutputBackgroundNormalizationWorkspace",
             "",
             direction=Direction.Input,
-            doc="Name for the Output Background Normalization Workspace",
+            doc="Name for the Output Background Normalization Workspace. "
+            "If unspecified, the name will that of the OutputWorkspace plus suffix '_background_normalization', "
+            "and only when option KeepTemporaryWorkspaces is True",
         )
         self.declareProperty(
             WorkspaceProperty("OutputWorkspace", "", optional=PropertyMode.Mandatory, direction=Direction.Output), "Output Workspace"
@@ -149,33 +158,33 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
         issues = dict()
 
         inWS = self.getProperty("InputWorkspace").value
-        instrument = inWS.getExperimentInfo(0).getInstrument().getName()
+
+        if inWS.getNumExperimentInfo() != 1:
+            issues["InputWorkspace"] = "InputWorkspace must have exactly one ExperimentInfo"
+            return issues
 
         if inWS.getNumDims() != 3:
             issues["InputWorkspace"] = "InputWorkspace has wrong number of dimensions, need 3"
             return issues
 
-        d0 = inWS.getDimension(0)
-        d1 = inWS.getDimension(1)
-        d2 = inWS.getDimension(2)
-        number_of_runs = d2.getNBins()
-
+        d0 = inWS.getDimension(0)  # pixel or group index along Y
+        d1 = inWS.getDimension(1)  # pixel or group index along X
+        d2 = inWS.getDimension(2)  # run index
         if d0.name != "y" or d1.name != "x" or d2.name != "scanIndex":
             issues["InputWorkspace"] = "InputWorkspace has wrong dimensions"
             return issues
 
-        if inWS.getNumExperimentInfo() == 0:
-            issues["InputWorkspace"] = "InputWorkspace is missing ExperimentInfo"
-            return issues
-
-        # Check that all logs are there and are of correct length
-        run = inWS.getExperimentInfo(0).run()
+        # Check that all logs are there and are of the correct length
+        experiment_info = inWS.getExperimentInfo(0)
+        run = experiment_info.run()
+        number_of_runs = d2.getNBins()
 
         # Check number of goniometers
         if run.getNumGoniometers() != number_of_runs:
             issues["InputWorkspace"] = "goniometers not set correctly, did you run SetGoniometer with Average=False"
 
-        if instrument == "HB3A":
+        instrument = experiment_info.getInstrument().getName()
+        if instrument in ("HB3A", "DEMAND"):
             for prop in ["monitor", "time"]:
                 if run.hasProperty(prop):
                     p = run.getProperty(prop).value
@@ -183,7 +192,7 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
                         issues["InputWorkspace"] = "log {} is of incorrect length".format(prop)
                 else:
                     issues["InputWorkspace"] = "missing log {}".format(prop)
-        else:
+        elif instrument in ("HB2C", "WAND"):
             for prop in ["duration", "monitor_count"]:
                 if run.hasProperty(prop):
                     p = run.getProperty(prop).value
@@ -191,29 +200,33 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
                         issues["InputWorkspace"] = "log {} is of incorrect length".format(prop)
                 else:
                     issues["InputWorkspace"] = "missing log {}".format(prop)
+        else:
+            issues["InputWorkspace"] = "InputWorkspace is from unsupported instrument {}".format(instrument)
+            return issues
 
+        pixel_y_count, pixel_x_count = d0.getNBins(), d1.getNBins()
         for prop in ["azimuthal", "twotheta"]:
             if run.hasProperty(prop):
                 p = run.getProperty(prop).value
-                if np.size(p) != d0.getNBins() * d1.getNBins():
+                if np.size(p) != pixel_y_count * pixel_x_count:
                     issues["InputWorkspace"] = "log {} is of incorrect length".format(prop)
 
         normWS = self.getProperty("NormalisationWorkspace").value
 
         if normWS:
-            nd0 = normWS.getDimension(0)
-            nd1 = normWS.getDimension(1)
-            nd2 = normWS.getDimension(2)
+            nd0 = normWS.getDimension(0)  # pixel or group index along Y
+            nd1 = normWS.getDimension(1)  # pixel or group index along X
+            nd2 = normWS.getDimension(2)  # run index
             if (
                 nd0.name != d0.name
-                or nd0.getNBins() != d0.getNBins()
+                or nd0.getNBins() != pixel_y_count
                 or nd1.name != d1.name
-                or nd1.getNBins() != d1.getNBins()
+                or nd1.getNBins() != pixel_x_count
                 or nd2.name != d2.name
             ):
                 issues["NormalisationWorkspace"] = "NormalisationWorkspace dimensions are not compatible with InputWorkspace"
 
-        ubWS = self.getProperty("UBWorkspace").value
+        ubWS = self.getProperty("UBWorkspace").value  # optional Workspace containing the UB matrix to use
         if ubWS:
             try:
                 sample = ubWS.sample()
@@ -223,10 +236,18 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
                 issues["UBWorkspace"] = "UBWorkspace does not has an OrientedLattice"
         else:
             if self.getProperty("Frame").value == "HKL":
-                if not inWS.getExperimentInfo(0).sample().hasOrientedLattice():
+                if not experiment_info.sample().hasOrientedLattice():
                     issues["Frame"] = (
-                        "HKL selected but neither an UBWorkspace workspace was provided or the InputWorkspace has an OrientedLattice"
+                        "HKL selected but neither an UBWorkspace workspace was provided nor the InputWorkspace has an OrientedLattice"
                     )
+
+        W = np.eye(3)
+        W[:, 0] = self.getProperty("Uproj").value
+        W[:, 1] = self.getProperty("Vproj").value
+        W[:, 2] = self.getProperty("Wproj").value
+        if abs(np.linalg.det(W)) < 1e-10:
+            issues["Uproj"] = "Uproj, Vproj, and Wproj are not linearly independent"
+
         symmetry = self.getProperty("SymmetryOperations").value
         if symmetry:
             try:
@@ -250,6 +271,8 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
         tempBkgData = self.getProperty("TemporaryBackgroundDataWorkspace").value
         tempBkgNorm = self.getProperty("TemporaryBackgroundNormalizationWorkspace").value
 
+        # create intermediate workspaces if requested, via argument KeepTemporaryWorkspaces
+        # or if any accumulation workspace is provided
         keep_temp = self.getProperty("KeepTemporaryWorkspaces").value
         if bool(tempData) or bool(tempNorm) or bool(tempBkgData) or bool(tempBkgNorm):
             keep_temp = True
@@ -266,9 +289,7 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
             else:
                 sym_ops = SymmetryOperationFactory.createSymOps(symmetry)
         else:
-            sym_ops = SymmetryOperationFactory.createSymOps("x,y,z")
-
-        instrument = inWS.getExperimentInfo(0).getInstrument().getName()
+            sym_ops = SymmetryOperationFactory.createSymOps("x,y,z")  # identity
 
         dim0_min, dim0_max, dim0_bins = self.getProperty("BinningDim0").value
         dim1_min, dim1_max, dim1_bins = self.getProperty("BinningDim1").value
@@ -285,15 +306,19 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
         progress = Progress(self, 0.0, 1.0, progress_end)
 
         normaliseBy = self.getProperty("NormaliseBy").value
+
+        instrument_name = inWS.getExperimentInfo(0).getInstrument().getName()
+        assert instrument_name in ["HB3A", "DEMAND", "HB2C", "WAND"], "Supported instruments are HB3A and HB2C"
+
         if normaliseBy == "Monitor":
-            if instrument == "HB3A":
+            if instrument_name in ("HB3A", "DEMAND"):
                 scale = np.asarray(inWS.getExperimentInfo(0).run().getProperty("monitor").value)
-            else:
+            else:  # ("HB2C", "WAND")
                 scale = np.asarray(inWS.getExperimentInfo(0).run().getProperty("monitor_count").value)
         elif normaliseBy == "Time":
-            if instrument == "HB3A":
+            if instrument_name in ("HB3A", "DEMAND"):
                 scale = np.asarray(inWS.getExperimentInfo(0).run().getProperty("time").value)
-            else:
+            else:  # ("HB2C", "WAND")
                 scale = np.asarray(inWS.getExperimentInfo(0).run().getProperty("duration").value)
         else:
             scale = np.ones(number_of_runs)
@@ -301,28 +326,28 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
         if _norm:
             norm_scale = 1.0
             if normaliseBy == "Monitor":
-                if instrument == "HB3A":
+                if instrument_name == "HB3A":
                     norm_scale = np.sum(normWS.getExperimentInfo(0).run().getProperty("monitor").value)
                 else:
                     norm_scale = np.sum(normWS.getExperimentInfo(0).run().getProperty("monitor_count").value)
             elif normaliseBy == "Time":
-                if instrument == "HB3A":
+                if instrument_name == "HB3A":
                     norm_scale = np.sum(normWS.getExperimentInfo(0).run().getProperty("time").value)
                 else:
                     norm_scale = np.sum(normWS.getExperimentInfo(0).run().getProperty("duration").value)
-            norm_array = normWS.getSignalArray().sum(axis=2)
+            norm_array = normWS.getSignalArray().sum(axis=2)  # shape = (pixel_y_count, pixel_x_count)
             norm_array /= norm_scale
         else:
             norm_array = np.ones_like(data_array[:, :, 0])
 
         if _bkg:
             if normaliseBy == "Monitor":
-                if instrument == "HB3A":
+                if instrument_name == "HB3A":
                     bkg_scale = np.asarray(bkgWS.getExperimentInfo(0).run().getProperty("monitor").value)
                 else:
                     bkg_scale = np.asarray(bkgWS.getExperimentInfo(0).run().getProperty("monitor_count").value)
             elif normaliseBy == "Time":
-                if instrument == "HB3A":
+                if instrument_name == "HB3A":
                     bkg_scale = np.asarray(bkgWS.getExperimentInfo(0).run().getProperty("time").value)
                 else:
                     bkg_scale = np.asarray(bkgWS.getExperimentInfo(0).run().getProperty("duration").value)
@@ -359,6 +384,7 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
                 for i in range(3)
             ]
             # Slicing because we want the column vector and not the row vector
+            # Get the length of each column vector in A^-1 by converting (1,0,0), (0,1,0), (0,0,1) from HKL to Q
             units = "in {:.3f} A^-1,in {:.3f} A^-1,in {:.3f} A^-1".format(
                 ol.qFromHKL(W[:, 0]).norm(), ol.qFromHKL(W[:, 1]).norm(), ol.qFromHKL(W[:, 2]).norm()
             )
@@ -367,12 +393,15 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
             names = "Q_sample_x,Q_sample_y,Q_sample_z"
             units = "Angstrom^-1,Angstrom^-1,Angstrom^-1"
             frames = "QSample,QSample,QSample"
+
         k = 2 * np.pi / self.getProperty("Wavelength").value
 
-        progress.report("Calculating Qlab for each pixel")
+        progress.report("Calculating Qlab for each pixel (or group of pixels)")
         if inWS.getExperimentInfo(0).run().hasProperty("twotheta"):
             polar = np.array(inWS.getExperimentInfo(0).run().getProperty("twotheta").value)
         else:
+            # Assumption: inWS was generated with no detector-pixel grouping,
+            # so that the first two dimensions of inWS correspond to the extent of the individual detector pixels
             di = inWS.getExperimentInfo(0).detectorInfo()
             polar = np.array([di.twoTheta(i) for i in range(di.size()) if not di.isMonitor(i)])
             if inWS.getExperimentInfo(0).getInstrument().getName() == "HB3A":
@@ -392,6 +421,7 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
 
         cop = self.getProperty("ObliquityParallaxCoefficient").value
 
+        # Q_lab for each pixel (or group of pixels)
         qlab = np.vstack((np.sin(polar) * np.cos(azim), np.sin(polar) * np.sin(azim) * cop, np.cos(polar) - 1)) * -k  # Kf - Ki(0,0,1)
 
         data_hist = np.zeros(dim0_bins * dim1_bins * dim2_bins)
@@ -414,17 +444,19 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
 
         progress.report("Calculating Q volume")
 
-        assert not data_array[:, :, 0].flags.owndata
-        assert not data_array[:, :, 0].ravel("F").flags.owndata
-        assert data_array[:, :, 0].flags.fnc
+        # assertions to ensure performance
+        assert not data_array[:, :, 0].flags.owndata  # data_array is a view, not a copy
+        assert not data_array[:, :, 0].ravel("F").flags.owndata  # flatten using Fortran/column-major order
+        assert data_array[:, :, 0].flags.fnc  # Elements stored column by column [a[0,0], a[1,0], a[2,0]...
 
+        # Correction to the Goniometer rotation matrix to account for its possible offset in the vertical axis
         s1offset = np.deg2rad(self.getProperty("S1Offset").value)
         s1offset = np.array([[np.cos(s1offset), 0, np.sin(s1offset)], [0, 1, 0], [-np.sin(s1offset), 0, np.cos(s1offset)]])
-
+        # Q_sample = R_inv * Q_lab
         R_invs = [np.dot(s1offset, inWS.getExperimentInfo(0).run().getGoniometer(n).getR()).T for n in range(number_of_runs)]
 
         # flat array
-        data_array_flat = data_array.T.reshape(number_of_runs, -1)
+        data_array_flat = data_array.T.reshape(number_of_runs, -1)  # data_array.T.shape = (#run, #pixel_x, #pixel_y)
         norm_array_flat = norm_array.ravel(order="F")
         if _bkg:
             bkg_data_array_flat = bkg_data_array.T.reshape(number_of_runs, -1)
@@ -438,28 +470,41 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
 
             # transform matrix
             if _hkl:
-                T = np.linalg.multi_dot([2 * np.pi * UB, S, W])
+                T = np.linalg.multi_dot([2 * np.pi * UB, S, W])  # Q_sample = T * (h', k', l')
             else:
-                T = np.dot(S, W)
+                T = np.dot(S, W)  # Q_sample = T * Q_sample'  (if frame="Q_sample", W should preserve the norm)
             T_inv = np.linalg.inv(T)
 
             for i_gon, R_inv in enumerate(R_invs):
-                # transformation matrix
+                # transformation matrix from Q_lab to desired frame and projection
                 combined_matrix = np.matmul(T_inv, R_inv)  # (3 x 3) x (3 x 3) = (3 x 3)
 
-                # matrix-vector multiplication for all q
+                # matrix-vector multiplication for Q_lab of all detector (pixels or groups of pixels)
+                # these qvals are coordinates in HKL or Q_sample space depending on the choice of frame
                 qvals = np.matmul(combined_matrix, qlab)  # (3 x 3) x (3 x n_det) = (3 x n_det)
 
-                # map q values to bin edges
+                # map qvals to bin edges. Resulting bin_indices has shape (n_det, 3)
                 bin_indices = np.stack([np.digitize(qvals[i], bins[i]) - 1 for i in range(3)], axis=-1)
 
                 # mask to exclude out-of-bound data
                 mask = np.all((bin_indices >= valid_range_min) & (bin_indices <= valid_range_max), axis=1)
 
+                # convert 3D bin indices to 1D bin index
+                # conversion formula for the first 3D bin indexes given by bin_indices[mask][0]:
+                # index_1D = bin_indices[mask][0][0[ * dim_bins[1] * dim_bins[2] +
+                #            bin_indices[mask][0][1] *               dim_bins[2] +
+                #            bin_indices[mask][0][2]
                 bin_indices = np.ravel_multi_index(bin_indices[mask].T, dim_bins)
+
+                # Note that bin_indices[mask].shape = (unmasked_pixel_count, 3),
+                # example: bin_indices[mask] = [5, 20,..] indicates the first unmasked pixel has a 1D bin index of 5,
+                # and the second unmasked-pixel has a 1D bin index of 20, etc.
+                # Thus, `inverse_indices` specify the unmasked-pixel indexes for each 1D bin index
                 unique_indices, inverse_indices = np.unique(bin_indices, return_inverse=True)
 
-                # sum weights for each unique bin index
+                # data_array_flat[i_gon][mask].shape is (unmasked_pixel_count, )
+                # count occurrences of each index of inverse_indices and weights them by corresponding values
+                # from data_array_flat[i_gon][mask], which is the number of events for each unmasked pixel
                 data_hist[unique_indices] += np.bincount(inverse_indices, data_array_flat[i_gon][mask])
                 norm_hist[unique_indices] += np.bincount(inverse_indices, norm_array_flat[mask]) * scale[i_gon]
 
@@ -470,6 +515,7 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
 
                 progress.report()
 
+        # revert from 1D to 3D arrays
         data_hist = data_hist.reshape(dim_bins)
         norm_hist = norm_hist.reshape(dim_bins)
         if _bkg:

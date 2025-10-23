@@ -7,7 +7,7 @@
 from mantid.simpleapi import (
     ConvertWANDSCDtoQ,
     CreateMDHistoWorkspace,
-    CreateSingleValuedWorkspace,
+    LoadEmptyInstrument,
     SetUB,
     mtd,
     SetGoniometer,
@@ -39,16 +39,16 @@ class ConvertWANDSCDtoQTest(unittest.TestCase):
             Units="bin,bin,number",
         )
 
-        ConvertWANDSCDtoQTest_dummy = CreateSingleValuedWorkspace()
-
+        ConvertWANDSCDtoQTest_dummy = LoadEmptyInstrument(InstrumentName="HB2C")
         ConvertWANDSCDtoQTest_gold.addExperimentInfo(ConvertWANDSCDtoQTest_dummy)
 
         log = FloatTimeSeriesProperty("s1")
         for t, v in zip(range(100), np.arange(0, 50, 0.5)):
             log.addValue(t, v)
+        run_count = 100
         ConvertWANDSCDtoQTest_gold.getExperimentInfo(0).run()["s1"] = log
-        ConvertWANDSCDtoQTest_gold.getExperimentInfo(0).run().addProperty("duration", [60.0] * 100, True)
-        ConvertWANDSCDtoQTest_gold.getExperimentInfo(0).run().addProperty("monitor_count", [120000.0] * 100, True)
+        ConvertWANDSCDtoQTest_gold.getExperimentInfo(0).run().addProperty("duration", [60.0] * run_count, True)
+        ConvertWANDSCDtoQTest_gold.getExperimentInfo(0).run().addProperty("monitor_count", [120000.0] * run_count, True)
         ConvertWANDSCDtoQTest_gold.getExperimentInfo(0).run().addProperty(
             "twotheta", list(np.linspace(np.pi * 2 / 3, 0, 240).repeat(32)), True
         )
@@ -71,7 +71,7 @@ class ConvertWANDSCDtoQTest(unittest.TestCase):
             Units="bin,bin,number",
         )
 
-        ConvertWANDSCDtoQTest_dummy2 = CreateSingleValuedWorkspace()
+        ConvertWANDSCDtoQTest_dummy2 = LoadEmptyInstrument(InstrumentName="HB2C")
         ConvertWANDSCDtoQTest_norm.addExperimentInfo(ConvertWANDSCDtoQTest_dummy2)
         ConvertWANDSCDtoQTest_norm.getExperimentInfo(0).run().addProperty("monitor_count", [100000.0], True)
         ConvertWANDSCDtoQTest_norm.getExperimentInfo(0).run().addProperty("duration", [3600.0], True)
