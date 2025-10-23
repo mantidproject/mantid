@@ -194,10 +194,10 @@ std::string MultipleFileProperty::setValueAsSingleFile(const std::string &propVa
     return SUCCESS;
   }
 
-  // Use a slave FileProperty to do the job for us.
-  FileProperty slaveFileProp("Slave", "", FileProperty::Load, m_exts, Direction::Input);
+  // Use a temporary single FileProperty to do the job for us using this name
+  FileProperty singleFileProperty(this->name(), "", FileProperty::Load, m_exts, Direction::Input);
 
-  std::string error = slaveFileProp.setValue(propValue);
+  std::string error = singleFileProperty.setValue(propValue);
 
   if (!error.empty())
     return error;
@@ -205,7 +205,7 @@ std::string MultipleFileProperty::setValueAsSingleFile(const std::string &propVa
   // Store.
   std::vector<std::vector<std::string>> foundFiles;
   try {
-    toValue(slaveFileProp(), foundFiles, "", "");
+    toValue(singleFileProperty(), foundFiles, "", "");
     PropertyWithValue<std::vector<std::vector<std::string>>>::operator=(foundFiles);
   } catch (std::invalid_argument &except) {
     g_log.debug() << "Could not set property " << name() << ": " << except.what();
