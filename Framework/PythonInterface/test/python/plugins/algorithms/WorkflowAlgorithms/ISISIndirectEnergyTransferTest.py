@@ -31,7 +31,7 @@ class ISISIndirectEnergyTransferTest(unittest.TestCase):
         """
 
         wks = ISISIndirectEnergyTransfer(
-            InputFiles=["IRS26176.RAW"], Instrument="IRIS", Analyser="graphite", Reflection="002", SpectraRange=[3, 53]
+            InputFiles=["IRS26176.raw"], Instrument="IRIS", Analyser="graphite", Reflection="002", SpectraRange=[3, 53]
         )
 
         self.assertTrue(isinstance(wks, WorkspaceGroup), "Result workspace should be a workspace group.")
@@ -47,7 +47,7 @@ class ISISIndirectEnergyTransferTest(unittest.TestCase):
         """
 
         wks = ISISIndirectEnergyTransfer(
-            InputFiles=["IRS26176.RAW"], Instrument="IRIS", Analyser="graphite", Reflection="002", SpectraRange=[35, 40]
+            InputFiles=["IRS26176.raw"], Instrument="IRIS", Analyser="graphite", Reflection="002", SpectraRange=[35, 40]
         )
 
         self.assertTrue(isinstance(wks, WorkspaceGroup), "Result workspace should be a workspace group.")
@@ -62,7 +62,7 @@ class ISISIndirectEnergyTransferTest(unittest.TestCase):
         """
 
         wks = ISISIndirectEnergyTransfer(
-            InputFiles=["IRS26176.RAW"],
+            InputFiles=["IRS26176.raw"],
             Instrument="IRIS",
             Analyser="graphite",
             Reflection="002",
@@ -82,7 +82,7 @@ class ISISIndirectEnergyTransferTest(unittest.TestCase):
         """
 
         wks = ISISIndirectEnergyTransfer(
-            InputFiles=["IRS26176.RAW"],
+            InputFiles=["IRS26176.raw"],
             Instrument="IRIS",
             Analyser="graphite",
             Reflection="002",
@@ -101,7 +101,7 @@ class ISISIndirectEnergyTransferTest(unittest.TestCase):
 
         for custom_string, expected_size in custom_grouping_strings.items():
             reduced_workspace = ISISIndirectEnergyTransfer(
-                InputFiles=["IRS26176.RAW"],
+                InputFiles=["IRS26176.raw"],
                 Instrument="IRIS",
                 Analyser="graphite",
                 Reflection="002",
@@ -119,7 +119,7 @@ class ISISIndirectEnergyTransferTest(unittest.TestCase):
 
         for number_of_groups, expected_size in results.items():
             reduced_workspace = ISISIndirectEnergyTransfer(
-                InputFiles=["IRS26176.RAW"],
+                InputFiles=["IRS26176.raw"],
                 Instrument="IRIS",
                 Analyser="graphite",
                 Reflection="002",
@@ -141,7 +141,7 @@ class ISISIndirectEnergyTransferTest(unittest.TestCase):
         """
 
         wks = ISISIndirectEnergyTransfer(
-            InputFiles=["IRS26176.RAW"],
+            InputFiles=["IRS26176.raw"],
             Instrument="IRIS",
             Analyser="graphite",
             Reflection="002",
@@ -158,7 +158,7 @@ class ISISIndirectEnergyTransferTest(unittest.TestCase):
         """
 
         wks = ISISIndirectEnergyTransfer(
-            InputFiles=["IRS26176.RAW"],
+            InputFiles=["IRS26176.raw"],
             Instrument="IRIS",
             Analyser="graphite",
             Reflection="002",
@@ -180,7 +180,7 @@ class ISISIndirectEnergyTransferTest(unittest.TestCase):
         """
 
         wks = ISISIndirectEnergyTransfer(
-            InputFiles=["IRS26176.RAW"],
+            InputFiles=["IRS26176.raw"],
             Instrument="IRIS",
             Analyser="graphite",
             Reflection="002",
@@ -223,7 +223,7 @@ class ISISIndirectEnergyTransferTest(unittest.TestCase):
         """
 
         wks = ISISIndirectEnergyTransfer(
-            InputFiles=["IRS26176.RAW"],
+            InputFiles=["IRS26176.raw"],
             Instrument="IRIS",
             Analyser="graphite",
             Reflection="002",
@@ -244,7 +244,7 @@ class ISISIndirectEnergyTransferTest(unittest.TestCase):
         """
 
         wks = ISISIndirectEnergyTransfer(
-            InputFiles=["IRS26176.RAW"],
+            InputFiles=["IRS26176.raw"],
             Instrument="IRIS",
             Analyser="graphite",
             Reflection="002",
@@ -270,7 +270,7 @@ class ISISIndirectEnergyTransferTest(unittest.TestCase):
         calibration_ws.setY(half_index + 1, [0])
 
         wks = ISISIndirectEnergyTransfer(
-            InputFiles=["IRS26176.RAW"],
+            InputFiles=["IRS26176.raw"],
             Instrument="IRIS",
             Analyser="graphite",
             Reflection="002",
@@ -293,7 +293,7 @@ class ISISIndirectEnergyTransferTest(unittest.TestCase):
         """
 
         wks = ISISIndirectEnergyTransfer(
-            InputFiles=["IRS26176.RAW", "IRS26173.RAW"], Instrument="IRIS", Analyser="graphite", Reflection="002", SpectraRange=[3, 53]
+            InputFiles=["IRS26176.raw", "IRS26173.raw"], Instrument="IRIS", Analyser="graphite", Reflection="002", SpectraRange=[3, 53]
         )
 
         self.assertTrue(isinstance(wks, WorkspaceGroup), "Result workspace should be a workspace group.")
@@ -307,7 +307,7 @@ class ISISIndirectEnergyTransferTest(unittest.TestCase):
         """
 
         wks = ISISIndirectEnergyTransfer(
-            InputFiles=["IRS26176.RAW", "IRS26173.RAW"],
+            InputFiles=["IRS26176.raw", "IRS26173.raw"],
             SumFIles=True,
             Instrument="IRIS",
             Analyser="graphite",
@@ -334,7 +334,7 @@ class ISISIndirectEnergyTransferTest(unittest.TestCase):
             "Invalid instrument configuration",
             ISISIndirectEnergyTransfer,
             OutputWorkspace="__ISISIndirectEnergyTransferTest_ws",
-            InputFiles=["IRS26176.RAW"],
+            InputFiles=["IRS26176.raw"],
             Instrument="IRIS",
             Analyser="graphite",
             Reflection="006",
@@ -352,7 +352,7 @@ class ISISIndirectEnergyTransferTest(unittest.TestCase):
             "Must select a grouping workspace for current GroupingWorkspace",
             ISISIndirectEnergyTransfer,
             OutputWorkspace="__ISISIndirectEnergyTransferTest_ws",
-            InputFiles=["IRS26176.RAW"],
+            InputFiles=["IRS26176.raw"],
             Instrument="IRIS",
             Analyser="graphite",
             Reflection="002",
@@ -366,7 +366,7 @@ class ISISIndirectEnergyTransferTest(unittest.TestCase):
         """
 
         wks = ISISIndirectEnergyTransfer(
-            InputFiles=["IRS26176.RAW"], Instrument="IRIS", Analyser="graphite", Reflection="002", SpectraRange=[3, 53], Efixed=1.9
+            InputFiles=["IRS26176.raw"], Instrument="IRIS", Analyser="graphite", Reflection="002", SpectraRange=[3, 53], Efixed=1.9
         )
 
         self.assertTrue(isinstance(wks, WorkspaceGroup), "Result workspace should be a workspace group.")
@@ -382,11 +382,11 @@ class ISISIndirectEnergyTransferTest(unittest.TestCase):
         """
 
         ref = ISISIndirectEnergyTransfer(
-            InputFiles=["IRS26176.RAW"], Instrument="IRIS", Analyser="graphite", Reflection="002", SpectraRange=[3, 53]
+            InputFiles=["IRS26176.raw"], Instrument="IRIS", Analyser="graphite", Reflection="002", SpectraRange=[3, 53]
         )
 
         wks = ISISIndirectEnergyTransfer(
-            InputFiles=["IRS26176.RAW"], Instrument="IRIS", Analyser="graphite", Reflection="002", SpectraRange=[3, 53], Efixed=1.845
+            InputFiles=["IRS26176.raw"], Instrument="IRIS", Analyser="graphite", Reflection="002", SpectraRange=[3, 53], Efixed=1.845
         )
 
         self.assertTrue(CompareWorkspaces(ref, wks)[0])
@@ -397,7 +397,7 @@ class ISISIndirectEnergyTransferTest(unittest.TestCase):
         """
 
         wks = ISISIndirectEnergyTransfer(
-            InputFiles=["IRS26176.RAW"], Instrument="IRIS", Analyser="graphite", Reflection="002", SpectraRange=[3, 53], ScaleFactor=0.5
+            InputFiles=["IRS26176.raw"], Instrument="IRIS", Analyser="graphite", Reflection="002", SpectraRange=[3, 53], ScaleFactor=0.5
         )
 
         red_ws = wks.getItem(0)
@@ -410,7 +410,7 @@ class ISISIndirectEnergyTransferTest(unittest.TestCase):
 
         for custom_string, expected_size in custom_grouping_strings.items():
             reduced_workspace = ISISIndirectEnergyTransfer(
-                InputFiles=["IRS26176.RAW"],
+                InputFiles=["IRS26176.raw"],
                 Instrument="IRIS",
                 Analyser="graphite",
                 Reflection="002",
@@ -425,7 +425,7 @@ class ISISIndirectEnergyTransferTest(unittest.TestCase):
         """Check that the spectra are changed for a custom grouping"""
 
         wks = ISISIndirectEnergyTransfer(
-            InputFiles=["IRS26176.RAW"],
+            InputFiles=["IRS26176.raw"],
             Instrument="IRIS",
             Analyser="graphite",
             Reflection="002",
@@ -443,7 +443,7 @@ class ISISIndirectEnergyTransferTest(unittest.TestCase):
         """Check that the output suffix is appended at the end of output workspace names"""
 
         wks = ISISIndirectEnergyTransfer(
-            InputFiles=["IRS26176.RAW"],
+            InputFiles=["IRS26176.raw"],
             Instrument="IRIS",
             Analyser="graphite",
             Reflection="002",

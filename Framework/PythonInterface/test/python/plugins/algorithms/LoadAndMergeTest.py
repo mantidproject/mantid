@@ -160,7 +160,7 @@ class LoadAndMergeTest(unittest.TestCase):
         self.assertEqual(mtd["__out"].getItem(1).name(), "__170300_170302")
 
     def test_non_ill_load(self):
-        out7 = LoadAndMerge(Filename="IRS26173,26174.RAW")
+        out7 = LoadAndMerge(Filename="IRS26173,26174.raw")
         self.assertTrue(out7)
         self.assertTrue(isinstance(out7, WorkspaceGroup))
         self.assertEqual(out7.getNumberOfEntries(), 2)
