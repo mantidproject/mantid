@@ -33,8 +33,8 @@ Usage
 
 .. testcode:: exIRISTransmission
 
-   sample_ws = Load('IRS26176.RAW')
-   can_ws = Load('IRS26173.RAW')
+   sample_ws = Load('IRS26176.raw')
+   can_ws = Load('IRS26173.raw')
 
    transmission_ws = IndirectTransmissionMonitor(SampleWorkspace=sample_ws, CanWorkspace=can_ws)
 

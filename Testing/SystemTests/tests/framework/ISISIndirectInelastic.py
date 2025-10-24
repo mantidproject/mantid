@@ -1206,8 +1206,8 @@ class ISISIndirectInelasticTransmissionMonitor(ISISIndirectInelasticBase):
 class IRISTransmissionMonitor(ISISIndirectInelasticTransmissionMonitor):
     def __init__(self):
         ISISIndirectInelasticTransmissionMonitor.__init__(self)
-        self.sample = "IRS26176.RAW"
-        self.can = "IRS26173.RAW"
+        self.sample = "IRS26176.raw"
+        self.can = "IRS26173.raw"
 
         self.result_names = ["IRISTransmissionMonitorTest"]
 
