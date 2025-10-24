@@ -13,7 +13,7 @@ class LoadInputErrorMessages(unittest.TestCase):
     def test_validate_sample_inputs_too_many_fields(self):
         # Test that providing both filename and IPTS/RunNumbers raises a RuntimeError
         with self.assertRaises(RuntimeError) as cm:
-            HFIRPowderReduction(SampleFilename="HB2C_7000.nxs.h5", SampleIPTS=123, SampleRunNumbers=[456])
+            HFIRPowderReduction(SampleFilename="HB2C_7000.nxs.h5", SampleIPTS=123, SampleRunNumbers=[456], Instrument="WAND^2")
 
         # Check the error message
         error_msg = str(cm.exception)
@@ -23,7 +23,7 @@ class LoadInputErrorMessages(unittest.TestCase):
     def test_validate_sample_inputs_missing_fields(self):
         # Test that not providing any sample inputs raises a RuntimeError
         with self.assertRaises(RuntimeError) as cm:
-            HFIRPowderReduction()
+            HFIRPowderReduction(Instrument="WAND^2")
 
         # Check the error message
         error_msg = str(cm.exception)
@@ -41,6 +41,7 @@ class LoadInputErrorMessages(unittest.TestCase):
                 f"{field}Filename": "HB2C_7000.nxs.h5",
                 f"{field}IPTS": 123,
                 f"{field}RunNumbers": [456],
+                "Instrument": "WAND^2",
             }
 
             with self.assertRaises(RuntimeError) as cm:
@@ -57,7 +58,7 @@ class LoadInputErrorMessages(unittest.TestCase):
 
         for field in all_fields:
             # Test that missing IPTS or RunNumbers when the other is filled out for optional fields raises a RuntimeError
-            kwargs = {f"{field}IPTS": 123}
+            kwargs = {f"{field}IPTS": 123, "Instrument": "WAND^2"}
 
             with self.assertRaises(RuntimeError) as cm:
                 HFIRPowderReduction(**kwargs)
@@ -67,7 +68,7 @@ class LoadInputErrorMessages(unittest.TestCase):
             self.assertIn(f"{field}RunNumbers", error_msg)
             self.assertIn(f"{field}RunNumbers must be provided if {field}IPTS is provided", error_msg)
 
-            kwargs = {f"{field}RunNumbers": [456]}
+            kwargs = {f"{field}RunNumbers": [456], "Instrument": "WAND^2"}
 
             with self.assertRaises(RuntimeError) as cm:
                 HFIRPowderReduction(**kwargs)
@@ -80,17 +81,34 @@ class LoadInputErrorMessages(unittest.TestCase):
     def test_valid_sample_input_combinations(self):
         # Test filename only - should not raise
         try:
-            HFIRPowderReduction(SampleFilename="HB2C_7000.nxs.h5")
+            HFIRPowderReduction(SampleFilename="HB2C_7000.nxs.h5", Instrument="WAND^2")
         except RuntimeError as e:
             if "Must specify either SampleFilename or SampleIPTS AND SampleRunNumbers" in str(e):
                 self.fail("Valid input combination with SampleFilename failed validation")
 
         # Test IPTS and RunNumbers - should not raise
         try:
-            HFIRPowderReduction(SampleIPTS=123, SampleRunNumbers=[456])
+            HFIRPowderReduction(SampleIPTS=123, SampleRunNumbers=[456], Instrument="WAND^2")
         except RuntimeError as e:
             if "Must specify either SampleFilename or SampleIPTS AND SampleRunNumbers" in str(e):
                 self.fail("Valid input combination with IPTS and RunNumbers failed validation")
+
+    def test_validate_xmin_xmax(self):
+        # Test that missing XMin raises a RuntimeError
+        with self.assertRaises(RuntimeError) as cm:
+            HFIRPowderReduction(SampleFilename="HB2C_7000.nxs.h5", XMax=10.0, Instrument="WAND^2")
+
+        error_msg = str(cm.exception)
+        self.assertIn("XMin", error_msg)
+        self.assertIn("XMin must be provided", error_msg)
+
+        # Test that missing XMax raises a RuntimeError
+        with self.assertRaises(RuntimeError) as cm:
+            HFIRPowderReduction(SampleFilename="HB2C_7000.nxs.h5", XMin=1.0, Instrument="WAND^2")
+
+        error_msg = str(cm.exception)
+        self.assertIn("XMax", error_msg)
+        self.assertIn("XMax must be provided", error_msg)
 
 
 if __name__ == "__main__":

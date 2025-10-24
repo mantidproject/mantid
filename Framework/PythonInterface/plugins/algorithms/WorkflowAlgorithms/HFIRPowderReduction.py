@@ -4,8 +4,15 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.api import DataProcessorAlgorithm, AlgorithmFactory, MultipleFileProperty, FileAction
-from mantid.kernel import Property, IntArrayProperty, StringListValidator
+from mantid.api import DataProcessorAlgorithm, AlgorithmFactory, MultipleFileProperty, FileAction, PropertyMode
+from mantid.kernel import (
+    StringListValidator,
+    Direction,
+    Property,
+    FloatBoundedValidator,
+    IntArrayProperty,
+)
+from mantid.dataobjects import MaskWorkspaceProperty
 
 
 class HFIRPowderReduction(DataProcessorAlgorithm):
@@ -19,6 +26,7 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
         return "Powder reduction for HFIR instruments"
 
     def PyInit(self):
+        # Load UI properties
         self.declareProperty(
             MultipleFileProperty(name="SampleFilename", action=FileAction.OptionalLoad, extensions=[".nxs.h5"]), "Sample files to Load"
         )
@@ -47,6 +55,70 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
 
         self.declareProperty("ApplyMask", True, "If True standard masking will be applied to the workspace")
         self.declareProperty("Grouping", "None", StringListValidator(["None", "2x2", "4x4"]), "Group pixels")
+
+        # Reduction UI properties
+        self.declareProperty("Instrument", "", StringListValidator(["MIDAS", "WAND^2"]), "HB2 Instrument")
+        self.declareProperty(
+            "Wavelength",
+            0.0,  # A
+            FloatBoundedValidator(lower=0.0),  # must be positive
+            doc="Incident wavelength (A)",
+        )
+        self.declareProperty(
+            "Vandaium Diameter",
+            0.0,  # cm
+            FloatBoundedValidator(lower=0.0),  # must be positive
+            doc="Vanadium rod diamter (cm)",
+        )
+        self.declareProperty(
+            "XUnits",
+            "2Theta",
+            StringListValidator(["2Theta", "d-spacing", "Q"]),
+            doc="The unit to which spectrum axis is converted to",
+        )
+        self.copyProperties("ResampleX", ["XMin", "XMax"])
+        self.declareProperty(
+            "XBinWidth",
+            0.0,
+            validator=FloatBoundedValidator(0.0),
+            doc="Bin width for each spectrum",
+        )
+        self.declareProperty(
+            "Scale",
+            1.0,
+            validator=FloatBoundedValidator(0.0),
+            doc="The background will be scaled by this number before being subtracted.",
+        )
+        self.declareProperty(
+            "NormaliseBy",
+            "Monitor",
+            StringListValidator(["None", "Time", "Monitor"]),
+            "Normalise to monitor or time. ",
+        )
+        self.declareProperty(
+            MaskWorkspaceProperty(
+                "MaskWorkspace",
+                "",
+                optional=PropertyMode.Optional,
+                direction=Direction.Input,
+            ),
+            doc="The mask from this workspace will be applied before reduction",
+        )
+        self.declareProperty(
+            "MaskAngle",
+            Property.EMPTY_DBL,
+            "Out of plane (phi) angle above which data will be masked",
+        )
+        self.declareProperty(
+            "AttenuationmuR",
+            Property.EMPTY_DBL,
+            doc="muR for sample attenuation correction",
+        )
+        self.declareProperty(
+            "Sum",
+            False,
+            doc="Specifies either single output workspace or output group workspace containing several workspaces.",
+        )
 
     def validateInputs(self):
         issues = dict()
@@ -81,6 +153,13 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
                     issues[f"{field}RunNumbers"] = f"{field}RunNumbers must be provided if {field}IPTS is provided"
                 if runNumbersBool:
                     issues[f"{field}IPTS"] = f"{field}IPTS must be provided if {field}RunNumbers is provided"
+
+        xMinBool = len(self.getProperty("XMin").value)
+        if xMinBool == 0:
+            issues["XMin"] = "XMin must be provided"
+        xMaxBool = len(self.getProperty("XMax").value)
+        if xMaxBool == 0:
+            issues["XMax"] = "XMax must be provided"
 
         return issues
 
