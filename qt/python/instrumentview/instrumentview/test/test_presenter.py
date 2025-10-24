@@ -47,7 +47,7 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
     @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.reset_cached_projection_positions")
     @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.set_peaks_workspaces")
     def test_3d_projection_resets_cache(self, mock_set_peaks_ws, mock_reset_cache):
-        self.assertEquals("3D", self._presenter._PROJECTION_OPTIONS[0])
+        self.assertEquals("3D", self._model._PROJECTION_OPTIONS[0])
         self._presenter.on_projection_option_selected(0)
         mock_reset_cache.assert_called_once()
         self._mock_view.add_main_mesh.assert_called()
@@ -270,6 +270,12 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._mock_view.clear_lineplot_overlays.assert_called_once()
         self._mock_view.redraw_lineplot.assert_called_once()
         self._mock_view.plot_lineplot_overlay.assert_not_called()
+
+    @mock.patch.object(FullInstrumentViewModel, "default_projection", new_callable=mock.PropertyMock)
+    def test_default_projection(self, mock_default_projection):
+        mock_default_projection.return_value = "SPHERICAL_Z"
+        default_index, _ = self._presenter.projection_combo_options()
+        self.assertEqual(3, default_index)
 
 
 if __name__ == "__main__":
