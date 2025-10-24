@@ -16,6 +16,10 @@ endif()
 if(POLICY CMP0177)
   cmake_policy(SET CMP0177 NEW)
 endif()
+# invalidate timestamps on dependencies https://cmake.org/cmake/help/latest/policy/CMP0168.html
+if(POLICY CMP0168)
+  cmake_policy(SET CMP0168 NEW)
+endif()
 
 # Add the path to our custom 'find' modules
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/buildconfig/CMake")
