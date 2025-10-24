@@ -106,10 +106,8 @@ std::pair<size_t, size_t> DefaultEventLoader::setupChunking(std::vector<std::str
           bankNames[j] = bankNames[j + 1];
           bankNames[j + 1] = stmp;
         }
-    int bigBanks = 0;
-    for (size_t i = 0; i < bankn; i++)
-      if (bankNumEvents[i] > eventsPerChunk)
-        bigBanks++;
+    const auto bigBanks = std::count_if(bankNumEvents.cbegin(), bankNumEvents.cend(),
+                                        [this](const size_t numEvents) { return numEvents > eventsPerChunk; });
     // Each chunk is part of bank or multiple whole banks
     // 0.5 for last chunk of a bank with multiple chunks
     // 0.1 for multiple whole banks not completely filled
