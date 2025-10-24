@@ -36,7 +36,8 @@ if [[ $OSTYPE == "msys"* ]]; then
 fi
 
 # Run CMake using preset and variables
-cmake --preset=${CMAKE_PRESET} ${MANTID_DATA_STORE_CMAKE} ${EXTRA_CMAKE_FLAGS} $WORKSPACE
+# --fresh ignores previous cmake configuration - build results may still be reused if they match
+cmake --fresh --preset=${CMAKE_PRESET} ${MANTID_DATA_STORE_CMAKE} ${EXTRA_CMAKE_FLAGS} $WORKSPACE
 
 # Run the actual builds for the code, unit tests, and system tests.
 cd $WORKSPACE/build
