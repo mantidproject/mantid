@@ -62,14 +62,14 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
         # TODO: This field fields below will be autopopulated from the sample file in a future PR, handled by EWM item 13209
         self.declareProperty(
             "Wavelength",
-            0.0,  # A
+            Property.EMPTY_DBL,  # A
             FloatBoundedValidator(lower=0.0),  # must be positive
             doc="Incident wavelength (A)",
         )
         # TODO: This field fields below will be autopopulated from the sample file in a future PR, handled by EWM item 13209
         self.declareProperty(
-            "Vandaium Diameter",
-            0.0,  # cm
+            "VanadiumDiameter",
+            Property.EMPTY_DBL,  # cm
             FloatBoundedValidator(lower=0.0),  # must be positive
             doc="Vanadium rod diamter (cm)",
         )
@@ -169,6 +169,12 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
         xMaxBool = len(self.getProperty("XMax").value)
         if xMaxBool == 0:
             issues["XMax"] = "XMax must be provided"
+        wavelength = self.getProperty("Wavelength").value
+        if wavelength == Property.EMPTY_DBL:
+            issues["Wavelength"] = "Wavelength must be provided"
+        vanadiumDiameter = self.getProperty("VanadiumDiameter").value
+        if vanadiumDiameter == Property.EMPTY_DBL:
+            issues["VanadiumDiameter"] = "VanadiumDiameter must be provided"
 
         return issues
 

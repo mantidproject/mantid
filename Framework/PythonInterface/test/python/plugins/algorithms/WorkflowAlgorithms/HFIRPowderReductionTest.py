@@ -119,6 +119,24 @@ class LoadInputErrorMessages(unittest.TestCase):
         self.assertIn("Instrument", error_msg)
         self.assertIn("Instrument must be provided", error_msg)
 
+    def test_validate_wavelength(self):
+        # Test that missing Wavelength raises a RuntimeError
+        with self.assertRaises(RuntimeError) as cm:
+            HFIRPowderReduction(SampleFilename="HB2C_7000.nxs.h5", XMin=1.0, XMax=10.0, Instrument="WAND^2", VanadiumDiameter=0.5)
+
+        error_msg = str(cm.exception)
+        self.assertIn("Wavelength", error_msg)
+        self.assertIn("Wavelength must be provided", error_msg)
+
+    def test_vanadium_diameter(self):
+        # Test that missing Vandaium Diameter raises a RuntimeError
+        with self.assertRaises(RuntimeError) as cm:
+            HFIRPowderReduction(SampleFilename="HB2C_7000.nxs.h5", XMin=1.0, XMax=10.0, Instrument="WAND^2", Wavelength=2.5)
+
+        error_msg = str(cm.exception)
+        self.assertIn("VanadiumDiameter", error_msg)
+        self.assertIn("VanadiumDiameter must be provided", error_msg)
+
 
 if __name__ == "__main__":
     unittest.main()
