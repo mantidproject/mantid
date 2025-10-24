@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 from unittest import mock
+import tempfile
 import numpy as np
 from unittest.mock import patch, MagicMock, mock_open, call
 from mantid.api import AnalysisDataService as ADS
@@ -447,7 +448,8 @@ class TextureCorrectionModelTest(unittest.TestCase):
         mock_ads.retrieve.return_value.getNumberHistograms.return_value = 1
         mock_table = MagicMock()
         mock_create.return_value = mock_table
-        self.model.write_atten_val_table("ws1", [3.14], 2.0, "Wavelength", "rb123", mock.MagicMock(), "/tmp")
+        with tempfile.TemporaryDirectory() as d:
+            self.model.write_atten_val_table("ws1", [3.14], 2.0, "Wavelength", "rb123", mock.MagicMock(), d.name)
         mock_save.assert_called()
 
     @patch(correction_model_path + ".SaveNexus")
@@ -457,7 +459,8 @@ class TextureCorrectionModelTest(unittest.TestCase):
         mock_exists.return_value = False
         calib = MagicMock()
         calib.group = "CUSTOM"
-        self.model._save_corrected_files("ws", "/tmp", "AbsorptionCorrection", "RB123", calib.group)
+        with tempfile.TemporaryDirectory() as d:
+            self.model._save_corrected_files("ws", d.name, "AbsorptionCorrection", "RB123", calib.group)
         mock_makedirs.assert_called()
         mock_save.assert_called()
 

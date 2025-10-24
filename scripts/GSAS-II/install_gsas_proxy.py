@@ -11,7 +11,8 @@ import pip
 import shutil
 import site
 import subprocess
-import urllib2
+import importlib
+import requests
 
 
 FAILED_DOWNLOAD_MESSAGE = (
@@ -38,8 +39,8 @@ def download_bootstrap(revision_number, target_location):
     if revision_number:
         url += "?r={}".format(revision_number)
 
-    response = urllib2.urlopen(url)
-    bootstrap_file = response.read()
+    response = requests.get(url, timeout=10)
+    bootstrap_file = response.text
     response.close()
 
     with open(target_location, "w") as out_file:
@@ -48,7 +49,7 @@ def download_bootstrap(revision_number, target_location):
 
 def package_is_installed(package_name):
     try:
-        exec("import " + package_name)
+        importlib.import_module(package_name)
     except ImportError:
         return False
     return True

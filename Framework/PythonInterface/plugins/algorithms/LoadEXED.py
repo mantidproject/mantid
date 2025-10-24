@@ -22,6 +22,7 @@ from mantid.simpleapi import RotateInstrumentComponent
 import struct
 import numpy as np
 import copy
+from ast import literal_eval
 
 
 class LoadEXED(PythonAlgorithm):
@@ -173,7 +174,7 @@ class LoadEXED(PythonAlgorithm):
                 elif len(line_lst) > 1:
                     parm_val = line_lst[1].strip()
                     if (parm_val.isdigit()) & (line_lst[0].find("Run_Number") < 0):
-                        parm_val = eval(parm_val)
+                        parm_val = literal_eval(parm_val)
                     parms_dict[line_lst[0].strip()] = parm_val
             if line.find("Following are binary data") > 0:
                 header = False

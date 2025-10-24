@@ -248,7 +248,8 @@ class Abins2D(AbinsAlgorithm, PythonAlgorithm):
 
         n_q_values, n_freq_bins = s_points.shape
         n_q_bins = self._q_bins.size
-        assert n_q_values + 1 == n_q_bins
+        if n_q_values + 1 != n_q_bins:
+            raise ValueError("Mismatch between number of values and bins")
 
         if self._energy_units == "meV":
             energy_bins = self._bins / MILLI_EV_TO_WAVENUMBER

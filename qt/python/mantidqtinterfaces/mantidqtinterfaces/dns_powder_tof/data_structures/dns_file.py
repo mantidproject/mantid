@@ -14,6 +14,7 @@ from dateutil.parser import parse
 import numpy as np
 from mantidqtinterfaces.dns_powder_tof.data_structures.object_dict import ObjectDict
 from mantidqtinterfaces.dns_powder_tof.helpers.file_processing import load_txt
+from ast import literal_eval
 
 
 class DNSFile(ObjectDict):
@@ -185,7 +186,7 @@ class DNSFile(ObjectDict):
 
     def format_xml_input_table(self, table):
         formatted_table = [",".join(x) for x in zip(table[0::5], table[1::5], table[2::5], table[3::5], table[4::5])]
-        stripped_table = [eval(x) for x in formatted_table]
+        stripped_table = [literal_eval(x) for x in formatted_table]
         return stripped_table
 
 

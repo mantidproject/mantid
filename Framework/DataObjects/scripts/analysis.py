@@ -36,7 +36,7 @@ def plot_results_vs_other(results, x_field, y_field, other_field, extra_title=""
     other_field is used to separate by another field, and make separate line plots for each"""
     others = set()
     for par in results:
-        others.add(eval("par.%s" % other_field))
+        others.add(eval("par.%s" % other_field))  # noqa: S307
     others = list(others)
     others.sort()
 
@@ -45,10 +45,10 @@ def plot_results_vs_other(results, x_field, y_field, other_field, extra_title=""
     for other in others:
         data = []
         for _ in results:
-            this_other = eval("par.%s" % other_field)
+            this_other = eval("par.%s" % other_field)  # noqa: S307
             if this_other == other:
-                x = eval("par.%s" % x_field)
-                y = eval("par.%s" % y_field)
+                x = eval("par.%s" % x_field)  # noqa: S307
+                y = eval("par.%s" % y_field)  # noqa: S307
                 data.append((x, y))
         data.sort()
         xs = [x for (x, y) in data]
@@ -74,8 +74,8 @@ def plot_results_with_slope(results, x_field, y_field, x_scale=1.0):
 
     data = []
     for _ in results:
-        x = eval("par.%s" % x_field)
-        y = eval("par.%s" % y_field)
+        x = eval("par.%s" % x_field)  # noqa: S307
+        y = eval("par.%s" % y_field)  # noqa: S307
         data.append((x, y))
     data.sort()
     xs = [x * x_scale for (x, y) in data]

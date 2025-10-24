@@ -93,7 +93,7 @@ def get_open_pull_request_ids(repo, milestone):
     issues_search_url = GH_API_URL + "/" + GH_SEARCH_ISSUES_ENDPOINT
     search_string = 'repo:{} is:pr is:open milestone:"{}"'.format(repo, milestone)
     debug("Sending query '{}' to '{}'".format(search_string, issues_search_url))
-    response = requests.get(issues_search_url, params={"q": search_string})
+    response = requests.get(issues_search_url, params={"q": search_string}, timeout=10)
     response.raise_for_status()
 
     response_json = response.json()
@@ -130,7 +130,7 @@ def update_pr_base_branch(pr, newbase, token):
     data = {"base": newbase}
 
     debug("Sending data '{}' to {}".format(data, pull_url))
-    response = requests.post(pull_url, headers=headers, data=json.dumps(data))
+    response = requests.post(pull_url, headers=headers, data=json.dumps(data), timeout=10)
     response.raise_for_status()
 
 

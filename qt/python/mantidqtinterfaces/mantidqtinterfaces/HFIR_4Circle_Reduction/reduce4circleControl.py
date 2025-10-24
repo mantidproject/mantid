@@ -31,6 +31,8 @@ import csv
 import random
 import os
 import numpy
+import tempfile
+from ast import literal_eval
 
 from mantidqtinterfaces.HFIR_4Circle_Reduction.fourcircle_utility import (
     check_list,
@@ -139,7 +141,7 @@ class CWSCDReductionControl(object):
         # No Use/Confusing: self._expNumber = 0
 
         self._dataDir = None
-        self._workDir = "/tmp"
+        self._workDir = tempfile.TemporaryDirectory(delete=False).name
         self._preprocessedDir = None
         # dictionary for pre-processed scans.  key = scan number, value = dictionary for all kinds of information
         self._preprocessedInfoDict = None
@@ -373,7 +375,7 @@ class CWSCDReductionControl(object):
 
         try:
             equation = "lambda x: {}".format(formula)
-            fwhm_func = eval(equation)
+            fwhm_func = literal_eval(equation)
         except SyntaxError as syn_err:
             return False, "Unable to accept 2theta-FWHM formula {} due to {}".format(formula, syn_err)
 

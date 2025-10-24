@@ -9,6 +9,7 @@ import testhelpers
 from mantid.geometry import UnitCell, AngleUnits
 from mantid.kernel import V3D
 import numpy as np
+from ast import literal_eval
 
 
 class UnitCellTest(unittest.TestCase):
@@ -47,7 +48,7 @@ class UnitCellTest(unittest.TestCase):
         self.assertEqual(expected_str, str(unit))
         self.assertEqual(expected_repr, unit.__repr__())
 
-        newUnit = eval(unit.__repr__())
+        newUnit = literal_eval(unit.__repr__())
         self.assertEqual(unit.a(), newUnit.a())
         self.assertEqual(unit.b(), newUnit.b())
         self.assertEqual(unit.c(), newUnit.c())

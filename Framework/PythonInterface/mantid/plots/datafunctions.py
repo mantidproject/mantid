@@ -132,7 +132,8 @@ def get_indices(md_workspace, **kwargs):
 
     if "slicepoint" in kwargs:
         slicepoint = kwargs.pop("slicepoint")
-        assert md_workspace.getNumDims() == len(slicepoint), "slicepoint provided do not match the dimensions of the workspace"
+        if md_workspace.getNumDims() != len(slicepoint):
+            raise RuntimeError("slicepoint provided do not match the dimensions of the workspace")
         indices = []
         for n, p in enumerate(slicepoint):
             if p is None:
@@ -142,7 +143,8 @@ def get_indices(md_workspace, **kwargs):
         indices = tuple(indices)
     elif "indices" in kwargs:
         indices = kwargs.pop("indices")
-        assert md_workspace.getNumDims() == len(indices), "indices provided do not match the dimensions of the workspace"
+        if md_workspace.getNumDims() != len(indices):
+            raise RuntimeError("indices provided do not match the dimensions of the workspace")
     else:
         indices = None
 
@@ -178,7 +180,8 @@ def points_from_boundaries(input_array):
 
     :param input_array: a :class:`numpy.ndarray` of bin boundaries
     """
-    assert isinstance(input_array, np.ndarray), "Not a numpy array"
+    if not isinstance(input_array, np.ndarray):
+        raise ValueError("Not a numpy array")
     if len(input_array) < 2:
         raise ValueError("could not get centers from less than two boundaries")
     return 0.5 * (input_array[0:-1] + input_array[1:])
@@ -273,7 +276,8 @@ def get_md_data1d(workspace, normalization, indices=None):
     and error, to be used in 1D plots (plot, scatter, errorbar)
     """
     coordinate, data, err = get_md_data(workspace, normalization, indices, withError=True)
-    assert len(coordinate) == 1, "The workspace is not 1D"
+    if len(coordinate) > 1:
+        raise ValueError("The workspace is not 1D")
     coordinate = points_from_boundaries(coordinate[0])
     return coordinate, data, err
 
@@ -439,7 +443,8 @@ def get_md_data2d_bin_bounds(workspace, normalization, indices=None, transpose=F
     Note: return coordinates are 1d vectors. Use numpy.meshgrid to generate 2d versions
     """
     coordinate, data, _ = get_md_data(workspace, normalization, indices, withError=False)
-    assert len(coordinate) == 2, "The workspace is not 2D"
+    if len(coordinate) != 2:
+        raise ValueError("The workspace is not 2D")
     if transpose:
         return coordinate[1], coordinate[0], data.T
     else:
@@ -467,7 +472,8 @@ def boundaries_from_points(input_array):
 
     :param input_array: a :class:`numpy.ndarray` of bin centers
     """
-    assert isinstance(input_array, np.ndarray), "Not a numpy array"
+    if not isinstance(input_array, np.ndarray):
+        raise ValueError("Not a numpy array")
     if len(input_array) == 0:
         raise ValueError("could not extend array with no elements")
     if len(input_array) == 1:
@@ -839,7 +845,8 @@ def get_sample_log(workspace, **kwargs):
             try:
                 t0 = run["proton_charge"].times.astype("datetime64[us]")[0]
             except:
-                pass  # TODO: Maybe raise a warning?
+                mantid.kernel.logger.warning("Workspace has no proton_charge log")
+                return
 
         if ShowTimeROI:
             x = (times - t0).astype(float) * 1e3

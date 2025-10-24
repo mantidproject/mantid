@@ -21,7 +21,7 @@ from mantidqt.widgets.codeeditor.errorformatter import ErrorFormatter
 class ErrorFormatterTest(unittest.TestCase):
     def test_syntax_error(self):
         try:
-            exec("if:")
+            exec("if:")  # noqa: S102
         except SyntaxError:
             exc_type, exc_value = sys.exc_info()[:2]
             formatter = ErrorFormatter()
@@ -45,7 +45,7 @@ def foo():
 foo()
 """
         try:
-            exec(code)
+            exec(code)  # noqa: S102
         except NameError:
             exc_type, exc_value, tb = sys.exc_info()
             formatter = ErrorFormatter()

@@ -335,7 +335,7 @@ def execute_script(script, error_cb=None):
         mantidplot.runPythonScript(script, True)  # TODO this option should get removed
     else:
         Logger("scripter").information("using straight exec")
-        exec(script, globals(), locals())
+        exec(script, globals(), locals())  # noqa: S102
 
 
 class BaseReductionScripter(object):

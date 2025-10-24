@@ -10,6 +10,7 @@ import platform
 import shutil
 import time
 import unittest
+import tempfile
 
 from Direct.ISISDirecInelasticConfig import UserProperties, MantidConfigDirectInelastic
 
@@ -36,7 +37,7 @@ class ISISDirectInelasticConfigTest(unittest.TestCase):
             if platform.system() == "Windows":
                 targetDir = str(os.environ["TEMP"])
             else:
-                targetDir = "/tmp"
+                targetDir = tempfile.TemporaryDirectory(delete=False).name
         return targetDir
 
     def write_test_file(self, filename):
