@@ -105,7 +105,7 @@ Doctest summary
 0 failures in tests
 0 failures in setup code
 0 failures in cleanup code
-"""
+"""  # noqa: S105
 
 TEST_PASS_CLEANUP_FAIL = """
 Document: algorithms/TestPassedCleanupFail
@@ -140,7 +140,7 @@ Doctest summary
 0 failures in tests
 1 failures in setup code
 0 failures in cleanup code
-"""
+"""  # noqa: S105
 
 ALL_FAIL_EX = """Document: algorithms/AllFailed
 ------------------------------

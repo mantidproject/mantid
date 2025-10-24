@@ -253,7 +253,8 @@ def imshow(
     Unlike matplotlib version, must explicitly specify axes
     """
     if norm is not None:
-        assert isinstance(norm, mcolors.Normalize)
+        if not isinstance(norm, mcolors.Normalize):
+            raise ValueError("norm is wrong type, expected mcolors.Normalize")
     if aspect is None:
         aspect = rcParams["image.aspect"]
     axes.set_aspect(aspect)

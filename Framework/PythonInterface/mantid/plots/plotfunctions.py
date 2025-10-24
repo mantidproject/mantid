@@ -72,7 +72,8 @@ def figure_title(workspaces, fig_num):
         # assume a single workspace
         first = workspaces
     else:
-        assert len(workspaces) > 0
+        if len(workspaces) == 0:
+            raise ValueError("workspaces is empty")
         first = workspaces[0]
 
     return wsname(first) + "-" + str(fig_num)
@@ -169,7 +170,8 @@ def plot(
     # a new one will be drawn later
     axes = [MantidAxes.from_mpl_axes(ax, ignore_artists=[Legend]) if not isinstance(ax, MantidAxes) else ax for ax in axes]
 
-    assert axes, "No axes are associated with this plot"
+    if not axes:
+        raise RuntimeError("No axes are associated with this plot")
 
     if tiled:
         ws_index = [(ws, index) for ws in workspaces for index in nums]
@@ -347,7 +349,8 @@ def get_plot_fig(overplot=None, ax_properties=None, window_title=None, axes_num=
     elif overplot:
         # The create subplot below assumes no figure was passed in, this is ensured by the elif above
         # but add an assert which prevents a future refactoring from breaking this assumption
-        assert not fig
+        if fig:
+            raise ValueError("Expected fig to be empty")
         fig = plt.gcf()
         if not fig.axes:
             plt.close(fig)
@@ -441,7 +444,8 @@ def get_plot_fig(overplot=None, ax_properties=None, window_title=None, axes_num=
 # Private Methods
 # -----------------------------------------------------------------------------
 def _unpack_grouped_workspaces(mixed_list: List):
-    assert isinstance(mixed_list, list), f"Expected list of group + non-group workspaces, got {repr(mixed_list)}"
+    if not isinstance(mixed_list, list):
+        raise ValueError(f"Expected list of group + non-group workspaces, got {repr(mixed_list)}")
     ret = []
     for ws in mixed_list:
         ret.extend([i for i in ws]) if isinstance(ws, WorkspaceGroup) else ret.append(ws)

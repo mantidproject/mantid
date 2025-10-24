@@ -53,9 +53,6 @@ from mantid.kernel import Direction, EnabledWhenProperty, PropertyCriterion, Int
 DEPRECATION_NOTICE = """BASISDiffraction is deprecated (on 2018-08-27).
 Instead, use BASISCrystalDiffraction or BASISPowderReduction."""
 
-_SOLID_ANGLE_WS_ = "/tmp/solid_angle_diff.nxs"
-_FLUX_WS_ = "/tmp/int_flux.nxs"
-
 
 @contextmanager
 def pyexec_setup(new_options):

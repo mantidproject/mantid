@@ -15,6 +15,7 @@ from .DrillTask import DrillTask
 
 import re
 import os
+from ast import literal_eval
 
 
 class DrillExportModel:
@@ -136,7 +137,7 @@ class DrillExportModel:
             for param in params:
                 value = processingAlgo.getPropertyValue(param[1:-1])
                 criteria = criteria.replace(param, '"' + value + '"')
-            return bool(eval(criteria))
+            return bool(literal_eval(criteria))
         except:
             return False
 

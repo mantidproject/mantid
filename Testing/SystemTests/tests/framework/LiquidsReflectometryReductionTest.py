@@ -10,6 +10,8 @@ import systemtesting
 import numpy as np
 from mantid.api import mtd, AlgorithmManager, FileFinder
 from mantid.simpleapi import LiquidsReflectometryReduction, Load, LRAutoReduction, LRReflectivityOutput
+import tempfile
+from pathlib import Path
 
 
 def get_file_path(filename):
@@ -260,10 +262,11 @@ class LRautoreductionTest(systemtesting.MantidSystemTest):
             fd.write(content)
 
         ws = Load("REF_L_%d" % 190367, OutputWorkspace="REFL_%d" % 190367)
+        temp_dir = tempfile.TemporaryDirectory()
         LRAutoReduction(
             InputWorkspace=ws,
             ScaleToUnity=False,
-            OutputDirectory="/tmp",
+            OutputDirectory=temp_dir.name,
             ReadSequenceFromFile=False,
             ForceSequenceNumber=1,
             TemplateFile="template.xml",
@@ -271,7 +274,7 @@ class LRautoreductionTest(systemtesting.MantidSystemTest):
 
         # Find the dQ/Q value in the output file to determine success
         self._success = False
-        output_path = "/tmp/REFL_190367_combined_data_auto.txt"
+        output_path = Path(temp_dir.name) / "REFL_190367_combined_data_auto.txt"
         if os.path.isfile(output_path):
             with open(output_path, "r") as fd:
                 for line in fd:

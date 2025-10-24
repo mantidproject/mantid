@@ -416,8 +416,13 @@ class SimulatedDensityOfStates(PythonAlgorithm):
 
         if PEAK_WIDTH_ENERGY_FLAG in self._peak_width:
             try:
+
+                def eval_peak_width_code(p):
+                    return eval(self._peak_width.replace(PEAK_WIDTH_ENERGY_FLAG, str(energies[p])))  # noqa: S307
+
                 peak_widths = np.fromiter(
-                    [eval(self._peak_width.replace(PEAK_WIDTH_ENERGY_FLAG, str(energies[p]))) for p in peaks], dtype=float
+                    [eval_peak_width_code(p) for p in peaks],
+                    dtype=float,
                 )
             except SyntaxError:
                 raise ValueError('Invalid peak width function (must be either a decimal or function containing "energy")')

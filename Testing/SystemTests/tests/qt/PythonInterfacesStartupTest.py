@@ -7,6 +7,7 @@
 from itertools import chain
 import os
 import systemtesting
+import runpy
 
 from mantidqt.utils.qt.testing import get_application
 from workbench.utils.gather_interfaces import gather_python_interface_names
@@ -70,7 +71,7 @@ class PythonInterfacesStartupTest(systemtesting.MantidSystemTest):
         set_instrument(interface_script)
 
         try:
-            exec(open(os.path.join(self._interface_directory, interface_script)).read())
+            runpy.run_path(os.path.join(self._interface_directory, interface_script))
             self._close_interface()
         except Exception as ex:
             self.fail(f"Exception thrown when attempting to open the {interface_script} interface: {ex}.")

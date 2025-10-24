@@ -43,7 +43,8 @@ def capture_logs(level=None) -> io.StringIO:
         backup = dict(channel=config["logging.channels.consoleChannel.class"], stdout=sys.stdout)
         # backup the logging level?
         if level:
-            assert level.lower() in ["debug", "information", "notice", "warning", "error"]
+            if level.lower() not in ["debug", "information", "notice", "warning", "error"]:
+                raise ValueError("Unknown logging level")
             current_level = config["logging.loggers.root.level"]
             backup["level"] = current_level if current_level else "notice"
             config["logging.loggers.root.level"] = level

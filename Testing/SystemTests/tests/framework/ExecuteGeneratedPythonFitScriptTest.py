@@ -108,6 +108,6 @@ class ExecuteGeneratedPythonFitScriptTest(MantidSystemTest):
 
     def _run_fit_script(self, script_text):
         try:
-            exec(script_text)
+            exec(script_text)  # noqa: S102
         except Exception as ex:
             self.fail(f"Execution of python fit script failed: {ex}.")

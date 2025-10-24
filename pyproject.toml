@@ -1,9 +1,8 @@
 [tool.ruff]
 line-length = 140
 # https://beta.ruff.rs/docs/rules/
-lint.select = ["C90", "E", "F", "RUF100", "W", "NPY201"]
-lint.ignore = ["E722", # bare except
-]
+lint.select = ["C90", "E", "F", "RUF100", "W", "NPY201", "S"]
+lint.ignore = ["E722", "S101", "S110", "S112", "S314", "S311", "S324", "S301", "S607", "S603", "S605", "S318"]
 exclude = [
    "qt/applications/workbench/workbench/app/resources.py",
    "qt/python/mantidqt/mantidqt/resources.py",
