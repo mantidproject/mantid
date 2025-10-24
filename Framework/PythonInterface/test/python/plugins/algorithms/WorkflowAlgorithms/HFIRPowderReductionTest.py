@@ -110,6 +110,15 @@ class LoadInputErrorMessages(unittest.TestCase):
         self.assertIn("XMax", error_msg)
         self.assertIn("XMax must be provided", error_msg)
 
+    def test_validate_instrument(self):
+        # Test that missing Instrument raises a RuntimeError
+        with self.assertRaises(RuntimeError) as cm:
+            HFIRPowderReduction(SampleFilename="HB2C_7000.nxs.h5", XMin=1.0, XMax=10.0)
+
+        error_msg = str(cm.exception)
+        self.assertIn("Instrument", error_msg)
+        self.assertIn("Instrument must be provided", error_msg)
+
 
 if __name__ == "__main__":
     unittest.main()

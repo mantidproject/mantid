@@ -57,13 +57,16 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
         self.declareProperty("Grouping", "None", StringListValidator(["None", "2x2", "4x4"]), "Group pixels")
 
         # Reduction UI properties
-        self.declareProperty("Instrument", "", StringListValidator(["MIDAS", "WAND^2"]), "HB2 Instrument")
+        # TODO: This field fields below will be autopopulated from the sample file in a future PR, handled by EWM item 13209
+        self.declareProperty("Instrument", "", StringListValidator(["", "MIDAS", "WAND^2"]), "HB2 Instrument")
+        # TODO: This field fields below will be autopopulated from the sample file in a future PR, handled by EWM item 13209
         self.declareProperty(
             "Wavelength",
             0.0,  # A
             FloatBoundedValidator(lower=0.0),  # must be positive
             doc="Incident wavelength (A)",
         )
+        # TODO: This field fields below will be autopopulated from the sample file in a future PR, handled by EWM item 13209
         self.declareProperty(
             "Vandaium Diameter",
             0.0,  # cm
@@ -76,6 +79,7 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
             StringListValidator(["2Theta", "d-spacing", "Q"]),
             doc="The unit to which spectrum axis is converted to",
         )
+        # TODO: These 2 fields below will be autopopulated from the sample file in a future PR, handled by EWM item 13209
         self.copyProperties("ResampleX", ["XMin", "XMax"])
         self.declareProperty(
             "XBinWidth",
@@ -89,6 +93,7 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
             validator=FloatBoundedValidator(0.0),
             doc="The background will be scaled by this number before being subtracted.",
         )
+        # TODO: This field below will be autopopulated from the sample file in a future PR, handled by EWM item 13209
         self.declareProperty(
             "NormaliseBy",
             "Monitor",
@@ -153,6 +158,10 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
                     issues[f"{field}RunNumbers"] = f"{field}RunNumbers must be provided if {field}IPTS is provided"
                 if runNumbersBool:
                     issues[f"{field}IPTS"] = f"{field}IPTS must be provided if {field}RunNumbers is provided"
+
+        instrument = self.getProperty("Instrument").value
+        if instrument == "":
+            issues["Instrument"] = "Instrument must be provided"
 
         xMinBool = len(self.getProperty("XMin").value)
         if xMinBool == 0:
