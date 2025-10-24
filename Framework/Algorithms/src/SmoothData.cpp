@@ -141,7 +141,7 @@ Histogram smooth(const Histogram &histogram, unsigned const npts) {
   auto &newY = smoothed.mutableY();
   auto &newE = smoothed.mutableE();
   newY = Mantid::Kernel::Smoothing::boxcarSmooth(Y, npts);
-  newE = Mantid::Kernel::Smoothing::boxcarSumSquareSmooth(E, npts);
+  newE = Mantid::Kernel::Smoothing::boxcarErrorSmooth(E, npts);
   return smoothed;
 }
 

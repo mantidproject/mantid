@@ -21,11 +21,13 @@ public:
   static SmoothingTest *createSuite() { return new SmoothingTest(); }
   static void destroySuite(SmoothingTest *suite) { delete suite; }
 
+  // BOX CAR SMOOTHING
+
   void test_boxcarSmooth_npoints_validation() {
     std::vector<double> input{1, 2, 3, 4, 5, 6, 7, 8, 9};
     for (unsigned npts = 0; npts < 3; npts++) {
       TS_ASSERT_THROWS(boxcarSmooth(input, npts), std::invalid_argument const &);
-      TS_ASSERT_THROWS_NOTHING(boxcarSmooth(input, npts + 3);)
+      TS_ASSERT_THROWS_NOTHING(boxcarSmooth(input, npts + 3));
     }
   }
 
@@ -49,29 +51,6 @@ public:
     }
   }
 
-  void test_boxcarSumSquareSmooth_flat() {
-    double const flatValue = 2.0; // NOTE using 2 to make sure square operation makes a different value
-    std::vector<double> input(20, flatValue);
-    std::vector<double> output = boxcarSmooth(input, 3);
-    TS_ASSERT_EQUALS(input, output);
-    for (double const &x : output) {
-      TS_ASSERT_EQUALS(x, flatValue);
-    }
-  }
-
-  void test_boxcarSumSquareSmooth_two() {
-    // a series of values which should sum-square-smooth out to 2
-    double const a1 = 3., a2 = std::sqrt(7.), a3 = 2. * std::sqrt(5.);
-    std::vector<double> input{a1, a2, a3, a1, a2, a3, a1, a2, a3, a1, a2, a3, a1};
-    std::vector<double> output = boxcarSumSquareSmooth(input, 3);
-    // output.erase(output.begin()); // NOTE the first value can't ever equal 2
-    output.erase(output.end()); // NOTE the last value can't ever equal 2
-    int i = 0;
-    for (double const &x : output) {
-      TS_ASSERT_EQUALS(x, 2.0);
-    }
-  }
-
   void test_boxcarSmooth() {
     std::vector<double> yVals(10);
     for (int i = 0; i < 10; ++i) {
@@ -81,5 +60,53 @@ public:
     std::vector<double> expected{2, 2.5, 3, 4, 5, 6, 7, 8, 8.5, 9};
 
     TS_ASSERT_EQUALS(Y, expected);
+  }
+
+  // BOX CAR ERROR PROPAHATION
+
+  void test_boxcarErrorSmooth_flat() {
+    // NOTE this uses the error propagation equation, which tends to decrease the error values
+    double const flatValue = 2.0; // NOTE using 2 to make sure square operation makes a different value
+    std::vector<double> input(20, flatValue);
+    std::vector<double> output = boxcarErrorSmooth(input, 3);
+    TS_ASSERT_LESS_THAN(output, input);
+    for (double const &x : output) {
+      TS_ASSERT_LESS_THAN(x, flatValue);
+    }
+  }
+
+  void test_boxcarErrorSmooth_two() {
+    // a series of values which should sum-square-smooth out to 2
+    double const a1 = 3., a2 = std::sqrt(7.), a3 = 2. * std::sqrt(5.);
+    std::vector<double> input{a1, a2, a3, a1, a2, a3, a1, a2, a3, a1, a2, a3, a1};
+    std::vector<double> output = boxcarErrorSmooth(input, 3);
+    // output.erase(output.begin()); // NOTE the first value can't ever equal 2
+    output.pop_back(); // NOTE the last value can't ever equal 2
+    for (double const &x : output) {
+      TS_ASSERT_EQUALS(x, 2.0);
+    }
+  }
+
+  // BOX CAR RMSE SMOOTHING
+
+  void test_boxcarRMSESmooth_flat() {
+    double const flatValue = 2.0; // NOTE using 2 to make sure squaring changes value
+    std::vector<double> input(20, flatValue);
+    std::vector<double> output = boxcarRMSESmooth(input, 3);
+    TS_ASSERT_EQUALS(input, output);
+    for (double const &x : output) {
+      TS_ASSERT_EQUALS(x, flatValue);
+    }
+  }
+
+  void test_boxcarRMSESmooth_two() {
+    // a series of values which should sum-square-smooth out to 2
+    double const a1 = std::sqrt(3), a2 = std::sqrt(5.), a3 = 2.;
+    std::vector<double> input{a1, a2, a3, a1, a2, a3, a1, a2, a3, a1, a2, a3, a1};
+    std::vector<double> output = boxcarRMSESmooth(input, 3);
+    output.pop_back(); // NOTE the last value can't ever equal 2
+    for (double const &x : output) {
+      TS_ASSERT_EQUALS(x, 2.0);
+    }
   }
 };
