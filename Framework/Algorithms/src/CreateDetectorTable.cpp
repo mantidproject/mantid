@@ -27,10 +27,17 @@ void CreateDetectorTable::init() {
   declareProperty("IncludeData", false, "Include the first value from each spectrum.");
   setPropertySettings("IncludeData",
                       std::make_unique<EnabledWhenWorkspaceIsType<MatrixWorkspace>>("InputWorkspace", true));
+
   declareProperty<bool>("IncludeDetectorPosition", false,
                         "Include the absolute position of the detector group for each spectrum.", Direction::Input);
   setPropertySettings("IncludeDetectorPosition",
                       std::make_unique<EnabledWhenWorkspaceIsType<MatrixWorkspace>>("InputWorkspace", true));
+
+  declareProperty<bool>("PickOneDetectorID", false, "Populate the Detector ID column with only the first of the set.",
+                        Direction::Input);
+  setPropertySettings("PickOneDetectorID",
+                      std::make_unique<EnabledWhenWorkspaceIsType<MatrixWorkspace>>("InputWorkspace", true));
+
   declareProperty(std::make_unique<WorkspaceProperty<TableWorkspace>>("DetectorTableWorkspace", "", Direction::Output,
                                                                       PropertyMode::Optional),
                   "The name of the outputted detector table workspace, if left empty then "
@@ -42,6 +49,7 @@ void CreateDetectorTable::exec() {
   bool includeData = getProperty("IncludeData");
   std::vector<int> indices = getProperty("WorkspaceIndices");
   bool includeDetectorPosition = getProperty("IncludeDetectorPosition");
+  bool pickOneDetectorID = getProperty("PickOneDetectorID");
 
   ITableWorkspace_sptr detectorTable;
 
@@ -50,7 +58,8 @@ void CreateDetectorTable::exec() {
     if (sample == nullptr) {
       throw std::runtime_error("Matrix workspace has no instrument information");
     }
-    detectorTable = createDetectorTableWorkspace(matrix, indices, includeData, includeDetectorPosition, g_log);
+    detectorTable =
+        createDetectorTableWorkspace(matrix, indices, includeData, includeDetectorPosition, pickOneDetectorID, g_log);
 
     if (detectorTable == nullptr) {
       throw std::runtime_error("Unknown error while creating detector table for matrix workspace");
@@ -104,13 +113,14 @@ std::map<std::string, std::string> CreateDetectorTable::validateInputs() {
  * displayed
  * @param includeDetectorPosition :: If true then include the absolute position of
  * the detector group for each spectrum
+ * @param pickOneDetectorID :: If true then picks only the first detector ID per row
  * @param logger: The Mantid logger so errors can be written to it.
  *
  * @return A pointer to the table workspace of detector information
  */
 ITableWorkspace_sptr createDetectorTableWorkspace(const MatrixWorkspace_sptr &ws, const std::vector<int> &indices,
                                                   const bool includeData, const bool includeDetectorPosition,
-                                                  Logger &logger) {
+                                                  const bool pickOneDetectorID, Logger &logger) {
   IComponent_const_sptr sample = ws->getInstrument()->getSample();
 
   // check if efixed value is available
@@ -141,7 +151,8 @@ ITableWorkspace_sptr createDetectorTableWorkspace(const MatrixWorkspace_sptr &ws
   }
 
   // Prepare column names
-  auto colNames = createColumns(isScanning, includeData, calcQ, hasDiffConstants, includeDetectorPosition);
+  auto colNames =
+      createColumns(isScanning, includeData, calcQ, hasDiffConstants, includeDetectorPosition, pickOneDetectorID);
 
   const int ncols = static_cast<int>(colNames.size());
   const int nrows = indices.empty() ? static_cast<int>(ws->getNumberHistograms()) : static_cast<int>(indices.size());
@@ -163,18 +174,24 @@ ITableWorkspace_sptr createDetectorTableWorkspace(const MatrixWorkspace_sptr &ws
                                                                     // value should be displayed
 
   populateTable(t, ws, nrows, indices, spectrumInfo, signedThetaParamRetrieved, showSignedTwoTheta, beamAxisIndex,
-                sampleDist, isScanning, includeData, calcQ, hasDiffConstants, includeDetectorPosition, logger);
+                sampleDist, isScanning, includeData, calcQ, hasDiffConstants, includeDetectorPosition,
+                pickOneDetectorID, logger);
 
   return t;
 }
 
 std::vector<std::pair<std::string, std::string>> createColumns(const bool isScanning, const bool includeData,
                                                                const bool calcQ, const bool hasDiffConstants,
-                                                               const bool includeDetectorPosition) {
+                                                               const bool includeDetectorPosition,
+                                                               const bool pickOneDetectorID) {
   std::vector<std::pair<std::string, std::string>> colNames;
   colNames.emplace_back("double", "Index");
   colNames.emplace_back("int", "Spectrum No");
-  colNames.emplace_back("str", "Detector ID(s)");
+  if (pickOneDetectorID) {
+    colNames.emplace_back("int", "Detector ID(s)");
+  } else {
+    colNames.emplace_back("str", "Detector ID(s)");
+  }
   if (isScanning)
     colNames.emplace_back("str", "Time Indexes");
   if (includeData) {
@@ -205,7 +222,7 @@ void populateTable(ITableWorkspace_sptr &t, const MatrixWorkspace_sptr &ws, cons
                    const std::vector<int> &indices, const SpectrumInfo &spectrumInfo, bool signedThetaParamRetrieved,
                    bool showSignedTwoTheta, const PointingAlong &beamAxisIndex, const double sampleDist,
                    const bool isScanning, const bool includeData, const bool calcQ, const bool includeDiffConstants,
-                   const bool includeDetectorPosition, Logger &logger) {
+                   const bool includeDetectorPosition, const bool pickOneDetectorID, Logger &logger) {
   PARALLEL_FOR_IF(Mantid::Kernel::threadSafe(*ws))
   for (int row = 0; row < nrows; ++row) {
     TableRow colValues = t->getRow(row);
@@ -216,6 +233,7 @@ void populateTable(ITableWorkspace_sptr &t, const MatrixWorkspace_sptr &ws, cons
       auto &spectrum = ws->getSpectrum(wsIndex);
       Mantid::specnum_t specNo = spectrum.getSpectrumNo();
       const auto &ids = dynamic_cast<const std::set<int> &>(spectrum.getDetectorIDs());
+      int detId = static_cast<int>(*ids.begin());
       std::string detIds = createTruncatedList(ids);
 
       // Geometry
@@ -254,7 +272,12 @@ void populateTable(ITableWorkspace_sptr &t, const MatrixWorkspace_sptr &ws, cons
         theta = sampleDist > dist ? 180.0 : 0.0;
       }
       const std::string isMonitorDisplay = isMonitor ? "yes" : "no";
-      colValues << static_cast<int>(specNo) << detIds;
+      colValues << static_cast<int>(specNo);
+      if (pickOneDetectorID) {
+        colValues << detId;
+      } else {
+        colValues << detIds;
+      }
       if (isScanning) {
         std::set<int> timeIndexSet;
         for (const auto &def : spectrumInfo.spectrumDefinition(wsIndex)) {
@@ -318,7 +341,12 @@ void populateTable(ITableWorkspace_sptr &t, const MatrixWorkspace_sptr &ws, cons
       colValues.row(row);
       colValues << static_cast<double>(wsIndex);
       // spectrumNo=-1, detID=0
-      colValues << -1 << "0";
+      colValues << -1;
+      if (pickOneDetectorID) {
+        colValues << 0;
+      } else {
+        colValues << "0";
+      }
       // Y/E
       if (includeData) {
         colValues << dataY0 << dataE0; // data
