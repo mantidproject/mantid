@@ -61,16 +61,14 @@ public:
 
   void test_boxcarSumSquareSmooth_two() {
     // a series of values which should sum-square-smooth out to 2
-    double const root2 = 1.41421356237309505;
-    std::vector<double> input{1, 3, root2, 1, 3, root2, 1, 3, root2, 1, 3, root2, 1};
+    double const a1 = 3., a2 = std::sqrt(7.), a3 = 2. * std::sqrt(5.);
+    std::vector<double> input{a1, a2, a3, a1, a2, a3, a1, a2, a3, a1, a2, a3, a1};
     std::vector<double> output = boxcarSumSquareSmooth(input, 3);
-    output.erase(output.begin()); // NOTE the first value can't ever equal 2
-    output.erase(output.end());   // NOTE the last value can't ever equal 2
+    // output.erase(output.begin()); // NOTE the first value can't ever equal 2
+    output.erase(output.end()); // NOTE the last value can't ever equal 2
     int i = 0;
     for (double const &x : output) {
-      printf("AT %d\t", i++);
       TS_ASSERT_EQUALS(x, 2.0);
-      printf("\n");
     }
   }
 
