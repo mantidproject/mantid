@@ -41,8 +41,11 @@ private:
   void loadCalFile(const API::Workspace_sptr &inputWS, const std::string &filename,
                    const std::vector<double> &difc_focus);
   std::vector<std::pair<size_t, size_t>> determinePulseIndices(const API::MatrixWorkspace_sptr &wksp,
-                                                               const Kernel::TimeROI &roi);
-  Kernel::TimeROI getStartingTimeROI(const API::MatrixWorkspace_sptr &wksp);
+                                                               const Kernel::TimeROI &filterROI);
+  static std::vector<std::pair<int, std::pair<size_t, size_t>>>
+  determinePulseIndicesTargets(const API::MatrixWorkspace_sptr &wksp, const Kernel::TimeROI &filterROI,
+                               const DataObjects::TimeSplitter &timeSplitter);
+  Kernel::TimeROI getFilterROI(const API::MatrixWorkspace_sptr &wksp);
   DataObjects::TimeSplitter timeSplitterFromSplitterWorkspace(const Types::Core::DateAndTime &);
 
   std::map<detid_t, double> m_calibration; // detid: 1/difc
@@ -62,6 +65,7 @@ const std::string FILTER_TIMESTART("FilterByTimeStart");
 const std::string FILTER_TIMESTOP("FilterByTimeStop");
 const std::string SPLITTER_WS("SplitterWorkspace");
 const std::string SPLITTER_RELATIVE("RelativeTime");
+const std::string PROCESS_BANK_SPLIT_TASK("ProcessBankSplitTask");
 const std::string FILTER_BAD_PULSES("FilterBadPulses");
 const std::string FILTER_BAD_PULSES_LOWER_CUTOFF("BadPulsesLowerCutoff");
 const std::string X_MIN("XMin");

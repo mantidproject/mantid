@@ -1,0 +1,1 @@
+- Added a new implementation for splitting into multiple workspace to :ref:`AlignAndFocusPowderSlim <algm-AlignAndFocusPowderSlim>` that can be tested by setting ``ProcessBankSplitTask=True``.
