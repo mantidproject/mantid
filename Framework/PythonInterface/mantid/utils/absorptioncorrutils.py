@@ -362,10 +362,11 @@ def calculate_absorption_correction(
 
     environment = {}
     find_env = True
-    if container_shape or (can_geometry and can_material):
-        environment["Name"] = "InAir"
+    custom_can = can_geometry and can_material
+    if custom_can or container_shape:
         find_env = False
-        if not (can_geometry and can_material):
+        if not custom_can:
+            environment["Name"] = "InAir"
             environment["Container"] = container_shape
 
     donorWS = create_absorption_input(
