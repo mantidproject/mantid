@@ -45,11 +45,11 @@ template <typename T> struct SumSquareAdder : public Adder<T> {
 
 template <typename T> struct GeometricAdder : public Adder<T> {
   void accumulate(T const &x) override {
-    this->total *= x;
+    this->total *= term(x);
     this->npts++;
   }
   void separate(T const &x) override {
-    this->total /= x;
+    this->total /= term(x);
     this->npts--;
   }
   T term(T const &x) const override { return x; }
