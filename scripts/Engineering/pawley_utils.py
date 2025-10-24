@@ -10,9 +10,8 @@ import numpy as np
 from mantid.fitfunctions import FunctionWrapper, CompositeFunctionWrapper
 from mantid.api import FunctionFactory
 from mantid.geometry import CrystalStructure, ReflectionGenerator, PointGroupFactory, PointGroup
-from mantid.kernel import V3D, logger
+from mantid.kernel import V3D, logger, UnitConversion, DeltaEModeType
 from typing import Optional, Tuple, TYPE_CHECKING, Sequence
-from itertools import chain
 from scipy.optimize import least_squares
 from plugins.algorithms.poldi_utils import simulate_2d_data, get_dspac_array_from_ws
 from abc import ABC, abstractmethod
@@ -21,6 +20,16 @@ from abc import ABC, abstractmethod
 if TYPE_CHECKING:
     from mantid.dataobjects import Workspace2D
     from scipy.optimize import OptimizeResult
+
+
+class InstrumentParams:
+    def __init__(self):
+        self.p: np.ndarray = np.array([1.0, 0.0])
+        self.labels = ("scale", "shift")
+        self.default_isfree: np.ndarray = np.zeros_like(self.p, dtype=bool)
+
+    def get_peak_centre(self, dpk: float) -> float:
+        return self.p[0] * dpk + self.p[1]
 
 
 class PeakProfile(ABC):
@@ -89,6 +98,26 @@ class GaussianProfile(PeakProfile):
         return {"Sigma": np.sqrt((self.p[0] ** 2) + (self.p[1] ** 2) * dpk**2 + (self.p[2] ** 2) * dpk**4)}  # Panel 6 in [1] with zeta=0
 
 
+class BackToBackGauss(PeakProfile):
+    def __init__(self):
+        self.func_name = "BackToBackExponential"
+        self.labels = ("sig0", "sig1", "sig2", "alpha_0", "alpha_1", "beta_0", "beta_1")
+        self.p: np.ndarray = np.array([0, 9.06, 6.52, 0, 0.0968, 0.0216, 0.0123])  # for ENGIN-X North Bank
+        self.default_isfree: np.ndarray = np.zeros_like(self.p, dtype=bool)
+
+    def get_mantid_peak_params(self, dpk: float) -> dict:
+        return {"S": self._calc_sigma(dpk), "A": self._calc_alpha(dpk), "B": self._calc_beta(dpk)}
+
+    def _calc_sigma(self, dpk: float) -> float:
+        return np.sqrt((self.p[0] ** 2) + (self.p[1] * dpk) ** 2 + (self.p[2] ** 2) * dpk**4)
+
+    def _calc_alpha(self, dpk: float) -> float:
+        return self.p[3] + self.p[4] / dpk
+
+    def _calc_beta(self, dpk: float) -> float:
+        return self.p[5] + self.p[6] / (dpk**4)
+
+
 class Phase:
     def __init__(self, crystal_structure: CrystalStructure, hkls: Optional[np.ndarray] = None):
         self.unit_cell = crystal_structure.getUnitCell()
@@ -148,7 +177,7 @@ class Phase:
             self.alatt[self.ipars[ipar]] = par
         self.unit_cell.set(*self.alatt)
 
-    def set_hkls(self, hkls: Sequence[np.ndarray]):
+    def set_hkls(self, hkls: Sequence[np.ndarray], do_sort: bool = True):
         self.hkls = []
         for hkl in hkls:
             hkl_vec = V3D(*hkl)
@@ -156,8 +185,9 @@ class Phase:
                 self.hkls.append(hkl_vec)
             else:
                 logger.warning(f"Reflection {hkl} not allowed by spacegroup")
-        # sort by descending d-spacing
-        self.hkls = [self.hkls[ipk] for ipk in np.argsort(self.calc_dspacings())[::-1]]
+        if do_sort:
+            # sort by descending d-spacing
+            self.hkls = [self.hkls[ipk] for ipk in np.argsort(self.calc_dspacings())[::-1]]
 
     def set_hkls_from_dspac_limits(self, dmin: float, dmax: float):
         xtal = CrystalStructure(" ".join([str(par) for par in self.alatt]), self.spgr.getHMSymbol(), "")
@@ -173,11 +203,23 @@ class Phase:
     def nparams(self) -> int:
         return len(self.ipars)
 
+    def merge_reflections(self, decimal_places=4):
+        _, ihkls = np.unique((self.calc_dspacings() * (10**decimal_places)).astype(int), return_index=True)
+        self.hkls = [self.hkls[ipk] for ipk in np.sort(ihkls)]
+
 
 # make this abstract base class?
 class PawleyPattern1D:
     def __init__(self, ws: Workspace2D, phases: Phase, profile: PeakProfile, bg_func: Optional[FunctionWrapper] = None):
         self.ws = ws
+        self.xunit = self.ws.getAxis(0).getUnit().unitID()
+        self.diff_consts = None
+
+        if self.xunit == "TOF":
+            si = self.ws.spectrumInfo()
+            if not si.hasDetectors(0):
+                raise RuntimeError("Workspace has no detectors - cannot convert between TOF and d-spacing.")
+            self.diff_consts = si.diffractometerConstants(0)  # for conversion to TOF if required
         self.phases = phases
         self.alatt_params = [phase.get_params() for phase in self.phases]
         self.alatt_isfree = [np.ones_like(alatt, dtype=bool) for alatt in self.alatt_params]
@@ -187,6 +229,9 @@ class PawleyPattern1D:
         self.peak_func = FunctionFactory.Instance().createPeakFunction(self.profile.func_name)
         self.intens = [np.ones(len(phase.hkls), dtype=float) for phase in self.phases]
         self.intens_isfree = [np.ones_like(pars, dtype=bool) for pars in self.intens]
+        self.inst = InstrumentParams()
+        self.inst_params = self.inst.p.copy()
+        self.inst_isfree = self.inst.default_isfree.copy()
         self.bg_params = []
         if bg_func is not None:
             self.bg_params = np.array([bg_func.function.getParamValue(ipar) for ipar in range(bg_func.nParams())])
@@ -206,14 +251,19 @@ class PawleyPattern1D:
 
     def update_profile_function(self):
         self.profile.p = self.profile_params
+        self.inst.p = self.inst_params
         istart = 0
         for iphase, phase in enumerate(self.phases):
             self.profile.p = self.profile_params[iphase]
             # set alatt for phase
             phase.set_params(self.alatt_params[iphase])
-            dpks = phase.calc_dspacings()
+            dpks = self.inst.get_peak_centre(phase.calc_dspacings())  # apply scale and shift to calculated d
+            if self.xunit == "TOF":
+                pk_cens = [UnitConversion.run("dSpacing", "TOF", dpk, 0, DeltaEModeType.Elastic, self.diff_consts) for dpk in dpks]
+            else:
+                pk_cens = dpks
             for ipk, dpk in enumerate(dpks):
-                self.comp_func[istart + ipk].function.setCentre(dpk)
+                self.comp_func[istart + ipk].function.setCentre(pk_cens[ipk])
                 for par_name, val in self.profile.get_mantid_peak_params(dpk).items():
                     self.comp_func[istart + ipk][par_name] = val
                 self.comp_func[istart + ipk].function.setIntensity(self.intens[iphase][ipk])
@@ -222,13 +272,15 @@ class PawleyPattern1D:
             [self.comp_func[len(self.comp_func) - 1].function.setParameter(ipar, par) for ipar, par in enumerate(self.bg_params)]
 
     def get_params(self) -> np.ndarray[float]:
-        return np.array(list(chain(*self.alatt_params, *self.intens, *self.profile_params, self.bg_params)))
+        return np.concatenate((*self.alatt_params, *self.intens, *self.profile_params, self.inst_params, self.bg_params))
 
     def get_free_params(self) -> np.ndarray[float]:
         return self.get_params()[self.get_isfree()]
 
     def get_isfree(self) -> np.ndarray[bool]:
-        return np.array(list(chain(*self.alatt_isfree, *self.intens_isfree, *self.profile_isfree, self.bg_isfree)))
+        return np.concatenate((*self.alatt_isfree, *self.intens_isfree, *self.profile_isfree, self.inst_isfree, self.bg_isfree)).astype(
+            bool
+        )
 
     def set_params(self, params: np.ndarray[float]):
         # set alatt
@@ -247,9 +299,12 @@ class PawleyPattern1D:
             npars = self.profile_params[iphase].size
             self.profile_params[iphase] = params[istart : istart + npars]
             istart = istart + npars
+        # set instrument params
+        iend = istart + len(self.inst_params)
+        self.inst_params = params[istart:iend]
         # set global profile and bg_func params
         if len(self.bg_params) > 0:
-            self.bg_params = params[istart:]
+            self.bg_params = params[iend:]
 
     def set_free_params(self, free_params: np.ndarray[float]):
         params = self.get_params()
@@ -306,6 +361,7 @@ class PawleyPattern2D(PawleyPattern1D):
             OutputWorkspace=f"{self.ws.name()}_pattern",
             EnableLogging=False,
         )
+        self.xunit = self.ws_1d.getAxis(0).getUnit()
 
     def set_global_scale(self, global_scale: bool):
         self.global_scale = global_scale
