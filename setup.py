@@ -3,6 +3,7 @@ import versioningit
 
 test
 
+
 def get_version():
     """Return the full version string.
 
