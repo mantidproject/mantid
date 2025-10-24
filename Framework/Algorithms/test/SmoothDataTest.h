@@ -82,8 +82,8 @@ public:
     // setting property
     std::string outWSName("CreateWorkspaceTest_OutputWS");
     TS_ASSERT_THROWS_NOTHING(createWS.setPropertyValue("OutputWorkspace", outWSName));
-    TS_ASSERT_THROWS_NOTHING(createWS.setProperty("BankPixelWidth", 1))
-    TS_ASSERT_THROWS_NOTHING(createWS.execute(););
+    TS_ASSERT_THROWS_NOTHING(createWS.setProperty("BankPixelWidth", 1));
+    TS_ASSERT_THROWS_NOTHING(createWS.execute());
     MatrixWorkspace_sptr input = createWS.getProperty("OutputWorkspace");
 
     // Creating group workspace
@@ -216,8 +216,8 @@ public:
     // verify bank2
     const auto &Ybank2 = output->y(1);  // 100 points, delta-peak at 50
     const auto &Ebank2 = output->e(1);  // 100 points, delta-peak at 50
-    const auto &Ybank2in = input->y(1); // three-point peak on 48, 49, 50, 51, 52
-    const auto &Ebank2in = input->e(1); // three-point peak on 48, 49, 50, 51, 52
+    const auto &Ybank2in = input->y(1); // five-point peak on 48, 49, 50, 51, 52
+    const auto &Ebank2in = input->e(1); // five-point peak on 48, 49, 50, 51, 52
     std::set<unsigned> skip2{peak2m, peakm, peak, peakp, peak2p};
     for (unsigned i = 0; i < nbins; i++) {
       // except at the peak points, all equal

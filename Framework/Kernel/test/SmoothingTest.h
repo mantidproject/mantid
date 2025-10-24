@@ -62,7 +62,7 @@ public:
     TS_ASSERT_EQUALS(Y, expected);
   }
 
-  // BOX CAR ERROR PROPAHATION
+  // BOX CAR ERROR PROPAGATION
 
   void test_boxcarErrorSmooth_flat() {
     // NOTE this uses the error propagation equation, which tends to decrease the error values
@@ -80,7 +80,6 @@ public:
     double const a1 = 3., a2 = std::sqrt(7.), a3 = 2. * std::sqrt(5.);
     std::vector<double> input{a1, a2, a3, a1, a2, a3, a1, a2, a3, a1, a2, a3, a1};
     std::vector<double> output = boxcarErrorSmooth(input, 3);
-    // output.erase(output.begin()); // NOTE the first value can't ever equal 2
     output.pop_back(); // NOTE the last value can't ever equal 2
     for (double const &x : output) {
       TS_ASSERT_EQUALS(x, 2.0);

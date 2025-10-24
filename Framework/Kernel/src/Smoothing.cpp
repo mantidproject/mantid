@@ -75,6 +75,9 @@ std::vector<T> boxcarSmoothWithFunction(std::vector<T> const &input, unsigned co
   if (numPoints < 3) {
     throw std::invalid_argument("Boxcar Smoothing requires at least 3 points in the moving average");
   }
+  if (input.size() < numPoints) {
+    throw std::invalid_argument("Boxcar Smoothing requires the vector size to be greater than the smoothing window");
+  }
   // copy the input
   std::size_t const vecSize = input.size();
   std::vector<T> output(vecSize);
