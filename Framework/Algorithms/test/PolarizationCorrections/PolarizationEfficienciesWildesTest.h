@@ -17,6 +17,8 @@
 #include "MantidAlgorithms/PolarizationCorrections/PolarizationEfficienciesWildes.h"
 #include "MantidDataObjects/TableWorkspace.h"
 
+#include "PolarizationCorrectionsTestUtils.h"
+
 using Mantid::Algorithms::CreateSampleWorkspace;
 using Mantid::Algorithms::GroupWorkspaces;
 using Mantid::Algorithms::PolarizationEfficienciesWildes;
@@ -25,6 +27,7 @@ using Mantid::API::MatrixWorkspace_sptr;
 using Mantid::API::WorkspaceFactory;
 using Mantid::API::WorkspaceGroup_sptr;
 using Mantid::DataObjects::TableWorkspace;
+using namespace PolCorrTestUtils;
 
 namespace PropErrors {
 auto constexpr PREFIX{"Some invalid Properties found: \n "};
@@ -66,8 +69,12 @@ auto constexpr TAMO_WS{"OutputTwoAMinusOne"};
 } // namespace OutputPropNames
 
 namespace {
-// The default bin width used by the CreateSampleWorkspace algorithm
-auto constexpr DEFAULT_BIN_WIDTH = 200;
+static std::string const EFF_FUNC_STR = fillFuncStr({0.9});
+// as of C++20 we can have constexpr std::string
+std::string constexpr NON_MAG_WS{"nonMagWs"};
+std::string constexpr MAG_WS{"magWs"};
+std::string constexpr EFF_WS{"polEff"};
+std::string constexpr HE_WS{"analyserEff"};
 } // unnamed namespace
 
 class PolarizationEfficienciesWildesTest : public CxxTest::TestSuite {
@@ -77,21 +84,22 @@ public:
   static PolarizationEfficienciesWildesTest *createSuite() { return new PolarizationEfficienciesWildesTest(); }
   static void destroySuite(PolarizationEfficienciesWildesTest *suite) { delete suite; }
 
+  void setUp() override { m_parameters = TestWorkspaceParameters(); }
   void tearDown() override { Mantid::API::AnalysisDataService::Instance().clear(); }
 
   /// Validation tests - WorkspaceGroup size
 
   void test_invalid_non_mag_group_size_throws_error() {
-    const auto group = createNonMagWSGroup("nonMagWs");
-    group->removeItem(0);
+    const auto group = createPolarizedTestGroup(NON_MAG_WS, m_parameters, NON_MAG_Y_VALS);
+    AnalysisDataService::Instance().remove(NON_MAG_WS + "_11"); // Remove first member of group
     const auto alg = createEfficiencyAlg(group);
     assertValidationError(alg, InputPropNames::NON_MAG_WS, PropErrors::WS_GRP_SIZE_ERROR);
   }
 
   void test_invalid_mag_group_size_throws_error() {
-    const auto nonMagGrp = createNonMagWSGroup("nonMagWs");
-    const auto magGrp = createMagWSGroup("magWs");
-    magGrp->removeItem(0);
+    const auto nonMagGrp = createPolarizedTestGroup(NON_MAG_WS, m_parameters, NON_MAG_Y_VALS);
+    const auto magGrp = createPolarizedTestGroup(MAG_WS, m_parameters, MAG_Y_VALS);
+    AnalysisDataService::Instance().remove(MAG_WS + "_11"); // Remove first member of group
     const auto alg = createEfficiencyAlg(nonMagGrp, magGrp);
     assertValidationError(alg, InputPropNames::MAG_WS, PropErrors::WS_GRP_SIZE_ERROR);
   }
@@ -99,23 +107,21 @@ public:
   /// Validation tests - WorkspaceGroup child workspace types
 
   void test_non_mag_group_child_ws_not_matrix_ws_throws_error() {
-    const auto group = createNonMagWSGroup("nonMagWs");
-    const auto tableWs = std::make_shared<TableWorkspace>();
-
-    group->removeItem(0);
-    group->addWorkspace(tableWs);
+    const auto group = createPolarizedTestGroup(NON_MAG_WS, m_parameters, NON_MAG_Y_VALS);
+    AnalysisDataService::Instance().add("table", std::make_shared<TableWorkspace>());
+    AnalysisDataService::Instance().remove(NON_MAG_WS + "_11"); // Remove first member of group
+    AnalysisDataService::Instance().addToGroup(NON_MAG_WS, "table");
 
     const auto alg = createEfficiencyAlg(group);
     assertValidationError(alg, InputPropNames::NON_MAG_WS, PropErrors::WS_GRP_CHILD_TYPE_ERROR);
   }
 
   void test_mag_group_child_ws_not_matrix_ws_throws_error() {
-    const auto nonMagGrp = createNonMagWSGroup("nonMagWs");
-    const auto magGrp = createMagWSGroup("magWs");
-    const auto tableWs = std::make_shared<TableWorkspace>();
-
-    magGrp->removeItem(0);
-    magGrp->addWorkspace(tableWs);
+    const auto nonMagGrp = createPolarizedTestGroup(NON_MAG_WS, m_parameters, NON_MAG_Y_VALS);
+    const auto magGrp = createPolarizedTestGroup(MAG_WS, m_parameters, MAG_Y_VALS);
+    AnalysisDataService::Instance().add("table", std::make_shared<TableWorkspace>());
+    AnalysisDataService::Instance().remove(MAG_WS + "_11"); // Remove first member of group
+    AnalysisDataService::Instance().addToGroup(MAG_WS, "table");
 
     const auto alg = createEfficiencyAlg(nonMagGrp, magGrp);
     assertValidationError(alg, InputPropNames::MAG_WS, PropErrors::WS_GRP_CHILD_TYPE_ERROR);
@@ -124,30 +130,33 @@ public:
   /// Validation tests - workspace units
 
   void test_non_mag_group_child_ws_not_wavelength_throws_error() {
-    const auto group = createNonMagWSGroup("nonMagWs", false);
+    m_parameters.xUnit = "TOF";
+    const auto group = createPolarizedTestGroup(NON_MAG_WS, m_parameters, NON_MAG_Y_VALS);
     const auto alg = createEfficiencyAlg(group);
     assertValidationError(alg, InputPropNames::NON_MAG_WS, PropErrors::WS_UNIT_ERROR);
   }
 
   void test_mag_group_child_ws_not_wavelength_throws_error() {
-    const auto nonMagGrp = createNonMagWSGroup("nonMagWs");
-    const auto magGrp = createMagWSGroup("magWs", false);
+    const auto nonMagGrp = createPolarizedTestGroup(NON_MAG_WS, m_parameters, NON_MAG_Y_VALS);
+    m_parameters.xUnit = "TOF";
+    const auto magGrp = createPolarizedTestGroup(MAG_WS, m_parameters, MAG_Y_VALS);
+
     const auto alg = createEfficiencyAlg(nonMagGrp, magGrp);
     assertValidationError(alg, InputPropNames::MAG_WS, PropErrors::WS_UNIT_ERROR);
   }
 
   void test_input_polarizer_efficiency_ws_not_wavelength_throws_error() {
-    const auto nonMagGrp = createNonMagWSGroup("nonMagWs");
-    const auto polarizerEffWs = createWS("polEff", 0.9, false);
-    auto alg = createEfficiencyAlg(nonMagGrp);
+    const auto group = createPolarizedTestGroup(NON_MAG_WS, m_parameters, NON_MAG_Y_VALS);
+    const auto polarizerEffWs = generateFunctionDefinedWorkspace(TestWorkspaceParameters(EFF_WS, EFF_FUNC_STR, "TOF"));
+    auto alg = createEfficiencyAlg(group);
     alg->setProperty(InputPropNames::P_EFF_WS, polarizerEffWs);
     assertValidationError(alg, InputPropNames::P_EFF_WS, PropErrors::WS_UNIT_ERROR);
   }
 
   void test_input_analyser_efficiency_ws_not_wavelength_throws_error() {
-    const auto nonMagGrp = createNonMagWSGroup("nonMagWs");
-    const auto analyserEffWs = createWS("analyserEff", 0.9, false);
-    auto alg = createEfficiencyAlg(nonMagGrp);
+    const auto group = createPolarizedTestGroup(NON_MAG_WS, m_parameters, NON_MAG_Y_VALS);
+    const auto analyserEffWs = generateFunctionDefinedWorkspace(TestWorkspaceParameters(HE_WS, EFF_FUNC_STR, "TOF"));
+    auto alg = createEfficiencyAlg(group);
     alg->setProperty(InputPropNames::A_EFF_WS, analyserEffWs);
     assertValidationError(alg, InputPropNames::A_EFF_WS, PropErrors::WS_UNIT_ERROR);
   }
@@ -155,29 +164,34 @@ public:
   /// Validation tests - workspace num spectra
 
   void test_non_mag_group_child_ws_not_single_spectrum_throws_error() {
-    const auto group = createNonMagWSGroup("nonMagWs", true, false);
+    m_parameters.numBanks = 2;
+    const auto group = createPolarizedTestGroup(NON_MAG_WS, m_parameters, NON_MAG_Y_VALS);
     const auto alg = createEfficiencyAlg(group);
     assertValidationError(alg, InputPropNames::NON_MAG_WS, PropErrors::WS_SPECTRUM_ERROR);
   }
 
   void test_mag_group_child_ws_not_single_spectrum_throws_error() {
-    const auto nonMagGrp = createNonMagWSGroup("nonMagWs");
-    const auto magGrp = createMagWSGroup("magWs", true, false);
+    const auto nonMagGrp = createPolarizedTestGroup(NON_MAG_WS, m_parameters, NON_MAG_Y_VALS);
+    m_parameters.numBanks = 2;
+    const auto magGrp = createPolarizedTestGroup(MAG_WS, m_parameters, MAG_Y_VALS);
     const auto alg = createEfficiencyAlg(nonMagGrp, magGrp);
     assertValidationError(alg, InputPropNames::MAG_WS, PropErrors::WS_SPECTRUM_ERROR);
   }
 
   void test_input_polarizer_efficiency_ws_not_single_spectrum_throws_error() {
-    const auto nonMagGrp = createNonMagWSGroup("nonMagWs");
-    const auto polarizerEffWs = createWS("polEff", 0.9, true, false);
+    const auto nonMagGrp = createPolarizedTestGroup(NON_MAG_WS, m_parameters, NON_MAG_Y_VALS);
+    const auto polarizerEffWs =
+        generateFunctionDefinedWorkspace(TestWorkspaceParameters(EFF_WS, EFF_FUNC_STR, "Wavelength", 2));
     auto alg = createEfficiencyAlg(nonMagGrp);
     alg->setProperty(InputPropNames::P_EFF_WS, polarizerEffWs);
     assertValidationError(alg, InputPropNames::P_EFF_WS, PropErrors::WS_SPECTRUM_ERROR);
   }
 
   void test_input_analyser_efficiency_ws_not_single_spectrum_throws_error() {
-    const auto nonMagGrp = createNonMagWSGroup("nonMagWs");
-    const auto analyserEffWs = createWS("analyserEff", 0.9, true, false);
+    const auto nonMagGrp = createPolarizedTestGroup(NON_MAG_WS, m_parameters, NON_MAG_Y_VALS);
+    const auto analyserEffWs =
+        generateFunctionDefinedWorkspace(TestWorkspaceParameters(HE_WS, EFF_FUNC_STR, "Wavelength", 2));
+
     auto alg = createEfficiencyAlg(nonMagGrp);
     alg->setProperty(InputPropNames::A_EFF_WS, analyserEffWs);
     assertValidationError(alg, InputPropNames::A_EFF_WS, PropErrors::WS_SPECTRUM_ERROR);
@@ -186,36 +200,50 @@ public:
   /// Validation tests - workspace bin boundaries
 
   void test_non_mag_group_child_ws_bin_mismatch_throws_error() {
-    const auto group = createNonMagWSGroup("nonMagWs", true, true, true);
+    const auto group = createPolarizedTestGroup(NON_MAG_WS, m_parameters, NON_MAG_Y_VALS);
+    const auto mismatchedWs =
+        generateFunctionDefinedWorkspace(TestWorkspaceParameters(INPUT_NAME, EFF_FUNC_STR, "Wavelength", 1, 1, 8, 0.1));
+    AnalysisDataService::Instance().addOrReplace(NON_MAG_WS + "_11", mismatchedWs);
+
     const auto alg = createEfficiencyAlg(group);
     assertValidationError(alg, InputPropNames::NON_MAG_WS, PropErrors::WS_BINS_ERROR);
   }
 
   void test_mag_group_child_ws_bin_mismatch_throws_error() {
-    const auto nonMagGrp = createNonMagWSGroup("nonMagWs");
-    const auto magGrp = createMagWSGroup("magWs", true, true, true);
+    const auto nonMagGrp = createPolarizedTestGroup(NON_MAG_WS, m_parameters, NON_MAG_Y_VALS);
+    const auto magGrp = createPolarizedTestGroup(MAG_WS, m_parameters, MAG_Y_VALS);
+    const auto mismatchedWs =
+        generateFunctionDefinedWorkspace(TestWorkspaceParameters(INPUT_NAME, EFF_FUNC_STR, "Wavelength", 1, 1, 8, 0.1));
+    AnalysisDataService::Instance().addOrReplace(MAG_WS + "_11", mismatchedWs);
+
     const auto alg = createEfficiencyAlg(nonMagGrp, magGrp);
     assertValidationError(alg, InputPropNames::MAG_WS, PropErrors::WS_BINS_ERROR);
   }
 
   void test_non_mag_and_mag_group_ws_bin_mismatch_throws_error() {
-    const auto nonMagGrp = createNonMagWSGroup("nonMagWs");
-    const auto magGrp = createMagWSGroup("magWs", true, true, false, DEFAULT_BIN_WIDTH + 100);
+    const auto nonMagGrp = createPolarizedTestGroup(NON_MAG_WS, m_parameters, NON_MAG_Y_VALS);
+    m_parameters.binWidth = 0.1;
+    const auto magGrp = createPolarizedTestGroup(MAG_WS, m_parameters, MAG_Y_VALS);
+
     const auto alg = createEfficiencyAlg(nonMagGrp, magGrp);
     assertValidationError(alg, InputPropNames::MAG_WS, PropErrors::WS_BINS_ERROR);
   }
 
   void test_input_polarizer_efficiency_ws_bin_mismatch_throws_error() {
-    const auto nonMagGrp = createNonMagWSGroup("nonMagWs");
-    const auto polarizerEffWs = createWS("polEff", 0.9, true, true, 300);
+    const auto nonMagGrp = createPolarizedTestGroup(NON_MAG_WS, m_parameters, NON_MAG_Y_VALS);
+    const auto polarizerEffWs =
+        generateFunctionDefinedWorkspace(TestWorkspaceParameters(EFF_WS, EFF_FUNC_STR, "Wavelength", 1, 1, 8, 0.1));
+
     auto alg = createEfficiencyAlg(nonMagGrp);
     alg->setProperty(InputPropNames::P_EFF_WS, polarizerEffWs);
     assertValidationError(alg, InputPropNames::P_EFF_WS, PropErrors::WS_BINS_ERROR);
   }
 
   void test_input_analyser_efficiency_ws_bin_mismatch_throws_error() {
-    const auto nonMagGrp = createNonMagWSGroup("nonMagWs");
-    const auto analyserEffWs = createWS("analyserEff", 0.9, true, true, 300);
+    const auto nonMagGrp = createPolarizedTestGroup(NON_MAG_WS, m_parameters, NON_MAG_Y_VALS);
+    const auto analyserEffWs =
+        generateFunctionDefinedWorkspace(TestWorkspaceParameters(HE_WS, EFF_FUNC_STR, "Wavelength", 1, 1, 8, 0.1));
+
     auto alg = createEfficiencyAlg(nonMagGrp);
     alg->setProperty(InputPropNames::A_EFF_WS, analyserEffWs);
     assertValidationError(alg, InputPropNames::A_EFF_WS, PropErrors::WS_BINS_ERROR);
@@ -244,15 +272,21 @@ public:
   }
 
   void test_input_non_mag_not_matrix_ws_group_throws_error() {
-    const auto nonMagGrp = createTableWorkspaceGrp("nonMagWs");
-    const auto magGrp = createMagWSGroup("magWs");
-    const auto alg = createEfficiencyAlg(nonMagGrp, magGrp);
+    const auto group = std::make_shared<WorkspaceGroup>();
+    for (int i = 0; i < 4; i++) {
+      group->addWorkspace(std::make_shared<TableWorkspace>());
+    }
+    const auto magGrp = createPolarizedTestGroup(MAG_WS, m_parameters, MAG_Y_VALS);
+    const auto alg = createEfficiencyAlg(group, magGrp);
     assertValidationError(alg, InputPropNames::NON_MAG_WS, PropErrors::WS_GRP_CHILD_TYPE_ERROR);
   }
 
   void test_input_mag_not_matrix_ws_group_throws_error() {
-    const auto nonMagGrp = createNonMagWSGroup("nonMagWs");
-    const auto magGrp = createTableWorkspaceGrp("magWs");
+    const auto magGrp = std::make_shared<WorkspaceGroup>();
+    for (int i = 0; i < 4; i++) {
+      magGrp->addWorkspace(std::make_shared<TableWorkspace>());
+    }
+    const auto nonMagGrp = createPolarizedTestGroup(NON_MAG_WS, m_parameters, NON_MAG_Y_VALS);
     const auto alg = createEfficiencyAlg(nonMagGrp, magGrp);
     assertValidationError(alg, InputPropNames::MAG_WS, PropErrors::WS_GRP_CHILD_TYPE_ERROR);
   }
@@ -260,32 +294,34 @@ public:
   /// Validation tests - valid property combinations
 
   void test_providing_both_mag_and_input_polarizer_efficiency_ws_throws_error() {
-    const auto nonMagGrp = createNonMagWSGroup("nonMagWs");
-    const auto magGrp = createMagWSGroup("magWs");
-    const auto polarizerEffWs = createWS("polEff", 0.9);
+    const auto nonMagGrp = createPolarizedTestGroup(NON_MAG_WS, m_parameters, NON_MAG_Y_VALS);
+    const auto magGrp = createPolarizedTestGroup(MAG_WS, m_parameters, MAG_Y_VALS);
+    const auto polarizerEffWs =
+        generateFunctionDefinedWorkspace(TestWorkspaceParameters(EFF_WS, EFF_FUNC_STR, "Wavelength", 1, 1, 8, 0.1));
     const auto alg = createEfficiencyAlg(nonMagGrp, magGrp);
     alg->setProperty(InputPropNames::P_EFF_WS, polarizerEffWs);
     assertValidationError(alg, InputPropNames::P_EFF_WS, PropErrors::INPUT_EFF_WS_ERROR);
   }
 
   void test_providing_both_mag_and_input_analyser_efficiency_ws_throws_error() {
-    const auto nonMagGrp = createNonMagWSGroup("nonMagWs");
-    const auto magGrp = createMagWSGroup("magWs");
-    const auto analyserEffWs = createWS("analyserEff", 0.9);
+    const auto nonMagGrp = createPolarizedTestGroup(NON_MAG_WS, m_parameters, NON_MAG_Y_VALS);
+    const auto magGrp = createPolarizedTestGroup(MAG_WS, m_parameters, MAG_Y_VALS);
+    const auto analyserEffWs =
+        generateFunctionDefinedWorkspace(TestWorkspaceParameters(HE_WS, EFF_FUNC_STR, "Wavelength", 1, 1, 8, 0.1));
     const auto alg = createEfficiencyAlg(nonMagGrp, magGrp);
     alg->setProperty(InputPropNames::A_EFF_WS, analyserEffWs);
     assertValidationError(alg, InputPropNames::A_EFF_WS, PropErrors::INPUT_EFF_WS_ERROR);
   }
 
   void test_requesting_p_eff_output_without_relevant_inputs_throws_error() {
-    const auto nonMagGrp = createNonMagWSGroup("nonMagWs");
+    const auto nonMagGrp = createPolarizedTestGroup(NON_MAG_WS, m_parameters, NON_MAG_Y_VALS);
     const auto alg = createEfficiencyAlg(nonMagGrp);
     alg->setPropertyValue(OutputPropNames::P_EFF_WS, "pEff");
     assertValidationError(alg, OutputPropNames::P_EFF_WS, PropErrors::OUTPUT_P_EFF_ERROR);
   }
 
   void test_requesting_a_eff_output_without_relevant_inputs_throws_error() {
-    const auto nonMagGrp = createNonMagWSGroup("nonMagWs");
+    const auto nonMagGrp = createPolarizedTestGroup(NON_MAG_WS, m_parameters, NON_MAG_Y_VALS);
     const auto alg = createEfficiencyAlg(nonMagGrp);
     alg->setPropertyValue(OutputPropNames::A_EFF_WS, "aEff");
     assertValidationError(alg, OutputPropNames::A_EFF_WS, PropErrors::OUTPUT_A_EFF_ERROR);
@@ -304,7 +340,9 @@ public:
     const std::pair expectedAEfficiency = {0.9855226, 1.0315912829};
     const std::pair expectedTAMO = {0.9710452, 2.0631825648};
 
-    const auto polarizerEffWs = createWS("polEff", expectedPEfficiency.first);
+    const auto polarizerEffWs = generateFunctionDefinedWorkspace(TestWorkspaceParameters(
+        EFF_WS, "name=UserFunction, Formula=x*0 +" + std::to_string(expectedPEfficiency.first)));
+
     polarizerEffWs->setDistribution(true);
 
     runCalculationTest(polarizerEffWs, nullptr, expectedPEfficiency, expectedAEfficiency, expectedTPMO, expectedTAMO);
@@ -316,7 +354,8 @@ public:
     const std::pair expectedAEfficiency = {0.975614, 0.9877317447};
     const std::pair expectedTAMO = {0.9512279, 1.9754634895};
 
-    const auto analyserEffWs = createWS("analyserEff", expectedAEfficiency.first);
+    const auto analyserEffWs =
+        generateFunctionDefinedWorkspace(TestWorkspaceParameters(HE_WS, fillFuncStr({expectedAEfficiency.first})));
     analyserEffWs->setDistribution(true);
 
     runCalculationTest(nullptr, analyserEffWs, expectedPEfficiency, expectedAEfficiency, expectedTPMO, expectedTAMO);
@@ -328,10 +367,10 @@ public:
     const std::pair expectedAEfficiency = {0.99, 0.9949874379};
     const std::pair expectedTAMO = {0.98, 1.9899748748};
 
-    const auto polarizerEffWs = createWS("polEff", expectedPEfficiency.first);
-    polarizerEffWs->setDistribution(true);
-
-    const auto analyserEffWs = createWS("analyserEff", expectedAEfficiency.first);
+    const auto polarizerEffWs =
+        generateFunctionDefinedWorkspace(TestWorkspaceParameters(EFF_WS, fillFuncStr({expectedPEfficiency.first})));
+    const auto analyserEffWs =
+        generateFunctionDefinedWorkspace(TestWorkspaceParameters(HE_WS, fillFuncStr({expectedAEfficiency.first})));
     analyserEffWs->setDistribution(true);
 
     runCalculationTest(polarizerEffWs, analyserEffWs, expectedPEfficiency, expectedAEfficiency, expectedTPMO,
@@ -426,6 +465,7 @@ public:
   }
 
 private:
+  TestWorkspaceParameters m_parameters;
   const std::vector<double> NON_MAG_Y_VALS = {12.0, 1.0, 2.0, 10.0};
   const std::vector<double> MAG_Y_VALS = {6.0, 0.2, 0.3, 1.0};
   const std::pair<double, double> EXPECTED_F_P{0.86363636, 0.19748435};
@@ -433,78 +473,6 @@ private:
   const std::pair<double, double> EXPECTED_PHI = {0.93220339, 0.4761454221};
   const std::pair<double, double> EXPECTED_ALPHA = {0.9, 0.4726520913};
   const std::pair<double, double> EXPECTED_RHO = {0.72727273, 0.3949686990};
-
-  WorkspaceGroup_sptr createNonMagWSGroup(const std::string &outName, const bool isWavelength = true,
-                                          const bool isSingleSpectrum = true, const bool includeBinMismatch = false,
-                                          const double binWidth = DEFAULT_BIN_WIDTH) {
-    return createWSGroup(outName, NON_MAG_Y_VALS, isWavelength, isSingleSpectrum, includeBinMismatch, binWidth);
-  }
-
-  WorkspaceGroup_sptr createMagWSGroup(const std::string &outName, const bool isWavelength = true,
-                                       const bool isSingleSpectrum = true, const bool includeBinMismatch = false,
-                                       const double binWidth = DEFAULT_BIN_WIDTH) {
-    return createWSGroup(outName, MAG_Y_VALS, isWavelength, isSingleSpectrum, includeBinMismatch, binWidth);
-  }
-
-  WorkspaceGroup_sptr createWSGroup(const std::string &outName, const std::vector<double> &yValues,
-                                    const bool isWavelength = true, const bool isSingleSpectrum = true,
-                                    const bool includeBinMismatch = false, const double binWidth = DEFAULT_BIN_WIDTH) {
-
-    const std::vector<std::string> &wsNames{outName + "_00", outName + "_01", outName + "_10", outName + "_11"};
-    const size_t lastWsIdx = wsNames.size() - 1;
-
-    for (size_t i = 0; i < lastWsIdx; ++i) {
-      const auto ws = createWS(wsNames[i], yValues[i], isWavelength, isSingleSpectrum, binWidth);
-      AnalysisDataService::Instance().addOrReplace(wsNames[i], ws);
-    }
-
-    const auto finalWs = createWS(wsNames[lastWsIdx], yValues[lastWsIdx], isWavelength, isSingleSpectrum,
-                                  includeBinMismatch ? binWidth + 100 : binWidth);
-    AnalysisDataService::Instance().addOrReplace(wsNames[lastWsIdx], finalWs);
-
-    GroupWorkspaces groupAlg;
-    groupAlg.initialize();
-    groupAlg.setChild(true);
-    groupAlg.setProperty("InputWorkspaces", wsNames);
-    groupAlg.setPropertyValue("OutputWorkspace", outName);
-    groupAlg.execute();
-
-    return groupAlg.getProperty("OutputWorkspace");
-  }
-
-  MatrixWorkspace_sptr createWS(const std::string &outName, const double yValue = 1, const bool isWavelength = true,
-                                const bool isSingleSpectrum = true, const double binWidth = DEFAULT_BIN_WIDTH) {
-    CreateSampleWorkspace alg;
-    alg.initialize();
-    alg.setChild(true);
-    alg.setPropertyValue("XUnit", isWavelength ? "wavelength" : "TOF");
-    alg.setProperty("NumBanks", isSingleSpectrum ? 1 : 2);
-    alg.setProperty("BankPixelWidth", 1);
-    alg.setProperty("BinWidth", binWidth);
-    alg.setPropertyValue("Function", "User Defined");
-    alg.setPropertyValue("UserDefinedFunction", "name=UserFunction, Formula=x*0+" + std::to_string(yValue));
-    alg.setPropertyValue("OutputWorkspace", outName);
-    alg.execute();
-
-    return alg.getProperty("OutputWorkspace");
-  }
-
-  WorkspaceGroup_sptr createTableWorkspaceGrp(const std::string &outName) {
-    const std::vector<std::string> &wsNames{outName + "_00", outName + "_01", outName + "_10", outName + "_11"};
-    for (const auto &wsName : wsNames) {
-      const auto ws = WorkspaceFactory::Instance().createTable();
-      AnalysisDataService::Instance().addOrReplace(wsName, ws);
-    }
-
-    GroupWorkspaces groupAlg;
-    groupAlg.initialize();
-    groupAlg.setChild(true);
-    groupAlg.setProperty("InputWorkspaces", wsNames);
-    groupAlg.setPropertyValue("OutputWorkspace", outName);
-    groupAlg.execute();
-
-    return groupAlg.getProperty("OutputWorkspace");
-  }
 
   std::unique_ptr<PolarizationEfficienciesWildes> createEfficiencyAlg(const WorkspaceGroup_sptr &nonMagWSGroup,
                                                                       const WorkspaceGroup_sptr &magWsGroup = nullptr) {
@@ -560,8 +528,9 @@ private:
   }
 
   void runTestOutputWorkspacesSetCorrectly(const bool includeP, const bool includeA, const bool includeDiagnostics) {
-    const auto nonMagGrp = createNonMagWSGroup("nonMagWs");
-    const auto magGrp = createMagWSGroup("magWs");
+    using namespace OutputPropNames;
+    const auto nonMagGrp = createPolarizedTestGroup(NON_MAG_WS, m_parameters, NON_MAG_Y_VALS);
+    const auto magGrp = createPolarizedTestGroup(MAG_WS, m_parameters, MAG_Y_VALS);
     const auto alg = createEfficiencyAlg(nonMagGrp, magGrp);
     alg->setProperty(InputPropNames::INCLUDE_DIAGNOSTICS, includeDiagnostics);
     if (includeP) {
@@ -572,30 +541,36 @@ private:
       alg->setPropertyValue(OutputPropNames::A_EFF_WS, "aEff");
     }
     alg->execute();
-
-    checkOutputWorkspaceIsSet(alg, OutputPropNames::F_P_EFF_WS, true);
-    checkOutputWorkspaceIsSet(alg, OutputPropNames::F_A_EFF_WS, true);
-    checkOutputWorkspaceIsSet(alg, OutputPropNames::P_EFF_WS, includeP);
-    checkOutputWorkspaceIsSet(alg, OutputPropNames::A_EFF_WS, includeA);
-    checkOutputWorkspaceIsSet(alg, OutputPropNames::PHI_WS, includeDiagnostics);
-    checkOutputWorkspaceIsSet(alg, OutputPropNames::ALPHA_WS, includeDiagnostics);
-    checkOutputWorkspaceIsSet(alg, OutputPropNames::RHO_WS, includeDiagnostics);
-    checkOutputWorkspaceIsSet(alg, OutputPropNames::TPMO_WS, includeDiagnostics && includeP);
-    checkOutputWorkspaceIsSet(alg, OutputPropNames::TAMO_WS, includeDiagnostics && includeA);
+    const std::vector<std::string> outputProps = {F_P_EFF_WS, F_A_EFF_WS, P_EFF_WS, A_EFF_WS, PHI_WS,
+                                                  ALPHA_WS,   RHO_WS,     TPMO_WS,  TAMO_WS};
+    const std::vector isSetValues = {true,
+                                     true,
+                                     includeP,
+                                     includeA,
+                                     includeDiagnostics,
+                                     includeDiagnostics,
+                                     includeDiagnostics,
+                                     includeDiagnostics && includeP,
+                                     includeDiagnostics && includeA};
+    for (size_t index = 0; index < outputProps.size(); ++index) {
+      checkOutputWorkspaceIsSet(alg, outputProps.at(index), isSetValues.at(index));
+    }
   }
 
   void runTestOutputWorkspacesSetCorrectlyWithInputEfficiencies(const bool includeInputP, const bool includeInputA,
                                                                 const bool includeOutputP, const bool includeOutputA) {
-    const auto nonMagGrp = createNonMagWSGroup("nonMagWs");
+    const auto nonMagGrp = createPolarizedTestGroup(NON_MAG_WS, m_parameters, NON_MAG_Y_VALS);
     const auto alg = createEfficiencyAlg(nonMagGrp);
 
     if (includeInputP) {
-      const auto polEffWs = createWS("pEff");
+      const auto polEffWs =
+          generateFunctionDefinedWorkspace(TestWorkspaceParameters(EFF_WS, "name=UserFunction, Formula=x*0 + 1"));
       alg->setProperty(InputPropNames::P_EFF_WS, polEffWs);
     }
 
     if (includeInputA) {
-      const auto analyserEffWs = createWS("aEff");
+      const auto analyserEffWs =
+          generateFunctionDefinedWorkspace(TestWorkspaceParameters(HE_WS, "name=UserFunction, Formula=x*0 + 1"));
       alg->setProperty(InputPropNames::A_EFF_WS, analyserEffWs);
     }
 
@@ -616,44 +591,41 @@ private:
                           const std::pair<double, double> &expectedP, const std::pair<double, double> &expectedA,
                           const std::pair<double, double> &expectedTPMO,
                           const std::pair<double, double> &expectedTAMO) {
-    const bool hasPEffWs = polarizerEffWs != nullptr;
-    const bool hasanalyserEffWs = analyserEffWs != nullptr;
-
-    const auto nonMagGrp = createNonMagWSGroup("nonMagWs");
-    const auto magGrp = (hasPEffWs || hasanalyserEffWs) ? nullptr : createMagWSGroup("magWs");
+    using namespace OutputPropNames;
+    const auto nonMagGrp = createPolarizedTestGroup(NON_MAG_WS, m_parameters, NON_MAG_Y_VALS);
+    const auto magGrp =
+        (polarizerEffWs || analyserEffWs) ? nullptr : createPolarizedTestGroup(MAG_WS, m_parameters, MAG_Y_VALS);
     const auto alg = createEfficiencyAlg(nonMagGrp, magGrp);
 
-    if (hasPEffWs) {
+    if (polarizerEffWs) {
       alg->setProperty(InputPropNames::P_EFF_WS, polarizerEffWs);
     }
-    if (hasanalyserEffWs) {
+    if (analyserEffWs) {
       alg->setProperty(InputPropNames::A_EFF_WS, analyserEffWs);
     }
 
     alg->setProperty(InputPropNames::INCLUDE_DIAGNOSTICS, true);
-    alg->setPropertyValue(OutputPropNames::P_EFF_WS, "pEff");
-    alg->setPropertyValue(OutputPropNames::A_EFF_WS, "aEff");
+    alg->setPropertyValue(P_EFF_WS, "pEff");
+    alg->setPropertyValue(A_EFF_WS, "aEff");
     alg->execute();
 
     const size_t expectedNumHistograms =
-        std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(nonMagGrp->getItem(0))->getNumberHistograms();
+        std::dynamic_pointer_cast<MatrixWorkspace>(nonMagGrp->getItem(0))->getNumberHistograms();
 
-    checkOutputWorkspace(alg, OutputPropNames::F_P_EFF_WS, expectedNumHistograms, EXPECTED_F_P);
-    checkOutputWorkspace(alg, OutputPropNames::F_A_EFF_WS, expectedNumHistograms, EXPECTED_F_A);
-    checkOutputWorkspace(alg, OutputPropNames::P_EFF_WS, expectedNumHistograms, expectedP);
-    checkOutputWorkspace(alg, OutputPropNames::A_EFF_WS, expectedNumHistograms, expectedA);
-    checkOutputWorkspace(alg, OutputPropNames::PHI_WS, expectedNumHistograms, EXPECTED_PHI);
-    checkOutputWorkspace(alg, OutputPropNames::ALPHA_WS, expectedNumHistograms, EXPECTED_ALPHA);
-    checkOutputWorkspace(alg, OutputPropNames::RHO_WS, expectedNumHistograms, EXPECTED_RHO);
-    checkOutputWorkspace(alg, OutputPropNames::TPMO_WS, expectedNumHistograms, expectedTPMO);
-    checkOutputWorkspace(alg, OutputPropNames::TAMO_WS, expectedNumHistograms, expectedTAMO);
+    const std::vector<std::string> outputProps = {F_P_EFF_WS, F_A_EFF_WS, P_EFF_WS, A_EFF_WS, PHI_WS,
+                                                  ALPHA_WS,   RHO_WS,     TPMO_WS,  TAMO_WS};
+    const std::vector expectedValues = {EXPECTED_F_P,   EXPECTED_F_A, expectedP,    expectedA,   EXPECTED_PHI,
+                                        EXPECTED_ALPHA, EXPECTED_RHO, expectedTPMO, expectedTAMO};
+    for (size_t index = 0; index < outputProps.size(); ++index) {
+      checkOutputWorkspace(alg, outputProps.at(index), expectedNumHistograms, expectedValues.at(index));
+    }
   }
 
   void runTestInputEfficiencyWorkspaceNotOverwrittenWhenSetAsOutput(const std::string &inputPropName,
                                                                     const std::string &outputPropName) {
-    const auto nonMagGrp = createNonMagWSGroup("nonMagWs");
+    const auto nonMagGrp = createPolarizedTestGroup(NON_MAG_WS, m_parameters, NON_MAG_Y_VALS);
     const auto alg = createEfficiencyAlg(nonMagGrp);
-    const auto inEffWs = createWS("inEff");
+    const auto inEffWs = generateFunctionDefinedWorkspace(TestWorkspaceParameters("inEff", fillFuncStr({1.0})));
     alg->setProperty(inputPropName, inEffWs);
     alg->setPropertyValue(outputPropName, "outEff");
     alg->execute();
@@ -665,32 +637,29 @@ private:
   void runTestOutputWorkspacesSetCorrectlyForMultipleRuns(const bool secondRunIncludeDiagnostics) {
     // We need to make sure we don't get outputs from previous runs if the same instance of the algorithm is run twice,
     // or is being run as a child algorithm.
-    const auto nonMagGrp = createNonMagWSGroup("nonMagWs");
-    const auto magGrp = createMagWSGroup("magWs");
+    using namespace OutputPropNames;
+    const auto nonMagGrp = createPolarizedTestGroup(NON_MAG_WS, m_parameters, NON_MAG_Y_VALS);
+    const auto magGrp = createPolarizedTestGroup(MAG_WS, m_parameters, MAG_Y_VALS);
     const auto alg = createEfficiencyAlg(nonMagGrp, magGrp);
 
-    alg->setPropertyValue(OutputPropNames::P_EFF_WS, "pEff");
-    alg->setPropertyValue(OutputPropNames::A_EFF_WS, "aEff");
+    alg->setPropertyValue(P_EFF_WS, "pEff");
+    alg->setPropertyValue(A_EFF_WS, "aEff");
     alg->setProperty(InputPropNames::INCLUDE_DIAGNOSTICS, true);
     alg->execute();
-    checkOutputWorkspaceIsSet(alg, OutputPropNames::P_EFF_WS, true);
-    checkOutputWorkspaceIsSet(alg, OutputPropNames::A_EFF_WS, true);
-    checkOutputWorkspaceIsSet(alg, OutputPropNames::PHI_WS, true);
-    checkOutputWorkspaceIsSet(alg, OutputPropNames::ALPHA_WS, true);
-    checkOutputWorkspaceIsSet(alg, OutputPropNames::RHO_WS, true);
-    checkOutputWorkspaceIsSet(alg, OutputPropNames::TPMO_WS, true);
-    checkOutputWorkspaceIsSet(alg, OutputPropNames::TAMO_WS, true);
+    const std::vector<std::string> outputProps = {P_EFF_WS, A_EFF_WS, PHI_WS, ALPHA_WS, RHO_WS, TPMO_WS, TAMO_WS};
+    auto isSetValues = std::vector(outputProps.size(), true);
+    for (size_t index = 0; index < outputProps.size(); ++index) {
+      checkOutputWorkspaceIsSet(alg, outputProps.at(index), isSetValues.at(index));
+    }
 
-    alg->setPropertyValue(OutputPropNames::P_EFF_WS, "");
-    alg->setPropertyValue(OutputPropNames::A_EFF_WS, "");
+    alg->setPropertyValue(P_EFF_WS, "");
+    alg->setPropertyValue(A_EFF_WS, "");
     alg->setProperty(InputPropNames::INCLUDE_DIAGNOSTICS, secondRunIncludeDiagnostics);
     alg->execute();
-    checkOutputWorkspaceIsSet(alg, OutputPropNames::P_EFF_WS, false);
-    checkOutputWorkspaceIsSet(alg, OutputPropNames::A_EFF_WS, false);
-    checkOutputWorkspaceIsSet(alg, OutputPropNames::PHI_WS, secondRunIncludeDiagnostics);
-    checkOutputWorkspaceIsSet(alg, OutputPropNames::ALPHA_WS, secondRunIncludeDiagnostics);
-    checkOutputWorkspaceIsSet(alg, OutputPropNames::RHO_WS, secondRunIncludeDiagnostics);
-    checkOutputWorkspaceIsSet(alg, OutputPropNames::TPMO_WS, false);
-    checkOutputWorkspaceIsSet(alg, OutputPropNames::TAMO_WS, false);
+    isSetValues.assign({false, false, secondRunIncludeDiagnostics, secondRunIncludeDiagnostics,
+                        secondRunIncludeDiagnostics, false, false});
+    for (size_t index = 0; index < outputProps.size(); ++index) {
+      checkOutputWorkspaceIsSet(alg, outputProps.at(index), isSetValues.at(index));
+    }
   }
 };
