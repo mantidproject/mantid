@@ -12,7 +12,7 @@ from mantid.api import mtd
 class EnergyWindowScanTest(unittest.TestCase):
     def test_IRIS(self):
         EnergyWindowScan(
-            InputFiles="IRS26176.RAW, IRS26173.RAW",
+            InputFiles="IRS26176.raw, IRS26173.raw",
             Instrument="IRIS",
             Analyser="graphite",
             Reflection="002",
@@ -42,7 +42,7 @@ class EnergyWindowScanTest(unittest.TestCase):
 
     def test_MSDFit(self):
         EnergyWindowScan(
-            InputFiles="IRS26176.RAW",
+            InputFiles="IRS26176.raw",
             Instrument="IRIS",
             Analyser="graphite",
             Reflection="002",
