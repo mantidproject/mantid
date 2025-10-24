@@ -85,6 +85,7 @@ public:
   ///@{
   /// Declare a specialized property
   static void declarePyAlgProperty(boost::python::object &self, Kernel::Property *prop, const std::string &doc = "");
+
   /// Declare a property using the type of the defaultValue with a validator and
   /// doc string
   static void declarePyAlgProperty(boost::python::object &self, const std::string &name,
@@ -100,6 +101,14 @@ public:
   /// Declare a property using the type of the defaultValue
   static void declarePyAlgProperty(boost::python::object &self, const std::string &name,
                                    const boost::python::object &defaultValue, const int direction);
+
+  /// Declare or replace a property using the type of the defaultValue with a validator and
+  /// doc string
+  static void declareOrReplacePyAlgProperty(boost::python::object &self, const std::string &name,
+                                            const boost::python::object &defaultValue,
+                                            const boost::python::object &validator = boost::python::object(),
+                                            const std::string &doc = "",
+                                            const int direction = Kernel::Direction::Input);
 
 protected:
   /**

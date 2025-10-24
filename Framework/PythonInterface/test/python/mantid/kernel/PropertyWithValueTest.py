@@ -37,6 +37,27 @@ class PropertyWithValueTest(unittest.TestCase):
 
         self.assertAlmostEqual(15.5, prop.value)
 
+    def test_value_setter_with_correct_type(self):
+        prop = self.__class__._integration.getProperty("RangeLower")
+        prop.value = 15.5
+
+        self.assertAlmostEqual(15.5, prop.value)
+
+    def test_value_setter_with_coercible_type(self):
+        # `int` type is coercible to `float`
+        prop = self.__class__._integration.getProperty("RangeLower")
+        prop.value = 25
+
+        self.assertAlmostEqual(25.0, prop.value)
+
+    def test_value_setter_with_incorrect_type(self):
+        # `str` is not implicitly coercible to `float`
+        prop = self.__class__._integration.getProperty("RangeLower")
+
+        with self.assertRaises(TypeError) as e:
+            prop.value = "12.3456"
+        assert "did not match C++ signature" in str(e.exception)
+
     def test_type_str_is_not_empty(self):
         rangeLower = self.__class__._integration.getProperty("RangeLower")
         self.assertGreater(len(rangeLower.type), 0)

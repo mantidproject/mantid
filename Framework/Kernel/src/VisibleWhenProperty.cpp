@@ -7,6 +7,7 @@
 #include "MantidKernel/VisibleWhenProperty.h"
 
 #include <memory>
+#include <set>
 #include <stdexcept>
 
 namespace Mantid::Kernel {
@@ -110,6 +111,24 @@ bool VisibleWhenProperty::isVisible(const IPropertyManager *algo) const {
     throw std::runtime_error("Both PropertyDetails and ComparisonDetails were "
                              "null in VisibleWhenProperty");
   }
+}
+
+/// Other properties that this property depends on.
+std::vector<std::string> VisibleWhenProperty::dependsOn(const std::string &thisProp) const {
+  if (m_propertyDetails) {
+    const std::string &otherProp = m_propertyDetails->otherPropName;
+    if (otherProp == thisProp)
+      throw std::runtime_error("VisibleWhenProperty: circular dependency detected");
+    return std::vector<std::string>{otherProp};
+  } else if (m_comparisonDetails) {
+    std::set<std::string> ps;
+    const auto ps1 = m_comparisonDetails->conditionOne->dependsOn(thisProp);
+    const auto ps2 = m_comparisonDetails->conditionTwo->dependsOn(thisProp);
+    ps.insert(ps1.cbegin(), ps1.cend());
+    ps.insert(ps2.cbegin(), ps2.cend());
+    return std::vector<std::string>(ps.cbegin(), ps.cend());
+  } else
+    return std::vector<std::string>{};
 }
 
 /**

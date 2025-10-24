@@ -307,6 +307,30 @@ void AlgorithmAdapter<BaseAlgorithm>::declarePyAlgProperty(boost::python::object
   declarePyAlgProperty(self, name, defaultValue, "", direction);
 }
 
+/**
+ * Declare or replace a property using the type of the defaultValue, a documentation
+ * string
+ * and validator
+ * @param self A reference to the calling Python object
+ * @param name :: The name of the new property
+ * @param defaultValue :: A default value for the property. The type is mapped
+ * to a C++ type
+ * @param validator :: A validator object
+ * @param doc :: The documentation string
+ * @param direction :: The direction of the property
+ */
+template <typename BaseAlgorithm>
+void AlgorithmAdapter<BaseAlgorithm>::declareOrReplacePyAlgProperty(boost::python::object &self,
+                                                                    const std::string &name,
+                                                                    const boost::python::object &defaultValue,
+                                                                    const boost::python::object &validator,
+                                                                    const std::string &doc, const int direction) {
+  BaseAlgorithm &caller = extract<BaseAlgorithm &>(self);
+  auto prop = std::unique_ptr<Kernel::Property>(
+      Registry::PropertyWithValueFactory::create(name, defaultValue, validator, direction));
+  caller.declareOrReplaceProperty(std::move(prop), doc);
+}
+
 //---------------------------------------------------------------------------------------------
 // Private members
 //---------------------------------------------------------------------------------------------
@@ -335,10 +359,12 @@ template <typename BaseAlgorithm> void AlgorithmAdapter<BaseAlgorithm>::exec() {
 }
 
 //-----------------------------------------------------------------------------------------------------------------------------
-// Concete instantiations (avoids definitions being all in the headers)
+// Concrete instantiations (allows explicit locating of tempate-body definitions)
 //-----------------------------------------------------------------------------------------------------------------------------
+
 /// API::Algorithm as base
 template class AlgorithmAdapter<API::Algorithm>;
-/// API::DataProcesstor as base
+
+/// API::DataProcessor as base
 template class AlgorithmAdapter<API::DataProcessorAlgorithm>;
 } // namespace Mantid::PythonInterface
