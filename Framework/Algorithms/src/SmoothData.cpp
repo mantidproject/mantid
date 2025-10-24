@@ -129,8 +129,8 @@ int SmoothData::validateSpectrumInGroup(size_t wi) {
 }
 
 /// Returns a smoothed version of histogram. npts must be odd.
-Histogram smooth(const Histogram &histogram, int npts) {
-  if (npts == 0)
+Histogram smooth(const Histogram &histogram, unsigned const npts) {
+  if (npts < 3)
     return histogram;
   int halfWidth = (npts - 1) / 2;
 
@@ -157,7 +157,7 @@ Histogram smooth(const Histogram &histogram, int npts) {
       total += Y[index]; // Exclude if NaN
     newY[j] = total / (index + 1);
     totalE += E[index] * E[index];
-    newE[j] = sqrt(totalE) / (index + 1);
+    newE[j] = sqrt(totalE / (index + 1));
   }
   // This is the main part, where each data point is the average of NPoints
   // points centred on the
@@ -174,7 +174,7 @@ Histogram smooth(const Histogram &histogram, int npts) {
     // Use of a moving average can lead to rounding error where what should be
     // zero actually comes out as a tiny negative number - bad news for sqrt
     // so protect
-    newE[k] = std::sqrt(std::abs(totalE)) / npts;
+    newE[k] = std::sqrt(std::abs(totalE) / npts);
   }
   // This deals with the 'end' at the tail of each spectrum
   for (int l = vecSize - halfWidth; l < vecSize; ++l) {
@@ -182,7 +182,7 @@ Histogram smooth(const Histogram &histogram, int npts) {
     total -= (Y[index - 1] != Y[index - 1] ? 0.0 : Y[index - 1]); // Exclude if NaN
     newY[l] = total / (vecSize - index);
     totalE -= E[index - 1] * E[index - 1];
-    newE[l] = std::sqrt(std::abs(totalE)) / (vecSize - index);
+    newE[l] = std::sqrt(std::abs(totalE) / (vecSize - index));
   }
   return smoothed;
 }

@@ -82,15 +82,16 @@ public:
     // setting property
     std::string outWSName("CreateWorkspaceTest_OutputWS");
     TS_ASSERT_THROWS_NOTHING(createWS.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(createWS.setProperty("BankPixelWidth", 1))
     TS_ASSERT_THROWS_NOTHING(createWS.execute(););
-    MatrixWorkspace_sptr outWS = createWS.getProperty("OutputWorkspace");
+    MatrixWorkspace_sptr input = createWS.getProperty("OutputWorkspace");
 
     // Creating group workspace
     CreateGroupingWorkspace alg;
     alg.initialize();
     alg.setChild(true);
     std::string outGWSName("CreateGroupingWorkspaceTest_OutputWS");
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", outWS));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", input));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("GroupNames", "bank1,bank2"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outGWSName));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
@@ -100,38 +101,100 @@ public:
     SmoothData smooth;
     smooth.initialize();
     smooth.setChild(true);
-    TS_ASSERT_THROWS_NOTHING(smooth.setProperty("InputWorkspace", outWS));
+    TS_ASSERT_THROWS_NOTHING(smooth.setProperty("InputWorkspace", input));
     std::string outputWS("smoothed");
     TS_ASSERT_THROWS_NOTHING(smooth.setPropertyValue("OutputWorkspace", outputWS));
-    // Set to 4 - algorithm should change it to 5
+    // use 3 points in bank1, use 5 points in bank2
     TS_ASSERT_THROWS_NOTHING(smooth.setPropertyValue("NPoints", "3,5"));
     TS_ASSERT_THROWS_NOTHING(smooth.setProperty("GroupingWorkspace", groupingWS));
     TS_ASSERT_THROWS_NOTHING(smooth.execute());
     TS_ASSERT(smooth.isExecuted());
-
     MatrixWorkspace_const_sptr output = smooth.getProperty("OutputWorkspace");
-    // as alg child is set true, wouldnt need to use AnalysisDataService
-    const auto &Y = output->y(0);
-    const auto &X = output->x(0);
-    const auto &E = output->e(0);
-    TS_ASSERT_EQUALS(Y[0], 0.3);
-    TS_ASSERT_EQUALS(X[6], 1200);
-    TS_ASSERT_DIFFERS(E[2], Y[2]);
-    for (int i = 0; i < 4; ++i) {
-      TS_ASSERT_EQUALS(Y[i], 0.3);
-      TS_ASSERT_EQUALS(X[i + 1], (i + 1) * 200);
+
+    // X values are shared
+    TS_ASSERT_EQUALS(&(output->x(0)), &(input->x(0)));
+    TS_ASSERT_EQUALS(&(output->x(1)), &(input->x(1)));
+
+    // CreateSampleWorkspace makes a workspace with a delta-peak at index 50
+    unsigned const nbins = 100, peak = 50;
+    // the three-point smoothing will effect the two points on either side of peak
+    unsigned const peakm = peak - 1, peakp = peak + 1;
+    // the five-point smoothing will also effect these points
+    unsigned const peak2m = peak - 2, peak2p = peak + 2;
+
+    // verify bank1
+    const auto &Ybank1 = output->y(0);  // 100 points, delta-peak at 50
+    const auto &Ebank1 = output->e(0);  // 100 points, delta-peak at 50
+    const auto &Ybank1in = input->y(0); // three-point peak on 49, 50, 51
+    const auto &Ebank1in = input->e(0); // three-point peak on 49, 50, 51
+    std::set<unsigned> skip1{peakm, peak, peakp};
+    for (unsigned i = 0; i < nbins; i++) {
+      // except at the peak points, all equal
+      if (!skip1.count(i)) {
+        TS_ASSERT_DELTA(Ybank1[i], Ybank1in[i], 0.00001);
+      }
     }
-    TS_ASSERT_LESS_THAN(E[8], 0.31625);
-    TS_ASSERT_EQUALS(Y[10], Y[15]);
-    TS_ASSERT_DIFFERS(Y[50], Y[45]);
-    TS_ASSERT_EQUALS(X[50], 10000);
-    TS_ASSERT_DIFFERS(Y[51], 3.63333333333333);
-    TS_ASSERT_LESS_THAN_EQUALS(E[15], 0.3169);
-    TS_ASSERT_EQUALS(X[16], 3200);
-    TS_ASSERT_LESS_THAN_EQUALS(Y[49], 3.64);
-    TS_ASSERT_DIFFERS(X[2], E[2]);
-    TS_ASSERT_DIFFERS(X[0], Y[0]);
-    TS_ASSERT_DIFFERS(E[5], Y[5]);
+    // symmetry
+    TS_ASSERT_EQUALS(Ybank1[peakm], Ybank1[peakp]);
+    TS_ASSERT_EQUALS(Ybank1in[peakm], Ybank1in[peakp]);
+    // smoothing will make values beside peak larger, at peak smaller
+    TS_ASSERT_LESS_THAN(Ybank1in[peakm], Ybank1[peakm]);
+    TS_ASSERT_LESS_THAN(Ybank1in[peakp], Ybank1[peakp]);
+    TS_ASSERT_LESS_THAN(Ybank1[peak], Ybank1in[peak]);
+    // do the same for E
+    TS_ASSERT_EQUALS(Ebank1[peakm], Ebank1[peakp]);
+    TS_ASSERT_EQUALS(Ebank1in[peakm], Ebank1in[peakp]);
+    TS_ASSERT_LESS_THAN(Ebank1in[peakm], Ebank1[peakm]);
+    TS_ASSERT_LESS_THAN(Ebank1in[peakp], Ebank1[peakp]);
+    TS_ASSERT_LESS_THAN(Ebank1[peak], Ebank1in[peak]);
+
+    // verify bank2
+    const auto &Ybank2 = output->y(1);  // 100 points, delta-peak at 50
+    const auto &Ebank2 = output->e(1);  // 100 points, delta-peak at 50
+    const auto &Ybank2in = input->y(1); // three-point peak on 48, 49, 50, 51, 52
+    const auto &Ebank2in = input->e(1); // three-point peak on 48, 49, 50, 51, 52
+    std::set<unsigned> skip2{peak2m, peakm, peak, peakp, peak2p};
+    for (unsigned i = 0; i < nbins; i++) {
+      // except at the peak points, all equal
+      if (!skip2.count(i)) {
+        TS_ASSERT_DELTA(Ybank2[i], Ybank2in[i], 0.00001);
+      }
+    }
+    // symmetry
+    TS_ASSERT_EQUALS(Ybank2[peakm], Ybank2[peakp]);
+    TS_ASSERT_EQUALS(Ybank2[peak2m], Ybank2[peak2p]);
+    TS_ASSERT_EQUALS(Ybank2in[peakm], Ybank2in[peakp]);
+    TS_ASSERT_EQUALS(Ybank2in[peak2m], Ybank2in[peak2p]);
+    // smoothing will make values beside peak larger, at peak smaller
+    TS_ASSERT_LESS_THAN(Ybank2in[peak2m], Ybank2[peak2m]);
+    TS_ASSERT_LESS_THAN(Ybank2in[peak2p], Ybank2[peak2p]);
+    TS_ASSERT_LESS_THAN(Ybank2in[peakm], Ybank2[peakm]);
+    TS_ASSERT_LESS_THAN(Ybank2in[peakp], Ybank2[peakp]);
+    TS_ASSERT_LESS_THAN(Ybank2[peak], Ybank2in[peak]);
+    // same for E
+    TS_ASSERT_EQUALS(Ebank2[peakm], Ebank2[peakp]);
+    TS_ASSERT_EQUALS(Ebank2[peak2m], Ebank2[peak2p]);
+    TS_ASSERT_EQUALS(Ebank2in[peakm], Ebank2in[peakp]);
+    TS_ASSERT_EQUALS(Ebank2in[peak2m], Ebank2in[peak2p]);
+    TS_ASSERT_LESS_THAN(Ebank2in[peak2m], Ebank2[peak2m]);
+    TS_ASSERT_LESS_THAN(Ebank2in[peak2p], Ebank2[peak2p]);
+    TS_ASSERT_LESS_THAN(Ebank2in[peakm], Ebank2[peakm]);
+    TS_ASSERT_LESS_THAN(Ebank2in[peakp], Ebank2[peakp]);
+    TS_ASSERT_LESS_THAN(Ebank2[peak], Ebank2in[peak]);
+
+    // legacy asserts
+    // these were part of the original test, and not very illuminating or helpful
+    TS_ASSERT_EQUALS(Ybank1[0], 0.3);
+    TS_ASSERT_DIFFERS(Ebank1[2], Ybank1[2]);
+    for (int i = 0; i < 4; ++i) {
+      TS_ASSERT_EQUALS(Ybank1[i], 0.3);
+    }
+    TS_ASSERT_EQUALS(Ybank1[10], Ybank1[15]);
+    TS_ASSERT_DIFFERS(Ybank1[50], Ybank1[45]);
+    TS_ASSERT_DIFFERS(Ybank1[51], 3.63333333333333);
+    TS_ASSERT_LESS_THAN_EQUALS(Ebank1[15], Ebank1in[15]);
+    TS_ASSERT_LESS_THAN_EQUALS(Ybank1[49], 3.64);
+    TS_ASSERT_DIFFERS(Ebank1[5], Ybank1[5]);
     // Check X vectors are shared
     TS_ASSERT_EQUALS(&(output->x(0)), &(output->x(1)));
   }
@@ -154,17 +217,17 @@ public:
     const auto &Y = output->y(0);
     const auto &E = output->e(0);
     TS_ASSERT_EQUALS(Y[0], 2);
-    TS_ASSERT_DELTA(E[0], sqrt(Y[0] / 3.0), 0.0001);
+    TS_ASSERT_DELTA(E[0], sqrt(Y[0]), 0.0001);
     TS_ASSERT_EQUALS(Y[1], 2.5);
-    TS_ASSERT_DELTA(E[1], sqrt(Y[1] / 4.0), 0.0001);
+    TS_ASSERT_DELTA(E[1], sqrt(Y[1]), 0.0001);
     for (size_t i = 2; i < Y.size() - 2; ++i) {
       TS_ASSERT_EQUALS(Y[i], static_cast<double>(i) + 1.0);
-      TS_ASSERT_DELTA(E[i], sqrt(Y[i] / 5.0), 0.0001);
+      TS_ASSERT_DELTA(E[i], sqrt(Y[i]), 0.0001);
     }
     TS_ASSERT_EQUALS(Y[8], 8.5);
-    TS_ASSERT_DELTA(E[8], sqrt(Y[8] / 4.0), 0.0001);
+    TS_ASSERT_DELTA(E[8], sqrt(Y[8]), 0.0001);
     TS_ASSERT_EQUALS(Y[9], 9);
-    TS_ASSERT_DELTA(E[9], sqrt(Y[9] / 3.0), 0.0001);
+    TS_ASSERT_DELTA(E[9], sqrt(Y[9]), 0.0001);
 
     // Check X vectors are shared
     TS_ASSERT_EQUALS(&(output->x(0)), &(output->x(1)));
