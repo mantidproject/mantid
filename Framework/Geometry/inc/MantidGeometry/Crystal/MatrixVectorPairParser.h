@@ -8,6 +8,7 @@
 
 #include "MantidGeometry/Crystal/MatrixVectorPair.h"
 #include "MantidGeometry/Crystal/V3R.h"
+#include "MantidKernel/Exception.h"
 
 #include <boost/parser/parser.hpp>
 
@@ -175,9 +176,9 @@ template <typename T> MatrixVectorPair<T, V3R> parseMatrixVectorPair(const std::
 
   auto negativeSignAction = [&builder](auto const &) { builder.setCurrentSignNegative(); };
 
-  auto currentFactorAction = [&builder](auto &ctx) { builder.setCurrentFactor(_attr(ctx)); };
+  auto currentFactorAction = [&builder](auto const &ctx) { builder.setCurrentFactor(_attr(ctx)); };
 
-  auto currentDirectionAction = [&builder](auto &ctx) { builder.setCurrentDirection(_attr(ctx)); };
+  auto currentDirectionAction = [&builder](auto const &ctx) { builder.setCurrentDirection(_attr(ctx)); };
 
   auto addCurrentStateToResultAction = [&builder](auto const &) { builder.addCurrentStateToResult(); };
 
@@ -208,21 +209,15 @@ template <typename T> MatrixVectorPair<T, V3R> parseMatrixVectorPair(const std::
   auto m_parser = (m_componentSeries >> lit(',')[advanceRowAction] >> m_componentSeries >> lit(',')[advanceRowAction] >>
                    m_componentSeries);
 
-  auto success = parse(matrixVectorString, m_parser);
+  try {
+    auto success = parse(matrixVectorString, m_parser, bp::ws);
 
-  if (!success) {
-    throw std::runtime_error("Parse error");
+    if (!success) {
+      throw std::runtime_error("Parse error in '" + matrixVectorString + "'.");
+    }
+  } catch (std::runtime_error &builderError) {
+    throw Kernel::Exception::ParseError("Parse error: " + std::string(builderError.what()), matrixVectorString, 0);
   }
-
-  // try {
-  //   qi::phrase_parse(strIterator, strEnd, parser, qi::space);
-
-  //  if (std::distance(strIterator, strEnd) > 0) {
-  //    throw std::runtime_error("Additional characters at end of string: '" + std::string(strIterator, strEnd) + "'.");
-  //  }
-  //} catch (std::runtime_error &builderError) {
-  //  throw Kernel::Exception::ParseError("Parse error: " + std::string(builderError.what()), matrixVectorString, 0);
-  //}
 
   return builder.getMatrixVectorPair<T>();
 }
