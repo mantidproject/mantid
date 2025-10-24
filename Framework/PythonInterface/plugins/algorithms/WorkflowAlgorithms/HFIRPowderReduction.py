@@ -148,7 +148,7 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
                     issues[f"{field}RunNumbers"] = (
                         f"Too many fields filled: Must specify either {field}Filename or {field}IPTS AND {field}RunNumbers"
                     )
-            elif not (IPTSBool == Property.EMPTY_INT and runNumbersBool == 0):
+            elif (IPTSBool == Property.EMPTY_INT) ^ (runNumbersBool == 0):
                 if IPTSBool != Property.EMPTY_INT:
                     issues[f"{field}RunNumbers"] = f"{field}RunNumbers must be provided if {field}IPTS is provided"
                 if runNumbersBool:
