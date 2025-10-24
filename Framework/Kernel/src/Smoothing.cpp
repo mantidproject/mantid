@@ -20,13 +20,17 @@ template <typename T> struct Adder {
   virtual T term(T const &) const = 0;
   virtual T assign() const = 0;
   virtual void accumulate(T const &x) {
-    total += term(x);
-    npts++;
+    if (!std::isnan(x)) {
+      total += term(x);
+      npts++;
+    }
   }
   virtual void separate(T const &x) {
-    total -= term(x);
-    npts--;
-  };
+    if (!std::isnan(x)) {
+      total -= term(x);
+      npts--;
+    }
+  }
 
 protected:
   T total;
@@ -38,19 +42,29 @@ template <typename T> struct SimpleAdder : public Adder<T> {
   T assign() const override { return this->total / this->npts; }
 };
 
-template <typename T> struct SumSquareAdder : public Adder<T> {
+template <typename T> struct ErrorPropagationAdder : public Adder<T> {
   T term(T const &x) const override { return x * x; }
   T assign() const override { return std::sqrt(std::abs(this->total)) / this->npts; }
 };
 
+template <typename T> struct SumSquareAdder : public Adder<T> {
+  T term(T const &x) const override { return x * x; }
+  T assign() const override { return std::sqrt(std::abs(this->total) / this->npts); }
+};
+
 template <typename T> struct GeometricAdder : public Adder<T> {
+  GeometricAdder() { this->total = T(1); }
   void accumulate(T const &x) override {
-    this->total *= term(x);
-    this->npts++;
+    if (x != T(0) && !std::isnan(x)) {
+      this->total *= term(x);
+      this->npts++;
+    }
   }
   void separate(T const &x) override {
-    this->total /= term(x);
-    this->npts--;
+    if (x != T(0) && !std::isnan(x)) {
+      this->total /= term(x);
+      this->npts--;
+    }
   }
   T term(T const &x) const override { return x; }
   T assign() const override { return std::pow(std::abs(this->total), 1. / this->npts); }
@@ -68,17 +82,13 @@ std::vector<T> boxcarSmoothWithFunction(std::vector<T> const &input, unsigned co
 
   // First push the values ahead of the current point onto total
   for (unsigned k = 0; k < halfWidth; k++) {
-    if (!std::isnan(input[k])) { // exclude NaN
-      adder.accumulate(input[k]);
-    }
+    adder.accumulate(input[k]);
   }
-  // smoothed values at the beginning, where ewer than numPoints
+  // smoothed values at the beginning, where fewer than numPoints
   for (unsigned k = 0; k <= halfWidth; k++) {
     unsigned const kp = k + halfWidth;
     // add the leading edge
-    if (!std::isnan(input[kp])) { // exclude NaN
-      adder.accumulate(input[kp]);
-    }
+    adder.accumulate(input[kp]);
     output[k] = adder.assign();
   }
   // main part, each average has numPoints
@@ -86,22 +96,16 @@ std::vector<T> boxcarSmoothWithFunction(std::vector<T> const &input, unsigned co
     std::size_t const kp = k + halfWidth;
     std::size_t const km = k - halfWidth - 1;
     // remove the previous trailing edge
-    if (!std::isnan(input[km])) { // exclude NaN
-      adder.separate(input[km]);
-    }
+    adder.separate(input[km]);
     // add the new leading edge
-    if (!std::isnan(input[kp])) { // exclude NaN
-      adder.accumulate(input[kp]);
-    }
+    adder.accumulate(input[kp]);
     output[k] = adder.assign();
   }
   // smoothed values at very end, where fewer than numPoints
   for (std::size_t k = vecSize - halfWidth; k < vecSize; k++) {
     std::size_t const km = k - halfWidth;
     // remove previous trailing edge
-    if (!std::isnan(input[km - 1])) { // exclude NaN
-      adder.separate(input[km - 1]);
-    }
+    adder.separate(input[km - 1]);
     output[k] = adder.assign();
   }
   return output;
@@ -113,12 +117,18 @@ template <typename T> std::vector<T> boxcarSmooth(std::vector<T> const &input, u
   return detail::boxcarSmoothWithFunction(input, numPoints, adder);
 }
 
-template <typename T> std::vector<T> boxcarSumSquareSmooth(std::vector<T> const &input, unsigned const numPoints) {
+template <typename T> std::vector<T> boxcarErrorSmooth(std::vector<T> const &input, unsigned const numPoints) {
+  detail::ErrorPropagationAdder<T> adder;
+  return detail::boxcarSmoothWithFunction(input, numPoints, adder);
+}
+
+template <typename T> std::vector<T> boxcarRMSESmooth(std::vector<T> const &input, unsigned const numPoints) {
   detail::SumSquareAdder<T> adder;
   return detail::boxcarSmoothWithFunction(input, numPoints, adder);
 }
 
 template MANTID_KERNEL_DLL std::vector<double> boxcarSmooth(std::vector<double> const &, unsigned const);
-template MANTID_KERNEL_DLL std::vector<double> boxcarSumSquareSmooth(std::vector<double> const &, unsigned const);
+template MANTID_KERNEL_DLL std::vector<double> boxcarRMSESmooth(std::vector<double> const &, unsigned const);
+template MANTID_KERNEL_DLL std::vector<double> boxcarErrorSmooth(std::vector<double> const &, unsigned const);
 
 } // namespace Mantid::Kernel::Smoothing
