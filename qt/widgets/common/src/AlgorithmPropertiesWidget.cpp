@@ -417,7 +417,7 @@ void AlgorithmPropertiesWidget::hideOrDisableProperties(const QString &changedPr
 
   // set Visible and Enabled as appropriate
   for (auto &widget : m_propWidgets) {
-    Mantid::Kernel::Property *prop = widget->getProperty();
+    const Mantid::Kernel::Property *prop = widget->getProperty();
     const IPropertySettings *settings = prop->getSettings();
     const auto &propName = QString::fromStdString(prop->name());
 

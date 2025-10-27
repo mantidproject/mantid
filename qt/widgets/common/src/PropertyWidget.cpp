@@ -480,7 +480,7 @@ void PropertyWidget::addReplaceWSButton() {
   if (m_replaceWSButton)
     return;
 
-  auto *wsProp = dynamic_cast<IWorkspaceProperty *>(m_prop);
+  const auto *wsProp = dynamic_cast<IWorkspaceProperty *>(m_prop);
   if (wsProp && (m_prop->direction() == Direction::Output)) {
     m_replaceWSButton = new QPushButton(QIcon(":/data_replace.png"), "", m_parent);
     // MG: There is no way with the QIcon class to actually ask what size it is
