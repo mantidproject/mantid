@@ -13,6 +13,7 @@
 #include "MantidKernel/cow_ptr.h"
 
 #include <iosfwd>
+#include <optional>
 #include <vector>
 
 namespace Mantid {
