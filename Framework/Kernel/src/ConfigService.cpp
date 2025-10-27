@@ -53,6 +53,7 @@
 #include <algorithm>
 #include <cctype>
 #include <codecvt>
+#include <cstdlib>
 #include <exception>
 #include <filesystem>
 #include <fstream>
@@ -1266,7 +1267,11 @@ std::string ConfigServiceImpl::getAppDataDir() {
   path /= applicationName;
   return path.string();
 #else // linux and mac
-  std::filesystem::path path(std::getenv("HOME"));
+  const char* home = std::getenv("HOME");
+  if (!home) {
+    throw std::runtime_error("HOME environment variable not set");
+  }
+  std::filesystem::path path(home);
   path /= ("." + applicationName);
   return path.string();
 #endif
