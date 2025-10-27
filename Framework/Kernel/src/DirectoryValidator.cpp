@@ -6,8 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/DirectoryValidator.h"
 #include "MantidKernel/IValidator.h"
-#include <Poco/Exception.h>
-#include <Poco/Path.h>
 #include <filesystem>
 #include <memory>
 
@@ -37,7 +35,10 @@ IValidator_sptr DirectoryValidator::clone() const { return std::make_shared<Dire
  */
 std::string DirectoryValidator::checkValidity(const std::string &value) const {
   // Check if the path is syntactically valid
-  if (!Poco::Path().tryParse(value)) {
+  try {
+    std::filesystem::path testPath(value);
+    // Just creating a path object validates syntax in most cases
+  } catch (const std::exception &) {
     return "Error in path syntax: \"" + value + "\".";
   }
 
@@ -48,8 +49,6 @@ std::string DirectoryValidator::checkValidity(const std::string &value) const {
         return "Directory \"" + value + "\" not found";
       if (!std::filesystem::is_directory(value))
         return "Directory \"" + value + "\" specified is actually a file";
-    } catch (Poco::FileException &) {
-      return "Error accessing directory \"" + value + "\"";
     } catch (const std::filesystem::filesystem_error &) {
       return "Error accessing directory \"" + value + "\"";
     }
