@@ -38,8 +38,9 @@ set(PYTHON_PLUGINS
     algorithms/CorrectTOF.py
     algorithms/CreateCacheFilename.py
     algorithms/CreateEmptyTableWorkspace.py
-    algorithms/CreatePoleFigureTableWorkspace.py
+    algorithms/CreateGroupingByComponent.py
     algorithms/CreateLeBailFitInput.py
+    algorithms/CreatePoleFigureTableWorkspace.py
     algorithms/CropWorkspaceForMDNorm.py
     algorithms/CylinderPaalmanPingsCorrection2.py
     algorithms/DNSComputeDetEffCorrCoefs.py
