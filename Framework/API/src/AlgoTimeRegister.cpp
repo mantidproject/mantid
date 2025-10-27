@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/AlgoTimeRegister.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/MultiThreaded.h"
 #include <fstream>
 #include <time.h>
