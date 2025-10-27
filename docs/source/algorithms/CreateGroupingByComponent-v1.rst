@@ -16,7 +16,7 @@ You have an instrument that has the following hierarchy Banks -> Module -> Pixel
 Let's say there are two banks called bank1 and bank2. Then each bank is made up of three module named module1, module2 and module3, respectively.
 Finally each of these module contains 5 detector pixels: pixel1, pixel2, pixel3, pixel4, and pixel5
 
-If you want to create a GroupingWorkspace where each module forms it's own detector group, you formulate this as grouping together "pixel" components
+If you want to create a GroupingWorkspace where each module forms its own detector group, you formulate this as grouping together "pixel" components
 belonging to the same parent component (in this case all the "pixel" components under each module). Likewise, to get a ``GroupingWorkspace`` where each
 bank is independent you would use ``IncludeComponents = "module"``, as this would group together each set of three modules in the two banks.
 

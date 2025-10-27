@@ -13,7 +13,7 @@ from testhelpers import run_algorithm
 import numpy as np
 
 
-class CreateGroupingByComponenetTest(unittest.TestCase):
+class CreateGroupingByComponentTest(unittest.TestCase):
     def setUp(self):
         self.default_kwargs = {"InstrumentName": "ENGINX", "OutputWorkspace": "test_group"}
 
