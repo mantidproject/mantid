@@ -8,8 +8,7 @@
 #include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/UnitLabel.h"
 
-#include <Poco/Path.h>
-
+#include <filesystem>
 #include <fstream>
 #include <list>
 #include <memory>
@@ -1004,9 +1003,8 @@ size_t split_path(const std::string &path, std::vector<std::string> &path_compon
   // path
   if (path[0] == '.') {
     // get absolute path using working directory as base;
-    Poco::Path absol;
-    absol = absol.absolute();
-    working_path = absol.toString(Poco::Path::PATH_UNIX) + working_path;
+    std::filesystem::path absol = std::filesystem::current_path();
+    working_path = absol.generic_string() + working_path;
   }
   // as poco splt using regular expressions is doing some rubbish, we need to do
   // split manually
