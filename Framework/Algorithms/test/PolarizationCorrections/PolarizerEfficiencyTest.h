@@ -13,18 +13,22 @@
 #include "MantidAlgorithms/PolarizationCorrections/PolarizerEfficiency.h"
 #include "MantidKernel/ConfigService.h"
 
+#include "PolarizationCorrectionsTestUtils.h"
+
 #include <cxxtest/TestSuite.h>
 #include <filesystem>
 
 using namespace Mantid;
 using namespace Mantid::Algorithms;
 using namespace Mantid::API;
+using namespace PolCorrTestUtils;
 
 class PolarizerEfficiencyTest : public CxxTest::TestSuite {
 public:
   void setUp() override {
+    m_parameters = TestWorkspaceParameters();
     // Use an analyser efficiency of 1 to make test calculations simpler
-    generateFunctionDefinedWorkspace(ANALYSER_EFFICIENCY_WS_NAME, "1 + x*0");
+    (void)generateFunctionDefinedWorkspace(TestWorkspaceParameters(ANALYSER_EFFICIENCY_WS_NAME, fillFuncStr({1.0})));
     m_defaultSaveDirectory = Kernel::ConfigService::Instance().getString("defaultsave.directory");
   }
 
@@ -33,12 +37,12 @@ public:
     Kernel::ConfigService::Instance().setString("defaultsave.directory", m_defaultSaveDirectory);
   }
 
-  void testName() {
+  void test_name() {
     PolarizerEfficiency alg;
     TS_ASSERT_EQUALS(alg.name(), "PolarizerEfficiency");
   }
 
-  void testInit() {
+  void test_init() {
     PolarizerEfficiency alg;
     alg.initialize();
     TS_ASSERT(alg.isInitialized());
@@ -49,44 +53,44 @@ public:
     TS_ASSERT(validator);
   }
 
-  void testOutput() {
+  void test_output() {
     auto polariserEfficiency = createPolarizerEfficiencyAlgorithm();
     polariserEfficiency->execute();
 
     const auto &workspaces = AnalysisDataService::Instance().getObjectNames();
-    ASSERT_TRUE(std::find(workspaces.cbegin(), workspaces.cend(), "psm") != workspaces.cend());
+    TS_ASSERT(std::find(workspaces.cbegin(), workspaces.cend(), "psm") != workspaces.cend());
   }
 
-  void testSpinConfigurations() {
+  void test_spin_configurations() {
     auto polariserEfficiency = AlgorithmManager::Instance().create("PolarizerEfficiency");
     TS_ASSERT_THROWS(polariserEfficiency->setProperty("SpinStates", "bad"), std::invalid_argument &);
     TS_ASSERT_THROWS(polariserEfficiency->setProperty("SpinStates", "00,00,11,11"), std::invalid_argument &);
     TS_ASSERT_THROWS(polariserEfficiency->setProperty("SpinStates", "02,20,22,00"), std::invalid_argument &);
   }
 
-  void testMissingRequiredSpinConfig() {
+  void test_missing_required_spin_config() {
     auto polariserEfficiency = createPolarizerEfficiencyAlgorithm();
     polariserEfficiency->setProperty("SpinStates", "11, 10");
     TS_ASSERT_THROWS(polariserEfficiency->execute(), const std::runtime_error &);
   }
 
-  void testNonMatchingBinsFails() {
-    auto polariserEfficiency = createPolarizerEfficiencyAlgorithm(nullptr, true, true);
+  void test_non_matching_bins_fails() {
+    (void)generateFunctionDefinedWorkspace(
+        TestWorkspaceParameters(ANALYSER_EFFICIENCY_WS_NAME, fillFuncStr({1.0}), X_UNIT, 1, 1, 8, 0.1));
+    auto polariserEfficiency = createPolarizerEfficiencyAlgorithm();
+
     TS_ASSERT_THROWS(polariserEfficiency->execute(), const std::runtime_error &);
   }
 
-  void testInvalidAnalyzerWsFails() {
-    generateFunctionDefinedWorkspace(ANALYSER_EFFICIENCY_WS_NAME, "1 + x*0", 2);
+  void test_invalid_analyzer_ws_fails() {
+    (void)generateFunctionDefinedWorkspace(
+        TestWorkspaceParameters(ANALYSER_EFFICIENCY_WS_NAME, fillFuncStr({1.0}), X_UNIT, 2));
     auto polariserEfficiency = createPolarizerEfficiencyAlgorithm();
     TS_ASSERT_THROWS(polariserEfficiency->execute(), const std::runtime_error &);
   }
 
-  void testFailsWithNonMatchingGroupSizeAndNumberOfSpinStates() {
-    auto tPara = generateFunctionDefinedWorkspace("T_para", "4 + x*0");
-    auto tAnti = generateFunctionDefinedWorkspace("T_anti", "2 + x*0");
-
-    auto grpWs = groupWorkspaces("grpWs", {tPara, tAnti});
-
+  void test_fails_with_non_matching_group_size_and_number_of_spin_states() {
+    auto grpWs = createPolarizedTestGroup(GROUP_NAME, m_parameters, std::vector(4, 4.0));
     auto polariserEfficiency = createPolarizerEfficiencyAlgorithm(grpWs);
     // The 00 spin state is deliberately placed at the end of the input string so that it does not match a workspace in
     // the group. The algorithm validation normally tries to look up the 00 workspace, so this checks that we don't do
@@ -95,32 +99,21 @@ public:
     TS_ASSERT_THROWS(polariserEfficiency->execute(), const std::runtime_error &);
   }
 
-  void testExampleCalculation() {
-    auto tPara = generateFunctionDefinedWorkspace("T_para", "4 + x*0");
-    auto tPara1 = generateFunctionDefinedWorkspace("T_para1", "4 + x*0");
-    auto tAnti = generateFunctionDefinedWorkspace("T_anti", "2 + x*0");
-    auto tAnti1 = generateFunctionDefinedWorkspace("T_anti1", "2 + x*0");
-
-    auto grpWs = groupWorkspaces("grpWs", {tPara, tAnti, tAnti1, tPara1});
-
+  void test_example_calculation() {
+    auto grpWs = createPolarizedTestGroup(GROUP_NAME, m_parameters, std::vector({4.0, 2.0, 2.0, 4.0}));
     auto polariserEfficiency = createPolarizerEfficiencyAlgorithm(grpWs);
     polariserEfficiency->execute();
     MatrixWorkspace_sptr calculatedPolariserEfficiency = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
         polariserEfficiency->getProperty("OutputWorkspace"));
-
-    // The T_para and T_anti curves are 4 and 2 (constant wrt wavelength) respectively, and the analyser
+    // The T_para(00,11) and T_anti(01,10)) curves are 4 and 2 (constant wrt wavelength) respectively, and the analyser
     // efficiency is 1 for all wavelengths, which should give us a polarizer efficiency of 2/3
     for (const double &y : calculatedPolariserEfficiency->dataY(0)) {
       TS_ASSERT_DELTA(2.0 / 3.0, y, 1e-8);
     }
   }
 
-  void testExampleCalculationTwoInputs() {
-    auto tPara = generateFunctionDefinedWorkspace("T_para", "4 + x*0");
-    auto tAnti = generateFunctionDefinedWorkspace("T_anti", "2 + x*0");
-
-    auto grpWs = groupWorkspaces("grpWs", {tPara, tAnti});
-
+  void test_example_calculation_two_inputs() {
+    auto grpWs = createPolarizedTestGroup(GROUP_NAME, m_parameters, std::vector({4.0, 2.0}), false);
     auto polariserEfficiency = createPolarizerEfficiencyAlgorithm(grpWs);
     polariserEfficiency->setProperty("SpinStates", "00,01");
     polariserEfficiency->execute();
@@ -134,31 +127,33 @@ public:
     }
   }
 
-  void testErrors() {
-    auto polarizerEfficiency = createPolarizerEfficiencyAlgorithm();
+  void test_errors() {
+    m_parameters.funcStr = "name=UserFunction,Formula=x^2";
+    auto grpWs = createPolarizedTestGroup(GROUP_NAME, m_parameters);
+    auto polarizerEfficiency = createPolarizerEfficiencyAlgorithm(grpWs);
     polarizerEfficiency->execute();
     MatrixWorkspace_sptr eff = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
         polarizerEfficiency->getProperty("OutputWorkspace"));
     const auto &errors = eff->dataE(0);
-    // Skip the first error because with this toy data it'll be NaN
-    const std::vector<double> expectedErrors{88.3883476283, 39.2837100613, 22.0970869124, 14.1421356255};
+    const std::vector<double> expectedErrors{0.23570, 0.14142, 0.10101, 0.07856, 0.06428, 0.05439, 0.047140};
     for (size_t i = 0; i < expectedErrors.size(); ++i) {
-      TS_ASSERT_DELTA(expectedErrors[i], errors[i + 1], 1e-7);
+      TS_ASSERT_DELTA(expectedErrors[i], errors[i], 1e-5);
     }
   }
 
   /// Saving Tests
 
-  void testSavingAbsolute() {
+  void test_saving_absolute() {
     auto const temp_filename = std::filesystem::temp_directory_path() /= "something.nxs";
-    auto polarizerEfficiency = createPolarizerEfficiencyAlgorithm(createExampleGroupWorkspace("wsGrp"), false);
+    auto polarizerEfficiency = createPolarizerEfficiencyAlgorithm();
+    polarizerEfficiency->setPropertyValue("OutputWorkspace", "");
     polarizerEfficiency->setPropertyValue("OutputFilePath", temp_filename.string());
     polarizerEfficiency->execute();
     TS_ASSERT(std::filesystem::exists(temp_filename))
     std::filesystem::remove(temp_filename);
   }
 
-  void testSavingRelative() {
+  void test_saving_relative() {
     auto tempDir = std::filesystem::temp_directory_path();
     Kernel::ConfigService::Instance().setString("defaultsave.directory", tempDir.string());
     std::string const &filename = "something.nxs";
@@ -170,7 +165,7 @@ public:
     std::filesystem::remove(savedPath);
   }
 
-  void testSavingNoExt() {
+  void test_saving_no_ext() {
     auto const temp_filename = std::filesystem::temp_directory_path() /= "something";
     auto polarizerEfficiency = createPolarizerEfficiencyAlgorithm();
     polarizerEfficiency->setPropertyValue("OutputFilePath", temp_filename.string());
@@ -181,117 +176,20 @@ public:
   }
 
 private:
-  const std::string ANALYSER_EFFICIENCY_WS_NAME = "effAnalyser";
   std::string m_defaultSaveDirectory;
+  TestWorkspaceParameters m_parameters;
 
-  WorkspaceGroup_sptr createExampleGroupWorkspace(const std::string &name, const std::string &xUnit = "Wavelength",
-                                                  const size_t numBins = 5) {
-    std::vector<double> x(numBins);
-    std::vector<double> y(numBins);
-    std::vector<double> e(numBins);
-    for (size_t i = 0; i < numBins; ++i) {
-      x[i] = static_cast<double>(i) + 1.0;
-      y[i] = x[i] * x[i];
-      e[i] = 1000;
-    }
-    std::vector<MatrixWorkspace_sptr> wsVec(4);
-    for (size_t i = 0; i < 4; ++i) {
-      wsVec[i] = generateWorkspace("ws" + std::to_string(i), x, y, e, xUnit);
-    }
-    return groupWorkspaces(name, wsVec);
-  }
-
-  MatrixWorkspace_sptr generateWorkspace(const std::string &name, const std::vector<double> &x,
-                                         const std::vector<double> &y, const std::string &xUnit = "Wavelength") {
-    auto e = std::vector<double>(x.size());
-    for (size_t i = 0; i < e.size(); ++i) {
-      e[i] = 0;
-    }
-    return generateWorkspace(name, x, y, e, xUnit);
-  }
-
-  MatrixWorkspace_sptr generateWorkspace(const std::string &name, const std::vector<double> &x,
-                                         const std::vector<double> &y, const std::vector<double> &e,
-                                         const std::string &xUnit = "Wavelength") {
-    auto createWorkspace = AlgorithmManager::Instance().create("CreateWorkspace");
-    createWorkspace->initialize();
-    createWorkspace->setProperty("DataX", x);
-    createWorkspace->setProperty("DataY", y);
-    createWorkspace->setProperty("DataE", e);
-    createWorkspace->setProperty("UnitX", xUnit);
-    createWorkspace->setProperty("OutputWorkspace", name);
-    createWorkspace->setProperty("Distribution", true);
-    createWorkspace->execute();
-
-    auto convertToHistogram = AlgorithmManager::Instance().create("ConvertToHistogram");
-    convertToHistogram->initialize();
-    convertToHistogram->setProperty("InputWorkspace", name);
-    convertToHistogram->setProperty("OutputWorkspace", name);
-    convertToHistogram->execute();
-
-    MatrixWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(name);
-    return ws;
-  }
-
-  WorkspaceGroup_sptr groupWorkspaces(const std::string &name, const std::vector<MatrixWorkspace_sptr> &wsToGroup) {
-    auto groupWorkspace = AlgorithmManager::Instance().create("GroupWorkspaces");
-    groupWorkspace->initialize();
-    std::vector<std::string> wsToGroupNames(wsToGroup.size());
-    std::transform(wsToGroup.cbegin(), wsToGroup.cend(), wsToGroupNames.begin(),
-                   [](MatrixWorkspace_sptr w) { return w->getName(); });
-    groupWorkspace->setProperty("InputWorkspaces", wsToGroupNames);
-    groupWorkspace->setProperty("OutputWorkspace", name);
-    groupWorkspace->execute();
-    WorkspaceGroup_sptr group = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(name);
-    return group;
-  }
-
-  MatrixWorkspace_sptr generateFunctionDefinedWorkspace(const std::string &name, const std::string &func,
-                                                        const int numBanks = 1) {
-    auto createSampleWorkspace = AlgorithmManager::Instance().create("CreateSampleWorkspace");
-    createSampleWorkspace->initialize();
-    createSampleWorkspace->setProperty("WorkspaceType", "Histogram");
-    createSampleWorkspace->setProperty("OutputWorkspace", name);
-    createSampleWorkspace->setProperty("Function", "User Defined");
-    createSampleWorkspace->setProperty("UserDefinedFunction", "name=UserFunction,Formula=" + func);
-    createSampleWorkspace->setProperty("XUnit", "Wavelength");
-    createSampleWorkspace->setProperty("XMin", "1");
-    createSampleWorkspace->setProperty("XMax", "8");
-    createSampleWorkspace->setProperty("BinWidth", "1");
-    createSampleWorkspace->setProperty("NumBanks", numBanks);
-    createSampleWorkspace->setProperty("BankPixelWidth", 1);
-    createSampleWorkspace->execute();
-
-    MatrixWorkspace_sptr result = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(name);
-    result->setYUnit("");
-    result->setDistribution(true);
-    return result;
-  }
-
-  IAlgorithm_sptr createPolarizerEfficiencyAlgorithm(WorkspaceGroup_sptr inputGrp = nullptr,
-                                                     const bool setOutputWs = true, const bool skipRebin = false) {
-    if (inputGrp == nullptr) {
-      inputGrp = createExampleGroupWorkspace("wsGrp");
-    }
-    if (!skipRebin) {
-      rebinWorkspaces(inputGrp, ANALYSER_EFFICIENCY_WS_NAME);
+  IAlgorithm_sptr createPolarizerEfficiencyAlgorithm(WorkspaceGroup_sptr inputGrp = nullptr) {
+    if (!inputGrp) {
+      auto testParameters = TestWorkspaceParameters();
+      inputGrp = createPolarizedTestGroup("wsGrp", testParameters, std::vector({4.0, 1.0, 1.0, 4.0}));
     }
     auto polarizerEfficiency = AlgorithmManager::Instance().create("PolarizerEfficiency");
     polarizerEfficiency->initialize();
     polarizerEfficiency->setProperty("InputWorkspace", inputGrp->getName());
     polarizerEfficiency->setProperty("AnalyserEfficiency", ANALYSER_EFFICIENCY_WS_NAME);
-    if (setOutputWs) {
-      polarizerEfficiency->setProperty("OutputWorkspace", "psm");
-    }
-    return polarizerEfficiency;
-  }
+    polarizerEfficiency->setProperty("OutputWorkspace", "psm");
 
-  void rebinWorkspaces(WorkspaceGroup_sptr const &inputGrp, std::string const &analyzerWsName) {
-    auto rebin = AlgorithmManager::Instance().create("RebinToWorkspace");
-    rebin->initialize();
-    rebin->setPropertyValue("WorkspaceToRebin", analyzerWsName);
-    rebin->setProperty("WorkspaceToMatch", inputGrp->getItem(0));
-    rebin->setPropertyValue("OutputWorkspace", analyzerWsName);
-    rebin->execute();
+    return polarizerEfficiency;
   }
 };
