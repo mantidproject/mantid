@@ -14,7 +14,7 @@ from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.setting
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import output_settings
 from Engineering.common.calibration_info import CalibrationInfo
 from mantidqt.utils.asynchronous import AsyncTask
-from mantidqt.utils.observer_pattern import GenericObservable
+from mantidqt.utils.observer_pattern import GenericObservable, GenericObserverWithArgPassing
 from mantid.kernel import logger
 
 from qtpy.QtWidgets import QMessageBox
@@ -26,10 +26,12 @@ class FocusPresenter(object):
         self.view = view
         self.worker = None
         self.calibration_observer = CalibrationObserver(self)
+        self.correction_observer = GenericObserverWithArgPassing(self.set_default_files)
 
         # Observable Setup
         self.focus_run_notifier = GenericObservable()
         self.focus_run_notifier_gsas2 = GenericObservable()
+        self.focus_run_notifier_texture = GenericObservable()
 
         # Connect view signals to local methods.
         self.view.set_on_focus_clicked(self.on_focus_clicked)
@@ -44,11 +46,20 @@ class FocusPresenter(object):
         if last_van_path:
             self.view.set_van_file_text_with_search(last_van_path)
 
+        self.set_default_directories()
+
+    def set_default_files(self, filepaths):
+        directory = self.model.get_last_directory(filepaths)
+        self.view.set_default_files(filepaths, directory)
+
     def add_focus_subscriber(self, obs):
         self.focus_run_notifier.add_subscriber(obs)
 
     def add_focus_gsas2_subscriber(self, obs):
         self.focus_run_notifier_gsas2.add_subscriber(obs)
+
+    def add_focus_texture_subscriber(self, obs):
+        self.focus_run_notifier_texture.add_subscriber(obs)
 
     def on_focus_clicked(self):
         if not self._validate():
@@ -81,11 +92,15 @@ class FocusPresenter(object):
         self.emit_enable_button_signal()
         self.focus_run_notifier.notify_subscribers(self.model.get_last_focused_files())
         self.focus_run_notifier_gsas2.notify_subscribers(self.model.get_last_focused_files_gsas2())
+        self.focus_run_notifier_texture.notify_subscribers(self.model.get_last_focused_files_texture())
 
     def set_instrument_override(self, instrument):
         instrument = INSTRUMENT_DICT[instrument]
         self.view.set_instrument_override(instrument)
         self.instrument = instrument
+
+    def set_default_directories(self):
+        self.view.set_finder_last_directory(output_settings.get_output_path())
 
     def set_rb_num(self, rb_num):
         self.rb_num = rb_num
