@@ -8,7 +8,6 @@
 import unittest
 from mantid.geometry import PointGroup, PointGroupFactory
 from mantid.kernel import V3D
-from ast import literal_eval
 
 
 class PointGroupTest(unittest.TestCase):
@@ -68,7 +67,7 @@ class PointGroupTest(unittest.TestCase):
         self.assertEqual(expected_str, str(pg))
         self.assertEqual(expected_repr, pg.__repr__())
 
-        newPg = literal_eval(pg.__repr__())
+        newPg = eval(pg.__repr__())  # noqa: S307
         self.assertEqual(pg.getHMSymbol(), newPg.getHMSymbol())
 
 

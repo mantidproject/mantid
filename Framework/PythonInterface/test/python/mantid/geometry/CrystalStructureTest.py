@@ -7,7 +7,6 @@
 # pylint: disable=no-init,invalid-name,too-many-public-methods,broad-except
 import unittest
 from mantid.geometry import CrystalStructure
-from ast import literal_eval
 
 
 class CrystalStructureTest(unittest.TestCase):
@@ -74,7 +73,7 @@ class CrystalStructureTest(unittest.TestCase):
         self.assertEqual(expected_str, str(structure))
         self.assertEqual(expected_repr, structure.__repr__())
 
-        newStructure = literal_eval(structure.__repr__())
+        newStructure = eval(structure.__repr__())  # noqa: S307
         self.assertEqual(structure.getUnitCell().a(), newStructure.getUnitCell().a())
 
 

@@ -37,7 +37,9 @@ class ISISDirectInelasticConfigTest(unittest.TestCase):
             if platform.system() == "Windows":
                 targetDir = str(os.environ["TEMP"])
             else:
-                targetDir = tempfile.TemporaryDirectory(delete=False).name
+                # Keep directory alive outside function
+                self._target_dir = tempfile.TemporaryDirectory()
+                targetDir = self._target_dir.name
         return targetDir
 
     def write_test_file(self, filename):

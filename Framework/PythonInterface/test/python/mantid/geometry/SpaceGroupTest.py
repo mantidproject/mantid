@@ -7,7 +7,6 @@
 # pylint: disable=no-init,invalid-name,too-many-public-methods
 import unittest
 from mantid.geometry import SpaceGroupFactory, UnitCell
-from ast import literal_eval
 
 
 class SpaceGroupTest(unittest.TestCase):
@@ -169,7 +168,7 @@ class SpaceGroupTest(unittest.TestCase):
         self.assertEqual(expected_str, str(spaceGroup))
         self.assertEqual(expected_repr, spaceGroup.__repr__())
 
-        newSpaceGroup = literal_eval(spaceGroup.__repr__())
+        newSpaceGroup = eval(spaceGroup.__repr__())  # noqa: S307
         self.assertEqual(spaceGroup.getHMSymbol(), newSpaceGroup.getHMSymbol())
 
     def checkWyckoffPositions(self, spaceGroup, wyckoffs):

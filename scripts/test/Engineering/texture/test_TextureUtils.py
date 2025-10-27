@@ -112,7 +112,7 @@ class TextureUtilsTest(CrystalPhaseHelperMixin, unittest.TestCase):
                 eval_point="1.54",
                 eval_units="Angstrom",
                 exp_name="exp1",
-                root_dir=d.name,
+                root_dir=d,
                 include_div_corr=True,
                 div_hoz=1.0,
                 div_vert=1.0,

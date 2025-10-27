@@ -449,7 +449,7 @@ class TextureCorrectionModelTest(unittest.TestCase):
         mock_table = MagicMock()
         mock_create.return_value = mock_table
         with tempfile.TemporaryDirectory() as d:
-            self.model.write_atten_val_table("ws1", [3.14], 2.0, "Wavelength", "rb123", mock.MagicMock(), d.name)
+            self.model.write_atten_val_table("ws1", [3.14], 2.0, "Wavelength", "rb123", mock.MagicMock(), d)
         mock_save.assert_called()
 
     @patch(correction_model_path + ".SaveNexus")
@@ -460,7 +460,7 @@ class TextureCorrectionModelTest(unittest.TestCase):
         calib = MagicMock()
         calib.group = "CUSTOM"
         with tempfile.TemporaryDirectory() as d:
-            self.model._save_corrected_files("ws", d.name, "AbsorptionCorrection", "RB123", calib.group)
+            self.model._save_corrected_files("ws", d, "AbsorptionCorrection", "RB123", calib.group)
         mock_makedirs.assert_called()
         mock_save.assert_called()
 

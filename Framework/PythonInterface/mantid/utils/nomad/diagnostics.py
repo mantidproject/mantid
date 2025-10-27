@@ -234,9 +234,8 @@ class _NOMADMedianDetectorTest:
         not_collimated_uppers = np.repeat(not_collimated_uppers, instrument_config.num_pixels_per_tube)
         not_collimated_masks = (pixel_collimation_states == CollimationLevel.Empty.value).astype(int)
         # sanity check
-        if not_collimated_lowers.shape != (instrument_config.num_pixels,) or not_collimated_masks.shape != not_collimated_uppers.shape:
-            raise ValueError("Incorrect shape of tubes array")
-
+        assert not_collimated_lowers.shape == (instrument_config.num_pixels,)
+        assert not_collimated_masks.shape == not_collimated_uppers.shape
         # Calculate boundary for full collimated pixels
         # condition 3:
         full_collimated_lowers = (1.0 + (low_pixel - 1) * 3.0) * tube_m_array
@@ -255,16 +254,14 @@ class _NOMADMedianDetectorTest:
         half_collimated_lowers = np.repeat(half1_collimated_lowers, 2)
         half_collimated_lowers[1::2] = half2_collimated_lowers
         half_collimated_lowers = np.repeat(half_collimated_lowers, instrument_config.num_pixels_per_tube // 2)
-        if half_collimated_lowers.shape != (instrument_config.num_pixels,):
-            raise ValueError("Wrong shape of half_collimated tube array")
+        assert half_collimated_lowers.shape == (instrument_config.num_pixels,)
 
         half_collimated_uppers = (1.0 + (high_pixel - 1) * 3.0) * tube_m1_array
         half2_collimated_uppers = (1.0 + (high_pixel - 1) * 3.0) * tube_m2_array
         half_collimated_uppers = np.repeat(half_collimated_uppers, 2)
         half_collimated_uppers[1::2] = half2_collimated_uppers
         half_collimated_uppers = np.repeat(half_collimated_uppers, instrument_config.num_pixels_per_tube // 2)
-        if half_collimated_uppers.shape != (instrument_config.num_pixels,):
-            raise ValueError("Wrong shape of half_collimated tube array")
+        assert half_collimated_uppers.shape == (instrument_config.num_pixels,)
         half_collimated_masks = (pixel_collimation_states == CollimationLevel.Half.value).astype(int)
 
         # Combine
@@ -308,8 +305,7 @@ class _NOMADMedianDetectorTest:
             spectrum_index += 1
         # sum counts for each detector histogram
         intensities = np.sum(intensities_workspace.extractY()[spectrum_index:], axis=1)
-        if len(intensities) != self.PIXEL_COUNT:
-            raise RuntimeError("Different number of intensities to pixels")
+        assert len(intensities) == self.PIXEL_COUNT
         return np.ma.masked_array(intensities, mask=~self.pixel_in_use)  # mask unused pixels
 
     @property

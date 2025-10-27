@@ -59,13 +59,14 @@ foo()
         expected_lines = [
             "NameError:.*'_local'.*",
             r'  File ".*test_errorformatter.py", line \d+, in test_standard_exception',
-            "    exec(.*)",
+            "    exec(.*).*",
+            r"    \^+",
             r'  File "<string>", line \d+, in <module>',
             r'  File "<string>", line \d+, in foo',
             r'  File "<string>", line \d+, in bar',
         ]
         for produced, expected in zip(error_lines, expected_lines):
-            self.assertRegexpMatches(produced, expected)
+            self.assertRegex(produced, expected)
 
 
 if __name__ == "__main__":

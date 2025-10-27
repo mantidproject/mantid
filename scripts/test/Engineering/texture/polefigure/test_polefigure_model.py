@@ -142,7 +142,7 @@ class TextureProjectionTest(unittest.TestCase):
     @patch(correction_model_path + ".makedirs")
     def test_get_save_dirs_creates_directories(self, mock_makedirs, mock_exists):
         with tempfile.TemporaryDirectory() as d:
-            dirs = self.model.get_save_dirs(d.name, "pf", "RB123", grouping="G")
+            dirs = self.model.get_save_dirs(d, "pf", "RB123", grouping="G")
         self.assertEqual(len(dirs), 2)
         mock_makedirs.assert_called()
 
@@ -150,7 +150,7 @@ class TextureProjectionTest(unittest.TestCase):
     @patch(correction_model_path + ".SaveAscii")
     def test_save_files_calls_both_savers(self, mock_ascii, mock_nexus):
         with tempfile.TemporaryDirectory() as d:
-            self.model._save_files("ws1", [d.name])
+            self.model._save_files("ws1", [d])
         mock_ascii.assert_called_once()
         mock_nexus.assert_called_once()
 

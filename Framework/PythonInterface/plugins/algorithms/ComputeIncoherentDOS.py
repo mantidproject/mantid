@@ -9,7 +9,6 @@ from scipy import constants
 from mantid.kernel import CompositeValidator, Direction, FloatBoundedValidator
 from mantid.api import AlgorithmFactory, CommonBinsValidator, HistogramValidator, MatrixWorkspaceProperty, PythonAlgorithm
 from mantid.simpleapi import CloneWorkspace, Rebin, Rebin2D, ScaleX, Transpose
-from ast import literal_eval
 
 
 class UnitError(ValueError):
@@ -36,7 +35,7 @@ def evaluateEbin(Emin, Emax, Ei, strn):
     if len(splits) < 2 or len(splits) > 3:
         raise ValueError("EnergyBinning must be a comma separated string with two or three values.")
     try:
-        out = [literal_eval(estr, None, {"Emax": Emax, "Emin": Emin, "Ei": Ei}) for estr in splits]
+        out = [eval(estr, None, {"Emax": Emax, "Emin": Emin, "Ei": Ei}) for estr in splits]  # noqa: S307
     except NameError:
         raise ValueError("Malformed EnergyBinning. Only the variables 'Emin', 'Emax' or 'Ei' are allowed.")
     except:
@@ -49,7 +48,7 @@ def evaluateQRange(Qmin, Qmax, strn):
     if len(splits) != 2:
         raise ValueError("QSumRange must be a comma separated string with two values.")
     try:
-        out = [literal_eval(qstr, None, {"Qmin": Qmin, "Qmax": Qmax}) for qstr in splits]
+        out = [eval(qstr, None, {"Qmin": Qmin, "Qmax": Qmax}) for qstr in splits]  # noqa: S307
     except NameError:
         raise ValueError("Malformed QSumRange. Only the variables 'Qmin' and 'Qmax' are allowed.")
     except:
@@ -62,7 +61,7 @@ def evaluateTwoThetaRange(Twothetamin, Twothetamax, strn):
     if len(splits) != 2:
         raise ValueError("TwoThetaSumRange must be a comma separated string with two values.")
     try:
-        out = [literal_eval(tstr, None, {"Twothetamin": Twothetamin, "Twothetamax": Twothetamax}) for tstr in splits]
+        out = [eval(tstr, None, {"Twothetamin": Twothetamin, "Twothetamax": Twothetamax}) for tstr in splits]  # noqa: S307
     except NameError:
         raise ValueError("Malformed TwoThetaSumRange. Only the variables 'Twothetamin' and 'Twothetamax' are allowed.")
     except:

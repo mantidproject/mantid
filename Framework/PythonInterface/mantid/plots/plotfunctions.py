@@ -72,8 +72,7 @@ def figure_title(workspaces, fig_num):
         # assume a single workspace
         first = workspaces
     else:
-        if len(workspaces) == 0:
-            raise ValueError("workspaces is empty")
+        assert len(workspaces) > 0
         first = workspaces[0]
 
     return wsname(first) + "-" + str(fig_num)
@@ -170,8 +169,7 @@ def plot(
     # a new one will be drawn later
     axes = [MantidAxes.from_mpl_axes(ax, ignore_artists=[Legend]) if not isinstance(ax, MantidAxes) else ax for ax in axes]
 
-    if not axes:
-        raise RuntimeError("No axes are associated with this plot")
+    assert axes, "No axes are associated with this plot"
 
     if tiled:
         ws_index = [(ws, index) for ws in workspaces for index in nums]
@@ -444,8 +442,7 @@ def get_plot_fig(overplot=None, ax_properties=None, window_title=None, axes_num=
 # Private Methods
 # -----------------------------------------------------------------------------
 def _unpack_grouped_workspaces(mixed_list: List):
-    if not isinstance(mixed_list, list):
-        raise ValueError(f"Expected list of group + non-group workspaces, got {repr(mixed_list)}")
+    assert isinstance(mixed_list, list), f"Expected list of group + non-group workspaces, got {repr(mixed_list)}"
     ret = []
     for ws in mixed_list:
         ret.extend([i for i in ws]) if isinstance(ws, WorkspaceGroup) else ret.append(ws)
