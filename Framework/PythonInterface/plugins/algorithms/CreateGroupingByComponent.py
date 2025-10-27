@@ -48,6 +48,12 @@ class CreateGroupingByComponent(PythonAlgorithm):
             direction=Direction.Input,
             doc="Search String for determining which components should be grouped, such components MUST NOT contain this string",
         )
+        self.declareProperty(
+            "ExcludeBranches",
+            "",
+            direction=Direction.Input,
+            doc="Search String for flagging any components which should not be searched through when looking for the target strings",
+        )
         positive_int_validator = IntBoundedValidator(lower=1)
         self.declareProperty(
             "GroupSubdivision",
@@ -79,17 +85,17 @@ class CreateGroupingByComponent(PythonAlgorithm):
 
         num_divisions = self.getProperty("GroupSubdivision").value
 
+        exclude_branch_strings = self.getProperty("ExcludeBranches").value
+        self.exclude_branches = [branch.strip() for branch in exclude_branch_strings.split(",")] if exclude_branch_strings else None
+
         self.info = ws.componentInfo()
         self.detinfo = ws.detectorInfo()
         self.dets = self.detinfo.detectorIDs()
         self.instr_dets = self.info.detectorsInSubtree(self.info.root())
 
-        idx = self.info.root()
-        subtree = list(self.info.componentsInSubtree(idx))
+        idx_root = self.info.root()
 
-        parents_with_any_target_descendant = [int(p) for p in subtree if self.has_target_descendant(int(p))]
-
-        direct_parents = [p for p in parents_with_any_target_descendant if np.any([self.is_target(int(c)) for c in self.info.children(p)])]
+        direct_parents = self.direct_parents_of_targets(idx_root)
 
         group_string = ",".join([self.get_component_group_string(p, num_divisions) for p in direct_parents])
 
@@ -123,12 +129,24 @@ class CreateGroupingByComponent(PythonAlgorithm):
     def is_target_exclude(self, idx):
         return self.is_target_include(idx) and not self.component_name_contains(idx, self.null)
 
-    def has_target_descendant(self, idx):
-        for c in self.info.children(idx):
-            c = int(c)
-            if self.is_target(c) or self.has_target_descendant(c):
-                return True
+    def branch_should_be_excluded(self, idx):
+        if self.exclude_branches:
+            return np.any([self.component_name_contains(idx, branch) for branch in self.exclude_branches])
         return False
+
+    def direct_parents_of_targets(self, root_idx: int):
+        parents = set()
+        stack = [int(root_idx)]
+        while stack:
+            idx = stack.pop()
+            if self.branch_should_be_excluded(idx):
+                continue
+            children = [int(c) for c in self.info.children(idx)]
+            # if any child is a target, this node is a direct parent
+            if any(self.is_target(c) for c in children):
+                parents.add(idx)
+            stack.extend(c for c in children if not self.is_target(c))
+        return sorted(parents)
 
     def get_det_id(self, comp_ind):
         return str(self.dets[np.where(self.instr_dets == comp_ind)][0])
