@@ -341,7 +341,7 @@ void AlgorithmPropertiesWidget::replaceWSClicked(const QString &propName) {
  * @param property :: the property that allows to check for the settings.
  * @param propName :: The name of the property
  */
-bool AlgorithmPropertiesWidget::isWidgetEnabled(Property *property, const QString &propName) const {
+bool AlgorithmPropertiesWidget::isWidgetEnabled(const Property *property, const QString &propName) const {
   // To avoid errors
   if (propName.isEmpty())
     return true;
