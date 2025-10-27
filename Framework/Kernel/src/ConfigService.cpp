@@ -1267,7 +1267,7 @@ std::string ConfigServiceImpl::getAppDataDir() {
   path /= applicationName;
   return path.string();
 #else // linux and mac
-  const char* home = std::getenv("HOME");
+  const char *home = std::getenv("HOME");
   if (!home) {
     throw std::runtime_error("HOME environment variable not set");
   }
