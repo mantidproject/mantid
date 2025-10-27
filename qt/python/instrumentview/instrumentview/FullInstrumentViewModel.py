@@ -320,3 +320,19 @@ class FullInstrumentViewModel:
                     detector_peaks.append(DetectorPeaks(list(peaks_for_id)))
             peaks_grouped_by_ws.append(detector_peaks)
         return peaks_grouped_by_ws
+
+    def relative_detector_angle(self) -> float:
+        picked_ids = self.picked_detector_ids
+        if len(picked_ids) != 2:
+            raise RuntimeError("Relative detector angle only valid when two detectors are selected")
+        q_lab_1 = self._calculate_q_lab_direction(picked_ids[0])
+        q_lab_2 = self._calculate_q_lab_direction(picked_ids[1])
+        return np.degrees(np.arccos(np.clip(np.dot(q_lab_1, q_lab_2), -1.0, 1.0)))
+
+    def _calculate_q_lab_direction(self, detector_id: int) -> np.ndarray:
+        detector_info = self.workspace.detectorInfo()
+        detector_index = detector_info.indexOf(int(detector_id))
+        two_theta = detector_info.twoTheta(detector_index)
+        phi = detector_info.azimuthal(detector_index)
+        q_lab = np.array([-np.sin(two_theta) * np.cos(phi), -np.sin(two_theta) * np.sin(phi), 1 - np.cos(two_theta)])
+        return q_lab / np.linalg.norm(q_lab)
