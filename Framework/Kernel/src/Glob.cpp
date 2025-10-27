@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/Glob.h"
+#include <Poco/Path.h>
 
 namespace Mantid::Kernel {
 
@@ -26,11 +27,13 @@ namespace Mantid::Kernel {
  *    It seems that whatever bug Poco had is fixed now.
  *    So calling Poco::Glob::glob(pathPattern,files,options) inside.
  *
- *    @param pathPattern :: The search pattern
+ *    @param pathPattern :: The search pattern as a string
  *    @param files :: The names of the files that match the pattern
  *    @param options :: Options
  */
-void Glob::glob(const Poco::Path &pathPattern, std::set<std::string> &files, int options) {
+void Glob::glob(const std::string &pathPattern, std::set<std::string> &files, int options) {
+  // Convert string to Poco::Path for use with Poco::Glob
+  Poco::Path pocoPath(pathPattern);
 #ifdef _WIN32
   // There appears to be a bug in the glob for windows.
   // Putting case sensitive on then with reference to test
@@ -40,9 +43,9 @@ void Glob::glob(const Poco::Path &pathPattern, std::set<std::string> &files, int
   // the case is wrong, but for some strange reason it then cannot find
   // IDF_for_UNiT_TESTiNG.xMl!!!!
   // Hence the reason to circumvent this by this #ifdef
-  Poco::Glob::glob(Poco::Path(pathPattern.toString()), files, Poco::Glob::GLOB_CASELESS);
+  Poco::Glob::glob(pocoPath, files, Poco::Glob::GLOB_CASELESS);
 #else
-  Poco::Glob::glob(Poco::Path(pathPattern.toString()), files, options);
+  Poco::Glob::glob(pocoPath, files, options);
 #endif
 }
 
