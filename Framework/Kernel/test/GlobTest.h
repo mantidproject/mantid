@@ -25,9 +25,7 @@ public:
   static GlobTest *createSuite() { return new GlobTest(); }
   static void destroySuite(GlobTest *suite) { delete suite; }
 
-  GlobTest() {
-    base = std::filesystem::path(ConfigService::Instance().getInstrumentDirectory()).parent_path();
-  }
+  GlobTest() { base = std::filesystem::path(ConfigService::Instance().getInstrumentDirectory()).parent_path(); }
 
   void test_Glob() {
     std::string pattern = base.string() + "/Framework/*/CMakeLists.*t";
