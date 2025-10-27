@@ -7,8 +7,8 @@
 import unittest
 
 from unittest import mock
-from unittest.mock import patch
-from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.focus import model, view, presenter
+from unittest.mock import patch, MagicMock
+from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.focus import presenter
 from Engineering.common.calibration_info import CalibrationInfo
 
 tab_path = "mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.focus"
@@ -16,8 +16,8 @@ tab_path = "mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.focu
 
 class FocusPresenterTest(unittest.TestCase):
     def setUp(self):
-        self.view = mock.create_autospec(view.FocusView, instance=True)
-        self.model = mock.create_autospec(model.FocusModel, instance=True)
+        self.view = MagicMock()
+        self.model = MagicMock()
         self.presenter = presenter.FocusPresenter(self.model, self.view)
         self.presenter.current_calibration = mock.create_autospec(CalibrationInfo, instance=True)
 

@@ -6,14 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from numpy import array, argsort
 
-from mantid.simpleapi import (
-    Load,
-    logger,
-    DeleteWorkspace,
-    EnggEstimateFocussedBackground,
-    SetUncertainties,
-    Minus,
-)
+from mantid.simpleapi import Load, logger, DeleteWorkspace, EnggEstimateFocussedBackground, SetUncertainties, Minus, ExtractSingleSpectrum
 
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import output_settings
@@ -24,6 +17,7 @@ from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.outp
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.workspace_record import FittingWorkspaceRecordContainer
 from mantid.api import AnalysisDataService as ADS
 from matplotlib.pyplot import subplots
+import os
 
 
 class FittingDataModel(object):
@@ -70,7 +64,14 @@ class FittingDataModel(object):
                         self._last_added.append(ws_name)
                         self._data_workspaces.add(ws_name, loaded_ws=ws)
                     else:
-                        logger.warning(f"Invalid number of spectra in workspace {ws_name}. Skipping loading of file.")
+                        for ispec in range(ws.getNumberHistograms()):
+                            # expect the spec number in front of unit, these should be the only two permitted units
+                            spec_ws_name = ws_name.replace("dSpacing", f"{ispec}_dSpacing").replace("TOF", f"{ispec}_TOF")
+                            if spec_ws_name.find(f"_{ispec}_") == -1:
+                                logger.error("Expect unit: dSpacing/TOF in the workspace name for subsequent extraction of bank id")
+                            spec_ws = ExtractSingleSpectrum(InputWorkspace=ws, OutputWorkspace=spec_ws_name, WorkspaceIndex=ispec)
+                            self._last_added.append(spec_ws_name)
+                            self._data_workspaces.add(spec_ws_name, loaded_ws=spec_ws)
                 except RuntimeError as e:
                     logger.error(f"Failed to load file: {filename}. Error: {e}. \n Continuing loading of other files.")
             else:
@@ -79,6 +80,16 @@ class FittingDataModel(object):
 
     def get_last_added(self):
         return self._last_added
+
+    @staticmethod
+    def get_last_directory(filepaths):
+        directories = set()
+        directory = None
+        for filepath in filepaths:
+            directory, discard = os.path.split(filepath)
+            directories.add(directory)
+        if len(directories) == 1:
+            return directory
 
     def get_loaded_ws_list(self):
         return list(self._data_workspaces.get_loaded_ws_dict().keys())
@@ -283,3 +294,7 @@ class FittingDataModel(object):
             # settings can only be saved as text
             ws_list_tof = ws_list_tof[::-1]
         return ws_list_tof
+
+    @staticmethod
+    def texture_auto_populate():
+        return get_setting(output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX, "auto_pop_texture", bool)
