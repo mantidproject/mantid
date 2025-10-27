@@ -34,7 +34,7 @@ class LagrangeInstrument(IndirectInstrument):
         abs_resolution_cm = abs_resolution_meV * MILLI_EV_TO_WAVENUMBER
         width = frequencies * ei_resolution + abs_resolution_cm
 
-        low_energy_indices = frequencies < (self.get_parameter("low_energy_cutoff_meV", default=float("-Inf")))
+        low_energy_indices = frequencies / MILLI_EV_TO_WAVENUMBER < (self.get_parameter("low_energy_cutoff_meV", default=float("-Inf")))
         width[low_energy_indices] = self.get_parameter("low_energy_resolution_meV", default=0.0) * MILLI_EV_TO_WAVENUMBER
         return width / 2  # Lagrange reported resolution seems to equal 2*sigma
 
