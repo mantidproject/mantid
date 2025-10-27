@@ -53,7 +53,7 @@ bool SetDefaultWhenProperty::applyChanges(const IPropertyManager *algo, const st
       currentProperty->setIsDynamicDefault(true);
       return true;
     }
-  } catch (const Exception::NotFoundError &e) {
+  } catch (const Exception::NotFoundError &) {
     g_log.warning() << "`SetDefaultWhenProperty::applyChanges`: one of the properies '" << currentPropName << "' or '"
                     << m_watchedPropName << "\n"
                     << "   is not present on the algorithm.\n";

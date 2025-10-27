@@ -51,7 +51,7 @@ bool SetValueWhenProperty::applyChanges(const IPropertyManager *algo, const std:
       return true;
     }
     return false;
-  } catch (const Exception::NotFoundError &e) {
+  } catch (const Exception::NotFoundError &) {
     g_log.warning() << "`SetValueWhenProperty::applyChanges`: one of the properies '" << currentPropName << "' or '"
                     << m_watchedPropName << "\n"
                     << "   is not present on the algorithm.\n";
