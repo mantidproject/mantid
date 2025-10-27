@@ -903,4 +903,38 @@ public:
     TS_ASSERT_EQUALS(splitter3.getNameTargetMap(), splitter1.getNameTargetMap())
     TS_ASSERT_EQUALS(splitter3.getTargetNameMap(), splitter1.getTargetNameMap())
   }
+
+  void test_calculate_target_indices() {
+    TimeSplitter splitter;
+    splitter.addROI(ONE, TWO, 1);
+    splitter.addROI(TWO, THREE, 2);
+    splitter.addROI(FOUR, FIVE, 3); // a gap with the previous ROI
+
+    std::vector<DateAndTime> times{ONE - 100.0,  ONE + 100.0,  TWO + 100.0, THREE + 100.0,
+                                   FOUR - 100.0, FOUR + 100.0, FIVE + 100.0};
+    const auto target_to_pulse_indices = splitter.calculate_target_indices(times);
+    TS_ASSERT_EQUALS(target_to_pulse_indices.size(), 3);
+
+    {
+      auto [target, pulse_indices] = target_to_pulse_indices.at(0);
+      TS_ASSERT_EQUALS(target, 1);
+      auto [start, stop] = pulse_indices;
+      TS_ASSERT_EQUALS(start, 1);
+      TS_ASSERT_EQUALS(stop, 2);
+    }
+    {
+      auto [target, pulse_indices] = target_to_pulse_indices.at(1);
+      TS_ASSERT_EQUALS(target, 2);
+      auto [start, stop] = pulse_indices;
+      TS_ASSERT_EQUALS(start, 2);
+      TS_ASSERT_EQUALS(stop, 3);
+    }
+    {
+      auto [target, pulse_indices] = target_to_pulse_indices.at(2);
+      TS_ASSERT_EQUALS(target, 3);
+      auto [start, stop] = pulse_indices;
+      TS_ASSERT_EQUALS(start, 5);
+      TS_ASSERT_EQUALS(stop, 6);
+    }
+  }
 };

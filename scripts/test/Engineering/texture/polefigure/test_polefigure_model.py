@@ -1,3 +1,10 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2025 ISIS Rutherford Appleton Laboratory UKRI,
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
+# SPDX - License - Identifier: GPL - 3.0 +
+#
 import unittest
 from unittest.mock import patch, MagicMock
 import numpy as np
@@ -90,7 +97,7 @@ class TextureProjectionTest(unittest.TestCase):
     def test_get_pf_table_name_with_hkl(self, mock_ads):
         mock_ads.retrieve.return_value = self.mock_ws
         table_name, grouping = self.model.get_pf_table_name(["ws1", "ws2"], ["param_ws1", "param_ws2"], [1, 1, 1], "I")
-        self.assertEqual("instrument_123456-123456_111_Texture20_pf_table_I", table_name)
+        self.assertEqual("111_instrument_123456-123456_Texture20_pf_table_I", table_name)
 
     @patch(correction_model_path + ".ADS")
     def test_get_pf_table_name_with_no_hkl_and_no_params(self, mock_ads):
@@ -110,7 +117,7 @@ class TextureProjectionTest(unittest.TestCase):
 
         mock_ads.retrieve.side_effect = get_ads_ws
         table_name, grouping = self.model.get_pf_table_name(["ws1", "ws2"], ["param_ws1", "param_ws2"], None, "I")
-        self.assertEqual("instrument_123456-123456_2.0_Texture20_pf_table_I", table_name)
+        self.assertEqual("2.0_instrument_123456-123456_Texture20_pf_table_I", table_name)
 
     def test_parse_hkl_valid(self):
         hkl = self.model.parse_hkl("1", "2", "3")
@@ -119,24 +126,6 @@ class TextureProjectionTest(unittest.TestCase):
     def test_parse_hkl_invalid(self):
         hkl = self.model.parse_hkl("a", "b", "c")
         self.assertIsNone(hkl)
-
-    @patch(correction_model_path + ".ADS")
-    def test_set_ws_xtal_sets_structure(self, mock_ads):
-        mock_ws = MagicMock()
-        mock_ads.retrieve.return_value = mock_ws
-        with patch(correction_model_path + ".CrystalStructure") as mock_cryst, patch(correction_model_path + ".logger") as mock_logger:
-            self.model.set_ws_xtal("ws", "4.0 4.0 4.0 90 90 90", "P 1", "Fe")
-            mock_cryst.assert_called_once()
-            mock_logger.notice.assert_called_once_with("Crystal Structure Set")
-
-    @patch(correction_model_path + ".ADS")
-    def test_copy_xtal_to_all(self, mock_ads):
-        ref_ws = MagicMock()
-        xtal = MagicMock()
-        ref_ws.sample().getCrystalStructure.return_value = xtal
-        mock_ads.retrieve.side_effect = lambda name: ref_ws if name == "ref" else MagicMock()
-        self.model.copy_xtal_to_all("ref", ["w1", "w2"])
-        self.assertEqual(mock_ads.retrieve.call_count, 3)  # 1 for ref + 2 for targets
 
     @patch(correction_model_path + ".path.exists", return_value=False)
     @patch(correction_model_path + ".makedirs")
@@ -157,9 +146,11 @@ class TextureProjectionTest(unittest.TestCase):
     @patch(correction_model_path + ".ADS")
     def test_read_param_cols_returns_names_and_index(self, mock_ads):
         mock_ws = MagicMock()
-        mock_ws.getColumnNames.return_value = ["I", "A", "B"]
+        mock_ws.getColumnNames.return_value = ["bank", "I", "A", "B"]
+        mock_ws.columnTypes.return_value = ["str", "double", "double", "double"]
         mock_ads.retrieve.return_value = mock_ws
         names, index = self.model.read_param_cols("ws1", "I")
+        # the bank (string data) column should not be a valid option
         self.assertEqual(names, ["I", "A", "B"])
         self.assertEqual(index, 0)
 

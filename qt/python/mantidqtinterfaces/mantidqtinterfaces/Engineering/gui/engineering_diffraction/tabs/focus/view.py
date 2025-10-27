@@ -96,3 +96,13 @@ class FocusView(QtWidgets.QWidget, Ui_focus):
         self.setTabOrder(self.finder_focus, self.finder_vanadium)
         self.setTabOrder(self.finder_vanadium, self.check_plotOutput)
         self.setTabOrder(self.check_plotOutput, self.button_focus)
+
+    def set_default_files(self, filepaths, directory):
+        if not filepaths:
+            return
+        self.finder_focus.setUserInput(",".join(filepaths))
+        if directory:
+            self.set_finder_last_directory(directory)
+
+    def set_finder_last_directory(self, directory):
+        self.finder_focus.setLastDirectory(directory)

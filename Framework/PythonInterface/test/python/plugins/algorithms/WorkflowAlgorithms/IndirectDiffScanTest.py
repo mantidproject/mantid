@@ -15,7 +15,7 @@ class IndirectDiffScanTest(unittest.TestCase):
         Sanity test to ensure the most basic reduction actually completes.
         """
 
-        IndirectDiffScan(InputFiles=["IRS26176.RAW"], Instrument="IRIS", SpectraRange=[105, 112])
+        IndirectDiffScan(InputFiles=["IRS26176.raw"], Instrument="IRIS", SpectraRange=[105, 112])
 
         wks = mtd["Output"]
         self.assertTrue(isinstance(wks, WorkspaceGroup), "Result workspace should be a workspace group.")
@@ -34,7 +34,7 @@ class IndirectDiffScanTest(unittest.TestCase):
         Test reducing multiple files.
         """
 
-        IndirectDiffScan(InputFiles=["IRS26176.RAW", "IRS26173.RAW"], Instrument="IRIS", SpectraRange=[105, 112])
+        IndirectDiffScan(InputFiles=["IRS26176.raw", "IRS26173.raw"], Instrument="IRIS", SpectraRange=[105, 112])
 
         wks = mtd["Output"]
         self.assertTrue(isinstance(wks, WorkspaceGroup), "Result workspace should be a workspace group.")
