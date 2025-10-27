@@ -1549,11 +1549,9 @@ private:
   void assert_bin_values(const MatrixWorkspace_sptr &ws, bool compareEdges, const std::vector<size_t> &indexList,
                          const std::vector<double> &values, const int wsIndex = 0) {
     for (size_t index = 0; index < indexList.size(); ++index) {
-      if (compareEdges) {
-        TS_ASSERT_DELTA(ws->binEdges(wsIndex)[indexList.at(index)], values.at(index), 1e-4);
-      } else {
-        TS_ASSERT_DELTA(ws->counts(wsIndex)[indexList.at(index)], values.at(index), 1e-4);
-      }
+      const auto refValue =
+          compareEdges ? ws->binEdges(wsIndex)[indexList.at(index)] : ws->counts(wsIndex)[indexList.at(index)];
+      TS_ASSERT_DELTA(refValue, values.at(index), 1e-4);
     }
   }
 
