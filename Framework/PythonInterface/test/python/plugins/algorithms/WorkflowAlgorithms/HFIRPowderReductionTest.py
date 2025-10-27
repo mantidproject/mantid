@@ -110,6 +110,23 @@ class LoadInputErrorMessages(unittest.TestCase):
         self.assertIn("XMax", error_msg)
         self.assertIn("XMax must be provided", error_msg)
 
+        # Test that XMin >= XMax raises a RuntimeError
+        with self.assertRaises(RuntimeError) as cm:
+            HFIRPowderReduction(SampleFilename="HB2C_7000.nxs.h5", XMin=10.0, XMax=5.0, Instrument="WAND^2")
+
+        error_msg = str(cm.exception)
+        self.assertIn("XMin", error_msg)
+        self.assertIn("XMax", error_msg)
+        self.assertIn("XMin (10.0) cannot be greater than or equal to XMax (5.0)", error_msg)
+
+        # Test that XMin and XMax of different lengths raises a RuntimeError
+        with self.assertRaises(RuntimeError) as cm:
+            HFIRPowderReduction(SampleFilename="HB2C_7000.nxs.h5", XMin=[1.0, 2.0], XMax=[5.0], Instrument="WAND^2")
+        error_msg = str(cm.exception)
+        self.assertIn("XMin", error_msg)
+        self.assertIn("XMax", error_msg)
+        self.assertIn("XMin and XMax do not define same number of spectra (2 != 1)", error_msg)
+
     def test_validate_instrument(self):
         # Test that missing Instrument raises a RuntimeError
         with self.assertRaises(RuntimeError) as cm:

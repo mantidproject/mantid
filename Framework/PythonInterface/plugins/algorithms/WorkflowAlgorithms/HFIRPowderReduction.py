@@ -169,6 +169,21 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
         xMaxBool = len(self.getProperty("XMax").value)
         if xMaxBool == 0:
             issues["XMax"] = "XMax must be provided"
+
+        size = xMinBool
+        xmins = self.getProperty("XMin").value
+        xmaxs = self.getProperty("XMax").value
+        if (xMinBool != xMaxBool) and (xMinBool and xMaxBool):
+            msg = f"XMin and XMax do not define same number of spectra ({xMinBool} != {xMaxBool})"
+            issues["XMin"] = msg
+            issues["XMax"] = msg
+        elif xMinBool and xMaxBool:
+            for i in range(size):
+                if xmins[i] >= xmaxs[i]:
+                    msg = f"XMin ({xmins[i]}) cannot be greater than or equal to XMax ({xmaxs[i]})"
+                    issues["XMin"] = msg
+                    issues["XMax"] = msg
+
         wavelength = self.getProperty("Wavelength").value
         if wavelength == Property.EMPTY_DBL:
             issues["Wavelength"] = "Wavelength must be provided"
