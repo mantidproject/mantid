@@ -26,6 +26,7 @@ class QAppThreadCall(QObject):
         """Encapsulate the arguments to a callable"""
 
         args: list
+        kwargs: dict
 
     @dataclass
     class CallResult:
@@ -57,7 +58,7 @@ class QAppThreadCall(QObject):
         self._moved_to_app = False
         self._pending_calls, self._completed_calls = [], []
 
-    def __call__(self, *args: Sequence) -> Any:
+    def __call__(self, *args: Sequence, **kwargs) -> Any:
         """
         If the current thread is the qApp thread then this
         performs a straight call to the wrapped callable_obj. Otherwise
@@ -65,7 +66,7 @@ class QAppThreadCall(QObject):
         BlockingQueuedConnection.
         """
         if self.is_qapp_thread():
-            return self._callable(*args)
+            return self._callable(*args, **kwargs)
         else:
             self._ensure_self_on_qapp_thread()
             connection_type = Qt.BlockingQueuedConnection if self._blocking else Qt.AutoConnection
@@ -77,7 +78,7 @@ class QAppThreadCall(QObject):
             # are very closely tied together. We append arguments to the end of a pending list
             # and pop results from the front of a results list. _on_call must understand
             # this ordering too.
-            self._pending_calls.append(QAppThreadCall.CallArgs(args))
+            self._pending_calls.append(QAppThreadCall.CallArgs(args=list(args), kwargs=dict(kwargs)))
             QMetaObject.invokeMethod(self, "_on_call", connection_type)
 
             # Only return/re-raise exceptions in the blocking case or else the
@@ -103,7 +104,7 @@ class QAppThreadCall(QObject):
         result, exc_info = None, None
         try:
             call_info = self._pending_calls.pop(0)
-            result = self._callable(*call_info.args)
+            result = self._callable(*call_info.args, **call_info.kwargs)
         except Exception:  # pylint: disable=broad-except
             exc_info = sys.exc_info()
 
@@ -148,3 +149,15 @@ def force_method_calls_to_qapp_thread(instance, *, all_methods=False):
             setattr(instance, name, QAppThreadCall(method))
 
     return instance
+
+
+def run_on_qapp_thread(cls):
+    """Class decorator to wrap all public methods with QAppThreadCall per instance."""
+    orig_init = cls.__init__
+
+    def __init__(self, *args, **kwargs):
+        orig_init(self, *args, **kwargs)
+        force_method_calls_to_qapp_thread(self, all_methods=False)
+
+    cls.__init__ = __init__
+    return cls
