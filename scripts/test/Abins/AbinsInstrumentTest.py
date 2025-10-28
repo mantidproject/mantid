@@ -58,8 +58,8 @@ class LagrangeResolutionTest(unittest.TestCase):
         """
         lagrange = get_instrument("Lagrange", setting="Cu(220) (Lagrange)")
 
-        # Cutoff should be at 25 meV
-        frequencies = ([24.5, 25.5] * ureg("meV")).to("1/cm", context="spectroscopy").magnitude
+        # Cutoff is around 35 meV
+        frequencies = ([30, 40] * ureg("meV")).to("1/cm", context="spectroscopy").magnitude
         sigma_below, sigma_above = lagrange.get_sigma(frequencies)
         self.assertAlmostEqual((sigma_below * ureg("1/cm")).to("meV").magnitude, 0.4, 6)
 
