@@ -173,7 +173,7 @@ class CreateGroupingByComponent(PythonAlgorithm):
         return self._component_name_contains(idx, self.include_target)
 
     def _is_target_include_and_exclude(self, idx):
-        return self._is_target_include(idx) and not self._component_name_contains(idx, self.exclude_target)
+        return self._is_target_just_include(idx) and not self._component_name_contains(idx, self.exclude_target)
 
     def _branch_should_be_excluded(self, idx):
         return np.any([self._component_name_contains(idx, branch) for branch in self.exclude_branches])
