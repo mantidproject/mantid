@@ -16,6 +16,9 @@ class SNSPowderReductionTest(unittest.TestCase):
     def setUp(self) -> None:
         self.temp_dir = tempfile.TemporaryDirectory()
 
+    def tearDown(self) -> None:
+        self.temp_dir.cleanup()
+
     def testValidateInputs(self):
         # PushDataPositive and OffsetData cannot be specified together
         self.assertRaises(

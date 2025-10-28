@@ -98,7 +98,8 @@ class ISISDirectInelasticConfigTest(unittest.TestCase):
 
     def tearDown(self):
         # Clean-up user's folder structure
-        self._target_dir.cleanup()
+        if hasattr(self, "_target_dir"):
+            self._target_dir.cleanup()
 
     def test_UserProperties(self):
         user = UserProperties(self.userID)
@@ -419,14 +420,13 @@ class ISISDirectInelasticConfigTest(unittest.TestCase):
 
         rbnum2 = "RB1999000"
 
-        targetDir = self.targetDir
-        rbdir2 = os.path.join(targetDir, self.userID, rbnum2)
+        rbdir2 = os.path.join(self.targetDir, self.userID, rbnum2)
         if not os.path.exists(rbdir2):
             os.makedirs(rbdir2)
         user.set_user_properties("MARI", rbdir2, "CYCLE20001", "20000124")
 
         rbnum3 = "RB1204000"
-        rbdir3 = os.path.join(targetDir, self.userID, rbnum3)
+        rbdir3 = os.path.join(self.targetDir, self.userID, rbnum3)
         if not os.path.exists(rbdir3):
             os.makedirs(rbdir3)
         user.set_user_properties("MAPS", rbdir3, "CYCLE20044", "20041207")
@@ -475,8 +475,7 @@ class ISISDirectInelasticConfigTest(unittest.TestCase):
 
         rbnum2 = "RB1999000"
 
-        targetDir = self.targetDir
-        rbdir2 = os.path.join(targetDir, self.userID, rbnum2)
+        rbdir2 = os.path.join(self.targetDir, self.userID, rbnum2)
         if not os.path.exists(rbdir2):
             os.makedirs(rbdir2)
         user.set_user_properties("MERLIN", rbdir2, "CYCLE20151", "20150508")

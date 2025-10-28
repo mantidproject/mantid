@@ -102,7 +102,7 @@ def extract_available_log_files(os_name: str, build_number: int, pipeline: str) 
     # Log files for first build
     text = requests.get(url, timeout=10).text.splitlines()
     for line in text:
-        regex_result = re.search(pattern=regex_logfile, string=line.decode("utf-8"))
+        regex_result = re.search(pattern=regex_logfile, string=line)
         if regex_result is not None and len(regex_result.groups()) > 0:
             build_log_files.append(str(regex_result.group(0)))
     return build_log_files
@@ -195,7 +195,7 @@ def extract_package_versions(url: str, os_name: str) -> Dict[str, str]:
         raise ValueError("URL must start with 'http:' or 'https:'")
     text = requests.get(url, timeout=10).text.splitlines()
     for line in text:
-        regex_result = re.search(pattern=regex_pattern, string=line.decode("utf-8"))
+        regex_result = re.search(pattern=regex_pattern, string=line)
         if regex_result is not None and len(regex_result.groups()) == 3:
             package_name = regex_result.group(1)
             if package_name.startswith("mantid"):

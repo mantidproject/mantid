@@ -150,7 +150,8 @@ def read_opts(t):
             'type'           : 'scons',
             'links'          : {}
             }
-    runpy.run_path(join(t, "TestDef.py"), init_globals=opts)
+    result = runpy.run_path(join(t, "TestDef.py"), init_globals=opts)
+    opts.update(result)
     return opts
 
 

@@ -261,9 +261,6 @@ class SaveMDHistoToVTKTest(unittest.TestCase):
         g = np.frombuffer(data[8:], dtype=np.float64)
         np.testing.assert_allclose(g, expected_points, atol=1e-15)
 
-        # cleanup
-        os.remove(filename)
-
 
 if __name__ == "__main__":
     unittest.main()

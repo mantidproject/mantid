@@ -65,7 +65,7 @@ foo()
             r'  File "<string>", line \d+, in foo',
             r'  File "<string>", line \d+, in bar',
         ]
-        for produced, expected in zip(error_lines, expected_lines):
+        for produced, expected in zip(error_lines, expected_lines, strict=True):
             self.assertRegex(produced, expected)
 
 
