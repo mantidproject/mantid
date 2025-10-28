@@ -509,15 +509,10 @@ public:
     TS_ASSERT_EQUALS(prop_lines[4], "key.withnospace=5");
 
     // Clean up
-    std::filesystem::remove(prop_file);
+    std::filesystem::remove(filename);
   }
 
   void testSaveConfigWithLineContinuation() {
-    /*const std::string propfile =
-    ConfigService::Instance().getDirectoryOfExecutable()
-      + "MantidTest.properties";
-    ConfigService::Instance().updateConfig(propfile);*/
-
     const std::string filename("user.settingsLineContinuation");
     if (std::filesystem::exists(filename))
       std::filesystem::remove(filename);
@@ -537,7 +532,7 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(settings.saveConfig(filename));
     // Should exist
-    TS_ASSERT_EQUALS(prop_file.exists(), true);
+    TS_ASSERT_EQUALS(std::filesystem::exists(filename), true);
 
     // Test the entry
     std::ifstream reader(filename.c_str(), std::ios::in);
@@ -720,7 +715,7 @@ private:
     TS_ASSERT_EQUALS(line, key_value);
 
     // Clean up
-    std::filesystem::remove(prop_file);
+    std::filesystem::remove(filename);
   }
 
   std::string readFile(const std::string &filename) {

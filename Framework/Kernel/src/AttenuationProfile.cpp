@@ -24,7 +24,7 @@ namespace Mantid::Kernel {
  * extrapolate beyond the lambda range of the supplied profile
  */
 AttenuationProfile::AttenuationProfile(const std::string &inputFileName, const std::string &searchPath,
-                                       Material *extrapolationMaterial, double extrapolationMaxX) {
+                                       Material const *extrapolationMaterial, double extrapolationMaxX) {
   std::filesystem::path suppliedFileName(inputFileName);
   std::filesystem::path inputFilePath;
   std::string fileExt = suppliedFileName.extension().string();
