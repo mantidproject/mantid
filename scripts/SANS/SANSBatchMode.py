@@ -55,7 +55,6 @@ import os
 import re
 from reduction_settings import REDUCTION_SETTINGS_OBJ_NAME
 from isis_reduction_steps import UserFile
-from ast import literal_eval
 
 sanslog = Logger("SANS")
 # The allowed number of entries per row.
@@ -478,7 +477,7 @@ def read_run(runs, run_role, format):
             return
 
     run_file, period = parse_run(run_file, format)
-    run_ws = literal_eval(COMMAND[run_role] + "run_file, period=period)")
+    run_ws = eval(COMMAND[run_role] + "run_file, period=period)")  # noqa: S307
     if not run_ws:
         raise SkipReduction("Cannot load " + run_role + ' run "' + run_file + '"')
 
@@ -507,7 +506,7 @@ def read_trans_runs(runs, sample_or_can, format):
         # it is OK for transmission files not to be present
         return []
 
-    ws1, ws2 = literal_eval(COMMAND[role1] + "run_file1, run_file2, period_t=p1, period_d=p2)")
+    ws1, ws2 = eval(COMMAND[role1] + "run_file1, run_file2, period_t=p1, period_d=p2)")  # noqa: S307
     if len(run_file1) > 0 and len(ws1) == 0:
         raise SkipReduction("Cannot load " + role1 + ' run "' + run_file1 + '"')
     if len(run_file2) > 0 and len(ws2) == 0:

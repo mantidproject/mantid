@@ -6,7 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import datetime
 import os
-import platform
 import shutil
 import time
 import unittest
@@ -34,12 +33,8 @@ class ISISDirectInelasticConfigTest(unittest.TestCase):
     def get_save_dir(self):
         targetDir = config["defaultsave.directory"]
         if targetDir is None or len(targetDir) == 0:
-            if platform.system() == "Windows":
-                targetDir = str(os.environ["TEMP"])
-            else:
-                # Keep directory alive outside function
-                self._target_dir = tempfile.TemporaryDirectory()
-                targetDir = self._target_dir.name
+            self._target_dir = tempfile.TemporaryDirectory()
+            targetDir = self._target_dir.name
         return targetDir
 
     def write_test_file(self, filename):
@@ -59,12 +54,12 @@ class ISISDirectInelasticConfigTest(unittest.TestCase):
     def setUp(self):
         # Create user's folder structure in default save directory.
         # the administrative script (not here) builds all this for real in /home
-        targetDir = self.get_save_dir()
+        self.targetDir = self.get_save_dir()
 
-        self.rbdir = os.path.join(targetDir, self.userID, self.rbnumber)
-        self.UserScriptRepoDir = os.path.join(targetDir, "UserScripts")
-        self.MapMaskDir = os.path.join(targetDir, "MapMaskDir")
-        self.userRootDir = os.path.join(targetDir, self.userID)
+        self.rbdir = os.path.join(self.targetDir, self.userID, self.rbnumber)
+        self.UserScriptRepoDir = os.path.join(self.targetDir, "UserScripts")
+        self.MapMaskDir = os.path.join(self.targetDir, "MapMaskDir")
+        self.userRootDir = os.path.join(self.targetDir, self.userID)
         if not os.path.exists(self.rbdir):
             os.makedirs(self.rbdir)
         if not os.path.exists(self.UserScriptRepoDir):
@@ -103,14 +98,7 @@ class ISISDirectInelasticConfigTest(unittest.TestCase):
 
     def tearDown(self):
         # Clean-up user's folder structure
-        if os.path.exists(self.rbdir):
-            shutil.rmtree(self.rbdir, ignore_errors=True)
-        if os.path.exists(self.UserScriptRepoDir):
-            shutil.rmtree(self.UserScriptRepoDir, ignore_errors=True)
-        if os.path.exists(self.MapMaskDir):
-            shutil.rmtree(self.MapMaskDir, ignore_errors=True)
-        if os.path.exists(self.userRootDir):
-            shutil.rmtree(self.userRootDir, ignore_errors=True)
+        self._target_dir.cleanup()
 
     def test_UserProperties(self):
         user = UserProperties(self.userID)
@@ -174,7 +162,7 @@ class ISISDirectInelasticConfigTest(unittest.TestCase):
         # script verifies the presence of a folder, not its contents.
         # for the script to work, let's run it on default save directory
         MantidDir = os.path.split(os.path.realpath(__file__))[0]
-        HomeRootDir = self.get_save_dir()
+        HomeRootDir = self.targetDir
 
         mcf = MantidConfigDirectInelastic(MantidDir, HomeRootDir, self.UserScriptRepoDir, self.MapMaskDir)
 
@@ -226,7 +214,7 @@ class ISISDirectInelasticConfigTest(unittest.TestCase):
         # script verifies the presence of a folder, not its contents.
         # for the script to work, let's run it on default save directory
         MantidDir = os.path.split(os.path.realpath(__file__))[0]
-        HomeRootDir = self.get_save_dir()
+        HomeRootDir = self.targetDir
         mcf = MantidConfigDirectInelastic(MantidDir, HomeRootDir, self.UserScriptRepoDir, self.MapMaskDir)
 
         user = UserProperties(self.userID)
@@ -234,14 +222,13 @@ class ISISDirectInelasticConfigTest(unittest.TestCase):
 
         rbnum2 = "RB1999000"
 
-        targetDir = self.get_save_dir()
-        rbdir2 = os.path.join(targetDir, self.userID, rbnum2)
+        rbdir2 = os.path.join(self.targetDir, self.userID, rbnum2)
         if not os.path.exists(rbdir2):
             os.makedirs(rbdir2)
         user.set_user_properties("MARI", rbdir2, "CYCLE20001", "20000124")
 
         rbnum3 = "RB1204000"
-        rbdir3 = os.path.join(targetDir, self.userID, rbnum3)
+        rbdir3 = os.path.join(self.targetDir, self.userID, rbnum3)
         if not os.path.exists(rbdir3):
             os.makedirs(rbdir3)
         user.set_user_properties("MAPS", rbdir3, "CYCLE20044", "20041207")
@@ -270,7 +257,7 @@ class ISISDirectInelasticConfigTest(unittest.TestCase):
         self.assertFalse(mcf.config_need_replacing(config_file))
         # --------------------------------------------------------------------
         user1ID = "tuf299966"
-        user1RootDir = os.path.join(self.get_save_dir(), user1ID)
+        user1RootDir = os.path.join(self.targetDir, user1ID)
         if not os.path.exists(user1RootDir):
             os.makedirs(user1RootDir)
         #
@@ -331,7 +318,7 @@ class ISISDirectInelasticConfigTest(unittest.TestCase):
         self.assertTrue(os.path.exists(test_xml))
 
         MantidDir = os.path.split(os.path.realpath(__file__))[0]
-        HomeRootDir = self.get_save_dir()
+        HomeRootDir = self.targetDir
         mcf = MantidConfigDirectInelastic(MantidDir, HomeRootDir, self.UserScriptRepoDir, self.MapMaskDir)
 
         user = UserProperties(self.userID)
@@ -378,7 +365,7 @@ class ISISDirectInelasticConfigTest(unittest.TestCase):
 
     def test_init_user(self):
         MantidDir = os.path.split(os.path.realpath(__file__))[0]
-        HomeRootDir = self.get_save_dir()
+        HomeRootDir = self.targetDir
         mcf = MantidConfigDirectInelastic(MantidDir, HomeRootDir, self.UserScriptRepoDir, self.MapMaskDir)
 
         user = UserProperties(self.userID)
@@ -424,7 +411,7 @@ class ISISDirectInelasticConfigTest(unittest.TestCase):
         # script verifies the presence of a folder, not its contents.
         # for the script to work, let's run it on default save directory
         MantidDir = os.path.split(os.path.realpath(__file__))[0]
-        HomeRootDir = self.get_save_dir()
+        HomeRootDir = self.targetDir
         mcf = MantidConfigDirectInelastic(MantidDir, HomeRootDir, self.UserScriptRepoDir, self.MapMaskDir)
 
         user = UserProperties(self.userID)
@@ -432,7 +419,7 @@ class ISISDirectInelasticConfigTest(unittest.TestCase):
 
         rbnum2 = "RB1999000"
 
-        targetDir = self.get_save_dir()
+        targetDir = self.targetDir
         rbdir2 = os.path.join(targetDir, self.userID, rbnum2)
         if not os.path.exists(rbdir2):
             os.makedirs(rbdir2)
@@ -480,7 +467,7 @@ class ISISDirectInelasticConfigTest(unittest.TestCase):
         # script verifies the presence of a folder, not its contents.
         # for the script to work, let's run it on default save directory
         MantidDir = os.path.split(os.path.realpath(__file__))[0]
-        HomeRootDir = self.get_save_dir()
+        HomeRootDir = self.targetDir
         mcf = MantidConfigDirectInelastic(MantidDir, HomeRootDir, self.UserScriptRepoDir, self.MapMaskDir)
 
         user = UserProperties(self.userID)
@@ -488,7 +475,7 @@ class ISISDirectInelasticConfigTest(unittest.TestCase):
 
         rbnum2 = "RB1999000"
 
-        targetDir = self.get_save_dir()
+        targetDir = self.targetDir
         rbdir2 = os.path.join(targetDir, self.userID, rbnum2)
         if not os.path.exists(rbdir2):
             os.makedirs(rbdir2)

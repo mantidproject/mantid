@@ -79,11 +79,11 @@ def start(options: argparse.ArgumentParser):
         # FrameworkManager and UsageService will be shutdown as expected.
         launch_command = [str(sys.executable), str(wp.__file__)]
         if options.script:
-            launch_command += str(options.script)
+            launch_command.append(str(options.script))
         if options.execute:
-            launch_command += "--execute"
+            launch_command.append("--execute")
         if options.quit:
-            launch_command += "--quit"
+            launch_command.append("--quit")
 
         if is_linux():
             # currently, reading coredump files for error reports is only supported on linux
