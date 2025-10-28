@@ -1,0 +1,6 @@
+- Improved Abins/Abins2D resolution function for ILL-LAGRANGE
+  instrument. A minimum resolution of 0.4 meV is applied at low energy
+  transfer for the Cu(220) monochromator: the switch between this
+  constant resolution and the energy-dependent resolution was
+  previously implemented too low in energy transfer, giving
+  unreasonably sharp peaks below 30meV.
