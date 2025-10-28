@@ -1,0 +1,63 @@
+digraph ConvertHFIRSCDtoMDE {
+label = "\n"
+$global_style
+
+subgraph params {
+$param_style
+  inputWs  [label="Input Workspace"]
+  azim_twoth   [label="azimuthal, twotheta"]
+  min_max  [label="Minvalues, MaxValues"]
+  outputWsEmpty [label="Output Workspace (Empty, Single Box)"]
+  q_lab  [label="detector Q_lab vectors"]
+  wavelength  [label="wavelength"]
+  lorentz  [label="Lorentz Coefficients"]
+  goniometer  [label="Goniometer Matrices"]
+  q_sample [label="detector Q_sample vectors"]
+  intensities  [label="detector intensities"]
+  expInfo  [label="Experiment Info"]
+  outputWsSingleBox  [label="Output Workspace (Single Box)"]
+  outputWsNoExpInfo  [label="Output Workspace (No Experiment Info)"]
+  outputWs  [label="Output Workspace"]
+}
+
+subgraph decisions {
+$decision_style
+  polarsLogged  [label="Are Polar angles logged?"]
+}
+
+subgraph algorithms {
+$algorithm_style
+  CreateMDWorkspace  [label="CreateMDWorkspace)"]
+  convention [label="Crystallographic Convention same as User's requested?"]
+  ChangeQConvention [label="ChangeQConvention"]
+}
+
+subgraph processes {
+$process_style
+  collect_polars               [label="Query logs"]
+  calculate_polars               [label="Calculate polar angles"]
+  insert_events               [label="Insert events"]
+  correct_intensities               [label="Correct Intensities"]
+  splitBox               [label="Split MD Box if needed"]
+  insertExpInfo               [label="Insert Experiment Info"]
+}
+
+
+// Main workflow
+inputWs -> polarsLogged
+polarsLogged -> collect_polars [label="yes"]
+polarsLogged -> calculate_polars [label="no"]
+collect_polars -> azim_twoth
+calculate_polars -> azim_twoth
+azim_twoth -> q_lab -> q_sample
+azim_twoth -> lorentz
+wavelength  -> lorentz -> correct_intensities
+min_max -> CreateMDWorkspace -> outputWsEmpty -> insert_events
+inputWs -> expInfo -> goniometer -> q_sample -> insert_events
+inputWs -> intensities -> correct_intensities -> insert_events -> outputWsSingleBox -> splitBox -> outputWsNoExpInfo
+expInfo -> insertExpInfo
+outputWsNoExpInfo -> insertExpInfo -> convention
+convention -> ChangeQConvention [label="no"]
+convention -> outputWs [label="yes"]
+ChangeQConvention -> outputWs
+}
