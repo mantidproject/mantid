@@ -1,7 +1,12 @@
-# import mantid algorithms, numpy and matplotlib
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2025 ISIS Rutherford Appleton Laboratory UKRI,
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
+# SPDX - License - Identifier: GPL - 3.0 +
 import numpy as np
 from mantid.kernel import logger
-from mantid.api import AlgorithmFactory, WorkspaceProperty, PythonAlgorithm, AnalysisDataService as ADS
+from mantid.api import AlgorithmFactory, WorkspaceProperty, PythonAlgorithm
 from mantid.kernel import (
     Direction,
     IntBoundedValidator,
@@ -17,9 +22,9 @@ class CreateGroupingByComponent(PythonAlgorithm):
 
     def summary(self):
         return (
-            "Creates a Grouping Workspace where all components matching the search criteria, "
+            "Creates a GroupingWorkspace where all components matching the search criteria, "
             "under a given parent component, are grouped together. "
-            "These groups are then subdivided by N"
+            "These groups are then subdivided by GroupSubdivision"
         )
 
     def seeAlso(self):
@@ -40,13 +45,13 @@ class CreateGroupingByComponent(PythonAlgorithm):
             doc="The detector grouping workspace.",
         )
         self.declareProperty(
-            "IncludeComponents",
+            "ComponentNameIncludes",
             "",
             direction=Direction.Input,
             doc="Search String for determining which components should be grouped, such components MUST contain this string",
         )
         self.declareProperty(
-            "ExcludeComponents",
+            "ComponentNameExcludes",
             "",
             direction=Direction.Input,
             doc="Search String for determining which components should be grouped, such components MUST NOT contain this string",
@@ -80,8 +85,8 @@ class CreateGroupingByComponent(PythonAlgorithm):
         # extract inputs
         instr = self.getProperty("InstrumentName").value
         num_divisions = self.getProperty("GroupSubdivision").value
-        self.target = self.getProperty("IncludeComponents").value
-        self.null = self.getProperty("ExcludeComponents").value
+        self.include_target = self.getProperty("ComponentNameIncludes").value
+        self.exclude_target = self.getProperty("ComponentNameExcludes").value
         exclude_branch_strings = self.getProperty("ExcludeBranches").value
 
         # create the empty instrument workspace
@@ -89,10 +94,10 @@ class CreateGroupingByComponent(PythonAlgorithm):
 
         # if an exclude string is provided the is_target evaluation function should be the one which also checks exclusion
         # otherwise this can just check inclusion
-        self.is_target = self._is_target_include if self.null == "" else self._is_target_exclude
+        self.is_target = self._is_target_just_include if self.exclude_target == "" else self._is_target_include_and_exclude
 
         # parse the input string for comma separated strings, that will exclude entire branches of the instrument tree
-        self.exclude_branches = [branch.strip() for branch in exclude_branch_strings.split(",")] if exclude_branch_strings else None
+        self.exclude_branches = [branch.strip() for branch in exclude_branch_strings.split(",")] if exclude_branch_strings else []
 
         # read the component and detector info
         self.info = ws.componentInfo()
@@ -125,8 +130,6 @@ class CreateGroupingByComponent(PythonAlgorithm):
         )
 
         self.setProperty("OutputWorkspace", group_ws)
-        ADS.remove("__instr_tmp_ws")
-        ADS.remove("__group_ws")
 
     def exec_child_alg(self, alg_name: str, **kwargs):
         alg = self.createChildAlgorithm(alg_name, enableLogging=False)
@@ -142,8 +145,8 @@ class CreateGroupingByComponent(PythonAlgorithm):
         find all the parent nodes in the instrument tree with at least one child node which meets the search criteria
         """
         parents = set()
-        stack = [int(root_idx)]
-        while stack:
+        stack = [root_idx]
+        while stack != []:
             idx = stack.pop()
             if self._branch_should_be_excluded(idx):
                 continue
@@ -159,25 +162,20 @@ class CreateGroupingByComponent(PythonAlgorithm):
         for a given parent node, find all the children which are detectors, and split them into n groups - formatted as
         a custom detector grouping string for CreateGroupingWorkspace
         """
-        all_sub_arrays = [
-            arr
-            for arr in np.array_split([str(self.det_id_dict[det_ind]) for det_ind in self.info.detectorsInSubtree(int(parent))], n)
-            if len(arr) > 0
-        ]
-        return ",".join(["+".join(sub_array) for sub_array in all_sub_arrays])
+        child_detector_ids = [str(self.det_id_dict[det_ind]) for det_ind in self.info.detectorsInSubtree(int(parent))]
+        sub_divided_child_detector_ids = [arr for arr in np.array_split(child_detector_ids, n) if len(arr) > 0]
+        return ",".join(["+".join(sub_array) for sub_array in sub_divided_child_detector_ids])
 
     def _component_name_contains(self, idx, target):
         return target in self.info.name(int(idx))
 
-    def _is_target_include(self, idx):
-        return self._component_name_contains(idx, self.target)
+    def _is_target_just_include(self, idx):
+        return self._component_name_contains(idx, self.include_target)
 
-    def _is_target_exclude(self, idx):
-        return self._is_target_include(idx) and not self._component_name_contains(idx, self.null)
+    def _is_target_include_and_exclude(self, idx):
+        return self._is_target_include(idx) and not self._component_name_contains(idx, self.exclude_target)
 
     def _branch_should_be_excluded(self, idx):
-        if not self.exclude_branches:
-            return False
         return np.any([self._component_name_contains(idx, branch) for branch in self.exclude_branches])
 
 
