@@ -40,6 +40,8 @@ Output:
 
 .. figure:: /images/ConvertHFIRSCDtoMDE.png
 
+.. diagram:: ConvertHFIRSCDtoMDE-v1_wkflw.dot
+
 .. categories::
 
 .. sourcelink::
