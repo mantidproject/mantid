@@ -5,8 +5,8 @@ $global_style
 subgraph params {
 $param_style
   inputWs  [label="Input Workspace"]
-  azim_twoth   [label="azimuthal, twothetha"]
-  min_max  [labels="Minvalues, MaxValues"]
+  azim_twoth   [label="azimuthal, twotheta"]
+  min_max  [label="Minvalues, MaxValues"]
   outputWsEmpty [label="Output Workspace (Empty, Single Box)"]
   q_lab  [label="detector Q_lab vectors"]
   wavelength  [label="wavelength"]
