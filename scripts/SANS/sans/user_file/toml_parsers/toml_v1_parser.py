@@ -149,6 +149,7 @@ class TomlV1ParserImpl(TomlParserImplBase):
 
         self.move.sample_offset = self.get_val("sample_offset", inst_config_dict, 0.0)
         self.convert_to_q.use_gravity = self.get_val("gravity_enabled", inst_config_dict, default=True)
+        self.convert_to_q.solid_angle_cylinder_slices = self.get_val("solid_angle_cylinder_slices", inst_config_dict, 11)
 
     def _parse_detector_configuration(self):
         det_config_dict = self.get_val(["detector", "configuration"])

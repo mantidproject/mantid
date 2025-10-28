@@ -30,6 +30,7 @@ class StateConvertToQ(metaclass=JsonSerializable):
         self.gravity_extra_length = 0.0  # : Float (Positive)
         self.radius_cutoff = 0.0  # : Float (Positive)
         self.wavelength_cutoff = 0.0  # : Float (Positive)
+        self.solid_angle_cylinder_slices = 11  # : Integer (Positive)
 
         # 1D settings
         self.q_min = None  # : Float (Positive)
