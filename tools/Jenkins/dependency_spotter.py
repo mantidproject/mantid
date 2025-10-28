@@ -97,15 +97,15 @@ def extract_available_log_files(os_name: str, build_number: int, pipeline: str) 
     :return: List of log file names
     """
     url = form_url_for_build_artifact(build_number, os_name, pipeline, "")
-    build_log_files = []
-    regex_logfile = r"((mantid|package-conda)[\w]+environment\.txt)"
+    build_log_files = set()
+    regex_logfile = r"((mantid|base)[\w]+environment\.txt)"
     # Log files for first build
     with urllib.request.urlopen(url) as file:
         for line in file.readlines():
-            regex_result = re.search(pattern=regex_logfile, string=line.decode("utf-8"))
-            if regex_result is not None and len(regex_result.groups()) > 0:
-                build_log_files.append(str(regex_result.group(0)))
-    return build_log_files
+            regex_result = re.findall(pattern=regex_logfile, string=line.decode("utf-8"))
+            for file_name, _ in regex_result:
+                build_log_files.add(file_name)
+    return list(build_log_files)
 
 
 def compare_dependencies_for_file(os_name: str, first_build: int, second_build: int, pipeline: str, log_file: str) -> None:
@@ -178,7 +178,7 @@ def form_url_for_build_artifact(build_number: int, os_name: str, pipeline: str, 
     :param log_file: Name of the file to compare, e.g. mantid_build_environment.txt
     :return: URL for build artifact
     """
-    return f"https://builds.mantidproject.org/job/{pipeline}/{build_number}/artifact/conda-bld/{os_name}/env_logs/{log_file}"
+    return f"https://builds.mantidproject.org/job/{pipeline}/{build_number}/artifact/conda-bld/env_logs/{os_name}/{log_file}"
 
 
 def extract_package_versions(url: str, os_name: str) -> Dict[str, str]:
