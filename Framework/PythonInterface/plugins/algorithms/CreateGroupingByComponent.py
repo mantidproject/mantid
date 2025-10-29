@@ -99,6 +99,9 @@ class CreateGroupingByComponent(PythonAlgorithm):
         # parse the input string for comma separated strings, that will exclude entire branches of the instrument tree
         self.exclude_branches = [branch.strip() for branch in exclude_branch_strings.split(",")] if exclude_branch_strings else []
 
+        for exclusion_term in self.exclude_branches:
+            logger.notice(f"Excluding subtree beneath any component containing: '{exclusion_term}'")
+
         # read the component and detector info
         self.info = ws.componentInfo()
         detinfo = ws.detectorInfo()
@@ -149,6 +152,7 @@ class CreateGroupingByComponent(PythonAlgorithm):
         while stack != []:
             idx = stack.pop()
             if self._branch_should_be_excluded(idx):
+                logger.notice(f"Subtree beneath '{self.info.name(idx)}' has been excluded")
                 continue
             children = [int(c) for c in self.info.children(idx)]
             # if any child is a target, this node is a direct parent
