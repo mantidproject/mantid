@@ -79,7 +79,7 @@ ninja:
 # Use novtk version, otherwise a lot of extra packages are installed, including qt6-main, which can cause issues when launching on Windows
 # Fix: pin to 7.9.2 to avoid issue with 7_9_1 (See: https://github.com/conda-forge/occt-feedstock/pull/124)
 occt:
-  - '7.9.2 novtk*'
+  - '==7.9.2 novtk*'
 
 # Fix the version to avoid updates being pulled in automatically, which might change the Reflectometry ORSO file content or layout and cause tests to fail.
 orsopy:
