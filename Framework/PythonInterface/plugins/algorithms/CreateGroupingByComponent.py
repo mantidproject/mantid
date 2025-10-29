@@ -106,10 +106,9 @@ class CreateGroupingByComponent(PythonAlgorithm):
         self.info = ws.componentInfo()
         detinfo = ws.detectorInfo()
         dets = detinfo.detectorIDs()
-        instr_dets = self.info.detectorsInSubtree(self.info.root())
 
         # create a lookup between the detectors on the instrument (by component index), and the detector id strings
-        self.det_id_dict = dict(zip(instr_dets, dets))
+        self.det_id_dict = {i: det_id for i, det_id in enumerate(dets)}
 
         # find the component index of the root component
         idx_root = self.info.root()
