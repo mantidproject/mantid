@@ -151,13 +151,17 @@ def force_method_calls_to_qapp_thread(instance, *, all_methods=False):
     return instance
 
 
-def run_on_qapp_thread(cls):
-    """Class decorator to wrap all public methods with QAppThreadCall per instance."""
-    orig_init = cls.__init__
+def run_on_qapp_thread(all_methods=False):
+    """Class decorator to wrap methods with QAppThreadCall per instance."""
 
-    def __init__(self, *args, **kwargs):
-        orig_init(self, *args, **kwargs)
-        force_method_calls_to_qapp_thread(self, all_methods=False)
+    def decorator(cls):
+        orig_init = cls.__init__
 
-    cls.__init__ = __init__
-    return cls
+        def __init__(self, *args, **kwargs):
+            orig_init(self, *args, **kwargs)
+            force_method_calls_to_qapp_thread(self, all_methods=all_methods)
+
+        cls.__init__ = __init__
+        return cls
+
+    return decorator
