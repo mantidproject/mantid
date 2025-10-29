@@ -195,6 +195,20 @@ public:
   void testForwardHistogram() { doTestForwardHistogram(N, XX); }
   void testBackwardHistogram() { doTestBackwardHistogram(N, dX); }
 
+  void testUnequalBinWidths_Invalid() {
+    const int N = 6;
+    auto inputWS = WorkspaceFactory::Instance().create("Workspace2D", 1, N, N);
+    inputWS->mutableX(0) = {0.0, 0.1, 0.3, 0.6, 0.7, 0.88};
+
+    auto fft = AlgorithmManager::Instance().create("RealFFT");
+    fft->initialize();
+    fft->setChild(true);
+    fft->setProperty("InputWorkspace", inputWS);
+    fft->setProperty("IgnoreXBins", false);
+    fft->setPropertyValue("OutputWorkspace", "__NotUsed");
+    TS_ASSERT_THROWS(fft->execute(), std::runtime_error const &);
+  }
+
 private:
   const int N;
   const double dX, XX;
