@@ -17,6 +17,7 @@ from mantid.api import (
 from mantid.kernel import (
     ConfigService,
     Direction,
+    LogicOperator,
     FloatBoundedValidator,
     StringArrayProperty,
     StringListValidator,
@@ -512,6 +513,17 @@ class SANSISISPolarizationCorrections(DataProcessorAlgorithm):
             self.setPropertyGroup(prop_name, FIT_PROPERTIES_GROUP_NAME)
 
         self.setPropertySettings(MAIN_PROPERTIES.ads, EnabledWhenProperty(MAIN_PROPERTIES.path, PropertyCriterion.IsNotDefault))
+        calibration = EnabledWhenProperty(MAIN_PROPERTIES.reduction, PropertyCriterion.IsEqualTo, REDUCTION.calibration)
+        calibration_or_both = EnabledWhenProperty(
+            calibration, EnabledWhenProperty(MAIN_PROPERTIES.reduction, PropertyCriterion.IsEqualTo, REDUCTION.both), LogicOperator.Or
+        )
+        self.setPropertySettings(
+            MAIN_PROPERTIES.scattering,
+            EnabledWhenProperty(MAIN_PROPERTIES.reduction, PropertyCriterion.IsNotEqualTo, REDUCTION.calibration),
+        )
+
+        for prop_name in [MAIN_PROPERTIES.cell, MAIN_PROPERTIES.direct, MAIN_PROPERTIES.transmission]:
+            self.setPropertySettings(prop_name, calibration_or_both)
 
     def validateInputs(self):
         issues = dict()
