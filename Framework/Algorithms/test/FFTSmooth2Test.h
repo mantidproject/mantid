@@ -46,7 +46,7 @@ public:
     TS_ASSERT_EQUALS(props[3]->name(), "Filter");
     TS_ASSERT(props[3]->isDefault());
     TS_ASSERT_EQUALS(props[3]->value(), "Zeroing");
-    TS_ASSERT(dynamic_cast<PropertyWithValue<std::string> *>(props[3]));
+    // NOTE: this is an EnumeratedStringProperty, works differently than other properties
 
     TS_ASSERT_EQUALS(props[4]->name(), "Params");
     TS_ASSERT(props[4]->isDefault());
