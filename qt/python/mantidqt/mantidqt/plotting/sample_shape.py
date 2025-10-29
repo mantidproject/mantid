@@ -18,7 +18,7 @@ from workbench.plotting.toolbar import ToolbarStateManager
 from mantidqt.utils.qt.qappthreadcall import run_on_qapp_thread
 
 
-@run_on_qapp_thread
+@run_on_qapp_thread()
 class SampleShapePlot:
     def __init__(
         self,
