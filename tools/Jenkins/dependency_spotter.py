@@ -11,8 +11,8 @@ for which it uses the build artifacts.
 Example use:
 dependency_spotter -f 593 -s 598
 dependency_spotter -f 593 -s 598 -os win-64
-dependency_spotter -f 593 -s 598 --pipeline main_nightly_deployment
-This will compare builds 593 and 598 from the "main_nightly_deployment" pipeline
+dependency_spotter -f 593 -s 598 --pipeline main_nightly
+This will compare builds 593 and 598 from the "main_nightly" pipeline
 """
 
 import argparse
@@ -27,7 +27,7 @@ def dependency_spotter(os_name: str, first_build: int, second_build: int, pipeli
     :param os_name: Operating string label, e.g. linux-64
     :param first_build: Build number of the first build for comparison
     :param second_build: Build number of the second build for comparison
-    :param pipeline: Name of the Jenkins pipeline, e.g. main_nightly_deployment
+    :param pipeline: Name of the Jenkins pipeline, e.g. main_nightly
     :param log_file: Name of the file to compare, e.g. mantid_build_environment.txt
     """
     if second_build < first_build:
@@ -93,19 +93,19 @@ def extract_available_log_files(os_name: str, build_number: int, pipeline: str) 
     available files, e.g. mantid_build_environment.txt. Returns a list of these filenames
     :param os_name: Operating string label, e.g. linux-64
     :param build_number: Build number
-    :param pipeline: Name of the Jenkins pipeline, e.g. main_nightly_deployment
+    :param pipeline: Name of the Jenkins pipeline, e.g. main_nightly
     :return: List of log file names
     """
     url = form_url_for_build_artifact(build_number, os_name, pipeline, "")
-    build_log_files = []
-    regex_logfile = r"((mantid|package-conda)[\w]+environment\.txt)"
+    build_log_files = set()
+    regex_logfile = r"((mantid|base)[\w]+environment\.txt)"
     # Log files for first build
     with urllib.request.urlopen(url) as file:
         for line in file.readlines():
-            regex_result = re.search(pattern=regex_logfile, string=line.decode("utf-8"))
-            if regex_result is not None and len(regex_result.groups()) > 0:
-                build_log_files.append(str(regex_result.group(0)))
-    return build_log_files
+            regex_result = re.findall(pattern=regex_logfile, string=line.decode("utf-8"))
+            for file_name, _ in regex_result:
+                build_log_files.add(file_name)
+    return list(build_log_files)
 
 
 def compare_dependencies_for_file(os_name: str, first_build: int, second_build: int, pipeline: str, log_file: str) -> None:
@@ -115,7 +115,7 @@ def compare_dependencies_for_file(os_name: str, first_build: int, second_build: 
     :param os_name: Operating string label, e.g. linux-64
     :param first_build: Build number of the first build for comparison
     :param second_build: Build number of the second build for comparison
-    :param pipeline: Name of the Jenkins pipeline, e.g. main_nightly_deployment
+    :param pipeline: Name of the Jenkins pipeline, e.g. main_nightly
     :param log_file: Name of the file to compare, e.g. mantid_build_environment.txt
     """
     # Form URLs for each build artifact file
@@ -174,11 +174,11 @@ def form_url_for_build_artifact(build_number: int, os_name: str, pipeline: str, 
     Form Jenkins URL from specified info.
     :param build_number: Build number
     :param os_name: Operating string label, e.g. linux-64
-    :param pipeline: Name of the Jenkins pipeline, e.g. main_nightly_deployment
+    :param pipeline: Name of the Jenkins pipeline, e.g. main_nightly
     :param log_file: Name of the file to compare, e.g. mantid_build_environment.txt
     :return: URL for build artifact
     """
-    return f"https://builds.mantidproject.org/job/{pipeline}/{build_number}/artifact/conda-bld/{os_name}/env_logs/{log_file}"
+    return f"https://builds.mantidproject.org/job/{pipeline}/{build_number}/artifact/conda-bld/env_logs/{os_name}/{log_file}"
 
 
 def extract_package_versions(url: str, os_name: str) -> Dict[str, str]:
@@ -208,7 +208,7 @@ if __name__ == "__main__":
     parser.add_argument("-os", help="Operating system string, e.g. linux-64", default="linux-64", type=str)
     parser.add_argument("--first", "-f", help="First (usually passing) build number", type=int, required=True)
     parser.add_argument("--second", "-s", help="Second (usually failing) build number", type=int, required=True)
-    parser.add_argument("--pipeline", "-p", help="Build pipeline", default="main_nightly_deployment", type=str)
+    parser.add_argument("--pipeline", "-p", help="Build pipeline", default="main_nightly", type=str)
     parser.add_argument(
         "--logfile",
         "-l",
