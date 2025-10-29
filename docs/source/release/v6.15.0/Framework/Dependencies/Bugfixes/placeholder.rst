@@ -1,0 +1,1 @@
+- Pin `occt` to 7.9.2 to avoid issue with 7_9_1 (See: https://github.com/conda-forge/occt-feedstock/pull/124)
