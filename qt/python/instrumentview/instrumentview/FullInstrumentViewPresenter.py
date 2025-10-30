@@ -8,6 +8,7 @@ import numpy as np
 import pyvista as pv
 from pyvista.plotting.picking import RectangleSelection
 from pyvista.plotting.opts import PickerType
+from vtk import vtkCylinder, vtkExtractGeometry
 from mantid import mtd
 from mantid.kernel import logger
 
@@ -210,6 +211,23 @@ class FullInstrumentViewPresenter:
         self._pickable_main_mesh[self._visible_label] = self._model.picked_visibility
 
         self._update_line_plot_ws_and_draw(self._view.current_selected_unit())
+
+    def on_cylinder_select_clicked(self) -> None:
+        if self._view.is_cylinder_select_checked():
+            self._view.add_cylinder_widget(self._detector_mesh.GetBounds(), self.cylinder_select)
+
+    def cylinder_select(self, obj, event) -> None:
+        cylinder = vtkCylinder()
+        obj.GetCylinderRepresentation().GetCylinder(cylinder)
+
+        extract = vtkExtractGeometry()
+        extract.SetInputData(self._detector_mesh)
+        extract.SetImplicitFunction(cylinder)
+        extract.ExtractInsideOn()
+        extract.Update()
+
+        inside = extract.GetOutput()
+        print("Points inside:", inside.GetNumberOfPoints())
 
     def _update_line_plot_ws_and_draw(self, unit: str) -> None:
         self._model.extract_spectra_for_line_plot(unit, self._view.sum_spectra_selected())

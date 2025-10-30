@@ -158,8 +158,10 @@ class FullInstrumentViewWindow(QMainWindow):
         self._multi_select_check.setToolTip("Currently only working on 3D view.")
         self._clear_selection_button = QPushButton("Clear Selection")
         self._clear_selection_button.setToolTip("Clear the current selection of detectors")
+        self._cylinder_select = QCheckBox()
         multi_select_layout.addWidget(self._multi_select_check)
         multi_select_layout.addWidget(self._clear_selection_button)
+        multi_select_layout.addWidget(self._cylinder_select)
 
         projection_group_box = QGroupBox("Projection")
         projection_layout = QHBoxLayout(projection_group_box)
@@ -221,6 +223,9 @@ class FullInstrumentViewWindow(QMainWindow):
 
     def is_multi_picking_checkbox_checked(self) -> bool:
         return self._multi_select_check.isChecked()
+
+    def is_cylinder_select_checked(self) -> bool:
+        return self._cylinder_select.isChecked()
 
     def _on_splitter_moved(self, pos, index) -> None:
         self._detector_spectrum_fig.tight_layout()
@@ -320,6 +325,7 @@ class FullInstrumentViewWindow(QMainWindow):
     def setup_connections_to_presenter(self) -> None:
         self._projection_combo_box.currentIndexChanged.connect(self._presenter.on_projection_option_selected)
         self._multi_select_check.stateChanged.connect(self._presenter.on_multi_select_detectors_clicked)
+        self._cylinder_select.stateChanged.connect(self._presenter.on_cylinder_select_clicked)
         self._clear_selection_button.clicked.connect(self._presenter.on_clear_selected_detectors_clicked)
         self._contour_range_slider.sliderReleased.connect(self._presenter.on_contour_limits_updated)
         self._integration_limit_slider.sliderReleased.connect(self._presenter.on_integration_limits_updated)
@@ -452,17 +458,6 @@ class FullInstrumentViewWindow(QMainWindow):
         """Draw the given mesh in the main plotter window"""
         self.main_plotter.clear()
         self.main_plotter.add_mesh(mesh, pickable=False, scalars=scalars, render_points_as_spheres=True, point_size=15)
-        # self.cylinder = vtkImplicitCylinderWidget()
-        self.cylinder = CylinderWidgetNoRotation()
-        # cylinder_repr = CylinderRepresentationNoRotation()
-        cylinder_repr = vtkImplicitCylinderRepresentation()
-        cylinder_repr.SetRadius(50)
-        cylinder_repr.SetWidgetBounds(mesh.bounds)
-        cylinder_repr.SetAxis([0, 0, 1])
-        self.cylinder.SetRepresentation(cylinder_repr)
-        self.cylinder.SetCurrentRenderer(self.main_plotter.renderer)
-        self.cylinder.SetInteractor(self.main_plotter.iren.interactor)
-        self.cylinder.On()
 
         if not self.main_plotter.off_screen:
             self.main_plotter.enable_trackball_style()
@@ -471,6 +466,20 @@ class FullInstrumentViewWindow(QMainWindow):
             self.main_plotter.view_xy()
             if not self.main_plotter.off_screen:
                 self.main_plotter.enable_zoom_style()
+
+    def add_cylinder_widget(self, bounds, callback) -> None:
+        self.cylinder = CylinderWidgetNoRotation()
+        cylinder_repr = vtkImplicitCylinderRepresentation()
+        cylinder_repr.SetRadius(50)
+        cylinder_repr.SetWidgetBounds(bounds)
+        cylinder_repr.SetAxis([0, 0, 1])
+        cylinder_repr.SetOutlineTranslation(False)
+        cylinder_repr.GetOutlineProperty().SetOpacity(0)
+        self.cylinder.SetRepresentation(cylinder_repr)
+        self.cylinder.SetCurrentRenderer(self.main_plotter.renderer)
+        self.cylinder.SetInteractor(self.main_plotter.iren.interactor)
+        self.cylinder.AddObserver(vtkCommand.EndInteractionEvent, callback)
+        self.cylinder.On()
 
     def add_pickable_main_mesh(self, point_cloud: PolyData, scalars: np.ndarray | str) -> None:
         self.main_plotter.add_mesh(
