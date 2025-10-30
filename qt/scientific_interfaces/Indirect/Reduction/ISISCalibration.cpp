@@ -699,6 +699,8 @@ void ISISCalibration::addRuntimeSmoothing(const QString &workspaceName) {
 IAlgorithm_sptr ISISCalibration::calibrationAlgorithm(const QString &inputFiles) {
   auto calibrationAlg = AlgorithmManager::Instance().create("IndirectCalibration");
   calibrationAlg->initialize();
+  calibrationAlg->setProperty("Instrument", getInstrumentName().toStdString());
+  calibrationAlg->setProperty("Analyser", getAnalyserName().toStdString());
   calibrationAlg->setProperty("InputFiles", inputFiles.toStdString());
   calibrationAlg->setProperty("OutputWorkspace", m_outputCalibrationName.toStdString());
   calibrationAlg->setProperty("DetectorRange", instrumentDetectorRangeString().toStdString());

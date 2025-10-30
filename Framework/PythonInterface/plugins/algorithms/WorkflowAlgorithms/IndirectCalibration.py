@@ -14,6 +14,7 @@ from mantid.kernel import (
     IntArrayMandatoryValidator,
     IntArrayProperty,
     StringArrayProperty,
+    StringListValidator,
 )
 from mantid.simpleapi import (
     CalculateFlatBackground,
@@ -47,6 +48,18 @@ class IndirectCalibration(DataProcessorAlgorithm):
         return "Creates a calibration workspace from a White-Beam Vanadium run."
 
     def PyInit(self):
+        self.declareProperty(
+            name="Instrument",
+            defaultValue="",
+            validator=StringListValidator(["IRIS", "OSIRIS", "TOSCA", "TFXA"]),
+            doc="Instrument used during run.",
+        )
+        self.declareProperty(
+            name="Analyser",
+            defaultValue="",
+            validator=StringListValidator(["graphite", "mica", "fmica", "silicon"]),
+            doc="Analyser bank used during run.",
+        )
         self.declareProperty(StringArrayProperty(name="InputFiles"), doc="Comma separated list of input files")
 
         self.declareProperty(
@@ -181,6 +194,9 @@ class IndirectCalibration(DataProcessorAlgorithm):
         """
         Gets properties.
         """
+
+        self._instrument_name = self.getPropertyValue("Instrument")
+        self._analyser = self.getPropertyValue("Analyser")
 
         self._input_files = self.getProperty("InputFiles").value
         self._out_ws = self.getPropertyValue("OutputWorkspace")
