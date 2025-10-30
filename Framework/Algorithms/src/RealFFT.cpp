@@ -180,7 +180,6 @@ void RealFFT::exec() {
     // then, inverse transform the data
     gsl_fft_real_workspace *workspace = gsl_fft_real_workspace_alloc(yOutSize);
     gsl_fft_halfcomplex_wavetable *wavetable = gsl_fft_halfcomplex_wavetable_alloc(yOutSize);
-    // &(yData[0]) because gsl func wants non const double data[]
     gsl_fft_halfcomplex_inverse(yhc.data(), 1, yOutSize, wavetable, workspace);
     gsl_fft_halfcomplex_wavetable_free(wavetable);
     gsl_fft_real_workspace_free(workspace);
