@@ -11,6 +11,7 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Glob.h"
 
+#include <Poco/Glob.h>
 #include <filesystem>
 #include <fstream>
 
@@ -25,10 +26,12 @@ public:
   static GlobTest *createSuite() { return new GlobTest(); }
   static void destroySuite(GlobTest *suite) { delete suite; }
 
-  GlobTest() { base = std::filesystem::path(ConfigService::Instance().getInstrumentDirectory()).parent_path(); }
+  GlobTest() {
+    base = std::filesystem::path(ConfigService::Instance().getInstrumentDirectory()).parent_path().parent_path();
+  }
 
   void test_Glob() {
-    std::string pattern = base.string() + "/Framework/*/CMakeLists.*t";
+    std::string pattern = (base / "Framework/*/CMakeLists.*t").string();
 
     std::set<std::string> files;
     Glob::glob(pattern, files);

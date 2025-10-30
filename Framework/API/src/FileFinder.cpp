@@ -22,6 +22,7 @@
 #include "MantidKernel/StringTokenizer.h"
 #include <Poco/Exception.h>
 #include <Poco/File.h>
+#include <Poco/Glob.h>
 #include <Poco/Path.h>
 #include <boost/lexical_cast.hpp>
 #include <boost/regex.hpp>
