@@ -30,6 +30,7 @@ set(TEST_PY_FILES
     CreateLeBailFitInputTest.py
     CorrectTOFTest.py
     CreateCacheFilenameTest.py
+    CreateGroupingByComponentTest.py
     CreatePoleFigureTableWorkspaceTest.py
     CreateWorkspaceTest.py
     CropWorkspaceForMDNormTest.py
