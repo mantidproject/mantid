@@ -318,7 +318,7 @@ pipeline {
                   expression { params.BUILD_PACKAGE == 'all' }
               }
             }
-            agent { label "${PLATFORM}" }
+            agent { label "ornl-nominee" }
             options {
                 timestamps()
                 retry(3)
