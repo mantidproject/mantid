@@ -40,6 +40,18 @@ from pyvista.plotting.picking import RectangleSelection
 from pyvista.plotting.opts import PickerType
 import os
 from vtkmodules.vtkInteractionWidgets import vtkImplicitCylinderWidget, vtkImplicitCylinderRepresentation
+from vtkmodules.vtkCommonCore import vtkCommand
+
+
+class CylinderWidgetNoRotation(vtkImplicitCylinderWidget):
+    def __init__(self):
+        super().__init__()
+        self.AddObserver(vtkCommand.StartInteractionEvent, lambda *_: self._on_interaction())
+
+    def _on_interaction(self):
+        if self.GetCylinderRepresentation().GetInteractionState() == 4:
+            self.GetCylinderRepresentation().SetInteractionState(3)
+            return
 
 
 class PeaksWorkspaceListWidget(QListWidget):
@@ -440,11 +452,13 @@ class FullInstrumentViewWindow(QMainWindow):
         """Draw the given mesh in the main plotter window"""
         self.main_plotter.clear()
         self.main_plotter.add_mesh(mesh, pickable=False, scalars=scalars, render_points_as_spheres=True, point_size=15)
-        self.cylinder = vtkImplicitCylinderWidget()
+        # self.cylinder = vtkImplicitCylinderWidget()
+        self.cylinder = CylinderWidgetNoRotation()
+        # cylinder_repr = CylinderRepresentationNoRotation()
         cylinder_repr = vtkImplicitCylinderRepresentation()
         cylinder_repr.SetRadius(50)
         cylinder_repr.SetWidgetBounds(mesh.bounds)
-        cylinder_repr.SetAlongZAxis(True)
+        cylinder_repr.SetAxis([0, 0, 1])
         self.cylinder.SetRepresentation(cylinder_repr)
         self.cylinder.SetCurrentRenderer(self.main_plotter.renderer)
         self.cylinder.SetInteractor(self.main_plotter.iren.interactor)
