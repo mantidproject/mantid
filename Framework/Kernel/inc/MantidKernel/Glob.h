@@ -10,7 +10,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/DllConfig.h"
-#include <Poco/Glob.h>
 
 #include <set>
 #include <string>
@@ -24,7 +23,7 @@ namespace Kernel {
     @date 23/07/2009
 */
 
-class MANTID_KERNEL_DLL Glob : public Poco::Glob {
+class MANTID_KERNEL_DLL Glob {
 public:
   /// Creates a set of files that match the given pathPattern.
   static void glob(const std::string &pathPattern, std::set<std::string> &files, int options = 0);
