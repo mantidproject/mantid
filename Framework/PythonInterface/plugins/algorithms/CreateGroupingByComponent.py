@@ -11,6 +11,8 @@ from mantid.kernel import (
     Direction,
     IntBoundedValidator,
 )
+from itertools import chain
+from typing import Sequence
 
 
 class CreateGroupingByComponent(PythonAlgorithm):
@@ -94,7 +96,9 @@ class CreateGroupingByComponent(PythonAlgorithm):
 
         # if an exclude string is provided the is_target evaluation function should be the one which also checks exclusion
         # otherwise this can just check inclusion
-        self.is_target = self._is_target_just_include if self.exclude_target == "" else self._is_target_include_and_exclude
+        self.component_is_target = (
+            self._component_is_target_just_include if self.exclude_target == "" else self._component_is_target_include_and_exclude
+        )
 
         # parse the input string for comma separated strings, that will exclude entire branches of the instrument tree
         self.exclude_branches = [branch.strip() for branch in exclude_branch_strings.split(",")] if exclude_branch_strings else []
@@ -104,20 +108,19 @@ class CreateGroupingByComponent(PythonAlgorithm):
 
         # read the component and detector info
         self.info = ws.componentInfo()
-        detinfo = ws.detectorInfo()
-        dets = detinfo.detectorIDs()
-
-        # create a lookup between the detectors on the instrument (by component index), and the detector id strings
-        self.det_id_dict = {i: det_id for i, det_id in enumerate(dets)}
+        self.detinfo = ws.detectorInfo()
+        self.dets = self.detinfo.detectorIDs()
 
         # find the component index of the root component
         idx_root = self.info.root()
 
         # find all the node ids for which a child meets the include/exclude criteria
-        direct_parents = self.get_direct_parents_of_targets(idx_root)
+        sets_of_target_components = self.get_target_component_sets(idx_root)
 
         # create a string input to get the desired groupings
-        group_string = ",".join([self.get_component_group_string(p, num_divisions) for p in direct_parents])
+        group_string = ",".join(
+            [self.get_component_group_string(component_set, num_divisions) for component_set in sets_of_target_components]
+        )
 
         # print this string in debug mode
         logger.debug(group_string)
@@ -142,44 +145,79 @@ class CreateGroupingByComponent(PythonAlgorithm):
         out_props = tuple(alg.getProperty(prop).value for prop in alg.outputProperties())
         return out_props[0] if len(out_props) == 1 else out_props
 
-    def get_direct_parents_of_targets(self, root_idx: int):
+    def get_target_component_sets(self, root_idx: int) -> Sequence[Sequence[int]]:
         """
-        find all the parent nodes in the instrument tree with at least one child node which meets the search criteria
+        find all the sets of components which meet the search criteria and live under the same parent node in the instrument tree
         """
-        parents = set()
+        # first check if the root component should be excluded, to break out of this whole function
+        if self._branch_should_be_excluded(root_idx):
+            logger.warning(f"Subtree beneath '{self.info.name(root_idx)}' has been excluded")
+            return [
+                [],
+            ]
+        # otherwise we start checking child components of parent nodes, starting with the root node
         stack = [root_idx]
+        component_sets = []
         while stack != []:
             idx = stack.pop()
-            if self._branch_should_be_excluded(idx):
-                logger.notice(f"Subtree beneath '{self.info.name(idx)}' has been excluded")
-                continue
-            children = [int(c) for c in self.info.children(idx)]
-            # if any child is a target, this node is a direct parent
-            if any(self.is_target(c) for c in children):
-                parents.add(idx)
-            stack.extend(c for c in children if not self.is_target(c))
-        return sorted(parents)
+            grouping_set = []
+            for c in self._get_children(idx):
+                # if child component is a branch which should be excluded, we move on
+                if self._branch_should_be_excluded(c):
+                    logger.notice(f"Subtree beneath '{self.info.name(c)}' has been excluded")
+                    continue
+                # otherwise we check if this child component is a target
+                if self.component_is_target(c):
+                    # if it is, it joins the component set under this parent node
+                    grouping_set.append(c)
+                else:
+                    # otherwise we add it to the stack of parent nodes to search
+                    stack.append(c)
+            # we add this set to the output and check the next parent node
+            component_sets.append(grouping_set)
+        return component_sets
 
-    def get_component_group_string(self, parent, n=1):
+    def get_component_group_string(self, component_set: Sequence[int], n=1) -> str:
         """
-        for a given parent node, find all the children which are detectors, and split them into n groups - formatted as
-        a custom detector grouping string for CreateGroupingWorkspace
+        for a given set of target components, find all the child detectors (excluding monitors) and split them into n groups -
+        formatted as a custom detector grouping string for CreateGroupingWorkspace
         """
-        child_detector_ids = [str(self.det_id_dict[det_ind]) for det_ind in self.info.detectorsInSubtree(int(parent))]
+        set_det_ids = [self.info.detectorsInSubtree(component) for component in component_set]
+        child_detector_ids = [str(self.dets[det_ind]) for det_ind in chain(*set_det_ids) if not self.detinfo.isMonitor(int(det_ind))]
         sub_divided_child_detector_ids = [arr for arr in np.array_split(child_detector_ids, n) if len(arr) > 0]
         return ",".join(["+".join(sub_array) for sub_array in sub_divided_child_detector_ids])
 
-    def _component_name_contains(self, idx, target):
+    def _component_name_contains(self, idx: int, target: str) -> bool:
+        """
+        check a given component (by component index) has a name which contains the target string
+        """
         return target in self.info.name(int(idx))
 
-    def _is_target_just_include(self, idx):
+    def _component_is_target_just_include(self, idx: int) -> bool:
+        """
+        check a given component (by component index) meets the search criteria when only ComponentNameIncludes is provided
+        """
         return self._component_name_contains(idx, self.include_target)
 
-    def _is_target_include_and_exclude(self, idx):
-        return self._is_target_just_include(idx) and not self._component_name_contains(idx, self.exclude_target)
+    def _component_is_target_include_and_exclude(self, idx: int) -> bool:
+        """
+        check a given component (by component index) meets the search criteria when
+        both ComponentNameIncludes and ComponentNameExcludes are provided
+        """
+        return self._component_is_target_just_include(idx) and not self._component_name_contains(idx, self.exclude_target)
 
-    def _branch_should_be_excluded(self, idx):
+    def _branch_should_be_excluded(self, idx: int) -> bool:
+        """
+        check a given component (by component index) name contains one of the exclusion terms which should prevent its subtree
+        from being explored for targets
+        """
         return np.any([self._component_name_contains(idx, branch) for branch in self.exclude_branches])
+
+    def _get_children(self, idx: int) -> Sequence[int]:
+        """
+        for a given component index get the child component indices as a list of ints
+        """
+        return [int(c) for c in self.info.children(idx)]
 
 
 AlgorithmFactory.subscribe(CreateGroupingByComponent)

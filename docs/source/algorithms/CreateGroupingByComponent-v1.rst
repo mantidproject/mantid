@@ -10,21 +10,34 @@ Description
 -----------
 
 A utility algorithm for grouping detector components together based on repeated component names
-(i.e. if you wanted to group all the pixels in each module together). This is best illustrated by example.
+(i.e. if you wanted to group all the pixels in each module together).
+Specifically, every *component* which matches the search conditions will have all its child *detectors* (excluding monitors) grouped together with
+the child *detectors* of the other matching *components* which are present under the *same* parent *component*.
+
+This is best illustrated by example.
 
 You have an instrument that has the following hierarchy Banks -> Module -> Pixels.
 Let's say there are two banks called ``bank1`` and ``bank2``. Then each bank is made up of three module named
 ``module1``, ``module2`` and ``module3``, respectively.
 Finally each of these module contains 5 detector pixels: ``pixel1``, ``pixel2``, ``pixel3``, ``pixel4``, and ``pixel5``
 
-If you want to create a ``GroupingWorkspace`` where each module forms its own detector group, you formulate this as grouping together "pixel" components
-belonging to the same parent component, with  ``ComponentNameIncludes = "pixel"`` (in this case all the "pixel" components under each module).
-Likewise, to get a ``GroupingWorkspace`` where each
-bank is independent you would use ``ComponentNameIncludes = "module"``, as this would group together each set of three modules in the two banks.
+If you want to create a ``GroupingWorkspace`` where each *bank* forms its own detector group,
+you can formulate this as grouping together "module" components (using ``ComponentNameIncludes = "module``").
+The algorithm will find all the *components* with names containing the term ``"module"``,
+find their child *detectors* (in this case, this is a set of 5 pixels per module),
+and group together all of these child *detectors* which belong to components appearing under the same *parent component*
+(i.e. grouping all *detectors* belonging to *modules* which appear under the same parent *bank* -
+resulting in a unique grouping for each bank)
 
-In some situations you may have undesirable components in the instrument tree which exactly contain the name of the
-actual component you are looking to match (for example ``transmission-pixel1`` when searching for ``pixel`` components).
-In these cases you can use ``ComponentNameExcludes`` to remove these from groupings.
+
+In some situations you may have components you do not wish to include in the grouping preset within the instrument tree,
+which entirely contain the name of the actual component you are looking to match
+(for example ``transmission-pixel1`` when searching for ``pixel`` components).
+
+In these cases you have two options, you can use ``ComponentNameExcludes`` or, in some situations ``ExcludeBranches``.
+
+``ComponentNameExcludes`` is used to alter the condition of which components meet the search criteria. When this is set
+the detectors of components
 Additionally, entire branches of the Instrument Component Tree can be excluded with ``ExcludeBranches``,
 no components will be grouped under any parent component
 with names containing any of the comma separated strings provided here.
