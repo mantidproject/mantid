@@ -87,7 +87,7 @@ pipeline {
   stages {
     // Fail the pipeline early if any parameters are incorrect.
     stage('Check parameters') {
-      agent { label 'linux-64' }
+      agent { label 'ornl-nominee' }
       steps {
         script {
           currentBuild.setDescription(params.DESCRIPTION)
@@ -108,7 +108,7 @@ pipeline {
     // the following step at the start of each subsequent stage:
     //   checkout scm: [$class: 'GitSCM', branches: [[name: "${GIT_SHA}"]], extensions: [[pruneTags: true]]]
     stage('Store git commit') {
-      agent { label 'linux-64' }
+      agent { label 'ornl-nominee' }
       steps {
         script {
           env.GIT_SHA = GIT_COMMIT
@@ -119,7 +119,7 @@ pipeline {
     // certain agents. In particular, this can be a problem when the branch being built
     // is on a fork.
     stage('Generate git tag') {
-      agent { label 'linux-64' }
+      agent { label 'ornl-nominee' }
       steps {
         checkoutSource("${GIT_SHA}")
         script {
@@ -143,7 +143,7 @@ pipeline {
                 expression { params.BUILD_DEVEL == 'linux-64' }
             }
           }
-          agent { label 'linux-64' }
+          agent { label 'ornl-nominee' }
           options { timestamps () }
           steps {
             checkoutSource("${GIT_SHA}")
@@ -210,7 +210,7 @@ pipeline {
             // conda packages unless 'none' is specified.
             expression { params.BUILD_PACKAGE != 'none' }
           }
-          agent { label 'linux-64' }
+          agent { label 'ornl-nominee' }
           options {
               timestamps ()
               retry(3)
@@ -359,7 +359,7 @@ pipeline {
         beforeOptions true
         expression { params.PUBLISH_TO_ANACONDA }
       }
-      agent { label 'linux-64' } // Use linux for simplicity with shell scripts
+      agent { label 'ornl-nominee' } // Use linux for simplicity with shell scripts
       options {
         timestamps ()
         retry(3)
@@ -392,7 +392,7 @@ pipeline {
             expression { params.ANACONDA_CHANNEL_LABEL.trim() == 'nightly' }
         }
       }
-      agent { label 'linux-64' } // Use linux for simplicity with shell scripts
+      agent { label 'ornl-nominee' } // Use linux for simplicity with shell scripts
       options { timestamps () }
       environment { ANACONDA_TOKEN = credentials("${ANACONDA_TOKEN_CREDENTIAL_ID}") }
       steps {
@@ -411,7 +411,7 @@ pipeline {
           expression { params.GITHUB_RELEASES_REPO.trim() != '' }
         }
       }
-      agent { label 'linux-64' } // Use linux for simplicity with shell scripts
+      agent { label 'ornl-nominee' } // Use linux for simplicity with shell scripts
       options {
         timestamps ()
         retry(3)
@@ -445,7 +445,7 @@ pipeline {
       }
     }
     stage ('Keep latest successful build') {
-      agent { label 'linux-64' } // Use linux for simplicity with shell scripts
+      agent { label 'ornl-nominee' } // Use linux for simplicity with shell scripts
       options {
         timestamps ()
       }
