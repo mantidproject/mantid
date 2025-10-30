@@ -39,6 +39,7 @@ import pyvista as pv
 from pyvista.plotting.picking import RectangleSelection
 from pyvista.plotting.opts import PickerType
 import os
+from vtkmodules.vtkInteractionWidgets import vtkImplicitCylinderWidget, vtkImplicitCylinderRepresentation
 
 
 class PeaksWorkspaceListWidget(QListWidget):
@@ -199,6 +200,8 @@ class FullInstrumentViewWindow(QMainWindow):
         self.interactor_style = CustomInteractorStyleZoomAndSelect()
         self._overlay_meshes = []
         self._lineplot_overlays = []
+
+        # self.main_plotter.add_box_widget(lambda x: None)
 
     def check_sum_spectra_checkbox(self) -> None:
         self._sum_spectra_checkbox.setChecked(True)
@@ -437,6 +440,15 @@ class FullInstrumentViewWindow(QMainWindow):
         """Draw the given mesh in the main plotter window"""
         self.main_plotter.clear()
         self.main_plotter.add_mesh(mesh, pickable=False, scalars=scalars, render_points_as_spheres=True, point_size=15)
+        self.cylinder = vtkImplicitCylinderWidget()
+        cylinder_repr = vtkImplicitCylinderRepresentation()
+        cylinder_repr.SetRadius(50)
+        cylinder_repr.SetWidgetBounds(mesh.bounds)
+        cylinder_repr.SetAlongZAxis(True)
+        self.cylinder.SetRepresentation(cylinder_repr)
+        self.cylinder.SetCurrentRenderer(self.main_plotter.renderer)
+        self.cylinder.SetInteractor(self.main_plotter.iren.interactor)
+        self.cylinder.On()
 
         if not self.main_plotter.off_screen:
             self.main_plotter.enable_trackball_style()
