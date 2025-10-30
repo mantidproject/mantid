@@ -65,6 +65,10 @@ class AbinsAlgorithmValidatorsTest(unittest.TestCase):
         issues = AbinsAlgorithm._validate_euphonic_input_file(wrong_yaml)
         self.assertEqual(issues, {"Invalid": True, "Comment": f"No 'phonopy' section found in {wrong_yaml}"})
 
+    def test_validate_e_init(self):
+        """Check incident energy / instrument combinations"""
+        raise NotImplementedError()
+
 
 class AbinsAlgorithmMethodsTest(unittest.TestCase):
     """Test static methods on AbinsAlgorithm"""
