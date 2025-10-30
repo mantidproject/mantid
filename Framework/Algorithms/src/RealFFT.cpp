@@ -162,8 +162,8 @@ void RealFFT::exec() {
     auto &y1 = inWS->mutableY(1);
     std::vector<double> yhc(yOutSize);
     for (std::size_t i = 0; i < ySize; i++) {
-      std::size_t j = i * 2;
       if (i != 0) {
+        std::size_t j = i * 2;
         yhc[j - 1] = y0[i];
         if (odd || i != ySize - 1) {
           yhc[j] = y1[i];
