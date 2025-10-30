@@ -87,7 +87,7 @@ def get_pr_number_and_link(release_note_path: pathlib.Path, git_token: str) -> T
     for commit_hash in commit_hashes:
         headers = {"Authorization": f"token {git_token}", "Accept": "application/vnd.github.groot-preview+json"}
         url = f"https://api.github.com/repos/{GIT_REPO}/commits/{commit_hash}/pulls"
-        response = requests.get(url, headers=headers)
+        response = requests.get(url, headers=headers, timeout=10)
         if response.status_code != 200:
             continue
 
