@@ -145,6 +145,42 @@ template MANTID_KERNEL_DLL std::vector<double> boxcarErrorSmooth(std::vector<dou
 // FFT SMOOTHING METHODS
 
 namespace fft {
+
+// filters
+template <typename Y> struct FFTFilter {
+  virtual Y operator()(std::size_t index) const = 0;
+};
+
+template <typename Y> struct ZeroFilter : public FFTFilter<Y> {
+  // remove the higher frequencies by setting to zero
+  // REF: see example code at
+  // - https://www.gnu.org/software/gsl/doc/html/fft.html#overview-of-real-data-f
+  ZeroFilter(std::size_t n) : cutoff(n) {}
+  Y operator()(std::size_t index) const override { return (index >= cutoff ? 0 : 1); }
+
+private:
+  std::size_t cutoff;
+};
+
+template <typename Y> struct ButterworthFilter : public FFTFilter<Y> {
+  // remove the higher frequencies by tapering with a Butterworth filter
+  // SOME REFS:
+  // - https://scikit-image.org/docs/0.25.x/api/skimage.filters.html#skimage.filters.butterworth
+  // - https://isbweb.org/software/sigproc/bogert/filter.pdf
+  // - https://users.cs.cf.ac.uk/dave/Vision_lecture/node22.html
+  ButterworthFilter(std::size_t dn, unsigned n, unsigned o) : two_order(2U * o) {
+    std::size_t complex_size = (dn % 2 == 0 ? dn / 2 : (dn - 1) / 2);
+    invcutoff = n / static_cast<Y>(complex_size);
+  }
+  Y operator()(std::size_t index) const override {
+    return 1.0 / (1.0 + std::pow(invcutoff * static_cast<Y>(index), two_order));
+  }
+
+private:
+  unsigned two_order;
+  Y invcutoff;
+};
+
 // wrap GSL points in unique pointers with deleters for memory leak safety in case of failures
 constexpr auto real_wt_deleter = [](gsl_fft_real_wavetable *p) { gsl_fft_real_wavetable_free(p); };
 constexpr auto real_ws_deleter = [](gsl_fft_real_workspace *p) { gsl_fft_real_workspace_free(p); };
@@ -157,13 +193,8 @@ using hc_wt_uptr = std::unique_ptr<gsl_fft_halfcomplex_wavetable, decltype(hc_wt
 real_wt_uptr make_gsl_real_wavetable(std::size_t dn) { return real_wt_uptr(gsl_fft_real_wavetable_alloc(dn)); }
 real_ws_uptr make_gsl_real_workspace(std::size_t dn) { return real_ws_uptr(gsl_fft_real_workspace_alloc(dn)); }
 hc_wt_uptr make_gsl_hc_wavetable(std::size_t dn) { return hc_wt_uptr(gsl_fft_halfcomplex_wavetable_alloc(dn)); }
-} // namespace fft
 
-template <typename Y> std::vector<Y> fftSmooth(std::vector<Y> const &input, unsigned const cutoff) {
-  if (cutoff >= input.size()) {
-    throw std::invalid_argument("The cutoff frequency must be less than the array size");
-  }
-
+template <typename Y> std::vector<Y> fftSmoothWithFilter(std::vector<Y> const &input, FFTFilter<Y> const &filter) {
   std::size_t dn = input.size();
   std::vector<Y> output(input.cbegin(), input.cend());
 
@@ -173,12 +204,16 @@ template <typename Y> std::vector<Y> fftSmooth(std::vector<Y> const &input, unsi
   gsl_fft_real_transform(output.data(), 1, dn, real_wt.get(), real_ws.get());
   real_wt.reset();
 
-  // remove the higher frequencies by setting to zero
-  // REF: see example code at
-  // - https://www.gnu.org/software/gsl/doc/html/fft.html#overview-of-real-data-f
-  for (std::size_t fn = cutoff + 1; fn < dn; fn++) {
-    output[fn] = 0;
+  // NOTE: the halfcomplex storage requires special treatment of even/odd
+  bool even = (dn % 2 == 0);
+  std::size_t complex_size = (even ? dn / 2 : (dn - 1) / 2);
+  for (std::size_t fn = 0; fn < complex_size - 1; fn++) {
+    output[2 * fn - 1] *= filter(fn); // real parts
+    output[2 * fn] *= filter(fn);     // imaginary parts
   }
+  // handle the last points, which may differ based on even/odd
+  output[dn - 2] *= filter(2 * complex_size - 2);
+  output[dn - 1] *= filter(2 * complex_size - 2);
 
   // transform back
   fft::hc_wt_uptr hc_wt = fft::make_gsl_hc_wavetable(dn);
@@ -188,69 +223,34 @@ template <typename Y> std::vector<Y> fftSmooth(std::vector<Y> const &input, unsi
 
   // return the smoothed result
   return output;
+}
+
+} // namespace fft
+
+template <typename Y> std::vector<Y> fftSmooth(std::vector<Y> const &input, unsigned const cutoff) {
+  if (cutoff == 0) {
+    throw std::invalid_argument("The cutoff frequency must be greater than zero");
+  } else if (cutoff > input.size()) {
+    throw std::invalid_argument("The cutoff frequency must be less than the array size");
+  }
+
+  fft::ZeroFilter<Y> filter(cutoff);
+  return fftSmoothWithFilter(input, filter);
 }
 
 template <typename Y>
 std::vector<Y> fftButterworthSmooth(std::vector<Y> const &input, unsigned const cutoff, unsigned const order) {
-  if (cutoff >= input.size()) {
-    throw std::invalid_argument("The cutoff frequency must be less than the array size");
+  if (cutoff == 0) {
+    throw std::invalid_argument("The cutoff frequency must be greater than zero");
+  }
+  if (cutoff > input.size()) {
+    throw std::invalid_argument("The Butterworth cutoff frequency must be less than the array size");
   }
 
-  std::vector<Y> output(input.cbegin(), input.cend());
-
-  // calculate the cutoff frequency
-  // note that output is half-complex with real and imag numbers packed in one array
-  // the "true" index of neighboring indices is identical, for purposes of the scale
   std::size_t dn = input.size();
-  std::size_t my = dn / 2 + 1;
-  std::size_t ny = my / cutoff;
-
-  // obtain the FFT
-  fft::real_ws_uptr real_ws = fft::make_gsl_real_workspace(dn);
-  fft::real_wt_uptr real_wt = fft::make_gsl_real_wavetable(dn);
-  gsl_fft_real_transform(output.data(), 1, dn, real_wt.get(), real_ws.get());
-  real_wt.reset();
-
-  // remove the higher frequencies by tapering with a Butterworth filter
-  // SOME REFS:
-  // - https://scikit-image.org/docs/0.25.x/api/skimage.filters.html#skimage.filters.butterworth
-  // - https://isbweb.org/software/sigproc/bogert/filter.pdf
-  // - https://users.cs.cf.ac.uk/dave/Vision_lecture/node22.html
-  Y invcutoff = 1. / static_cast<Y>(ny);
-  unsigned two_order = 2U * order;
-  for (std::size_t fn = 0; fn < dn; fn++) {
-    Y hci = static_cast<Y>(std::size_t(fn / 2U)); // halfcomplex index
-    Y scale = 1.0 / (1.0 + std::pow(invcutoff * hci, two_order));
-    output[fn] *= scale;
-  }
-
-  // transform back
-  fft::hc_wt_uptr hc_wt = fft::make_gsl_hc_wavetable(dn);
-  gsl_fft_halfcomplex_inverse(output.data(), 1, dn, hc_wt.get(), real_ws.get());
-  hc_wt.reset();
-  real_ws.reset();
-
-  // return the smoothed result
-  return output;
+  fft::ButterworthFilter<Y> filter(dn, cutoff, order);
+  return fft::fftSmoothWithFilter(input, filter);
 }
-
-// symmetrize the input data
-// suppose original is graph like
-//        |....
-//       .|     .
-// -----.--------.---
-//    .   |       .
-//   .    |
-//   |    |
-//   ^x0, i=0
-// then the symmetrized looks like
-//     ....         |....
-//   .     .       .|     .
-//--.-------.-----.--------.---
-// .          . .   |       .
-//             .    |
-//             |    |
-//             ^x0, i = dn
 
 template MANTID_KERNEL_DLL std::vector<double> fftSmooth(std::vector<double> const &, unsigned const);
 template MANTID_KERNEL_DLL std::vector<double> fftButterworthSmooth(std::vector<double> const &, unsigned const,

@@ -127,7 +127,7 @@ public:
     for (std::size_t i = 0; i < input.size(); i++) {
       input[i] += (i % 2 == 0 ? +1 : -1);
     }
-    std::vector<double> output = fftSmooth(input, 0);
+    std::vector<double> output = fftSmooth(input, 1);
     TS_ASSERT_EQUALS(input.size(), output.size());
     for (double const &x : output) {
       TS_ASSERT_EQUALS(x, flatValue);
@@ -140,19 +140,26 @@ public:
     std::vector<double> input(N);
     // make periodic data
     constexpr double w0 = 6.28318530717958648 / double(N);
-    double w1 = 3. * w0, w2 = 15. * w0;
+    unsigned n1 = 3, n2 = 15;
+    double w1 = n1 * w0, w2 = n2 * w0;
     auto sine = [](double w, std::size_t i) { return std::sin(w * double(i)); };
     for (std::size_t i = 0; i < N; i++) {
       input[i] = sine(w1, i) + sine(w2, i);
     }
     // cut off too low -- signal will be zero
-    std::vector<double> output = fftSmooth(input, 4);
+    std::vector<double> output = fftSmooth(input, n1 - 1);
     TS_ASSERT_EQUALS(input.size(), output.size());
     for (std::size_t i = 0; i < output.size(); i++) {
       TS_ASSERT_DELTA(output[i], 0.0, 1.e-8);
     }
+    // cutoff too high -- the higher frequency is still there
+    output = fftSmooth(input, n2 + 1);
+    TS_ASSERT_EQUALS(input.size(), output.size());
+    for (std::size_t i = 0; i < output.size(); i++) {
+      TS_ASSERT_DELTA(output[i], input[i], 1.e-8);
+    }
     // cutoff just right -- the higher frequency part is removed
-    output = fftSmooth(input, 6);
+    output = fftSmooth(input, n2 - 1);
     TS_ASSERT_EQUALS(input.size(), output.size());
     for (std::size_t i = 0; i < output.size(); i++) {
       TS_ASSERT_DELTA(output[i], sine(w1, i), 1.e-8);
@@ -202,7 +209,7 @@ public:
     for (std::size_t i = 0; i < input.size(); i++) {
       input[i] += (i % 2 == 0 ? +1 : -1);
     }
-    std::vector<double> output = fftButterworthSmooth(input, 1, 10);
+    std::vector<double> output = fftButterworthSmooth(input, 2, 10);
     TS_ASSERT_EQUALS(input.size(), output.size());
     for (double const &x : output) {
       TS_ASSERT_DELTA(x, flatValue, 1.e-4);

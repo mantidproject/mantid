@@ -49,7 +49,7 @@ template <typename T> std::vector<T> boxcarRMSESmooth(std::vector<T> const &inpu
  *  NOTE: the input data MUST be defined on a uniform grid
  *
  * @param input The input vector to be smoothed
- * @param cutoff Represents the cutoff frequency, 1 / cutoff, after which values set to zero
+ * @param cutoff The cutoff frequency; all components from this number forward will be set to zero
  * @return A new vector containing the smoothed data
  * @tparam Y numeric type for y-values
  */
@@ -59,7 +59,7 @@ template <typename Y> std::vector<Y> fftSmooth(std::vector<Y> const &input, unsi
  *  NOTE: the input data MUST be defined on a uniform grid
  *
  * @param input The input vector to be smoothed
- * @param cutoff Represents the cutoff frequency, 1 / cutoff
+ * @param cutoff Represents the cutoff frequency, where step function behavior begins descent
  * @param order Represents the steepness of the frequency cutoff; as this approaches infinity, approaches step cutoff
  * @return A new vector containing the smoothed data
  * @tparam Y numeric type for y-values
