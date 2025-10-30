@@ -1069,7 +1069,7 @@ class AbinsAlgorithm:
             raise RuntimeError("Invalid number of threads for parallelisation over atoms" + message_end)
 
 
-def validate_e_init(e_init: str, energy_units: str, instrument_name: str) -> dict[str, str]:
+def validate_e_init(*, e_init: str, energy_units: str, instrument_name: str) -> dict[str, str]:
     """Validator for direct-geometry incident energy parameters
 
     Check that algorithm inputs specify a valid energy for the given instrument
@@ -1087,10 +1087,13 @@ def validate_e_init(e_init: str, energy_units: str, instrument_name: str) -> dic
     else:
         max_energy = abins.parameters.sampling["max_wavenumber"]
 
-    if energy_units == "meV":
-        max_energy = max_energy / MILLI_EV_TO_WAVENUMBER
-    else:
-        max_energy = max_energy
+    match energy_units:
+        case "meV":
+            max_energy = max_energy / MILLI_EV_TO_WAVENUMBER
+        case "cm-1":
+            max_energy = max_energy
+        case _:
+            raise ValueError(f"Invalid energy unit: {energy_units}")
 
     if float(e_init) > max_energy:
         issues["IncidentEnergy"] = f"Incident energy cannot be greater than {max_energy:.3f} {energy_units} for this instrument."
