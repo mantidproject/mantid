@@ -149,6 +149,7 @@ namespace fft {
 // filters
 template <typename Y> struct FFTFilter {
   virtual Y operator()(std::size_t index) const = 0;
+  virtual ~FFTFilter() = default;
 };
 
 template <typename Y> struct ZeroFilter : public FFTFilter<Y> {
@@ -168,10 +169,7 @@ template <typename Y> struct ButterworthFilter : public FFTFilter<Y> {
   // - https://scikit-image.org/docs/0.25.x/api/skimage.filters.html#skimage.filters.butterworth
   // - https://isbweb.org/software/sigproc/bogert/filter.pdf
   // - https://users.cs.cf.ac.uk/dave/Vision_lecture/node22.html
-  ButterworthFilter(std::size_t dn, unsigned n, unsigned o) : two_order(2U * o) {
-    std::size_t complex_size = (dn % 2 == 0 ? dn / 2 : (dn - 1) / 2);
-    invcutoff = n / static_cast<Y>(complex_size);
-  }
+  ButterworthFilter(unsigned n, unsigned o) : two_order(2U * o), invcutoff(1.0 / static_cast<Y>(n)) {}
   Y operator()(std::size_t index) const override {
     return 1.0 / (1.0 + std::pow(invcutoff * static_cast<Y>(index), two_order));
   }
@@ -247,8 +245,7 @@ std::vector<Y> fftButterworthSmooth(std::vector<Y> const &input, unsigned const 
     throw std::invalid_argument("The Butterworth cutoff frequency must be less than the array size");
   }
 
-  std::size_t dn = input.size();
-  fft::ButterworthFilter<Y> filter(dn, cutoff, order);
+  fft::ButterworthFilter<Y> filter(cutoff, order);
   return fft::fftSmoothWithFilter(input, filter);
 }
 

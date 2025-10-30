@@ -129,17 +129,14 @@ void FFTSmooth2::exec() {
     // |  symm_size = 2 * dn
     // |  halfcomplex size of symm = symm_size / 2 = dn
     // so correct size to use is dn
-    std::size_t adjusted_cutoff = (n > dn ? 1 : dn / n);
+    unsigned adjusted_cutoff = (n > dn ? 1 : static_cast<unsigned>(dn / n));
     smoothMethod = [adjusted_cutoff](std::vector<double> const &y) {
       return Kernel::Smoothing::fftSmooth(y, adjusted_cutoff);
     };
     break;
   }
   case FilterType::BUTTERWORTH: {
-    std::size_t adjusted_cutoff = n * (dn + 1) / dn;
-    if (adjusted_cutoff > dn) {
-      adjusted_cutoff = dn;
-    }
+    unsigned adjusted_cutoff = (n > dn ? 1 : static_cast<unsigned>(dn / n));
     smoothMethod = [adjusted_cutoff, order](std::vector<double> const &y) {
       return Kernel::Smoothing::fftButterworthSmooth(y, adjusted_cutoff, order);
     };
