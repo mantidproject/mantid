@@ -1074,6 +1074,16 @@ def validate_e_init(*, e_init: str, energy_units: str, instrument_name: str) -> 
 
     Check that algorithm inputs specify a valid energy for the given instrument
     and return appropriate issues dict for .validateInputs() method.
+
+    Note that parameters are strings; this is the form they are received from
+    algorithm parameters.
+
+    Args:
+        e_init: IncidentEnergy for Abins2D
+        energy_units: 'meV' or 'cm-1'
+        instrument_name:
+            A valid Abins2D instrument. This must be validated elsewhere,
+            with a corresponding entry in abins.parameters.instruments.
     """
 
     issues = {}
