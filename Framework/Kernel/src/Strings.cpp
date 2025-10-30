@@ -7,7 +7,6 @@
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/UnitLabel.h"
-
 #include <filesystem>
 #include <fstream>
 #include <list>
@@ -1003,8 +1002,8 @@ size_t split_path(const std::string &path, std::vector<std::string> &path_compon
   // path
   if (path[0] == '.') {
     // get absolute path using working directory as base;
-    std::filesystem::path absol = std::filesystem::current_path();
-    working_path = absol.generic_string() + working_path;
+    std::filesystem::path absol = std::filesystem::absolute(std::filesystem::current_path());
+    working_path = (absol / working_path).generic_string();
   }
   // as poco splt using regular expressions is doing some rubbish, we need to do
   // split manually
