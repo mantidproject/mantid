@@ -455,7 +455,7 @@ std::string ConfigServiceImpl::makeAbsolute(const std::string &dir, const std::s
   try {
     std::filesystem::path testPath(dir);
     is_relative = testPath.is_relative();
-    
+
 #ifdef _WIN32
     // On Windows, std::filesystem treats paths starting with / or \ as relative
     // (because they lack a drive letter), but we want to treat them as absolute
