@@ -122,15 +122,17 @@ public:
     // valid
     TS_ASSERT_EQUALS(wsp2->setValue("ws2"), "");
     TS_ASSERT_EQUALS(wsp2->isValid(), "");
-    // Setting an invalid name should make wsp6 invalid
-    const std::string illegalChars = " +-/*\\%<>&|^~=!@()[]{},:.`$'\"?";
-    AnalysisDataService::Instance().setIllegalCharacterList(illegalChars);
-    std::string error = "Invalid object name 'ws6-1'. Names cannot contain any "
-                        "of the following characters: " +
-                        illegalChars;
-    TS_ASSERT_EQUALS(wsp6->setValue("ws6-1"), error);
+
+    // Setting an invalid name should make wsp6 invalid but currently only in debug mode.
+    std::string invalidWorkspaceName = "ws6-1";
+    std::string error = "";
+#ifndef NDEBUG
+    error =
+        "Invalid object name '" + invalidWorkspaceName +
+        "'. Names must start with a letter or underscore and contain only alpha-numeric characters and underscores.";
+#endif
+    TS_ASSERT_EQUALS(wsp6->setValue(invalidWorkspaceName), error);
     TS_ASSERT_EQUALS(wsp6->isValid(), error);
-    AnalysisDataService::Instance().setIllegalCharacterList("");
 
     // The other three need the input workspace to exist in the ADS
     Workspace_sptr space;
@@ -341,21 +343,31 @@ public:
     TS_ASSERT_EQUALS(p1.value(), "");
   }
 
-  void test_trimmming() {
-    // trimming on
-    Workspace_sptr ws1 = WorkspaceFactory::Instance().create("WorkspacePropertyTest", 1, 1, 1);
-    AnalysisDataService::Instance().add("space1", ws1);
-    WorkspaceProperty<Workspace> p1("workspace1", "", Direction::Input);
-    p1.setValue("  space1\t\n");
-    TS_ASSERT_EQUALS(p1.value(), "space1");
+  void test_trimmming_on() {
+    Workspace_sptr ws = WorkspaceFactory::Instance().create("WorkspacePropertyTest", 1, 1, 1);
+    AnalysisDataService::Instance().add("space1", ws);
+    WorkspaceProperty<Workspace> p("workspace1", "", Direction::Input);
+    p.setValue("  space1\t\n");
+    TS_ASSERT_EQUALS(p.value(), "space1");
+    AnalysisDataService::Instance().clear();
+  }
 
+  void test_trimmming_off() {
+    Workspace_sptr ws = WorkspaceFactory::Instance().create("WorkspacePropertyTest", 1, 1, 1);
+    std::string wsNameWithWhitespace = "  space1\t\n";
+    AnalysisDataService::Instance().add(wsNameWithWhitespace, ws);
+    WorkspaceProperty<Workspace> p("workspace1", "", Direction::Input);
     // turn trimming off
-    Workspace_sptr ws2 = WorkspaceFactory::Instance().create("WorkspacePropertyTest", 1, 1, 1);
-    AnalysisDataService::Instance().add("  space1\t\n", ws2);
-    WorkspaceProperty<Workspace> p2("workspace1", "", Direction::Input);
-    p2.setAutoTrim(false);
-    p2.setValue("  space1\t\n");
-    TS_ASSERT_EQUALS(p2.value(), "  space1\t\n");
+    p.setAutoTrim(false);
+
+    std::string expectedError = "";
+#ifndef NDEBUG
+    expectedError =
+        "Invalid object name '" + wsNameWithWhitespace +
+        "'. Names must start with a letter or underscore and contain only alpha-numeric characters and underscores.";
+#endif
+    // setValue() should return an error string in debug mode if illegal workspace name is provided.
+    TS_ASSERT_EQUALS(p.setValue(wsNameWithWhitespace), expectedError);
 
     AnalysisDataService::Instance().clear();
   }
