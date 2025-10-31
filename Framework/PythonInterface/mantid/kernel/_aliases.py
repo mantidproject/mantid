@@ -12,7 +12,7 @@ accessing certain objects easier.
 from mantid.kernel import ConfigServiceImpl, Logger, PropertyManagerDataServiceImpl, UnitFactoryImpl, UsageServiceImpl
 
 
-def lazy_instance_access(cls, key_as_str=False):
+def lazy_instance_access(cls, key_as_str=False, kwargs=None):
     """
     Takes a singleton class and wraps it in an LazySingletonHolder
     that constructs the instance on first access.
@@ -31,6 +31,8 @@ def lazy_instance_access(cls, key_as_str=False):
     :return: A new LazySingletonHolder wrapping cls
     """
 
+    kwargs = {} if not kwargs else kwargs
+
     class LazySingletonHolder(object):
         """
         Delays construction of a singleton instance until the
@@ -40,34 +42,34 @@ def lazy_instance_access(cls, key_as_str=False):
         def __getattribute__(self, item):
             # Called for each attribute access. cls.Instance() constructs
             # the singleton at first access
-            return cls.__getattribute__(cls.Instance(), item)
+            return cls.__getattribute__(cls.Instance(**kwargs), item)
 
         def __len__(self):
-            return cls.__getattribute__(cls.Instance(), "__len__")()
+            return cls.__getattribute__(cls.Instance(**kwargs), "__len__")()
 
         def __getitem__(self, item):
             if key_as_str:
                 if item is None:
                     raise KeyError(item)
                 else:
-                    cls.__getattribute__(cls.Instance(), "__getitem__")(str(item))
-            return cls.__getattribute__(cls.Instance(), "__getitem__")(item)
+                    cls.__getattribute__(cls.Instance(**kwargs), "__getitem__")(str(item))
+            return cls.__getattribute__(cls.Instance(**kwargs), "__getitem__")(item)
 
         def __setitem__(self, item, value):
             if key_as_str:
                 if item is None:
                     raise KeyError(item)
                 else:
-                    return cls.__getattribute__(cls.Instance(), "__setitem__")(str(item), value)
-            return cls.__getattribute__(cls.Instance(), "__setitem__")(item, value)
+                    return cls.__getattribute__(cls.Instance(**kwargs), "__setitem__")(str(item), value)
+            return cls.__getattribute__(cls.Instance(**kwargs), "__setitem__")(item, value)
 
         def __delitem__(self, item):
             if key_as_str:
                 if item is None:
                     raise KeyError(item)
                 else:
-                    return cls.__getattribute__(cls.Instance(), "__delitem__")(str(item))
-            return cls.__getattribute__(cls.Instance(), "__delitem__")(item)
+                    return cls.__getattribute__(cls.Instance(**kwargs), "__delitem__")(str(item))
+            return cls.__getattribute__(cls.Instance(**kwargs), "__delitem__")(item)
 
         def __contains__(self, item):
             if key_as_str:
@@ -76,9 +78,9 @@ def lazy_instance_access(cls, key_as_str=False):
                     return False
                 else:
                     # convert the ``item`` to a string
-                    return cls.__getattribute__(cls.Instance(), "__contains__")(str(item))
+                    return cls.__getattribute__(cls.Instance(**kwargs), "__contains__")(str(item))
             else:
-                return cls.__getattribute__(cls.Instance(), "__contains__")(item)
+                return cls.__getattribute__(cls.Instance(**kwargs), "__contains__")(item)
 
     return LazySingletonHolder()
 

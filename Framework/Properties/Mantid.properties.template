@@ -343,3 +343,6 @@ performancelog.filename = algotimeregister.out
 
 # Algorithm Profiler Default Status
 performancelog.write = Off
+
+# AI token
+default.aitoken =

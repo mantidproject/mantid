@@ -21,6 +21,8 @@ from mantid.api import (
     WorkspaceFactoryImpl,
 )
 from mantid.kernel._aliases import lazy_instance_access
+from mantid.utils.ai.llm_service_manager import LLMServiceManagerImpl
+from mantid.utils.ai.llm_defaults import isis_default
 
 # Historically the singleton aliases mapped to the instances rather than
 # the class types, i.e. AnalysisDataService is the instance and not the type,
@@ -43,5 +45,8 @@ FunctionFactory = lazy_instance_access(FunctionFactoryImpl)
 WorkspaceFactory = lazy_instance_access(WorkspaceFactoryImpl)
 CatalogManager = lazy_instance_access(CatalogManagerImpl)
 AlgoTimeRegister = lazy_instance_access(AlgoTimeRegisterImpl)
+LLMServiceManager = lazy_instance_access(LLMServiceManagerImpl, kwargs={"services": [isis_default]})
+
 # backwards-compatible
 mtd = AnalysisDataService
+ai = LLMServiceManager
