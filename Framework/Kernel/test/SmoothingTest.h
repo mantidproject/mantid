@@ -4,7 +4,6 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#pragma once
 
 #include "MantidKernel/Smoothing.h"
 #include <cxxtest/TestSuite.h>
@@ -27,7 +26,10 @@ public:
     std::vector<double> input{1, 2, 3, 4, 5, 6, 7, 8, 9};
     for (unsigned npts = 0; npts < 3; npts++) {
       TS_ASSERT_THROWS(boxcarSmooth(input, npts), std::invalid_argument const &);
-      TS_ASSERT_THROWS_NOTHING(boxcarSmooth(input, npts + 3));
+    }
+    for (unsigned npts = 1; npts < 3; npts++) {
+      TS_ASSERT_THROWS(boxcarSmooth(input, 2 * npts), std::invalid_argument const &);
+      TS_ASSERT_THROWS_NOTHING(boxcarSmooth(input, 2 * npts + 1));
     }
   }
 
