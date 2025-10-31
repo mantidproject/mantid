@@ -116,18 +116,18 @@ class TestGSAS2Handler(unittest.TestCase):
                 )
 
     def test_invalid_path_to_gsas2_not_a_directory(self):
-        invalid_path = "/tmp/test_file.txt"
-        Path(invalid_path).touch()  # Create a temporary file to simulate a non-directory path
+        # Create a temporary file to simulate a non-directory path
+        invalid_path = tempfile.NamedTemporaryFile()
 
         with self.assertRaises(ValueError) as context:
             GSAS2Handler(
-                path_to_gsas2=invalid_path,
+                path_to_gsas2=invalid_path.name,
                 save_directories=self.save_directories,
                 refinement_settings=self.refinement_settings,
                 file_paths=self.file_paths,
                 config=self.config,
             )
-        self.assertIn(f"Invalid path_to_gsas2: {Path(invalid_path).resolve()} must be a valid directory.", str(context.exception))
+        self.assertIn(f"Invalid path_to_gsas2: {Path(invalid_path.name).resolve()} must be a valid directory.", str(context.exception))
 
     def test_init_valid_inputs(self):
         expected_path = self.path_to_gsas2

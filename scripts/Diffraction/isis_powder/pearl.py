@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from contextlib import contextmanager
 import os
+from ast import literal_eval
 
 import mantid.simpleapi as mantid
 from mantid.kernel import logger
@@ -206,7 +207,7 @@ class Pearl(AbstractInst):
             name_key = "name"
             path_key = "path"
             if isinstance(self._inst_settings.attenuation_files, str):
-                self._inst_settings.attenuation_files = eval(self._inst_settings.attenuation_files)
+                self._inst_settings.attenuation_files = literal_eval(self._inst_settings.attenuation_files)
             atten_file_found = False
             for atten_file in self._inst_settings.attenuation_files:
                 if any(required_key not in atten_file for required_key in [name_key, path_key]):

@@ -27,7 +27,7 @@ class AcqMode(IntEnum):
 
 
 # Empty run rumber to act as a placeholder where a sample measurement is missing.
-EMPTY_TOKEN = "000000"
+EMPTY_TOKEN = "000000"  # noqa: S105
 # Quite often some samples are not measured at the some distances.
 # Still, it is preferred to reduce them together in one table.
 # Below is an example of why the blanks are needed:

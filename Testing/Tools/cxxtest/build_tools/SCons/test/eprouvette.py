@@ -12,6 +12,7 @@ import sys
 from os.path import isdir, isfile, islink, join
 from optparse import OptionParser
 from subprocess import check_call, CalledProcessError, PIPE
+import runpy
 
 options = None
 args    = []
@@ -149,7 +150,8 @@ def read_opts(t):
             'type'           : 'scons',
             'links'          : {}
             }
-    exec(open(join(t, "TestDef.py")), opts)
+    result = runpy.run_path(join(t, "TestDef.py"), init_globals=opts)
+    opts.update(result)
     return opts
 
 

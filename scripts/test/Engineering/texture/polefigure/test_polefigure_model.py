@@ -8,6 +8,7 @@
 import unittest
 from unittest.mock import patch, MagicMock
 import numpy as np
+import tempfile
 from Engineering.texture.polefigure.polefigure_model import TextureProjection
 
 correction_model_path = "Engineering.texture.polefigure.polefigure_model"
@@ -129,14 +130,16 @@ class TextureProjectionTest(unittest.TestCase):
     @patch(correction_model_path + ".path.exists", return_value=False)
     @patch(correction_model_path + ".makedirs")
     def test_get_save_dirs_creates_directories(self, mock_makedirs, mock_exists):
-        dirs = self.model.get_save_dirs("/tmp", "pf", "RB123", grouping="G")
+        with tempfile.TemporaryDirectory() as d:
+            dirs = self.model.get_save_dirs(d, "pf", "RB123", grouping="G")
         self.assertEqual(len(dirs), 2)
         mock_makedirs.assert_called()
 
     @patch(correction_model_path + ".SaveNexus")
     @patch(correction_model_path + ".SaveAscii")
     def test_save_files_calls_both_savers(self, mock_ascii, mock_nexus):
-        self.model._save_files("ws1", ["/tmp"])
+        with tempfile.TemporaryDirectory() as d:
+            self.model._save_files("ws1", [d])
         mock_ascii.assert_called_once()
         mock_nexus.assert_called_once()
 

@@ -16,6 +16,7 @@ from mantid.api import AnalysisDataService as ADS
 from mantid.simpleapi import logger
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import output_settings
+from ast import literal_eval
 
 BaseBrowser = import_qt(".._common", "mantidqt.widgets", "FitPropertyBrowser")
 
@@ -53,7 +54,7 @@ class EngDiffFitPropertyBrowser(FitPropertyBrowser):
         dict_str = self.getFitAlgorithmParameters()
         if dict_str:
             # evaluate string to make a dict (replace case of bool values)
-            fitprop = eval(dict_str.replace("true", "True").replace("false", "False"))
+            fitprop = literal_eval(dict_str.replace("true", "True").replace("false", "False"))
             fitprop["peak_centre_params"] = self._get_center_param_names()
             fitprop["status"] = self.getFitAlgorithmOutputStatus()
             return fitprop

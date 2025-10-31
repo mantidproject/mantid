@@ -534,7 +534,7 @@ class CalculateNorm(object):
             if self._load_params:
                 load_com += "," + self._load_params
             load_com += ")"
-            eval(load_com)
+            eval(load_com)  # noqa: S307
 
         if AnalysisDataService.doesExist(self.TMP_WORKSPACE_NAME):
             AnalysisDataService.remove(self.TMP_WORKSPACE_NAME)

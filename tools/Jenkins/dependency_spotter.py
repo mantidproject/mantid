@@ -18,7 +18,7 @@ This will compare builds 593 and 598 from the "main_nightly" pipeline
 import argparse
 import re
 from typing import List, Dict
-import urllib.request
+import requests
 
 
 def dependency_spotter(os_name: str, first_build: int, second_build: int, pipeline: str, log_file: str) -> None:
@@ -97,15 +97,12 @@ def extract_available_log_files(os_name: str, build_number: int, pipeline: str) 
     :return: List of log file names
     """
     url = form_url_for_build_artifact(build_number, os_name, pipeline, "")
-    build_log_files = set()
     regex_logfile = r"((mantid|base)[\w]+environment\.txt)"
     # Log files for first build
-    with urllib.request.urlopen(url) as file:
-        for line in file.readlines():
-            regex_result = re.findall(pattern=regex_logfile, string=line.decode("utf-8"))
-            for file_name, _ in regex_result:
-                build_log_files.add(file_name)
-    return list(build_log_files)
+    text = requests.get(url, timeout=10).text
+    regex_result = re.findall(pattern=regex_logfile, string=text)
+    build_log_files = set([file_name for file_name, _ in regex_result])
+    return build_log_files
 
 
 def compare_dependencies_for_file(os_name: str, first_build: int, second_build: int, pipeline: str, log_file: str) -> None:
@@ -191,15 +188,17 @@ def extract_package_versions(url: str, os_name: str) -> Dict[str, str]:
     """
     regex_pattern = os_name + r"\/([\w\-]+)-([\w\-.]+)\.(conda|tar\.bz2)"
     package_version_dict = {}
-    with urllib.request.urlopen(url) as file:
-        for line in file.readlines():
-            regex_result = re.search(pattern=regex_pattern, string=line.decode("utf-8"))
-            if regex_result is not None and len(regex_result.groups()) == 3:
-                package_name = regex_result.group(1)
-                if package_name.startswith("mantid"):
-                    continue
-                version = regex_result.group(2)
-                package_version_dict[package_name] = version
+    if not url.startswith(("http:", "https:")):
+        raise ValueError("URL must start with 'http:' or 'https:'")
+    text = requests.get(url, timeout=10).text.splitlines()
+    for line in text:
+        regex_result = re.search(pattern=regex_pattern, string=line)
+        if regex_result is not None and len(regex_result.groups()) == 3:
+            package_name = regex_result.group(1)
+            if package_name.startswith("mantid"):
+                continue
+            version = regex_result.group(2)
+            package_version_dict[package_name] = version
     return package_version_dict
 
 

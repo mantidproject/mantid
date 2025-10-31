@@ -168,7 +168,7 @@ class SpaceGroupTest(unittest.TestCase):
         self.assertEqual(expected_str, str(spaceGroup))
         self.assertEqual(expected_repr, spaceGroup.__repr__())
 
-        newSpaceGroup = eval(spaceGroup.__repr__())
+        newSpaceGroup = eval(spaceGroup.__repr__())  # noqa: S307
         self.assertEqual(spaceGroup.getHMSymbol(), newSpaceGroup.getHMSymbol())
 
     def checkWyckoffPositions(self, spaceGroup, wyckoffs):

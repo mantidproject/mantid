@@ -37,7 +37,7 @@ class SelectNexusFilesByMetadata(PythonAlgorithm):
                     # keep other portions intact
                     toeval += item
             try:
-                eval(toeval)
+                eval(toeval)  # noqa: S307
             except (NameError, ValueError, SyntaxError):
                 issues["NexusCriteria"] = "Invalid syntax, check NexusCriteria."
 
@@ -122,7 +122,7 @@ class SelectNexusFilesByMetadata(PythonAlgorithm):
                 toeval += item
         self.log().debug("Expression to be evaluated for file %s :\n %s" % (run, toeval))
         try:
-            return eval(toeval)
+            return eval(toeval)  # noqa: S307
         except (NameError, ValueError, SyntaxError):
             # even if syntax is validated, eval can still throw, since
             # the nexus entry value itself can be spurious for a given file

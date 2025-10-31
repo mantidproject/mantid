@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import os
+import tempfile
 import time
 import csv
 from mantidqtinterfaces.HFIR_4Circle_Reduction import reduce4circleControl
@@ -170,9 +171,8 @@ class ScanPreProcessWindow(QMainWindow):
         # form the output files
         output_dir = str(self.ui.lineEdit_outputDir.text())
         if os.path.exists(output_dir) is False:
-            # create output directory and change to all accessible
             os.mkdir(output_dir)
-            os.chmod(output_dir, 0o777)
+            os.chmod(output_dir, 0o700)
         self._outputDir = output_dir
 
         file_list = list()
@@ -351,7 +351,8 @@ class ScanPreProcessWindow(QMainWindow):
                     os.mkdir(default_output_dir)
                     self.ui.lineEdit_outputDir.setText(default_output_dir)
                 except OSError:
-                    self.ui.lineEdit_outputDir.setText("/tmp")
+                    self._temp_output_dir = tempfile.TemporaryDirectory()
+                    self.ui.lineEdit_outputDir.setText(self._temp_output_dir.name)
                     # default_output_dir = '/tmp'
             # END-IF
         # END-IF

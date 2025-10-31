@@ -73,7 +73,7 @@ class CrystalStructureTest(unittest.TestCase):
         self.assertEqual(expected_str, str(structure))
         self.assertEqual(expected_repr, structure.__repr__())
 
-        newStructure = eval(structure.__repr__())
+        newStructure = eval(structure.__repr__())  # noqa: S307
         self.assertEqual(structure.getUnitCell().a(), newStructure.getUnitCell().a())
 
 

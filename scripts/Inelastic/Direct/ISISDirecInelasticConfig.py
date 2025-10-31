@@ -610,7 +610,7 @@ class MantidConfigDirectInelastic(object):
             shutil.copyfile(input_file, output_file)
         else:
             self._copy_and_parse_user_file(input_file, output_file, replacement_list)
-        os.chmod(output_file, 0o777)
+        os.chmod(output_file, 0o660)
 
         ownership_str = "chown {0}:{1} {2}".format(self._user.userID, rb_group, output_file)
         if platform.system() != "Windows":

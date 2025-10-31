@@ -3208,7 +3208,7 @@ class UnitsConvert(ReductionStep):
             bin_alg = self.rebin_alg
 
         rebin_com = bin_alg + '(workspace, "' + self._get_rebin(low_wav, self.wav_step, high_wav) + '", OutputWorkspace=workspace)'
-        eval(rebin_com)
+        eval(rebin_com)  # noqa: S307
 
     def _get_rebin(self, low, step, high):
         """

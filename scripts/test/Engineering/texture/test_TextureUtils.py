@@ -68,31 +68,31 @@ class TextureUtilsTest(unittest.TestCase):
         mock_validate.return_value = (True, "")
 
         wss = ["ws1", "ws2"]
-
         # Act
-        run_abs_corr(
-            wss=wss,
-            ref_ws="ref",
-            orientation_file="orient.txt",
-            orient_file_is_euler=True,
-            euler_scheme="xyz",
-            euler_axes_sense="right",
-            copy_ref=True,
-            include_abs_corr=True,
-            monte_carlo_args="Arg: Val",
-            gauge_vol_preset="4mmCube",
-            gauge_vol_shape_file="shape.xml",
-            include_atten_table=True,
-            eval_point="1.54",
-            eval_units="Angstrom",
-            exp_name="exp1",
-            root_dir="/tmp",
-            include_div_corr=True,
-            div_hoz=1.0,
-            div_vert=1.0,
-            det_hoz=0.5,
-            clear_ads_after=True,
-        )
+        with tempfile.TemporaryDirectory() as d:
+            run_abs_corr(
+                wss=wss,
+                ref_ws="ref",
+                orientation_file="orient.txt",
+                orient_file_is_euler=True,
+                euler_scheme="xyz",
+                euler_axes_sense="right",
+                copy_ref=True,
+                include_abs_corr=True,
+                monte_carlo_args="Arg: Val",
+                gauge_vol_preset="4mmCube",
+                gauge_vol_shape_file="shape.xml",
+                include_atten_table=True,
+                eval_point="1.54",
+                eval_units="Angstrom",
+                exp_name="exp1",
+                root_dir=d,
+                include_div_corr=True,
+                div_hoz=1.0,
+                div_vert=1.0,
+                det_hoz=0.5,
+                clear_ads_after=True,
+            )
 
         mock_validate.assert_called_once_with(
             "ref",
