@@ -1,0 +1,1 @@
+- Add the option to calculate the efficiency for an analyzer flipper in :ref:`algm-FlipperEfficiency` and in :ref:`algm-SANSISISPolarizationCorrections`.

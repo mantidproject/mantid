@@ -25,7 +25,7 @@ class FlipperEfficiencyTestBase(SANSPolarizationCorrectionsBase, metaclass=ABCMe
 
     def _run_test(self):
         pre_processed = self._prepare_workspace(self.input_filename)
-        FlipperEfficiency(pre_processed, "00,10,11,01", OutputWorkspace="result")
+        FlipperEfficiency(pre_processed, SpinStates="00,10,11,01", OutputWorkspace="result")
 
     def _validate(self):
         result = "result"

@@ -132,6 +132,40 @@ public:
     }
   }
 
+  void test_normal_perfect_calculation_flipper_analyser() {
+    auto const &group = createPolarizedTestGroup("testWs", m_parameters, FLIPPER_AMPS);
+    auto alg = initialize_alg(group);
+    alg->setProperty("Flipper", "Analyzer");
+    alg->execute();
+
+    MatrixWorkspace_sptr const outWs = alg->getProperty("OutputWorkspace");
+    TS_ASSERT_EQUALS(outWs->getNumberHistograms(),
+                     std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(group->getItem(0))->getNumberHistograms())
+    auto const &outY = outWs->dataY(0);
+    auto const &outE = outWs->dataE(0);
+    auto const numBins = outY.size();
+    for (size_t i = 0; i < numBins; ++i) {
+      TS_ASSERT_EQUALS(1.0, outY[i])
+      TS_ASSERT_DELTA(0.4216370213557839, outE[i], 1e-8);
+    }
+  }
+
+  void test_flipper_polariser_and_analyser_eff_have_same_values_for_equal_amplitudes() {
+    auto const &group = createPolarizedTestGroup("testWs", m_parameters, FLIPPER_AMPS);
+    auto alg = initialize_alg(group);
+    alg->setProperty("Flipper", "Analyzer");
+    alg->execute();
+    MatrixWorkspace_sptr const outWsA = alg->getProperty("OutputWorkspace");
+
+    alg->setProperty("Flipper", "Polarizer");
+    alg->execute();
+    MatrixWorkspace_sptr const outWsP = alg->getProperty("OutputWorkspace");
+
+    auto const &outYA = outWsA->dataY(0);
+    auto const &outYP = outWsP->dataY(0);
+    TS_ASSERT_DELTA(outYA, outYP, 1e-8);
+  }
+
   void test_normal_typical_calculation_occurs() {
     auto flipAmps{FLIPPER_AMPS};
     flipAmps[0] *= 0.9;

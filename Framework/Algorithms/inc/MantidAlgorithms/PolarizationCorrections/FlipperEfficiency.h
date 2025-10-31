@@ -40,6 +40,7 @@ private:
   void saveToFile(API::MatrixWorkspace_sptr const &workspace, std::string const &filePathStr);
 
   /// Perform the main calculation for determining the efficiency on the given group.
-  API::MatrixWorkspace_sptr calculateEfficiency(API::WorkspaceGroup_sptr const &groupWs);
+  API::MatrixWorkspace_sptr calculateEfficiency(API::WorkspaceGroup_sptr const &groupWs,
+                                                bool const isFlipperAnalyser = false);
 };
 } // namespace Mantid::Algorithms

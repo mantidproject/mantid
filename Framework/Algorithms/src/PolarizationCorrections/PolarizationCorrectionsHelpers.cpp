@@ -27,8 +27,8 @@ namespace PolarizationCorrectionsHelpers {
  * @param targetSpinState The spin state workspace to extract from the group.
  * @return The MatrixWorkspace containing the target spin state. nullptr if not present.
  */
-API::MatrixWorkspace_sptr workspaceForSpinState(API::WorkspaceGroup_sptr group, const std::string &spinStateOrder,
-                                                const std::string &targetSpinState) {
+API::MatrixWorkspace_sptr workspaceForSpinState(const API::WorkspaceGroup_sptr &group,
+                                                const std::string &spinStateOrder, const std::string &targetSpinState) {
   const auto &spinStateOrderVec = Mantid::Kernel::SpinStateHelpers::splitSpinStateString(spinStateOrder);
   const auto &wsIndex =
       Mantid::Kernel::SpinStateHelpers::indexOfWorkspaceForSpinState(spinStateOrderVec, targetSpinState);
