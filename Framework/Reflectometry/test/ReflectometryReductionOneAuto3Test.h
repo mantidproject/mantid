@@ -312,8 +312,7 @@ public:
     MatrixWorkspace_sptr outQ = alg->getProperty("OutputWorkspace");
     MatrixWorkspace_sptr outLam = alg->getProperty("OutputWorkspaceWavelength");
 
-    TS_ASSERT_EQUALS(outQ->getNumberHistograms(), 1);
-    TS_ASSERT_EQUALS(outQ->binEdges(0).size(), 15);
+    assert_size(outQ, 1, std::nullopt, 15);
     // X range in outLam
     assert_bin_values(outLam, true, {0, 7}, {1.7924, 8.0658});
     // X range in outQ
@@ -328,9 +327,8 @@ public:
     MatrixWorkspace_sptr outQ = alg->getProperty("OutputWorkspace");
     MatrixWorkspace_sptr outLam = alg->getProperty("OutputWorkspaceWavelength");
 
-    TS_ASSERT_EQUALS(outQ->getNumberHistograms(), 1);
     // X range in outQ is cropped to momentum transfer limits
-    TS_ASSERT_EQUALS(outQ->binEdges(0).size(), 7);
+    assert_size(outQ, 1, std::nullopt, 7);
     assert_bin_values(outQ, true, {0, 1, 5, 6}, {0.5366, 0.5962, 1.0732, 1.3414});
   }
 
@@ -339,8 +337,7 @@ public:
     alg->execute();
     MatrixWorkspace_sptr outQ = alg->getProperty("OutputWorkspace");
 
-    TS_ASSERT_EQUALS(outQ->getNumberHistograms(), 1);
-    TS_ASSERT_EQUALS(outQ->counts(0).size(), 14);
+    assert_size(outQ, 1, std::nullopt, 14, false);
     // Y values in outQ
     assert_bin_values(outQ, false, {0, 13}, {2.0, 2.0});
   }
@@ -351,8 +348,7 @@ public:
     alg->execute();
     MatrixWorkspace_sptr outQ = alg->getProperty("OutputWorkspace");
 
-    TS_ASSERT_EQUALS(outQ->getNumberHistograms(), 1);
-    TS_ASSERT_EQUALS(outQ->counts(0).size(), 14);
+    assert_size(outQ, 1, std::nullopt, 14, false);
     // Y values in outQ
     assert_bin_values(outQ, false, {0, 13}, {20.0, 20.0});
   }
@@ -364,8 +360,7 @@ public:
     alg->execute();
     MatrixWorkspace_sptr outQ = alg->getProperty("OutputWorkspaceBinned");
 
-    TS_ASSERT_EQUALS(outQ->getNumberHistograms(), 1);
-    TS_ASSERT_EQUALS(outQ->counts(0).size(), 7);
+    assert_size(outQ, 1, std::nullopt, 7, false);
     // Y values in outQ
     assert_bin_values(outQ, false, {0, 1, 2, 3, 4, 5, 6}, {21.1817, 5.2910, 1.5273, 0.0, 0.0, 0.0, 0.0});
   }
@@ -380,8 +375,7 @@ public:
     alg->execute();
     MatrixWorkspace_sptr outQ = alg->getProperty("OutputWorkspaceBinned");
 
-    TS_ASSERT_EQUALS(outQ->getNumberHistograms(), 1);
-    TS_ASSERT_EQUALS(outQ->counts(0).size(), 7);
+    assert_size(outQ, 1, std::nullopt, 7, false);
     // Y values in outQ
     assert_bin_values(outQ, false, {0, 1, 2, 3, 4, 5, 6}, {211.8171, 52.9097, 15.2731, 0.0, 0.0, 0.0, 0.0});
   }
@@ -392,8 +386,7 @@ public:
     alg->execute();
     MatrixWorkspace_sptr outLam = alg->getProperty("OutputWorkspaceWavelength");
 
-    TS_ASSERT_EQUALS(outLam->getNumberHistograms(), 1);
-    TS_ASSERT_EQUALS(outLam->counts(0).size(), 14);
+    assert_size(outLam, 1, std::nullopt, 14, false);
     // Y values in outLam
     assert_bin_values(outLam, false, {0, 13}, {2.0, 2.0});
   }
@@ -405,8 +398,7 @@ public:
     alg->execute();
     MatrixWorkspace_sptr outLam = alg->getProperty("OutputWorkspaceWavelength");
 
-    TS_ASSERT_EQUALS(outLam->getNumberHistograms(), 1);
-    TS_ASSERT_EQUALS(outLam->counts(0).size(), 14);
+    assert_size(outLam, 1, std::nullopt, 14, false);
     // Y values in outQ
     assert_bin_values(outLam, false, {0, 13}, {2.0, 2.0});
   }
@@ -526,18 +518,10 @@ public:
     // X range in outLam
     TS_ASSERT_DELTA(outLamGroup[0]->x(0).front(), 2.0729661466, 0.0001);
     TS_ASSERT_DELTA(outLamGroup[0]->x(0).back(), 14.2963182408, 0.0001);
-
-    TS_ASSERT_DELTA(outLamGroup[0]->y(0)[0], 0.9, 0.0001);
-    TS_ASSERT_DELTA(outLamGroup[1]->y(0)[0], 0.8, 0.0001);
-    TS_ASSERT_DELTA(outLamGroup[2]->y(0)[0], 0.7, 0.0001);
-    TS_ASSERT_DELTA(outLamGroup[3]->y(0)[0], 0.6, 0.0001);
+    assert_spectra_in_group_values(outLamGroup, {0, 1, 2, 3}, {0, 0, 0, 0}, {0.9, 0.8, 0.7, 0.6});
 
     TS_ASSERT_EQUALS(outQGroup[0]->blocksize(), 9);
-
-    TS_ASSERT_DELTA(outQGroup[0]->y(0)[0], 0.9, 0.0001);
-    TS_ASSERT_DELTA(outQGroup[1]->y(0)[0], 0.8, 0.0001);
-    TS_ASSERT_DELTA(outQGroup[2]->y(0)[0], 0.7, 0.0001);
-    TS_ASSERT_DELTA(outQGroup[3]->y(0)[0], 0.6, 0.0001);
+    assert_spectra_in_group_values(outQGroup, {0, 1, 2, 3}, {0, 0, 0, 0}, {0.9, 0.8, 0.7, 0.6});
   }
 
   void test_polarization_correction_with_background_subtraction() {
@@ -654,18 +638,10 @@ public:
 
     auto outQGroup = retrieveOutWS("IvsQ");
     auto outLamGroup = retrieveOutWS("IvsLam");
-
-    TS_ASSERT_DELTA(outQGroup[0]->x(0)[0], 2.8022, 0.0001);
-    TS_ASSERT_DELTA(outQGroup[0]->x(0)[3], 11.2088, 0.0001);
-
-    TS_ASSERT_DELTA(outQGroup[0]->y(0)[0], 1.3484, 0.0001);
-    TS_ASSERT_DELTA(outQGroup[0]->y(0)[2], 0.9207, 0.0001);
-
-    TS_ASSERT_DELTA(outLamGroup[0]->x(0)[0], 0.1946, 0.0001);
-    TS_ASSERT_DELTA(outLamGroup[0]->x(0)[3], 0.7787, 0.0001);
-
-    TS_ASSERT_DELTA(outLamGroup[0]->y(0)[0], 0.9207, 0.0001);
-    TS_ASSERT_DELTA(outLamGroup[0]->y(0)[2], 1.3484, 0.0001);
+    assert_spectra_in_group_values(outQGroup, {0, 0}, {0, 3}, {2.8022, 11.2088}, false);
+    assert_spectra_in_group_values(outQGroup, {0, 0}, {0, 2}, {1.3484, 0.9207});
+    assert_spectra_in_group_values(outLamGroup, {0, 0}, {0, 3}, {0.1946, 0.7787}, false);
+    assert_spectra_in_group_values(outLamGroup, {0, 0}, {0, 2}, {0.9207, 1.3484});
   }
 
   void test_polarization_with_transmissionrun() {
@@ -698,18 +674,10 @@ public:
 
     auto outQGroup = retrieveOutWS("IvsQ");
     auto outLamGroup = retrieveOutWS("IvsLam");
-
-    TS_ASSERT_DELTA(outQGroup[0]->x(0)[0], 3.4710, 0.0001);
-    TS_ASSERT_DELTA(outQGroup[0]->x(0)[3], 13.8841, 0.0001);
-
-    TS_ASSERT_DELTA(outQGroup[0]->y(0)[0], 0.5810, 0.0001);
-    TS_ASSERT_DELTA(outQGroup[0]->y(0)[2], 0.7785, 0.0001);
-
-    TS_ASSERT_DELTA(outLamGroup[0]->x(0)[0], 0.1430, 0.0001);
-    TS_ASSERT_DELTA(outLamGroup[0]->x(0)[3], 0.5719, 0.0001);
-
-    TS_ASSERT_DELTA(outLamGroup[0]->y(0)[0], 0.7785, 0.0001);
-    TS_ASSERT_DELTA(outLamGroup[0]->y(0)[2], 0.5810, 0.0001);
+    assert_spectra_in_group_values(outQGroup, {0, 0}, {0, 3}, {3.4710, 13.8841}, false);
+    assert_spectra_in_group_values(outQGroup, {0, 0}, {0, 2}, {0.5810, 0.7785});
+    assert_spectra_in_group_values(outLamGroup, {0, 0}, {0, 3}, {0.1430, 0.5719}, false);
+    assert_spectra_in_group_values(outLamGroup, {0, 0}, {0, 2}, {0.7785, 0.5810});
   }
 
   void test_second_transmissionrun() {
@@ -755,18 +723,10 @@ public:
 
     auto outQGroup = retrieveOutWS("IvsQ");
     auto outLamGroup = retrieveOutWS("IvsLam");
-
-    TS_ASSERT_DELTA(outQGroup[0]->x(0)[0], 2.8022, 0.0001);
-    TS_ASSERT_DELTA(outQGroup[0]->x(0)[3], 11.2088, 0.0001);
-
-    TS_ASSERT_DELTA(outQGroup[0]->y(0)[0], 1.3484, 0.0001);
-    TS_ASSERT_DELTA(outQGroup[0]->y(0)[2], 0.9207, 0.0001);
-
-    TS_ASSERT_DELTA(outLamGroup[0]->x(0)[0], 0.1946, 0.0001);
-    TS_ASSERT_DELTA(outLamGroup[0]->x(0)[3], 0.7787, 0.0001);
-
-    TS_ASSERT_DELTA(outLamGroup[0]->y(0)[0], 0.9207, 0.0001);
-    TS_ASSERT_DELTA(outLamGroup[0]->y(0)[2], 1.3484, 0.0001);
+    assert_spectra_in_group_values(outQGroup, {0, 0}, {0, 3}, {2.8022, 11.2088}, false);
+    assert_spectra_in_group_values(outQGroup, {0, 0}, {0, 2}, {1.3484, 0.9207});
+    assert_spectra_in_group_values(outLamGroup, {0, 0}, {0, 3}, {0.1946, 0.7787}, false);
+    assert_spectra_in_group_values(outLamGroup, {0, 0}, {0, 2}, {0.9207, 1.3484});
   }
 
   void test_polarization_correction_default_Wildes() {
@@ -787,17 +747,10 @@ public:
     TS_ASSERT_DELTA(outLamGroup[0]->x(0).front(), 2.0729661466, 0.0001);
     TS_ASSERT_DELTA(outLamGroup[0]->x(0).back(), 14.2963182408, 0.0001);
 
-    TS_ASSERT_DELTA(outLamGroup[0]->y(0)[0], 0.9368, 0.0001);
-    TS_ASSERT_DELTA(outLamGroup[1]->y(0)[0], 0.7813, 0.0001);
-    TS_ASSERT_DELTA(outLamGroup[2]->y(0)[0], 0.6797, 0.0001);
-    TS_ASSERT_DELTA(outLamGroup[3]->y(0)[0], 0.5242, 0.0001);
+    assert_spectra_in_group_values(outLamGroup, {0, 1, 2, 3}, {0, 0, 0, 0}, {0.9368, 0.7813, 0.6797, 0.5242});
 
     TS_ASSERT_EQUALS(outQGroup[0]->blocksize(), 9);
-
-    TS_ASSERT_DELTA(outQGroup[0]->y(0)[0], 0.9368, 0.0001);
-    TS_ASSERT_DELTA(outQGroup[1]->y(0)[0], 0.7813, 0.0001);
-    TS_ASSERT_DELTA(outQGroup[2]->y(0)[0], 0.6797, 0.0001);
-    TS_ASSERT_DELTA(outQGroup[3]->y(0)[0], 0.5242, 0.0001);
+    assert_spectra_in_group_values(outQGroup, {0, 1, 2, 3}, {0, 0, 0, 0}, {0.9368, 0.7813, 0.6797, 0.5242});
   }
 
   void test_polarization_correction_with_efficiency_workspace() {
@@ -819,18 +772,10 @@ public:
     // X range in outLam
     TS_ASSERT_DELTA(outLamGroup[0]->x(0).front(), 2.0729661466, 0.0001);
     TS_ASSERT_DELTA(outLamGroup[0]->x(0).back(), 14.2963182408, 0.0001);
-
-    TS_ASSERT_DELTA(outLamGroup[0]->y(0)[0], 1.9267, 0.0001);
-    TS_ASSERT_DELTA(outLamGroup[1]->y(0)[0], 1.7838, 0.0001);
-    TS_ASSERT_DELTA(outLamGroup[2]->y(0)[0], -0.3231, 0.0001);
-    TS_ASSERT_DELTA(outLamGroup[3]->y(0)[0], -0.4659, 0.0001);
+    assert_spectra_in_group_values(outLamGroup, {0, 1, 2, 3}, {0, 0, 0, 0}, {1.9267, 1.7838, -0.3231, -0.4659});
 
     TS_ASSERT_EQUALS(outQGroup[0]->blocksize(), 9);
-
-    TS_ASSERT_DELTA(outQGroup[0]->y(0)[0], 1.9267, 0.0001);
-    TS_ASSERT_DELTA(outQGroup[1]->y(0)[0], 1.7838, 0.0001);
-    TS_ASSERT_DELTA(outQGroup[2]->y(0)[0], -0.3231, 0.0001);
-    TS_ASSERT_DELTA(outQGroup[3]->y(0)[0], -0.4659, 0.0001);
+    assert_spectra_in_group_values(outQGroup, {0, 1, 2, 3}, {0, 0, 0, 0}, {1.9267, 1.7838, -0.3231, -0.4659});
   }
 
   void test_polarization_correction_with_efficiency_workspace_Fredrikze_PNR() {
@@ -883,18 +828,10 @@ public:
     // X range in outLam
     TS_ASSERT_DELTA(outLamGroup[0]->x(0).front(), 2.0729661466, 0.0001);
     TS_ASSERT_DELTA(outLamGroup[0]->x(0).back(), 14.2963182408, 0.0001);
-
-    TS_ASSERT_DELTA(outLamGroup[0]->y(0)[0], 0.6552, 0.0001);
-    TS_ASSERT_DELTA(outLamGroup[1]->y(0)[0], 0.4330, 0.0001);
-    TS_ASSERT_DELTA(outLamGroup[2]->y(0)[0], 0.9766, 0.0001);
-    TS_ASSERT_DELTA(outLamGroup[3]->y(0)[0], 0.7544, 0.0001);
+    assert_spectra_in_group_values(outLamGroup, {0, 1, 2, 3}, {0, 0, 0, 0}, {0.6552, 0.4330, 0.9766, 0.7544});
 
     TS_ASSERT_EQUALS(outQGroup[0]->blocksize(), 9);
-
-    TS_ASSERT_DELTA(outQGroup[0]->y(0)[0], 0.6552, 0.0001);
-    TS_ASSERT_DELTA(outQGroup[1]->y(0)[0], 0.4330, 0.0001);
-    TS_ASSERT_DELTA(outQGroup[2]->y(0)[0], 0.9766, 0.0001);
-    TS_ASSERT_DELTA(outQGroup[3]->y(0)[0], 0.7544, 0.0001);
+    assert_spectra_in_group_values(outQGroup, {0, 1, 2, 3}, {0, 0, 0, 0}, {0.6552, 0.4330, 0.9766, 0.7544});
   }
 
   void test_parameter_file_used_with_efficiency_workspace_Wildes() {
@@ -1546,12 +1483,37 @@ private:
     }
   }
 
+  void assert_size(const MatrixWorkspace_sptr &ws, const std::optional<int> &expectedHistNo = std::nullopt,
+                   const std::optional<int> &expectedBlockSize = std::nullopt,
+                   const std::optional<int> &expectedSize = std::nullopt, const bool assertEdges = true) {
+    if (expectedHistNo) {
+      TS_ASSERT_EQUALS(ws->getNumberHistograms(), *expectedHistNo);
+    }
+    if (expectedBlockSize) {
+      TS_ASSERT_EQUALS(ws->blocksize(), *expectedBlockSize);
+    }
+    if (expectedSize) {
+      const auto refSize = assertEdges ? ws->binEdges(0).size() : ws->counts(0).size();
+      TS_ASSERT_EQUALS(refSize, *expectedSize);
+    }
+  }
+
   void assert_bin_values(const MatrixWorkspace_sptr &ws, bool compareEdges, const std::vector<size_t> &indexList,
                          const std::vector<double> &values, const int wsIndex = 0) {
     for (size_t index = 0; index < indexList.size(); ++index) {
       const auto refValue =
           compareEdges ? ws->binEdges(wsIndex)[indexList.at(index)] : ws->counts(wsIndex)[indexList.at(index)];
       TS_ASSERT_DELTA(refValue, values.at(index), 1e-4);
+    }
+  }
+
+  void assert_spectra_in_group_values(const std::vector<MatrixWorkspace_sptr> &group, const std::vector<int> &grpIdx,
+                                      const std::vector<int> &spIdx, const std::vector<double> &expectedValues,
+                                      bool testY = true) {
+    for (auto index = 0; index < static_cast<int>(expectedValues.size()); index++) {
+      const auto refValue =
+          testY ? group.at(grpIdx[index])->y(0)[spIdx[index]] : group.at(grpIdx[index])->x(0)[spIdx[index]];
+      TS_ASSERT_DELTA(refValue, expectedValues[index], 1e-4);
     }
   }
 
