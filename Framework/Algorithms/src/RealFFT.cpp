@@ -122,7 +122,6 @@ void RealFFT::exec() {
     gsl_fft_halfcomplex_unpack(data.data(), unpacked.data(), 1, ySize);
 
     // second, setup the workspace
-    bool odd = ySize % 2 != 0;
     auto yOutSize = ySize / 2 + 1;
     auto xOutSize = inWS->isHistogramData() ? yOutSize + 1 : yOutSize;
 
