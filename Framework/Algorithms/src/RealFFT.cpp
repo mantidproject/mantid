@@ -100,9 +100,7 @@ void RealFFT::exec() {
   int spec = (transform == "Forward") ? getProperty("WorkspaceIndex") : 0;
   const auto &X = inWS->x(spec);
   double dx = (X.back() - X.front()) / static_cast<double>(X.size() - 1);
-
   auto ySize = inWS->blocksize();
-  double df = 1.0 / (dx * static_cast<double>(ySize));
 
   API::MatrixWorkspace_sptr outWS;
 
@@ -132,24 +130,25 @@ void RealFFT::exec() {
     tAxis->setLabel(2, "Modulus");
     outWS->replaceAxis(1, std::move(tAxis));
 
+    // set the workspace x values
     auto &x = outWS->mutableX(0);
+    double df = 1.0 / (dx * static_cast<double>(ySize));
+    std::generate(x.begin(), x.end(), HistogramData::LinearGenerator(0, df));
+    outWS->setSharedX(1, outWS->sharedX(0));
+    outWS->setSharedX(2, outWS->sharedX(0));
+
+    // set the workspace y values
     auto &y1 = outWS->mutableY(0);
     auto &y2 = outWS->mutableY(1);
     auto &y3 = outWS->mutableY(2);
     for (std::size_t i = 0; i < yOutSize; i++) {
       std::size_t const j = i * 2;
-      x[i] = df * static_cast<double>(i);
       double re = unpacked[j];
       double im = unpacked[j + 1];
       y1[i] = re * dx;                      // real part
       y2[i] = im * dx;                      // imaginary part
       y3[i] = dx * sqrt(re * re + im * im); // modulus
     }
-    if (inWS->isHistogramData()) {
-      outWS->mutableX(0)[yOutSize] = outWS->mutableX(0)[yOutSize - 1] + df;
-    }
-    outWS->setSharedX(1, outWS->sharedX(0));
-    outWS->setSharedX(2, outWS->sharedX(0));
   } else // Backward
   {
     if (inWS->getNumberHistograms() < 2)
@@ -191,12 +190,13 @@ void RealFFT::exec() {
     tAxis->setLabel(0, "Real");
     outWS->replaceAxis(1, std::move(tAxis));
 
-    df = 1.0 / (dx * static_cast<double>(yOutSize));
-
+    // set the workspace x values
+    double df = 1.0 / (dx * static_cast<double>(yOutSize));
     auto &xData = outWS->mutableX(0);
-    auto &yData = outWS->mutableY(0);
-
     std::generate(xData.begin(), xData.end(), HistogramData::LinearGenerator(0, df));
+
+    // set the workspace y values
+    auto &yData = outWS->mutableY(0);
     std::move(yhc.begin(), yhc.end(), yData.begin());
     yData /= df;
   }
