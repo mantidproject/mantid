@@ -420,13 +420,15 @@ pipeline {
       agent { label 'linux-64' } // Use linux for simplicity with shell scripts
       options { timestamps() }
       steps {
-        def channel = params.ANACONDA_CHANNEL.trim()
-        def credId = anacondaChannelToCredId(channel)
+        script {
+          def channel = params.ANACONDA_CHANNEL.trim()
+          def credId = anacondaChannelToCredId(channel)
 
-        withCredentials([string(credentialsId: credId, variable: 'ANACONDA_TOKEN')]) {
-          checkoutSource("${GIT_SHA}")
-          sh "${CISCRIPT_DIR}/delete-old-packages.sh ${WORKSPACE}" + ' ${ANACONDA_TOKEN} ' +\
-            "--channel ${ANACONDA_CHANNEL} --label ${ANACONDA_CHANNEL_LABEL} mantid mantidqt mantiddocs mantidworkbench mantid-developer"
+          withCredentials([string(credentialsId: credId, variable: 'ANACONDA_TOKEN')]) {
+            checkoutSource("${GIT_SHA}")
+            sh "${CISCRIPT_DIR}/delete-old-packages.sh ${WORKSPACE}" + ' ${ANACONDA_TOKEN} ' +\
+              "--channel ${ANACONDA_CHANNEL} --label ${ANACONDA_CHANNEL_LABEL} mantid mantidqt mantiddocs mantidworkbench mantid-developer"
+          }
         }
       }
     }
