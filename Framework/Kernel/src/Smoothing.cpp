@@ -203,15 +203,19 @@ template <typename Y> std::vector<Y> fftSmoothWithFilter(std::vector<Y> const &i
   real_wt.reset();
 
   // NOTE: the halfcomplex storage requires special treatment of even/odd
+  // NOTE: we cannot use GSL's unpack because these values would have to be altered and then re-packed
+  // it is simpler to access them inplace.
   bool even = (dn % 2 == 0);
   std::size_t complex_size = (even ? dn / 2 : (dn - 1) / 2);
-  for (std::size_t fn = 0; fn < complex_size - 1; fn++) {
+  output[0] *= filter(0); // x[0] = z[0].real; z[0].imag = 0 and is not stored anywhere
+  for (std::size_t fn = 1; fn < complex_size + (even ? 0UL : 1UL); fn++) {
     output[2 * fn - 1] *= filter(fn); // real parts
     output[2 * fn] *= filter(fn);     // imaginary parts
   }
-  // handle the last points, which may differ based on even/odd
-  output[dn - 2] *= filter(2 * complex_size - 2);
-  output[dn - 1] *= filter(2 * complex_size - 2);
+  // for even data, last point is an unmatched real value
+  if (even) {
+    output[dn - 1] *= filter(complex_size);
+  }
 
   // transform back
   fft::hc_wt_uptr hc_wt = fft::make_gsl_hc_wavetable(dn);
