@@ -118,7 +118,7 @@ MatrixWorkspace_sptr FlipperEfficiency::calculateEfficiency(WorkspaceGroup_sptr 
 
   auto const &numerator = (Tij[0] * Tij[3]) - (Tij[2] * Tij[1]);
   auto const &denominator =
-      isFlipperAnalyser ? (Tij[0] + Tij[1]) * (Tij[3] - Tij[2]) : (Tij[0] + Tij[2]) * (Tij[3] - Tij[1]);
+      isFlipperAnalyser ? (Tij[0] + Tij[2]) * (Tij[3] - Tij[1]) : (Tij[0] + Tij[1]) * (Tij[3] - Tij[2]);
   auto const &efficiency = numerator / denominator;
 
   // Calculate the errors
