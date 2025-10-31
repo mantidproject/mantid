@@ -12,4 +12,5 @@ Useful links
  * Build server: https://builds.mantidproject.org
  * Developer site: https://developer.mantidproject.org
 
-[![Build Status](https://builds.mantidproject.org/buildStatus/icon?job=main_nightly_deployment)](https://builds.mantidproject.org/job/main_nightly_deployment)
+[![Build Status](https://builds.mantidproject.org/buildStatus/icon?job=main_nightly)](https://builds.mantidproject.org/job/main_nightly/)
+[![OpenSSF Best Practices](https://www.bestpractices.dev/projects/4316/badge)](https://www.bestpractices.dev/projects/4316)
