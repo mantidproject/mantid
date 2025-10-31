@@ -190,6 +190,7 @@ set(INC_FILES
     inc/MantidKernel/FunctionTask.h
     inc/MantidKernel/GitHubApiHelper.h
     inc/MantidKernel/Glob.h
+    inc/MantidKernel/GSL_FFT_Helpers.h
     inc/MantidKernel/ICatalogInfo.h
     inc/MantidKernel/IPropertyManager.h
     inc/MantidKernel/IPropertySettings.h

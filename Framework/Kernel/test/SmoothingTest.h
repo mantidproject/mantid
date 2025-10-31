@@ -139,7 +139,7 @@ public:
     std::size_t const N{100};
     std::vector<double> input(N);
     // make periodic data
-    constexpr double w0 = 6.28318530717958648 / double(N);
+    double const w0 = 6.28318530717958648 / double(N);
     unsigned n1 = 3, n2 = 15;
     double w1 = n1 * w0, w2 = n2 * w0;
     auto sine = [](double w, std::size_t i) { return std::sin(w * double(i)); };

@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/Smoothing.h"
 #include "MantidKernel/DllConfig.h"
+#include "MantidKernel/GSL_FFT_Helpers.h"
 
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_fft_halfcomplex.h>
@@ -179,26 +180,13 @@ private:
   Y invcutoff;
 };
 
-// wrap GSL points in unique pointers with deleters for memory leak safety in case of failures
-constexpr auto real_wt_deleter = [](gsl_fft_real_wavetable *p) { gsl_fft_real_wavetable_free(p); };
-constexpr auto real_ws_deleter = [](gsl_fft_real_workspace *p) { gsl_fft_real_workspace_free(p); };
-constexpr auto hc_wt_deleter = [](gsl_fft_halfcomplex_wavetable *p) { gsl_fft_halfcomplex_wavetable_free(p); };
-
-using real_wt_uptr = std::unique_ptr<gsl_fft_real_wavetable, decltype(real_wt_deleter)>;
-using real_ws_uptr = std::unique_ptr<gsl_fft_real_workspace, decltype(real_ws_deleter)>;
-using hc_wt_uptr = std::unique_ptr<gsl_fft_halfcomplex_wavetable, decltype(hc_wt_deleter)>;
-
-real_wt_uptr make_gsl_real_wavetable(std::size_t dn) { return real_wt_uptr(gsl_fft_real_wavetable_alloc(dn)); }
-real_ws_uptr make_gsl_real_workspace(std::size_t dn) { return real_ws_uptr(gsl_fft_real_workspace_alloc(dn)); }
-hc_wt_uptr make_gsl_hc_wavetable(std::size_t dn) { return hc_wt_uptr(gsl_fft_halfcomplex_wavetable_alloc(dn)); }
-
 template <typename Y> std::vector<Y> fftSmoothWithFilter(std::vector<Y> const &input, FFTFilter<Y> const &filter) {
   std::size_t dn = input.size();
   std::vector<Y> output(input.cbegin(), input.cend());
 
   // obtain the FFT
-  fft::real_ws_uptr real_ws = fft::make_gsl_real_workspace(dn);
-  fft::real_wt_uptr real_wt = fft::make_gsl_real_wavetable(dn);
+  Kernel::fft::real_ws_uptr real_ws = Kernel::fft::make_gsl_real_workspace(dn);
+  Kernel::fft::real_wt_uptr real_wt = Kernel::fft::make_gsl_real_wavetable(dn);
   gsl_fft_real_transform(output.data(), 1, dn, real_wt.get(), real_ws.get());
   real_wt.reset();
 
@@ -218,7 +206,7 @@ template <typename Y> std::vector<Y> fftSmoothWithFilter(std::vector<Y> const &i
   }
 
   // transform back
-  fft::hc_wt_uptr hc_wt = fft::make_gsl_hc_wavetable(dn);
+  Kernel::fft::hc_wt_uptr hc_wt = Kernel::fft::make_gsl_hc_wavetable(dn);
   gsl_fft_halfcomplex_inverse(output.data(), 1, dn, hc_wt.get(), real_ws.get());
   hc_wt.reset();
   real_ws.reset();

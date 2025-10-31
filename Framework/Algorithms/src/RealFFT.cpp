@@ -10,9 +10,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/Exception.h"
 
-#include <gsl/gsl_errno.h>
-#include <gsl/gsl_fft_halfcomplex.h>
-#include <gsl/gsl_fft_real.h>
+#include "MantidKernel/GSL_FFT_Helpers.h"
 
 #define REAL(z, i) ((z)[2 * (i)])
 #define IMAG(z, i) ((z)[2 * (i) + 1])
@@ -107,20 +105,20 @@ void RealFFT::exec() {
   if (transform == "Forward") {
     // first, transform the data
     std::vector<double> data(ySize, 0);
-    auto &yData = inWS->mutableY(spec);
+    auto const &yData = inWS->y(spec);
     std::copy(yData.cbegin(), yData.cend(), data.begin());
-    gsl_fft_real_workspace *workspace = gsl_fft_real_workspace_alloc(ySize);
-    gsl_fft_real_wavetable *wavetable = gsl_fft_real_wavetable_alloc(ySize);
-    gsl_fft_real_transform(data.data(), 1, ySize, wavetable, workspace);
-    gsl_fft_real_wavetable_free(wavetable);
-    gsl_fft_real_workspace_free(workspace);
+    Kernel::fft::real_ws_uptr *workspace = Kernel::fft::make_gsl_real_workspace(ySize);
+    Kernel::fft::real_wt_uptr *wavetable = Kernel::fft::make_gsl_real_wavetable(ySize);
+    gsl_fft_real_transform(data.data(), 1, ySize, wavetable.get(), workspace.get());
+    workspace.reset();
+    wavetable.reset();
 
     // unpack the halfcomplex values -- will be full complex, interleaved real/imag
     std::vector<double> unpacked(2 * ySize, 0.0);
     gsl_fft_halfcomplex_unpack(data.data(), unpacked.data(), 1, ySize);
 
     // second, setup the workspace
-    auto yOutSize = ySize / 2 + 1;
+    auto yOutSize = ySize;
     auto xOutSize = inWS->isHistogramData() ? yOutSize + 1 : yOutSize;
 
     outWS = WorkspaceFactory::Instance().create(inWS, 3, xOutSize, yOutSize);
@@ -177,11 +175,11 @@ void RealFFT::exec() {
     }
 
     // then, inverse transform the data
-    gsl_fft_real_workspace *workspace = gsl_fft_real_workspace_alloc(yOutSize);
-    gsl_fft_halfcomplex_wavetable *wavetable = gsl_fft_halfcomplex_wavetable_alloc(yOutSize);
+    Kernel::fft::real_ws_uptr *workspace = Kernel::fft::make_gsl_real_workspace(yOutSize);
+    Kernel::fft::hc_wt_uptr *wavetable = Kernel::fft::make_gsl_hc_wavetable(yOutSize);
     gsl_fft_halfcomplex_inverse(yhc.data(), 1, yOutSize, wavetable, workspace);
-    gsl_fft_halfcomplex_wavetable_free(wavetable);
-    gsl_fft_real_workspace_free(workspace);
+    wavetable.reset();
+    workspace.reset();
 
     // finally, setup the output workspace
     auto xOutSize = inWS->isHistogramData() ? yOutSize + 1 : yOutSize;
