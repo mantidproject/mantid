@@ -126,7 +126,7 @@ by the CI pipeline to indicate it has been built outside of the standard process
 Build packages from branch using Jenkins
 ----------------------------------------
 
-Developers can build packages to test branches using the ``build_packages_from_branch`` `Jenkins job <build_packages_from_branch_job_>`_. This job provides the ability to,
+Developers can build packages to test branches using the ``build_branch`` `Jenkins job <build_branch_job_>`_. This job provides the ability to,
 
 - Run system tests on Windows, Mac, Linux, or all three.
 - Build a packages on Windows, Mac, Linux, or all three.
@@ -156,7 +156,7 @@ Example
 
 Say I've implemented a new file searching method on a branch ``1234_new_file_search`` and I want to test this on IDAaaS, one of the easiest ways to do this would be to build the packages and upload them to Anaconda using the pipeline. These are the steps I'd take to do this.
 
-1. Go to the ``build_packages_from_branch`` `Jenkins job <build_packages_from_branch_job_>`_.
+1. Go to the ``build_branch`` `Jenkins job <build_branch_job_>`_.
 2. If needed click ``login`` in the top right of the window.
 3. Go to ``Build with parameters`` in the side bar.
 4. Fill out the following options:
@@ -252,4 +252,4 @@ Generally a listing of the contents is what is desired
 .. _download-page: https://download.mantidproject.org
 .. _nsis: https://sourceforge.net/projects/nsis/
 .. _dmg: https://en.wikipedia.org/wiki/Apple_Disk_Image
-.. _build_packages_from_branch_job: https://builds.mantidproject.org/job/build_packages_from_branch/
+.. _build_branch_job: https://builds.mantidproject.org/job/build_branch/
