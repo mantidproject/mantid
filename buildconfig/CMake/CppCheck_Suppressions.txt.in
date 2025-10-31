@@ -319,7 +319,6 @@ comparisonOfFuncReturningBoolError:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/Mant
 missingOverride:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/ConfigPropertyObserver.h:20
 missingOverride:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/GitHubApiHelper.h:26
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/VectorHelper.h:101
-constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/AttenuationProfile.cpp:28
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/DateValidator.cpp:122
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/DiskBuffer.cpp:363
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/EnabledWhenProperty.cpp:111
@@ -348,8 +347,8 @@ constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/PropertyManagerPro
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/SetValueWhenProperty.cpp:36
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/SetValueWhenProperty.cpp:56
 variableScope:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/Statistics.cpp:58
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/Strings.cpp:1020
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/Strings.cpp:1070
+useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/Strings.cpp:1017
+useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/Strings.cpp:1067
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/TimeROI.cpp:97
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/TimeSeriesProperty.cpp:38
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/TimeSeriesProperty.cpp:2117
