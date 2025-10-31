@@ -163,7 +163,7 @@ pipeline {
             }
           }
           agent { label 'linux-64' }
-          options { timestamps () }
+          options { timestamps() }
           steps {
             checkoutSource("${GIT_SHA}")
             build_and_test('linux-64')
@@ -185,7 +185,7 @@ pipeline {
             }
           }
           agent { label 'win-64' }
-          options { timestamps () }
+          options { timestamps() }
           steps {
             checkoutSource("${GIT_SHA}")
             build_and_test('win-64')
@@ -209,7 +209,7 @@ pipeline {
             }
           }
           agent { label 'osx-arm64' }
-          options { timestamps () }
+          options { timestamps() }
           steps {
             checkoutSource("${GIT_SHA}")
             build_and_test('osx-arm64')
@@ -231,7 +231,7 @@ pipeline {
           }
           agent { label 'linux-64' }
           options {
-              timestamps ()
+              timestamps()
               retry(3)
           }
           steps {
@@ -264,7 +264,7 @@ pipeline {
           }
           agent { label 'win-64' }
           options {
-              timestamps ()
+              timestamps()
               retry(3)
           }
           steps {
@@ -296,7 +296,7 @@ pipeline {
           }
           agent { label 'osx-arm64' }
           options {
-              timestamps ()
+              timestamps()
               retry(3)
           }
           steps {
@@ -380,7 +380,7 @@ pipeline {
       }
       agent { label 'linux-64' } // Use linux for simplicity with shell scripts
       options {
-        timestamps ()
+        timestamps()
         retry(3)
       }
       steps {
@@ -418,7 +418,7 @@ pipeline {
         }
       }
       agent { label 'linux-64' } // Use linux for simplicity with shell scripts
-      options { timestamps () }
+      options { timestamps() }
       steps {
         def channel = params.ANACONDA_CHANNEL.trim()
         def credId = anacondaChannelToCredId(channel)
@@ -442,7 +442,7 @@ pipeline {
       }
       agent { label 'linux-64' } // Use linux for simplicity with shell scripts
       options {
-        timestamps ()
+        timestamps()
         retry(3)
       }
       environment {
@@ -476,7 +476,7 @@ pipeline {
     stage ('Keep latest successful build') {
       agent { label 'linux-64' } // Use linux for simplicity with shell scripts
       options {
-        timestamps ()
+        timestamps()
       }
       steps {
         script {
@@ -689,7 +689,7 @@ def archive_test_logs(){
 
 def archive_env_logs(platform) {
   def env_log_dir = "**/env_logs/${platform}"
-  archiveArtifacts artifacts: env_log_dir += "/**/*.txt",
+  archiveArtifacts artifacts: "${env_log_dir}/**/*.txt",
     allowEmptyArchive: false,
     fingerprint: true,
     onlyIfSuccessful: false
