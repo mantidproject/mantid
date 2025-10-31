@@ -104,11 +104,10 @@ void RealFFT::exec() {
 
   if (transform == "Forward") {
     // first, transform the data
-    std::vector<double> data(ySize, 0);
     auto const &yData = inWS->y(spec);
-    std::copy(yData.cbegin(), yData.cend(), data.begin());
-    Kernel::fft::real_ws_uptr *workspace = Kernel::fft::make_gsl_real_workspace(ySize);
-    Kernel::fft::real_wt_uptr *wavetable = Kernel::fft::make_gsl_real_wavetable(ySize);
+    std::vector<double> data(yData.cbegin(), yData.cend());
+    Kernel::fft::real_ws_uptr workspace = Kernel::fft::make_gsl_real_workspace(ySize);
+    Kernel::fft::real_wt_uptr wavetable = Kernel::fft::make_gsl_real_wavetable(ySize);
     gsl_fft_real_transform(data.data(), 1, ySize, wavetable.get(), workspace.get());
     workspace.reset();
     wavetable.reset();
@@ -118,6 +117,10 @@ void RealFFT::exec() {
     gsl_fft_halfcomplex_unpack(data.data(), unpacked.data(), 1, ySize);
 
     // second, setup the workspace
+    // NOTE: the FT of a real sequence is a half-complex sequence.
+    // However, the "half" part refers to a mirror symmetry z[k] = z*[N-k],
+    // NOT to the actual number of complex elements in the transform.
+    // There are as many complex elements in the output sequence as real elements in the input sequence.
     auto yOutSize = ySize;
     auto xOutSize = inWS->isHistogramData() ? yOutSize + 1 : yOutSize;
 
@@ -152,44 +155,53 @@ void RealFFT::exec() {
     if (inWS->getNumberHistograms() < 2)
       throw std::runtime_error("The input workspace must have at least 2 spectra.");
 
-    // first, setup the data vector
-    std::size_t yOutSize = (ySize - 1) * 2;
-    if (inWS->y(1).back() != 0.0)
-      yOutSize++;
-    bool even = yOutSize % 2 == 0;
+    // Setup the half-complex data vector, whose arrangement depends on even/odd of input sequence.
 
-    auto &y0 = inWS->mutableY(0);
-    auto &y1 = inWS->mutableY(1);
-    std::vector<double> yhc(yOutSize);
-    // first element is always real -- no imag stored
-    yhc[0] = y0[0];
-    // starting at 1, interleaved real/imag
-    for (std::size_t i = 1; i < ySize + (even ? 0UL : 1UL); ++i) {
+    // If there are N complex elements, there are at most 2 * N real values to store.
+    // Half-complex has the symmetry z[k] = z*[N - k], which further reduced storage needs.
+    // if N is ODD:  N = 2n + 1, z[1] = z*[N - 1], ..., z[n] = z*[n+1], z[n+1] = z*[n] --> n unique complex values
+    // if N is EVEN: N = 2n,     z[1] = z*[N - 1], ..., z[n] = z*[n] is REAL           --> n - 1 unique complex values
+    // In both cases, including the pure real elements, the halfcomplex array size is equal to N
+    bool even = (ySize % 2 == 0);
+    std::size_t num_unique_complex = (even ? ySize / 2 : (ySize - 1) / 2);
+    std::vector<double> yhc(ySize);
+
+    auto const &yR = inWS->y(0); // real
+    auto const &yI = inWS->y(1); // imag
+
+    // Pack the values in a halfcomplex array with GSL format, based on even / odd behavior
+    // index | 0         | 1                    |    | n - 1                   | n = num unique complex elements
+    // hc    | y[0]      | y[1]       y[2]      | ...| y[2*n - 3]   y[2*n - 2] | y[2*n - 1]   y[2*n]
+    // odd   | z[0].real | z[1].real, z[1].imag | ...| z[n-1].real, z[n-1].imag| z[n].real, z[n].imag
+    // even  | z[0].real | z[1].real, z[1].imag | ...| z[n-1].real, z[n-1].imag| z[n].real
+    yhc[0] = yR[0];
+    // starting at 1, interleaved real/imag; odd is an inclusive loop, even exclusive loop with special treatment
+    for (std::size_t i = 1; i < num_unique_complex + (even ? 0UL : 1UL); i++) {
       std::size_t const j = 2 * i;
-      yhc[j - 1] = y0[i]; // real
-      yhc[j] = y1[i];     // imag
+      yhc[j - 1] = yR[i]; // real
+      yhc[j] = yI[i];     // imag
     }
     // if even, an unmatched real value at the end
     if (even) {
-      yhc[yOutSize - 1] = y0[ySize - 1];
+      yhc[2 * num_unique_complex - 1] = yR[num_unique_complex];
     }
 
-    // then, inverse transform the data
-    Kernel::fft::real_ws_uptr *workspace = Kernel::fft::make_gsl_real_workspace(yOutSize);
-    Kernel::fft::hc_wt_uptr *wavetable = Kernel::fft::make_gsl_hc_wavetable(yOutSize);
-    gsl_fft_halfcomplex_inverse(yhc.data(), 1, yOutSize, wavetable, workspace);
+    // Then, inverse transform the data
+    Kernel::fft::real_ws_uptr workspace = Kernel::fft::make_gsl_real_workspace(ySize);
+    Kernel::fft::hc_wt_uptr wavetable = Kernel::fft::make_gsl_hc_wavetable(ySize);
+    gsl_fft_halfcomplex_inverse(yhc.data(), 1, ySize, wavetable.get(), workspace.get());
     wavetable.reset();
     workspace.reset();
 
-    // finally, setup the output workspace
-    auto xOutSize = inWS->isHistogramData() ? yOutSize + 1 : yOutSize;
-    outWS = WorkspaceFactory::Instance().create(inWS, 1, xOutSize, yOutSize);
+    // Finally, setup the output workspace
+    auto xOutSize = inWS->isHistogramData() ? ySize + 1 : ySize;
+    outWS = WorkspaceFactory::Instance().create(inWS, 1, xOutSize, ySize);
     auto tAxis = std::make_unique<API::TextAxis>(1);
     tAxis->setLabel(0, "Real");
     outWS->replaceAxis(1, std::move(tAxis));
 
     // set the workspace x values
-    double df = 1.0 / (dx * static_cast<double>(yOutSize));
+    double df = 1.0 / (dx * static_cast<double>(ySize));
     auto &xData = outWS->mutableX(0);
     std::generate(xData.begin(), xData.end(), HistogramData::LinearGenerator(0, df));
 

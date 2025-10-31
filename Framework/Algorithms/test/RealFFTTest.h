@@ -86,19 +86,31 @@ void doTestForward(const int N, const double XX, bool performance = false) {
     double a = M_PI * M_PI / 3;
     double dx = 1 / (XX);
 
-    for (int i = 0; i < N / 4; i++) {
+    for (int i = 0; i < N / 2; i++) {
       double x = X[i];
       double tmp = sqrt(Yr[i] * Yr[i] + Yi[i] * Yi[i]);
-      // std::cerr<<x<<' '<<tmp<<' '<<h*exp(-a*x*x)<<'\n';
       TS_ASSERT_DELTA(x, dx * i, 0.00001);
-      TS_ASSERT_DELTA(tmp / (h * exp(-a * x * x)), 1., 0.001);
+      TS_ASSERT_DELTA(tmp, (h * exp(-a * x * x)), 0.001);
+      TS_ASSERT_DELTA(Yi[i], 0.0, 0.00001);
+    }
+    for (int i = N / 2; i < N; i++) {
+      double x = (X[N - 1] - X[i - 1]);
+      double tmp = sqrt(Yr[i] * Yr[i] + Yi[i] * Yi[i]);
+      TS_ASSERT_DELTA(tmp, (h * exp(-a * x * x)), 0.001);
       TS_ASSERT_DELTA(Yi[i], 0.0, 0.00001);
     }
   }
 }
 
 void doTestBackward(const int N, const double dX, bool performance = false) {
+  // first transform forward
   auto fft = Mantid::API::AlgorithmManager::Instance().create("RealFFT");
+  fft->initialize();
+  fft->setPropertyValue("InputWorkspace", "RealFFT_WS");
+  fft->setPropertyValue("OutputWorkspace", "RealFFT_WS_forward");
+  fft->setPropertyValue("WorkspaceIndex", "0");
+  fft->execute();
+  // now transform back and compare
   fft->initialize();
   fft->setPropertyValue("InputWorkspace", "RealFFT_WS_forward");
   fft->setPropertyValue("OutputWorkspace", "RealFFT_WS_backward");
@@ -144,19 +156,32 @@ void doTestForwardHistogram(const int N, const double XX, bool performance = fal
     double a = M_PI * M_PI / 3;
     double dx = 1 / (XX);
 
-    for (int i = 0; i < N / 4; i++) {
+    for (int i = 0; i < N / 2; i++) {
       double x = X[i];
       double tmp = sqrt(Yr[i] * Yr[i] + Yi[i] * Yi[i]);
       // std::cerr<<x<<' '<<tmp<<' '<<h*exp(-a*x*x)<<'\n';
       TS_ASSERT_DELTA(x, dx * i, 0.00001);
-      TS_ASSERT_DELTA(tmp / (h * exp(-a * x * x)), 1., 0.001);
+      TS_ASSERT_DELTA(tmp, (h * exp(-a * x * x)), 0.001);
+      TS_ASSERT_DELTA(Yi[i], 0.0, 0.00001);
+    }
+    for (int i = N / 2; i < N; i++) {
+      double x = (X[N - 1] - X[i - 1]);
+      double tmp = sqrt(Yr[i] * Yr[i] + Yi[i] * Yi[i]);
+      TS_ASSERT_DELTA(tmp, (h * exp(-a * x * x)), 0.001);
       TS_ASSERT_DELTA(Yi[i], 0.0, 0.00001);
     }
   }
 }
 
 void doTestBackwardHistogram(const int N, const double dX, bool performance = false) {
+  // transform forward
   auto fft = Mantid::API::AlgorithmManager::Instance().create("RealFFT");
+  fft->initialize();
+  fft->setPropertyValue("InputWorkspace", "RealFFT_WS_hist");
+  fft->setPropertyValue("OutputWorkspace", "RealFFT_WS_forward_hist");
+  fft->setPropertyValue("WorkspaceIndex", "0");
+  fft->execute();
+  // then transform backward
   fft->initialize();
   fft->setPropertyValue("InputWorkspace", "RealFFT_WS_forward_hist");
   fft->setPropertyValue("OutputWorkspace", "RealFFT_WS_backward_hist");
