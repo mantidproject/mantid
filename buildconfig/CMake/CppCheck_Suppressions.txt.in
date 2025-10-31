@@ -150,8 +150,6 @@ constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/MergeRuns.cp
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/MergeRuns.cpp:679
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/NormaliseByCurrent.cpp:61
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/NormaliseByCurrent.cpp:66
-constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/NormaliseToMonitor.cpp:348
-constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/NormaliseToMonitor.cpp:350
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/PDDetermineCharacterizations.cpp:232
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/PDDetermineCharacterizations.cpp:260
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/PaalmanPingsAbsorptionCorrection.cpp:464
@@ -345,8 +343,6 @@ constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/PropertyManager.
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/PropertyManager.cpp:538
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/PropertyManager.cpp:705
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/PropertyManagerProperty.cpp:149
-constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/SetValueWhenProperty.cpp:36
-constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/SetValueWhenProperty.cpp:56
 variableScope:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/Statistics.cpp:58
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/Strings.cpp:1020
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/Strings.cpp:1070
@@ -481,7 +477,6 @@ unknownMacro:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/Sc
 virtualCallInConstructor:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/SequentialFitDialog.h:57
 missingOverride:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/WorkspacePresenter/WorkspaceTreeWidget.h:65
 missingOverride:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/WorkspacePresenter/WorkspaceTreeWidgetSimple.h:35
-constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/AlgorithmPropertiesWidget.cpp:441
 constParameterPointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/ConvolutionFunctionModel.cpp:230
 constVariableReference:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FileDialogHandler.cpp:103
 constVariableReference:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FileDialogHandler.cpp:113
@@ -515,7 +510,6 @@ constVariableReference:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/MessageDisplay.
 constVariableReference:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/OptionsPropertyWidget.cpp:53
 constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/PropertyHandler.cpp:65
 constParameterPointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/PropertyWidget.cpp:60
-constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/PropertyWidget.cpp:379
 constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/PropertyWidgetFactory.cpp:43
 constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/PropertyWidgetFactory.cpp:44
 constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/DoubleEditorFactory.cpp:18

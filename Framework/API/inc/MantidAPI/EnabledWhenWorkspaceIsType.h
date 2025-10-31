@@ -85,6 +85,14 @@ public:
   bool isVisible(const Kernel::IPropertyManager *) const override { return true; }
 
   //--------------------------------------------------------------------------------------------
+  /// Other properties that this property depends on.
+  std::vector<std::string> dependsOn(const std::string &thisProp) const override {
+    if (m_otherPropName == thisProp)
+      throw std::runtime_error("EnabledWhenWorkspaceIsType: circular dependency detected");
+    return std::vector<std::string>{m_otherPropName};
+  }
+
+  //--------------------------------------------------------------------------------------------
   /// Make a copy of the present type of validator
   IPropertySettings *clone() const override {
     return new EnabledWhenWorkspaceIsType<T>(m_otherPropName, m_enabledSetting);
