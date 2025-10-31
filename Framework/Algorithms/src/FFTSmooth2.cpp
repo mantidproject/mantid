@@ -74,8 +74,8 @@ std::map<std::string, std::string> FFTSmooth2::validateInputs() {
   }
 
   // Check that the x values are evenly spaced
-  bool IgnoreXBins = getProperty("IgnoreXBins");
-  if (!IgnoreXBins) {
+  bool ignoreXBins = getProperty("IgnoreXBins");
+  if (!ignoreXBins) {
     const auto &X = inWS->x(wi);
     double dx = (X.back() - X.front()) / static_cast<double>(X.size() - 1);
     for (size_t i = 0; i < X.size() - 2; i++) {
@@ -97,18 +97,19 @@ void FFTSmooth2::exec() {
 
   // retrieve parameters
   unsigned n = 2, order = 2;
-  std::string string_params = getProperty("Params");
-  std::vector<std::string> params;
-  boost::split(params, string_params, boost::algorithm::detail::is_any_ofF<char>(" ,:;\t"));
-  if (params.size() == 1) {
-    std::string param0 = params.at(0);
-    n = std::stoi(param0);
-    order = 2;
-  } else if (params.size() == 2) {
-    std::string param0 = params.at(0);
-    std::string param1 = params.at(1);
-    n = std::stoi(param0);
-    order = std::stoi(param1);
+  if (!(getPointerToProperty("Params")->isDefault())) {
+    std::string string_params = getPropertyValue("Params");
+    std::vector<std::string> params;
+    boost::split(params, string_params, boost::algorithm::detail::is_any_ofF<char>(" ,:;\t"));
+    if (params.size() == 1) {
+      std::string param0 = params.at(0);
+      n = std::stoi(param0);
+    } else if (params.size() == 2) {
+      std::string param0 = params.at(0);
+      std::string param1 = params.at(1);
+      n = std::stoi(param0);
+      order = std::stoi(param1);
+    }
   }
   if (n <= 1)
     throw std::invalid_argument("Truncation parameter must be an integer > 1");
@@ -122,10 +123,10 @@ void FFTSmooth2::exec() {
   std::function<std::vector<double>(std::vector<double> const &)> smoothMethod;
   switch (type) {
   case FilterType::ZERO: {
-    // NOTE this algorithm used a cutoff *frequency*, whereas fftSmooth
-    // uses a cutoff number (a quantum number).  The below ny is precisely
+    // NOTE this algorithm used a cutoff *period*, whereas fftSmooth
+    // uses a cutoff number (a quantum number).  The below adjusted cutoff is precisely
     // the value needed for fftSmooth to have the same result as the prior behavior
-    // this takes into account BOTH the symmetrization op below, AND the halfcomplex packing
+    // This takes into account BOTH the symmetrization op below, AND the halfcomplex packing
     // |  symm_size = 2 * dn
     // |  halfcomplex size of symm = symm_size / 2 = dn
     // so correct size to use is dn
@@ -136,6 +137,7 @@ void FFTSmooth2::exec() {
     break;
   }
   case FilterType::BUTTERWORTH: {
+    // see note above about adjusted cutoff
     unsigned adjusted_cutoff = (n > dn ? 1 : static_cast<unsigned>(dn / n));
     smoothMethod = [adjusted_cutoff, order](std::vector<double> const &y) {
       return Kernel::Smoothing::fftButterworthSmooth(y, adjusted_cutoff, order);
