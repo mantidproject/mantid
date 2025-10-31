@@ -455,6 +455,15 @@ std::string ConfigServiceImpl::makeAbsolute(const std::string &dir, const std::s
   try {
     std::filesystem::path testPath(dir);
     is_relative = testPath.is_relative();
+    
+#ifdef _WIN32
+    // On Windows, std::filesystem treats paths starting with / or \ as relative
+    // (because they lack a drive letter), but we want to treat them as absolute
+    // to match the original Poco::Path behavior and Unix conventions
+    if (is_relative && !dir.empty() && (dir[0] == '/' || dir[0] == '\\')) {
+      is_relative = false;
+    }
+#endif
   } catch (const std::exception &) {
     g_log.warning() << "Malformed path detected in the \"" << key << "\" variable, skipping \"" << dir << "\"\n";
     return "";
