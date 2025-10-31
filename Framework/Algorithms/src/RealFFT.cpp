@@ -108,7 +108,7 @@ void RealFFT::exec() {
 
   if (transform == "Forward") {
     // first, transform the data
-    std::vector<double> data(2 * ySize, 0);
+    std::vector<double> data(ySize, 0);
     auto &yData = inWS->mutableY(spec);
     std::copy(yData.cbegin(), yData.cend(), data.begin());
     gsl_fft_real_workspace *workspace = gsl_fft_real_workspace_alloc(ySize);
@@ -117,10 +117,14 @@ void RealFFT::exec() {
     gsl_fft_real_wavetable_free(wavetable);
     gsl_fft_real_workspace_free(workspace);
 
+    // unpack the halfcomplex values -- will be full complex, interleaved real/imag
+    std::vector<double> unpacked(2 * ySize, 0.0);
+    gsl_fft_halfcomplex_unpack(data.data(), unpacked.data(), 1, ySize);
+
     // second, setup the workspace
+    bool odd = ySize % 2 != 0;
     auto yOutSize = ySize / 2 + 1;
     auto xOutSize = inWS->isHistogramData() ? yOutSize + 1 : yOutSize;
-    bool odd = ySize % 2 != 0;
 
     outWS = WorkspaceFactory::Instance().create(inWS, 3, xOutSize, yOutSize);
     auto tAxis = std::make_unique<API::TextAxis>(3);
@@ -134,10 +138,10 @@ void RealFFT::exec() {
     auto &y2 = outWS->mutableY(1);
     auto &y3 = outWS->mutableY(2);
     for (std::size_t i = 0; i < yOutSize; i++) {
-      std::size_t j = i * 2;
+      std::size_t const j = i * 2;
       x[i] = df * static_cast<double>(i);
-      double re = i != 0 ? data[j - 1] : data[0];
-      double im = (i != 0 && (odd || i != yOutSize - 1)) ? data[j] : 0;
+      double re = unpacked[j];
+      double im = unpacked[j + 1];
       y1[i] = re * dx;                      // real part
       y2[i] = im * dx;                      // imaginary part
       y3[i] = dx * sqrt(re * re + im * im); // modulus
@@ -156,21 +160,22 @@ void RealFFT::exec() {
     std::size_t yOutSize = (ySize - 1) * 2;
     if (inWS->y(1).back() != 0.0)
       yOutSize++;
-    bool odd = yOutSize % 2 != 0;
+    bool even = yOutSize % 2 == 0;
 
     auto &y0 = inWS->mutableY(0);
     auto &y1 = inWS->mutableY(1);
     std::vector<double> yhc(yOutSize);
-    for (std::size_t i = 0; i < ySize; i++) {
-      if (i != 0) {
-        std::size_t j = i * 2;
-        yhc[j - 1] = y0[i];
-        if (odd || i != ySize - 1) {
-          yhc[j] = y1[i];
-        }
-      } else {
-        yhc[0] = y0[0];
-      }
+    // first element is always real -- no imag stored
+    yhc[0] = y0[0];
+    // starting at 1, interleaved real/imag
+    for (std::size_t i = 1; i < ySize + (even ? 0UL : 1UL); ++i) {
+      std::size_t const j = 2 * i;
+      yhc[j - 1] = y0[i]; // real
+      yhc[j] = y1[i];     // imag
+    }
+    // if even, an unmatched real value at the end
+    if (even) {
+      yhc[yOutSize - 1] = y0[ySize - 1];
     }
 
     // then, inverse transform the data
