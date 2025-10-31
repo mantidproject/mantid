@@ -2,7 +2,6 @@
 // GITHUB_USER_NAME - The name of the user, being used with pushing/pulling from git
 // GITHUB_USER_EMAIL - The email of the user, being used with pushing/pulling from git
 // GITHUB_TOKEN_CREDENTIAL_ID - The name of the credentials token in Jenkins that you want to use for pushing to the mantid repo
-// ANACONDA_TOKEN_CREDENTIAL_ID - The name of the credentials token in Jenkins that you want to use for publishing conda packages
 
 import groovy.transform.Field
 
@@ -13,7 +12,7 @@ def publishPackages = (gitBranch == "${BRANCH_TO_PUBLISH}")
 
 // Determine default values of parameters. Some are based on the branch.
 def defaults = [
-  anacondaChannel : 'mantid',
+  anacondaChannelChoices : ['mantid-test'],
   githubReleasesRepo: 'mantidproject/mantid',
   platformChoices : ['none', 'all', 'linux-64', 'win-64', 'osx-arm64'],
   publishToAnaconda : publishPackages,
@@ -29,12 +28,29 @@ def defaults = [
 // pipeline parameters because it's only switched off for ornl-next anaconda publishing.
 @Field Boolean buildMantiddocs = true
 
+// Map Anaconda channel name to the Jenkins credential ID for the channel token.
+def anacondaChannelToCredId(channel) {
+    def map = [
+      'mantid'      : 'anaconda-cloud-token',
+      'mantid-ornl' : 'anaconda-token-ornl',
+      'mantid-test' : 'anaconda-token-mantid-test'
+    ]
+    def id = map[channel]
+    if (!id) {
+      error("No Jenkins credential configured for Anaconda channel '${channel}'. " +
+            "Please add it to the map in the Jenkinsfile and create the appropriate credential.")
+    }
+    return id
+}
+
 // Restrict the parameter choices for certain named branches.
 switch(gitBranch) {
   case ['main', 'release-next']:
     defaults.packageSuffix = 'Nightly'
     defaults.anacondaLabel = 'nightly'
     defaults.platformChoices = ['all']
+    // The mantid channel is reserved only for main and release-next branches.
+    defaults.anacondaChannelChoices = ['mantid', 'mantid-test']
     break
   case ['ornl-next', 'ornl-qa', 'ornl']:
     defaults.packageSuffix = 'Nightly'
@@ -42,7 +58,7 @@ switch(gitBranch) {
     defaults.platformChoices = ['linux-64']
     defaults.publishToGithub = false
     defaults.publishToAnaconda = true
-    defaults.anacondaChannel = 'mantid-ornl'
+    defaults.anacondaChannelChoices = ['mantid-ornl', 'mantid-test']
     buildMantiddocs = false
     break
 }
@@ -68,8 +84,8 @@ pipeline {
                  description: 'If true, publish the packages to the specified Anaconda channel')
     booleanParam(name: 'PUBLISH_TO_GITHUB', defaultValue: defaults.publishToGithub,
                  description: 'If true, publish the packages to GitHub')
-    string(name: 'ANACONDA_CHANNEL', defaultValue: defaults.anacondaChannel,
-           description: 'The Anaconda channel to accept the package')
+    choice(name: 'ANACONDA_CHANNEL', choices: defaults.anacondaChannelChoices,
+           description: 'The Anaconda channel where the packages will be published')
     string(name: 'ANACONDA_CHANNEL_LABEL', defaultValue: defaults.anacondaLabel,
            description: 'The label attached to package in the Anaconda channel')
     string(name: 'GITHUB_RELEASES_REPO', defaultValue: defaults.githubReleasesRepo,
@@ -99,6 +115,9 @@ pipeline {
             if(!params.ANACONDA_CHANNEL?.trim()) {
               error("You must specify an Anaconda channel to publish packages.")
             }
+            // Verify that the channel has an associated token.
+            // This will throw an error and exit the pipeline if no token exists in the map.
+            anacondaChannelToCredId(params.ANACONDA_CHANNEL.trim())
           }
         }
       }
@@ -144,7 +163,7 @@ pipeline {
             }
           }
           agent { label 'linux-64' }
-          options { timestamps () }
+          options { timestamps() }
           steps {
             checkoutSource("${GIT_SHA}")
             build_and_test('linux-64')
@@ -166,7 +185,7 @@ pipeline {
             }
           }
           agent { label 'win-64' }
-          options { timestamps () }
+          options { timestamps() }
           steps {
             checkoutSource("${GIT_SHA}")
             build_and_test('win-64')
@@ -190,7 +209,7 @@ pipeline {
             }
           }
           agent { label 'osx-arm64' }
-          options { timestamps () }
+          options { timestamps() }
           steps {
             checkoutSource("${GIT_SHA}")
             build_and_test('osx-arm64')
@@ -212,7 +231,7 @@ pipeline {
           }
           agent { label 'linux-64' }
           options {
-              timestamps ()
+              timestamps()
               retry(3)
           }
           steps {
@@ -245,7 +264,7 @@ pipeline {
           }
           agent { label 'win-64' }
           options {
-              timestamps ()
+              timestamps()
               retry(3)
           }
           steps {
@@ -277,7 +296,7 @@ pipeline {
           }
           agent { label 'osx-arm64' }
           options {
-              timestamps ()
+              timestamps()
               retry(3)
           }
           steps {
@@ -361,25 +380,31 @@ pipeline {
       }
       agent { label 'linux-64' } // Use linux for simplicity with shell scripts
       options {
-        timestamps ()
+        timestamps()
         retry(3)
       }
-      environment {
-        ANACONDA_TOKEN = credentials("${ANACONDA_TOKEN_CREDENTIAL_ID}")
-      }
       steps {
-        checkoutSource("${GIT_SHA}")
-        // Conda first
-        sh 'rm -fr ${WORKSPACE}/conda-packages'
-        copyArtifacts filter: '**/conda-bld/**/*.conda',
-          fingerprintArtifacts: true,
-          projectName: '${JOB_NAME}',
-          selector: specific('${BUILD_NUMBER}'),
-          target: 'conda-packages',
-          flatten: true
-        // Single quotes are required for token variables to avoid them leaking
-        sh "${CISCRIPT_DIR}/publish-to-anaconda ${WORKSPACE}" + ' ${ANACONDA_TOKEN} ' +\
-          "${ANACONDA_CHANNEL} ${ANACONDA_CHANNEL_LABEL} ${WORKSPACE}/conda-packages/*.conda"
+        script {
+          def channel = params.ANACONDA_CHANNEL.trim()
+          def credId = anacondaChannelToCredId(channel)
+
+          withCredentials([string(credentialsId: credId, variable: 'ANACONDA_TOKEN')]) {
+            checkoutSource("${GIT_SHA}")
+
+            // Remove any old package left over from previous jobs.
+            sh 'rm -fr ${WORKSPACE}/conda-packages'
+            copyArtifacts filter: '**/conda-bld/**/*.conda',
+              fingerprintArtifacts: true,
+              projectName: '${JOB_NAME}',
+              selector: specific('${BUILD_NUMBER}'),
+              target: 'conda-packages',
+              flatten: true
+
+            // Single quotes are required for token variables to avoid them leaking
+            sh "${CISCRIPT_DIR}/publish-to-anaconda ${WORKSPACE}" + ' ${ANACONDA_TOKEN} ' +\
+              "${ANACONDA_CHANNEL} ${ANACONDA_CHANNEL_LABEL} ${WORKSPACE}/conda-packages/*.conda"
+          }
+        }
       }
     }
 
@@ -393,12 +418,18 @@ pipeline {
         }
       }
       agent { label 'linux-64' } // Use linux for simplicity with shell scripts
-      options { timestamps () }
-      environment { ANACONDA_TOKEN = credentials("${ANACONDA_TOKEN_CREDENTIAL_ID}") }
+      options { timestamps() }
       steps {
-        checkoutSource("${GIT_SHA}")
-        sh "${CISCRIPT_DIR}/delete-old-packages.sh ${WORKSPACE}" + ' ${ANACONDA_TOKEN} ' +\
-          "--channel ${ANACONDA_CHANNEL} --label ${ANACONDA_CHANNEL_LABEL} mantid mantidqt mantiddocs mantidworkbench mantid-developer"
+        script {
+          def channel = params.ANACONDA_CHANNEL.trim()
+          def credId = anacondaChannelToCredId(channel)
+
+          withCredentials([string(credentialsId: credId, variable: 'ANACONDA_TOKEN')]) {
+            checkoutSource("${GIT_SHA}")
+            sh "${CISCRIPT_DIR}/delete-old-packages.sh ${WORKSPACE}" + ' ${ANACONDA_TOKEN} ' +\
+              "--channel ${ANACONDA_CHANNEL} --label ${ANACONDA_CHANNEL_LABEL} mantid mantidqt mantiddocs mantidworkbench mantid-developer"
+          }
+        }
       }
     }
 
@@ -413,7 +444,7 @@ pipeline {
       }
       agent { label 'linux-64' } // Use linux for simplicity with shell scripts
       options {
-        timestamps ()
+        timestamps()
         retry(3)
       }
       environment {
@@ -447,7 +478,7 @@ pipeline {
     stage ('Keep latest successful build') {
       agent { label 'linux-64' } // Use linux for simplicity with shell scripts
       options {
-        timestamps ()
+        timestamps()
       }
       steps {
         script {
@@ -660,7 +691,7 @@ def archive_test_logs(){
 
 def archive_env_logs(platform) {
   def env_log_dir = "**/env_logs/${platform}"
-  archiveArtifacts artifacts: env_log_dir += "/**/*.txt",
+  archiveArtifacts artifacts: "${env_log_dir}/**/*.txt",
     allowEmptyArchive: false,
     fingerprint: true,
     onlyIfSuccessful: false

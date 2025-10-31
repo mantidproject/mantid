@@ -498,12 +498,13 @@ We are now ready to create the release candidates for Smoke testing.
   <https://builds.mantidproject.org/view/Nightly%20Pipelines/job/release-next_nightly/>`__
   with the following parameters (most are already defaulted to the correct values):
 
+  * set ``DESCRIPTION`` to ``Smoke testing candidates vX.Y.ZrcN``
   * set ``BUILD_DEVEL`` to ``all``
   * set ``BUILD_PACKAGE`` to ``all``
   * set ``PACKAGE_SUFFIX`` to an **empty string**
   * tick the ``PUBLISH_TO_ANACONDA`` checkbox
   * tick the ``PUBLISH_TO_GITHUB`` checkbox
-  * set the ``ANACONDA_CHANNEL`` to ``mantid``
+  * set the ``ANACONDA_CHANNEL`` to ``mantid-test``
   * set the ``ANACONDA_CHANNEL_LABEL`` to ``vX.Y.ZrcN`` where ``X.Y.Z`` is the release number,
     and ``N`` is an incremental build number for release candidates, starting at ``1`` (e.g. ``v6.7.0rc1``)
   * set ``GITHUB_RELEASES_REPO`` to ``mantidproject/mantid``
@@ -530,6 +531,7 @@ now be recreated with their final version numbers. To do this, build the
 <https://builds.mantidproject.org/view/Nightly%20Pipelines/job/release-next_nightly/>`__
 with the following parameters (most are already defaulted to the correct values):
 
+* set ``DESCRIPTION`` to ``Release build for vX.Y.Z``
 * set ``BUILD_DEVEL`` to ``all``
 * set ``BUILD_PACKAGE`` to ``all``
 * set ``PACKAGE_SUFFIX`` to an **empty string**
