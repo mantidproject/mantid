@@ -14,8 +14,8 @@ namespace API {
 
 /**
  * @brief The Correction struct to be applied as factor * TOF + offset
- * additiveOffset:: TOF additive offset in unit of TOF
  * multiplicativeFactor:  TOF correction factor to multiply TOF by
+ * additiveOffset:: TOF additive offset in unit of TOF
  */
 struct Correction {
   Correction(const double &multiplicativeFactor, const double &additiveOffset)
