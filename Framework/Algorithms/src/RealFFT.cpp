@@ -10,9 +10,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/Exception.h"
 
-#include <gsl/gsl_errno.h>
-#include <gsl/gsl_fft_halfcomplex.h>
-#include <gsl/gsl_fft_real.h>
+#include "MantidKernel/GSL_FFT_Helpers.h"
 
 #define REAL(z, i) ((z)[2 * (i)])
 #define IMAG(z, i) ((z)[2 * (i) + 1])
@@ -58,43 +56,73 @@ void RealFFT::init() {
                   "FFT result will not be valid for the X axis, and should be ignored.");
 }
 
+std::map<std::string, std::string> RealFFT::validateInputs() {
+  std::map<std::string, std::string> issues;
+
+  API::MatrixWorkspace_sptr inWS = getProperty("InputWorkspace");
+
+  // verify the spectrum workspace index
+  std::string transform = getProperty("Transform");
+  int wi = (transform == "Forward") ? getProperty("WorkspaceIndex") : 0;
+  if (wi >= static_cast<int>(inWS->getNumberHistograms())) {
+    issues["WorkspaceIndex"] = "Property WorkspaceIndex is out of range";
+    return issues;
+  }
+
+  // Check that the x values are evenly spaced
+  bool IgnoreXBins = getProperty("IgnoreXBins");
+  if (!IgnoreXBins) {
+    const auto &X = inWS->x(wi);
+    double dx = (X.back() - X.front()) / static_cast<double>(X.size() - 1);
+    for (size_t i = 0; i < X.size() - 2; i++) {
+      if (std::abs(dx - X[i + 1] + X[i]) / dx > 1e-7) {
+        issues["InputWorkspace"] = "X axis must be linear (all bins have same "
+                                   "width). This can be ignored if "
+                                   "IgnoreXBins is set to true.";
+        break;
+      }
+    }
+  }
+  return issues;
+}
+
 /** Executes the algorithm
  *
  *  @throw runtime_error Thrown if
  */
 void RealFFT::exec() {
   API::MatrixWorkspace_sptr inWS = getProperty("InputWorkspace");
+
+  // get the x-spacing
   std::string transform = getProperty("Transform");
-  bool IgnoreXBins = getProperty("IgnoreXBins");
-
   int spec = (transform == "Forward") ? getProperty("WorkspaceIndex") : 0;
-
   const auto &X = inWS->x(spec);
-  auto ySize = static_cast<int>(inWS->blocksize());
-
-  if (spec >= ySize)
-    throw std::invalid_argument("Property WorkspaceIndex is out of range");
-
-  // Check that the x values are evenly spaced
   double dx = (X.back() - X.front()) / static_cast<double>(X.size() - 1);
-  if (!IgnoreXBins) {
-    for (size_t i = 0; i < X.size() - 2; i++)
-      // note this cannot be replaced with Kernel::withinRelativeDifference,
-      // or fails to detect some errors
-      if (std::abs(dx - X[i + 1] + X[i]) / dx > 1e-7)
-        throw std::invalid_argument("X axis must be linear (all bins have same "
-                                    "width). This can be ignored if "
-                                    "IgnoreXBins is set to true.");
-  }
+  auto ySize = inWS->blocksize();
 
   API::MatrixWorkspace_sptr outWS;
 
-  double df = 1.0 / (dx * ySize);
-
   if (transform == "Forward") {
-    int yOutSize = ySize / 2 + 1;
-    int xOutSize = inWS->isHistogramData() ? yOutSize + 1 : yOutSize;
-    bool odd = ySize % 2 != 0;
+    // first, transform the data
+    auto const &yData = inWS->y(spec);
+    std::vector<double> data(yData.cbegin(), yData.cend());
+    Kernel::fft::real_ws_uptr workspace = Kernel::fft::make_gsl_real_workspace(ySize);
+    Kernel::fft::real_wt_uptr wavetable = Kernel::fft::make_gsl_real_wavetable(ySize);
+    gsl_fft_real_transform(data.data(), 1, ySize, wavetable.get(), workspace.get());
+    workspace.reset();
+    wavetable.reset();
+
+    // unpack the halfcomplex values -- will be full complex, interleaved real/imag
+    std::vector<double> unpacked(2 * ySize, 0.0);
+    gsl_fft_halfcomplex_unpack(data.data(), unpacked.data(), 1, ySize);
+
+    // second, setup the workspace
+    // NOTE: the FT of a real sequence is a half-complex sequence.
+    // However, the "half" part refers to a mirror symmetry z[k] = z*[N-k],
+    // NOT to the actual number of complex elements in the transform.
+    // There are as many complex elements in the output sequence as real elements in the input sequence.
+    auto yOutSize = ySize;
+    auto xOutSize = inWS->isHistogramData() ? yOutSize + 1 : yOutSize;
 
     outWS = WorkspaceFactory::Instance().create(inWS, 3, xOutSize, yOutSize);
     auto tAxis = std::make_unique<API::TextAxis>(3);
@@ -103,87 +131,84 @@ void RealFFT::exec() {
     tAxis->setLabel(2, "Modulus");
     outWS->replaceAxis(1, std::move(tAxis));
 
-    gsl_fft_real_workspace *workspace = gsl_fft_real_workspace_alloc(ySize);
-    std::vector<double> data(2 * ySize);
-
-    auto &yData = inWS->mutableY(spec);
-    for (int i = 0; i < ySize; i++) {
-      data[i] = yData[i];
-    }
-
-    gsl_fft_real_wavetable *wavetable = gsl_fft_real_wavetable_alloc(ySize);
-    gsl_fft_real_transform(data.data(), 1, ySize, wavetable, workspace);
-    gsl_fft_real_wavetable_free(wavetable);
-    gsl_fft_real_workspace_free(workspace);
-
+    // set the workspace x values
     auto &x = outWS->mutableX(0);
+    double df = 1.0 / (dx * static_cast<double>(ySize));
+    std::generate(x.begin(), x.end(), HistogramData::LinearGenerator(0, df));
+    outWS->setSharedX(1, outWS->sharedX(0));
+    outWS->setSharedX(2, outWS->sharedX(0));
+
+    // set the workspace y values
     auto &y1 = outWS->mutableY(0);
     auto &y2 = outWS->mutableY(1);
     auto &y3 = outWS->mutableY(2);
-    for (int i = 0; i < yOutSize; i++) {
-      int j = i * 2;
-      x[i] = df * i;
-      double re = i != 0 ? data[j - 1] : data[0];
-      double im = (i != 0 && (odd || i != yOutSize - 1)) ? data[j] : 0;
+    for (std::size_t i = 0; i < yOutSize; i++) {
+      std::size_t const j = i * 2;
+      double re = unpacked[j];
+      double im = unpacked[j + 1];
       y1[i] = re * dx;                      // real part
       y2[i] = im * dx;                      // imaginary part
       y3[i] = dx * sqrt(re * re + im * im); // modulus
     }
-    if (inWS->isHistogramData()) {
-      outWS->mutableX(0)[yOutSize] = outWS->mutableX(0)[yOutSize - 1] + df;
-    }
-    outWS->setSharedX(1, outWS->sharedX(0));
-    outWS->setSharedX(2, outWS->sharedX(0));
   } else // Backward
   {
-
     if (inWS->getNumberHistograms() < 2)
       throw std::runtime_error("The input workspace must have at least 2 spectra.");
 
-    int yOutSize = (ySize - 1) * 2;
-    if (inWS->y(1).back() != 0.0)
-      yOutSize++;
-    int xOutSize = inWS->isHistogramData() ? yOutSize + 1 : yOutSize;
-    bool odd = yOutSize % 2 != 0;
+    // Setup the half-complex data vector, whose arrangement depends on even/odd of input sequence.
 
-    df = 1.0 / (dx * (yOutSize));
+    // If there are N complex elements, there are at most 2 * N real values to store.
+    // Half-complex has the symmetry z[k] = z*[N - k], which further reduced storage needs.
+    // if N is ODD:  N = 2n + 1, z[1] = z*[N - 1], ..., z[n] = z*[n+1], z[n+1] = z*[n] --> n unique complex values
+    // if N is EVEN: N = 2n,     z[1] = z*[N - 1], ..., z[n] = z*[n] is REAL           --> n - 1 unique complex values
+    // In both cases, including the pure real elements, the halfcomplex array size is equal to N
+    bool even = (ySize % 2 == 0);
+    std::size_t num_unique_complex = (even ? ySize / 2 : (ySize - 1) / 2);
+    std::vector<double> yhc(ySize);
 
-    outWS = WorkspaceFactory::Instance().create(inWS, 1, xOutSize, yOutSize);
+    auto const &yR = inWS->y(0); // real
+    auto const &yI = inWS->y(1); // imag
+
+    // Pack the values in a halfcomplex array with GSL format, based on even / odd behavior
+    // index | 0         | 1                    |    | n - 1                   | n = num unique complex elements
+    // hc    | y[0]      | y[1]       y[2]      | ...| y[2*n - 3]   y[2*n - 2] | y[2*n - 1]   y[2*n]
+    // odd   | z[0].real | z[1].real, z[1].imag | ...| z[n-1].real, z[n-1].imag| z[n].real, z[n].imag
+    // even  | z[0].real | z[1].real, z[1].imag | ...| z[n-1].real, z[n-1].imag| z[n].real
+    yhc[0] = yR[0];
+    // starting at 1, interleaved real/imag; odd is an inclusive loop, even exclusive loop with special treatment
+    for (std::size_t i = 1; i < num_unique_complex + (even ? 0UL : 1UL); i++) {
+      std::size_t const j = 2 * i;
+      yhc[j - 1] = yR[i]; // real
+      yhc[j] = yI[i];     // imag
+    }
+    // if even, an unmatched real value at the end
+    if (even) {
+      yhc[2 * num_unique_complex - 1] = yR[num_unique_complex];
+    }
+
+    // Then, inverse transform the data
+    Kernel::fft::real_ws_uptr workspace = Kernel::fft::make_gsl_real_workspace(ySize);
+    Kernel::fft::hc_wt_uptr wavetable = Kernel::fft::make_gsl_hc_wavetable(ySize);
+    gsl_fft_halfcomplex_inverse(yhc.data(), 1, ySize, wavetable.get(), workspace.get());
+    wavetable.reset();
+    workspace.reset();
+
+    // Finally, setup the output workspace
+    auto xOutSize = inWS->isHistogramData() ? ySize + 1 : ySize;
+    outWS = WorkspaceFactory::Instance().create(inWS, 1, xOutSize, ySize);
     auto tAxis = std::make_unique<API::TextAxis>(1);
     tAxis->setLabel(0, "Real");
     outWS->replaceAxis(1, std::move(tAxis));
 
-    gsl_fft_real_workspace *workspace = gsl_fft_real_workspace_alloc(yOutSize);
-
+    // set the workspace x values
+    double df = 1.0 / (dx * static_cast<double>(ySize));
     auto &xData = outWS->mutableX(0);
-    auto &yData = outWS->mutableY(0);
-    auto &y0 = inWS->mutableY(0);
-    auto &y1 = inWS->mutableY(1);
-    for (int i = 0; i < ySize; i++) {
-      int j = i * 2;
-      xData[i] = df * i;
-      if (i != 0) {
-        yData[j - 1] = y0[i];
-        if (odd || i != ySize - 1) {
-          yData[j] = y1[i];
-        }
-      } else {
-        yData[0] = y0[0];
-      }
-    }
-
-    gsl_fft_halfcomplex_wavetable *wavetable = gsl_fft_halfcomplex_wavetable_alloc(yOutSize);
-
-    // &(yData[0]) because gsl func wants non const double data[]
-    gsl_fft_halfcomplex_inverse(&(yData[0]), 1, yOutSize, wavetable, workspace);
-    gsl_fft_halfcomplex_wavetable_free(wavetable);
-    gsl_fft_real_workspace_free(workspace);
-
     std::generate(xData.begin(), xData.end(), HistogramData::LinearGenerator(0, df));
-    yData /= df;
 
-    if (outWS->isHistogramData())
-      outWS->mutableX(0)[yOutSize] = outWS->mutableX(0)[yOutSize - 1] + df;
+    // set the workspace y values
+    auto &yData = outWS->mutableY(0);
+    std::move(yhc.begin(), yhc.end(), yData.begin());
+    yData /= df;
   }
 
   setProperty("OutputWorkspace", outWS);

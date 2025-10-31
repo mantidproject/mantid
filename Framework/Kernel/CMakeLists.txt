@@ -98,6 +98,7 @@ set(SRC_FILES
     src/RegexStrings.cpp
     src/SetValueWhenProperty.cpp
     src/SingletonHolder.cpp
+    src/Smoothing.cpp
     src/SobolSequence.cpp
     src/SpinStateValidator.cpp
     src/SplittingInterval.cpp
@@ -189,6 +190,7 @@ set(INC_FILES
     inc/MantidKernel/FunctionTask.h
     inc/MantidKernel/GitHubApiHelper.h
     inc/MantidKernel/Glob.h
+    inc/MantidKernel/GSL_FFT_Helpers.h
     inc/MantidKernel/ICatalogInfo.h
     inc/MantidKernel/IPropertyManager.h
     inc/MantidKernel/IPropertySettings.h
@@ -263,6 +265,7 @@ set(INC_FILES
     inc/MantidKernel/RegistrationHelper.h
     inc/MantidKernel/SetValueWhenProperty.h
     inc/MantidKernel/SingletonHolder.h
+    inc/MantidKernel/Smoothing.h
     inc/MantidKernel/SobolSequence.h
     inc/MantidKernel/SpecialCoordinateSystem.h
     inc/MantidKernel/SpinStateHelpers.h
@@ -414,6 +417,7 @@ set(TEST_FILES
     RegexStringsTest.h
     SLSQPMinimizerTest.h
     ShrinkToFitTest.h
+    SmoothingTest.h
     SobolSequenceTest.h
     SpecialCoordinateSystemTest.h
     SpinStateHelpersTest.h
