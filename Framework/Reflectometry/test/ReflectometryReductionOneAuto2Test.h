@@ -304,7 +304,7 @@ public:
 
   void test_correct_detector_position_rotation_POLREF() {
     // Histograms in this run correspond to 'OSMOND' component
-    auto polref = loadRun("POLREF00014966.raw");
+    auto polref = loadRun("POLREF00014966.nxs");
 
     // Correct by rotating detectors around the sample
     ReflectometryReductionOneAuto2 alg;
