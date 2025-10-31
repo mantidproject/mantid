@@ -15,9 +15,9 @@
 #include "MantidKernel/V3D.h"
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/TimeAtSampleStrategyDirect.h"
+#include "MantidAPI/TimeAtSampleStrategyDirect.h"
 
-using namespace Mantid::Algorithms;
+using namespace Mantid::API;
 
 class TimeAtSampleStrategyDirectTest : public CxxTest::TestSuite {
 public:
@@ -42,14 +42,12 @@ public:
     const double ei = 12;           // MeV
 
     const double L1 = source->getPos().distance(sample->getPos());
+    const double expectedShift = L1 / std::sqrt(ei * 2. * PhysicalConstants::meV / PhysicalConstants::NeutronMass);
 
     TimeAtSampleStrategyDirect strategy(ws, ei);
     Correction correction = strategy.calculate(detectorIndex);
 
-    const double shift = correction.factor;
-
-    double expectedShift = L1 / std::sqrt(ei * 2. * PhysicalConstants::meV / PhysicalConstants::NeutronMass);
-
-    TSM_ASSERT_DELTA("L1 / (L1 + L2)", expectedShift, shift, 0.0000001);
+    TS_ASSERT_EQUALS(0., correction.factor);
+    TSM_ASSERT_DELTA("L1/sqrt(m/(2*Ei))", expectedShift, correction.offset, 0.0000001);
   }
 };

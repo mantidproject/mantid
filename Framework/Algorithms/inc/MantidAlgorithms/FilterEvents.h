@@ -23,9 +23,11 @@ namespace Kernel {
 class TimeROI; // forward declaration
 }
 
-namespace Algorithms {
-
+namespace API {
 class TimeAtSampleStrategy;
+}
+
+namespace Algorithms {
 
 /** FilterEvents : Filter Events in EventWorkspace to multiple EventsWorkspace
   by Splitters
@@ -77,15 +79,15 @@ private:
   void setupDetectorTOFCalibration();
 
   /// Set up detector calibration parameters for elastic scattering instrument
-  TimeAtSampleStrategy *setupElasticTOFCorrection() const;
+  API::TimeAtSampleStrategy *setupElasticTOFCorrection() const;
 
   /// Set up detector calibration parmaeters for direct inelastic scattering
   /// instrument
-  TimeAtSampleStrategy *setupDirectTOFCorrection() const;
+  API::TimeAtSampleStrategy *setupDirectTOFCorrection() const;
 
   /// Set up detector calibration parameters for indirect inelastic scattering
   /// instrument
-  TimeAtSampleStrategy *setupIndirectTOFCorrection() const;
+  API::TimeAtSampleStrategy *setupIndirectTOFCorrection() const;
 
   /// Set up detector calibration parameters from customized values
   void setupCustomizedTOFCorrection();

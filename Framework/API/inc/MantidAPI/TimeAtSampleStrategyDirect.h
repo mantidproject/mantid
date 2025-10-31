@@ -6,20 +6,18 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidAlgorithms/TimeAtSampleStrategy.h"
+#include "MantidAPI/TimeAtSampleStrategy.h"
 #include <memory>
 
 namespace Mantid {
 
 namespace API {
 class MatrixWorkspace;
-}
 
-namespace Algorithms {
 /** TimeAtSampleStrategyDirect : Determine the Time at Sample corrections for a
   Direct Geometry instrument
 */
-class MANTID_ALGORITHMS_DLL TimeAtSampleStrategyDirect : public TimeAtSampleStrategy {
+class MANTID_API_DLL TimeAtSampleStrategyDirect : public TimeAtSampleStrategy {
 public:
   TimeAtSampleStrategyDirect(const std::shared_ptr<const Mantid::API::MatrixWorkspace> &ws, double ei);
   Correction calculate(const size_t &workspace_index) const override;
@@ -29,5 +27,5 @@ private:
   double m_constShift;
 };
 
-} // namespace Algorithms
+} // namespace API
 } // namespace Mantid
