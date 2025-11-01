@@ -230,44 +230,49 @@ Mantid Graphical User Interface Properties
 Network Properties
 ******************
 
-+-------------------------------------------+---------------------------------------------------+---------------------------------+
-|Property                                   |Description                                        |Example value                    |
-+===========================================+===================================================+=================================+
-| ``catalog.timeout.value``                 | Network timeout for ICAT4 requests                | ``30``                          |
-+-------------------------------------------+---------------------------------------------------+---------------------------------+
-| ``CheckMantidVersion.OnStartup``          | Check if there is a newer version available and   |                                 |
-|                                           | logs a message at ``information`` level           | ``1``                           |
-+-------------------------------------------+---------------------------------------------------+---------------------------------+
-| ``ISISDAE.Timeout``                       | Timeout for network requests when reading live    |  ``100``                        |
-|                                           | data from ISIS (in seconds)                       |                                 |
-+-------------------------------------------+---------------------------------------------------+---------------------------------+
-| ``network.default.timeout``               |Defines the default timeout for all network        | ``30``                          |
-|                                           |operations (in seconds).                           |                                 |
-+-------------------------------------------+---------------------------------------------------+---------------------------------+
-| ``network.scriptrepo.timeout``            |The timeout for network operations in the script   | ``5``                           |
-|                                           |repository, this overrides the default timeout.    |                                 |
-+-------------------------------------------+---------------------------------------------------+---------------------------------+
-| ``network.github.api_token``              |The api token for github calls used by             | (not shown)                     |
-|                                           |``DownloadInstrument``. Setting this to ``unset``  |                                 |
-|                                           |or an empty string will turn off authentication.   |                                 |
-+-------------------------------------------+---------------------------------------------------+---------------------------------+
-| ``proxy.host``                            | Allows the system proxy to be overridden, if not  | ``http://www.proxy.org``        |
-|                                           | set mantid will use the system proxy              |                                 |
-+-------------------------------------------+---------------------------------------------------+---------------------------------+
-| ``proxy.port``                            | Must be set if proxy.host is set                  | ``8080``                        |
-+-------------------------------------------+---------------------------------------------------+---------------------------------+
-| ``proxy.httpsTargetUrl``                  | A sample url used to determine the system proxy to| ``http://www.google.com``       |
-|                                           | use on windows.                                   |                                 |
-+-------------------------------------------+---------------------------------------------------+---------------------------------+
-| ``UpdateInstrumentDefinitions.OnStartup`` | Download new instrument definition files and      |                                 |
-|                                           | ``Facilities.xml`` to ``~/.mantid/instruments``   |                                 |
-|                                           | on linux or ``APPDATA`` directory on windows. If  |                                 |
-|                                           | this is disabled, previously downloaded           |                                 |
-|                                           | instruments are ignored and only those in the     |                                 |
-|                                           | installation are used.                            | ``1``                           |
-+-------------------------------------------+---------------------------------------------------+---------------------------------+
-| ``usagereports.enabled``                  | Enable usage reporting                            | ``1``                           |
-+-------------------------------------------+---------------------------------------------------+---------------------------------+
++-----------------------------------------------+-------------------------------------------------------+---------------------------------+
+| Property                                      | Description                                           | Example value                   |
++===============================================+=======================================================+=================================+
+| ``catalog.timeout.value``                     | Network timeout for ICAT4 requests                    | ``30``                          |
++-----------------------------------------------+-------------------------------------------------------+---------------------------------+
+| ``CheckMantidVersion.OnStartup``              | Check if there is a newer version available and       |                                 |
+|                                               | logs a message at ``information`` level               | ``1``                           |
++-----------------------------------------------+-------------------------------------------------------+---------------------------------+
+| ``ISISDAE.Timeout``                           | Timeout for network requests when reading live        | ``100``                         |
+|                                               | data from ISIS (in seconds)                           |                                 |
++-----------------------------------------------+-------------------------------------------------------+---------------------------------+
+| ``network.default.timeout``                   | Defines the default timeout for all network           | ``30``                          |
+|                                               | operations (in seconds).                              |                                 |
++-----------------------------------------------+-------------------------------------------------------+---------------------------------+
+| ``network.scriptrepo.timeout``                | The timeout for network operations in the script      | ``5``                           |
+|                                               | repository, this overrides the default timeout.       |                                 |
++-----------------------------------------------+-------------------------------------------------------+---------------------------------+
+| ``network.github.api_token``                  | The api token for github calls used by                | (not shown)                     |
+|                                               | ``DownloadInstrument``. Setting this to ``unset``     |                                 |
+|                                               | or an empty string will turn off authentication.      |                                 |
++-----------------------------------------------+-------------------------------------------------------+---------------------------------+
+| ``proxy.host``                                | Allows the system proxy to be overridden, if not      | ``http://www.proxy.org``        |
+|                                               | set mantid will use the system proxy                  |                                 |
++-----------------------------------------------+-------------------------------------------------------+---------------------------------+
+| ``proxy.port``                                | Must be set if proxy.host is set                      | ``8080``                        |
++-----------------------------------------------+-------------------------------------------------------+---------------------------------+
+| ``proxy.httpsTargetUrl``                      | A sample url used to determine the system proxy to    | ``http://www.google.com``       |
+|                                               | use on windows.                                       |                                 |
++-----------------------------------------------+-------------------------------------------------------+---------------------------------+
+| ``SNSLiveEventDataListener.testAddress``      | Fallback instrument server url used by the            | ``127.0.0.1:12345``             |
+|                                               | SNS live-data listener.                               |                                 |
++-----------------------------------------------+-------------------------------------------------------+---------------------------------+
+| ``SNSLiveEventDataListener.keepPausedEvents`` | Process events, even when a run has been paused.      | ``false``                       |
++-----------------------------------------------+-------------------------------------------------------+---------------------------------+
+| ``UpdateInstrumentDefinitions.OnStartup``     | Download new instrument definition files and          |                                 |
+|                                               | ``Facilities.xml`` to ``~/.mantid/instruments``       |                                 |
+|                                               | on linux or ``APPDATA`` directory on windows. If      |                                 |
+|                                               | this is disabled, previously downloaded               |                                 |
+|                                               | instruments are ignored and only those in the         | ``1``                           |
+|                                               | installation are used.                                |                                 |
++-----------------------------------------------+-------------------------------------------------------+---------------------------------+
+| ``usagereports.enabled``                      | Enable usage reporting                                | ``1``                           |
++-----------------------------------------------+-------------------------------------------------------+---------------------------------+
 
 
 ScriptRepository Properties

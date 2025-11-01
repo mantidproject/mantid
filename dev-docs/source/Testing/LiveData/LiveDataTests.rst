@@ -10,11 +10,13 @@ Introduction
 ------------
 A video example of using multiple live streams and full direct elastic data reduction can be seen `here <../../_static/videos/LiveData.htm>`__.
 
-The rest of this document describes some examples you can run yourself using a fake instrument which simulates the arrival of new data.
+The rest of these sections of the document describe examples you can run yourself using a fake instrument which simulates the arrival of new data.
 For all of these tests you will need to change your Facility to ``TEST_LIVE``, as described below.
 You can use MantidWorkbench.
 
 **Time required 20 - 30 minutes**
+
+As an advanced scenario, live-data streams can be tested by recording, and then playing back ADARA-packet streams from real instruments (see :ref:`live_data_packet_playback`).  In this case, the details of how to setup the facility and instrument will be quite different.  However, other details about using the ``StartLiveData`` algorithm from MantidWorkbench will be the same, and so it will be useful to read through the next few sections about using fake instruments first.
 
 Set up the test facility
 ------------------------
@@ -211,3 +213,11 @@ A live data session will run until it is cancelled or Mantid is closed.  To canc
 
 #. To stop the live data session, open the ``Algorithm Details`` window, by clicking on the  button at the bottom of the Algorithms Toolbox
 #. Find the Algorithm "MonitorLiveData" and click the "Cancel" button next to it.
+
+Advanced Topics
+---------------
+
+.. toctree::
+   :maxdepth: 1
+
+   LiveDataPacketPlayback
