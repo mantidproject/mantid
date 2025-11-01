@@ -11,7 +11,7 @@ from typing import BinaryIO, Iterator
 import yaml
 
 Config = {}
-with open(os.environ.get("player_conf", "player_conf.yml"), "rb") as f:
+with open(os.environ.get("adara_player_conf", "adara_player_conf.yml"), "rb") as f:
     Config = yaml.safe_load(os.environ.get("player_conf", "player_conf.yml"))
 
 
@@ -28,6 +28,72 @@ def sha256sum(path: Path) -> str:
         for block in iter(lambda: f.read(65536), b""):
             sha256.update(block)
     return sha256.hexdigest()
+
+
+class UnixGlob:
+    # Parse a bash-style glob expression (optionally including braces)
+    #   into a Python-compatible format: `(<base-directory path>, list[<glob str>])`.
+    
+    @classmethod
+    def parse(cls, pattern) -> tuple(Path, list[str]):
+        # Split pattern into base dir and glob (find first non-path element)
+        sep = os.sep
+        parts = pattern.split(sep)
+        base = []
+        for part in parts:
+            if any(ch in part for ch in "*?[]{},"):
+                break
+            base.append(part)
+        base_dir = sep.join(base) if base else '.'
+        glob_pattern = sep.join(parts[len(base):]) if base else pattern
+        
+        # Brace expansion: expand {a,b} to [a, b]
+        def expand_braces(s):
+            # Matches {...}
+            match = re.search(r'\{([^{}]+)\}', s)
+            if not match:
+                return [s]
+            choices = match.group(1).split(',')
+            results = []
+            for choice in choices:
+                replaced = s[:match.start()] + choice + s[match.end():]
+                for result in expand_braces(replaced):
+                    results.append(result)
+            return results
+        globs = expand_braces(glob_pattern)
+        
+        return (Path(base_dir), globs)
+
+
+class SocketAddress:
+    # Parse a socket address, specified as either a Unix-domain socket path, or an IP:port string,
+    #   into a Python-compatible format: `Path | tuple[<IP str>, <port: int>]`.
+
+    @classmethod
+    def parse(cls, address: str) -> Path | tuple[str, int]:
+        # Match IP:port, IPv4 or IPv6 (with brackets for IPv6)
+        ip_port_re = re.compile(r'''
+            ^
+            (?:\[([0-9a-fA-F:]+)\]|([0-9\.]+)) # IPv6 or IPv4
+            :(\d{1,5})                         # Port
+            $
+        ''', re.VERBOSE)
+
+        match = ip_port_re.match(address)
+        if match:
+            ip = match.group(1) or match.group(2)
+            port = int(match.group(3))
+            if 0 <= port <= 65535:
+                return (ip, port)
+            else:
+                raise ValueError(f"Port out of range: {port}")
+
+        # If not IP:port, treat as Unix socket path (requires a /)
+        if address.startswith('/'):
+            return Path(address)
+
+        raise ValueError(f"Invalid address format: {address}")
+
 
 class Packet:
     class Type(IntEnum):
@@ -178,14 +244,12 @@ class Player:
         UNLIMITED: 'unlimited'
     
     def __init__(
-        self,
-        socket_address = None,
-        rate = None,
-        ignore_packets = []
+        self, *,
+        socket_address = None
         ):
-        self._rate_filter = Player._get_rate_filter(rate if rate else Config['playback']['rate'])
-        self._socket_address = socket_address if socket_address else Player.get_socket_address()
-        self._packet_filter = Player._get_packet_filter(ignore_packets if ignore_packets else Config['playback']['ignore_packets'])
+        self._rate_filter = Player._get_rate_filter(Config['playback']['rate'])
+        self._socket_address = socket_address if socket_address else Player._get_socket_address()
+        self._packet_filter = Player._get_packet_filter(Config['playback']['ignore_packets'])
 
         # Miscellaneous settings from `Config`
         self._buffer_MB = Config['server']['buffer_MB']
@@ -216,15 +280,17 @@ class Player:
         # Assemble the socket address using information from the from `Config` and from `os.environ`:
         # -- unless overridden, this path will be: ${XDG_RUNTIME_DIR}/sock-${name};
         # -- alternatively: ${TMPDIR} is used to support macOS.
-        address = None
-        try:
-            address_fmt = Config['server']['socket_address']
-            runtime_dir = os.environ["XDG_RUNTIME_DIR"] if "XDG_RUNTIME_DIR" in os.environ else os.environ["TMPDIR"]
+        address = Config['server']['socket_address']
+        if isinstance(address, str):
+            # replace any tokens that may have been specified
+            runtime_dir = os.environ.get("XDG_RUNTIME_DIR", os.environ["TMPDIR"])
             name = os.environ.get('adara_player_name', Config['server']['name']) # environment overrides `Config`
-            address = address_fmt.format(XDG_RUNTIME_DIR=runtime_dir, name=name))
-        except KeyError:
-            # Github runners may not have either of the temporary directories: we do not care.
-            pass
+            address = address.format(XDG_RUNTIME_DIR=runtime_dir, name=name)
+        # convert the address into the "internal" format: `Path | tuple(str, int)`
+        address = SocketAddress.parse(address)
+        
+        # Note: this method may raise `KeyError`: e.g. github runners may not have either of the temporary directories,
+        #   or `ValueError` (any parsing error).
         return address
     
     def stream_packets(self, path: Path, patterns: str | list[str], socket):
@@ -288,7 +354,7 @@ class Player:
             if not (packet_buffer and packet_buffer[0].timestamp <= (now - start_time)):
                 time.sleep(0.01)
 
-    def start(self, path: Path, patterns: str | list[str]):
+    def play(self, path: Path, patterns: str | list[str]):
         address = self._socket_address
         use_unix_socket = isinstance(address, (str, os.PathLike))
         if use_unix_socket:
@@ -326,6 +392,42 @@ class Player:
             conn.close()
             srv_sock.close()
 
+    def record(output_path: Path, source_address: Path | tuple(str, int)):
+        pass
+        
+
 if __name__ == "__main__":
-    # Usage
-    start_server_and_send_streaming_mb('your_large_packets.dat', use_unix_socket=False, port=12345, buffer_mb=10)
+
+    import argparse
+
+    def main():
+        # Parse commandline arguments:
+        #   allow overriding the most-often-used configuration args.
+        
+        parser = argparse.ArgumentParser(description='ADARA packet player.')
+        parser.add_argument('-r', '--record', action='store_true', help='Enable record mode')
+        parser.add_argument('-s', '--source', type=str, help='Specify packet source address: used for record')
+        parser.add_argument('-a', '--address', type=str, help='Specify server address')
+        
+        # Default config-file location is overridden using the environment, NOT here:
+        # Usage: `adara_player_conf=<new config-file location> adara_player <options> <glob>`
+        
+        parser.add_argument('glob', help='Standard Unix glob spec, or an output-directory path (in record mode)')
+        args = parser.parse_args()
+        if args.record and not args.source:
+            logger.error("When using record mode, you must specify a source address as '--source=IP:port' or '--source=<Unix-domain socket path>'.")
+            return
+        
+        glob = UnixGlob.parse(args.glob) # Parse Unix-style glob to "internal" format: (<base-directory path>, list[<glob expr>]).
+        if args.record and glob[1]:
+            logger.error(f"When using record mode, the positional argument should be the target directory, not '{args.glob}'.")
+        
+        player = Player(socket_address=args.address)
+        if not args.record:
+            player.play(glob)
+        else:
+            source = SocketAddress.parse(args.source) # Parse to "internal" format: <Unix-domain socket path> or (<IP address>, port: int)
+            player.record(glob[0], source_address=source)
+
+    
+    main()
