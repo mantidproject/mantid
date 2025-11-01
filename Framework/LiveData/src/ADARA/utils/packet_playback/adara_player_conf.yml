@@ -1,0 +1,25 @@
+# live-data playback configuration
+
+server:
+  name: 'adara_player' # will be overridden by `${adara_player_name}` (in environment)
+  
+  socket_address: '{XDG_RUNTIME_DIR}/sock-{name}' # Unix domain socket
+  # socket_address: ['127.0.0.1', 31415]  # IP socket as [IP, port]
+  
+  buffer_MB: 64
+
+playback:
+  handshake: client_hello # expect 'CLIENT_HELLO_PACKET' at start
+                          # none: just playback all of the data
+  
+  rate: normal # normal: at original speed
+               # unlimited: as fast as possible
+  timestamps:
+    offset: none # none
+                 # start: subtract the start time
+              
+  packet_types: [] # no filtering
+                   # <list of packet types by name> 
+  
+logging:
+  verbose: 1 # 0: off, 1: packet summary at send
