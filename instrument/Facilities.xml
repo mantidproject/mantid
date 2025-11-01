@@ -512,6 +512,13 @@
         </livedata>
    </instrument>
 
+   <instrument name="SNAP_shim" beamline="3">
+	<technique>Neutron Diffraction</technique>
+        <livedata>
+          <connection name="event" address="/run/user/46619/sock-adara_player" listener="SNSLiveEventDataListener" />
+        </livedata>
+   </instrument>
+
    <instrument name="REF_M" beamline="4A">
       <technique>Reflectometry</technique>
       <livedata>

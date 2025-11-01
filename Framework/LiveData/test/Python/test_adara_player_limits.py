@@ -1,0 +1,50 @@
+from packet_player import Player, Packet
+
+import unittest
+from unittest.mock import patch, MagicMock
+
+
+class TestPlayerLimits(unittest.TestCase):
+    def test_impose_transfer_limit_stops_at_limit(self):
+        """
+        Checks that _impose_transfer_limit will set the appropriate state
+          (e.g., stop the transfer, log an error, set relevant flags)
+            when the byte transfer limit is reached or exceeded.
+        """
+        dummy_packet = MagicMock(spec=Packet)
+        dummy_packet.size = 10 * 1024**2  # 10 MB
+
+        with patch("packet_player.Player.get_server_address", return_value="/tmp/sock-test"):
+            player = Player()
+            player.TRANSFER_LIMIT_MB = 1  # set limit to 1 MB for test
+            player._running = True
+            player._transferred_bytes = 0
+
+            with patch("packet_player._logger") as logger_mock:
+                player._impose_transfer_limit(dummy_packet)
+                self.assertFalse(player._running)  # should stop
+                self.assertTrue(logger_mock.error.called)
+                self.assertIn("Transfer limit", logger_mock.error.call_args[0][0])
+
+    def test_impose_transfer_limit_under_limit(self):
+        """
+        Verifies that normal operation continues when _impose_transfer_limit is called,
+          but the total transferred bytes are still below the defined limit.
+        """
+        dummy_packet = MagicMock(spec=Packet)
+        dummy_packet.size = 512 * 1024  # 0.5 MB
+
+        with patch("packet_player.Player.get_server_address", return_value="/tmp/sock-test"):
+            player = Player()
+            player.TRANSFER_LIMIT_MB = 1  # set limit to 1 MB for test
+            player._running = True
+            player._transferred_bytes = 0
+
+            with patch("packet_player._logger") as logger_mock:
+                player._impose_transfer_limit(dummy_packet)
+                self.assertTrue(player._running)  # should keep running
+                self.assertFalse(logger_mock.error.called)
+
+
+if __name__ == "__main__":
+    unittest.main()
