@@ -1,23 +1,44 @@
 import collections
+from enum import IntEnum, StrEnum
 import hashlib
 import itertools
 import logging
 import numpy as np
 import os
 from pathlib import Path
+import re
+import select
+import signal
 import socket
 import struct
+import sys
 import time
-from typing import BinaryIO, Iterator
+from typing import BinaryIO, Callable, Iterable, Iterator
 import yaml
 
+TRACE_LEVEL = 5
+logging.addLevelName(TRACE_LEVEL, "TRACE")
+def trace(self, message, *args, **kws):
+    if self.isEnabledFor(TRACE_LEVEL):
+        self._log(TRACE_LEVEL, message, args, **kws)
+logging.Logger.trace = trace
 
 _logger = logging.getLogger(__name__)
 
-Config = {}
-with open(os.environ.get("adara_player_conf", "adara_player_conf.yml"), "rt") as f:
-    Config = yaml.safe_load(f)
+_config_path = Path(os.environ.get("adara_player_conf", "adara_player_conf.yml")).resolve()
+if not _config_path.exists():
+    print(
+        f"Error during load of module '{__file__}' (as '{__name__}'):\n"
+        f"    config file '{_config_path}' not found on filesystem."
+    )
+    sys.exit(1)
 
+Config = {}
+with open(_config_path, "rt") as f:
+    Config = yaml.safe_load(f)
+    _logger.setLevel(Config['logging']['level'])
+    _logger.info(f"Loaded configuration from '{_config_path}'.")
+    _logger.debug(f"Server address: {Config['server']['address']}.")
 
 EPICS_EPOCH_OFFSET = 631152000
 
@@ -39,7 +60,7 @@ class UnixGlob:
     #   into a Python-compatible format: `(<base-directory path>, list[<glob str>])`.
     
     @classmethod
-    def parse(cls, pattern) -> tuple(Path, list[str]):
+    def parse(cls, pattern) -> tuple[Path, list[str]]:
         # Split pattern into base dir and glob (find first non-path element)
         sep = os.sep
         parts = pattern.split(sep)
@@ -244,11 +265,40 @@ class Packet:
         # Source files are specified using glob expressions.
         # Source files themselves will be iterated in order of the timestamp of their first `Packet`.
         def _timestamp(filePath: Path) -> np.datetime64:
-            with open(filePath, 'rb', buffering=0) as src:
-                return next(cls.iter_file(src, header_only=True)).timestamp
+            try:
+                with open(filePath, 'rb', buffering=0) as src:
+                    first_packet = next(cls.iter_file(src, header_only=True))
+                    return first_packet.timestamp
+            except FileNotFoundError:
+                _logger.error(f"File not found: {filePath}")
+                raise
+            except PermissionError:
+                _logger.error(f"Permission denied reading file: {filePath}")
+                raise
+            except StopIteration:
+                _logger.warning(f"Empty or invalid file (no packets): {filePath}, using epoch as timestamp")
+                return np.datetime64(0, 'ns')  # Use epoch for empty files
+            except struct.error as e:
+                _logger.error(f"Corrupt packet header in file: {filePath}: {e}")
+                raise ValueError(f"Corrupt file: {filePath}")
+            except Exception as e:
+                _logger.error(f"Unexpected error reading timestamp from {filePath}: {e}")
+                raise
         
-        ps = sorted(multi_glob(path, patterns), key=_timestamp)
+        try:
+            files = list(multi_glob(path, patterns))
+            if not files:
+                logger.warning(f"No files found matching pattern: {patterns} in '{path}'")
+                return
+
+            logger.info(f"Found {len(files)} files, sorting by timestamp...")        
+            ps = sorted(files, key=_timestamp)
+        except Exception as e:
+            logger.error(f"Error sorting files: {e}")
+            raise
+        
         for p in ps:
+            _logger.debug(f"Processing file: {p}")
             with open(p, 'rb', buffering=0 if header_only else -1) as f:
                 yield from cls.iter_file(f, header_only=header_only, source=str(p))
 
@@ -256,10 +306,11 @@ class Packet:
     
     @classmethod
     def _recv_exact(cls, src: socket.socket, num_bytes: int) -> bytes:
+        _logger.trace(f"Receiving {num_bytes} bytes from socket")
         data = b""
         while len(data) < num_bytes:
             try:
-                chunk = sock.recv(num_bytes - len(data))
+                chunk = src.recv(num_bytes - len(data))
                 if not chunk:
                     raise ConnectionError(
                         f"Socket connection closed after receiving {len(data)} of {num_bytes} bytes"
@@ -274,6 +325,7 @@ class Packet:
 
     @staticmethod
     def _send_all(sock: socket.socket, data: bytes) -> int:
+        _logger.trace(f"Sending {len(data)} bytes to socket")
         total_sent = 0
         while total_sent < len(data):
             try:
@@ -293,7 +345,7 @@ class Packet:
 
 class ClientHelloPacket(Packet):
     def __init__(self, header: bytes, payload: bytes):
-        super.__init__(header, payload)
+        super().__init__(header, payload)
         if self.type != Packet.Type.CLIENT_HELLO_TYPE:
             raise ValueError(f"Expecting 'CLIENT_HELLO_TYPE' not '{self.type}'.")
         self._start_time = np.datetime64(struct.unpack('<I', self.payload[0:4])[0], 's')
@@ -312,8 +364,8 @@ class Player:
     PLAYBACK_HANDSHAKE = Config['playback']['handshake']
     
     class Rate(StrEnum):
-        NORMAL: 'normal'
-        UNLIMITED: 'unlimited'
+        NORMAL = 'normal'
+        UNLIMITED = 'unlimited'
     
     def __init__(
         self, *,
@@ -339,7 +391,7 @@ class Player:
         
     @classmethod
     def _get_rate_filter(cls, rate: str) -> Callable[[Packet, np.datetime64], bool]:
-        rate = Packet.Rate(rate)
+        rate = Player.Rate(rate)
         rate_filter = lambda _packet, _start_time: True
         match rate:
             case Rate.NORMAL:
@@ -381,10 +433,13 @@ class Player:
         current_buffer_bytes = 0
         start_time = np.datetime64('now')
 
+        # Get packet iterator
         packets = Packet.iter_files(path, patterns)
+        
         try:
             next_packet = next(packets)
         except StopIteration:
+            _logger.warning("No packets available to stream")
             return
         packets_start_time = next_packet.timestamp
 
@@ -396,6 +451,7 @@ class Player:
                 next_packet = next(packets)
             except StopIteration:
                 break
+        _logger.debug(f"Buffered {len(packet_buffer)} packets ({current_buffer_bytes/MB:.2f} MB).")
 
         while packet_buffer:
             if not self._running:
@@ -409,27 +465,39 @@ class Player:
                     break                
                 pkt = packet_buffer.popleft()
 
+                readable, writable, exceptional = select.select([socket], [socket], [socket], 0)
+
+                if socket in exceptional:
+                    _logger.error("Socket error detected")
+                    return
+
                 # Check for unexpected incoming packets
-                try:
-                    unexpected_pkt = Packet.from_socket(socket)
-                    if unexpected_pkt:
-                        _logger.warning(f"WARNING: Unexpected packet received from client: '{unexpected_pkt.type}'")
-                except BlockingIOError:
-                    # No data available - this is expected
-                    pass
-                except Exception as e:
-                    _logger.error(f"Exception while checking for incoming data: {e}")
-                    raise
-                    
-                # Send the packet
+                if socket in readable:
+                    try:
+                        unexpected_pkt = Packet.from_socket(socket)
+                        _logger.warning(f"Unexpected packet received from client: type={unexpected_pkt.packet_type}")
+                    except Exception as e:
+                        logger.error(f"Unable to read unexpected packet: {e}")
+                        return                
+
+                # Verify socket is writable before sending
+                if socket not in writable:
+                    _logger.warning("Socket not ready for writing, retrying...")
+                    packet_buffer.appendleft(pkt)  # Put packet back
+                    current_buffer_bytes += pkt.size
+                    time.sleep(0.001)
+                    continue
+                
+                # Send the packet                                
                 try:
                     Packet.to_socket(socket, pkt)
+                    _logger.debug(f"Sent packet: type={pkt.packet_type}: timestamp={pkt.timestamp}, size={pkt.size}")                    
                 except (socket.error, socket.timeout) as e:
-                    _logger.error(f"ERROR: Failed to send packet: {e}")
+                    _logger.error(f"Failed to send packet: {e}")
                     return
                 current_buffer_bytes -= pkt.size
                 
-            # Fill buffer if room
+            # Fill buffer if room available
             while current_buffer_bytes < buffer_bytes:
                 if not self._running:
                     break
@@ -439,22 +507,37 @@ class Player:
                     next_packet = next(packets)
                 except StopIteration:
                     break
+            _logger.debug(f"Buffered {len(packet_buffer)} packets ({current_buffer_bytes/MB:.2f} MB).")
 
             # Sleep if nothing to send
-            if not (packet_buffer and packet_buffer[0].timestamp <= (now - start_time)):
-                time.sleep(0.01)
+            if not (packet_buffer and\
+                (packet_buffer[0].timestamp - packets_start_time) <= (now - start_time)):
+                time.sleep(0.001)
+                
+        _logger.info("Finished streaming all packets")
 
     def play(self, path: Path, patterns: str | list[str]):
         try: 
             self.running = True
             self._server = self._createServerSocket(self._server_address)
+            
+            _logger.info("Waiting for client connection...")
             self._client, _ = self._server.accept()
+            _logger.info(f"Accepted connection from client.")
+            
+            # Make this as symmetric with `record()` as possible -- use non-blocking mode.
             self._client.settimeout(self.SOCKET_TIMEOUT)
+            self._client.setblocking(False)
             
             self._start_time = np.datetime64(1, 's') # default: stream all of the data
+            
             if self.PLAYBACK_HANDSHAKE == 'client_hello':
                 # Wait for "hello" packet before streaming
                 _logger.info("Waiting for 'CLIENT_HELLO_PACKET'...")
+                
+                # For handshake, temporarily use blocking mode with a longer timeout.
+                self._client.settimeout(self.SOCKET_TIMEOUT * 10.0)
+                self._client.setblocking(True)
                 try:
                     client_hello = ClientHelloPacket.from_socket(self._client)
                     self._start_time = client_hello.start_time
@@ -462,6 +545,10 @@ class Player:
                 except ValueError as e:
                     _logger.error(f"{e}")
                     raise
+                finally:
+                    # Restore non-blocking mode for streaming
+                    self._client.settimeout(self.SOCKET_TIMEOUT)
+                    self._client.setblocking(False)
 
             self.stream_packets(path, patterns, self._client)
         finally:
@@ -485,6 +572,7 @@ class Player:
                 try:
                     self._server.settimeout(self.SOCKET_TIMEOUT)
                     self._client, _ = self._server.accept()
+                    _logger.info(f"Accepted connection from client application.")
                     self._client.settimeout(self.SOCKET_TIMEOUT)
                 except socket.timeout:
                     continue
@@ -497,12 +585,13 @@ class Player:
                 try:
                     _logger.info(f"Connecting to ADARA packet server at {self._source_address}.")
                     self._source = None
-                    if SocketAddress.isUDFSocket(self._source_address):
+                    if SocketAddress.isUDSSocket(self._source_address):
                         self._source = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)                    
                     else:
                         self._source = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                    self._source.connect(self._source_address)
                     self._source.settimeout(self.SOCKET_TIMEOUT)
+                    self._source.connect(self._source_address)
+                    _logger.info(f"Successfully connected to ADARA packet server at {self._source_address}.")
                     
                     # Set sockets to non-blocking mode for use with select
                     self._client.setblocking(False)
@@ -516,7 +605,7 @@ class Player:
                             [self._source, self._client],  # sockets to monitor for reading
                             [],  # sockets to monitor for writing (none needed)
                             [self._source, self._client],  # sockets to monitor for errors
-                            1.0  # timeout in seconds
+                            self.SOCKET_TIMEOUT # timeout in seconds
                         )
                         
                         # Check for errors first
@@ -537,7 +626,7 @@ class Player:
                                     Packet.to_socket(self._client, packet)
                                 else:
                                     # Data from client => forward to server (e.g. control packet)
-                                    Packet.to_socket(self._server, packet)
+                                    Packet.to_socket(self._source, packet)
                                     
                             except (socket.timeout, socket.error) as e:
                                 _logger.error(f"Socket error during recv: {e}")
@@ -560,9 +649,9 @@ class Player:
             self._cleanup()  
             
     @classmethod
-    def _createServerSocket(cls, address: Path | tuple[str, int]) -> Socket:
+    def _createServerSocket(cls, address: Path | tuple[str, int]) -> socket.socket:
         server = None
-        if SocketAddress.isUDFSocket(address):
+        if SocketAddress.isUDSSocket(address):
             # Remove existing UDS if present
             if address.exists():
                 address.unlink()
@@ -596,8 +685,9 @@ class Player:
             try:
                 self._server.close()
                 # Remove any UDS path from filesystem
-                if SocketAddress.isUDSSocket(self._server) and self._server.exists():
-                    self._server.unlink()                
+                if SocketAddress.isUDSSocket(self._server_address)\
+                    and self._server_address.exists():
+                    self._server_address.unlink()                
             except:
                 pass
             self._server = None
@@ -606,6 +696,14 @@ class Player:
         """Handle shutdown signals"""
         _logger.info(f"\nReceived signal {signum}, shutting down...")
         self._running = False
+        
+        # Set an alarm to force exit if cleanup takes too long.
+        def _timeout_handler(signum, frame):
+            _logger.error("Shutdown timeout exceeded, forcing exit")
+            os._exit(1)
+        
+        signal.signal(signal.SIGALRM, _timeout_handler)
+        signal.alarm(10.0) # 10-second timeout
 
 
 
