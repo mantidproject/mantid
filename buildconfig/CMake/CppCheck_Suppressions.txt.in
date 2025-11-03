@@ -131,8 +131,6 @@ constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/FindPeakBac
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/FindPeakBackground.cpp:275
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/FindPeaks.cpp:892
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/FindPeaks.cpp:999
-shadowVariable:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/FitPeak.cpp:1399
-shadowVariable:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/FitPeak.cpp:1400
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/GenerateEventsFilter.cpp:752
 containerOutOfBounds:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/GenerateEventsFilter.cpp:1263
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/GenerateEventsFilter.cpp:1804
