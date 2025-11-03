@@ -288,13 +288,13 @@ class Packet:
         try:
             files = list(multi_glob(path, patterns))
             if not files:
-                logger.warning(f"No files found matching pattern: {patterns} in '{path}'")
+                _logger.warning(f"No files found matching pattern: {patterns} in '{path}'")
                 return
 
-            logger.info(f"Found {len(files)} files, sorting by timestamp...")        
+            _logger.info(f"Found {len(files)} files, sorting by timestamp...")        
             ps = sorted(files, key=_timestamp)
         except Exception as e:
-            logger.error(f"Error sorting files: {e}")
+            _logger.error(f"Error sorting files: {e}")
             raise
         
         for p in ps:
@@ -361,6 +361,7 @@ class ClientHelloPacket(Packet):
         
 class Player:
     SOCKET_TIMEOUT = Config['server']['socket_timeout']
+    HANDSHAKE_TIMEOUT = Config['server']['handshake_timeout']
     PLAYBACK_HANDSHAKE = Config['playback']['handshake']
     
     class Rate(StrEnum):
@@ -477,7 +478,7 @@ class Player:
                         unexpected_pkt = Packet.from_socket(socket)
                         _logger.warning(f"Unexpected packet received from client: type={unexpected_pkt.packet_type}")
                     except Exception as e:
-                        logger.error(f"Unable to read unexpected packet: {e}")
+                        _logger.error(f"Unable to read unexpected packet: {e}")
                         return                
 
                 # Verify socket is writable before sending
@@ -518,7 +519,7 @@ class Player:
 
     def play(self, path: Path, patterns: str | list[str]):
         try: 
-            self.running = True
+            self._running = True
             self._server = self._createServerSocket(self._server_address)
             
             _logger.info("Waiting for client connection...")
@@ -536,7 +537,7 @@ class Player:
                 _logger.info("Waiting for 'CLIENT_HELLO_PACKET'...")
                 
                 # For handshake, temporarily use blocking mode with a longer timeout.
-                self._client.settimeout(self.SOCKET_TIMEOUT * 10.0)
+                self._client.settimeout(self.HANDSHAKE_TIMEOUT)
                 self._client.setblocking(True)
                 try:
                     client_hello = ClientHelloPacket.from_socket(self._client)
@@ -556,7 +557,7 @@ class Player:
             self._running = False
             self._cleanup()
 
-    def record(self, output_path: Path, source_address: Path | tuple(str, int)):
+    def record(self, output_path: Path, source_address: Path | tuple[str, int]):
         def _packet_filename(output_path: Path, packet: Packet) -> Path:
             return output_path / f"{packet.packet_type}-{packet.timestamp}.adara"
         
@@ -598,7 +599,7 @@ class Player:
                     self._source.setblocking(False)
                     
                     # Proxy data bidirectionally using select
-                    while self.running:
+                    while self._running:
                         # Wait for either socket to have data available (with 1 second timeout)
                         # (This returns immediately when data is available.)
                         readable, writable, exceptional = select.select(
@@ -703,7 +704,7 @@ class Player:
             os._exit(1)
         
         signal.signal(signal.SIGALRM, _timeout_handler)
-        signal.alarm(10.0) # 10-second timeout
+        signal.alarm(10) # 10-second timeout
 
 
 

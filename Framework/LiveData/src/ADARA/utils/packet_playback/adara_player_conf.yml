@@ -15,6 +15,7 @@ source:
 playback:
   handshake: client_hello # expect 'CLIENT_HELLO_PACKET' at start
                           # none: just playback all of the data
+  handshake_timeout: 10.0
   
   rate: normal # normal: at original speed
                # unlimited: as fast as possible
