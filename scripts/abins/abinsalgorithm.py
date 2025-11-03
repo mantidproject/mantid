@@ -1103,7 +1103,8 @@ def validate_e_init(*, e_init: str, energy_units: str, instrument_name: str) -> 
         case "cm-1":
             max_energy = max_energy
         case _:
-            raise ValueError(f"Invalid energy unit: {energy_units}")
+            issues["EnergyUnits"] = f"Invalid energy unit: {energy_units}"
+            return issues
 
     if float(e_init) > max_energy:
         issues["IncidentEnergy"] = f"Incident energy cannot be greater than {max_energy:.3f} {energy_units} for this instrument."
