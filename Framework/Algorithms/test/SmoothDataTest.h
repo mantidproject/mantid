@@ -181,19 +181,19 @@ public:
     TS_ASSERT_EQUALS(&(output->x(1)), &(input->x(1)));
 
     // CreateSampleWorkspace makes a workspace with a delta-peak at index 50
-    unsigned const nbins = 100, peak = 50;
+    unsigned int const nbins = 100, peak = 50;
     // the three-point smoothing will effect the two points on either side of peak
-    unsigned const peakm = peak - 1, peakp = peak + 1;
+    unsigned int const peakm = peak - 1, peakp = peak + 1;
     // the five-point smoothing will also effect these points
-    unsigned const peak2m = peak - 2, peak2p = peak + 2;
+    unsigned int const peak2m = peak - 2, peak2p = peak + 2;
 
     // verify bank1
     const auto &Ybank1 = output->y(0);  // 100 points, delta-peak at 50
     const auto &Ebank1 = output->e(0);  // 100 points, delta-peak at 50
     const auto &Ybank1in = input->y(0); // three-point peak on 49, 50, 51
     const auto &Ebank1in = input->e(0); // three-point peak on 49, 50, 51
-    std::set<unsigned> skip1{peakm, peak, peakp};
-    for (unsigned i = 0; i < nbins; i++) {
+    std::set<unsigned int> skip1{peakm, peak, peakp};
+    for (unsigned int i = 0; i < nbins; i++) {
       // except at the peak points, all equal
       if (!skip1.count(i)) {
         TS_ASSERT_DELTA(Ybank1[i], Ybank1in[i], 0.00001);
@@ -218,8 +218,8 @@ public:
     const auto &Ebank2 = output->e(1);  // 100 points, delta-peak at 50
     const auto &Ybank2in = input->y(1); // five-point peak on 48, 49, 50, 51, 52
     const auto &Ebank2in = input->e(1); // five-point peak on 48, 49, 50, 51, 52
-    std::set<unsigned> skip2{peak2m, peakm, peak, peakp, peak2p};
-    for (unsigned i = 0; i < nbins; i++) {
+    std::set<unsigned int> skip2{peak2m, peakm, peak, peakp, peak2p};
+    for (unsigned int i = 0; i < nbins; i++) {
       // except at the peak points, all equal
       if (!skip2.count(i)) {
         TS_ASSERT_DELTA(Ybank2[i], Ybank2in[i], 0.00001);

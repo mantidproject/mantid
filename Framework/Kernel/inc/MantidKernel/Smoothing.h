@@ -20,7 +20,7 @@ namespace Smoothing {
  * @throw std::invalid_argument if numPoints is too small
  * @tparam T Numeric type (e.g., int, float, double)
  */
-template <typename T> std::vector<T> boxcarSmooth(std::vector<T> const &input, unsigned const numPoints);
+template <typename T> std::vector<T> boxcarSmooth(std::vector<T> const &input, unsigned int const numPoints);
 
 /** Performs boxcar (moving average) smoothing on the input data,
  * using error propagation formula.  This is the correct method to use
@@ -32,7 +32,7 @@ template <typename T> std::vector<T> boxcarSmooth(std::vector<T> const &input, u
  * @throw std::invalid_argument if numPoints is too small
  * @tparam T Numeric type (e.g., int, float, double)
  */
-template <typename T> std::vector<T> boxcarErrorSmooth(std::vector<T> const &input, unsigned const numPoints);
+template <typename T> std::vector<T> boxcarErrorSmooth(std::vector<T> const &input, unsigned int const numPoints);
 
 /** Performs boxcar (moving average) smoothing on the input data,
  * using a RMSE average, as is appropriate for error averaging.
@@ -43,7 +43,7 @@ template <typename T> std::vector<T> boxcarErrorSmooth(std::vector<T> const &inp
  * @throw std::invalid_argument if numPoints is too small
  * @tparam T Numeric type (e.g., int, float, double)
  */
-template <typename T> std::vector<T> boxcarRMSESmooth(std::vector<T> const &input, unsigned const numPoints);
+template <typename T> std::vector<T> boxcarRMSESmooth(std::vector<T> const &input, unsigned int const numPoints);
 
 } // namespace Smoothing
 } // namespace Mantid::Kernel

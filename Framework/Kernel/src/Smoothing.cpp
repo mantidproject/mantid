@@ -48,7 +48,7 @@ template <typename T> struct Averager {
 
 protected:
   T total;
-  unsigned npts;
+  unsigned int npts;
 };
 
 /** Represents taking the arithmetic mean */
@@ -89,7 +89,8 @@ template <typename T> struct GeometricAverager : public Averager<T> {
 };
 
 template <typename T>
-std::vector<T> boxcarSmoothWithFunction(std::vector<T> const &input, unsigned const numPoints, Averager<T> &averager) {
+std::vector<T> boxcarSmoothWithFunction(std::vector<T> const &input, unsigned int const numPoints,
+                                        Averager<T> &averager) {
   if (numPoints < 3) {
     throw std::invalid_argument("Boxcar Smoothing requires at least 3 points in the moving average");
   }
@@ -102,15 +103,15 @@ std::vector<T> boxcarSmoothWithFunction(std::vector<T> const &input, unsigned co
   // copy the input
   std::size_t const vecSize = input.size();
   std::vector<T> output(vecSize);
-  unsigned const halfWidth = (numPoints - 1U) / 2U;
+  unsigned int const halfWidth = (numPoints - 1U) / 2U;
 
   // First push the values ahead of the current point onto total
-  for (unsigned k = 0; k < halfWidth; k++) {
+  for (unsigned int k = 0; k < halfWidth; k++) {
     averager.accumulate(input[k]);
   }
   // smoothed values at the beginning, where fewer than numPoints
-  for (unsigned k = 0; k <= halfWidth; k++) {
-    unsigned const kp = k + halfWidth;
+  for (unsigned int k = 0; k <= halfWidth; k++) {
+    unsigned int const kp = k + halfWidth;
     // add the leading edge
     averager.accumulate(input[kp]);
     output[k] = averager.getAverage();
@@ -136,23 +137,23 @@ std::vector<T> boxcarSmoothWithFunction(std::vector<T> const &input, unsigned co
 }
 } // namespace detail
 
-template <typename T> std::vector<T> boxcarSmooth(std::vector<T> const &input, unsigned const numPoints) {
+template <typename T> std::vector<T> boxcarSmooth(std::vector<T> const &input, unsigned int const numPoints) {
   detail::ArithmeticAverager<T> averager;
   return detail::boxcarSmoothWithFunction(input, numPoints, averager);
 }
 
-template <typename T> std::vector<T> boxcarErrorSmooth(std::vector<T> const &input, unsigned const numPoints) {
+template <typename T> std::vector<T> boxcarErrorSmooth(std::vector<T> const &input, unsigned int const numPoints) {
   detail::ErrorPropagationAverager<T> averager;
   return detail::boxcarSmoothWithFunction(input, numPoints, averager);
 }
 
-template <typename T> std::vector<T> boxcarRMSESmooth(std::vector<T> const &input, unsigned const numPoints) {
+template <typename T> std::vector<T> boxcarRMSESmooth(std::vector<T> const &input, unsigned int const numPoints) {
   detail::SumSquareAverager<T> averager;
   return detail::boxcarSmoothWithFunction(input, numPoints, averager);
 }
 
-template MANTID_KERNEL_DLL std::vector<double> boxcarSmooth(std::vector<double> const &, unsigned const);
-template MANTID_KERNEL_DLL std::vector<double> boxcarRMSESmooth(std::vector<double> const &, unsigned const);
-template MANTID_KERNEL_DLL std::vector<double> boxcarErrorSmooth(std::vector<double> const &, unsigned const);
+template MANTID_KERNEL_DLL std::vector<double> boxcarSmooth(std::vector<double> const &, unsigned int const);
+template MANTID_KERNEL_DLL std::vector<double> boxcarRMSESmooth(std::vector<double> const &, unsigned int const);
+template MANTID_KERNEL_DLL std::vector<double> boxcarErrorSmooth(std::vector<double> const &, unsigned int const);
 
 } // namespace Mantid::Kernel::Smoothing

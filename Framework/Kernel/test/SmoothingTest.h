@@ -24,10 +24,10 @@ public:
 
   void test_boxcarSmooth_npoints_validation() {
     std::vector<double> input{1, 2, 3, 4, 5, 6, 7, 8, 9};
-    for (unsigned npts = 0; npts < 3; npts++) {
+    for (unsigned int npts = 0; npts < 3; npts++) {
       TS_ASSERT_THROWS(boxcarSmooth(input, npts), std::invalid_argument const &);
     }
-    for (unsigned npts = 1; npts < 3; npts++) {
+    for (unsigned int npts = 1; npts < 3; npts++) {
       TS_ASSERT_THROWS(boxcarSmooth(input, 2 * npts), std::invalid_argument const &);
       TS_ASSERT_THROWS_NOTHING(boxcarSmooth(input, 2 * npts + 1));
     }

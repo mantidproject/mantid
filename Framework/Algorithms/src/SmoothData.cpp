@@ -130,7 +130,7 @@ int SmoothData::validateSpectrumInGroup(size_t wi) {
 }
 
 /// Returns a smoothed version of histogram. npts must be odd.
-Histogram smooth(const Histogram &histogram, unsigned const npts) {
+Histogram smooth(const Histogram &histogram, unsigned int const npts) {
   if (npts < 3)
     return histogram;
 
