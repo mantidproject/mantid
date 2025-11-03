@@ -201,7 +201,6 @@ constParameterReference:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/FuncMinim
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Functions/BSpline.cpp:146
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Functions/ChebfunBase.cpp:601
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Functions/ChebfunBase.cpp:625
-shadowFunction:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Functions/ChebfunBase.cpp:687
 variableScope:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Functions/ChebfunBase.cpp:832
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Functions/ComptonScatteringCountRate.cpp:202
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Functions/Convolution.cpp:402
