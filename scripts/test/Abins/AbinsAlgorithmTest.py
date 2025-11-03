@@ -68,8 +68,9 @@ class AbinsAlgorithmValidatorsTest(unittest.TestCase):
     def test_validate_e_init(self):
         """Check incident energy / instrument combinations"""
 
-        with self.assertRaisesRegex(ValueError, "Invalid energy unit"):
-            validate_e_init(e_init="100", energy_units="invalid", instrument_name="MARI")
+        issues = validate_e_init(e_init="100", energy_units="invalid", instrument_name="MARI")
+        self.assertIn("EnergyUnits", issues)
+        self.assertEqual(issues["EnergyUnits"], "Invalid energy unit: invalid")
 
         for instrument_name, valid_energy, invalid_energy, energy_units in [
             ("Ideal2D", "1e12", None, "cm-1"),
