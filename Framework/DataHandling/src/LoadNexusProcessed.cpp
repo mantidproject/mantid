@@ -20,6 +20,7 @@
 #include "MantidDataHandling/SaveNexusProcessedHelper.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/LeanElasticPeaksWorkspace.h"
+#include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/PeakNoShapeFactory.h"
 #include "MantidDataObjects/PeakShapeDetectorBinFactory.h"
@@ -27,6 +28,7 @@
 #include "MantidDataObjects/PeakShapeSphericalFactory.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/RebinnedOutput.h"
+#include "MantidDataObjects/SpecialWorkspace2D.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -514,19 +516,45 @@ void LoadNexusProcessed::execLoader() {
   // NexusGeometry uses direct HDF5 access, and not the `NexusFileIO` methods.
   // For this reason, a separate section is required to load the instrument[s] into the output workspace[s].
 
-  if (nWorkspaceEntries == 1 || !bDefaultEntryNumber)
+  if (nWorkspaceEntries == 1 || !bDefaultEntryNumber) {
     loadNexusGeometry(*getValue<API::Workspace_sptr>("OutputWorkspace"), static_cast<size_t>(entryNumber), g_log,
                       std::string(getProperty("Filename")));
-  else {
+    // NOTE: if this is a specialworkspace2d there are some additonal initialization steps that need to happen
+    // such as updating the detector id mapping
+    // as this is skipped by initializing the workspace and injecting values.
+    std::shared_ptr<SpecialWorkspace2D> specialLocalWorkspace =
+        std::dynamic_pointer_cast<SpecialWorkspace2D>(getValue<API::Workspace_sptr>("OutputWorkspace"));
+    if (specialLocalWorkspace) {
+      reinitSpecialWorkspace2D(specialLocalWorkspace);
+    }
+  } else {
     for (size_t nEntry = 1; nEntry <= static_cast<size_t>(nWorkspaceEntries); ++nEntry) {
       std::ostringstream wsPropertyName;
       wsPropertyName << "OutputWorkspace_" << nEntry;
       loadNexusGeometry(*getValue<API::Workspace_sptr>(wsPropertyName.str()), nEntry, g_log,
                         std::string(getProperty("Filename")));
+      std::shared_ptr<SpecialWorkspace2D> specialLocalWorkspace =
+          std::dynamic_pointer_cast<SpecialWorkspace2D>(getValue<API::Workspace_sptr>(wsPropertyName.str()));
+      if (specialLocalWorkspace) {
+        reinitSpecialWorkspace2D(specialLocalWorkspace);
+      }
     }
   }
 
   m_axis1vals.clear();
+}
+
+void LoadNexusProcessed::reinitSpecialWorkspace2D(std::shared_ptr<SpecialWorkspace2D> specialLocalWorkspace) {
+  g_log.warning() << "SpecialWorkspace2D init!";
+  if (specialLocalWorkspace->isDetectorIDMappingEmpty()) {
+    g_log.warning() << "SpecialWorkspace2D has an empty detector ID Mapping!";
+  }
+  bool includeMonitors = false;
+  if (std::dynamic_pointer_cast<MaskWorkspace>(specialLocalWorkspace)) {
+    includeMonitors = true;
+  }
+  specialLocalWorkspace->MatrixWorkspace::rebuildSpectraMapping(includeMonitors);
+  specialLocalWorkspace->buildDetectorIDMapping();
 }
 
 /**

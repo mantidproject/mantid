@@ -15,6 +15,10 @@
 namespace Mantid {
 namespace DataObjects {
 
+// Reference Docs
+// Concepts: https://developer.mantidproject.org/MaskWorkspace.html
+// API: https://docs.mantidproject.org/api/python/mantid/dataobjects/MaskWorkspace.html
+
 class MANTID_DATAOBJECTS_DLL MaskWorkspace : public SpecialWorkspace2D, public API::IMaskWorkspace {
 public:
   MaskWorkspace() = default;
@@ -27,6 +31,8 @@ public:
   /// Returns a default-initialized clone of the workspace
   std::unique_ptr<MaskWorkspace> cloneEmpty() const { return std::unique_ptr<MaskWorkspace>(doCloneEmpty()); }
   MaskWorkspace &operator=(const MaskWorkspace &other) = delete;
+  bool containsDetID(const detid_t detectorID) const override;
+  bool containsDetIDs(const std::set<detid_t> &detectorIDs) const override;
   bool isMasked(const detid_t detectorID) const override;
   bool isMasked(const std::set<detid_t> &detectorIDs) const override;
   bool isMaskedIndex(const std::size_t wkspIndex) const;

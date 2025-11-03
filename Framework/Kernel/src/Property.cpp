@@ -229,7 +229,6 @@ class MaskWorkspace;
 class SpecialWorkspace2D;
 class Workspace2D;
 class TableWorkspace;
-class SpecialWorkspace2D;
 class SplittersWorkspace;
 } // namespace DataObjects
 

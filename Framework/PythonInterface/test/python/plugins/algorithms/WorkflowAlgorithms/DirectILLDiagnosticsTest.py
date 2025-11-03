@@ -206,6 +206,8 @@ class DirectILLDiagnosticsTest(unittest.TestCase):
             detector = outWS.getDetector(i)
             componentName = detector.getFullName()
             if "tube_1" in componentName:
+                if outWS.isMasked(detector.getID()):
+                    print("Detid is masked")
                 self.assertEqual(Ys[0], 1)
             else:
                 self.assertEqual(Ys[0], 0)

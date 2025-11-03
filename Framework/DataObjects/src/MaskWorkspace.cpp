@@ -144,6 +144,18 @@ set<size_t> MaskWorkspace::getMaskedWkspIndices() const {
   return indices;
 }
 
+bool MaskWorkspace::containsDetID(const detid_t detectorID) const { return this->contains(detectorID); }
+
+bool MaskWorkspace::containsDetIDs(const std::set<detid_t> &detectorIDs) const {
+  if (detectorIDs.empty()) {
+    return false;
+  }
+
+  const auto it = std::find_if_not(detectorIDs.cbegin(), detectorIDs.cend(),
+                                   [this](const auto detectorID) { return this->containsDetID(detectorID); });
+  return it == detectorIDs.cend();
+}
+
 //--------------------------------------------------------------------------------------------
 /**
  * @param detectorID :: ID of the detector to check whether it is masked or not
@@ -160,22 +172,11 @@ bool MaskWorkspace::isMasked(const detid_t detectorID) const {
     throw std::runtime_error(msg.str());
   }
 
-  // return true if the value isn't zero
-  if (this->getValue(detectorID, LIVE_VALUE) != LIVE_VALUE) {
-    return true;
-  }
-
-  // the mask bit on the workspace can be set
-  // Performance wise, it is not optimal to call detectorInfo() for every index,
-  // but this method seems to be used rarely enough to justify this until the
-  // Instrument-2.0 implementation has progressed far enough to make this cheap.
-  const auto &detectorInfo = this->detectorInfo();
-  try {
-    return detectorInfo.isMasked(detectorInfo.indexOf(detectorID));
-  } catch (std::out_of_range &) {
-    // The workspace can contain bad detector IDs. DetectorInfo::indexOf throws.
-    return false;
-  }
+  // if you are fetching detectorID's that dont exist in your mask workspace
+  // this is expected to explode(throw an exception)
+  // otherwise we are **masking** an issue with the consuming code
+  // especially if the underlying index map is desynced
+  return this->getValue(detectorID);
 }
 
 /**
@@ -209,6 +210,9 @@ void MaskWorkspace::setMasked(const detid_t detectorID, const bool mask) {
   if (mask)
     value = DEAD_VALUE;
 
+  // TODO: Consider updating deterctorinfo with .setMask
+  // or deleting this comment
+  // whichever makes more sense.
   this->setValue(detectorID, value, ERROR_VALUE);
 }
 
@@ -256,7 +260,7 @@ void MaskWorkspace::combineToDetectorMasks(DetectorInfo &detectors) const {
   if (N_spectra == N_detectors - N_monitors) {
     // One detector per spectrum
     for (const auto &det : detids) {
-      if (isMasked(det))
+      if (!this->containsDetID(det) || isMasked(det))
         detectors.setMasked(detectors.indexOf(det), true);
     }
     return;
@@ -338,12 +342,11 @@ bool MaskWorkspace::isConsistentWithDetectorMasks(const DetectorInfo &detectors)
   const size_t N_detectors(detectors.size());
   if (N_spectra == N_detectors - N_monitors) {
     // One detector per spectrum
-    for (const auto &det : detids) {
-      if (isMasked(det) != detectors.isMasked(detectors.indexOf(det)))
-        return false;
-    }
-    return true;
+    auto maskConsistent = [&](const auto &det) { return isMasked(det) == detectors.isMasked(detectors.indexOf(det)); };
+
+    return std::all_of(detids.begin(), detids.end(), maskConsistent);
   }
+
   // Multiple detectors per spectrum
   throw NotImplementedError(
       "MaskWorkspace::isConsistentWithDetectorMasks: not implemented for the case of multiple detectors per spectrum.");
