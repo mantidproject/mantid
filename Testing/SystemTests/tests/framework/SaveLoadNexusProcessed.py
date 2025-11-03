@@ -87,6 +87,7 @@ class SaveLoadNexusProcessedMaskWorkspaceTest(SaveLoadNexusProcessedTestBase):
         CreateSampleWorkspace(
             OutputWorkspace=self.test_ws_name, Function="Flat background", BankPixelWidth=1, XMax=15, BinWidth=0.75, NumBanks=4
         )
+        LoadInstrument(Workspace=self.test_ws_name, InstrumentName="SNAP", MonitorList="-2--1", RewriteSpectraMap="True")
         MaskDetectors(Workspace=self.test_ws_name, WorkspaceIndexList=[1, 3])
         ExtractMask(InputWorkspace=self.test_ws_name, OutputWorkspace=self.test_ws_name)
 
@@ -96,6 +97,11 @@ class SaveLoadNexusProcessedMaskWorkspaceTest(SaveLoadNexusProcessedTestBase):
     def validate(self):
         loaded_ws = AnalysisDataService.Instance()[self.loaded_ws_name]
         self.assertTrue(isinstance(loaded_ws, MaskWorkspace))
+
+        detIds = set(loaded_ws.getDetectorIDs(1)) | set(loaded_ws.getDetectorIDs(3))
+        for detId in detIds:
+            self.assertTrue(loaded_ws.isMasked(detId))
+
         return self.compareWorkspaces()
 
 

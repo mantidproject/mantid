@@ -27,6 +27,7 @@ public:
   /// Returns a default-initialized clone of the workspace
   std::unique_ptr<MaskWorkspace> cloneEmpty() const { return std::unique_ptr<MaskWorkspace>(doCloneEmpty()); }
   MaskWorkspace &operator=(const MaskWorkspace &other) = delete;
+  bool containsDetID(const detid_t detectorID) const override;
   bool isMasked(const detid_t detectorID) const override;
   bool isMasked(const std::set<detid_t> &detectorIDs) const override;
   bool isMaskedIndex(const std::size_t wkspIndex) const;
