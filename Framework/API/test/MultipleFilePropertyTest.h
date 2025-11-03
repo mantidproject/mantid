@@ -730,5 +730,5 @@ private:
   //////////////////////////////////////////////////////////////////////////////////////////////
   // Private helper functions.
   //////////////////////////////////////////////////////////////////////////////////////////////
-  std::string dummyFile(const std::string &filename) { return m_dummyFilesDir + Poco::Path::separator() + filename; }
+  std::string dummyFile(const std::string &filename) { return m_dummyFilesDir + "/" + filename; }
 };
