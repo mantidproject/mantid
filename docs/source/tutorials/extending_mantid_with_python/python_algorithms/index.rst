@@ -37,3 +37,5 @@ Benefits of an algorithm over just writing in a script:
 * :ref:`04_main_algorithm_body`
 * :ref:`05_logging`
 * :ref:`06_exercise_2`
+
+For an advanced breakdown of Algorithms, see :ref:`Writing an Algorithm <WritingAnAlgorithm>` and :ref:`Python Vs C++ Algorithms <PythonVSCppAlgorithms>`.
