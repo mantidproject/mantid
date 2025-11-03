@@ -16,15 +16,29 @@ namespace Mantid::Kernel::Smoothing {
 
 namespace detail {
 template <typename T> struct Averager {
+  /** A small ABC to represent taking an average over a few values */
   Averager() : total(0), npts(0) {}
-  virtual T term(T const &) const = 0;
+  /** A function returning a "term" in the average
+   * @param x the input value, from which the term is computed
+   * @returns the term, calculated from x
+   */
+  virtual T term(T const &x) const = 0;
+  /**  Retrieve the average of all included values
+   * @returns the average of all included terms
+   */
   virtual T getAverage() const = 0;
+  /** Include values in the average
+   * @param x the value to be included in the averaged
+   */
   virtual void accumulate(T const &x) {
     if (!std::isnan(x)) {
       total += term(x);
       npts++;
     }
   }
+  /** Remove values from the average
+   * @param x the value to be removed from the averaged
+   */
   virtual void separate(T const &x) {
     if (!std::isnan(x)) {
       total -= term(x);
@@ -37,21 +51,25 @@ protected:
   unsigned npts;
 };
 
+/** Represents taking the arithmetic mean */
 template <typename T> struct ArithmeticAverager : public Averager<T> {
   T term(T const &x) const override { return x; }
   T getAverage() const override { return this->total / this->npts; }
 };
 
+/** Represents propagating errors for values which had been arithmetically averaged */
 template <typename T> struct ErrorPropagationAverager : public Averager<T> {
   T term(T const &x) const override { return x * x; }
   T getAverage() const override { return std::sqrt(std::abs(this->total)) / this->npts; }
 };
 
+/** Represents taking the root-mean-square averaege */
 template <typename T> struct SumSquareAverager : public Averager<T> {
   T term(T const &x) const override { return x * x; }
   T getAverage() const override { return std::sqrt(std::abs(this->total) / this->npts); }
 };
 
+/** Represents taking the geometric mean */
 template <typename T> struct GeometricAverager : public Averager<T> {
   GeometricAverager() { this->total = T(1); }
   void accumulate(T const &x) override {
