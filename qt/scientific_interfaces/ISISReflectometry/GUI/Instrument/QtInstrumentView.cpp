@@ -76,23 +76,23 @@ void QtInstrumentView::connectSettingsChange(QCheckBox &edit) {
   connect(&edit, SIGNAL(stateChanged(int)), this, SLOT(onSettingsChanged()));
 }
 
-void QtInstrumentView::disconnectSettingsChange(QLineEdit &edit) {
+void QtInstrumentView::disconnectSettingsChange(QLineEdit const &edit) {
   disconnect(&edit, SIGNAL(textChanged(QString const &)), this, SLOT(onSettingsChanged()));
 }
 
-void QtInstrumentView::disconnectSettingsChange(QSpinBox &edit) {
+void QtInstrumentView::disconnectSettingsChange(QSpinBox const &edit) {
   disconnect(&edit, SIGNAL(valueChanged(QString const &)), this, SLOT(onSettingsChanged()));
 }
 
-void QtInstrumentView::disconnectSettingsChange(QDoubleSpinBox &edit) {
+void QtInstrumentView::disconnectSettingsChange(QDoubleSpinBox const &edit) {
   disconnect(&edit, SIGNAL(valueChanged(QString const &)), this, SLOT(onSettingsChanged()));
 }
 
-void QtInstrumentView::disconnectSettingsChange(QComboBox &edit) {
+void QtInstrumentView::disconnectSettingsChange(QComboBox const &edit) {
   disconnect(&edit, SIGNAL(currentIndexChanged(int)), this, SLOT(onSettingsChanged()));
 }
 
-void QtInstrumentView::disconnectSettingsChange(QCheckBox &edit) {
+void QtInstrumentView::disconnectSettingsChange(QCheckBox const &edit) {
   disconnect(&edit, SIGNAL(stateChanged(int)), this, SLOT(onSettingsChanged()));
 }
 

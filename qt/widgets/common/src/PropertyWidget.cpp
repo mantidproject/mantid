@@ -57,7 +57,7 @@ double stringToRoundedNumber(const std::string &s) {
  * @param value :: the string to test with
  * @returns     :: true if the value is valid, else false.
  */
-bool isValidPropertyValue(Mantid::Kernel::Property *prop, const std::string &value) {
+bool isValidPropertyValue(Mantid::Kernel::Property const *prop, const std::string &value) {
   const auto guineaPig = std::shared_ptr<Property>(prop->clone());
   return guineaPig->setValue(value).empty();
 }
@@ -376,7 +376,7 @@ void PropertyWidget::addReplaceWSButton() {
   if (m_replaceWSButton)
     return;
 
-  auto *wsProp = dynamic_cast<IWorkspaceProperty *>(m_prop);
+  auto const *wsProp = dynamic_cast<IWorkspaceProperty *>(m_prop);
   if (wsProp && (m_prop->direction() == Direction::Output)) {
     m_replaceWSButton = new QPushButton(QIcon(":/data_replace.png"), "", m_parent);
     // MG: There is no way with the QIcon class to actually ask what size it is
