@@ -63,7 +63,7 @@ private:
   API::MatrixWorkspace_const_sptr inputWorkspace;
 };
 
-HistogramData::Histogram smooth(const HistogramData::Histogram &histogram, int npts);
+HistogramData::Histogram smooth(const HistogramData::Histogram &histogram, unsigned int const npts);
 
 } // namespace Algorithms
 } // namespace Mantid
