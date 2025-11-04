@@ -44,9 +44,11 @@ public:
   // Unhide the base class assignment operator
   using PropertyWithValue<std::vector<T>>::operator=;
 
-  std::string value() const override; // cppcheck-suppress uselessOverride
+  // cppcheck-suppress uselessOverride
+  std::string value() const override;
 
-  std::string setValue(const std::string &value) override; // cppcheck-suppress uselessOverride
+  // cppcheck-suppress uselessOverride
+  std::string setValue(const std::string &value) override;
   // May want to add specialisation to the class later, e.g. setting just one
   // element of the vector
 
