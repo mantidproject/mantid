@@ -107,7 +107,7 @@ std::map<std::string, std::string> DiffractionFocussing2::validateInputs() {
       }
     }
   } else {
-    validateInputWorkspaceUnit(inputWS, issues);
+    validateInputWorkspaceUnit(std::move(inputWS), issues);
   }
 
   if (isDefault("DMin") && isDefault("DMax") && isDefault("Delta"))

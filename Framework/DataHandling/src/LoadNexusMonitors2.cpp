@@ -498,7 +498,7 @@ void LoadNexusMonitors2::splitMutiPeriodHistrogramData(const size_t numPeriods) 
     monLogCreator.addStatusLog(wsPeriod->mutableRun());
     monLogCreator.addPeriodLogs(static_cast<int>(i + 1), wsPeriod->mutableRun());
 
-    outputWorkspaces.push_back(wsPeriod);
+    outputWorkspaces.push_back(std::move(wsPeriod));
   }
 
   // set output workspace to either single period ws, or group ws.
