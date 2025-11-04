@@ -679,7 +679,7 @@ int NexusFileIO::writeNexusProcessedDataEventCombined(const DataObjects::EventWo
   if (weights)
     writeData("weight", NXnumtype::FLOAT32, dims_array, weights, compress);
   if (errorSquareds)
-    writeData("error_squared", NXnumtype::FLOAT32, dims_array, errorSquareds, compress);
+    writeData("error_squared", NXnumtype::FLOAT32, std::move(dims_array), errorSquareds, compress);
 
   // Close up the overall group
   m_filehandle->closeGroup();
