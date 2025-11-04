@@ -50,6 +50,13 @@ if [[ -z "$BUILD_THREADS" ]]; then
     fi
 fi
 
+if [[ $OSTYPE == "msys"* ]]; then
+    # Convert all slashes to forward slashes for consistency with the rest of the build scripts.
+    if [[ "$WORKSPACE" == *'\'* ]]; then
+        WORKSPACE="${WORKSPACE//\\//}" # Replace \ with /
+    fi
+fi
+
 XVFB_SERVER_NUM=101
 BUILD_DIR=$WORKSPACE/build
 
