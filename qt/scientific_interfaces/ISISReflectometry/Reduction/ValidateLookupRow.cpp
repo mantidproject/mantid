@@ -153,7 +153,7 @@ ValidationResult<LookupRow, std::unordered_set<int>> LookupRowValidator::operato
   auto lookupRow =
       LookupRow(m_thetaOrInvalid, m_titleMatcherOrInvalid, optionalTransmissionRuns.value(),
                 optionalTransmissionProcessingInstructions, optionalQRange.value(), optionalScaleFactor,
-                optionalProcessingInstructions, optionalBackgroundProcessingInstructions, optionalROIDetectorIDs);
+                std::move(optionalProcessingInstructions), optionalBackgroundProcessingInstructions, optionalROIDetectorIDs);
 
   return ValidationResult<LookupRow, std::unordered_set<int>>(lookupRow);
 }

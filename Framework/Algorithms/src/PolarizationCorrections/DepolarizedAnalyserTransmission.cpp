@@ -123,7 +123,7 @@ std::map<std::string, std::string> DepolarizedAnalyserTransmission::validateInpu
   if (!isDefault(PropNames::MT_WORKSPACE)) {
     MatrixWorkspace_sptr mtWs = getProperty(PropNames::MT_WORKSPACE);
     validateWorkspace(mtWs, PropNames::MT_WORKSPACE, result);
-    m_mtWs = mtWs;
+    m_mtWs = std::move(mtWs);
   } else if (!isDefault(PropNames::MT_FILE)) {
     auto loadAlg = createChildAlgorithm("LoadNexus");
     loadAlg->initialize();
