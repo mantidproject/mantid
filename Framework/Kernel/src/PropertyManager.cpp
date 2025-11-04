@@ -154,7 +154,7 @@ void PropertyManager::filterByProperty(Mantid::Kernel::LogFilter *logFilter,
       if (this->existsProperty(PropertyManager::getInvalidValuesFilterLogName(propName))) {
 
         // add the filter to the passed in filters
-        auto filterProp = getPointerToProperty(PropertyManager::getInvalidValuesFilterLogName(propName));
+        auto const *filterProp = getPointerToProperty(PropertyManager::getInvalidValuesFilterLogName(propName));
         auto const *tspFilterProp = dynamic_cast<TimeSeriesProperty<bool> const *>(filterProp);
         if (!tspFilterProp)
           break;
@@ -188,7 +188,7 @@ PropertyManager *PropertyManager::cloneInTimeROI(const Kernel::TimeROI &timeROI)
   // We need to do a deep copy of the property pointers here
   for (auto const *prop : m_orderedProperties) {
     std::unique_ptr<Property> newProp;
-    if (auto const *tsp = dynamic_cast<const ITimeSeriesProperty const *>(prop))
+    if (auto const *tsp = dynamic_cast<ITimeSeriesProperty const *>(prop))
       newProp = std::unique_ptr<Property>(tsp->cloneInTimeROI(timeROI));
     else
       newProp = std::unique_ptr<Property>(prop->clone());

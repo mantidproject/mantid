@@ -116,11 +116,11 @@ static int getdat(const idc_handle_t fh, int ifsn, int nos, int **value, int dim
   return 0;
 }
 
-int IDCgetdat(idc_handle_t fh, int ifsn, int nos, int *value, int dims_array[], int *ndims) {
+int IDCgetdat(const idc_handle_t fh, int ifsn, int nos, int *value, int dims_array[], int *ndims) {
   return getdat(fh, ifsn, nos, &value, dims_array, ndims, 0);
 }
 
-int IDCAgetdat(idc_handle_t fh, int ifsn, int nos, int **value, int dims_array[], int *ndims) {
+int IDCAgetdat(const idc_handle_t fh, int ifsn, int nos, int **value, int dims_array[], int *ndims) {
   return getdat(fh, ifsn, nos, value, dims_array, ndims, 1);
 }
 
@@ -157,7 +157,7 @@ static int IDCgetpar(const idc_handle_t fh, const char *name, void **value, ISIS
 }
 
 /// Get a parameter
-int IDCAgetpari(idc_handle_t fh, const char *name, int **value, int dims_array[], int *ndims) {
+int IDCAgetpari(const idc_handle_t fh, const char *name, int **value, int dims_array[], int *ndims) {
   int stat;
   ISISDSDataType type = ISISDSInt32;
   stat = IDCgetpar(fh, name, reinterpret_cast<void **>(value), type, dims_array, ndims, 1);
@@ -165,7 +165,7 @@ int IDCAgetpari(idc_handle_t fh, const char *name, int **value, int dims_array[]
 }
 
 /// Get a parameter
-int IDCgetpari(idc_handle_t fh, const char *name, int *value, int dims_array[], int *ndims) {
+int IDCgetpari(const idc_handle_t fh, const char *name, int *value, int dims_array[], int *ndims) {
   int stat;
   ISISDSDataType type = ISISDSInt32;
   stat = IDCgetpar(fh, name, reinterpret_cast<void **>(&value), type, dims_array, ndims, 0);
@@ -173,7 +173,7 @@ int IDCgetpari(idc_handle_t fh, const char *name, int *value, int dims_array[], 
 }
 
 /// Get a parameter
-int IDCgetparr(idc_handle_t fh, const char *name, float *value, int dims_array[], int *ndims) {
+int IDCgetparr(const idc_handle_t fh, const char *name, float *value, int dims_array[], int *ndims) {
   int stat;
   ISISDSDataType type = ISISDSReal32;
   stat = IDCgetpar(fh, name, reinterpret_cast<void **>(&value), type, dims_array, ndims, 0);
@@ -181,7 +181,7 @@ int IDCgetparr(idc_handle_t fh, const char *name, float *value, int dims_array[]
 }
 
 /// Get a parameter
-int IDCAgetparr(idc_handle_t fh, const char *name, float **value, int dims_array[], int *ndims) {
+int IDCAgetparr(const idc_handle_t fh, const char *name, float **value, int dims_array[], int *ndims) {
   int stat;
   ISISDSDataType type = ISISDSReal32;
   stat = IDCgetpar(fh, name, reinterpret_cast<void **>(value), type, dims_array, ndims, 1);
@@ -189,7 +189,7 @@ int IDCAgetparr(idc_handle_t fh, const char *name, float **value, int dims_array
 }
 
 /// Get a parameter
-int IDCgetpard(idc_handle_t fh, const char *name, double *value, int dims_array[], int *ndims) {
+int IDCgetpard(const idc_handle_t fh, const char *name, double *value, int dims_array[], int *ndims) {
   int stat;
   ISISDSDataType type = ISISDSReal64;
   stat = IDCgetpar(fh, name, reinterpret_cast<void **>(&value), type, dims_array, ndims, 0);
@@ -197,7 +197,7 @@ int IDCgetpard(idc_handle_t fh, const char *name, double *value, int dims_array[
 }
 
 /// Get a parameter
-int IDCAgetpard(idc_handle_t fh, const char *name, double **value, int dims_array[], int *ndims) {
+int IDCAgetpard(const idc_handle_t fh, const char *name, double **value, int dims_array[], int *ndims) {
   int stat;
   ISISDSDataType type = ISISDSReal64;
   stat = IDCgetpar(fh, name, reinterpret_cast<void **>(value), type, dims_array, ndims, 1);
@@ -205,7 +205,7 @@ int IDCAgetpard(idc_handle_t fh, const char *name, double **value, int dims_arra
 }
 
 /// Get a parameter
-int IDCgetparc(idc_handle_t fh, const char *name, char *value, int dims_array[], int *ndims) {
+int IDCgetparc(const idc_handle_t fh, const char *name, char *value, int dims_array[], int *ndims) {
   int stat;
   ISISDSDataType type = ISISDSChar;
   stat = IDCgetpar(fh, name, reinterpret_cast<void **>(&value), type, dims_array, ndims, 0);
@@ -213,7 +213,7 @@ int IDCgetparc(idc_handle_t fh, const char *name, char *value, int dims_array[],
 }
 
 /// Get a parameter
-int IDCAgetparc(idc_handle_t fh, const char *name, char **value, int dims_array[], int *ndims) {
+int IDCAgetparc(const idc_handle_t fh, const char *name, char **value, int dims_array[], int *ndims) {
   int stat;
   ISISDSDataType type = ISISDSChar;
   stat = IDCgetpar(fh, name, reinterpret_cast<void **>(value), type, dims_array, ndims, 1);

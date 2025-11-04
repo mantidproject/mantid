@@ -170,7 +170,7 @@ void ChangeTimeZero::shiftTimeOfLogs(const Mantid::API::MatrixWorkspace_sptr &ws
  * @param timeShift :: the time shift in seconds
  */
 void ChangeTimeZero::shiftTimeInLogForTimeSeries(const Mantid::API::MatrixWorkspace_sptr &ws,
-                                                 Mantid::Kernel::Property *prop, double timeShift) const {
+                                                 Mantid::Kernel::Property const *prop, double timeShift) const {
   if (auto const *timeSeries = dynamic_cast<Mantid::Kernel::ITimeSeriesProperty const *>(prop)) {
     auto newlog = timeSeries->cloneWithTimeShift(timeShift);
     ws->mutableRun().addProperty(newlog, true);

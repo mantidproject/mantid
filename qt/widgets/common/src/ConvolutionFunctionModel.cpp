@@ -213,7 +213,7 @@ void ConvolutionFunctionModel::findComponentPrefixes() {
   }
 }
 
-void ConvolutionFunctionModel::iterateThroughFunction(IFunction *func, std::string const &prefix) {
+void ConvolutionFunctionModel::iterateThroughFunction(IFunction const *func, std::string const &prefix) {
   auto numberOfSubFunction = func->nFunctions();
 
   setPrefix(func, prefix);
