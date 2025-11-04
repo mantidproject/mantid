@@ -82,12 +82,12 @@ class UnixGlob:
             if not match:
                 return [s]
             choices = match.group(1).split(",")
-            results = []
+            results = set()
             for choice in choices:
                 replaced = s[: match.start()] + choice + s[match.end() :]
                 for result in expand_braces(replaced):
-                    results.append(result)
-            return results
+                    results.add(result)
+            return list(results)
 
         globs = expand_braces(glob_pattern)
 
@@ -115,7 +115,10 @@ class SocketAddress:
         if match:
             ip = match.group(1) or match.group(2)
             port = int(match.group(3))
-            if 0 <= port <= 65535:
+
+            # Explicitly dissallow port 0 for this application:
+            #   otherwise meaning: "pick an available ephemeral port".
+            if 0 < port <= 65535:
                 return (ip, port)
             else:
                 raise ValueError(f"Port out of range: {port}")
