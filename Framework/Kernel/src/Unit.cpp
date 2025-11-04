@@ -145,7 +145,7 @@ void Unit::validateUnitParams(const int, const UnitParametersMap &) {}
 /** Perform the conversion to TOF on a vector of data
  */
 
-void Unit::toTOF(std::vector<double> &xdata, std::vector<double> &ydata, const double &_l1, const int &_emode,
+void Unit::toTOF(std::vector<double> &xdata, std::vector<double> const &ydata, const double &_l1, const int &_emode,
                  std::initializer_list<std::pair<const UnitParams, double>> params) {
   UnitParametersMap paramsMap(params);
   toTOF(xdata, ydata, _l1, _emode, paramsMap);

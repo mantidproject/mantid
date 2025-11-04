@@ -278,8 +278,6 @@ iterateByValue:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/MantidTreeWidget.cpp:17
 iterateByValue:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/MantidWSIndexDialog.cpp:161
 cstyleCast:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/FormulaDialogEditor.cpp:18
 constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/ParameterPropertyManager.cpp:54
-constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/StringDialogEditor.cpp:37
-constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/StringEditorFactory.cpp:16
 constParameterPointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtbuttonpropertybrowser.cpp:136
 publicAllocationError:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtbuttonpropertybrowser.cpp:143
 constParameterPointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtbuttonpropertybrowser.cpp:233

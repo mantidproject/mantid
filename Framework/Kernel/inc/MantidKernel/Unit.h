@@ -88,7 +88,7 @@ public:
    *                    Fixed energy: EI (emode=1) or EF (emode=2)(in meV)
    *                    Delta (not currently used)
    */
-  void toTOF(std::vector<double> &xdata, std::vector<double> &ydata, const double &_l1, const int &_emode,
+  void toTOF(std::vector<double> &xdata, std::vector<double> const &ydata, const double &_l1, const int &_emode,
              std::initializer_list<std::pair<const UnitParams, double>> params);
   void toTOF(std::vector<double> &xdata, std::vector<double> const &ydata, const double &_l1, const int &_emode,
              const UnitParametersMap &params);
