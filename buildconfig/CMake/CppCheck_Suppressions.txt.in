@@ -365,9 +365,6 @@ nullPointerOutOfMemory:${CMAKE_SOURCE_DIR}/Framework/LiveData/src/ISIS/DAE/isisd
 unusedStructMember:${CMAKE_SOURCE_DIR}/Framework/LiveData/src/ISIS/FakeISISHistoDAE.cpp:27
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/LiveData/src/ISIS/FakeISISHistoDAE.cpp:268
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/LiveData/src/ISIS/ISISHistoDataListener.cpp:527
-shadowFunction:${CMAKE_SOURCE_DIR}/Framework/LiveData/src/Kafka/KafkaTopicSubscriber.cpp:125
-shadowFunction:${CMAKE_SOURCE_DIR}/Framework/LiveData/src/Kafka/KafkaTopicSubscriber.cpp:283
-shadowFunction:${CMAKE_SOURCE_DIR}/Framework/LiveData/src/Kafka/KafkaTopicSubscriber.cpp:452
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/LiveData/src/LoadLiveData.cpp:49
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/LiveData/src/LoadLiveData.cpp:58
 missingOverride:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/inc/MantidMDAlgorithms/PreprocessDetectorsToMD.h:27
