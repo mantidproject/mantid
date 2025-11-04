@@ -433,9 +433,11 @@ class Player:
         match rate:
             case cls.Rate.NORMAL:
                 # Send packets at their original source rate
-                return lambda packet, start_time: packet.timestamp <= (np.datetime64("now") - start_time)
+                return lambda packet, packets_start_time, start_time: (packet.timestamp - packets_start_time) <= (
+                    np.datetime64("now") - start_time
+                )
             case cls.Rate.UNLIMITED:
-                return lambda _packet, _start_time: True
+                return lambda _packet, _packets_start_time, _start_time: True
             case _:
                 raise ValueError(f"unrecognized `Player.Rate` value '{rate}'")
 
@@ -444,7 +446,7 @@ class Player:
         ignore_packets = [Packet.Type(t) for t in ignore_packets]
         if not ignore_packets:
             return lambda _packet: True
-        return lambda packet: packet.type not in ignore_packets
+        return lambda packet: packet.packet_type not in ignore_packets
 
     @classmethod
     def _get_server_address(cls) -> str:
@@ -454,7 +456,7 @@ class Player:
         address = Config["server"]["address"]
 
         # replace any tokens that may have been specified
-        runtime_dir = os.environ.get("XDG_RUNTIME_DIR", os.environ["TMPDIR"])
+        runtime_dir = os.environ.get("XDG_RUNTIME_DIR", os.environ.get("TMPDIR"))
         name = os.environ.get("adara_player_name", Config["server"]["name"])  # environment overrides `Config`
         address = address.format(XDG_RUNTIME_DIR=runtime_dir, name=name)
 
@@ -553,7 +555,7 @@ class Player:
     def play(self, path: Path, patterns: str | list[str]):
         try:
             self._running = True
-            self._server = self._createServerSocket(self._server_address)
+            self._server = self._create_server_socket(self._server_address)
 
             _logger.info("Waiting for client connection...")
             self._client, _ = self._server.accept()
@@ -600,7 +602,7 @@ class Player:
         # Main server loop
         try:
             self._running = True
-            self._server = self._createServerSocket(self._server_address)
+            self._server = self._create_server_socket(self._server_address)
             while self._running:
                 # Accept connection from client (the application).
                 try:
@@ -682,7 +684,7 @@ class Player:
             self._cleanup()
 
     @classmethod
-    def _createServerSocket(cls, address: Path | tuple[str, int]) -> socket.socket:
+    def _create_server_socket(cls, address: Path | tuple[str, int]) -> socket.socket:
         server = None
         if SocketAddress.isUDSSocket(address):
             # Remove existing UDS if present
@@ -691,11 +693,13 @@ class Player:
 
             server = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
             _logger.info(f"Listening for Unix socket connection at '{address}'...")
+            server.bind(str(address))  # only accepts `str` not `Path`
+            server.listen(1)
         else:
             server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             _logger.info(f"Listening for TCP connection at {address}...")
-        server.bind(address)
-        server.listen(1)
+            server.bind(address)  # accepts `tuple[str, int]`
+            server.listen(1)
         return server
 
     def _cleanup(self, *, close_server=True):
