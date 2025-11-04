@@ -370,7 +370,6 @@ constParameterReference:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/Replicate
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/ReplicateMD.cpp:151
 templateRecursion:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/SliceMD.cpp:300
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/TransposeMD.cpp:83
-uselessCallsSubstr:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/UnaryOperationMD.cpp:59
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Muon/src/ConvertFitFunctionForMuonTFAsymmetry.cpp:60
 returnByReference:${CMAKE_SOURCE_DIR}/Framework/Nexus/inc/MantidNexus/NexusFile.h:193
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/core/src/GlobalInterpreterLock.cpp:24
