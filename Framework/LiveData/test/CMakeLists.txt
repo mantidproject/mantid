@@ -1,3 +1,5 @@
+add_subdirectory(Python)
+
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   add_compile_options(-Wno-uninitialized)
 endif()
@@ -21,5 +23,3 @@ if(CXXTEST_FOUND)
   # Add to the 'FrameworkTests' group in VS
   set_property(TARGET LiveDataTest PROPERTY FOLDER "UnitTests")
 endif()
-
-add_subdirectory(Python)

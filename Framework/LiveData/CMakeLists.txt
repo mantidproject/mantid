@@ -1,3 +1,5 @@
+set(LIVEDATA_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
+
 set(SRC_FILES
     src/ADARA/ADARAPackets.cpp
     src/ADARA/ADARAParser.cpp
