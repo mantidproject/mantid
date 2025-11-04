@@ -41,7 +41,7 @@ PyObjectToMatrix::PyObjectToMatrix(const boost::python::object &p) : m_obj(p), m
     msg << "Cannot convert object to Matrix. Expected numpy array, found " << p.ptr()->ob_type->tp_name;
     throw std::invalid_argument(msg.str());
   }
-  const auto ndim = PyArray_NDIM((PyArrayObject *)p.ptr());
+  const auto ndim = PyArray_NDIM(reinterpret_cast<PyArrayObject *>(p.ptr()));
   if (ndim != 2) {
     std::ostringstream msg;
     msg << "Error converting numpy array to Matrix. Expected ndim=2, found "
@@ -61,15 +61,15 @@ Kernel::Matrix<double> PyObjectToMatrix::operator()() {
   if (m_alreadyMatrix) {
     return extract<Kernel::Matrix<double>>(m_obj)();
   }
-  auto *ndarray =
-      (PyArrayObject *)PyArray_View((PyArrayObject *)m_obj.ptr(), PyArray_DescrFromType(NPY_DOUBLE), &PyArray_Type);
+  auto *ndarray = reinterpret_cast<PyArrayObject *>(
+      PyArray_View(reinterpret_cast<PyArrayObject *>(m_obj.ptr()), PyArray_DescrFromType(NPY_DOUBLE), &PyArray_Type));
   const auto shape = PyArray_DIMS(ndarray);
   npy_intp nx(shape[0]), ny(shape[1]);
   Kernel::Matrix<double> matrix(nx, ny);
   for (npy_intp i = 0; i < nx; i++) {
     auto row = matrix[i];
     for (npy_intp j = 0; j < ny; j++) {
-      row[j] = *((double *)PyArray_GETPTR2(ndarray, i, j));
+      row[j] = *(static_cast<double *>(PyArray_GETPTR2(ndarray, i, j)));
     }
   }
   return matrix;
