@@ -784,7 +784,7 @@ void LoadAscii2::init() {
                   "Data Service]].");
 
   const int numSpacers = 7;
-  std::string spacers[numSpacers][2] = {
+  std::string const spacers[numSpacers][2] = {
       {"Automatic", ",\t:; "},       {"CSV", ","}, {"Tab", "\t"}, {"Space", " "}, {"Colon", ":"}, {"SemiColon", ";"},
       {"UserDefined", "UserDefined"}};
   // For the ListValidator

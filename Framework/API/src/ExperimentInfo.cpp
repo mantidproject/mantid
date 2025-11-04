@@ -137,7 +137,7 @@ const std::string ExperimentInfo::toString() const {
 
   // parameter files loaded
   auto paramFileVector = this->constInstrumentParameters().getParameterFilenames();
-  for (auto &itFilename : paramFileVector) {
+  for (auto const &itFilename : paramFileVector) {
     out << "Parameters from: " << itFilename;
     out << "\n";
   }
@@ -576,7 +576,7 @@ int ExperimentInfo::getRunNumber() const {
     // No run_number property, default to 0
     return 0;
   } else {
-    Property *prop = m_run->getProperty("run_number");
+    Property const *prop = m_run->getProperty("run_number");
     if (prop) {
       // Use the string representation. That way both a string and a number
       // property will work.

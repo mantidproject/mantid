@@ -121,7 +121,7 @@ void MDHistoWorkspace::init(std::vector<Mantid::Geometry::MDHistoDimension_sptr>
 /** Constructor helper method
  * @param dimensions :: vector of IMDDimension; no limit to how many.
  */
-void MDHistoWorkspace::init(std::vector<Mantid::Geometry::IMDDimension_sptr> &dimensions) {
+void MDHistoWorkspace::init(std::vector<Mantid::Geometry::IMDDimension_sptr> const &dimensions) {
   MDGeometry::initGeometry(dimensions);
   this->cacheValues();
 

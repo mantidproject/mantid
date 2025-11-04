@@ -54,7 +54,7 @@ void LoadCalFile::getInstrument3WaysInit(Algorithm *alg) {
   alg->setPropertyGroup("InstrumentFilename", grpName);
 }
 
-bool LoadCalFile::instrumentIsSpecified(API::Algorithm *alg) {
+bool LoadCalFile::instrumentIsSpecified(API::Algorithm const *alg) {
   MatrixWorkspace_sptr inWS = alg->getProperty("InputWorkspace");
   if (bool(inWS))
     return true;

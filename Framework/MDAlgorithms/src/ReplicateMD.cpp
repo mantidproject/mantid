@@ -108,7 +108,7 @@ std::vector<int> findAxes(const IMDHistoWorkspace &shapeWS, const IMDHistoWorksp
  */
 size_t linearIndexToLinearIndex(const size_t &nDimsShape, const size_t &shapeReplicationIndex,
                                 const std::vector<size_t> &indexMaxShape, const std::vector<size_t> &indexMakerShape,
-                                const size_t &sourceIndex, std::vector<size_t> &indexMakerData,
+                                size_t const &sourceIndex, std::vector<size_t> const &indexMakerData,
                                 const size_t &nDimsData) {
   std::vector<size_t> vecShapeIndexes(nDimsShape);
   Utils::NestedForLoop::GetIndicesFromLinearIndex(nDimsShape, sourceIndex, &indexMakerShape[0], &indexMaxShape[0],
@@ -148,7 +148,8 @@ const std::string ReplicateMD::summary() const {
  * @param axes : target axes indexes
  * @return : Transposed workspace.
  */
-MDHistoWorkspace_const_sptr ReplicateMD::transposeMD(MDHistoWorkspace_sptr &toTranspose, const std::vector<int> &axes) {
+MDHistoWorkspace_const_sptr ReplicateMD::transposeMD(MDHistoWorkspace_sptr const &toTranspose,
+                                                     const std::vector<int> &axes) {
 
   auto transposeMD = this->createChildAlgorithm("TransposeMD", 0.0, 0.5);
   transposeMD->setProperty("InputWorkspace", toTranspose);

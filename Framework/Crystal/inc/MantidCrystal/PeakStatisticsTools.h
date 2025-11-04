@@ -165,7 +165,7 @@ public:
 
 private:
   void calculatePeaksStatistics(const std::map<Kernel::V3D, UniqueReflection> &uniqueReflections,
-                                std::string &equivalentIntensities, double &sigmaCritical, bool &weightedZ);
+                                std::string const &equivalentIntensities, double &sigmaCritical, bool &weightedZ);
 
   double getIOverSigmaSum(const std::vector<double> &sigmas, const std::vector<double> &intensities) const;
   double getRMS(const std::vector<double> &data) const;

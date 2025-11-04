@@ -72,7 +72,7 @@ void CentroidPeaks::integrate() {
   size_t Numberwi = inWS->getNumberHistograms();
   int NumberPeaks = peakWS->getNumberPeaks();
   for (int i = 0; i < NumberPeaks; ++i) {
-    Peak &peak = peakWS->getPeaks()[i];
+    Peak const &peak = peakWS->getPeaks()[i];
     int pixelID = peak.getDetectorID();
 
     // Find the workspace index for this detector ID

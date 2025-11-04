@@ -126,7 +126,7 @@ ComponentInfo::QuadrilateralComponent ComponentInfo::quadrilateralComponent(cons
   return corners;
 }
 
-size_t ComponentInfo::indexOf(Geometry::IComponent *id) const { return m_compIDToIndex->at(id); }
+size_t ComponentInfo::indexOf(Geometry::IComponent *const id) const { return m_compIDToIndex->at(id); }
 
 size_t ComponentInfo::indexOfAny(const std::string &name) const { return m_componentInfo->indexOfAny(name); }
 

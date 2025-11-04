@@ -123,7 +123,7 @@ static void clear_replies(SOCKET s) {
 SOCKET isisds_send_open(const char *host, ISISDSAccessMode access_type, uint16_t port) {
   SOCKET s;
   int setkeepalive = 1;
-  struct hostent *hostp;
+  struct hostent const *hostp;
   struct sockaddr_in address;
   char *comm, *comm_data;
   /*	int len_comm_data; */

@@ -131,7 +131,7 @@ void SelectCellWithForm::ApplyTransform(Kernel::Matrix<double> &newUB, IPeaksWor
   o_lattice->setModHKL(modHKL);
 
   for (int i = 0; i < n_peaks; i++) {
-    IPeak &peak = ws->getPeak(i);
+    IPeak const &peak = ws->getPeak(i);
     q_vectors.emplace_back(peak.getQSampleFrame() - modUB * peak.getIntMNP() * 2 * M_PI);
   }
 

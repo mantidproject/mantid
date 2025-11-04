@@ -61,7 +61,7 @@ void vtkGeometryCacheReader::Init() {
 /**
  * Set the geometry for the object
  */
-void vtkGeometryCacheReader::readCacheForObject(IObject *obj) {
+void vtkGeometryCacheReader::readCacheForObject(IObject const *obj) {
   // Get the element corresponding to the name of the object
   std::stringstream objName;
   objName << obj->getName();

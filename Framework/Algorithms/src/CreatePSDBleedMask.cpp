@@ -208,10 +208,10 @@ bool CreatePSDBleedMask::performBleedTest(const std::vector<int> &tubeIndices,
   for (; top < topEnd; ++top, ++bot) {
     const int topIndex = tubeIndices[top];
     const int botIndex = tubeIndices[bot];
-    auto &topY = inputWS->y(topIndex);
-    auto &botY = inputWS->y(botIndex);
-    auto &topX = inputWS->x(topIndex);
-    auto &botX = inputWS->x(botIndex);
+    auto const &topY = inputWS->y(topIndex);
+    auto const &botY = inputWS->y(botIndex);
+    auto const &topX = inputWS->x(topIndex);
+    auto const &botX = inputWS->x(botIndex);
     for (int j = 0; j < numBins; ++j) {
       double topRate(topY[j]), botRate(botY[j]);
       if (isRawCounts) {

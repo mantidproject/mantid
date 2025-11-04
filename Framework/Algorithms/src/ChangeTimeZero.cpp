@@ -151,7 +151,7 @@ void ChangeTimeZero::shiftTimeOfLogs(const Mantid::API::MatrixWorkspace_sptr &ws
   // 2. string properties: here we change the values if they are ISO8601 times
   auto logs = ws->mutableRun().getLogData();
   Progress prog(this, startProgress, stopProgress, logs.size());
-  for (auto &log : logs) {
+  for (auto const &log : logs) {
     if (isTimeSeries(log)) {
       shiftTimeInLogForTimeSeries(ws, log, timeShift);
 
@@ -171,7 +171,7 @@ void ChangeTimeZero::shiftTimeOfLogs(const Mantid::API::MatrixWorkspace_sptr &ws
  */
 void ChangeTimeZero::shiftTimeInLogForTimeSeries(const Mantid::API::MatrixWorkspace_sptr &ws,
                                                  Mantid::Kernel::Property *prop, double timeShift) const {
-  if (auto timeSeries = dynamic_cast<Mantid::Kernel::ITimeSeriesProperty *>(prop)) {
+  if (auto const timeSeries = dynamic_cast<Mantid::Kernel::ITimeSeriesProperty *>(prop)) {
     auto newlog = timeSeries->cloneWithTimeShift(timeShift);
     ws->mutableRun().addProperty(newlog, true);
   }
@@ -220,7 +220,7 @@ void ChangeTimeZero::shiftTimeOfNeutrons(const Mantid::API::MatrixWorkspace_sptr
 DateAndTime ChangeTimeZero::getStartTimeFromWorkspace(const API::MatrixWorkspace_sptr &ws) const {
   auto run = ws->run();
   // Check for the first good frame in the log
-  Mantid::Kernel::TimeSeriesProperty<double> *goodFrame = nullptr;
+  Mantid::Kernel::TimeSeriesProperty<double> const *goodFrame = nullptr;
   try {
     goodFrame = run.getTimeSeriesProperty<double>("proton_charge");
   } catch (const std::invalid_argument &) {

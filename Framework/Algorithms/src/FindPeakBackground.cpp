@@ -269,7 +269,7 @@ void FindPeakBackground::estimateBackground(const HistogramData::Histogram &hist
  * @param n :: length of vector
  * @param mean :: mean of X
  */
-double FindPeakBackground::moment4(MantidVec &X, size_t n, double mean) {
+double FindPeakBackground::moment4(MantidVec const &X, size_t n, double mean) {
   double sum = 0.0;
   for (size_t i = 0; i < n; ++i) {
     sum += (X[i] - mean) * (X[i] - mean) * (X[i] - mean) * (X[i] - mean);

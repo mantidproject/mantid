@@ -173,7 +173,7 @@ void DetectorEfficiencyCorUser::retrieveProperties() {
   m_Ei = this->getProperty("IncidentEnergy");
   // If we're not given an Ei, see if one has been set.
   if (m_Ei == EMPTY_DBL()) {
-    Mantid::Kernel::Property *prop = m_inputWS->run().getProperty("Ei");
+    Mantid::Kernel::Property const *prop = m_inputWS->run().getProperty("Ei");
     double val;
     if (!prop || !Strings::convert(prop->value(), val)) {
       throw std::invalid_argument("No Ei value has been set or stored within the run information.");

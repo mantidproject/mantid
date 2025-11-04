@@ -429,7 +429,7 @@ void SaveGSS::generateInstrumentHeader(std::stringstream &out, double l1) const 
   if (this->getProperty("ExtendedHeader")) {
     // the instrument parameter file
     if (runinfo.hasProperty("iparm_file")) {
-      Kernel::Property *prop = runinfo.getProperty("iparm_file");
+      Kernel::Property const *prop = runinfo.getProperty("iparm_file");
       if (prop != nullptr && (!prop->value().empty())) {
         out << std::setw(80) << std::left;
         out << "#Instrument parameter file: " << prop->value() << "\n";
@@ -563,7 +563,7 @@ void SaveGSS::getLogValue(std::stringstream &out, const API::Run &runInfo, const
   }
 
   // Get value
-  auto *log = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(prop);
+  auto const *log = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(prop);
   if (log) {
     // Time series to get mean
     out << log->getStatistics().mean;

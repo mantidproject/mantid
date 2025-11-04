@@ -33,7 +33,7 @@ std::string SetValueWhenProperty::getPropertyValue(const IPropertyManager *algo)
   if (algo == nullptr)
     throw std::runtime_error("Algorithm properties passed to SetValueWhenProperty was null");
 
-  Property *prop = nullptr;
+  Property const *prop = nullptr;
   try {
     prop = algo->getPointerToProperty(m_watchedPropName);
   } catch (Exception::NotFoundError &) {
@@ -53,7 +53,7 @@ std::string SetValueWhenProperty::getPropertyValue(const IPropertyManager *algo)
  * @return  :: True if the Property we are watching is the property that just changed, otherwise False
  */
 bool SetValueWhenProperty::isConditionChanged(const IPropertyManager *algo, const std::string &changedPropName) const {
-  auto watchedProp = algo->getPointerToProperty(m_watchedPropName);
+  auto const watchedProp = algo->getPointerToProperty(m_watchedPropName);
   bool hasWatchedPropChanged = false;
   if (watchedProp->name() == changedPropName) {
     hasWatchedPropChanged = true;

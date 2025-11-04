@@ -55,7 +55,7 @@ public:
   std::unique_ptr<MDHistoWorkspace> cloneEmpty() const { return std::unique_ptr<MDHistoWorkspace>(doCloneEmpty()); }
 
   void init(std::vector<Mantid::Geometry::MDHistoDimension_sptr> &dimensions);
-  void init(std::vector<Mantid::Geometry::IMDDimension_sptr> &dimensions);
+  void init(std::vector<Mantid::Geometry::IMDDimension_sptr> const &dimensions);
 
   void cacheValues();
 

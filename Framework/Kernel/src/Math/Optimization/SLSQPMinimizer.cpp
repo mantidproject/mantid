@@ -224,10 +224,10 @@ int dcopy___(const int *n, double *dx, const int *incx, double *dy, const int *i
 int daxpy_sl__(const int *n, const double *da, double *dx, const int *incx, double *dy, const int *incy);
 int lsq_(int *m, int *meq, int *n, const int *nl, const int *la, double *l, double *g, double *a, double *b, double *xl,
          double *xu, double *x, double *y, double *w, int *jw, int *mode);
-double ddot_sl__(const int *n, double *dx, const int *incx, double *dy, const int *incy);
+double ddot_sl__(const int *n, double *dx, const int *incx, double const *dy, const int *incy);
 int dscal_sl__(const int *n, const double *da, double *dx, const int *incx);
 double linmin_(int *mode, const double *ax, const double *bx, const double *f, const double *tol);
-double dnrm2___(const int *n, double *dx, const int *incx);
+double dnrm2___(const int *n, double const *dx, const int *incx);
 int ldl_(const int *n, double *a, double *z__, const double *sigma, double *w);
 int lsei_(double *c__, double *d__, double *e, double *f, double *g, double *h__, const int *lc, const int *mc,
           const int *le, const int *me, const int *lg, const int *mg, const int *n, double *x, double *xnrm, double *w,
@@ -2395,7 +2395,7 @@ L100:
 } /* linmin_ */
 
 /* ## Following a selection from BLAS Level 1 */
-int daxpy_sl__(const int *n, const double *da, double *dx, const int *incx, double *dy, const int *incy) {
+int daxpy_sl__(const int *n, const double *da, double *dx, const int *incx, double *dy, int const *incy) {
   /* System generated locals */
   int i__1;
 
@@ -2465,7 +2465,7 @@ L40:
   return 0;
 } /* daxpy_sl__ */
 
-int dcopy___(const int *n, double *dx, const int *incx, double *dy, const int *incy) {
+int dcopy___(const int *n, double *dx, const int *incx, double *dy, int const *incy) {
   /* System generated locals */
   int i__1;
 
@@ -2535,7 +2535,7 @@ L40:
   return 0;
 } /* dcopy___ */
 
-double ddot_sl__(const int *n, double *dx, const int *incx, double *dy, const int *incy) {
+double ddot_sl__(const int *n, double *dx, const int *incx, double const *dy, int const *incy) {
   /* System generated locals */
   int i__1;
   double ret_val;
@@ -2607,7 +2607,7 @@ L60:
   return ret_val;
 } /* ddot_sl__ */
 
-double dnrm2___(const int *n, double *dx, const int *incx) {
+double dnrm2___(const int *n, double const *dx, int const *incx) {
   /* Initialized data */
 
   static double zero = 0.;

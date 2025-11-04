@@ -598,7 +598,7 @@ std::vector<double> ChebfunBase::fit(const API::IFunction &f) const {
  * @param f :: Function to calculate.
  * @param p :: Values of function f at the even-valued indices of m_x.
  */
-std::vector<double> ChebfunBase::fitOdd(const ChebfunFunctionType &f, std::vector<double> &p) const {
+std::vector<double> ChebfunBase::fitOdd(const ChebfunFunctionType &f, std::vector<double> const &p) const {
   assert(size() == p.size() * 2 - 1);
   assert(size() % 2 == 1);
   auto &xp = xPoints();
@@ -622,7 +622,7 @@ std::vector<double> ChebfunBase::fitOdd(const ChebfunFunctionType &f, std::vecto
  * @param f :: Function to calculate.
  * @param pEven :: Values of function f at the even-valued indices of m_x.
  */
-std::vector<double> ChebfunBase::fitOdd(const API::IFunction &f, std::vector<double> &pEven) const {
+std::vector<double> ChebfunBase::fitOdd(const API::IFunction &f, std::vector<double> const &pEven) const {
   assert(size() == pEven.size() * 2 - 1);
   assert(size() % 2 == 1);
   std::vector<double> pOdd(size() - pEven.size());

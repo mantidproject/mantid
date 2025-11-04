@@ -88,7 +88,7 @@ static int getdat(idc_handle_t fh, int ifsn, int nos, int **value, int dims_arra
 
   int stat, comm_buff_size;
   ISISDSDataType ret_type;
-  int spec_nos[2] = {ifsn, nos};
+  int const spec_nos[2] = {ifsn, nos};
   int spec_nos_dims[1] = {2};
   char *command = nullptr;
   if (isisds_send_command(fh->s, "GETDAT", spec_nos, ISISDSInt32, spec_nos_dims, 1) <= 0) {

@@ -749,7 +749,7 @@ void GenerateEventsFilter::processMultipleValueFilters(double minvalue, double v
   // Debug print
   stringstream dbsplitss;
   dbsplitss << "Index map size = " << indexwsindexmap.size() << "\n";
-  for (auto &mit : indexwsindexmap) {
+  for (auto const &mit : indexwsindexmap) {
     dbsplitss << "Index " << mit.first << ":  WS-group = " << mit.second << ". Log value range: ["
               << logvalueranges[mit.first * 2] << ", " << logvalueranges[mit.first * 2 + 1] << ").\n";
   }
@@ -1801,7 +1801,7 @@ DateAndTime GenerateEventsFilter::findRunEnd() {
 
   auto extended_ns = static_cast<int64_t>(1.0E8); // 0.1 seconds
   if (m_dataWS->run().hasProperty("proton_charge")) {
-    Kernel::TimeSeriesProperty<double> *protonchargelog =
+    Kernel::TimeSeriesProperty<double> const *protonchargelog =
         dynamic_cast<Kernel::TimeSeriesProperty<double> *>(m_dataWS->run().getProperty("proton_charge"));
     if (protonchargelog->size() > 1) {
       extended_ns = protonchargelog->nthTime(1).totalNanoseconds() - protonchargelog->nthTime(0).totalNanoseconds();
