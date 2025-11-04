@@ -250,8 +250,11 @@ class Packet:
             header = src.read(cls.HEADER_BYTES)
             if not header:
                 break
+            if len(header) < cls.HEADER_BYTES:
+                # Incomplete header at EOF: do not yield, just stop iteration.
+                break
             payload_len = struct.unpack("<I", header[0:4])[0]
-            payload = None
+            payload = b""
             if not header_only:
                 payload = src.read(payload_len)
             else:
@@ -306,26 +309,6 @@ class Packet:
 
         # Source files are specified using glob expressions.
         # Source files themselves will be iterated in order of the timestamp of their first `Packet`.
-        def _timestamp(filePath: Path) -> np.datetime64:
-            try:
-                with open(filePath, "rb", buffering=0) as src:
-                    first_packet = next(cls.iter_file(src, header_only=True))
-                    return first_packet.timestamp
-            except FileNotFoundError:
-                _logger.error(f"File not found: {filePath}")
-                raise
-            except PermissionError:
-                _logger.error(f"Permission denied reading file: {filePath}")
-                raise
-            except StopIteration:
-                _logger.warning(f"Empty or invalid file (no packets): {filePath}, using epoch as timestamp")
-                return np.datetime64(0, "ns")  # Use epoch for empty files
-            except struct.error as e:
-                _logger.error(f"Corrupt packet header in file: {filePath}: {e}")
-                raise ValueError(f"Corrupt file: {filePath}")
-            except Exception as e:
-                _logger.error(f"Unexpected error reading timestamp from {filePath}: {e}")
-                raise
 
         try:
             files = list(multi_glob(path, patterns))
@@ -334,7 +317,7 @@ class Packet:
                 return
 
             _logger.info(f"Found {len(files)} files, sorting by timestamp...")
-            ps = sorted(files, key=_timestamp)
+            ps = sorted(files, key=cls._file_timestamp)
         except Exception as e:
             _logger.error(f"Error sorting files: {e}")
             raise
@@ -343,6 +326,28 @@ class Packet:
             _logger.debug(f"Processing file: {p}")
             with open(p, "rb", buffering=0 if header_only else -1) as f:
                 yield from cls.iter_file(f, header_only=header_only, source=str(p))
+
+    @classmethod
+    def _file_timestamp(cls, filePath: Path) -> np.datetime64:
+        try:
+            with open(filePath, "rb", buffering=0) as src:
+                first_packet = next(cls.iter_file(src, header_only=True))
+                return first_packet.timestamp
+        except FileNotFoundError:
+            _logger.error(f"File not found: {filePath}")
+            raise
+        except PermissionError:
+            _logger.error(f"Permission denied reading file: {filePath}")
+            raise
+        except StopIteration:
+            _logger.warning(f"Empty or invalid file (no packets): {filePath}, using epoch as timestamp")
+            return np.datetime64(0, "ns")  # Use epoch for empty files
+        except struct.error as e:
+            _logger.error(f"Corrupt packet header in file: {filePath}: {e}")
+            raise ValueError(f"Corrupt file: {filePath}")
+        except Exception as e:
+            _logger.error(f"Unexpected error reading timestamp from {filePath}: {e}")
+            raise
 
     ## ====== HELPER methods to WRAP socket partial transfers. ======
 
