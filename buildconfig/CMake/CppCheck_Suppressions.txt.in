@@ -222,7 +222,6 @@ constParameterReference:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/RalNlls/T
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/DefaultEventLoader.cpp:112
 constVariable:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadAscii2.cpp:787
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadCalFile.cpp:57
-uselessCallsSubstr:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadFITS.cpp:547
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadHFIRSANS.cpp:433
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadILLDiffraction.cpp:567
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadILLDiffraction.cpp:593
