@@ -108,7 +108,7 @@ using Mantid::PythonInterface::ndarrayType;
  * @return True if the type matches numpy.NDArray
  */
 bool object_manager_traits<Mantid::PythonInterface::NDArray>::check(PyObject *obj) {
-  return ::PyObject_IsInstance(obj, (PyObject *)ndarrayType());
+  return ::PyObject_IsInstance(obj, reinterpret_cast<PyObject *>(ndarrayType()));
 }
 
 /**

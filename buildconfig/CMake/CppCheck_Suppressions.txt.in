@@ -163,8 +163,6 @@ constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/SofQCommon.cp
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/SofQWNormalisedPolygon.cpp:537
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/SpatialGrouping.cpp:214
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/Stitch1D.cpp:246
-cstyleCast:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/SumEventsByLogValue.cpp:409
-cstyleCast:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/SumSpectra.cpp:252
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/Transpose.cpp:96
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/UnwrapMonitorsInTOF.cpp:65
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/UnwrapMonitorsInTOF.cpp:85
@@ -254,9 +252,6 @@ knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/v
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadSpice2D.cpp:418
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadSpice2D.cpp:613
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadSpiceXML2DDet.cpp:453
-dangerousTypeCast:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadSpiceXML2DDet.cpp:481
-dangerousTypeCast:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadSpiceXML2DDet.cpp:483
-dangerousTypeCast:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadSpiceXML2DDet.cpp:495
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveCanSAS1D.cpp:32
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveCanSAS1D.cpp:397
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveCanSAS1D2.cpp:24
@@ -363,7 +358,6 @@ nullPointerOutOfMemory:${CMAKE_SOURCE_DIR}/Framework/LegacyNexus/src/napi5.cpp:6
 nullPointerArithmeticOutOfMemory:${CMAKE_SOURCE_DIR}/Framework/LegacyNexus/src/napi5.cpp:609
 nullPointerOutOfMemory:${CMAKE_SOURCE_DIR}/Framework/LegacyNexus/src/napi5.cpp:613
 nullPointerOutOfMemory:${CMAKE_SOURCE_DIR}/Framework/LegacyNexus/src/napi5.cpp:614
-dangerousTypeCast:${CMAKE_SOURCE_DIR}/Framework/LiveData/inc/MantidLiveData/ADARA/ADARAPackets.h:110
 unsignedPositive:${CMAKE_SOURCE_DIR}/Framework/LiveData/inc/MantidLiveData/ISIS/TCPEventStreamDefs.h:61
 badBitmaskCheck:${CMAKE_SOURCE_DIR}/Framework/LiveData/inc/MantidLiveData/ISIS/TCPEventStreamDefs.h:70
 missingOverride:${CMAKE_SOURCE_DIR}/Framework/LiveData/inc/MantidLiveData/LiveDataAlgorithm.h:38
@@ -373,7 +367,6 @@ constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/LiveData/src/ISIS/DAE/idc.cp
 constVariable:${CMAKE_SOURCE_DIR}/Framework/LiveData/src/ISIS/DAE/idc.cpp:91
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/LiveData/src/ISIS/DAE/idc.cpp:128
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/LiveData/src/ISIS/DAE/isisds_command.cpp:126
-dangerousTypeCast:${CMAKE_SOURCE_DIR}/Framework/LiveData/src/ISIS/DAE/isisds_command.cpp:170
 nullPointerOutOfMemory:${CMAKE_SOURCE_DIR}/Framework/LiveData/src/ISIS/DAE/isisds_command.cpp:294
 unusedStructMember:${CMAKE_SOURCE_DIR}/Framework/LiveData/src/ISIS/FakeISISHistoDAE.cpp:27
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/LiveData/src/ISIS/FakeISISHistoDAE.cpp:268
@@ -395,15 +388,7 @@ constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/TransposeMD.
 uselessCallsSubstr:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/UnaryOperationMD.cpp:59
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Muon/src/ConvertFitFunctionForMuonTFAsymmetry.cpp:60
 returnByReference:${CMAKE_SOURCE_DIR}/Framework/Nexus/inc/MantidNexus/NexusFile.h:193
-cstyleCast:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/core/src/Converters/NDArrayToVector.cpp:151
-cstyleCast:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/core/src/Converters/NDArrayToVector.cpp:156
-cstyleCast:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/core/src/Converters/PyObjectToMatrix.cpp:44
-cstyleCast:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/core/src/Converters/PyObjectToMatrix.cpp:65
-cstyleCast:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/core/src/Converters/PyObjectToMatrix.cpp:72
-cstyleCast:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/core/src/Converters/WrapWithNDArray.cpp:82
-dangerousTypeCast:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/core/src/Converters/WrapWithNDArray.cpp:87
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/core/src/GlobalInterpreterLock.cpp:24
-dangerousTypeCast:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/core/src/NDArray.cpp:111
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/core/src/ReleaseGlobalInterpreterLock.cpp:17
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/core/src/UninstallTrace.cpp:16
 constParameterCallback:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/inc/MantidPythonInterface/api/WorkspacePropertyExporter.h:39
@@ -412,7 +397,6 @@ constParameterCallback:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/
 cstyleCast:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/CloneMatrixWorkspace.cpp:45
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/CloneMatrixWorkspace.cpp:70
 constParameterCallback:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/AlgorithmProperty.cpp:30
-cstyleCast:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/IMDHistoWorkspace.cpp:50
 cstyleCast:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/MDGeometry.cpp:96
 syntaxError:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/Run.cpp:258
 syntaxError:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/SpectrumDefinition.cpp:40
@@ -519,7 +503,6 @@ constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/PropertyWidget.cp
 constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/PropertyWidgetFactory.cpp:43
 constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/PropertyWidgetFactory.cpp:44
 constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/DoubleEditorFactory.cpp:18
-cstyleCast:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/FormulaDialogEditor.cpp:18
 constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/ParameterPropertyManager.cpp:54
 constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/StringDialogEditor.cpp:37
 constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/StringEditorFactory.cpp:16
