@@ -442,24 +442,24 @@ void AlignAndFocusPowderSlim::exec() {
     } else {
       g_log.information() << "Using ProcessBankTask for splitter processing\n";
       // loop over the targets in the splitter workspace, each target gets its own output workspace
-      tbb::parallel_for(tbb::blocked_range<size_t>(0, workspaceIndices.size()),
-                        [&](const tbb::blocked_range<size_t> &target_indices) {
-                          for (size_t target_index = target_indices.begin(); target_index != target_indices.end();
-                               ++target_index) {
-                            const int splitter_target = workspaceIndices[target_index];
+      tbb::parallel_for(
+          tbb::blocked_range<size_t>(0, workspaceIndices.size()),
+          [&](const tbb::blocked_range<size_t> &target_indices) {
+            for (size_t target_index = target_indices.begin(); target_index != target_indices.end(); ++target_index) {
+              const int splitter_target = workspaceIndices[target_index];
 
-                            auto splitter_roi = timeSplitter.getTimeROI(splitter_target);
-                            // copy the roi so we can modify it just for this target
-                            auto target_roi = filterROI;
-                            if (target_roi.useAll())
-                              target_roi = std::move(splitter_roi); // use the splitter ROI if no time filtering is specified
-                            else if (!splitter_roi.useAll())
-                              target_roi.update_intersection(splitter_roi); // otherwise intersect with the splitter ROI
+              auto splitter_roi = timeSplitter.getTimeROI(splitter_target);
+              // copy the roi so we can modify it just for this target
+              auto target_roi = filterROI;
+              if (target_roi.useAll())
+                target_roi = std::move(splitter_roi); // use the splitter ROI if no time filtering is specified
+              else if (!splitter_roi.useAll())
+                target_roi.update_intersection(splitter_roi); // otherwise intersect with the splitter ROI
 
-                            // clone wksp for this target
-                            MatrixWorkspace_sptr target_wksp = workspaces[target_index];
+              // clone wksp for this target
+              MatrixWorkspace_sptr target_wksp = workspaces[target_index];
 
-                            const auto pulse_indices = this->determinePulseIndices(target_wksp, target_roi);
+              const auto pulse_indices = this->determinePulseIndices(target_wksp, target_roi);
 
                             ProcessBankTask task(bankEntryNames, h5file, is_time_filtered, target_wksp, m_calibration,
                                                  m_scale_at_sample, m_masked, static_cast<size_t>(DISK_CHUNK),
