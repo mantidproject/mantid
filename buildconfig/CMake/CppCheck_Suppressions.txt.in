@@ -249,7 +249,6 @@ constParameterReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadSpice
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveCanSAS1D.cpp:32
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveCanSAS1D.cpp:397
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveCanSAS1D2.cpp:24
-uselessCallsSubstr:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveFocusedXYE.cpp:73
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveFullprofResolution.cpp:177
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveGSS.cpp:432
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveGSS.cpp:566
