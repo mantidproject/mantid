@@ -116,17 +116,17 @@ Mantid::HistogramData::Histogram MayersSampleCorrectionStrategy::getCorrectedHis
   // by initial values above
   const double dmuR = (muRmax() - muRmin()) / to<double>(N_MUR_PTS - 1);
   for (size_t i = 1; i < N_MUR_PTS + 1; ++i) {
-    const double muR = muRmin() + to<double>(i - 1) * dmuR;
-    xmur[i] = muR;
+    const double muRValue = muRmin() + to<double>(i - 1) * dmuR;
+    xmur[i] = muRValue;
 
-    auto attenuation = calculateSelfAttenuation(muR);
-    const double absFactor = attenuation / (M_PI * muR * muR);
+    auto attenuation = calculateSelfAttenuation(muRValue);
+    const double absFactor = attenuation / (M_PI * muRValue * muRValue);
     // track these
     yabs[i] = 1. / absFactor;
     wabs[i] = absFactor;
     if (m_pars.mscat) {
       // ratio of second/first scatter
-      auto mscat = calculateMS(i, muR, attenuation);
+      auto mscat = calculateMS(i, muRValue, attenuation);
       yms[i] = mscat.first;
       wms[i] = mscat.second;
     }

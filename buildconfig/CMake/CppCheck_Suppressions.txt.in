@@ -131,8 +131,6 @@ constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/FindPeakBac
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/FindPeakBackground.cpp:275
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/FindPeaks.cpp:892
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/FindPeaks.cpp:999
-shadowVariable:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/FitPeak.cpp:1399
-shadowVariable:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/FitPeak.cpp:1400
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/GenerateEventsFilter.cpp:752
 containerOutOfBounds:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/GenerateEventsFilter.cpp:1263
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/GenerateEventsFilter.cpp:1804
@@ -155,7 +153,6 @@ constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/NormaliseToMon
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/PDDetermineCharacterizations.cpp:232
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/PDDetermineCharacterizations.cpp:260
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/PaalmanPingsAbsorptionCorrection.cpp:464
-shadowFunction:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/SampleCorrections/MayersSampleCorrectionStrategy.cpp:119
 containerOutOfBounds:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/SampleCorrections/SparseWorkspace.cpp:32
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/SampleCorrections/SparseWorkspace.cpp:34
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/ShiftLogTime.cpp:61
@@ -204,7 +201,6 @@ constParameterReference:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/FuncMinim
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Functions/BSpline.cpp:146
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Functions/ChebfunBase.cpp:601
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Functions/ChebfunBase.cpp:625
-shadowFunction:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Functions/ChebfunBase.cpp:687
 variableScope:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Functions/ChebfunBase.cpp:832
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Functions/ComptonScatteringCountRate.cpp:202
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Functions/Convolution.cpp:402
