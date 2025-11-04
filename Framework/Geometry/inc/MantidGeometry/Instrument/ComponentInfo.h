@@ -83,7 +83,7 @@ public:
   const std::vector<size_t> &children(size_t componentIndex) const;
   size_t size() const;
   QuadrilateralComponent quadrilateralComponent(const size_t componentIndex) const;
-  size_t indexOf(Geometry::IComponent *const id) const;
+  size_t indexOf(Geometry::IComponent const *id) const;
   size_t indexOfAny(const std::string &name) const;
   bool uniqueName(const std::string &name) const;
   bool isDetector(const size_t componentIndex) const;

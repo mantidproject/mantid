@@ -446,9 +446,10 @@ double matjz2(const ComplexFortranMatrix &ev, int i, int k, int dim) { return st
 // calculates all transition matrix elements for a single crystal
 // and a polycrystalline sample (powder)
 //---------------------------------------------------------------
-void matcalc(const ComplexFortranMatrix &ev, const int dim, DoubleFortranMatrix &jx2,
-             DoubleFortranMatrix &jy2,                             // cppcheck-suppress: constParameterReference
-             DoubleFortranMatrix &jz2, DoubleFortranMatrix &jt2) { // cppcheck-suppress: constParameterReference
+void matcalc(const ComplexFortranMatrix &ev, const int dim,
+             DoubleFortranMatrix &jx2,                             // cppcheck-suppress constParameterReference
+             DoubleFortranMatrix &jy2,                             // cppcheck-suppress constParameterReference
+             DoubleFortranMatrix &jz2, DoubleFortranMatrix &jt2) { // cppcheck-suppress constParameterReference
   for (int i = 1; i <= dim; ++i) {                                 // do 10 i=1,dim
     for (int k = 1; k <= dim; ++k) {                               // do 20 k=1,dim
       jx2(i, k) = matjx2(ev, i, k, dim);

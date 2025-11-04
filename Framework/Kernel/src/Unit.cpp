@@ -151,7 +151,7 @@ void Unit::toTOF(std::vector<double> &xdata, std::vector<double> &ydata, const d
   toTOF(xdata, ydata, _l1, _emode, paramsMap);
 }
 
-void Unit::toTOF(std::vector<double> &xdata, std::vector<double> &ydata, const double &_l1, const int &_emode,
+void Unit::toTOF(std::vector<double> &xdata, std::vector<double> const &ydata, const double &_l1, const int &_emode,
                  const UnitParametersMap &params) {
   UNUSED_ARG(ydata);
   this->initialize(_l1, _emode, params);

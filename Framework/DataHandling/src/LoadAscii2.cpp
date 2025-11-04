@@ -791,7 +791,7 @@ void LoadAscii2::init() {
   std::array<std::string, numSpacers> sepOptions;
   int sepOptionsIndex = 0;
 
-  for (const auto &spacer : spacers) {
+  for (std::string const *spacer : spacers) {
     const auto &option = spacer[0];
     m_separatorIndex.insert(std::pair<std::string, std::string>(option, spacer[1]));
     sepOptions[sepOptionsIndex++] = option;

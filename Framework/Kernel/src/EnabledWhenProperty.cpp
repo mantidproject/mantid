@@ -108,7 +108,7 @@ bool EnabledWhenProperty::checkCriterion(const IPropertyManager *algo) const {
   const std::string propValue = getPropertyValue(algo);
   // This is safe as long as getPropertyValue (which checks) has been called
   // already
-  auto const prop = algo->getPointerToProperty(m_propertyDetails->otherPropName);
+  auto const *prop = algo->getPointerToProperty(m_propertyDetails->otherPropName);
 
   // OK, we have the property. Check the condition
   switch (m_propertyDetails->criterion) {

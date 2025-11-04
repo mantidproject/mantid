@@ -82,7 +82,7 @@ int IDCclose(idc_handle_t *pfh) {
 
 /** main worker routine for all data reading. Returns 0 on success, -1 on error
  */
-static int getdat(idc_handle_t fh, int ifsn, int nos, int **value, int dims_array[], int *ndims, int do_alloc) {
+static int getdat(const idc_handle_t fh, int ifsn, int nos, int **value, int dims_array[], int *ndims, int do_alloc) {
   (void)isisds_type_size; // Avoid compiler warning
   (void)isisds_type_name; // Avoid compiler warning
 
@@ -125,8 +125,8 @@ int IDCAgetdat(idc_handle_t fh, int ifsn, int nos, int **value, int dims_array[]
 }
 
 /// Get a parameter
-static int IDCgetpar(idc_handle_t fh, const char *name, void **value, ISISDSDataType type, int dims_array[], int *ndims,
-                     int do_alloc) {
+static int IDCgetpar(const idc_handle_t fh, const char *name, void **value, ISISDSDataType type, int dims_array[],
+                     int *ndims, int do_alloc) {
   int n, stat, comm_buff_size;
   ISISDSDataType ret_type;
   char *command = nullptr;

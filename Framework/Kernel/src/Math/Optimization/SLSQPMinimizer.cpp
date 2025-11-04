@@ -861,8 +861,8 @@ L330:
   return 0;
 } /* slsqpb_ */
 
-int lsq_(int *m, int *meq, int *n, const int *nl, const int *la, double *l, double *g, double *a, double *b, double *xl,
-         double *xu, double *x, double *y, double *w, int *jw, int *mode) {
+int lsq_(int *m, int *meq, int *n, const int *nl, const int *la, double *l, double const *g, double *a, double *b,
+         double *xl, double *xu, double *x, double *y, double *w, int *jw, int *mode) {
   /* Initialized data */
 
   static double zero = 0.;
@@ -2395,7 +2395,7 @@ L100:
 } /* linmin_ */
 
 /* ## Following a selection from BLAS Level 1 */
-int daxpy_sl__(const int *n, const double *da, double *dx, const int *incx, double *dy, int const *incy) {
+int daxpy_sl__(const int *n, const double *da, double const *dx, const int *incx, double *dy, int const *incy) {
   /* System generated locals */
   int i__1;
 
@@ -2465,7 +2465,7 @@ L40:
   return 0;
 } /* daxpy_sl__ */
 
-int dcopy___(const int *n, double *dx, const int *incx, double *dy, int const *incy) {
+int dcopy___(const int *n, double const *dx, const int *incx, double *dy, int const *incy) {
   /* System generated locals */
   int i__1;
 
@@ -2535,7 +2535,7 @@ L40:
   return 0;
 } /* dcopy___ */
 
-double ddot_sl__(const int *n, double *dx, const int *incx, double const *dy, int const *incy) {
+double ddot_sl__(const int *n, double const *dx, const int *incx, double const *dy, int const *incy) {
   /* System generated locals */
   int i__1;
   double ret_val;
