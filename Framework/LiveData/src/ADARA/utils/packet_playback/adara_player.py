@@ -465,6 +465,9 @@ class Player:
         return address
 
     def stream_packets(self, path: Path, patterns: str | list[str], socket):
+        # *** DEBUG ***
+        print(f"\n*** stream_packets: at entry:", flush=True)
+        
         MB = 1024 * 1024
         buffer_bytes = self._buffer_MB * MB
         packet_buffer = collections.deque()
@@ -474,8 +477,14 @@ class Player:
         # Get packet iterator
         packets = Packet.iter_files(path, patterns)
 
+        # *** DEBUG ***
+        print(f"\n*** stream_packets: 2:", flush=True)
+        
         try:
             next_packet = next(packets)
+            
+            # *** DEBUG ***
+            print(f"\n[first]: stream_packets: 3:", flush=True)
         except StopIteration:
             _logger.warning("No packets available to stream")
             return
@@ -483,13 +492,25 @@ class Player:
 
         # Pre-fill buffer by MB
         while current_buffer_bytes < buffer_bytes:
+            # *** DEBUG ***
+            print(f"buffer_size: {current_buffer_bytes}, limit: {buffer_bytes}")
+        
             packet_buffer.append(next_packet)
             current_buffer_bytes += next_packet.size
             try:
                 next_packet = next(packets)
+            
+                # *** DEBUG ***
+                print(f"\n[next]: stream_packets: 4:", flush=True)
             except StopIteration:
+            
+                # *** DEBUG ***
+                print(f"\n[stop]: stream_packets: 5:", flush=True)
                 break
         _logger.debug(f"Buffered {len(packet_buffer)} packets ({current_buffer_bytes / MB:.2f} MB).")
+
+        # *** DEBUG ***
+        print(f"\n[pre-send-loop]: stream_packets: 6:", flush=True)
 
         while packet_buffer:
             if not self._running:
@@ -497,6 +518,10 @@ class Player:
 
             now = np.datetime64("now")
             # Send all packets whose timestamp is ready
+            
+            # *** DEBUG ***
+            print(f"packet time-delta: {packet_buffer[0].timestamp - packets_start_time}, vs. running time-delta: {now - start_time}.", flush=True)
+            
             while packet_buffer and (packet_buffer[0].timestamp - packets_start_time) <= (now - start_time):
                 if not self._running:
                     break
@@ -504,6 +529,9 @@ class Player:
 
                 readable, writable, exceptional = select.select([socket], [socket], [socket], 0)
 
+                # *** DEBUG ***
+                print(f"readable, writable, exceptional: {(readable, writable, exceptional)}, buffer: {bool(packet_buffer)}", flush=True)
+                
                 if socket in exceptional:
                     _logger.error("Socket error detected")
                     return

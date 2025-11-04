@@ -57,6 +57,8 @@ def main(argv):
         failfast=False,
         buffer=False,
         catchbreak=False,
+        # *** DEBUG ***
+        verbosity=2,
     )
 
 
