@@ -225,7 +225,7 @@ std::vector<coord_t> MDGeometry::estimateResolution() const {
  * @throw runtime_error if it cannot be found.
  */
 size_t MDGeometry::getDimensionIndexByName(const std::string &name) const {
-  const auto it = std::find_if(m_dimensions.begin(), m_dimensions.cend(),
+  const auto it = std::find_if(m_dimensions.cbegin(), m_dimensions.cend(),
                                [&name](const auto &dimension) { return dimension->getName() == name; });
   if (it != m_dimensions.cend()) {
     return std::distance(m_dimensions.cbegin(), it);
@@ -241,7 +241,7 @@ size_t MDGeometry::getDimensionIndexByName(const std::string &name) const {
  * @throw runtime_error if it cannot be found.
  */
 size_t MDGeometry::getDimensionIndexById(const std::string &id) const {
-  const auto it = std::find_if(m_dimensions.begin(), m_dimensions.cend(),
+  const auto it = std::find_if(m_dimensions.cbegin(), m_dimensions.cend(),
                                [&id](const auto &dimension) { return dimension->getDimensionId() == id; });
   if (it != m_dimensions.cend()) {
     return std::distance(m_dimensions.cbegin(), it);
