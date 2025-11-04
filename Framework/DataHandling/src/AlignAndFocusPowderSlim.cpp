@@ -417,7 +417,7 @@ void AlignAndFocusPowderSlim::exec() {
     std::vector<MatrixWorkspace_sptr> workspaces;
     for (const int &splitter_target : timeSplitter.outputWorkspaceIndices()) {
       std::string ws_name = ws_basename + "_" + timeSplitter.getWorkspaceIndexName(splitter_target);
-      wsNames.push_back(ws_name);
+      wsNames.push_back(std::move(ws_name));
       workspaceIndices.push_back(splitter_target);
       workspaces.emplace_back(wksp->clone());
     }
@@ -452,7 +452,7 @@ void AlignAndFocusPowderSlim::exec() {
                             // copy the roi so we can modify it just for this target
                             auto target_roi = filterROI;
                             if (target_roi.useAll())
-                              target_roi = splitter_roi; // use the splitter ROI if no time filtering is specified
+                              target_roi = std::move(splitter_roi); // use the splitter ROI if no time filtering is specified
                             else if (!splitter_roi.useAll())
                               target_roi.update_intersection(splitter_roi); // otherwise intersect with the splitter ROI
 

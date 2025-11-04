@@ -203,7 +203,7 @@ void PeakOverlay::removeShapes(const QList<Shape2D *> &shapeList) {
     rows.emplace_back(marker->getRow());
   }
 
-  m_peaksWorkspace->removePeaks(rows);
+  m_peaksWorkspace->removePeaks(std::move(rows));
   recreateMarkers(getCurrentStyle());
 }
 
