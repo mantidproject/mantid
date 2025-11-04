@@ -201,7 +201,7 @@ void renderCuboid(const detail::ShapeInfo &shapeInfo) {
   };
   // first face
   glBegin(GL_QUADS);
-  for (const auto &row : faceindex) { // cppcheck-suppress constVariablePointer
+  for (const auto &row : faceindex) { // cppcheck-suppress constVariableReference
     const auto normal = normalize((vertex[row[0]] - vertex[row[1]]).cross_prod((vertex[row[0]] - vertex[row[2]])));
     glNormal3d(normal[0], normal[1], normal[2]);
     for (const int &ij : row) {
