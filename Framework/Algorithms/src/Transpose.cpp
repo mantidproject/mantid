@@ -30,21 +30,21 @@ void Transpose::init() {
 }
 
 void Transpose::exec() {
-  MatrixWorkspace_const_sptr inputWorkspace = getProperty("InputWorkspace");
-  MatrixWorkspace_sptr outputWorkspace = createOutputWorkspace(inputWorkspace);
+  MatrixWorkspace_const_sptr const inputWorkspace = getProperty("InputWorkspace");
+  MatrixWorkspace_sptr const outputWorkspace = createOutputWorkspace(inputWorkspace);
 
   // Things to take care of RebinnedOutput workspaces
-  DataObjects::RebinnedOutput_const_sptr inRebinWorkspace =
+  DataObjects::RebinnedOutput_const_sptr const inRebinWorkspace =
       std::dynamic_pointer_cast<const DataObjects::RebinnedOutput>(inputWorkspace);
-  DataObjects::RebinnedOutput_sptr outRebinWorkspace =
+  DataObjects::RebinnedOutput_sptr const outRebinWorkspace =
       std::dynamic_pointer_cast<DataObjects::RebinnedOutput>(outputWorkspace);
 
-  size_t newNhist = outputWorkspace->getNumberHistograms();
-  size_t newXsize = outputWorkspace->x(0).size();
-  size_t newYsize = outputWorkspace->blocksize();
+  size_t const newNhist = outputWorkspace->getNumberHistograms();
+  size_t const newXsize = outputWorkspace->x(0).size();
+  size_t const newYsize = outputWorkspace->blocksize();
 
   // Create a shareable X vector for the output workspace
-  Axis *inputYAxis = getVerticalAxis(inputWorkspace);
+  Axis const *inputYAxis = getVerticalAxis(inputWorkspace);
   std::vector<double> newXValues(newXsize);
   for (size_t i = 0; i < newXsize; ++i) {
     newXValues[i] = (*inputYAxis)(i);
@@ -93,7 +93,7 @@ void Transpose::exec() {
  * @return A pointer to the output workspace.
  */
 API::MatrixWorkspace_sptr Transpose::createOutputWorkspace(const API::MatrixWorkspace_const_sptr &inputWorkspace) {
-  Mantid::API::Axis *yAxis = getVerticalAxis(inputWorkspace);
+  Mantid::API::Axis const *yAxis = getVerticalAxis(inputWorkspace);
   const size_t oldNhist = inputWorkspace->getNumberHistograms();
   const auto &inX = inputWorkspace->x(0);
   const size_t oldYlength = inputWorkspace->blocksize();

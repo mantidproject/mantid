@@ -13,7 +13,7 @@ namespace Mantid::API {
 class MANTID_API_DLL IAlgorithmRuntimeProps : public virtual Mantid::Kernel::IPropertyManager {
 public:
   IAlgorithmRuntimeProps() = default;
-  virtual ~IAlgorithmRuntimeProps() = default;
+  ~IAlgorithmRuntimeProps() override = default;
 
   using Mantid::Kernel::IPropertyManager::getDeclaredPropertyNames;
 
@@ -29,8 +29,8 @@ public:
     }
   }
 
-  virtual void setPropertyValue(const std::string &, const std::string &) override = 0;
-  virtual TypedValue getProperty(const std::string &name) const override = 0;
+  void setPropertyValue(const std::string &, const std::string &) override = 0;
+  TypedValue getProperty(const std::string &name) const override = 0;
 };
 
 } // namespace Mantid::API
