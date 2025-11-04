@@ -107,7 +107,7 @@ public:
   uint32_t tofOffset() const { return m_fields[5] & 0x7fffffff; }
   uint32_t tofField() const { return m_fields[5]; }
 
-  const Event *events() const { return (const Event *)&m_fields[6]; }
+  const Event *events() const { return reinterpret_cast<const Event *>(&m_fields[6]); }
   uint32_t num_events() const { return (m_payload_len - 24) / (uint32_t)(2 * sizeof(uint32_t)); }
 
 private:

@@ -406,7 +406,8 @@ template <typename T> void SumEventsByLogValue::createBinnedOutput(const Kernel:
 
   // The errors are the sqrt of the counts so long as we don't deal with
   // weighted events.
-  std::transform(Y.cbegin(), Y.cend(), outputWorkspace->mutableE(0).begin(), (double (*)(double))std::sqrt);
+  std::transform(Y.cbegin(), Y.cend(), outputWorkspace->mutableE(0).begin(),
+                 static_cast<double (*)(double)>(std::sqrt));
 
   setProperty("OutputWorkspace", outputWorkspace);
 }
