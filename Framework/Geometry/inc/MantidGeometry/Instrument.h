@@ -213,9 +213,6 @@ public:
 
   bool isEmptyInstrument() const;
 
-  /// Add a component to the instrument
-  virtual int add(IComponent *component) override;
-
   void parseTreeAndCacheBeamline();
   std::pair<std::unique_ptr<ComponentInfo>, std::unique_ptr<DetectorInfo>>
   makeBeamline(ParameterMap &pmap, const ParameterMap *source = nullptr) const;
