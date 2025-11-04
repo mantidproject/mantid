@@ -76,7 +76,7 @@ void FindFilesWorker::run() {
     else if (m_parameters.isForRunFiles) {
       filenames = fileSearcher.findRuns(m_parameters.searchText, m_parameters.extensions);
       valueForProperty = "";
-      for (auto &filename : filenames) {
+      for (auto const &filename : filenames) {
         valueForProperty += QString::fromStdString(filename) + ",";
       }
       valueForProperty.chop(1);
@@ -138,7 +138,7 @@ std::pair<std::vector<std::string>, std::string> FindFilesWorker::getFilesFromAl
   std::string valueForProperty = prop->value();
 
   auto *fileProp = dynamic_cast<FileProperty *>(prop);
-  auto *multiFileProp = dynamic_cast<MultipleFileProperty *>(prop);
+  auto const *multiFileProp = dynamic_cast<MultipleFileProperty *>(prop);
 
   if (fileProp) {
     filenames.emplace_back(fileProp->value());
