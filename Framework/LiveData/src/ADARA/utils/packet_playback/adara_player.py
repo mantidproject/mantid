@@ -136,6 +136,8 @@ class SocketAddress:
 
 
 class Packet:
+    HEADER_BYTES = 16
+
     class Type(IntEnum):
         RAW_EVENT_TYPE = (0x0000, 0x01)
         RTDL_TYPE = (0x0001, 0x01)
@@ -179,12 +181,11 @@ class Packet:
         def asPacketField(self) -> int:
             return self._value_ << 8 | self.version
 
-    def __init__(self, header: bytes, payload: bytes = b"", source: str = ""):
+    def __init__(self, header: bytes, payload: bytes = b"", source: str | None = None):
         self._header = header
         self._payload = payload
         self._source = source
 
-        # Also provide the hex digest
         sha256 = hashlib.sha256()
         sha256.update(header + payload)
         self._SHA = sha256.hexdigest()
@@ -192,14 +193,21 @@ class Packet:
         # Use LITTLE-ENDIAN byte order here!
         payload_len = struct.unpack("<I", header[0:4])[0]
         self._size = len(header) + payload_len
-
         type_field = struct.unpack("<I", header[4:8])[0]
-        self._packet_type = Packet.Type(type_field >> 8)
+
+        # Extract type value before creating enum
+        type_value = type_field >> 8
+        version = type_field & 0xFF
+
+        try:
+            self._packet_type = Packet.Type(type_value)
+        except ValueError:
+            raise ValueError(f"Invalid ADARA packet type: 0x{type_value:04X} (version {version}). Type field: 0x{type_field:08X}")
 
         tv_sec = struct.unpack("<I", header[8:12])[0]
         tv_nsec = struct.unpack("<I", header[12:16])[0]
-        self._pulseid = tv_sec << 32 | tv_nsec
-        self._timestamp = np.datetime64((tv_sec + EPICS_EPOCH_OFFSET) * 10**9 + tv_nsec, "ns")
+        self._pulseid = (tv_sec << 32) | tv_nsec
+        self._timestamp = np.datetime64(tv_sec + EPICS_EPOCH_OFFSET, "s") + np.timedelta64(tv_nsec, "ns")
 
     @property
     def header(self) -> bytes:
@@ -210,7 +218,7 @@ class Packet:
         return self._payload
 
     @property
-    def source(self) -> str:
+    def source(self) -> str | None:
         return self._source
 
     @property
@@ -239,7 +247,7 @@ class Packet:
         # If `header_only=True`, only read the headers:
         # for best efficiency in this case, open files as `open(<filename>, 'rb', buffering=0)`.
         while True:
-            header = src.read(16)
+            header = src.read(cls.HEADER_BYTES)
             if not header:
                 break
             payload_len = struct.unpack("<I", header[0:4])[0]
@@ -253,6 +261,26 @@ class Packet:
     @classmethod
     def to_file(cls, dest: BinaryIO, packet: "Packet"):
         dest.write(packet.header + packet.payload)
+
+    @classmethod
+    def from_file(cls, src: BinaryIO, source: str = None) -> "Packet":
+        """Read a single packet from a file object."""
+        header = src.read(cls.HEADER_BYTES)
+        if not header:
+            raise EOFError("No data available to read")
+        if len(header) < cls.HEADER_BYTES:
+            raise EOFError(f"Incomplete header: got {len(header)} bytes, expected {cls.HEADER_BYTES}")
+
+        payload_len = struct.unpack("<I", header[0:4])[0]
+
+        if payload_len > 0:
+            payload = src.read(payload_len)
+            if len(payload) < payload_len:
+                raise EOFError(f"Incomplete payload: got {len(payload)} bytes, expected {payload_len}")
+        else:
+            payload = b""
+
+        return cls(header=header, payload=payload, source=source)
 
     @classmethod
     def to_socket(cls, dest: socket.socket, packet: "Packet"):
@@ -354,8 +382,8 @@ class Packet:
 class ClientHelloPacket(Packet):
     def __init__(self, header: bytes, payload: bytes):
         super().__init__(header, payload)
-        if self.type != Packet.Type.CLIENT_HELLO_TYPE:
-            raise ValueError(f"Expecting 'CLIENT_HELLO_TYPE' not '{self.type}'.")
+        if self.packet_type != Packet.Type.CLIENT_HELLO_TYPE:
+            raise ValueError(f"Expecting 'CLIENT_HELLO_TYPE' not '{self._packet_type}'.")
         self._start_time = np.datetime64(struct.unpack("<I", self.payload[0:4])[0], "s")
 
     @property
