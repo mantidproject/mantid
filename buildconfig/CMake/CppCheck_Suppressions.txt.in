@@ -188,7 +188,6 @@ containerOutOfBounds:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/SaveHKL.cpp:607
 constVariable:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/SaveIsawUB.cpp:49
 constVariable:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/SaveIsawUB.cpp:50
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/SelectCellWithForm.cpp:134
-uselessOverride:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/inc/MantidCurveFitting/Functions/UserFunction1D.h:64
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Algorithms/Fit1D.cpp:379
 derefInvalidIteratorRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/ExcludeRangeFinder.cpp:77
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/FuncMinimizers/FABADAMinimizer.cpp:377
