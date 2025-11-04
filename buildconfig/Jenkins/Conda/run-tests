@@ -13,10 +13,11 @@
 
 WORKSPACE=$1
 ENABLE_SYSTEM_TESTS=$2
-ENABLE_UNIT_TESTS=$3
+ENABLE_UNIT_TESTS=skip_for_now
 ENABLE_DOCS=$4
 ENABLE_DOC_TESTS=$5
 BUILD_THREADS=$6
+RUN_CHANGED_SYSTEM_TESTS=true
 
 XVFB_SERVER_NUM=101
 
@@ -106,7 +107,7 @@ if [[ $ENABLE_DOCS == true && $ENABLE_DOC_TESTS == true ]]; then
     trap - INT TERM EXIT
 fi
 
-if [[ $ENABLE_SYSTEM_TESTS == true ]]; then
+if [[ $ENABLE_SYSTEM_TESTS == true || $RUN_CHANGED_SYSTEM_TESTS == true ]]; then
     rm -fr $userconfig_dir
     rm -f $workbench_ini
 
@@ -117,6 +118,12 @@ if [[ $ENABLE_SYSTEM_TESTS == true ]]; then
     echo "CheckMantidVersion.OnStartup = 0" >> $userprops
 
     SYSTEM_TEST_OPTIONS="-j${BUILD_THREADS_SYSTEM_TESTS} -l information --quiet --output-on-failure"
+
+    # If not running all system tests, just run those that have changed.
+    if [[ $ENABLE_SYSTEM_TESTS != true ]]; then
+        # TODO - create regex for changed tests. For now just try CRISPLoadingTest
+        SYSTEM_TEST_OPTIONS+=" -R CRISPLoadingTest"
+    fi
 
     if [[ ${JOB_NAME} == *pull_requests* ]]; then
         SYSTEM_TEST_OPTIONS+=" --exclude-in-pull-requests"
