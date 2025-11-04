@@ -327,7 +327,7 @@ bool ExportTimeSeriesLog::calculateTimeSeriesRangeByTime(std::vector<Types::Core
   // Check existence of proton_charge as run start
   Types::Core::DateAndTime run_start(0);
   if (m_inputWS->run().hasProperty("proton_charge")) {
-    auto const ts = dynamic_cast<TimeSeriesProperty<double> *>(m_inputWS->run().getProperty("proton_charge"));
+    auto const *ts = dynamic_cast<TimeSeriesProperty<double> const *>(m_inputWS->run().getProperty("proton_charge"));
     if (nullptr == ts) {
       throw std::runtime_error("Found the run property proton_charge but failed to interpret it "
                                "as a time series property of double values (failed dynamic cast).");

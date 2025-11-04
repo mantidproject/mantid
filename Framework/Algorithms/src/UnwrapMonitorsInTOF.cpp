@@ -68,8 +68,9 @@ double getDistanceFromSourceForWorkspaceIndex(Mantid::API::MatrixWorkspace const
   return detector.getDistance(*(workspace->getInstrument()->getSource()));
 }
 
-MinAndMaxTof getMinAndMaxTof(Mantid::API::MatrixWorkspace *workspace, const Mantid::API::SpectrumInfo &spectrumInfo,
-                             size_t workspaceIndex, double lowerWavelengthLimit, double upperWavelengthLimit) {
+MinAndMaxTof getMinAndMaxTof(Mantid::API::MatrixWorkspace const *workspace,
+                             const Mantid::API::SpectrumInfo &spectrumInfo, size_t workspaceIndex,
+                             double lowerWavelengthLimit, double upperWavelengthLimit) {
   const auto distanceFromSource = getDistanceFromSourceForWorkspaceIndex(workspace, spectrumInfo, workspaceIndex);
   return getMinAndMaxTofForDistanceFromSoure(distanceFromSource, lowerWavelengthLimit, upperWavelengthLimit);
 }

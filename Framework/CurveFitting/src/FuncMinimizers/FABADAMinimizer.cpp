@@ -804,7 +804,7 @@ double FABADAMinimizer::outputPDF(std::size_t const &convLength, std::vector<std
 }
 
 void FABADAMinimizer::outputPDF(std::vector<double> &xValues, std::vector<double> &yValues,
-                                std::vector<std::vector<double>> &reducedChain, std::size_t const &convLength,
+                                std::vector<std::vector<double>> const &reducedChain, std::size_t const &convLength,
                                 int const &pdfLength) {
   setParameterXAndYValuesForPDF(xValues, yValues, reducedChain, convLength, pdfLength);
   auto parameterNames = m_fitFunction->getParameterNames();

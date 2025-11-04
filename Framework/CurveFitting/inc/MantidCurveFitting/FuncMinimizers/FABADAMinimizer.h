@@ -77,7 +77,8 @@ private:
   /// Output PDF
   double outputPDF(std::size_t const &convLength, std::vector<std::vector<double>> &reducedChain);
   void outputPDF(std::vector<double> &xValues, std::vector<double> &yValues,
-                 std::vector<std::vector<double>> &reducedChain, std::size_t const &convLength, int const &pdfLength);
+                 std::vector<std::vector<double>> const &reducedChain, std::size_t const &convLength,
+                 int const &pdfLength);
   /// Finds the most probable Chi Squared value
   double getMostProbableChiSquared(std::size_t const &convLength, std::vector<std::vector<double>> const &reducedChain,
                                    int const &pdfLength, std::vector<double> &xValues, std::vector<double> &yValues,
