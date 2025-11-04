@@ -294,8 +294,6 @@ constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Crystal/Index
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Crystal/ProductOfCyclicGroups.cpp:49
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Crystal/ScalarUtils.cpp:389
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Crystal/StructureFactorCalculatorSummation.cpp:55
-shadowFunction:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Instrument.cpp:629
-shadowFunction:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Instrument.cpp:642
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Instrument/CompAssembly.cpp:376
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Instrument/CompAssembly.cpp:405
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Instrument/ComponentInfo.cpp:129
