@@ -297,6 +297,8 @@ constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Rendering/Rend
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Rendering/vtkGeometryCacheReader.cpp:64
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Rendering/vtkGeometryCacheWriter.cpp:83
 invalidFunctionArgBool:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Surfaces/General.cpp:53
+uselessOverride:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/ArrayProperty.h:47
+uselessOverride:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/ArrayProperty.h:49
 comparisonOfFuncReturningBoolError:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/BoundedValidator.h:148
 comparisonOfFuncReturningBoolError:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/BoundedValidator.h:156
 missingOverride:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/ConfigPropertyObserver.h:20
