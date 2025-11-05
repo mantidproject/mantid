@@ -626,8 +626,8 @@ void Instrument::markAsDetector(const IDetector *det) {
   if ((it != m_detectorCache.end()) && (std::get<0>(*it) == det->getID())) {
     raiseDuplicateDetectorError(det->getID());
   }
-  bool isMonitor = false;
-  m_detectorCache.emplace(it, det->getID(), det_sptr, isMonitor);
+  bool isMonitorFlag = false;
+  m_detectorCache.emplace(it, det->getID(), det_sptr, isMonitorFlag);
 }
 
 /// As markAsDetector but without the required sorting. Must call
@@ -639,8 +639,8 @@ void Instrument::markAsDetectorIncomplete(const IDetector *det) {
 
   // Create a (non-deleting) shared pointer to it
   IDetector_const_sptr det_sptr = IDetector_const_sptr(det, NoDeleting());
-  bool isMonitor = false;
-  m_detectorCache.emplace_back(det->getID(), det_sptr, isMonitor);
+  bool isMonitorFlag = false;
+  m_detectorCache.emplace_back(det->getID(), det_sptr, isMonitorFlag);
 }
 
 /// Sorts the detector cache. Called after all detectors have been marked via
@@ -1157,11 +1157,6 @@ bool Instrument::isMonitorViaIndex(const size_t index) const {
 }
 
 bool Instrument::isEmptyInstrument() const { return this->nelements() == 0; }
-
-int Instrument::add(IComponent *component) {
-  // invalidate cache
-  return CompAssembly::add(component);
-}
 
 /// Returns the index for a detector ID. Used for accessing DetectorInfo.
 size_t Instrument::detectorIndex(const detid_t detID) const {
