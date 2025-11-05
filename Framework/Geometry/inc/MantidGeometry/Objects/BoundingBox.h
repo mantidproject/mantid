@@ -7,7 +7,6 @@
 #pragma once
 
 #include "MantidGeometry/DllConfig.h"
-#include "MantidKernel/Tolerance.h"
 #include "MantidKernel/V3D.h"
 #ifndef Q_MOC_RUN
 #include <memory>
