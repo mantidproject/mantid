@@ -1,3 +1,5 @@
+#!/bin/bash -ex
+
 # This script will set up a conda environment before building the doxygen target.
 #
 # Script usage:
@@ -22,6 +24,11 @@ WORKSPACE=$1
 shift 1
 
 cd $WORKSPACE
+
+if $SCRIPT_DIR/../check_for_changes doxygen; then
+    echo "No C++ files or doxygen configuration have changed. Skipping check."
+    exit 0
+fi
 
 # Setup Mamba. Create and activate environment
 setup_mamba $WORKSPACE/miniforge "" true ""
