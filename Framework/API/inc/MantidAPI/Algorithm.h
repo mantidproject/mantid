@@ -21,7 +21,6 @@
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidAPI/WorkspaceProperty.h"
-#include "MantidKernel/EmptyValues.h"
 
 namespace Poco {
 template <class R, class A, class O, class S> class ActiveMethod;
