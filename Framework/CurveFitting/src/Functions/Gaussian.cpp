@@ -43,16 +43,16 @@ void Gaussian::functionLocal(double *out, const double *xValues, const size_t nD
 void Gaussian::functionDerivLocal(Jacobian *out, const double *xValues, const size_t nData) {
   const double peakHeight = getParameter("Height");
   const double peakCentre = getParameter("PeakCentre");
-  const double sigma = getParameter("Sigma");
-  const double weight = 1 / (sigma * sigma);
+  const double weight = 1 / getParameter("Sigma");
+  const double weight_sq = weight * weight;
 
   for (size_t i = 0; i < nData; i++) {
     double diff = xValues[i] - peakCentre;
-    double e = exp(-0.5 * diff * diff * weight);
+    double e = exp(-0.5 * diff * diff * weight_sq);
     out->set(i, 0, e);
-    out->set(i, 1, diff * peakHeight * e * weight);
+    out->set(i, 1, diff * peakHeight * e * weight_sq);
     out->set(i, 2,
-             diff * diff * peakHeight * e * weight / sigma); // derivative with respect to weight not sigma
+             -weight * diff * diff * peakHeight * e); // derivative with respect to weight not sigma
   }
 }
 
@@ -60,14 +60,20 @@ void Gaussian::setActiveParameter(size_t i, double value) {
   if (!isActive(i)) {
     throw std::runtime_error("Attempt to use an inactive parameter");
   }
-  setParameter(i, value, false);
+  if (parameterName(i) == "Sigma")
+    setParameter(i, 1. / value, false);
+  else
+    setParameter(i, value, false);
 }
 
 double Gaussian::activeParameter(size_t i) const {
   if (!isActive(i)) {
     throw std::runtime_error("Attempt to use an inactive parameter");
   }
-  return getParameter(i);
+  if (parameterName(i) == "Sigma")
+    return 1. / getParameter(i);
+  else
+    return getParameter(i);
 }
 
 double Gaussian::centre() const { return getParameter("PeakCentre"); }
