@@ -180,8 +180,10 @@ if [[ ${ENABLE_SYSTEM_TESTS} == false ]]; then
     SYSTEM_TEST_REGEX="CRISPLoadingTest"
 fi
 
+# If system tests are enabled, or if the regex of changed system tests is not empty, need to build the system
+# test data target.
 BUILD_SYSTEM_TESTS=false
-if [[ -z "$SYSTEM_TEST_REGEX" || ${ENABLE_SYSTEM_TESTS} == true ]]; then
+if [[ -n "$SYSTEM_TEST_REGEX" || ${ENABLE_SYSTEM_TESTS} == true ]]; then
     BUILD_SYSTEM_TESTS=true
 fi
 
