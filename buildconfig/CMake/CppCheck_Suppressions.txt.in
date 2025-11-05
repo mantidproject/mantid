@@ -78,10 +78,6 @@ constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/IPeaksWorkspace.cpp:5
 operatorEqVarError:${CMAKE_SOURCE_DIR}/Framework/API/src/ISpectrum.cpp:156
 operatorEqVarError:${CMAKE_SOURCE_DIR}/Framework/API/src/ISpectrum.cpp:167
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/ITableWorkspace.cpp:118
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/API/src/LogManager.cpp:221
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/API/src/MDGeometry.cpp:229
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/API/src/MDGeometry.cpp:243
-constParameterReference:${CMAKE_SOURCE_DIR}/Framework/API/src/MDGeometry.cpp:395
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/MatrixWorkspaceMDIterator.cpp:100
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/API/src/MultiDomainFunction.cpp:135
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/API/src/MultiDomainFunction.cpp:174
@@ -93,13 +89,10 @@ constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/MultiPeriodGroupWorke
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/NumericAxisValidator.cpp:26
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/ParameterReference.cpp:52
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/PeakFunctionIntegrator.cpp:190
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/API/src/Run.cpp:369
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/API/src/ScopedWorkspace.cpp:49
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/API/src/ScriptBuilder.cpp:279
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/SpectraAxisValidator.cpp:26
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/WorkspaceGroup.cpp:79
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/API/src/WorkspaceGroup.cpp:153
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/API/src/WorkspaceGroup.cpp:434
 passedByValue:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/CalculateDIFC.cpp:41
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/ChangeLogTime.cpp:59
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/ChangeTimeZero.cpp:154
@@ -119,7 +112,6 @@ constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/DiffractionEve
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/DiffractionFocussing.cpp:116
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/DirectILLTubeBackground.cpp:351
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/DirectILLTubeBackground.cpp:367
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/DiscusMultipleScatteringCorrection.cpp:735
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/EQSANSTofStructure.cpp:71
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/EQSANSTofStructure.cpp:81
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/EstimateResolutionDiffraction.cpp:188
@@ -127,15 +119,12 @@ constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/ExportTimeSeri
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/ExportTimeSeriesLog.cpp:330
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/FilterByLogValue.cpp:82
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/FilterEvents.cpp:304
-constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/FindPeakBackground.cpp:272
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/FindPeakBackground.cpp:275
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/FindPeaks.cpp:892
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/FindPeaks.cpp:999
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/GenerateEventsFilter.cpp:752
 containerOutOfBounds:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/GenerateEventsFilter.cpp:1263
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/GenerateEventsFilter.cpp:1804
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/GenerateGoniometerIndependentBackground.cpp:189
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/GeneratePeaks.cpp:512
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/GeneratePeaks.cpp:518
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/GetEi2.cpp:510
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/GetEi2.cpp:517
@@ -154,7 +143,6 @@ constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/PDDetermineC
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/PDDetermineCharacterizations.cpp:260
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/PaalmanPingsAbsorptionCorrection.cpp:464
 containerOutOfBounds:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/SampleCorrections/SparseWorkspace.cpp:32
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/SampleCorrections/SparseWorkspace.cpp:34
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/ShiftLogTime.cpp:61
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/SofQCommon.cpp:25
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/SofQWNormalisedPolygon.cpp:537
@@ -176,7 +164,6 @@ constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/IndexSXPeaks.c
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/IndexSXPeaks.cpp:181
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/IntegratePeakTimeSlices.cpp:207
 variableScope:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/IntegratePeakTimeSlices.cpp:239
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/IntegratePeakTimeSlices.cpp:1640
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/OptimizeCrystalPlacement.cpp:165
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/PeakIntegration.cpp:105
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/PeakIntensityVsRadius.cpp:184
@@ -208,7 +195,6 @@ constParameterReference:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Functions
 duplicateCondition:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Functions/CrystalFieldFunction.cpp:120
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Functions/CrystalFieldMultiSpectrum.cpp:240
 constParameter:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Functions/DynamicKuboToyabe.cpp:69
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Functions/GramCharlierComptonProfile.cpp:48
 constVariable:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Functions/InelasticDiffSphere.cpp:58
 constVariable:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Functions/InelasticDiffSphere.cpp:70
 constVariable:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Functions/InelasticDiffSphere.cpp:75
@@ -219,7 +205,6 @@ constVariableReference:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/MSVesuvioH
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/MSVesuvioHelpers.cpp:370
 unsignedLessThanZero:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/ParDomain.cpp:72
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/RalNlls/TrustRegion.cpp:280
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/DefaultEventLoader.cpp:112
 constVariable:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadAscii2.cpp:787
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadCalFile.cpp:57
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadHFIRSANS.cpp:433

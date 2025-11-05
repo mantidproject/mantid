@@ -215,13 +215,12 @@ const DateAndTime LogManager::getFirstPulseTime() const {
   const DateAndTime reference("1991-01-01T00:00:00");
   const std::vector<DateAndTime> &times = log->timesAsVector();
   const size_t maxSkip{100};
-  size_t index;
   const size_t maxIndex = std::min(static_cast<size_t>(log->realSize()), maxSkip);
-  for (index = 0; index < maxIndex; index++) {
-    if (times[index] >= reference)
-      return times[index];
+  const auto it = std::find_if(times.cbegin(), times.cbegin() + maxIndex,
+                               [&reference](const auto &time) { return time >= reference; });
+  if (it != times.cbegin() + maxIndex) {
+    return *it;
   }
-
   return times[maxIndex - 1];
 }
 
