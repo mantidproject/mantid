@@ -39,6 +39,7 @@ class Test_Player_play(unittest.TestCase):
                 },
             ),
             patch("adara_player.Player._get_server_address", return_value="/tmp/sock-test"),
+            patch.object(Player, "PLAYBACK_HANDSHAKE", "none"),  # patch class attribute
         ):
             player = Player()
 
@@ -76,6 +77,7 @@ class Test_Player_play(unittest.TestCase):
                 },
             ),
             patch("adara_player.Player._get_server_address", return_value="/tmp/sock-test"),
+            patch.object(Player, "PLAYBACK_HANDSHAKE", "client_hello"),  # patch class attribute
         ):
             player = Player()
 
@@ -120,6 +122,7 @@ class Test_Player_play(unittest.TestCase):
                 },
             ),
             patch("adara_player.Player._get_server_address", return_value="/tmp/sock-test"),
+            patch.object(Player, "PLAYBACK_HANDSHAKE", "client_hello"),  # patch class attribute
         ):
             player = Player()
 
@@ -152,6 +155,7 @@ class Test_Player_play(unittest.TestCase):
                 },
             ),
             patch("adara_player.Player._get_server_address", return_value="/tmp/sock-test"),
+            patch.object(Player, "PLAYBACK_HANDSHAKE", "client_hello"),  # patch class attribute
         ):
             player = Player()
 
@@ -184,6 +188,7 @@ class Test_Player_play(unittest.TestCase):
                 },
             ),
             patch("adara_player.Player._get_server_address", return_value="/tmp/sock-test"),
+            patch.object(Player, "PLAYBACK_HANDSHAKE", "none"),  # patch class attribute
         ):
             player = Player()
 
@@ -209,6 +214,7 @@ class Test_Player_play(unittest.TestCase):
                 },
             ),
             patch("adara_player.Player._get_server_address", return_value="/tmp/sock-test"),
+            patch.object(Player, "PLAYBACK_HANDSHAKE", "none"),  # patch class attribute
         ):
             player = Player()
 
@@ -245,6 +251,7 @@ class Test_Player_play(unittest.TestCase):
                 },
             ),
             patch("adara_player.Player._get_server_address", return_value="/tmp/sock-test"),
+            patch.object(Player, "PLAYBACK_HANDSHAKE", "none"),  # patch class attribute
         ):
             player = Player()
 
@@ -302,22 +309,38 @@ class Test_Player_play(unittest.TestCase):
                 },
             ),
             patch("adara_player.Player._get_server_address", return_value="/tmp/sock-test"),
+            patch.object(Player, "PLAYBACK_HANDSHAKE", "none"),  # patch class attribute
         ):
             player = Player()
 
             mock_socket = MagicMock(spec=socket.socket)
 
-            # Mock empty packet iterator
-            with patch.object(Packet, "iter_files", return_value=iter([])):
-                # Should handle gracefully (no exception)
-                player._running = True
-                player.stream_packets(Path("/fake"), "*.adara", mock_socket)
+            # Set up timeout alarm to detect infinite loops
+            old_handler = signal.signal(signal.SIGALRM, timeout_handler)
+            signal.alarm(5)  # 5 second timeout
+
+            try:
+                # Mock empty packet iterator
+                with patch.object(Packet, "iter_files", return_value=iter([])):
+                    # Should handle gracefully (no exception)
+                    player._running = True
+                    player.stream_packets(Path("/fake"), "*.adara", mock_socket)
 
                 # Verify no packets were sent
                 with patch.object(Packet, "to_socket") as mock_send:
                     player._running = True
                     player.stream_packets(Path("/fake"), "*.adara", mock_socket)
                     mock_send.assert_not_called()
+
+            except TimeoutException:
+                self.fail(
+                    "`stream_packets` entered infinite loop with empty packet iterator. The code should handle empty iterators gracefully."
+                )
+
+            finally:
+                # Cancel the alarm and restore old handler
+                signal.alarm(0)
+                signal.signal(signal.SIGALRM, old_handler)
 
     def test_unexpected_client_packet(self):
         """Ensures warnings are logged for any packet received from the client unexpectedly."""
@@ -331,6 +354,7 @@ class Test_Player_play(unittest.TestCase):
                 },
             ),
             patch("adara_player.Player._get_server_address", return_value="/tmp/sock-test"),
+            patch.object(Player, "PLAYBACK_HANDSHAKE", "none"),  # patch class attribute
         ):
             player = Player()
 
@@ -346,20 +370,36 @@ class Test_Player_play(unittest.TestCase):
 
             mock_socket = MagicMock(spec=socket.socket)
 
-            # Mock select to indicate socket is readable (unexpected data)
-            with (
-                patch("select.select", return_value=([mock_socket], [mock_socket], [])),
-                patch.object(Packet, "iter_files", return_value=iter([mock_packet])),
-                patch.object(Packet, "from_socket", return_value=unexpected_packet),
-                patch.object(Packet, "to_socket"),
-                patch("adara_player._logger") as mock_logger,
-            ):
-                player._running = True
-                player.stream_packets(Path("/fake"), "*.adara", mock_socket)
+            # Set up timeout alarm to detect infinite loops
+            old_handler = signal.signal(signal.SIGALRM, timeout_handler)
+            signal.alarm(5)  # 5 second timeout
 
-                # Verify warning was logged about unexpected packet
-                warning_logged = any("Unexpected packet" in str(call_args) for call_args in mock_logger.warning.call_args_list)
-                self.assertTrue(warning_logged)
+            try:
+                # Mock select to indicate socket is readable (unexpected data)
+                with (
+                    patch("select.select", return_value=([mock_socket], [mock_socket], [])),
+                    patch.object(Packet, "iter_files", return_value=iter([mock_packet])),
+                    patch.object(Packet, "from_socket", return_value=unexpected_packet),
+                    patch.object(Packet, "to_socket"),
+                    patch("adara_player._logger") as mock_logger,
+                ):
+                    player._running = True
+                    player.stream_packets(Path("/fake"), "*.adara", mock_socket)
+
+                    # Verify warning was logged about unexpected packet
+                    warning_logged = any("Unexpected packet" in str(call_args) for call_args in mock_logger.warning.call_args_list)
+                    self.assertTrue(warning_logged)
+
+            except TimeoutException:
+                self.fail(
+                    "`stream_packets` entered infinite loop when handling unexpected client packet. "
+                    "Check the packet buffer management logic."
+                )
+
+            finally:
+                # Cancel the alarm and restore old handler
+                signal.alarm(0)
+                signal.signal(signal.SIGALRM, old_handler)
 
     def test_socket_not_writable_retry(self):
         """Verifies retries if the client socket isn't writable."""
@@ -373,6 +413,7 @@ class Test_Player_play(unittest.TestCase):
                 },
             ),
             patch("adara_player.Player._get_server_address", return_value="/tmp/sock-test"),
+            patch.object(Player, "PLAYBACK_HANDSHAKE", "none"),  # patch class attribute
         ):
             player = Player()
 
@@ -389,23 +430,36 @@ class Test_Player_play(unittest.TestCase):
                 ([], [mock_socket], []),  # Writable
             ]
 
-            with (
-                patch("select.select", side_effect=select_results),
-                patch.object(Packet, "iter_files", return_value=iter([mock_packet])),
-                patch.object(Packet, "to_socket") as mock_send,
-                patch("time.sleep") as mock_sleep,
-            ):
-                player._running = True
-                player.stream_packets(Path("/fake"), "*.adara", mock_socket)
+            # Set up timeout alarm to detect infinite loops
+            old_handler = signal.signal(signal.SIGALRM, timeout_handler)
+            signal.alarm(5)  # 5 second timeout
 
-                # Verify sleep was called (retry logic)
-                mock_sleep.assert_called()
+            try:
+                with (
+                    patch("select.select", side_effect=select_results),
+                    patch.object(Packet, "iter_files", return_value=iter([mock_packet])),
+                    patch.object(Packet, "to_socket") as mock_send,
+                    patch("time.sleep") as mock_sleep,
+                ):
+                    player._running = True
+                    player.stream_packets(Path("/fake"), "*.adara", mock_socket)
+
+                    # Verify sleep was called (retry logic)
+                    mock_sleep.assert_called()
+
+            except TimeoutException:
+                self.fail(
+                    "`stream_packets` entered infinite loop during socket retry logic. "
+                    "Check the buffer management when socket is not writable."
+                )
+
+            finally:
+                # Cancel the alarm and restore old handler
+                signal.alarm(0)
+                signal.signal(signal.SIGALRM, old_handler)
 
     def test_cleanup_and_disconnect(self):
         """Ensures server shutdown and all resources are handled after client disconnect."""
-
-        # *** DEBUG ***
-        print("*** `test_cleanup_and_disconnect`: at entry ***", flush=True)
 
         with (
             patch(
@@ -417,11 +471,9 @@ class Test_Player_play(unittest.TestCase):
                 },
             ),
             patch("adara_player.Player._get_server_address", return_value="/tmp/sock-test"),
+            patch.object(Player, "PLAYBACK_HANDSHAKE", "none"),  # patch class attribute
         ):
             player = Player()
-
-            # *** DEBUG ***
-            print("*** `test_cleanup_and_disconnect`: main clause ***", flush=True)
 
             mock_server_socket = MagicMock(spec=socket.socket)
             mock_client_socket = MagicMock(spec=socket.socket)
@@ -432,13 +484,7 @@ class Test_Player_play(unittest.TestCase):
                 patch.object(player, "stream_packets"),
                 patch.object(player, "_cleanup") as mock_cleanup,
             ):
-                # *** DEBUG ***
-                print("*** `test_cleanup_and_disconnect`: before `play` ***", flush=True)
-
                 player.play(Path("/fake/path"), "*.adara")
-
-                # *** DEBUG ***
-                print("*** `test_cleanup_and_disconnect`: after `play` ***", flush=True)
 
                 # Verify cleanup was called
                 mock_cleanup.assert_called_once()
@@ -458,6 +504,7 @@ class Test_Player_play(unittest.TestCase):
                 },
             ),
             patch("adara_player.Player._get_server_address", return_value="/tmp/sock-test"),
+            patch.object(Player, "PLAYBACK_HANDSHAKE", "none"),  # patch class attribute
         ):
             player = Player()
 
