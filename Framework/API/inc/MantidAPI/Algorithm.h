@@ -22,7 +22,6 @@
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidKernel/EmptyValues.h"
-#include "MantidKernel/MultiThreaded.h"
 
 namespace Poco {
 template <class R, class A, class O, class S> class ActiveMethod;
