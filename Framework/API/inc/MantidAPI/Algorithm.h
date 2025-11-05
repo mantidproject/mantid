@@ -13,7 +13,6 @@
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/IndexTypeProperty.h"
 #include "MantidKernel/DateAndTime.h"
-#include "MantidKernel/IValidator.h"
 #include "MantidKernel/PropertyManagerOwner.h"
 
 // -- These headers will (most-likely) be used by every inheriting algorithm
