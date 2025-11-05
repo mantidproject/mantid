@@ -10,6 +10,8 @@
 #   4. ENABLE_DOCS: Whether or not the docs have been built
 #   5. ENABLE_DOC_TESTS: Whether or not the doc tests should be run
 #   6. BUILD_THREADS: The number of threads to use during testing
+# Option args:
+#   7. SYSTEM_TEST_REGEX: a regex for selecting which system tests to run
 
 WORKSPACE=$1
 ENABLE_SYSTEM_TESTS=$2
@@ -17,7 +19,7 @@ ENABLE_UNIT_TESTS=skip_for_now
 ENABLE_DOCS=$4
 ENABLE_DOC_TESTS=$5
 BUILD_THREADS=$6
-RUN_CHANGED_SYSTEM_TESTS=true
+SYSTEM_TEST_REGEX=$7
 
 XVFB_SERVER_NUM=101
 
@@ -107,7 +109,7 @@ if [[ $ENABLE_DOCS == true && $ENABLE_DOC_TESTS == true ]]; then
     trap - INT TERM EXIT
 fi
 
-if [[ $ENABLE_SYSTEM_TESTS == true || $RUN_CHANGED_SYSTEM_TESTS == true ]]; then
+if [[ $ENABLE_SYSTEM_TESTS == true ]]; then
     rm -fr $userconfig_dir
     rm -f $workbench_ini
 
@@ -119,10 +121,10 @@ if [[ $ENABLE_SYSTEM_TESTS == true || $RUN_CHANGED_SYSTEM_TESTS == true ]]; then
 
     SYSTEM_TEST_OPTIONS="-j${BUILD_THREADS_SYSTEM_TESTS} -l information --quiet --output-on-failure"
 
-    # If not running all system tests, just run those that have changed.
-    if [[ $ENABLE_SYSTEM_TESTS != true ]]; then
-        # TODO - create regex for changed tests. For now just try CRISPLoadingTest
-        SYSTEM_TEST_OPTIONS+=" -R CRISPLoadingTest"
+    # Append the system test regex argument if required. This is currently used on Windows and MacOS
+    # PR builds to test only files that have been changed.
+    if [[ -n "$SYSTEM_TEST_REGEX" ]]; then
+        SYSTEM_TEST_OPTIONS+=" -R ${SYSTEM_TEST_REGEX}"
     fi
 
     if [[ ${JOB_NAME} == *pull_requests* ]]; then
