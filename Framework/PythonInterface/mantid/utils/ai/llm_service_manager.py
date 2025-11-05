@@ -72,7 +72,8 @@ class LLMServiceManagerImpl:
         self._application_context[ENUM_MAP[AppContext.ADS]] = AnalysisDataService.Instance().getObjectNames()
         algs = AlgorithmFactory.Instance().getRegisteredAlgorithms(True)
         short_algs = []
-        for i in range(50):
+        # disabled registered alg context as it seems to make the prompt too long
+        for i in range(0):
             name, versions = list(algs.items())[i]
             short_algs.append(name)
 
