@@ -220,11 +220,11 @@ int slsqpb_(int * /*m*/, int * /*meq*/, const int * /*la*/, int * /*n*/, double 
             double * /*xu*/, const double * /*f*/, double * /*c__*/, double * /*g*/, double * /*a*/, double * /*acc*/,
             int * /*iter*/, int * /*mode*/, double * /*r__*/, double * /*l*/, double * /*x0*/, double * /*mu*/,
             double * /*s*/, double * /*u*/, double * /*v*/, double * /*w*/, int * /*iw*/);
-int dcopy___(const int *n, double *dx, const int *incx, double *dy, const int *incy);
-int daxpy_sl__(const int *n, const double *da, double *dx, const int *incx, double *dy, const int *incy);
-int lsq_(int *m, int *meq, int *n, const int *nl, const int *la, double *l, double *g, double *a, double *b, double *xl,
-         double *xu, double *x, double *y, double *w, int *jw, int *mode);
-double ddot_sl__(const int *n, double *dx, const int *incx, double const *dy, const int *incy);
+int dcopy___(const int *n, double const *dx, const int *incx, double *dy, const int *incy);
+int daxpy_sl__(const int *n, const double *da, double const *dx, const int *incx, double *dy, const int *incy);
+int lsq_(int *m, int *meq, int *n, const int *nl, const int *la, double *l, double const *g, double *a, double *b,
+         double *xl, double *xu, double *x, double *y, double *w, int *jw, int *mode);
+double ddot_sl__(const int *n, double const *dx, const int *incx, double const *dy, const int *incy);
 int dscal_sl__(const int *n, const double *da, double *dx, const int *incx);
 double linmin_(int *mode, const double *ax, const double *bx, const double *f, const double *tol);
 double dnrm2___(const int *n, double const *dx, const int *incx);
