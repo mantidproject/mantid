@@ -12,8 +12,8 @@
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/IndexTypeProperty.h"
-#include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/PropertyManagerOwner.h"
+#include "MantidTypes/Core/DateAndTime.h"
 
 // -- These headers will (most-likely) be used by every inheriting algorithm
 #include "MantidAPI/AlgorithmFactory.h" //for the factory macro
