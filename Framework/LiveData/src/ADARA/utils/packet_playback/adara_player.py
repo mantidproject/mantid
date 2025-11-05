@@ -524,7 +524,7 @@ class Player:
                     _logger.warning("Socket not ready for writing, retrying...")
                     packet_buffer.appendleft(pkt)  # Put packet back
                     current_buffer_bytes += pkt.size
-                    time.sleep(0.001)
+                    time.sleep(0.001)  # packet rate is 60 Hz: 0.017 seconds
                     continue
 
                 # Send the packet
@@ -553,7 +553,7 @@ class Player:
 
             # Sleep if nothing to send
             if not (packet_buffer and (packet_buffer[0].timestamp - packets_start_time) <= (now - start_time)):
-                time.sleep(0.001)
+                time.sleep(0.001)  # packet rate is 60 Hz: 0.017 seconds
 
         _logger.info("Finished streaming all packets")
 
