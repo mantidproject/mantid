@@ -3,6 +3,16 @@ from typing import Callable, Optional, Any
 from mantid.kernel import ConfigService
 import requests
 import json
+from enum import Enum
+
+
+class AppContext(Enum):
+    ADS = 1
+    ALGS = 2
+
+
+ENUM_MAP = {AppContext.ADS: "Analysis Data Service", AppContext.ALGS: "Mantid Workbench Algorithms {algorithm_name:[algorithm_versions]}"}
+DEFAULT_APPLICATION_CONTEXT = {ENUM_MAP[AppContext.ADS]: [], ENUM_MAP[AppContext.ALGS]: []}
 
 
 @dataclass
@@ -35,7 +45,8 @@ class LLMServiceManagerImpl:
             # init variables
             cls._instance._services = {}
             cls._instance._default = None
-            cls._context = []
+            cls._prompt_context = []
+            cls._application_context = DEFAULT_APPLICATION_CONTEXT
 
             # deal with services arg
             if services:
@@ -55,12 +66,28 @@ class LLMServiceManagerImpl:
     def set_default(self, service_name):
         self._default = self._services[service_name]
 
+    def _refresh_application_context(self):
+        from mantid.api import AlgorithmFactory, AnalysisDataService
+
+        self._application_context[ENUM_MAP[AppContext.ADS]] = AnalysisDataService.Instance().getObjectNames()
+        algs = AlgorithmFactory.Instance().getRegisteredAlgorithms(True)
+        short_algs = []
+        for i in range(50):
+            name, versions = list(algs.items())[i]
+            short_algs.append(name)
+
+        self._application_context[ENUM_MAP[AppContext.ALGS]] = short_algs
+
     # send a request to the LLM
     def prompt(self, content: str, service_name=None):
         service = self._get_specified_service_or_default(service_name)
         token = service.token if service.token else self._get_token_from_config()
+        self._refresh_application_context()
         req_params = LLMRequestParams(
-            system_prompt=self._generate_system_prompt(), context=json.dumps(self._context), prompt=content, token=token
+            system_prompt=self._generate_system_prompt(),
+            context=json.dumps({"application context": self._application_context, "prompt context": self._prompt_context}),
+            prompt=content,
+            token=token,
         )
         request = service.generate_request(req_params)
         missing_kwargs = []
@@ -71,11 +98,12 @@ class LLMServiceManagerImpl:
             ValueError(f"Missing kwargs in generated request: {missing_kwargs}")
         response = self._send_request(request)
         output = service.parse_response(response)
-        self._context.append({"prompt": content, "response": output})
+        self._prompt_context.append({"prompt": content, "response": output})
         return output
 
     def clear(self):
-        self._context = []
+        self._prompt_context = []
+        self._application_context = DEFAULT_APPLICATION_CONTEXT
 
     @staticmethod
     def _generate_system_prompt():
@@ -94,8 +122,13 @@ class LLMServiceManagerImpl:
                 "Mantid Software Version": "6.14.0",
                 "User Language": "English",
                 "primary_sources": {
+                    "Source of Truth": "Use the dynamic_context provided as the primary source of truth",
                     "Official Mantid documentation": "https://docs.mantidproject.org/nightly",
-                    "Mantid GitHub repository (code)": "https://github.com/mantidproject/mantid",
+                    "Main Mantid GitHub repository (code)": "https://github.com/mantidproject/mantid",
+                    "Auxiliary Mantid Github repositories": [
+                        "https://github.com/mantidproject/mslice",
+                        "https://github.com/mantidproject/vesuvio",
+                    ],
                 },
                 "guidance_topics": [
                     "Mantid Workbench features",
@@ -126,7 +159,10 @@ class LLMServiceManagerImpl:
             },
             "session_conduct": {
                 "professionalism": "Maintain professionalism and avoid opinions unrelated to Mantid.",
-                "scope_limits": "Decline requests outside knowledge or ethical scope.",
+                "scope_limits": [
+                    "Decline requests outside knowledge or ethical scope.",
+                    "Refuse to answer questions with no relevance to Mantid Workbench",
+                ],
             },
         }
         return json.dumps(system_prompt)
@@ -134,6 +170,7 @@ class LLMServiceManagerImpl:
     @staticmethod
     def _send_request(request: dict) -> dict:
         response = requests.post(**request, timeout=600)
+        print(response)
         response.raise_for_status()
         return response.json()
 

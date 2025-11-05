@@ -1,15 +1,16 @@
 from .llm_service_manager import LLMService, LLMRequestParams
+import json
 
 
 def _isis_default_generate_request(params: LLMRequestParams) -> dict[str:str]:
-    url = "http://172.16.114.118:8080/v1/chat/completions"
+    # "http://172.16.114.118:8080/v1/chat/completions"
+    url = "http://172.16.114.118:8080/prompt"
     headers = {"Authorization": f"Bearer {params.token}", "Content-Type": "application/json"}
-    content = params.context + "\n" + params.prompt if params.context else params.prompt
-    print(content)
+    content = {"context": params.context, "user prompt": params.prompt} if params.context else {"user prompt": params.prompt}
     json_data = {
         "model": "qwen2.5-7b-instruct",
-        "messages": [{"role": "system", "content": f"{params.system_prompt}"}, {"role": "user", "content": f"{content}"}],
-        "max_tokens": 1000,
+        "messages": [{"role": "system", "content": f"{params.system_prompt}"}, {"role": "user", "content": f"{json.dumps(content)}"}],
+        "max_tokens": 10000,
     }
     return {"url": url, "headers": headers, "json": json_data}
 
