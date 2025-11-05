@@ -17,8 +17,8 @@
 #include <Poco/File.h>
 #include <Poco/Path.h>
 
-#include <boost/algorithm/string/join.hpp>
 #include <algorithm>
+#include <boost/algorithm/string/join.hpp>
 #include <unordered_set>
 
 using namespace Mantid;
@@ -731,15 +731,13 @@ private:
   //////////////////////////////////////////////////////////////////////////////////////////////
   // Private helper functions.
   //////////////////////////////////////////////////////////////////////////////////////////////
-  
+
   // Normalize path separators to forward slashes for consistent comparison
   std::string normalizePath(const std::string &path) const {
     std::string normalized = path;
     std::replace(normalized.begin(), normalized.end(), '\\', '/');
     return normalized;
   }
-  
-  std::string dummyFile(const std::string &filename) { 
-    return normalizePath(m_dummyFilesDir + "/" + filename); 
-  }
+
+  std::string dummyFile(const std::string &filename) { return normalizePath(m_dummyFilesDir + "/" + filename); }
 };
