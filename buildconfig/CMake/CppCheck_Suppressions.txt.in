@@ -76,14 +76,12 @@ missingOverride:${CMAKE_SOURCE_DIR}/Framework/Crystal/inc/MantidCrystal/ClearUB.
 missingOverride:${CMAKE_SOURCE_DIR}/Framework/Crystal/inc/MantidCrystal/PeaksIntersection.h:33
 variableScope:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/IntegratePeakTimeSlices.cpp:239
 containerOutOfBounds:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/SaveHKL.cpp:607
-uselessOverride:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/inc/MantidCurveFitting/Functions/UserFunction1D.h:64
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Algorithms/Fit1D.cpp:379
 derefInvalidIteratorRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/ExcludeRangeFinder.cpp:77
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Functions/BSpline.cpp:146
 variableScope:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Functions/ChebfunBase.cpp:832
 duplicateCondition:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Functions/CrystalFieldFunction.cpp:120
 constParameter:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Functions/DynamicKuboToyabe.cpp:69
-uselessCallsSubstr:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadFITS.cpp:547
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadHFIRSANS.cpp:433
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadILLDiffraction.cpp:567
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadILLDiffraction.cpp:593
@@ -104,7 +102,6 @@ unusedStructMember:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/vms_co
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/vms_convert.cpp:371
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/vms_convert.cpp:386
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadSpice2D.cpp:418
-uselessCallsSubstr:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveFocusedXYE.cpp:73
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveFullprofResolution.cpp:177
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveNexusProcessed.cpp:571
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveSampleEnvironmentAndShape.cpp:62
@@ -121,7 +118,6 @@ useInitializationList:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/TimeSplitter
 returnByReference:${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry/Crystal/BraggScattererInCrystalStructure.h:36
 returnByReference:${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry/Crystal/CrystalStructure.h:76
 virtualCallInConstructor:${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry/Crystal/UnitCell.h:212
-uselessOverride:${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry/Instrument.h:217
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry/MDGeometry/MDImplicitFunction.h:96
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry/MDGeometry/MDImplicitFunction.h:112
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry/MDGeometry/MDImplicitFunction.h:128
@@ -132,8 +128,6 @@ virtualCallInConstructor:${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeomet
 virtualCallInConstructor:${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry/Surfaces/Plane.h:75
 virtualCallInConstructor:${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry/Surfaces/Sphere.h:72
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Crystal/ProductOfCyclicGroups.cpp:49
-shadowFunction:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Instrument.cpp:629
-shadowFunction:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Instrument.cpp:642
 invalidFunctionArgBool:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Surfaces/General.cpp:53
 uselessOverride:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/ArrayProperty.h:47
 uselessOverride:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/ArrayProperty.h:49
@@ -169,12 +163,8 @@ missingOverride:${CMAKE_SOURCE_DIR}/Framework/LiveData/inc/MantidLiveData/LoadLi
 nullPointerOutOfMemory:${CMAKE_SOURCE_DIR}/Framework/LiveData/src/ISIS/DAE/idc.cpp:72
 nullPointerOutOfMemory:${CMAKE_SOURCE_DIR}/Framework/LiveData/src/ISIS/DAE/isisds_command.cpp:294
 unusedStructMember:${CMAKE_SOURCE_DIR}/Framework/LiveData/src/ISIS/FakeISISHistoDAE.cpp:27
-shadowFunction:${CMAKE_SOURCE_DIR}/Framework/LiveData/src/Kafka/KafkaTopicSubscriber.cpp:125
-shadowFunction:${CMAKE_SOURCE_DIR}/Framework/LiveData/src/Kafka/KafkaTopicSubscriber.cpp:283
-shadowFunction:${CMAKE_SOURCE_DIR}/Framework/LiveData/src/Kafka/KafkaTopicSubscriber.cpp:452
 missingOverride:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/inc/MantidMDAlgorithms/PreprocessDetectorsToMD.h:27
 templateRecursion:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/SliceMD.cpp:300
-uselessCallsSubstr:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/UnaryOperationMD.cpp:59
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Muon/src/ConvertFitFunctionForMuonTFAsymmetry.cpp:60
 returnByReference:${CMAKE_SOURCE_DIR}/Framework/Nexus/inc/MantidNexus/NexusFile.h:193
 constParameterCallback:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/inc/MantidPythonInterface/api/WorkspacePropertyExporter.h:39
