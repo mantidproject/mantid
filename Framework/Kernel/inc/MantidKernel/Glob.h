@@ -16,8 +16,8 @@
 
 namespace Mantid {
 namespace Kernel {
-/** This Glob class overrides the glob() method of Poco::Glob class
-    to make it more reliable.
+/**
+   This Glob class uses the glob() method of Poco::Glob class to make it more reliable.
 
     @author Roman Tolchenov, Tessella plc
     @date 23/07/2009

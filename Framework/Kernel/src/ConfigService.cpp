@@ -868,6 +868,10 @@ void ConfigServiceImpl::remove(const std::string &rootName) {
  */
 bool ConfigServiceImpl::hasProperty(const std::string &rootName) const { return m_pConf->hasProperty(rootName); }
 
+namespace {
+std::string expandEnvironmentInFilepath(const std::string &target) { return Poco::Path::expand(target); }
+} // namespace
+
 /** Checks to see whether the given file target is an executable one and it
  *exists.
  * This method will expand environment variables found in the given file path.
@@ -878,21 +882,17 @@ bool ConfigServiceImpl::hasProperty(const std::string &rootName) const { return 
  */
 bool ConfigServiceImpl::isExecutable(const std::string &target) const {
   try {
-    std::string expTarget = Poco::Path::expand(target);
-    std::filesystem::path filepath(expTarget);
+    std::filesystem::path filepath(expandEnvironmentInFilepath(target));
 
-    if (std::filesystem::exists(filepath)) {
+    if (std::filesystem::exists(filepath) && std::filesystem::is_regular_file(filepath)) {
       // On Unix-like systems, check execute permission
       // std::filesystem doesn't have a direct equivalent to canExecute
       // so we use std::filesystem::status
 #ifdef _WIN32
       // On Windows, check if it's a regular file with .exe, .bat, .cmd extension
-      if (std::filesystem::is_regular_file(filepath)) {
-        std::string ext = filepath.extension().string();
-        std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
-        return (ext == ".exe" || ext == ".bat" || ext == ".cmd" || ext == ".com");
-      }
-      return false;
+      std::string ext = filepath.extension().string();
+      std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
+      return (ext == ".exe" || ext == ".bat" || ext == ".cmd" || ext == ".com");
 #else
       // On Unix-like systems, check execute permissions
       auto perms = std::filesystem::status(filepath).permissions();
@@ -922,7 +922,7 @@ bool ConfigServiceImpl::isExecutable(const std::string &target) const {
 void ConfigServiceImpl::launchProcess(const std::string &programFilePath,
                                       const std::vector<std::string> &programArguments) const {
   try {
-    std::string expTarget = Poco::Path::expand(programFilePath);
+    std::string expTarget = expandEnvironmentInFilepath(programFilePath);
     Poco::Process::launch(expTarget, programArguments);
   } catch (Poco::SystemException &e) {
     throw std::runtime_error(e.what());
@@ -1278,7 +1278,7 @@ std::string ConfigServiceImpl::getAppDataDir() {
 #else // linux and mac
   const char *home = std::getenv("HOME");
   if (!home) {
-    throw std::runtime_error("HOME environment variable not set");
+    throw std::runtime_error("HOME environment variable not set - seen in ConfigService.getAppDataDir()");
   }
   std::filesystem::path path(home);
   path /= ("." + applicationName);

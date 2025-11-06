@@ -129,10 +129,10 @@ class RunDescriptorTest(unittest.TestCase):
 
         # compare filename rather than full path
         ok, file = PropertyManager.sample_run.find_file(propman)
-        self.assertEqual(testFile1, os.path.basename(file))
+        self.assertEqual(os.path.basename(testFile1), os.path.basename(file))
         PropertyManager.sample_run.set_file_ext(".raw")
         ok, file = PropertyManager.sample_run.find_file(propman)
-        self.assertEqual(testFile2, os.path.basename(file))
+        self.assertEqual(os.path.basename(testFile2), os.path.basename(file))
 
         os.remove(testFile1)
         os.remove(testFile2)
