@@ -16,8 +16,8 @@
 
 #include "Poco/File.h"
 
-#include <cxxtest/TestSuite.h>
 #include <algorithm>
+#include <cxxtest/TestSuite.h>
 #include <fstream>
 
 using namespace Mantid;
