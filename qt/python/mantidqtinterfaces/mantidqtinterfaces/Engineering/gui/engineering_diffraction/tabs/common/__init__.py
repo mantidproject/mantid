@@ -19,6 +19,27 @@ def create_error_message(parent, message):
     QMessageBox.warning(parent, "Engineering Diffraction - Error", str(message))
 
 
+def wsname_in_instr_run_ceria_group_ispec_unit_format(ws_name):
+    words = ws_name.split("_")
+    # fairly length validation method to try and determine with some confidence that
+    # filename fits the: 'INSTR_CERIANUM_RUNNUM_GROUP_ispec_UNIT' format
+    if words[0] not in INSTRUMENT_DICT.values():
+        return False
+    if not words[1].isnumeric():
+        # expect second word to be a ceria run number so all characters should be numbers
+        return False
+    if not words[2].isnumeric():
+        # expect third word to be an exp run number so all characters should be numbers
+        return False
+    if not words[4].isnumeric():
+        # should be a spectrum index
+        return False
+    if words[5] not in ("dSpacing", "TOF"):
+        # currently supported units for fitting tab
+        return False
+    return True
+
+
 class CalibrationObserver(Observer):
     def __init__(self, outer):
         Observer.__init__(self)

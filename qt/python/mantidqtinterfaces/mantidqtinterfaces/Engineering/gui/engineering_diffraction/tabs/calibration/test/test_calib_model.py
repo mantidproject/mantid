@@ -6,18 +6,19 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 from unittest import mock
-from unittest.mock import call, patch, create_autospec
+from unittest.mock import call, patch, create_autospec, MagicMock
 from os import path
 from Engineering.EnggUtils import GROUP
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.calibration.model import CalibrationModel
 from Engineering.common.calibration_info import CalibrationInfo
-from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings import settings_model, settings_view, settings_presenter
+from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings import settings_presenter
 from testhelpers import assert_any_call_partial
 from qtpy.QtCore import QCoreApplication
 from workbench.config import APPNAME
 
 file_path = "mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.calibration.model"
 enggutils_path = "Engineering.EnggUtils"
+setting_path = "mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.settings_presenter.SettingsPresenter"
 
 
 class CalibrationModelTest(unittest.TestCase):
@@ -39,19 +40,26 @@ class CalibrationModelTest(unittest.TestCase):
         self.calibration_info.load_relevant_calibration_files.assert_called_once()
         self.assertEqual(self.calibration_info.prm_filepath, self.model._saved_prm_file)
 
+    @patch(setting_path + ".set_contour_option_enabled")
+    @patch(setting_path + ".set_euler_options_enabled")
     @patch(file_path + ".output_settings.get_output_path")
     @patch(enggutils_path + ".create_new_calibration")
     @patch(enggutils_path + ".run_calibration")
     @patch(file_path + ".load_full_instrument_calibration")
     def test_first_time_create_uses_correct_default_save_directory(
-        self, mock_load_cal, mock_run_cal, mock_enggutils_create_new_calibration, mock_get_output_path
+        self,
+        mock_load_cal,
+        mock_run_cal,
+        mock_enggutils_create_new_calibration,
+        mock_get_output_path,
+        mock_euler_settings_enabled,
+        mock_contour_setting,
     ):
         default_save_location = path.join(path.expanduser("~"), "Engineering_Mantid")
         QCoreApplication.setApplicationName("Engineering_Diffraction_test_calib_model")
-        presenter = settings_presenter.SettingsPresenter(
-            mock.create_autospec(settings_model.SettingsModel, instance=True),
-            mock.create_autospec(settings_view.SettingsView, instance=True),
-        )
+        settings_model, settings_view = MagicMock(), MagicMock()
+        presenter = settings_presenter.SettingsPresenter(settings_model, settings_view)
+        settings_model.validate_settings.return_value = {"save_location": default_save_location}
         presenter.settings = {  # "save_location" is not defined
             "full_calibration": "cal",
             "logs": "some,logs",

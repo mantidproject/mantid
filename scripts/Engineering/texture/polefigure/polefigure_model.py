@@ -17,12 +17,13 @@ import numpy as np
 from mantid.api import AnalysisDataService as ADS
 from typing import Optional, Sequence, Tuple
 import matplotlib.pyplot as plt
-from mantid.geometry import CrystalStructure
 from os import path, makedirs
 from scipy.interpolate import griddata
 from scipy.ndimage import gaussian_filter
-from Engineering.common.texture_sample_viewer import has_valid_shape, plot_sample_directions
+from Engineering.common.texture_sample_viewer import has_valid_shape
 from matplotlib.figure import Figure
+from matplotlib.axes import Axes
+from Engineering.texture.xtal_helper import get_xtal_structure
 
 
 class TextureProjection:
@@ -112,7 +113,7 @@ class TextureProjection:
         try:
             # try and get a peak reference either from hkl or from the X0 column of param
             peak = "".join([str(ind) for ind in hkl]) if hkl else str(np.round(np.mean(ADS.retrieve(fit_params[0]).column("X0")), 2))
-            table_name = f"{instr}_{run_range}_{peak}_{grouping}_pf_table_{readout_column}"
+            table_name = f"{peak}_{instr}_{run_range}_{grouping}_pf_table_{readout_column}"
         except Exception:
             # if no param table given, no peak reference
             table_name = f"{instr}_{run_range}_{grouping}_pf_table_{readout_column}"
@@ -126,7 +127,7 @@ class TextureProjection:
         projection: str,
         fig: Optional[Figure] = None,
         readout_col: str = "I",
-        save_dirs: Optional[str] = None,
+        save_dirs: Optional[Sequence[str] | str] = None,
         plot_exp: bool = True,
         ax_labels: Sequence[str] = ("Dir1", "Dir2"),
         contour_kernel: Optional[float] = 2.0,
@@ -136,42 +137,57 @@ class TextureProjection:
 
         if plot_exp:
             suffix = "scatter"
-            fig = self.plot_exp_pf(pfi, ax_labels, fig, **kwargs)
+            fig, ax = self.plot_exp_pf(pfi, ax_labels, readout_col, fig, **kwargs)
         else:
             suffix = f"contour_{contour_kernel}"
-            fig = self.plot_contour_pf(pfi, ax_labels, fig, contour_kernel, **kwargs)
+            fig, ax = self.plot_contour_pf(pfi, ax_labels, readout_col, fig, contour_kernel, **kwargs)
         if save_dirs:
             for save_dir in save_dirs:
                 fig.savefig(str(path.join(save_dir, ws_name + f"_{suffix}.png")))
 
-        return fig
+        return fig, ax
 
     @staticmethod
-    def plot_exp_pf(pfi: np.ndarray, ax_labels: Sequence[str], fig: Optional[Figure] = None, **kwargs) -> Figure:
+    def plot_exp_pf(pfi: np.ndarray, ax_labels: Sequence[str], column_label: str, fig: Optional[Figure] = None, **kwargs) -> [Figure, Axes]:
         u = np.linspace(0, 2 * np.pi, 100)
         x = np.cos(u)
         y = np.sin(u)
         z = np.zeros_like(x)
         eq = np.concatenate((x[None, :], y[None, :], z[None, :]), axis=0)
 
-        fig = plt.figure() if not fig else fig
-        ax = fig.add_subplot(1, 1, 1)
-        scat_plot = ax.scatter(pfi[:, 1], pfi[:, 0], c=pfi[:, 2], s=20, cmap="jet", **kwargs)
-        ax.plot(eq[0], eq[1], c="grey")
+        fig = plt.figure(layout="constrained") if not fig else fig
+        gs = fig.add_gridspec(
+            1,
+            3,
+            width_ratios=[1, 30, 1],  # tweak 30 to control plot vs cbar width
+            left=0.05,
+            right=0.98,
+            top=0.98,
+            bottom=0.06,
+            wspace=0.05,
+        )
+        # left spacer: gs[0, 0] (we don't use it)
+        ax = fig.add_subplot(gs[0, 1])
+        cax = fig.add_subplot(gs[0, 2])
+        scat_plot = ax.scatter(pfi[:, 1], pfi[:, 0], c=pfi[:, 2], s=20, cmap="jet", label="poles", **kwargs)
+        ax.plot(eq[0], eq[1], c="grey", label="plot bounding circle")
         ax.set_aspect("equal")
         ax.set_axis_off()
         ax.quiver(-1, -1, 0.2, 0, color="blue", scale=1)
         ax.quiver(-1, -1, 0, 0.2, color="red", scale=1)
         ax.text(-0.8, -0.95, ax_labels[-1], fontsize=10)
         ax.text(-0.95, -0.8, ax_labels[0], fontsize=10)
-        fig.colorbar(scat_plot, ax=ax, shrink=0.8, pad=0.05)
-        return fig
+        cbar = fig.colorbar(scat_plot, cax=cax)
+        ax.set_label("Pole Figure Plot")
+        scat_plot.set_label("pole figure data")
+        cbar.set_label(column_label, rotation=0, labelpad=15)
+        return fig, ax
 
     @staticmethod
     def plot_contour_pf(
-        pfi: np.ndarray, ax_labels: Sequence[str], fig: Optional[Figure] = None, contour_kernel: float = 2.0, **kwargs
-    ) -> Figure:
-        x, y, z = pfi[:, 1], pfi[:, 0], pfi[:, 2]
+        pfi: np.ndarray, ax_labels: Sequence[str], column_label: str, fig: Optional[Figure] = None, contour_kernel: float = 2.0, **kwargs
+    ) -> [Figure, Axes]:
+        x, y, z = pfi[:, 1], pfi[:, 0], np.nan_to_num(pfi[:, 2])
         # Grid definition
         R = 1
         grid_x, grid_y = np.mgrid[-R:R:200j, -R:R:200j]
@@ -188,9 +204,21 @@ class TextureProjection:
 
         # Plotting
         fig = plt.figure() if not fig else fig
-        ax = fig.add_subplot(1, 1, 1)
+        gs = fig.add_gridspec(
+            1,
+            3,
+            width_ratios=[1, 30, 1],  # tweak 30 to control plot vs cbar width
+            left=0.05,
+            right=0.98,
+            top=0.98,
+            bottom=0.06,
+            wspace=0.05,
+        )
+        # left spacer: gs[0, 0] (we don't use it)
+        ax = fig.add_subplot(gs[0, 1])
+        cax = fig.add_subplot(gs[0, 2])
         contour_plot = ax.contourf(grid_x, grid_y, grid_z, levels=10, cmap="jet", **kwargs)
-        circle = plt.Circle((0, 0), R, color="grey", fill=False, linestyle="-")
+        circle = plt.Circle((0, 0), R, color="grey", fill=False, linestyle="-", label="plot bounding circle")
         ax.add_patch(circle)
         ax.set_aspect("equal")
         ax.set_axis_off()
@@ -198,12 +226,11 @@ class TextureProjection:
         ax.quiver(-1, -1, 0, 0.2, color="red", scale=1)
         ax.text(-0.8, -0.95, ax_labels[-1], fontsize=10)
         ax.text(-0.95, -0.8, ax_labels[0], fontsize=10)
-        fig.colorbar(contour_plot, ax=ax, shrink=0.8, pad=0.05)
-        return fig
-
-    @staticmethod
-    def plot_sample_directions(fig: Figure, ws_name: str, ax_transform: np.ndarray, ax_labels: Sequence[str], fix_axes_to_sample: bool):
-        plot_sample_directions(fig, ws_name, ax_transform, ax_labels, fix_axes_to_sample)
+        ax.set_label("Pole Figure Plot")
+        contour_plot.set_label("pole figure data")
+        cbar = fig.colorbar(contour_plot, cax=cax)
+        cbar.set_label(column_label, rotation=0, labelpad=15)
+        return fig, ax
 
     # ~~~~~ General Utility functions ~~~~~~~~
 
@@ -266,6 +293,8 @@ class TextureProjection:
     def read_param_cols(ws_name: str, target_default: str = "I") -> Tuple[str, int]:
         ws = ADS.retrieve(ws_name)
         col_names = ws.getColumnNames()
+        col_types = ws.columnTypes()
+        col_names = [c for i, c in enumerate(col_names) if col_types[i] in ("double", "int", "float", "bool")]
         index = col_names.index(target_default) if target_default in col_names else 0
         return col_names, index
 
@@ -290,20 +319,21 @@ class TextureProjection:
         return f"{scatts}: {sg}"
 
     @staticmethod
-    def set_ws_xtal(ws: str, lattice: str, space_group: str, basis: str) -> None:
+    def set_ws_xtal(ws: str, lattice: str, space_group: str, basis: str, cif: str) -> None:
         ws = ADS.retrieve(ws)
-        ws.sample().setCrystalStructure(CrystalStructure(lattice, space_group, basis))
+        has_cif = cif != ""
+        has_latt_prop = lattice != "" and space_group != "" and basis != ""
+
+        input = "cif" if has_cif else "string" if has_latt_prop else None
+        args = (cif,) if has_cif else (lattice, space_group, basis) if has_latt_prop else None
+
+        xtal = get_xtal_structure(input, *args)
+        ws.sample().setCrystalStructure(xtal)
         logger.notice("Crystal Structure Set")
 
-    def set_all_ws_xtal(self, wss: Sequence[str], lattice: str, space_group: str, basis: str) -> None:
+    def set_all_ws_xtal(self, wss: Sequence[str], lattice: str, space_group: str, basis: str, cif: str) -> None:
         for ws in wss:
-            self.set_ws_xtal(ws, lattice, space_group, basis)
-
-    @staticmethod
-    def copy_xtal_to_all(ref_ws: str, wss: Sequence[str]) -> None:
-        xtal = ADS.retrieve(ref_ws).sample().getCrystalStructure()
-        for ws in wss:
-            ADS.retrieve(ws).sample().setCrystalStructure(xtal)
+            self.set_ws_xtal(ws, lattice, space_group, basis, cif)
 
 
 def ster_proj(alphas: np.ndarray, betas: np.ndarray, i: np.ndarray) -> np.ndarray:
