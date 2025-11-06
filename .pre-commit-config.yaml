@@ -22,7 +22,10 @@ repos:
         exclude: conda/recipes/mantid/meta.yaml|conda/recipes/mantid-developer/meta.yaml|conda/recipes/mantidqt/meta.yaml|conda/recipes/mantiddocs/meta.yaml|conda/recipes/mantidworkbench/meta.yaml
       - id: end-of-file-fixer
         exclude: .md5$|^external/|^tools/|Testing/Tools/cxxtest
-
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.29.0
+    hooks:
+      - id: gitleaks
   - repo: https://github.com/pre-commit/mirrors-clang-format
     rev: v21.1.2
     hooks:
