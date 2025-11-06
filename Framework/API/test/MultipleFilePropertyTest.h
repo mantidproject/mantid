@@ -12,13 +12,11 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Timer.h"
 
-#include <cxxtest/TestSuite.h>
-
-#include <Poco/File.h>
-#include <Poco/Path.h>
-
 #include <algorithm>
 #include <boost/algorithm/string/join.hpp>
+#include <cxxtest/TestSuite.h>
+#include <filesystem>
+#include <fstream>
 #include <unordered_set>
 
 using namespace Mantid;
@@ -39,11 +37,9 @@ namespace // anonymous
  * @returns the absolute path to the directory.
  */
 std::string createAbsoluteDirectory(const std::string &dirPath) {
-  Poco::File dir(dirPath);
-  dir.createDirectories();
-  Poco::Path path(dir.path());
-  path = path.makeAbsolute();
-  return path.toString();
+  std::filesystem::path dirPathObj(dirPath);
+  std::filesystem::create_directory(dirPathObj);
+  return std::filesystem::absolute(dirPathObj).string();
 }
 
 /**
@@ -55,8 +51,12 @@ std::string createAbsoluteDirectory(const std::string &dirPath) {
  */
 void createFilesInDirectory(const std::unordered_set<std::string> &filenames, const std::string &dirPath) {
   for (const auto &filename : filenames) {
-    Poco::File file(dirPath + "/" + filename);
-    file.createFile();
+    // create a full path to the file
+    std::filesystem::path filepath(dirPath);
+    filepath /= filename;
+    // create the empty file
+    std::ofstream filehandle(filepath);
+    filehandle.close();
   }
 }
 
@@ -144,8 +144,7 @@ public:
   ~MultipleFilePropertyTest() override {
     // Remove temp dirs.
     for (const auto &tempDir : m_tempDirs) {
-      Poco::File dir(tempDir);
-      dir.remove(true);
+      std::filesystem::remove_all(tempDir);
     }
   }
 
@@ -734,9 +733,8 @@ private:
 
   // Normalize path separators to forward slashes for consistent comparison
   std::string normalizePath(const std::string &path) const {
-    std::string normalized = path;
-    std::replace(normalized.begin(), normalized.end(), '\\', '/');
-    return normalized;
+    const std::filesystem::path filepath(path);
+    return filepath.generic_string();
   }
 
   std::string dummyFile(const std::string &filename) { return normalizePath(m_dummyFilesDir + "/" + filename); }
