@@ -597,7 +597,7 @@ class Player:
             self._running = False
             self._cleanup()
 
-    def record(self, output_path: Path, source_address: Path | tuple[str, int]):
+    def record(self, output_path: Path):
         def _packet_filename(output_path: Path, packet: Packet) -> Path:
             return output_path / f"{packet.packet_type}-{packet.timestamp}.adara"
 
@@ -766,7 +766,7 @@ if __name__ == "__main__":
         args = parser.parse_args()
 
         glob = UnixGlob.parse(args.glob)  # Parse Unix-style glob to "internal" format: (<base-directory path>, list[<glob expr>]).
-        if args.record and glob[1]:
+        if args.record and (glob[1] and glob[1][0]):
             _logger.error(f"When using record mode, the positional argument should be the target directory, not '{args.glob}'.")
 
         player = Player(server_address=args.server_address, source_address=args.source_address)

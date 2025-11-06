@@ -71,7 +71,7 @@ class Test_Player_record(unittest.TestCase):
                         patch("socket.socket", return_value=mock_source_socket),
                         patch("select.select", side_effect=stop_after_connect_select),
                     ):
-                        player.record(output_path, player._source_address)
+                        player.record(output_path)
 
                         # Verify directory was created
                         self.assertTrue(output_path.exists())
@@ -101,7 +101,7 @@ class Test_Player_record(unittest.TestCase):
 
             # Test with None - should raise TypeError or AttributeError
             with self.assertRaises(AttributeError):
-                player.record(None, player._source_address)
+                player.record(None)
 
     def test_file_and_socket_forwarding(self):
         """Tests packet forwarding to file and socket."""
@@ -159,7 +159,7 @@ class Test_Player_record(unittest.TestCase):
                         patch("builtins.open", mock_open()) as mock_file,
                         patch.object(Packet, "to_file") as mock_to_file,
                     ):
-                        player.record(output_path, player._source_address)
+                        player.record(output_path)
 
                         # Verify packet was forwarded to client socket
                         mock_to_socket.assert_called_once_with(mock_client_socket, mock_packet)
@@ -234,7 +234,7 @@ class Test_Player_record(unittest.TestCase):
                         patch("builtins.open", mock_open()),
                         patch.object(Packet, "to_file"),
                     ):
-                        player.record(output_path, player._source_address)
+                        player.record(output_path)
 
                         # Verify both directions were forwarded
                         self.assertEqual(mock_to_socket.call_count, 2)
@@ -297,7 +297,7 @@ class Test_Player_record(unittest.TestCase):
                         patch.object(Packet, "from_socket", side_effect=socket.timeout("Read timeout")),
                         patch("adara_player._logger") as mock_logger,
                     ):
-                        player.record(output_path, player._source_address)
+                        player.record(output_path)
 
                         # Verify error was logged
                         error_logged = any(
@@ -363,7 +363,7 @@ class Test_Player_record(unittest.TestCase):
                         patch.object(Packet, "from_socket", return_value=control_packet),
                         patch.object(Packet, "to_socket") as mock_to_socket,
                     ):
-                        player.record(output_path, player._source_address)
+                        player.record(output_path)
 
                         # Verify control packet was forwarded to source (not saved to file)
                         mock_to_socket.assert_called_once_with(mock_source_socket, control_packet)
@@ -428,7 +428,7 @@ class Test_Player_record(unittest.TestCase):
                         patch("builtins.open", mock_open()) as mock_file,
                         patch.object(Packet, "to_file"),
                     ):
-                        player.record(output_path, player._source_address)
+                        player.record(output_path)
 
                         # Verify file was opened with expected name
                         expected_filename = output_path / f"{mock_packet.packet_type}-{mock_packet.timestamp}.adara"
@@ -484,7 +484,7 @@ class Test_Player_record(unittest.TestCase):
                         # Use function instead of list to avoid StopIteration issue
                         patch("select.select", side_effect=stop_running_and_return_empty_select),
                     ):
-                        player.record(output_path, player._source_address)
+                        player.record(output_path)
 
                         # Verify all sockets were closed
                         mock_server_socket.close.assert_called()
