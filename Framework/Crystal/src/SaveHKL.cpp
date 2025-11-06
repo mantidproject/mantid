@@ -155,7 +155,7 @@ void SaveHKL::exec() {
   std::set<int> uniqueRuns;
   runMap_t runMap;
   for (size_t i = 0; i < peaks.size(); ++i) {
-    Peak &p = peaks[i];
+    Peak const &p = peaks[i];
     int run = p.getRunNumber();
     int bank = 0;
     std::string bankName = p.getBankName();

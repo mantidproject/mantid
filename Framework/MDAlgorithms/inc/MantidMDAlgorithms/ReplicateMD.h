@@ -37,7 +37,7 @@ public:
 
 private:
   std::shared_ptr<const Mantid::DataObjects::MDHistoWorkspace>
-  transposeMD(std::shared_ptr<Mantid::DataObjects::MDHistoWorkspace> &toTranspose, const std::vector<int> &axes);
+  transposeMD(std::shared_ptr<Mantid::DataObjects::MDHistoWorkspace> const &toTranspose, const std::vector<int> &axes);
   std::shared_ptr<Mantid::DataObjects::MDHistoWorkspace> getDataWorkspace() const;
   std::shared_ptr<Mantid::DataObjects::MDHistoWorkspace> getShapeWorkspace() const;
   void init() override;

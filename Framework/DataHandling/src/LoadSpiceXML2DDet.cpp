@@ -450,7 +450,7 @@ std::vector<SpiceXMLNode> LoadSpiceXML2DDet::xmlParseSpice(const std::string &xm
 
 //----------------------------------------------------------------------------------------------
 /// parse binary integer file
-std::vector<unsigned int> LoadSpiceXML2DDet::binaryParseIntegers(std::string &binary_file_name) {
+std::vector<unsigned int> LoadSpiceXML2DDet::binaryParseIntegers(std::string const &binary_file_name) {
   // check binary file size
   ifstream infile(binary_file_name.c_str(), ios::binary);
   streampos begin, end;

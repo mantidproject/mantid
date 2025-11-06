@@ -29,7 +29,7 @@ Logger g_log("InstrumentInfo");
  * @param inst Pointer to InstrumentInfo that this LiveListenerInfo belongs to
  * @param elem The Poco::XML::Element to read the data from
  */
-LiveListenerInfo::LiveListenerInfo(InstrumentInfo *inst, const Poco::XML::Element *elem)
+LiveListenerInfo::LiveListenerInfo(InstrumentInfo const *inst, Poco::XML::Element const *elem)
     : m_name(elem->getAttribute("name")), m_address(elem->getAttribute("address")),
       m_listener(elem->getAttribute("listener")) {
 

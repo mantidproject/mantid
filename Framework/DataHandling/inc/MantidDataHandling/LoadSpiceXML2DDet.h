@@ -70,7 +70,7 @@ private:
   /// create workspace (good to load instrument) from vector of counts
   API::MatrixWorkspace_sptr createMatrixWorkspace(const std::vector<unsigned int> &vec_counts);
   /// parse binary integer file
-  std::vector<unsigned int> binaryParseIntegers(std::string &binary_file_name);
+  std::vector<unsigned int> binaryParseIntegers(std::string const &binary_file_name);
 
   /// Parse SPICE XML file
   std::vector<SpiceXMLNode> xmlParseSpice(const std::string &xmlfilename);

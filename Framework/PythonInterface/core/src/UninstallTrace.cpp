@@ -13,7 +13,7 @@ namespace Mantid::PythonInterface {
  * and calls PyEval_SetTrace(nullptr, nullptr) to remove the trace function
  */
 UninstallTrace::UninstallTrace() {
-  PyThreadState *curThreadState = PyThreadState_GET();
+  PyThreadState const *curThreadState = PyThreadState_GET();
   m_tracefunc = curThreadState->c_tracefunc;
   m_tracearg = curThreadState->c_traceobj;
   Py_XINCREF(m_tracearg);

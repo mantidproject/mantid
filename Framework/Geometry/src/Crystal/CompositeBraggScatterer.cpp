@@ -186,7 +186,7 @@ void CompositeBraggScatterer::redeclareProperties() {
   }
 
   // Remove unused properties
-  for (auto &property : propertyUseCount) {
+  for (auto const &property : propertyUseCount) {
     if (property.second == 0) {
       removeProperty(property.first);
     }

@@ -14,7 +14,7 @@ namespace Mantid::PythonInterface {
  */
 ReleaseGlobalInterpreterLock::ReleaseGlobalInterpreterLock()
     : m_tracefunc(nullptr), m_tracearg(nullptr), m_saved(nullptr) {
-  PyThreadState *curThreadState = PyThreadState_GET();
+  PyThreadState const *curThreadState = PyThreadState_GET();
   m_tracefunc = curThreadState->c_tracefunc;
   m_tracearg = curThreadState->c_traceobj;
   Py_XINCREF(m_tracearg);

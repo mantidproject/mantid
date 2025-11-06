@@ -97,7 +97,7 @@ inline void MatrixWorkspaceMDIterator::calcWorkspacePos(size_t newWI) {
 
     // Find the vertical bin size
     m_verticalBinSize = 1.0;
-    NumericAxis *ax1 = dynamic_cast<NumericAxis *>(m_ws->getAxis(1));
+    NumericAxis const *ax1 = dynamic_cast<NumericAxis *>(m_ws->getAxis(1));
     if (ax1) {
       const MantidVec &yVals = ax1->getValues();
       if (yVals.size() > 1) {

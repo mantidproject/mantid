@@ -54,7 +54,7 @@ private:
                                          VecWSGroupType &vecWorkspaceGroups) const;
 
   /// Copy input workspace properties to spawned algorithm.
-  void copyInputWorkspaceProperties(IAlgorithm *targetAlg, IAlgorithm *sourceAlg, const int &periodNumber) const;
+  void copyInputWorkspaceProperties(IAlgorithm *targetAlg, IAlgorithm const *sourceAlg, const int &periodNumber) const;
 
   /// Create an input workspace string from the workspace groups.
   std::string createFormattedInputWorkspaceNames(const size_t &periodIndex,

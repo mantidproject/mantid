@@ -534,7 +534,7 @@ void SofQWNormalisedPolygon::initAngularCachesPSD(const MatrixWorkspace &workspa
     const specnum_t deltaPlusT = inSpec + this->m_detNeighbourOffset;
     const specnum_t deltaMinusT = inSpec - this->m_detNeighbourOffset;
 
-    for (auto &neighbour : neighbours) {
+    for (auto const &neighbour : neighbours) {
       specnum_t spec = neighbour.first;
       if (spec == deltaPlus1 || spec == deltaMinus1 || spec == deltaPlusT || spec == deltaMinusT) {
         const double theta_n = spectrumInfo.twoTheta(spec - 1) * 0.5;

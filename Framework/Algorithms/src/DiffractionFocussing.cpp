@@ -113,7 +113,7 @@ void DiffractionFocussing::exec() {
   // discarded
   int discarded = 0;
   const int64_t oldHistNumber = tmpW->getNumberHistograms();
-  API::Axis *spectraAxis = tmpW->getAxis(1);
+  API::Axis const *spectraAxis = tmpW->getAxis(1);
   for (int64_t i = 0; i < oldHistNumber; i++)
     if (spectraAxis->spectraNo(i) >= 0 && find(resultIndeces.begin(), resultIndeces.end(), i) == resultIndeces.end()) {
       ++discarded;

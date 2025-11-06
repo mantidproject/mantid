@@ -515,7 +515,7 @@ void GeneratePeaks::processTableColumnNames() {
       errss << "Peak function " << m_peakFunction->name() << " does not have paramter " << *it << "\n"
             << "Allowed function parameters are ";
       std::vector<std::string> parnames = m_peakFunction->getParameterNames();
-      for (auto &parname : parnames)
+      for (auto const &parname : parnames)
         errss << parname << ", ";
       throw std::runtime_error(errss.str());
     }

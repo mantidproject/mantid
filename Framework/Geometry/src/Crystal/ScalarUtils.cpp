@@ -386,7 +386,7 @@ std::vector<DblMatrix> ScalarUtils::GetRelatedUBs(const DblMatrix &UB, double fa
                                       {b_temp, c_temp, a_temp}, {m_b_temp, a_temp, c_temp},
                                       {c_temp, a_temp, b_temp}, {m_c_temp, b_temp, a_temp}};
 
-      for (const auto &permutation : permutations) {
+      for (V3D const *permutation : permutations) {
         a = permutation[0];
         b = permutation[1];
         c = permutation[2];

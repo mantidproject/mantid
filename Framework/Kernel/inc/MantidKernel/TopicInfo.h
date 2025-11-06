@@ -31,7 +31,7 @@ enum class TopicType { Event, Chopper, Sample, Run, Monitor };
  */
 class MANTID_KERNEL_DLL TopicInfo {
 public:
-  TopicInfo(InstrumentInfo *inst, const Poco::XML::Element *elem);
+  TopicInfo(InstrumentInfo const *inst, const Poco::XML::Element *elem);
   TopicInfo(std::string name, TopicType type);
   const std::string &name() const { return m_name; }
   TopicType type() const { return m_type; }

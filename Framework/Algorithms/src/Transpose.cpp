@@ -93,7 +93,7 @@ void Transpose::exec() {
  * @return A pointer to the output workspace.
  */
 API::MatrixWorkspace_sptr Transpose::createOutputWorkspace(const API::MatrixWorkspace_const_sptr &inputWorkspace) {
-  Mantid::API::Axis *yAxis = getVerticalAxis(inputWorkspace);
+  Mantid::API::Axis const *yAxis = getVerticalAxis(inputWorkspace);
   const size_t oldNhist = inputWorkspace->getNumberHistograms();
   const auto &inX = inputWorkspace->x(0);
   const size_t oldYlength = inputWorkspace->blocksize();

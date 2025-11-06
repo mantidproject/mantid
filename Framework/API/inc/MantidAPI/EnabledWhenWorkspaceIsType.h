@@ -47,7 +47,7 @@ public:
     // Find the property
     if (!algo)
       return true;
-    Mantid::Kernel::Property *prop = nullptr;
+    Mantid::Kernel::Property const *prop = nullptr;
     try {
       prop = algo->getPointerToProperty(m_otherPropName);
     } catch (Mantid::Kernel::Exception::NotFoundError &) {

@@ -199,7 +199,7 @@ void ComptonScatteringCountRate::updateCMatrixValues() const {
   // -- Compute constraint matrix from each "member function" --
   const size_t nprofiles = m_profiles.size();
   for (size_t i = 0, start = 0; i < nprofiles; ++i) {
-    auto *profile = m_profiles[i];
+    auto const *profile = m_profiles[i];
     const size_t numFilled = profile->fillConstraintMatrix(m_cmatrix, start, m_hist->e());
     start += numFilled;
   }

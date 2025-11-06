@@ -11,7 +11,7 @@
 
 namespace MantidQt::Icons {
 
-CharIconEngine::CharIconEngine(IconicFont *iconic, CharIconPainter *painter,
+CharIconEngine::CharIconEngine(IconicFont *iconic, CharIconPainter *const painter,
                                const QList<QHash<QString, QVariant>> &options)
     : m_iconic(iconic), m_painter(painter), m_options(options) {}
 

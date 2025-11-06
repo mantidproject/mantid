@@ -85,7 +85,7 @@ private:
 
   /// This method throws not found error if a element is not found in the xml
   /// file
-  void throwException(Poco::XML::Element *elem, const std::string &name, const std::string &fileName);
+  void throwException(Poco::XML::Element const *elem, const std::string &name, const std::string &fileName);
   /// Run LoadInstrument Child Algorithm
   void runLoadInstrument(const std::string &inst_name, const DataObjects::Workspace2D_sptr &localWorkspace);
 
