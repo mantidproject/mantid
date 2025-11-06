@@ -181,7 +181,7 @@ void PeakIntensityVsRadius::exec() {
       IPeaksWorkspace_sptr outPeaks = alg->getProperty("OutputWorkspace");
       for (int i = 0; i < outPeaks->getNumberPeaks(); i++) {
         auto wi = size_t(i); // workspace index in output
-        Geometry::IPeak &p = outPeaks->getPeak(i);
+        Geometry::IPeak const &p = outPeaks->getPeak(i);
         outWS->mutableX(wi)[step] = radius;
         outWS->mutableY(wi)[step] = p.getIntensity();
         outWS->mutableE(wi)[step] = p.getSigmaIntensity();

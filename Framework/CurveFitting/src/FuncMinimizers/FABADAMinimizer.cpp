@@ -374,7 +374,7 @@ void FABADAMinimizer::boundApplication(const size_t &parameterIndex, double &new
   API::IConstraint *iConstraint = m_fitFunction->getConstraint(parameterIndex);
   if (!iConstraint)
     return;
-  auto *bcon = dynamic_cast<Constraints::BoundaryConstraint *>(iConstraint);
+  auto const *bcon = dynamic_cast<Constraints::BoundaryConstraint *>(iConstraint);
   if (!bcon)
     return;
 
@@ -804,7 +804,7 @@ double FABADAMinimizer::outputPDF(std::size_t const &convLength, std::vector<std
 }
 
 void FABADAMinimizer::outputPDF(std::vector<double> &xValues, std::vector<double> &yValues,
-                                std::vector<std::vector<double>> &reducedChain, std::size_t const &convLength,
+                                std::vector<std::vector<double>> const &reducedChain, std::size_t const &convLength,
                                 int const &pdfLength) {
   setParameterXAndYValuesForPDF(xValues, yValues, reducedChain, convLength, pdfLength);
   auto parameterNames = m_fitFunction->getParameterNames();
@@ -823,10 +823,10 @@ void FABADAMinimizer::outputPDF(std::vector<double> &xValues, std::vector<double
 }
 
 double FABADAMinimizer::getMostProbableChiSquared(std::size_t const &convLength,
-                                                  std::vector<std::vector<double>> &reducedChain, int const &pdfLength,
-                                                  std::vector<double> &xValues, std::vector<double> &yValues,
-                                                  std::vector<double> &PDFYAxis, double const &start,
-                                                  double const &bin) {
+                                                  std::vector<std::vector<double>> const &reducedChain,
+                                                  int const &pdfLength, std::vector<double> &xValues,
+                                                  std::vector<double> &yValues, std::vector<double> &PDFYAxis,
+                                                  double const &start, double const &bin) {
   std::size_t step = 0;
   std::size_t const chiXStartPos = m_nParams * (pdfLength + 1);
   std::size_t const chiYStartPos = m_nParams * pdfLength;
@@ -849,7 +849,7 @@ double FABADAMinimizer::getMostProbableChiSquared(std::size_t const &convLength,
 }
 
 void FABADAMinimizer::setParameterXAndYValuesForPDF(std::vector<double> &xValues, std::vector<double> &yValues,
-                                                    std::vector<std::vector<double>> &reducedChain,
+                                                    std::vector<std::vector<double>> const &reducedChain,
                                                     std::size_t const &convLength, int const &pdfLength) {
   for (std::size_t j = 0; j < m_nParams; ++j) {
 
@@ -1001,7 +1001,7 @@ void FABADAMinimizer::initChainsAndParameters() {
 
     API::IConstraint *iConstraint = m_fitFunction->getConstraint(i);
     if (iConstraint) {
-      auto *bcon = dynamic_cast<Constraints::BoundaryConstraint *>(iConstraint);
+      auto const *bcon = dynamic_cast<Constraints::BoundaryConstraint *>(iConstraint);
       if (bcon) {
         if (bcon->hasLower()) {
           if (param < bcon->lower())

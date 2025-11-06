@@ -162,7 +162,7 @@ void OptimizeCrystalPlacement::exec() {
   double HKLintOffsetMax = getProperty("MaxIndexingError");
   double HKLMax = getProperty("MaxHKLPeaks2Use");
   for (int i = 0; i < peaks->getNumberPeaks(); i++) {
-    IPeak &peak = peaks->getPeak(i);
+    IPeak const &peak = peaks->getPeak(i);
     int runNum = peak.getRunNumber();
     auto it = RunNumList.begin();
     for (; it != RunNumList.end() && *it != runNum; ++it) {

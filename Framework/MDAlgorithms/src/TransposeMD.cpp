@@ -80,7 +80,7 @@ void TransposeMD::exec() {
   size_t nDimsOutput = inWS->getNumDims(); // The assumed default.
   std::vector<int> axesInts = this->getProperty("Axes");
   std::vector<size_t> axes(axesInts.begin(), axesInts.end());
-  Property *axesProperty = this->getProperty("Axes");
+  Property const *axesProperty = this->getProperty("Axes");
   if (!axesProperty->isDefault()) {
     Kernel::MDAxisValidator checker(axesInts, nDimsInput, false);
     auto axisErrors = checker.validate();

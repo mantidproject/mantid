@@ -274,7 +274,7 @@ void LoadIsawDetCal::exec() {
       // has already
       // applied a calibration
       if (inputW) {
-        Geometry::ParameterMap &pmap = inputW->instrumentParameters();
+        Geometry::ParameterMap const &pmap = inputW->instrumentParameters();
         auto oldscalex = pmap.getDouble(detname, std::string("scalex"));
         auto oldscaley = pmap.getDouble(detname, std::string("scaley"));
         if (!oldscalex.empty())
@@ -283,7 +283,7 @@ void LoadIsawDetCal::exec() {
           detScaling.scaleY *= oldscaley[0];
       }
       if (inputP) {
-        Geometry::ParameterMap &pmap = inputP->instrumentParameters();
+        Geometry::ParameterMap const &pmap = inputP->instrumentParameters();
         auto oldscalex = pmap.getDouble(detname, std::string("scalex"));
         auto oldscaley = pmap.getDouble(detname, std::string("scaley"));
         if (!oldscalex.empty())

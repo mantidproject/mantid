@@ -186,7 +186,7 @@ std::string FitScriptOptionsBrowser::getProperty(std::string const &name) const 
 }
 
 bool FitScriptOptionsBrowser::getBoolProperty(std::string const &name) const {
-  auto const prop = getQtPropertyFor(name);
+  auto const *prop = getQtPropertyFor(name);
   return m_boolManager->value(prop);
 }
 

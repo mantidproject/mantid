@@ -62,7 +62,7 @@ void CalculateUMatrix::exec() {
   V3D old(0, 0, 0);
   Matrix<double> Hi(4, 4), Si(4, 4), HS(4, 4), zero(4, 4);
   for (int i = 0; i < ws->getNumberPeaks(); i++) {
-    Mantid::Geometry::IPeak &p = ws->getPeak(i);
+    Mantid::Geometry::IPeak const &p = ws->getPeak(i);
     double H = p.getH();
     double K = p.getK();
     double L = p.getL();

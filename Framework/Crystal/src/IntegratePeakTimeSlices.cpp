@@ -204,7 +204,7 @@ void IntegratePeakTimeSlices::exec() {
 
   int indx = getProperty("PeakIndex");
 
-  Peak &peak = peaksW->getPeak(indx);
+  Peak const &peak = peaksW->getPeak(indx);
 
   //------------------------------- Get Panel
   //--------------------------------------

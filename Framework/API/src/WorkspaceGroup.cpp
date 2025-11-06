@@ -76,7 +76,7 @@ bool WorkspaceGroup::isInChildGroup(const Workspace &workspaceToCheck) const {
   std::lock_guard<std::recursive_mutex> _lock(m_mutex);
   for (const auto &workspace : m_workspaces) {
     // check child groups only
-    auto *group = dynamic_cast<WorkspaceGroup *>(workspace.get());
+    auto const *group = dynamic_cast<WorkspaceGroup *>(workspace.get());
     if (group) {
       if (group->isInGroup(workspaceToCheck))
         return true;

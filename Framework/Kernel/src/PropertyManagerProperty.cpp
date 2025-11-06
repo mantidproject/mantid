@@ -146,7 +146,7 @@ MANTID_KERNEL_DLL PropertyManager_sptr IPropertyManager::getValue<PropertyManage
 template <>
 MANTID_KERNEL_DLL PropertyManager_const_sptr
 IPropertyManager::getValue<PropertyManager_const_sptr>(const std::string &name) const {
-  auto *prop = dynamic_cast<PropertyWithValue<PropertyManager_sptr> *>(getPointerToProperty(name));
+  auto const *prop = dynamic_cast<PropertyWithValue<PropertyManager_sptr> *>(getPointerToProperty(name));
   if (prop) {
     return prop->operator()();
   } else {

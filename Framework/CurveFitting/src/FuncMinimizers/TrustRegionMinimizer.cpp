@@ -811,7 +811,8 @@ void rootsCubic(double a0, double a1, double a2, double a3, double tol, int &nro
  *  @param pi_beta :: (0) value of ||x||^beta,
  *                    (i) ith derivative of ||x||^beta, i = 1, max_order
  */
-void PiBetaDerivs(int max_order, double beta, const DoubleFortranVector &x_norm2, DoubleFortranVector &pi_beta) {
+void PiBetaDerivs(int max_order, double beta, const DoubleFortranVector &x_norm2,
+                  DoubleFortranVector &pi_beta) { // cppcheck-suppress constParameterReference
   double hbeta = HALF * beta;
   pi_beta(0) = pow(x_norm2(0), hbeta);
   pi_beta(1) = hbeta * (pow(x_norm2(0), (hbeta - ONE))) * x_norm2(1);
