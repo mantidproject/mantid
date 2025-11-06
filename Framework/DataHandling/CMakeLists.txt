@@ -433,11 +433,11 @@ set(INC_FILES
     src/LoadRaw/isisraw2.h
     src/LoadRaw/item_struct.h
     src/LoadRaw/vms_convert.h
-    src/AlignAndFocusPowderSlim/NexusLoader.h
-    src/AlignAndFocusPowderSlim/ProcessBankTask.h
-    src/AlignAndFocusPowderSlim/ProcessBankSplitTask.h
-    src/AlignAndFocusPowderSlim/ProcessEventsTask.h
-    src/AlignAndFocusPowderSlim/BankCalibration.h
+    inc/MantidDataHandling/AlignAndFocusPowderSlim/NexusLoader.h
+    inc/MantidDataHandling/AlignAndFocusPowderSlim/ProcessBankTask.h
+    inc/MantidDataHandling/AlignAndFocusPowderSlim/ProcessBankSplitTask.h
+    inc/MantidDataHandling/AlignAndFocusPowderSlim/ProcessEventsTask.h
+    inc/MantidDataHandling/AlignAndFocusPowderSlim/BankCalibration.h
     inc/MantidDataHandling/RotateSampleShape.h
 )
 

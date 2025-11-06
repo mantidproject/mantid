@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include "MantidDataHandling/DllConfig.h"
 #include "MantidGeometry/IDTypes.h"
 #include <map>
 #include <set>
@@ -16,7 +17,7 @@ namespace Mantid::DataHandling::AlignAndFocusPowderSlim {
 
 constexpr double IGNORE_PIXEL{1.e6};
 
-class BankCalibration {
+class MANTID_DATAHANDLING_DLL BankCalibration {
 public:
   BankCalibration(const detid_t idmin, const detid_t idmax, const double time_conversion,
                   const std::map<detid_t, double> &calibration_map, const std::set<detid_t> &mask);
