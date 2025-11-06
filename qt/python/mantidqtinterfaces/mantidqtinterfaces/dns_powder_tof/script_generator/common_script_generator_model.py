@@ -35,7 +35,7 @@ class DNSScriptGeneratorModel(DNSObsModel):
         self._progress_is_canceled = False
         for i, line in enumerate(script):
             try:
-                exec(line)  # pylint: disable=exec-used
+                exec(line)  # noqa: S102
             except DNSError as error_message:
                 return str(error_message)
             self._update_progress(i)

@@ -74,7 +74,7 @@ def getInfo(number, oauth):
         req_params["access_token"] = oauth
 
     for url in urls:
-        req = requests.get(url, params=req_params)
+        req = requests.get(url, params=req_params, timeout=10)
         json = req.json()
         if req.status_code == 403:
             print("For", number, "status:", req.status_code, "skipping")

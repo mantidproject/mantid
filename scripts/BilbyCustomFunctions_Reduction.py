@@ -242,7 +242,7 @@ def get_pixel_size(run_start):  # reads current IDF and get pixelsize from there
 
     currentIDF = ExperimentInfo.getInstrumentFilename("Bilby", run_start)
     # print currentIDF
-    tree = ET.parse(currentIDF)
+    tree = ET.parse(currentIDF)  # noqa: S313
     for node in tree.iter():
         if node.tag == "{http://www.mantidproject.org/IDF/1.0}height":
             name = node.attrib.get("val")

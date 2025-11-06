@@ -77,20 +77,20 @@ def start(options: argparse.ArgumentParser):
         # this is already the default on Windows/macOS.
         # This will mean the relevant 'atexit' code will execute in the child process, and therefore the
         # FrameworkManager and UsageService will be shutdown as expected.
-        launch_command = f"{sys.executable} {wp.__file__}"
+        launch_command = [str(sys.executable), str(wp.__file__)]
         if options.script:
-            launch_command += f" {options.script}"
+            launch_command.append(str(options.script))
         if options.execute:
-            launch_command += " --execute"
+            launch_command.append("--execute")
         if options.quit:
-            launch_command += " --quit"
+            launch_command.append("--quit")
 
         if is_linux():
             # currently, reading coredump files for error reports is only supported on linux
             _raise_open_file_descriptor_limit()
-            workbench_process = subprocess.Popen(launch_command, shell=True, preexec_fn=_setup_core_dump_files)
+            workbench_process = subprocess.Popen(launch_command, preexec_fn=_setup_core_dump_files)
         else:
-            workbench_process = subprocess.Popen(launch_command, shell=True)
+            workbench_process = subprocess.Popen(launch_command)
 
         workbench_pid = str(workbench_process.pid)
         workbench_process.wait()
