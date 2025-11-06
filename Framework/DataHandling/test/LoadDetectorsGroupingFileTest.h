@@ -14,10 +14,9 @@
 #include "MantidDataObjects/GroupingWorkspace.h"
 #include "MantidFrameworkTestHelpers/ScopedFileHelper.h"
 
-#include "Poco/File.h"
-
 #include <algorithm>
 #include <cxxtest/TestSuite.h>
+#include <filesystem>
 #include <fstream>
 
 using namespace Mantid;
@@ -82,10 +81,8 @@ public:
     TS_ASSERT_DELTA(gws->y(3696)[0], 2.0, 1.0E-5);
     TS_ASSERT_DELTA(gws->y(7000)[0], 0.0, 1.0E-5);
     // Check if filename is saved (normalize path separators for comparison)
-    std::string inputFile = load.getPropertyValue("InputFile");
-    std::string savedFile = gws->run().getProperty("Filename")->value();
-    std::replace(inputFile.begin(), inputFile.end(), '\\', '/');
-    std::replace(savedFile.begin(), savedFile.end(), '\\', '/');
+    std::filesystem::path inputFile(load.getPropertyValue("InputFile"));
+    std::filesystem::path savedFile(gws->run().getProperty("Filename")->value());
     TS_ASSERT_EQUALS(inputFile, savedFile);
 
     // Clean-up
