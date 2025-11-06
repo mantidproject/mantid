@@ -75,7 +75,7 @@ MDHistoWorkspace::MDHistoWorkspace(std::vector<Mantid::Geometry::MDHistoDimensio
  * @param displayNormalization :: optional display normalization to use as the
  * default.
  */
-MDHistoWorkspace::MDHistoWorkspace(std::vector<Mantid::Geometry::IMDDimension_sptr> &dimensions,
+MDHistoWorkspace::MDHistoWorkspace(std::vector<Mantid::Geometry::IMDDimension_sptr> const &dimensions,
                                    Mantid::API::MDNormalization displayNormalization)
     : IMDHistoWorkspace(), numDimensions(0), m_nEventsContributed(std::numeric_limits<uint64_t>::quiet_NaN()),
       m_coordSystem(None), m_displayNormalization(displayNormalization) {
@@ -121,7 +121,7 @@ void MDHistoWorkspace::init(std::vector<Mantid::Geometry::MDHistoDimension_sptr>
 /** Constructor helper method
  * @param dimensions :: vector of IMDDimension; no limit to how many.
  */
-void MDHistoWorkspace::init(std::vector<Mantid::Geometry::IMDDimension_sptr> &dimensions) {
+void MDHistoWorkspace::init(std::vector<Mantid::Geometry::IMDDimension_sptr> const &dimensions) {
   MDGeometry::initGeometry(dimensions);
   this->cacheValues();
 

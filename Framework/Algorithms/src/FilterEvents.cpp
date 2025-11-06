@@ -301,7 +301,7 @@ void FilterEvents::exec() {
 
   // Set goniometer to output workspaces
   Goniometer gon = m_eventWS->run().getGoniometer();
-  for (auto &it : m_outputWorkspacesMap) {
+  for (auto const &it : m_outputWorkspacesMap) {
     try {
       DataObjects::EventWorkspace_sptr ws_i = it.second;
       ws_i->mutableRun().setGoniometer(gon, true);

@@ -204,7 +204,7 @@ void IntegratePeakTimeSlices::exec() {
 
   int indx = getProperty("PeakIndex");
 
-  Peak &peak = peaksW->getPeak(indx);
+  Peak const &peak = peaksW->getPeak(indx);
 
   //------------------------------- Get Panel
   //--------------------------------------
@@ -1636,10 +1636,10 @@ std::string IntegratePeakTimeSlices::CalculateFunctionProperty_Fit() {
 int IntegratePeakTimeSlices::findNameInVector(std::string const &oneName, std::vector<std::string> const &nameList)
 
 {
-  for (size_t i = 0; i < nameList.size(); i++)
-    if (oneName == nameList[i])
-      return static_cast<int>(i);
-
+  const auto it = std::find(nameList.cbegin(), nameList.cend(), oneName);
+  if (it != nameList.cend()) {
+    return static_cast<int>(std::distance(nameList.cbegin(), it));
+  }
   return -1;
 }
 

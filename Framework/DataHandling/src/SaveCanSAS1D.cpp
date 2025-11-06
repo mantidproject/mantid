@@ -29,7 +29,7 @@ void encode(std::string &data) {
   std::string buffer;
   buffer.reserve(data.size());
 
-  for (auto &element : data) {
+  for (auto const &element : data) {
     switch (element) {
     case '&':
       buffer.append("&amp;");
@@ -394,7 +394,7 @@ void SaveCanSAS1D::createSASRunElement(std::string &sasRun) {
   // changed later
   std::string run;
   if (m_workspace->run().hasProperty("run_number")) {
-    Kernel::Property *logP = m_workspace->run().getLogData("run_number");
+    Kernel::Property const *logP = m_workspace->run().getLogData("run_number");
     run = logP->value();
   } else {
     g_log.debug() << "Didn't find RunNumber log in workspace. Writing "

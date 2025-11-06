@@ -57,7 +57,7 @@ double stringToRoundedNumber(const std::string &s) {
  * @param value :: the string to test with
  * @returns     :: true if the value is valid, else false.
  */
-bool isValidPropertyValue(Mantid::Kernel::Property *prop, const std::string &value) {
+bool isValidPropertyValue(Mantid::Kernel::Property const *prop, const std::string &value) {
   const auto guineaPig = std::shared_ptr<Property>(prop->clone());
   return guineaPig->setValue(value).empty();
 }
@@ -98,7 +98,7 @@ bool isEmptyNumMacro(const std::string &value, const double value_d) {
  * @param prop :: the property to check
  * @returns    :: true if can be left blank, else false
  */
-bool isOptionalProperty(Mantid::Kernel::Property *prop) {
+bool isOptionalProperty(Mantid::Kernel::Property const *prop) {
   return isValidPropertyValue(prop, "") || isValidPropertyValue(prop, prop->getDefault());
 }
 
@@ -112,7 +112,7 @@ bool isOptionalProperty(Mantid::Kernel::Property *prop) {
  * @param prop :: the property for which to create placeholder text
  * @returns    :: the placeholder text
  */
-std::string createFieldPlaceholderText(Mantid::Kernel::Property *prop) {
+std::string createFieldPlaceholderText(Mantid::Kernel::Property const *prop) {
   const std::string defaultValue = prop->getDefault();
   if (defaultValue.empty())
     return "";
@@ -376,7 +376,7 @@ void PropertyWidget::addReplaceWSButton() {
   if (m_replaceWSButton)
     return;
 
-  auto *wsProp = dynamic_cast<IWorkspaceProperty *>(m_prop);
+  auto const *wsProp = dynamic_cast<IWorkspaceProperty *>(m_prop);
   if (wsProp && (m_prop->direction() == Direction::Output)) {
     m_replaceWSButton = new QPushButton(QIcon(":/data_replace.png"), "", m_parent);
     // MG: There is no way with the QIcon class to actually ask what size it is

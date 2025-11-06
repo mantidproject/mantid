@@ -25,7 +25,7 @@ public:
   std::map<std::string, std::string> validateInputs() override;
 
 private:
-  DataObjects::TableWorkspace_sptr sortTableWorkspace(DataObjects::TableWorkspace_sptr &table);
+  DataObjects::TableWorkspace_sptr sortTableWorkspace(DataObjects::TableWorkspace_sptr const &table);
   void init() override;
   void exec() override;
 };

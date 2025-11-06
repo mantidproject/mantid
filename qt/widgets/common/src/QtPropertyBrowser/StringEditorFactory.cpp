@@ -13,7 +13,7 @@ QWidget *StringEditorFactory::createEditorForManager(QtStringPropertyManager * /
 
 StringEditor::StringEditor(QtProperty *property, QWidget *parent) : QLineEdit(parent), m_property(property) {
   connect(this, SIGNAL(editingFinished()), this, SLOT(updateProperty()));
-  auto *mgr = dynamic_cast<QtStringPropertyManager *>(property->propertyManager());
+  auto const *mgr = dynamic_cast<QtStringPropertyManager *>(property->propertyManager());
   if (mgr) {
     setText(mgr->value(property));
   }

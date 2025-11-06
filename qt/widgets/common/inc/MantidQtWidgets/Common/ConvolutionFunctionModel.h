@@ -38,8 +38,8 @@ public:
 
 private:
   void findComponentPrefixes();
-  void iterateThroughFunction(IFunction *func, std::string const &prefix);
-  void setPrefix(IFunction *func, std::string const &prefix);
+  void iterateThroughFunction(IFunction const *func, std::string const &prefix);
+  void setPrefix(IFunction const *func, std::string const &prefix);
 
   CompositeFunction_sptr createInnerFunction(const std::string &lorentzianPeaks, const std::string &fitType,
                                              bool hasDeltaFunction, bool isQDependent, double q, bool hasTempCorrection,

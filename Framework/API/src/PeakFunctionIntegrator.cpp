@@ -187,7 +187,7 @@ gsl_function PeakFunctionIntegrator::getGSLFunction(const IPeakFunction &peakFun
 }
 
 double gsl_peak_wrapper(double x, void *parameters) {
-  auto *peakFunction = reinterpret_cast<IPeakFunction *>(parameters);
+  auto const *peakFunction = reinterpret_cast<IPeakFunction *>(parameters);
 
   if (!peakFunction) {
     throw std::runtime_error("Cannot process NULL-pointer in gsl_peak_wrapper.");

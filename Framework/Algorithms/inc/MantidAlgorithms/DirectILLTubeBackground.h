@@ -32,8 +32,9 @@ private:
   void exec() override;
   API::MatrixWorkspace_sptr applyDiagnostics(API::MatrixWorkspace_sptr ws);
   std::vector<std::string> components(Geometry::Instrument const &instrument);
-  API::MatrixWorkspace_sptr cropToComponent(API::MatrixWorkspace_sptr &ws, std::string const &componentName);
-  API::MatrixWorkspace_sptr fitComponentBackground(API::MatrixWorkspace_sptr &ws, std::vector<double> const &xRanges);
+  API::MatrixWorkspace_sptr cropToComponent(API::MatrixWorkspace_sptr const &ws, std::string const &componentName);
+  API::MatrixWorkspace_sptr fitComponentBackground(API::MatrixWorkspace_sptr const &ws,
+                                                   std::vector<double> const &xRanges);
   API::MatrixWorkspace_sptr peakExcludingAverage(const API::MatrixWorkspace &ws, std::vector<double> const &peakStarts,
                                                  std::vector<double> const &peakEnds);
 };

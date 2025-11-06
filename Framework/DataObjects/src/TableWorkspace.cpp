@@ -250,7 +250,7 @@ void TableWorkspace::sort(std::vector<std::pair<std::string, bool>> &criteria) {
     // add more records to the back of the queue
     if (record.keyIndex < criteria.size() - 1) {
       size_t keyIndex = record.keyIndex + 1;
-      for (auto &equalRange : equalRanges) {
+      for (auto const &equalRange : equalRanges) {
         sortRecords.push(SortIterationRecord(keyIndex, equalRange.first, equalRange.second));
       }
     }
@@ -315,7 +315,7 @@ IPropertyManager::getValue<DataObjects::TableWorkspace_sptr>(const std::string &
 template <>
 DLLExport DataObjects::TableWorkspace_const_sptr
 IPropertyManager::getValue<DataObjects::TableWorkspace_const_sptr>(const std::string &name) const {
-  auto *prop = dynamic_cast<PropertyWithValue<DataObjects::TableWorkspace_sptr> *>(getPointerToProperty(name));
+  auto const *prop = dynamic_cast<PropertyWithValue<DataObjects::TableWorkspace_sptr> *>(getPointerToProperty(name));
   if (prop) {
     return prop->operator()();
   } else {

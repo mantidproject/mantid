@@ -83,7 +83,7 @@ void CombineDiffCal::init() {
 }
 
 /// sort the calibration table according increasing values in column "detid"
-DataObjects::TableWorkspace_sptr CombineDiffCal::sortTableWorkspace(DataObjects::TableWorkspace_sptr &table) {
+DataObjects::TableWorkspace_sptr CombineDiffCal::sortTableWorkspace(DataObjects::TableWorkspace_sptr const &table) {
   auto alg = createChildAlgorithm("SortTableWorkspace");
   alg->setLoggingOffset(1);
   alg->setProperty("InputWorkspace", table);

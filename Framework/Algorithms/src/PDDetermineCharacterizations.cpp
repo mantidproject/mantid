@@ -229,7 +229,7 @@ double PDDetermineCharacterizations::getLogValue(const API::Run &run, const std:
     validUnits.insert("Hz");
   }
 
-  for (auto &propertyName : propNames) {
+  for (auto const &propertyName : propNames) {
     if (run.hasProperty(propertyName)) {
       const std::string units = run.getProperty(propertyName)->units();
 
@@ -257,7 +257,7 @@ double PDDetermineCharacterizations::getLogValue(const API::Run &run, const std:
   // generate an exception if it gets here because the log wasn't found
   std::stringstream msg;
   msg << "Failed to determine " << label << " because none of the logs ";
-  for (auto &propertyName : propNames) {
+  for (auto const &propertyName : propNames) {
     msg << "\"" << propertyName << "\" ";
   }
   msg << "exist";

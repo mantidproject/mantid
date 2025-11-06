@@ -51,7 +51,7 @@ IPropertyManager::getValue<Mantid::API::IMDHistoWorkspace_sptr>(const std::strin
 template <>
 MANTID_API_DLL Mantid::API::IMDHistoWorkspace_const_sptr
 IPropertyManager::getValue<Mantid::API::IMDHistoWorkspace_const_sptr>(const std::string &name) const {
-  auto *prop = dynamic_cast<PropertyWithValue<Mantid::API::IMDHistoWorkspace_sptr> *>(getPointerToProperty(name));
+  auto const *prop = dynamic_cast<PropertyWithValue<Mantid::API::IMDHistoWorkspace_sptr> *>(getPointerToProperty(name));
   if (prop) {
     return prop->operator()();
   } else {

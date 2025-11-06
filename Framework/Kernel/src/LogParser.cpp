@@ -239,7 +239,7 @@ LogParser::LogParser(const Kernel::Property *log) : m_nOfPeriods(1) {
  *  @return times requested period was active
  */
 Kernel::TimeSeriesProperty<bool> *LogParser::createPeriodLog(int period) const {
-  auto *periods = dynamic_cast<Kernel::TimeSeriesProperty<int> *>(m_periods.get());
+  auto const *periods = dynamic_cast<Kernel::TimeSeriesProperty<int> *>(m_periods.get());
   if (!periods) {
     throw std::logic_error("Failed to cast periods to TimeSeriesProperty");
   }

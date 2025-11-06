@@ -438,7 +438,7 @@ void AlgorithmPropertiesWidget::hideOrDisableProperties(const QString &changedPr
 void AlgorithmPropertiesWidget::saveInput() {
   if (m_inputHistory) {
     for (auto pitr = m_propWidgets.begin(); pitr != m_propWidgets.end(); ++pitr) {
-      PropertyWidget *widget = pitr.value();
+      PropertyWidget const *widget = pitr.value();
       const QString &propName = pitr.key();
       QString value = widget->getValue();
       //        Mantid::Kernel::Property *prop = widget->getProperty();

@@ -213,7 +213,7 @@ void ConvolutionFunctionModel::findComponentPrefixes() {
   }
 }
 
-void ConvolutionFunctionModel::iterateThroughFunction(IFunction *func, std::string const &prefix) {
+void ConvolutionFunctionModel::iterateThroughFunction(IFunction const *func, std::string const &prefix) {
   auto numberOfSubFunction = func->nFunctions();
 
   setPrefix(func, prefix);
@@ -227,7 +227,7 @@ void ConvolutionFunctionModel::iterateThroughFunction(IFunction *func, std::stri
   }
 }
 
-void ConvolutionFunctionModel::setPrefix(IFunction *func, std::string const &prefix) {
+void ConvolutionFunctionModel::setPrefix(IFunction const *func, std::string const &prefix) {
   if (isBackground(func)) {
     if (m_backgroundPrefix) {
       throw std::runtime_error("Model cannot have more than one background.");

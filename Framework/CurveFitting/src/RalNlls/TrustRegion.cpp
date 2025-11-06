@@ -277,8 +277,9 @@ void testConvergence(double normF, double normJF, double normF0, double normJF0,
  *  @param scale :: Stored scaling data.
  *  @param options :: The options.
  */
-void applyScaling(const DoubleFortranMatrix &J, DoubleFortranMatrix &A, DoubleFortranVector &v,
-                  DoubleFortranVector &scale, const nlls_options &options) {
+void applyScaling(const DoubleFortranMatrix &J, DoubleFortranMatrix &A, // cppcheck-suppress constParameterReference
+                  DoubleFortranVector &v, DoubleFortranVector &scale,   // cppcheck-suppress constParameterReference
+                  const nlls_options &options) {
   auto m = J.len1();
   auto n = J.len2();
   if (scale.len() != n) {
