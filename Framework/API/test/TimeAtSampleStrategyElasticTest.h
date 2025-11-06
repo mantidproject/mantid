@@ -10,8 +10,8 @@
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectrumInfo.h"
-#include "MantidAlgorithms/TimeAtSampleStrategy.h"
-#include "MantidAlgorithms/TimeAtSampleStrategyElastic.h"
+#include "MantidAPI/TimeAtSampleStrategy.h"
+#include "MantidAPI/TimeAtSampleStrategyElastic.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/IDetector.h"
@@ -19,7 +19,6 @@
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidKernel/V3D.h"
 
-using namespace Mantid::Algorithms;
 using namespace Mantid::Geometry;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -32,6 +31,7 @@ public:
   static void destroySuite(TimeAtSampleStrategyElasticTest *suite) { delete suite; }
 
   void test_L2_detector() {
+    constexpr size_t detectorIndex = 0; // detector workspace index.
 
     auto ws = WorkspaceCreationHelper::create2DWorkspaceWithReflectometryInstrument();
 
@@ -41,7 +41,6 @@ public:
 
     auto source = instrument->getSource();
 
-    const size_t detectorIndex = 0; // detector workspace index.
     const auto &spectrumInfo = ws->spectrumInfo();
 
     const double L1 = spectrumInfo.l1();
@@ -49,12 +48,12 @@ public:
     TimeAtSampleStrategyElastic strategy(ws);
     Correction correction = strategy.calculate(detectorIndex);
 
-    const double ratio = correction.factor;
-
-    TSM_ASSERT_EQUALS("L1 / (L1 + L2)", L1 / (L1 + spectrumInfo.l2(detectorIndex)), ratio);
+    TSM_ASSERT_EQUALS("L1 / (L1 + L2)", L1 / (L1 + spectrumInfo.l2(detectorIndex)), correction.factor);
+    TS_ASSERT_EQUALS(0., correction.offset);
   }
 
   void test_L2_monitor() {
+    const size_t monitorIndex = 1; // monitor workspace index.
 
     auto ws = WorkspaceCreationHelper::create2DWorkspaceWithReflectometryInstrument();
 
@@ -66,7 +65,6 @@ public:
 
     const V3D &beamDir = instrument->getReferenceFrame()->vecPointingAlongBeam();
 
-    const size_t monitorIndex = 1; // monitor workspace index.
     auto monitor = ws->getDetector(monitorIndex);
 
     const double L1 = source->getPos().distance(sample->getPos());
@@ -74,8 +72,8 @@ public:
     TimeAtSampleStrategyElastic strategy(ws);
     Correction correction = strategy.calculate(monitorIndex);
 
-    const double ratio = correction.factor;
-
-    TSM_ASSERT_EQUALS("L1/L1m", std::abs(L1 / beamDir.scalar_prod(source->getPos() - monitor->getPos())), ratio);
+    TSM_ASSERT_EQUALS("L1/L1m", std::abs(L1 / beamDir.scalar_prod(source->getPos() - monitor->getPos())),
+                      correction.factor);
+    TS_ASSERT_EQUALS(0., correction.offset);
   }
 };

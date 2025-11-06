@@ -6,30 +6,33 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidAlgorithms/TimeAtSampleStrategy.h"
+#include "MantidAPI/TimeAtSampleStrategy.h"
 #include "MantidKernel/V3D.h"
 #include <memory>
 
 namespace Mantid {
-
+namespace Geometry {
+class ParameterMap;
+}
 namespace API {
 class MatrixWorkspace;
 class SpectrumInfo;
-} // namespace API
-namespace Algorithms {
 
-/** TimeAtSampleStrategyElastic : Time at sample stragegy for elastic scattering
- */
-class MANTID_ALGORITHMS_DLL TimeAtSampleStrategyElastic : public Mantid::Algorithms::TimeAtSampleStrategy {
+/** TimeAtSampleStrategyIndirect : Determine Time At Sample for an indirect
+  instrument setup.
+*/
+class MANTID_API_DLL TimeAtSampleStrategyIndirect : public TimeAtSampleStrategy {
 public:
-  TimeAtSampleStrategyElastic(std::shared_ptr<const Mantid::API::MatrixWorkspace> ws);
+  TimeAtSampleStrategyIndirect(std::shared_ptr<const Mantid::API::MatrixWorkspace> ws);
   Correction calculate(const size_t &workspace_index) const override;
 
 private:
-  std::shared_ptr<const Mantid::API::MatrixWorkspace> m_ws;
+  double getEfixed(const size_t &workspace_index) const;
   const API::SpectrumInfo &m_spectrumInfo;
+  const double m_L1s;
   const Kernel::V3D m_beamDir;
+  const Geometry::ParameterMap &m_paramMap;
 };
 
-} // namespace Algorithms
+} // namespace API
 } // namespace Mantid

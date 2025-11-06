@@ -4,7 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidAlgorithms/TimeAtSampleStrategyDirect.h"
+#include "MantidAPI/TimeAtSampleStrategyDirect.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/IDetector.h"
@@ -18,23 +18,22 @@
 
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
-using namespace Mantid::API;
 
-namespace Mantid::Algorithms {
+namespace Mantid::API {
+
+namespace {
+// A constant among all spectra
+constexpr double TWO_MEV_OVER_MASS = 2. * PhysicalConstants::meV / PhysicalConstants::NeutronMass;
+} // namespace
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-TimeAtSampleStrategyDirect::TimeAtSampleStrategyDirect(const MatrixWorkspace_const_sptr &ws, double ei)
-    : m_constShift(0) {
-
-  // A constant among all spectra
-  constexpr double TWO_MEV_OVER_MASS = 2. * PhysicalConstants::meV / PhysicalConstants::NeutronMass;
-
+TimeAtSampleStrategyDirect::TimeAtSampleStrategyDirect(const MatrixWorkspace_const_sptr &ws, double ei) {
   // Get L1
   const auto &samplepos = ws->getInstrument()->getSample()->getPos();
   const auto &sourcepos = ws->getInstrument()->getSource()->getPos();
-  double l1 = samplepos.distance(sourcepos);
+  const double l1 = samplepos.distance(sourcepos);
 
   // Calculate constant (to all spectra) shift
   m_constShift = l1 / std::sqrt(ei * TWO_MEV_OVER_MASS);
@@ -44,10 +43,9 @@ TimeAtSampleStrategyDirect::TimeAtSampleStrategyDirect(const MatrixWorkspace_con
  * @brief Calculate corrections to get a Time at Sample for a DG instrument.
  * @return Correction struct
  */
-Correction Mantid::Algorithms::TimeAtSampleStrategyDirect::calculate(const size_t & /*workspace_index*/) const {
-
-  // Correction is L1 and Ei dependent only. Detector positions are not
-  // required.
-  return Correction(0, m_constShift);
+Correction Mantid::API::TimeAtSampleStrategyDirect::calculate(const size_t & /*workspace_index*/) const {
+  constexpr double SET_TOF_TO_ZERO{0.};
+  // Correction is L1 and Ei dependent only. Detector positions are not required.
+  return Correction(SET_TOF_TO_ZERO, m_constShift);
 }
-} // namespace Mantid::Algorithms
+} // namespace Mantid::API
