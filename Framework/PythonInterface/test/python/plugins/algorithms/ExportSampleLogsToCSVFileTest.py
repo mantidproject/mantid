@@ -10,6 +10,7 @@ import mantid.kernel as kernel
 from testhelpers import run_algorithm
 from mantid.api import AnalysisDataService
 import os
+import tempfile
 
 
 class ExportVulcanSampleLogTest(unittest.TestCase):
@@ -385,13 +386,14 @@ class ExportVulcanSampleLogTest(unittest.TestCase):
         )
 
         # Test algorithm
-        alg_test = run_algorithm(
-            "ExportSampleLogsToCSVFile",
-            InputWorkspace="VULCAN_41703",
-            OutputFilename="/tmp/furnace41703.txt",
-            SampleLogNames=["furnace.temp1", "furnace.temp2", "furnace.power"],
-            WriteHeaderFile=False,
-        )
+        with tempfile.NamedTemporaryFile() as file:
+            alg_test = run_algorithm(
+                "ExportSampleLogsToCSVFile",
+                InputWorkspace="VULCAN_41703",
+                OutputFilename=file.name,
+                SampleLogNames=["furnace.temp1", "furnace.temp2", "furnace.power"],
+                WriteHeaderFile=False,
+            )
 
         # Validate
         self.assertTrue(alg_test.isExecuted())

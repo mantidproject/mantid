@@ -136,7 +136,7 @@ class DrillExportModel:
             for param in params:
                 value = processingAlgo.getPropertyValue(param[1:-1])
                 criteria = criteria.replace(param, '"' + value + '"')
-            return bool(eval(criteria))
+            return bool(eval(criteria))  # noqa: S307
         except:
             return False
 

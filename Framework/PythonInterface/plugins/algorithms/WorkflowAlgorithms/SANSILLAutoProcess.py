@@ -36,7 +36,7 @@ import SANSILLCommon as common
 import numpy as np
 from os import path
 
-EMPTY_TOKEN = "000000"
+EMPTY_TOKEN = "000000"  # noqa: S105
 
 
 def needs_processing(property_value, process_reduction_type):

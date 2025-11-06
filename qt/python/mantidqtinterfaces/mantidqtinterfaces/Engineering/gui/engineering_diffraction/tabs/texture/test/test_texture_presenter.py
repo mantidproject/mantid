@@ -9,6 +9,7 @@ import unittest
 from unittest.mock import patch, MagicMock
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.texture.presenter import TexturePresenter
 import numpy as np
+import tempfile
 
 dir_path = "mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.texture.presenter"
 
@@ -204,7 +205,8 @@ class TestTexturePresenter(unittest.TestCase):
         self.view.get_plot_axis.return_value = (fig, canvas)
         self.presenter.model.exec_plot_pf = MagicMock()
 
-        self.presenter.plot_pf(["/tmp"])
+        with tempfile.TemporaryDirectory() as d:
+            self.presenter.plot_pf([d])
 
         self.presenter.model.exec_plot_pf.assert_called_once()
         canvas.draw.assert_called_once()

@@ -347,7 +347,8 @@ def get_plot_fig(overplot=None, ax_properties=None, window_title=None, axes_num=
     elif overplot:
         # The create subplot below assumes no figure was passed in, this is ensured by the elif above
         # but add an assert which prevents a future refactoring from breaking this assumption
-        assert not fig
+        if fig is not None:
+            raise ValueError("Expected fig to be empty")
         fig = plt.gcf()
         if not fig.axes:
             plt.close(fig)
