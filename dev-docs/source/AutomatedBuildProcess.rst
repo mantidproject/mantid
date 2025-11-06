@@ -55,7 +55,7 @@ The nightly pipelines are Jenkins jobs responsible for building Mantid packages
 and deploying them to the Mantid conda channel. They build both nightly and release versions.
 You can find them on `this page <https://builds.mantidproject.org/view/Nightly%20Pipelines/>`_.
 
-The `build_packages_from_branch <https://builds.mantidproject.org/view/Nightly%20Pipelines/>`_
+The `build_branch <https://builds.mantidproject.org/job/build_branch/>`_ pipeline
 is a Jenkins job based on these nightly jobs that allows you to manually build packages
 from an upstream branch in the Mantid repository. For the full guide on how to use the
 job, please follow `this link <https://developer.mantidproject.org/Packaging.html#build-packages-from-branch-using-jenkins>`_.
