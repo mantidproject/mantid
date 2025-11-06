@@ -11,7 +11,7 @@ from instrumentview.Peaks.Peak import Peak
 from instrumentview.Peaks.DetectorPeaks import DetectorPeaks
 
 from mantid.dataobjects import Workspace2D, PeaksWorkspace
-from mantid.simpleapi import CreateDetectorTable, ExtractSpectra, ConvertUnits, AnalysisDataService, SumSpectra, Rebin
+from mantid.simpleapi import CreateDetectorTable, ExtractSpectra, ConvertUnits, AnalysisDataService, SumSpectra, Rebin, ExtractMask
 from itertools import groupby
 import numpy as np
 
@@ -58,13 +58,15 @@ class FullInstrumentViewModel:
         # Array of strings 'yes', 'no' and 'n/a'
         self._is_monitor = detector_info_table.columnArray("Monitor")
         self._is_valid = self._is_monitor == "no"
+        mask_ws, mask_list = ExtractMask(self._workspace, StoreInADS=False)
+        self._is_masked = mask_ws.extractY().flatten().astype(bool)
         self._monitor_positions = self._detector_positions[self._is_monitor == "yes"]
         self._current_projected_positions = self.detector_positions
 
         # Initialise with zeros
         self._counts = np.zeros_like(self._detector_ids)
         self._counts_limits = (0, 0)
-        self._detector_is_picked = np.full(len(self._detector_ids[self._is_valid]), False)
+        self._detector_is_picked = np.full(len(self._detector_ids[self.is_pickable]), False)
 
         # Get min and max integration values
         if self._workspace.isRaggedWorkspace():
@@ -107,15 +109,19 @@ class FullInstrumentViewModel:
 
     @property
     def detector_positions(self) -> np.ndarray:
-        return self._detector_positions[self._is_valid]
+        return self._detector_positions[self.is_pickable]
 
     @property
     def detector_ids(self) -> np.ndarray:
-        return self._detector_ids[self._is_valid]
+        return self._detector_ids[self.is_pickable]
 
     @property
     def monitor_positions(self) -> np.ndarray:
         return self._monitor_positions
+
+    @property
+    def is_pickable(self) -> np.ndarray:
+        return ~self._is_masked & self._is_valid
 
     @property
     def picked_visibility(self) -> np.ndarray:
@@ -123,15 +129,19 @@ class FullInstrumentViewModel:
 
     @property
     def picked_detector_ids(self) -> np.ndarray:
-        return self._detector_ids[self._is_valid][self._detector_is_picked]
+        return self._detector_ids[self.is_pickable][self._detector_is_picked]
 
     @property
     def picked_workspace_indices(self) -> np.ndarray:
-        return self._workspace_indices[self._is_valid][self._detector_is_picked]
+        return self._workspace_indices[self.is_pickable][self._detector_is_picked]
+
+    @property
+    def masked_positions(self) -> np.ndarray:
+        return self._detector_positions[self._is_masked & self._is_valid]
 
     @property
     def detector_counts(self) -> np.ndarray:
-        return self._counts[self._is_valid]
+        return self._counts[self.is_pickable]
 
     @property
     def counts_limits(self) -> tuple[int, int]:
@@ -167,7 +177,7 @@ class FullInstrumentViewModel:
 
     def update_integration_range(self, integration_limits: tuple[float, float], entire_range: bool = False) -> None:
         integration_min, integration_max = integration_limits
-        workspace_indices = self._workspace_indices[self._is_valid]
+        workspace_indices = self._workspace_indices[self.is_pickable]
         new_detector_counts = np.array(
             self._workspace.getIntegratedCountsForWorkspaceIndices(
                 workspace_indices, len(workspace_indices), float(integration_min), float(integration_max), entire_range
@@ -175,7 +185,7 @@ class FullInstrumentViewModel:
             dtype=int,
         )
         self._counts_limits = (np.min(new_detector_counts), np.max(new_detector_counts))
-        self._counts[self._is_valid] = new_detector_counts
+        self._counts[self.is_pickable] = new_detector_counts
 
     def negate_picked_visibility(self, indices: list[int] | np.ndarray) -> None:
         self._detector_is_picked[indices] = ~self._detector_is_picked[indices]
@@ -186,11 +196,11 @@ class FullInstrumentViewModel:
     def picked_detectors_info_text(self) -> list[DetectorInfo]:
         """For the specified detector, extract info that can be displayed in the View, and wrap it all up in a DetectorInfo class"""
 
-        picked_ws_indices = self._workspace_indices[self._is_valid][self._detector_is_picked]
-        picked_ids = self._detector_ids[self._is_valid][self._detector_is_picked]
-        picked_xyz_positions = self._detector_positions[self._is_valid][self._detector_is_picked]
-        picked_spherical_positions = self._spherical_positions[self._is_valid][self._detector_is_picked]
-        picked_counts = self._counts[self._is_valid][self._detector_is_picked]
+        picked_ws_indices = self._workspace_indices[self.is_pickable][self._detector_is_picked]
+        picked_ids = self._detector_ids[self.is_pickable][self._detector_is_picked]
+        picked_xyz_positions = self._detector_positions[self.is_pickable][self._detector_is_picked]
+        picked_spherical_positions = self._spherical_positions[self.is_pickable][self._detector_is_picked]
+        picked_counts = self._counts[self.is_pickable][self._detector_is_picked]
 
         picked_info = []
         for i, ws_index in enumerate(picked_ws_indices):
