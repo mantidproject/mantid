@@ -16,6 +16,7 @@ import time
 from typing import BinaryIO, Callable, Iterable, Iterator
 import yaml
 
+logging.basicConfig()
 TRACE_LEVEL = 5
 logging.addLevelName(TRACE_LEVEL, "TRACE")
 
@@ -770,7 +771,7 @@ if __name__ == "__main__":
             _logger.error(f"When using record mode, the positional argument should be the target directory, not '{args.glob}'.")
 
         player = Player(server_address=args.server_address, source_address=args.source_address)
-
+        
         # Set up signal handlers
         signal.signal(signal.SIGINT, player.signal_handler)
         signal.signal(signal.SIGTERM, player.signal_handler)

@@ -8,6 +8,7 @@
 #include <exception>
 #include <sstream> // for ostringstream
 #include <string>
+#include <typeinfo>
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
@@ -152,9 +153,19 @@ bool SNSLiveEventDataListener::connect(const Poco::Net::SocketAddress &address)
   } else {
     try {
       m_socket.connect(address); // BLOCKING connect
+    } catch (const Poco::Exception &e) {
+        glog.error() << "POCO Exception in connect(): " << e.name() << " : " << e.what()
+                     << " code: " << e.code()
+                     << " type: " << typeid(e).name();
+        return false;
+    } catch (const std::exception &e) {
+        glog.error() << "STD Exception in connect(): " << e.what()
+                     << " type: " << typeid(e).name();
+        return false;
     } catch (...) {
-      g_log.debug() << "Connection to " << address.toString() << " failed.\n";
-      return false;
+        glog.error() << "Unknown exception in connect()"
+                     << " type: " << typeid(*this).name(); // Only useful if you have context
+        return false;
     }
   }
 
