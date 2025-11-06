@@ -8,7 +8,6 @@
 #include <exception>
 #include <sstream> // for ostringstream
 #include <string>
-#include <typeinfo>
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
@@ -76,8 +75,10 @@ namespace Mantid::LiveData {
 DECLARE_LISTENER(SNSLiveEventDataListener)
 
 namespace {
+
 /// static logger
 Kernel::Logger g_log("SNSLiveEventDataListener");
+
 } // namespace
 
 /// Constructor
@@ -139,10 +140,10 @@ bool SNSLiveEventDataListener::connect(const Poco::Net::SocketAddress &address)
 // and it doesn't check the return value.  (It does, however, trap the Poco
 // exceptions.)
 {
-  // If we don't have an address, force a connection to the test server running
-  // on
-  // localhost on the default port
-  if (address.host().toString() == "0.0.0.0") {
+  // If we don't have an address, make a connection to the test server running
+  //   on localhost on the default port.
+  if (address.family() != Poco::Net::SocketAddress::UNIX_LOCAL
+        && address.host().toString() == "0.0.0.0") {
     Poco::Net::SocketAddress tempAddress("localhost:31415");
     try {
       m_socket.connect(tempAddress); // BLOCKING connect
@@ -150,20 +151,20 @@ bool SNSLiveEventDataListener::connect(const Poco::Net::SocketAddress &address)
       g_log.error() << "Connection to " << tempAddress.toString() << " failed.\n";
       return false;
     }
-  } else {
+  } else {    
     try {
       m_socket.connect(address); // BLOCKING connect
     } catch (const Poco::Exception &e) {
-        glog.error() << "POCO Exception in connect(): " << e.name() << " : " << e.what()
+        g_log.error() << "POCO Exception in connect(): " << e.name() << " : " << e.what()
                      << " code: " << e.code()
                      << " type: " << typeid(e).name();
         return false;
     } catch (const std::exception &e) {
-        glog.error() << "STD Exception in connect(): " << e.what()
+        g_log.error() << "STD Exception in connect(): " << e.what()
                      << " type: " << typeid(e).name();
         return false;
     } catch (...) {
-        glog.error() << "Unknown exception in connect()"
+        g_log.error() << "Unknown exception in connect()"
                      << " type: " << typeid(*this).name(); // Only useful if you have context
         return false;
     }
@@ -171,8 +172,8 @@ bool SNSLiveEventDataListener::connect(const Poco::Net::SocketAddress &address)
 
   m_socket.setReceiveTimeout(Poco::Timespan(RECV_TIMEOUT, 0)); // POCO timespan is seconds, microseconds
   g_log.debug() << "Connected to " << m_socket.address().toString() << '\n';
-
   m_isConnected = true;
+  
   return true;
 }
 
