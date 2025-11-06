@@ -24,9 +24,8 @@ class PathTest(unittest.TestCase):
         expected = Path(data_dir) / "SNAP_45874.nxs.h5"
         expected.touch()  # create empty file
         # Normalize path separators for comparison (ConfigService returns paths with forward slashes)
-        actual = path.run_file(45874, instrument="SNAP", oncat=False)
-        expected_str = str(expected).replace("\\", "/")
-        self.assertEqual(actual, expected_str)
+        actual = Path(path.run_file(45874, instrument="SNAP", oncat=False))
+        self.assertEqual(actual, expected)
         config["datasearch.directories"] = old  # restore the original list of data search directories
 
 
