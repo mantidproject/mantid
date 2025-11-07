@@ -46,7 +46,8 @@ public:
     TS_ASSERT_EQUALS(props[3]->name(), "Filter");
     TS_ASSERT(props[3]->isDefault());
     TS_ASSERT_EQUALS(props[3]->value(), "Zeroing");
-    TS_ASSERT(dynamic_cast<PropertyWithValue<std::string> *>(props[3]));
+    // NOTE: enumerated string properties cannot be converted to a PropertyWithValue
+    // To test here, the enum and vector would need to be accessible, but they are not
 
     TS_ASSERT_EQUALS(props[4]->name(), "Params");
     TS_ASSERT(props[4]->isDefault());

@@ -9,6 +9,8 @@
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/EnumeratedString.h"
+#include "MantidKernel/EnumeratedStringProperty.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/ListValidator.h"
 
@@ -23,6 +25,12 @@ DECLARE_ALGORITHM(FFTSmooth2)
 using namespace Kernel;
 using namespace API;
 
+namespace {
+enum class FilterType { ZERO, BUTTERWORTH, enum_count };
+const std::vector<std::string> filterTypes{"Zeroing", "Butterworth"};
+typedef Mantid::Kernel::EnumeratedString<FilterType, &filterTypes> FILTER;
+} // namespace
+
 /// Initialisation method. Declares properties to be used in algorithm.
 void FFTSmooth2::init() {
   declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>("InputWorkspace", "", Direction::Input),
@@ -34,8 +42,9 @@ void FFTSmooth2::init() {
   mustBePositive->setLower(0);
   declareProperty("WorkspaceIndex", 0, mustBePositive, "Workspace index for smoothing");
 
-  std::vector<std::string> type{"Zeroing", "Butterworth"};
-  declareProperty("Filter", "Zeroing", std::make_shared<StringListValidator>(type), "The type of the applied filter");
+  declareProperty(std::make_unique<Mantid::Kernel::EnumeratedStringProperty<FilterType, &filterTypes>>("Filter"),
+                  "The type of the applied filter");
+
   declareProperty("Params", "",
                   "The filter parameters:\n"
                   "For Zeroing, 1 parameter: 'n' - an integer greater than 1 "
@@ -49,6 +58,35 @@ void FFTSmooth2::init() {
                   "Set this to true if you are using log binning.\n"
                   "The output X axis will be the same as the input either way.");
   declareProperty("AllSpectra", false, "Smooth all spectra");
+}
+
+std::map<std::string, std::string> FFTSmooth2::validateInputs() {
+  std::map<std::string, std::string> issues;
+
+  API::MatrixWorkspace_sptr inWS = getProperty("InputWorkspace");
+
+  // verify the spectrum workspace index
+  int wi = getProperty("WorkspaceIndex");
+  if (wi >= static_cast<int>(inWS->getNumberHistograms())) {
+    issues["WorkspaceIndex"] = "Property WorkspaceIndex is out of range";
+    return issues;
+  }
+
+  // Check that the x values are evenly spaced
+  bool ignoreXBins = getProperty("IgnoreXBins");
+  if (!ignoreXBins) {
+    const auto &X = inWS->x(wi);
+    double dx = (X.back() - X.front()) / static_cast<double>(X.size() - 1);
+    for (size_t i = 0; i < X.size() - 2; i++) {
+      if (std::abs(dx - X[i + 1] + X[i]) / dx > 1e-7) {
+        issues["InputWorkspace"] = "X axis must be linear (all bins have same "
+                                   "width). This can be ignored if "
+                                   "IgnoreXBins is set to true.";
+        break;
+      }
+    }
+  }
+  return issues;
 }
 
 /** Executes the algorithm
@@ -119,9 +157,9 @@ void FFTSmooth2::exec() {
     API::MatrixWorkspace_sptr filteredWS;
 
     // Apply the filter
-    std::string type = getProperty("Filter");
+    FILTER type = getPropertyValue("Filter");
 
-    if (type == "Zeroing") {
+    if (type == FilterType::ZERO) {
       std::string sn = getProperty("Params");
       int n;
       if (sn.empty())
@@ -134,7 +172,7 @@ void FFTSmooth2::exec() {
       progress.report("Zero Filter");
 
       zero(n, unfilteredWS, filteredWS);
-    } else if (type == "Butterworth") {
+    } else if (type == FilterType::BUTTERWORTH) {
       int n, order;
 
       std::string string_params = getProperty("Params");
