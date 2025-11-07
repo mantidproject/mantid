@@ -92,7 +92,7 @@ cd $WORKSPACE/build
 # mkdir for test logs
 mkdir -p test_logs
 if [[ $ENABLE_UNIT_TESTS == true ]]; then
-    run_with_xvfb ctest -j$UNIT_TEST_THREADS --no-compress-output -T Test -O test_logs/ctest_$OSTYPE.log --schedule-random --output-on-failure --repeat until-pass:3 $WINDOWS_TEST_OPTIONS $WINDOWS_UNITTEST_TIMEOUT_OPTIONS
+    run_with_xvfb ctest -L UnitTest -j$UNIT_TEST_THREADS --no-compress-output -T Test -O test_logs/ctest_$OSTYPE.log --schedule-random --output-on-failure --repeat until-pass:3 $WINDOWS_TEST_OPTIONS $WINDOWS_UNITTEST_TIMEOUT_OPTIONS
 fi
 
 if [[ $ENABLE_DOCS == true && $ENABLE_DOC_TESTS == true ]]; then
