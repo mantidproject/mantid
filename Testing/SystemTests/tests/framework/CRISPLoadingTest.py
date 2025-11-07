@@ -9,7 +9,7 @@ from LoadAndCheckBase import LoadAndCheckBase
 
 class CRISPLoadingTest(LoadAndCheckBase):
     """
-    Test File loading and basic data integrity checks of CRISP data in Mantid.
+    Test file loading and basic data integrity checks of CRISP data in Mantid.
     """
 
     def __init__(self):
