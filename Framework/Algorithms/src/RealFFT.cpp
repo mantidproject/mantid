@@ -10,12 +10,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/Exception.h"
 
-#include <gsl/gsl_errno.h>
-#include <gsl/gsl_fft_halfcomplex.h>
-#include <gsl/gsl_fft_real.h>
-
-#define REAL(z, i) ((z)[2 * (i)])
-#define IMAG(z, i) ((z)[2 * (i) + 1])
+#include "MantidKernel/GSL_FFT_Helpers.h"
 
 #include <algorithm>
 #include <cmath>
@@ -110,9 +105,26 @@ void RealFFT::exec() {
   double df = 1.0 / (dx * ySize);
 
   if (transform == "Forward") {
-    int yOutSize = ySize / 2 + 1;
-    int xOutSize = inWS->isHistogramData() ? yOutSize + 1 : yOutSize;
-    bool odd = ySize % 2 != 0;
+    // first, transform the data
+    auto const &yData = inWS->y(spec);
+    std::vector<double> data(yData.cbegin(), yData.cend());
+    Kernel::fft::real_ws_uptr workspace = Kernel::fft::make_gsl_real_workspace(ySize);
+    Kernel::fft::real_wt_uptr wavetable = Kernel::fft::make_gsl_real_wavetable(ySize);
+    gsl_fft_real_transform(data.data(), 1, ySize, wavetable.get(), workspace.get());
+    workspace.reset();
+    wavetable.reset();
+
+    // unpack the halfcomplex values -- will be full complex, interleaved real/imag
+    std::vector<double> unpacked(2 * ySize, 0.0);
+    gsl_fft_halfcomplex_unpack(data.data(), unpacked.data(), 1, ySize);
+
+    // second, setup the workspace
+    // NOTE: the FT of a real sequence is a half-complex sequence.
+    // The "half" part refers to a mirror symmetry z[k] = z*[N-k], NOT to the actual number of complex elements in the
+    // transform. There are as many complex elements in the output sequence as real elements in the input sequence.
+    // HOWEVER using the correct value introduces incomatibilities with legacy behavior, so must be retained for now
+    auto yOutSize = ySize / 2 + 1; // TODO replace with yOutSize = ySize;
+    auto xOutSize = inWS->isHistogramData() ? yOutSize + 1 : yOutSize;
 
     outWS = WorkspaceFactory::Instance().create(inWS, 3, xOutSize, yOutSize);
     auto tAxis = std::make_unique<API::TextAxis>(3);
@@ -121,37 +133,25 @@ void RealFFT::exec() {
     tAxis->setLabel(2, "Modulus");
     outWS->replaceAxis(1, std::move(tAxis));
 
-    gsl_fft_real_workspace *workspace = gsl_fft_real_workspace_alloc(ySize);
-    std::vector<double> data(2 * ySize);
-
-    auto &yData = inWS->mutableY(spec);
-    for (int i = 0; i < ySize; i++) {
-      data[i] = yData[i];
-    }
-
-    gsl_fft_real_wavetable *wavetable = gsl_fft_real_wavetable_alloc(ySize);
-    gsl_fft_real_transform(data.data(), 1, ySize, wavetable, workspace);
-    gsl_fft_real_wavetable_free(wavetable);
-    gsl_fft_real_workspace_free(workspace);
-
+    // set the workspace x values
     auto &x = outWS->mutableX(0);
+    double df = 1.0 / (dx * static_cast<double>(ySize));
+    std::generate(x.begin(), x.end(), HistogramData::LinearGenerator(0, df));
+    outWS->setSharedX(1, outWS->sharedX(0));
+    outWS->setSharedX(2, outWS->sharedX(0));
+
+    // set the workspace y values
     auto &y1 = outWS->mutableY(0);
     auto &y2 = outWS->mutableY(1);
     auto &y3 = outWS->mutableY(2);
-    for (int i = 0; i < yOutSize; i++) {
-      int j = i * 2;
-      x[i] = df * i;
-      double re = i != 0 ? data[j - 1] : data[0];
-      double im = (i != 0 && (odd || i != yOutSize - 1)) ? data[j] : 0;
+    for (std::size_t i = 0; i < yOutSize; i++) {
+      std::size_t const j = i * 2;
+      double re = unpacked[j];
+      double im = unpacked[j + 1];
       y1[i] = re * dx;                      // real part
       y2[i] = im * dx;                      // imaginary part
       y3[i] = dx * sqrt(re * re + im * im); // modulus
     }
-    if (inWS->isHistogramData()) {
-      outWS->mutableX(0)[yOutSize] = outWS->mutableX(0)[yOutSize - 1] + df;
-    }
-    outWS->setSharedX(1, outWS->sharedX(0));
-    outWS->setSharedX(2, outWS->sharedX(0));
   } else // Backward
   {
 
