@@ -1,6 +1,5 @@
 import collections
 from enum import IntEnum, StrEnum
-import hashlib
 import itertools
 import logging
 import numpy as np
@@ -15,6 +14,7 @@ import sys
 import time
 from typing import BinaryIO, Callable, Iterable, Iterator
 import yaml
+from zlib import crc32
 
 logging.basicConfig()
 TRACE_LEVEL = 5
@@ -49,14 +49,6 @@ def multi_glob(path: Path, patterns: str | list[str]) -> Iterator[Path]:
     if isinstance(patterns, str):
         patterns = [patterns]
     return itertools.chain.from_iterable(path.glob(p) for p in patterns)
-
-
-def sha256sum(path: Path) -> str:
-    sha256 = hashlib.sha256()
-    with path.open("rb") as f:
-        for block in iter(lambda: f.read(65536), b""):
-            sha256.update(block)
-    return sha256.hexdigest()
 
 
 class UnixGlob:
@@ -138,6 +130,7 @@ class SocketAddress:
 
 class Packet:
     HEADER_BYTES = 16
+    STR_FORMAT = Config['logging']['packet_summary']
 
     class Type(IntEnum):
         RAW_EVENT_TYPE = (0x0000, 0x01)
@@ -187,9 +180,7 @@ class Packet:
         self._payload = payload
         self._source = source
 
-        sha256 = hashlib.sha256()
-        sha256.update(header + payload)
-        self._SHA = sha256.hexdigest()
+        self._CRC = crc32(header + payload)
 
         # Use LITTLE-ENDIAN byte order here!
         payload_len = struct.unpack("<I", header[0:4])[0]
@@ -223,8 +214,8 @@ class Packet:
         return self._source
 
     @property
-    def SHA(self) -> str:
-        return self._SHA
+    def CRC(self) -> int:
+        return self._CRC
 
     @property
     def size(self) -> int:
@@ -242,6 +233,15 @@ class Packet:
     def pulseid(self) -> int:
         return self._pulseid
 
+    def __str__(self) -> str:
+        MB = 1024**2
+        return self.STR_FORMAT.format(
+            type=self.type,
+            timestamp=self.timestamp,
+            size_MB=self.size / MB,
+            CRC=self.CRC
+        )
+        
     @classmethod
     def iter_file(cls, src: BinaryIO, header_only=False, source=None) -> "Iterator[Packet]":
         """Iterate over packets in a single file."""
@@ -405,6 +405,8 @@ class Player:
     SOCKET_TIMEOUT = Config["server"]["socket_timeout"]
     HANDSHAKE_TIMEOUT = Config["playback"]["handshake_timeout"]
     PLAYBACK_HANDSHAKE = Config["playback"]["handshake"]
+    TRANSFER_LIMIT_MB = Config["record"]["transfer_limit"]
+    ITERATION_LIMIT = Config["record"]["iteration_limit"]
 
     class Rate(StrEnum):
         NORMAL = "normal"
@@ -420,6 +422,10 @@ class Player:
         self._buffer_MB = Config["server"]["buffer_MB"]
 
         self._running = False
+        
+        # transferred bytes (for record)
+        self._transferred_bytes = 0
+        
         # packet-source socket:
         self._source = None
         # listener socket:
@@ -515,7 +521,7 @@ class Player:
                 if socket in readable:
                     try:
                         unexpected_pkt = Packet.from_socket(socket)
-                        _logger.warning(f"Unexpected packet received from client: type={unexpected_pkt.packet_type}")
+                        _logger.warning(f"RECV unexpected: {unexpected_pkt}")
                     except Exception as e:
                         _logger.error(f"Unable to read unexpected packet: {e}")
                         return
@@ -531,7 +537,7 @@ class Player:
                 # Send the packet
                 try:
                     Packet.to_socket(socket, pkt)
-                    _logger.debug(f"Sent packet: type={pkt.packet_type}: timestamp={pkt.timestamp}, size={pkt.size}")
+                    _logger.debug(f"SEND: {pkt}")
                 except (socket.error, socket.timeout) as e:
                     _logger.error(f"Failed to send packet: {e}")
                     return
@@ -599,15 +605,14 @@ class Player:
             self._cleanup()
 
     def record(self, output_path: Path):
-        def _packet_filename(output_path: Path, packet: Packet) -> Path:
-            return output_path / f"{packet.packet_type}-{packet.timestamp}.adara"
-
         # Ensure target directory exists
         output_path.mkdir(parents=True, exist_ok=True)
 
         # Main server loop
         try:
             self._running = True
+            self._transferred_bytes = 0
+            
             self._server = self._create_server_socket(self._server_address)
             while self._running:
                 # Accept connection from client (the application).
@@ -659,15 +664,27 @@ class Player:
                         for sock in readable:
                             try:
                                 packet = Packet.from_socket(sock)
-
+                                
+                                # limit total number of bytes transferred
+                                self._impose_transfer_limit(packet)
+                                if not self._running:
+                                    break
+                                
                                 # Determine direction and forward
                                 if sock == self._source:
                                     # Data from server => save and forward to client
-                                    with open(_packet_filename(output_path, packet), "wb") as f:
+                                    file_path = self._packet_file_path(output_path, packet)
+                                    if file_path is None:
+                                        self._running = False
+                                        break                                        
+                                    with open(file_path, "wb") as f:
                                         Packet.to_file(f, packet)
+                                        
+                                    _logger.debug(f"server SENDs client -> {packet}")
                                     Packet.to_socket(self._client, packet)
                                 else:
                                     # Data from client => forward to server (e.g. control packet)
+                                    _logger.debug(f"client SENDs server <- {packet}")
                                     Packet.to_socket(self._source, packet)
 
                             except (socket.timeout, socket.error) as e:
@@ -689,6 +706,35 @@ class Player:
         finally:
             self._cleanup()
 
+    @classmethod
+    def _packet_file_path(cls, output_path: Path, packet: Packet) -> Path | None:
+        iteration = 1
+        file_path = output_path / cls._packet_filename(packet, iteration)
+        while file_path.exists() and iteration < cls.ITERATION_LIMIT:
+            # Do NOT overwrite: add a suffix for the copy number.
+            iteration += 1
+            file_path = output_path / cls._packet_filename(packet, iteration)
+        if iteration < cls.ITERATION_LIMIT:
+            return file_path
+        _logger.error(f"Save count for packet file '{file_path}' exceeds {cls.ITERATION_LIMIT}-copy limit.")
+        return None
+    
+    @classmethod
+    def _packet_filename(cls, packet: Packet, iteration: int) -> str:
+        return (
+            f"{packet.packet_type:#04x}-{packet.timestamp}"
+            + (f"-{iteration}" if iteration > 1 else "")
+            + ".adara"
+        )
+
+    def _impose_transfer_limit(self, pkt: Packet):
+        # impose absolute limit on number of bytes transferred
+        MB = 1024**2
+        self._transferred_bytes += pkt.size
+        if self._transferred_bytes / MB > self.TRANSFER_LIMIT_MB:
+            _logger.error(f"Transfer limit of {self.TRANSFER_LIMIT_MB} MB exceeded.")
+            self._running = False
+    
     @classmethod
     def _create_server_socket(cls, address: Path | tuple[str, int]) -> socket.socket:
         server = None

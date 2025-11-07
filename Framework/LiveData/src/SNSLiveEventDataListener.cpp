@@ -95,7 +95,7 @@ SNSLiveEventDataListener::SNSLiveEventDataListener()
   // Initialize m_keepPausedEvents from the config file.
   // NOTE: To the best of my knowledge, the existence of this property is not
   // documented anywhere and this lack of documentation is deliberate.
-  auto keepPausedEvents = ConfigService::Instance().getValue<bool>("livelistener.keeppausedevents");
+  auto keepPausedEvents = ConfigService::Instance().getValue<bool>("SNSLiveEventDataListener.keepPausedEvents");
 
   // If the property hasn't been set, assume false
   m_keepPausedEvents = keepPausedEvents.value_or(false);
@@ -128,7 +128,7 @@ SNSLiveEventDataListener::~SNSLiveEventDataListener() {
 /// Connect to the SMS daemon.
 
 /// Attempts to connect to the SMS daemon at the specified address.  Note:
-/// if the address is '0.0.0.0', it looks on localhost:31415 (useful for
+/// if the address hasn't been set, it uses the "testaddress" (useful for
 /// debugging and testing).
 /// @param address The address to attempt to connect to
 /// @return Returns true if the connection succeeds.  False otherwise.
@@ -142,30 +142,34 @@ bool SNSLiveEventDataListener::connect(const Poco::Net::SocketAddress &address)
 {
   // If we don't have an address, make a connection to the test server running
   //   on localhost on the default port.
-  if (address.family() != Poco::Net::SocketAddress::UNIX_LOCAL
-        && address.host().toString() == "0.0.0.0") {
-    Poco::Net::SocketAddress tempAddress("localhost:31415");
+  if (address == Poco::Net::SocketAddress()) {
+    // WARNING: check the config setting: system admin may not allow loopback!
+    const auto maybeTestAddress = ConfigService::Instance().getValue<std::string>("SNSLiveEventDataListener.testAddress");
+    if (!maybeTestAddress.has_value())
+      throw std::runtime_error("SNSLiveEventDataListener: 'testAddress' is not set in `Config`");
+    Poco::Net::SocketAddress testAddress(maybeTestAddress.value());
+    
     try {
-      m_socket.connect(tempAddress); // BLOCKING connect
+      m_socket.connect(testAddress); // BLOCKING connect
     } catch (...) {
-      g_log.error() << "Connection to " << tempAddress.toString() << " failed.\n";
+      g_log.error() << "Connection to " << testAddress.toString() << " failed.\n";
       return false;
     }
   } else {    
     try {
       m_socket.connect(address); // BLOCKING connect
     } catch (const Poco::Exception &e) {
-        g_log.error() << "POCO Exception in connect(): " << e.name() << " : " << e.what()
+        g_log.error() << "POCO Exception in connect(): " << e.name() << ": " << e.what()
                      << " code: " << e.code()
                      << " type: " << typeid(e).name();
         return false;
     } catch (const std::exception &e) {
-        g_log.error() << "STD Exception in connect(): " << e.what()
+        g_log.error() << "STD Exception in connect(): " << e.what() << ": "
                      << " type: " << typeid(e).name();
         return false;
     } catch (...) {
-        g_log.error() << "Unknown exception in connect()"
-                     << " type: " << typeid(*this).name(); // Only useful if you have context
+        g_log.error() << "Unknown exception in connect(): "
+                     << " type: " << typeid(*this).name();
         return false;
     }
   }

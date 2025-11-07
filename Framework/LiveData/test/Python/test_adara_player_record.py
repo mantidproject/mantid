@@ -431,7 +431,7 @@ class Test_Player_record(unittest.TestCase):
                         player.record(output_path)
 
                         # Verify file was opened with expected name
-                        expected_filename = output_path / f"{mock_packet.packet_type}-{mock_packet.timestamp}.adara"
+                        expected_filename = output_path / f"{mock_packet.packet_type:#04x}-{mock_packet.timestamp}.adara"
                         mock_file.assert_called()
 
                         # Check that the file path matches expected pattern

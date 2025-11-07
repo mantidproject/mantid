@@ -387,7 +387,7 @@ class Test_Player_play(unittest.TestCase):
                     player.stream_packets(Path("/fake"), "*.adara", mock_socket)
 
                     # Verify warning was logged about unexpected packet
-                    warning_logged = any("Unexpected packet" in str(call_args) for call_args in mock_logger.warning.call_args_list)
+                    warning_logged = any("RECV unexpected" in str(call_args) for call_args in mock_logger.warning.call_args_list)
                     self.assertTrue(warning_logged)
 
             except TimeoutException:

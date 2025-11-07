@@ -2,13 +2,13 @@
 Test suite for Packet and ClientHelloPacket classes from adara_player module.
 """
 
-import hashlib
 from io import BytesIO
 import numpy as np
 from pathlib import Path
 import socket
 import struct
 import tempfile
+from zlib import crc32
 
 from adara_player import Packet, ClientHelloPacket, EPICS_EPOCH_OFFSET
 
@@ -106,8 +106,8 @@ class Test_Packet(unittest.TestCase):
         self.assertIsInstance(packet.source, str)
         self.assertEqual(packet.source, "test")
 
-        self.assertIsInstance(packet.SHA, str)
-        self.assertEqual(len(packet.SHA), 64)  # SHA256 produces 64 hex characters
+        self.assertIsInstance(packet.CRC, int)
+        self.assertEqual(packet.CRC, packet.CRC & 0xffffffff)  # CRC32 produces 32-bit integers
 
         self.assertIsInstance(packet.size, int)
         self.assertEqual(packet.size, self.expected_size)
@@ -119,26 +119,24 @@ class Test_Packet(unittest.TestCase):
 
         self.assertIsInstance(packet.pulseid, int)
 
-    def test_sha256(self):
+    def test_CRC32(self):
         """Ensures hash calculation is consistent and correct given header/payload."""
         packet = Packet(header=self.header, payload=self.payload)
 
-        # Calculate expected SHA256
-        sha256 = hashlib.sha256()
-        sha256.update(self.header + self.payload)
-        expected_sha = sha256.hexdigest()
+        # Calculate expected CRC32
+        expected_CRC = crc32(self.header + self.payload)
 
-        # Verify packet SHA matches
-        self.assertEqual(packet.SHA, expected_sha)
+        # Verify packet CRC matches
+        self.assertEqual(packet.CRC, expected_CRC)
 
         # Test that same input produces same hash
         packet2 = Packet(header=self.header, payload=self.payload)
-        self.assertEqual(packet.SHA, packet2.SHA)
+        self.assertEqual(packet.CRC, packet2.CRC)
 
         # Test that different payload produces different hash
         different_payload = b"\xff" * 8
         packet3 = Packet(header=self.header, payload=different_payload)
-        self.assertNotEqual(packet.SHA, packet3.SHA)
+        self.assertNotEqual(packet.CRC, packet3.CRC)
 
     def test_as_packet_field(self):
         """Tests that the packed representation (asPacketField) is correct for the type/version."""
@@ -239,7 +237,7 @@ class Test_Packet(unittest.TestCase):
         # Verify all critical attributes match
         self.assertEqual(restored_packet._header, original_packet._header)
         self.assertEqual(restored_packet._payload, original_packet._payload)
-        self.assertEqual(restored_packet._SHA, original_packet._SHA)
+        self.assertEqual(restored_packet._CRC, original_packet._CRC)
         self.assertEqual(restored_packet._size, original_packet._size)
         self.assertEqual(restored_packet._packet_type, original_packet._packet_type)
         self.assertEqual(restored_packet._timestamp, original_packet._timestamp)
@@ -300,7 +298,7 @@ class Test_Packet(unittest.TestCase):
         # Verify lossless transmission
         self.assertEqual(received_packet.header, original_packet.header)
         self.assertEqual(received_packet.payload, original_packet.payload)
-        self.assertEqual(received_packet.SHA, original_packet.SHA)
+        self.assertEqual(received_packet.CRC, original_packet.CRC)
         self.assertEqual(received_packet.size, original_packet.size)
         self.assertEqual(received_packet.packet_type, original_packet.packet_type)
 
@@ -321,7 +319,7 @@ class Test_Packet(unittest.TestCase):
         # Should assemble correctly despite fragmentation
         self.assertEqual(packet.header, self.header)
         self.assertEqual(packet.payload, self.payload)
-        self.assertEqual(packet.SHA, hashlib.sha256(self.header + self.payload).hexdigest())
+        self.assertEqual(packet.CRC, crc32(self.header + self.payload))
 
         # Verify recv was called multiple times
         self.assertEqual(mock_socket.recv.call_count, 4)
