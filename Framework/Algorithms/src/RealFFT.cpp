@@ -56,14 +56,31 @@ void RealFFT::init() {
 
 std::map<std::string, std::string> RealFFT::validateInputs() {
   std::map<std::string, std::string> issues;
+  API::MatrixWorkspace_sptr inWS = getProperty("InputWorkspace");
+  auto groupWS = dynamic_cast<API::WorkspaceGroup const *>(inWS.get());
+  if (groupWS != nullptr) {
+    for (std::size_t idx = 0; idx < groupWS->size(); idx++) {
+      auto subissues = this->actuallyValidateInputs(groupWS->getItem(idx));
+      for (auto const &[key, value] : subissues) {
+        std::string new_key = key + "_" + std::to_string(idx);
+        issues[new_key] = value;
+      }
+    }
+  } else {
+    issues = this->actuallyValidateInputs(inWS);
+  }
+  return issues;
+}
+
+std::map<std::string, std::string> RealFFT::actuallyValidateInputs(API::Workspace_sptr ws) {
+  std::map<std::string, std::string> issues;
 
   // verify a matrix workspace has been passed
-  API::MatrixWorkspace_const_sptr inWS = getProperty("Inputworkspace");
+  auto inWS = dynamic_cast<API::MatrixWorkspace const *>(ws.get());
   if (!inWS) {
     issues["InputWorkspace"] = "RealFFT requires an input matrix workspace";
     return issues;
   }
-  // verify the spectrum workspace index
   std::string transform = getProperty("Transform");
   int wi = (transform == "Forward") ? getProperty("WorkspaceIndex") : 0;
   if (wi >= static_cast<int>(inWS->getNumberHistograms())) {

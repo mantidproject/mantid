@@ -36,6 +36,7 @@ private:
   // Overridden Algorithm methods
   void init() override;
   std::map<std::string, std::string> validateInputs() override;
+  std::map<std::string, std::string> actuallyValidateInputs(API::Workspace_sptr);
   void exec() override;
 };
 
