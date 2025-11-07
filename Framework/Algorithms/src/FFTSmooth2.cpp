@@ -8,6 +8,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/EnumeratedString.h"
 #include "MantidKernel/EnumeratedStringProperty.h"
@@ -63,8 +64,12 @@ void FFTSmooth2::init() {
 std::map<std::string, std::string> FFTSmooth2::validateInputs() {
   std::map<std::string, std::string> issues;
 
-  API::MatrixWorkspace_sptr inWS = getProperty("InputWorkspace");
-
+  // verify a matrix workspace has been passed
+  API::MatrixWorkspace_const_sptr inWS = getProperty("Inputworkspace");
+  if (!inWS) {
+    issues["InputWorkspace"] = "FFTSmooth requires an input matrix workspace";
+    return issues;
+  }
   // verify the spectrum workspace index
   int wi = getProperty("WorkspaceIndex");
   if (wi >= static_cast<int>(inWS->getNumberHistograms())) {

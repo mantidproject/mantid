@@ -8,6 +8,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/Exception.h"
 
 #include "MantidKernel/GSL_FFT_Helpers.h"
@@ -56,8 +57,12 @@ void RealFFT::init() {
 std::map<std::string, std::string> RealFFT::validateInputs() {
   std::map<std::string, std::string> issues;
 
-  API::MatrixWorkspace_sptr inWS = getProperty("InputWorkspace");
-
+  // verify a matrix workspace has been passed
+  API::MatrixWorkspace_const_sptr inWS = getProperty("Inputworkspace");
+  if (!inWS) {
+    issues["InputWorkspace"] = "RealFFT requires an input matrix workspace";
+    return issues;
+  }
   // verify the spectrum workspace index
   std::string transform = getProperty("Transform");
   int wi = (transform == "Forward") ? getProperty("WorkspaceIndex") : 0;

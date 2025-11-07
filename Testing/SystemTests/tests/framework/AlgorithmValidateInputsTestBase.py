@@ -55,7 +55,7 @@ class AlgorithmValidateInputsTestBase(MantidSystemTest, metaclass=ABCMeta):
             algorithm.validateInputs()
         except Exception as ex:
             # Makes sure that an exception gets printed if it fails, and then re-raises the exception
-            print(ex)
+            print(f"Exception for algorithm {algorithm_name}: {ex}")
             raise ex
 
     @staticmethod
