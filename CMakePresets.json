@@ -68,11 +68,13 @@
     },
     {
       "name": "win-64-ci",
-      "description": "Build options for a CI build on windows with Ninja",
+      "description": "Build options for a CI build on windows with Visual Studio",
       "inherits": [
         "ci-default",
         "conda"
-      ]
+      ],
+      "generator": "Visual Studio 17 2022",
+      "toolset": "v143"
     },
     {
       "name": "cppcheck-ci",

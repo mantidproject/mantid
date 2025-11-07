@@ -12,6 +12,7 @@
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
 #include "MantidGeometry/Objects/MeshObject.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
+#include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/Material.h"
 

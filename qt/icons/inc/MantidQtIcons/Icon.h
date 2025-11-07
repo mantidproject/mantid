@@ -35,7 +35,7 @@ public:
 
 private:
   void loadFont(const QString &prefix, const QString &ttfFilename, const QString &charmapFilename);
-  QIcon iconByPainter(CharIconPainter *painter, QList<QHash<QString, QVariant>> &options);
+  QIcon iconByPainter(CharIconPainter *const painter, QList<QHash<QString, QVariant>> const &options);
   void addValuesToOptions(QList<QHash<QString, QVariant>> &options, const QStringList &iconNames,
                           unsigned int vectorIndex);
 

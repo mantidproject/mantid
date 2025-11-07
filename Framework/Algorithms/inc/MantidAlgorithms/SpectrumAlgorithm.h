@@ -12,6 +12,7 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAlgorithms/DllConfig.h"
 #include "MantidKernel/IndexSet.h"
+#include "MantidKernel/MultiThreaded.h"
 
 namespace Mantid {
 

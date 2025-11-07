@@ -7,8 +7,6 @@
 #pragma once
 
 #include "MantidGeometry/Crystal/CompositeBraggScatterer.h"
-#include "MantidGeometry/Crystal/HKLFilter.h"
-#include "MantidGeometry/Crystal/PointGroup.h"
 #include "MantidGeometry/Crystal/PointGroupFactory.h"
 #include "MantidGeometry/Crystal/ReflectionCondition.h"
 #include "MantidGeometry/Crystal/SpaceGroup.h"

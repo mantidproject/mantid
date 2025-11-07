@@ -50,7 +50,7 @@ OptionsPropertyWidget::OptionsPropertyWidget(Mantid::Kernel::Property *prop, QWi
   m_widgets.push_back(m_combo);
 
   std::vector<std::string> items = prop->allowedValues();
-  for (auto &item : items) {
+  for (auto const &item : items) {
     m_combo->addItem(QString::fromStdString(item));
   }
   // Make current value visible

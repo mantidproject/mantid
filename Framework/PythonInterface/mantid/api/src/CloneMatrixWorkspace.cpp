@@ -67,6 +67,7 @@ PyArrayObject *cloneArray(const MatrixWorkspace &workspace, DataField field, con
                                                              2,         // rank 2
                                                              arrayDims, // Length in each dimension
                                                              nullptr, nullptr, 0, nullptr));
+  // cppcheck-suppress constVariablePointer
   auto *dest = reinterpret_cast<double *>(PyArray_DATA(nparray)); // HEAD of the contiguous numpy data array
 
   PARALLEL_FOR_IF(threadSafe(workspace))

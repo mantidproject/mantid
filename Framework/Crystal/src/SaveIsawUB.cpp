@@ -46,9 +46,10 @@ void SaveIsawUB::init() {
 
 double SaveIsawUB::getErrorVolume(const OrientedLattice &lattice) {
   double Volume;
-  double latticeParams[6] = {lattice.a(), lattice.b(), lattice.c(), lattice.alpha(), lattice.beta(), lattice.gamma()};
-  double lattice_errors[6] = {lattice.errora(),     lattice.errorb(),    lattice.errorc(),
-                              lattice.erroralpha(), lattice.errorbeta(), lattice.errorgamma()};
+  double const latticeParams[6] = {lattice.a(),     lattice.b(),    lattice.c(),
+                                   lattice.alpha(), lattice.beta(), lattice.gamma()};
+  double const lattice_errors[6] = {lattice.errora(),     lattice.errorb(),    lattice.errorc(),
+                                    lattice.erroralpha(), lattice.errorbeta(), lattice.errorgamma()};
   if (lattice.volume() <= 0) {
 
     double xA = cos(lattice.alpha() / 180. * M_PI);

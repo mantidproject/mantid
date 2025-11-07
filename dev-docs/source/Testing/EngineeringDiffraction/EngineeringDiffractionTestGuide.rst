@@ -17,11 +17,13 @@ Preamble
 Overview
 ^^^^^^^^
 The Engineering Diffraction interface allows scientists using the EnginX instrument to interactively
-process their data. There are 4 tabs in total. These are:
+process their data. There are 6 tabs in total. These are:
 
 - ``Calibration`` - This is where a cerium oxide run is entered to calibrate the subsequent data.
+- ``Absorption Correction`` - This is where the experimental can be corrected for beam attenuation
 - ``Focus`` - Where are the data across multiple spectra are normalised and summed into a single spectrum for later steps.
 - ``Fitting`` - Where peaks can be fitted on focused data
+- ``Texture`` - Where pole figure's can be generated for experimental runs and their fitted peaks
 - ``GSAS II`` - Run a basic refinement on the `GSASIIscriptable API <https://gsas-ii.readthedocs.io/en/latest/GSASIIscriptable.html>`_
 
 Especially to aide ``GSASII`` testing, please test on an ENGINX IDAaaS instance.
@@ -101,6 +103,11 @@ Focus
     - ENGINX_305738_305721_bank_2_TOF.gss
     - ENGINX_305738_305721_bank_2_TOF.nxs
 
+7. There should also be a ``CombinedFiles`` folder which should contain:
+
+   - ENGINX_305761_307521_bank_dSpacing.nxs
+   - ENGINX_305761_307521_bank_2_dSpacing.nxs
+
 Test 2
 ^^^^^^
 
@@ -141,6 +148,79 @@ This test covers the Cropping functionality in the ``Calibration`` tab.
 Test 4
 ^^^^^^
 
+This test covers the sample setting functionality in the ``Absorption Correction`` tab.
+
+1. Change the ``RB Number`` to ``ManualTesting``.
+
+2. Go to the ``Absorption Correction`` tab, in ``Sample Run(s)`` enter ``305738`` and click ``Load Files``
+
+3. A row should have been added to the table with ``Run: ENGINX00305738``, ``Shape: Not Set``, ``Material: Not set``, and ``Orientation: default``
+
+4. Click ``Create Reference Workspace``, ``ManualTesting_reference_workspace`` should now be listed as ``Reference Frame``
+
+5. In the ``Sample Shape`` section click ``Load Shape onto single WS``
+
+6. Make sure ``InputWorkspace`` and ``OutputWorkspace`` are set to ``ManualTesting_reference_workspace``
+
+7. Set ``Filename`` to a suitable file (``<mantidBuildDir>/ExternalData/Testing/Data/UnitTest/cube.stl``) and ``Scale`` to ``mm``
+
+8. There should now be a ``View`` button next to ``Shape`` in the ``Reference Workspace Information``
+
+9. Click this ``View`` button
+
+10. If you have used the example STL you should get the following:
+
+.. image:: /images/EngineeringDiffractionTest/EnggDiffSamplePlot.png
+    :width: 600px
+
+11. Now click ``Set Shape onto single WS`` and set ``InputWorkspace`` again to ``ManualTesting_reference_workspace``
+
+12. Set ``ShapeXML`` to:
+
+..testcode::
+
+   <cuboid id='some-cuboid'> \
+   <height val='0.015'  /> \
+   <width val='0.012' />  \
+   <depth  val='0.012' />  \
+   <centre x='0.0' y='0.0' z='0.0'  />  \
+   </cuboid>  \
+   <algebra val='some-cuboid' /> \
+
+13. Click ``Set Sample Material``, set ``InputWorkspace`` to ``ManualTesting_reference_workspace`` and ``ChemicalFormula`` to ``Fe`` and click ``Run``
+
+14. Click ``Set Single Orientation`` and set the ``Workspace`` as ``ENGINX00305738`` and set ``Axis0`` to ``90,1,0,0,1`` and ``Axis1`` to ``135,0,0,1,-1``, then click ``Run``
+
+15. Click either the checkbox in the table or ``Select All`` beneath the table to select the workspace and click ``Copy Reference Sample``
+
+16. The table should now be updated to ``Run: ENGINX00305738``, ``Shape: [View Shape]``, ``Material: Fe``, and ``Orientation: set``
+
+17. Open the settings menu (gear icon, bottom left)
+
+18. Set Texture Directions to be ``D1  0  1  0``, ``D2  1  0  0``, and ``D3  0  0  1`` and click ``OK``
+
+19. Down under the ``Include Absorption Correction`` change ``4mmCube`` to ``Custom Shape``
+
+20. A new ``Custom Gauge Volume File`` field should have appeared, click ``Browse`` and navigate to ``<mantidBuildDir>/ExternalData/Testing/Data/SystemTest/Texture/custom_gauge_volume.xml``
+
+21. Clicking ``View Shape`` again, the shape should now look like:
+
+.. image:: /images/EngineeringDiffractionTest/EnggDiffSamplePlot2.png
+    :width: 600px
+
+22. Click ``Apply Correction`` at the bottom of the tab
+
+23. In the save directories, you should see an ``AbsorptionCorrection`` folder with ``Corrected_ENGINX00305738.nxs``
+
+24. Play around with other functionality (tool tips or Technique reference might be helpful) in this tab some things you can try:
+
+   - Load a collection of runs using the search ``305793-305795``
+   - Load runs from browsing (some more ENGINX data can be found in ``ExternalData/Testing/Data/SystemTest``)
+   - Load Orientation File (some orientation files can be found in ``ExternalData/Testing/Data/SystemTest/Texture``)
+
+Test 5
+^^^^^^
+
 This test covers the loading and plotting focused data in the fitting tab.
 
 .. note:: Sometimes it will be tricky to load ENGINX files from the archive and the red ``*`` next to the ``Browse`` button won't disappear. Proceeding with the red ``*`` will raise an error saying ``Check run numbers/path is valid.`` or ``Mantid is searching for data files. Please wait``. In such cases, please try re-entering the text and wait till the red ``*`` is cleared before proceeding. If the log level is set to Information, found path = 1 will be visible in the message log when the runs are found from the archive.
@@ -168,7 +248,7 @@ This test covers the loading and plotting focused data in the fitting tab.
 
 9. To dock it double click the ``Fit Plot`` bar (or drag to the bottom of the toolbar). You may want to un-dock it again for subsequent tests.
 
-Test 5
+Test 6
 ^^^^^^
 
 This tests the ``Browse Filters`` functionality to filter the focused data in the ``Load Focused Data`` section at the top of ``Fitting`` tab.
@@ -176,7 +256,7 @@ This tests the ``Browse Filters`` functionality to filter the focused data in th
 1. The tests so far have enabled you to produce many different focussed data files. In the ``Load Focused Data`` section at the top of ``Fitting`` tab,
    when clicked on ``Browse`` button, check that the ``Unit Filter`` and ``Region Filter`` combo boxes help you to find ``dSpacing`` data for Texture regions and ``TOF`` data for North bank.
 
-Test 6
+Test 7
 ^^^^^^
 
 This tests the removal of focused runs from the ``Fitting`` tab.
@@ -195,7 +275,7 @@ This tests the removal of focused runs from the ``Fitting`` tab.
 
 6. Delete a ``_bgsub`` workspace in the ADS, the corresponding row will not be deleted, but the ``Subtract BG`` checkbox will be unchecked.
 
-Test 7
+Test 8
 ^^^^^^
 
 This tests that the background subtraction works.
@@ -206,7 +286,7 @@ This tests that the background subtraction works.
 
 3. Click  ``Inspect Background`` to open a new figure which shows the raw data, the background and the subtracted data. Changing the values of ``Niter``, ``BG``, ``XWindow`` and ``SG`` (input to ``EnggEstimateFocussedBackground``, hover over a cell in the table to see a tool tip for explanation) should produce a change in the background on the external plot and in the UI plot.
 
-Test 8
+Test 9
 ^^^^^^
 
 This tests the operation of the fit browser.
@@ -233,8 +313,8 @@ This tests the operation of the fit browser.
 7. In the Fit property browser, go to ``Setup > Custom Setup``. The function string, including the best-fit parameters, should also have been automatically saved
    as a custom setup. Select ``Setup > Clear Model``, then select this new custom setup model. Inspect the fit by clicking ``Fit > Evaluate`` Function.
 
-Test 9
-^^^^^^
+Test 10
+^^^^^^^
 
 This tests the sequential fitting capability of the UI (where the result of a fit to one workspace is used as the initial guess for the next).
 This test uses data generated in `Test 4`.
@@ -266,7 +346,7 @@ This test uses data generated in `Test 4`.
 
 9. Close and re-open the Engineering Diffraction interface. Reopen the Engineering Diffraction settings menu, it should remember the `Primary Log` and the order.
 
-Test 10
+Test 11
 ^^^^^^^
 
 This tests the serial fitting capability of the UI (where all loaded workspaces are fitted from the same starting parameters).
@@ -280,7 +360,61 @@ This test uses data generated in `Test 4`.
 3. The order of the runs in the serial fit should be obtainable from the log at notice level - check that this
    corresponds to the order of the runs in the table.
 
-Test 11
+
+Test 12
+^^^^^^^
+
+This test will check the Pole Figure plotting in the Texture Tab
+
+1. Click on the ``Texture Tab``
+
+2. Click ``Browse`` next to ``Load Workspace Files`` and navigate to ``<mantidBuildDir>/ExternalData/Testing/Data/SystemTest/Texture/ValidationFiles/Focus``
+
+3. Select all the files within that folder and click ``Load Workspace Files``
+
+4. You should see seven rows populate the table
+
+5. Click on any of the ``View Sample`` buttons and verify it displays the sample and the sample axes + labels
+
+6. Click ``Select All Files``
+
+7. In settings, ensure the texture directions are set to  ``D1  1  0  0``, ``D2  0  1  0``, and ``D3  0  0  1``, and the ``Scatter Plot Experimental Pole Figure`` is checked, then click ``OK``
+
+8. Click ``Calculate Pole Figure``, you should get a plot like the one below
+
+.. image:: /images/EngineeringDiffractionTest/EnggDiffPF1.png
+    :width: 600px
+
+9. Now click ``Browse`` next to ``Load Parameter Files`` and navigate to ``<mantidBuildDir>/ExternalData/Testing/Data/SystemTest/Texture/ValidationFiles/FitParameters``
+
+10. Select all the files within that folder and click ``Load Parameter Files``
+
+11. The ``Fit Parameters`` column should now be populated in the table, as well as a readout column option having appeared above ``Calculate Pole Figure``
+
+12. Click ``Calculate Pole Figure``, you should get a plot like the one below
+
+.. image:: /images/EngineeringDiffractionTest/EnggDiffPF2.png
+    :width: 600px
+
+13. Open the settings menu and set ``Scatter Plot Experimental Pole Figure`` to unchecked
+
+14. This should enable ``Contour Kernel Size``, set this to ``6.0`` and click ``OK``
+
+15. Click ``Calculate Pole Figure``, you should get a plot like the one below
+
+.. image:: /images/EngineeringDiffractionTest/EnggDiffPF3.png
+    :width: 600px
+
+16. Try changing options around in the interface, see if you can break it (some things you can try if you are short ideas):
+
+   - Try different sample axes
+   - Try changing the projection
+   - Try including scattering power (HKL for this peak is 1,1,0 if you set the crystal to the ``Fe.cif``)
+   - Try disabling some of the rows
+   - Try having a mixture of runs with/without parameter files
+
+
+Test 13
 ^^^^^^^
 
 Note this test will only work if ``GSASII`` is also installed.

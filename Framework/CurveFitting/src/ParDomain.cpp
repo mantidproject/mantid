@@ -69,7 +69,7 @@ void ParDomain::additiveCostFunctionValDerivHessian(const CostFunctions::CostFun
     }
     std::vector<API::IFunction_sptr>::size_type k = PARALLEL_THREAD_NUMBER;
     PARALLEL_CRITICAL(resize) {
-      if (k >= funs.size()) {
+      if (k >= funs.size()) { // cppcheck-suppress unsignedLessThanZero
         funs.resize(k + 1);
       }
       if (!funs[k]) {

@@ -165,11 +165,11 @@ Beta Testing Begins
   * ``git pull`` on ``release-next``.
   * Create a new branch using the `Mantid Git Workflow guidance <https://developer.mantidproject.org/GitWorkflow.html#new-branches>`__.
   * Navigate to your Mantid 'build' directory and open ``command-prompt.bat``.
-  * In the new command prompt, navigate to the `release_editor.py script <https://github.com/mantidproject/mantid/blob/main/tools/ReleaseNotes/release_editor.py>`__ and run, parsing the correct version number. The script copies all of the separate release notes under the correct heading of their upper level file, e.g. ``framework.rst``, and moves the original release notes into a 'Used' directory.
+  * In the new command prompt, navigate to the `release_editor.py script <https://github.com/mantidproject/mantid/blob/main/tools/ReleaseNotes/release_editor.py>`__ and run, parsing the correct version number. The script copies all of the separate release notes under the correct heading of their upper level file, e.g. ``framework.rst``, and moves the original release notes into a 'Used' directory. The Git token is needed to query the git api for the pull request which added each release note.
 
     .. code-block:: bash
 
-      python release_editor.py --release 6.5.0
+      python release_editor.py --release 6.5.0 --git_token <your_git_token_here>
 
   * Check the script has run correctly by checking all individual rst files have been moved into their respective 'used' directories. You could use the `unused_release_note_finder.py script <https://github.com/mantidproject/mantid/blob/main/tools/ReleaseNotes/unused_release_note_finder.py>`__ for this (explained further bellow).
   * Look over the files to make sure they look roughly correct then submit a PR to be merged into ``release-next``.
@@ -498,12 +498,13 @@ We are now ready to create the release candidates for Smoke testing.
   <https://builds.mantidproject.org/view/Nightly%20Pipelines/job/release-next_nightly/>`__
   with the following parameters (most are already defaulted to the correct values):
 
+  * set ``DESCRIPTION`` to ``Smoke testing candidates vX.Y.ZrcN``
   * set ``BUILD_DEVEL`` to ``all``
   * set ``BUILD_PACKAGE`` to ``all``
   * set ``PACKAGE_SUFFIX`` to an **empty string**
   * tick the ``PUBLISH_TO_ANACONDA`` checkbox
   * tick the ``PUBLISH_TO_GITHUB`` checkbox
-  * set the ``ANACONDA_CHANNEL`` to ``mantid``
+  * set the ``ANACONDA_CHANNEL`` to ``mantid-test``
   * set the ``ANACONDA_CHANNEL_LABEL`` to ``vX.Y.ZrcN`` where ``X.Y.Z`` is the release number,
     and ``N`` is an incremental build number for release candidates, starting at ``1`` (e.g. ``v6.7.0rc1``)
   * set ``GITHUB_RELEASES_REPO`` to ``mantidproject/mantid``
@@ -530,6 +531,7 @@ now be recreated with their final version numbers. To do this, build the
 <https://builds.mantidproject.org/view/Nightly%20Pipelines/job/release-next_nightly/>`__
 with the following parameters (most are already defaulted to the correct values):
 
+* set ``DESCRIPTION`` to ``Release build for vX.Y.Z``
 * set ``BUILD_DEVEL`` to ``all``
 * set ``BUILD_PACKAGE`` to ``all``
 * set ``PACKAGE_SUFFIX`` to an **empty string**

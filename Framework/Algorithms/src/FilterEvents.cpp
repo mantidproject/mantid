@@ -10,11 +10,11 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/TimeAtSampleStrategyDirect.h"
+#include "MantidAPI/TimeAtSampleStrategyElastic.h"
+#include "MantidAPI/TimeAtSampleStrategyIndirect.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceProperty.h"
-#include "MantidAlgorithms/TimeAtSampleStrategyDirect.h"
-#include "MantidAlgorithms/TimeAtSampleStrategyElastic.h"
-#include "MantidAlgorithms/TimeAtSampleStrategyIndirect.h"
 #include "MantidDataObjects/SplittersWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -301,7 +301,7 @@ void FilterEvents::exec() {
 
   // Set goniometer to output workspaces
   Goniometer gon = m_eventWS->run().getGoniometer();
-  for (auto &it : m_outputWorkspacesMap) {
+  for (auto const &it : m_outputWorkspacesMap) {
     try {
       DataObjects::EventWorkspace_sptr ws_i = it.second;
       ws_i->mutableRun().setGoniometer(gon, true);
@@ -788,7 +788,7 @@ void FilterEvents::setupDetectorTOFCalibration() {
   m_detTofFactors.resize(numhist, 1.0); // multiplication factor
 
   // Set up detector values
-  std::unique_ptr<TimeAtSampleStrategy> strategy;
+  std::unique_ptr<API::TimeAtSampleStrategy> strategy;
 
   if (m_tofCorrType == CustomizedCorrect) {
     setupCustomizedTOFCorrection();
@@ -807,8 +807,8 @@ void FilterEvents::setupDetectorTOFCalibration() {
       if (!m_vecSkip[i]) {
 
         Correction correction = strategy->calculate(i);
-        m_detTofOffsets[i] = correction.offset;
         m_detTofFactors[i] = correction.factor;
+        m_detTofOffsets[i] = correction.offset;
 
         corrws->mutableY(i)[0] = correction.factor;
         corrws->mutableY(i)[1] = correction.offset;
@@ -817,12 +817,12 @@ void FilterEvents::setupDetectorTOFCalibration() {
   }
 }
 
-TimeAtSampleStrategy *FilterEvents::setupElasticTOFCorrection() const {
+API::TimeAtSampleStrategy *FilterEvents::setupElasticTOFCorrection() const {
 
-  return new TimeAtSampleStrategyElastic(m_eventWS);
+  return new API::TimeAtSampleStrategyElastic(m_eventWS);
 }
 
-TimeAtSampleStrategy *FilterEvents::setupDirectTOFCorrection() const {
+API::TimeAtSampleStrategy *FilterEvents::setupDirectTOFCorrection() const {
 
   // Get incident energy Ei
   double ei = getProperty("IncidentEnergy");
@@ -837,10 +837,10 @@ TimeAtSampleStrategy *FilterEvents::setupDirectTOFCorrection() const {
     g_log.debug() << "Using user-input Ei value " << ei << "\n";
   }
 
-  return new TimeAtSampleStrategyDirect(m_eventWS, ei);
+  return new API::TimeAtSampleStrategyDirect(m_eventWS, ei);
 }
 
-TimeAtSampleStrategy *FilterEvents::setupIndirectTOFCorrection() const {
+API::TimeAtSampleStrategy *FilterEvents::setupIndirectTOFCorrection() const {
   return new TimeAtSampleStrategyIndirect(m_eventWS);
 }
 

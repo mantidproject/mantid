@@ -58,7 +58,7 @@ void ShiftLogTime::exec() {
 
   // make sure the log is in the input workspace
   MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
-  auto *oldlog = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(inputWS->run().getLogData(logname));
+  auto const *oldlog = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(inputWS->run().getLogData(logname));
   if (!oldlog) {
     stringstream msg;
     msg << "InputWorkspace \'" << this->getPropertyValue("InputWorkspace") << "\' does not have LogName \'" << logname

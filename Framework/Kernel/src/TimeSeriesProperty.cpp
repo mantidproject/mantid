@@ -2114,7 +2114,7 @@ void TimeSeriesProperty<TYPE>::histogramData(const Types::Core::DateAndTime &tMi
 
   double dt = (t1 - t0) / static_cast<double>(nPoints);
 
-  for (auto &ev : m_values) {
+  for (auto const &ev : m_values) {
     auto time = static_cast<double>(ev.time().totalNanoseconds());
     if (time < t0 || time >= t1)
       continue;

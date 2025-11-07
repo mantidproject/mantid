@@ -186,7 +186,7 @@ void GenerateGoniometerIndependentBackground::exec() {
 
   std::vector<MatrixWorkspace_sptr> grouped_inputs;
   // Run GroupDetectors on all the input workspaces
-  for (auto &input : inputs) {
+  for (auto const &input : inputs) {
     const auto msg = "Running GroupDetectors on " + input;
     progress.report(msg);
     g_log.debug(msg);

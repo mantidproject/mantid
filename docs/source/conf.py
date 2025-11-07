@@ -13,6 +13,7 @@ import sys
 import qtpy.QtCore  # noqa: F401
 
 import os
+import runpy
 
 import mantid
 from mantid.kernel import ConfigService
@@ -208,8 +209,7 @@ epub_uid = "Mantid Reference: " + version
 # Default is to use standard HTML theme unless the qthelp tag is specified
 # 'tags' is a special object available in config files, which exposes the project tags
 html_theme_cfg = "conf-qthelp.py" if "qthelp" in [k.strip() for k in tags] else "conf-html.py"  # noqa: F821
-# Python 3 removed execfile...
-exec(compile(open(html_theme_cfg).read(), html_theme_cfg, "exec"))
+runpy.run_path(html_theme_cfg)
 
 # -- Link to other projects ----------------------------------------------------
 

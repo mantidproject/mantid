@@ -211,7 +211,7 @@ bool SpatialGrouping::expandNet(std::map<specnum_t, Mantid::Kernel::V3D> &neares
     for (auto &nrsIt : nearest) {
       std::map<specnum_t, Mantid::Kernel::V3D> results;
       results = m_neighbourInfo->getNeighbours(nrsIt.first, 0.0);
-      for (auto &result : results) {
+      for (auto const &result : results) {
         potentials[result.first] = result.second;
       }
     }

@@ -1,0 +1,70 @@
+digraph TextureGUIWorkflow {
+  label = "High-level workflow for the Texture GUI.";
+  $global_style
+
+  // --- Parameters / data (ellipses) ---
+  subgraph params {
+    $param_style
+    raw            [label="Raw Workspaces"]
+    orient         [label="Orientation Data"]
+    sample         [label="Sample Data\n(Shape + Material)"]
+    ceria          [label="Ceria Run"]
+    vanadium       [label="Vanadium Run"]
+    grouping       [label="Detector Grouping"]
+
+    in_ws          [label="Input Workspaces"]
+    cal_info       [label="Calibration Info"]
+    foc_ws         [label="Focused Workspaces"]
+    peaks          [label="Peaks of\nInterest"]
+    structure      [label="Crystal Structure\nand HKLs"]
+    param_tables   [label="Parameter Tables"]
+    pole_tables    [label="Pole Figure\nTables"]
+  }
+
+  // --- Processes / tabs (rounded boxes) ---
+  subgraph algorithms {
+    $algorithm_style
+    abs_tab        [label="Absorption Correction"]
+    cal_tab        [label="Calibration"]
+    focus_tab      [label="Focusing"]
+    fit_tab        [label="Fitting"]
+    texture_tab    [label="Texture"]
+  }
+
+  // --- Decisions (diamonds) ---
+  subgraph decisions {
+    $decision_style
+    do_abs         [label="Absorption\nCorrection?"]
+    have_crystal   [label="Crystal\nInformation?"]
+  }
+
+  // --- Absorption correction branch ---
+  raw     -> abs_tab
+  orient  -> abs_tab
+  do_abs  -> sample  [label="Yes"]
+  sample  -> abs_tab
+  abs_tab -> in_ws
+
+  // --- Calibration branch ---
+  ceria     -> cal_tab
+  vanadium  -> cal_tab
+  grouping  -> cal_tab
+  cal_tab   -> cal_info
+
+  // --- Focusing ---
+  in_ws     -> focus_tab
+  cal_info  -> focus_tab
+  focus_tab -> foc_ws
+
+  // --- Fitting & texture ---
+  foc_ws       -> peaks
+  foc_ws       -> fit_tab
+  peaks        -> fit_tab
+  peaks        -> have_crystal
+
+  fit_tab      -> param_tables
+  param_tables -> texture_tab
+  have_crystal -> structure   [label="Yes"]
+  structure    -> texture_tab
+  texture_tab  -> pole_tables
+}

@@ -178,12 +178,12 @@ private:
   void connectSettingsChange(QTableWidget &edit);
   void connectSettingsChange(QDoubleSpinBox &edit);
   void connectSettingsChange(QSpinBox &edit);
-  void disconnectSettingsChange(QLineEdit &edit);
-  void disconnectSettingsChange(QComboBox &edit);
-  void disconnectSettingsChange(QCheckBox &edit);
-  void disconnectSettingsChange(QTableWidget &edit);
-  void disconnectSettingsChange(QDoubleSpinBox &edit);
-  void disconnectSettingsChange(QSpinBox &edit);
+  void disconnectSettingsChange(QLineEdit const &edit);
+  void disconnectSettingsChange(QComboBox const &edit);
+  void disconnectSettingsChange(QCheckBox const &edit);
+  void disconnectSettingsChange(QTableWidget const &edit);
+  void disconnectSettingsChange(QDoubleSpinBox const &edit);
+  void disconnectSettingsChange(QSpinBox const &edit);
   QLineEdit &stitchOptionsLineEdit() const;
   void setSelected(QComboBox &box, std::string const &str);
   void setText(QLineEdit &lineEdit, int value);

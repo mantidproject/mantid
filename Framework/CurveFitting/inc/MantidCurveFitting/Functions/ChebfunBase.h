@@ -140,9 +140,9 @@ private:
   void calcIntegrationWeights() const;
 
   /// Calculate function values at odd-valued indices of the base x-points
-  std::vector<double> fitOdd(const ChebfunFunctionType &f, std::vector<double> &p) const;
+  std::vector<double> fitOdd(const ChebfunFunctionType &f, std::vector<double> const &p) const;
   /// Calculate function values at odd-valued indices of the base x-points
-  std::vector<double> fitOdd(const API::IFunction &f, std::vector<double> &pEven) const;
+  std::vector<double> fitOdd(const API::IFunction &f, std::vector<double> const &pEven) const;
   /// Test an array of Chebyshev coefficients for convergence
   static bool hasConverged(const std::vector<double> &a, double maxA, double tolerance, size_t shift = 0);
   /// Templated implementation of bestFit method

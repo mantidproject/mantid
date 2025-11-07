@@ -126,51 +126,51 @@ by the CI pipeline to indicate it has been built outside of the standard process
 Build packages from branch using Jenkins
 ----------------------------------------
 
-Developers can build packages to test branches using the ``build_packages_from_branch`` `Jenkins job <build_packages_from_branch_job_>`_. This job provides the ability to,
+Developers can build packages to test branches using the ``build_branch`` `Jenkins job <build_branch_job_>`_. This job provides the ability to,
 
-- Run system tests on Windows, Mac, Linux, or all three.
-- Build a packages on Windows, Mac, Linux, or all three.
-- Publish the package(s) to a given Anaconda channel and label.
-- Publish the package(s) to a given Github repository under a specified tag.
+- Run system tests on Windows, Mac, Linux, or all three
+- Build a packages on Windows, Mac, Linux, or all three
+- Publish the package(s) to the ``mantid-test`` Anaconda channel
+- Publish the package(s) to a given Github repository under a specified tag
 
 for a given branch of mantid. The branch can be from the main mantid repo or from a remote.
 
 Options
 #######
 
+- ``DESCRIPTION``: A description to help catalogue the build. Please make use of this!
 - ``BUILD_DEVEL`` [``none``, ``all``, ``linux-64``, ``win-64``, ``osx-arm64``]: Run the system tests for this OS.
 - ``BUILD_PACKAGE`` [``none``, ``all``, ``linux-64``, ``win-64``, ``osx-arm64``]: Build a package on this OS.
 - ``PACKAGE_SUFFIX``: String to append onto the standalone package name, useful for distinguishing builds. By default this is ``Unstable``.
 - ``PUBLISH_TO_ANACONDA``: Set true to publish to the given Anaconda channel and label.
 - ``PUBLISH_TO_GITHUB``: Set true to publish to the Github repository using the specified tag.
-- ``ANACONDA_CHANNEL``: Anaconda channel to upload the package to. By default this is ``mantid``.
-- ``ANACONDA_CHANNEL_LABEL``: Label attached to the uploaded package. By default this is ``unstable``.
+- ``ANACONDA_CHANNEL``: Anaconda channel to upload the package to. For this job the only option is ``mantid-test``.
+- ``ANACONDA_CHANNEL_LABEL``: Label attached to the uploaded package. By default this is ``unstable``. Please give it a meaningful label.
 - ``GITHUB_RELEASES_REPO``: Repository to store the release. By Default this is ``mantidproject/mantid``.
 - ``GITHUB_RELEASES_TAG``: Name of the tag for the release; only to be used for release candidate builds.
-- ``ANACONDA_TOKEN_CREDENTIAL_ID`` [``anaconda-cloud-token``, ``anaconda-token-ornl``]: One of two credentials to use for publishing to Anaconda.
 - ``GH_ORGANIZATION_OR_USERNAME``: Name of the organisation or Github user name who owns the repository with the code to build. By default this is ``mantidproject``, if you are building from a fork this will need to change to your username.
 - ``BRANCH_NAME``: Name of the branch to build the packages from.
 
 Example
 #######
 
-Say I've implemented a new file searching method on a branch ``1234_new_file_search`` and I want to test this on IDAaaS, one of the easiest ways to do this would be to build the packages and upload them to Anaconda using the pipeline. These are the steps I'd take to do this.
+Say I've implemented a new file searching method on a branch ``1234_new_file_search`` and I want to test this on IDAaaS, one of the easiest ways to do this would be to build the packages and upload them to Anaconda using the pipeline. These are the steps I'd take to do this:
 
-1. Go to the ``build_packages_from_branch`` `Jenkins job <build_packages_from_branch_job_>`_.
+1. Go to the ``build_branch`` `Jenkins job <build_branch_job_>`_.
 2. If needed click ``login`` in the top right of the window.
 3. Go to ``Build with parameters`` in the side bar.
 4. Fill out the following options:
 
+   - ``DESCRIPTION`` = ``Upload Linux test packages for new file searching method``
    - ``BUILD_DEVEL`` = ``none``
    - ``BUILD_PACKAGE`` = ``linux-64``
    - ``PUBLISH_TO_ANACONDA`` = true
-   - ``ANACONDA_CHANNEL_LABEL`` = ``new_file_system_test``
-   - ``ANACONDA_TOKEN_CREDENTIAL_ID`` = ``anaconda-cloud-token``
+   - ``ANACONDA_CHANNEL_LABEL`` = ``new_file_search_test``
    - ``BRANCH_NAME`` = ``1234_new_file_search``
 
 5. Click ``Build``. This will take you back to the main job page, the build just set off will be the most recent (highest number) build on the left hand side. It is a good idea to make note of the build number / copy the link somewhere safe. If the build is for testing a pr, make sure to add the link to the testing instructions.
 6. Once the job has successfully completed, check `the Mantid Anaconda page <mantid-conda-org_>`_ to make sure it has uploaded.
-7. Head to IDAaaS (or any linux system) and run ``mamba install -c mantid/label/new_file_system_test mantidworkbench`` in a new environment to install the test package.
+7. Head to IDAaaS (or any linux system) and run ``mamba install -c mantid-test/label/new_file_search_test mantidworkbench`` in a new environment to install the test package.
 
 Most often, you won't need to upload the packages to Anaconda, this is most useful in cases where installing standalone packages is inconvenient. Standalone package builds created by the jenkins job can be found under the jenkins job build artifacts, this is near the top of the page. Say you built a package for Windows using the jenkins job, you should find a ``mantidworkbench`` exe file in the build artifacts.
 
@@ -181,21 +181,70 @@ Building a custom ``mantid-developer`` environment
 
 This is useful if you need to change a pinned version of one of Mantid's dependencies and test the change locally.
 
-1. Create a conda environment and install ``boa`` and ``versioningit`` into it. For this example, called ``mantid_dev_builder``.
+1. One can create a new environment specifically for building the package (with ``conda-build``, ``conda-index``, ``rattler-build``, and ``versioningit``), but the build itself happens in a separate sandbox which makes this unneccesary.
 2. Make your changes to the conda recipe files.
 3. Change directory to ``mantid/conda/recipes``
-4. With ``mantid_dev_builder`` active, run ``conda mambabuild ./mantid-developer/ -c neutrons``. This will build a local version of ``mantid-developer`` with your changes and place it in ``mantid_dev_builder``'s ``conda-bld`` folder. The output from ``conda mambabuild`` should tell you the location.
-5. Deactivate ``mantid_dev_builder`` and create a new environment to install the custom ``mantid-developer`` package into (e.g if you were testing a new version of numpy you might call it ``mantid_dev_numpy_test``)
-6. ``mamba install -c <path to mantid_dev_builder's conda-bld folder> -c neutrons mantid-developer`` to install the package.
-7. You will need to re-run cmake with this new environment.
+4. With ``mantid_dev_builder`` active, run
 
-Note: If you have ``boa`` installed in your base environment it seems ``conda mambabuild`` will use it over your activated environment. In this case you will likely get an error that you don't have ``versioningit`` installed. One way to fix this is to install ``versioningit`` into your base environment and just use that instead of making a new environment.
+   .. code-block:: sh
 
+       MANTID_VERSION=$(versioningit ../../) rattler-build build -r ./mantid-developer -m ./conda_build_config.yaml --output-dir=/home/me/tmp/rattler
+
+   This will build a local version of ``mantid-developer`` with your changes and place it in the directory ``/home/me/tmp/rattler``. **This must be outside of the buildtree** because rattler will recursively copy everything.
+5. Index the new packages
+
+   .. code-block:: sh
+
+       python -m conda_index /home/me/tmp/rattler/
+
+   This will allow conda to install the package by name rather than by file. At this time, creating an environment using the filename will skip installing the dependencies and not use any channels.
+6. Create a new environment with the new developer package
+
+   .. code-block:: sh
+
+       mamba create -n test -c /home/me/tmp/rattler/ -c neutrons mantid-developer
+
+7. You will need to re-run ``cmake --fresh ...`` with this new environment.
+
+Exploring package contents
+--------------------------
+For this example, assume that the package is named ``mantid`` and the version number is ``1.2.3`` and that one is using linux.
+After creating the package there will be a file named ``mantid-1.2.3-<buildinfo>.conda``.
+Since this is actually a zip file, it can be unpacked
+
+.. code-block:: sh
+
+    mkdir tmp && cd tmp
+    unzip ../<mantid-1.2.3-<buildinfo>.conda
+
+This will unpack 3 files
+
+.. code-block:: sh
+
+    info-mantid-1.2.3-<buildinfo>.tar.zst
+    metadata.json
+    pkg-mantid-1.2.3-<buildinfo>.tar.zst
+
+The ``info-mantid-1.2.3-<buildinfo>.tar.zst`` file contains all of the metadata and can be unpacked using
+
+.. code-block:: sh
+
+    tar --zstd -xf info-mantid-1.2.3-<buildinfo>.tar.zst
+    ls info
+    recipe  about.json  git         hash_input.json  paths.json
+    test    files       has_prefix  index.json       run_exports.json
+
+Similarly, ``pkg-mantid-1.2.3-<buildinfo>.tar.zst`` contains all of the actual files to be installed.
+Generally a listing of the contents is what is desired
+
+.. code-block:: sh
+
+    tar --zstd -tf pkg-mantid-1.2.3-<buildinfo>.tar.zst
 
 .. _conda: https://conda.io
 .. _mantid-conda-recipes: https://github.com/mantidproject/mantid/tree/main/conda
 .. _mantid-conda-org: https://anaconda.org/mantid
-.. _conda-recipes-docs: https://docs.conda.io/projects/conda-build/en/stable/concepts/recipe.html
+.. _conda-recipes-docs: https://rattler.build/latest/reference/recipe_file/
 .. _mantid-conda-recipes: https://github.com/mantidproject/mantid/tree/main/conda
 .. _ci-pipeline: https://github.com/mantidproject/mantid/blob/main/buildconfig/Jenkins/Conda/nightly_build_and_deploy.jenkinsfile
 .. _package-conda: https://github.com/mantidproject/mantid/blob/main/buildconfig/Jenkins/Conda/package-conda
@@ -203,4 +252,4 @@ Note: If you have ``boa`` installed in your base environment it seems ``conda ma
 .. _download-page: https://download.mantidproject.org
 .. _nsis: https://sourceforge.net/projects/nsis/
 .. _dmg: https://en.wikipedia.org/wiki/Apple_Disk_Image
-.. _build_packages_from_branch_job: https://builds.mantidproject.org/job/build_packages_from_branch/
+.. _build_branch_job: https://builds.mantidproject.org/job/build_branch/

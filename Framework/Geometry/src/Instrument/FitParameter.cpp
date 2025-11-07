@@ -8,9 +8,9 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidGeometry/Instrument/FitParameter.h"
-#include "MantidGeometry/Instrument/Parameter.h"
 #include "MantidGeometry/Instrument/ParameterFactory.h"
 #include "MantidGeometry/muParser_Silent.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/StringTokenizer.h"
 
 #include <boost/lexical_cast.hpp>

@@ -15,7 +15,7 @@
 #include <stdexcept>
 
 DoubleEditor::DoubleEditor(QtProperty *property, QWidget *parent) : QLineEdit(parent), m_property(property) {
-  auto mgr = dynamic_cast<QtDoublePropertyManager *>(property->propertyManager());
+  auto const *mgr = dynamic_cast<QtDoublePropertyManager const *>(property->propertyManager());
   if (!mgr) {
     throw std::runtime_error("QtDoublePropertyManager expected as parent of DoubleEditor");
   }

@@ -1382,7 +1382,8 @@ void SCDCalibratePanels2::saveIsawDetCal(const std::string &filename,
  * @param FileName
  * @param tws
  */
-void SCDCalibratePanels2::saveCalibrationTable(const std::string &FileName, Mantid::API::ITableWorkspace_sptr &tws) {
+void SCDCalibratePanels2::saveCalibrationTable(const std::string &FileName,
+                                               Mantid::API::ITableWorkspace_sptr const &tws) {
   auto alg = createChildAlgorithm("SaveAscii");
   alg->setProperty("InputWorkspace", tws);
   alg->setProperty("Filename", FileName);
@@ -1480,7 +1481,7 @@ void SCDCalibratePanels2::profileL1(Mantid::API::IPeaksWorkspace_sptr &pws,
  * @param pws
  * @param pws_original
  */
-void SCDCalibratePanels2::profileBanks(Mantid::API::IPeaksWorkspace_sptr &pws,
+void SCDCalibratePanels2::profileBanks(Mantid::API::IPeaksWorkspace_sptr const &pws,
                                        const Mantid::API::IPeaksWorkspace_sptr &pws_original) {
   g_log.notice() << "START of profiling all banks along six degree of freedom\n";
 

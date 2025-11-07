@@ -3,29 +3,29 @@ c_compiler:
   - clang                    # [osx]
   - vs2022                   # [win]
 c_compiler_version:          # [unix]
-  - 18                       # [osx]
-  - 13                       # [linux]
+  - '18.*'                   # [osx]
+  - '13.*'                   # [linux]
 cxx_compiler:
   - gxx                      # [linux]
   - clangxx                  # [osx]
   - vs2022                   # [win]
 cxx_compiler_version:        # [unix]
-  - 18                       # [osx]
-  - 13                       # [linux]
+  - '18.*'                   # [osx]
+  - '13.*'                   # [linux]
 llvm_openmp:                 # [osx]
-  - 18                       # [osx]
+  - '18.*'                   # [osx]
 c_stdlib:                    # [linux]
   - sysroot                  # [linux]
 c_stdlib_version:            # [linux]
-  - 2.17                     # [linux]
+  - '2.17.*'                 # [linux]
 
 python:
-  - 3.11
+  - '3.11.*'
 
 # Aim to follow conda-forge
 libboost:
-  - 1.88 # [win or linux]
-  - 1.86 # [osx]
+  - '1.88.*'  # [win or linux]
+  - '1.86.*'  # [osx]
 
 cmake:
   - '>=3.21.0'
@@ -44,14 +44,14 @@ hdf5: # this is to move to libcurl>=8.4
   - '>1.14.0,<1.15'
 
 gdk_pixbuf:
-  - '=2.42.12=hed59a49_0' # [win]
+  - '==2.42.12 hed59a49_0' # [win]
 
 graphviz:
   - '>=2.47.0'
 
 jemalloc:
-  - 5.2.0 # [linux]
-  - 5.2.* # [osx]
+  - '==5.2.0'   # [linux]
+  - '5.2.*'     # [osx]
 
 jsoncpp:
   - '>=1.9.4,<2'
@@ -68,21 +68,22 @@ numpy:
   - 2.1.*
 
 matplotlib:
-  - 3.9.*
+  - '3.9.*'
 
 mslice:
-  - 2.13
+  - '2.13.*'
 
 ninja:
   - '>=1.10.2'
 
 # Use novtk version, otherwise a lot of extra packages are installed, including qt6-main, which can cause issues when launching on Windows
+# Fix: pin to 7.* to avoid issue with 7_9_1 (See: https://github.com/conda-forge/occt-feedstock/pull/124)
 occt:
-  - '=*=novtk*'
+  - '7.* novtk*'
 
 # Fix the version to avoid updates being pulled in automatically, which might change the Reflectometry ORSO file content or layout and cause tests to fail.
 orsopy:
-  - 1.2.1
+  - '==1.2.1'
 
 # An API change to HTTPSClientSession was introduced in 1.14.0
 poco:
@@ -95,13 +96,20 @@ pydantic:
  - '>=2.11.4,<3'
 
 sphinx:
-  - '>=4.5.*'
+  - '>=4.5'
 
 sphinx_bootstrap_theme:
-  - 0.8.1
+  - '==0.8.1'
 
 scipy:
   - '>=1.10.0'
+
+# This is not a primary dependency, but we pin it to avoid a memory allocator mismatch.
+# Pillow 12.0.0 compiles with zlib-ng, which causes problems with jemalloc.
+# Once we move away from jemalloc, this pin and the instances of pillow in our recipe files
+# can be removed.
+pillow:
+  - '<12.0.0'
 
 pip:
   - '>=21.0.1'
@@ -127,14 +135,14 @@ pyyaml:
 
 # Pins qt to a specific version to avoid gui rendering problems in certain versions
 qt_main:
-  - 5.15
+  - '5.15.*'
 
 # 5.4.2 crashes the jupyter console. 5.5.0 raises a TypeError when using tab completion.
 qtconsole:
   - '>5.5.0'
 
 qscintilla2:
-  - 2.13
+  - '2.13.*'
 
 # 2.4.2 fails workbench.test_mainwindow.test_mainwindow which uses isinstance()
 qtpy:
@@ -142,15 +150,15 @@ qtpy:
 
 # We must pin this because it is known to be particularly unstable (especially in system tests).
 quasielasticbayes:
-  - 0.3.0
+  - '==0.3.0'
 
 # There have previously been API breaking changes in patch version updates to quickBayes,
 # so pin this to the patch version number.
 quickbayes:
-  - '1.0.2'
+  - '==1.0.2'
 
 tbb:
-  - 2021
+  - '2021.*'
 
 texlive_core:
   - '>=20180414'
@@ -159,12 +167,12 @@ toml:
   - '>=0.10.2'
 # Keep gsl a specific version to reduce changes in our fitting
 gsl:
-  - 2.8
+  - '2.8.*'
 
 # v0.3.23 causes a hang on osx for some system tests, v0.3.24 causes a unit test failure that needs investigation, v0.3.25 causes a system test failure on linux, v0.3.28 causes unit test failures on osx and system test failures on linux, v0.3.29 causes failures on macOS and linux.
 # Just pin it to 0.3.27 for simplicity, rather than '!=0.3.23,!=0.3.24,!=0.3.25,!=0.3.28','!=0.3.29'
 libopenblas:
-  - 0.3.27
+  - '==0.3.27'
 
 # currently pinning seekpath in mantid-developer and mantid to use v2.1.0 build 2
 # which does not require future https://github.com/conda-forge/seekpath-feedstock/pull/15/

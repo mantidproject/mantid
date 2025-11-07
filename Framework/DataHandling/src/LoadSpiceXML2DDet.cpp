@@ -450,7 +450,7 @@ std::vector<SpiceXMLNode> LoadSpiceXML2DDet::xmlParseSpice(const std::string &xm
 
 //----------------------------------------------------------------------------------------------
 /// parse binary integer file
-std::vector<unsigned int> LoadSpiceXML2DDet::binaryParseIntegers(std::string &binary_file_name) {
+std::vector<unsigned int> LoadSpiceXML2DDet::binaryParseIntegers(std::string const &binary_file_name) {
   // check binary file size
   ifstream infile(binary_file_name.c_str(), ios::binary);
   streampos begin, end;
@@ -478,9 +478,9 @@ std::vector<unsigned int> LoadSpiceXML2DDet::binaryParseIntegers(std::string &bi
   unsigned int total_counts(0);
 
   // read detector size (row and column)
-  infile.read((char *)&buffer, sizeof(buffer));
+  infile.read(reinterpret_cast<char *>(&buffer), sizeof(buffer));
   auto num_rows = static_cast<size_t>(buffer);
-  infile.read((char *)&buffer, sizeof(buffer));
+  infile.read(reinterpret_cast<char *>(&buffer), sizeof(buffer));
   auto num_cols = static_cast<size_t>(buffer);
   if (num_rows * num_cols != num_dets) {
     g_log.error() << "Input binary file " << binary_file_name << " has inconsistent specification "
@@ -492,7 +492,7 @@ std::vector<unsigned int> LoadSpiceXML2DDet::binaryParseIntegers(std::string &bi
 
   for (size_t i = 0; i < num_dets; ++i) {
     // infile.read(buffer, sizeof(int));
-    infile.read((char *)&buffer, sizeof(buffer));
+    infile.read(reinterpret_cast<char *>(&buffer), sizeof(buffer));
     vec_counts[i] = buffer;
     total_counts += buffer;
   }

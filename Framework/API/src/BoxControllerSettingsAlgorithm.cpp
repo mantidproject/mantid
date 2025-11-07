@@ -75,7 +75,7 @@ void BoxControllerSettingsAlgorithm::takeDefaultsFromInstrument(
   const std::string splitThresholdName = "SplitThreshold";
   const std::string splitIntoName = "SplitInto";
   const std::string maxRecursionDepthName = "MaxRecursionDepth";
-  Property *p = getProperty(splitThresholdName);
+  Property const *p = getProperty(splitThresholdName);
   if (p->isDefault()) {
     std::vector<double> instrumentSplitThresholds = instrument->getNumberParameter(splitThresholdName, true);
     if (!instrumentSplitThresholds.empty()) {

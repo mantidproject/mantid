@@ -100,7 +100,7 @@ QString getFilter(const std::vector<std::string> &exts) {
     // Generate the display all filter
     if (exts.size() > 1) {
       QString displayAllFilter = "Data Files (";
-      for (auto &itr : exts) {
+      for (auto const &itr : exts) {
         // Add a space to between each extension
         displayAllFilter.append(" ");
         displayAllFilter.append(formatExtension(itr));
@@ -110,7 +110,7 @@ QString getFilter(const std::vector<std::string> &exts) {
     }
 
     // Append individual file filters
-    for (auto &itr : exts) {
+    for (auto const &itr : exts) {
       filter.append(QString::fromStdString(itr) + " (*" + QString::fromStdString(itr) + ");;");
     }
     filter = filter.trimmed();

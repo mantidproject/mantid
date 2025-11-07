@@ -148,7 +148,7 @@ void MessageDisplay::setSource(const QString &source) { m_logChannel->setSource(
  */
 void MessageDisplay::filterMessages() {
   m_textDisplay->clear();
-  for (auto &msg : getHistory()) {
+  for (auto const &msg : getHistory()) {
     if (shouldBeDisplayed(msg)) {
       m_textDisplay->textCursor().insertText(msg.text(), format(msg.priority()));
     }

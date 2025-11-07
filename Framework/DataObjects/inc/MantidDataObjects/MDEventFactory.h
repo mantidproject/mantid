@@ -10,7 +10,6 @@
 
 #include "MantidDataObjects/MDBin.h"
 #include "MantidDataObjects/MDEvent.h"
-#include "MantidDataObjects/MDEventFactory.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidDataObjects/MDLeanEvent.h"
 

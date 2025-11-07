@@ -148,6 +148,9 @@ set(SRC_FILES
     src/SpectrumDetectorMapping.cpp
     src/SpectrumInfo.cpp
     src/TableRow.cpp
+    src/TimeAtSampleStrategyDirect.cpp
+    src/TimeAtSampleStrategyElastic.cpp
+    src/TimeAtSampleStrategyIndirect.cpp
     src/TextAxis.cpp
     src/TransformScaleFactory.cpp
     src/Workspace.cpp
@@ -352,6 +355,10 @@ set(INC_FILES
     inc/MantidAPI/SpectrumInfoIterator.h
     inc/MantidAPI/TableRow.h
     inc/MantidAPI/TextAxis.h
+    inc/MantidAPI/TimeAtSampleStrategy.h
+    inc/MantidAPI/TimeAtSampleStrategyDirect.h
+    inc/MantidAPI/TimeAtSampleStrategyElastic.h
+    inc/MantidAPI/TimeAtSampleStrategyIndirect.h
     inc/MantidAPI/TransformScaleFactory.h
     inc/MantidAPI/VectorParameter.h
     inc/MantidAPI/VectorParameterParser.h
@@ -478,6 +485,9 @@ set(TEST_FILES
     SpectrumDetectorMappingTest.h
     SpectrumInfoTest.h
     TextAxisTest.h
+    TimeAtSampleStrategyDirectTest.h
+    TimeAtSampleStrategyElasticTest.h
+    TimeAtSampleStrategyIndirectTest.h
     VectorParameterParserTest.h
     VectorParameterTest.h
     WorkspaceFactoryTest.h

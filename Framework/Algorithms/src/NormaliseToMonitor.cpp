@@ -345,9 +345,9 @@ std::map<std::string, std::string> NormaliseToMonitor::validateInputs() {
 void NormaliseToMonitor::checkProperties(const MatrixWorkspace_sptr &inputWorkspace) {
 
   // Check where the monitor spectrum should come from
-  Property *monSpec = getProperty("MonitorSpectrum");
+  Property const *monSpec = getProperty("MonitorSpectrum");
   MatrixWorkspace_sptr monWS = getProperty("MonitorWorkspace");
-  Property *monID = getProperty("MonitorID");
+  Property const *monID = getProperty("MonitorID");
   // Is the monitor spectrum within the main input workspace
   const bool inWS = !monSpec->isDefault();
   m_scanInput = inputWorkspace->detectorInfo().isScanning();

@@ -22,7 +22,7 @@ namespace Mantid::Algorithms {
  *@param hostAlgorithm :: the pointer to SofQ algorithm hosting the base class.
  *This algorithm expects to have EMode and EFixed properties attached to it.
  */
-void SofQCommon::initCachedValues(const API::MatrixWorkspace &workspace, API::Algorithm *const hostAlgorithm) {
+void SofQCommon::initCachedValues(const API::MatrixWorkspace &workspace, API::Algorithm const *const hostAlgorithm) {
   // Retrieve the emode & efixed properties
   const std::string emode = hostAlgorithm->getProperty("EMode");
   // Convert back to an integer representation

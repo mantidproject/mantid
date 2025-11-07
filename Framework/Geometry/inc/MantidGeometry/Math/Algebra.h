@@ -8,8 +8,6 @@
 
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Math/Acomp.h"
-#include "MantidGeometry/Math/BnId.h"
-#include "MantidKernel/Matrix.h"
 
 namespace Mantid {
 

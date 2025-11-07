@@ -12,7 +12,7 @@
 namespace Mantid::API {
 
 void applyRectangularDetectorScaleToComponentInfo(Geometry::ComponentInfo &componentInfo,
-                                                  Geometry::ComponentID componentId, const double scaleX,
+                                                  const Geometry::ComponentID componentId, const double scaleX,
                                                   const double scaleY) {
 
   const size_t componentIndex = componentInfo.indexOf(componentId);

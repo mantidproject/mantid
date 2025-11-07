@@ -21,7 +21,7 @@ void encode(std::string &data) {
   std::string buffer;
   buffer.reserve(data.size());
 
-  for (auto &element : data) {
+  for (auto const &element : data) {
     switch (element) {
     case '&':
       buffer.append("&amp;");

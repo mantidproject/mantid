@@ -1,3 +1,6 @@
+# SCM syntax highlighting & preventing 3-way merges
+pixi.lock merge=binary linguist-language=YAML linguist-generated=true
+
 # Set default behaviour, in case users don't have core.autocrlf set.
 # See https://help.github.com/articles/dealing-with-line-endings#platform-all for more info
 # N.B. Only works with git client 1.7.2+
@@ -12,8 +15,3 @@
 
 # .dot files are diff'd using Word on Windows by default
 *.dot !diff
-
-# Allowing gSoap generated files to be committed.
-/Code/Mantid/Framework/ICat/inc/MantidICat/ICat3/GSoapGenerated/ICat3H.h              hooks.MaxObjectKiB131025=2048
-/Code/Mantid/Framework/ICat/src/ICat3/GSoapGenerated/ICat3C.cpp                       hooks.MaxObjectKiB131025=5120
-/Code/Mantid/Framework/ICat/src/ICat4/GSoapGenerated/ICat4C.cpp                       hooks.MaxObjectKiB131025=2048

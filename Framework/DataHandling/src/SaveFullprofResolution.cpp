@@ -9,6 +9,7 @@
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/ListValidator.h"
 
 #include "Poco/File.h"

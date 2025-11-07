@@ -123,7 +123,7 @@ static void clear_replies(SOCKET s) {
 SOCKET isisds_send_open(const char *host, ISISDSAccessMode access_type, uint16_t port) {
   SOCKET s;
   int setkeepalive = 1;
-  struct hostent *hostp;
+  struct hostent const *hostp;
   struct sockaddr_in address;
   char *comm, *comm_data;
   /*	int len_comm_data; */
@@ -161,13 +161,13 @@ SOCKET isisds_send_open(const char *host, ISISDSAccessMode access_type, uint16_t
 #ifdef WIN32
   // WINDOWS
   DWORD timeout = timeoutinSec * 1000;
-  setsockopt(s, SOL_SOCKET, SO_RCVTIMEO, (const char *)&timeout, sizeof(timeout));
+  setsockopt(s, SOL_SOCKET, SO_RCVTIMEO, reinterpret_cast<const char *>(&timeout), sizeof(timeout));
 #else
   // LINUX
   struct timeval tv;
   tv.tv_sec = timeoutinSec; /* 30 Secs Timeout */
   tv.tv_usec = 0;           // Not init'ing this can cause strange errors
-  setsockopt(s, SOL_SOCKET, SO_RCVTIMEO, (const char *)&tv, sizeof(struct timeval));
+  setsockopt(s, SOL_SOCKET, SO_RCVTIMEO, reinterpret_cast<const char *>(&tv), sizeof(struct timeval));
 #endif // WIN
 
   /* socket connected */
