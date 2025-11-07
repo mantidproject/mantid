@@ -9,6 +9,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataHandling/DllConfig.h"
 #include "MantidHistogramData/Histogram.h"
+#include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/cow_ptr.h"
 
 #include <map>
