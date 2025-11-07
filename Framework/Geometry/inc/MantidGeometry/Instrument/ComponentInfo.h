@@ -11,7 +11,7 @@
 #include "MantidGeometry/Instrument/ComponentInfoIterator.h"
 #include "MantidGeometry/Instrument/SolidAngleParams.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
-#include "MantidKernel/DateAndTime.h"
+#include "MantidTypes/Core/DateAndTime.h"
 #include <memory>
 #include <unordered_map>
 #include <vector>
