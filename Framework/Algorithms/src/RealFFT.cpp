@@ -58,34 +58,52 @@ void RealFFT::init() {
                   "FFT result will not be valid for the X axis, and should be ignored.");
 }
 
+std::map<std::string, std::string> RealFFT::validateInputs() {
+  std::map<std::string, std::string> issues;
+
+  API::MatrixWorkspace_sptr inWS = getProperty("InputWorkspace");
+
+  // verify the spectrum workspace index
+  std::string transform = getProperty("Transform");
+  int wi = (transform == "Forward") ? getProperty("WorkspaceIndex") : 0;
+  if (wi >= static_cast<int>(inWS->getNumberHistograms())) {
+    issues["WorkspaceIndex"] = "Property WorkspaceIndex is out of range";
+    return issues;
+  }
+  if (transform == "Backward") {
+    if (inWS->getNumberHistograms() < 2)
+      issues["InputWorkspace"] = "The input workspace must have at least 2 spectra.";
+  }
+
+  // Check that the x values are evenly spaced
+  bool IgnoreXBins = getProperty("IgnoreXBins");
+  if (!IgnoreXBins) {
+    const auto &X = inWS->x(wi);
+    double dx = (X.back() - X.front()) / static_cast<double>(X.size() - 1);
+    for (size_t i = 0; i < X.size() - 2; i++) {
+      if (std::abs(dx - X[i + 1] + X[i]) / dx > 1e-7) {
+        issues["InputWorkspace"] = "X axis must be linear (all bins have same width). This can be ignored if "
+                                   "IgnoreXBins is set to true.";
+        break;
+      }
+    }
+  }
+  return issues;
+}
+
 /** Executes the algorithm
  *
  *  @throw runtime_error Thrown if
  */
 void RealFFT::exec() {
   API::MatrixWorkspace_sptr inWS = getProperty("InputWorkspace");
+
+  // get the x-spacing
   std::string transform = getProperty("Transform");
-  bool IgnoreXBins = getProperty("IgnoreXBins");
-
   int spec = (transform == "Forward") ? getProperty("WorkspaceIndex") : 0;
-
   const auto &X = inWS->x(spec);
-  auto ySize = static_cast<int>(inWS->blocksize());
-
-  if (spec >= ySize)
-    throw std::invalid_argument("Property WorkspaceIndex is out of range");
-
-  // Check that the x values are evenly spaced
   double dx = (X.back() - X.front()) / static_cast<double>(X.size() - 1);
-  if (!IgnoreXBins) {
-    for (size_t i = 0; i < X.size() - 2; i++)
-      // note this cannot be replaced with Kernel::withinRelativeDifference,
-      // or fails to detect some errors
-      if (std::abs(dx - X[i + 1] + X[i]) / dx > 1e-7)
-        throw std::invalid_argument("X axis must be linear (all bins have same "
-                                    "width). This can be ignored if "
-                                    "IgnoreXBins is set to true.");
-  }
+  auto ySize = inWS->blocksize();
 
   API::MatrixWorkspace_sptr outWS;
 
