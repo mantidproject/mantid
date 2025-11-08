@@ -230,6 +230,7 @@ class Test_Player_record(unittest.TestCase):
                         patch("socket.socket", return_value=mock_source_socket),
                         patch("select.select", side_effect=controlled_bidirectional_select),
                         patch.object(Packet, "from_socket", side_effect=packet_from_socket_calls),
+                        patch.object(player, "_impose_transfer_limit"),
                         patch.object(Packet, "to_socket") as mock_to_socket,
                         patch("builtins.open", mock_open()),
                         patch.object(Packet, "to_file"),
@@ -361,6 +362,7 @@ class Test_Player_record(unittest.TestCase):
                         patch("socket.socket", return_value=mock_source_socket),
                         patch("select.select", side_effect=controlled_control_select),
                         patch.object(Packet, "from_socket", return_value=control_packet),
+                        patch.object(player, "_impose_transfer_limit"),
                         patch.object(Packet, "to_socket") as mock_to_socket,
                     ):
                         player.record(output_path)
@@ -424,6 +426,7 @@ class Test_Player_record(unittest.TestCase):
                         patch("socket.socket", return_value=mock_source_socket),
                         patch("select.select", side_effect=controlled_naming_select),
                         patch.object(Packet, "from_socket", return_value=mock_packet),
+                        patch.object(player, "_impose_transfer_limit"),
                         patch.object(Packet, "to_socket"),
                         patch("builtins.open", mock_open()) as mock_file,
                         patch.object(Packet, "to_file"),
