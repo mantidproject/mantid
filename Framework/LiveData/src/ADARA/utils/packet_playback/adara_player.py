@@ -89,7 +89,7 @@ class UnixGlob:
 
 
 class SocketAddress:
-    # Parse a socket address, specified as either a Unix-domain socket path, or an IP/host:port string,
+    # Parse a socket address string, specified as either a Unix-domain socket path, or an IP/host:port,
     #   into a Python-compatible format: `Path | tuple[str, int]`.
 
     @classmethod
