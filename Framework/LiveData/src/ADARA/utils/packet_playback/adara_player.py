@@ -40,7 +40,8 @@ with open(_config_path, "rt") as f:
     Config = yaml.safe_load(f)
     _logger.setLevel(Config["logging"]["level"])
     _logger.info(f"Loaded configuration from '{_config_path}'.")
-    _logger.debug(f"Server address: {Config['server']['address']}.")
+    _logger.debug(f"  source: '{Config['source']['address']}'.")
+    _logger.debug(f"  server: '{Config['server']['address']}'.")
 
 EPICS_EPOCH_OFFSET = 631152000
 
@@ -88,35 +89,37 @@ class UnixGlob:
 
 
 class SocketAddress:
-    # Parse a socket address, specified as either a Unix-domain socket path, or an IP:port string,
-    #   into a Python-compatible format: `Path | tuple[<IP str>, <port: int>]`.
+    # Parse a socket address, specified as either a Unix-domain socket path, or an IP/host:port string,
+    #   into a Python-compatible format: `Path | tuple[str, int]`.
 
     @classmethod
     def parse(cls, address: str) -> Path | tuple[str, int]:
-        # Match IP:port, IPv4 or IPv6 (with brackets for IPv6)
-        ip_port_re = re.compile(
+        # Match [IPv6]:port, IPv4:port, or hostname:port
+        # Hostname spec (RFC 1123): letter/digit first, can contain '-', '.', letters, digits
+        host_port_re = re.compile(
             r"""
             ^
-            (?:\[([0-9a-fA-F:]+)\]|([0-9\.]+)) # IPv6 or IPv4
-            :(\d{1,5})                         # Port
+            (?:\[(?P<ipv6>[0-9a-fA-F:]+)\]|      # [IPv6]
+               (?P<host>[a-zA-Z0-9.\-]+)         # or hostname/domain, or IPv4
+            )
+            :
+            (?P<port>\d{1,5})                    # Port
             $
-        """,
+            """,
             re.VERBOSE,
         )
 
-        match = ip_port_re.match(address)
+        match = host_port_re.match(address)
         if match:
-            ip = match.group(1) or match.group(2)
-            port = int(match.group(3))
+            ip = match.group("ipv6") or match.group("host")
+            port = int(match.group("port"))
 
-            # Explicitly dissallow port 0 for this application:
-            #   otherwise meaning: "pick an available ephemeral port".
             if 0 < port <= 65535:
                 return (ip, port)
             else:
                 raise ValueError(f"Port out of range: {port}")
 
-        # If not IP:port, treat as Unix socket path (requires a /)
+        # If not host:port, treat as Unix socket path (absolute only)
         if address.startswith("/"):
             return Path(address)
 
@@ -124,13 +127,12 @@ class SocketAddress:
 
     @classmethod
     def isUDSSocket(cls, address: Path | tuple[str, int]):
-        # Determine if an address, as parsed by `parse`, refers to a UDS socket.
         return isinstance(address, Path)
 
 
 class Packet:
     HEADER_BYTES = 16
-    STR_FORMAT = Config['logging']['packet_summary']
+    STR_FORMAT = Config["logging"]["packet_summary"]
 
     class Type(IntEnum):
         RAW_EVENT_TYPE = (0x0000, 0x01)
@@ -235,13 +237,8 @@ class Packet:
 
     def __str__(self) -> str:
         MB = 1024**2
-        return self.STR_FORMAT.format(
-            type=self.type,
-            timestamp=self.timestamp,
-            size_MB=self.size / MB,
-            CRC=self.CRC
-        )
-        
+        return self.STR_FORMAT.format(type=self.type, timestamp=self.timestamp, size_MB=self.size / MB, CRC=self.CRC)
+
     @classmethod
     def iter_file(cls, src: BinaryIO, header_only=False, source=None) -> "Iterator[Packet]":
         """Iterate over packets in a single file."""
@@ -422,10 +419,10 @@ class Player:
         self._buffer_MB = Config["server"]["buffer_MB"]
 
         self._running = False
-        
+
         # transferred bytes (for record)
         self._transferred_bytes = 0
-        
+
         # packet-source socket:
         self._source = None
         # listener socket:
@@ -612,7 +609,7 @@ class Player:
         try:
             self._running = True
             self._transferred_bytes = 0
-            
+
             self._server = self._create_server_socket(self._server_address)
             while self._running:
                 # Accept connection from client (the application).
@@ -664,22 +661,22 @@ class Player:
                         for sock in readable:
                             try:
                                 packet = Packet.from_socket(sock)
-                                
+
                                 # limit total number of bytes transferred
                                 self._impose_transfer_limit(packet)
                                 if not self._running:
                                     break
-                                
+
                                 # Determine direction and forward
                                 if sock == self._source:
                                     # Data from server => save and forward to client
                                     file_path = self._packet_file_path(output_path, packet)
                                     if file_path is None:
                                         self._running = False
-                                        break                                        
+                                        break
                                     with open(file_path, "wb") as f:
                                         Packet.to_file(f, packet)
-                                        
+
                                     _logger.debug(f"server SENDs client -> {packet}")
                                     Packet.to_socket(self._client, packet)
                                 else:
@@ -718,14 +715,10 @@ class Player:
             return file_path
         _logger.error(f"Save count for packet file '{file_path}' exceeds {cls.ITERATION_LIMIT}-copy limit.")
         return None
-    
+
     @classmethod
     def _packet_filename(cls, packet: Packet, iteration: int) -> str:
-        return (
-            f"{packet.packet_type:#04x}-{packet.timestamp}"
-            + (f"-{iteration}" if iteration > 1 else "")
-            + ".adara"
-        )
+        return f"{packet.packet_type:#04x}-{packet.timestamp}" + (f"-{iteration}" if iteration > 1 else "") + ".adara"
 
     def _impose_transfer_limit(self, pkt: Packet):
         # impose absolute limit on number of bytes transferred
@@ -734,7 +727,7 @@ class Player:
         if self._transferred_bytes / MB > self.TRANSFER_LIMIT_MB:
             _logger.error(f"Transfer limit of {self.TRANSFER_LIMIT_MB} MB exceeded.")
             self._running = False
-    
+
     @classmethod
     def _create_server_socket(cls, address: Path | tuple[str, int]) -> socket.socket:
         server = None
@@ -817,7 +810,7 @@ if __name__ == "__main__":
             _logger.error(f"When using record mode, the positional argument should be the target directory, not '{args.glob}'.")
 
         player = Player(server_address=args.server_address, source_address=args.source_address)
-        
+
         # Set up signal handlers
         signal.signal(signal.SIGINT, player.signal_handler)
         signal.signal(signal.SIGTERM, player.signal_handler)

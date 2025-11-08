@@ -101,6 +101,57 @@ class Test_UnixGlob(unittest.TestCase):
 class Test_SocketAddress(unittest.TestCase):
     """Test cases for SocketAddress class."""
 
+    def test_parse_hostname(self):
+        """Checks that hostnames and DNS names parse as (host, port) tuples."""
+
+        # Simple "localhost"
+        result = SocketAddress.parse("localhost:12345")
+        self.assertEqual(result, ("localhost", 12345))
+
+        # Common DNS-style name
+        result = SocketAddress.parse("example.com:80")
+        self.assertEqual(result, ("example.com", 80))
+
+        # Subdomain and hyphen in name
+        result = SocketAddress.parse("my-db-server.local:54321")
+        self.assertEqual(result, ("my-db-server.local", 54321))
+
+        # Fully qualified domain name (FQDN)
+        result = SocketAddress.parse("bl3-daq1.sns.gov:31415")
+        self.assertEqual(result, ("bl3-daq1.sns.gov", 31415))
+
+        # Hostname with digits
+        result = SocketAddress.parse("node123:8081")
+        self.assertEqual(result, ("node123", 8081))
+
+    def test_parse_invalid_hostname_formats(self):
+        """Ensures invalid hostname/port addresses throw errors."""
+
+        # Hostname, missing port
+        with self.assertRaises(ValueError) as ctx:
+            SocketAddress.parse("example.com")
+        self.assertIn("Invalid address format", str(ctx.exception))
+
+        # Hostname, port out of range
+        with self.assertRaises(ValueError) as ctx:
+            SocketAddress.parse("localhost:99999")
+        self.assertIn("Port out of range", str(ctx.exception))
+
+        # Port is zero (not allowed)
+        with self.assertRaises(ValueError) as ctx:
+            SocketAddress.parse("someserv:0")
+        self.assertIn("Port out of range", str(ctx.exception))
+
+        # Hostname with invalid character
+        with self.assertRaises(ValueError) as ctx:
+            SocketAddress.parse("bad*host:8000")
+        self.assertIn("Invalid address format", str(ctx.exception))
+
+        # Leading colon, missing host
+        with self.assertRaises(ValueError) as ctx:
+            SocketAddress.parse(":8080")
+        self.assertIn("Invalid address format", str(ctx.exception))
+
     def test_parse_ipv4(self):
         """Checks that IPv4 address/port strings parse to expected tuples."""
         # Standard IPv4 address
