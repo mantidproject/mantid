@@ -43,7 +43,7 @@ private:
 
 namespace PropertyNames {
 std::string const INPUT_WKSP("InputWorkspace");
-std::string const OUTPUT_WKSP("Outputworkspace");
+std::string const OUTPUT_WKSP("OutputWorkspace");
 std::string const WKSP_INDEX("WorkspaceIndex");
 std::string const TRANSFORM("Transform");
 std::string const IGNORE_X_BINS("IgnoreXBins");
