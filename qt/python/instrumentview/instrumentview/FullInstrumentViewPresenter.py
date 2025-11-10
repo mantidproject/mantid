@@ -21,15 +21,6 @@ from instrumentview.Peaks.WorkspaceDetectorPeaks import WorkspaceDetectorPeaks
 class FullInstrumentViewPresenter:
     """Presenter for the Instrument View window"""
 
-    _FULL_3D = "3D"
-    _SPHERICAL_X = "Spherical X"
-    _SPHERICAL_Y = "Spherical Y"
-    _SPHERICAL_Z = "Spherical Z"
-    _CYLINDRICAL_X = "Cylindrical X"
-    _CYLINDRICAL_Y = "Cylindrical Y"
-    _CYLINDRICAL_Z = "Cylindrical Z"
-    _PROJECTION_OPTIONS = [_FULL_3D, _SPHERICAL_X, _SPHERICAL_Y, _SPHERICAL_Z, _CYLINDRICAL_X, _CYLINDRICAL_Y, _CYLINDRICAL_Z]
-
     _TIME_OF_FLIGHT = "TOF"
     _D_SPACING = "dSpacing"
     _WAVELENGTH = "Wavelength"
@@ -48,8 +39,7 @@ class FullInstrumentViewPresenter:
 
     def setup(self):
         self._view.subscribe_presenter(self)
-        default_index, options = self.projection_combo_options()
-        self._view.set_projection_combo_options(default_index, options)
+        self._view.set_projection_combo_options(*self._model.get_default_projection_index_and_options())
         self._view.setup_connections_to_presenter()
         self._view.set_contour_range_limits(self._model.counts_limits)
         self._view.set_integration_range_limits(self._model.integration_limits)
@@ -63,7 +53,7 @@ class FullInstrumentViewPresenter:
         self._visible_label = "Visible Picked"
         self._view.show_axes()
         self._is_projection_selected = False
-        self.on_projection_option_selected(default_index)
+        self.update_plotter()
 
         if self._model.workspace_x_unit in self._UNIT_OPTIONS:
             self._view.set_unit_combo_box_index(self._UNIT_OPTIONS.index(self._model.workspace_x_unit))
@@ -77,16 +67,6 @@ class FullInstrumentViewPresenter:
             add_callback=self.add_workspace_callback,
         )
         self._view.hide_status_box()
-
-    # TODO: Sort out view names and return names all in one place
-    def projection_combo_options(self) -> tuple[int, list[str]]:
-        default_projection = self._model.default_projection
-        try:
-            possible_returns = ["3D", "SPHERICAL_X", "SPHERICAL_Y", "SPHERICAL_Z", "CYLINDRICAL_X", "CYLINDRICAL_Y", "CYLINDRICAL_Z"]
-            default_index = possible_returns.index(default_projection)
-        except ValueError:
-            default_index = 0
-        return default_index, self._PROJECTION_OPTIONS
 
     def on_export_workspace_clicked(self) -> None:
         self._model.save_line_plot_workspace_to_ads()
@@ -121,49 +101,11 @@ class FullInstrumentViewPresenter:
     def set_view_contour_limits(self) -> None:
         self._view.set_plotter_scalar_bar_range(self._model.counts_limits, self._counts_label)
 
-    def on_projection_option_selected(self, selected_index: int) -> None:
+    def update_plotter(self) -> None:
         """Update the projection based on the selected option."""
-        # projection_type = self._PROJECTION_OPTIONS[selected_index]
-        projection_type = self._view.current_selected_projection()
-
-        if projection_type.startswith("3D"):
-            # Plot orange sphere at the origin
-            # origin = pv.Sphere(radius=0.1, center=[0, 0, 0])
-            # self._view.add_simple_shape(origin, colour="orange", pickable=False)
-            self._model.reset_cached_projection_positions()
-            self._apply_projection_state(False, self._model.detector_positions)
-            return
-
-        projected_points = self._adjust_points_for_selected_projection(self._model.detector_positions, projection_type)
-        self._apply_projection_state(True, projected_points)
-
-    def _adjust_points_for_selected_projection(self, points: np.ndarray, projection_type: str) -> np.ndarray:
-        if projection_type.startswith("3D"):
-            self._model.reset_cached_projection_positions()
-            return points
-
-        is_spherical = True
-        if projection_type.startswith("Spherical"):
-            is_spherical = True
-        elif projection_type.startswith("Cylindrical"):
-            is_spherical = False
-        else:
-            raise ValueError(f"Unknown projection type: {projection_type}")
-
-        if projection_type.endswith("X"):
-            axis = [1, 0, 0]
-        elif projection_type.endswith("Y"):
-            axis = [0, 1, 0]
-        elif projection_type.endswith("Z"):
-            axis = [0, 0, 1]
-        else:
-            raise ValueError(f"Unknown projection type {projection_type}")
-
-        return self._model.calculate_projection(is_spherical, axis, points)
-
-    def _apply_projection_state(self, is_projection: bool, positions: np.ndarray) -> None:
-        self._is_projection_selected = is_projection
-        self._update_view_main_plotter(positions, is_projection=self._is_projection_selected)
+        self._model.projection_type = self._view.current_selected_projection()
+        self._is_projection_selected = self._model.is_2d_projection()
+        self._update_view_main_plotter(self._model.detector_positions, is_projection=self._model.is_2d_projection())
         self.on_multi_select_detectors_clicked()
         self.on_peaks_workspace_selected()
 
@@ -193,20 +135,22 @@ class FullInstrumentViewPresenter:
         if point_position is None:
             return
         point_index = picker.GetPointId()
-        self.update_picked_detectors([point_index])
+        picked_mask = np.full(self._detector_mesh.GetNumberOfPoints(), False)
+        picked_mask[point_index] = True
+        self.update_picked_detectors(picked_mask)
 
     def rectangle_picked(self, rectangle: RectangleSelection) -> None:
         """Get points within the selection rectangle and display information for those detectors"""
         selected_mesh = self._detector_mesh.select_enclosed_points(rectangle.frustum_mesh)
         selected_mask = selected_mesh.point_data["SelectedPoints"].view(bool)
-        selected_point_indices = np.argwhere(selected_mask).flatten()
-        self.update_picked_detectors(selected_point_indices)
+        # selected_point_indices = np.argwhere(selected_mask).flatten()
+        self.update_picked_detectors(selected_mask)
 
-    def update_picked_detectors(self, point_indices: list[int] | np.ndarray) -> None:
-        if len(point_indices) == 0:
+    def update_picked_detectors(self, picked_mask: np.ndarray) -> None:
+        if np.sum(picked_mask) == 0:
             self._model.clear_all_picked_detectors()
         else:
-            self._model.negate_picked_visibility(point_indices)
+            self._model.negate_picked_visibility(picked_mask)
 
         # Update to visibility shows up in real time
         self._pickable_main_mesh[self._visible_label] = self._model.picked_visibility
@@ -220,30 +164,9 @@ class FullInstrumentViewPresenter:
     def cylinder_select(self, obj, event) -> None:
         cylinder = vtkCylinder()
         obj.GetCylinderRepresentation().GetCylinder(cylinder)
-
         mask = [(cylinder.FunctionValue(self._detector_mesh.GetPoint(i)) < 0) for i in range(self._detector_mesh.GetNumberOfPoints())]
-        print("Points picked up: ", np.sum(mask))
-
-        # extract = vtkExtractPolyDataGeometry()
-        # extract.SetInputData(self._detector_mesh)
-        # extract.SetImplicitFunction(cylinder)
-        # extract.ExtractInsideOn()
-        # extract.Update()
-        #
-        # inside = extract.GetOutput()
-        # print("Points inside:", inside.GetNumberOfPoints())
-        # point_data = extract.GetOutput()
-
-        # select = vtkSelectEnclosedPoints()
-        # select.SetInputData(self._detector_mesh)
-        # select.SetSurfaceData(inside)  # points enclosed = 1
-        # select.Update()
-        #
-        # mask = extract.GetOutput().GetPointData().GetArray("SelectedPoints")
-        # mask_np = vtk_to_numpy(mask).astype(bool)
-        # print("Points picked up: ", np.sum(mask_np))
         self._model.mask_detectors_in_workspace(mask)
-        self.on_projection_option_selected(0)
+        self.update_plotter()
 
     def _update_line_plot_ws_and_draw(self, unit: str) -> None:
         self._model.extract_spectra_for_line_plot(unit, self._view.sum_spectra_selected())
@@ -341,7 +264,7 @@ class FullInstrumentViewPresenter:
             valid = sorted_detector_ids[positions] == peaks_detector_ids
             ordered_indices = ordered_indices[valid]
             labels = [p.label for i, p in enumerate(ws_peaks.detector_peaks) if valid[i]]
-            projected_points = self._model.current_projected_positions[ordered_indices]
+            projected_points = self._model.detector_positions[ordered_indices]
             # Plot the peaks and their labels on the projection
             if len(projected_points) > 0:
                 self._view.plot_overlay_mesh(projected_points, labels, ws_peaks.colour)
