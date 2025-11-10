@@ -54,7 +54,7 @@ class FullInstrumentViewModel:
         phi = detector_info_table.columnArray("Phi")
         self._spherical_positions = np.transpose(np.vstack([r, theta, phi]))
         self._detector_positions = detector_info_table.columnArray("Position")
-        self._workspace_indices = detector_info_table.columnArray("Index")
+        self._workspace_indices = detector_info_table.columnArray("Index").astype(int)
         # Array of strings 'yes', 'no' and 'n/a'
         self._is_monitor = detector_info_table.columnArray("Monitor")
         self._is_valid = self._is_monitor == "no"
@@ -302,3 +302,16 @@ class FullInstrumentViewModel:
                     detector_peaks.append(DetectorPeaks(list(peaks_for_id)))
             peaks_grouped_by_ws.append(detector_peaks)
         return peaks_grouped_by_ws
+
+    def mask_detectors_in_workspace(self, new_mask):
+        print("Before update: ", np.sum(self._is_masked))
+        self._is_masked[self.is_pickable] = new_mask
+        print("After update: ", np.sum(self._is_masked))
+        # ws_index_to_mask = self._workspace_indices[self.is_pickable][new_mask]
+
+        # MaskDetectors(Workspace=self._workspace.name(), WorkspaceIndexList=ws_index_to_mask)
+        # self.update_masked_from_workspace()
+
+    # def update_masked_from_workspace(self):
+    #     mask_ws, mask_list = ExtractMask(self._workspace, StoreInADS=False)
+    #     self._is_masked = mask_ws.extractY().flatten().astype(bool)

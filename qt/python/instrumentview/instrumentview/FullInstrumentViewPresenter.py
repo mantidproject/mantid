@@ -8,7 +8,7 @@ import numpy as np
 import pyvista as pv
 from pyvista.plotting.picking import RectangleSelection
 from pyvista.plotting.opts import PickerType
-from vtk import vtkCylinder, vtkExtractGeometry
+from vtk import vtkCylinder
 from mantid import mtd
 from mantid.kernel import logger
 
@@ -123,7 +123,8 @@ class FullInstrumentViewPresenter:
 
     def on_projection_option_selected(self, selected_index: int) -> None:
         """Update the projection based on the selected option."""
-        projection_type = self._PROJECTION_OPTIONS[selected_index]
+        # projection_type = self._PROJECTION_OPTIONS[selected_index]
+        projection_type = self._view.current_selected_projection()
 
         if projection_type.startswith("3D"):
             # Plot orange sphere at the origin
@@ -220,14 +221,29 @@ class FullInstrumentViewPresenter:
         cylinder = vtkCylinder()
         obj.GetCylinderRepresentation().GetCylinder(cylinder)
 
-        extract = vtkExtractGeometry()
-        extract.SetInputData(self._detector_mesh)
-        extract.SetImplicitFunction(cylinder)
-        extract.ExtractInsideOn()
-        extract.Update()
+        mask = [(cylinder.FunctionValue(self._detector_mesh.GetPoint(i)) < 0) for i in range(self._detector_mesh.GetNumberOfPoints())]
+        print("Points picked up: ", np.sum(mask))
 
-        inside = extract.GetOutput()
-        print("Points inside:", inside.GetNumberOfPoints())
+        # extract = vtkExtractPolyDataGeometry()
+        # extract.SetInputData(self._detector_mesh)
+        # extract.SetImplicitFunction(cylinder)
+        # extract.ExtractInsideOn()
+        # extract.Update()
+        #
+        # inside = extract.GetOutput()
+        # print("Points inside:", inside.GetNumberOfPoints())
+        # point_data = extract.GetOutput()
+
+        # select = vtkSelectEnclosedPoints()
+        # select.SetInputData(self._detector_mesh)
+        # select.SetSurfaceData(inside)  # points enclosed = 1
+        # select.Update()
+        #
+        # mask = extract.GetOutput().GetPointData().GetArray("SelectedPoints")
+        # mask_np = vtk_to_numpy(mask).astype(bool)
+        # print("Points picked up: ", np.sum(mask_np))
+        self._model.mask_detectors_in_workspace(mask)
+        self.on_projection_option_selected(0)
 
     def _update_line_plot_ws_and_draw(self, unit: str) -> None:
         self._model.extract_spectra_for_line_plot(unit, self._view.sum_spectra_selected())
