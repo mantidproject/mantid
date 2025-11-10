@@ -33,7 +33,8 @@ public:
 
     // change the local download directory by adding a unittest subdirectory
     auto testDirectories = m_originalInstDir;
-    Poco::Path localDownloadPath(m_originalInstDir[0]);
+    // std::filesystem doesn't append the '/' to denote directory
+    Poco::Path localDownloadPath(m_originalInstDir[0] + "/");
     localDownloadPath.pushDirectory(TEST_SUFFIX);
     m_localInstDir = localDownloadPath.toString();
     createDirectory(localDownloadPath);

@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/FileValidator.h"
 #include "MantidKernel/Logger.h"
-#include <Poco/Path.h>
 #include <boost/algorithm/string/case_conv.hpp>
 #include <filesystem>
 #include <fstream>
@@ -51,7 +50,10 @@ IValidator_sptr FileValidator::clone() const { return std::make_shared<FileValid
  */
 std::string FileValidator::checkValidity(const std::string &value) const {
   // Check if the path is syntactically valid
-  if (!Poco::Path().tryParse(value)) {
+  try {
+    std::filesystem::path testPath(value);
+    // Just creating a path object validates syntax in most cases
+  } catch (const std::exception &) {
     return "Error in path syntax: \"" + value + "\".";
   }
 
