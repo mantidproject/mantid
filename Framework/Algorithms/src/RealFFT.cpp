@@ -74,7 +74,7 @@ std::map<std::string, std::string> RealFFT::validateInputs() {
   return issues;
 }
 
-std::map<std::string, std::string> RealFFT::actuallyValidateInputs(API::Workspace_sptr ws) {
+std::map<std::string, std::string> RealFFT::actuallyValidateInputs(API::Workspace_sptr const &ws) {
   std::map<std::string, std::string> issues;
 
   // verify a matrix workspace has been passed

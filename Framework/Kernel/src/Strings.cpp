@@ -88,16 +88,11 @@ std::string replace(const std::string &input, const std::string &find_what, cons
  * @param substitute :: The char which will be placed instead
  * @return A new string with the characters replaced
  */
-MANTID_KERNEL_DLL std::string replaceAll(const std::string &input, char const to_replace, char const substitute) {
+MANTID_KERNEL_DLL std::string replaceAll(std::string const &input, char const to_replace, char const substitute) {
   std::string replaced;
   replaced.reserve(input.size());
-  for (auto itr = input.cbegin(); itr != input.cend(); ++itr) {
-    if (*itr == to_replace) {
-      replaced.push_back(substitute);
-    } else {
-      replaced.push_back(*itr);
-    }
-  }
+  std::transform(input.cbegin(), input.cend(), std::back_inserter(replaced),
+                 [to_replace, substitute](char c) { return (c == to_replace) ? substitute : c; });
   return replaced;
 }
 

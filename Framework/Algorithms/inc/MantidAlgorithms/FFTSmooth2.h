@@ -35,7 +35,7 @@ private:
   // Overridden Algorithm methods
   void init() override;
   std::map<std::string, std::string> validateInputs() override;
-  std::map<std::string, std::string> actuallyValidateInputs(API::Workspace_sptr);
+  std::map<std::string, std::string> actuallyValidateInputs(API::Workspace_sptr const &);
   void exec() override;
 
   // Smoothing by zeroing.
@@ -46,13 +46,13 @@ private:
 };
 
 namespace PropertyNames {
-std::string const INPUT_WKSP("InputWorkspace");
-std::string const OUTPUT_WKSP("OutputWorkspace");
-std::string const WKSP_INDEX("WorkspaceIndex");
-std::string const FILTER("Filter");
-std::string const PARAMS("Params");
-std::string const IGNORE_X_BINS("IgnoreXBins");
-std::string const ALL_SPECTRA("AllSpectra");
+inline std::string const INPUT_WKSP("InputWorkspace");
+inline std::string const OUTPUT_WKSP("OutputWorkspace");
+inline std::string const WKSP_INDEX("WorkspaceIndex");
+inline std::string const FILTER("Filter");
+inline std::string const PARAMS("Params");
+inline std::string const IGNORE_X_BINS("IgnoreXBins");
+inline std::string const ALL_SPECTRA("AllSpectra");
 } // namespace PropertyNames
 
 } // namespace FFTSmooth
