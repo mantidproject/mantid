@@ -12,6 +12,7 @@
 
 namespace Mantid {
 namespace Algorithms {
+namespace RealFFT {
 /** Performs a Fast Fourier Transform of real data
 
     @author Roman Tolchenov
@@ -40,5 +41,13 @@ private:
   void exec() override;
 };
 
+namespace PropertyNames {
+std::string const INPUT_WKSP("InputWorkspace");
+std::string const OUTPUT_WKSP("Outputworkspace");
+std::string const WKSP_INDEX("WorkspaceIndex");
+std::string const TRANSFORM("Transform");
+std::string const IGNORE_X_BINS("IgnoreXBins");
+} // namespace PropertyNames
+} // namespace RealFFT
 } // namespace Algorithms
 } // namespace Mantid

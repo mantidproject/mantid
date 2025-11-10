@@ -13,11 +13,12 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAlgorithms/FFT.h"
+#include "MantidAlgorithms/RealFFT.h"
 #include "MantidDataObjects/Workspace2D.h"
 
 using namespace Mantid;
 using namespace Mantid::API;
+using namespace Mantid::Algorithms::RealFFT::PropertyNames;
 
 // Anonymous namespace to share methods with Performance test
 namespace {
@@ -69,9 +70,9 @@ void deleteWorkspacesFromADS() {
 void doTestForward(const int N, const double XX, bool performance = false) {
   auto fft = Mantid::API::AlgorithmManager::Instance().create("RealFFT");
   fft->initialize();
-  fft->setPropertyValue("InputWorkspace", "RealFFT_WS");
-  fft->setPropertyValue("OutputWorkspace", "RealFFT_WS_forward");
-  fft->setPropertyValue("WorkspaceIndex", "0");
+  fft->setPropertyValue(INPUT_WKSP, "RealFFT_WS");
+  fft->setPropertyValue(OUTPUT_WKSP, "RealFFT_WS_forward");
+  fft->setPropertyValue(WKSP_INDEX, "0");
   fft->execute();
 
   if (!performance) {
@@ -101,15 +102,15 @@ void doTestBackward(const int N, const double dX, bool performance = false) {
   // first transform forward
   auto fft = Mantid::API::AlgorithmManager::Instance().create("RealFFT");
   fft->initialize();
-  fft->setPropertyValue("InputWorkspace", "RealFFT_WS");
-  fft->setPropertyValue("OutputWorkspace", "RealFFT_WS_forward");
-  fft->setPropertyValue("WorkspaceIndex", "0");
+  fft->setPropertyValue(INPUT_WKSP, "RealFFT_WS");
+  fft->setPropertyValue(OUTPUT_WKSP, "RealFFT_WS_forward");
+  fft->setPropertyValue(WKSP_INDEX, "0");
   fft->execute();
   // now transform back and compare
   fft->initialize();
-  fft->setPropertyValue("InputWorkspace", "RealFFT_WS_forward");
-  fft->setPropertyValue("OutputWorkspace", "RealFFT_WS_backward");
-  fft->setPropertyValue("Transform", "Backward");
+  fft->setPropertyValue(INPUT_WKSP, "RealFFT_WS_forward");
+  fft->setPropertyValue(OUTPUT_WKSP, "RealFFT_WS_backward");
+  fft->setPropertyValue(TRANSFORM, "Backward");
   fft->execute();
 
   if (!performance) {
@@ -134,9 +135,9 @@ void doTestBackward(const int N, const double dX, bool performance = false) {
 void doTestForwardHistogram(const int N, const double XX, bool performance = false) {
   auto fft = Mantid::API::AlgorithmManager::Instance().create("RealFFT");
   fft->initialize();
-  fft->setPropertyValue("InputWorkspace", "RealFFT_WS_hist");
-  fft->setPropertyValue("OutputWorkspace", "RealFFT_WS_forward_hist");
-  fft->setPropertyValue("WorkspaceIndex", "0");
+  fft->setPropertyValue(INPUT_WKSP, "RealFFT_WS_hist");
+  fft->setPropertyValue(OUTPUT_WKSP, "RealFFT_WS_forward_hist");
+  fft->setPropertyValue(WKSP_INDEX, "0");
   fft->execute();
 
   MatrixWorkspace_sptr fWS =
@@ -166,15 +167,15 @@ void doTestBackwardHistogram(const int N, const double dX, bool performance = fa
   // transform forward
   auto fft = Mantid::API::AlgorithmManager::Instance().create("RealFFT");
   fft->initialize();
-  fft->setPropertyValue("InputWorkspace", "RealFFT_WS_hist");
-  fft->setPropertyValue("OutputWorkspace", "RealFFT_WS_forward_hist");
-  fft->setPropertyValue("WorkspaceIndex", "0");
+  fft->setPropertyValue(INPUT_WKSP, "RealFFT_WS_hist");
+  fft->setPropertyValue(OUTPUT_WKSP, "RealFFT_WS_forward_hist");
+  fft->setPropertyValue(WKSP_INDEX, "0");
   fft->execute();
   // then transform backward
   fft->initialize();
-  fft->setPropertyValue("InputWorkspace", "RealFFT_WS_forward_hist");
-  fft->setPropertyValue("OutputWorkspace", "RealFFT_WS_backward_hist");
-  fft->setPropertyValue("Transform", "Backward");
+  fft->setPropertyValue(INPUT_WKSP, "RealFFT_WS_forward_hist");
+  fft->setPropertyValue(OUTPUT_WKSP, "RealFFT_WS_backward_hist");
+  fft->setPropertyValue(TRANSFORM, "Backward");
   fft->execute();
 
   MatrixWorkspace_sptr WS =
@@ -217,9 +218,9 @@ public:
     auto fft = AlgorithmManager::Instance().create("RealFFT");
     fft->initialize();
     fft->setChild(true);
-    fft->setProperty("InputWorkspace", inputWS);
-    fft->setProperty("IgnoreXBins", false);
-    fft->setPropertyValue("OutputWorkspace", "__NotUsed");
+    fft->setProperty(INPUT_WKSP, inputWS);
+    fft->setProperty(IGNORE_X_BINS, false);
+    fft->setPropertyValue(OUTPUT_WKSP, "__NotUsed");
     TS_ASSERT_THROWS(fft->execute(), std::runtime_error const &);
   }
 

@@ -12,6 +12,7 @@
 
 namespace Mantid {
 namespace Algorithms {
+namespace FFTSmooth {
 /** Data smoothing using the FFT algorithm and various filters.
 
     @author Roman Tolchenov
@@ -43,5 +44,16 @@ private:
   void Butterworth(int n, int order, API::MatrixWorkspace_sptr &unfilteredWS, API::MatrixWorkspace_sptr &filteredWS);
 };
 
+namespace PropertyNames {
+std::string const INPUT_WKSP("InputWorkspace");
+std::string const OUTPUT_WKSP("OutputWorkspace");
+std::string const WKSP_INDEX("WorkspaceIndex");
+std::string const FILTER("Filter");
+std::string const PARAMS("Params");
+std::string const IGNORE_X_BINS("IgnoreXBins");
+std::string const ALL_SPECTRA("AllSpectra");
+} // namespace PropertyNames
+
+} // namespace FFTSmooth
 } // namespace Algorithms
 } // namespace Mantid

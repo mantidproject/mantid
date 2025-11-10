@@ -24,7 +24,7 @@
 
 #include "MantidHistogramData/LinearGenerator.h"
 
-namespace Mantid::Algorithms {
+namespace Mantid::Algorithms::RealFFT {
 
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(RealFFT)
@@ -34,29 +34,31 @@ using namespace API;
 
 /// Initialisation method. Declares properties to be used in algorithm.
 void RealFFT::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>("InputWorkspace", "", Direction::Input),
-                  "The name of the input workspace.");
-  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>("OutputWorkspace", "", Direction::Output),
-                  "The name of the output workspace. It contains three "
-                  "spectra: the real, the imaginary parts of the transform and "
-                  "their modulus.");
+  declareProperty(
+      std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(PropertyNames::INPUT_WKSP, "", Direction::Input),
+      "The name of the input workspace.");
+  declareProperty(
+      std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(PropertyNames::OUTPUT_WKSP, "", Direction::Output),
+      "The name of the output workspace. It contains three "
+      "spectra: the real, the imaginary parts of the transform and "
+      "their modulus.");
 
   auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(0);
-  declareProperty("WorkspaceIndex", 0, mustBePositive,
+  declareProperty(PropertyNames::WKSP_INDEX, 0, mustBePositive,
                   "The index of the spectrum in the input workspace to transform.");
 
   std::vector<std::string> fft_dir{"Forward", "Backward"};
-  declareProperty("Transform", "Forward", std::make_shared<StringListValidator>(fft_dir),
+  declareProperty(PropertyNames::TRANSFORM, "Forward", std::make_shared<StringListValidator>(fft_dir),
                   R"(The direction of the transform: "Forward" or "Backward".)");
-  declareProperty("IgnoreXBins", false,
+  declareProperty(PropertyNames::IGNORE_X_BINS, false,
                   "Ignores the requirement that X bins be linear and of the same size. "
                   "FFT result will not be valid for the X axis, and should be ignored.");
 }
 
 std::map<std::string, std::string> RealFFT::validateInputs() {
   std::map<std::string, std::string> issues;
-  API::MatrixWorkspace_sptr inWS = getProperty("InputWorkspace");
+  API::MatrixWorkspace_sptr inWS = getProperty(PropertyNames::INPUT_WKSP);
   auto groupWS = dynamic_cast<API::WorkspaceGroup const *>(inWS.get());
   if (groupWS != nullptr) {
     for (std::size_t idx = 0; idx < groupWS->size(); idx++) {
@@ -78,29 +80,29 @@ std::map<std::string, std::string> RealFFT::actuallyValidateInputs(API::Workspac
   // verify a matrix workspace has been passed
   auto inWS = dynamic_cast<API::MatrixWorkspace const *>(ws.get());
   if (!inWS) {
-    issues["InputWorkspace"] = "RealFFT requires an input matrix workspace";
+    issues[PropertyNames::INPUT_WKSP] = "RealFFT requires an input matrix workspace";
     return issues;
   }
-  std::string transform = getProperty("Transform");
-  int wi = (transform == "Forward") ? getProperty("WorkspaceIndex") : 0;
+  std::string transform = getProperty(PropertyNames::TRANSFORM);
+  int wi = (transform == "Forward") ? getProperty(PropertyNames::WKSP_INDEX) : 0;
   if (wi >= static_cast<int>(inWS->getNumberHistograms())) {
-    issues["WorkspaceIndex"] = "Property WorkspaceIndex is out of range";
+    issues[PropertyNames::INPUT_WKSP] = "Property WorkspaceIndex is out of range";
     return issues;
   }
   if (transform == "Backward") {
     if (inWS->getNumberHistograms() < 2)
-      issues["InputWorkspace"] = "The input workspace must have at least 2 spectra.";
+      issues[PropertyNames::INPUT_WKSP] = "The input workspace must have at least 2 spectra.";
   }
 
   // Check that the x values are evenly spaced
-  bool IgnoreXBins = getProperty("IgnoreXBins");
+  bool IgnoreXBins = getProperty(PropertyNames::IGNORE_X_BINS);
   if (!IgnoreXBins) {
     const auto &X = inWS->x(wi);
     double dx = (X.back() - X.front()) / static_cast<double>(X.size() - 1);
     for (size_t i = 0; i < X.size() - 2; i++) {
       if (std::abs(dx - X[i + 1] + X[i]) / dx > 1e-7) {
-        issues["InputWorkspace"] = "X axis must be linear (all bins have same width). This can be ignored if "
-                                   "IgnoreXBins is set to true.";
+        issues[PropertyNames::INPUT_WKSP] = "X axis must be linear (all bins have same width). This can be ignored if "
+                                            "IgnoreXBins is set to true.";
         break;
       }
     }
@@ -113,11 +115,11 @@ std::map<std::string, std::string> RealFFT::actuallyValidateInputs(API::Workspac
  *  @throw runtime_error Thrown if
  */
 void RealFFT::exec() {
-  API::MatrixWorkspace_sptr inWS = getProperty("InputWorkspace");
+  API::MatrixWorkspace_sptr inWS = getProperty(PropertyNames::INPUT_WKSP);
 
   // get the x-spacing
-  std::string transform = getProperty("Transform");
-  int spec = (transform == "Forward") ? getProperty("WorkspaceIndex") : 0;
+  std::string transform = getProperty(PropertyNames::TRANSFORM);
+  int spec = (transform == "Forward") ? getProperty(PropertyNames::WKSP_INDEX) : 0;
   const auto &X = inWS->x(spec);
   double dx = (X.back() - X.front()) / static_cast<double>(X.size() - 1);
   auto ySize = inWS->blocksize();
@@ -237,7 +239,7 @@ void RealFFT::exec() {
     yData /= df;
   }
 
-  setProperty("OutputWorkspace", outWS);
+  setProperty(PropertyNames::OUTPUT_WKSP, outWS);
 }
 
-} // namespace Mantid::Algorithms
+} // namespace Mantid::Algorithms::RealFFT
