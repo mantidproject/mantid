@@ -161,24 +161,22 @@ To debug C++ and start directly into the Workbench, add this to the configuratio
 .. code-block:: javascript
 
     {
-      "name": "(gdb) Workbench C++ Only",
-      "type": "cppdbg",
-      "request": "launch",
-      "program": "/usr/bin/python3", // Path to your used Python interpreter, here and below
-      "args": ["Path/To/Build/Directory/bin/workbench", "--single-process", "&&","gdb","/usr/bin/python3","$!"], // $! gets the process ID
-      "stopAtEntry": false,
-      "cwd": "Path/To/Build/Directory/bin", // this should point to bin inside the build directory
-      "environment": [],
-      "externalConsole": true,
-      "MIMode": "gdb",
-      "preLaunchTask": "Build Mantid",
-      "setupCommands": [
-        {
-          "description": "Enable pretty-printing for gdb",
-          "text": "-enable-pretty-printing",
-          "ignoreFailures": true
-        }
-      ]
+        "name": "(gdb) Workbench C++ Only",
+        "type": "cppdbg",
+        "request": "launch",
+        "program": "/Path/To/Mamba/Install/envs/mantid-developer/bin/python",   // Full path (do not use '~') to the python executable inside your build directory
+        "preLaunchTask": "Build Mantid",
+        "args": ["-m", "workbench", "--single-process"],
+        "MIMode": "gdb",
+        "cwd": "Path/To/Build/Directory/bin", // this should point to bin inside the build directory
+        "stopAtEntry": false,
+        "setupCommands": [
+            {
+            "description": "Enable pretty-printing for gdb",
+            "text": "-enable-pretty-printing",
+            "ignoreFailures": true
+            }
+        ]
     }
 
 The ``--single-process`` flag is necessary for debugging. See the :ref:`Running Workbench <RunningWorkbench>` documentation for more information.
