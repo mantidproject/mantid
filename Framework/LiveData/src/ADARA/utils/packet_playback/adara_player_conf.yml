@@ -2,36 +2,35 @@
 
 server:
   name: 'adara_player' # will be overridden by `${adara_player_name}` (in environment)
-  
+
   address: '{XDG_RUNTIME_DIR}/sock-{name}' # Unix domain socket
   # address: '127.0.0.1:31415'  # IP socket as 'IP:port'
-  
+
   buffer_MB: 64
 
   socket_timeout: 1.0 # affects all socket types`
 source:
   address: '127.0.0.1:31415'
-  
+
 playback:
   handshake: client_hello # expect 'CLIENT_HELLO_PACKET' at start
                           # none: just playback all of the data
   handshake_timeout: 10.0
-  
+
   rate: normal # normal: at original speed
                # unlimited: as fast as possible
   timestamps:
     offset: none # none
                  # start: subtract the start time
-              
+
   ignore_packets: [] # no filtering
-                     # <list of packet types to ignore> 
+                     # <list of packet types to ignore>
 
 record:
   transfer_limit: 16000 # MB
-  iteration_limit: 10 # identical packet, saved multiple times (e.g. reload of the same run number)
-    
+
 logging:
   level: DEBUG # DEBUG: packet summary at send and receive
-  
+
   # `Packet` summary format.
   packet_summary: "type: {type:#06x}: {timestamp}, size: {size_MB:.2f} MB, CRC: {CRC:#04x}"

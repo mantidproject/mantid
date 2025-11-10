@@ -237,7 +237,7 @@ class Packet:
 
     def __str__(self) -> str:
         MB = 1024**2
-        return self.STR_FORMAT.format(type=self.type, timestamp=self.timestamp, size_MB=self.size / MB, CRC=self.CRC)
+        return self.STR_FORMAT.format(type=self.packet_type, timestamp=self.timestamp, size_MB=self.size / MB, CRC=self.CRC)
 
     @classmethod
     def iter_file(cls, src: BinaryIO, header_only=False, source=None) -> "Iterator[Packet]":
@@ -315,7 +315,7 @@ class Packet:
                 return
 
             _logger.info(f"Found {len(files)} files, sorting by timestamp...")
-            ps = sorted(files, key=cls._file_timestamp)
+            ps = sorted(files, key=cls._file_timestamps)
         except Exception as e:
             _logger.error(f"Error sorting files: {e}")
             raise
@@ -326,11 +326,16 @@ class Packet:
                 yield from cls.iter_file(f, header_only=header_only, source=str(p))
 
     @classmethod
-    def _file_timestamp(cls, filePath: Path) -> np.datetime64:
+    def _file_timestamps(cls, filePath: Path) -> tuple(np.datetime64, np.datetime64):
+        # Timestamps used for sorting:
+        #   first by ADARA timestamp, then by file-modification time.
         try:
+            mtime_ns = int(filePath.stat().st_mtime * 1e9)  # nanoseconds since epoch
+            mtime_ns = np.datetime64(mtime_ns, "ns")
+
             with open(filePath, "rb", buffering=0) as src:
                 first_packet = next(cls.iter_file(src, header_only=True))
-                return first_packet.timestamp
+                return (first_packet.timestamp, mtime_ns)
         except FileNotFoundError:
             _logger.error(f"File not found: {filePath}")
             raise
@@ -339,7 +344,7 @@ class Packet:
             raise
         except StopIteration:
             _logger.warning(f"Empty or invalid file (no packets): {filePath}, using epoch as timestamp")
-            return np.datetime64(0, "ns")  # Use epoch for empty files
+            return (np.datetime64(0, "ns"), mtime_ns)  # Use epoch for empty files
         except struct.error as e:
             _logger.error(f"Corrupt packet header in file: {filePath}: {e}")
             raise ValueError(f"Corrupt file: {filePath}")
@@ -403,7 +408,6 @@ class Player:
     HANDSHAKE_TIMEOUT = Config["playback"]["handshake_timeout"]
     PLAYBACK_HANDSHAKE = Config["playback"]["handshake"]
     TRANSFER_LIMIT_MB = Config["record"]["transfer_limit"]
-    ITERATION_LIMIT = Config["record"]["iteration_limit"]
 
     class Rate(StrEnum):
         NORMAL = "normal"
@@ -420,8 +424,9 @@ class Player:
 
         self._running = False
 
-        # transferred bytes (for record)
-        self._transferred_bytes = 0
+        self._transferred_bytes = 0  # total transferred bytes: for current `record` session
+        self._sequence_number = 0  # packet file sequence number: for current `record` session
+        self._session_number = 0  # `record` session number
 
         # packet-source socket:
         self._source = None
@@ -602,7 +607,11 @@ class Player:
             self._cleanup()
 
     def record(self, output_path: Path):
+        session_number = self._next_session_number(output_path)
+        sequence_number = 1
+
         # Ensure target directory exists
+        output_path = output_path / f"{session_number:04d}"
         output_path.mkdir(parents=True, exist_ok=True)
 
         # Main server loop
@@ -670,12 +679,10 @@ class Player:
                                 # Determine direction and forward
                                 if sock == self._source:
                                     # Data from server => save and forward to client
-                                    file_path = self._packet_file_path(output_path, packet)
-                                    if file_path is None:
-                                        self._running = False
-                                        break
+                                    file_path = self._packet_file_path(output_path, packet, sequence_number)
                                     with open(file_path, "wb") as f:
                                         Packet.to_file(f, packet)
+                                        sequence_number += 1
 
                                     _logger.debug(f"server SENDs client -> {packet}")
                                     Packet.to_socket(self._client, packet)
@@ -704,21 +711,33 @@ class Player:
             self._cleanup()
 
     @classmethod
-    def _packet_file_path(cls, output_path: Path, packet: Packet) -> Path | None:
-        iteration = 1
-        file_path = output_path / cls._packet_filename(packet, iteration)
-        while file_path.exists() and iteration < cls.ITERATION_LIMIT:
-            # Do NOT overwrite: add a suffix for the copy number.
-            iteration += 1
-            file_path = output_path / cls._packet_filename(packet, iteration)
-        if iteration < cls.ITERATION_LIMIT:
-            return file_path
-        _logger.error(f"Save count for packet file '{file_path}' exceeds {cls.ITERATION_LIMIT}-copy limit.")
-        return None
+    def _next_session_number(cls, base: Path) -> int:
+        # Get the next session number, using the output-directory base
+
+        if not base.exists():
+            return 1
+        # List integer-named directories under base
+        session_numbers = []
+        for entry in base.iterdir():
+            if entry.is_dir():
+                try:
+                    number = int(entry.name)
+                    session_numbers.append(number)
+                except ValueError:
+                    pass  # Skip non-integer directories
+        if not session_numbers:
+            return 1  # No numbered sub-directories yet
+        return max(session_numbers) + 1
 
     @classmethod
-    def _packet_filename(cls, packet: Packet, iteration: int) -> str:
-        return f"{packet.packet_type:#04x}-{packet.timestamp}" + (f"-{iteration}" if iteration > 1 else "") + ".adara"
+    def _packet_file_path(cls, output_path: Path, packet: Packet, sequence_number: int) -> Path | None:
+        return output_path / cls._packet_filename(packet, sequence_number)
+
+    @classmethod
+    def _packet_filename(cls, packet: Packet, sequence_number: int) -> str:
+        # Device descriptor (and other) packet types may have a non-unique timestamp,
+        #   so the sequence number is used as an additional suffix in order to generate a unique filename.
+        return f"{packet.packet_type:#06x}-{packet.timestamp}-{sequence_number:06d}" + ".adara"
 
     def _impose_transfer_limit(self, pkt: Packet):
         # impose absolute limit on number of bytes transferred
