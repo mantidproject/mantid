@@ -124,7 +124,7 @@ void RealFFT::exec() {
   int spec = (transform == "Forward") ? getProperty(PropertyNames::WKSP_INDEX) : 0;
   const auto &X = inWS->x(spec);
   double dx = (X.back() - X.front()) / static_cast<double>(X.size() - 1);
-  auto ySize = inWS->blocksize();
+  auto ySize = inWS->y(spec).size();
 
   API::MatrixWorkspace_sptr outWS;
 
