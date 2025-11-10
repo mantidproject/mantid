@@ -138,6 +138,10 @@ class ConvertQtoHKLMDHisto(PythonAlgorithm):
 
         units = ["in {:.3f} A^-1".format(q[i].norm()) for i in range(3)]
 
+        # BinMD will keep original units from the MDFrame, use r.l.u. first
+        current_frame = input_ws.getSpecialCoordinateSystem().name
+        SetMDFrame(InputWorkspace=input_ws, MDFrame="HKL", Axes="0,1,2")
+
         mdhist = BinMD(
             InputWorkspace=input_ws,
             AxisAligned=False,
@@ -149,7 +153,8 @@ class ConvertQtoHKLMDHisto(PythonAlgorithm):
             OutputBins=bins,
         )
 
-        SetMDFrame(InputWorkspace=mdhist, MDFrame="HKL", Axes="0,1,2")
+        # Restort frame to original
+        SetMDFrame(InputWorkspace=input_ws, MDFrame=current_frame, Axes="0,1,2")
 
         self.setProperty("OutputWorkspace", mdhist)
         mdhist.clearOriginalWorkspaces()
