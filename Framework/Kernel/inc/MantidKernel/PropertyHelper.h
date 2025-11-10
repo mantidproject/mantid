@@ -15,7 +15,6 @@
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/Strings.h"
-#include "MantidKernel/WarningSuppressions.h"
 
 #include <type_traits>
 

@@ -15,6 +15,7 @@
 #include "MantidGeometry/MDGeometry/QSample.h"
 #include "MantidGeometry/MDGeometry/UnknownFrame.h"
 #include "MantidKernel/MDUnit.h"
+#include "MantidKernel/MDUnitFactory.h"
 #include "MantidMDAlgorithms/SetMDFrame.h"
 #include <memory>
 #include <utility>

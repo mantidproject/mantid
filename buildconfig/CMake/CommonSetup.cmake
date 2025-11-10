@@ -82,7 +82,25 @@ if(BUILD_MANTIDFRAMEWORK OR BUILD_MANTIDQT)
   # The new interface is not available in Clang yet so we haven't migrated
   add_definitions(-D_SILENCE_CXX20_OLD_SHARED_PTR_ATOMIC_SUPPORT_DEPRECATION_WARNING)
 
-  find_package(Poco REQUIRED)
+  function(strip_unicode_definitions target_name)
+    get_target_property(defs ${target_name} INTERFACE_COMPILE_DEFINITIONS)
+    if(defs)
+      list(REMOVE_ITEM defs UNICODE)
+      list(REMOVE_ITEM defs _UNICODE)
+      set_target_properties(${target_name} PROPERTIES INTERFACE_COMPILE_DEFINITIONS "${defs}")
+    endif()
+  endfunction()
+
+  find_package(Poco REQUIRED COMPONENTS Foundation Util XML Net Crypto NetSSL)
+
+  # Remove inherited UNICODE definitions
+  strip_unicode_definitions(Poco::Foundation)
+  strip_unicode_definitions(Poco::Util)
+  strip_unicode_definitions(Poco::XML)
+  strip_unicode_definitions(Poco::Net)
+  strip_unicode_definitions(Poco::NetSSL)
+  strip_unicode_definitions(Poco::Crypto)
+
   find_package(TBB REQUIRED)
   find_package(OpenSSL REQUIRED)
 endif()

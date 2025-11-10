@@ -11,6 +11,7 @@
 #include "MantidKernel/ArrayLengthValidator.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/EmptyValues.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;

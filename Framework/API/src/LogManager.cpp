@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/LogManager.h"
 #include "MantidKernel/Cache.h"
+#include "MantidKernel/Exception.h"
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/PropertyNexus.h"
 #include "MantidKernel/TimeROI.h"
