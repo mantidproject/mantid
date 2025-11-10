@@ -75,13 +75,6 @@ function(PY_ADD_TEST _test_type _test_runner_module _additional_flags _test_src_
     list(APPEND _test_environment "LD_PRELOAD=${LOCAL_PRELOAD}")
   endif()
 
-  # Check if this is a PR build.
-  if(PR_JOB)
-    set(_pr_flag "True")
-  else()
-    set(_pr_flag "False")
-  endif()
-
   # Add all of the individual tests so that they can be run in parallel
   foreach(part ${ARGN})
     set(_filename ${part})
