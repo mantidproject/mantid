@@ -7,7 +7,7 @@ permissions:
 on:
   workflow_dispatch:
   schedule:
-    - cron: 0 5 1 * *
+    - cron: 0 6 * * *
 
 jobs:
   pixi-update-lockfile:

@@ -6,11 +6,10 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include <Poco/Path.h>
-#include <cxxtest/TestSuite.h>
-#include <fstream>
-
 #include "MantidKernel/Strings.h"
+#include <cxxtest/TestSuite.h>
+#include <filesystem>
+#include <fstream>
 #include <string>
 
 using namespace Mantid::Kernel::Strings;
@@ -84,9 +83,8 @@ public:
     TS_ASSERT_EQUALS("ee", result[2]);
   }
   void testSplitExpandFullPath() {
-    Poco::Path test;
-    test = test.absolute();
-    std::string wkPath = test.toString();
+    std::filesystem::path test = std::filesystem::absolute(std::filesystem::current_path());
+    std::string wkPath = test.generic_string();
     std::vector<std::string> base;
     size_t depth = split_path(wkPath, base);
 
@@ -96,9 +94,8 @@ public:
     TS_ASSERT_EQUALS("bbbbb", result[depth + 1]);
   }
   void testSplitExpandMoveUpPath() {
-    Poco::Path test;
-    test = test.absolute();
-    std::string wkPath = test.toString();
+    std::filesystem::path test = std::filesystem::absolute(std::filesystem::current_path());
+    std::string wkPath = test.generic_string();
     std::vector<std::string> base;
     size_t depth = split_path(wkPath, base);
 

@@ -11,6 +11,7 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidKernel/EmptyValues.h"
 
 #include "MantidDataHandling/PDLoadCharacterizations.h"
 using Mantid::API::ITableWorkspace;

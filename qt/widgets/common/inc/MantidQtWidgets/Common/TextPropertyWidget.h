@@ -38,6 +38,8 @@ protected:
 
   /// The text box to edit
   QLineEdit *m_textbox;
+
+private:
 };
 
 } // namespace API

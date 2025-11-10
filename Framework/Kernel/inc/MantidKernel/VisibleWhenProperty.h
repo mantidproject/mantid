@@ -46,6 +46,9 @@ public:
   /// criterion
   bool isVisible(const IPropertyManager *algo) const override;
 
+  /// Other properties that this property depends on.
+  std::vector<std::string> dependsOn(const std::string &thisProp) const override;
+
   /// Make a copy of the present type of validator
   IPropertySettings *clone() const override;
 

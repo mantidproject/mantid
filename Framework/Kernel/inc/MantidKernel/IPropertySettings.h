@@ -8,6 +8,7 @@
 
 #include "MantidKernel/DllConfig.h"
 #include <string>
+#include <vector>
 
 namespace Mantid {
 namespace Kernel {
@@ -43,6 +44,7 @@ public:
     UNUSED_ARG(algo);
     return true;
   }
+
   /** to verify if the properties, this one depends on have changed
       or other special condition occurs which needs the framework to react to */
   virtual bool isConditionChanged(const IPropertyManager *algo, const std::string &changedPropName = "") const {
@@ -51,24 +53,21 @@ public:
     return false;
   }
 
-  /** The function user have to overload it in their custom code to modify the
-   property
-      according to the changes to other properties.
+  /** Overload this virtual function in order to modify the
+   *  current property based on changes to other properties.
    *
-   *  Currently it has been tested to modify the property values as function of
-   other properties
-   *
-   *  Allowed property values are obtained from property's allowedValues
-   function, and the purpose the
-   *  function interfaced here is to modify its output.
-   *
-   *  allowedValues function on propertyWithValue class obtains its data from a
-   validator, so in the case of
-   *  simple PropertyWithValue, this function has to replace the validator.
-   *  For WorkspaceProperty, which obtains its values from dataservice and
-   filters them by validators,
-   *  a new validator has to be a new filter      */
-  virtual void applyChanges(const IPropertyManager *, Property *const) {}
+   *  @return: whether or not the current property was changed.
+   */
+  virtual bool applyChanges(const IPropertyManager *algo, const std::string &currentPropName) {
+    UNUSED_ARG(algo);
+    UNUSED_ARG(currentPropName);
+    return false;
+  }
+
+  /// Other properties that this property depends on.
+  virtual std::vector<std::string> dependsOn(const std::string & /* unused */) const {
+    return std::vector<std::string>();
+  }
 
   //--------------------------------------------------------------------------------------------
   /// Make a copy of the present type of IPropertySettings

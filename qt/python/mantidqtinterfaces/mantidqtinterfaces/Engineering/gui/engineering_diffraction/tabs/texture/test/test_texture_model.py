@@ -9,6 +9,7 @@ import unittest
 from unittest.mock import patch, MagicMock, call
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.texture.model import ProjectionModel
 from numpy import eye, all
+import tempfile
 
 
 model_path = "mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.texture.model"
@@ -235,9 +236,9 @@ class TestProjectionModel_ExecMakePFTables(unittest.TestCase):
 
         wss = ["ws1", "ws2"]
         params = ["p1", "p2"]
-        save_dirs = ["/tmp"]
-
-        self.model.exec_make_pf_tables(wss, params, save_dirs)
+        with tempfile.TemporaryDirectory() as d:
+            save_dirs = [d]
+            self.model.exec_make_pf_tables(wss, params, save_dirs)
 
         mock_make_pf.assert_called_once_with(
             wss,

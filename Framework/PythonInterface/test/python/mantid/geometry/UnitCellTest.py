@@ -47,7 +47,7 @@ class UnitCellTest(unittest.TestCase):
         self.assertEqual(expected_str, str(unit))
         self.assertEqual(expected_repr, unit.__repr__())
 
-        newUnit = eval(unit.__repr__())
+        newUnit = eval(unit.__repr__())  # noqa: S307
         self.assertEqual(unit.a(), newUnit.a())
         self.assertEqual(unit.b(), newUnit.b())
         self.assertEqual(unit.c(), newUnit.c())

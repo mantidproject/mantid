@@ -308,3 +308,13 @@ Exceptions
 
 It is fine to throw exceptions in your algorithms in the event of an unrecoverable failure.
 These will be caught in the base Algorithm class, which will report the failure of the algorithm.
+
+
+Properties access within workbench dialogs
+------------------------------------------
+
+Once your algorithm is working from a script, and provided it is registered with ``AlgorithmFactory``, it will also be possible to execute the algorithm from ``mantidworkbench`` using the built-in ``GenericDialog`` feature.  To this end there are several *optional* features available through the use of ``IPropertySettings``-derived classes, to enhance the interaction between your algorithm's properties and the GUI dialog.
+
+``EnableWhenProperty``, ``VisibleWhenProperty``, and ``InvisibleProperty`` can be used to hide or disable a property in the GUI dialog panel based on various conditions.
+
+``SetValueWhenProperty``, and ``SetDefaultWhenProperty`` can be used to set the value of a property based on the value of another upstream property, or to emulate the effect of having a property's *default* value depend on the value of another property.  See :ref:`Dynamic dialog properties <DynamicProperties>` for example code showing how to use this feature.

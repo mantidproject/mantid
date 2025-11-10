@@ -36,6 +36,34 @@ class EnabledWhenPropertyTest(unittest.TestCase):
         for val in expected:
             self.assertTrue(hasattr(LogicOperator, val))
 
+    def test_simple_dependsOn(self):
+        # Verify that the single-property `dependsOn` works as expected.
+        a = EnabledWhenProperty("PropA", PropertyCriterion.IsDefault)
+        assert list(a.dependsOn("someOtherProp")) == ["PropA"]
+
+    def test_multiple_dependsOn(self):
+        # Verify that binary condition `dependsOn` case works as expected.
+        a = EnabledWhenProperty("PropA", PropertyCriterion.IsDefault)
+        b = EnabledWhenProperty("PropB", PropertyCriterion.IsDefault)
+        c = EnabledWhenProperty(a, b, LogicOperator.Or)
+        assert set(c.dependsOn("PropC")) == set(["PropA", "PropB"])
+
+    def test_multiple_dependsOn_2X(self):
+        # Verify that multiple binary condition `dependsOn` case works as expected.
+        a = EnabledWhenProperty("PropA", PropertyCriterion.IsDefault)
+        b = EnabledWhenProperty("PropB", PropertyCriterion.IsDefault)
+        c = EnabledWhenProperty("PropC", PropertyCriterion.IsDefault)
+        d = EnabledWhenProperty(c, EnabledWhenProperty(a, b, LogicOperator.Or), LogicOperator.And)
+        assert set(d.dependsOn("PropD")) == set(["PropA", "PropB", "PropC"])
+
+    def test_multiple_dependsOn_2X_no_duplicates(self):
+        # Verify that multiple binary condition `dependsOn` case has no duplicates.
+        a = EnabledWhenProperty("PropA", PropertyCriterion.IsDefault)
+        b = EnabledWhenProperty("PropB", PropertyCriterion.IsDefault)
+        d = EnabledWhenProperty(b, EnabledWhenProperty(a, b, LogicOperator.And), LogicOperator.Or)
+        assert set(d.dependsOn("PropD")) == set(["PropA", "PropB"])
+        assert len(set(d.dependsOn("PropD"))) == 2
+
     #  ------------ Failure cases ------------------
 
     def test_default_construction_raises_error(self):
@@ -46,6 +74,22 @@ class EnabledWhenPropertyTest(unittest.TestCase):
             # boost.python.ArgumentError are not catchable
             if "Python argument types in" not in str(e):
                 raise RuntimeError("Unexpected exception type raised")
+
+    def test_simple_dependsOn_circular(self):
+        # Verify that the single-property circular dependency raises exception.
+        a = EnabledWhenProperty("PropA", PropertyCriterion.IsDefault)
+        with self.assertRaises(RuntimeError) as context:
+            a.dependsOn("PropA")
+        assert "circular dependency" in str(context.exception)
+
+    def test_multiple_dependsOn_circular(self):
+        # Verify that binary condition circular dependency raises exception.
+        a = EnabledWhenProperty("PropA", PropertyCriterion.IsDefault)
+        b = EnabledWhenProperty("PropB", PropertyCriterion.IsDefault)
+        ab = EnabledWhenProperty(a, b, LogicOperator.Or)
+        with self.assertRaises(RuntimeError) as context:
+            ab.dependsOn("PropA")
+        assert "circular dependency" in str(context.exception)
 
 
 if __name__ == "__main__":

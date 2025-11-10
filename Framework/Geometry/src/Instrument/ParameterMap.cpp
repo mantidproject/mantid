@@ -12,6 +12,7 @@
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
 #include "MantidGeometry/Instrument/ParameterFactory.h"
 #include "MantidKernel/Cache.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidNexus/NexusFile.h"
 #include <boost/algorithm/string.hpp>

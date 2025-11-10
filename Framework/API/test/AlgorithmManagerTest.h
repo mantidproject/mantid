@@ -12,6 +12,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/MultiThreaded.h"
 #include <Poco/ActiveResult.h>
 #include <Poco/Thread.h>
 #include <stdexcept>
