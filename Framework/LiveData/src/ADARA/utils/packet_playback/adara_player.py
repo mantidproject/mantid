@@ -12,7 +12,7 @@ import socket
 import struct
 import sys
 import time
-from typing import BinaryIO, Callable, Iterable, Iterator
+from typing import Any, BinaryIO, Callable, Iterable, Iterator
 import yaml
 from zlib import crc32
 
@@ -133,6 +133,8 @@ class SocketAddress:
 class Packet:
     HEADER_BYTES = 16
     STR_FORMAT = Config["logging"]["packet_summary"]
+    PACKET_ORDER_SCHEME = Config["playback"]["packet_order"]
+    PACKET_ORDER = None  # set in `__init__`
 
     class Type(IntEnum):
         RAW_EVENT_TYPE = (0x0000, 0x01)
@@ -178,6 +180,10 @@ class Packet:
             return self._value_ << 8 | self.version
 
     def __init__(self, header: bytes, payload: bytes = b"", source: str | None = None):
+        # `Packet` class attributes:
+        if Packet.PACKET_ORDER is None:
+            Packet.PACKET_ORDER = Packet._get_packet_order(self.PACKET_ORDER_SCHEME)
+
         self._header = header
         self._payload = payload
         self._source = source
@@ -238,6 +244,16 @@ class Packet:
     def __str__(self) -> str:
         MB = 1024**2
         return self.STR_FORMAT.format(type=self.packet_type, timestamp=self.timestamp, size_MB=self.size / MB, CRC=self.CRC)
+
+    @classmethod
+    def _get_packet_order(cls, ordering: str) -> Callable[[Path], Any]:
+        match ordering:
+            case "sequence_number":
+                return cls._file_sequence_number
+            case "timestamps":
+                return cls._file_timestamps
+            case _:
+                raise ValueError(f"unrecognized packet ordering '{ordering}'")
 
     @classmethod
     def iter_file(cls, src: BinaryIO, header_only=False, source=None) -> "Iterator[Packet]":
@@ -314,8 +330,8 @@ class Packet:
                 _logger.warning(f"No files found matching pattern: {patterns} in '{path}'")
                 return
 
-            _logger.info(f"Found {len(files)} files, sorting by timestamp...")
-            ps = sorted(files, key=cls._file_timestamps)
+            _logger.info(f"Found {len(files)} files, sorting by {cls.PACKET_ORDER_SCHEME}...")
+            ps = sorted(files, key=cls._packet_order)
         except Exception as e:
             _logger.error(f"Error sorting files: {e}")
             raise
@@ -327,8 +343,8 @@ class Packet:
 
     @classmethod
     def _file_timestamps(cls, filePath: Path) -> tuple(np.datetime64, np.datetime64):
-        # Timestamps used for sorting:
-        #   first by ADARA timestamp, then by file-modification time.
+        # Sorting key for ADARA packet files, using timestamps:
+        #   first sort by ADARA timestamp, then by file-modification time.
         try:
             mtime_ns = int(filePath.stat().st_mtime * 1e9)  # nanoseconds since epoch
             mtime_ns = np.datetime64(mtime_ns, "ns")
@@ -343,7 +359,7 @@ class Packet:
             _logger.error(f"Permission denied reading file: {filePath}")
             raise
         except StopIteration:
-            _logger.warning(f"Empty or invalid file (no packets): {filePath}, using epoch as timestamp")
+            _logger.error(f"Empty or invalid file (no packets): {filePath}, using epoch as timestamp")
             return (np.datetime64(0, "ns"), mtime_ns)  # Use epoch for empty files
         except struct.error as e:
             _logger.error(f"Corrupt packet header in file: {filePath}: {e}")
@@ -351,6 +367,17 @@ class Packet:
         except Exception as e:
             _logger.error(f"Unexpected error reading timestamp from {filePath}: {e}")
             raise
+
+    @classmethod
+    def _file_sequence_number(cls, filePath: Path) -> int:
+        # Sorting key for ADARA packet files, using the sequence number from the filename.
+
+        # Match the last hyphen-separated group before '.adara'
+        match = re.search(r"-(\d{4})\.adara$", filePath.name)
+        if match is None:
+            _logger.error(f"Can't extract sequence number from '{filePath}', using 0 as sequence number")
+            return 0
+        return int(match.group(1))
 
     ## ====== HELPER methods to WRAP socket partial transfers. ======
 
@@ -416,6 +443,9 @@ class Player:
     def __init__(self, *, server_address=None, source_address=None):
         self._server_address = SocketAddress.parse(server_address if server_address else Player._get_server_address())
         self._source_address = SocketAddress.parse(source_address if source_address else Config["source"]["address"])
+
+        # Initialize control callbacks
+        self._packet_order = Player._get_packet_order(Config["playback"]["packet_order"])
         self._rate_filter = Player._get_rate_filter(Config["playback"]["rate"])
         self._packet_filter = Player._get_packet_filter(Config["playback"]["ignore_packets"])
 

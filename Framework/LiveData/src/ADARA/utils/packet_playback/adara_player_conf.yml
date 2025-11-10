@@ -14,18 +14,21 @@ source:
 
 playback:
   handshake: client_hello # expect 'CLIENT_HELLO_PACKET' at start
-                          # none: just playback all of the data
+                          # 'none': just playback all of the data
   handshake_timeout: 10.0
 
-  rate: normal # normal: at original speed
-               # unlimited: as fast as possible
+  rate: normal # 'normal': at original speed
+               # 'unlimited': as fast as possible
   timestamps:
-    offset: none # none
-                 # start: subtract the start time
+    offset: none # 'none'
+                 # 'start': subtract the start time
 
   ignore_packets: [] # no filtering
-                     # <list of packet types to ignore>
+                     # [<list of packet types to ignore>, ...]
 
+  packet_order: sequence_number # sort by the sequence number in the filename
+                                # 'timestamps': sort by ADARA packet timestamp,
+                                #     and then by the file-modification timestamp
 record:
   transfer_limit: 16000 # MB
 
