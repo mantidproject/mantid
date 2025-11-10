@@ -10,12 +10,14 @@ set(EXPORT_FILES
     src/Exports/ConfigPropertyObserver.cpp
     src/Exports/DataItem.cpp
     src/Exports/HTTPStatus.cpp
-    src/Exports/IPropertyManager.cpp
     src/Exports/Property.cpp
+    src/Exports/IPropertyManager.cpp # export order: depends on `Direction` enum declared in `Property.cpp`
     src/Exports/IValidator.cpp
     src/Exports/IPropertySettings.cpp
     src/Exports/EnabledWhenProperty.cpp
     src/Exports/ErrorReporter.cpp
+    src/Exports/SetValueWhenProperty.cpp
+    src/Exports/SetDefaultWhenProperty.cpp
     src/Exports/VisibleWhenProperty.cpp
     src/Exports/PropertyWithValue.cpp
     src/Exports/ArrayProperty.cpp

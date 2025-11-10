@@ -4,7 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidKernel/SetValueWhenProperty.h"
+#include "MantidKernel/SetDefaultWhenProperty.h"
 
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/IPropertyManager.h"
@@ -20,7 +20,7 @@ using namespace Mantid::Kernel;
 
 namespace {
 
-Mantid::Kernel::Logger g_log("SetValueWhenProperty");
+Mantid::Kernel::Logger g_log("SetDefaultWhenProperty");
 
 } // namespace
 
@@ -31,34 +31,36 @@ namespace Mantid::Kernel {
  *
  * @param algo :: Pointer to the algorithm containing the property
  * @param changedPropName :: Name of the property that has just been changed
- * @return  :: True if the Property we are watching is the property that just changed, otherwise False
+ * @return  :: True if the changed property is the property that we are watching
  */
-bool SetValueWhenProperty::isConditionChanged(const IPropertyManager *algo, const std::string &changedPropName) const {
-  const auto *watchedProp = algo->getPointerToProperty(m_watchedPropName);
-  return watchedProp->name() == changedPropName;
+bool SetDefaultWhenProperty::isConditionChanged(const IPropertyManager *algo,
+                                                const std::string &changedPropName) const {
+  UNUSED_ARG(algo);
+  return changedPropName == m_watchedPropName;
 }
 
-bool SetValueWhenProperty::applyChanges(const IPropertyManager *algo, const std::string &currentPropName) {
+bool SetDefaultWhenProperty::applyChanges(const IPropertyManager *algo, const std::string &currentPropName) {
   try {
-    auto *currentProperty = algo->getPointerToProperty(currentPropName);
-    const auto *watchedProperty = algo->getPointerToProperty(m_watchedPropName);
-    const std::string currentValue = currentProperty->value();
-    const std::string watchedValue = watchedProperty->value();
+    auto currentProperty = algo->getPointerToProperty(currentPropName);
+    auto watchedProperty = algo->getPointerToProperty(m_watchedPropName);
 
-    std::string newValue = m_changeCriterion(currentValue, watchedValue);
-    if (newValue != currentValue) {
-      currentProperty->setValue(newValue);
+    // For this `IPropertySettings`: only apply changes if the property still has its default value,
+    //   or its value has been set programmatically.
+    if (!(currentProperty->isDefault() || currentProperty->isDynamicDefault()))
+      return false;
+
+    if (m_changeCriterion(algo, currentProperty, watchedProperty)) {
+      currentProperty->setIsDynamicDefault(true);
       return true;
     }
-    return false;
   } catch (const Exception::NotFoundError &) {
-    g_log.warning() << "`SetValueWhenProperty::applyChanges`: one of the properies '" << currentPropName << "' or '"
+    g_log.warning() << "`SetDefaultWhenProperty::applyChanges`: one of the properies '" << currentPropName << "' or '"
                     << m_watchedPropName << "\n"
                     << "   is not present on the algorithm.\n";
   } catch (const std::runtime_error &e) {
     // Note: the exception might be a `PythonException`, but `MantidPythonInterface/core`
     //   is not accessible at this level.
-    g_log.warning() << "`SetValueWhenProperty::applyChanges`: exception thrown within provided callback.\n"
+    g_log.warning() << "`SetDefaultWhenProperty::applyChanges`: exception thrown within provided callback.\n"
                     << "If the callback was a Python `Callable`, the stack trace follows:\n"
                     << "-------------------------------------------------------------------------\n"
                     << e.what() << "\n-------------------------------------------------------------------------\n";
@@ -67,12 +69,12 @@ bool SetValueWhenProperty::applyChanges(const IPropertyManager *algo, const std:
 }
 
 /// Other properties that this property depends on.
-std::vector<std::string> SetValueWhenProperty::dependsOn(const std::string &thisProp) const {
+std::vector<std::string> SetDefaultWhenProperty::dependsOn(const std::string &thisProp) const {
   if (m_watchedPropName == thisProp)
-    throw std::runtime_error("SetValueWhenProperty: circular dependency detected");
+    throw std::runtime_error("SetDefaultWhenProperty: circular dependency detected");
   return std::vector<std::string>{m_watchedPropName};
 }
 
-IPropertySettings *SetValueWhenProperty::clone() const { return new SetValueWhenProperty(*this); }
+IPropertySettings *SetDefaultWhenProperty::clone() const { return new SetDefaultWhenProperty(*this); }
 
 } // namespace Mantid::Kernel
