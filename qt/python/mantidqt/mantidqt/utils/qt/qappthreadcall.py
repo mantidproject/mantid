@@ -152,7 +152,13 @@ def force_method_calls_to_qapp_thread(instance, *, all_methods=False):
 
 
 def run_on_qapp_thread(all_methods=False):
-    """Class decorator to wrap methods with QAppThreadCall per instance."""
+    """Class decorator to wrap methods with QAppThreadCall per instance
+    (ensuring such methods get called on the QApplication thread).
+    Practically equivalent to adding a force_method_calls_to_qapp_thread into the relevant class init
+    but will make it more obvious to future developers that this is happening.
+
+    :param all_methods: If True, both public and private method calls are forced to run in the qapp thread.
+    """
 
     def decorator(cls):
         orig_init = cls.__init__

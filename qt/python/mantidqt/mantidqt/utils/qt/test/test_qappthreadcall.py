@@ -121,18 +121,30 @@ class QAppThreadCallTest(unittest.TestCase):
         self.assertTrue(isinstance(all_methods.public, QAppThreadCall))
         self.assertTrue(isinstance(all_methods._private, QAppThreadCall))
 
-    def test_force_method_decorator_calls_to_qapp_thread(self):
-        @run_on_qapp_thread(False)
-        class Impl:
+    def test_force_method_decorator_calls_to_qapp_thread_while_applying_all_method_correctly(self):
+        class BaseClass:
             def public(self):
                 pass
 
             def _private(self):
                 pass
 
-        public_only = Impl()
+        @run_on_qapp_thread(True)
+        class ImplAllMethod(BaseClass):
+            pass
+
+        @run_on_qapp_thread(False)
+        class ImplPublicOnly(BaseClass):
+            pass
+
+        public_only = ImplPublicOnly()
+        public_and_private = ImplAllMethod()
+
         self.assertTrue(isinstance(public_only.public, QAppThreadCall))
         self.assertFalse(isinstance(public_only._private, QAppThreadCall))
+
+        self.assertTrue(isinstance(public_and_private.public, QAppThreadCall))
+        self.assertTrue(isinstance(public_and_private._private, QAppThreadCall))
 
 
 if __name__ == "__main__":
