@@ -187,7 +187,7 @@ def split2range(*args, **kwargs):
     argin["Output"] = "dictionary"
     argin["Parameters"] = []
     # Parses the non-keyword arguments
-    for ia in range(3 if len(args) > 3 else len(args)):
+    for ia in range(min(len(args), 3)):
         argin[argnames[ia]] = args[ia]
     # Further arguments beyond the first 3 are treated as crystal field parameter names
     for ia in range(3, len(args)):

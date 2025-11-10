@@ -82,8 +82,7 @@ class D4ILLReductionTest(unittest.TestCase):
         bank_positions = np.linspace(0, 9, 9)
         calibration_file = "calibration.dat"
         with open(calibration_file, "w") as f:
-            for bank_no, bank_pos in enumerate(bank_positions):
-                f.write("{}\t{}\n".format(bank_no, bank_pos))
+            f.writelines("{}\t{}\n".format(bank_no, bank_pos) for bank_no, bank_pos in enumerate(bank_positions))
         output_ws = "calibrate_positions"
         D4ILLReduction(Run="387230", OutputWorkspace=output_ws, BankPositionOffsetsFile=calibration_file, ExportAscii=True)
         remove(calibration_file)  # clean up the temporary file

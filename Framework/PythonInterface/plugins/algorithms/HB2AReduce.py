@@ -197,7 +197,7 @@ class HB2AReduce(PythonAlgorithm):
                 _target = "# def_x = 2theta"
                 for fn in filenames:
                     with open(fn) as f:
-                        if not any([_target in line for line in f.readlines()]):
+                        if not any([_target in line for line in f]):
                             issues["OutputFormat"] = f"{fn} can't be saved to GSAS due to missing header:\n{_target}"
                             break
         return issues
@@ -229,7 +229,7 @@ class HB2AReduce(PythonAlgorithm):
             if metadata is None:
                 # Read in metadata from first file only file
                 metadata = dict(
-                    [np.char.strip(re.split("#(.*?)=(.*)", line, flags=re.U)[1:3]) for line in lines if re.match("^#.*=", line)]
+                    [np.char.strip(re.split("#(.*?)=(.*)", line, flags=re.UNICODE)[1:3]) for line in lines if re.match("^#.*=", line)]
                 )
                 # Get indir and exp from first file
                 indir, data_filename = os.path.split(filename)

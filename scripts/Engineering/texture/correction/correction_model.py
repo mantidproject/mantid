@@ -232,7 +232,7 @@ class TextureCorrectionModel:
     ) -> None:
         if self._validate_file(txt_file, ".txt"):
             with open(txt_file, "r") as f:
-                goniometer_strings = [line.strip().replace("\t", ",") for line in f.readlines()]
+                goniometer_strings = [line.strip().replace("\t", ",") for line in f]
                 goniometer_lists = [[float(x) for x in gs.split(",")] for gs in goniometer_strings]
             try:
                 n_ws, n_gonios = len(wss), len(goniometer_lists)

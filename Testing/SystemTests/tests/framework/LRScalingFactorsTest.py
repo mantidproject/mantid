@@ -45,7 +45,7 @@ class LRPrimaryFractionTest(systemtesting.MantidSystemTest):
         tolerances = [[0.1, 5e-6, 0.1, 3e-6], [0.1, 1e-5, 0.2, 2e-5]]
         filed = open(self.cfg_file, "r")
         item_number = 0
-        for line in filed.readlines():
+        for line in filed:
             if line.startswith("#"):
                 continue
             toks = line.split()

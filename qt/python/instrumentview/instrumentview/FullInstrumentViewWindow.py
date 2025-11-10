@@ -228,9 +228,9 @@ class FullInstrumentViewWindow(QMainWindow):
                 except ValueError:
                     return
                 if callled_from_min:
-                    min = max if min > max else min
+                    min = min(min, max)
                 else:
-                    max = min if max < min else max
+                    max = max(min, max)
                 slider.setValue((min, max))
                 presenter_callback()
                 return
