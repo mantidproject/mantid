@@ -32,7 +32,7 @@ add_definitions(-D_SILENCE_STDEXT_ARR_ITERS_DEPRECATION_WARNING)
 set(CMAKE_CXX_FLAGS
     "${CMAKE_CXX_FLAGS} \
   /MP /W3 /bigobj \
-  /wd4251 /wd4275 /wd4373 \
+  /wd4251 /wd4275 /wd4373 /EHsc \
   /experimental:external /external:W0 "
 )
 # the warnings suppressed are:
@@ -45,6 +45,9 @@ set(CMAKE_CXX_FLAGS
 #
 # 4373 previous versions of the compiler did not override when parameters only differed by const/volatile qualifiers.
 # This is basically saying that it now follows the C++ standard and doesn't seem useful
+#
+# /EHsc Full compiler support for the Standard C++ exception handling model
+# https://learn.microsoft.com/en-us/cpp/build/reference/eh-exception-handling-model?view=msvc-170
 
 # Set PCH heap limit, the default does not work when running msbuild from the commandline for some reason Any other
 # value lower or higher seems to work but not the default. It is fine without this when compiling in the GUI though...
