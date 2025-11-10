@@ -52,8 +52,44 @@ public:
 
     TS_ASSERT_EQUALS(props[4]->name(), PARAMS);
     TS_ASSERT(props[4]->isDefault());
-    TS_ASSERT_EQUALS(props[4]->value(), "");
-    TS_ASSERT(dynamic_cast<PropertyWithValue<std::string> *>(props[4]));
+    TS_ASSERT(!props[4]->value().empty()); // will equal default of {2, 2}
+    TS_ASSERT(dynamic_cast<ArrayProperty<std::size_t> *>(props[4]));
+  }
+
+  // check the Params property can be set with strings
+  void doTestSetParams(std::string const &input, std::vector<std::size_t> const &res) {
+    Mantid::Algorithms::FFTSmooth::FFTSmooth2 alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty(PARAMS, input));
+
+    std::vector<std::size_t> params = alg.getProperty(PARAMS);
+    TS_ASSERT(!params.empty());
+    TS_ASSERT_EQUALS(params, res);
+  }
+
+  void testSetParams() { // set the parameter values every possible way
+    Mantid::Algorithms::FFTSmooth::FFTSmooth2 alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
+
+    // set one value
+    doTestSetParams(" 12\t ", {12});
+
+    // set with space
+    doTestSetParams(" 7  3 ", {7, 3});
+
+    // set with comma
+    doTestSetParams("3, 4  ", {3, 4});
+
+    // set with semicolon
+    doTestSetParams(" 5; 6", {5, 6});
+
+    // set with colon
+    doTestSetParams("7:8 ", {7, 8});
+
+    // set with tab
+    doTestSetParams("9\t10", {9, 10});
   }
 
   void testZeroing() { // load input and "Gold" result workspaces

@@ -9,6 +9,7 @@
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/EnumeratedString.h"
 #include "MantidKernel/EnumeratedStringProperty.h"
@@ -32,6 +33,39 @@ const std::vector<std::string> filterTypes{"Zeroing", "Butterworth"};
 typedef Mantid::Kernel::EnumeratedString<FilterType, &filterTypes> FILTER;
 } // namespace
 
+namespace {
+typedef std::size_t param_t;
+/** FFTParamsProperty
+ * The "Params" property of this class should be declared as an ArrayProperty.
+ * However, it was originally written to allow many things to serve as an array delimiter.
+ * To properly make this an ArrayProperty, while still allowing old behavior, we can use
+ * a standatd ArrayProperty and change all of the delimiters to commas.
+ */
+class FFTParamsProperty : public ArrayProperty<param_t> {
+public:
+  FFTParamsProperty(std::string const &name, std::vector<param_t> const &defaultValue)
+      : ArrayProperty<param_t>(name, defaultValue) {}
+  std::string setValue(std::string const &value) override {
+    std::string valueCopy(value);
+    boost::trim(valueCopy);
+    for (char const delim : m_delims) {
+      valueCopy = Kernel::Strings::replaceAll(valueCopy, delim, m_sep);
+    }
+    std::vector<param_t> result;
+    toValue(valueCopy, result);
+    *this = result;
+    return "";
+  }
+
+  // Unhide the base class assignment operator
+  using PropertyWithValue<std::vector<param_t>>::operator=;
+
+private:
+  static char constexpr m_sep = ',';
+  static char constexpr m_delims[] = {'\t', ' ', ':', ';'};
+};
+} // namespace
+
 /// Initialisation method. Declares properties to be used in algorithm.
 void FFTSmooth2::init() {
   declareProperty(
@@ -45,11 +79,10 @@ void FFTSmooth2::init() {
   mustBePositive->setLower(0);
   declareProperty(PropertyNames::WKSP_INDEX, 0, mustBePositive, "Workspace index for smoothing");
 
-  declareProperty(
-      std::make_unique<Mantid::Kernel::EnumeratedStringProperty<FilterType, &filterTypes>>(PropertyNames::FILTER),
-      "The type of the applied filter");
+  declareProperty(std::make_unique<Kernel::EnumeratedStringProperty<FilterType, &filterTypes>>(PropertyNames::FILTER),
+                  "The type of the applied filter");
 
-  declareProperty(PropertyNames::PARAMS, "",
+  declareProperty(std::make_unique<FFTParamsProperty>(PropertyNames::PARAMS, std::vector<param_t>(2, 2)),
                   "The filter parameters:\n"
                   "For Zeroing, 1 parameter: 'n' - an integer greater than 1 "
                   "meaning that the Fourier coefficients with frequencies "
@@ -94,7 +127,8 @@ std::map<std::string, std::string> FFTSmooth2::actuallyValidateInputs(API::Works
   // verify the spectrum workspace index
   int wi = getProperty(PropertyNames::WKSP_INDEX);
   if (wi >= static_cast<int>(inWS->getNumberHistograms())) {
-    issues[PropertyNames::WKSP_INDEX] = "Property WorkspaceIndex is out of range";
+    issues[PropertyNames::INPUT_WKSP] = "Property WorkspaceIndex is out of range";
+    issues[PropertyNames::WKSP_INDEX] = issues[PropertyNames::INPUT_WKSP];
     return issues;
   }
 
@@ -105,12 +139,30 @@ std::map<std::string, std::string> FFTSmooth2::actuallyValidateInputs(API::Works
     double dx = (X.back() - X.front()) / static_cast<double>(X.size() - 1);
     for (size_t i = 0; i < X.size() - 2; i++) {
       if (std::abs(dx - X[i + 1] + X[i]) / dx > 1e-7) {
-        issues[PropertyNames::INPUT_WKSP] = "X axis must be linear (all bins have same "
-                                            "width). This can be ignored if "
+        issues[PropertyNames::INPUT_WKSP] = "X axis must be linear (all bins have same width). This can be ignored if "
                                             "IgnoreXBins is set to true.";
+        issues[PropertyNames::IGNORE_X_BINS] = issues[PropertyNames::INPUT_WKSP];
         break;
       }
     }
+  }
+
+  // Check that the parameters are valid
+  std::vector<param_t> params = getProperty(PropertyNames::PARAMS);
+  std::string const trunc_err = "Truncation parameter must be an integer > 1. ";
+  std::string const order_err = "Butterworth filter order must be an integer >= 1. ";
+  std::string err_msg;
+  if (params.size() > 0 && params[0] <= 1) {
+    err_msg += trunc_err;
+  }
+  if (params.size() > 1 && params[1] < 1) {
+    err_msg += order_err;
+  }
+  if (params.size() > 2) {
+    err_msg += "Too many parameters passed";
+  }
+  if (!err_msg.empty()) {
+    issues[PropertyNames::PARAMS] = err_msg;
   }
   return issues;
 }
@@ -123,25 +175,14 @@ void FFTSmooth2::exec() {
   bool ignoreXBins = getProperty(PropertyNames::IGNORE_X_BINS);
 
   // retrieve parameters
-  unsigned n = 2, order = 2;
-  if (!(getPointerToProperty(PropertyNames::PARAMS)->isDefault())) {
-    std::string string_params = getPropertyValue(PropertyNames::PARAMS);
-    std::vector<std::string> params;
-    boost::split(params, string_params, boost::algorithm::detail::is_any_ofF<char>(" ,:;\t"));
-    if (params.size() == 1) {
-      std::string param0 = params.at(0);
-      n = std::stoi(param0);
-    } else if (params.size() == 2) {
-      std::string param0 = params.at(0);
-      std::string param1 = params.at(1);
-      n = std::stoi(param0);
-      order = std::stoi(param1);
-    }
+  std::size_t n = 2, order = 2;
+  std::vector<std::size_t> params = getProperty(PropertyNames::PARAMS);
+  if (params.size() == 1) {
+    n = params[0];
+  } else if (params.size() == 2) {
+    n = params[0];
+    order = params[1];
   }
-  if (n <= 1)
-    throw std::invalid_argument("Truncation parameter must be an integer > 1");
-  if (order < 1)
-    throw std::invalid_argument("Butterworth filter order must be an integer >= 1");
 
   std::size_t dn = inWS->y(0).size();
 
@@ -248,7 +289,8 @@ void FFTSmooth2::exec() {
     // std::ceil should probably be used.
     dn = static_cast<int>(tmpWS->blocksize()) / 2;
 
-    if (getProperty("AllSpectra")) {
+    // assign
+    if (getProperty(PropertyNames::ALL_SPECTRA)) {
       outWS->setSharedX(spec, inWS->sharedX(spec));
       outWS->mutableY(spec).assign(tmpWS->y(0).cbegin() + dn, tmpWS->y(0).cend());
     } else {
@@ -266,10 +308,10 @@ void FFTSmooth2::exec() {
  * transform of the input spectrum
  *  @param filteredWS :: workspace for storing the filtered spectrum
  */
-void FFTSmooth2::zero(int n, API::MatrixWorkspace_sptr &unfilteredWS, API::MatrixWorkspace_sptr &filteredWS) {
-  auto mx = static_cast<int>(unfilteredWS->x(0).size());
-  auto my = static_cast<int>(unfilteredWS->y(0).size());
-  int ny = my / n;
+void FFTSmooth2::zero(std::size_t n, API::MatrixWorkspace_sptr &unfilteredWS, API::MatrixWorkspace_sptr &filteredWS) {
+  auto mx = unfilteredWS->x(0).size();
+  auto my = unfilteredWS->y(0).size();
+  auto ny = my / n;
 
   if (ny == 0)
     ny = 1;
@@ -297,11 +339,11 @@ void FFTSmooth2::zero(int n, API::MatrixWorkspace_sptr &unfilteredWS, API::Matri
  * transform of the input spectrum
  *  @param filteredWS :: workspace for storing the filtered spectrum
  */
-void FFTSmooth2::Butterworth(int n, int order, API::MatrixWorkspace_sptr &unfilteredWS,
+void FFTSmooth2::Butterworth(std::size_t n, std::size_t order, API::MatrixWorkspace_sptr &unfilteredWS,
                              API::MatrixWorkspace_sptr &filteredWS) {
-  auto mx = static_cast<int>(unfilteredWS->x(0).size());
-  auto my = static_cast<int>(unfilteredWS->y(0).size());
-  int ny = my / n;
+  auto mx = unfilteredWS->x(0).size();
+  auto my = unfilteredWS->y(0).size();
+  auto ny = my / n;
 
   if (ny == 0)
     ny = 1;
@@ -316,10 +358,10 @@ void FFTSmooth2::Butterworth(int n, int order, API::MatrixWorkspace_sptr &unfilt
   auto &yr = filteredWS->mutableY(0);
   auto &yi = filteredWS->mutableY(1);
 
-  double cutoff = ny;
-
-  for (int i = 0; i < my; i++) {
-    double scale = 1.0 / (1.0 + pow(static_cast<double>(i) / cutoff, 2 * order));
+  double cutoff = static_cast<double>(ny);
+  unsigned int two_order = 2U * static_cast<unsigned int>(order);
+  for (std::size_t i = 0; i < my; i++) {
+    double scale = 1.0 / (1.0 + pow(static_cast<double>(i) / cutoff, two_order));
     yr[i] = scale * Yr[i];
     yi[i] = scale * Yi[i];
   }

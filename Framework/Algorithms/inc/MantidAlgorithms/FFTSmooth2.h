@@ -39,9 +39,10 @@ private:
   void exec() override;
 
   // Smoothing by zeroing.
-  void zero(int n, API::MatrixWorkspace_sptr &unfilteredWS, API::MatrixWorkspace_sptr &filteredWS);
+  void zero(std::size_t n, API::MatrixWorkspace_sptr &unfilteredWS, API::MatrixWorkspace_sptr &filteredWS);
   // Smoothing using Butterworth filter of any positive order.
-  void Butterworth(int n, int order, API::MatrixWorkspace_sptr &unfilteredWS, API::MatrixWorkspace_sptr &filteredWS);
+  void Butterworth(std::size_t n, std::size_t order, API::MatrixWorkspace_sptr &unfilteredWS,
+                   API::MatrixWorkspace_sptr &filteredWS);
 };
 
 namespace PropertyNames {

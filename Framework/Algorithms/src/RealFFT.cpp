@@ -87,6 +87,7 @@ std::map<std::string, std::string> RealFFT::actuallyValidateInputs(API::Workspac
   int wi = (transform == "Forward") ? getProperty(PropertyNames::WKSP_INDEX) : 0;
   if (wi >= static_cast<int>(inWS->getNumberHistograms())) {
     issues[PropertyNames::INPUT_WKSP] = "Property WorkspaceIndex is out of range";
+    issues[PropertyNames::WKSP_INDEX] = issues[PropertyNames::INPUT_WKSP];
     return issues;
   }
   if (transform == "Backward") {
@@ -103,6 +104,7 @@ std::map<std::string, std::string> RealFFT::actuallyValidateInputs(API::Workspac
       if (std::abs(dx - X[i + 1] + X[i]) / dx > 1e-7) {
         issues[PropertyNames::INPUT_WKSP] = "X axis must be linear (all bins have same width). This can be ignored if "
                                             "IgnoreXBins is set to true.";
+        issues[PropertyNames::IGNORE_X_BINS] = issues[PropertyNames::INPUT_WKSP];
         break;
       }
     }
