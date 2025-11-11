@@ -467,6 +467,22 @@ class FullInstrumentViewWindow(QMainWindow):
             if not self.main_plotter.off_screen:
                 self.main_plotter.enable_zoom_style()
 
+    def add_pickable_mesh(self, point_cloud: PolyData, scalars: np.ndarray | str) -> None:
+        self.main_plotter.add_mesh(
+            point_cloud,
+            scalars=scalars,
+            opacity=[0.0, 0.5],
+            show_scalar_bar=False,
+            pickable=True,
+            cmap="Oranges",
+            point_size=30,
+            render_points_as_spheres=True,
+        )
+
+    def add_masked_mesh(self, mesh: PolyData) -> None:
+        # RGB for dark grey is (64, 64, 64), normalised is (0.25, 0.25, 0.25)
+        self.main_plotter.add_mesh(mesh, color=(0.25, 0.25, 0.25), pickable=False, render_points_as_spheres=True, point_size=15)
+
     def add_cylinder_widget(self, bounds, callback) -> None:
         self.cylinder = CylinderWidgetNoRotation()
         cylinder_repr = vtkImplicitCylinderRepresentation()
@@ -480,18 +496,6 @@ class FullInstrumentViewWindow(QMainWindow):
         self.cylinder.SetInteractor(self.main_plotter.iren.interactor)
         self.cylinder.AddObserver(vtkCommand.EndInteractionEvent, callback)
         self.cylinder.On()
-
-    def add_pickable_mesh(self, point_cloud: PolyData, scalars: np.ndarray | str) -> None:
-        self.main_plotter.add_mesh(
-            point_cloud,
-            scalars=scalars,
-            opacity=[0.0, 0.5],
-            show_scalar_bar=False,
-            pickable=True,
-            cmap="Oranges",
-            point_size=30,
-            render_points_as_spheres=True,
-        )
 
     def add_rgba_mesh(self, mesh: PolyData, scalars: np.ndarray | str):
         """Draw the given mesh in the main plotter window, and set the colours manually with RGBA numbers"""

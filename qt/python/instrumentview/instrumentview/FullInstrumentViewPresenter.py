@@ -116,6 +116,9 @@ class FullInstrumentViewPresenter:
         self._pickable_mesh[self._visible_label] = self._model.picked_visibility
         self._view.add_pickable_mesh(self._pickable_mesh, scalars=self._visible_label)
 
+        self._masked_mesh = self.create_poly_data_mesh(self._model.masked_positions)
+        self._view.add_masked_mesh(self._masked_mesh)
+
         self.set_view_contour_limits()
         self.set_view_integration_limits()
         self._view.reset_camera()
@@ -157,7 +160,7 @@ class FullInstrumentViewPresenter:
         if self._view.is_cylinder_select_checked():
             self._view.add_cylinder_widget(self._detector_mesh.GetBounds(), self.cylinder_select)
 
-    def cylinder_select(self, obj, event) -> None:
+    def cylinder_select(self, obj, _) -> None:
         cylinder = vtkCylinder()
         obj.GetCylinderRepresentation().GetCylinder(cylinder)
         mask = [(cylinder.FunctionValue(self._detector_mesh.GetPoint(i)) < 0) for i in range(self._detector_mesh.GetNumberOfPoints())]
@@ -172,7 +175,7 @@ class FullInstrumentViewPresenter:
         self.refresh_lineplot_peaks()
 
     def on_clear_selected_detectors_clicked(self) -> None:
-        self.update_picked_detectors([])
+        self.update_picked_detectors(np.array([]))
 
     def create_poly_data_mesh(self, points: np.ndarray, faces=None) -> pv.PolyData:
         """Create a PyVista mesh from the given points and faces"""

@@ -141,10 +141,6 @@ class FullInstrumentViewModel:
         return self._workspace_indices[self._detector_is_picked]
 
     @property
-    def masked_positions(self) -> np.ndarray:
-        return self._detector_positions_3d[self._is_masked & self._is_valid]
-
-    @property
     def detector_counts(self) -> np.ndarray:
         return self._counts[self.is_pickable]
 
@@ -248,6 +244,12 @@ class FullInstrumentViewModel:
         if self._projection_type == ProjectionType.THREE_D:
             return self._detector_positions_3d[self.is_pickable]
         return self._calculate_projection()[self.is_pickable]
+
+    @property
+    def masked_positions(self) -> np.ndarray:
+        if self._projection_type == ProjectionType.THREE_D:
+            return self._detector_positions_3d[self._is_masked & self._is_valid]
+        return self._calculate_projection()[self._is_masked & self._is_valid]
 
     def _calculate_projection(self) -> np.ndarray:
         """Calculate the 2D projection with the specified axis. Can be either cylindrical or spherical."""
