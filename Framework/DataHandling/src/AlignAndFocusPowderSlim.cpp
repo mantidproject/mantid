@@ -14,6 +14,8 @@
 #include "MantidAPI/Sample.h"
 #include "MantidDataHandling/AlignAndFocusPowderSlim/ProcessBankSplitTask.h"
 #include "MantidDataHandling/AlignAndFocusPowderSlim/ProcessBankTask.h"
+#include "MantidAPI/SpectrumInfo.h"
+#include "MantidAPI/TimeAtSampleStrategyElastic.h"
 #include "MantidDataHandling/LoadEventNexus.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/MaskWorkspace.h"
@@ -44,6 +46,7 @@ using Mantid::API::AnalysisDataService;
 using Mantid::API::FileProperty;
 using Mantid::API::ITableWorkspace_sptr;
 using Mantid::API::MatrixWorkspace_sptr;
+using Mantid::API::TimeAtSampleStrategyElastic;
 using Mantid::API::WorkspaceProperty;
 using Mantid::DataObjects::MaskWorkspace_sptr;
 using Mantid::DataObjects::TimeSplitter;
@@ -159,6 +162,9 @@ void AlignAndFocusPowderSlim::init() {
       PropertyNames::PROCESS_BANK_SPLIT_TASK, false,
       "For development testing. Changes how the splitters are processed. If true then use ProcessBankSplitTask "
       "otherwise loop over ProcessBankTask.");
+  declareProperty(PropertyNames::CORRECTION_TO_SAMPLE, false,
+                  "Find time-of-flight when neutron was at the sample position. This is only necessary for fast logs "
+                  "(i.e. more frequent than proton on target pulse).");
   auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(0);
   declareProperty(PropertyNames::FILTER_BAD_PULSES, false,
@@ -294,6 +300,11 @@ void AlignAndFocusPowderSlim::exec() {
     this->loadCalFile(wksp, cal_filename, difc_focused);
   } else {
     this->initCalibrationConstants(wksp, difc_focused);
+  }
+
+  // calculate correction for tof of the neutron at the sample position
+  if (this->getProperty(PropertyNames::CORRECTION_TO_SAMPLE)) {
+    this->initScaleAtSample(wksp);
   }
 
   // set the instrument
@@ -565,6 +576,21 @@ void AlignAndFocusPowderSlim::initCalibrationConstants(API::MatrixWorkspace_sptr
       m_calibration.emplace(static_cast<detid_t>(iter->detid()),
                             difc_focussed / detInfo.difcUncalibrated(iter->index()));
     }
+  }
+}
+
+/// For fast logs, calculate the sample position correction
+void AlignAndFocusPowderSlim::initScaleAtSample(const API::MatrixWorkspace_sptr &wksp) {
+  const auto specInfo = wksp->spectrumInfo();
+  TimeAtSampleStrategyElastic timeAtSampleCalc(wksp);
+  const std::size_t numhist = wksp->getNumberHistograms();
+  // loop over workspace index, but add information to detid-based map
+  for (std::size_t wi = 0; wi < numhist; ++wi) {
+    const auto &spectrum = wksp->getSpectrum(wi);
+    // assume only one detector id per spectrum
+    const detid_t detid = *(spectrum.getDetectorIDs().cbegin());
+    const auto path_correction = timeAtSampleCalc.calculate(wi);
+    m_scale_at_sample[detid] = path_correction.factor; // additive is always zero
   }
 }
 
