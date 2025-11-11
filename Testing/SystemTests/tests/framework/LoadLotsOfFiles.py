@@ -181,7 +181,7 @@ def useFile(direc, filename):
 
     # list of banned files by regexp
     for regexp in BANNED_REGEXP:
-        if re.match(regexp, filename, re.I) is not None:
+        if re.match(regexp, filename, re.IGNORECASE) is not None:
             return False, filename
 
     filename = os.path.join(direc, filename)

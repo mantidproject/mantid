@@ -887,7 +887,7 @@ class Instrument(object):
             frac_dist = 1 - (xm / x0)
             tsmeff = tsqmod * frac_dist**2  # Effective moderator time at first chopper
             x0 -= xm  # Propagate from first chopper, not from moderator (after rescaling tmod)
-            tsqmod = tsmeff if (tsqchp[1] > tsmeff) else tsqchp[1]
+            tsqmod = min(tsqchp[1], tsmeff)
         tsqchp = tsqchp[0]
         tsqmodchop = np.array([tsqmod, tsqchp, x0])
         # Propagate the time widths to the sample position

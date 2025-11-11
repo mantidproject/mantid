@@ -401,8 +401,7 @@ class LoadNMoldyn3Ascii(PythonAlgorithm):
         handle = open(path, "w")
         head = "spectrum,theta"
         handle.write(f"{head} \n")
-        for n in range(0, len(theta)):
-            handle.write(f"{n + 1}   {str(theta[n])}\n")
+        handle.writelines(f"{n + 1}   {str(theta[n])}\n" for n in range(0, len(theta)))
         handle.close()
         UpdateInstrumentFromFile(Workspace=workspace_name, Filename=path, MoveMonitors=False, IgnorePhi=False, AsciiHeader=head)
 
