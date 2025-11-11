@@ -12,7 +12,7 @@ import numpy as np
 # Import mantid.simpleapi first, otherwise we get circular import
 import mantid.simpleapi  # noqa: F401
 
-from abins.abinsalgorithm import AbinsAlgorithm, AtomInfo
+from abins.abinsalgorithm import AbinsAlgorithm, AtomInfo, validate_e_init
 from abins.atomsdata import AtomsData
 
 
@@ -64,6 +64,35 @@ class AbinsAlgorithmValidatorsTest(unittest.TestCase):
         wrong_yaml = find_file("ISISPowderRunDetailsTestCallable.yaml")
         issues = AbinsAlgorithm._validate_euphonic_input_file(wrong_yaml)
         self.assertEqual(issues, {"Invalid": True, "Comment": f"No 'phonopy' section found in {wrong_yaml}"})
+
+    def test_validate_e_init(self):
+        """Check incident energy / instrument combinations"""
+
+        issues = validate_e_init(e_init="100", energy_units="invalid", instrument_name="MARI")
+        self.assertIn("EnergyUnits", issues)
+        self.assertEqual(issues["EnergyUnits"], "Invalid energy unit: invalid")
+
+        for instrument_name, valid_energy, invalid_energy, energy_units in [
+            ("Ideal2D", "1e12", None, "cm-1"),
+            ("PANTHER", "149", "151", "meV"),
+            ("MAPS", "1999", "2001", "meV"),
+            ("MARI", "999", "1001", "meV"),
+            ("MERLIN", "180", "182", "meV"),
+        ]:
+            self.assertFalse(  # i.e. empty dict of validation errors
+                validate_e_init(e_init=valid_energy, energy_units=energy_units, instrument_name=instrument_name)
+            )
+
+            if invalid_energy is None:
+                continue
+
+            issues = validate_e_init(e_init=invalid_energy, energy_units=energy_units, instrument_name=instrument_name)
+
+            self.assertIn("IncidentEnergy", issues)
+            self.assertRegex(
+                issues["IncidentEnergy"],
+                r"Incident energy cannot be greater than \d+\.\d+ meV for this instrument.",
+            )
 
 
 class AbinsAlgorithmMethodsTest(unittest.TestCase):
