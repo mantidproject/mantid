@@ -8,14 +8,18 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/EnumeratedString.h"
+#include "MantidKernel/EnumeratedStringProperty.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/ListValidator.h"
 
 #include <boost/algorithm/string/detail/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
 
-namespace Mantid::Algorithms {
+namespace Mantid::Algorithms::FFTSmooth {
 
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(FFTSmooth2)
@@ -23,20 +27,62 @@ DECLARE_ALGORITHM(FFTSmooth2)
 using namespace Kernel;
 using namespace API;
 
+namespace {
+enum class FilterType { ZERO, BUTTERWORTH, enum_count };
+const std::vector<std::string> filterTypes{"Zeroing", "Butterworth"};
+typedef Mantid::Kernel::EnumeratedString<FilterType, &filterTypes> FILTER;
+} // namespace
+
+namespace {
+typedef std::size_t param_t;
+/** FFTParamsProperty
+ * The "Params" property of this class should be declared as an ArrayProperty.
+ * However, it was originally written to allow many things to serve as an array delimiter.
+ * To properly make this an ArrayProperty, while still allowing old behavior, we can use
+ * a standatd ArrayProperty and change all of the delimiters to commas.
+ */
+class FFTParamsProperty : public ArrayProperty<param_t> {
+public:
+  FFTParamsProperty(std::string const &name, std::vector<param_t> const &defaultValue)
+      : ArrayProperty<param_t>(name, defaultValue) {}
+  std::string setValue(std::string const &value) override {
+    std::string valueCopy(value);
+    boost::trim(valueCopy);
+    for (char const delim : m_delims) {
+      valueCopy = Kernel::Strings::replaceAll(valueCopy, delim, m_sep);
+    }
+    std::vector<param_t> result;
+    toValue(valueCopy, result);
+    *this = result;
+    return "";
+  }
+
+  // Unhide the base class assignment operator
+  using PropertyWithValue<std::vector<param_t>>::operator=;
+
+private:
+  static char constexpr m_sep = ',';
+  static char constexpr m_delims[] = {'\t', ' ', ':', ';'};
+};
+} // namespace
+
 /// Initialisation method. Declares properties to be used in algorithm.
 void FFTSmooth2::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>("InputWorkspace", "", Direction::Input),
-                  "The name of the input workspace.");
-  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>("OutputWorkspace", "", Direction::Output),
-                  "The name of the output workspace.");
+  declareProperty(
+      std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(PropertyNames::INPUT_WKSP, "", Direction::Input),
+      "The name of the input workspace.");
+  declareProperty(
+      std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(PropertyNames::OUTPUT_WKSP, "", Direction::Output),
+      "The name of the output workspace.");
 
   auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(0);
-  declareProperty("WorkspaceIndex", 0, mustBePositive, "Workspace index for smoothing");
+  declareProperty(PropertyNames::WKSP_INDEX, 0, mustBePositive, "Workspace index for smoothing");
 
-  std::vector<std::string> type{"Zeroing", "Butterworth"};
-  declareProperty("Filter", "Zeroing", std::make_shared<StringListValidator>(type), "The type of the applied filter");
-  declareProperty("Params", "",
+  declareProperty(std::make_unique<Kernel::EnumeratedStringProperty<FilterType, &filterTypes>>(PropertyNames::FILTER),
+                  "The type of the applied filter");
+
+  declareProperty(std::make_unique<FFTParamsProperty>(PropertyNames::PARAMS, std::vector<param_t>(2, 2)),
                   "The filter parameters:\n"
                   "For Zeroing, 1 parameter: 'n' - an integer greater than 1 "
                   "meaning that the Fourier coefficients with frequencies "
@@ -44,40 +90,143 @@ void FFTSmooth2::init() {
                   "For Butterworth, 2 parameters: 'n' and 'order', giving the "
                   "1/n truncation and the smoothing order.\n");
 
-  declareProperty("IgnoreXBins", false,
+  declareProperty(PropertyNames::IGNORE_X_BINS, false,
                   "Ignores the requirement that X bins be linear and of the same size.\n"
                   "Set this to true if you are using log binning.\n"
                   "The output X axis will be the same as the input either way.");
-  declareProperty("AllSpectra", false, "Smooth all spectra");
+  declareProperty(PropertyNames::ALL_SPECTRA, false, "Smooth all spectra");
+}
+
+std::map<std::string, std::string> FFTSmooth2::validateInputs() {
+  std::map<std::string, std::string> issues;
+  API::MatrixWorkspace_sptr inWS = getProperty(PropertyNames::INPUT_WKSP);
+  auto groupWS = dynamic_cast<API::WorkspaceGroup const *>(inWS.get());
+  if (groupWS != nullptr) {
+    for (std::size_t idx = 0; idx < groupWS->size(); idx++) {
+      auto subissues = this->actuallyValidateInputs(groupWS->getItem(idx));
+      for (auto const &[key, value] : subissues) {
+        std::string new_key = key + "_" + std::to_string(idx);
+        issues[new_key] = value;
+      }
+    }
+  } else {
+    issues = this->actuallyValidateInputs(inWS);
+  }
+  return issues;
+}
+
+std::map<std::string, std::string> FFTSmooth2::actuallyValidateInputs(API::Workspace_sptr const &ws) {
+  std::map<std::string, std::string> issues;
+
+  // verify a matrix workspace has been passed
+  auto inWS = dynamic_cast<API::MatrixWorkspace const *>(ws.get());
+  if (!inWS) {
+    issues[PropertyNames::INPUT_WKSP] = "FFTSmooth requires an input matrix workspace";
+    return issues;
+  }
+  // verify the spectrum workspace index
+  int wi = getProperty(PropertyNames::WKSP_INDEX);
+  if (wi >= static_cast<int>(inWS->getNumberHistograms())) {
+    issues[PropertyNames::INPUT_WKSP] = "Property WorkspaceIndex is out of range";
+    issues[PropertyNames::WKSP_INDEX] = issues[PropertyNames::INPUT_WKSP];
+    return issues;
+  }
+
+  // Check that the x values are evenly spaced
+  bool ignoreXBins = getProperty(PropertyNames::IGNORE_X_BINS);
+  if (!ignoreXBins) {
+    const auto &X = inWS->x(wi);
+    double dx = (X.back() - X.front()) / static_cast<double>(X.size() - 1);
+    for (size_t i = 0; i < X.size() - 2; i++) {
+      if (std::abs(dx - X[i + 1] + X[i]) / dx > 1e-7) {
+        issues[PropertyNames::INPUT_WKSP] = "X axis must be linear (all bins have same width). This can be ignored if "
+                                            "IgnoreXBins is set to true.";
+        issues[PropertyNames::IGNORE_X_BINS] = issues[PropertyNames::INPUT_WKSP];
+        break;
+      }
+    }
+  }
+
+  // Check that the parameters are valid
+  std::vector<param_t> params = getProperty(PropertyNames::PARAMS);
+  std::string const trunc_err = "Truncation parameter must be an integer > 1. ";
+  std::string const order_err = "Butterworth filter order must be an integer >= 1. ";
+  std::string err_msg;
+  if (params.size() > 0 && params[0] <= 1) {
+    err_msg += trunc_err;
+  }
+  if (params.size() > 1 && params[1] < 1) {
+    err_msg += order_err;
+  }
+  if (params.size() > 2) {
+    err_msg += "Too many parameters passed";
+  }
+  if (!err_msg.empty()) {
+    issues[PropertyNames::PARAMS] = err_msg;
+  }
+  return issues;
 }
 
 /** Executes the algorithm
  */
 void FFTSmooth2::exec() {
-  API::MatrixWorkspace_sptr inWS = getProperty("InputWorkspace");
+  API::MatrixWorkspace_sptr inWS = getProperty(PropertyNames::INPUT_WKSP);
   /// Will we Allow Any X Bins?
-  bool ignoreXBins = getProperty("IgnoreXBins");
+  bool ignoreXBins = getProperty(PropertyNames::IGNORE_X_BINS);
+
+  // retrieve parameters
+  std::size_t n = 2, order = 2;
+  std::vector<std::size_t> params = getProperty(PropertyNames::PARAMS);
+  if (params.size() == 1) {
+    n = params[0];
+  } else if (params.size() == 2) {
+    n = params[0];
+    order = params[1];
+  }
+
+  std::size_t dn = inWS->y(0).size();
+
+  // set smoothing method based on user setting
+  FILTER type = getPropertyValue(PropertyNames::FILTER);
+  std::function<void(API::MatrixWorkspace_sptr &, API::MatrixWorkspace_sptr &)> smoothMethod;
+  switch (type) {
+  case FilterType::ZERO: {
+    smoothMethod = [this, n](API::MatrixWorkspace_sptr &uws, API::MatrixWorkspace_sptr &fws) {
+      this->zero(n, uws, fws);
+    };
+    break;
+  }
+  case FilterType::BUTTERWORTH: {
+    smoothMethod = [this, n, order](API::MatrixWorkspace_sptr &uws, API::MatrixWorkspace_sptr &fws) {
+      this->Butterworth(n, order, uws, fws);
+    };
+    break;
+  }
+  default: {
+    smoothMethod = [](API::MatrixWorkspace_sptr &, API::MatrixWorkspace_sptr &) {};
+    // [](std::vector<double> const &y) { return y; };
+  }
+  }
 
   // First spectrum in input
-  int s0 = getProperty("WorkspaceIndex");
+  int s0 = getProperty(PropertyNames::WKSP_INDEX);
   // By default only do one
-  int send = s0 + 1;
-  if (getProperty("AllSpectra")) { // Except if AllSpectra
+  std::size_t send = s0 + 1;
+  if (getProperty(PropertyNames::ALL_SPECTRA)) { // Except if AllSpectra
     s0 = 0;
-    send = static_cast<int>(inWS->getNumberHistograms());
+    send = inWS->getNumberHistograms();
   }
   // Create output
   API::MatrixWorkspace_sptr outWS =
       API::WorkspaceFactory::Instance().create(inWS, send - s0, inWS->x(0).size(), inWS->y(0).size());
 
   // Symmetrize the input spectrum
-  auto dn = static_cast<int>(inWS->y(0).size());
   API::MatrixWorkspace_sptr symmWS =
       API::WorkspaceFactory::Instance().create("Workspace2D", 1, inWS->x(0).size() + dn, inWS->y(0).size() + dn);
 
   Progress progress(this, 0.0, 1.0, 4 * (send - s0));
 
-  for (int spec = s0; spec < send; spec++) {
+  for (std::size_t spec = s0; spec < send; spec++) {
     // Save the starting x value so it can be restored after all transforms.
     double x0 = inWS->x(spec)[0];
 
@@ -88,15 +237,15 @@ void FFTSmooth2::exec() {
     auto &symX = symmWS->mutableX(0);
     auto &symY = symmWS->mutableY(0);
 
-    for (int i = 0; i < dn; i++) {
+    for (std::size_t i = 0; i < dn; i++) {
       symX[dn + i] = inWS->x(spec)[i];
       symY[dn + i] = inWS->y(spec)[i];
 
-      symX[dn - i] = x0 - dx * i;
+      symX[dn - i] = x0 - dx * static_cast<double>(i);
       symY[dn - i] = inWS->y(spec)[i];
     }
     symY.front() = inWS->y(spec).back();
-    symX.front() = x0 - dx * dn;
+    symX.front() = x0 - dx * static_cast<double>(dn);
     if (inWS->isHistogramData())
       symX.back() = inWS->x(spec).back();
 
@@ -119,44 +268,8 @@ void FFTSmooth2::exec() {
     API::MatrixWorkspace_sptr filteredWS;
 
     // Apply the filter
-    std::string type = getProperty("Filter");
-
-    if (type == "Zeroing") {
-      std::string sn = getProperty("Params");
-      int n;
-      if (sn.empty())
-        n = 2;
-      else
-        n = std::stoi(sn);
-      if (n <= 1)
-        throw std::invalid_argument("Truncation parameter must be an integer > 1");
-
-      progress.report("Zero Filter");
-
-      zero(n, unfilteredWS, filteredWS);
-    } else if (type == "Butterworth") {
-      int n, order;
-
-      std::string string_params = getProperty("Params");
-      std::vector<std::string> params;
-      boost::split(params, string_params, boost::algorithm::detail::is_any_ofF<char>(" ,:;\t"));
-      if (params.size() != 2) {
-        n = 2;
-        order = 2;
-      } else {
-        std::string param0 = params.at(0);
-        std::string param1 = params.at(1);
-        n = std::stoi(param0);
-        order = std::stoi(param1);
-      }
-      if (n <= 1)
-        throw std::invalid_argument("Truncation parameter must be an integer > 1");
-      if (order < 1)
-        throw std::invalid_argument("Butterworth filter order must be an integer >= 1");
-
-      progress.report("ButterWorth Filter");
-      Butterworth(n, order, unfilteredWS, filteredWS);
-    }
+    progress.report("Applying Filter");
+    smoothMethod(unfilteredWS, filteredWS);
 
     progress.report("Backward Transformation");
     // Backward transform
@@ -173,11 +286,11 @@ void FFTSmooth2::exec() {
     API::MatrixWorkspace_sptr tmpWS = fft->getProperty("OutputWorkspace");
 
     // FIXME: The intent of the following line is not clear. std::floor or
-    // std::ceil should
-    // probably be used.
+    // std::ceil should probably be used.
     dn = static_cast<int>(tmpWS->blocksize()) / 2;
 
-    if (getProperty("AllSpectra")) {
+    // assign
+    if (getProperty(PropertyNames::ALL_SPECTRA)) {
       outWS->setSharedX(spec, inWS->sharedX(spec));
       outWS->mutableY(spec).assign(tmpWS->y(0).cbegin() + dn, tmpWS->y(0).cend());
     } else {
@@ -186,7 +299,7 @@ void FFTSmooth2::exec() {
     }
   }
 
-  setProperty("OutputWorkspace", outWS);
+  setProperty(PropertyNames::OUTPUT_WKSP, outWS);
 }
 
 /** Smoothing by zeroing.
@@ -195,10 +308,10 @@ void FFTSmooth2::exec() {
  * transform of the input spectrum
  *  @param filteredWS :: workspace for storing the filtered spectrum
  */
-void FFTSmooth2::zero(int n, API::MatrixWorkspace_sptr &unfilteredWS, API::MatrixWorkspace_sptr &filteredWS) {
-  auto mx = static_cast<int>(unfilteredWS->x(0).size());
-  auto my = static_cast<int>(unfilteredWS->y(0).size());
-  int ny = my / n;
+void FFTSmooth2::zero(std::size_t n, API::MatrixWorkspace_sptr &unfilteredWS, API::MatrixWorkspace_sptr &filteredWS) {
+  auto mx = unfilteredWS->x(0).size();
+  auto my = unfilteredWS->y(0).size();
+  auto ny = my / n;
 
   if (ny == 0)
     ny = 1;
@@ -226,11 +339,11 @@ void FFTSmooth2::zero(int n, API::MatrixWorkspace_sptr &unfilteredWS, API::Matri
  * transform of the input spectrum
  *  @param filteredWS :: workspace for storing the filtered spectrum
  */
-void FFTSmooth2::Butterworth(int n, int order, API::MatrixWorkspace_sptr &unfilteredWS,
+void FFTSmooth2::Butterworth(std::size_t n, std::size_t order, API::MatrixWorkspace_sptr &unfilteredWS,
                              API::MatrixWorkspace_sptr &filteredWS) {
-  auto mx = static_cast<int>(unfilteredWS->x(0).size());
-  auto my = static_cast<int>(unfilteredWS->y(0).size());
-  int ny = my / n;
+  auto mx = unfilteredWS->x(0).size();
+  auto my = unfilteredWS->y(0).size();
+  auto ny = my / n;
 
   if (ny == 0)
     ny = 1;
@@ -245,13 +358,13 @@ void FFTSmooth2::Butterworth(int n, int order, API::MatrixWorkspace_sptr &unfilt
   auto &yr = filteredWS->mutableY(0);
   auto &yi = filteredWS->mutableY(1);
 
-  double cutoff = ny;
-
-  for (int i = 0; i < my; i++) {
-    double scale = 1.0 / (1.0 + pow(static_cast<double>(i) / cutoff, 2 * order));
+  double cutoff = static_cast<double>(ny);
+  unsigned int two_order = 2U * static_cast<unsigned int>(order);
+  for (std::size_t i = 0; i < my; i++) {
+    double scale = 1.0 / (1.0 + pow(static_cast<double>(i) / cutoff, two_order));
     yr[i] = scale * Yr[i];
     yi[i] = scale * Yi[i];
   }
 }
 
-} // namespace Mantid::Algorithms
+} // namespace Mantid::Algorithms::FFTSmooth

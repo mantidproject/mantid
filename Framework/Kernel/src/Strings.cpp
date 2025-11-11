@@ -80,6 +80,21 @@ std::string replace(const std::string &input, const std::string &find_what, cons
 }
 
 /**
+ * Return a string with all occurrences of a character replaced by another
+ * @param input :: The input string to perform the replacement on
+ * @param to_replace :: Each occurrence of this char will be replaced
+ * @param substitute :: The char which will be placed instead
+ * @return A new string with the characters replaced
+ */
+MANTID_KERNEL_DLL std::string replaceAll(std::string const &input, char const to_replace, char const substitute) {
+  std::string replaced;
+  replaced.reserve(input.size());
+  std::transform(input.cbegin(), input.cend(), std::back_inserter(replaced),
+                 [to_replace, substitute](char c) { return (c == to_replace) ? substitute : c; });
+  return replaced;
+}
+
+/**
  * Return a string with all occurrences of the characters in the input replaced
  * by the replace string
  * @param input :: The input string to perform the replacement on
