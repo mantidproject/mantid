@@ -501,7 +501,7 @@ def print_test_summary(test_results, test_name=None):
         print(format_string.format(t_name, t_result[0], t_result[1]))
     # Append a new line
     print("================================================================")
-    print("")
+    print()
 
 
 # -------------------------------------------------------------------------------
