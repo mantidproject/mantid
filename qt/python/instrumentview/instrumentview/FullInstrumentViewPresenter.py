@@ -110,13 +110,12 @@ class FullInstrumentViewPresenter:
     def _update_view_main_plotter(self):
         self._detector_mesh = self.create_poly_data_mesh(self._model.detector_positions)
         self._detector_mesh[self._counts_label] = self._model.detector_counts
-        self._view.add_main_mesh(self._detector_mesh, is_projection=self._model.is_2d_projection(), scalars=self._counts_label)
+        self._view.add_detector_mesh(self._detector_mesh, is_projection=self._model.is_2d_projection(), scalars=self._counts_label)
 
-        self._pickable_main_mesh = self.create_poly_data_mesh(self._model.detector_positions)
-        self._pickable_main_mesh[self._visible_label] = self._model.picked_visibility
-        self._view.add_pickable_main_mesh(self._pickable_main_mesh, scalars=self._visible_label)
+        self._pickable_mesh = self.create_poly_data_mesh(self._model.detector_positions)
+        self._pickable_mesh[self._visible_label] = self._model.picked_visibility
+        self._view.add_pickable_mesh(self._pickable_mesh, scalars=self._visible_label)
 
-        # self._view.enable_point_picking(self._model.is_2d_projection(), callback=self.point_picked)
         self.set_view_contour_limits()
         self.set_view_integration_limits()
         self._view.reset_camera()
@@ -151,7 +150,7 @@ class FullInstrumentViewPresenter:
         else:
             self._model.negate_picked_visibility(picked_mask)
         # Update to visibility shows up in real time
-        self._pickable_main_mesh[self._visible_label] = self._model.picked_visibility
+        self._pickable_mesh[self._visible_label] = self._model.picked_visibility
         self._update_line_plot_ws_and_draw(self._view.current_selected_unit())
 
     def on_cylinder_select_clicked(self) -> None:

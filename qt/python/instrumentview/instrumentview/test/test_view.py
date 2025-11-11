@@ -61,7 +61,7 @@ class TestFullInstrumentViewWindow(unittest.TestCase):
         self._view.main_plotter.reset_mock()
         mock_mesh = MagicMock()
         mock_scalars = MagicMock()
-        self._view.add_main_mesh(mock_mesh, False, mock_scalars)
+        self._view.add_detector_mesh(mock_mesh, False, mock_scalars)
         self._view.main_plotter.add_mesh.assert_called_once_with(
             mock_mesh, pickable=False, scalars=mock_scalars, render_points_as_spheres=True, point_size=15
         )
@@ -70,7 +70,7 @@ class TestFullInstrumentViewWindow(unittest.TestCase):
         self._view.main_plotter.reset_mock()
         mock_mesh = MagicMock()
         mock_scalars = MagicMock()
-        self._view.add_pickable_main_mesh(mock_mesh, mock_scalars)
+        self._view.add_pickable_mesh(mock_mesh, mock_scalars)
         self._view.main_plotter.add_mesh.assert_called_once_with(
             mock_mesh,
             scalars=mock_scalars,
