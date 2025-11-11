@@ -158,10 +158,8 @@ class FullInstrumentViewWindow(QMainWindow):
         self._multi_select_check.setToolTip("Currently only working on 3D view.")
         self._clear_selection_button = QPushButton("Clear Selection")
         self._clear_selection_button.setToolTip("Clear the current selection of detectors")
-        self._cylinder_select = QCheckBox()
         multi_select_layout.addWidget(self._multi_select_check)
         multi_select_layout.addWidget(self._clear_selection_button)
-        multi_select_layout.addWidget(self._cylinder_select)
 
         projection_group_box = QGroupBox("Projection")
         projection_layout = QHBoxLayout(projection_group_box)
@@ -177,6 +175,13 @@ class FullInstrumentViewWindow(QMainWindow):
         self._peak_ws_list = PeaksWorkspaceListWidget(self)
         self._peak_ws_list.setSizeAdjustPolicy(QListWidget.AdjustToContents)
         peak_v_layout.addWidget(self._peak_ws_list)
+
+        masking_group_box = QGroupBox("Masking")
+        masking_layout = QHBoxLayout(masking_group_box)
+        self._add_cylinder = QPushButton("Add Cylinder")
+        self._cylinder_select = QPushButton("Apply Mask")
+        masking_layout.addWidget(self._add_cylinder)
+        masking_layout.addWidget(self._cylinder_select)
 
         self.status_group_box = QGroupBox("Status")
         status_layout = QHBoxLayout(self.status_group_box)
@@ -205,6 +210,7 @@ class FullInstrumentViewWindow(QMainWindow):
         units_group_box.setLayout(units_vbox)
         options_vertical_layout.addWidget(units_group_box)
         options_vertical_layout.addWidget(peak_ws_group_box)
+        options_vertical_layout.addWidget(masking_group_box)
         options_vertical_layout.addWidget(QSplitter(Qt.Horizontal))
 
         options_vertical_layout.addWidget(self.status_group_box)
@@ -215,6 +221,8 @@ class FullInstrumentViewWindow(QMainWindow):
         self._overlay_meshes = []
         self._lineplot_overlays = []
 
+        self._current_widget = None
+
         # self.main_plotter.add_box_widget(lambda x: None)
 
     def check_sum_spectra_checkbox(self) -> None:
@@ -223,9 +231,6 @@ class FullInstrumentViewWindow(QMainWindow):
 
     def is_multi_picking_checkbox_checked(self) -> bool:
         return self._multi_select_check.isChecked()
-
-    def is_cylinder_select_checked(self) -> bool:
-        return self._cylinder_select.isChecked()
 
     def _on_splitter_moved(self, pos, index) -> None:
         self._detector_spectrum_fig.tight_layout()
@@ -325,7 +330,8 @@ class FullInstrumentViewWindow(QMainWindow):
     def setup_connections_to_presenter(self) -> None:
         self._projection_combo_box.currentIndexChanged.connect(self._presenter.update_plotter)
         self._multi_select_check.stateChanged.connect(self._presenter.update_detector_picker)
-        self._cylinder_select.stateChanged.connect(self._presenter.on_cylinder_select_clicked)
+        self._add_cylinder.clicked.connect(self._presenter.on_add_cylinder_clicked)
+        self._cylinder_select.clicked.connect(self._presenter.on_cylinder_select_clicked)
         self._clear_selection_button.clicked.connect(self._presenter.on_clear_selected_detectors_clicked)
         self._contour_range_slider.sliderReleased.connect(self._presenter.on_contour_limits_updated)
         self._integration_limit_slider.sliderReleased.connect(self._presenter.on_integration_limits_updated)
@@ -484,18 +490,22 @@ class FullInstrumentViewWindow(QMainWindow):
         self.main_plotter.add_mesh(mesh, color=(0.25, 0.25, 0.25), pickable=False, render_points_as_spheres=True, point_size=15)
 
     def add_cylinder_widget(self, bounds, callback) -> None:
-        self.cylinder = CylinderWidgetNoRotation()
+        cylinder_widget = CylinderWidgetNoRotation()
         cylinder_repr = vtkImplicitCylinderRepresentation()
         cylinder_repr.SetRadius(50)
         cylinder_repr.SetWidgetBounds(bounds)
         cylinder_repr.SetAxis([0, 0, 1])
         cylinder_repr.SetOutlineTranslation(False)
         cylinder_repr.GetOutlineProperty().SetOpacity(0)
-        self.cylinder.SetRepresentation(cylinder_repr)
-        self.cylinder.SetCurrentRenderer(self.main_plotter.renderer)
-        self.cylinder.SetInteractor(self.main_plotter.iren.interactor)
-        self.cylinder.AddObserver(vtkCommand.EndInteractionEvent, callback)
-        self.cylinder.On()
+        cylinder_widget.SetRepresentation(cylinder_repr)
+        cylinder_widget.SetCurrentRenderer(self.main_plotter.renderer)
+        cylinder_widget.SetInteractor(self.main_plotter.iren.interactor)
+        cylinder_widget.AddObserver(vtkCommand.EndInteractionEvent, callback)
+        cylinder_widget.On()
+        self._current_widget = cylinder_widget
+
+    def get_current_widget(self):
+        return self._current_widget
 
     def add_rgba_mesh(self, mesh: PolyData, scalars: np.ndarray | str):
         """Draw the given mesh in the main plotter window, and set the colours manually with RGBA numbers"""

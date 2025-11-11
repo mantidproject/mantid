@@ -156,13 +156,13 @@ class FullInstrumentViewPresenter:
         self._pickable_mesh[self._visible_label] = self._model.picked_visibility
         self._update_line_plot_ws_and_draw(self._view.current_selected_unit())
 
-    def on_cylinder_select_clicked(self) -> None:
-        if self._view.is_cylinder_select_checked():
-            self._view.add_cylinder_widget(self._detector_mesh.GetBounds(), self.cylinder_select)
+    def on_add_cylinder_clicked(self) -> None:
+        self._view.add_cylinder_widget(self._detector_mesh.GetBounds(), lambda *_: None)
 
-    def cylinder_select(self, obj, _) -> None:
+    def on_cylinder_select_clicked(self) -> None:
+        widget = self._view.get_current_widget()
         cylinder = vtkCylinder()
-        obj.GetCylinderRepresentation().GetCylinder(cylinder)
+        widget.GetCylinderRepresentation().GetCylinder(cylinder)
         mask = [(cylinder.FunctionValue(self._detector_mesh.GetPoint(i)) < 0) for i in range(self._detector_mesh.GetNumberOfPoints())]
         self._model.mask_detectors_in_workspace(mask)
         self.update_plotter()
