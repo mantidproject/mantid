@@ -240,6 +240,15 @@ class Packet:
         return self.STR_FORMAT.format(type=self.packet_type, timestamp=self.timestamp, size_MB=self.size / MB, CRC=self.CRC)
 
     @classmethod
+    def create_header(self, *, payload_len, packet_type, tv_sec, tv_nsec):
+        """Helper method to create packet headers for testing."""
+        header = struct.pack("<I", payload_len)
+        header += struct.pack("<I", packet_type.asPacketField())
+        header += struct.pack("<I", tv_sec)
+        header += struct.pack("<I", tv_nsec)
+        return header
+
+    @classmethod
     def to_file(cls, dest: BinaryIO, packet: "Packet"):
         dest.write(packet.header + packet.payload)
 
@@ -337,7 +346,7 @@ class Player:
     HANDSHAKE_TIMEOUT = Config["playback"]["handshake_timeout"]
     PLAYBACK_HANDSHAKE = Config["playback"]["handshake"]
     TRANSFER_LIMIT_MB = Config["record"]["transfer_limit"]
-    PACKET_ORDER_SCHEME = Config["playback"]["packet_order"]
+    PACKET_ORDERING_SCHEME = Config["playback"]["packet_ordering"]
 
     class Rate(StrEnum):
         NORMAL = "normal"
@@ -391,25 +400,23 @@ class Player:
 
     @classmethod
     def _packet_ordering(cls) -> Callable[[Path], Any]:
-        match cls.PACKET_ORDER_SCHEME:
+        match cls.PACKET_ORDERING_SCHEME:
             case "sequence_number":
                 return cls._file_sequence_number
-            case "timestamps":
-                return cls._file_timestamps
+            case "timestamp":
+                return cls._file_timestamp
+            case "mtime":
+                return cls._file_mtime
             case _:
-                raise ValueError(f"unrecognized packet ordering '{cls.PACKET_ORDER_SCHEME}'")
+                raise ValueError(f"unrecognized packet ordering '{cls.PACKET_ORDERING_SCHEME}'")
 
     @classmethod
-    def _file_timestamps(cls, filePath: Path) -> tuple[np.datetime64, np.datetime64]:
-        # Sorting key for ADARA packet files, using timestamps:
-        #   first sort by ADARA timestamp, then by file-modification time.
+    def _file_timestamp(cls, filePath: Path) -> np.datetime64:
+        # Sorting key for ADARA packet files, using the timestamp of the first packet.
         try:
-            mtime_ns = int(filePath.stat().st_mtime * 1e9)  # nanoseconds since epoch
-            mtime_ns = np.datetime64(mtime_ns, "ns")
-
             with open(filePath, "rb", buffering=0) as src:
                 first_packet = next(cls.iter_file(src, header_only=True))
-                return (first_packet.timestamp, mtime_ns)
+                return first_packet.timestamp
         except FileNotFoundError:
             _logger.error(f"File not found: {filePath}")
             raise
@@ -418,7 +425,33 @@ class Player:
             raise
         except StopIteration:
             _logger.error(f"Empty or invalid file (no packets): {filePath}, using epoch as timestamp")
-            return (np.datetime64(0, "ns"), mtime_ns)  # Use epoch for empty files
+            return np.datetime64(0, "ns")  # Use epoch for empty files
+        except struct.error as e:
+            _logger.error(f"Corrupt packet header in file: {filePath}: {e}")
+            raise ValueError(f"Corrupt file: {filePath}")
+        except Exception as e:
+            _logger.error(f"Unexpected error reading timestamp from {filePath}: {e}")
+            raise
+
+    @classmethod
+    def _file_mtime(cls, filePath: Path) -> np.datetime64:
+        # Sorting key for ADARA packet files, using the file's modification time.
+        try:
+            mtime_ns = int(filePath.stat().st_mtime * 1e9)  # nanoseconds since epoch
+
+            # *** DEBUG ***
+            print(f"MTIME: {filePath.name}: {np.datetime64(mtime_ns, 'ns')}")
+
+            return np.datetime64(mtime_ns, "ns")
+        except FileNotFoundError:
+            _logger.error(f"File not found: {filePath}")
+            raise
+        except PermissionError:
+            _logger.error(f"Permission denied reading file: {filePath}")
+            raise
+        except StopIteration:
+            _logger.error(f"Empty or invalid file (no packets): {filePath}, using epoch as timestamp")
+            return np.datetime64(0, "ns")  # Use epoch for empty files
         except struct.error as e:
             _logger.error(f"Corrupt packet header in file: {filePath}: {e}")
             raise ValueError(f"Corrupt file: {filePath}")
@@ -471,7 +504,7 @@ class Player:
                 payload = src.read(payload_len)
             else:
                 src.seek(payload_len, 1)
-            yield cls(header, payload, source)
+            yield Packet(header, payload, source)
 
     @classmethod
     def iter_files(cls, path: Path, patterns: str | list[str], header_only=False) -> Iterator[Packet]:
@@ -486,7 +519,7 @@ class Player:
                 _logger.warning(f"No files found matching pattern: {patterns} in '{path}'")
                 return
 
-            _logger.info(f"Found {len(files)} files, sorting by {cls.PACKET_ORDER_SCHEME}...")
+            _logger.info(f"Found {len(files)} files, sorting by {cls.PACKET_ORDERING_SCHEME}...")
             ps = sorted(files, key=cls._packet_ordering())
         except Exception as e:
             _logger.error(f"Error sorting files: {e}")

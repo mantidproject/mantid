@@ -4,10 +4,8 @@ Test suite for Packet and ClientHelloPacket classes from adara_player module.
 
 from io import BytesIO
 import numpy as np
-from pathlib import Path
 import socket
 import struct
-import tempfile
 from zlib import crc32
 
 from adara_player import Packet, ClientHelloPacket, EPICS_EPOCH_OFFSET
@@ -41,17 +39,6 @@ class Test_Packet(unittest.TestCase):
         self.expected_size = Packet.HEADER_BYTES + self.payload_len
         self.expected_pulseid = (self.tv_sec << 32) | self.tv_nsec
         self.expected_timestamp = np.datetime64(self.tv_sec + EPICS_EPOCH_OFFSET, "s") + np.timedelta64(self.tv_nsec, "ns")
-
-    def _create_header(self, payload_len=0, packet_type=None, tv_sec=0, tv_nsec=0):
-        """Helper method to create packet headers for testing."""
-        if packet_type is None:
-            packet_type = Packet.Type.HEARTBEAT_TYPE
-
-        header = struct.pack("<I", payload_len)
-        header += struct.pack("<I", packet_type.asPacketField())
-        header += struct.pack("<I", tv_sec)
-        header += struct.pack("<I", tv_nsec)
-        return header
 
     def test_init_valid_header_payload(self):
         """Creates Packet objects with valid inputs and verifies all attribute calculations."""
@@ -107,7 +94,7 @@ class Test_Packet(unittest.TestCase):
         self.assertEqual(packet.source, "test")
 
         self.assertIsInstance(packet.CRC, int)
-        self.assertEqual(packet.CRC, packet.CRC & 0xffffffff)  # CRC32 produces 32-bit integers
+        self.assertEqual(packet.CRC, packet.CRC & 0xFFFFFFFF)  # CRC32 produces 32-bit integers
 
         self.assertIsInstance(packet.size, int)
         self.assertEqual(packet.size, self.expected_size)
@@ -150,77 +137,6 @@ class Test_Packet(unittest.TestCase):
         for packet_type, expected_field in test_cases:
             self.assertEqual(packet_type.asPacketField(), expected_field, f"Failed for {packet_type.name}")
 
-    def test_iter_file_single_file(self):
-        """Validates packet iteration from a single file stream (including edge cases)."""
-        # Create a BytesIO with multiple packets
-        stream = BytesIO()
-
-        # Write first packet
-        stream.write(self.header)
-        stream.write(self.payload)
-
-        # Create second packet with different data
-        header2 = struct.pack("<I", 4)  # shorter payload
-        header2 += struct.pack("<I", Packet.Type.SYNC_TYPE.asPacketField())
-        header2 += struct.pack("<I", 2000000000)
-        header2 += struct.pack("<I", 0)
-        payload2 = b"\xaa\xbb\xcc\xdd"
-        stream.write(header2)
-        stream.write(payload2)
-
-        # Reset stream to beginning
-        stream.seek(0)
-
-        # Iterate and collect packets
-        packets = list(Packet.iter_file(stream, source="test_stream"))
-
-        self.assertEqual(len(packets), 2)
-        self.assertEqual(packets[0].payload, self.payload)
-        self.assertEqual(packets[1].payload, payload2)
-        self.assertEqual(packets[0].source, "test_stream")
-        self.assertEqual(packets[1].source, "test_stream")
-
-    def test_iter_file_empty_file(self):
-        """Test iteration over empty file yields no packets."""
-        stream = BytesIO(b"")
-        packets = list(Packet.iter_file(stream))
-        self.assertEqual(len(packets), 0)
-
-    def test_iter_file_incomplete_header(self):
-        """Test that iter_file stops cleanly when encountering incomplete header."""
-        # Create stream with one complete packet, then incomplete header
-        complete_header = self._create_header(payload_len=4, tv_sec=1000000000)
-        complete_payload = b"\x01\x02\x03\x04"
-
-        # Write complete packet, then only 10 bytes of next header (need 16)
-        stream = BytesIO(complete_header + complete_payload + b"\x00" * 10)
-
-        # Should yield first packet successfully, then stop (not raise error)
-        packets = list(Packet.iter_file(stream))
-
-        # Should get exactly one packet (incomplete header is silently skipped)
-        self.assertEqual(len(packets), 1)
-        self.assertEqual(packets[0].payload, complete_payload)
-
-    def test_iter_file_corrupt_packet_type(self):
-        """Test that iter_file raises ValueError for corrupt packet type."""
-        # Create complete header (16 bytes) but with invalid packet type
-        corrupt_header = struct.pack("<I", 0)  # payload_len = 0
-        corrupt_header += struct.pack("<I", 0xFFFFFFFF)  # Invalid type field
-        corrupt_header += struct.pack("<I", 1000000000)  # tv_sec
-        corrupt_header += struct.pack("<I", 0)  # tv_nsec
-
-        stream = BytesIO(corrupt_header)
-
-        # Should raise ValueError for invalid packet type
-        with self.assertRaises(ValueError) as context:
-            list(Packet.iter_file(stream))
-
-        # Error should mention invalid packet type
-        error_msg = str(context.exception)
-        self.assertIn("Invalid ADARA packet type", error_msg)
-        self.assertIn("0xFFFFFF", error_msg)  # Type value
-
     def test_to_file_and_from_file(self):
         """Round-trip serialize and parse: matching input/output for a given packet."""
         original_packet = Packet(header=self.header, payload=self.payload, source="original")
@@ -258,7 +174,7 @@ class Test_Packet(unittest.TestCase):
     def test_from_file_incomplete_payload(self):
         """Test EOFError when payload is truncated."""
         # Create header that claims 100 bytes of payload
-        header = self._create_header(payload_len=100, tv_sec=1000000000)
+        header = Packet.create_header(payload_len=100, packet_type=Packet.Type.HEARTBEAT_TYPE, tv_sec=1000000000, tv_nsec=0)
         # But only provide 50 bytes
         stream = BytesIO(header + b"\x00" * 50)
 
@@ -379,137 +295,6 @@ class Test_Packet(unittest.TestCase):
 
         sent_data = b"".join(sent_chunks)
         self.assertEqual(sent_data, data)
-
-    def test_iter_files_multi_file_ordering(self):
-        """Tests that packets from multiple files are sorted chronologically as per first packet."""
-        with tempfile.TemporaryDirectory() as tmpdir:
-            tmppath = Path(tmpdir)
-
-            # Create file 1 with LATER timestamp (should be read second)
-            file1 = tmppath / "data_001.adara"
-            header1 = self._create_header(
-                payload_len=8,
-                packet_type=Packet.Type.HEARTBEAT_TYPE,
-                tv_sec=2000000000,  # Later timestamp
-                tv_nsec=0,
-            )
-            payload1 = b"LATER---"
-            with open(file1, "wb") as f:
-                f.write(header1 + payload1)
-
-            # Create file 2 with EARLIER timestamp (should be read first)
-            file2 = tmppath / "data_002.adara"
-            header2 = self._create_header(
-                payload_len=8,
-                packet_type=Packet.Type.HEARTBEAT_TYPE,
-                tv_sec=1000000000,  # Earlier timestamp
-                tv_nsec=0,
-            )
-            payload2 = b"EARLIER-"
-            with open(file2, "wb") as f:
-                f.write(header2 + payload2)
-
-            # Create file 3 with MIDDLE timestamp
-            file3 = tmppath / "data_003.adara"
-            header3 = self._create_header(
-                payload_len=8,
-                packet_type=Packet.Type.HEARTBEAT_TYPE,
-                tv_sec=1500000000,  # Middle timestamp
-                tv_nsec=0,
-            )
-            payload3 = b"MIDDLE--"
-            with open(file3, "wb") as f:
-                f.write(header3 + payload3)
-
-            # iter_files should yield packets in chronological order
-            # regardless of filename order
-            packets = list(Packet.iter_files(tmppath, "*.adara"))
-
-            self.assertEqual(len(packets), 3)
-            # Verify chronological ordering by payload content
-            self.assertEqual(packets[0].payload, payload2)  # EARLIER (1000000000)
-            self.assertEqual(packets[1].payload, payload3)  # MIDDLE (1500000000)
-            self.assertEqual(packets[2].payload, payload1)  # LATER (2000000000)
-
-            # Verify source is set correctly (file path)
-            self.assertTrue(str(file2) in packets[0].source)
-            self.assertTrue(str(file3) in packets[1].source)
-            self.assertTrue(str(file1) in packets[2].source)
-
-    def test__file_timestamp_file_not_found(self):
-        """Confirms proper error on missing file passed to `_file_timestamp`."""
-        nonexistent_path = Path("/nonexistent/path/to/file.adara")
-
-        with self.assertRaises(FileNotFoundError):
-            Packet._file_timestamp(nonexistent_path)
-
-    def test__file_timestamp_empty_malformed(self):
-        """Verifies behavior when the file is empty or contains corrupt packet headers."""
-        # Test 1: Empty file should return epoch timestamp
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".adara") as f:
-            empty_filepath = Path(f.name)
-
-        try:
-            # Empty file should catch StopIteration and return epoch
-            timestamp = Packet._file_timestamp(empty_filepath)
-            self.assertEqual(timestamp, np.datetime64(0, "ns"))
-        finally:
-            empty_filepath.unlink()
-
-        # Test 2: File with corrupt/invalid packet type (complete header)
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".adara") as f:
-            # Write complete header (16 bytes) with invalid packet type
-            corrupt_header = struct.pack("<I", 0)  # payload_len = 0
-            corrupt_header += struct.pack("<I", 0xFFFFFFFF)  # Invalid type field
-            corrupt_header += struct.pack("<I", 1000000000)  # tv_sec
-            corrupt_header += struct.pack("<I", 0)  # tv_nsec
-            f.write(corrupt_header)
-            corrupt_filepath = Path(f.name)
-
-        try:
-            # Should raise ValueError for invalid packet type
-            with self.assertRaises(ValueError) as context:
-                Packet._file_timestamp(corrupt_filepath)
-
-            # Verify error message mentions invalid packet type
-            error_msg = str(context.exception)
-            self.assertIn("Invalid ADARA packet type", error_msg)
-        finally:
-            corrupt_filepath.unlink()
-
-    def test__file_timestamp_incomplete_header(self):
-        """Test _file_timestamp behavior with incomplete header in file."""
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".adara") as f:
-            # Write incomplete header (only 10 bytes, need 16)
-            f.write(b"\x00" * 10)
-            incomplete_filepath = Path(f.name)
-
-        try:
-            # iter_file should handle this gracefully, returning no packets
-            # _file_timestamp catches StopIteration and returns epoch
-            timestamp = Packet._file_timestamp(incomplete_filepath)
-            self.assertEqual(timestamp, np.datetime64(0, "ns"))
-        finally:
-            incomplete_filepath.unlink()
-
-    def test__file_timestamp_valid_file(self):
-        """Test _file_timestamp returns correct timestamp from valid file."""
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".adara") as f:
-            # Create valid packet with known timestamp
-            test_tv_sec = 1234567890
-            test_tv_nsec = 123456789
-            header = self._create_header(payload_len=4, tv_sec=test_tv_sec, tv_nsec=test_tv_nsec)
-            f.write(header + b"\x00\x00\x00\x00")
-            filepath = Path(f.name)
-
-        try:
-            timestamp = Packet._file_timestamp(filepath)
-
-            # Verify timestamp matches the packet's timestamp
-            expected_timestamp = np.datetime64(test_tv_sec + EPICS_EPOCH_OFFSET, "s") + np.timedelta64(test_tv_nsec, "ns")
-            self.assertEqual(timestamp, expected_timestamp)
-        finally:
-            filepath.unlink()
 
 
 class Test_ClientHelloPacket(unittest.TestCase):

@@ -26,9 +26,9 @@ playback:
   ignore_packets: [] # no filtering
                      # [<list of packet types to ignore>, ...]
 
-  packet_order: sequence_number # sort by the sequence number in the filename
-                                # 'timestamps': sort by ADARA packet timestamp,
-                                #     and then by the file-modification timestamp
+  packet_ordering: sequence_number # sort by the sequence number in the filename
+                                   # 'timestamp': sort by ADARA packet timestamp
+                                   # 'mtime': sort by the file-modification timestamp
 record:
   transfer_limit: 16000 # MB
 
