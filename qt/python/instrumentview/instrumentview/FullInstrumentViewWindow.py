@@ -33,6 +33,8 @@ from instrumentview.Detectors import DetectorInfo
 from instrumentview.InteractorStyles import CustomInteractorStyleZoomAndSelect, CustomInteractorStyleRubberBand3D
 from typing import Callable
 from mantid.dataobjects import Workspace2D
+from mantid import UsageService
+from mantid.kernel import FeatureType
 from mantidqt.plotting.mantid_navigation_toolbar import MantidNavigationToolbar
 import numpy as np
 import pyvista as pv
@@ -199,6 +201,8 @@ class FullInstrumentViewWindow(QMainWindow):
         self.interactor_style = CustomInteractorStyleZoomAndSelect()
         self._overlay_meshes = []
         self._lineplot_overlays = []
+
+        UsageService.registerFeatureUsage(FeatureType.Interface, "InstrumentView2025", False)
 
     def check_sum_spectra_checkbox(self) -> None:
         self._sum_spectra_checkbox.setChecked(True)
