@@ -543,7 +543,7 @@ class FullInstrumentViewWindow(QMainWindow):
         self._set_detector_edit_text(
             self._detector_spherical_position_edit,
             detector_infos,
-            lambda d: f"r: {d.spherical_position[0]:.3f}, t: {d.spherical_position[1]:.1f}, p: {d.spherical_position[2]:.1f}",
+            lambda d: f"r: {d.spherical_position[0]:.3f}, 2\u03b8: {d.spherical_position[1]:.1f}, \u03c6: {d.spherical_position[2]:.1f}",
         )
         self._set_detector_edit_text(self._detector_pixel_counts_edit, detector_infos, lambda d: str(d.pixel_counts))
 
