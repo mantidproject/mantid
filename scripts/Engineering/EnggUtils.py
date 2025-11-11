@@ -430,7 +430,7 @@ def read_diff_constants_from_prm(file_path):
     """
     diff_consts = []  # one list per component (e.g. bank)
     with open(file_path) as f:
-        for line in f.readlines():
+        for line in f:
             if "ICONS" in line:
                 # If formatted correctly the line should be in the format INS bank ICONS difc difa tzero
                 elements = line.split()

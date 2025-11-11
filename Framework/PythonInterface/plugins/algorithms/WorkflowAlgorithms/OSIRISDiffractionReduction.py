@@ -803,7 +803,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         for sample in sample_runs:
             match = re.search(r"OSIRIS(\d+).", sample)
             if match:
-                number = match.groups()[0][2:] if match.groups()[0].startswith("00") else match.groups()[0]
+                number = match.groups()[0].removeprefix("00")
                 run_numbers = run_numbers + "," + number
             else:
                 return ""

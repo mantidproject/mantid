@@ -224,14 +224,14 @@ class FullInstrumentViewWindow(QMainWindow):
         def set_slider(callled_from_min):
             def wrapped():
                 try:
-                    min, max = float(min_edit.text()), float(max_edit.text())
+                    min_val, max_val = float(min_edit.text()), float(max_edit.text())
                 except ValueError:
                     return
                 if callled_from_min:
-                    min = max if min > max else min
+                    min_val = min(min_val, max_val)
                 else:
-                    max = min if max < min else max
-                slider.setValue((min, max))
+                    max_val = max(min_val, max_val)
+                slider.setValue((min_val, max_val))
                 presenter_callback()
                 return
 

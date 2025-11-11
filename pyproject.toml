@@ -1,7 +1,7 @@
 [tool.ruff]
 line-length = 140
 # https://beta.ruff.rs/docs/rules/
-lint.select = ["C90", "E", "F", "RUF100", "W", "NPY201", "S"]
+lint.select = ["C90", "E", "F", "FURB", "RUF100", "W", "NPY201", "S"]
 lint.ignore = ["E722", # bare except https://docs.astral.sh/ruff/rules/bare-except/
 "S101", # using assert https://docs.astral.sh/ruff/rules/assert/
 "S110", # try-except-pass https://docs.astral.sh/ruff/rules/try-except-pass/

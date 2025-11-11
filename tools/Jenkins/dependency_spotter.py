@@ -55,14 +55,14 @@ def dependency_spotter(os_name: str, first_build: int, second_build: int, pipeli
             print(f"{i + 1}) {file}")
     else:
         print("None")
-    print("")
+    print()
     print("Files missing from second build:")
     if len(files_missing_from_second_build) > 0:
         for file in files_missing_from_second_build:
             print(file)
     else:
         print("None")
-    print("")
+    print()
 
     if len(files_in_both_builds) == 0:
         print("No matching pair of files was found in the two builds specified, so unable to go any further.")
@@ -78,13 +78,13 @@ def dependency_spotter(os_name: str, first_build: int, second_build: int, pipeli
         file_indices = files_to_compare.split(",")
         file_indices = [int(x) - 1 for x in file_indices]
 
-    print("")
+    print()
     for file_id in file_indices:
         file = files_in_both_builds[file_id]
         print(f"{file}:")
-        print("")
+        print()
         compare_dependencies_for_file(os_name, first_build, second_build, pipeline, file)
-        print("")
+        print()
 
 
 def extract_available_log_files(os_name: str, build_number: int, pipeline: str) -> List[str]:
@@ -120,7 +120,7 @@ def compare_dependencies_for_file(os_name: str, first_build: int, second_build: 
     print(f"Path to first build: {first_build_output_path}")
     second_build_output_path = form_url_for_build_artifact(second_build, os_name, pipeline, log_file)
     print(f"Path to second build: {second_build_output_path}")
-    print("")
+    print()
 
     # Read in the packages used, with versions
     first_output_packages = extract_package_versions(first_build_output_path, os_name)
@@ -154,12 +154,12 @@ def output_package_changes_to_console(added: list, removed: list, changed: Dict[
         print("Packages added:")
         for p in added:
             print(p)
-        print("")
+        print()
     if len(removed) > 0:
         print("Packages removed:")
         for p in removed:
             print(p)
-        print("")
+        print()
     if len(changed) > 0:
         print("Packages changed:")
         for p in changed:

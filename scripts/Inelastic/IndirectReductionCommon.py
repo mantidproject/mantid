@@ -1142,8 +1142,8 @@ def _get_x_range_when_bins_vary(workspace: MatrixWorkspace, grouping_workspace: 
         if detector_ids[0] in excluded_ids:
             continue
         x = workspace.extractX()[i]
-        min_value = x.min() if x.min() < min_value else min_value
-        max_value = x.max() if x.max() > max_value else max_value
+        min_value = min(min_value, x.min())
+        max_value = max(max_value, x.max())
 
     assert min_value > 0, "The minimum x value in a dSpacing workspace should be a positive number."
     assert max_value == float("-inf") or max_value > 0, "The maximum x value in a dSpacing workspace should be a positive number."
