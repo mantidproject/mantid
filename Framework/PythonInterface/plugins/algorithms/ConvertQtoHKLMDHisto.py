@@ -13,7 +13,7 @@ from mantid.api import (
     PropertyMode,
 )
 from mantid.kernel import Direction, FloatArrayLengthValidator, FloatArrayProperty, IntArrayProperty
-from mantid.simpleapi import BinMD, CloneMDWorkspace, DeleteWorkspace, SetMDFrame, mtd
+from mantid.simpleapi import BinMD, DeleteWorkspace, SetMDFrame, mtd
 import numpy as np
 
 
@@ -138,12 +138,12 @@ class ConvertQtoHKLMDHisto(PythonAlgorithm):
 
         units = ["in {:.3f} A^-1".format(q[i].norm()) for i in range(3)]
 
-        output_name = self.getPropertyValue("OutputWorkspace")
-        CloneMDWorkspace(InputWorkspace=input_ws, OutputWorkspace=output_name)
-        SetMDFrame(InputWorkspace=output_name, MDFrame="HKL", Axes="0,1,2")
+        # BinMD will keep original units from the MDFrame, use r.l.u. first
+        current_frame = input_ws.getSpecialCoordinateSystem().name
+        SetMDFrame(InputWorkspace=input_ws, MDFrame="HKL", Axes="0,1,2")
 
         mdhist = BinMD(
-            InputWorkspace=output_name,
+            InputWorkspace=input_ws,
             AxisAligned=False,
             NormalizeBasisVectors=False,
             BasisVector0="{},{},{},{},{}".format(names[0], units[0], q[0].X(), q[0].Y(), q[0].Z()),
@@ -152,6 +152,9 @@ class ConvertQtoHKLMDHisto(PythonAlgorithm):
             OutputExtents=extents,
             OutputBins=bins,
         )
+
+        # Restort frame to original
+        SetMDFrame(InputWorkspace=input_ws, MDFrame=current_frame, Axes="0,1,2")
 
         self.setProperty("OutputWorkspace", mdhist)
         mdhist.clearOriginalWorkspaces()
