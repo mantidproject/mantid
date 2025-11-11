@@ -46,12 +46,6 @@ with open(_config_path, "rt") as f:
 EPICS_EPOCH_OFFSET = 631152000
 
 
-def multi_glob(path: Path, patterns: str | list[str]) -> Iterator[Path]:
-    if isinstance(patterns, str):
-        patterns = [patterns]
-    return itertools.chain.from_iterable(path.glob(p) for p in patterns)
-
-
 class UnixGlob:
     # Parse a bash-style glob expression (optionally including braces)
     #   into a Python-compatible format: `(<base-directory path>, list[<glob str>])`.
@@ -86,6 +80,12 @@ class UnixGlob:
         globs = expand_braces(glob_pattern)
 
         return (Path(base_dir), globs)
+
+    @classmethod
+    def multi_glob(cls, path: Path, patterns: str | list[str]) -> Iterator[Path]:
+        if isinstance(patterns, str):
+            patterns = [patterns]
+        return itertools.chain.from_iterable(path.glob(p) for p in patterns)
 
 
 class SocketAddress:
@@ -133,8 +133,6 @@ class SocketAddress:
 class Packet:
     HEADER_BYTES = 16
     STR_FORMAT = Config["logging"]["packet_summary"]
-    PACKET_ORDER_SCHEME = Config["playback"]["packet_order"]
-    PACKET_ORDER = None  # set in `__init__`
 
     class Type(IntEnum):
         RAW_EVENT_TYPE = (0x0000, 0x01)
@@ -180,10 +178,6 @@ class Packet:
             return self._value_ << 8 | self.version
 
     def __init__(self, header: bytes, payload: bytes = b"", source: str | None = None):
-        # `Packet` class attributes:
-        if Packet.PACKET_ORDER is None:
-            Packet.PACKET_ORDER = Packet._get_packet_order(self.PACKET_ORDER_SCHEME)
-
         self._header = header
         self._payload = payload
         self._source = source
@@ -246,36 +240,6 @@ class Packet:
         return self.STR_FORMAT.format(type=self.packet_type, timestamp=self.timestamp, size_MB=self.size / MB, CRC=self.CRC)
 
     @classmethod
-    def _get_packet_order(cls, ordering: str) -> Callable[[Path], Any]:
-        match ordering:
-            case "sequence_number":
-                return cls._file_sequence_number
-            case "timestamps":
-                return cls._file_timestamps
-            case _:
-                raise ValueError(f"unrecognized packet ordering '{ordering}'")
-
-    @classmethod
-    def iter_file(cls, src: BinaryIO, header_only=False, source=None) -> "Iterator[Packet]":
-        """Iterate over packets in a single file."""
-        # If `header_only=True`, only read the headers:
-        # for best efficiency in this case, open files as `open(<filename>, 'rb', buffering=0)`.
-        while True:
-            header = src.read(cls.HEADER_BYTES)
-            if not header:
-                break
-            if len(header) < cls.HEADER_BYTES:
-                # Incomplete header at EOF: do not yield, just stop iteration.
-                break
-            payload_len = struct.unpack("<I", header[0:4])[0]
-            payload = b""
-            if not header_only:
-                payload = src.read(payload_len)
-            else:
-                src.seek(payload_len, 1)
-            yield cls(header, payload, source)
-
-    @classmethod
     def to_file(cls, dest: BinaryIO, packet: "Packet"):
         dest.write(packet.header + packet.payload)
 
@@ -316,68 +280,6 @@ class Packet:
             payload = b""
 
         return cls(header=header, payload=payload)
-
-    @classmethod
-    def iter_files(cls, path: Path, patterns: str | list[str], header_only=False) -> "Iterator[Packet]":
-        """Iterate over packets across multiple files."""
-
-        # Source files are specified using glob expressions.
-        # Source files themselves will be iterated in order of the timestamp of their first `Packet`.
-
-        try:
-            files = list(multi_glob(path, patterns))
-            if not files:
-                _logger.warning(f"No files found matching pattern: {patterns} in '{path}'")
-                return
-
-            _logger.info(f"Found {len(files)} files, sorting by {cls.PACKET_ORDER_SCHEME}...")
-            ps = sorted(files, key=cls.PACKET_ORDER)
-        except Exception as e:
-            _logger.error(f"Error sorting files: {e}")
-            raise
-
-        for p in ps:
-            _logger.debug(f"Processing file: {p}")
-            with open(p, "rb", buffering=0 if header_only else -1) as f:
-                yield from cls.iter_file(f, header_only=header_only, source=str(p))
-
-    @classmethod
-    def _file_timestamps(cls, filePath: Path) -> tuple[np.datetime64, np.datetime64]:
-        # Sorting key for ADARA packet files, using timestamps:
-        #   first sort by ADARA timestamp, then by file-modification time.
-        try:
-            mtime_ns = int(filePath.stat().st_mtime * 1e9)  # nanoseconds since epoch
-            mtime_ns = np.datetime64(mtime_ns, "ns")
-
-            with open(filePath, "rb", buffering=0) as src:
-                first_packet = next(cls.iter_file(src, header_only=True))
-                return (first_packet.timestamp, mtime_ns)
-        except FileNotFoundError:
-            _logger.error(f"File not found: {filePath}")
-            raise
-        except PermissionError:
-            _logger.error(f"Permission denied reading file: {filePath}")
-            raise
-        except StopIteration:
-            _logger.error(f"Empty or invalid file (no packets): {filePath}, using epoch as timestamp")
-            return (np.datetime64(0, "ns"), mtime_ns)  # Use epoch for empty files
-        except struct.error as e:
-            _logger.error(f"Corrupt packet header in file: {filePath}: {e}")
-            raise ValueError(f"Corrupt file: {filePath}")
-        except Exception as e:
-            _logger.error(f"Unexpected error reading timestamp from {filePath}: {e}")
-            raise
-
-    @classmethod
-    def _file_sequence_number(cls, filePath: Path) -> int:
-        # Sorting key for ADARA packet files, using the sequence number from the filename.
-
-        # Match the last hyphen-separated group before '.adara'
-        match = re.search(r"-(\d{6})\.adara$", filePath.name)
-        if match is None:
-            _logger.error(f"Can't extract sequence number from '{filePath}', using 0 as sequence number")
-            return 0
-        return int(match.group(1))
 
     ## ====== HELPER methods to WRAP socket partial transfers. ======
 
@@ -435,6 +337,7 @@ class Player:
     HANDSHAKE_TIMEOUT = Config["playback"]["handshake_timeout"]
     PLAYBACK_HANDSHAKE = Config["playback"]["handshake"]
     TRANSFER_LIMIT_MB = Config["record"]["transfer_limit"]
+    PACKET_ORDER_SCHEME = Config["playback"]["packet_order"]
 
     class Rate(StrEnum):
         NORMAL = "normal"
@@ -487,6 +390,54 @@ class Player:
         return lambda packet: packet.packet_type not in ignore_packets
 
     @classmethod
+    def _packet_ordering(cls) -> Callable[[Path], Any]:
+        match cls.PACKET_ORDER_SCHEME:
+            case "sequence_number":
+                return cls._file_sequence_number
+            case "timestamps":
+                return cls._file_timestamps
+            case _:
+                raise ValueError(f"unrecognized packet ordering '{cls.PACKET_ORDER_SCHEME}'")
+
+    @classmethod
+    def _file_timestamps(cls, filePath: Path) -> tuple[np.datetime64, np.datetime64]:
+        # Sorting key for ADARA packet files, using timestamps:
+        #   first sort by ADARA timestamp, then by file-modification time.
+        try:
+            mtime_ns = int(filePath.stat().st_mtime * 1e9)  # nanoseconds since epoch
+            mtime_ns = np.datetime64(mtime_ns, "ns")
+
+            with open(filePath, "rb", buffering=0) as src:
+                first_packet = next(cls.iter_file(src, header_only=True))
+                return (first_packet.timestamp, mtime_ns)
+        except FileNotFoundError:
+            _logger.error(f"File not found: {filePath}")
+            raise
+        except PermissionError:
+            _logger.error(f"Permission denied reading file: {filePath}")
+            raise
+        except StopIteration:
+            _logger.error(f"Empty or invalid file (no packets): {filePath}, using epoch as timestamp")
+            return (np.datetime64(0, "ns"), mtime_ns)  # Use epoch for empty files
+        except struct.error as e:
+            _logger.error(f"Corrupt packet header in file: {filePath}: {e}")
+            raise ValueError(f"Corrupt file: {filePath}")
+        except Exception as e:
+            _logger.error(f"Unexpected error reading timestamp from {filePath}: {e}")
+            raise
+
+    @classmethod
+    def _file_sequence_number(cls, filePath: Path) -> int:
+        # Sorting key for ADARA packet files, using the sequence number from the filename.
+
+        # Match the last hyphen-separated group before '.adara'
+        match = re.search(r"-(\d{6})\.adara$", filePath.name)
+        if match is None:
+            _logger.error(f"Can't extract sequence number from '{filePath}', using 0 as sequence number")
+            return 0
+        return int(match.group(1))
+
+    @classmethod
     def _get_server_address(cls) -> str:
         # Assemble the socket address using information from the from `Config` and from `os.environ`:
         # -- unless overridden, this path will be: ${XDG_RUNTIME_DIR}/sock-${name};
@@ -502,6 +453,50 @@ class Player:
         #   or `ValueError` (any parsing error).
         return address
 
+    @classmethod
+    def iter_file(cls, src: BinaryIO, header_only=False, source=None) -> Iterator[Packet]:
+        """Iterate over packets in a single file."""
+        # If `header_only=True`, only read the headers:
+        # for best efficiency in this case, open files as `open(<filename>, 'rb', buffering=0)`.
+        while True:
+            header = src.read(Packet.HEADER_BYTES)
+            if not header:
+                break
+            if len(header) < Packet.HEADER_BYTES:
+                # Incomplete header at EOF: do not yield, just stop iteration.
+                break
+            payload_len = struct.unpack("<I", header[0:4])[0]
+            payload = b""
+            if not header_only:
+                payload = src.read(payload_len)
+            else:
+                src.seek(payload_len, 1)
+            yield cls(header, payload, source)
+
+    @classmethod
+    def iter_files(cls, path: Path, patterns: str | list[str], header_only=False) -> Iterator[Packet]:
+        """Iterate over packets across multiple files."""
+
+        # Source files are specified using glob expressions.
+        # Source files themselves will be iterated in order of the timestamp of their first `Packet`.
+
+        try:
+            files = list(UnixGlob.multi_glob(path, patterns))
+            if not files:
+                _logger.warning(f"No files found matching pattern: {patterns} in '{path}'")
+                return
+
+            _logger.info(f"Found {len(files)} files, sorting by {cls.PACKET_ORDER_SCHEME}...")
+            ps = sorted(files, key=cls._packet_ordering())
+        except Exception as e:
+            _logger.error(f"Error sorting files: {e}")
+            raise
+
+        for p in ps:
+            _logger.debug(f"Processing file: {p}")
+            with open(p, "rb", buffering=0 if header_only else -1) as f:
+                yield from cls.iter_file(f, header_only=header_only, source=str(p))
+
     def stream_packets(self, path: Path, patterns: str | list[str], socket, dry_run=False):
         MB = 1024 * 1024
         buffer_bytes = self._buffer_MB * MB
@@ -510,7 +505,7 @@ class Player:
         start_time = np.datetime64("now")
 
         # Get packet iterator
-        packets = Packet.iter_files(path, patterns)
+        packets = self.iter_files(path, patterns)
 
         try:
             next_packet = next(packets)
