@@ -470,7 +470,7 @@
      <technique>Single Crystal Diffraction</technique>
    </instrument>
 
-   <instrument name="IMAGINE" shortname="IMAGINE">
+   <instrument name="IMAGINE" shortname="CG4D">
      <technique>Neutron Diffraction</technique>
      <technique>Single Crystal Diffraction</technique>
    </instrument>
