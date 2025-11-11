@@ -52,7 +52,6 @@ class FullInstrumentViewPresenter:
         self._counts_label = "Integrated Counts"
         self._visible_label = "Visible Picked"
         self._view.show_axes()
-        self._is_projection_selected = False
         self.update_plotter()
 
         if self._model.workspace_x_unit in self._UNIT_OPTIONS:
@@ -104,57 +103,55 @@ class FullInstrumentViewPresenter:
     def update_plotter(self) -> None:
         """Update the projection based on the selected option."""
         self._model.projection_type = self._view.current_selected_projection()
-        self._is_projection_selected = self._model.is_2d_projection()
-        self._update_view_main_plotter(self._model.detector_positions, is_projection=self._model.is_2d_projection())
-        self.on_multi_select_detectors_clicked()
+        self._update_view_main_plotter()
+        self.update_detector_picker()
         self.on_peaks_workspace_selected()
 
-    def _update_view_main_plotter(self, positions: np.ndarray, is_projection: bool):
-        self._detector_mesh = self.create_poly_data_mesh(positions)
+    def _update_view_main_plotter(self):
+        self._detector_mesh = self.create_poly_data_mesh(self._model.detector_positions)
         self._detector_mesh[self._counts_label] = self._model.detector_counts
-        self._view.add_main_mesh(self._detector_mesh, is_projection=is_projection, scalars=self._counts_label)
+        self._view.add_main_mesh(self._detector_mesh, is_projection=self._model.is_2d_projection(), scalars=self._counts_label)
 
-        self._pickable_main_mesh = self.create_poly_data_mesh(positions)
+        self._pickable_main_mesh = self.create_poly_data_mesh(self._model.detector_positions)
         self._pickable_main_mesh[self._visible_label] = self._model.picked_visibility
         self._view.add_pickable_main_mesh(self._pickable_main_mesh, scalars=self._visible_label)
 
-        self._view.enable_point_picking(self._is_projection_selected, callback=self.point_picked)
+        # self._view.enable_point_picking(self._model.is_2d_projection(), callback=self.point_picked)
         self.set_view_contour_limits()
         self.set_view_integration_limits()
         self._view.reset_camera()
 
-    def on_multi_select_detectors_clicked(self) -> None:
+    def update_detector_picker(self) -> None:
         """Change between single and multi point picking"""
         if self._view.is_multi_picking_checkbox_checked():
             self._view.check_sum_spectra_checkbox()
-            self._view.enable_rectangle_picking(self._is_projection_selected, callback=self.rectangle_picked)
+
+            def rectangle_picked(rectangle: RectangleSelection) -> None:
+                """Get points within the selection rectangle and display information for those detectors"""
+                selected_mesh = self._detector_mesh.select_enclosed_points(rectangle.frustum_mesh)
+                selected_mask = selected_mesh.point_data["SelectedPoints"].view(bool)
+                self.update_picked_detectors(selected_mask)
+
+            self._view.enable_rectangle_picking(self._model.is_2d_projection(), callback=rectangle_picked)
         else:
-            self._view.enable_point_picking(self._is_projection_selected, callback=self.point_picked)
 
-    def point_picked(self, point_position: np.ndarray | None, picker: PickerType) -> None:
-        if point_position is None:
-            return
-        point_index = picker.GetPointId()
-        picked_mask = np.full(self._detector_mesh.GetNumberOfPoints(), False)
-        picked_mask[point_index] = True
-        self.update_picked_detectors(picked_mask)
+            def point_picked(point_position: np.ndarray | None, picker: PickerType.POINT.value) -> None:
+                if point_position is None:
+                    return
+                point_index = picker.GetPointId()
+                picked_mask = np.full(self._detector_mesh.GetNumberOfPoints(), False)
+                picked_mask[point_index] = True
+                self.update_picked_detectors(picked_mask)
 
-    def rectangle_picked(self, rectangle: RectangleSelection) -> None:
-        """Get points within the selection rectangle and display information for those detectors"""
-        selected_mesh = self._detector_mesh.select_enclosed_points(rectangle.frustum_mesh)
-        selected_mask = selected_mesh.point_data["SelectedPoints"].view(bool)
-        # selected_point_indices = np.argwhere(selected_mask).flatten()
-        self.update_picked_detectors(selected_mask)
+            self._view.enable_point_picking(self._model.is_2d_projection(), callback=point_picked)
 
     def update_picked_detectors(self, picked_mask: np.ndarray) -> None:
         if np.sum(picked_mask) == 0:
             self._model.clear_all_picked_detectors()
         else:
             self._model.negate_picked_visibility(picked_mask)
-
         # Update to visibility shows up in real time
         self._pickable_main_mesh[self._visible_label] = self._model.picked_visibility
-
         self._update_line_plot_ws_and_draw(self._view.current_selected_unit())
 
     def on_cylinder_select_clicked(self) -> None:

@@ -324,7 +324,7 @@ class FullInstrumentViewWindow(QMainWindow):
 
     def setup_connections_to_presenter(self) -> None:
         self._projection_combo_box.currentIndexChanged.connect(self._presenter.update_plotter)
-        self._multi_select_check.stateChanged.connect(self._presenter.on_multi_select_detectors_clicked)
+        self._multi_select_check.stateChanged.connect(self._presenter.update_detector_picker)
         self._cylinder_select.stateChanged.connect(self._presenter.on_cylinder_select_clicked)
         self._clear_selection_button.clicked.connect(self._presenter.on_clear_selected_detectors_clicked)
         self._contour_range_slider.sliderReleased.connect(self._presenter.on_contour_limits_updated)
