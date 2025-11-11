@@ -296,5 +296,6 @@ Component Overviews
    ScriptRepository
    Widgets/Plotting
    WritingAnAlgorithm
+   DynamicProperties
    WritingCustomConvertToMDTransformation
    ISISEnergyTransferTab

@@ -131,7 +131,7 @@ public:
   bool isEnabled(const Mantid::Kernel::IPropertyManager *algo) const override;
   bool isConditionChanged(const Mantid::Kernel::IPropertyManager *algo,
                           const std::string &changedPropName = "") const override;
-  void applyChanges(const Mantid::Kernel::IPropertyManager *algo, Kernel::Property *const pProp) override;
+  bool applyChanges(const Mantid::Kernel::IPropertyManager *algo, const std::string &propName) override;
 
   // interface needs it but if indeed proper clone used -- do not know.
   IPropertySettings *clone() const override {

@@ -112,8 +112,11 @@ public:
 
   /// Set the PropertySettings object
   void setSettings(std::unique_ptr<IPropertySettings> settings);
+
   /** @return the PropertySettings for this property */
+  const IPropertySettings *getSettings() const;
   IPropertySettings *getSettings();
+
   /** Deletes the PropertySettings object contained */
   void clearSettings();
 
@@ -201,6 +204,9 @@ public:
   bool disableReplaceWSButton() const;
   void setDisableReplaceWSButton(const bool &disable);
 
+  bool isDynamicDefault() const;
+  void setIsDynamicDefault(const bool &flag);
+
 protected:
   /// Constructor
   Property(std::string name, const std::type_info &type, const unsigned int &direction = Direction::Input);
@@ -240,6 +246,10 @@ private:
 
   /// Flag to disable the generation of the "Replace Workspace" button on the OutputWorkspace property
   bool m_disableReplaceWSButton;
+
+  /// Flag to indicate that the property's value has been set programmatically,
+  /// for example, when a default value is dynamic and depends on an upstream property.
+  bool m_isDynamicDefault;
 };
 
 /// Compares this to another property for equality
