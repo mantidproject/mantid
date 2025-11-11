@@ -331,7 +331,7 @@ class Packet:
                 return
 
             _logger.info(f"Found {len(files)} files, sorting by {cls.PACKET_ORDER_SCHEME}...")
-            ps = sorted(files, key=cls._packet_order)
+            ps = sorted(files, key=cls.PACKET_ORDER)
         except Exception as e:
             _logger.error(f"Error sorting files: {e}")
             raise
@@ -342,7 +342,7 @@ class Packet:
                 yield from cls.iter_file(f, header_only=header_only, source=str(p))
 
     @classmethod
-    def _file_timestamps(cls, filePath: Path) -> tuple(np.datetime64, np.datetime64):
+    def _file_timestamps(cls, filePath: Path) -> tuple[np.datetime64, np.datetime64]:
         # Sorting key for ADARA packet files, using timestamps:
         #   first sort by ADARA timestamp, then by file-modification time.
         try:
@@ -373,7 +373,7 @@ class Packet:
         # Sorting key for ADARA packet files, using the sequence number from the filename.
 
         # Match the last hyphen-separated group before '.adara'
-        match = re.search(r"-(\d{4})\.adara$", filePath.name)
+        match = re.search(r"-(\d{6})\.adara$", filePath.name)
         if match is None:
             _logger.error(f"Can't extract sequence number from '{filePath}', using 0 as sequence number")
             return 0
@@ -445,7 +445,6 @@ class Player:
         self._source_address = SocketAddress.parse(source_address if source_address else Config["source"]["address"])
 
         # Initialize control callbacks
-        self._packet_order = Player._get_packet_order(Config["playback"]["packet_order"])
         self._rate_filter = Player._get_rate_filter(Config["playback"]["rate"])
         self._packet_filter = Player._get_packet_filter(Config["playback"]["ignore_packets"])
 
@@ -503,7 +502,7 @@ class Player:
         #   or `ValueError` (any parsing error).
         return address
 
-    def stream_packets(self, path: Path, patterns: str | list[str], socket):
+    def stream_packets(self, path: Path, patterns: str | list[str], socket, dry_run=False):
         MB = 1024 * 1024
         buffer_bytes = self._buffer_MB * MB
         packet_buffer = collections.deque()
@@ -543,52 +542,58 @@ class Player:
                     break
                 pkt = packet_buffer.popleft()
 
-                readable, writable, exceptional = select.select([socket], [socket], [socket], 0)
+                if not dry_run:
+                    readable, writable, exceptional = select.select([socket], [socket], [socket], 0)
 
-                if socket in exceptional:
-                    _logger.error("Socket error detected")
-                    return
-
-                # Check for unexpected incoming packets
-                if socket in readable:
-                    try:
-                        unexpected_pkt = Packet.from_socket(socket)
-                        _logger.warning(f"RECV unexpected: {unexpected_pkt}")
-                    except Exception as e:
-                        _logger.error(f"Unable to read unexpected packet: {e}")
+                    if socket in exceptional:
+                        _logger.error("Socket error detected")
                         return
 
-                # Verify socket is writable before sending
-                if socket not in writable:
-                    _logger.warning("Socket not ready for writing, retrying...")
-                    packet_buffer.appendleft(pkt)  # Put packet back
-                    current_buffer_bytes += pkt.size
-                    time.sleep(0.001)  # packet rate is 60 Hz: 0.017 seconds
-                    continue
+                    # Check for unexpected incoming packets
+                    if socket in readable:
+                        try:
+                            unexpected_pkt = Packet.from_socket(socket)
+                            _logger.warning(f"RECV unexpected: {unexpected_pkt}")
+                        except Exception as e:
+                            _logger.error(f"Unable to read unexpected packet: {e}")
+                            return
 
-                # Send the packet
-                try:
-                    Packet.to_socket(socket, pkt)
-                    _logger.debug(f"SEND: {pkt}")
-                except (socket.error, socket.timeout) as e:
-                    _logger.error(f"Failed to send packet: {e}")
-                    return
-                current_buffer_bytes -= pkt.size
+                    # Verify socket is writable before sending
+                    if socket not in writable:
+                        _logger.warning("Socket not ready for writing, retrying...")
+                        packet_buffer.appendleft(pkt)  # Put packet back
+                        current_buffer_bytes += pkt.size
+                        time.sleep(0.001)  # packet rate is 60 Hz: 0.017 seconds
+                        continue
+
+                    # Send the packet
+                    try:
+                        Packet.to_socket(socket, pkt)
+                        _logger.debug(f"SEND: {pkt}")
+                    except (socket.error, socket.timeout) as e:
+                        _logger.error(f"Failed to send packet: {e}")
+                        return
+                    current_buffer_bytes -= pkt.size
+                else:
+                    # dry run: log the packet that would have been sent
+                    _logger.debug(f"[{Path(pkt.source).name}]: SEND: {pkt}")
+                    current_buffer_bytes -= pkt.size
 
             # Fill buffer if room available
-            while current_buffer_bytes < buffer_bytes:
-                if not self._running:
-                    break
-                if next_packet is None:
-                    break
-                try:
-                    packet_buffer.append(next_packet)
-                    current_buffer_bytes += next_packet.size
-                    next_packet = next(packets)
-                except StopIteration:
-                    next_packet = None
-                    break
-            _logger.debug(f"Buffered {len(packet_buffer)} packets ({current_buffer_bytes / MB:.2f} MB).")
+            if current_buffer_bytes < buffer_bytes and next_packet:
+                while current_buffer_bytes < buffer_bytes:
+                    if not self._running:
+                        break
+                    if next_packet is None:
+                        break
+                    try:
+                        packet_buffer.append(next_packet)
+                        current_buffer_bytes += next_packet.size
+                        next_packet = next(packets)
+                    except StopIteration:
+                        next_packet = None
+                        break
+                _logger.debug(f"Buffered {len(packet_buffer)} packets ({current_buffer_bytes / MB:.2f} MB).")
 
             # Sleep if nothing to send
             if not (packet_buffer and (packet_buffer[0].timestamp - packets_start_time) <= (now - start_time)):
@@ -596,54 +601,48 @@ class Player:
 
         _logger.info("Finished streaming all packets")
 
-    def play(self, path: Path, patterns: str | list[str]):
+    def play(self, path: Path, patterns: str | list[str], dry_run=False):
         try:
             self._running = True
             self._server = self._create_server_socket(self._server_address)
 
-            _logger.info("Waiting for client connection...")
-            self._client, _ = self._server.accept()
-            _logger.info("Accepted connection from client.")
+            if not dry_run:
+                _logger.info("Waiting for client connection...")
+                self._client, _ = self._server.accept()
+                _logger.info("Accepted connection from client.")
 
-            # Make this as symmetric with `record()` as possible -- use non-blocking mode.
-            self._client.settimeout(self.SOCKET_TIMEOUT)
-            self._client.setblocking(False)
+                # Make this as symmetric with `record()` as possible -- use non-blocking mode.
+                self._client.settimeout(self.SOCKET_TIMEOUT)
+                self._client.setblocking(False)
 
-            self._start_time = np.datetime64(1, "s")  # default: stream all of the data
+                self._start_time = np.datetime64(1, "s")  # default: stream all of the data
 
-            if self.PLAYBACK_HANDSHAKE == "client_hello":
-                # Wait for "hello" packet before streaming
-                _logger.info("Waiting for 'CLIENT_HELLO_PACKET'...")
+                if self.PLAYBACK_HANDSHAKE == "client_hello":
+                    # Wait for "hello" packet before streaming
+                    _logger.info("Waiting for 'CLIENT_HELLO_PACKET'...")
 
-                # For handshake, temporarily use blocking mode with a longer timeout.
-                self._client.settimeout(self.HANDSHAKE_TIMEOUT)
-                self._client.setblocking(True)
-                try:
-                    client_hello = ClientHelloPacket.from_socket(self._client)
-                    self._start_time = client_hello.start_time
-                    _logger.info("Received 'CLIENT_HELLO_PACKET'. Starting stream...")
-                except ValueError as e:
-                    _logger.error(f"{e}")
-                    raise
-                finally:
-                    # Restore non-blocking mode for streaming
-                    self._client.settimeout(self.SOCKET_TIMEOUT)
-                    self._client.setblocking(False)
+                    # For handshake, temporarily use blocking mode with a longer timeout.
+                    self._client.settimeout(self.HANDSHAKE_TIMEOUT)
+                    self._client.setblocking(True)
+                    try:
+                        client_hello = ClientHelloPacket.from_socket(self._client)
+                        self._start_time = client_hello.start_time
+                        _logger.info("Received 'CLIENT_HELLO_PACKET'. Starting stream...")
+                    except ValueError as e:
+                        _logger.error(f"{e}")
+                        raise
+                    finally:
+                        # Restore non-blocking mode for streaming
+                        self._client.settimeout(self.SOCKET_TIMEOUT)
+                        self._client.setblocking(False)
 
-            self.stream_packets(path, patterns, self._client)
+            self.stream_packets(path, patterns, self._client, dry_run=dry_run)
         finally:
             _logger.info("Disconnecting server.")
             self._running = False
             self._cleanup()
 
     def record(self, output_path: Path):
-        session_number = self._next_session_number(output_path)
-        sequence_number = 1
-
-        # Ensure target directory exists
-        output_path = output_path / f"{session_number:04d}"
-        output_path.mkdir(parents=True, exist_ok=True)
-
         # Main server loop
         try:
             self._running = True
@@ -675,6 +674,13 @@ class Player:
                     self._source.settimeout(self.SOCKET_TIMEOUT)
                     self._source.connect(self._source_address)
                     _logger.info(f"Successfully connected to ADARA packet server at {self._source_address}.")
+
+                    # Start a new session for each connection to the packet server.
+                    sequence_number = 1
+                    session_number = self._next_session_number(output_path)
+                    # Ensure target directory exists
+                    output_path = output_path / f"{session_number:04d}"
+                    output_path.mkdir(parents=True, exist_ok=True)
 
                     # Set sockets to non-blocking mode for use with select
                     self._client.setblocking(False)
@@ -843,20 +849,30 @@ if __name__ == "__main__":
         # Parse commandline arguments:
         #   allow overriding the most-often-used configuration args.
 
-        parser = argparse.ArgumentParser(description="ADARA packet player.")
+        parser = argparse.ArgumentParser(
+            description="ADARA packet player.", usage="%(prog)s [-h] [-r] [-s SOURCE_ADDRESS] [-a SERVER_ADDRESS] [-d] 'glob'"
+        )
         parser.add_argument("-r", "--record", action="store_true", help="Enable record mode")
         parser.add_argument("-s", "--source_address", type=str, help="Specify packet source address: used for record")
         parser.add_argument("-a", "--server_address", type=str, help="Specify server address")
+        parser.add_argument("-d", "--dry_run", action="store_true", help="Dry run: used for play mode")
 
         # Default config-file location is overridden using the environment, NOT here:
         # Usage: `adara_player_conf=<new config-file location> adara_player <options> <glob>`
 
-        parser.add_argument("glob", help="Standard Unix glob spec, or an output-directory path (in record mode)")
+        parser.add_argument("glob", help="Standard Unix glob spec (in single quotes), or an output-directory path (in record mode)")
         args = parser.parse_args()
 
-        glob = UnixGlob.parse(args.glob)  # Parse Unix-style glob to "internal" format: (<base-directory path>, list[<glob expr>]).
-        if args.record and (glob[1] and glob[1][0]):
-            _logger.error(f"When using record mode, the positional argument should be the target directory, not '{args.glob}'.")
+        path, patterns = UnixGlob.parse(
+            args.glob
+        )  # Parse Unix-style glob to "internal" format: (<base-directory path>, list[<glob expr>]).
+        if args.record:
+            if patterns and patterns[0]:
+                _logger.error(f"When using record mode, the positional argument should be the target directory, not '{args.glob}'.")
+                return
+            if args.dry_run:
+                _logger.error("Dry run can not be used with record mode.")
+                return
 
         player = Player(server_address=args.server_address, source_address=args.source_address)
 
@@ -865,8 +881,8 @@ if __name__ == "__main__":
         signal.signal(signal.SIGTERM, player.signal_handler)
 
         if not args.record:
-            player.play(glob)
+            player.play(path, patterns, dry_run=args.dry_run)
         else:
-            player.record(glob[0])
+            player.record(path)
 
     main()

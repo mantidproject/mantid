@@ -36,4 +36,4 @@ logging:
   level: DEBUG # DEBUG: packet summary at send and receive
 
   # `Packet` summary format.
-  packet_summary: "type: {type:#06x}: {timestamp}, size: {size_MB:.2f} MB, CRC: {CRC:#04x}"
+  packet_summary: "type: {type:#06x}: {timestamp}, size: {size_MB:.2f} MB, CRC: {CRC:#010x}"
