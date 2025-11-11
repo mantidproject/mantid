@@ -37,12 +37,6 @@ private:
   std::map<std::string, std::string> validateInputs() override;
   std::map<std::string, std::string> actuallyValidateInputs(API::Workspace_sptr const &);
   void exec() override;
-
-  // Smoothing by zeroing.
-  void zero(std::size_t n, API::MatrixWorkspace_sptr &unfilteredWS, API::MatrixWorkspace_sptr &filteredWS);
-  // Smoothing using Butterworth filter of any positive order.
-  void Butterworth(std::size_t n, std::size_t order, API::MatrixWorkspace_sptr &unfilteredWS,
-                   API::MatrixWorkspace_sptr &filteredWS);
 };
 
 namespace PropertyNames {
