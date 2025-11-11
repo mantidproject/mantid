@@ -90,7 +90,7 @@ private:
       double sig1 = work_in1->dataY(i / work_in1->blocksize())[i % work_in1->blocksize()];
       double sig3 = work_out1->dataY(i / work_in1->blocksize())[i % work_in1->blocksize()];
       TS_ASSERT_DELTA(work_in1->dataX(i / work_in1->blocksize())[i % work_in1->blocksize()],
-                      work_out1 -> dataX(i / work_in1->blocksize())[i % work_in1->blocksize()], 1.e-10);
+                      work_out1->dataX(i / work_in1->blocksize())[i % work_in1->blocksize()], 1.e-10);
       double expsig3 = exp(sig1);
       TS_ASSERT_DELTA(expsig3, sig3, 1e-10 * sig3);
       double err1 = work_in1->dataE(i / work_in1->blocksize())[i % work_in1->blocksize()];
