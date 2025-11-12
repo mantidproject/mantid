@@ -49,8 +49,12 @@ private:
   Kernel::TimeROI getFilterROI(const API::MatrixWorkspace_sptr &wksp);
   DataObjects::TimeSplitter timeSplitterFromSplitterWorkspace(const Types::Core::DateAndTime &);
 
-  std::map<detid_t, double> m_calibration;     ///< detid: 1/difc
-  std::map<detid_t, double> m_scale_at_sample; ///< multiplicative 0<value<1 to move neutron TOF at sample
+  std::map<detid_t, double> m_calibration; ///< detid: 1/difc
+  /**
+   * Multiplicative 0<value<1 to move neutron TOF at sample.
+   * It will only be filled if time at sample is requested.
+   */
+  std::map<detid_t, double> m_scale_at_sample;
   std::set<detid_t> m_masked;
   bool is_time_filtered{false};
   /// Index to load start at in the file
