@@ -18,7 +18,6 @@
 #include "MantidKernel/Logger.h"
 
 #include <cmath>
-#include <gsl/gsl_blas.h>
 
 namespace Mantid::CurveFitting::FuncMinimisers {
 namespace {
@@ -194,15 +193,11 @@ bool LevenbergMarquardtMDMinimizer::iterate(size_t /*iteration*/) {
   double dL;
   // der -> - der - 0.5 * hessian * dx
 
-  EigenMatrix tempHessianTr = m_costFunction->getHessian().tr();
-  const gsl_matrix_const_view tempHessianTrGSL = getGSLMatrixView_const(tempHessianTr.inspector());
-  const gsl_vector_const_view dxGSL = getGSLVectorView_const(dx.inspector());
-  gsl_vector_view ddGSL = getGSLVectorView(dd.mutator());
-
-  gsl_blas_dgemv(CblasNoTrans, -0.5, &tempHessianTrGSL.matrix, &dxGSL.vector, 1., &ddGSL.vector);
+  EigenVector Trdx = m_costFunction->getHessian().tr() * dx;
+  Trdx *= -0.5;
+  dd += Trdx;
   // calculate the linear part of the change in cost function
-  // dL = - der * dx - 0.5 * dx * hessian * dx
-  gsl_blas_ddot(&ddGSL.vector, &dxGSL.vector, &dL);
+  dL = dd.dot(dx);
 
   double F1 = m_costFunction->val();
   if (verbose) {
@@ -216,7 +211,7 @@ bool LevenbergMarquardtMDMinimizer::iterate(size_t /*iteration*/) {
   if (m_rho >= 0) {
     EigenVector p(n);
     m_costFunction->getParameters(p);
-    double dx_norm = gsl_blas_dnrm2(&dxGSL.vector);
+    double dx_norm = dx.norm();
     if (dx_norm < absError) {
       if (verbose) {
         g_log.warning() << "Successful fit, parameters changed by less than " << absError << '\n';
