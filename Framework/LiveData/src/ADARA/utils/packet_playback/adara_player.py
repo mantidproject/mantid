@@ -40,8 +40,6 @@ with open(_config_path, "rt") as f:
     Config = yaml.safe_load(f)
     _logger.setLevel(Config["logging"]["level"])
     _logger.info(f"Loaded configuration from '{_config_path}'.")
-    _logger.debug(f"  source: '{Config['source']['address']}'.")
-    _logger.debug(f"  server: '{Config['server']['address']}'.")
 
 EPICS_EPOCH_OFFSET = 631152000
 
@@ -355,6 +353,8 @@ class Player:
     def __init__(self, *, server_address=None, source_address=None):
         self._server_address = SocketAddress.parse(server_address if server_address else Player._get_server_address())
         self._source_address = SocketAddress.parse(source_address if source_address else Config["source"]["address"])
+        _logger.debug(f"  server: '{self._server_address}'")
+        _logger.debug(f"  source: '{self._source_address}'")
 
         # Initialize control callbacks
         self._rate_filter = Player._get_rate_filter(Config["playback"]["rate"])
