@@ -8,7 +8,7 @@ from mantid.kernel import ConfigService
 from sans.common.enums import BinningType
 
 
-class OverlayEventWorkspaces(object):
+class OverlayEventWorkspaces:
     def __init__(self, enabled_by_default):
         self._overlay_event_workspaces = enabled_by_default
 
@@ -22,7 +22,7 @@ class OverlayEventWorkspaces(object):
         self._overlay_event_workspaces = False
 
 
-class CustomBinning(object):
+class CustomBinning:
     def __init__(self):
         self._bin_settings = ""
 
@@ -67,7 +67,7 @@ class SaveAsEventData(OverlayEventWorkspaces):
         return True
 
 
-class BinningFromMonitors(object):
+class BinningFromMonitors:
     def has_bin_settings(self):
         return False
 
@@ -78,7 +78,7 @@ class BinningFromMonitors(object):
         return False
 
 
-class SummationSettingsModel(object):
+class SummationSettingsModel:
     def __init__(self, initial_type):
         self._save_directory = ConfigService.getString("defaultsave.directory")
         self._type_factory_dict = {

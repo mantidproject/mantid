@@ -5,13 +5,12 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import hashlib
-import io
 import json
 import os
 from pathlib import Path
 import subprocess
 import shutil
-from typing import List, Optional
+from typing import Optional
 
 import h5py
 
@@ -49,7 +48,7 @@ class IO(BaseModel):
         try:
             with NamedTemporaryFile(mode="w", dir=directory) as fd:
                 print("check this directory is writeable", file=fd)
-        except IOError:
+        except OSError:
             return True
 
         return False
@@ -68,7 +67,7 @@ class IO(BaseModel):
     def model_post_init(self, __context):
         try:
             self._hash_input_filename = self.calculate_ab_initio_file_hash()
-        except IOError as err:
+        except OSError as err:
             logger.error(str(err))
         except ValueError as err:
             logger.error(str(err))
@@ -360,14 +359,14 @@ class IO(BaseModel):
             shutil.move(os.path.join(path, temp_file), os.path.join(path, self._hdf_filename))
         except OSError:
             pass  # repacking failed: no h5repack installed in the system... but we proceed
-        except IOError:
+        except OSError:
             pass
         except RuntimeError:
             pass
 
     @staticmethod
     @validate_call
-    def _list_of_str(list_str: Optional[List[str]]) -> bool:
+    def _list_of_str(list_str: Optional[list[str]]) -> bool:
         """
         Checks if all elements of the list are strings.
         :param list_str: list to check
@@ -514,7 +513,7 @@ class IO(BaseModel):
         hash_calculator = hashlib.sha512()
 
         # chop content of a file into chunks to minimize memory consumption for hash creation
-        with io.open(file=filename, mode="rb", buffering=BUF, newline=None) as file_handle:
+        with open(file=filename, mode="rb", buffering=BUF, newline=None) as file_handle:
             while True:
                 data = file_handle.read(BUF)
                 if not data:

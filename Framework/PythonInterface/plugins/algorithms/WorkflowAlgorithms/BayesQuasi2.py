@@ -11,7 +11,6 @@ from mantid.kernel import StringListValidator, Direction
 from mantid import logger
 from IndirectCommon import get_two_theta_and_q
 
-from typing import Dict
 from numpy import ndarray
 import numpy as np
 
@@ -85,8 +84,8 @@ class BayesQuasi2(QuickBayesTemplate):
 
     def make_results(
         self,
-        results: Dict["str", ndarray],
-        results_errors: Dict["str", ndarray],
+        results: dict["str", ndarray],
+        results_errors: dict["str", ndarray],
         x_data: ndarray,
         x_unit: str,
         max_features: int,

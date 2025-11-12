@@ -8,7 +8,7 @@ from mantidqtinterfaces.Muon.GUI.Common.muon_load_data import MuonLoadData
 import mantidqtinterfaces.Muon.GUI.Common.utilities.load_utils as load_utils
 
 
-class LoadRunWidgetModel(object):
+class LoadRunWidgetModel:
     """Stores info on all currently loaded workspaces"""
 
     def __init__(self, loaded_data_store=MuonLoadData(), context=None):

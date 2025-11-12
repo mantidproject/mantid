@@ -14,18 +14,17 @@ from mantid.kernel import IntBoundedValidator
 from mantid.kernel import PhysicalConstants
 from scipy.integrate import quad
 from scipy.special import i0e
-from typing import Tuple
 
 MUON_MAGNETOGYRIC_RATIO = 2 * np.pi * PhysicalConstants.MuonGyromagneticRatio  # MHz / G
 
 
 @cache
-def cached_i0e(d_i: float, t: Tuple[float]) -> NDArray[float64]:
+def cached_i0e(d_i: float, t: tuple[float]) -> NDArray[float64]:
     """Calculate the zeroth order modified Bessel function, scaled by an exponential term."""
     return i0e(2 * d_i * np.array(t))
 
 
-def autocorrelation(t: Tuple[float], d_1: float, d_2: float, d_3: float) -> NDArray[float64]:
+def autocorrelation(t: tuple[float], d_1: float, d_2: float, d_3: float) -> NDArray[float64]:
     """Calculate S(t), the autocorrelation function represented by an anisotropic random walk."""
     return cached_i0e(d_1, t) * cached_i0e(d_2, t) * cached_i0e(d_3, t)
 
@@ -47,7 +46,7 @@ def spectral_density(d_1, d_2, d_3, w):
     return 2 * integral
 
 
-def d_rates_from_dimensionality(n_dimensions: int, d_parallel: float, d_perpendicular: float) -> Tuple[float]:
+def d_rates_from_dimensionality(n_dimensions: int, d_parallel: float, d_perpendicular: float) -> tuple[float]:
     """Tie dipolar rates based on the dimensionality of the system."""
     match n_dimensions:
         case 1:  # D1 = D||           D2, D3 = D_|_

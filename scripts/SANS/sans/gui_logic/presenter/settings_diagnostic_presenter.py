@@ -19,7 +19,7 @@ from sans.state.AllStates import AllStates
 from sans.state.Serializer import Serializer
 
 
-class SettingsDiagnosticPresenter(object):
+class SettingsDiagnosticPresenter:
     class ConcreteSettingsDiagnosticTabListener(SettingsDiagnosticTab.SettingsDiagnosticTabListener):
         def __init__(self, presenter):
             super(SettingsDiagnosticPresenter.ConcreteSettingsDiagnosticTabListener, self).__init__()

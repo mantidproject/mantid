@@ -14,7 +14,7 @@ from mantidqt.utils.observer_pattern import GenericObservable, GenericObserverWi
 from mantid.api import AnalysisDataService as ADS
 
 
-class FittingDataPresenter(object):
+class FittingDataPresenter:
     def __init__(self, model, view):
         self.model = model
         self.view = view

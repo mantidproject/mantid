@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
-from typing import Callable, List, Tuple
+from collections.abc import Callable
 import sys
 
 from mantid.kernel import Logger, SpecialCoordinateSystem
@@ -542,7 +542,7 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
 
         return current_workspaces
 
-    def _decide_plot_update_methods(self) -> Tuple[Callable, Callable]:
+    def _decide_plot_update_methods(self) -> tuple[Callable, Callable]:
         """
         Checks the type of workspace in self.model and decides which of the
         new_plot and update_plot_data methods to use
@@ -595,7 +595,7 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
         return {"H": hkl_as_strings[0], "K": hkl_as_strings[1], "L": hkl_as_strings[2]}
 
     @staticmethod
-    def _get_full_point(slice_point: List[float], xdata: float, ydata: float, xdim: int, ydim: int) -> List[float]:
+    def _get_full_point(slice_point: list[float], xdata: float, ydata: float, xdim: int, ydim: int) -> list[float]:
         """Construct a list containing the full cursor coordinate i.e. x, y, z, and any other dimensions"""
         full_point = slice_point.copy()
         full_point[xdim] = xdata

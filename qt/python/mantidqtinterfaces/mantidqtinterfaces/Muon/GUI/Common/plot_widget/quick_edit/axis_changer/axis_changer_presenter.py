@@ -7,12 +7,12 @@
 from mantidqtinterfaces.Muon.GUI.Common.plot_widget.quick_edit.axis_changer.axis_changer_view import AxisChangerView
 
 
-class AxisChangerPresenter(object):
+class AxisChangerPresenter:
     def __init__(self, view):
         self._view = view
 
 
-class AxisChangerWidget(object):
+class AxisChangerWidget:
     def __init__(self, label, parent=None):
         self._view = AxisChangerView(label, parent)
         self._presenter = AxisChangerPresenter(self._view)

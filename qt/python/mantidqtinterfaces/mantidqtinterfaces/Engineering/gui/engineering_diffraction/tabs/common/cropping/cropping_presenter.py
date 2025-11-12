@@ -9,7 +9,7 @@ from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.crop
 from Engineering.EnggUtils import GROUP
 
 
-class CroppingPresenter(object):
+class CroppingPresenter:
     def __init__(self, parent, view=None, model=None):
         self.parent = parent
         self.model = model if model else CroppingModel()

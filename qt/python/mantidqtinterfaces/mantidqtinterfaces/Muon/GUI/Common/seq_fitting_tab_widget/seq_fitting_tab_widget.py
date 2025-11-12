@@ -9,7 +9,7 @@ from mantidqtinterfaces.Muon.GUI.Common.seq_fitting_tab_widget.seq_fitting_tab_v
 from mantidqtinterfaces.Muon.GUI.Common.seq_fitting_tab_widget.seq_fitting_tab_presenter import SeqFittingTabPresenter
 
 
-class SeqFittingTabWidget(object):
+class SeqFittingTabWidget:
     def __init__(self, context, model, parent, view=None):
         self.seq_fitting_tab_view = view if view else SeqFittingTabView(parent)
         self.seq_fitting_tab_model = model

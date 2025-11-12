@@ -18,7 +18,7 @@ from mantid.plots.legend import LegendProperties
 from mantidqt.widgets.plotconfigdialog.curvestabwidget import curve_has_errors, CurveProperties, remove_curve_from_ax
 
 
-class FigureErrorsManager(object):
+class FigureErrorsManager:
     AXES_NOT_MANTIDAXES_ERR_MESSAGE = "Plot axes are not MantidAxes. There is no way to automatically load error data."
 
     def __init__(self, canvas):

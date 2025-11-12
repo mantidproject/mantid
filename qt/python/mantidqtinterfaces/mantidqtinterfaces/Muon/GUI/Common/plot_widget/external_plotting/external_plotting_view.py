@@ -4,12 +4,11 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from typing import List
 
 from mantidqtinterfaces.Muon.GUI.Common.plot_widget.external_plotting.external_plotting_model import PlotInformation
 
 
-class ExternalPlottingView(object):
+class ExternalPlottingView:
     def __init__(self):
         self.number_of_axes = 0
 
@@ -31,7 +30,7 @@ class ExternalPlottingView(object):
         """
         self._copy_axes_setup_workbench(fig_window, internal_axes)
 
-    def plot_data(self, fig_window, data: List[PlotInformation]):
+    def plot_data(self, fig_window, data: list[PlotInformation]):
         """
         Handles the plotting of the input data into the new fig window
         :param fig_window, The new figure window

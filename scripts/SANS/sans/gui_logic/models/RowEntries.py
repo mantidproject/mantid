@@ -13,7 +13,7 @@ from mantid.kernel import Logger
 
 
 @dataclass(eq=False)
-class _UserEntries(object):
+class _UserEntries:
     """
     POD type for the row entries found on the main GUI
     """

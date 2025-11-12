@@ -7,7 +7,7 @@
 from sans.common.enums import BinningType
 
 
-class SummationSettingsPresenter(object):
+class SummationSettingsPresenter:
     def __init__(self, summation_settings, view, parent_view):
         self._summation_settings = summation_settings
         self.view = view

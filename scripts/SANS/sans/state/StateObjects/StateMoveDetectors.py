@@ -9,7 +9,6 @@
 """State for moving workspaces."""
 
 import copy
-from typing import Dict
 
 from sans.common.enums import CanonicalCoordinates, SANSInstrument, DetectorType
 from sans.state.JsonSerializable import JsonSerializable
@@ -47,7 +46,7 @@ class StateMove(metaclass=JsonSerializable):
         super(StateMove, self).__init__()
 
         self.sample_offset = 0.0  # : Float
-        self.detectors: Dict[StateMoveDetectors] = {}
+        self.detectors: dict[StateMoveDetectors] = {}
 
         # The sample offset direction is Z for the ISIS instruments
         self.sample_offset_direction = CanonicalCoordinates.Z
@@ -140,7 +139,7 @@ class StateMoveNoInst(StateMove):
 # ----------------------------------------------------------------------------------------------------------------------
 
 
-class StateMoveLOQBuilder(object):
+class StateMoveLOQBuilder:
     @automatic_setters(StateMoveLOQ, exclusions=["detector_name", "detector_name_short", "monitor_names"])
     def __init__(self):
         super(StateMoveLOQBuilder, self).__init__()
@@ -156,7 +155,7 @@ class StateMoveLOQBuilder(object):
         return value / 1000.0
 
 
-class StateMoveSANS2DBuilder(object):
+class StateMoveSANS2DBuilder:
     @automatic_setters(StateMoveSANS2D, exclusions=["detector_name", "detector_name_short", "monitor_names"])
     def __init__(self):
         super(StateMoveSANS2DBuilder, self).__init__()
@@ -172,7 +171,7 @@ class StateMoveSANS2DBuilder(object):
         return value / 1000.0
 
 
-class StateMoveZOOMBuilder(object):
+class StateMoveZOOMBuilder:
     @automatic_setters(StateMoveZOOM, exclusions=["detector_name", "detector_name_short", "monitor_names"])
     def __init__(self):
         super(StateMoveZOOMBuilder, self).__init__()
@@ -188,7 +187,7 @@ class StateMoveZOOMBuilder(object):
         return value / 1000.0
 
 
-class StateMoveLARMORBuilder(object):
+class StateMoveLARMORBuilder:
     @automatic_setters(StateMoveLARMOR, exclusions=["detector_name", "detector_name_short", "monitor_names"])
     def __init__(self, data_info):
         super(StateMoveLARMORBuilder, self).__init__()
@@ -217,7 +216,7 @@ class StateMoveLARMORBuilder(object):
         return value / 1000.0
 
 
-class StateMoveNoInstBuilder(object):
+class StateMoveNoInstBuilder:
     @automatic_setters(StateMoveNoInst, exclusions=["detector_name", "detector_name_short", "monitor_names"])
     def __init__(self):
         self.state = StateMoveNoInst()

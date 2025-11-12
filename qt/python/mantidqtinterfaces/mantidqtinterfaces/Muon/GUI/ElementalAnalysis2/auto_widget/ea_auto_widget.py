@@ -11,7 +11,7 @@ from mantidqtinterfaces.Muon.GUI.ElementalAnalysis2.auto_widget.ea_match_table_v
 from mantidqtinterfaces.Muon.GUI.ElementalAnalysis2.auto_widget.ea_match_table_presenter import EAMatchTablePresenter
 
 
-class EAAutoTabWidget(object):
+class EAAutoTabWidget:
     def __init__(self, context):
         self.match_table_view = EAMatchTableView()
         self.match_table_presenter = EAMatchTablePresenter(self.match_table_view)

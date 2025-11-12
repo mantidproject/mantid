@@ -20,7 +20,7 @@ from sans.gui_logic.presenter.summation_settings_presenter import SummationSetti
 DEFAULT_BIN_SETTINGS = "5.5,45.5,50.0, 50.0,1000.0, 500.0,1500.0, 750.0,99750.0, 255.0,100005.0"
 
 
-class AddRunsFilenameManager(object):
+class AddRunsFilenameManager:
     def __init__(self, inst):
         if isinstance(inst, str):
             self.instrument_string = inst
@@ -61,7 +61,7 @@ class AddRunsFilenameManager(object):
         return zeros_to_add * "0"
 
 
-class AddRunsPagePresenter(object):
+class AddRunsPagePresenter:
     def __init__(self, sum_runs_model, view, parent_view):
         self._view = view
         self._parent_view = parent_view

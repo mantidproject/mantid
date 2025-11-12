@@ -11,7 +11,7 @@ from os import path
 from mantid import logger
 
 
-class WorkspaceLoader(object):
+class WorkspaceLoader:
     @staticmethod
     def load_workspaces(directory, workspaces_to_load):
         """

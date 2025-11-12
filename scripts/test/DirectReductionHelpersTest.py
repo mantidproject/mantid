@@ -13,7 +13,7 @@ from mantid.api import mtd
 from mantid.simpleapi import LoadEmptyInstrument
 
 
-class SomeDescriptor(object):
+class SomeDescriptor:
     def __init__(self):
         self._val = None
 
@@ -246,7 +246,7 @@ class DirectReductionHelpersTest(unittest.TestCase):
         self.assertEqual(kkdict["C"], 20)
 
     def test_class_property_setter(self):
-        class test_class(object):
+        class test_class:
             def __init__(self):
                 object.__setattr__(self, "A", helpers.ComplexProperty(["B", "C"]))
                 # kkdict['A']=
@@ -319,7 +319,7 @@ class DirectReductionHelpersTest(unittest.TestCase):
         # self.assertEqual(t1.oveloaded_prop ,'BlaBla')
 
     def test_class_property_setter2(self):
-        class test_class(object):
+        class test_class:
             def __init__(self):
                 kkdict = {}
                 kkdict["_A"] = helpers.ComplexProperty(["B", "C"])
@@ -403,7 +403,7 @@ class DirectReductionHelpersTest(unittest.TestCase):
         self.assertEqual(dep[1], "C")
 
     def test_class_property_setter3(self):
-        class test_class(object):
+        class test_class:
             def __init__(self):
                 all_methods = dir(self)
                 existing = []

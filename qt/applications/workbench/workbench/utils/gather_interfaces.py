@@ -11,7 +11,7 @@ Helper functions to collect the names of interfaces
 """
 
 import os
-from typing import AnyStr, List, Dict
+from typing import AnyStr
 
 from mantid.kernel import ConfigService, logger
 from mantidqt.usersubwindowfactory import UserSubWindowFactory
@@ -28,7 +28,7 @@ def get_interface_dir() -> AnyStr:
     return os.path.dirname(mantidqtinterfaces.__file__)
 
 
-def _discover_python_interfaces(interface_dir) -> Dict[str, List[str]]:
+def _discover_python_interfaces(interface_dir) -> dict[str, list[str]]:
     interfaces = {}
     for category, script_name in [interface.split("/") for interface in ConfigService["mantidqt.python_interfaces"].split()]:
         if not os.path.exists(os.path.join(interface_dir, script_name)):
@@ -39,7 +39,7 @@ def _discover_python_interfaces(interface_dir) -> Dict[str, List[str]]:
     return interfaces
 
 
-def _discover_registers_to_run(interface_dir: str) -> Dict[str, List[str]]:
+def _discover_registers_to_run(interface_dir: str) -> dict[str, list[str]]:
     try:
         register_items = ConfigService["mantidqt.python_interfaces_io_registry"].split()
     except KeyError:
@@ -54,7 +54,7 @@ def _discover_registers_to_run(interface_dir: str) -> Dict[str, List[str]]:
     return registers_to_run
 
 
-def _discover_cpp_interfaces(interfaces: Dict[str, List[str]]):
+def _discover_cpp_interfaces(interfaces: dict[str, list[str]]):
     """Add C++ interfaces to passed dictionary"""
     # need to initialise this so cpp interfaces are registered
     InterfaceManager()
@@ -68,7 +68,7 @@ def _discover_cpp_interfaces(interfaces: Dict[str, List[str]]):
             interfaces.setdefault(category, []).append(name)
 
 
-def gather_interface_names(python_interface_dir: str = get_interface_dir()) -> Dict[str, List[str]]:
+def gather_interface_names(python_interface_dir: str = get_interface_dir()) -> dict[str, list[str]]:
     """
     Returns a dictionary where keys are the interface categories and
     values are lists of interface names in each category
@@ -78,7 +78,7 @@ def gather_interface_names(python_interface_dir: str = get_interface_dir()) -> D
     return interfaces
 
 
-def gather_python_interface_names(python_interface_dir: str = get_interface_dir()) -> Dict[str, List[str]]:
+def gather_python_interface_names(python_interface_dir: str = get_interface_dir()) -> dict[str, list[str]]:
     """
     Returns a dictionary where keys are the interface categories and
     values are lists of interface names in each category
@@ -86,7 +86,7 @@ def gather_python_interface_names(python_interface_dir: str = get_interface_dir(
     return _discover_python_interfaces(python_interface_dir)
 
 
-def gather_cpp_interface_names() -> Dict[str, List[str]]:
+def gather_cpp_interface_names() -> dict[str, list[str]]:
     """
     Returns a dictionary where keys are the interface categories and
     values are lists of interface names in each category
@@ -96,6 +96,6 @@ def gather_cpp_interface_names() -> Dict[str, List[str]]:
     return interfaces
 
 
-def get_registers_to_run(python_interface_dir: str = get_interface_dir()) -> Dict[str, List[str]]:
+def get_registers_to_run(python_interface_dir: str = get_interface_dir()) -> dict[str, list[str]]:
     registers_to_run = _discover_registers_to_run(python_interface_dir)
     return registers_to_run

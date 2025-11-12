@@ -4,15 +4,14 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from typing import List, Tuple
 
 
 class Presenter:
-    def __init__(self, view, colours: List[str]):
+    def __init__(self, view, colours: list[str]):
         self._view = view
         self._view.set_colours(colours)
 
-    def get_plot_info(self) -> Tuple[str, float, float]:
+    def get_plot_info(self) -> tuple[str, float, float]:
         return str(self._view.get_colour()), self._view.get_freq(), self._view.get_phase()
 
     def get_grid_lines(self) -> bool:

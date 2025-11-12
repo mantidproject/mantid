@@ -7,7 +7,6 @@
 
 from abc import ABCMeta, abstractmethod
 from pathlib import Path
-from typing import List
 
 from systemtesting import MantidSystemTest
 
@@ -17,9 +16,9 @@ PATH_TO_DOCS = (Path(__file__).resolve() / "../../../../../docs/source").resolve
 class DocumentationTestBase(MantidSystemTest, metaclass=ABCMeta):
     def __init__(self):
         super(DocumentationTestBase, self).__init__()
-        self._known_no_docs: List[str] = []
+        self._known_no_docs: list[str] = []
         self._docs_path: Path = Path("")
-        self._files: List[List[str]] = []
+        self._files: list[list[str]] = []
         self._test_type: str = ""
         self._setup_test()
 

@@ -8,7 +8,7 @@ from mantid.api import FunctionFactory, Workspace, AlgorithmManager, IFunction1D
 import numpy as np
 
 
-class FunctionWrapper(object):
+class FunctionWrapper:
     """
     Wrapper class for Fitting Function
     """

@@ -39,7 +39,7 @@ from mantidqtinterfaces.Muon.GUI.Common.utilities.workspace_utils import StaticW
 import math
 import numpy as np
 import re
-from typing import List, NamedTuple
+from typing import NamedTuple
 
 DEFAULT_CHI_SQUARED = 0.0
 DEFAULT_FIT_STATUS = None
@@ -64,7 +64,7 @@ class FitPlotInformation(NamedTuple):
     This class is used to send fit data to the plot widget for plotting.
     """
 
-    input_workspaces: List[str]
+    input_workspaces: list[str]
     fit: FitInformation
 
 

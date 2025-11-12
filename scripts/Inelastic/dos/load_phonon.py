@@ -63,7 +63,7 @@ def parse_phonon_file(file_name, record_eigenvectors):
                     for _ in range(file_data["num_ions"] * file_data["num_branches"]):
                         line = f_handle.readline()
                         if not line:
-                            raise IOError("Bad file format. Uexpectedly reached end of file.")
+                            raise OSError("Bad file format. Uexpectedly reached end of file.")
 
     frequencies = np.asarray(frequencies)
     ir_intensities = np.asarray(ir_intensities)
@@ -101,7 +101,7 @@ def _parse_phonon_file_header(f_handle):
         line = f_handle.readline()
 
         if not line:
-            raise IOError("Could not find any header information.")
+            raise OSError("Could not find any header information.")
 
         if "Number of ions" in line:
             file_data["num_ions"] = int(line.strip().split()[-1])
@@ -111,7 +111,7 @@ def _parse_phonon_file_header(f_handle):
             file_data["unit_cell"] = _parse_phonon_unit_cell_vectors(f_handle)
         elif "Fractional Co-ordinates" in line:
             if file_data["num_ions"] is None:
-                raise IOError("Failed to parse file. Invalid file header.")
+                raise OSError("Failed to parse file. Invalid file header.")
 
             # Extract the mode number for each of the ion in the data file
             for _ in range(file_data["num_ions"]):
@@ -130,7 +130,7 @@ def _parse_phonon_file_header(f_handle):
 
         if "END header" in line:
             if file_data["num_ions"] is None or file_data["num_branches"] is None:
-                raise IOError("Failed to parse file. Invalid file header.")
+                raise OSError("Failed to parse file. Invalid file header.")
             return file_data
 
 
@@ -179,7 +179,7 @@ def _parse_phonon_eigenvectors(f_handle, num_ions, num_branches):
         line = f_handle.readline()
 
         if not line:
-            raise IOError("Could not parse file. Invalid file format.")
+            raise OSError("Could not parse file. Invalid file format.")
 
         line_data = line.strip().split()
         vector_componets = line_data[2::2]

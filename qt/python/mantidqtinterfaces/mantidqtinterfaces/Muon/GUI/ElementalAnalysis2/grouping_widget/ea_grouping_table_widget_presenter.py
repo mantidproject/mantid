@@ -17,7 +17,7 @@ REBIN_VARIABLE_OPTION = "2"
 DEFAULT_DETECTOR_PLOTTED_ORDER = ["Detector 3", "Detector 1", "Detector 4", "Detector 2"]
 
 
-class EAGroupingTablePresenter(object):
+class EAGroupingTablePresenter:
     def __init__(self, view, model):
         self._view = view
         self._model = model

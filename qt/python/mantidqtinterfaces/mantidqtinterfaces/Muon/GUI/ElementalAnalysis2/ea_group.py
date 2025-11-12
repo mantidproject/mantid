@@ -9,7 +9,7 @@ from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.ADS_calls import remove_ws_if
 from mantidqt.utils.observer_pattern import GenericObservable
 
 
-class EAGroup(object):
+class EAGroup:
     """
     Simple structure to store information on a group in Elemental Analysis.
 

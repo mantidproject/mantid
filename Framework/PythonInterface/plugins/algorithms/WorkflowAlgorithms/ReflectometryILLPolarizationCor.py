@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-# Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
@@ -25,7 +24,6 @@ from mantid.kernel import (
     StringListValidator,
 )
 from mantid.simpleapi import LoadILLPolarizationFactors, PolarizationEfficiencyCor, RebinToWorkspace
-from typing import List
 
 
 class Prop:
@@ -115,7 +113,7 @@ class ReflectometryILLPolarizationCor(DataProcessorAlgorithm):
 
         self._finalize(ws)
 
-    def _common_binning(self, wss: List[str]) -> List[str]:
+    def _common_binning(self, wss: list[str]) -> list[str]:
         """Rebins all workspaces in wss list to the first one.
 
         Keyword arguments:
@@ -125,7 +123,7 @@ class ReflectometryILLPolarizationCor(DataProcessorAlgorithm):
             RebinToWorkspace(WorkspaceToRebin=wss[i], OutputWorkspace=wss[i], WorkspaceToMatch=wss[0], EnableLogging=self._subalg_logging)
         return wss
 
-    def _correct(self, wss: List[str], eff_ws: MatrixWorkspace) -> WorkspaceGroup:
+    def _correct(self, wss: list[str], eff_ws: MatrixWorkspace) -> WorkspaceGroup:
         """Returns a workspace group containing the polarization efficiency corrected workspaces.
 
         Keyword arguments:
@@ -164,7 +162,7 @@ class ReflectometryILLPolarizationCor(DataProcessorAlgorithm):
         self.setProperty(Prop.OUTPUT_WS, ws)
         self._cleanup.finalCleanup()
 
-    def _flipper_configuration(self, wss: List[str]) -> str:
+    def _flipper_configuration(self, wss: list[str]) -> str:
         """Returns flipper configuration string and reorder wss for PolarizationEfficiencyCor compatibility.
 
         Keyword arguments:
@@ -233,7 +231,7 @@ class ReflectometryILLPolarizationCor(DataProcessorAlgorithm):
         wss[3] = flippers[1, 1]
         return "00, 01, 10, 11"
 
-    def _input_ws(self) -> List[str]:
+    def _input_ws(self) -> list[str]:
         """Returns an array containing the input workspaces."""
         wss = self.getProperty(Prop.INPUT_WS).value
         for ws in wss:

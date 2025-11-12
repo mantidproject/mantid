@@ -14,7 +14,7 @@ from mantidqtinterfaces.Muon.GUI.Common.utilities.run_string_utils import flatte
 from mantidqt.utils.observer_pattern import Observable
 
 
-class LoadRunWidgetPresenter(object):
+class LoadRunWidgetPresenter:
     def __init__(self, view, model):
         self._view = view
         self._model = model

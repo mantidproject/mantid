@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from typing import Dict, Any
+from typing import Any
 
 from qtpy.QtCore import Qt
 from qtpy.QtWidgets import QMessageBox
@@ -37,7 +37,7 @@ class SettingsView(base, form):
             self.deleteLater()
             super(SettingsView, self).closeEvent(event)
 
-    def ask_before_close(self, unsaved_changes: Dict[str, Any]):
+    def ask_before_close(self, unsaved_changes: dict[str, Any]):
         change_strings = [f"{property_string}: {value}" for property_string, value in unsaved_changes.items()]
         reply = QMessageBox.question(
             self,

@@ -17,7 +17,7 @@ from mantidqt.widgets.workspacedisplay.table.presenter_standard import TableWork
 
 # standard
 from enum import Enum
-from typing import List, Union
+from typing import Union
 
 
 class PeaksWorkspaceDataPresenter(TableWorkspaceDataPresenterStandard):
@@ -203,7 +203,7 @@ class PeaksViewerCollectionPresenter:
         self._view = view
         self._actions_view = view.peak_actions_view
         self._actions_view.subscribe(self)
-        self._child_presenters: List[PeaksViewerPresenter] = []
+        self._child_presenters: list[PeaksViewerPresenter] = []
         self._ads_observer = None
         self.setup_ads_observer()
 

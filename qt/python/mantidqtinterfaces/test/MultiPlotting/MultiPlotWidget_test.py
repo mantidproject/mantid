@@ -13,7 +13,7 @@ from mantidqtinterfaces.MultiPlotting.multi_plotting_context import PlottingCont
 from mantidqtinterfaces.MultiPlotting.multi_plotting_widget import MultiPlotWidget
 
 
-class bounds(object):
+class bounds:
     def __init__(self, x, y):
         self.x = x
         self.y = y

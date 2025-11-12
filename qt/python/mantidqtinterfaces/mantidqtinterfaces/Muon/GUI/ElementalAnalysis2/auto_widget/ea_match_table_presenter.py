@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 
-class EAMatchTablePresenter(object):
+class EAMatchTablePresenter:
     def __init__(self, view):
         self.view = view
         self.table_entries = []

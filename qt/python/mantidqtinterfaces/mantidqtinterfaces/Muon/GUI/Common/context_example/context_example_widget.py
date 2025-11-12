@@ -9,7 +9,7 @@ from mantidqtinterfaces.Muon.GUI.Common.context_example.context_example_presente
 from mantidqtinterfaces.Muon.GUI.Common.context_example.context_example_model import ContextExampleModel
 
 
-class ContextExampleWidget(object):
+class ContextExampleWidget:
     """
     An example of how to use the context with a widget class.
     The widget class exposes the MVP to the rest of the GUI

@@ -236,7 +236,7 @@ def getISAWub(fullfilename):
     """
     fileID = fullfilename
     if fileID == 1:
-        print(("Error opening file: " + fullfilename))
+        print("Error opening file: " + fullfilename)
     f = open(fileID, "r")
     lines = f.readlines()
     f.close()
@@ -477,7 +477,7 @@ def getMANTIDdat_keepbinning(csvfile):
     y = []
     e = []
     if fid < 0:
-        print(("Error opening file: " + csvfile))
+        print("Error opening file: " + csvfile)
     for i in range(1, len(lines)):
         a, b, c = lines[i].split(",")
         x.append(float(a))
@@ -556,16 +556,16 @@ def showx3(x):
     L2 = x[neqv1 + neqv2 + 13]
 
     print("_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/\n")
-    print(("Setting angles diam {0} : \nalp {1} bet {2} gam {3} \n".format(1, setang1[0], setang1[1], setang1[2])))
-    print(("pkmult1: {0}\n".format(pkmult1)))
-    print(("Setting angles diam {0} : \nalp {1} bet {2} gam {3} \n".format(2, setang2[0], setang2[1], setang2[2])))
-    print(("pkmult2: {0}\n".format(pkmult2)))
-    print(("Scale factor: {0}\n".format(sf)))
-    print(("pkwid1: {0}\n".format(pkwid1)))
-    print(("pkwid2: {0}\n".format(pkwid2)))
-    print(("Rel. scale factor : {0}\n".format(relsf)))
-    print(("Lambda multiplier: {0}\n".format(delam)))
-    print(("L2 sample to detector: {0} m\n".format(L2)))
+    print("Setting angles diam {0} : \nalp {1} bet {2} gam {3} \n".format(1, setang1[0], setang1[1], setang1[2]))
+    print("pkmult1: {0}\n".format(pkmult1))
+    print("Setting angles diam {0} : \nalp {1} bet {2} gam {3} \n".format(2, setang2[0], setang2[1], setang2[2]))
+    print("pkmult2: {0}\n".format(pkmult2))
+    print("Scale factor: {0}\n".format(sf))
+    print("pkwid1: {0}\n".format(pkwid1))
+    print("pkwid2: {0}\n".format(pkwid2))
+    print("Rel. scale factor : {0}\n".format(relsf))
+    print("Lambda multiplier: {0}\n".format(delam))
+    print("L2 sample to detector: {0} m\n".format(L2))
     print("_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/\n")
 
 
@@ -846,7 +846,7 @@ def SimTrans3(x):
 
     # Print if the user wants verbose minimization
     if function_verbose == "y":
-        print(("Chi^2 ... " + str(chi2)))
+        print("Chi^2 ... " + str(chi2))
 
     return chi2
 
@@ -887,8 +887,8 @@ def FitTrans():
         print("*diamonds allowed to have different dip intensities!*")
 
     if cnstang == 1:
-        print(("*Diam {0} setting angles constrained to range of +/- {1} about their current values*".format(1, anglim1)))
-        print(("*Diam {0} setting angles constrained to range of +/- {1} about their current values*".format(2, anglim2)))
+        print("*Diam {0} setting angles constrained to range of +/- {1} about their current values*".format(1, anglim1))
+        print("*Diam {0} setting angles constrained to range of +/- {1} about their current values*".format(2, anglim2))
     else:
         print("no constraint on setting angles")
 
@@ -928,7 +928,7 @@ def FitTrans():
     # fullfilename_trans = 'transNorm13148.csv'
     TOF, yin, ein = getMANTIDdat_keepbinning(fullfilename_trans)
 
-    print(("Starting refinement for: " + fullfilename_trans))
+    print("Starting refinement for: " + fullfilename_trans)
 
     # set-up simulation
 
@@ -947,7 +947,7 @@ def FitTrans():
     # rebin transmission data
     lam = 0.0039558 * TOF / (L1 + initL2)
 
-    print(("wavelength limits: " + str(lam[0]) + " and " + str(lam[len(lam) - 1])))
+    print("wavelength limits: " + str(lam[0]) + " and " + str(lam[len(lam) - 1]))
     minlam = 0.8
     maxlam = 3.5
     imin = np.where(lam >= minlam)[0][0]
@@ -998,8 +998,8 @@ def FitTrans():
             hkl2 = np.vstack([hkl2, allhkl[i]])
             k2 += 1
 
-    print(("There are: " + str(k1) + " expected dips due to Crystal 1"))
-    print(("There are: " + str(k2) + " expected dips due to Crystal 2"))
+    print("There are: " + str(k1) + " expected dips due to Crystal 1")
+    print("There are: " + str(k2) + " expected dips due to Crystal 2")
 
     # determine equivalents
     # returns array with same dim as input labelling equivs
@@ -1044,10 +1044,10 @@ def FitTrans():
             x0 = np.hstack((setang1, pkmult1, setang2, pkmult2, sf, pkwid, tbgd, pkwid2, relsf, delam, L2))
             print("discarding pars from previous run")
 
-    print((str(len(x0)) + " parameters will be refined"))
+    print(str(len(x0)) + " parameters will be refined")
 
     nvar = len(x0)
-    print(("number of variables: " + str(nvar)))
+    print("number of variables: " + str(nvar))
     # nref1 = hkl1.shape[0] # unused variable
     # nref2 = hkl2.shape[0] # unused variable
 
@@ -1057,7 +1057,7 @@ def FitTrans():
 
     if fxsamediam == 1 and x0[neqv1 + neqv2 + 11] != 1:
         x0[6 + neqv1 : 7 + neqv1 + neqv2 - 1] = x0[3 : 4 + neqv2 - 1] / x0[neqv1 + neqv2 + 11]
-        print(("Diam 2 peak multipliers reset: " + str(x0[neqv1 + neqv2 + 11])))
+        print("Diam 2 peak multipliers reset: " + str(x0[neqv1 + neqv2 + 11]))
 
     # check starting point
 
@@ -1072,7 +1072,7 @@ def FitTrans():
     plt.grid()
     plt.legend(bbox_to_anchor=(0.0, 1.02, 1.0, 0.102), loc=3, ncol=3, mode="expand", borderaxespad=0.0)
     plt.show()
-    print(("Initial chi^2 is: " + str(chi2)))
+    print("Initial chi^2 is: " + str(chi2))
 
     showx3(x0)
 
@@ -1200,7 +1200,7 @@ def FitTrans():
         # neqv1+neqv2+11
         # x[neqv1+neqv2+11]
         x[6 + neqv1 : 7 + neqv1 + neqv2 - 1] = x[3 : 4 + neqv2 - 1] * x[neqv1 + neqv2 + 11]
-        print(("Diam 2 peak multipliers reset with factor: " + str(x[neqv1 + neqv2 + 11])))
+        print("Diam 2 peak multipliers reset with factor: " + str(x[neqv1 + neqv2 + 11]))
     else:
         # label ensuring I know that run did not use fxsamediam
         x[neqv1 + neqv2 + 11] = 1.0
@@ -1214,7 +1214,7 @@ def FitTrans():
 
     # calculate chi2 for best fit
     chi2 = SimTrans3(x)
-    print(("Final Chi2 = " + str(chi2)))
+    print("Final Chi2 = " + str(chi2))
 
     # determine output wavelength range using refined L2 value
 
@@ -1246,7 +1246,7 @@ def FitTrans():
     else:
         fitparname = str(run_number) + ".best_fit_pars3.dat"
         np.savetxt(fitparname, x, delimiter=",")
-        print(("output parameters written to file: \n" + fitparname))
+        print("output parameters written to file: \n" + fitparname)
         ofilename = str(run_number) + ".fitted3.dat"
         SimTransOutput3(ofilename, x)  # generate output file with fitted data
 

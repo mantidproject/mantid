@@ -13,7 +13,7 @@ from ...utils.asynchronous import set_interval
 TIME_INTERVAL_MEMORY_USAGE_UPDATE = 2.000  # in s
 
 
-class MemoryPresenter(object):
+class MemoryPresenter:
     """
     Gets system memory usage information and passes it to the memory view this happens at the beginning as well as
     every TIME_INTERVAL_MEMORY_USAGE_UPDATE (s) using threading.Timer; Also, sets the style of the memory(progress) bar

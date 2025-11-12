@@ -6,7 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantidqt.
 # std imports
-from typing import Tuple, Sequence, Optional
+from typing import Optional
+from collections.abc import Sequence
 
 # 3rd party
 import numpy as np
@@ -15,7 +16,7 @@ from mantidqt.widgets.sliceviewer.models.transform import NonOrthogonalTransform
 
 # Types
 SlicePointType = Optional[float]
-DimensionRange = Tuple[float, float]
+DimensionRange = tuple[float, float]
 DimensionRangeCollection = Sequence[DimensionRange]
 
 

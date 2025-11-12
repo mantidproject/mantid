@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 
-class PEARL_FOCUS_MODES(object):
+class PEARL_FOCUS_MODES:
     enum_friendly_name = "focus modes"
     all = "all"
     groups = "groups"
@@ -15,7 +15,7 @@ class PEARL_FOCUS_MODES(object):
     trans_custom = "trans_custom"
 
 
-class PEARL_TT_MODES(object):
+class PEARL_TT_MODES:
     enum_friendly_name = "tt_modes"
     all = "all"
     tt_35 = "tt35"

@@ -388,7 +388,7 @@ class AbinsBasicTest(unittest.TestCase):
 
         assert_array_almost_equal(wrk_h_total.extractX(), wrk_atom_totals[0].extractX())
 
-        assert_array_almost_equal(wrk_h_total.extractY(), sum((wrk.extractY() for wrk in wrk_atom_totals)))
+        assert_array_almost_equal(wrk_h_total.extractY(), sum(wrk.extractY() for wrk in wrk_atom_totals))
 
 
 if __name__ == "__main__":

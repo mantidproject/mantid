@@ -81,7 +81,7 @@ class ValidatedTableItem(QtWidgets.QTableWidgetItem):
 
 
 def setRowName(table, row, name, col=0):
-    text = QtWidgets.QTableWidgetItem((name))
+    text = QtWidgets.QTableWidgetItem(name)
     text.setFlags(QtCore.Qt.ItemIsEnabled)
     table.setItem(row, col, text)
 
@@ -206,7 +206,7 @@ class DoubleItemDelegate(QStyledItemDelegate):
 
     def createEditor(self, parent, option, index):
         line_edit = QLineEdit(parent)
-        validator = LineEditDoubleValidator(line_edit, float(0.0))
+        validator = LineEditDoubleValidator(line_edit, 0.0)
         validator.setBottom(-sys.float_info.max)
         validator.setTop(sys.float_info.max)
         line_edit.setValidator(validator)

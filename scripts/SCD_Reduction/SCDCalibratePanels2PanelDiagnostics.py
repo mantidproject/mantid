@@ -17,14 +17,14 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 from matplotlib.colors import LogNorm, SymLogNorm
 from mpl_toolkits.axes_grid1.inset_locator import InsetPosition
-from typing import List, Tuple, Dict, Union
+from typing import Union
 from mantid.dataobjects import PeaksWorkspace
 from mantid.simpleapi import mtd
 
 
 def bank_boxplot(
-    pltdata_eng: Dict[str, np.ndarray],
-    pltdata_cal: Dict[str, np.ndarray],
+    pltdata_eng: dict[str, np.ndarray],
+    pltdata_cal: dict[str, np.ndarray],
     figsize: np.ndarray,
     figname: str = None,
     saveto: str = ".",
@@ -109,7 +109,7 @@ def bank_boxplot(
     logging.info(f"Figure {figname} is saved to {saveto}.")
 
 
-def get_boxplot_data(pltdata: Dict[str, np.ndarray]) -> Tuple[list, list, np.ndarray, np.ndarray]:
+def get_boxplot_data(pltdata: dict[str, np.ndarray]) -> tuple[list, list, np.ndarray, np.ndarray]:
     """
     Helper function to organize the plot data for box plot
 
@@ -128,8 +128,8 @@ def get_boxplot_data(pltdata: Dict[str, np.ndarray]) -> Tuple[list, list, np.nda
 
 
 def bank_overlay(
-    pltdata_eng: Dict[str, np.ndarray],
-    pltdata_cal: Dict[str, np.ndarray],
+    pltdata_eng: dict[str, np.ndarray],
+    pltdata_cal: dict[str, np.ndarray],
     figsize: np.ndarray,
     generate_report: bool = True,
     figname: str = None,
@@ -232,9 +232,9 @@ def bank_overlay(
 
 
 def calc_overlay_delta(
-    pltdata_eng: Dict[str, np.ndarray],
-    pltdata_cal: Dict[str, np.ndarray],
-) -> Dict[str, np.ndarray]:
+    pltdata_eng: dict[str, np.ndarray],
+    pltdata_cal: dict[str, np.ndarray],
+) -> dict[str, np.ndarray]:
     """
     Return a dictionary containing the pair wise relative difference
 
@@ -259,8 +259,8 @@ def calc_overlay_delta(
 
 def get_plot_data(
     pws: PeaksWorkspace,
-    banknames: List[str],
-) -> Dict[str, np.ndarray]:
+    banknames: list[str],
+) -> dict[str, np.ndarray]:
     """
     Gather data for Panel diagnostics
 
@@ -294,17 +294,17 @@ def get_plot_data(
 def SCDCalibratePanels2PanelDiagnosticsPlot(
     peaksWorkspace_engineering: Union[PeaksWorkspace, str],
     peaksWorkspace_calibrated: Union[PeaksWorkspace, str],
-    banknames: Union[str, List[str]] = None,
+    banknames: Union[str, list[str]] = None,
     mode: str = "boxplot",
     generate_report: bool = True,
     use_logscale: bool = True,
-    config: Dict[str, str] = {
+    config: dict[str, str] = {
         "prefix": "fig",
         "type": "png",
         "saveto": ".",
     },
     showPlots: bool = True,
-) -> List[Dict[str, np.ndarray]]:
+) -> list[dict[str, np.ndarray]]:
     """
     Visualization of the diagnostic for SCDCalibratePanels2 on a per
     panel (bank) basis.

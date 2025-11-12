@@ -50,7 +50,7 @@ def construct_empty_pair(group_names, pair_names, pair_index=0):
     return MuonPair(pair_name=new_pair_name, forward_group_name=group1, backward_group_name=group2, alpha=1.0)
 
 
-class MuonDataContext(object):
+class MuonDataContext:
     """
     The MuonContext is the core class for the MuonAnalysis 2 interface. It stores all the data and parameters used
     in the interface and serves as the model part of the MVP design pattern for every widget in the interface.

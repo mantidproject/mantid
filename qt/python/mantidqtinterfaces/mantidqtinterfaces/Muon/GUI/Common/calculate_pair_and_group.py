@@ -7,7 +7,7 @@
 import mantidqtinterfaces.Muon.GUI.Common.utilities.algorithm_utils as algorithm_utils
 from mantidqtinterfaces.Muon.GUI.Common.utilities.run_string_utils import run_list_to_string
 from mantidqtinterfaces.Muon.GUI.Common.muon_pair import MuonPair
-from typing import Iterable
+from collections.abc import Iterable
 
 
 def calculate_group_data(context, group, run, workspace_name, periods):

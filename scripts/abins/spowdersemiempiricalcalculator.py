@@ -10,7 +10,7 @@ from functools import cached_property, partial
 import json
 from operator import attrgetter
 from pathlib import Path
-from typing import Dict, Tuple, Union
+from typing import Union
 
 from euphonic import ureg
 from euphonic.spectra import (
@@ -47,7 +47,7 @@ from mantid.api import Progress
 SpectrumCollection = Spectrum1DCollection | Spectrum2DCollection
 
 # Raw S contributions as a dict keyed by (atom_index, quantum_order)
-SByAtomAndOrder = Dict[Tuple[int, int], np.ndarray]
+SByAtomAndOrder = dict[tuple[int, int], np.ndarray]
 
 
 class SPowderSemiEmpiricalCalculator:
@@ -179,7 +179,7 @@ class SPowderSemiEmpiricalCalculator:
             spectra = self.load_formatted_data()
             self._report_progress("Spectrum data has been loaded from the HDF file.", reporter=self.progress_reporter)
 
-        except (IOError, ValueError):
+        except (OSError, ValueError):
             self._report_progress("Data not found in cache. Structure factors need to be calculated.", notice=True)
             spectra = self.calculate_data()
 

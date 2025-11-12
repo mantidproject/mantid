@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 
-class SummableRunFile(object):
+class SummableRunFile:
     def __init__(self, path, run_number, is_event_mode):
         assert isinstance(path, str)
         assert isinstance(run_number, str)

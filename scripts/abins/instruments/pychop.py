@@ -1,4 +1,4 @@
-from typing import Optional, Tuple, Union
+from typing import Optional, Union
 
 import numpy as np
 from pychop import Instruments as pychop_instruments
@@ -41,7 +41,7 @@ class PyChopInstrument(DirectInstrument):
 
         return chopper_frequency
 
-    def get_angle_range(self) -> Tuple[float, float]:
+    def get_angle_range(self) -> tuple[float, float]:
         return np.min(self._tthlims), np.max(self._tthlims)
 
     def prepare_resolution(self):

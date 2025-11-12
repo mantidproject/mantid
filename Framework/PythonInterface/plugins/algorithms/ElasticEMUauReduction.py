@@ -59,7 +59,8 @@ from ANSTO.ansto_common import (
 )
 from ANSTO.emu_common import FilterEmuPixelsTubes, EmuParameters, DopplerSupport
 
-from typing import Any, List, Sequence, Callable, Dict, Tuple
+from typing import Any
+from collections.abc import Sequence, Callable
 
 Interpolator = Callable[[NDArray], NDArray]
 
@@ -86,7 +87,7 @@ class ElasticEMUauReduction(PythonAlgorithm):
     def summary(self) -> str:
         return "Performs an elastic reduction for ANSTO EMU indirect geometry data."
 
-    def seeAlso(self) -> List[str]:
+    def seeAlso(self) -> list[str]:
         return ["IndirectILLEnergyTransfer"]
 
     def name(self) -> str:
@@ -631,7 +632,7 @@ class ElasticEMUauReduction(PythonAlgorithm):
             ParentWorkspace=input_ws,
         )
 
-    def get_single_bin_map(self, input_ws: str) -> Tuple[Interpolator, Dict[str, List[float]]]:
+    def get_single_bin_map(self, input_ws: str) -> tuple[Interpolator, dict[str, list[float]]]:
         iws = mtd[input_ws]
         irun = iws.getRun()
         start = irun.startTime()
@@ -648,7 +649,7 @@ class ElasticEMUauReduction(PythonAlgorithm):
 
         return tsmap, bin_params
 
-    def get_pulse_map_bins(self, input_ws: str, env_tag: str, stepped_env: bool) -> Tuple[Interpolator, Dict[str, Any]]:
+    def get_pulse_map_bins(self, input_ws: str, env_tag: str, stepped_env: bool) -> tuple[Interpolator, dict[str, Any]]:
         iws = mtd[input_ws]
         irun = iws.getRun()
         start = irun.startTime()
@@ -710,7 +711,7 @@ class ElasticEMUauReduction(PythonAlgorithm):
 
         return tsmap, bin_params
 
-    def rebin_by_values(self, input_ws: str, output_ws: str, tsmap: Interpolator, bin_params: Dict[str, Any]) -> None:
+    def rebin_by_values(self, input_ws: str, output_ws: str, tsmap: Interpolator, bin_params: dict[str, Any]) -> None:
         # open the workspace, get the variable timeseries and create the interpolator,
         # note that the env variables are captured at the end dataset acquisition
         iws = mtd[input_ws]

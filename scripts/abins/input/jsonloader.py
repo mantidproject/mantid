@@ -8,7 +8,6 @@
 from enum import auto, Enum
 import json
 from pathlib import Path
-from typing import Dict
 
 from euphonic import QpointPhononModes
 import numpy as np
@@ -73,7 +72,7 @@ class JSONLoader(AbInitioLoader):
                 return PhononJSON.UNKNOWN
 
     @staticmethod
-    def array_from_dict(data: Dict[str | int, np.ndarray], complex=False) -> np.ndarray:
+    def array_from_dict(data: dict[str | int, np.ndarray], complex=False) -> np.ndarray:
         """Convert from dict of n-d arrays to (n+1-d) array
 
         AbinsData uses these dicts so that frequency data rows can have

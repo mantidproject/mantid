@@ -6,7 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 from enum import Enum
-from typing import Sequence, Optional
+from typing import Optional
+from collections.abc import Sequence
 
 from mantid.api import MatrixWorkspace, MultipleExperimentInfos
 

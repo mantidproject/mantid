@@ -48,7 +48,7 @@ d_range_alice = {
 }
 
 
-class WORKSPACE_SUFFIX(object):
+class WORKSPACE_SUFFIX:
     CONTAINER_CORRECTED = "_container_corrected"
     MERGED = "_merged"
     FOCUSED = "_focused"
@@ -61,7 +61,7 @@ def get_osiris_d_range(run_ws):
     return list(d_range_with_time.keys())[list(d_range_with_time.values()).index(x_range)]
 
 
-class DrangeData(object):
+class DrangeData:
     def __init__(self, drange):
         self._drange = drange
         self._sample = []

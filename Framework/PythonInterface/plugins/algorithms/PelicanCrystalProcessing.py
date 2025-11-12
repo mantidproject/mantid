@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import os
 import h5py
-from typing import Sequence
+from collections.abc import Sequence
 
 from mantid import config
 from mantid.kernel import Direction, StringArrayMandatoryValidator, StringArrayProperty, CompositeValidator

@@ -12,17 +12,17 @@ from sans.common.general_functions import create_unmanaged_algorithm
 from sans.common.constants import EMPTY_NAME
 
 
-class Mode(object):
-    class ShiftOnly(object):
+class Mode:
+    class ShiftOnly:
         pass
 
-    class ScaleOnly(object):
+    class ScaleOnly:
         pass
 
-    class BothFit(object):
+    class BothFit:
         pass
 
-    class NoneFit(object):
+    class NoneFit:
         pass
 
 
@@ -449,7 +449,7 @@ class SANSStitch(DataProcessorAlgorithm):
                 errors[property_name] = "This workspace is required in order to process the can"
 
 
-class QErrorCorrectionForMergedWorkspaces(object):
+class QErrorCorrectionForMergedWorkspaces:
     def __init__(self):
         super(QErrorCorrectionForMergedWorkspaces, self).__init__()
 

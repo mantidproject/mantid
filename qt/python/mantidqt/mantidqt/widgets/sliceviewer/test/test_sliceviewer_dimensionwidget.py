@@ -6,7 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 import unittest
-from typing import Dict
 
 from mantidqt.widgets.sliceviewer.views.dimensionwidget import DimensionWidget
 from mantidqt.utils.qt.testing import start_qapplication
@@ -18,7 +17,7 @@ class DimensionWidgetTest(unittest.TestCase):
         dimensions = ["H", "K", "L", "E"]
         self.dim_info = [self.generate_dim_info(d) for d in dimensions]
 
-    def generate_dim_info(self, dimension: str) -> Dict:
+    def generate_dim_info(self, dimension: str) -> dict:
         return {
             "minimum": -1.0,
             "maximum": 1.0,

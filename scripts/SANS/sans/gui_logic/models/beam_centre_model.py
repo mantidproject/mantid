@@ -10,7 +10,7 @@ from sans.gui_logic.gui_common import meter_2_millimeter, millimeter_2_meter, ap
 from sans.gui_logic.models.async_workers.beam_centre_async import BeamCentreFields
 
 
-class BeamCentreModel(object):
+class BeamCentreModel:
     logger = Logger("CentreFinder")
 
     def __init__(self):

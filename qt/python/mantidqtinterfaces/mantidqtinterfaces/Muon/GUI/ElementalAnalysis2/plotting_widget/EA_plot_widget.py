@@ -14,7 +14,7 @@ from mantidqtinterfaces.Muon.GUI.ElementalAnalysis2.plotting_widget.EA_plotting_
 from mantidqtinterfaces.Muon.GUI.Common.plot_widget.base_pane.base_pane_view import BasePaneView
 
 
-class EAPlotWidget(object):
+class EAPlotWidget:
     def __init__(self, context=None, get_active_fit_results=lambda: [], parent=None):
         self.data_model = EAPlotDataPaneModel(context)
 

@@ -387,7 +387,7 @@ class MultiPythonFileInterpreter(QWidget):
         if self.prev_session_tabs is not None:
             try:
                 self.open_files_in_new_tabs(self.prev_session_tabs)
-            except IOError:
+            except OSError:
                 pass
             self.close_tab(0)  # close default empty script
 

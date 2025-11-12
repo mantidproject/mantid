@@ -7,7 +7,7 @@
 import re
 
 
-class RowOptionsModel(object):
+class RowOptionsModel:
     def __init__(self):
         self._user_options = None
         self._developer_options = {}

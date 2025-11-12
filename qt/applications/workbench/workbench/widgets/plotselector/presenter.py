@@ -14,7 +14,7 @@ from .model import PlotSelectorModel
 from .view import PlotSelectorView, Column
 
 
-class PlotSelectorPresenter(object):
+class PlotSelectorPresenter:
     """
     Presenter for the plot selector widget. This class can be
     responsible for the creation of the model and view, passing in

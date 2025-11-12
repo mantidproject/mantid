@@ -49,7 +49,7 @@ class USANSReduction(PythonAlgorithm):
         self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", "", Direction.Output), "Output workspace")
 
     # pylint: disable= too-few-public-methods
-    class DataFile(object):
+    class DataFile:
         # pylint: disable= too-many-arguments
         def __init__(self, workspace, monitor, empty, empty_monitor, is_scan=False, max_index=1):
             self.workspace = workspace

@@ -12,7 +12,7 @@ from mantid.api import WorkspaceGroup
 from mantid.kernel import logger
 
 
-class SaveOtherPresenter(object):
+class SaveOtherPresenter:
     def __init__(self, parent_presenter=None):
         self._parent_presenter = parent_presenter
         self._view = None

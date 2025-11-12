@@ -19,7 +19,7 @@ from reduction_gui.reduction.scripter import BaseScriptElement, BaseReductionScr
 # -------------------------------------------------------------------------------
 
 
-class OptionalFloat(object):
+class OptionalFloat:
     """value can be either a float or None. if value is None, str(self) == ''"""
 
     def __init__(self, value=None):

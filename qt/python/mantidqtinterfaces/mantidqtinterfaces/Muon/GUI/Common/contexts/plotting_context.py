@@ -7,10 +7,9 @@
 
 from mantidqtinterfaces.Muon.GUI.Common.contexts.plot_edit_context import PlotEditContext
 from mantidqtinterfaces.Muon.GUI.Common.contexts.plot_settings_context import PlotSettingsContext
-from typing import List
 
 
-class PlottingContext(object):
+class PlottingContext:
     def __init__(self):
         self._subplots = {}
         self._default_xlim = [-0.1, 0.1]
@@ -39,7 +38,7 @@ class PlottingContext(object):
     def set_tiled_by(self, tiled_by):
         self._is_tiled_by = tiled_by
 
-    def set_defaults(self, default_xlim: List[float], default_ylim: List[float]):
+    def set_defaults(self, default_xlim: list[float], default_ylim: list[float]):
         self._default_xlim = default_xlim
         self._default_ylim = default_ylim
         self._xlim_all = self._default_xlim
@@ -76,18 +75,18 @@ class PlottingContext(object):
 
     """ methods for the All option """
 
-    def update_xlim_all(self, values: List[float]):
+    def update_xlim_all(self, values: list[float]):
         self._xlim_all = values
 
     @property
-    def get_xlim_all(self) -> List[float]:
+    def get_xlim_all(self) -> list[float]:
         return self._xlim_all
 
-    def update_ylim_all(self, values: List[float]):
+    def update_ylim_all(self, values: list[float]):
         self._ylim_all = values
 
     @property
-    def get_ylim_all(self) -> List[float]:
+    def get_ylim_all(self) -> list[float]:
         return self._ylim_all
 
     def set_autoscale_all(self, state: bool):
@@ -106,14 +105,14 @@ class PlottingContext(object):
 
     """ get/edit values for a specific subplot"""
 
-    def update_xlim(self, name: str, values: List[float]):
+    def update_xlim(self, name: str, values: list[float]):
         if name == "All":
             for subplot in list(self._subplots.keys()):
                 self._subplots[subplot].update_xlim(values)
             return
         self._subplots[name].update_xlim(values)
 
-    def update_ylim(self, name: str, values: List[float]):
+    def update_ylim(self, name: str, values: list[float]):
         if name == "All":
             for subplot in list(self._subplots.keys()):
                 self._subplots[subplot].update_ylim(values)
@@ -134,12 +133,12 @@ class PlottingContext(object):
             return
         self._subplots[name].update_error_state(state)
 
-    def get_xlim(self, name: str) -> List[float]:
+    def get_xlim(self, name: str) -> list[float]:
         if name == "All":
             return self._subplots[self._subplots.keys[0]].get_xlim()
         return self._subplots[name].get_xlim
 
-    def get_ylim(self, name: str) -> List[float]:
+    def get_ylim(self, name: str) -> list[float]:
         if name == "All":
             return self._subplots[self._subplots.keys[0]].get_ylim()
         return self._subplots[name].get_ylim

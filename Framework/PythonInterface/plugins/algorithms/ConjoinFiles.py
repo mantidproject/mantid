@@ -37,7 +37,7 @@ class ConjoinFiles(PythonAlgorithm):
                 self.log().information("Trying to load '%s'" % filename)
                 loader(Filename=filename, OutputWorkspace=wksp)
                 return
-            except (RuntimeError, IOError, ValueError) as e:
+            except (OSError, RuntimeError, ValueError) as e:
                 logger.information(str(e))
         raise RuntimeError("Failed to load run %s from file %s" % (str(run), filename))
 

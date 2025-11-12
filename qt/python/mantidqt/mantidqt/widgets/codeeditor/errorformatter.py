@@ -13,7 +13,7 @@ import traceback
 # third-party imports
 
 
-class ErrorFormatter(object):
+class ErrorFormatter:
     """Formats errors to strings"""
 
     def format(self, exc_type, exc_value, stack):

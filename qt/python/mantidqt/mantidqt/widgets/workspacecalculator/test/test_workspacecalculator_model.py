@@ -120,7 +120,7 @@ class WorkspaceCalculatorModelTest(unittest.TestCase):
         self.assertEqual(lhs_validation, passed)
         self.assertEqual(rhs_validation, passed)
         if passed:
-            self.assertEqual(err_msg, str())
+            self.assertEqual(err_msg, "")
         else:
             self.assertTrue(len(err_msg) != 0)
 

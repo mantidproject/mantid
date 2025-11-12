@@ -5,13 +5,12 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import abc
-from typing import List
 from mantid.dataobjects import Workspace2D
 
 
 class PlottingCanvasPresenterInterface(abc.ABC):
     @abc.abstractmethod
-    def plot_workspaces(self, workspace_names: List[str], workspace_indices: List[int], hold_on: bool, autoscale: bool):
+    def plot_workspaces(self, workspace_names: list[str], workspace_indices: list[int], hold_on: bool, autoscale: bool):
         """Plots the input workspace names and indices in the figure window
         If hold_on is True the existing workspaces plotted in the figure are kept
         :param workspace_names: List of workspace names.
@@ -30,7 +29,7 @@ class PlottingCanvasPresenterInterface(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def remove_workspace_names_from_plot(self, workspace_names: List[str]):
+    def remove_workspace_names_from_plot(self, workspace_names: list[str]):
         """Removes the input workspace names from the plot
         :param workspace_names: List of workspace names
         """
@@ -51,7 +50,7 @@ class PlottingCanvasPresenterInterface(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def create_tiled_plot(self, keys: List[str], tiled_by: str):
+    def create_tiled_plot(self, keys: list[str], tiled_by: str):
         """Creates a blank tiled plot specified by the keys and tiled by type
         :param keys: A list of keys which will be used to label and categorize each tile
         :param tiled_by: A string which states how the tiles are arranged (can be either by Groups or Runs)
@@ -64,7 +63,7 @@ class PlottingCanvasPresenterInterface(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def convert_plot_to_tiled_plot(self, keys: List[str], tiled_by: str):
+    def convert_plot_to_tiled_plot(self, keys: list[str], tiled_by: str):
         """Converts the current plot into a tiled plot specified by the keys and tiled by type
         In then replots the existing data on the new tiles
         :param keys: A list of keys which will be used to label and categorize each tile
@@ -102,6 +101,6 @@ class PlottingCanvasPresenterInterface(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def set_plot_range(self, range: List[float]):
+    def set_plot_range(self, range: list[float]):
         """Sets the x range of all the plots"""
         pass

@@ -14,7 +14,7 @@ Set of functions to assist with processing instrument parameters relevant to red
 """
 
 
-class ComplexProperty(object):
+class ComplexProperty:
     """Class describes property which depends on other properties and stores/receives values in other properties"""
 
     def __init__(self, other_prop_list):

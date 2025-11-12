@@ -194,7 +194,7 @@ def attach_tableworkspaceiterator():
     """Attaches the iterator code to a table workspace."""
 
     def __iter_method(self):
-        class ITableWorkspaceIter(object):
+        class ITableWorkspaceIter:
             def __init__(self, wksp):
                 self.__wksp = wksp
                 self.__pos = 0

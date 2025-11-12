@@ -12,7 +12,7 @@ import sys
 from mantid.kernel import logger
 
 
-class ShowInExplorer(object):
+class ShowInExplorer:
     @staticmethod
     def open_directory(path):
         try:

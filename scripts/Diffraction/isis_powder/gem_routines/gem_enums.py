@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 
-class GEM_CHOPPER_MODES(object):
+class GEM_CHOPPER_MODES:
     enum_friendly_name = "Gem chopper modes"
     PDF = "PDF"
     Rietveld = "Rietveld"

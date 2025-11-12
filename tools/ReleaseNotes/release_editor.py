@@ -10,8 +10,6 @@ import pathlib
 import subprocess
 import requests
 
-from typing import List, Tuple
-
 
 DIRECTIVE = ".. amalgamate:: "
 GIT_REPO = "mantidproject/mantid"
@@ -63,7 +61,7 @@ def add_release_notes_to_main_pages(release_notes_root: pathlib.Path, git_token:
                     update_file(release_notes_root / file, release_notes_text, line)
 
 
-def append_release_note_directories(path: pathlib.Path, directory_list: List[pathlib.Path]):
+def append_release_note_directories(path: pathlib.Path, directory_list: list[pathlib.Path]):
     if not os.path.isdir(path):
         return
 
@@ -75,14 +73,14 @@ def append_release_note_directories(path: pathlib.Path, directory_list: List[pat
         append_release_note_directories(path / d, directory_list)
 
 
-def gather_release_note_directories(path: pathlib.Path) -> List[pathlib.Path]:
+def gather_release_note_directories(path: pathlib.Path) -> list[pathlib.Path]:
     release_note_directories = []
     append_release_note_directories(path, release_note_directories)
     release_note_directories.pop(0)
     return release_note_directories
 
 
-def get_pr_number_and_link(release_note_path: pathlib.Path, git_token: str) -> Tuple[str, str]:
+def get_pr_number_and_link(release_note_path: pathlib.Path, git_token: str) -> tuple[str, str]:
     commit_hashes = get_file_creation_commits(release_note_path)
     for commit_hash in commit_hashes:
         headers = {"Authorization": f"token {git_token}", "Accept": "application/vnd.github.groot-preview+json"}
@@ -98,7 +96,7 @@ def get_pr_number_and_link(release_note_path: pathlib.Path, git_token: str) -> T
     return "", ""
 
 
-def get_file_creation_commits(release_note_path: pathlib.Path) -> List[str]:
+def get_file_creation_commits(release_note_path: pathlib.Path) -> list[str]:
     result = subprocess.run(
         ["git", "log", "--diff-filter=A", "--pretty=format:%H", "--", release_note_path], capture_output=True, text=True
     )
@@ -123,7 +121,7 @@ def collate_release_notes(release_note_dir: pathlib.Path, git_token: str) -> str
 
 
 # Moves the release note files that have been copied to top level file into 'Used' folders
-def move_files_to_used(release_note_directories: List[pathlib.Path]) -> None:
+def move_files_to_used(release_note_directories: list[pathlib.Path]) -> None:
     for path in release_note_directories:
         used_dir = path / "Used"
         used_dir.mkdir(parents=True, exist_ok=True)

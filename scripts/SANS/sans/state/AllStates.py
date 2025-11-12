@@ -92,7 +92,7 @@ class AllStates(metaclass=JsonSerializable):
             raise ValueError("State: There is an issue with your input. See: {0}".format(json.dumps(is_invalid)))
 
 
-class AllStatesBuilder(object):
+class AllStatesBuilder:
     @automatic_setters(AllStates)
     def __init__(self):
         super(AllStatesBuilder, self).__init__()

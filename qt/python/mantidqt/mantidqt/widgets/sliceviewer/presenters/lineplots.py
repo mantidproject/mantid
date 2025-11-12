@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantidqt
 # std imports
-from typing import Any, Tuple
+from typing import Any
 
 # 3rd party imports
 from matplotlib.axes import Axes
@@ -27,7 +27,7 @@ from mantidqt.widgets.sliceviewer.views.cursor import (
 from .selector import make_selector_class, cursor_info
 
 # Limits for X/Y axes
-Limits = Tuple[Tuple[float, float], Tuple[float, float]]
+Limits = tuple[tuple[float, float], tuple[float, float]]
 
 
 class LinePlots:

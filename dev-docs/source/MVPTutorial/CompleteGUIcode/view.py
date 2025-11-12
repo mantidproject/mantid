@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from qtpy.QtCore import Qt
 from qtpy.QtWidgets import QComboBox, QPushButton, QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget
-from typing import List, Union
+from typing import Union
 
 TEXT_COLUMN = 0
 WIDGET_COLUMN = 1
@@ -82,6 +82,6 @@ class View(QWidget):
         self._set_table_row(name, row)
         self._table.setItem(row, WIDGET_COLUMN, widget)
 
-    def set_colours(self, options: List[str]) -> None:
+    def set_colours(self, options: list[str]) -> None:
         self._colours.clear()
         self._colours.addItems(options)

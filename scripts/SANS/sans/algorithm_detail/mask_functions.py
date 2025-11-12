@@ -101,7 +101,7 @@ def get_geometry_information(ipf_path, detector_type):
     return geometry_bundle(shape=shape, first_low_angle_spec_number=found_items["first-low-angle-spec-number"])
 
 
-class SpectraBlock(object):
+class SpectraBlock:
     """
     The SpectraBlock class maps a SANS-particular detector selection syntax to a detector selection on the actual
     instrument.
@@ -174,17 +174,17 @@ class SpectraBlock(object):
         if self._detector_orientation == DetectorOrientation.HORIZONTAL:
             start_spectrum = base_spectrum_number + y_lower * detector_dimension + x_lower
             for y in range(0, y_dim):
-                output.extend((start_spectrum + (y * detector_dimension) + x for x in range(0, x_dim)))
+                output.extend(start_spectrum + (y * detector_dimension) + x for x in range(0, x_dim))
         elif self._detector_orientation == DetectorOrientation.VERTICAL:
             start_spectrum = base_spectrum_number + x_lower * detector_dimension + y_lower
             for x in range(detector_dimension - 1, detector_dimension - x_dim - 1, -1):
-                output.extend((start_spectrum + ((detector_dimension - x - 1) * detector_dimension) + y for y in range(0, y_dim)))
+                output.extend(start_spectrum + ((detector_dimension - x - 1) * detector_dimension) + y for y in range(0, y_dim))
         elif self._detector_orientation == DetectorOrientation.ROTATED:
             # This is the horizontal one rotated so need to map the x_low and y_low to their rotated versions
             start_spectrum = base_spectrum_number + y_lower * detector_dimension + x_lower
             max_spectrum = detector_dimension * detector_dimension + base_spectrum_number - 1
             for y in range(0, y_dim):
                 output.extend(
-                    (max_spectrum - (start_spectrum + x + (y * detector_dimension) - base_spectrum_number) for x in range(0, x_dim))
+                    max_spectrum - (start_spectrum + x + (y * detector_dimension) - base_spectrum_number) for x in range(0, x_dim)
                 )
         return output

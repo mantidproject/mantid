@@ -96,7 +96,7 @@ def _parse_castep_file_header(f_handle):
         line = f_handle.readline()
 
         if not line:
-            raise IOError("Could not find any header information.")
+            raise OSError("Could not find any header information.")
 
         if "Total number of ions in cell =" in line:
             file_data["num_ions"] = int(line.strip().split()[-1])
@@ -153,7 +153,7 @@ def _find_castep_freq_block(f_handle, data_regex):
         line = f_handle.readline()
 
         if not line:
-            raise IOError("Could not parse frequency block. Invalid file format.")
+            raise OSError("Could not parse frequency block. Invalid file format.")
 
         if data_regex.match(line):
             f_handle.seek(pos)

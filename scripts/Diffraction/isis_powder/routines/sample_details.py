@@ -11,7 +11,7 @@ from mantid import logger
 property_err_string = "The following sample property was not passed as an argument: {}"
 
 
-class SampleDetails(object):
+class SampleDetails:
     def __init__(self, **kwargs):
         self._shape_type = common.dictionary_key_helper(dictionary=kwargs, key="shape", throws=False)
         if self._shape_type is None:
@@ -272,7 +272,7 @@ class SampleDetails(object):
             return None
 
 
-class _Material(object):
+class _Material:
     def __init__(self, chemical_formula, number_density=None, number_density_effective=None, packing_fraction=None):
         self.chemical_formula = chemical_formula
         # If it is not an element Mantid requires us to provide the number density
@@ -340,7 +340,7 @@ class _Material(object):
         self._is_material_props_set = True
 
 
-class _Cylinder(object):
+class _Cylinder:
     def __init__(self, kwargs):
         # By using kwargs we get a better error than "init takes n arguments"
         height = common.dictionary_key_helper(dictionary=kwargs, key="height", exception_msg=property_err_string.format("height"))
@@ -376,7 +376,7 @@ class _Cylinder(object):
         print("Center: {}".format(self.center))
 
 
-class _Slab(object):
+class _Slab:
     def __init__(self, kwargs):
         # By using kwargs we get a better error than "init takes n arguments"
         thickness = common.dictionary_key_helper(dictionary=kwargs, key="thickness", exception_msg=property_err_string.format("thickness"))
@@ -409,7 +409,7 @@ class _Slab(object):
         print(f"Thickness: {self.thickness} \n Width: {self.width} \n Height: {self.height} \nAngle: {self.angle} \n Center: {self.center}")
 
 
-class _HollowCylinder(object):
+class _HollowCylinder:
     def __init__(self, kwargs, sample_height, sample_radius, sample_center):
         # By using kwargs we get a better error than "init takes n arguments"
         container_radius = common.dictionary_key_helper(dictionary=kwargs, key="radius", exception_msg=property_err_string.format("radius"))
@@ -432,7 +432,7 @@ class _HollowCylinder(object):
         }
 
 
-class _FlatPlateHolder(object):
+class _FlatPlateHolder:
     def __init__(self, kwargs, sample_height, sample_width, sample_thickness, sample_center, sample_angle):
         # By using kwargs we get a better error than "init takes n arguments"
         front_thick = common.dictionary_key_helper(

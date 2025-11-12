@@ -22,7 +22,7 @@ from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common impo
 from os import path, makedirs
 
 
-class FittingPlotModel(object):
+class FittingPlotModel:
     def __init__(self):
         self.plotted_workspaces = set()
         self._fit_results = {}  # {WorkspaceName: fit_result_dict}

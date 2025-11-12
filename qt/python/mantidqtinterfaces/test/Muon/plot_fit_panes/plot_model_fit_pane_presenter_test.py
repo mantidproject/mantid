@@ -19,7 +19,7 @@ from mantid import AnalysisDataService
 from mantidqt.utils.qt.testing import start_qapplication
 
 
-class MockFitInfo(object):
+class MockFitInfo:
     def __init__(self, name):
         self.fit = "FlatBackground"
         self.input_workspaces = name

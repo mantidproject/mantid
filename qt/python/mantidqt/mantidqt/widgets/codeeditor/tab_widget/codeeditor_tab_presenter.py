@@ -11,7 +11,7 @@ from mantid.kernel import logger
 from mantidqt.utils.show_in_explorer import ShowInExplorer
 
 
-class CodeEditorTabPresenter(object):
+class CodeEditorTabPresenter:
     def __init__(self, view=None):
         self.view = view
 

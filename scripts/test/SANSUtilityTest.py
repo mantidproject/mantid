@@ -1041,7 +1041,7 @@ class TestConvertToAndFromPythonStringList(unittest.TestCase):
         self.assertEqual(expected, result)
 
 
-class HelperRescaleShift(object):
+class HelperRescaleShift:
     def __init__(self, hasValues=True, min=1, max=2):
         super(HelperRescaleShift, self).__init__()
         self.qRangeUserSelected = hasValues

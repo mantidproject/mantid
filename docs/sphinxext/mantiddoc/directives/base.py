@@ -10,7 +10,6 @@ import os
 import re
 from mantid.api import AlgorithmFactory, AlgorithmManager, FunctionFactory
 from mantiddoc import get_logger
-from typing import List
 from pathlib import PurePosixPath
 
 ALG_DOCNAME_RE = re.compile(r"^([A-Z][a-zA-Z0-9]+)-v([0-9][0-9]*)$")
@@ -91,7 +90,7 @@ class BaseDirective(Directive):
         self.initialise_rst_lines()
         self.rst_lines.extend(statemachine.string2lines(text))
 
-    def add_rst_list(self, text: List[str]):
+    def add_rst_list(self, text: list[str]):
         """
         Appends given list of strings. It is NOT inserted into the
         document until commit_rst() is called

@@ -8,7 +8,7 @@
 from qtpy.QtWidgets import QPushButton
 
 
-class QtAssertionsHelper(object):
+class QtAssertionsHelper:
     """
     Provides common assertions for Qt specific cases, such as:
     - Checking the number of connections a QObject has on a signal

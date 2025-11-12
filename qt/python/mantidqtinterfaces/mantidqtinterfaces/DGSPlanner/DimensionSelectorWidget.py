@@ -12,7 +12,7 @@ import numpy
 try:
     from qtpy.QtCore import QString
 except ImportError:
-    QString = type("")
+    QString = str
 
 
 def returnValid(validity, teststring, pos):

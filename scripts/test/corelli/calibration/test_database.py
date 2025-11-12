@@ -13,7 +13,6 @@ from os import path, remove
 import pathlib
 import shutil
 import tempfile
-from typing import List
 import unittest
 
 from mantid import AnalysisDataService, config
@@ -396,7 +395,7 @@ class TestCorelliDatabase(unittest.TestCase):
         """
 
         @contextmanager
-        def mock_database(day_stamps: List[int]):
+        def mock_database(day_stamps: list[int]):
             r"""create a database with mock calibration files"""
             dir_path = tempfile.mkdtemp()
             path = pathlib.Path(dir_path)

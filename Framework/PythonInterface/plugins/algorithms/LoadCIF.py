@@ -37,7 +37,7 @@ def convertBtoU(bIso):
     return bIso / (8.0 * np.pi * np.pi)
 
 
-class SpaceGroupBuilder(object):
+class SpaceGroupBuilder:
     """
     Helper class that extracts the space group from CIF data provided by PyCifRW.
 
@@ -117,7 +117,7 @@ class SpaceGroupBuilder(object):
         return SpaceGroupFactory.createSpaceGroup(possibleSpaceGroupSymbols[0]).getHMSymbol()
 
 
-class UnitCellBuilder(object):
+class UnitCellBuilder:
     """
     Helper class that builds a unit cell from CIF data provided by PyCifRW.
 
@@ -164,7 +164,7 @@ class UnitCellBuilder(object):
         return " ".join(unitCellValues)
 
 
-class AtomListBuilder(object):
+class AtomListBuilder:
     """
     Helper class that builds a list of atoms from CIF data provided by PyCifRW.
 
@@ -361,7 +361,7 @@ class AtomListBuilder(object):
         return np.dot(reciprocalLengthVector.transpose(), reciprocalLengthVector)
 
 
-class CrystalStructureBuilder(object):
+class CrystalStructureBuilder:
     """
     This helper class simplifies the creation of CrystalStructure-objects from CIF-files. It uses the helper classes
     defined above.
@@ -380,7 +380,7 @@ class CrystalStructureBuilder(object):
         return CrystalStructure(self.unitCell, self.spaceGroup, self.atoms)
 
 
-class UBMatrixBuilder(object):
+class UBMatrixBuilder:
     ub_matrix_keys = [
         "_diffrn_orient_matrix_ub_11",
         "_diffrn_orient_matrix_ub_12",

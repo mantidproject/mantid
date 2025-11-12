@@ -9,7 +9,7 @@ from mantidqtinterfaces.Muon.GUI.Common.phase_table_widget.phase_table_model imp
 from mantidqtinterfaces.Muon.GUI.Common.phase_table_widget.phase_table_presenter import PhaseTablePresenter
 
 
-class PhaseTabWidget(object):
+class PhaseTabWidget:
     def __init__(self, context, parent):
         self.phase_table_view = PhaseTableView(parent)
         self.phase_table_model = PhaseTableModel(context)

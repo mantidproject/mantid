@@ -507,7 +507,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
                 try:
                     with open(filepath, "w") as f:
                         f.write(script)
-                except IOError as io_error:
+                except OSError as io_error:
                     logger.error("Could not write file: {}\n{}".format(filepath, io_error))
 
     # If a user creates a plot from a script using mpl features we don't support, asking for a recreated script from the

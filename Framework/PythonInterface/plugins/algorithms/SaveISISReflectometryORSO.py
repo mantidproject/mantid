@@ -18,7 +18,7 @@ from mantid.kernel import (
 from mantid.api import AlgorithmFactory, FileProperty, FileAction, PythonAlgorithm, AnalysisDataService, WorkspaceGroup
 
 from pathlib import Path
-from typing import Optional, Tuple, Union, List
+from typing import Optional, Union
 import re
 from collections import OrderedDict
 import numpy as np
@@ -298,7 +298,7 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
                 ws_groups.append(ws)
         return ws_groups
 
-    def _create_and_sort_refl_datasets(self) -> List[ReflectometryDataset]:
+    def _create_and_sort_refl_datasets(self) -> list[ReflectometryDataset]:
         """Retrieve the workspaces from the input list, transform them into ReflectometryDataset objects and sort them
         into the order that the datasets should appear in the ORSO file"""
         ws_groups_in_ADS = self._get_all_workspace_groups()
@@ -456,7 +456,7 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
         if calib_file_entry:
             dataset.add_measurement_additional_file(calib_file_entry, comment="Calibration file")
 
-    def _get_rb_number_and_doi(self, run) -> Union[Tuple[str, str], Tuple[None, None]]:
+    def _get_rb_number_and_doi(self, run) -> Union[tuple[str, str], tuple[None, None]]:
         """
         Check if the experiment RB number can be found in the workspace logs.
         This can be stored under different log names depending on whether time slicing was performed.
@@ -502,7 +502,7 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
             self.log().debug("Could not parse reduction timestamp into required format - this information will be excluded from the file.")
             return None
 
-    def _get_individual_angle_files(self, instrument_name, reduction_workflow_histories) -> List[Tuple[str, str]]:
+    def _get_individual_angle_files(self, instrument_name, reduction_workflow_histories) -> list[tuple[str, str]]:
         """
         Find the names of the individual angle files that were used in the reduction
         """
@@ -518,7 +518,7 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
                 return []
         return angle_files
 
-    def _get_transmission_files(self, instrument_name, reduction_workflow_histories) -> Tuple[List[str], List[str]]:
+    def _get_transmission_files(self, instrument_name, reduction_workflow_histories) -> tuple[list[str], list[str]]:
         """
         Find the names of the transmission files that were used in the reduction
         """
@@ -543,7 +543,7 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
 
         return list(first_trans_files.keys()), list(second_trans_files.keys())
 
-    def _get_file_names_from_history_run_list(self, run_list: str, instrument_name: str) -> List[str]:
+    def _get_file_names_from_history_run_list(self, run_list: str, instrument_name: str) -> list[str]:
         """
         Construct the run file names from the comma-separated run list values from the history
         of ReflectometryISISLoadAndProcess.

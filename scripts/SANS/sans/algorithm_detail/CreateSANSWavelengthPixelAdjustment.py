@@ -16,7 +16,7 @@ from sans.common.general_functions import create_unmanaged_algorithm
 from sans.state.StateObjects.wavelength_interval import WavRange
 
 
-class CreateSANSWavelengthPixelAdjustment(object):
+class CreateSANSWavelengthPixelAdjustment:
     def __init__(self, state_adjustment_wavelength_and_pixel, component):
         """
         :param state_adjustment_wavelength_and_pixel: The state.adjustment.wavelength_and_pixel state

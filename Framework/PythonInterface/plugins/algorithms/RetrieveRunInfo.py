@@ -19,7 +19,7 @@ import os
 from itertools import filterfalse
 
 
-class FileBackedWsIterator(object):
+class FileBackedWsIterator:
     """An iterator to iterate over workspaces.  Each filename in the list
     provided is loaded into a workspace, validated by the given ws_validator,
     yielded, and then deleted from memory."""

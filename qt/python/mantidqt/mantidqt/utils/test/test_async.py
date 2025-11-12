@@ -18,7 +18,7 @@ from mantidqt.utils.asynchronous import AsyncTask, BlockingAsyncTaskWithCallback
 
 
 class AsyncTaskTest(unittest.TestCase):
-    class Receiver(object):
+    class Receiver:
         success_cb_called, error_cb_called, finished_cb_called = False, False, False
         task_output = (None,)
         task_exc_type, task_exc, task_exc_stack = None, None, None

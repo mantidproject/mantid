@@ -8,7 +8,7 @@ from mantidqtinterfaces.MultiPlotting.QuickEdit.quickEdit_view import QuickEditV
 from mantidqtinterfaces.MultiPlotting.QuickEdit.quickEdit_presenter import QuickEditPresenter
 
 
-class QuickEditWidget(object):
+class QuickEditWidget:
     def __init__(self, parent=None, auto_btn=False):
         view = QuickEditView(None, parent, auto_btn)
         self._presenter = QuickEditPresenter(view)

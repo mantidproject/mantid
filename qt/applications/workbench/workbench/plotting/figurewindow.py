@@ -10,7 +10,6 @@
 """Provides the QMainWindow subclass for a plotting window"""
 
 # std imports
-from typing import List
 import weakref
 
 # 3rdparty imports
@@ -25,7 +24,7 @@ from mantid.api import AnalysisDataServiceImpl, WorkspaceGroup, MatrixWorkspace
 import mantid.kernel
 
 
-def _validate_workspaces(names: List[str]) -> List[bool]:
+def _validate_workspaces(names: list[str]) -> list[bool]:
     """
     Checks that workspaces being over plot have multiple bins
     :param names: A list of workspace names

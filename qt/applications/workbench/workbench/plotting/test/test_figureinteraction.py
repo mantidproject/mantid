@@ -401,10 +401,10 @@ class FigureInteractionTest(unittest.TestCase):
 
     # Failure tests
     def test_construction_with_non_qt_canvas_raises_exception(self):
-        class NotQtCanvas(object):
+        class NotQtCanvas:
             pass
 
-        class FigureManager(object):
+        class FigureManager:
             def __init__(self):
                 self.canvas = NotQtCanvas()
 

@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from typing import NamedTuple, List
+from typing import NamedTuple
 from mantid.dataobjects import Workspace2D
 
 
@@ -15,8 +15,8 @@ class PlotInformation(NamedTuple):
     normalised: bool
 
 
-class ExternalPlottingModel(object):
-    def get_plotted_workspaces_and_indices_from_axes(self, axes) -> List[PlotInformation]:
+class ExternalPlottingModel:
+    def get_plotted_workspaces_and_indices_from_axes(self, axes) -> list[PlotInformation]:
         plotted_data = []
         for i, axis in enumerate(axes):
             artists = axis.get_tracked_artists()

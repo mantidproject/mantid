@@ -22,7 +22,7 @@ Groups = "groups"
 Pairs = "pairs"
 
 
-class MuonContext(object):
+class MuonContext:
     def __init__(self, name):
         self._name = name
         self.common_context = OrderedDict()

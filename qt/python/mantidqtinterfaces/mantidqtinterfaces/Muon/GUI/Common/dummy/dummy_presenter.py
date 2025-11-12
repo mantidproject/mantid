@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 
-class DummyPresenter(object):
+class DummyPresenter:
     def __init__(self, view, model):
         self.view = view
         self.model = model

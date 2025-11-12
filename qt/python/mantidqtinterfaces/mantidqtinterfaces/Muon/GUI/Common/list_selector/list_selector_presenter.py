@@ -13,7 +13,7 @@ view_item_selected = 1
 view_item_enabled = 2
 
 
-class ListSelectorPresenter(object):
+class ListSelectorPresenter:
     def __init__(self, view, model):
         """
         Initialize with a view and model reference

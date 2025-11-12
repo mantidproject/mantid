@@ -13,7 +13,7 @@ from mantidqt.widgets.workspacedisplay.table.marked_columns import MarkedColumns
 from contextlib import contextmanager
 
 
-class TableWorkspaceColumnTypeMapping(object):
+class TableWorkspaceColumnTypeMapping:
     """
     Enum can't be used here because the original C++ code maps the types to integers.
     Comparing the integer to a Python enum does not work, as it does not simply compare

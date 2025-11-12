@@ -17,7 +17,7 @@ eng_common = "Engineering.common.calibration_info"
 # define a mixin, as there is a lot of reused code to test each group
 
 
-class SetCalibrationMixin(object):
+class SetCalibrationMixin:
     def setup_set_calibration_from_prm(self, test_file, group):
         calibration = CalibrationInfo()
         calibration.set_calibration_from_prm_fname(test_file)

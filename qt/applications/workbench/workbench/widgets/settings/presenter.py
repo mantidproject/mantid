@@ -22,7 +22,7 @@ from workbench.widgets.settings.view import SettingsView
 from workbench.widgets.settings.model import SettingsModel
 
 
-class SettingsPresenter(object):
+class SettingsPresenter:
     SETTINGS_TABS = {
         "general_settings": "General",
         "categories_settings": "Categories",

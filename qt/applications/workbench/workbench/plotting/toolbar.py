@@ -379,7 +379,7 @@ class WorkbenchNavigationToolbar(MantidNavigationToolbar):
         self.sig_change_line_collection_colour_triggered.emit(colour)
 
 
-class ToolbarStateManager(object):
+class ToolbarStateManager:
     """
     An object that lets users check and manipulate the state of the toolbar
     whilst hiding any implementation details.

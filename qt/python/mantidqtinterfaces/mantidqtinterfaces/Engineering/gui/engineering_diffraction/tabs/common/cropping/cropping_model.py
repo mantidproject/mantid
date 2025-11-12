@@ -11,7 +11,7 @@ VALID_PUNCT = [",", " ", "-"]
 SPLITTING_REGEX = ",|-"
 
 
-class CroppingModel(object):
+class CroppingModel:
     def validate_and_clean_spectrum_numbers(self, numbers):
         numbers = numbers.strip()
         try:

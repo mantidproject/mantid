@@ -48,7 +48,7 @@ def tchop(freq, Ei, pslit, radius, rho):
     if hasattr(gamm, "__len__"):
         tausqr = np.zeros(len(gamm))
         pre = (p / (2.00 * R * w)) ** 2 / 6.00
-        idx = np.where((gamm <= 1.0))
+        idx = np.where(gamm <= 1.0)
         tausqr[idx] = pre * (1.00 - (gamm[idx] ** 2) ** 2 / 10.00) / (1.00 - (gamm[idx] ** 2) / 6.00)
         idx = np.where((gamm > 1.0) * (gamm < 4.0))
         groot = np.sqrt(gamm[idx])

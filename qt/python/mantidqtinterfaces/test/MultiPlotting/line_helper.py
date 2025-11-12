@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 
-class line(object):
+class line:
     def __init__(self):
         self.label = "test"
 
@@ -23,7 +23,7 @@ class line(object):
         return
 
 
-class label(object):
+class label:
     def __init__(self, name, protected):
         self.text = name
         self.protected = protected

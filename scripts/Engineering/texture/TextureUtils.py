@@ -14,7 +14,8 @@ from pathlib import Path
 from Engineering.EnggUtils import GROUP
 from Engineering.EnginX import EnginX
 from mantid.api import AnalysisDataService as ADS, MultiDomainFunction, FunctionFactory
-from typing import Optional, Sequence, Union, Tuple
+from typing import Optional, Union
+from collections.abc import Sequence
 from mantid.dataobjects import Workspace2D
 from mantid.fitfunctions import FunctionWrapper, CompositeFunctionWrapper
 from plugins.algorithms.IntegratePeaks1DProfile import PeakFunctionGenerator, calc_intens_and_sigma_arrays
@@ -209,7 +210,7 @@ def validate_abs_corr_inputs(
     div_hoz: Optional[float] = None,
     div_vert: Optional[float] = None,
     det_hoz: Optional[float] = None,
-) -> Tuple[bool, str]:
+) -> tuple[bool, str]:
     error_msg = ""
     # validate inputs
     if orientation_file:
@@ -258,7 +259,7 @@ class TexturePeakFunctionGenerator(PeakFunctionGenerator):
         parameters_to_tie: Sequence[str],
         peak_func_name: str,
         bg_func_name: str,
-    ) -> Tuple[str, dict, Sequence[float]]:
+    ) -> tuple[str, dict, Sequence[float]]:
         # modification of get_initial_fit_function_and_kwargs to just fit a peak within the x_window
         si = ws.spectrumInfo()
         ispecs = list(range(si.size()))
@@ -331,7 +332,7 @@ class TexturePeakFunctionGenerator(PeakFunctionGenerator):
         return f"{str(function)};ties=({','.join(ties)})"
 
 
-def _get_run_and_prefix_from_ws_log(ws: Workspace2D, wsname: str) -> Tuple[str, str]:
+def _get_run_and_prefix_from_ws_log(ws: Workspace2D, wsname: str) -> tuple[str, str]:
     try:
         run = str(ws.getRun().getLogData("run_number").value)
         prefix = wsname.split(run)[0]

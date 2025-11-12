@@ -111,7 +111,7 @@ def set_information_from_file(data_info, file_information):
     data_info.ipf_file_path = file_information.get_ipf_file_path()
 
 
-class StateDataBuilder(object):
+class StateDataBuilder:
     @automatic_setters(StateData)
     def __init__(self, file_information):
         super(StateDataBuilder, self).__init__()

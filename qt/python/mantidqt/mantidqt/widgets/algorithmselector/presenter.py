@@ -11,7 +11,7 @@ from .model import AlgorithmSelectorModel
 SelectedAlgorithm = namedtuple("SelectedAlgorithm", ["name", "version"])
 
 
-class IAlgorithmSelectorView(object):
+class IAlgorithmSelectorView:
     """
     The interface to the actual algorithm selector view.
     Presenter interacts with the view through this interface only.
@@ -43,7 +43,7 @@ class IAlgorithmSelectorView(object):
             print("Execute %s v.%s" % algorithm)
 
 
-class AlgorithmSelectorPresenter(object):
+class AlgorithmSelectorPresenter:
     """
     Presents (controls) an algorithm selector view. This UI element allows the user
     to select and execute a Mantid algorithm.

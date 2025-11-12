@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 
-class RundexSettings(object):
+class RundexSettings:
     # instruments
     D11 = "D11"
     D16 = "D16"

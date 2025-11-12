@@ -24,7 +24,7 @@ from mantid.api import PythonAlgorithm, MultipleFileProperty, AlgorithmFactory, 
 from scipy import constants
 import numpy as np
 from mantid.fitfunctions import FunctionWrapper
-from typing import Sequence
+from collections.abc import Sequence
 
 
 class PEARLTransfit(PythonAlgorithm):

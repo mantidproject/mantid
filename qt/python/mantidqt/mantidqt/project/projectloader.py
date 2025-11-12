@@ -30,7 +30,7 @@ def _confirm_all_workspaces_loaded(workspaces_to_confirm):
     return True
 
 
-class ProjectLoader(object):
+class ProjectLoader:
     def __init__(self, project_file_ext):
         self.project_reader = ProjectReader(project_file_ext)
         self.workspace_loader = WorkspaceLoader()

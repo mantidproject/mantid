@@ -17,7 +17,7 @@ from mantidqtinterfaces.Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget_
 from mantidqtinterfaces.Muon.GUI.Common.difference_table_widget.difference_widget_presenter import DifferencePresenter
 
 
-class GroupingTabWidget(object):
+class GroupingTabWidget:
     def __init__(self, context, parent=None):
         self.group_tab_model = GroupingTabModel(context)
 

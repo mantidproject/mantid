@@ -15,7 +15,7 @@ FREQ = "Frequency"
 FIELD = "Field"
 
 
-class freq_and_field_ws(object):
+class freq_and_field_ws:
     def __init__(self, ws_name, ws_unit):
         if ws_unit == MHz:
             self._freq = ws_name + UNIT + MHz
@@ -33,13 +33,13 @@ class freq_and_field_ws(object):
         return self._freq
 
 
-class MaxEnt(object):
+class MaxEnt:
     def __init__(self, run, freq_field_ws):
         self.run = run
         self.ws = freq_field_ws
 
 
-class FFT(object):
+class FFT:
     # fft has two runs, one for Re and one for Im
 
     def __init__(self, freq_field_ws, Re_run, Re, Im_run, Im):
@@ -58,7 +58,7 @@ class FFT(object):
 FREQUENCY_EXTENSIONS = {"MOD": "mod", "RE": "Re", "IM": "Im", "MAXENT": "MaxEnt", "FFT": "FFT All"}
 
 
-class FrequencyContext(object):
+class FrequencyContext:
     """
     A simple class for identifing the current run
     and it can return the name, run and instrument.

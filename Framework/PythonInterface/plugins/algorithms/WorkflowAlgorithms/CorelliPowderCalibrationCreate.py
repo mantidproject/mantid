@@ -7,7 +7,7 @@
 import numpy as np
 import random
 import string
-from typing import List, Optional, Union
+from typing import Optional, Union
 
 from mantid.api import (
     AlgorithmFactory,
@@ -561,7 +561,7 @@ class CorelliPowderCalibrationCreate(DataProcessorAlgorithm):
         workspace_with_instrument: Union[str, Workspace],
         output_workspace: str,
         grouping_workspace: Union[str, WorkspaceGroup],
-        deviation_params: List[float] = [-0.1, 0.0001, 0.1],
+        deviation_params: list[float] = [-0.1, 0.0001, 0.1],
         percent_deviations: bool = False,
     ):
         r"""

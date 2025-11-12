@@ -5,7 +5,8 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from functools import wraps
-from typing import Any, Optional, Callable
+from typing import Any, Optional
+from collections.abc import Callable
 
 from qtpy import QtCore
 from qtpy.QtCore import QObject, Signal

@@ -143,12 +143,12 @@ class FittingPresenterTest(unittest.TestCase):
     def test_fit_all_started_notified_sequential(self):
         self.presenter.plot_widget.fit_all_started_notifier.notify_subscribers = mock.MagicMock()
         self.presenter.plot_widget.do_seq_fit()
-        self.presenter.plot_widget.fit_all_started_notifier.notify_subscribers.assert_called_once_with((True))
+        self.presenter.plot_widget.fit_all_started_notifier.notify_subscribers.assert_called_once_with(True)
 
     def test_fit_all_started_notified_serial(self):
         self.presenter.plot_widget.fit_all_started_notifier.notify_subscribers = mock.MagicMock()
         self.presenter.plot_widget.do_serial_fit()
-        self.presenter.plot_widget.fit_all_started_notifier.notify_subscribers.assert_called_once_with((False))
+        self.presenter.plot_widget.fit_all_started_notifier.notify_subscribers.assert_called_once_with(False)
 
     def test_fit_all_started_sequential(self):
         self.presenter.data_widget.model.get_active_ws_sorted_by_primary_log = mock.MagicMock(return_value=ws_list)

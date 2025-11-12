@@ -23,7 +23,7 @@ from qtpy.QtWidgets import QApplication, QWidget
 # we reach the equal assertion
 
 
-class MockSignalHandler(object):
+class MockSignalHandler:
     def __init__(self, parent=None):
         self.call_count = 0
 

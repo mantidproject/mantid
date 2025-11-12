@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 
-class PlotSettingsContext(object):
+class PlotSettingsContext:
     def __init__(self):
         self._min_y_range = 2.0
         self._y_axis_margin = 20.0

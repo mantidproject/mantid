@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-# Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
@@ -29,7 +28,6 @@ from mantid.simpleapi import (
 import ReflectometryILL_common as common
 import scipy.constants as constants
 import numpy as np
-from typing import List, Tuple
 
 
 class Prop:
@@ -49,7 +47,7 @@ class SubalgLogging:
 
 class ReflectometryILLConvertToQ(DataProcessorAlgorithm):
     @staticmethod
-    def _foreground(sample_logs: Run) -> List[float]:
+    def _foreground(sample_logs: Run) -> list[float]:
         """Returns a [start, end] list defining the foreground workspace indices from provided sample logs metadata.
 
         Keyword arguments:
@@ -351,7 +349,7 @@ class ReflectometryILLConvertToQ(DataProcessorAlgorithm):
         self._cleanup.cleanupLater(grouped_ws_name)
         return grouped_ws
 
-    def _input_ws(self) -> Tuple[MatrixWorkspace, MatrixWorkspace]:
+    def _input_ws(self) -> tuple[MatrixWorkspace, MatrixWorkspace]:
         """Returns the input workspace and the workspace containing direct beam data."""
         ws = self.getProperty(Prop.INPUT_WS).value
         self._cleanup.protect(ws)

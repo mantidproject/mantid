@@ -26,7 +26,7 @@ def make_decorator(algorithm_to_decorate):
 
     """
 
-    class Decorator(object):
+    class Decorator:
         def __init__(self, alg_subject):
             self.__alg_subject = alg_subject
             self.__parameters__ = dict()

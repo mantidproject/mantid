@@ -14,7 +14,7 @@ import time
 from isis_instrument import BaseInstrument
 
 
-class ReductionStep(object):
+class ReductionStep:
     """
     Base class for reduction steps
     """
@@ -52,7 +52,7 @@ class ReductionStep(object):
         return
 
 
-class Reducer(object):
+class Reducer:
     """
     Base reducer class. Instrument-specific reduction processes should be
     implemented in a child of this class.
@@ -172,7 +172,7 @@ class Reducer(object):
         return self.log_text
 
 
-class ReductionSingleton(object):
+class ReductionSingleton:
     """Singleton reduction class"""
 
     ## storage for the instance reference

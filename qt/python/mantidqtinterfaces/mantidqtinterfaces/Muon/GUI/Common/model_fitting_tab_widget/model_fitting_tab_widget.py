@@ -9,7 +9,7 @@ from mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.model_fitting.model_fitt
 from mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.model_fitting.model_fitting_view import ModelFittingView
 
 
-class ModelFittingTabWidget(object):
+class ModelFittingTabWidget:
     """
     The ModelFittingTabWidget creates the tab used for model fitting in the Muon Analysis interface.
     """

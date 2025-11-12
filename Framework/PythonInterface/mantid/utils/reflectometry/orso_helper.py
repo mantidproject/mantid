@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import numpy as np
 from datetime import datetime, timezone
-from typing import Optional, Union, List
+from typing import Optional, Union
 import re
 from orsopy.fileio.data_source import DataSource, Person, Experiment, Sample, Measurement, Polarization, InstrumentSettings
 from orsopy.fileio import Reduction, Software
@@ -217,7 +217,7 @@ class MantidORSODataColumns:
             )
 
     @property
-    def header_info(self) -> List[Union[Column, ErrorColumn]]:
+    def header_info(self) -> list[Union[Column, ErrorColumn]]:
         return self._header_info
 
     @property

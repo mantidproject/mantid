@@ -4,14 +4,13 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from typing import List, Dict
 
 from mantidqt.widgets.sliceviewer.models.workspaceinfo import WorkspaceInfo
 
 
 class Dimensions:
     @staticmethod
-    def get_dimensions_info(workspace) -> List[Dict]:
+    def get_dimensions_info(workspace) -> list[dict]:
         """
         returns a list of dict for each dimension containing dim_info
         """

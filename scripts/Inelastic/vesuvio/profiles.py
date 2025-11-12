@@ -21,7 +21,7 @@ from mantid import logger
 # --------------------------------------------------------------------------------
 
 
-class MassProfile(object):
+class MassProfile:
     cfunction = None
 
     def __init__(self, width, mass, intensity=None):

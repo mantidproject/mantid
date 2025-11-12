@@ -7,7 +7,7 @@
 from mantidqtinterfaces.Muon.GUI.Common.muon_load_data import MuonLoadData
 
 
-class LoadWidgetModel(object):
+class LoadWidgetModel:
     """
     The model is responsible for storing the currently loaded run or runs
     (both the nun numbers, filenames and workspaces) as well as loading new runs using a separate loading thread.

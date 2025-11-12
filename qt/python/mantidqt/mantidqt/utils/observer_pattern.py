@@ -7,7 +7,7 @@
 from mantidqt.utils.qt.qappthreadcall import QAppThreadCall
 
 
-class Observer(object):
+class Observer:
     """
     The Observer subscribes to Observables, when the Observable notifies its subscribers (the observers)
     they will call their update() method
@@ -24,7 +24,7 @@ class Observer(object):
         pass
 
 
-class Observable(object):
+class Observable:
     """
     The Observable is an object which may be subscribed to by Observers. It maintains a list of subscribers to it,
     and when needed, it will notify those subscribers.

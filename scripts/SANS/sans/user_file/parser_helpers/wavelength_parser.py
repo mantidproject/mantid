@@ -4,7 +4,6 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from typing import Tuple
 from dataclasses import dataclass
 
 from sans.common.enums import RangeStepType
@@ -31,7 +30,7 @@ class DuplicateWavelengthStates:
         return [self.transmission, self.wavelength, self.pixel]
 
 
-def parse_range_wavelength(wavelength_range: str) -> Tuple[WavRange, WavRangePairs]:
+def parse_range_wavelength(wavelength_range: str) -> tuple[WavRange, WavRangePairs]:
     """
     Parses a wavelength range and outputs a tuple of wavelength_start
     and wavelength_stop in the format StateObjects expect.

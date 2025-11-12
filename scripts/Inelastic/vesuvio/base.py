@@ -57,7 +57,7 @@ class VesuvioBase(Algorithm):
 # -----------------------------------------------------------------------------------------
 
 
-class TableWorkspaceDictionaryFacade(object):
+class TableWorkspaceDictionaryFacade:
     """
     Allows an underlying table workspace to be treated like a read-only dictionary
     """

@@ -14,7 +14,7 @@ import numpy.linalg
 # This module does absorption correction
 
 
-class Lattice(object):
+class Lattice:
     """A simple structure-styled class to hold lattice or lattice*"""
 
     def __init__(self, a, b, c, alpha, beta, gamma):

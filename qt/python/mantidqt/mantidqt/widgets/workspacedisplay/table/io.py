@@ -10,7 +10,7 @@ from mantidqt.widgets.workspacedisplay.table.error_column import ErrorColumn
 from mantidqt.widgets.workspacedisplay.table.presenter import TableWorkspaceDisplay
 
 
-class TableWorkspaceDisplayAttributes(object):
+class TableWorkspaceDisplayAttributes:
     # WARNING: If you delete a tag from here instead of adding a new one, it will make old project files obsolete so
     # just add an extra tag to the list e.g. ["InstrumentWidget", "IWidget"]
     _tags = ["TableWorkspaceDisplayView"]

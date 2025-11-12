@@ -8,7 +8,7 @@ from mantidqtinterfaces.Muon.GUI.Common.plot_widget.quick_edit.quick_edit_view i
 from mantidqtinterfaces.Muon.GUI.Common.plot_widget.quick_edit.quick_edit_presenter import QuickEditPresenter, DualQuickEditPresenter
 
 
-class QuickEditWidgetInterface(object):
+class QuickEditWidgetInterface:
     def __init__(self, context, view, presenter, parent=None):
         self._view = view
         self._presenter = presenter

@@ -182,7 +182,7 @@ class SaveReflections(PythonAlgorithm):
 # ------------------------------------------------------------------------------------------------------
 
 
-class FullprofFormat(object):
+class FullprofFormat:
     """Writes a PeaksWorkspace to an ASCII file in the format required
     by the Fullprof crystallographic refinement program.
 
@@ -261,7 +261,7 @@ class FullprofFormat(object):
 # ------------------------------------------------------------------------------------------------------
 
 
-class JanaFormat(object):
+class JanaFormat:
     """Writes a PeaksWorkspace to an ASCII file in the format required
     by the Jana2006 crystallographic refinement program.
 
@@ -272,7 +272,7 @@ class JanaFormat(object):
     Currently the last three columns are hard coded to 1.0, 0.0, and 0.0 respectively.
     """
 
-    class FileBuilder(object):
+    class FileBuilder:
         """Encapsulate information to build a single Jana file"""
 
         def __init__(self, filepath, workspace, num_mod_vec, modulation_col_num=None):
@@ -450,7 +450,7 @@ class JanaFormat(object):
 # ------------------------------------------------------------------------------------------------------
 
 
-class SHELXFormat(object):
+class SHELXFormat:
     """Writes a PeaksWorkspace to an ASCII file in the format required
     by the SHELX crystallographic refinement program.
     For constant wavelength workspaces this is an ASCII file
@@ -495,7 +495,7 @@ class SHELXFormat(object):
 # ------------------------------------------------------------------------------------------------------
 
 
-class SaveHKLFormat(object):
+class SaveHKLFormat:
     """Writes a PeaksWorkspace to an ASCII file in the format output from
     the SaveHKL algorithm.
 

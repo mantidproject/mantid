@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-# Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
@@ -37,7 +36,6 @@ from mantid.simpleapi import (
 import ReflectometryILL_common as common
 import ILL_utilities as utils
 import numpy
-from typing import List
 
 
 class Prop:
@@ -339,7 +337,7 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
         self._cleanup.cleanup(ws)
         self._cleanup.finalCleanup()
 
-    def _foreground_indices(self, ws: MatrixWorkspace) -> List[int]:
+    def _foreground_indices(self, ws: MatrixWorkspace) -> list[int]:
         """Returns a three-element list of foreground start, center and end workspace indices.
 
         Keyword arguments:

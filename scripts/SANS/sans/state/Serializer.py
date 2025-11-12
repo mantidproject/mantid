@@ -11,7 +11,7 @@ from enum import Enum
 from sans.state.JsonSerializable import JsonSerializable
 
 
-class Serializer(object):
+class Serializer:
     @staticmethod
     def to_json(obj):
         return json.dumps(obj, cls=SerializerImpl)

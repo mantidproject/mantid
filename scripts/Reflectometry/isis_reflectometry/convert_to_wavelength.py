@@ -11,7 +11,7 @@ from mantid.kernel import logger
 import re
 
 
-class ConvertToWavelength(object):
+class ConvertToWavelength:
     # List of workspaces to process.
     __ws_list = []
 

@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 
-class HomeTabModel(object):
+class HomeTabModel:
     def __init__(self, context=None):
         self._data = context.data_context
         self._context = context

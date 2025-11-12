@@ -5,7 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantidqt package
-import io
 import os.path
 import sys
 import traceback
@@ -35,7 +34,7 @@ TAB_CHAR = "\t"
 SPACE_CHAR = " "
 
 
-class EditorIO(object):
+class EditorIO:
     def __init__(self, editor, confirm_on_exit=True):
         self.editor = editor
         self.confirm_on_exit = confirm_on_exit
@@ -102,10 +101,10 @@ class EditorIO(object):
             self.editor.setFileName(filename)
 
         try:
-            with io.open(filename, "w", encoding="utf8", newline="") as f:
+            with open(filename, "w", encoding="utf8", newline="") as f:
                 f.write(self.editor.text())
             self.editor.setModified(False)
-        except IOError as exc:
+        except OSError as exc:
             QMessageBox.warning(self.editor, "", "Error while saving '{}': {}".format(filename, str(exc)))
             return False
         else:

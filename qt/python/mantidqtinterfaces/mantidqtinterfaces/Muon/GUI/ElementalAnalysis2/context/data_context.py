@@ -4,12 +4,11 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from typing import List
 from mantidqtinterfaces.Muon.GUI.Common.muon_load_data import MuonLoadData
 import mantidqtinterfaces.Muon.GUI.Common.utilities.load_utils as load_utils
 
 
-class DataContext(object):
+class DataContext:
     def __init__(self, load_data=MuonLoadData()):
         self.instrument = "rooth"
         self.current_runs = []
@@ -78,8 +77,8 @@ class DataContext(object):
         self.current_runs = [item for item in self.current_runs if item not in runs_removed]
 
 
-class RunObject(object):
+class RunObject:
     def __init__(self, run, detectors, groupworkspace):
         self._run_number: int = run
-        self._detectors: List[str] = detectors
+        self._detectors: list[str] = detectors
         self._groupworkspace = groupworkspace

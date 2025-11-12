@@ -8,7 +8,7 @@ from mantidqtinterfaces.Muon.GUI.Common import thread_model
 import mantid.simpleapi as mantid
 
 
-class LoadPresenter(object):
+class LoadPresenter:
     def __init__(self, view, load_model, co_model):
         self.view = view
         self.load_model = load_model

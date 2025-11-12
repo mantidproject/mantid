@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Resource object code
 #
 # Created by: The Resource Compiler for qtpy (Qt v5.12.8)

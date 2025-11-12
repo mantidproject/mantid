@@ -18,7 +18,7 @@ from reduction_gui.reduction.scripter import BaseReductionScripter
 unicode = str
 
 
-class InstrumentInterface(object):
+class InstrumentInterface:
     """
     Defines the instrument-specific widgets
     """

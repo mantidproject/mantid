@@ -313,7 +313,7 @@ def validate_step(func):  # noqa
     return validated_f
 
 
-class Reducer(object):
+class Reducer:
     """
     Base reducer class. Instrument-specific reduction processes should be
     implemented in a child of this class.
@@ -536,7 +536,7 @@ class Reducer(object):
         return self.log_text
 
 
-class ReductionStep(object):
+class ReductionStep:
     """
     Base class for reduction steps
     """

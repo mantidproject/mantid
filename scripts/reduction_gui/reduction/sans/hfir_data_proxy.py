@@ -20,7 +20,7 @@ except ImportError:
     HAS_MANTID = False
 
 
-class DataProxy(object):
+class DataProxy:
     """
     Class used to load a data file temporarily to extract header information:
     HFIR SANS Data files have the following properties (parsed from the data file!)

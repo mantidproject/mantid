@@ -12,7 +12,7 @@ import shutil
 import subprocess
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Dict, List, Optional, Union, Tuple, TypeAlias
+from typing import Optional, Union, TypeAlias
 
 import matplotlib.pyplot as plt
 from matplotlib.axes import Axes
@@ -74,11 +74,11 @@ class XLimitsState:
         limits: Limits for each region as [min, max] pairs.
     """
 
-    x_min: List[float] = field(default_factory=list)
-    x_max: List[float] = field(default_factory=list)
-    data_x_min: Optional[List[float]] = None
-    data_x_max: Optional[List[float]] = None
-    limits: Optional[List[List[float]]] = field(default_factory=list)
+    x_min: list[float] = field(default_factory=list)
+    x_max: list[float] = field(default_factory=list)
+    data_x_min: Optional[list[float]] = None
+    data_x_max: Optional[list[float]] = None
+    limits: Optional[list[list[float]]] = field(default_factory=list)
 
 
 @dataclass
@@ -95,10 +95,10 @@ class RefinementState:
     """
 
     override_cell_length_string: Optional[str] = None
-    override_cell_lengths: Optional[List[List[float]]] = None
-    mantid_pawley_reflections: Optional[List[Union[str, int]]] = None
-    crystal_structures: List[CrystalStructure] = field(default_factory=list)
-    chosen_cell_lengths: Optional[List[List[float]]] = None
+    override_cell_lengths: Optional[list[list[float]]] = None
+    mantid_pawley_reflections: Optional[list[Union[str, int]]] = None
+    crystal_structures: list[CrystalStructure] = field(default_factory=list)
+    chosen_cell_lengths: Optional[list[list[float]]] = None
 
 
 @dataclass
@@ -114,7 +114,7 @@ class OutputState:
 
     out_call_gsas2: Optional[str] = None
     err_call_gsas2: Optional[str] = None
-    phase_names_list: List[str] = field(default_factory=list)
+    phase_names_list: list[str] = field(default_factory=list)
 
 
 @dataclass
@@ -141,7 +141,7 @@ class GSAS2Model:
     Diffraction interface.
     """
 
-    ReflectionType: TypeAlias = Tuple[List[int], float, int]
+    ReflectionType: TypeAlias = tuple[list[int], float, int]
 
     def __init__(self) -> None:
         # Configuration and State
@@ -200,8 +200,8 @@ class GSAS2Model:
         refinement_parameters: list,
         project_name: str,
         rb_num: Optional[str] = None,
-        user_x_limits: Optional[List[List[float]]] = None,
-    ) -> Optional[Dict[str, int]]:
+        user_x_limits: Optional[list[list[float]]] = None,
+    ) -> Optional[dict[str, int]]:
         """
         Returns a dictionary mapping data file names to their result counts
         """
@@ -235,7 +235,7 @@ class GSAS2Model:
         refinement_parameters: list,
         project_name: str,
         rb_num: Optional[str] = None,
-        user_x_limits: Optional[List[List[float]]] = None,
+        user_x_limits: Optional[list[list[float]]] = None,
     ) -> Optional[int]:
         self.clear_input_components()
         if not self.initial_validation(project_name, load_parameters):
@@ -244,7 +244,7 @@ class GSAS2Model:
         self.read_phase_files()
         self.generate_reflections_from_space_group()
 
-        formatted_limits: Optional[List[List[float]]] = None
+        formatted_limits: Optional[list[list[float]]] = None
         # Ensure both elements are lists of floats and pass formatted limits to validate_x_limits
         if isinstance(user_x_limits, list) and len(user_x_limits) == 2:
             formatted_limits = [
@@ -325,7 +325,7 @@ class GSAS2Model:
     # ===============
     # Calling GSASII
     # ===============
-    def call_gsas2(self) -> Optional[Tuple[str, str]]:
+    def call_gsas2(self) -> Optional[tuple[str, str]]:
         """
         Prepares and executes the GSAS-II subprocess call.
         """
@@ -400,7 +400,7 @@ class GSAS2Model:
             raise FileNotFoundError("The file 'call_G2sc.py' could not be found in the expected directory.")
         return call_g2sc_path
 
-    def _construct_gsasii_call(self, gsas2_handler: GSAS2Handler, call_g2sc_path: Path, serialized_inputs: str) -> List[str]:
+    def _construct_gsasii_call(self, gsas2_handler: GSAS2Handler, call_g2sc_path: Path, serialized_inputs: str) -> list[str]:
         if not gsas2_handler.gsas2_python_path:
             gsas2_handler.set_gsas2_python_path()
 
@@ -410,7 +410,7 @@ class GSAS2Model:
             serialized_inputs,
         ]
 
-    def _prepare_gsas2_environment(self, gsas_binary_paths: List[str], serialized_inputs: str) -> dict:
+    def _prepare_gsas2_environment(self, gsas_binary_paths: list[str], serialized_inputs: str) -> dict:
         """
         Prepares the environment variables for the GSAS-II subprocess call.
         """
@@ -423,7 +423,7 @@ class GSAS2Model:
             env["PYTHONPATH"] = str(gsasii_dir.parent) if platform.system() == "Windows" else str(gsasii_dir)
         return env
 
-    def call_subprocess(self, command_string_list: List[str], gsas_binary_paths: List[str]) -> Optional[Tuple[str, str]]:
+    def call_subprocess(self, command_string_list: list[str], gsas_binary_paths: list[str]) -> Optional[tuple[str, str]]:
         """
         Notes:
         1. **Binary Search Order**:
@@ -508,8 +508,8 @@ class GSAS2Model:
                             value_string = value_string.strip(" ")
         return value_string
 
-    def get_crystal_params_from_instrument(self, instrument: str) -> Optional[List[float]]:
-        crystal_params: List[Optional[str]] = []
+    def get_crystal_params_from_instrument(self, instrument: str) -> Optional[list[float]]:
+        crystal_params: list[Optional[str]] = []
         if not self.state.number_of_regions:
             crystal_params = [self.find_in_file(instrument, "ICONS", "S", "INS", strip_separator="ICONS\t")]
 
@@ -517,13 +517,13 @@ class GSAS2Model:
             for region_index in range(1, self.state.number_of_regions + 1):
                 loop_crystal_params = self.find_in_file(instrument, f"{region_index} ICONS", "S", "INS", strip_separator="ICONS\t")
                 crystal_params.append(loop_crystal_params)
-        tof_min: List[float] = []
+        tof_min: list[float] = []
         file_mismatch: str = f"Different number of banks in {instrument} and {self.file_paths.data_files}"
         for loop_crystal_param_string in crystal_params:
             if not loop_crystal_param_string:
                 logger.error(file_mismatch)
                 return None
-            list_crystal_params: List[str] = loop_crystal_param_string.split(" ")
+            list_crystal_params: list[str] = loop_crystal_param_string.split(" ")
             if len(list_crystal_params) == 1:
                 list_crystal_params = list_crystal_params[0].split("\t")
             list_crystal_params = list(filter(None, list_crystal_params))
@@ -541,13 +541,13 @@ class GSAS2Model:
     # Pawley Reflections
     # ===================
 
-    def create_pawley_reflections(self, crystal_structure: CrystalStructure) -> List[Tuple[List[int], float, int]]:
+    def create_pawley_reflections(self, crystal_structure: CrystalStructure) -> list[tuple[list[int], float, int]]:
         generator = ReflectionGenerator(crystal_structure)
-        hkls: List[List[int]] = generator.getUniqueHKLsUsingFilter(self.dSpacing_min, 4.2, ReflectionConditionFilter.StructureFactor)
-        dValues: List[float] = generator.getDValues(hkls)
+        hkls: list[list[int]] = generator.getUniqueHKLsUsingFilter(self.dSpacing_min, 4.2, ReflectionConditionFilter.StructureFactor)
+        dValues: list[float] = generator.getDValues(hkls)
         pg = crystal_structure.getSpaceGroup().getPointGroup()
         # Make list of tuples and sort by d-values, descending, include point group for multiplicity.
-        generated_reflections: List[Tuple[List[int], float, int]] = sorted(
+        generated_reflections: list[tuple[list[int], float, int]] = sorted(
             [(list(hkl), d, len(pg.getEquivalents(hkl))) for hkl, d in zip(hkls, dValues)],
             key=lambda x: x[1] - x[0][0] * 1e-6 if isinstance(x[0], list) and len(x[0]) > 0 else x[1],
             reverse=True,
@@ -564,13 +564,13 @@ class GSAS2Model:
                 self.refinement_state.crystal_structures[0]
             )
 
-    def get_override_lattice_parameters(self) -> Optional[List[List[float]]]:
+    def get_override_lattice_parameters(self) -> Optional[list[list[float]]]:
         if self.refinement_state.override_cell_length_string:
             return [self._get_lattice_parameters_from_crystal_structure(xtal) for xtal in self.refinement_state.crystal_structures]
         else:
             return None
 
-    def _get_lattice_parameters_from_crystal_structure(self, crystal_structure: CrystalStructure) -> List[float]:
+    def _get_lattice_parameters_from_crystal_structure(self, crystal_structure: CrystalStructure) -> list[float]:
         return [getattr(crystal_structure.getUnitCell(), method)() for method in ("a", "b", "c", "alpha", "beta", "gamma")]
 
     def _read_cif_file(self, phase_filepath: str) -> CrystalStructure:
@@ -581,7 +581,7 @@ class GSAS2Model:
     def set_lattice_params_from_user_input(self, input_crystal_structure: CrystalStructure) -> CrystalStructure:
         # User can delimit with commas or whitespace
         assert isinstance(self.refinement_state.override_cell_length_string, str), "override_cell_length_string should be a string"
-        user_alatt: List[str] = list(self.refinement_state.override_cell_length_string.replace(",", " ").split())
+        user_alatt: list[str] = list(self.refinement_state.override_cell_length_string.replace(",", " ").split())
         if len(user_alatt) == 1:
             user_alatt = 3 * user_alatt  # Assume cubic lattice
 
@@ -646,7 +646,7 @@ class GSAS2Model:
         self.state.number_of_regions = number_of_regions
         return True
 
-    def validate_x_limits(self, users_limits: Optional[List[List[float]]]) -> bool:
+    def validate_x_limits(self, users_limits: Optional[list[list[float]]]) -> bool:
         if not self.understand_data_structure():
             return False
         if users_limits:
@@ -673,7 +673,7 @@ class GSAS2Model:
     # Handle Outputs
     # ===============
 
-    def read_gsas_lst_and_print_wR(self, result_filepath: str, histogram_data_files: List[str], test: bool = False) -> Optional[str]:
+    def read_gsas_lst_and_print_wR(self, result_filepath: str, histogram_data_files: list[str], test: bool = False) -> Optional[str]:
         with open(result_filepath, "rt", encoding="utf-8") as file:
             result_string = file.read().replace("\n", "")
             for loop_histogram in histogram_data_files:
@@ -689,8 +689,8 @@ class GSAS2Model:
                             return logged_lst_result
         return None
 
-    def find_phase_names_in_lst(self, file_path: str) -> List[str]:
-        phase_names: List[str] = []
+    def find_phase_names_in_lst(self, file_path: str) -> list[str]:
+        phase_names: list[str] = []
         marker_string: str = "Phase name"
         start_of_value: str = ":"
         end_of_value: str = "="
@@ -708,7 +708,7 @@ class GSAS2Model:
                     where_marker = -1
         return phase_names
 
-    def report_on_outputs(self, runtime: str, test: bool = False) -> Optional[Tuple[str, str]]:
+    def report_on_outputs(self, runtime: str, test: bool = False) -> Optional[tuple[str, str]]:
         """
         Reports on the outputs of the GSAS-II call.
 
@@ -804,16 +804,16 @@ class GSAS2Model:
         )
         logger.notice(save_message)
 
-        self.output_state.phase_names_list: List[str] = self.find_phase_names_in_lst(
+        self.output_state.phase_names_list: list[str] = self.find_phase_names_in_lst(
             os.path.join(self.user_save_directory, self.save_directories.project_name + ".lst")
         )
         self.create_lattice_parameter_table()
         self.create_instrument_parameter_table()
         self.create_reflections_table()
 
-    def load_result_for_plot(self, index_histograms: int) -> Tuple[Optional[object], Optional[List[np.ndarray]]]:
+    def load_result_for_plot(self, index_histograms: int) -> tuple[Optional[object], Optional[list[np.ndarray]]]:
         workspace = self.load_gsas_histogram(index_histograms)
-        reflections: Optional[List[np.ndarray]] = None
+        reflections: Optional[list[np.ndarray]] = None
         if self.refinement_method == "Pawley":
             reflections = self.load_gsas_reflections_per_histogram_for_plot(index_histograms)
         return workspace, reflections
@@ -848,8 +848,8 @@ class GSAS2Model:
         )
         return gsas_histogram
 
-    def load_gsas_reflections_per_histogram_for_plot(self, histogram_index: int) -> List[np.ndarray]:
-        loaded_reflections: List[np.ndarray] = []
+    def load_gsas_reflections_per_histogram_for_plot(self, histogram_index: int) -> list[np.ndarray]:
+        loaded_reflections: list[np.ndarray] = []
         for phase_name in self.output_state.phase_names_list:
             if not self.user_save_directory:
                 raise ValueError("user_save_directory is None. Cannot construct the file path.")
@@ -863,9 +863,9 @@ class GSAS2Model:
                 logger.warning(f"No reflections found for phase {phase_name} within x-limits of the fit.")
         return loaded_reflections
 
-    def load_gsas_reflections_all_histograms_for_table(self) -> List[List[str]]:
-        result_reflections_rows: List[List[str]] = []
-        output_reflections_files: List[str] = self.get_txt_files_that_include("_reflections_")
+    def load_gsas_reflections_all_histograms_for_table(self) -> list[list[str]]:
+        result_reflections_rows: list[list[str]] = []
+        output_reflections_files: list[str] = self.get_txt_files_that_include("_reflections_")
         for file in output_reflections_files:
             # note delimiter="," specified so as to accept whitespace in phase name (2nd header row)
             loop_file_text: np.ndarray = np.genfromtxt(file, delimiter=",", dtype="str")
@@ -876,7 +876,7 @@ class GSAS2Model:
         return result_reflections_rows
 
     def create_reflections_table(self, test: bool = False) -> Optional[Union[None, object]]:
-        table_rows: List[List[str]] = self.load_gsas_reflections_all_histograms_for_table()
+        table_rows: list[list[str]] = self.load_gsas_reflections_all_histograms_for_table()
         if not table_rows or self.refinement_method == "Rietveld":
             # cannot generate a valid reflections workspace. If one with the same project_name exists, remove it.
             # This is to cover the case where a user runs a Pawley then Rietveld Refinement for the same project_name.
@@ -893,8 +893,8 @@ class GSAS2Model:
             return table
         return None
 
-    def get_txt_files_that_include(self, sub_string: str) -> List[str]:
-        output_files: List[str] = []
+    def get_txt_files_that_include(self, sub_string: str) -> list[str]:
+        output_files: list[str] = []
         if not self.user_save_directory:
             raise ValueError("user_save_directory is None. Cannot iterate over it.")
         for _, _, filenames in os.walk(self.user_save_directory):
@@ -905,7 +905,7 @@ class GSAS2Model:
         return output_files
 
     def create_instrument_parameter_table(self, test: bool = False) -> Optional[Union[None, object]]:
-        INST_TABLE_PARAMS: List[str] = ["Histogram name", "Sigma-1", "Gamma (Y)"]
+        INST_TABLE_PARAMS: list[str] = ["Histogram name", "Sigma-1", "Gamma (Y)"]
         table = CreateEmptyTableWorkspace(
             OutputWorkspace=f"{self.save_directories.project_name}_GSASII_instrument_parameters", EnableLogging=False
         )
@@ -915,13 +915,13 @@ class GSAS2Model:
         table.addReadOnlyColumn("double", "Fit X Min")
         table.addReadOnlyColumn("double", "Fit X Max")
 
-        output_inst_param_files: List[str] = self.get_txt_files_that_include("_inst_parameters_")
+        output_inst_param_files: list[str] = self.get_txt_files_that_include("_inst_parameters_")
 
         for inst_parameters_txt in output_inst_param_files:
             with open(inst_parameters_txt, "rt", encoding="utf-8") as file:
                 full_file_string: str = file.read().replace("\n", "")
             inst_parameter_dict: dict = json.loads(full_file_string)
-            loop_inst_parameters: List[Union[str, float]] = [inst_parameter_dict["Histogram name"]]
+            loop_inst_parameters: list[Union[str, float]] = [inst_parameter_dict["Histogram name"]]
             for param in INST_TABLE_PARAMS[1:]:
                 loop_inst_parameters.append(float(inst_parameter_dict[param][1]))
 
@@ -935,7 +935,7 @@ class GSAS2Model:
         return None
 
     def create_lattice_parameter_table(self, test: bool = False) -> Optional[Union[None, object]]:
-        LATTICE_TABLE_PARAMS: List[str] = ["length_a", "length_b", "length_c", "angle_alpha", "angle_beta", "angle_gamma", "volume"]
+        LATTICE_TABLE_PARAMS: list[str] = ["length_a", "length_b", "length_c", "angle_alpha", "angle_beta", "angle_gamma", "volume"]
 
         table = CreateEmptyTableWorkspace(
             OutputWorkspace=f"{self.save_directories.project_name}_GSASII_lattice_parameters", EnableLogging=False
@@ -957,7 +957,7 @@ class GSAS2Model:
             with open(parameters_txt, "rt", encoding="utf-8") as file:
                 full_file_string: str = file.read().replace("\n", "")
             parameter_dict: dict = json.loads(full_file_string)
-            loop_parameters: List[Union[str, float]] = [phase_name]
+            loop_parameters: list[Union[str, float]] = [phase_name]
             for param in LATTICE_TABLE_PARAMS:
                 loop_parameters.append(float(parameter_dict[param]))
             loop_parameters.append(float(parameter_dict["Microstrain"]))
@@ -971,7 +971,7 @@ class GSAS2Model:
     # Sample Logs
     # ===========
 
-    def load_focused_nxs_for_logs(self, filenames: List[str]) -> None:
+    def load_focused_nxs_for_logs(self, filenames: list[str]) -> None:
         banks_filenames = []
         for filename in filenames:
             if "all_banks" in filename:
@@ -997,10 +997,10 @@ class GSAS2Model:
     def update_sample_log_workspace_group(self) -> None:
         self._sample_logs_workspace_group.update_log_workspace_group(self._data_workspaces)
 
-    def get_all_workspace_names(self) -> List[str]:
+    def get_all_workspace_names(self) -> list[str]:
         return self._data_workspaces.get_loaded_workpace_names() + self._data_workspaces.get_bgsub_workpace_names()
 
-    def get_log_workspaces_name(self) -> Union[List[str], str]:
+    def get_log_workspaces_name(self) -> Union[list[str], str]:
         current_log_workspaces = self._sample_logs_workspace_group.get_log_workspaces()
         return [ws.name() for ws in current_log_workspaces] if current_log_workspaces else ""
 
@@ -1048,20 +1048,20 @@ class GSAS2Model:
         self._data_workspaces.clear()
         self.set_log_workspaces_none()
 
-    def delete_workspaces(self) -> List[object]:
+    def delete_workspaces(self) -> list[object]:
         current_log_workspaces = self._sample_logs_workspace_group.get_log_workspaces()
         if current_log_workspaces:
             ws_name = current_log_workspaces.name()
             self._sample_logs_workspace_group.clear_log_workspaces()
             DeleteWorkspace(ws_name)
-        removed_ws_list: List[object] = []
+        removed_ws_list: list[object] = []
         for ws_name in self._data_workspaces.get_loaded_workpace_names():
             removed_ws_list.extend(self.delete_workspace(ws_name))
         return removed_ws_list
 
-    def delete_workspace(self, loaded_ws_name: str) -> List[object]:
+    def delete_workspace(self, loaded_ws_name: str) -> list[object]:
         removed = self._data_workspaces.pop(loaded_ws_name)
-        removed_ws_list: List[object] = [removed.loaded_ws]
+        removed_ws_list: list[object] = [removed.loaded_ws]
         DeleteWorkspace(removed.loaded_ws)
         if removed.bgsub_ws:
             DeleteWorkspace(removed.bgsub_ws)
@@ -1078,7 +1078,7 @@ class GSAS2Model:
         return plot_window_title
 
     def plot_gsas_histogram(
-        self, axis: Axes, gsas_histogram: Workspace, reflection_positions: Optional[List[np.ndarray]], histogram_index: int
+        self, axis: Axes, gsas_histogram: Workspace, reflection_positions: Optional[list[np.ndarray]], histogram_index: int
     ) -> str:
         axis.plot(gsas_histogram, color="#1105f0", label="observed", linestyle="None", marker="+", wkspIndex=0)
         axis.plot(gsas_histogram, color="#246b01", label="calculated", wkspIndex=1)
@@ -1112,7 +1112,7 @@ class GSAS2Model:
                 input_file_name = os.path.basename(self.file_paths.data_files[histogram_index - 1])
         return "GSAS-II Refinement " + input_file_name
 
-    def _create_reflection_labels(self, reflection_positions: List[np.ndarray]) -> List[str]:
+    def _create_reflection_labels(self, reflection_positions: list[np.ndarray]) -> list[str]:
         """Create the labels used to identify different phase reflection lists
         The primary format, if the number of phase names equals the number of positions, is 'reflections_{phase_name}'
         The fallback format is 'reflections_phase_{index}' where index starts at 1

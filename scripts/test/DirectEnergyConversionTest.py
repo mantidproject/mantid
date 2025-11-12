@@ -267,7 +267,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
                 self.assertAlmostEqual(samp, rez)
 
         # Now Test shifted:
-        ei, mon1_peak, mon1_index, tzero = GetEi(InputWorkspace=ws, Monitor1Spec=int(2), Monitor2Spec=int(3), EnergyEstimate=13)
+        ei, mon1_peak, mon1_index, tzero = GetEi(InputWorkspace=ws, Monitor1Spec=2, Monitor2Spec=3, EnergyEstimate=13)
         ScaleX(InputWorkspace="ws", OutputWorkspace="ws", Operation="Add", Factor=-mon1_peak, InstrumentParameter="DelayTime", Combine=True)
         ws = mtd["ws"]
 

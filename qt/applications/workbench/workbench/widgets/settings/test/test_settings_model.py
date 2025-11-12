@@ -24,14 +24,14 @@ test_CONF_settings = {
 }
 
 
-class MockConfigService(object):
+class MockConfigService:
     def __init__(self):
         self.setString = MagicMock()
         self.getString = MagicMock(side_effect=lambda x: test_config_settings[x])
         self.hasProperty = MagicMock(side_effect=lambda x: x in test_config_settings)
 
 
-class MockCONF(object):
+class MockCONF:
     def __init__(self):
         self.set = MagicMock()
         self.get = MagicMock(side_effect=lambda x, type: test_CONF_settings[x])

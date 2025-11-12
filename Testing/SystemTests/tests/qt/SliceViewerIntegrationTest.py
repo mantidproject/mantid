@@ -48,7 +48,7 @@ from math import inf
 from numpy.testing import assert_allclose
 
 
-class MockConfig(object):
+class MockConfig:
     def get(self, name, type=None):
         if name == SCALENORM:
             return "Log"

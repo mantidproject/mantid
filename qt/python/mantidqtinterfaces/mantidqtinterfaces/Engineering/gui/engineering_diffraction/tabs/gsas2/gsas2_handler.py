@@ -8,7 +8,7 @@
 
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import List, Optional, Union
+from typing import Optional, Union
 import os
 import fnmatch
 import json
@@ -62,10 +62,10 @@ class FilePaths:
         instrument_files: A list of paths to instrument files.
     """
 
-    data_files: List[str] = field(default_factory=list)
-    phase_filepaths: List[str] = field(default_factory=list)
-    instrument_files: List[str] = field(default_factory=list)
-    gsas2_save_dirs: List[str] = field(default_factory=list)
+    data_files: list[str] = field(default_factory=list)
+    phase_filepaths: list[str] = field(default_factory=list)
+    instrument_files: list[str] = field(default_factory=list)
+    gsas2_save_dirs: list[str] = field(default_factory=list)
 
 
 @dataclass
@@ -81,14 +81,14 @@ class GSAS2Config:
         number_of_regions: The number of regions to configure.
     """
 
-    limits: Optional[List[Union[int, float]]] = field(default_factory=list)
-    mantid_pawley_reflections: Optional[List[Union[str, int]]] = None
-    override_cell_lengths: Optional[List[List[float]]] = None
+    limits: Optional[list[Union[int, float]]] = field(default_factory=list)
+    mantid_pawley_reflections: Optional[list[Union[str, int]]] = None
+    override_cell_lengths: Optional[list[list[float]]] = None
     d_spacing_min: float = 1.0
     number_of_regions: int = 1
 
 
-class GSAS2Handler(object):
+class GSAS2Handler:
     """
     A class that encapsulates logic for managing GSAS-II input parameters, paths, and configurations.
 
@@ -142,7 +142,7 @@ class GSAS2Handler(object):
         # GSAS-II configuration
         self._gsas2_python_path: Optional[Path] = None
         self.os_platform: str = platform.system()
-        self.python_binaries: List[str] = []
+        self.python_binaries: list[str] = []
 
         # Validate inputs
         self.validate_inputs()

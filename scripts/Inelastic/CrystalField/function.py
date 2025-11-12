@@ -10,7 +10,7 @@ from mantid import logger
 PARAMETER_NAME_PATTERN = re.compile(r"([a-zA-Z][\w.]+)")
 
 
-class FunctionParameters(object):
+class FunctionParameters:
     """
     A helper class that simplifies access to parameters of nested composite fitting functions.
     """
@@ -29,7 +29,7 @@ class FunctionParameters(object):
         self.function = function
 
 
-class FunctionAttributes(object):
+class FunctionAttributes:
     """
     A helper class that simplifies access to attributes of nested composite fitting functions.
     """
@@ -48,7 +48,7 @@ class FunctionAttributes(object):
         self.function = function
 
 
-class Function(object):
+class Function:
     """A helper object that simplifies getting and setting parameters of a simple named function."""
 
     def __init__(self, name_or_function, **kwargs):
@@ -162,7 +162,7 @@ class Function(object):
         self._params.update(function)
 
 
-class CompositeProperties(object):
+class CompositeProperties:
     """
     A helper class that simplifies access of attributes and parameters of a composite function.
     """
@@ -227,7 +227,7 @@ class CompositeProperties(object):
             self.function.addConstraints(constraint)
 
 
-class PeaksFunction(object):
+class PeaksFunction:
     """A helper object that simplifies getting and setting parameters of a composite function
     containing multiple peaks of the same spectrum.
     """
@@ -325,7 +325,7 @@ class PeaksFunction(object):
         self.constraints(*[pattern % i for i in range(start, end)])
 
 
-class Background(object):
+class Background:
     """Object representing spectrum background: a sum of a central peak and a
     background.
     """
@@ -490,7 +490,7 @@ class ResolutionModel:
         return list(x), list(y)
 
 
-class PhysicalProperties(object):
+class PhysicalProperties:
     """
     Contains information about measurement conditions of physical properties
     """

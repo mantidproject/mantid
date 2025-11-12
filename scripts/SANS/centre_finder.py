@@ -13,7 +13,7 @@ from mantid.simpleapi import CloneWorkspace, DeleteWorkspace, MaskDetectorsInSha
 import SANSUtility
 
 
-class FindDirectionEnum(object):  # pylint: disable=R0903
+class FindDirectionEnum:  # pylint: disable=R0903
     ALL = 0
     UP_DOWN = 1
     LEFT_RIGHT = 2
@@ -56,7 +56,7 @@ def get_bench_rotation(reducer):
     return bench_rotation
 
 
-class CentreFinder(object):
+class CentreFinder:
     """
     Aids estimating the effective centre of the particle beam by calculating Q in four
     quadrants and using the asymmetry to calculate the direction to the beam centre. A
@@ -267,7 +267,7 @@ class CentreFinder(object):
         return cylinder_direction.X(), cylinder_direction.Y(), cylinder_direction.Z()
 
 
-class CentrePositioner(object):
+class CentrePositioner:
     """
     Handles the positions and increments for beam finding.
     """
@@ -370,7 +370,7 @@ class CentrePositioner(object):
 # They are not instrument dependent, they should only dependt on the user's choice.
 
 
-class BeamCentrePositionUpdaterFactory(object):  # pylint: disable=R0903
+class BeamCentrePositionUpdaterFactory:  # pylint: disable=R0903
     """
     Creates the required beam centre position updater.
     """
@@ -395,7 +395,7 @@ class BeamCentrePositionUpdaterFactory(object):  # pylint: disable=R0903
             )
 
 
-class BeamCentrePositionUpdater(object):  # pylint: disable=R0903
+class BeamCentrePositionUpdater:  # pylint: disable=R0903
     """
     Handles the position updates, ie if we are only intereseted in left/right or up/down or all
     """
@@ -479,7 +479,7 @@ class BeamCentrePositionUpdaterLeftRight(BeamCentrePositionUpdater):
 
 # Provides the positions and increments with the correct scaling
 # These set of classes are instrument dependent.
-class PositionProviderFactory(object):
+class PositionProviderFactory:
     """
     Creates the required increment provider. The increments for the two coordinates
     depend on the instrument, eg Larmor's first coordinate is an angle for certain
@@ -570,7 +570,7 @@ class PositionProviderFactory(object):
         return (increment_angle / increment_linear) * tolerance_linear
 
 
-class PositionProvider(object):
+class PositionProvider:
     def __init__(self, increment_coord1, increment_coord2, tolerance):
         super(PositionProvider, self).__init__()
 
@@ -770,7 +770,7 @@ class PositionProviderAngleY(PositionProvider):
 
 
 # The classes below provide a logging facility for the Beam Centre Finder mechanism
-class BeamCenterLogger(object):
+class BeamCenterLogger:
     """
     Logger during the beam centre operation. The logging will
     depend partially on the type of the first coordinate, ie [m, m] or [degree, m].

@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import collections.abc
-from typing import List, NamedTuple, Optional, overload, Type, TypedDict, TypeVar
+from typing import NamedTuple, Optional, overload, TypedDict, TypeVar
 from math import isclose
 
 import numpy as np
@@ -148,7 +148,7 @@ class KpointsData(collections.abc.Sequence):
     def __getitem__(self, item: int) -> KpointData: ...
 
     @overload  # F811
-    def __getitem__(self, item: slice) -> List[KpointData]:  # F811
+    def __getitem__(self, item: slice) -> list[KpointData]:  # F811
         ...
 
     def __getitem__(self, item):  # F811
@@ -162,11 +162,11 @@ class KpointsData(collections.abc.Sequence):
     class JSONableData(TypedDict):
         """JSON-friendly representation of KpointsData"""
 
-        frequencies: List[List[float]]
-        atomic_displacements: List[List[List[List[float]]]]
-        weights: List[float]
-        k_vectors: List[List[float]]
-        unit_cell: List[List[float]]
+        frequencies: list[list[float]]
+        atomic_displacements: list[list[list[list[float]]]]
+        weights: list[float]
+        k_vectors: list[list[float]]
+        unit_cell: list[list[float]]
 
     def to_dict(self) -> "KpointsData.JSONableData":
         """Get a JSON-compatible representation of the data"""
@@ -179,7 +179,7 @@ class KpointsData(collections.abc.Sequence):
         )
 
     @classmethod
-    def from_dict(cls: Type[KPD], data: "KpointsData.JSONableData") -> KPD:
+    def from_dict(cls: type[KPD], data: "KpointsData.JSONableData") -> KPD:
         """Construct from JSON-compatible dictionary"""
         array_data = {key: np.asarray(value, dtype=FLOAT_TYPE) for key, value in data.items()}
         array_data["atomic_displacements"] = array_data["atomic_displacements"].view(COMPLEX_TYPE)

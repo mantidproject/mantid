@@ -15,7 +15,7 @@ class IsAnAlgorithm(PythonAlgorithm):
         pass
 
 
-class NotAnAlgorithm(object):
+class NotAnAlgorithm:
     pass
 
 

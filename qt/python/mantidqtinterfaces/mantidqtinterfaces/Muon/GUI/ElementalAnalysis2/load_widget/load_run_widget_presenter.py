@@ -13,7 +13,7 @@ import mantidqtinterfaces.Muon.GUI.ElementalAnalysis2.load_widget.load_utils_ea 
 from mantidqt.utils.observer_pattern import GenericObservable, Observable
 
 
-class LoadRunWidgetPresenterEA(object):
+class LoadRunWidgetPresenterEA:
     def __init__(self, view, model):
         self._view = view
         self._model = model

@@ -8,15 +8,10 @@ from functools import partial
 from itertools import chain, groupby
 from operator import itemgetter
 from typing import (
-    Dict,
-    Generator,
-    Iterable,
-    List,
     Optional,
-    Sequence,
-    Tuple,
     Union,
 )
+from collections.abc import Generator, Iterable, Sequence
 
 from euphonic import Quantity, ureg
 from euphonic.spectra import Spectrum1DCollection, Spectrum2DCollection
@@ -35,7 +30,7 @@ import pint
 pint.set_application_registry(ureg)
 
 
-def _iter_check_thresholds(items: Iterable[Tuple[int, int, np.ndarray]]) -> Generator[Tuple[int, int, float], None, None]:
+def _iter_check_thresholds(items: Iterable[tuple[int, int, np.ndarray]]) -> Generator[tuple[int, int, float], None, None]:
     """Compare S data values to minimum thresholds, return items with low intensity
 
     Items have form (atom_index, quantum_order_index, s_array)
@@ -52,8 +47,8 @@ def _iter_check_thresholds(items: Iterable[Tuple[int, int, np.ndarray]]) -> Gene
 
 
 def check_thresholds(
-    items: Iterable[Tuple[int, int, np.ndarray]], logger: Optional[Logger] = None, logging_level: str = "warning"
-) -> List[Tuple[int, int, float]]:
+    items: Iterable[tuple[int, int, np.ndarray]], logger: Optional[Logger] = None, logging_level: str = "warning"
+) -> list[tuple[int, int, float]]:
     """
     Compare the S data values to minimum thresholds and warn if the threshold appears large relative to the data
 
@@ -87,10 +82,10 @@ def check_thresholds(
     return warning_cases
 
 
-XTickLabels = Sequence[Tuple[int, str]]
-OneLineData = Dict[str, Union[str, int]]
+XTickLabels = Sequence[tuple[int, str]]
+OneLineData = dict[str, Union[str, int]]
 LineData = Sequence[OneLineData]
-Metadata = Dict[str, Union[str, int, LineData]]
+Metadata = dict[str, Union[str, int, LineData]]
 
 
 def apply_kinematic_constraints(spectra: Spectrum2DCollection, instrument: DirectInstrument) -> None:

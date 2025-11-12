@@ -26,7 +26,7 @@ def getMANTIDpkds(filename):
     f.close()
 
     hkl = np.zeros((len(lines) - 2, 3))
-    d = np.zeros((len(lines) - 2))
+    d = np.zeros(len(lines) - 2)
     q = np.zeros((len(lines) - 2, 3))
 
     for i in range(1, len(lines) - 1):

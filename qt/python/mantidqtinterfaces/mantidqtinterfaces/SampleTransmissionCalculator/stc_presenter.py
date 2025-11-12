@@ -7,7 +7,7 @@
 from mantidqt.interfacemanager import InterfaceManager
 
 
-class SampleTransmissionCalculatorPresenter(object):
+class SampleTransmissionCalculatorPresenter:
     """
     The sample transmission calculator interface
     """

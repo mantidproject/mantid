@@ -197,7 +197,7 @@ class ReductionWrapperTest(unittest.TestCase):
         adv_prop["data_file_ext"] = ".nxs"
         main_prop["sample_run"] = 10000
 
-        class ww(object):
+        class ww:
             def __init__(self):
                 self.standard_vars = None
                 self.advanced_vars = None

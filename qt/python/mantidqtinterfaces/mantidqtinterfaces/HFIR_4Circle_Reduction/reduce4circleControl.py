@@ -122,7 +122,7 @@ def check_int_type(variable, var_name):
     return
 
 
-class CWSCDReductionControl(object):
+class CWSCDReductionControl:
     """Controlling class for reactor-based single crystal diffraction reduction"""
 
     RESERVED_ROI_NAME = "__temp_roi__"
@@ -2183,7 +2183,7 @@ class CWSCDReductionControl(object):
                 download_result = None
 
             if not file_available:
-                raise IOError(
+                raise OSError(
                     "SPICE file for Exp {0} Scan {1} cannot be found at {2} or downloaded ({3})".format(
                         exp_no, scan_no, spice_file_name, download_result
                     )
@@ -2548,7 +2548,7 @@ class CWSCDReductionControl(object):
             message = "Unable to load file {0} due to RuntimeError {1}.".format(md_file_path, run_err)
         except OSError as run_err:
             message = "Unable to load file {0} due to OSError {1}.".format(md_file_path, run_err)
-        except IOError as run_err:
+        except OSError as run_err:
             message = "Unable to load file {0} due to IOError {1}.".format(md_file_path, run_err)
 
         return status, message

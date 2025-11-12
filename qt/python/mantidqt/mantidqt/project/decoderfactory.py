@@ -9,7 +9,7 @@
 from mantidqt.usersubwindowfactory import UserSubWindowFactory
 
 
-class DecoderFactory(object):
+class DecoderFactory:
     decoder_list = set([])
 
     @classmethod

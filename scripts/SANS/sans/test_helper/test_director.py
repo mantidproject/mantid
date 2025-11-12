@@ -37,7 +37,7 @@ from sans.state.StateObjects.state_instrument_info import StateInstrumentInfo
 from sans.test_helper.file_information_mock import SANSFileInformationMock
 
 
-class TestDirector(object):
+class TestDirector:
     """The purpose of this builder is to create a valid state object for tests"""
 
     def __init__(self):

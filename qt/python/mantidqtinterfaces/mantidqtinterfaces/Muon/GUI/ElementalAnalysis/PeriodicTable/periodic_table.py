@@ -156,7 +156,7 @@ _elements = [
 ]
 
 
-class PeriodicTableItem(object):
+class PeriodicTableItem:
     """Periodic table item, used as generic item in :class:`PeriodicTable`,
     :class:`PeriodicCombo` and  :class:`PeriodicList`.
 

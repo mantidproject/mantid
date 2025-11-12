@@ -30,7 +30,7 @@ class BatchFileKeywords(Enum):
     SCALE_FACTOR = "scale_factor"
 
 
-class BatchCsvParser(object):
+class BatchCsvParser:
     IGNORED_KEYWORDS = {"background_sans", "background_trans", "background_direct_beam", ""}
     COMMENT_KEWORDS = {"#", "MANTID_BATCH_FILE"}
 

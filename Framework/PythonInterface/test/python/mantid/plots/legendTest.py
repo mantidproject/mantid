@@ -16,7 +16,7 @@ from mantid.plots.legend import LegendProperties
 LEGEND_OPTIONS = {"plots.legend.Location": "best", "plots.legend.FontSize": "8.0"}
 
 
-class MockConfigService(object):
+class MockConfigService:
     def __init__(self):
         self.getString = mock.Mock(side_effect=LEGEND_OPTIONS.get)
 

@@ -8,7 +8,6 @@
 #
 #
 
-from typing import List
 
 import numpy as np
 
@@ -19,7 +18,7 @@ from mantidqt.plotting.functions import plot_contour, plot_surface
 
 
 def plot(
-    plot_type: SpectraSelection, plot_index: int, axis_name: str, log_name: str, custom_log_values: List[float], workspaces: List[Workspace]
+    plot_type: SpectraSelection, plot_index: int, axis_name: str, log_name: str, custom_log_values: list[float], workspaces: list[Workspace]
 ) -> None:
     if len(workspaces) > 0:
         matrix_ws = _create_workspace_for_group_plot(plot_type, workspaces, plot_index, log_name, custom_log_values)
@@ -48,7 +47,7 @@ def plot(
 
 
 def _create_workspace_for_group_plot(
-    plot_type: SpectraSelection, workspaces: List[Workspace], plot_index: int, log_name: str, custom_log_values: List[float]
+    plot_type: SpectraSelection, workspaces: list[Workspace], plot_index: int, log_name: str, custom_log_values: list[float]
 ) -> MatrixWorkspace:
     _validate_workspace_choices(workspaces, plot_index)
 
@@ -92,7 +91,7 @@ def _create_workspace_for_group_plot(
     return matrix_ws
 
 
-def _group_contents_have_same_x(workspaces: List[Workspace], index: int) -> bool:
+def _group_contents_have_same_x(workspaces: list[Workspace], index: int) -> bool:
     # Check and retrieve X data for given workspace and spectrum
     def get_x_data(index: int, spectrum: int) -> np.ndarray:
         nonlocal workspaces
@@ -123,7 +122,7 @@ def _group_contents_have_same_x(workspaces: List[Workspace], index: int) -> bool
         return all_same_x
 
 
-def _validate_workspace_choices(workspaces: List[Workspace], spectrum: int) -> None:
+def _validate_workspace_choices(workspaces: list[Workspace], spectrum: int) -> None:
     if len(workspaces) == 0:
         raise RuntimeError("Must provide a non-empty WorkspaceGroup.")
 

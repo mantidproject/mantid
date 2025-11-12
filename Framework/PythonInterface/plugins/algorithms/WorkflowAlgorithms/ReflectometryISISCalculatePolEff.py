@@ -14,7 +14,8 @@ from mantid.kernel import (
 )
 
 from dataclasses import dataclass
-from typing import Any, Callable, Optional, TYPE_CHECKING
+from typing import Any, Optional, TYPE_CHECKING
+from collections.abc import Callable
 
 if TYPE_CHECKING:
     from mantid.api import MatrixWorkspace

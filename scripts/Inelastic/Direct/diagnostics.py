@@ -531,7 +531,7 @@ def get_failed_spectra_list(diag_workspace):
 # ------------------------------------------------------------------------------
 
 
-class ArgumentParser(object):
+class ArgumentParser:
     def __init__(self, keywords):
         self.start_index = None  # Make this more general for anything that is missing!
         self.end_index = None

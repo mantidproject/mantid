@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 
-class XYPosition(object):
+class XYPosition:
     X = None  # Float
     Y = None  # Float
 
@@ -15,7 +15,7 @@ class XYPosition(object):
         self.Y = Y
 
 
-class XYZPosition(object):
+class XYZPosition:
     X = None  # Float
     Y = None  # Float
     Z = None  # Float

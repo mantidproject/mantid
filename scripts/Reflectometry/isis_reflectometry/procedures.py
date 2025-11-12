@@ -1027,7 +1027,7 @@ def NRCombineDatafn(RunsNameList, CombNameList, applySFs, SFList, SFError, scale
 def nrWriteXYE(wksp, fname):
     a1 = mtd[wksp]
     x1 = a1.readX(0)
-    X1 = n.zeros((len(x1) - 1))
+    X1 = n.zeros(len(x1) - 1)
     for i in range(0, len(x1) - 1):
         X1[i] = (x1[i] + x1[i + 1]) / 2.0
     y1 = a1.readY(0)
@@ -1433,7 +1433,7 @@ def writemap_tab(dat, th0, spchan, fname):
 def xye(wksp):
     a1 = mtd[wksp]
     x1 = a1.readX(0)
-    X1 = n.zeros((len(x1) - 1))
+    X1 = n.zeros(len(x1) - 1)
     for i in range(0, len(x1) - 1):
         X1[i] = (x1[i] + x1[i + 1]) / 2.0
     y1 = a1.readY(0)

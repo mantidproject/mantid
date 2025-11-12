@@ -5,14 +5,14 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
-from typing import List, Optional
+from typing import Optional
 from mantid.api import mtd
 from mantid.dataobjects import Workspace2D
 from mantid.kernel import logger
 from mantid.simpleapi import DeleteWorkspace, LoadEventNexus, Plus, Rebin
 
 
-def load_and_rebin(runs: List[int], output_workspace: str, rebin_params: List[float], banks: Optional[List[int]] = None) -> Workspace2D:
+def load_and_rebin(runs: list[int], output_workspace: str, rebin_params: list[float], banks: Optional[list[int]] = None) -> Workspace2D:
     r"""
     @brief Load a list of run numbers and rebin
 

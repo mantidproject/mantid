@@ -28,9 +28,7 @@ class AbinsLoadVASPTest(unittest.TestCase, abins.input.Tester):
 
         with TemporaryDirectory() as tmpdir:
             bad_vasp_reader = VASPLoader(input_ab_initio_filename=filename, cache_directory=Path(tmpdir))
-            with self.assertRaisesRegexp(
-                ValueError, "Could not find a 'calculation' block containing a 'dynmat' block in VASP XML file\\."
-            ):
+            with self.assertRaisesRegex(ValueError, "Could not find a 'calculation' block containing a 'dynmat' block in VASP XML file\\."):
                 bad_vasp_reader.read_vibrational_or_phonon_data()
 
     # IBRION=8 from optimised structure

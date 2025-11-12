@@ -28,7 +28,7 @@ from mantidqt.plotting.functions import plot_from_names
 
 
 # Avoid importing the whole of mantid for a single mock of the workspace class
-class FakeWorkspace(object):
+class FakeWorkspace:
     def __init__(self, name):
         self._name = name
 

@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from enum import Enum
-from typing import List, Any, Dict
+from typing import Any
 
 from mantid.kernel import ConfigService
 
@@ -38,15 +38,15 @@ class GeneralUserConfigProperties(Enum):
 class GeneralSettingsModel(ConfigSettingsChangesModel):
     def __init__(self):
         super().__init__()
-        self._user_config_changes: Dict[str, Any] = {}
+        self._user_config_changes: dict[str, Any] = {}
 
-    def properties_to_be_changed(self) -> List[str]:
+    def properties_to_be_changed(self) -> list[str]:
         return list(self._user_config_changes.keys()) + super().properties_to_be_changed()
 
     def has_unsaved_changes(self) -> bool:
         return self._user_config_changes != {} or super().has_unsaved_changes()
 
-    def get_changes(self) -> Dict[str, Any]:
+    def get_changes(self) -> dict[str, Any]:
         return self._user_config_changes | super().get_changes()
 
     def apply_changes(self) -> None:
@@ -87,7 +87,7 @@ class GeneralSettingsModel(ConfigSettingsChangesModel):
         return None
 
     @staticmethod
-    def get_facility_names() -> List[str]:
+    def get_facility_names() -> list[str]:
         return ConfigService.getFacilityNames()
 
     def get_instrument(self) -> str:

@@ -8,7 +8,7 @@
 from abc import ABCMeta, abstractmethod
 from functools import wraps
 from pathlib import Path
-from typing import Callable, Sequence
+from collections.abc import Callable, Sequence
 
 import numpy as np
 from pydantic import ConfigDict, validate_call, with_config
@@ -55,7 +55,7 @@ class AbInitioLoader(metaclass=NamedAbstractClass):
         if not isinstance(input_ab_initio_filename, str):
             raise TypeError("Filename must be a string")
         elif not Path(input_ab_initio_filename).is_file():
-            raise IOError(f"Ab initio file {input_ab_initio_filename} not found.")
+            raise OSError(f"Ab initio file {input_ab_initio_filename} not found.")
 
         self._clerk = abins.IO(
             input_filename=input_ab_initio_filename,
@@ -185,7 +185,7 @@ class AbInitioLoader(metaclass=NamedAbstractClass):
             logger.notice(str(ab_initio_data) + " has been loaded from the HDF file.")
 
         # if loading from *.hdf5 file failed than read data directly from input ab initio file and erase hdf file
-        except (IOError, ValueError) as err:
+        except (OSError, ValueError) as err:
             logger.notice(str(err))
             self._clerk.erase_hdf_file()
             ab_initio_data = self.read_vibrational_or_phonon_data()

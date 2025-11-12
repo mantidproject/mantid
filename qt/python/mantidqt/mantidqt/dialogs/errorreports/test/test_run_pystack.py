@@ -8,7 +8,6 @@
 from pathlib import Path
 from tempfile import NamedTemporaryFile, TemporaryDirectory
 from time import sleep
-from typing import List
 from unittest import TestCase
 from unittest.mock import MagicMock, patch
 
@@ -99,7 +98,7 @@ class TestRunPystack(TestCase):
 
 
 class SetupSomeFilesInATempDir:
-    def __init__(self, file_names: List[str]):
+    def __init__(self, file_names: list[str]):
         self.tmp_dir = TemporaryDirectory()
         for name in file_names:
             open(f"{self.tmp_dir.name}/{name}", "a").close()

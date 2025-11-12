@@ -11,7 +11,7 @@ import matplotlib as mpl
 SCALE_OPTIONS = {0: "linear", 1: "log"}
 
 
-class MantidPlotProjectParser(object):
+class MantidPlotProjectParser:
     plot_layer_pattern = r"<multiLayer>\s*(.*?)\s*<\/multiLayer>"
     graph_pattern = r"<graph>\s*(.*?)\s*<\/graph>"
     workspaces_pattern = r"<mantidworkspaces>\s*(.*?)\s*<\/mantidworkspaces>"

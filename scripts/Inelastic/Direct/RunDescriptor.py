@@ -40,7 +40,7 @@ import re
 import collections.abc
 
 
-class RunList(object):
+class RunList:
     """Helper class to maintain list of runs used in RunDescriptor for summing
     or subsequent processing range of files.
 
@@ -1166,7 +1166,7 @@ class RunDescriptor(PropDescriptor):
         ok, data_file = self.find_file(RunDescriptor._holder, inst_name, run_number, filePath, fileExt, **kwargs)
         if not ok:
             self._ws_name = None
-            raise IOError(data_file)
+            raise OSError(data_file)
 
         if load_mon_with_workspace:
             mon_load_option = "Include"

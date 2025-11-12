@@ -10,7 +10,7 @@
 from abc import ABCMeta, abstractmethod
 
 
-class Configurations(object):
+class Configurations:
     class _EssentialAttrs(metaclass=ABCMeta):
         """
         Interface for essential properties all config classes should have

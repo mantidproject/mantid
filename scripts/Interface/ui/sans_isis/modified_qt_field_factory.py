@@ -4,7 +4,7 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from typing import Callable, List
+from collections.abc import Callable
 
 from qtpy.QtWidgets import QLineEdit, QComboBox, QCheckBox, QSpinBox
 
@@ -18,19 +18,19 @@ class ModifiedQtFieldFactory:
         self._attach_to_q_combo_box(parent.findChildren(QComboBox))
         self._attach_to_q_checkbox(parent.findChildren(QCheckBox))
 
-    def _attach_to_line_edits(self, line_edits: List[QLineEdit]):
+    def _attach_to_line_edits(self, line_edits: list[QLineEdit]):
         for editable_field in line_edits:
             editable_field.editingFinished.connect(self._on_modified_callable)
 
-    def _attach_to_q_combo_box(self, combo_boxes: List[QComboBox]):
+    def _attach_to_q_combo_box(self, combo_boxes: list[QComboBox]):
         for combo_box in combo_boxes:
             combo_box.currentIndexChanged.connect(self._on_modified_callable)
 
-    def _attach_to_q_checkbox(self, checkboxes: List[QCheckBox]):
+    def _attach_to_q_checkbox(self, checkboxes: list[QCheckBox]):
         for box in checkboxes:
             box.toggled.connect(self._on_modified_callable)
 
-    def _attach_to_q_spinbox(self, spinboxes: List[QSpinBox]):
+    def _attach_to_q_spinbox(self, spinboxes: list[QSpinBox]):
         for box in spinboxes:
             # Note spin boxes do not work as expected, scrolling or using the
             # arrows will no emit this signal. I'm yet to find a simple workaround...

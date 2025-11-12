@@ -85,7 +85,7 @@ def get_settings_object(settings_prop_man_name=REDUCTION_SETTINGS_OBJ_NAME):
     and then pass around the returned object to wherever it is needed.
     """
 
-    class PropertyManagerPicklableWrapper(object):
+    class PropertyManagerPicklableWrapper:
         """
         Pickling has not been enabled for PropertyManager, and this is needed
         in the Reducer so that the "deep copy" stuff does not complain.  This

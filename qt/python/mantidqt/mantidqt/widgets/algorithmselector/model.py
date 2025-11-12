@@ -10,7 +10,7 @@ from mantid.kernel import Direction
 CATEGORY_SEP = "\\"
 
 
-class AlgorithmSelectorModel(object):
+class AlgorithmSelectorModel:
     """
     This is a model for the algorithm selector widget.
     """

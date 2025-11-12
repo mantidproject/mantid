@@ -8,13 +8,13 @@
 import numpy as np
 from mantid.api import AnalysisDataService as ADS
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
-from typing import Sequence
+from collections.abc import Sequence
 from mantid.kernel import logger
 from mantidqt.plotting import sample_shape
 from Engineering.common.texture_sample_viewer import get_scaled_intrinsic_sample_directions_in_lab_frame, get_xml_mesh, is_valid_mesh
 
 
-class ShowSampleModel(object):
+class ShowSampleModel:
     def __init__(self, inc_gauge_vol=False, fix_axes_to_sample=True):
         self.ws_name = None
         self.include_gauge_vol = inc_gauge_vol

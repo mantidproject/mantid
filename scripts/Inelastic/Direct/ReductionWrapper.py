@@ -32,7 +32,7 @@ from abc import abstractmethod
 # pylint: disable=too-many-instance-attributes, R0921
 
 
-class ReductionWrapper(object):
+class ReductionWrapper:
     """Abstract class provides interface to direct inelastic reduction
     allowing it to be run  from Mantid, web services, or system tests
     using the same interface and the same run file placed in different
@@ -40,7 +40,7 @@ class ReductionWrapper(object):
     """
 
     # pylint: disable=too-few-public-methods
-    class var_holder(object):
+    class var_holder:
         """A simple wrapper class to keep web variables"""
 
         def __init__(self, Web_vars=None):
@@ -526,11 +526,11 @@ class ReductionWrapper(object):
                 with h5py.File(input_file, "r") as f:  # noqa: F841
                     ok = True
                     break  # can read the file
-            except IOError:
+            except OSError:
                 self.reducer.prop_man.log("*** File found but access can not be gained. Waiting for 10 sec", "notice")
                 time.sleep(10)
         if not ok:
-            raise IOError("Can not get read access to input file: " + input_file + " after 4 min of trying")
+            raise OSError("Can not get read access to input file: " + input_file + " after 4 min of trying")
 
     def reduce(self, input_file=None, output_directory=None):
         """The method performs all main reduction operations over

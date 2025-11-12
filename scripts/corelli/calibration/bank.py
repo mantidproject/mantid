@@ -8,7 +8,7 @@
 from copy import deepcopy
 import numpy as np
 import re
-from typing import List, Optional, Tuple
+from typing import Optional
 from corelli.calibration.utils import InputTable, WorkspaceGroupTypes, WorkspaceTypes  # custom type aliases
 
 # imports from Mantid
@@ -254,7 +254,7 @@ def criterion_peak_vertical_position(
     # `positions_average` stores the vertical position for each wire shadow, averaged for all tubes
     positions_average = [np.mean(table.column(column_number)) for column_number in range(1, 1 + peak_count)]
 
-    deviations: List[float] = list()  # a measure of how much the vertical positions deviate from the mean positions
+    deviations: list[float] = list()  # a measure of how much the vertical positions deviate from the mean positions
     tube_count = table.rowCount()  # number of tubes in the bank
     for tube_index in range(tube_count):
         positions = np.array(list(table.row(tube_index).values())[1:])  # peak positions for the current tube
@@ -469,7 +469,7 @@ def calibrate_bank(
     shadow_width: float = 4,
     fit_domain: float = 7,
     minimum_intensity: float = 1000,
-) -> Tuple[TableWorkspace, Optional[TableWorkspace]]:
+) -> tuple[TableWorkspace, Optional[TableWorkspace]]:
     r"""
     Calibrate the tubes in a bank and assess their goodness-of-fit with an acceptance function. Creates a
     table of calibrated detector IDs and a table of non-calibrated detector IDs
@@ -539,7 +539,7 @@ def calibrate_banks(
     mask_group: str = "masks",
     fit_group: str = "fits",
     **kwargs,
-) -> Tuple[WorkspaceGroup, Optional[WorkspaceGroup]]:
+) -> tuple[WorkspaceGroup, Optional[WorkspaceGroup]]:
     r"""
     Calibrate the tubes in a selection of banks, and assess their goodness-of-fit with an acceptance function.
 

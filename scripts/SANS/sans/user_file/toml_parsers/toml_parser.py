@@ -11,7 +11,7 @@ from sans.user_file.toml_parsers.toml_v1_parser import TomlV1Parser
 from sans.user_file.toml_parsers.toml_v2_parser import TomlV2Parser
 
 
-class TomlParser(object):
+class TomlParser:
     def __init__(self, toml_reader=None):
         self._lib_impl = toml_reader if toml_reader else TomlReader()
 

@@ -5,7 +5,7 @@
 import json
 import math
 import os
-import xml.etree.cElementTree as ET
+import xml.etree.ElementTree as ET
 
 
 maxCountPerFile = 1500

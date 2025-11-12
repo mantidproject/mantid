@@ -172,7 +172,7 @@ class HFIRTestsAPIv2(systemtesting.MantidSystemTest):
             AnalysisDataService.remove(ws)
 
     def runTest(self):
-        class TestStub(object):
+        class TestStub:
             def __init__(self, test_method):
                 self._test_method = test_method
                 self._passed = True

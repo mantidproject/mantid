@@ -17,7 +17,7 @@ from mantidqt.dialogs.errorreports.report import MAX_STACK_TRACE_LENGTH
 from mantidqt.dialogs.errorreports.run_pystack import retrieve_thread_traces_from_coredump_file
 
 
-class ErrorReporterPresenter(object):
+class ErrorReporterPresenter:
     SENDING_ERROR_MESSAGE = "There was an error when sending the report.\nPlease contact mantid-help@mantidproject.org directly"
 
     def __init__(self, view, exit_code: str, application: str, workbench_pid: str, traceback: Optional[str] = None):

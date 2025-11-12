@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
-from typing import Dict, Optional
+from typing import Optional
 
 import numpy as np
 
@@ -66,7 +66,7 @@ class Abins(AbinsAlgorithm, PythonAlgorithm):
             multiple_choice_settings=[("Setting", "settings", "Setting choice for this instrument (e.g. monochromator)")],
         )
 
-    def validateInputs(self) -> Dict[str, str]:
+    def validateInputs(self) -> dict[str, str]:
         issues = dict()
         issues = self.validate_common_inputs(issues)
         issues.update(self._validate_instrument_settings())

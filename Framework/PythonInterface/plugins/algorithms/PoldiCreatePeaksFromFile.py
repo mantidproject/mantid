@@ -38,7 +38,7 @@ except ImportError:
     PYPARSING_AVAILABLE = False
 
 
-class PoldiCompound(object):
+class PoldiCompound:
     """Small helper class to handle the results from PoldiCrystalFileParser."""
 
     def __init__(self, name, elements):
@@ -79,7 +79,7 @@ def raiseParseErrorException(message):
 # pylint: disable=too-many-instance-attributes
 
 
-class PoldiCrystalFileParser(object):
+class PoldiCrystalFileParser:
     """Small parser for crystal structure files used at POLDI
 
     This class encapsulates a small parser for crystal structure files that are used at

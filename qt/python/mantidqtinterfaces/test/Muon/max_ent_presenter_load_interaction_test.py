@@ -28,7 +28,7 @@ def retrieve_combobox_info(combo_box):
     return output_list
 
 
-class mock_ws(object):
+class mock_ws:
     def __init__(self, name):
         self._name = name
 
@@ -36,7 +36,7 @@ class mock_ws(object):
         return self._name
 
 
-class mock_wrapper(object):
+class mock_wrapper:
     def __init__(self, name):
         self.workspace = mock_ws(name)
 

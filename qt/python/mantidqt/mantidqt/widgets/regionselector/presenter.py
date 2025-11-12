@@ -4,7 +4,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
-from typing import Callable, Optional
+from typing import Optional
+from collections.abc import Callable
 
 from .view import RegionSelectorView
 from ..observers.observing_presenter import ObservingPresenter

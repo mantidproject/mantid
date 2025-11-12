@@ -17,7 +17,7 @@ from mantidqtinterfaces.Muon.GUI.MuonAnalysis.load_widget.load_widget_view impor
 from mantidqtinterfaces.Muon.GUI.MuonAnalysis.load_widget.load_widget_presenter import LoadWidgetPresenter
 
 
-class LoadWidget(object):
+class LoadWidget:
     def __init__(self, loaded_data, context, parent):
         # set up the views
         self.load_file_view = BrowseFileWidgetView(parent)

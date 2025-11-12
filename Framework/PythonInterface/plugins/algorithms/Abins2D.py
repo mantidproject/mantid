@@ -5,7 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
-from typing import Dict
 
 import numpy as np
 
@@ -61,7 +60,7 @@ class Abins2D(AbinsAlgorithm, PythonAlgorithm):
             ],
         )
 
-    def validateInputs(self) -> Dict[str, str]:
+    def validateInputs(self) -> dict[str, str]:
         """
         Performs input validation. Use to ensure the user has defined a consistent set of parameters.
         """

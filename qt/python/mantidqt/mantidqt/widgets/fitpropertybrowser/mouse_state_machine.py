@@ -9,7 +9,7 @@ from qtpy.QtGui import QCursor
 from qtpy.QtWidgets import QApplication
 
 
-class StateMachine(object):
+class StateMachine:
     """
     A state machine implementation to control mouse interaction with the peak editing tool.
     """
@@ -59,7 +59,7 @@ class StateMachine(object):
             raise RuntimeError("Unknown state {}".format(state_name))
 
 
-class MoveMarkersState(object):
+class MoveMarkersState:
     """
     A state that controls marker movement.
     """
@@ -91,7 +91,7 @@ class MoveMarkersState(object):
         return self
 
 
-class AddPeakState(object):
+class AddPeakState:
     """
     A state that controls adding a new peak.
     """

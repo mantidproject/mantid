@@ -219,7 +219,7 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
         self.flat_bkg_scaling = self.getProperty(common.PROP_FLAT_BKG_SCALING).value
         self.empty = self.getPropertyValue("EmptyContainerWorkspace")
         self.vanadium = self.getPropertyValue("VanadiumWorkspace")
-        if self.vanadium != str():
+        if self.vanadium != "":
             self.vanadium_diagnostics, self.vanadium_integral = get_vanadium_corrections(self.vanadium)
         self.flat_background = self.getPropertyValue("FlatBackgroundSource")
         self.save_output = self.getProperty("SaveOutput").value
@@ -610,7 +610,7 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
         """Builds a masking workspace from the provided inputs. Masking using threshold cannot be prepared ahead."""
         existing_masks = []
         mask = self.getPropertyValue("MaskWorkspace")
-        if mask != str():
+        if mask != "":
             mask = self.getPropertyValue("MaskWorkspace")
             if mask not in mtd:
                 if ".nxs" in mask:
@@ -619,7 +619,7 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
                     LoadMask(Instrument=self.instrument, InputFile=mask, OutputWorkspace=mask)
             existing_masks.append(mask)
         mask_tubes = self.getPropertyValue("MaskedTubes")
-        if mask_tubes != str():
+        if mask_tubes != "":
             MaskBTP(Instrument=self.instrument, Tube=self.getPropertyValue(mask_tubes))
             tube_mask_ws = "{}_masked_tubes".format(self.instrument)
             RenameWorkspace(InputWorkspace="{}MaskBTP".format(self.instrument), OutputWorkspace=tube_mask_ws)

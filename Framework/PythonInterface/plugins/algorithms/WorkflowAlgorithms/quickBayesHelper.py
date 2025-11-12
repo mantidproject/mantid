@@ -8,8 +8,6 @@
 from mantid.api import PythonAlgorithm, MatrixWorkspaceProperty, WorkspaceGroupProperty
 from mantid.kernel import StringListValidator, Direction
 
-from typing import List
-
 
 class QuickBayesTemplate(PythonAlgorithm):
     """
@@ -101,7 +99,7 @@ class QuickBayesTemplate(PythonAlgorithm):
         alg.execute()
         return alg.getPropertyValue("OutputWorkspace")
 
-    def add_sample_logs(self, workspace, sample_logs: List, data_ws):
+    def add_sample_logs(self, workspace, sample_logs: list, data_ws):
         """
         Method for adding sample logs to results
         :param workspace: the workspace to add sample logs too

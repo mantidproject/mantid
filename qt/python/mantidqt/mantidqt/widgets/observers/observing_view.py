@@ -7,7 +7,7 @@
 #  This file is part of the mantid workbench.
 
 
-class ObservingView(object):
+class ObservingView:
     """
     This class provides some common functions needed across views observers the ADS.
     It runs the close_signal so that the view is closed from the GUI thread,

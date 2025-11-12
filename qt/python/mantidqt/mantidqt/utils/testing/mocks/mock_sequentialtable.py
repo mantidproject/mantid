@@ -8,7 +8,7 @@ from unittest import mock
 from mantidqt.utils.testing.mocks.mock_qt import MockQSelectionModel
 
 
-class MockSequentialTableView(object):
+class MockSequentialTableView:
     def __init__(self):
         self.setItemDelegateForColumn = mock.MagicMock()
         self.blockSignals = mock.MagicMock()
@@ -18,7 +18,7 @@ class MockSequentialTableView(object):
         self.selectionModel = mock.MagicMock(return_value=self.mock_selection_model)
 
 
-class MockSequentialTableModel(object):
+class MockSequentialTableModel:
     def __init__(self):
         self.set_fit_parameters_and_values = mock.MagicMock()
         self.set_fit_quality = mock.MagicMock()

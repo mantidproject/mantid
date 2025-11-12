@@ -48,7 +48,7 @@ MplLineMarkers = [
 MplBasicColors = ["black", "red", "blue", "green", "cyan", "magenta", "yellow"]
 
 
-class IndicatorManager(object):
+class IndicatorManager:
     """Manager for all indicator lines
 
     Indicator's Type =

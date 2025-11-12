@@ -9,7 +9,7 @@ from mantidqtinterfaces.Muon.GUI.Common.results_tab_widget.results_tab_view impo
 from mantidqtinterfaces.Muon.GUI.Common.results_tab_widget.results_tab_model import ResultsTabModel
 
 
-class ResultsTabWidget(object):
+class ResultsTabWidget:
     """Factory object to wire together components of the results tab"""
 
     def __init__(self, fit_context, context, parent):

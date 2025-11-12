@@ -17,7 +17,7 @@ from collections import namedtuple
 WorkspaceInfo = namedtuple("Workspace", "runs groups")
 
 
-class SequentialTableWidget(object):
+class SequentialTableWidget:
     """Sequential table widget implemented using a QTableView and QAbstractTableModel
     Based on the model-view pattern https://doc.qt.io/qt-5/model-view-programming.html"""
 

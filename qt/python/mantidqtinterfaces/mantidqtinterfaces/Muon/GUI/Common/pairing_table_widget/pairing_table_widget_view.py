@@ -8,10 +8,9 @@ from qtpy import QtWidgets, QtCore, QtGui
 from qtpy.QtCore import Signal
 from mantidqtinterfaces.Muon.GUI.Common import message_box
 from mantidqtinterfaces.Muon.GUI.Common.utilities import table_utils
-from typing import List
 
 
-def get_pair_columns() -> List[str]:
+def get_pair_columns() -> list[str]:
     return list(pair_columns.values())
 
 

@@ -45,7 +45,7 @@ def get_tick_format(tick_formatters: dict, tick_formatter: str, tick_format):
     return fmt
 
 
-class PlotsLoader(object):
+class PlotsLoader:
     def __init__(self):
         self.color_bar_remade = False
 

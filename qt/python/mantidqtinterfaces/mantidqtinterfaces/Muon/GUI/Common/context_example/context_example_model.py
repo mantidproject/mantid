@@ -10,7 +10,7 @@ from mantidqtinterfaces.Muon.GUI.Common import pair_object
 from mantidqtinterfaces.Muon.GUI.Common.muon_context.muon_context import Groups, Pairs
 
 
-class ContextExampleModel(object):
+class ContextExampleModel:
     def __init__(self, context):
         self._context = context
 

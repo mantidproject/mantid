@@ -8,7 +8,7 @@
 from mantid.api import AlgorithmManager
 
 
-class DarkRunCorrection(object):
+class DarkRunCorrection:
     """
     This class performs the dark run correction for ISIS SANS instruments
     """
@@ -93,7 +93,7 @@ class DarkRunCorrection(object):
 # pylint: disable=too-few-public-methods
 
 
-class DarkRunNormalizationExtractor(object):
+class DarkRunNormalizationExtractor:
     """
     Extrats the normalization ratio from the scatter workspace
     and the dark run workspace depending. The normalization ratio

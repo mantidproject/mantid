@@ -106,8 +106,8 @@ class LoadFullprofFile(PythonAlgorithm):
             hklfile = open(hklfilename, "r")
             lines = hklfile.readlines()
             hklfile.close()
-        except IOError:
-            raise IOError("Error to open/read Fullprof .hkl file %s" % (hklfilename))
+        except OSError:
+            raise OSError("Error to open/read Fullprof .hkl file %s" % (hklfilename))
 
         # 2. Parse
         hkldict = {}
@@ -232,7 +232,7 @@ class LoadFullprofFile(PythonAlgorithm):
         # Import .prf file
         try:
             pfile = open(filename, "r")
-        except IOError:
+        except OSError:
             raise NotImplementedError("Unable to open .prf file %s" % (filename))
 
         rawlines = pfile.readlines()

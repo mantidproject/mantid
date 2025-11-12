@@ -18,17 +18,17 @@ from mantid.kernel import Direction, Property, StringListValidator, UnitFactory
 import numpy as np
 
 
-class Mode(object):
-    class ShiftOnly(object):
+class Mode:
+    class ShiftOnly:
         pass
 
-    class ScaleOnly(object):
+    class ScaleOnly:
         pass
 
-    class BothFit(object):
+    class BothFit:
         pass
 
-    class NoneFit(object):
+    class NoneFit:
         pass
 
 
@@ -250,7 +250,7 @@ class SANSFitShiftScale(DataProcessorAlgorithm):
         return min_q, max_q
 
 
-class ErrorTransferFromModelToData(object):
+class ErrorTransferFromModelToData:
     """
     Handles the error transfer from the model workspace to the
     data workspace

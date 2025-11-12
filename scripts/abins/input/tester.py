@@ -8,7 +8,7 @@ import json
 from numbers import Real
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import Any, Dict
+from typing import Any
 
 import numpy as np
 from numpy.testing import assert_allclose
@@ -19,7 +19,7 @@ from abins.input import AbInitioLoader
 from abins.test_helpers import dict_arrays_to_lists
 
 
-class Tester(object):
+class Tester:
     """Base class for testing Abins input loaders"""
 
     _loaders_extensions = {
@@ -220,7 +220,7 @@ class Tester(object):
                 cache_directory=Path(tmpdir),
             )
 
-    def _read_ab_initio(self, loader=None, filename=None, extension=None, **loader_kwargs) -> Dict[str, Any]:
+    def _read_ab_initio(self, loader=None, filename=None, extension=None, **loader_kwargs) -> dict[str, Any]:
         """
         Reads data from .{extension} file.
 

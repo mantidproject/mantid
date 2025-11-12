@@ -8,7 +8,7 @@ from mantid.simpleapi import CalculateSampleTransmission
 import numpy as np
 
 
-class SampleTransmissionCalculatorModel(object):
+class SampleTransmissionCalculatorModel:
     @staticmethod
     def calculate(input_dict):
         output_key = {}

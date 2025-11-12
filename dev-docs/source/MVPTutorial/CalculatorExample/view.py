@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from qtpy.QtCore import Qt
 from qtpy.QtWidgets import QComboBox, QGridLayout, QPushButton, QTableWidget, QTableWidgetItem, QWidget
-from typing import List, Union
+from typing import Union
 
 
 class View(QWidget):
@@ -62,7 +62,7 @@ class View(QWidget):
         text.setFlags(Qt.ItemIsEnabled)
         self._table.setItem(row, 0, text)
 
-    def set_options(self, key: str, options: List[str]) -> None:
+    def set_options(self, key: str, options: list[str]) -> None:
         self._combo[key].clear()
         self._combo[key].addItems(options)
 

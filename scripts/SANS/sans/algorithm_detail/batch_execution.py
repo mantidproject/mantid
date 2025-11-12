@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from typing import Dict, Any
+from typing import Any
 from copy import deepcopy
 
 from mantid.api import AnalysisDataService, WorkspaceGroup
@@ -1318,8 +1318,8 @@ def rename_group_workspace(name_of_workspace, name_of_group_workspace):
 def save_to_file(
     reduction_packages: list,
     save_can: bool,
-    additional_run_numbers: Dict[str, str],
-    additional_metadata: Dict[str, Any],
+    additional_run_numbers: dict[str, str],
+    additional_metadata: dict[str, Any],
     event_slice_optimisation: bool = False,
 ):
     """
@@ -1747,8 +1747,8 @@ def save_workspace_to_file(
     workspace_name,
     file_formats: list,
     file_name,
-    additional_run_numbers: Dict[str, str],
-    additional_metadata: Dict[str, str],
+    additional_run_numbers: dict[str, str],
+    additional_metadata: dict[str, str],
     transmission_name: str = "",
     transmission_can_name: str = "",
 ):
@@ -1820,18 +1820,18 @@ def subtract_scaled_background(reduction_package, scaled_ws_name: str):
 # ----------------------------------------------------------------------------------------------------------------------
 # Container classes
 # ----------------------------------------------------------------------------------------------------------------------
-class ReducedDataType(object):
-    class Merged(object):
+class ReducedDataType:
+    class Merged:
         pass
 
-    class LAB(object):
+    class LAB:
         pass
 
-    class HAB(object):
+    class HAB:
         pass
 
 
-class ReductionPackage(object):
+class ReductionPackage:
     """
     The reduction package is a mutable store for
     1. The state object which defines our reductions.

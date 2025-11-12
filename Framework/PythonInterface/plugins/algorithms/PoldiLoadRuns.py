@@ -186,7 +186,7 @@ class PoldiLoadRuns(PythonAlgorithm):
 
         if remainder != 0:
             self.log().warning(
-                ("Number of runs is not compatible with selected merge width. Leaving out the last " + str(remainder) + " file(s).")
+                "Number of runs is not compatible with selected merge width. Leaving out the last " + str(remainder) + " file(s)."
             )
 
             actualLastRun = lastRun - remainder

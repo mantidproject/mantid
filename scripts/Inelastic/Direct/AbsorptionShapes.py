@@ -26,7 +26,7 @@ import ast
 import collections.abc
 
 
-class anAbsorptionShape(object):
+class anAbsorptionShape:
     """The parent class for all shapes, used to perform various absorption corrections
     in direct inelastic analysis.
 

@@ -13,7 +13,7 @@ URL = "http://builds.mantidproject.org/job/master_systemtests"
 PLATFORMS = ["rhel7", "osx", "win7", "ubuntu", "ubuntu-16.04"]
 
 
-class TestCase(object):
+class TestCase:
     def __init__(self, kwargs):
         self.status = kwargs["status"]
         if self.status == "REGRESSION":

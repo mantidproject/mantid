@@ -262,8 +262,8 @@ class GenerateLogbook(PythonAlgorithm):
             if operation == list():
                 break
             ind1, ind2, op = operation[0]
-            if values[ind2] is None or values[ind2] is str():
-                if op != "+" or op == "+" and values[ind1] in [None, str()]:
+            if values[ind2] is None or values[ind2] == "":
+                if op != "+" or op == "+" and values[ind1] in [None, ""]:
                     values[ind1] = "N/A"
                 values.pop(ind2)
                 binary_operations.pop(ind1)

@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 
-class LineSelectorPresenter(object):
+class LineSelectorPresenter:
     def __init__(self, view):
         self.view = view
         self.total = self.view.total

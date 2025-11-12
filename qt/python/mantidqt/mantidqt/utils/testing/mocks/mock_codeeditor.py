@@ -8,7 +8,7 @@
 from mantidqt.utils.testing.strict_mock import StrictMock
 
 
-class MockCodeEditor(object):
+class MockCodeEditor:
     def __init__(self):
         self.setFocus = StrictMock()
         self.findFirst = StrictMock()

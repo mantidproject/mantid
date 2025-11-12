@@ -4,11 +4,10 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-import io
 from io import BufferedReader
 from pathlib import Path
 import re
-from typing import Iterable, List
+from collections.abc import Iterable
 
 import numpy as np
 
@@ -45,7 +44,7 @@ class GAUSSIANLoader(AbInitioLoader):
 
         data = {}  # container to store read data
 
-        with io.open(
+        with open(
             self._clerk.get_input_filename(),
             "rb",
         ) as gaussian_file:
@@ -67,7 +66,7 @@ class GAUSSIANLoader(AbInitioLoader):
 
             return self._rearrange_data(data=data)
 
-    def _read_atomic_coordinates(self, *, file_obj: BufferedReader, data: dict, masses_from_file: List[float]) -> None:
+    def _read_atomic_coordinates(self, *, file_obj: BufferedReader, data: dict, masses_from_file: list[float]) -> None:
         """
         Read atomic coordinates from .log GAUSSIAN file and update data dict
 
@@ -103,7 +102,7 @@ class GAUSSIANLoader(AbInitioLoader):
         data["atoms"] = atoms
 
     @staticmethod
-    def _remove_frozen_atoms(*, active_atoms: List[int], data: dict) -> None:
+    def _remove_frozen_atoms(*, active_atoms: list[int], data: dict) -> None:
         """Modify data in-place, removing atoms that are missing from active_atoms and re-indexing"""
 
         # Do nothing if there are no frozen atoms
@@ -128,7 +127,7 @@ class GAUSSIANLoader(AbInitioLoader):
         data["unit_cell"] = np.zeros(shape=(3, 3), dtype=FLOAT_TYPE)
 
     @staticmethod
-    def _read_active_atoms(*, file_obj: BufferedReader) -> List[int]:
+    def _read_active_atoms(*, file_obj: BufferedReader) -> list[int]:
         """Get indices of rows from atomic displacement data block
 
         If the calculation uses frozen atoms, these will be a subset of the structure
@@ -230,7 +229,7 @@ class GAUSSIANLoader(AbInitioLoader):
         data["atomic_displacements"] = np.asarray([np.transpose(a=atomic_disp, axes=(1, 0, 2))])
 
     @staticmethod
-    def _read_freq_block(*, file_obj: BufferedReader, freq: List[float], high_precision: bool = False) -> None:
+    def _read_freq_block(*, file_obj: BufferedReader, freq: list[float], high_precision: bool = False) -> None:
         """
         Parses block with frequencies.
         :param file_obj: file object from which we read
@@ -306,7 +305,7 @@ class GAUSSIANLoader(AbInitioLoader):
         return [complex(x, 0) for x in floats]
 
     @staticmethod
-    def _read_masses_from_file(file_obj: BufferedReader) -> List[float]:
+    def _read_masses_from_file(file_obj: BufferedReader) -> list[float]:
         masses = []
         with TextParser.save_excursion(file_obj):
             TextParser.find_first(file_obj=file_obj, msg="Thermochemistry")

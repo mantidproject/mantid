@@ -20,7 +20,7 @@ from mantidqtinterfaces.Muon.GUI.ElementalAnalysis2.load_widget.load_models impo
 )
 
 
-class LoadWidget(object):
+class LoadWidget:
     def __init__(self, loaded_data, context, parent):
         # set up the views
         self.load_file_view = BrowseFileWidgetView(parent)

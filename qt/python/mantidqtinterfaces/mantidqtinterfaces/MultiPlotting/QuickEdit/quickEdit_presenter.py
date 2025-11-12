@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 
-class QuickEditPresenter(object):
+class QuickEditPresenter:
     def __init__(self, view):
         self._view = view
 

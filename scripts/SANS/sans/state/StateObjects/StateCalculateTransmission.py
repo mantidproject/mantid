@@ -9,7 +9,6 @@
 """State describing the calculation of the transmission for SANS reduction."""
 
 import json
-from typing import Dict
 
 from sans.common.configurations import Configurations
 from sans.common.enums import RebinType, RangeStepType, FitType, DataType, SANSInstrument
@@ -98,8 +97,8 @@ class StateCalculateTransmission(metaclass=JsonSerializable):
         # ----------------------
         self.background_TOF_general_start: float = None
         self.background_TOF_general_stop: float = None
-        self.background_TOF_monitor_start: Dict[int, float] = {}
-        self.background_TOF_monitor_stop: Dict[int, float] = {}
+        self.background_TOF_monitor_start: dict[int, float] = {}
+        self.background_TOF_monitor_stop: dict[int, float] = {}
         self.background_TOF_roi_start: float = None
         self.background_TOF_roi_stop: float = None
 

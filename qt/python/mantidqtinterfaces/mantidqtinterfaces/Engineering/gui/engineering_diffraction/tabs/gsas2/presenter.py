@@ -10,7 +10,7 @@ from mantidqt.utils.observer_pattern import GenericObserverWithArgPassing
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.fitting.fitting_ads_observer import FittingADSObserver
 
 
-class GSAS2Presenter(object):
+class GSAS2Presenter:
     def __init__(self, model, view, test=False):
         self.model = model
         self.view = view

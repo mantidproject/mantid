@@ -23,7 +23,7 @@ class HomeTabSubWidget:
         pass
 
 
-class HomeTabPresenter(object):
+class HomeTabPresenter:
     def __init__(self, view, model, subwidgets):
         self._view = view
         self._model = model

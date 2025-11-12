@@ -53,7 +53,7 @@ class TableColumnType(Enum):
     Label = 6
 
 
-class ResultsTabModel(object):
+class ResultsTabModel:
     """Captures the data and operations
     for the results tab"""
 

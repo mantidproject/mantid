@@ -21,7 +21,7 @@ from mantidqt.utils.observer_pattern import GenericObservable
 from mantidqtinterfaces.Muon.GUI.FrequencyDomainAnalysis.frequency_context import FREQUENCY_EXTENSIONS
 
 
-class FFTPresenter(object):
+class FFTPresenter:
     """
     This class links the FFT model to the GUI
     """

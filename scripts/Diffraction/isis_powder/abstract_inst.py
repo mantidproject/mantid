@@ -19,7 +19,7 @@ import mantid.simpleapi as mantid
 # private method for the scripts
 
 
-class AbstractInst(object):
+class AbstractInst:
     def __init__(self, user_name, calibration_dir, output_dir, inst_prefix):
         # ----- Properties common to ALL instruments -------- #
         if user_name is None:

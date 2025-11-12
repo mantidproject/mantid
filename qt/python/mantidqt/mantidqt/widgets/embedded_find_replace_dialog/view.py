@@ -13,7 +13,7 @@ from mantidqt.utils.qt import create_action, load_ui
 DialogBase, DialogForm = load_ui(__file__, "dialog.ui")
 
 
-class FindReplaceOptions(object):
+class FindReplaceOptions:
     def __init__(self, match_case, words, regex, wrap_around):
         self.match_case = match_case
         self.words = words

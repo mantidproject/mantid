@@ -1614,7 +1614,7 @@ class MantidAxes3D(Axes3D):
         self.set_zlim3d([z_middle - plot_radius, z_middle + plot_radius])
 
 
-class _WorkspaceArtists(object):
+class _WorkspaceArtists:
     """Captures information regarding an artist that has been plotted
     from a workspace. It allows for removal and replacement of said artists
 

@@ -6,7 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import os
 from collections import OrderedDict
-from typing import List, Tuple
 
 from mantid.kernel import logger
 from mantid.dataobjects import Workspace2D
@@ -188,7 +187,7 @@ def _pack_bundles(reduction_alg, reduction_setting_bundle):
     return slices
 
 
-def pair_up_wav_ranges(list_to_pair: CompletedSlices) -> List[Tuple[ReducedSlice]]:
+def pair_up_wav_ranges(list_to_pair: CompletedSlices) -> list[tuple[ReducedSlice]]:
     # We need to preserve order for system tests, so we can't use set directly
     unique_wav_lengths = list(OrderedDict.fromkeys(map(lambda i: i.wav_range, list_to_pair)))
     packed = [tuple(filter(lambda x: x.wav_range == k, list_to_pair)) for k in unique_wav_lengths]
@@ -219,7 +218,7 @@ def get_final_output_workspaces(completed_event_slices, parent_alg) -> SANSWorkf
     return SANSWorkflowAlgorithmOutputs(lab_output=lab_workspaces, hab_output=hab_workspaces)
 
 
-def _pack_outputs(reductions, parent_alg) -> List[Workspace2D]:
+def _pack_outputs(reductions, parent_alg) -> list[Workspace2D]:
     if not reductions:
         return []
     final_output_workspaces = []

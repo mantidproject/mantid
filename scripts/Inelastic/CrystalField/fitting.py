@@ -23,7 +23,7 @@ from scipy.optimize._numdiff import approx_derivative
 import numpy as np
 import re
 import scipy.optimize as sp
-from typing import Callable, Dict, List, Tuple
+from collections.abc import Callable
 import warnings
 
 # RegEx pattern matching a composite function parameter name, eg f2.Sigma.
@@ -85,7 +85,7 @@ def getSymmAllowedParam(sym_str):
 
 
 # pylint: disable=too-many-instance-attributes,too-many-public-methods
-class CrystalField(object):
+class CrystalField:
     """Calculates the crystal fields for one ion"""
 
     allowed_symmetries = [
@@ -809,7 +809,7 @@ class CrystalField(object):
         peaks = np.array([self._peakList.column(0), self._peakList.column(1)])
         return peaks
 
-    def getSpectrum(self, i=0, workspace=None, ws_index=0, x_range: Tuple[int, int] = None):
+    def getSpectrum(self, i=0, workspace=None, ws_index=0, x_range: tuple[int, int] = None):
         """
         Get the i-th spectrum calculated with the current field and peak parameters.
 
@@ -1062,7 +1062,7 @@ class CrystalField(object):
                 lvstr += ("+" if (ii > 0 and ev[ii, lv].real > 0) else "") + f"{val:.3f}|{jzstr}> "
             print(lvstr + "\n")
 
-    def plot(self, i=0, workspace=None, ws_index=0, x_range: Tuple[int, int] = None, name=None):
+    def plot(self, i=0, workspace=None, ws_index=0, x_range: tuple[int, int] = None, name=None):
         """Plot a spectrum. Parameters are the same as in getSpectrum(...)"""
         createWS = AlgorithmManager.createUnmanaged("CreateWorkspace")
         createWS.initialize()
@@ -1278,7 +1278,7 @@ class CrystalField(object):
         return self._isMultiSpectrum
 
 
-class CrystalFieldSite(object):
+class CrystalFieldSite:
     """
     A helper class for the multi-site algebra. It is a result of the '*' operation between a CrystalField
     and a number. Multiplication sets the abundance for the site and which the returned object holds.
@@ -1372,7 +1372,7 @@ class CrystalFieldSite(object):
 
 
 # pylint: disable=too-few-public-methods
-class CrystalFieldFit(object):
+class CrystalFieldFit:
     """
     Object that controls fitting.
     """
@@ -1472,13 +1472,13 @@ class CrystalFieldFit(object):
     def _get_algorithm_args(
         self,
         algorithm_name: str,
-        all_parameters: List[str],
-        b_parameters: List[str],
-        p0: List[float],
+        all_parameters: list[str],
+        b_parameters: list[str],
+        p0: list[float],
         residual: Callable,
-        parameter_bounds: Dict[str, Tuple[float, float]],
+        parameter_bounds: dict[str, tuple[float, float]],
         jacobian: bool,
-    ) -> List:
+    ) -> list:
         """Gets the algorithm arguments to be used for a specific GOFit algorithm."""
         algorithm_args = []
         if algorithm_name == "regularisation":
@@ -1496,7 +1496,7 @@ class CrystalFieldFit(object):
             algorithm_args.append(lambda p: approx_derivative(residual, p, method="2-point"))
         return algorithm_args
 
-    def _find_b_and_shape_parameters_to_optimize(self) -> Tuple[List[str], List[str], List[float]]:
+    def _find_b_and_shape_parameters_to_optimize(self) -> tuple[list[str], list[str], list[float]]:
         """Finds the B parameters and Shape parameters we want to optimize across."""
         b_params, shape_params, initial_values = [], [], []
         for i in range(self.model.function.nParams()):
@@ -1512,8 +1512,8 @@ class CrystalFieldFit(object):
 
     @staticmethod
     def _parse_lower_and_upper_bounds(
-        parameters_names: List[str], parameter_bounds: Dict[str, Tuple[float, float]]
-    ) -> Tuple[List[float], List[float]]:
+        parameters_names: list[str], parameter_bounds: dict[str, tuple[float, float]]
+    ) -> tuple[list[float], list[float]]:
         """Parses the lower and upper bounds into two separate lists."""
         xl, xu = [], []
         for name in parameters_names:
@@ -1522,7 +1522,7 @@ class CrystalFieldFit(object):
             xu.append(bounds[1])
         return xl, xu
 
-    def _process_gofit_output(self, parameter_names: List[str], parameter_values: List[float], suffix: str = "") -> None:
+    def _process_gofit_output(self, parameter_names: list[str], parameter_values: list[float], suffix: str = "") -> None:
         """Create an output workspace with the fitted data, and a parameter table."""
         for name, value in zip(parameter_names, parameter_values):
             self.model.function.setParameter(name, value)

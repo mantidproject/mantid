@@ -4,7 +4,6 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from typing import Dict, List
 
 
 class MissingMandatoryParam(KeyError):
@@ -14,10 +13,10 @@ class MissingMandatoryParam(KeyError):
 
 
 class TomlParserImplBase:
-    def __init__(self, toml_dict: Dict):
+    def __init__(self, toml_dict: dict):
         self._input = toml_dict
 
-    def get_mandatory_val(self, keys: List):
+    def get_mandatory_val(self, keys: list):
         """
         Gets a mandatory key, the full path is required to ensure the error message is
         valid. Raises a MissingMandatoryParam if the key is not found with

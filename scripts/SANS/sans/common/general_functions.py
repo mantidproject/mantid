@@ -12,7 +12,7 @@ from math import acos, sqrt, degrees
 import re
 from copy import deepcopy
 import json
-from typing import Tuple, Optional, List
+from typing import Optional
 
 from mantid.api import AlgorithmManager, AnalysisDataService, isSameWorkspaceObject
 from sans.common.constant_containers import SANSInstrument_enum_list, SANSInstrument_string_list, SANSInstrument_string_as_key_NoInstrument
@@ -468,7 +468,7 @@ def parse_diagnostic_settings(string_to_parse):
 # ----------------------------------------------------------------------------------------------------------------------
 #  Functions for bins, ranges and slices
 # ----------------------------------------------------------------------------------------------------------------------
-class EventSliceParser(object):
+class EventSliceParser:
     number = r"(\d+(?:\.\d+)?(?:[eE][+-]\d+)?)"  # float without sign
     simple_slice_pattern = re.compile("\\s*" + number + "\\s*" r"-" + "\\s*" + number + "\\s*")
     slice_range_pattern = re.compile("\\s*" + number + "\\s*" + r":" + "\\s*" + number + "\\s*" + r":" + "\\s*" + number)
@@ -679,12 +679,12 @@ def get_ranges_for_rebin_array(rebin_array):
 # ----------------------------------------------------------------------------------------------------------------------
 # Functions related to workspace names
 # ----------------------------------------------------------------------------------------------------------------------
-def get_wav_range_from_ws(workspace) -> Tuple[float, float]:
+def get_wav_range_from_ws(workspace) -> tuple[float, float]:
     range_str = workspace.getRun().getProperty("Wavelength Range").valueAsStr
     return range_str.split("-")
 
 
-def wav_ranges_to_str(wav_ranges: List[Tuple[float, float]], *, remove_full_range: bool = False) -> str:
+def wav_ranges_to_str(wav_ranges: list[tuple[float, float]], *, remove_full_range: bool = False) -> str:
     ranges = copy.deepcopy(wav_ranges)
     if remove_full_range:
         min_value, max_value = min(wav_ranges, key=lambda t: t[0])[0], max(wav_ranges, key=lambda t: t[1])[1]
@@ -692,7 +692,7 @@ def wav_ranges_to_str(wav_ranges: List[Tuple[float, float]], *, remove_full_rang
     return ", ".join(wav_range_to_str(i) for i in ranges)
 
 
-def wav_range_to_str(wav_range: Tuple[float, float]) -> str:
+def wav_range_to_str(wav_range: tuple[float, float]) -> str:
     return f"{wav_range[0]}-{wav_range[1]}"
 
 

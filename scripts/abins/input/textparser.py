@@ -7,7 +7,7 @@
 from contextlib import contextmanager
 from io import BufferedReader
 import re
-from typing import Callable, Sequence, Tuple
+from collections.abc import Callable, Sequence
 
 from abins.constants import EOF, ONE_CHARACTER
 
@@ -29,7 +29,7 @@ class TextParser:
             file_obj.seek(pos)
 
     @staticmethod
-    def _get_test_from_args(msg: str = None, regex: str = None) -> Tuple[Callable[[str], bool], str]:
+    def _get_test_from_args(msg: str = None, regex: str = None) -> tuple[Callable[[str], bool], str]:
         """Validate string/regex search and create a line-testing function"""
         if (msg is not None) and (regex is not None):
             raise ValueError("msg or regex should be provided, not both")

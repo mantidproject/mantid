@@ -9,7 +9,7 @@ from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common impo
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.show_sample.show_sample_model import ShowSampleModel
 
 
-class ShowSamplePresenter(object):
+class ShowSamplePresenter:
     def __init__(self, model, view, include_gauge_volume):
         self.tab_model = model
         self.sample_model = ShowSampleModel(inc_gauge_vol=include_gauge_volume)

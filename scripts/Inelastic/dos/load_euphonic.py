@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 from math import ceil
-from typing import Optional, Tuple
+from typing import Optional
 
 from euphonic import __version__ as euphonic_version
 from euphonic import QpointPhononModes
@@ -75,7 +75,7 @@ def euphonic_calculate_modes(
 
 def get_data_with_euphonic(
     filename: str, cutoff: float = 20.0, gamma: bool = True, acoustic_sum_rule: Optional[str] = None
-) -> Tuple[dict, dict]:
+) -> tuple[dict, dict]:
     """
     Read force constants file with Euphonic and sample frequencies/modes
 

@@ -17,7 +17,7 @@ spectrum_index = {"Delayed": 1, "Prompt": 2, "Total": 3}
 num_files_per_detector = 3
 
 
-class LModel(object):
+class LModel:
     def __init__(self):
         self.run = 0
         self.num_loaded_detectors = OrderedDict()

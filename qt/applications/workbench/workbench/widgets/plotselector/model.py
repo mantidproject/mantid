@@ -10,7 +10,7 @@
 from workbench.plotting.globalfiguremanager import FigureAction
 
 
-class PlotSelectorModel(object):
+class PlotSelectorModel:
     """
     This is the model for the plot selector widget. Essentially this
     is just a wrapper to the true model - GlobalFigureManager.
@@ -181,5 +181,5 @@ class PlotSelectorModel(object):
 
         try:
             figure_manager.canvas.figure.savefig(save_absolute_path)
-        except IOError as e:
+        except OSError as e:
             raise ValueError("Error, could not save plot to {}.\n\nError was: {}".format(save_absolute_path, e))

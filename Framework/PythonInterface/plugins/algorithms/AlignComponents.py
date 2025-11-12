@@ -7,7 +7,6 @@
 # pylint: disable=no-init, no-name-in-module
 import math
 import numpy as np
-from typing import List
 
 from mantid.api import (
     AlgorithmFactory,
@@ -541,7 +540,7 @@ class AlignComponents(PythonAlgorithm):
                 raise RuntimeError("TOFS detid doesn't match instrument")
 
             comp = api.mtd[wks_name].getInstrument().getComponentByName(component)
-            eulerAngles: List[float] = comp.getRotation().getEulerAngles(self._eulerConvention)
+            eulerAngles: list[float] = comp.getRotation().getEulerAngles(self._eulerConvention)
 
             logger.notice(
                 "Working on "

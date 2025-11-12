@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import collections.abc
 import numbers
-from typing import Dict, List, Optional, overload, Union
+from typing import Optional, overload, Union
 import re
 
 import numpy as np
@@ -26,7 +26,7 @@ class AtomData(TypedDict):
 
 
 class AtomsData(collections.abc.Sequence):
-    def __init__(self, atoms_data: Dict[str, AtomData]) -> None:
+    def __init__(self, atoms_data: dict[str, AtomData]) -> None:
         """Data container for Atomic position information
 
         AtomsData objects can be iterated, indexed and sliced to obtain
@@ -151,7 +151,7 @@ class AtomsData(collections.abc.Sequence):
     def __getitem__(self, item: int) -> AtomData: ...
 
     @overload
-    def __getitem__(self, item: slice) -> List[AtomData]: ...
+    def __getitem__(self, item: slice) -> list[AtomData]: ...
 
     def __getitem__(self, item):
         return self._data[item]
@@ -163,16 +163,16 @@ class AtomsData(collections.abc.Sequence):
     class JSONableAtomData(TypedDict):
         """JSON-friendly representation of an AtomsData entry"""
 
-        coord: List[float]
+        coord: list[float]
         mass: float
         sort: int
         symbol: str
 
-    JSONableData = Dict[str, "AtomsData.JSONableAtomData"]
+    JSONableData = dict[str, "AtomsData.JSONableAtomData"]
 
     def to_dict(self) -> "AtomsData.JSONableData":
         """Get a JSON-compatible representation of the data"""
-        data: "AtomsData.JSONableData"
+        data: AtomsData.JSONableData
         data = {
             f"atom_{i}": {
                 "coord": item["coord"].tolist(),

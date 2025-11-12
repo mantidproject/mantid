@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-# Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2020 ISIS Rutherford Appleton Laboratory UKRI,
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
@@ -45,11 +44,11 @@ from mantid.simpleapi import (
     Stitch,
 )
 import math
-from typing import List, Tuple, Union
+from typing import Union
 import os
 
 
-class PropertyNames(object):
+class PropertyNames:
     RB = "Run"
     DB = "DirectRun"
     WAVELENGTH_LOWER = "WavelengthLowerBound"
@@ -570,7 +569,7 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         self.log().accumulate(log)
         self._logs.append(log)
 
-    def compose_polarized_runs_list(self, angle_index: int) -> Tuple[List[str], List[str]]:
+    def compose_polarized_runs_list(self, angle_index: int) -> tuple[list[str], list[str]]:
         """Returns two lists: one of runs, the other of names for different flipper configurations at the given angle_index
 
         Keyword arguments:
@@ -821,7 +820,7 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
 
     def process_reflected_beam(
         self, reflected_beam_input, reflected_beam_name: str, direct_beam_name: str, angle_index: int
-    ) -> Tuple[str, str, str]:
+    ) -> tuple[str, str, str]:
         """Processes the reflected beam for the given angle configuration by calling preprocessing, summing foreground,
         correcting gravity (FIGARO only), and in case of polarized processing, polarization correction.
 
@@ -904,7 +903,7 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
 
     def sum_foreground(
         self, input_ws_name: str, output_ws_name: str, sum_type: str, angle_index: int, direct_foreground_name=""
-    ) -> Tuple[str, str]:
+    ) -> tuple[str, str]:
         """Runs the ReflectometryILLSumForeground algorithm on the input workspace. The direct_foreground_name argument decides,
         if reflected beam is present, when it is empty, the summing is of direct beam, and of reflected beam otherwise.
 

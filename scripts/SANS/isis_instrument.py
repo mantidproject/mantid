@@ -28,7 +28,7 @@ from math import copysign
 sanslog = Logger("SANS")
 
 
-class BaseInstrument(object):
+class BaseInstrument:
     def __init__(self, instr_filen=None):
         """
         Reads the instrument definition xml file
@@ -85,8 +85,8 @@ class BaseInstrument(object):
         return workspace_name
 
 
-class DetectorBank(object):
-    class _DectShape(object):
+class DetectorBank:
+    class _DectShape:
         """
         Stores the dimensions of the detector, normally this is a square
         which is easy, but it can have a hole in it which is harder!
@@ -128,7 +128,7 @@ class DetectorBank(object):
         def n_pixels(self):
             return self._n_pixels
 
-    class _MergeRange(object):
+    class _MergeRange:
         """
         Stores property about the detector which is used to specify the merge ranges after the data has been reduced.
         """
@@ -146,7 +146,7 @@ class DetectorBank(object):
             else:
                 self.q_merge_range = True
 
-    class _RescaleAndShift(object):
+    class _RescaleAndShift:
         """
         Stores property about the detector which is used to rescale and shift
         data in the bank after data have been reduced. The scale attempts to

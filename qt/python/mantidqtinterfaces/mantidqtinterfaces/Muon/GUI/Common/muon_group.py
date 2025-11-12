@@ -7,11 +7,10 @@
 # pylint: disable=C0111
 from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
 from mantidqtinterfaces.Muon.GUI.Common.muon_base import MuonRun
-from typing import List
 import itertools
 
 
-class MuonGroup(object):
+class MuonGroup:
     """
     Simple structure to store information on a detector group.
 
@@ -99,7 +98,7 @@ class MuonGroup(object):
     def periods(self, value):
         self._periods = value
 
-    def show_raw(self, run: List[int], name: str, asym_name: str, asym_name_unnorm: str):
+    def show_raw(self, run: list[int], name: str, asym_name: str, asym_name_unnorm: str):
         run_object = MuonRun(run)
         run_object not in self._counts_workspace or self._counts_workspace[run_object].show(name)
         run_object not in self._asymmetry_estimate or self._asymmetry_estimate[run_object].show(asym_name)

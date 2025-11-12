@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 
-class Label(object):
+class Label:
     def __init__(self, text, xvalue, xrelative, yvalue, yrelative, rotation=0, protected=False):
         self._text = text
         self._xvalue = xvalue

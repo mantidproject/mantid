@@ -11,7 +11,7 @@ from posixpath import join as joinsettings
 from qtpy.QtCore import QSettings, QVariant
 
 
-class UserConfig(object):
+class UserConfig:
     """Holds user configuration option. Options are assigned a section
     and a key must only be unique within a section.
 

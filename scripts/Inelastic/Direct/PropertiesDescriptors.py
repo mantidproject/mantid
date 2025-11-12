@@ -26,7 +26,7 @@ from Direct.AbsorptionShapes import anAbsorptionShape
 # Descriptors, providing overloads for complex properties in NonIDF_Properties
 # class
 # -----------------------------------------------------------------------------------------
-class PropDescriptor(object):
+class PropDescriptor:
     """Class provides common custom interface for property descriptors"""
 
     def dependencies(self):

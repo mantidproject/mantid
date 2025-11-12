@@ -11,7 +11,7 @@ from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.data
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.fitting.fitting_ads_observer import FittingADSObserver
 
 
-class FittingDataWidget(object):
+class FittingDataWidget:
     def __init__(self, parent, view=None):
         if view is None:
             self.view = FittingDataView(parent)

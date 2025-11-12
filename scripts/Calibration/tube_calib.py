@@ -22,7 +22,7 @@ import math
 import numpy
 import os
 import re
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Optional, Union
 
 # Mantid
 from mantid.api import AnalysisDataService as ADS
@@ -36,7 +36,7 @@ from tube_calib_fit_params import TubeCalibFitParams
 from tube_spec import TubeSpec
 
 # Type aliases
-ArrayInt = Union[List[int], numpy.ndarray]
+ArrayInt = Union[list[int], numpy.ndarray]
 WorkspaceInput = Union[str, EventWorkspace, Workspace2D]
 
 
@@ -302,8 +302,8 @@ def correct_tube(AP, BP, CP, nDets):
 
 
 def correct_tube_to_ideal_tube(
-    tube_points: List,
-    ideal_tube_points: List,
+    tube_points: list,
+    ideal_tube_points: list,
     n_detectors: int,
     test_mode: bool = False,
     polin_fit: int = 2,
@@ -395,7 +395,7 @@ def getCalibratedPixelPositions(
     peak_test_mode: bool = False,
     polin_fit: int = 2,
     parameters_table: Optional[str] = None,
-) -> Tuple[List[int], List[int]]:
+) -> tuple[list[int], list[int]]:
     r"""
     Get the calibrated detector positions for one tube.
 
@@ -512,10 +512,10 @@ def getCalibration(
     fitPar: TubeCalibFitParams,
     iTube: IdealTube,
     peaksTable: TableWorkspace,
-    overridePeaks: Dict[int, List[Any]] = dict(),
+    overridePeaks: dict[int, list[Any]] = dict(),
     excludeShortTubes: float = 0.0,
-    plotTube: List[int] = [],
-    range_list: Optional[List[int]] = None,
+    plotTube: list[int] = [],
+    range_list: Optional[list[int]] = None,
     polinFit: int = 2,
     peaksTestMode: bool = False,
     parameters_table_group: Optional[str] = None,

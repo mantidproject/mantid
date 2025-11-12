@@ -28,7 +28,7 @@ RAW = "raw"
 MODEL = "model"
 
 
-class MuonAnalysisPlotWidget(object):
+class MuonAnalysisPlotWidget:
     def __init__(self, context=None, parent=None):
         self._parent = parent
         self._context = context

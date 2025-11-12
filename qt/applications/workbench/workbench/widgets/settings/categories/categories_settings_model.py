@@ -5,7 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from enum import Enum
-from typing import Dict
 
 from mantid.api import AlgorithmFactory
 
@@ -31,5 +30,5 @@ class CategoriesSettingsModel(ConfigSettingsChangesModel):
     def get_hidden_interfaces(self) -> str:
         return self.get_saved_value(CategoryProperties.HIDDEN_INTERFACES.value)
 
-    def get_algorithm_factory_category_map(self) -> Dict[str, bool]:
+    def get_algorithm_factory_category_map(self) -> dict[str, bool]:
         return self._algorithm_factory.getCategoriesandState()

@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 
-class PeakSelectorPresenter(object):
+class PeakSelectorPresenter:
     def __init__(self, view):
         self.view = view
         self.primary_checkboxes = self.view.primary_checkboxes

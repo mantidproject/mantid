@@ -169,7 +169,7 @@ def set_default_incident_monitor(normalize_monitor_info, data_info):
         normalize_monitor_info.incident_monitor = found_monitor_spectrum[named_element]
 
 
-class StateNormalizeToMonitorBuilder(object):
+class StateNormalizeToMonitorBuilder:
     @automatic_setters(StateNormalizeToMonitor, exclusions=["default_incident_monitor"])
     def __init__(self, data_info):
         super(StateNormalizeToMonitorBuilder, self).__init__()
@@ -188,7 +188,7 @@ class StateNormalizeToMonitorBuilder(object):
         self.state.rebin_type = val
 
 
-class StateNormalizeToMonitorBuilderLOQ(object):
+class StateNormalizeToMonitorBuilderLOQ:
     @automatic_setters(StateNormalizeToMonitorLOQ)
     def __init__(self, data_info):
         super(StateNormalizeToMonitorBuilderLOQ, self).__init__()

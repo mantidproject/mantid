@@ -290,7 +290,7 @@ def remove_dir_from_datasearch(batch_file_path, directories):
 # ----------------------------------------------------------------------------------------------------------------------
 # GUI Property Defaults
 # ----------------------------------------------------------------------------------------------------------------------
-class SANSGuiPropertiesHandler(object):
+class SANSGuiPropertiesHandler:
     """
     This class handles the setting and getting
     of SANSDataProcessorGUI default properties.

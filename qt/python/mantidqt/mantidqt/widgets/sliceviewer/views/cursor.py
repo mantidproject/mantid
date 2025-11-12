@@ -7,7 +7,7 @@
 #  This file is part of the mantidqt
 # std imports
 from math import ceil, floor
-from typing import Callable, Tuple
+from collections.abc import Callable
 
 # 3rd party imports
 from matplotlib.axes import Axes
@@ -74,7 +74,7 @@ class MoveMouseCursor:
     computation of the new data coordinates
     """
 
-    def __init__(self, image: AxesImage, new_pixel: Callable[[float, float], Tuple[float, float]], to_int: Callable[[float], int]):
+    def __init__(self, image: AxesImage, new_pixel: Callable[[float, float], tuple[float, float]], to_int: Callable[[float], int]):
         """
         :param image: A reference to the image the cursor hovers over
         :param new_pixel: Callable to calculate the new position in data coordinates
@@ -104,7 +104,7 @@ class MoveMouseCursor:
         self.delta_y = (ymax - ymin) / ny
         self.canvas = image.axes.figure.canvas
 
-    def move_from(self, cur_pos_data: Tuple[float, float]) -> None:
+    def move_from(self, cur_pos_data: tuple[float, float]) -> None:
         """
         Calculate a new position based on the given starting position
         and self.new_pixel transform and move the mouse cursor there.

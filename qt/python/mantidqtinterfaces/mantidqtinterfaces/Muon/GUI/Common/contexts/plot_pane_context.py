@@ -8,7 +8,7 @@
 from mantidqtinterfaces.Muon.GUI.Common.contexts.plotting_context import PlottingContext
 
 
-class PlotPanesContext(object):
+class PlotPanesContext:
     def __init__(self):
         self._plotting_context = {}
 

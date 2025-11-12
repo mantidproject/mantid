@@ -7,7 +7,7 @@
 import pythonTSV as TSVHelper
 
 
-class pair(object):
+class pair:
     def __init__(self, name="", F_group="", B_group="", alpha=1.0):
         self._name = name
         self._F_group = F_group

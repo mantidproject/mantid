@@ -13,7 +13,7 @@ from mantid.dataobjects import MDHistoWorkspace, GroupingWorkspace
 from mantid import logger
 
 
-class WorkspaceSaver(object):
+class WorkspaceSaver:
     def __init__(self, directory):
         """
 

@@ -7,7 +7,7 @@
 # TODO convert back to NamedTuple with defined types in Python 3
 
 
-class FloatRange(object):
+class FloatRange:
     start = None  # : float
     end = None  #: float
 

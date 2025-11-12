@@ -13,7 +13,7 @@ from abins.constants import ALL_SAMPLE_FORMS
 from abins.instruments import Instrument
 
 
-class SCalculatorFactory(object):
+class SCalculatorFactory:
     """
     Get an instantiated S calculator. Currently available S calculators:
 

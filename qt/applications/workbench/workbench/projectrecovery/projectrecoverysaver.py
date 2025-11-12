@@ -18,7 +18,7 @@ from workbench.utils.windowfinder import find_all_windows_that_are_savable
 from workbench.utils.workspacehistorygeneration import get_all_workspace_history_from_ads
 
 
-class ProjectRecoverySaver(object):
+class ProjectRecoverySaver:
     def __init__(self, project_recovery, global_figure_manager):
         self.pr = project_recovery
         self.gfm = global_figure_manager

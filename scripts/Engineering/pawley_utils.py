@@ -11,7 +11,8 @@ from mantid.fitfunctions import FunctionWrapper, CompositeFunctionWrapper
 from mantid.api import FunctionFactory
 from mantid.geometry import CrystalStructure, ReflectionGenerator, PointGroupFactory, PointGroup
 from mantid.kernel import V3D, logger, UnitConversion, DeltaEModeType
-from typing import Optional, Tuple, TYPE_CHECKING, Sequence
+from typing import Optional, TYPE_CHECKING
+from collections.abc import Sequence
 from scipy.optimize import least_squares
 from plugins.algorithms.poldi_utils import simulate_2d_data, get_dspac_array_from_ws
 from abc import ABC, abstractmethod
@@ -35,7 +36,7 @@ class InstrumentParams:
 class PeakProfile(ABC):
     def __init__(self):
         self.func_name: str
-        self.labels: Tuple[str]
+        self.labels: tuple[str]
         self.p: np.ndarray
         self.default_isfree: np.ndarray
 

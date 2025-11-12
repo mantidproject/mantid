@@ -54,7 +54,7 @@ def get_parameters(crystal_field, ion_prefix, existing_prefix):
     return params
 
 
-class CrystalFieldMultiSite(object):
+class CrystalFieldMultiSite:
     def __init__(self, Ions, Symmetries, **kwargs):
         self._makeFunction()
 

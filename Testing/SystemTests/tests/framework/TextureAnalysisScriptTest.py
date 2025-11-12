@@ -26,7 +26,7 @@ config.appendDataSearchSubDir(CWDIR)
 # Pole Figure creation in CreatePoleFigureTableWorkspace
 
 
-class AbsCorrMixin(object):
+class AbsCorrMixin:
     def setup_absorption_correction_inputs(self):
         self.shape_xml = get_cube_xml("test_cube", 0.01)
         LoadEmptyInstrument(InstrumentName="ENGINX", OutputWorkspace="ref_ws")
@@ -191,7 +191,7 @@ class RunAStandardAbsorptionCorrectionWithDivergenceCorrection(systemtesting.Man
         _try_delete_dirs(CWDIR, ["AbsorptionCorrection"])
 
 
-class PeakFitMixin(object):
+class PeakFitMixin:
     def setup_fit_peaks_inputs(self):
         raw_ws = Load(Filename=os.path.join(DATA_DIR, "ENGINX_280625_focused_bank_1.nxs"), OutputWorkspace="ENGINX_280625_focused_bank_1")
         self.input_ws = ConvertUnits(InputWorkspace=raw_ws, OutputWorkspace="ENGINX_280625_focused_bank_1_dSpacing", Target="dSpacing")
