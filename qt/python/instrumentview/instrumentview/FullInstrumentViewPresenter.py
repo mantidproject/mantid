@@ -164,7 +164,7 @@ class FullInstrumentViewPresenter:
         cylinder = vtkCylinder()
         widget.GetCylinderRepresentation().GetCylinder(cylinder)
         mask = [(cylinder.FunctionValue(self._detector_mesh.GetPoint(i)) < 0) for i in range(self._detector_mesh.GetNumberOfPoints())]
-        self._model.mask_detectors_in_workspace(mask)
+        self._model.mask_detectors(mask)
         self.update_plotter()
 
     def _update_line_plot_ws_and_draw(self, unit: str) -> None:

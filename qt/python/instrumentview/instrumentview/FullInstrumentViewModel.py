@@ -353,5 +353,6 @@ class FullInstrumentViewModel:
             peaks_grouped_by_ws.append(detector_peaks)
         return peaks_grouped_by_ws
 
-    def mask_detectors_in_workspace(self, new_mask):
+    def mask_detectors(self, new_mask):
         self._is_masked[self.is_pickable] = new_mask
+        self._detector_is_picked[~self.is_pickable] = False
