@@ -6,14 +6,14 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 #include "MantidDataHandling/AlignAndFocusPowderSlim.h"
-#include "AlignAndFocusPowderSlim/ProcessBankSplitTask.h"
-#include "AlignAndFocusPowderSlim/ProcessBankTask.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
+#include "MantidDataHandling/AlignAndFocusPowderSlim/ProcessBankSplitTask.h"
+#include "MantidDataHandling/AlignAndFocusPowderSlim/ProcessBankTask.h"
 #include "MantidDataHandling/LoadEventNexus.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/MaskWorkspace.h"
