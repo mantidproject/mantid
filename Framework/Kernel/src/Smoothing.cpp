@@ -171,8 +171,8 @@ template <typename Y> struct ZeroFilter : public FFTFilter<Y> {
   // remove the higher frequencies by setting to zero
   // REF: see example code at
   // - https://www.gnu.org/software/gsl/doc/html/fft.html#overview-of-real-data-f
-  ZeroFilter(std::size_t n) : m_cutoff(n) {}
-  Y operator()(std::size_t index) const override { return (index >= m_cutoff ? 0 : 1); }
+  ZeroFilter(std::size_t const n) : m_cutoff(n) {}
+  Y operator()(std::size_t const index) const override { return (index >= m_cutoff ? 0 : 1); }
 
 private:
   std::size_t m_cutoff;
@@ -184,8 +184,9 @@ template <typename Y> struct ButterworthFilter : public FFTFilter<Y> {
   // - https://scikit-image.org/docs/0.25.x/api/skimage.filters.html#skimage.filters.butterworth
   // - https://isbweb.org/software/sigproc/bogert/filter.pdf
   // - https://users.cs.cf.ac.uk/dave/Vision_lecture/node22.html
-  ButterworthFilter(unsigned n, unsigned o) : m_two_order(2U * o), m_invcutoff(1.0 / static_cast<Y>(n)) {}
-  Y operator()(std::size_t index) const override {
+  ButterworthFilter(unsigned int const n, unsigned int const o)
+      : m_two_order(2U * o), m_invcutoff(1.0 / static_cast<Y>(n)) {}
+  Y operator()(std::size_t const index) const override {
     return 1.0 / (1.0 + std::pow(m_invcutoff * static_cast<Y>(index), m_two_order));
   }
 
@@ -195,7 +196,7 @@ private:
 };
 
 template <typename Y> std::vector<Y> fftSmoothWithFilter(std::vector<Y> const &input, FFTFilter<Y> const &filter) {
-  std::size_t dn = input.size();
+  std::size_t const dn = input.size();
   std::vector<Y> output(input.cbegin(), input.cend());
 
   // obtain the FFT
@@ -207,8 +208,8 @@ template <typename Y> std::vector<Y> fftSmoothWithFilter(std::vector<Y> const &i
   // NOTE: the halfcomplex storage requires special treatment of even/odd
   // NOTE: we cannot use GSL's unpack because these values would have to be altered and then re-packed
   // it is simpler to access them inplace.
-  bool even = (dn % 2 == 0);
-  std::size_t complex_size = (even ? dn / 2 : (dn - 1) / 2);
+  bool const even = (dn % 2 == 0);
+  std::size_t const complex_size = (even ? dn / 2 : (dn - 1) / 2);
   output[0] *= filter(0); // x[0] = z[0].real; z[0].imag = 0 and is not stored anywhere
   for (std::size_t fn = 1; fn < complex_size + (even ? 0UL : 1UL); fn++) {
     output[2 * fn - 1] *= filter(fn); // real parts
