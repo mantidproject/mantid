@@ -21,8 +21,8 @@
 #include "MantidGeometry/Instrument/FitParameter.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Exception.h"
-#include <filesystem>
 #include <cstring>
+#include <filesystem>
 #include <fstream>
 #include <vector>
 

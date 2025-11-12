@@ -9,8 +9,8 @@
 #include "MantidAlgorithms/DiffractionEventCalibrateDetectors.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/Timer.h"
-#include <filesystem>
 #include <cxxtest/TestSuite.h>
+#include <filesystem>
 #include <fstream>
 
 using namespace Mantid::Algorithms;
