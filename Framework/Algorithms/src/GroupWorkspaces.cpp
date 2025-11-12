@@ -10,7 +10,7 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/ArrayProperty.h"
 
-#include "Poco/Glob.h"
+#include <fnmatch.h>
 
 namespace Mantid::Algorithms {
 
@@ -96,12 +96,10 @@ std::map<std::string, std::string> GroupWorkspaces::validateInputs() {
  */
 void GroupWorkspaces::addToGroup(const std::string &globExpression) {
 
-  Poco::Glob glob(globExpression);
-
   const AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
   const auto wsNames = ads.topLevelItems();
   for (const auto &wsName : wsNames) {
-    if (glob.match(wsName.first)) {
+    if (fnmatch(globExpression.c_str(), wsName.first.c_str(), 0) == 0) {
       addToGroup(wsName.second);
     }
   }

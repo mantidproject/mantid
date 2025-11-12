@@ -16,7 +16,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/OptionalBool.h"
 
-#include <Poco/File.h>
+#include <filesystem>
 #include <fstream>
 #include <sstream>
 
@@ -134,8 +134,7 @@ public:
     // clean workspaces and file written
     AnalysisDataService::Instance().remove("CorrectionTable");
 
-    Poco::File file("VucanCorrection.dat");
-    file.remove(false);
+    std::filesystem::remove("VucanCorrection.dat");
 
     return;
   }
