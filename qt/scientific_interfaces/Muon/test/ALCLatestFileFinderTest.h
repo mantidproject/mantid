@@ -14,7 +14,7 @@
 #include "MantidFrameworkTestHelpers/ScopedFileHelper.h"
 
 #include <Poco/DateTime.h>
-#include <filesystem>
+#include <Poco/File.h>
 
 using Mantid::Types::Core::DateAndTime;
 using MantidQt::CustomInterfaces::ALCLatestFileFinder;
@@ -29,7 +29,6 @@ public:
   ScopedDirectory(const std::string &dirName) : m_dirName(dirName) {
     Poco::Path tmpPath(Mantid::Kernel::ConfigService::Instance().getTempDir());
     tmpPath.pushDirectory(m_dirName);
-
     m_directory = Poco::File(tmpPath);
     m_directory.createDirectories();
   }

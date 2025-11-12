@@ -9,7 +9,8 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include <filesystem>
+#include <Poco/Path.h>
+
 #include <utility>
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
@@ -54,7 +55,7 @@ bool FileSaver::isValidSaveDirectory(std::string const &path) const { return m_f
 
 std::string FileSaver::assembleSavePath(std::string const &saveDirectory, std::string const &prefix,
                                         std::string const &name, std::string const &extension) const {
-  auto path = std::filesystem::create_directory(saveDirectory);
+  auto path = Poco::Path(saveDirectory).makeDirectory();
 
   if (extension == FileExtensions::CUSTOM) {
     path.append(prefix + name + std::string(FileExtensions::DAT));
