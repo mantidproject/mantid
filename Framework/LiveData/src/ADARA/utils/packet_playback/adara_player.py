@@ -17,7 +17,10 @@ from typing import Any, BinaryIO, Callable, Iterable, Iterator
 import yaml
 from zlib import crc32
 
-logging.basicConfig()
+
+# =========================================================
+# ====== INITIALIZE the application's `Config` dict. ======
+# =========================================================
 TRACE_LEVEL = 5
 logging.addLevelName(TRACE_LEVEL, "TRACE")
 
@@ -29,8 +32,6 @@ def trace(self, message, *args, **kws):
 
 logging.Logger.trace = trace
 
-_logger = logging.getLogger(__name__)
-
 _config_path = Path(os.environ.get("adara_player_conf", "adara_player_conf.yml")).resolve()
 if not _config_path.exists():
     print(f"Error during load of module '{__file__}' (as '{__name__}'):\n    config file '{_config_path}' not found on filesystem.")
@@ -38,9 +39,28 @@ if not _config_path.exists():
 
 Config = {}
 with open(_config_path, "rt") as f:
+    print(f"Initializing configuration from '{_config_path}':")
     Config = yaml.safe_load(f)
-    _logger.setLevel(Config["logging"]["level"])
-    _logger.info(f"Loaded configuration from '{_config_path}'.")
+
+    # Initialize logging:
+    logging_params = {"format": Config["logging"]["format"], "level": Config["logging"]["level"]}
+    log_file_path = Config["logging"]["filename"]
+    if log_file_path:
+        print(f"  logging to file: '{log_file_path}'.")
+        logging_params["filename"] = log_file_path
+    else:
+        print("  logging to console.")
+    print("Type CNTL-C to exit.")
+    logging.basicConfig(**logging_params)
+
+    _logger = logging.getLogger(__name__)
+    if log_file_path:
+        _logger.info(f"Initialized configuration from '{_config_path}'.")
+
+# =========================================================
+# ====== end: `Config` initialization                ======
+# =========================================================
+
 
 EPICS_EPOCH_OFFSET = 631152000
 
@@ -352,7 +372,7 @@ class ClientHelloPacket(Packet):
     def start_time(self) -> np.datetime64:
         return self._start_time
 
-    def fromStartOfRun(self):
+    def is_StartOfRun_packet(self) -> bool:
         # `start_time` == 1000000000 ns from the EPICs epoch => replay all historical data
         return self.start_time == np.datetime64(1, "s")
 
@@ -752,6 +772,8 @@ class Player:
                             break
 
                         # Process readable sockets
+                        _logger.info(f"*** R, W, E: [{len(readable)}], [{len(writable)}], [{len(exceptional)}] *** ")
+
                         for sock in readable:
                             try:
                                 packet = Packet.from_socket(sock)

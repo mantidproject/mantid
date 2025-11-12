@@ -33,7 +33,11 @@ record:
   transfer_limit: 16000 # MB
 
 logging:
-  level: INFO # DEBUG: packet summary at send and receive
+  format: '%(asctime)s: %(levelname)s: %(message)s'
+
+  level: DEBUG # DEBUG: packet summary at send and receive
+
+  filename: /SNS/users/ux0/workspaces/mantid-PRs/tmp/SNAP_packets/sessions.log
 
   # `Packet` summary format.
   packet_summary: "type: {type:#06x}: {timestamp}, size: {size:>7}, CRC: {CRC:#010x}"
