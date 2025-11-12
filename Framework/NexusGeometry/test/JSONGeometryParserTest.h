@@ -8,9 +8,9 @@
 
 #include "MantidFrameworkTestHelpers/JSONGeometryParserTestHelper.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/Glob.h"
 #include "MantidKernel/Strings.h"
 #include "MantidNexusGeometry/JSONGeometryParser.h"
-#include <Poco/Glob.h>
 #include <cxxtest/TestSuite.h>
 #include <exception>
 #include <json/json.h>
@@ -420,7 +420,7 @@ public:
 
   void setUp() override {
     std::string filename = "V20_file_write_start_20190524.json";
-    std::string fullPath = ConfigService::Instance().getFullPath(filename, true, Poco::Glob::GLOB_DEFAULT);
+    std::string fullPath = ConfigService::Instance().getFullPath(filename, true, Glob::GLOB_DEFAULT);
 
     instrument = Strings::loadFile(fullPath);
   }
