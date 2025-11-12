@@ -13,9 +13,9 @@
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/VectorHelper.h"
 
-#include <Poco/File.h>
 #include <QApplication>
 #include <boost/algorithm/string.hpp>
+#include <filesystem>
 
 #include <utility>
 
@@ -93,8 +93,7 @@ void FindFilesWorker::run() {
       for (; it != filestext.end(); ++it) {
         boost::algorithm::trim(*it);
         std::string result = fileSearcher.getFullPath(*it);
-        Poco::File test(result);
-        if ((!result.empty()) && test.exists()) {
+        if ((!result.empty()) && std::filesystem::exists(result)) {
           filenames.emplace_back(*it);
           valueForProperty += QString::fromStdString(*it) + ",";
         } else {
