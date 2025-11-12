@@ -485,7 +485,7 @@ jobs:
         platform: [linux-64, win-64, osx-arm64]
     runs-on: [self-hosted, '${{ matrix.platform }}']
     if: inputs.platforms == 'all' || inputs.platforms == matrix.platform
-    
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
