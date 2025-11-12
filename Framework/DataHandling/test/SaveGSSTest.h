@@ -15,10 +15,10 @@
 #include "MantidFrameworkTestHelpers/FileComparisonHelper.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 
+#include "MantidKernel/Glob.h"
 #include "cxxtest/TestSuite.h"
 
 #include <Poco/File.h>
-#include <Poco/Glob.h>
 #include <Poco/TemporaryFile.h>
 #include <fstream>
 
@@ -270,7 +270,7 @@ public:
 
     // Use glob to find any files that match the output pattern
     std::set<std::string> returnedFiles;
-    Poco::Glob::glob(outFilePath, returnedFiles);
+    Kernel::Glob::glob(outFilePath, returnedFiles);
     for (const auto &filename : returnedFiles) {
       Poco::File pocoFile{filename};
       pocoFile.remove();
@@ -323,7 +323,7 @@ public:
 
     // Use glob to find any files that match the output pattern
     std::set<std::string> returnedFiles;
-    Poco::Glob::glob(globPattern, returnedFiles);
+    Kernel::Glob::glob(globPattern, returnedFiles);
     for (const auto &filename : returnedFiles) {
       Poco::File pocoFile{filename};
       pocoFile.remove();

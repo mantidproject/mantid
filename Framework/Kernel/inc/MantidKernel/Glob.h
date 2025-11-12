@@ -25,6 +25,10 @@ namespace Kernel {
 
 class MANTID_KERNEL_DLL Glob {
 public:
+  /// Glob option constants (compatible with Poco::Glob)
+  static constexpr int GLOB_DEFAULT = 0;
+  static constexpr int GLOB_CASELESS = 1;
+
   /// Creates a set of files that match the given pathPattern.
   static void glob(const std::string &pathPattern, std::set<std::string> &files, int options = 0);
 };

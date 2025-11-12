@@ -16,13 +16,13 @@
 #include <Poco/DateTimeFormat.h>
 #include <Poco/DateTimeFormatter.h>
 #include <Poco/DateTimeParser.h>
-#include <Poco/Glob.h>
 #include <Poco/Path.h>
 
 #include <boost/scoped_array.hpp>
 
 #include <algorithm>
 #include <locale>
+#include <regex>
 
 namespace Mantid::DataHandling {
 // Register the algorithm into the algorithm factory
@@ -38,6 +38,45 @@ using Types::Core::DateAndTime;
 
 // Anonymous namespace
 namespace {
+/**
+ * Convert a glob pattern to a regex pattern
+ * @param glob The glob pattern with wildcards (* and ?)
+ * @return The equivalent regex pattern
+ */
+std::string globToRegex(const std::string &glob) {
+  std::string regex;
+  regex.reserve(glob.size() * 2);
+  regex += '^';
+  for (char c : glob) {
+    switch (c) {
+    case '*':
+      regex += ".*";
+      break;
+    case '?':
+      regex += '.';
+      break;
+    case '.':
+    case '^':
+    case '$':
+    case '|':
+    case '+':
+    case '\\':
+    case '(':
+    case ')':
+    case '{':
+    case '}':
+      regex += '\\';
+      regex += c;
+      break;
+    // [ and ] are special in both glob and regex, so pass through
+    default:
+      regex += c;
+    }
+  }
+  regex += '$';
+  return regex;
+}
+
 /**
  * @brief loadAndApplyMeasurementInfo
  * @param file : Nexus::File pointer
@@ -783,12 +822,12 @@ void LoadNexusLogs::loadLogs(Nexus::File &file, const std::string &absolute_entr
     auto itPrefixBegin = logsSet.lower_bound(absolute_entry_name);
 
     if (allow_list.empty()) {
-      // convert the blocklist into a bunch of objects to handle globbing
+      // convert the blocklist into regex patterns for globbing
       const bool has_block_list = (!block_list.empty());
-      std::vector<std::unique_ptr<Poco::Glob>> globblock_list;
+      std::vector<std::regex> globblock_list;
       if (has_block_list) {
         std::transform(block_list.cbegin(), block_list.cend(), std::back_inserter(globblock_list),
-                       [](const auto &block) { return std::make_unique<Poco::Glob>(block); });
+                       [](const auto &block) { return std::regex(globToRegex(block)); });
       }
 
       for (auto it = itPrefixBegin;
@@ -797,8 +836,9 @@ void LoadNexusLogs::loadLogs(Nexus::File &file, const std::string &absolute_entr
         if (std::count(it->begin(), it->end(), '/') == 3) {
           if (has_block_list) {
             bool skip = false;
+            std::string logName = (*it).substr((*it).find_last_of("/") + 1);
             for (auto &block : globblock_list) {
-              if (block->match((*it).substr((*it).find_last_of("/") + 1))) {
+              if (std::regex_match(logName, block)) {
                 skip = true;
                 break; // from the loop of block items
               }
