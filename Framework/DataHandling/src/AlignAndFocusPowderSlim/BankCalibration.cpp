@@ -5,7 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 
-#include "BankCalibration.h"
+#include "MantidDataHandling/AlignAndFocusPowderSlim/BankCalibration.h"
 #include <algorithm>
 #include <stdexcept>
 

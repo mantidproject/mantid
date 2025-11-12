@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "BankCalibration.h"
+#include "MantidDataHandling/AlignAndFocusPowderSlim/BankCalibration.h"
 #include <ranges>
 #include <tbb/tbb.h>
 #include <vector>

@@ -5,13 +5,13 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 
-#include "ProcessBankTask.h"
+#include "MantidDataHandling/AlignAndFocusPowderSlim/ProcessBankTask.h"
+#include "MantidDataHandling/AlignAndFocusPowderSlim/ProcessEventsTask.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/ParallelMinMax.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/Unit.h"
 #include "MantidNexus/H5Util.h"
-#include "ProcessEventsTask.h"
 #include "tbb/parallel_for.h"
 #include "tbb/parallel_reduce.h"
 

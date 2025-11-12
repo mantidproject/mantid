@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidDataHandling/AlignAndFocusPowderSlim/NexusLoader.h"
 #include "MantidGeometry/IDTypes.h"
-#include "NexusLoader.h"
 #include <H5Cpp.h>
 #include <MantidAPI/Progress.h>
 #include <map>
