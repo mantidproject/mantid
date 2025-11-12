@@ -13,8 +13,7 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/TestChannel.h"
 
-#include <Poco/File.h>
-#include <Poco/Path.h>
+#include <filesystem>
 #include <fstream>
 #include <memory>
 #include <regex>
@@ -258,8 +257,8 @@ public:
 
     // check all of the directory entries actually exist
     for (auto &directoryPath : directories) {
-      Poco::File directory(directoryPath);
-      TSM_ASSERT(directoryPath + " does not exist", directory.exists());
+      std::filesystem::path directory(directoryPath);
+      TSM_ASSERT(directoryPath + " does not exist", std::filesystem::exists(directory));
     }
   }
 
@@ -343,16 +342,15 @@ public:
     // save any previous changed settings to make sure we're on a clean slate
     ConfigService::Instance().saveConfig(filename);
 
-    Poco::File prop_file(filename);
     // Start with a clean state
-    if (prop_file.exists())
-      prop_file.remove();
+    if (std::filesystem::exists(filename))
+      std::filesystem::remove(filename);
 
     ConfigServiceImpl &settings = ConfigService::Instance();
     TS_ASSERT_THROWS_NOTHING(settings.saveConfig(filename));
 
     // No changes yet, file exists but is blank
-    TS_ASSERT_EQUALS(prop_file.exists(), true);
+    TS_ASSERT_EQUALS(std::filesystem::exists(filename), true);
     std::string contents = readFile(filename);
     TS_ASSERT(contents.empty());
 
@@ -362,9 +360,8 @@ public:
   void testSaveConfigExistingSettings() {
 
     const std::string filename("user.settings");
-    Poco::File prop_file(filename);
-    if (prop_file.exists())
-      prop_file.remove();
+    if (std::filesystem::exists(filename))
+      std::filesystem::remove(filename);
 
     std::ofstream writer(filename.c_str(), std::ios_base::trunc);
     writer << "mantid.legs = 6";
@@ -375,9 +372,8 @@ public:
 
   void testLoadChangeLoadSavesOriginalValueIfSettingExists() {
     const std::string filename("user.settingsLoadChangeLoad");
-    Poco::File prop_file(filename);
-    if (prop_file.exists())
-      prop_file.remove();
+    if (std::filesystem::exists(filename))
+      std::filesystem::remove(filename);
     const std::string value("15");
     std::ofstream writer(filename.c_str());
     writer << "mantid.legs = " << value << "\n";
@@ -393,7 +389,7 @@ public:
     const std::string contents = readFile(filename);
     TS_ASSERT_EQUALS(contents, "mantid.legs=6\n");
 
-    prop_file.remove();
+    std::filesystem::remove(filename);
   }
 
   void testLoadChangeClearSavesOriginalPropsFile() {
@@ -401,9 +397,8 @@ public:
     ConfigServiceImpl &settings = ConfigService::Instance();
     const std::string userFileBackup = settings.getUserFilename() + ".unittest";
     try {
-      Poco::File userFile(settings.getUserFilename());
-      userFile.moveTo(userFileBackup);
-    } catch (Poco::Exception &) {
+      std::filesystem::rename(settings.getUserFilename(), userFileBackup);
+    } catch (const std::exception &) {
     }
 
     const std::string propfile = ConfigService::Instance().getDirectoryOfExecutable() + "MantidTest.properties";
@@ -418,9 +413,8 @@ public:
     TS_ASSERT(contents.find("mantid.legs") == std::string::npos);
 
     try {
-      Poco::File backup(userFileBackup);
-      backup.moveTo(settings.getUserFilename());
-    } catch (Poco::Exception &) {
+      std::filesystem::rename(userFileBackup, settings.getUserFilename());
+    } catch (const std::exception &) {
     }
   }
 
@@ -434,9 +428,8 @@ public:
     ConfigServiceImpl &settings = ConfigService::Instance();
     const std::string userFileBackup = settings.getUserFilename() + ".unittest";
     try {
-      Poco::File userFile(settings.getUserFilename());
-      userFile.moveTo(userFileBackup);
-    } catch (Poco::Exception &) {
+      std::filesystem::rename(settings.getUserFilename(), userFileBackup);
+    } catch (const std::exception &) {
     }
 
     // pick a property that is not in the config file
@@ -462,17 +455,15 @@ public:
 
     // restore the old file
     try {
-      Poco::File backup(userFileBackup);
-      backup.moveTo(settings.getUserFilename());
-    } catch (Poco::Exception &) {
+      std::filesystem::rename(userFileBackup, settings.getUserFilename());
+    } catch (const std::exception &) {
     }
   }
 
   void testSaveConfigWithPropertyRemoved() {
     const std::string filename("user.settings.testSaveConfigWithPropertyRemoved");
-    Poco::File prop_file(filename);
-    if (prop_file.exists())
-      prop_file.remove();
+    if (std::filesystem::exists(filename))
+      std::filesystem::remove(filename);
 
     std::ofstream writer(filename.c_str(), std::ios_base::trunc);
     writer << "mantid.legs = 6"
@@ -518,19 +509,13 @@ public:
     TS_ASSERT_EQUALS(prop_lines[4], "key.withnospace=5");
 
     // Clean up
-    prop_file.remove();
+    std::filesystem::remove(filename);
   }
 
   void testSaveConfigWithLineContinuation() {
-    /*const std::string propfile =
-    ConfigService::Instance().getDirectoryOfExecutable()
-      + "MantidTest.properties";
-    ConfigService::Instance().updateConfig(propfile);*/
-
     const std::string filename("user.settingsLineContinuation");
-    Poco::File prop_file(filename);
-    if (prop_file.exists())
-      prop_file.remove();
+    if (std::filesystem::exists(filename))
+      std::filesystem::remove(filename);
 
     ConfigServiceImpl &settings = ConfigService::Instance();
 
@@ -547,7 +532,7 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(settings.saveConfig(filename));
     // Should exist
-    TS_ASSERT_EQUALS(prop_file.exists(), true);
+    TS_ASSERT_EQUALS(std::filesystem::exists(filename), true);
 
     // Test the entry
     std::ifstream reader(filename.c_str(), std::ios::in);
@@ -569,7 +554,7 @@ public:
     TS_ASSERT_EQUALS(prop_lines[2], "search.directories=/test1;/test2;/test3;/test4");
 
     // Clean up
-    // prop_file.remove();
+    // std::filesystem::remove(prop_file);
   }
 
   // Test that the ValueChanged notification is sent
@@ -710,8 +695,7 @@ private:
     TS_ASSERT_THROWS_NOTHING(settings.saveConfig(filename));
 
     // Should exist
-    Poco::File prop_file(filename);
-    TS_ASSERT_EQUALS(prop_file.exists(), true);
+    TS_ASSERT_EQUALS(std::filesystem::exists(filename), true);
 
     // Test the entry
     std::ifstream reader(filename.c_str(), std::ios::in);
@@ -731,7 +715,7 @@ private:
     TS_ASSERT_EQUALS(line, key_value);
 
     // Clean up
-    prop_file.remove();
+    std::filesystem::remove(filename);
   }
 
   std::string readFile(const std::string &filename) {

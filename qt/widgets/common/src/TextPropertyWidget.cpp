@@ -30,8 +30,10 @@ TextPropertyWidget::TextPropertyWidget(Mantid::Kernel::Property *prop, QWidget *
   setFieldPlaceholderText(prop, m_textbox);
   // Make current value visible
   this->setValue(QString::fromStdString(m_prop->value()));
+
   // Make sure the connection comes after updating any values
   connect(m_textbox, SIGNAL(editingFinished()), this, SLOT(userEditedProperty()));
+
   m_gridLayout->addWidget(m_textbox, m_row, 1);
   m_widgets.push_back(m_textbox);
 

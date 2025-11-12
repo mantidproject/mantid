@@ -10,6 +10,7 @@
 from collections import defaultdict
 from math import isnan
 import multiprocessing
+import numbers
 import os
 from pathlib import Path
 import re
@@ -38,6 +39,7 @@ from abins.constants import (
     ATOM_PREFIX,
     FLOAT_TYPE,
     MASS_EPS,
+    MILLI_EV_TO_WAVENUMBER,
     ONE_DIMENSIONAL_INSTRUMENTS,
     TWO_DIMENSIONAL_INSTRUMENTS,
 )
@@ -1065,3 +1067,46 @@ class AbinsAlgorithm:
             return  # Pool() will set a sensible default
         if not (1 <= threads <= multiprocessing.cpu_count()):
             raise RuntimeError("Invalid number of threads for parallelisation over atoms" + message_end)
+
+
+def validate_e_init(*, e_init: str, energy_units: str, instrument_name: str) -> dict[str, str]:
+    """Validator for direct-geometry incident energy parameters
+
+    Check that algorithm inputs specify a valid energy for the given instrument
+    and return appropriate issues dict for .validateInputs() method.
+
+    Note that parameters are strings; this is the form they are received from
+    algorithm parameters.
+
+    Args:
+        e_init: IncidentEnergy for Abins2D
+        energy_units: 'meV' or 'cm-1'
+        instrument_name:
+            A valid Abins2D instrument. This must be validated elsewhere,
+            with a corresponding entry in abins.parameters.instruments.
+    """
+
+    issues = {}
+
+    if not isinstance(float(e_init), numbers.Real):
+        issues["IncidentEnergy"] = "Incident energy must be a real number"
+        return issues
+
+    if "max_wavenumber" in abins.parameters.instruments[instrument_name]:
+        max_energy = abins.parameters.instruments[instrument_name]["max_wavenumber"]
+    else:
+        max_energy = abins.parameters.sampling["max_wavenumber"]
+
+    match energy_units:
+        case "meV":
+            max_energy = max_energy / MILLI_EV_TO_WAVENUMBER
+        case "cm-1":
+            max_energy = max_energy
+        case _:
+            issues["EnergyUnits"] = f"Invalid energy unit: {energy_units}"
+            return issues
+
+    if float(e_init) > max_energy:
+        issues["IncidentEnergy"] = f"Incident energy cannot be greater than {max_energy:.3f} {energy_units} for this instrument."
+
+    return issues

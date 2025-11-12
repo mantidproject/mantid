@@ -7,9 +7,7 @@
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/UnitLabel.h"
-
-#include <Poco/Path.h>
-
+#include <filesystem>
 #include <fstream>
 #include <list>
 #include <memory>
@@ -79,6 +77,21 @@ std::string replace(const std::string &input, const std::string &find_what, cons
     pos += replace_with.length();
   }
   return output;
+}
+
+/**
+ * Return a string with all occurrences of a character replaced by another
+ * @param input :: The input string to perform the replacement on
+ * @param to_replace :: Each occurrence of this char will be replaced
+ * @param substitute :: The char which will be placed instead
+ * @return A new string with the characters replaced
+ */
+MANTID_KERNEL_DLL std::string replaceAll(std::string const &input, char const to_replace, char const substitute) {
+  std::string replaced;
+  replaced.reserve(input.size());
+  std::transform(input.cbegin(), input.cend(), std::back_inserter(replaced),
+                 [to_replace, substitute](char c) { return (c == to_replace) ? substitute : c; });
+  return replaced;
 }
 
 /**
@@ -1004,9 +1017,8 @@ size_t split_path(const std::string &path, std::vector<std::string> &path_compon
   // path
   if (path[0] == '.') {
     // get absolute path using working directory as base;
-    Poco::Path absol;
-    absol = absol.absolute();
-    working_path = absol.toString(Poco::Path::PATH_UNIX) + working_path;
+    std::filesystem::path absol = std::filesystem::absolute(std::filesystem::current_path());
+    working_path = (absol / working_path).generic_string();
   }
   // as poco splt using regular expressions is doing some rubbish, we need to do
   // split manually

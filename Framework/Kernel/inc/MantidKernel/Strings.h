@@ -240,6 +240,10 @@ MANTID_KERNEL_DLL std::string shorten(const std::string &input, const size_t max
 /// Return a string with all matching occurence-strings
 MANTID_KERNEL_DLL std::string replace(const std::string &input, const std::string &find_what,
                                       const std::string &replace_with);
+
+/// Return a string with all occurrences of indicated character replaced by the new character
+MANTID_KERNEL_DLL std::string replaceAll(std::string const &input, char const to_replace, char const substitute);
+
 /// Return a string with all occurrences of the characters in the input replaced
 /// by the replace string
 MANTID_KERNEL_DLL std::string replaceAll(const std::string &input, const std::string &charStr,

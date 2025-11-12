@@ -15,8 +15,10 @@ from mantid.api import AnalysisDataService as ADS
 from mantidqt.plotting.sample_shape_ads_observer import SampleShapePlotADSObserver
 from workbench.plotting.globalfiguremanager import FigureAction, GlobalFigureManager
 from workbench.plotting.toolbar import ToolbarStateManager
+from mantidqt.utils.qt.qappthreadcall import run_on_qapp_thread
 
 
+@run_on_qapp_thread()
 class SampleShapePlot:
     def __init__(
         self,

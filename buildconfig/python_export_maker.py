@@ -120,7 +120,7 @@ void export_%(class)s()
         cppfile.write(cppcode % {"header": include, "namespace": namespace, "class": classname})
 
     print('Generated export file "%s"' % os.path.basename(exportfile))
-    print("")
+    print()
     print(
         "  ** Add this to the EXPORT_FILES variable in '%s'"
         % os.path.join(get_modulepath(get_frameworkdir(headerfile), get_submodule(headerfile)), "CMakeLists.txt")
@@ -155,7 +155,7 @@ if __name__ == '__main__':
     unittest.close()
 
     print('Generated unit test file "%s"' % os.path.basename(filename))
-    print("")
+    print()
     print("  ** Add this to the TEST_PY_FILES variable in '%s'" % os.path.join("PythonInterface", "CMakeLists.txt"))
 
 

@@ -97,6 +97,7 @@ set(SRC_FILES
     src/RebinParamsValidator.cpp
     src/RegexStrings.cpp
     src/SetValueWhenProperty.cpp
+    src/SetDefaultWhenProperty.cpp
     src/SingletonHolder.cpp
     src/Smoothing.cpp
     src/SobolSequence.cpp
@@ -190,6 +191,7 @@ set(INC_FILES
     inc/MantidKernel/FunctionTask.h
     inc/MantidKernel/GitHubApiHelper.h
     inc/MantidKernel/Glob.h
+    inc/MantidKernel/GSL_FFT_Helpers.h
     inc/MantidKernel/ICatalogInfo.h
     inc/MantidKernel/IPropertyManager.h
     inc/MantidKernel/IPropertySettings.h
@@ -263,6 +265,7 @@ set(INC_FILES
     inc/MantidKernel/RegexStrings.h
     inc/MantidKernel/RegistrationHelper.h
     inc/MantidKernel/SetValueWhenProperty.h
+    inc/MantidKernel/SetDefaultWhenProperty.h
     inc/MantidKernel/SingletonHolder.h
     inc/MantidKernel/Smoothing.h
     inc/MantidKernel/SobolSequence.h

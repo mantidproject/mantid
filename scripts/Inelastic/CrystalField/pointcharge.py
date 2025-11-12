@@ -135,7 +135,7 @@ class PointCharge(object):
         # Parse args / kwargs
         argname = ["Structure", "IonLabel", "Charges", "Ion", "MaxDistance", "Neighbour"]
         argdict = {"MaxDistance": 5.0}
-        for ind in range(0, (len(argname) if len(args) > len(argname) else len(args))):
+        for ind in range(0, (min(len(args), len(argname)))):
             argdict[argname[ind]] = args[ind]
         for ind in kwargs.keys():
             if ind in argname:

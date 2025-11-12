@@ -1,0 +1,1 @@
+- ``SampleShapePlot`` (from ``mantidqt/plotting/sample_shape``) no longer crashes upon being called from a script in workbench. Previously, this would crash as the plotting methods expected to be on the user interface thread.
