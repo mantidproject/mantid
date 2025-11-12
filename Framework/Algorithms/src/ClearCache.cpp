@@ -11,7 +11,6 @@
 #include "MantidKernel/Glob.h"
 #include "MantidKernel/UsageService.h"
 #include <filesystem>
-#include <system_error>
 
 namespace Mantid::Algorithms {
 

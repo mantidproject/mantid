@@ -10,7 +10,7 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/ArrayProperty.h"
 
-#include <fnmatch.h>
+#include <regex>
 
 namespace Mantid::Algorithms {
 
@@ -90,16 +90,59 @@ std::map<std::string, std::string> GroupWorkspaces::validateInputs() {
   return results;
 }
 
+namespace {
+/**
+ * Convert a glob pattern to a regex pattern
+ * @param glob The glob pattern with wildcards (* and ?)
+ * @return The equivalent regex pattern
+ */
+std::string globToRegex(const std::string &glob) {
+  std::string regex;
+  regex.reserve(glob.size() * 2);
+  regex += '^';
+  for (char c : glob) {
+    switch (c) {
+    case '*':
+      regex += ".*";
+      break;
+    case '?':
+      regex += '.';
+      break;
+    case '.':
+    case '^':
+    case '$':
+    case '|':
+    case '+':
+    case '\\':
+    case '(':
+    case ')':
+    case '{':
+    case '}':
+      regex += '\\';
+      regex += c;
+      break;
+    // [ and ] are special in both glob and regex, so pass through
+    default:
+      regex += c;
+    }
+  }
+  regex += '$';
+  return regex;
+}
+} // namespace
+
 /**
  * Add a list of names to the new group
  * @param globExpression glob pattern for selecting names from the ADS
  */
 void GroupWorkspaces::addToGroup(const std::string &globExpression) {
 
+  std::regex pattern(globToRegex(globExpression));
+
   const AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
   const auto wsNames = ads.topLevelItems();
   for (const auto &wsName : wsNames) {
-    if (fnmatch(globExpression.c_str(), wsName.first.c_str(), 0) == 0) {
+    if (std::regex_match(wsName.first, pattern)) {
       addToGroup(wsName.second);
     }
   }
