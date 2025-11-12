@@ -1,0 +1,1612 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!-- For help on the notation used to specify an Instrument Definition File
+     see http://www.mantidproject.org/IDF -->
+<instrument xmlns="http://www.mantidproject.org/IDF/1.0"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd"
+            name="IMAGINE" valid-from   ="2025-10-01 00:00:00"
+                           valid-to     ="2100-01-31 23:59:59"
+		           last-modified="2025-10-02 00:00:01">
+  <!--DEFAULTS-->
+  <defaults>
+    <length unit="metre"/>
+    <angle unit="degree"/>
+    <reference-frame>
+      <along-beam axis="z"/>
+      <pointing-up axis="y"/>
+      <handedness val="right"/>
+      <theta-sign axis="x"/>
+    </reference-frame>
+  </defaults>
+
+  <!--SOURCE-->
+  <component type="moderator">
+    <location z="-3.0"/>
+  </component>
+  <type name="moderator" is="Source"/>
+
+  <!--SAMPLE-->
+  <component type="sample-position">
+    <location y="0.0" x="0.0" z="0.0"/>
+  </component>
+  <type name="sample-position" is="SamplePos"/>
+
+  <!--MONITORS-->
+  <idlist idname="Downstream_monitor">
+    <id val="-2"/>
+  </idlist>
+  <component type="Downstream_monitor" idlist="Downstream_monitor">
+    <properties />
+    <location  />
+  </component>
+  <type is="monitor" name="Downstream_monitor">
+   <component type="monitor">
+    <location x="0.0" y="0.0" z="0.4" name="monitor2" />
+   </component>
+  </type>
+
+  <idlist idname="monitors">
+    <id val="-1"/>
+  </idlist>
+  <component type="monitors" idlist="monitors">
+    <location/>
+  </component>
+  <type is="monitor" name="monitors">
+    <component type="monitor">
+      <location x="0.0" y="0.0" z="-4.0" name="monitor1"/>
+    </component>
+  </type>
+
+  <!--DETECTORS-->
+  
+  <component type="bank11">
+    <location x="0" y="-0.42666399999999954" z="0"/>
+  </component>
+  <type name="bank11">
+    <component type="panel" idfillbyfirst="y" idstart="0" idstepbyrow="512">
+      <location>
+        <parameter name="r-position">
+          <value val="0.34939881768689485"/>
+        </parameter>
+        <parameter name="t-position">
+          <value val="-167.49840687691767"/>
+        </parameter>
+        <parameter name="roty">
+          <value val="-167.49840687691767"/>
+        </parameter>
+      </location>
+    </component>
+  </type>
+
+  <component type="bank12">
+    <location x="0" y="-0.3047599999999997" z="0"/>
+  </component>
+  <type name="bank12">
+    <component type="panel" idfillbyfirst="y" idstart="262144" idstepbyrow="512">
+      <location>
+        <parameter name="r-position">
+          <value val="0.34939881768689485"/>
+        </parameter>
+        <parameter name="t-position">
+          <value val="-167.49840687691767"/>
+        </parameter>
+        <parameter name="roty">
+          <value val="-167.49840687691767"/>
+        </parameter>
+      </location>
+    </component>
+  </type>
+
+  <component type="bank13">
+    <location x="0" y="-0.1828559999999998" z="0"/>
+  </component>
+  <type name="bank13">
+    <component type="panel" idfillbyfirst="y" idstart="524288" idstepbyrow="512">
+      <location>
+        <parameter name="r-position">
+          <value val="0.34939881768689485"/>
+        </parameter>
+        <parameter name="t-position">
+          <value val="-167.49840687691767"/>
+        </parameter>
+        <parameter name="roty">
+          <value val="-167.49840687691767"/>
+        </parameter>
+      </location>
+    </component>
+  </type>
+
+  <component type="bank14">
+    <location x="0" y="-0.06095199999999994" z="0"/>
+  </component>
+  <type name="bank14">
+    <component type="panel" idfillbyfirst="y" idstart="786432" idstepbyrow="512">
+      <location>
+        <parameter name="r-position">
+          <value val="0.34939881768689485"/>
+        </parameter>
+        <parameter name="t-position">
+          <value val="-167.49840687691767"/>
+        </parameter>
+        <parameter name="roty">
+          <value val="-167.49840687691767"/>
+        </parameter>
+      </location>
+    </component>
+  </type>
+
+  <component type="bank15">
+    <location x="0" y="0.06095199999999994" z="0"/>
+  </component>
+  <type name="bank15">
+    <component type="panel" idfillbyfirst="y" idstart="1048576" idstepbyrow="512">
+      <location>
+        <parameter name="r-position">
+          <value val="0.34939881768689485"/>
+        </parameter>
+        <parameter name="t-position">
+          <value val="-167.49840687691767"/>
+        </parameter>
+        <parameter name="roty">
+          <value val="-167.49840687691767"/>
+        </parameter>
+      </location>
+    </component>
+  </type>
+
+  <component type="bank16">
+    <location x="0" y="0.1828559999999998" z="0"/>
+  </component>
+  <type name="bank16">
+    <component type="panel" idfillbyfirst="y" idstart="1310720" idstepbyrow="512">
+      <location>
+        <parameter name="r-position">
+          <value val="0.34939881768689485"/>
+        </parameter>
+        <parameter name="t-position">
+          <value val="-167.49840687691767"/>
+        </parameter>
+        <parameter name="roty">
+          <value val="-167.49840687691767"/>
+        </parameter>
+      </location>
+    </component>
+  </type>
+
+  <component type="bank17">
+    <location x="0" y="0.3047599999999997" z="0"/>
+  </component>
+  <type name="bank17">
+    <component type="panel" idfillbyfirst="y" idstart="1572864" idstepbyrow="512">
+      <location>
+        <parameter name="r-position">
+          <value val="0.34939881768689485"/>
+        </parameter>
+        <parameter name="t-position">
+          <value val="-167.49840687691767"/>
+        </parameter>
+        <parameter name="roty">
+          <value val="-167.49840687691767"/>
+        </parameter>
+      </location>
+    </component>
+  </type>
+
+  <component type="bank18">
+    <location x="0" y="0.42666399999999954" z="0"/>
+  </component>
+  <type name="bank18">
+    <component type="panel" idfillbyfirst="y" idstart="1835008" idstepbyrow="512">
+      <location>
+        <parameter name="r-position">
+          <value val="0.34939881768689485"/>
+        </parameter>
+        <parameter name="t-position">
+          <value val="-167.49840687691767"/>
+        </parameter>
+        <parameter name="roty">
+          <value val="-167.49840687691767"/>
+        </parameter>
+      </location>
+    </component>
+  </type>
+
+  <component type="bank21">
+    <location x="0" y="-0.42666399999999954" z="0"/>
+  </component>
+  <type name="bank21">
+    <component type="panel" idfillbyfirst="y" idstart="2097152" idstepbyrow="512">
+      <location>
+        <parameter name="r-position">
+          <value val="0.34939881768689485"/>
+        </parameter>
+        <parameter name="t-position">
+          <value val="-147.88523442069138"/>
+        </parameter>
+        <parameter name="roty">
+          <value val="-147.88523442069138"/>
+        </parameter>
+      </location>
+    </component>
+  </type>
+
+  <component type="bank22">
+    <location x="0" y="-0.3047599999999997" z="0"/>
+  </component>
+  <type name="bank22">
+    <component type="panel" idfillbyfirst="y" idstart="2359296" idstepbyrow="512">
+      <location>
+        <parameter name="r-position">
+          <value val="0.34939881768689485"/>
+        </parameter>
+        <parameter name="t-position">
+          <value val="-147.88523442069138"/>
+        </parameter>
+        <parameter name="roty">
+          <value val="-147.88523442069138"/>
+        </parameter>
+      </location>
+    </component>
+  </type>
+
+  <component type="bank23">
+    <location x="0" y="-0.1828559999999998" z="0"/>
+  </component>
+  <type name="bank23">
+    <component type="panel" idfillbyfirst="y" idstart="2621440" idstepbyrow="512">
+      <location>
+        <parameter name="r-position">
+          <value val="0.34939881768689485"/>
+        </parameter>
+        <parameter name="t-position">
+          <value val="-147.88523442069138"/>
+        </parameter>
+        <parameter name="roty">
+          <value val="-147.88523442069138"/>
+        </parameter>
+      </location>
+    </component>
+  </type>
+
+  <component type="bank24">
+    <location x="0" y="-0.06095199999999994" z="0"/>
+  </component>
+  <type name="bank24">
+    <component type="panel" idfillbyfirst="y" idstart="2883584" idstepbyrow="512">
+      <location>
+        <parameter name="r-position">
+          <value val="0.34939881768689485"/>
+        </parameter>
+        <parameter name="t-position">
+          <value val="-147.88523442069138"/>
+        </parameter>
+        <parameter name="roty">
+          <value val="-147.88523442069138"/>
+        </parameter>
+      </location>
+    </component>
+  </type>
+
+  <component type="bank25">
+    <location x="0" y="0.06095199999999994" z="0"/>
+  </component>
+  <type name="bank25">
+    <component type="panel" idfillbyfirst="y" idstart="3145728" idstepbyrow="512">
+      <location>
+        <parameter name="r-position">
+          <value val="0.34939881768689485"/>
+        </parameter>
+        <parameter name="t-position">
+          <value val="-147.88523442069138"/>
+        </parameter>
+        <parameter name="roty">
+          <value val="-147.88523442069138"/>
+        </parameter>
+      </location>
+    </component>
+  </type>
+
+  <component type="bank26">
+    <location x="0" y="0.1828559999999998" z="0"/>
+  </component>
+  <type name="bank26">
+    <component type="panel" idfillbyfirst="y" idstart="3407872" idstepbyrow="512">
+      <location>
+        <parameter name="r-position">
+          <value val="0.34939881768689485"/>
+        </parameter>
+        <parameter name="t-position">
+          <value val="-147.88523442069138"/>
+        </parameter>
+        <parameter name="roty">
+          <value val="-147.88523442069138"/>
+        </parameter>
+      </location>
+    </component>
+  </type>
+
+  <component type="bank27">
+    <location x="0" y="0.3047599999999997" z="0"/>
+  </component>
+  <type name="bank27">
+    <component type="panel" idfillbyfirst="y" idstart="3670016" idstepbyrow="512">
+      <location>
+        <parameter name="r-position">
+          <value val="0.34939881768689485"/>
+        </parameter>
+        <parameter name="t-position">
+          <value val="-147.88523442069138"/>
+        </parameter>
+        <parameter name="roty">
+          <value val="-147.88523442069138"/>
+        </parameter>
+      </location>
+    </component>
+  </type>
+
+  <component type="bank28">
+    <location x="0" y="0.42666399999999954" z="0"/>
+  </component>
+  <type name="bank28">
+    <component type="panel" idfillbyfirst="y" idstart="3932160" idstepbyrow="512">
+      <location>
+        <parameter name="r-position">
+          <value val="0.34939881768689485"/>
+        </parameter>
+        <parameter name="t-position">
+          <value val="-147.88523442069138"/>
+        </parameter>
+        <parameter name="roty">
+          <value val="-147.88523442069138"/>
+        </parameter>
+      </location>
+    </component>
+  </type>
+
+  <component type="bank31">
+    <location x="0" y="-0.42666399999999954" z="0"/>
+  </component>
+  <type name="bank31">
+    <component type="panel" idfillbyfirst="y" idstart="4194304" idstepbyrow="512">
+      <location>
+        <parameter name="r-position">
+          <value val="0.34939881768689485"/>
+        </parameter>
+        <parameter name="t-position">
+          <value val="-128.27376798421676"/>
+        </parameter>
+        <parameter name="roty">
+          <value val="-128.27376798421676"/>
+        </parameter>
+      </location>
+    </component>
+  </type>
+
+  <component type="bank32">
+    <location x="0" y="-0.3047599999999997" z="0"/>
+  </component>
+  <type name="bank32">
+    <component type="panel" idfillbyfirst="y" idstart="4456448" idstepbyrow="512">
+      <location>
+        <parameter name="r-position">
+          <value val="0.34939881768689485"/>
+        </parameter>
+        <parameter name="t-position">
+          <value val="-128.27376798421676"/>
+        </parameter>
+        <parameter name="roty">
+          <value val="-128.27376798421676"/>
+        </parameter>
+      </location>
+    </component>
+  </type>
+
+  <component type="bank33">
+    <location x="0" y="-0.1828559999999998" z="0"/>
+  </component>
+  <type name="bank33">
+    <component type="panel" idfillbyfirst="y" idstart="4718592" idstepbyrow="512">
+      <location>
+        <parameter name="r-position">
+          <value val="0.34939881768689485"/>
+        </parameter>
+        <parameter name="t-position">
+          <value val="-128.27376798421676"/>
+        </parameter>
+        <parameter name="roty">
+          <value val="-128.27376798421676"/>
+        </parameter>
+      </location>
+    </component>
+  </type>
+
+  <component type="bank34">
+    <location x="0" y="-0.06095199999999994" z="0"/>
+  </component>
+  <type name="bank34">
+    <component type="panel" idfillbyfirst="y" idstart="4980736" idstepbyrow="512">
+      <location>
+        <parameter name="r-position">
+          <value val="0.34939881768689485"/>
+        </parameter>
+        <parameter name="t-position">
+          <value val="-128.27376798421676"/>
+        </parameter>
+        <parameter name="roty">
+          <value val="-128.27376798421676"/>
+        </parameter>
+      </location>
+    </component>
+  </type>
+
+  <component type="bank35">
+    <location x="0" y="0.06095199999999994" z="0"/>
+  </component>
+  <type name="bank35">
+    <component type="panel" idfillbyfirst="y" idstart="5242880" idstepbyrow="512">
+      <location>
+        <parameter name="r-position">
+          <value val="0.34939881768689485"/>
+        </parameter>
+        <parameter name="t-position">
+          <value val="-128.27376798421676"/>
+        </parameter>
+        <parameter name="roty">
+          <value val="-128.27376798421676"/>
+        </parameter>
+      </location>
+    </component>
+  </type>
+
+  <component type="bank36">
+    <location x="0" y="0.1828559999999998" z="0"/>
+  </component>
+  <type name="bank36">
+    <component type="panel" idfillbyfirst="y" idstart="5505024" idstepbyrow="512">
+      <location>
+        <parameter name="r-position">
+          <value val="0.34939881768689485"/>
+        </parameter>
+        <parameter name="t-position">
+          <value val="-128.27376798421676"/>
+        </parameter>
+        <parameter name="roty">
+          <value val="-128.27376798421676"/>
+        </parameter>
+      </location>
+    </component>
+  </type>
+
+  <component type="bank37">
+    <location x="0" y="0.3047599999999997" z="0"/>
+  </component>
+  <type name="bank37">
+    <component type="panel" idfillbyfirst="y" idstart="5767168" idstepbyrow="512">
+      <location>
+        <parameter name="r-position">
+          <value val="0.34939881768689485"/>
+        </parameter>
+        <parameter name="t-position">
+          <value val="-128.27376798421676"/>
+        </parameter>
+        <parameter name="roty">
+          <value val="-128.27376798421676"/>
+        </parameter>
+      </location>
+    </component>
+  </type>
+
+  <component type="bank38">
+    <location x="0" y="0.42666399999999954" z="0"/>
+  </component>
+  <type name="bank38">
+    <component type="panel" idfillbyfirst="y" idstart="6029312" idstepbyrow="512">
+      <location>
+        <parameter name="r-position">
+          <value val="0.34939881768689485"/>
+        </parameter>
+        <parameter name="t-position">
+          <value val="-128.27376798421676"/>
+        </parameter>
+        <parameter name="roty">
+          <value val="-128.27376798421676"/>
+        </parameter>
+      </location>
+    </component>
+  </type>
+
+  <component type="bank41">
+    <location x="0" y="-0.42666399999999954" z="0"/>
+  </component>
+  <type name="bank41">
+    <component type="panel" idfillbyfirst="y" idstart="6291456" idstepbyrow="512">
+      <location>
+        <parameter name="r-position">
+          <value val="0.34939881768689485"/>
+        </parameter>
+        <parameter name="t-position">
+          <value val="-108.64749137038126"/>
+        </parameter>
+        <parameter name="roty">
+          <value val="-108.64749137038126"/>
+        </parameter>
+      </location>
+    </component>
+  </type>
+
+  <component type="bank42">
+    <location x="0" y="-0.3047599999999997" z="0"/>
+  </component>
+  <type name="bank42">
+    <component type="panel" idfillbyfirst="y" idstart="6553600" idstepbyrow="512">
+      <location>
+        <parameter name="r-position">
+          <value val="0.34939881768689485"/>
+        </parameter>
+        <parameter name="t-position">
+          <value val="-108.64749137038126"/>
+        </parameter>
+        <parameter name="roty">
+          <value val="-108.64749137038126"/>
+        </parameter>
+      </location>
+    </component>
+  </type>
+
+  <component type="bank43">
+    <location x="0" y="-0.1828559999999998" z="0"/>
+  </component>
+  <type name="bank43">
+    <component type="panel" idfillbyfirst="y" idstart="6815744" idstepbyrow="512">
+      <location>
+        <parameter name="r-position">
+          <value val="0.34939881768689485"/>
+        </parameter>
+        <parameter name="t-position">
+          <value val="-108.64749137038126"/>
+        </parameter>
+        <parameter name="roty">
+          <value val="-108.64749137038126"/>
+        </parameter>
+      </location>
+    </component>
+  </type>
+
+  <component type="bank44">
+    <location x="0" y="-0.06095199999999994" z="0"/>
+  </component>
+  <type name="bank44">
+    <component type="panel" idfillbyfirst="y" idstart="7077888" idstepbyrow="512">
+      <location>
+        <parameter name="r-position">
+          <value val="0.34939881768689485"/>
+        </parameter>
+        <parameter name="t-position">
+          <value val="-108.64749137038126"/>
+        </parameter>
+        <parameter name="roty">
+          <value val="-108.64749137038126"/>
+        </parameter>
+      </location>
+    </component>
+  </type>
+
+  <component type="bank45">
+    <location x="0" y="0.06095199999999994" z="0"/>
+  </component>
+  <type name="bank45">
+    <component type="panel" idfillbyfirst="y" idstart="7340032" idstepbyrow="512">
+      <location>
+        <parameter name="r-position">
+          <value val="0.34939881768689485"/>
+        </parameter>
+        <parameter name="t-position">
+          <value val="-108.64749137038126"/>
+        </parameter>
+        <parameter name="roty">
+          <value val="-108.64749137038126"/>
+        </parameter>
+      </location>
+    </component>
+  </type>
+
+  <component type="bank46">
+    <location x="0" y="0.1828559999999998" z="0"/>
+  </component>
+  <type name="bank46">
+    <component type="panel" idfillbyfirst="y" idstart="7602176" idstepbyrow="512">
+      <location>
+        <parameter name="r-position">
+          <value val="0.34939881768689485"/>
+        </parameter>
+        <parameter name="t-position">
+          <value val="-108.64749137038126"/>
+        </parameter>
+        <parameter name="roty">
+          <value val="-108.64749137038126"/>
+        </parameter>
+      </location>
+    </component>
+  </type>
+
+  <component type="bank47">
+    <location x="0" y="0.3047599999999997" z="0"/>
+  </component>
+  <type name="bank47">
+    <component type="panel" idfillbyfirst="y" idstart="7864320" idstepbyrow="512">
+      <location>
+        <parameter name="r-position">
+          <value val="0.34939881768689485"/>
+        </parameter>
+        <parameter name="t-position">
+          <value val="-108.64749137038126"/>
+        </parameter>
+        <parameter name="roty">
+          <value val="-108.64749137038126"/>
+        </parameter>
+      </location>
+    </component>
+  </type>
+
+  <component type="bank48">
+    <location x="0" y="0.42666399999999954" z="0"/>
+  </component>
+  <type name="bank48">
+    <component type="panel" idfillbyfirst="y" idstart="8126464" idstepbyrow="512">
+      <location>
+        <parameter name="r-position">
+          <value val="0.34939881768689485"/>
+        </parameter>
+        <parameter name="t-position">
+          <value val="-108.64749137038126"/>
+        </parameter>
+        <parameter name="roty">
+          <value val="-108.64749137038126"/>
+        </parameter>
+      </location>
+    </component>
+  </type>
+
+  <component type="bank51">
+    <location x="0" y="-0.42666399999999954" z="0"/>
+  </component>
+  <type name="bank51">
+    <component type="panel" idfillbyfirst="y" idstart="8388608" idstepbyrow="512">
+      <location>
+        <parameter name="r-position">
+          <value val="0.34939881768689485"/>
+        </parameter>
+        <parameter name="t-position">
+          <value val="-89.03245179515432"/>
+        </parameter>
+        <parameter name="roty">
+          <value val="-89.03245179515432"/>
+        </parameter>
+      </location>
+    </component>
+  </type>
+
+  <component type="bank52">
+    <location x="0" y="-0.3047599999999997" z="0"/>
+  </component>
+  <type name="bank52">
+    <component type="panel" idfillbyfirst="y" idstart="8650752" idstepbyrow="512">
+      <location>
+        <parameter name="r-position">
+          <value val="0.34939881768689485"/>
+        </parameter>
+        <parameter name="t-position">
+          <value val="-89.03245179515432"/>
+        </parameter>
+        <parameter name="roty">
+          <value val="-89.03245179515432"/>
+        </parameter>
+      </location>
+    </component>
+  </type>
+
+  <component type="bank53">
+    <location x="0" y="-0.1828559999999998" z="0"/>
+  </component>
+  <type name="bank53">
+    <component type="panel" idfillbyfirst="y" idstart="8912896" idstepbyrow="512">
+      <location>
+        <parameter name="r-position">
+          <value val="0.34939881768689485"/>
+        </parameter>
+        <parameter name="t-position">
+          <value val="-89.03245179515432"/>
+        </parameter>
+        <parameter name="roty">
+          <value val="-89.03245179515432"/>
+        </parameter>
+      </location>
+    </component>
+  </type>
+
+  <component type="bank54">
+    <location x="0" y="-0.06095199999999994" z="0"/>
+  </component>
+  <type name="bank54">
+    <component type="panel" idfillbyfirst="y" idstart="9175040" idstepbyrow="512">
+      <location>
+        <parameter name="r-position">
+          <value val="0.34939881768689485"/>
+        </parameter>
+        <parameter name="t-position">
+          <value val="-89.03245179515432"/>
+        </parameter>
+        <parameter name="roty">
+          <value val="-89.03245179515432"/>
+        </parameter>
+      </location>
+    </component>
+  </type>
+
+  <component type="bank55">
+    <location x="0" y="0.06095199999999994" z="0"/>
+  </component>
+  <type name="bank55">
+    <component type="panel" idfillbyfirst="y" idstart="9437184" idstepbyrow="512">
+      <location>
+        <parameter name="r-position">
+          <value val="0.34939881768689485"/>
+        </parameter>
+        <parameter name="t-position">
+          <value val="-89.03245179515432"/>
+        </parameter>
+        <parameter name="roty">
+          <value val="-89.03245179515432"/>
+        </parameter>
+      </location>
+    </component>
+  </type>
+
+  <component type="bank56">
+    <location x="0" y="0.1828559999999998" z="0"/>
+  </component>
+  <type name="bank56">
+    <component type="panel" idfillbyfirst="y" idstart="9699328" idstepbyrow="512">
+      <location>
+        <parameter name="r-position">
+          <value val="0.34939881768689485"/>
+        </parameter>
+        <parameter name="t-position">
+          <value val="-89.03245179515432"/>
+        </parameter>
+        <parameter name="roty">
+          <value val="-89.03245179515432"/>
+        </parameter>
+      </location>
+    </component>
+  </type>
+
+  <component type="bank57">
+    <location x="0" y="0.3047599999999997" z="0"/>
+  </component>
+  <type name="bank57">
+    <component type="panel" idfillbyfirst="y" idstart="9961472" idstepbyrow="512">
+      <location>
+        <parameter name="r-position">
+          <value val="0.34939881768689485"/>
+        </parameter>
+        <parameter name="t-position">
+          <value val="-89.03245179515432"/>
+        </parameter>
+        <parameter name="roty">
+          <value val="-89.03245179515432"/>
+        </parameter>
+      </location>
+    </component>
+  </type>
+
+  <component type="bank58">
+    <location x="0" y="0.42666399999999954" z="0"/>
+  </component>
+  <type name="bank58">
+    <component type="panel" idfillbyfirst="y" idstart="10223616" idstepbyrow="512">
+      <location>
+        <parameter name="r-position">
+          <value val="0.34939881768689485"/>
+        </parameter>
+        <parameter name="t-position">
+          <value val="-89.03245179515432"/>
+        </parameter>
+        <parameter name="roty">
+          <value val="-89.03245179515432"/>
+        </parameter>
+      </location>
+    </component>
+  </type>
+
+  <component type="bank61">
+    <location x="0" y="-0.42666399999999954" z="0"/>
+  </component>
+  <type name="bank61">
+    <component type="panel" idfillbyfirst="y" idstart="10485760" idstepbyrow="512">
+      <location>
+        <parameter name="r-position">
+          <value val="0.34939881768689485"/>
+        </parameter>
+        <parameter name="t-position">
+          <value val="12.501561102543636"/>
+        </parameter>
+        <parameter name="roty">
+          <value val="12.501561102543636"/>
+        </parameter>
+      </location>
+    </component>
+  </type>
+
+  <component type="bank62">
+    <location x="0" y="-0.3047599999999997" z="0"/>
+  </component>
+  <type name="bank62">
+    <component type="panel" idfillbyfirst="y" idstart="10747904" idstepbyrow="512">
+      <location>
+        <parameter name="r-position">
+          <value val="0.34939881768689485"/>
+        </parameter>
+        <parameter name="t-position">
+          <value val="12.501561102543636"/>
+        </parameter>
+        <parameter name="roty">
+          <value val="12.501561102543636"/>
+        </parameter>
+      </location>
+    </component>
+  </type>
+
+  <component type="bank63">
+    <location x="0" y="-0.1828559999999998" z="0"/>
+  </component>
+  <type name="bank63">
+    <component type="panel" idfillbyfirst="y" idstart="11010048" idstepbyrow="512">
+      <location>
+        <parameter name="r-position">
+          <value val="0.34939881768689485"/>
+        </parameter>
+        <parameter name="t-position">
+          <value val="12.501561102543636"/>
+        </parameter>
+        <parameter name="roty">
+          <value val="12.501561102543636"/>
+        </parameter>
+      </location>
+    </component>
+  </type>
+
+  <component type="bank64">
+    <location x="0" y="-0.06095199999999994" z="0"/>
+  </component>
+  <type name="bank64">
+    <component type="panel" idfillbyfirst="y" idstart="11272192" idstepbyrow="512">
+      <location>
+        <parameter name="r-position">
+          <value val="0.34939881768689485"/>
+        </parameter>
+        <parameter name="t-position">
+          <value val="12.501561102543636"/>
+        </parameter>
+        <parameter name="roty">
+          <value val="12.501561102543636"/>
+        </parameter>
+      </location>
+    </component>
+  </type>
+
+  <component type="bank65">
+    <location x="0" y="0.06095199999999994" z="0"/>
+  </component>
+  <type name="bank65">
+    <component type="panel" idfillbyfirst="y" idstart="11534336" idstepbyrow="512">
+      <location>
+        <parameter name="r-position">
+          <value val="0.34939881768689485"/>
+        </parameter>
+        <parameter name="t-position">
+          <value val="12.501561102543636"/>
+        </parameter>
+        <parameter name="roty">
+          <value val="12.501561102543636"/>
+        </parameter>
+      </location>
+    </component>
+  </type>
+
+  <component type="bank66">
+    <location x="0" y="0.1828559999999998" z="0"/>
+  </component>
+  <type name="bank66">
+    <component type="panel" idfillbyfirst="y" idstart="11796480" idstepbyrow="512">
+      <location>
+        <parameter name="r-position">
+          <value val="0.34939881768689485"/>
+        </parameter>
+        <parameter name="t-position">
+          <value val="12.501561102543636"/>
+        </parameter>
+        <parameter name="roty">
+          <value val="12.501561102543636"/>
+        </parameter>
+      </location>
+    </component>
+  </type>
+
+  <component type="bank67">
+    <location x="0" y="0.3047599999999997" z="0"/>
+  </component>
+  <type name="bank67">
+    <component type="panel" idfillbyfirst="y" idstart="12058624" idstepbyrow="512">
+      <location>
+        <parameter name="r-position">
+          <value val="0.34939881768689485"/>
+        </parameter>
+        <parameter name="t-position">
+          <value val="12.501561102543636"/>
+        </parameter>
+        <parameter name="roty">
+          <value val="12.501561102543636"/>
+        </parameter>
+      </location>
+    </component>
+  </type>
+
+  <component type="bank68">
+    <location x="0" y="0.42666399999999954" z="0"/>
+  </component>
+  <type name="bank68">
+    <component type="panel" idfillbyfirst="y" idstart="12320768" idstepbyrow="512">
+      <location>
+        <parameter name="r-position">
+          <value val="0.34939881768689485"/>
+        </parameter>
+        <parameter name="t-position">
+          <value val="12.501561102543636"/>
+        </parameter>
+        <parameter name="roty">
+          <value val="12.501561102543636"/>
+        </parameter>
+      </location>
+    </component>
+  </type>
+
+  <component type="bank71">
+    <location x="0" y="-0.42666399999999954" z="0"/>
+  </component>
+  <type name="bank71">
+    <component type="panel" idfillbyfirst="y" idstart="12582912" idstepbyrow="512">
+      <location>
+        <parameter name="r-position">
+          <value val="0.34939881768689485"/>
+        </parameter>
+        <parameter name="t-position">
+          <value val="32.11475168844916"/>
+        </parameter>
+        <parameter name="roty">
+          <value val="32.11475168844916"/>
+        </parameter>
+      </location>
+    </component>
+  </type>
+
+  <component type="bank72">
+    <location x="0" y="-0.3047599999999997" z="0"/>
+  </component>
+  <type name="bank72">
+    <component type="panel" idfillbyfirst="y" idstart="12845056" idstepbyrow="512">
+      <location>
+        <parameter name="r-position">
+          <value val="0.34939881768689485"/>
+        </parameter>
+        <parameter name="t-position">
+          <value val="32.11475168844916"/>
+        </parameter>
+        <parameter name="roty">
+          <value val="32.11475168844916"/>
+        </parameter>
+      </location>
+    </component>
+  </type>
+
+  <component type="bank73">
+    <location x="0" y="-0.1828559999999998" z="0"/>
+  </component>
+  <type name="bank73">
+    <component type="panel" idfillbyfirst="y" idstart="13107200" idstepbyrow="512">
+      <location>
+        <parameter name="r-position">
+          <value val="0.34939881768689485"/>
+        </parameter>
+        <parameter name="t-position">
+          <value val="32.11475168844916"/>
+        </parameter>
+        <parameter name="roty">
+          <value val="32.11475168844916"/>
+        </parameter>
+      </location>
+    </component>
+  </type>
+
+  <component type="bank74">
+    <location x="0" y="-0.06095199999999994" z="0"/>
+  </component>
+  <type name="bank74">
+    <component type="panel" idfillbyfirst="y" idstart="13369344" idstepbyrow="512">
+      <location>
+        <parameter name="r-position">
+          <value val="0.34939881768689485"/>
+        </parameter>
+        <parameter name="t-position">
+          <value val="32.11475168844916"/>
+        </parameter>
+        <parameter name="roty">
+          <value val="32.11475168844916"/>
+        </parameter>
+      </location>
+    </component>
+  </type>
+
+  <component type="bank75">
+    <location x="0" y="0.06095199999999994" z="0"/>
+  </component>
+  <type name="bank75">
+    <component type="panel" idfillbyfirst="y" idstart="13631488" idstepbyrow="512">
+      <location>
+        <parameter name="r-position">
+          <value val="0.34939881768689485"/>
+        </parameter>
+        <parameter name="t-position">
+          <value val="32.11475168844916"/>
+        </parameter>
+        <parameter name="roty">
+          <value val="32.11475168844916"/>
+        </parameter>
+      </location>
+    </component>
+  </type>
+
+  <component type="bank76">
+    <location x="0" y="0.1828559999999998" z="0"/>
+  </component>
+  <type name="bank76">
+    <component type="panel" idfillbyfirst="y" idstart="13893632" idstepbyrow="512">
+      <location>
+        <parameter name="r-position">
+          <value val="0.34939881768689485"/>
+        </parameter>
+        <parameter name="t-position">
+          <value val="32.11475168844916"/>
+        </parameter>
+        <parameter name="roty">
+          <value val="32.11475168844916"/>
+        </parameter>
+      </location>
+    </component>
+  </type>
+
+  <component type="bank77">
+    <location x="0" y="0.3047599999999997" z="0"/>
+  </component>
+  <type name="bank77">
+    <component type="panel" idfillbyfirst="y" idstart="14155776" idstepbyrow="512">
+      <location>
+        <parameter name="r-position">
+          <value val="0.34939881768689485"/>
+        </parameter>
+        <parameter name="t-position">
+          <value val="32.11475168844916"/>
+        </parameter>
+        <parameter name="roty">
+          <value val="32.11475168844916"/>
+        </parameter>
+      </location>
+    </component>
+  </type>
+
+  <component type="bank78">
+    <location x="0" y="0.42666399999999954" z="0"/>
+  </component>
+  <type name="bank78">
+    <component type="panel" idfillbyfirst="y" idstart="14417920" idstepbyrow="512">
+      <location>
+        <parameter name="r-position">
+          <value val="0.34939881768689485"/>
+        </parameter>
+        <parameter name="t-position">
+          <value val="32.11475168844916"/>
+        </parameter>
+        <parameter name="roty">
+          <value val="32.11475168844916"/>
+        </parameter>
+      </location>
+    </component>
+  </type>
+
+  <component type="bank81">
+    <location x="0" y="-0.42666399999999954" z="0"/>
+  </component>
+  <type name="bank81">
+    <component type="panel" idfillbyfirst="y" idstart="14680064" idstepbyrow="512">
+      <location>
+        <parameter name="r-position">
+          <value val="0.34939881768689485"/>
+        </parameter>
+        <parameter name="t-position">
+          <value val="51.72623201578324"/>
+        </parameter>
+        <parameter name="roty">
+          <value val="51.72623201578324"/>
+        </parameter>
+      </location>
+    </component>
+  </type>
+
+  <component type="bank82">
+    <location x="0" y="-0.3047599999999997" z="0"/>
+  </component>
+  <type name="bank82">
+    <component type="panel" idfillbyfirst="y" idstart="14942208" idstepbyrow="512">
+      <location>
+        <parameter name="r-position">
+          <value val="0.34939881768689485"/>
+        </parameter>
+        <parameter name="t-position">
+          <value val="51.72623201578324"/>
+        </parameter>
+        <parameter name="roty">
+          <value val="51.72623201578324"/>
+        </parameter>
+      </location>
+    </component>
+  </type>
+
+  <component type="bank83">
+    <location x="0" y="-0.1828559999999998" z="0"/>
+  </component>
+  <type name="bank83">
+    <component type="panel" idfillbyfirst="y" idstart="15204352" idstepbyrow="512">
+      <location>
+        <parameter name="r-position">
+          <value val="0.34939881768689485"/>
+        </parameter>
+        <parameter name="t-position">
+          <value val="51.72623201578324"/>
+        </parameter>
+        <parameter name="roty">
+          <value val="51.72623201578324"/>
+        </parameter>
+      </location>
+    </component>
+  </type>
+
+  <component type="bank84">
+    <location x="0" y="-0.06095199999999994" z="0"/>
+  </component>
+  <type name="bank84">
+    <component type="panel" idfillbyfirst="y" idstart="15466496" idstepbyrow="512">
+      <location>
+        <parameter name="r-position">
+          <value val="0.34939881768689485"/>
+        </parameter>
+        <parameter name="t-position">
+          <value val="51.72623201578324"/>
+        </parameter>
+        <parameter name="roty">
+          <value val="51.72623201578324"/>
+        </parameter>
+      </location>
+    </component>
+  </type>
+
+  <component type="bank85">
+    <location x="0" y="0.06095199999999994" z="0"/>
+  </component>
+  <type name="bank85">
+    <component type="panel" idfillbyfirst="y" idstart="15728640" idstepbyrow="512">
+      <location>
+        <parameter name="r-position">
+          <value val="0.34939881768689485"/>
+        </parameter>
+        <parameter name="t-position">
+          <value val="51.72623201578324"/>
+        </parameter>
+        <parameter name="roty">
+          <value val="51.72623201578324"/>
+        </parameter>
+      </location>
+    </component>
+  </type>
+
+  <component type="bank86">
+    <location x="0" y="0.1828559999999998" z="0"/>
+  </component>
+  <type name="bank86">
+    <component type="panel" idfillbyfirst="y" idstart="15990784" idstepbyrow="512">
+      <location>
+        <parameter name="r-position">
+          <value val="0.34939881768689485"/>
+        </parameter>
+        <parameter name="t-position">
+          <value val="51.72623201578324"/>
+        </parameter>
+        <parameter name="roty">
+          <value val="51.72623201578324"/>
+        </parameter>
+      </location>
+    </component>
+  </type>
+
+  <component type="bank87">
+    <location x="0" y="0.3047599999999997" z="0"/>
+  </component>
+  <type name="bank87">
+    <component type="panel" idfillbyfirst="y" idstart="16252928" idstepbyrow="512">
+      <location>
+        <parameter name="r-position">
+          <value val="0.34939881768689485"/>
+        </parameter>
+        <parameter name="t-position">
+          <value val="51.72623201578324"/>
+        </parameter>
+        <parameter name="roty">
+          <value val="51.72623201578324"/>
+        </parameter>
+      </location>
+    </component>
+  </type>
+
+  <component type="bank88">
+    <location x="0" y="0.42666399999999954" z="0"/>
+  </component>
+  <type name="bank88">
+    <component type="panel" idfillbyfirst="y" idstart="16515072" idstepbyrow="512">
+      <location>
+        <parameter name="r-position">
+          <value val="0.34939881768689485"/>
+        </parameter>
+        <parameter name="t-position">
+          <value val="51.72623201578324"/>
+        </parameter>
+        <parameter name="roty">
+          <value val="51.72623201578324"/>
+        </parameter>
+      </location>
+    </component>
+  </type>
+
+  <component type="bank91">
+    <location x="0" y="-0.42666399999999954" z="0"/>
+  </component>
+  <type name="bank91">
+    <component type="panel" idfillbyfirst="y" idstart="16777216" idstepbyrow="512">
+      <location>
+        <parameter name="r-position">
+          <value val="0.34939881768689485"/>
+        </parameter>
+        <parameter name="t-position">
+          <value val="71.35245618781975"/>
+        </parameter>
+        <parameter name="roty">
+          <value val="71.35245618781975"/>
+        </parameter>
+      </location>
+    </component>
+  </type>
+
+  <component type="bank92">
+    <location x="0" y="-0.3047599999999997" z="0"/>
+  </component>
+  <type name="bank92">
+    <component type="panel" idfillbyfirst="y" idstart="17039360" idstepbyrow="512">
+      <location>
+        <parameter name="r-position">
+          <value val="0.34939881768689485"/>
+        </parameter>
+        <parameter name="t-position">
+          <value val="71.35245618781975"/>
+        </parameter>
+        <parameter name="roty">
+          <value val="71.35245618781975"/>
+        </parameter>
+      </location>
+    </component>
+  </type>
+
+  <component type="bank93">
+    <location x="0" y="-0.1828559999999998" z="0"/>
+  </component>
+  <type name="bank93">
+    <component type="panel" idfillbyfirst="y" idstart="17301504" idstepbyrow="512">
+      <location>
+        <parameter name="r-position">
+          <value val="0.34939881768689485"/>
+        </parameter>
+        <parameter name="t-position">
+          <value val="71.35245618781975"/>
+        </parameter>
+        <parameter name="roty">
+          <value val="71.35245618781975"/>
+        </parameter>
+      </location>
+    </component>
+  </type>
+
+  <component type="bank94">
+    <location x="0" y="-0.06095199999999994" z="0"/>
+  </component>
+  <type name="bank94">
+    <component type="panel" idfillbyfirst="y" idstart="17563648" idstepbyrow="512">
+      <location>
+        <parameter name="r-position">
+          <value val="0.34939881768689485"/>
+        </parameter>
+        <parameter name="t-position">
+          <value val="71.35245618781975"/>
+        </parameter>
+        <parameter name="roty">
+          <value val="71.35245618781975"/>
+        </parameter>
+      </location>
+    </component>
+  </type>
+
+  <component type="bank95">
+    <location x="0" y="0.06095199999999994" z="0"/>
+  </component>
+  <type name="bank95">
+    <component type="panel" idfillbyfirst="y" idstart="17825792" idstepbyrow="512">
+      <location>
+        <parameter name="r-position">
+          <value val="0.34939881768689485"/>
+        </parameter>
+        <parameter name="t-position">
+          <value val="71.35245618781975"/>
+        </parameter>
+        <parameter name="roty">
+          <value val="71.35245618781975"/>
+        </parameter>
+      </location>
+    </component>
+  </type>
+
+  <component type="bank96">
+    <location x="0" y="0.1828559999999998" z="0"/>
+  </component>
+  <type name="bank96">
+    <component type="panel" idfillbyfirst="y" idstart="18087936" idstepbyrow="512">
+      <location>
+        <parameter name="r-position">
+          <value val="0.34939881768689485"/>
+        </parameter>
+        <parameter name="t-position">
+          <value val="71.35245618781975"/>
+        </parameter>
+        <parameter name="roty">
+          <value val="71.35245618781975"/>
+        </parameter>
+      </location>
+    </component>
+  </type>
+
+  <component type="bank97">
+    <location x="0" y="0.3047599999999997" z="0"/>
+  </component>
+  <type name="bank97">
+    <component type="panel" idfillbyfirst="y" idstart="18350080" idstepbyrow="512">
+      <location>
+        <parameter name="r-position">
+          <value val="0.34939881768689485"/>
+        </parameter>
+        <parameter name="t-position">
+          <value val="71.35245618781975"/>
+        </parameter>
+        <parameter name="roty">
+          <value val="71.35245618781975"/>
+        </parameter>
+      </location>
+    </component>
+  </type>
+
+  <component type="bank98">
+    <location x="0" y="0.42666399999999954" z="0"/>
+  </component>
+  <type name="bank98">
+    <component type="panel" idfillbyfirst="y" idstart="18612224" idstepbyrow="512">
+      <location>
+        <parameter name="r-position">
+          <value val="0.34939881768689485"/>
+        </parameter>
+        <parameter name="t-position">
+          <value val="71.35245618781975"/>
+        </parameter>
+        <parameter name="roty">
+          <value val="71.35245618781975"/>
+        </parameter>
+      </location>
+    </component>
+  </type>
+
+  <component type="bank101">
+    <location x="0" y="-0.42666399999999954" z="0"/>
+  </component>
+  <type name="bank101">
+    <component type="panel" idfillbyfirst="y" idstart="18874368" idstepbyrow="512">
+      <location>
+        <parameter name="r-position">
+          <value val="0.34939881768689485"/>
+        </parameter>
+        <parameter name="t-position">
+          <value val="90.96755097389406"/>
+        </parameter>
+        <parameter name="roty">
+          <value val="90.96755097389406"/>
+        </parameter>
+      </location>
+    </component>
+  </type>
+
+  <component type="bank102">
+    <location x="0" y="-0.3047599999999997" z="0"/>
+  </component>
+  <type name="bank102">
+    <component type="panel" idfillbyfirst="y" idstart="19136512" idstepbyrow="512">
+      <location>
+        <parameter name="r-position">
+          <value val="0.34939881768689485"/>
+        </parameter>
+        <parameter name="t-position">
+          <value val="90.96755097389406"/>
+        </parameter>
+        <parameter name="roty">
+          <value val="90.96755097389406"/>
+        </parameter>
+      </location>
+    </component>
+  </type>
+
+  <component type="bank103">
+    <location x="0" y="-0.1828559999999998" z="0"/>
+  </component>
+  <type name="bank103">
+    <component type="panel" idfillbyfirst="y" idstart="19398656" idstepbyrow="512">
+      <location>
+        <parameter name="r-position">
+          <value val="0.34939881768689485"/>
+        </parameter>
+        <parameter name="t-position">
+          <value val="90.96755097389406"/>
+        </parameter>
+        <parameter name="roty">
+          <value val="90.96755097389406"/>
+        </parameter>
+      </location>
+    </component>
+  </type>
+
+  <component type="bank104">
+    <location x="0" y="-0.06095199999999994" z="0"/>
+  </component>
+  <type name="bank104">
+    <component type="panel" idfillbyfirst="y" idstart="19660800" idstepbyrow="512">
+      <location>
+        <parameter name="r-position">
+          <value val="0.34939881768689485"/>
+        </parameter>
+        <parameter name="t-position">
+          <value val="90.96755097389406"/>
+        </parameter>
+        <parameter name="roty">
+          <value val="90.96755097389406"/>
+        </parameter>
+      </location>
+    </component>
+  </type>
+
+  <component type="bank105">
+    <location x="0" y="0.06095199999999994" z="0"/>
+  </component>
+  <type name="bank105">
+    <component type="panel" idfillbyfirst="y" idstart="19922944" idstepbyrow="512">
+      <location>
+        <parameter name="r-position">
+          <value val="0.34939881768689485"/>
+        </parameter>
+        <parameter name="t-position">
+          <value val="90.96755097389406"/>
+        </parameter>
+        <parameter name="roty">
+          <value val="90.96755097389406"/>
+        </parameter>
+      </location>
+    </component>
+  </type>
+
+  <component type="bank106">
+    <location x="0" y="0.1828559999999998" z="0"/>
+  </component>
+  <type name="bank106">
+    <component type="panel" idfillbyfirst="y" idstart="20185088" idstepbyrow="512">
+      <location>
+        <parameter name="r-position">
+          <value val="0.34939881768689485"/>
+        </parameter>
+        <parameter name="t-position">
+          <value val="90.96755097389406"/>
+        </parameter>
+        <parameter name="roty">
+          <value val="90.96755097389406"/>
+        </parameter>
+      </location>
+    </component>
+  </type>
+
+  <component type="bank107">
+    <location x="0" y="0.3047599999999997" z="0"/>
+  </component>
+  <type name="bank107">
+    <component type="panel" idfillbyfirst="y" idstart="20447232" idstepbyrow="512">
+      <location>
+        <parameter name="r-position">
+          <value val="0.34939881768689485"/>
+        </parameter>
+        <parameter name="t-position">
+          <value val="90.96755097389406"/>
+        </parameter>
+        <parameter name="roty">
+          <value val="90.96755097389406"/>
+        </parameter>
+      </location>
+    </component>
+  </type>
+
+  <component type="bank108">
+    <location x="0" y="0.42666399999999954" z="0"/>
+  </component>
+  <type name="bank108">
+    <component type="panel" idfillbyfirst="y" idstart="20709376" idstepbyrow="512">
+      <location>
+        <parameter name="r-position">
+          <value val="0.34939881768689485"/>
+        </parameter>
+        <parameter name="t-position">
+          <value val="90.96755097389406"/>
+        </parameter>
+        <parameter name="roty">
+          <value val="90.96755097389406"/>
+        </parameter>
+      </location>
+    </component>
+  </type>
+
+<!-- Rectangular Detector Panel -->
+  <type name="panel" is="rectangular_detector" type="pixel"
+      xpixels="512" xstart="-0.06095199999999994" xstep="0.00023809374999999975"
+      ypixels="512" ystart="-0.06095199999999994" ystep="0.00023809374999999975" >
+    <properties/>
+  </type>
+
+  <!-- Pixel for Detectors-->
+  <type is="detector" name="pixel">
+    <cuboid id="pixel-shape">
+      <left-front-bottom-point y="-0.00023809374999999975" x="-0.00023809374999999975" z="0.0"/>
+      <left-front-top-point y="0.00023809374999999975" x="-0.00023809374999999975" z="0.0"/>
+      <left-back-bottom-point y="-0.00023809374999999975" x="-0.00023809374999999975" z="-0.0001"/>
+      <right-front-bottom-point y="0.00023809374999999975" x="0.00023809374999999975" z="0.0"/>
+    </cuboid>
+    <algebra val="pixel-shape"/>
+  </type>
+
+  <!-- Shape for Monitors-->
+  <!-- TODO: Update to real shape -->
+  <type is="monitor" name="monitor">
+    <cylinder id="some-shape">
+      <centre-of-bottom-base p="0.0" r="0.0" t="0.0"/>
+      <axis y="0.0" x="0.0" z="1.0"/>
+      <radius val="0.01"/>
+      <height val="0.03"/>
+    </cylinder>
+    <algebra val="some-shape"/>
+  </type>
+
+</instrument>
