@@ -23,8 +23,8 @@
 #include "MantidKernel/Material.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/Timer.h"
-#include <Poco/File.h>
 #include <cxxtest/TestSuite.h>
+#include <filesystem>
 #include <fstream>
 
 using namespace Mantid;
@@ -164,7 +164,7 @@ public:
 
     // Get the file
     outfile = alg.getPropertyValue("Filename");
-    TS_ASSERT(Poco::File(outfile).exists());
+    TS_ASSERT(std::filesystem::exists(outfile));
 
     std::ifstream in(outfile.c_str());
     double h, k, l, fsw, sigmafsq, histnum, wl, tbar, dir_cos_1_x, dir_cos_2_x, dir_cos_1_y, dir_cos_2_y, dir_cos_1_z,
@@ -206,8 +206,8 @@ public:
     TS_ASSERT_DELTA(dir_cos_2_y, dir_cos_2[1], 1e-3);
     TS_ASSERT_DELTA(dir_cos_2_z, dir_cos_2[2], 1e-3);
 
-    if (Poco::File(outfile).exists())
-      Poco::File(outfile).remove();
+    if (std::filesystem::exists(outfile))
+      std::filesystem::remove(outfile);
   }
 
 private:
@@ -255,7 +255,7 @@ private:
 
     // Get the file
     outfile = alg.getPropertyValue("Filename");
-    TS_ASSERT(Poco::File(outfile).exists());
+    TS_ASSERT(std::filesystem::exists(outfile));
     return outfile;
   }
 
@@ -284,7 +284,7 @@ private:
     TS_ASSERT_EQUALS(d14, 3.5933);
     in.close();
 
-    if (Poco::File(filepath).exists())
-      Poco::File(filepath).remove();
+    if (std::filesystem::exists(filepath))
+      std::filesystem::remove(filepath);
   }
 };
