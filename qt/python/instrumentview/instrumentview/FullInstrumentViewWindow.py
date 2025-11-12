@@ -221,7 +221,7 @@ class FullInstrumentViewWindow(QMainWindow):
         self._overlay_meshes = []
         self._lineplot_overlays = []
 
-        self._current_widget = None
+        self._current_widget = CylinderWidgetNoRotation()
 
         # self.main_plotter.add_box_widget(lambda x: None)
 
@@ -239,6 +239,7 @@ class FullInstrumentViewWindow(QMainWindow):
         self.status_group_box.hide()
 
     def reset_camera(self) -> None:
+        self._current_widget.Off()
         if not self._off_screen:
             self.main_plotter.reset_camera()
 
@@ -463,6 +464,7 @@ class FullInstrumentViewWindow(QMainWindow):
     def add_detector_mesh(self, mesh: PolyData, is_projection: bool, scalars=None) -> None:
         """Draw the given mesh in the main plotter window"""
         self.main_plotter.clear()
+        self._current_widget.Off()
         self.main_plotter.add_mesh(mesh, pickable=False, scalars=scalars, render_points_as_spheres=True, point_size=15)
 
         if not self.main_plotter.off_screen:
@@ -472,6 +474,8 @@ class FullInstrumentViewWindow(QMainWindow):
             self.main_plotter.view_xy()
             if not self.main_plotter.off_screen:
                 self.main_plotter.enable_zoom_style()
+
+        self.reset_camera()
 
     def add_pickable_mesh(self, point_cloud: PolyData, scalars: np.ndarray | str) -> None:
         self.main_plotter.add_mesh(
@@ -490,13 +494,30 @@ class FullInstrumentViewWindow(QMainWindow):
         self.main_plotter.add_mesh(mesh, color=(0.25, 0.25, 0.25), pickable=False, render_points_as_spheres=True, point_size=15)
 
     def add_cylinder_widget(self, bounds, callback) -> None:
-        cylinder_widget = CylinderWidgetNoRotation()
         cylinder_repr = vtkImplicitCylinderRepresentation()
-        cylinder_repr.SetRadius(50)
-        cylinder_repr.SetWidgetBounds(bounds)
-        cylinder_repr.SetAxis([0, 0, 1])
         cylinder_repr.SetOutlineTranslation(False)
         cylinder_repr.GetOutlineProperty().SetOpacity(0)
+
+        # NOTE: For 2D projections, camera view is always perpendicular to Z axis
+        cylinder_repr.SetAxis([0, 0, 1])
+        # TODO: Find a better way than using fixed bounds
+        bounds = np.array(bounds)
+        fixed_bounds = np.array([-10, 10, -10, 10, -10, 10])
+        fixed_bounds[bounds == 0] = 0
+        cylinder_repr.SetWidgetBounds(list(fixed_bounds))
+
+        # NOTE: Currently method below hides center as well
+        # TODO: Make PR on VTK to fix this
+        # cylinder_repr.GetAxisProperty().SetOpacity(0)
+
+        # NOTE: Tried to iterate over actors in representation
+        # But did not work to hide axis because it's not a poly data object
+        # i.e. actors inside representation have no geometry that we can modify
+
+        # NOTE: Tried to cahnge the bounds of the outline box
+        # but the axis arrow has a minimum size allowed
+
+        cylinder_widget = CylinderWidgetNoRotation()
         cylinder_widget.SetRepresentation(cylinder_repr)
         cylinder_widget.SetCurrentRenderer(self.main_plotter.renderer)
         cylinder_widget.SetInteractor(self.main_plotter.iren.interactor)
