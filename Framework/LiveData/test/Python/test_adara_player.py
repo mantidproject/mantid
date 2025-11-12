@@ -437,6 +437,19 @@ class Test_Player(unittest.TestCase):
         finally:
             filepath.unlink()
 
+    def test_packet_filename_sequence_number(self):
+        """
+        Validates that successive calls to _packet_filename with increasing sequence numbers
+        yield distinct filenames, and the naming scheme follows the expected pattern.
+        """
+        dummy_packet = MagicMock(spec=Packet)
+        dummy_packet.packet_type = Packet.Type.BANKED_EVENT_TYPE
+        dummy_packet.timestamp = 123456
+        expected_names = ["0x4000-123456-000001.adara", "0x4000-123456-000002.adara", "0x4000-123456-000003.adara"]
+        for i, expected in zip([1, 2, 3], expected_names):
+            fname = Player._packet_filename(dummy_packet, i)
+            self.assertEqual(fname, expected)
+
     def test_cleanup_all_sockets_closed(self):
         """Verifies closure and cleanup logic for all held sockets."""
         with tempfile.TemporaryDirectory() as tmpdir:

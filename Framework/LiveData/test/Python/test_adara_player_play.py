@@ -232,7 +232,7 @@ class Test_Player_play(unittest.TestCase):
                 player.play(test_path, test_pattern)
 
                 # Verify stream_packets was called with correct arguments
-                mock_stream.assert_called_once_with(test_path, test_pattern, mock_client_socket)
+                mock_stream.assert_called_once_with(test_path, test_pattern, mock_client_socket, dry_run=False)
 
     def test_buffer_prefill_and_stream(self):
         """
@@ -271,9 +271,9 @@ class Test_Player_play(unittest.TestCase):
             signal.alarm(5)  # 5 second timeout
 
             try:
-                # Mock Packet.iter_files to return our test packets
+                # Mock Player.iter_files to return our test packets
                 with (
-                    patch.object(Packet, "iter_files", return_value=iter(mock_packets)),
+                    patch.object(Player, "iter_files", return_value=iter(mock_packets)),
                     patch("select.select", return_value=([], [mock_socket], [])),
                     patch.object(Packet, "to_socket") as mock_to_socket,
                 ):
@@ -321,7 +321,7 @@ class Test_Player_play(unittest.TestCase):
 
             try:
                 # Mock empty packet iterator
-                with patch.object(Packet, "iter_files", return_value=iter([])):
+                with patch.object(Player, "iter_files", return_value=iter([])):
                     # Should handle gracefully (no exception)
                     player._running = True
                     player.stream_packets(Path("/fake"), "*.adara", mock_socket)
@@ -378,7 +378,7 @@ class Test_Player_play(unittest.TestCase):
                 # Mock select to indicate socket is readable (unexpected data)
                 with (
                     patch("select.select", return_value=([mock_socket], [mock_socket], [])),
-                    patch.object(Packet, "iter_files", return_value=iter([mock_packet])),
+                    patch.object(Player, "iter_files", return_value=iter([mock_packet])),
                     patch.object(Packet, "from_socket", return_value=unexpected_packet),
                     patch.object(Packet, "to_socket"),
                     patch("adara_player._logger") as mock_logger,
@@ -437,7 +437,7 @@ class Test_Player_play(unittest.TestCase):
             try:
                 with (
                     patch("select.select", side_effect=select_results),
-                    patch.object(Packet, "iter_files", return_value=iter([mock_packet])),
+                    patch.object(Player, "iter_files", return_value=iter([mock_packet])),
                     patch.object(Packet, "to_socket") as mock_send,
                     patch("time.sleep") as mock_sleep,
                 ):

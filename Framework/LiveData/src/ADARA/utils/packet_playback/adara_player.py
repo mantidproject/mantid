@@ -671,6 +671,9 @@ class Player:
             self._cleanup()
 
     def record(self, output_path: Path):
+        # Ensure target base directory exists
+        output_path.mkdir(parents=True, exist_ok=True)
+
         # Main server loop
         try:
             self._running = True
@@ -800,7 +803,7 @@ class Player:
     @classmethod
     def _packet_filename(cls, packet: Packet, sequence_number: int) -> str:
         # Device descriptor (and other) packet types may have a non-unique timestamp,
-        #   so the sequence number is used as an additional suffix in order to generate a unique filename.
+        #   so the sequence number is used as an additional suffix in the filename.
         return f"{packet.packet_type:#06x}-{packet.timestamp}-{sequence_number:06d}" + ".adara"
 
     def _impose_transfer_limit(self, pkt: Packet):
