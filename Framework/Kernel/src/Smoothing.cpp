@@ -18,7 +18,7 @@ namespace Mantid::Kernel::Smoothing {
 namespace detail {
 template <typename T> struct Averager {
   /** A small ABC to represent taking an average over a few values */
-  Averager() : total(0), npts(0) {}
+  Averager() : m_total(0), m_npts(0) {}
   /** A function returning a "term" in the average
    * @param x the input value, from which the term is computed
    * @returns the term, calculated from x
@@ -33,8 +33,8 @@ template <typename T> struct Averager {
    */
   virtual void accumulate(T const &x) {
     if (!std::isnan(x)) {
-      total += term(x);
-      npts++;
+      m_total += term(x);
+      m_npts++;
     }
   }
   /** Remove values from the average
@@ -42,47 +42,47 @@ template <typename T> struct Averager {
    */
   virtual void separate(T const &x) {
     if (!std::isnan(x)) {
-      total -= term(x);
-      npts--;
+      m_total -= term(x);
+      m_npts--;
     }
   }
 
 protected:
-  T total;
-  unsigned int npts;
+  T m_total;
+  unsigned int m_npts;
 };
 
 /** Represents taking the arithmetic mean */
 template <typename T> struct ArithmeticAverager : public Averager<T> {
   T term(T const &x) const override { return x; }
-  T getAverage() const override { return this->total / this->npts; }
+  T getAverage() const override { return this->m_total / this->m_npts; }
 };
 
 /** Represents propagating errors for values which had been arithmetically averaged */
 template <typename T> struct ErrorPropagationAverager : public Averager<T> {
   T term(T const &x) const override { return x * x; }
-  T getAverage() const override { return std::sqrt(std::abs(this->total)) / this->npts; }
+  T getAverage() const override { return std::sqrt(std::abs(this->m_total)) / this->m_npts; }
 };
 
 /** Represents taking the root-mean-square averaege */
 template <typename T> struct SumSquareAverager : public Averager<T> {
   T term(T const &x) const override { return x * x; }
-  T getAverage() const override { return std::sqrt(std::abs(this->total) / this->npts); }
+  T getAverage() const override { return std::sqrt(std::abs(this->m_total) / this->m_npts); }
 };
 
 /** Represents taking the geometric mean */
 template <typename T> struct GeometricAverager : public Averager<T> {
-  GeometricAverager() { this->total = T(1); }
+  GeometricAverager() { this->m_total = T(1); }
   void accumulate(T const &x) override {
     if (x != T(0) && !std::isnan(x)) {
-      this->total *= term(x);
-      this->npts++;
+      this->m_total *= term(x);
+      this->m_npts++;
     }
   }
   void separate(T const &x) override {
     if (x != T(0) && !std::isnan(x)) {
-      this->total /= term(x);
-      this->npts--;
+      this->m_total /= term(x);
+      this->m_npts--;
     }
   }
   T term(T const &x) const override { return x; }
@@ -171,11 +171,11 @@ template <typename Y> struct ZeroFilter : public FFTFilter<Y> {
   // remove the higher frequencies by setting to zero
   // REF: see example code at
   // - https://www.gnu.org/software/gsl/doc/html/fft.html#overview-of-real-data-f
-  ZeroFilter(std::size_t n) : cutoff(n) {}
-  Y operator()(std::size_t index) const override { return (index >= cutoff ? 0 : 1); }
+  ZeroFilter(std::size_t n) : m_cutoff(n) {}
+  Y operator()(std::size_t index) const override { return (index >= m_cutoff ? 0 : 1); }
 
 private:
-  std::size_t cutoff;
+  std::size_t m_cutoff;
 };
 
 template <typename Y> struct ButterworthFilter : public FFTFilter<Y> {
@@ -184,14 +184,14 @@ template <typename Y> struct ButterworthFilter : public FFTFilter<Y> {
   // - https://scikit-image.org/docs/0.25.x/api/skimage.filters.html#skimage.filters.butterworth
   // - https://isbweb.org/software/sigproc/bogert/filter.pdf
   // - https://users.cs.cf.ac.uk/dave/Vision_lecture/node22.html
-  ButterworthFilter(unsigned n, unsigned o) : two_order(2U * o), invcutoff(1.0 / static_cast<Y>(n)) {}
+  ButterworthFilter(unsigned n, unsigned o) : m_two_order(2U * o), m_invcutoff(1.0 / static_cast<Y>(n)) {}
   Y operator()(std::size_t index) const override {
-    return 1.0 / (1.0 + std::pow(invcutoff * static_cast<Y>(index), two_order));
+    return 1.0 / (1.0 + std::pow(m_invcutoff * static_cast<Y>(index), m_two_order));
   }
 
 private:
-  unsigned two_order;
-  Y invcutoff;
+  unsigned m_two_order;
+  Y m_invcutoff;
 };
 
 template <typename Y> std::vector<Y> fftSmoothWithFilter(std::vector<Y> const &input, FFTFilter<Y> const &filter) {
@@ -202,7 +202,7 @@ template <typename Y> std::vector<Y> fftSmoothWithFilter(std::vector<Y> const &i
   Kernel::fft::real_ws_uptr real_ws = Kernel::fft::make_gsl_real_workspace(dn);
   Kernel::fft::real_wt_uptr real_wt = Kernel::fft::make_gsl_real_wavetable(dn);
   gsl_fft_real_transform(output.data(), 1, dn, real_wt.get(), real_ws.get());
-  real_wt.reset();
+  real_wt.reset(); // wavetable no longer needed
 
   // NOTE: the halfcomplex storage requires special treatment of even/odd
   // NOTE: we cannot use GSL's unpack because these values would have to be altered and then re-packed
@@ -222,8 +222,8 @@ template <typename Y> std::vector<Y> fftSmoothWithFilter(std::vector<Y> const &i
   // transform back
   Kernel::fft::hc_wt_uptr hc_wt = Kernel::fft::make_gsl_hc_wavetable(dn);
   gsl_fft_halfcomplex_inverse(output.data(), 1, dn, hc_wt.get(), real_ws.get());
-  hc_wt.reset();
-  real_ws.reset();
+  hc_wt.reset();   // wavetable no longer needed
+  real_ws.reset(); // workspace no longer needed
 
   // return the smoothed result
   return output;
@@ -233,9 +233,10 @@ template <typename Y> std::vector<Y> fftSmoothWithFilter(std::vector<Y> const &i
 
 template <typename Y> std::vector<Y> fftSmooth(std::vector<Y> const &input, unsigned const cutoff) {
   if (cutoff == 0) {
-    throw std::invalid_argument("The cutoff frequency must be greater than zero");
+    throw std::invalid_argument("The cutoff frequency must be greater than zero (" + std::to_string(cutoff) + " <= 0)");
   } else if (cutoff > input.size()) {
-    throw std::invalid_argument("The cutoff frequency must be less than the array size");
+    throw std::invalid_argument("The cutoff frequency must be less than the array size( " + std::to_string(cutoff) +
+                                " > " + std::to_string(input.size()) + ")");
   }
 
   fft::ZeroFilter<Y> filter(cutoff);
@@ -245,10 +246,15 @@ template <typename Y> std::vector<Y> fftSmooth(std::vector<Y> const &input, unsi
 template <typename Y>
 std::vector<Y> fftButterworthSmooth(std::vector<Y> const &input, unsigned const cutoff, unsigned const order) {
   if (cutoff == 0) {
-    throw std::invalid_argument("The cutoff frequency must be greater than zero");
+    throw std::invalid_argument("The Butterworth cutoff frequency must be greater than zero (" +
+                                std::to_string(cutoff) + " <= 0)");
   }
   if (cutoff > input.size()) {
-    throw std::invalid_argument("The Butterworth cutoff frequency must be less than the array size");
+    throw std::invalid_argument("The Butterworth cutoff frequency must be less than the array size (" +
+                                std::to_string(cutoff) + " > " + std::to_string(input.size()) + ")");
+  }
+  if (order < 1) {
+    throw std::invalid_argument("The Butterworth order must be nonzero (" + std::to_string(order) + " <= 0)");
   }
 
   fft::ButterworthFilter<Y> filter(cutoff, order);

@@ -113,6 +113,16 @@ public:
 
   // FFT SMOOTHING
 
+  void test_fftSmooth_invalid() {
+    int N = 10;
+    int zero_cutoff = 0, large_cutoff = N + 1;
+    std::vector<double> input(N, 1);
+    TS_ASSERT_THROWS_ASSERT(fftSmooth(input, zero_cutoff), std::invalid_argument const &e,
+                            TS_ASSERT(strstr(e.what(), "zero")));
+    TS_ASSERT_THROWS_ASSERT(fftSmooth(input, large_cutoff), std::invalid_argument const &e,
+                            TS_ASSERT(strstr(e.what(), "array size")));
+  }
+
   void test_fftSmooth_flat() {
     // put flat signal in, get flat signal back out
     double const flatValue = 3.0;
@@ -194,6 +204,19 @@ public:
   }
 
   // butterworth
+
+  void test_fftButterworthSmooth_invalid() {
+    int N = 10;
+    int zero_cutoff = 0, large_cutoff = N + 1, good_cutoff = N / 2;
+    int zero_order = 0, good_order = 1;
+    std::vector<double> input(N, 1);
+    TS_ASSERT_THROWS_ASSERT(fftButterworthSmooth(input, zero_cutoff, good_order), std::invalid_argument const &e,
+                            TS_ASSERT(strstr(e.what(), "zero")));
+    TS_ASSERT_THROWS_ASSERT(fftButterworthSmooth(input, large_cutoff, good_order), std::invalid_argument const &e,
+                            TS_ASSERT(strstr(e.what(), "array size")));
+    TS_ASSERT_THROWS_ASSERT(fftButterworthSmooth(input, good_cutoff, zero_order), std::invalid_argument const &e,
+                            TS_ASSERT(strstr(e.what(), "nonzero")));
+  }
 
   void test_fftButterworthSmooth_flat() {
     // put flat signal in, get flat signal back out
