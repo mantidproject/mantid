@@ -571,6 +571,7 @@ set(TEST_FILES
     MoveInstrumentComponentTest.h
     ORNLDataArchiveTest.h
     PDLoadCharacterizationsTest.h
+    ProcessEventsTaskTest.h
     PulseIndexerTest.h
     RawFileInfoTest.h
     ReadMaterialTest.h
