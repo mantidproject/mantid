@@ -121,7 +121,6 @@ class FullInstrumentViewPresenter:
 
         self.set_view_contour_limits()
         self.set_view_integration_limits()
-        self._view.reset_camera()
 
     def update_detector_picker(self) -> None:
         """Change between single and multi point picking"""

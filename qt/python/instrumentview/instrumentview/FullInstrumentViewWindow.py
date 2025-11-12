@@ -222,6 +222,7 @@ class FullInstrumentViewWindow(QMainWindow):
         self._lineplot_overlays = []
 
         self._current_widget = CylinderWidgetNoRotation()
+        self._projection_camera_map = {}
 
         # self.main_plotter.add_box_widget(lambda x: None)
 
@@ -239,9 +240,8 @@ class FullInstrumentViewWindow(QMainWindow):
         self.status_group_box.hide()
 
     def reset_camera(self) -> None:
-        self._current_widget.Off()
         if not self._off_screen:
-            self.main_plotter.reset_camera()
+            self.main_plotter.camera_position = self._projection_camera_map[self.current_selected_projection()]
 
     def _add_min_max_group_box(self, parent_box: QGroupBox) -> tuple[QLineEdit, QLineEdit, QDoubleRangeSlider]:
         """Creates a minimum and a maximum box (with labels) inside the given group box. The callbacks will be attached to textEdited
@@ -464,7 +464,6 @@ class FullInstrumentViewWindow(QMainWindow):
     def add_detector_mesh(self, mesh: PolyData, is_projection: bool, scalars=None) -> None:
         """Draw the given mesh in the main plotter window"""
         self.main_plotter.clear()
-        self._current_widget.Off()
         self.main_plotter.add_mesh(mesh, pickable=False, scalars=scalars, render_points_as_spheres=True, point_size=15)
 
         if not self.main_plotter.off_screen:
@@ -475,6 +474,8 @@ class FullInstrumentViewWindow(QMainWindow):
             if not self.main_plotter.off_screen:
                 self.main_plotter.enable_zoom_style()
 
+        if self.current_selected_projection() not in self._projection_camera_map.keys():
+            self._projection_camera_map[self.current_selected_projection()] = self.main_plotter.camera_position
         self.reset_camera()
 
     def add_pickable_mesh(self, point_cloud: PolyData, scalars: np.ndarray | str) -> None:
