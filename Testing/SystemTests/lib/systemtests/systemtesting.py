@@ -334,7 +334,7 @@ class MantidSystemTest(unittest.TestCase):
 
             if not (self.validateWorkspaces(valPair, mismatchName)):
                 validationResult = False
-                print("Workspace {0} not equal to its reference file".format(valname))
+                print(f"Workspace {valname} not equal to its reference file, {refname}")
 
         return validationResult
 
