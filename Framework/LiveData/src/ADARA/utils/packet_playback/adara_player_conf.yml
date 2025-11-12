@@ -33,7 +33,7 @@ record:
   transfer_limit: 16000 # MB
 
 logging:
-  level: DEBUG # DEBUG: packet summary at send and receive
+  level: INFO # DEBUG: packet summary at send and receive
 
   # `Packet` summary format.
-  packet_summary: "type: {type:#06x}: {timestamp}, size: {size_MB:.2f} MB, CRC: {CRC:#010x}"
+  packet_summary: "type: {type:#06x}: {timestamp}, size: {size:>7}, CRC: {CRC:#010x}"

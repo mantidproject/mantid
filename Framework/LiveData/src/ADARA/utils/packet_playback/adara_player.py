@@ -1,5 +1,6 @@
 import collections
 from enum import IntEnum, StrEnum
+import errno
 import itertools
 import logging
 import numpy as np
@@ -234,8 +235,15 @@ class Packet:
         return self._pulseid
 
     def __str__(self) -> str:
-        MB = 1024**2
-        return self.STR_FORMAT.format(type=self.packet_type, timestamp=self.timestamp, size_MB=self.size / MB, CRC=self.CRC)
+        KB = 1024
+        MB = 1024 * 1024
+        if self.size >= MB:
+            size_str = f"{self.size / MB:6.2f} MB"
+        elif self.size >= KB:
+            size_str = f"{self.size // KB:5d} KB"
+        else:
+            size_str = f"{self.size:5d}  B"
+        return self.STR_FORMAT.format(type=self.packet_type, timestamp=self.timestamp, size=size_str, CRC=self.CRC)
 
     @classmethod
     def create_header(self, *, payload_len, packet_type, tv_sec, tv_nsec):
@@ -300,6 +308,11 @@ class Packet:
                 if not chunk:
                     raise ConnectionError(f"Socket connection closed after receiving {len(data)} of {num_bytes} bytes")
                 data += chunk
+            except socket.error as e:
+                if e.errno in (errno.EAGAIN, errno.EWOULDBLOCK):
+                    continue  # Just retry, DO NOT break or lose track
+                else:
+                    raise
             except socket.timeout:
                 # Re-raise timeout with context about partial transfer
                 raise socket.timeout(f"Socket timeout after receiving {len(data)} of {num_bytes} bytes")
@@ -315,6 +328,11 @@ class Packet:
                 if sent == 0:
                     raise ConnectionError("Socket connection broken")
                 total_sent += sent
+            except socket.error as e:
+                if e.errno in (errno.EAGAIN, errno.EWOULDBLOCK):
+                    continue  # Retry the send, DO NOT break or lose track
+                else:
+                    raise
             except socket.timeout:
                 # Re-raise timeout with context about partial transfer
                 raise socket.timeout(f"Socket timeout after sending {total_sent} of {len(data)} bytes")
