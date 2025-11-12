@@ -100,7 +100,12 @@ class TestSideBySideProjection(unittest.TestCase):
     @patch("instrumentview.Projections.SideBySide.PanelsSurfaceCalculator")
     def test_calculate_axes(self, mock_panels_surface_calculator):
         side_by_side = self._create_side_by_side(list(range(3)), False)
-        side_by_side._calculator.setupBasisAxes.assert_called_once_with([0, 0, 0], [0, 0, 0], [0, 0, 1])
+        side_by_side._calculator.setupBasisAxes.assert_called_once()
+        args = side_by_side._calculator.setupBasisAxes.call_args_list[0][0]
+        self.assertEquals(3, len(args))
+        np.testing.assert_allclose([0, 0, 0], args[0])
+        np.testing.assert_allclose([0, 0, 0], args[1])
+        np.testing.assert_allclose([0, 0, 1], args[2])
 
     @patch("instrumentview.Projections.SideBySide.SideBySide._arrange_panels")
     @patch("instrumentview.Projections.Projection.Projection._calculate_detector_coordinates")

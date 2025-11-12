@@ -97,7 +97,7 @@ class SideBySide(Projection):
     def _calculate_axes(self, root_position: np.ndarray) -> None:
         x = [0.0] * 3
         y = [0.0] * 3
-        self._calculator.setupBasisAxes(x, y, list(self._projection_axis))
+        self._calculator.setupBasisAxes(x, y, self._projection_axis)
         self._x_axis = x
         self._y_axis = y
 
@@ -173,11 +173,11 @@ class SideBySide(Projection):
             flat_bank.reference_position = np.array(component_info.position(int(detector_component_indices[0])))
             normal = np.array(self._calculator.calculateBankNormal(component_info, group))
             rotation = self._calculator.calcBankRotation(
-                list(flat_bank.reference_position),
-                list(normal),
-                list(self._projection_axis),
-                list(self._y_axis),
-                list(self._sample_position),
+                flat_bank.reference_position,
+                normal,
+                self._projection_axis,
+                self._y_axis,
+                self._sample_position,
             )
             # SciPy from_quat expects (x, y, z, w)
             flat_bank.rotation = Rotation.from_quat([rotation[1], rotation[2], rotation[3], rotation[0]])

@@ -7,6 +7,7 @@
 #include "MantidAPI/PanelsSurfaceCalculator.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/WarningSuppressions.h"
+#include "MantidPythonInterface/core/Converters/PyObjectToV3D.h"
 #include <boost/python.hpp>
 #include <boost/python/class.hpp>
 #include <boost/python/list.hpp>
@@ -18,19 +19,12 @@ using namespace boost::python;
 
 namespace {
 using Mantid::API::PanelsSurfaceCalculator;
+using Mantid::PythonInterface::Converters::PyObjectToV3D;
 
-V3D pythonListToV3D(const object &pyList) {
-  size_t listLength = len(pyList);
-  if (listLength != 3) {
-    throw std::invalid_argument("List must have length 3.");
-  }
-  return {extract<double>(pyList[0]), extract<double>(pyList[1]), extract<double>(pyList[2])};
-}
-
-void setupBasisAxes(const PanelsSurfaceCalculator &self, list &xAxis, list &yAxis, const list &zAxis) {
-  auto x = pythonListToV3D(xAxis);
-  auto y = pythonListToV3D(yAxis);
-  const auto z = pythonListToV3D(zAxis);
+void setupBasisAxes(const PanelsSurfaceCalculator &self, object &xAxis, object &yAxis, const object &zAxis) {
+  auto x = PyObjectToV3D(xAxis)();
+  auto y = PyObjectToV3D(yAxis)();
+  const auto z = PyObjectToV3D(zAxis)();
   self.setupBasisAxes(z, x, y);
   for (size_t i = 0; i < 3; i++) {
     xAxis[i] = x[i];
@@ -49,14 +43,14 @@ list retrievePanelCorners(const PanelsSurfaceCalculator &self, const object &com
   return panelCornersList;
 }
 
-list calculatePanelNormal(const PanelsSurfaceCalculator &self, const list &panelCorners) {
+list calculatePanelNormal(const PanelsSurfaceCalculator &self, const object &panelCorners) {
   if (len(panelCorners) != 4) {
     throw std::invalid_argument("Must be 4 panel corners");
   }
   std::vector<V3D> panelCornersVec{4};
   for (size_t i = 0; i < 4; i++) {
     const object corner = panelCorners[i];
-    panelCornersVec[i] = pythonListToV3D(panelCorners[i]);
+    panelCornersVec[i] = PyObjectToV3D(panelCorners[i])();
   }
   const auto panelNormal = self.calculatePanelNormal(panelCornersVec);
   list panelNormalList(panelNormal);
@@ -64,14 +58,14 @@ list calculatePanelNormal(const PanelsSurfaceCalculator &self, const list &panel
 }
 
 bool isBankFlat(PanelsSurfaceCalculator &self, const object &componentInfo, const size_t bankIndex, const list &tubes,
-                const list &normal) {
+                const object &normal) {
   const std::shared_ptr<ComponentInfo> cInfoSharedPtr = extract<std::shared_ptr<ComponentInfo>>(componentInfo);
   std::vector<size_t> tubesVector;
   const size_t lenTubes = len(tubes);
   for (size_t i = 0; i < lenTubes; i++) {
     tubesVector.push_back(extract<size_t>(tubes[i]));
   }
-  const auto normalV3D = pythonListToV3D(normal);
+  const auto normalV3D = PyObjectToV3D(normal)();
   return self.isBankFlat(*(cInfoSharedPtr.get()), bankIndex, tubesVector, normalV3D);
 }
 
@@ -115,11 +109,11 @@ size_t findNumDetectors(const PanelsSurfaceCalculator &self, const object &compo
   return self.findNumDetectors(*(cInfoSharedPtr.get()), componentsVector);
 }
 
-list calcBankRotation(const PanelsSurfaceCalculator &self, const list &detPos, list normal, const list &zAxis,
-                      const list &yAxis, const list &samplePosition) {
+list calcBankRotation(const PanelsSurfaceCalculator &self, const object &detPos, object normal, const object &zAxis,
+                      const object &yAxis, const object &samplePosition) {
   const auto bankRotation =
-      self.calcBankRotation(pythonListToV3D(detPos), pythonListToV3D(normal), pythonListToV3D(zAxis),
-                            pythonListToV3D(yAxis), pythonListToV3D(samplePosition));
+      self.calcBankRotation(PyObjectToV3D(detPos)(), PyObjectToV3D(normal)(), PyObjectToV3D(zAxis)(),
+                            PyObjectToV3D(yAxis)(), PyObjectToV3D(samplePosition)());
 
   list quat;
   quat.append(bankRotation.real());
@@ -130,14 +124,14 @@ list calcBankRotation(const PanelsSurfaceCalculator &self, const list &detPos, l
 }
 
 list transformedBoundingBoxPoints(const PanelsSurfaceCalculator &self, const object &componentInfo,
-                                  size_t detectorIndex, const list &refPos, const list &rotation, const list &xaxis,
-                                  const list &yaxis) {
+                                  size_t detectorIndex, const object &refPos, const list &rotation, const object &xaxis,
+                                  const object &yaxis) {
   const std::shared_ptr<ComponentInfo> cInfoSharedPtr = extract<std::shared_ptr<ComponentInfo>>(componentInfo);
   Mantid::Kernel::Quat quatRotation{extract<double>(rotation[0]), extract<double>(rotation[1]),
                                     extract<double>(rotation[2]), extract<double>(rotation[3])};
-  const auto referencePosition = pythonListToV3D(refPos);
-  const auto xAxisVec = pythonListToV3D(xaxis);
-  const auto yAxisVec = pythonListToV3D(yaxis);
+  const auto referencePosition = PyObjectToV3D(refPos)();
+  const auto xAxisVec = PyObjectToV3D(xaxis)();
+  const auto yAxisVec = PyObjectToV3D(yaxis)();
   const auto boundingBoxPoints = self.transformedBoundingBoxPoints(*(cInfoSharedPtr.get()), detectorIndex,
                                                                    referencePosition, quatRotation, xAxisVec, yAxisVec);
   list pointA, pointB;

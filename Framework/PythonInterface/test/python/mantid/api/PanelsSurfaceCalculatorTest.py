@@ -30,6 +30,14 @@ class PanelsSurfaceCalculatorTest(unittest.TestCase):
         self.assertEqual(y_axis, [0, 1, 0])
         self.assertEqual(z_axis, [0, 0, 1])
 
+    def test_setupBasisAxes_ndarray(self):
+        z_axis = np.array([0, 0, 1])
+        x_axis, y_axis = np.array([0, 0, 0]), np.array([0, 0, 0])
+        self._calculator.setupBasisAxes(x_axis, y_axis, z_axis)
+        np.testing.assert_allclose([1, 0, 0], x_axis)
+        np.testing.assert_allclose([0, 1, 0], y_axis)
+        np.testing.assert_allclose([0, 0, 1], z_axis)
+
     def test_retrievePanelCorners(self):
         corners = self._calculator.retrievePanelCorners(self._ws.componentInfo(), 30)
         self.assertEqual(4, len(corners))
