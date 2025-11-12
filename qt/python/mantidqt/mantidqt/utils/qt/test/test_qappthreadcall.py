@@ -11,7 +11,7 @@ import unittest
 from qtpy.QtWidgets import QApplication
 
 from mantidqt.utils.asynchronous import AsyncTask, TaskExitCode
-from mantidqt.utils.qt.qappthreadcall import QAppThreadCall, force_method_calls_to_qapp_thread
+from mantidqt.utils.qt.qappthreadcall import QAppThreadCall, force_method_calls_to_qapp_thread, run_on_qapp_thread
 from mantidqt.utils.qt.testing import start_qapplication
 
 
@@ -27,15 +27,30 @@ def raises_exception():
 @start_qapplication
 class QAppThreadCallTest(unittest.TestCase):
     def test_successive_non_blocking_calls_receive_expected_arguments(self):
-        self.do_successive_call_with_expected_args_test(blocking=True)
+        self.do_successive_call_with_expected_args_and_kwargs_test(blocking=True)
 
     def test_successive_blocking_calls_receive_expected_arguments(self):
-        self.do_successive_call_with_expected_args_test(blocking=False)
+        self.do_successive_call_with_expected_args_and_kwargs_test(blocking=False)
 
-    def do_successive_call_with_expected_args_test(self, blocking: bool):
+    def do_successive_call_with_expected_args_and_kwargs_test(self, blocking: bool):
         # scenario: Test calling a callable from a separate thread with successive arguments
         # Simple add function taking successive pairs of arguments.
-        input_args = ((1, 2), (4, 3))
+        # we test this providing both a set of args and a set of kwargs (here, just one of each)
+        input_args = (
+            (
+                [
+                    1,
+                ],
+                {"rhs": 2},
+            ),
+            (
+                [
+                    4,
+                ],
+                {"rhs": 3},
+            ),
+        )
+        expected_args = ((1, 2), (4, 3))
         called_args = []
 
         def add(lhs, rhs):
@@ -47,8 +62,8 @@ class QAppThreadCallTest(unittest.TestCase):
 
         # Define an outer function that is the entrypoint for the new thread
         def add_inputs():
-            for arg in input_args:
-                wrapped_add(*arg)
+            for args, kwargs in input_args:
+                wrapped_add(*args, **kwargs)
 
         # Start async task to do the addition and simulate
         thread = AsyncTask(add_inputs, error_cb=lambda x: self.fail(msg=str(x.exc_value)))
@@ -60,10 +75,10 @@ class QAppThreadCallTest(unittest.TestCase):
 
         # Assert correct ordering
         self.assertEqual(
-            len(called_args), len(input_args), msg="Number of called arguments does not match the expected number of input arguments"
+            len(called_args), len(expected_args), msg="Number of called arguments does not match the expected number of input arguments"
         )
-        for input_arg, called_arg in zip(input_args, called_args):
-            self.assertEqual(input_arg, called_arg)
+        for expected_arg, called_arg in zip(expected_args, called_args):
+            self.assertEqual(expected_arg, called_arg)
 
     def test_correct_exception_is_raised_when_called_on_main_thread(self):
         qappthread_wrap = QAppThreadCall(raises_exception)
@@ -105,6 +120,31 @@ class QAppThreadCallTest(unittest.TestCase):
         all_methods = force_method_calls_to_qapp_thread(Impl(), all_methods=True)
         self.assertTrue(isinstance(all_methods.public, QAppThreadCall))
         self.assertTrue(isinstance(all_methods._private, QAppThreadCall))
+
+    def test_force_method_decorator_calls_to_qapp_thread_while_applying_all_method_correctly(self):
+        class BaseClass:
+            def public(self):
+                pass
+
+            def _private(self):
+                pass
+
+        @run_on_qapp_thread(True)
+        class ImplAllMethod(BaseClass):
+            pass
+
+        @run_on_qapp_thread(False)
+        class ImplPublicOnly(BaseClass):
+            pass
+
+        public_only = ImplPublicOnly()
+        public_and_private = ImplAllMethod()
+
+        self.assertTrue(isinstance(public_only.public, QAppThreadCall))
+        self.assertFalse(isinstance(public_only._private, QAppThreadCall))
+
+        self.assertTrue(isinstance(public_and_private.public, QAppThreadCall))
+        self.assertTrue(isinstance(public_and_private._private, QAppThreadCall))
 
 
 if __name__ == "__main__":
