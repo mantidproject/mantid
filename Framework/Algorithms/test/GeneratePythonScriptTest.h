@@ -23,7 +23,7 @@
 #include "MantidHistogramData/Histogram.h"
 #include "MantidKernel/MantidVersion.h"
 #include "MantidKernel/Timer.h"
-#include <Poco/File.h>
+#include <filesystem>
 
 #include <fstream>
 
@@ -119,8 +119,8 @@ public:
                                                          "OutputWorkspace='testGeneratePython', Exponent=1.5)");
 
     file.close();
-    if (Poco::File(filename).exists())
-      Poco::File(filename).remove();
+    if (std::filesystem::exists(filename))
+      std::filesystem::remove(filename);
 
     // Clean the ADS
     Mantid::API::AnalysisDataService::Instance().clear();

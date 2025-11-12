@@ -17,7 +17,7 @@
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Instrument.h"
 
-#include <Poco/File.h>
+#include <filesystem>
 #include <fstream>
 #include <utility>
 
@@ -243,7 +243,7 @@ public:
     std::fstream outFile(filename.c_str());
     TS_ASSERT(outFile)
     outFile.close();
-    Poco::File(filename).remove();
+    std::filesystem::remove(filename);
 
     work_out = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("testdead_out");
     work_out->removeAll();

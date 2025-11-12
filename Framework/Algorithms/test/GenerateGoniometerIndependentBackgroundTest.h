@@ -12,7 +12,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAlgorithms/GenerateGoniometerIndependentBackground.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include <Poco/File.h>
+#include <filesystem>
 
 using Mantid::Algorithms::GenerateGoniometerIndependentBackground;
 
@@ -52,8 +52,8 @@ public:
 
   void tearDown() override {
     Mantid::API::AnalysisDataService::Instance().clear();
-    if (Poco::File("groups.xml").exists())
-      Poco::File("groups.xml").remove();
+    if (std::filesystem::exists("groups.xml"))
+      std::filesystem::remove("groups.xml");
   }
 
   void test_exec() {

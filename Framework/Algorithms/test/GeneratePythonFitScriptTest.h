@@ -18,7 +18,7 @@
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
 
-#include <Poco/File.h>
+#include <filesystem>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -150,7 +150,7 @@ public:
 
 private:
   void assertExpectedScriptExists(std::vector<std::string> const &expectedLines) {
-    TS_ASSERT(Poco::File(m_filepath).exists());
+    TS_ASSERT(std::filesystem::exists(m_filepath));
 
     std::ifstream file(m_filepath.c_str(), std::ifstream::in);
 
@@ -162,7 +162,7 @@ private:
     }
 
     file.close();
-    Poco::File(m_filepath).remove();
+    std::filesystem::remove(m_filepath);
   }
 
   Mantid::API::IAlgorithm_sptr m_algorithm;
