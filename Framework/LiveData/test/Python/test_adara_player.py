@@ -271,48 +271,50 @@ class Test_Player(unittest.TestCase):
         self.assertIn("Invalid ADARA packet type", error_msg)
         self.assertIn("0xFFFFFF", error_msg)  # Type value
 
-    def test_iter_files_multi_file_timestamp_ordering(self):
-        """Tests that packets from multiple files are sorted chronologically as per first packet."""
-        with patch.object(Player, "PACKET_ORDERING_SCHEME", "timestamp"):
-            with tempfile.TemporaryDirectory() as tmpdir:
-                tmppath = Path(tmpdir)
+    def test_iter_files_multi_file_ordering(self):
+        """Tests that packets from multiple files are sorted by file modification time."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmppath = Path(tmpdir)
 
-                # Create file 1 with LATER timestamp (should be read second)
-                file1 = tmppath / "data-000001.adara"
-                header1 = Packet.create_header(
-                    payload_len=8,
-                    packet_type=Packet.Type.HEARTBEAT_TYPE,
-                    tv_sec=2000000000,  # Later timestamp
-                    tv_nsec=0,
-                )
-                payload1 = b"LATER---"
-                with open(file1, "wb") as f:
-                    f.write(header1 + payload1)
+            # Create file 3 with MIDDLE timestamp (THIRD sequence number): (FIRST mtime)
+            file3 = tmppath / "data-000003.adara"
+            header3 = Packet.create_header(
+                payload_len=8,
+                packet_type=Packet.Type.HEARTBEAT_TYPE,
+                tv_sec=1500000000,  # Middle timestamp
+                tv_nsec=0,
+            )
+            payload3 = b"MIDDLE--"
+            with open(file3, "wb") as f:
+                f.write(header3 + payload3)
+            time.sleep(0.001)  # force mtime to change
 
-                # Create file 2 with EARLIER timestamp (should be read first)
-                file2 = tmppath / "data-000002.adara"
-                header2 = Packet.create_header(
-                    payload_len=8,
-                    packet_type=Packet.Type.HEARTBEAT_TYPE,
-                    tv_sec=1000000000,  # Earlier timestamp
-                    tv_nsec=0,
-                )
-                payload2 = b"EARLIER-"
-                with open(file2, "wb") as f:
-                    f.write(header2 + payload2)
+            # Create file 2 with EARLIER timestamp (SECOND sequence number): (SECOND mtime)
+            file2 = tmppath / "data-000002.adara"
+            header2 = Packet.create_header(
+                payload_len=8,
+                packet_type=Packet.Type.HEARTBEAT_TYPE,
+                tv_sec=1000000000,  # Earlier timestamp
+                tv_nsec=0,
+            )
+            payload2 = b"EARLIER-"
+            with open(file2, "wb") as f:
+                f.write(header2 + payload2)
+            time.sleep(0.001)  # force mtime to change
 
-                # Create file 3 with MIDDLE timestamp
-                file3 = tmppath / "data-000003.adara"
-                header3 = Packet.create_header(
-                    payload_len=8,
-                    packet_type=Packet.Type.HEARTBEAT_TYPE,
-                    tv_sec=1500000000,  # Middle timestamp
-                    tv_nsec=0,
-                )
-                payload3 = b"MIDDLE--"
-                with open(file3, "wb") as f:
-                    f.write(header3 + payload3)
+            # Create file 1 with LATER timestamp (FIRST sequence number): (LAST mtime)
+            file1 = tmppath / "data-000001.adara"
+            header1 = Packet.create_header(
+                payload_len=8,
+                packet_type=Packet.Type.HEARTBEAT_TYPE,
+                tv_sec=2000000000,  # Later timestamp
+                tv_nsec=0,
+            )
+            payload1 = b"LATER---"
+            with open(file1, "wb") as f:
+                f.write(header1 + payload1)
 
+            with patch.object(Player, "PACKET_ORDERING_SCHEME", "timestamp"):
                 # iter_files should yield packets in chronological order
                 # regardless of filename order
                 packets = list(Player.iter_files(tmppath, "*.adara"))
@@ -328,48 +330,7 @@ class Test_Player(unittest.TestCase):
                 self.assertTrue(str(file3) in packets[1].source)
                 self.assertTrue(str(file1) in packets[2].source)
 
-    def test_iter_files_multi_file_sequence_number_ordering(self):
-        """Tests that packets from multiple files are sorted by sequence number."""
-        with patch.object(Player, "PACKET_ORDERING_SCHEME", "sequence_number"):
-            with tempfile.TemporaryDirectory() as tmpdir:
-                tmppath = Path(tmpdir)
-
-                # Create file 1 with LATER timestamp (FIRST sequence number)
-                file1 = tmppath / "data-000001.adara"
-                header1 = Packet.create_header(
-                    payload_len=8,
-                    packet_type=Packet.Type.HEARTBEAT_TYPE,
-                    tv_sec=2000000000,  # Later timestamp
-                    tv_nsec=0,
-                )
-                payload1 = b"LATER---"
-                with open(file1, "wb") as f:
-                    f.write(header1 + payload1)
-
-                # Create file 2 with EARLIER timestamp (SECOND sequence number)
-                file2 = tmppath / "data-000002.adara"
-                header2 = Packet.create_header(
-                    payload_len=8,
-                    packet_type=Packet.Type.HEARTBEAT_TYPE,
-                    tv_sec=1000000000,  # Earlier timestamp
-                    tv_nsec=0,
-                )
-                payload2 = b"EARLIER-"
-                with open(file2, "wb") as f:
-                    f.write(header2 + payload2)
-
-                # Create file 3 with MIDDLE timestamp (THIRD sequence number)
-                file3 = tmppath / "data-000003.adara"
-                header3 = Packet.create_header(
-                    payload_len=8,
-                    packet_type=Packet.Type.HEARTBEAT_TYPE,
-                    tv_sec=1500000000,  # Middle timestamp
-                    tv_nsec=0,
-                )
-                payload3 = b"MIDDLE--"
-                with open(file3, "wb") as f:
-                    f.write(header3 + payload3)
-
+            with patch.object(Player, "PACKET_ORDERING_SCHEME", "sequence_number"):
                 # iter_files should yield packets in order of the sequence numbers
                 # regardless of timestamp order, or modification-time order
                 packets = list(Player.iter_files(tmppath, "*.adara"))
@@ -385,50 +346,7 @@ class Test_Player(unittest.TestCase):
                 self.assertTrue(str(file2) in packets[1].source)
                 self.assertTrue(str(file3) in packets[2].source)
 
-    def test_iter_files_multi_file_mtime_ordering(self):
-        """Tests that packets from multiple files are sorted by file modification time."""
-        with patch.object(Player, "PACKET_ORDERING_SCHEME", "mtime"):
-            with tempfile.TemporaryDirectory() as tmpdir:
-                tmppath = Path(tmpdir)
-
-                # Create file 3 with MIDDLE timestamp (THIRD sequence number): (FIRST mtime)
-                file3 = tmppath / "data-000003.adara"
-                header3 = Packet.create_header(
-                    payload_len=8,
-                    packet_type=Packet.Type.HEARTBEAT_TYPE,
-                    tv_sec=1500000000,  # Middle timestamp
-                    tv_nsec=0,
-                )
-                payload3 = b"MIDDLE--"
-                with open(file3, "wb") as f:
-                    f.write(header3 + payload3)
-                time.sleep(0.001)  # force mtime to change
-
-                # Create file 2 with EARLIER timestamp (SECOND sequence number): (SECOND mtime)
-                file2 = tmppath / "data-000002.adara"
-                header2 = Packet.create_header(
-                    payload_len=8,
-                    packet_type=Packet.Type.HEARTBEAT_TYPE,
-                    tv_sec=1000000000,  # Earlier timestamp
-                    tv_nsec=0,
-                )
-                payload2 = b"EARLIER-"
-                with open(file2, "wb") as f:
-                    f.write(header2 + payload2)
-                time.sleep(0.001)  # force mtime to change
-
-                # Create file 1 with LATER timestamp (FIRST sequence number): (LAST mtime)
-                file1 = tmppath / "data-000001.adara"
-                header1 = Packet.create_header(
-                    payload_len=8,
-                    packet_type=Packet.Type.HEARTBEAT_TYPE,
-                    tv_sec=2000000000,  # Later timestamp
-                    tv_nsec=0,
-                )
-                payload1 = b"LATER---"
-                with open(file1, "wb") as f:
-                    f.write(header1 + payload1)
-
+            with patch.object(Player, "PACKET_ORDERING_SCHEME", "mtime"):
                 # iter_files should yield packets in order of the modification times
                 # regardless of timestamp order, or sequence-number order
                 packets = list(Player.iter_files(tmppath, "*.adara"))
