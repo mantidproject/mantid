@@ -163,7 +163,7 @@ namespace fft {
 
 // filters
 template <typename Y> struct FFTFilter {
-  virtual Y operator()(std::size_t index) const = 0;
+  virtual Y operator()(std::size_t const index) const = 0;
   virtual ~FFTFilter() = default;
 };
 
