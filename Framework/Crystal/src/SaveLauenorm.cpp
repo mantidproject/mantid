@@ -18,9 +18,8 @@
 #include "MantidKernel/Utils.h"
 #include "boost/math/special_functions/round.hpp"
 
-#include <Poco/File.h>
-#include <Poco/Path.h>
 #include <cmath>
+#include <filesystem>
 #include <fstream>
 #include <iomanip>
 
@@ -77,8 +76,8 @@ void SaveLauenorm::init() {
 void SaveLauenorm::exec() {
 
   std::string filename = getProperty("Filename");
-  Poco::Path path(filename);
-  std::string basename = path.getBaseName(); // Filename minus extension
+  std::filesystem::path path(filename);
+  std::string basename = path.stem().string(); // Filename minus extension
   ws = getProperty("InputWorkspace");
   double scaleFactor = getProperty("ScalePeaks");
   double dMin = getProperty("MinDSpacing");
@@ -286,12 +285,11 @@ void SaveLauenorm::exec() {
       ss << std::setw(3) << std::setfill('0') << sequenceNo;
 
       // Chop off filename
-      path.makeParent();
-      path.append(basename + ss.str());
+      path = path.parent_path();
+      path /= basename + ss.str();
       if (newFormat)
-        path.setExtension("geasc");
-      Poco::File fileobj(path);
-      out.open(path.toString().c_str(), std::ios::out);
+        path.replace_extension("geasc");
+      out.open(path.string(), std::ios::out);
       if (newFormat) {
         out << "TITL\n";
         out << basename << "\n";

@@ -18,8 +18,8 @@
 #include "MantidGeometry/IDTypes.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/Timer.h"
-#include <Poco/File.h>
 #include <cxxtest/TestSuite.h>
+#include <filesystem>
 #include <fstream>
 
 using namespace Mantid;
@@ -96,8 +96,8 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     outfile = alg.getPropertyValue("Filename");
-    if (Poco::File(outfile).exists())
-      Poco::File(outfile).remove();
+    if (std::filesystem::exists(outfile))
+      std::filesystem::remove(outfile);
 
     PeaksWorkspace_sptr wsout;
     TS_ASSERT_THROWS_NOTHING(

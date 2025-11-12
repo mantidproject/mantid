@@ -639,16 +639,6 @@ void ConfigServiceImpl::reset() {
 void ConfigServiceImpl::updateConfig(const std::string &filename, const bool append, const bool update_caches) {
   loadConfig(filename, append);
 
-  // Ensure that the default save directory makes sense
-  /*
-  if (!append)
-  {
-    std::string save_dir = getString("defaultsave.directory");
-    if (Poco::trimInPlace(save_dir).size() == 0)
-      setString("defaultsave.directory", Poco::Path::home());
-  }
-  */
-
   if (update_caches) {
     // Only configure logging once
     configureLogging();
