@@ -13,19 +13,15 @@
 namespace Mantid {
 namespace Algorithms {
 
-using namespace Mantid::Types::Core;
-
-/** Takes an existing sample log, and calculates its first or second
- * derivative, and adds it as a new log.
-
+/** Takes an existing sample log and smooths it using one of the indicated methods
   @author Reece Boston
-  @date Nov 11, in the two-thouandth and twenty fifth year of our Lord
+  @date Nov 11, in the two-thousandth and twenty fifth year of our Lord
 */
 
 class MANTID_ALGORITHMS_DLL AddLogSmoothed final : public API::Algorithm {
 public:
   /// Algorithm's name for identification
-  const std::string name() const override { return "AddLogSmoothed"; };
+  const std::string name() const override { return "AddLogSmoothed"; }
   /// Summary of algorithms purpose
   const std::string summary() const override {
     return "Add a sample log that is the smoothed version of an existing log";
@@ -36,11 +32,6 @@ public:
   const std::vector<std::string> seeAlso() const override { return {"AddSampleLog", "AddLogDerivative"}; }
   /// Algorithm's category for identification
   const std::string category() const override { return "DataHandling\\Logs"; }
-
-  std::vector<double> getUniformXValues(std::vector<double> const &x);
-  std::vector<double> getSplinedYValues(std::vector<double> const &nx, std::vector<double> const &x,
-                                        std::vector<double> const &y);
-  std::vector<DateAndTime> timesToDateAndTime(DateAndTime const &start, std::vector<double> const &times);
 
 private:
   /// Initialise the properties

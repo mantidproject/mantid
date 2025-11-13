@@ -52,6 +52,44 @@ spline_uptr make_cubic_spline(std::vector<double> const &x, std::vector<double> 
 }
 } // namespace
 
+namespace {
+using namespace Mantid::Types::Core;
+std::vector<double> getUniformXValues(std::vector<double> const &xVec) {
+  std::vector<double> newX;
+  newX.reserve(xVec.size());
+  if (xVec.size() < 2) {
+    newX = xVec;
+  } else {
+    double const xf = xVec.back(), xi = xVec.front();
+    double const dx = (xf - xi) / static_cast<double>(xVec.size() - 1);
+    for (std::size_t i = 0; i < xVec.size(); i++) {
+      newX.push_back(xi + static_cast<double>(i) * dx);
+    }
+  }
+  return newX;
+}
+
+std::vector<double> getSplinedYValues(std::vector<double> const &newX, std::vector<double> const &x,
+                                      std::vector<double> const &y) {
+  auto acc = make_interp_accel();
+  auto cspline = make_cubic_spline(x, y);
+  std::vector<double> newY;
+  newY.reserve(newX.size());
+  std::transform(newX.cbegin(), newX.cend(), std::back_inserter(newY),
+                 [&acc, &cspline](double const x) { return gsl_spline_eval(cspline.get(), x, acc.get()); });
+  return newY;
+}
+
+std::vector<DateAndTime> timesToDateAndTime(DateAndTime const &start, std::vector<double> const &times) {
+  // Convert time in sec to DateAndTime
+  std::vector<DateAndTime> timeFull;
+  timeFull.reserve(times.size());
+  std::transform(times.begin(), times.end(), std::back_inserter(timeFull),
+                 [&start](const double time) { return start + time; });
+  return timeFull;
+}
+} // namespace
+
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
@@ -60,7 +98,7 @@ void AddLogSmoothed::init() {
                   "An input/output workspace. The new log will be added to it.");
   declareProperty(
       "LogName", "", std::make_shared<MandatoryValidator<std::string>>(),
-      "The name that will identify the log entry to ne smoothed.\nThis log must be a numerical series (double).");
+      "The name that will identify the log entry to be smoothed.\nThis log must be a numerical series (double).");
   declareProperty(
       std::make_unique<Kernel::EnumeratedStringProperty<SmoothingMethod, &smoothingMethods>>("SmoothingMethod"),
       "The smoothing method to use");
@@ -82,7 +120,7 @@ std::map<std::string, std::string> AddLogSmoothed::validateInputs() {
     if (params.empty()) {
       issues["Params"] = "Boxcar smoothing requires the window width be passed as parameter";
     } else if (params[0] % 2 == 0) {
-      issues["Params"] = "Boxcar smoothing requires an odd number of points as the window width";
+      issues["Params"] = Strings::strmakef("Boxcar smoothing requires an odd window size: %d is even", params[0]);
     }
     break;
   }
@@ -90,15 +128,15 @@ std::map<std::string, std::string> AddLogSmoothed::validateInputs() {
     if (params.empty()) {
       issues["Params"] = "FFT zeroing requires the cutoff frequency as a parameter";
     } else if (params[0] <= 1) {
-      issues["Params"] = "The cutoff in FFT zeroing must be larger than 1";
+      issues["Params"] = Strings::strmakef("The cutoff in FFT zeroing must be larger than 1; passed %d", params[0]);
     }
     break;
   }
   case SmoothingMethod::FFT_BUTTERWORTH: {
     if (params.size() < 2) {
-      issues["Params"] = "Butterworth smoothing requires two parameters, cutoff and order";
+      issues["Params"] = Strings::strmakef("Butterworth smoothing requires two parameters, passed %d", params.size());
     } else if (params[0] <= 1 || params[1] < 1) {
-      issues["Params"] = "In Butterworth smoothing, cutoff must be greater than one and order greater than zero";
+      issues["Params"] = "In Butterworth smoothing, cutoff must be greater than 1 and order must be greater than 0";
     }
     break;
   }
@@ -111,52 +149,32 @@ std::map<std::string, std::string> AddLogSmoothed::validateInputs() {
   // validate input workspace: must have a log with LogName and not one with NewLogName
   std::string logName = getPropertyValue("LogName");
   MatrixWorkspace_sptr ws = getProperty("InputWorkspace");
-  if (!ws)
+  if (!ws) {
     issues["InputWorkspace"] = "No matrix workspace specified for input workspace";
+    return issues;
+  }
   Run &run = ws->mutableRun();
-  if (!run.hasProperty(logName))
+  if (!run.hasProperty(logName)) {
     issues["LogName"] = "Log " + logName + " not found in the workspace sample logs.";
+    return issues;
+  }
   Property *prop = run.getProperty(logName);
-  if (!prop)
+  if (!prop) {
     issues["LogName"] = "Log " + logName + " not found in the workspace sample logs.";
+    return issues;
+  }
   auto *tsp = dynamic_cast<TimeSeriesProperty<double> *>(prop);
-  if (!tsp)
-    issues["LogName"] = "Log " + logName +
-                        " is not a numerical series (TimeSeriesProperty<double>) so we can't perform its derivative.";
+  if (!tsp) {
+    issues["LogName"] = "Log " + logName + " must be a numerical time series (TimeSeries<double>).";
+  } else {
+    int const MIN_SPLINE_POINTS{5}; // minimum points needed for spline fits
+    int minTimeSeriesSize = (type == SmoothingMethod::BOXCAR ? params[0] : MIN_SPLINE_POINTS);
+    if (tsp->size() < minTimeSeriesSize) {
+      issues["LogName"] = Strings::strmakef("Log %s has insufficient number of points; %zu < %d", logName, tsp->size(),
+                                            minTimeSeriesSize);
+    }
+  }
   return issues;
-}
-
-std::vector<double> AddLogSmoothed::getUniformXValues(std::vector<double> const &xVec) {
-  double xf = xVec.back(), xi = xVec.front();
-  double dx = (xf - xi) / static_cast<double>(xVec.size());
-  std::vector<double> newX;
-  newX.reserve(xVec.size());
-  for (double x = xi; x <= xf; x += dx) {
-    newX.push_back(x);
-  }
-  return newX;
-}
-
-std::vector<double> AddLogSmoothed::getSplinedYValues(std::vector<double> const &newX, std::vector<double> const &x,
-                                                      std::vector<double> const &y) {
-  auto acc = make_interp_accel();
-  auto cspline = make_cubic_spline(x, y);
-  std::vector<double> newY;
-  newY.reserve(newX.size());
-  for (auto xi = newX.cbegin(); xi != newX.cend(); xi++) {
-    newY.push_back(gsl_spline_eval(cspline.get(), *xi, acc.get()));
-  }
-  return newY;
-}
-
-std::vector<DateAndTime> AddLogSmoothed::timesToDateAndTime(DateAndTime const &start,
-                                                            std::vector<double> const &times) {
-  // Convert time in sec to DateAndTime
-  std::vector<DateAndTime> timeFull;
-  timeFull.reserve(times.size());
-  std::transform(times.begin(), times.end(), std::back_inserter(timeFull),
-                 [&start](const double time) { return start + time; });
-  return timeFull;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -170,8 +188,6 @@ void AddLogSmoothed::exec() {
   if (newLogName.empty())
     newLogName = logName + "_smoothed";
 
-  // Progress progress(this, 0.0, 1.0, 1.0);
-
   // retrieve the time series data
   Run &run = ws->mutableRun();
   auto *tsp = dynamic_cast<TimeSeriesProperty<double> *>(run.getProperty(logName));
@@ -179,7 +195,7 @@ void AddLogSmoothed::exec() {
   std::vector<double> times = tsp->timesAsVectorSeconds();
 
   // Perform smoothing
-  auto output = new TimeSeriesProperty<double>(newLogName);
+  auto output = std::make_unique<TimeSeriesProperty<double>>(newLogName);
   SMOOTH smoothingMethod = getPropertyValue("SmoothingMethod");
   switch (smoothingMethod) {
   case SmoothingMethod::BOXCAR: {
@@ -188,15 +204,15 @@ void AddLogSmoothed::exec() {
     break;
   }
   case SmoothingMethod::FFT_ZERO: {
-    std::vector<double> flatTimes = this->getUniformXValues(times);
-    std::vector<double> splinedValues = this->getSplinedYValues(flatTimes, times, values);
+    std::vector<double> flatTimes = getUniformXValues(times);
+    std::vector<double> splinedValues = getSplinedYValues(flatTimes, times, values);
     std::vector<double> smoothedValues = Smoothing::fftSmooth(splinedValues, params[0]);
     output->addValues(timesToDateAndTime(tsp->nthTime(0), flatTimes), smoothedValues);
     break;
   }
   case SmoothingMethod::FFT_BUTTERWORTH: {
-    std::vector<double> flatTimes = this->getUniformXValues(times);
-    std::vector<double> splinedValues = this->getSplinedYValues(flatTimes, times, values);
+    std::vector<double> flatTimes = getUniformXValues(times);
+    std::vector<double> splinedValues = getSplinedYValues(flatTimes, times, values);
     std::vector<double> smoothedValues = Smoothing::fftButterworthSmooth(splinedValues, params[0], params[1]);
     output->addValues(timesToDateAndTime(tsp->nthTime(0), flatTimes), smoothedValues);
     break;
@@ -206,9 +222,9 @@ void AddLogSmoothed::exec() {
   }
 
   // Add the log
-  run.addProperty(output, true);
+  run.addProperty(output.release(), true);
 
-  g_log.notice() << "Added log named " << newLogName << '\n';
+  g_log.notice() << "Added log named " << newLogName << " to " << ws << '\n';
 }
 
 } // namespace Mantid::Algorithms
