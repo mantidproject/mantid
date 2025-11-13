@@ -411,7 +411,6 @@ set(TEST_FILES
     EigenFortranVectorTest.h
     EigenJacobianTest.h
     EigenMatrixTest.h
-    EigenToGSLTest.h
     EigenVectorTest.h
     EigenViewTest.h
     FitMWTest.h
