@@ -1234,7 +1234,7 @@ std::string strmakef(const char *const fmt, ...) {
   va_start(args, fmt);
   auto const r2 = std::vsnprintf(s.data(), len + 1, fmt, args);
   va_end(args);
-  if (r2 < 0 || r2 != len) {
+  if (r2 < 0 || static_cast<std::size_t>(r2) != len) {
     return {}; // unspecified error
   }
   return s;
