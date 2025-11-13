@@ -223,6 +223,7 @@ class FullInstrumentViewWindow(QMainWindow):
 
         self._current_widget = CylinderWidgetNoRotation()
         self._projection_camera_map = {}
+        self._parallel_scales = {}
 
         # self.main_plotter.add_box_widget(lambda x: None)
 
@@ -242,6 +243,7 @@ class FullInstrumentViewWindow(QMainWindow):
     def reset_camera(self) -> None:
         if not self._off_screen:
             self.main_plotter.camera_position = self._projection_camera_map[self.current_selected_projection()]
+            self.main_plotter.camera.parallel_scale = self._parallel_scales[self.current_selected_projection()]
 
     def _add_min_max_group_box(self, parent_box: QGroupBox) -> tuple[QLineEdit, QLineEdit, QDoubleRangeSlider]:
         """Creates a minimum and a maximum box (with labels) inside the given group box. The callbacks will be attached to textEdited
@@ -471,12 +473,13 @@ class FullInstrumentViewWindow(QMainWindow):
 
         if is_projection:
             self.main_plotter.view_xy()
+            self.main_plotter.enable_parallel_projection()
             if not self.main_plotter.off_screen:
                 self.main_plotter.enable_zoom_style()
 
         if self.current_selected_projection() not in self._projection_camera_map.keys():
             self._projection_camera_map[self.current_selected_projection()] = self.main_plotter.camera_position
-        self.reset_camera()
+            self._parallel_scales[self.current_selected_projection()] = self.main_plotter.camera.parallel_scale
 
     def add_pickable_mesh(self, point_cloud: PolyData, scalars: np.ndarray | str) -> None:
         self.main_plotter.add_mesh(
@@ -499,32 +502,19 @@ class FullInstrumentViewWindow(QMainWindow):
         cylinder_repr.SetOutlineTranslation(False)
         cylinder_repr.GetOutlineProperty().SetOpacity(0)
 
-        # NOTE: For 2D projections, camera view is always perpendicular to Z axis
+        # For 2D projections, camera view is always perpendicular to Z axis
         cylinder_repr.SetAxis([0, 0, 1])
         # TODO: Find a better way than using fixed bounds
-        bounds = np.array(bounds)
-        fixed_bounds = np.array([-10, 10, -10, 10, -10, 10])
-        fixed_bounds[bounds == 0] = 0
-        cylinder_repr.SetWidgetBounds(list(fixed_bounds))
-
-        # NOTE: Currently method below hides center as well
-        # TODO: Make PR on VTK to fix this
-        # cylinder_repr.GetAxisProperty().SetOpacity(0)
-
-        # NOTE: Tried to iterate over actors in representation
-        # But did not work to hide axis because it's not a poly data object
-        # i.e. actors inside representation have no geometry that we can modify
-
-        # NOTE: Tried to cahnge the bounds of the outline box
-        # but the axis arrow has a minimum size allowed
-
+        cylinder_repr.SetWidgetBounds([-10, 10, -10, 10, 0, 1])
         cylinder_widget = CylinderWidgetNoRotation()
         cylinder_widget.SetRepresentation(cylinder_repr)
         cylinder_widget.SetCurrentRenderer(self.main_plotter.renderer)
         cylinder_widget.SetInteractor(self.main_plotter.iren.interactor)
-        cylinder_widget.AddObserver(vtkCommand.EndInteractionEvent, callback)
         cylinder_widget.On()
         self._current_widget = cylinder_widget
+        # The command below is a hacky way of making the widget appear on top of detectors
+        # No idea why it works
+        self.main_plotter.camera_position = self.main_plotter.camera_position
 
     def get_current_widget(self):
         return self._current_widget
