@@ -822,9 +822,6 @@ std::vector<double> ChebfunBase::smooth(const std::vector<double> &xvalues, cons
     double xm = (1.0 + ri0f) / 2;
     ym /= ri0f;
     double a1 = (xy - ri0f * xm * ym) / (xx - ri0f * xm * xm);
-    double b1 = ym - a1 * xm;
-
-    // std::cerr << "(a1,b1) = (" << a1 << ',' << b1 << ')' << '\n';
 
     // calculate coeffs of a cubic c3*i^3 + c2*i^2 + c1*i + c0
     // which will replace the linear a1*i + b1 in building the
@@ -836,6 +833,8 @@ std::vector<double> ChebfunBase::smooth(const std::vector<double> &xvalues, cons
       double sigma = g_tolerance / noise / 10;
       double s = sigma / (1.0 - sigma);
       double m1 = log(s);
+      double b1 = ym - a1 * xm;
+      // std::cerr << "(a1,b1) = (" << a1 << ',' << b1 << ')' << '\n';
       double m0 = a1 * x0 + b1;
       if (a1 < 0.0) {
         c3 = 0.0;
