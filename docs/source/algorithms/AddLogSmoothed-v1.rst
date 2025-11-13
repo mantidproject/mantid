@@ -18,7 +18,7 @@ Usage
 
 **Example: Smoothing a log with moving average smoothing**
 
-.. testcode:: AddLogDerivative
+.. testcode:: AddLogSmoothed
 
     ws = CreateSampleWorkspace()
     AddTimeSeriesLog(ws,"MyLog","2010-01-01T00:00:00",1.0,DeleteExisting=False)
@@ -34,7 +34,7 @@ Usage
 
 Output:
 
-.. testoutput:: AddLogDerivative
+.. testoutput:: AddLogSmoothed
     :options: +NORMALIZE_WHITESPACE
 
     Log: MyLog
