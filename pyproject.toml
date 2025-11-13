@@ -1,5 +1,6 @@
 [tool.ruff]
 line-length = 140
+target-version = "py311" # should match mantid-developer
 # https://beta.ruff.rs/docs/rules/
 lint.select = ["C90", "E", "F", "FURB", "RUF100", "UP", "W", "NPY201", "S"]
 lint.ignore = ["E722", # bare except https://docs.astral.sh/ruff/rules/bare-except/
