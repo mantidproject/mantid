@@ -45,5 +45,27 @@ template <typename T> std::vector<T> boxcarErrorSmooth(std::vector<T> const &inp
  */
 template <typename T> std::vector<T> boxcarRMSESmooth(std::vector<T> const &input, unsigned int const numPoints);
 
+/** Performs FFT smoothing on the input data, with high frequencies set to zero
+ *  NOTE: the input data MUST be defined on a uniform grid
+ *
+ * @param input The input vector to be smoothed
+ * @param cutoff The cutoff frequency; all components from this number forward will be set to zero
+ * @return A new vector containing the smoothed data
+ * @tparam Y numeric type for y-values
+ */
+template <typename Y> std::vector<Y> fftSmooth(std::vector<Y> const &input, unsigned const cutoff);
+
+/** Performs FFT smoothing on the input data, using a Butterworth filter
+ *  NOTE: the input data MUST be defined on a uniform grid
+ *
+ * @param input The input vector to be smoothed
+ * @param cutoff Represents the cutoff frequency, where step function behavior begins descent
+ * @param order Represents the steepness of the frequency cutoff; as this approaches infinity, approaches step cutoff
+ * @return A new vector containing the smoothed data
+ * @tparam Y numeric type for y-values
+ */
+template <typename Y>
+std::vector<Y> fftButterworthSmooth(std::vector<Y> const &input, unsigned const cutoff, unsigned const order);
+
 } // namespace Smoothing
 } // namespace Mantid::Kernel
