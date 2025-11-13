@@ -19,7 +19,7 @@
 #include "MantidKernel/SpecialCoordinateSystem.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidMDAlgorithms/MDWSDescription.h"
-#include <cmath>
+#include <math.h>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -207,9 +207,8 @@ void ApplyDetailedBalanceMD::applyDetailedBalance(typename Mantid::DataObjects::
         // delta_e = it->getCenter(mDeltaEIndex);
         // factor = pi * (1 - exp(-deltaE/(kb*T)))
         float factor = static_cast<float>(M_PI) *
-                       (static_cast<float>(1.) -
-                        static_cast<float>(exp(-it->getCenter(mDeltaEIndex)) *
-                                           static_cast<float>(PhysicalConstants::meVtoKelvin / temperatue)));
+                       (static_cast<float>(1.) - exp(-it->getCenter(mDeltaEIndex) *
+                                                     static_cast<float>(PhysicalConstants::meVtoKelvin / temperatue)));
 
         // calcalate and set intesity
         auto intensity = it->getSignal() * factor;
