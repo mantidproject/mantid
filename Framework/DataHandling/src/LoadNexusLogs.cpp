@@ -47,11 +47,11 @@ std::string globToRegex(const std::string &glob) {
   std::string regex;
   regex.reserve(glob.size() * 2);
   regex += '^';
-  
+
   bool escaped = false;
   for (size_t i = 0; i < glob.size(); ++i) {
     char c = glob[i];
-    
+
     if (escaped) {
       // Previous character was backslash, so this character should be literal
       // Escape it for regex if needed
@@ -107,7 +107,7 @@ std::string globToRegex(const std::string &glob) {
       }
     }
   }
-  
+
   regex += '$';
   return regex;
 }
