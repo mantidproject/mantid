@@ -7,6 +7,7 @@
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/UnitLabel.h"
+#include <cstdarg>
 #include <filesystem>
 #include <fstream>
 #include <list>
@@ -1198,6 +1199,30 @@ std::string randomString(size_t len) {
   }
 
   return result;
+}
+
+std::string strmakef(const char *const fmt, ...) {
+  char buf[256];
+
+  va_list args;
+  va_start(args, fmt);
+  const auto r = std::vsnprintf(buf, sizeof buf, fmt, args);
+  va_end(args);
+
+  if (r < 0)
+    // conversion failed
+    return {};
+
+  const size_t len = r;
+  if (len < sizeof buf)
+    // we fit in the buffer
+    return {buf, len};
+
+  std::string s(len, '\0');
+  va_start(args, fmt);
+  std::vsnprintf(&(*s.begin()), len + 1, fmt, args);
+  va_end(args);
+  return s;
 }
 
 /// \cond TEMPLATE

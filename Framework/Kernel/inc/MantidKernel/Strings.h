@@ -446,6 +446,14 @@ MANTID_KERNEL_DLL std::string randomString(const size_t len);
 /// Extract a line from input stream, discarding any EOL characters encountered
 MANTID_KERNEL_DLL std::istream &extractToEOL(std::istream &is, std::string &str);
 
+/**
+ * Let's face it, std::string is poorly designed, and this is the constructor that it needed to have.
+ * Initialize a string from a c-style formatting string, as you would with printf.
+ * @param fmt : c-style format string with specifiers such as %d or %f
+ * @param ... : variadic arguments corresponding to c-style format specifiers
+ */
+MANTID_KERNEL_DLL std::string strmakef(char const *const fmt, ...);
+
 } // NAMESPACE Strings
 
 } // NAMESPACE Kernel
