@@ -1,0 +1,7 @@
+#!/bin/bash
+
+#Download and install pixi
+install_pixi() {
+  curl -fsSL https://pixi.sh/install.sh | sh
+  source ~/.bashrc
+}
