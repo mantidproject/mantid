@@ -99,6 +99,7 @@ set(SRC_FILES
     src/SetValueWhenProperty.cpp
     src/SetDefaultWhenProperty.cpp
     src/SingletonHolder.cpp
+    src/Smoothing.cpp
     src/SobolSequence.cpp
     src/SpinStateValidator.cpp
     src/SplittingInterval.cpp
@@ -266,6 +267,7 @@ set(INC_FILES
     inc/MantidKernel/SetValueWhenProperty.h
     inc/MantidKernel/SetDefaultWhenProperty.h
     inc/MantidKernel/SingletonHolder.h
+    inc/MantidKernel/Smoothing.h
     inc/MantidKernel/SobolSequence.h
     inc/MantidKernel/SpecialCoordinateSystem.h
     inc/MantidKernel/SpinStateHelpers.h
@@ -417,6 +419,7 @@ set(TEST_FILES
     RegexStringsTest.h
     SLSQPMinimizerTest.h
     ShrinkToFitTest.h
+    SmoothingTest.h
     SobolSequenceTest.h
     SpecialCoordinateSystemTest.h
     SpinStateHelpersTest.h
