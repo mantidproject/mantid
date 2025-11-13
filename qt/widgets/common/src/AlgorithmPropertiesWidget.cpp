@@ -38,7 +38,7 @@ namespace MantidQt::API {
 /** Constructor
  */
 AlgorithmPropertiesWidget::AlgorithmPropertiesWidget(QWidget *parent)
-    : QWidget(parent), m_algoName(""), m_algo(), m_inputHistory(nullptr) {
+    : QWidget(parent), m_algoName(""), m_algo(), m_errors(nullptr), m_inputHistory(nullptr) {
   // Create the grid layout that will have all the widgets
   m_inputGrid = new QGridLayout;
 
@@ -135,13 +135,15 @@ void AlgorithmPropertiesWidget::addEnabledAndDisableLists(const QStringList &ena
 }
 
 //---------------------------------------------------------------------------------------------------------------
-/** @return true if the workspace has an input workspace */
-bool haveInputWS(const std::vector<Property *> &prop_list) {
-  // For the few algorithms (mainly loading) that do not have input workspaces,
-  // we do not
-  // want to render the 'replace input workspace button'. Do a quick scan to
-  // check.
-  // Also the ones that don't have a set of allowed values as input workspace
+/** Share the errors map with the parent dialog */
+void AlgorithmPropertiesWidget::shareErrorsMap(const QHash<QString, QString> &errors) { this->m_errors = &errors; }
+
+//---------------------------------------------------------------------------------------------------------------
+/** @return true if there is any input workspace in the properties list */
+bool AlgorithmPropertiesWidget::hasInputWS(const std::vector<Property *> &prop_list) const {
+  // For any algorithm that does not have any input workspaces,
+  // we do not want to render the 'replace input workspace button'.
+  // Do a scan to check.
   std::vector<Property *>::const_iterator pEnd = prop_list.end();
   for (std::vector<Property *>::const_iterator pIter = prop_list.begin(); pIter != pEnd; ++pIter) {
     Property *prop = *pIter;
@@ -178,7 +180,7 @@ void AlgorithmPropertiesWidget::initLayout() {
 
   // Create a grid of properties if there are any available
   const std::vector<Property *> &prop_list = getAlgorithm()->getProperties();
-  bool hasInputWS = haveInputWS(prop_list);
+  bool hasInputWS_ = hasInputWS(prop_list);
 
   if (!prop_list.empty()) {
     // Put the property boxes in a grid
@@ -241,12 +243,12 @@ void AlgorithmPropertiesWidget::initLayout() {
         if (!oldValue.isEmpty()) {
           auto error = prop->setValue(oldValue.toStdString());
           // TODO: [Known defect]: this does not match the initialization sequence
-          //   in `AlgorithmDialog`.  In the `AlgorithmDialog` case the 'valueChanged' SIGNAL
+          //   in `AlgorithmDialog`.  In the `AlgorithmDialog` case, the 'valueChanged' SIGNAL
           //   will already have been connected at the point the previous values are set.
           //   By implication: this initialization will not initialize properties
           //   with dynamic-default values correctly.
-          //   However, at present this clause is not actually executed anywhere in the codebase.
-          //   WHEN this clause is used, this issue might need to be fixed!
+          //   Since at present this clause is not actually executed anywhere in the codebase.
+          //   WHEN this clause is used, this issue should be fixed!
           widget->setError(QString::fromStdString(error));
           widget->setPrevious_isDynamicDefault(false);
           widget->setPreviousValue(oldValue);
@@ -263,7 +265,7 @@ void AlgorithmPropertiesWidget::initLayout() {
 
       // Only show the "Replace Workspace" button if the algorithm has an input
       // workspace.
-      if (hasInputWS && !prop->disableReplaceWSButton())
+      if (hasInputWS_ && !prop->disableReplaceWSButton())
         widget->addReplaceWSButton();
 
       ++row;
@@ -338,42 +340,52 @@ void AlgorithmPropertiesWidget::replaceWSClicked(const QString &propName) {
 
 //-------------------------------------------------------------------------------------------------
 /** Check if the control should be enabled for this property
- * @param property :: the property that allows to check for the settings.
- * @param propName :: The name of the property
+ * @param property :: the property to check
  */
-bool AlgorithmPropertiesWidget::isWidgetEnabled(const Property *property, const QString &propName) const {
-  // To avoid errors
-  if (propName.isEmpty())
-    return true;
-  if (!property)
-    return true;
+bool AlgorithmPropertiesWidget::isWidgetEnabled(const Property *prop) const {
+  if (!prop)
+    throw std::runtime_error("`AlgorithmPropertiesWidget::isWidgetEnabled` called with null property pointer");
+  const std::string &propName = prop->name();
 
   // Keep things enabled if requested
-  if (m_enabled.contains(propName))
+  if (m_enabled.contains(QString::fromStdString(propName)))
     return true;
 
   /** The control is disabled if
    *   (1) It is contained in the disabled list or
-   *   (2) A user passed a value into the dialog
+   *   (2) the property's settings chain indicates it should be disabled.
    */
-  if (m_disabled.contains(propName)) {
+  if (m_disabled.contains(QString::fromStdString(propName)))
     return false;
-  } else {
-    // Regular C++ algo. Let the property tell us,
-    // possibly using validators, if it is to be shown enabled
-    if (property->getSettings())
-      return property->getSettings()->isEnabled(m_algo.get());
-    else
-      return true;
-  }
+
+  return m_algo->isPropertyEnabled(propName);
 }
 
 //-------------------------------------------------------------------------------------------------
-/** Go through all the properties, and check their validators to determine
- * whether they should be made disabled/invisible.
- * It also shows/hides the validators.
- * All properties' values should be set already, otherwise the validators
- * will be running on old data.
+/** Compute if the control should be visible for this property based on settings and error state.
+ *  WARNING: the GUI itself may override this visibility setting (e.g. if a parent widget is hidden).
+ * @param property :: the property that allows to check for the settings.
+ */
+bool AlgorithmPropertiesWidget::isWidgetVisible(const Property *prop) const {
+  if (!prop)
+    throw std::runtime_error("`AlgorithmPropertiesWidget::isWidgetVisible` called with null property pointer");
+  const std::string &propName = prop->name();
+
+  bool visible = m_algo->isPropertyVisible(propName);
+
+  // Always show properties that are in an error state
+  if (m_errors && !m_errors->value(QString::fromStdString(propName)).isEmpty())
+    visible = true;
+
+  return visible;
+}
+
+//-------------------------------------------------------------------------------------------------
+/** Go through all the properties, and check their settings in order to implement
+ * any changes dependent on upstream properties.
+ * Then, once any changes have been applied, go through settings and validators again
+ * to determine whether properties will be hidden or disabled.
+ * At entry to this method: all properties' values must be current.
  * @param changedPropName :: name of the property that was changed
  */
 void AlgorithmPropertiesWidget::hideOrDisableProperties(const QString &changedPropName) {
@@ -383,63 +395,46 @@ void AlgorithmPropertiesWidget::hideOrDisableProperties(const QString &changedPr
     Mantid::Kernel::Property *prop = widget->getProperty();
     const QString propName = QString::fromStdString(prop->name());
 
-    IPropertySettings *settings = prop->getSettings();
-    if (settings) {
+    auto const &settings = prop->getSettings();
+    if (!settings.empty()) {
       // Dynamic PropertySettings objects allow a property to change
       // validators. This removes the old widget and creates a new one
       // instead.
 
-      if (settings->isConditionChanged(m_algo.get(), changedPropName.toStdString())) {
-        if (settings->applyChanges(m_algo.get(), prop->name())) {
-          // WARNING: allow for the possibility that the current property has been replaced inside of `applyChanges`!
-          prop = m_algo->getPointerToProperty(propName.toStdString());
+      for (auto const &setting : settings)
+        if (setting->isConditionChanged(m_algo.get(), changedPropName.toStdString())) {
+          if (setting->applyChanges(m_algo.get(), prop->name())) {
+            // WARNING: allow for the possibility that the current property has been replaced inside of `applyChanges`!
+            prop = m_algo->getPointerToProperty(propName.toStdString());
 
-          widget->setVisible(false);
+            widget->setVisible(false);
 
-          // Create a new widget at the same position in the layout grid:
-          //   since widget is a reference, this also replaces the `widget*` in `m_propWidgets`.
-          auto *oldWidget = widget;
-          int row = widget->getGridRow();
-          QGridLayout *layout = widget->getGridLayout();
-          widget = PropertyWidgetFactory::createWidget(prop, this, layout, row);
-          widget->transferHistoryState(oldWidget, changedPropWidget);
+            // Create a new widget at the same position in the layout grid:
+            //   since widget is a reference, this also replaces the `widget*` in `m_propWidgets`.
+            auto *oldWidget = widget;
+            int row = widget->getGridRow();
+            QGridLayout *layout = widget->getGridLayout();
+            widget = PropertyWidgetFactory::createWidget(prop, this, layout, row);
+            widget->transferHistoryState(oldWidget, changedPropWidget);
 
-          // Delete the old widget
-          oldWidget->deleteLater();
+            // Delete the old widget
+            oldWidget->deleteLater();
 
-          // Whenever the value changes in the widget, this fires
-          // propertyChanged()
-          connect(widget, SIGNAL(valueChanged(const QString &)), this, SLOT(propertyChanged(const QString &)));
+            // Whenever the value changes in the widget, this fires
+            // propertyChanged()
+            connect(widget, SIGNAL(valueChanged(const QString &)), this, SLOT(propertyChanged(const QString &)));
+          }
         }
-      }
     }
   } // for each property
 
   // set Visible and Enabled as appropriate
   for (auto &widget : m_propWidgets) {
     Mantid::Kernel::Property const *prop = widget->getProperty();
-    IPropertySettings const *settings = prop->getSettings();
-    auto const &propName = QString::fromStdString(prop->name());
 
-    // Set the enabled and visible flags based on what the validators say.
-    // Default is always true.
-    bool visible = true;
-    // Dynamically check if the widget should be enabled.
-    bool enabled = this->isWidgetEnabled(prop, propName);
-
-    // Do we have a custom IPropertySettings?
-    if (settings) {
-      // Set the visible flag
-      visible = settings->isVisible(m_algo.get());
-    }
-
-    // Show/hide the validator label (that red star)
-    QString error = "";
-    if (m_errors.contains(propName))
-      error = m_errors[propName];
-    // Always show controls that are in error
-    if (error.length() != 0)
-      visible = true;
+    // Set the enabled and visible flags based on what the settings and validators say.
+    bool enabled = this->isWidgetEnabled(prop);
+    bool visible = this->isWidgetVisible(prop);
 
     // Hide/disable the widget
     widget->setEnabled(enabled);

@@ -315,12 +315,10 @@ void AlgorithmDialog::showValidators() {
  * @return true if the property is valid.
  */
 bool AlgorithmDialog::setPropertyValue(const QString &pName, bool validateOthers) {
-  // Mantid::Kernel::Property *p = getAlgorithmProperty(pName);
   QString value = getInputValue(pName);
 
   std::string error("");
   try {
-    // error = p->setValue(value.toStdString());
     getAlgorithm()->setPropertyValue(pName.toStdString(), value.toStdString());
   } catch (std::exception &err_details) {
     error = err_details.what();
@@ -438,32 +436,31 @@ bool AlgorithmDialog::isMessageAvailable() const { return !m_strMessage.isEmpty(
  * @param propName :: The name of the property
  */
 bool AlgorithmDialog::isWidgetEnabled(const QString &propName) const {
+  // TODO: these "to avoid errors" pre-checks may seem like a good idea, but they mask defects.
+  // They really should be removed!!
+
   // To avoid errors
   if (propName.isEmpty())
     return true;
 
-  // Otherwise it must be disabled but only if it is valid
   Mantid::Kernel::Property *property = getAlgorithmProperty(propName);
   if (!property)
     return true;
 
   if (!isForScript()) {
-    // Regular C++ algo. Let the property tell us,
-    // possibly using validators, if it is to be shown enabled
-    if (property->getSettings())
-      return property->getSettings()->isEnabled(getAlgorithm().get());
-    else
-      return true;
+    // Not called from a script:
+    //   use the property's settings to determine if it should be enabled.
+    return m_algorithm->isPropertyEnabled(propName.toStdString());
   } else {
-    // Algorithm dialog was called from a script(i.e. Python)
-    // Keep things enabled if requested
+    // Called from a script:
+    //   use the enabled / disabled lists to determine if it should be enabled.
     if (m_enabled.contains(propName))
       return true;
 
     /**
      * The control is disabled if
      *   (1) It is contained in the disabled list or
-     *   (2) A user passed a value into the dialog
+     *   (2) A user passed a value into the dialog as an argument
      */
 
     return !(m_disabled.contains(propName) || m_python_arguments.contains(propName));
