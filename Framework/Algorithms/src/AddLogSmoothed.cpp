@@ -142,7 +142,7 @@ std::vector<double> AddLogSmoothed::getSplinedYValues(std::vector<double> const 
   auto acc = make_interp_accel();
   auto cspline = make_cubic_spline(x, y);
   std::vector<double> newY;
-  newY.resize(newX.size());
+  newY.reserve(newX.size());
   for (auto xi = newX.cbegin(); xi != newX.cend(); xi++) {
     newY.push_back(gsl_spline_eval(cspline.get(), *xi, acc.get()));
   }
@@ -179,7 +179,7 @@ void AddLogSmoothed::exec() {
   std::vector<double> times = tsp->timesAsVectorSeconds();
 
   // Perform smoothing
-  auto output = std::make_shared<TimeSeriesProperty<double>>(newLogName);
+  auto output = new TimeSeriesProperty<double>(newLogName);
   SMOOTH smoothingMethod = getPropertyValue("SmoothingMethod");
   switch (smoothingMethod) {
   case SmoothingMethod::BOXCAR: {
@@ -204,10 +204,9 @@ void AddLogSmoothed::exec() {
   default:
     break;
   }
-  output->addValues(tsp->timesAsVector(), tsp->valuesAsVector());
 
   // Add the log
-  run.addProperty(tsp, true);
+  run.addProperty(output, true);
 
   g_log.notice() << "Added log named " << newLogName << '\n';
 }
