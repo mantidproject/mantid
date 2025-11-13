@@ -817,22 +817,22 @@ std::vector<double> ChebfunBase::smooth(const std::vector<double> &xvalues, cons
       return y;
     }
 
-    // high frequency filter values: smooth decreasing function
-    auto ri0f = static_cast<double>(i0 + 1);
-    double xm = (1.0 + ri0f) / 2;
-    ym /= ri0f;
-    double a1 = (xy - ri0f * xm * ym) / (xx - ri0f * xm * xm);
-
     // calculate coeffs of a cubic c3*i^3 + c2*i^2 + c1*i + c0
     // which will replace the linear a1*i + b1 in building the
     // second part of the filter
     double c0, c1, c2, c3;
     {
+      // high frequency filter values: smooth decreasing function
+      auto ri0f = static_cast<double>(i0 + 1);
+      double xm = (1.0 + ri0f) / 2;
+      ym /= ri0f;
+
       auto x0 = double(i0 + 1);
       auto x1 = double(n + 1);
       double sigma = g_tolerance / noise / 10;
       double s = sigma / (1.0 - sigma);
       double m1 = log(s);
+      double a1 = (xy - ri0f * xm * ym) / (xx - ri0f * xm * xm);
       double b1 = ym - a1 * xm;
       // std::cerr << "(a1,b1) = (" << a1 << ',' << b1 << ')' << '\n';
       double m0 = a1 * x0 + b1;
