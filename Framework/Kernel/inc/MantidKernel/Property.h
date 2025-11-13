@@ -111,13 +111,12 @@ public:
   virtual std::string isValid() const;
 
   /// Set the PropertySettings object
-  void setSettings(std::unique_ptr<IPropertySettings> settings);
+  void setSettings(std::unique_ptr<IPropertySettings const> settings);
 
-  /** @return the PropertySettings for this property */
-  const IPropertySettings *getSettings() const;
-  IPropertySettings *getSettings();
+  /** @return the vector of PropertySettings for this property */
+  std::vector<std::unique_ptr<IPropertySettings const>> const &getSettings() const;
 
-  /** Deletes the PropertySettings object contained */
+  /** Clears the vector of PropertySettings for this property */
   void clearSettings();
 
   /// Overriden function that returns if property has the same value that it was
@@ -229,7 +228,7 @@ private:
   std::string m_units;
 
   /// Property settings (enabled/visible)
-  std::unique_ptr<IPropertySettings> m_settings;
+  std::vector<std::unique_ptr<IPropertySettings const>> m_settings;
 
   /// Name of the "group" of this property, for grouping in the GUI. Default ""
   std::string m_group;

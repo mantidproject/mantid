@@ -77,7 +77,7 @@ void IPropertyManager::updatePropertyValues(const IPropertyManager &other) {
  * property
  * @param name :: property name
  * @param settings :: IPropertySettings     */
-void IPropertyManager::setPropertySettings(const std::string &name, std::unique_ptr<IPropertySettings> settings) {
+void IPropertyManager::setPropertySettings(const std::string &name, std::unique_ptr<IPropertySettings const> settings) {
   Property *prop = getPointerToProperty(name);
   if (prop)
     prop->setSettings(std::move(settings));

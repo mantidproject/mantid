@@ -92,6 +92,18 @@ PyObject *unitAsUnicode(const Property &self) {
  */
 PyObject *unitsAsBytes(const Property &self) { return PyBytes_FromString(self.units().c_str()); }
 
+/**
+ * Convert the `std::vector<std::unique_ptr<IPropertySettings const>>` returned by `getSettings`
+ *   into a Python-compatible form.
+ */
+std::vector<IPropertySettings const *> getSettingsRawPointers(Property const &self) {
+  std::vector<IPropertySettings const *> out;
+  for (auto const &ptr : self.getSettings()) {
+    out.push_back(ptr.get());
+  }
+  return out;
+}
+
 } // namespace
 
 GET_POINTER_SPECIALIZATION(Property)
@@ -169,10 +181,9 @@ void export_Property() {
                     "Return the 'group' of the property, that is, the header "
                     "in the algorithm's list of properties.")
 
-      .add_property("settings",
-                    make_function(static_cast<IPropertySettings *(Property::*)()>(&Property::getSettings),
-                                  return_value_policy<return_by_value>()),
-                    "Return the object managing this property's settings")
+      .add_property("settings", make_function(&getSettingsRawPointers, return_value_policy<copy_const_reference>()),
+                    "Return the settings vector for this property")
+      .def("clearSettings", &Property::clearSettings, "Clear the settings vector for this property")
 
       .add_static_property("EMPTY_DBL", emptyDouble)
       .add_static_property("EMPTY_INT", emptyInt)

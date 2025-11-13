@@ -119,7 +119,7 @@ void declareOrReplaceProperty(IPropertyManager &self, const std::string &name,
  */
 void setPropertySettings(IPropertyManager &self, const std::string &propName,
                          const IPropertySettings *settingsManager) {
-  self.setPropertySettings(propName, std::unique_ptr<IPropertySettings>(settingsManager->clone()));
+  self.setPropertySettings(propName, std::unique_ptr<IPropertySettings const>(settingsManager->clone()));
 }
 
 void deleteProperty(IPropertyManager &self, const std::string &propName) { self.removeProperty(propName); }

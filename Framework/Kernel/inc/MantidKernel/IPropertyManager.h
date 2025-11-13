@@ -320,7 +320,7 @@ public:
   /// Return the property manager serialized as a json object.
   virtual ::Json::Value asJson(bool withDefaultValues = false) const = 0;
 
-  void setPropertySettings(const std::string &name, std::unique_ptr<IPropertySettings> settings);
+  void setPropertySettings(const std::string &name, std::unique_ptr<IPropertySettings const> settings);
 
   /** Set the group for a given property
    * @param name :: property name

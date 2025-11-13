@@ -58,7 +58,7 @@ public:
    *
    *  @return: whether or not the current property was changed.
    */
-  virtual bool applyChanges(const IPropertyManager *algo, const std::string &currentPropName) {
+  virtual bool applyChanges(const IPropertyManager *algo, const std::string &currentPropName) const {
     UNUSED_ARG(algo);
     UNUSED_ARG(currentPropName);
     return false;

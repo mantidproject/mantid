@@ -48,8 +48,10 @@ Property::Property(const Property &right)
   if (m_name.empty()) {
     throw std::invalid_argument("An empty property name is not permitted");
   }
-  if (right.m_settings)
-    m_settings.reset(right.m_settings->clone());
+  if (!right.m_settings.empty()) {
+    for (const auto &settings : right.m_settings)
+      m_settings.emplace_back(std::unique_ptr<IPropertySettings const>(settings->clone()));
+  }
 }
 
 /// Virtual destructor
@@ -100,19 +102,20 @@ std::string Property::isValid() const {
  * Takes ownership of the given object
  * @param settings A pointer to an object specifying the settings type
  */
-void Property::setSettings(std::unique_ptr<IPropertySettings> settings) { m_settings = std::move(settings); }
+void Property::setSettings(std::unique_ptr<IPropertySettings const> settings) {
+  m_settings.emplace_back(std::move(settings));
+}
 
 /**
  *
- * @return the PropertySettings for this property
+ * @return the vector of PropertySettings for this property
  */
-const IPropertySettings *Property::getSettings() const { return m_settings.get(); }
-IPropertySettings *Property::getSettings() { return m_settings.get(); }
+std::vector<std::unique_ptr<IPropertySettings const>> const &Property::getSettings() const { return m_settings; }
 
 /**
- * Deletes the PropertySettings object contained
+ * Clear the vector of PropertySettings for this property
  */
-void Property::clearSettings() { m_settings.reset(nullptr); }
+void Property::clearSettings() { m_settings.clear(); }
 
 /**
  * Whether to remember this property input
