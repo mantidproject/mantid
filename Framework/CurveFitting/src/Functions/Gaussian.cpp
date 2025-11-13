@@ -154,27 +154,26 @@ void Gaussian::histogramDerivative1D(Jacobian *jacobian, double left, const doub
   const double h = getParameter("Height");
   const double c = getParameter("PeakCentre");
   const double s = getParameter("Sigma");
-  const double w = pow(1 / s, 2);
-  const double sw = sqrt(w);
+  const auto w = 1 / s;
 
-  auto cumulFun = [sw, c](double x) { return sqrt(M_PI / 2) / sw * erf(sw / sqrt(2.0) * (x - c)); };
-  auto fun = [w, c](double x) { return exp(-w / 2 * pow(x - c, 2)); };
+  auto e = [w](const double d) { return exp(-0.5 * w * w * d * d); };
+  auto eint = [w](const double d) { return M_SQRT2 * erf(M_SQRT2 * w * d) / (w * M_2_SQRTPI); };
 
-  double xl = left;
-  double fLeft = fun(left);
-  double cLeft = cumulFun(left);
-  const double h_over_2w = h / (2 * w);
+  auto dLeft = left - c;
+  auto eLeft = e(dLeft);
+  auto eintLeft = eint(dLeft);
+  const auto h_over_w = h / w;
   for (size_t i = 0; i < nBins; ++i) {
-    double xr = right[i];
-    double fRight = fun(xr);
-    double cRight = cumulFun(xr);
-    jacobian->set(i, 0, cRight - cLeft);        // height
-    jacobian->set(i, 1, -h * (fRight - fLeft)); // centre
+    const auto dRight = right[i] - c;
+    const auto eRight = e(dRight);
+    const auto eintRight = eint(dRight);
+    jacobian->set(i, 0, eintRight - eintLeft);  // height
+    jacobian->set(i, 1, -h * (eRight - eLeft)); // centre
     jacobian->set(i, 2,
-                  h_over_2w * ((xr - c) * fRight - (xl - c) * fLeft + cLeft - cRight)); // weight
-    fLeft = fRight;
-    cLeft = cRight;
-    xl = xr;
+                  w * (dRight * eRight - dLeft * eLeft) + h_over_w * (eintLeft - eintRight)); // weight
+    eLeft = eRight;
+    eintLeft = eintRight;
+    dLeft = dRight;
   }
 }
 
