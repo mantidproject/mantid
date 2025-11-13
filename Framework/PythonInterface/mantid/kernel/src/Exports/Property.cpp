@@ -94,14 +94,26 @@ PyObject *unitsAsBytes(const Property &self) { return PyBytes_FromString(self.un
 
 /**
  * Convert the `std::vector<std::unique_ptr<IPropertySettings const>>` returned by `getSettings`
- *   into a Python-compatible form.
+ *   into a Python-compatible form.  In order to support legacy code, we return a single
+ *   `IPropertySettings` instance when that case applies, and `None` in the case the vector
+ *   is empty.
  */
-std::vector<IPropertySettings const *> getSettingsRawPointers(Property const &self) {
-  std::vector<IPropertySettings const *> out;
-  for (auto const &ptr : self.getSettings()) {
-    out.push_back(ptr.get());
+boost::python::object getSettingsRawPointers(Property const &self) {
+  namespace py = boost::python;
+
+  auto const &settings = self.getSettings();
+  size_t n = settings.size();
+  if (n == 0) {
+    return py::object(); // returns 'None'
+  } else if (n == 1) {
+    // SAFE `const_cast`: `IPropertySettings` exports do not allow any modification of the instance.
+    return py::object(py::ptr(const_cast<IPropertySettings *>(settings[0].get())));
+  } else {
+    py::list out;
+    for (auto const &ptr : settings)
+      out.append(py::ptr(const_cast<IPropertySettings *>(ptr.get())));
+    return out;
   }
-  return out;
 }
 
 } // namespace
@@ -181,7 +193,7 @@ void export_Property() {
                     "Return the 'group' of the property, that is, the header "
                     "in the algorithm's list of properties.")
 
-      .add_property("settings", make_function(&getSettingsRawPointers, return_value_policy<copy_const_reference>()),
+      .add_property("settings", make_function(&getSettingsRawPointers, return_value_policy<return_by_value>()),
                     "Return the settings vector for this property")
       .def("clearSettings", &Property::clearSettings, "Clear the settings vector for this property")
 

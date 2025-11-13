@@ -358,14 +358,11 @@ bool AlgorithmPropertiesWidget::isWidgetEnabled(const Property *property, const 
    */
   if (m_disabled.contains(propName)) {
     return false;
-  } else {
-    // Regular C++ algo. Let the property tell us,
-    // possibly using validators, if it is to be shown enabled
-    if (property->getSettings())
-      return property->getSettings()->isEnabled(m_algo.get());
-    else
-      return true;
   }
+  if (!property->getSettings().empty())
+    return std::all_of(property->getSettings().begin(), property->getSettings().end(),
+                       [this](auto const &ptr) { return ptr->isEnabled(this->m_algo.get()); });
+  return true;
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -383,54 +380,52 @@ void AlgorithmPropertiesWidget::hideOrDisableProperties(const QString &changedPr
     Mantid::Kernel::Property *prop = widget->getProperty();
     const QString propName = QString::fromStdString(prop->name());
 
-    IPropertySettings *settings = prop->getSettings();
-    if (settings) {
+    auto const &settings = prop->getSettings();
+    if (!settings.empty()) {
       // Dynamic PropertySettings objects allow a property to change
       // validators. This removes the old widget and creates a new one
       // instead.
 
-      if (settings->isConditionChanged(m_algo.get(), changedPropName.toStdString())) {
-        if (settings->applyChanges(m_algo.get(), prop->name())) {
-          // WARNING: allow for the possibility that the current property has been replaced inside of `applyChanges`!
-          prop = m_algo->getPointerToProperty(propName.toStdString());
+      for (auto const &setting : settings)
+        if (setting->isConditionChanged(m_algo.get(), changedPropName.toStdString())) {
+          if (setting->applyChanges(m_algo.get(), prop->name())) {
+            // WARNING: allow for the possibility that the current property has been replaced inside of `applyChanges`!
+            prop = m_algo->getPointerToProperty(propName.toStdString());
 
-          widget->setVisible(false);
+            widget->setVisible(false);
 
-          // Create a new widget at the same position in the layout grid:
-          //   since widget is a reference, this also replaces the `widget*` in `m_propWidgets`.
-          auto *oldWidget = widget;
-          int row = widget->getGridRow();
-          QGridLayout *layout = widget->getGridLayout();
-          widget = PropertyWidgetFactory::createWidget(prop, this, layout, row);
-          widget->transferHistoryState(oldWidget, changedPropWidget);
+            // Create a new widget at the same position in the layout grid:
+            //   since widget is a reference, this also replaces the `widget*` in `m_propWidgets`.
+            auto *oldWidget = widget;
+            int row = widget->getGridRow();
+            QGridLayout *layout = widget->getGridLayout();
+            widget = PropertyWidgetFactory::createWidget(prop, this, layout, row);
+            widget->transferHistoryState(oldWidget, changedPropWidget);
 
-          // Delete the old widget
-          oldWidget->deleteLater();
+            // Delete the old widget
+            oldWidget->deleteLater();
 
-          // Whenever the value changes in the widget, this fires
-          // propertyChanged()
-          connect(widget, SIGNAL(valueChanged(const QString &)), this, SLOT(propertyChanged(const QString &)));
+            // Whenever the value changes in the widget, this fires
+            // propertyChanged()
+            connect(widget, SIGNAL(valueChanged(const QString &)), this, SLOT(propertyChanged(const QString &)));
+          }
         }
-      }
     }
   } // for each property
 
   // set Visible and Enabled as appropriate
   for (auto &widget : m_propWidgets) {
     Mantid::Kernel::Property const *prop = widget->getProperty();
-    IPropertySettings const *settings = prop->getSettings();
     auto const &propName = QString::fromStdString(prop->name());
 
     // Set the enabled and visible flags based on what the validators say.
-    // Default is always true.
-    bool visible = true;
-    // Dynamically check if the widget should be enabled.
     bool enabled = this->isWidgetEnabled(prop, propName);
+    bool visible = true;
 
-    // Do we have a custom IPropertySettings?
-    if (settings) {
-      // Set the visible flag
-      visible = settings->isVisible(m_algo.get());
+    auto const &settings = prop->getSettings();
+    if (!settings.empty()) {
+      visible = std::all_of(settings.begin(), settings.end(),
+                            [this](auto const &ptr) { return ptr->isVisible(this->m_algo.get()); });
     }
 
     // Show/hide the validator label (that red star)

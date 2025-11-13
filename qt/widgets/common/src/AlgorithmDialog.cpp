@@ -30,6 +30,8 @@
 
 #include <Poco/ActiveResult.h>
 
+#include <algorithm>
+
 using namespace MantidQt::API;
 using namespace Mantid::Kernel::DateAndTimeHelpers;
 using Mantid::API::IAlgorithm;
@@ -450,9 +452,10 @@ bool AlgorithmDialog::isWidgetEnabled(const QString &propName) const {
   if (!isForScript()) {
     // Regular C++ algo. Let the property tell us,
     // possibly using validators, if it is to be shown enabled
-    if (property->getSettings())
-      return property->getSettings()->isEnabled(getAlgorithm().get());
-    else
+    if (!property->getSettings().empty()) {
+      return std::all_of(property->getSettings().begin(), property->getSettings().end(),
+                         [this](auto const &ptr) { return ptr->isEnabled(this->getAlgorithm().get()); });
+    } else
       return true;
   } else {
     // Algorithm dialog was called from a script(i.e. Python)

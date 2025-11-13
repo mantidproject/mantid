@@ -35,20 +35,20 @@ public:
     Property *prop = alg.getPointerToProperty(m_resultPropName);
     TS_ASSERT(prop);
 
-    TSM_ASSERT("Property always returns visible.", prop->getSettings()->isVisible(&alg))
+    TSM_ASSERT("Property always returns visible.", prop->getSettings()[0]->isVisible(&alg))
     TSM_ASSERT("Property always returns valid.", prop->isValid().empty())
 
-    TSM_ASSERT("Starts off NOT enabled", !prop->getSettings()->isEnabled(&alg));
+    TSM_ASSERT("Starts off NOT enabled", !prop->getSettings()[0]->isEnabled(&alg));
     // Change the property so it is no longer default
     alg.setProperty(m_propertyOneName, 234);
-    TSM_ASSERT("Becomes enabled when another property has been changed", prop->getSettings()->isEnabled(&alg));
+    TSM_ASSERT("Becomes enabled when another property has been changed", prop->getSettings()[0]->isEnabled(&alg));
 
     alg.declareProperty(m_propertyTwoName, 456);
     alg.setPropertySettings(m_propertyTwoName, enabledWhenNotDefault());
     prop = alg.getPointerToProperty(m_propertyTwoName);
-    TSM_ASSERT("Starts off enabled", prop->getSettings()->isEnabled(&alg));
+    TSM_ASSERT("Starts off enabled", prop->getSettings()[0]->isEnabled(&alg));
     alg.setProperty(m_propertyOneName, 123);
-    TSM_ASSERT("Goes back to disabled", !prop->getSettings()->isEnabled(&alg));
+    TSM_ASSERT("Goes back to disabled", !prop->getSettings()[0]->isEnabled(&alg));
   }
 
   void test_when_IS_DEFAULT() {
@@ -63,9 +63,9 @@ public:
     TS_ASSERT(prop);
     if (!prop)
       return;
-    TSM_ASSERT("Starts off enabled", prop->getSettings()->isEnabled(&alg));
+    TSM_ASSERT("Starts off enabled", prop->getSettings()[0]->isEnabled(&alg));
     alg.setProperty(m_propertyOneName, -1);
-    TSM_ASSERT("Becomes disabled when another property has been changed", !prop->getSettings()->isEnabled(&alg));
+    TSM_ASSERT("Becomes disabled when another property has been changed", !prop->getSettings()[0]->isEnabled(&alg));
   }
 
   void test_when_IS_EQUAL_TO() {
@@ -78,10 +78,10 @@ public:
     TS_ASSERT(prop);
     if (!prop)
       return;
-    TSM_ASSERT("Starts off disabled", !prop->getSettings()->isEnabled(&alg));
+    TSM_ASSERT("Starts off disabled", !prop->getSettings()[0]->isEnabled(&alg));
     alg.setProperty(m_propertyOneName, 234);
     TSM_ASSERT("Becomes enabled when the other property is equal to the given string",
-               prop->getSettings()->isEnabled(&alg));
+               prop->getSettings()[0]->isEnabled(&alg));
   }
 
   void test_when_IS_NOT_EQUAL_TO() {
@@ -94,10 +94,10 @@ public:
     TS_ASSERT(prop);
     if (!prop)
       return;
-    TSM_ASSERT("Starts off enabled", prop->getSettings()->isEnabled(&alg));
+    TSM_ASSERT("Starts off enabled", prop->getSettings()[0]->isEnabled(&alg));
     alg.setProperty(m_propertyOneName, 234);
     TSM_ASSERT("Becomes disabled when the other property is equal to the given string",
-               !prop->getSettings()->isEnabled(&alg));
+               !prop->getSettings()[0]->isEnabled(&alg));
   }
 
   void test_combination_AND() {
@@ -105,7 +105,7 @@ public:
     auto alg = setupCombinationTest(AND, true);
     const auto prop = alg.getPointerToProperty(m_resultPropName);
     TS_ASSERT(prop);
-    const auto propSettings = prop->getSettings();
+    const auto &propSettings = prop->getSettings()[0];
 
     // AND should return true first
     TS_ASSERT(propSettings->isEnabled(&alg));
@@ -120,7 +120,7 @@ public:
     auto alg = setupCombinationTest(OR, true);
     const auto prop = alg.getPointerToProperty(m_resultPropName);
     TS_ASSERT(prop);
-    const auto propSettings = prop->getSettings();
+    const auto &propSettings = prop->getSettings()[0];
 
     // OR should return true for both values on
     TS_ASSERT(propSettings->isEnabled(&alg));
@@ -145,7 +145,7 @@ public:
     auto alg = setupCombinationTest(XOR, true);
     const auto prop = alg.getPointerToProperty(m_resultPropName);
     TS_ASSERT(prop);
-    const auto propSettings = prop->getSettings();
+    const auto &propSettings = prop->getSettings()[0];
 
     // With both set to the same value this should return false
     TS_ASSERT(!propSettings->isEnabled(&alg));
