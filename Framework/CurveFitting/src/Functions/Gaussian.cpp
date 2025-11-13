@@ -30,25 +30,25 @@ void Gaussian::init() {
 }
 
 void Gaussian::functionLocal(double *out, const double *xValues, const size_t nData) const {
-  const double peakHeight = getParameter("Height");
-  const double peakCentre = getParameter("PeakCentre");
-  const double weight = pow(1 / getParameter("Sigma"), 2);
+  const auto peakHeight = getParameter("Height");
+  const auto peakCentre = getParameter("PeakCentre");
+  const auto weight = 1 / getParameter("Sigma");
 
   for (size_t i = 0; i < nData; i++) {
-    double diff = xValues[i] - peakCentre;
-    out[i] = peakHeight * exp(-0.5 * diff * diff * weight);
+    const auto diff = (xValues[i] - peakCentre) * weight;
+    out[i] = peakHeight * exp(-0.5 * diff * diff);
   }
 }
 
 void Gaussian::functionDerivLocal(Jacobian *out, const double *xValues, const size_t nData) {
-  const double peakHeight = getParameter("Height");
-  const double peakCentre = getParameter("PeakCentre");
-  const double weight = 1 / getParameter("Sigma");
-  const double weight_sq = weight * weight;
+  const auto peakHeight = getParameter("Height");
+  const auto peakCentre = getParameter("PeakCentre");
+  const auto weight = 1 / getParameter("Sigma");
+  const auto weight_sq = weight * weight;
 
   for (size_t i = 0; i < nData; i++) {
-    double diff = xValues[i] - peakCentre;
-    double e = exp(-0.5 * diff * diff * weight_sq);
+    const auto diff = xValues[i] - peakCentre;
+    const auto e = exp(-0.5 * diff * diff * weight_sq);
     out->set(i, 0, e);
     out->set(i, 1, diff * peakHeight * e * weight_sq);
     out->set(i, 2,
