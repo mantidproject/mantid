@@ -49,6 +49,7 @@ std::string globToRegex(const std::string &glob) {
   regex += '^';
 
   bool escaped = false;
+  bool inBracket = false;
   for (size_t i = 0; i < glob.size(); ++i) {
     char c = glob[i];
 
@@ -89,6 +90,21 @@ std::string globToRegex(const std::string &glob) {
       case '?':
         regex += '.';
         break;
+      case '[':
+        // Start of bracket expression
+        inBracket = true;
+        regex += c;
+        // Check if next character is ! (glob negation) and convert to ^ (regex negation)
+        if (i + 1 < glob.size() && glob[i + 1] == '!') {
+          regex += '^';
+          ++i; // Skip the !
+        }
+        break;
+      case ']':
+        // End of bracket expression
+        inBracket = false;
+        regex += c;
+        break;
       case '.':
       case '^':
       case '$':
@@ -101,7 +117,6 @@ std::string globToRegex(const std::string &glob) {
         regex += '\\';
         regex += c;
         break;
-      // [ and ] are special in both glob and regex, so pass through
       default:
         regex += c;
       }
