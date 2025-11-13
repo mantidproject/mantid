@@ -59,12 +59,6 @@ std::map<std::string, std::string> GroupWorkspaces::validateInputs() {
   const std::vector<std::string> inputWorkspaces = getProperty("InputWorkspaces");
   std::string globExpression = getProperty("GlobExpression");
 
-  for (auto it = globExpression.begin(); it < globExpression.end(); ++it) {
-    if (*it == '\\') {
-      it = globExpression.erase(it, it + 1);
-    }
-  }
-
   if (inputWorkspaces.empty() && globExpression.empty()) {
     results["InputWorkspaces"] = "No InputWorkspace names specified. Rerun with a list of workspaces "
                                  "names or a glob expression";
