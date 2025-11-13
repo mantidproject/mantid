@@ -215,6 +215,7 @@ GSL_FitData::~GSL_FitData() {
   gsl_vector_free(initFuncParams);
 }
 
+// Replicates equivalent gsl function
 Eigen::MatrixXd covar_from_jacobian(const map_type &J, double epsrel, const map_type &r) {
   const Eigen::Index m = J.rows(), n = J.cols();
   const int dof = std::max<int>(1, static_cast<int>(m - n)); // avoid div by 0 for safety
