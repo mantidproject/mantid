@@ -12,8 +12,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
-#include "MantidAPI/SpectrumInfo.h"
-#include "MantidAPI/TimeAtSampleStrategyElastic.h"
+#include "MantidDataHandling/AlignAndFocusPowderSlim/ProcessBankSplitFastLogsTask.h"
 #include "MantidDataHandling/AlignAndFocusPowderSlim/ProcessBankSplitTask.h"
 #include "MantidDataHandling/AlignAndFocusPowderSlim/ProcessBankTask.h"
 #include "MantidDataHandling/LoadEventNexus.h"
@@ -48,7 +47,6 @@ using Mantid::API::AnalysisDataService;
 using Mantid::API::FileProperty;
 using Mantid::API::ITableWorkspace_sptr;
 using Mantid::API::MatrixWorkspace_sptr;
-using Mantid::API::TimeAtSampleStrategyElastic;
 using Mantid::API::WorkspaceProperty;
 using Mantid::DataObjects::MaskWorkspace_sptr;
 using Mantid::DataObjects::TimeSplitter;
@@ -167,6 +165,9 @@ void AlignAndFocusPowderSlim::init() {
   declareProperty(PropertyNames::CORRECTION_TO_SAMPLE, false,
                   "Find time-of-flight when neutron was at the sample position. This is only necessary for fast logs "
                   "(i.e. more frequent than proton on target pulse).");
+  declareProperty(
+      PropertyNames::FULL_TIME, false,
+      "If true, events will be splitting using full time values (tof+pulsetime) rather than just pulsetime.");
   auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(0);
   declareProperty(PropertyNames::FILTER_BAD_PULSES, false,
@@ -409,7 +410,6 @@ void AlignAndFocusPowderSlim::exec() {
     wksp->mutableRun().removeDataOutsideTimeROI();
 
     setProperty(PropertyNames::OUTPUT_WKSP, std::move(wksp));
-
   } else {
     std::string ws_basename = this->getPropertyValue(PropertyNames::OUTPUT_WKSP);
     std::vector<std::string> wsNames;
@@ -423,8 +423,25 @@ void AlignAndFocusPowderSlim::exec() {
     }
 
     auto progress = std::make_shared<API::Progress>(this, .17, .9, num_banks_to_read * workspaceIndices.size());
+    if (this->getProperty(PropertyNames::FULL_TIME)) {
+      g_log.information() << "Using ProcessBankSplitTask for splitter processing\n";
+      const auto pulse_indices = this->determinePulseIndices(wksp, filterROI);
 
-    if (this->getProperty(PropertyNames::PROCESS_BANK_SPLIT_TASK)) {
+      const auto splitterMap = timeSplitter.getSplittersMap();
+
+      ProcessBankSplitFastLogsTask task(bankEntryNames, h5file, is_time_filtered, workspaceIndices, workspaces,
+                                        m_calibration, m_scale_at_sample, m_masked, static_cast<size_t>(DISK_CHUNK),
+                                        static_cast<size_t>(GRAINSIZE_EVENTS), pulse_indices, splitterMap, progress);
+
+      // generate threads only if appropriate
+      if (num_banks_to_read > 1) {
+        tbb::parallel_for(tbb::blocked_range<size_t>(0, num_banks_to_read), task);
+      } else {
+        // a "range" of 1; note -1 to match 0-indexed array with 1-indexed bank labels
+        task(tbb::blocked_range<size_t>(outputSpecNum - 1, outputSpecNum));
+      }
+
+    } else if (this->getProperty(PropertyNames::PROCESS_BANK_SPLIT_TASK)) {
       g_log.information() << "Using ProcessBankSplitTask for splitter processing\n";
       // determine the pulse indices from the time and splitter workspace
       const auto target_to_pulse_indices = this->determinePulseIndicesTargets(wksp, filterROI, timeSplitter);
