@@ -1,0 +1,176 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2025 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
+import numpy as np
+
+from mantid.api import PythonAlgorithm, AlgorithmFactory, IPeaksWorkspaceProperty
+from mantid.geometry import PointGroupFactory
+from mantid.kernel import Direction, FloatBoundedValidator, StringListValidator
+from mantid.simpleapi import FilterPeaks, IndexPeaks, mtd, TransformHKL
+
+
+class ReorientUnitCell(PythonAlgorithm):
+    """
+    Reorients a unit cell based on crystal symmetry by finding the transformation
+    that maximizes trace(U @ B @ inv(M)) across all symmetry operations M.
+    """
+
+    @staticmethod
+    def get_point_group_symbol(crystal_system, lattice_system):
+        """
+        Get the point group symbol based on crystal system and lattice system.
+
+        :param str crystal_system: Crystal system (Triclinic, Monoclinic, etc.)
+        :param str lattice_system: Lattice system (for Trigonal: Rhombohedral or Hexagonal)
+        :return: Point group symbol string
+        :rtype: str
+        """
+        point_group_map = {
+            "Cubic": "m-3m",
+            "Hexagonal": "6/mmm",
+            "Tetragonal": "4/mmm",
+            "Orthorhombic": "mmm",
+            "Monoclinic": "2/m",
+            "Triclinic": "-1",
+        }
+
+        # Special case for Trigonal
+        if crystal_system == "Trigonal":
+            if lattice_system == "Rhombohedral":
+                return "-3m r"
+            else:  # Hexagonal
+                return "-3m"
+
+        return point_group_map[crystal_system]
+
+    def name(self):
+        return "ReorientUnitCell"
+
+    def category(self):
+        return "Crystal\\UBMatrix"
+
+    def seeAlso(self):
+        return ["IndexPeaks", "TransformHKL", "FindUBUsingIndexedPeaks"]
+
+    def summary(self):
+        return "Select the unit cell most aligned to goniometer axes."
+
+    def PyInit(self):
+        # Input/Output properties
+        self.declareProperty(
+            IPeaksWorkspaceProperty(name="PeaksWorkspace", defaultValue="", direction=Direction.InOut),
+            doc="The peaks workspace to reorient (modified in place).",
+        )
+
+        # Tolerance
+        self.declareProperty(
+            name="Tolerance",
+            defaultValue=0.12,
+            direction=Direction.Input,
+            validator=FloatBoundedValidator(lower=0.0),
+            doc="Indexing tolerance for IndexPeaks algorithm.",
+        )
+
+        # Crystal system
+        crystal_systems = ["Triclinic", "Monoclinic", "Orthorhombic", "Tetragonal", "Trigonal", "Hexagonal", "Cubic"]
+        self.declareProperty(
+            name="CrystalSystem",
+            defaultValue="Triclinic",
+            direction=Direction.Input,
+            validator=StringListValidator(crystal_systems),
+            doc="Crystal system.",
+        )
+
+        # Lattice system (optional, for Trigonal)
+        self.declareProperty(
+            name="LatticeSystem",
+            defaultValue="",
+            direction=Direction.Input,
+            doc="Lattice system (for Trigonal: Rhombohedral or Hexagonal). Defaults to CrystalSystem value.",
+        )
+
+    def validateInputs(self):
+        issues = dict()
+
+        # Check that peaks workspace has oriented lattice
+        peaks_ws = self.getProperty("PeaksWorkspace").value
+        if not peaks_ws.sample().hasOrientedLattice():
+            issues["PeaksWorkspace"] = "PeaksWorkspace must have an oriented lattice (UB matrix)."
+
+        # Check lattice system is appropriate
+        crystal_system = self.getProperty("CrystalSystem").value
+        lattice_system = self.getProperty("LatticeSystem").value
+        if lattice_system and crystal_system != "Trigonal":
+            issues["LatticeSystem"] = "LatticeSystem should only be specified for Trigonal crystal system."
+
+        if crystal_system == "Trigonal" and lattice_system:
+            if lattice_system not in ["Rhombohedral", "Hexagonal"]:
+                issues["LatticeSystem"] = "For Trigonal system, LatticeSystem must be Rhombohedral or Hexagonal."
+
+        return issues
+
+    def PyExec(self):
+        # Get input properties
+        wsname: str = self.getPropertyValue("PeaksWorkspace")
+        tolerance = self.getProperty("Tolerance").value
+        crystal_system: str = self.getProperty("CrystalSystem").value
+        lattice_system: str = self.getProperty("LatticeSystem").value
+
+        # If lattice system not specified, use crystal system
+        if not lattice_system:
+            lattice_system = crystal_system
+
+        # Step 1: Fetch U and B matrices
+        oriented_lattice = mtd[wsname].sample().getOrientedLattice()
+        U, B = oriented_lattice.getU(), oriented_lattice.getB()
+
+        # Step 2: Index peaks with the given tolerance
+        IndexPeaks(PeaksWorkspace=wsname, Tolerance=tolerance, CommonUBForAll=False)
+
+        # Step 3: Get unique run numbers
+        run_numbers = np.unique(mtd[wsname].column("RunNumber")).tolist()
+        for run in run_numbers:
+            FilterPeaks(
+                InputWorkspace=wsname, FilterVariable="RunNumber", FilterValue=run, Operator="=", OutputWorkspace=mtd.unique_hidden_name()
+            )
+
+        # Step 4: Generate cell symmetry transformation matrices
+        point_group_symbol = self.get_point_group_symbol(crystal_system, lattice_system)
+        point_group = PointGroupFactory.createPointGroup(point_group_symbol)
+
+        # Get symmetry operations with positive determinant to preserve handedness
+        transforms = []
+        coords = np.eye(3).astype(int)  # 3x3 identity matrix representing hkl coordinates for the lattice vectors
+        for sym_op in point_group.getSymmetryOperations():
+            transform = np.column_stack([sym_op.transformHKL(vec) for vec in coords])
+            if np.linalg.det(transform) > 0:
+                transforms.append(transform)
+
+        # Step 5: Find the symmetry operation that maximizes trace(U @ B @ inv(M)) = trace(U' @ B)
+        max_trace = -np.inf
+        optimal_transform = None
+        for transform in transforms:
+            try:
+                transform_inv = np.linalg.inv(transform)
+                trace = np.trace(U @ B @ transform_inv)
+                if trace > max_trace:
+                    max_trace = trace
+                    optimal_transform = transform
+            except np.linalg.LinAlgError:  # corner case when np.linalg.det(transform) > 0 and very close to 0
+                # Skip singular matrices
+                continue
+
+        # Step 6: Apply the optimal transformation
+        if optimal_transform is not None:
+            # Determine whether to use FindError based on number of peaks
+            find_error = mtd[wsname].getNumberPeaks() > 3
+            TransformHKL(PeaksWorkspace=wsname, HKLTransform=optimal_transform, FindError=find_error)
+
+        self.setProperty("PeaksWorkspace", mtd[wsname])
+
+
+# Register algorithm with Mantid
+AlgorithmFactory.subscribe(ReorientUnitCell)
