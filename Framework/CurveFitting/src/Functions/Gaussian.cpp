@@ -131,16 +131,19 @@ void Gaussian::unfixIntensity() { removeTie("Height"); }
 /// @param nBins :: Number of bins.
 void Gaussian::histogram1D(double *out, double left, const double *right, const size_t nBins) const {
 
-  double amplitude = intensity();
-  const double peakCentre = getParameter("PeakCentre");
-  const double sigma2 = getParameter("Sigma") * sqrt(2.0);
+  const auto amplitude = intensity();
+  const auto peakCentre = getParameter("PeakCentre");
+  const auto sigma2 = getParameter("Sigma") * sqrt(2.0);
 
   auto cumulFun = [sigma2, peakCentre](double x) { return 0.5 * erf((x - peakCentre) / sigma2); };
-  double cLeft = cumulFun(left);
+  auto cLeft = cumulFun(left);
+  auto xLeft = left;
   for (size_t i = 0; i < nBins; ++i) {
-    double cRight = cumulFun(right[i]);
-    out[i] = amplitude * (cRight - cLeft);
+    const auto bin_width = right[i] - xLeft;
+    const auto cRight = cumulFun(right[i]);
+    out[i] = amplitude * (cRight - cLeft) / bin_width;
     cLeft = cRight;
+    xLeft = right[i];
   }
 }
 
@@ -151,10 +154,9 @@ void Gaussian::histogram1D(double *out, double left, const double *right, const 
 /// (size = nBins).
 /// @param nBins :: Number of bins.
 void Gaussian::histogramDerivative1D(Jacobian *jacobian, double left, const double *right, const size_t nBins) const {
-  const double h = getParameter("Height");
-  const double c = getParameter("PeakCentre");
-  const double s = getParameter("Sigma");
-  const auto w = 1 / s;
+  const auto h = getParameter("Height");
+  const auto c = getParameter("PeakCentre");
+  const auto w = 1 / getParameter("Sigma");
 
   auto e = [w](const double d) { return exp(-0.5 * w * w * d * d); };
   auto eint = [w](const double d) { return M_SQRT2 * erf(M_SQRT2 * w * d) / (w * M_2_SQRTPI); };
@@ -165,12 +167,13 @@ void Gaussian::histogramDerivative1D(Jacobian *jacobian, double left, const doub
   const auto h_over_w = h / w;
   for (size_t i = 0; i < nBins; ++i) {
     const auto dRight = right[i] - c;
+    const auto bin_width = dRight - dLeft;
     const auto eRight = e(dRight);
     const auto eintRight = eint(dRight);
-    jacobian->set(i, 0, eintRight - eintLeft);  // height
-    jacobian->set(i, 1, -h * (eRight - eLeft)); // centre
+    jacobian->set(i, 0, (eintRight - eintLeft) / bin_width); // height
+    jacobian->set(i, 1, -h * (eRight - eLeft) / bin_width);  // centre
     jacobian->set(i, 2,
-                  w * (dRight * eRight - dLeft * eLeft) + h_over_w * (eintLeft - eintRight)); // weight
+                  (w * (dRight * eRight - dLeft * eLeft) + h_over_w * (eintLeft - eintRight)) / bin_width); // weight
     eLeft = eRight;
     eintLeft = eintRight;
     dLeft = dRight;
