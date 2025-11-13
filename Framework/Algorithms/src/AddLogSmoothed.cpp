@@ -119,6 +119,8 @@ std::map<std::string, std::string> AddLogSmoothed::validateInputs() {
   case SmoothingMethod::BOXCAR: {
     if (params.empty()) {
       issues["Params"] = "Boxcar smoothing requires the window width be passed as parameter";
+    } else if (params[0] < 0) {
+      issues["Params"] = Strings::strmakef("Boxcar smoothing requires a positive window; given %d\n", params[0]);
     } else if (params[0] % 2 == 0) {
       issues["Params"] = Strings::strmakef("Boxcar smoothing requires an odd window size: %d is even", params[0]);
     }
@@ -146,7 +148,7 @@ std::map<std::string, std::string> AddLogSmoothed::validateInputs() {
   if (issues.count("Params"))
     issues["SmoothingMethod"] = issues["Params"];
 
-  // validate input workspace: must have a log with LogName and not one with NewLogName
+  // validate input workspace: must have a log with LogName
   std::string logName = getPropertyValue("LogName");
   MatrixWorkspace_sptr ws = getProperty("InputWorkspace");
   if (!ws) {
@@ -162,11 +164,12 @@ std::map<std::string, std::string> AddLogSmoothed::validateInputs() {
   if (!tsp) {
     issues["LogName"] = "Log " + logName + " must be a numerical time series (TimeSeries<double>).";
   } else {
+    std::size_t const minBoxCarSize = (params.empty() ? 0 : static_cast<std::size_t>(params[0]));
     std::size_t const MIN_SPLINE_POINTS{5UL}; // minimum points needed for spline fits
-    std::size_t minSize = (type == SmoothingMethod::BOXCAR ? static_cast<std::size_t>(params[0]) : MIN_SPLINE_POINTS);
+    std::size_t minSize = (type == SmoothingMethod::BOXCAR ? minBoxCarSize : MIN_SPLINE_POINTS);
     if (static_cast<std::size_t>(tsp->size()) < minSize) {
-      issues["LogName"] =
-          Strings::strmakef("Log %s has insufficient number of points; %zu < %zu", logName, tsp->size(), minSize);
+      issues["LogName"] = Strings::strmakef("Log %s has insufficient number of points; %zu < %zu", logName.c_str(),
+                                            tsp->size(), minSize);
     }
   }
   return issues;

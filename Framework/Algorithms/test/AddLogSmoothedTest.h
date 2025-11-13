@@ -30,8 +30,12 @@ public:
   static void destroySuite(AddLogSmoothedTest *suite) { delete suite; }
 
   void tearDown() {
-    if (AnalysisDataService::Instance().doesExist("_smooth_test")) {
-      AnalysisDataService::Instance().clear();
+    auto &ads = AnalysisDataService::Instance();
+    if (ads.doesExist("_smooth_test")) {
+      ads.remove("_smooth_test");
+    }
+    if (ads.doesExist("_tab")) {
+      ads.remove("_tab");
     }
   }
 

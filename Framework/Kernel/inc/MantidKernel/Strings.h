@@ -449,9 +449,10 @@ MANTID_KERNEL_DLL std::istream &extractToEOL(std::istream &is, std::string &str)
 /**
  * This is the constructor that std::string needed to have.
  * Initialize a string from a c-style formatting string, as you would with printf.
- * @param fmt :: c-style format string with specifiers such as %d or %f
- * @param ... :: variadic arguments corresponding to c-style format specifiers
+ * @param fmt : c-style format string with specifiers such as %d or %f
+ * @param ... : variadic arguments corresponding to c-style format specifiers
  * @return formatted string, or empty string on error condition
+ * by Toby Speight, Feb 9 2018
  */
 MANTID_KERNEL_DLL std::string strmakef(char const *const fmt, ...);
 

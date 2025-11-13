@@ -1201,13 +1201,7 @@ std::string randomString(size_t len) {
   return result;
 }
 
-/**
- * Create a formatted string using printf-style formatting.
- * @param fmt :: printf-style format string
- * @param ... :: variadic arguments matching the format specifiers
- * @return formatted string, or empty string on error condition
- * by Toby Speight, Feb 9 2018
- */
+/// Create a formatted string using printf-style formatting.
 std::string strmakef(const char *const fmt, ...) {
   if (!fmt) {
     // empty format string -- do nothing
