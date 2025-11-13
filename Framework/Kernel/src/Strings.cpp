@@ -1201,7 +1201,18 @@ std::string randomString(size_t len) {
   return result;
 }
 
+/**
+ * Creare a formatted string using printf-style formatting.
+ * @param fmt :: printf-style format string
+ * @param ... :: variadic arguments matching the format specifiers
+ * @return formatted string, or empty string on error condition
+ */
 std::string strmakef(const char *const fmt, ...) {
+  if (!fmt) {
+    // empty format string -- do nothing
+    return {};
+  }
+
   char buf[256];
 
   va_list args;
@@ -1220,7 +1231,7 @@ std::string strmakef(const char *const fmt, ...) {
 
   std::string s(len, '\0');
   va_start(args, fmt);
-  std::vsnprintf(&(*s.begin()), len + 1, fmt, args);
+  std::vsnprintf(s.data(), len + 1, fmt, args);
   va_end(args);
   return s;
 }
