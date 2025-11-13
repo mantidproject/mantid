@@ -158,7 +158,7 @@ std::map<std::string, std::string> AddLogSmoothed::validateInputs() {
     issues["LogName"] = "Log " + logName + " not found in the workspace sample logs.";
     return issues;
   }
-  auto *tsp = dynamic_cast<TimeSeriesProperty<double> *>(run.getProperty(logName));
+  auto const *tsp = dynamic_cast<TimeSeriesProperty<double> *>(run.getProperty(logName));
   if (!tsp) {
     issues["LogName"] = "Log " + logName + " must be a numerical time series (TimeSeries<double>).";
   } else {
