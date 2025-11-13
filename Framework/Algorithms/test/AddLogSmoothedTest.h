@@ -29,6 +29,12 @@ public:
   static AddLogSmoothedTest *createSuite() { return new AddLogSmoothedTest(); }
   static void destroySuite(AddLogSmoothedTest *suite) { delete suite; }
 
+  void tearDown() {
+    if (AnalysisDataService::Instance().doesExist("_smooth_test")) {
+      AnalysisDataService::Instance().clear();
+    }
+  }
+
   void test_Init() {
     AddLogSmoothed alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
@@ -64,7 +70,7 @@ public:
     // param must be bigger than 1
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Params", "1"));
     TS_ASSERT_THROWS_ASSERT(alg.execute(), std::runtime_error const &e,
-                            TS_ASSERT(strstr(e.what(), "The cutoff in FFT zeroing must be larger than 1")););
+                            TS_ASSERT(strstr(e.what(), "The cutoff in FFT zeroing must be larger than 1")));
 
     // fft butterworth smoothing
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("SmoothingMethod", "Butterworth"));
@@ -83,7 +89,6 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Params", "2, 0"));
     TS_ASSERT_THROWS_ASSERT(alg.execute(), std::runtime_error const &e,
                             TS_ASSERT(strstr(e.what(), "order must be greater than 0")));
-    // TS_ASSERT(strstr(e.what(), "order must be greater than zero"));
   }
 
   void test_invalid_wksp() {
@@ -129,7 +134,7 @@ public:
     std::string root_time = "2016-11-20T16:17";
     TimeSeriesProperty<double> *tsp = new TimeSeriesProperty<double>("tsp_log");
     for (unsigned i = 0; i < values.size(); i++) {
-      tsp->addValue(Kernel::Strings::strmakef("%s:2%d", root_time.c_str(), i), values[i]);
+      tsp->addValue(Kernel::Strings::strmakef("%s:02%d", root_time.c_str(), i), values[i]);
     }
     ws->mutableRun().addProperty(tsp);
     return ws;
@@ -170,6 +175,11 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Params", "3"));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
+
+    auto outTSP = dynamic_cast<TimeSeriesProperty<double> *>(ws->run().getProperty("tsp_log_smoothed"));
+    TS_ASSERT(outTSP != nullptr);
+    auto result = outTSP->valuesAsVector();
+    TS_ASSERT_EQUALS(result.size(), values.size());
   }
 
   void test_execute_butterworth() {
@@ -186,5 +196,10 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Params", "3, 2"));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
+
+    auto outTSP = dynamic_cast<TimeSeriesProperty<double> *>(ws->run().getProperty("tsp_log_smoothed"));
+    TS_ASSERT(outTSP != nullptr);
+    auto result = outTSP->valuesAsVector();
+    TS_ASSERT_EQUALS(result.size(), values.size());
   }
 };

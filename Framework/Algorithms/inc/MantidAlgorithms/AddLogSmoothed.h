@@ -8,14 +8,13 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAlgorithms/DllConfig.h"
-#include "MantidKernel/TimeSeriesProperty.h"
 
 namespace Mantid {
 namespace Algorithms {
 
-/** Takes an existing sample log and smooths it using one of the indicated methods
+/** Takes an existing sample log and smooths it using a selected method
   @author Reece Boston
-  @date Nov 11, in the two-thousandth and twenty fifth year of our Lord
+  @date 2025-11-11
 */
 
 class MANTID_ALGORITHMS_DLL AddLogSmoothed final : public API::Algorithm {
@@ -28,7 +27,7 @@ public:
   }
 
   /// Algorithm's version for identification
-  int version() const override { return 1; };
+  int version() const override { return 1; }
   const std::vector<std::string> seeAlso() const override { return {"AddSampleLog", "AddLogDerivative"}; }
   /// Algorithm's category for identification
   const std::string category() const override { return "DataHandling\\Logs"; }

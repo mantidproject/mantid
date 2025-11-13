@@ -153,25 +153,20 @@ std::map<std::string, std::string> AddLogSmoothed::validateInputs() {
     issues["InputWorkspace"] = "No matrix workspace specified for input workspace";
     return issues;
   }
-  Run &run = ws->mutableRun();
+  Run const &run = ws->run();
   if (!run.hasProperty(logName)) {
     issues["LogName"] = "Log " + logName + " not found in the workspace sample logs.";
     return issues;
   }
-  Property *prop = run.getProperty(logName);
-  if (!prop) {
-    issues["LogName"] = "Log " + logName + " not found in the workspace sample logs.";
-    return issues;
-  }
-  auto *tsp = dynamic_cast<TimeSeriesProperty<double> *>(prop);
+  auto *tsp = dynamic_cast<TimeSeriesProperty<double> *>(run.getProperty(logName));
   if (!tsp) {
     issues["LogName"] = "Log " + logName + " must be a numerical time series (TimeSeries<double>).";
   } else {
-    int const MIN_SPLINE_POINTS{5}; // minimum points needed for spline fits
-    int minTimeSeriesSize = (type == SmoothingMethod::BOXCAR ? params[0] : MIN_SPLINE_POINTS);
-    if (tsp->size() < minTimeSeriesSize) {
-      issues["LogName"] = Strings::strmakef("Log %s has insufficient number of points; %zu < %d", logName, tsp->size(),
-                                            minTimeSeriesSize);
+    std::size_t const MIN_SPLINE_POINTS{5UL}; // minimum points needed for spline fits
+    std::size_t minSize = (type == SmoothingMethod::BOXCAR ? static_cast<std::size_t>(params[0]) : MIN_SPLINE_POINTS);
+    if (static_cast<std::size_t>(tsp->size()) < minSize) {
+      issues["LogName"] =
+          Strings::strmakef("Log %s has insufficient number of points; %zu < %zu", logName, tsp->size(), minSize);
     }
   }
   return issues;
