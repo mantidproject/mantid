@@ -11,10 +11,10 @@
 #include "MantidCurveFitting/GSLFunctions.h"
 #include "MantidCurveFitting/HalfComplex.h"
 
-#include <gsl/gsl_eigen.h>
-#include <gsl/gsl_errno.h>
 #include <gsl/gsl_fft_halfcomplex.h>
 #include <gsl/gsl_fft_real.h>
+
+#include <Eigen/Eigenvalues>
 
 #include <algorithm>
 #include <cassert>
@@ -684,21 +684,16 @@ std::vector<double> ChebfunBase::roots(const std::vector<double> &a) const {
     C.set(N + i, lasti, tmp);
   }
 
-  gsl_vector_complex *eigenval = gsl_vector_complex_alloc(N2);
-  auto workspace = gsl_eigen_nonsymm_alloc(N2);
-
-  EigenMatrix C_tr(C.tr());
-  gsl_matrix_view C_tr_gsl = getGSLMatrixView(C_tr.mutator());
-  gsl_eigen_nonsymm(&C_tr_gsl.matrix, eigenval, workspace);
-  gsl_eigen_nonsymm_free(workspace);
+  Eigen::EigenSolver<Eigen::MatrixXd> es(C.mutator());
+  const Eigen::VectorXcd evals = es.eigenvalues();
 
   const double Dx = endX() - startX();
   bool isFirst = true;
   double firstIm = 0;
   for (size_t i = 0; i < N2; ++i) {
-    auto val = gsl_vector_complex_get(eigenval, i);
-    double re = GSL_REAL(val);
-    double im = GSL_IMAG(val);
+    const std::complex<double> val = evals[static_cast<Eigen::Index>(i)];
+    double re = val.real();
+    double im = val.imag();
     double ab = re * re + im * im;
     if (fabs(ab - 1.0) > 1e-2) {
       isFirst = true;
@@ -715,8 +710,6 @@ std::vector<double> ChebfunBase::roots(const std::vector<double> &a) const {
       isFirst = true;
     }
   }
-  gsl_vector_complex_free(eigenval);
-
   return r;
 }
 
