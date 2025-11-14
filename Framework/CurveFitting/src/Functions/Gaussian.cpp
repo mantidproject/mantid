@@ -159,7 +159,7 @@ void Gaussian::histogramDerivative1D(Jacobian *jacobian, double left, const doub
   const auto w = 1 / getParameter("Sigma");
 
   auto e = [w](const double d) { return exp(-0.5 * w * w * d * d); };
-  auto eint = [w](const double d) { return M_SQRT2 * erf(M_SQRT2 * w * d) / (w * M_2_SQRTPI); };
+  auto eint = [w](double d) { return std::sqrt(M_PI / 2.0) * (1.0 / w) * std::erf(w * d / M_SQRT2); };
 
   auto dLeft = left - c;
   auto eLeft = e(dLeft);
