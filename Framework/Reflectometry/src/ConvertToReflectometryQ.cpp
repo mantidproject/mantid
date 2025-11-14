@@ -404,7 +404,7 @@ MatrixWorkspace_sptr ConvertToReflectometryQ::correctDetectors(MatrixWorkspace_s
     if (parent) {
       auto parentType = parent->type();
       auto detectorName = (parentType == "Instrument") ? detector->getName() : parent->getName();
-      componentsToMove.insert(detectorName);
+      componentsToMove.insert(std::move(detectorName));
     }
   }
 

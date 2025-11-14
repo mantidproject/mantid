@@ -89,7 +89,7 @@ MCInteractionVolume::MCInteractionVolume(const API::Sample &sample, const size_t
                                          const MCInteractionVolume::ScatteringPointVicinity pointsIn,
                                          IObject_sptr gaugeVolume)
     : m_sample(sample.getShape().clone()), m_env(sample.hasEnvironment() ? &sample.getEnvironment() : nullptr),
-      m_maxScatterAttempts(maxScatterAttempts), m_pointsIn(pointsIn), m_gaugeVolume(gaugeVolume) {}
+      m_maxScatterAttempts(maxScatterAttempts), m_pointsIn(pointsIn), m_gaugeVolume(std::move(gaugeVolume)) {}
 
 /**
  * Returns the defined gauge volume if one is present, otherwise returns nullptr
