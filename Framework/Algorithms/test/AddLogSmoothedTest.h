@@ -29,7 +29,7 @@ public:
   static AddLogSmoothedTest *createSuite() { return new AddLogSmoothedTest(); }
   static void destroySuite(AddLogSmoothedTest *suite) { delete suite; }
 
-  void tearDown() {
+  void tearDown() override {
     auto &ads = AnalysisDataService::Instance();
     if (ads.doesExist("_smooth_test")) {
       ads.remove("_smooth_test");
@@ -138,7 +138,7 @@ public:
     std::string root_time = "2016-11-20T16:17";
     TimeSeriesProperty<double> *tsp = new TimeSeriesProperty<double>("tsp_log");
     for (unsigned i = 0; i < values.size(); i++) {
-      tsp->addValue(Kernel::Strings::strmakef("%s:02%d", root_time.c_str(), i), values[i]);
+      tsp->addValue(Mantid::Kernel::Strings::strmakef("%s:02%d", root_time.c_str(), i), values[i]);
     }
     ws->mutableRun().addProperty(tsp);
     return ws;
