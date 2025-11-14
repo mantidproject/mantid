@@ -6,10 +6,10 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
+import argparse
 import inspect
 import os
 import sys
-import time
 import importlib.util
 
 from collections import OrderedDict
@@ -20,8 +20,6 @@ os.environ["MPLBACKEND"] = "Agg"
 #########################################################################
 # Set up the command line options
 #########################################################################
-
-start_time = time.time()
 
 DEFAULT_QT_API = "pyqt5"
 THIS_MODULE_DIR = os.path.dirname(os.path.realpath(__file__))
@@ -34,15 +32,14 @@ DEFAULT_ARCHIVE_SEARCH = True
 DEFAULT_MAKE_PROP = True
 DEFAULT_EXECUTABLE = sys.executable
 
+def main():
 
-def kill_children(processes):
-    for process in processes:
-        process.terminate()
-    # Exit with status 1 - NOT OK
-    sys.exit(1)
+    parser = argparse.ArgumentParser()
+    parser.add_argument("test_path", type=str, help="path to the test file that should be run")
+    parser.add_argument("pr", type=bool, help="is this being run as a pr job?")
+    args = parser.parse_args()
 
 
-def main(argv):
     # Set the Qt version to use during the system tests
     os.environ["QT_API"] = DEFAULT_QT_API
 
@@ -76,7 +73,8 @@ def main(argv):
     # Generate list of tests
     #########################################################################
 
-    path_to_test = argv[1]
+    path_to_test = args.test_path
+    print(path_to_test)
     test_dir_name = os.path.dirname(path_to_test)
     test_file_name = os.path.basename(path_to_test)
     test_module_name = os.path.splitext(test_file_name)[0]
@@ -93,14 +91,13 @@ def main(argv):
 
     runner = systemtesting.TestRunner(
         executable=DEFAULT_EXECUTABLE,
-        # see InstallerTests.py for why lstrip is required
         exec_args="--classic",
         escape_quotes=True,
     )
 
     results = OrderedDict()
     for test_class_name in test_class_names:
-        script_obj = systemtesting.TestScript(test_dir_name, test_module_name, test_class_name, bool(argv[2]))
+        script_obj = systemtesting.TestScript(test_dir_name, test_module_name, test_class_name, bool(args.pr))
         results[test_class_name] = runner.start_in_current_process(script_obj)
 
     #########################################################################
@@ -108,6 +105,7 @@ def main(argv):
     #########################################################################
 
     failure = False
+    print(results.values())
     if any(exit_code is not systemtesting.TestRunner.SUCCESS_CODE and
            exit_code is not systemtesting.TestRunner.SKIP_TEST
            for (exit_code, _) in results.values()):
@@ -130,4 +128,4 @@ def main(argv):
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()
