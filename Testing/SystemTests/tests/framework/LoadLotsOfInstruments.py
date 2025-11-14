@@ -31,13 +31,21 @@ class LoadLotsOfInstruments(systemtesting.MantidSystemTest):
                     clone_file = open(os.path.join(instrument_directory, clone + file_type)).read()
                     assert original_file == clone_file.replace(clone, original)
 
+    def __getInstrumentsToSkip__(self):
+        """
+        Skip instruments due to, for example, large size
+        """
+        instruments = ["IMAGINE", "CG4D"]
+        return instruments
+
     def __getDataFileList__(self):
         # get a list of directories to look in
         direc = config["instrumentDefinition.directory"]
         print("Looking for instrument definition files in: %s" % direc)
         cwd = os.getcwd()
         os.chdir(direc)
-        myFiles = glob.glob("*Definition*.xml")
+        skipInstruments = self.__getInstrumentsToSkip__()
+        myFiles = [f for f in glob.glob("*Definition*.xml") if not any([inst in f for inst in skipInstruments])]
         os.chdir(cwd)
         # Files and their corresponding sizes. the low-memory win machines
         # fair better loading the big files first
