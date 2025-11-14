@@ -978,7 +978,7 @@ bool LoadISISNexus2::findSpectraDetRangeInFile(const NXEntry &entry, std::vector
   auto monitorSpectra = m_monBlockInfo.getAllSpectrumNumbers();
   populateDataBlockCompositeWithContainer(m_detBlockInfo, spectrum_index, ndets,
                                           static_cast<int>(data.dim0()) /*Number of Periods*/,
-                                          data.dim2() /*Number of channels*/, monitorSpectra);
+                                          data.dim2() /*Number of channels*/, std::move(monitorSpectra));
 
   // We should handle legacy files which include the spectrum number of the
   // monitors

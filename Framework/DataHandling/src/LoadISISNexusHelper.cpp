@@ -66,7 +66,7 @@ std::tuple<NXInt, NXInt> findDetectorIDsAndSpectrumNumber(const NXEntry &entry, 
     // This is typical of a Muon Nexus file, as stated in the Nexus V2
     // specification.
     NXInt udet = spectrum_index;
-    NXInt spec = spectrum_index;
+    NXInt spec = std::move(spectrum_index);
     return std::make_tuple(udet, spec);
   }
 }

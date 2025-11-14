@@ -483,7 +483,7 @@ void LoadMuonNexus2::loadLogs(const API::MatrixWorkspace_sptr &ws, const Mantid:
 
   std::string run_num = std::to_string(entry.getInt("run_number"));
   // The sample is left to delete the property
-  ws->mutableRun().addLogData(new PropertyWithValue<std::string>("run_number", run_num));
+  ws->mutableRun().addLogData(new PropertyWithValue<std::string>("run_number", std::move(run_num)));
 
   ws->populateInstrumentParameters();
 }
@@ -629,7 +629,7 @@ std::map<int, std::set<int>> LoadMuonNexus2::loadDetectorMapping(const Mantid::L
         for (detid_t jDet = 0; jDet < nDetectors; ++jDet) {
           detIDs.insert(detList[start + jDet]);
         }
-        mapping[i] = detIDs;
+        mapping[i] = std::move(detIDs);
       }
     } catch (const LegacyNexus::Exception &err) {
       // Throw a more user-friendly message

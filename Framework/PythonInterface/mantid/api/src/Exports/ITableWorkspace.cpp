@@ -430,7 +430,7 @@ PyObject *columnArray(const ITableWorkspace &self, const object &value) {
     throw std::runtime_error("Failed to allocate NumPy array");
   }
   void *dest = PyArray_DATA(reinterpret_cast<PyArrayObject *>(nparray)); // HEAD of the contiguous numpy data array
-  copy_func(dest, column);
+  copy_func(dest, std::move(column));
   return nparray;
 }
 

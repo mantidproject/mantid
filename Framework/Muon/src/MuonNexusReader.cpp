@@ -182,7 +182,7 @@ void MuonNexusReader::readPeriodInfo(Mantid::LegacyNexus::File &handle) {
     try {
       std::vector<int> tempIntVector;
       handle.readData(logName, tempIntVector);
-      destAttr = convertVectorToString(tempIntVector, ";");
+      destAttr = convertVectorToString(std::move(tempIntVector), ";");
     } catch (...) {
       g_log.debug("Muon nexus file does not contain " + logName);
     }
@@ -192,7 +192,7 @@ void MuonNexusReader::readPeriodInfo(Mantid::LegacyNexus::File &handle) {
     try {
       std::vector<float> tempFloatVector;
       handle.readData(logName, tempFloatVector);
-      destAttr = convertVectorToString(tempFloatVector, ";");
+      destAttr = convertVectorToString(std::move(tempFloatVector), ";");
     } catch (...) {
       g_log.debug("Muon nexus file does not contain " + logName);
     }

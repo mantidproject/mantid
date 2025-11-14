@@ -152,7 +152,7 @@ void CreateMonteCarloWorkspace::exec() {
   // Calculate errors as the square root of the counts
   Mantid::HistogramData::HistogramE outputE(outputY.size());
   std::transform(outputY.begin(), outputY.end(), outputE.begin(), [](double count) { return std::sqrt(count); });
-  outputWs->mutableE(0) = outputE;
+  outputWs->mutableE(0) = std::move(outputE);
 
   g_log.warning("Only the first spectrum is being plotted.");
 

@@ -93,7 +93,7 @@ void CreateBootstrapWorkspaces::exec() {
     MatrixWorkspace_sptr bootWs = WorkspaceFactory::Instance().create(inputWs);
     std::string wsName = prefix + '_' + std::to_string(i);
     ADS.addOrReplace(wsName, bootWs);
-    bootNames.push_back(wsName);
+    bootNames.push_back(std::move(wsName));
 
     for (size_t index = 0; index < bootWs->getNumberHistograms(); index++) {
       bootWs->setSharedX(index, inputWs->sharedX(index));

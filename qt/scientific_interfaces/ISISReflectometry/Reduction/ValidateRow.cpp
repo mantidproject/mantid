@@ -112,7 +112,7 @@ ValidationResult<Row, std::vector<int>> RowValidator::operator()(std::vector<std
   auto wsNames = workspaceNames(optionalRunNumbers.value(), optionalTransmissionRuns.value());
   auto optionalRow =
       Row(optionalRunNumbers.value(), optionalTheta.value(), optionalTransmissionRuns.value(), optionalQRange.value(),
-          optionalScaleFactor, optionalOptions.value(), ReductionWorkspaces(wsNames));
+          optionalScaleFactor, optionalOptions.value(), ReductionWorkspaces(std::move(wsNames)));
   return RowValidationResult(optionalRow);
 }
 
