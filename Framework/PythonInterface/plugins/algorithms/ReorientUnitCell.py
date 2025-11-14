@@ -23,7 +23,7 @@ class ReorientUnitCell(PythonAlgorithm):
         """
         Get the point group symbol based on crystal system and lattice system.
 
-        :param str crystal_system: Crystal system (Triclinic, Monoclinic, etc.)
+        :param str crystal_system: Crystal system (Cubic, Monoclinic, etc.)
         :param str lattice_system: Lattice system (for Trigonal: Rhombohedral or Hexagonal)
         :return: Point group symbol string
         :rtype: str
@@ -34,7 +34,6 @@ class ReorientUnitCell(PythonAlgorithm):
             "Tetragonal": "4/mmm",
             "Orthorhombic": "mmm",
             "Monoclinic": "2/m",
-            "Triclinic": "-1",
         }
 
         # Special case for Trigonal
@@ -75,7 +74,7 @@ class ReorientUnitCell(PythonAlgorithm):
         )
 
         # Crystal system
-        crystal_systems = ["Triclinic", "Monoclinic", "Orthorhombic", "Tetragonal", "Trigonal", "Hexagonal", "Cubic"]
+        crystal_systems = ["Cubic", "Hexagonal", "Tetragonal", "Trigonal", "Orthorhombic", "Monoclinic"]
         self.declareProperty(
             name="CrystalSystem",
             defaultValue="Triclinic",
@@ -113,6 +112,7 @@ class ReorientUnitCell(PythonAlgorithm):
         return issues
 
     def PyExec(self):
+        g_log = self.log()
         # Get input properties
         wsname: str = self.getPropertyValue("PeaksWorkspace")
         tolerance = self.getProperty("Tolerance").value
@@ -142,29 +142,33 @@ class ReorientUnitCell(PythonAlgorithm):
         point_group = PointGroupFactory.createPointGroup(point_group_symbol)
 
         # Get symmetry operations with positive determinant to preserve handedness
-        transforms = []
+        transforms = {}
         coords = np.eye(3).astype(int)  # 3x3 identity matrix representing hkl coordinates for the lattice vectors
         for sym_op in point_group.getSymmetryOperations():
             transform = np.column_stack([sym_op.transformHKL(vec) for vec in coords])
             if np.linalg.det(transform) > 0:
-                transforms.append(transform)
+                name = "{}: ".format(sym_op.getOrder()) + sym_op.getIdentifier()
+                transforms[name] = transform
 
         # Step 5: Find the symmetry operation that maximizes trace(U @ B @ inv(M)) = trace(U' @ B)
         max_trace = -np.inf
         optimal_transform = None
-        for transform in transforms:
+        transform_name = None
+        for name, transform in transforms.items():
             try:
                 transform_inv = np.linalg.inv(transform)
                 trace = np.trace(U @ B @ transform_inv)
                 if trace > max_trace:
                     max_trace = trace
                     optimal_transform = transform
-            except np.linalg.LinAlgError:  # corner case when np.linalg.det(transform) > 0 and very close to 0
+                    transform_name = name
+            except np.linalg.LinAlgError:  # Skip matrices that are not invertible due to numerical issues
                 # Skip singular matrices
                 continue
 
         # Step 6: Apply the optimal transformation
         if optimal_transform is not None:
+            g_log.notice(f"Aligning symmetry operation: {transform_name}")
             # Determine whether to use FindError based on number of peaks
             find_error = mtd[wsname].getNumberPeaks() > 3
             TransformHKL(PeaksWorkspace=wsname, HKLTransform=optimal_transform, FindError=find_error)

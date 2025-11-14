@@ -10,7 +10,7 @@ Description
 -----------
 
 ReorientUnitCell finds the unit cell most aligned with the goniometer axes by finding rotation :math:`U`
-most similar to the identity matrix. The similarity is quantized by the angle of rotation :math:`\theta`,
+most similar to the identity matrix. The similarity is quantified by the angle of rotation :math:`\theta`,
 which can be calculated from the trace of the rotation matrix:
 
 .. math::
@@ -45,6 +45,9 @@ matrix :math:`B` directly transforms to goniometer axes, thus :math:`U'` is the 
 Notice that matrix :math:`S \equiv U^{-1}` transforms :math:`\{{a'}_{1}^{*}, {a'}_{2}^{*}\}`
 to :math:`\{a_1^*, a_2^*\}`.
 
+The triclinic crystal system has no symmetry operations other than the identity, so no reorientation is possible.
+Hence, this algorithm does not support triclinic crystals.
+
 Usage
 -----
 
@@ -53,6 +56,8 @@ Usage
 **Example - ReorientUnitCell:**
 
 .. testcode:: ReorientUnitCellExample
+
+    import numpy as np
 
     def rotation_angle(workspace):
         oriented_lattice = mtd['peaks'].sample().getOrientedLattice()
