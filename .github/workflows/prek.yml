@@ -12,19 +12,14 @@ jobs:
     steps:
       - uses: actions/checkout@v5
         with:
-          fetch-depth: 0
-      - name: Switch to PR branch
-        run: git switch ${{ github.head_ref }}
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          ref: ${{ github.event.pull_request.head.ref }}
       - uses: j178/prek-action@v1
         with:
           install-only: true
       - name: Run prek
         run: prek run --all-files || true
-      - name: Commit fixes
-        run: |
-          if [[ -n "$(git status --porcelain)" ]]; then
-            git config user.name 'github-actions[bot]'
-            git config user.email 'github-actions[bot]@users.noreply.github.com'
-            git commit -am "prek fixes"
-            git push
-          fi
+      - uses: EndBug/add-and-commit@v9
+        with:
+          message: prek fixes
+          default_author: github_actions
