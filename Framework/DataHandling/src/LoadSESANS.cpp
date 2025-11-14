@@ -148,7 +148,7 @@ void LoadSESANS::exec() {
   // Check file is readable
   if (!infile) {
     g_log.error("Unable to open file " + filename);
-    throw Kernel::Exception::FileError("Unable to open file ", std::move(filename));
+    throw Kernel::Exception::FileError("Unable to open file ", filename);
   }
 
   g_log.information() << "Opened file \"" << filename << "\" for reading\n";

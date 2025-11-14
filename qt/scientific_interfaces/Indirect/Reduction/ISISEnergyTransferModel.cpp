@@ -29,12 +29,12 @@ std::vector<std::string> IETModel::validateRunData(IETRunData const &runData) {
 
   std::string analysisError = validator.validateAnalysisData(runData.getAnalysisData());
   if (!analysisError.empty()) {
-    errors.push_back(analysisError);
+    errors.push_back(std::move(analysisError));
   }
 
   std::string conversionError = validator.validateConversionData(runData.getConversionData());
   if (!conversionError.empty()) {
-    errors.push_back(conversionError);
+    errors.push_back(std::move(conversionError));
   }
 
   std::vector<std::string> backgroundErrors = validator.validateBackgroundData(
@@ -156,7 +156,7 @@ std::vector<std::string> IETModel::validatePlotData(IETPlotData const &plotParam
 
   std::string conversionError = validator.validateConversionData(plotParams.getConversionData());
   if (!conversionError.empty()) {
-    errors.push_back(conversionError);
+    errors.push_back(std::move(conversionError));
   }
 
   std::vector<std::string> backgroundErrors = validator.validateBackgroundData(
