@@ -424,7 +424,7 @@ void AlignAndFocusPowderSlim::exec() {
 
     auto progress = std::make_shared<API::Progress>(this, .17, .9, num_banks_to_read * workspaceIndices.size());
     if (this->getProperty(PropertyNames::FULL_TIME)) {
-      g_log.information() << "Using ProcessBankSplitTask for splitter processing\n";
+      g_log.information() << "Using ProcessBankSplitFastLogsTask for splitter processing\n";
       const auto pulse_indices = this->determinePulseIndices(wksp, filterROI);
 
       const auto splitterMap = timeSplitter.getSplittersMap();

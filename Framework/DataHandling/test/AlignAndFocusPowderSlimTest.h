@@ -51,13 +51,14 @@ struct TestConfig {
   std::string binningUnits = "dSpacing";
   double timeMin = -1.;
   double timeMax = -1.;
-  TableWorkspace_sptr tablesplitter = nullptr;
+  Workspace_sptr splitterWS = nullptr;
   bool relativeTime = false;
   bool filterBadPulses = false;
   std::string logListBlock = "";
   std::string logListAllow = "";
   int outputSpecNum = -10;
   bool processBankSplitTask = false;
+  bool useFullTime = false;
 };
 } // namespace
 
@@ -107,10 +108,11 @@ public:
       TS_ASSERT_THROWS_NOTHING(alg.setProperty(FILTER_TIMESTART, configuration.timeMin));
     if (configuration.timeMax > 0.)
       TS_ASSERT_THROWS_NOTHING(alg.setProperty(FILTER_TIMESTOP, configuration.timeMax));
-    if (configuration.tablesplitter != nullptr) {
-      TS_ASSERT_THROWS_NOTHING(alg.setProperty(SPLITTER_WS, configuration.tablesplitter));
+    if (configuration.splitterWS != nullptr) {
+      TS_ASSERT_THROWS_NOTHING(alg.setProperty(SPLITTER_WS, configuration.splitterWS));
       TS_ASSERT_THROWS_NOTHING(alg.setProperty(SPLITTER_RELATIVE, configuration.relativeTime));
       TS_ASSERT_THROWS_NOTHING(alg.setProperty(PROCESS_BANK_SPLIT_TASK, configuration.processBankSplitTask));
+      TS_ASSERT_THROWS_NOTHING(alg.setProperty(FULL_TIME, configuration.useFullTime));
     }
     if (configuration.filterBadPulses) {
       TS_ASSERT_THROWS_NOTHING(alg.setProperty(FILTER_BAD_PULSES, configuration.filterBadPulses));
@@ -428,7 +430,7 @@ public:
   void test_splitter_table() {
     TestConfig configuration({0.}, {50000.}, {50000.}, "Linear", "TOF");
     configuration.relativeTime = true;
-    configuration.tablesplitter = create_splitter_table(configuration.relativeTime);
+    configuration.splitterWS = create_splitter_table(configuration.relativeTime);
     for (bool processBankSplitTask : {false, true}) {
       configuration.processBankSplitTask = processBankSplitTask;
       auto outputWS = std::dynamic_pointer_cast<WorkspaceGroup>(run_algorithm(VULCAN_218062, configuration));
@@ -466,7 +468,7 @@ public:
   void test_splitter_table_absolute_time() {
     TestConfig configuration({0.}, {50000.}, {50000.}, "Linear", "TOF");
     configuration.relativeTime = false;
-    configuration.tablesplitter = create_splitter_table(configuration.relativeTime);
+    configuration.splitterWS = create_splitter_table(configuration.relativeTime);
     for (bool processBankSplitTask : {false, true}) {
       configuration.processBankSplitTask = processBankSplitTask;
       auto outputWS = std::dynamic_pointer_cast<WorkspaceGroup>(run_algorithm(VULCAN_218062, configuration));
@@ -486,7 +488,7 @@ public:
   void test_splitter_table_multiple_targets() {
     TestConfig configuration({0.}, {50000.}, {50000.}, "Linear", "TOF");
     configuration.relativeTime = true;
-    configuration.tablesplitter = create_splitter_table(configuration.relativeTime, false);
+    configuration.splitterWS = create_splitter_table(configuration.relativeTime, false);
     for (bool processBankSplitTask : {false, true}) {
       configuration.processBankSplitTask = processBankSplitTask;
       auto outputWS = std::dynamic_pointer_cast<WorkspaceGroup>(run_algorithm(VULCAN_218062, configuration));
@@ -548,7 +550,7 @@ public:
     configuration.timeMin = 15;
     configuration.timeMax = 300;
     configuration.relativeTime = true;
-    configuration.tablesplitter = create_splitter_table(configuration.relativeTime);
+    configuration.splitterWS = create_splitter_table(configuration.relativeTime);
     for (bool processBankSplitTask : {false, true}) {
       configuration.processBankSplitTask = processBankSplitTask;
       auto outputWS = std::dynamic_pointer_cast<WorkspaceGroup>(run_algorithm(VULCAN_218062, configuration));
@@ -631,12 +633,12 @@ public:
     gen->setProperty("InformationWorkspace", "info");
     gen->execute();
 
-    auto tablesplitter = std::dynamic_pointer_cast<Mantid::DataObjects::SplittersWorkspace>(
+    auto splitterWS = std::dynamic_pointer_cast<Mantid::DataObjects::SplittersWorkspace>(
         AnalysisDataService::Instance().retrieve("splitter"));
 
     TestConfig configuration({0.}, {50000.}, {50000.}, "Linear", "TOF");
     configuration.relativeTime = true;
-    configuration.tablesplitter = tablesplitter;
+    configuration.splitterWS = splitterWS;
 
     for (bool processBankSplitTask : {false, true}) {
       configuration.processBankSplitTask = processBankSplitTask;
@@ -688,6 +690,74 @@ public:
       TS_ASSERT_EQUALS(outputWS2->readY(4).front(), 516351);
       TS_ASSERT_EQUALS(outputWS2->readY(5).front(), 984359);
     }
+  }
+
+  void test_split_full_time() {
+    // create splitter with sub pulsetime ranges plus one that covers multiple pulses
+    auto createSplitter = AlgorithmManager::Instance().createUnmanaged("CreateWorkspace");
+    createSplitter->initialize();
+    createSplitter->setProperty("DataX", std::vector<double>{0.2, 0.202, 0.204, 0.206, 0.208, 0.21, 0.212, 0.55});
+    createSplitter->setProperty("DataY", std::vector<double>{0, 1, 2, 0, 1, 2, 3});
+    createSplitter->setProperty("NSpec", 1);
+    createSplitter->setPropertyValue("OutputWorkspace", "split_matrix_ws");
+    createSplitter->execute();
+
+    TestConfig configuration({0.}, {50000.}, {50000.}, "Linear", "TOF");
+    configuration.useFullTime = true;
+    configuration.relativeTime = true;
+    configuration.splitterWS =
+        std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("split_matrix_ws"));
+    auto outputWS = std::dynamic_pointer_cast<WorkspaceGroup>(run_algorithm(VULCAN_218062, configuration));
+
+    /* expected results came from running
+
+    ws = LoadEventNexus("VULCAN_218062.nxs.h5", NumberOfBins=1)
+    grp = CreateGroupingWorkspace(ws, GroupDetectorsBy='bank')
+    ws = GroupDetectors(ws, CopyGroupingFromWorkspace="grp")
+
+    times = [0.2, 0.202, 0.204, 0.206, 0.208, 0.21, 0.212, 0.55]
+    targets = [0, 1, 2, 0, 1, 2, 3]
+    split_matrix_ws = CreateWorkspace(DataX=times, DataY=targets, NSpec=1)
+
+    FilterEvents(ws, SplitterWorkspace='split_matrix_ws', OutputWorkspaceBaseName="eventFiltered", GroupWorkspaces=True,
+    FilterByPulseTime=False, RelativeTime=True)
+    Rebin("eventFiltered", "0,50000,50000", PreserveEvents=False,
+    OutputWorkspace="eventFiltered")
+    for ws in mtd['eventFiltered']:
+        print(str(ws), ws.extractY())
+    */
+
+    auto outputWS0 = std::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(0));
+    TS_ASSERT_EQUALS(outputWS0->readY(0).front(), 214);
+    TS_ASSERT_EQUALS(outputWS0->readY(1).front(), 219);
+    TS_ASSERT_EQUALS(outputWS0->readY(2).front(), 269);
+    TS_ASSERT_EQUALS(outputWS0->readY(3).front(), 228);
+    TS_ASSERT_EQUALS(outputWS0->readY(4).front(), 71);
+    TS_ASSERT_EQUALS(outputWS0->readY(5).front(), 144);
+
+    auto outputWS1 = std::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(1));
+    TS_ASSERT_EQUALS(outputWS1->readY(0).front(), 171);
+    TS_ASSERT_EQUALS(outputWS1->readY(1).front(), 163);
+    TS_ASSERT_EQUALS(outputWS1->readY(2).front(), 188);
+    TS_ASSERT_EQUALS(outputWS1->readY(3).front(), 182);
+    TS_ASSERT_EQUALS(outputWS1->readY(4).front(), 68);
+    TS_ASSERT_EQUALS(outputWS1->readY(5).front(), 135);
+
+    auto outputWS2 = std::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(2));
+    TS_ASSERT_EQUALS(outputWS2->readY(0).front(), 132);
+    TS_ASSERT_EQUALS(outputWS2->readY(1).front(), 131);
+    TS_ASSERT_EQUALS(outputWS2->readY(2).front(), 159);
+    TS_ASSERT_EQUALS(outputWS2->readY(3).front(), 139);
+    TS_ASSERT_EQUALS(outputWS2->readY(4).front(), 54);
+    TS_ASSERT_EQUALS(outputWS2->readY(5).front(), 77);
+
+    auto outputWS3 = std::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(3));
+    TS_ASSERT_EQUALS(outputWS3->readY(0).front(), 12705);
+    TS_ASSERT_EQUALS(outputWS3->readY(1).front(), 12668);
+    TS_ASSERT_EQUALS(outputWS3->readY(2).front(), 14334);
+    TS_ASSERT_EQUALS(outputWS3->readY(3).front(), 14313);
+    TS_ASSERT_EQUALS(outputWS3->readY(4).front(), 4807);
+    TS_ASSERT_EQUALS(outputWS3->readY(5).front(), 9179);
   }
 
   void test_filter_bad_pulses() {
