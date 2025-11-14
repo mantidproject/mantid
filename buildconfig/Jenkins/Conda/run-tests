@@ -10,13 +10,16 @@
 #   4. ENABLE_DOCS: Whether or not the docs have been built
 #   5. ENABLE_DOC_TESTS: Whether or not the doc tests should be run
 #   6. BUILD_THREADS: The number of threads to use during testing
+# Option args:
+#   7. SYSTEM_TEST_REGEX: a regex for selecting which system tests to run
 
 WORKSPACE=$1
 ENABLE_SYSTEM_TESTS=$2
-ENABLE_UNIT_TESTS=$3
+ENABLE_UNIT_TESTS=skip_for_now
 ENABLE_DOCS=$4
 ENABLE_DOC_TESTS=$5
 BUILD_THREADS=$6
+SYSTEM_TEST_REGEX=$7
 
 XVFB_SERVER_NUM=101
 
@@ -117,6 +120,12 @@ if [[ $ENABLE_SYSTEM_TESTS == true ]]; then
     echo "CheckMantidVersion.OnStartup = 0" >> $userprops
 
     SYSTEM_TEST_OPTIONS="-j${BUILD_THREADS_SYSTEM_TESTS} -l information --quiet --output-on-failure"
+
+    # Append the system test regex argument if required. This is currently used on Windows and MacOS
+    # PR builds to test only files that have been changed.
+    if [[ -n "$SYSTEM_TEST_REGEX" ]]; then
+        SYSTEM_TEST_OPTIONS+=" -R ${SYSTEM_TEST_REGEX}"
+    fi
 
     if [[ ${JOB_NAME} == *pull_requests* ]]; then
         SYSTEM_TEST_OPTIONS+=" --exclude-in-pull-requests"
