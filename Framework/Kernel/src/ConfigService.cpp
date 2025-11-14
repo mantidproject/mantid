@@ -1144,7 +1144,7 @@ std::string ConfigServiceImpl::getOSVersionReadable() {
     std::string line;
     while (std::getline(handle, line)) {
       if (!line.empty()) {
-        description = line;
+        description = std::move(line);
         break;
       }
     }
