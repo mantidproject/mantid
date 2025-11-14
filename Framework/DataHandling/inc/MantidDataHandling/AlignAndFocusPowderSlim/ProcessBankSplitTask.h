@@ -21,8 +21,8 @@ class ProcessBankSplitTask {
 public:
   ProcessBankSplitTask(std::vector<std::string> &bankEntryNames, H5::H5File &h5file, const bool is_time_filtered,
                        std::vector<int> &workspaceIndices, std::vector<API::MatrixWorkspace_sptr> &wksps,
-                       const std::map<detid_t, double> &calibration, const std::set<detid_t> &masked,
-                       const size_t events_per_chunk, const size_t grainsize_event,
+                       const std::map<detid_t, double> &calibration, const std::map<detid_t, double> &scale_at_sample,
+                       const std::set<detid_t> &masked, const size_t events_per_chunk, const size_t grainsize_event,
                        std::vector<std::pair<int, PulseROI>> target_to_pulse_indices,
                        std::shared_ptr<API::Progress> &progress);
 
@@ -34,7 +34,8 @@ private:
   mutable NexusLoader m_loader;
   std::vector<int> m_workspaceIndices;
   std::vector<API::MatrixWorkspace_sptr> m_wksps;
-  const std::map<detid_t, double> m_calibration; // detid: 1/difc
+  const std::map<detid_t, double> m_calibration; ///< detid: 1/difc
+  std::map<detid_t, double> m_scale_at_sample;   ///< multiplicative 0<value<1 to move neutron TOF at sample
   const std::set<detid_t> m_masked;
   /// number of events to read from disk at one time
   const size_t m_events_per_chunk;

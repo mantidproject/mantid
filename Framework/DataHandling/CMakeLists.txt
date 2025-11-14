@@ -444,6 +444,7 @@ set(INC_FILES
 set(TEST_FILES
     AlignAndFocusPowderSlimTest.h
     ApplyDiffCalTest.h
+    BankCalibrationTest.h
     BankPulseTimesTest.h
     CheckMantidVersionTest.h
     CompressEventAccumulatorTest.h
