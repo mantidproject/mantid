@@ -8,7 +8,7 @@
 import numpy as np
 from mantid.simpleapi import CreateSampleWorkspace, CreateSampleShape, logger
 from mantid.api import AnalysisDataService as ADS
-from typing import Sequence, Tuple
+from collections.abc import Sequence
 
 
 def is_valid_mesh(mesh: np.ndarray) -> bool:
@@ -36,7 +36,7 @@ def get_xml_mesh(xml: str) -> np.ndarray:
 
 def get_scaled_intrinsic_sample_directions_in_lab_frame(
     ax_transform: np.ndarray, rotation_matrix: np.ndarray, sample_mesh: np.ndarray, scale: float = 1.2
-) -> Tuple[np.ndarray, np.ndarray, np.ndarray, Sequence[float]]:
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, Sequence[float]]:
     # apply the rotation matrix to the axes
     rotated_ax_transform = rotation_matrix @ ax_transform
     # transform the mesh vertices into new axes frame

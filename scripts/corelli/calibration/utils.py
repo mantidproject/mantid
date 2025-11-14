@@ -9,7 +9,7 @@ from os import path
 import numpy as np
 from numpy.polynomial.polynomial import polyval
 from scipy.ndimage import gaussian_filter
-from typing import List, Optional, Union
+from typing import Optional, Union
 
 # imports from Mantid
 from mantid.api import AnalysisDataService, mtd, WorkspaceGroup
@@ -69,7 +69,7 @@ def wire_positions(units: str = "pixels") -> np.ndarray:
     return wire_pixel_positions
 
 
-def bank_numbers(bank_selection: str) -> List[str]:
+def bank_numbers(bank_selection: str) -> list[str]:
     r"""
     Expand a bank selection string into a list of bank numbers, from smallest to highest
 

@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # noinspection PyPep8Naming
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 import numpy as np
 
@@ -53,14 +53,14 @@ class Instrument:
         else:
             return self.get_parameters().get(key, default)
 
-    def get_parameters(self) -> Dict[str, Any]:
+    def get_parameters(self) -> dict[str, Any]:
         """Get parameters for this instrument from abins.parameters"""
         return abins.parameters.instruments.get(self.get_name())
 
     def get_setting(self) -> str:
         return self._setting
 
-    def get_setting_parameters(self) -> Dict[str, Any]:
+    def get_setting_parameters(self) -> dict[str, Any]:
         """Get instrument parameters associated with the current setting
 
         (These will be cached the first time this method is called. Instrument

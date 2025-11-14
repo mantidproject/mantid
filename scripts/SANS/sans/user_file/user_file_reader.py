@@ -8,7 +8,7 @@ from sans.common.file_information import find_full_file_path
 from sans.user_file.user_file_parser import UserFileParser
 
 
-class UserFileReader(object):
+class UserFileReader:
     def __init__(self, user_file):
         super(UserFileReader, self).__init__()
         self._user_file = find_full_file_path(user_file)

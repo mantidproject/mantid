@@ -11,7 +11,7 @@ ROUNDING_PRECISION = 4
 millions_counts_conversion = 1.0 / 1e6
 
 
-class HomeRunInfoWidgetModel(object):
+class HomeRunInfoWidgetModel:
     def __init__(self, context=None):
         self._data = context.data_context
 

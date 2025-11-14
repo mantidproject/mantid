@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import ast
-from typing import List, Dict, Any
+from typing import Any
 
 from mantid import ConfigService
 from workbench.config import CONF
@@ -14,14 +14,14 @@ from workbench.widgets.settings.base_classes.config_settings_changes_model impor
 
 
 class SettingsModel:
-    def __init__(self, category_setting_models: List[ConfigSettingsChangesModel] = None):
-        self.category_setting_models: List[ConfigSettingsChangesModel] = category_setting_models
+    def __init__(self, category_setting_models: list[ConfigSettingsChangesModel] = None):
+        self.category_setting_models: list[ConfigSettingsChangesModel] = category_setting_models
         self.properties_which_need_a_restart = []
 
     def register_property_which_needs_a_restart(self, property_string: str) -> None:
         self.properties_which_need_a_restart.append(property_string)
 
-    def potential_changes_that_need_a_restart(self) -> List[str]:
+    def potential_changes_that_need_a_restart(self) -> list[str]:
         def search_for_property_in_all_model_changes(property_string: str) -> bool:
             for model in self.category_setting_models:
                 if property_string in model.properties_to_be_changed():
@@ -38,7 +38,7 @@ class SettingsModel:
         for model in self.category_setting_models:
             model.apply_changes()
 
-    def unsaved_changes(self) -> Dict[str, Any]:
+    def unsaved_changes(self) -> dict[str, Any]:
         changes = {}
         for model in self.category_setting_models:
             changes |= model.get_changes()

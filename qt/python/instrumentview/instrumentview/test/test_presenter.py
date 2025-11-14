@@ -166,14 +166,14 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         mock_has_unit.return_value = False
         units = self._presenter.available_unit_options()
         mock_has_unit.assert_called_once()
-        self.assertEquals(["No units"], units)
+        self.assertEqual(["No units"], units)
 
     @mock.patch.object(FullInstrumentViewModel, "has_unit", new_callable=mock.PropertyMock)
     def test_available_units_has_units(self, mock_has_unit):
         mock_has_unit.return_value = True
         units = self._presenter.available_unit_options()
         mock_has_unit.assert_called_once()
-        self.assertEquals(self._presenter._UNIT_OPTIONS, units)
+        self.assertEqual(self._presenter._UNIT_OPTIONS, units)
 
     def test_only_close_on_correct_ws_replace(self):
         ws_name = self._model.workspace.name()

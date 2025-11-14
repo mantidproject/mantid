@@ -4,13 +4,13 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from typing import Dict, Optional
+from typing import Optional
 
 import numpy as np
 from pydantic import validate_call
 from pydantic.types import PositiveInt
 
-PowderDict = Dict[str, Dict[int, np.ndarray]]
+PowderDict = dict[str, dict[int, np.ndarray]]
 
 
 class PowderData:
@@ -35,10 +35,10 @@ class PowderData:
     def __init__(
         self,
         *,
-        a_tensors: Dict[int, np.ndarray],
-        b_tensors: Dict[int, np.ndarray],
-        frequencies: Dict[int, np.ndarray],
-        n_plus_1: Dict[int, np.ndarray],
+        a_tensors: dict[int, np.ndarray],
+        b_tensors: dict[int, np.ndarray],
+        frequencies: dict[int, np.ndarray],
+        n_plus_1: dict[int, np.ndarray],
         num_atoms: Optional[PositiveInt] = None,
     ):
         self._data = {"a_tensors": a_tensors, "b_tensors": b_tensors, "frequencies": frequencies, "n_plus_1": n_plus_1}  # type: PowderDict
@@ -49,10 +49,10 @@ class PowderData:
 
         self._a_traces = {}
 
-    def get_a_tensors(self) -> Dict[int, np.ndarray]:
+    def get_a_tensors(self) -> dict[int, np.ndarray]:
         return self._data["a_tensors"]
 
-    def get_b_tensors(self) -> Dict[int, np.ndarray]:
+    def get_b_tensors(self) -> dict[int, np.ndarray]:
         return self._data["b_tensors"]
 
     def get_a_traces(self, k_index):

@@ -10,7 +10,7 @@ from datetime import datetime
 import re
 
 
-class MantidGeom(object):
+class MantidGeom:
     def __init__(self, instname, valid_from=None):
         if valid_from is None:
             valid_from = datetime.now()

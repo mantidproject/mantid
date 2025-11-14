@@ -8,7 +8,7 @@
 from mantidqtinterfaces.Muon.GUI.Common.muon_base_pair import MuonBasePair
 
 
-class MuonPhasequad(object):
+class MuonPhasequad:
     """
     Simple structure to store information on a phasequad.
 

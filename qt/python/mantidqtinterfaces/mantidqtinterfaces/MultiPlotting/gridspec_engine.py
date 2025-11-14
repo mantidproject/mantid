@@ -24,7 +24,7 @@ def defaultGridspecGrid(number):
         return [col, col]
 
 
-class gridspecEngine(object):
+class gridspecEngine:
     def __init__(self, grid=defaultGridspecGrid, max_plot=None):
         self._max_plot = max_plot
         self.grid = grid

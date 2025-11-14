@@ -13,7 +13,7 @@ RESULTS_TAB_MODEL_CLS = "mantidqtinterfaces.Muon.GUI.Common.results_tab_widget.r
 RESULTS_TAB_VIEW_CLS = "mantidqtinterfaces.Muon.GUI.Common.results_tab_widget.results_tab_widget.ResultsTabView"
 
 
-class mock_fit_info(object):
+class mock_fit_info:
     def __init__(self, name):
         self.name = name
 

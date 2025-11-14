@@ -22,7 +22,7 @@ from mantid.kernel import V3D
 __author__ = "wzz"
 
 
-class PeakProcessRecord(object):
+class PeakProcessRecord:
     """Class containing a peak's information for GUI
     In order to manage some operations for a peak
     It does not contain peak workspace but will hold all the parameters about peak integration
@@ -626,7 +626,7 @@ class PeakProcessRecord(object):
         return
 
 
-class SinglePointPeakIntegration(object):
+class SinglePointPeakIntegration:
     """
     simple class to store the result of ONE and ONLY ONE single point measurement peak integration
     """
@@ -865,7 +865,7 @@ class SinglePointPeakIntegration(object):
 # END-CLASS
 
 
-class SinglePtScansIntegrationOperation(object):
+class SinglePtScansIntegrationOperation:
     """
     a class to handle and manage Mantid Workspace2D instance created from integrated single pt-scan peaks
     along either vertical direction or horizontal direction

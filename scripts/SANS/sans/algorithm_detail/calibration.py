@@ -36,7 +36,7 @@ def apply_calibration(calibration_file_name, workspaces, monitor_workspaces, use
     full_file_path = find_full_file_path(calibration_file_name)
 
     if not full_file_path:
-        raise IOError(f"{calibration_file_name} was not found")
+        raise OSError(f"{calibration_file_name} was not found")
 
     # Check for the sample scatter and the can scatter workspaces
     workspaces_to_calibrate = {}

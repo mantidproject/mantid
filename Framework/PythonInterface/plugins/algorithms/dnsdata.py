@@ -9,7 +9,7 @@ import re
 from dateutil.parser import parse
 
 
-class DNSdata(object):
+class DNSdata:
     """
     this class describes the DNS data structure
     will be used for DNS data read-in and write-out routines

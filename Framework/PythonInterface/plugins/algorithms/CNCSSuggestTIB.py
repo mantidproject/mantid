@@ -17,7 +17,7 @@ import numpy as np
 # pylint: disable=too-few-public-methods
 
 
-class Interval(object):
+class Interval:
     """Simple class that provides check for overlapping intervals"""
 
     def __init__(self, minv, maxv):

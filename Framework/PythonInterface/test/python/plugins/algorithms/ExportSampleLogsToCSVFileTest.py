@@ -38,7 +38,7 @@ class ExportVulcanSampleLogTest(unittest.TestCase):
             ifile = open(outfilename)
             lines = ifile.readlines()
             ifile.close()
-        except IOError:
+        except OSError:
             print("Unable to open file {0}.".format(outfilename))
             self.fail()
             return
@@ -86,7 +86,7 @@ class ExportVulcanSampleLogTest(unittest.TestCase):
             ifile = open(outfilename)
             lines = ifile.readlines()
             ifile.close()
-        except IOError:
+        except OSError:
             print("Unable to open file {0}.".format(outfilename))
             self.fail()
             return
@@ -137,7 +137,7 @@ class ExportVulcanSampleLogTest(unittest.TestCase):
             ifile = open(headerfilename)
             lines = ifile.readlines()
             ifile.close()
-        except IOError:
+        except OSError:
             errmsg = "Unable to open header file %s. " % (headerfilename)
             self.assertEqual(errmsg, "")
             return
@@ -190,7 +190,7 @@ class ExportVulcanSampleLogTest(unittest.TestCase):
             ifile = open(headerfilename)
             lines = ifile.readlines()
             ifile.close()
-        except IOError:
+        except OSError:
             errmsg = "Unable to open header file %s. " % (headerfilename)
             self.assertEqual(errmsg, "")
             return
@@ -234,7 +234,7 @@ class ExportVulcanSampleLogTest(unittest.TestCase):
             ifile = open(outfilename)
             lines = ifile.readlines()
             ifile.close()
-        except IOError:
+        except OSError:
             print("Unable to open file {0}.".format(outfilename))
             self.fail()
             return

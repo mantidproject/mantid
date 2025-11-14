@@ -12,7 +12,7 @@ from mantidqtinterfaces.HFIR_4Circle_Reduction import mplgraphicsview
 class IntegratedPeakView(mplgraphicsview.MplGraphicsView):
     """Extended graphic view for integrated peaks"""
 
-    class MousePress(object):
+    class MousePress:
         RELEASED = 0
         LEFT = 1
         RIGHT = 2

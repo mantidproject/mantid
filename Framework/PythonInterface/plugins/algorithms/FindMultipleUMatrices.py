@@ -26,7 +26,7 @@ from mantid.geometry import (
 )
 from itertools import combinations, product
 import numpy as np
-from typing import Sequence
+from collections.abc import Sequence
 
 
 _MIN_NUM_INDEXED_PEAKS = 3  # one more peak indexed than required for CalculateUMatrix

@@ -63,7 +63,7 @@ def perform_musr_file_finder(self):
     ConfigService["default.instrument"] = "MUSR"
     file_path = FileFinder.findRuns("MUSR00022725.nxs")[0]
     ws, run, filename, psi_data = load_utils.load_workspace_from_filename(file_path)
-    self.assert_(not psi_data)
+    self.assertTrue(not psi_data)
     self.data_context._loaded_data.remove_data(run=run)
     self.data_context._loaded_data.add_data(run=[run], workspace=ws, filename=filename, instrument="MUSR")
     self.data_context.current_runs = [[22725]]

@@ -72,7 +72,7 @@ class ReductionOptions(BaseScriptElement):
     masked_side = None
 
     # Masking
-    class RectangleMask(object):
+    class RectangleMask:
         def __init__(self, x_min=0, x_max=0, y_min=0, y_max=0):
             self.x_min = x_min
             self.x_max = x_max

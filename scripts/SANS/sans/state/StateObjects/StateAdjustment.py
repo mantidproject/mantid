@@ -64,7 +64,7 @@ class StateAdjustment(metaclass=JsonSerializable):
 # ----------------------------------------------------------------------------------------------------------------------
 # Builder
 # ----------------------------------------------------------------------------------------------------------------------
-class StateAdjustmentBuilder(object):
+class StateAdjustmentBuilder:
     @automatic_setters(StateAdjustment)
     def __init__(self):
         super(StateAdjustmentBuilder, self).__init__()

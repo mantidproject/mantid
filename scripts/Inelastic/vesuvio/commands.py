@@ -99,7 +99,7 @@ def fit_tof(runs, flags, iterations=1, convergence_threshold=None):
 # -----------------------------------------------------------------------------------------
 
 
-class VesuvioTOFFitRoutine(object):
+class VesuvioTOFFitRoutine:
     """
     A class for executing the Vesuvio TOF Fit Routine from a Vesuvio Driver Script.
 
@@ -172,7 +172,7 @@ class VesuvioTOFFitRoutine(object):
 # ------------------------------------------------------------------------------------------------------
 
 
-class VesuvioTOFFitRoutineIteration(object):
+class VesuvioTOFFitRoutineIteration:
     """
     A class for executing a single iteration of the Vesuvio TOF Fit Routine, from a
     Vesuvio Driver Script.
@@ -291,7 +291,7 @@ class VesuvioTOFFitRoutineIteration(object):
 # ------------------------------------------------------------------------------------------------------
 
 
-class VesuvioMSHelper(object):
+class VesuvioMSHelper:
     """
     A helper class for storing and manipulating the multiple scattering parameters of
     the Vesuvio TOF Fit Routine.
@@ -362,7 +362,7 @@ class VesuvioMSHelper(object):
 # -----------------------------------------------------------------------------------------
 
 
-class VesuvioTOFFitHelper(object):
+class VesuvioTOFFitHelper:
     """
     A helper class for executing a VesuvioTOFFit.
 
@@ -396,7 +396,7 @@ class VesuvioTOFFitHelper(object):
 # -----------------------------------------------------------------------------------------
 
 
-class VesuvioCorrectionsHelper(object):
+class VesuvioCorrectionsHelper:
     """
     A helper class for executing VesuvioCorrections.
 
@@ -432,7 +432,7 @@ class VesuvioCorrectionsHelper(object):
 # -----------------------------------------------------------------------------------------
 
 
-class VesuvioConstraints(object):
+class VesuvioConstraints:
     """
     A class for parsing and storing a set of constraints for the Vesuvio Fit Routine
 
@@ -473,7 +473,7 @@ class VesuvioConstraints(object):
 # -----------------------------------------------------------------------------------------
 
 
-class MassProfile(object):
+class MassProfile:
     def __init__(self, symbol, mass, function, width, **parameters):
         self.symbol = symbol
         self.mass = mass
@@ -507,7 +507,7 @@ class MassProfile(object):
 # -----------------------------------------------------------------------------------------
 
 
-class MassProfileCollection(object):
+class MassProfileCollection:
     def __init__(self, profiles):
         self._profiles = profiles
 
@@ -541,7 +541,7 @@ class MassProfileCollection(object):
 # -----------------------------------------------------------------------------------------
 
 
-class MassProfileCollection2D(object):
+class MassProfileCollection2D:
     def __init__(self, collections):
         self._collections = collections
         self._index_to_symbol_map = {
@@ -578,7 +578,7 @@ class MassProfileCollection2D(object):
 # -----------------------------------------------------------------------------------------
 
 
-class VesuvioFitNamer(object):
+class VesuvioFitNamer:
     def __init__(
         self,
         sample_runs,
@@ -708,7 +708,7 @@ class VesuvioFitNamer(object):
 # -----------------------------------------------------------------------------------------
 
 
-class VesuvioTOFFitOutput(object):
+class VesuvioTOFFitOutput:
     def __init__(self, get_spectrum):
         self._prefit_parameters = []
         self._correction_parameters = []

@@ -8,7 +8,7 @@
 import heapq
 
 
-class ColorQueue(object):
+class ColorQueue:
     def __init__(self, color_list):
         """Create a ColorQueue based on an input color_list
         The entry at index 0 has highest priority

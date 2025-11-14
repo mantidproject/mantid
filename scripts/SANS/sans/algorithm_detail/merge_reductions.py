@@ -153,7 +153,7 @@ class NullMerger(Merger):
         pass
 
 
-class MergeFactory(object):
+class MergeFactory:
     def __init__(self):
         super(MergeFactory, self).__init__()
 

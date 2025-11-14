@@ -28,7 +28,7 @@ except ImportError:
     logger = logging.getLogger("data_cat")
 
 
-class DataType(object):
+class DataType:
     TABLE_NAME = "datatype"
 
     # Data type names
@@ -75,7 +75,7 @@ class DataType(object):
         return None
 
 
-class DataSet(object):
+class DataSet:
     TABLE_NAME = "dataset"
     data_type_cls = DataType
 
@@ -195,7 +195,7 @@ class DataSet(object):
         return cursor.lastrowid
 
 
-class DataCatalog(object):
+class DataCatalog:
     """
     Data catalog
     """

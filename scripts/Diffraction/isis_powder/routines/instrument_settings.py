@@ -18,7 +18,7 @@ warnings.formatwarning = _warning_no_source
 warnings.simplefilter("always", UserWarning)  # changed to warnings.simplefilter('default') by unittest runner
 
 
-class InstrumentSettings(object):
+class InstrumentSettings:
     # Holds instance variables updated at runtime
     def __init__(self, param_map, adv_conf_dict=None, kwargs=None):
         self._param_map = param_map

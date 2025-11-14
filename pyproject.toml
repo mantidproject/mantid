@@ -1,7 +1,8 @@
 [tool.ruff]
 line-length = 140
+target-version = "py311" # should match mantid-developer
 # https://beta.ruff.rs/docs/rules/
-lint.select = ["C90", "E", "F", "FURB", "RUF100", "W", "NPY201", "S"]
+lint.select = ["C90", "E", "F", "FURB", "RUF100", "UP", "W", "NPY201", "S"]
 lint.ignore = ["E722", # bare except https://docs.astral.sh/ruff/rules/bare-except/
 "S101", # using assert https://docs.astral.sh/ruff/rules/assert/
 "S110", # try-except-pass https://docs.astral.sh/ruff/rules/try-except-pass/
@@ -13,7 +14,16 @@ lint.ignore = ["E722", # bare except https://docs.astral.sh/ruff/rules/bare-exce
 "S607", # starting process with partial path https://docs.astral.sh/ruff/rules/start-process-with-partial-path/
 "S603", # check subprocess for untrusted input https://docs.astral.sh/ruff/rules/subprocess-without-shell-equals-true/
 "S605", # starting process with a shell https://docs.astral.sh/ruff/rules/start-process-with-a-shell/
-"S318"  # use of xml module https://docs.astral.sh/ruff/rules/suspicious-xml-mini-dom-usage/
+"S318",  # use of xml module https://docs.astral.sh/ruff/rules/suspicious-xml-mini-dom-usage/
+"UP007", # use X | Y for type annotations https://docs.astral.sh/ruff/rules/non-pep604-annotation-union/
+"UP008", # use super() instead of super(__class__, self) https://docs.astral.sh/ruff/rules/super-call-with-parameters/
+"UP015", # unnecessary mode argument https://docs.astral.sh/ruff/rules/redundant-open-modes/
+"UP019", # {}.Text is deprecated, use str https://docs.astral.sh/ruff/rules/typing-text-str-alias/
+"UP028", # replace yield over for loop with yield from https://docs.astral.sh/ruff/rules/yield-in-for-loop/
+"UP030", # use implicit references for positional format fields https://docs.astral.sh/ruff/rules/format-literals/
+"UP031", # use format specifiers instead of percent format https://docs.astral.sh/ruff/rules/printf-string-formatting/
+"UP032", # use f-string instead of format call https://docs.astral.sh/ruff/rules/f-string/
+"UP045", # use X | None for type annotations https://docs.astral.sh/ruff/rules/non-pep604-annotation-optional/
 ]
 exclude = [
    "qt/applications/workbench/workbench/app/resources.py",

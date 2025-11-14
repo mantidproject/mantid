@@ -31,7 +31,7 @@ NO_OF_CHECKPOINTS_KEY = "projectRecovery.numberOfCheckpoints"
 RECOVERY_ENABLED_KEY = "projectRecovery.enabled"
 
 
-class ProjectRecovery(object):
+class ProjectRecovery:
     recovery_ordered_recovery_file_name = "ordered_recovery.py"
     recovery_workbench_recovery_name = "workbench-recovery"
     recovery_file_ext = ".recfile"

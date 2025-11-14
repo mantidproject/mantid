@@ -10,7 +10,7 @@ from mantidqt.utils.qt.testing import start_qapplication
 from mantidqtinterfaces.Muon.GUI.Common.test_helpers.context_setup import setup_context
 
 
-class MockFitInfo(object):
+class MockFitInfo:
     def __init__(self, name):
         self.fit = "FlatBackground"
         self.tf_asymmetry_fit = False

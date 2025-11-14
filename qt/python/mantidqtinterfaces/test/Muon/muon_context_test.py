@@ -60,7 +60,7 @@ class MuonContextTest(unittest.TestCase):
         self.filepath = FileFinder.findRuns("EMU00019489.nxs")[0]
 
         self.load_result, self.run_number, self.filename, psi_data = load_workspace_from_filename(self.filepath)
-        self.assert_(not psi_data)
+        self.assertTrue(not psi_data)
 
         self.context = setup_context()
         self.context.gui_context.update({"RebinType": "None"})

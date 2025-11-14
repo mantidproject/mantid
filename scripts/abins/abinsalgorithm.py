@@ -16,7 +16,8 @@ from pathlib import Path
 import re
 from tempfile import NamedTemporaryFile
 import textwrap
-from typing import Dict, Iterable, List, Optional, Literal, Tuple, Union
+from typing import Optional, Literal, Union
+from collections.abc import Iterable
 
 import yaml
 
@@ -185,8 +186,8 @@ class AbinsAlgorithm:
         self,
         default: str = "TOSCA",
         choices: Iterable = ALL_INSTRUMENTS,
-        multiple_choice_settings: List[Tuple[str, str, str]] = [],
-        freeform_settings: List[Tuple[str, str, str]] = [],
+        multiple_choice_settings: list[tuple[str, str, str]] = [],
+        freeform_settings: list[tuple[str, str, str]] = [],
     ):
         """Declare properties related to instrument
 
@@ -230,7 +231,7 @@ class AbinsAlgorithm:
         for property_name, default, doc in freeform_settings:
             self.declareProperty(name=property_name, direction=Direction.Input, defaultValue=default, doc=doc)
 
-    def validate_common_inputs(self, issues: dict = None) -> Dict[str, str]:
+    def validate_common_inputs(self, issues: dict = None) -> dict[str, str]:
         """Validate inputs common to Abins 1D and 2D versions
 
         Args:
@@ -280,7 +281,7 @@ class AbinsAlgorithm:
         try:
             with NamedTemporaryFile(mode="w", dir=cache_directory) as fd:
                 print("check this directory is writeable", file=fd)
-        except IOError:
+        except OSError:
             issues["CacheDirectory"] = "Cache directory is not writeable"
 
         temperature = self.getProperty("TemperatureInKelvin").value
@@ -289,7 +290,7 @@ class AbinsAlgorithm:
 
         return issues
 
-    def _validate_instrument_settings(self, name="Setting", parameter="settings") -> Dict[str, str]:
+    def _validate_instrument_settings(self, name="Setting", parameter="settings") -> dict[str, str]:
         """Check that multiple-choice parameter is compatible with selected Instrument"""
         instrument_name = self.getProperty("Instrument").value
         setting = self.getProperty(name).value
@@ -322,7 +323,7 @@ class AbinsAlgorithm:
         }
 
     @staticmethod
-    def get_atom_selection(*, atoms_data: abins.AtomsData, selection: list) -> Tuple[list, list]:
+    def get_atom_selection(*, atoms_data: abins.AtomsData, selection: list) -> tuple[list, list]:
         """Interpret the user 'Atoms' input as a set of elements and atom indices
 
         (These atom indices match the user-facing convention and begin at 1.)
@@ -423,7 +424,7 @@ class AbinsAlgorithm:
         return sorted(atom_numbers), atom_symbols
 
     @classmethod
-    def get_masses_table(cls, spectra: Spectrum1DCollection | Spectrum2DCollection) -> Dict[str, List[float]]:
+    def get_masses_table(cls, spectra: Spectrum1DCollection | Spectrum2DCollection) -> dict[str, list[float]]:
         """
         Collect masses associated with each element in SpectrumNDCollection
 
@@ -519,7 +520,7 @@ class AbinsAlgorithm:
 
     def _atom_number_s(
         self, *, atom_number: int, spectra: Spectrum1DCollection | Spectrum2DCollection, s_atom_data: np.ndarray
-    ) -> List[str]:
+    ) -> list[str]:
         """
         Helper function for calculating S for the given atomic index
 

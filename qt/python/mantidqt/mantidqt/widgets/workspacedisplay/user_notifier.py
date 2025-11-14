@@ -13,7 +13,7 @@ from qtpy.QtGui import QCursor, QFont, QFontMetrics
 from qtpy.QtWidgets import QToolTip
 
 
-class UserNotifier(object):
+class UserNotifier:
     """
     Provides common functionality for notifying the user using a
     status bar, or (Windows only) mouse tooltip notifications.

@@ -20,7 +20,7 @@ from mantid.kernel import logger
 from qtpy.QtWidgets import QMessageBox
 
 
-class FocusPresenter(object):
+class FocusPresenter:
     def __init__(self, model, view):
         self.model = model
         self.view = view

@@ -65,7 +65,7 @@ class FunctionFactoryTest(unittest.TestCase):
         self.assertRaises(ValueError, FunctionFactory.subscribe, not_a_fit_function)
 
     def test_function_subscription_of_class_without_IFunction_base_raises_error(self):
-        class NotAFitFunction(object):
+        class NotAFitFunction:
             pass
 
         self.assertRaises(ValueError, FunctionFactory.subscribe, NotAFitFunction)

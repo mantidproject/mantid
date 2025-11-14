@@ -85,7 +85,7 @@ class DiffractionReductionScripter(BaseReductionScripter):
             f = open(file_name, "w")
             f.write(script)
             f.close()
-        except IOError as e:
+        except OSError as e:
             print("Unable to save script to file. Reason: %s." % (str(e)))
 
         # Export XML file

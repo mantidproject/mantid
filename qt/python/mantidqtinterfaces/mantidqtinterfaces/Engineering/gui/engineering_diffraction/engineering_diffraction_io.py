@@ -22,7 +22,7 @@ SETTINGS_KEYS_TYPES = {
 }
 
 
-class EngineeringDiffractionUIAttributes(object):
+class EngineeringDiffractionUIAttributes:
     # WARNING: If you delete a tag from here instead of adding a new one, it will make old project files obsolete so
     # just add an extra tag to the list e.g. ["InstrumentWidget", "IWidget"]
     _tags = ["EngineeringDiffractionGui"]

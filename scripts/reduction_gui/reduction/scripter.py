@@ -38,7 +38,7 @@ except (ImportError, ImportWarning):
         SCRIPT_EXEC_METHOD = "async"
 
 
-class BaseScriptElement(object):
+class BaseScriptElement:
     """
     Base class for each script element (panel on the UI).
     Contains only data and is UI implementation agnostic.
@@ -338,7 +338,7 @@ def execute_script(script, error_cb=None):
         exec(script, globals(), locals())  # noqa: S102
 
 
-class BaseReductionScripter(object):
+class BaseReductionScripter:
     """
     Organizes the set of reduction parameters that will be used to
     create a reduction script. Parameters are organized by groups that
@@ -348,7 +348,7 @@ class BaseReductionScripter(object):
     ## List of observers
     _observers = []
 
-    class ReductionObserver(object):
+    class ReductionObserver:
         ## Script element class (for type checking)
         _state_cls = None
         ## Script element object

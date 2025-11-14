@@ -11,7 +11,7 @@ import numpy as np
 # Author: Karl Palmen ISIS
 
 
-class IdealTube(object):
+class IdealTube:
     """
     The IdealTube specifies where the peaks formed by slits or edges should occur.
 

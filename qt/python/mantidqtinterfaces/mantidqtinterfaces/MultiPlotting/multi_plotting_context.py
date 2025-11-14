@@ -13,7 +13,7 @@ xBounds = "xBounds"
 yBounds = "yBounds"
 
 
-class PlottingContext(object):
+class PlottingContext:
     def __init__(self, gridspec_engine=gridspecEngine()):
         self.context = {}
         self.subplots = {}

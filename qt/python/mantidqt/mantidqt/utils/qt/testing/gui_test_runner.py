@@ -37,7 +37,7 @@ def create_widget(widget_path):
     return widget_generator()
 
 
-class ScriptRunner(object):
+class ScriptRunner:
     """
     Runs a script that interacts with a widget (tests it).
     If the script is a python generator then after each iteration controls returns

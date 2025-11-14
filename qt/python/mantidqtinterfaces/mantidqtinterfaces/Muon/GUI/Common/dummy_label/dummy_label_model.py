@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 
-class DummyLabelModel(object):
+class DummyLabelModel:
     def __init__(self, context, key):
         self._context = context
         self._key = key

@@ -4,7 +4,6 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from typing import List
 from matplotlib.container import ErrorbarContainer
 from matplotlib.artist import Artist
 from qtpy import QtWidgets, QtCore
@@ -33,8 +32,8 @@ NUMBER_OF_COLOURS = 10
 DEFAULT_COLOR_CYCLE = ["C" + str(index) for index in range(NUMBER_OF_COLOURS)]
 
 
-class ShadedRegionInfo(object):
-    def __init__(self, workspace_name: str, axis, x_values: List[float], y1_values: List[float], y2_values: List[float]):
+class ShadedRegionInfo:
+    def __init__(self, workspace_name: str, axis, x_values: list[float], y1_values: list[float], y2_values: list[float]):
         self.workspace_name = workspace_name
         self.axis = axis
         self.x_values = x_values
@@ -42,7 +41,7 @@ class ShadedRegionInfo(object):
         self.y2_values = y2_values
         self.ID = None
 
-    def update(self, axis, x_values: List[float], y1_values: List[float], y2_values: List[float]):
+    def update(self, axis, x_values: list[float], y1_values: list[float], y2_values: list[float]):
         self.axis = axis
         self.x_values = x_values
         self.y1_values = y1_values
@@ -188,7 +187,7 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
         _do_single_plot(ax, workspace, ws_index, errors=errors, plot_kwargs=plot_kwargs)
         return axis_number
 
-    def add_workspaces_to_plot(self, workspace_plot_info_list: List[WorkspacePlotInformation]):
+    def add_workspaces_to_plot(self, workspace_plot_info_list: list[WorkspacePlotInformation]):
         """Add a list of workspaces to the plot - The workspaces are contained in a list PlotInformation
         The PlotInformation contains the workspace name, workspace index and target axis."""
         nrows, ncols = get_num_row_and_col(self._number_of_axes)
@@ -248,7 +247,7 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
             ax.yaxis.set_label_position("right")
             ax.yaxis.tick_right()
 
-    def remove_workspace_info_from_plot(self, workspace_plot_info_list: List[WorkspacePlotInformation]):
+    def remove_workspace_info_from_plot(self, workspace_plot_info_list: list[WorkspacePlotInformation]):
         # We reverse the workspace info list so that we can maintain a unique color queue
         # See _update_color_queue_on_workspace_removal for more
         workspace_plot_info_list.reverse()

@@ -42,7 +42,7 @@ from plugins.algorithms.peakdata_utils import (
     set_peak_intensity,
 )
 from enum import Enum
-from typing import Sequence, Tuple
+from collections.abc import Sequence
 from mantid.dataobjects import PeakShapeDetectorBin
 
 
@@ -576,7 +576,7 @@ class PeakFunctionGenerator:
         return at_limit
 
     @staticmethod
-    def _estimate_intensity_and_background(ws: Workspace2D, ispec: int, istart: int, iend: int) -> Tuple[float, float, float]:
+    def _estimate_intensity_and_background(ws: Workspace2D, ispec: int, istart: int, iend: int) -> tuple[float, float, float]:
         bin_width = np.diff(ws.readX(ispec)[istart:iend])
         bin_width = np.hstack((bin_width, bin_width[-1]))  # easier than checking iend and istart not out of bounds
         y = ws.readY(ispec)[istart:iend]

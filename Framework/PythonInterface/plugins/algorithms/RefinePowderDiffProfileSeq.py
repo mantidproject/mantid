@@ -243,7 +243,7 @@ class RefinePowderDiffProfileSeq(PythonAlgorithm):
 #
 # --------------------------------------------------------------------
 # pylint: disable=too-many-instance-attributes
-class SeqRefineProfile(object):
+class SeqRefineProfile:
     """A class to do sequential refinement on peak profile
 
     Use case:
@@ -468,7 +468,7 @@ class SeqRefineProfile(object):
                 os.remove(projectfname)
             except RuntimeError:
                 shutil.rmtree(projectfname)
-            except IOError:
+            except OSError:
                 shutil.rmtree(projectfname)
             except OSError:
                 shutil.rmtree(projectfname)
@@ -782,7 +782,7 @@ def resetParametersGroups(tablews):
 # pylint: disable=too-many-instance-attributes
 
 
-class RefineProfileParameters(object):
+class RefineProfileParameters:
     """Class to refine profile parameters ONE step"""
 
     datawsname = None

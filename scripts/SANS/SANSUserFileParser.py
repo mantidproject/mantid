@@ -14,7 +14,7 @@ DarkRunSettings = namedtuple("DarkRunSettings", "run_number time mean mon mon_nu
 # pylint: disable=too-many-instance-attributes
 
 
-class BackCommandParser(object):
+class BackCommandParser:
     def __init__(self):
         super(BackCommandParser, self).__init__()
         self._uniform_key = ["TIME", "UAMP"]

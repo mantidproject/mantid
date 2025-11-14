@@ -68,7 +68,7 @@ class CreateVanadiumTest(systemtesting.MantidSystemTest):
             config["datasearch.directories"] = self.existing_config
 
 
-class FocusTestMixin(object):
+class FocusTestMixin:
     focus_results = None
     existing_config = config["datasearch.directories"]
 

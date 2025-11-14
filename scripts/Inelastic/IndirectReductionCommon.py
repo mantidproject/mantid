@@ -18,7 +18,6 @@ except ImportError:
 import os
 import numpy as np
 from math import expm1, log
-from typing import List, Tuple
 
 
 # -------------------------------------------------------------------------------
@@ -723,7 +722,7 @@ def group_spectra(
     group_ws: GroupingWorkspace = None,
     group_string: str = None,
     number_of_groups: int = None,
-    spectra_range: List[float] = None,
+    spectra_range: list[float] = None,
 ) -> MatrixWorkspace:
     """
     Groups spectra in a given workspace according to the Workflow.GroupingMethod property.
@@ -754,7 +753,7 @@ def group_spectra_of(
     group_ws: GroupingWorkspace = None,
     group_string: str = None,
     number_of_groups: int = None,
-    spectra_range: List[int] = None,
+    spectra_range: list[int] = None,
 ) -> MatrixWorkspace:
     """
     Groups spectra in a given workspace according to the Workflow.GroupingMethod property.
@@ -876,7 +875,7 @@ def create_grouping_workspace(workspace: MatrixWorkspace, cal_file: str) -> Grou
     return group_ws
 
 
-def _excluded_detector_ids(grouping_workspace: GroupingWorkspace) -> List[int]:
+def _excluded_detector_ids(grouping_workspace: GroupingWorkspace) -> list[int]:
     """
     Finds the detector IDs which are not included in the grouping. These detector IDs will be in a group with a negative group ID.
     @param grouping_workspace The GroupingWorkspace containing the detector grouping information.
@@ -1123,7 +1122,7 @@ def get_multi_frame_rebin(workspace_name, rebin_string):
 # -------------------------------------------------------------------------------
 
 
-def _get_x_range_when_bins_vary(workspace: MatrixWorkspace, grouping_workspace: GroupingWorkspace) -> Tuple[float]:
+def _get_x_range_when_bins_vary(workspace: MatrixWorkspace, grouping_workspace: GroupingWorkspace) -> tuple[float]:
     """
     Finds the minimum and maximum X values for a workspace with varying bins. It will only search for the min
     and max x values in spectra which are included in the grouping provided by the GroupingWorkspace.

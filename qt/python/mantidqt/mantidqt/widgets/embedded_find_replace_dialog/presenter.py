@@ -14,7 +14,7 @@ class SearchDirection(Enum):
     BACKWARD = 1
 
 
-class EmbeddedFindReplaceDialog(object):
+class EmbeddedFindReplaceDialog:
     def __init__(self, parent, editor, view=None):
         self.view = view if view else EmbeddedFindReplaceDialogView(parent, self)
         self.editor = editor

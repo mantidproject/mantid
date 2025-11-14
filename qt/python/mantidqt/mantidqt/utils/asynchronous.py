@@ -88,7 +88,7 @@ class AsyncTask(threading.Thread):
         time.sleep(0.1)
 
 
-class _Receiver(object):
+class _Receiver:
     def __init__(self, success_cb=None, error_cb=None):
         self.output = None
         self.exc_value = None
@@ -161,7 +161,7 @@ class BlockingAsyncTaskWithCallback(AsyncTask):
         time.sleep(0.1)
 
 
-class AsyncTaskResult(object):
+class AsyncTaskResult:
     """Object describing the execution of an asynchronous task"""
 
     def __init__(self, elapsed_time):

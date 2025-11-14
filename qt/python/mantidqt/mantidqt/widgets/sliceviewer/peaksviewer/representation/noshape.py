@@ -14,7 +14,7 @@ from .painter import MplPainter, Painted
 from mantidqt.widgets.sliceviewer.models.sliceinfo import SliceInfo
 
 # standard library
-from typing import Sequence
+from collections.abc import Sequence
 
 
 class NonIntegratedPeakRepresentation:

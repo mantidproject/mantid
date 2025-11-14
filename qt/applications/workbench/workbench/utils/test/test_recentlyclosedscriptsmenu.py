@@ -20,7 +20,7 @@ working_directory = tempfile.mkdtemp()
 fake_script = os.path.join(working_directory, "fake_script.py")
 
 
-class MockCONF(object):
+class MockCONF:
     def __init__(self):
         self.set = MagicMock()
         self.get = MagicMock(side_effect=lambda x: test_CONF_settings[x])

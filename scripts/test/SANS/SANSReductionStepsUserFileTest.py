@@ -111,7 +111,7 @@ class SANSReductionStepsUserFileTest(unittest.TestCase):
         self.assertEqual(merge_Range.q_merge_range, False, "q_merge_range should be true")
 
 
-class MockConvertTOQISISQResolution(object):
+class MockConvertTOQISISQResolution:
     def __init__(self):
         super(MockConvertTOQISISQResolution, self).__init__()
 
@@ -153,7 +153,7 @@ class MockConvertTOQISISQResolution(object):
         self.on_off = enabled
 
 
-class MockReducerQResolution(object):
+class MockReducerQResolution:
     def __init__(self):
         super(MockReducerQResolution, self).__init__()
         self.to_Q = MockConvertTOQISISQResolution()

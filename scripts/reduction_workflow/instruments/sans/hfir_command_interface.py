@@ -518,7 +518,7 @@ def beam_center_gravitational_drop(beam_center_file, sdd=1.13):
         try:
             ws = Load(beam_center_file)
             Logger("CommandInterface").debug("Using filename %s." % (beam_center_file))
-        except IOError:
+        except OSError:
             Logger("CommandInterface").error("Cannot read input file %s." % beam_center_file)
             return
 

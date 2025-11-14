@@ -31,7 +31,6 @@ from mantid.simpleapi import (
 )
 
 import numpy as np
-from typing import List, Tuple
 
 
 class LagrangeILLReduction(DataProcessorAlgorithm):
@@ -147,7 +146,7 @@ class LagrangeILLReduction(DataProcessorAlgorithm):
 
         empty_cell_files = self.getPropertyValue("ContainerRuns").split(",")
         # empty cell treatment, if there is any
-        if empty_cell_files[0] != str():
+        if empty_cell_files[0] != "":
             self.process_empty_cell(empty_cell_files)
 
         # sample load and formatting
@@ -185,7 +184,7 @@ class LagrangeILLReduction(DataProcessorAlgorithm):
         self.setProperty("OutputWorkspace", self.output_ws_name)
         GroupWorkspaces(OutputWorkspace="__" + self.output_ws_name, InputWorkspaces=self.intermediate_workspaces)
 
-    def add_metadata(self, ws: str, time: List[float], temperature: List[float]):
+    def add_metadata(self, ws: str, time: list[float], temperature: list[float]):
         """
         Adds metadata from provided loaded lists of values.
 
@@ -199,7 +198,7 @@ class LagrangeILLReduction(DataProcessorAlgorithm):
         run.addProperty("temperature", temperature, True)
         run.addProperty("run_title", self._title, True)
 
-    def load_and_concatenate(self, files: List[str]) -> np.ndarray:
+    def load_and_concatenate(self, files: list[str]) -> np.ndarray:
         """
         Loads ASCII Lagrange data files as input, loads the interesting data from it and concatenates them into one numpy array
 
@@ -287,7 +286,7 @@ class LagrangeILLReduction(DataProcessorAlgorithm):
             loaded_data = np.reshape(loaded_data, (1, loaded_data.shape[0]))
         return loaded_data
 
-    def preprocess_nexus(self, file_name: List[str], output_name: str):
+    def preprocess_nexus(self, file_name: list[str], output_name: str):
         """
         Loads, merges adjacent bins and puts the detector counts workspace in the ADS. The method interfaces to the LoadAndMerge
         algorithm to load NeXus Lagrange data, then processes the loaded workspace to remove all bins that have a smaller
@@ -318,7 +317,7 @@ class LagrangeILLReduction(DataProcessorAlgorithm):
             Divide(LHSWorkspace=output_name, RHSWorkspace=monitor_name, OutputWorkspace=output_name)
         DeleteWorkspace(Workspace=monitor_name)
 
-    def get_counts_errors_metadata(self, data: np.ndarray) -> Tuple[List[float], List[int], List[float], List[float], List[float]]:
+    def get_counts_errors_metadata(self, data: np.ndarray) -> tuple[list[float], list[int], list[float], list[float], list[float]]:
         """
         Processes loaded data and metadata, computes and returns correct energy, (optionally) normalized detector counts
         and errors.
@@ -487,7 +486,7 @@ class LagrangeILLReduction(DataProcessorAlgorithm):
 
         Multiply(LHSWorkspace=ws_to_correct, RHSWorkspace=interpolated_water_ws, OutputWorkspace=corrected_ws)
 
-    def process_empty_cell(self, empty_cell_files: List[str]):
+    def process_empty_cell(self, empty_cell_files: list[str]):
         """
         Process empty cell files by loading the raw data, adding metadata, normalising to monitor (if requested) and
         performing water correction.

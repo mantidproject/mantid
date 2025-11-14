@@ -1,5 +1,4 @@
 import math
-from typing import Tuple
 
 import numpy as np
 
@@ -76,7 +75,7 @@ class DirectInstrument(Instrument):
         q_limits[1, :] = np.sqrt(self.calculate_q_powder(input_data=energy, angle=max_angle))
         return q_limits
 
-    def get_q_bounds(self, pad: float = 0.05) -> Tuple[float, float]:
+    def get_q_bounds(self, pad: float = 0.05) -> tuple[float, float]:
         """Calculate appropriate q range for instrument
 
         Coarsely sample the outer E-Q lines to determine plotting extent

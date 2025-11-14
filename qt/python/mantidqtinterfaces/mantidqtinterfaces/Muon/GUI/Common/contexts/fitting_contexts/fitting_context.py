@@ -93,7 +93,7 @@ def _move_globals_to_front(unique_params):
     return OrderedDict(sorted(unique_params.items(), key=lambda x: not x[1].is_global))
 
 
-class Parameter(object):
+class Parameter:
     """Hold single parameter from a fit"""
 
     def __init__(self, raw_name, value, error, isglobal):
@@ -130,7 +130,7 @@ class Parameter(object):
         return self._isglobal
 
 
-class FitParameters(object):
+class FitParameters:
     """Data-object encapsulating fit parameters for a single fit"""
 
     def __init__(self, parameter_workspace, global_parameters=None):
@@ -179,7 +179,7 @@ class FitParameters(object):
         return self._global_parameters
 
 
-class FitInformation(object):
+class FitInformation:
     """Data-object encapsulating a single fit"""
 
     def __init__(
@@ -328,7 +328,7 @@ class FitInformation(object):
         return self.log_value_and_error(log_name)[0]
 
 
-class FittingContext(object):
+class FittingContext:
     """Context specific to fitting.
 
     It holds details are any fits performed including:

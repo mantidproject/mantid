@@ -11,7 +11,7 @@ from mantid.kernel import Direction
 # pylint: disable=too-few-public-methods
 
 
-class QueryFlag(object):
+class QueryFlag:
     def isMasked(self, specInfo, index, dummy_yValue):
         return specInfo.isMasked(index)
 
@@ -19,7 +19,7 @@ class QueryFlag(object):
 # pylint: disable=too-few-public-methods
 
 
-class QueryValue(object):
+class QueryValue:
     def isMasked(self, dummy_specInfo, dummy_index, yValue):
         return yValue == 1
 

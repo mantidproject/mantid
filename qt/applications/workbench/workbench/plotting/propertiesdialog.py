@@ -66,7 +66,7 @@ class PropertiesEditorBase(QDialog):
         raise NotImplementedError("Derived classes should override error_occurred")
 
 
-class LabelEditorModel(object):
+class LabelEditorModel:
     def __init__(self, label_text):
         self.label_text = label_text
 
@@ -99,7 +99,7 @@ class LabelEditor(PropertiesEditorBase):
         self.ui.errors.show()
 
 
-class LegendEditorModel(object):
+class LegendEditorModel:
     def __init__(self, label_text):
         self.label_text = label_text
 
@@ -135,7 +135,7 @@ class LegendEditor(PropertiesEditorBase):
         self.ui.errors.show()
 
 
-class AxisEditorModel(object):
+class AxisEditorModel:
     min = None
     max = None
     scale_mode = None

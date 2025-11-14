@@ -32,7 +32,7 @@ from mantidqt.interfacemanager import InterfaceManager
 from mantidqt.utils.observer_pattern import GenericObservable
 
 
-class EngineeringDiffractionPresenter(object):
+class EngineeringDiffractionPresenter:
     def __init__(self):
         self.calibration_presenter = None
         self.correction_presenter = None

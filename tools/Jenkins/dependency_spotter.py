@@ -17,7 +17,6 @@ This will compare builds 593 and 598 from the "main_nightly" pipeline
 
 import argparse
 import re
-from typing import List, Dict
 import requests
 
 
@@ -87,7 +86,7 @@ def dependency_spotter(os_name: str, first_build: int, second_build: int, pipeli
         print()
 
 
-def extract_available_log_files(os_name: str, build_number: int, pipeline: str) -> List[str]:
+def extract_available_log_files(os_name: str, build_number: int, pipeline: str) -> list[str]:
     """
     Reads the Jenkins page listing the artifacts from the specified build and extracts the
     available files, e.g. mantid_build_environment.txt. Returns a list of these filenames
@@ -143,7 +142,7 @@ def compare_dependencies_for_file(os_name: str, first_build: int, second_build: 
     output_package_changes_to_console(packages_added, packages_removed, packages_changed)
 
 
-def output_package_changes_to_console(added: list, removed: list, changed: Dict[str, str]) -> None:
+def output_package_changes_to_console(added: list, removed: list, changed: dict[str, str]) -> None:
     """
     Format and output the packages that have been added, removed, or changed version.
     :param added: List of names of packages that have been added
@@ -178,7 +177,7 @@ def form_url_for_build_artifact(build_number: int, os_name: str, pipeline: str, 
     return f"https://builds.mantidproject.org/job/{pipeline}/{build_number}/artifact/conda-bld/env_logs/{os_name}/{log_file}"
 
 
-def extract_package_versions(url: str, os_name: str) -> Dict[str, str]:
+def extract_package_versions(url: str, os_name: str) -> dict[str, str]:
     """
     Open specified URL and use a regular expression to extract the packages listed, and their versions. Returns
     a dictionary of packages and their versions

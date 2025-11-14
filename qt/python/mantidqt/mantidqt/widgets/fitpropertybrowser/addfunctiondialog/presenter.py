@@ -8,7 +8,7 @@ from .view import AddFunctionDialogView
 from mantidqt.interfacemanager import InterfaceManager
 
 
-class AddFunctionDialog(object):
+class AddFunctionDialog:
     """
     Dialog to add function to fit property browser
     """

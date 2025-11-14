@@ -24,7 +24,7 @@ import os
 from sys import platform
 
 
-class NonIDF_Properties(object):
+class NonIDF_Properties:
     """Class defines the interface for main properties, used in reduction, and not described in
     IDF ( Instrument_Properties.xml file)
 

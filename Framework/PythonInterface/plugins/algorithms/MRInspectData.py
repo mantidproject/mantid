@@ -141,7 +141,7 @@ def _as_ints(a):
     return [int(a[0]), int(a[1])]
 
 
-class DataInfo(object):
+class DataInfo:
     """
     Class to hold the relevant information from a run (scattering or direct beam).
     """

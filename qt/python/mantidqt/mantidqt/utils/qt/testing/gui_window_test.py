@@ -110,7 +110,7 @@ def skipIf(test, reason):
     return wrap
 
 
-class GuiTestBase(object):
+class GuiTestBase:
     def _call_test_method(self, w):
         self.widget = w
         if hasattr(self, self.call_method):
@@ -240,7 +240,7 @@ class GuiWindowTest(TestCase, GuiTestBase):
             setattr(cls, name, cls.make_test_wrapper(wrapped_name, skip))
 
 
-class MultiTestRunner(object):
+class MultiTestRunner:
     def __init__(self, methods):
         self.methods = methods
 
