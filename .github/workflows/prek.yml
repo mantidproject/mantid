@@ -11,11 +11,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: Switch to PR branch
+        run: git switch ${{ github.head_ref }}
       - uses: j178/prek-action@v1
         with:
           install-only: true
       - name: Run prek
-        run: prek run --all-files --fix
+        run: prek run --all-files || true
       - name: Commit fixes
         run: |
           if [[ -n "$(git status --porcelain)" ]]; then
