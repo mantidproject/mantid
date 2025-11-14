@@ -53,7 +53,7 @@ LoadMuonStrategy::loadDefaultDetectorGrouping(const DataObjects::Workspace2D &lo
   auto instrument = localWorkspace.getInstrument();
   auto &run = localWorkspace.run();
   std::string mainFieldDirection = run.getLogData("main_field_direction")->value();
-  API::GroupingLoader groupLoader(std::move(instrument), mainFieldDirection);
+  API::GroupingLoader groupLoader(instrument, mainFieldDirection);
   try {
     const auto idfGrouping = groupLoader.getGroupingFromIDF();
     return idfGrouping->toTable();
