@@ -20,7 +20,7 @@ class MockPosition:
         self.z = z
 
     def getSpherical(self):
-        return [self.x, self.y, self.z]
+        return [self.x,self.y,self.z]
 
     def __array__(self):
         return np.array([self.x, self.y, self.z])
