@@ -15,6 +15,10 @@
 namespace Mantid {
 namespace DataObjects {
 
+// Reference Docs
+// Concepts: https://developer.mantidproject.org/MaskWorkspace.html
+// API: https://docs.mantidproject.org/api/python/mantid/dataobjects/MaskWorkspace.html
+
 class MANTID_DATAOBJECTS_DLL MaskWorkspace : public SpecialWorkspace2D, public API::IMaskWorkspace {
 public:
   MaskWorkspace() = default;

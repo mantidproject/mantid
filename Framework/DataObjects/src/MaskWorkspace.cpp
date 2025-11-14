@@ -201,8 +201,9 @@ void MaskWorkspace::setMasked(const detid_t detectorID, const bool mask) {
     value = DEAD_VALUE;
 
   this->setValue(detectorID, value, ERROR_VALUE);
-  auto index = this->detectorInfo().indexOf(detectorID);
-  this->mutableSpectrumInfo().setMasked(index, true);
+
+  // auto index = this->detectorInfo().indexOf(detectorID);
+  // this->mutableDetectorInfo().setMasked(index, true);
 }
 
 /**
