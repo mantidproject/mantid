@@ -1208,11 +1208,12 @@ std::string strmakef(const char *const fmt, ...) {
     return {};
   }
 
-  char buf[256];
+  std::size_t constexpr BUFSIZE{256};
+  char buf[BUFSIZE];
 
   va_list args;
   va_start(args, fmt);
-  const auto r = std::vsnprintf(buf, sizeof buf, fmt, args);
+  const auto r = std::vsnprintf(buf, BUFSIZE, fmt, args);
   va_end(args);
 
   if (r < 0)
@@ -1220,7 +1221,7 @@ std::string strmakef(const char *const fmt, ...) {
     return {};
 
   const size_t len = r;
-  if (len < sizeof buf)
+  if (len < BUFSIZE)
     // we fit in the buffer
     return {buf, len};
 
