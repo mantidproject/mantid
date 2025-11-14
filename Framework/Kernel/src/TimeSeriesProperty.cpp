@@ -1053,11 +1053,13 @@ template <typename TYPE> std::vector<double> TimeSeriesProperty<TYPE>::timesAsVe
 
   // 2. Output data structure
   std::vector<double> out;
-  out.reserve(m_values.size());
+  if (!m_values.empty()) {
+    out.reserve(m_values.size());
 
-  Types::Core::DateAndTime start = m_values[0].time();
-  for (size_t i = 0; i < m_values.size(); i++) {
-    out.emplace_back(DateAndTime::secondsFromDuration(m_values[i].time() - start));
+    Types::Core::DateAndTime start = m_values[0].time();
+    for (size_t i = 0; i < m_values.size(); i++) {
+      out.emplace_back(DateAndTime::secondsFromDuration(m_values[i].time() - start));
+    }
   }
 
   return out;

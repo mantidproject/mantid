@@ -1307,6 +1307,14 @@ public:
     TS_ASSERT_THROWS(empty.getSingleValue(time, i), const std::runtime_error &);
   }
 
+  void test_timesAsVectorSeconds_empty() {
+    // make sure that running timesAsVectorSeconds does not cause any errors for empty arrays
+    const TimeSeriesProperty<int> empty("Empty");
+    std::vector<double> times;
+    TS_ASSERT_THROWS_NOTHING(times = empty.timesAsVectorSeconds());
+    TS_ASSERT(times.empty());
+  }
+
   void test_firstLastTimeValue() {
     TimeSeriesProperty<double> *p = createDoubleTSP();
 
