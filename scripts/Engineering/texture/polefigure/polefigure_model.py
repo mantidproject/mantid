@@ -16,14 +16,12 @@ from mantid.simpleapi import (
 import numpy as np
 from mantid.api import AnalysisDataService as ADS
 from typing import Optional, Sequence, Tuple
-import matplotlib.pyplot as plt
 from os import path, makedirs
-from scipy.interpolate import griddata
-from scipy.ndimage import gaussian_filter
 from Engineering.common.texture_sample_viewer import has_valid_shape
+from Engineering.texture.xtal_helper import get_xtal_structure
+from Engineering.texture.texture_helper import plot_pole_figure, ster_proj, azim_proj
 from matplotlib.figure import Figure
 from matplotlib.axes import Axes
-from Engineering.texture.xtal_helper import get_xtal_structure
 
 
 class TextureProjection:
@@ -121,116 +119,8 @@ class TextureProjection:
 
     # ~~~~~ Pole Figure Plotting functions ~~~~~~~~
 
-    def plot_pole_figure(
-        self,
-        ws_name: str,
-        projection: str,
-        fig: Optional[Figure] = None,
-        readout_col: str = "I",
-        save_dirs: Optional[Sequence[str] | str] = None,
-        plot_exp: bool = True,
-        ax_labels: Sequence[str] = ("Dir1", "Dir2"),
-        contour_kernel: Optional[float] = 2.0,
-        **kwargs,
-    ) -> Figure:
-        pfi = self.get_pole_figure_data(ws_name, projection, readout_col)
-
-        if plot_exp:
-            suffix = "scatter"
-            fig, ax = self.plot_exp_pf(pfi, ax_labels, readout_col, fig, **kwargs)
-        else:
-            suffix = f"contour_{contour_kernel}"
-            fig, ax = self.plot_contour_pf(pfi, ax_labels, readout_col, fig, contour_kernel, **kwargs)
-        if save_dirs:
-            for save_dir in save_dirs:
-                fig.savefig(str(path.join(save_dir, ws_name + f"_{suffix}.png")))
-
-        return fig, ax
-
-    @staticmethod
-    def plot_exp_pf(pfi: np.ndarray, ax_labels: Sequence[str], column_label: str, fig: Optional[Figure] = None, **kwargs) -> [Figure, Axes]:
-        u = np.linspace(0, 2 * np.pi, 100)
-        x = np.cos(u)
-        y = np.sin(u)
-        z = np.zeros_like(x)
-        eq = np.concatenate((x[None, :], y[None, :], z[None, :]), axis=0)
-
-        fig = plt.figure(layout="constrained") if not fig else fig
-        gs = fig.add_gridspec(
-            1,
-            3,
-            width_ratios=[1, 30, 1],  # tweak 30 to control plot vs cbar width
-            left=0.05,
-            right=0.98,
-            top=0.98,
-            bottom=0.06,
-            wspace=0.05,
-        )
-        # left spacer: gs[0, 0] (we don't use it)
-        ax = fig.add_subplot(gs[0, 1])
-        cax = fig.add_subplot(gs[0, 2])
-        scat_plot = ax.scatter(pfi[:, 1], pfi[:, 0], c=pfi[:, 2], s=20, cmap="jet", label="poles", **kwargs)
-        ax.plot(eq[0], eq[1], c="grey", label="plot bounding circle")
-        ax.set_aspect("equal")
-        ax.set_axis_off()
-        ax.quiver(-1, -1, 0.2, 0, color="blue", scale=1)
-        ax.quiver(-1, -1, 0, 0.2, color="red", scale=1)
-        ax.text(-0.8, -0.95, ax_labels[-1], fontsize=10)
-        ax.text(-0.95, -0.8, ax_labels[0], fontsize=10)
-        cbar = fig.colorbar(scat_plot, cax=cax)
-        ax.set_label("Pole Figure Plot")
-        scat_plot.set_label("pole figure data")
-        cbar.set_label(column_label, rotation=0, labelpad=15)
-        return fig, ax
-
-    @staticmethod
-    def plot_contour_pf(
-        pfi: np.ndarray, ax_labels: Sequence[str], column_label: str, fig: Optional[Figure] = None, contour_kernel: float = 2.0, **kwargs
-    ) -> [Figure, Axes]:
-        x, y, z = pfi[:, 1], pfi[:, 0], np.nan_to_num(pfi[:, 2])
-        # Grid definition
-        R = 1
-        grid_x, grid_y = np.mgrid[-R:R:200j, -R:R:200j]
-
-        # Mask to keep only points inside the circle of radius R
-        mask = grid_x**2 + grid_y**2 <= R**2
-
-        # Interpolate z-values on the grid
-        grid_z = np.asarray(griddata((x, y), z, (grid_x, grid_y), method="nearest"))
-        grid_z = np.asarray(gaussian_filter(grid_z, sigma=contour_kernel))
-
-        # Apply the mask
-        grid_z[~mask] = np.nan
-
-        # Plotting
-        fig = plt.figure() if not fig else fig
-        gs = fig.add_gridspec(
-            1,
-            3,
-            width_ratios=[1, 30, 1],  # tweak 30 to control plot vs cbar width
-            left=0.05,
-            right=0.98,
-            top=0.98,
-            bottom=0.06,
-            wspace=0.05,
-        )
-        # left spacer: gs[0, 0] (we don't use it)
-        ax = fig.add_subplot(gs[0, 1])
-        cax = fig.add_subplot(gs[0, 2])
-        contour_plot = ax.contourf(grid_x, grid_y, grid_z, levels=10, cmap="jet", **kwargs)
-        circle = plt.Circle((0, 0), R, color="grey", fill=False, linestyle="-", label="plot bounding circle")
-        ax.add_patch(circle)
-        ax.set_aspect("equal")
-        ax.set_axis_off()
-        ax.quiver(-1, -1, 0.2, 0, color="blue", scale=1)
-        ax.quiver(-1, -1, 0, 0.2, color="red", scale=1)
-        ax.text(-0.8, -0.95, ax_labels[-1], fontsize=10)
-        ax.text(-0.95, -0.8, ax_labels[0], fontsize=10)
-        ax.set_label("Pole Figure Plot")
-        contour_plot.set_label("pole figure data")
-        cbar = fig.colorbar(contour_plot, cax=cax)
-        cbar.set_label(column_label, rotation=0, labelpad=15)
-        return fig, ax
+    def plot_pole_figure(self, *args, **kwargs) -> [Figure, Axes]:
+        return plot_pole_figure(*args, **kwargs)
 
     # ~~~~~ General Utility functions ~~~~~~~~
 
@@ -334,21 +224,3 @@ class TextureProjection:
     def set_all_ws_xtal(self, wss: Sequence[str], lattice: str, space_group: str, basis: str, cif: str) -> None:
         for ws in wss:
             self.set_ws_xtal(ws, lattice, space_group, basis, cif)
-
-
-def ster_proj(alphas: np.ndarray, betas: np.ndarray, i: np.ndarray) -> np.ndarray:
-    betas = np.pi - betas  # this formula projects onto the north-pole, and beta is taken from the south
-    r = np.sin(betas) / (1 - np.cos(betas))
-    out = np.zeros((len(alphas), 3))
-    out[:, 0] = r * np.cos(alphas)
-    out[:, 1] = r * np.sin(alphas)
-    out[:, 2] = i
-    return out
-
-
-def azim_proj(alphas: np.ndarray, betas: np.ndarray, i: np.ndarray) -> np.ndarray:
-    betas = betas / (np.pi / 2)
-    xs = (betas * np.cos(alphas))[:, None]
-    zs = (betas * np.sin(alphas))[:, None]
-    out = np.concatenate([xs, zs, i[:, None]], axis=1)
-    return out
