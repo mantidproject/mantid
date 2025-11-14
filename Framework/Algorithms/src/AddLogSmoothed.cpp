@@ -8,12 +8,11 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/EnumeratedString.h"
 #include "MantidKernel/EnumeratedStringProperty.h"
+#include "MantidKernel/Exception.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/Smoothing.h"
-#include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
 #include <gsl/gsl_errno.h>
@@ -29,6 +28,16 @@ namespace Mantid::Algorithms {
 DECLARE_ALGORITHM(AddLogSmoothed)
 
 //----------------------------------------------------------------------------------------------
+
+namespace {
+namespace PropertyNames {
+std::string const INPUT_WKSP("InputWorkspace");
+std::string const LOG_NAME("LogName");
+std::string const SMOOTHING_METHOD("SmoothingMethod");
+std::string const PARAMS("Params");
+std::string const NEW_LOG_NAME("NewLogName");
+} // namespace PropertyNames
+} // namespace
 
 namespace {
 enum class SmoothingMethod { BOXCAR, FFT_ZERO, FFT_BUTTERWORTH, enum_count };
@@ -80,12 +89,12 @@ std::vector<double> getSplinedYValues(std::vector<double> const &newX, std::vect
   return newY;
 }
 
-std::vector<DateAndTime> timesToDateAndTime(DateAndTime const &start, std::vector<double> const &times) {
+std::vector<DateAndTime> relativeToAbsoluteTime(DateAndTime const &startTime, std::vector<double> const &relTimes) {
   // Convert time in sec to DateAndTime
   std::vector<DateAndTime> timeFull;
-  timeFull.reserve(times.size());
-  std::transform(times.begin(), times.end(), std::back_inserter(timeFull),
-                 [&start](const double time) { return start + time; });
+  timeFull.reserve(relTimes.size());
+  std::transform(relTimes.begin(), relTimes.end(), std::back_inserter(timeFull),
+                 [&startTime](const double time) { return startTime + time; });
   return timeFull;
 }
 } // namespace
@@ -94,18 +103,18 @@ std::vector<DateAndTime> timesToDateAndTime(DateAndTime const &start, std::vecto
 /** Initialize the algorithm's properties.
  */
 void AddLogSmoothed::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::InOut),
+  declareProperty(std::make_unique<WorkspaceProperty<>>(PropertyNames::INPUT_WKSP, "", Direction::InOut),
                   "An input/output workspace. The new log will be added to it.");
   declareProperty(
-      "LogName", "", std::make_shared<MandatoryValidator<std::string>>(),
+      PropertyNames::LOG_NAME, "", std::make_shared<MandatoryValidator<std::string>>(),
       "The name that will identify the log entry to be smoothed.\nThis log must be a numerical series (double).");
-  declareProperty(
-      std::make_unique<Kernel::EnumeratedStringProperty<SmoothingMethod, &smoothingMethods>>("SmoothingMethod"),
-      "The smoothing method to use");
-  declareProperty(std::make_unique<ArrayProperty<int>>("Params", std::vector<int>()),
+  declareProperty(std::make_unique<Kernel::EnumeratedStringProperty<SmoothingMethod, &smoothingMethods>>(
+                      PropertyNames::SMOOTHING_METHOD),
+                  "The smoothing method to use");
+  declareProperty(std::make_unique<ArrayProperty<int>>(PropertyNames::PARAMS, std::vector<int>()),
                   "The parameters which will be passed to the smoothing function.");
   declareProperty(
-      "NewLogName", "",
+      PropertyNames::NEW_LOG_NAME, "",
       "Name of the newly created log. If not specified, the string '_smoothed' will be appended to the original name");
 }
 
@@ -113,63 +122,70 @@ std::map<std::string, std::string> AddLogSmoothed::validateInputs() {
   std::map<std::string, std::string> issues;
 
   // validate parameters based on smoothing method chosen
-  SMOOTH type = getPropertyValue("SmoothingMethod");
-  std::vector<int> params = getProperty("Params");
+  SMOOTH type = getPropertyValue(PropertyNames::SMOOTHING_METHOD);
+  std::vector<int> params = getProperty(PropertyNames::PARAMS);
   switch (type) {
   case SmoothingMethod::BOXCAR: {
     if (params.empty()) {
-      issues["Params"] = "Boxcar smoothing requires the window width be passed as parameter";
+      issues[PropertyNames::PARAMS] = "Boxcar smoothing requires the window width be passed as parameter";
     } else if (params[0] < 0) {
-      issues["Params"] = Strings::strmakef("Boxcar smoothing requires a positive window; given %d\n", params[0]);
+      issues[PropertyNames::PARAMS] = "Boxcar smoothing requires a positive window; given " + std::to_string(params[0]);
     } else if (params[0] % 2 == 0) {
-      issues["Params"] = Strings::strmakef("Boxcar smoothing requires an odd window size: %d is even", params[0]);
+      issues[PropertyNames::PARAMS] =
+          "Boxcar smoothing requires an odd window size: " + std::to_string(params[0]) + " is even";
     }
     break;
   }
   case SmoothingMethod::FFT_ZERO: {
     if (params.empty()) {
-      issues["Params"] = "FFT zeroing requires the cutoff frequency as a parameter";
+      issues[PropertyNames::PARAMS] = "FFT zeroing requires the cutoff frequency as a parameter";
     } else if (params[0] <= 1) {
-      issues["Params"] = Strings::strmakef("The cutoff in FFT zeroing must be larger than 1; passed %d", params[0]);
+      issues[PropertyNames::PARAMS] =
+          "The cutoff in FFT zeroing must be larger than 1; passed " + std::to_string(params[0]);
     }
     break;
   }
   case SmoothingMethod::FFT_BUTTERWORTH: {
     if (params.size() < 2) {
-      issues["Params"] = Strings::strmakef("Butterworth smoothing requires two parameters, passed %d", params.size());
+      issues[PropertyNames::PARAMS] =
+          "Butterworth smoothing requires two parameters, passed " + std::to_string(params.size());
     } else if (params[0] <= 1 || params[1] < 1) {
-      issues["Params"] = "In Butterworth smoothing, cutoff must be greater than 1 and order must be greater than 0";
+      issues[PropertyNames::PARAMS] =
+          "In Butterworth smoothing, cutoff must be greater than 1 and order must be greater than 0";
     }
     break;
   }
-  default:
-    break;
+  default: {
+    issues[PropertyNames::SMOOTHING_METHOD] =
+        "Parameter validation for smoothing method " + std::string(type) + " has not been implemented";
   }
-  if (issues.count("Params"))
-    issues["SmoothingMethod"] = issues["Params"];
+  }
+  if (issues.count(PropertyNames::PARAMS))
+    issues[PropertyNames::SMOOTHING_METHOD] = issues[PropertyNames::PARAMS];
 
   // validate input workspace: must have a log with LogName
-  std::string logName = getPropertyValue("LogName");
-  MatrixWorkspace_sptr ws = getProperty("InputWorkspace");
+  std::string logName = getPropertyValue(PropertyNames::LOG_NAME);
+  MatrixWorkspace_const_sptr ws = getProperty(PropertyNames::INPUT_WKSP);
   if (!ws) {
-    issues["InputWorkspace"] = "No matrix workspace specified for input workspace";
+    issues[PropertyNames::INPUT_WKSP] = "No matrix workspace specified for input workspace";
     return issues;
   }
   Run const &run = ws->run();
   if (!run.hasProperty(logName)) {
-    issues["LogName"] = "Log " + logName + " not found in the workspace sample logs.";
+    issues[PropertyNames::LOG_NAME] = "Log " + logName + " not found in the workspace sample logs.";
     return issues;
   }
   auto const *tsp = dynamic_cast<TimeSeriesProperty<double> *>(run.getProperty(logName));
   if (!tsp) {
-    issues["LogName"] = "Log " + logName + " must be a numerical time series (TimeSeries<double>).";
+    issues[PropertyNames::LOG_NAME] = "Log " + logName + " must be a numerical time series (TimeSeries<double>).";
   } else {
     std::size_t const minBoxCarSize = (params.empty() ? 0 : static_cast<std::size_t>(params[0]));
     std::size_t const MIN_SPLINE_POINTS{5UL}; // minimum points needed for spline fits
     std::size_t minSize = (type == SmoothingMethod::BOXCAR ? minBoxCarSize : MIN_SPLINE_POINTS);
     if (static_cast<std::size_t>(tsp->size()) < minSize) {
-      issues["LogName"] = Strings::strmakef("Log %s has insufficient number of points; %zu < %zu", logName.c_str(),
-                                            tsp->size(), minSize);
+      issues[PropertyNames::LOG_NAME] = "Log " + logName +
+                                        " has insufficient number of points: " + std::to_string(tsp->size()) + " < " +
+                                        std::to_string(minSize);
     }
   }
   return issues;
@@ -179,10 +195,10 @@ std::map<std::string, std::string> AddLogSmoothed::validateInputs() {
 /** Execute the algorithm.
  */
 void AddLogSmoothed::exec() {
-  MatrixWorkspace_sptr ws = getProperty("InputWorkspace");
-  std::vector<int> params = getProperty("Params");
-  std::string logName = getPropertyValue("LogName");
-  std::string newLogName = getPropertyValue("NewLogName");
+  MatrixWorkspace_sptr ws = getProperty(PropertyNames::INPUT_WKSP);
+  std::vector<int> params = getProperty(PropertyNames::PARAMS);
+  std::string logName = getPropertyValue(PropertyNames::LOG_NAME);
+  std::string newLogName = getPropertyValue(PropertyNames::NEW_LOG_NAME);
   if (newLogName.empty())
     newLogName = logName + "_smoothed";
 
@@ -194,7 +210,7 @@ void AddLogSmoothed::exec() {
 
   // Perform smoothing
   auto output = std::make_unique<TimeSeriesProperty<double>>(newLogName);
-  SMOOTH smoothingMethod = getPropertyValue("SmoothingMethod");
+  SMOOTH smoothingMethod = getPropertyValue(PropertyNames::SMOOTHING_METHOD);
   switch (smoothingMethod) {
   case SmoothingMethod::BOXCAR: {
     std::vector<double> newValues = Smoothing::boxcarSmooth(values, params[0]);
@@ -205,18 +221,19 @@ void AddLogSmoothed::exec() {
     std::vector<double> flatTimes = getUniformXValues(times);
     std::vector<double> splinedValues = getSplinedYValues(flatTimes, times, values);
     std::vector<double> smoothedValues = Smoothing::fftSmooth(splinedValues, params[0]);
-    output->addValues(timesToDateAndTime(tsp->nthTime(0), flatTimes), smoothedValues);
+    output->addValues(relativeToAbsoluteTime(tsp->nthTime(0), flatTimes), smoothedValues);
     break;
   }
   case SmoothingMethod::FFT_BUTTERWORTH: {
     std::vector<double> flatTimes = getUniformXValues(times);
     std::vector<double> splinedValues = getSplinedYValues(flatTimes, times, values);
     std::vector<double> smoothedValues = Smoothing::fftButterworthSmooth(splinedValues, params[0], params[1]);
-    output->addValues(timesToDateAndTime(tsp->nthTime(0), flatTimes), smoothedValues);
+    output->addValues(relativeToAbsoluteTime(tsp->nthTime(0), flatTimes), smoothedValues);
     break;
   }
   default:
-    break;
+    throw Mantid::Kernel::Exception::NotImplementedError("Smoothing method " + std::string(smoothingMethod) +
+                                                         " has not been implemented");
   }
 
   // Add the log

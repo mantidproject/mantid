@@ -136,10 +136,10 @@ public:
     // setup a workspace with a time series log
     Workspace2D_sptr ws = WorkspaceCreationHelper::create2DWorkspace(1, 1);
     AnalysisDataService::Instance().addOrReplace("_smooth_test", ws);
-    std::string root_time = "2016-11-20T16:17";
+    Mantid::Types::Core::DateAndTime root_time("2016-11-20T16:17");
     TimeSeriesProperty<double> *tsp = new TimeSeriesProperty<double>("tsp_log");
     for (unsigned i = 0; i < values.size(); i++) {
-      tsp->addValue(Mantid::Kernel::Strings::strmakef("%s:%02d", root_time.c_str(), i), values[i]);
+      tsp->addValue((root_time + double(i)), values[i]);
     }
     ws->mutableRun().addProperty(tsp);
     return ws;
