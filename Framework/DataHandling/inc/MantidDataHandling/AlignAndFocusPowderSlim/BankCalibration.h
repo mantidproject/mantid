@@ -17,6 +17,10 @@ namespace Mantid::DataHandling::AlignAndFocusPowderSlim {
 
 constexpr double IGNORE_PIXEL{1.e6};
 
+/**
+ * Class that handles all the calibration constants for a bank of detectors. Accessing values DOES NO RANGE CHECKING so
+ * only request values within the range of detector IDs supplied to the constructor.
+ */
 class MANTID_DATAHANDLING_DLL BankCalibration {
 public:
   BankCalibration(const detid_t idmin, const detid_t idmax, const double time_conversion,
