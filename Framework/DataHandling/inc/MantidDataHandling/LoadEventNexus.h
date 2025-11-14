@@ -735,7 +735,7 @@ bool LoadEventNexus::loadInstrument(const std::string &nexusfilename, T localWor
   if (loadNexusInstrumentXML)
     foundInstrument = runLoadIDFFromNexus<T>(nexusfilename, localWorkspace, top_entry_name, alg);
   if (!foundInstrument)
-    foundInstrument = runLoadInstrument<T>(nexusfilename, localWorkspace, top_entry_name, alg, descriptor);
+    foundInstrument = runLoadInstrument<T>(nexusfilename, std::move(localWorkspace), top_entry_name, alg, descriptor);
   return foundInstrument;
 }
 

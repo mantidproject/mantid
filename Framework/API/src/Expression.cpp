@@ -526,7 +526,7 @@ std::unordered_set<std::string> Expression::getVariables() const {
   if (!isFunct()) {
     std::string s = name();
     if (!s.empty() && !isdigit(s[0])) {
-      out.insert(s);
+      out.insert(std::move(s));
     }
   } else {
     for (const auto &e : *this) {

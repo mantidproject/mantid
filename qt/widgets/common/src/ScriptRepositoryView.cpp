@@ -239,7 +239,7 @@ void ScriptRepositoryView::updateModel() {
   RepoModel *before = model;
   auto model_repo_ptr = model->getRepoPtr();
   if (!model_repo_ptr->isValid()) {
-    const bool success = chooseLocationAndInstall(model_repo_ptr);
+    const bool success = chooseLocationAndInstall(std::move(model_repo_ptr));
     if (!success) {
       return;
     }

@@ -113,7 +113,7 @@ void BoundaryConstraint::initialize(API::IFunction *fun, const API::Expression &
         g_log.error("Non-numeric value for a bound");
         throw std::invalid_argument("Non-numeric value for a bound");
       }
-      parName = name;
+      parName = std::move(name);
     }
   } // for i
 

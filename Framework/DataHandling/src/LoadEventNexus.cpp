@@ -332,7 +332,7 @@ void LoadEventNexus::setTopEntryName() {
       break;
     }
   }
-  m_top_entry_name = firstGoodEntry;
+  m_top_entry_name = std::move(firstGoodEntry);
   if (m_top_entry_name.empty()) {
     g_log.error() << "Unable to determine name of top level NXentry - assuming \"entry\".\n";
     m_top_entry_name = "entry";
