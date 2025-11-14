@@ -10,8 +10,6 @@ cd build
 
 cmake \
   ${CMAKE_ARGS} \
-  -DCMAKE_BUILD_TYPE=Release \
-  -DCMAKE_PREFIX_PATH=$PREFIX \
   -DCMAKE_FIND_FRAMEWORK=LAST \
   -DCMAKE_CXX_SCAN_FOR_MODULES=OFF \
   -DENABLE_DOCS=OFF \
@@ -22,9 +20,8 @@ cmake \
   -DMANTID_FRAMEWORK_LIB=BUILD \
   -DMANTID_QT_LIB=OFF \
   -DENABLE_WORKBENCH=OFF \
-  -DPython_EXECUTABLE=$PYTHON \
   -GNinja \
   ../
 
-ninja
-ninja install
+cmake --build .
+cmake --build . --target install
