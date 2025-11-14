@@ -33,7 +33,7 @@ public:
 
     std::set<detid_t> mask{4}; // mask detID 4
 
-    BankCalibration bankCal(1, 4, 1., calibration_map, mask);
+    BankCalibration bankCal(1, 4, 1., calibration_map, std::map<detid_t, double>(), mask);
 
     ProcessEventsTask task(&detIDs, &tofs, &bankCal, &binEdges);
     task(tbb::blocked_range<size_t>(0, tofs.size()));
