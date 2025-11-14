@@ -711,12 +711,12 @@ class Player:
     def record(self, output_path: Path):
         # Ensure target base directory exists
         output_path.mkdir(parents=True, exist_ok=True)
-
+        
         # Main server loop
         try:
             self._running = True
             self._transferred_bytes = 0
-
+            
             self._server = self._create_server_socket(self._server_address)
             while self._running:
                 # Accept connection from client (the application).
@@ -743,27 +743,37 @@ class Player:
                     self._source.settimeout(self.SOCKET_TIMEOUT)
                     self._source.connect(self._source_address)
                     _logger.info(f"Successfully connected to ADARA packet server at {self._source_address}.")
-
-                    # Start a new session for each connection to the packet server.
+                                        
+                    # Start a new session for each connection to the packet server:
+                    #   this will write all output to a single directory, named as the session number.
                     sequence_number = 1
                     session_number = self._next_session_number(output_path)
-                    # Ensure target directory exists
                     output_path = output_path / f"{session_number:04d}"
-                    output_path.mkdir(parents=True, exist_ok=True)
-
+                    output_path.mkdir(parents=True, exist_ok=True)                   
+                    
                     # Set sockets to non-blocking mode for use with select
                     self._client.setblocking(False)
                     self._source.setblocking(False)
 
-                    # Proxy data bidirectionally using select
+                    # Queue all data to allow source and client transfer-rate mismatch!
+                    to_client_queue = []
+                    to_server_queue = []
+
                     while self._running:
-                        # Wait for either socket to have data available (with 1 second timeout)
-                        # (This returns immediately when data is available.)
+                        readables = []
+                        if not to_server_queue:
+                            readables.append(self._client)
+                        if not to_client_queue:
+                            readables.append(self._source)
+
+                        writeables = []
+                        if to_client_queue:
+                            writeables.append(self._client)
+                        if to_server_queue:
+                            writeables.append(self._source)
+                        exceptionals = [self._client, self._source]
                         readable, writable, exceptional = select.select(
-                            [self._source, self._client],  # sockets to monitor for reading
-                            [],  # sockets to monitor for writing (none needed)
-                            [self._source, self._client],  # sockets to monitor for errors
-                            self.SOCKET_TIMEOUT,  # timeout in seconds
+                            readables, writeables, exceptionals, self.SOCKET_TIMEOUT
                         )
 
                         # Check for errors first
@@ -771,7 +781,9 @@ class Player:
                             _logger.error("Socket error detected: select clause")
                             break
 
-                        # Process readable sockets
+                        loop_broken = False  # Used to propagate any 'break'
+                        
+                        # Process readable sockets: one packet per iteration.
                         for sock in readable:
                             try:
                                 packet = Packet.from_socket(sock)
@@ -779,44 +791,61 @@ class Player:
                                 # limit total number of bytes transferred
                                 self._impose_transfer_limit(packet)
                                 if not self._running:
+                                    loop_broken = True
                                     break
 
                                 # Determine direction and forward
-                                try:
-                                    if sock == self._source:
-                                        # Data from server => save and forward to client
-                                        file_path = self._packet_file_path(output_path, packet, sequence_number)
-                                        with open(file_path, "wb") as f:
-                                            Packet.to_file(f, packet)
-                                            sequence_number += 1
-
-                                        _logger.debug(f"server SENDs client -> {packet}")
-                                        Packet.to_socket(self._client, packet)
-                                    else:
-                                        # Data from client => forward to server (e.g. control packet)
-                                        _logger.debug(f"client SENDs server <- {packet}")
-                                        Packet.to_socket(self._source, packet)
-                                except (socket.timeout, socket.error) as e:
-                                    _logger.error(f"Socket error during SEND: {e}")
-                                    break
-
+                                if sock is self._source:
+                                    # Data from server: log packet and forward to client.
+                                    file_path = self._packet_file_path(output_path, packet, sequence_number)
+                                    with open(file_path, "wb") as f:
+                                        Packet.to_file(f, packet)
+                                    sequence_number += 1
+                                    
+                                    data = packet.header + packet.payload
+                                    to_client_queue.append(data)
+                                    
+                                    # The packet hasn't actually been sent yet, but it's easiest to log it here.
+                                    _logger.debug(f"server SENDs client -> {packet}")
+                                else:
+                                    # Data from client: forward to server (e.g. control packets)
+                                    data = packet.header + packet.payload
+                                    to_server_queue.append(data)
+                                    _logger.debug(f"client SENDs server <- {packet}")                           
                             except (socket.timeout, socket.error) as e:
                                 _logger.error(f"Socket error during RECV: {e}")
+                                loop_broken = True
                                 break
                         else:
-                            # Continue if no break occurred in the for loop
-                            continue
-                        # Break from while loop if break occurred in for loop
-                        break
+                            # Process writable sockets: one packet per iteration.
+                            for sock in writable:
+                                if not self._running:
+                                    loop_broken = True
+                                    break
+                                queue = to_client_queue if sock is self._client else to_server_queue
+                                if queue:
+                                    data = queue[0]
+                                    try:
+                                        sent = sock.send(data)
+                                        if sent < len(data):
+                                            queue[0] = data[sent:]  # Partial write; keep unsent part
+                                        else:
+                                            queue.pop(0)
+                                    except (socket.timeout, socket.error) as e:
+                                        _logger.error(f"Socket error during SEND: {e}")
+                                        loop_broken = True
+                                        break
 
+                        if loop_broken:
+                            break
                 except Exception as e:
                     _logger.error(f"Error in proxy loop: {e}.")
                 finally:
-                    # Clean up connection sockets
+                    # Clean up connection sockets, but don't disconnect server.
                     self._cleanup(close_server=False)
                     _logger.info("Connection closed, waiting for new client...")
-
         finally:
+            # Clean up all sockets.
             self._cleanup()
 
     @classmethod
