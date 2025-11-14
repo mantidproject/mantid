@@ -7,7 +7,6 @@
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/UnitLabel.h"
-#include <cstdarg>
 #include <filesystem>
 #include <fstream>
 #include <list>

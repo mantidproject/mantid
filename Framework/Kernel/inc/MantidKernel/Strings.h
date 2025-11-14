@@ -445,6 +445,7 @@ MANTID_KERNEL_DLL std::string randomString(const size_t len);
 
 /// Extract a line from input stream, discarding any EOL characters encountered
 MANTID_KERNEL_DLL std::istream &extractToEOL(std::istream &is, std::string &str);
+
 } // NAMESPACE Strings
 
 } // NAMESPACE Kernel
