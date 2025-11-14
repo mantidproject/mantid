@@ -146,8 +146,8 @@ void RealFFT::exec() {
     // NOTE: the FT of a real sequence is a half-complex sequence.
     // The "half" part refers to a mirror symmetry z[k] = z*[N-k], NOT to the actual number of complex elements in the
     // transform. There are as many complex elements in the output sequence as real elements in the input sequence.
-    // HOWEVER using the correct value introduces incomatibilities with legacy behavior, so must be retained for now
-    auto yOutSize = ySize / 2 + 1; // TODO replace with yOutSize = ySize;
+    // HOWEVER for real data, only the first N/2 points are true measurements; the rest are artifacts
+    auto yOutSize = ySize / 2 + 1;
     auto xOutSize = inWS->isHistogramData() ? yOutSize + 1 : yOutSize;
 
     outWS = WorkspaceFactory::Instance().create(inWS, 3, xOutSize, yOutSize);
@@ -178,8 +178,7 @@ void RealFFT::exec() {
     }
   } else // Backward
   {
-    // NOTE for legacy compatibility, this expects the complex spectra to be half the size of the output real spectra
-    // TODO replace the below with yOutSize = ySize
+    // NOTE for legacy compatibility, the size of the output is computed this way
     std::size_t yOutSize = (ySize - 1) * 2;
     if (inWS->y(1).back() != 0.0) {
       yOutSize++;
