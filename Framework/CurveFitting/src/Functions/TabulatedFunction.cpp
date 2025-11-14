@@ -176,7 +176,7 @@ void TabulatedFunction::setAttribute(const std::string &attName, const IFunction
       storeAttributeValue("Workspace", Attribute(""));
     } else {
       // file not found
-      throw Kernel::Exception::FileError(error, std::move(fileName));
+      throw Kernel::Exception::FileError(error, fileName);
     }
     load(fileName);
     m_setupFinished = false;
