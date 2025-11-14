@@ -342,12 +342,12 @@ class Test_ClientHelloPacket(unittest.TestCase):
         # Verify it's accessible via property
         self.assertIsInstance(packet.start_time, np.datetime64)
 
-    def test_from_start_of_run(self):
-        """Confirms that `fromStartOfRun` property reflects the correct time semantics."""
+    def test_is_StartOfRun_packet(self):
+        """Confirms that `is_StartOfRun_packet` property reflects the correct time semantics."""
         packet = ClientHelloPacket(header=self.header, payload=self.start_of_run_payload)
 
         # fromStartOfRun should return True
-        self.assertTrue(packet.fromStartOfRun())
+        self.assertTrue(packet.is_StartOfRun_packet)
 
         # Verify the calculation is consistent
         self.assertEqual(packet.start_time, np.datetime64(1, "s"))

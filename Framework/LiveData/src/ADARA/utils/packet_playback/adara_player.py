@@ -1,3 +1,5 @@
+# ruff: noqa: C901
+
 import collections
 from enum import IntEnum, StrEnum
 import errno
@@ -372,6 +374,7 @@ class ClientHelloPacket(Packet):
     def start_time(self) -> np.datetime64:
         return self._start_time
 
+    @property
     def is_StartOfRun_packet(self) -> bool:
         # `start_time` == 1000000000 ns from the EPICs epoch => replay all historical data
         return self.start_time == np.datetime64(1, "s")
@@ -711,12 +714,12 @@ class Player:
     def record(self, output_path: Path):
         # Ensure target base directory exists
         output_path.mkdir(parents=True, exist_ok=True)
-        
+
         # Main server loop
         try:
             self._running = True
             self._transferred_bytes = 0
-            
+
             self._server = self._create_server_socket(self._server_address)
             while self._running:
                 # Accept connection from client (the application).
@@ -743,14 +746,14 @@ class Player:
                     self._source.settimeout(self.SOCKET_TIMEOUT)
                     self._source.connect(self._source_address)
                     _logger.info(f"Successfully connected to ADARA packet server at {self._source_address}.")
-                                        
+
                     # Start a new session for each connection to the packet server:
                     #   this will write all output to a single directory, named as the session number.
                     sequence_number = 1
                     session_number = self._next_session_number(output_path)
                     output_path = output_path / f"{session_number:04d}"
-                    output_path.mkdir(parents=True, exist_ok=True)                   
-                    
+                    output_path.mkdir(parents=True, exist_ok=True)
+
                     # Set sockets to non-blocking mode for use with select
                     self._client.setblocking(False)
                     self._source.setblocking(False)
@@ -772,9 +775,7 @@ class Player:
                         if to_server_queue:
                             writeables.append(self._source)
                         exceptionals = [self._client, self._source]
-                        readable, writable, exceptional = select.select(
-                            readables, writeables, exceptionals, self.SOCKET_TIMEOUT
-                        )
+                        readable, writable, exceptional = select.select(readables, writeables, exceptionals, self.SOCKET_TIMEOUT)
 
                         # Check for errors first
                         if exceptional:
@@ -782,7 +783,7 @@ class Player:
                             break
 
                         loop_broken = False  # Used to propagate any 'break'
-                        
+
                         # Process readable sockets: one packet per iteration.
                         for sock in readable:
                             try:
@@ -801,17 +802,17 @@ class Player:
                                     with open(file_path, "wb") as f:
                                         Packet.to_file(f, packet)
                                     sequence_number += 1
-                                    
+
                                     data = packet.header + packet.payload
                                     to_client_queue.append(data)
-                                    
+
                                     # The packet hasn't actually been sent yet, but it's easiest to log it here.
                                     _logger.debug(f"server SENDs client -> {packet}")
                                 else:
                                     # Data from client: forward to server (e.g. control packets)
                                     data = packet.header + packet.payload
                                     to_server_queue.append(data)
-                                    _logger.debug(f"client SENDs server <- {packet}")                           
+                                    _logger.debug(f"client SENDs server <- {packet}")
                             except (socket.timeout, socket.error) as e:
                                 _logger.error(f"Socket error during RECV: {e}")
                                 loop_broken = True

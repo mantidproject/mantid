@@ -3,7 +3,6 @@ Test suite for Player.record method from adara_player module.
 """
 # ruff: noqa: F841
 
-import numpy as np
 import signal
 import socket
 import tempfile
@@ -119,10 +118,13 @@ class Test_Player_record(unittest.TestCase):
             player = Player()
 
             # Create mock packet from source
-            mock_packet = MagicMock(spec=Packet)
-            mock_packet.packet_type = Packet.Type.BANKED_EVENT_TYPE
-            mock_packet.timestamp = np.datetime64("2024-01-01T12:00:00")
-            mock_packet.size = 1024
+            payload = b"\x01\x02\x03\x04\x05\x06\x07\x08"
+            mock_packet = Packet(
+                header=Packet.create_header(
+                    payload_len=len(payload), packet_type=Packet.Type.BANKED_EVENT_TYPE, tv_sec=12345, tv_nsec=67890
+                ),
+                payload=payload,
+            )
 
             with tempfile.TemporaryDirectory() as tmpdir:
                 output_path = Path(tmpdir) / "output"
@@ -155,14 +157,14 @@ class Test_Player_record(unittest.TestCase):
                         patch("socket.socket", return_value=mock_source_socket),
                         patch("select.select", side_effect=controlled_select),
                         patch.object(Packet, "from_socket", return_value=mock_packet),
-                        patch.object(Packet, "to_socket") as mock_to_socket,
+                        patch.object(mock_client_socket, "send") as mock_client_send,
                         patch("builtins.open", mock_open()) as mock_file,
                         patch.object(Packet, "to_file") as mock_to_file,
                     ):
                         player.record(output_path)
 
                         # Verify packet was forwarded to client socket
-                        mock_to_socket.assert_called_once_with(mock_client_socket, mock_packet)
+                        mock_client_send.assert_called_once_with(mock_packet.header + mock_packet.payload)
 
                         # Verify packet was written to file
                         mock_to_file.assert_called_once()
@@ -187,12 +189,21 @@ class Test_Player_record(unittest.TestCase):
             player = Player()
 
             # Create mock packets
-            server_packet = MagicMock(spec=Packet)
-            server_packet.packet_type = Packet.Type.BANKED_EVENT_TYPE
-            server_packet.timestamp = np.datetime64("2024-01-01T12:00:00")
+            payload = b"\x01\x02\x03\x04\x05\x06\x07\x08"
+            server_packet = Packet(
+                header=Packet.create_header(
+                    payload_len=len(payload), packet_type=Packet.Type.BANKED_EVENT_TYPE, tv_sec=12345, tv_nsec=67890
+                ),
+                payload=payload,
+            )
 
-            client_packet = MagicMock(spec=Packet)
-            client_packet.packet_type = Packet.Type.CLIENT_HELLO_TYPE
+            payload = b"\x11\x22\x33\x44"
+            client_packet = Packet(
+                header=Packet.create_header(
+                    payload_len=len(payload), packet_type=Packet.Type.CLIENT_HELLO_TYPE, tv_sec=12345, tv_nsec=78900
+                ),
+                payload=payload,
+            )
 
             with tempfile.TemporaryDirectory() as tmpdir:
                 output_path = Path(tmpdir) / "output"
@@ -211,9 +222,9 @@ class Test_Player_record(unittest.TestCase):
                     """Return source data, then client data, then stop."""
                     call_count[0] += 1
                     if call_count[0] == 1:
-                        return ([mock_source_socket], [], [])
+                        return ([mock_source_socket], [], [mock_client_socket])
                     elif call_count[0] == 2:
-                        return ([mock_client_socket], [], [])
+                        return ([mock_client_socket], [], [mock_source_socket])
                     else:
                         player._running = False
                         return ([], [], [])
@@ -231,20 +242,18 @@ class Test_Player_record(unittest.TestCase):
                         patch("select.select", side_effect=controlled_bidirectional_select),
                         patch.object(Packet, "from_socket", side_effect=packet_from_socket_calls),
                         patch.object(player, "_impose_transfer_limit"),
-                        patch.object(Packet, "to_socket") as mock_to_socket,
+                        patch.object(mock_server_socket, "send") as mock_server_send,
+                        patch.object(mock_client_socket, "send") as mock_client_send,
                         patch("builtins.open", mock_open()),
                         patch.object(Packet, "to_file"),
                     ):
                         player.record(output_path)
 
-                        # Verify both directions were forwarded
-                        self.assertEqual(mock_to_socket.call_count, 2)
-
                         # Verify server->client forwarding
-                        mock_to_socket.assert_any_call(mock_client_socket, server_packet)
+                        mock_client_send.assert_called_once_with(server_packet.header + server_packet.payload)
 
                         # Verify client->server forwarding
-                        mock_to_socket.assert_any_call(mock_source_socket, client_packet)
+                        mock_server_send.assert_called_once_with(client_packet.header + client_packet.payload)
 
                 finally:
                     signal.alarm(0)
@@ -327,9 +336,13 @@ class Test_Player_record(unittest.TestCase):
             player = Player()
 
             # Create control packet from client
-            control_packet = MagicMock(spec=Packet)
-            control_packet.packet_type = Packet.Type.CLIENT_HELLO_TYPE
-            control_packet.timestamp = np.datetime64("2024-01-01T12:00:00")
+            payload = b"\x11\x22\x33\x44"
+            control_packet = Packet(
+                header=Packet.create_header(
+                    payload_len=len(payload), packet_type=Packet.Type.CLIENT_HELLO_TYPE, tv_sec=12345, tv_nsec=78900
+                ),
+                payload=payload,
+            )
 
             with tempfile.TemporaryDirectory() as tmpdir:
                 output_path = Path(tmpdir) / "output"
@@ -363,12 +376,12 @@ class Test_Player_record(unittest.TestCase):
                         patch("select.select", side_effect=controlled_control_select),
                         patch.object(Packet, "from_socket", return_value=control_packet),
                         patch.object(player, "_impose_transfer_limit"),
-                        patch.object(Packet, "to_socket") as mock_to_socket,
+                        patch.object(mock_source_socket, "send") as mock_source_send,
                     ):
                         player.record(output_path)
 
                         # Verify control packet was forwarded to source (not saved to file)
-                        mock_to_socket.assert_called_once_with(mock_source_socket, control_packet)
+                        mock_source_send.assert_called_once_with(control_packet.header + control_packet.payload)
 
                 finally:
                     signal.alarm(0)
@@ -390,10 +403,13 @@ class Test_Player_record(unittest.TestCase):
             player = Player()
 
             # Create mock packet with specific metadata
-            mock_packet = MagicMock(spec=Packet)
-            mock_packet.packet_type = Packet.Type.BANKED_EVENT_TYPE
-            timestamp = np.datetime64("2024-01-15T10:30:45")
-            mock_packet.timestamp = timestamp
+            payload = b"\x01\x02\x03\x04\x05\x06\x07\x08"
+            mock_packet = Packet(
+                header=Packet.create_header(
+                    payload_len=len(payload), packet_type=Packet.Type.BANKED_EVENT_TYPE, tv_sec=12345, tv_nsec=67890
+                ),
+                payload=payload,
+            )
 
             with tempfile.TemporaryDirectory() as tmpdir:
                 output_path = Path(tmpdir) / "output"
@@ -427,7 +443,7 @@ class Test_Player_record(unittest.TestCase):
                         patch("select.select", side_effect=controlled_naming_select),
                         patch.object(Packet, "from_socket", return_value=mock_packet),
                         patch.object(player, "_impose_transfer_limit"),
-                        patch.object(Packet, "to_socket"),
+                        patch.object(mock_client_socket, "send"),
                         patch("builtins.open", mock_open()) as mock_file,
                         patch.object(Packet, "to_file"),
                     ):
