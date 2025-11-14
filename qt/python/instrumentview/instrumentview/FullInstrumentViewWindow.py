@@ -30,6 +30,8 @@ from instrumentview.Detectors import DetectorInfo
 from instrumentview.InteractorStyles import CustomInteractorStyleZoomAndSelect, CustomInteractorStyleRubberBand3D
 from typing import Callable
 from mantid.dataobjects import Workspace2D
+from mantid import UsageService
+from mantid.kernel import FeatureType
 from mantidqt.plotting.mantid_navigation_toolbar import MantidNavigationToolbar
 import numpy as np
 import pyvista as pv
@@ -163,6 +165,8 @@ class FullInstrumentViewWindow(QMainWindow):
         left_column_layout.addStretch()
 
         self.interactor_style = CustomInteractorStyleZoomAndSelect()
+
+        UsageService.registerFeatureUsage(FeatureType.Interface, "InstrumentView2025", False)
 
     def check_sum_spectra_checkbox(self) -> None:
         self._sum_spectra_checkbox.setChecked(True)
@@ -462,7 +466,7 @@ class FullInstrumentViewWindow(QMainWindow):
         self._set_detector_edit_text(
             self._detector_spherical_position_edit,
             detector_infos,
-            lambda d: f"r: {d.spherical_position[0]:.3f}, t: {d.spherical_position[1]:.1f}, p: {d.spherical_position[2]:.1f}",
+            lambda d: f"r: {d.spherical_position[0]:.3f}, 2\u03b8: {d.spherical_position[1]:.1f}, \u03c6: {d.spherical_position[2]:.1f}",
         )
         self._set_detector_edit_text(self._detector_pixel_counts_edit, detector_infos, lambda d: str(d.pixel_counts))
 
