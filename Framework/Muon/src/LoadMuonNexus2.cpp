@@ -629,7 +629,7 @@ std::map<int, std::set<int>> LoadMuonNexus2::loadDetectorMapping(const Mantid::L
         for (detid_t jDet = 0; jDet < nDetectors; ++jDet) {
           detIDs.insert(detList[start + jDet]);
         }
-        mapping[i] = detIDs;
+        mapping[i] = std::move(detIDs);
       }
     } catch (const LegacyNexus::Exception &err) {
       // Throw a more user-friendly message

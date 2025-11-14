@@ -258,7 +258,7 @@ void savePolarizedDataSet(H5::Group &group, const WorkspaceGroup_sptr &workspace
       setCompression(static_cast<int>(dataDimensions.getDataShape().size()), dataDimensions.getSlabShape().data());
   auto dataSet =
       group.createDataSet(dataSetName, dataDimensions.getDataType(), dataDimensions.getDataSpace(), propList);
-  writePolarizedDataToFile(dataSet, func, dataDimensions, spin);
+  writePolarizedDataToFile(dataSet, std::move(func), dataDimensions, spin);
   writeDataSetAttributes(dataSet, attributes);
 }
 

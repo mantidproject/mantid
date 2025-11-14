@@ -56,7 +56,7 @@ auto addPeriodSeries = [](Property *left, const Property *right) {
 struct addableProperty {
 public:
   using func = std::function<void(Property *, const Property *)>;
-  addableProperty(const std::string &name, func opFunc_in = nullptr) : name(name), opFunc(opFunc_in) {};
+  addableProperty(const std::string &name, func opFunc_in = nullptr) : name(name), opFunc(std::move(opFunc_in)) {};
   std::string name;
   func opFunc;
 };

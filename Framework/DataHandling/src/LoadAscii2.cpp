@@ -839,7 +839,7 @@ void LoadAscii2::exec() {
   std::ifstream file(filename.c_str());
   if (!file) {
     g_log.error("Unable to open file: " + filename);
-    throw Exception::FileError("Unable to open file: ", filename);
+    throw Exception::FileError("Unable to open file: ", std::move(filename));
   }
 
   std::string sepOption = getProperty("Separator");

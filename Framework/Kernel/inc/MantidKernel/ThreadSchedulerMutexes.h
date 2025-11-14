@@ -101,7 +101,7 @@ public:
     if (temp) {
       std::shared_ptr<std::mutex> mut = temp->getMutex();
       if (mut)
-        m_mutexes.insert(mut);
+        m_mutexes.insert(std::move(mut));
     }
 
     return temp;
