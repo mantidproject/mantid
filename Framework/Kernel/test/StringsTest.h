@@ -603,6 +603,30 @@ public:
   }
 
   void test_endsWith_when_the_suffix_is_too_large() { TS_ASSERT(!endsWith("SmallText", "AVeryLongSuffix")); }
+
+  void test_strmakef_empty() { TS_ASSERT(strmakef("").empty()); }
+
+  void test_strmakef_too_big() {
+    // deliberately pass something that would cause the buffer to overflow
+    // make sure this is properly handled and returns correct object
+    const std::size_t LARGEN{2048};
+    std::string expected(LARGEN, 'A');
+    std::string res = strmakef("%s", expected.c_str());
+    TS_ASSERT_EQUALS(res.size(), LARGEN);
+    TS_ASSERT_EQUALS(res, expected);
+  }
+
+  void test_strmakef_doubles() {
+    std::string expected{"0001.000000000000"};
+    std::string res = strmakef("%017.12f", 1.0);
+    TS_ASSERT_EQUALS(res, expected);
+  }
+
+  void test_strmakef_ints() {
+    std::string expected{"0017"};
+    std::string res = strmakef("%04d", 17);
+    TS_ASSERT_EQUALS(res, expected);
+  }
 };
 
 class StringsTestPerformance : public CxxTest::TestSuite {
