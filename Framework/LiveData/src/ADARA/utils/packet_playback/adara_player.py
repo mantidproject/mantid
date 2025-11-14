@@ -772,8 +772,6 @@ class Player:
                             break
 
                         # Process readable sockets
-                        _logger.info(f"*** R, W, E: [{len(readable)}], [{len(writable)}], [{len(exceptional)}] *** ")
-
                         for sock in readable:
                             try:
                                 packet = Packet.from_socket(sock)
@@ -784,22 +782,26 @@ class Player:
                                     break
 
                                 # Determine direction and forward
-                                if sock == self._source:
-                                    # Data from server => save and forward to client
-                                    file_path = self._packet_file_path(output_path, packet, sequence_number)
-                                    with open(file_path, "wb") as f:
-                                        Packet.to_file(f, packet)
-                                        sequence_number += 1
+                                try:
+                                    if sock == self._source:
+                                        # Data from server => save and forward to client
+                                        file_path = self._packet_file_path(output_path, packet, sequence_number)
+                                        with open(file_path, "wb") as f:
+                                            Packet.to_file(f, packet)
+                                            sequence_number += 1
 
-                                    _logger.debug(f"server SENDs client -> {packet}")
-                                    Packet.to_socket(self._client, packet)
-                                else:
-                                    # Data from client => forward to server (e.g. control packet)
-                                    _logger.debug(f"client SENDs server <- {packet}")
-                                    Packet.to_socket(self._source, packet)
+                                        _logger.debug(f"server SENDs client -> {packet}")
+                                        Packet.to_socket(self._client, packet)
+                                    else:
+                                        # Data from client => forward to server (e.g. control packet)
+                                        _logger.debug(f"client SENDs server <- {packet}")
+                                        Packet.to_socket(self._source, packet)
+                                except (socket.timeout, socket.error) as e:
+                                    _logger.error(f"Socket error during SEND: {e}")
+                                    break
 
                             except (socket.timeout, socket.error) as e:
-                                _logger.error(f"Socket error during recv: {e}")
+                                _logger.error(f"Socket error during RECV: {e}")
                                 break
                         else:
                             # Continue if no break occurred in the for loop

@@ -144,40 +144,40 @@ bool SNSLiveEventDataListener::connect(const Poco::Net::SocketAddress &address)
   //   on localhost on the default port.
   if (address == Poco::Net::SocketAddress()) {
     // WARNING: check the config setting: system admin may not allow loopback!
-    const auto maybeTestAddress = ConfigService::Instance().getValue<std::string>("SNSLiveEventDataListener.testAddress");
+    const auto maybeTestAddress =
+        ConfigService::Instance().getValue<std::string>("SNSLiveEventDataListener.testAddress");
     if (!maybeTestAddress.has_value())
       throw std::runtime_error("SNSLiveEventDataListener: 'testAddress' is not set in `Config`");
     Poco::Net::SocketAddress testAddress(maybeTestAddress.value());
-    
+
     try {
       m_socket.connect(testAddress); // BLOCKING connect
     } catch (...) {
       g_log.error() << "Connection to " << testAddress.toString() << " failed.\n";
       return false;
     }
-  } else {    
+  } else {
     try {
       m_socket.connect(address); // BLOCKING connect
     } catch (const Poco::Exception &e) {
-        g_log.error() << "POCO Exception in connect(): " << e.name() << ": " << e.what()
-                     << " code: " << e.code()
-                     << " type: " << typeid(e).name();
-        return false;
+      g_log.error() << "POCO Exception in connect(): " << e.name() << ": " << e.what() << " code: " << e.code()
+                    << " type: " << typeid(e).name();
+      return false;
     } catch (const std::exception &e) {
-        g_log.error() << "STD Exception in connect(): " << e.what() << ": "
-                     << " type: " << typeid(e).name();
-        return false;
+      g_log.error() << "STD Exception in connect(): " << e.what() << ": "
+                    << " type: " << typeid(e).name();
+      return false;
     } catch (...) {
-        g_log.error() << "Unknown exception in connect(): "
-                     << " type: " << typeid(*this).name();
-        return false;
+      g_log.error() << "Unknown exception in connect(): "
+                    << " type: " << typeid(*this).name();
+      return false;
     }
   }
 
   m_socket.setReceiveTimeout(Poco::Timespan(RECV_TIMEOUT, 0)); // POCO timespan is seconds, microseconds
   g_log.debug() << "Connected to " << m_socket.address().toString() << '\n';
   m_isConnected = true;
-  
+
   return true;
 }
 
@@ -724,6 +724,9 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::RunStatusPkt &pkt) {
     // See detailed comments below for what the m_pauseNetRead flag does and the
     // comments above about m_status for why we don't always set it.
     if (m_workspaceInitialized) {
+      // *** DEBUG ***
+      g_log.warning() << "****** Setting `m_pauseNetRead`. ******\n";
+
       m_pauseNetRead = true;
     }
 
@@ -759,6 +762,10 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::RunStatusPkt &pkt) {
     // disconnect us.
     // This flag will be cleared down in runStatus(), which is guaranteed to be
     // called after extractData().
+
+    // *** DEBUG ***
+    g_log.warning() << "****** Setting `m_pauseNetRead`. ******\n";
+
     m_pauseNetRead = true;
 
     // Set the run number & start time if we don't already have it
@@ -1526,6 +1533,9 @@ ILiveListener::RunStatus SNSLiveEventDataListener::runStatus() {
       m_status = NoRun;
     }
   }
+
+  // *** DEBUG ***
+  g_log.warning() << "****** Clearing `m_pauseNetRead`. ******\n";
 
   m_pauseNetRead = false; // make sure the network reads start back up
 
