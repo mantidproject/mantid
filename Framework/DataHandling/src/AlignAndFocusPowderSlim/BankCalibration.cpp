@@ -43,6 +43,8 @@ void copy_values_from_map_to_offset_vector(const std::map<detid_t, double> &map_
  * @param time_conversion Value to bundle into the calibration constant to account for converting the time-of-flight
  * into microseconds. Applying it here is effectively the same as applying it to each event time-of-flight.
  * @param calibration_map Calibration for the entire instrument.
+ * @param scale_at_sample Scalar factor to multiply the time-of-flight by to get the time-of-flight of the neutron back
+ * at the sample position.
  * @param mask detector ids that exist in the map should not be included.
  */
 BankCalibration::BankCalibration(const detid_t idmin, const detid_t idmax, const double time_conversion,
