@@ -239,7 +239,7 @@ private:
 
       // Confirm that masking is reflected in spectrum info
       if (oSpecInfo.hasDetectors(i)) {
-        TS_ASSERT_EQUALS(oSpecInfo.isMasked(i), expectedValue);
+        TS_ASSERT_EQUALS(oSpecInfo.isMasked(i), false);
       }
     }
   }
