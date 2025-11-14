@@ -313,7 +313,7 @@ MatrixWorkspace_uptr MonteCarloAbsorption::doSimulation(const MatrixWorkspace &i
 
   if (hasGaugeVol) {
     std::string xmlString = inputWS.run().getProperty("GaugeVolume")->value();
-    gaugeVolume = ShapeFactory().createShape(xmlString);
+    gaugeVolume = ShapeFactory().createShape(std::move(xmlString));
     if (pointsIn != MCInteractionVolume::ScatteringPointVicinity::SAMPLEONLY) {
       g_log.warning("Gauge Volume found. Scattering Points limited to Sample Only.");
     }
@@ -327,7 +327,7 @@ MatrixWorkspace_uptr MonteCarloAbsorption::doSimulation(const MatrixWorkspace &i
   Geometry::IObject_sptr gv = interactionVolume->getGaugeVolume();
 
   std::shared_ptr<IMCAbsorptionStrategy> strategy =
-      createStrategy(interactionVolume, *beamProfile, efixed.emode(), nevents, maxScatterPtAttempts,
+      createStrategy(std::move(interactionVolume), *beamProfile, efixed.emode(), nevents, maxScatterPtAttempts,
                      resimulateTracksForDiffWavelengths);
 
   const auto &spectrumInfo = simulationWS.spectrumInfo();

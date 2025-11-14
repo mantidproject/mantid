@@ -103,7 +103,7 @@ ScriptRepositoryView::ScriptRepositoryView(QWidget *parent) : MantidDialog(paren
 
     // check if the ScriptRepository was ever installed
     if (!repo_ptr->isValid()) {
-      bool successful = chooseLocationAndInstall(repo_ptr);
+      bool successful = chooseLocationAndInstall(std::move(repo_ptr));
       if (!successful) {
         return;
       }
