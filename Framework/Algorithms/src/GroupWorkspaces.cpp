@@ -9,7 +9,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/ArrayProperty.h"
-
+#include "MantidKernel/Glob.h"
 #include <regex>
 
 namespace Mantid::Algorithms {
@@ -59,6 +59,12 @@ std::map<std::string, std::string> GroupWorkspaces::validateInputs() {
   const std::vector<std::string> inputWorkspaces = getProperty("InputWorkspaces");
   std::string globExpression = getProperty("GlobExpression");
 
+  for (auto it = globExpression.begin(); it < globExpression.end(); ++it) {
+    if (*it == '\\') {
+      it = globExpression.erase(it, it + 1);
+    }
+  }
+
   if (inputWorkspaces.empty() && globExpression.empty()) {
     results["InputWorkspaces"] = "No InputWorkspace names specified. Rerun with a list of workspaces "
                                  "names or a glob expression";
@@ -84,104 +90,14 @@ std::map<std::string, std::string> GroupWorkspaces::validateInputs() {
   return results;
 }
 
-namespace {
-/**
- * Convert a glob pattern to a regex pattern
- * @param glob The glob pattern with wildcards (* and ?)
- * @return The equivalent regex pattern
- */
-std::string globToRegex(const std::string &glob) {
-  std::string regex;
-  regex.reserve(glob.size() * 2);
-  regex += '^';
-
-  bool escaped = false;
-  bool inBracket = false;
-  for (size_t i = 0; i < glob.size(); ++i) {
-    char c = glob[i];
-
-    if (escaped) {
-      // Previous character was backslash, so this character should be literal
-      // Escape it for regex if needed
-      switch (c) {
-      case '.':
-      case '^':
-      case '$':
-      case '|':
-      case '+':
-      case '\\':
-      case '(':
-      case ')':
-      case '{':
-      case '}':
-      case '[':
-      case ']':
-      case '*':
-      case '?':
-        regex += '\\';
-        regex += c;
-        break;
-      default:
-        regex += c;
-      }
-      escaped = false;
-    } else if (c == '\\') {
-      // Start of escape sequence - don't add to regex yet
-      escaped = true;
-    } else {
-      // Normal character processing
-      switch (c) {
-      case '*':
-        regex += ".*";
-        break;
-      case '?':
-        regex += '.';
-        break;
-      case '[':
-        // Start of bracket expression
-        inBracket = true;
-        regex += c;
-        // Check if next character is ! (glob negation) and convert to ^ (regex negation)
-        if (i + 1 < glob.size() && glob[i + 1] == '!') {
-          regex += '^';
-          ++i; // Skip the !
-        }
-        break;
-      case ']':
-        // End of bracket expression
-        inBracket = false;
-        regex += c;
-        break;
-      case '.':
-      case '^':
-      case '$':
-      case '|':
-      case '+':
-      case '(':
-      case ')':
-      case '{':
-      case '}':
-        regex += '\\';
-        regex += c;
-        break;
-      default:
-        regex += c;
-      }
-    }
-  }
-
-  regex += '$';
-  return regex;
-}
-} // namespace
-
 /**
  * Add a list of names to the new group
  * @param globExpression glob pattern for selecting names from the ADS
  */
 void GroupWorkspaces::addToGroup(const std::string &globExpression) {
-
-  std::regex pattern(globToRegex(globExpression));
+  const std::string globRegexp = Kernel::Glob::globToRegex(globExpression);
+  g_log.debug() << "convert \"" << globExpression << "\" to \"" << globRegexp << "\"\n";
+  std::regex pattern(globRegexp);
 
   const AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
   const auto wsNames = ads.topLevelItems();

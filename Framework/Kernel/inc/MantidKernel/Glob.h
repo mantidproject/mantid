@@ -31,6 +31,12 @@ public:
 
   /// Creates a set of files that match the given pathPattern.
   static void glob(const std::string &pathPattern, std::set<std::string> &files, int options = 0);
+
+  /**
+   * Convert a glob pattern to an equivalent regular expression. This essentially converts non-escaped "*" to ".+" and
+   * non-escaped "?" to ".". This is how Poco's Glob module acts.
+   */
+  static std::string globToRegex(const std::string &globPattern);
 };
 
 } // namespace Kernel

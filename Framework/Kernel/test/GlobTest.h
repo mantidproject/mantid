@@ -138,4 +138,26 @@ public:
     Glob::glob(pattern.string(), files, Glob::GLOB_CASELESS);
     TS_ASSERT(!files.empty());
   }
+
+  void test_glob_to_regex() {
+    // no globbing specified
+    TS_ASSERT_EQUALS(Glob::globToRegex("abcd"), "^abcd$");
+
+    // globbing *
+    TS_ASSERT_EQUALS(Glob::globToRegex("a*bc*d"), "^a.+bc.+d$");
+    TS_ASSERT_EQUALS(Glob::globToRegex("*a*bc*d*"), "^.+a.+bc.+d.+$");
+
+    // globbing * with escapes
+    TS_ASSERT_EQUALS(Glob::globToRegex("a*bc\\*d"), "^a.+bc\\*d$");
+    TS_ASSERT_EQUALS(Glob::globToRegex("\\*a*bc\\*d"), "^\\*a.+bc\\*d$");
+
+    // globbing ?
+    TS_ASSERT_EQUALS(Glob::globToRegex("a?bc*d"), "^a.bc.+d$");
+
+    // globbing ? with escapes
+    TS_ASSERT_EQUALS(Glob::globToRegex("a?bc\\?d"), "^a.bc\\?d$");
+
+    // globbing both
+    TS_ASSERT_EQUALS(Glob::globToRegex("a?bc*d"), "^a.bc.+d$");
+  }
 };
