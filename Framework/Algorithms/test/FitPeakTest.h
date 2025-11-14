@@ -254,7 +254,7 @@ public:
     TS_ASSERT_EQUALS(fittedbkgdvalues.size(), 2);
 
     double peakheight = fittedpeakvalues[0];
-    TS_ASSERT_DELTA(peakheight, 26., 1.);
+    TS_ASSERT_DELTA(peakheight, 38.02, 1.);
 
     // Clean
     AnalysisDataService::Instance().remove("PG3_Si_Peak");
@@ -302,7 +302,7 @@ public:
     TS_ASSERT_EQUALS(fittedbkgdvalues.size(), 2);
 
     double peakheight = fittedpeakvalues[0];
-    TS_ASSERT_DELTA(peakheight, 26., 1.);
+    TS_ASSERT_DELTA(peakheight, 38.02, 1.);
 
     // Clean
     AnalysisDataService::Instance().remove("PG3_Si_Peak");

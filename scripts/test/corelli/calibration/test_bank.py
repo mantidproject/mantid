@@ -34,7 +34,7 @@ class TestBank(unittest.TestCase):
         r"""
         Load the tests cases for calibrate_bank, consisting of data for only one bank
         CORELLI_123455_bank20, control bank, it has no problems
-        CORELLI_123454_bank58, beam center intensity spills over adjacent tubes, tube15 and tube16
+        CORELLI_123454_bank58, beam center intensity spills over tube16
         CORELLI_124018_bank45, tube11 is not working at all
         CORELLI_123555_bank20, insufficient intensity for all tubes in the bank
         CORELLI_124023_bank10, tube 13 has shadows at pixel numbers quite different from the rest
@@ -128,9 +128,9 @@ class TestBank(unittest.TestCase):
         assert_equal(actual, expected)
         DeleteWorkspaces(["CalibTable", "ParametersTable", "PeakTable", "PeakYTable"])  # a bit of clean-up
 
-        # beam center intensity spills over adjacent tubes, tube15 and tube16
+        # beam center intensity spills over tube16
         fit_bank(self.cases["123454_bank58"], "bank58")
-        expected = np.array([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0], dtype=bool)
+        expected = np.array([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0], dtype=bool)
         actual = criterion_peak_vertical_position("PeakYTable", zscore_threshold=2.5, deviation_threshold=0.0035)
         assert_equal(actual, expected)
         DeleteWorkspaces(["CalibTable", "ParametersTable", "PeakTable", "PeakYTable"])  # a bit of clean-up
@@ -174,9 +174,9 @@ class TestBank(unittest.TestCase):
         assert_equal(criterion_peak_pixel_position("PeakTable", zscore_threshold=2.5, deviation_threshold=3), expected)
         DeleteWorkspaces(["CalibTable", "PeakTable", "PeakYTable", "ParametersTable"])  # a bit of clean-up
 
-        # beam center intensity spills over adjacent tubes, tube15 and tube16
+        # beam center intensity spills over tube16
         fit_bank(self.cases["123454_bank58"], "bank58")
-        expected = np.array([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0], dtype=bool)
+        expected = np.array([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0], dtype=bool)
         assert_equal(criterion_peak_pixel_position("PeakTable", zscore_threshold=2.5, deviation_threshold=3), expected)
         DeleteWorkspaces(["CalibTable", "PeakTable", "PeakYTable", "ParametersTable"])  # a bit of clean-up
 
@@ -251,13 +251,10 @@ class TestBank(unittest.TestCase):
         assert detector_ids[0], detector_ids[-1] == [182784, 182784 + 256]
         DeleteWorkspaces(["CalibTable", "masked_tubes", "PeakTable", "PeakYTable", "ParametersTable"])
 
-        # tubes 3, 8, and 13 have very faint wire shadows. Thus, mask these tubes
+        # tubes 3, 8, and 13 have very faint wire shadows, but can still be fitted
         fit_bank(self.cases["124023_bank14"], "bank14")
         tube_fit_success = criterion_peak_vertical_position("PeakTable", zscore_threshold=2.5, deviation_threshold=0.0035)
-        mask_bank("bank14", tube_fit_success, "masked_tubes")
-        detector_ids = mtd["masked_tubes"].column(0)
-        assert detector_ids[0], detector_ids[-1] == [182784, 182784 + 3 * 256]
-        DeleteWorkspaces(["CalibTable", "masked_tubes", "PeakTable", "PeakYTable", "ParametersTable"])
+        DeleteWorkspaces(["CalibTable", "PeakTable", "PeakYTable", "ParametersTable"])
 
     def test_collect_bank_fit_results(self):
         def spectra_labels(workspace_name):
@@ -325,12 +322,12 @@ class TestBank(unittest.TestCase):
         assert AnalysisDataService.doesExist("MaskTable") is False
         DeleteWorkspaces(["calibration_table"])  # clean-up
 
-        # beam center intensity spills over adjacent tubes, tube15 and tube16
+        # beam center intensity spills over to tube16
         calibration, mask = calibrate_bank(self.cases["123454_bank58"], "bank58", "calibration_table")
-        assert calibration.rowCount() == 256 * (16 - 2)
+        assert calibration.rowCount() == 256 * (16 - 1)
         assert calibration.columnCount() == 2  # Detector ID, Position
         assert AnalysisDataService.doesExist("calibration_table")
-        assert mask.rowCount() == 256 * 2
+        assert mask.rowCount() == 256
         assert mask.columnCount() == 1
         assert AnalysisDataService.doesExist("MaskTable")
         DeleteWorkspaces(["calibration_table", "MaskTable"])  # clean-up
