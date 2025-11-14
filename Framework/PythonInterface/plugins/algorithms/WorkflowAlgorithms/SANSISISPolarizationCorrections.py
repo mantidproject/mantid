@@ -17,6 +17,7 @@ from mantid.api import (
 from mantid.kernel import (
     ConfigService,
     Direction,
+    LogicOperator,
     FloatBoundedValidator,
     StringArrayProperty,
     StringListValidator,
@@ -97,6 +98,7 @@ _prop_nt = namedtuple(
         "suffix",
         "ads",
         "sp_assert",
+        "second_flipper",
         "delete_partial",
         *FIT_PROPERTIES,
     ],
@@ -111,6 +113,7 @@ _prop_nt = namedtuple(
         "OutputSuffix",
         "KeepWsOnADS",
         "AssertSpinState",
+        "SecondFlipperEfficiency",
         "DeletePartialWsOnFail",
         "PxDInitialValue",
         "LifetimeInitialValue",
@@ -200,6 +203,7 @@ ALGS = _algs_nt()
 EFF_KEYS_USER = dict(
     analyzer_eff=["polarization", "analyzer", "efficiency"],
     flipper_eff=["polarization", "flipper", "polarizing", "efficiency"],
+    flipper_a_eff=["polarization", "flipper", "flipping", "efficiency"],
     pol_fit_table=["polarization", "analyzer", "initial_polarization"],
     polarizer_eff=["polarization", "polarizer", "efficiency"],
     empty_cell=["polarization", "analyzer", "empty_cell"],
@@ -313,7 +317,8 @@ def _user_file_reader(file_path: str, names_dict: dict[str, WsInfo]) -> Instrume
         instrument.spin_state_str = _get_value_from_dict(user_file, ["polarization", "flipper_configuration"], instrument.spin_state_str)
         # Efficiency files paths
         for name, key_list in EFF_KEYS_USER.items():
-            names_dict[name].path = _get_value_from_dict(user_file, key_list, "", False)
+            if name in names_dict:
+                names_dict[name].path = _get_value_from_dict(user_file, key_list, "", False)
 
         return instrument
 
@@ -386,9 +391,11 @@ class SANSISISPolarizationCorrections(DataProcessorAlgorithm):
     delete_ads_ws: bool = False
     delete_partial: bool = True
     assert_spin: bool = True
+    has_2nd_flipper: bool = False
     reduction_type: str = None
     suffix: str = None
     progress: Progress = None
+    eff_basenames: list[str] = None
     scattering_runs: list[str] = None
     transmission_runs: list[str] = None
 
@@ -482,6 +489,15 @@ class SANSISISPolarizationCorrections(DataProcessorAlgorithm):
             ),
         )
 
+        self.declareProperty(
+            name=MAIN_PROPERTIES.second_flipper,
+            defaultValue=False,
+            doc=(
+                "Whether to perform calculation for second flipper efficiency in calibration, as well as use second flipper efficiency "
+                "on correction if a path for the second flipper is found on the UserFile"
+            ),
+        )
+
         always_positive = FloatBoundedValidator(lower=0)
 
         self.declareProperty(
@@ -512,6 +528,17 @@ class SANSISISPolarizationCorrections(DataProcessorAlgorithm):
             self.setPropertyGroup(prop_name, FIT_PROPERTIES_GROUP_NAME)
 
         self.setPropertySettings(MAIN_PROPERTIES.ads, EnabledWhenProperty(MAIN_PROPERTIES.path, PropertyCriterion.IsNotDefault))
+        calibration = EnabledWhenProperty(MAIN_PROPERTIES.reduction, PropertyCriterion.IsEqualTo, REDUCTION.calibration)
+        calibration_or_both = EnabledWhenProperty(
+            calibration, EnabledWhenProperty(MAIN_PROPERTIES.reduction, PropertyCriterion.IsEqualTo, REDUCTION.both), LogicOperator.Or
+        )
+        self.setPropertySettings(
+            MAIN_PROPERTIES.scattering,
+            EnabledWhenProperty(MAIN_PROPERTIES.reduction, PropertyCriterion.IsNotEqualTo, REDUCTION.calibration),
+        )
+
+        for prop_name in [MAIN_PROPERTIES.cell, MAIN_PROPERTIES.direct, MAIN_PROPERTIES.transmission]:
+            self.setPropertySettings(prop_name, calibration_or_both)
 
     def validateInputs(self):
         issues = dict()
@@ -553,10 +580,13 @@ class SANSISISPolarizationCorrections(DataProcessorAlgorithm):
         self.delete_ads_ws = not self.getProperty(MAIN_PROPERTIES.ads).value
         self.delete_partial = self.getProperty(MAIN_PROPERTIES.delete_partial).value
         self.assert_spin = self.getProperty(MAIN_PROPERTIES.sp_assert).value
+        self.has_2nd_flipper = self.getProperty(MAIN_PROPERTIES.second_flipper).value
 
         # We add efficiency auxiliary names here. We'll only delete those in the ADS at the end in case of error.
+        excluded = ["flipper_a_eff"] if not self.has_2nd_flipper else []
+        self.eff_basenames = [key for key in [*EFF_KEYS_USER.keys()] if key not in excluded]
         self.aux_ws = {
-            name: WsInfo(ads_name=_add_suffix(name, self.suffix)) for name in [*EFF_KEYS_USER.keys(), *AUX_WS_BASENAMES_CALIBRATION]
+            name: WsInfo(ads_name=_add_suffix(name, self.suffix)) for name in [*self.eff_basenames, *AUX_WS_BASENAMES_CALIBRATION]
         }
 
         self.parameters = {
@@ -618,7 +648,7 @@ class SANSISISPolarizationCorrections(DataProcessorAlgorithm):
 
         if self.getProperty(MAIN_PROPERTIES.reduction).value == REDUCTION.correction:
             # We already have the efficiencies in the ADS and the parameters from the calibration
-            self._load_workspace_from_path([key for key in EFF_KEYS_USER.keys() if key not in ["empty_cell"]])
+            self._load_workspace_from_path([key for key in self.eff_basenames if key not in ["empty_cell"]])
             self.parameters = _build_parameters_from_table(self.aux_ws["pol_fit_table"].ads_name)
 
         scattering_runs_list = self._load_and_process_runs(
@@ -725,20 +755,23 @@ class SANSISISPolarizationCorrections(DataProcessorAlgorithm):
 
     def _join_efficiencies(self, eff_list: list[str] = None) -> "MatrixWorkspace":
         """
-        Join efficiencies algorithm. We do not have a second flipper in this setup for LARMOR or ZOOM at the moment,
-        therefore we create a flat workspace for F2 based off the first flipper efficiency
+        Join efficiencies algorithm. If there is not a second flipper for LARMOR or ZOOM,
+        we create a flat workspace for F2 based off the first flipper efficiency
         """
-        pol_name, flip_name, analyzer_name = eff_list
-        fp = ADS.retrieve(flip_name)
+        pol_name, flip_p_name, analyzer_name = eff_list
 
-        """ Unlike simpleapi, running algorithm with `createChildAlgorithm` doesn't properly convert types like numpy arrays
-        to what's expected on the algorithm(dbl list in this case), so we need to be specific."""
-        x = fp.readX(0).tolist()
-        ones = np.ones_like(fp.readY(0)).tolist()
-        f2 = self._load_child_algorithm(ALGS.create, OUT_WS, DataX=x, DataY=ones, DataE=ones, UnitX=self.instrument.units)
-        efficiencies = self._load_child_algorithm(ALGS.join_eff, OUT_WS, P1=pol_name, F1=flip_name, P2=analyzer_name, F2=f2)
+        if not self.has_2nd_flipper:
+            flip_a_name = f"{TMP_NAME}_flipper_a_eff"
+            fp = ADS.retrieve(flip_p_name)
+            x = fp.readX(0).tolist()
+            ones = np.ones_like(fp.readY(0)).tolist()
+            self._load_child_algorithm(
+                ALGS.create, OutputWorkspace=flip_a_name, DataX=x, DataY=ones, DataE=ones, UnitX=self.instrument.units
+            )
+        else:
+            flip_a_name = self.aux_ws["flipper_a_eff"].ads_name
 
-        return efficiencies
+        return self._load_child_algorithm(ALGS.join_eff, OUT_WS, P1=pol_name, F1=flip_p_name, P2=analyzer_name, F2=flip_a_name)
 
     def _helium_analyzer_efficiency_at_scattering_run_time(self, ws_name: str):
         """
@@ -865,20 +898,27 @@ class SANSISISPolarizationCorrections(DataProcessorAlgorithm):
         """
         self.progress.report("Calculating Flipper, Polarizer and Analyzer efficiencies")
 
-        pol_eff_names, flipper_eff_names = [self._create_run_list(transmission_run_list, prefix) for prefix in ["pol", "flipper"]]
+        pol_names = self._create_run_list(transmission_run_list, "pol")
+        flipper_p_names = self._create_run_list(transmission_run_list, "flipper_p")
+        flipper_a_names = self._create_run_list(transmission_run_list, "flipper_a") if self.has_2nd_flipper else None
+
         analyzer_eff_group = self._calculate_helium_analyzer_efficiency_and_parameters(transmission_run_list)
 
         for index, run in enumerate(transmission_run_list):
-            params = {"InputWorkspace": run, "SpinStates": self.instrument.spin_state_str, "OutputWorkspace": flipper_eff_names[index]}
+            params = {"InputWorkspace": run, "SpinStates": self.instrument.spin_state_str, "OutputWorkspace": flipper_p_names[index]}
             self._load_child_algorithm(ALGS.flipper, **params)
             self._load_child_algorithm(
-                ALGS.polarizer, **dict(params, OutputWorkspace=pol_eff_names[index]), AnalyserEfficiency=analyzer_eff_group.getItem(index)
+                ALGS.polarizer, **dict(params, OutputWorkspace=pol_names[index]), AnalyserEfficiency=analyzer_eff_group.getItem(index)
             )
+            if flipper_a_names:
+                self._load_child_algorithm(ALGS.flipper, **dict(params, Flipper="Analyzer", OutputWorkspace=flipper_a_names[index]))
 
         # Average out the efficiencies before storing, the partial workspaces are deleted
-        self._average_workspaces(flipper_eff_names, self.aux_ws["flipper_eff"].ads_name)
-        self._average_workspaces(pol_eff_names, self.aux_ws["polarizer_eff"].ads_name)
+        self._average_workspaces(flipper_p_names, self.aux_ws["flipper_eff"].ads_name)
+        self._average_workspaces(pol_names, self.aux_ws["polarizer_eff"].ads_name)
         self._average_workspaces([self.aux_ws["analyzer_eff"].ads_name], self.aux_ws["analyzer_eff"].ads_name, ungroup=True)
+        if flipper_a_names:
+            self._average_workspaces(flipper_a_names, self.aux_ws["flipper_a_eff"].ads_name)
 
     def _save_results(self, ws_names_list: Union[set[str], list[str]] = None, is_scattering_data: bool = False):
         """
@@ -1013,7 +1053,8 @@ class SANSISISPolarizationCorrections(DataProcessorAlgorithm):
         Additionally, we delete result workspaces if that is chosen in the properties.
         """
         scat_out_names = []
-        prefixes = ["transmission", *EFF_KEYS_USER.keys(), *AUX_WS_BASENAMES_CALIBRATION]
+        prefixes = ["transmission", *self.eff_basenames, *AUX_WS_BASENAMES_CALIBRATION]
+
         if scattering_list:
             prefixes.extend(["scattering", *AUX_WS_BASENAMES_CORRECTION])
             scat_out_names = self._prepare_corrected_data_for_save(scattering_list)
