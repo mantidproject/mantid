@@ -156,7 +156,7 @@ void CreateDetectorTable::setup() {
 
 void CreateDetectorTable::createColumns() {
   std::vector<std::pair<std::string, std::string>> colNames;
-  colNames.emplace_back("double", "Index");
+  colNames.emplace_back("int", "Index");
   colNames.emplace_back("int", "Spectrum No");
   if (PickOneDetectorID) {
     colNames.emplace_back("int", "Detector ID(s)");
@@ -200,7 +200,7 @@ void CreateDetectorTable::populateTable() {
   for (int row = 0; row < nrows; ++row) {
     TableRow colValues = table->getRow(row);
     size_t wsIndex = workspaceIndices.empty() ? static_cast<size_t>(row) : workspaceIndices[row];
-    colValues << static_cast<double>(wsIndex);
+    colValues << static_cast<int>(wsIndex);
     const double dataY0{ws->y(wsIndex)[0]}, dataE0{ws->e(wsIndex)[0]};
     try {
       auto &spectrum = ws->getSpectrum(wsIndex);
@@ -314,7 +314,7 @@ void CreateDetectorTable::populateTable() {
       }
     } catch (const std::exception &) {
       colValues.row(row);
-      colValues << static_cast<double>(wsIndex);
+      colValues << static_cast<int>(wsIndex);
       // spectrumNo=-1, detID=0
       colValues << -1;
       if (PickOneDetectorID) {
