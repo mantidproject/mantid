@@ -328,7 +328,7 @@ void LoadEventNexus::setTopEntryName() {
   auto allEntries = m_file->getEntries();
   for (std::string goodEntry : goodEntries) {
     if (allEntries.count(goodEntry) != 0 && allEntries[goodEntry] != "SDS") {
-      firstGoodEntry = goodEntry;
+      firstGoodEntry = std::move(goodEntry);
       break;
     }
   }
