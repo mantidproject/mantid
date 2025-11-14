@@ -21,8 +21,8 @@
 #include "MantidGeometry/Instrument/FitParameter.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Exception.h"
-#include <Poco/File.h>
 #include <cstring>
+#include <filesystem>
 #include <fstream>
 #include <vector>
 
@@ -62,7 +62,7 @@ public:
 
     // has the algorithm written a file to disk?
     bool fileExists = false;
-    TS_ASSERT(fileExists = Poco::File(outputFile).exists());
+    TS_ASSERT(fileExists = std::filesystem::exists(outputFile));
 
     if (fileExists) {
       // Do a few tests to see if the content of outputFile is what you
@@ -109,7 +109,7 @@ public:
       in.close();
 
       // remove file created by this algorithm
-      Poco::File(outputFile).remove();
+      std::filesystem::remove(outputFile);
       // Remove workspace
       AnalysisDataService::Instance().remove(wsName);
     }

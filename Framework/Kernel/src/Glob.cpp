@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/Glob.h"
+#include "MantidKernel/Strings.h"
 #include <Poco/Glob.h>
 
 namespace Mantid::Kernel {
@@ -45,6 +46,61 @@ void Glob::glob(const std::string &pathPattern, std::set<std::string> &files, in
 #else
   Poco::Glob::glob(pathPattern, files, options);
 #endif
+}
+
+std::string Glob::globToRegex(const std::string &globPattern) {
+  const std::string STAR("*");
+  const std::string STAR_ESCAPED("\\*");
+  const std::string QUESTION("?");
+  const std::string QUESTION_ESCAPED("\\?");
+
+  const std::string REGEX_MATCH_GLOB(".+");
+  const std::string REGEX_MATCH_CHAR(".");
+  const std::string REGEX_START_STR("^");
+  const std::string REGEX_END_STR("$");
+
+  // this is a variant of Strings::replace and Strings::replaceAll
+  std::string output = globPattern;
+
+  // replace stars
+  std::string::size_type pos = 0;
+  while ((pos = output.find(STAR, pos)) != std::string::npos) {
+    if ((pos > 0) && (pos + 1 != std::string::npos)) {
+      if (output.substr(pos - 1, STAR_ESCAPED.length()) == STAR_ESCAPED) {
+        pos += 1;
+        continue;
+      }
+    }
+    output.erase(pos, STAR.length());
+    output.insert(pos, REGEX_MATCH_GLOB);
+    pos += REGEX_MATCH_GLOB.length();
+  }
+
+  // now with question marks
+  pos = 0;
+  while ((pos = output.find(QUESTION, pos)) != std::string::npos) {
+    if ((pos > 0) && (pos + 1 != std::string::npos)) {
+      if (output.substr(pos - 1, QUESTION_ESCAPED.length()) == QUESTION_ESCAPED) {
+        pos += 1;
+        continue;
+      }
+    }
+    output.erase(pos, QUESTION.length());
+    output.insert(pos, REGEX_MATCH_CHAR);
+    pos += REGEX_MATCH_CHAR.length();
+  }
+
+  // now [! and don't worry about escaping
+  pos = 0;
+  while ((pos = output.find("[!", pos)) != std::string::npos) {
+    output.erase(pos, std::string("[!").length());
+    output.insert(pos, "![");
+    pos += std::string("![").length();
+  }
+
+  // replaced string with anchors
+  return REGEX_START_STR + output + REGEX_END_STR;
+  // return output;
 }
 
 } // namespace Mantid::Kernel
