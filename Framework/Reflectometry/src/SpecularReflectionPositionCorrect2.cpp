@@ -18,7 +18,7 @@ using namespace Mantid::Kernel;
 
 namespace {
 /// Enumerations to define the rotation plane of the detector.
-enum class Plane { horizontal, vertical };
+enum class RotationPlane { horizontal, vertical };
 
 /** Return true if twoTheta increases with workspace index.
  *  @param spectrumInfo a spectrum info
@@ -199,7 +199,7 @@ void SpecularReflectionPositionCorrect2::correctDetectorPosition(
   const auto upAxis = referenceFrame.pointingUpAxis();
   const auto thetaSignDir = referenceFrame.vecThetaSign();
   const auto upDir = referenceFrame.vecPointingUp();
-  const auto plane = thetaSignDir.scalar_prod(upDir) == 1. ? Plane::vertical : Plane::horizontal;
+  const auto plane = thetaSignDir.scalar_prod(upDir) == 1. ? RotationPlane::vertical : RotationPlane::horizontal;
 
   // Get the offset from the sample in the beam direction
   double beamOffset = 0.0;
@@ -228,7 +228,7 @@ void SpecularReflectionPositionCorrect2::correctDetectorPosition(
   }
   moveAlg->setProperty("RelativePosition", false);
   moveAlg->setProperty(beamAxis, beamOffsetFromOrigin);
-  if (plane == Plane::vertical) {
+  if (plane == RotationPlane::vertical) {
     moveAlg->setProperty(horizontalAxis, 0.0);
     moveAlg->setProperty(upAxis, perpendicularOffset);
   } else {
@@ -247,7 +247,7 @@ void SpecularReflectionPositionCorrect2::correctDetectorPosition(
       rotate->setProperty("ComponentName", detectorName);
     else
       rotate->setProperty("DetectorID", detectorID);
-    if (plane == Plane::horizontal) {
+    if (plane == RotationPlane::horizontal) {
       rotate->setProperty("X", upDir.X());
       rotate->setProperty("Y", upDir.Y());
       rotate->setProperty("Z", upDir.Z());

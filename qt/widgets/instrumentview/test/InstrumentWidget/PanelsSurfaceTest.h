@@ -32,7 +32,7 @@ public:
     PanelsSurface::project(position, u, v, uscale, vscale);
   }
   Mantid::Kernel::Quat calcBankRotation(const Mantid::Kernel::V3D &detPos, Mantid::Kernel::V3D normal) {
-    return PanelsSurface::calcBankRotation(detPos, normal);
+    return this->m_calculator.calcBankRotation(detPos, normal, m_zaxis, m_yaxis, m_pos);
   }
   std::optional<size_t> processTubes(size_t rootIndex) { return PanelsSurface::processTubes(rootIndex); }
   std::vector<UnwrappedDetector> getUnwrappedDetectors() { return m_unwrappedDetectors; };
@@ -42,6 +42,9 @@ public:
     info->refPos = refPos;
     m_flatBanks << info;
   }
+
+private:
+  PanelsSurfaceCalculator m_calculator;
 };
 
 class PanelsSurfaceTest : public CxxTest::TestSuite {

@@ -90,6 +90,7 @@ set(EXPORT_FILES
     src/Exports/PreviewManager.cpp
     src/Exports/RegionSelectorObserver.cpp
     src/Exports/WorkspaceNearestNeighbourInfo.cpp
+    src/Exports/PanelsSurfaceCalculator.cpp
 )
 
 set(MODULE_DEFINITION ${CMAKE_CURRENT_BINARY_DIR}/api.cpp)

@@ -8,9 +8,11 @@
 #include "MantidGeometry/Instrument/CompAssembly.h"
 #include "MantidGeometry/Instrument/GridDetectorPixel.h"
 #include "MantidPythonInterface/core/GetPointer.h"
+#include "MantidPythonInterface/core/StlExportDefinitions.h"
 #include <boost/python/class.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
 
+using Mantid::PythonInterface::std_vector_exporter;
 using namespace Mantid::Geometry;
 using namespace boost::python;
 
@@ -22,6 +24,9 @@ GET_POINTER_SPECIALIZATION(GridDetector)
  */
 void export_GridDetector() {
   register_ptr_to_python<std::shared_ptr<GridDetector>>();
+  register_ptr_to_python<GridDetector_const_sptr>();
+
+  std_vector_exporter<GridDetector_const_sptr, /*NoProxy=*/true>::wrap("std_vector_grid_detector");
 
   class_<GridDetector, bases<CompAssembly, IObjComponent>, boost::noncopyable>("GridDetector", no_init)
       .def("xpixels", &GridDetector::xpixels, arg("self"), "Returns the number of pixels in the X direction")

@@ -120,6 +120,7 @@ set(SRC_FILES
     src/NumericAxis.cpp
     src/NumericAxisValidator.cpp
     src/OrientedLatticeValidator.cpp
+    src/PanelsSurfaceCalculator.cpp
     src/ParamFunction.cpp
     src/ParameterReference.cpp
     src/ParameterTie.cpp
@@ -321,6 +322,7 @@ set(INC_FILES
     inc/MantidAPI/NumericAxis.h
     inc/MantidAPI/NumericAxisValidator.h
     inc/MantidAPI/OrientedLatticeValidator.h
+    inc/MantidAPI/PanelsSurfaceCalculator.h
     inc/MantidAPI/ParamFunction.h
     inc/MantidAPI/ParameterReference.h
     inc/MantidAPI/ParameterTie.h
@@ -459,6 +461,7 @@ set(TEST_FILES
     NumericAxisTest.h
     NumericAxisValidatorTest.h
     OrientedLatticeValidatorTest.h
+    PanelsSurfaceCalculatorTest.h
     ParamFunctionAttributeHolderTest.h
     ParameterReferenceTest.h
     ParameterTieTest.h
