@@ -103,7 +103,7 @@ std::map<std::string, std::string> DiffractionFocussing2::validateInputs() {
     } else {
       for (const Workspace_sptr &ws : wsGroup->getAllItems()) {
         inputWS = std::dynamic_pointer_cast<MatrixWorkspace>(ws);
-        validateInputWorkspaceUnit(inputWS, issues);
+        validateInputWorkspaceUnit(std::move(inputWS), issues);
       }
     }
   } else {

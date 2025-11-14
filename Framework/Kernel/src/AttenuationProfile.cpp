@@ -50,7 +50,7 @@ AttenuationProfile::AttenuationProfile(const std::string &inputFileName, const s
         if (!foundFile.empty()) {
           inputFilePath = std::filesystem::path(foundFile);
         } else {
-          inputFilePath = suppliedFileName;
+          inputFilePath = std::move(suppliedFileName);
         }
       }
     } else {
