@@ -210,7 +210,13 @@ if(ENABLE_DOCS)
 endif()
 
 # System test data target
-add_subdirectory(Testing/SystemTests/scripts)
+if(BUILD_MANTIDFRAMEWORK
+   OR BUILD_MANTIDQT
+   OR ENABLE_WORKBENCH
+)
+  add_subdirectory(Testing/SystemTests/scripts)
+  add_subdirectory(Testing/SystemTests/tests)
+endif()
 
 if(COVERAGE)
   get_property(ALL_SRCS GLOBAL PROPERTY COVERAGE_SRCS)

@@ -158,7 +158,7 @@ PYTHONHOME=${_python_home}"
                                                     $<TARGET_FILE:${_cxxtest_testname}> ${_suitename}
     )
 
-    set_tests_properties(${_cxxtest_separate_name} PROPERTIES TIMEOUT ${TESTING_TIMEOUT})
+    set_tests_properties(${_cxxtest_separate_name} PROPERTIES TIMEOUT ${TESTING_TIMEOUT} LABELS "UnitTest")
     if(WIN32)
       set_property(
         TEST ${_cxxtest_separate_name}

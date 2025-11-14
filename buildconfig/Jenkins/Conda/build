@@ -35,6 +35,10 @@ if [[ $OSTYPE == "msys"* ]]; then
     eval "$($WORKSPACE/buildconfig/Jenkins/Conda/vcvarsall.sh x64 -vcvars_ver=14.38.17.8)"
 fi
 
+if [[ ${JOB_NAME} == *pull_requests* ]]; then
+    EXTRA_CMAKE_FLAGS+=" -DPR_JOB=True"
+fi
+
 # Run CMake using preset and variables
 cmake --preset=${CMAKE_PRESET} ${MANTID_DATA_STORE_CMAKE} ${EXTRA_CMAKE_FLAGS} $WORKSPACE
 
