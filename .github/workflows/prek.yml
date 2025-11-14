@@ -1,0 +1,25 @@
+name: Prek checks
+on:
+  pull_request:
+    branches:
+      - '**'
+permissions:
+  contents: write
+
+jobs:
+  prek:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          ref: ${{ github.event.pull_request.head.ref }}
+      - uses: j178/prek-action@v1
+        with:
+          install-only: true
+      - name: Run prek
+        run: prek run --all-files || true
+      - uses: EndBug/add-and-commit@v9
+        with:
+          message: prek fixes
+          default_author: github_actions
