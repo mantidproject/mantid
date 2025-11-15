@@ -139,13 +139,17 @@ class Test_Player_record(unittest.TestCase):
                 call_count = [0]
 
                 def controlled_select(*args, **kwargs):
-                    """Return data from source on first call, then stop."""
+                    """Return data from source on first call, the client writable, then stop."""
                     call_count[0] += 1
-                    if call_count[0] == 1:
-                        return ([mock_source_socket], [], [])
-                    else:
-                        player._running = False
-                        return ([], [], [])
+
+                    match call_count[0]:
+                        case 1:
+                            return ([mock_source_socket], [], [])
+                        case 2:
+                            return ([], [mock_client_socket], [])
+                        case _:
+                            player._running = False
+                            return ([], [], [])
 
                 # Set up timeout alarm
                 old_handler = signal.signal(signal.SIGALRM, timeout_handler)
@@ -161,6 +165,8 @@ class Test_Player_record(unittest.TestCase):
                         patch("builtins.open", mock_open()) as mock_file,
                         patch.object(Packet, "to_file") as mock_to_file,
                     ):
+                        mock_client_send.return_value = mock_packet.size
+
                         player.record(output_path)
 
                         # Verify packet was forwarded to client socket
@@ -190,7 +196,7 @@ class Test_Player_record(unittest.TestCase):
 
             # Create mock packets
             payload = b"\x01\x02\x03\x04\x05\x06\x07\x08"
-            server_packet = Packet(
+            source_packet = Packet(
                 header=Packet.create_header(
                     payload_len=len(payload), packet_type=Packet.Type.BANKED_EVENT_TYPE, tv_sec=12345, tv_nsec=67890
                 ),
@@ -215,21 +221,26 @@ class Test_Player_record(unittest.TestCase):
 
                 mock_server_socket.accept.return_value = (mock_client_socket, None)
 
-                # FIX: Use counter-based function for multiple iterations
+                # Use counter-based function for multiple iterations
                 call_count = [0]
 
                 def controlled_bidirectional_select(*args, **kwargs):
-                    """Return source data, then client data, then stop."""
+                    """Return client data, then source data, then stop."""
                     call_count[0] += 1
-                    if call_count[0] == 1:
-                        return ([mock_source_socket], [], [mock_client_socket])
-                    elif call_count[0] == 2:
-                        return ([mock_client_socket], [], [mock_source_socket])
-                    else:
-                        player._running = False
-                        return ([], [], [])
+                    match call_count[0]:
+                        case 1:
+                            return ([mock_client_socket], [], [])
+                        case 2:
+                            return ([], [mock_source_socket], [])
+                        case 3:
+                            return ([mock_source_socket], [], [])
+                        case 4:
+                            return ([], [mock_client_socket], [])
+                        case _:
+                            player._running = False
+                            return ([], [], [])
 
-                packet_from_socket_calls = [server_packet, client_packet]
+                packet_from_socket_calls = [client_packet, source_packet]
 
                 # Set up timeout alarm
                 old_handler = signal.signal(signal.SIGALRM, timeout_handler)
@@ -242,18 +253,18 @@ class Test_Player_record(unittest.TestCase):
                         patch("select.select", side_effect=controlled_bidirectional_select),
                         patch.object(Packet, "from_socket", side_effect=packet_from_socket_calls),
                         patch.object(player, "_impose_transfer_limit"),
-                        patch.object(mock_server_socket, "send") as mock_server_send,
+                        patch.object(mock_source_socket, "send") as mock_source_send,
                         patch.object(mock_client_socket, "send") as mock_client_send,
                         patch("builtins.open", mock_open()),
                         patch.object(Packet, "to_file"),
                     ):
                         player.record(output_path)
 
-                        # Verify server->client forwarding
-                        mock_client_send.assert_called_once_with(server_packet.header + server_packet.payload)
-
                         # Verify client->server forwarding
-                        mock_server_send.assert_called_once_with(client_packet.header + client_packet.payload)
+                        mock_source_send.assert_called_once_with(client_packet.header + client_packet.payload)
+
+                        # Verify server->client forwarding
+                        mock_client_send.assert_called_once_with(source_packet.header + source_packet.payload)
 
                 finally:
                     signal.alarm(0)
@@ -357,13 +368,16 @@ class Test_Player_record(unittest.TestCase):
                 call_count = [0]
 
                 def controlled_control_select(*args, **kwargs):
-                    """Return client data on first call, then stop."""
+                    """Return client data on first call, then source writable, then stop."""
                     call_count[0] += 1
-                    if call_count[0] == 1:
-                        return ([mock_client_socket], [], [])
-                    else:
-                        player._running = False
-                        return ([], [], [])
+                    match call_count[0]:
+                        case 1:
+                            return ([mock_client_socket], [], [])
+                        case 2:
+                            return ([], [mock_source_socket], [])
+                        case _:
+                            player._running = False
+                            return ([], [], [])
 
                 # Set up timeout alarm
                 old_handler = signal.signal(signal.SIGALRM, timeout_handler)
@@ -378,6 +392,8 @@ class Test_Player_record(unittest.TestCase):
                         patch.object(player, "_impose_transfer_limit"),
                         patch.object(mock_source_socket, "send") as mock_source_send,
                     ):
+                        mock_source_send.return_value = control_packet.size
+
                         player.record(output_path)
 
                         # Verify control packet was forwarded to source (not saved to file)
