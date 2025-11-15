@@ -1,4 +1,5 @@
 # ruff: noqa: C901
+# ruff: noqa: E501
 
 import collections
 from enum import IntEnum, StrEnum
@@ -305,14 +306,14 @@ class Packet:
         cls._send_all(dest, packet.header + packet.payload)
 
     @classmethod
-    def from_socket(cls, src: socket.socket) -> "Packet":
+    def from_socket(cls, src: socket.socket, allow_zero_bytes=False) -> "Packet":
         # Read the header:
-        header = cls._recv_exact(src, cls.HEADER_BYTES)
+        header = cls._recv_exact(src, cls.HEADER_BYTES, allow_zero_bytes=allow_zero_bytes)
         payload_len = struct.unpack("<I", header[0:4])[0]
 
         # Read the payload
         if payload_len > 0:
-            payload = cls._recv_exact(src, payload_len)
+            payload = cls._recv_exact(src, payload_len, allow_zero_bytes=allow_zero_bytes)
         else:
             payload = b""
 
@@ -321,14 +322,18 @@ class Packet:
     ## ====== HELPER methods to WRAP socket partial transfers. ======
 
     @classmethod
-    def _recv_exact(cls, src: socket.socket, num_bytes: int) -> bytes:
+    def _recv_exact(cls, src: socket.socket, num_bytes: int, allow_zero_bytes=False) -> bytes:
         _logger.trace(f"Receiving {num_bytes} bytes from socket")
         data = b""
         while len(data) < num_bytes:
             try:
                 chunk = src.recv(num_bytes - len(data))
                 if not chunk:
-                    raise ConnectionError(f"Socket connection closed after receiving {len(data)} of {num_bytes} bytes")
+                    if not allow_zero_bytes:
+                        raise ConnectionError(f"Socket connection closed after receiving {len(data)} of {num_bytes} bytes")
+                    else:
+                        _logger.debug("*** IGNORING zero-byte RECV ***")
+                        time.sleep(0.01)
                 data += chunk
             except socket.error as e:
                 if e.errno in (errno.EAGAIN, errno.EWOULDBLOCK):
@@ -769,13 +774,22 @@ class Player:
                         if not to_client_queue:
                             readables.append(self._source)
 
-                        writeables = []
+                        writables = []
                         if to_client_queue:
-                            writeables.append(self._client)
+                            writables.append(self._client)
                         if to_server_queue:
-                            writeables.append(self._source)
+                            writables.append(self._source)
+
+                        # *** DEBUG ***
+                        # _logger.debug(f"client {'readable' if self._client in readables else ''}{', writable' if self._client in writables else ''} check...")
+                        # _logger.debug(f"source {'readable' if self._source in readables else ''}{', writable' if self._source in writables else ''} check...")
+
                         exceptionals = [self._client, self._source]
-                        readable, writable, exceptional = select.select(readables, writeables, exceptionals, self.SOCKET_TIMEOUT)
+                        readable, writable, exceptional = select.select(readables, writables, exceptionals, self.SOCKET_TIMEOUT)
+
+                        # *** DEBUG ***
+                        # _logger.debug(f"... client is {'readable' if self._client in readable else ''}{', writable' if self._client in writable else ''}")
+                        # _logger.debug(f"... source is {'readable' if self._source in readable else ''}{', writable' if self._source in writable else ''}")
 
                         # Check for errors first
                         if exceptional:
@@ -784,10 +798,13 @@ class Player:
 
                         loop_broken = False  # Used to propagate any 'break'
 
-                        # Process readable sockets: one packet per iteration.
+                        # Process readable sockets: one packet per iteration per socket.
                         for sock in readable:
                             try:
-                                packet = Packet.from_socket(sock)
+                                # *** DEBUG *** allow zero byte RECV without disconnect?
+                                _logger.debug(f"*** RECV packet: {'source' if sock is self._source else 'client'} ***")
+
+                                packet = Packet.from_socket(sock)  # , allow_zero_bytes=sock is self._source)
 
                                 # limit total number of bytes transferred
                                 self._impose_transfer_limit(packet)
@@ -818,7 +835,7 @@ class Player:
                                 loop_broken = True
                                 break
                         else:
-                            # Process writable sockets: one packet per iteration.
+                            # Process writable sockets: one packet per iteration per socket.
                             for sock in writable:
                                 if not self._running:
                                     loop_broken = True
@@ -832,6 +849,7 @@ class Player:
                                             queue[0] = data[sent:]  # Partial write; keep unsent part
                                         else:
                                             queue.pop(0)
+
                                     except (socket.timeout, socket.error) as e:
                                         _logger.error(f"Socket error during SEND: {e}")
                                         loop_broken = True
