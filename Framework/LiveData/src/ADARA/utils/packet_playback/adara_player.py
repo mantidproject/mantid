@@ -1,5 +1,4 @@
 # ruff: noqa: C901
-# ruff: noqa: E501
 
 import collections
 from enum import IntEnum, StrEnum
@@ -716,14 +715,13 @@ class Player:
             self._running = False
             self._cleanup()
 
-    def record(self, output_path: Path):
+    def record(self, output_base_path: Path):
         # Ensure target base directory exists
-        output_path.mkdir(parents=True, exist_ok=True)
+        output_base_path.mkdir(parents=True, exist_ok=True)
 
         # Main server loop
         try:
             self._running = True
-            self._transferred_bytes = 0
 
             self._server = self._create_server_socket(self._server_address)
             while self._running:
@@ -755,8 +753,9 @@ class Player:
                     # Start a new session for each connection to the packet server:
                     #   this will write all output to a single directory, named as the session number.
                     sequence_number = 1
-                    session_number = self._next_session_number(output_path)
-                    output_path = output_path / f"{session_number:04d}"
+                    session_number = self._next_session_number(output_base_path)
+                    self._transferred_bytes = 0
+                    output_path = output_base_path / f"{session_number:04d}"
                     output_path.mkdir(parents=True, exist_ok=True)
 
                     # Set sockets to non-blocking mode for use with select
@@ -780,16 +779,8 @@ class Player:
                         if to_server_queue:
                             writables.append(self._source)
 
-                        # *** DEBUG ***
-                        # _logger.debug(f"client {'readable' if self._client in readables else ''}{', writable' if self._client in writables else ''} check...")
-                        # _logger.debug(f"source {'readable' if self._source in readables else ''}{', writable' if self._source in writables else ''} check...")
-
                         exceptionals = [self._client, self._source]
                         readable, writable, exceptional = select.select(readables, writables, exceptionals, self.SOCKET_TIMEOUT)
-
-                        # *** DEBUG ***
-                        # _logger.debug(f"... client is {'readable' if self._client in readable else ''}{', writable' if self._client in writable else ''}")
-                        # _logger.debug(f"... source is {'readable' if self._source in readable else ''}{', writable' if self._source in writable else ''}")
 
                         # Check for errors first
                         if exceptional:
@@ -801,9 +792,6 @@ class Player:
                         # Process readable sockets: one packet per iteration per socket.
                         for sock in readable:
                             try:
-                                # *** DEBUG *** allow zero byte RECV without disconnect?
-                                _logger.debug(f"*** RECV packet: {'source' if sock is self._source else 'client'} ***")
-
                                 packet = Packet.from_socket(sock)  # , allow_zero_bytes=sock is self._source)
 
                                 # limit total number of bytes transferred
