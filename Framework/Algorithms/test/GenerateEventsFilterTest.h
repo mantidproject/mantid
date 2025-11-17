@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include <Poco/File.h>
 #include <cmath>
 #include <cxxtest/TestSuite.h>
 
