@@ -25,6 +25,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidKernel/ArrayBoundedValidator.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -33,6 +34,7 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/Unit.h"
+#include "MantidKernel/V3D.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidNexus/H5Util.h"
 
@@ -579,21 +581,6 @@ void AlignAndFocusPowderSlim::initCalibrationConstants(API::MatrixWorkspace_sptr
   }
 }
 
-/// For fast logs, calculate the sample position correction
-void AlignAndFocusPowderSlim::initScaleAtSample(const API::MatrixWorkspace_sptr &wksp) {
-  const auto specInfo = wksp->spectrumInfo();
-  TimeAtSampleStrategyElastic timeAtSampleCalc(wksp);
-  const std::size_t numhist = wksp->getNumberHistograms();
-  // loop over workspace index, but add information to detid-based map
-  for (std::size_t wi = 0; wi < numhist; ++wi) {
-    const auto &spectrum = wksp->getSpectrum(wi);
-    // assume only one detector id per spectrum
-    const detid_t detid = *(spectrum.getDetectorIDs().cbegin());
-    const auto path_correction = timeAtSampleCalc.calculate(wi);
-    m_scale_at_sample[detid] = path_correction.factor; // additive is always zero
-  }
-}
-
 void AlignAndFocusPowderSlim::loadCalFile(const Mantid::API::Workspace_sptr &inputWS, const std::string &filename,
                                           const std::vector<double> &difc_focus) {
   auto alg = createChildAlgorithm("LoadDiffCal");
@@ -616,6 +603,25 @@ void AlignAndFocusPowderSlim::loadCalFile(const Mantid::API::Workspace_sptr &inp
   const MaskWorkspace_sptr maskWS = alg->getProperty("OutputMaskWorkspace");
   m_masked = maskWS->getMaskedDetectors();
   g_log.debug() << "Masked detectors: " << m_masked.size() << '\n';
+}
+
+/**
+ * For fast logs, calculate the sample position correction. This is a separate implementation of
+ * Mantid::API::TimeAtSampleElastic that uses DetectorInfo.
+ */
+void AlignAndFocusPowderSlim::initScaleAtSample(const API::MatrixWorkspace_sptr &wksp) {
+  // detector information for all of the L2
+  const auto detInfo = wksp->detectorInfo();
+  // cache a single L1 value
+  const double L1 = detInfo.l1();
+
+  // calculate scale factors for each detector
+  for (auto iter = detInfo.cbegin(); iter != detInfo.cend(); ++iter) {
+    if (!iter->isMonitor()) {
+      const double path_correction = (L1 + iter->l2()) / L1;
+      m_scale_at_sample.emplace(static_cast<detid_t>(iter->detid()), path_correction);
+    }
+  }
 }
 
 API::MatrixWorkspace_sptr AlignAndFocusPowderSlim::editInstrumentGeometry(
