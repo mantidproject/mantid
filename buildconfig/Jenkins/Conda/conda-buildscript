@@ -127,7 +127,7 @@ git clean -d -x --force --exclude=".Xauthority-*" $git_clean_excludes_extra
 
 # Build and install the mantid-developer environment
 install_pixi
-pixi run -e rattler-builder build-and-install-mantid-developer
+pixi run --manifest-path $SCRIPT_DIR/pixi.toml -e rattler-builder build-and-install-mantid-developer $WORKSPACE
 
 
 # Check whether this is an incremental build that only changes rst files

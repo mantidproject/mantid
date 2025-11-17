@@ -88,10 +88,10 @@ done
 
 # Mamba
 # make sure versions specified here are compatible with the developer meta-package
-setup_mamba $WORKSPACE/miniforge "" true $PLATFORM
-mamba activate base
+#setup_mamba $WORKSPACE/miniforge "" true $PLATFORM
+#mamba activate base
 # something is wrong with versioningit and rattler-build 0.48
-mamba install --yes rattler-build=0.47 versioningit python=3.11 rattler-index
+#mamba install --yes rattler-build=0.47 versioningit python=3.11 rattler-index
 
 # Clean up any legacy conda-recipes git clones
 cd $WORKSPACE
@@ -136,8 +136,8 @@ fi
 
 export CONDA_SUBDIR=$PLATFORM
 
-echo "CONDA BASE ENVIRONMENT (package-conda):"
-mamba run -n base mamba list
+#echo "CONDA BASE ENVIRONMENT (package-conda):"
+#mamba run -n base mamba list
 
 # Run conda build.
 if [[ $ENABLE_BUILD_MANTID_DEVELOPER == true ]]; then

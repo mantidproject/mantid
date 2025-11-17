@@ -9,13 +9,11 @@ rattler-builder = {features = ["rattler-builder"], no-default-feature = true}
 mantid-developer-ci = {features = ["mantid-developer-ci"], no-default-feature = true}
 
 [feature.mantid-developer-ci]
-channels = ["C:/Users/bya67386/work/mantid-fork/../temp/rattler-build", "conda-forge", "neutrons"]
-
-[feature.mantid-developer-ci.target.win-64.dependencies]
-mantid-developer = ">=6.14.20251111.2102.dev3+uncommitted,<7+0"
+channels = ["conda-forge", "neutrons"]
 
 [feature.rattler-builder.dependencies]
 rattler-build = "*"
+rattler-index = "*"
 versioningit = "*"
 
 [feature.rattler-builder.target.win-64.dependencies]
@@ -30,14 +28,12 @@ jq = ">=1.8.1,<2"
 [feature.rattler-builder.tasks.build-and-install-mantid-developer]
 args = [
   "mantid_root",
-  "rattler_build_path",
-  "extra_build_options",
 ]
-
 cmd = """
-export MANTID_VERSION=$(versioningit {{ mantid_root }}) && \
-rattler-build build -r {{ mantid_root }}/conda/recipes/mantid-developer/ -m {{ mantid_root }}/conda/recipes/conda_build_config.yaml --output-dir {{ rattler_build_path }} -c neutrons {{ extra_build_options }} && \
+sh {{ mantid_root }}/buildconfig/Jenkins/Conda/package-conda {{ mantid_root }} --build-mantid-developer && \
 PLATFORM=$(pixi info --json | jq -r .platform) && \
-pixi workspace channel add {{ rattler_build_path }} -f mantid-developer-ci --prepend && \
+pixi workspace channel add {{ mantid_root }}/conda-bld -f mantid-developer-ci --prepend && \
 pixi add --platform $PLATFORM -f mantid-developer-ci mantid-developer
 """
+# export MANTID_VERSION=$(versioningit {{ mantid_root }}) && \
+# rattler-build build -r {{ mantid_root }}/conda/recipes/mantid-developer/ -m {{ mantid_root }}/conda/recipes/conda_build_config.yaml --output-dir {{ rattler_build_path }} -c neutrons {{ extra_build_options }} && \
