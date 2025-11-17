@@ -8,7 +8,6 @@
 
 import unittest
 from os import path
-import traceback
 
 import systemtesting
 from systemtesting import MantidSystemTest, GENERATE_REFERENCE_FILES, REFERENCE_FILE_DIR
@@ -30,8 +29,6 @@ from sans.user_file.txt_parsers.UserFileReaderAdapter import UserFileReaderAdapt
 
 @ISISSansSystemTest(SANSInstrument.SANS2D)
 class SingleReductionTest(unittest.TestCase):
-    _errors = []
-
     def _load_workspace(self, state):
         load_alg = AlgorithmManager.createUnmanaged("SANSLoad")
         load_alg.setChild(True)
@@ -85,7 +82,7 @@ class SingleReductionTest(unittest.TestCase):
         reference_workspace = load_alg.getProperty("OutputWorkspace").value
 
         # Compare reference file with the output_workspace
-        mismatch_name = reference_file_name.split(".")[0] if GENERATE_REFERENCE_FILES else mismatch_name
+        mismatch_name = reference_file_name if GENERATE_REFERENCE_FILES else mismatch_name
         self._compare_workspace(workspace, reference_workspace, check_spectra_map=check_spectra_map, mismatch_name=mismatch_name)
 
     def _compare_workspace(self, input_workspace, reference_workspace, check_spectra_map=True, tolerance=1e-6, mismatch_name=""):
@@ -113,10 +110,8 @@ class SingleReductionTest(unittest.TestCase):
 
         if not result:
             self._save_output(input_workspace, mismatch_name)
-        try:
+        with self.subTest(part=f"output ws validation, see {mismatch_name}"):
             self.assertTrue(result)
-        except AssertionError as e:
-            self.__class__._errors.append((self.id(), e))
 
     def _save_output(self, workspace, mismatch_name):
         # Save the workspace out
@@ -854,14 +849,8 @@ class SANSReductionRunnerTest(systemtesting.MantidSystemTest):
         suite.addTest(unittest.makeSuite(SANSSingleReduction2Test, "test"))
         runner = unittest.TextTestRunner()
         res = runner.run(suite)
-        errors = [j for i in [SANSSingleReductionTest._errors, SANSSingleReduction2Test._errors] for j in i]
-
-        if res.wasSuccessful() and not errors:
+        if res.wasSuccessful():
             self._success = True
-        elif self._errors:
-            for test_name, err in errors:
-                print(f"Error raised during test {test_name}:")
-                traceback.print_exception(err, limit=3)
 
     def requiredMemoryMB(self):
         return 2000
