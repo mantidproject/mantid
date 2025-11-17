@@ -713,5 +713,19 @@ TimeSplitter::calculate_target_indices(const std::vector<DateAndTime> &times) co
   return indices;
 }
 
+const TimeROI TimeSplitter::combinedTimeROI(const int64_t start_offset) const {
+  TimeROI combined;
+
+  auto it = m_roi_map.cbegin();
+  for (; it != std::prev(m_roi_map.cend()); it++) {
+    if (it->second == NO_TARGET)
+      continue;
+    DateAndTime intervalStart = it->first - start_offset;
+    DateAndTime intervalStop = std::next(it)->first;
+    combined.addROI(intervalStart, intervalStop);
+  }
+  return combined;
+}
+
 } // namespace DataObjects
 } // namespace Mantid

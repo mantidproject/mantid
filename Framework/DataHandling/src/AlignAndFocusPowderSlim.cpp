@@ -425,7 +425,15 @@ void AlignAndFocusPowderSlim::exec() {
     auto progress = std::make_shared<API::Progress>(this, .17, .9, num_banks_to_read * workspaceIndices.size());
     if (this->getProperty(PropertyNames::FULL_TIME)) {
       g_log.information() << "Using ProcessBankSplitFastLogsTask for splitter processing\n";
-      const auto pulse_indices = this->determinePulseIndices(wksp, filterROI);
+
+      // Get the combined time ROI for all targets so we only load necessary events.
+      // Need to offset the start time to account for tof's greater than pulsetime. 66.6ms is 4 pulses.
+      auto combined_time_roi = timeSplitter.combinedTimeROI(66666666);
+      if (!filterROI.useAll()) {
+        combined_time_roi.update_intersection(filterROI);
+      }
+
+      const auto pulse_indices = this->determinePulseIndices(wksp, combined_time_roi);
 
       const auto splitterMap = timeSplitter.getSplittersMap();
 
