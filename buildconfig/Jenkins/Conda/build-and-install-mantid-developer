@@ -1,0 +1,7 @@
+#!/bin/bash
+MANTID_ROOT=$1
+#TODO: should this be three smaller tasks which depend on each other, rather than calling an external script?
+sh $MANTID_ROOT/buildconfig/Jenkins/Conda/package-conda $MANTID_ROOT --build-mantid-developer
+PLATFORM=$(pixi info --json | jq -r .platform)
+pixi workspace channel add $MANTID_ROOT/conda-bld -f mantid-developer-ci --prepend
+pixi add --platform $PLATFORM -f mantid-developer-ci mantid-developer
