@@ -7,7 +7,6 @@
 #pragma once
 
 #include "MantidKernel/Timer.h"
-#include <Poco/File.h>
 #include <cmath>
 #include <cxxtest/TestSuite.h>
 #include <fstream>

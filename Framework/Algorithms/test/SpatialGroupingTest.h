@@ -14,7 +14,6 @@
 #include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 #include "MantidIndexing/IndexInfo.h"
 
-#include <Poco/Path.h>
 #include <filesystem>
 #include <fstream>
 
