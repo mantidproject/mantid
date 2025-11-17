@@ -12,7 +12,7 @@
 #   1. WORKSPACE: path to the workspace/source code that this should run inside, Windows Caveat: Only use / for
 #                 this argument do not use \\ or \ in the path.
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source $SCRIPT_DIR/mamba-utils
+source $SCRIPT_DIR/pixi-utils
 
 # Check 1 argument is passed, and is not optional.
 if [[ $# < 1 || $1 == "--"* ]]; then
@@ -30,9 +30,10 @@ if $SCRIPT_DIR/../check_for_changes cpp; then
     exit 0
 fi
 
-# Setup conda environment
-setup_mamba $WORKSPACE/miniforge "" false ""
-create_and_activate_mantid_developer_env $WORKSPACE
+# Setup mantid-developer environment
+install_pixi
+setup_pixi_toml $WORKSPACE
+create_and_activate_mantid-developer-ci $WORKSPACE
 
 ###############################################################################
 # Run Cppcheck

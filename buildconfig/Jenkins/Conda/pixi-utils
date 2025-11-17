@@ -32,5 +32,13 @@ setup_pixi_toml() {
   pixi workspace --manifest-path $LOCAL_MANIFEST environment add mantid-developer-ci --feature mantid-developer-ci --no-default-feature
   # add the build-and-install-mantid-developer task to the rattler-builder feature
   pixi task add --manifest-path $LOCAL_MANIFEST -f rattler-builder --arg mantid_root build-and-install-mantid-developer "sh {{ mantid_root }}/buildconfig/Jenkins/Conda/build-and-install-mantid-developer {{ mantid_root }}"
+  # add task for calling package-conda
+  pixi task add --manifest-path $LOCAL_MANIFEST -f rattler-builder --arg mantid_root --arg other_flags call-package-conda "sh {{ mantid_root }}/buildconfig/Jenkins/Conda/package-conda {{ mantid_root }} {{ other_flags }}"
   cd -
+}
+
+create_and_activate_mantid-developer-ci() {
+  MANTID_ROOT=$1
+  pixi run --manifest-path $SCRIPT_DIR/pixi.toml -e rattler-builder build-and-install-mantid-developer $MANTID_ROOT
+  pixi shell --manifest-path $SCRIPT_DIR/pixi.toml -e mantid-developer-ci
 }
