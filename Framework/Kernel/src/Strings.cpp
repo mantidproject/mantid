@@ -1208,23 +1208,26 @@ std::string strmakef(const char *const fmt, ...) {
     return {};
   }
 
+  // first read to buffer to get correct size
   std::size_t constexpr BUFSIZE{256};
   char buf[BUFSIZE];
-
   va_list args;
   va_start(args, fmt);
+  // NOTE vsnprintf is limited to only write BUFSIZE chars
   const auto r = std::vsnprintf(buf, BUFSIZE, fmt, args);
   va_end(args);
 
+  // conversion failed
   if (r < 0)
-    // conversion failed
     return {};
 
+  // otherwise, r is the true length
   const size_t len = r;
+  // if the true length is less than BUFSIZE, then buf is the string
   if (len < BUFSIZE)
-    // we fit in the buffer
     return {buf, len};
 
+  // otherwise, make a string correct length, now write again
   std::string s(len, '\0');
   va_start(args, fmt);
   auto const r2 = std::vsnprintf(s.data(), len + 1, fmt, args);

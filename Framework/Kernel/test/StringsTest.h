@@ -627,6 +627,17 @@ public:
     std::string res = strmakef("%04d", 17);
     TS_ASSERT_EQUALS(res, expected);
   }
+
+  void test_strmakef_compare() {
+    // make a string using standard methods,
+    // and against using strmakef, and ensure the same
+    double x = std::sin(1);
+    std::ostringstream oss;
+    oss << std::fixed << std::setprecision(12) << std::setw(16) << std::setfill('0') << x;
+    std::string s1 = oss.str();
+    std::string s2 = strmakef("%016.12f", x);
+    TS_ASSERT_EQUALS(s1, s2);
+  }
 };
 
 class StringsTestPerformance : public CxxTest::TestSuite {
