@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidAPI/PanelsSurfaceCalculator.h"
 #include "UnwrappedSurface.h"
 
 #include <QPolygonF>
@@ -81,7 +82,6 @@ protected:
   void setupAxes();
   // Add a flat bank
   void constructFromComponentInfo();
-  Mantid::Kernel::Quat calcBankRotation(const Mantid::Kernel::V3D &detPos, Mantid::Kernel::V3D normal) const;
   // Add a detector from an assembly
   void addDetector(size_t detIndex, int bankIndex);
   // Arrange the banks on the projection plane
@@ -112,6 +112,9 @@ protected:
   std::vector<int> m_detector2bankMap;
 
   friend struct FlatBankInfo;
+
+private:
+  Mantid::API::PanelsSurfaceCalculator m_calculator;
 };
 
 } // namespace MantidWidgets

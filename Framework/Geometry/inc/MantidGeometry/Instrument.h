@@ -9,6 +9,7 @@
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"
+#include "MantidGeometry/Instrument/GridDetector.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Instrument_fwd.h"
 
@@ -204,7 +205,10 @@ public:
   /// @return Full if all detectors are rect., Partial if some, None if none
   ContainsState containsRectDetectors() const;
 
-  std::vector<RectangularDetector_const_sptr> findRectDetectors() const;
+  std::vector<RectangularDetector_const_sptr> findRectDetectors() const {
+    return findDetectorsOfType<RectangularDetector>();
+  }
+  std::vector<GridDetector_const_sptr> findGridDetectors() const { return findDetectorsOfType<GridDetector>(); }
 
   bool isMonitorViaIndex(const size_t index) const;
   size_t detectorIndex(const detid_t detID) const;
@@ -224,6 +228,30 @@ private:
 
   void addInstrumentChildrenToQueue(std::queue<IComponent_const_sptr> &queue) const;
   bool addAssemblyChildrenToQueue(std::queue<IComponent_const_sptr> &queue, IComponent_const_sptr component) const;
+  template <typename T> std::vector<std::shared_ptr<const T>> findDetectorsOfType() const {
+    std::queue<IComponent_const_sptr> compQueue; // Search queue
+    addInstrumentChildrenToQueue(compQueue);
+
+    std::vector<std::shared_ptr<const T>> detectors;
+
+    IComponent_const_sptr comp;
+
+    while (!compQueue.empty()) {
+      comp = compQueue.front();
+      compQueue.pop();
+
+      if (!validateComponentProperties(comp))
+        continue;
+
+      if (auto const detector = std::dynamic_pointer_cast<const T>(comp)) {
+        detectors.push_back(detector);
+      } else {
+        // If component is a ComponentAssembly, we add its children to the queue to check if they're type T
+        addAssemblyChildrenToQueue(compQueue, comp);
+      }
+    }
+    return detectors;
+  }
 
   /// Private copy assignment operator
   Instrument &operator=(const Instrument &);
@@ -240,11 +268,11 @@ private:
 
   /// Purpose to hold copy of source component. For now assumed to be just one
   /// component
-  const IComponent *m_sourceCache;
+  const IComponent *m_sourceCache = nullptr;
 
   /// Purpose to hold copy of samplePos component. For now assumed to be just
   /// one component
-  const IComponent *m_sampleCache;
+  const IComponent *m_sampleCache = nullptr;
 
   /// To store info about the parameters defined in IDF. Indexed according to
   /// logfile-IDs, which equals logfile filename minus the run number and file
