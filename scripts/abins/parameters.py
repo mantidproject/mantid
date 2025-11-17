@@ -123,8 +123,7 @@ instruments = {
             "Cu(220) (Lagrange)": {
                 "Ei_range_meV": [26, 500],
                 "abs_resolution_meV": [7.6987e-5, 2.156e-2, -3.5961e-2],
-                "low_energy_cutoff_meV": 25,
-                "low_energy_resolution_meV": 0.8,
+                "minimum_resolution_meV": 0.8,
             },
             "Cu(331) (Lagrange)": {
                 "Ei_range_meV": [67, 500],

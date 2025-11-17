@@ -125,6 +125,7 @@ Tools
    ProfilingOverview
    Timers
    ProfilingWithPerf
+   ProfilingWithJemalloc
    ProfilingWithValgrind
    FlowchartCreation
    VisualStudioBuildImpact
@@ -189,6 +190,7 @@ Testing
    DataFilesForTesting
    TestingUtilities
    RunningSanitizers
+   UnittestMonitor
 
 :doc:`RunningTheUnitTests`
    Details on how to run the suite of unit tests.
@@ -219,6 +221,9 @@ Testing
 
 :doc:`RunningSanitizers`
    How to run the various sanitizers locally.
+
+:doc:`UnittestMonitor`
+   Monitor failing and flakey unittests from the Jenkins nightly pipelines.
 
 ===============
 GUI Development

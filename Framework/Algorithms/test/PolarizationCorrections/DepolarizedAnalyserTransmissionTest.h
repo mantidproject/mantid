@@ -14,21 +14,35 @@
 #include "MantidAlgorithms/PolarizationCorrections/DepolarizedAnalyserTransmission.h"
 #include "MantidKernel/Strings.h"
 
+#include "PolarizationCorrectionsTestUtils.h"
+
 namespace {
 constexpr double PXD_VALUE = 9.32564;
 constexpr double PXD_ERROR = 7.92860;
 constexpr double COST_FUNC_MAX = 3.3e-5;
 
 constexpr double FIT_DELTA = 1e-6;
+constexpr double X_MIN = 3.5;
+constexpr double X_MAX = 16.5;
 } // namespace
 
 using Mantid::Algorithms::CreateSampleWorkspace;
 using Mantid::Algorithms::DepolarizedAnalyserTransmission;
 using Mantid::API::ITableWorkspace_sptr;
 using Mantid::API::MatrixWorkspace_sptr;
+using namespace PolCorrTestUtils;
 
 class DepolarizedAnalyserTransmissionTest : public CxxTest::TestSuite {
 public:
+  void setUp() override {
+    m_parameters = TestWorkspaceParameters("__mt", "name=LinearBackground, A0=0.112, A1=-0.004397", "Wavelength",
+                                           N_SPECS, X_MIN, X_MAX, 0.1);
+    auto const &mtWs = generateFunctionDefinedWorkspace(m_parameters);
+    m_parameters.updateNameAndFunc("__dep", "name=ExpDecay, Height=0.1239, Lifetime=1.338");
+    auto const &depWs = generateFunctionDefinedWorkspace(m_parameters);
+    m_testWs = std::make_pair(mtWs, depWs);
+  }
+
   void test_name() {
     DepolarizedAnalyserTransmission const alg;
     TS_ASSERT_EQUALS(alg.name(), "DepolarizedAnalyserTransmission");
@@ -41,7 +55,7 @@ public:
 
   void test_normal_exec() {
     // GIVEN
-    auto const &[mtWs, depWs] = createDefaultWorkspaces();
+    auto const &[mtWs, depWs] = m_testWs;
 
     auto alg = createAlgorithm(mtWs, depWs);
     alg->execute();
@@ -56,7 +70,7 @@ public:
 
   void test_normal_exec_with_file() {
     // GIVEN
-    auto const &[mtWs, depWs] = createDefaultWorkspaces();
+    auto const &[mtWs, depWs] = m_testWs;
     auto alg = createAlgorithmUsingFilename(mtWs, depWs);
     alg->execute();
 
@@ -70,7 +84,7 @@ public:
 
   void test_fit_ws_is_output_when_optional_prop_set() {
     // GIVEN
-    auto const &[mtWs, depWs] = createDefaultWorkspaces();
+    auto const &[mtWs, depWs] = m_testWs;
     auto alg = createAlgorithm(mtWs, depWs);
 
     // WHEN
@@ -89,7 +103,7 @@ public:
     // GIVEN
     auto constexpr PXD_VALUE_DIFX = 9.3256240143;
     auto constexpr PXD_ERROR_DIFX = 7.9249356146;
-    auto const &[mtWs, depWs] = createDefaultWorkspaces();
+    auto const &[mtWs, depWs] = m_testWs;
     auto alg = createAlgorithm(mtWs, depWs);
     alg->setProperty("StartX", 1.5);
     alg->setProperty("EndX", 14.5);
@@ -107,7 +121,7 @@ public:
 
   void test_failed_fit() {
     // GIVEN
-    auto const &[mtWs, depWs] = createDefaultWorkspaces();
+    auto const &[mtWs, depWs] = m_testWs;
     auto alg = createAlgorithm(mtWs, depWs);
     alg->setProperty("PxDStartingValue", 1e50);
 
@@ -119,8 +133,9 @@ public:
 
   void test_apparently_successful_fit() {
     // GIVEN
-    MatrixWorkspace_sptr const &mtWs = createTestingWorkspace("__mt", "name=UserFunction, Formula=0*x");
-    auto const &depWs = createTestingWorkspace("__dep", "name=ExpDecay, Height=0.1239, Lifetime=1.338");
+    m_parameters.updateNameAndFunc("__mt", "name=UserFunction, Formula=0*x");
+    MatrixWorkspace_sptr const &mtWs = generateFunctionDefinedWorkspace(m_parameters);
+    auto const &depWs = m_testWs.second;
     auto alg = createAlgorithm(mtWs, depWs);
 
     // THEN
@@ -133,9 +148,10 @@ public:
 
   void test_invalid_workspace_lengths() {
     // GIVEN
-    MatrixWorkspace_sptr const &mtWs =
-        createTestingWorkspace("__mt", "name=LinearBackground, A0=0.112, A1=-0.004397", 12);
-    auto const &depWs = createTestingWorkspace("__dep", "name=ExpDecay, Height=0.1239, Lifetime=1.338", 2);
+    m_parameters.updateSpectra(12, X_MIN, X_MAX, 0.1);
+    MatrixWorkspace_sptr const &mtWs = generateFunctionDefinedWorkspace(m_parameters);
+    m_parameters.updateSpectra(2, X_MIN, X_MAX, 0.1);
+    MatrixWorkspace_sptr const &depWs = generateFunctionDefinedWorkspace(m_parameters);
     auto alg = createAlgorithm(mtWs, depWs);
 
     // THEN
@@ -148,9 +164,9 @@ public:
 
   void test_invalid_empty_cell_workspace_length_from_file() {
     // GIVEN
-    MatrixWorkspace_sptr const &mtWs =
-        createTestingWorkspace("__mt", "name=LinearBackground, A0=0.112, A1=-0.004397", 12);
-    auto const &depWs = createTestingWorkspace("__dep", "name=ExpDecay, Height=0.1239, Lifetime=1.338", 1);
+    m_parameters.updateSpectra(12, X_MIN, X_MAX, 0.1);
+    MatrixWorkspace_sptr const &mtWs = generateFunctionDefinedWorkspace(m_parameters);
+    auto const &depWs = m_testWs.second;
     auto alg = createAlgorithmUsingFilename(mtWs, depWs);
 
     // THEN
@@ -162,9 +178,9 @@ public:
 
   void test_non_matching_workspace_bins() {
     // GIVEN
-    MatrixWorkspace_sptr const &mtWs =
-        createTestingWorkspace("__mt", "name=LinearBackground, A0=0.112, A1=-0.004397", 1, true, 0.2);
-    auto const &depWs = createTestingWorkspace("__dep", "name=ExpDecay, Height=0.1239, Lifetime=1.338", 1);
+    m_parameters.updateSpectra(1, X_MIN, X_MAX, 0.2);
+    MatrixWorkspace_sptr const &mtWs = generateFunctionDefinedWorkspace(m_parameters);
+    auto const &depWs = m_testWs.second;
     auto alg = createAlgorithm(mtWs, depWs);
 
     // THEN
@@ -176,7 +192,7 @@ public:
 
   void test_error_if_neither_empty_cell_workspace_or_file_are_set() {
     // GIVEN
-    auto const &depWs = createTestingWorkspace("__dep", "name=ExpDecay, Height=0.1239, Lifetime=1.338");
+    auto const &depWs = m_testWs.first;
 
     auto alg = std::make_shared<DepolarizedAnalyserTransmission>();
     alg->setChild(true);
@@ -193,35 +209,8 @@ public:
   }
 
 private:
-  MatrixWorkspace_sptr createTestingWorkspace(std::string const &outName, std::string const &function,
-                                              int const numSpectra = 1, bool const isMonitor = true,
-                                              double const binWidth = 0.1) {
-    CreateSampleWorkspace makeWsAlg;
-    makeWsAlg.initialize();
-    makeWsAlg.setChild(true);
-    makeWsAlg.setPropertyValue("OutputWorkspace", outName);
-    makeWsAlg.setPropertyValue("Function", "User Defined");
-    makeWsAlg.setPropertyValue("UserDefinedFunction", function);
-    makeWsAlg.setPropertyValue("XUnit", "wavelength");
-    if (isMonitor) {
-      makeWsAlg.setProperty("NumBanks", 0);
-      makeWsAlg.setProperty("NumMonitors", numSpectra);
-    } else {
-      makeWsAlg.setProperty("NumBanks", numSpectra);
-    }
-    makeWsAlg.setProperty("BankPixelWidth", 1);
-    makeWsAlg.setProperty("XMin", 3.5);
-    makeWsAlg.setProperty("XMax", 16.5);
-    makeWsAlg.setProperty("BinWidth", binWidth);
-    makeWsAlg.execute();
-    return makeWsAlg.getProperty("OutputWorkspace");
-  }
-
-  std::pair<MatrixWorkspace_sptr, MatrixWorkspace_sptr> createDefaultWorkspaces() {
-    MatrixWorkspace_sptr const &mtWs = createTestingWorkspace("__mt", "name=LinearBackground, A0=0.112, A1=-0.004397");
-    auto const &depWs = createTestingWorkspace("__dep", "name=ExpDecay, Height=0.1239, Lifetime=1.338");
-    return std::pair{mtWs, depWs};
-  }
+  TestWorkspaceParameters m_parameters;
+  std::pair<MatrixWorkspace_sptr, MatrixWorkspace_sptr> m_testWs;
 
   std::shared_ptr<DepolarizedAnalyserTransmission> createAlgorithm(MatrixWorkspace_sptr const &mtWs,
                                                                    MatrixWorkspace_sptr const &depWs) {

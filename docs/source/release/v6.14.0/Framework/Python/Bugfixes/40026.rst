@@ -1,0 +1,2 @@
+- Input validation errors have been corrected for numerical line edits of the :ref:`Filter Events Interface <Filter_Events_Interface>`.
+- Add horizontal and vertical range markers in lieu of sliders to simplify range filtering with the mouse.
