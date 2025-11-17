@@ -8,10 +8,9 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/InstrumentDataService.h"
+#include "MantidKernel/Glob.h"
 #include "MantidKernel/UsageService.h"
-#include <Poco/File.h>
-#include <Poco/Glob.h>
-#include <Poco/Path.h>
+#include <filesystem>
 
 namespace Mantid::Algorithms {
 
@@ -73,8 +72,7 @@ void ClearCache::exec() {
 
   // get the instrument directories
   auto instrumentDirs = Mantid::Kernel::ConfigService::Instance().getInstrumentDirectories();
-  Poco::Path localPath(instrumentDirs[0]);
-  localPath.makeDirectory();
+  std::filesystem::path localPath(instrumentDirs[0]);
 
   if (clearAlgCache) {
     g_log.debug("Emptying the Algorithm cache (AlgorithmCache).");
@@ -91,17 +89,16 @@ void ClearCache::exec() {
   if (clearInstFileCache) {
     g_log.debug("Removing files from the Downloaded Instrument file cache "
                 "(DownloadedInstrumentFileCache).");
-    int filecount = deleteFiles(localPath.toString(), "*.xml");
-    filecount += deleteFiles(localPath.toString(), "github.json");
+    int filecount = deleteFiles(localPath.string(), "*.xml");
+    filecount += deleteFiles(localPath.string(), "github.json");
     g_log.information() << filecount << " files deleted\n";
     filesRemoved += filecount;
   }
   if (clearGeometryFileCache) {
     g_log.debug("Removing files from the triangulated detector geometry file "
                 "cache (GeometryFileCache).");
-    Poco::Path GeomPath(localPath);
-    GeomPath.append("geometryCache").makeDirectory();
-    int filecount = deleteFiles(GeomPath.toString(), "*.vtp");
+    std::filesystem::path GeomPath = localPath / "geometryCache";
+    int filecount = deleteFiles(GeomPath.string(), "*.vtp");
     g_log.information() << filecount << " files deleted\n";
     filesRemoved += filecount;
   }
@@ -120,19 +117,16 @@ void ClearCache::exec() {
 int ClearCache::deleteFiles(const std::string &path, const std::string &pattern) const {
   int filesDeleted = 0;
 
-  Poco::Path pathPattern(path);
-  pathPattern.makeDirectory();
-  pathPattern.append(pattern);
+  std::filesystem::path pathPattern = std::filesystem::path(path) / pattern;
   std::set<std::string> files;
-  Poco::Glob::glob(pathPattern, files, Poco::Glob::GLOB_CASELESS);
+  Mantid::Kernel::Glob::glob(pathPattern.string(), files);
 
   for (const auto &filepath : files) {
-    Poco::File file(filepath);
     g_log.debug("Deleting file " + filepath);
     try {
-      file.remove();
+      std::filesystem::remove(filepath);
       filesDeleted++;
-    } catch (Poco::FileException &ex) {
+    } catch (std::filesystem::filesystem_error &ex) {
       g_log.warning("Cannot delete file " + filepath + ": " + ex.what());
     }
   }

@@ -18,13 +18,13 @@
 #include "MantidGeometry/Surfaces/Cylinder.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/EigenConversionHelpers.h"
+#include "MantidKernel/Glob.h"
 #include "MantidNexus/H5Util.h"
 #include "MantidNexusGeometry/NexusGeometryDefinitions.h"
 #include "MantidNexusGeometry/NexusGeometryParser.h"
 
 #include "mockobjects.h"
 #include <H5Cpp.h>
-#include <Poco/Glob.h>
 #include <chrono>
 #include <gmock/gmock.h>
 #include <string>
@@ -47,7 +47,7 @@ extractBeamline(const Mantid::Geometry::Instrument &instrument) {
 }
 
 std::string instrument_path(const std::string &local_name) {
-  return Kernel::ConfigService::Instance().getFullPath(local_name, true, Poco::Glob::GLOB_DEFAULT);
+  return Kernel::ConfigService::Instance().getFullPath(local_name, true, Kernel::Glob::GLOB_DEFAULT);
 }
 
 } // namespace
