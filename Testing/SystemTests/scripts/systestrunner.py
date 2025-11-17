@@ -74,7 +74,6 @@ def main():
     #########################################################################
 
     path_to_test = args.test_path
-    print(path_to_test)
     test_dir_name = os.path.dirname(path_to_test)
     test_file_name = os.path.basename(path_to_test)
     test_module_name = os.path.splitext(test_file_name)[0]
@@ -105,7 +104,6 @@ def main():
     #########################################################################
 
     failure = False
-    print(results.values())
     if any(exit_code is not systemtesting.TestRunner.SUCCESS_CODE and
            exit_code is not systemtesting.TestRunner.SKIP_TEST
            for (exit_code, _) in results.values()):
