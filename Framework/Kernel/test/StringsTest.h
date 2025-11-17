@@ -616,15 +616,31 @@ public:
     TS_ASSERT_EQUALS(res, expected);
   }
 
+  void test_strmakef_too_small() {
+    // create a string that is much smaller than the buffer
+    // ensure the result has been correctly resized
+    std::string expected{'A'};
+    std::string res = strmakef("%c", 'A');
+    TS_ASSERT_EQUALS(res.size(), 1);
+    TS_ASSERT_EQUALS(res, expected);
+    std::string res2(res.data()); // remake from data, to be sure
+    TS_ASSERT_EQUALS(res2.size(), 1);
+    TS_ASSERT_EQUALS(res2, expected);
+  }
+
   void test_strmakef_doubles() {
+    // correctly format a double with format specifiers
     std::string expected{"0001.000000000000"};
     std::string res = strmakef("%017.12f", 1.0);
+    TS_ASSERT_EQUALS(res.size(), expected.size());
     TS_ASSERT_EQUALS(res, expected);
   }
 
   void test_strmakef_ints() {
+    // correctly format an int with left zero padding
     std::string expected{"0017"};
     std::string res = strmakef("%04d", 17);
+    TS_ASSERT_EQUALS(res.size(), expected.size());
     TS_ASSERT_EQUALS(res, expected);
   }
 
@@ -637,6 +653,20 @@ public:
     std::string s1 = oss.str();
     std::string s2 = strmakef("%016.12f", x);
     TS_ASSERT_EQUALS(s1, s2);
+  }
+
+  void test_strmakef_badfmt() {
+    // create an invalid formatting and ensure an empty stirng is returned
+    std::string res = strmakef("invalid: %lc", (wint_t)0xFFFFFFFF);
+    TS_ASSERT(res.empty());
+  }
+
+  void test_strmakef_two() {
+    // create two strings, then add them together
+    std::string s1 = strmakef("x%d", 1);
+    std::string s2 = strmakef("x%d", 2);
+    std::string s3 = s1 + s2;
+    TS_ASSERT_EQUALS(s3, "x1x2");
   }
 };
 

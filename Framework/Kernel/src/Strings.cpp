@@ -1203,39 +1203,31 @@ std::string randomString(size_t len) {
 
 /// Create a formatted string using printf-style formatting.
 std::string strmakef(const char *const fmt, ...) {
-  if (!fmt) {
-    // empty format string -- do nothing
-    return {};
-  }
-
-  // first read to buffer to get correct size
   std::size_t constexpr BUFSIZE{256};
-  char buf[BUFSIZE];
-  va_list args;
-  va_start(args, fmt);
-  // NOTE vsnprintf is limited to only write BUFSIZE chars
-  const auto r = std::vsnprintf(buf, BUFSIZE, fmt, args);
-  va_end(args);
-
-  // conversion failed
-  if (r < 0)
-    return {};
-
-  // otherwise, r is the true length
-  const size_t len = r;
-  // if the true length is less than BUFSIZE, then buf is the string
-  if (len < BUFSIZE)
-    return {buf, len};
-
-  // otherwise, make a string correct length, now write again
-  std::string s(len, '\0');
-  va_start(args, fmt);
-  auto const r2 = std::vsnprintf(s.data(), len + 1, fmt, args);
-  va_end(args);
-  if (r2 < 0 || static_cast<std::size_t>(r2) != len) {
-    return {}; // unspecified error
+  std::string res{};
+  if (fmt) { // ensure the format string is not null
+    char buf[BUFSIZE];
+    va_list args;
+    va_start(args, fmt);
+    // NOTE vsnprintf is limited to only write BUFSIZE chars
+    int const r = std::vsnprintf(buf, BUFSIZE, fmt, args);
+    va_end(args);
+    if (r >= 0) { // conversion succeeded
+      size_t const len(r);
+      res.resize(len);
+      if (len < BUFSIZE) { // output fit into buf; return buf
+        res.assign(buf, len);
+      } else { // otherwise, read again with proper size
+        va_start(args, fmt);
+        int const r2 = std::vsnprintf(res.data(), len + 1, fmt, args);
+        va_end(args);
+        if (r2 < 0 || static_cast<std::size_t>(r2) != len) {
+          res = ""; // unspecified error due to run-time memory failure
+        }
+      }
+    }
   }
-  return s;
+  return res;
 }
 
 /// \cond TEMPLATE
