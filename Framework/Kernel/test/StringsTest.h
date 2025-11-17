@@ -657,14 +657,13 @@ public:
 
   void test_strmakef_badfmt() {
     // create an invalid formatting and ensure an empty stirng is returned
+#if !defined(_WIN32)
     std::string res = strmakef("invalid: %lc", (wint_t)0xFFFFFFFF);
-#if !defined(_WIN32) // NOTE this negative test fails to fail on windows
-    TS_ASSERT(res.empty());
 #else
-    // NOTE this negative test tries to print an invalid formatter
-    // vsnprint errors are system-dependent, and for but MSVC this compiles and runs fine
-    TS_ASSERT_EQUALS(res, "invalid: \xFFFFFFFF")
+    char cstr[] = {'a', 'b', 'c'};
+    std::string res = strmakef("invalid: %ls", cstr);
 #endif
+    TS_ASSERT(res.empty());
   }
 
   void test_strmakef_two() {
