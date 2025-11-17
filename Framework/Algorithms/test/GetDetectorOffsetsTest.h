@@ -245,7 +245,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<OffsetsWorkspace>(outputWS));
     TS_ASSERT(output);
 
-    TS_ASSERT_DELTA(output->y(0)[0], -0.11074, 0.0001);
+    // offset = - peak_cen * step/(dRef + peak_cen * step); step =0.02, dRef=1, peak_cen=1
+    TS_ASSERT_DELTA(output->y(0)[0], -0.019608, 0.0001);
 
     AnalysisDataService::Instance().remove(outputWS);
     AnalysisDataService::Instance().remove(outputWS + "_mask");
@@ -287,7 +288,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<OffsetsWorkspace>(outputWS));
     TS_ASSERT(output);
 
-    TS_ASSERT_DELTA(output->y(0)[0], 2.38925, 0.0001);
+    // offset = offset_relative + (dIdeal - dRef)/dRef; dIdeal = 3.5, dRef=1
+    TS_ASSERT_DELTA(output->y(0)[0], 2.48039, 0.0001);
 
     AnalysisDataService::Instance().remove(outputWS);
     AnalysisDataService::Instance().remove(outputWS + "_mask");
@@ -328,7 +330,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<OffsetsWorkspace>(outputWS));
     TS_ASSERT(output);
 
-    TS_ASSERT_DELTA(output->y(0)[0], -6.22677, 0.01);
+    TS_ASSERT_DELTA(output->y(0)[0], -1.0, 0.01); // offset = - peak_cen
 
     AnalysisDataService::Instance().remove(outputWS);
     AnalysisDataService::Instance().remove(outputWS + "_mask");
