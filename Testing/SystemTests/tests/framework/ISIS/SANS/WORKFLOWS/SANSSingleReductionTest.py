@@ -316,7 +316,7 @@ class SANSSingleReductionTest(SingleReductionTest):
         )
 
         calculated_transmission_reference_file = "SANS2D_ws_D20_calculated_transmission_reference_LAB.nxs"
-        unfitted_transmission_reference_file = "SANS2D_ws_D20_calculated_transmission_reference_LAB.nxs"
+        unfitted_transmission_reference_file = "SANS2D_ws_D20_unfitted_transmission_reference_LAB.nxs"
         calculated_transmission_reference_file_can = "SANS2D_ws_D20_calculated_transmission_reference_LAB_can.nxs"
         unfitted_transmission_reference_file_can = "SANS2D_ws_D20_unfitted_transmission_reference_LAB_can.nxs"
         self._compare_to_reference(
