@@ -159,7 +159,9 @@ void Gaussian::histogramDerivative1D(Jacobian *jacobian, double left, const doub
   const auto w = 1 / getParameter("Sigma");
 
   auto e = [w](const double d) { return exp(-0.5 * w * w * d * d); };
-  auto eint = [w](double d) { return std::sqrt(M_PI / 2.0) * (1.0 / w) * std::erf(w * d / M_SQRT2); };
+  auto eint = [w](double d) {
+    return std::sqrt(M_PI / 2.0) * (1.0 / w) * std::erf(w * d / M_SQRT2);
+  }; // integral of gaussian (h=1)
 
   auto dLeft = left - c;
   auto eLeft = e(dLeft);
@@ -173,7 +175,7 @@ void Gaussian::histogramDerivative1D(Jacobian *jacobian, double left, const doub
     jacobian->set(i, 0, (eintRight - eintLeft) / bin_width); // height
     jacobian->set(i, 1, -h * (eRight - eLeft) / bin_width);  // centre
     jacobian->set(i, 2,
-                  (w * (dRight * eRight - dLeft * eLeft) + h_over_w * (eintLeft - eintRight)) / bin_width); // weight
+                  h * ((dRight * eRight - eintRight) - (dLeft * eLeft - eintLeft)) / (w * bin_width)); // weight
     eLeft = eRight;
     eintLeft = eintRight;
     dLeft = dRight;
