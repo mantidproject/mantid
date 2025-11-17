@@ -204,8 +204,6 @@ class FullInstrumentViewWindow(QMainWindow):
 
         UsageService.registerFeatureUsage(FeatureType.Interface, "InstrumentView2025", False)
 
-        UsageService.registerFeatureUsage(FeatureType.Interface, "InstrumentView2025", False)
-
     def check_sum_spectra_checkbox(self) -> None:
         self._sum_spectra_checkbox.setChecked(True)
         self._presenter.on_sum_spectra_checkbox_clicked()
