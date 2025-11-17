@@ -36,6 +36,7 @@ set(SRC_FILES
     src/CreateMDHistoWorkspace.cpp
     src/CreateMDWorkspace.cpp
     src/CutMD.cpp
+    src/DebyeWallerFactorCorrectionMD.cpp
     src/DgsScatteredTransmissionCorrectionMD.cpp
     src/DisplayNormalizationSetter.cpp
     src/DivideMD.cpp
@@ -85,7 +86,6 @@ set(SRC_FILES
     src/MDWSDescription.cpp
     src/MDWSTransform.cpp
     src/MagneticFormFactorCorrectionMD.cpp
-    src/DebyeWallerFactorCorrectionMD.cpp
     src/MaskMD.cpp
     src/MergeMD.cpp
     src/MergeMDFiles.cpp
@@ -110,6 +110,7 @@ set(SRC_FILES
     src/SliceMD.cpp
     src/SlicingAlgorithm.cpp
     src/SmoothMD.cpp
+    src/SpectralMomentMD.cpp
     src/ThresholdMD.cpp
     src/TransformMD.cpp
     src/TransposeMD.cpp
@@ -154,6 +155,7 @@ set(INC_FILES
     inc/MantidMDAlgorithms/CreateMDHistoWorkspace.h
     inc/MantidMDAlgorithms/CreateMDWorkspace.h
     inc/MantidMDAlgorithms/CutMD.h
+    inc/MantidMDAlgorithms/DebyeWallerFactorCorrectionMD.h
     inc/MantidMDAlgorithms/DgsScatteredTransmissionCorrectionMD.h
     inc/MantidMDAlgorithms/DisplayNormalizationSetter.h
     inc/MantidMDAlgorithms/DivideMD.h
@@ -207,7 +209,6 @@ set(INC_FILES
     inc/MantidMDAlgorithms/MDWSDescription.h
     inc/MantidMDAlgorithms/MDWSTransform.h
     inc/MantidMDAlgorithms/MagneticFormFactorCorrectionMD.h
-    inc/MantidMDAlgorithms/DebyeWallerFactorCorrectionMD.h
     inc/MantidMDAlgorithms/MaskMD.h
     inc/MantidMDAlgorithms/MergeMD.h
     inc/MantidMDAlgorithms/MergeMDFiles.h
@@ -232,6 +233,7 @@ set(INC_FILES
     inc/MantidMDAlgorithms/SliceMD.h
     inc/MantidMDAlgorithms/SlicingAlgorithm.h
     inc/MantidMDAlgorithms/SmoothMD.h
+    inc/MantidMDAlgorithms/SpectralMomentMD.h
     inc/MantidMDAlgorithms/ThresholdMD.h
     inc/MantidMDAlgorithms/TransformMD.h
     inc/MantidMDAlgorithms/TransposeMD.h
@@ -277,6 +279,7 @@ set(TEST_FILES
     CreateMDTest.h
     CreateMDWorkspaceTest.h
     CutMDTest.h
+    DebyeWallerFactorCorrectionMDTest.h
     DgsScatteredTransmissionCorrectionMDTest.h
     DisplayNormalizationSetterTest.h
     DivideMDTest.h
@@ -322,7 +325,6 @@ set(TEST_FILES
     MDWSDescriptionTest.h
     MDWSTransfTest.h
     MagneticFormFactorCorrectionMDTest.h
-    DebyeWallerFactorCorrectionMDTest.h
     MaskMDTest.h
     MergeMDFilesTest.h
     MergeMDTest.h
@@ -347,6 +349,7 @@ set(TEST_FILES
     SliceMDTest.h
     SlicingAlgorithmTest.h
     SmoothMDTest.h
+    SpectralMomentMDTest.h
     ThresholdMDTest.h
     TransformMDTest.h
     TransposeMDTest.h
