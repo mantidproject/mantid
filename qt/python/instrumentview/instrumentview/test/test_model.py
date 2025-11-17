@@ -2,7 +2,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.simpleapi import CreateSampleWorkspace
+from mantid.simpleapi import CreateSampleWorkspace, CreatePeaksWorkspace
 from instrumentview.FullInstrumentViewModel import FullInstrumentViewModel
 import unittest
 from unittest import mock
@@ -20,6 +20,10 @@ class MockPosition:
 
     def __array__(self):
         return np.array([self.x, self.y, self.z])
+
+
+class PeaksWorkspaceMock(mock.MagicMock):
+    pass
 
 
 class TestFullInstrumentViewModel(unittest.TestCase):
@@ -66,7 +70,7 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         mock_workspace.getIntegratedCountsForWorkspaceIndices.return_value = [100 * i for i in detector_ids]
         return mock_workspace
 
-    def test_update_time_of_flight_range(self):
+    def test_update_integration_range(self):
         self._mock_detector_table(list(range(self._ws.getNumberHistograms())))
         model = FullInstrumentViewModel(self._ws)
         model.setup()
@@ -74,7 +78,7 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         mock_workspace = mock.MagicMock()
         mock_workspace.getIntegratedCountsForWorkspaceIndices.return_value = integrated_spectra
         model._workspace = mock_workspace
-        model.update_time_of_flight_range((200, 10000), False)
+        model.update_integration_range((200, 10000), False)
         model._workspace.getIntegratedCountsForWorkspaceIndices.assert_called_once()
         self.assertEqual(min(integrated_spectra), model._counts_limits[0])
         self.assertEqual(max(integrated_spectra), model._counts_limits[1])
@@ -127,15 +131,19 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         np.testing.assert_array_equal(model._is_valid, [True, True, False, False])
         np.testing.assert_array_equal(model._counts, [100, 200, 0, 0])
 
-    @mock.patch("instrumentview.Projections.SphericalProjection.SphericalProjection")
+    @mock.patch("instrumentview.FullInstrumentViewModel.SphericalProjection")
     def test_calculate_spherical_projection(self, mock_spherical_projection):
-        self._run_projection_test(mock_spherical_projection, True)
+        self._run_projection_test(mock_spherical_projection, FullInstrumentViewModel._SPHERICAL_Y)
 
-    @mock.patch("instrumentview.Projections.CylindricalProjection.CylindricalProjection")
+    @mock.patch("instrumentview.FullInstrumentViewModel.CylindricalProjection")
     def test_calculate_cylindrical_projection(self, mock_cylindrical_projection):
-        self._run_projection_test(mock_cylindrical_projection, False)
+        self._run_projection_test(mock_cylindrical_projection, FullInstrumentViewModel._CYLINDRICAL_Y)
 
-    def _run_projection_test(self, mock_projection_constructor, is_spherical):
+    @mock.patch("instrumentview.FullInstrumentViewModel.SideBySide")
+    def test_calculate_side_by_side_projection(self, mock_side_by_side):
+        self._run_projection_test(mock_side_by_side, FullInstrumentViewModel._SIDE_BY_SIDE)
+
+    def _run_projection_test(self, mock_projection_constructor, projection_option):
         self._mock_detector_table([1, 2, 3])
         mock_workspace = self._create_mock_workspace([1, 2, 3])
         model = FullInstrumentViewModel(mock_workspace)
@@ -143,7 +151,7 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         mock_projection = mock.MagicMock()
         mock_projection.positions.return_value = [[1, 2], [1, 2], [1, 2]]
         mock_projection_constructor.return_value = mock_projection
-        points = model.calculate_projection(is_spherical, axis=[0, 1, 0])
+        points = model.calculate_projection(projection_option, axis=[0, 1, 0], positions=model.detector_positions)
         mock_projection_constructor.assert_called_once()
         self.assertTrue(all(all(point == [1, 2, 0]) for point in points))
 
@@ -217,16 +225,16 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         self.assertEqual(model.counts_limits[0], 100)
         self.assertEqual(model.counts_limits[1], 300)
 
-    def test_tof_limits_ws_with_common_bins(self):
+    def test_integration_limits_ws_with_common_bins(self):
         self._mock_detector_table([1, 2, 3])
         mock_workspace = self._create_mock_workspace([1, 2, 3])
         mock_workspace.isCommonBins.return_value = True
         mock_workspace.dataX.return_value = np.array([1, 2, 3])
         model = FullInstrumentViewModel(mock_workspace)
         model.setup()
-        self.assertEqual(model.tof_limits, (1, 3))
+        self.assertEqual(model.integration_limits, (1, 3))
 
-    def test_tof_limits_on_ragged_workspace(self):
+    def test_integration_limits_on_ragged_workspace(self):
         self._mock_detector_table([1, 2, 3])
         mock_workspace = self._create_mock_workspace([1, 2, 3])
         mock_workspace.isRaggedWorkspace.return_value = True
@@ -234,16 +242,16 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         mock_workspace.readX.side_effect = lambda i: data_x[i]
         model = FullInstrumentViewModel(mock_workspace)
         model.setup()
-        self.assertEqual(model.tof_limits, (1, 50))
+        self.assertEqual(model.integration_limits, (1, 50))
 
-    def test_tof_limits_on_non_ragged_workspace(self):
+    def test_integration_limits_on_non_ragged_workspace(self):
         self._mock_detector_table([1, 2, 3])
         mock_workspace = self._create_mock_workspace([1, 2, 3])
         mock_workspace.isRaggedWorkspace.return_value = False
         mock_workspace.extractX.return_value = np.array([[1, 2, 3], [10, 20, 30], [10, 20, 50]])
         model = FullInstrumentViewModel(mock_workspace)
         model.setup()
-        self.assertEqual(model.tof_limits, (1, 50))
+        self.assertEqual(model.integration_limits, (1, 50))
 
     def test_monitor_positions(self):
         self._mock_detector_table([1, 2, 3], monitors=np.array(["yes", "no", "yes"]))
@@ -386,6 +394,44 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         mock_workspace.getAxis(0).getUnit().unitID.return_value = "Wavelength"
         model = FullInstrumentViewModel(mock_workspace)
         self.assertEqual(True, model.has_unit)
+
+    @mock.patch("instrumentview.FullInstrumentViewModel.AnalysisDataService")
+    def test_peaks_workspaces_in_ads(self, mock_ads):
+        mock_ads_instance = mock_ads.Instance()
+        mock_peaks_workspace = PeaksWorkspaceMock()
+        instrument = "MyFirstInstrument"
+        mock_workspace = self._create_mock_workspace([1, 2, 3])
+        mock_workspace.getInstrument().getFullName.return_value = instrument
+        mock_peaks_workspace.getInstrument().getFullName.return_value = instrument
+        mock_ads_instance.retrieveWorkspaces.return_value = [mock_peaks_workspace, mock_workspace]
+        model = FullInstrumentViewModel(mock_workspace)
+        peaks_workspaces = model.peaks_workspaces_in_ads()
+        self.assertEqual(1, len(peaks_workspaces))
+        self.assertEqual(mock_peaks_workspace, peaks_workspaces[0])
+
+    @mock.patch("instrumentview.FullInstrumentViewModel.AnalysisDataService")
+    def test_set_peaks_workspaces(self, mock_ads):
+        mock_ads_instance = mock_ads.Instance()
+        mock_peaks_workspace = PeaksWorkspaceMock()
+        mock_ads_instance.retrieveWorkspaces.return_value = [mock_peaks_workspace]
+        model = FullInstrumentViewModel(self._ws)
+        names = ["a", "b"]
+        model.set_peaks_workspaces(names)
+        mock_ads_instance.retrieveWorkspaces.assert_called_once_with(names)
+        self.assertEqual(mock_peaks_workspace, model._selected_peaks_workspaces[0])
+
+    def test_peak_overlay_points(self):
+        model = FullInstrumentViewModel(self._ws)
+        peaks_ws = CreatePeaksWorkspace(self._ws, 2)
+        model._selected_peaks_workspaces = [peaks_ws]
+        model._detector_ids = np.array([100])
+        model._is_valid = np.array([True])
+        peaks = model.peak_overlay_points()
+        self.assertEqual(1, len(peaks))
+        detector_peak = peaks[0][0]
+        self.assertEqual(100, detector_peak.detector_id)
+        self.assertEqual("[0, 0, 0] x 2", detector_peak.label)
+        np.testing.assert_almost_equal(np.array([0, 0, 5.0]), detector_peak.location)
 
 
 if __name__ == "__main__":

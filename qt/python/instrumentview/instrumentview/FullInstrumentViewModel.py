@@ -5,16 +5,40 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from instrumentview.Detectors import DetectorInfo
-import instrumentview.Projections.SphericalProjection as iv_spherical
-import instrumentview.Projections.CylindricalProjection as iv_cylindrical
+from instrumentview.Projections.SphericalProjection import SphericalProjection
+from instrumentview.Projections.CylindricalProjection import CylindricalProjection
+from instrumentview.Projections.SideBySide import SideBySide
+from instrumentview.Peaks.Peak import Peak
+from instrumentview.Peaks.DetectorPeaks import DetectorPeaks
 
-from mantid.dataobjects import Workspace2D
+from mantid.dataobjects import Workspace2D, PeaksWorkspace
 from mantid.simpleapi import CreateDetectorTable, ExtractSpectra, ConvertUnits, AnalysisDataService, SumSpectra, Rebin
+from itertools import groupby
 import numpy as np
+from typing import ClassVar
 
 
 class FullInstrumentViewModel:
     """Model for the Instrument View Window. Will calculate detector positions, indices, and integrated counts that give the colours"""
+
+    _FULL_3D: ClassVar[str] = "3D"
+    _SPHERICAL_X: ClassVar[str] = "Spherical X"
+    _SPHERICAL_Y: ClassVar[str] = "Spherical Y"
+    _SPHERICAL_Z: ClassVar[str] = "Spherical Z"
+    _CYLINDRICAL_X: ClassVar[str] = "Cylindrical X"
+    _CYLINDRICAL_Y: ClassVar[str] = "Cylindrical Y"
+    _CYLINDRICAL_Z: ClassVar[str] = "Cylindrical Z"
+    _SIDE_BY_SIDE: ClassVar[str] = "Side by Side"
+    _PROJECTION_OPTIONS: ClassVar[list[str]] = [
+        _FULL_3D,
+        _SPHERICAL_X,
+        _SPHERICAL_Y,
+        _SPHERICAL_Z,
+        _CYLINDRICAL_X,
+        _CYLINDRICAL_Y,
+        _CYLINDRICAL_Z,
+        _SIDE_BY_SIDE,
+    ]
 
     _sample_position = np.array([0, 0, 0])
     _source_position = np.array([0, 0, 0])
@@ -24,6 +48,7 @@ class FullInstrumentViewModel:
     line_plot_workspace = None
     _workspace_x_unit: str
     _workspace_x_unit_display: str
+    _selected_peaks_workspaces: list[PeaksWorkspace]
 
     def __init__(self, workspace: Workspace2D):
         """For the given workspace, calculate detector positions, the map from detector indices to workspace indices, and integrated
@@ -32,6 +57,7 @@ class FullInstrumentViewModel:
         x_unit = workspace.getAxis(0).getUnit()
         self._workspace_x_unit = x_unit.unitID()
         self._workspace_x_unit_display = f"{str(x_unit.caption())} ({str(x_unit.symbol())})"
+        self._selected_peaks_workspaces = []
 
     def setup(self):
         component_info = self._workspace.componentInfo()
@@ -40,7 +66,9 @@ class FullInstrumentViewModel:
         self._source_position = np.array(component_info.sourcePosition()) if has_source else np.array([0, 0, 0])
         self._root_position = np.array(component_info.position(0))
 
-        detector_info_table = CreateDetectorTable(self._workspace, IncludeDetectorPosition=True, PickOneDetectorID=True, StoreInADS=False)
+        detector_info_table = CreateDetectorTable(
+            self._workspace, IncludeDetectorPosition=True, PickOneDetectorID=True, StoreInADS=False, EnableLogging=False
+        )
 
         # Might have comma-separated multiple detectors, choose first one in the string in that case
         self._detector_ids = detector_info_table.columnArray("Detector ID(s)")
@@ -54,27 +82,27 @@ class FullInstrumentViewModel:
         self._is_monitor = detector_info_table.columnArray("Monitor")
         self._is_valid = self._is_monitor == "no"
         self._monitor_positions = self._detector_positions[self._is_monitor == "yes"]
+        self._current_projected_positions = self.detector_positions
 
         # Initialise with zeros
         self._counts = np.zeros_like(self._detector_ids)
         self._counts_limits = (0, 0)
-        self._detector_projection_positions = np.zeros_like(self._detector_positions)
         self._detector_is_picked = np.full(len(self._detector_ids[self._is_valid]), False)
 
-        # Get min and max tof values
+        # Get min and max integration values
         if self._workspace.isRaggedWorkspace():
             first_last = np.array([self._workspace.readX(i)[[0, -1]] for i in self._workspace_indices[self._is_valid]])
-            self._tof_limits = (np.min(first_last[:, 0]), np.max(first_last[:, 1]))
+            self._integration_limits = (np.min(first_last[:, 0]), np.max(first_last[:, 1]))
 
         elif self._workspace.isCommonBins():
-            self._tof_limits = tuple(self._workspace.dataX(0)[[0, -1]])
+            self._integration_limits = tuple(self._workspace.dataX(0)[[0, -1]])
 
         else:
             data_x = self._workspace.extractX()[self._is_valid]
-            self._tof_limits = (np.min(data_x[:, 0]), np.max(data_x[:, -1]))
+            self._integration_limits = (np.min(data_x[:, 0]), np.max(data_x[:, -1]))
 
         # Update counts with default total range
-        self.update_time_of_flight_range(self._tof_limits, True)
+        self.update_integration_range(self._integration_limits, True)
 
     @property
     def workspace(self) -> Workspace2D:
@@ -103,10 +131,6 @@ class FullInstrumentViewModel:
     @property
     def detector_positions(self) -> np.ndarray:
         return self._detector_positions[self._is_valid]
-
-    @property
-    def detector_projection_positions(self) -> np.ndarray:
-        return self._detector_projection_positions[self._is_valid]
 
     @property
     def detector_ids(self) -> np.ndarray:
@@ -146,26 +170,30 @@ class FullInstrumentViewModel:
         self._counts_limits = limits
 
     @property
-    def tof_limits(self) -> tuple[float, float]:
-        return self._tof_limits
+    def current_projected_positions(self) -> np.ndarray:
+        return self._current_projected_positions
 
-    @tof_limits.setter
-    def tof_limits(self, limits) -> None:
+    @property
+    def integration_limits(self) -> tuple[float, float]:
+        return self._integration_limits
+
+    @integration_limits.setter
+    def integration_limits(self, limits) -> None:
         try:
             min, max = limits
             assert float(max) > float(min)
         except (ValueError, AssertionError):
             return
-        self._tof_limits = limits
+        self._integration_limits = limits
         # Update the counts
-        self.update_time_of_flight_range(self._tof_limits)
+        self.update_integration_range(self._integration_limits)
 
-    def update_time_of_flight_range(self, tof_limits: tuple[float, float], entire_range: bool = False) -> None:
-        tof_min, tof_max = tof_limits
+    def update_integration_range(self, integration_limits: tuple[float, float], entire_range: bool = False) -> None:
+        integration_min, integration_max = integration_limits
         workspace_indices = self._workspace_indices[self._is_valid]
         new_detector_counts = np.array(
             self._workspace.getIntegratedCountsForWorkspaceIndices(
-                workspace_indices, len(workspace_indices), float(tof_min), float(tof_max), entire_range
+                workspace_indices, len(workspace_indices), float(integration_min), float(integration_max), entire_range
             ),
             dtype=int,
         )
@@ -198,15 +226,26 @@ class FullInstrumentViewModel:
             picked_info.append(det_info)
         return picked_info
 
-    def calculate_projection(self, is_spherical: bool, axis: list[int]):
-        """Calculate the 2D projection with the specified axis. Can be either cylindrical or spherical."""
-        projection = (
-            iv_spherical.SphericalProjection(self._sample_position, self._root_position, self._detector_positions, np.array(axis))
-            if is_spherical
-            else iv_cylindrical.CylindricalProjection(self._sample_position, self._root_position, self._detector_positions, np.array(axis))
-        )
-        self._detector_projection_positions[:, :2] = projection.positions()  # Assign only x and y coordinate
-        return self._detector_projection_positions
+    def reset_cached_projection_positions(self) -> None:
+        self._current_projected_positions = self.detector_positions
+
+    def calculate_projection(self, projection_option: str, axis: list[int], positions: np.ndarray):
+        """Calculate the 2D projection with the specified axis. Can be cylindrical, spherical, or side-by-side."""
+        if projection_option == self._SIDE_BY_SIDE:
+            projection = SideBySide(
+                self._workspace, self.detector_ids, self.sample_position, self._root_position, positions, np.array(axis)
+            )
+        elif projection_option.startswith("Spherical"):
+            projection = SphericalProjection(self.sample_position, self._root_position, positions, np.array(axis))
+        elif projection_option.startswith("Cylindrical"):
+            projection = CylindricalProjection(self.sample_position, self._root_position, positions, np.array(axis))
+        else:
+            raise ValueError(f"Unknown projection type: {projection_option}")
+
+        projected_positions = np.zeros_like(positions)
+        projected_positions[:, :2] = projection.positions()  # Assign only x and y coordinate
+        self._current_projected_positions = projected_positions
+        return self._current_projected_positions
 
     def extract_spectra_for_line_plot(self, unit: str, sum_spectra: bool) -> None:
         workspace_indices = self.picked_workspace_indices
@@ -243,3 +282,41 @@ class FullInstrumentViewModel:
             return
         name_exported_ws = f"instrument_view_selected_spectra_{self._workspace.name()}"
         AnalysisDataService.addOrReplace(name_exported_ws, self.line_plot_workspace)
+
+    def peaks_workspaces_in_ads(self) -> list[PeaksWorkspace]:
+        ads = AnalysisDataService.Instance()
+        workspaces_in_ads = ads.retrieveWorkspaces(ads.getObjectNames())
+        return [
+            pws
+            for pws in workspaces_in_ads
+            if "PeaksWorkspace" in str(type(pws)) and pws.getInstrument().getFullName() == self._workspace.getInstrument().getFullName()
+        ]
+
+    def set_peaks_workspaces(self, peaks_workspace_names: list[str]) -> None:
+        self._selected_peaks_workspaces = AnalysisDataService.Instance().retrieveWorkspaces(peaks_workspace_names)
+
+    def peak_overlay_points(self) -> list[list[DetectorPeaks]]:
+        detector_info = self._workspace.detectorInfo()
+        peaks_grouped_by_ws = []
+        for pws in self._selected_peaks_workspaces:
+            peaks = []
+            peaks_dict = pws.toDict()
+            detector_ids = peaks_dict["DetID"]
+            hkls = zip(peaks_dict["h"], peaks_dict["k"], peaks_dict["l"])
+            positions = [np.array(detector_info.position(detector_info.indexOf(id))) for id in detector_ids]
+            tofs = peaks_dict["TOF"]
+            dspacings = peaks_dict["DSpacing"]
+            wavelengths = peaks_dict["Wavelength"]
+            peaks += [
+                Peak(det_id, v, hkl, tof, dspacing, wavelength, 2 * np.pi / dspacing)
+                for (det_id, v, hkl, tof, dspacing, wavelength) in zip(detector_ids, positions, hkls, tofs, dspacings, wavelengths)
+            ]
+            # Combine peaks on the same detector
+            detector_peaks = []
+            # groupby groups consecutive matches, so must be sorted
+            peaks.sort(key=lambda x: x.detector_id)
+            for det_id, peaks_for_id in groupby(peaks, lambda x: x.detector_id):
+                if det_id in self.detector_ids:
+                    detector_peaks.append(DetectorPeaks(list(peaks_for_id)))
+            peaks_grouped_by_ws.append(detector_peaks)
+        return peaks_grouped_by_ws

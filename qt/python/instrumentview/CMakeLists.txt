@@ -11,8 +11,11 @@ set(PYTHON_TEST_FILES
     instrumentview/test/test_view.py
     instrumentview/test/test_instruments.py
     instrumentview/test/test_interactor_styles.py
+    instrumentview/Peaks/test/test_peak.py
+    instrumentview/Peaks/test/test_detector_peaks.py
     instrumentview/Projections/test/test_projection.py
     instrumentview/Projections/test/test_cylindrical_projection.py
+    instrumentview/Projections/test/test_SideBySide.py
     instrumentview/Projections/test/test_spherical_projection.py
 )
 
