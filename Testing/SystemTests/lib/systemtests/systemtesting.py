@@ -814,21 +814,7 @@ class TestSuite(object):
         self._result.date = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         self._result.addItem(["test_date", self._result.date])
 
-        if retcode == TestRunner.SUCCESS_CODE:
-            status = "success"
-        elif retcode == TestRunner.GENERIC_FAIL_CODE:
-            # This is most likely an algorithm failure, but it's not certain
-            status = "algorithm failure"
-        elif retcode == TestRunner.VALIDATION_FAIL_CODE:
-            status = "failed validation"
-        elif retcode == TestRunner.SEGFAULT_CODE:
-            status = "crashed"
-        elif retcode == TestRunner.SKIP_TEST:
-            status = "skipped"
-        elif retcode < 0:
-            status = "hung"
-        else:
-            status = "unknown"
+        status = exit_code_to_str(retcode)
 
         # Check return code and add result
         self._result.status = status if status in ["success", "skipped"] else "failed"
@@ -1161,7 +1147,7 @@ class TestManager(object):
             spec.loader.exec_module(mod)
 
             module_classes = dict(inspect.getmembers(mod, inspect.isclass))
-            module_classes = [x for x in module_classes if self.isValidTestClass(module_classes[x]) and x != "MantidSystemTest"]
+            module_classes = [x for x in module_classes if isValidTestClass(module_classes[x]) and x != "MantidSystemTest"]
             for test_name in module_classes:
                 tests.append(TestSuite(self._runner.getTestDir(), modname, test_name, filename))
             module_loaded = True
@@ -1175,21 +1161,6 @@ class TestManager(object):
             tests.append(TestSuite(self._runner.getTestDir(), modname, None, filename))
 
         return module_loaded, tests
-
-    def isValidTestClass(self, class_obj):
-        """Returns true if the test is a valid test class. It is valid
-        if: the class subclassses MantidSystemTest and has no abstract methods
-        """
-        if not issubclass(class_obj, MantidSystemTest):
-            return False
-        # Check if the get_reference_file is abstract or not
-        if hasattr(class_obj, "__abstractmethods__"):
-            if len(class_obj.__abstractmethods__) == 0:
-                return True
-            else:
-                return False
-        else:
-            return True
 
 
 #########################################################################
@@ -1321,6 +1292,42 @@ class MantidFrameworkConfig:
         self.__moveFile(self.__userPropsFile, self.__userPropsFileSystest)
         self.__moveFile(self.__userPropsFileBackup, self.__userPropsFile)
 
+def exit_code_to_str(exit_code):
+    if exit_code < 0:
+         return "hung"
+    match exit_code:
+        case TestRunner.SUCCESS_CODE:
+            return "success"
+        case TestRunner.GENERIC_FAIL_CODE:
+            # This is most likely an algorithm failure, but it's not certain
+            return "algorithm failure"
+        case TestRunner.VALIDATION_FAIL_CODE:
+            return "failed validation"
+        case TestRunner.SEGFAULT_CODE:
+            return "crashed"
+        case TestRunner.SKIP_TEST:
+            return "skipped"
+        case _:
+            return"unknown"
+
+#########################################################################
+# Function to check if a given class object is a Mantid System Test
+# that can be run by the TestRunner class.
+#########################################################################
+def isValidTestClass(class_obj):
+    """Returns true if the test is a valid test class. It is valid
+    if: the class subclassses MantidSystemTest and has no abstract methods
+    """
+    if not issubclass(class_obj, MantidSystemTest):
+        return False
+    # Check if the get_reference_file is abstract or not
+    if hasattr(class_obj, "__abstractmethods__"):
+        if len(class_obj.__abstractmethods__) == 0:
+            return True
+        else:
+            return False
+    else:
+        return True
 
 #########################################################################
 # Function to return a string describing the environment
