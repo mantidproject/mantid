@@ -8,7 +8,7 @@
 
 import unittest
 import os
-import systemtesting
+from systemtesting import MantidSystemTest, GENERATE_REFERENCE_FILES, REFERENCE_FILE_DIR
 
 import mantid
 from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
@@ -137,11 +137,20 @@ class SANSReductionCoreTest(unittest.TestCase):
         compare_alg.setChild(False)
         compare_alg.execute()
         result = compare_alg.getProperty("Result").value
-        self.assertTrue(result)
-
+        if not result and GENERATE_REFERENCE_FILES:
+            self._save_output(ws, reference_file_name)
+        with self.subTest(part=f"output ws validation: {reference_file_name}"):
+            self.assertTrue(result)
         # Remove file
         if os.path.exists(f_name):
             os.remove(f_name)
+
+    def _save_output(self, workspace, out_name):
+        f_name = os.path.join(REFERENCE_FILE_DIR, out_name)
+        save_name = "SaveNexus"
+        save_options = {"Filename": f_name, "InputWorkspace": workspace}
+        save_alg = create_unmanaged_algorithm(save_name, **save_options)
+        save_alg.execute()
 
     def test_that_reduction_core_evaluates_LAB(self):
         # Arrange
@@ -252,9 +261,9 @@ class SANSReductionCoreTest(unittest.TestCase):
         self.assertTrue(result)
 
 
-class SANSReductionCoreRunnerTest(systemtesting.MantidSystemTest):
+class SANSReductionCoreRunnerTest(MantidSystemTest):
     def __init__(self):
-        systemtesting.MantidSystemTest.__init__(self)
+        MantidSystemTest.__init__(self)
         self._success = False
 
     def runTest(self):
