@@ -145,7 +145,8 @@ class SANSReductionCoreTest(unittest.TestCase):
         if os.path.exists(f_name):
             os.remove(f_name)
 
-    def _save_output(self, workspace, out_name):
+    @staticmethod
+    def _save_output(workspace, out_name):
         f_name = os.path.join(REFERENCE_FILE_DIR, out_name)
         save_name = "SaveNexus"
         save_options = {"Filename": f_name, "InputWorkspace": workspace}
