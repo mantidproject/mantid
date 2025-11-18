@@ -14,7 +14,7 @@
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Instrument.h"
 
-#include <Poco/File.h>
+#include <filesystem>
 
 #include <fstream>
 
@@ -120,7 +120,7 @@ public:
     std::fstream outFile(filename.c_str());
     TS_ASSERT(outFile)
     outFile.close();
-    Poco::File(filename).remove();
+    std::filesystem::remove(filename);
 
     // Set Range_lower to later in the histogram when the yTooDead detectors
     // stop working

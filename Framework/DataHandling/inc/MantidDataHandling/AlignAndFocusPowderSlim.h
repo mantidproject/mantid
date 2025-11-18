@@ -40,6 +40,7 @@ private:
   void initCalibrationConstants(API::MatrixWorkspace_sptr &wksp, const std::vector<double> &difc_focus);
   void loadCalFile(const API::Workspace_sptr &inputWS, const std::string &filename,
                    const std::vector<double> &difc_focus);
+  void initScaleAtSample(const API::MatrixWorkspace_sptr &wksp);
   std::vector<std::pair<size_t, size_t>> determinePulseIndices(const API::MatrixWorkspace_sptr &wksp,
                                                                const Kernel::TimeROI &filterROI);
   static std::vector<std::pair<int, std::pair<size_t, size_t>>>
@@ -48,7 +49,12 @@ private:
   Kernel::TimeROI getFilterROI(const API::MatrixWorkspace_sptr &wksp);
   DataObjects::TimeSplitter timeSplitterFromSplitterWorkspace(const Types::Core::DateAndTime &);
 
-  std::map<detid_t, double> m_calibration; // detid: 1/difc
+  std::map<detid_t, double> m_calibration; ///< detid: 1/difc
+  /**
+   * Multiplicative 0<value<1 to move neutron TOF at sample.
+   * It will only be filled if time at sample is requested.
+   */
+  std::map<detid_t, double> m_scale_at_sample;
   std::set<detid_t> m_masked;
   bool is_time_filtered{false};
   /// Index to load start at in the file
@@ -65,6 +71,7 @@ const std::string FILTER_TIMESTART("FilterByTimeStart");
 const std::string FILTER_TIMESTOP("FilterByTimeStop");
 const std::string SPLITTER_WS("SplitterWorkspace");
 const std::string SPLITTER_RELATIVE("RelativeTime");
+const std::string CORRECTION_TO_SAMPLE("CorrectionToSample");
 const std::string PROCESS_BANK_SPLIT_TASK("ProcessBankSplitTask");
 const std::string FILTER_BAD_PULSES("FilterBadPulses");
 const std::string FILTER_BAD_PULSES_LOWER_CUTOFF("BadPulsesLowerCutoff");

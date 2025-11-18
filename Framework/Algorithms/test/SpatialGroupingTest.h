@@ -14,8 +14,7 @@
 #include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 #include "MantidIndexing/IndexInfo.h"
 
-#include <Poco/File.h>
-#include <Poco/Path.h>
+#include <filesystem>
 #include <fstream>
 
 using namespace Mantid;
@@ -51,10 +50,9 @@ public:
 
     std::string file = alg.getProperty("Filename");
 
-    Poco::File fileobj(file);
-    const bool fileExists = fileobj.exists();
+    const bool fileExists = std::filesystem::exists(file);
 
-    TSM_ASSERT(fileobj.path(), fileExists);
+    TSM_ASSERT(file, fileExists);
 
     std::ifstream input;
     input.open(file.c_str());

@@ -10,9 +10,8 @@
 
 #include "MantidAlgorithms/FixGSASInstrumentFile.h"
 
+#include <filesystem>
 #include <fstream>
-
-#include "Poco/File.h"
 
 using namespace std;
 
@@ -43,9 +42,8 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     // File existence
-    Poco::File file(prmfilename);
-    TS_ASSERT(file.exists());
-    if (!file.exists())
+    TS_ASSERT(std::filesystem::exists(prmfilename));
+    if (!std::filesystem::exists(prmfilename))
       return;
 
     // Check each line
@@ -62,7 +60,7 @@ public:
     chkfile.close();
 
     // Clean
-    file.remove();
+    std::filesystem::remove(prmfilename);
   }
 
   void createFaultFile(const std::string &prmfilename) {
