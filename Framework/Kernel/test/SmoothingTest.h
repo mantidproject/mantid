@@ -196,7 +196,7 @@ public:
       input[i] += (i % 2 == 0 ? +0.5 : -0.5);
     }
     // smooth and check
-    std::vector<double> output = fftSmooth(input, 50);
+    std::vector<double> output = fftSmooth(input, 49);
     TS_ASSERT_EQUALS(input.size(), output.size());
     for (std::size_t i = 0; i < output.size(); i++) {
       TS_ASSERT_DELTA(output[i], gauss(i), 1.e-4);
