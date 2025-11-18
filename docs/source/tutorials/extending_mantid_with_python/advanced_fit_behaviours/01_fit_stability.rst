@@ -19,12 +19,12 @@ The simple function fits over 3 parameters:
 
 However, the :math:`\frac{1}{\sigma^2}` dependence causes the fit to become
 unstable if the \sigma parameter is varied by the minimization routine. A more
-stable fit can be achieved by fitting in :math:`\frac{1}{\sigma^2}`.
+stable fit can be achieved by fitting in :math:`\frac{1}{\sigma}`.
 
-We could just naively change the **\sigma** parameter to :math:`\frac{1}{\sigma^2}`
+We could just naively change the **\sigma** parameter to :math:`\frac{1}{\sigma}`
 and fit over this. The function is now much less user-friendly though as we
 still want to think terms of the values of **A**, **c**, **\sigma** and not **A**,
-**c**, :math:`\frac{1}{\sigma^2}`.
+**c**, :math:`\frac{1}{\sigma}`.
 
 Our optimisation framework actually works with the concept of active
 parameters, where we allow the fitting to proceed over different parameter
