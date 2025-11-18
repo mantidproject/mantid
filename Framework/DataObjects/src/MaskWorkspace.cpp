@@ -176,7 +176,7 @@ bool MaskWorkspace::isMasked(const detid_t detectorID) const {
   // this is expected to explode(throw an exception)
   // otherwise we are **masking** an issue with the consuming code
   // especially if the underlying index map is desynced
-  return this->getValue(detectorID);
+  return this->getValue(detectorID) != LIVE_VALUE;
 }
 
 /**
