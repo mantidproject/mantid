@@ -93,8 +93,10 @@ done
 # something is wrong with versioningit and rattler-build 0.48
 #mamba install --yes rattler-build=0.47 versioningit python=3.11 rattler-index
 install_pixi
-# TODO: setup and shell IF! not already running in rattler-builder env
-pixi shell --manifest-path $SCRIPT_DIR/pixi.toml -e rattler-builder
+if [[ $PIXI_ENVIRONMENT_NAME != "rattler-builder" ]]; then
+    setup_pixi_toml
+    pixi shell --manifest-path $SCRIPT_DIR/pixi.toml -e rattler-builder
+fi
 
 # Clean up any legacy conda-recipes git clones
 cd $WORKSPACE
@@ -141,6 +143,8 @@ export CONDA_SUBDIR=$PLATFORM
 
 #echo "CONDA BASE ENVIRONMENT (package-conda):"
 #mamba run -n base mamba list
+echo "pixi rattler-builder environment"
+pixi list --manifest-path $SCRIPT_DIR/pixi.toml
 
 # Run conda build.
 if [[ $ENABLE_BUILD_MANTID_DEVELOPER == true ]]; then

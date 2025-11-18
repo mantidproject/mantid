@@ -32,7 +32,7 @@ fi
 
 # Setup mantid-developer environment
 install_pixi
-create_and_activate_mantid-developer-ci $WORKSPACE
+create_and_activate_mantid_developer_ci $WORKSPACE
 
 ###############################################################################
 # Run Cppcheck

@@ -2,8 +2,12 @@
 
 # Download and install pixi
 install_pixi() {
-  curl -fsSL https://pixi.sh/install.sh | sh
-  source ~/.bashrc
+  # check if pixi is not installed
+  if ! command -v pixi >/dev/null 2>&1
+  then
+    curl -fsSL https://pixi.sh/install.sh | sh
+    source ~/.bashrc
+  fi
 }
 
 # The pixi.toml (manifest) file we use for ci is build programmatically and not kept in git
@@ -29,11 +33,9 @@ setup_pixi_toml() {
   pixi workspace --manifest-path $LOCAL_MANIFEST channel add -f mantid-developer-ci conda-forge
   pixi workspace --manifest-path $LOCAL_MANIFEST channel add -f mantid-developer-ci neutrons
   pixi workspace --manifest-path $LOCAL_MANIFEST environment add mantid-developer-ci --feature mantid-developer-ci --no-default-feature
-  # add task for calling package-conda
-  pixi task add --manifest-path $LOCAL_MANIFEST -f rattler-builder --arg mantid_root --arg other_flags call-package-conda "sh {{ mantid_root }}/buildconfig/Jenkins/Conda/package-conda {{ mantid_root }} {{ other_flags }}"
 }
 
-create_and_activate_mantid-developer-ci() {
+create_and_activate_mantid_developer_ci() {
   MANTID_ROOT=$1
   PATH_TO_HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
   #pixi run --manifest-path $PATH_TO_HERE/pixi.toml -e rattler-builder build-and-install-mantid-developer $MANTID_ROOT
