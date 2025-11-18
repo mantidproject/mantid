@@ -461,18 +461,18 @@ void AlignAndFocusPowderSlim::exec() {
 
               const auto pulse_indices = this->determinePulseIndices(target_wksp, target_roi);
 
-                            ProcessBankTask task(bankEntryNames, h5file, is_time_filtered, target_wksp, m_calibration,
-                                                 m_scale_at_sample, m_masked, static_cast<size_t>(DISK_CHUNK),
-                                                 static_cast<size_t>(GRAINSIZE_EVENTS), pulse_indices, progress);
-                            // generate threads only if appropriate
-                            if (num_banks_to_read > 1) {
-                              tbb::parallel_for(tbb::blocked_range<size_t>(0, num_banks_to_read), task);
-                            } else {
-                              // a "range" of 1; note -1 to match 0-indexed array with 1-indexed bank labels
-                              task(tbb::blocked_range<size_t>(outputSpecNum - 1, outputSpecNum));
-                            }
-                          }
-                        });
+              ProcessBankTask task(bankEntryNames, h5file, is_time_filtered, target_wksp, m_calibration,
+                                   m_scale_at_sample, m_masked, static_cast<size_t>(DISK_CHUNK),
+                                   static_cast<size_t>(GRAINSIZE_EVENTS), pulse_indices, progress);
+              // generate threads only if appropriate
+              if (num_banks_to_read > 1) {
+                tbb::parallel_for(tbb::blocked_range<size_t>(0, num_banks_to_read), task);
+              } else {
+                // a "range" of 1; note -1 to match 0-indexed array with 1-indexed bank labels
+                task(tbb::blocked_range<size_t>(outputSpecNum - 1, outputSpecNum));
+              }
+            }
+          });
     }
 
     // close the file so child algorithms can do their thing
