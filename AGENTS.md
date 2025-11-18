@@ -5,7 +5,8 @@ This data can be gathered from Neutron scattering or Muon spectroscopy experimen
 
 # Dev environment setup
 
-- Install pixi and use the environment specified in the `pixi.toml`
+- Install pixi and activate the environment specified in `pixi.toml`:
+   - `pixi shell` (or `eval $(pixi shell-hook)` for non-interactive use)
 - Dependencies are tracked from a conda metapackage in `conda/recipes/mantid-developer`
 
 # Dev workflow
