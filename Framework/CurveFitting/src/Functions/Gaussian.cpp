@@ -166,7 +166,6 @@ void Gaussian::histogramDerivative1D(Jacobian *jacobian, double left, const doub
   auto dLeft = left - c;
   auto eLeft = e(dLeft);
   auto eintLeft = eint(dLeft);
-  const auto h_over_w = h / w;
   for (size_t i = 0; i < nBins; ++i) {
     const auto dRight = right[i] - c;
     const auto bin_width = dRight - dLeft;
