@@ -31,14 +31,15 @@ public:
   template <typename Type>
   void loadData(H5::DataSet &SDS, std::unique_ptr<std::vector<Type>> &data, const std::vector<size_t> &offsets,
                 const std::vector<size_t> &slabsizes);
-  std::stack<EventROI> getEventIndexRanges(H5::Group &event_group, const uint64_t number_events);
+  std::stack<EventROI> getEventIndexRanges(H5::Group &event_group, const uint64_t number_events,
+                                           std::unique_ptr<std::vector<uint64_t>> *event_index = nullptr);
   std::stack<std::pair<int, EventROI>> getEventIndexSplitRanges(H5::Group &event_group, const uint64_t number_events);
-  void loadEventIndex(H5::Group &event_group, std::unique_ptr<std::vector<uint64_t>> &data);
 
 private:
   const bool m_is_time_filtered;
   const std::vector<PulseROI> m_pulse_indices;
   std::vector<std::pair<int, PulseROI>> m_target_to_pulse_indices;
+  void loadEventIndex(H5::Group &event_group, std::unique_ptr<std::vector<uint64_t>> &data);
 };
 
 } // namespace Mantid::DataHandling::AlignAndFocusPowderSlim

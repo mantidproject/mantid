@@ -56,7 +56,8 @@ void NexusLoader::loadData(H5::DataSet &SDS, std::unique_ptr<std::vector<Type>> 
   SDS.read(data->data(), dataType, memspace, filespace);
 }
 
-std::stack<EventROI> NexusLoader::getEventIndexRanges(H5::Group &event_group, const uint64_t number_events) {
+std::stack<EventROI> NexusLoader::getEventIndexRanges(H5::Group &event_group, const uint64_t number_events,
+                                                      std::unique_ptr<std::vector<uint64_t>> *event_index_out) {
   // This will return a stack of pairs, where each pair is the start and stop index of the event ranges
   std::stack<EventROI> ranges;
   if (m_is_time_filtered) {
@@ -71,6 +72,11 @@ std::stack<EventROI> NexusLoader::getEventIndexRanges(H5::Group &event_group, co
           (pair.second == std::numeric_limits<size_t>::max()) ? number_events : event_index->at(pair.second);
       if (start_event < stop_event)
         ranges.emplace(start_event, stop_event);
+    }
+
+    // If caller wants the event_index data, transfer it
+    if (event_index_out) {
+      *event_index_out = std::move(event_index);
     }
   } else {
     constexpr uint64_t START_DEFAULT = 0;

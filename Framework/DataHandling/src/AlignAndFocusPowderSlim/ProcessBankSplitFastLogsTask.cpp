@@ -64,7 +64,8 @@ void ProcessBankSplitFastLogsTask::operator()(const tbb::blocked_range<size_t> &
       continue;
     }
 
-    auto eventRanges = m_loader.getEventIndexRanges(event_group, total_events);
+    std::unique_ptr<std::vector<uint64_t>> event_index = std::make_unique<std::vector<uint64_t>>();
+    auto eventRanges = m_loader.getEventIndexRanges(event_group, total_events, &event_index);
 
     // Get all spectra for this bank.
     // Create temporary y arrays for each workspace.
@@ -85,9 +86,6 @@ void ProcessBankSplitFastLogsTask::operator()(const tbb::blocked_range<size_t> &
     std::string tof_unit;
     Nexus::H5Util::readStringAttribute(tof_SDS, "units", tof_unit);
     const double time_conversion = Kernel::Units::timeConversionValue(tof_unit, MICROSEC);
-
-    std::unique_ptr<std::vector<uint64_t>> event_index = std::make_unique<std::vector<uint64_t>>();
-    m_loader.loadEventIndex(event_group, event_index);
 
     const auto frequency_log =
         dynamic_cast<const Kernel::TimeSeriesProperty<double> *>(m_wksps.at(0)->run().getProperty("frequency"));
@@ -166,16 +164,19 @@ void ProcessBankSplitFastLogsTask::operator()(const tbb::blocked_range<size_t> &
       event_pulsetimes->resize(total_events_to_read);
       // get the pulsetime of every event, event_index maps the first event of each pulse
       size_t pos = 0;
+      auto event_index_it = event_index->cbegin();
       for (size_t i = 0; i < offsets.size(); ++i) {
         const size_t off = offsets[i];
         const size_t slab = slabsizes[i];
         for (size_t j = 0; j < slab; ++j) {
           const uint64_t global_idx = static_cast<uint64_t>(off + j);
           // find pulse: event_index holds the first event index of each pulse
-          auto it = std::upper_bound(event_index->cbegin(), event_index->cend(), global_idx);
+          while (event_index_it != event_index->cend() && *event_index_it <= global_idx) {
+            ++event_index_it;
+          }
           size_t pulse_idx = 0;
-          if (it != event_index->cbegin()) {
-            pulse_idx = static_cast<size_t>(std::distance(event_index->cbegin(), it) - 1);
+          if (event_index_it != event_index->cbegin()) {
+            pulse_idx = static_cast<size_t>(std::distance(event_index->cbegin(), event_index_it) - 1);
           }
           (*event_pulsetimes)[pos++] = (*pulse_times)[pulse_idx];
         }
