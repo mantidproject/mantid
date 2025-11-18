@@ -16,8 +16,12 @@ setup_pixi_toml() {
   PATH_TO_HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
   LOCAL_MANIFEST=$PATH_TO_HERE/pixi.toml
   LOCAL_LOCK=$PATH_TO_HERE/pixi.lock
-  rm $LOCAL_MANIFEST
-  rm $LOCAL_LOCK
+  if [[ -f $LOCAL_MANIFEST ]]; then
+    rm $LOCAL_MANIFEST
+  fi
+  if [[ -f $LOCAL_LOCK ]]; then
+    rm $LOCAL_LOCK
+  fi
 
   # if you pass pixi init a path it will make a new directory, so cd there instead
   cd $PATH_TO_HERE
