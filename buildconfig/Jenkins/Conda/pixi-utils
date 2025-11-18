@@ -9,8 +9,7 @@ install_pixi() {
 # The pixi.toml (manifest) file we use for ci is build programmatically and not kept in git
 # since it modifies itself.
 setup_pixi_toml() {
-  MANTID_ROOT=$1
-  PATH_TO_HERE=$MANTID_ROOT/buildconfig/Jenkins/Conda
+  PATH_TO_HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
   LOCAL_MANIFEST=$PATH_TO_HERE/pixi.toml
   LOCAL_LOCK=$PATH_TO_HERE/pixi.lock
   rm $LOCAL_MANIFEST
@@ -30,15 +29,15 @@ setup_pixi_toml() {
   pixi workspace --manifest-path $LOCAL_MANIFEST channel add -f mantid-developer-ci conda-forge
   pixi workspace --manifest-path $LOCAL_MANIFEST channel add -f mantid-developer-ci neutrons
   pixi workspace --manifest-path $LOCAL_MANIFEST environment add mantid-developer-ci --feature mantid-developer-ci --no-default-feature
-  # add the build-and-install-mantid-developer task to the rattler-builder feature
-  pixi task add --manifest-path $LOCAL_MANIFEST -f rattler-builder --arg mantid_root build-and-install-mantid-developer "sh {{ mantid_root }}/buildconfig/Jenkins/Conda/build-and-install-mantid-developer {{ mantid_root }}"
   # add task for calling package-conda
   pixi task add --manifest-path $LOCAL_MANIFEST -f rattler-builder --arg mantid_root --arg other_flags call-package-conda "sh {{ mantid_root }}/buildconfig/Jenkins/Conda/package-conda {{ mantid_root }} {{ other_flags }}"
-  cd -
 }
 
 create_and_activate_mantid-developer-ci() {
   MANTID_ROOT=$1
-  pixi run --manifest-path $SCRIPT_DIR/pixi.toml -e rattler-builder build-and-install-mantid-developer $MANTID_ROOT
-  pixi shell --manifest-path $SCRIPT_DIR/pixi.toml -e mantid-developer-ci
+  PATH_TO_HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+  #pixi run --manifest-path $PATH_TO_HERE/pixi.toml -e rattler-builder build-and-install-mantid-developer $MANTID_ROOT
+  setup_pixi_toml
+  pixi run --manifest-path $PATH_TO_HERE/pixi.toml -e rattler-builder "sh $MANTID_ROOT/buildconfig/Jenkins/Conda/build-and-install-mantid-developer $MANTID_ROOT"
+  pixi shell --manifest-path $PATH_TO_HERE/pixi.toml -e mantid-developer-ci
 }

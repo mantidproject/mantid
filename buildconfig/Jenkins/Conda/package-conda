@@ -25,7 +25,7 @@
 #   --git-tag: specify a tag for a release or nightly version
 #   --platform: target architecture, e.g. linux-64
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source $SCRIPT_DIR/mamba-utils
+source $SCRIPT_DIR/pixi-utils
 start_time=$(date +%s)
 
 # Setup expected variables
@@ -92,6 +92,9 @@ done
 #mamba activate base
 # something is wrong with versioningit and rattler-build 0.48
 #mamba install --yes rattler-build=0.47 versioningit python=3.11 rattler-index
+install_pixi
+# TODO: setup and shell IF! not already running in rattler-builder env
+pixi shell --manifest-path $SCRIPT_DIR/pixi.toml -e rattler-builder
 
 # Clean up any legacy conda-recipes git clones
 cd $WORKSPACE

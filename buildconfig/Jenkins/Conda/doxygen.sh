@@ -32,7 +32,6 @@ fi
 
 # Setup mantid-developer environment
 install_pixi
-setup_pixi_toml $WORKSPACE
 create_and_activate_mantid-developer-ci $WORKSPACE
 
 # Create the build directory if it doesn't exist
