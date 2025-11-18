@@ -112,7 +112,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(fftsmooth2_c.setPropertyValue(OUTPUT_WKSP, "SmoothedWS"));
     TS_ASSERT_THROWS_NOTHING(fftsmooth2_c.setPropertyValue(WKSP_INDEX, "0"));
     TS_ASSERT_THROWS_NOTHING(fftsmooth2_c.setPropertyValue(FILTER, "Zeroing"));
-    TS_ASSERT_THROWS_NOTHING(fftsmooth2_c.setPropertyValue(PARAMS, "101"));
+    TS_ASSERT_THROWS_NOTHING(fftsmooth2_c.setPropertyValue(PARAMS, "100"));
     TS_ASSERT_THROWS_NOTHING(fftsmooth2_c.execute());
     TS_ASSERT(fftsmooth2_c.isExecuted());
 

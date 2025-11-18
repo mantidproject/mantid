@@ -172,7 +172,7 @@ template <typename Y> struct ZeroFilter : public FFTFilter<Y> {
   // REF: see example code at
   // - https://www.gnu.org/software/gsl/doc/html/fft.html#overview-of-real-data-f
   ZeroFilter(std::size_t const n) : m_cutoff(n) {}
-  Y operator()(std::size_t const index) const override { return (index > m_cutoff ? 0 : 1); }
+  Y operator()(std::size_t const index) const override { return (index >= m_cutoff ? 0 : 1); }
 
 private:
   std::size_t m_cutoff;
