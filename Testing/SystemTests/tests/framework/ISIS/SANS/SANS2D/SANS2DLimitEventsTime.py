@@ -8,7 +8,7 @@
 
 import systemtesting
 import mantid  # noqa
-from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
+from isis_sans_system_test import ISISSansSystemTest
 from sans.command_interface.ISISCommandInterface import SANS2D, MaskFile, AssignSample, WavRangeReduction, UseCompatibilityMode
 from sans.common.enums import SANSInstrument
 
