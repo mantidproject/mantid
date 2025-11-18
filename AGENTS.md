@@ -10,7 +10,11 @@ This data can be gathered from Neutron scattering or Muon spectroscopy experimen
 
 # Dev workflow
 
-- Configure: `cmake --preset=linux . && cd build/`
+- Configure:
+  - **Linux:** `cmake --preset=linux . && cd build/`
+  - **Windows:** `cmake --preset=win64 . && cd build/`
+  - **macOS (Apple Silicon):** `cmake --preset=osx-arm64 . && cd build/`
+  > _Choose the preset that matches your platform. If you are unsure, check the available presets in `CMakePresets.json` or ask for guidance._
 - Build:
   - framework `ninja Framework`
   - gui `ninja workbench`
