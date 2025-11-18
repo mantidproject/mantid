@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import systemtesting
 import mantid  # noqa
-from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
+from isis_sans_system_test import ISISSansSystemTest
 from sans.command_interface.ISISCommandInterface import (
     LOQ,
     Set2D,
