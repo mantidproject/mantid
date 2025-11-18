@@ -13,11 +13,17 @@ class OFFSPECLoadingTest(LoadAndCheckBase):
     Test File loading and basic data integrity checks of OFFSPEC data in Mantid.
     """
 
+    def __init__(self):
+        LoadAndCheckBase.__init__(self)
+
     def get_raw_workspace_filename(self):
         return "OFFSPEC00010791.raw"
 
     def get_nexus_workspace_filename(self):
         return "OFFSPEC00010791.nxs"
+
+    def get_expected_instrument_name(self):
+        return "OFFSPEC"
 
     def get_expected_number_of_periods(self):
         return 2
