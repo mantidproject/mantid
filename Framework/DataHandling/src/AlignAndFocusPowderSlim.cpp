@@ -439,7 +439,8 @@ void AlignAndFocusPowderSlim::exec() {
 
       ProcessBankSplitFastLogsTask task(bankEntryNames, h5file, is_time_filtered, workspaceIndices, workspaces,
                                         m_calibration, m_scale_at_sample, m_masked, static_cast<size_t>(DISK_CHUNK),
-                                        static_cast<size_t>(GRAINSIZE_EVENTS), pulse_indices, splitterMap, progress);
+                                        static_cast<size_t>(GRAINSIZE_EVENTS), pulse_indices, splitterMap,
+                                        this->getProperty(PropertyNames::CORRECTION_TO_SAMPLE), progress);
 
       // generate threads only if appropriate
       if (num_banks_to_read > 1) {
@@ -643,7 +644,7 @@ void AlignAndFocusPowderSlim::initScaleAtSample(const API::MatrixWorkspace_sptr 
   // calculate scale factors for each detector
   for (auto iter = detInfo.cbegin(); iter != detInfo.cend(); ++iter) {
     if (!iter->isMonitor()) {
-      const double path_correction = (L1 + iter->l2()) / L1;
+      const double path_correction = L1 / (L1 + iter->l2());
       m_scale_at_sample.emplace(static_cast<detid_t>(iter->detid()), path_correction);
     }
   }

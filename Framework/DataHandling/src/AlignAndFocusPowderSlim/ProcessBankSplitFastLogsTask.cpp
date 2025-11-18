@@ -35,11 +35,12 @@ ProcessBankSplitFastLogsTask::ProcessBankSplitFastLogsTask(
     const std::map<detid_t, double> &calibration, const std::map<detid_t, double> &scale_at_sample,
     const std::set<detid_t> &masked, const size_t events_per_chunk, const size_t grainsize_event,
     const std::vector<PulseROI> pulse_indices, const std::map<DateAndTime, int> splitterMap,
-    std::shared_ptr<API::Progress> &progress)
+    const bool correction_to_sample, std::shared_ptr<API::Progress> &progress)
     : m_h5file(h5file), m_bankEntries(bankEntryNames), m_loader(is_time_filtered, pulse_indices),
       m_workspaceIndices(workspaceIndices), m_wksps(wksps), m_calibration(calibration),
       m_scale_at_sample(scale_at_sample), m_masked(masked), m_events_per_chunk(events_per_chunk),
-      m_splitterMap(splitterMap), m_grainsize_event(grainsize_event), m_progress(progress) {}
+      m_splitterMap(splitterMap), m_grainsize_event(grainsize_event), m_correction_to_sample(correction_to_sample),
+      m_progress(progress) {}
 
 void ProcessBankSplitFastLogsTask::operator()(const tbb::blocked_range<size_t> &range) const {
   auto entry = m_h5file.openGroup("entry"); // type=NXentry
@@ -190,10 +191,11 @@ void ProcessBankSplitFastLogsTask::operator()(const tbb::blocked_range<size_t> &
               std::vector<size_t> indices;
               for (size_t k = 0; k < event_detid->size(); ++k) {
                 // Calculate the full time at sample: pulse_time + tof * correctionToSample[detid]
-                // Note: The calibration factor is for TOF calibration, not time correction
-                // For time correction, we need a separate correctionToSample factor
-                // For now, assuming correctionToSample = 1 (no time correction) and just using pulse_time + tof
-                const auto tof = static_cast<double>((*event_time_of_flight)[k]);
+                const double correctionFactor =
+                    m_correction_to_sample ? calibration->value_scale_at_sample(static_cast<detid_t>((*event_detid)[k]))
+                                           : 1.0;
+
+                const auto tof = static_cast<double>((*event_time_of_flight)[k]) * correctionFactor;
                 const auto tof_in_nanoseconds =
                     static_cast<int64_t>(tof * 1000.0); // Convert microseconds to nanoseconds
                 const Mantid::Types::Core::DateAndTime full_time = (*event_pulsetimes)[k] + tof_in_nanoseconds;

@@ -28,7 +28,7 @@ public:
                                const size_t events_per_chunk, const size_t grainsize_event,
                                const std::vector<PulseROI> pulse_indices,
                                const std::map<Mantid::Types::Core::DateAndTime, int> splitterMap,
-                               std::shared_ptr<API::Progress> &progress);
+                               const bool correction_to_sample, std::shared_ptr<API::Progress> &progress);
 
   void operator()(const tbb::blocked_range<size_t> &range) const;
 
@@ -46,6 +46,7 @@ private:
   const std::map<Mantid::Types::Core::DateAndTime, int> m_splitterMap;
   /// number of events to histogram in a single thread
   const size_t m_grainsize_event;
+  const bool m_correction_to_sample;
   std::shared_ptr<API::Progress> m_progress;
 };
 } // namespace Mantid::DataHandling::AlignAndFocusPowderSlim
