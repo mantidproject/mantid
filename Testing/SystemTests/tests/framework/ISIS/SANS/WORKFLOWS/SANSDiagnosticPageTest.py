@@ -13,7 +13,7 @@ from unittest import mock
 import systemtesting
 
 import mantid
-from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
+from isis_sans_system_test import ISISSansSystemTest
 
 from sans.gui_logic.presenter.diagnostic_presenter import DiagnosticsPagePresenter
 from sans.state.StateObjects.StateData import get_data_builder

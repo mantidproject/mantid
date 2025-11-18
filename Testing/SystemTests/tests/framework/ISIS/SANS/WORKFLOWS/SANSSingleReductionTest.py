@@ -11,7 +11,7 @@ from os import path
 
 import systemtesting
 from systemtesting import MantidSystemTest, GENERATE_REFERENCE_FILES, REFERENCE_FILE_DIR
-from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
+from isis_sans_system_test import ISISSansSystemTest
 from mantid import config
 from mantid.api import AlgorithmManager, WorkspaceGroup
 from sans.common.constants import EMPTY_NAME

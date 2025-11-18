@@ -11,7 +11,7 @@ import os
 from systemtesting import MantidSystemTest, GENERATE_REFERENCE_FILES, REFERENCE_FILE_DIR
 
 import mantid
-from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
+from isis_sans_system_test import ISISSansSystemTest
 from mantid.api import AlgorithmManager
 from sans.state.Serializer import Serializer
 
