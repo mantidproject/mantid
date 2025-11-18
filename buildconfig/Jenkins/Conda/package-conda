@@ -90,7 +90,7 @@ done
 # make sure versions specified here are compatible with the developer meta-package
 setup_mamba $WORKSPACE/miniforge "" true $PLATFORM
 mamba activate base
-mamba install --yes rattler-build=0.49 versioningit python=3.11 rattler-index
+mamba install --yes rattler-build=0.48.1 versioningit python=3.11 rattler-index
 
 # Clean up any legacy conda-recipes git clones
 cd $WORKSPACE
