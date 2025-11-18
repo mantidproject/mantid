@@ -89,6 +89,8 @@ requirements:
         - xorg-libxtst>=1.2.3
         # Development tooling:
         - gcovr>=4.2
+        # Required for new instrument view
+        - vtk ${{ vtk }}
     - if: win
       then:
         - conda-wrappers
