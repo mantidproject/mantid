@@ -11,6 +11,7 @@ from mantid.simpleapi import LoadEmptyInstrument, SaveNexusGeometry
 import os
 import glob
 import tempfile
+import systemtesting
 
 temp_dir = tempfile.gettempdir()
 EXPECTED_EXT = ".expected"
@@ -57,7 +58,7 @@ known_error_files = duplicate_bank_names + duplicate_monitor_names + no_source +
 direc = config["instrumentDefinition.directory"]
 
 
-class LoadAndSaveLotsOfInstruments(object):
+class LoadAndSaveLotsOfInstruments(systemtesting.MantidSystemTest):
     def __getDataFileList__(self):
         # get a list of directories to look in
         print("Looking for instrument definition files in: %s" % direc)
