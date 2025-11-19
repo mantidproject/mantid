@@ -28,9 +28,10 @@ from unittest.mock import patch, MagicMock, call
 
 
 class SANSISISPolarizationCorrectionsTest(unittest.TestCase):
+    _ALG_PATCH_PATH = "plugins.algorithms.WorkflowAlgorithms.SANSISISPolarizationCorrections.SANSISISPolarizationCorrections"
     _GROUP_NAME = "group"
     _WS_NAME = "test"
-    _EFF_NAMES = ["analyzer_eff", "flipper_eff", "pol_fit_table", "polarizer_eff"]
+    _EFF_NAMES = ["analyzer_eff", "flipper_eff", "flipper_a_eff", "pol_fit_table", "polarizer_eff"]
     _RED_TYPE = "Calibration"
 
     @classmethod
@@ -144,7 +145,7 @@ class SANSISISPolarizationCorrectionsTest(unittest.TestCase):
         filtered_names = alg._filter_ads_names(["pre_1", "pre_2"])
         self.assertEqual(filtered_names, [*names[0:2], names[4]])
 
-    @patch("plugins.algorithms.WorkflowAlgorithms.SANSISISPolarizationCorrections.SANSISISPolarizationCorrections._load_child_algorithm")
+    @patch(f"{_ALG_PATCH_PATH}._load_child_algorithm")
     def test_load_runs_raises_runtime_error_for_non_groups_if_not_direct_run(self, mock_alg_child):
         self._create_test_workspace(out_name=self._WS_NAME)
         alg = self._setup_algorithm()
@@ -154,7 +155,7 @@ class SANSISISPolarizationCorrectionsTest(unittest.TestCase):
         )
         mock_alg_child.assert_called_once()
 
-    @patch("plugins.algorithms.WorkflowAlgorithms.SANSISISPolarizationCorrections.SANSISISPolarizationCorrections._load_child_algorithm")
+    @patch(f"{_ALG_PATCH_PATH}._load_child_algorithm")
     def test_load_runs_accepts_a_non_group_for_direct_runs(self, mock_alg_child):
         self._create_test_workspace(out_name="direct")
         alg = self._setup_algorithm()
@@ -162,7 +163,7 @@ class SANSISISPolarizationCorrectionsTest(unittest.TestCase):
         assertRaisesNothing(self, alg._load_run, "run_number", "direct")
         mock_alg_child.assert_called_once()
 
-    @patch("plugins.algorithms.WorkflowAlgorithms.SANSISISPolarizationCorrections.SANSISISPolarizationCorrections._load_child_algorithm")
+    @patch(f"{_ALG_PATCH_PATH}._load_child_algorithm")
     def test_ungroup_on_average_workspace_method(self, mock_alg_child):
         group_names = self._create_test_group(return_member_names=True)
         alg = self._setup_algorithm()
@@ -177,7 +178,7 @@ class SANSISISPolarizationCorrectionsTest(unittest.TestCase):
 
         mock_alg_child.assert_has_calls(calls)
 
-    @patch("plugins.algorithms.WorkflowAlgorithms.SANSISISPolarizationCorrections.SANSISISPolarizationCorrections._load_child_algorithm")
+    @patch(f"{_ALG_PATCH_PATH}._load_child_algorithm")
     def test_move_instrument_not_called_if_parameters_are_zero(self, mock_child_alg):
         alg = self._setup_algorithm()
         alg.instrument = self.inst
@@ -206,7 +207,7 @@ class SANSISISPolarizationCorrectionsTest(unittest.TestCase):
             assertRaisesNothing(self, alg._load_workspace_from_path, self._EFF_NAMES)
             self.assertTrue(all([ads.doesExist(f"{key}_file_test") for key in self._EFF_NAMES]))
 
-    @patch("plugins.algorithms.WorkflowAlgorithms.SANSISISPolarizationCorrections.SANSISISPolarizationCorrections.load")
+    @patch(f"{_ALG_PATCH_PATH}.load")
     def test_load_ws_from_paths_doesnt_try_to_load_if_ws_on_ads(self, mock_data_processor_load):
         alg = self._setup_algorithm()
         alg.aux_ws = dict()
@@ -218,8 +219,8 @@ class SANSISISPolarizationCorrectionsTest(unittest.TestCase):
         assertRaisesNothing(self, alg._load_workspace_from_path, self._EFF_NAMES)
         mock_data_processor_load.assert_not_called()
 
-    @patch("plugins.algorithms.WorkflowAlgorithms.SANSISISPolarizationCorrections.SANSISISPolarizationCorrections._load_run")
-    @patch("plugins.algorithms.WorkflowAlgorithms.SANSISISPolarizationCorrections.SANSISISPolarizationCorrections._prepare_workspace")
+    @patch(f"{_ALG_PATCH_PATH}._load_run")
+    @patch(f"{_ALG_PATCH_PATH}._prepare_workspace")
     def test_load_and_process_runs_doesnt_do_anything_if_ws_on_ads(self, mock_prepare, mock_load):
         alg = self._setup_algorithm()
         alg.aux_ws = dict()
@@ -232,7 +233,7 @@ class SANSISISPolarizationCorrectionsTest(unittest.TestCase):
         mock_load.assert_not_called()
         mock_prepare.assert_not_called()
 
-    @patch("plugins.algorithms.WorkflowAlgorithms.SANSISISPolarizationCorrections.SANSISISPolarizationCorrections._load_child_algorithm")
+    @patch(f"{_ALG_PATCH_PATH}._load_child_algorithm")
     def test_assert_spin_alg_not_called_if_assert_spin_states_property_false(self, mock_load_child_alg):
         self._create_test_group()
         alg = self._setup_algorithm()
@@ -243,7 +244,7 @@ class SANSISISPolarizationCorrectionsTest(unittest.TestCase):
         assertRaisesNothing(self, alg._check_spin_states, self._GROUP_NAME)
         mock_load_child_alg.assert_not_called()
 
-    @patch("plugins.algorithms.WorkflowAlgorithms.SANSISISPolarizationCorrections.SANSISISPolarizationCorrections._load_child_algorithm")
+    @patch(f"{_ALG_PATCH_PATH}._load_child_algorithm")
     def test_check_spin_state_raises_error_if_not_assert_spin_and_group_size_different_than_spin_states(self, mock_load_child_alg):
         self._create_test_group()
         alg = self._setup_algorithm()
@@ -259,7 +260,28 @@ class SANSISISPolarizationCorrectionsTest(unittest.TestCase):
         )
         mock_load_child_alg.assert_not_called()
 
-    @patch("plugins.algorithms.WorkflowAlgorithms.SANSISISPolarizationCorrections.SANSISISPolarizationCorrections._load_child_algorithm")
+    @patch(f"{_ALG_PATCH_PATH}._average_workspaces")
+    @patch(f"{_ALG_PATCH_PATH}._load_child_algorithm")
+    def test_process_efficiencies_calls_correctly_for_every_flipper_configuration(self, mock_child, mock_average):
+        alg = self._setup_algorithm()
+        alg.aux_ws = {key: WsInfo(key, "") for key in self._EFF_NAMES}
+        alg.instrument = self.inst
+        alg.instrument.spin_state_str = "00,01,10,11"
+
+        alg.progress = MagicMock()
+        alg._calculate_helium_analyzer_efficiency_and_parameters = MagicMock()
+        alg._create_run_list = MagicMock(return_value=["test_1"])
+
+        for has_2nd_flipper, no_calls in zip([False, True], [2, 3]):
+            with self.subTest(has_2nd_flipper=has_2nd_flipper, no_calls=no_calls):
+                alg.has_2nd_flipper = has_2nd_flipper
+                alg._process_efficiencies(["1"])
+                self.assertEqual(mock_child.call_count, no_calls)
+                self.assertEqual(mock_average.call_count, no_calls + 1)
+                mock_child.reset_mock()
+                mock_average.reset_mock()
+
+    @patch(f"{_ALG_PATCH_PATH}._load_child_algorithm")
     def test_check_spin_state_raises_error_for_wrong_spin_assertion(self, mock_load_child_alg):
         alg = self._setup_algorithm()
         alg.instrument = self.inst
@@ -275,7 +297,7 @@ class SANSISISPolarizationCorrectionsTest(unittest.TestCase):
         )
         mock_load_child_alg.assert_called_once()
 
-    @patch("plugins.algorithms.WorkflowAlgorithms.SANSISISPolarizationCorrections.SANSISISPolarizationCorrections.createChildAlgorithm")
+    @patch(f"{_ALG_PATCH_PATH}.createChildAlgorithm")
     def test_load_child_algorithm_when_output_param_is_not_set(self, mock_create_child_alg):
         alg_name = "TestAlg"
         alg = self._setup_algorithm()
@@ -290,7 +312,7 @@ class SANSISISPolarizationCorrectionsTest(unittest.TestCase):
         child_alg.setAlwaysStoreInADS.assert_called_once_with(True)
         self.assertEqual(result, None)
 
-    @patch("plugins.algorithms.WorkflowAlgorithms.SANSISISPolarizationCorrections.SANSISISPolarizationCorrections.createChildAlgorithm")
+    @patch(f"{_ALG_PATCH_PATH}.createChildAlgorithm")
     def test_load_child_algorithm_when_output_param_set(self, mock_create_child_alg):
         alg_name = "TestAlg"
         alg = self._setup_algorithm()
@@ -307,7 +329,7 @@ class SANSISISPolarizationCorrectionsTest(unittest.TestCase):
         child_alg.setAlwaysStoreInADS.assert_called_once_with(False)
         self.assertEqual(result_alg, "OutputWS")
 
-    @patch("plugins.algorithms.WorkflowAlgorithms.SANSISISPolarizationCorrections.SANSISISPolarizationCorrections.createChildAlgorithm")
+    @patch(f"{_ALG_PATCH_PATH}.createChildAlgorithm")
     def test_load_child_algorithm_error(self, mock_create_child_alg):
         alg_name = "TestAlg"
         error_msg = "error message"
@@ -320,10 +342,8 @@ class SANSISISPolarizationCorrectionsTest(unittest.TestCase):
         with self.assertRaisesRegex(RuntimeError, f"Error in execution of child algorithm {alg_name} : {error_msg}"):
             alg._load_child_algorithm(alg_name)
 
-    @patch("plugins.algorithms.WorkflowAlgorithms.SANSISISPolarizationCorrections.SANSISISPolarizationCorrections._init_reduction_settings")
-    @patch(
-        "plugins.algorithms.WorkflowAlgorithms.SANSISISPolarizationCorrections.SANSISISPolarizationCorrections._polarization_calibration"
-    )
+    @patch(f"{_ALG_PATCH_PATH}._init_reduction_settings")
+    @patch(f"{_ALG_PATCH_PATH}._polarization_calibration")
     def test_context_manager_deletes_partial_ads_names_on_error(self, mock_calibration, mock_init):
         alg = self._setup_algorithm()
         # add test workspaces to ads
@@ -345,10 +365,8 @@ class SANSISISPolarizationCorrectionsTest(unittest.TestCase):
         mock_calibration.assert_called_once()
         self.assertEqual(0, len(ads.getObjectNames()))
 
-    @patch("plugins.algorithms.WorkflowAlgorithms.SANSISISPolarizationCorrections.SANSISISPolarizationCorrections._init_reduction_settings")
-    @patch(
-        "plugins.algorithms.WorkflowAlgorithms.SANSISISPolarizationCorrections.SANSISISPolarizationCorrections._polarization_calibration"
-    )
+    @patch(f"{_ALG_PATCH_PATH}._init_reduction_settings")
+    @patch(f"{_ALG_PATCH_PATH}._polarization_calibration")
     def test_context_manager_does_not_deletes_partial_ads_names_on_error_if_delete_partial_property_set_to_false(
         self, mock_calibration, mock_init
     ):
@@ -374,10 +392,8 @@ class SANSISISPolarizationCorrectionsTest(unittest.TestCase):
         mock_calibration.assert_called_once()
         self.assertEqual(len(names), len(ads.getObjectNames()))
 
-    @patch("plugins.algorithms.WorkflowAlgorithms.SANSISISPolarizationCorrections.SANSISISPolarizationCorrections._init_reduction_settings")
-    @patch(
-        "plugins.algorithms.WorkflowAlgorithms.SANSISISPolarizationCorrections.SANSISISPolarizationCorrections._polarization_calibration"
-    )
+    @patch(f"{_ALG_PATCH_PATH}._init_reduction_settings")
+    @patch(f"{_ALG_PATCH_PATH}._polarization_calibration")
     def test_context_manager_restores_config(self, mock_calibration, mock_init):
         def set_config(input_dict):
             for k, v in input_dict.items():
