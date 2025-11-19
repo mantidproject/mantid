@@ -523,11 +523,9 @@ def _check_ws_foc_and_ws_van_foc(ws_foc, ws_van_foc):
         num_foc, num_van = ws_foc.getNumberHistograms(), ws_van_foc.getNumberHistograms()
         assert num_foc == num_van
         if num_foc == num_van:
-            ind = 0
-            while ind < num_foc:
+            for ind in range(num_foc):
                 # check each grouping difcs is same within 3 dp, stop if any fail
                 assert round(_get_difc(ws_foc, ind), 3) == round(_get_difc(ws_van_foc, ind), 3)
-                ind += 1
     except AssertionError:
         error_msg = f"The calibration of {ws_van_foc} does not match {ws_foc}. Ensure the vanadium calibration file loaded is correct."
         logger.error(error_msg)
