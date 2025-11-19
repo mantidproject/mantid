@@ -1,0 +1,23 @@
+name: doxygen documentation build test
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+
+jobs:
+  doxygen:
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        shell: bash -l {0}
+
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: build doxygen
+        run: |
+          $GITHUB_WORKSPACE/buildconfig/Jenkins/Conda/doxygen.sh $GITHUB_WORKSPACE
