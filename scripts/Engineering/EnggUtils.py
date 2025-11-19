@@ -8,6 +8,7 @@ from enum import Enum
 from numpy import array, degrees, isfinite, reshape, round
 from os import path, makedirs
 from shutil import copy2
+import math
 
 from mantid.api import AnalysisDataService as ADS, AlgorithmManager
 from mantid.kernel import IntArrayProperty, UnitConversion, DeltaEModeType, logger, UnitParams
@@ -604,7 +605,6 @@ def _smooth_vanadium(van_ws_foc):
 
 def _apply_vanadium_norm(sample_ws_foc, van_ws_foc):
     # divide by curves - automatically corrects for solid angle, det efficiency and lambda dep. flux
-    sample_ws_foc = mantid.CropWorkspace(InputWorkspace=sample_ws_foc, OutputWorkspace=sample_ws_foc.name(), XMin=0.45)
     van_ws_foc_rb = mantid.RebinToWorkspace(
         WorkspaceToRebin=van_ws_foc, WorkspaceToMatch=sample_ws_foc, OutputWorkspace=VAN_CURVE_REBINNED_NAME
     )  # copy so as not to lose data
@@ -614,6 +614,7 @@ def _apply_vanadium_norm(sample_ws_foc, van_ws_foc):
     sample_ws_foc = mantid.ReplaceSpecialValues(
         InputWorkspace=sample_ws_foc, OutputWorkspace=sample_ws_foc.name(), NaNValue=0, NaNError=0.0, InfinityValue=0, InfinityError=0.0
     )
+    sample_ws_foc = mantid.MaskBins(sample_ws_foc, XMin=-math.inf, XMax=0.45)
     return sample_ws_foc
 
 
