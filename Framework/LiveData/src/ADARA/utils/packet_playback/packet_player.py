@@ -39,33 +39,31 @@ if not _config_path.exists():
 
 Config = {}
 with open(_config_path, "rt") as f:
-    print(f"Initializing configuration from '{_config_path}':")
+    # Load the `Config` `dict`.
     Config = yaml.safe_load(f)
 
     # Initialize logging:
+    
+    ##################################################################################
+    ## WARNING: in general, no console logging should originate from these classes. ##
+    ##   Each client session runs in its own process, and at present we do not      ##
+    ##   implement multi-process logging.                                           ##
+    ##################################################################################
+    
     log_file_path = Config["logging"]["filename"].format(PID=os.getpid())
     formatter = logging.Formatter(Config["logging"]["format"])
 
     _logger = logging.getLogger(__name__)
     _logger.setLevel(Config["logging"]["level"])
-    _console_logger = logging.getLogger(__name__ + "_console")
-    _console_logger.setLevel(Config["logging"]["level"])
 
-    console_handler = logging.StreamHandler()
-    console_handler.setFormatter(formatter)
-    _console_logger.addHandler(console_handler)
     if log_file_path:
         file_handler = logging.FileHandler(log_file_path)
         file_handler.setFormatter(formatter)
         _logger.addHandler(file_handler)
     else:
-        print("  logging to console.")
+        console_handler = logging.StreamHandler()
+        console_handler.setFormatter(formatter)
         _logger.addHandler(console_handler)
-
-    if log_file_path:
-        _console_logger.info(f"Logging to file: '{log_file_path}'.")
-    else:
-        _console_logger.info("Logging to console.")
 
 # =========================================================
 # ====== end: `Config` initialization                ======
@@ -313,14 +311,14 @@ class Packet:
         cls._send_all(dest, packet.header + packet.payload)
 
     @classmethod
-    def from_socket(cls, src: socket.socket, allow_zero_bytes=False) -> "Packet":
+    def from_socket(cls, src: socket.socket) -> "Packet":
         # Read the header:
-        header = cls._recv_exact(src, cls.HEADER_BYTES, allow_zero_bytes=allow_zero_bytes)
+        header = cls._recv_exact(src, cls.HEADER_BYTES)
         payload_len = struct.unpack("<I", header[0:4])[0]
 
         # Read the payload
         if payload_len > 0:
-            payload = cls._recv_exact(src, payload_len, allow_zero_bytes=allow_zero_bytes)
+            payload = cls._recv_exact(src, payload_len)
         else:
             payload = b""
 
@@ -329,18 +327,14 @@ class Packet:
     ## ====== HELPER methods to WRAP socket partial transfers. ======
 
     @classmethod
-    def _recv_exact(cls, src: socket.socket, num_bytes: int, allow_zero_bytes=False) -> bytes:
+    def _recv_exact(cls, src: socket.socket, num_bytes: int) -> bytes:
         _logger.trace(f"Receiving {num_bytes} bytes from socket")
         data = b""
         while len(data) < num_bytes:
             try:
                 chunk = src.recv(num_bytes - len(data))
                 if not chunk:
-                    if not allow_zero_bytes:
-                        raise ConnectionError(f"Socket connection closed after receiving {len(data)} of {num_bytes} bytes")
-                    else:
-                        _logger.debug("*** IGNORING zero-byte RECV ***")
-                        time.sleep(0.01)
+                    raise ConnectionError(f"Socket connection closed after receiving {len(data)} of {num_bytes} bytes")
                 data += chunk
             except socket.error as e:
                 if e.errno in (errno.EAGAIN, errno.EWOULDBLOCK):
@@ -398,6 +392,9 @@ class Player:
     PLAYBACK_HANDSHAKE = Config["playback"]["handshake"]
     TRANSFER_LIMIT_MB = Config["record"]["transfer_limit"]
     PACKET_ORDERING_SCHEME = Config["playback"]["packet_ordering"]
+    
+    # "generic" glob (for use in multi-session playback): all packets in a directory
+    PACKET_GLOB = Config["playback"]["packet_glob"]
 
     class Rate(StrEnum):
         NORMAL = "normal"
@@ -489,10 +486,6 @@ class Player:
         # Sorting key for ADARA packet files, using the file's modification time.
         try:
             mtime_ns = int(filePath.stat().st_mtime * 1e9)  # nanoseconds since epoch
-
-            # *** DEBUG ***
-            print(f"MTIME: {filePath.name}: {np.datetime64(mtime_ns, 'ns')}")
-
             return np.datetime64(mtime_ns, "ns")
         except FileNotFoundError:
             _logger.error(f"File not found: {filePath}")
@@ -517,12 +510,12 @@ class Player:
         # Match the last hyphen-separated group before '.adara'
         match = re.search(r"-(\d{6})\.adara$", filePath.name)
         if match is None:
-            _logger.error(f"Can't extract sequence number from '{filePath}', using 0 as sequence number")
+            _logger.error(f"Cannot extract sequence number from '{filePath}': using 0 as sequence number")
             return 0
         return int(match.group(1))
 
     @classmethod
-    def _get_server_address(cls) -> str:
+    def get_server_address(cls) -> str:
         # Assemble the socket address using information from the from `Config` and from `os.environ`:
         # -- unless overridden, this path will be: ${XDG_RUNTIME_DIR}/sock-${name};
         # -- alternatively: ${TMPDIR} is used to support macOS.
@@ -680,49 +673,6 @@ class Player:
 
         _logger.info("Finished streaming all packets")
 
-    """
-    def play(self, path: Path, patterns: str | list[str], dry_run=False):
-        try:
-            self._running = True
-            self._server = self._create_server_socket(self._server_address)
-
-            if not dry_run:
-                _logger.info("Waiting for client connection...")
-                self._client, _ = self._server.accept()
-                _logger.info("Accepted connection from client.")
-
-                # Make this as symmetric with `record()` as possible -- use non-blocking mode.
-                self._client.settimeout(self.SOCKET_TIMEOUT)
-                self._client.setblocking(False)
-
-                self._start_time = np.datetime64(1, "s")  # default: stream all of the data
-
-                if self.PLAYBACK_HANDSHAKE == "client_hello":
-                    # Wait for "hello" packet before streaming
-                    _logger.info("Waiting for 'CLIENT_HELLO_PACKET'...")
-
-                    # For handshake, temporarily use blocking mode with a longer timeout.
-                    self._client.settimeout(self.HANDSHAKE_TIMEOUT)
-                    self._client.setblocking(True)
-                    try:
-                        client_hello = ClientHelloPacket.from_socket(self._client)
-                        self._start_time = client_hello.start_time
-                        _logger.info("Received 'CLIENT_HELLO_PACKET'. Starting stream...")
-                    except ValueError as e:
-                        _logger.error(f"{e}")
-                        raise
-                    finally:
-                        # Restore non-blocking mode for streaming
-                        self._client.settimeout(self.SOCKET_TIMEOUT)
-                        self._client.setblocking(False)
-
-            self.stream_packets(path, patterns, self._client, dry_run=dry_run)
-        finally:
-            _logger.info("Disconnecting server.")
-            self._running = False
-            self._cleanup()
-    """
-
     def play(self, client: socket.socket, path: Path, patterns: str | list[str], dry_run=False):
         try:
             self._running = True
@@ -758,148 +708,6 @@ class Player:
             _logger.info("Disconnecting from server.")
             self._running = False
             self._cleanup(sockets=[client])
-
-    """
-    def record(self, output_base_path: Path):
-        # Ensure target base directory exists
-        output_base_path.mkdir(parents=True, exist_ok=True)
-
-        # Main server loop
-        try:
-            self._running = True
-
-            self._server = self._create_server_socket(self._server_address)
-            while self._running:
-                # Accept connection from client (the application).
-                try:
-                    self._server.settimeout(self.SOCKET_TIMEOUT)
-                    self._client, _ = self._server.accept()
-                    _logger.info("Accepted connection from client application.")
-                    self._client.settimeout(self.SOCKET_TIMEOUT)
-                except socket.timeout:
-                    continue
-                except Exception as e:
-                    if self._running:
-                        _logger.error(f"Error accepting connection from client: {e}.")
-                    break
-
-                # Connect to ADARA packet server.
-                try:
-                    _logger.info(f"Connecting to ADARA packet server at {self._source_address}.")
-                    self._source = None
-                    if SocketAddress.isUDSSocket(self._source_address):
-                        self._source = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-                    else:
-                        self._source = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                    self._source.settimeout(self.SOCKET_TIMEOUT)
-                    self._source.connect(self._source_address)
-                    _logger.info(f"Successfully connected to ADARA packet server at {self._source_address}.")
-
-                    # Start a new session for each connection to the packet server:
-                    #   this will write all output to a single directory, named as the session number.
-                    sequence_number = 1
-                    session_number = self._next_session_number(output_base_path)
-                    self._transferred_bytes = 0
-                    output_path = output_base_path / f"{session_number:04d}"
-                    output_path.mkdir(parents=True, exist_ok=True)
-
-                    # Set sockets to non-blocking mode for use with select
-                    self._client.setblocking(False)
-                    self._source.setblocking(False)
-
-                    # Queue all data to allow source and client transfer-rate mismatch!
-                    to_client_queue = []
-                    to_server_queue = []
-
-                    while self._running:
-                        readables = []
-                        if not to_server_queue:
-                            readables.append(self._client)
-                        if not to_client_queue:
-                            readables.append(self._source)
-
-                        writables = []
-                        if to_client_queue:
-                            writables.append(self._client)
-                        if to_server_queue:
-                            writables.append(self._source)
-
-                        exceptionals = [self._client, self._source]
-                        readable, writable, exceptional = select.select(readables, writables, exceptionals, self.SOCKET_TIMEOUT)
-
-                        # Check for errors first
-                        if exceptional:
-                            _logger.error("Socket error detected: select clause")
-                            break
-
-                        loop_broken = False  # Used to propagate any 'break'
-
-                        # Process readable sockets: one packet per iteration per socket.
-                        for sock in readable:
-                            try:
-                                packet = Packet.from_socket(sock)  # , allow_zero_bytes=sock is self._source)
-
-                                # limit total number of bytes transferred
-                                self._impose_transfer_limit(packet)
-                                if not self._running:
-                                    loop_broken = True
-                                    break
-
-                                # Determine direction and forward
-                                if sock is self._source:
-                                    # Data from server: log packet and forward to client.
-                                    file_path = self._packet_file_path(output_path, packet, sequence_number)
-                                    with open(file_path, "wb") as f:
-                                        Packet.to_file(f, packet)
-                                    sequence_number += 1
-
-                                    data = packet.header + packet.payload
-                                    to_client_queue.append(data)
-
-                                    # The packet hasn't actually been sent yet, but it's easiest to log it here.
-                                    _logger.debug(f"server SENDs client -> {packet}")
-                                else:
-                                    # Data from client: forward to server (e.g. control packets)
-                                    data = packet.header + packet.payload
-                                    to_server_queue.append(data)
-                                    _logger.debug(f"client SENDs server <- {packet}")
-                            except (socket.timeout, socket.error) as e:
-                                _logger.error(f"Socket error during RECV: {e}")
-                                loop_broken = True
-                                break
-                        else:
-                            # Process writable sockets: one packet per iteration per socket.
-                            for sock in writable:
-                                if not self._running:
-                                    loop_broken = True
-                                    break
-                                queue = to_client_queue if sock is self._client else to_server_queue
-                                if queue:
-                                    data = queue[0]
-                                    try:
-                                        sent = sock.send(data)
-                                        if sent < len(data):
-                                            queue[0] = data[sent:]  # Partial write; keep unsent part
-                                        else:
-                                            queue.pop(0)
-
-                                    except (socket.timeout, socket.error) as e:
-                                        _logger.error(f"Socket error during SEND: {e}")
-                                        loop_broken = True
-                                        break
-
-                        if loop_broken:
-                            break
-                except Exception as e:
-                    _logger.error(f"Error in proxy loop: {e}.")
-                finally:
-                    # Clean up connection sockets, but don't disconnect server.
-                    self._cleanup(close_server=False)
-                    _logger.info("Connection closed, waiting for new client...")
-        finally:
-            # Clean up all sockets.
-            self._cleanup()
-    """
 
     def record(self, *, output_path: Path, client: socket.socket):
         # Ensure target directory exists
@@ -1013,26 +821,7 @@ class Player:
             _logger.error(f"Error in proxy loop: {e}.")
         finally:
             self.cleanup(sockets=[client, source])
-
-    @classmethod
-    def next_session_number(cls, base: Path) -> int:
-        # Get the next session number (for 'record' mode), using the output-directory base
-
-        if not base.exists():
-            return 1
-        # List integer-named directories under base
-        session_numbers = []
-        for entry in base.iterdir():
-            if entry.is_dir():
-                try:
-                    number = int(entry.name)
-                    session_numbers.append(number)
-                except ValueError:
-                    pass  # Skip non-integer directories
-        if not session_numbers:
-            return 1  # No numbered sub-directories yet
-        return max(session_numbers) + 1
-
+    
     @classmethod
     def _packet_file_path(cls, output_path: Path, packet: Packet, sequence_number: int) -> Path | None:
         return output_path / cls._packet_filename(packet, sequence_number)
@@ -1052,53 +841,6 @@ class Player:
             self._running = False
 
     @classmethod
-    def create_server_socket(cls, address: Path | tuple[str, int]) -> socket.socket:
-        server = None
-        if SocketAddress.isUDSSocket(address):
-            # Remove existing UDS if present
-            if address.exists():
-                address.unlink()
-
-            server = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-            _logger.info(f"Listening for Unix socket connection at '{address}'...")
-            server.bind(str(address))  # only accepts `str` not `Path`
-            server.listen(1)
-        else:
-            server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            _logger.info(f"Listening for TCP connection at {address}...")
-            server.bind(address)  # accepts `tuple[str, int]`
-            server.listen(1)
-        return server
-
-    """
-    def _cleanup(self, *, close_server=True):
-        ### Clean up sockets and associated files ###
-        if self._source:
-            try:
-                self._source.close()
-            except:
-                pass
-            self._source = None
-
-        if self._client:
-            try:
-                self._client.close()
-            except:
-                pass
-            self._client = None
-
-        if self._server and close_server:
-            try:
-                self._server.close()
-                # Remove any UDS path from filesystem
-                if SocketAddress.isUDSSocket(self._server_address) and self._server_address.exists():
-                    self._server_address.unlink()
-            except:
-                pass
-            self._server = None
-    """
-
-    @classmethod
     def cleanup(cls, *, sockets: Iterable[socket.socket], addresses: Iterable[Path | tuple[str, int]] = []):
         """Clean up sockets and associated files"""
         for sock in sockets:
@@ -1116,7 +858,7 @@ class Player:
 
     def signal_handler(self, signum, frame):
         """Handle shutdown signals"""
-        _logger.info(f"\nReceived signal {signum}, shutting down...")
+        _logger.info(f"\nReceived signal {signum}, shutting down client session...")
         self._running = False
 
         # Set an alarm to force exit if cleanup takes too long.
@@ -1126,96 +868,3 @@ class Player:
 
         signal.signal(signal.SIGALRM, _timeout_handler)
         signal.alarm(10)  # 10-second timeout
-
-
-"""
-if __name__ == "__main__":
-    import argparse
-
-    def main():
-        # Parse commandline arguments:
-        #   allow overriding the most-often-used configuration args.
-
-        parser = argparse.ArgumentParser(
-            description="ADARA packet player.", usage="%(prog)s [-h] [-r] [-s SOURCE_ADDRESS] [-a SERVER_ADDRESS] [-d] 'glob'"
-        )
-        parser.add_argument("-r", "--record", action="store_true", help="Enable record mode")
-        parser.add_argument("-s", "--source_address", type=str, help="Specify packet source address: used for record")
-        parser.add_argument("-a", "--server_address", type=str, help="Specify server address")
-        parser.add_argument("-d", "--dry_run", action="store_true", help="Dry run: used for play mode")
-
-        # Default config-file location is overridden using the environment, NOT here:
-        # Usage: `adara_player_conf=<new config-file location> adara_player <options> <glob>`
-
-        parser.add_argument("glob", help="Standard Unix glob spec (in single quotes), or an output-directory path (in record mode)")
-        args = parser.parse_args()
-
-        path, patterns = UnixGlob.parse(
-            args.glob
-        )  # Parse Unix-style glob to "internal" format: (<base-directory path>, list[<glob expr>]).
-        if args.record:
-            if patterns and patterns[0]:
-                _logger.error(f"When using record mode, the positional argument should be the target directory, not '{args.glob}'.")
-                return
-            if args.dry_run:
-                _logger.error("Dry run can not be used with record mode.")
-                return
-
-        player = Player(server_address=args.server_address, source_address=args.source_address)
-
-        # Set up signal handlers
-        signal.signal(signal.SIGINT, player.signal_handler)
-        signal.signal(signal.SIGTERM, player.signal_handler)
-
-        if not args.record:
-            player.play(path, patterns, dry_run=args.dry_run)
-        else:
-            player.record(path)
-
-    main()
-"""
-
-
-if __name__ == "__main__":
-    import argparse
-
-    def main():
-        # Parse commandline arguments:
-        #   allow overriding the most-often-used configuration args.
-
-        parser = argparse.ArgumentParser(
-            description="ADARA packet player.", usage="%(prog)s [-h] [-r] [-s SOURCE_ADDRESS] [-a SERVER_ADDRESS] [-d] 'glob'"
-        )
-        parser.add_argument("-r", "--record", action="store_true", help="Enable record mode")
-        parser.add_argument("-s", "--source_address", type=str, help="Specify packet source address: used for record")
-        parser.add_argument("-a", "--server_address", type=str, help="Specify server address")
-        parser.add_argument("-d", "--dry_run", action="store_true", help="Dry run: used for play mode")
-
-        # Default config-file location is overridden using the environment, NOT here:
-        # Usage: `adara_player_conf=<new config-file location> adara_player <options> <glob>`
-
-        parser.add_argument("glob", help="Standard Unix glob spec (in single quotes), or an output-directory path (in record mode)")
-        args = parser.parse_args()
-
-        # Parse Unix-style glob to "internal" format: (<base-directory path>, list[<glob expr>]).
-        path, patterns = UnixGlob.parse(args.glob)
-        if args.record:
-            if patterns and patterns[0]:
-                _logger.error(f"When using record mode, the positional argument should be the target directory, not '{args.glob}'.")
-                return
-            if args.dry_run:
-                _logger.error("Dry run cannot be used with record mode.")
-                return
-
-        player = Player(server_address=args.server_address, source_address=args.source_address)
-
-        # Set up signal handlers
-        signal.signal(signal.SIGINT, player.signal_handler)
-        signal.signal(signal.SIGTERM, player.signal_handler)
-
-        if not args.record:
-            player.play(path, patterns, dry_run=args.dry_run)
-        else:
-            player.record(path)
-
-    main()

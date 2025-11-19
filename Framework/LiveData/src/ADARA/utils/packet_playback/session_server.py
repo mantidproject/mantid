@@ -1,7 +1,25 @@
+import logging
 import os
 import socketserver
 import signal
 import threading
+
+from packet_player import Player, SocketAddress, UnixGlob
+
+##################################################################################################
+## WARNING: if at all possible `Config` should be used only from the `packet_player.py` module. ##
+##################################################################################################
+
+## Which explains why this logging initialization is hard coded! ##
+formatter = logging.Formatter('%(asctime)s: %(levelname)s: %(message)s')
+
+console_logger = logging.getLogger(__name__ + "_console")
+console_logger.setLevel("DEBUG")
+
+console_handler = logging.StreamHandler()
+console_handler.setFormatter(formatter)
+console_logger.addHandler(console_handler)
+
 
 # `Player.play(<client socket>, <single-session glob path>, <single-session glob patterns>)`
 
@@ -20,8 +38,8 @@ class SessionServer:
         # Validate commandline args
         self._record = args.record
         self._source_address = args.source_address    
-        if self._record:
-            _logger.debug(f"  source: '{self._source_address}'")
+        if self._record and self._source_address:
+            console_logger.debug(f"source: '{self._source_address}'")
         self._dry_run = args.dry_run
 
         # Parse Unix-style glob to "internal" format: (<base-directory path>, list[<glob expr>]).
@@ -58,14 +76,9 @@ class SessionServer:
         # Default config-file location is overridden using the environment, NOT here:
         # example override: `adara_player_conf=<new config-file location> adara_player <options> <glob>`
 
-        parser.add_argument("glob", help="Standard Unix glob spec (in single quotes), or an output-directory path (in record mode)")
+        parser.add_argument("glob", help="Standard Unix glob spec (in single quotes), or an output-directory path (in multi-session mode)")
         args = parser.parse_args()
         return args
-
-    @staticmethod
-    def serverIsUDSSocket(args: argeparse.Namespace) -> bool:
-        # Before we can create the server, we need to know whether or not it serves from a UDS or INET socket.  How stupid!  :(
-        return SocketAddress.parse(args.server_address if args.server_address else Player._get_server_address()).isUDSSocket()
          
     @property
     def record(self) -> bool:
@@ -99,7 +112,7 @@ class SessionServer:
     def next_session_path(self) -> Path:
         if not self.is_multi_session:
             # in play mode: a complete glob string (i.e. not a base directory) implies only one session is expected
-            raise RuntimeError("multiple client connections when only a single session is expected")
+            raise RuntimeError("There are multiple client connections when only a single session is expected.")
             
         with self._session_number.get_lock():
             session_path = self.base_path / f"{self.session_number.value:04d}")
@@ -110,8 +123,14 @@ class SessionServer:
             raise RuntimeError(f"in play mode: required session directory '{session_path}' does not exist")
         return session_path
 
+    # Override: `ForkingMixIn` method.
+    def process_request(self, request, client_address):
+        console_logger.info(f"Accepting client connection for session {self.session_number}.")
+        super().process_request(request, client_address)
+
     def signal_handler(self, signum, frame):
         # handler for SIGINT, SIGTERM
+        console_logger.info(f"\nReceived signal {signum}, shutting down server...")
         
         # propagate the signal to the entire process group
         #   (e.g. child processes handling each session)
@@ -123,7 +142,7 @@ class SessionServer:
 
         # Set an alarm to force exit if cleanup takes too long.
         def _timeout_handler(signum, frame):
-            _logger.error("Shutdown timeout exceeded, forcing exit")
+            console_logger.error("Shutdown timeout exceeded, forcing exit")
             os._exit(1)
 
         signal.signal(signal.SIGALRM, _timeout_handler)
@@ -137,8 +156,6 @@ class SessionHandler(socketserver.BaseRequestHandler):
         # Set up signal handlers for this child process
         signal.signal(signal.SIGINT, player.signal_handler)
         signal.signal(signal.SIGTERM, player.signal_handler)
-        
-        _console_logger.info(f"Accepted client connection for session {self.server.session_number}.")
 
         if not self.server.record:
             # `play` takes the client socket,
@@ -147,7 +164,7 @@ class SessionHandler(socketserver.BaseRequestHandler):
             path, patterns = self.server.glob
             if self.server.is_multi_session:
                 path = self.server.next_session_path()
-                patterns = [Config["playback"]["packet_glob"]]
+                patterns = [Player.PACKET_GLOB]
             player.play(self.request, path, patterns, dry_run=self.server.dry_run)
         else:
             # `record` is always multi-session,
@@ -159,41 +176,19 @@ class SessionHandler(socketserver.BaseRequestHandler):
 class SessionTCPServer(SessionServer, socketserver.ForkingMixIn, socketserver.TCPServer):
     def __init__(
         self,
-        server_address: Path | tuple[str, int],
+        server_address: tuple[str, int],
         args: argparse.Namespace,
         manager: multiprocessing.Manager
     ):
         super().__init__(server_address, SessionHandler, args=args, manager=manager)
 
+
 class SessionUDSServer(SessionServer, socketserver.ForkingMixIn, socketserver.UnixStreamServer):
     def __init__(
         self,
-        server_address: Path | tuple[str, int],
+        server_address: Path,
         args: argparse.Namespace,
         manager: multiprocessing.Manager
     ):
         super().__init__(str(server_address), SessionHandler, args=args, manager=manager)
 
-
-if __name__ == "__main__":
-    args = SessionServer.parse_args()
-    server_address = SocketAddress.parse(
-        args.server_address if args.server_address else Player._get_server_address()
-    )
-    manager = multiprocessing.Manager()
-    
-    if SocketAddress.isUDSSocket(server_address):
-        with SessionUDSServer(server_address, commandline_args=args, manager=manager) as server:
-            # Set up signal handlers
-            signal.signal(signal.SIGINT, server.signal_handler)
-            signal.signal(signal.SIGTERM, server.signal_handler)
-            _console_logger.info(f"Waiting for client connection at {server_address}...")
-            _console_logger.info("Type CNTL-C to exit.")
-            server.serve_forever()
-    else:
-        with SessionTCPServer(server_address, commandline_args=args, manager=manager) as server:
-            signal.signal(signal.SIGINT, server.signal_handler)
-            signal.signal(signal.SIGTERM, server.signal_handler)
-            _console_logger.info(f"Waiting for client connection at {server_address}...")
-            _console_logger.info("Type CNTL-C to exit.")
-            server.serve_forever()
