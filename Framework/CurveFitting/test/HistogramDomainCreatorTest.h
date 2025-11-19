@@ -255,8 +255,6 @@ public:
       FunctionDomain1DHistogram domain({-10.0, 10.0});
       FunctionValues values(domain);
       fun.function(domain, values);
-      // normalise expected height by bin_width
-      auto intens = fun.intensity();
       TS_ASSERT_DELTA(fun.intensity(), a, 1e-15);
       TS_ASSERT_DELTA(values[0] * 20, a, 1e-15);
     }
