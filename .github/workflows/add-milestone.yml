@@ -1,7 +1,8 @@
 name: Add milestone to new PRs
 on:
   pull_request:
-    types: [opened]
+    types: [opened, reopened]
+    branches: [main, release-next]
 
 jobs:
   add-milestone:
