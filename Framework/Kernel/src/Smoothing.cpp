@@ -196,20 +196,19 @@ private:
 };
 
 template <typename Y> std::vector<Y> fftSmoothWithFilter(std::vector<Y> const &input, FFTFilter<Y> const &filter) {
-  std::size_t const dn = input.size();
+  std::size_t const N = input.size();
   std::vector<Y> output(input.cbegin(), input.cend());
 
   // obtain the FFT
-  Kernel::fft::real_ws_uptr real_ws = Kernel::fft::make_gsl_real_workspace(dn);
-  Kernel::fft::real_wt_uptr real_wt = Kernel::fft::make_gsl_real_wavetable(dn);
-  gsl_fft_real_transform(output.data(), 1, dn, real_wt.get(), real_ws.get());
+  Kernel::fft::real_ws_uptr real_ws = Kernel::fft::make_gsl_real_workspace(N);
+  Kernel::fft::real_wt_uptr real_wt = Kernel::fft::make_gsl_real_wavetable(N);
+  gsl_fft_real_transform(output.data(), 1, N, real_wt.get(), real_ws.get());
   real_wt.reset(); // wavetable no longer needed
 
   // NOTE: the halfcomplex storage requires special treatment of even/odd
-  // NOTE: we cannot use GSL's unpack because these values would have to be altered and then re-packed
-  // it is simpler to access them inplace.
-  bool const even = (dn % 2 == 0);
-  std::size_t const complex_size = (even ? dn / 2 : (dn - 1) / 2);
+  // while we could use GSL's unpack, it is easier to alter the values in place
+  bool const even = (N % 2 == 0);
+  std::size_t const complex_size = (even ? N / 2 : (N - 1) / 2);
   output[0] *= filter(0); // x[0] = z[0].real; z[0].imag = 0 and is not stored anywhere
   for (std::size_t fn = 1; fn < complex_size + (even ? 0UL : 1UL); fn++) {
     output[2 * fn - 1] *= filter(fn); // real parts
@@ -217,12 +216,12 @@ template <typename Y> std::vector<Y> fftSmoothWithFilter(std::vector<Y> const &i
   }
   // for even data, last point is an unmatched real value
   if (even) {
-    output[dn - 1] *= filter(complex_size);
+    output[N - 1] *= filter(complex_size);
   }
 
   // transform back
-  Kernel::fft::hc_wt_uptr hc_wt = Kernel::fft::make_gsl_hc_wavetable(dn);
-  gsl_fft_halfcomplex_inverse(output.data(), 1, dn, hc_wt.get(), real_ws.get());
+  Kernel::fft::hc_wt_uptr hc_wt = Kernel::fft::make_gsl_hc_wavetable(N);
+  gsl_fft_halfcomplex_inverse(output.data(), 1, N, hc_wt.get(), real_ws.get());
   hc_wt.reset();   // wavetable no longer needed
   real_ws.reset(); // workspace no longer needed
 
