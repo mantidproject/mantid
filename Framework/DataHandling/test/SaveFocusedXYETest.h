@@ -18,13 +18,13 @@
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 
-#include <Poco/File.h>
 #include <cxxtest/TestSuite.h>
 
 #include <cmath>
 #include <fstream>
 #include <sstream>
 #include <string>
+#include <filesystem>
 
 namespace {
 /// This is the number of header lines in Fullprof format 10
@@ -60,7 +60,7 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(saveXYE.execute());
 
-    Poco::File focusfile(filename);
+    std::filesystem::path focusfile(filename);
     TS_ASSERT_EQUALS(focusfile.exists(), true);
 
     std::ifstream filestrm(filename.c_str());
@@ -102,7 +102,7 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(saveXYE.execute());
 
-    Poco::File focusfile(filename);
+    std::filesystem::path focusfile(filename);
     TS_ASSERT_EQUALS(focusfile.exists(), true);
 
     std::ifstream filestrm(filename.c_str());
@@ -164,7 +164,7 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(saveXYE.execute());
 
-    Poco::File focusfile(filename);
+    std::filesystem::path focusfile(filename);
     TS_ASSERT_EQUALS(focusfile.exists(), true);
 
     std::ifstream filestrm(filename.c_str());
@@ -252,7 +252,7 @@ public:
     saveXYE.setPropertyValue("Append", "0");
 
     TS_ASSERT_THROWS_NOTHING(saveXYE.execute());
-    Poco::File focusfile(filename);
+    std::filesystem::path focusfile(filename);
     TS_ASSERT_EQUALS(focusfile.exists(), true);
 
     std::ifstream filestrm(filename.c_str());
@@ -341,7 +341,7 @@ public:
     saveGSS.setPropertyValue("MultiplyByBinWidth", "1");
 
     TS_ASSERT_THROWS_NOTHING(saveGSS.execute());
-    Poco::File focusfile(filename);
+    std::filesystem::path focusfile(filename);
     TS_ASSERT_EQUALS(focusfile.exists(), true);
 
     std::ifstream filestrm(filename.c_str());
@@ -419,7 +419,7 @@ public:
     saveGSS.setPropertyValue("MultiplyByBinWidth", "0");
 
     TS_ASSERT_THROWS_NOTHING(saveGSS.execute());
-    Poco::File focusfile(filename);
+    std::filesystem::path focusfile(filename);
     TS_ASSERT_EQUALS(focusfile.exists(), true);
 
     std::ifstream filestrm(filename.c_str());
@@ -486,7 +486,7 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(saveXYE.execute());
 
-    Poco::File focusfile(filename);
+    std::filesystem::path focusfile(filename);
     TS_ASSERT_EQUALS(focusfile.exists(), true);
 
     std::ifstream filestrm(filename.c_str());
@@ -541,7 +541,7 @@ public:
     saveXYE.setProperty("SplitFiles", false);
     saveXYE.execute();
     TS_ASSERT(saveXYE.isExecuted());
-    Poco::File focusfile(filename);
+    std::filesystem::path focusfile(filename);
     TS_ASSERT_EQUALS(focusfile.exists(), true);
     if (focusfile.exists())
       focusfile.remove();
@@ -577,7 +577,7 @@ public:
       saveAlgPtrs[i] = nullptr;
     }
     Mantid::API::AnalysisDataService::Instance().remove(m_wsName);
-    Poco::File focusedFile(m_filename);
+    std::filesystem::path focusedFile(m_filename);
     if (focusedFile.exists())
       focusedFile.remove();
   }

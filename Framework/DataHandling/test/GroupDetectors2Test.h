@@ -10,6 +10,7 @@
 #include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
+#include <filesystem>
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
@@ -28,8 +29,6 @@
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidTypes/SpectrumDefinition.h"
-
-#include <Poco/Path.h>
 
 using Mantid::DataHandling::GroupDetectors2;
 using namespace Mantid::Kernel;
@@ -54,7 +53,7 @@ public:
   GroupDetectors2Test()
       : inputWSName("groupdetectorstests_input_workspace"), offsetWSName("groupdetectorstests_offset_workspace"),
         outputWSNameBase("groupdetectorstests_output_basename"),
-        inputFile(Poco::Path::current() + "GroupDetectors2Test_mapfile_example") {
+        inputFile(std::filesystem::path::current() + "GroupDetectors2Test_mapfile_example") {
     // This is needed to load in the plugin algorithms (specifically Divide,
     // which is a Child Algorithm of GroupDetectors)
     FrameworkManager::Instance();

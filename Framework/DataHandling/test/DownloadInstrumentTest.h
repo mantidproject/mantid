@@ -11,13 +11,11 @@
 #include "MantidDataHandling/DownloadInstrument.h"
 #include "MantidKernel/ConfigService.h"
 
-#include <Poco/File.h>
 #include <Poco/Glob.h>
-#include <Poco/Path.h>
-
 #include <cstdio>
 #include <fstream>
 #include <string>
+#include <filesystem>
 
 using Mantid::DataHandling::DownloadInstrument;
 using Mantid::Kernel::InternetHelper;
@@ -98,8 +96,8 @@ public:
   static DownloadInstrumentTest *createSuite() { return new DownloadInstrumentTest(); }
   static void destroySuite(DownloadInstrumentTest *suite) { delete suite; }
 
-  void createDirectory(const Poco::Path &path) {
-    Poco::File file(path);
+  void createDirectory(const std::filesystem::path &path) {
+    std::filesystem::path file(path);
     if (file.createDirectory()) {
       m_directoriesToRemove.emplace_back(file);
     }
@@ -122,19 +120,19 @@ public:
 
     // change the local download directory by adding a unittest subdirectory
     auto testDirectories = m_originalInstDir;
-    Poco::Path localDownloadPath(Poco::Path::temp());
+    std::filesystem::path localDownloadPath(std::filesystem::path::temp());
     localDownloadPath.pushDirectory(TEST_SUFFIX);
-    m_localInstDir = localDownloadPath.toString();
+    m_localInstDir = localDownloadPath.string();
     createDirectory(localDownloadPath);
     testDirectories[0] = m_localInstDir;
 
     // also if you move the instrument directory to one with less files then it
     // will run faster as it does not need to checksum as many files
     try {
-      Poco::Path installInstrumentPath(testDirectories.back());
+      std::filesystem::path installInstrumentPath(testDirectories.back());
       installInstrumentPath.pushDirectory(TEST_SUFFIX);
       createDirectory(installInstrumentPath);
-      testDirectories.back() = installInstrumentPath.toString();
+      testDirectories.back() = installInstrumentPath.string();
     } catch (Poco::FileException &) {
       std::cout << "Failed to change instrument directory continuing without, "
                    "fine, just slower\n";
@@ -162,17 +160,17 @@ public:
 
   void test_execOrphanedFile() {
     // add an orphaned file
-    Poco::Path orphanedFilePath(m_localInstDir);
+    std::filesystem::path orphanedFilePath(m_localInstDir);
     orphanedFilePath.makeDirectory();
     orphanedFilePath.setFileName("Orphaned_Should_not_be_here.xml");
 
     std::ofstream file;
-    file.open(orphanedFilePath.toString().c_str());
+    file.open(orphanedFilePath.string().c_str());
     file.close();
 
     TSM_ASSERT_EQUALS("The expected number of files downloaded was wrong.", runDownloadInstrument(), 2);
 
-    Poco::File orphanedFile(orphanedFilePath);
+    std::filesystem::path orphanedFile(orphanedFilePath);
     TSM_ASSERT("The orphaned file was not deleted", orphanedFile.exists() == false);
   }
 
@@ -188,5 +186,5 @@ public:
 
   std::string m_localInstDir;
   std::vector<std::string> m_originalInstDir;
-  std::vector<Poco::File> m_directoriesToRemove;
+  std::vector<std::filesystem::path> m_directoriesToRemove;
 };

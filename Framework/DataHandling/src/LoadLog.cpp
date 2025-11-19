@@ -23,13 +23,12 @@
 #include <Poco/DateTimeFormat.h>
 #include <Poco/DateTimeParser.h>
 #include <Poco/DirectoryIterator.h>
-#include <Poco/File.h>
-#include <Poco/Path.h>
 #include <boost/algorithm/string.hpp>
 #include <fstream> // used to get ifstream
 #include <regex>
 #include <sstream>
 #include <utility>
+#include <filesystem>
 
 using Mantid::Types::Core::DateAndTime;
 
@@ -115,8 +114,8 @@ void LoadLog::exec() {
 
   // File property checks whether the given path exists, just check that is
   // actually a file
-  Poco::File l_path(m_filename);
-  if (l_path.isDirectory()) {
+  std::filesystem::path l_path(m_filename);
+  if (std::filesystem::is_directory(l_path)) {
     throw Exception::FileError("Filename is a directory:", m_filename);
   }
 
@@ -307,7 +306,7 @@ void LoadLog::loadThreeColumnLogFile(std::ifstream &logFileStream, const std::st
  */
 std::string LoadLog::extractLogName(const std::vector<std::string> &logName) {
   if (logName.empty()) {
-    return (Poco::Path(Poco::Path(m_filename).getFileName()).getBaseName());
+    return (std::filesystem::path(std::filesystem::path(m_filename).getFileName()).stem().string());
   } else {
     return (logName.front());
   }

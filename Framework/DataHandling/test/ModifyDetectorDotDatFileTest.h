@@ -9,11 +9,10 @@
 #include "MantidKernel/Timer.h"
 #include <cxxtest/TestSuite.h>
 #include <sstream>
+#include <filesystem>
 
 #include "MantidDataHandling/LoadEmptyInstrument.h"
 #include "MantidDataHandling/ModifyDetectorDotDatFile.h"
-#include <Poco/File.h>
-
 using namespace Mantid;
 using namespace Mantid::DataHandling;
 using namespace Mantid::API;
@@ -64,7 +63,7 @@ public:
     // Check output file
     std::string fullFilename = alg.getPropertyValue("OutputFilename"); // Get absolute path
     // has the algorithm written the output file to disk?
-    bool OutputFileExists = Poco::File(fullFilename).exists();
+    bool OutputFileExists = std::filesystem::exists(fullFilename);
     TS_ASSERT(OutputFileExists);
     // If output file exists do some tests on its contents
     if (OutputFileExists) {
@@ -121,6 +120,6 @@ public:
     }
 
     // Remove output file
-    Poco::File(fullFilename).remove();
+    std::filesystem::remove(fullFilename);
   }
 };

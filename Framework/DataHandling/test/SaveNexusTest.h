@@ -8,6 +8,7 @@
 
 #include <cxxtest/TestSuite.h>
 #include <fstream>
+#include <filesystem>
 
 // These includes seem to make the difference between initialization of the
 // workspace names (workspace2D/1D etc), instrument classes and not for this
@@ -20,9 +21,6 @@
 #include "MantidDataHandling/LoadNexus.h"
 #include "MantidDataHandling/SaveNexus.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
-#include <Poco/File.h>
-#include <Poco/Path.h>
-
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataHandling;
@@ -100,7 +98,7 @@ public:
     const bool executed = alg.execute();
     TSM_ASSERT("SaveNexus did not execute successfully", executed)
     if (executed)
-      Poco::File(outputFile).remove();
+      std::filesystem::remove(outputFile);
   }
 
 private:

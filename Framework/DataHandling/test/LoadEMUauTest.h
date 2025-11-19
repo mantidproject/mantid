@@ -18,8 +18,8 @@
 #include "MantidDataHandling/LoadEMU.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
-#include <Poco/Path.h>
 #include <Poco/TemporaryFile.h>
+#include <filesystem>
 
 #ifdef _MSC_VER
 // Disable warning on 'no suitable definition ..' as the extern
@@ -164,12 +164,12 @@ public:
     auto filename = InstrumentFileFinder::getInstrumentFilename(instname, preMod);
 
     // confirm that file "EMUau_definition_2025.xml" is returned but ignore the file path
-    Poco::Path prePath(filename);
+    std::filesystem::path prePath(filename);
     TS_ASSERT_EQUALS(prePath.getFileName(), "EMUau_Definition_2025.xml");
 
     std::string postMod("2025-07-26 10:13:12");
     filename = InstrumentFileFinder::getInstrumentFilename(instname, postMod);
-    Poco::Path postPath(filename);
+    std::filesystem::path postPath(filename);
     TS_ASSERT_EQUALS(postPath.getFileName(), "EMUau_Definition.xml");
   }
 };

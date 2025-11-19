@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include <Poco/File.h>
 #include <cxxtest/TestSuite.h>
+#include <filesystem>
 
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/TableRow.h"
@@ -113,11 +113,11 @@ public:
 
     // confirm that it exists
     std::string filename = alg.getPropertyValue("Filename");
-    TS_ASSERT(Poco::File(filename).exists());
+    TS_ASSERT(std::filesystem::exists(filename));
 
     // cleanup
-    if (Poco::File(filename).exists())
-      Poco::File(filename).remove();
+    if (std::filesystem::exists(filename))
+      std::filesystem::remove(filename);
   }
 
   void test_empty_cal_wksp() {
@@ -154,11 +154,11 @@ public:
 
     // confirm that it exists
     std::string filename = alg.getPropertyValue("Filename");
-    TS_ASSERT(Poco::File(filename).exists());
+    TS_ASSERT(std::filesystem::exists(filename));
 
     // cleanup
-    if (Poco::File(filename).exists())
-      Poco::File(filename).remove();
+    if (std::filesystem::exists(filename))
+      std::filesystem::remove(filename);
   }
 
   void test_no_grouping() {
@@ -178,11 +178,11 @@ public:
 
     // confirm that it exists
     std::string filename = alg.getPropertyValue("Filename");
-    TS_ASSERT(Poco::File(filename).exists());
+    TS_ASSERT(std::filesystem::exists(filename));
 
     // cleanup
-    if (Poco::File(filename).exists())
-      Poco::File(filename).remove();
+    if (std::filesystem::exists(filename))
+      std::filesystem::remove(filename);
   }
 
   void test_exec() {
@@ -203,10 +203,10 @@ public:
 
     // confirm that it exists
     std::string filename = alg.getPropertyValue("Filename");
-    TS_ASSERT(Poco::File(filename).exists());
+    TS_ASSERT(std::filesystem::exists(filename));
 
     // cleanup
-    if (Poco::File(filename).exists())
-      Poco::File(filename).remove();
+    if (std::filesystem::exists(filename))
+      std::filesystem::remove(filename);
   }
 };

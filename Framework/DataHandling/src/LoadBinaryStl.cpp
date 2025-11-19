@@ -7,8 +7,8 @@
 #include "MantidDataHandling/LoadBinaryStl.h"
 #include "MantidGeometry/Objects/MeshObject.h"
 #include "MantidKernel/BinaryStreamReader.h"
-#include <Poco/File.h>
 #include <fstream>
+#include <filesystem>
 namespace Mantid::DataHandling {
 
 namespace {
@@ -23,7 +23,7 @@ uint32_t getNumberTriangles(Kernel::BinaryStreamReader streamReader, const int h
 } // namespace
 
 bool LoadBinaryStl::isBinarySTL(const std::string &filename) {
-  Poco::File stlFile = Poco::File(filename);
+  std::filesystem::path stlFile = std::filesystem::path(filename);
   if (!stlFile.exists()) {
     // if the file cannot be read then it is not a valid binary Stl File
     return false;

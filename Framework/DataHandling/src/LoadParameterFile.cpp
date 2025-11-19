@@ -20,8 +20,7 @@
 #include <Poco/DOM/NodeFilter.h>
 #include <Poco/DOM/NodeIterator.h>
 #include <Poco/DOM/NodeList.h>
-#include <Poco/File.h>
-
+#include <filesystem>
 using Mantid::Geometry::InstrumentDefinitionParser;
 using Poco::XML::AutoPtr;
 using Poco::XML::Document;
@@ -99,13 +98,11 @@ void LoadParameterFile::exec() {
   } else {
     try {
       // First see if the file exists
-      Poco::File ipfFile(filename);
-      if (!ipfFile.exists()) {
-        Poco::Path filePath(filename);
-        filename = Poco::Path(Kernel::ConfigService::Instance().getInstrumentDirectory())
-                       .makeDirectory()
-                       .setFileName(filePath.getFileName())
-                       .toString();
+      std::filesystem::path ipfFile(filename);
+      if (!std::filesystem::exists(ipfFile)) {
+        std::filesystem::path filePath(filename);
+        filename = (std::filesystem::path(Kernel::ConfigService::Instance().getInstrumentDirectory()) / 
+                    filePath.filename()).string();
       }
       g_log.information() << "Parsing from XML file: " << filename << '\n';
       pDoc = pParser.parse(filename);

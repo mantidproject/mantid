@@ -23,6 +23,7 @@
 #include <cmath>
 #include <cstdio>
 #include <stdexcept>
+#include <filesystem>
 
 namespace Mantid::DataHandling {
 
@@ -119,7 +120,7 @@ void SaveSPE::exec() {
     fclose(outSPEFile);
   } catch (std::exception &) {
     fclose(outSPEFile);
-    Poco::File(filename).remove();
+    std::filesystem::remove(filename);
     // throw the exception again so the base class can deal with it too in it's
     // own way
     throw;

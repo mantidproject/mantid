@@ -12,11 +12,10 @@
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidKernel/ConfigService.h"
-#include <Poco/File.h>
-#include <Poco/Path.h>
 #include <cmath>
 #include <cxxtest/TestSuite.h>
 #include <fstream>
+#include <filesystem>
 
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
@@ -89,7 +88,7 @@ public:
       }
     }
 
-    Poco::File(scalingFile).remove();
+    std::filesystem::remove(scalingFile);
     dataStore.remove(wsName);
   }
 
@@ -152,11 +151,11 @@ private:
   }
 
   Workspace2D_sptr loadEmptyMARI() {
-    Poco::Path mariIDF(ConfigService::Instance().getInstrumentDirectory());
+    std::filesystem::path mariIDF(ConfigService::Instance().getInstrumentDirectory());
     mariIDF.resolve("MARI_Definition.xml");
     LoadEmptyInstrument loader;
     loader.initialize();
-    loader.setPropertyValue("Filename", mariIDF.toString());
+    loader.setPropertyValue("Filename", mariIDF.string());
     const std::string outputName("test-emptyMARI");
     loader.setPropertyValue("OutputWorkspace", outputName);
     loader.execute();

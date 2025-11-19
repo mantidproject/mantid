@@ -26,9 +26,8 @@
 #include "MantidNexus/H5Util.h"
 #include <H5Cpp.h>
 
-#include <Poco/File.h>
-
 #include <limits>
+#include <filesystem>
 
 using namespace Mantid::API;
 using namespace Mantid::DataHandling;
@@ -184,10 +183,10 @@ public:
     // throws file not exist from ChildAlgorithm
     saver.setRethrows(true);
     TS_ASSERT_THROWS(saver.execute(), const Mantid::Kernel::Exception::FileError &);
-    TS_ASSERT(Poco::File(outputFile).exists());
+    TS_ASSERT(std::filesystem::exists(outputFile));
 
-    if (Poco::File(outputFile).exists())
-      Poco::File(outputFile).remove();
+    if (std::filesystem::exists(outputFile))
+      std::filesystem::remove(outputFile);
   }
 
   void test_WorkspaceNameData() {
@@ -269,8 +268,8 @@ private:
     TS_ASSERT_THROWS_NOTHING(saver.execute());
     TS_ASSERT(saver.isExecuted());
 
-    TS_ASSERT(Poco::File(outputFile).exists());
-    if (!Poco::File(outputFile).exists()) {
+    TS_ASSERT(std::filesystem::exists(outputFile));
+    if (!std::filesystem::exists(outputFile)) {
       return boost::make_tuple(std::vector<hsize_t>(), std::vector<double>(), std::vector<double>(),
                                std::vector<double>());
     }

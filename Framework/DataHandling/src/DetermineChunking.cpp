@@ -18,10 +18,10 @@
 #include "MantidNexus/NexusException.h"
 #include "MantidNexus/NexusFile.h"
 
-#include <Poco/File.h>
 #include <exception>
 #include <set>
 #include <vector>
+#include <filesystem>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -113,7 +113,7 @@ void DetermineChunking::exec() {
     return;
   }
 
-  Poco::File fileinfo(filename);
+  std::filesystem::path fileinfo(filename);
   const double fileSizeGiB = static_cast<double>(fileinfo.getSize()) * BYTES_TO_GiB;
 
   // don't bother opening the file if its size is "small"

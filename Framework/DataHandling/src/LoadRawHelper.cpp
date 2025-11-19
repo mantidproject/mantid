@@ -748,7 +748,7 @@ void LoadRawHelper::runLoadLog(const std::string &fileName, const DataObjects::W
  */
 std::string LoadRawHelper::extractLogName(const std::string &path) {
   // The log file's name, including workspace (e.g. CSP78173_ICPevent)
-  std::string fileName = Poco::Path(Poco::Path(path).getFileName()).getBaseName();
+  std::string fileName = std::filesystem::path(std::filesystem::path(path).getFileName()).stem().string();
   // Return only the log name (excluding workspace, e.g. ICPevent)
   return (fileName.substr(fileName.find('_') + 1));
 }

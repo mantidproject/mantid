@@ -24,10 +24,9 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
-#include <Poco/File.h>
-#include <Poco/Path.h>
 #include <cxxtest/TestSuite.h>
 #include <fstream>
+#include <filesystem>
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
@@ -219,7 +218,7 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(saveNexusP.execute());
     TS_ASSERT(saveNexusP.isExecuted());
-    TS_ASSERT(Poco::File(outputFile).exists());
+    TS_ASSERT(std::filesystem::exists(outputFile));
 
     if (!algToBeTested.isInitialized())
       algToBeTested.initialize();

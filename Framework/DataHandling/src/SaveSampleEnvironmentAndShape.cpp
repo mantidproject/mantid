@@ -18,8 +18,7 @@
 #include "MantidGeometry/Objects/MeshObject.h"
 
 #include <memory>
-
-#include <Poco/Path.h>
+#include <filesystem>
 
 namespace Mantid::DataHandling {
 // Register the algorithm into the algorithm factory
@@ -116,7 +115,7 @@ void SaveSampleEnvironmentAndShape::exec() {
 
   // Save out the shape
   auto filename = getPropertyValue("Filename");
-  std::string fileExt = Poco::Path(filename).getExtension();
+  std::string fileExt = std::filesystem::path(filename).extension().string();
   std::transform(fileExt.begin(), fileExt.end(), fileExt.begin(), toupper);
 
   if (fileExt == "STL") {

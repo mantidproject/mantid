@@ -23,8 +23,8 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/MultiThreaded.h"
 
-#include <Poco/File.h>
 #include <limits>
+#include <filesystem>
 
 namespace Mantid::DataHandling {
 // Register the algorithm into the algorithm factory
@@ -70,7 +70,7 @@ void FindDetectorsPar::exec() {
   // try to load par file if one is availible
   std::string fileName = this->getProperty("ParFile");
   if (!(fileName.empty() || fileName == "not_used.par")) {
-    if (!Poco::File(fileName).exists()) {
+    if (!std::filesystem::exists(fileName)) {
       g_log.error() << " FindDetectorsPar: attempting to load par file: " << fileName << " but it does not exist\n";
       throw(Kernel::Exception::FileError(" file not exist", fileName));
     }

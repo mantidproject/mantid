@@ -6,9 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include <Poco/File.h>
 #include <cxxtest/TestSuite.h>
 #include <fstream>
+#include <filesystem>
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -87,7 +87,7 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     // do the checks
-    Poco::File outFile(outFilename);
+    std::filesystem::path outFile(outFilename);
     TS_ASSERT(outFile.isFile());
     TS_ASSERT_EQUALS(countLines(outFilename), 1004);
 

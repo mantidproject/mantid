@@ -13,11 +13,10 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/Unit.h"
-#include <Poco/File.h>
-#include <Poco/Path.h>
 #include <cmath>
 #include <exception>
 #include <fstream>
+#include <filesystem>
 
 using namespace Mantid::DataHandling;
 
@@ -62,8 +61,8 @@ void SaveFocusedXYE::exec() {
   std::string filepath = getProperty("Filename");
   std::string ext;
   {
-    Poco::Path path(filepath);
-    std::string directory = path.parent().toString();
+    std::filesystem::path path(filepath);
+    std::string directory = path.parent_path().string();
     std::string filename = path.getFileName();
 
     std::size_t pos = filename.find_first_of('.');
@@ -73,7 +72,7 @@ void SaveFocusedXYE::exec() {
       filename.erase(pos);
     }
 
-    filepath = Poco::Path(directory, filename).toString();
+    filepath = std::filesystem::path(directory, filename).string();
   }
 
   const bool append = getProperty("Append");
@@ -108,8 +107,8 @@ void SaveFocusedXYE::exec() {
 
   if (!split) {
     const std::string file(std::string(filepath).append(".").append(ext));
-    Poco::File fileObj(file);
-    const bool exists = fileObj.exists();
+    std::filesystem::path fileObj(file);
+    const bool exists = std::filesystem::exists(fileObj);
     out.open(file.c_str(), mode);
     if (headers && (!exists || !append))
       writeHeaders(out, inputWS);
@@ -143,8 +142,8 @@ void SaveFocusedXYE::exec() {
       // Several files will be created with names filename-i.ext
       number << "-" << i + startingbank;
       const std::string file(std::string(filepath).append(number.str()).append(".").append(ext));
-      Poco::File fileObj(file);
-      const bool exists = fileObj.exists();
+      std::filesystem::path fileObj(file);
+      const bool exists = std::filesystem::exists(fileObj);
       out.open(file.c_str(), mode);
       number.str("");
       if (headers && (!exists || !append))

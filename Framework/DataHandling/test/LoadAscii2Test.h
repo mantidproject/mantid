@@ -19,9 +19,8 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/Unit.h"
 
-#include <Poco/File.h>
-
 #include <fstream>
+#include <filesystem>
 
 using namespace Mantid::API;
 using namespace Mantid::DataHandling;
@@ -49,7 +48,7 @@ public:
     TS_ASSERT_EQUALS(2, testLoad.version());
     TS_ASSERT_EQUALS("DataHandling\\Text", testLoad.category());
   }
-  // the Poco::File.remove() is always in a TS_ASERT as i need to make sure the
+  // the std::filesystem::path.remove() is always in a TS_ASERT as i need to make sure the
   // loader has released the file.
   void testConfidence() {
     m_testno++;
@@ -61,77 +60,77 @@ public:
     auto *descriptor = new FileDescriptor(m_abspath);
     TS_ASSERT_EQUALS(10, testLoad.confidence(*descriptor));
     delete descriptor;
-    TS_ASSERT_THROWS_NOTHING(Poco::File(m_abspath).remove());
+    TS_ASSERT_THROWS_NOTHING(std::filesystem::remove(m_abspath));
   }
 
   void test_Three_Column_Example_With_No_Header() {
     m_testno++;
     m_abspath = writeTestFile(3, false);
     runTest(3);
-    TS_ASSERT_THROWS_NOTHING(Poco::File(m_abspath).remove());
+    TS_ASSERT_THROWS_NOTHING(std::filesystem::remove(m_abspath));
   }
 
   void test_Three_Column_With_Header_Info() {
     m_testno++;
     m_abspath = writeTestFile(3);
     runTest(3);
-    TS_ASSERT_THROWS_NOTHING(Poco::File(m_abspath).remove());
+    TS_ASSERT_THROWS_NOTHING(std::filesystem::remove(m_abspath));
   }
 
   void test_Two_Column_Example_With_No_Header() {
     m_testno++;
     m_abspath = writeTestFile(2, false);
     runTest(2);
-    TS_ASSERT_THROWS_NOTHING(Poco::File(m_abspath).remove());
+    TS_ASSERT_THROWS_NOTHING(std::filesystem::remove(m_abspath));
   }
 
   void test_Two_Column_With_Header_Info() {
     m_testno++;
     m_abspath = writeTestFile(2);
     runTest(2);
-    TS_ASSERT_THROWS_NOTHING(Poco::File(m_abspath).remove());
+    TS_ASSERT_THROWS_NOTHING(std::filesystem::remove(m_abspath));
   }
 
   void test_Four_Column_Example_With_No_Header() {
     m_testno++;
     m_abspath = writeTestFile(4, false);
     runTest(4);
-    TS_ASSERT_THROWS_NOTHING(Poco::File(m_abspath).remove());
+    TS_ASSERT_THROWS_NOTHING(std::filesystem::remove(m_abspath));
   }
 
   void test_Four_Column_Example_With_HeaderInfo() {
     m_testno++;
     m_abspath = writeTestFile(4);
     runTest(4);
-    TS_ASSERT_THROWS_NOTHING(Poco::File(m_abspath).remove());
+    TS_ASSERT_THROWS_NOTHING(std::filesystem::remove(m_abspath));
   }
 
   void test_Four_Column_With_HeaderInfo_CommentChange() {
     m_testno++;
     m_abspath = writeTestFile(4, true, "~");
     runTest(4, false, "~");
-    TS_ASSERT_THROWS_NOTHING(Poco::File(m_abspath).remove());
+    TS_ASSERT_THROWS_NOTHING(std::filesystem::remove(m_abspath));
   }
 
   void test_Four_Column_With_HeaderInfo_NonScientific() {
     m_testno++;
     m_abspath = writeTestFile(4, true, "#", false, 7);
     runTest(4);
-    TS_ASSERT_THROWS_NOTHING(Poco::File(m_abspath).remove());
+    TS_ASSERT_THROWS_NOTHING(std::filesystem::remove(m_abspath));
   }
 
   void test_Four_Column_With_Different_Separator() {
     m_testno++;
     m_abspath = writeTestFile(4, true, "#", true, 6, "Space");
     runTest(4, true, "#", "Space");
-    TS_ASSERT_THROWS_NOTHING(Poco::File(m_abspath).remove());
+    TS_ASSERT_THROWS_NOTHING(std::filesystem::remove(m_abspath));
   }
 
   void test_Custom_Separators() {
     m_testno++;
     m_abspath = writeTestFile(4, true, "#", true, 6, "UserDefined", "~");
     runTest(4, false, "#", "UserDefined", false, "~");
-    TS_ASSERT_THROWS_NOTHING(Poco::File(m_abspath).remove());
+    TS_ASSERT_THROWS_NOTHING(std::filesystem::remove(m_abspath));
   }
 
   void test_Spacing_Around_Separators() {
@@ -141,7 +140,7 @@ public:
     // this should work as the load will look for commas and strip out excess
     // spaces
     runTest(4);
-    TS_ASSERT_THROWS_NOTHING(Poco::File(m_abspath).remove());
+    TS_ASSERT_THROWS_NOTHING(std::filesystem::remove(m_abspath));
   }
 
   void test_Double_Spacing_Separators() {
@@ -150,7 +149,7 @@ public:
                               "  "); // double space
     // this should work as the load will strip out excess spaces
     runTest(4, true, "#", "Space");
-    TS_ASSERT_THROWS_NOTHING(Poco::File(m_abspath).remove());
+    TS_ASSERT_THROWS_NOTHING(std::filesystem::remove(m_abspath));
   }
 
   void test_Distribution_Header_Flag_true() {
@@ -160,7 +159,7 @@ public:
     m_abspath = writeTestFile(4, true, "#", true, 6, "UserDefined", " ", true, true);
     auto loadedWS = runTest(4, true, "#", "Space");
     TS_ASSERT_EQUALS(loadedWS->isDistribution(), true);
-    TS_ASSERT_THROWS_NOTHING(Poco::File(m_abspath).remove());
+    TS_ASSERT_THROWS_NOTHING(std::filesystem::remove(m_abspath));
   }
 
   void test_Distribution_Header_Flag_true_Two_Columns() {
@@ -171,7 +170,7 @@ public:
     m_abspath = writeTestFile(2, true, "#", true, 6, "UserDefined", " ", true, true);
     auto loadedWS = runTest(2, true);
     TS_ASSERT_EQUALS(loadedWS->isDistribution(), true);
-    TS_ASSERT_THROWS_NOTHING(Poco::File(m_abspath).remove());
+    TS_ASSERT_THROWS_NOTHING(std::filesystem::remove(m_abspath));
   }
 
   void test_Distribution_Header_Flag_false() {
@@ -181,7 +180,7 @@ public:
     m_abspath = writeTestFile(4, true, "#", true, 6, "UserDefined", " ", false, true);
     auto loadedWS = runTest(4, true, "#", "Space");
     TS_ASSERT_EQUALS(loadedWS->isDistribution(), false);
-    TS_ASSERT_THROWS_NOTHING(Poco::File(m_abspath).remove());
+    TS_ASSERT_THROWS_NOTHING(std::filesystem::remove(m_abspath));
   }
 
   void test_Distribution_Header_Flag_false_Two_Columns() {
@@ -192,7 +191,7 @@ public:
     m_abspath = writeTestFile(2, true, "#", true, 6, "UserDefined", " ", false, true);
     auto loadedWS = runTest(2, true);
     TS_ASSERT_EQUALS(loadedWS->isDistribution(), false);
-    TS_ASSERT_THROWS_NOTHING(Poco::File(m_abspath).remove());
+    TS_ASSERT_THROWS_NOTHING(std::filesystem::remove(m_abspath));
   }
 
   void test_Distribution_No_Flag_false() {
@@ -202,7 +201,7 @@ public:
     m_abspath = writeTestFile(4, true, "#", true, 6, "UserDefined", " ", true, false);
     auto loadedWS = runTest(4, true, "#", "Space");
     TS_ASSERT_EQUALS(loadedWS->isDistribution(), false);
-    TS_ASSERT_THROWS_NOTHING(Poco::File(m_abspath).remove());
+    TS_ASSERT_THROWS_NOTHING(std::filesystem::remove(m_abspath));
   }
 
   void test_Distribution_No_Flag_false_Two_Columns() {
@@ -213,7 +212,7 @@ public:
     m_abspath = writeTestFile(2, false, "#", true, 6, "UserDefined", " ", true, false);
     auto loadedWS = runTest(2, true);
     TS_ASSERT_EQUALS(loadedWS->isDistribution(), false);
-    TS_ASSERT_THROWS_NOTHING(Poco::File(m_abspath).remove());
+    TS_ASSERT_THROWS_NOTHING(std::filesystem::remove(m_abspath));
   }
 
   void test_Distribution_Property_true_No_Flag() {
@@ -224,7 +223,7 @@ public:
     m_abspath = writeTestFile(4, false, "#", true, 6, "UserDefined", " ", false, false);
     auto loadedWS = runTest(4, true, "#", "Space", false, "", true);
     TS_ASSERT_EQUALS(loadedWS->isDistribution(), true);
-    TS_ASSERT_THROWS_NOTHING(Poco::File(m_abspath).remove());
+    TS_ASSERT_THROWS_NOTHING(std::filesystem::remove(m_abspath));
   }
 
   void test_Distribution_Property_true_Two_Columns_No_Flag() {
@@ -236,7 +235,7 @@ public:
     m_abspath = writeTestFile(2, false, "#", true, 6, "UserDefined", " ", false, false);
     auto loadedWS = runTest(2, true, "#", "CSV", false, "", true);
     TS_ASSERT_EQUALS(loadedWS->isDistribution(), true);
-    TS_ASSERT_THROWS_NOTHING(Poco::File(m_abspath).remove());
+    TS_ASSERT_THROWS_NOTHING(std::filesystem::remove(m_abspath));
   }
 
   void test_Distribution_Property_true_Flag_true() {
@@ -247,7 +246,7 @@ public:
     m_abspath = writeTestFile(4, false, "#", true, 6, "UserDefined", " ", true, true);
     auto loadedWS = runTest(4, true, "#", "Space", false, "", true);
     TS_ASSERT_EQUALS(loadedWS->isDistribution(), true);
-    TS_ASSERT_THROWS_NOTHING(Poco::File(m_abspath).remove());
+    TS_ASSERT_THROWS_NOTHING(std::filesystem::remove(m_abspath));
   }
 
   void test_Distribution_Property_true_Two_Columns_Flag_true() {
@@ -259,7 +258,7 @@ public:
     m_abspath = writeTestFile(2, true, "#", true, 6, "UserDefined", " ", true, true);
     auto loadedWS = runTest(2, true, "#", "CSV", false, "", true);
     TS_ASSERT_EQUALS(loadedWS->isDistribution(), true);
-    TS_ASSERT_THROWS_NOTHING(Poco::File(m_abspath).remove());
+    TS_ASSERT_THROWS_NOTHING(std::filesystem::remove(m_abspath));
   }
 
   void test_Distribution_Property_true_Flag_false() {
@@ -270,7 +269,7 @@ public:
     m_abspath = writeTestFile(4, false, "#", true, 6, "UserDefined", " ", false, true);
     auto loadedWS = runTest(4, true, "#", "Space", false, "", true);
     TS_ASSERT_EQUALS(loadedWS->isDistribution(), true);
-    TS_ASSERT_THROWS_NOTHING(Poco::File(m_abspath).remove());
+    TS_ASSERT_THROWS_NOTHING(std::filesystem::remove(m_abspath));
   }
 
   void test_Distribution_Property_true_Two_Columns_Flag_false() {
@@ -282,7 +281,7 @@ public:
     m_abspath = writeTestFile(2, true, "#", true, 6, "UserDefined", " ", false, true);
     auto loadedWS = runTest(2, true, "#", "CSV", false, "", true);
     TS_ASSERT_EQUALS(loadedWS->isDistribution(), true);
-    TS_ASSERT_THROWS_NOTHING(Poco::File(m_abspath).remove());
+    TS_ASSERT_THROWS_NOTHING(std::filesystem::remove(m_abspath));
   }
 
   void test_fail_five_columns() {
@@ -301,7 +300,7 @@ public:
     file.unsetf(std::ios_base::floatfield);
     file.close();
     runTest(4, false, "#", "CSV", true); // cols doesn't matter here
-    TS_ASSERT_THROWS_NOTHING(Poco::File(m_abspath).remove());
+    TS_ASSERT_THROWS_NOTHING(std::filesystem::remove(m_abspath));
   }
 
   void test_fail_one_column() {
@@ -319,7 +318,7 @@ public:
     file.unsetf(std::ios_base::floatfield);
     file.close();
     runTest(1, false, "#", "CSV", true); // cols doesn't matter here
-    TS_ASSERT_THROWS_NOTHING(Poco::File(m_abspath).remove());
+    TS_ASSERT_THROWS_NOTHING(std::filesystem::remove(m_abspath));
   }
 
   void test_fail_mismatching_bins() {
@@ -339,7 +338,7 @@ public:
     file.unsetf(std::ios_base::floatfield);
     file.close();
     runTest(4, false, "#", "CSV", true); // cols doesn't matter here
-    TS_ASSERT_THROWS_NOTHING(Poco::File(m_abspath).remove());
+    TS_ASSERT_THROWS_NOTHING(std::filesystem::remove(m_abspath));
   }
 
   void test_fail_mismatching_columns() {
@@ -361,7 +360,7 @@ public:
     file.unsetf(std::ios_base::floatfield);
     file.close();
     runTest(4, false, "#", "CSV", true); // cols doesn't matter here
-    TS_ASSERT_THROWS_NOTHING(Poco::File(m_abspath).remove());
+    TS_ASSERT_THROWS_NOTHING(std::filesystem::remove(m_abspath));
   }
 
   void test_fail_line_start_letter() {
@@ -384,7 +383,7 @@ public:
     file.unsetf(std::ios_base::floatfield);
     file.close();
     runTest(4, false, "#", "CSV", true); // cols doesn't matter here
-    TS_ASSERT_THROWS_NOTHING(Poco::File(m_abspath).remove());
+    TS_ASSERT_THROWS_NOTHING(std::filesystem::remove(m_abspath));
   }
 
   void test_fail_line_start_noncomment_symbol() {
@@ -406,7 +405,7 @@ public:
     file.unsetf(std::ios_base::floatfield);
     file.close();
     runTest(4, false, "#", "CSV", true); // cols doesn't matter here
-    TS_ASSERT_THROWS_NOTHING(Poco::File(m_abspath).remove());
+    TS_ASSERT_THROWS_NOTHING(std::filesystem::remove(m_abspath));
   }
 
   void test_fail_line_mixed_letter_number() {
@@ -430,7 +429,7 @@ public:
     file.unsetf(std::ios_base::floatfield);
     file.close();
     runTest(4, false, "#", "CSV", true); // cols doesn't matter here
-    TS_ASSERT_THROWS_NOTHING(Poco::File(m_abspath).remove());
+    TS_ASSERT_THROWS_NOTHING(std::filesystem::remove(m_abspath));
   }
 
   void test_fail_line_mixed_symbol_number() {
@@ -453,7 +452,7 @@ public:
     file.unsetf(std::ios_base::floatfield);
     file.close();
     runTest(4, false, "#", "CSV", true); // cols doesn't matter here
-    TS_ASSERT_THROWS_NOTHING(Poco::File(m_abspath).remove());
+    TS_ASSERT_THROWS_NOTHING(std::filesystem::remove(m_abspath));
   }
 
   void test_fail_spectra_ID_inclusion_inconisitant() {
@@ -476,7 +475,7 @@ public:
     file.unsetf(std::ios_base::floatfield);
     file.close();
     runTest(4, false, "#", "CSV", true); // cols doesn't matter here
-    TS_ASSERT_THROWS_NOTHING(Poco::File(m_abspath).remove());
+    TS_ASSERT_THROWS_NOTHING(std::filesystem::remove(m_abspath));
   }
 
   void test_tableworkspace() {
@@ -513,7 +512,7 @@ public:
       TS_FAIL(outputName + " does not exist.");
     }
     dataStore.remove(outputName);
-    TS_ASSERT_THROWS_NOTHING(Poco::File(m_abspath).remove());
+    TS_ASSERT_THROWS_NOTHING(std::filesystem::remove(m_abspath));
   }
 
 private:
@@ -763,7 +762,7 @@ public:
   void testLoadAscii2Performance() { TS_ASSERT_THROWS_NOTHING(loadAlg.execute()); }
 
   void tearDown() override {
-    TS_ASSERT_THROWS_NOTHING(Poco::File(filename).remove());
+    TS_ASSERT_THROWS_NOTHING(std::filesystem::remove(filename));
     AnalysisDataService::Instance().remove(outputName);
   }
 

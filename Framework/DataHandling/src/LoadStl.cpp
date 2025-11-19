@@ -6,8 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadStl.h"
 #include "MantidKernel/V3D.h"
-#include <Poco/File.h>
-
 #include <functional>
 
 namespace Mantid::DataHandling {

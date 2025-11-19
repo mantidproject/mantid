@@ -12,9 +12,7 @@
 #include "MantidNexus/H5Util.h"
 
 #include <H5Cpp.h>
-#include <Poco/File.h>
-#include <Poco/Path.h>
-
+#include <filesystem>
 namespace Mantid::DataHandling {
 
 using Mantid::API::FileProperty;
@@ -273,8 +271,8 @@ void SaveDiffCal::exec() {
 
   // delete the file if it already exists
   std::string filename = getProperty("Filename");
-  if (Poco::File(filename).exists()) {
-    Poco::File(filename).remove();
+  if (std::filesystem::exists(filename)) {
+    std::filesystem::remove(filename);
   }
 
   H5File file(filename, H5F_ACC_EXCL, Nexus::H5Util::defaultFileAcc());
@@ -333,7 +331,7 @@ void SaveDiffCal::exec() {
     }
   }
   if (!instrumentSource.empty()) {
-    instrumentSource = Poco::Path(instrumentSource).getFileName();
+    instrumentSource = std::filesystem::path(instrumentSource).getFileName();
   }
 
   // add the instrument information

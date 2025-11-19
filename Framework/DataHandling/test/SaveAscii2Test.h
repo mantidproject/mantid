@@ -17,12 +17,12 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
-#include <Poco/File.h>
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <cxxtest/TestSuite.h>
 #include <fstream>
 #include <iostream>
+#include <filesystem>
 
 using namespace Mantid::API;
 using namespace Mantid::DataHandling;
@@ -56,7 +56,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(save.execute());
 
     // has the algorithm written a file to disk?
-    TS_ASSERT(Poco::File(filename).exists());
+    TS_ASSERT(std::filesystem::exists(filename));
 
     // Now make some checks on the content of the file
     std::ifstream in(filename.c_str());
@@ -98,7 +98,7 @@ public:
 
     in.close();
 
-    Poco::File(filename).remove();
+    std::filesystem::remove(filename);
     AnalysisDataService::Instance().remove(m_name);
   }
 
@@ -120,8 +120,8 @@ public:
     for (int spec = 0; spec < 3; ++spec) {
       std::ostringstream ss;
       ss << std::string(filename, 0, extPos) << "_" << spec << std::string(filename, extPos);
-      TS_ASSERT(Poco::File(ss.str()).exists());
-      Poco::File(ss.str()).remove();
+      TS_ASSERT(std::filesystem::path(ss.str()).exists());
+      std::filesystem::path(ss.str()).remove();
     }
 
     // numeric axis
@@ -136,8 +136,8 @@ public:
       std::ostringstream ss;
       ss << std::string(filename, 0, extPos) << "_" << spec << "_" << spec * spec << std::string(filename, extPos);
       std::cout << ss.str() << std::endl;
-      TS_ASSERT(Poco::File(ss.str()).exists());
-      Poco::File(ss.str()).remove();
+      TS_ASSERT(std::filesystem::path(ss.str()).exists());
+      std::filesystem::path(ss.str()).remove();
     }
 
     // bin edge axis
@@ -151,8 +151,8 @@ public:
       std::ostringstream ss;
       ss << std::string(filename, 0, extPos) << "_" << spec << "_" << 0.5 * (spec * spec + (spec + 1) * (spec + 1))
          << std::string(filename, extPos);
-      TS_ASSERT(Poco::File(ss.str()).exists());
-      Poco::File(ss.str()).remove();
+      TS_ASSERT(std::filesystem::path(ss.str()).exists());
+      std::filesystem::path(ss.str()).remove();
     }
 
     // text axis
@@ -165,8 +165,8 @@ public:
     for (int spec = 0; spec < 3; ++spec) {
       std::ostringstream ss;
       ss << std::string(filename, 0, extPos) << "_" << spec << "_ax_" << spec << std::string(filename, extPos);
-      TS_ASSERT(Poco::File(ss.str()).exists());
-      Poco::File(ss.str()).remove();
+      TS_ASSERT(std::filesystem::path(ss.str()).exists());
+      std::filesystem::path(ss.str()).remove();
     }
   }
 
@@ -216,7 +216,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(save.execute());
 
     // has the algorithm written a file to disk?
-    TS_ASSERT(Poco::File(filename).exists());
+    TS_ASSERT(std::filesystem::exists(filename));
 
     // Now make some checks on the content of the file
     std::ifstream in(filename.c_str());
@@ -261,7 +261,7 @@ public:
 
     in.close();
 
-    Poco::File(filename).remove();
+    std::filesystem::remove(filename);
     AnalysisDataService::Instance().remove(m_name);
   }
 
@@ -277,7 +277,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(save.execute());
 
     // has the algorithm written a file to disk?
-    TS_ASSERT(Poco::File(filename).exists());
+    TS_ASSERT(std::filesystem::exists(filename));
 
     // Now make some checks on the content of the file
     std::ifstream in(filename.c_str());
@@ -300,7 +300,7 @@ public:
 
     in.close();
 
-    Poco::File(filename).remove();
+    std::filesystem::remove(filename);
     AnalysisDataService::Instance().remove(m_name);
   }
 
@@ -315,7 +315,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(save.execute());
 
     // has the algorithm written a file to disk?
-    TS_ASSERT(Poco::File(filename).exists());
+    TS_ASSERT(std::filesystem::exists(filename));
 
     // Now make some checks on the content of the file
     std::ifstream in(filename.c_str());
@@ -334,7 +334,7 @@ public:
     TS_ASSERT_EQUALS(axisVal, 1.);
     in.close();
 
-    Poco::File(filename).remove();
+    std::filesystem::remove(filename);
     AnalysisDataService::Instance().remove(m_name);
   }
 
@@ -350,7 +350,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(save.execute());
 
     // has the algorithm written a file to disk?
-    TS_ASSERT(Poco::File(filename).exists());
+    TS_ASSERT(std::filesystem::exists(filename));
 
     // Now make some checks on the content of the file
     std::ifstream in(filename.c_str());
@@ -371,7 +371,7 @@ public:
 
     in.close();
 
-    Poco::File(filename).remove();
+    std::filesystem::remove(filename);
     AnalysisDataService::Instance().remove(m_name);
   }
 
@@ -386,8 +386,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(save.execute());
 
     // the algorithm will have used a defualt and written a file to disk
-    TS_ASSERT(Poco::File(filename).exists());
-    Poco::File(filename).remove();
+    TS_ASSERT(std::filesystem::exists(filename));
+    std::filesystem::remove(filename);
 
     AnalysisDataService::Instance().remove(m_name);
   }
@@ -403,7 +403,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(save.execute());
 
     // has the algorithm written a file to disk?
-    TS_ASSERT(Poco::File(filename).exists());
+    TS_ASSERT(std::filesystem::exists(filename));
 
     // Now make some checks on the content of the file
     std::ifstream in(filename.c_str());
@@ -422,7 +422,7 @@ public:
 
     in.close();
 
-    Poco::File(filename).remove();
+    std::filesystem::remove(filename);
     AnalysisDataService::Instance().remove(m_name);
   }
 
@@ -436,7 +436,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(save.execute());
 
     // has the algorithm written a file to disk?
-    TS_ASSERT(Poco::File(filename).exists());
+    TS_ASSERT(std::filesystem::exists(filename));
 
     save.setPropertyValue("Filename", m_filename_nohead);
     save.setPropertyValue("InputWorkspace", m_name);
@@ -445,7 +445,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(save.execute());
 
     // has the algorithm written a file to disk?
-    TS_ASSERT(Poco::File(filename_nohead).exists());
+    TS_ASSERT(std::filesystem::exists(filename_nohead));
 
     // Now we check that the first line of the file without header matches the
     // second line of the file with header
@@ -462,8 +462,8 @@ public:
     in1.close();
     in2.close();
     // Remove files
-    Poco::File(filename).remove();
-    Poco::File(filename_nohead).remove();
+    std::filesystem::remove(filename);
+    std::filesystem::remove(filename_nohead);
     AnalysisDataService::Instance().remove(m_name);
   }
 
@@ -479,7 +479,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(save.execute());
 
     // has the algorithm written a file to disk?
-    TS_ASSERT(Poco::File(filename).exists());
+    TS_ASSERT(std::filesystem::exists(filename));
 
     // Now we check that the first line of the file without header matches the
     // second line of the file with header
@@ -493,7 +493,7 @@ public:
     TS_ASSERT_EQUALS(line3, "does_not_exist,Not defined,");
     in1.close();
     // Remove files
-    Poco::File(filename).remove();
+    std::filesystem::remove(filename);
     AnalysisDataService::Instance().remove(m_name);
   }
 
@@ -511,7 +511,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(save.execute());
 
     // has the algorithm written a file to disk?
-    TS_ASSERT(Poco::File(filename).exists());
+    TS_ASSERT(std::filesystem::exists(filename));
 
     // Now make some checks on the content of the file
     std::ifstream in(filename.c_str());
@@ -531,7 +531,7 @@ public:
     TS_ASSERT_EQUALS(header3, "E");
 
     in.close();
-    Poco::File(filename).remove();
+    std::filesystem::remove(filename);
 
     AnalysisDataService::Instance().remove(m_name);
   }
@@ -548,7 +548,7 @@ public:
     TS_ASSERT_THROWS_ANYTHING(save.execute());
 
     // the algorithm shouldn't have written a file to disk
-    TS_ASSERT(!Poco::File(filename).exists());
+    TS_ASSERT(!std::filesystem::exists(filename));
 
     AnalysisDataService::Instance().remove(m_name);
   }
@@ -564,7 +564,7 @@ public:
     TS_ASSERT_THROWS_ANYTHING(save.execute());
 
     // the algorithm shouldn't have written a file to disk
-    TS_ASSERT(!Poco::File(filename).exists());
+    TS_ASSERT(!std::filesystem::exists(filename));
   }
 
   void test_fail_invalid_IndexMax() {
@@ -583,7 +583,7 @@ public:
     TS_ASSERT_THROWS(save.execute(), const std::invalid_argument &);
 
     // the algorithm shouldn't have written a file to disk
-    TS_ASSERT(!Poco::File(filename).exists());
+    TS_ASSERT(!std::filesystem::exists(filename));
 
     AnalysisDataService::Instance().remove(m_name);
   }
@@ -610,7 +610,7 @@ public:
 
     // the algorithm didn't run so there should be no file
     // the algorithm shouldn't have written a file to disk
-    TS_ASSERT(!Poco::File(filename).exists());
+    TS_ASSERT(!std::filesystem::exists(filename));
 
     AnalysisDataService::Instance().remove(m_name);
   }
@@ -635,8 +635,8 @@ public:
     SaveAscii2 save;
     std::string filename = initSaveAscii2(save);
 
-    if (Poco::File(filename).exists())
-      Poco::File(filename).remove();
+    if (std::filesystem::exists(filename))
+      std::filesystem::remove(filename);
 
     TS_ASSERT_THROWS_NOTHING(save.setPropertyValue("WorkspaceIndexMin", "3"));
     TS_ASSERT_THROWS_NOTHING(save.setPropertyValue("WorkspaceIndexMax", "2"));
@@ -644,7 +644,7 @@ public:
     TS_ASSERT_THROWS(save.execute(), const std::invalid_argument &);
 
     // the algorithm shouldn't have written a file to disk
-    TS_ASSERT(!Poco::File(filename).exists());
+    TS_ASSERT(!std::filesystem::exists(filename));
 
     AnalysisDataService::Instance().remove(m_name);
   }
@@ -661,8 +661,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(save.execute());
 
     // the algorithm will have used a defualt and written a file to disk
-    TS_ASSERT(Poco::File(filename).exists());
-    Poco::File(filename).remove();
+    TS_ASSERT(std::filesystem::exists(filename));
+    std::filesystem::remove(filename);
 
     AnalysisDataService::Instance().remove(m_name);
   }
@@ -679,7 +679,7 @@ public:
     TS_ASSERT_THROWS(save.execute(), const std::invalid_argument &);
 
     // the algorithm shouldn't have written a file to disk
-    TS_ASSERT(!Poco::File(filename).exists());
+    TS_ASSERT(!std::filesystem::exists(filename));
 
     AnalysisDataService::Instance().remove(m_name);
   }
@@ -696,7 +696,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(save.execute());
 
     // the algorithm shouldn't have written a file to disk
-    TS_ASSERT(Poco::File(filename).exists());
+    TS_ASSERT(std::filesystem::exists(filename));
 
     // Now make some checks on the content of the file
     std::ifstream in(filename.c_str());
@@ -738,7 +738,7 @@ public:
 
     in.close();
 
-    Poco::File(filename).remove();
+    std::filesystem::remove(filename);
     AnalysisDataService::Instance().remove(m_name);
   }
 
@@ -754,8 +754,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(save.execute());
 
     // the algorithm will have used a defualt and written a file to disk
-    TS_ASSERT(Poco::File(filename).exists());
-    Poco::File(filename).remove();
+    TS_ASSERT(std::filesystem::exists(filename));
+    std::filesystem::remove(filename);
 
     AnalysisDataService::Instance().remove(m_name);
   }
@@ -772,7 +772,7 @@ public:
     TS_ASSERT_THROWS(save.execute(), const std::invalid_argument &);
 
     // the algorithm shouldn't have written a file to disk
-    TS_ASSERT(!Poco::File(filename).exists());
+    TS_ASSERT(!std::filesystem::exists(filename));
 
     AnalysisDataService::Instance().remove(m_name);
   }
@@ -789,7 +789,7 @@ public:
     TS_ASSERT_THROWS(save.execute(), const std::invalid_argument &);
 
     // the algorithm shouldn't have written a file to disk
-    TS_ASSERT(!Poco::File(filename).exists());
+    TS_ASSERT(!std::filesystem::exists(filename));
 
     AnalysisDataService::Instance().remove(m_name);
   }
@@ -806,7 +806,7 @@ public:
     TS_ASSERT_THROWS(save.execute(), const std::invalid_argument &);
 
     // the algorithm shouldn't have written a file to disk
-    TS_ASSERT(!Poco::File(filename).exists());
+    TS_ASSERT(!std::filesystem::exists(filename));
 
     AnalysisDataService::Instance().remove(m_name);
   }
@@ -823,7 +823,7 @@ public:
     TS_ASSERT_THROWS(save.execute(), const std::invalid_argument &);
 
     // the algorithm shouldn't have written a file to disk
-    TS_ASSERT(!Poco::File(filename).exists());
+    TS_ASSERT(!std::filesystem::exists(filename));
 
     AnalysisDataService::Instance().remove(m_name);
   }
@@ -841,7 +841,7 @@ public:
     TS_ASSERT_THROWS(save.execute(), const std::invalid_argument &);
 
     // the algorithm shouldn't have written a file to disk
-    TS_ASSERT(!Poco::File(filename).exists());
+    TS_ASSERT(!std::filesystem::exists(filename));
 
     AnalysisDataService::Instance().remove(m_name);
   }
@@ -859,7 +859,7 @@ public:
     TS_ASSERT_THROWS(save.execute(), const std::invalid_argument &);
 
     // the algorithm shouldn't have written a file to disk
-    TS_ASSERT(!Poco::File(filename).exists());
+    TS_ASSERT(!std::filesystem::exists(filename));
 
     AnalysisDataService::Instance().remove(m_name);
   }
@@ -877,7 +877,7 @@ public:
     TS_ASSERT_THROWS(save.execute(), const std::invalid_argument &);
 
     // the algorithm shouldn't have written a file to disk
-    TS_ASSERT(!Poco::File(filename).exists());
+    TS_ASSERT(!std::filesystem::exists(filename));
 
     AnalysisDataService::Instance().remove(m_name);
   }
@@ -895,7 +895,7 @@ public:
     TS_ASSERT_THROWS(save.execute(), const std::invalid_argument &);
 
     // the algorithm shouldn't have written a file to disk
-    TS_ASSERT(!Poco::File(filename).exists());
+    TS_ASSERT(!std::filesystem::exists(filename));
 
     AnalysisDataService::Instance().remove(m_name);
   }
@@ -912,8 +912,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(save.execute());
 
     // the algorithm will have used a defualt and written a file to disk
-    TS_ASSERT(Poco::File(filename).exists());
-    Poco::File(filename).remove();
+    TS_ASSERT(std::filesystem::exists(filename));
+    std::filesystem::remove(filename);
 
     AnalysisDataService::Instance().remove(m_name);
   }
@@ -945,7 +945,7 @@ public:
     TS_ASSERT_THROWS_ANYTHING(save.execute());
 
     // the algorithm shouldn't have written a file to disk
-    TS_ASSERT(!Poco::File(filename).exists());
+    TS_ASSERT(!std::filesystem::exists(filename));
 
     AnalysisDataService::Instance().remove(m_name);
   }
@@ -959,7 +959,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(save.execute());
 
     // has the algorithm written a file to disk?
-    TS_ASSERT(Poco::File(filename).exists());
+    TS_ASSERT(std::filesystem::exists(filename));
 
     // Now make some checks on the content of the file
     std::ifstream in(filename.c_str());
@@ -988,7 +988,7 @@ public:
 
     in.close();
 
-    Poco::File(filename).remove();
+    std::filesystem::remove(filename);
     AnalysisDataService::Instance().remove(m_name);
   }
 
@@ -1005,8 +1005,8 @@ public:
     std::ostringstream ss0, ss1;
     ss0 << std::string(filename, 0, extPos) << "_0" << std::string(filename, extPos);
     ss1 << std::string(filename, 0, extPos) << "_1" << std::string(filename, extPos);
-    TS_ASSERT(Poco::File(ss0.str()).exists());
-    TS_ASSERT(Poco::File(ss1.str()).exists());
+    TS_ASSERT(std::filesystem::path(ss0.str()).exists());
+    TS_ASSERT(std::filesystem::path(ss1.str()).exists());
     AnalysisDataService::Instance().remove(m_name);
   }
 
@@ -1027,7 +1027,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(save.execute());
 
     // has the algorithm written a file to disk?
-    TS_ASSERT(Poco::File(filename).exists());
+    TS_ASSERT(std::filesystem::exists(filename));
 
     // Now make some checks on the content of the file
     std::ifstream in(filename.c_str());
@@ -1051,7 +1051,7 @@ public:
 
     in.close();
 
-    Poco::File(filename).remove();
+    std::filesystem::remove(filename);
     AnalysisDataService::Instance().remove(m_name);
   }
 
@@ -1071,7 +1071,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(save.execute());
 
     // has the algorithm written a file to disk?
-    TS_ASSERT(Poco::File(filename).exists());
+    TS_ASSERT(std::filesystem::exists(filename));
 
     // Now make some checks on the content of the file
     std::ifstream in(filename.c_str());
@@ -1095,7 +1095,7 @@ public:
 
     in.close();
 
-    Poco::File(filename).remove();
+    std::filesystem::remove(filename);
     AnalysisDataService::Instance().remove(m_name);
   }
 
@@ -1119,7 +1119,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(save.execute());
 
     // has the algorithm written a file to disk?
-    TS_ASSERT(Poco::File(filename).exists());
+    TS_ASSERT(std::filesystem::exists(filename));
 
     // Now make some checks on the content of the file
     std::ifstream in(filename.c_str());
@@ -1143,7 +1143,7 @@ public:
 
     in.close();
 
-    Poco::File(filename).remove();
+    std::filesystem::remove(filename);
     AnalysisDataService::Instance().remove(m_name);
   }
 
@@ -1166,7 +1166,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(save.execute());
 
     // has the algorithm written a file to disk?
-    TS_ASSERT(Poco::File(filename).exists());
+    TS_ASSERT(std::filesystem::exists(filename));
 
     // Now make some checks on the content of the file
     std::ifstream in(filename.c_str());
@@ -1183,7 +1183,7 @@ public:
 
     in.close();
 
-    Poco::File(filename).remove();
+    std::filesystem::remove(filename);
     AnalysisDataService::Instance().remove(m_name);
   }
 
@@ -1196,7 +1196,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(save.execute());
 
     // has the algorithm written a file to disk?
-    TS_ASSERT(Poco::File(filename).exists());
+    TS_ASSERT(std::filesystem::exists(filename));
 
     // Now make some checks on the content of the file
     std::ifstream in(filename.c_str());
@@ -1221,7 +1221,7 @@ public:
 
     in.close();
 
-    Poco::File(filename).remove();
+    std::filesystem::remove(filename);
     AnalysisDataService::Instance().remove(m_name);
   }
 
@@ -1340,7 +1340,7 @@ public:
       saveAlgPtrs[i] = nullptr;
     }
     Mantid::API::AnalysisDataService::Instance().remove(m_name);
-    Poco::File gsasfile(m_filename);
+    std::filesystem::path gsasfile(m_filename);
     if (gsasfile.exists())
       gsasfile.remove();
   }

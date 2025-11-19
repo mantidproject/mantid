@@ -11,9 +11,9 @@
 #include "MantidDataHandling/SaveCSV.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidHistogramData/LinearGenerator.h"
-#include <Poco/File.h>
 #include <cxxtest/TestSuite.h>
 #include <fstream>
+#include <filesystem>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -85,7 +85,7 @@ public:
 
     // has the algorithm written a file to disk?
 
-    TS_ASSERT(Poco::File(outputFile).exists());
+    TS_ASSERT(std::filesystem::exists(outputFile));
 
     // Do a few tests to see if the content of outputFile is what you
     // expect.
@@ -109,7 +109,7 @@ public:
     TS_ASSERT_EQUALS(number_plus_comma, "0.3,");
 
     // remove file created by this algorithm
-    Poco::File(outputFile).remove();
+    std::filesystem::remove(outputFile);
     AnalysisDataService::Instance().remove("SAVECSVTEST-testSpace");
   }
 
@@ -156,11 +156,11 @@ private:
     TS_ASSERT(saveCSV.isExecuted());
 
     // Assert
-    TS_ASSERT(Poco::File(fileName).exists());
+    TS_ASSERT(std::filesystem::exists(fileName));
     evaluateFileWithDX(fileName, nSpec);
 
     // Clean up
-    Poco::File(fileName).remove();
+    std::filesystem::remove(fileName);
   }
 
   void evaluateFileWithDX(const std::string &fileName, const size_t nSpec) const {

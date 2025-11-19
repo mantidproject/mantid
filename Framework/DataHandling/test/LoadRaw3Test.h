@@ -18,13 +18,12 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/Unit.h"
-#include <Poco/File.h>
-#include <Poco/Path.h>
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/lexical_cast.hpp>
 #include <cxxtest/TestSuite.h>
+#include <filesystem>
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -49,8 +48,8 @@ public:
   /// </summary>
   void testAlternateDataStream() {
 #ifdef _WIN32
-    Poco::Path rawFilePath("./fakeRawFile.raw");
-    Poco::File rawFile(rawFilePath);
+    std::filesystem::path rawFilePath("./fakeRawFile.raw");
+    std::filesystem::path rawFile(rawFilePath);
 
     std::ofstream file(rawFile.path());
     file << "data goes here";
@@ -70,15 +69,15 @@ public:
 
     // Create the log files, otherwise the searchForLogFiles function won't include them in the
     // list of log files.
-    Poco::File logFile("./fakeRawFile.log");
+    std::filesystem::path logFile("./fakeRawFile.log");
     logFile.createFile();
-    Poco::File icpDebugFile("./fakeRawFile_ICPdebug.txt");
+    std::filesystem::path icpDebugFile("./fakeRawFile_ICPdebug.txt");
     icpDebugFile.createFile();
-    Poco::File icpEventFile("./fakeRawFile_ICPevent.txt");
+    std::filesystem::path icpEventFile("./fakeRawFile_ICPevent.txt");
     icpEventFile.createFile();
-    Poco::File icpStatusFile("./fakeRawFile_ICPstatus.txt");
+    std::filesystem::path icpStatusFile("./fakeRawFile_ICPstatus.txt");
     icpStatusFile.createFile();
-    Poco::File statusFile("./fakeRawFile_Status.txt");
+    std::filesystem::path statusFile("./fakeRawFile_Status.txt");
     statusFile.createFile();
 
     std::list<std::string> logFiles = LoadRawHelper::searchForLogFiles(rawFilePath);
@@ -105,7 +104,7 @@ public:
   /// </summary>
   void testLogFileSearch() {
     std::string rawFileName = FileFinder::Instance().getFullPath("NIMROD00001097.raw");
-    Poco::Path rawFilePath(rawFileName);
+    std::filesystem::path rawFilePath(rawFileName);
 
     std::list<std::string> logFiles = LoadRawHelper::searchForLogFiles(rawFilePath);
 

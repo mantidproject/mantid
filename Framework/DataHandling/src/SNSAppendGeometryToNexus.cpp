@@ -15,9 +15,7 @@
 #include "MantidNexus/NexusFile.h"
 
 #include <Poco/Exception.h>
-#include <Poco/File.h>
-#include <Poco/Path.h>
-
+#include <filesystem>
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Nexus;
@@ -87,11 +85,11 @@ void SNSAppendGeometryToNexus::exec() {
   m_makeNexusCopy = getProperty("MakeCopy");
 
   if (m_makeNexusCopy) {
-    Poco::File originalFile(m_filename);
-    Poco::Path originalPath(m_filename);
+    std::filesystem::path originalFile(m_filename);
+    std::filesystem::path originalPath(m_filename);
 
     if (originalFile.exists()) {
-      Poco::File destinationFile(Poco::Path(Poco::Path::temp(), originalPath.getFileName()));
+      std::filesystem::path destinationFile(std::filesystem::path(std::filesystem::path::temp(), originalPath.getFileName()));
 
       try {
         originalFile.copyTo(destinationFile.path());
@@ -109,7 +107,7 @@ void SNSAppendGeometryToNexus::exec() {
   }
 
   // Let's check to see if we can write to the NeXus file.
-  if (!(Poco::File(m_filename).canWrite())) {
+  if (!(std::filesystem::path(m_filename).canWrite())) {
     throw std::runtime_error("The specified NeXus file (" + m_filename + ") is not writable.");
   }
 
