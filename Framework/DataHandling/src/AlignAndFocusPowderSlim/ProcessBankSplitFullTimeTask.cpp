@@ -190,6 +190,7 @@ void ProcessBankSplitFullTimeTask::operator()(const tbb::blocked_range<size_t> &
 
               // Precompute indices for this target
               std::vector<size_t> indices;
+              auto splitter_it = m_splitterMap.cbegin();
               for (size_t k = 0; k < event_detid->size(); ++k) {
                 // Calculate the full time at sample: pulse_time + tof * correctionToSample[detid]
                 const double correctionFactor =
@@ -199,16 +200,35 @@ void ProcessBankSplitFullTimeTask::operator()(const tbb::blocked_range<size_t> &
                 const auto tof = static_cast<double>((*event_time_of_flight)[k]) * correctionFactor;
                 const auto tof_in_nanoseconds =
                     static_cast<int64_t>(tof * 1000.0); // Convert microseconds to nanoseconds
-                const Mantid::Types::Core::DateAndTime full_time = (*event_pulsetimes)[k] + tof_in_nanoseconds;
-                // Find the splitter entry whose key is the greatest key <= full_time.
-                // exact match will often fail, so use upper_bound and take the previous element (range search).
-                auto splitter_it = m_splitterMap.end();
-                auto up = m_splitterMap.upper_bound(full_time);
-                if (up != m_splitterMap.begin()) {
-                  splitter_it = std::prev(up);
+                const auto pulsetime = (*event_pulsetimes)[k];
+                const Mantid::Types::Core::DateAndTime full_time = pulsetime + tof_in_nanoseconds;
+                // Linear search for pulsetime in splitter map, assume pulsetime and splitter map are both sorted. This
+                // is the starting point for the full_time search so we need to subtract some time (66.6ms) to ensure we
+                // don't skip it when adding the tof.
+                // Advance splitter_it until it points to the first element greater than (pulsetime - offset).
+                // This gives us a reasonable starting point for the full_time search.
+                while (splitter_it != m_splitterMap.end() &&
+                       splitter_it->first <= pulsetime - static_cast<int64_t>(83333333)) {
+                  ++splitter_it;
                 }
-                if (splitter_it != m_splitterMap.end() && splitter_it->second == i) {
-                  indices.push_back(k);
+
+                // now starting at splitter_it find full_time (can not assume tof will not be sorted)
+                // Advance until we find the first element > full_time, then step back to get the greatest key <=
+                // full_time.
+                auto full_time_it = splitter_it;
+                while (full_time_it != m_splitterMap.end() && full_time_it->first <= full_time) {
+                  ++full_time_it;
+                }
+
+                // If there is no element <= full_time then full_time_it will be begin(); otherwise step back to the
+                // element that is <= full_time.
+                if (full_time_it == m_splitterMap.begin()) {
+                  // no splitter entry <= full_time; skip this event
+                } else {
+                  --full_time_it;
+                  if (full_time_it != m_splitterMap.end() && full_time_it->second == i) {
+                    indices.push_back(k);
+                  }
                 }
               }
 
