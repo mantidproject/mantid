@@ -737,7 +737,7 @@ std::string LoadILLDiffraction::getInstrumentFilePath(const std::string &instNam
 
   std::filesystem::path directory(ConfigService::Instance().getInstrumentDirectory());
   std::filesystem::path file(instName + "_Definition.xml");
-  std::filesystem::path fullPath(directory, file);
+  std::filesystem::path fullPath = std::filesystem::path(directory) / file;
   return fullPath.string();
 }
 

@@ -306,9 +306,9 @@ void LoadLog::loadThreeColumnLogFile(std::ifstream &logFileStream, const std::st
  */
 std::string LoadLog::extractLogName(const std::vector<std::string> &logName) {
   if (logName.empty()) {
-    return (std::filesystem::path(std::filesystem::path(m_filename).getFileName()).stem().string());
+    return std::filesystem::path(m_filename).stem().string();
   } else {
-    return (logName.front());
+    return logName.front();
   }
 }
 

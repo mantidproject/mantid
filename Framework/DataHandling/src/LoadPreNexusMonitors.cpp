@@ -85,7 +85,7 @@ void LoadPreNexusMonitors::exec() {
 
   // TODO: Extract the directory that the runinfo file is in.
   // Create a Poco Path object for runinfo filename
-  std::filesystem::path runinfoPath(runinfo_filename, std::filesystem::path::PATH_GUESS);
+  std::filesystem::path runinfoPath(runinfo_filename);
   // Now lets get the directory
   std::filesystem::path dirPath(runinfoPath.parent_path());
 
@@ -176,7 +176,7 @@ void LoadPreNexusMonitors::exec() {
   BinEdges edges(time_bins);
   for (int i = 0; i < nMonitors; i++) {
     // Now lets actually read the monitor files..
-    std::filesystem::path pMonitorFilename(dirPath, monitorFilenames[i]);
+    std::filesystem::path pMonitorFilename = dirPath / monitorFilenames[i];
 
     g_log.debug() << "Loading monitor file :" << pMonitorFilename.string() << '\n';
 

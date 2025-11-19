@@ -62,8 +62,9 @@ void SaveFocusedXYE::exec() {
   std::string ext;
   {
     std::filesystem::path path(filepath);
-    std::string directory = path.parent_path().string();
-    std::string filename = path.getFileName();
+    std::filesystem::path directory = path.parent_path();
+
+    std::string filename = path.filename();
 
     std::size_t pos = filename.find_first_of('.');
     if (pos != std::string::npos) // Remove the extension
@@ -72,7 +73,7 @@ void SaveFocusedXYE::exec() {
       filename.erase(pos);
     }
 
-    filepath = std::filesystem::path(directory, filename).string();
+    filepath = (directory / filename).string();
   }
 
   const bool append = getProperty("Append");

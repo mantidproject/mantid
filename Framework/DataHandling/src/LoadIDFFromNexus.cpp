@@ -117,7 +117,7 @@ void LoadIDFFromNexus::exec() {
     g_log.debug() << "Correction file path: " << corrFilePath.string() << "\n";
     std::filesystem::path corrDirPath = corrFilePath.parent_path();
     g_log.debug() << "Correction directory path: " << corrDirPath.string() << "\n";
-    std::filesystem::path corrParamFile(corrDirPath, correctionParameterFile);
+    std::filesystem::path corrParamFile(corrDirPath / correctionParameterFile);
     if (append) {
       g_log.notice() << "Using correction parameter file: " << corrParamFile.string() << " to append parameters.\n";
     } else {

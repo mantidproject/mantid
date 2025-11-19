@@ -197,10 +197,10 @@ void LoadPreNexus::parseRuninfo(const string &runinfo, string &dataDir, vector<s
   eventFilenames.clear();
 
   // Create a Poco Path object for runinfo filename
-  std::filesystem::path runinfoPath(runinfo, std::filesystem::path::PATH_GUESS);
+  std::filesystem::path runinfoPath(runinfo);
   // Now lets get the directory
   std::filesystem::path dirPath(runinfoPath.parent_path());
-  dataDir = dirPath.absolute().string();
+  dataDir = std::filesystem::absolute(dirPath).string();
   g_log.debug() << "Data directory \"" << dataDir << "\"\n";
 
   std::ifstream in(runinfo.c_str());

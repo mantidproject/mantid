@@ -156,7 +156,7 @@ void LoadCalFile::exec() {
   MaskWorkspace_sptr maskWS;
 
   // Title of all workspaces = the file without path
-  std::string title = std::filesystem::path(CalFilename).getFileName();
+  std::string title = std::filesystem::path(CalFilename).filename();
 
   // Initialize all required workspaces.
   if (MakeGroupingWorkspace) {
