@@ -20,17 +20,16 @@
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/UnitFactory.h"
-#include <Poco/File.h>
-#include <Poco/Path.h>
 #include <boost/algorithm/string/predicate.hpp>
 #include <cstdio>
+#include <filesystem>
 
 namespace {
 /**
  * Return the path to the alternate data stream for the given path
  * @param filePath The full path to the main data path
  */
-inline std::string alternateDataStream(const Poco::Path &filePath) { return filePath.toString() + ":checksum"; }
+inline std::string alternateDataStream(const std::filesystem::path &filePath) { return filePath.string() + ":checksum"; }
 
 /**
  * This method looks for ADS with name checksum exists
@@ -38,7 +37,7 @@ inline std::string alternateDataStream(const Poco::Path &filePath) { return file
  * @return True if ADS stream checksum exists
  */
 #ifdef _WIN32
-inline bool hasAlternateDataStream(const Poco::Path &pathToFile) {
+inline bool hasAlternateDataStream(const std::filesystem::path &pathToFile) {
   std::ifstream adsStream(alternateDataStream(pathToFile));
   if (!adsStream) {
     return false;
@@ -47,7 +46,7 @@ inline bool hasAlternateDataStream(const Poco::Path &pathToFile) {
   return true;
 }
 #else
-inline bool hasAlternateDataStream([[maybe_unused]] const Poco::Path &pathToFile) { return false; }
+inline bool hasAlternateDataStream([[maybe_unused]] const std::filesystem::path &pathToFile) { return false; }
 #endif
 
 /**
@@ -57,7 +56,7 @@ inline bool hasAlternateDataStream([[maybe_unused]] const Poco::Path &pathToFile
  * @param pathToRawFile The path and name of the raw file.
  * @return set of logfile names.
  */
-std::set<std::string> logFilesFromAlternateDataStream(const Poco::Path &pathToRawFile) {
+std::set<std::string> logFilesFromAlternateDataStream(const std::filesystem::path &pathToRawFile) {
   std::set<std::string> logfilesList;
   std::ifstream adsStream(alternateDataStream(pathToRawFile));
   if (!adsStream) {
@@ -72,17 +71,16 @@ std::set<std::string> logFilesFromAlternateDataStream(const Poco::Path &pathToRa
   // e200aa65186b61e487175d5263b315aa *IRIS00055132_ICPevent.txt
   // 91be40aa4f54d050a9eb4abea394720e *IRIS00055132_ICPstatus.txt
   // 50aa2872110a9b862b01c6c83f8ce9a8 *IRIS00055132_Status.txt
-  Poco::Path dirOfFile(pathToRawFile.parent());
+  std::filesystem::path dirOfFile = pathToRawFile.parent_path();
   std::string line;
   while (Mantid::Kernel::Strings::extractToEOL(adsStream, line)) {
     if (boost::algorithm::iends_with(line, ".txt") || boost::algorithm::iends_with(line, ".log")) {
       const size_t asteriskPos = line.find('*');
       if (asteriskPos == std::string::npos)
         continue;
-      Poco::Path logFilePath(dirOfFile);
-      logFilePath.append(line.substr(asteriskPos + 1));
-      if (Poco::File(logFilePath).exists()) {
-        logfilesList.insert(logFilePath.toString());
+      std::filesystem::path logFilePath = dirOfFile / line.substr(asteriskPos + 1);
+      if (std::filesystem::exists(logFilePath)) {
+        logfilesList.insert(logFilePath.string());
       }
     }
   }
@@ -670,7 +668,7 @@ void LoadRawHelper::runLoadMappingTable(const std::string &fileName,
 void LoadRawHelper::runLoadLog(const std::string &fileName, const DataObjects::Workspace2D_sptr &localWorkspace,
                                double progStart, double progEnd) {
   // search for the log file to load, and save their names in a list.
-  std::list<std::string> logFiles = searchForLogFiles(Poco::Path(fileName));
+  std::list<std::string> logFiles = searchForLogFiles(std::filesystem::path(fileName));
 
   g_log.debug("Loading the log files...");
   if (progStart < progEnd) {
@@ -1115,7 +1113,7 @@ int LoadRawHelper::confidence(Kernel::FileDescriptor &descriptor) const {
  * @param pathToRawFile The path and name of the raw file.
  * @returns A set containing paths to log files related to RAW file used.
  */
-std::list<std::string> LoadRawHelper::searchForLogFiles(const Poco::Path &pathToRawFile) {
+std::list<std::string> LoadRawHelper::searchForLogFiles(const std::filesystem::path &pathToRawFile) {
   // If pathToRawFile is the filename of a raw datafile then search for
   // potential log files
   // in the directory of this raw datafile. Otherwise check if it is a potential
@@ -1130,17 +1128,17 @@ std::list<std::string> LoadRawHelper::searchForLogFiles(const Poco::Path &pathTo
 
   // File property checks whether the given path exists, just check that is
   // actually a file
-  if (Poco::File(pathToRawFile).isDirectory()) {
-    throw Exception::FileError("Filename is a directory:", pathToRawFile.toString());
+  if (std::filesystem::is_directory(pathToRawFile)) {
+    throw Exception::FileError("Filename is a directory:", pathToRawFile.string());
   }
 
   // start the process or populating potential log files into the container:
   // potentialLogFiles
   // have we been given what looks like a log file
-  const auto fileExt = pathToRawFile.getExtension();
-  if (boost::algorithm::iequals(fileExt, "log") || boost::algorithm::iequals(fileExt, "txt")) {
+  const auto fileExt = pathToRawFile.extension().string();
+  if (boost::algorithm::iequals(fileExt, ".log") || boost::algorithm::iequals(fileExt, ".txt")) {
     // then we will assume that the file is an ISIS log file
-    potentialLogFiles.insert(pathToRawFile.toString());
+    potentialLogFiles.insert(pathToRawFile.string());
   } else {
     // then we will assume that the file is an ISIS raw file. The file validator
     // will have warned the user if the extension is not one of the suggested
@@ -1150,17 +1148,17 @@ std::list<std::string> LoadRawHelper::searchForLogFiles(const Poco::Path &pathTo
       potentialLogFiles = logFilesFromAlternateDataStream(pathToRawFile);
     } else {
       // look for log files in the directory of the raw datafile
-      Poco::Path pattern = pathToRawFile;
-      pattern.setFileName(pathToRawFile.getBaseName() + "_*.txt");
+      std::filesystem::path pattern = pathToRawFile.parent_path() / (pathToRawFile.stem().string() + "_*.txt");
       try {
-        Kernel::Glob::glob(pattern.toString(), potentialLogFiles);
+        Kernel::Glob::glob(pattern.string(), potentialLogFiles);
       } catch (std::exception &) {
       }
       // Check for .log
-      const Poco::File combinedLogPath(Poco::Path(pathToRawFile).setExtension("log"));
-      if (combinedLogPath.exists()) {
+      std::filesystem::path combinedLogPath = pathToRawFile;
+      combinedLogPath.replace_extension(".log");
+      if (std::filesystem::exists(combinedLogPath)) {
         // Push three column filename to end of list.
-        potentialLogFilesList.insert(potentialLogFilesList.end(), combinedLogPath.path());
+        potentialLogFilesList.insert(potentialLogFilesList.end(), combinedLogPath.string());
       }
     }
 
