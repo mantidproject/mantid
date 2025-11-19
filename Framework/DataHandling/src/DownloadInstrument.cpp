@@ -149,9 +149,9 @@ DownloadInstrument::StringToStringMap DownloadInstrument::processRepository() {
   // get the instrument directories
   auto instrumentDirs = Mantid::Kernel::ConfigService::Instance().getInstrumentDirectories();
   std::filesystem::path installPath(instrumentDirs.back());
-  installPath.makeDirectory();
+  std::filesystem::create_directories(installPath);
   std::filesystem::path localPath(instrumentDirs[0]);
-  localPath.makeDirectory();
+  std::filesystem::create_directories(localPath);
 
   // get the date of the local github.json file if it exists
   std::filesystem::path gitHubJsonFile = std::filesystem::path(localPath) / "github.json";
@@ -180,7 +180,7 @@ DownloadInstrument::StringToStringMap DownloadInstrument::processRepository() {
   }
   StringToStringMap fileMap;
   try {
-    doDownloadFile(gitHubInstrumentRepoUrl, gitHubJson.string(), headers);
+    doDownloadFile(gitHubInstrumentRepoUrl, gitHubJsonFile.string(), headers);
   } catch (Exception::InternetError &ex) {
     if (ex.errorCode() == static_cast<int>(InternetHelper::HTTPStatus::NOT_MODIFIED)) {
       // No changes since last time
@@ -191,27 +191,27 @@ DownloadInstrument::StringToStringMap DownloadInstrument::processRepository() {
   }
 
   // update local repo files
-  std::filesystem::path installRepoFile(localPath, "install.json");
+  std::filesystem::path installRepoFile = std::filesystem::path(localPath) / "install.json";
   StringToStringMap installShas = getFileShas(installPath.string());
-  std::filesystem::path localRepoFile(localPath, "local.json");
+  std::filesystem::path localRepoFile = std::filesystem::path(localPath) / "local.json";
   StringToStringMap localShas = getFileShas(localPath.string());
 
   // verify repo info was downloaded correctly
-  if (gitHubJsonFile.getSize() == 0) {
+  if (std::filesystem::file_size(gitHubJsonFile) == 0) {
     std::stringstream msg;
-    msg << "Encountered empty file \"" << gitHubJson.string() << "\" while determining what to download";
+    msg << "Encountered empty file \"" << gitHubJsonFile.string() << "\" while determining what to download";
     throw std::runtime_error(msg.str());
   }
 
   // Parse the server JSON response
   ::Json::CharReaderBuilder readerBuilder;
   Json::Value serverContents;
-  Poco::FileStream fileStream(gitHubJson.string(), std::ios::in);
+  Poco::FileStream fileStream(gitHubJsonFile.string(), std::ios::in);
 
   std::string errors;
   Json::parseFromStream(readerBuilder, fileStream, &serverContents, &errors);
   if (errors.size() != 0) {
-    throw std::runtime_error("Unable to parse server JSON file \"" + gitHubJson.string() + "\"");
+    throw std::runtime_error("Unable to parse server JSON file \"" + gitHubJsonFile.string() + "\"");
   }
   fileStream.close();
 
@@ -220,7 +220,7 @@ DownloadInstrument::StringToStringMap DownloadInstrument::processRepository() {
   for (auto &serverElement : serverContents) {
     std::string elementName = serverElement.get("name", "").asString();
     repoFilenames.insert(elementName);
-    std::filesystem::path filePath(localPath, elementName);
+    std::filesystem::path filePath = std::filesystem::path(localPath) / elementName;
     if (filePath.extension().string() != "xml")
       continue;
     std::string sha = serverElement.get("sha", "").asString();
@@ -278,7 +278,7 @@ DownloadInstrument::StringToStringMap DownloadInstrument::getFileShas(const std:
         continue;
       std::string sha1 = ChecksumHelper::gitSha1FromFile(entryPath.string());
       // Track sha1
-      filesToSha.emplace(entryPath.getFileName(), sha1);
+      filesToSha.emplace(entryPath.filename().string(), sha1);
     }
   } catch (Poco::Exception &ex) {
     g_log.error() << "DownloadInstrument: failed to parse the directory: " << directoryPath << " : " << ex.className()
@@ -311,10 +311,10 @@ size_t DownloadInstrument::removeOrphanedFiles(const std::string &directoryPath,
       const auto &entryPath = std::filesystem::path(it->path());
       if (entryPath.extension().string() != "xml")
         continue;
-      if (filenamesToKeep.find(entryPath.getFileName()) == filenamesToKeep.end()) {
+      if (filenamesToKeep.find(entryPath.filename().string()) == filenamesToKeep.end()) {
         g_log.debug() << "File not found in remote instrument repository, will "
                          "be deleted: "
-                      << entryPath.getFileName() << '\n';
+                      << entryPath.filename().string() << '\n';
         filesToDelete.emplace_back(it->path());
       }
     }
@@ -332,7 +332,7 @@ size_t DownloadInstrument::removeOrphanedFiles(const std::string &directoryPath,
   try {
     for (const auto &filename : filesToDelete) {
       std::filesystem::path file(filename);
-      file.remove();
+      std::filesystem::remove(file);
     }
   } catch (Poco::Exception &ex) {
     g_log.error() << "DownloadInstrument: failed to delete file: " << ex.className() << " : " << ex.displayText()
@@ -366,15 +366,17 @@ InternetHelper::HTTPStatus DownloadInstrument::doDownloadFile(const std::string 
                                                               const std::string &localFilePath,
                                                               const StringToStringMap &headers) {
   std::filesystem::path localFile(localFilePath);
-  if (localFile.exists()) {
-    if (!localFile.canWrite()) {
+  if (std::filesystem::exists(localFile)) {
+    auto perms = std::filesystem::status(localFile).permissions();
+    if ((perms & std::filesystem::perms::owner_write) == std::filesystem::perms::none) {
       std::stringstream msg;
       msg << "Cannot write file \"" << localFilePath << "\"";
       throw std::runtime_error(msg.str());
     }
   } else {
-    localFile = std::filesystem::path(std::filesystem::path(localFilePath).parent_path().string());
-    if (!localFile.canWrite()) {
+    localFile = std::filesystem::path(localFilePath).parent_path();
+    auto perms = std::filesystem::status(localFile).permissions();
+    if ((perms & std::filesystem::perms::owner_write) == std::filesystem::perms::none) {
       std::stringstream msg;
       msg << "Cannot write file \"" << localFilePath << "\"";
       throw std::runtime_error(msg.str());

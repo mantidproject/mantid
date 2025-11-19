@@ -114,7 +114,7 @@ void DetermineChunking::exec() {
   }
 
   std::filesystem::path fileinfo(filename);
-  const double fileSizeGiB = static_cast<double>(fileinfo.getSize()) * BYTES_TO_GiB;
+  const double fileSizeGiB = static_cast<double>(std::filesystem::file_size(fileinfo)) * BYTES_TO_GiB;
 
   // don't bother opening the file if its size is "small"
   // note that prenexus "_runinfo.xml" files don't represent what
