@@ -93,10 +93,7 @@ done
 # something is wrong with versioningit and rattler-build 0.48
 #mamba install --yes rattler-build=0.47 versioningit python=3.11 rattler-index
 install_pixi
-if [[ $PIXI_ENVIRONMENT_NAME != "rattler-builder" ]]; then
-    setup_pixi_toml
-    pixi shell --manifest-path $SCRIPT_DIR/pixi.toml -e rattler-builder
-fi
+setup_pixi_toml
 
 # Clean up any legacy conda-recipes git clones
 cd $WORKSPACE
@@ -115,7 +112,7 @@ if [[ -n "$GIT_TAG" ]]; then
 fi
 
 # Set the version to inject into the recipe file
-export MANTID_VERSION=$(versioningit "${REPO_ROOT_DIR}")
+export MANTID_VERSION=$(pixi run --manifest-path $SCRIPT_DIR/pixi.toml -e rattler-builder "versioningit .")
 
 # Set locale to avoid problems building the docs
 # See https://unix.stackexchange.com/questions/87745/what-does-lc-all-c-do
@@ -127,7 +124,7 @@ export LC_ALL=C
 # copy the source to a working folder.
 export CONDA_BLD_PATH=$WORKSPACE/conda-bld
 if [[ -d $CONDA_BLD_PATH ]]; then
-    rattler-index fs $CONDA_BLD_PATH
+    pixi run --manifest-path $SCRIPT_DIR/pixi.toml -e rattler-builder "rattler-index fs $CONDA_BLD_PATH"
 fi
 cd $RECIPES_DIR
 
@@ -144,23 +141,23 @@ export CONDA_SUBDIR=$PLATFORM
 #echo "CONDA BASE ENVIRONMENT (package-conda):"
 #mamba run -n base mamba list
 echo "pixi rattler-builder environment"
-pixi list --manifest-path $SCRIPT_DIR/pixi.toml
+pixi list --manifest-path $SCRIPT_DIR/pixi.toml -e rattler-builder
 
 # Run conda build.
 if [[ $ENABLE_BUILD_MANTID_DEVELOPER == true ]]; then
-    rattler-build build -r ./mantid-developer/ -m ./conda_build_config.yaml --output-dir $CONDA_BLD_PATH -c neutrons $EXTRA_BUILD_OPTIONS
+    pixi run --manifest-path $SCRIPT_DIR/pixi.toml -e rattler-builder "rattler-build build -r ./mantid-developer/ -m ./conda_build_config.yaml --output-dir $CONDA_BLD_PATH -c neutrons $EXTRA_BUILD_OPTIONS"
 fi
 if [[ $ENABLE_BUILD_MANTID == true ]]; then
-    rattler-build build -r ./mantid/ -m ./conda_build_config.yaml --output-dir $CONDA_BLD_PATH $EXTRA_BUILD_OPTIONS
+    pixi run --manifest-path $SCRIPT_DIR/pixi.toml -e rattler-builder "rattler-build build -r ./mantid/ -m ./conda_build_config.yaml --output-dir $CONDA_BLD_PATH $EXTRA_BUILD_OPTIONS"
 fi
 if [[ $ENABLE_BUILD_QT == true ]]; then
-    rattler-build build -r ./mantidqt/ -m ./conda_build_config.yaml --output-dir $CONDA_BLD_PATH $EXTRA_BUILD_OPTIONS
+    pixi run --manifest-path $SCRIPT_DIR/pixi.toml -e rattler-builder "rattler-build build -r ./mantidqt/ -m ./conda_build_config.yaml --output-dir $CONDA_BLD_PATH $EXTRA_BUILD_OPTIONS"
 fi
 if [[ $ENABLE_BUILD_DOCS == true ]]; then
-    rattler-build build -r ./mantiddocs/ -m ./conda_build_config.yaml --output-dir $CONDA_BLD_PATH -c conda-forge -c neutrons $EXTRA_BUILD_OPTIONS
+    pixi run --manifest-path $SCRIPT_DIR/pixi.toml -e rattler-builder "rattler-build build -r ./mantiddocs/ -m ./conda_build_config.yaml --output-dir $CONDA_BLD_PATH -c conda-forge -c neutrons $EXTRA_BUILD_OPTIONS"
 fi
 if [[ $ENABLE_BUILD_WORKBENCH == true ]]; then
-    rattler-build build -r ./mantidworkbench/ -m ./conda_build_config.yaml --output-dir $CONDA_BLD_PATH $EXTRA_BUILD_OPTIONS
+    pixi run --manifest-path $SCRIPT_DIR/pixi.toml -e rattler-builder "rattler-build build -r ./mantidworkbench/ -m ./conda_build_config.yaml --output-dir $CONDA_BLD_PATH $EXTRA_BUILD_OPTIONS"
 fi
 
 # elapsed time with second resolution

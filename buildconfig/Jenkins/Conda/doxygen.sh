@@ -32,7 +32,7 @@ fi
 
 # Setup mantid-developer environment
 install_pixi
-create_and_activate_mantid_developer_ci $WORKSPACE
+create_mantid_developer_ci $WORKSPACE
 
 # Create the build directory if it doesn't exist
 [ -d $WORKSPACE/build ] || mkdir $WORKSPACE/build
@@ -42,7 +42,7 @@ cd $WORKSPACE/build
 export LC_ALL=C
 
 # Configure and generate build files
-cmake --preset=doxygen-ci ..
+pixi run --manifest-path $SCRIPT_DIR/pixi.toml -e mantid-developer-ci "cmake --preset=doxygen-ci .."
 
 # Build doxygen target
-cmake --build . --target doxygen
+pixi run --manifest-path $SCRIPT_DIR/pixi.toml -e mantid-developer-ci "cmake --build . --target doxygen"

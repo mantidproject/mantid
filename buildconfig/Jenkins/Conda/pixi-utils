@@ -37,13 +37,36 @@ setup_pixi_toml() {
   pixi workspace --manifest-path $LOCAL_MANIFEST channel add -f mantid-developer-ci conda-forge
   pixi workspace --manifest-path $LOCAL_MANIFEST channel add -f mantid-developer-ci neutrons
   pixi workspace --manifest-path $LOCAL_MANIFEST environment add mantid-developer-ci --feature mantid-developer-ci --no-default-feature
+  cd -
 }
 
-create_and_activate_mantid_developer_ci() {
+normalise_windows_path() {
+    local p="$1"
+
+    # 1. Convert backslashes → forward slashes
+    p="${p//\\//}"
+
+    # 2. Strip any leading slash before drive letter: /c/... → c/...
+    p="${p#/}"
+
+    # 3. Uppercase the drive letter: c/... → C/...
+    p="$(printf '%s' "$p" | sed -E 's/^([a-zA-Z])/\U\1/')"
+
+    # 4. Add colon after drive letter if missing: C/... → C:/...
+    p="$(printf '%s' "$p" | sed -E 's/^([A-Z]):?/\1:/')"
+
+    echo "$p"
+}
+
+create_mantid_developer_ci() {
   MANTID_ROOT=$1
+  if [[ $OSTYPE == "msys"* ]]; then
+    MANTID_ROOT=normalise_windows_path "$MANTID_ROOT"
+  fi
   PATH_TO_HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-  #pixi run --manifest-path $PATH_TO_HERE/pixi.toml -e rattler-builder build-and-install-mantid-developer $MANTID_ROOT
   setup_pixi_toml
-  pixi run --manifest-path $PATH_TO_HERE/pixi.toml -e rattler-builder "sh $MANTID_ROOT/buildconfig/Jenkins/Conda/build-and-install-mantid-developer $MANTID_ROOT"
-  pixi shell --manifest-path $PATH_TO_HERE/pixi.toml -e mantid-developer-ci
+  sh $PATH_TO_HERE/package-conda $MANTID_ROOT --build-mantid-developer
+  PLATFORM=$(pixi run --manifest-path $PATH_TO_HERE/pixi.toml -e rattler-builder "pixi info --json | jq -r .platform")
+  pixi workspace --manifest-path $PATH_TO_HERE/pixi.toml channel add $MANTID_ROOT/conda-bld -f mantid-developer-ci --prepend
+  pixi add --manifest-path $PATH_TO_HERE/pixi.toml --platform $PLATFORM -f mantid-developer-ci mantid-developer
 }

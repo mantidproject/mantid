@@ -32,7 +32,7 @@ fi
 
 # Setup mantid-developer environment
 install_pixi
-create_and_activate_mantid_developer_ci $WORKSPACE
+create_mantid_developer_ci $WORKSPACE
 
 ###############################################################################
 # Run Cppcheck
@@ -50,13 +50,13 @@ cd $WORKSPACE/build
 # remove old results if they exist
 find -name cppcheck.xml -delete
 
-cmake --preset=cppcheck-ci -DCPPCHECK_NUM_THREADS=$BUILD_THREADS ..
+pixi run --manifest-path $SCRIPT_DIR/pixi.toml -e mantid-developer-ci "cmake --preset=cppcheck-ci -DCPPCHECK_NUM_THREADS=$BUILD_THREADS .."
 
 # Run cppcheck
-cmake --build . --target cppcheck
+pixi run --manifest-path $SCRIPT_DIR/pixi.toml -e mantid-developer-ci "cmake --build . --target cppcheck"
 
 # Generate HTML report
-cppcheck-htmlreport --file=cppcheck.xml --title=Embedded --report-dir=cppcheck-report
+pixi run --manifest-path $SCRIPT_DIR/pixi.toml -e mantid-developer-ci "cppcheck-htmlreport --file=cppcheck.xml --title=Embedded --report-dir=cppcheck-report"
 
 # Mark build as passed or failed. The additional "|| true" stops the build from failing if there are no errors.
 errors_count=$(grep -c '</error>' cppcheck.xml) || true
