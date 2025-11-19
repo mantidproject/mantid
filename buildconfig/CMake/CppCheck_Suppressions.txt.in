@@ -87,7 +87,6 @@ useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadILLDiffractio
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadILLDiffraction.cpp:593
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadILLDiffraction.cpp:611
 mismatchingContainerExpression:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadInstrument.cpp:148
-nullPointerOutOfResources:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadLog.cpp:444
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadPLN.cpp:659
 integerOverflowCond:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/byte_rel_comp.cpp:59
 unusedStructMember:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/vms_convert.cpp:222
