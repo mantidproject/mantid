@@ -20,14 +20,13 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidNexus/NexusIOHelper.h"
 
-#include <Poco/File.h>
-#include <Poco/Path.h>
 #include <boost/lexical_cast.hpp>
 
 #include <algorithm>
 #include <cmath>
 #include <map>
 #include <vector>
+#include <filesystem>
 
 using namespace Mantid::Kernel::DateAndTimeHelpers;
 using Mantid::API::WorkspaceGroup;
@@ -555,8 +554,8 @@ size_t LoadNexusMonitors2::getMonitorInfo(Nexus::File &file, size_t &numPeriods)
         info.detNum = static_cast<detid_t>(detNum);
       } else {
         // default creates it from monitor name
-        Poco::Path monPath(entry_name);
-        std::string monitorName = monPath.getBaseName();
+        std::filesystem::path monPath(entry_name);
+        std::string monitorName = monPath.stem().string();
 
         // check for monitor name - in our case will be of the form either
         // monitor1

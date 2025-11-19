@@ -22,6 +22,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include <fstream>
+#include <filesystem>
 
 namespace { // helpers
 
@@ -123,7 +124,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(testAlg.execute());
     TS_ASSERT(testAlg.isExecuted());
 
-    Poco::File shouldExist(tempFileName);
+    std::filesystem::path shouldExist(tempFileName);
     TS_ASSERT(shouldExist.exists());
   }
 

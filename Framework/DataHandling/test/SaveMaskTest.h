@@ -16,6 +16,7 @@
 #include "Poco/File.h"
 
 #include <cxxtest/TestSuite.h>
+#include <filesystem>
 
 using namespace Mantid;
 using namespace Mantid::DataHandling;
@@ -90,7 +91,7 @@ public:
     }
 
     // 6. Clean the file
-    Poco::File cleanfile(file1);
+    std::filesystem::path cleanfile(file1);
     cleanfile.remove(false);
   }
 };

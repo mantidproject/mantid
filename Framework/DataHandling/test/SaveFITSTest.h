@@ -16,8 +16,8 @@
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 
-#include <Poco/File.h>
 #include <cxxtest/TestSuite.h>
+#include <filesystem>
 
 using Mantid::DataHandling::SaveFITS;
 
@@ -123,7 +123,7 @@ public:
                               alg.execute());
     TS_ASSERT(alg.isExecuted());
 
-    Poco::File saved(filename);
+    std::filesystem::path saved(filename);
     TSM_ASSERT("The saved file should be found on disk", saved.exists());
     TSM_ASSERT("The saved file should be a regular file", saved.isFile());
     TSM_ASSERT("The saved file should be readable", saved.canRead());

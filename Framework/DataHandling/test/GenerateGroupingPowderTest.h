@@ -24,11 +24,11 @@
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/NodeFilter.h>
 #include <Poco/DOM/NodeIterator.h>
-#include <Poco/File.h>
 #include <Poco/SAX/InputSource.h>
 #include <cxxtest/TestSuite.h>
 #include <exception>
 #include <fstream>
+#include <filesystem>
 
 using namespace Mantid;
 using namespace Mantid::DataHandling;
@@ -550,7 +550,7 @@ private:
   MatrixWorkspace_sptr m_emptyInstrument;
 
   bool fileExists(const std::string &filename) {
-    Poco::File handle{filename};
+    std::filesystem::path handle{filename};
     return handle.exists();
   }
 };

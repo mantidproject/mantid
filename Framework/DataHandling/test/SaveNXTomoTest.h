@@ -7,14 +7,13 @@
 #pragma once
 
 #include <cxxtest/TestSuite.h>
+#include <filesystem>
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataHandling/SaveNXTomo.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidNexus/NexusFile.h"
-#include <Poco/File.h>
-
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
@@ -57,7 +56,7 @@ public:
     TS_ASSERT(saver->isExecuted());
 
     // Check file exists
-    Poco::File file(m_outputFile);
+    std::filesystem::path file(m_outputFile);
     TS_ASSERT(file.exists());
 
     checksOnNXTomoFormat(3);
@@ -89,7 +88,7 @@ public:
     TS_ASSERT(saver->isExecuted());
 
     // Check file exists
-    Poco::File file(m_outputFile);
+    std::filesystem::path file(m_outputFile);
     TS_ASSERT(file.exists());
 
     checksOnNXTomoFormat(2);
@@ -109,7 +108,7 @@ public:
     checkWriteSingleCreating(false);
 
     // Test appending a ws group to an existing file
-    if (Poco::File(m_outputFile).exists()) {
+    if (std::filesystem::exists(m_outputFile)) {
       int numberOfPriorWS = 1; // Count of current workspaces in the file
       // Create small test workspaces
       std::vector<Workspace2D_sptr> wspaces(3);
@@ -129,7 +128,7 @@ public:
       TS_ASSERT(saver->isExecuted());
 
       // Check file exists
-      Poco::File file(m_outputFile);
+      std::filesystem::path file(m_outputFile);
       TS_ASSERT(file.exists());
 
       checksOnNXTomoFormat(static_cast<int>(wspaces.size()) + numberOfPriorWS);
@@ -210,7 +209,7 @@ private:
     TS_ASSERT(saver->isExecuted());
 
     // Check file exists
-    Poco::File file(m_outputFile);
+    std::filesystem::path file(m_outputFile);
     TS_ASSERT(file.exists());
 
     // Check that the structure of the nxTomo file is correct

@@ -22,12 +22,11 @@
 #include <Poco/DOM/Node.h>
 #include <Poco/DOM/NodeFilter.h>
 #include <Poco/DOM/NodeIterator.h>
-#include <Poco/File.h>
-#include <Poco/Path.h>
 #include <Poco/SAX/InputSource.h>
 
 #include <fstream>
 #include <sstream>
+#include <filesystem>
 
 using namespace Mantid::DataHandling;
 using namespace Mantid::API;
@@ -100,8 +99,8 @@ public:
   }
 
   void tearDown() override {
-    if (Poco::File(m_filename).exists())
-      Poco::File(m_filename).remove();
+    if (std::filesystem::exists(m_filename))
+      std::filesystem::remove(m_filename);
   }
 
   void testCanSAS1dXML() {
@@ -170,8 +169,8 @@ public:
     doTestProcessNote();
 
     // no more tests on the file are possible after this
-    if (Poco::File(m_filename).exists())
-      Poco::File(m_filename).remove();
+    if (std::filesystem::exists(m_filename))
+      std::filesystem::remove(m_filename);
   }
 
   void testGroup() {

@@ -17,8 +17,8 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/OptionalBool.h"
 
-#include <Poco/Path.h>
 #include <fstream>
+#include <filesystem>
 
 using Mantid::Geometry::Instrument_const_sptr;
 using namespace Mantid::Kernel;
@@ -156,7 +156,7 @@ void LoadCalFile::exec() {
   MaskWorkspace_sptr maskWS;
 
   // Title of all workspaces = the file without path
-  std::string title = Poco::Path(CalFilename).getFileName();
+  std::string title = std::filesystem::path(CalFilename).getFileName();
 
   // Initialize all required workspaces.
   if (MakeGroupingWorkspace) {

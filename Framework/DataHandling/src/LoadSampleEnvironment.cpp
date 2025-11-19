@@ -28,9 +28,9 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 
-#include <Poco/Path.h>
 #include <boost/algorithm/string.hpp>
 #include <fstream>
+#include <filesystem>
 
 namespace Mantid::DataHandling {
 
@@ -344,7 +344,7 @@ void LoadSampleEnvironment::exec() {
   std::string debugString;
   Sample &sample = outputWS->mutableSample();
 
-  std::string fileExt = Poco::Path(filename).getExtension();
+  std::string fileExt = std::filesystem::path(filename).extension().string();
 
   std::transform(fileExt.begin(), fileExt.end(), fileExt.begin(), toupper);
 

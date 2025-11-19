@@ -35,9 +35,8 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include <Poco/File.h>
-
 #include <string>
+#include <filesystem>
 
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 
@@ -230,8 +229,8 @@ public:
     TS_ASSERT(workspace->hasMaskedBins(4));
     TS_ASSERT(workspace->hasMaskedBins(5));
 
-    if (Poco::File(filename).exists())
-      Poco::File(filename).remove();
+    if (std::filesystem::exists(filename))
+      std::filesystem::remove(filename);
   }
 
   void dotest_LoadAnEventFile(EventType type) {
@@ -294,8 +293,8 @@ public:
     }
 
     // Clear old file
-    if (Poco::File(outputFile).exists())
-      Poco::File(outputFile).remove();
+    if (std::filesystem::exists(outputFile))
+      std::filesystem::remove(outputFile);
   }
 
   void test_LoadEventNexus_TOF() { dotest_LoadAnEventFile(TOF); }
@@ -766,7 +765,7 @@ public:
 
     Mantid::API::Workspace_sptr loadedWS = loadAlg.getProperty("OutputWorkspace");
     auto loadedPeaksWS = std::dynamic_pointer_cast<Mantid::API::IPeaksWorkspace>(loadedWS);
-    Poco::File testFile(filePath);
+    std::filesystem::path testFile(filePath);
     if (testFile.exists()) {
       testFile.remove();
     }
@@ -812,7 +811,7 @@ public:
 
     Mantid::API::Workspace_sptr loadedWS = loadAlg.getProperty("OutputWorkspace");
     auto loadedPeaksWS = std::dynamic_pointer_cast<Mantid::API::IPeaksWorkspace>(loadedWS);
-    Poco::File testFile(filePath);
+    std::filesystem::path testFile(filePath);
     if (testFile.exists()) {
       testFile.remove();
     }
@@ -872,7 +871,7 @@ public:
     TS_ASSERT(loadAlg.isExecuted());
 
     // The file is not needed anymore
-    Poco::File(savedFileName).remove();
+    std::filesystem::remove(savedFileName);
 
     if (!loadAlg.isExecuted())
       return; // Nothing to check
@@ -984,8 +983,8 @@ public:
     // Clean up
     AnalysisDataService::Instance().remove("ws_loaded_1");
     AnalysisDataService::Instance().remove("ws_loaded_2");
-    if (!tempFile.empty() && Poco::File(tempFile).exists()) {
-      Poco::File(tempFile).remove();
+    if (!tempFile.empty() && std::filesystem::exists(tempFile)) {
+      std::filesystem::remove(tempFile);
     }
   }
 
@@ -1114,8 +1113,8 @@ public:
     workspace = std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(output_ws));
     TS_ASSERT(workspace.get());
     check_log(workspace, LOG_TO_CHECK, LOG_SIZE, LOG_SECONDS, LOG_VALUE);
-    if (Poco::File(filename).exists())
-      Poco::File(filename).remove();
+    if (std::filesystem::exists(filename))
+      std::filesystem::remove(filename);
   }
 
   void test_log_filtering_survives_save_and_load() {
@@ -1163,8 +1162,8 @@ public:
     check_log(reloadedWorkspace, "period 1", 36, 505, true);
     check_log(reloadedWorkspace, "running", 72, 501, true);
 
-    if (Poco::File(filename).exists())
-      Poco::File(filename).remove();
+    if (std::filesystem::exists(filename))
+      std::filesystem::remove(filename);
   }
 
   void test_load_leanElasticPeakWorkspace() {
@@ -1215,8 +1214,8 @@ public:
     TS_ASSERT_DELTA(lpws->getPeak(1).getQLabFrame().Y(), pk2.getQLabFrame().Y(), 1e-5);
     TS_ASSERT_DELTA(lpws->getPeak(1).getQLabFrame().Z(), pk2.getQLabFrame().Z(), 1e-5);
 
-    if (Poco::File(filename).exists())
-      Poco::File(filename).remove();
+    if (std::filesystem::exists(filename))
+      std::filesystem::remove(filename);
   }
 
   void test_ws_run_title_failover_to_title() {
@@ -1261,8 +1260,8 @@ public:
 
     // Remove workspace and saved nexus file
     AnalysisDataService::Instance().remove("test_failoverOutput");
-    if (Poco::File(filename).exists())
-      Poco::File(filename).remove();
+    if (std::filesystem::exists(filename))
+      std::filesystem::remove(filename);
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().remove("test_CreateWorkspace"));
   }
 
@@ -1471,7 +1470,7 @@ private:
 
   void writeTmpEventNexus() {
     // return;
-    if (!m_savedTmpEventFile.empty() && Poco::File(m_savedTmpEventFile).exists())
+    if (!m_savedTmpEventFile.empty() && std::filesystem::exists(m_savedTmpEventFile))
       return;
 
     std::vector<std::vector<int>> groups(6);
@@ -1507,8 +1506,8 @@ private:
 
   void clearTmpEventNexus() {
     // remove saved/re-loaded test event data file
-    if (!m_savedTmpEventFile.empty() && Poco::File(m_savedTmpEventFile).exists())
-      Poco::File(m_savedTmpEventFile).remove();
+    if (!m_savedTmpEventFile.empty() && std::filesystem::exists(m_savedTmpEventFile))
+      std::filesystem::remove(m_savedTmpEventFile);
   }
 
   void doTestLoadAndSaveHistogramWS(bool useXErrors = false, bool numericAxis = false, bool legacyXErrors = false) {
@@ -1588,8 +1587,8 @@ private:
 
     // Remove workspace and saved nexus file
     AnalysisDataService::Instance().remove("output");
-    if (Poco::File(filename).exists())
-      Poco::File(filename).remove();
+    if (std::filesystem::exists(filename))
+      std::filesystem::remove(filename);
   }
 
   void doTestLoadAndSavePointWS(bool useXErrors = false) {
@@ -1644,8 +1643,8 @@ private:
 
     // Remove workspace and saved nexus file
     AnalysisDataService::Instance().remove("output");
-    if (Poco::File(filename).exists())
-      Poco::File(filename).remove();
+    if (std::filesystem::exists(filename))
+      std::filesystem::remove(filename);
   }
 
   void doRaggedWorkspaceTest(MatrixWorkspace_sptr raggedWS) {
@@ -1680,8 +1679,8 @@ private:
       TS_ASSERT(false);
     }
 
-    if (Poco::File(filename).exists())
-      Poco::File(filename).remove();
+    if (std::filesystem::exists(filename))
+      std::filesystem::remove(filename);
   }
 
   std::string testFile, output_ws;

@@ -14,9 +14,9 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataHandling/SaveTBL.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include <Poco/File.h>
 #include <cxxtest/TestSuite.h>
 #include <fstream>
+#include <filesystem>
 
 using namespace Mantid::API;
 using namespace Mantid::DataHandling;
@@ -46,7 +46,7 @@ public:
       TS_FAIL("Could not run SaveTBL");
     }
 
-    TS_ASSERT(Poco::File(m_abspath).exists());
+    TS_ASSERT(std::filesystem::exists(m_abspath));
     std::ifstream file(m_abspath.c_str());
     std::string line = "";
     getline(file, line);
@@ -110,7 +110,7 @@ public:
       TS_FAIL("Could not run SaveTBL");
     }
 
-    TS_ASSERT(Poco::File(m_abspath).exists());
+    TS_ASSERT(std::filesystem::exists(m_abspath));
     std::ifstream file(m_abspath.c_str());
     std::string line = "";
     getline(file, line);
@@ -181,7 +181,7 @@ public:
       TS_FAIL("Could not run SaveTBL");
     }
 
-    TS_ASSERT(Poco::File(m_abspath).exists());
+    TS_ASSERT(std::filesystem::exists(m_abspath));
     std::ifstream file(m_abspath.c_str());
     std::string line = "";
     getline(file, line);
@@ -225,7 +225,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg->execute());
 
     // the algorithm shouldn't have written a file to disk
-    TS_ASSERT(Poco::File(m_abspath).exists());
+    TS_ASSERT(std::filesystem::exists(m_abspath));
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().remove(m_name));
   }
 
@@ -266,7 +266,7 @@ public:
     TS_ASSERT_THROWS_ANYTHING(alg->execute());
 
     // the algorithm shouldn't have written a file to disk
-    TS_ASSERT(!Poco::File(m_abspath).exists());
+    TS_ASSERT(!std::filesystem::exists(m_abspath));
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().remove(m_name));
   }
 
@@ -299,7 +299,7 @@ public:
 private:
   void cleanupafterwards() {
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().remove(m_name));
-    TS_ASSERT_THROWS_NOTHING(Poco::File(m_abspath).remove());
+    TS_ASSERT_THROWS_NOTHING(std::filesystem::remove(m_abspath));
   }
 
   ITableWorkspace_sptr CreateWorkspace() {

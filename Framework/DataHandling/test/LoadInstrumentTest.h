@@ -24,12 +24,11 @@
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/Strings.h"
 
-#include <Poco/File.h>
-#include <Poco/Path.h>
 #include <cxxtest/TestSuite.h>
 
 #include <string>
 #include <vector>
+#include <filesystem>
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -84,14 +83,14 @@ public:
     const auto &fileFinder = Mantid::API::FileFinder::Instance();
     const std::string originalFilePath = fileFinder.getFullPath("HET_Definition.xml");
 
-    const std::string tmpDir = Poco::Path::temp();
+    const std::string tmpDir = std::filesystem::path::temp();
     auto generateFiles = [&tmpDir, &originalFilePath](const std::string &name) {
-      Poco::Path tmpFilePath(tmpDir, name);
+      std::filesystem::path tmpFilePath(tmpDir, name);
 
-      Poco::File originalFile(originalFilePath);
-      originalFile.copyTo(tmpFilePath.toString());
+      std::filesystem::path originalFile(originalFilePath);
+      originalFile.copyTo(tmpFilePath.string());
 
-      Poco::File tmpFile(tmpFilePath);
+      std::filesystem::path tmpFile(tmpFilePath);
       return tmpFile;
     };
 

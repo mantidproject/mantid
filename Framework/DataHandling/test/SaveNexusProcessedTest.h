@@ -36,6 +36,7 @@
 #include <cxxtest/TestSuite.h>
 #include <fstream>
 #include <memory>
+#include <filesystem>
 
 #include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 #include "MantidFrameworkTestHelpers/FakeObjects.h"

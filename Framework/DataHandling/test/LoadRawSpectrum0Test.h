@@ -18,7 +18,6 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/Unit.h"
 
-#include <Poco/Path.h>
 #include <boost/lexical_cast.hpp>
 
 using namespace Mantid::API;

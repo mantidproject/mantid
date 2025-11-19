@@ -24,13 +24,13 @@
 #include <Poco/DOM/NodeFilter.h>
 #include <Poco/DOM/NodeIterator.h>
 #include <Poco/DOM/NodeList.h>
-#include <Poco/Path.h>
 #include <Poco/SAX/InputSource.h>
 
 #include <cmath>
 #include <cstdlib>
 #include <fstream>
 #include <iterator>
+#include <filesystem>
 
 using Mantid::HistogramData::BinEdges;
 using Mantid::HistogramData::Counts;
@@ -85,11 +85,11 @@ void LoadPreNexusMonitors::exec() {
 
   // TODO: Extract the directory that the runinfo file is in.
   // Create a Poco Path object for runinfo filename
-  Poco::Path runinfoPath(runinfo_filename, Poco::Path::PATH_GUESS);
+  std::filesystem::path runinfoPath(runinfo_filename, std::filesystem::path::PATH_GUESS);
   // Now lets get the directory
-  Poco::Path dirPath(runinfoPath.parent());
+  std::filesystem::path dirPath(runinfoPath.parent_path());
 
-  this->g_log.information("Monitor File Dir: " + dirPath.toString());
+  this->g_log.information("Monitor File Dir: " + dirPath.string());
 
   // Some XML parsing magic...
   std::ifstream in(runinfo_filename.c_str());
@@ -176,11 +176,11 @@ void LoadPreNexusMonitors::exec() {
   BinEdges edges(time_bins);
   for (int i = 0; i < nMonitors; i++) {
     // Now lets actually read the monitor files..
-    Poco::Path pMonitorFilename(dirPath, monitorFilenames[i]);
+    std::filesystem::path pMonitorFilename(dirPath, monitorFilenames[i]);
 
-    g_log.debug() << "Loading monitor file :" << pMonitorFilename.toString() << '\n';
+    g_log.debug() << "Loading monitor file :" << pMonitorFilename.string() << '\n';
 
-    Kernel::BinaryFile<uint32_t> monitorFile(pMonitorFilename.toString());
+    Kernel::BinaryFile<uint32_t> monitorFile(pMonitorFilename.string());
     // temp buffer for file reading
     std::vector<uint32_t> buffer = monitorFile.loadAllIntoVector();
 

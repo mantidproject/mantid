@@ -28,6 +28,7 @@
 #include "Poco/Path.h"
 
 #include <fstream>
+#include <filesystem>
 
 using Mantid::DataHandling::SetSample;
 using Mantid::Kernel::PropertyWithValue;
@@ -41,12 +42,12 @@ public:
 
   SetSampleTest() {
     // Setup a temporary directory structure for testing
-    Poco::Path testDirec(Poco::Path::temp(), "SetSampleTest");
-    m_testRoot = testDirec.toString();
+    std::filesystem::path testDirec(std::filesystem::path::temp(), "SetSampleTest");
+    m_testRoot = testDirec.string();
     testDirec.append("sampleenvironments");
     testDirec.makeDirectory();
     testDirec.append(m_facilityName).append(m_instName);
-    Poco::File(testDirec).createDirectories();
+    std::filesystem::create_directories(testDirec);
 
     // Write test files
     const std::string xml = "<environmentspec>"
@@ -80,7 +81,7 @@ public:
                             "  </containers>"
                             " </components>"
                             "</environmentspec>";
-    Poco::File envFile(Poco::Path(testDirec, m_envName + ".xml"));
+    std::filesystem::path envFile(std::filesystem::path(testDirec, m_envName + ".xml"));
     std::ofstream goodStream(envFile.path(), std::ios_base::out);
     goodStream << xml;
     goodStream.close();
@@ -102,7 +103,7 @@ public:
                                   "  </containers>"
                                   " </components>"
                                   "</environmentspec>";
-    Poco::File envFileFixed(Poco::Path(testDirec, m_envName + "_fixedgeometry.xml"));
+    std::filesystem::path envFileFixed(std::filesystem::path(testDirec, m_envName + "_fixedgeometry.xml"));
     std::ofstream goodStreamFixed(envFileFixed.path(), std::ios_base::out);
     goodStreamFixed << xml_fixed;
     goodStreamFixed.close();
@@ -110,7 +111,7 @@ public:
 
   ~SetSampleTest() {
     try {
-      Poco::File(m_testRoot).remove(true);
+      std::filesystem::path(m_testRoot).remove(true);
     } catch (...) {
     }
   }

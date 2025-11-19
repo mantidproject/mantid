@@ -13,9 +13,8 @@
 #include "MantidDataHandling/SaveFullprofResolution.h"
 #include "MantidDataObjects/TableWorkspace.h"
 
-#include <Poco/File.h>
-
 #include <fstream>
+#include <filesystem>
 
 using namespace std;
 using namespace Mantid;
@@ -61,7 +60,7 @@ public:
 
     // Check file
     std::string filename = alg.getProperty("OutputFilename"); // Get full pathname
-    bool outputfileexist = Poco::File(filename).exists();
+    bool outputfileexist = std::filesystem::exists(filename);
     TS_ASSERT(outputfileexist);
 
     if (!outputfileexist) {
@@ -73,7 +72,7 @@ public:
     TS_ASSERT_EQUALS(numlines, 22);
 
     // Clean
-    Poco::File(filename).remove();
+    std::filesystem::remove(filename);
 
     return;
   }
@@ -101,10 +100,10 @@ public:
 
     // Locate file
     std::string filename = alg.getProperty("OutputFilename"); // Get full pathname
-    Poco::File irffile(filename);
+    std::filesystem::path irffile(filename);
     TS_ASSERT(irffile.exists());
     if (!irffile.exists()) {
-      Poco::File(parwsname).remove();
+      std::filesystem::remove(parwsname);
       return;
     }
 
@@ -113,7 +112,7 @@ public:
     TS_ASSERT_EQUALS(numlines, 18);
 
     // Clean
-    Poco::File(filename).remove();
+    std::filesystem::remove(filename);
 
     return;
   }
@@ -155,10 +154,10 @@ public:
 
     // Locate file
     std::string filename = alg.getProperty("OutputFilename"); // Get full pathname
-    Poco::File irffile(filename);
+    std::filesystem::path irffile(filename);
     TS_ASSERT(irffile.exists());
     if (!irffile.exists()) {
-      Poco::File(parwsname).remove();
+      std::filesystem::remove(parwsname);
       return;
     }
 
@@ -167,7 +166,7 @@ public:
     TS_ASSERT_EQUALS(numlines, 34);
 
     // Clean
-    Poco::File(filename).remove();
+    std::filesystem::remove(filename);
   }
 
   //----------------------------------------------------------------------------------------------

@@ -31,7 +31,6 @@
 #include <Poco/DOM/Node.h>
 #include <Poco/DOM/NodeList.h>
 #include <Poco/DOM/Text.h>
-#include <Poco/Path.h>
 #include <Poco/SAX/InputSource.h>
 
 #include <algorithm>

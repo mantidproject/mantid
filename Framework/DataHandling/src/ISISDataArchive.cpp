@@ -14,9 +14,7 @@
 
 #include "MantidKernel/StringTokenizer.h"
 #include <Poco/Exception.h>
-#include <Poco/File.h>
-#include <Poco/Path.h>
-
+#include <filesystem>
 namespace Mantid::DataHandling {
 namespace {
 /// static logger
@@ -87,7 +85,7 @@ std::string ISISDataArchive::getPath(const std::string &fName) const {
     return ""; // Avoid pointless call to service
 
   std::ostringstream os = sendRequest(fName);
-  os << Poco::Path::separator() << fName;
+  os << std::filesystem::path::separator() << fName;
   std::string expectedPath = os.str();
   return expectedPath;
 }
@@ -138,7 +136,7 @@ std::string ISISDataArchive::getCorrectExtension(const std::string &path, const 
  */
 bool ISISDataArchive::fileExists(const std::string &path) const {
   try {
-    if (Poco::File(path).exists())
+    if (std::filesystem::exists(path))
       return true;
   } catch (Poco::Exception &) {
   }

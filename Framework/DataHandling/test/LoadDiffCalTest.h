@@ -7,6 +7,7 @@
 #pragma once
 
 #include <cxxtest/TestSuite.h>
+#include <filesystem>
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -15,8 +16,6 @@
 // reuse what another test has for creating dummy workspaces
 #include "MantidDataHandling/SaveDetectorsGrouping.h"
 #include "SaveDiffCalTest.h"
-
-#include <Poco/File.h>
 
 using Mantid::DataHandling::LoadDiffCal;
 using Mantid::DataHandling::SaveDiffCal;
@@ -81,8 +80,8 @@ public:
     }
 
     // cleanup
-    if (Poco::File(filename).exists())
-      Poco::File(filename).remove();
+    if (std::filesystem::exists(filename))
+      std::filesystem::remove(filename);
   }
 
   // Override a grouping definition specified by LoadDiffCal "Filename" property.
@@ -164,10 +163,10 @@ public:
     }
 
     // cleanup
-    if (Poco::File(filename).exists())
-      Poco::File(filename).remove();
-    if (Poco::File(groupingfile).exists())
-      Poco::File(groupingfile).remove();
+    if (std::filesystem::exists(filename))
+      std::filesystem::remove(filename);
+    if (std::filesystem::exists(groupingfile))
+      std::filesystem::remove(groupingfile);
   }
 
   // Create a zero calibration workspace consistent with an input grouping workspace.
@@ -282,9 +281,9 @@ public:
     }
 
     // cleanup
-    if (Poco::File(filename).exists())
-      Poco::File(filename).remove();
-    if (Poco::File(groupingfile).exists())
-      Poco::File(groupingfile).remove();
+    if (std::filesystem::exists(filename))
+      std::filesystem::remove(filename);
+    if (std::filesystem::exists(groupingfile))
+      std::filesystem::remove(groupingfile);
   }
 };

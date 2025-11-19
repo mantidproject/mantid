@@ -16,7 +16,6 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
 
-#include <Poco/Path.h>
 #include <cmath>
 #include <cstdio> //Required for gcc 4.4
 #include <memory>

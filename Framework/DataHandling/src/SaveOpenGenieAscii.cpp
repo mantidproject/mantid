@@ -16,9 +16,6 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/VisibleWhenProperty.h"
 
-#include <Poco/File.h>
-#include <Poco/Path.h>
-
 #include <fstream>
 #include <vector>
 

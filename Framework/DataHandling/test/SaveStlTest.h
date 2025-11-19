@@ -10,9 +10,8 @@
 #include "MantidDataHandling/LoadBinaryStl.h"
 #include "MantidKernel/V3D.h"
 
-#include <Poco/File.h>
-#include <Poco/Path.h>
 #include <cxxtest/TestSuite.h>
+#include <filesystem>
 
 using namespace Mantid::DataHandling;
 using namespace Mantid::Kernel;
@@ -41,10 +40,10 @@ public:
     writer.writeStl();
     {
       auto reader = LoadBinaryStl(path, ScaleUnits::metres);
-      TS_ASSERT(Poco::File(path).exists());
+      TS_ASSERT(std::filesystem::exists(path));
       TS_ASSERT(LoadBinaryStl::isBinarySTL(path));
     }
-    Poco::File(path).remove();
+    std::filesystem::remove(path);
   }
 
   void test_saves_shape_correctly() {
@@ -58,7 +57,7 @@ public:
     auto writer = SaveStl(path, triangle, vertices, ScaleUnits::metres);
     writer.writeStl();
 
-    TS_ASSERT(Poco::File(path).exists());
+    TS_ASSERT(std::filesystem::exists(path));
     TS_ASSERT(LoadBinaryStl::isBinarySTL(path));
     {
       auto reader = LoadBinaryStl(path, ScaleUnits::metres);
@@ -68,7 +67,7 @@ public:
       TS_ASSERT_EQUALS(loadedTriangles, triangle);
       TS_ASSERT_EQUALS(loadedVertices, compareVertices);
     }
-    Poco::File(path).remove();
+    std::filesystem::remove(path);
   }
 
   void test_fails_invalid_shape() {
@@ -80,7 +79,7 @@ public:
                               V3D(5, -5, 15),   V3D(5, 5, 15),  V3D(-5, 5, 15),  V3D(-5, -5, 15)};
     auto writer = SaveStl(path, triangle, vertices, ScaleUnits::metres);
     TS_ASSERT_THROWS(writer.writeStl(), const std::runtime_error &);
-    TS_ASSERT(!Poco::File(path).exists());
+    TS_ASSERT(!std::filesystem::exists(path));
   }
 
   const std::string cubePath = FileFinder::Instance().getFullPath("cubeBin.stl");

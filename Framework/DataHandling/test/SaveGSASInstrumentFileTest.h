@@ -14,8 +14,8 @@
 #include "MantidDataHandling/SaveGSASInstrumentFile.h"
 #include "MantidDataObjects/TableWorkspace.h"
 
-#include <Poco/File.h>
 #include <fstream>
+#include <filesystem>
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -62,7 +62,7 @@ public:
 
     // Check the output file's existence and size
     std::string filename = saver.getProperty("OutputFilename"); // get full pathname
-    TS_ASSERT(Poco::File(filename).exists());
+    TS_ASSERT(std::filesystem::exists(filename));
 
     vector<size_t> veclineindextoread;
     veclineindextoread.emplace_back(5);
@@ -85,7 +85,7 @@ public:
 
     // Clean
     AnalysisDataService::Instance().remove("PG3ProfileTable");
-    Poco::File(filename).remove();
+    std::filesystem::remove(filename);
 
     return;
   }
@@ -114,11 +114,11 @@ public:
 
     // Check the output file's existence and size
     std::string filename = saver.getProperty("OutputFilename"); // get full pathname
-    TS_ASSERT(Poco::File(filename).exists());
+    TS_ASSERT(std::filesystem::exists(filename));
 
     // Clean
     AnalysisDataService::Instance().remove("PG3ProfileTable");
-    Poco::File(filename).remove();
+    std::filesystem::remove(filename);
 
     return;
   }
@@ -132,7 +132,7 @@ public:
     string prmfilename1("test3bank.iparm");
 
     generate3BankIrfFile(irffilename);
-    TS_ASSERT(Poco::File(irffilename).exists());
+    TS_ASSERT(std::filesystem::exists(irffilename));
 
     // Set up the algorithm
     SaveGSASInstrumentFile saver;
@@ -155,7 +155,7 @@ public:
 
     // Check existence of file
     std::string prmfilename = saver.getProperty("OutputFilename");
-    TS_ASSERT(Poco::File(prmfilename).exists());
+    TS_ASSERT(std::filesystem::exists(prmfilename));
 
     string filename("test3bank.iparm");
     vector<size_t> veclineindextoread;
@@ -171,8 +171,8 @@ public:
     TS_ASSERT_EQUALS(veclines[2], "INS  4PAB589   3.91787 173.70816   0.01643   0.01323");
 
     // Clean
-    Poco::File(prmfilename).remove();
-    Poco::File(irffilename).remove();
+    std::filesystem::remove(prmfilename);
+    std::filesystem::remove(irffilename);
   }
 
   //----------------------------------------------------------------------------------------------

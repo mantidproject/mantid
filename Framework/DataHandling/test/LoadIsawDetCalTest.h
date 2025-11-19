@@ -21,10 +21,10 @@
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Exception.h"
-#include <Poco/File.h>
 #include <cstring>
 #include <fstream>
 #include <vector>
+#include <filesystem>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -100,7 +100,7 @@ public:
     checkRotation(det, 0.707146, -8.47033e-22, -0.707068, -7.53079e-13);
 
     // remove file created by this algorithm
-    Poco::File(inputFile).remove();
+    std::filesystem::remove(inputFile);
     // Remove workspace
     AnalysisDataService::Instance().remove(wsName);
   }

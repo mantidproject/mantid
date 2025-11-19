@@ -12,9 +12,9 @@
 #include "MantidDataHandling/SaveAscii.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidHistogramData/LinearGenerator.h"
-#include <Poco/File.h>
 #include <cxxtest/TestSuite.h>
 #include <fstream>
+#include <filesystem>
 
 using namespace Mantid::API;
 using namespace Mantid::DataHandling;
@@ -62,7 +62,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(save.execute());
 
     // has the algorithm written a file to disk?
-    TS_ASSERT(Poco::File(filename).exists());
+    TS_ASSERT(std::filesystem::exists(filename));
 
     // Now make some checks on the content of the file
     std::ifstream in(filename.c_str());
@@ -87,7 +87,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(save.execute());
 
     // has the algorithm written a file to disk?
-    TS_ASSERT(Poco::File(filename_nohead).exists());
+    TS_ASSERT(std::filesystem::exists(filename_nohead));
 
     // Now we check that the first line of the file without header matches the
     // second line of the file with header
@@ -103,8 +103,8 @@ public:
     in2.close();
 
     // Remove files
-    Poco::File(filename).remove();
-    Poco::File(filename_nohead).remove();
+    std::filesystem::remove(filename);
+    std::filesystem::remove(filename_nohead);
   }
 
   void testExec_DX() {
@@ -138,7 +138,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(save.execute());
 
     // has the algorithm written a file to disk?
-    TS_ASSERT(Poco::File(filename).exists());
+    TS_ASSERT(std::filesystem::exists(filename));
 
     // Now make some checks on the content of the file
     std::ifstream in(filename.c_str());
@@ -154,7 +154,7 @@ public:
     TS_ASSERT_EQUALS(header4, "DX0");
     in.close();
 
-    Poco::File(filename).remove();
+    std::filesystem::remove(filename);
     AnalysisDataService::Instance().remove(WSname);
   }
 };

@@ -20,7 +20,6 @@
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidKernel/UnitFactory.h"
 
-#include <Poco/File.h>
 #include <boost/regex.hpp>
 #include <fstream>
 #include <sstream>

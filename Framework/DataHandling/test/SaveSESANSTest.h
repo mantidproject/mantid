@@ -15,11 +15,11 @@
 #include "MantidDataHandling/SaveSESANS.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 
-#include <Poco/File.h>
 #include <Poco/TemporaryFile.h>
 #include <boost/algorithm/string/predicate.hpp>
 #include <cmath>
 #include <fstream>
+#include <filesystem>
 
 using Mantid::DataHandling::SaveSESANS;
 using namespace Mantid::DataObjects;
@@ -173,7 +173,7 @@ private:
     TS_ASSERT_THROWS_NOTHING(loader.setProperty("Filename", outputPath));
     TS_ASSERT_THROWS_NOTHING(loader.setProperty("OutputWorkspace", outWSName));
     TS_ASSERT_THROWS_NOTHING(loader.execute());
-    TS_ASSERT(Poco::File(outputPath).exists());
+    TS_ASSERT(std::filesystem::exists(outputPath));
 
     // Check the file against original data - load it into a workspace
     API::Workspace_sptr loadedWS;
@@ -215,7 +215,7 @@ private:
     }
 
     // Clean up the file
-    TS_ASSERT_THROWS_NOTHING(Poco::File(outputPath).remove());
-    TS_ASSERT(!Poco::File(outputPath).exists());
+    TS_ASSERT_THROWS_NOTHING(std::filesystem::remove(outputPath));
+    TS_ASSERT(!std::filesystem::exists(outputPath));
   }
 };

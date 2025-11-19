@@ -22,9 +22,9 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidNexus/NexusFile.h"
 
-#include <Poco/File.h>
 #include <boost/lexical_cast.hpp>
 #include <vector>
+#include <filesystem>
 
 using namespace Mantid::DataHandling;
 using namespace Mantid::Kernel;
@@ -247,8 +247,8 @@ public:
   }
 
   ~LoadDetectorInfoTest() override {
-    Poco::File(m_DatFile).remove();
-    Poco::File(m_NXSFile).remove();
+    std::filesystem::remove(m_DatFile);
+    std::filesystem::remove(m_NXSFile);
   }
 
   void testLoadDat() { loadDatFileTestHelper(m_DatFile); }
@@ -416,7 +416,7 @@ public:
   }
 
   void tearDown() override {
-    Poco::File(m_testfile).remove();
+    std::filesystem::remove(m_testfile);
     AnalysisDataService::Instance().remove(m_wsName);
   }
 

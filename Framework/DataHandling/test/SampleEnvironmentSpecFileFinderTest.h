@@ -9,11 +9,9 @@
 #include "MantidDataHandling/SampleEnvironmentFactory.h"
 #include <cxxtest/TestSuite.h>
 
-#include <Poco/File.h>
-#include <Poco/Path.h>
-
 #include <fstream>
 #include <vector>
+#include <filesystem>
 
 using Mantid::DataHandling::SampleEnvironmentSpec_uptr;
 using Mantid::DataHandling::SampleEnvironmentSpecFileFinder;
@@ -27,11 +25,11 @@ public:
 
   SampleEnvironmentSpecFileFinderTest() {
     // Setup a temporary directory structure for testing
-    Poco::Path testDirec(Poco::Path::temp(), "SampleEnvironmentSpecFileFinderTest");
+    std::filesystem::path testDirec(std::filesystem::path::temp(), "SampleEnvironmentSpecFileFinderTest");
     testDirec.makeDirectory();
-    m_testRoot = testDirec.toString();
+    m_testRoot = testDirec.string();
     testDirec.append(m_facilityName).append(m_instName);
-    Poco::File(testDirec).createDirectories();
+    std::filesystem::create_directories(testDirec);
 
     // Write test files
     const std::string xml = "<environmentspec>"
@@ -57,12 +55,12 @@ public:
                             "  </containers>"
                             " </components>"
                             "</environmentspec>";
-    Poco::File envFile(Poco::Path(testDirec, m_envName + ".xml"));
+    std::filesystem::path envFile(std::filesystem::path(testDirec, m_envName + ".xml"));
     std::ofstream goodStream(envFile.path(), std::ios_base::out);
     goodStream << xml;
     goodStream.close();
     // Bad file
-    envFile = Poco::Path(testDirec, m_badName + ".xml");
+    envFile = std::filesystem::path(testDirec, m_badName + ".xml");
     std::ofstream badStream(envFile.path(), std::ios_base::out);
     const std::string wrongContent = "<garbage>";
     badStream << wrongContent;
@@ -71,7 +69,7 @@ public:
 
   ~SampleEnvironmentSpecFileFinderTest() {
     try {
-      Poco::File(m_testRoot).remove(true);
+      std::filesystem::path(m_testRoot).remove(true);
     } catch (...) {
     }
   }

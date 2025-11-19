@@ -73,7 +73,7 @@ void DownloadFile::exec() {
   std::string filename = getProperty("Filename");
 
   Poco::URI url(address);
-  m_internetHelper->downloadFile(url.toString(), filename);
+  m_internetHelper->downloadFile(url.string(), filename);
   setProperty("Address", address);
 }
 

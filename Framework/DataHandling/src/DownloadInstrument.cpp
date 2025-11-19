@@ -13,8 +13,6 @@
 #include <Poco/DateTimeFormat.h>
 #include <Poco/DateTimeFormatter.h>
 #include <Poco/DirectoryIterator.h>
-#include <Poco/File.h>
-#include <Poco/Path.h>
 // Visual Studio complains with the inclusion of Poco/FileStream
 // disabling this warning.
 #if defined(_WIN32) || defined(_WIN64)
@@ -35,6 +33,7 @@
 
 // std
 #include <fstream>
+#include <filesystem>
 
 namespace Mantid::DataHandling {
 using namespace Kernel;
@@ -149,18 +148,21 @@ std::string getDownloadUrl(Json::Value &contents) {
 DownloadInstrument::StringToStringMap DownloadInstrument::processRepository() {
   // get the instrument directories
   auto instrumentDirs = Mantid::Kernel::ConfigService::Instance().getInstrumentDirectories();
-  Poco::Path installPath(instrumentDirs.back());
+  std::filesystem::path installPath(instrumentDirs.back());
   installPath.makeDirectory();
-  Poco::Path localPath(instrumentDirs[0]);
+  std::filesystem::path localPath(instrumentDirs[0]);
   localPath.makeDirectory();
 
   // get the date of the local github.json file if it exists
-  Poco::Path gitHubJson(localPath, "github.json");
-  Poco::File gitHubJsonFile(gitHubJson);
+  std::filesystem::path gitHubJsonFile = std::filesystem::path(localPath) / "github.json";
   Poco::DateTime gitHubJsonDate(1900, 1, 1);
   bool forceUpdate = this->getProperty("ForceUpdate");
-  if ((!forceUpdate) && gitHubJsonFile.exists() && gitHubJsonFile.isFile()) {
-    gitHubJsonDate = gitHubJsonFile.getLastModified();
+  if ((!forceUpdate) && std::filesystem::exists(gitHubJsonFile) && std::filesystem::is_regular_file(gitHubJsonFile)) {
+    auto ftime = std::filesystem::last_write_time(gitHubJsonFile);
+    auto sctp = std::chrono::time_point_cast<std::chrono::system_clock::duration>(
+        ftime - std::filesystem::file_time_type::clock::now() + std::chrono::system_clock::now());
+    std::time_t cftime = std::chrono::system_clock::to_time_t(sctp);
+    gitHubJsonDate = Poco::Timestamp::fromEpochTime(cftime);
   }
 
   // get the file list from github
@@ -178,7 +180,7 @@ DownloadInstrument::StringToStringMap DownloadInstrument::processRepository() {
   }
   StringToStringMap fileMap;
   try {
-    doDownloadFile(gitHubInstrumentRepoUrl, gitHubJson.toString(), headers);
+    doDownloadFile(gitHubInstrumentRepoUrl, gitHubJson.string(), headers);
   } catch (Exception::InternetError &ex) {
     if (ex.errorCode() == static_cast<int>(InternetHelper::HTTPStatus::NOT_MODIFIED)) {
       // No changes since last time
@@ -189,27 +191,27 @@ DownloadInstrument::StringToStringMap DownloadInstrument::processRepository() {
   }
 
   // update local repo files
-  Poco::Path installRepoFile(localPath, "install.json");
-  StringToStringMap installShas = getFileShas(installPath.toString());
-  Poco::Path localRepoFile(localPath, "local.json");
-  StringToStringMap localShas = getFileShas(localPath.toString());
+  std::filesystem::path installRepoFile(localPath, "install.json");
+  StringToStringMap installShas = getFileShas(installPath.string());
+  std::filesystem::path localRepoFile(localPath, "local.json");
+  StringToStringMap localShas = getFileShas(localPath.string());
 
   // verify repo info was downloaded correctly
   if (gitHubJsonFile.getSize() == 0) {
     std::stringstream msg;
-    msg << "Encountered empty file \"" << gitHubJson.toString() << "\" while determining what to download";
+    msg << "Encountered empty file \"" << gitHubJson.string() << "\" while determining what to download";
     throw std::runtime_error(msg.str());
   }
 
   // Parse the server JSON response
   ::Json::CharReaderBuilder readerBuilder;
   Json::Value serverContents;
-  Poco::FileStream fileStream(gitHubJson.toString(), std::ios::in);
+  Poco::FileStream fileStream(gitHubJson.string(), std::ios::in);
 
   std::string errors;
   Json::parseFromStream(readerBuilder, fileStream, &serverContents, &errors);
   if (errors.size() != 0) {
-    throw std::runtime_error("Unable to parse server JSON file \"" + gitHubJson.toString() + "\"");
+    throw std::runtime_error("Unable to parse server JSON file \"" + gitHubJson.string() + "\"");
   }
   fileStream.close();
 
@@ -218,8 +220,8 @@ DownloadInstrument::StringToStringMap DownloadInstrument::processRepository() {
   for (auto &serverElement : serverContents) {
     std::string elementName = serverElement.get("name", "").asString();
     repoFilenames.insert(elementName);
-    Poco::Path filePath(localPath, elementName);
-    if (filePath.getExtension() != "xml")
+    std::filesystem::path filePath(localPath, elementName);
+    if (filePath.extension().string() != "xml")
       continue;
     std::string sha = serverElement.get("sha", "").asString();
     std::string downloadUrl = getDownloadUrl(serverElement);
@@ -232,10 +234,10 @@ DownloadInstrument::StringToStringMap DownloadInstrument::processRepository() {
     // will be "")
     if ((sha != installSha) && (sha != localSha)) {
       fileMap.emplace(downloadUrl,
-                      filePath.toString());                                     // ACTION - DOWNLOAD to localPath
+                      filePath.string());                                     // ACTION - DOWNLOAD to localPath
     } else if ((!localSha.empty()) && (sha == installSha) && (sha != localSha)) // matches install, but different local
     {
-      fileMap.emplace(downloadUrl, filePath.toString()); // ACTION - DOWNLOAD to
+      fileMap.emplace(downloadUrl, filePath.string()); // ACTION - DOWNLOAD to
                                                          // localPath and
                                                          // overwrite
     }
@@ -243,7 +245,7 @@ DownloadInstrument::StringToStringMap DownloadInstrument::processRepository() {
 
   // remove any .xml files from the local appdata directory that are not present
   // in the remote instrument repo
-  removeOrphanedFiles(localPath.toString(), repoFilenames);
+  removeOrphanedFiles(localPath.string(), repoFilenames);
 
   return fileMap;
 }
@@ -271,10 +273,10 @@ DownloadInstrument::StringToStringMap DownloadInstrument::getFileShas(const std:
     using Poco::DirectoryIterator;
     DirectoryIterator end;
     for (DirectoryIterator it(directoryPath); it != end; ++it) {
-      const auto &entryPath = Poco::Path(it->path());
-      if (entryPath.getExtension() != "xml")
+      const auto &entryPath = std::filesystem::path(it->path());
+      if (entryPath.extension().string() != "xml")
         continue;
-      std::string sha1 = ChecksumHelper::gitSha1FromFile(entryPath.toString());
+      std::string sha1 = ChecksumHelper::gitSha1FromFile(entryPath.string());
       // Track sha1
       filesToSha.emplace(entryPath.getFileName(), sha1);
     }
@@ -306,8 +308,8 @@ size_t DownloadInstrument::removeOrphanedFiles(const std::string &directoryPath,
     using Poco::DirectoryIterator;
     DirectoryIterator end;
     for (DirectoryIterator it(directoryPath); it != end; ++it) {
-      const auto &entryPath = Poco::Path(it->path());
-      if (entryPath.getExtension() != "xml")
+      const auto &entryPath = std::filesystem::path(it->path());
+      if (entryPath.extension().string() != "xml")
         continue;
       if (filenamesToKeep.find(entryPath.getFileName()) == filenamesToKeep.end()) {
         g_log.debug() << "File not found in remote instrument repository, will "
@@ -329,7 +331,7 @@ size_t DownloadInstrument::removeOrphanedFiles(const std::string &directoryPath,
   // delete any identified files
   try {
     for (const auto &filename : filesToDelete) {
-      Poco::File file(filename);
+      std::filesystem::path file(filename);
       file.remove();
     }
   } catch (Poco::Exception &ex) {
@@ -363,7 +365,7 @@ behaviour.
 InternetHelper::HTTPStatus DownloadInstrument::doDownloadFile(const std::string &urlFile,
                                                               const std::string &localFilePath,
                                                               const StringToStringMap &headers) {
-  Poco::File localFile(localFilePath);
+  std::filesystem::path localFile(localFilePath);
   if (localFile.exists()) {
     if (!localFile.canWrite()) {
       std::stringstream msg;
@@ -371,7 +373,7 @@ InternetHelper::HTTPStatus DownloadInstrument::doDownloadFile(const std::string 
       throw std::runtime_error(msg.str());
     }
   } else {
-    localFile = Poco::File(Poco::Path(localFilePath).parent().toString());
+    localFile = std::filesystem::path(std::filesystem::path(localFilePath).parent_path().string());
     if (!localFile.canWrite()) {
       std::stringstream msg;
       msg << "Cannot write file \"" << localFilePath << "\"";
