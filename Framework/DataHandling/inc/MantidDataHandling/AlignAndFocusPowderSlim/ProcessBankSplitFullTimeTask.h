@@ -18,9 +18,9 @@
 
 namespace Mantid::DataHandling::AlignAndFocusPowderSlim {
 
-class ProcessBankSplitFastLogsTask {
+class ProcessBankSplitFullTimeTask {
 public:
-  ProcessBankSplitFastLogsTask(std::vector<std::string> &bankEntryNames, H5::H5File &h5file,
+  ProcessBankSplitFullTimeTask(std::vector<std::string> &bankEntryNames, H5::H5File &h5file,
                                const bool is_time_filtered, std::vector<int> &workspaceIndices,
                                std::vector<API::MatrixWorkspace_sptr> &wksps,
                                const std::map<detid_t, double> &calibration,

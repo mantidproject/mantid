@@ -5,7 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 
-#include "MantidDataHandling/AlignAndFocusPowderSlim/ProcessBankSplitFastLogsTask.h"
+#include "MantidDataHandling/AlignAndFocusPowderSlim/ProcessBankSplitFullTimeTask.h"
 #include "MantidAPI/Run.h"
 #include "MantidDataHandling/AlignAndFocusPowderSlim/ProcessEventsTask.h"
 #include "MantidKernel/Logger.h"
@@ -26,10 +26,10 @@ namespace {
 const std::string MICROSEC("microseconds");
 
 // Logger for this class
-auto g_log = Kernel::Logger("ProcessBankSplitFastLogsTask");
+auto g_log = Kernel::Logger("ProcessBankSplitFullTimeTask");
 
 } // namespace
-ProcessBankSplitFastLogsTask::ProcessBankSplitFastLogsTask(
+ProcessBankSplitFullTimeTask::ProcessBankSplitFullTimeTask(
     std::vector<std::string> &bankEntryNames, H5::H5File &h5file, const bool is_time_filtered,
     std::vector<int> &workspaceIndices, std::vector<API::MatrixWorkspace_sptr> &wksps,
     const std::map<detid_t, double> &calibration, const std::map<detid_t, double> &scale_at_sample,
@@ -42,7 +42,7 @@ ProcessBankSplitFastLogsTask::ProcessBankSplitFastLogsTask(
       m_splitterMap(splitterMap), m_grainsize_event(grainsize_event), m_correction_to_sample(correction_to_sample),
       m_progress(progress) {}
 
-void ProcessBankSplitFastLogsTask::operator()(const tbb::blocked_range<size_t> &range) const {
+void ProcessBankSplitFullTimeTask::operator()(const tbb::blocked_range<size_t> &range) const {
   auto entry = m_h5file.openGroup("entry"); // type=NXentry
   for (size_t wksp_index = range.begin(); wksp_index < range.end(); ++wksp_index) {
     const auto &bankName = m_bankEntries[wksp_index];

@@ -12,7 +12,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
-#include "MantidDataHandling/AlignAndFocusPowderSlim/ProcessBankSplitFastLogsTask.h"
+#include "MantidDataHandling/AlignAndFocusPowderSlim/ProcessBankSplitFullTimeTask.h"
 #include "MantidDataHandling/AlignAndFocusPowderSlim/ProcessBankSplitTask.h"
 #include "MantidDataHandling/AlignAndFocusPowderSlim/ProcessBankTask.h"
 #include "MantidDataHandling/LoadEventNexus.h"
@@ -424,7 +424,7 @@ void AlignAndFocusPowderSlim::exec() {
 
     auto progress = std::make_shared<API::Progress>(this, .17, .9, num_banks_to_read * workspaceIndices.size());
     if (this->getProperty(PropertyNames::FULL_TIME)) {
-      g_log.information() << "Using ProcessBankSplitFastLogsTask for splitter processing\n";
+      g_log.information() << "Using ProcessBankSplitFullTimeTask for splitter processing\n";
 
       // Get the combined time ROI for all targets so we only load necessary events.
       // Need to offset the start time to account for tof's greater than pulsetime. 66.6ms is 4 pulses.
@@ -437,7 +437,7 @@ void AlignAndFocusPowderSlim::exec() {
 
       const auto splitterMap = timeSplitter.getSplittersMap();
 
-      ProcessBankSplitFastLogsTask task(bankEntryNames, h5file, is_time_filtered, workspaceIndices, workspaces,
+      ProcessBankSplitFullTimeTask task(bankEntryNames, h5file, is_time_filtered, workspaceIndices, workspaces,
                                         m_calibration, m_scale_at_sample, m_masked, static_cast<size_t>(DISK_CHUNK),
                                         static_cast<size_t>(GRAINSIZE_EVENTS), pulse_indices, splitterMap,
                                         this->getProperty(PropertyNames::CORRECTION_TO_SAMPLE), progress);
