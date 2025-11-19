@@ -157,20 +157,16 @@ void MomentsView::setPlotPropertyRange(const std::pair<double, double> &bounds) 
 void MomentsView::setRangeSelector(const std::pair<double, double> &bounds) {
   disconnect(m_dblManager, &QtDoublePropertyManager::valueChanged, this, &MomentsView::notifyValueChanged);
 
-  double deltaX = abs(bounds.second - bounds.first);
-  double lowX = bounds.first + (0.1) * deltaX;
-  double highX = bounds.second - (0.1) * deltaX;
-
-  m_dblManager->setValue(m_properties["EMin"], lowX);
-  m_dblManager->setValue(m_properties["EMax"], highX);
+  m_dblManager->setValue(m_properties["EMin"], bounds.first);
+  m_dblManager->setValue(m_properties["EMax"], bounds.second);
 
   // connecting back so that the model is updated.
   connect(m_dblManager, &QtDoublePropertyManager::valueChanged, this, &MomentsView::notifyValueChanged);
 
   auto xRangeSelector = getRangeSelector();
   xRangeSelector->setRange(bounds.first, bounds.second);
-  xRangeSelector->setMinimum(lowX);
-  xRangeSelector->setMaximum(highX);
+  xRangeSelector->setMinimum(bounds.first);
+  xRangeSelector->setMaximum(bounds.second);
 }
 
 /**
