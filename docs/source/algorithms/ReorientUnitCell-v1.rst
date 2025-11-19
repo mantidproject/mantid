@@ -65,7 +65,7 @@ Usage
         cos_theta = (trace - 1) / 2.
         return int(np.degrees(np.arccos(cos_theta)))
 
-    filename = '/SNS/TOPAZ/IPTS-33878/shared/RFMBA2PbI4/RFMBA2PbI4_mantid_295K_find_peaks/RFMBA2PbI4_Monoclinic_P_5sig.integrate'
+    filename = 'RFMBA2PbI4_Monoclinic_P_5sig.integrate'
     LoadIsawPeaks(Filename=filename, OutputWorkspace='peaks')
     FindUBUsingIndexedPeaks(PeaksWorkspace='peaks')
     IndexPeaks(PeaksWorkspace='peaks', CommonUBForAll=True)

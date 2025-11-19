@@ -9,7 +9,7 @@ import numpy as np
 from mantid.api import PythonAlgorithm, AlgorithmFactory, IPeaksWorkspaceProperty
 from mantid.geometry import PointGroupFactory
 from mantid.kernel import Direction, FloatBoundedValidator, StringListValidator
-from mantid.simpleapi import FilterPeaks, IndexPeaks, mtd, TransformHKL
+from mantid.simpleapi import mtd, TransformHKL
 
 
 class ReorientUnitCell(PythonAlgorithm):
@@ -115,7 +115,6 @@ class ReorientUnitCell(PythonAlgorithm):
         g_log = self.log()
         # Get input properties
         wsname: str = self.getPropertyValue("PeaksWorkspace")
-        tolerance = self.getProperty("Tolerance").value
         crystal_system: str = self.getProperty("CrystalSystem").value
         lattice_system: str = self.getProperty("LatticeSystem").value
 
@@ -126,16 +125,6 @@ class ReorientUnitCell(PythonAlgorithm):
         # Step 1: Fetch U and B matrices
         oriented_lattice = mtd[wsname].sample().getOrientedLattice()
         U, B = oriented_lattice.getU(), oriented_lattice.getB()
-
-        # Step 2: Index peaks with the given tolerance
-        IndexPeaks(PeaksWorkspace=wsname, Tolerance=tolerance, CommonUBForAll=False)
-
-        # Step 3: Get unique run numbers
-        run_numbers = np.unique(mtd[wsname].column("RunNumber")).tolist()
-        for run in run_numbers:
-            FilterPeaks(
-                InputWorkspace=wsname, FilterVariable="RunNumber", FilterValue=run, Operator="=", OutputWorkspace=mtd.unique_hidden_name()
-            )
 
         # Step 4: Generate cell symmetry transformation matrices
         point_group_symbol = self.get_point_group_symbol(crystal_system, lattice_system)
@@ -170,7 +159,14 @@ class ReorientUnitCell(PythonAlgorithm):
             g_log.notice(f"Aligning symmetry operation: {transform_name}")
             # Determine whether to use FindError based on number of peaks
             find_error = mtd[wsname].getNumberPeaks() > 3
-            TransformHKL(PeaksWorkspace=wsname, HKLTransform=optimal_transform, FindError=find_error)
+            (
+                TransformHKL(
+                    PeaksWorkspace=wsname,
+                    Tolerance=self.getProperty("Tolerance").value,
+                    HKLTransform=optimal_transform,
+                    FindError=find_error,
+                ),
+            )
 
         self.setProperty("PeaksWorkspace", mtd[wsname])
 
