@@ -60,7 +60,7 @@ Usage
     import numpy as np
 
     def rotation_angle(workspace):
-        oriented_lattice = mtd['peaks'].sample().getOrientedLattice()
+        oriented_lattice = mtd[str(workspace)].sample().getOrientedLattice()
         trace = oriented_lattice.getU().diagonal().sum()
         cos_theta = (trace - 1) / 2.
         return int(np.degrees(np.arccos(cos_theta)))
@@ -71,7 +71,7 @@ Usage
     IndexPeaks(PeaksWorkspace='peaks', CommonUBForAll=True)
     print(f"(before) rotation angle {rotation_angle('peaks')}")
 
-    ReorientUnitCell(PeaksWorkspace='peaks', crystal_system='Monoclinic')
+    ReorientUnitCell(PeaksWorkspace='peaks', CrystalSystem='Monoclinic')
     IndexPeaks(PeaksWorkspace='peaks', CommonUBForAll=True)
     print(f"(after ) rotation angle {rotation_angle('peaks')}")
 

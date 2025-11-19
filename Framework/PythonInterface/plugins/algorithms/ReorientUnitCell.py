@@ -77,7 +77,7 @@ class ReorientUnitCell(PythonAlgorithm):
         crystal_systems = ["Cubic", "Hexagonal", "Tetragonal", "Trigonal", "Orthorhombic", "Monoclinic"]
         self.declareProperty(
             name="CrystalSystem",
-            defaultValue="Triclinic",
+            defaultValue="Monoclinic",
             direction=Direction.Input,
             validator=StringListValidator(crystal_systems),
             doc="Crystal system.",
@@ -163,7 +163,6 @@ class ReorientUnitCell(PythonAlgorithm):
                     optimal_transform = transform
                     transform_name = name
             except np.linalg.LinAlgError:  # Skip matrices that are not invertible due to numerical issues
-                # Skip singular matrices
                 continue
 
         # Step 6: Apply the optimal transformation

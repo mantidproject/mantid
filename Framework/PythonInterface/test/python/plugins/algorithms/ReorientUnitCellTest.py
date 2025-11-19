@@ -32,7 +32,7 @@ class ReorientUnitCellTest(unittest.TestCase):
             DeleteWorkspace(self.peaks_ws_name)
 
     @staticmethod
-    def setup_algorightm():
+    def setup_algorithm():
         alg = AlgorithmManager.create("ReorientUnitCell")
         alg.setChild(True)
         alg.initialize()
@@ -86,7 +86,7 @@ class ReorientUnitCellTest(unittest.TestCase):
         CreatePeaksWorkspace(OutputType="LeanElasticPeak", OutputWorkspace=test_ws)
         try:
             # This should fail validation
-            alg = self.setup_algorightm()
+            alg = self.setup_algorithm()
             alg.setProperty("PeaksWorkspace", test_ws)
             alg.setProperty("CrystalSystem", "Cubic")
             issues = alg.validateInputs()
@@ -96,7 +96,7 @@ class ReorientUnitCellTest(unittest.TestCase):
 
     def test_invalid_lattice_system(self):
         """Test that specifying LatticeSystem for non-Trigonal fails validation."""
-        alg = self.setup_algorightm()
+        alg = self.setup_algorithm()
         alg.setProperty("PeaksWorkspace", self.peaks_ws_name)
         alg.setProperty("CrystalSystem", "Cubic")
         alg.setProperty("LatticeSystem", "Hexagonal")
@@ -134,7 +134,7 @@ class ReorientUnitCellTest(unittest.TestCase):
         self.assertEqual(self.rotation_angle_of_U(), 120)
         # Run the algorithm
         ReorientUnitCell(PeaksWorkspace=self.peaks_ws_name, CrystalSystem="Trigonal", LatticeSystem="Rhombohedral", Tolerance=0.12)
-        # deformation from the cube (89 degress vs 90) means we can't get the identity matrix for U
+        # deformation from the cube (89 degrees vs 90) means we can't get the identity matrix for U
         # but we should get a small residual rotation ~ 1 degree
         self.assertEqual(self.rotation_angle_of_U(), 1)
 
