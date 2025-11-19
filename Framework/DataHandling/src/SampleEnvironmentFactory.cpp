@@ -106,8 +106,8 @@ void SampleEnvironmentFactory::clearCache() { retrieveSpecCache().clear(); }
 SampleEnvironmentSpec_uptr SampleEnvironmentFactory::parseSpec(const std::string &filename,
                                                                const std::string &filepath) const {
   assert(m_finder);
-  std::filesystem::path fullpath(std::filesystem::path(filepath, filename + ".xml"));
-  return m_finder->parseSpec(filename, fullpath.path());
+  std::filesystem::path fullpath = std::filesystem::path(filepath) / (filename + ".xml");
+  return m_finder->parseSpec(filename, fullpath.string());
 }
 
 //------------------------------------------------------------------------------
@@ -151,10 +151,10 @@ SampleEnvironmentSpec_uptr SampleEnvironmentSpecFileFinder::find(const std::stri
       path prefix(prefixStr);
       path fullpath = prefix / rel_path;
       if (std::filesystem::exists(fullpath)) {
-        g_log.debug() << "Found environment at \"" << fullpath.string() << "\"\n";
+        g_log.debug() << "Found environment at \"" << fullpath << "\"\n";
         return parseSpec(name, fullpath.string());
       } else {
-        g_log.debug() << "Failed to find environment at \"" << fullpath.path() << "\"\n";
+        g_log.debug() << "Failed to find environment at \"" << fullpath << "\"\n";
       }
     }
   }

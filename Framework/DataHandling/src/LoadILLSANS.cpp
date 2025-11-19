@@ -782,8 +782,7 @@ void LoadILLSANS::createEmptyWorkspace(const size_t numberOfHistograms, const si
 std::string LoadILLSANS::getInstrumentFilePath(const std::string &instName) const {
 
   std::filesystem::path directory(ConfigService::Instance().getInstrumentDirectory());
-  std::filesystem::path file(instName + "_Definition.xml");
-  std::filesystem::path fullPath(directory, file);
+  std::filesystem::path fullPath = directory / (instName + "_Definition.xml");
   return fullPath.string();
 }
 

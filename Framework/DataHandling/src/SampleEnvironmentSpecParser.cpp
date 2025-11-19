@@ -337,12 +337,12 @@ std::vector<double> SampleEnvironmentSpecParser::parseTranslationVector(const st
 std::string SampleEnvironmentSpecParser::findFile(const std::string &filename) const {
   std::filesystem::path suppliedStlFileName(filename);
   std::filesystem::path stlFileName;
-  if (suppliedStlFileName.isRelative()) {
+  if (suppliedStlFileName.is_relative()) {
     bool useSearchDirectories = true;
     if (!m_filepath.empty()) {
       // if environment spec xml came from a file, search in the same
       // directory as the file
-      stlFileName = std::filesystem::path(std::filesystem::path(m_filepath).parent_path(), filename);
+      stlFileName = std::filesystem::path(m_filepath).parent_path() / filename;
       if (std::filesystem::exists(stlFileName)) {
         useSearchDirectories = false;
       }

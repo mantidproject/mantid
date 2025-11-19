@@ -331,7 +331,7 @@ void SaveDiffCal::exec() {
     }
   }
   if (!instrumentSource.empty()) {
-    instrumentSource = std::filesystem::path(instrumentSource).getFileName();
+    instrumentSource = std::filesystem::path(instrumentSource).filename();
   }
 
   // add the instrument information
