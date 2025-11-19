@@ -15,6 +15,7 @@
 #include "MantidKernel/EnumeratedStringProperty.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/Smoothing.h"
 
 #include <boost/algorithm/string/detail/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
@@ -149,7 +150,7 @@ std::map<std::string, std::string> FFTSmooth2::actuallyValidateInputs(API::Works
 
   // Check that the parameters are valid
   std::vector<param_t> params = getProperty(PropertyNames::PARAMS);
-  std::string const trunc_err = "Truncation parameter must be an integer > 1. ";
+  std::string const trunc_err = "Cutoff parameter must be an integer > 1. ";
   std::string const order_err = "Butterworth filter order must be an integer >= 1. ";
   std::string err_msg;
   if (params.size() > 0 && params[0] <= 1) {
@@ -171,8 +172,6 @@ std::map<std::string, std::string> FFTSmooth2::actuallyValidateInputs(API::Works
  */
 void FFTSmooth2::exec() {
   API::MatrixWorkspace_sptr inWS = getProperty(PropertyNames::INPUT_WKSP);
-  /// Will we Allow Any X Bins?
-  bool ignoreXBins = getProperty(PropertyNames::IGNORE_X_BINS);
 
   // retrieve parameters
   std::size_t n = 2, order = 2;
@@ -188,23 +187,32 @@ void FFTSmooth2::exec() {
 
   // set smoothing method based on user setting
   FILTER type = getPropertyValue(PropertyNames::FILTER);
-  std::function<void(API::MatrixWorkspace_sptr &, API::MatrixWorkspace_sptr &)> smoothMethod;
+  std::function<std::vector<double>(std::vector<double> const &)> smoothMethod;
   switch (type) {
   case FilterType::ZERO: {
-    smoothMethod = [this, n](API::MatrixWorkspace_sptr &uws, API::MatrixWorkspace_sptr &fws) {
-      this->zero(n, uws, fws);
+    // NOTE this algorithm used a cutoff *period*, whereas fftSmooth
+    // uses a cutoff number (a quantum number).  The below adjusted cutoff is precisely
+    // the value needed for fftSmooth to have the same result as the prior behavior
+    // This takes into account BOTH the symmetrization op below, AND the halfcomplex packing
+    // |  symm_size = 2 * dn
+    // |  halfcomplex size of symm = symm_size / 2 = dn
+    // so correct size to use is dn
+    unsigned adjusted_cutoff = (n > dn ? 1 : static_cast<unsigned>((dn + 1) / n));
+    smoothMethod = [adjusted_cutoff](std::vector<double> const &y) {
+      return Kernel::Smoothing::fftSmooth(y, adjusted_cutoff);
     };
     break;
   }
   case FilterType::BUTTERWORTH: {
-    smoothMethod = [this, n, order](API::MatrixWorkspace_sptr &uws, API::MatrixWorkspace_sptr &fws) {
-      this->Butterworth(n, order, uws, fws);
+    // see note above about adjusted cutoff
+    unsigned adjusted_cutoff = (n > dn ? 1 : static_cast<unsigned>((dn + 1) / n));
+    smoothMethod = [adjusted_cutoff, order](std::vector<double> const &y) {
+      return Kernel::Smoothing::fftButterworthSmooth(y, adjusted_cutoff, static_cast<unsigned int>(order));
     };
     break;
   }
   default: {
-    smoothMethod = [](API::MatrixWorkspace_sptr &, API::MatrixWorkspace_sptr &) {};
-    // [](std::vector<double> const &y) { return y; };
+    smoothMethod = [](std::vector<double> const &y) { return y; };
   }
   }
 
@@ -220,151 +228,41 @@ void FFTSmooth2::exec() {
   API::MatrixWorkspace_sptr outWS =
       API::WorkspaceFactory::Instance().create(inWS, send - s0, inWS->x(0).size(), inWS->y(0).size());
 
-  // Symmetrize the input spectrum
-  API::MatrixWorkspace_sptr symmWS =
-      API::WorkspaceFactory::Instance().create("Workspace2D", 1, inWS->x(0).size() + dn, inWS->y(0).size() + dn);
-
   Progress progress(this, 0.0, 1.0, 4 * (send - s0));
 
   for (std::size_t spec = s0; spec < send; spec++) {
-    // Save the starting x value so it can be restored after all transforms.
-    double x0 = inWS->x(spec)[0];
-
-    double dx = (inWS->x(spec).back() - inWS->x(spec).front()) / (static_cast<double>(inWS->x(spec).size()) - 1.0);
-
     progress.report();
 
-    auto &symX = symmWS->mutableX(0);
-    auto &symY = symmWS->mutableY(0);
-
+    // Symmetrize the input vector.
+    // The below pictograph illustrates the transformation from original to "symmetrized"
+    //            o            :     oo             o
+    //       oo  o|            :      |o  oo   oo  o|
+    //      o  oo |          ---->    | oo  o o  oo |
+    //     o      |            :      |      o      |
+    //     ^i=0   ^i=dn-1      :      ^i=1   ^i=dn  ^i=2*dn-1
+    // NOTE it's unknown why this operation was originally added.
+    // It is necessary to retain this operation to support legacy behavior.
+    std::vector<double> symY(2 * dn);
     for (std::size_t i = 0; i < dn; i++) {
-      symX[dn + i] = inWS->x(spec)[i];
       symY[dn + i] = inWS->y(spec)[i];
-
-      symX[dn - i] = x0 - dx * static_cast<double>(i);
       symY[dn - i] = inWS->y(spec)[i];
     }
     symY.front() = inWS->y(spec).back();
-    symX.front() = x0 - dx * static_cast<double>(dn);
-    if (inWS->isHistogramData())
-      symX.back() = inWS->x(spec).back();
-
-    // setProperty("OutputWorkspace",symmWS); return;
-
-    progress.report("Calculating FFT");
-    // Forward Fourier transform
-    auto fft = createChildAlgorithm("RealFFT", 0, 0.5);
-    fft->setProperty("InputWorkspace", symmWS);
-    fft->setProperty("WorkspaceIndex", 0);
-    fft->setProperty("IgnoreXBins", ignoreXBins);
-    try {
-      fft->execute();
-    } catch (...) {
-      g_log.error("Error in direct FFT algorithm");
-      throw;
-    }
-
-    API::MatrixWorkspace_sptr unfilteredWS = fft->getProperty("OutputWorkspace");
-    API::MatrixWorkspace_sptr filteredWS;
 
     // Apply the filter
     progress.report("Applying Filter");
-    smoothMethod(unfilteredWS, filteredWS);
-
-    progress.report("Backward Transformation");
-    // Backward transform
-    fft = createChildAlgorithm("RealFFT", 0.5, 1.);
-    fft->setProperty("InputWorkspace", filteredWS);
-    fft->setProperty("Transform", "Backward");
-    fft->setProperty("IgnoreXBins", ignoreXBins);
-    try {
-      fft->execute();
-    } catch (...) {
-      g_log.error("Error in inverse FFT algorithm");
-      throw;
-    }
-    API::MatrixWorkspace_sptr tmpWS = fft->getProperty("OutputWorkspace");
-
-    // FIXME: The intent of the following line is not clear. std::floor or
-    // std::ceil should probably be used.
-    dn = static_cast<int>(tmpWS->blocksize()) / 2;
+    std::vector<double> tmpY = smoothMethod(symY);
 
     // assign
     if (getProperty(PropertyNames::ALL_SPECTRA)) {
       outWS->setSharedX(spec, inWS->sharedX(spec));
-      outWS->mutableY(spec).assign(tmpWS->y(0).cbegin() + dn, tmpWS->y(0).cend());
+      outWS->mutableY(spec).assign(tmpY.cbegin() + dn, tmpY.cend());
     } else {
       outWS->setSharedX(0, inWS->sharedX(spec));
-      outWS->mutableY(0).assign(tmpWS->y(0).cbegin() + dn, tmpWS->y(0).cend());
+      outWS->mutableY(0).assign(tmpY.cbegin() + dn, tmpY.cend());
     }
   }
 
   setProperty(PropertyNames::OUTPUT_WKSP, outWS);
 }
-
-/** Smoothing by zeroing.
- *  @param n :: The order of truncation
- *  @param unfilteredWS :: workspace for storing the unfiltered Fourier
- * transform of the input spectrum
- *  @param filteredWS :: workspace for storing the filtered spectrum
- */
-void FFTSmooth2::zero(std::size_t n, API::MatrixWorkspace_sptr &unfilteredWS, API::MatrixWorkspace_sptr &filteredWS) {
-  auto mx = unfilteredWS->x(0).size();
-  auto my = unfilteredWS->y(0).size();
-  auto ny = my / n;
-
-  if (ny == 0)
-    ny = 1;
-
-  filteredWS = API::WorkspaceFactory::Instance().create(unfilteredWS, 2, mx, my);
-
-  filteredWS->setSharedX(0, unfilteredWS->sharedX(0));
-  filteredWS->setSharedX(1, unfilteredWS->sharedX(0));
-
-  std::copy(unfilteredWS->y(0).cbegin(), unfilteredWS->y(0).begin() + ny, filteredWS->mutableY(0).begin());
-
-  std::copy(unfilteredWS->y(1).cbegin(), unfilteredWS->y(1).begin() + ny, filteredWS->mutableY(1).begin());
-}
-
-/** Smoothing using Butterworth filter.
- *  @param n ::     The cutoff frequency control parameter.
- *               Cutoff frequency = my/n where my is the
- *               number of sample points in the data.
- *               As with the "Zeroing" case, the cutoff
- *               frequency is truncated to an integer value
- *               and set to 1 if the truncated value was zero.
- *  @param order :: The order of the Butterworth filter, 1, 2, etc.
- *               This must be a positive integer.
- *  @param unfilteredWS :: workspace for storing the unfiltered Fourier
- * transform of the input spectrum
- *  @param filteredWS :: workspace for storing the filtered spectrum
- */
-void FFTSmooth2::Butterworth(std::size_t n, std::size_t order, API::MatrixWorkspace_sptr &unfilteredWS,
-                             API::MatrixWorkspace_sptr &filteredWS) {
-  auto mx = unfilteredWS->x(0).size();
-  auto my = unfilteredWS->y(0).size();
-  auto ny = my / n;
-
-  if (ny == 0)
-    ny = 1;
-
-  filteredWS = API::WorkspaceFactory::Instance().create(unfilteredWS, 2, mx, my);
-
-  filteredWS->setSharedX(0, unfilteredWS->sharedX(0));
-  filteredWS->setSharedX(1, unfilteredWS->sharedX(0));
-
-  auto &Yr = unfilteredWS->y(0);
-  auto &Yi = unfilteredWS->y(1);
-  auto &yr = filteredWS->mutableY(0);
-  auto &yi = filteredWS->mutableY(1);
-
-  double cutoff = static_cast<double>(ny);
-  unsigned int two_order = 2U * static_cast<unsigned int>(order);
-  for (std::size_t i = 0; i < my; i++) {
-    double scale = 1.0 / (1.0 + pow(static_cast<double>(i) / cutoff, two_order));
-    yr[i] = scale * Yr[i];
-    yi[i] = scale * Yi[i];
-  }
-}
-
 } // namespace Mantid::Algorithms::FFTSmooth
