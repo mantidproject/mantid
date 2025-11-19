@@ -29,6 +29,9 @@ playback:
   packet_ordering: sequence_number # sort by the sequence number in the filename
                                    # 'timestamp': sort by ADARA packet timestamp
                                    # 'mtime': sort by the file-modification timestamp
+
+  packet_glob: '*.adara' # all packet files in a directory
+
 record:
   transfer_limit: 16000 # MB
 
@@ -37,7 +40,7 @@ logging:
 
   level: DEBUG # DEBUG: packet summary at send and receive
 
-  filename: /SNS/users/ux0/workspaces/mantid-PRs/tmp/SNAP_packets/sessions.log
+  filename: /SNS/users/ux0/workspaces/mantid-PRs/tmp/SNAP_packets/sessions.{PID}.log
 
   # `Packet` summary format.
   packet_summary: "type: {type:#06x}: {timestamp}, size: {size:>7}, CRC: {CRC:#010x}"
