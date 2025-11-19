@@ -218,6 +218,8 @@ if(BUILD_MANTIDFRAMEWORK
   add_subdirectory(Testing/SystemTests/tests)
 endif()
 
+#test
+
 if(COVERAGE)
   get_property(ALL_SRCS GLOBAL PROPERTY COVERAGE_SRCS)
   set(SRCS_FILE "")
