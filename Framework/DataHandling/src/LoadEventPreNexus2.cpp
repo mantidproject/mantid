@@ -174,7 +174,7 @@ static string generateMappingfileName(EventWorkspace_sptr &wksp) {
   const string CAL("_CAL");
   const size_t CAL_LEN = CAL.length(); // cache to make life easier
   vector<string> files;
-  for (auto &dir : dirs) {
+  for (const auto &dir : dirs) {
     if ((dir.length() > CAL_LEN) && (dir.compare(dir.length() - CAL.length(), CAL.length(), CAL) == 0)) {
       std::filesystem::path path = base / dir / "calibrations" / mapping;
       if (std::filesystem::exists(path))

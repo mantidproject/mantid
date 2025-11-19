@@ -279,7 +279,7 @@ void LoadPreNexus::runLoadNexusLogs(const string &runinfo, const string &dataDir
 
   // run the algorithm
   bool loadedLogs = false;
-  for (auto &possibility : possibilities) {
+  for (const auto &possibility : possibilities) {
     if (std::filesystem::exists(possibility)) {
       g_log.information() << "Loading logs from \"" << possibility << "\"\n";
       auto alg = createChildAlgorithm("LoadNexusLogs", prog_start, prog_stop);
