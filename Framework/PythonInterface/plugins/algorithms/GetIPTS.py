@@ -56,7 +56,7 @@ class GetIPTS(PythonAlgorithm):
                 pass  # just keep looking
 
         # failed to find any is an error
-        raise RuntimeError("Cannot find IPTS directory for '%s'" % runnumber)
+        raise RuntimeError(f"Cannot find IPTS directory for RunNumber'{runnumber}' at Instrument='{instrument}'")
 
     def getIPTSLocal(self, instrument, runnumber):
         # prepend non-empty instrument name for FileFinder
