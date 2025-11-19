@@ -368,7 +368,7 @@ public:
 
     // LET parameter correction file exists
     std::string testpath1 = loader.getParameterCorrectionFile("LET");
-    std::filesystem::path iPath(true);                                                             // Absolute path
+    std::filesystem::path iPath(true);                                                  // Absolute path
     TS_ASSERT(iPath.tryParse(testpath1));                                               // Result has correct syntax
     TS_ASSERT(iPath.isFile());                                                          // Result is a file
     TS_ASSERT(iPath.getFileName() == "LET_Parameter_Corrections.xml");                  // Correct filename

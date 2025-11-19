@@ -13,9 +13,9 @@
 
 #include <Poco/Glob.h>
 #include <cstdio>
+#include <filesystem>
 #include <fstream>
 #include <string>
-#include <filesystem>
 
 using Mantid::DataHandling::DownloadInstrument;
 using Mantid::Kernel::InternetHelper;

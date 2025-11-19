@@ -15,8 +15,8 @@
 #include <boost/algorithm/string/compare.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 
-#include <fstream>
 #include <filesystem>
+#include <fstream>
 
 namespace Mantid::DataHandling {
 using namespace Kernel;

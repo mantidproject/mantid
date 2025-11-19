@@ -19,8 +19,8 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidNexus/NexusFile.h"
 #include <cxxtest/TestSuite.h>
-#include <memory>
 #include <filesystem>
+#include <memory>
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;

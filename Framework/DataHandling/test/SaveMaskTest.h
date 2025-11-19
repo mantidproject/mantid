@@ -13,8 +13,6 @@
 #include "MantidDataObjects/SpecialWorkspace2D.h"
 #include "MantidKernel/Timer.h"
 
-#include "Poco/File.h"
-
 #include <cxxtest/TestSuite.h>
 #include <filesystem>
 

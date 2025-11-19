@@ -20,8 +20,8 @@
 
 #include <boost/algorithm/string.hpp>
 
-#include <fstream>
 #include <filesystem>
+#include <fstream>
 
 using namespace Mantid;
 using namespace Mantid::DataHandling;

@@ -17,13 +17,12 @@
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/Unit.h"
 
-#include "Poco/File.h"
 #include <cmath>
 
 #include <cmath>
 #include <cstdio>
-#include <stdexcept>
 #include <filesystem>
+#include <stdexcept>
 
 namespace Mantid::DataHandling {
 

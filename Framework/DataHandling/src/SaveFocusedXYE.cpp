@@ -15,8 +15,8 @@
 #include "MantidKernel/Unit.h"
 #include <cmath>
 #include <exception>
-#include <fstream>
 #include <filesystem>
+#include <fstream>
 
 using namespace Mantid::DataHandling;
 

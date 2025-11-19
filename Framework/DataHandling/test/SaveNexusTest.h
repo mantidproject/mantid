@@ -7,8 +7,8 @@
 #pragma once
 
 #include <cxxtest/TestSuite.h>
-#include <fstream>
 #include <filesystem>
+#include <fstream>
 
 // These includes seem to make the difference between initialization of the
 // workspace names (workspace2D/1D etc), instrument classes and not for this

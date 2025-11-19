@@ -11,9 +11,9 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/BoundedValidator.h"
+#include <filesystem>
 #include <fstream>
 #include <string>
-#include <filesystem>
 
 namespace Mantid::DataHandling {
 

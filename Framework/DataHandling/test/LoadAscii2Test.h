@@ -19,8 +19,8 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/Unit.h"
 
-#include <fstream>
 #include <filesystem>
+#include <fstream>
 
 using namespace Mantid::API;
 using namespace Mantid::DataHandling;

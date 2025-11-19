@@ -28,9 +28,9 @@
 
 #include <cmath>
 #include <cstdlib>
+#include <filesystem>
 #include <fstream>
 #include <iterator>
-#include <filesystem>
 
 using Mantid::HistogramData::BinEdges;
 using Mantid::HistogramData::Counts;

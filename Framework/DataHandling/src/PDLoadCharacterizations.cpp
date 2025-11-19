@@ -18,9 +18,9 @@
 #include "MantidKernel/Strings.h"
 #include <boost/algorithm/string.hpp>
 #include <boost/regex.hpp>
+#include <filesystem>
 #include <fstream>
 #include <set>
-#include <filesystem>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;

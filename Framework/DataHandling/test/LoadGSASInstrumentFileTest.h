@@ -18,8 +18,8 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/Instrument/FitParameter.h"
-#include <fstream>
 #include <filesystem>
+#include <fstream>
 
 using Mantid::DataHandling::LoadGSASInstrumentFile;
 

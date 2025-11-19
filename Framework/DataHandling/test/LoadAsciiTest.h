@@ -15,8 +15,8 @@
 #include "MantidAPI/Run.h"
 #include "MantidKernel/Unit.h"
 
-#include <fstream>
 #include <filesystem>
+#include <fstream>
 
 class LoadAsciiTest : public CxxTest::TestSuite {
 public:

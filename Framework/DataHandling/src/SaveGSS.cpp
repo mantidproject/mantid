@@ -22,8 +22,8 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/VisibleWhenProperty.h"
 
-#include <fstream>
 #include <filesystem>
+#include <fstream>
 
 namespace Mantid::DataHandling {
 

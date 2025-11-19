@@ -16,7 +16,6 @@
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidDataHandling/LoadDetectorsGroupingFile.h"
 #include "MantidDataHandling/SaveDetectorsGrouping.h"
-#include "Poco/File.h"
 
 using namespace Mantid;
 using namespace Mantid::DataHandling;

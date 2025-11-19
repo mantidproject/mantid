@@ -15,9 +15,9 @@
 #include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 #include "MantidKernel/Timer.h"
 #include <cxxtest/TestSuite.h>
+#include <filesystem>
 #include <fstream>
 #include <iosfwd>
-#include <filesystem>
 
 using namespace Mantid::DataHandling;
 using namespace Mantid::API;

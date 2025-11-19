@@ -29,7 +29,9 @@ namespace {
  * Return the path to the alternate data stream for the given path
  * @param filePath The full path to the main data path
  */
-inline std::string alternateDataStream(const std::filesystem::path &filePath) { return filePath.string() + ":checksum"; }
+inline std::string alternateDataStream(const std::filesystem::path &filePath) {
+  return filePath.string() + ":checksum";
+}
 
 /**
  * This method looks for ADS with name checksum exists

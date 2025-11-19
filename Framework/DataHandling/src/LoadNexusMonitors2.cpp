@@ -24,9 +24,9 @@
 
 #include <algorithm>
 #include <cmath>
+#include <filesystem>
 #include <map>
 #include <vector>
-#include <filesystem>
 
 using namespace Mantid::Kernel::DateAndTimeHelpers;
 using Mantid::API::WorkspaceGroup;

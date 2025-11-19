@@ -19,8 +19,8 @@
 #include "cxxtest/TestSuite.h"
 
 #include <Poco/TemporaryFile.h>
-#include <fstream>
 #include <filesystem>
+#include <fstream>
 
 using namespace Mantid;
 using namespace Mantid::API;

@@ -34,9 +34,9 @@
 #include <boost/lexical_cast.hpp>
 
 #include <cxxtest/TestSuite.h>
+#include <filesystem>
 #include <fstream>
 #include <memory>
-#include <filesystem>
 
 #include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 #include "MantidFrameworkTestHelpers/FakeObjects.h"

@@ -26,9 +26,9 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include <filesystem>
 #include <string>
 #include <vector>
-#include <filesystem>
 
 using namespace Mantid;
 using namespace Mantid::API;

@@ -12,12 +12,11 @@
 #include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/ListValidator.h"
 
-#include "Poco/File.h"
 #include "boost/math/special_functions/round.hpp"
 
+#include <filesystem>
 #include <fstream>
 #include <iomanip>
-#include <filesystem>
 
 using namespace Mantid;
 using namespace Mantid::API;

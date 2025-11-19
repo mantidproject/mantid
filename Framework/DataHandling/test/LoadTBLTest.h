@@ -11,8 +11,8 @@
 #include "MantidAPI/TableRow.h"
 #include "MantidDataHandling/LoadTBL.h"
 #include "cxxtest/TestSuite.h"
-#include <fstream>
 #include <filesystem>
+#include <fstream>
 
 using namespace Mantid::API;
 using namespace Mantid::DataHandling;

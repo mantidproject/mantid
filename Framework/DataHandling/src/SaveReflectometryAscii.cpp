@@ -20,12 +20,12 @@
 
 #include <boost/lexical_cast.hpp>
 #include <cmath>
+#include <filesystem>
 #include <iomanip>
 #include <limits>
 #include <map>
 #include <memory>
 #include <stdexcept>
-#include <filesystem>
 
 namespace Mantid::DataHandling {
 

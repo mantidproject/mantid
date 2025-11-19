@@ -26,8 +26,8 @@
 #include "MantidNexus/H5Util.h"
 #include <H5Cpp.h>
 
-#include <limits>
 #include <filesystem>
+#include <limits>
 
 using namespace Mantid::API;
 using namespace Mantid::DataHandling;

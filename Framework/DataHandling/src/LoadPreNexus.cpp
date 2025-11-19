@@ -25,8 +25,8 @@
 #include <Poco/DOM/NodeList.h>
 #include <Poco/SAX/InputSource.h>
 #include <exception>
-#include <fstream>
 #include <filesystem>
+#include <fstream>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;

@@ -24,11 +24,8 @@
 #include "MantidKernel/Material.h"
 #include "MantidKernel/PropertyManager.h"
 
-#include "Poco/File.h"
-#include "Poco/Path.h"
-
-#include <fstream>
 #include <filesystem>
+#include <fstream>
 
 using Mantid::DataHandling::SetSample;
 using Mantid::Kernel::PropertyWithValue;

@@ -22,7 +22,6 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidNexusGeometry/Hdf5Version.h"
 
-#include "Poco/Path.h"
 #include <cxxtest/TestSuite.h>
 #include <filesystem>
 

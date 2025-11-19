@@ -9,12 +9,9 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Material.h"
 
-#include "Poco/File.h"
-#include "Poco/Path.h"
-
+#include <filesystem>
 #include <fstream>
 #include <utility>
-#include <filesystem>
 
 namespace Mantid::DataHandling {
 
