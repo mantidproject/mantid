@@ -22,9 +22,9 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Exception.h"
 #include <cstring>
+#include <filesystem>
 #include <fstream>
 #include <vector>
-#include <filesystem>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;

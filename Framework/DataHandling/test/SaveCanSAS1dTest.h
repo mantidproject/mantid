@@ -24,9 +24,9 @@
 #include <Poco/DOM/NodeIterator.h>
 #include <Poco/SAX/InputSource.h>
 
+#include <filesystem>
 #include <fstream>
 #include <sstream>
-#include <filesystem>
 
 using namespace Mantid::DataHandling;
 using namespace Mantid::API;

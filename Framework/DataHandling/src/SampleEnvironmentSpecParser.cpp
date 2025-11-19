@@ -23,15 +23,13 @@
 #include "Poco/DOM/NamedNodeMap.h"
 #include "Poco/DOM/NodeFilter.h"
 #include "Poco/DOM/NodeIterator.h"
-#include "Poco/File.h"
-#include "Poco/Path.h"
 #include "Poco/SAX/InputSource.h"
 #include "Poco/SAX/SAXException.h"
 
 #include <boost/algorithm/string.hpp>
+#include <filesystem>
 #include <memory>
 #include <sstream>
-#include <filesystem>
 
 using namespace Poco::XML;
 

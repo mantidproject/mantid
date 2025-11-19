@@ -17,8 +17,8 @@
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
 #include "MantidGeometry/Objects/MeshObject.h"
 
-#include <memory>
 #include <filesystem>
+#include <memory>
 
 namespace Mantid::DataHandling {
 // Register the algorithm into the algorithm factory

@@ -101,8 +101,9 @@ void LoadParameterFile::exec() {
       std::filesystem::path ipfFile(filename);
       if (!std::filesystem::exists(ipfFile)) {
         std::filesystem::path filePath(filename);
-        filename = (std::filesystem::path(Kernel::ConfigService::Instance().getInstrumentDirectory()) / 
-                    filePath.filename()).string();
+        filename =
+            (std::filesystem::path(Kernel::ConfigService::Instance().getInstrumentDirectory()) / filePath.filename())
+                .string();
       }
       g_log.information() << "Parsing from XML file: " << filename << '\n';
       pDoc = pParser.parse(filename);

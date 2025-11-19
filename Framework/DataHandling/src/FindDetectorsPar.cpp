@@ -23,8 +23,8 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/MultiThreaded.h"
 
-#include <limits>
 #include <filesystem>
+#include <limits>
 
 namespace Mantid::DataHandling {
 // Register the algorithm into the algorithm factory

@@ -20,9 +20,9 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/UnitFactory.h"
 
+#include <filesystem>
 #include <fstream>
 #include <sstream>
-#include <filesystem>
 
 using namespace Mantid::DataHandling;
 using namespace Mantid::API;

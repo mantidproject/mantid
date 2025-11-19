@@ -20,9 +20,9 @@
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <cxxtest/TestSuite.h>
+#include <filesystem>
 #include <fstream>
 #include <iostream>
-#include <filesystem>
 
 using namespace Mantid::API;
 using namespace Mantid::DataHandling;

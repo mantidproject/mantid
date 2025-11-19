@@ -7,8 +7,8 @@
 #pragma once
 
 #include <cxxtest/TestSuite.h>
-#include <fstream>
 #include <filesystem>
+#include <fstream>
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"

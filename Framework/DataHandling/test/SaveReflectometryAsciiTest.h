@@ -18,9 +18,9 @@
 #include <Poco/TemporaryFile.h>
 #include <cmath>
 #include <cxxtest/TestSuite.h>
+#include <filesystem>
 #include <iterator>
 #include <memory>
-#include <filesystem>
 
 using namespace Mantid::API;
 using namespace Mantid::DataHandling;

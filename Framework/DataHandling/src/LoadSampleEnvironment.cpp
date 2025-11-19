@@ -29,8 +29,8 @@
 #include "MantidKernel/MandatoryValidator.h"
 
 #include <boost/algorithm/string.hpp>
-#include <fstream>
 #include <filesystem>
+#include <fstream>
 
 namespace Mantid::DataHandling {
 

@@ -89,7 +89,8 @@ void SNSAppendGeometryToNexus::exec() {
     std::filesystem::path originalPath(m_filename);
 
     if (originalFile.exists()) {
-      std::filesystem::path destinationFile(std::filesystem::path(std::filesystem::path::temp(), originalPath.getFileName()));
+      std::filesystem::path destinationFile(
+          std::filesystem::path(std::filesystem::path::temp(), originalPath.getFileName()));
 
       try {
         originalFile.copyTo(destinationFile.path());

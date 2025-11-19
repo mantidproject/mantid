@@ -26,11 +26,11 @@
 
 #include <boost/regex.hpp>
 
+#include <filesystem>
 #include <map>
 #include <sstream>
 #include <string>
 #include <vector>
-#include <filesystem>
 
 namespace Mantid::DataHandling {
 

@@ -19,9 +19,9 @@
 #include "MantidKernel/UnitFactory.h"
 
 #include <boost/lexical_cast.hpp>
+#include <filesystem>
 #include <fstream>
 #include <numeric>
-#include <filesystem>
 
 using namespace Mantid;
 using namespace API;

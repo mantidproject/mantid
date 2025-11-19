@@ -7,8 +7,8 @@
 #include "MantidDataHandling/LoadBinaryStl.h"
 #include "MantidGeometry/Objects/MeshObject.h"
 #include "MantidKernel/BinaryStreamReader.h"
-#include <fstream>
 #include <filesystem>
+#include <fstream>
 namespace Mantid::DataHandling {
 
 namespace {

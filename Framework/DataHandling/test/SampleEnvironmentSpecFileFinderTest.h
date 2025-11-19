@@ -9,9 +9,9 @@
 #include "MantidDataHandling/SampleEnvironmentFactory.h"
 #include <cxxtest/TestSuite.h>
 
+#include <filesystem>
 #include <fstream>
 #include <vector>
-#include <filesystem>
 
 using Mantid::DataHandling::SampleEnvironmentSpec_uptr;
 using Mantid::DataHandling::SampleEnvironmentSpecFileFinder;

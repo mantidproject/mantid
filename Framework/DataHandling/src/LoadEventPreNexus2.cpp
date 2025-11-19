@@ -164,7 +164,7 @@ static string generateMappingfileName(EventWorkspace_sptr &wksp) {
       return "";
   }
   vector<string> dirs;
-  for (const auto& entry : std::filesystem::directory_iterator(base)) {
+  for (const auto &entry : std::filesystem::directory_iterator(base)) {
     if (entry.is_directory()) {
       dirs.push_back(entry.path().filename().string());
     }

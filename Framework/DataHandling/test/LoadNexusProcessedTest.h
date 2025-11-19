@@ -35,8 +35,8 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include <string>
 #include <filesystem>
+#include <string>
 
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 

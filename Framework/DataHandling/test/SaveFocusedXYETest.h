@@ -21,10 +21,10 @@
 #include <cxxtest/TestSuite.h>
 
 #include <cmath>
+#include <filesystem>
 #include <fstream>
 #include <sstream>
 #include <string>
-#include <filesystem>
 
 namespace {
 /// This is the number of header lines in Fullprof format 10

@@ -27,8 +27,8 @@
 #include <Poco/SAX/InputSource.h>
 #include <cxxtest/TestSuite.h>
 #include <exception>
-#include <fstream>
 #include <filesystem>
+#include <fstream>
 
 using namespace Mantid;
 using namespace Mantid::DataHandling;

@@ -12,9 +12,9 @@
 #include "MantidHistogramData/LinearGenerator.h"
 #include <cxxtest/TestSuite.h>
 
+#include <filesystem>
 #include <fstream>
 #include <numeric>
-#include <filesystem>
 using namespace Mantid::API;
 using Mantid::HistogramData::BinEdges;
 using Mantid::HistogramData::LinearGenerator;

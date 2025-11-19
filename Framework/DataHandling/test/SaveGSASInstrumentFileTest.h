@@ -14,8 +14,8 @@
 #include "MantidDataHandling/SaveGSASInstrumentFile.h"
 #include "MantidDataObjects/TableWorkspace.h"
 
-#include <fstream>
 #include <filesystem>
+#include <fstream>
 
 using namespace Mantid;
 using namespace Mantid::API;

@@ -8,8 +8,8 @@
 
 #include "MantidKernel/Timer.h"
 #include <cxxtest/TestSuite.h>
-#include <sstream>
 #include <filesystem>
+#include <sstream>
 
 #include "MantidDataHandling/LoadEmptyInstrument.h"
 #include "MantidDataHandling/ModifyDetectorDotDatFile.h"

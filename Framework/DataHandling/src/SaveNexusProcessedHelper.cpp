@@ -24,8 +24,8 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidHistogramData/Histogram.h"
 
-#include <memory>
 #include <filesystem>
+#include <memory>
 
 namespace Mantid::Nexus {
 using namespace Kernel;

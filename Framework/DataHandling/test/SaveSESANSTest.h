@@ -18,8 +18,8 @@
 #include <Poco/TemporaryFile.h>
 #include <boost/algorithm/string/predicate.hpp>
 #include <cmath>
-#include <fstream>
 #include <filesystem>
+#include <fstream>
 
 using Mantid::DataHandling::SaveSESANS;
 using namespace Mantid::DataObjects;

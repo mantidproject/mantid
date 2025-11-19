@@ -23,8 +23,8 @@
 #include "MantidNexus/NexusFile.h"
 
 #include <boost/lexical_cast.hpp>
-#include <vector>
 #include <filesystem>
+#include <vector>
 
 using namespace Mantid::DataHandling;
 using namespace Mantid::Kernel;

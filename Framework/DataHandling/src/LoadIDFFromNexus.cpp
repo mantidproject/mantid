@@ -141,8 +141,8 @@ std::string LoadIDFFromNexus::getParameterCorrectionFile(const std::string &inst
   for (auto &directoryName : directoryNames) {
     // This will iterate around the directories from user ->etc ->install, and
     // find the first appropriate file
-    std::filesystem::path iPath = std::filesystem::path(directoryName) /
-                     "embedded_instrument_corrections"; // Go to correction file subfolder
+    std::filesystem::path iPath =
+        std::filesystem::path(directoryName) / "embedded_instrument_corrections"; // Go to correction file subfolder
     // First see if the directory exists
     if (std::filesystem::exists(iPath) && std::filesystem::is_directory(iPath)) {
       std::filesystem::path ipFile = iPath / (instName + "_Parameter_Corrections.xml"); // Append file name to pathname

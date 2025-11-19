@@ -17,8 +17,8 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/OptionalBool.h"
 
-#include <fstream>
 #include <filesystem>
+#include <fstream>
 
 using Mantid::Geometry::Instrument_const_sptr;
 using namespace Mantid::Kernel;

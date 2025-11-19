@@ -13,8 +13,8 @@
 #include "MantidDataHandling/SaveFullprofResolution.h"
 #include "MantidDataObjects/TableWorkspace.h"
 
-#include <fstream>
 #include <filesystem>
+#include <fstream>
 
 using namespace std;
 using namespace Mantid;

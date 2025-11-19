@@ -19,9 +19,9 @@
 #include "MantidNexus/NexusFile.h"
 
 #include <exception>
+#include <filesystem>
 #include <set>
 #include <vector>
-#include <filesystem>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;

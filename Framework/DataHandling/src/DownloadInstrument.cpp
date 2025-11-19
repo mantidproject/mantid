@@ -32,8 +32,8 @@
 #include <json/json.h>
 
 // std
-#include <fstream>
 #include <filesystem>
+#include <fstream>
 
 namespace Mantid::DataHandling {
 using namespace Kernel;
@@ -234,12 +234,12 @@ DownloadInstrument::StringToStringMap DownloadInstrument::processRepository() {
     // will be "")
     if ((sha != installSha) && (sha != localSha)) {
       fileMap.emplace(downloadUrl,
-                      filePath.string());                                     // ACTION - DOWNLOAD to localPath
+                      filePath.string());                                       // ACTION - DOWNLOAD to localPath
     } else if ((!localSha.empty()) && (sha == installSha) && (sha != localSha)) // matches install, but different local
     {
       fileMap.emplace(downloadUrl, filePath.string()); // ACTION - DOWNLOAD to
-                                                         // localPath and
-                                                         // overwrite
+                                                       // localPath and
+                                                       // overwrite
     }
   }
 

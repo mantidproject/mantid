@@ -24,11 +24,11 @@
 #include <Poco/DateTimeParser.h>
 #include <Poco/DirectoryIterator.h>
 #include <boost/algorithm/string.hpp>
+#include <filesystem>
 #include <fstream> // used to get ifstream
 #include <regex>
 #include <sstream>
 #include <utility>
-#include <filesystem>
 
 using Mantid::Types::Core::DateAndTime;
 

@@ -17,8 +17,8 @@
 #include "MantidKernel/Strings.h"
 
 #include <boost/algorithm/string/trim.hpp>
-#include <fstream>
 #include <filesystem>
+#include <fstream>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;

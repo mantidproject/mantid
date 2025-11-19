@@ -29,8 +29,8 @@
 #include <H5Cpp.h>
 #include <boost/algorithm/string.hpp>
 #include <boost/math/special_functions/round.hpp>
-#include <numeric>
 #include <filesystem>
+#include <numeric>
 
 namespace Mantid::DataHandling {
 

@@ -21,8 +21,8 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include <fstream>
 #include <filesystem>
+#include <fstream>
 
 namespace { // helpers
 
