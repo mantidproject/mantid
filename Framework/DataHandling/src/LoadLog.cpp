@@ -440,21 +440,25 @@ std::string LoadLog::stringToLower(std::string strToConvert) {
  */
 bool LoadLog::isAscii(const std::string &filename) {
   FILE *file = fopen(filename.c_str(), "rb");
-  char data[256];
-  size_t file_size = fread(data, 1, sizeof(data), file);
-  fclose(file);
-  char const *pend = &data[file_size];
-  /*
-   * Call it a binary file if we find a non-ascii character in the
-   * first 256 bytes of the file.
-   */
-  for (char *char_pos = data; char_pos < pend; ++char_pos) {
-    auto char_value = static_cast<unsigned long>(*char_pos);
-    if (char_value > 0x7F) {
-      return false;
+  if (file) {
+    char data[256];
+    size_t file_size = fread(data, 1, sizeof(data), file);
+    fclose(file);
+    char const *pend = &data[file_size];
+    /*
+     * Call it a binary file if we find a non-ascii character in the
+     * first 256 bytes of the file.
+     */
+    for (char *char_pos = data; char_pos < pend; ++char_pos) {
+      auto char_value = static_cast<unsigned long>(*char_pos);
+      if (char_value > 0x7F) {
+        return false;
+      }
     }
+    return true;
+  } else {
+    return false; // failed to open the file
   }
-  return true;
 }
 
 /**
