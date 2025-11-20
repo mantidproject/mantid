@@ -98,43 +98,26 @@ void CreateMDHistoWorkspace::exec() {
   auto errors = ws->mutableErrorSquaredArray();
   auto nEvents = ws->mutableNumEventsArray();
 
-  std::vector<double> signalValues = getProperty("SignalInput");
-  std::vector<double> errorValues = getProperty("ErrorInput");
-  std::vector<double> numberOfEvents = getProperty("NumberOfEvents");
+  const std::vector<double> &signalValues = getProperty("SignalInput");
+  const std::vector<double> &errorValues = getProperty("ErrorInput");
+  const std::vector<double> &numberOfEvents = getProperty("NumberOfEvents");
 
   size_t binProduct = this->getBinProduct();
-  std::stringstream stream;
-  stream << binProduct;
-  if (binProduct != signalValues.size()) {
-    throw std::invalid_argument("Expected size of the SignalInput is: " + stream.str());
-  }
-  if (binProduct != errorValues.size()) {
-    throw std::invalid_argument("Expected size of the ErrorInput is: " + stream.str());
-  }
-  if (!numberOfEvents.empty() && binProduct != numberOfEvents.size()) {
-    throw std::invalid_argument("Expected size of the NumberOfEvents is: " + stream.str() +
-                                ". Leave empty to auto fill with 1.0");
+  if (signalValues.size() != binProduct || errorValues.size() != binProduct ||
+      (!numberOfEvents.empty() && numberOfEvents.size() != binProduct)) {
+    throw std::invalid_argument("All inputs must match size: " + std::to_string(binProduct));
   }
 
-  // Auto fill number of events.
+  // Fast memory copies and squaring
+  std::memcpy(signals, signalValues.data(), binProduct * sizeof(double));
+  for (size_t i = 0; i < binProduct; ++i)
+    errors[i] = errorValues[i] * errorValues[i];
+
   if (numberOfEvents.empty()) {
-    numberOfEvents = std::vector<double>(binProduct, 1.0);
+    std::fill(nEvents, nEvents + binProduct, 1.0);
+  } else {
+    std::memcpy(nEvents, numberOfEvents.data(), binProduct * sizeof(double));
   }
-
-  // Copy from property
-  std::copy(signalValues.begin(), signalValues.end(), signals);
-  std::vector<double> empty;
-  // Clean up.
-  signalValues.swap(empty);
-  // Copy from property
-  std::for_each(errorValues.begin(), errorValues.end(), Square());
-  std::copy(errorValues.begin(), errorValues.end(), errors);
-  // Clean up
-  errorValues.swap(empty);
-  // Copy from property
-  std::copy(numberOfEvents.begin(), numberOfEvents.end(), nEvents);
-  // Clean up
-  numberOfEvents.swap(empty);
 
   setProperty("OutputWorkspace", ws);
 }
