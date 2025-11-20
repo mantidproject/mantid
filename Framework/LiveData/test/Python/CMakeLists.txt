@@ -1,5 +1,11 @@
-set(TEST_PY_FILES test_adara_player.py test_adara_player_play.py test_adara_player_record.py
-                  test_adara_player_packet.py test_adara_player_util.py test_adara_player_limits.py
+set(TEST_PY_FILES
+    test_adara_player.py
+    test_adara_player_play.py
+    test_adara_player_record.py
+    test_adara_player_packet.py
+    test_adara_player_util.py
+    test_adara_player_limits.py
+    test_adara_player_server.py
 )
 
 # Prefix for test name=python.utils.livedata

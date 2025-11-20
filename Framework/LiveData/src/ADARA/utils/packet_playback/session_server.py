@@ -31,33 +31,29 @@ console_logger.addHandler(console_handler)
 
 class SessionServer:
     # Mixin class to control commandline argument and session-specific handling.
-    def __init__(
-        self,
-        *,
-        # kwargs only:
-        args: argparse.Namespace,
-        manager: multiprocessing.Manager,
-    ):
-        super().__init__()
+    def __init__(self, *args, commandline_args: argparse.Namespace, manager: multiprocessing.Manager, **kwargs):
+        super().__init__(*args, **kwargs)
 
         # Validate commandline args
-        self._record = args.record
-        self._source_address = args.source_address
+        self._record = commandline_args.record
+        self._source_address = commandline_args.source_address
         if self._record and self._source_address:
             console_logger.debug(f"source: '{self._source_address}'")
-        self._dry_run = args.dry_run
+        self._dry_run = commandline_args.dry_run
 
         # Parse Unix-style glob to "internal" format: (<base-directory path>, list[<glob expr>]).
-        base_path, patterns = UnixGlob.parse(args.glob)
+        base_path, patterns = UnixGlob.parse(commandline_args.glob)
         self._glob = base_path, patterns
 
         if self._record:
             if self.patterns and self.patterns[0]:
-                raise RuntimeError(f"When using record mode, the positional argument should be the target directory, not '{args.glob}'.")
+                raise RuntimeError(
+                    f"When using record mode, the positional argument should be the target directory, not '{commandline_args.glob}'."
+                )
             if base_path.exists() and any(base_path.iterdir()):
                 raise RuntimeError(f"in record mode: base directory '{base_path}' should be empty")
             if args.dry_run:
-                raise RuntimeError("Dry run cannot be used with record mode.")
+                raise RuntimeError("`dry_run` flag cannot be used with record mode.")
 
         # Initialize the shared IPC-value for the current session number:
         #   each session corresponds to a client connection to the server
@@ -118,7 +114,7 @@ class SessionServer:
             raise RuntimeError("multiple client connections when only a single session is expected.")
 
         with self._session_number.get_lock():
-            session_path = self.base_path / f"{self.session_number.value:04d}"
+            session_path = self.base_path / f"{self._session_number.value:04d}"
             self._session_number.value += 1
         if self.record and session_path.exists() and any(session_path.iterdir()):
             raise RuntimeError(f"in record mode: session directory '{session_path}' should be empty")
@@ -178,12 +174,12 @@ class SessionHandler(socketserver.BaseRequestHandler):
 
 class SessionTCPServer(SessionServer, socketserver.ForkingMixIn, socketserver.TCPServer):
     def __init__(self, server_address: tuple[str, int], args: argparse.Namespace, manager: multiprocessing.Manager):
-        super().__init__(server_address, SessionHandler, args=args, manager=manager)
+        super().__init__(server_address, SessionHandler, commandline_args=args, manager=manager)
 
 
 class SessionUDSServer(SessionServer, socketserver.ForkingMixIn, socketserver.UnixStreamServer):
     def __init__(self, server_address: Path, args: argparse.Namespace, manager: multiprocessing.Manager):
-        super().__init__(str(server_address), SessionHandler, args=args, manager=manager)
+        super().__init__(str(server_address), SessionHandler, commandline_args=args, manager=manager)
 
 
 def main():

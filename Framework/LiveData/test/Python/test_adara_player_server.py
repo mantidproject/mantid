@@ -1,17 +1,10 @@
 import argparse
+import inspect
 from pathlib import Path
 import signal
-import types
-import os
 import tempfile
 
-from session_server import (
-    SessionServer,
-    SessionHandler,
-    SessionTCPServer,
-    SessionUDSServer,
-    main
-)
+from session_server import SessionServer, SessionHandler, SessionTCPServer, SessionUDSServer, main
 
 import unittest
 from unittest import mock
@@ -23,10 +16,10 @@ class TestSessionServer(unittest.TestCase):
         self.args = argparse.Namespace(
             record=False,
             source_address=None,
-            dryrun=False,
+            dry_run=False,
             glob="/tmp/sessions",
         )
-        self.server = SessionServer(self.args, self.manager)
+        self.server = SessionServer(commandline_args=self.args, manager=self.manager)
 
     def test_init_initializes_server(self):
         """Test that SessionServer.__init__ properly initializes the server with given arguments."""
@@ -36,7 +29,7 @@ class TestSessionServer(unittest.TestCase):
 
     def test_parseargs_returns_namespace(self):
         """Test that SessionServer.parseargs returns an argparse.Namespace with expected attributes."""
-        args = SessionServer.parseargs()
+        args = SessionServer.parse_args()
         self.assertIsInstance(args, argparse.Namespace)
         self.assertTrue(hasattr(args, "record"))
         self.assertTrue(hasattr(args, "source_address"))
@@ -70,22 +63,22 @@ class TestSessionServer(unittest.TestCase):
         # Single-session glob is identified correctly.
         self.server._glob = (Path("/tmp/sessions"), ["*.pkt"])
         self.assertFalse(self.server.is_multi_session)
-        
+
         # Multi-session glob is identified correctly.
         self.server._glob = (Path("/tmp/sessions"), [""])
         self.assertTrue(self.server.is_multi_session)
-       
+
     def test_property_sessionnumber(self):
         """Test that sessionnumber property correctly tracks the current session number."""
-        self.server._session_number = mock.Mock()
+        self.server._session_number = mock.MagicMock()
         self.server._session_number.value = 2
         self.assertEqual(self.server.session_number, 2)
 
     def test_nextsessionpath_returns_next_path(self):
         """Test that nextsessionpath generates or validates the appropriate session path."""
-        with mock.patch("SessionServer.is_multi_session", new_callable=PropertyMock) as mock_is_multi_session:
+        with mock.patch.object(SessionServer, "is_multi_session", new_callable=mock.PropertyMock) as mock_is_multi_session:
             mock_is_multi_session.return_value = True
-            self.server._session_number = mock.Mock()
+            self.server._session_number = mock.MagicMock()
             self.server._session_number.value = 54
             result = self.server.next_session_path()
             mock_is_multi_session.assert_called_once()
@@ -94,19 +87,19 @@ class TestSessionServer(unittest.TestCase):
 
     def test_nextsessionpath_error(self):
         """Test that nextsessionpath raises an exception if used in single-session mode."""
-        with mock.patch("SessionServer.is_multi_session", new_callable=PropertyMock) as mock_is_multi_session:
+        with mock.patch.object(SessionServer, "is_multi_session", new_callable=mock.PropertyMock) as mock_is_multi_session:
             mock_is_multi_session.return_value = False
             with self.assertRaises(RuntimeError) as context:
-                result = self.server.next_session_path() # noqa: F841
+                result = self.server.next_session_path()  # noqa: F841
             self.assertIn("a single session is expected", str(context.exception))
 
     def test_processrequest_accepts_and_logs_session(self):
         """Test that processrequest handles client requests and logs each new session."""
         with (
-            mock.patch.object(super(SessionServer, self.server), "processrequest") as mock_super,
-            mock.patch.object(inspect.getModule(SessionServer), "console_logger") as mock_logger
+            mock.patch.object(super(SessionServer, self.server), "process_request") as mock_super,
+            mock.patch.object(inspect.getModule(SessionServer), "console_logger") as mock_logger,
         ):
-            self.server._session_number = mock.Mock()
+            self.server._session_number = mock.MagicMock()
             self.server._session_number.value = 1
             self.server.process_request(mock.sentinel.request, mock.sentinel.address)
             mock_logger.info.assert_called_once()
@@ -118,9 +111,9 @@ class TestSessionServer(unittest.TestCase):
         with (
             mock.patch("os.getpid", return_value=mock.sentinel.PID) as mock_getpid,
             mock.patch("os.getpgid", return_value=mock.sentinel.PGID) as mock_getpgid,
-            mock.patch("os.killpg") as killpg
+            mock.patch("os.killpg") as killpg,
         ):
-            self.server.signalhandler(signal.SIGINT, None)
+            self.server.signal_handler(signal.SIGINT, None)
             mock_getpid.assert_called_once()
             mock_getpgid.assert_called_once_with(mock.sentinel.PID)
             killpg.assert_called_once_with(mock.sentinel.PGID)
@@ -129,21 +122,21 @@ class TestSessionServer(unittest.TestCase):
 class TestSessionHandler(unittest.TestCase):
     def test_handle_calls_player_play_or_record(self):
         """Test that SessionHandler.handle invokes Player.play or Player.record as needed."""
-        handler = SessionHandler()
-        handler.server = mock.Mock()
-        handler.server.record = False
-        handler.server.source_address = None
-        handler.request = mock.Mock()
-        with mock.patch("packet_player.Player") as PlayerMock:
+        mock_server = mock.Mock(record=False, source_address=None, glob=(Path("/tmp/sessions"), [""]))
+        mock_request = mock.Mock()
+        handler = SessionHandler(mock_request, mock.sentinel.client_address, mock_server)
+        with mock.patch.object(inspect.getmodule(SessionHandler), "Player") as PlayerMock:
             player_inst = PlayerMock.return_value
             player_inst.play = mock.Mock()
             player_inst.record = mock.Mock()
             handler.handle()
             player_inst.play.assert_called_once()
-            player_inst.record.assert_not_called()      
-        
-        handler.server.record = True
-        with mock.patch("packet_player.Player") as PlayerMock:
+            player_inst.record.assert_not_called()
+        mock_server.reset_mock()
+        mock_request.reset_mock()
+
+        mock_server.record = True
+        with mock.patch.object(inspect.getmodule(SessionHandler), "Player") as PlayerMock:
             player_inst = PlayerMock.return_value
             player_inst.play = mock.Mock()
             player_inst.record = mock.Mock()
@@ -181,7 +174,7 @@ class TestMainFunction(unittest.TestCase):
         """Test that main() chooses UDS/TCP server based on arguments and calls serve_forever."""
         args = argparse.Namespace(server_address=None, record=False, source_address=None, dry_run=False, glob="/tmp/sessions")
         parse_args.return_value = args
-        
+
         # INET socket:
         SocketAddress.isUDSSocket.return_value = False
         UDSServer.return_value.__enter__.return_value.serve_forever = mock.Mock()
@@ -197,13 +190,12 @@ class TestMainFunction(unittest.TestCase):
         main()
         self.assertTrue(UDSServer.return_value.__enter__.return_value.serve_forever.called)
         self.assertFalse(TCPServer.return_value.__enter__.return_value.serve_forever.called)
-        
-        
+
     @mock.patch("signal.signal")
     @mock.patch("session_server.SessionTCPServer")
     @mock.patch("session_server.SessionServer.parse_args")
     @mock.patch("session_server.SocketAddress")
-    def test_main_signal_handlers_registered(self, SocketAddress, parseargs, TCPServer, sig_signal):
+    def test_main_signal_handlers_registered(self, SocketAddress, parse_args, TCPServer, sig_signal):
         """Test that main() sets up signal handlers for SIGINT and SIGTERM."""
         args = argparse.Namespace(server_address=None, record=False, source_address=None, dry_run=False, glob="/tmp/sessions")
         parse_args.return_value = args
@@ -218,7 +210,7 @@ class TestMainFunction(unittest.TestCase):
     @mock.patch("session_server.SessionTCPServer")
     @mock.patch("session_server.SessionServer.parse_args")
     @mock.patch("session_server.SocketAddress")
-    def test_main_exits_gracefully_on_keyboard_interrupt(self, SocketAddress, parseargs, TCPServer):
+    def test_main_exits_gracefully_on_keyboard_interrupt(self, SocketAddress, parse_args, TCPServer):
         """Test that main() exits gracefully when interrupted (CTRL-C)."""
         args = argparse.Namespace(server_address=None, record=False, source_address=None, dry_run=False, glob="/tmp/sessions")
         parse_args.return_value = args
@@ -228,6 +220,7 @@ class TestMainFunction(unittest.TestCase):
             main()
         except KeyboardInterrupt:
             self.fail("main() should handle KeyboardInterrupt gracefully")
+
 
 if __name__ == "__main__":
     unittest.main()
