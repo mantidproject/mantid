@@ -8,8 +8,7 @@
 import unittest
 from os import path
 
-import systemtesting
-from systemtesting import MantidSystemTest
+from systemtesting import MantidSystemTest, GENERATE_REFERENCE_FILES, REFERENCE_FILE_DIR
 from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
 
 from mantid import config
@@ -42,13 +41,6 @@ class SANSBatchReductionTest(unittest.TestCase):
         load_alg.execute()
         reference_workspace = load_alg.getProperty("OutputWorkspace").value
 
-        # Save the workspace out if the comparison fails (i.e. they are not equal)
-        f_name = path.join(config.getString("defaultsave.directory"), MantidSystemTest.mismatchWorkspaceName(reference_file_name))
-
-        save_name = "SaveNexus"
-        save_options = {"Filename": f_name, "InputWorkspace": workspace}
-        save_alg = create_unmanaged_algorithm(save_name, **save_options)
-
         # Compare reference file with the output_workspace
         # We need to disable the instrument comparison, it takes way too long
         # We need to disable the sample -- Not clear why yet
@@ -72,10 +64,25 @@ class SANSBatchReductionTest(unittest.TestCase):
         compare_alg.execute()
         result = compare_alg.getProperty("Result").value
 
+        # Save the workspace out if the comparison fails (i.e. they are not equal)
         if not result:
-            save_alg.execute()
+            if GENERATE_REFERENCE_FILES:
+                out_name = reference_file_name
+                out_dir = REFERENCE_FILE_DIR
+            else:
+                out_name = MantidSystemTest.mismatchWorkspaceName(reference_file_name)
+                out_dir = config.getString("defaultsave.directory")
+            self._save_output(workspace, out_name, out_dir)
+        with self.subTest(part=f"output ws validation: {reference_file_name}"):
+            self.assertTrue(result)
 
-        self.assertTrue(result)
+    @staticmethod
+    def _save_output(workspace, out_name, out_dir):
+        full_name = path.join(out_dir, out_name)
+        save_name = "SaveNexus"
+        save_options = {"Filename": full_name, "InputWorkspace": workspace}
+        save_alg = create_unmanaged_algorithm(save_name, **save_options)
+        save_alg.execute()
 
     def test_that_batch_reduction_evaluates_LAB(self):
         # Arrange
@@ -290,9 +297,9 @@ class SANSBatchReductionTest(unittest.TestCase):
             AnalysisDataService.remove(element)
 
 
-class SANSBatchReductionRunnerTest(systemtesting.MantidSystemTest):
+class SANSBatchReductionRunnerTest(MantidSystemTest):
     def __init__(self):
-        systemtesting.MantidSystemTest.__init__(self)
+        MantidSystemTest.__init__(self)
         self._success = False
 
     def runTest(self):

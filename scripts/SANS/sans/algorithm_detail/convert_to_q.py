@@ -74,6 +74,7 @@ def _run_q_1d(workspace, output_summed_parts, conv_to_q_state, wavelength_adj_ws
     gravity_extra_length = conv_to_q_state.gravity_extra_length
     radius_cutoff = conv_to_q_state.radius_cutoff * 1000.0  # Q1D2 expects the radius cutoff to be in mm
     wavelength_cutoff = conv_to_q_state.wavelength_cutoff
+    solid_angle_cylinder_slices = conv_to_q_state.solid_angle_cylinder_slices
 
     q1d_name = "Q1D"
     q1d_options = {
@@ -85,6 +86,7 @@ def _run_q_1d(workspace, output_summed_parts, conv_to_q_state, wavelength_adj_ws
         "WaveCut": wavelength_cutoff,
         "OutputParts": output_summed_parts,
         "ExtraLength": gravity_extra_length,
+        "SolidAngleNumberOfCylinderSlices": solid_angle_cylinder_slices,
     }
     if wavelength_adj_ws:
         q1d_options.update({"WavelengthAdj": wavelength_adj_ws})
@@ -126,6 +128,7 @@ def _run_q_2d(workspace, output_summed_parts, state_convert_to_q, wavelength_adj
     wavelength_cutoff = state_convert_to_q.wavelength_cutoff
     use_gravity = state_convert_to_q.use_gravity
     gravity_extra_length = state_convert_to_q.gravity_extra_length
+    solid_angle_cylinder_slices = state_convert_to_q.solid_angle_cylinder_slices
 
     qxy_name = "Qxy"
     qxy_options = {
@@ -139,6 +142,7 @@ def _run_q_2d(workspace, output_summed_parts, state_convert_to_q, wavelength_adj
         "WaveCut": wavelength_cutoff,
         "OutputParts": output_summed_parts,
         "ExtraLength": gravity_extra_length,
+        "SolidAngleNumberOfCylinderSlices": solid_angle_cylinder_slices,
     }
     if wavelength_adj_ws:
         qxy_options.update({"WavelengthAdj": wavelength_adj_ws})
