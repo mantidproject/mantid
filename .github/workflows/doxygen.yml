@@ -1,0 +1,31 @@
+name: doxygen documentation build
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+    paths:
+      - '**.cpp'
+      - '**.h'
+      - 'Framework/Doxygen/**'
+      - 'conda/recipes/mantid-developer/**'
+      - 'conda/recipes/conda_build_config.yaml'
+      - 'buildconfig/Jenkins/Conda/doxygen.sh'
+      - '.github/workflows/doxygen.yml'
+
+jobs:
+  doxygen:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash -l {0}
+
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: build doxygen
+        run: |
+          $GITHUB_WORKSPACE/buildconfig/Jenkins/Conda/doxygen.sh $GITHUB_WORKSPACE
