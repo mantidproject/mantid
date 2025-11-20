@@ -97,7 +97,10 @@ def main():
     results = OrderedDict()
     for test_class_name in test_class_names:
         script_obj = systemtesting.TestScript(test_dir_name, test_module_name, test_class_name, bool(args.pr))
+
+        print(f"Running test: {test_class_name}")
         results[test_class_name] = runner.start_in_current_process(script_obj)
+        print("-----------\n")
 
     #########################################################################
     # Process Results
