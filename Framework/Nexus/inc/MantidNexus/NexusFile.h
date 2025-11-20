@@ -64,7 +64,7 @@ public:
 
 using Deleter = int (*const)(hid_t);
 
-template <Deleter const deleter> class MANTID_NEXUS_DLL UniqueID {
+template <Deleter const deleter> class UniqueID {
 private:
   hid_t m_id;
   UniqueID &operator=(UniqueID<deleter> const &) = delete;
@@ -76,7 +76,7 @@ private:
   }
 
 public:
-  UniqueID(UniqueID<deleter> const &uid) = delete;
+  UniqueID(UniqueID<deleter> &uid) : m_id(uid.m_id) { uid.m_id = -1; };
   UniqueID(UniqueID<deleter> &&uid) noexcept : m_id(uid.m_id) { uid.m_id = -1; };
   UniqueID &operator=(hid_t const id) {
     if (id != m_id) {
