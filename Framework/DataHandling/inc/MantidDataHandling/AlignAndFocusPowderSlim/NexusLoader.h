@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include "MantidDataHandling/DllConfig.h"
 #include <H5Cpp.h>
 #include <memory>
 #include <stack>
@@ -24,7 +25,7 @@ const std::string INDEX_ID("event_index");
 using PulseROI = std::pair<size_t, size_t>;     // start and stop indices for the pulse ROIs
 using EventROI = std::pair<uint64_t, uint64_t>; // start and stop indices for the events ROIs
 
-class NexusLoader {
+class MANTID_DATAHANDLING_DLL NexusLoader {
 public:
   NexusLoader(const bool is_time_filtered, const std::vector<PulseROI> &pulse_indices,
               const std::vector<std::pair<int, PulseROI>> &target_to_pulse_indices = {});

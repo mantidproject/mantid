@@ -7,6 +7,7 @@
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataHandling/AlignAndFocusPowderSlim/NexusLoader.h"
+#include "MantidDataHandling/DllConfig.h"
 #include "MantidGeometry/IDTypes.h"
 #include "MantidKernel/DateAndTime.h"
 #include <H5Cpp.h>
@@ -18,7 +19,7 @@
 
 namespace Mantid::DataHandling::AlignAndFocusPowderSlim {
 
-class ProcessBankSplitFullTimeTask {
+class MANTID_DATAHANDLING_DLL ProcessBankSplitFullTimeTask {
 public:
   ProcessBankSplitFullTimeTask(std::vector<std::string> &bankEntryNames, H5::H5File &h5file,
                                const bool is_time_filtered, std::vector<int> &workspaceIndices,
@@ -30,6 +31,7 @@ public:
                                const std::map<Mantid::Types::Core::DateAndTime, int> splitterMap,
                                const bool correction_to_sample, std::shared_ptr<API::Progress> &progress);
 
+  // Contructor with custom loader to allow mocking in tests
   ProcessBankSplitFullTimeTask(std::vector<std::string> &bankEntryNames, H5::H5File &h5file,
                                std::shared_ptr<NexusLoader> loader, std::vector<int> &workspaceIndices,
                                std::vector<API::MatrixWorkspace_sptr> &wksps,
