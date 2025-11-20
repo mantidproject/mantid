@@ -20,7 +20,7 @@ from unittest.mock import MagicMock
 class TestFullInstrumentViewPresenter(unittest.TestCase):
     def setUp(self):
         self._mock_view = MagicMock()
-        self._ws = CreateSampleWorkspace(OutputWorkspace="TestFullInstrumentViewPresenter")
+        self._ws = CreateSampleWorkspace(OutputWorkspace="TestFullInstrumentViewPresenter", EnableLogging=False)
         self._model = FullInstrumentViewModel(self._ws)
         with mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.set_peaks_workspaces"):
             self._presenter = FullInstrumentViewPresenter(self._mock_view, self._model)
@@ -112,13 +112,13 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._model._workspace_indices = np.array([0, 1, 2])
         self._model._is_valid = np.array([True, True, True])
         self._model._detector_is_picked = np.array([True, True, False])
+        self._model._detector_ids = np.array([1, 2, 3])
         self._model.picked_detectors_info_text = MagicMock(return_value=["a", "a"])
         self._model.extract_spectra_for_line_plot = MagicMock()
         self._presenter._pickable_main_mesh = {}
         self._presenter._pickable_projection_mesh = {}
         self._mock_view.current_selected_unit.return_value = "TOF"
         self._mock_view.sum_spectra_selected.return_value = True
-
         self._presenter.update_picked_detectors([])
         np.testing.assert_allclose(self._presenter._pickable_main_mesh[self._presenter._visible_label], self._model._detector_is_picked)
         self._mock_view.show_plot_for_detectors.assert_called_once_with(self._model.line_plot_workspace)
@@ -270,6 +270,22 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._mock_view.clear_lineplot_overlays.assert_called_once()
         self._mock_view.redraw_lineplot.assert_called_once()
         self._mock_view.plot_lineplot_overlay.assert_not_called()
+
+    @mock.patch.object(FullInstrumentViewModel, "picked_detector_ids", new_callable=mock.PropertyMock)
+    @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.relative_detector_angle")
+    def test_update_relative_detector_angle_no_dectors(self, mock_relative_detector_angle, mock_picked_detector_ids):
+        mock_picked_detector_ids.return_value = []
+        self._presenter._update_relative_detector_angle()
+        mock_relative_detector_angle.assert_not_called()
+        self._mock_view.set_relative_detector_angle.assert_called_once()
+
+    @mock.patch.object(FullInstrumentViewModel, "picked_detector_ids", new_callable=mock.PropertyMock)
+    @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.relative_detector_angle")
+    def test_update_relative_detector_angle_two_dectors(self, mock_relative_detector_angle, mock_picked_detector_ids):
+        mock_picked_detector_ids.return_value = [11, 12]
+        self._presenter._update_relative_detector_angle()
+        mock_relative_detector_angle.assert_called_once()
+        self._mock_view.set_relative_detector_angle.assert_called_once()
 
     @mock.patch.object(FullInstrumentViewModel, "default_projection", new_callable=mock.PropertyMock)
     def test_default_projection(self, mock_default_projection):

@@ -130,6 +130,8 @@ class FullInstrumentViewWindow(QMainWindow):
         self._detector_xyz_edit = self._add_detector_info_boxes(detector_info_layout, "XYZ Position")
         self._detector_spherical_position_edit = self._add_detector_info_boxes(detector_info_layout, "Spherical Position")
         self._detector_pixel_counts_edit = self._add_detector_info_boxes(detector_info_layout, "Pixel Counts")
+        self._detector_relative_angle_edit = self._add_detector_info_boxes(detector_info_layout, "Relative Angle (degrees)")
+        self.set_relative_detector_angle(None)
 
         self._integration_limit_group_box = QGroupBox("Time of Flight")
         self._integration_limit_min_edit, self._integration_limit_max_edit, self._integration_limit_slider = self._add_min_max_group_box(
@@ -549,6 +551,10 @@ class FullInstrumentViewWindow(QMainWindow):
             lambda d: f"r: {d.spherical_position[0]:.3f}, 2\u03b8: {d.spherical_position[1]:.1f}, \u03c6: {d.spherical_position[2]:.1f}",
         )
         self._set_detector_edit_text(self._detector_pixel_counts_edit, detector_infos, lambda d: str(d.pixel_counts))
+
+    def set_relative_detector_angle(self, angle: float | None) -> None:
+        angle_text = "Select exactly two detectors to show angle" if angle is None else f"{angle:.4f}"
+        self._detector_relative_angle_edit.setPlainText(angle_text)
 
     def _set_detector_edit_text(
         self, edit_box: QTextEdit, detector_infos: list[DetectorInfo], property_lambda: Callable[[DetectorInfo], str]

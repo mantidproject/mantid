@@ -2,7 +2,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.simpleapi import CreateSampleWorkspace, CreatePeaksWorkspace
+from mantid.simpleapi import CreateSampleWorkspace, CreatePeaksWorkspace, AddPeak
 from instrumentview.FullInstrumentViewModel import FullInstrumentViewModel
 import unittest
 from unittest import mock
@@ -432,6 +432,59 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         self.assertEqual(100, detector_peak.detector_id)
         self.assertEqual("[0, 0, 0] x 2", detector_peak.label)
         np.testing.assert_almost_equal(np.array([0, 0, 5.0]), detector_peak.location)
+
+    @mock.patch.object(FullInstrumentViewModel, "picked_detector_ids", new_callable=mock.PropertyMock)
+    def test_relative_detector_angle_no_picked(self, mock_picked_detector_ids):
+        mock_ws = self._create_mock_workspace([10, 11, 12])
+        mock_detector_info = mock_ws.detectorInfo()
+        mock_detector_info.azimuthal.return_value = 0.1
+        model = FullInstrumentViewModel(mock_ws)
+        with self.assertRaisesRegex(RuntimeError, ".*two detectors are selected"):
+            model.relative_detector_angle()
+        mock_picked_detector_ids.assert_called_once()
+
+    @mock.patch.object(FullInstrumentViewModel, "picked_detector_ids", new_callable=mock.PropertyMock)
+    def test_relative_detector_angle_two_picked(self, mock_picked_detector_ids):
+        mock_ws = self._create_mock_workspace([10, 11, 12])
+        mock_detector_info = mock_ws.detectorInfo()
+        mock_detector_info.azimuthal.return_value = 0.1
+
+        def mock_index_of(idx):
+            return idx
+
+        mock_detector_info.indexOf = mock_index_of
+
+        def mock_two_theta(idx):
+            return 0.3 if idx == 10 else 0.8
+
+        mock_detector_info.twoTheta = mock_two_theta
+        mock_picked_detector_ids.return_value = [10, 11]
+        model = FullInstrumentViewModel(mock_ws)
+        angle = model.relative_detector_angle()
+        np.testing.assert_allclose(14.324, angle, rtol=0.001)
+        mock_picked_detector_ids.assert_called_once()
+        self.assertEquals(2, mock_detector_info.azimuthal.call_count)
+
+    def test_calculate_q_lab_direction(self):
+        mock_ws = self._create_mock_workspace([10])
+        mock_detector_info = mock_ws.detectorInfo()
+        mock_detector_info.azimuthal.return_value = 0.1
+        mock_detector_info.twoTheta.return_value = 0.8
+        model = FullInstrumentViewModel(mock_ws)
+        q_lab = model._calculate_q_lab_direction(10)
+        np.testing.assert_allclose([-0.91646, -0.091953, 0.389418], q_lab, rtol=1e-5)
+
+    def test_actual_q_lab_calc(self):
+        detector_info = self._ws.detectorInfo()
+        peaks_ws = CreatePeaksWorkspace(self._ws, 1)
+        detector_id = int(detector_info.detectorIDs()[-1])
+        AddPeak(peaks_ws, self._ws, DetectorID=detector_id, TOF=10000)
+        peak = peaks_ws.getPeak(1)
+        q_lab = np.array(peak.getQLabFrame())
+        q_lab_direction = q_lab / np.linalg.norm(q_lab)
+        model = FullInstrumentViewModel(self._ws)
+        iv_qlab = model._calculate_q_lab_direction(detector_id)
+        np.testing.assert_allclose(q_lab_direction, iv_qlab, rtol=1e-5)
 
 
 if __name__ == "__main__":
