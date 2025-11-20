@@ -70,7 +70,9 @@ class FullInstrumentViewModel:
         self._is_monitor = detector_info_table.columnArray("Monitor")
         self._is_valid = self._is_monitor == "no"
         mask_ws, mask_list = ExtractMask(self._workspace, StoreInADS=False)
-        self._is_masked = mask_ws.extractY().flatten().astype(bool)
+        self._is_masked_in_ws = mask_ws.extractY().flatten().astype(bool)
+        # For computing current mask, detateched from the permanent mask in ws
+        self._is_masked = self._is_masked_in_ws
         self._monitor_positions = self._detector_positions_3d[self._is_monitor == "yes"]
 
         # Initialise with zeros
@@ -80,6 +82,8 @@ class FullInstrumentViewModel:
 
         self._projection_type = ProjectionType.THREE_D
         self._cached_projections_map = {}
+
+        self._cached_masks_map = {}
 
         # Get min and max integration values
         if self._workspace.isRaggedWorkspace():
@@ -353,6 +357,20 @@ class FullInstrumentViewModel:
             peaks_grouped_by_ws.append(detector_peaks)
         return peaks_grouped_by_ws
 
-    def mask_detectors(self, new_mask):
-        self._is_masked[self.is_pickable] = new_mask
+    def clear_masks(self) -> None:
+        self._cached_masks_map.clear()
+
+    def add_new_detector_mask(self, new_mask: list[bool]) -> str:
+        new_key = f"Mask {len(self._cached_masks_map) + 1}"
+        mask_to_save = self._is_masked_in_ws.copy()
+        mask_to_save[self.is_pickable] = new_mask
+        self._cached_masks_map[new_key] = mask_to_save
+        return new_key
+
+    def apply_detector_masks(self, mask_keys: list[str]) -> None:
+        if not mask_keys:
+            mask_total = self._is_masked_in_ws
+        else:
+            mask_total = np.logical_or.reduce([self._cached_masks_map[key] for key in mask_keys])
+        self._is_masked = mask_total
         self._detector_is_picked[~self.is_pickable] = False

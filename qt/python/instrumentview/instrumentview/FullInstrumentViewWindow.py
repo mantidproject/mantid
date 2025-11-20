@@ -76,6 +76,28 @@ class PeaksWorkspaceListWidget(QListWidget):
         event.acceptProposedAction()
 
 
+class MasksWorkspaceListWidget(QListWidget):
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.setDragDropMode(QAbstractItemView.DropOnly)
+
+    def dragEnterEvent(self, event: QDragEnterEvent):
+        if event.mimeData().hasText():
+            event.acceptProposedAction()
+
+    def dragMoveEvent(self, event: QDragMoveEvent):
+        if event.mimeData().hasText():
+            event.acceptProposedAction()
+
+    def dropEvent(self, event: QDropEvent):
+        drop_text = event.mimeData().text()
+        for i in range(self.count()):
+            item = self.item(i)
+            if item.text() == drop_text:
+                item.setCheckState(Qt.Checked)
+        event.acceptProposedAction()
+
+
 class FullInstrumentViewWindow(QMainWindow):
     """View for the Instrument View window. Contains the 3D view, the projection view, boxes showing information about the selected
     detector, and a line plot of selected detector(s)"""
@@ -177,11 +199,17 @@ class FullInstrumentViewWindow(QMainWindow):
         peak_v_layout.addWidget(self._peak_ws_list)
 
         masking_group_box = QGroupBox("Masking")
-        masking_layout = QHBoxLayout(masking_group_box)
-        self._add_cylinder = QPushButton("Add Cylinder")
-        self._cylinder_select = QPushButton("Apply Mask")
-        masking_layout.addWidget(self._add_cylinder)
-        masking_layout.addWidget(self._cylinder_select)
+        masking_layout = QVBoxLayout(masking_group_box)
+        pre_list_layout = QHBoxLayout()
+        self._add_cylinder = QPushButton("Add Cylinder Shape")
+        self._cylinder_select = QPushButton("Add Mask")
+        self._mask_list = MasksWorkspaceListWidget(self)
+        self._mask_list.setSizeAdjustPolicy(QListWidget.AdjustToContents)
+        self._mask_list.setSelectionMode(QAbstractItemView.NoSelection)
+        pre_list_layout.addWidget(self._add_cylinder)
+        pre_list_layout.addWidget(self._cylinder_select)
+        masking_layout.addLayout(pre_list_layout)
+        masking_layout.addWidget(self._mask_list)
 
         self.status_group_box = QGroupBox("Status")
         status_layout = QHBoxLayout(self.status_group_box)
@@ -342,6 +370,7 @@ class FullInstrumentViewWindow(QMainWindow):
         self._export_workspace_button.clicked.connect(self._presenter.on_export_workspace_clicked)
         self._sum_spectra_checkbox.clicked.connect(self._presenter.on_sum_spectra_checkbox_clicked)
         self._peak_ws_list.itemChanged.connect(self._presenter.on_peaks_workspace_selected)
+        self._mask_list.itemChanged.connect(self._presenter.on_mask_item_selected)
 
         self._add_connections_to_edits_and_slider(
             self._contour_range_min_edit,
@@ -664,3 +693,14 @@ class FullInstrumentViewWindow(QMainWindow):
     def redraw_lineplot(self) -> None:
         self._detector_spectrum_fig.tight_layout()
         self._detector_figure_canvas.draw()
+
+    def selected_masks(self) -> list[str]:
+        return [
+            self._mask_list.item(row_index).text()
+            for row_index in range(self._mask_list.count())
+            if self._mask_list.item(row_index).checkState() > 0
+        ]
+
+    def set_new_mask_key(self, new_key: str) -> None:
+        list_item = QListWidgetItem(new_key, self._mask_list)
+        list_item.setCheckState(Qt.Checked)
