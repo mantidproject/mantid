@@ -112,7 +112,7 @@ if [[ -n "$GIT_TAG" ]]; then
 fi
 
 # Set the version to inject into the recipe file
-export MANTID_VERSION=$(pixi run --manifest-path $SCRIPT_DIR/pixi.toml -e rattler-builder "versioningit .")
+export MANTID_VERSION=$(pixi run --manifest-path $SCRIPT_DIR/pixi.toml -e rattler-builder "versioningit $REPO_ROOT_DIR")
 
 # Set locale to avoid problems building the docs
 # See https://unix.stackexchange.com/questions/87745/what-does-lc-all-c-do
