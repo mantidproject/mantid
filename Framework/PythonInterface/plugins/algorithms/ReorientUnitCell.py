@@ -8,7 +8,7 @@ import numpy as np
 
 from mantid.api import PythonAlgorithm, AlgorithmFactory, IPeaksWorkspaceProperty
 from mantid.geometry import PointGroupFactory
-from mantid.kernel import Direction, FloatBoundedValidator, StringListValidator
+from mantid.kernel import Direction, FloatBoundedValidator, PropertyMode, StringListValidator
 from mantid.simpleapi import mtd, TransformHKL
 
 
@@ -52,7 +52,7 @@ class ReorientUnitCell(PythonAlgorithm):
         return "Crystal\\UBMatrix"
 
     def seeAlso(self):
-        return ["IndexPeaks", "TransformHKL", "FindUBUsingIndexedPeaks"]
+        return ["TransformHKL", "FindUBUsingIndexedPeaks"]
 
     def summary(self):
         return "Select the unit cell most aligned to goniometer axes."
@@ -70,7 +70,7 @@ class ReorientUnitCell(PythonAlgorithm):
             defaultValue=0.12,
             direction=Direction.Input,
             validator=FloatBoundedValidator(lower=0.0),
-            doc="Indexing tolerance for IndexPeaks algorithm.",
+            doc="Indexing tolerance for algorithm TransformHKL.",
         )
 
         # Crystal system
@@ -79,15 +79,17 @@ class ReorientUnitCell(PythonAlgorithm):
             name="CrystalSystem",
             defaultValue="Monoclinic",
             direction=Direction.Input,
+            optional=PropertyMode.Optional,
             validator=StringListValidator(crystal_systems),
             doc="Crystal system.",
         )
 
         # Lattice system (optional, for Trigonal)
+        lattice_systems = ["Rhombohedral", "Hexagonal"]
         self.declareProperty(
             name="LatticeSystem",
-            defaultValue="",
             direction=Direction.Input,
+            validator=StringListValidator(lattice_systems),
             doc="Lattice system (for Trigonal: Rhombohedral or Hexagonal). Defaults to CrystalSystem value.",
         )
 
@@ -105,9 +107,8 @@ class ReorientUnitCell(PythonAlgorithm):
         if lattice_system and crystal_system != "Trigonal":
             issues["LatticeSystem"] = "LatticeSystem should only be specified for Trigonal crystal system."
 
-        if crystal_system == "Trigonal" and lattice_system:
-            if lattice_system not in ["Rhombohedral", "Hexagonal"]:
-                issues["LatticeSystem"] = "For Trigonal system, LatticeSystem must be Rhombohedral or Hexagonal."
+        if crystal_system == "Trigonal" and lattice_system == "":
+            issues["LatticeSystem"] = "For Trigonal system, LatticeSystem must be passed."
 
         return issues
 
@@ -161,12 +162,11 @@ class ReorientUnitCell(PythonAlgorithm):
             )
 
     def PyExec(self):
-        g_log = self.log()
         # Get input properties
         wsname: str = self.getPropertyValue("PeaksWorkspace")
         crystal_system: str = self.getProperty("CrystalSystem").value
         lattice_system: str = self.getProperty("LatticeSystem").value
-
+        print("DEBUG: lattice_system =", lattice_system)
         # If lattice system not specified, use crystal system
         if not lattice_system:
             lattice_system = crystal_system
@@ -206,7 +206,7 @@ class ReorientUnitCell(PythonAlgorithm):
 
         # Step 6: Apply the optimal transformation
         if optimal_transform is not None:
-            g_log.notice(f"Aligning symmetry operation: {transform_name}")
+            self.log().notice(f"Aligning symmetry operation: {transform_name}")
             # Determine whether to use FindError based on number of peaks
             find_error = mtd[wsname].getNumberPeaks() > 3
             (
