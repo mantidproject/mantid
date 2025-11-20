@@ -116,10 +116,12 @@ class SessionServer:
         with self._session_number.get_lock():
             session_path = self.base_path / f"{self._session_number.value:04d}"
             self._session_number.value += 1
-        if self.record and session_path.exists() and any(session_path.iterdir()):
-            raise RuntimeError(f"in record mode: session directory '{session_path}' should be empty")
-        elif not session_path.exists():
-            raise RuntimeError(f"in play mode: required session directory '{session_path}' does not exist")
+        if self.record:
+            if session_path.exists() and any(session_path.iterdir()):
+                raise RuntimeError(f"in record mode: session directory '{session_path}' should be empty")
+        else:
+            if not session_path.exists():
+                raise RuntimeError(f"in play mode: required session directory '{session_path}' does not exist")
         return session_path
 
     # Override: `ForkingMixIn` method.

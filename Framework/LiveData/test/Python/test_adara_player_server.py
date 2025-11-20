@@ -10,6 +10,16 @@ import unittest
 from unittest import mock
 
 
+class _DummyBase:
+    def process_request(self, request, client_address):
+        pass
+
+
+class _SessionServer(SessionServer, _DummyBase):
+    def __init__(self, *args, commandline_args, manager):
+        super().__init__(*args, commandline_args=commandline_args, manager=manager)
+
+
 class TestSessionServer(unittest.TestCase):
     def setUp(self):
         self.manager = mock.Mock()
@@ -19,7 +29,7 @@ class TestSessionServer(unittest.TestCase):
             dry_run=False,
             glob="/tmp/sessions",
         )
-        self.server = SessionServer(commandline_args=self.args, manager=self.manager)
+        self.server = _SessionServer(commandline_args=self.args, manager=self.manager)
 
     def test_init_initializes_server(self):
         """Test that SessionServer.__init__ properly initializes the server with given arguments."""
@@ -76,14 +86,77 @@ class TestSessionServer(unittest.TestCase):
 
     def test_nextsessionpath_returns_next_path(self):
         """Test that nextsessionpath generates or validates the appropriate session path."""
-        with mock.patch.object(SessionServer, "is_multi_session", new_callable=mock.PropertyMock) as mock_is_multi_session:
+        with (
+            tempfile.TemporaryDirectory() as tmpdir,
+            mock.patch.object(SessionServer, "is_multi_session", new_callable=mock.PropertyMock) as mock_is_multi_session,
+        ):
+            # For `play` mode: all session paths must already exist: positive test.
+            session_number = 54
+            session_path = Path(tmpdir) / f"{session_number:04d}"
+            session_path.mkdir(parents=True, exist_ok=True)
+            self.assertTrue(session_path.exists())
+            self.server._record = False
+            self.server._glob = Path(tmpdir), [""]
             mock_is_multi_session.return_value = True
             self.server._session_number = mock.MagicMock()
-            self.server._session_number.value = 54
+            self.server._session_number.value = session_number
             result = self.server.next_session_path()
             mock_is_multi_session.assert_called_once()
-            self.assertIn(str(self.server._glob[0]), str(result))
-            self.assertTrue(str(result).endswith("0054"))
+            self.assertEqual(result, session_path)
+
+        with (
+            tempfile.TemporaryDirectory() as tmpdir,
+            mock.patch.object(SessionServer, "is_multi_session", new_callable=mock.PropertyMock) as mock_is_multi_session,
+        ):
+            # For `play` mode: all session paths must already exist: negative test.
+            session_number = 55
+            session_path = Path(tmpdir) / f"{session_number:04d}"
+            self.assertFalse(session_path.exists())
+            self.server._record = False
+            self.server._glob = Path(tmpdir), [""]
+            mock_is_multi_session.return_value = True
+            self.server._session_number = mock.MagicMock()
+            self.server._session_number.value = session_number
+
+            with self.assertRaises(RuntimeError) as context:
+                result = self.server.next_session_path()
+            self.assertIn(f"'{session_path}' does not exist", str(context.exception))
+
+        with (
+            tempfile.TemporaryDirectory() as tmpdir,
+            mock.patch.object(SessionServer, "is_multi_session", new_callable=mock.PropertyMock) as mock_is_multi_session,
+        ):
+            # For `record` mode: any session path may not exist: positive test.
+            session_number = 26
+            session_path = Path(tmpdir) / f"{session_number:04d}"
+            self.assertFalse(session_path.exists())
+            self.server._record = True
+            self.server._glob = Path(tmpdir), [""]
+            mock_is_multi_session.return_value = True
+            self.server._session_number = mock.MagicMock()
+            self.server._session_number.value = session_number
+            result = self.server.next_session_path()
+            mock_is_multi_session.assert_called_once()
+            self.assertEqual(result, session_path)
+
+        with (
+            tempfile.TemporaryDirectory() as tmpdir,
+            mock.patch.object(SessionServer, "is_multi_session", new_callable=mock.PropertyMock) as mock_is_multi_session,
+        ):
+            # For `record` mode: any session path that exists must be empty: negative test.
+            session_number = 42
+            session_path = Path(tmpdir) / f"{session_number:04d}"
+            session_path.mkdir(parents=True, exist_ok=True)
+            (session_path / "something_in_the_directory.adara").touch()
+            self.server._record = True
+            self.server._glob = Path(tmpdir), [""]
+            mock_is_multi_session.return_value = True
+            self.server._session_number = mock.MagicMock()
+            self.server._session_number.value = session_number
+
+            with self.assertRaises(RuntimeError) as context:
+                result = self.server.next_session_path()
+            self.assertIn(f"'{session_path}' should be empty", str(context.exception))
 
     def test_nextsessionpath_error(self):
         """Test that nextsessionpath raises an exception if used in single-session mode."""
@@ -96,8 +169,8 @@ class TestSessionServer(unittest.TestCase):
     def test_processrequest_accepts_and_logs_session(self):
         """Test that processrequest handles client requests and logs each new session."""
         with (
-            mock.patch.object(super(SessionServer, self.server), "process_request") as mock_super,
-            mock.patch.object(inspect.getModule(SessionServer), "console_logger") as mock_logger,
+            mock.patch.object(inspect.getmodule(SessionServer), "console_logger") as mock_logger,
+            mock.patch.object(_DummyBase, "process_request") as mock_super,
         ):
             self.server._session_number = mock.MagicMock()
             self.server._session_number.value = 1
@@ -113,10 +186,14 @@ class TestSessionServer(unittest.TestCase):
             mock.patch("os.getpgid", return_value=mock.sentinel.PGID) as mock_getpgid,
             mock.patch("os.killpg") as killpg,
         ):
+            # Keep test limited to `SessionServer`,
+            #   although actual instance will be `socketserver.TCPServer` or `socketserver.UnixStreamServer`.
+            self.server.shutdown = mock.Mock()
+
             self.server.signal_handler(signal.SIGINT, None)
-            mock_getpid.assert_called_once()
+            mock_getpid.assert_called()  # maybe 2X: does `shutdown` send 'SIGTERM'?
             mock_getpgid.assert_called_once_with(mock.sentinel.PID)
-            killpg.assert_called_once_with(mock.sentinel.PGID)
+            killpg.assert_called_once_with(mock.sentinel.PGID, signal.SIGINT)
 
 
 class TestSessionHandler(unittest.TestCase):
@@ -124,23 +201,23 @@ class TestSessionHandler(unittest.TestCase):
         """Test that SessionHandler.handle invokes Player.play or Player.record as needed."""
         mock_server = mock.Mock(record=False, source_address=None, glob=(Path("/tmp/sessions"), [""]))
         mock_request = mock.Mock()
-        handler = SessionHandler(mock_request, mock.sentinel.client_address, mock_server)
-        with mock.patch.object(inspect.getmodule(SessionHandler), "Player") as PlayerMock:
+        with mock.patch("session_server.Player") as PlayerMock:
             player_inst = PlayerMock.return_value
             player_inst.play = mock.Mock()
             player_inst.record = mock.Mock()
-            handler.handle()
+            # Creating a `SessionHandler` instance automatically calls the `handle` method.
+            _handler = SessionHandler(mock_request, mock.sentinel.client_address, mock_server)
             player_inst.play.assert_called_once()
             player_inst.record.assert_not_called()
         mock_server.reset_mock()
         mock_request.reset_mock()
 
         mock_server.record = True
-        with mock.patch.object(inspect.getmodule(SessionHandler), "Player") as PlayerMock:
+        with mock.patch("session_server.Player") as PlayerMock:
             player_inst = PlayerMock.return_value
             player_inst.play = mock.Mock()
             player_inst.record = mock.Mock()
-            handler.handle()
+            _handler = SessionHandler(mock_request, mock.sentinel.client_address, mock_server)
             player_inst.record.assert_called_once()
             player_inst.play.assert_not_called()
 
@@ -159,8 +236,9 @@ class TestSessionUDSServer(unittest.TestCase):
         """Test that SessionUDSServer is initialized with correct arguments and handler."""
         args = argparse.Namespace(record=False, source_address=None, dry_run=False, glob="/tmp/sessions")
         manager = mock.Mock()
-        with tempfile.NamedTemporaryFile() as tf:
-            server = SessionUDSServer(tf.name, args, manager)
+        with tempfile.TemporaryDirectory() as tmpdir:
+            UDS_path = Path(tmpdir) / "sock"
+            server = SessionUDSServer(UDS_path, args, manager)
             self.assertIsInstance(server, SessionUDSServer)
 
 
@@ -215,7 +293,7 @@ class TestMainFunction(unittest.TestCase):
         args = argparse.Namespace(server_address=None, record=False, source_address=None, dry_run=False, glob="/tmp/sessions")
         parse_args.return_value = args
         SocketAddress.isUDSSocket.return_value = False
-        TCPServer.return_value.__enter__.side_effect = KeyboardInterrupt
+        TCPServer.return_value.serve_forever.side_effect = KeyboardInterrupt
         try:
             main()
         except KeyboardInterrupt:
