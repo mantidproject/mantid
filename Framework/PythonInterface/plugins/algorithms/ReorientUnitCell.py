@@ -111,6 +111,55 @@ class ReorientUnitCell(PythonAlgorithm):
 
         return issues
 
+    def validate_lattice(self, lattice_system):
+        wsname: str = self.getPropertyValue("PeaksWorkspace")
+        oriented_lattice = mtd[wsname].sample().getOrientedLattice()
+
+        a = oriented_lattice.a()
+        b = oriented_lattice.b()
+        c = oriented_lattice.c()
+        alpha = oriented_lattice.alpha()
+        beta = oriented_lattice.beta()
+        gamma = oriented_lattice.gamma()
+
+        def all_same(x, y, z=None, value=None, tol=1e-5):
+            """Check if all provided values are the same (or equal to a specified value)."""
+            if z is None:
+                z = x
+            if value is None:
+                value = x
+            return np.allclose([x, y, z], value, atol=tol)
+
+        def not_equal(x, y, tol=1e-5):
+            """Check if two values are not equal."""
+            return abs(x - y) > tol
+
+        def all_different(x, y, z, tol=1e-5):
+            """Check if all provided values are different from each other."""
+            return not_equal(x, y, tol) and not_equal(y, z, tol) and not_equal(x, z, tol)
+
+        if all_same(a, b, c, tol=0.01) and all_same(alpha, beta, gamma, 90, tol=1):
+            lattice = "Cubic"
+        elif all_same(a, b, c, tol=0.01) and all_same(alpha, beta, gamma, tol=1) and not_equal(gamma, 90, tol=1):
+            lattice = "Rhombohedral"
+        elif all_same(a, b, tol=0.01) and not_equal(b, c, tol=0.01) and all_same(alpha, beta, gamma, 90, tol=1):
+            lattice = "Tetragonal"
+        elif all_same(a, b, tol=0.01) and not_equal(b, c, tol=0.01) and all_same(alpha, beta, 90, tol=1) and all_same(gamma, 120, tol=1):
+            lattice = "Hexagonal"
+        elif all_different(a, b, c, tol=0.01) and all_same(alpha, beta, gamma, 90, tol=1):
+            lattice = "Orthorhombic"
+        elif all_different(a, b, c, tol=0.01) and all_same(alpha, gamma, 90, tol=1) and not_equal(beta, 90, tol=1):
+            lattice = "Monoclinic"
+        else:
+            lattice = "Triclinic"
+
+        if lattice_system != lattice:
+            params = f"a={a}, b={b}, c={c}, alpha={alpha}, beta={beta}, gamma={gamma}"
+            raise ValueError(
+                f"Lattice system encoded in the input peaks workspace '{lattice}' does not match"
+                f"input CrystalSystem '{lattice_system}'.\nLattice parameters: {params}"
+            )
+
     def PyExec(self):
         g_log = self.log()
         # Get input properties
@@ -121,6 +170,7 @@ class ReorientUnitCell(PythonAlgorithm):
         # If lattice system not specified, use crystal system
         if not lattice_system:
             lattice_system = crystal_system
+        self.validate_lattice(lattice_system)
 
         # Step 1: Fetch U and B matrices
         oriented_lattice = mtd[wsname].sample().getOrientedLattice()
