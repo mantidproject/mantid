@@ -7,7 +7,7 @@ import socketserver
 import signal
 import threading
 
-from packet_player import Player, UnixGlob
+from packet_player import Player, SocketAddress, UnixGlob
 
 ##################################################################################################
 ## WARNING: if at all possible `Config` should be used only from the `packet_player.py` module. ##
@@ -115,7 +115,7 @@ class SessionServer:
     def next_session_path(self) -> Path:
         if not self.is_multi_session:
             # in play mode: a complete glob string (i.e. not a base directory) implies only one session is expected
-            raise RuntimeError("There are multiple client connections when only a single session is expected.")
+            raise RuntimeError("multiple client connections when only a single session is expected.")
 
         with self._session_number.get_lock():
             session_path = self.base_path / f"{self.session_number.value:04d}"
@@ -184,3 +184,26 @@ class SessionTCPServer(SessionServer, socketserver.ForkingMixIn, socketserver.TC
 class SessionUDSServer(SessionServer, socketserver.ForkingMixIn, socketserver.UnixStreamServer):
     def __init__(self, server_address: Path, args: argparse.Namespace, manager: multiprocessing.Manager):
         super().__init__(str(server_address), SessionHandler, args=args, manager=manager)
+
+
+def main():
+    # Application `main` for commandline `adara_player`.
+    args = SessionServer.parse_args()
+    server_address = SocketAddress.parse(args.server_address if args.server_address else Player.get_server_address())
+    manager = multiprocessing.Manager()
+
+    if SocketAddress.isUDSSocket(server_address):
+        with SessionUDSServer(server_address, commandline_args=args, manager=manager) as server:
+            # Set up signal handlers
+            signal.signal(signal.SIGINT, server.signal_handler)
+            signal.signal(signal.SIGTERM, server.signal_handler)
+            console_logger.info(f"Waiting for client connection at {server_address}...")
+            console_logger.info("Type CNTL-C to exit.")
+            server.serve_forever()
+    else:
+        with SessionTCPServer(server_address, commandline_args=args, manager=manager) as server:
+            signal.signal(signal.SIGINT, server.signal_handler)
+            signal.signal(signal.SIGTERM, server.signal_handler)
+            console_logger.info(f"Waiting for client connection at {server_address}...")
+            console_logger.info("Type CNTL-C to exit.")
+            server.serve_forever()
