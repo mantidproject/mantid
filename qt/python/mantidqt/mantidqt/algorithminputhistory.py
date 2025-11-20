@@ -13,7 +13,7 @@ from mantidqt.utils.qt import import_qt, toQSettings
 _AlgorithmInputHistory = import_qt("._common", "mantidqt", "AlgorithmInputHistory")
 
 
-class AlgorithmInputHistory(object):
+class AlgorithmInputHistory:
     """Wrapper class around MantidQtWidgets::Common::AlgorithmInputHistory"""
 
     _singleton = _AlgorithmInputHistory.Instance()

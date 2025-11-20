@@ -9,7 +9,7 @@ import json
 from mantid.utils.muon import PEAK_DATA_JSON
 
 
-class PeriodicTableModel(object):
+class PeriodicTableModel:
     def __init__(self):
         self._peak_data = {}
         self._peak_data_file = self.get_default_peak_data_file()

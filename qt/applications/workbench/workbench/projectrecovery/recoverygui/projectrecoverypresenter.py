@@ -12,7 +12,7 @@ from workbench.projectrecovery.recoverygui.projectrecoverywidgetview import Proj
 from workbench.projectrecovery.recoverygui.recoveryfailureview import RecoveryFailureView
 
 
-class ProjectRecoveryPresenter(object):
+class ProjectRecoveryPresenter:
     def __init__(self, project_recovery, model=None):
         self.model = model if model else ProjectRecoveryModel(project_recovery, self)
         self.current_view = None

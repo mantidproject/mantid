@@ -13,7 +13,7 @@ from numpy.linalg import det, norm
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.settings_presenter import SETTINGS_DICT
 
 
-class SettingsModel(object):
+class SettingsModel:
     def get_settings_dict(self, names_and_types):
         settings = {}
         for setting_name in names_and_types.keys():

@@ -38,7 +38,7 @@ class LoadMultipleGSS(PythonAlgorithm):
                 self.log().information("Trying to load '%s'" % filename)
                 self.__loader(Filename=filename, OutputWorkspace=prefix, UseBankIDasSpectrumNumber=True)
                 return
-            except (RuntimeError, ValueError, IOError):
+            except (OSError, RuntimeError, ValueError):
                 pass
         raise RuntimeError("Failed to load run %s" % prefix)
 

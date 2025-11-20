@@ -8,7 +8,7 @@ from mantidqtinterfaces.Muon.GUI.Common.dummy.dummy_view import DummyView
 from mantidqtinterfaces.Muon.GUI.Common.dummy.dummy_presenter import DummyPresenter
 
 
-class DummyWidget(object):
+class DummyWidget:
     """ """
 
     def __init__(self, name, parent=None):

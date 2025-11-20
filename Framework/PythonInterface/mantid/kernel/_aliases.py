@@ -31,7 +31,7 @@ def lazy_instance_access(cls, key_as_str=False):
     :return: A new LazySingletonHolder wrapping cls
     """
 
-    class LazySingletonHolder(object):
+    class LazySingletonHolder:
         """
         Delays construction of a singleton instance until the
         first attribute access.

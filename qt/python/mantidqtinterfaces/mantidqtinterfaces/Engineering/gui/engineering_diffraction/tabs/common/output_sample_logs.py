@@ -34,7 +34,7 @@ def _generate_workspace_name(filepath: str, suffix: str) -> str:
     return wsname
 
 
-class SampleLogsGroupWorkspace(object):
+class SampleLogsGroupWorkspace:
     def __init__(self, suffix: str):
         self._log_names = []
         self._log_workspaces = None  # GroupWorkspace

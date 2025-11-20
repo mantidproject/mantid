@@ -7,7 +7,6 @@
 import io
 import numpy as np
 import re
-from typing import List, Tuple
 
 from .textparser import TextParser
 from .abinitioloader import AbInitioLoader
@@ -49,7 +48,7 @@ class DMOL3Loader(AbInitioLoader):
         """
         data = {}  # container to store read data
 
-        with io.open(
+        with open(
             self._clerk.get_input_filename(),
             "rb",
         ) as dmol3_file:
@@ -142,7 +141,7 @@ class DMOL3Loader(AbInitioLoader):
                 last_line = file_obj.tell()
 
     @classmethod
-    def _read_modes(cls, file_obj) -> Tuple[np.ndarray, np.ndarray]:
+    def _read_modes(cls, file_obj) -> tuple[np.ndarray, np.ndarray]:
         """Read vibrational frequencies and atomic displacements
 
         Modes are in their raw format: a 2-D array with modes along index 1
@@ -178,7 +177,7 @@ class DMOL3Loader(AbInitioLoader):
         return frequencies, displacements
 
     @classmethod
-    def _read_mode_block(cls, file_obj) -> Tuple[np.ndarray, np.ndarray]:
+    def _read_mode_block(cls, file_obj) -> tuple[np.ndarray, np.ndarray]:
         """Get a row of frequencies and corresponding array of displacements"""
 
         # Frequency row: "  1: freq1  2: freq2 ..."
@@ -257,7 +256,7 @@ class DMOL3Loader(AbInitioLoader):
         return displacements
 
     @staticmethod
-    def _read_masses_from_file(obj_file) -> List[float]:
+    def _read_masses_from_file(obj_file) -> list[float]:
         masses = []
 
         with TextParser.save_excursion(obj_file):

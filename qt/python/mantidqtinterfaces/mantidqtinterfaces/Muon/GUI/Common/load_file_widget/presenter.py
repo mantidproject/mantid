@@ -12,7 +12,7 @@ import mantidqtinterfaces.Muon.GUI.Common.utilities.load_utils as load_utils
 from mantidqt.utils.observer_pattern import GenericObserverWithArgPassing
 
 
-class BrowseFileWidgetPresenter(object):
+class BrowseFileWidgetPresenter:
     def __init__(self, view, model):
         self._view = view
         self._model = model

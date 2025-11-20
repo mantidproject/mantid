@@ -21,7 +21,7 @@ INELASTIC_INSTRUMENTS = ["MAPS", "LET", "MERLIN", "MARI", "HET"]
 USER_PROPERTIES = ["instrument", "userID", "cycleID", "start_date", "rb_folder"]
 
 
-class UserProperties(object):
+class UserProperties:
     """Helper class to define & retrieve user properties
     as retrieved from file provided by user office
     """
@@ -359,7 +359,7 @@ class UserProperties(object):
 #
 
 
-class MantidConfigDirectInelastic(object):
+class MantidConfigDirectInelastic:
     """Class describes Mantid server specific user's configuration,
      necessary for Direct Inelastic reduction and analysis to work
 

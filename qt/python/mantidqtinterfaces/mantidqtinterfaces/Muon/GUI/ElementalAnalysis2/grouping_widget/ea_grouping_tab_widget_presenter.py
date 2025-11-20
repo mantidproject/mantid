@@ -10,7 +10,7 @@ from mantidqtinterfaces.Muon.GUI.Common import thread_model
 from mantidqtinterfaces.Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapper
 
 
-class EAGroupingTabPresenter(object):
+class EAGroupingTabPresenter:
     """
     The grouping tab presenter is responsible for synchronizing the group table.
     """

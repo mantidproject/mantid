@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 
-class BasePaneModel(object):
+class BasePaneModel:
     def __init__(self, context, name="Plot"):
         self.context = context
         self.name = name

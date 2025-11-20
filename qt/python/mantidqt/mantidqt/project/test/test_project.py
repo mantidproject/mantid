@@ -23,7 +23,7 @@ from mantidqt.project.project import Project
 from mantidqt.utils.qt.testing import start_qapplication
 
 
-class FakeGlobalFigureManager(object):
+class FakeGlobalFigureManager:
     def add_observer(self, *unused):
         pass
 
@@ -206,7 +206,7 @@ class ProjectTest(unittest.TestCase):
         with mock.patch.object(self.project, "_load_file_dialog", lambda: _raise(IOError)):
             try:
                 self.project.load()
-            except IOError:
+            except OSError:
                 pass
         self.assertFalse(self.project.is_loading)
 
@@ -215,7 +215,7 @@ class ProjectTest(unittest.TestCase):
         with mock.patch.object(self.project, "_load_file_dialog", lambda: None):
             try:
                 self.project.load()
-            except IOError:
+            except OSError:
                 pass
         self.assertFalse(self.project.is_loading)
 
@@ -223,7 +223,7 @@ class ProjectTest(unittest.TestCase):
         with mock.patch.object(self.project, "_get_project_size", lambda x: _raise(IOError)):
             try:
                 self.project._save()
-            except IOError:
+            except OSError:
                 pass
         self.assertFalse(self.project.is_saving)
 

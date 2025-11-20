@@ -68,7 +68,7 @@ class StateWavelength(metaclass=JsonSerializable):
 # ----------------------------------------------------------------------------------------------------------------------
 # Builder
 # ----------------------------------------------------------------------------------------------------------------------
-class StateWavelengthBuilder(object):
+class StateWavelengthBuilder:
     @automatic_setters(StateWavelength)
     def __init__(self):
         super(StateWavelengthBuilder, self).__init__()

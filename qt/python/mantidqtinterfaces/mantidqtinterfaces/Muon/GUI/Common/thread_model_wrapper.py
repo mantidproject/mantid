@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 
-class ThreadModelWrapper(object):
+class ThreadModelWrapper:
     def __init__(self, function=None):
         self.callback = function
 
@@ -20,7 +20,7 @@ class ThreadModelWrapper(object):
         self.callback()
 
 
-class ThreadModelWrapperWithOutput(object):
+class ThreadModelWrapperWithOutput:
     def __init__(self, function, *args):
         self.callback = function
         self.args = args

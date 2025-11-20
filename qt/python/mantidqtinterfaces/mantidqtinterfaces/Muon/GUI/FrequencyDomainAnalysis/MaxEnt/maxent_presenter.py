@@ -42,7 +42,7 @@ optional_output_suffixes = {
 }
 
 
-class MaxEntPresenter(object):
+class MaxEntPresenter:
     """
     This class links the MaxEnt model to the GUI
     """

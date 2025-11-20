@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from pathlib import Path
-from typing import Any, Dict, Type, TypedDict, TypeVar
+from typing import Any, TypedDict, TypeVar
 
 from pydantic import validate_call
 
@@ -70,7 +70,7 @@ class AbinsData:
                     "KpointsData and AtomsData are not consistent: number of atoms in structure does not match displacement data."
                 )
 
-    def extract(self) -> Dict[str, Any]:
+    def extract(self) -> dict[str, Any]:
         """Get a dict with k-points data and atoms data"""
         return {"k_points_data": self.get_kpoints_data().extract(), "atoms_data": self.get_atoms_data().extract()}
 
@@ -95,7 +95,7 @@ class AbinsData:
         )
 
     @classmethod
-    def from_dict(cls: Type[AD], data: "AbinsData.JSONableData") -> AD:
+    def from_dict(cls: type[AD], data: "AbinsData.JSONableData") -> AD:
         """Construct from JSON-compatible dictionary"""
 
         return cls(k_points_data=KpointsData.from_dict(data["k_points_data"]), atoms_data=AtomsData.from_dict(data["atoms_data"]))

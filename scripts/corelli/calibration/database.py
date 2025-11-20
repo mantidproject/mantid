@@ -11,7 +11,7 @@ from datetime import datetime
 import enum
 import pathlib
 import re
-from typing import List, Optional, Tuple, Union
+from typing import Optional, Union
 
 from mantid.dataobjects import EventWorkspace, MaskWorkspace, TableWorkspace, Workspace2D
 from mantid.api import mtd, Workspace, WorkspaceGroup
@@ -30,7 +30,7 @@ from mantid.simpleapi import (
 __all__ = ["day_stamp", "load_calibration_set", "new_corelli_calibration", "save_calibration_set"]
 
 # Custom type aliases
-CalibrationInputSetTypes = Union[str, TableWorkspace, Workspace2D, List[TableWorkspace], List[str], WorkspaceGroup]
+CalibrationInputSetTypes = Union[str, TableWorkspace, Workspace2D, list[TableWorkspace], list[str], WorkspaceGroup]
 InputWorkspaceTypes = Union[str, Workspace2D, EventWorkspace]
 
 
@@ -101,8 +101,8 @@ def filename_bank_table(bank_id: int, database_path: str, date: str, table_type:
 
 def save_manifest_file(
     database_path: str,
-    bank_ids: List[Union[int, str]],
-    day_stamps: List[Union[int, str]],
+    bank_ids: list[Union[int, str]],
+    day_stamps: list[Union[int, str]],
     manifest_day_stamp: Optional[Union[int, str]] = None,
 ) -> str:
     """
@@ -213,7 +213,7 @@ def save_calibration_set(
             return mtd[input_set]
         return None
 
-    def set_to_list(input_set: Optional[CalibrationInputSetTypes]) -> List[Tuple[str, int]]:
+    def set_to_list(input_set: Optional[CalibrationInputSetTypes]) -> list[tuple[str, int]]:
         r"""Extract the number for every workspace in the input set"""
         if input_set is None:
             return list()
@@ -256,7 +256,7 @@ def load_bank_table(bank_id: int, database_path: str, date: str, table_type: str
     return outputWS
 
 
-def combine_temporal_banks(database_path: str, date: str, table_type: str = "calibration") -> Tuple[WorkspaceGroup, List[Tuple[int, str]]]:
+def combine_temporal_banks(database_path: str, date: str, table_type: str = "calibration") -> tuple[WorkspaceGroup, list[tuple[int, str]]]:
     """
     Function that combines stored bank calibrations into a group workspace
 
@@ -390,7 +390,7 @@ def verify_date_format(function_name: str, date: Union[int, str]) -> None:
         raise ValueError("date in function " + function_name + " " + str(date) + " is not YYYYMMDD")
 
 
-def new_corelli_calibration(database_path: str, date: Optional[str] = None) -> Tuple[str, str, str]:
+def new_corelli_calibration(database_path: str, date: Optional[str] = None) -> tuple[str, str, str]:
     r"""
     Generate a Corelli calibration set of files for a given day stamp, or for today if no day stamp is given.
 
@@ -487,7 +487,7 @@ def load_calibration_set(
     output_calibration_name: str = "calibration",
     output_mask_name: str = "mask",
     mask_format: str = "MaskWorkspace",
-) -> Tuple[Optional[TableWorkspace], Optional[TableWorkspace]]:
+) -> tuple[Optional[TableWorkspace], Optional[TableWorkspace]]:
     r"""
     Retrieve an instrument calibration and instrument mask.
 

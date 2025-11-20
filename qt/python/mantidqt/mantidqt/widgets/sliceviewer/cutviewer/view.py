@@ -197,7 +197,7 @@ class CutViewerView(QWidget):
             for irow in range(self.table.rowCount()):
                 item = QTableWidgetItem()
                 if icol == 5:
-                    item.setData(Qt.EditRole, int(1))
+                    item.setData(Qt.EditRole, 1)
                 else:
                     item.setData(Qt.EditRole, float(1))
                 if irow == self.table.rowCount() - 1:

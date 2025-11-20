@@ -12,7 +12,8 @@ import h5py
 import json
 
 from scipy.interpolate import RectBivariateSpline
-from typing import Tuple, List, Union, NamedTuple, Dict, Any, Callable, TypeVar
+from typing import Union, NamedTuple, Any, TypeVar
+from collections.abc import Callable
 
 from configparser import ConfigParser, NoOptionError, NoSectionError
 
@@ -41,12 +42,12 @@ TOption = Union[T, None]
 IntOption = Union[int, None]
 FloatOption = Union[float, None]
 StrOption = Union[str, None]
-RangeOption = Union[Tuple[int, int], None]
+RangeOption = Union[tuple[int, int], None]
 TypeCast = Callable[[str], T]
 ConfigType = Union[bool, int, float, str]
 
 NDArray = np.ndarray
-LoaderOptions = Dict[str, Any]
+LoaderOptions = dict[str, Any]
 
 
 class SingleRun(NamedTuple):
@@ -88,7 +89,7 @@ class LoadLog(NamedTuple):
 CYCLE_TAG = "NNN"
 
 
-def start_end_time(source_ws: str) -> Tuple[DateAndTime, DateAndTime]:
+def start_end_time(source_ws: str) -> tuple[DateAndTime, DateAndTime]:
     run = mtd[source_ws].getRun()
     start_time = run.startTime()
     end_time = run.endTime()
@@ -108,16 +109,16 @@ def num_detectors(ws: Workspace) -> int:
     return sum
 
 
-def range_to_values(rng: str) -> Tuple[float, ...]:
+def range_to_values(rng: str) -> tuple[float, ...]:
     # converts a comma separated list of numbers to a tuple of floats
     return tuple([float(x) for x in rng.split(",")])
 
 
-def find_nearest_index(values: List[float], target: float) -> int:
+def find_nearest_index(values: list[float], target: float) -> int:
     return int(np.abs(np.array(values) - target).argmin())
 
 
-def split_run_index(run: str) -> Tuple[str, int]:
+def split_run_index(run: str) -> tuple[str, int]:
     # splits fpath.hdf:n to fpath.hdf and n
     gp = re.search(r":([0-9]+?)$", run)
     if gp:
@@ -129,7 +130,7 @@ def split_run_index(run: str) -> Tuple[str, int]:
     return base, index
 
 
-def find_file(fname: str, directories: List[str]) -> str:
+def find_file(fname: str, directories: list[str]) -> str:
     # search for the file in the list of directories otherwise try
     # mantid file finder
     for dir in directories:
@@ -139,7 +140,7 @@ def find_file(fname: str, directories: List[str]) -> str:
     return FileFinder.getFullPath(fname)
 
 
-def find_event_folder(hdf_path: str, search_directories: List[str]) -> Tuple[str, str, NDArray]:
+def find_event_folder(hdf_path: str, search_directories: list[str]) -> tuple[str, str, NDArray]:
     # TOF ansto data is stored typically as a pair of files (hdf, binary) where the
     # name of the binary event file is saved in the hdf file. The function extracts
     # name from the hdf and looks through the search directories for a match.
@@ -180,7 +181,7 @@ def find_event_folder(hdf_path: str, search_directories: List[str]) -> Tuple[str
     return "./", "", datasets
 
 
-def seq_to_list(iseqn: str) -> List[int]:
+def seq_to_list(iseqn: str) -> list[int]:
     # convert a comma separated range of numbers returned as a list
     # first clean all whitespaces
     seqn = iseqn.replace(" ", "")
@@ -204,14 +205,14 @@ def seq_to_list(iseqn: str) -> List[int]:
     return nlist
 
 
-def datasets_in_file(file_path: str) -> List[int]:
+def datasets_in_file(file_path: str) -> list[int]:
     # return an array with the dataset indexes
     tags = [HdfKey("ds", "/entry1/instrument/detector/dataset_number/", None)]
     values, _ = extract_hdf_params(file_path, tags)
     return list(values["ds"])
 
 
-def dataset_indexes(fpath: str, ds_seqn: str) -> List[int]:
+def dataset_indexes(fpath: str, ds_seqn: str) -> list[int]:
     # the loader uses the index into the dataset to find the number
     all_datasets = datasets_in_file(fpath)
     ds_map = dict([(x, i) for i, x in enumerate(all_datasets)])
@@ -225,7 +226,7 @@ def dataset_indexes(fpath: str, ds_seqn: str) -> List[int]:
             raise ValueError("Cannot find dataset {} in file {}".format(ds_seqn, fpath))
 
 
-def get_variants(tag: str) -> List[str]:
+def get_variants(tag: str) -> list[str]:
     # extract all the variants from a single tag
     values = re.findall(r"\[(.*?)\]", tag)
     variants = []
@@ -240,7 +241,7 @@ def get_variants(tag: str) -> List[str]:
     return variants
 
 
-def replace_variants(infolders: List[str], tags: List[str]) -> List[str]:
+def replace_variants(infolders: list[str], tags: list[str]) -> list[str]:
     # expand the folder list with variants from the first tag and recursively
     # call for the remaining tags
     if tags:
@@ -256,7 +257,7 @@ def replace_variants(infolders: List[str], tags: List[str]) -> List[str]:
         return infolders
 
 
-def expand_directories(included: List[str]) -> List[str]:
+def expand_directories(included: list[str]) -> list[str]:
     # expand the search path with confirmed variants
     exp_folders = []
     for folder in included:
@@ -270,7 +271,7 @@ def expand_directories(included: List[str]) -> List[str]:
     return exp_folders
 
 
-def find_cycle_folders(cycle_no: int, folder_list: List[str]) -> List[str]:
+def find_cycle_folders(cycle_no: int, folder_list: list[str]) -> list[str]:
     # look for the pattern 'NNN' in the folder path
     cycle_folders = []
     for folder in folder_list:
@@ -280,7 +281,7 @@ def find_cycle_folders(cycle_no: int, folder_list: List[str]) -> List[str]:
     return cycle_folders
 
 
-def list_to_seq(nlist: List[int]) -> str:
+def list_to_seq(nlist: list[int]) -> str:
     # converts a list of numbers into an ordered string sequence,
     # for example [1,2,3,10,7,6,8] -> '1-3,6-8,10'
 
@@ -311,7 +312,7 @@ def list_to_seq(nlist: List[int]) -> str:
     return ",".join(sequence)
 
 
-def encode_run_list(file_list: List[str]) -> str:
+def encode_run_list(file_list: list[str]) -> str:
     # filename is of the form ../EMUnnnnnnn.nx.hdf:ds
     # encode the run number and dataset index
     seqn = {}
@@ -350,7 +351,7 @@ def encode_run_list(file_list: List[str]) -> str:
     return ";".join(merged)
 
 
-def build_file_list(search_path: List[str], file_prefix: str, file_extn: str, rungrp: RunGroup) -> List[str]:
+def build_file_list(search_path: list[str], file_prefix: str, file_extn: str, rungrp: RunGroup) -> list[str]:
     data_files = []
     for run in seq_to_list(rungrp.runs):
         fname = "{}{:07d}{}".format(file_prefix, run, file_extn)
@@ -365,7 +366,7 @@ def build_file_list(search_path: List[str], file_prefix: str, file_extn: str, ru
     return data_files
 
 
-def run_groups(allruns: str) -> List[RunGroup]:
+def run_groups(allruns: str) -> list[RunGroup]:
     """
     The complete runs sequence can be expressed using the following defns:
     rungroup : [cycle::]runseqn[:ds]
@@ -386,7 +387,7 @@ def run_groups(allruns: str) -> List[RunGroup]:
     return groups
 
 
-def expanded_runs(allruns: str) -> List[SingleRun]:
+def expanded_runs(allruns: str) -> list[SingleRun]:
     exruns = []
     for rgp in run_groups(allruns):
         cycle = int(rgp.cycle) if rgp.cycle else None
@@ -396,7 +397,7 @@ def expanded_runs(allruns: str) -> List[SingleRun]:
     return exruns
 
 
-def hdf_files_from_runs(all_runs: str, search_dirs: List[str], file_prefix: str, file_extn: str) -> List[str]:
+def hdf_files_from_runs(all_runs: str, search_dirs: list[str], file_prefix: str, file_extn: str) -> list[str]:
     # the run format is cycle:: runs; cycle:: runs; ..
     # to collect all the data the split sequence ';', '::'
     #
@@ -420,7 +421,7 @@ def hdf_files_from_runs(all_runs: str, search_dirs: List[str], file_prefix: str,
     return sorted(list(set(analyse_runs)))
 
 
-def extract_hdf_params(fpath: str, tags: List[HdfKey]) -> Tuple[Dict[str, Any], Dict[str, Dict[str, str]]]:
+def extract_hdf_params(fpath: str, tags: list[HdfKey]) -> tuple[dict[str, Any], dict[str, dict[str, str]]]:
     # gets the parameters from the base file to be able to complete the setup
     # such as, doppler amplitude and speed
     # if the hdf parameter is mssing and no default is provide an
@@ -447,7 +448,7 @@ def total_time(src: str) -> float:
     return run.getProperty("dur").value
 
 
-def setup_axis(ws_tag: str, curAxis: Dict[str, Any]):
+def setup_axis(ws_tag: str, curAxis: dict[str, Any]):
     """
     create an axis object and initiate the label, units and values
     then replace the axis in the workspace
@@ -464,7 +465,7 @@ def setup_axis(ws_tag: str, curAxis: Dict[str, Any]):
     ws.replaceAxis(1, newAxis)
 
 
-def append_ini_params(output_ws: str, ini_options: Dict[str, str], ui_options: Dict[str, str]) -> None:
+def append_ini_params(output_ws: str, ini_options: dict[str, str], ui_options: dict[str, str]) -> None:
     # ui_options have precedent over the ini file options
     run = mtd[output_ws].getRun()
     options = {}
@@ -605,7 +606,7 @@ class ScratchFolder:
         tmp = os.path.join(self._temp_folder, basename + dset + name + ".nxs")
         return os.path.normpath(tmp)
 
-    def restore_runs_from_scratch_folder(self, output_ws: str, runs: List[str], lopts: LoaderOptions) -> Tuple[List[str], str]:
+    def restore_runs_from_scratch_folder(self, output_ws: str, runs: list[str], lopts: LoaderOptions) -> tuple[list[str], str]:
         # look for a workspace that is a match or a subset
         # of the runs required with the same load options
         # returning the merged workspace and the files that are already loaded
@@ -648,7 +649,7 @@ class ScratchFolder:
         DeleteWorkspace(Workspace=output_ws)
         return [], empty_ws
 
-    def copy_to_scratch_folder(self, output_ws: str, loaded: List[str], lopts: LoaderOptions) -> None:
+    def copy_to_scratch_folder(self, output_ws: str, loaded: list[str], lopts: LoaderOptions) -> None:
         # add the lopts to the properties
         run = mtd[output_ws].getRun()
         run.addProperty("loader_options", json.dumps(lopts, sort_keys=True), True)
@@ -661,7 +662,7 @@ class ScratchFolder:
         fpath = self.build_temp_fpath(loaded[0], 0, output_ws)
         SaveNexusProcessed(InputWorkspace=output_ws, Filename=fpath)
 
-    def check_parameters_match(self, output_ws: str, load_opts: LoaderOptions, params: List[LoadLog]) -> bool:
+    def check_parameters_match(self, output_ws: str, load_opts: LoaderOptions, params: list[LoadLog]) -> bool:
         mrun = mtd[output_ws].getRun()
         for otag, rtag, tol in params:
             try:
@@ -686,8 +687,8 @@ class ScratchFolder:
         loader: Algorithm,
         lopts: LoaderOptions,
         output_ws: str,
-        params: List[LoadLog],
-        event_dirs: List[str],
+        params: list[LoadLog],
+        event_dirs: list[str],
         filter: Union[FilterPixelsTubes, None],
     ) -> bool:
         # looks for a nxs file file in the temp folder and either loads the nxs
@@ -723,11 +724,11 @@ class ScratchFolder:
 
 def load_merge(
     loader: Algorithm,
-    runs: List[str],
+    runs: list[str],
     output_ws: str,
     lopts: LoaderOptions,
-    event_dirs: List[str] = [],
-    params: List[LoadLog] = [],
+    event_dirs: list[str] = [],
+    params: list[LoadLog] = [],
     filter: Union[FilterPixelsTubes, None] = None,
     scratch: Union[ScratchFolder, None] = None,
     check_file: Union[Callable[[str], None], None] = None,
@@ -878,7 +879,7 @@ class IniParameters(ConfigParser):
             value = default
         return value
 
-    def get_section(self, tag: str) -> Dict[str, str]:
+    def get_section(self, tag: str) -> dict[str, str]:
         try:
             options = dict(self.items(tag))
         except (NoOptionError, NoSectionError):
@@ -944,7 +945,7 @@ def fractional_facet_area(p1: Point, p2: Point, p3: Point, qlevel: float) -> flo
         return triangle_base_area(pts[0], ip1, ip2)
 
 
-def fractional_quad_area(zvals: Tuple[float, float, float, float, float], qlevel: float) -> float:
+def fractional_quad_area(zvals: tuple[float, float, float, float, float], qlevel: float) -> float:
     # calculates the area of the region below qlevel over the unit square defined
     # by [(0,0),(1,0),(1,1),(0,1)] and the centre point at (0.5, 0.5) by using
     # triangular facets
@@ -986,8 +987,8 @@ def extrapolate_grid_edges(grid):
 
 
 def fractional_map(
-    grids: List[NDArray], base_pixels: List[int], bin_edges: List[float]
-) -> Tuple[Dict[int, List[int]], Dict[int, List[float]]]:
+    grids: list[NDArray], base_pixels: list[int], bin_edges: list[float]
+) -> tuple[dict[int, list[int]], dict[int, list[float]]]:
     # Assumes a collection of 2D panels with base pixel offset.
     # The bands are monotonically increasing.
     pixel_map = {i: [] for i in range(len(bin_edges) - 1)}
@@ -1042,10 +1043,10 @@ class FractionalAreaDetectorTubes:
     _efixed: float
     _analyse_tubes: str
     _spectrum_axis: str
-    _panel_tubes: List[Tuple[int, int]]
-    _y_axis: Dict[str, Any] = {}
-    _fractional_map: Dict[int, List[int]] = {}
-    _fractional_wgts: Dict[int, List[float]] = {}
+    _panel_tubes: list[tuple[int, int]]
+    _y_axis: dict[str, Any] = {}
+    _fractional_map: dict[int, list[int]] = {}
+    _fractional_wgts: dict[int, list[float]] = {}
 
     def __init__(
         self,
@@ -1056,7 +1057,7 @@ class FractionalAreaDetectorTubes:
         q_range: str,
         q2_range: str,
         efixed: float,
-        panel_tubes: List[Tuple[int, int]],
+        panel_tubes: list[tuple[int, int]],
         def_bins: int = 30,
     ) -> None:
         self._pixels_per_tube = pixels_per_tube
@@ -1070,18 +1071,18 @@ class FractionalAreaDetectorTubes:
         self._panel_tubes = panel_tubes
 
     @property
-    def y_axis(self) -> Dict[str, Any]:
+    def y_axis(self) -> dict[str, Any]:
         return self._y_axis
 
     @property
-    def detector_map(self) -> Dict[int, List[int]]:
+    def detector_map(self) -> dict[int, list[int]]:
         return self._fractional_map
 
     @property
-    def detector_wgts(self) -> Dict[int, List[float]]:
+    def detector_wgts(self) -> dict[int, list[float]]:
         return self._fractional_wgts
 
-    def _get_axis_bins(self) -> Tuple[NDArray, float]:
+    def _get_axis_bins(self) -> tuple[NDArray, float]:
         y_axis = self._y_axis["values"]
         bin_edges = np.zeros(len(y_axis) + 1)
         step_size = np.mean(np.diff(y_axis))

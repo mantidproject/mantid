@@ -25,7 +25,7 @@ from mantidqtinterfaces.Muon.GUI.Common.utilities.run_string_utils import (
 import os
 
 
-class GroupingTabPresenter(object):
+class GroupingTabPresenter:
     """
     The grouping tab presenter is responsible for synchronizing the group and pair tables. It also maintains
     functionality which covers both groups/pairs ; e.g. loading/saving/updating data.

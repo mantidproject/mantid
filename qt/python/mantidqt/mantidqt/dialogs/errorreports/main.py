@@ -7,7 +7,7 @@
 import argparse
 import importlib
 import sys
-from typing import Sequence
+from collections.abc import Sequence
 
 import mantid
 from qtpy import QT_VERSION

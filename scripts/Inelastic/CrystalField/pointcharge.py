@@ -12,7 +12,7 @@ import warnings
 CHARGES_PATTERN = re.compile(r"^[A-z]+")
 
 
-class PointCharge(object):
+class PointCharge:
     """
     Class for calculating crystal field parameters under the point-charge model.
     """

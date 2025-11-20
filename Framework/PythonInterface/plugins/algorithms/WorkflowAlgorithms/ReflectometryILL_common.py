@@ -211,8 +211,8 @@ def slit_sizes(ws: MatrixWorkspace) -> None:
     slit2_width = run.get(slit_size_log_entry(instr_name, 1))
     slit3_width = run.get(slit_size_log_entry(instr_name, 2))
     if slit2_width is None or slit3_width is None:
-        run.addProperty(SampleLogs.SLIT2WIDTH, str("-"), "", True)
-        run.addProperty(SampleLogs.SLIT3WIDTH, str("-"), "", True)
+        run.addProperty(SampleLogs.SLIT2WIDTH, "-", "", True)
+        run.addProperty(SampleLogs.SLIT3WIDTH, "-", "", True)
     else:
         slit2_width_unit = slit2_width.units
         slit3_width_unit = slit3_width.units

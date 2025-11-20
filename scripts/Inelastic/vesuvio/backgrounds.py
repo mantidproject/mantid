@@ -14,7 +14,7 @@ import ast
 # --------------------------------------------------------------------------------
 
 
-class Background(object):
+class Background:
     """Base class"""
 
     pass
@@ -25,7 +25,7 @@ class Background(object):
 # --------------------------------------------------------------------------------
 
 
-class PolynomialBackground(object):
+class PolynomialBackground:
     cfunction = "Polynomial"
 
     def __init__(self, order):

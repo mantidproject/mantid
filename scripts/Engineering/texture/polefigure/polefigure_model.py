@@ -15,7 +15,8 @@ from mantid.simpleapi import (
 )
 import numpy as np
 from mantid.api import AnalysisDataService as ADS
-from typing import Optional, Sequence, Tuple
+from typing import Optional
+from collections.abc import Sequence
 import matplotlib.pyplot as plt
 from os import path, makedirs
 from scipy.interpolate import griddata
@@ -98,7 +99,7 @@ class TextureProjection:
     @staticmethod
     def get_pf_table_name(
         wss: Sequence[str], fit_params: Sequence[str], hkl: Optional[Sequence[int]], readout_column: str
-    ) -> Tuple[str, str]:
+    ) -> tuple[str, str]:
         fws, lws = ADS.retrieve(wss[0]), ADS.retrieve(wss[-1])
         try:
             run_range = f"{fws.getRun().getLogData('run_number').value}-{lws.getRun().getLogData('run_number').value}"
@@ -265,7 +266,7 @@ class TextureProjection:
     # ~~~~~ Parameter Table helper functions ~~~~~~~~
 
     @staticmethod
-    def check_param_ws_for_columns(wss: Sequence[str]) -> Tuple[bool, bool]:
+    def check_param_ws_for_columns(wss: Sequence[str]) -> tuple[bool, bool]:
         has_chi2, has_x0 = True, True
         for ws in wss:
             param_ws = ADS.retrieve(ws)
@@ -290,7 +291,7 @@ class TextureProjection:
             )
 
     @staticmethod
-    def read_param_cols(ws_name: str, target_default: str = "I") -> Tuple[str, int]:
+    def read_param_cols(ws_name: str, target_default: str = "I") -> tuple[str, int]:
         ws = ADS.retrieve(ws_name)
         col_names = ws.getColumnNames()
         col_types = ws.columnTypes()

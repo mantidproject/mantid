@@ -107,7 +107,7 @@ def get_cal_mapping_dict(run_number_string, cal_mapping_path):
     return cal_mapping_dict
 
 
-class _RunDetails(object):
+class _RunDetails:
     """
     This class holds the full file paths associated with each run and various other useful attributes
     """

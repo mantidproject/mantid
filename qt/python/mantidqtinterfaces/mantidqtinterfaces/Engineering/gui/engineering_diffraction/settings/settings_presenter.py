@@ -142,7 +142,7 @@ ALL_LOGS = ",".join(
 ALL_PEAKS = ",".join(["BackToBackExponential", "Gaussian", "Lorentzian", "Voigt"])
 
 
-class SettingsPresenter(object):
+class SettingsPresenter:
     def __init__(self, model, view):
         self.model = model
         self.view = view

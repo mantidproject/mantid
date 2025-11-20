@@ -20,7 +20,7 @@ IN_PROGRESS_STYLE_SHEET = """QProgressBar::chunk { width: 25px; margin: 0.5px;
 EMPTY_STYLE_SHEET = """QProgressBar {color: blue;}"""
 
 
-class FittingPlotPresenter(object):
+class FittingPlotPresenter:
     def __init__(self, parent, model=None, view=None):
         if view is None:
             self.view = FittingPlotView(parent)

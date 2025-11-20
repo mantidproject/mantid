@@ -11,7 +11,7 @@ from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.workspace_naming import get_f
 from mantidqtinterfaces.Muon.GUI.Common.utilities.run_string_utils import valid_name_regex
 
 
-class PhaseTablePresenter(object):
+class PhaseTablePresenter:
     def __init__(self, view, model):
         self.view = view
         self.model = model

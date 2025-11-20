@@ -18,7 +18,6 @@ from collections import namedtuple
 # 6. A handle to the scatter monitor workspace (sample or can)
 # 7. A handle to the transmission workspace (sample or can)
 # 8. A handle to the direct workspace (sample or can)
-from typing import List
 
 from dataclasses import dataclass
 from sans.state.StateObjects.wavelength_interval import WavRange
@@ -79,4 +78,4 @@ class ReducedSlice:
     transmission_bundle: OutputTransmissionBundle
 
 
-CompletedSlices = List[ReducedSlice]
+CompletedSlices = list[ReducedSlice]

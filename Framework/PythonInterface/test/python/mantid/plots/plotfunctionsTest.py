@@ -39,13 +39,13 @@ PLOT_OPTIONS = {
 }
 
 
-class MockConfigService(object):
+class MockConfigService:
     def __init__(self):
         self.getString = mock.Mock(side_effect=PLOT_OPTIONS.get)
 
 
 # Avoid importing the whole of mantid for a single mock of the workspace class
-class FakeWorkspace(object):
+class FakeWorkspace:
     def __init__(self, name):
         self._name = name
 

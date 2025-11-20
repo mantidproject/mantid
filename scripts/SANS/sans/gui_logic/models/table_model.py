@@ -11,7 +11,6 @@ information regarding the custom output name and the information in the options 
 """
 
 import copy
-from typing import List
 
 from mantid.kernel import Logger
 from sans.common.enums import RowState
@@ -19,7 +18,7 @@ from sans.gui_logic.models.RowEntries import RowEntries
 from sans.gui_logic.models.basic_hint_strategy import BasicHintStrategy
 
 
-class TableModel(object):
+class TableModel:
     column_name_converter = [
         "sample_scatter",
         "sample_scatter_period",
@@ -50,7 +49,7 @@ class TableModel(object):
         self._subscriber_list = []
 
         self._table_entries = []
-        self._clipboard: List[RowEntries] = []
+        self._clipboard: list[RowEntries] = []
         self._default_entry_added = None
         self.clear_table_entries()
 
@@ -60,22 +59,22 @@ class TableModel(object):
         else:
             raise IndexError("The row {} does not exist.".format(row_index))
 
-    def add_multiple_table_entries(self, table_index_model_list: List[RowEntries]):
+    def add_multiple_table_entries(self, table_index_model_list: list[RowEntries]):
         for row in table_index_model_list:
             self._set_single_table_entry(row_entry=row)
 
     def append_table_entry(self, table_index_model: RowEntries):
         self._set_single_table_entry(row_entry=table_index_model)
 
-    def copy_rows(self, row_positions: List[int]):
+    def copy_rows(self, row_positions: list[int]):
         row_positions = sorted(row_positions)
         self._clipboard = self.get_multiple_rows(row_positions)
 
-    def cut_rows(self, row_positions: List[int]):
+    def cut_rows(self, row_positions: list[int]):
         self.copy_rows(row_positions)
         self.remove_table_entries(row_positions)
 
-    def _paste_overwrite(self, row_positions: List[int]):
+    def _paste_overwrite(self, row_positions: list[int]):
         # Only consider the first row position, this means multiple selections...etc.
         # behaves the same as other spreadsheet tools
         first_elem = min(row_positions)
@@ -85,7 +84,7 @@ class TableModel(object):
         for pos, entry in zip(paste_positions, self._clipboard):
             self.replace_table_entry(pos, copy.deepcopy(entry))
 
-    def paste_rows(self, row_positions: List[int]):
+    def paste_rows(self, row_positions: list[int]):
         if row_positions:
             self._paste_overwrite(row_positions)
         else:
@@ -94,10 +93,10 @@ class TableModel(object):
             for i, row in enumerate(self._clipboard):
                 self.insert_row_at(row_entry=copy.deepcopy(row), row_index=i + initial_pos)
 
-    def get_all_rows(self) -> List[RowEntries]:
+    def get_all_rows(self) -> list[RowEntries]:
         return self._table_entries
 
-    def get_multiple_rows(self, row_indexes: List[int]) -> List[RowEntries]:
+    def get_multiple_rows(self, row_indexes: list[int]) -> list[RowEntries]:
         return [self._table_entries[i] for i in row_indexes]
 
     def get_row(self, index: int) -> RowEntries:

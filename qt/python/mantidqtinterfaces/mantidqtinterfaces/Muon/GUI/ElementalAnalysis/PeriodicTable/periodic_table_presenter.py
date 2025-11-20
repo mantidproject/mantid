@@ -7,7 +7,7 @@
 from mantidqtinterfaces.Muon.GUI.Common import message_box
 
 
-class PeriodicTablePresenter(object):
+class PeriodicTablePresenter:
     def __init__(self, view, model):
         self.view = view
         self.model = model

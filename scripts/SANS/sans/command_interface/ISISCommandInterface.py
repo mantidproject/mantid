@@ -9,7 +9,7 @@ import os
 import re
 
 import types
-from typing import Union, Dict
+from typing import Union
 
 from SANSadd2 import add_runs
 from mantid.api import AnalysisDataService, WorkspaceGroup
@@ -503,7 +503,7 @@ def SetPhiLimit(phimin, phimax, use_mirror=True):
 
 
 def set_save(
-    save_algorithms: Union[None, Dict] = None, save_as_zero_error_free: bool = False, output_mode: OutputMode = OutputMode.PUBLISH_TO_ADS
+    save_algorithms: Union[None, dict] = None, save_as_zero_error_free: bool = False, output_mode: OutputMode = OutputMode.PUBLISH_TO_ADS
 ) -> OutputMode:
     """
     Mainly used internally by WavRangeReduction. Prepares the save state on the director.

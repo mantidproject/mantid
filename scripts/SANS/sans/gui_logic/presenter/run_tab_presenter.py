@@ -475,7 +475,7 @@ class RunTabPresenter(PresenterCommon):
             # 4. Set the batch file path in the model
             self._model.batch_file = batch_file_path
 
-        except (RuntimeError, ValueError, SyntaxError, IOError, KeyError) as e:
+        except (OSError, RuntimeError, ValueError, SyntaxError, KeyError) as e:
             self.sans_logger.error("Loading of the batch file failed. {}".format(str(e)))
             self.display_warning_box("Warning", "Loading of the batch file failed", str(e))
 
@@ -726,7 +726,7 @@ class RunTabPresenter(PresenterCommon):
             self.sans_logger.information("Starting export of table. Filename: {}".format(filename))
             try:
                 self._csv_parser.save_batch_file(rows=non_empty_rows, file_path=filename)
-            except (PermissionError, IOError) as e:
+            except (OSError, PermissionError) as e:
                 self.display_errors(error=e, context_msg="Failed to save the .csv file.", use_error_name=True)
             self.sans_logger.information("Table exporting finished.")
 

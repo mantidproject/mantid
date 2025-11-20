@@ -283,7 +283,7 @@ def _load_qlims(q_lims):
                     q_max.append(float(value_list[3]))
             q_min = np.array(q_min)
             q_max = np.array(q_max)
-        except IOError as exc:
+        except OSError as exc:
             raise RuntimeError("q_lims path is not valid: {}".format(exc))
     elif isinstance(q_lims, (list, tuple)) or isinstance(q_lims, np.ndarray):
         q_min = q_lims[0]

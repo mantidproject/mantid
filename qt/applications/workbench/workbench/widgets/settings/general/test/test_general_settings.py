@@ -15,12 +15,12 @@ from workbench.config import SAVE_STATE_VERSION
 from qtpy.QtCore import Qt
 
 
-class MockInstrument(object):
+class MockInstrument:
     def __init__(self, idx):
         self.name = StrictMock(return_value="instr{}".format(idx))
 
 
-class MockFacility(object):
+class MockFacility:
     def __init__(self, name):
         self.name = StrictMock(return_value=name)
         self.all_instruments = [MockInstrument(0), MockInstrument(1)]

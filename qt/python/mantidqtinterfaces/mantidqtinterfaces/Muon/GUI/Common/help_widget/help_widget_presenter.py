@@ -7,7 +7,7 @@
 from mantidqtinterfaces.Muon.GUI.Common.help_widget.help_widget_view import HelpWidgetView
 
 
-class HelpWidgetPresenter(object):
+class HelpWidgetPresenter:
     def __init__(self, view):
         self._view = view
 
@@ -21,7 +21,7 @@ class HelpWidgetPresenter(object):
         self._view._on_help_button_clicked()
 
 
-class HelpWidget(object):
+class HelpWidget:
     def __init__(self, doc):
         self.view = HelpWidgetView(doc)
         self.presenter = HelpWidgetPresenter(self.view)

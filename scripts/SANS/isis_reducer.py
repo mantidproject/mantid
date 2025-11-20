@@ -27,7 +27,7 @@ import copy
 logger = Logger("ISISReducer")
 
 
-class ReductionStateTransferer(object):
+class ReductionStateTransferer:
     def __init__(self):
         super(ReductionStateTransferer, self).__init__()
         # A copy of the reducer
@@ -150,7 +150,7 @@ __version__ = "0.0"
 current_settings = None
 
 
-class Sample(object):
+class Sample:
     ISSAMPLE = True
 
     def __init__(self):

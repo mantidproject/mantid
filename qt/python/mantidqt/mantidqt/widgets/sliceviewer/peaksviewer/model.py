@@ -17,7 +17,6 @@ from mantid.kernel import logger, SpecialCoordinateSystem
 
 # standard library
 import numpy as np
-from typing import List
 
 # map coordinate system to correct Peak getter
 FRAME_TO_PEAK_CENTER_ATTR = {
@@ -45,7 +44,7 @@ class PeaksViewerModel(TableWorkspaceDisplayModel):
         self._peaks_ws_name = peaks_ws.name()
         self._fg_color = fg_color
         self._bg_color = bg_color
-        self._representations: List[Painted] = []
+        self._representations: list[Painted] = []
         self._orientedLattice = None
         self._calcHKL = False
 

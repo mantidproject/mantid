@@ -45,7 +45,7 @@ class StateBackgroundSubtraction(metaclass=JsonSerializable):
 # ----------------------------------------------------------------------------------------------------------------------
 # Builder
 # ----------------------------------------------------------------------------------------------------------------------
-class StateBackgroundSubtractionBuilder(object):
+class StateBackgroundSubtractionBuilder:
     @automatic_setters(StateBackgroundSubtraction)
     def __init__(self):
         super(StateBackgroundSubtractionBuilder, self).__init__()

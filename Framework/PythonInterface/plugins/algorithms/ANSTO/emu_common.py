@@ -8,7 +8,7 @@
 import math
 import numpy as np
 
-from typing import Dict, Any
+from typing import Any
 
 from mantid import mtd
 
@@ -199,7 +199,7 @@ class EmuParameters(IniParameters):
             max_dE = 2 * efixed * dv / analysed_v2
             self._ev_range = "{:.3f},{:.5f},{:.3f}".format(-max_dE, 0.0001, max_dE)
 
-    def processing_options(self) -> Dict[str, str]:
+    def processing_options(self) -> dict[str, str]:
         # returns a dict of parameters that are not visible from the UI
         # and affect the processing results
         options = {}

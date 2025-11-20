@@ -8,7 +8,6 @@ import os
 import re
 import math
 import numpy as np
-from typing import List, Dict
 
 # import debugpy
 
@@ -87,7 +86,7 @@ class PelicanReduction(PythonAlgorithm):
     def summary(self) -> str:
         return "Performs an inelastic energy transfer reduction for ANSTO Pelican geometry data."
 
-    def seeAlso(self) -> List:
+    def seeAlso(self) -> list:
         return []
 
     def name(self) -> str:
@@ -350,7 +349,7 @@ class PelicanReduction(PythonAlgorithm):
         Qmax_sqrd = Ki**2 + Kt**2 - 2 * Ki * Kt * math.cos(TWO_THETA)
         self._q_range = "0.0, 0.02, {:.1f}".format(math.sqrt(Qmax_sqrd))
 
-    def processing_options(self) -> Dict[str, str]:
+    def processing_options(self) -> dict[str, str]:
         # returns a dict of parameters that are not visible from the UI
         # and affect the processing results
         options = {}
@@ -517,7 +516,7 @@ class PelicanReduction(PythonAlgorithm):
         for tof, pt in zip(tofs, pulsetimes):
             eventlist.addEventQuickly(tof, pt)
 
-    def _load_and_reduce(self, output_ws: str, analyse_runs: List[str], convert_dE: bool = True, energy_bins: str = "") -> str:
+    def _load_and_reduce(self, output_ws: str, analyse_runs: list[str], convert_dE: bool = True, energy_bins: str = "") -> str:
         # check if no runs or already loaded
         if not analyse_runs:
             return ""
@@ -567,7 +566,7 @@ class PelicanReduction(PythonAlgorithm):
 
         return output_ws
 
-    def _load_merge(self, runs: List[str], output_ws: str, lopts: LoaderOptions):
+    def _load_merge(self, runs: list[str], output_ws: str, lopts: LoaderOptions):
         params = [("LambdaOnTwoMode", "LambdaOnTwoMode", 0), ("SelectDataset", "SelectDataset", 0.1)]
         if lopts["CalibrateTOFBias"]:
             params.append(("CalibrateTOFBias", "CalibrateTOF", 0.1))

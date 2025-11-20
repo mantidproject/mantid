@@ -15,7 +15,6 @@ import argparse
 import sys
 import xml.etree.ElementTree as ET
 from dataclasses import dataclass
-from typing import List
 
 NEW_SOURCE_ROOT = "${CMAKE_SOURCE_DIR}"
 OLD_SOURCE_ROOT = "/jenkins_workdir/workspace/pull_requests-cppcheck"
@@ -72,7 +71,7 @@ def parse_arguments() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def generate_suppressions(xml_tree: ET.ElementTree, old_source_root: str) -> List[str]:
+def generate_suppressions(xml_tree: ET.ElementTree, old_source_root: str) -> list[str]:
     """
     Extract all cppcheck suppressions from the xml tree and return them as a list of strings
     in the format:

@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import re
-from typing import List, Optional
+from typing import Optional
 
 import numpy as np
 import h5py
@@ -165,7 +165,7 @@ class LoadWANDSCD(PythonAlgorithm):
         # cleanup
         DeleteWorkspace(data)
 
-    def get_intput_filenames(self) -> List[str]:
+    def get_intput_filenames(self) -> list[str]:
         """
         Retrieves the list of input file paths based on the provided properties.
 
@@ -211,7 +211,7 @@ class LoadWANDSCD(PythonAlgorithm):
             va_filename = None
         return va_filename
 
-    def load_and_group(self, runs: List[str]) -> IMDHistoWorkspace:  # noqa: C901
+    def load_and_group(self, runs: list[str]) -> IMDHistoWorkspace:  # noqa: C901
         """
         Loads and groups data from the provided list of run files.
 

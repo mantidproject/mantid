@@ -4,7 +4,6 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from typing import Tuple, List
 
 from qtpy import QtCore
 from qtpy.QtCore import QObject, Signal
@@ -80,7 +79,7 @@ class SansRunTabAsync(IQtAsync):
             self._notify_progress_signal.signal.emit(index, out_shift_factors, out_scale_factors)
 
     @qt_async_task
-    def load_workspaces_on_thread(self, row_index_pairs: List[Tuple[RowEntries, int]], get_states_func):
+    def load_workspaces_on_thread(self, row_index_pairs: list[tuple[RowEntries, int]], get_states_func):
         for row, index in row_index_pairs:
             try:
                 states, errors = get_states_func(row_entries=[row])

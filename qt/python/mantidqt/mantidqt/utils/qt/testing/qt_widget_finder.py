@@ -8,7 +8,7 @@
 from qtpy.QtWidgets import QApplication
 
 
-class QtWidgetFinder(object):
+class QtWidgetFinder:
     """
     This class provides common functions for finding widgets within all currently existing ones.
     """

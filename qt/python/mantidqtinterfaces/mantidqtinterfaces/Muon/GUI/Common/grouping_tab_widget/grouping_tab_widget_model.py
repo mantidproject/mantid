@@ -18,7 +18,7 @@ class RowValid(Enum):
     valid_for_some_runs = 1
 
 
-class GroupingTabModel(object):
+class GroupingTabModel:
     """
     The model for the grouping tab should be shared between all widgets of the tab.
     It keeps a record of the groups and pairs defined for the current instance of the interface.

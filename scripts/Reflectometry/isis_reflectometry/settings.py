@@ -12,7 +12,7 @@ class MissingSettings(Exception):
     pass
 
 
-class Settings(object):
+class Settings:
     __contents = None
     __filename = None
 

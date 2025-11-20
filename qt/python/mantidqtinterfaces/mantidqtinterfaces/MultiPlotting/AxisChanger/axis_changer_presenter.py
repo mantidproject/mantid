@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 
-class AxisChangerPresenter(object):
+class AxisChangerPresenter:
     def __init__(self, view):
         self.view = view
 

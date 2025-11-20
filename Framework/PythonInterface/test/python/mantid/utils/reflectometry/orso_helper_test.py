@@ -8,7 +8,7 @@ import numpy as np
 import unittest
 from unittest import mock
 from mantid.kernel import version
-from datetime import datetime, timezone, date, time
+from datetime import datetime, date, time, UTC
 
 from mantid.simpleapi import CreateSampleWorkspace
 from mantid.utils.reflectometry.orso_helper import MantidORSODataColumns, MantidORSODataset, MantidORSOSaver
@@ -277,7 +277,7 @@ class MantidORSODatasetTest(unittest.TestCase):
 
     def test_create_local_datetime_from_utc_string(self):
         date_string = "2023-10-18T12:30:45.12345"
-        expected_value = datetime.combine(date(2023, 10, 18), time(12, 30, 45)).replace(tzinfo=timezone.utc).astimezone(tz=None)
+        expected_value = datetime.combine(date(2023, 10, 18), time(12, 30, 45)).replace(tzinfo=UTC).astimezone(tz=None)
         self.assertEqual(expected_value, MantidORSODataset.create_local_datetime_from_utc_string(date_string))
 
     def test_create_local_datetime_from_utc_string_with_invalid_format_raises_error(self):

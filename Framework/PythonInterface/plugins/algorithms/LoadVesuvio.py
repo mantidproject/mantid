@@ -1061,7 +1061,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
 #########################################################################################
 
 
-class SpectraToFoilPeriodMap(object):
+class SpectraToFoilPeriodMap:
     """Defines the mapping between a spectrum number
     & the period index into a WorkspaceGroup for a foil state.
     2 period :: forward scattering

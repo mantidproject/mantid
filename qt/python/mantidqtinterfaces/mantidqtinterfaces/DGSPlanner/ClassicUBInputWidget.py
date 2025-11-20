@@ -14,7 +14,7 @@ from mantidqtinterfaces.DGSPlanner.ValidateOL import ValidateOL
 try:
     from qtpy.QtCore import QString
 except ImportError:
-    QString = type("")
+    QString = str
 
 
 class ClassicUBInputWidget(QtWidgets.QWidget):

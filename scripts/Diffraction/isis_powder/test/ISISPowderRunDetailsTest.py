@@ -134,7 +134,7 @@ class ISISPowderInstrumentRunDetailsTest(unittest.TestCase):
         self.assertEqual(expected_path, output_obj.splined_vanadium_file_path)
 
 
-class MockInstSettings(object):
+class MockInstSettings:
     def __init__(self, cal_file_path, calibration_dir):
         self.calibration_dir = calibration_dir
         self.cal_mapping_path = cal_file_path

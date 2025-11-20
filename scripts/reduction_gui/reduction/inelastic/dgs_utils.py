@@ -18,7 +18,7 @@ except:
     pass
 
 
-class InstrumentParameters(object):
+class InstrumentParameters:
     instrument_name = None
     _instrument = None
 

@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
-from typing import Any, Tuple
+from typing import Any
 from enum import Enum
 from bisect import bisect_left
 
@@ -557,7 +557,7 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
             table_ws.addRow(peak_dict)
 
     @staticmethod
-    def _fit_projection(axis: np.ndarray, data: np.ndarray) -> Tuple[float, float]:
+    def _fit_projection(axis: np.ndarray, data: np.ndarray) -> tuple[float, float]:
         """
         Fits the provided data with a single gaussian and flat background and returns fitted peak centre value and width.
 
@@ -605,7 +605,7 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
 
         return peak_pos, peak_width
 
-    def _find_peak(self, rect: Rectangle) -> Tuple[float, float, float, float]:
+    def _find_peak(self, rect: Rectangle) -> tuple[float, float, float, float]:
         """
         Find the peak by fitting x and y projections of the rectangle
         @param rect: the relevant rectangle
@@ -652,7 +652,7 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
 
         return x_peak_pos, y_peak_pos, x_peak_width, y_peak_width
 
-    def _show_peak(self, rect: Rectangle, peak: Tuple[float, float, float, float]):
+    def _show_peak(self, rect: Rectangle, peak: tuple[float, float, float, float]):
         """
         Display the peak on the figure, replacing previous one if needed
         @param rect: the rectangle whose peak is shown

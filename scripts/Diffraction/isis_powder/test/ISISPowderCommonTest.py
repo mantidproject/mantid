@@ -651,7 +651,7 @@ class ISISPowderCommonTest(unittest.TestCase):
         mantid.DeleteWorkspace(sample_ws)
 
 
-class ISISPowderMockInst(object):
+class ISISPowderMockInst:
     def __init__(self, file_ext=None):
         self._file_ext = file_ext
         self._inst_prefix = "MOCK"
@@ -678,12 +678,12 @@ class ISISPowderMockInst(object):
         pass
 
 
-class ISISPowderMockRunDetails(object):
+class ISISPowderMockRunDetails:
     def __init__(self, file_ext):
         self.file_extension = file_ext
 
 
-class ISISPowderMockInstrumentSettings(object):
+class ISISPowderMockInstrumentSettings:
     def __init__(self, keep_raw_workspace=None):
         self.keep_raw_workspace = keep_raw_workspace
 

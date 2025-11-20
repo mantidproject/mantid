@@ -4,7 +4,6 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from typing import List
 from mantidqtinterfaces.Muon.GUI.Common.utilities.algorithm_utils import run_convert_to_points, run_convert_to_histogram
 from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.ADS_calls import retrieve_ws
 
@@ -12,7 +11,7 @@ from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.ADS_calls import retrieve_ws
 FIT_FUNCTION_GUESS_LABEL = "Fit function guess"
 
 
-class WorkspacePlotInformation(object):
+class WorkspacePlotInformation:
     def __init__(self, workspace_name: str, index: int, axis: int, normalised: bool, errors: bool, label: str):
         self.workspace_name = workspace_name
         self.index = index
@@ -29,7 +28,7 @@ class WorkspacePlotInformation(object):
             return False
 
 
-class PlottingCanvasModel(object):
+class PlottingCanvasModel:
     def __init__(self, plot_model):
         self._user_axis_limits = None
         self._axes_workspace_map = {}
@@ -48,8 +47,8 @@ class PlottingCanvasModel(object):
         self._is_tiled = state
 
     def create_workspace_plot_information(
-        self, input_workspace_names: List[str], input_indices: List[int], errors: bool
-    ) -> List[WorkspacePlotInformation]:
+        self, input_workspace_names: list[str], input_indices: list[int], errors: bool
+    ) -> list[WorkspacePlotInformation]:
         """
         Creates a list of workspace plot information (workspace name, index, axis..) from a input list
         of indices and workspace names
@@ -68,7 +67,7 @@ class PlottingCanvasModel(object):
 
         return workspace_plot_information
 
-    def update_tiled_axis_map(self, tiled_keys: List[str]):
+    def update_tiled_axis_map(self, tiled_keys: list[str]):
         """
         Updates the map containing the {tiled_key: axis}. This map is used to assign
         each WorkspacePlotInformation to the correct tiled.

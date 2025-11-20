@@ -20,7 +20,7 @@ from mantidqt.widgets.instrumentview.presenter import InstrumentViewPresenter
 masking_information = namedtuple("masking_information", "first, second, third")
 
 
-class MaskingTablePresenter(object):
+class MaskingTablePresenter:
     DISPLAY_WORKSPACE_NAME = "__sans_mask_display_dummy_workspace"
 
     class ConcreteMaskingTableListener(MaskingTable.MaskingTableListener):

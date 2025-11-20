@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 
-class ContextExamplePresenter(object):
+class ContextExamplePresenter:
     def __init__(self, view, model):
         self._model = model
         self._view = view

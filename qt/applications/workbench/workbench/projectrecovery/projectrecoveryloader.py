@@ -17,7 +17,7 @@ from mantidqt.project.projectloader import ProjectLoader
 from workbench.projectrecovery.recoverygui.projectrecoverypresenter import ProjectRecoveryPresenter
 
 
-class ProjectRecoveryLoader(object):
+class ProjectRecoveryLoader:
     def __init__(self, project_recovery, main_window, multi_file_interpreter):
         self.pr = project_recovery
         self.main_window = main_window

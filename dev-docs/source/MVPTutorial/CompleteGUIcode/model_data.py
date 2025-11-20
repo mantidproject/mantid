@@ -5,7 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from numpy import linspace, ndarray, sin
-from typing import List
 
 
 class PlotModel:
@@ -23,5 +22,5 @@ class PlotModel:
         return self._y_data
 
     @staticmethod
-    def line_colours() -> List[str]:
+    def line_colours() -> list[str]:
         return ["red", "blue", "black"]

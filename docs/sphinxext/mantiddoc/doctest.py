@@ -173,7 +173,7 @@ MIX_FAIL_RE = re.compile(r"^\s+(\d+)\s+of\s+(\d+)\s+in\s+(\w+)$")
 
 
 # -------------------------------------------------------------------------------
-class TestSuiteReport(object):
+class TestSuiteReport:
     def __init__(self, name, cases, package=None):
         if len(cases) == 0:
             raise ValueError("No test cases provided")
@@ -199,7 +199,7 @@ class TestSuiteReport(object):
 
 
 # -------------------------------------------------------------------------------
-class TestCaseReport(object):
+class TestCaseReport:
     def __init__(self, classname, name, failure_descr):
         self.classname = classname
         self.name = name
@@ -227,7 +227,7 @@ class TestCaseReport(object):
 
 
 # -------------------------------------------------------------------------------
-class DocTestOutputParser(object):
+class DocTestOutputParser:
     """
     Process a doctest output file and convert it
     to a different format

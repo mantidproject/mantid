@@ -5,7 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import copy
-from typing import Dict
 
 from sans.common.enums import DetectorType
 from mantid import UsageService
@@ -16,7 +15,7 @@ from sans.gui_logic.models.beam_centre_model import BeamCentreModel
 from ui.sans_isis.beam_centre import BeamCentre
 
 
-class BeamCentrePresenter(object):
+class BeamCentrePresenter:
     class ConcreteBeamCentreListener(BeamCentre.BeamCentreListener):
         def __init__(self, presenter):
             self._presenter = presenter
@@ -56,7 +55,7 @@ class BeamCentrePresenter(object):
         self._beam_centre_model.reset_inst_defaults(self._parent_presenter.instrument)
         self.update_centre_positions()
 
-    def on_update_centre_values(self, new_vals: Dict):
+    def on_update_centre_values(self, new_vals: dict):
         self._beam_centre_model.update_centre_positions(new_vals)
 
     def on_processing_finished_centre_finder(self):

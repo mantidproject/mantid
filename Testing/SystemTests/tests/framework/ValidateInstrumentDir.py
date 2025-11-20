@@ -18,7 +18,7 @@ FILE_TO_TEST = None  # "MARI_Definition.xml"
 INSTRUMENT_DIR = config["instrumentDefinition.directory"]
 
 
-class ValidateXML(object):
+class ValidateXML:
     def skipTests(self):
         try:
             import lxml  # noqa

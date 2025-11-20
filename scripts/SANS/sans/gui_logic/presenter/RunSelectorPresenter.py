@@ -7,7 +7,7 @@
 from mantid import ConfigService
 
 
-class RunSelectorPresenter(object):
+class RunSelectorPresenter:
     file_extensions = [".nxs"]
 
     def __init__(self, title, run_selection, run_finder, view, parent_view):

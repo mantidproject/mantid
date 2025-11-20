@@ -176,7 +176,7 @@ class StateConvertToQ(metaclass=JsonSerializable):
 # ----------------------------------------------------------------------------------------------------------------------
 # Builder
 # ----------------------------------------------------------------------------------------------------------------------
-class StateConvertToQBuilder(object):
+class StateConvertToQBuilder:
     @automatic_setters(StateConvertToQ)
     def __init__(self):
         super(StateConvertToQBuilder, self).__init__()

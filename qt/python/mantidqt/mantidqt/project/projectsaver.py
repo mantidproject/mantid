@@ -15,7 +15,7 @@ from mantidqt.project.plotssaver import PlotsSaver
 from mantidqt.project.workspacesaver import WorkspaceSaver
 
 
-class ProjectSaver(object):
+class ProjectSaver:
     def __init__(self, project_file_ext):
         self.project_file_ext = project_file_ext
 
@@ -87,7 +87,7 @@ class ProjectSaver(object):
         return interfaces
 
 
-class ProjectWriter(object):
+class ProjectWriter:
     def __init__(self, save_location, workspace_names, project_file_ext, plots_to_save, interfaces_to_save):
         self.workspace_names = workspace_names
         self.file_name = save_location
@@ -111,7 +111,7 @@ class ProjectWriter(object):
         except KeyboardInterrupt:
             # Catch any exception and log it
             raise
-        except (IOError, OSError) as e:
+        except OSError as e:
             logger.warning("JSON project file unable to be opened/written to.")
             logger.debug("Full error: {}".format(e))
         except Exception as e:

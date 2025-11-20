@@ -17,7 +17,7 @@ from mantidqtinterfaces.Muon.GUI.Common.home_tab.home_tab_view import HomeTabVie
 from mantidqtinterfaces.Muon.GUI.Common.home_tab.home_tab_presenter import HomeTabPresenter
 
 
-class HomeTabWidget(object):
+class HomeTabWidget:
     def __init__(self, context, parent):
         self.inst_view = InstrumentWidgetView(parent)
         self.run_info_view = HomeRunInfoWidgetView(parent)

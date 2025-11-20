@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import re
-from typing import Callable, Sequence
+from collections.abc import Callable, Sequence
 
 from qtpy.QtCore import QModelIndex, Qt
 from qtpy.QtWidgets import QWidget, QPushButton, QComboBox, QTreeWidget, QVBoxLayout, QHBoxLayout, QCompleter, QTreeWidgetItem

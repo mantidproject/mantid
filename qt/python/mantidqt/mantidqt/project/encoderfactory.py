@@ -17,7 +17,7 @@ def default_encoder_compatability_check(obj, encoder_cls):
     return False
 
 
-class EncoderFactory(object):
+class EncoderFactory:
     encoder_dict = dict()  # cls name: (encoder, compatible check)
 
     @classmethod

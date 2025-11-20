@@ -30,7 +30,7 @@ if reducer.setup_layout(load_last=True):
         autopath = os.path.join(mantidconfigdir, "snspowderreduction.xml")
         # Load configuration
         reducer.open_file(autopath)
-    except IOError as e:
+    except OSError as e:
         print("[Error] Unable to load previously reduction setup from file %s.\nReason: %s." % (autopath, str(e)))
     else:
         print("[Info] Load earlier reduction setup from auto-saved %s." % (autopath))

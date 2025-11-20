@@ -13,7 +13,7 @@ See sanitize_generated_module docs for changes that are made.
 # system imports
 import argparse
 import re
-from typing import Sequence
+from collections.abc import Sequence
 import sys
 
 THROW_SPEC_RE = re.compile(r"throw\(.*?\)")

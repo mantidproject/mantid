@@ -5,7 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from pathlib import Path
-from typing import Dict, Tuple
 
 import numpy as np
 
@@ -29,8 +28,8 @@ class PowderCalculator:
             raise ValueError("Object of AbinsData was expected.")
 
         k_data: abins.KpointsData = abins_data.get_kpoints_data()
-        self._frequencies: Dict[str, np.ndarray] = {}
-        self._displacements: Dict[str, np.ndarray] = {}
+        self._frequencies: dict[str, np.ndarray] = {}
+        self._displacements: dict[str, np.ndarray] = {}
         self._temperature = temperature
 
         atoms_data = abins_data.get_atoms_data()
@@ -71,7 +70,7 @@ class PowderCalculator:
         )
         return powder
 
-    def _calculate_powder_k(self, *, k: str) -> Tuple[np.ndarray, np.ndarray]:
+    def _calculate_powder_k(self, *, k: str) -> tuple[np.ndarray, np.ndarray]:
         """
         :param k: k index
         """
@@ -130,7 +129,7 @@ class PowderCalculator:
             data = self.load_formatted_data()
             self._report_progress(str(data) + " has been loaded from the HDF file.")
 
-        except (IOError, ValueError) as err:
+        except (OSError, ValueError) as err:
             self._report_progress("Warning: " + str(err) + " Data has to be calculated.")
             data = self.calculate_data()
             self._report_progress(str(data) + " has been calculated.")
