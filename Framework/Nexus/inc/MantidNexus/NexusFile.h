@@ -62,31 +62,32 @@ public:
   ~FileID();
 };
 
-using Deleter = void (*const)(hid_t);
+using Deleter = int (*const)(hid_t);
 
 template <Deleter const deleter> class MANTID_NEXUS_DLL UniqueID {
 private:
   hid_t m_id;
   UniqueID &operator=(UniqueID<deleter> const &) = delete;
   UniqueID &operator=(UniqueID<deleter> const &&) = delete;
+  void closeId() const {
+    if (m_id >= 0) {
+      deleter(m_id);
+    }
+  }
 
 public:
   UniqueID(UniqueID<deleter> const &uid) = delete;
   UniqueID(UniqueID<deleter> &&uid) noexcept : m_id(uid.m_id) { uid.m_id = -1; };
   UniqueID &operator=(hid_t const id) {
     if (id != m_id) {
-      if (m_id >= 0) {
-        deleter(m_id);
-      }
+      closeId();
       m_id = id;
     }
     return *this;
   };
   UniqueID &operator=(UniqueID<deleter> &uid) {
     if (this != &uid) {
-      if (m_id >= 0) {
-        deleter(m_id);
-      }
+      closeId();
       m_id = uid.m_id;
       uid.m_id = -1;
     }
@@ -104,11 +105,7 @@ public:
   }
   UniqueID() : m_id(-1) {}
   UniqueID(hid_t const id) : m_id(id) {}
-  ~UniqueID() {
-    if (m_id >= 0) {
-      deleter(m_id);
-    }
-  }
+  ~UniqueID() { closeId(); }
 };
 
 /**
