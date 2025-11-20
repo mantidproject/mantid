@@ -32,12 +32,14 @@ def trace(self, message, *args, **kws):
 
 logging.Logger.trace = trace
 
-_config_path = Path(os.environ.get("adara_player_conf", "adara_player_conf.yml")).resolve()
+_source_path = Path(__file__).resolve().parent
+_config_path = Path(os.environ.get("adara_player_conf", _source_path / "adara_player_conf.yml")).resolve()
 if not _config_path.exists():
     print(f"Error during load of module '{__file__}' (as '{__name__}'):\n    config file '{_config_path}' not found on filesystem.")
     sys.exit(1)
 
 Config = {}
+_log_file_path = None
 with open(_config_path, "rt") as f:
     # Load the `Config` `dict`.
     Config = yaml.safe_load(f)
@@ -55,10 +57,10 @@ with open(_config_path, "rt") as f:
     _logger = logging.getLogger(__name__)
     _logger.setLevel(Config["logging"]["level"])
 
-    log_file_path = Config["logging"]["filename"]
-    if log_file_path and Path(log_file_path).parent.exists():
-        log_file_path.format(PID=os.getpid())
-        file_handler = logging.FileHandler(log_file_path)
+    _log_file_path = Config["logging"]["filename"]
+    if _log_file_path and Path(_log_file_path).parent.exists():
+        _log_file_path.format(PID=os.getpid())
+        file_handler = logging.FileHandler(_log_file_path)
         file_handler.setFormatter(formatter)
         _logger.addHandler(file_handler)
     else:
@@ -704,6 +706,10 @@ class Player:
     def record(self, output_path: Path, client: socket.socket):
         # Ensure target directory exists
         output_path.mkdir(parents=True, exist_ok=True)
+
+        # If the logger is attached to a file: make a symlink to it in the target directory.
+        if _log_file_path:
+            (output_path / "session.log").symlink_to(Path(_log_file_path))
 
         # Connect to ADARA packet server.
         try:

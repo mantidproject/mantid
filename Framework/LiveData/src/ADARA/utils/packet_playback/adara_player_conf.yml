@@ -40,7 +40,7 @@ logging:
 
   level: DEBUG # DEBUG: packet summary at send and receive
 
-  filename: /SNS/users/ux0/workspaces/mantid-PRs/tmp/SNAP_packets/sessions.{PID}.log
+  filename: /SNS/users/ux0/workspaces/mantid-PRs/tmp/SNAP_packets/session.{PID}.log
 
   # `Packet` summary format.
   packet_summary: "type: {type:#06x}: {timestamp}, size: {size:>7}, CRC: {CRC:#010x}"
