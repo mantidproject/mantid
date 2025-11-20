@@ -642,7 +642,7 @@ std::vector<std::string> FileFinderImpl::findRuns(const std::string &hintstr,
           previousPath = tempPath.makeParent().toString();
           res.emplace_back(path);
         } else {
-          throw Kernel::Exception::NotFoundError("Unable to find file:", run);
+          throw Kernel::Exception::NotFoundError("Unable to find file:", std::move(run));
         }
       }
     } else {

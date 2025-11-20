@@ -150,12 +150,12 @@ ValidationResult<LookupRow, std::unordered_set<int>> LookupRowValidator::operato
 
   // if we reach this point, no column is invalid, but there may be empty columns.
   // We just need to pass on the values (Even though they are nullopt) of each column
-  auto lookupRow =
-      LookupRow(m_thetaOrInvalid, m_titleMatcherOrInvalid, optionalTransmissionRuns.value(),
-                optionalTransmissionProcessingInstructions, optionalQRange.value(), optionalScaleFactor,
-                optionalProcessingInstructions, optionalBackgroundProcessingInstructions, optionalROIDetectorIDs);
+  auto lookupRow = LookupRow(m_thetaOrInvalid, m_titleMatcherOrInvalid, optionalTransmissionRuns.value(),
+                             std::move(optionalTransmissionProcessingInstructions), optionalQRange.value(),
+                             optionalScaleFactor, std::move(optionalProcessingInstructions),
+                             std::move(optionalBackgroundProcessingInstructions), std::move(optionalROIDetectorIDs));
 
-  return ValidationResult<LookupRow, std::unordered_set<int>>(lookupRow);
+  return ValidationResult<LookupRow, std::unordered_set<int>>(std::move(lookupRow));
 }
 
 ValidationResult<LookupRow, std::unordered_set<int>> validateLookupRow(CellText const &cells) {

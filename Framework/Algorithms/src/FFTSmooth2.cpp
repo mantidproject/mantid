@@ -163,7 +163,7 @@ std::map<std::string, std::string> FFTSmooth2::actuallyValidateInputs(API::Works
     err_msg += "Too many parameters passed";
   }
   if (!err_msg.empty()) {
-    issues[PropertyNames::PARAMS] = err_msg;
+    issues[PropertyNames::PARAMS] = std::move(err_msg);
   }
   return issues;
 }
