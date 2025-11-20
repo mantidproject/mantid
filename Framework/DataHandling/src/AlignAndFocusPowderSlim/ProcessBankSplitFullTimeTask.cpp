@@ -36,11 +36,23 @@ ProcessBankSplitFullTimeTask::ProcessBankSplitFullTimeTask(
     const std::set<detid_t> &masked, const size_t events_per_chunk, const size_t grainsize_event,
     const std::vector<PulseROI> pulse_indices, const std::map<DateAndTime, int> splitterMap,
     const bool correction_to_sample, std::shared_ptr<API::Progress> &progress)
-    : m_h5file(h5file), m_bankEntries(bankEntryNames), m_loader(is_time_filtered, pulse_indices),
-      m_workspaceIndices(workspaceIndices), m_wksps(wksps), m_calibration(calibration),
-      m_scale_at_sample(scale_at_sample), m_masked(masked), m_events_per_chunk(events_per_chunk),
-      m_splitterMap(splitterMap), m_grainsize_event(grainsize_event), m_correction_to_sample(correction_to_sample),
-      m_progress(progress) {}
+    : m_h5file(h5file), m_bankEntries(bankEntryNames),
+      m_loader(std::make_shared<NexusLoader>(is_time_filtered, pulse_indices)), m_workspaceIndices(workspaceIndices),
+      m_wksps(wksps), m_calibration(calibration), m_scale_at_sample(scale_at_sample), m_masked(masked),
+      m_events_per_chunk(events_per_chunk), m_splitterMap(splitterMap), m_grainsize_event(grainsize_event),
+      m_correction_to_sample(correction_to_sample), m_progress(progress) {}
+
+ProcessBankSplitFullTimeTask::ProcessBankSplitFullTimeTask(
+    std::vector<std::string> &bankEntryNames, H5::H5File &h5file, std::shared_ptr<NexusLoader> loader,
+    std::vector<int> &workspaceIndices, std::vector<API::MatrixWorkspace_sptr> &wksps,
+    const std::map<detid_t, double> &calibration, const std::map<detid_t, double> &scale_at_sample,
+    const std::set<detid_t> &masked, const size_t events_per_chunk, const size_t grainsize_event,
+    const std::map<DateAndTime, int> splitterMap, const bool correction_to_sample,
+    std::shared_ptr<API::Progress> &progress)
+    : m_h5file(h5file), m_bankEntries(bankEntryNames), m_loader(loader), m_workspaceIndices(workspaceIndices),
+      m_wksps(wksps), m_calibration(calibration), m_scale_at_sample(scale_at_sample), m_masked(masked),
+      m_events_per_chunk(events_per_chunk), m_splitterMap(splitterMap), m_grainsize_event(grainsize_event),
+      m_correction_to_sample(correction_to_sample), m_progress(progress) {}
 
 void ProcessBankSplitFullTimeTask::operator()(const tbb::blocked_range<size_t> &range) const {
   auto entry = m_h5file.openGroup("entry"); // type=NXentry
@@ -65,7 +77,7 @@ void ProcessBankSplitFullTimeTask::operator()(const tbb::blocked_range<size_t> &
     }
 
     std::unique_ptr<std::vector<uint64_t>> event_index = std::make_unique<std::vector<uint64_t>>();
-    auto eventRanges = m_loader.getEventIndexRanges(event_group, total_events, &event_index);
+    auto eventRanges = m_loader->getEventIndexRanges(event_group, total_events, &event_index);
 
     // Get all spectra for this bank.
     // Create temporary y arrays for each workspace.
@@ -145,7 +157,7 @@ void ProcessBankSplitFullTimeTask::operator()(const tbb::blocked_range<size_t> &
       tbb::parallel_invoke(
           [&] { // load detid
             // event_detid->clear();
-            m_loader.loadData(detID_SDS, event_detid, offsets, slabsizes);
+            m_loader->loadData(detID_SDS, event_detid, offsets, slabsizes);
             // immediately find min/max to allow for other things to read disk
             const auto [minval, maxval] = Mantid::Kernel::parallel_minmax(event_detid, m_grainsize_event);
             // only recreate calibration if it doesn't already have the useful information
@@ -158,7 +170,7 @@ void ProcessBankSplitFullTimeTask::operator()(const tbb::blocked_range<size_t> &
           },
           [&] { // load time-of-flight
             // event_time_of_flight->clear();
-            m_loader.loadData(tof_SDS, event_time_of_flight, offsets, slabsizes);
+            m_loader->loadData(tof_SDS, event_time_of_flight, offsets, slabsizes);
           });
 
       event_pulsetimes->resize(total_events_to_read);
@@ -256,7 +268,7 @@ void ProcessBankSplitFullTimeTask::operator()(const tbb::blocked_range<size_t> &
       std::copy(y_temps[i].cbegin(), y_temps[i].cend(), y_values.begin());
     });
 
-    g_log.debug() << bankName << " stop " << timer << std::endl;
+    g_log.debug() << bankName << " stop" << timer << std::endl;
     m_progress->report();
   }
 }

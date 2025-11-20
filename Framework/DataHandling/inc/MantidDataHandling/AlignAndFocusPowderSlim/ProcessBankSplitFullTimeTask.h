@@ -30,12 +30,21 @@ public:
                                const std::map<Mantid::Types::Core::DateAndTime, int> splitterMap,
                                const bool correction_to_sample, std::shared_ptr<API::Progress> &progress);
 
+  ProcessBankSplitFullTimeTask(std::vector<std::string> &bankEntryNames, H5::H5File &h5file,
+                               std::shared_ptr<NexusLoader> loader, std::vector<int> &workspaceIndices,
+                               std::vector<API::MatrixWorkspace_sptr> &wksps,
+                               const std::map<detid_t, double> &calibration,
+                               const std::map<detid_t, double> &scale_at_sample, const std::set<detid_t> &masked,
+                               const size_t events_per_chunk, const size_t grainsize_event,
+                               const std::map<Mantid::Types::Core::DateAndTime, int> splitterMap,
+                               const bool correction_to_sample, std::shared_ptr<API::Progress> &progress);
+
   void operator()(const tbb::blocked_range<size_t> &range) const;
 
 private:
   H5::H5File m_h5file;
   const std::vector<std::string> m_bankEntries;
-  mutable NexusLoader m_loader;
+  std::shared_ptr<NexusLoader> m_loader;
   std::vector<int> m_workspaceIndices;
   std::vector<API::MatrixWorkspace_sptr> m_wksps;
   const std::map<detid_t, double> m_calibration; // detid: 1/difc
