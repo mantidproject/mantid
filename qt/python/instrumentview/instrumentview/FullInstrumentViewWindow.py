@@ -206,10 +206,12 @@ class FullInstrumentViewWindow(QMainWindow):
         self._mask_list = MasksWorkspaceListWidget(self)
         self._mask_list.setSizeAdjustPolicy(QListWidget.AdjustToContents)
         self._mask_list.setSelectionMode(QAbstractItemView.NoSelection)
+        self._save_mask = QPushButton("Save to workspace")
         pre_list_layout.addWidget(self._add_cylinder)
         pre_list_layout.addWidget(self._cylinder_select)
         masking_layout.addLayout(pre_list_layout)
         masking_layout.addWidget(self._mask_list)
+        masking_layout.addWidget(self._save_mask)
 
         self.status_group_box = QGroupBox("Status")
         status_layout = QHBoxLayout(self.status_group_box)
@@ -371,6 +373,7 @@ class FullInstrumentViewWindow(QMainWindow):
         self._sum_spectra_checkbox.clicked.connect(self._presenter.on_sum_spectra_checkbox_clicked)
         self._peak_ws_list.itemChanged.connect(self._presenter.on_peaks_workspace_selected)
         self._mask_list.itemChanged.connect(self._presenter.on_mask_item_selected)
+        self._save_mask.clicked.connect(self._presenter.on_save_mask_to_workspace_clicked)
 
         self._add_connections_to_edits_and_slider(
             self._contour_range_min_edit,
@@ -523,6 +526,8 @@ class FullInstrumentViewWindow(QMainWindow):
         )
 
     def add_masked_mesh(self, mesh: PolyData) -> None:
+        if mesh.number_of_points == 0:
+            return
         # RGB for dark grey is (64, 64, 64), normalised is (0.25, 0.25, 0.25)
         self.main_plotter.add_mesh(mesh, color=(0.25, 0.25, 0.25), pickable=False, render_points_as_spheres=True, point_size=15)
 

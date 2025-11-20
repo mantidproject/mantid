@@ -11,7 +11,16 @@ from instrumentview.Peaks.Peak import Peak
 from instrumentview.Peaks.DetectorPeaks import DetectorPeaks
 
 from mantid.dataobjects import Workspace2D, PeaksWorkspace
-from mantid.simpleapi import CreateDetectorTable, ExtractSpectra, ConvertUnits, AnalysisDataService, SumSpectra, Rebin, ExtractMask
+from mantid.simpleapi import (
+    CreateDetectorTable,
+    ExtractSpectra,
+    ConvertUnits,
+    AnalysisDataService,
+    SumSpectra,
+    Rebin,
+    ExtractMask,
+    ExtractMaskToTable,
+)
 from itertools import groupby
 import numpy as np
 from enum import Enum
@@ -69,8 +78,8 @@ class FullInstrumentViewModel:
         # Array of strings 'yes', 'no' and 'n/a'
         self._is_monitor = detector_info_table.columnArray("Monitor")
         self._is_valid = self._is_monitor == "no"
-        mask_ws, mask_list = ExtractMask(self._workspace, StoreInADS=False)
-        self._is_masked_in_ws = mask_ws.extractY().flatten().astype(bool)
+        self._mask_ws, mask_list = ExtractMask(self._workspace, StoreInADS=False)
+        self._is_masked_in_ws = self._mask_ws.extractY().flatten().astype(bool)
         # For computing current mask, detateched from the permanent mask in ws
         self._is_masked = self._is_masked_in_ws
         self._monitor_positions = self._detector_positions_3d[self._is_monitor == "yes"]
@@ -374,3 +383,12 @@ class FullInstrumentViewModel:
             mask_total = np.logical_or.reduce([self._cached_masks_map[key] for key in mask_keys])
         self._is_masked = mask_total
         self._detector_is_picked[~self.is_pickable] = False
+
+    def save_mask_workspace_to_ads(self) -> None:
+        name_exported_ws = f"instrument_view_mask_{self._workspace.name()}"
+        # TODO: Avoid changing mask_ws in the future
+        for i, v in enumerate(self._is_masked):
+            self._mask_ws.dataY(i)[:] = v
+
+        xmin, xmax = self._integration_limits
+        ExtractMaskToTable(self._mask_ws, Xmin=xmin, Xmax=xmax, OutputWorkspace=name_exported_ws)

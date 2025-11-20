@@ -170,6 +170,9 @@ class FullInstrumentViewPresenter:
         self._model.apply_detector_masks(self._view.selected_masks())
         self.update_plotter()
 
+    def on_save_mask_to_workspace_clicked(self) -> None:
+        self._model.save_mask_workspace_to_ads()
+
     def _update_line_plot_ws_and_draw(self, unit: str) -> None:
         self._model.extract_spectra_for_line_plot(unit, self._view.sum_spectra_selected())
         self._view.show_plot_for_detectors(self._model.line_plot_workspace)
