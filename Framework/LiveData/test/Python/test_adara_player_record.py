@@ -10,7 +10,7 @@ from pathlib import Path
 from unittest.mock import patch, MagicMock, mock_open
 import unittest
 
-from adara_player import Player, Packet
+from packet_player import Player, Packet
 
 
 class TimeoutException(Exception):
@@ -30,14 +30,13 @@ class Test_Player_record(unittest.TestCase):
         """Ensures connection to packet source and existence/creation of target output directory."""
         with (
             patch(
-                "adara_player.Config",
+                "packet_player.Config",
                 {
                     "server": {"address": "/tmp/sock-test", "socket_timeout": 1.0, "buffer_MB": 64},
                     "source": {"address": "127.0.0.1:31415"},
                     "playback": {"rate": "normal", "ignore_packets": [], "handshake": "none", "handshake_timeout": 10.0},
                 },
             ),
-            patch("adara_player.Player._get_server_address", return_value="/tmp/sock-test"),
         ):
             player = Player()
 
@@ -46,12 +45,8 @@ class Test_Player_record(unittest.TestCase):
                 output_path = Path(tmpdir) / "output"
 
                 # Mock sockets
-                mock_server_socket = MagicMock(spec=socket.socket)
                 mock_client_socket = MagicMock(spec=socket.socket)
                 mock_source_socket = MagicMock(spec=socket.socket)
-
-                # Configure accept to return client socket once then timeout
-                mock_server_socket.accept.return_value = (mock_client_socket, None)
 
                 # Use `select` mock `side_effect` to additionally control the
                 #   `_running` flag.
@@ -66,11 +61,10 @@ class Test_Player_record(unittest.TestCase):
 
                 try:
                     with (
-                        patch.object(Player, "_create_server_socket", return_value=mock_server_socket),
                         patch("socket.socket", return_value=mock_source_socket),
                         patch("select.select", side_effect=stop_after_connect_select),
                     ):
-                        player.record(output_path)
+                        player.record(output_path, mock_client_socket)
 
                         # Verify directory was created
                         self.assertTrue(output_path.exists())
@@ -87,33 +81,34 @@ class Test_Player_record(unittest.TestCase):
         """Verifies error if no output directory is provided."""
         with (
             patch(
-                "adara_player.Config",
+                "packet_player.Config",
                 {
                     "server": {"address": "/tmp/sock-test", "socket_timeout": 1.0, "buffer_MB": 64},
                     "source": {"address": "127.0.0.1:31415"},
                     "playback": {"rate": "normal", "ignore_packets": [], "handshake": "none", "handshake_timeout": 10.0},
                 },
             ),
-            patch("adara_player.Player._get_server_address", return_value="/tmp/sock-test"),
         ):
             player = Player()
 
+            # Mock sockets
+            mock_client_socket = MagicMock(spec=socket.socket)
+
             # Test with None - should raise TypeError or AttributeError
             with self.assertRaises(AttributeError):
-                player.record(None)
+                player.record(None, mock_client_socket)
 
     def test_file_and_socket_forwarding(self):
         """Tests packet forwarding to file and socket."""
         with (
             patch(
-                "adara_player.Config",
+                "packet_player.Config",
                 {
                     "server": {"address": "/tmp/sock-test", "socket_timeout": 1.0, "buffer_MB": 64},
                     "source": {"address": "127.0.0.1:31415"},
                     "playback": {"rate": "normal", "ignore_packets": [], "handshake": "none", "handshake_timeout": 10.0},
                 },
             ),
-            patch("adara_player.Player._get_server_address", return_value="/tmp/sock-test"),
         ):
             player = Player()
 
@@ -130,11 +125,8 @@ class Test_Player_record(unittest.TestCase):
                 output_path = Path(tmpdir) / "output"
 
                 # Mock sockets
-                mock_server_socket = MagicMock(spec=socket.socket)
                 mock_client_socket = MagicMock(spec=socket.socket)
                 mock_source_socket = MagicMock(spec=socket.socket)
-
-                mock_server_socket.accept.return_value = (mock_client_socket, None)
 
                 call_count = [0]
 
@@ -157,7 +149,6 @@ class Test_Player_record(unittest.TestCase):
 
                 try:
                     with (
-                        patch.object(Player, "_create_server_socket", return_value=mock_server_socket),
                         patch("socket.socket", return_value=mock_source_socket),
                         patch("select.select", side_effect=controlled_select),
                         patch.object(Packet, "from_socket", return_value=mock_packet),
@@ -167,7 +158,7 @@ class Test_Player_record(unittest.TestCase):
                     ):
                         mock_client_send.return_value = mock_packet.size
 
-                        player.record(output_path)
+                        player.record(output_path, mock_client_socket)
 
                         # Verify packet was forwarded to client socket
                         mock_client_send.assert_called_once_with(mock_packet.header + mock_packet.payload)
@@ -183,14 +174,13 @@ class Test_Player_record(unittest.TestCase):
         """Checks handling of data in both directions between client and server."""
         with (
             patch(
-                "adara_player.Config",
+                "packet_player.Config",
                 {
                     "server": {"address": "/tmp/sock-test", "socket_timeout": 1.0, "buffer_MB": 64},
                     "source": {"address": "127.0.0.1:31415"},
                     "playback": {"rate": "normal", "ignore_packets": [], "handshake": "none", "handshake_timeout": 10.0},
                 },
             ),
-            patch("adara_player.Player._get_server_address", return_value="/tmp/sock-test"),
         ):
             player = Player()
 
@@ -215,11 +205,8 @@ class Test_Player_record(unittest.TestCase):
                 output_path = Path(tmpdir) / "output"
 
                 # Mock sockets
-                mock_server_socket = MagicMock(spec=socket.socket)
                 mock_client_socket = MagicMock(spec=socket.socket)
                 mock_source_socket = MagicMock(spec=socket.socket)
-
-                mock_server_socket.accept.return_value = (mock_client_socket, None)
 
                 # Use counter-based function for multiple iterations
                 call_count = [0]
@@ -248,7 +235,6 @@ class Test_Player_record(unittest.TestCase):
 
                 try:
                     with (
-                        patch.object(Player, "_create_server_socket", return_value=mock_server_socket),
                         patch("socket.socket", return_value=mock_source_socket),
                         patch("select.select", side_effect=controlled_bidirectional_select),
                         patch.object(Packet, "from_socket", side_effect=packet_from_socket_calls),
@@ -258,7 +244,9 @@ class Test_Player_record(unittest.TestCase):
                         patch("builtins.open", mock_open()),
                         patch.object(Packet, "to_file"),
                     ):
-                        player.record(output_path)
+                        mock_source_send.return_value = client_packet.size
+                        mock_client_send.return_value = source_packet.size
+                        player.record(output_path, mock_client_socket)
 
                         # Verify client->server forwarding
                         mock_source_send.assert_called_once_with(client_packet.header + client_packet.payload)
@@ -274,14 +262,13 @@ class Test_Player_record(unittest.TestCase):
         """Confirms resilience against timeouts and errors during socket operations."""
         with (
             patch(
-                "adara_player.Config",
+                "packet_player.Config",
                 {
                     "server": {"address": "/tmp/sock-test", "socket_timeout": 1.0, "buffer_MB": 64},
                     "source": {"address": "127.0.0.1:31415"},
                     "playback": {"rate": "normal", "ignore_packets": [], "handshake": "none", "handshake_timeout": 10.0},
                 },
             ),
-            patch("adara_player.Player._get_server_address", return_value="/tmp/sock-test"),
         ):
             player = Player()
 
@@ -289,11 +276,8 @@ class Test_Player_record(unittest.TestCase):
                 output_path = Path(tmpdir) / "output"
 
                 # Mock sockets
-                mock_server_socket = MagicMock(spec=socket.socket)
                 mock_client_socket = MagicMock(spec=socket.socket)
                 mock_source_socket = MagicMock(spec=socket.socket)
-
-                mock_server_socket.accept.return_value = (mock_client_socket, None)
 
                 call_count = [0]
 
@@ -312,13 +296,12 @@ class Test_Player_record(unittest.TestCase):
 
                 try:
                     with (
-                        patch.object(Player, "_create_server_socket", return_value=mock_server_socket),
                         patch("socket.socket", return_value=mock_source_socket),
                         patch("select.select", side_effect=select_with_data),
                         patch.object(Packet, "from_socket", side_effect=socket.timeout("Read timeout")),
-                        patch("adara_player._logger") as mock_logger,
+                        patch("packet_player._logger") as mock_logger,
                     ):
-                        player.record(output_path)
+                        player.record(output_path, mock_client_socket)
 
                         # Verify error was logged
                         error_logged = any(
@@ -335,14 +318,13 @@ class Test_Player_record(unittest.TestCase):
         """Tests that control packets are forwarded appropriately."""
         with (
             patch(
-                "adara_player.Config",
+                "packet_player.Config",
                 {
                     "server": {"address": "/tmp/sock-test", "socket_timeout": 1.0, "buffer_MB": 64},
                     "source": {"address": "127.0.0.1:31415"},
                     "playback": {"rate": "normal", "ignore_packets": [], "handshake": "none", "handshake_timeout": 10.0},
                 },
             ),
-            patch("adara_player.Player._get_server_address", return_value="/tmp/sock-test"),
         ):
             player = Player()
 
@@ -359,11 +341,8 @@ class Test_Player_record(unittest.TestCase):
                 output_path = Path(tmpdir) / "output"
 
                 # Mock sockets
-                mock_server_socket = MagicMock(spec=socket.socket)
                 mock_client_socket = MagicMock(spec=socket.socket)
                 mock_source_socket = MagicMock(spec=socket.socket)
-
-                mock_server_socket.accept.return_value = (mock_client_socket, None)
 
                 call_count = [0]
 
@@ -385,7 +364,6 @@ class Test_Player_record(unittest.TestCase):
 
                 try:
                     with (
-                        patch.object(Player, "_create_server_socket", return_value=mock_server_socket),
                         patch("socket.socket", return_value=mock_source_socket),
                         patch("select.select", side_effect=controlled_control_select),
                         patch.object(Packet, "from_socket", return_value=control_packet),
@@ -394,7 +372,7 @@ class Test_Player_record(unittest.TestCase):
                     ):
                         mock_source_send.return_value = control_packet.size
 
-                        player.record(output_path)
+                        player.record(output_path, mock_client_socket)
 
                         # Verify control packet was forwarded to source (not saved to file)
                         mock_source_send.assert_called_once_with(control_packet.header + control_packet.payload)
@@ -407,14 +385,13 @@ class Test_Player_record(unittest.TestCase):
         """Ensures output files are named based on packet metadata as expected."""
         with (
             patch(
-                "adara_player.Config",
+                "packet_player.Config",
                 {
                     "server": {"address": "/tmp/sock-test", "socket_timeout": 1.0, "buffer_MB": 64},
                     "source": {"address": "127.0.0.1:31415"},
                     "playback": {"rate": "normal", "ignore_packets": [], "handshake": "none", "handshake_timeout": 10.0},
                 },
             ),
-            patch("adara_player.Player._get_server_address", return_value="/tmp/sock-test"),
         ):
             player = Player()
 
@@ -431,11 +408,8 @@ class Test_Player_record(unittest.TestCase):
                 output_path = Path(tmpdir) / "output"
 
                 # Mock sockets
-                mock_server_socket = MagicMock(spec=socket.socket)
                 mock_client_socket = MagicMock(spec=socket.socket)
                 mock_source_socket = MagicMock(spec=socket.socket)
-
-                mock_server_socket.accept.return_value = (mock_client_socket, None)
 
                 call_count = [0]
 
@@ -454,16 +428,16 @@ class Test_Player_record(unittest.TestCase):
 
                 try:
                     with (
-                        patch.object(Player, "_create_server_socket", return_value=mock_server_socket),
                         patch("socket.socket", return_value=mock_source_socket),
                         patch("select.select", side_effect=controlled_naming_select),
                         patch.object(Packet, "from_socket", return_value=mock_packet),
                         patch.object(player, "_impose_transfer_limit"),
-                        patch.object(mock_client_socket, "send"),
+                        patch.object(mock_client_socket, "send") as mock_client_send,
                         patch("builtins.open", mock_open()) as mock_file,
                         patch.object(Packet, "to_file"),
                     ):
-                        player.record(output_path)
+                        mock_client_send.return_value = mock_packet.size
+                        player.record(output_path, mock_client_socket)
 
                         # Verify file was opened with expected name
                         expected_filename = output_path / f"{mock_packet.packet_type:#04x}-{mock_packet.timestamp}-000001.adara"
@@ -482,14 +456,13 @@ class Test_Player_record(unittest.TestCase):
         """Verifies all sockets are closed and cleaned up after recording finishes."""
         with (
             patch(
-                "adara_player.Config",
+                "packet_player.Config",
                 {
                     "server": {"address": "/tmp/sock-test", "socket_timeout": 1.0, "buffer_MB": 64},
                     "source": {"address": "127.0.0.1:31415"},
                     "playback": {"rate": "normal", "ignore_packets": [], "handshake": "none", "handshake_timeout": 10.0},
                 },
             ),
-            patch("adara_player.Player._get_server_address", return_value="/tmp/sock-test"),
         ):
             player = Player()
 
@@ -497,11 +470,8 @@ class Test_Player_record(unittest.TestCase):
                 output_path = Path(tmpdir) / "output"
 
                 # Mock sockets
-                mock_server_socket = MagicMock(spec=socket.socket)
                 mock_client_socket = MagicMock(spec=socket.socket)
                 mock_source_socket = MagicMock(spec=socket.socket)
-
-                mock_server_socket.accept.return_value = (mock_client_socket, None)
 
                 def stop_running_and_return_empty_select(*args, **kwargs):
                     """Stop the loop by setting _running to False, then return empty select result."""
@@ -514,15 +484,13 @@ class Test_Player_record(unittest.TestCase):
 
                 try:
                     with (
-                        patch.object(Player, "_create_server_socket", return_value=mock_server_socket),
                         patch("socket.socket", return_value=mock_source_socket),
                         # Use function instead of list to avoid StopIteration issue
                         patch("select.select", side_effect=stop_running_and_return_empty_select),
                     ):
-                        player.record(output_path)
+                        player.record(output_path, mock_client_socket)
 
                         # Verify all sockets were closed
-                        mock_server_socket.close.assert_called()
                         mock_client_socket.close.assert_called()
                         mock_source_socket.close.assert_called()
 

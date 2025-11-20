@@ -43,20 +43,21 @@ with open(_config_path, "rt") as f:
     Config = yaml.safe_load(f)
 
     # Initialize logging:
-    
+
     ##################################################################################
     ## WARNING: in general, no console logging should originate from these classes. ##
     ##   Each client session runs in its own process, and at present we do not      ##
     ##   implement multi-process logging.                                           ##
     ##################################################################################
-    
-    log_file_path = Config["logging"]["filename"].format(PID=os.getpid())
+
     formatter = logging.Formatter(Config["logging"]["format"])
 
     _logger = logging.getLogger(__name__)
     _logger.setLevel(Config["logging"]["level"])
 
-    if log_file_path:
+    log_file_path = Config["logging"]["filename"]
+    if log_file_path and Path(log_file_path).parent.exists():
+        log_file_path.format(PID=os.getpid())
         file_handler = logging.FileHandler(log_file_path)
         file_handler.setFormatter(formatter)
         _logger.addHandler(file_handler)
@@ -392,7 +393,7 @@ class Player:
     PLAYBACK_HANDSHAKE = Config["playback"]["handshake"]
     TRANSFER_LIMIT_MB = Config["record"]["transfer_limit"]
     PACKET_ORDERING_SCHEME = Config["playback"]["packet_ordering"]
-    
+
     # "generic" glob (for use in multi-session playback): all packets in a directory
     PACKET_GLOB = Config["playback"]["packet_glob"]
 
@@ -415,15 +416,6 @@ class Player:
         self._transferred_bytes = 0  # total transferred bytes: for current `record` session
         self._sequence_number = 0  # packet file sequence number: for current `record` session
         self._session_number = 0  # `record` session number
-
-        # packet-source socket:
-        self._source = None
-
-        # listener socket:
-        self._server = None
-
-        # client (i.e. connection) socket:
-        self._client = None
 
     @classmethod
     def _get_rate_filter(cls, rate: str) -> Callable[[Packet, np.datetime64], bool]:
@@ -574,7 +566,7 @@ class Player:
             with open(p, "rb", buffering=0 if header_only else -1) as f:
                 yield from cls.iter_file(f, header_only=header_only, source=str(p))
 
-    def stream_packets(self, dest: socket.socket, path: Path, patterns: str | list[str], dry_run=False):
+    def stream_packets(self, dest: socket.socket, path: Path, patterns: list[str], dry_run=False):
         MB = 1024 * 1024
         buffer_bytes = self._buffer_MB * MB
         packet_buffer = collections.deque()
@@ -673,7 +665,7 @@ class Player:
 
         _logger.info("Finished streaming all packets")
 
-    def play(self, client: socket.socket, path: Path, patterns: str | list[str], dry_run=False):
+    def play(self, client: socket.socket, path: Path, patterns: list[str], dry_run=False):
         try:
             self._running = True
 
@@ -692,7 +684,7 @@ class Player:
                     client.settimeout(self.HANDSHAKE_TIMEOUT)
                     client.setblocking(True)
                     try:
-                        client_hello = ClientHelloPacket.from_socket(self._client)
+                        client_hello = ClientHelloPacket.from_socket(client)
                         self._start_time = client_hello.start_time
                         _logger.info("Received 'CLIENT_HELLO_PACKET'. Starting stream...")
                     except ValueError as e:
@@ -707,14 +699,16 @@ class Player:
         finally:
             _logger.info("Disconnecting from server.")
             self._running = False
-            self._cleanup(sockets=[client])
+            self.cleanup(sockets=[client])
 
-    def record(self, *, output_path: Path, client: socket.socket):
+    def record(self, output_path: Path, client: socket.socket):
         # Ensure target directory exists
         output_path.mkdir(parents=True, exist_ok=True)
 
         # Connect to ADARA packet server.
         try:
+            self._running = True
+
             _logger.info(f"Connecting to ADARA packet server at {self._source_address}.")
             source = None
             if SocketAddress.isUDSSocket(self._source_address):
@@ -820,8 +814,10 @@ class Player:
         except Exception as e:
             _logger.error(f"Error in proxy loop: {e}.")
         finally:
+            _logger.info("Disconnecting from server.")
+            self._running = False
             self.cleanup(sockets=[client, source])
-    
+
     @classmethod
     def _packet_file_path(cls, output_path: Path, packet: Packet, sequence_number: int) -> Path | None:
         return output_path / cls._packet_filename(packet, sequence_number)

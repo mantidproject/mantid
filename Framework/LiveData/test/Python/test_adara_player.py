@@ -14,7 +14,7 @@ import struct
 import tempfile
 import time
 
-from adara_player import Player, Packet, EPICS_EPOCH_OFFSET
+from packet_player import Player, Packet, EPICS_EPOCH_OFFSET
 
 import unittest
 from unittest.mock import Mock, patch, MagicMock
@@ -27,43 +27,37 @@ class Test_Player(unittest.TestCase):
         """Tests initialization with default configuration values and with explicit overrides."""
         # Test with defaults (using Config values)
         with patch(
-            "adara_player.Config",
+            "packet_player.Config",
             {
                 "server": {"address": "/tmp/sock-test", "socket_timeout": 1.0, "buffer_MB": 64},
                 "source": {"address": "127.0.0.1:31415"},
                 "playback": {"rate": "normal", "ignore_packets": []},
             },
         ):
-            with patch("adara_player.Player._get_server_address", return_value="/tmp/sock-test"):
+            with patch("packet_player.Player.get_server_address", return_value="/tmp/sock-test"):
                 player = Player()
 
                 # Check defaults
-                self.assertIsNotNone(player._server_address)
                 self.assertIsNotNone(player._source_address)
                 self.assertIsNotNone(player._rate_filter)
                 self.assertIsNotNone(player._packet_filter)
                 self.assertEqual(player._buffer_MB, 64)
                 self.assertFalse(player._running)
-                self.assertIsNone(player._source)
-                self.assertIsNone(player._server)
-                self.assertIsNone(player._client)
 
         # Test with explicit overrides
-        custom_server = "127.0.0.1:9999"
         custom_source = "192.168.1.1:8888"
 
         with patch(
-            "adara_player.Config",
+            "packet_player.Config",
             {
                 "server": {"address": "/tmp/sock-test", "socket_timeout": 1.0, "buffer_MB": 64},
                 "source": {"address": "127.0.0.1:31415"},
                 "playback": {"rate": "normal", "ignore_packets": []},
             },
         ):
-            player = Player(server_address=custom_server, source_address=custom_source)
+            player = Player(source_address=custom_source)
 
             # Check overrides
-            self.assertEqual(player._server_address, ("127.0.0.1", 9999))
             self.assertEqual(player._source_address, ("192.168.1.1", 8888))
 
     def test_getratefilter_normal_unlimited(self):
@@ -145,61 +139,21 @@ class Test_Player(unittest.TestCase):
 
     def test_getserveraddress_config_env(self):
         """Tests config/environment variable substitutions in address formatting."""
-        with patch("adara_player.Config", {"server": {"address": "{XDG_RUNTIME_DIR}/sock-{name}", "name": "default_player"}}):
+        with patch("packet_player.Config", {"server": {"address": "{XDG_RUNTIME_DIR}/sock-{name}", "name": "default_player"}}):
             # Test with environment variables set
             with patch.dict(os.environ, {"XDG_RUNTIME_DIR": "/run/user/1000", "adara_player_name": "custom_player"}):
-                address = Player._get_server_address()
+                address = Player.get_server_address()
                 self.assertEqual(address, "/run/user/1000/sock-custom_player")
 
             # Test with only XDG_RUNTIME_DIR (use default name from Config)
             with patch.dict(os.environ, {"XDG_RUNTIME_DIR": "/run/user/1000"}, clear=True):
-                address = Player._get_server_address()
+                address = Player.get_server_address()
                 self.assertEqual(address, "/run/user/1000/sock-default_player")
 
             # Test fallback to TMPDIR on macOS
             with patch.dict(os.environ, {"TMPDIR": "/tmp"}, clear=True):
-                address = Player._get_server_address()
+                address = Player.get_server_address()
                 self.assertEqual(address, "/tmp/sock-default_player")
-
-    def test_create_server_socket_tcp_uds(self):
-        """Ensures correct creation and binding of TCP and Unix domain sockets."""
-        # Test TCP socket creation
-        tcp_address = ("127.0.0.1", 12345)
-        tcp_socket = Player._create_server_socket(tcp_address)
-
-        try:
-            self.assertIsNotNone(tcp_socket)
-            self.assertEqual(tcp_socket.family, socket.AF_INET)
-            self.assertEqual(tcp_socket.type, socket.SOCK_STREAM)
-
-            # Check that socket is bound and listening
-            socket_address = tcp_socket.getsockname()
-            self.assertEqual(socket_address[0], "127.0.0.1")
-            self.assertEqual(socket_address[1], 12345)
-        finally:
-            tcp_socket.close()
-
-        with tempfile.TemporaryDirectory() as tmpdir:
-            # Test UDS socket creation
-            uds_path = Path(tmpdir) / "test_adara_socket"
-
-            # Clean up if exists
-            if uds_path.exists():
-                uds_path.unlink()
-
-            uds_socket = Player._create_server_socket(uds_path)
-
-            try:
-                self.assertIsNotNone(uds_socket)
-                self.assertEqual(uds_socket.family, socket.AF_UNIX)
-                self.assertEqual(uds_socket.type, socket.SOCK_STREAM)
-
-                # Check that UDS file was created
-                self.assertTrue(uds_path.exists())
-            finally:
-                uds_socket.close()
-                if uds_path.exists():
-                    uds_path.unlink()
 
     def test_iter_file_single_file(self):
         """Validates packet iteration from a single file stream (including edge cases)."""
@@ -456,24 +410,18 @@ class Test_Player(unittest.TestCase):
             test_socket_path = Path(tmpdir) / "test_adara_socket"
 
             with patch(
-                "adara_player.Config",
+                "packet_player.Config",
                 {
                     "server": {"address": "/tmp/sock-test", "socket_timeout": 1.0, "buffer_MB": 64},
                     "source": {"address": "127.0.0.1:31415"},
                     "playback": {"rate": "normal", "ignore_packets": []},
                 },
             ):
-                with patch("adara_player.Player._get_server_address", return_value=str(test_socket_path)):
-                    player = Player()
+                player = Player()
 
             # Create mock sockets
             mock_source = MagicMock(spec=socket.socket)
             mock_client = MagicMock(spec=socket.socket)
-            mock_server = MagicMock(spec=socket.socket)
-
-            player._source = mock_source
-            player._client = mock_client
-            player._server = mock_server
 
             # Create a fake socket file
             test_socket_path.touch()
@@ -481,17 +429,11 @@ class Test_Player(unittest.TestCase):
 
             try:
                 # Call cleanup
-                player._cleanup(close_server=True)
+                player.cleanup(sockets=[mock_source, mock_client], addresses=[test_socket_path])
 
                 # Verify all sockets were closed
                 mock_source.close.assert_called_once()
                 mock_client.close.assert_called_once()
-                mock_server.close.assert_called_once()
-
-                # Verify socket references are None
-                self.assertIsNone(player._source)
-                self.assertIsNone(player._client)
-                self.assertIsNone(player._server)
 
                 # Verify UDS file was removed
                 self.assertFalse(test_socket_path.exists())
@@ -500,55 +442,17 @@ class Test_Player(unittest.TestCase):
                 if test_socket_path.exists():
                     test_socket_path.unlink()
 
-        with tempfile.TemporaryDirectory() as tmpdir:
-            test_socket_path = Path(tmpdir) / "test_adara_socket"
-
-            # Test cleanup with close_server=False
-            with patch(
-                "adara_player.Config",
-                {
-                    "server": {"address": "/tmp/test-sock", "socket_timeout": 1.0, "buffer_MB": 64},
-                    "source": {"address": "127.0.0.1:31415"},
-                    "playback": {"rate": "normal", "ignore_packets": []},
-                },
-            ):
-                with patch("adara_player.Player._get_server_address", return_value=str(test_socket_path)):
-                    player = Player()
-
-            mock_server2 = MagicMock(spec=socket.socket)
-            player._server = mock_server2
-
-            # Create a fake socket file
-            test_socket_path.touch()
-            self.assertTrue(test_socket_path.exists())
-
-            try:
-                # Call cleanup
-                player._cleanup(close_server=False)
-
-                # Server should not be closed
-                mock_server2.close.assert_not_called()
-
-                # Server path should still exist
-                self.assertTrue(test_socket_path.exists())
-            finally:
-                # Cleanup
-                if test_socket_path.exists():
-                    test_socket_path.unlink()
-
     def test_signalhandler_sets_running_false(self):
         """Tests the handler response: sets flag and prepares for shutdown."""
         with patch(
-            "adara_player.Config",
+            "packet_player.Config",
             {
                 "server": {"address": "/tmp/sock-test", "socket_timeout": 1.0, "buffer_MB": 64},
                 "source": {"address": "127.0.0.1:31415"},
                 "playback": {"rate": "normal", "ignore_packets": []},
             },
         ):
-            # `player._server` should not be created during this test, so we don't care what its path is!
-            with patch("adara_player.Player._get_server_address", return_value="/tmp/sock-test"):
-                player = Player()
+            player = Player()
 
         # Set running to True
         player._running = True

@@ -2,16 +2,14 @@ import multiprocessing
 import signal
 
 from packet_player import Player, SocketAddress
-from session_server import console_log, SessionServer, SessionTCPServer, SessionUDSServer
+from session_server import console_logger, SessionServer, SessionTCPServer, SessionUDSServer
 
 
 if __name__ == "__main__":
     args = SessionServer.parse_args()
-    server_address = SocketAddress.parse(
-        args.server_address if args.server_address else Player.get_server_address()
-    )
+    server_address = SocketAddress.parse(args.server_address if args.server_address else Player.get_server_address())
     manager = multiprocessing.Manager()
-    
+
     if SocketAddress.isUDSSocket(server_address):
         with SessionUDSServer(server_address, commandline_args=args, manager=manager) as server:
             # Set up signal handlers

@@ -3,7 +3,7 @@ Test suite for UnixGlob and SocketAddress classes from adara_player module.
 """
 
 from pathlib import Path
-from adara_player import UnixGlob, SocketAddress
+from packet_player import UnixGlob, SocketAddress
 
 import unittest
 

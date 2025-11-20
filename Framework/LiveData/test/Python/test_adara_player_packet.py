@@ -8,7 +8,7 @@ import socket
 import struct
 from zlib import crc32
 
-from adara_player import Packet, ClientHelloPacket, EPICS_EPOCH_OFFSET
+from packet_player import Packet, ClientHelloPacket, EPICS_EPOCH_OFFSET
 
 import unittest
 from unittest.mock import Mock

@@ -1,6 +1,7 @@
+from packet_player import Player, Packet
+
 import unittest
 from unittest.mock import patch, MagicMock
-from adara_player import Player, Packet
 
 
 class TestPlayerLimits(unittest.TestCase):
@@ -13,13 +14,13 @@ class TestPlayerLimits(unittest.TestCase):
         dummy_packet = MagicMock(spec=Packet)
         dummy_packet.size = 10 * 1024**2  # 10 MB
 
-        with patch("adara_player.Player._get_server_address", return_value="/tmp/sock-test"):
+        with patch("packet_player.Player.get_server_address", return_value="/tmp/sock-test"):
             player = Player()
             player.TRANSFER_LIMIT_MB = 1  # set limit to 1 MB for test
             player._running = True
             player._transferred_bytes = 0
 
-            with patch("adara_player._logger") as logger_mock:
+            with patch("packet_player._logger") as logger_mock:
                 player._impose_transfer_limit(dummy_packet)
                 self.assertFalse(player._running)  # should stop
                 self.assertTrue(logger_mock.error.called)
@@ -33,13 +34,13 @@ class TestPlayerLimits(unittest.TestCase):
         dummy_packet = MagicMock(spec=Packet)
         dummy_packet.size = 512 * 1024  # 0.5 MB
 
-        with patch("adara_player.Player._get_server_address", return_value="/tmp/sock-test"):
+        with patch("packet_player.Player.get_server_address", return_value="/tmp/sock-test"):
             player = Player()
             player.TRANSFER_LIMIT_MB = 1  # set limit to 1 MB for test
             player._running = True
             player._transferred_bytes = 0
 
-            with patch("adara_player._logger") as logger_mock:
+            with patch("packet_player._logger") as logger_mock:
                 player._impose_transfer_limit(dummy_packet)
                 self.assertTrue(player._running)  # should keep running
                 self.assertFalse(logger_mock.error.called)

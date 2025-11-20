@@ -1,17 +1,20 @@
+import argparse
 import logging
+import multiprocessing
 import os
+from pathlib import Path
 import socketserver
 import signal
 import threading
 
-from packet_player import Player, SocketAddress, UnixGlob
+from packet_player import Player, UnixGlob
 
 ##################################################################################################
 ## WARNING: if at all possible `Config` should be used only from the `packet_player.py` module. ##
 ##################################################################################################
 
 ## Which explains why this logging initialization is hard coded! ##
-formatter = logging.Formatter('%(asctime)s: %(levelname)s: %(message)s')
+formatter = logging.Formatter("%(asctime)s: %(levelname)s: %(message)s")
 
 console_logger = logging.getLogger(__name__ + "_console")
 console_logger.setLevel("DEBUG")
@@ -25,27 +28,27 @@ console_logger.addHandler(console_handler)
 
 # `Player.record(<single-session path>, <client socket>)`
 
+
 class SessionServer:
     # Mixin class to control commandline argument and session-specific handling.
     def __init__(
-        self, *,
+        self,
+        *,
         # kwargs only:
         args: argparse.Namespace,
-        manager: multiprocessing.Manager
+        manager: multiprocessing.Manager,
     ):
         super().__init__()
-        
+
         # Validate commandline args
         self._record = args.record
-        self._source_address = args.source_address    
+        self._source_address = args.source_address
         if self._record and self._source_address:
             console_logger.debug(f"source: '{self._source_address}'")
         self._dry_run = args.dry_run
 
         # Parse Unix-style glob to "internal" format: (<base-directory path>, list[<glob expr>]).
-        base_path, patterns = UnixGlob.parse(
-            args.glob
-        )
+        base_path, patterns = UnixGlob.parse(args.glob)
         self._glob = base_path, patterns
 
         if self._record:
@@ -58,7 +61,7 @@ class SessionServer:
 
         # Initialize the shared IPC-value for the current session number:
         #   each session corresponds to a client connection to the server
-        self._session_number = manager.Value('i', 1)
+        self._session_number = manager.Value("i", 1)
 
     @staticmethod
     def parse_args() -> argparse.Namespace:
@@ -72,30 +75,30 @@ class SessionServer:
         parser.add_argument("-s", "--source_address", type=str, help="Specify packet source address: used for record")
         parser.add_argument("-a", "--server_address", type=str, help="Specify server address")
         parser.add_argument("-d", "--dry_run", action="store_true", help="Dry run: used for play mode")
-    
+
         # Default config-file location is overridden using the environment, NOT here:
         # example override: `adara_player_conf=<new config-file location> adara_player <options> <glob>`
 
         parser.add_argument("glob", help="Standard Unix glob spec (in single quotes), or an output-directory path (in multi-session mode)")
         args = parser.parse_args()
         return args
-         
+
     @property
     def record(self) -> bool:
         return self._record
-         
+
     @property
     def source_address(self) -> Path | tuple[str, int]:
         return self._source_address
-       
+
     @property
     def dry_run(self) -> bool:
         return self._dry_run
-        
+
     @property
-    def glob(self) -> Path, list[str]:
+    def glob(self) -> Path | list[str]:
         return self._glob
-        
+
     @property
     def base_path(self) -> Path:
         return self._glob[0]
@@ -108,18 +111,18 @@ class SessionServer:
     @property
     def session_number(self) -> int:
         return self._session_number.value
-                   
+
     def next_session_path(self) -> Path:
         if not self.is_multi_session:
             # in play mode: a complete glob string (i.e. not a base directory) implies only one session is expected
             raise RuntimeError("There are multiple client connections when only a single session is expected.")
-            
+
         with self._session_number.get_lock():
-            session_path = self.base_path / f"{self.session_number.value:04d}")
+            session_path = self.base_path / f"{self.session_number.value:04d}"
             self._session_number.value += 1
         if self.record and session_path.exists() and any(session_path.iterdir()):
             raise RuntimeError(f"in record mode: session directory '{session_path}' should be empty")
-        elif not session_path.exists():       
+        elif not session_path.exists():
             raise RuntimeError(f"in play mode: required session directory '{session_path}' does not exist")
         return session_path
 
@@ -131,7 +134,7 @@ class SessionServer:
     def signal_handler(self, signum, frame):
         # handler for SIGINT, SIGTERM
         console_logger.info(f"\nReceived signal {signum}, shutting down server...")
-        
+
         # propagate the signal to the entire process group
         #   (e.g. child processes handling each session)
         pgid = os.getpgid(os.getpid())
@@ -148,7 +151,7 @@ class SessionServer:
         signal.signal(signal.SIGALRM, _timeout_handler)
         signal.alarm(20)  # 20-second timeout
 
-        
+
 class SessionHandler(socketserver.BaseRequestHandler):
     def handle(self):
         player = Player(source_address=self.server.source_address)
@@ -160,7 +163,7 @@ class SessionHandler(socketserver.BaseRequestHandler):
         if not self.server.record:
             # `play` takes the client socket,
             #    and then a parsed Unix glob as (<base path>, <patterns>)
-            
+
             path, patterns = self.server.glob
             if self.server.is_multi_session:
                 path = self.server.next_session_path()
@@ -174,21 +177,10 @@ class SessionHandler(socketserver.BaseRequestHandler):
 
 
 class SessionTCPServer(SessionServer, socketserver.ForkingMixIn, socketserver.TCPServer):
-    def __init__(
-        self,
-        server_address: tuple[str, int],
-        args: argparse.Namespace,
-        manager: multiprocessing.Manager
-    ):
+    def __init__(self, server_address: tuple[str, int], args: argparse.Namespace, manager: multiprocessing.Manager):
         super().__init__(server_address, SessionHandler, args=args, manager=manager)
 
 
 class SessionUDSServer(SessionServer, socketserver.ForkingMixIn, socketserver.UnixStreamServer):
-    def __init__(
-        self,
-        server_address: Path,
-        args: argparse.Namespace,
-        manager: multiprocessing.Manager
-    ):
+    def __init__(self, server_address: Path, args: argparse.Namespace, manager: multiprocessing.Manager):
         super().__init__(str(server_address), SessionHandler, args=args, manager=manager)
-

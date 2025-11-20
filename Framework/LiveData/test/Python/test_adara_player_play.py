@@ -8,7 +8,7 @@ from pathlib import Path
 import signal
 import socket
 
-from adara_player import Player, Packet, ClientHelloPacket
+from packet_player import Player, Packet, ClientHelloPacket
 
 import unittest
 from unittest.mock import patch, MagicMock, call
@@ -27,39 +27,29 @@ def timeout_handler(signum, frame):
 class Test_Player_play(unittest.TestCase):
     """Test cases for Player.play method."""
 
-    def test_starts_server_socket_and_waits(self):
-        """Checks that server sockets are created and listen for clients."""
+    def test_client_socket_init(self):
+        """Checks that client socket is initialized correctly."""
         with (
             patch(
-                "adara_player.Config",
+                "packet_player.Config",
                 {
                     "server": {"address": "/tmp/sock-test", "socket_timeout": 1.0, "buffer_MB": 64},
                     "source": {"address": "127.0.0.1:31415"},
                     "playback": {"rate": "normal", "ignore_packets": [], "handshake": "none", "handshake_timeout": 10.0},
                 },
             ),
-            patch("adara_player.Player._get_server_address", return_value="/tmp/sock-test"),
             patch.object(Player, "PLAYBACK_HANDSHAKE", "none"),  # patch class attribute
         ):
             player = Player()
 
             # Mock socket creation and operations
-            mock_server_socket = MagicMock(spec=socket.socket)
             mock_client_socket = MagicMock(spec=socket.socket)
-            mock_server_socket.accept.return_value = (mock_client_socket, None)
 
             with (
-                patch.object(Player, "_create_server_socket", return_value=mock_server_socket),
                 patch.object(player, "stream_packets") as mock_stream,
             ):
                 # Execute play
-                player.play(Path("/fake/path"), "*.adara")
-
-                # Verify server socket was created
-                Player._create_server_socket.assert_called_once_with(player._server_address)
-
-                # Verify accept was called (waiting for client)
-                mock_server_socket.accept.assert_called_once()
+                player.play(mock_client_socket, Path("/fake/path"), ["*.adara"])
 
                 # Verify socket configuration
                 mock_client_socket.settimeout.assert_called()
@@ -69,14 +59,13 @@ class Test_Player_play(unittest.TestCase):
         """Ensures handshake blocks until a CLIENTHELLO packet arrives."""
         with (
             patch(
-                "adara_player.Config",
+                "packet_player.Config",
                 {
                     "server": {"address": "/tmp/sock-test", "socket_timeout": 1.0, "buffer_MB": 64},
                     "source": {"address": "127.0.0.1:31415"},
                     "playback": {"rate": "normal", "ignore_packets": [], "handshake": "client_hello", "handshake_timeout": 10.0},
                 },
             ),
-            patch("adara_player.Player._get_server_address", return_value="/tmp/sock-test"),
             patch.object(Player, "PLAYBACK_HANDSHAKE", "client_hello"),  # patch class attribute
         ):
             player = Player()
@@ -87,17 +76,14 @@ class Test_Player_play(unittest.TestCase):
             mock_hello_packet.start_time = start_time
 
             # Mock socket operations
-            mock_server_socket = MagicMock(spec=socket.socket)
             mock_client_socket = MagicMock(spec=socket.socket)
-            mock_server_socket.accept.return_value = (mock_client_socket, None)
 
             with (
-                patch.object(Player, "_create_server_socket", return_value=mock_server_socket),
                 patch.object(ClientHelloPacket, "from_socket", return_value=mock_hello_packet),
                 patch.object(player, "stream_packets") as mock_stream,
             ):
                 # Execute play
-                player.play(Path("/fake/path"), "*.adara")
+                player.play(mock_client_socket, Path("/fake/path"), ["*.adara"])
 
                 # Verify ClientHelloPacket.from_socket was called
                 ClientHelloPacket.from_socket.assert_called_once_with(mock_client_socket)
@@ -114,30 +100,26 @@ class Test_Player_play(unittest.TestCase):
         """Verifies timeout and error-handling if CLIENTHELLO doesn't arrive."""
         with (
             patch(
-                "adara_player.Config",
+                "packet_player.Config",
                 {
                     "server": {"address": "/tmp/sock-test", "socket_timeout": 1.0, "buffer_MB": 64},
                     "source": {"address": "127.0.0.1:31415"},
                     "playback": {"rate": "normal", "ignore_packets": [], "handshake": "client_hello", "handshake_timeout": 10.0},
                 },
             ),
-            patch("adara_player.Player._get_server_address", return_value="/tmp/sock-test"),
             patch.object(Player, "PLAYBACK_HANDSHAKE", "client_hello"),  # patch class attribute
         ):
             player = Player()
 
             # Mock socket operations
-            mock_server_socket = MagicMock(spec=socket.socket)
             mock_client_socket = MagicMock(spec=socket.socket)
-            mock_server_socket.accept.return_value = (mock_client_socket, None)
 
             with (
-                patch.object(Player, "_create_server_socket", return_value=mock_server_socket),
                 patch.object(ClientHelloPacket, "from_socket", side_effect=socket.timeout("Timeout")),
             ):
                 # Should raise socket.timeout
                 with self.assertRaises(socket.timeout):
-                    player.play(Path("/fake/path"), "*.adara")
+                    player.play(mock_client_socket, Path("/fake/path"), ["*.adara"])
 
                 # Cleanup should still be called
                 self.assertFalse(player._running)
@@ -147,14 +129,13 @@ class Test_Player_play(unittest.TestCase):
         # Test with client_hello handshake
         with (
             patch(
-                "adara_player.Config",
+                "packet_player.Config",
                 {
                     "server": {"address": "/tmp/sock-test", "socket_timeout": 1.0, "buffer_MB": 64},
                     "source": {"address": "127.0.0.1:31415"},
                     "playback": {"rate": "normal", "ignore_packets": [], "handshake": "client_hello", "handshake_timeout": 10.0},
                 },
             ),
-            patch("adara_player.Player._get_server_address", return_value="/tmp/sock-test"),
             patch.object(Player, "PLAYBACK_HANDSHAKE", "client_hello"),  # patch class attribute
         ):
             player = Player()
@@ -163,16 +144,13 @@ class Test_Player_play(unittest.TestCase):
             mock_hello_packet = MagicMock(spec=ClientHelloPacket)
             mock_hello_packet.start_time = custom_start_time
 
-            mock_server_socket = MagicMock(spec=socket.socket)
             mock_client_socket = MagicMock(spec=socket.socket)
-            mock_server_socket.accept.return_value = (mock_client_socket, None)
 
             with (
-                patch.object(Player, "_create_server_socket", return_value=mock_server_socket),
                 patch.object(ClientHelloPacket, "from_socket", return_value=mock_hello_packet),
                 patch.object(player, "stream_packets"),
             ):
-                player.play(Path("/fake/path"), "*.adara")
+                player.play(mock_client_socket, Path("/fake/path"), ["*.adara"])
 
                 # Verify start_time was set from CLIENT_HELLO packet
                 self.assertEqual(player._start_time, custom_start_time)
@@ -180,24 +158,21 @@ class Test_Player_play(unittest.TestCase):
         # Test with no handshake (default start_time)
         with (
             patch(
-                "adara_player.Config",
+                "packet_player.Config",
                 {
                     "server": {"address": "/tmp/sock-test", "socket_timeout": 1.0, "buffer_MB": 64},
                     "source": {"address": "127.0.0.1:31415"},
                     "playback": {"rate": "normal", "ignore_packets": [], "handshake": "none", "handshake_timeout": 10.0},
                 },
             ),
-            patch("adara_player.Player._get_server_address", return_value="/tmp/sock-test"),
             patch.object(Player, "PLAYBACK_HANDSHAKE", "none"),  # patch class attribute
         ):
             player = Player()
 
-            mock_server_socket = MagicMock(spec=socket.socket)
             mock_client_socket = MagicMock(spec=socket.socket)
-            mock_server_socket.accept.return_value = (mock_client_socket, None)
 
-            with patch.object(Player, "_create_server_socket", return_value=mock_server_socket), patch.object(player, "stream_packets"):
-                player.play(Path("/fake/path"), "*.adara")
+            with patch.object(player, "stream_packets"):
+                player.play(mock_client_socket, Path("/fake/path"), ["*.adara"])
 
                 # Verify default start_time (stream all data)
                 self.assertEqual(player._start_time, np.datetime64(1, "s"))
@@ -206,33 +181,27 @@ class Test_Player_play(unittest.TestCase):
         """Ensures all packets matching patterns/rate are streamed."""
         with (
             patch(
-                "adara_player.Config",
+                "packet_player.Config",
                 {
                     "server": {"address": "/tmp/sock-test", "socket_timeout": 1.0, "buffer_MB": 64},
                     "source": {"address": "127.0.0.1:31415"},
                     "playback": {"rate": "normal", "ignore_packets": [], "handshake": "none", "handshake_timeout": 10.0},
                 },
             ),
-            patch("adara_player.Player._get_server_address", return_value="/tmp/sock-test"),
             patch.object(Player, "PLAYBACK_HANDSHAKE", "none"),  # patch class attribute
         ):
             player = Player()
 
             test_path = Path("/test/data")
-            test_pattern = "*.adara"
+            test_patterns = ["*.adara"]
 
-            mock_server_socket = MagicMock(spec=socket.socket)
             mock_client_socket = MagicMock(spec=socket.socket)
-            mock_server_socket.accept.return_value = (mock_client_socket, None)
 
-            with (
-                patch.object(Player, "_create_server_socket", return_value=mock_server_socket),
-                patch.object(player, "stream_packets") as mock_stream,
-            ):
-                player.play(test_path, test_pattern)
+            with patch.object(player, "stream_packets") as mock_stream:
+                player.play(mock_client_socket, test_path, test_patterns)
 
                 # Verify stream_packets was called with correct arguments
-                mock_stream.assert_called_once_with(test_path, test_pattern, mock_client_socket, dry_run=False)
+                mock_stream.assert_called_once_with(mock_client_socket, test_path, test_patterns, dry_run=False)
 
     def test_buffer_prefill_and_stream(self):
         """
@@ -243,14 +212,13 @@ class Test_Player_play(unittest.TestCase):
         """
         with (
             patch(
-                "adara_player.Config",
+                "packet_player.Config",
                 {
                     "server": {"address": "/tmp/sock-test", "socket_timeout": 1.0, "buffer_MB": 2},
                     "source": {"address": "127.0.0.1:31415"},
                     "playback": {"rate": "unlimited", "ignore_packets": [], "handshake": "none", "handshake_timeout": 10.0},
                 },
             ),
-            patch("adara_player.Player._get_server_address", return_value="/tmp/sock-test"),
             patch.object(Player, "PLAYBACK_HANDSHAKE", "none"),  # patch class attribute
         ):
             player = Player()
@@ -279,14 +247,14 @@ class Test_Player_play(unittest.TestCase):
                 ):
                     # Run stream_packets
                     player._running = True
-                    player.stream_packets(Path("/fake"), "*.adara", mock_socket)
+                    player.stream_packets(mock_socket, Path("/fake"), ["*.adara"])
 
-                    # If we get here, the method exited gracefully (bug is fixed!)
+                    # If we get here, the method exited gracefully
                     # Verify all packets were sent
                     self.assertEqual(mock_to_socket.call_count, 5, "Expected exactly 5 packets to be sent")
 
             except TimeoutException:
-                # Test timed out - the bug is present!
+                # Test timed out!
                 self.fail(
                     "`stream_packets` entered infinite loop after iterator exhausted. "
                     "Previous defect: next_packet is not set to None when StopIteration is caught, "
@@ -301,14 +269,13 @@ class Test_Player_play(unittest.TestCase):
         """Checks for proper handling when source files are empty."""
         with (
             patch(
-                "adara_player.Config",
+                "packet_player.Config",
                 {
                     "server": {"address": "/tmp/sock-test", "socket_timeout": 1.0, "buffer_MB": 64},
                     "source": {"address": "127.0.0.1:31415"},
                     "playback": {"rate": "normal", "ignore_packets": [], "handshake": "none", "handshake_timeout": 10.0},
                 },
             ),
-            patch("adara_player.Player._get_server_address", return_value="/tmp/sock-test"),
             patch.object(Player, "PLAYBACK_HANDSHAKE", "none"),  # patch class attribute
         ):
             player = Player()
@@ -324,12 +291,12 @@ class Test_Player_play(unittest.TestCase):
                 with patch.object(Player, "iter_files", return_value=iter([])):
                     # Should handle gracefully (no exception)
                     player._running = True
-                    player.stream_packets(Path("/fake"), "*.adara", mock_socket)
+                    player.stream_packets(mock_socket, Path("/fake"), ["*.adara"])
 
                 # Verify no packets were sent
                 with patch.object(Packet, "to_socket") as mock_send:
                     player._running = True
-                    player.stream_packets(Path("/fake"), "*.adara", mock_socket)
+                    player.stream_packets(mock_socket, Path("/fake"), ["*.adara"])
                     mock_send.assert_not_called()
 
             except TimeoutException:
@@ -346,14 +313,13 @@ class Test_Player_play(unittest.TestCase):
         """Ensures warnings are logged for any packet received from the client unexpectedly."""
         with (
             patch(
-                "adara_player.Config",
+                "packet_player.Config",
                 {
                     "server": {"address": "/tmp/sock-test", "socket_timeout": 1.0, "buffer_MB": 64},
                     "source": {"address": "127.0.0.1:31415"},
                     "playback": {"rate": "unlimited", "ignore_packets": [], "handshake": "none", "handshake_timeout": 10.0},
                 },
             ),
-            patch("adara_player.Player._get_server_address", return_value="/tmp/sock-test"),
             patch.object(Player, "PLAYBACK_HANDSHAKE", "none"),  # patch class attribute
         ):
             player = Player()
@@ -381,10 +347,10 @@ class Test_Player_play(unittest.TestCase):
                     patch.object(Player, "iter_files", return_value=iter([mock_packet])),
                     patch.object(Packet, "from_socket", return_value=unexpected_packet),
                     patch.object(Packet, "to_socket"),
-                    patch("adara_player._logger") as mock_logger,
+                    patch("packet_player._logger") as mock_logger,
                 ):
                     player._running = True
-                    player.stream_packets(Path("/fake"), "*.adara", mock_socket)
+                    player.stream_packets(mock_socket, Path("/fake"), ["*.adara"])
 
                     # Verify warning was logged about unexpected packet
                     warning_logged = any("RECV unexpected" in str(call_args) for call_args in mock_logger.warning.call_args_list)
@@ -405,14 +371,13 @@ class Test_Player_play(unittest.TestCase):
         """Verifies retries if the client socket isn't writable."""
         with (
             patch(
-                "adara_player.Config",
+                "packet_player.Config",
                 {
                     "server": {"address": "/tmp/sock-test", "socket_timeout": 1.0, "buffer_MB": 64},
                     "source": {"address": "127.0.0.1:31415"},
                     "playback": {"rate": "unlimited", "ignore_packets": [], "handshake": "none", "handshake_timeout": 10.0},
                 },
             ),
-            patch("adara_player.Player._get_server_address", return_value="/tmp/sock-test"),
             patch.object(Player, "PLAYBACK_HANDSHAKE", "none"),  # patch class attribute
         ):
             player = Player()
@@ -442,7 +407,7 @@ class Test_Player_play(unittest.TestCase):
                     patch("time.sleep") as mock_sleep,
                 ):
                     player._running = True
-                    player.stream_packets(Path("/fake"), "*.adara", mock_socket)
+                    player.stream_packets(mock_socket, Path("/fake"), ["*.adara"])
 
                     # Verify sleep was called (retry logic)
                     mock_sleep.assert_called()
@@ -463,28 +428,24 @@ class Test_Player_play(unittest.TestCase):
 
         with (
             patch(
-                "adara_player.Config",
+                "packet_player.Config",
                 {
                     "server": {"address": "/tmp/sock-test", "socket_timeout": 1.0, "buffer_MB": 64},
                     "source": {"address": "127.0.0.1:31415"},
                     "playback": {"rate": "normal", "ignore_packets": [], "handshake": "none", "handshake_timeout": 10.0},
                 },
             ),
-            patch("adara_player.Player._get_server_address", return_value="/tmp/sock-test"),
             patch.object(Player, "PLAYBACK_HANDSHAKE", "none"),  # patch class attribute
         ):
             player = Player()
 
-            mock_server_socket = MagicMock(spec=socket.socket)
             mock_client_socket = MagicMock(spec=socket.socket)
-            mock_server_socket.accept.return_value = (mock_client_socket, None)
 
             with (
-                patch.object(Player, "_create_server_socket", return_value=mock_server_socket),
                 patch.object(player, "stream_packets"),
-                patch.object(player, "_cleanup") as mock_cleanup,
+                patch.object(player, "cleanup") as mock_cleanup,
             ):
-                player.play(Path("/fake/path"), "*.adara")
+                player.play(mock_client_socket, Path("/fake/path"), ["*.adara"])
 
                 # Verify cleanup was called
                 mock_cleanup.assert_called_once()
@@ -496,30 +457,26 @@ class Test_Player_play(unittest.TestCase):
         """Checks robust handling of unexpected exceptions during play."""
         with (
             patch(
-                "adara_player.Config",
+                "packet_player.Config",
                 {
                     "server": {"address": "/tmp/sock-test", "socket_timeout": 1.0, "buffer_MB": 64},
                     "source": {"address": "127.0.0.1:31415"},
                     "playback": {"rate": "normal", "ignore_packets": [], "handshake": "none", "handshake_timeout": 10.0},
                 },
             ),
-            patch("adara_player.Player._get_server_address", return_value="/tmp/sock-test"),
             patch.object(Player, "PLAYBACK_HANDSHAKE", "none"),  # patch class attribute
         ):
             player = Player()
 
-            mock_server_socket = MagicMock(spec=socket.socket)
             mock_client_socket = MagicMock(spec=socket.socket)
-            mock_server_socket.accept.return_value = (mock_client_socket, None)
 
             with (
-                patch.object(Player, "_create_server_socket", return_value=mock_server_socket),
                 patch.object(player, "stream_packets", side_effect=RuntimeError("Test error")),
-                patch.object(player, "_cleanup") as mock_cleanup,
+                patch.object(player, "cleanup") as mock_cleanup,
             ):
                 # Should raise the exception but still call cleanup
                 with self.assertRaises(RuntimeError):
-                    player.play(Path("/fake/path"), "*.adara")
+                    player.play(mock_client_socket, Path("/fake/path"), ["*.adara"])
 
                 # Verify cleanup was called even after exception
                 mock_cleanup.assert_called_once()
