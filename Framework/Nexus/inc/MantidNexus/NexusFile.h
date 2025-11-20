@@ -62,6 +62,55 @@ public:
   ~FileID();
 };
 
+using Deleter = void (*const)(hid_t);
+
+template <Deleter const deleter> class MANTID_NEXUS_DLL UniqueID {
+private:
+  hid_t m_id;
+  UniqueID &operator=(UniqueID<deleter> const &) = delete;
+  UniqueID &operator=(UniqueID<deleter> const &&) = delete;
+
+public:
+  UniqueID(UniqueID<deleter> const &uid) = delete;
+  UniqueID(UniqueID<deleter> &&uid) noexcept : m_id(uid.m_id) { uid.m_id = -1; };
+  UniqueID &operator=(hid_t const id) {
+    if (id != m_id) {
+      if (m_id >= 0) {
+        deleter(m_id);
+      }
+      m_id = id;
+    }
+    return *this;
+  };
+  UniqueID &operator=(UniqueID<deleter> &uid) {
+    if (this != &uid) {
+      if (m_id >= 0) {
+        deleter(m_id);
+      }
+      m_id = uid.m_id;
+      uid.m_id = -1;
+    }
+    return *this;
+  }
+
+  bool operator==(int const v) const { return static_cast<int>(m_id) == v; }
+  bool operator<=(int const v) const { return static_cast<int>(m_id) <= v; }
+  operator hid_t const &() const { return m_id; };
+  hid_t getId() const { return m_id; }
+  hid_t releaseId() {
+    hid_t tmp = m_id;
+    m_id = -1;
+    return tmp;
+  }
+  UniqueID() : m_id(-1) {}
+  UniqueID(hid_t const id) : m_id(id) {}
+  ~UniqueID() {
+    if (m_id >= 0) {
+      deleter(m_id);
+    }
+  }
+};
+
 /**
  * The Object that allows access to the information in the file.
  * \ingroup cpp_core

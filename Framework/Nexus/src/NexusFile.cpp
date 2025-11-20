@@ -111,6 +111,11 @@ FileID::~FileID() {
   }
 }
 
+using GroupID = UniqueID<[](hid_t const id) { H5Gclose(id); }>;
+using DataSetID = UniqueID<[](hid_t const id) { H5Dclose(id); }>;
+using DataTypeID = UniqueID<[](hid_t const id) { H5Tclose(id); }>;
+using DataSpaceID = UniqueID<[](hid_t const id) { H5Sclose(id); }>;
+
 } // namespace Mantid::Nexus
 
 namespace Mantid::Nexus {
@@ -1136,10 +1141,10 @@ template <typename NumT> void File::getSlab(NumT *data, DimVector const &start, 
   }
 
   /* map datatypes of other platforms */
-  hid_t memtype;
+  DataTypeID memtype;
   H5T_class_t tclass = H5Tget_class(m_current_type_id);
   if (tclass == H5T_STRING) {
-    memtype = m_current_type_id;
+    memtype = H5Tcopy(m_current_type_id);
   } else {
     memtype = h5MemType(m_current_type_id);
   }
@@ -1149,12 +1154,10 @@ template <typename NumT> void File::getSlab(NumT *data, DimVector const &start, 
   if (rank < 0) {
     throw NXEXCEPTION("Failed to fetch rank for slab data");
   } else if (rank == 0) { // this is an unslabbable SCALAR
-    hid_t memspace = H5Screate(H5S_SCALAR);
-    hid_t filespace = H5Dget_space(m_current_data_id);
-    H5Sselect_all(filespace);
-    iRet = H5Dread(m_current_data_id, memtype, memspace, filespace, H5P_DEFAULT, data);
-    H5Sclose(filespace);
-    H5Sclose(memspace);
+    DataSpaceID memspace = H5Screate(H5S_SCALAR);
+    DataSpaceID filespace = H5Dget_space(m_current_data_id);
+    H5Sselect_all(filespace.getId());
+    iRet = H5Dread(m_current_data_id, memtype.getId(), memspace.getId(), filespace.getId(), H5P_DEFAULT, data);
   } else {
     DimVector myStart(start.cbegin(), start.cend());
     DimVector mySize(size.cbegin(), size.cend());
@@ -1173,27 +1176,23 @@ template <typename NumT> void File::getSlab(NumT *data, DimVector const &start, 
       throw NXEXCEPTION("Selecting slab failed");
     }
 
-    hid_t memspace = H5Screate_simple(rank, mySize.data(), nullptr);
-    iRet = H5Sselect_hyperslab(memspace, H5S_SELECT_SET, mStart.data(), nullptr, mySize.data(), nullptr);
+    DataSpaceID memspace = H5Screate_simple(rank, mySize.data(), nullptr);
+    iRet = H5Sselect_hyperslab(memspace.getId(), H5S_SELECT_SET, mStart.data(), nullptr, mySize.data(), nullptr);
     if (iRet < 0) {
-      H5Tclose(memtype);
-      H5Sclose(memspace);
       throw NXEXCEPTION("Selecting memspace failed");
     }
     // read slab
     if (mtype == NXnumtype::CHAR) {
       std::vector<char> tmp_data(mySize[0] + 1, '\0');
-      iRet = H5Dread(m_current_data_id, memtype, H5S_ALL, H5S_ALL, H5P_DEFAULT, tmp_data.data());
+      iRet = H5Dread(m_current_data_id, memtype.getId(), H5S_ALL, H5S_ALL, H5P_DEFAULT, tmp_data.data());
       char const *data1;
       data1 = tmp_data.data() + myStart[0];
       strncpy(static_cast<char *>(static_cast<void *>(data)), data1, size[0]);
     } else {
-      iRet = H5Dread(m_current_data_id, memtype, memspace, m_current_space_id, H5P_DEFAULT, data);
+      iRet = H5Dread(m_current_data_id, memtype.getId(), memspace.getId(), m_current_space_id, H5P_DEFAULT, data);
     }
-    H5Tclose(memspace);
   }
   /* cleanup */
-  H5Tclose(memtype);
   if (iRet < 0) {
     throw NXEXCEPTION("Reading slab failed");
   }
