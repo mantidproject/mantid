@@ -358,8 +358,6 @@ NexusAddress File::groupAddress(NexusAddress const &addr) const {
   }
 }
 
-std::string File::getAddress() const { return m_address; }
-
 bool File::hasAddress(std::string const &name) const {
   if (name == "/") { // NexusDescriptor does not keep the root, but it does exist
     return true;
@@ -1012,7 +1010,7 @@ template <typename NumT> void File::putSlab(NumT const *data, DimVector const &s
   stringstream msg;
   msg << "putSlab(data, " << toString(start) << ", " << toString(size) << ") failed: ";
 
-  /* check if there is an Dataset open */
+  /* check if there is a Dataset open */
   if (!isDataSetOpen()) {
     msg << "no dataset open";
     throw NXEXCEPTION(msg.str());
