@@ -260,7 +260,7 @@ public:
   // #################################################################################################################
   void test_uniqueID() {
     static int call_count = 0;
-    auto blank_deleter = [](hid_t) -> int { return ++call_count; };
+    static auto const blank_deleter = [](hid_t) -> int { return ++call_count; };
 
     // construct empty
     {
