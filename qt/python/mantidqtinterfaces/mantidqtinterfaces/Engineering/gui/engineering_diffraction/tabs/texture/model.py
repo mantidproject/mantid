@@ -5,7 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #
-from Engineering.texture.polefigure.polefigure_model import TextureProjection, ster_proj, azim_proj
+from Engineering.texture.polefigure.polefigure_model import TextureProjection
+from Engineering.texture.texture_helper import ster_proj, azim_proj
 from mantid.kernel import logger
 from mantid.api import AnalysisDataService as ADS
 from mantid.simpleapi import Load
