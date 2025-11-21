@@ -33,6 +33,11 @@ using std::multimap;
 using std::string;
 using std::vector;
 
+namespace {
+static int call_count = 0;
+int blank_deleter(hid_t) { return ++call_count; }
+} // namespace
+
 class NexusFileTest : public CxxTest::TestSuite {
 
 public:
@@ -258,6 +263,75 @@ public:
   // #################################################################################################################
   // TEST MAKE / OPEN / PUT / CLOSE DATASET
   // #################################################################################################################
+  void test_uniqueID() {
+    cout << "\ntest uniqueID\n";
+    // construct empty
+    call_count = 0;
+    {
+      Mantid::Nexus::UniqueID<blank_deleter> uid;
+      TS_ASSERT_EQUALS(uid.getId(), -1);
+    }
+    TS_ASSERT_EQUALS(call_count, 0);
+
+    // construct
+    hid_t test = 101;
+    {
+      Mantid::Nexus::UniqueID<blank_deleter> uid(test);
+      TS_ASSERT_EQUALS(uid.getId(), test);
+    }
+    TS_ASSERT_EQUALS(call_count, 1);
+    cout << "\ntest uniqueID\n";
+
+    // release
+    call_count = 0;
+    hid_t res;
+    {
+      Mantid::Nexus::UniqueID<blank_deleter> uid(test);
+      TS_ASSERT_THROWS_NOTHING(res = uid.releaseId());
+      TS_ASSERT_EQUALS(uid.getId(), -1);
+      TS_ASSERT_EQUALS(res, test);
+    }
+    TS_ASSERT_EQUALS(call_count, 0);
+    TS_ASSERT_EQUALS(res, test);
+
+    // copy construct
+    call_count = 0;
+    {
+      Mantid::Nexus::UniqueID<blank_deleter> uid(test);
+      {
+        Mantid::Nexus::UniqueID<blank_deleter> uid2(uid);
+        TS_ASSERT_EQUALS(uid.getId(), -1);
+        TS_ASSERT_EQUALS(uid2.getId(), test);
+      }
+      TS_ASSERT_EQUALS(uid.getId(), -1);
+      TS_ASSERT_EQUALS(call_count, 1);
+    }
+    TS_ASSERT_EQUALS(call_count, 1);
+
+    // assign from hid_t
+    call_count = 0;
+    hid_t val1 = 73, val2 = 17;
+    {
+      Mantid::Nexus::UniqueID<blank_deleter> uid(val1);
+      uid = val2;
+      TS_ASSERT_EQUALS(uid.getId(), val2);
+      TS_ASSERT_EQUALS(call_count, 1);
+    }
+    TS_ASSERT_EQUALS(call_count, 2);
+
+    // assign from uid
+    call_count = 0;
+    {
+      Mantid::Nexus::UniqueID<blank_deleter> uid1(val1), uid2(val2);
+      TS_ASSERT_EQUALS(uid1.getId(), val1);
+      TS_ASSERT_EQUALS(uid2.getId(), val2);
+      uid1 = uid2;
+      TS_ASSERT_EQUALS(uid1.getId(), val2);
+      TS_ASSERT_EQUALS(uid2.getId(), -1);
+      TS_ASSERT_EQUALS(call_count, 1);
+    }
+    TS_ASSERT_EQUALS(call_count, 2);
+  }
 
   void test_makeData() {
     cout << "\ntest make data\n";
