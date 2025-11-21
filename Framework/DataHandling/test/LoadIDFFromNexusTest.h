@@ -367,12 +367,10 @@ public:
     // for a given instrument.
 
     // LET parameter correction file exists
-    std::string testpath1 = loader.getParameterCorrectionFile("LET");
-    std::filesystem::path iPath(true);                                                  // Absolute path
-    TS_ASSERT(iPath.tryParse(testpath1));                                               // Result has correct syntax
-    TS_ASSERT(iPath.isFile());                                                          // Result is a file
-    TS_ASSERT(iPath.getFileName() == "LET_Parameter_Corrections.xml");                  // Correct filename
-    TS_ASSERT(iPath.directory(iPath.depth() - 1) == "embedded_instrument_corrections"); // Correct folder
+    std::filesystem::path iPath = std::filesystem::absolute(loader.getParameterCorrectionFile("LET"));
+    TS_ASSERT(std::filesystem::is_regular_file(iPath));                                           // Result is a file
+    TS_ASSERT(iPath.filename() == "LET_Parameter_Corrections.xml");                               // Correct filename
+    TS_ASSERT_EQUALS(iPath.parent_path().filename().string(), "embedded_instrument_corrections"); // Correct folder
 
     // TEST0 parameter correction file does not exist
     std::string testpath0 = loader.getParameterCorrectionFile("TEST0");

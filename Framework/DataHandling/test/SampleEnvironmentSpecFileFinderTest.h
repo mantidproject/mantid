@@ -25,10 +25,10 @@ public:
 
   SampleEnvironmentSpecFileFinderTest() {
     // Setup a temporary directory structure for testing
-    std::filesystem::path testDirec(std::filesystem::path::temp(), "SampleEnvironmentSpecFileFinderTest");
-    testDirec.makeDirectory();
+    std::filesystem::path testDirec = std::filesystem::temp_directory_path() / "SampleEnvironmentSpecFileFinderTest";
+    std::filesystem::create_directory(testDirec);
     m_testRoot = testDirec.string();
-    testDirec.append(m_facilityName).append(m_instName);
+    testDirec = testDirec / m_facilityName / m_instName;
     std::filesystem::create_directories(testDirec);
 
     // Write test files
@@ -55,13 +55,13 @@ public:
                             "  </containers>"
                             " </components>"
                             "</environmentspec>";
-    std::filesystem::path envFile(std::filesystem::path(testDirec, m_envName + ".xml"));
-    std::ofstream goodStream(envFile.path(), std::ios_base::out);
+    std::filesystem::path envFile = testDirec / (m_envName + ".xml");
+    std::ofstream goodStream(envFile, std::ios_base::out);
     goodStream << xml;
     goodStream.close();
     // Bad file
-    envFile = std::filesystem::path(testDirec, m_badName + ".xml");
-    std::ofstream badStream(envFile.path(), std::ios_base::out);
+    envFile = testDirec / (m_badName + ".xml");
+    std::ofstream badStream(envFile, std::ios_base::out);
     const std::string wrongContent = "<garbage>";
     badStream << wrongContent;
     badStream.close();
@@ -69,7 +69,7 @@ public:
 
   ~SampleEnvironmentSpecFileFinderTest() {
     try {
-      std::filesystem::path(m_testRoot).remove(true);
+      std::filesystem::remove_all(m_testRoot);
     } catch (...) {
     }
   }

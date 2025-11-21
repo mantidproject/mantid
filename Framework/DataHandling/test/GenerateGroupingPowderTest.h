@@ -549,8 +549,5 @@ private:
 
   MatrixWorkspace_sptr m_emptyInstrument;
 
-  bool fileExists(const std::string &filename) {
-    std::filesystem::path handle{filename};
-    return handle.exists();
-  }
+  bool fileExists(const std::string &filename) { return std::filesystem::exists(filename); }
 };

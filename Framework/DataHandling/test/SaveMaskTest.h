@@ -89,7 +89,6 @@ public:
     }
 
     // 6. Clean the file
-    std::filesystem::path cleanfile(file1);
-    cleanfile.remove(false);
+    std::filesystem::remove(file1);
   }
 };

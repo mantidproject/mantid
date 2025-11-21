@@ -66,7 +66,7 @@ void LoadDetectorsGroupingFile::init() {
 void LoadDetectorsGroupingFile::exec() {
   std::filesystem::path inputFile(static_cast<std::string>(getProperty(PropertyNames::INPUT_FILE)));
 
-  std::string ext = Poco::toLower(inputFile.extension().string());
+  std::string ext = Poco::toLower(inputFile.extension().string().substr(1)); // skip `.`
 
   // The number of steps depends on the type of input file
   // Set them to zero for the moment

@@ -272,8 +272,7 @@ public:
     std::set<std::string> returnedFiles;
     Kernel::Glob::glob(outFilePath, returnedFiles);
     for (const auto &filename : returnedFiles) {
-      std::filesystem::path pocoFile{filename};
-      pocoFile.remove();
+      std::filesystem::remove(filename);
     }
 
     AnalysisDataService::Instance().remove(wsName);
@@ -325,8 +324,7 @@ public:
     std::set<std::string> returnedFiles;
     Kernel::Glob::glob(globPattern, returnedFiles);
     for (const auto &filename : returnedFiles) {
-      std::filesystem::path pocoFile{filename};
-      pocoFile.remove();
+      std::filesystem::remove(filename);
     }
   }
 

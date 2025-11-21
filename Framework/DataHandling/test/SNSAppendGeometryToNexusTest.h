@@ -47,7 +47,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
-    std::string fullpath(std::filesystem::path::temp() + NXS_FILENAME);
+    std::filesystem::path fullpath = std::filesystem::temp_directory_path() / NXS_FILENAME;
 
     if (std::filesystem::exists(fullpath)) {
       std::filesystem::remove(fullpath);

@@ -97,17 +97,16 @@ public:
   static void destroySuite(DownloadInstrumentTest *suite) { delete suite; }
 
   void createDirectory(const std::filesystem::path &path) {
-    std::filesystem::path file(path);
-    if (file.createDirectory()) {
-      m_directoriesToRemove.emplace_back(file);
+    if (std::filesystem::create_directory(path)) {
+      m_directoriesToRemove.emplace_back(path);
     }
   }
 
   void removeDirectories() {
     for (auto directory : m_directoriesToRemove) {
       try {
-        directory.remove(true);
-      } catch (Poco::FileException &fe) {
+        std::filesystem::remove_all(directory);
+      } catch (const std::filesystem::filesystem_error &fe) {
         std::cout << fe.what() << std::endl;
       }
     }
@@ -120,22 +119,19 @@ public:
 
     // change the local download directory by adding a unittest subdirectory
     auto testDirectories = m_originalInstDir;
-    std::filesystem::path localDownloadPath(std::filesystem::path::temp());
-    localDownloadPath.pushDirectory(TEST_SUFFIX);
-    m_localInstDir = localDownloadPath.string();
-    createDirectory(localDownloadPath);
-    testDirectories[0] = m_localInstDir;
+    m_localInstDir = std::filesystem::temp_directory_path() / TEST_SUFFIX;
+    createDirectory(m_localInstDir);
+    testDirectories[0] = m_localInstDir.string() + "/";
 
     // also if you move the instrument directory to one with less files then it
     // will run faster as it does not need to checksum as many files
     try {
       std::filesystem::path installInstrumentPath(testDirectories.back());
-      installInstrumentPath.pushDirectory(TEST_SUFFIX);
+      installInstrumentPath /= TEST_SUFFIX;
       createDirectory(installInstrumentPath);
       testDirectories.back() = installInstrumentPath.string();
-    } catch (Poco::FileException &) {
-      std::cout << "Failed to change instrument directory continuing without, "
-                   "fine, just slower\n";
+    } catch (const std::filesystem::filesystem_error &) {
+      std::cout << "Failed to change instrument directory continuing without, fine, just slower\n";
     }
 
     Mantid::Kernel::ConfigService::Instance().setInstrumentDirectories(testDirectories);
@@ -160,18 +156,15 @@ public:
 
   void test_execOrphanedFile() {
     // add an orphaned file
-    std::filesystem::path orphanedFilePath(m_localInstDir);
-    orphanedFilePath.makeDirectory();
-    orphanedFilePath.setFileName("Orphaned_Should_not_be_here.xml");
+    std::filesystem::create_directories(m_localInstDir);
 
+    std::filesystem::path orphanedFilePath = m_localInstDir / "Orphaned_Should_not_be_here.xml";
     std::ofstream file;
-    file.open(orphanedFilePath.string().c_str());
+    file.open(orphanedFilePath);
     file.close();
 
     TSM_ASSERT_EQUALS("The expected number of files downloaded was wrong.", runDownloadInstrument(), 2);
-
-    std::filesystem::path orphanedFile(orphanedFilePath);
-    TSM_ASSERT("The orphaned file was not deleted", orphanedFile.exists() == false);
+    TSM_ASSERT("The orphaned file was not deleted", std::filesystem::exists(orphanedFilePath) == false);
   }
 
   int runDownloadInstrument() {
@@ -184,7 +177,7 @@ public:
     return alg.getProperty("FileDownloadCount");
   }
 
-  std::string m_localInstDir;
+  std::filesystem::path m_localInstDir;
   std::vector<std::string> m_originalInstDir;
   std::vector<std::filesystem::path> m_directoriesToRemove;
 };

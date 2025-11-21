@@ -66,7 +66,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted());
     std::string filename = alg.getPropertyValue("Filename");
-    TS_ASSERT(std::filesystem::path(filename.append(".mft")).exists())
+    TS_ASSERT(std::filesystem::exists(filename.append(".mft")));
     std::vector<std::string> data;
     data.reserve(5);
     data.emplace_back("MFT");
@@ -105,7 +105,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted());
     std::string filename = alg.getPropertyValue("Filename");
-    TS_ASSERT(std::filesystem::path(filename.append(".mft")).exists())
+    TS_ASSERT(std::filesystem::exists(filename.append(".mft")));
     std::vector<std::string> data;
     data.reserve(5);
     data.emplace_back("MFT");
@@ -160,7 +160,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
     std::string filename = alg.getPropertyValue("Filename");
-    TS_ASSERT(std::filesystem::path(filename.append(".mft")).exists())
+    TS_ASSERT(std::filesystem::exists(filename.append(".mft")));
     std::ifstream in(filename);
     // Total number of lines
     TS_ASSERT(not_empty(in))
@@ -186,7 +186,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted());
     std::string filename = alg.getPropertyValue("Filename");
-    TS_ASSERT(std::filesystem::path(filename.append(".mft")).exists())
+    TS_ASSERT(std::filesystem::exists(filename.append(".mft")));
     std::vector<std::string> data;
     data.reserve(5);
     data.emplace_back("MFT");
@@ -228,7 +228,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
     std::string filename = alg.getPropertyValue("Filename");
-    TS_ASSERT(std::filesystem::path(filename.append(".txt")).exists())
+    TS_ASSERT(std::filesystem::exists(filename.append(".txt")));
     std::vector<std::string> data;
     data.reserve(2);
     data.emplace_back("3.300000000000000e-01\t"
@@ -275,7 +275,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
     std::string filename = alg.getPropertyValue("Filename");
-    TS_ASSERT(std::filesystem::path(filename.append(".txt")).exists())
+    TS_ASSERT(std::filesystem::exists(filename.append(".txt")));
     std::vector<std::string> data;
     data.reserve(2);
     data.emplace_back("3.300000000000000e-01\t"
@@ -314,7 +314,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
     std::string filename = alg.getPropertyValue("Filename");
-    TS_ASSERT(std::filesystem::path(filename.append(".mft")).exists())
+    TS_ASSERT(std::filesystem::exists(filename.append(".mft")));
     std::ifstream in(filename);
     std::string line;
     std::getline(in, line);
@@ -376,7 +376,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
     std::string filename = alg.getPropertyValue("Filename");
-    TS_ASSERT(std::filesystem::path(filename.append(".mft")).exists())
+    TS_ASSERT(std::filesystem::exists(filename.append(".mft")));
     std::ifstream in(filename);
     std::string line;
     std::getline(in, line);
@@ -441,7 +441,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
     std::string filename = alg.getPropertyValue("Filename");
-    TS_ASSERT(std::filesystem::path(filename.append(".mft")).exists())
+    TS_ASSERT(std::filesystem::exists(filename.append(".mft")));
     std::ifstream in(filename);
     std::string line;
     std::getline(in, line);
@@ -499,7 +499,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
     std::string filename = alg.getPropertyValue("Filename");
-    TS_ASSERT(std::filesystem::path(filename.append(".mft")).exists())
+    TS_ASSERT(std::filesystem::exists(filename.append(".mft")));
     std::ifstream in(filename);
     std::string line;
     std::getline(in, line);
@@ -619,7 +619,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted());
     std::string filename = alg.getPropertyValue("Filename");
-    TS_ASSERT(std::filesystem::path(filename.append(".dat")).exists())
+    TS_ASSERT(std::filesystem::exists(filename.append(".dat")));
     std::vector<std::string> data;
     data.reserve(3);
     data.emplace_back("2");
@@ -819,7 +819,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
     std::string filename = alg.getPropertyValue("Filename");
-    TS_ASSERT(std::filesystem::path(filename.append(".lam")).exists())
+    TS_ASSERT(std::filesystem::exists(filename.append(".lam")));
     std::vector<std::string> data;
     data.reserve(2);
     data.emplace_back("       1.000000000000000e-01       "

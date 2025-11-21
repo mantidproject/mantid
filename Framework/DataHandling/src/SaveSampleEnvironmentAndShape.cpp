@@ -115,7 +115,7 @@ void SaveSampleEnvironmentAndShape::exec() {
 
   // Save out the shape
   auto filename = getPropertyValue("Filename");
-  std::string fileExt = std::filesystem::path(filename).extension().string();
+  std::string fileExt = std::filesystem::path(filename).extension().string().substr(1); // remove the '.'
   std::transform(fileExt.begin(), fileExt.end(), fileExt.begin(), toupper);
 
   if (fileExt == "STL") {

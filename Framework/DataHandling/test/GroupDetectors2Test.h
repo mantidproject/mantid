@@ -53,7 +53,7 @@ public:
   GroupDetectors2Test()
       : inputWSName("groupdetectorstests_input_workspace"), offsetWSName("groupdetectorstests_offset_workspace"),
         outputWSNameBase("groupdetectorstests_output_basename"),
-        inputFile(std::filesystem::path::current() + "GroupDetectors2Test_mapfile_example") {
+        inputFile(std::filesystem::current_path() / "GroupDetectors2Test_mapfile_example") {
     // This is needed to load in the plugin algorithms (specifically Divide,
     // which is a Child Algorithm of GroupDetectors)
     FrameworkManager::Instance();

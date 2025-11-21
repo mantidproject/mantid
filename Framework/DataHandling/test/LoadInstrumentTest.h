@@ -83,29 +83,26 @@ public:
     const auto &fileFinder = Mantid::API::FileFinder::Instance();
     const std::string originalFilePath = fileFinder.getFullPath("HET_Definition.xml");
 
-    const std::string tmpDir = std::filesystem::path::temp();
+    const std::filesystem::path tmpDir = std::filesystem::temp_directory_path();
     auto generateFiles = [&tmpDir, &originalFilePath](const std::string &name) {
-      std::filesystem::path tmpFilePath(tmpDir, name);
-
+      std::filesystem::path tmpFilePath = tmpDir / name;
       std::filesystem::path originalFile(originalFilePath);
-      originalFile.copyTo(tmpFilePath.string());
 
-      std::filesystem::path tmpFile(tmpFilePath);
-      return tmpFile;
+      std::filesystem::copy_file(originalFile, tmpFilePath);
+
+      return tmpFilePath;
     };
 
     auto runAlg = [&generateFiles, &loader, &ws2D](const std::string &name, const std::string &expected) {
-      auto fileHandle = generateFiles(name);
-      const std::string path = fileHandle.path();
-
-      loader.setPropertyValue("Filename", path);
+      auto filePath = generateFiles(name);
+      loader.setPropertyValue("Filename", filePath.string());
       loader.setProperty("RewriteSpectraMap", OptionalBool(true));
       loader.setProperty("Workspace", ws2D);
 
       loader.execute();
       TS_ASSERT(loader.isExecuted());
 
-      fileHandle.remove();
+      std::filesystem::remove(filePath);
 
       MatrixWorkspace_sptr output = loader.getProperty("Workspace");
       const std::string loadedName = output->getInstrument()->getName();

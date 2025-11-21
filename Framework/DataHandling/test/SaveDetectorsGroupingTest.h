@@ -82,9 +82,7 @@ public:
     // TS_ASSERT_DELTA(gws2->y(7000)[0], 0.0, 1.0E-5);
 
     // 5. Clear
-    std::filesystem::path file(file1);
-    file.remove(false);
-
+    std::filesystem::remove(file1);
     API::AnalysisDataService::Instance().remove("Vulcan_Group");
     API::AnalysisDataService::Instance().remove("Vulcan_Group2");
   }
@@ -142,8 +140,7 @@ public:
     // Clean-up
     API::AnalysisDataService::Instance().remove(testWs);
 
-    std::filesystem::path file(testFile);
-    file.remove();
+    std::filesystem::remove(testFile);
   }
 
   void test_SaveUngroupedDetectors() {
@@ -195,7 +192,6 @@ public:
     TS_ASSERT_DIFFERS(xmlText.find("<group ID=\"1\">"), std::string::npos)            // group 1 found
     TS_ASSERT_DIFFERS(xmlText.find("<detids>42</detids>"), std::string::npos)         // group 1 found
 
-    std::filesystem::path file(testFile);
-    file.remove();
+    std::filesystem::remove(testFile);
   }
 };

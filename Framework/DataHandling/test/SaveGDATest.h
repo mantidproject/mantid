@@ -124,8 +124,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(testAlg.execute());
     TS_ASSERT(testAlg.isExecuted());
 
-    std::filesystem::path shouldExist(tempFileName);
-    TS_ASSERT(shouldExist.exists());
+    TS_ASSERT(std::filesystem::exists(tempFileName));
   }
 
   void test_headerValuesAreCorrect() {
