@@ -97,7 +97,13 @@ std::map<std::string, std::string> GetDetectorOffsets::validateInputs() {
 
   if (MaskWorkspace_const_sptr maskWS = getProperty("MaskWorkspace")) {
     // detectors which are monitors are not included in the mask
-    if (maskWS->getInstrument()->getNumberDetectors(true) != inputWS->getInstrument()->getNumberDetectors(true)) {
+    const bool maskContainsAllDetIDs = maskWS->containsDetIDs(inputWS->getInstrument()->getDetectorIDs());
+
+    if (!maskContainsAllDetIDs) {
+      result["MaskWorkspace"] =
+          "incoming mask workspace must be fully specified, containing an entry for each detid in the input workspace";
+    } else if (maskWS->getInstrument()->getNumberDetectors(true) !=
+               inputWS->getInstrument()->getNumberDetectors(true)) {
       result["MaskWorkspace"] = "incoming mask workspace must have the same instrument as the input workspace";
     } else if (maskWS->getNumberHistograms() != inputWS->getInstrument()->getNumberDetectors(true)) {
       result["MaskWorkspace"] = "incoming mask workspace must have one spectrum per detector";
@@ -170,7 +176,7 @@ void GetDetectorOffsets::exec() {
     const auto &dets = inputW->getSpectrum(static_cast<size_t>(wi)).getDetectorIDs();
 
     // If the entire spectrum is already masked, there's nothing to do.
-    if (maskWS->isMasked(dets))
+    if (!maskWS->containsDetIDs(dets) || maskWS->isMasked(dets))
       continue;
 
     // Fit the peak
@@ -188,11 +194,12 @@ void GetDetectorOffsets::exec() {
       // Use the same offset for all detectors from this pixel
       for (const auto &det : dets) {
         if (spectrumIsMasked) {
-          maskWS->setMasked(det, true);
+          if (maskWS->containsDetID(det))
+            maskWS->setMasked(det, true);
           continue;
         }
         // Warning: individual detectors in a spectrum may be masked.
-        if (!maskWS->isMasked(det))
+        if (!maskWS->containsDetID(det) || !maskWS->isMasked(det))
           outputW->setValue(det, offset);
       }
     }
@@ -210,7 +217,8 @@ void GetDetectorOffsets::exec() {
     for (size_t ns = 0; ns < inputW->getNumberHistograms(); ++ns) {
       const auto dets = inputW->getSpectrum(ns).getDetectorIDs();
       for (const auto &det : dets)
-        trace << "  " << outputW->getValue(det) << (maskWS->isMasked(det) ? "*" : "") << "\n";
+        trace << "  " << outputW->getValue(det) << (!maskWS->containsDetID(det) || maskWS->isMasked(det) ? "*" : "")
+              << "\n";
     }
   }
   // Return the output

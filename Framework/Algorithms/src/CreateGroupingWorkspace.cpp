@@ -696,6 +696,8 @@ void CreateGroupingWorkspace::exec() {
       g_log.warning() << numNotFound << " detector IDs (out of " << detIDtoGroup.size()
                       << ") were not found in the instrument\n.";
   }
+  outWS->MatrixWorkspace::rebuildSpectraMapping(false);
+  outWS->buildDetectorIDMapping();
 }
 
 Instrument_const_sptr CreateGroupingWorkspace::getInstrument() {

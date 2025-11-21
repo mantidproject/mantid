@@ -1046,10 +1046,12 @@ void InstrumentActor::setDataIntegrationRange(const double &xmin, const double &
     // Ignore monitors if multiple detectors aren't grouped.
     for (size_t i = 0; i < m_integratedSignal.size(); i++) {
       const auto &spectrumDefinition = spectrumInfo.spectrumDefinition(i);
+      const auto detId = static_cast<int>(i);
       // Ignore monitors if they are masked on the view
       if (spectrumDefinition.size() == 1 &&
           (std::find(monitorIndices.begin(), monitorIndices.end(), i) != monitorIndices.end() ||
-           (maskWksp && maskWksp->isMasked(static_cast<int>(i)))))
+           /// Check if detid exists in mask ws
+           (maskWksp && maskWksp->containsDetID(detId) && maskWksp->isMasked(detId))))
         continue;
 
       auto sum = m_integratedSignal[i];
