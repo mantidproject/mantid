@@ -7,7 +7,11 @@ install_pixi() {
   if ! command -v pixi >/dev/null 2>&1
   then
     curl -fsSL https://pixi.sh/install.sh | sh
-    source ~/.bashrc
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+      PATH=$PATH:$HOME/.pixi/bin
+    else
+      source ~/.bashrc
+    fi
   fi
 }
 
@@ -63,28 +67,8 @@ setup_pixi_toml() {
   export
 }
 
-# For some reason (probably a pixi bug) when dereferencing bash environment variables
-# during a pixi run command (i.e  pixi run "versioningit $REPO_ROOT_DIR" from package-conda)
-# on Windows the slashes were reversed (\). We found that a path in the style C:/one/two/three
-# always worked, we this functions converts a path into that from.
-normalise_windows_path() {
-    local p="$1"
-    # 1. Convert backslashes → forward slashes
-    p="${p//\\//}"
-    # 2. Strip any leading slash before drive letter: /c/... → c/...
-    p="${p#/}"
-    # 3. Uppercase the drive letter: c/... → C/...
-    p="$(printf '%s' "$p" | sed -E 's/^([a-zA-Z])/\U\1/')"
-    # 4. Add colon after drive letter if missing: C/... → C:/...
-    p="$(printf '%s' "$p" | sed -E 's/^([A-Z]):?/\1:/')"
-    echo "$p"
-}
-
 create_mantid_developer_ci() {
   MANTID_ROOT=$1
-  if [[ $OSTYPE == "msys"* ]]; then
-    MANTID_ROOT=normalise_windows_path "$MANTID_ROOT"
-  fi
   setup_pixi_toml --force-regenerate
   sh $PATH_TO_HERE/package-conda $MANTID_ROOT --build-mantid-developer
   PLATFORM=$(pixi run --manifest-path $PATH_TO_HERE/pixi.toml -e rattler-builder "pixi info --json | jq -r .platform")
