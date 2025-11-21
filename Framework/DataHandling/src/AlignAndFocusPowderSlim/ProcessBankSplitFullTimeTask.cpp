@@ -34,7 +34,7 @@ ProcessBankSplitFullTimeTask::ProcessBankSplitFullTimeTask(
     std::vector<int> &workspaceIndices, std::vector<API::MatrixWorkspace_sptr> &wksps,
     const std::map<detid_t, double> &calibration, const std::map<detid_t, double> &scale_at_sample,
     const std::set<detid_t> &masked, const size_t events_per_chunk, const size_t grainsize_event,
-    const std::vector<PulseROI> pulse_indices, const std::map<DateAndTime, int> splitterMap,
+    const std::vector<PulseROI> &pulse_indices, const std::map<DateAndTime, int> &splitterMap,
     const bool correction_to_sample, std::shared_ptr<API::Progress> &progress)
     : m_h5file(h5file), m_bankEntries(bankEntryNames),
       m_loader(std::make_shared<NexusLoader>(is_time_filtered, pulse_indices)), m_workspaceIndices(workspaceIndices),
@@ -47,7 +47,7 @@ ProcessBankSplitFullTimeTask::ProcessBankSplitFullTimeTask(
     std::vector<int> &workspaceIndices, std::vector<API::MatrixWorkspace_sptr> &wksps,
     const std::map<detid_t, double> &calibration, const std::map<detid_t, double> &scale_at_sample,
     const std::set<detid_t> &masked, const size_t events_per_chunk, const size_t grainsize_event,
-    const std::map<DateAndTime, int> splitterMap, const bool correction_to_sample,
+    const std::map<DateAndTime, int> &splitterMap, const bool correction_to_sample,
     std::shared_ptr<API::Progress> &progress)
     : m_h5file(h5file), m_bankEntries(bankEntryNames), m_loader(loader), m_workspaceIndices(workspaceIndices),
       m_wksps(wksps), m_calibration(calibration), m_scale_at_sample(scale_at_sample), m_masked(masked),

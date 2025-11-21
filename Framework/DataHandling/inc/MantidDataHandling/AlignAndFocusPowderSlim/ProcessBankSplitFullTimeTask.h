@@ -27,8 +27,8 @@ public:
                                const std::map<detid_t, double> &calibration,
                                const std::map<detid_t, double> &scale_at_sample, const std::set<detid_t> &masked,
                                const size_t events_per_chunk, const size_t grainsize_event,
-                               const std::vector<PulseROI> pulse_indices,
-                               const std::map<Mantid::Types::Core::DateAndTime, int> splitterMap,
+                               const std::vector<PulseROI> &pulse_indices,
+                               const std::map<Mantid::Types::Core::DateAndTime, int> &splitterMap,
                                const bool correction_to_sample, std::shared_ptr<API::Progress> &progress);
 
   // Contructor with custom loader to allow mocking in tests
@@ -38,7 +38,7 @@ public:
                                const std::map<detid_t, double> &calibration,
                                const std::map<detid_t, double> &scale_at_sample, const std::set<detid_t> &masked,
                                const size_t events_per_chunk, const size_t grainsize_event,
-                               const std::map<Mantid::Types::Core::DateAndTime, int> splitterMap,
+                               const std::map<Mantid::Types::Core::DateAndTime, int> &splitterMap,
                                const bool correction_to_sample, std::shared_ptr<API::Progress> &progress);
 
   void operator()(const tbb::blocked_range<size_t> &range) const;
