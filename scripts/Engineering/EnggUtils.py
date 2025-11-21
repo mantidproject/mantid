@@ -603,7 +603,7 @@ def _smooth_vanadium(van_ws_foc):
 def _apply_vanadium_norm(sample_ws_foc, van_ws_foc):
     # divide by curves - automatically corrects for solid angle, det efficiency and lambda dep. flux
     sample_ws_foc = mantid.CropWorkspaceRagged(
-        InputWorkspace=sample_ws_foc, OutputWorkspace=sample_ws_foc.name(), XMin=0.45, XMax=sample_ws_foc.readX(0).max()
+        InputWorkspace=sample_ws_foc, OutputWorkspace=sample_ws_foc.name(), XMin=0.45, XMax=float("inf")
     )
     van_ws_foc_rb = mantid.RebinToWorkspace(
         WorkspaceToRebin=van_ws_foc, WorkspaceToMatch=sample_ws_foc, OutputWorkspace=VAN_CURVE_REBINNED_NAME
