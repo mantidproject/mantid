@@ -713,5 +713,27 @@ TimeSplitter::calculate_target_indices(const std::vector<DateAndTime> &times) co
   return indices;
 }
 
+/**
+ * @brief Returns a combined TimeROI covering all intervals.
+ *
+ * @param start_offset Offset in nanoseconds to subtract from interval start times.
+ *        This accounts for TOF (Time-of-Flight) values that may extend before the pulse time.
+ *        Pass 0 if no offset is required.
+ * @return TimeROI covering all intervals, with start times adjusted by start_offset.
+ */
+const TimeROI TimeSplitter::combinedTimeROI(const int64_t start_offset) const {
+  TimeROI combined;
+
+  auto it = m_roi_map.cbegin();
+  for (; it != std::prev(m_roi_map.cend()); it++) {
+    if (it->second == NO_TARGET)
+      continue;
+    DateAndTime intervalStart = it->first - start_offset;
+    DateAndTime intervalStop = std::next(it)->first;
+    combined.addROI(intervalStart, intervalStop);
+  }
+  return combined;
+}
+
 } // namespace DataObjects
 } // namespace Mantid

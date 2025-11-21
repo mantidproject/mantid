@@ -11,14 +11,26 @@
 
 namespace Mantid::DataHandling::AlignAndFocusPowderSlim {
 
+NexusLoader::~NexusLoader() = default;
+
 NexusLoader::NexusLoader(const bool is_time_filtered, const std::vector<PulseROI> &pulse_indices,
                          const std::vector<std::pair<int, PulseROI>> &target_to_pulse_indices)
     : m_is_time_filtered(is_time_filtered), m_pulse_indices(pulse_indices),
       m_target_to_pulse_indices(target_to_pulse_indices) {}
 
-template <typename Type>
-void NexusLoader::loadData(H5::DataSet &SDS, std::unique_ptr<std::vector<Type>> &data,
+void NexusLoader::loadData(H5::DataSet &SDS, std::unique_ptr<std::vector<uint32_t>> &data,
                            const std::vector<size_t> &offsets, const std::vector<size_t> &slabsizes) {
+  loadDataInternal(SDS, data, offsets, slabsizes);
+}
+
+void NexusLoader::loadData(H5::DataSet &SDS, std::unique_ptr<std::vector<float>> &data,
+                           const std::vector<size_t> &offsets, const std::vector<size_t> &slabsizes) {
+  loadDataInternal(SDS, data, offsets, slabsizes);
+}
+
+template <typename Type>
+void NexusLoader::loadDataInternal(H5::DataSet &SDS, std::unique_ptr<std::vector<Type>> &data,
+                                   const std::vector<size_t> &offsets, const std::vector<size_t> &slabsizes) const {
   // assumes that data is the same type as the dataset
   H5::DataSpace filespace = SDS.getSpace();
 
@@ -56,7 +68,8 @@ void NexusLoader::loadData(H5::DataSet &SDS, std::unique_ptr<std::vector<Type>> 
   SDS.read(data->data(), dataType, memspace, filespace);
 }
 
-std::stack<EventROI> NexusLoader::getEventIndexRanges(H5::Group &event_group, const uint64_t number_events) {
+std::stack<EventROI> NexusLoader::getEventIndexRanges(H5::Group &event_group, const uint64_t number_events,
+                                                      std::unique_ptr<std::vector<uint64_t>> *event_index_out) const {
   // This will return a stack of pairs, where each pair is the start and stop index of the event ranges
   std::stack<EventROI> ranges;
   if (m_is_time_filtered) {
@@ -71,6 +84,11 @@ std::stack<EventROI> NexusLoader::getEventIndexRanges(H5::Group &event_group, co
           (pair.second == std::numeric_limits<size_t>::max()) ? number_events : event_index->at(pair.second);
       if (start_event < stop_event)
         ranges.emplace(start_event, stop_event);
+    }
+
+    // If caller wants the event_index data, transfer it
+    if (event_index_out) {
+      *event_index_out = std::move(event_index);
     }
   } else {
     constexpr uint64_t START_DEFAULT = 0;
@@ -94,23 +112,21 @@ std::stack<std::pair<int, EventROI>> NexusLoader::getEventIndexSplitRanges(H5::G
     uint64_t stop_event = (pair.second.second == std::numeric_limits<size_t>::max())
                               ? number_events
                               : event_index->at(pair.second.second);
-    if (start_event < stop_event) {
+    if (start_event < stop_event)
       ranges.emplace(pair.first, EventROI(start_event, stop_event));
-    }
   }
 
   return ranges;
 }
 
-void NexusLoader::loadEventIndex(H5::Group &event_group, std::unique_ptr<std::vector<uint64_t>> &data) {
-  auto index_SDS = event_group.openDataSet(NxsFieldNames::INDEX_ID);
-  Nexus::H5Util::readArray1DCoerce(index_SDS, *data);
+void NexusLoader::loadEventIndex(H5::Group &event_group, std::unique_ptr<std::vector<uint64_t>> &data) const {
+  auto event_index_sds = event_group.openDataSet(NxsFieldNames::INDEX_ID);
+  std::vector<size_t> offsets = {0};
+  std::vector<size_t> slabsizes = {static_cast<size_t>(event_index_sds.getSpace().getSelectNpoints())};
+  loadDataInternal(event_index_sds, data, offsets, slabsizes);
 }
+template void NexusLoader::loadDataInternal<uint64_t>(H5::DataSet &SDS, std::unique_ptr<std::vector<uint64_t>> &data,
+                                                      const std::vector<size_t> &offsets,
+                                                      const std::vector<size_t> &slabsizes) const;
 
-// explict instantiation for uint32_t and float
-template void NexusLoader::loadData<uint32_t>(H5::DataSet &SDS, std::unique_ptr<std::vector<uint32_t>> &data,
-                                              const std::vector<size_t> &offsets, const std::vector<size_t> &slabsizes);
-template void NexusLoader::loadData<float>(H5::DataSet &SDS, std::unique_ptr<std::vector<float>> &data,
-                                           const std::vector<size_t> &offsets, const std::vector<size_t> &slabsizes);
-
-}; // namespace Mantid::DataHandling::AlignAndFocusPowderSlim
+} // namespace Mantid::DataHandling::AlignAndFocusPowderSlim

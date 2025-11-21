@@ -937,4 +937,39 @@ public:
       TS_ASSERT_EQUALS(stop, 6);
     }
   }
+
+  void test_combinedTimeROI() {
+    TimeSplitter splitter;
+    splitter.addROI(TWO, THREE, 0);
+    splitter.addROI(FOUR, FIVE, 1);
+    splitter.addROI(FIVE, SIX, 2);
+    TS_ASSERT_EQUALS(splitter.numRawValues(), 5);
+
+    {
+      // offset = 0
+      const auto roi = splitter.combinedTimeROI();
+      TS_ASSERT_EQUALS(roi.numberOfRegions(), 2);
+
+      // the second and third ROIs should be merged
+      auto times = roi.getAllTimes();
+      TS_ASSERT_EQUALS(times.size(), 4);
+      TS_ASSERT_EQUALS(times[0], TWO);
+      TS_ASSERT_EQUALS(times[1], THREE);
+      TS_ASSERT_EQUALS(times[2], FOUR);
+      TS_ASSERT_EQUALS(times[3], SIX);
+    }
+
+    {
+      // offset = 1 hour, all merged
+      int64_t offset_ns = int64_t(1000000000) * 60 * 60; // 1 hour in nanoseconds
+      const auto roi = splitter.combinedTimeROI(offset_ns);
+      TS_ASSERT_EQUALS(roi.numberOfRegions(), 1);
+
+      // all ROIs merged into one
+      auto times = roi.getAllTimes();
+      TS_ASSERT_EQUALS(times.size(), 2);
+      TS_ASSERT_EQUALS(times[0], ONE);
+      TS_ASSERT_EQUALS(times[1], SIX);
+    }
+  }
 };
