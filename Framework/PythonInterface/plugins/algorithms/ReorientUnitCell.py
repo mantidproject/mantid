@@ -8,7 +8,7 @@ import numpy as np
 
 from mantid.api import PythonAlgorithm, AlgorithmFactory, IPeaksWorkspaceProperty
 from mantid.geometry import PointGroupFactory
-from mantid.kernel import Direction, FloatBoundedValidator, PropertyMode, StringListValidator
+from mantid.kernel import Direction, EnabledWhenProperty, FloatBoundedValidator, PropertyCriterion, StringListValidator
 from mantid.simpleapi import mtd, TransformHKL
 
 
@@ -79,7 +79,6 @@ class ReorientUnitCell(PythonAlgorithm):
             name="CrystalSystem",
             defaultValue="Monoclinic",
             direction=Direction.Input,
-            optional=PropertyMode.Optional,
             validator=StringListValidator(crystal_systems),
             doc="Crystal system.",
         )
@@ -89,9 +88,12 @@ class ReorientUnitCell(PythonAlgorithm):
         self.declareProperty(
             name="LatticeSystem",
             direction=Direction.Input,
+            defaultValue="Rhombohedral",
             validator=StringListValidator(lattice_systems),
             doc="Lattice system (for Trigonal: Rhombohedral or Hexagonal). Defaults to CrystalSystem value.",
         )
+        # Set up conditional visibility
+        self.setPropertySettings("LatticeSystem", EnabledWhenProperty("CrystalSystem", PropertyCriterion.IsEqualTo, "Trigonal"))
 
     def validateInputs(self):
         issues = dict()
@@ -100,15 +102,6 @@ class ReorientUnitCell(PythonAlgorithm):
         peaks_ws = self.getProperty("PeaksWorkspace").value
         if not peaks_ws.sample().hasOrientedLattice():
             issues["PeaksWorkspace"] = "PeaksWorkspace must have an oriented lattice (UB matrix)."
-
-        # Check lattice system is appropriate
-        crystal_system = self.getProperty("CrystalSystem").value
-        lattice_system = self.getProperty("LatticeSystem").value
-        if lattice_system and crystal_system != "Trigonal":
-            issues["LatticeSystem"] = "LatticeSystem should only be specified for Trigonal crystal system."
-
-        if crystal_system == "Trigonal" and lattice_system == "":
-            issues["LatticeSystem"] = "For Trigonal system, LatticeSystem must be passed."
 
         return issues
 
@@ -165,10 +158,10 @@ class ReorientUnitCell(PythonAlgorithm):
         # Get input properties
         wsname: str = self.getPropertyValue("PeaksWorkspace")
         crystal_system: str = self.getProperty("CrystalSystem").value
-        lattice_system: str = self.getProperty("LatticeSystem").value
-        print("DEBUG: lattice_system =", lattice_system)
-        # If lattice system not specified, use crystal system
-        if not lattice_system:
+
+        if crystal_system == "Trigonal":
+            lattice_system: str = self.getProperty("LatticeSystem").value
+        else:
             lattice_system = crystal_system
         self.validate_lattice(lattice_system)
 
