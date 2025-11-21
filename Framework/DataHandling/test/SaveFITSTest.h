@@ -124,10 +124,13 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     std::filesystem::path saved(filename);
-    TSM_ASSERT("The saved file should be found on disk", saved.exists());
-    TSM_ASSERT("The saved file should be a regular file", saved.isFile());
-    TSM_ASSERT("The saved file should be readable", saved.canRead());
-    TSM_ASSERT_EQUALS("The size of the file should be as expected", saved.getSize(), 2888);
-    TSM_ASSERT_THROWS_NOTHING("It should be possible to remove the file saved by the algorithm", saved.remove());
+    const auto perms = std::filesystem::status(saved).permissions();
+    const bool canRead((perms & std::filesystem::perms::owner_read) != std::filesystem::perms::none);
+    TSM_ASSERT("The saved file should be found on disk", std::filesystem::exists(saved));
+    TSM_ASSERT("The saved file should be a regular file", std::filesystem::is_regular_file(saved));
+    TSM_ASSERT("The saved file should be readable", canRead);
+    TSM_ASSERT_EQUALS("The size of the file should be as expected", std::filesystem::file_size(saved), 2888);
+    TSM_ASSERT_THROWS_NOTHING("It should be possible to remove the file saved by the algorithm",
+                              std::filesystem::remove(saved));
   }
 };

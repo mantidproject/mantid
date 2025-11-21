@@ -200,7 +200,7 @@ void LoadPreNexus::parseRuninfo(const string &runinfo, string &dataDir, vector<s
   std::filesystem::path runinfoPath(runinfo);
   // Now lets get the directory
   std::filesystem::path dirPath(runinfoPath.parent_path());
-  dataDir = std::filesystem::absolute(dirPath).string();
+  dataDir = std::filesystem::absolute(dirPath).string() + "/";
   g_log.debug() << "Data directory \"" << dataDir << "\"\n";
 
   std::ifstream in(runinfo.c_str());

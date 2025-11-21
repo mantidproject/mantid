@@ -39,10 +39,10 @@ public:
 
   SetSampleTest() {
     // Setup a temporary directory structure for testing
-    std::filesystem::path testDirec(std::filesystem::path::temp(), "SetSampleTest");
+    std::filesystem::path testDirec = std::filesystem::temp_directory_path() / "SetSampleTest";
     m_testRoot = testDirec.string();
     testDirec.append("sampleenvironments");
-    testDirec.makeDirectory();
+    std::filesystem::create_directories(testDirec);
     testDirec.append(m_facilityName).append(m_instName);
     std::filesystem::create_directories(testDirec);
 
@@ -78,8 +78,8 @@ public:
                             "  </containers>"
                             " </components>"
                             "</environmentspec>";
-    std::filesystem::path envFile(std::filesystem::path(testDirec, m_envName + ".xml"));
-    std::ofstream goodStream(envFile.path(), std::ios_base::out);
+    std::filesystem::path envFile = testDirec / (m_envName + ".xml");
+    std::ofstream goodStream(envFile, std::ios_base::out);
     goodStream << xml;
     goodStream.close();
 
@@ -100,15 +100,15 @@ public:
                                   "  </containers>"
                                   " </components>"
                                   "</environmentspec>";
-    std::filesystem::path envFileFixed(std::filesystem::path(testDirec, m_envName + "_fixedgeometry.xml"));
-    std::ofstream goodStreamFixed(envFileFixed.path(), std::ios_base::out);
+    std::filesystem::path envFileFixed = testDirec / (m_envName + "_fixedgeometry.xml");
+    std::ofstream goodStreamFixed(envFileFixed, std::ios_base::out);
     goodStreamFixed << xml_fixed;
     goodStreamFixed.close();
   }
 
   ~SetSampleTest() {
     try {
-      std::filesystem::path(m_testRoot).remove(true);
+      std::filesystem::remove_all(m_testRoot);
     } catch (...) {
     }
   }

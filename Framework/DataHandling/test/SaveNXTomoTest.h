@@ -56,15 +56,14 @@ public:
     TS_ASSERT(saver->isExecuted());
 
     // Check file exists
-    std::filesystem::path file(m_outputFile);
-    TS_ASSERT(file.exists());
+    TS_ASSERT(std::filesystem::exists(m_outputFile));
 
     checksOnNXTomoFormat(3);
 
     // Tidy up
     AnalysisDataService::Instance().remove(input->getName());
-    if (file.exists())
-      file.remove();
+    if (std::filesystem::exists(m_outputFile))
+      std::filesystem::remove(m_outputFile);
   }
 
   // using image workspaces with one spectrum per row (as opposed to
@@ -88,15 +87,15 @@ public:
     TS_ASSERT(saver->isExecuted());
 
     // Check file exists
-    std::filesystem::path file(m_outputFile);
-    TS_ASSERT(file.exists());
+
+    TS_ASSERT(std::filesystem::exists(m_outputFile));
 
     checksOnNXTomoFormat(2);
 
     // Tidy up
     AnalysisDataService::Instance().remove(input->getName());
-    if (file.exists())
-      file.remove();
+    if (std::filesystem::exists(m_outputFile))
+      std::filesystem::remove(m_outputFile);
   }
 
   void testWriteGroupAppending() {
@@ -128,14 +127,13 @@ public:
       TS_ASSERT(saver->isExecuted());
 
       // Check file exists
-      std::filesystem::path file(m_outputFile);
-      TS_ASSERT(file.exists());
+      TS_ASSERT(std::filesystem::exists(m_outputFile));
 
       checksOnNXTomoFormat(static_cast<int>(wspaces.size()) + numberOfPriorWS);
 
       // Tidy up
       AnalysisDataService::Instance().remove(input->getName());
-      file.remove();
+      std::filesystem::remove(m_outputFile);
     }
   }
 
@@ -209,8 +207,7 @@ private:
     TS_ASSERT(saver->isExecuted());
 
     // Check file exists
-    std::filesystem::path file(m_outputFile);
-    TS_ASSERT(file.exists());
+    TS_ASSERT(std::filesystem::exists(m_outputFile));
 
     // Check that the structure of the nxTomo file is correct
     checkNXTomoStructure();
@@ -225,8 +222,8 @@ private:
     checkNXTomoData(1);
 
     if (deleteWhenComplete) {
-      if (file.exists())
-        file.remove();
+      if (std::filesystem::exists(m_outputFile))
+        std::filesystem::remove(m_outputFile);
     }
   }
 

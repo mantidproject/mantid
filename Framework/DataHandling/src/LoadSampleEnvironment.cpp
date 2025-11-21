@@ -344,7 +344,7 @@ void LoadSampleEnvironment::exec() {
   std::string debugString;
   Sample &sample = outputWS->mutableSample();
 
-  std::string fileExt = std::filesystem::path(filename).extension().string();
+  std::string fileExt = std::filesystem::path(filename).extension().string().substr(1); // remove the '.'
 
   std::transform(fileExt.begin(), fileExt.end(), fileExt.begin(), toupper);
 

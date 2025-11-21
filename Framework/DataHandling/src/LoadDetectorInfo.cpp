@@ -63,7 +63,7 @@ void LoadDetectorInfo::init() {
 void LoadDetectorInfo::exec() {
   cacheInputs();
   std::string filename = getPropertyValue("DataFilename");
-  std::string ext = std::filesystem::path(filename).extension().string();
+  std::string ext = std::filesystem::path(filename).extension().string().substr(1); // remove the '.'
   if (boost::iequals(ext, "dat") || boost::iequals(ext, "sca")) {
     loadFromDAT(filename);
   } else if (boost::iequals(ext, "raw")) {

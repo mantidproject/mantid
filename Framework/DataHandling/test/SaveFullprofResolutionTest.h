@@ -60,10 +60,8 @@ public:
 
     // Check file
     std::string filename = alg.getProperty("OutputFilename"); // Get full pathname
-    bool outputfileexist = std::filesystem::exists(filename);
-    TS_ASSERT(outputfileexist);
-
-    if (!outputfileexist) {
+    if (!std::filesystem::exists(filename)) {
+      TS_FAIL("\"" + filename + "\" does not exist");
       return;
     }
 
@@ -100,9 +98,8 @@ public:
 
     // Locate file
     std::string filename = alg.getProperty("OutputFilename"); // Get full pathname
-    std::filesystem::path irffile(filename);
-    TS_ASSERT(irffile.exists());
-    if (!irffile.exists()) {
+    if (!std::filesystem::exists(filename)) {
+      TS_FAIL("\"" + filename + "\" does not exist");
       std::filesystem::remove(parwsname);
       return;
     }
@@ -113,8 +110,6 @@ public:
 
     // Clean
     std::filesystem::remove(filename);
-
-    return;
   }
 
   //----------------------------------------------------------------------------------------------
@@ -154,9 +149,8 @@ public:
 
     // Locate file
     std::string filename = alg.getProperty("OutputFilename"); // Get full pathname
-    std::filesystem::path irffile(filename);
-    TS_ASSERT(irffile.exists());
-    if (!irffile.exists()) {
+    if (!std::filesystem::exists(filename)) {
+      TS_FAIL("\"" + filename + "\" does not exist");
       std::filesystem::remove(parwsname);
       return;
     }

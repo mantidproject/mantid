@@ -765,9 +765,8 @@ public:
 
     Mantid::API::Workspace_sptr loadedWS = loadAlg.getProperty("OutputWorkspace");
     auto loadedPeaksWS = std::dynamic_pointer_cast<Mantid::API::IPeaksWorkspace>(loadedWS);
-    std::filesystem::path testFile(filePath);
-    if (testFile.exists()) {
-      testFile.remove();
+    if (std::filesystem::exists(filePath)) {
+      std::filesystem::remove(filePath);
     }
 
     TS_ASSERT_EQUALS(appliedCoordinateSystem, loadedPeaksWS->getSpecialCoordinateSystem());
@@ -811,9 +810,8 @@ public:
 
     Mantid::API::Workspace_sptr loadedWS = loadAlg.getProperty("OutputWorkspace");
     auto loadedPeaksWS = std::dynamic_pointer_cast<Mantid::API::IPeaksWorkspace>(loadedWS);
-    std::filesystem::path testFile(filePath);
-    if (testFile.exists()) {
-      testFile.remove();
+    if (std::filesystem::exists(filePath)) {
+      std::filesystem::remove(filePath);
     }
 
     TS_ASSERT_EQUALS(appliedCoordinateSystem, loadedPeaksWS->getSpecialCoordinateSystem());

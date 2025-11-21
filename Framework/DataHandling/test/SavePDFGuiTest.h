@@ -48,10 +48,10 @@ public:
     return newlines;
   }
 
-  size_t countLines(const std::string &filename) {
+  size_t countLines(const std::filesystem::path &filename) {
     const size_t BUFFER_SIZE = 1024 * 1024;
     std::vector<char> buffer(BUFFER_SIZE);
-    std::ifstream in(filename.c_str());
+    std::ifstream in(filename);
     size_t n = 0;
     while (size_t cc = read(in, buffer)) {
       n += countEOL(buffer, cc);
@@ -88,14 +88,14 @@ public:
 
     // do the checks
     std::filesystem::path outFile(outFilename);
-    TS_ASSERT(outFile.isFile());
-    TS_ASSERT_EQUALS(countLines(outFilename), 1004);
+    TS_ASSERT(std::filesystem::is_regular_file(outFile));
+    TS_ASSERT_EQUALS(countLines(outFile), 1004);
 
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(wsName);
 
     // remove the output file
-    outFile.remove(false);
+    std::filesystem::remove(outFile);
   }
 
   void test_exec_ws_group() {

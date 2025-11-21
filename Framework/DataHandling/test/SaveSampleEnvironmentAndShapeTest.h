@@ -231,5 +231,5 @@ public:
     return cube;
   }
 
-  const std::string m_OutputFile = std::filesystem::path::current() + "SaveSampleTest.stl";
+  const std::string m_OutputFile = (std::filesystem::current_path() / "SaveSampleTest.stl").string();
 };

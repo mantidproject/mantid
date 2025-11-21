@@ -151,8 +151,8 @@ private:
   }
 
   Workspace2D_sptr loadEmptyMARI() {
-    std::filesystem::path mariIDF(ConfigService::Instance().getInstrumentDirectory());
-    mariIDF.resolve("MARI_Definition.xml");
+    std::filesystem::path mariIDF =
+        std::filesystem::path(ConfigService::Instance().getInstrumentDirectory()) / "MARI_Definition.xml";
     LoadEmptyInstrument loader;
     loader.initialize();
     loader.setPropertyValue("Filename", mariIDF.string());

@@ -120,8 +120,9 @@ public:
     for (int spec = 0; spec < 3; ++spec) {
       std::ostringstream ss;
       ss << std::string(filename, 0, extPos) << "_" << spec << std::string(filename, extPos);
-      TS_ASSERT(std::filesystem::path(ss.str()).exists());
-      std::filesystem::path(ss.str()).remove();
+      std::filesystem::path filepath(ss.str());
+      TS_ASSERT(std::filesystem::exists(filepath));
+      std::filesystem::remove(filepath);
     }
 
     // numeric axis
@@ -135,9 +136,10 @@ public:
     for (int spec = 0; spec < 3; ++spec) {
       std::ostringstream ss;
       ss << std::string(filename, 0, extPos) << "_" << spec << "_" << spec * spec << std::string(filename, extPos);
-      std::cout << ss.str() << std::endl;
-      TS_ASSERT(std::filesystem::path(ss.str()).exists());
-      std::filesystem::path(ss.str()).remove();
+      std::filesystem::path filepath(ss.str());
+      std::cout << filepath << std::endl;
+      TS_ASSERT(std::filesystem::exists(filepath));
+      std::filesystem::remove(filepath);
     }
 
     // bin edge axis
@@ -151,8 +153,9 @@ public:
       std::ostringstream ss;
       ss << std::string(filename, 0, extPos) << "_" << spec << "_" << 0.5 * (spec * spec + (spec + 1) * (spec + 1))
          << std::string(filename, extPos);
-      TS_ASSERT(std::filesystem::path(ss.str()).exists());
-      std::filesystem::path(ss.str()).remove();
+      std::filesystem::path filepath(ss.str());
+      TS_ASSERT(std::filesystem::exists(filepath));
+      std::filesystem::remove(filepath);
     }
 
     // text axis
@@ -165,8 +168,9 @@ public:
     for (int spec = 0; spec < 3; ++spec) {
       std::ostringstream ss;
       ss << std::string(filename, 0, extPos) << "_" << spec << "_ax_" << spec << std::string(filename, extPos);
-      TS_ASSERT(std::filesystem::path(ss.str()).exists());
-      std::filesystem::path(ss.str()).remove();
+      std::filesystem::path filepath(ss.str());
+      TS_ASSERT(std::filesystem::exists(filepath));
+      std::filesystem::remove(filepath);
     }
   }
 
@@ -1005,8 +1009,8 @@ public:
     std::ostringstream ss0, ss1;
     ss0 << std::string(filename, 0, extPos) << "_0" << std::string(filename, extPos);
     ss1 << std::string(filename, 0, extPos) << "_1" << std::string(filename, extPos);
-    TS_ASSERT(std::filesystem::path(ss0.str()).exists());
-    TS_ASSERT(std::filesystem::path(ss1.str()).exists());
+    TS_ASSERT(std::filesystem::exists(ss0.str()));
+    TS_ASSERT(std::filesystem::exists(ss1.str()));
     AnalysisDataService::Instance().remove(m_name);
   }
 
@@ -1340,9 +1344,8 @@ public:
       saveAlgPtrs[i] = nullptr;
     }
     Mantid::API::AnalysisDataService::Instance().remove(m_name);
-    std::filesystem::path gsasfile(m_filename);
-    if (gsasfile.exists())
-      gsasfile.remove();
+    if (std::filesystem::exists(m_filename))
+      std::filesystem::remove(m_filename);
   }
 
 private:

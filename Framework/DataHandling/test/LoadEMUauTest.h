@@ -165,11 +165,11 @@ public:
 
     // confirm that file "EMUau_definition_2025.xml" is returned but ignore the file path
     std::filesystem::path prePath(filename);
-    TS_ASSERT_EQUALS(prePath.getFileName(), "EMUau_Definition_2025.xml");
+    TS_ASSERT_EQUALS(prePath.filename(), "EMUau_Definition_2025.xml");
 
     std::string postMod("2025-07-26 10:13:12");
     filename = InstrumentFileFinder::getInstrumentFilename(instname, postMod);
     std::filesystem::path postPath(filename);
-    TS_ASSERT_EQUALS(postPath.getFileName(), "EMUau_Definition.xml");
+    TS_ASSERT_EQUALS(postPath.filename(), "EMUau_Definition.xml");
   }
 };

@@ -130,8 +130,9 @@ void DetermineChunking::exec() {
     string dataDir;
     LoadPreNexus lp;
     lp.parseRuninfo(filename, dataDir, eventFilenames);
+    std::filesystem::path dataPath(dataDir);
     for (const auto &eventFilename : eventFilenames) {
-      BinaryFile<DasEvent> eventfile(dataDir + eventFilename);
+      BinaryFile<DasEvent> eventfile(dataPath / eventFilename);
       // Factor of 2 for compression
       wkspSizeGiB += static_cast<double>(eventfile.getNumElements()) * 48.0 * BYTES_TO_GiB;
     }
