@@ -33,6 +33,11 @@ using std::multimap;
 using std::string;
 using std::vector;
 
+namespace {
+static int call_count = 0;
+int blank_deleter(hid_t) { return ++call_count; }
+} // namespace
+
 class NexusFileTest : public CxxTest::TestSuite {
 
 public:
@@ -259,10 +264,9 @@ public:
   // TEST MAKE / OPEN / PUT / CLOSE DATASET
   // #################################################################################################################
   void test_uniqueID() {
-    static int call_count = 0;
-    static auto const blank_deleter = [](hid_t) -> int { return ++call_count; };
-
+    cout << "\ntest uniqueID\n";
     // construct empty
+    call_count = 0;
     {
       Mantid::Nexus::UniqueID<blank_deleter> uid;
       TS_ASSERT_EQUALS(uid.getId(), -1);
@@ -276,6 +280,7 @@ public:
       TS_ASSERT_EQUALS(uid.getId(), test);
     }
     TS_ASSERT_EQUALS(call_count, 1);
+    cout << "\ntest uniqueID\n";
 
     // release
     call_count = 0;
