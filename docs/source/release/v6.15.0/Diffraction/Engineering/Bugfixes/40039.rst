@@ -1,0 +1,1 @@
+- Updated the ``Focus`` tab processing in the :ref:`Engineering Diffraction interface<Engineering_Diffraction-ref>` to use :ref:`CropWorkspaceRagged <algm-CropWorkspaceRagged>` in order to remove zeros outside the data limits.
