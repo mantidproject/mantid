@@ -1,0 +1,30 @@
+name: Linux unit tests and system tests
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  linux-build-and-test:
+    runs-on: [self-hosted, linux, x64]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Needed to fetch tags for versioningit
+          fetch-depth: "0"
+      
+      - name: Run unit tests and system tests on Linux
+        run: ${GITHUB_WORKSPACE}/buildconfig/Jenkins/Conda/conda-buildscript ${GITHUB_WORKSPACE} linux-64-ci --enable-systemtests
+
+      - name: Upload build and test log artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          path: ${{ github.workspace }}/build/test_logs/*.log
+
+      - name: Publish Test Results
+        uses: EnricoMi/publish-unit-test-result-action/linux@v2
+        if: always()
+        with:
+          files: |
+            ${{ github.workspace }}/build/test_logs/junit.xml
