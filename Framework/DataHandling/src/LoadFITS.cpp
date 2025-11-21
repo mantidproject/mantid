@@ -645,7 +645,7 @@ Workspace2D_sptr LoadFITS::makeWorkspace(const FITSInfo &fileInfo, size_t &newFi
   }
 
   try {
-    ws->setTitle(std::filesystem::path(fileInfo.filePath).filename());
+    ws->setTitle(std::filesystem::path(fileInfo.filePath).filename().string());
   } catch (std::runtime_error &) {
     ws->setTitle(padZeros(newFileNumber, g_DIGIT_SIZE_APPEND));
   }

@@ -571,7 +571,7 @@ void LoadEventPreNexus2::addToWorkspaceLog(const std::string &logtitle, size_t m
 void LoadEventPreNexus2::runLoadInstrument(const std::string &eventfilename,
                                            const MatrixWorkspace_sptr &localWorkspace) {
   // start by getting just the filename
-  string instrument = std::filesystem::path(eventfilename).filename();
+  string instrument = std::filesystem::path(eventfilename).filename().string();
 
   // initialize vector of endings and put live at the beginning
   vector<string> eventExts(EVENT_EXTS, EVENT_EXTS + NUM_EXT);
