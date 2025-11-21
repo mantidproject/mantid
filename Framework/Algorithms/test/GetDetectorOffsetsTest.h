@@ -361,7 +361,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(algorithmProperties.setPropertyValue("DReference", "1.00"));
     TS_ASSERT_THROWS_NOTHING(algorithmProperties.setPropertyValue("XMin", "-20.0"));
     TS_ASSERT_THROWS_NOTHING(algorithmProperties.setPropertyValue("XMax", "20.0"));
-    //    TS_ASSERT_THROWS_NOTHING(algorithmProperties.setPropertyValue("MaxOffset", "20.0"));
+    TS_ASSERT_THROWS_NOTHING(algorithmProperties.setPropertyValue("MaxOffset", "0.24")); // peak at x~15.7
 
     std::function<Histogram_sptr(double, double, std::size_t, double, double)> peakFunc =
         [](double x_0, double x_1, std::size_t N_x, double p_0, double p_width) -> Histogram_sptr {
@@ -388,7 +388,6 @@ public:
 
     Workspace2D_sptr input = WorkspaceCreationHelper::create2DWorkspaceFromFunctionAndArgsList(
         peakFunc, {
-                      // note that "{0.0, 200.0, std::size_t(200), 1.0, 1.0}" reliably fails
                       {0.0, 200.0, std::size_t(200), 5.0, 5.0},
                       {0.0, 200.0, std::size_t(200), 6.0, 5.0},
                       {0.0, 200.0, std::size_t(200), 7.0, 5.0},
@@ -407,7 +406,8 @@ public:
     MaskWorkspace_sptr mask = std::make_shared<MaskWorkspace>(input->getInstrument());
     AnalysisDataService::Instance().add(maskWSName, mask);
 
-    Histogram_sptr exampleFailingSpectrum = peakFunc(0.0, 200.0, std::size_t(200), 1.0, 1.0);
+    // put peak with centre larger than max (relative) offset specified
+    Histogram_sptr exampleFailingSpectrum = peakFunc(0.0, 200.0, std::size_t(200), 17, 5.0);
 
     return std::make_tuple(input, maskWSName, expectedPeakFitLocations, exampleFailingSpectrum);
   }
