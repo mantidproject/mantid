@@ -8,6 +8,10 @@ jobs:
   linux-build-and-test:
     runs-on: [self-hosted, linux, x64]
     steps:
+      - name: debug
+        run: |
+          env -0 | while IFS='' read -d '' line ; do printf '%s\t: %s\n' "${line%%=*}" "${line#*=}" | expand -t 30 | sed ':a;N;$!ba;s/\n/ /g'; done | LC_COLLATE=C sort -b
+
       - uses: actions/checkout@v4
         with:
           # Needed to fetch tags for versioningit
