@@ -8,14 +8,18 @@ import numpy as np
 import pyvista as pv
 from pyvista.plotting.picking import RectangleSelection
 from pyvista.plotting.opts import PickerType
+from qtpy.QtWidgets import QFileDialog
 from vtk import vtkCylinder
 from mantid import mtd
-from mantid.kernel import logger
+from mantid.kernel import logger, ConfigService
+from mantidqt.io import open_a_file_dialog
 
 from instrumentview.FullInstrumentViewModel import FullInstrumentViewModel
 from instrumentview.FullInstrumentViewWindow import FullInstrumentViewWindow
 from instrumentview.InstrumentViewADSObserver import InstrumentViewADSObserver
 from instrumentview.Peaks.WorkspaceDetectorPeaks import WorkspaceDetectorPeaks
+
+from pathlib import Path
 
 
 class FullInstrumentViewPresenter:
@@ -298,3 +302,15 @@ class FullInstrumentViewPresenter:
             if len(x_values) > 0:
                 self._view.plot_lineplot_overlay(x_values, labels, ws_peaks.colour)
         self._view.redraw_lineplot()
+
+    def on_save_xml_mask_clicked(self):
+        filename = open_a_file_dialog(
+            accept_mode=QFileDialog.AcceptSave,
+            file_mode=QFileDialog.AnyFile,
+            file_filter="XML files (*xml)",
+            directory=ConfigService["defaultsave.directory"],
+        )
+        # TODO: Figure out if this can be done automatically by the dialog
+        if Path(filename).suffix != ".xml":
+            filename += ".xml"
+        self._model.save_xml_mask(filename)

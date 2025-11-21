@@ -20,6 +20,7 @@ from mantid.simpleapi import (
     Rebin,
     ExtractMask,
     ExtractMaskToTable,
+    SaveMask,
 )
 from itertools import groupby
 import numpy as np
@@ -392,3 +393,10 @@ class FullInstrumentViewModel:
 
         xmin, xmax = self._integration_limits
         ExtractMaskToTable(self._mask_ws, Xmin=xmin, Xmax=xmax, OutputWorkspace=name_exported_ws)
+
+    def save_xml_mask(self, filename) -> None:
+        if not filename:
+            return
+        for i, v in enumerate(self._is_masked):
+            self._mask_ws.dataY(i)[:] = v
+        SaveMask(self._mask_ws, OutputFile=filename)
