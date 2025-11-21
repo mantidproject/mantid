@@ -1,0 +1,1 @@
+- New algorithm :ref:`ReorientUnitCell <algm-ReorientUnitCell>` to select the unit cell most aligned to goniometer axes.
