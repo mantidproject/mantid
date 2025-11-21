@@ -31,7 +31,7 @@ public:
                                const std::map<Mantid::Types::Core::DateAndTime, int> &splitterMap,
                                const bool correction_to_sample, std::shared_ptr<API::Progress> &progress);
 
-  // Contructor with custom loader to allow mocking in tests
+  // Constructor with custom loader to allow mocking in tests
   ProcessBankSplitFullTimeTask(std::vector<std::string> &bankEntryNames, H5::H5File &h5file,
                                std::shared_ptr<NexusLoader> loader, std::vector<int> &workspaceIndices,
                                std::vector<API::MatrixWorkspace_sptr> &wksps,

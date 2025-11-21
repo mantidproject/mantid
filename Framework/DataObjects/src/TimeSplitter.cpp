@@ -713,6 +713,14 @@ TimeSplitter::calculate_target_indices(const std::vector<DateAndTime> &times) co
   return indices;
 }
 
+/**
+ * @brief Returns a combined TimeROI covering all intervals.
+ *
+ * @param start_offset Offset in nanoseconds to subtract from interval start times.
+ *        This accounts for TOF (Time-of-Flight) values that may extend before the pulse time.
+ *        Pass 0 if no offset is required.
+ * @return TimeROI covering all intervals, with start times adjusted by start_offset.
+ */
 const TimeROI TimeSplitter::combinedTimeROI(const int64_t start_offset) const {
   TimeROI combined;
 

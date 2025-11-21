@@ -34,7 +34,7 @@ ProcessBankSplitFullTimeTask::ProcessBankSplitFullTimeTask(
     std::vector<int> &workspaceIndices, std::vector<API::MatrixWorkspace_sptr> &wksps,
     const std::map<detid_t, double> &calibration, const std::map<detid_t, double> &scale_at_sample,
     const std::set<detid_t> &masked, const size_t events_per_chunk, const size_t grainsize_event,
-    const std::vector<PulseROI> &pulse_indices, const std::map<DateAndTime, int> &splitterMap,
+    const std::vector<PulseROI> &pulse_indices, const std::map<Mantid::Types::Core::DateAndTime, int> &splitterMap,
     const bool correction_to_sample, std::shared_ptr<API::Progress> &progress)
     : m_h5file(h5file), m_bankEntries(bankEntryNames),
       m_loader(std::make_shared<NexusLoader>(is_time_filtered, pulse_indices)), m_workspaceIndices(workspaceIndices),
@@ -47,7 +47,7 @@ ProcessBankSplitFullTimeTask::ProcessBankSplitFullTimeTask(
     std::vector<int> &workspaceIndices, std::vector<API::MatrixWorkspace_sptr> &wksps,
     const std::map<detid_t, double> &calibration, const std::map<detid_t, double> &scale_at_sample,
     const std::set<detid_t> &masked, const size_t events_per_chunk, const size_t grainsize_event,
-    const std::map<DateAndTime, int> &splitterMap, const bool correction_to_sample,
+    const std::map<Mantid::Types::Core::DateAndTime, int> &splitterMap, const bool correction_to_sample,
     std::shared_ptr<API::Progress> &progress)
     : m_h5file(h5file), m_bankEntries(bankEntryNames), m_loader(loader), m_workspaceIndices(workspaceIndices),
       m_wksps(wksps), m_calibration(calibration), m_scale_at_sample(scale_at_sample), m_masked(masked),
@@ -93,8 +93,6 @@ void ProcessBankSplitFullTimeTask::operator()(const tbb::blocked_range<size_t> &
 
     // get handle to the data
     auto detID_SDS = event_group.openDataSet(NxsFieldNames::DETID);
-    // auto tof_SDS = event_group.openDataSet(NxsFieldNames::TIME_OF_FLIGHT);
-    // and the units
     std::string tof_unit;
     Nexus::H5Util::readStringAttribute(tof_SDS, "units", tof_unit);
     const double time_conversion = Kernel::Units::timeConversionValue(tof_unit, MICROSEC);
@@ -156,7 +154,6 @@ void ProcessBankSplitFullTimeTask::operator()(const tbb::blocked_range<size_t> &
       // load detid and tof at the same time
       tbb::parallel_invoke(
           [&] { // load detid
-            // event_detid->clear();
             m_loader->loadData(detID_SDS, event_detid, offsets, slabsizes);
             // immediately find min/max to allow for other things to read disk
             const auto [minval, maxval] = Mantid::Kernel::parallel_minmax(event_detid, m_grainsize_event);
@@ -169,7 +166,6 @@ void ProcessBankSplitFullTimeTask::operator()(const tbb::blocked_range<size_t> &
             }
           },
           [&] { // load time-of-flight
-            // event_time_of_flight->clear();
             m_loader->loadData(tof_SDS, event_time_of_flight, offsets, slabsizes);
           });
 
@@ -204,7 +200,8 @@ void ProcessBankSplitFullTimeTask::operator()(const tbb::blocked_range<size_t> &
               std::vector<size_t> indices;
               auto splitter_it = m_splitterMap.cbegin();
               for (size_t k = 0; k < event_detid->size(); ++k) {
-                // Calculate the full time at sample: pulse_time + tof * correctionToSample[detid]
+                // Calculate the full time at sample: full_time = pulse_time + (tof * correctionFactor), where
+                // correctionFactor is either scale_at_sample[detid] or 1.0
                 const double correctionFactor =
                     m_correction_to_sample ? calibration->value_scale_at_sample(static_cast<detid_t>((*event_detid)[k]))
                                            : 1.0;
@@ -224,7 +221,7 @@ void ProcessBankSplitFullTimeTask::operator()(const tbb::blocked_range<size_t> &
                   ++splitter_it;
                 }
 
-                // now starting at splitter_it find full_time (can not assume tof will not be sorted)
+                // Now, starting at splitter_it, find full_time (TOFs will be unsorted)
                 // Advance until we find the first element > full_time, then step back to get the greatest key <=
                 // full_time.
                 auto full_time_it = splitter_it;
