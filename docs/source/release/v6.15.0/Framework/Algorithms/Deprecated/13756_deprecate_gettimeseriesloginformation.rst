@@ -1,0 +1,1 @@
+- :ref:`GetTimeSeriesLogInformation <algm-GetTimeSeriesLogInformation>` has been deprecated. Use ``workspace.run().getStatistics("log_name")`` instead to access time series log statistics directly.
