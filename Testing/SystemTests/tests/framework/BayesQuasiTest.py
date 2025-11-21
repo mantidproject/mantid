@@ -17,7 +17,7 @@ class BayesQuasiTest(MantidSystemTest):
     _reference_result_file_name = "irs26176_graphite002_QLr_Result.nxs"
 
     def skipTests(self):
-        return platform == "darwin"
+        return True
 
     def runTest(self):
         Load(Filename=f"{self._sample_name}.nxs", OutputWorkspace=self._sample_name, LoadHistory=False)

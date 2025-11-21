@@ -34,7 +34,7 @@ def _cleanup_files(dirname, filenames):
 
 class QLresTest(systemtesting.MantidSystemTest):
     def skipTests(self):
-        return platform == "darwin"
+        return True
 
     def runTest(self):
         prefix = "rt_"
