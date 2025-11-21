@@ -85,13 +85,7 @@ do
   shift
 done
 
-
-# Mamba
-# make sure versions specified here are compatible with the developer meta-package
-#setup_mamba $WORKSPACE/miniforge "" true $PLATFORM
-#mamba activate base
-# something is wrong with versioningit and rattler-build 0.48
-#mamba install --yes rattler-build=0.47 versioningit python=3.11 rattler-index
+# pixi setup
 install_pixi
 setup_pixi_toml
 
@@ -138,8 +132,6 @@ fi
 
 export CONDA_SUBDIR=$PLATFORM
 
-#echo "CONDA BASE ENVIRONMENT (package-conda):"
-#mamba run -n base mamba list
 echo "pixi rattler-builder environment"
 pixi list --manifest-path $SCRIPT_DIR/pixi.toml -e rattler-builder
 

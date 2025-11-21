@@ -1,8 +1,0 @@
-#!/bin/bash
-MANTID_ROOT=$1
-PATH_TO_HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-#TODO: should this be three smaller tasks which depend on each other, rather than calling an external script?
-sh $PATH_TO_HERE/package-conda $MANTID_ROOT --build-mantid-developer
-PLATFORM=$(pixi info --json | jq -r .platform)
-pixi workspace --manifest-path $PATH_TO_HERE/pixi.toml channel add $MANTID_ROOT/conda-bld -f mantid-developer-ci --prepend
-pixi add --manifest-path $PATH_TO_HERE/pixi.toml --platform $PLATFORM -f mantid-developer-ci mantid-developer

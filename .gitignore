@@ -226,3 +226,12 @@ installers/conda/win/_package_build
 installers/conda/win/_nsis_conda_env
 installers/conda/win/nsis_log.txt
 !installers/conda/win/MantidWorkbench.exe
+
+# pixi ci
+buildconfig/Jenkins/Conda/pixi.toml
+buildconfig/Jenkins/Conda/pixi.lock
+buildconfig/Jenkins/Conda/.pixi/*
+# ignoring these because they are created when pixi is setup for
+# the ci in pixi-utils
+buildconfig/Jenkins/Conda/.gitignore
+buildconfig/Jenkins/Conda/.gitatributes
