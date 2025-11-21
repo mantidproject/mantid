@@ -15,6 +15,29 @@ Usage
 -----
 .. include:: ../usagedata-note.txt
 
+**Example - Get Information Using Run Object (Recommended)**
+
+.. testcode:: exGetTimeSeriesLogInformationRunObject
+
+   w=Load('CNCS_7860')
+
+   speed5_stats = w.run().getStatistics("Speed5")
+   print("duration {:.3f}".format(speed5_stats.duration))
+   print("minimum {:.3f}".format(speed5_stats.minimum))
+   print("maximum {:.3f}".format(speed5_stats.maximum))
+   print("mean {:.3f}".format(speed5_stats.mean))
+   print("time_mean {:.3f}".format(speed5_stats.time_mean))
+
+Output:
+
+.. testoutput:: exGetTimeSeriesLogInformationRunObject
+
+   duration 117.901
+   minimum 30.000
+   maximum 30.000
+   mean 30.000
+   time_mean 30.000
+
 **Example - Get Information from One Log**
 
 .. testcode:: exGetTimeSeriesLogInformationSimple

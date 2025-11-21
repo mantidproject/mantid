@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/DeprecatedAlgorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAlgorithms/DllConfig.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -21,7 +22,7 @@ namespace Algorithms {
 
   @date 2011-12-22
 */
-class MANTID_ALGORITHMS_DLL GetTimeSeriesLogInformation final : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL GetTimeSeriesLogInformation final : public API::Algorithm, public API::DeprecatedAlgorithm {
 public:
   GetTimeSeriesLogInformation();
 
