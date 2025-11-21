@@ -28,7 +28,7 @@
 
 # Use versioningit to compute version number to match conda-build
 execute_process(
-  COMMAND "${Python_EXECUTABLE}" -m versioningit
+  COMMAND "${Python_EXECUTABLE}" -m versioningits
   WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
   OUTPUT_VARIABLE _version_str
   ERROR_VARIABLE _error
