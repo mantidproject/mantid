@@ -29,7 +29,7 @@ source $SCRIPT_DIR/pixi-utils
 start_time=$(date +%s)
 
 # For some reason (probably a pixi bug) when dereferencing bash environment variables
-# during a pixi run command (i.e  pixi run "versioningit $REPO_ROOT_DIR" from package-conda)
+# during a pixi run command (i.e  pixi run "versioningit $REPO_ROOT_DIR")
 # on Windows the slashes were reversed (\). We found that a path in the style C:/one/two/three
 # always worked, we this functions converts a path into that from.
 normalise_windows_path() {
@@ -46,7 +46,6 @@ normalise_windows_path() {
 }
 
 # Setup expected variables
-REPO_ROOT_DIR=$SCRIPT_DIR/../../..
 WORKSPACE=$1
 if [[ -z "$WORKSPACE" ]]; then
     echo "A workspace argument is required"
@@ -54,13 +53,16 @@ if [[ -z "$WORKSPACE" ]]; then
 fi
 shift
 if [[ $OSTYPE == "msys"* ]]; then
-    WORKSPACE=normalise_windows_path "$WORKSPACE"
+    WORKSPACE=$(normalise_windows_path "$WORKSPACE")
+    SCRIPT_DIR=$(normalise_windows_path "$SCRIPT_DIR")
     # Require git settings so that paths can be checked out with longer file names than 260 characters
     if [[ ! $(git config --system --get core.longpaths) == true ]]; then
         echo "This windows machine is does not have longpaths enabled for git, please run this command: git config --system core.longpaths true"
         exit 1
     fi
 fi
+
+REPO_ROOT_DIR=$SCRIPT_DIR/../../..
 RECIPES_DIR=$REPO_ROOT_DIR/conda/recipes/
 
 # Parse flags
