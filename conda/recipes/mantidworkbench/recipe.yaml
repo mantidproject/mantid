@@ -30,7 +30,6 @@ requirements:
     - mantidqt == ${{ version }}
     - python ${{ python }}
     - pip ${{ pip }}
-    - versioningit ${{ versioningit }}
     - if: linux
       then:
         - libgl-devel
