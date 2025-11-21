@@ -47,14 +47,12 @@ public:
   /// Test that the log file paths are correctly found on Windows when using the alternate data stream.
   /// </summary>
   void testAlternateDataStream() {
+    std::filesystem::path rawFile("./fakeRawFile.raw");
 #ifdef _WIN32
-    std::filesystem::path rawFilePath("./fakeRawFile.raw");
-    std::filesystem::path rawFile(rawFilePath);
-
-    std::ofstream file(rawFile.path());
+    std::ofstream file(rawFile);
     file << "data goes here";
 
-    std::string adsFileName = rawFile.path() + ":checksum";
+    std::string adsFileName = rawFile.string() + ":checksum";
     std::ofstream adsFile(adsFileName);
     adsFile << "ad0bc56c4c556fa368565000f01e77f7 *fakeRawFile.log" << std::endl;
     adsFile << "d5ace6dc7ac6c4365d48ee1f2906c6f4 *fakeRawFile.nxs" << std::endl;
@@ -70,17 +68,32 @@ public:
     // Create the log files, otherwise the searchForLogFiles function won't include them in the
     // list of log files.
     std::filesystem::path logFile("./fakeRawFile.log");
-    logFile.createFile();
+    {
+      std::ofstream handle(logFile);
+      handle.close();
+    }
     std::filesystem::path icpDebugFile("./fakeRawFile_ICPdebug.txt");
-    icpDebugFile.createFile();
+    {
+      std::ofstream handle(icpDebugFile);
+      handle.close();
+    }
     std::filesystem::path icpEventFile("./fakeRawFile_ICPevent.txt");
-    icpEventFile.createFile();
+    {
+      std::ofstream handle(icpEventFile);
+      handle.close();
+    }
     std::filesystem::path icpStatusFile("./fakeRawFile_ICPstatus.txt");
-    icpStatusFile.createFile();
+    {
+      std::ofstream handle(icpStatusFile);
+      handle.close();
+    }
     std::filesystem::path statusFile("./fakeRawFile_Status.txt");
-    statusFile.createFile();
+    {
+      std::ofstream handle(statusFile);
+      handle.close();
+    }
 
-    std::list<std::string> logFiles = LoadRawHelper::searchForLogFiles(rawFilePath);
+    std::list<std::string> logFiles = LoadRawHelper::searchForLogFiles(rawFile.string());
 
     // One .log and four .txt files are listed in the alternate data stream.
     TS_ASSERT_EQUALS(5, logFiles.size());
@@ -90,12 +103,12 @@ public:
     TS_ASSERT(std::find(logFiles.begin(), logFiles.end(), "fakeRawFile_ICPstatus.txt") != logFiles.end());
     TS_ASSERT(std::find(logFiles.begin(), logFiles.end(), "fakeRawFile_Status.txt") != logFiles.end());
 
-    rawFile.remove();
-    logFile.remove();
-    icpDebugFile.remove();
-    icpEventFile.remove();
-    icpStatusFile.remove();
-    statusFile.remove();
+    std::filesystem::remove(rawFile);
+    std::filesystem::remove(logFile);
+    std::filesystem::remove(icpDebugFile);
+    std::filesystem::remove(icpEventFile);
+    std::filesystem::remove(icpStatusFile);
+    std::filesystem::remove(statusFile);
 #endif
   }
 

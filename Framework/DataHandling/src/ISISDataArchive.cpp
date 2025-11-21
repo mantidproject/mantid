@@ -84,7 +84,7 @@ std::string ISISDataArchive::getPath(const std::string &fName) const {
     return ""; // Avoid pointless call to service
 
   std::ostringstream os = sendRequest(fName);
-  os << std::filesystem::path::preferred_separator << fName;
+  os << std::string(1, std::filesystem::path::preferred_separator) << fName;
   std::string expectedPath = os.str();
   return expectedPath;
 }

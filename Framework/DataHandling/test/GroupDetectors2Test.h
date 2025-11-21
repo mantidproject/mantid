@@ -293,7 +293,7 @@ public:
     grouper.setPropertyValue("InputWorkspace", inputWSName);
     std::string output(outputWSNameBase + "File");
     grouper.setPropertyValue("OutputWorkspace", output);
-    grouper.setPropertyValue("MapFile", inputFile);
+    grouper.setPropertyValue("MapFile", inputFile.string());
     grouper.setProperty<bool>("KeepUngroupedSpectra", true);
 
     TS_ASSERT_THROWS_NOTHING(grouper.execute());
@@ -352,7 +352,7 @@ public:
     TS_ASSERT(spectrumInfo.hasDetectors(4));
     TS_ASSERT(spectrumInfo.hasUniqueDetector(4));
 
-    remove(inputFile.c_str());
+    std::filesystem::remove(inputFile);
   }
 
   void testFileRanges() {
@@ -365,7 +365,7 @@ public:
     grouper.setPropertyValue("InputWorkspace", inputWSName);
     std::string output(outputWSNameBase + "File");
     grouper.setPropertyValue("OutputWorkspace", output);
-    grouper.setPropertyValue("MapFile", inputFile);
+    grouper.setPropertyValue("MapFile", inputFile.string());
     grouper.setProperty<bool>("KeepUngroupedSpectra", true);
 
     TS_ASSERT_THROWS_NOTHING(grouper.execute());
@@ -400,7 +400,7 @@ public:
     }
     TS_ASSERT_EQUALS(outputWS->getAxis(1)->spectraNo(2), 3);
     TS_ASSERT_EQUALS(outputWS->getSpectrum(2).getSpectrumNo(), 3);
-    remove(inputFile.c_str());
+    std::filesystem::remove(inputFile);
   }
 
   void testReadingFromXML() {
@@ -1011,7 +1011,8 @@ public:
   }
 
 private:
-  const std::string inputWSName, offsetWSName, outputWSNameBase, inputFile;
+  const std::string inputWSName, offsetWSName, outputWSNameBase;
+  const std::filesystem::path inputFile;
   enum { NHIST = 6, NBINS = 4 };
 
   static void createTestWorkspace(const std::string &name, const int offset) {
