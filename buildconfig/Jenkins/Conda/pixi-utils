@@ -28,7 +28,7 @@ setup_pixi_toml() {
   pixi init -c conda-forge -c neutrons -p linux-64 -p win-64 -p osx-arm64
   pixi workspace --manifest-path $LOCAL_MANIFEST name set mantid-ci
   # environment for running rattler-build
-  pixi add --manifest-path $LOCAL_MANIFEST -f rattler-builder rattler-build rattler-index versioningit
+  pixi add --manifest-path $LOCAL_MANIFEST -f rattler-builder rattler-build=0.47 rattler-index versioningit
   pixi add --manifest-path $LOCAL_MANIFEST -f rattler-builder -p linux-64 jq
   pixi add --manifest-path $LOCAL_MANIFEST -f rattler-builder -p osx-arm64 jq
   pixi add --manifest-path $LOCAL_MANIFEST -f rattler-builder -p win-64 m2w64-jq
