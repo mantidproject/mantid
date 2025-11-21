@@ -110,6 +110,11 @@ fi
 
 # Set the version to inject into the recipe file
 export MANTID_VERSION=$(versioningit "${REPO_ROOT_DIR}")
+# rattler-build doesn't bring along the git repository info
+# these queries match VersionNumber.cmake
+export MANTID_REV_FULL=$(git -C "${REPO_ROOT_DIR}" rev-parse HEAD)
+export MANTID_REV_SHORT=$(git -C "${REPO_ROOT_DIR}" rev-parse --short HEAD)
+export MANTID_REV_DATE=$(git -C "${REPO_ROOT_DIR}" log -1 --format=format:%cD)
 
 # Set locale to avoid problems building the docs
 # See https://unix.stackexchange.com/questions/87745/what-does-lc-all-c-do
