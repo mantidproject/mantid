@@ -16,8 +16,8 @@
 
 #include "MantidKernel/Strings.h"
 
-#include <Poco/File.h>
 #include <boost/algorithm/string/trim.hpp>
+#include <filesystem>
 #include <fstream>
 
 using namespace Mantid::Kernel;
@@ -120,7 +120,7 @@ void SaveIsawDetCal::exec() {
   bool append = getProperty("AppendFile");
 
   // do not append if file does not exist
-  if (!Poco::File(filename.c_str()).exists())
+  if (!std::filesystem::exists(std::filesystem::path(filename.c_str())))
     append = false;
 
   if (append) {

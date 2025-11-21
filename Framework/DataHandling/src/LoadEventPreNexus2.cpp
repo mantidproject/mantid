@@ -43,10 +43,8 @@
 #include <boost/timer.hpp>
 #else
 #include <boost/timer/timer.hpp>
+#include <filesystem>
 #endif
-
-#include <Poco/File.h>
-#include <Poco/Path.h>
 
 namespace Mantid::DataHandling {
 
@@ -104,7 +102,7 @@ static const int NUM_EXT = 7;
  */
 static string getRunnumber(const string &filename) {
   // start by trimming the filename
-  string runnumber(Poco::Path(filename).getBaseName());
+  string runnumber(std::filesystem::path(filename).stem().string());
 
   if (runnumber.find("neutron") >= string::npos)
     return "0";
@@ -146,8 +144,8 @@ static string generateMappingfileName(EventWorkspace_sptr &wksp) {
     return "";
   string mapping = temp[0];
   // Try to get it from the working directory
-  Poco::File localmap(mapping);
-  if (localmap.exists())
+  std::filesystem::path localmap(mapping);
+  if (std::filesystem::exists(localmap))
     return mapping;
 
   // Try to get it from the data directories
@@ -157,26 +155,30 @@ static string generateMappingfileName(EventWorkspace_sptr &wksp) {
 
   // get a list of all proposal directories
   string instrument = wksp->getInstrument()->getName();
-  Poco::File base("/SNS/" + instrument + "/");
+  std::filesystem::path base("/SNS/" + instrument + "/");
   // try short instrument name
-  if (!base.exists()) {
+  if (!std::filesystem::exists(base)) {
     instrument = Kernel::ConfigService::Instance().getInstrument(instrument).shortName();
-    base = Poco::File("/SNS/" + instrument + "/");
-    if (!base.exists())
+    base = std::filesystem::path("/SNS/" + instrument + "/");
+    if (!std::filesystem::exists(base))
       return "";
   }
-  vector<string> dirs; // poco won't let me reuse temp
-  base.list(dirs);
+  vector<string> dirs;
+  for (const auto &entry : std::filesystem::directory_iterator(base)) {
+    if (entry.is_directory()) {
+      dirs.push_back(entry.path().filename().string());
+    }
+  }
 
   // check all of the proposals for the mapping file in the canonical place
   const string CAL("_CAL");
   const size_t CAL_LEN = CAL.length(); // cache to make life easier
   vector<string> files;
-  for (auto &dir : dirs) {
+  for (const auto &dir : dirs) {
     if ((dir.length() > CAL_LEN) && (dir.compare(dir.length() - CAL.length(), CAL.length(), CAL) == 0)) {
-      std::string path = std::string(base.path()).append("/").append(dir).append("/calibrations/").append(mapping);
-      if (Poco::File(path).exists())
-        files.emplace_back(path);
+      std::filesystem::path path = base / dir / "calibrations" / mapping;
+      if (std::filesystem::exists(path))
+        files.emplace_back(path.string());
     }
   }
 
@@ -338,7 +340,7 @@ void LoadEventPreNexus2::exec() {
   if (pulseid_filename.empty()) {
     pulseid_filename = generatePulseidName(event_filename);
     if (!pulseid_filename.empty()) {
-      if (Poco::File(pulseid_filename).exists()) {
+      if (std::filesystem::exists(pulseid_filename)) {
         this->g_log.information() << "Found pulseid file " << pulseid_filename << '\n';
         throwError = false;
       } else {
@@ -569,7 +571,7 @@ void LoadEventPreNexus2::addToWorkspaceLog(const std::string &logtitle, size_t m
 void LoadEventPreNexus2::runLoadInstrument(const std::string &eventfilename,
                                            const MatrixWorkspace_sptr &localWorkspace) {
   // start by getting just the filename
-  string instrument = Poco::Path(eventfilename).getFileName();
+  string instrument = std::filesystem::path(eventfilename).filename().string();
 
   // initialize vector of endings and put live at the beginning
   vector<string> eventExts(EVENT_EXTS, EVENT_EXTS + NUM_EXT);

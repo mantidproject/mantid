@@ -11,7 +11,7 @@
 #include "MantidAPI/TableRow.h"
 #include "MantidDataHandling/LoadTBL.h"
 #include "cxxtest/TestSuite.h"
-#include <Poco/File.h>
+#include <filesystem>
 #include <fstream>
 
 using namespace Mantid::API;
@@ -179,7 +179,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("OutputWorkspace", m_wsName));
     TS_ASSERT_THROWS_ANYTHING(alg->execute());
 
-    TS_ASSERT_THROWS_NOTHING(Poco::File(m_abspath).remove());
+    TS_ASSERT_THROWS_NOTHING(std::filesystem::remove(m_abspath));
   }
 
   void testManyColumns() {
@@ -204,7 +204,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("OutputWorkspace", m_wsName));
     TS_ASSERT_THROWS_ANYTHING(alg->execute());
 
-    TS_ASSERT_THROWS_NOTHING(Poco::File(m_abspath).remove());
+    TS_ASSERT_THROWS_NOTHING(std::filesystem::remove(m_abspath));
   }
 
   void testManyColumnsTwo() {
@@ -229,7 +229,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("OutputWorkspace", m_wsName));
     TS_ASSERT_THROWS_ANYTHING(alg->execute());
 
-    TS_ASSERT_THROWS_NOTHING(Poco::File(m_abspath).remove());
+    TS_ASSERT_THROWS_NOTHING(std::filesystem::remove(m_abspath));
   }
 
   void testTBLWithColumnHeadingsRowAndData() {
@@ -267,7 +267,7 @@ public:
     TS_ASSERT_EQUALS(secondRow.cell<std::string>(1), "0.3");
     TS_ASSERT_EQUALS(secondRow.cell<std::string>(3), "4.388");
 
-    TS_ASSERT_THROWS_NOTHING(Poco::File(m_abspath).remove());
+    TS_ASSERT_THROWS_NOTHING(std::filesystem::remove(m_abspath));
   }
 
   void testTBLWithColumnHeadingsRowOnly() {
@@ -339,6 +339,6 @@ private:
   std::string m_abspath;
   void cleanupafterwards() {
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().remove(m_wsName));
-    TS_ASSERT_THROWS_NOTHING(Poco::File(m_abspath).remove());
+    TS_ASSERT_THROWS_NOTHING(std::filesystem::remove(m_abspath));
   }
 };

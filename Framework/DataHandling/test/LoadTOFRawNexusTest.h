@@ -16,7 +16,6 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Unit.h"
 
-#include <Poco/File.h>
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;

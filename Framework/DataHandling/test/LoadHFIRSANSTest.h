@@ -16,7 +16,6 @@
 #include "MantidGeometry/Instrument/Parameter.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidKernel/PropertyWithValue.h"
-#include <Poco/Path.h>
 #include <vector>
 
 /**

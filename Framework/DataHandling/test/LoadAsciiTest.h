@@ -15,8 +15,7 @@
 #include "MantidAPI/Run.h"
 #include "MantidKernel/Unit.h"
 
-#include <Poco/File.h>
-
+#include <filesystem>
 #include <fstream>
 
 class LoadAsciiTest : public CxxTest::TestSuite {
@@ -25,28 +24,28 @@ public:
     const std::string filename("LoadAsciiTest_test_No_Header_3.txt");
     writeThreeColumnTestFile(filename, false);
     runTest(filename, "CSV", true);
-    Poco::File(filename).remove();
+    std::filesystem::remove(filename);
   }
 
   void test_Three_Column_With_Header_Info() {
     const std::string filename("LoadAsciiTest_test_With_Header_3.txt");
     writeThreeColumnTestFile(filename, true);
     runTest(filename, "CSV", true);
-    Poco::File(filename).remove();
+    std::filesystem::remove(filename);
   }
 
   void test_Two_Column_Example_With_No_Header() {
     const std::string filename("LoadAsciiTest_test_No_Header_2.txt");
     writeTwoColumnTestFile(filename, false);
     runTest(filename, "Space", false);
-    Poco::File(filename).remove();
+    std::filesystem::remove(filename);
   }
 
   void test_Two_Column_With_Header_Info() {
     const std::string filename("LoadAsciiTest_test_With_Header_2.txt");
     writeTwoColumnTestFile(filename, true);
     runTest(filename, "Space", false);
-    Poco::File(filename).remove();
+    std::filesystem::remove(filename);
   }
 
   void test_Four_Column_Example_With_No_Header() {
@@ -56,7 +55,7 @@ public:
     TS_ASSERT_EQUALS(outputWS->dx(0)[0], 0.1);
     TS_ASSERT_EQUALS(outputWS->dx(0)[18], 1.9);
     TS_ASSERT_EQUALS(outputWS->dx(0)[29], 0.8);
-    Poco::File(filename).remove();
+    std::filesystem::remove(filename);
   }
 
   void test_Spacing_Around_Separators() {
@@ -79,7 +78,7 @@ public:
     TS_ASSERT_EQUALS(outputWS->blocksize(), 9);
 
     Mantid::API::AnalysisDataService::Instance().remove(outputWS->getName());
-    Poco::File(filename).remove();
+    std::filesystem::remove(filename);
   }
 
 private:

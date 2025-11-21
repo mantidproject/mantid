@@ -11,7 +11,6 @@
 #include "MantidDataHandling/LoadRKH.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/ConfigService.h"
-#include <Poco/Path.h>
 #include <cxxtest/TestSuite.h>
 
 using Mantid::Kernel::ConfigServiceImpl;

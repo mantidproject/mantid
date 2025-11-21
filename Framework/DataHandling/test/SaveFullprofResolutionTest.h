@@ -13,8 +13,7 @@
 #include "MantidDataHandling/SaveFullprofResolution.h"
 #include "MantidDataObjects/TableWorkspace.h"
 
-#include <Poco/File.h>
-
+#include <filesystem>
 #include <fstream>
 
 using namespace std;
@@ -61,10 +60,8 @@ public:
 
     // Check file
     std::string filename = alg.getProperty("OutputFilename"); // Get full pathname
-    bool outputfileexist = Poco::File(filename).exists();
-    TS_ASSERT(outputfileexist);
-
-    if (!outputfileexist) {
+    if (!std::filesystem::exists(filename)) {
+      TS_FAIL("\"" + filename + "\" does not exist");
       return;
     }
 
@@ -73,7 +70,7 @@ public:
     TS_ASSERT_EQUALS(numlines, 22);
 
     // Clean
-    Poco::File(filename).remove();
+    std::filesystem::remove(filename);
 
     return;
   }
@@ -101,10 +98,9 @@ public:
 
     // Locate file
     std::string filename = alg.getProperty("OutputFilename"); // Get full pathname
-    Poco::File irffile(filename);
-    TS_ASSERT(irffile.exists());
-    if (!irffile.exists()) {
-      Poco::File(parwsname).remove();
+    if (!std::filesystem::exists(filename)) {
+      TS_FAIL("\"" + filename + "\" does not exist");
+      std::filesystem::remove(parwsname);
       return;
     }
 
@@ -113,9 +109,7 @@ public:
     TS_ASSERT_EQUALS(numlines, 18);
 
     // Clean
-    Poco::File(filename).remove();
-
-    return;
+    std::filesystem::remove(filename);
   }
 
   //----------------------------------------------------------------------------------------------
@@ -155,10 +149,9 @@ public:
 
     // Locate file
     std::string filename = alg.getProperty("OutputFilename"); // Get full pathname
-    Poco::File irffile(filename);
-    TS_ASSERT(irffile.exists());
-    if (!irffile.exists()) {
-      Poco::File(parwsname).remove();
+    if (!std::filesystem::exists(filename)) {
+      TS_FAIL("\"" + filename + "\" does not exist");
+      std::filesystem::remove(parwsname);
       return;
     }
 
@@ -167,7 +160,7 @@ public:
     TS_ASSERT_EQUALS(numlines, 34);
 
     // Clean
-    Poco::File(filename).remove();
+    std::filesystem::remove(filename);
   }
 
   //----------------------------------------------------------------------------------------------

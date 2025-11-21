@@ -15,10 +15,10 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidKernel/PropertyWithValue.h"
-#include <Poco/File.h>
 #include <Poco/TemporaryFile.h>
 #include <cmath>
 #include <cxxtest/TestSuite.h>
+#include <filesystem>
 #include <iterator>
 #include <memory>
 
@@ -66,7 +66,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted());
     std::string filename = alg.getPropertyValue("Filename");
-    TS_ASSERT(Poco::File(filename.append(".mft")).exists())
+    TS_ASSERT(std::filesystem::exists(filename.append(".mft")));
     std::vector<std::string> data;
     data.reserve(5);
     data.emplace_back("MFT");
@@ -87,7 +87,7 @@ public:
     }
     TS_ASSERT(in.eof())
     in.close();
-    Poco::File(filename).remove();
+    std::filesystem::remove(filename);
   }
 
   void test_histogram_data() {
@@ -105,7 +105,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted());
     std::string filename = alg.getPropertyValue("Filename");
-    TS_ASSERT(Poco::File(filename.append(".mft")).exists())
+    TS_ASSERT(std::filesystem::exists(filename.append(".mft")));
     std::vector<std::string> data;
     data.reserve(5);
     data.emplace_back("MFT");
@@ -126,7 +126,7 @@ public:
     }
     TS_ASSERT(in.eof())
     in.close();
-    Poco::File(filename).remove();
+    std::filesystem::remove(filename);
   }
 
   void test_empty_workspace() {
@@ -141,7 +141,7 @@ public:
     TS_ASSERT_THROWS_ANYTHING(alg.execute())
     TS_ASSERT(!alg.isExecuted())
     std::string filename = alg.getPropertyValue("Filename");
-    TS_ASSERT(!Poco::File(filename).exists())
+    TS_ASSERT(!std::filesystem::exists(filename))
   }
 
   void test_number_lines_for_two_data_values() {
@@ -160,14 +160,14 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
     std::string filename = alg.getPropertyValue("Filename");
-    TS_ASSERT(Poco::File(filename.append(".mft")).exists())
+    TS_ASSERT(std::filesystem::exists(filename.append(".mft")));
     std::ifstream in(filename);
     // Total number of lines
     TS_ASSERT(not_empty(in))
     TS_ASSERT_EQUALS(std::count(std::istreambuf_iterator<char>(in), std::istreambuf_iterator<char>(), in.widen('\n')),
                      25)
     in.close();
-    Poco::File(filename).remove();
+    std::filesystem::remove(filename);
   }
 
   void test_dx_values() {
@@ -186,7 +186,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted());
     std::string filename = alg.getPropertyValue("Filename");
-    TS_ASSERT(Poco::File(filename.append(".mft")).exists())
+    TS_ASSERT(std::filesystem::exists(filename.append(".mft")));
     std::vector<std::string> data;
     data.reserve(5);
     data.emplace_back("MFT");
@@ -209,7 +209,7 @@ public:
         TS_ASSERT_EQUALS(fullline, *(it++))
     }
     in.close();
-    Poco::File(filename).remove();
+    std::filesystem::remove(filename);
   }
 
   void test_txt() {
@@ -228,7 +228,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
     std::string filename = alg.getPropertyValue("Filename");
-    TS_ASSERT(Poco::File(filename.append(".txt")).exists())
+    TS_ASSERT(std::filesystem::exists(filename.append(".txt")));
     std::vector<std::string> data;
     data.reserve(2);
     data.emplace_back("3.300000000000000e-01\t"
@@ -247,7 +247,7 @@ public:
     TS_ASSERT(in.eof())
 
     in.close();
-    Poco::File(filename).remove();
+    std::filesystem::remove(filename);
   }
 
   void test_override_existing_file_txt() {
@@ -275,7 +275,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
     std::string filename = alg.getPropertyValue("Filename");
-    TS_ASSERT(Poco::File(filename.append(".txt")).exists())
+    TS_ASSERT(std::filesystem::exists(filename.append(".txt")));
     std::vector<std::string> data;
     data.reserve(2);
     data.emplace_back("3.300000000000000e-01\t"
@@ -294,7 +294,7 @@ public:
     TS_ASSERT(in.eof())
 
     in.close();
-    Poco::File(filename).remove();
+    std::filesystem::remove(filename);
   }
 
   void test_more_than_nine_logs() {
@@ -314,7 +314,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
     std::string filename = alg.getPropertyValue("Filename");
-    TS_ASSERT(Poco::File(filename.append(".mft")).exists())
+    TS_ASSERT(std::filesystem::exists(filename.append(".mft")));
     std::ifstream in(filename);
     std::string line;
     std::getline(in, line);
@@ -351,7 +351,7 @@ public:
     TS_ASSERT_EQUALS(line, "Number of data points : 2")
 
     in.close();
-    Poco::File(filename).remove();
+    std::filesystem::remove(filename);
   }
 
   void test_user_log() {
@@ -376,7 +376,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
     std::string filename = alg.getPropertyValue("Filename");
-    TS_ASSERT(Poco::File(filename.append(".mft")).exists())
+    TS_ASSERT(std::filesystem::exists(filename.append(".mft")));
     std::ifstream in(filename);
     std::string line;
     std::getline(in, line);
@@ -413,7 +413,7 @@ public:
     TS_ASSERT_EQUALS(line, "Number of data points : 2")
 
     in.close();
-    Poco::File(filename).remove();
+    std::filesystem::remove(filename);
   }
 
   void test_user_log_overrides_fixed_log() {
@@ -441,7 +441,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
     std::string filename = alg.getPropertyValue("Filename");
-    TS_ASSERT(Poco::File(filename.append(".mft")).exists())
+    TS_ASSERT(std::filesystem::exists(filename.append(".mft")));
     std::ifstream in(filename);
     std::string line;
     std::getline(in, line);
@@ -476,7 +476,7 @@ public:
     TS_ASSERT_EQUALS(line, "Number of data points : 2")
 
     in.close();
-    Poco::File(filename).remove();
+    std::filesystem::remove(filename);
   }
 
   void test_automatic_log_filling() {
@@ -499,7 +499,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
     std::string filename = alg.getPropertyValue("Filename");
-    TS_ASSERT(Poco::File(filename.append(".mft")).exists())
+    TS_ASSERT(std::filesystem::exists(filename.append(".mft")));
     std::ifstream in(filename);
     std::string line;
     std::getline(in, line);
@@ -532,7 +532,7 @@ public:
     TS_ASSERT_EQUALS(line, "Number of data points : 2")
 
     in.close();
-    Poco::File(filename).remove();
+    std::filesystem::remove(filename);
   }
 
   void test_group_workspaces() {
@@ -563,7 +563,7 @@ public:
     const std::string filename = alg.getPropertyValue("Filename");
     std::string f1 = filename + "ws1.txt";
     std::string f2 = filename + "ws2.txt";
-    TS_ASSERT(Poco::File(f1).exists())
+    TS_ASSERT(std::filesystem::exists(f1))
     std::vector<std::string> data1;
     data1.reserve(2);
     data1.emplace_back("4.360000000000000e+00\t"
@@ -580,7 +580,7 @@ public:
       TS_ASSERT_EQUALS(fullline, *(it1++));
     }
     TS_ASSERT(in1.eof())
-    TS_ASSERT(Poco::File(f2).exists())
+    TS_ASSERT(std::filesystem::exists(f2))
     std::vector<std::string> data2;
     data2.reserve(2);
     data2.emplace_back("3.300000000000000e-01\t"
@@ -598,9 +598,9 @@ public:
     TS_ASSERT(in2.eof())
 
     in1.close();
-    Poco::File(f1).remove();
+    std::filesystem::remove(f1);
     in2.close();
-    Poco::File(f2).remove();
+    std::filesystem::remove(f2);
   }
 
   void test_point_data_dat() {
@@ -619,7 +619,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted());
     std::string filename = alg.getPropertyValue("Filename");
-    TS_ASSERT(Poco::File(filename.append(".dat")).exists())
+    TS_ASSERT(std::filesystem::exists(filename.append(".dat")));
     std::vector<std::string> data;
     data.reserve(3);
     data.emplace_back("2");
@@ -637,7 +637,7 @@ public:
     TS_ASSERT(in.eof())
 
     in.close();
-    Poco::File(filename).remove();
+    std::filesystem::remove(filename);
   }
 
   void test_dx_values_with_header_custom() {
@@ -658,7 +658,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted());
     std::string filename = alg.getPropertyValue("Filename");
-    TS_ASSERT(Poco::File(filename).exists())
+    TS_ASSERT(std::filesystem::exists(filename))
     std::vector<std::string> data;
     data.reserve(5);
     data.emplace_back("MFT");
@@ -680,7 +680,7 @@ public:
     }
 
     in.close();
-    Poco::File(filename).remove();
+    std::filesystem::remove(filename);
   }
 
   void test_calculated_dx_values_with_header_custom() {
@@ -700,7 +700,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted());
     std::string filename = alg.getPropertyValue("Filename");
-    TS_ASSERT(Poco::File(filename).exists())
+    TS_ASSERT(std::filesystem::exists(filename))
     std::vector<std::string> data;
     data.reserve(5);
     data.emplace_back("MFT");
@@ -722,7 +722,7 @@ public:
     }
 
     in.close();
-    Poco::File(filename).remove();
+    std::filesystem::remove(filename);
   }
 
   void test_dx_values_no_header_custom() {
@@ -743,7 +743,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted());
     std::string filename = alg.getPropertyValue("Filename");
-    TS_ASSERT(Poco::File(filename).exists())
+    TS_ASSERT(std::filesystem::exists(filename))
     std::vector<std::string> data;
     data.reserve(2);
     data.emplace_back("3.300000000000000e-01\t"
@@ -761,7 +761,7 @@ public:
     }
 
     in.close();
-    Poco::File(filename).remove();
+    std::filesystem::remove(filename);
   }
 
   void test_no_header_no_resolution_separator_custom() {
@@ -784,7 +784,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted());
     std::string filename = alg.getPropertyValue("Filename");
-    TS_ASSERT(Poco::File(filename).exists())
+    TS_ASSERT(std::filesystem::exists(filename))
     std::vector<std::string> data;
     data.reserve(2);
     data.emplace_back("3.300000000000000e-01 "
@@ -799,7 +799,7 @@ public:
       TS_ASSERT_EQUALS(fullline, *(it++))
     }
     in.close();
-    Poco::File(filename).remove();
+    std::filesystem::remove(filename);
   }
 
   void test_lam() {
@@ -819,7 +819,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
     std::string filename = alg.getPropertyValue("Filename");
-    TS_ASSERT(Poco::File(filename.append(".lam")).exists())
+    TS_ASSERT(std::filesystem::exists(filename.append(".lam")));
     std::vector<std::string> data;
     data.reserve(2);
     data.emplace_back("       1.000000000000000e-01       "
@@ -843,7 +843,7 @@ public:
     TS_ASSERT(in.eof())
 
     in.close();
-    Poco::File(filename).remove();
+    std::filesystem::remove(filename);
   }
 
 private:

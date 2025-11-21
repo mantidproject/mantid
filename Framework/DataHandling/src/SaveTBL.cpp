@@ -13,7 +13,6 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidDataObjects/TableWorkspace.h"
-#include "Poco/File.h"
 #include <boost/tokenizer.hpp>
 #include <fstream>
 

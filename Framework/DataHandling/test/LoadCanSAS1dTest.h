@@ -13,8 +13,6 @@
 #include "MantidDataHandling/LoadCanSAS1D.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument.h"
-#include <Poco/Path.h>
-
 class LoadCanSAS1dTest : public CxxTest::TestSuite {
 public:
   static LoadCanSAS1dTest *createSuite() { return new LoadCanSAS1dTest(); }

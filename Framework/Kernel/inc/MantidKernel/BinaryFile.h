@@ -48,27 +48,25 @@ public:
 
   //------------------------------------------------------------------------------------
   /// Constructor - open a file
-  BinaryFile(const std::string &filename) { this->open(filename); }
+  BinaryFile(const std::filesystem::path &filepath) { this->open(filepath); }
 
   /// Destructor, close the file if needed
   ~BinaryFile() { this->close(); }
 
   //------------------------------------------------------------------------------------
   /** Open a file and keep a handle to the file
-   * @param filename :: full path to open
+   * @param filepath :: full path to open
    * @throw runtime_error if the file size is not an even multiple of the type
    * size
    * @throw invalid_argument if the file does not exist
    * */
-  void open(const std::string &filename) {
+  void open(const std::filesystem::path &filepath) {
     this->handle.reset(nullptr);
-    if (!std::filesystem::exists(filename)) {
-      std::stringstream msg;
-      msg << "BinaryFile::open: File " << filename << " was not found.";
-      throw std::invalid_argument("File does not exist.");
+    if (!std::filesystem::exists(filepath)) {
+      throw std::invalid_argument(std::string("BinaryFile::open \"") + filepath.string() + "\" was not found.");
     }
     // Open the file
-    this->handle = std::make_unique<std::ifstream>(filename.c_str(), std::ios::binary);
+    this->handle = std::make_unique<std::ifstream>(filepath, std::ios::binary);
     // Count the # of elements.
     this->num_elements = this->getFileSize();
     // Make sure we are starting at 0

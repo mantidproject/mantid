@@ -17,9 +17,7 @@
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/NodeIterator.h>
 #include <Poco/DOM/NodeList.h>
-#include <Poco/File.h>
-#include <Poco/Path.h>
-
+#include <filesystem>
 using Poco::XML::Document;
 using Poco::XML::DOMParser;
 using Poco::XML::Element;
@@ -115,17 +113,17 @@ void LoadIDFFromNexus::exec() {
 
   // Load parameters from correction parameter file, if it exists
   if (!correctionParameterFile.empty()) {
-    Poco::Path corrFilePath(parameterCorrectionFile);
-    g_log.debug() << "Correction file path: " << corrFilePath.toString() << "\n";
-    Poco::Path corrDirPath = corrFilePath.parent();
-    g_log.debug() << "Correction directory path: " << corrDirPath.toString() << "\n";
-    Poco::Path corrParamFile(corrDirPath, correctionParameterFile);
+    std::filesystem::path corrFilePath(parameterCorrectionFile);
+    g_log.debug() << "Correction file path: " << corrFilePath.string() << "\n";
+    std::filesystem::path corrDirPath = corrFilePath.parent_path();
+    g_log.debug() << "Correction directory path: " << corrDirPath.string() << "\n";
+    std::filesystem::path corrParamFile(corrDirPath / correctionParameterFile);
     if (append) {
-      g_log.notice() << "Using correction parameter file: " << corrParamFile.toString() << " to append parameters.\n";
+      g_log.notice() << "Using correction parameter file: " << corrParamFile.string() << " to append parameters.\n";
     } else {
-      g_log.notice() << "Using correction parameter file: " << corrParamFile.toString() << " to replace parameters.\n";
+      g_log.notice() << "Using correction parameter file: " << corrParamFile.string() << " to replace parameters.\n";
     }
-    loadParameterFile(corrParamFile.toString(), localWorkspace);
+    loadParameterFile(corrParamFile.string(), localWorkspace);
   } else {
     g_log.notice() << "No correction parameter file applies to the date for "
                       "correction file.\n";
@@ -143,15 +141,13 @@ std::string LoadIDFFromNexus::getParameterCorrectionFile(const std::string &inst
   for (auto &directoryName : directoryNames) {
     // This will iterate around the directories from user ->etc ->install, and
     // find the first appropriate file
-    Poco::Path iPath(directoryName,
-                     "embedded_instrument_corrections"); // Go to correction file subfolder
+    std::filesystem::path iPath =
+        std::filesystem::path(directoryName) / "embedded_instrument_corrections"; // Go to correction file subfolder
     // First see if the directory exists
-    Poco::File ipDir(iPath);
-    if (ipDir.exists() && ipDir.isDirectory()) {
-      iPath.append(instName + "_Parameter_Corrections.xml"); // Append file name to pathname
-      Poco::File ipFile(iPath);
-      if (ipFile.exists() && ipFile.isFile()) {
-        return ipFile.path(); // Return first found
+    if (std::filesystem::exists(iPath) && std::filesystem::is_directory(iPath)) {
+      std::filesystem::path ipFile = iPath / (instName + "_Parameter_Corrections.xml"); // Append file name to pathname
+      if (std::filesystem::exists(ipFile) && std::filesystem::is_regular_file(ipFile)) {
+        return ipFile.string(); // Return first found
       }
     } // Directory
   } // Loop
