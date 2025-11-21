@@ -33,6 +33,7 @@ public:
   MaskWorkspace &operator=(const MaskWorkspace &other) = delete;
   bool containsDetID(const detid_t detectorID) const override;
   bool containsDetIDs(const std::set<detid_t> &detectorIDs) const override;
+  bool containsDetIDs(const std::vector<detid_t> &detectorIDs) const override;
   bool isMasked(const detid_t detectorID) const override;
   bool isMasked(const std::set<detid_t> &detectorIDs) const override;
   bool isMaskedIndex(const std::size_t wkspIndex) const;

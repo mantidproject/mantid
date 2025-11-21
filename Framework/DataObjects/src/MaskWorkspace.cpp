@@ -156,6 +156,16 @@ bool MaskWorkspace::containsDetIDs(const std::set<detid_t> &detectorIDs) const {
   return it == detectorIDs.cend();
 }
 
+bool MaskWorkspace::containsDetIDs(const std::vector<detid_t> &detectorIDs) const {
+  if (detectorIDs.empty()) {
+    return false;
+  }
+
+  const auto it = std::find_if_not(detectorIDs.cbegin(), detectorIDs.cend(),
+                                   [this](const auto detectorID) { return this->containsDetID(detectorID); });
+  return it == detectorIDs.cend();
+}
+
 //--------------------------------------------------------------------------------------------
 /**
  * @param detectorID :: ID of the detector to check whether it is masked or not

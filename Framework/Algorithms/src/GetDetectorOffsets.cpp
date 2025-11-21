@@ -97,7 +97,13 @@ std::map<std::string, std::string> GetDetectorOffsets::validateInputs() {
 
   if (MaskWorkspace_const_sptr maskWS = getProperty("MaskWorkspace")) {
     // detectors which are monitors are not included in the mask
-    if (maskWS->getInstrument()->getNumberDetectors(true) != inputWS->getInstrument()->getNumberDetectors(true)) {
+    const bool maskContainsAllDetIDs = maskWS->containsDetIDs(inputWS->getInstrument()->getDetectorIDs());
+
+    if (!maskContainsAllDetIDs) {
+      result["MaskWorkspace"] =
+          "incoming mask workspace must be fully specified, containing an entry for each detid in the input workspace";
+    } else if (maskWS->getInstrument()->getNumberDetectors(true) !=
+               inputWS->getInstrument()->getNumberDetectors(true)) {
       result["MaskWorkspace"] = "incoming mask workspace must have the same instrument as the input workspace";
     } else if (maskWS->getNumberHistograms() != inputWS->getInstrument()->getNumberDetectors(true)) {
       result["MaskWorkspace"] = "incoming mask workspace must have one spectrum per detector";
