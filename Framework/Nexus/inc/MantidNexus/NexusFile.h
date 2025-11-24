@@ -62,6 +62,65 @@ public:
   ~FileID();
 };
 
+using Deleter = int (*const)(hid_t);
+
+/**
+ * \class UniqueID
+ * \brief A wrapper class for managing HDF5 object handles (hid_t).
+ *
+ * The UniqueID class is designed to manage the lifecycle of HDF5 object handles (hid_t),
+ * ensuring that the handle is properly closed when the UniqueID object is destroyed.
+ * This helps prevent resource leaks and ensures proper cleanup of HDF5 resources.
+ */
+template <Deleter const deleter> class UniqueID {
+private:
+  hid_t m_id;
+  UniqueID &operator=(UniqueID<deleter> const &) = delete;
+  UniqueID &operator=(UniqueID<deleter> const &&) = delete;
+  void closeId() const {
+    if (m_id >= 0) {
+      deleter(m_id);
+    }
+  }
+
+public:
+  UniqueID(UniqueID<deleter> &uid) : m_id(uid.m_id) { uid.m_id = -1; };
+  UniqueID(UniqueID<deleter> &&uid) noexcept : m_id(uid.m_id) { uid.m_id = -1; };
+  /// @brief Assign a HDF5 object ID to be managed
+  /// @param id : the ID to be managed
+  UniqueID &operator=(hid_t const id) {
+    if (id != m_id) {
+      closeId();
+      m_id = id;
+    }
+    return *this;
+  };
+  /// @brief Pass the HDF5 object ID from an existing UniqueID to another UniqueID
+  /// @param uid : the UniqueID previously managing the ID; it will lose ownership of the ID.
+  UniqueID &operator=(UniqueID<deleter> &uid) {
+    if (this != &uid) {
+      closeId();
+      m_id = uid.m_id;
+      uid.m_id = -1;
+    }
+    return *this;
+  }
+  bool operator==(int const v) const { return static_cast<int>(m_id) == v; }
+  bool operator<=(int const v) const { return static_cast<int>(m_id) <= v; }
+  operator hid_t const &() const { return m_id; };
+  hid_t getId() const { return m_id; }
+  /// @brief  Release hold on the managed ID; it will not be closed by this UniqueID
+  /// @return the managed ID
+  hid_t releaseId() {
+    hid_t tmp = m_id;
+    m_id = -1;
+    return tmp;
+  }
+  UniqueID() : m_id(-1) {}
+  UniqueID(hid_t const id) : m_id(id) {}
+  ~UniqueID() { closeId(); }
+};
+
 /**
  * The Object that allows access to the information in the file.
  * \ingroup cpp_core
@@ -190,7 +249,7 @@ public:
    * \return A unix like address string pointing to the current
    *         position in the file
    */
-  std::string getAddress() const;
+  std::string const &getAddress() const { return m_address.string(); };
 
   // CHECK ADDRESS EXISTENCE
 
