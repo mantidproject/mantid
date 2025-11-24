@@ -1,0 +1,1 @@
+- :ref:`AlignAndFocusPowderSlim <algm-AlignAndFocusPowderSlim>` can now can split events based on full time (pulsetime+TOF) with the parameter ``UseFullTime``.
