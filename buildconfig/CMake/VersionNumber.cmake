@@ -28,9 +28,8 @@
 
 # package version should be from versioningit
 
-# PKG_VERSION is defined by rattler-build - use the value if it was supplied this is because the rattler-build tree does
-# not contain the files needed for versioningit to decide the version number
-if((DEFINED ENV{PKG_VERSION}) AND ("${CONDA_BUILD}"))
+# PKG_VERSION is defined by rattler-build - use the value if it was supplied to ensure consistency
+if(DEFINED ENV{PKG_VERSION})
   message(STATUS "Using version from environment=$ENV{PKG_VERSION}")
   set(_version_str "$ENV{PKG_VERSION}")
 else()
@@ -68,40 +67,22 @@ endif()
 
 # Revision information from git for CONDA_BUILD (i.e. rattler-build) this information has to be injected from the
 # environment
-if((DEFINED ENV{MANTID_REV_FULL}) AND ("${CONDA_BUILD}"))
-  message(STATUS "Using revision from environment=$ENV{MANTID_REV_FULL}")
-  set(REVISION_FULL "$ENV{MANTID_REV_FULL}")
-else()
-  execute_process(
-    COMMAND ${GIT_EXECUTABLE} rev-parse HEAD
-    OUTPUT_VARIABLE REVISION_FULL
-    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-    OUTPUT_STRIP_TRAILING_WHITESPACE
-  )
-endif()
+execute_process(
+  COMMAND ${GIT_EXECUTABLE} rev-parse HEAD
+  OUTPUT_VARIABLE REVISION_FULL
+  WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+)
 if(REVISION_FULL STREQUAL "")
   set(REVISION_FULL "UNKNOWN")
 endif()
 
-if("${CONDA_BUILD}")
-  if(DEFINED ENV{MANTID_REV_SHORT})
-    message(STATUS "Using short revision from environment=$ENV{MANTID_REV_SHORT}")
-    set(REVISION_SHORT "$ENV{MANTID_REV_SHORT}")
-  elseif(DEFINED ENV{MANTID_REV_FULL})
-    # generate the short from the long - this is the right number of characters on 2025-11-20 on linux
-    string(SUBSTRING ${REVISION_FULL} 0 11 REVISION_SHORT)
-    message(STATUS "Creating revision short from revision full ${REVISION_SHORT}")
-  endif()
-endif()
-# ask git if short revision isn't already present
-if(REVISION_SHORT STREQUAL "")
-  execute_process(
-    COMMAND ${GIT_EXECUTABLE} rev-parse --short HEAD
-    OUTPUT_VARIABLE REVISION_SHORT
-    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-    OUTPUT_STRIP_TRAILING_WHITESPACE
-  )
-endif()
+execute_process(
+  COMMAND ${GIT_EXECUTABLE} rev-parse --short HEAD
+  OUTPUT_VARIABLE REVISION_SHORT
+  WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+)
 # Historically the short revision has been prefixed with a 'g'
 if(REVISION_SHORT STREQUAL "")
   set(REVISION_SHORT "UNKNOWN")
@@ -110,16 +91,11 @@ else()
 endif()
 
 # Get the date of the last commit
-if((DEFINED ENV{MANTID_REV_DATE}) AND ("${CONDA_BUILD}"))
-  message(STATUS "Using revision date from environment=$ENV{MANTID_REV_DATE}")
-  set(REVISION_DATE "$ENV{MANTID_REV_DATE}")
-else()
-  execute_process(
-    COMMAND ${GIT_EXECUTABLE} log -1 --format=format:%cD
-    OUTPUT_VARIABLE REVISION_DATE
-    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-  )
-endif()
+execute_process(
+  COMMAND ${GIT_EXECUTABLE} log -1 --format=format:%cD
+  OUTPUT_VARIABLE REVISION_DATE
+  WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+)
 if(REVISION_DATE STREQUAL "")
   set(REVISION_DATE "UNKNOWN")
 else()
