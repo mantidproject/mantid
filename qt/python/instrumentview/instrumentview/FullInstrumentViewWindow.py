@@ -204,6 +204,10 @@ class FullInstrumentViewWindow(QMainWindow):
         pre_list_layout = QHBoxLayout()
         self._add_cylinder = QPushButton("Cylinder Shape")
         self._cylinder_select = QPushButton("Store Mask")
+        self._clear_masks = QPushButton("Clear Masks")
+        pre_list_layout.addWidget(self._add_cylinder)
+        pre_list_layout.addWidget(self._cylinder_select)
+        pre_list_layout.addWidget(self._clear_masks)
         self._mask_list = MasksWorkspaceListWidget(self)
         self._mask_list.setSizeAdjustPolicy(QListWidget.AdjustToContents)
         self._mask_list.setSelectionMode(QAbstractItemView.NoSelection)
@@ -211,8 +215,6 @@ class FullInstrumentViewWindow(QMainWindow):
         self._save_mask_to_ws = QPushButton("Export to ADS")
         self._save_mask_to_file = QPushButton("Save to XML")
         self._overwrite_mask = QPushButton("Overwrite Permanently")
-        pre_list_layout.addWidget(self._add_cylinder)
-        pre_list_layout.addWidget(self._cylinder_select)
         post_list_layout.addWidget(self._save_mask_to_ws)
         post_list_layout.addWidget(self._save_mask_to_file)
         post_list_layout.addWidget(self._overwrite_mask)
@@ -384,6 +386,7 @@ class FullInstrumentViewWindow(QMainWindow):
         self._save_mask_to_ws.clicked.connect(self._presenter.on_save_mask_to_workspace_clicked)
         self._save_mask_to_file.clicked.connect(self._presenter.on_save_xml_mask_clicked)
         self._overwrite_mask.clicked.connect(self._presenter.on_overwrite_mask_clicked)
+        self._clear_masks.clicked.connect(self._presenter.on_clear_masks_clicked)
 
         self._add_connections_to_edits_and_slider(
             self._contour_range_min_edit,
@@ -720,3 +723,6 @@ class FullInstrumentViewWindow(QMainWindow):
     def set_new_mask_key(self, new_key: str) -> None:
         list_item = QListWidgetItem(new_key, self._mask_list)
         list_item.setCheckState(Qt.Checked)
+
+    def clear_mask_list(self) -> None:
+        self._mask_list.clear()

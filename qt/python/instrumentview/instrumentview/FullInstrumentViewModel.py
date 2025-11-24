@@ -369,7 +369,7 @@ class FullInstrumentViewModel:
             peaks_grouped_by_ws.append(detector_peaks)
         return peaks_grouped_by_ws
 
-    def clear_masks(self) -> None:
+    def clear_stored_masks(self) -> None:
         self._cached_masks_map.clear()
 
     def add_new_detector_mask(self, new_mask: list[bool]) -> str:

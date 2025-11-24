@@ -180,6 +180,12 @@ class FullInstrumentViewPresenter:
 
     def on_overwrite_mask_clicked(self) -> None:
         self._model.overwrite_mask_to_current_workspace()
+        self.on_clear_masks_clicked()
+
+    def on_clear_masks_clicked(self) -> None:
+        self._view.clear_mask_list()
+        self._model.clear_stored_masks()
+        self.on_mask_item_selected()
 
     def _update_line_plot_ws_and_draw(self, unit: str) -> None:
         self._model.extract_spectra_for_line_plot(unit, self._view.sum_spectra_selected())
