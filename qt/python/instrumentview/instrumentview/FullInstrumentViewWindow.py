@@ -200,19 +200,23 @@ class FullInstrumentViewWindow(QMainWindow):
 
         masking_group_box = QGroupBox("Masking")
         masking_layout = QVBoxLayout(masking_group_box)
+        note = QLabel("Currently only a cylinder/circle shape is supported. A rectangular shape will be added in the next update.")
         pre_list_layout = QHBoxLayout()
-        self._add_cylinder = QPushButton("Add Cylinder Shape")
-        self._cylinder_select = QPushButton("Add Mask")
+        self._add_cylinder = QPushButton("Cylinder Shape")
+        self._cylinder_select = QPushButton("Store Mask")
         self._mask_list = MasksWorkspaceListWidget(self)
         self._mask_list.setSizeAdjustPolicy(QListWidget.AdjustToContents)
         self._mask_list.setSelectionMode(QAbstractItemView.NoSelection)
         post_list_layout = QHBoxLayout()
-        self._save_mask_to_ws = QPushButton("Export to workspace")
+        self._save_mask_to_ws = QPushButton("Export to ADS")
         self._save_mask_to_file = QPushButton("Save to XML")
+        self._overwrite_mask = QPushButton("Overwrite Permanently")
         pre_list_layout.addWidget(self._add_cylinder)
         pre_list_layout.addWidget(self._cylinder_select)
         post_list_layout.addWidget(self._save_mask_to_ws)
         post_list_layout.addWidget(self._save_mask_to_file)
+        post_list_layout.addWidget(self._overwrite_mask)
+        masking_layout.addWidget(note)
         masking_layout.addLayout(pre_list_layout)
         masking_layout.addWidget(self._mask_list)
         masking_layout.addLayout(post_list_layout)
@@ -379,6 +383,7 @@ class FullInstrumentViewWindow(QMainWindow):
         self._mask_list.itemChanged.connect(self._presenter.on_mask_item_selected)
         self._save_mask_to_ws.clicked.connect(self._presenter.on_save_mask_to_workspace_clicked)
         self._save_mask_to_file.clicked.connect(self._presenter.on_save_xml_mask_clicked)
+        self._overwrite_mask.clicked.connect(self._presenter.on_overwrite_mask_clicked)
 
         self._add_connections_to_edits_and_slider(
             self._contour_range_min_edit,
@@ -540,6 +545,7 @@ class FullInstrumentViewWindow(QMainWindow):
         cylinder_repr = vtkImplicitCylinderRepresentation()
         cylinder_repr.SetOutlineTranslation(False)
         cylinder_repr.GetOutlineProperty().SetOpacity(0)
+        cylinder_repr.SetMinRadius(0.001)
 
         # For 2D projections, camera view is always perpendicular to Z axis
         cylinder_repr.SetAxis([0, 0, 1])

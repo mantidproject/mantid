@@ -21,6 +21,8 @@ from mantid.simpleapi import (
     ExtractMask,
     ExtractMaskToTable,
     SaveMask,
+    MaskDetectors,
+    DeleteWorkspace,
 )
 from itertools import groupby
 import numpy as np
@@ -387,7 +389,6 @@ class FullInstrumentViewModel:
 
     def save_mask_workspace_to_ads(self) -> None:
         name_exported_ws = f"instrument_view_mask_{self._workspace.name()}"
-        # TODO: Avoid changing mask_ws in the future
         for i, v in enumerate(self._is_masked):
             self._mask_ws.dataY(i)[:] = v
 
@@ -400,3 +401,14 @@ class FullInstrumentViewModel:
         for i, v in enumerate(self._is_masked):
             self._mask_ws.dataY(i)[:] = v
         SaveMask(self._mask_ws, OutputFile=filename)
+
+    def overwrite_mask_to_current_workspace(self) -> None:
+        for i, v in enumerate(self._is_masked):
+            self._mask_ws.dataY(i)[:] = v
+        # TODO: Check if copies are expensive with big workspaces
+        temp_ws = self._workspace.clone()
+        MaskDetectors(temp_ws, MaskedWorkspace=self._mask_ws)
+        self._workspace = temp_ws.clone(StoreInADS=False)
+        # Update array that tracks permanent mask
+        self._is_masked_in_ws = self._mask_ws.extractY().flatten().astype(bool)
+        DeleteWorkspace(temp_ws)
