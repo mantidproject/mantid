@@ -173,6 +173,7 @@ class FullInstrumentViewPresenter:
     def on_mask_item_selected(self) -> None:
         self._model.apply_detector_masks(self._view.selected_masks())
         self.update_plotter()
+        self._update_line_plot_ws_and_draw(self._view.current_selected_unit())
 
     def on_save_mask_to_workspace_clicked(self) -> None:
         self._model.save_mask_workspace_to_ads()
