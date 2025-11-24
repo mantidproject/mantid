@@ -32,11 +32,11 @@ Output:
 
 .. testoutput:: exGetTimeSeriesLogInformationRunObject
 
-   duration 117.901
-   minimum 30.000
-   maximum 30.000
-   mean 30.000
-   time_mean 30.000
+   duration 171.702
+   minimum 299.800
+   maximum 300.000
+   mean 299.900
+   time_mean 299.888
 
 **Example - Get Information from One Log**
 
