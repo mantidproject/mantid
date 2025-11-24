@@ -105,7 +105,7 @@ void ProcessBankSplitFullTimeTask::operator()(const tbb::blocked_range<size_t> &
     // declare arrays once so memory can be reused
     auto event_detid = std::make_unique<std::vector<uint32_t>>();       // uint32 for ORNL nexus file
     auto event_time_of_flight = std::make_unique<std::vector<float>>(); // float for ORNL nexus files
-    auto event_pulsetimes = std::make_unique<std::vector<Mantid::Types::Core::DateAndTime>>();
+    auto pulse_times_idx = std::make_unique<std::vector<size_t>>();     // index into pulse_times for every event
 
     // read parts of the bank at a time until all events are processed
     while (!eventRanges.empty()) {
@@ -169,7 +169,7 @@ void ProcessBankSplitFullTimeTask::operator()(const tbb::blocked_range<size_t> &
             m_loader->loadData(tof_SDS, event_time_of_flight, offsets, slabsizes);
           });
 
-      event_pulsetimes->resize(total_events_to_read);
+      pulse_times_idx->resize(total_events_to_read);
       // get the pulsetime of every event, event_index maps the first event of each pulse
       size_t pos = 0;
       auto event_index_it = event_index->cbegin();
@@ -186,7 +186,7 @@ void ProcessBankSplitFullTimeTask::operator()(const tbb::blocked_range<size_t> &
           if (event_index_it != event_index->cbegin()) {
             pulse_idx = static_cast<size_t>(std::distance(event_index->cbegin(), event_index_it) - 1);
           }
-          (*event_pulsetimes)[pos++] = (*pulse_times)[pulse_idx];
+          (*pulse_times_idx)[pos++] = pulse_idx;
         }
       }
 
@@ -209,7 +209,7 @@ void ProcessBankSplitFullTimeTask::operator()(const tbb::blocked_range<size_t> &
                 const auto tof = static_cast<double>((*event_time_of_flight)[k]) * correctionFactor;
                 const auto tof_in_nanoseconds =
                     static_cast<int64_t>(tof * 1000.0); // Convert microseconds to nanoseconds
-                const auto pulsetime = (*event_pulsetimes)[k];
+                const auto pulsetime = (*pulse_times)[(*pulse_times_idx)[k]];
                 const Mantid::Types::Core::DateAndTime full_time = pulsetime + tof_in_nanoseconds;
                 // Linear search for pulsetime in splitter map, assume pulsetime and splitter map are both sorted. This
                 // is the starting point for the full_time search so we need to subtract some time (66.6ms) to ensure we
