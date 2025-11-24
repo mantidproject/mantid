@@ -88,9 +88,11 @@ void Qxy::init() {
                   "_sumOfCounts and _sumOfNormFactors equals the workspace "
                   "returned by the property OutputWorkspace");
   declareProperty("ExtraLength", 0.0, mustBePositive2, "Additional length for gravity correction.");
-  declareProperty("SolidAngleNumberOfCylinderSlices", 10, mustBeIntOver2,
-                  "The number of angular slices used when triangulating a cylinder in order to calculate the solid "
-                  "angle of a tube detector.");
+  declareProperty(
+      "SolidAngleNumberOfCylinderSlices", 10, mustBeIntOver2,
+      "The number of angular slices used when triangulating a cylinder in order to calculate the solid "
+      "angle of a tube detector. The default is 10 to preserve legacy behaviour, but increased accuracy has "
+      "been observed when using values of 11+");
 }
 
 void Qxy::exec() {
