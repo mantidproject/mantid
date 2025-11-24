@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from enum import Enum
-from numpy import array, degrees, isfinite, reshape, round
+from numpy import array, degrees, isfinite, reshape
 from os import path, makedirs
 from shutil import copy2
 
@@ -524,7 +524,7 @@ def _check_ws_foc_and_ws_van_foc(ws_foc, ws_van_foc):
         if num_foc == num_van:
             for ind in range(num_foc):
                 # check each grouping difcs is same within 3 dp, stop if any fail
-                assert round(_get_difc(ws_foc, ind), 3) == round(_get_difc(ws_van_foc, ind), 3)
+                assert abs(_get_difc(ws_foc, ind) - _get_difc(ws_van_foc, ind)) < 1e-3
     except AssertionError:
         error_msg = f"The calibration of {ws_van_foc} does not match {ws_foc}. Ensure the vanadium calibration file loaded is correct."
         logger.error(error_msg)
