@@ -18,13 +18,13 @@ namespace Mantid {
 namespace Kernel {
 
 /// Default number of items to read in from any of the files.
-static const size_t DEFAULT_BLOCK_SIZE = 100000; // 100,000
+constexpr size_t DEFAULT_BLOCK_SIZE{100000}; // 100,000
 
 /// Max size block to read from a file (memory limitations)
-static const size_t MAX_BLOCK_SIZE = 100000000; // 100 million
+constexpr size_t MAX_BLOCK_SIZE{100000000}; // 100 million
 
 /// Min size of a block (too small is inefficient)
-static const size_t MIN_BLOCK_SIZE = 1000;
+constexpr size_t MIN_BLOCK_SIZE{1000};
 
 /**
  * The BinaryFile template is a helper function for loading simple binary files.
@@ -48,27 +48,25 @@ public:
 
   //------------------------------------------------------------------------------------
   /// Constructor - open a file
-  BinaryFile(const std::string &filename) { this->open(filename); }
+  BinaryFile(std::filesystem::path const &filepath) { this->open(filepath); }
 
   /// Destructor, close the file if needed
   ~BinaryFile() { this->close(); }
 
   //------------------------------------------------------------------------------------
   /** Open a file and keep a handle to the file
-   * @param filename :: full path to open
+   * @param filepath :: full path to open
    * @throw runtime_error if the file size is not an even multiple of the type
    * size
    * @throw invalid_argument if the file does not exist
    * */
-  void open(const std::string &filename) {
+  void open(std::filesystem::path const &filepath) {
     this->handle.reset(nullptr);
-    if (!std::filesystem::exists(filename)) {
-      std::stringstream msg;
-      msg << "BinaryFile::open: File " << filename << " was not found.";
-      throw std::invalid_argument("File does not exist.");
+    if (!std::filesystem::exists(filepath)) {
+      throw std::invalid_argument(std::string("BinaryFile::open \"") + filepath.string() + "\" was not found.");
     }
     // Open the file
-    this->handle = std::make_unique<std::ifstream>(filename.c_str(), std::ios::binary);
+    this->handle = std::make_unique<std::ifstream>(filepath, std::ios::binary);
     // Count the # of elements.
     this->num_elements = this->getFileSize();
     // Make sure we are starting at 0
