@@ -87,7 +87,7 @@ public:
     wksps.push_back(ws2);
 
     const std::map<Mantid::detid_t, double> calibration{{1, 1.}, {2, 2.}};
-    const std::map<Mantid::detid_t, double> scale_at_sample;
+    const std::map<Mantid::detid_t, double> scale_at_sample{{1, 1.0}, {2, 0.5}};
     const std::set<Mantid::detid_t> masked;
     std::map<Mantid::Types::Core::DateAndTime, int> splitterMap;
     splitterMap.emplace(Mantid::Types::Core::DateAndTime("2024-01-01T00:00:00"), 0);
@@ -96,7 +96,7 @@ public:
     splitterMap.emplace(Mantid::Types::Core::DateAndTime("2024-01-01T00:00:00.015"), 0);
     splitterMap.emplace(Mantid::Types::Core::DateAndTime("2024-01-01T00:00:00.05"), -1);
 
-    const bool correction_to_sample = false;
+    bool correction_to_sample = false;
     std::shared_ptr<Mantid::API::Progress> progress = std::make_shared<Mantid::API::Progress>();
 
     ProcessBankSplitFullTimeTask task(bankEntryNames, file, mockLoader, workspaceIndices, wksps, calibration,
@@ -104,11 +104,10 @@ public:
 
     // Run the task
     task(tbb::blocked_range<size_t>(0, 1));
-    file.close();
 
     // Check results
 
-    /* should match this simple python calculation
+    /* should match this python calculation
 
     calibration = np.array([(i % 2) + 1 for i in range(15)])
     tofs = np.array([(i*1000) % 5000 + 1000 for i in range(15)])
@@ -128,11 +127,48 @@ public:
         bin_count[x][y] += 1
     print(bin_count)
     */
-    auto outWS1 = wksps[0];
-    auto outWS2 = wksps[1];
-    TS_ASSERT_EQUALS(outWS1->readY(0)[0], 7.0);
-    TS_ASSERT_EQUALS(outWS1->readY(0)[1], 3.0);
-    TS_ASSERT_EQUALS(outWS2->readY(0)[0], 3.0);
-    TS_ASSERT_EQUALS(outWS2->readY(0)[1], 0.0);
+    TS_ASSERT_EQUALS(ws->readY(0)[0], 7.0);
+    TS_ASSERT_EQUALS(ws->readY(0)[1], 3.0);
+    TS_ASSERT_EQUALS(ws2->readY(0)[0], 3.0);
+    TS_ASSERT_EQUALS(ws2->readY(0)[1], 0.0);
+
+    // now test with correction to sample enabled
+    correction_to_sample = true;
+
+    ProcessBankSplitFullTimeTask task2(bankEntryNames, file, mockLoader, workspaceIndices, wksps, calibration,
+                                       scale_at_sample, masked, 1000, 100, splitterMap, correction_to_sample, progress);
+
+    // Run the task
+    task2(tbb::blocked_range<size_t>(0, 1));
+    file.close();
+
+    // Check results
+
+    /* should match this python calculation
+
+    correction_to_sample = np.array([1 - (i % 2)*0.5 for i in range(15)])
+    calibration = np.array([(i % 2) + 1 for i in range(15)])
+    tofs = np.array([(i*1000) % 5000 + 1000 for i in range(15)])
+    full_time = np.array([tofs[i]*correction_to_sample[i]/1e6 + (i//5)*0.01 for i in range(15)])
+    calibrated_tofs = tofs * calibration
+    bin_count = np.zeros((2, 2))
+    for i in range(15):
+        if full_time[i] < 0.005:
+            x = 0
+        elif full_time[i] < 0.013:
+            x = 1
+        elif full_time[i] < 0.015:
+            continue
+        else:
+            x = 0
+        y = 0 if calibrated_tofs[i] < 6000 else 1
+        bin_count[x][y] += 1
+    print(bin_count)
+    */
+
+    TS_ASSERT_EQUALS(ws->readY(0)[0], 7.0);
+    TS_ASSERT_EQUALS(ws->readY(0)[1], 2.0);
+    TS_ASSERT_EQUALS(ws2->readY(0)[0], 3.0);
+    TS_ASSERT_EQUALS(ws2->readY(0)[1], 2.0);
   }
 };
