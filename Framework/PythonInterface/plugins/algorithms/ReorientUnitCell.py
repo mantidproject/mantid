@@ -15,7 +15,7 @@ from mantid.simpleapi import mtd, TransformHKL
 class ReorientUnitCell(PythonAlgorithm):
     """
     Reorients a unit cell based on crystal symmetry by finding the transformation
-    that maximizes trace (R @ U @ B @ inv(M)) across all symmetry operations M.
+    that maximizes trace (U @ B @ inv(M) @ B^{-1}) across all symmetry operations M.
     """
 
     @staticmethod
@@ -192,13 +192,14 @@ class ReorientUnitCell(PythonAlgorithm):
         # c* points along the vertical direction (0, 1, 0)
         # R equivalent to a 120-degree rotation around diagonal <111>
         R = np.array([[0, 1, 0], [0, 0, 1], [1, 0, 0]])
+        B_inv = np.linalg.inv(B)
         max_trace = -np.inf
         optimal_transform = None
         transform_name = None
         for name, transform in transforms.items():
             try:
                 transform_inv = np.linalg.inv(transform)
-                trace = np.trace(R @ U @ B @ transform_inv)
+                trace = np.trace(R @ U @ B @ transform_inv @ B_inv)
                 if trace > max_trace:
                     max_trace = trace
                     optimal_transform = transform
