@@ -132,6 +132,9 @@ class ReorientUnitCell(PythonAlgorithm):
             """Check if all provided values are different from each other."""
             return not_equal(x, y, tol) and not_equal(y, z, tol) and not_equal(x, z, tol)
 
+        # The following `if` statements are redundant but improve readability.
+        # Each `if` statement has all the conditions that identify the lattice system,
+        # irrespective of the other `if` statements.
         if all_same(a, b, c, tol=0.01) and all_same(alpha, beta, gamma, 90, tol=1):
             lattice = "Cubic"
         elif all_same(a, b, c, tol=0.01) and all_same(alpha, beta, gamma, tol=1) and not_equal(gamma, 90, tol=1):
