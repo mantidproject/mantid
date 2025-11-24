@@ -217,7 +217,7 @@ void ProcessBankSplitFullTimeTask::operator()(const tbb::blocked_range<size_t> &
                 // Advance splitter_it until it points to the first element greater than (pulsetime - offset).
                 // This gives us a reasonable starting point for the full_time search.
                 while (splitter_it != m_splitterMap.end() &&
-                       splitter_it->first <= pulsetime - static_cast<int64_t>(83333333)) {
+                       splitter_it->first <= pulsetime - static_cast<int64_t>(PULSETIME_OFFSET)) {
                   ++splitter_it;
                 }
 

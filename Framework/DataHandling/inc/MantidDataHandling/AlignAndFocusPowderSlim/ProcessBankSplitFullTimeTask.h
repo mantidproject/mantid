@@ -19,6 +19,9 @@
 
 namespace Mantid::DataHandling::AlignAndFocusPowderSlim {
 
+// we need to include additional pulses because time-of-flight can be greater than a couple of pulse periods
+const int64_t PULSETIME_OFFSET = 66666666;
+
 class MANTID_DATAHANDLING_DLL ProcessBankSplitFullTimeTask {
 public:
   ProcessBankSplitFullTimeTask(std::vector<std::string> &bankEntryNames, H5::H5File &h5file,

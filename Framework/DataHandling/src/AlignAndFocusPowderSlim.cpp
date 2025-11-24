@@ -428,7 +428,7 @@ void AlignAndFocusPowderSlim::exec() {
 
       // Get the combined time ROI for all targets so we only load necessary events.
       // Need to offset the start time to account for tof's greater than pulsetime. 66.6ms is 4 pulses.
-      auto combined_time_roi = timeSplitter.combinedTimeROI(66666666);
+      auto combined_time_roi = timeSplitter.combinedTimeROI(PULSETIME_OFFSET);
       if (!filterROI.useAll()) {
         combined_time_roi.update_intersection(filterROI);
       }
