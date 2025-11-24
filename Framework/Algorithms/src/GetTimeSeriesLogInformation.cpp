@@ -42,9 +42,6 @@ GetTimeSeriesLogInformation::GetTimeSeriesLogInformation()
 /** Definition of all input arguments
  */
 void GetTimeSeriesLogInformation::init() {
-  g_log.warning("GetTimeSeriesLogInformation is deprecated. Use workspace.run().getStatistics(\"log_name\") instead "
-                "to access time series log statistics directly.");
-
   declareProperty(
       std::make_unique<API::WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "Anonymous", Direction::InOut),
       "Input EventWorkspace.  Each spectrum corresponds to 1 pixel");
