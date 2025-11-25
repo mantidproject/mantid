@@ -1137,7 +1137,7 @@ std::list<std::string> LoadRawHelper::searchForLogFiles(const std::filesystem::p
   // start the process or populating potential log files into the container:
   // potentialLogFiles
   // have we been given what looks like a log file
-  const auto fileExt = pathToRawFile.extension().string();
+  const auto fileExt = pathToRawFile.extension().string().substr(1);
   if (boost::algorithm::iequals(fileExt, ".log") || boost::algorithm::iequals(fileExt, ".txt")) {
     // then we will assume that the file is an ISIS log file
     potentialLogFiles.insert(pathToRawFile.string());
@@ -1157,7 +1157,7 @@ std::list<std::string> LoadRawHelper::searchForLogFiles(const std::filesystem::p
       }
       // Check for .log
       std::filesystem::path combinedLogPath = pathToRawFile;
-      combinedLogPath.replace_extension(".log");
+      combinedLogPath.replace_extension("log");
       if (std::filesystem::exists(combinedLogPath)) {
         // Push three column filename to end of list.
         potentialLogFilesList.insert(potentialLogFilesList.end(), combinedLogPath.string());

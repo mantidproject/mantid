@@ -208,7 +208,7 @@ void SampleEnvironmentSpecParser::loadFullSpecification(SampleEnvironmentSpec *s
     std::string stlFileName = findFile(filename);
 
     std::filesystem::path suppliedFileName(stlFileName);
-    std::string fileExt = suppliedFileName.extension().string();
+    std::string fileExt = suppliedFileName.extension().string().substr(1); // drop the '.'
     std::transform(fileExt.begin(), fileExt.end(), fileExt.begin(), toupper);
 
     std::vector<std::shared_ptr<Geometry::MeshObject>> environmentMeshes;
