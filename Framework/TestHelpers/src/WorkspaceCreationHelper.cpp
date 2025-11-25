@@ -300,15 +300,12 @@ MatrixWorkspace_sptr create2DWorkspaceRagged(int version) {
   MantidVec x_data{100., 200., 300., 400.};
   MantidVec y_data{1., 1., 1.};
   MantidVec e_data{1., 1., 1.};
-  Mantid::HistogramData::HistogramBuilder builder;
-  builder.setX(x_data);
-  builder.setY(y_data);
-  builder.setE(e_data);
-  raggedWS->setHistogram(0, builder.build());
 
   MantidVec x_data2{200., 400., 600.};
   MantidVec y_data2{1., 1.};
   MantidVec e_data2{1., 1.};
+
+  // Update values based on version specification
   if (version == 1) {
     // different number of bins
     x_data2 = {200., 400.};
@@ -320,7 +317,19 @@ MatrixWorkspace_sptr create2DWorkspaceRagged(int version) {
   } else if (version == 3) {
     // same number of bins but different x values
     x_data2 = {200., 500., 600.};
+  } else if (version == 4) {
+    // sets up histograms for the Multiply/Divide tests
+    y_data = {2., 2., 2.};
+    e_data = {2., 2., 2.};
+    y_data2 = {2., 2.};
+    e_data2 = {2., 2.};
   }
+
+  Mantid::HistogramData::HistogramBuilder builder;
+  builder.setX(x_data);
+  builder.setY(y_data);
+  builder.setE(e_data);
+  raggedWS->setHistogram(0, builder.build());
 
   Mantid::HistogramData::HistogramBuilder builder2;
   builder2.setX(x_data2);
