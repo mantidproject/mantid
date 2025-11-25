@@ -143,7 +143,7 @@ void FindEPP::fitGaussian(int64_t index) {
       if (status == "success") {
         m_outWS->cell<double>(spectrum, 1) = fitResult->cell<double>(1, 1);
         m_outWS->cell<double>(spectrum, 2) = fitResult->cell<double>(1, 2);
-        m_outWS->cell<double>(spectrum, 3) = fitResult->cell<double>(2, 1);
+        m_outWS->cell<double>(spectrum, 3) = std::abs(fitResult->cell<double>(2, 1)); // output positive sigma
         m_outWS->cell<double>(spectrum, 4) = fitResult->cell<double>(2, 2);
         m_outWS->cell<double>(spectrum, 5) = fitResult->cell<double>(0, 1);
         m_outWS->cell<double>(spectrum, 6) = fitResult->cell<double>(0, 2);
