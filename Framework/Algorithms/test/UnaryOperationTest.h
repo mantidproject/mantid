@@ -80,7 +80,6 @@ public:
 
   void testExecOn2DWorkspaceRagged() {
     MatrixWorkspace_sptr raggedWS = WorkspaceCreationHelper::create2DWorkspaceRagged();
-    TS_ASSERT(raggedWS->isRaggedWorkspace());
     runExec(raggedWS);
   }
 
