@@ -189,12 +189,10 @@ endif()
 # ######################################################################################################################
 # Visibility Setting
 # ######################################################################################################################
-if(CMAKE_COMPILER_IS_GNUCXX)
-  set(CMAKE_CXX_VISIBILITY_PRESET
-      hidden
-      CACHE STRING ""
-  )
-endif()
+set(CMAKE_CXX_VISIBILITY_PRESET
+    hidden
+    CACHE STRING ""
+)
 
 # ######################################################################################################################
 # Bundles setting used for install commands if not set by something else e.g. Darwin
