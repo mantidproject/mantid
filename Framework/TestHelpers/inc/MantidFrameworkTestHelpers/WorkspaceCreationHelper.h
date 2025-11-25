@@ -159,6 +159,11 @@ Mantid::API::WorkspaceGroup_sptr createWorkspaceGroup(int nEntries, int nHist, i
 Mantid::DataObjects::Workspace2D_sptr create2DWorkspaceBinned(size_t nhist, size_t numVals, double x0 = 0.0,
                                                               double deltax = 1.0);
 
+/**
+ * Create a 2D ragged workspace.
+ */
+Mantid::API::MatrixWorkspace_sptr create2DWorkspaceRagged(int version = 0);
+
 /** Create a 2D workspace with this many point-histograms and bins.
  * Filled with Y = 2.0 and E = M_SQRT2
  */

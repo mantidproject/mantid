@@ -74,6 +74,22 @@ public:
     AnalysisDataService::Instance().remove("InputWS");
   }
 
+  void testExecRagged() {
+    MatrixWorkspace_sptr raggedWS = WorkspaceCreationHelper::create2DWorkspaceRagged();
+    TS_ASSERT(raggedWS->isRaggedWorkspace());
+    AnalysisDataService::Instance().add("raggedWS", raggedWS);
+
+    UnaryOpHelper helper4;
+    helper4.initialize();
+    TS_ASSERT_THROWS_NOTHING(helper4.setPropertyValue("InputWorkspace", "raggedWS"))
+    TS_ASSERT_THROWS_NOTHING(helper4.setPropertyValue("OutputWorkspace", "raggedWS"))
+
+    TS_ASSERT_THROWS_NOTHING(helper4.execute())
+    TS_ASSERT(helper4.isExecuted())
+
+    AnalysisDataService::Instance().remove("raggedWS");
+  }
+
 private:
   UnaryOpHelper helper;
 };
