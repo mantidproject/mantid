@@ -203,7 +203,7 @@ IPropertyManager::getValue<Mantid::API::IMDWorkspace_sptr>(const std::string &na
 template <>
 MANTID_API_DLL Mantid::API::IMDWorkspace_const_sptr
 IPropertyManager::getValue<Mantid::API::IMDWorkspace_const_sptr>(const std::string &name) const {
-  auto *prop = dynamic_cast<PropertyWithValue<Mantid::API::IMDWorkspace_sptr> *>(getPointerToProperty(name));
+  auto const *prop = dynamic_cast<PropertyWithValue<Mantid::API::IMDWorkspace_sptr> *>(getPointerToProperty(name));
   if (prop) {
     return prop->operator()();
   } else {

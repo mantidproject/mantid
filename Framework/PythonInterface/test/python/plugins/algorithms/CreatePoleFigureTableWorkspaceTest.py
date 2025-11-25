@@ -499,7 +499,7 @@ class CreatePoleFigureTableTest(unittest.TestCase):
         )
         issues = alg.validateInputs()
         self.assertEqual(len(issues), 1)
-        self.assertEqual(issues["InputWorkspace"], "If reflection is specified: InputWorkspace must have a sample")
+        self.assertEqual(issues["InputWorkspace"], "If reflection is specified: InputWorkspace sample must have a CrystalStructure")
 
     def test_error_if_hkl_given_but_no_crystal_structure(self):
         CreateWorkspace(DataX=[0.0, 1.0], DataY=[1.0, 2.0, 3.0, 4.0], NSpec=4, OutputWorkspace="bad_ws")

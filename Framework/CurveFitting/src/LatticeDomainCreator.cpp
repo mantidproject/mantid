@@ -168,7 +168,7 @@ void LatticeDomainCreator::createDomainFromPeaksWorkspace(const API::IPeaksWorks
   dSpacings.reserve(peakCount);
 
   for (size_t i = 0; i < peakCount; ++i) {
-    Geometry::IPeak *currentPeak = workspace->getPeakPtr(static_cast<int>(i));
+    Geometry::IPeak const *currentPeak = workspace->getPeakPtr(static_cast<int>(i));
     V3D hkl = currentPeak->getHKL();
 
     if (hkl != V3D(0, 0, 0)) {

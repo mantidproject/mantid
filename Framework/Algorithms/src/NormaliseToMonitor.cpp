@@ -72,8 +72,8 @@ bool MonIDPropChanger::isConditionChanged(const IPropertyManager *algo, const st
 }
 
 // function which modifies the allowed values for the list of monitors.
-void MonIDPropChanger::applyChanges(const IPropertyManager *algo, Kernel::Property *const pProp) {
-  auto *piProp = dynamic_cast<Kernel::PropertyWithValue<int> *>(pProp);
+bool MonIDPropChanger::applyChanges(const IPropertyManager *algo, const std::string &propName) {
+  auto *piProp = dynamic_cast<Kernel::PropertyWithValue<int> *>(algo->getPointerToProperty(propName));
   if (!piProp) {
     throw(std::invalid_argument("modify allowed value has been called on wrong property"));
   }
@@ -90,6 +90,7 @@ void MonIDPropChanger::applyChanges(const IPropertyManager *algo, Kernel::Proper
   } else {
     piProp->replaceValidator(std::make_shared<Kernel::ListValidator<int>>(iExistingAllowedValues));
   }
+  return true;
 }
 
 // read the monitors list from the workspace and try to do it once for any
@@ -345,9 +346,9 @@ std::map<std::string, std::string> NormaliseToMonitor::validateInputs() {
 void NormaliseToMonitor::checkProperties(const MatrixWorkspace_sptr &inputWorkspace) {
 
   // Check where the monitor spectrum should come from
-  Property *monSpec = getProperty("MonitorSpectrum");
+  Property const *monSpec = getProperty("MonitorSpectrum");
   MatrixWorkspace_sptr monWS = getProperty("MonitorWorkspace");
-  Property *monID = getProperty("MonitorID");
+  Property const *monID = getProperty("MonitorID");
   // Is the monitor spectrum within the main input workspace
   const bool inWS = !monSpec->isDefault();
   m_scanInput = inputWorkspace->detectorInfo().isScanning();

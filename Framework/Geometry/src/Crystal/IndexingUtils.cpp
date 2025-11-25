@@ -1024,8 +1024,8 @@ double IndexingUtils::Optimize_6dUB(DblMatrix &UB, DblMatrix &ModUB, const std::
                                  the best direction can't be calculated.
 */
 
-double IndexingUtils::Optimize_Direction(V3D &best_vec, const std::vector<int> &index_values,
-                                         const std::vector<V3D> &q_vectors) {
+double IndexingUtils::Optimize_Direction(V3D &best_vec, // cppcheck-suppress constParameterReference
+                                         const std::vector<int> &index_values, const std::vector<V3D> &q_vectors) {
   if (index_values.size() < 3) {
     throw std::invalid_argument("Optimize_Direction(): Three or more indexed values needed");
   }

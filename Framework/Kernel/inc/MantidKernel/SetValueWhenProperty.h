@@ -27,26 +27,26 @@ public:
                        const std::function<std::string(std::string, std::string)> &changeCriterion)
       : IPropertySettings(), m_watchedPropName{watchedPropName}, m_changeCriterion{changeCriterion} {}
 
-  /// Return true always
+  /// Return true when the property changed is the property that the current property's value depends on.
   bool isConditionChanged(const IPropertyManager *algo, const std::string &changedPropName) const override;
 
-  /// If a new value should be set, the change is applied here
-  void applyChanges(const Mantid::Kernel::IPropertyManager *algo, Kernel::Property *const pProp) override;
+  /// If a new value should be set, the change is applied here.
+  /// Return true if the current property was actually changed.
+  bool applyChanges(const Mantid::Kernel::IPropertyManager *algo, const std::string &currentPropName) override;
 
-  /// Stub function to satisfy the interface.
-  void modify_allowed_values(Property *const);
+  /// Other properties that this property depends on.
+  std::vector<std::string> dependsOn(const std::string &thisProp) const override;
 
-  /// Checks the algorithm and property are both valid and attempts
-  /// to get the value associated with the property
-  std::string getPropertyValue(const IPropertyManager *algo) const;
   /// Make a copy of the present type of IPropertySettings
   IPropertySettings *clone() const override;
 
 private:
-  /// Name of the watched property, based on which we may
-  /// set the value of the current property
+  /// Name of the watched property, which is the property that the current property's value depends on.
   std::string m_watchedPropName;
-  /// Function to check if changes should be applied
+
+  /// Callback to check and actually apply any required changes:
+  /// this function returns a new string value for the current property,
+  /// which in some cases might be the same as the current value.
   std::function<std::string(std::string, std::string)> m_changeCriterion;
 };
 

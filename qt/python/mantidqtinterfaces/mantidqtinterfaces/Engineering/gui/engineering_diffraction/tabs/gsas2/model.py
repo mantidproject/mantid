@@ -605,7 +605,7 @@ class GSAS2Model:
 
     def get_no_banks(self, prm_file):
         with open(prm_file) as f:
-            for line in f.readlines():
+            for line in f:
                 if "BANK" in line and len(line.split()) == 3:
                     return int(line.split()[-1])
 

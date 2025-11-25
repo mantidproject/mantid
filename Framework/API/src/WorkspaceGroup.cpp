@@ -76,7 +76,7 @@ bool WorkspaceGroup::isInChildGroup(const Workspace &workspaceToCheck) const {
   std::lock_guard<std::recursive_mutex> _lock(m_mutex);
   for (const auto &workspace : m_workspaces) {
     // check child groups only
-    auto *group = dynamic_cast<WorkspaceGroup *>(workspace.get());
+    auto const *group = dynamic_cast<WorkspaceGroup *>(workspace.get());
     if (group) {
       if (group->isInGroup(workspaceToCheck))
         return true;
@@ -120,7 +120,7 @@ void WorkspaceGroup::reorderMembersWithIndices(const std::vector<int> &indices) 
   std::vector<Mantid::API::Workspace_sptr> reordered;
   std::transform(indices.cbegin(), indices.cend(), std::back_inserter(reordered),
                  [&](const auto &i) { return m_workspaces[i]; });
-  m_workspaces = reordered;
+  m_workspaces = std::move(reordered);
 }
 
 /**
@@ -150,19 +150,16 @@ void WorkspaceGroup::addWorkspace(const Workspace_sptr &workspace) {
  */
 bool WorkspaceGroup::containsInChildren(const std::string &wsName) const {
   std::lock_guard<std::recursive_mutex> _lock(m_mutex);
-  for (const auto &workspace : m_workspaces) {
+
+  const auto it = std::find_if(m_workspaces.cbegin(), m_workspaces.cend(), [&wsName](const auto &workspace) {
     if (workspace->isGroup()) {
-      // Recursive containsInChildren search
       const auto group = std::dynamic_pointer_cast<WorkspaceGroup>(workspace);
-      if (group->containsInChildren(wsName)) {
-        return true;
-      }
-    } else {
-      if (workspace->getName() == wsName)
-        return true;
+      return group->containsInChildren(wsName);
     }
-  }
-  return false;
+    return workspace->getName() == wsName;
+  });
+
+  return it != m_workspaces.cend();
 }
 
 /**
@@ -431,7 +428,7 @@ bool WorkspaceGroup::areNamesSimilar() const {
     return false;
 
   // Check all the members are of similar names
-  for (const auto &workspace : m_workspaces) {
+  return std::all_of(m_workspaces.cbegin(), m_workspaces.cend(), [this](const auto &workspace) {
     const std::string &wsName = workspace->getName();
     // Find the last underscore _
     std::size_t pos = wsName.find_last_of('_');
@@ -443,8 +440,8 @@ bool WorkspaceGroup::areNamesSimilar() const {
     std::string commonpart(wsName.substr(0, pos));
     if (this->getName() != commonpart)
       return false;
-  }
-  return true;
+    return true;
+  });
 }
 
 //------------------------------------------------------------------------------

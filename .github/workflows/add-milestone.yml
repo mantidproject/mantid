@@ -1,0 +1,14 @@
+name: Add milestone to new PRs
+on:
+  pull_request:
+    types: [opened, reopened]
+    branches: [main, release-next]
+
+jobs:
+  add-milestone:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: benelan/milestone-action@v3
+        with:
+          farthest: false      # false = use current milestone by due date
+          overwrite: false     # don't overwrite if milestone already exists

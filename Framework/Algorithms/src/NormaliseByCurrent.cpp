@@ -58,12 +58,12 @@ double NormaliseByCurrent::extractCharge(const std::shared_ptr<Mantid::API::Matr
   // The number of periods is set above by reference
   if (nPeriods > 1) {
     // Fetch the period property
-    Property *currentPeriodNumberProperty = run.getLogData("current_period");
+    Property const *currentPeriodNumberProperty = run.getLogData("current_period");
     int periodNumber = std::stoi(currentPeriodNumberProperty->value());
 
     // Fetch the charge property
     Property *chargeProperty = run.getLogData("proton_charge_by_period");
-    auto *chargePropertyArray = dynamic_cast<ArrayProperty<double> *>(chargeProperty);
+    auto const *chargePropertyArray = dynamic_cast<ArrayProperty<double> *>(chargeProperty);
     if (chargePropertyArray) {
       charge = chargePropertyArray->operator()()[periodNumber - 1];
     } else {

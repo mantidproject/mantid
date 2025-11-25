@@ -249,7 +249,7 @@ void SumSpectra::exec() {
     // take the square root of all the accumulated squared errors - Assumes
     // Gaussian errors
     auto &YError = outSpec.mutableE();
-    std::transform(YError.begin(), YError.end(), YError.begin(), (double (*)(double))std::sqrt);
+    std::transform(YError.begin(), YError.end(), YError.begin(), static_cast<double (*)(double)>(std::sqrt));
   }
 
   // set up the summing statistics

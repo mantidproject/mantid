@@ -117,7 +117,7 @@ public:
     bool weightedZ = false;
     calculatePeaksStatistics(reflections.getReflections(), equivalentIntensities, sigmaCritical, weightedZ);
   }
-  explicit PeaksStatistics(const UniqueReflectionCollection &reflections, std::string &equivalentIntensities,
+  explicit PeaksStatistics(const UniqueReflectionCollection &reflections, std::string const &equivalentIntensities,
                            double &sigmaCritical, bool &weightedZ)
       : m_measuredReflections(0), m_uniqueReflections(0), m_completeness(0.0), m_redundancy(0.0), m_rMerge(0.0),
         m_rPim(0.0), m_meanIOverSigma(0.0), m_dspacingMin(0.0), m_dspacingMax(0.0), m_chiSquared(0.0), m_peaks() {
@@ -165,7 +165,7 @@ public:
 
 private:
   void calculatePeaksStatistics(const std::map<Kernel::V3D, UniqueReflection> &uniqueReflections,
-                                std::string &equivalentIntensities, double &sigmaCritical, bool &weightedZ);
+                                std::string const &equivalentIntensities, double &sigmaCritical, bool &weightedZ);
 
   double getIOverSigmaSum(const std::vector<double> &sigmas, const std::vector<double> &intensities) const;
   double getRMS(const std::vector<double> &data) const;

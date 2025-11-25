@@ -542,9 +542,8 @@ void LoadFITS::parseHeader(FITSInfo &headerInfo) {
 
         // Comments on header entries are added after the value separated by a /
         // symbol. Exclude those comments.
-        auto slashPos = value.find('/');
-        if (slashPos > 0)
-          value = value.substr(0, slashPos);
+        if (auto pos = value.find('/'); pos != std::string::npos && pos > 0)
+          value.erase(pos);
 
         boost::trim(key);
         boost::trim(value);

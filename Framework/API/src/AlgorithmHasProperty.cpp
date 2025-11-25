@@ -33,7 +33,7 @@ Kernel::IValidator_sptr AlgorithmHasProperty::clone() const { return std::make_s
 std::string AlgorithmHasProperty::checkValidity(const std::shared_ptr<IAlgorithm> &value) const {
   std::string message;
   if (value->existsProperty(m_propName)) {
-    Kernel::Property *p = value->getProperty(m_propName);
+    Kernel::Property const *p = value->getProperty(m_propName);
     if (!p->isValid().empty()) {
       message = "Algorithm object contains the required property \"" + m_propName +
                 "\" but it has an invalid value: " + p->value();

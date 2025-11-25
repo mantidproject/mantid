@@ -16,6 +16,8 @@
 #include <boost/python/return_value_policy.hpp>
 #endif
 
+namespace {
+
 // Call the dtype helper function
 template <typename HeldType> std::string dtype(Mantid::Kernel::PropertyWithValue<HeldType> &self) {
   // Check for the special case of a string
@@ -29,6 +31,17 @@ template <typename HeldType> std::string dtype(Mantid::Kernel::PropertyWithValue
 
   return Mantid::PythonInterface::Converters::dtype(self);
 }
+
+// getter and setter helper functions for `value` Python property export.
+template <typename T> static T const &get_value(Mantid::Kernel::PropertyWithValue<T> const &self) {
+  return self(); // forwards to operator()()
+}
+
+template <typename T> static void set_value(Mantid::Kernel::PropertyWithValue<T> &self, T const &v) {
+  self = v; // forwards to operator=
+}
+
+} // namespace
 
 namespace Mantid {
 namespace PythonInterface {
@@ -45,8 +58,8 @@ struct PropertyWithValueExporter {
     class_<PropertyWithValue<HeldType>, bases<Property>, boost::noncopyable>(
         pythonClassName, init<std::string, HeldType, unsigned int>(
                              (arg("self"), arg("name"), arg("value"), arg("direction") = Direction::Input)))
-        .add_property("value",
-                      make_function(&PropertyWithValue<HeldType>::operator(), return_value_policy<ValueReturnPolicy>()))
+        .add_property("value", make_function(&get_value<HeldType>, return_value_policy<ValueReturnPolicy>()),
+                      &set_value<HeldType>)
         .def("dtype", &dtype<HeldType>, arg("self"));
   }
 };

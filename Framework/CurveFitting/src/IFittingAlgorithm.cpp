@@ -227,7 +227,7 @@ void IFittingAlgorithm::addWorkspace(const std::string &workspacePropertyName, b
     if (fun->getNumberDomains() > 1) {
       std::shared_ptr<MultiDomainCreator> multiCreator = std::dynamic_pointer_cast<MultiDomainCreator>(m_domainCreator);
       if (!multiCreator) {
-        auto &reference = *m_domainCreator;
+        auto const &reference = *m_domainCreator;
         throw std::runtime_error(std::string("MultiDomainCreator expected, found ") + typeid(reference).name());
       }
       if (!multiCreator->hasCreator(index)) {

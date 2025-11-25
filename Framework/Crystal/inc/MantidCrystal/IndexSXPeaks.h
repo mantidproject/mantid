@@ -146,7 +146,7 @@ public:
 
 private:
   // Helper method to cull potential hkls off each peak.
-  void cullHKLs(std::vector<PeakCandidate> &peakCandidates, Mantid::Geometry::UnitCell &unitcell);
+  void cullHKLs(std::vector<PeakCandidate> &peakCandidates, Mantid::Geometry::UnitCell const &unitcell);
   // Helper method used to check that not all peaks are colinear.
   void validateNotColinear(const std::vector<PeakCandidate> &peakCandidates) const;
   // Overridden Algorithm methods

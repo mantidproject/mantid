@@ -144,7 +144,7 @@ class TOFTOFScriptElementTest(unittest.TestCase):
 
     def test_that_script_is_executable_in_mantid(self):
         def exec_script(script):
-            exec(script, dict(), dict())
+            exec(script, dict(), dict())  # noqa: S102
 
         # data files are here
         self.scriptElement.dataDir = ""

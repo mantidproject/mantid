@@ -75,7 +75,7 @@ public:
 
   // For reporting and saving
   void getFreeSpaceVector(std::vector<uint64_t> &free) const;
-  void setFreeSpaceVector(std::vector<uint64_t> &free);
+  void setFreeSpaceVector(std::vector<uint64_t> const &free);
   std::string getMemoryStr() const;
 
   //-------------------------------------------------------------------------------------------

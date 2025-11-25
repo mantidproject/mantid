@@ -51,7 +51,7 @@ private:
   bool checkForDateTime(const std::string &val) const;
 
   /// Time shift the log of a double series property
-  void shiftTimeInLogForTimeSeries(const Mantid::API::MatrixWorkspace_sptr &ws, Mantid::Kernel::Property *prop,
+  void shiftTimeInLogForTimeSeries(const Mantid::API::MatrixWorkspace_sptr &ws, Mantid::Kernel::Property const *prop,
                                    double timeShift) const;
   /// Time shift the log of a string property
   void shiftTimeOfLogForStringProperty(Mantid::Kernel::PropertyWithValue<std::string> *logEntry,

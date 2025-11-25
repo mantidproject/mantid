@@ -266,9 +266,6 @@ void Parser::split() {
   if (m_multiFileName.empty())
     throw std::runtime_error("No file name to parse.");
 
-  // (We shun the use of Poco::File here as it is unable to deal with certain
-  // combinations of special characters, for example double commas.)
-
   // Clear whitespace before getting extentions and directories, if requested.
   if (trimWhiteSpaces()) {
     m_multiFileName.erase(std::remove_if( // ("Erase-remove" idiom.)

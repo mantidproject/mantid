@@ -1396,16 +1396,16 @@ void FitPeak::setupOutput(const std::map<std::string, double> &m_fitErrorPeakFun
   // TODO - Need to retrieve useful information from FitOneSinglePeak object
   // (think of how)
   const auto &vecX = m_dataWS->x(m_wsIndex);
-  const size_t i_minFitX = getIndex(vecX, m_minFitX);
-  const size_t i_maxFitX = getIndex(vecX, m_maxFitX);
+  const size_t indexMinFitX = getIndex(vecX, m_minFitX);
+  const size_t indexMaxFitX = getIndex(vecX, m_maxFitX);
 
   // Data workspace
   const size_t nspec = 3;
   // Get a vector for fit window
 
-  vector<double> vecoutx(i_maxFitX - i_minFitX + 1);
-  for (size_t i = i_minFitX; i <= i_maxFitX; ++i)
-    vecoutx[i - i_minFitX] = vecX[i];
+  vector<double> vecoutx(indexMaxFitX - indexMinFitX + 1);
+  for (size_t i = indexMinFitX; i <= i_maxFitX; ++i)
+    vecoutx[i - indexMinFitX] = vecX[i];
 
   // Create workspace
   const size_t sizex = vecoutx.size();
@@ -1430,7 +1430,7 @@ void FitPeak::setupOutput(const std::map<std::string, double> &m_fitErrorPeakFun
 
   auto &vecY = m_dataWS->y(m_wsIndex);
   const auto valvec = values.toVector();
-  outws->mutableY(0).assign(vecY.cbegin() + i_minFitX, vecY.cbegin() + i_minFitX + sizey);
+  outws->mutableY(0).assign(vecY.cbegin() + indexMinFitX, vecY.cbegin() + indexMinFitX + sizey);
   outws->mutableY(1).assign(valvec.cbegin(), valvec.cbegin() + sizey);
   std::transform(outws->y(0).cbegin(), outws->y(0).cbegin() + sizey, outws->y(1).cbegin(), outws->mutableY(2).begin(),
                  std::minus<double>());

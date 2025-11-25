@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 from unittest import mock
-from unittest.mock import patch
+from unittest.mock import patch, call
 from numpy import isnan
 
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.data_handling.data_model import FittingDataModel
@@ -124,18 +124,22 @@ class TestFittingDataModel(unittest.TestCase):
         mock_load.assert_any_call("/dir/file2.nxs", OutputWorkspace="file2_Fitting")
         mock_update_logws_group.assert_called_once()
 
-    @patch(data_model_path + ".logger")
+    @patch(data_model_path + ".ExtractSingleSpectrum")
     @patch(data_model_path + ".Load")
-    def test_loading_multiple_files_too_many_spectra(self, mock_load, mock_logger):
+    def test_loading_file_with_multiple_spectra(self, mock_load, mock_extract):
         self.mock_ws.getNumberHistograms.return_value = 2
         mock_load.return_value = self.mock_ws
 
-        self.model.load_files("/dir/file1.txt, /dir/file2.nxs")
+        self.model.load_files("/dir/file_dSpacing.nxs")
 
-        self.assertEqual(0, len(self.model._data_workspaces))
-        mock_load.assert_any_call("/dir/file1.txt", OutputWorkspace="file1_Fitting")
-        mock_load.assert_any_call("/dir/file2.nxs", OutputWorkspace="file2_Fitting")
-        self.assertEqual(2, mock_logger.warning.call_count)
+        self.assertEqual(2, len(self.model._data_workspaces))
+        mock_load.assert_any_call("/dir/file_dSpacing.nxs", OutputWorkspace="file_dSpacing_Fitting")
+        mock_extract.assert_has_calls(
+            [
+                call(InputWorkspace=self.mock_ws, OutputWorkspace="file_0_dSpacing_Fitting", WorkspaceIndex=0),
+                call(InputWorkspace=self.mock_ws, OutputWorkspace="file_1_dSpacing_Fitting", WorkspaceIndex=1),
+            ]
+        )
 
     @patch(data_model_path + ".logger")
     @patch(data_model_path + ".Load")

@@ -46,7 +46,7 @@ ScopedWorkspace::operator bool() const { return AnalysisDataService::Instance().
  * under the name.
  */
 Workspace_sptr ScopedWorkspace::retrieve() const {
-  AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
+  AnalysisDataServiceImpl const &ads = AnalysisDataService::Instance();
 
   if (ads.doesExist(m_name)) {
     return ads.retrieveWS<Workspace>(m_name);

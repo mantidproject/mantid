@@ -21,7 +21,7 @@ from mantidqt.widgets.codeeditor.errorformatter import ErrorFormatter
 class ErrorFormatterTest(unittest.TestCase):
     def test_syntax_error(self):
         try:
-            exec("if:")
+            exec("if:")  # noqa: S102
         except SyntaxError:
             exc_type, exc_value = sys.exc_info()[:2]
             formatter = ErrorFormatter()
@@ -45,7 +45,7 @@ def foo():
 foo()
 """
         try:
-            exec(code)
+            exec(code)  # noqa: S102
         except NameError:
             exc_type, exc_value, tb = sys.exc_info()
             formatter = ErrorFormatter()
@@ -59,13 +59,14 @@ foo()
         expected_lines = [
             "NameError:.*'_local'.*",
             r'  File ".*test_errorformatter.py", line \d+, in test_standard_exception',
-            "    exec(.*)",
+            "    exec(.*).*",
+            r"    \^+",
             r'  File "<string>", line \d+, in <module>',
             r'  File "<string>", line \d+, in foo',
             r'  File "<string>", line \d+, in bar',
         ]
-        for produced, expected in zip(error_lines, expected_lines):
-            self.assertRegexpMatches(produced, expected)
+        for produced, expected in zip(error_lines, expected_lines, strict=True):
+            self.assertRegex(produced, expected)
 
 
 if __name__ == "__main__":

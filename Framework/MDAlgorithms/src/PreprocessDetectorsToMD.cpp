@@ -391,7 +391,7 @@ void PreprocessDetectorsToMD::buildFakeDetectorsPositions(const API::MatrixWorks
 /// function checks if source workspace still has information about detectors.
 /// Some ws (like rebinned one) do not have this information any more.
 bool PreprocessDetectorsToMD::isDetInfoLost(const Mantid::API::MatrixWorkspace_const_sptr &inWS2D) const {
-  auto pYAxis = dynamic_cast<API::NumericAxis *>(inWS2D->getAxis(1));
+  auto const *pYAxis = dynamic_cast<API::NumericAxis const *>(inWS2D->getAxis(1));
   // if this is numeric axis, then the detector's information has been lost:
   return pYAxis != nullptr;
 }

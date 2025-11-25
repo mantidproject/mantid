@@ -14,7 +14,7 @@
 #include <algorithm>
 
 namespace {
-std::vector<double> getSubVector(Mantid::MantidVec &data, const int64_t &lowerIndex, const int64_t &upperIndex) {
+std::vector<double> getSubVector(Mantid::MantidVec const &data, const int64_t &lowerIndex, const int64_t &upperIndex) {
   auto low = std::next(data.begin(), lowerIndex);
   auto up = std::next(data.begin(), upperIndex);
   // get new vectors

@@ -264,25 +264,27 @@ void QtExperimentView::connectSettingsChange(QTableWidget &edit) {
   connect(&edit, SIGNAL(cellChanged(int, int)), this, SLOT(onLookupRowChanged(int, int)));
 }
 
-void QtExperimentView::disconnectSettingsChange(QLineEdit &edit) {
+void QtExperimentView::disconnectSettingsChange(QLineEdit const &edit) {
   disconnect(&edit, SIGNAL(textChanged(QString const &)), 0, 0);
 }
 
-void QtExperimentView::disconnectSettingsChange(QSpinBox &edit) {
+void QtExperimentView::disconnectSettingsChange(QSpinBox const &edit) {
   disconnect(&edit, SIGNAL(valueChanged(QString const &)), 0, 0);
 }
 
-void QtExperimentView::disconnectSettingsChange(QDoubleSpinBox &edit) {
+void QtExperimentView::disconnectSettingsChange(QDoubleSpinBox const &edit) {
   disconnect(&edit, SIGNAL(valueChanged(QString const &)), 0, 0);
 }
 
-void QtExperimentView::disconnectSettingsChange(QComboBox &edit) {
+void QtExperimentView::disconnectSettingsChange(QComboBox const &edit) {
   disconnect(&edit, SIGNAL(currentIndexChanged(int)), 0, 0);
 }
 
-void QtExperimentView::disconnectSettingsChange(QCheckBox &edit) { disconnect(&edit, SIGNAL(stateChanged(int)), 0, 0); }
+void QtExperimentView::disconnectSettingsChange(QCheckBox const &edit) {
+  disconnect(&edit, SIGNAL(stateChanged(int)), 0, 0);
+}
 
-void QtExperimentView::disconnectSettingsChange(QTableWidget &edit) {
+void QtExperimentView::disconnectSettingsChange(QTableWidget const &edit) {
   disconnect(&edit, SIGNAL(cellChanged(int, int)), 0, 0);
 }
 

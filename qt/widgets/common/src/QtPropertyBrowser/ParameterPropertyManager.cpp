@@ -51,7 +51,7 @@ std::string ParameterPropertyManager::description(const QtProperty *property) co
  */
 bool ParameterPropertyManager::isErrorSet(const QtProperty *property) const {
   // Cast for searching purposes
-  auto prop = const_cast<QtProperty *>(property);
+  auto const prop = const_cast<QtProperty *>(property);
 
   return m_errors.contains(prop);
 }

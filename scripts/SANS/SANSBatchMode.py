@@ -414,7 +414,7 @@ def BatchReduce(  # noqa: C901
                     elif algor == "SaveRKH":
                         SaveRKH(save_names_dict[workspace_name], workspace_name + ext, Append=False)
                     else:
-                        exec("from mantid.simpleapi import *; " + algor + "('" + save_names_dict[workspace_name] + "', workspace_name+ext)")
+                        exec("from mantid.simpleapi import *; " + algor + "('" + save_names_dict[workspace_name] + "', workspace_name+ext)")  # noqa: S102
             # If we performed a zero-error correction, then we should get rid of the cloned workspaces
             if save_as_zero_error_free:
                 delete_cloned_workspaces(save_names_dict)
@@ -477,7 +477,7 @@ def read_run(runs, run_role, format):
             return
 
     run_file, period = parse_run(run_file, format)
-    run_ws = eval(COMMAND[run_role] + "run_file, period=period)")
+    run_ws = eval(COMMAND[run_role] + "run_file, period=period)")  # noqa: S307
     if not run_ws:
         raise SkipReduction("Cannot load " + run_role + ' run "' + run_file + '"')
 
@@ -506,7 +506,7 @@ def read_trans_runs(runs, sample_or_can, format):
         # it is OK for transmission files not to be present
         return []
 
-    ws1, ws2 = eval(COMMAND[role1] + "run_file1, run_file2, period_t=p1, period_d=p2)")
+    ws1, ws2 = eval(COMMAND[role1] + "run_file1, run_file2, period_t=p1, period_d=p2)")  # noqa: S307
     if len(run_file1) > 0 and len(ws1) == 0:
         raise SkipReduction("Cannot load " + role1 + ' run "' + run_file1 + '"')
     if len(run_file2) > 0 and len(ws2) == 0:

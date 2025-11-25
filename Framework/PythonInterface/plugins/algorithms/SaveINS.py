@@ -146,8 +146,7 @@ class SaveINS(PythonAlgorithm):
             f_handle.write(f"LATT {latt_type}\n")
 
             # print sym operations
-            for sym_str in self._get_shelx_symmetry_operators(spgr, latt_type):
-                f_handle.write(f"SYMM {sym_str}\n")
+            f_handle.writelines(f"SYMM {sym_str}\n" for sym_str in self._get_shelx_symmetry_operators(spgr, latt_type))
 
             # print atom info
             f_handle.write("NEUT\n")

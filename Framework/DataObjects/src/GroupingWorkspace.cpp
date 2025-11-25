@@ -150,7 +150,7 @@ IPropertyManager::getValue<Mantid::DataObjects::GroupingWorkspace_sptr>(const st
 template <>
 DLLExport Mantid::DataObjects::GroupingWorkspace_const_sptr
 IPropertyManager::getValue<Mantid::DataObjects::GroupingWorkspace_const_sptr>(const std::string &name) const {
-  auto *prop =
+  auto const *prop =
       dynamic_cast<PropertyWithValue<Mantid::DataObjects::GroupingWorkspace_sptr> *>(getPointerToProperty(name));
   if (prop) {
     return prop->operator()();

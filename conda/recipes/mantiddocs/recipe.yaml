@@ -31,7 +31,6 @@ requirements:
     - setuptools
     - sphinx ${{ sphinx }}
     - sphinx_bootstrap_theme ${{ sphinx_bootstrap_theme }}
-    - versioningit ${{ versioningit }}
     - graphviz ${{ graphviz }}
     - pystog ${{ pystog }}
     - if: linux

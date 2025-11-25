@@ -21,7 +21,7 @@ bool GlobalInterpreterLock::locked() {
 #if defined(IS_PY3K)
   return (PyGILState_Check() == 1);
 #else
-  PyThreadState *ts = _PyThreadState_Current;
+  PyThreadState const *ts = _PyThreadState_Current;
   return (ts && ts == PyGILState_GetThisThreadState());
 #endif
 }

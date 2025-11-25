@@ -56,7 +56,7 @@ auto addPeriodSeries = [](Property *left, const Property *right) {
 struct addableProperty {
 public:
   using func = std::function<void(Property *, const Property *)>;
-  addableProperty(const std::string &name, func opFunc_in = nullptr) : name(name), opFunc(opFunc_in) {};
+  addableProperty(const std::string &name, func opFunc_in = nullptr) : name(name), opFunc(std::move(opFunc_in)) {};
   std::string name;
   func opFunc;
 };
@@ -359,15 +359,11 @@ void Run::integrateProtonCharge(const std::string &logname) const {
       const std::vector<double> logValues = log->valuesAsVector();
       total = std::accumulate(logValues.begin(), logValues.end(), 0.0);
     } else {
-      const auto &values = log->valuesAsVector();
       const auto &times = log->timesAsVector();
-      const auto NUM_VALUES = values.size();
 
-      total = 0.;
-      for (std::size_t i = 0; i < NUM_VALUES; ++i) {
-        if (timeroi.valueAtTime(times[i]))
-          total += values[i];
-      }
+      total = std::accumulate(times.cbegin(), times.cend(), 0., [&](double valueTotal, const DateAndTime &time) {
+        return timeroi.valueAtTime(time) ? valueTotal + log->getSingleValue(time) : valueTotal;
+      });
     }
 
     const std::string &unit = log->units();

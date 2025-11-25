@@ -34,7 +34,7 @@ StringDialogEditor::StringDialogEditor(QtProperty *property, QWidget *parent) : 
   layout->addWidget(m_lineEdit);
   setFocusProxy(m_lineEdit);
   connect(m_lineEdit, SIGNAL(editingFinished()), this, SLOT(updateProperty()));
-  auto *mgr = dynamic_cast<QtStringPropertyManager *>(property->propertyManager());
+  auto const *mgr = dynamic_cast<QtStringPropertyManager const *>(property->propertyManager());
   if (mgr) {
     m_lineEdit->setText(mgr->value(property));
   }

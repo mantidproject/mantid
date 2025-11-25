@@ -237,10 +237,18 @@ void AlgorithmPropertiesWidget::initLayout() {
       // Set the previous input value, if any
       if (m_inputHistory) {
         QString oldValue = m_inputHistory->previousInput(m_algoName, propName);
-        // Empty string if not found. This means use the default.
+        // Empty string if not found. This means use the default value.
         if (!oldValue.isEmpty()) {
           auto error = prop->setValue(oldValue.toStdString());
+          // TODO: [Known defect]: this does not match the initialization sequence
+          //   in `AlgorithmDialog`.  In the `AlgorithmDialog` case the 'valueChanged' SIGNAL
+          //   will already have been connected at the point the previous values are set.
+          //   By implication: this initialization will not initialize properties
+          //   with dynamic-default values correctly.
+          //   However, at present this clause is not actually executed anywhere in the codebase.
+          //   WHEN this clause is used, this issue might need to be fixed!
           widget->setError(QString::fromStdString(error));
+          widget->setPrevious_isDynamicDefault(false);
           widget->setPreviousValue(oldValue);
         }
       }
@@ -333,7 +341,7 @@ void AlgorithmPropertiesWidget::replaceWSClicked(const QString &propName) {
  * @param property :: the property that allows to check for the settings.
  * @param propName :: The name of the property
  */
-bool AlgorithmPropertiesWidget::isWidgetEnabled(Property *property, const QString &propName) const {
+bool AlgorithmPropertiesWidget::isWidgetEnabled(const Property *property, const QString &propName) const {
   // To avoid errors
   if (propName.isEmpty())
     return true;
@@ -363,45 +371,55 @@ bool AlgorithmPropertiesWidget::isWidgetEnabled(Property *property, const QStrin
 //-------------------------------------------------------------------------------------------------
 /** Go through all the properties, and check their validators to determine
  * whether they should be made disabled/invisible.
- * It also shows/hids the validators.
+ * It also shows/hides the validators.
  * All properties' values should be set already, otherwise the validators
  * will be running on old data.
  * @param changedPropName :: name of the property that was changed
  */
 void AlgorithmPropertiesWidget::hideOrDisableProperties(const QString &changedPropName) {
-  // SetValueWhenProperty as appropriate
+  // Apply `SetValueWhenProperty` or other `IPropertySettings` as appropriate.
+  auto const *changedPropWidget = !changedPropName.isEmpty() ? m_propWidgets[changedPropName] : nullptr;
   for (auto &widget : m_propWidgets) {
     Mantid::Kernel::Property *prop = widget->getProperty();
-    IPropertySettings *settings = prop->getSettings();
+    const QString propName = QString::fromStdString(prop->name());
 
+    IPropertySettings *settings = prop->getSettings();
     if (settings) {
       // Dynamic PropertySettings objects allow a property to change
       // validators. This removes the old widget and creates a new one
       // instead.
+
       if (settings->isConditionChanged(m_algo.get(), changedPropName.toStdString())) {
-        settings->applyChanges(m_algo.get(), prop);
+        if (settings->applyChanges(m_algo.get(), prop->name())) {
+          // WARNING: allow for the possibility that the current property has been replaced inside of `applyChanges`!
+          prop = m_algo->getPointerToProperty(propName.toStdString());
 
-        // Delete the old widget
-        int row = widget->getGridRow();
-        QGridLayout *layout = widget->getGridLayout();
-        widget->setVisible(false);
-        widget->deleteLater();
+          widget->setVisible(false);
 
-        // Create the appropriate widget at this row in the grid.
-        widget = PropertyWidgetFactory::createWidget(prop, this, layout, row);
+          // Create a new widget at the same position in the layout grid:
+          //   since widget is a reference, this also replaces the `widget*` in `m_propWidgets`.
+          auto *oldWidget = widget;
+          int row = widget->getGridRow();
+          QGridLayout *layout = widget->getGridLayout();
+          widget = PropertyWidgetFactory::createWidget(prop, this, layout, row);
+          widget->transferHistoryState(oldWidget, changedPropWidget);
 
-        // Whenever the value changes in the widget, this fires
-        // propertyChanged()
-        connect(widget, SIGNAL(valueChanged(const QString &)), this, SLOT(propertyChanged(const QString &)));
+          // Delete the old widget
+          oldWidget->deleteLater();
+
+          // Whenever the value changes in the widget, this fires
+          // propertyChanged()
+          connect(widget, SIGNAL(valueChanged(const QString &)), this, SLOT(propertyChanged(const QString &)));
+        }
       }
     }
   } // for each property
 
   // set Visible and Enabled as appropriate
   for (auto &widget : m_propWidgets) {
-    Mantid::Kernel::Property *prop = widget->getProperty();
-    const IPropertySettings *settings = prop->getSettings();
-    const auto &propName = QString::fromStdString(prop->name());
+    Mantid::Kernel::Property const *prop = widget->getProperty();
+    IPropertySettings const *settings = prop->getSettings();
+    auto const &propName = QString::fromStdString(prop->name());
 
     // Set the enabled and visible flags based on what the validators say.
     // Default is always true.
@@ -438,11 +456,14 @@ void AlgorithmPropertiesWidget::hideOrDisableProperties(const QString &changedPr
 void AlgorithmPropertiesWidget::saveInput() {
   if (m_inputHistory) {
     for (auto pitr = m_propWidgets.begin(); pitr != m_propWidgets.end(); ++pitr) {
-      PropertyWidget *widget = pitr.value();
-      const QString &propName = pitr.key();
-      QString value = widget->getValue();
-      //        Mantid::Kernel::Property *prop = widget->getProperty();
-      //        if (!prop || prop->remember())
+      PropertyWidget const *widget = pitr.value();
+      auto const *prop = widget->getProperty();
+      QString const &propName = pitr.key();
+
+      // Normalize default values to empty string.
+      QString value = (prop->isDefault() || prop->isDynamicDefault() ? "" : widget->getValue());
+
+      // save the value
       m_inputHistory->storeNewValue(m_algoName, QPair<QString, QString>(propName, value));
     }
   }

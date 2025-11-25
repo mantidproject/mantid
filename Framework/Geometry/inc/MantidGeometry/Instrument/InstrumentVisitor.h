@@ -71,7 +71,7 @@ private:
   std::shared_ptr<std::vector<std::pair<size_t, size_t>>> m_componentRanges;
 
   /// Component ID -> Component Index map
-  std::shared_ptr<std::unordered_map<Mantid::Geometry::IComponent *, size_t>> m_componentIdToIndexMap;
+  std::shared_ptr<std::unordered_map<Mantid::Geometry::IComponent const *, size_t>> m_componentIdToIndexMap;
 
   /// Detector ID -> index mappings
   std::shared_ptr<const std::unordered_map<detid_t, size_t>> m_detectorIdToIndexMap;
@@ -158,7 +158,7 @@ public:
 
   std::shared_ptr<const std::vector<Mantid::Geometry::IComponent *>> componentIds() const;
 
-  std::shared_ptr<const std::unordered_map<Mantid::Geometry::IComponent *, size_t>> componentIdToIndexMap() const;
+  std::shared_ptr<const std::unordered_map<Mantid::Geometry::IComponent const *, size_t>> componentIdToIndexMap() const;
 
   std::shared_ptr<const std::unordered_map<detid_t, size_t>> detectorIdToIndexMap() const;
   size_t size() const;

@@ -5,7 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
-import numbers
 from typing import Dict
 
 import numpy as np
@@ -17,7 +16,7 @@ from mantid.kernel import logger
 # noinspection PyProtectedMember
 from mantid.simpleapi import GroupWorkspaces
 import abins
-from abins.abinsalgorithm import AbinsAlgorithm, AtomInfo
+from abins.abinsalgorithm import AbinsAlgorithm, AtomInfo, validate_e_init
 
 
 # noinspection PyPep8Naming,PyMethodMayBeStatic
@@ -66,7 +65,7 @@ class Abins2D(AbinsAlgorithm, PythonAlgorithm):
         """
         Performs input validation. Use to ensure the user has defined a consistent set of parameters.
         """
-        from abins.constants import MILLI_EV_TO_WAVENUMBER, TWO_DIMENSIONAL_CHOPPER_INSTRUMENTS
+        from abins.constants import TWO_DIMENSIONAL_CHOPPER_INSTRUMENTS
 
         issues = dict()
         issues = self.validate_common_inputs(issues)
@@ -87,23 +86,13 @@ class Abins2D(AbinsAlgorithm, PythonAlgorithm):
                     "Valid frequencies: " + ", ".join([str(freq) for freq in allowed_frequencies])
                 )
 
-        if not isinstance(float(self.getProperty("IncidentEnergy").value), numbers.Real):
-            issues["IncidentEnergy"] = "Incident energy must be a real number"
-
-        if "max_wavenumber" in abins.parameters.instruments[instrument_name]:
-            max_energy = abins.parameters.instruments[instrument_name]["max_wavenumber"]
-        else:
-            max_energy = abins.parameters.sampling["max_wavenumber"]
-
-        energy_units = self.getProperty("EnergyUnits").value
-
-        if energy_units == "meV":
-            max_energy = max_energy / MILLI_EV_TO_WAVENUMBER
-        else:
-            max_energy = max_energy
-
-        if float(self.getProperty("IncidentEnergy").value) > max_energy:
-            issues["IncidentEnergy"] = f"Incident energy cannot be greater than {max_energy:.3f} {energy_units} for this instrument."
+        issues.update(
+            validate_e_init(
+                e_init=self.getProperty("IncidentEnergy").value,
+                energy_units=self.getProperty("EnergyUnits").value,
+                instrument_name=instrument_name,
+            )
+        )
 
         return issues
 
@@ -248,7 +237,8 @@ class Abins2D(AbinsAlgorithm, PythonAlgorithm):
 
         n_q_values, n_freq_bins = s_points.shape
         n_q_bins = self._q_bins.size
-        assert n_q_values + 1 == n_q_bins
+        if n_q_values + 1 != n_q_bins:
+            raise ValueError("Mismatch between number of values and bins")
 
         if self._energy_units == "meV":
             energy_bins = self._bins / MILLI_EV_TO_WAVENUMBER

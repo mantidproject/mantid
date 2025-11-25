@@ -402,7 +402,7 @@ void Algorithm::cacheInputWorkspaceHistories() {
     if (prop->direction() != Direction::Input && prop->direction() != Direction::InOut)
       continue;
 
-    if (auto wsProp = dynamic_cast<IWorkspaceProperty *>(prop)) {
+    if (auto wsProp = dynamic_cast<IWorkspaceProperty const *>(prop)) {
       if (auto ws = wsProp->getWorkspace()) {
         cacheHistories(ws);
       } else {
@@ -1178,8 +1178,8 @@ bool Algorithm::checkGroups() {
   m_unrolledInputWorkspaces.clear();
   m_groupWorkspaces.clear();
   for (auto inputWorkspaceProp : m_inputWorkspaceProps) {
-    auto prop = dynamic_cast<Property *>(inputWorkspaceProp);
-    auto wsGroupProp = dynamic_cast<WorkspaceProperty<WorkspaceGroup> *>(prop);
+    auto const prop = dynamic_cast<Property *>(inputWorkspaceProp);
+    auto wsGroupProp = dynamic_cast<WorkspaceProperty<WorkspaceGroup> const *>(prop);
     auto ws = inputWorkspaceProp->getWorkspace();
     auto wsGroup = std::dynamic_pointer_cast<WorkspaceGroup>(ws);
 

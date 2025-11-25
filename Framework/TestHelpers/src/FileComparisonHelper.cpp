@@ -140,11 +140,11 @@ bool areFilesEqual(const std::string &referenceFileFullPath, const std::string &
   std::ifstream outFileStream(outFileFullPath, std::ifstream::binary);
 
   if (refFileStream.fail()) {
-    throw std::runtime_error("Could not open reference file at specified path");
+    throw std::runtime_error("Could not open reference file at specified path \"" + referenceFileFullPath + "\"");
   }
 
   if (outFileStream.fail()) {
-    throw std::runtime_error("Could not open output file at specified path");
+    throw std::runtime_error("Could not open output file at specified path \"" + outFileFullPath + "\"");
   }
 
   return areFileStreamsEqual(refFileStream, outFileStream);

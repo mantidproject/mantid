@@ -123,7 +123,7 @@ std::map<std::string, std::string> DepolarizedAnalyserTransmission::validateInpu
   if (!isDefault(PropNames::MT_WORKSPACE)) {
     MatrixWorkspace_sptr mtWs = getProperty(PropNames::MT_WORKSPACE);
     validateWorkspace(mtWs, PropNames::MT_WORKSPACE, result);
-    m_mtWs = mtWs;
+    m_mtWs = std::move(mtWs);
   } else if (!isDefault(PropNames::MT_FILE)) {
     auto loadAlg = createChildAlgorithm("LoadNexus");
     loadAlg->initialize();
@@ -132,7 +132,7 @@ std::map<std::string, std::string> DepolarizedAnalyserTransmission::validateInpu
     Workspace_sptr output = loadAlg->getProperty("OutputWorkspace");
     MatrixWorkspace_sptr mtWs = std::dynamic_pointer_cast<MatrixWorkspace>(output);
     validateWorkspace(mtWs, PropNames::MT_FILE, result);
-    m_mtWs = mtWs;
+    m_mtWs = std::move(mtWs);
   } else {
     result[PropNames::MT_WORKSPACE] =
         "Must set either " + std::string(PropNames::MT_WORKSPACE) + " or " + std::string(PropNames::MT_FILE) + ".";

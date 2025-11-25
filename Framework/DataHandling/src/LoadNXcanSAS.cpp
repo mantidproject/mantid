@@ -179,7 +179,7 @@ std::vector<SpinState> prepareSpinIndexes(const std::vector<int> &pIn, const std
       SpinState state;
       state.strSpinState = spinToString(pIn.at(i)) + spinToString(pOut.at(j));
       state.spinIndexPair = std::make_pair(i, j);
-      spinIndexes.push_back(state);
+      spinIndexes.push_back(std::move(state));
     }
   }
   return spinIndexes;

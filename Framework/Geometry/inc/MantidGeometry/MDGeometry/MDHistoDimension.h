@@ -12,10 +12,7 @@
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/MDFrame.h"
 #include "MantidGeometry/MDGeometry/UnknownFrame.h"
-#include "MantidKernel/Exception.h"
 #include "MantidKernel/MDUnit.h"
-#include "MantidKernel/MDUnitFactory.h"
-#include "MantidKernel/VMD.h"
 
 namespace Mantid {
 namespace Geometry {

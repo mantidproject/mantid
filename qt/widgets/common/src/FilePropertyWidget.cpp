@@ -89,7 +89,7 @@ void FilePropertyWidget::browseClicked() {
  * @return full path to the file(s) to load/save
  */
 QString FilePropertyWidget::openFileDialog(Mantid::Kernel::Property *baseProp) {
-  auto *prop = dynamic_cast<Mantid::API::FileProperty *>(baseProp);
+  auto const *prop = dynamic_cast<Mantid::API::FileProperty *>(baseProp);
   if (!prop)
     return "";
 
@@ -131,7 +131,7 @@ QString FilePropertyWidget::openFileDialog(Mantid::Kernel::Property *baseProp) {
 QStringList FilePropertyWidget::openMultipleFileDialog(Mantid::Kernel::Property *baseProp) {
   if (!baseProp)
     return QStringList();
-  auto *prop = dynamic_cast<Mantid::API::MultipleFileProperty *>(baseProp);
+  auto const *prop = dynamic_cast<Mantid::API::MultipleFileProperty *>(baseProp);
   if (!prop)
     return QStringList();
 

@@ -615,8 +615,8 @@ void PoldiIndexKnownCompounds::assignCandidates(const std::vector<IndexCandidate
           unassignedMeasuredPeaks.erase(measuredPeak);
         }
 
-        usedExpectedPeaks.insert(expectedPeak);
-        usedMeasuredPeaks.insert(measuredPeak);
+        usedExpectedPeaks.insert(std::move(expectedPeak));
+        usedMeasuredPeaks.insert(std::move(measuredPeak));
 
         assignPeakIndex(currentCandidate);
         g_log.information() << "      Candidate accepted.\n";

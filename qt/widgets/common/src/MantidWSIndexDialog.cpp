@@ -626,7 +626,7 @@ void MantidWSIndexWidget::populateLogComboBox() {
 
   // loop over all of the workspaces in the group to see that the value has
   // changed
-  for (auto &wsName : m_wsNames) {
+  for (auto const &wsName : m_wsNames) {
     ws = getWorkspace(wsName);
     if (ws) {
       const auto runObj = ws->run();

@@ -839,7 +839,8 @@ def get_sample_log(workspace, **kwargs):
             try:
                 t0 = run["proton_charge"].times.astype("datetime64[us]")[0]
             except:
-                pass  # TODO: Maybe raise a warning?
+                mantid.kernel.logger.warning("Workspace has no proton_charge log")
+                pass
 
         if ShowTimeROI:
             x = (times - t0).astype(float) * 1e3

@@ -9,6 +9,7 @@
 //-----------------------------------------------------------------------------
 // Includes
 //-----------------------------------------------------------------------------
+#include "MantidKernel/Exception.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/NullValidator.h"
 #include "MantidKernel/PropertyWithValue.h"

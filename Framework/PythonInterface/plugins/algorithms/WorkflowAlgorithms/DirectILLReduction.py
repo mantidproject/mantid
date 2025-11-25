@@ -110,7 +110,7 @@ def _parseHybridBinningTokens(rebinning):
     currentGroup = list()
     for tokenIndex in range(len(tokens)):
         token = tokens[tokenIndex].strip()
-        if token == "a":
+        if token == "a":  # noqa: S105
             if currentGroup:
                 paramGroups.append(currentGroup)
                 currentGroup = list()

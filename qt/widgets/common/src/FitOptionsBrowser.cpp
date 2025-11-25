@@ -163,7 +163,7 @@ void FitOptionsBrowser::createCommonProperties() {
     QStringList minimizers;
 
     // Store them in the m_minimizer enum property
-    for (auto &minimizerOption : minimizerOptions) {
+    for (auto const &minimizerOption : minimizerOptions) {
       minimizers << QString::fromStdString(minimizerOption);
     }
     m_enumManager->setEnumNames(m_minimizer, minimizers);
@@ -182,7 +182,7 @@ void FitOptionsBrowser::createCommonProperties() {
     std::vector<std::string> costOptions = Mantid::API::CostFunctionFactory::Instance().getKeys();
     QStringList costFunctions;
     // Store them in the m_minimizer enum property
-    for (auto &costOption : costOptions) {
+    for (auto const &costOption : costOptions) {
       costFunctions << QString::fromStdString(costOption);
     }
     m_enumManager->setEnumNames(m_costFunction, costFunctions);
@@ -314,7 +314,7 @@ void FitOptionsBrowser::addProperty(const QString &name, QtProperty *prop,
  */
 void FitOptionsBrowser::removeProperty(const QString &name) {
   if (m_propertyNameMap.contains(name)) {
-    const auto prop = m_propertyNameMap[name];
+    auto const *prop = m_propertyNameMap[name];
     m_getters.remove(prop);
     m_setters.remove(prop);
     m_propertyNameMap.remove(name);
@@ -364,7 +364,7 @@ void FitOptionsBrowser::updateMinimizer() {
 
   // Create and add properties to the minimizer group
   auto minimizerProperties = minimizer->getProperties();
-  for (auto &minimizerProperty : minimizerProperties) {
+  for (auto const &minimizerProperty : minimizerProperties) {
     auto prop = createPropertyProperty(minimizerProperty);
     if (prop) {
       m_minimizerGroup->addSubProperty(prop);
@@ -408,27 +408,27 @@ QtProperty *FitOptionsBrowser::createPropertyProperty(Mantid::Kernel::Property *
   }
   QString propName = QString::fromStdString(property->name());
   QtProperty *prop = nullptr;
-  if (auto prp = dynamic_cast<Mantid::Kernel::PropertyWithValue<bool> *>(property)) {
+  if (auto const *prp = dynamic_cast<Mantid::Kernel::PropertyWithValue<bool> const *>(property)) {
     prop = m_boolManager->addProperty(propName);
     bool val = *prp;
     m_boolManager->setValue(prop, val);
-  } else if (auto prp = dynamic_cast<Mantid::Kernel::PropertyWithValue<double> *>(property)) {
+  } else if (auto const *prp = dynamic_cast<Mantid::Kernel::PropertyWithValue<double> const *>(property)) {
     prop = this->addDoubleProperty(propName);
     double val = *prp;
     m_doubleManager->setValue(prop, val);
-  } else if (auto prp = dynamic_cast<Mantid::Kernel::PropertyWithValue<int> *>(property)) {
+  } else if (auto const *prp = dynamic_cast<Mantid::Kernel::PropertyWithValue<int> const *>(property)) {
     prop = m_intManager->addProperty(propName);
     int val = *prp;
     m_intManager->setValue(prop, val);
-  } else if (auto prp = dynamic_cast<Mantid::Kernel::PropertyWithValue<size_t> *>(property)) {
+  } else if (auto const *prp = dynamic_cast<Mantid::Kernel::PropertyWithValue<size_t> const *>(property)) {
     prop = m_intManager->addProperty(propName);
     size_t val = *prp;
     m_intManager->setValue(prop, static_cast<int>(val));
-  } else if (auto prp = dynamic_cast<Mantid::Kernel::PropertyWithValue<std::string> *>(property)) {
+  } else if (auto const *prp = dynamic_cast<Mantid::Kernel::PropertyWithValue<std::string> const *>(property)) {
     prop = m_stringManager->addProperty(propName);
     QString val = QString::fromStdString(prp->value());
     m_stringManager->setValue(prop, val);
-  } else if (dynamic_cast<Mantid::API::IWorkspaceProperty *>(property)) {
+  } else if (dynamic_cast<Mantid::API::IWorkspaceProperty const *>(property)) {
     prop = m_stringManager->addProperty(propName);
     m_stringManager->setValue(prop, QString::fromStdString(property->value()));
   } else {

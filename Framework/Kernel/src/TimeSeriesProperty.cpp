@@ -1053,11 +1053,13 @@ template <typename TYPE> std::vector<double> TimeSeriesProperty<TYPE>::timesAsVe
 
   // 2. Output data structure
   std::vector<double> out;
-  out.reserve(m_values.size());
+  if (!m_values.empty()) {
+    out.reserve(m_values.size());
 
-  Types::Core::DateAndTime start = m_values[0].time();
-  for (size_t i = 0; i < m_values.size(); i++) {
-    out.emplace_back(DateAndTime::secondsFromDuration(m_values[i].time() - start));
+    Types::Core::DateAndTime start = m_values[0].time();
+    for (size_t i = 0; i < m_values.size(); i++) {
+      out.emplace_back(DateAndTime::secondsFromDuration(m_values[i].time() - start));
+    }
   }
 
   return out;
@@ -2114,7 +2116,7 @@ void TimeSeriesProperty<TYPE>::histogramData(const Types::Core::DateAndTime &tMi
 
   double dt = (t1 - t0) / static_cast<double>(nPoints);
 
-  for (auto &ev : m_values) {
+  for (auto const &ev : m_values) {
     auto time = static_cast<double>(ev.time().totalNanoseconds());
     if (time < t0 || time >= t1)
       continue;

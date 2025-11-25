@@ -265,7 +265,7 @@ public:
       } else {
         std::string command(comm.command);
         if (command == "GETDAT") {
-          auto *spec_nos = reinterpret_cast<int *>(buffer);
+          auto const *spec_nos = reinterpret_cast<int *>(buffer);
           int spec = spec_nos[0];
           int nos = spec_nos[1];
           sendData(spec, nos);

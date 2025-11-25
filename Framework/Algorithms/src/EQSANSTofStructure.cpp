@@ -68,7 +68,7 @@ void EQSANSTofStructure::exec() {
   high_tof_cut = getProperty("HighTOFCut");
 
   // Calculate the frame width
-  auto frequencyLog = dynamic_cast<TimeSeriesProperty<double> *>(inputWS->run().getLogData("frequency"));
+  auto const *frequencyLog = dynamic_cast<TimeSeriesProperty<double> const *>(inputWS->run().getLogData("frequency"));
   if (!frequencyLog) {
     throw std::runtime_error("Frequency log not found.");
   }
@@ -78,7 +78,7 @@ void EQSANSTofStructure::exec() {
   // Determine whether we need frame skipping or not by checking the chopper
   // speed
   bool frame_skipping = false;
-  auto chopper_speedLog = dynamic_cast<TimeSeriesProperty<double> *>(inputWS->run().getLogData("Speed1"));
+  auto const *chopper_speedLog = dynamic_cast<TimeSeriesProperty<double> const *>(inputWS->run().getLogData("Speed1"));
   if (!chopper_speedLog) {
     throw std::runtime_error("Chopper speed log not found.");
   }

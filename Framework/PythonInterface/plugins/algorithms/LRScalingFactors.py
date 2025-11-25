@@ -408,8 +408,7 @@ class LRScalingFactors(PythonAlgorithm):
         fd.write("# y=a+bx\n#\n")
         fd.write("# LambdaRequested[Angstroms] S1H[mm] (S2/Si)H[mm] S1W[mm] (S2/Si)W[mm] a b error_a error_b\n#\n")
 
-        for k, v in scaling_file_meta.items():
-            fd.write("%s\n" % v)
+        fd.writelines("%s\n" % v for k, v in scaling_file_meta.items())
         for item in scaling_file_content:
             fd.write("IncidentMedium=%s " % item["IncidentMedium"])
             fd.write("LambdaRequested=%s " % item["LambdaRequested"])

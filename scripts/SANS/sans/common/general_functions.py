@@ -634,7 +634,7 @@ def get_bins_for_rebin_setting(min_value, max_value, step_value, step_type):
 
         # Check if the step will bring us out of bounds. If so, then set the new upper value to the max_value
         upper_bound = lower_bound + step
-        upper_bound = upper_bound if upper_bound < max_value else max_value
+        upper_bound = min(max_value, upper_bound)
 
         # Now we advance the lower bound
         lower_bound = upper_bound

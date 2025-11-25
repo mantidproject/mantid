@@ -54,7 +54,7 @@ parameters of this algorithm, the corresponding data will be integrated. The sem
 
 The binned workspace is stored in the `OutputDataWorkspace`.
 
-Trajectories of each detector in reciprocal space are omputed, and the normalization is calculated between intersections with each
+Trajectories of each detector in reciprocal space are computed, and the normalization is calculated between intersections with each
 MDBox. A brief introduction to the multi-dimensional data normalization can be found :ref:`here <MDNorm>`. The
 `OutputNormalizationWorkspace` contains the denominator of equations (2) or (3). In the :ref:`normalization document <MDNorm>`.
 

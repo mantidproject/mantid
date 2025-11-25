@@ -167,9 +167,9 @@ private:
   /// Maps algorithm property name to the QtProperty
   QMap<QString, QtProperty *> m_propertyNameMap;
   /// Store for the properties setter methods
-  QMap<QtProperty *, SetterType> m_setters;
+  QMap<QtProperty const *, SetterType> m_setters;
   /// Store for the properties getter methods
-  QMap<QtProperty *, GetterType> m_getters;
+  QMap<QtProperty const *, GetterType> m_getters;
 
   /// The Fitting Type
   FittingMode m_fittingType;

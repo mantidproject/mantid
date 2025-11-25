@@ -1,8 +1,19 @@
 [tool.ruff]
 line-length = 140
 # https://beta.ruff.rs/docs/rules/
-lint.select = ["C90", "E", "F", "RUF100", "W", "NPY201"]
-lint.ignore = ["E722", # bare except
+lint.select = ["C90", "E", "F", "FURB", "RUF100", "W", "NPY201", "S"]
+lint.ignore = ["E722", # bare except https://docs.astral.sh/ruff/rules/bare-except/
+"S101", # using assert https://docs.astral.sh/ruff/rules/assert/
+"S110", # try-except-pass https://docs.astral.sh/ruff/rules/try-except-pass/
+"S112", # try-except-continue https://docs.astral.sh/ruff/rules/try-except-continue/
+"S314", # use of xml module https://docs.astral.sh/ruff/rules/suspicious-xml-element-tree-usage/
+"S311", # use of insecure random numbers https://docs.astral.sh/ruff/rules/suspicious-non-cryptographic-random-usage/
+"S324", # probable use of insecure hash functions https://docs.astral.sh/ruff/rules/hashlib-insecure-hash-function/
+"S301", # suspicious pickle use https://docs.astral.sh/ruff/rules/suspicious-pickle-usage/
+"S607", # starting process with partial path https://docs.astral.sh/ruff/rules/start-process-with-partial-path/
+"S603", # check subprocess for untrusted input https://docs.astral.sh/ruff/rules/subprocess-without-shell-equals-true/
+"S605", # starting process with a shell https://docs.astral.sh/ruff/rules/start-process-with-a-shell/
+"S318"  # use of xml module https://docs.astral.sh/ruff/rules/suspicious-xml-mini-dom-usage/
 ]
 exclude = [
    "qt/applications/workbench/workbench/app/resources.py",

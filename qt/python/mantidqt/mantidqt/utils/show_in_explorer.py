@@ -17,7 +17,7 @@ class ShowInExplorer(object):
     def open_directory(path):
         try:
             if sys.platform == "win32":
-                os.startfile(path)
+                os.startfile(path)  # noqa: S606
             elif sys.platform == "darwin":
                 subprocess.check_call(["open", "--", path])
             elif sys.platform == "linux2":

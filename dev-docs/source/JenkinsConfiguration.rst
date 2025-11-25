@@ -212,7 +212,7 @@ It is advised to take the target node offline.
     // Example: "isis-ndw1597"
     String agentName = <agent/node name>
 
-    // Example: "pull_requests-conda-windows" , "build_packages_from_branch"
+    // Example: "pull_requests-conda-windows" , "build_branch"
     jobs = [<job 1 string> , <job 2 string>, ...]
 
     nodes = Jenkins.instance.slaves

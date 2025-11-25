@@ -122,10 +122,10 @@ void KafkaTopicSubscriber::subscribe(int64_t offset) {
 std::vector<RdKafka::TopicPartition *> KafkaTopicSubscriber::getTopicPartitions() {
   std::vector<RdKafka::TopicPartition *> partitions;
   auto metadata = queryMetadata();
-  auto topics = metadata->topics();
+  auto metadataTopics = metadata->topics();
   // Search through all topics for the ones we are interested in
   for (const auto &topicName : m_topicNames) {
-    auto iter = std::find_if(topics->cbegin(), topics->cend(),
+    auto iter = std::find_if(metadataTopics->cbegin(), metadataTopics->cend(),
                              [topicName](const TopicMetadata *tpc) { return tpc->topic() == topicName; });
     auto matchedTopic = *iter;
     auto partitionMetadata = matchedTopic->partitions();
@@ -280,11 +280,11 @@ void KafkaTopicSubscriber::createConsumer() {
  */
 void KafkaTopicSubscriber::checkTopicsExist() const {
   auto metadata = queryMetadata();
-  auto topics = metadata->topics();
+  auto metadataTopics = metadata->topics();
   for (const auto &topicName : m_topicNames) {
-    auto iter = std::find_if(topics->cbegin(), topics->cend(),
+    auto iter = std::find_if(metadataTopics->cbegin(), metadataTopics->cend(),
                              [topicName](const TopicMetadata *tpc) { return tpc->topic() == topicName; });
-    if (iter == topics->cend()) {
+    if (iter == metadataTopics->cend()) {
       std::ostringstream os;
       os << "Failed to find topic '" << topicName << "' on broker";
       throw std::runtime_error(os.str());
@@ -449,13 +449,14 @@ std::unordered_map<std::string, std::vector<int64_t>> KafkaTopicSubscriber::getO
 
   // Preallocate map
   auto metadata = queryMetadata();
-  auto topics = metadata->topics();
+  auto metadataTopics = metadata->topics();
   std::unordered_map<std::string, std::vector<int64_t>> partitionOffsetMap;
-  std::for_each(topics->cbegin(), topics->cend(), [&partitionOffsetMap, this](const TopicMetadata *tpc) {
-    if (std::find(m_topicNames.cbegin(), m_topicNames.cend(), tpc->topic()) != m_topicNames.cend()) {
-      partitionOffsetMap.insert({tpc->topic(), std::vector<int64_t>(tpc->partitions()->size())});
-    }
-  });
+  std::for_each(metadataTopics->cbegin(), metadataTopics->cend(),
+                [&partitionOffsetMap, this](const TopicMetadata *tpc) {
+                  if (std::find(m_topicNames.cbegin(), m_topicNames.cend(), tpc->topic()) != m_topicNames.cend()) {
+                    partitionOffsetMap.insert({tpc->topic(), std::vector<int64_t>(tpc->partitions()->size())});
+                  }
+                });
 
   // Get the offsets from the topic partitions and add them to map
   for (auto partition : partitions) {

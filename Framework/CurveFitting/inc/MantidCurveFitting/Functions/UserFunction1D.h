@@ -60,8 +60,6 @@ public:
   UserFunction1D() : m_x(0.0), m_x_set(false), m_parameters(100), m_nPars(0) {};
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "UserFunction1D"; }
-  /// Algorithm's version for identification overriding a virtual method
-  int version() const override { return (1); }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "Optimization\\FitAlgorithms"; }
   /// Summary of algorithms purpose

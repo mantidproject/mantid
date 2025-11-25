@@ -12,17 +12,14 @@
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/IndexTypeProperty.h"
-#include "MantidKernel/DateAndTime.h"
-#include "MantidKernel/IValidator.h"
 #include "MantidKernel/PropertyManagerOwner.h"
+#include "MantidTypes/Core/DateAndTime.h"
 
 // -- These headers will (most-likely) be used by every inheriting algorithm
 #include "MantidAPI/AlgorithmFactory.h" //for the factory macro
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidAPI/WorkspaceProperty.h"
-#include "MantidKernel/EmptyValues.h"
-#include "MantidKernel/MultiThreaded.h"
 
 namespace Poco {
 template <class R, class A, class O, class S> class ActiveMethod;

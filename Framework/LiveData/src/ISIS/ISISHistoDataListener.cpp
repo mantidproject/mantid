@@ -524,7 +524,7 @@ void ISISHistoDataListener::loadTimeRegimes() {
           m_monitorSpectra[i] = m_specIDs[monitorIndices[i] - 1];
         }
 
-        for (auto &mon : m_monitorSpectra) {
+        for (auto const &mon : m_monitorSpectra) {
           g_log.information() << "Monitor spectrum " << mon << '\n';
         }
 

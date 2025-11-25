@@ -495,7 +495,7 @@ class SANSILLIntegration(PythonAlgorithm):
         pixel_width = instrument.getNumberParameter("x-pixel-size")[0] / 1000
         pixel_height = instrument.getNumberParameter("y-pixel-size")[0] / 1000
 
-        pixel_size = pixel_height if pixel_height >= pixel_width else pixel_width
+        pixel_size = max(pixel_height, pixel_width)
         binning_factor = self.getProperty("BinningFactor").value
         wavelength = 0.0  # for TOF mode there is no wavelength
         if run.hasProperty("wavelength"):

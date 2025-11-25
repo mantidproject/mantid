@@ -16,6 +16,7 @@ It covers the basics, with links to more advanced options where appropriate.
 There is special description for the case when you are looking to add a custom :ref:`MD conversion plugin <WritingCustomConvertToMDTransformation>`.
 
 Alternatively, you can implement your algorithm in :ref:`Python <emwp_intro>`.
+Prototyping your algorithm in Python can be faster with features like hot-reloading.
 See :ref:`Python Vs C++ Algorithms <PythonVSCppAlgorithms>` for a comparison of Mantid's two programming languages.
 
 All :ref:`algorithms <Algorithms List>` in Mantid `inherit <http://en.wikipedia.org/wiki/Inheritance_(computer_science)>`__ from a base ``Algorithm`` class,
@@ -307,3 +308,13 @@ Exceptions
 
 It is fine to throw exceptions in your algorithms in the event of an unrecoverable failure.
 These will be caught in the base Algorithm class, which will report the failure of the algorithm.
+
+
+Properties access within workbench dialogs
+------------------------------------------
+
+Once your algorithm is working from a script, and provided it is registered with ``AlgorithmFactory``, it will also be possible to execute the algorithm from ``mantidworkbench`` using the built-in ``GenericDialog`` feature.  To this end there are several *optional* features available through the use of ``IPropertySettings``-derived classes, to enhance the interaction between your algorithm's properties and the GUI dialog.
+
+``EnableWhenProperty``, ``VisibleWhenProperty``, and ``InvisibleProperty`` can be used to hide or disable a property in the GUI dialog panel based on various conditions.
+
+``SetValueWhenProperty``, and ``SetDefaultWhenProperty`` can be used to set the value of a property based on the value of another upstream property, or to emulate the effect of having a property's *default* value depend on the value of another property.  See :ref:`Dynamic dialog properties <DynamicProperties>` for example code showing how to use this feature.

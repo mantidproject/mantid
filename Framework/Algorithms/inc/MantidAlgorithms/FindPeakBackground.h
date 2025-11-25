@@ -60,7 +60,7 @@ private:
   void init() override;
   /// Implement abstract Algorithm methods
   void exec() override;
-  double moment4(MantidVec &X, size_t n, double mean);
+  double moment4(const MantidVec &X, const size_t n, const double mean) const;
   void estimateBackground(const HistogramData::Histogram &histogram, const size_t i_min, const size_t i_max,
                           const size_t p_min, const size_t p_max, const bool hasPeak, double &out_bg0, double &out_bg1,
                           double &out_bg2);

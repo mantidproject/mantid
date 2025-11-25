@@ -64,7 +64,7 @@ void MaskInstrument::exec() {
       outputWS->getSpectrum(i).clearData();
   }
 
-  if (auto event = dynamic_cast<DataObjects::EventWorkspace *>(outputWS.get()))
+  if (auto const *event = dynamic_cast<DataObjects::EventWorkspace const *>(outputWS.get()))
     event->clearMRU();
 }
 

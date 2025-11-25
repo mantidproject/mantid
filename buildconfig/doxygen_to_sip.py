@@ -85,12 +85,9 @@ def doxygen_to_docstring(doxygen, method):
 
     for line in doxygen:
         line = line.strip()
-        if line.startswith("/**"):
-            line = line[3:]
-        if line.endswith("*/"):
-            line = line[:-2]
-        if line.startswith("*"):
-            line = line[1:]
+        line = line.removeprefix("/**")
+        line = line.removesuffix("*/")
+        line = line.removeprefix("*")
 
         # Add the 'Args:' line.
         if not args_started:

@@ -3319,7 +3319,7 @@ PropertyHandler *FitPropertyBrowser::getPeakHandler(const QString &prefix) {
     throw std::runtime_error("Peak function prefix cannot be empty");
   auto const indexList = prefix.split(".");
   auto const n = indexList.size() - 1;
-  auto handler = getHandler();
+  auto const *handler = getHandler();
   for (int i = 0; i < n; ++i) {
     auto const index = indexList[i].mid(1).toInt();
     handler = handler->getHandler(index);

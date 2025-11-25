@@ -8,7 +8,6 @@
 
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument/Component.h"
-#include "MantidGeometry/Instrument/ObjComponent.h"
 #include <map>
 #include <vector>
 

@@ -5,14 +5,16 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 
-#include "NexusLoader.h"
+#include "MantidDataHandling/AlignAndFocusPowderSlim/NexusLoader.h"
 #include "MantidNexus/H5Util.h"
 #include <ranges>
 
 namespace Mantid::DataHandling::AlignAndFocusPowderSlim {
 
-NexusLoader::NexusLoader(const bool is_time_filtered, const std::vector<PulseROI> &pulse_indices)
-    : m_is_time_filtered(is_time_filtered), m_pulse_indices(pulse_indices) {}
+NexusLoader::NexusLoader(const bool is_time_filtered, const std::vector<PulseROI> &pulse_indices,
+                         const std::vector<std::pair<int, PulseROI>> &target_to_pulse_indices)
+    : m_is_time_filtered(is_time_filtered), m_pulse_indices(pulse_indices),
+      m_target_to_pulse_indices(target_to_pulse_indices) {}
 
 template <typename Type>
 void NexusLoader::loadData(H5::DataSet &SDS, std::unique_ptr<std::vector<Type>> &data,
@@ -74,6 +76,29 @@ std::stack<EventROI> NexusLoader::getEventIndexRanges(H5::Group &event_group, co
     constexpr uint64_t START_DEFAULT = 0;
     ranges.emplace(START_DEFAULT, number_events);
   }
+  return ranges;
+}
+
+std::stack<std::pair<int, EventROI>> NexusLoader::getEventIndexSplitRanges(H5::Group &event_group,
+                                                                           const uint64_t number_events) {
+  // This will return a stack of pairs, where each pair is the start and stop index of the event ranges with a mapping
+  // to target, taking intersection with m_pulse_indices
+  std::stack<std::pair<int, EventROI>> ranges;
+  // TODO this should be made smarter to only read the necessary range
+  std::unique_ptr<std::vector<uint64_t>> event_index = std::make_unique<std::vector<uint64_t>>();
+  this->loadEventIndex(event_group, event_index);
+
+  // add backwards so that the first range is on top
+  for (const auto &pair : m_target_to_pulse_indices | std::views::reverse) {
+    uint64_t start_event = event_index->at(pair.second.first);
+    uint64_t stop_event = (pair.second.second == std::numeric_limits<size_t>::max())
+                              ? number_events
+                              : event_index->at(pair.second.second);
+    if (start_event < stop_event) {
+      ranges.emplace(pair.first, EventROI(start_event, stop_event));
+    }
+  }
+
   return ranges;
 }
 

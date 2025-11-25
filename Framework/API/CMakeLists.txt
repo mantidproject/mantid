@@ -120,6 +120,7 @@ set(SRC_FILES
     src/NumericAxis.cpp
     src/NumericAxisValidator.cpp
     src/OrientedLatticeValidator.cpp
+    src/PanelsSurfaceCalculator.cpp
     src/ParamFunction.cpp
     src/ParameterReference.cpp
     src/ParameterTie.cpp
@@ -147,6 +148,9 @@ set(SRC_FILES
     src/SpectrumDetectorMapping.cpp
     src/SpectrumInfo.cpp
     src/TableRow.cpp
+    src/TimeAtSampleStrategyDirect.cpp
+    src/TimeAtSampleStrategyElastic.cpp
+    src/TimeAtSampleStrategyIndirect.cpp
     src/TextAxis.cpp
     src/TransformScaleFactory.cpp
     src/Workspace.cpp
@@ -318,6 +322,7 @@ set(INC_FILES
     inc/MantidAPI/NumericAxis.h
     inc/MantidAPI/NumericAxisValidator.h
     inc/MantidAPI/OrientedLatticeValidator.h
+    inc/MantidAPI/PanelsSurfaceCalculator.h
     inc/MantidAPI/ParamFunction.h
     inc/MantidAPI/ParameterReference.h
     inc/MantidAPI/ParameterTie.h
@@ -350,6 +355,10 @@ set(INC_FILES
     inc/MantidAPI/SpectrumInfoIterator.h
     inc/MantidAPI/TableRow.h
     inc/MantidAPI/TextAxis.h
+    inc/MantidAPI/TimeAtSampleStrategy.h
+    inc/MantidAPI/TimeAtSampleStrategyDirect.h
+    inc/MantidAPI/TimeAtSampleStrategyElastic.h
+    inc/MantidAPI/TimeAtSampleStrategyIndirect.h
     inc/MantidAPI/TransformScaleFactory.h
     inc/MantidAPI/VectorParameter.h
     inc/MantidAPI/VectorParameterParser.h
@@ -452,6 +461,7 @@ set(TEST_FILES
     NumericAxisTest.h
     NumericAxisValidatorTest.h
     OrientedLatticeValidatorTest.h
+    PanelsSurfaceCalculatorTest.h
     ParamFunctionAttributeHolderTest.h
     ParameterReferenceTest.h
     ParameterTieTest.h
@@ -475,6 +485,9 @@ set(TEST_FILES
     SpectrumDetectorMappingTest.h
     SpectrumInfoTest.h
     TextAxisTest.h
+    TimeAtSampleStrategyDirectTest.h
+    TimeAtSampleStrategyElasticTest.h
+    TimeAtSampleStrategyIndirectTest.h
     VectorParameterParserTest.h
     VectorParameterTest.h
     WorkspaceFactoryTest.h

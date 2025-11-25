@@ -180,7 +180,7 @@ SpecularReflectionAlgorithm::getDetectorComponent(const MatrixWorkspace_sptr &wo
  * @return: True only if the property has it's default value.
  */
 bool SpecularReflectionAlgorithm::isPropertyDefault(const std::string &propertyName) const {
-  Property *property = this->getProperty(propertyName);
+  Property const *property = this->getProperty(propertyName);
   return property->isDefault();
 }
 

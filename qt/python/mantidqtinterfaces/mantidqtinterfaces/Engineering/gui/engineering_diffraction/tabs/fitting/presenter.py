@@ -42,6 +42,8 @@ class FittingPresenter(object):
 
         self.connect_view_signals()
 
+        self._rb_num = None
+
     def fit_all_started(self, do_sequential):
         if do_sequential:
             ws_name_list = self.data_widget.get_sorted_active_ws_list()
@@ -113,3 +115,7 @@ class FittingPresenter(object):
         self.plot_widget.on_cancel_clicked()
         self.enable_view()
         self.plot_widget.set_progress_bar_zero()
+
+    def set_rb_num(self, rb_num):
+        self._rb_num = rb_num
+        self.plot_widget.set_rb_num(rb_num)

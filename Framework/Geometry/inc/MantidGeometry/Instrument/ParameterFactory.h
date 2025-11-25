@@ -11,8 +11,6 @@
 //----------------------------------------------------------------------
 #include "MantidGeometry/DllConfig.h"
 #include "MantidKernel/Instantiator.h"
-#include "MantidKernel/Logger.h"
-#include "MantidKernel/SingletonHolder.h"
 
 #include <map>
 #include <vector>

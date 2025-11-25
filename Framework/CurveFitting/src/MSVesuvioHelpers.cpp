@@ -366,8 +366,8 @@ void SimulationWithErrors::normalise() {
     // Divide everything by the sum
     const size_t nscatters = sim.counts.size();
     for (size_t i = 0; i < nscatters; ++i) {
-      auto &counts = sim.counts[i];
-      auto &scerrors = this->errors[i];
+      auto &counts = sim.counts[i];     // cppcheck-suppress constVariableReference
+      auto &scerrors = this->errors[i]; // cppcheck-suppress constVariableReference
       for (auto cit = counts.begin(), eit = scerrors.begin(); cit != counts.end(); ++cit, ++eit) {
         (*cit) *= invSum;
         (*eit) *= invSum;

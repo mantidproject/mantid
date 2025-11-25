@@ -16,18 +16,18 @@
 # Need to install BeautifulSoup4:
 # pip install beautifulsoup4
 from bs4 import BeautifulSoup
-import urllib.request as urllib2
 import re
 import random
 import webbrowser
 import time
 import argparse
+import requests
 
 
 def crawl_url_for_html_addons(url, k=0):
     parent_url = url
     parent_url = re.sub("index.html$", "", parent_url)
-    html_page = urllib2.urlopen(url)
+    html_page = requests.get(url, timeout=10).text
     soup = BeautifulSoup(html_page)
     urls = []
     for link in soup.findAll("a", attrs={"href": re.compile(".html")}):

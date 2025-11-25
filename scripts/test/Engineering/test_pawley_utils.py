@@ -9,9 +9,9 @@ from unittest.mock import patch, create_autospec
 from numpy import allclose, sqrt, log, linspace, zeros_like, ones, trapezoid, array
 from numpy.testing import assert_array_equal, assert_array_almost_equal
 from mantid.api import AnalysisDataService, FileFinder
-from mantid.simpleapi import CreateWorkspace, FlatBackground
+from mantid.simpleapi import CreateWorkspace, FlatBackground, EditInstrumentGeometry, ConvertUnits
 from mantid.geometry import CrystalStructure
-from Engineering.pawley_utils import Phase, GaussianProfile, PVProfile, PawleyPattern1D, PawleyPattern2D
+from Engineering.pawley_utils import Phase, GaussianProfile, PVProfile, PawleyPattern1D, PawleyPattern2D, BackToBackGauss
 from plugins.algorithms.poldi_utils import load_poldi
 
 
@@ -82,6 +82,14 @@ class ProfileTest(unittest.TestCase):
         self.assertAlmostEqual(param_dict["Mixing"], 0, delta=1e-8)
         self.assertEqual(profile.func_name, "PseudoVoigt")
 
+    def test_back_to_back_gauss(self):
+        profile = BackToBackGauss()
+        param_dict = profile.get_mantid_peak_params(self.DSPAC)
+        self.assertAlmostEqual(param_dict["A"], 0.0645, delta=1e-4)
+        self.assertAlmostEqual(param_dict["B"], 0.0240, delta=1e-4)
+        self.assertAlmostEqual(param_dict["S"], 20.0, delta=1e-1)
+        self.assertEqual(profile.func_name, "BackToBackExponential")
+
 
 class PawleyPattern1DTest(unittest.TestCase):
     @classmethod
@@ -90,6 +98,7 @@ class PawleyPattern1DTest(unittest.TestCase):
         cls.ws = CreateWorkspace(
             DataX=dspacs, DataY=zeros_like(dspacs), UnitX="dSpacing", YUnitLabel="Intensity (a.u.)", OutputWorkspace="ws"
         )
+        EditInstrumentGeometry(Workspace=cls.ws, PrimaryFlightPath=50, L2=1, Polar=90)
         cls.comp_func_str = "composite=CompositeFunction,NumDeriv=true;name=Gaussian,Height=125.644,PeakCentre=3.13555,Sigma=0.00317517"
 
     @classmethod
@@ -110,7 +119,7 @@ class PawleyPattern1DTest(unittest.TestCase):
 
     def test_get_params(self):
         pawley = PawleyPattern1D(self.ws, [self.phase], profile=GaussianProfile())
-        self.assertEqual(len(pawley.get_params()), 5)
+        self.assertEqual(len(pawley.get_params()), 7)
 
     def test_get_free_params(self):
         pawley = PawleyPattern1D(self.ws, [self.phase], profile=GaussianProfile())
@@ -118,7 +127,7 @@ class PawleyPattern1DTest(unittest.TestCase):
 
     def test_get_isfree(self):
         pawley = PawleyPattern1D(self.ws, [self.phase], profile=GaussianProfile())
-        assert_array_equal(pawley.get_isfree(), array([True, True, True, True, False]))
+        assert_array_equal(pawley.get_isfree(), array([True, True, True, True, False, False, False]))
 
     def test_set_params(self):
         pawley = PawleyPattern1D(self.ws, [self.phase], profile=GaussianProfile())
@@ -129,7 +138,7 @@ class PawleyPattern1DTest(unittest.TestCase):
     def test_set_free_params(self):
         pawley = PawleyPattern1D(self.ws, [self.phase], profile=GaussianProfile())
         pawley.set_free_params(ones(4))
-        assert_array_equal(pawley.get_params().astype(int), array([1, 1, 1, 1, 0]))
+        assert_array_equal(pawley.get_params().astype(int), array([1, 1, 1, 1, 0, 1, 0]))
 
     def test_estimate_initial_params(self):
         pawley = PawleyPattern1D(self.ws, [self.phase], profile=GaussianProfile())
@@ -161,6 +170,19 @@ class PawleyPattern1DTest(unittest.TestCase):
         # run fit with 1 func eval to check no error and result returned
         result = pawley.fit(max_nfev=1)
         self.assertEqual(result.nfev, 1)
+
+    def test_inst_params(self):
+        pawley = PawleyPattern1D(self.ws, [self.phase], profile=GaussianProfile())
+        zero_shift = 0.5
+        pawley.inst_params[-1] = zero_shift
+        pawley.update_profile_function()
+        # assert peak centre shifted by zero_shift
+        self.assertAlmostEqual(pawley.comp_func[0]["PeakCentre"], self.phase.calc_dspacings()[0] + zero_shift, delta=1e-8)
+
+    def test_tof_workspace(self):
+        ws_tof = ConvertUnits(InputWorkspace=self.ws, OutputWorkspace=self.ws.name() + "_tof", Target="TOF")
+        pawley = PawleyPattern1D(ws_tof, [self.phase], profile=GaussianProfile())
+        self.assertAlmostEqual(pawley.comp_func[0]["PeakCentre"], 57166, delta=1)
 
 
 class PawleyPattern2DTest(unittest.TestCase):

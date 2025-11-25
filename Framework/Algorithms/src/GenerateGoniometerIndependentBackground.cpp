@@ -186,7 +186,7 @@ void GenerateGoniometerIndependentBackground::exec() {
 
   std::vector<MatrixWorkspace_sptr> grouped_inputs;
   // Run GroupDetectors on all the input workspaces
-  for (auto &input : inputs) {
+  for (auto const &input : inputs) {
     const auto msg = "Running GroupDetectors on " + input;
     progress.report(msg);
     g_log.debug(msg);
@@ -198,7 +198,7 @@ void GenerateGoniometerIndependentBackground::exec() {
 
     MatrixWorkspace_sptr output = group->getProperty("OutputWorkspace");
 
-    grouped_inputs.push_back(output);
+    grouped_inputs.push_back(std::move(output));
   }
 
   // all spectra for all input workspaces have same binning

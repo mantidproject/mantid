@@ -13,8 +13,8 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAlgorithms/ClearCache.h"
-#include <Poco/File.h>
-#include <Poco/Path.h>
+#include <filesystem>
+#include <fstream>
 
 using Mantid::Algorithms::ClearCache;
 using namespace Mantid::API;
@@ -33,34 +33,32 @@ public:
 
     // change the local download directory by adding a unittest subdirectory
     auto testDirectories = m_originalInstDir;
-    Poco::Path localDownloadPath(m_originalInstDir[0]);
-    localDownloadPath.pushDirectory(TEST_SUFFIX);
-    m_localInstDir = localDownloadPath.toString();
+    std::filesystem::path localDownloadPath(m_originalInstDir[0]);
+    localDownloadPath /= TEST_SUFFIX;
+    m_localInstDir = localDownloadPath.string();
     createDirectory(localDownloadPath);
     testDirectories[0] = m_localInstDir;
 
     Mantid::Kernel::ConfigService::Instance().setInstrumentDirectories(testDirectories);
 
     // create a geometryCache subdirectory
-    Poco::Path GeomPath = localDownloadPath;
-    GeomPath.pushDirectory("geometryCache");
+    std::filesystem::path GeomPath = localDownloadPath / "geometryCache";
     createDirectory(GeomPath);
   }
 
-  void createDirectory(const Poco::Path &path) {
-    Poco::File file(path);
-    if (file.createDirectory()) {
-      m_directoriesToRemove.emplace_back(file);
+  void createDirectory(const std::filesystem::path &path) {
+    if (std::filesystem::create_directories(path)) {
+      m_directoriesToRemove.emplace_back(path);
     }
   }
 
   void removeDirectories() {
     for (auto directory : m_directoriesToRemove) {
       try {
-        if (directory.exists()) {
-          directory.remove(true);
+        if (std::filesystem::exists(directory)) {
+          std::filesystem::remove_all(directory);
         }
-      } catch (Poco::FileException &fe) {
+      } catch (std::filesystem::filesystem_error &fe) {
         std::cout << fe.what() << std::endl;
       }
     }
@@ -110,11 +108,11 @@ public:
     ClearCache alg;
 
     auto instrumentDirs = ConfigService::Instance().getInstrumentDirectories();
-    Poco::Path localPath(instrumentDirs[0]);
-    localPath.makeDirectory();
+    std::filesystem::path localPath(instrumentDirs[0]);
     // create a file in the directory
-    Poco::File testFile(localPath.append("test_exec_DownloadInstrument_Cache.xml"));
-    testFile.createFile();
+    std::filesystem::path testFilePath = localPath / "test_exec_DownloadInstrument_Cache.xml";
+    std::ofstream testFile(testFilePath);
+    testFile.close();
 
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
@@ -122,7 +120,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
-    TSM_ASSERT("The test file has not been deleted", !testFile.exists());
+    TSM_ASSERT("The test file has not been deleted", !std::filesystem::exists(testFilePath));
     int filesRemoved = alg.getProperty("FilesRemoved");
     TS_ASSERT_LESS_THAN_EQUALS(1, filesRemoved);
   }
@@ -131,13 +129,12 @@ public:
     ClearCache alg;
 
     auto instrumentDirs = ConfigService::Instance().getInstrumentDirectories();
-    Poco::Path localPath(instrumentDirs[0]);
-    localPath.makeDirectory();
-    Poco::Path GeomPath(localPath);
-    GeomPath.append("geometryCache").makeDirectory();
+    std::filesystem::path localPath(instrumentDirs[0]);
+    std::filesystem::path GeomPath = localPath / "geometryCache";
     // create a file in the directory
-    Poco::File testFile(GeomPath.append("test_exec_Geometry_Cache.vtp"));
-    testFile.createFile();
+    std::filesystem::path testFilePath = GeomPath / "test_exec_Geometry_Cache.vtp";
+    std::ofstream testFile(testFilePath);
+    testFile.close();
 
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
@@ -145,7 +142,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
-    TSM_ASSERT("The test file has not been deleted", !testFile.exists());
+    TSM_ASSERT("The test file has not been deleted", !std::filesystem::exists(testFilePath));
     int filesRemoved = alg.getProperty("FilesRemoved");
     TS_ASSERT_LESS_THAN_EQUALS(1, filesRemoved);
   }
@@ -165,5 +162,5 @@ public:
 
   std::string m_localInstDir;
   std::vector<std::string> m_originalInstDir;
-  std::vector<Poco::File> m_directoriesToRemove;
+  std::vector<std::filesystem::path> m_directoriesToRemove;
 };

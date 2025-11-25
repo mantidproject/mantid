@@ -276,7 +276,7 @@ const std::string ScriptBuilder::buildPropertyString(const Mantid::Kernel::Prope
 
   // If the property is to be ignored then return with an empty string
   if (std::find_if(m_propertiesToIgnore.begin(), m_propertiesToIgnore.end(),
-                   [&propHistory, algName](std::vector<std::string> &c) -> bool {
+                   [&propHistory, algName](std::vector<std::string> const &c) -> bool {
                      return algName == c[0] && propHistory.name() == c[1];
                    }) != m_propertiesToIgnore.end()) {
     return "";

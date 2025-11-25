@@ -22,8 +22,8 @@ def get_y_min_max_between_x_range(line, x_min, x_max, y_min, y_max):
         return y_min, y_max
     current_min = np.min(crop)
     current_max = np.max(crop)
-    y_min = current_min if current_min < y_min else y_min
-    y_max = current_max if current_max > y_max else y_max
+    y_min = min(y_min, current_min)
+    y_max = max(y_max, current_max)
     return y_min, y_max
 
 

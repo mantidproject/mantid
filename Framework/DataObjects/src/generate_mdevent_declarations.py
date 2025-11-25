@@ -183,8 +183,7 @@ def generate():
     lines += footer_lines + lines_after
 
     f = open("../inc/MantidDataObjects/MDEventFactory.h", "w")
-    for line in lines:
-        f.write(line + "\n")
+    f.writelines(line + "\n" for line in lines)
     f.close()
 
     padding, lines, lines_after = parse_file("./MDEventFactory.cpp", "//### BEGIN AUTO-GENERATED CODE", "//### END AUTO-GENERATED CODE")
@@ -210,13 +209,12 @@ def generate():
 
     lines += footer_lines + lines_after
     f = open("./MDEventFactory.cpp", "w")
-    for line in lines:
-        f.write(line + "\n")
+    f.writelines(line + "\n" for line in lines)
     f.close()
 
     # Post message about updating the id strings in the python layer to
     # understand the new structure
-    print("")
+    print()
     print("The available IDs on the templated MDEventWorkspace classes may have changed.")
     print("Please update the casting IDs in PythonInterface/mantid/api/IMDEventWorkspace accordingly")
 

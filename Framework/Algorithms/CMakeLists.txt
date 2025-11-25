@@ -2,6 +2,7 @@ set(SRC_FILES
     src/AbsorptionCorrection.cpp
     src/AddAbsorptionWeightedPathLengths.cpp
     src/AddLogDerivative.cpp
+    src/AddLogSmoothed.cpp
     src/AddPeak.cpp
     src/AddSampleLog.cpp
     src/AddTimeSeriesLog.cpp
@@ -330,9 +331,6 @@ set(SRC_FILES
     src/TOFSANSResolution.cpp
     src/TOFSANSResolutionByPixel.cpp
     src/TOFSANSResolutionByPixelCalculator.cpp
-    src/TimeAtSampleStrategyDirect.cpp
-    src/TimeAtSampleStrategyElastic.cpp
-    src/TimeAtSampleStrategyIndirect.cpp
     src/Transpose.cpp
     src/UnGroupWorkspace.cpp
     src/UnaryOperation.cpp
@@ -356,6 +354,7 @@ set(INC_FILES
     inc/MantidAlgorithms/AbsorptionCorrection.h
     inc/MantidAlgorithms/AddAbsorptionWeightedPathLengths.h
     inc/MantidAlgorithms/AddLogDerivative.h
+    inc/MantidAlgorithms/AddLogSmoothed.h
     inc/MantidAlgorithms/AddPeak.h
     inc/MantidAlgorithms/AddSampleLog.h
     inc/MantidAlgorithms/AddTimeSeriesLog.h
@@ -690,10 +689,6 @@ set(INC_FILES
     inc/MantidAlgorithms/TOFSANSResolution.h
     inc/MantidAlgorithms/TOFSANSResolutionByPixel.h
     inc/MantidAlgorithms/TOFSANSResolutionByPixelCalculator.h
-    inc/MantidAlgorithms/TimeAtSampleStrategy.h
-    inc/MantidAlgorithms/TimeAtSampleStrategyDirect.h
-    inc/MantidAlgorithms/TimeAtSampleStrategyElastic.h
-    inc/MantidAlgorithms/TimeAtSampleStrategyIndirect.h
     inc/MantidAlgorithms/Transpose.h
     inc/MantidAlgorithms/UnGroupWorkspace.h
     inc/MantidAlgorithms/UnaryOperation.h
@@ -716,6 +711,7 @@ set(INC_FILES
 set(TEST_FILES
     AddAbsorptionWeightedPathLengthsTest.h
     AddLogDerivativeTest.h
+    AddLogSmoothedTest.h
     AddPeakTest.h
     AddSampleLogTest.h
     AddTimeSeriesLogTest.h
@@ -1029,9 +1025,6 @@ set(TEST_FILES
     SumSpectraTest.h
     TOFSANSResolutionByPixelCalculatorTest.h
     TOFSANSResolutionByPixelTest.h
-    TimeAtSampleStrategyDirectTest.h
-    TimeAtSampleStrategyElasticTest.h
-    TimeAtSampleStrategyIndirectTest.h
     TransposeTest.h
     UnGroupWorkspaceTest.h
     UnaryOperationTest.h

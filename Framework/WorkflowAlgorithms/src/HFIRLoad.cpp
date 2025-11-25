@@ -220,7 +220,7 @@ void HFIRLoad::exec() {
 
   const std::string sampleADName = "sample-aperture-diameter";
   Mantid::Kernel::Property *prop = dataWS->run().getProperty(sampleADName);
-  auto *dp = dynamic_cast<Mantid::Kernel::PropertyWithValue<double> *>(prop);
+  auto const *dp = dynamic_cast<Mantid::Kernel::PropertyWithValue<double> *>(prop);
   if (!dp) {
     throw std::runtime_error("Could not cast (interpret) the property " + sampleADName +
                              " as a floating point numeric value.");

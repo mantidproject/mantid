@@ -55,7 +55,7 @@ IPropertyManager::getValue<Mantid::API::IEventWorkspace_sptr>(const std::string 
 template <>
 MANTID_API_DLL Mantid::API::IEventWorkspace_const_sptr
 IPropertyManager::getValue<Mantid::API::IEventWorkspace_const_sptr>(const std::string &name) const {
-  auto *prop = dynamic_cast<PropertyWithValue<Mantid::API::IEventWorkspace_sptr> *>(getPointerToProperty(name));
+  auto const *prop = dynamic_cast<PropertyWithValue<Mantid::API::IEventWorkspace_sptr> *>(getPointerToProperty(name));
   if (prop) {
     return prop->operator()();
   } else {

@@ -7,7 +7,7 @@ Checks: >
   -cppcoreguidelines-pro-bounds-array-to-pointer-decay,
   -cppcoreguidelines-pro-bounds-constant-array-index,
   -cppcoreguidelines-pro-bounds-pointer-arithmetic,
-  modernize-*,,
+  modernize-*,
   -modernize-avoid-c-arrays,
   -modernize-type-traits,
   -modernize-use-trailing-return-type,

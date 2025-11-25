@@ -254,7 +254,7 @@ private:
     double sig2e = work_in2->e(ws2Index / work_in2->blocksize())[ws2Index % work_in2->blocksize()];
     double sig3 = work_out1->y(i / work_in1->blocksize())[i % work_in1->blocksize()];
     TS_ASSERT_DELTA(work_in1->x(i / work_in1->blocksize())[i % work_in1->blocksize()],
-                    work_out1 -> x(i / work_in1->blocksize())[i % work_in1->blocksize()], 0.0001);
+                    work_out1->x(i / work_in1->blocksize())[i % work_in1->blocksize()], 0.0001);
     TS_ASSERT_DELTA(sig1, sig3, 0.0001);
     // double err1 =
     // work_in1->e(i/work_in1->blocksize())[i%work_in1->blocksize()];

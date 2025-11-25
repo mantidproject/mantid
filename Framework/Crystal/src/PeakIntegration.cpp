@@ -102,7 +102,7 @@ void PeakIntegration::exec() {
 
   std::vector<int> badPeaks;
   for (int i = NumberPeaks - 1; i >= 0; i--) {
-    Peak &peak = peaksW->getPeaks()[i];
+    Peak const &peak = peaksW->getPeaks()[i];
     int pixelID = peak.getDetectorID();
 
     // Find the workspace index for this detector ID

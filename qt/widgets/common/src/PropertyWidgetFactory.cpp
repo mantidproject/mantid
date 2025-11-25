@@ -40,8 +40,8 @@ PropertyWidgetFactory::~PropertyWidgetFactory() = default;
  */
 PropertyWidget *PropertyWidgetFactory::createWidget(Mantid::Kernel::Property *prop, QWidget *parent,
                                                     QGridLayout *layout, int row) {
-  auto *fileType = dynamic_cast<Mantid::API::FileProperty *>(prop);
-  auto *multipleFileType = dynamic_cast<Mantid::API::MultipleFileProperty *>(prop);
+  auto const *fileType = dynamic_cast<Mantid::API::FileProperty *>(prop);
+  auto const *multipleFileType = dynamic_cast<Mantid::API::MultipleFileProperty *>(prop);
   PropertyWithValue<bool> *boolProp = dynamic_cast<PropertyWithValue<bool> *>(prop);
 
   if (boolProp) {

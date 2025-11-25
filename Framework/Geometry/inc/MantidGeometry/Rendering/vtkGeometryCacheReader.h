@@ -44,7 +44,7 @@ private:
 public:
   vtkGeometryCacheReader(std::string filename);
   ~vtkGeometryCacheReader();
-  void readCacheForObject(IObject *obj);
+  void readCacheForObject(IObject const *obj);
 };
 
 } // NAMESPACE Geometry

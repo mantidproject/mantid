@@ -25,7 +25,6 @@
 #include <Poco/URI.h>
 
 #include <Poco/Exception.h>
-#include <Poco/File.h>
 #include <Poco/FileStream.h>
 #include <Poco/Net/Context.h>
 #include <Poco/Net/HTTPClientSession.h>
@@ -42,6 +41,7 @@
 #include <boost/lexical_cast.hpp>
 
 // std
+#include <filesystem>
 #include <fstream>
 #include <mutex>
 #include <utility>
@@ -397,9 +397,8 @@ InternetHelper::HTTPStatus InternetHelper::downloadFile(const std::string &urlFi
   // if there have been no errors move it to the final location, and turn off
   // automatic deletion.
   // clear the way if the target file path is already in use
-  Poco::File file(localFilePath);
-  if (file.exists()) {
-    file.remove();
+  if (std::filesystem::exists(localFilePath)) {
+    std::filesystem::remove(localFilePath);
   }
 
   tempFile.moveTo(localFilePath);

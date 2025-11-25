@@ -861,8 +861,7 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
         handle = open(path, "w")
         head = "spectrum,theta"
         handle.write(head + " \n")
-        for n in range(0, len(theta)):
-            handle.write(str(n + 1) + "   " + str(theta[n]) + "\n")
+        handle.writelines(str(n + 1) + "   " + str(theta[n]) + "\n" for n in range(0, len(theta)))
         handle.close()
 
         update_alg = self.createChildAlgorithm("UpdateInstrumentFromFile", enableLogging=False)

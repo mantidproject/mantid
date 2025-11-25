@@ -5,7 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/RebinByTimeAtSample.h"
-#include "MantidAlgorithms/TimeAtSampleStrategyElastic.h"
+#include "MantidAPI/TimeAtSampleStrategyElastic.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/V3D.h"
@@ -57,7 +57,7 @@ void RebinByTimeAtSample::doHistogramming(IEventWorkspace_sptr inWS, MatrixWorks
 
   const double tofOffset = 0;
 
-  TimeAtSampleStrategyElastic strategy(inWS);
+  API::TimeAtSampleStrategyElastic strategy(inWS);
 
   auto x = Kernel::make_cow<HistogramData::HistogramX>(OutXValues_scaled);
 

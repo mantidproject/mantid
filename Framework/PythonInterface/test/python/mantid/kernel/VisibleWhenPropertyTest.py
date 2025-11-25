@@ -26,6 +26,26 @@ class VisibleWhenPropertyTest(unittest.TestCase):
         result = VisibleWhenProperty(a, b, LogicOperator.And)
         self.assertIsNotNone(result)
 
+    def test_simple_dependsOn(self):
+        # Verify that the single-property `dependsOn` works as expected.
+        a = VisibleWhenProperty("PropA", PropertyCriterion.IsDefault)
+        assert list(a.dependsOn("someOtherProp")) == ["PropA"]
+
+    def test_multiple_dependsOn(self):
+        # Verify that binary condition `dependsOn` case works as expected.
+        a = VisibleWhenProperty("PropA", PropertyCriterion.IsDefault)
+        b = VisibleWhenProperty("PropB", PropertyCriterion.IsDefault)
+        c = VisibleWhenProperty(a, b, LogicOperator.Or)
+        assert set(c.dependsOn("PropC")) == set(["PropA", "PropB"])
+
+    def test_multiple_dependsOn_2X(self):
+        # Verify that multiple binary condition `dependsOn` case works as expected.
+        a = VisibleWhenProperty("PropA", PropertyCriterion.IsDefault)
+        b = VisibleWhenProperty("PropB", PropertyCriterion.IsDefault)
+        c = VisibleWhenProperty("PropC", PropertyCriterion.IsDefault)
+        d = VisibleWhenProperty(c, VisibleWhenProperty(a, b, LogicOperator.Or), LogicOperator.And)
+        assert set(d.dependsOn("PropD")) == set(["PropA", "PropB", "PropC"])
+
     # ------------ Failure cases ------------------
 
     def test_default_construction_raises_error(self):
@@ -36,6 +56,22 @@ class VisibleWhenPropertyTest(unittest.TestCase):
             # boost.python.ArgumentError are not catchable
             if "Python argument types in" not in str(e):
                 raise RuntimeError("Unexpected exception type raised")
+
+    def test_simple_dependsOn_circular(self):
+        # Verify that the single-property circular dependency raises exception.
+        a = VisibleWhenProperty("PropA", PropertyCriterion.IsDefault)
+        with self.assertRaises(RuntimeError) as context:
+            a.dependsOn("PropA")
+        assert "circular dependency" in str(context.exception)
+
+    def test_multiple_dependsOn_circular(self):
+        # Verify that binary condition circular dependency raises exception.
+        a = VisibleWhenProperty("PropA", PropertyCriterion.IsDefault)
+        b = VisibleWhenProperty("PropB", PropertyCriterion.IsDefault)
+        ab = VisibleWhenProperty(a, b, LogicOperator.Or)
+        with self.assertRaises(RuntimeError) as context:
+            ab.dependsOn("PropA")
+        assert "circular dependency" in str(context.exception)
 
 
 if __name__ == "__main__":

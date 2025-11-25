@@ -160,7 +160,7 @@ Integrate3DEvents::integrateStrongPeak(const IntegrationParameters &params, cons
     return std::make_pair(std::make_shared<NoShape>(), make_tuple(0., 0., 0.));
 
   auto rValues = calculateRadiusFactors(params, max_sigma);
-  auto &r1 = std::get<0>(rValues), r2 = std::get<1>(rValues), r3 = std::get<2>(rValues);
+  auto const &r1 = std::get<0>(rValues), r2 = std::get<1>(rValues), r3 = std::get<2>(rValues);
 
   DataObjects::PeakEllipsoidExtent abcBackgroundOuterRadii, abcBackgroundInnerRadii;
   DataObjects::PeakEllipsoidExtent peakRadii;
@@ -290,7 +290,7 @@ double Integrate3DEvents::estimateSignalToNoiseRatio(const IntegrationParameters
     return .0;
 
   auto rValues = calculateRadiusFactors(params, max_sigma);
-  auto &r1 = std::get<0>(rValues), r2 = std::get<1>(rValues), r3 = std::get<2>(rValues);
+  auto const &r1 = std::get<0>(rValues), r2 = std::get<1>(rValues), r3 = std::get<2>(rValues);
   DataObjects::PeakEllipsoidExtent abcBackgroundOuterRadii, abcBackgroundInnerRadii;
   DataObjects::PeakEllipsoidExtent peakRadii;
   if (forceSpherical) {

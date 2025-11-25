@@ -14,14 +14,14 @@ namespace MantidQt::MantidWidgets {
 ImageInfoModel::ImageInfo ImageInfoModelMD::info(const double x, const double y, const double signal,
                                                  const QMap<QString, QString> &extraValues) const {
   ImageInfo info({"x", "y", "Signal"});
-  for (auto &extraName : extraValues.keys())
+  for (auto const &extraName : extraValues.keys())
     info.m_names.push_back(extraName);
 
   auto valueOrMissing = [](double value) { return value == UnsetValue ? MissingValue : defaultFormat(value); };
   info.setValue(0, valueOrMissing(x));
   info.setValue(1, valueOrMissing(y));
   info.setValue(2, valueOrMissing(signal));
-  for (auto &extraValue : extraValues.values())
+  for (auto const &extraValue : extraValues.values())
     info.m_values.push_back(extraValue);
 
   return info;

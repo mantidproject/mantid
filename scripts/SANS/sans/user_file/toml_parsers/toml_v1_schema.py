@@ -31,6 +31,7 @@ class TomlSchemaV1Validator(TomlSchemaValidator):
                 "sample_aperture_diameter",
                 "sample_offset",
                 "trans_monitor",
+                "solid_angle_cylinder_slices",
             },
         }
 

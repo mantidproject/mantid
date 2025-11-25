@@ -20,7 +20,6 @@ from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.calibration
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.calibration.view import CalibrationView
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.calibration.presenter import CalibrationPresenter
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.focus.model import FocusModel
-from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.focus.view import FocusView
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.focus.presenter import FocusPresenter
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.fitting.view import FittingView
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.fitting.presenter import FittingPresenter
@@ -28,8 +27,6 @@ from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.fitting.plo
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.fitting.plotting.EngDiff_fitpropertybrowser import (
     EngDiffFitPropertyBrowser,
 )
-from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.settings_model import SettingsModel
-from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.settings_view import SettingsView
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.settings_presenter import SettingsPresenter
 
 IO_VERSION = 2
@@ -113,7 +110,7 @@ class EngineeringDiffractionEncoderTest(unittest.TestCase):
 
     def create_test_focus_presenter(self):
         focus_model = FocusModel()
-        focus_view = mock.create_autospec(FocusView, instance=True)
+        focus_view = MagicMock()
         self.presenter.focus_presenter = FocusPresenter(focus_model, focus_view)
 
     def create_test_calibration_presenter(self):
@@ -131,10 +128,11 @@ class EngineeringDiffractionEncoderTest(unittest.TestCase):
         self.presenter.fitting_presenter.plot_widget.view = fitting_plot_view
 
     def create_test_settings_presenter(self):
-        settings_model = mock.create_autospec(SettingsModel, instance=True)
-        settings_view = mock.create_autospec(SettingsView, instance=True)
+        settings_model = MagicMock()
+        settings_view = MagicMock()
         settings_presenter = SettingsPresenter(settings_model, settings_view)
         self.presenter.settings_presenter = settings_presenter
+        settings_model.validate_settings.return_value = SETTINGS_DICT
         settings_presenter.settings = SETTINGS_DICT
         settings_presenter._save_settings_to_file()
 

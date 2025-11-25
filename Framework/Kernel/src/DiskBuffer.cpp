@@ -360,7 +360,7 @@ void DiskBuffer::getFreeSpaceVector(std::vector<uint64_t> &free) const {
 
 /** Sets the free space map. Should only be used when loading a file.
  * @param[in] free :: vector containing free space index to set */
-void DiskBuffer::setFreeSpaceVector(std::vector<uint64_t> &free) {
+void DiskBuffer::setFreeSpaceVector(std::vector<uint64_t> const &free) {
   m_free.clear();
 
   if (free.size() % 2 != 0)

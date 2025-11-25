@@ -13,6 +13,7 @@
 #include "MantidDataObjects/MDEventInserter.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidKernel/MDUnit.h"
+#include "MantidKernel/MDUnitFactory.h"
 
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/split.hpp>

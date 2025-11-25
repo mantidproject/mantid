@@ -373,7 +373,7 @@ void CompAssembly::getBoundingBox(BoundingBox &assemblyBox) const {
     if (!m_cachedBoundingBox) {
       m_cachedBoundingBox = new BoundingBox();
       // Loop over the children and define a box large enough for all of them
-      for (auto child : m_children) {
+      for (auto const child : m_children) {
         BoundingBox compBox;
         if (child) {
           child->getBoundingBox(compBox);
@@ -402,7 +402,7 @@ void CompAssembly::testIntersectionWithChildren(Track &testRay, std::deque<IComp
       searchQueue.emplace_back(comp);
     }
     // Check the physical object intersection
-    else if (auto *physicalObject = dynamic_cast<IObjComponent *>(comp.get())) {
+    else if (auto const *physicalObject = dynamic_cast<IObjComponent *>(comp.get())) {
       physicalObject->interceptSurface(testRay);
     } else {
     }

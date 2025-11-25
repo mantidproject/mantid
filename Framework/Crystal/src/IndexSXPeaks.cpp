@@ -85,7 +85,7 @@ sit.
 @param peakCandidates : Potential peaks containing sets of possible hkl values.
 @param unitcell : the unit cell for lattice
 */
-void IndexSXPeaks::cullHKLs(std::vector<PeakCandidate> &peakCandidates, Mantid::Geometry::UnitCell &unitcell) {
+void IndexSXPeaks::cullHKLs(std::vector<PeakCandidate> &peakCandidates, Mantid::Geometry::UnitCell const &unitcell) {
   size_t npeaks = peakCandidates.size();
   for (std::size_t p = 0; p < npeaks; p++) {
     for (std::size_t q = 0; q < npeaks; q++) {
@@ -178,7 +178,7 @@ void IndexSXPeaks::exec() {
     if (row < 0) {
       throw std::runtime_error("Cannot have a peak index < 0.");
     }
-    IPeak &peak = ws->getPeak(row);
+    IPeak const &peak = ws->getPeak(row);
     V3D Qs = peak.getQSampleFrame() / (2.0 * M_PI);
     peaks.emplace_back(Qs[0], Qs[1], Qs[2]);
   }

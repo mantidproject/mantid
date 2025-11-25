@@ -245,6 +245,12 @@ void export_leaf_classes() {
            (arg("self"), arg("name"), arg("defaultValue"), arg("direction") = Direction::Input),
            "Declares a named property where the type is taken from the type "
            "of the defaultValue and mapped to an appropriate C++ type")
+      .def("declareOrReplaceProperty", &PythonAlgorithm::declareOrReplacePyAlgProperty,
+           (arg("self"), arg("name"), arg("defaultValue"), arg("validator") = object(), arg("doc") = "",
+            arg("direction") = Direction::Input),
+           "Declares or replaces a named property where the type is taken from "
+           "the type of the defaultValue and mapped to an appropriate C++ "
+           "type")
       .def("getLogger", &PythonAlgorithm::getLogger, arg("self"), return_value_policy<reference_existing_object>(),
            "Returns a reference to this algorithm's logger")
       .def("log", &PythonAlgorithm::getLogger, arg("self"), return_value_policy<reference_existing_object>(),

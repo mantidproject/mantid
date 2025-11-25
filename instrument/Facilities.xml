@@ -470,6 +470,16 @@
      <technique>Single Crystal Diffraction</technique>
    </instrument>
 
+   <instrument name="IMAGINE" shortname="CG4D">
+     <technique>Neutron Diffraction</technique>
+     <technique>Single Crystal Diffraction</technique>
+   </instrument>
+
+   <instrument name="IMAGINE" shortname="CG4D">
+     <technique>Neutron Diffraction</technique>
+     <technique>Single Crystal Diffraction</technique>
+   </instrument>
+
    <instrument name="HIRESSANS">
       <technique>Small Angle Scattering</technique>
    </instrument>

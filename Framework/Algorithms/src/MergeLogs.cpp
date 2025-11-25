@@ -79,8 +79,8 @@ void MergeLogs::exec() {
   const std::string log2name = this->getProperty("LogName2");
   const std::string mlogname = this->getProperty("MergedLogName");
   const bool resetlogvalue = this->getProperty("ResetLogValue");
-  TimeSeriesProperty<double> *log1(ws->run().getTimeSeriesProperty<double>(log1name));
-  TimeSeriesProperty<double> *log2(ws->run().getTimeSeriesProperty<double>(log2name));
+  TimeSeriesProperty<double> const *log1(ws->run().getTimeSeriesProperty<double>(log1name));
+  TimeSeriesProperty<double> const *log2(ws->run().getTimeSeriesProperty<double>(log2name));
   std::unique_ptr<TimeSeriesProperty<double>> mlog1(log1->clone());
   std::unique_ptr<TimeSeriesProperty<double>> mlog2(log2->clone());
   mlog1->setName(mlogname);

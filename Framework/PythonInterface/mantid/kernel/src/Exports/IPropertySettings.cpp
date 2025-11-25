@@ -23,5 +23,15 @@ void export_IPropertySettings() {
            "Is the property to be shown as enabled in the GUI. Default true.")
 
       .def("isVisible", &IPropertySettings::isVisible, (arg("self"), arg("alg")),
-           "Is the property to be shown in the GUI? Default true.");
+           "Is the property to be shown in the GUI? Default true.")
+
+      .def("dependsOn", &IPropertySettings::dependsOn, (arg("self"), arg("thisProp")),
+           "Other properties that this property depends on.")
+
+      .def("_isConditionChanged", &IPropertySettings::isConditionChanged,
+           (arg("self"), arg("alg"), arg("changedPropName")),
+           "Has the dependency condition changed: exported for testing use only")
+
+      .def("_applyChanges", &IPropertySettings::applyChanges, (arg("self"), arg("alg"), arg("currentProperty")),
+           "Apply the changed criterion to the current property: exported for testing use only");
 }

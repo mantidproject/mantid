@@ -13,7 +13,7 @@ import requests
 JENKINS_ROOT_URL = "http://builds.mantidproject.org"
 QUEUE_ENDPOINT_JSON = path.join(JENKINS_ROOT_URL, "queue/api/json")
 
-req = requests.get(QUEUE_ENDPOINT_JSON)
+req = requests.get(QUEUE_ENDPOINT_JSON, timeout=10)
 payload = req.json()
 
 # extract items by job name

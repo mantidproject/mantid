@@ -36,12 +36,12 @@ namespace {
  Helper function to create an ID -> index map from an ordered collection of IDs.
  First ID gets index of 0, subsequent ID entries increment index by 1.
 */
-std::shared_ptr<const std::unordered_map<Mantid::Geometry::ComponentID, size_t>>
+std::shared_ptr<const std::unordered_map<Mantid::Geometry::IComponent const *, size_t>>
 makeComponentIDMap(const std::shared_ptr<const std::vector<Mantid::Geometry::ComponentID>> &componentIds) {
-  auto idMap = std::make_shared<std::unordered_map<Mantid::Geometry::ComponentID, size_t>>();
+  auto idMap = std::make_shared<std::unordered_map<Mantid::Geometry::IComponent const *, size_t>>();
 
   for (size_t i = 0; i < componentIds->size(); ++i) {
-    (*idMap)[(*componentIds)[i]] = i;
+    (*idMap.get())[(*componentIds)[i]] = i;
   }
   return idMap;
 }

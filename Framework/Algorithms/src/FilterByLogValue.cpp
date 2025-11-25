@@ -79,7 +79,7 @@ std::map<std::string, std::string> FilterByLogValue::validateInputs() {
   // Check that the log exists for the given input workspace
   std::string logname = getPropertyValue("LogName");
   try {
-    auto *log = dynamic_cast<ITimeSeriesProperty *>(inputWS->run().getLogData(logname));
+    auto const *log = dynamic_cast<ITimeSeriesProperty *>(inputWS->run().getLogData(logname));
     if (log == nullptr) {
       errors["LogName"] = "'" + logname + "' is not a time-series log.";
       return errors;

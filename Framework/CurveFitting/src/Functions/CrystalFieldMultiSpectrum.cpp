@@ -237,7 +237,7 @@ void CrystalFieldMultiSpectrum::buildTargetFunction() const {
   ComplexFortranMatrix ham;
   ComplexFortranMatrix hz;
   int nre = 0;
-  auto &peakCalculator = dynamic_cast<Peaks &>(*m_source);
+  auto const &peakCalculator = dynamic_cast<Peaks &>(*m_source);
   peakCalculator.calculateEigenSystem(en, wf, ham, hz, nre);
   ham += hz;
 

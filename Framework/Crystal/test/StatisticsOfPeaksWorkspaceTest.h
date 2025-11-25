@@ -15,7 +15,6 @@
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/IDTypes.h"
 #include "MantidKernel/Timer.h"
-#include <Poco/File.h>
 #include <cxxtest/TestSuite.h>
 #include <fstream>
 

@@ -77,7 +77,7 @@ QIcon IconicFont::getIcon(const QStringList &iconNames, const QList<QHash<QStrin
   return this->iconByPainter(&m_painter, actualOptions);
 }
 
-QIcon IconicFont::iconByPainter(CharIconPainter *painter, QList<QHash<QString, QVariant>> &options) {
+QIcon IconicFont::iconByPainter(CharIconPainter *painter, QList<QHash<QString, QVariant>> const &options) {
   auto engine = new CharIconEngine(this, painter, options);
   return QIcon(engine);
 }

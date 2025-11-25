@@ -19,8 +19,8 @@
 #include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/Utils.h"
-#include <Poco/File.h>
 #include <boost/algorithm/string/trim.hpp>
+#include <filesystem>
 #include <fstream>
 
 using namespace Mantid::Geometry;
@@ -151,7 +151,7 @@ void SaveIsawPeaks::exec() {
   const bool renumber = getProperty("RenumberPeaks");
 
   // do not append if file does not exist
-  if (!Poco::File(filename.c_str()).exists())
+  if (!std::filesystem::exists(filename))
     append = false;
 
   int appendPeakNumb = 0;

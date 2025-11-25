@@ -18,6 +18,7 @@
 #include "MantidGeometry/MDGeometry/HKL.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/MDUnitFactory.h"
 #include "MantidKernel/UnitLabelTypes.h"
 
 #include "MantidAPI/ExperimentInfo.h"

@@ -10,6 +10,7 @@
 #include "MantidAPI/TableRow.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/ListValidator.h"
 
 #include <boost/algorithm/string/classification.hpp>

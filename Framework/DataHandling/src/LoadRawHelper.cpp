@@ -1153,7 +1153,7 @@ std::list<std::string> LoadRawHelper::searchForLogFiles(const Poco::Path &pathTo
       Poco::Path pattern = pathToRawFile;
       pattern.setFileName(pathToRawFile.getBaseName() + "_*.txt");
       try {
-        Kernel::Glob::glob(pattern, potentialLogFiles);
+        Kernel::Glob::glob(pattern.toString(), potentialLogFiles);
       } catch (std::exception &) {
       }
       // Check for .log

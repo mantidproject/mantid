@@ -14,6 +14,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/ITimeSeriesProperty.h"
 #include "MantidKernel/Interpolation.h"
 #include "MantidKernel/UnitFactory.h"

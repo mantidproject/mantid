@@ -82,15 +82,16 @@ public:
     // setting property
     std::string outWSName("CreateWorkspaceTest_OutputWS");
     TS_ASSERT_THROWS_NOTHING(createWS.setPropertyValue("OutputWorkspace", outWSName));
-    TS_ASSERT_THROWS_NOTHING(createWS.execute(););
-    MatrixWorkspace_sptr outWS = createWS.getProperty("OutputWorkspace");
+    TS_ASSERT_THROWS_NOTHING(createWS.setProperty("BankPixelWidth", 1));
+    TS_ASSERT_THROWS_NOTHING(createWS.execute());
+    MatrixWorkspace_sptr input = createWS.getProperty("OutputWorkspace");
 
     // Creating group workspace
     CreateGroupingWorkspace alg;
     alg.initialize();
     alg.setChild(true);
     std::string outGWSName("CreateGroupingWorkspaceTest_OutputWS");
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", outWS));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", input));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("GroupNames", "bank1,bank2"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outGWSName));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
@@ -100,10 +101,10 @@ public:
     SmoothData smooth;
     smooth.initialize();
     smooth.setChild(true);
-    TS_ASSERT_THROWS_NOTHING(smooth.setProperty("InputWorkspace", outWS));
+    TS_ASSERT_THROWS_NOTHING(smooth.setProperty("InputWorkspace", input));
     std::string outputWS("smoothed");
     TS_ASSERT_THROWS_NOTHING(smooth.setPropertyValue("OutputWorkspace", outputWS));
-    // Set to 4 - algorithm should change it to 5
+    // use 3 points in bank1, use 5 points in bank2
     TS_ASSERT_THROWS_NOTHING(smooth.setPropertyValue("NPoints", "3,5"));
     TS_ASSERT_THROWS_NOTHING(smooth.setProperty("GroupingWorkspace", groupingWS));
     TS_ASSERT_THROWS_NOTHING(smooth.execute());
@@ -134,6 +135,117 @@ public:
     TS_ASSERT_DIFFERS(E[5], Y[5]);
     // Check X vectors are shared
     TS_ASSERT_EQUALS(&(output->x(0)), &(output->x(1)));
+  }
+
+  void testGroupspaceProperty_check_banks() {
+
+    MatrixWorkspace_sptr createSampleWorkspace;
+    // Creating sample workspace
+    CreateSampleWorkspace createWS;
+    createWS.initialize();
+    createWS.setChild(true);
+    // setting property
+    std::string outWSName("CreateWorkspaceTest_OutputWS");
+    TS_ASSERT_THROWS_NOTHING(createWS.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(createWS.setProperty("BankPixelWidth", 1))
+    TS_ASSERT_THROWS_NOTHING(createWS.execute(););
+    MatrixWorkspace_sptr input = createWS.getProperty("OutputWorkspace");
+
+    // Creating group workspace
+    CreateGroupingWorkspace alg;
+    alg.initialize();
+    alg.setChild(true);
+    std::string outGWSName("CreateGroupingWorkspaceTest_OutputWS");
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", input));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("GroupNames", "bank1,bank2"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outGWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+    GroupingWorkspace_sptr groupingWS = alg.getProperty("OutputWorkspace");
+
+    SmoothData smooth;
+    smooth.initialize();
+    smooth.setChild(true);
+    TS_ASSERT_THROWS_NOTHING(smooth.setProperty("InputWorkspace", input));
+    std::string outputWS("smoothed");
+    TS_ASSERT_THROWS_NOTHING(smooth.setPropertyValue("OutputWorkspace", outputWS));
+    // use 3 points in bank1, use 5 points in bank2
+    TS_ASSERT_THROWS_NOTHING(smooth.setPropertyValue("NPoints", "3,5"));
+    TS_ASSERT_THROWS_NOTHING(smooth.setProperty("GroupingWorkspace", groupingWS));
+    TS_ASSERT_THROWS_NOTHING(smooth.execute());
+    TS_ASSERT(smooth.isExecuted());
+    MatrixWorkspace_const_sptr output = smooth.getProperty("OutputWorkspace");
+
+    // X values are shared
+    TS_ASSERT_EQUALS(&(output->x(0)), &(input->x(0)));
+    TS_ASSERT_EQUALS(&(output->x(1)), &(input->x(1)));
+
+    // CreateSampleWorkspace makes a workspace with a delta-peak at index 50
+    unsigned int const nbins = 100, peak = 50;
+    // the three-point smoothing will effect the two points on either side of peak
+    unsigned int const peakm = peak - 1, peakp = peak + 1;
+    // the five-point smoothing will also effect these points
+    unsigned int const peak2m = peak - 2, peak2p = peak + 2;
+
+    // verify bank1
+    const auto &Ybank1 = output->y(0);  // 100 points, delta-peak at 50
+    const auto &Ebank1 = output->e(0);  // 100 points, delta-peak at 50
+    const auto &Ybank1in = input->y(0); // three-point peak on 49, 50, 51
+    const auto &Ebank1in = input->e(0); // three-point peak on 49, 50, 51
+    std::set<unsigned int> skip1{peakm, peak, peakp};
+    for (unsigned int i = 0; i < nbins; i++) {
+      // except at the peak points, all equal
+      if (!skip1.count(i)) {
+        TS_ASSERT_DELTA(Ybank1[i], Ybank1in[i], 0.00001);
+      }
+    }
+    // symmetry
+    TS_ASSERT_EQUALS(Ybank1[peakm], Ybank1[peakp]);
+    TS_ASSERT_EQUALS(Ybank1in[peakm], Ybank1in[peakp]);
+    // smoothing will make values beside peak larger, at peak smaller
+    TS_ASSERT_LESS_THAN(Ybank1in[peakm], Ybank1[peakm]);
+    TS_ASSERT_LESS_THAN(Ybank1in[peakp], Ybank1[peakp]);
+    TS_ASSERT_LESS_THAN(Ybank1[peak], Ybank1in[peak]);
+    // do the same for E
+    TS_ASSERT_EQUALS(Ebank1[peakm], Ebank1[peakp]);
+    TS_ASSERT_EQUALS(Ebank1in[peakm], Ebank1in[peakp]);
+    TS_ASSERT_LESS_THAN(Ebank1in[peakm], Ebank1[peakm]);
+    TS_ASSERT_LESS_THAN(Ebank1in[peakp], Ebank1[peakp]);
+    TS_ASSERT_LESS_THAN(Ebank1[peak], Ebank1in[peak]);
+
+    // verify bank2
+    const auto &Ybank2 = output->y(1);  // 100 points, delta-peak at 50
+    const auto &Ebank2 = output->e(1);  // 100 points, delta-peak at 50
+    const auto &Ybank2in = input->y(1); // five-point peak on 48, 49, 50, 51, 52
+    const auto &Ebank2in = input->e(1); // five-point peak on 48, 49, 50, 51, 52
+    std::set<unsigned int> skip2{peak2m, peakm, peak, peakp, peak2p};
+    for (unsigned int i = 0; i < nbins; i++) {
+      // except at the peak points, all equal
+      if (!skip2.count(i)) {
+        TS_ASSERT_DELTA(Ybank2[i], Ybank2in[i], 0.00001);
+      }
+    }
+    // symmetry
+    TS_ASSERT_EQUALS(Ybank2[peakm], Ybank2[peakp]);
+    TS_ASSERT_EQUALS(Ybank2[peak2m], Ybank2[peak2p]);
+    TS_ASSERT_EQUALS(Ybank2in[peakm], Ybank2in[peakp]);
+    TS_ASSERT_EQUALS(Ybank2in[peak2m], Ybank2in[peak2p]);
+    // smoothing will make values beside peak larger, at peak smaller
+    TS_ASSERT_LESS_THAN(Ybank2in[peak2m], Ybank2[peak2m]);
+    TS_ASSERT_LESS_THAN(Ybank2in[peak2p], Ybank2[peak2p]);
+    TS_ASSERT_LESS_THAN(Ybank2in[peakm], Ybank2[peakm]);
+    TS_ASSERT_LESS_THAN(Ybank2in[peakp], Ybank2[peakp]);
+    TS_ASSERT_LESS_THAN(Ybank2[peak], Ybank2in[peak]);
+    // same for E
+    TS_ASSERT_EQUALS(Ebank2[peakm], Ebank2[peakp]);
+    TS_ASSERT_EQUALS(Ebank2[peak2m], Ebank2[peak2p]);
+    TS_ASSERT_EQUALS(Ebank2in[peakm], Ebank2in[peakp]);
+    TS_ASSERT_EQUALS(Ebank2in[peak2m], Ebank2in[peak2p]);
+    TS_ASSERT_LESS_THAN(Ebank2in[peak2m], Ebank2[peak2m]);
+    TS_ASSERT_LESS_THAN(Ebank2in[peak2p], Ebank2[peak2p]);
+    TS_ASSERT_LESS_THAN(Ebank2in[peakm], Ebank2[peakm]);
+    TS_ASSERT_LESS_THAN(Ebank2in[peakp], Ebank2[peakp]);
+    TS_ASSERT_LESS_THAN(Ebank2[peak], Ebank2in[peak]);
   }
 
   void testExec() {

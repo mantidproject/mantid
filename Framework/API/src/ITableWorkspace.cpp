@@ -115,7 +115,7 @@ IPropertyManager::getValue<API::ITableWorkspace_sptr>(const std::string &name) c
 template <>
 MANTID_API_DLL API::ITableWorkspace_const_sptr
 IPropertyManager::getValue<API::ITableWorkspace_const_sptr>(const std::string &name) const {
-  auto *prop = dynamic_cast<PropertyWithValue<API::ITableWorkspace_sptr> *>(getPointerToProperty(name));
+  auto const *prop = dynamic_cast<PropertyWithValue<API::ITableWorkspace_sptr> *>(getPointerToProperty(name));
   if (prop) {
     return prop->operator()();
   } else {

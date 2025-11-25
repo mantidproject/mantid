@@ -46,7 +46,7 @@ public:
   vtkGeometryCacheWriter(const vtkGeometryCacheWriter &) = delete;
   vtkGeometryCacheWriter &operator=(const vtkGeometryCacheWriter) = delete;
 
-  void addObject(CSGObject *obj);
+  void addObject(CSGObject const *obj);
   void write(); ///< Write the XML to a file
 };
 

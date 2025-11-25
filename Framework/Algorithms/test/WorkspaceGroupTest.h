@@ -17,7 +17,7 @@
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Instrument.h"
 
-#include <Poco/File.h>
+#include <filesystem>
 #include <fstream>
 #include <utility>
 
@@ -70,7 +70,7 @@ private:
     double sig2 = work_in2->dataY(ws2Index / work_in1->blocksize())[ws2Index % work_in2->blocksize()];
     double sig3 = work_out1->dataY(i / work_in1->blocksize())[i % work_in1->blocksize()];
     TS_ASSERT_DELTA(work_in1->dataX(i / work_in1->blocksize())[i % work_in1->blocksize()],
-                    work_out1 -> dataX(i / work_in1->blocksize())[i % work_in1->blocksize()], 0.0001);
+                    work_out1->dataX(i / work_in1->blocksize())[i % work_in1->blocksize()], 0.0001);
 
     TS_ASSERT_DELTA(sig1 + sig2, sig3, 0.0001);
     double err1 = work_in1->dataE(i / work_in1->blocksize())[i % work_in1->blocksize()];
@@ -243,7 +243,7 @@ public:
     std::fstream outFile(filename.c_str());
     TS_ASSERT(outFile)
     outFile.close();
-    Poco::File(filename).remove();
+    std::filesystem::remove(filename);
 
     work_out = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("testdead_out");
     work_out->removeAll();

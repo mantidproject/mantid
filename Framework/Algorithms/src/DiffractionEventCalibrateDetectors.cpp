@@ -25,7 +25,6 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/UnitFactory.h"
 
-#include <Poco/File.h>
 #include <cmath>
 #include <fstream>
 #include <numeric>
@@ -51,7 +50,7 @@ using Types::Core::DateAndTime;
 static double gsl_costFunction(const gsl_vector *v, void *params) {
   double x, y, z, rotx, roty, rotz;
   std::string detname, inname, outname, peakOpt, rb_param, groupWSName;
-  auto *p = reinterpret_cast<std::string *>(params);
+  auto const *p = reinterpret_cast<std::string *>(params);
   detname = p[0];
   inname = p[1];
   outname = p[2];

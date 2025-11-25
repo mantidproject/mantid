@@ -360,7 +360,7 @@ public:
     // throw and change the validator
     IPropertySettings *pSett(nullptr);
     TS_ASSERT_THROWS_NOTHING(pSett = monSpec->getSettings());
-    TS_ASSERT_THROWS_NOTHING(pSett->applyChanges(&norm6, monSpec));
+    TS_ASSERT_THROWS_NOTHING(pSett->applyChanges(&norm6, monSpec->name()));
     // it should return the list of allowed monitor ID-s
     std::vector<std::string> monitors = monSpec->allowedValues();
     TS_ASSERT_EQUALS(1, monitors.size());
@@ -382,7 +382,7 @@ public:
     // this funciton is called by gui when the above is true. It should not
     // throw and change the validator
     TS_ASSERT_THROWS_NOTHING(pSett = monSpec->getSettings());
-    TS_ASSERT_THROWS_NOTHING(pSett->applyChanges(&norm6, monSpec));
+    TS_ASSERT_THROWS_NOTHING(pSett->applyChanges(&norm6, monSpec->name()));
     // it should return the list of allowed monitor ID-s
     monitors = monSpec->allowedValues();
     TS_ASSERT(monitors.empty());

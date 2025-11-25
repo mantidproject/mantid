@@ -9,7 +9,6 @@
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/IObjComponent.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"
-#include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Objects/CSGObject.h"
 #include <string>

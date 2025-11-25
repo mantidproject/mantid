@@ -46,7 +46,7 @@ public:
   static void getInstrument3WaysInit(Mantid::API::Algorithm *alg);
 
   static Geometry::Instrument_const_sptr getInstrument3Ways(API::Algorithm *alg);
-  static bool instrumentIsSpecified(API::Algorithm *alg);
+  static bool instrumentIsSpecified(API::Algorithm const *alg);
 
   static void readCalFile(const std::string &calFileName, const Mantid::DataObjects::GroupingWorkspace_sptr &groupWS,
                           const Mantid::DataObjects::OffsetsWorkspace_sptr &offsetsWS,

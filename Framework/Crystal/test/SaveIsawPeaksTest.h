@@ -15,8 +15,8 @@
 #include "MantidGeometry/IDTypes.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/V3D.h"
-#include <Poco/File.h>
 #include <cxxtest/TestSuite.h>
+#include <filesystem>
 #include <fstream>
 
 using namespace Mantid;
@@ -75,7 +75,7 @@ public:
     // Get the file
     if (numPeaksPerBank > 0) {
       outfile = alg2.getPropertyValue("Filename");
-      TS_ASSERT(Poco::File(outfile).exists())
+      TS_ASSERT(std::filesystem::exists(outfile))
       std::ifstream in(outfile.c_str());
       std::string line0;
       getline(in, line0);
@@ -94,8 +94,8 @@ public:
                              "14.3227        3       3.10    1.73   310")
     }
 
-    if (Poco::File(outfile).exists())
-      Poco::File(outfile).remove();
+    if (std::filesystem::exists(outfile))
+      std::filesystem::remove(outfile);
   }
 
   /// Test with an empty PeaksWorkspace

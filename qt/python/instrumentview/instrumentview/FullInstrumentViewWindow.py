@@ -33,6 +33,8 @@ from instrumentview.Detectors import DetectorInfo
 from instrumentview.InteractorStyles import CustomInteractorStyleZoomAndSelect, CustomInteractorStyleRubberBand3D
 from typing import Callable
 from mantid.dataobjects import Workspace2D
+from mantid import UsageService
+from mantid.kernel import FeatureType
 from mantidqt.plotting.mantid_navigation_toolbar import MantidNavigationToolbar
 import numpy as np
 import pyvista as pv
@@ -267,6 +269,8 @@ class FullInstrumentViewWindow(QMainWindow):
 
         # self.main_plotter.add_box_widget(lambda x: None)
 
+        UsageService.registerFeatureUsage(FeatureType.Interface, "InstrumentView2025", False)
+
     def check_sum_spectra_checkbox(self) -> None:
         self._sum_spectra_checkbox.setChecked(True)
         self._presenter.on_sum_spectra_checkbox_clicked()
@@ -328,14 +332,14 @@ class FullInstrumentViewWindow(QMainWindow):
         def set_slider(callled_from_min):
             def wrapped():
                 try:
-                    min, max = float(min_edit.text()), float(max_edit.text())
+                    min_val, max_val = float(min_edit.text()), float(max_edit.text())
                 except ValueError:
                     return
                 if callled_from_min:
-                    min = max if min > max else min
+                    min_val = min(min_val, max_val)
                 else:
-                    max = min if max < min else max
-                slider.setValue((min, max))
+                    max_val = max(min_val, max_val)
+                slider.setValue((min_val, max_val))
                 presenter_callback()
                 return
 
@@ -511,7 +515,10 @@ class FullInstrumentViewWindow(QMainWindow):
     def add_detector_mesh(self, mesh: PolyData, is_projection: bool, scalars=None) -> None:
         """Draw the given mesh in the main plotter window"""
         self.main_plotter.clear()
-        self.main_plotter.add_mesh(mesh, pickable=False, scalars=scalars, render_points_as_spheres=True, point_size=15)
+        scalar_bar_args = dict(interactive=True, vertical=True, title_font_size=15, label_font_size=12) if scalars is not None else None
+        self.main_plotter.add_mesh(
+            mesh, pickable=False, scalars=scalars, render_points_as_spheres=True, point_size=15, scalar_bar_args=scalar_bar_args
+        )
 
         if not self.main_plotter.off_screen:
             self.main_plotter.enable_trackball_style()
@@ -648,7 +655,7 @@ class FullInstrumentViewWindow(QMainWindow):
         self._set_detector_edit_text(
             self._detector_spherical_position_edit,
             detector_infos,
-            lambda d: f"r: {d.spherical_position[0]:.3f}, t: {d.spherical_position[1]:.1f}, p: {d.spherical_position[2]:.1f}",
+            lambda d: f"r: {d.spherical_position[0]:.3f}, 2\u03b8: {d.spherical_position[1]:.1f}, \u03c6: {d.spherical_position[2]:.1f}",
         )
         self._set_detector_edit_text(self._detector_pixel_counts_edit, detector_infos, lambda d: str(d.pixel_counts))
 

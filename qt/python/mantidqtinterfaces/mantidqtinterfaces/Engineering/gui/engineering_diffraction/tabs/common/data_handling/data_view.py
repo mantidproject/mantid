@@ -100,7 +100,7 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
     # Component Setters
     # =================
 
-    def set_default_files(self, filepaths):
+    def set_default_files(self, filepaths, directory):
         if not filepaths:
             return
         self.finder_data.setUserInput(",".join(filepaths))
@@ -108,7 +108,7 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
         for filepath in filepaths:
             directory, discard = path.split(filepath)
             directories.add(directory)
-        if len(directories) == 1:
+        if directory:
             self.finder_data.setLastDirectory(directory)
 
     def set_load_button_enabled(self, enabled):
@@ -268,3 +268,14 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
         # make TOF default for combo_xunit
         index = self.combo_xunit.findText("TOF")
         self.combo_xunit.setCurrentIndex(index)
+
+
+def create_workspace_table(table_column_headers, table_loaded_data, row_count):
+    n_col = len(table_column_headers)
+    table_loaded_data.setColumnCount(n_col)
+    table_loaded_data.setHorizontalHeaderLabels(table_column_headers)
+    table_loaded_data.setRowCount(row_count)
+
+    header = table_loaded_data.horizontalHeader()
+    [header.setSectionResizeMode(ind, QtWidgets.QHeaderView.Stretch) for ind in range(n_col - 1)]
+    header.setSectionResizeMode(n_col - 1, QtWidgets.QHeaderView.ResizeToContents)

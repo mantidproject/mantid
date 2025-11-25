@@ -54,7 +54,7 @@ const Kernel::V3D toShapeFrame(const Kernel::V3D &point, const Beamline::Compone
 ComponentInfo::ComponentInfo(
     std::unique_ptr<Beamline::ComponentInfo> componentInfo,
     std::shared_ptr<const std::vector<Mantid::Geometry::IComponent *>> componentIds,
-    std::shared_ptr<const std::unordered_map<Geometry::IComponent *, size_t>> componentIdToIndexMap,
+    std::shared_ptr<const std::unordered_map<Geometry::IComponent const *, size_t>> componentIdToIndexMap,
     std::shared_ptr<std::vector<std::shared_ptr<const Geometry::IObject>>> shapes)
     : m_componentInfo(std::move(componentInfo)), m_componentIds(std::move(componentIds)),
       m_compIDToIndex(std::move(componentIdToIndexMap)), m_shapes(std::move(shapes)) {
@@ -126,7 +126,7 @@ ComponentInfo::QuadrilateralComponent ComponentInfo::quadrilateralComponent(cons
   return corners;
 }
 
-size_t ComponentInfo::indexOf(Geometry::IComponent *id) const { return m_compIDToIndex->at(id); }
+size_t ComponentInfo::indexOf(Geometry::IComponent const *id) const { return m_compIDToIndex->at(id); }
 
 size_t ComponentInfo::indexOfAny(const std::string &name) const { return m_componentInfo->indexOfAny(name); }
 

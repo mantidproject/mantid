@@ -13,9 +13,9 @@
 
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Instrument/DetectorInfoIterator.h"
-#include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/V3D.h"
+#include "MantidTypes/Core/DateAndTime.h"
 
 namespace Mantid {
 using detid_t = int32_t;

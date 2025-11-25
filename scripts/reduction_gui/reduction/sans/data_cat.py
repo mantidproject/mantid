@@ -63,12 +63,12 @@ class DataType(object):
             type_id,
             dataset_id,
         )
-        cursor.execute("insert into %s(type_id, dataset_id) values (?,?)" % cls.TABLE_NAME, t)
+        cursor.execute(f"insert into {cls.TABLE_NAME} (type_id, dataset_id) values (?,?)", t)  # noqa: S608
 
     @classmethod
     def get_likely_type(cls, dataset_id, cursor):
         t = (dataset_id,)
-        cursor.execute("select type_id from %s where dataset_id=?" % cls.TABLE_NAME, t)
+        cursor.execute(f"select type_id from {cls.TABLE_NAME} where dataset_id=?", t)  # noqa: S608
         rows = cursor.fetchall()
         if len(rows) > 1:
             return cls.DATA_TYPES[rows[len(rows) - 1][0]]
@@ -133,7 +133,7 @@ class DataSet(object):
     @classmethod
     def get_data_set_id(cls, run, cursor):
         t = (run,)
-        cursor.execute("select * from %s where run=?" % cls.TABLE_NAME, t)
+        cursor.execute(f"select * from {cls.TABLE_NAME} where run=?", t)  # noqa: S608
         rows = cursor.fetchall()
         if len(rows) == 0:
             return -1
@@ -150,7 +150,7 @@ class DataSet(object):
             return None
 
         t = (run,)
-        cursor.execute("select * from %s where run=?" % cls.TABLE_NAME, t)
+        cursor.execute(f"select * from {cls.TABLE_NAME} where run=?", t)  # noqa: S608
         rows = cursor.fetchall()
 
         if len(rows) == 0:
@@ -191,7 +191,7 @@ class DataSet(object):
             self.duration,
             self.sdd,
         )
-        cursor.execute("insert into %s(run, title, start, duration,sdd) values (?,?,?,?,?)" % self.TABLE_NAME, t)
+        cursor.execute(f"insert into {self.TABLE_NAME} (run, title, start, duration,sdd) values (?,?,?,?,?)", t)  # noqa: S608
         return cursor.lastrowid
 
 

@@ -38,6 +38,8 @@ set(TEST_PY_FILES
     PythonObjectPropertyTest.py
     PythonPluginsTest.py
     RebinParamsValidatorTest.py
+    SetValueWhenPropertyTest.py
+    SetDefaultWhenPropertyTest.py
     StatisticsTest.py
     StringContainsValidatorTest.py
     test_funcinspect.py

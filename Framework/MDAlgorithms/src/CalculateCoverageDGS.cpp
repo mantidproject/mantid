@@ -162,7 +162,7 @@ void CalculateCoverageDGS::exec() {
 
   if (m_Ei == EMPTY_DBL()) {
     if (inputWS->run().hasProperty("Ei")) {
-      Kernel::Property *eiprop = inputWS->run().getProperty("Ei");
+      Kernel::Property const *eiprop = inputWS->run().getProperty("Ei");
       m_Ei = boost::lexical_cast<double>(eiprop->value());
       if (m_Ei <= 0) {
         throw std::invalid_argument("Ei stored in the workspace is not positive");

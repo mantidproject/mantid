@@ -36,7 +36,7 @@ class InstrumentInfo;
  */
 class MANTID_KERNEL_DLL LiveListenerInfo {
 public:
-  LiveListenerInfo(InstrumentInfo *inst, const Poco::XML::Element *elem);
+  LiveListenerInfo(InstrumentInfo const *inst, const Poco::XML::Element *elem);
   LiveListenerInfo(std::string listener = "", std::string address = "", std::string name = "");
 
   /// Required for Python bindings

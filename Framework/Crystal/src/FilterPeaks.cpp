@@ -8,6 +8,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/LeanElasticPeaksWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 

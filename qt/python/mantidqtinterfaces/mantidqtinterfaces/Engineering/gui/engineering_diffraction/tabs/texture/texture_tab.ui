@@ -1,0 +1,484 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>CorrectionTab</class>
+ <widget class="QWidget" name="TextureTab">
+    <property name="styleSheet">
+   <string notr="true">QGroupBox {
+border: 1px solid grey;border-radius: 10px;margin-top: 1ex; margin-right: 0ex
+}
+QGroupBox:title {
+                           subcontrol-origin: margin;
+                           padding: 0 3px;
+                           subcontrol-position: top center;
+                           padding-top: 0px;
+                          padding-bottom: 0px;
+                           padding-right: 10px;
+                            color: rgb(56, 56, 56)
+}</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+
+   <!-- Load Data Section -->
+   <item>
+    <widget class="QGroupBox" name="groupBox_loadData">
+     <property name="title">
+      <string>Load Data</string>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout_load">
+         <item>
+                  <layout class="QHBoxLayout" name="horizontalLayout_loadFiles">
+      <item>
+       <widget class="FileFinderWidget" name="finder_texture_ws" native="true"/>
+      </item>
+        <item>
+   <widget class="QPushButton" name="btn_loadWSFiles">
+    <property name="text">
+     <string>Load Workspace Files</string>
+    </property>
+   </widget>
+  </item>
+                  </layout>
+         </item>
+        <item>
+                  <layout class="QHBoxLayout" name="horizontalLayout_loadFiles">
+         <item>
+       <widget class="FileFinderWidget" name="finder_texture_tables" native="true"/>
+      </item>
+        <item>
+   <widget class="QPushButton" name="btn_loadParamFiles">
+    <property name="text">
+     <string>Load Parameter Files</string>
+    </property>
+   </widget>
+  </item>
+                      </layout>
+        </item>
+      <item>
+       <widget class="QTableWidget" name="table_loaded_data"/>
+      </item>
+      <item>
+ <layout class="QHBoxLayout" name="horizontalLayout_tableButtons">
+  <item>
+   <spacer name="spacer_left">
+    <property name="orientation">
+     <enum>Qt::Horizontal</enum>
+    </property>
+    <property name="sizeHint" stdset="0">
+     <size>
+      <width>40</width>
+      <height>20</height>
+     </size>
+    </property>
+   </spacer>
+        <item>
+   <widget class="QPushButton" name="btn_selectAll">
+    <property name="text">
+     <string>Select All Files</string>
+    </property>
+   </widget>
+  </item>
+      <item>
+   <widget class="QPushButton" name="btn_deselectAll">
+    <property name="text">
+     <string>Deselect All Files</string>
+    </property>
+   </widget>
+  </item>
+  </item>
+    <item>
+   <widget class="QPushButton" name="btn_deleteSelected">
+    <property name="text">
+     <string>Delete All Selected Files</string>
+    </property>
+   </widget>
+  </item>
+     <item>
+   <widget class="QPushButton" name="btn_deleteSelectedParams">
+    <property name="text">
+     <string>Delete Selected Parameter Files</string>
+    </property>
+   </widget>
+  </item>
+  <item>
+   <spacer name="spacer_right">
+    <property name="orientation">
+     <enum>Qt::Horizontal</enum>
+    </property>
+    <property name="sizeHint" stdset="0">
+     <size>
+      <width>40</width>
+      <height>20</height>
+     </size>
+    </property>
+   </spacer>
+  </item>
+ </layout>
+</item>
+     </layout>
+    </widget>
+   </item>
+ <item>
+ <widget class="QGroupBox" name="groupBox_sample">
+  <property name="title">
+   <string>Scattering Power Corrections</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout_incBtn">
+           <item>
+      <widget class="QCheckBox" name="check_scatt">
+        <property name="text">
+         <string>Include Scattering Power Correction</string>
+        </property>
+      </widget>
+      </item>
+      <item>
+          <widget class="QWidget" name="widget_scattPowerContainer">
+      <layout class="QVBoxLayout" name="verticalLayout_scattPower">
+
+      <item>
+    <widget class="QGroupBox" name="groupBox_xtalProp">
+     <property name="title">
+      <string>Set Crystal Structure Properties</string>
+     </property>
+ <property name="styleSheet">
+  <string notr="true">
+   QGroupBox {
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-top: 10px;
+   }
+   QGroupBox::title {
+    subcontrol-origin: margin;
+    subcontrol-position: top left;
+    padding: 0 5px;
+    font-weight: normal;
+    color: #555;
+   }
+  </string>
+ </property>
+     <layout class="QVBoxLayout">
+<item>
+  <layout class="QHBoxLayout" name="latticeInfoLayout">
+    <item>
+      <widget class="QLabel" name="label_lattice">
+        <property name="text">
+          <string>Lattice:</string>
+        </property>
+      </widget>
+    </item>
+    <item>
+      <widget class="QLineEdit" name="lattice_lineedit"/>
+    </item>
+    <item>
+      <widget class="QLabel" name="label_spacegroup">
+        <property name="text">
+          <string>Space Group:</string>
+        </property>
+      </widget>
+    </item>
+    <item>
+      <widget class="QLineEdit" name="spacegroup_lineedit"/>
+    </item>
+    <item>
+      <widget class="QLabel" name="label_basis">
+        <property name="text">
+          <string>Basis:</string>
+        </property>
+      </widget>
+    </item>
+    <item>
+      <widget class="QLineEdit" name="basis_lineedit"/>
+    </item>
+  </layout>
+</item>
+<item>
+  <widget class="QLabel" name="label_or">
+    <property name="text">
+      <string>or:</string>
+    </property>
+    <property name="alignment">
+      <set>Qt::AlignCenter</set>
+    </property>
+    <property name="styleSheet">
+      <string notr="true">color: grey; font-style: italic;</string>
+    </property>
+  </widget>
+</item>
+          <item>
+       <widget class="FileFinderWidget" name="finder_cif_file" native="true"/>
+      </item>
+<item>
+    <layout class="QHBoxLayout" name="transferSampleLayout">
+        <item>
+  <widget class="QComboBox" name="combo_workspaceListProp">
+    <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+        <horstretch>1</horstretch>
+        <verstretch>0</verstretch>
+      </sizepolicy>
+    </property>
+  </widget>
+</item>
+        <item>
+    <widget class="QPushButton" name="btn_setCrystal">
+     <property name="text">
+      <string>Set Crystal</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QPushButton" name="btn_setAllCrystal">
+     <property name="text">
+      <string>Set Crystal to All</string>
+     </property>
+    </widget>
+   </item>
+
+    </layout>
+   </item>
+
+     </layout>
+    </widget>
+   </item>
+      <item>
+  <widget class="QLabel" name="label_then">
+    <property name="text">
+      <string>then</string>
+    </property>
+    <property name="alignment">
+      <set>Qt::AlignCenter</set>
+    </property>
+    <property name="styleSheet">
+      <string notr="true">color: grey; font-style: italic;</string>
+    </property>
+  </widget>
+</item>
+      <item>
+    <widget class="QGroupBox" name="groupBox_xtalHKL">
+     <property name="title">
+      <string>Set Scattering Power Reflection</string>
+     </property>
+ <property name="styleSheet">
+  <string notr="true">
+   QGroupBox {
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-top: 10px;
+   }
+   QGroupBox::title {
+    subcontrol-origin: margin;
+    subcontrol-position: top left;
+    padding: 0 5px;
+    font-weight: normal;
+    color: #555;
+   }
+  </string>
+ </property>
+     <layout class="QHBoxLayout">
+         <item>
+   <spacer name="spacer_hkl_left">
+    <property name="orientation">
+     <enum>Qt::Horizontal</enum>
+    </property>
+    <property name="sizeHint" stdset="0">
+     <size>
+      <width>40</width>
+      <height>20</height>
+     </size>
+    </property>
+   </spacer>
+  </item>
+<item>
+  <widget class="QLabel" name="label_hkl">
+    <property name="text">
+      <string>HKL: (</string>
+    </property>
+  </widget>
+</item>
+<item>
+  <widget class="QLineEdit" name="h_lineedit">
+    <property name="maximumWidth">
+      <number>30</number>
+    </property>
+    <property name="sizePolicy">
+      <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+      </sizepolicy>
+    </property>
+  </widget>
+</item>
+        <item>
+  <widget class="QLabel" name="label_comma1">
+    <property name="text">
+      <string>,</string>
+    </property>
+  </widget>
+</item>
+<item>
+  <widget class="QLineEdit" name="k_lineedit">
+    <property name="maximumWidth">
+      <number>30</number>
+    </property>
+    <property name="sizePolicy">
+      <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+      </sizepolicy>
+    </property>
+  </widget>
+</item>
+                <item>
+  <widget class="QLabel" name="label_comma2">
+    <property name="text">
+      <string>,</string>
+    </property>
+  </widget>
+</item>
+<item>
+  <widget class="QLineEdit" name="l_lineedit">
+    <property name="maximumWidth">
+      <number>30</number>
+    </property>
+    <property name="sizePolicy">
+      <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+      </sizepolicy>
+    </property>
+  </widget>
+</item>
+                <item>
+  <widget class="QLabel" name="label_bracket">
+    <property name="text">
+      <string>)</string>
+    </property>
+  </widget>
+</item>
+         <item>
+   <spacer name="spacer_hkl_right">
+    <property name="orientation">
+     <enum>Qt::Horizontal</enum>
+    </property>
+    <property name="sizeHint" stdset="0">
+     <size>
+      <width>40</width>
+      <height>20</height>
+     </size>
+    </property>
+   </spacer>
+  </item>
+     </layout>
+    </widget>
+   </item>
+  </layout>
+          </widget>
+      </item>
+     </layout>
+ </widget>
+</item>
+
+   <!-- Pole Figure Calculation Section -->
+<item>
+  <widget class="QGroupBox" name="groupBox_absorption">
+    <property name="title">
+      <string>Pole Figure Calculation</string>
+    </property>
+    <layout class="QVBoxLayout">
+
+      <!-- Matplotlib Canvas Placeholder -->
+      <item>
+        <widget class="QWidget" name="plot_canvas" native="true"/>
+      </item>
+
+      <!-- Projection Combo Row -->
+      <item>
+        <layout class="QHBoxLayout" name="hozLayout_proj">
+          <item>
+            <spacer name="spacer_left">
+              <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+                <size>
+                  <width>40</width>
+                  <height>20</height>
+                </size>
+              </property>
+            </spacer>
+          </item>
+          <item>
+            <widget class="QLabel" name="label_proj">
+              <property name="text">
+                <string>Projection:</string>
+              </property>
+            </widget>
+          </item>
+          <item>
+            <widget class="QComboBox" name="combo_projMethod">
+              <item>
+                <property name="text">
+                  <string>Azimuthal</string>
+                </property>
+              </item>
+              <item>
+                <property name="text">
+                  <string>Stereographic</string>
+                </property>
+              </item>
+            </widget>
+          </item>
+            <item>
+            <widget class="QLabel" name="label_param">
+              <property name="text">
+                <string>Parameter Readout Column:</string>
+              </property>
+            </widget>
+          </item>
+          <item>
+            <widget class="QComboBox" name="combo_param">
+            </widget>
+          </item>
+          <item>
+            <spacer name="spacer_right">
+              <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+                <size>
+                  <width>40</width>
+                  <height>20</height>
+                </size>
+              </property>
+            </spacer>
+          </item>
+        </layout>
+      </item>
+
+      <!-- Calculate Button -->
+      <item>
+        <widget class="QPushButton" name="btn_calc_pf">
+          <property name="text">
+            <string>Calculate Pole Figure</string>
+          </property>
+        </widget>
+      </item>
+
+    </layout>
+  </widget>
+</item>
+
+
+
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>FileFinderWidget</class>
+   <extends>QWidget</extends>
+   <header>mantidqt.widgets.filefinderwidget</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>

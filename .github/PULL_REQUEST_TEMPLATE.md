@@ -37,6 +37,7 @@ As per the [review guidelines](http://developer.mantidproject.org/ReviewingAPull
 - Are appropriately scoped unit and/or system tests provided?
 - Do the release notes conform to the [guidelines](https://developer.mantidproject.org/Standards/ReleaseNotesGuide.html) and describe the changes appropriately?
 - Has the relevant (user and developer) documentation been added/updated?
+- If the PR author isn’t in the `mantid-developers` or `mantid-contributors` teams, add a review comment `rerun ci` to authorize/rerun the CI
 
 ### Gatekeeper
 

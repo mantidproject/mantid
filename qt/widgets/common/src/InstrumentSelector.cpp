@@ -35,7 +35,7 @@ InstrumentSelector::InstrumentSelector(QWidget *parent, bool init)
   if (init) {
     fillWithInstrumentsFromFacility();
 
-    Mantid::Kernel::ConfigServiceImpl &config = Mantid::Kernel::ConfigService::Instance();
+    Mantid::Kernel::ConfigServiceImpl const &config = Mantid::Kernel::ConfigService::Instance();
     config.addObserver(m_changeObserver);
   }
 

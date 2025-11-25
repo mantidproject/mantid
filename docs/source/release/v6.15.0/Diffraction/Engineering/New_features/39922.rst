@@ -1,0 +1,4 @@
+- Update to the :ref:`Engineering Diffraction interface<Engineering_Diffraction-ref>`, adding two tabs, ``Absorption Correction`` and ``Texture``.
+- The new ``Absorption Correction`` tab allows the user to correct workspaces for the beam attenuation through the sample.
+- The new ``Texture`` tab allows the user to combine data from focused workspaces and peak fitting, to plot pole figures for their experimental data
+- Basic usage of these tabs as part of a texture analysis reduction pipeline has been documented in the Texture Technique Documentation

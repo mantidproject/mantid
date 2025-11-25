@@ -43,7 +43,7 @@ ListPropertyWidget::ListPropertyWidget(Mantid::Kernel::Property *prop, QWidget *
   m_widgets.push_back(m_list);
 
   std::vector<std::string> items = prop->allowedValues();
-  for (auto &item : items) {
+  for (auto const &item : items) {
     m_list->addItem(QString::fromStdString(item));
   }
   // Make current value visible

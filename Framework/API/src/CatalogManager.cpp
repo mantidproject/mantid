@@ -51,7 +51,7 @@ ICatalog_sptr CatalogManagerImpl::getCatalog(const std::string &sessionID) {
 
   if (sessionID.empty()) {
     auto composite = std::make_shared<CompositeCatalog>();
-    for (auto &activeCatalog : m_activeCatalogs) {
+    for (auto const &activeCatalog : m_activeCatalogs) {
       composite->add(activeCatalog.second);
     }
     return composite;

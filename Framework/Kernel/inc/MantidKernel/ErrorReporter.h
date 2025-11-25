@@ -9,9 +9,9 @@
 #include <Poco/ActiveMethod.h>
 #include <string>
 
-#include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/InternetHelper.h"
+#include "MantidTypes/Core/DateAndTime.h"
 
 namespace Mantid {
 namespace Kernel {

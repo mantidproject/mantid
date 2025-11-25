@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/IPropertyManager.h"
+#include "MantidKernel/Exception.h"
 #include "MantidKernel/IPropertySettings.h"
 #include "MantidPythonInterface/core/GetPointer.h"
 #include "MantidPythonInterface/kernel/Registry/PropertyValueHandler.h"
@@ -92,6 +93,23 @@ void declareOrSetProperty(IPropertyManager &self, const std::string &name, const
 }
 
 /**
+ * Declare or replace a property from the value within the boost::python object.
+ * @param self :: A reference to the calling object
+ * @param name :: The name of the property
+ * @param defaultValue :: The value of the property
+ * @param validator :: The validator for the property (default: empty)
+ * @param doc :: The doc string (default: "")
+ * @param direction :: The property's direction (default: Direction::Input)
+ */
+void declareOrReplaceProperty(IPropertyManager &self, const std::string &name,
+                              const boost::python::object &defaultValue, const boost::python::object &validator,
+                              const std::string &doc, const int direction) {
+  auto prop =
+      std::unique_ptr<Property>(Registry::PropertyWithValueFactory::create(name, defaultValue, validator, direction));
+  self.declareOrReplaceProperty(std::move(prop), doc);
+}
+
+/**
  * Clones the given settingsManager and passes it on to the calling object as it
  * takes ownership
  * of the IPropertySettings object
@@ -163,6 +181,13 @@ void export_IPropertyManager() {
            "Returns the list of properties managed by this object")
 
       .def("declareProperty", &declareProperty, (arg("self"), arg("name"), arg("value")), "Create a new named property")
+
+      .def("declareOrReplaceProperty", &declareOrReplaceProperty,
+           (arg("self"), arg("name"), arg("defaultValue"), arg("validator") = object(), arg("doc") = "",
+            arg("direction") = Direction::Input),
+           "Declares or replaces a named property where the type is taken from "
+           "the type of the defaultValue and mapped to an appropriate C++ "
+           "type")
 
       .def("setPropertyValue", &IPropertyManager::setPropertyValue, (arg("self"), arg("name"), arg("value")),
            "Set the value of the named property via a string")

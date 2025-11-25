@@ -57,7 +57,7 @@ double stringToRoundedNumber(const std::string &s) {
  * @param value :: the string to test with
  * @returns     :: true if the value is valid, else false.
  */
-bool isValidPropertyValue(Mantid::Kernel::Property *prop, const std::string &value) {
+bool isValidPropertyValue(Mantid::Kernel::Property const *prop, const std::string &value) {
   const auto guineaPig = std::shared_ptr<Property>(prop->clone());
   return guineaPig->setValue(value).empty();
 }
@@ -98,7 +98,7 @@ bool isEmptyNumMacro(const std::string &value, const double value_d) {
  * @param prop :: the property to check
  * @returns    :: true if can be left blank, else false
  */
-bool isOptionalProperty(Mantid::Kernel::Property *prop) {
+bool isOptionalProperty(Mantid::Kernel::Property const *prop) {
   return isValidPropertyValue(prop, "") || isValidPropertyValue(prop, prop->getDefault());
 }
 
@@ -112,7 +112,7 @@ bool isOptionalProperty(Mantid::Kernel::Property *prop) {
  * @param prop :: the property for which to create placeholder text
  * @returns    :: the placeholder text
  */
-std::string createFieldPlaceholderText(Mantid::Kernel::Property *prop) {
+std::string createFieldPlaceholderText(Mantid::Kernel::Property const *prop) {
   const std::string defaultValue = prop->getDefault();
   if (defaultValue.empty())
     return "";
@@ -179,8 +179,9 @@ void ClickableLabel::mousePressEvent(QMouseEvent *event) {
  */
 PropertyWidget::PropertyWidget(Mantid::Kernel::Property *prop, QWidget *parent, QGridLayout *layout, int row)
     : QWidget(parent), m_prop(prop), m_gridLayout(layout), m_parent(nullptr), m_row(row), // m_info(NULL),
-      m_doc(), m_replaceWSButton(nullptr), m_widgets(), m_error(), m_isOutputWsProp(false), m_previousValue(),
-      m_enteredValue(), m_icons(), m_useHistory(true) {
+      m_doc(), m_replaceWSButton(nullptr), m_widgets(), m_lastValue(), m_error(), m_isOutputWsProp(false),
+      m_previousValue(), m_previous_isDynamicDefault(false), m_enteredValue(), m_entered_isDynamicDefault(false),
+      m_icons(), m_useHistory(true) {
   if (!prop)
     throw std::runtime_error("NULL Property passed to the PropertyWidget constructor.");
   setObjectName(QString::fromStdString(prop->name()));
@@ -209,6 +210,7 @@ PropertyWidget::PropertyWidget(Mantid::Kernel::Property *prop, QWidget *parent, 
   infoWidget->setLayout(new QHBoxLayout(this));
   infoWidget->layout()->setSpacing(1);
   infoWidget->layout()->setContentsMargins(0, 0, 0, 0);
+  // `addLayout` sets parent of `infoWidget` correctly
   m_gridLayout->addWidget(infoWidget, m_row, 4);
 
   QMap<Info, QPair<QString, QString>> pathsAndToolTips;
@@ -233,6 +235,13 @@ PropertyWidget::PropertyWidget(Mantid::Kernel::Property *prop, QWidget *parent, 
     infoWidget->layout()->addWidget(icon);
     m_icons[info] = icon;
   }
+
+  // Qt will have parented the `infoWidget` to `m_gridLayout`, and re-parented all of the icons to `infoWidget`.
+  // However, some end-user classes need to be able to completely recreate the `PropertyWidget`,
+  //   so for this reason we explicitly delete these objects when this widget is destroyed.
+  connect(this, &QObject::destroyed, this, [infoWidget]() {
+    infoWidget->deleteLater(); // Safe deferred deletion
+  });
 
   connect(m_icons[RESTORE], SIGNAL(clicked()), this, SLOT(toggleUseHistory()));
 
@@ -259,9 +268,19 @@ PropertyWidget::~PropertyWidget() = default;
  * @param value :: the value to set
  */
 void PropertyWidget::setValue(const QString &value) {
+  // Set the value in the widget itself.
   setValueImpl(value);
-  valueChangedSlot();
+  m_lastValue = value;
+
+  // Set the current value in the property, and check its validation.
+  // TODO: this method could have a much better name!
   updateIconVisibility();
+
+  // Emit the `valueChanged` signal only when both the widget (and its property)
+  //   have their _current_ values, _AND_ those values are valid!
+  if (m_error.isEmpty()) {
+    valueChangedSlot();
+  }
 }
 
 /**
@@ -270,6 +289,7 @@ void PropertyWidget::setValue(const QString &value) {
  * @param previousValue :: the previous value of this widget
  */
 void PropertyWidget::setPreviousValue(const QString &previousValue) {
+  m_useHistory = true;
   m_previousValue = previousValue;
   setValue(m_previousValue);
 
@@ -282,15 +302,64 @@ void PropertyWidget::setPreviousValue(const QString &previousValue) {
 
   // Once we've made the history icon visible, it will stay that way for
   // the lifetime of the property widget.
-  if (m_previousValue.toStdString() != m_prop->getDefault() && !m_previousValue.isEmpty())
+  if (!m_previousValue.isEmpty() && m_previousValue.toStdString() != m_prop->getDefault()) {
+    setUseHistoryIcon(m_useHistory, m_prop->isDynamicDefault());
     m_icons[RESTORE]->setVisible(true);
+  }
+}
+
+/**
+ * Set this widget's `isDynamicDefault` flag to correspond to the previously-entered value.
+ *
+ * @param flag :: the `isDynamicDefault` state for the previous value of this widget
+ */
+void PropertyWidget::setPrevious_isDynamicDefault(bool flag) {
+  m_previous_isDynamicDefault = flag;
+  m_prop->setIsDynamicDefault(m_previous_isDynamicDefault);
+}
+
+/**
+ * Transfer the history state from another `PropertyWidget`, possibly additionally
+ * depending on the state of an upstream property.
+ * This method is provided to facilitate end-user classes which need to be able to
+ * completely re-create a `PropertyWidget` from scratch, usually in the case of
+ * a dynamic-default value derived from an upstream property.
+ *
+ * @param other :: the `PropertyWidget` to transfer the history state from
+ *
+ * @param upstream :: [optional] additionally adjust the state
+ * to be consistent with that of an upstream property.
+ */
+void PropertyWidget::transferHistoryState(const PropertyWidget *other, const PropertyWidget *upstream) {
+  QString value = QString::fromStdString(m_prop->value());
+  bool isDynamicDefault = m_prop->isDynamicDefault();
+
+  m_icons[RESTORE]->setVisible(other->m_icons[RESTORE]->isVisible());
+  if (!upstream) {
+    // This clause transfers the state details, while making the new
+    //   property's state consistent with its new value.
+    m_previousValue = other->m_previousValue;
+    m_useHistory = (value == m_previousValue);
+    m_previous_isDynamicDefault = other->m_previous_isDynamicDefault;
+    m_enteredValue = (m_useHistory ? other->m_enteredValue : value);
+    m_entered_isDynamicDefault = (m_useHistory ? other->m_entered_isDynamicDefault : isDynamicDefault);
+  } else {
+    // This clause treats the dynamic-default case:
+    //   the use-history state for a dynamic-default value tracks the upstream state.
+    m_useHistory = upstream->m_useHistory;
+    m_previousValue = (m_useHistory ? value : other->m_previousValue);
+    m_previous_isDynamicDefault = (m_useHistory ? isDynamicDefault : other->m_previous_isDynamicDefault);
+    m_enteredValue = (m_useHistory ? other->m_enteredValue : value);
+    m_entered_isDynamicDefault = (m_useHistory ? other->m_entered_isDynamicDefault : isDynamicDefault);
+  }
+
+  setUseHistoryIcon(m_useHistory, isDynamicDefault);
 }
 
 /**
  * Update which icons should be shown.
  * @param error An optional error string. If empty the property is revalidated
- * by calling prop->setValue and
- * the error is pulled from here
+ * by calling prop->setValue and the error is pulled from there
  */
 void PropertyWidget::updateIconVisibility(const QString &error) {
   QString userError(error);
@@ -334,22 +403,50 @@ void PropertyWidget::valueChangedSlot() {
  * programmatically.
  */
 void PropertyWidget::userEditedProperty() {
-  setUseHistoryIcon(getValue() == m_previousValue);
-  if (getValue() != m_previousValue)
-    m_enteredValue = getValue();
-  updateIconVisibility();
-  valueChangedSlot();
+  QString value = this->getValue();
+  if (value != m_lastValue) {
+    // DO NOTHING if the value has not changed =>
+    //   ignore focus changes that don't correspond to value changes.
+    m_lastValue = value;
+
+    if (value != m_previousValue) {
+      m_useHistory = false;
+      m_enteredValue = value;
+
+      // The user has edited the property => disable dynamic-default values.
+      m_entered_isDynamicDefault = false;
+      m_prop->setIsDynamicDefault(m_entered_isDynamicDefault);
+    } else {
+      m_useHistory = true;
+      m_prop->setIsDynamicDefault(m_previous_isDynamicDefault);
+    }
+
+    setUseHistoryIcon(m_useHistory, m_prop->isDynamicDefault());
+
+    // The property's value is validated and updated here:
+    updateIconVisibility();
+
+    // As in `setValue`:
+    //   emit the `valueChanged` signal only when both the widget (and its property)
+    //   have their _current_ values, _AND_ those values are valid!
+    if (m_error.isEmpty())
+      valueChangedSlot();
+  }
 }
 
 /**
  * Toggle whether or not to use the previously-entered value.
  */
 void PropertyWidget::toggleUseHistory() {
-  setUseHistoryIcon(!m_useHistory);
-  if (m_useHistory)
+  m_useHistory = !m_useHistory;
+  if (m_useHistory) {
+    m_prop->setIsDynamicDefault(m_previous_isDynamicDefault);
     setValue(m_previousValue);
-  else
+  } else {
+    m_prop->setIsDynamicDefault(m_entered_isDynamicDefault);
     setValue(m_enteredValue);
+  }
+  setUseHistoryIcon(m_useHistory, m_prop->isDynamicDefault());
 }
 
 /**
@@ -357,13 +454,20 @@ void PropertyWidget::toggleUseHistory() {
  *
  * @param useHistory :: when true, will show the history on image, when false
  * will show the history off image.
+ *
+ * @param isDynamicDefault :: when true, indicates that the property's value has been changed
+ * from its default value, as a result of the value of an upstream property.
  */
-void PropertyWidget::setUseHistoryIcon(bool useHistory) {
-  if (m_useHistory != useHistory) {
-    m_useHistory = useHistory;
-    const QString iconPath = useHistory ? ":/history.png" : ":/history_off.png";
-    m_icons[RESTORE]->setPixmap(QPixmap(iconPath).scaledToHeight(15));
-  }
+void PropertyWidget::setUseHistoryIcon(bool useHistory, bool isDynamicDefault) {
+  const QString iconPath = useHistory ? (isDynamicDefault ? ":/history_dynamic_default.png" : ":/history.png")
+                                      : (isDynamicDefault ? ":/history_off_dynamic_default.png" : ":/history_off.png");
+  m_icons[RESTORE]->setPixmap(QPixmap(iconPath).scaledToHeight(15));
+
+  // When any user-entered value exists:
+  // OR when a value is a dynamic-default value:
+  //   make the use-history icons visible.
+  if (!m_enteredValue.isEmpty() || isDynamicDefault)
+    m_icons[RESTORE]->setVisible(true);
 }
 
 /** Create and show the "Replace WS" button.
@@ -376,7 +480,7 @@ void PropertyWidget::addReplaceWSButton() {
   if (m_replaceWSButton)
     return;
 
-  auto *wsProp = dynamic_cast<IWorkspaceProperty *>(m_prop);
+  auto const *wsProp = dynamic_cast<IWorkspaceProperty *>(m_prop);
   if (wsProp && (m_prop->direction() == Direction::Output)) {
     m_replaceWSButton = new QPushButton(QIcon(":/data_replace.png"), "", m_parent);
     // MG: There is no way with the QIcon class to actually ask what size it is

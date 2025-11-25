@@ -11,7 +11,7 @@
 #include "MantidGeometry/Instrument/ComponentInfoIterator.h"
 #include "MantidGeometry/Instrument/SolidAngleParams.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
-#include "MantidKernel/DateAndTime.h"
+#include "MantidTypes/Core/DateAndTime.h"
 #include <memory>
 #include <unordered_map>
 #include <vector>
@@ -45,7 +45,7 @@ private:
   /// Collection of component ids
   std::shared_ptr<const std::vector<Geometry::IComponent *>> m_componentIds;
   /// Map of component ids to indexes
-  std::shared_ptr<const std::unordered_map<Geometry::IComponent *, size_t>> m_compIDToIndex;
+  std::shared_ptr<const std::unordered_map<Geometry::IComponent const *, size_t>> m_compIDToIndex;
 
   /// Shapes for each component
   std::shared_ptr<std::vector<std::shared_ptr<const Geometry::IObject>>> m_shapes;
@@ -72,7 +72,7 @@ public:
 
   ComponentInfo(std::unique_ptr<Beamline::ComponentInfo> componentInfo,
                 std::shared_ptr<const std::vector<Mantid::Geometry::IComponent *>> componentIds,
-                std::shared_ptr<const std::unordered_map<Geometry::IComponent *, size_t>> componentIdToIndexMap,
+                std::shared_ptr<const std::unordered_map<Geometry::IComponent const *, size_t>> componentIdToIndexMap,
                 std::shared_ptr<std::vector<std::shared_ptr<const Geometry::IObject>>> shapes);
   ~ComponentInfo();
   /// Copy assignment is not possible for ComponentInfo
@@ -83,7 +83,7 @@ public:
   const std::vector<size_t> &children(size_t componentIndex) const;
   size_t size() const;
   QuadrilateralComponent quadrilateralComponent(const size_t componentIndex) const;
-  size_t indexOf(Geometry::IComponent *id) const;
+  size_t indexOf(Geometry::IComponent const *id) const;
   size_t indexOfAny(const std::string &name) const;
   bool uniqueName(const std::string &name) const;
   bool isDetector(const size_t componentIndex) const;

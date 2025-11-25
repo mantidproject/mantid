@@ -123,7 +123,7 @@ void CreateLogPropertyTable::exec() {
     MatrixWorkspace_sptr matrixWs = matrixWsList[i];
 
     for (const auto &propName : propNames) {
-      Property *prop = matrixWs->run().getProperty(propName);
+      Property const *prop = matrixWs->run().getProperty(propName);
       std::stringstream propValue;
 
       if (prop->type().find("TimeValue") != std::string::npos) {

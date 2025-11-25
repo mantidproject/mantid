@@ -7,7 +7,7 @@
 
 
 from argparse import ArgumentParser
-from release_editor import fixReleaseName, createFileLocation, checkContainsReleaseNote
+from release_editor import fix_release_name, create_file_location, gather_release_note_directories
 
 
 def parse_args():
@@ -43,8 +43,8 @@ def print_paths(dirs):
 
 if __name__ == "__main__":
     args = parse_args()
-    args.release = fixReleaseName(args.release)
-    main_release_dir = createFileLocation(args.release)
-    release_note_dirs = checkContainsReleaseNote(main_release_dir)
+    args.release = fix_release_name(args.release)
+    main_release_dir = create_file_location(args.release)
+    release_note_dirs = gather_release_note_directories(main_release_dir)
     unused_note_dirs = check_for_unused_files(release_note_dirs)
     print_paths(unused_note_dirs)

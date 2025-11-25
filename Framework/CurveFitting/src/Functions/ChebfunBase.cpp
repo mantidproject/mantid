@@ -598,7 +598,7 @@ std::vector<double> ChebfunBase::fit(const API::IFunction &f) const {
  * @param f :: Function to calculate.
  * @param p :: Values of function f at the even-valued indices of m_x.
  */
-std::vector<double> ChebfunBase::fitOdd(const ChebfunFunctionType &f, std::vector<double> &p) const {
+std::vector<double> ChebfunBase::fitOdd(const ChebfunFunctionType &f, std::vector<double> const &p) const {
   assert(size() == p.size() * 2 - 1);
   assert(size() % 2 == 1);
   auto &xp = xPoints();
@@ -622,7 +622,7 @@ std::vector<double> ChebfunBase::fitOdd(const ChebfunFunctionType &f, std::vecto
  * @param f :: Function to calculate.
  * @param pEven :: Values of function f at the even-valued indices of m_x.
  */
-std::vector<double> ChebfunBase::fitOdd(const API::IFunction &f, std::vector<double> &pEven) const {
+std::vector<double> ChebfunBase::fitOdd(const API::IFunction &f, std::vector<double> const &pEven) const {
   assert(size() == pEven.size() * 2 - 1);
   assert(size() % 2 == 1);
   std::vector<double> pOdd(size() - pEven.size());
@@ -684,19 +684,19 @@ std::vector<double> ChebfunBase::roots(const std::vector<double> &a) const {
     C.set(N + i, lasti, tmp);
   }
 
-  gsl_vector_complex *eval = gsl_vector_complex_alloc(N2);
+  gsl_vector_complex *eigenval = gsl_vector_complex_alloc(N2);
   auto workspace = gsl_eigen_nonsymm_alloc(N2);
 
   EigenMatrix C_tr(C.tr());
   gsl_matrix_view C_tr_gsl = getGSLMatrixView(C_tr.mutator());
-  gsl_eigen_nonsymm(&C_tr_gsl.matrix, eval, workspace);
+  gsl_eigen_nonsymm(&C_tr_gsl.matrix, eigenval, workspace);
   gsl_eigen_nonsymm_free(workspace);
 
   const double Dx = endX() - startX();
   bool isFirst = true;
   double firstIm = 0;
   for (size_t i = 0; i < N2; ++i) {
-    auto val = gsl_vector_complex_get(eval, i);
+    auto val = gsl_vector_complex_get(eigenval, i);
     double re = GSL_REAL(val);
     double im = GSL_IMAG(val);
     double ab = re * re + im * im;
@@ -715,7 +715,7 @@ std::vector<double> ChebfunBase::roots(const std::vector<double> &a) const {
       isFirst = true;
     }
   }
-  gsl_vector_complex_free(eval);
+  gsl_vector_complex_free(eigenval);
 
   return r;
 }

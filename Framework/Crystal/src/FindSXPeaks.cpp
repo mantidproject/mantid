@@ -220,7 +220,7 @@ std::map<std::string, std::string> FindSXPeaks::validateInputs() {
   // create the map
   std::map<std::string, std::string> validationOutput;
   const std::string resolutionStrategy = getProperty("ResolutionStrategy");
-  const auto xResolutionProperty = getPointerToProperty("XResolution");
+  auto const *xResolutionProperty = getPointerToProperty("XResolution");
 
   // Check that the user has set a valid value for the x resolution when
   // in absolute resolution mode.

@@ -909,7 +909,7 @@ IConstraint *CompositeFunction::getConstraint(size_t i) const {
  */
 void CompositeFunction::removeConstraint(const std::string &parName) {
   auto i = parameterIndex(parName);
-  auto constraint = IFunction::getConstraint(i);
+  auto const *constraint = IFunction::getConstraint(i);
   if (constraint != nullptr) {
     IFunction::removeConstraint(parName);
   } else {

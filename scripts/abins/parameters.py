@@ -31,7 +31,7 @@ instruments = {
         "settings_default": "",
         "settings": {"": {"chopper": ""}},
         "min_wavenumber": 0.0,
-        "max_wavenumber": 4100.0,
+        "max_wavenumber": float("Inf"),
     },
     "PANTHER": {
         "q_size": 100,
@@ -69,6 +69,7 @@ instruments = {
         "resolution": "pychop",
         "q_size": 100,
         "e_init": 400 * MILLI_EV_TO_WAVENUMBER,
+        "max_wavenumber": 1000 * MILLI_EV_TO_WAVENUMBER,
         "settings_default": "A",
         "settings": {
             "A": {"chopper": "A"},
@@ -83,6 +84,7 @@ instruments = {
         "resolution": "pychop",
         "q_size": 100,
         "e_init": 400 * MILLI_EV_TO_WAVENUMBER,
+        "max_wavenumber": 181 * MILLI_EV_TO_WAVENUMBER,
         "settings_default": "G",
         "settings": {
             "G": {"chopper": "G"},
@@ -121,8 +123,7 @@ instruments = {
             "Cu(220) (Lagrange)": {
                 "Ei_range_meV": [26, 500],
                 "abs_resolution_meV": [7.6987e-5, 2.156e-2, -3.5961e-2],
-                "low_energy_cutoff_meV": 25,
-                "low_energy_resolution_meV": 0.8,
+                "minimum_resolution_meV": 0.8,
             },
             "Cu(331) (Lagrange)": {
                 "Ei_range_meV": [67, 500],

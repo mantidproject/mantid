@@ -67,7 +67,7 @@ class PointGroupTest(unittest.TestCase):
         self.assertEqual(expected_str, str(pg))
         self.assertEqual(expected_repr, pg.__repr__())
 
-        newPg = eval(pg.__repr__())
+        newPg = eval(pg.__repr__())  # noqa: S307
         self.assertEqual(pg.getHMSymbol(), newPg.getHMSymbol())
 
 

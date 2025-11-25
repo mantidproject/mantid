@@ -11,14 +11,13 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Glob.h"
 
-#include <Poco/Path.h>
 #include <filesystem>
 #include <fstream>
 
 using namespace Mantid::Kernel;
 
 class GlobTest : public CxxTest::TestSuite {
-  Poco::Path base;
+  std::filesystem::path base;
 
 public:
   // This pair of boilerplate methods prevent the suite being created statically
@@ -27,13 +26,11 @@ public:
   static void destroySuite(GlobTest *suite) { delete suite; }
 
   GlobTest() {
-    base.assign(ConfigService::Instance().getInstrumentDirectory());
-    base.makeParent();
-    base.assign(base.toString());
+    base = std::filesystem::path(ConfigService::Instance().getInstrumentDirectory()).parent_path().parent_path();
   }
 
   void test_Glob() {
-    std::string pattern = base.toString() + "Framework/*/CMakeLists.*t";
+    std::string pattern = (base / "Framework/*/CMakeLists.*t").string();
 
     std::set<std::string> files;
     Glob::glob(pattern, files);
@@ -41,8 +38,8 @@ public:
 
     size_t matches = 0;
     for (const auto &file : files) {
-      Poco::Path path = file;
-      std::string project = path[path.depth() - 1];
+      std::filesystem::path path = file;
+      std::string project = path.parent_path().filename().string();
       if (project == "API")
         ++matches;
       if (project == "Algorithms")
@@ -53,13 +50,13 @@ public:
         ++matches;
       if (project == "DataObjects")
         ++matches;
-      TS_ASSERT_EQUALS(path.getFileName(), "CMakeLists.txt");
+      TS_ASSERT_EQUALS(path.filename().string(), "CMakeLists.txt");
     }
     TS_ASSERT_EQUALS(matches, 5);
   }
 
   void test_no_match() {
-    std::string pattern = base.toString() + "Doesnotexist/*/CMakeLists.*t";
+    std::string pattern = base.string() + "/Doesnotexist/*/CMakeLists.*t";
 
     std::set<std::string> files;
     Glob::glob(pattern, files);
@@ -101,7 +98,7 @@ public:
   }
 
   void test_double_dots_in_pattern() {
-    std::string pattern = base.toString() + "Framework/*/CMakeLists.*t";
+    std::string pattern = base.string() + "/Framework/*/CMakeLists.*t";
 
     std::set<std::string> files;
     Glob::glob(pattern, files);
@@ -109,8 +106,8 @@ public:
 
     size_t matches = 0;
     for (const auto &file : files) {
-      Poco::Path path = file;
-      std::string project = path[path.depth() - 1];
+      std::filesystem::path path = file;
+      std::string project = path.parent_path().filename().string();
       if (project == "API")
         ++matches;
       if (project == "Algorithms")
@@ -121,24 +118,46 @@ public:
         ++matches;
       if (project == "DataObjects")
         ++matches;
-      TS_ASSERT_EQUALS(path.getFileName(), "CMakeLists.txt");
+      TS_ASSERT_EQUALS(path.filename().string(), "CMakeLists.txt");
     }
     TS_ASSERT_EQUALS(matches, 5);
   }
 
   void test_filename_contains_directory() {
-    Poco::Path pattern(base.toString() + "instrument", "unit_testing/DUM_Definition.xml");
+    std::filesystem::path pattern = base / "instrument" / "unit_testing/DUM_Definition.xml";
 
     std::set<std::string> files;
-    Glob::glob(pattern, files);
+    Glob::glob(pattern.string(), files);
     TS_ASSERT(!files.empty());
   }
 
   void test_caseless() {
-    Poco::Path pattern(base.toString() + "instrument", "unit_TESTING/dum_Definition.xml");
+    std::filesystem::path pattern = base / "instrument" / "unit_TESTING/dum_Definition.xml";
 
     std::set<std::string> files;
-    Glob::glob(pattern, files, Poco::Glob::GLOB_CASELESS);
+    Glob::glob(pattern.string(), files, Glob::GLOB_CASELESS);
     TS_ASSERT(!files.empty());
+  }
+
+  void test_glob_to_regex() {
+    // no globbing specified
+    TS_ASSERT_EQUALS(Glob::globToRegex("abcd"), "^abcd$");
+
+    // globbing *
+    TS_ASSERT_EQUALS(Glob::globToRegex("a*bc*d"), "^a.+bc.+d$");
+    TS_ASSERT_EQUALS(Glob::globToRegex("*a*bc*d*"), "^.+a.+bc.+d.+$");
+
+    // globbing * with escapes
+    TS_ASSERT_EQUALS(Glob::globToRegex("a*bc\\*d"), "^a.+bc\\*d$");
+    TS_ASSERT_EQUALS(Glob::globToRegex("\\*a*bc\\*d"), "^\\*a.+bc\\*d$");
+
+    // globbing ?
+    TS_ASSERT_EQUALS(Glob::globToRegex("a?bc*d"), "^a.bc.+d$");
+
+    // globbing ? with escapes
+    TS_ASSERT_EQUALS(Glob::globToRegex("a?bc\\?d"), "^a.bc\\?d$");
+
+    // globbing both
+    TS_ASSERT_EQUALS(Glob::globToRegex("a?bc*d"), "^a.bc.+d$");
   }
 };

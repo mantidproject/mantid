@@ -80,7 +80,7 @@ void vtkGeometryCacheWriter::createVTKFileHeader() {
  * Adds the geometry of the Object to the document
  * @param obj :: The object to add
  */
-void vtkGeometryCacheWriter::addObject(CSGObject *obj) {
+void vtkGeometryCacheWriter::addObject(CSGObject const *obj) {
   // First check whether Object can be written to the file
   std::shared_ptr<GeometryHandler> handle = obj->getGeometryHandler();
   if (!(handle->canTriangulate()))

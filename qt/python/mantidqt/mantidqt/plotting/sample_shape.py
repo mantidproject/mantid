@@ -15,8 +15,10 @@ from mantid.api import AnalysisDataService as ADS
 from mantidqt.plotting.sample_shape_ads_observer import SampleShapePlotADSObserver
 from workbench.plotting.globalfiguremanager import FigureAction, GlobalFigureManager
 from workbench.plotting.toolbar import ToolbarStateManager
+from mantidqt.utils.qt.qappthreadcall import run_on_qapp_thread
 
 
+@run_on_qapp_thread()
 class SampleShapePlot:
     def __init__(
         self,
@@ -61,7 +63,7 @@ class SampleShapePlot:
         if action == FigureAction.VisibilityChanged:
             self.plot_visible = is_visible(plot_number)
 
-    def create_plot(self, workspace_name, figure=None, test=None):
+    def create_plot(self, workspace_name, figure=None, test=None, alpha=1.0, custom_color=None):
         self.workspace_name = workspace_name
         workspace = ADS.retrieve(workspace_name)
         sample_mesh = get_valid_sample_mesh_from_workspace(workspace)
@@ -76,7 +78,7 @@ class SampleShapePlot:
             figure, axes = plt.subplots(subplot_kw={"projection": "mantid3d", "proj_type": "ortho"})
 
         sample_plotted, container_plotted, components_plotted = try_to_plot_all_sample_shapes(
-            figure, sample_mesh, container_mesh, component_meshes
+            figure, sample_mesh, container_mesh, component_meshes, alpha, custom_color
         )
         if int(sample_plotted) + int(container_plotted) + int(components_plotted) == 0:
             raise Exception("Workspace has no valid Sample, Container or Component Shapes to plot")
@@ -176,14 +178,14 @@ def set_figure_window_title(plot_number, workspace_name):
         figure_manager.set_window_title(f"{workspace_name} Sample Shape")
 
 
-def plot_sample_container_and_components(workspace_name, test=None):
+def plot_sample_container_and_components(workspace_name, test=None, alpha=1.0, custom_color=None):
     new_plot = SampleShapePlot()
-    return new_plot.create_plot(workspace_name, test=test)
+    return new_plot.create_plot(workspace_name, test=test, alpha=alpha, custom_color=custom_color)
 
 
-def try_to_plot_all_sample_shapes(figure, sample_mesh, container_mesh, component_meshes):
+def try_to_plot_all_sample_shapes(figure, sample_mesh, container_mesh, component_meshes, alpha, custom_color):
     container_plotted = components_plotted = False
-    sample_plotted = plot_sample_only(figure, sample_mesh)
+    sample_plotted = plot_sample_only(figure, sample_mesh, alpha, custom_color)
     if container_mesh is not None:
         container_plotted = plot_container(figure, container_mesh)
     if component_meshes:
@@ -239,10 +241,10 @@ def get_component_shape_from_workspace(workspace_with_components, component_inde
         return workspace_with_components.sample().getEnvironment().getComponent(component_index)
 
 
-def plot_sample_only(figure, mesh):
+def plot_sample_only(figure, mesh, alpha=1.0, specified_face_color=None):
     axes = figure.gca()
     if mesh is not None:
-        if len(mesh) < 13:
+        if len(mesh) > 13 and not specified_face_color:
             face_colors = [
                 "purple",
                 "mediumorchid",
@@ -257,10 +259,11 @@ def plot_sample_only(figure, mesh):
                 "gold",
                 "orange",
             ]
-            mesh_polygon = Poly3DCollection(mesh, facecolors=face_colors, edgecolors="black", alpha=1.0, linewidths=0.1)
+            mesh_polygon = Poly3DCollection(mesh, facecolors=face_colors, edgecolors="black", alpha=alpha, linewidths=0.1)
+        elif specified_face_color:
+            mesh_polygon = Poly3DCollection(mesh, facecolors=specified_face_color, edgecolors="black", alpha=alpha, linewidths=0.1)
         else:
-            mesh_polygon = Poly3DCollection(mesh, facecolors="red", edgecolors="black", alpha=1.0, linewidths=0.1)
-            mesh_polygon.set_facecolor((1, 0, 0, 0.5))
+            mesh_polygon = Poly3DCollection(mesh, facecolors="red", edgecolors="black", alpha=alpha, linewidths=0.1)
         axes.add_collection3d(mesh_polygon)
         return True
     else:

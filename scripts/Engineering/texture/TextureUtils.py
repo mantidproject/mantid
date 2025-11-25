@@ -9,16 +9,16 @@ from os import path, scandir
 import sys
 from Engineering.texture.polefigure.polefigure_model import TextureProjection
 from Engineering.texture.correction.correction_model import TextureCorrectionModel
-from mantid.simpleapi import SaveNexus, logger, CreateEmptyTableWorkspace, LoadCIF, Fit, CreateSingleValuedWorkspace
+from mantid.simpleapi import SaveNexus, logger, CreateEmptyTableWorkspace, Fit
 from pathlib import Path
 from Engineering.EnggUtils import GROUP
 from Engineering.EnginX import EnginX
-from mantid.geometry import CrystalStructure
 from mantid.api import AnalysisDataService as ADS, MultiDomainFunction, FunctionFactory
 from typing import Optional, Sequence, Union, Tuple
 from mantid.dataobjects import Workspace2D
 from mantid.fitfunctions import FunctionWrapper, CompositeFunctionWrapper
 from plugins.algorithms.IntegratePeaks1DProfile import PeakFunctionGenerator, calc_intens_and_sigma_arrays
+from Engineering.texture.xtal_helper import get_xtal_structure
 # -------- Utility --------------------------------
 
 
@@ -177,31 +177,19 @@ def run_abs_corr(
     if copy_ref:
         model.copy_sample_info(ref_ws, wss)
 
-    for i, ws in enumerate(wss):
-        abs_corr = 1.0
-        div_corr = 1.0
+    model.set_include_abs(include_abs_corr)
+    model.set_include_atten(include_atten_table)
+    model.set_include_div(include_div_corr)
+    model.set_rb_num(exp_name)
+    model.set_remove_after_processing(clear_ads_after)
 
-        if include_abs_corr:
-            model.define_gauge_volume(ws, gauge_vol_preset, gauge_vol_shape_file)
-            model.calc_absorption(ws, monte_carlo_args)
-            abs_corr = "_abs_corr"
-            if include_atten_table:
-                atten_vals = model.read_attenuation_coefficient_at_value(abs_corr, eval_point, eval_units)
-                model.write_atten_val_table(
-                    ws,
-                    atten_vals,
-                    eval_point,
-                    eval_units,
-                    exp_name,
-                    None,
-                    root_dir,
-                )
+    abs_args = {"gauge_vol_preset": gauge_vol_preset, "gauge_vol_file": gauge_vol_shape_file, "mc_param_str": monte_carlo_args}
 
-        if include_div_corr:
-            model.calc_divergence(ws, div_hoz, div_vert, det_hoz)
-            div_corr = "_div_corr"
+    atten_args = {"atten_val": eval_point, "atten_units": eval_units}
 
-        model.apply_corrections(ws, out_wss[i], None, root_dir, abs_corr, div_corr, None, clear_ads_after)
+    div_args = {"hoz": div_hoz, "vert": div_vert, "det_hoz": det_hoz}
+
+    model.calc_all_corrections(wss, out_wss, root_dir=root_dir, abs_args=abs_args, atten_args=atten_args, div_args=div_args)
 
 
 def validate_abs_corr_inputs(
@@ -527,43 +515,6 @@ def fit_all_peaks(
 # -------- Pole Figure Script Logic--------------------------------
 
 
-class CrystalPhase:
-    def __init__(self, crystal_structure: CrystalStructure):
-        self.xtal = crystal_structure
-
-    @classmethod
-    def from_cif(cls, cif_file: str):
-        ws = CreateSingleValuedWorkspace(StoreInADS=False, EnableLogging=False)
-        LoadCIF(ws, cif_file, StoreInADS=False)
-        return CrystalPhase(ws.sample().getCrystalStructure())
-
-    @classmethod
-    def from_alatt(cls, alatt: np.ndarray, space_group: str = "P 1", basis: str = ""):
-        alatt_str = " ".join([str(par) for par in alatt])
-        xtal = CrystalStructure(alatt_str, space_group, basis)
-        return CrystalPhase(xtal)
-
-    @classmethod
-    def from_string(cls, lattice: str, space_group: str, basis: str):
-        xtal = CrystalStructure(lattice, space_group, basis)
-        return CrystalPhase(xtal)
-
-
-def get_xtal_structure(input_method: str, *args, **kwargs) -> CrystalStructure:
-    match input_method:
-        case "cif":
-            phase = CrystalPhase.from_cif(*args, **kwargs)
-            return phase.xtal
-        case "array":
-            phase = CrystalPhase.from_alatt(*args, **kwargs)
-            return phase.xtal
-        case "string":
-            phase = CrystalPhase.from_string(*args, **kwargs)
-            return phase.xtal
-        case _:
-            raise ValueError(f"input_method must be: 'cif', 'array', or 'string', '{input_method}' was provided")
-
-
 def create_pf(
     wss: Sequence[str],
     root_dir: str,
@@ -640,7 +591,7 @@ def create_pf(
         wss, params, out_ws, pf_hkl, include_scatt_power, scat_vol_pos, chi2_thresh, peak_thresh, save_dirs, ax_transform, readout_column
     )
 
-    fig = model.plot_pole_figure(
+    fig, ax = model.plot_pole_figure(
         out_ws,
         projection_method,
         fig=None,
@@ -650,7 +601,7 @@ def create_pf(
         ax_labels=ax_labels,
         contour_kernel=kernel,
     )
-    fig.gca().set_title(out_ws)
+    ax.set_title(out_ws)
     try:
         fig.show()
     except IndexError:

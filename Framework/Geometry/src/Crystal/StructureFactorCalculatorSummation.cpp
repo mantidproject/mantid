@@ -52,7 +52,7 @@ void StructureFactorCalculatorSummation::updateUnitCellScatterers(const CrystalS
       if (current) {
         std::vector<V3D> positions = spaceGroup->getEquivalentPositions(current->getPosition());
 
-        for (auto &position : positions) {
+        for (auto const &position : positions) {
           BraggScatterer_sptr clone = current->clone();
           clone->setProperty("Position", getV3DasString(position));
 

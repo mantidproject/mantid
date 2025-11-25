@@ -26,7 +26,6 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/ListValidator.h"
-#include <Poco/File.h>
 #include <boost/container/flat_set.hpp>
 #include <boost/math/special_functions/round.hpp>
 #include <fstream>

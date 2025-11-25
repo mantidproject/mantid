@@ -80,7 +80,7 @@ public:
   Mantid::API::CoordTransform const *getTransformToOriginal(size_t index = 0) const;
   void setTransformToOriginal(Mantid::API::CoordTransform *transform, size_t index = 0);
 
-  void transformDimensions(std::vector<double> &scaling, std::vector<double> &offset);
+  void transformDimensions(std::vector<double> const &scaling, std::vector<double> const &offset);
 
   size_t getNumberTransformsToOriginal() const;
   size_t getNumberTransformsFromOriginal() const;

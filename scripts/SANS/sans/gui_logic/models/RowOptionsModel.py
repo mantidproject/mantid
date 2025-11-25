@@ -23,8 +23,7 @@ class RowOptionsModel(object):
         for k, v in self._developer_options.items():
             output += k + "=" + str(v) + ", "
 
-        if output.endswith(", "):
-            output = output[:-2]
+        output = output.removesuffix(", ")
         return output
 
     def get_options_dict(self):
@@ -88,8 +87,7 @@ class RowOptionsModel(object):
 
         # The findall option finds all instances of the pattern specified above in the options string.
         for key, value in option_pattern.findall(options_column_string_no_whitespace):
-            if value.endswith(","):
-                value = value[:-1]
+            value = value.removesuffix(",")
             parsed.update({key: value})
 
         return parsed

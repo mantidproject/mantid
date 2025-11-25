@@ -47,7 +47,7 @@ const std::string IMDEventWorkspace::toString() const {
 
   // Now box controller details
   std::vector<std::string> stats = getBoxControllerStats();
-  for (auto &stat : stats) {
+  for (auto const &stat : stats) {
     os << stat << "\n";
   }
 
@@ -82,14 +82,15 @@ IPropertyManager::getValue<Mantid::API::IMDEventWorkspace_sptr>(const std::strin
 template <>
 MANTID_API_DLL Mantid::API::IMDEventWorkspace_const_sptr
 IPropertyManager::getValue<Mantid::API::IMDEventWorkspace_const_sptr>(const std::string &name) const {
-  auto *prop = dynamic_cast<PropertyWithValue<Mantid::API::IMDEventWorkspace_const_sptr> *>(getPointerToProperty(name));
+  auto const *prop =
+      dynamic_cast<PropertyWithValue<Mantid::API::IMDEventWorkspace_const_sptr> *>(getPointerToProperty(name));
   if (prop) {
     return prop->operator()();
   } else {
     // Every other class with this behaviour allows you to get a shared_ptr<T>
     // property as a shared_ptr<const T>. This class should be consistent, so
     // try that:
-    auto *nonConstProp =
+    auto const *nonConstProp =
         dynamic_cast<PropertyWithValue<Mantid::API::IMDEventWorkspace_sptr> *>(getPointerToProperty(name));
     if (nonConstProp) {
       return nonConstProp->operator()();

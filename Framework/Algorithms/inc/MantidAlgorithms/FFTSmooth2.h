@@ -12,6 +12,7 @@
 
 namespace Mantid {
 namespace Algorithms {
+namespace FFTSmooth {
 /** Data smoothing using the FFT algorithm and various filters.
 
     @author Roman Tolchenov
@@ -33,13 +34,21 @@ public:
 private:
   // Overridden Algorithm methods
   void init() override;
+  std::map<std::string, std::string> validateInputs() override;
+  std::map<std::string, std::string> actuallyValidateInputs(API::Workspace_sptr const &);
   void exec() override;
-
-  // Smoothing by zeroing.
-  void zero(int n, API::MatrixWorkspace_sptr &unfilteredWS, API::MatrixWorkspace_sptr &filteredWS);
-  // Smoothing using Butterworth filter of any positive order.
-  void Butterworth(int n, int order, API::MatrixWorkspace_sptr &unfilteredWS, API::MatrixWorkspace_sptr &filteredWS);
 };
 
+namespace PropertyNames {
+inline std::string const INPUT_WKSP("InputWorkspace");
+inline std::string const OUTPUT_WKSP("OutputWorkspace");
+inline std::string const WKSP_INDEX("WorkspaceIndex");
+inline std::string const FILTER("Filter");
+inline std::string const PARAMS("Params");
+inline std::string const IGNORE_X_BINS("IgnoreXBins");
+inline std::string const ALL_SPECTRA("AllSpectra");
+} // namespace PropertyNames
+
+} // namespace FFTSmooth
 } // namespace Algorithms
 } // namespace Mantid

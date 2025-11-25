@@ -22,6 +22,7 @@
 #include "MantidGeometry/MDGeometry/MDFrame.h"
 #include "MantidIndexing/GlobalSpectrumIndex.h"
 #include "MantidIndexing/IndexInfo.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MDUnit.h"
 #include "MantidKernel/MultiThreaded.h"

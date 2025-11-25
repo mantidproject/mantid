@@ -79,7 +79,7 @@ class LoadDNSLegacyTest(unittest.TestCase):
         self._createIncompleteFile(filename)
         self.assertRaisesRegex(
             RuntimeError,
-            "File dns-incomplete.d_dat does not contain any data!",
+            "File .+dns-incomplete.d_dat does not contain any data!",
             LoadDNSLegacy,
             Filename=filename,
             OutputWorkspace=outputWorkspaceName,

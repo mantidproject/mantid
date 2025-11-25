@@ -22,5 +22,4 @@ times = [line.split("Passed")[-1].split("sec")[0] for line in lines]
 
 with open(sys.argv[2], "w") as f:
     f.write("name, time\n")
-    for name, time in zip(names, times):
-        f.write(", ".join([name, time]) + "\n")
+    f.writelines(", ".join([name, time]) + "\n" for name, time in zip(names, times))

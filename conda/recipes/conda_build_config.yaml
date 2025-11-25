@@ -77,8 +77,10 @@ ninja:
   - '>=1.10.2'
 
 # Use novtk version, otherwise a lot of extra packages are installed, including qt6-main, which can cause issues when launching on Windows
+# Fix: pin to 7.* to avoid issue with 7_9_1 (See: https://github.com/conda-forge/occt-feedstock/pull/124)
 occt:
-  - '* novtk*'
+  - '7.* novtk*'
+
 # Fix the version to avoid updates being pulled in automatically, which might change the Reflectometry ORSO file content or layout and cause tests to fail.
 orsopy:
   - '==1.2.1'
@@ -101,6 +103,13 @@ sphinx_bootstrap_theme:
 
 scipy:
   - '>=1.10.0'
+
+# This is not a primary dependency, but we pin it to avoid a memory allocator mismatch.
+# Pillow 12.0.0 compiles with zlib-ng, which causes problems with jemalloc.
+# Once we move away from jemalloc, this pin and the instances of pillow in our recipe files
+# can be removed.
+pillow:
+  - '<12.0.0'
 
 pip:
   - '>=21.0.1'

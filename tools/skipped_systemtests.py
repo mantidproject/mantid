@@ -101,7 +101,7 @@ for platform in PLATFORMS:
     url = URL + "-" + platform + "/lastCompletedBuild/testReport/api/json"
     params = {}
 
-    request = requests.get(url, params=params)
+    request = requests.get(url, params=params, timeout=10)
 
     if request.status_code != 200:
         raise RuntimeError("'%s' returned %d" % (url, request.getcode()))

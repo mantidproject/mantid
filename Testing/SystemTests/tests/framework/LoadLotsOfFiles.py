@@ -181,7 +181,7 @@ def useFile(direc, filename):
 
     # list of banned files by regexp
     for regexp in BANNED_REGEXP:
-        if re.match(regexp, filename, re.I) is not None:
+        if re.match(regexp, filename, re.IGNORECASE) is not None:
             return False, filename
 
     filename = os.path.join(direc, filename)
@@ -231,7 +231,7 @@ class LoadLotsOfFiles(systemtesting.MantidSystemTest):
         failed = []  # still run all of the tests
         for test in tests:
             test = test.strip()
-            result = eval(test)
+            result = eval(test)  # noqa: S307
             if not result:
                 failed.append((test, result))
         if len(failed) > 0:

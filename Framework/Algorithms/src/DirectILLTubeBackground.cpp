@@ -348,7 +348,7 @@ std::vector<std::string> DirectILLTubeBackground::components(Geometry::Instrumen
  * @param componentName name of the component to crop
  * @return a component workspace
  */
-API::MatrixWorkspace_sptr DirectILLTubeBackground::cropToComponent(API::MatrixWorkspace_sptr &ws,
+API::MatrixWorkspace_sptr DirectILLTubeBackground::cropToComponent(API::MatrixWorkspace_sptr const &ws,
                                                                    std::string const &componentName) {
   auto crop = createChildAlgorithm("CropToComponent");
   crop->setProperty("InputWorkspace", ws);
@@ -364,7 +364,7 @@ API::MatrixWorkspace_sptr DirectILLTubeBackground::cropToComponent(API::MatrixWo
  * @param xRanges fitting ranges
  * @return the fitted backgrounds
  */
-API::MatrixWorkspace_sptr DirectILLTubeBackground::fitComponentBackground(API::MatrixWorkspace_sptr &ws,
+API::MatrixWorkspace_sptr DirectILLTubeBackground::fitComponentBackground(API::MatrixWorkspace_sptr const &ws,
                                                                           std::vector<double> const &xRanges) {
   int const degree = getProperty(Prop::POLYNOMIAL_DEGREE);
   auto calculateBkg = createChildAlgorithm("CalculatePolynomialBackground");

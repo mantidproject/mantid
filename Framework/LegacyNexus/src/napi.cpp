@@ -738,7 +738,7 @@ static int isRoot(NXhandle hfil) {
   returns a pointer into path beyond the extracted path
   ---------------------------------------------------------------------*/
 static char *extractNextAddress(char *path, NXname element) {
-  char *pStart = path;
+  char *pStart = path; // cppcheck-suppress constVariablePointer
   /*
      skip over leading /
    */

@@ -185,8 +185,7 @@ class HelpWindowModel:
             # Set final base URL based on online path and version string
             if self._version_string:
                 base_online = self._raw_online_base
-                if base_online.endswith("/stable"):
-                    base_online = base_online[: -len("/stable")]
+                base_online = base_online.removesuffix("/stable")
                 # Avoid double versioning if base_online already has it
                 if self._version_string not in base_online:
                     self._base_url = f"{base_online.rstrip('/')}/{self._version_string}"

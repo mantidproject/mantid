@@ -1,0 +1,1 @@
+- New algorithm :ref:`AddLogSmoothed <algm-AddLogSmoothed>` for smoothing time series log data.

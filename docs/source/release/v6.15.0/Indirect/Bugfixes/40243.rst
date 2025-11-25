@@ -1,0 +1,1 @@
+- Fixed bug in `FilterEvents <algm-FilterEvents>` for ``CorrectionToSample="Indirect"``. The code now matches the equations in the documentation.

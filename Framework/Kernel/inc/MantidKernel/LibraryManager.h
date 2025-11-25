@@ -42,8 +42,8 @@ private:
   /// Private Destructor
   ~LibraryManagerImpl() = default;
 
-  /// Load libraries from the given Poco::File path
-  /// Private so Poco::File doesn't leak to the public interface
+  /// Load libraries from the given filesystem path
+  /// Private so filesystem implementation doesn't leak to the public interface
   int openLibraries(const std::filesystem::path &libpath, LoadLibraries loadingBehaviour,
                     const std::vector<std::string> &excludes);
   /// Check if the library should be loaded

@@ -6,11 +6,10 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include <Poco/Path.h>
-#include <cxxtest/TestSuite.h>
-#include <fstream>
-
 #include "MantidKernel/Strings.h"
+#include <cxxtest/TestSuite.h>
+#include <filesystem>
+#include <fstream>
 #include <string>
 
 using namespace Mantid::Kernel::Strings;
@@ -84,9 +83,8 @@ public:
     TS_ASSERT_EQUALS("ee", result[2]);
   }
   void testSplitExpandFullPath() {
-    Poco::Path test;
-    test = test.absolute();
-    std::string wkPath = test.toString();
+    std::filesystem::path test = std::filesystem::absolute(std::filesystem::current_path());
+    std::string wkPath = test.generic_string();
     std::vector<std::string> base;
     size_t depth = split_path(wkPath, base);
 
@@ -96,9 +94,8 @@ public:
     TS_ASSERT_EQUALS("bbbbb", result[depth + 1]);
   }
   void testSplitExpandMoveUpPath() {
-    Poco::Path test;
-    test = test.absolute();
-    std::string wkPath = test.toString();
+    std::filesystem::path test = std::filesystem::absolute(std::filesystem::current_path());
+    std::string wkPath = test.generic_string();
     std::vector<std::string> base;
     size_t depth = split_path(wkPath, base);
 
@@ -606,6 +603,76 @@ public:
   }
 
   void test_endsWith_when_the_suffix_is_too_large() { TS_ASSERT(!endsWith("SmallText", "AVeryLongSuffix")); }
+
+  void test_strmakef_empty() { TS_ASSERT(strmakef("").empty()); }
+
+  void test_strmakef_too_big() {
+    // deliberately pass something that would cause the buffer to overflow
+    // make sure this is properly handled and returns correct object
+    const std::size_t LARGEN{2048};
+    std::string expected(LARGEN, 'A');
+    std::string res = strmakef("%s", expected.c_str());
+    TS_ASSERT_EQUALS(res.size(), LARGEN);
+    TS_ASSERT_EQUALS(res, expected);
+  }
+
+  void test_strmakef_too_small() {
+    // create a string that is much smaller than the buffer
+    // ensure the result has been correctly resized
+    std::string expected{'A'};
+    std::string res = strmakef("%c", 'A');
+    TS_ASSERT_EQUALS(res.size(), 1);
+    TS_ASSERT_EQUALS(res, expected);
+    std::string res2(res.data()); // remake from data, to be sure
+    TS_ASSERT_EQUALS(res2.size(), 1);
+    TS_ASSERT_EQUALS(res2, expected);
+  }
+
+  void test_strmakef_doubles() {
+    // correctly format a double with format specifiers
+    std::string expected{"0001.000000000000"};
+    std::string res = strmakef("%017.12f", 1.0);
+    TS_ASSERT_EQUALS(res.size(), expected.size());
+    TS_ASSERT_EQUALS(res, expected);
+  }
+
+  void test_strmakef_ints() {
+    // correctly format an int with left zero padding
+    std::string expected{"0017"};
+    std::string res = strmakef("%04d", 17);
+    TS_ASSERT_EQUALS(res.size(), expected.size());
+    TS_ASSERT_EQUALS(res, expected);
+  }
+
+  void test_strmakef_compare() {
+    // make a string using standard methods,
+    // and against using strmakef, and ensure the same
+    double x = std::sin(1);
+    std::ostringstream oss;
+    oss << std::fixed << std::setprecision(12) << std::setw(16) << std::setfill('0') << x;
+    std::string s1 = oss.str();
+    std::string s2 = strmakef("%016.12f", x);
+    TS_ASSERT_EQUALS(s1, s2);
+  }
+
+  void test_strmakef_badfmt() {
+    // create an invalid formatting and ensure an empty stirng is returned
+#if !defined(_WIN32)
+    std::string res = strmakef("invalid: %lc", (wint_t)0xFFFFFFFF);
+#else
+    char cstr[] = {'a', 'b', 'c'};
+    std::string res = strmakef("invalid: %ls", cstr);
+#endif
+    TS_ASSERT(res.empty());
+  }
+
+  void test_strmakef_two() {
+    // create two strings, then add them together
+    std::string s1 = strmakef("x%d", 1);
+    std::string s2 = strmakef("x%d", 2);
+    std::string s3 = s1 + s2;
+    TS_ASSERT_EQUALS(s3, "x1x2");
+  }
 };
 
 class StringsTestPerformance : public CxxTest::TestSuite {

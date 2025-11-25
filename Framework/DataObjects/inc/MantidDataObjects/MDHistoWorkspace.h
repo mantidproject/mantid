@@ -44,7 +44,7 @@ public:
 
   MDHistoWorkspace(std::vector<Mantid::Geometry::MDHistoDimension_sptr> &dimensions,
                    Mantid::API::MDNormalization displayNormalization = Mantid::API::NoNormalization);
-  MDHistoWorkspace(std::vector<Mantid::Geometry::IMDDimension_sptr> &dimensions,
+  MDHistoWorkspace(std::vector<Mantid::Geometry::IMDDimension_sptr> const &dimensions,
                    Mantid::API::MDNormalization displayNormalization = Mantid::API::NoNormalization);
   MDHistoWorkspace &operator=(const MDHistoWorkspace &other) = delete;
 
@@ -55,7 +55,7 @@ public:
   std::unique_ptr<MDHistoWorkspace> cloneEmpty() const { return std::unique_ptr<MDHistoWorkspace>(doCloneEmpty()); }
 
   void init(std::vector<Mantid::Geometry::MDHistoDimension_sptr> &dimensions);
-  void init(std::vector<Mantid::Geometry::IMDDimension_sptr> &dimensions);
+  void init(std::vector<Mantid::Geometry::IMDDimension_sptr> const &dimensions);
 
   void cacheValues();
 

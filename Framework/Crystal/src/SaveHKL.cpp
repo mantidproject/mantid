@@ -19,10 +19,9 @@
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/Utils.h"
-#include <fstream>
-
-#include <Poco/File.h>
 #include <cmath>
+#include <filesystem>
+#include <fstream>
 
 using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
@@ -155,7 +154,7 @@ void SaveHKL::exec() {
   std::set<int> uniqueRuns;
   runMap_t runMap;
   for (size_t i = 0; i < peaks.size(); ++i) {
-    Peak &p = peaks[i];
+    Peak const &p = peaks[i];
     int run = p.getRunNumber();
     int bank = 0;
     std::string bankName = p.getBankName();
@@ -510,7 +509,7 @@ void SaveHKL::exec() {
   peaksW->removePeaks(std::move(badPeaks));
 
   bool append = getProperty("AppendFile");
-  if (append && Poco::File(filename.c_str()).exists()) {
+  if (append && std::filesystem::exists(filename)) {
     auto load_alg = createChildAlgorithm("LoadHKL");
     load_alg->setPropertyValue("Filename", filename);
     load_alg->setProperty("OutputWorkspace", "peaks");

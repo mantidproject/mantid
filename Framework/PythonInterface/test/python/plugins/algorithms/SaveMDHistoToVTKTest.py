@@ -15,8 +15,14 @@ from mantid.simpleapi import SaveMDHistoToVTK, CreateMDHistoWorkspace, CreateMDW
 
 
 class SaveMDHistoToVTKTest(unittest.TestCase):
+    def setUp(self) -> None:
+        self.tmp_file = tempfile.NamedTemporaryFile(suffix=".vts", delete=False)
+
+    def tearDown(self) -> None:
+        self.tmp_file.close()
+        os.remove(self.tmp_file.name)
+
     def test_simple(self):
-        tmp_filename = tempfile.mktemp(".vts")
         input_data = [np.nan, 1, 2, 3, 4, 5, 6, 7]
         ws = CreateMDHistoWorkspace(
             Dimensionality=3,
@@ -29,7 +35,7 @@ class SaveMDHistoToVTKTest(unittest.TestCase):
             Frames="HKL,HKL,HKL",
         )
 
-        SaveMDHistoToVTK(ws, tmp_filename)
+        SaveMDHistoToVTK(ws, self.tmp_file.name)
 
         # manually calculate points
         expected_points = []
@@ -38,10 +44,9 @@ class SaveMDHistoToVTKTest(unittest.TestCase):
                 for x in (-1, 0, 1):
                     expected_points += [x, y, z]
 
-        self.check_result(tmp_filename, expected_points)
+        self.check_result(self.tmp_file.name, expected_points)
 
     def test_non_orthogonal(self):
-        tmp_filename = tempfile.mktemp(".vts")
         input_data = [np.nan, 1, 2, 3, 4, 5, 6, 7]
         ws = CreateMDHistoWorkspace(
             Dimensionality=3,
@@ -57,7 +62,7 @@ class SaveMDHistoToVTKTest(unittest.TestCase):
         AddSampleLog(ws, LogName="sample")  # easy was to create ExperimentInfo
         SetUB(ws, gamma=120)
 
-        SaveMDHistoToVTK(ws, tmp_filename)
+        SaveMDHistoToVTK(ws, self.tmp_file.name)
 
         expected_cob = np.array([[1, 0.5, 0, 0], [0, np.sin(np.pi / 3), 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]])
 
@@ -71,10 +76,9 @@ class SaveMDHistoToVTKTest(unittest.TestCase):
                 for x in (-1, 0, 1):
                     expected_points += np.dot(B, [x, y, z]).tolist()
 
-        self.check_result(tmp_filename, expected_points, expected_cob=expected_cob)
+        self.check_result(self.tmp_file.name, expected_points, expected_cob=expected_cob)
 
     def test_non_orthogonal_W_MATRIX(self):
-        tmp_filename = tempfile.mktemp(".vts")
         input_data = [np.nan, 1, 2, 3, 4, 5, 6, 7]
         ws = CreateMDHistoWorkspace(
             Dimensionality=3,
@@ -93,7 +97,7 @@ class SaveMDHistoToVTKTest(unittest.TestCase):
         # aligning the W_MATRIX for a HH0 slice with a lattice with gamma=120 should result in an identity change of basis matrix
         ws.getExperimentInfo(0).run().addProperty("W_MATRIX", [1.0, 1.0, 0.0, 1.0, -1.0, 0.0, 0.0, 0.0, 1.0], True)
 
-        SaveMDHistoToVTK(ws, tmp_filename)
+        SaveMDHistoToVTK(ws, self.tmp_file.name)
 
         # manually calculate points
         expected_points = []
@@ -102,10 +106,9 @@ class SaveMDHistoToVTKTest(unittest.TestCase):
                 for x in (-1, 0, 1):
                     expected_points += [x, y, z]
 
-        self.check_result(tmp_filename, expected_points, axes=("[H,H,0]", "[H,-H,0]", "[0,0,L]"))
+        self.check_result(self.tmp_file.name, expected_points, axes=("[H,H,0]", "[H,-H,0]", "[0,0,L]"))
 
     def test_non_orthogonal_W_MATRIX2(self):
-        tmp_filename = tempfile.mktemp(".vts")
         input_data = [np.nan, 1, 2, 3, 4, 5, 6, 7]
         ws = CreateMDHistoWorkspace(
             Dimensionality=3,
@@ -123,7 +126,7 @@ class SaveMDHistoToVTKTest(unittest.TestCase):
 
         ws.getExperimentInfo(0).run().addProperty("W_MATRIX", [1.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 1.0], True)
 
-        SaveMDHistoToVTK(ws, tmp_filename)
+        SaveMDHistoToVTK(ws, self.tmp_file.name)
 
         expected_cob = np.array([[1, 1 / np.sqrt(2), 0, 0], [0, 1 / np.sqrt(2), 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]])
 
@@ -134,10 +137,9 @@ class SaveMDHistoToVTKTest(unittest.TestCase):
                 for x in (-1, 0, 1):
                     expected_points += [x + y / np.sqrt(2), y / np.sqrt(2), z]
 
-        self.check_result(tmp_filename, expected_points, expected_cob=expected_cob, axes=("[H,0,0]", "[H,H,0]", "[0,0,L]"))
+        self.check_result(self.tmp_file.name, expected_points, expected_cob=expected_cob, axes=("[H,0,0]", "[H,H,0]", "[0,0,L]"))
 
     def test_non_orthogonal_basis_vector(self):
-        tmp_filename = tempfile.mktemp(".vts")
         ws = CreateMDWorkspace(
             Dimensions=3,
             Extents="-10,10,-10,10,-10,10",
@@ -162,7 +164,7 @@ class SaveMDHistoToVTKTest(unittest.TestCase):
             NormalizeBasisVectors=False,
         )
 
-        SaveMDHistoToVTK(ws_slice, tmp_filename)
+        SaveMDHistoToVTK(ws_slice, self.tmp_file.name)
 
         expected_cob = np.array(
             [[1 / np.sqrt(2), 1 / np.sqrt(5), 0, 0], [1 / np.sqrt(2), 2 / np.sqrt(5), 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
@@ -176,7 +178,7 @@ class SaveMDHistoToVTKTest(unittest.TestCase):
                     expected_points += [x / np.sqrt(2) + y / np.sqrt(5), x / np.sqrt(2) + y * 2 / np.sqrt(5), z]
 
         self.check_result(
-            tmp_filename,
+            self.tmp_file.name,
             expected_points,
             expected_cob=expected_cob,
             expected_signal=(0, 0, 0, 0, 0, 0, 3, 7),
@@ -260,9 +262,6 @@ class SaveMDHistoToVTKTest(unittest.TestCase):
         assert byte_count == 648  # 3 x 3 x 3 x 3 X 8
         g = np.frombuffer(data[8:], dtype=np.float64)
         np.testing.assert_allclose(g, expected_points, atol=1e-15)
-
-        # cleanup
-        os.remove(filename)
 
 
 if __name__ == "__main__":

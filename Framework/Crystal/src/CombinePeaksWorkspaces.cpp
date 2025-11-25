@@ -12,6 +12,7 @@
 #include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 
 namespace Mantid::Crystal {

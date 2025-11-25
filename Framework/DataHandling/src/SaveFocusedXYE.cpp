@@ -70,7 +70,7 @@ void SaveFocusedXYE::exec() {
     if (pos != std::string::npos) // Remove the extension
     {
       ext = filename.substr(pos + 1, filename.npos);
-      filename = filename.substr(0, pos);
+      filename.erase(pos);
     }
 
     filepath = Poco::Path(directory, filename).toString();

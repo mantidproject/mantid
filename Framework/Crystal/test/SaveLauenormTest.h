@@ -14,8 +14,8 @@
 #include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 #include "MantidGeometry/IDTypes.h"
 #include "MantidKernel/Timer.h"
-#include <Poco/File.h>
 #include <cxxtest/TestSuite.h>
+#include <filesystem>
 #include <fstream>
 
 using namespace Mantid;
@@ -65,7 +65,7 @@ public:
     // Get the file
     outfile = alg.getPropertyValue("Filename") + "001";
     bool fileExists = false;
-    TS_ASSERT(fileExists = Poco::File(outfile).exists());
+    TS_ASSERT(fileExists = std::filesystem::exists(outfile));
 
     std::ifstream in(outfile.c_str());
 
@@ -97,7 +97,7 @@ public:
     TS_ASSERT(alg2.isExecuted());
     // Get the file
     outfile2 = alg2.getPropertyValue("Filename") + "001";
-    TS_ASSERT(Poco::File(outfile2).exists());
+    TS_ASSERT(std::filesystem::exists(outfile2));
 
     std::ifstream in2(outfile2.c_str());
 
@@ -126,7 +126,7 @@ public:
     // Get the file
     outfile3 = alg3.getPropertyValue("Filename") + "001";
     // file does not exist because all peaks are bank1 which were eliminated
-    TS_ASSERT(!Poco::File(outfile3).exists());
+    TS_ASSERT(!std::filesystem::exists(outfile3));
     remove(outfile.c_str());
     remove(outfile2.c_str());
     remove(outfile3.c_str());
@@ -152,7 +152,7 @@ public:
     TS_ASSERT(alg4.isExecuted());
     // Get the file
     outfile4 = alg4.getPropertyValue("Filename") + "001.geasc";
-    TS_ASSERT(Poco::File(outfile4).exists());
+    TS_ASSERT(std::filesystem::exists(outfile4));
 
     std::ifstream in4(outfile4.c_str());
     std::string line;

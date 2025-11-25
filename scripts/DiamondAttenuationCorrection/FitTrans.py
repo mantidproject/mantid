@@ -49,7 +49,7 @@ def dlmread(filename):
     """
     content = []
     with open(filename, "r") as f:
-        for line in f.readlines():
+        for line in f:
             content.append(float(line))
     return np.array(content)
 

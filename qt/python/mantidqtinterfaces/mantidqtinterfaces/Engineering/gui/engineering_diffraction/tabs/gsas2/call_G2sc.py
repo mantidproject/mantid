@@ -17,7 +17,7 @@ def print_histogram_R_factors(project):
     print("*** Weighted profile R-factor: Rwp " + os.path.split(project.filename)[1])
     for loop_histogram in project.histograms():
         print("\t{:20s}: {:.2f}".format(loop_histogram.name, loop_histogram.get_wR()))
-    print("")
+    print()
 
 
 def add_phases(project, phase_files):
@@ -123,8 +123,7 @@ def export_reflections(temp_save_directory, name_of_project, project):
             with open(reflection_file_path, "wt", encoding="utf-8") as file:
                 file.write(f"{loop_histogram_name}\n")
                 file.write(f"{phase_name}\n")
-                for reflection in reflection_positions:
-                    file.write(f"{str(reflection)}\n")
+                file.writelines(f"{str(reflection)}\n" for reflection in reflection_positions)
 
 
 def export_refined_instrument_parameters(temp_save_directory, name_of_project, project):

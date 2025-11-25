@@ -132,7 +132,7 @@ void MultiDomainFunction::function(const FunctionDomain &domain, FunctionValues 
     std::vector<size_t> domains;
     getDomainIndices(iFun, cd.getNParts(), domains);
 
-    for (auto &dom : domains) {
+    for (auto const &dom : domains) {
       const FunctionDomain &d = cd.getDomain(dom);
       FunctionValues tmp(d);
       getFunction(iFun)->function(d, tmp);
@@ -171,7 +171,7 @@ void MultiDomainFunction::functionDeriv(const FunctionDomain &domain, Jacobian &
       std::vector<size_t> domains;
       getDomainIndices(iFun, cd.getNParts(), domains);
 
-      for (auto &dom : domains) {
+      for (auto const &dom : domains) {
         const FunctionDomain &d = cd.getDomain(dom);
         PartialJacobian J(&jacobian, m_valueOffsets[dom], paramOffset(iFun));
         getFunction(iFun)->functionDeriv(d, J);

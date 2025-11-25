@@ -430,7 +430,7 @@ def read_diff_constants_from_prm(file_path):
     """
     diff_consts = []  # one list per component (e.g. bank)
     with open(file_path) as f:
-        for line in f.readlines():
+        for line in f:
             if "ICONS" in line:
                 # If formatted correctly the line should be in the format INS bank ICONS difc difa tzero
                 elements = line.split()
@@ -480,6 +480,7 @@ def focus_run(sample_paths, vanadium_path, plot_output, rb_num, calibration, sav
     # Loop over runs and focus
     focused_files_list = []
     focused_files_gsas2_list = []
+    focused_files_combined_list = []
     output_workspaces = []  # List of focused workspaces to plot.
     for sample_path in sample_paths:
         ws_sample = _load_run_and_convert_to_dSpacing(sample_path, calibration.get_instrument(), full_calib)
@@ -490,15 +491,17 @@ def focus_run(sample_paths, vanadium_path, plot_output, rb_num, calibration, sav
             ws_foc = _apply_vanadium_norm(ws_foc, ws_van_foc)
             # add grouping to log data
             ws_foc.getRun().addProperty("Grouping", calibration.get_foc_ws_suffix(), False)
-            # save files
-            _save_output_files(focus_dirs, ws_foc, calibration, van_run, rb_num)
+            # save files, extract the combined paths
+            _, _, combined_paths = _save_output_files(focus_dirs, ws_foc, calibration, van_run, rb_num)
             # convert units to TOF and save again
             ws_foc = mantid.ConvertUnits(InputWorkspace=ws_foc, OutputWorkspace=ws_foc.name(), Target="TOF")
-            nxs_paths, gss_path = _save_output_files(focus_dirs, ws_foc, calibration, van_run, rb_num)
+            nxs_paths, gss_path, _ = _save_output_files(focus_dirs, ws_foc, calibration, van_run, rb_num)
             focused_files_list.extend(nxs_paths)  # list of .nsx paths for that sample using last dir in focus_dirs
             print(type(gss_path), len(gss_path))
             focused_files_gsas2_list.extend(gss_path)
             print(type(focused_files_gsas2_list), len(focused_files_gsas2_list))
+            focused_files_combined_list.extend(combined_paths)
+            print(type(focused_files_combined_list), len(focused_files_combined_list))
             output_workspaces.append(ws_foc.name())
 
     # Plot the output
@@ -507,7 +510,7 @@ def focus_run(sample_paths, vanadium_path, plot_output, rb_num, calibration, sav
         if plot_output:
             _plot_focused_workspaces(output_workspaces)
 
-    return focused_files_list, focused_files_gsas2_list
+    return focused_files_list, focused_files_gsas2_list, focused_files_combined_list
 
 
 def _get_difc(ws, ind):
@@ -636,12 +639,15 @@ def _save_output_files(focus_dirs, sample_ws_foc, calibration, van_run, rb_num=N
             InputWorkspace=sample_ws_foc, Filename=path.join(focus_dir, ascii_fname + ".abc"), SplitFiles=False, Format="TOPAS"
         )
         # for dSpacing save all spectra in single nxs
+        combined_paths = []
         if xunit_suffix == "dSpacing":
             combined_dir = path.join(focus_dir, "CombinedFiles")
             filename = _generate_output_file_name(
                 calibration.get_instrument(), sample_run_no, van_run, foc_suffix, xunit_suffix, ext=".nxs"
             )
-            mantid.SaveNexus(InputWorkspace=sample_ws_foc, Filename=path.join(combined_dir, filename))
+            combined_path = path.join(combined_dir, filename)
+            mantid.SaveNexus(InputWorkspace=sample_ws_foc, Filename=combined_path)
+            combined_paths.append(combined_path)
 
         # Save nxs per spectrum
         nxs_paths = []
@@ -655,7 +661,7 @@ def _save_output_files(focus_dirs, sample_ws_foc, calibration, van_run, rb_num=N
             nxs_path = path.join(focus_dir, filename)
             mantid.SaveNexus(InputWorkspace=sample_ws_foc, Filename=nxs_path, WorkspaceIndexList=[ispec])
             nxs_paths.append(nxs_path)
-    return nxs_paths, gss_paths  # from last focus_dir only
+    return nxs_paths, gss_paths, combined_paths  # from last focus_dir only
 
 
 def _generate_output_file_name(inst, sample_run_no, van_run_no, suffix, xunit, ext=""):

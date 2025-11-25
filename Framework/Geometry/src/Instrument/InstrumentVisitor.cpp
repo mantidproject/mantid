@@ -72,7 +72,7 @@ InstrumentVisitor::InstrumentVisitor(std::shared_ptr<const Instrument> instrumen
       m_children(std::make_shared<std::vector<std::vector<size_t>>>()),
       m_detectorRanges(std::make_shared<std::vector<std::pair<size_t, size_t>>>()),
       m_componentRanges(std::make_shared<std::vector<std::pair<size_t, size_t>>>()),
-      m_componentIdToIndexMap(std::make_shared<std::unordered_map<Mantid::Geometry::IComponent *, size_t>>()),
+      m_componentIdToIndexMap(std::make_shared<std::unordered_map<Mantid::Geometry::IComponent const *, size_t>>()),
       m_detectorIdToIndexMap(makeDetIdToIndexMap(*m_orderedDetectorIds)),
       m_positions(std::make_shared<std::vector<Eigen::Vector3d>>()),
       m_detectorPositions(std::make_shared<std::vector<Eigen::Vector3d>>(m_orderedDetectorIds->size())),
@@ -357,7 +357,7 @@ size_t InstrumentVisitor::size() const { return m_componentIds->size(); }
 
 bool InstrumentVisitor::isEmpty() const { return size() == 0; }
 
-std::shared_ptr<const std::unordered_map<Mantid::Geometry::IComponent *, size_t>>
+std::shared_ptr<const std::unordered_map<Mantid::Geometry::IComponent const *, size_t>>
 InstrumentVisitor::componentIdToIndexMap() const {
   return m_componentIdToIndexMap;
 }

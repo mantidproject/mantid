@@ -26,14 +26,22 @@
 # * 6.6.20230314.1458+ill - a nightly build with an extra local version specifier to denote useful information
 # * 6.6.0+somechanges - a "local" version specifier to denote specific added features
 
-# Use versioningit to compute version number to match conda-build
-execute_process(
-  COMMAND "${Python_EXECUTABLE}" -m versioningit
-  WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-  OUTPUT_VARIABLE _version_str
-  ERROR_VARIABLE _error
-  OUTPUT_STRIP_TRAILING_WHITESPACE
-)
+# package version should be from versioningit
+
+# PKG_VERSION is defined by rattler-build - use the value if it was supplied to ensure consistency
+if(DEFINED ENV{PKG_VERSION})
+  message(STATUS "Using version from environment=$ENV{PKG_VERSION}")
+  set(_version_str "$ENV{PKG_VERSION}")
+else()
+  # Use versioningit to compute version number to match conda-build
+  execute_process(
+    COMMAND "${Python_EXECUTABLE}" -m versioningit
+    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+    OUTPUT_VARIABLE _version_str
+    ERROR_VARIABLE _error
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+  )
+endif()
 
 # Expect format defined as in comments above. Major.Minor.Patch(.Patch)(.devN|rcN)(+abc)
 if(_version_str MATCHES "([0-9]+)\\.([0-9]+)\\.([0-9]+(\\.[0-9]+)*)(rc[0-9]+)?(\\.dev[0-9]+)?(\\+[A-Za-z0-9.]+)?")
@@ -57,13 +65,17 @@ if(NOT _version_str STREQUAL "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}
   message(FATAL_ERROR "Error when extracting version information from version string ${_version_str}")
 endif()
 
-# Revision information
+# Revision information from git for CONDA_BUILD (i.e. rattler-build) this information has to be injected from the
+# environment
 execute_process(
   COMMAND ${GIT_EXECUTABLE} rev-parse HEAD
   OUTPUT_VARIABLE REVISION_FULL
   WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
   OUTPUT_STRIP_TRAILING_WHITESPACE
 )
+if(REVISION_FULL STREQUAL "")
+  set(REVISION_FULL "UNKNOWN")
+endif()
 
 execute_process(
   COMMAND ${GIT_EXECUTABLE} rev-parse --short HEAD
@@ -72,7 +84,11 @@ execute_process(
   OUTPUT_STRIP_TRAILING_WHITESPACE
 )
 # Historically the short revision has been prefixed with a 'g'
-set(REVISION_SHORT "g${REVISION_SHORT}")
+if(REVISION_SHORT STREQUAL "")
+  set(REVISION_SHORT "UNKNOWN")
+else()
+  set(REVISION_SHORT "g${REVISION_SHORT}")
+endif()
 
 # Get the date of the last commit
 execute_process(
@@ -80,4 +96,11 @@ execute_process(
   OUTPUT_VARIABLE REVISION_DATE
   WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
 )
-string(SUBSTRING ${REVISION_DATE} 0 16 REVISION_DATE)
+if(REVISION_DATE STREQUAL "")
+  set(REVISION_DATE "UNKNOWN")
+else()
+  # only the last portion of the datetime
+  string(SUBSTRING ${REVISION_DATE} 0 16 REVISION_DATE)
+endif()
+
+message(STATUS "Git revision ${REVISION_FULL} on ${REVISION_DATE}")

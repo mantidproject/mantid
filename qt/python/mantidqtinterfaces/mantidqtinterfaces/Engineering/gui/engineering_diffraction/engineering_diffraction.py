@@ -60,10 +60,21 @@ class EngineeringDiffractionGui(QtWidgets.QMainWindow, Ui_main_window):
 
         # setup that can only happen with presenter created
         self.setup_statusbar()
+        # Calibration Tab
         self.set_on_instrument_changed(self.presenter.calibration_presenter.set_instrument_override)
         self.set_on_rb_num_changed(self.presenter.calibration_presenter.set_rb_num)
+        # Absorption Correction Tab
+        self.set_on_instrument_changed(self.presenter.correction_presenter.set_instrument_override)
+        self.set_on_rb_num_changed(self.presenter.correction_presenter.set_rb_num)
+        # Focus Tab
         self.set_on_instrument_changed(self.presenter.focus_presenter.set_instrument_override)
         self.set_on_rb_num_changed(self.presenter.focus_presenter.set_rb_num)
+        # Fitting Tab
+        self.set_on_rb_num_changed(self.presenter.fitting_presenter.set_rb_num)
+        # Texture Tab
+        self.set_on_instrument_changed(self.presenter.texture_presenter.set_instrument_override)
+        self.set_on_rb_num_changed(self.presenter.texture_presenter.set_rb_num)
+        # GSAS Tab
         # self.set_on_instrument_changed(self.presenter.gsas2_presenter.set_instrument_override)
         self.set_on_rb_num_changed(self.presenter.gsas2_presenter.set_rb_num)
 
@@ -87,8 +98,10 @@ class EngineeringDiffractionGui(QtWidgets.QMainWindow, Ui_main_window):
         presenter = EngineeringDiffractionPresenter()
         presenter.setup_settings(self)  # init before fitting otherwise default peak not populated on first time opened
         presenter.setup_calibration(self)
+        presenter.setup_correction(self)
         presenter.setup_focus(self)
         presenter.setup_fitting(self)
+        presenter.setup_texture(self)
         presenter.setup_gsas2(self)
         presenter.setup_calibration_notifier()
         presenter.statusbar_observable.add_subscriber(self.update_statusbar_text_observable)

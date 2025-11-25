@@ -206,7 +206,7 @@ const std::map<V3D, UniqueReflection> &UniqueReflectionCollection::getReflection
  * @param weightedZ :: True for weighted Zscore
  */
 void PeaksStatistics::calculatePeaksStatistics(const std::map<V3D, UniqueReflection> &uniqueReflections,
-                                               std::string &equivalentIntensities, double &sigmaCritical,
+                                               std::string const &equivalentIntensities, double &sigmaCritical,
                                                bool &weightedZ) {
   double rMergeNumerator = 0.0;
   double rPimNumerator = 0.0;

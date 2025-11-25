@@ -117,11 +117,12 @@ private:
                       std::shared_ptr<Geometry::Instrument> &instrument, double T0);
 
   /// Save the calibration table to a CSV file
-  void saveCalibrationTable(const std::string &FileName, Mantid::API::ITableWorkspace_sptr &tws);
+  void saveCalibrationTable(const std::string &FileName, Mantid::API::ITableWorkspace_sptr const &tws);
 
   /// Profile related functions
   void profileL1(Mantid::API::IPeaksWorkspace_sptr &pws, Mantid::API::IPeaksWorkspace_sptr pws_original);
-  void profileBanks(Mantid::API::IPeaksWorkspace_sptr &pws, const Mantid::API::IPeaksWorkspace_sptr &pws_original);
+  void profileBanks(Mantid::API::IPeaksWorkspace_sptr const &pws,
+                    const Mantid::API::IPeaksWorkspace_sptr &pws_original);
   void profileT0(Mantid::API::IPeaksWorkspace_sptr &pws, Mantid::API::IPeaksWorkspace_sptr pws_original);
   void profileL1T0(Mantid::API::IPeaksWorkspace_sptr &pws, Mantid::API::IPeaksWorkspace_sptr pws_original);
 

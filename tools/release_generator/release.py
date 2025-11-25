@@ -157,8 +157,7 @@ def getTemplateRoot() -> pathlib.Path:
 
 
 def fixReleaseName(name):
-    if name.startswith("v"):
-        name = name[1:]
+    name = name.removeprefix("v")
 
     # make sure that all of the parts can be converted to integers
     try:

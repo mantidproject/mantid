@@ -23,7 +23,7 @@ Kernel::IValidator_sptr NumericAxisValidator::clone() const { return std::make_s
  *  @return A message for users with negative results, otherwise ""
  */
 std::string NumericAxisValidator::checkValidity(const MatrixWorkspace_sptr &value) const {
-  Mantid::API::Axis *axis;
+  Mantid::API::Axis const *axis;
   try {
     axis = value->getAxis(m_axisNumber);
   } catch (Kernel::Exception::IndexError &) {

@@ -62,14 +62,15 @@ MinAndMaxTof getMinAndMaxTofForDistanceFromSoure(double distanceFromSource, doub
   return MinAndMaxTof(minTof, maxTof);
 }
 
-double getDistanceFromSourceForWorkspaceIndex(Mantid::API::MatrixWorkspace *workspace,
+double getDistanceFromSourceForWorkspaceIndex(Mantid::API::MatrixWorkspace const *workspace,
                                               const Mantid::API::SpectrumInfo &spectrumInfo, size_t workspaceIndex) {
   const auto &detector = spectrumInfo.detector(workspaceIndex);
   return detector.getDistance(*(workspace->getInstrument()->getSource()));
 }
 
-MinAndMaxTof getMinAndMaxTof(Mantid::API::MatrixWorkspace *workspace, const Mantid::API::SpectrumInfo &spectrumInfo,
-                             size_t workspaceIndex, double lowerWavelengthLimit, double upperWavelengthLimit) {
+MinAndMaxTof getMinAndMaxTof(Mantid::API::MatrixWorkspace const *workspace,
+                             const Mantid::API::SpectrumInfo &spectrumInfo, size_t workspaceIndex,
+                             double lowerWavelengthLimit, double upperWavelengthLimit) {
   const auto distanceFromSource = getDistanceFromSourceForWorkspaceIndex(workspace, spectrumInfo, workspaceIndex);
   return getMinAndMaxTofForDistanceFromSoure(distanceFromSource, lowerWavelengthLimit, upperWavelengthLimit);
 }
@@ -82,7 +83,7 @@ MinAndMaxTof getMinAndMaxTof(Mantid::API::MatrixWorkspace *workspace, const Mant
  * @param workspaceIndex the particular histogram index
  * @return a BinEdges object
  */
-Mantid::HistogramData::Points getPoints(Mantid::API::MatrixWorkspace *workspace, size_t workspaceIndex) {
+Mantid::HistogramData::Points getPoints(Mantid::API::MatrixWorkspace const *workspace, size_t workspaceIndex) {
   auto points = workspace->points(workspaceIndex);
   std::vector<double> doubledData(2 * points.size(), 0);
   std::copy(std::begin(points), std::end(points), std::begin(doubledData));
@@ -183,7 +184,7 @@ void setTofAboveUpperBoundToZero(std::vector<double> &doubledData, int maxIndex)
  * @param binEdges the TOF BinEdges object
  * @return a Counts object
  */
-Mantid::HistogramData::Counts getCounts(Mantid::API::MatrixWorkspace *workspace, size_t workspaceIndex,
+Mantid::HistogramData::Counts getCounts(Mantid::API::MatrixWorkspace const *workspace, size_t workspaceIndex,
                                         const MinAndMaxTof &minMaxTof, const Mantid::HistogramData::Points &points) {
   // Create the data twice
   auto counts = workspace->counts(workspaceIndex);

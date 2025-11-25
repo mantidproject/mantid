@@ -95,8 +95,7 @@ class MaskWorkspaceToCalFile(PythonAlgorithm):
                     detIDs = det.getDetectorIDs()
                 except AttributeError:
                     detIDs = [det.getID()]
-                for did in detIDs:
-                    calFile.write(self.FormatLine(i, did, 0.0, group, group))
+                calFile.writelines(self.FormatLine(i, did, 0.0, group, group) for did in detIDs)
             except RuntimeError:
                 # no detector for this spectra
                 pass

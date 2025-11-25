@@ -16,6 +16,8 @@
         <file>panning.png</file>
         <file>history.png</file>
         <file>history_off.png</file>
+        <file>history_dynamic_default.png</file>
+        <file>history_off_dynamic_default.png</file>
         <file>invalid.png</file>
         <file>replace.png</file>
         <file>mantid.png</file>

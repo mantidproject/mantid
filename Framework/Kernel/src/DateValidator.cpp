@@ -119,7 +119,7 @@ std::string DateValidator::checkValidity(const std::string &value) const {
   // get current time
   time_t rawtime;
   time(&rawtime);
-  struct tm *currenttime = localtime(&rawtime);
+  struct tm const *currenttime = localtime(&rawtime);
   if (timeinfo.tm_year > currenttime->tm_year) {
     return "Invalid Date:Year part of the Date parameter can not be greater "
            "than the current year";

@@ -72,6 +72,12 @@ public:
   void setValue(const QString &value);
   /// Set this widget's previously-entered value.
   void setPreviousValue(const QString &previousValue);
+  /// Set the `isDynamicDefault` flag associated with the previously-entered value.
+  void setPrevious_isDynamicDefault(bool flag);
+
+  /// Transfer the history state from another `PropertyWidget`, possibly additionally depending
+  /// on the history state of an upstream property.
+  void transferHistoryState(const PropertyWidget *other, const PropertyWidget *upstream = nullptr);
 
   virtual QWidget *getMainWidget() = 0;
 
@@ -87,6 +93,7 @@ public:
   void addReplaceWSButton();
 
   /// @return the property in the widget
+  const Mantid::Kernel::Property *getProperty() const { return m_prop; }
   Mantid::Kernel::Property *getProperty() { return m_prop; }
 
   void setError(const QString &error);
@@ -97,19 +104,23 @@ private:
 public slots:
   /// Update which icons should be shown.
   void updateIconVisibility(const QString &error = "");
+
   /// Deal with the "replace workspace" button being clicked.
   void replaceWSButtonClicked();
+
   /// Emits a signal that the value of the property was changed.
   void valueChangedSlot();
+
   /// To be called when a user edits a property, as opposed to one being set
   /// programmatically.
   void userEditedProperty();
+
   /// Toggle whether or not to use the previously-entered value.
   void toggleUseHistory();
 
 private:
-  /// Sets the history on/off icons.
-  void setUseHistoryIcon(bool useHistory);
+  /// Sets the history on/off icons and the dynamic-default marker.
+  void setUseHistoryIcon(bool useHistory, bool isDynamicDefault);
 
 signals:
   /// Signal is emitted whenever the value (as entered by the user) in the GUI
@@ -147,6 +158,9 @@ protected:
   /// All contained widgets
   QVector<QWidget *> m_widgets;
 
+  /// Last modified value
+  QString m_lastValue;
+
   /// Error message received when trying to set the value
   QString m_error;
 
@@ -156,8 +170,14 @@ protected:
   /// Stores the previously entered value when this dialog was last open.
   QString m_previousValue;
 
-  /// Stored the last non-previously-entered value entered entered by the user.
+  /// Stores the `isDynamicDefault` flag corresponding to the previously entered value.
+  bool m_previous_isDynamicDefault;
+
+  /// Stores the last value entered by the user.
   QString m_enteredValue;
+
+  /// Stores the `isDynamicDefault` flag corresponding to the last value entered by the user.
+  bool m_entered_isDynamicDefault;
 
   /// Allow icon access by Info enum.
   QMap<Info, ClickableLabel *> m_icons;

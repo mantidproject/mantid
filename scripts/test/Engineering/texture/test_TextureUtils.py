@@ -1,3 +1,10 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2025 ISIS Rutherford Appleton Laboratory UKRI,
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
+# SPDX - License - Identifier: GPL - 3.0 +
+#
 import unittest
 from unittest.mock import patch, MagicMock, call
 
@@ -12,7 +19,6 @@ from Engineering.texture.TextureUtils import (
     fit_all_peaks,
     make_iterable,
     create_pf_loop,
-    get_xtal_structure,
     _get_run_and_prefix_from_ws_log,
     _get_grouping_from_ws_log,
     TexturePeakFunctionGenerator,
@@ -23,45 +29,7 @@ import os
 texture_utils_path = "Engineering.texture.TextureUtils"
 
 
-class CrystalPhaseHelperMixin:
-    def get_valid_xtal_string_kwargs(self):
-        return {"lattice": "2.8665  2.8665  2.8665", "space_group": "I m -3 m", "basis": "Fe 0 0 0 1.0 0.05; Fe 0.5 0.5 0.5 1.0 0.05"}
-
-    def get_valid_xtal_array_kwargs(self):
-        return {"alatt": ones(3), "space_group": "I m -3 m", "basis": "Fe 0 0 0 1.0 0.05; Fe 0.5 0.5 0.5 1.0 0.05"}
-
-    def get_valid_xtal_cif_kwargs(self):
-        return {"cif_file": "example.cif"}
-
-    def get_invalid_kwargs_dict(self, valid_kwarg_dict, key):
-        valid_kwarg_dict["bad_val"] = valid_kwarg_dict.pop(key)
-        return valid_kwarg_dict
-
-    def get_invalid_kwargs_val_dict(self, valid_kwarg_dict, key, bad_val):
-        valid_kwarg_dict[key] = bad_val
-        return valid_kwarg_dict
-
-    def exec_kwarg_checker(self, valid_kwargs_dict, input_type):
-        valid_kwargs = list(valid_kwargs_dict.keys())
-        for key in valid_kwargs:
-            bad_kwargs_dict = self.get_invalid_kwargs_dict(valid_kwargs_dict, key)
-            self.assertFalse(self.try_make_xtal_from_args(input_type, bad_kwargs_dict))
-
-    def try_make_xtal_from_args(self, input_type, kwargs_dict):
-        try:
-            get_xtal_structure(input_type, **kwargs_dict)
-            return True
-        except Exception:
-            return False
-
-    def exec_bad_val_checker(self, valid_kwargs_dict, input_type, bad_val):
-        valid_kwargs = valid_kwargs_dict.keys()
-        for key in valid_kwargs:
-            bad_kwargs_dict = self.get_invalid_kwargs_val_dict(valid_kwargs_dict, key, bad_val)
-            self.assertFalse(self.try_make_xtal_from_args(input_type, bad_kwargs_dict))
-
-
-class TextureUtilsTest(CrystalPhaseHelperMixin, unittest.TestCase):
+class TextureUtilsTest(unittest.TestCase):
     def test_find_all_files_returns_only_files(self):
         with tempfile.TemporaryDirectory() as tmpdir:
             file_path = os.path.join(tmpdir, "file1.txt")
@@ -90,43 +58,90 @@ class TextureUtilsTest(CrystalPhaseHelperMixin, unittest.TestCase):
         mock_model.main.assert_called_once()
         mock_mk.assert_called_once_with("focus")
 
+    @patch(f"{texture_utils_path}.logger")
+    @patch(f"{texture_utils_path}.validate_abs_corr_inputs")
     @patch(f"{texture_utils_path}.TextureCorrectionModel")
-    def test_run_abs_corr_executes_full_pipeline(self, mock_model_class):
+    def test_run_abs_corr_executes_full_pipeline(self, mock_model_class, mock_validate, mock_logger):
+        # Arrange
         mock_model = MagicMock()
         mock_model_class.return_value = mock_model
-        wss = ["ws1", "ws2"]
-        run_abs_corr(
-            wss=wss,
-            ref_ws="ref",
-            orientation_file="orient.txt",
-            orient_file_is_euler=True,
-            euler_scheme="xyz",
-            euler_axes_sense="right",
-            copy_ref=True,
-            include_abs_corr=True,
-            monte_carlo_args="Arg: Val",
-            gauge_vol_preset="4mmCube",
-            gauge_vol_shape_file="shape.xml",
-            include_atten_table=True,
-            eval_point="1.54",
-            eval_units="Angstrom",
-            exp_name="exp1",
-            root_dir="/tmp",
-            include_div_corr=True,
-            div_hoz=1.0,
-            div_vert=1.0,
-            det_hoz=0.5,
-            clear_ads_after=True,
-        )
+        mock_validate.return_value = (True, "")
 
+        wss = ["ws1", "ws2"]
+        # Act
+        with tempfile.TemporaryDirectory() as d:
+            run_abs_corr(
+                wss=wss,
+                ref_ws="ref",
+                orientation_file="orient.txt",
+                orient_file_is_euler=True,
+                euler_scheme="xyz",
+                euler_axes_sense="right",
+                copy_ref=True,
+                include_abs_corr=True,
+                monte_carlo_args="Arg: Val",
+                gauge_vol_preset="4mmCube",
+                gauge_vol_shape_file="shape.xml",
+                include_atten_table=True,
+                eval_point="1.54",
+                eval_units="Angstrom",
+                exp_name="exp1",
+                root_dir=d,
+                include_div_corr=True,
+                div_hoz=1.0,
+                div_vert=1.0,
+                det_hoz=0.5,
+                clear_ads_after=True,
+            )
+
+        mock_validate.assert_called_once_with(
+            "ref",
+            "orient.txt",
+            True,
+            "xyz",
+            "right",
+            True,
+            True,
+            "4mmCube",
+            "shape.xml",
+            True,
+            "1.54",
+            "Angstrom",
+            True,
+            1.0,
+            1.0,
+            0.5,
+        )
+        mock_logger.error.assert_not_called()
+
+        # Orientation file triggers a load
         mock_model.load_all_orientations.assert_called_once_with(wss, "orient.txt", True, "xyz", "right")
+
+        # Copy ref when requested
         mock_model.copy_sample_info.assert_called_once_with("ref", wss)
-        self.assertEqual(mock_model.define_gauge_volume.call_count, 2)
-        self.assertEqual(mock_model.calc_absorption.call_count, 2)
-        self.assertEqual(mock_model.read_attenuation_coefficient_at_value.call_count, 2)
-        self.assertEqual(mock_model.write_atten_val_table.call_count, 2)
-        self.assertEqual(mock_model.calc_divergence.call_count, 2)
-        self.assertEqual(mock_model.apply_corrections.call_count, 2)
+
+        # Set processing flags / metadata
+        mock_model.set_include_abs.assert_called_once_with(True)
+        mock_model.set_include_atten.assert_called_once_with(True)
+        mock_model.set_include_div.assert_called_once_with(True)
+        mock_model.set_rb_num.assert_called_once_with("exp1")
+        mock_model.set_remove_after_processing.assert_called_once_with(True)
+
+        # corrections call: check args and kwargs
+        mock_model.calc_all_corrections.assert_called_once()
+        args, kwargs = mock_model.calc_all_corrections.call_args
+
+        # Positional args
+        self.assertEqual(args[0], ["ws1", "ws2"])
+        self.assertEqual(args[1], ["Corrected_ws1", "Corrected_ws2"])
+
+        # Keyword args
+        self.assertEqual(
+            kwargs["abs_args"],
+            {"gauge_vol_preset": "4mmCube", "gauge_vol_file": "shape.xml", "mc_param_str": "Arg: Val"},
+        )
+        self.assertEqual(kwargs["atten_args"], {"atten_val": "1.54", "atten_units": "Angstrom"})
+        self.assertEqual(kwargs["div_args"], {"hoz": 1.0, "vert": 1.0, "det_hoz": 0.5})
 
     @patch(f"{texture_utils_path}.logger")
     @patch(f"{texture_utils_path}.TextureCorrectionModel")
@@ -410,50 +425,6 @@ class TextureUtilsTest(CrystalPhaseHelperMixin, unittest.TestCase):
                 bg_func_name="LinearBackground",
             )
             self.assertIn("Invalid parameter(s) to tie", str(ctx.exception))
-
-    def test_make_xtal_from_string(self):
-        string_kwargs = self.get_valid_xtal_string_kwargs()
-        self.assertTrue(self.try_make_xtal_from_args("string", string_kwargs))
-
-    def test_make_phase_from_array(self):
-        array_kwargs = self.get_valid_xtal_array_kwargs()
-        self.assertTrue(self.try_make_xtal_from_args("array", array_kwargs))
-
-    @patch(f"{texture_utils_path}.LoadCIF")
-    @patch(f"{texture_utils_path}.CreateSingleValuedWorkspace")
-    def test_make_xtal_from_cif(self, mock_create, mock_load):
-        cif_kwargs = self.get_valid_xtal_cif_kwargs()
-
-        # setup mocks for the cif loading
-        mock_ws = MagicMock()
-        mock_sample = MagicMock()
-        mock_ws.sample().return_value = mock_sample
-        mock_create.return_value = mock_ws
-        mock_load.return_value = MagicMock()
-
-        # check
-        self.assertTrue(self.try_make_xtal_from_args("cif", cif_kwargs))
-        mock_create.assert_called_once()
-        mock_load.assert_called_once()
-
-    def test_make_xtal_from_string_gives_error_invalid_kwarg(self):
-        self.exec_kwarg_checker(self.get_valid_xtal_string_kwargs(), "string")
-
-    def test_make_xtal_from_array_gives_error_invalid_kwarg(self):
-        self.exec_kwarg_checker(self.get_valid_xtal_array_kwargs(), "array")
-
-    def test_make_xtal_from_cif_gives_error_invalid_kwarg(self):
-        self.exec_kwarg_checker(self.get_valid_xtal_cif_kwargs(), "cif")
-
-    def test_make_xtal_from_string_gives_error_bad_vals(self):
-        self.exec_bad_val_checker(self.get_valid_xtal_string_kwargs(), "string", "test")
-
-    def test_make_xtal_from_array_gives_error_bad_vals(self):
-        self.exec_bad_val_checker(self.get_valid_xtal_string_kwargs(), "array", "test")
-
-    def test_get_xtal_structure_invalid_input_method_raises(self):
-        with self.assertRaises(ValueError):
-            get_xtal_structure("invalid_method")
 
     def get_default_pf_kwargs(self):
         return {

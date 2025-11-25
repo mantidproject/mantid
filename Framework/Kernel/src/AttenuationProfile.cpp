@@ -8,7 +8,6 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Material.h"
-#include <Poco/Path.h>
 #include <filesystem>
 #include <fstream>
 
@@ -25,19 +24,23 @@ namespace Mantid::Kernel {
  * extrapolate beyond the lambda range of the supplied profile
  */
 AttenuationProfile::AttenuationProfile(const std::string &inputFileName, const std::string &searchPath,
-                                       Material *extrapolationMaterial, double extrapolationMaxX) {
-  Poco::Path suppliedFileName(inputFileName);
-  Poco::Path inputFilePath;
-  std::string fileExt = suppliedFileName.getExtension();
+                                       Material const *extrapolationMaterial, double extrapolationMaxX) {
+  std::filesystem::path suppliedFileName(inputFileName);
+  std::filesystem::path inputFilePath;
+  std::string fileExt = suppliedFileName.extension().string();
+  // Remove leading dot from extension if present
+  if (!fileExt.empty() && fileExt[0] == '.') {
+    fileExt = fileExt.substr(1);
+  }
   std::transform(fileExt.begin(), fileExt.end(), fileExt.begin(), toupper);
 
   if (fileExt == "DAT") {
-    if (suppliedFileName.isRelative()) {
+    if (suppliedFileName.is_relative()) {
       bool useSearchDirectories = true;
 
       if (!searchPath.empty()) {
-        inputFilePath = Poco::Path(Poco::Path(searchPath).parent(), inputFileName);
-        if (std::filesystem::exists(inputFilePath.toString())) {
+        inputFilePath = std::filesystem::path(searchPath).parent_path() / inputFileName;
+        if (std::filesystem::exists(inputFilePath)) {
           useSearchDirectories = false;
         }
       }
@@ -45,15 +48,15 @@ AttenuationProfile::AttenuationProfile(const std::string &inputFileName, const s
         // ... and if that doesn't work look in the search directories
         std::string foundFile = Mantid::Kernel::ConfigService::Instance().getFullPath(inputFileName, false, 0);
         if (!foundFile.empty()) {
-          inputFilePath = Poco::Path(foundFile);
+          inputFilePath = std::filesystem::path(foundFile);
         } else {
-          inputFilePath = suppliedFileName;
+          inputFilePath = std::move(suppliedFileName);
         }
       }
     } else {
       inputFilePath = suppliedFileName;
     }
-    std::ifstream input(inputFilePath.toString(), std::ios_base::in);
+    std::ifstream input(inputFilePath, std::ios_base::in);
     if (input) {
       std::string line;
       double minX = std::numeric_limits<double>::max();

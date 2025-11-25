@@ -243,7 +243,7 @@ double Stitch1D::getEndOverlap(const double intesectionMin, const double intesec
 std::vector<double> Stitch1D::getRebinParams(MatrixWorkspace_const_sptr &lhsWS, MatrixWorkspace_const_sptr &rhsWS,
                                              const bool scaleRHS) const {
   std::vector<double> inputParams = this->getProperty("Params");
-  Property *prop = this->getProperty("Params");
+  Property const *prop = this->getProperty("Params");
   const bool areParamsDefault = prop->isDefault();
 
   const auto &lhsX = lhsWS->x(0);

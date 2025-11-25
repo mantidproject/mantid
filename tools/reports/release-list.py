@@ -84,7 +84,7 @@ def getMilestones(endpoint, oauth=None):
     req_params = {"state": "all"}
     if oauth is not None:
         req_params["access_token"] = oauth
-    req = requests.get("%smilestones" % endpoint, params=req_params)
+    req = requests.get("%smilestones" % endpoint, params=req_params, timeout=10)
     status_code = req.status_code
     if status_code == 403:
         print("status:", status_code)
@@ -100,7 +100,7 @@ def getMilestones(endpoint, oauth=None):
     while status_code == 200:
         # we have more pages
         try:
-            req = requests.get(req.links["next"]["url"])
+            req = requests.get(req.links["next"]["url"], timeout=10)
             if status_code == 403:
                 print("status:", status_code)
                 print(json_doc()["message"])

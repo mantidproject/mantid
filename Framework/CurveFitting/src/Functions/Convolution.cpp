@@ -399,7 +399,7 @@ void Convolution::functionDirectMode(const FunctionDomain &domain, FunctionValue
     Mantid::API::FunctionValues valuesExtd(domainExtd);
     getFunction(1)->function(domainExtd, valuesExtd);
     // Convolve with resolution
-    double *outExt = valuesExtd.getPointerToCalculated(0);
+    double const *outExt = valuesExtd.getPointerToCalculated(0);
     for (size_t i = 0; i < nData; i++) {
       double tmp{0.0};
       for (size_t j = 0; j < nData; j++) {
@@ -489,7 +489,7 @@ void Convolution::refreshResolution() const {
   bool needRefreshing = m_resolution.empty();
   if (!needRefreshing) {
     // if resolution has active parameters always refresh
-    IFunction &res = *getFunction(0);
+    IFunction const &res = *getFunction(0);
     for (size_t i = 0; i < res.nParams(); ++i) {
       if (res.isActive(i)) {
         needRefreshing = true;

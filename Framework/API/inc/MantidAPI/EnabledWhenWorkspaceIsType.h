@@ -47,7 +47,7 @@ public:
     // Find the property
     if (!algo)
       return true;
-    Mantid::Kernel::Property *prop = nullptr;
+    Mantid::Kernel::Property const *prop = nullptr;
     try {
       prop = algo->getPointerToProperty(m_otherPropName);
     } catch (Mantid::Kernel::Exception::NotFoundError &) {
@@ -83,6 +83,14 @@ public:
   //--------------------------------------------------------------------------------------------
   /// Return true always
   bool isVisible(const Kernel::IPropertyManager *) const override { return true; }
+
+  //--------------------------------------------------------------------------------------------
+  /// Other properties that this property depends on.
+  std::vector<std::string> dependsOn(const std::string &thisProp) const override {
+    if (m_otherPropName == thisProp)
+      throw std::runtime_error("EnabledWhenWorkspaceIsType: circular dependency detected");
+    return std::vector<std::string>{m_otherPropName};
+  }
 
   //--------------------------------------------------------------------------------------------
   /// Make a copy of the present type of validator

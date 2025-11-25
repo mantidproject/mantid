@@ -56,7 +56,7 @@ OptionalLabelPeakIndexMap createOptionalLabelFilter(size_t dimensionality, int e
     PeakClusterProjection projection(clusterImage);
 
     for (int i = 0; i < filterWorkspace->getNumberPeaks(); ++i) {
-      Mantid::Geometry::IPeak &peak = filterWorkspace->getPeak(i);
+      Mantid::Geometry::IPeak const &peak = filterWorkspace->getPeak(i);
       const auto labelIdAtPeakCenter = static_cast<int>(projection.signalAtPeakCenter(peak));
       if (labelIdAtPeakCenter > emptyLabelId) {
         allowedLabels.emplace(labelIdAtPeakCenter, i);
@@ -114,7 +114,7 @@ container
 @param localClusterFaces : collection of cluster faces to add faces to
 (writable)
 */
-void findFacesAtIndex(const size_t linearIndex, IMDIterator *mdIterator, IMDHistoWorkspace_sptr &clusterImage,
+void findFacesAtIndex(const size_t linearIndex, IMDIterator const *mdIterator, IMDHistoWorkspace_sptr &clusterImage,
                       const double &radius, const int &id, const int &emptyLabelId,
                       const std::vector<size_t> &imageShape, ClusterFaces &localClusterFaces) {
   auto indexes = Mantid::Kernel::Utils::getIndicesFromLinearIndex(linearIndex, imageShape);

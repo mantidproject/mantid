@@ -2886,6 +2886,7 @@ class ConvertToQISIS(ReductionStep):
                     WavePixelAdj=wavepixeladj,
                     ExtraLength=self._grav_extra_length,
                     QResolution=qResolution,
+                    SolidAngleNumberOfCylinderSlices=11,
                 )
             elif self._Q_alg == "Qxy":
                 Qxy(
@@ -2900,6 +2901,7 @@ class ConvertToQISIS(ReductionStep):
                     WaveCut=self.w_cut,
                     OutputParts=self.outputParts,
                     ExtraLength=self._grav_extra_length,
+                    SolidAngleNumberOfCylinderSlices=11,
                 )
                 ReplaceSpecialValues(
                     InputWorkspace=workspace,
@@ -3208,7 +3210,7 @@ class UnitsConvert(ReductionStep):
             bin_alg = self.rebin_alg
 
         rebin_com = bin_alg + '(workspace, "' + self._get_rebin(low_wav, self.wav_step, high_wav) + '", OutputWorkspace=workspace)'
-        eval(rebin_com)
+        eval(rebin_com)  # noqa: S307
 
     def _get_rebin(self, low, step, high):
         """

@@ -27,6 +27,7 @@ The code changes should be manually reviewed (the github compare view is ideal f
   * Have a performance test, if appropriate.
 
 * Check that any user documentation is adequate and that there are release notes.  In the case of new algorithms, there should be an accompanying ``*.rst`` file that has been added, containing an explanation of what exactly the algorithm does along with Python usage examples.
+* For increased security of the CI runs, the author of a pull request must be a member of the ``mantid-developers`` or ``mantid-contributors`` Git teams to automatically trigger the CI workflows. Otherwise, the pull request must be manually authorized by a member of one of the above teams after thoroughly reviewing the proposed changes, by submitting a *pull request review comment* with the text ``rerun ci`` to authorize and trigger the CI workflows.
 
 Functional Testing
 ==================

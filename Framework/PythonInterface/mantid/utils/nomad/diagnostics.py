@@ -236,7 +236,6 @@ class _NOMADMedianDetectorTest:
         # sanity check
         assert not_collimated_lowers.shape == (instrument_config.num_pixels,)
         assert not_collimated_masks.shape == not_collimated_uppers.shape
-
         # Calculate boundary for full collimated pixels
         # condition 3:
         full_collimated_lowers = (1.0 + (low_pixel - 1) * 3.0) * tube_m_array

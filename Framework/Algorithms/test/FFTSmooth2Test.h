@@ -16,6 +16,7 @@
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
+using namespace Mantid::Algorithms::FFTSmooth::PropertyNames;
 
 class FFTSmooth2Test : public CxxTest::TestSuite {
 public:
@@ -24,34 +25,71 @@ public:
   void testVersion() { TS_ASSERT_EQUALS(fftsmooth2.version(), 2) }
 
   void testInit() {
-    Mantid::Algorithms::FFTSmooth2 fftsmooth2_b;
+    Mantid::Algorithms::FFTSmooth::FFTSmooth2 fftsmooth2_b;
     TS_ASSERT_THROWS_NOTHING(fftsmooth2_b.initialize());
     TS_ASSERT(fftsmooth2_b.isInitialized());
 
     const std::vector<Property *> props = fftsmooth2_b.getProperties();
     TS_ASSERT_EQUALS(props.size(), 7);
 
-    TS_ASSERT_EQUALS(props[0]->name(), "InputWorkspace");
+    TS_ASSERT_EQUALS(props[0]->name(), INPUT_WKSP);
     TS_ASSERT(props[0]->isDefault());
     TS_ASSERT(dynamic_cast<WorkspaceProperty<MatrixWorkspace> *>(props[0]));
 
-    TS_ASSERT_EQUALS(props[1]->name(), "OutputWorkspace");
+    TS_ASSERT_EQUALS(props[1]->name(), OUTPUT_WKSP);
     TS_ASSERT(props[1]->isDefault());
     TS_ASSERT(dynamic_cast<WorkspaceProperty<MatrixWorkspace> *>(props[1]));
 
-    TS_ASSERT_EQUALS(props[2]->name(), "WorkspaceIndex");
+    TS_ASSERT_EQUALS(props[2]->name(), WKSP_INDEX);
     TS_ASSERT(props[2]->isDefault());
     TS_ASSERT(dynamic_cast<PropertyWithValue<int> *>(props[2]));
 
-    TS_ASSERT_EQUALS(props[3]->name(), "Filter");
+    TS_ASSERT_EQUALS(props[3]->name(), FILTER);
     TS_ASSERT(props[3]->isDefault());
     TS_ASSERT_EQUALS(props[3]->value(), "Zeroing");
-    TS_ASSERT(dynamic_cast<PropertyWithValue<std::string> *>(props[3]));
+    // NOTE: enumerated string properties cannot be converted to a PropertyWithValue
+    // To test here, the enum and vector would need to be accessible, but they are not
 
-    TS_ASSERT_EQUALS(props[4]->name(), "Params");
+    TS_ASSERT_EQUALS(props[4]->name(), PARAMS);
     TS_ASSERT(props[4]->isDefault());
-    TS_ASSERT_EQUALS(props[4]->value(), "");
-    TS_ASSERT(dynamic_cast<PropertyWithValue<std::string> *>(props[4]));
+    TS_ASSERT(!props[4]->value().empty()); // will equal default of {2, 2}
+    TS_ASSERT(dynamic_cast<ArrayProperty<std::size_t> *>(props[4]));
+  }
+
+  // check the Params property can be set with strings
+  void doTestSetParams(std::string const &input, std::vector<std::size_t> const &res) {
+    Mantid::Algorithms::FFTSmooth::FFTSmooth2 alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty(PARAMS, input));
+
+    std::vector<std::size_t> params = alg.getProperty(PARAMS);
+    TS_ASSERT(!params.empty());
+    TS_ASSERT_EQUALS(params, res);
+  }
+
+  void testSetParams() { // set the parameter values every possible way
+    Mantid::Algorithms::FFTSmooth::FFTSmooth2 alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
+
+    // set one value
+    doTestSetParams(" 12\t ", {12});
+
+    // set with space
+    doTestSetParams(" 7  3 ", {7, 3});
+
+    // set with comma
+    doTestSetParams("3, 4  ", {3, 4});
+
+    // set with semicolon
+    doTestSetParams(" 5; 6", {5, 6});
+
+    // set with colon
+    doTestSetParams("7:8 ", {7, 8});
+
+    // set with tab
+    doTestSetParams("9\t10", {9, 10});
   }
 
   void testZeroing() { // load input and "Gold" result workspaces
@@ -66,15 +104,15 @@ public:
     loader.setProperty("OutputWorkspace", "ZeroingGoldWS");
     loader.execute();
     // create and execute the algorithm for "Zeroing"
-    Mantid::Algorithms::FFTSmooth2 fftsmooth2_c;
+    Mantid::Algorithms::FFTSmooth::FFTSmooth2 fftsmooth2_c;
     TS_ASSERT_THROWS_NOTHING(fftsmooth2_c.initialize());
     TS_ASSERT(fftsmooth2_c.isInitialized());
 
-    TS_ASSERT_THROWS_NOTHING(fftsmooth2_c.setPropertyValue("InputWorkspace", "TestInputWS"));
-    TS_ASSERT_THROWS_NOTHING(fftsmooth2_c.setPropertyValue("OutputWorkspace", "SmoothedWS"));
-    TS_ASSERT_THROWS_NOTHING(fftsmooth2_c.setPropertyValue("WorkspaceIndex", "0"));
-    TS_ASSERT_THROWS_NOTHING(fftsmooth2_c.setPropertyValue("Filter", "Zeroing"));
-    TS_ASSERT_THROWS_NOTHING(fftsmooth2_c.setPropertyValue("Params", "100"));
+    TS_ASSERT_THROWS_NOTHING(fftsmooth2_c.setPropertyValue(INPUT_WKSP, "TestInputWS"));
+    TS_ASSERT_THROWS_NOTHING(fftsmooth2_c.setPropertyValue(OUTPUT_WKSP, "SmoothedWS"));
+    TS_ASSERT_THROWS_NOTHING(fftsmooth2_c.setPropertyValue(WKSP_INDEX, "0"));
+    TS_ASSERT_THROWS_NOTHING(fftsmooth2_c.setPropertyValue(FILTER, "Zeroing"));
+    TS_ASSERT_THROWS_NOTHING(fftsmooth2_c.setPropertyValue(PARAMS, "100"));
     TS_ASSERT_THROWS_NOTHING(fftsmooth2_c.execute());
     TS_ASSERT(fftsmooth2_c.isExecuted());
 
@@ -114,15 +152,15 @@ public:
     loader.setProperty("OutputWorkspace", "ButterworthGoldWS");
     loader.execute();
     // create and execute the algorithm for "Butterworth"
-    Mantid::Algorithms::FFTSmooth2 fftsmooth2_c;
+    Mantid::Algorithms::FFTSmooth::FFTSmooth2 fftsmooth2_c;
     TS_ASSERT_THROWS_NOTHING(fftsmooth2_c.initialize());
     TS_ASSERT(fftsmooth2_c.isInitialized());
 
-    TS_ASSERT_THROWS_NOTHING(fftsmooth2_c.setPropertyValue("InputWorkspace", "TestInputWS"));
-    TS_ASSERT_THROWS_NOTHING(fftsmooth2_c.setPropertyValue("OutputWorkspace", "SmoothedWS"));
-    TS_ASSERT_THROWS_NOTHING(fftsmooth2_c.setPropertyValue("WorkspaceIndex", "0"));
-    TS_ASSERT_THROWS_NOTHING(fftsmooth2_c.setPropertyValue("Filter", "Butterworth"));
-    TS_ASSERT_THROWS_NOTHING(fftsmooth2_c.setPropertyValue("Params", "100,2"));
+    TS_ASSERT_THROWS_NOTHING(fftsmooth2_c.setPropertyValue(INPUT_WKSP, "TestInputWS"));
+    TS_ASSERT_THROWS_NOTHING(fftsmooth2_c.setPropertyValue(OUTPUT_WKSP, "SmoothedWS"));
+    TS_ASSERT_THROWS_NOTHING(fftsmooth2_c.setPropertyValue(WKSP_INDEX, "0"));
+    TS_ASSERT_THROWS_NOTHING(fftsmooth2_c.setPropertyValue(FILTER, "Butterworth"));
+    TS_ASSERT_THROWS_NOTHING(fftsmooth2_c.setPropertyValue(PARAMS, "100,2"));
     TS_ASSERT_THROWS_NOTHING(fftsmooth2_c.execute());
     TS_ASSERT(fftsmooth2_c.isExecuted());
 
@@ -165,23 +203,23 @@ public:
 
     std::string outName = "SmoothedWS";
 
-    Mantid::Algorithms::FFTSmooth2 alg;
+    Mantid::Algorithms::FFTSmooth::FFTSmooth2 alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
 
     if (inPlace) {
       AnalysisDataService::Instance().addOrReplace("FFTSmooth2WsInput", ws1);
-      TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", "FFTSmooth2WsInput"));
+      TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue(INPUT_WKSP, "FFTSmooth2WsInput"));
       outName = "FFTSmooth2WsInput";
     } else {
-      TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", ws1));
+      TS_ASSERT_THROWS_NOTHING(alg.setProperty(INPUT_WKSP, ws1));
     }
 
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outName));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("WorkspaceIndex", WorkspaceIndex));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filter", filter));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Params", params));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("AllSpectra", AllSpectra));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue(OUTPUT_WKSP, outName));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty(WKSP_INDEX, WorkspaceIndex));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue(FILTER, filter));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue(PARAMS, params));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty(ALL_SPECTRA, AllSpectra));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
@@ -253,5 +291,5 @@ public:
   }
 
 private:
-  Mantid::Algorithms::FFTSmooth2 fftsmooth2;
+  Mantid::Algorithms::FFTSmooth::FFTSmooth2 fftsmooth2;
 };

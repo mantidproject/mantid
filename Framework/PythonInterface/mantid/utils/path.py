@@ -28,7 +28,8 @@ def run_file(run_number: Union[str, int], instrument: Optional[str] = None, onca
             int(run_number)
         except ValueError:
             raise ValueError(f"{run_number} does not represent a number")
-        assert int(run_number) > 0, f"{run_number} does not represent an positive integer number"
+        if int(run_number) <= 0:
+            raise ValueError(f"{run_number} does not represent an positive integer number")
     if instrument is None:
         instrument = config["default.instrument"]
     root_name = f"{instrument}_{run_number}"
