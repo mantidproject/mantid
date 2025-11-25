@@ -2,6 +2,7 @@ from typing import Optional, Tuple, Union
 
 import numpy as np
 from pychop import Instruments as pychop_instruments
+from pydantic import validate_call
 
 from abins.constants import MILLI_EV_TO_WAVENUMBER
 from abins.logging import get_logger, Logger
@@ -68,3 +69,29 @@ class PyChopInstrument(DirectInstrument):
         fit = np.polyfit(frequencies_invcm, resolution_sigma * MILLI_EV_TO_WAVENUMBER, order)
 
         self._polyfits[self._e_init] = fit
+
+
+@validate_call
+def validate_pychop_params(name: str, chopper: str, chopper_frequency: str, e_i: str, energy_units: str) -> dict[str, str]:
+    """Check chopper parameters are in valid range
+
+    If the chopper speed is too high relative to incident this can lead to zero transmission
+    """
+
+    EPSILON = 1e-8  # Calculation range is slightly reduced to avoid considering stationary neutrons
+
+    energy = float(e_i)
+    if energy_units != "meV":
+        energy = energy / MILLI_EV_TO_WAVENUMBER
+    pychop_instrument = pychop_instruments.Instrument(name, chopper=chopper, freq=int(chopper_frequency))
+
+    widths = pychop_instrument.getResolution(Ei_in=energy, Etrans=[0, energy - EPSILON])
+
+    if np.any(np.isnan(widths)):
+        return {
+            "ChopperFrequency": (
+                "Cannot use this combination of chopper, frequency and incident energy. Use PyChop to identify a valid setting."
+            )
+        }
+
+    return {}
