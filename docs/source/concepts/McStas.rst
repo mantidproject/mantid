@@ -29,13 +29,29 @@ Once the NeXus data has been generated it can be loaded into Mantid using :ref:`
 
 Quick McStas Tutorial
 ----------------------
-This tutorial is just to generate a simple data file with McStas that Mantid is able to load. It is recommendeed to install McStas with conda by following the instructions on the `McStas conda installation page <https://github.com/mccode-dev/McCode/blob/main/INSTALL-McStas/conda/README.md>`_.
-Once you clone the McStas repository, build with conda, and activate the McStas environment, you can run the command ``mcgui`` on the command line to open the McStas GUI. On the GUI, select File -> New From Template and you will see a selection for Mantid.
-Pick a template from Mantid and you will see a save window pop up. Rename the file if you wish and save it.
+This tutorial is just to generate a simple data file with McStas that Mantid is able to load.
+It is recommendeed to install McStas with conda by following the instructions on the `McStas conda installation page <https://github.com/mccode-dev/McCode/blob/main/INSTALL-McStas/conda/README.md>`_.
+Once you clone the McStas repository, build with conda, and activate the McStas environment, you can run the command ``mcgui`` on the command line to open the McStas GUI.
+
+1. On the GUI, select File -> New From Template and you will see a selection for Mantid.
+
+2. Pick a template from Mantid and you will see a save window pop up.
+It should not matter which template you pick.
+
+3. Rename the file if you wish and save it.
 If you would like more info on how to make an instrument file for McStas, see `this section in the wiki <https://github.com/mccode-dev/McCode/wiki/McStas-and-Mantid#setup-the-mcstas-instrument-to-create-a-mantid-instrument>`_.
-On the McStas GUI, click Run and a window will pop up asking for parameters. The main thing to change here is the output format to NeXus --IDF.
-If it does not have --IDF when you generate the data, Mantid will not be able to load it properly. Click start to generate the data. Once the data has been generated, open Mantid and click Load -> File in the workspaces box.
-Alternatively, you can use the :ref:`algm-LoadMcstas` algorithm to load the data. Browse to the McStas generated file and load it. It will be called something like mccode.h5.
+
+4. On the McStas GUI, click Run and a window will pop up asking for parameters.
+The main thing to change here is the output format to NeXus --IDF.
+If it does not have --IDF when you generate the data, Mantid will not be able to load it properly.
+
+5. Click start to generate the data.
+
+6. Once the data has been generated, open Mantid and click Load -> File in the workspaces box.
+Alternatively, you can use the :ref:`algm-LoadMcstas` algorithm to load the data.
+
+7.Browse to the McStas generated file and load it.
+It will be called something like mccode.h5.
 You should now see the McStas data in the workspace browser.
 
 
