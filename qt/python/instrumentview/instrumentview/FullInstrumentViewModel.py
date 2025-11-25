@@ -10,6 +10,7 @@ from instrumentview.Peaks.DetectorPeaks import DetectorPeaks
 from instrumentview.Projections.SphericalProjection import SphericalProjection
 from instrumentview.Projections.CylindricalProjection import CylindricalProjection
 from instrumentview.Projections.SideBySide import SideBySide
+from instrumentview.Projections.ProjectionType import ProjectionType
 
 from mantid.dataobjects import Workspace2D, PeaksWorkspace
 from mantid.simpleapi import (
@@ -27,18 +28,6 @@ from mantid.simpleapi import (
 )
 from itertools import groupby
 import numpy as np
-from enum import Enum
-
-
-class ProjectionType(str, Enum):
-    THREE_D = "3D"
-    SPHERICAL_X = "Spherical X"
-    SPHERICAL_Y = "Spherical Y"
-    SPHERICAL_Z = "Spherical Z"
-    CYLINDRICAL_X = "Cylindrical X"
-    CYLINDRICAL_Y = "Cylindrical Y"
-    CYLINDRICAL_Z = "Cylindrical Z"
-    SIDE_BY_SIDE = "Side by Side"
 
 
 class FullInstrumentViewModel:

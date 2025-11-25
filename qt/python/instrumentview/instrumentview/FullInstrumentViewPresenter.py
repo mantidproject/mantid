@@ -123,6 +123,7 @@ class FullInstrumentViewPresenter:
         self._masked_mesh = self.create_poly_data_mesh(self._model.masked_positions)
         self._view.add_masked_mesh(self._masked_mesh)
 
+        self._view.enable_or_disable_mask_widgets()
         self.set_view_contour_limits()
         self.set_view_integration_limits()
 

@@ -32,6 +32,7 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from instrumentview.Detectors import DetectorInfo
 from instrumentview.InteractorStyles import CustomInteractorStyleZoomAndSelect, CustomInteractorStyleRubberBand3D
 from typing import Callable
+from instrumentview.Projections.ProjectionType import ProjectionType
 from mantid.dataobjects import Workspace2D
 from mantid import UsageService
 from mantid.kernel import FeatureType
@@ -224,6 +225,10 @@ class FullInstrumentViewWindow(QMainWindow):
         masking_layout.addLayout(pre_list_layout)
         masking_layout.addWidget(self._mask_list)
         masking_layout.addLayout(post_list_layout)
+
+        # TODO: Find a more apropriate solution than logic in view
+        self._add_cylinder.clicked.connect(lambda: self._add_cylinder.setDisabled(True))
+        self._cylinder_select.clicked.connect(lambda: self._add_cylinder.setDisabled(False))
 
         self.status_group_box = QGroupBox("Status")
         status_layout = QHBoxLayout(self.status_group_box)
@@ -577,6 +582,9 @@ class FullInstrumentViewWindow(QMainWindow):
 
     def get_current_widget(self):
         return self._current_widget
+
+    def enable_or_disable_mask_widgets(self):
+        self._add_cylinder.setDisabled(self.current_selected_projection() == ProjectionType.THREE_D)
 
     def add_rgba_mesh(self, mesh: PolyData, scalars: np.ndarray | str):
         """Draw the given mesh in the main plotter window, and set the colours manually with RGBA numbers"""
