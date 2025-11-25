@@ -9,6 +9,7 @@ from instrumentview.Peaks.Peak import Peak
 from instrumentview.Peaks.DetectorPeaks import DetectorPeaks
 from instrumentview.Projections.SphericalProjection import SphericalProjection
 from instrumentview.Projections.CylindricalProjection import CylindricalProjection
+from instrumentview.Projections.SideBySide import SideBySide
 
 from mantid.dataobjects import Workspace2D, PeaksWorkspace
 from mantid.simpleapi import (
@@ -26,7 +27,6 @@ from mantid.simpleapi import (
 )
 from itertools import groupby
 import numpy as np
-from typing import ClassVar
 from enum import Enum
 
 
@@ -38,29 +38,11 @@ class ProjectionType(str, Enum):
     CYLINDRICAL_X = "Cylindrical X"
     CYLINDRICAL_Y = "Cylindrical Y"
     CYLINDRICAL_Z = "Cylindrical Z"
+    SIDE_BY_SIDE = "Side by Side"
 
 
 class FullInstrumentViewModel:
     """Model for the Instrument View Window. Will calculate detector positions, indices, and integrated counts that give the colours"""
-
-    _FULL_3D: ClassVar[str] = "3D"
-    _SPHERICAL_X: ClassVar[str] = "Spherical X"
-    _SPHERICAL_Y: ClassVar[str] = "Spherical Y"
-    _SPHERICAL_Z: ClassVar[str] = "Spherical Z"
-    _CYLINDRICAL_X: ClassVar[str] = "Cylindrical X"
-    _CYLINDRICAL_Y: ClassVar[str] = "Cylindrical Y"
-    _CYLINDRICAL_Z: ClassVar[str] = "Cylindrical Z"
-    _SIDE_BY_SIDE: ClassVar[str] = "Side by Side"
-    _PROJECTION_OPTIONS: ClassVar[list[str]] = [
-        _FULL_3D,
-        _SPHERICAL_X,
-        _SPHERICAL_Y,
-        _SPHERICAL_Z,
-        _CYLINDRICAL_X,
-        _CYLINDRICAL_Y,
-        _CYLINDRICAL_Z,
-        _SIDE_BY_SIDE,
-    ]
 
     _sample_position = np.array([0, 0, 0])
     _source_position = np.array([0, 0, 0])
@@ -303,14 +285,17 @@ class FullInstrumentViewModel:
 
         if self._projection_type in (ProjectionType.SPHERICAL_X, ProjectionType.SPHERICAL_Y, ProjectionType.SPHERICAL_Z):
             projection = SphericalProjection(self._sample_position, self._root_position, self._detector_positions_3d, np.array(axis))
-        else:
+        elif self._projection_type in (ProjectionType.CYLINDRICAL_X, ProjectionType.CYLINDRICAL_Y, ProjectionType.CYLINDRICAL_Z):
             projection = CylindricalProjection(self._sample_position, self._root_position, self._detector_positions_3d, np.array(axis))
+        else:
+            projection = SideBySide(
+                self._workspace, self._detector_ids, self._sample_position, self._root_position, self._detector_positions_3d, np.array(axis)
+            )
 
         projected_positions = np.zeros_like(self._detector_positions_3d)
         projected_positions[:, :2] = projection.positions()  # Assign only x and y coordinate
 
         self._cached_projections_map[self._projection_type.value] = projected_positions
-        print("Ran projection!")
         return projected_positions
 
     def extract_spectra_for_line_plot(self, unit: str, sum_spectra: bool) -> None:
