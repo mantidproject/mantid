@@ -288,6 +288,7 @@ class FullInstrumentViewWindow(QMainWindow):
         if not self._off_screen:
             self.main_plotter.camera_position = self._projection_camera_map[self.current_selected_projection()]
             self.main_plotter.camera.parallel_scale = self._parallel_scales[self.current_selected_projection()]
+        return
 
     def _add_min_max_group_box(self, parent_box: QGroupBox) -> tuple[QLineEdit, QLineEdit, QDoubleRangeSlider]:
         """Creates a minimum and a maximum box (with labels) inside the given group box. The callbacks will be attached to textEdited
@@ -530,8 +531,11 @@ class FullInstrumentViewWindow(QMainWindow):
                 self.main_plotter.enable_zoom_style()
 
         if self.current_selected_projection() not in self._projection_camera_map.keys():
+            self.main_plotter.reset_camera()
             self._projection_camera_map[self.current_selected_projection()] = self.main_plotter.camera_position
             self._parallel_scales[self.current_selected_projection()] = self.main_plotter.camera.parallel_scale
+
+        self.reset_camera()
 
     def add_pickable_mesh(self, point_cloud: PolyData, scalars: np.ndarray | str) -> None:
         self.main_plotter.add_mesh(
