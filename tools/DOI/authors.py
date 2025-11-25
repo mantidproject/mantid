@@ -13,371 +13,28 @@ import subprocess
 # The structure of a release tag
 RELEASE_TAG_RE = re.compile(r"^v?\d+.\d+(.\d)?$")
 
-# Authors in Git that do not have a translation listed here or who are not on the
-# blocklist will cause the DOI script to fail.
-#
-# The DOI schema asks that names be of the form "last_name, first_name(s)."
-#
-# Translations exist for Git aliases, even where users have more than one. We
-# prefer multiple translations over blocklist entries in case users log back on
-# to machines and start using old aliases again.
-_translations = {
-    # Name in Git : Preferred name for DOI.
-    "Freddie Akeroyd": "Akeroyd, Freddie",
-    "Stuart Ansell": "Ansell, Stuart",
-    "Sofia Antony": "Antony, Sofia",
-    "owen": "Arnold, Owen",
-    "Owen Arnold": "Arnold, Owen",
-    "Arturs Bekasovs": "Bekasovs, Arturs",
-    "Jean Bilheux": "Bilheux, Jean",
-    "JeanBilheux": "Bilheux, Jean",
-    "Bilheux": "Bilheux, Jean",
-    "Jose Borreguero": "Borreguero, Jose",
-    "Keith Brown": "Brown, Keith",
-    "Alex Buts": "Buts, Alex",
-    "abuts": "Buts, Alex",
-    "Stuart Campbell": "Campbell, Stuart",
-    "Stuart I. Campbell": "Campbell, Stuart",
-    "Dickon Champion": "Champion, Dickon",
-    "Laurent Chapon": "Chapon, Laurent",
-    "Matt Clarke": "Clarke, Matt",
-    "Robert Dalgliesh": "Dalgliesh, Robert",
-    "mathieu": "Doucet, Mathieu",
-    "mdoucet": "Doucet, Mathieu",
-    "Mathieu Doucet": "Doucet, Mathieu",
-    "Doucet, Mathieu": "Doucet, Mathieu",
-    "Mat Doucet": "Doucet, Mathieu",
-    "Nick Draper": "Draper, Nick",
-    "NickDraper": "Draper, Nick",
-    "Nicholas Draper": "Draper, Nick",
-    "Ronald Fowler": "Fowler, Ronald",
-    "Martyn Gigg": "Gigg, Martyn A.",
-    "Samuel Jackson": "Jackson, Samuel",
-    "Dereck Kachere": "Kachere, Dereck",
-    "Mark Koennecke": "Koennecke, Mark",
-    "Ricardo Leal": "Leal, Ricardo",
-    "Ricardo Ferraz Leal": "Leal, Ricardo",
-    "Ricardo M. Ferraz Leal": "Leal, Ricardo",
-    "Christophe Le Bourlot": "Le Bourlot, Christophe",
-    "VickieLynch": "Lynch, Vickie",
-    "Vickie Lynch": "Lynch, Vickie",
-    "Pascal Manuel": "Manuel, Pascal",
-    "Anders Markvardsen": "Markvardsen, Anders",
-    "Anders-Markvardsen": "Markvardsen, Anders",
-    "Dennis Mikkelson": "Mikkelson, Dennis",
-    "Ruth Mikkelson": "Mikkelson, Ruth",
-    "Miller R G": "Miller, Ross",
-    "Ross Miller": "Miller, Ross",
-    "Sri Nagella": "Nagella, Sri",
-    "T Nielsen": "Nielsen, Torben",
-    "Karl Palmen": "Palmen, Karl",
-    "Peter Parker": "Parker, Peter G.",
-    "Parker, Peter G": "Parker, Peter G.",
-    "Gesner Passos": "Passos, Gesner",
-    "Pete Peterson": "Peterson, Peter F.",
-    "Peter Peterson": "Peterson, Peter F.",
-    "Peter F. Peterson": "Peterson, Peter F.",
-    "Jay Rainey": "Rainey, Jay",
-    "Yannick Raoul": "Raoul, Yannick",
-    "Shelly Ren": "Ren, Shelly",
-    "Michael Reuter": "Reuter, Michael",
-    "Lakshmi Sastry": "Sastry, Lakshmi",
-    "AndreiSavici": "Savici, Andrei",
-    "Andrei Savici": "Savici, Andrei",
-    "Russell Taylor": "Taylor, Russell J.",
-    "Mike Thomas": "Thomas, Mike",
-    "Roman Tolchenov": "Tolchenov, Roman",
-    "MichaelWedel": "Wedel, Michael",
-    "Michael Wedel": "Wedel, Michael",
-    "Ross Whitfield": "Whitfield, Ross",
-    "Robert Whitley": "Whitley, Robert",
-    "Michael Whitty": "Whitty, Michael",
-    "Steve Williams": "Williams, Steve",
-    "Marie Yao": "Yao, Marie",
-    "Wenduo Zhou": "Zhou, Wenduo",
-    "Janik Zikovsky": "Zikovsky, Janik",
-    "Harry Jeffery": "Jeffery, Harry",
-    "Federico M Pouzols": "Pouzols, Federico M",
-    "FedeMPouzols": "Pouzols, Federico M",
-    "Federico Montesino Pouzols": "Pouzols, Federico M",
-    "Fede": "Pouzols, Federico M",
-    "Anton Piccardo-Selg": "Piccardo-Selg, Anton",
-    "Lottie Greenwood": "Greenwood, Lottie",
-    "Dan Nixon": "Nixon, Dan",
-    "Raquel Alvarez Banos": "Banos, Raquel Alvarez",
-    "John Hill": "Hill, John",
-    "Ian Bush": "Bush, Ian",
-    "Steven Hahn": "Hahn, Steven",
-    "Steven E. Hahn": "Hahn, Steven",
-    "Joachim Wuttke (o)": "Wuttke, Joachim",
-    "DiegoMonserrat": "Monserrat, Diego",
-    "Diego Monserrat": "Monserrat, Diego",
-    "David Mannicke": "Mannicke, David",
-    "Garrett Granroth": "Granroth, Garrett",
-    "Hahn": "Hahn, Steven",
-    "Marina Ganeva": "Ganeva, Marina",
-    "Raquel Alvarez": "Alvarez, Raquel",
-    "Raquel": "Alvarez, Raquel",
-    "jmborr": "Borreguero, Jose",
-    "Tobias Richter": "Richter, Tobias",
-    "ianbush": "Bush, Ian",
-    "KarlPalmen": "Palmen, Karl",
-    "Matthew D Jones": "Jones, Matthew D.",
-    "Matt King": "King, Matt",
-    "Jiao Lin": "Lin, Jiao",
-    "Jiao": "Lin, Jiao",
-    "Simon Heybrock": "Heybrock, Simon",
-    "Elliot Oram": "Oram, Elliot",
-    "Dominic Oram": "Oram, Dominic",
-    "Shahroz Ahmed": "Ahmed, Shahroz",
-    "celinedurniak": "Durniak, Celine",
-    "Celine Durniak": "Durniak, Celine",
-    "Michael Hart": "Hart, Michael",
-    "Lamar Moore": "Moore, Lamar",
-    "LamarMoore": "Moore, Lamar",
-    "Moore": "Moore, Lamar",
-    "Tom Perkins": "Perkins, Tom",
-    "Jan Burle": "Burle, Jan",
-    "Duc Le": "Le, Duc",
-    "David Fairbrother": "Fairbrother, David",
-    "DavidFair": "Fairbrother, David",
-    "Eltayeb Ahmed": "Ahmed, Eltayeb",
-    "Dimitar Tasev": "Tasev, Dimitar",
-    "Dimitar Borislavov Tasev": "Tasev, Dimitar",
-    "Antti Soininen": "Soininen, Antti",
-    "Antti Soininnen": "Soininen, Antti",
-    "Pranav Bahuguna": "Bahuguna, Pranav",
-    "Louise McCann": "McCann, Louise",
-    "louisemccann": "McCann, Louise",
-    "Gagik Vardanyan": "Vardanyan, Gagik",
-    "gvardany": "Vardanyan, Gagik",
-    "Verena Reimund": "Reimund, Verena",
-    "reimundILL": "Reimund, Verena",
-    "Krzysztof Dymkowski": "Dymkowski, Krzysztof",
-    "dymkowsk": "Dymkowski, Krzysztof",
-    "krzych": "Dymkowski, Krzysztof",
-    "Gemma Guest": "Guest, Gemma",
-    "Anthony Lim": "Lim, Anthony",
-    "AnthonyLim23": "Lim, Anthony",
-    "Anthony": "Lim, Anthony",
-    "CipPruteanu": "Ciprian Pruteanu",
-    "Tasev": "Tasev, Dimitar",
-    "Mayer Alexandra": "Mayer, Alexandra",
-    "simonfernandes": "Fernandes, Simon",
-    "Simon Fernandes": "Fernandes, Simon",
-    "brandonhewer": "Hewer, Brandon",
-    "Brandon Hewer": "Hewer, Brandon",
-    "Thomas Lohnert": "Lohnert, Thomas",
-    "James Tricker": "Tricker, James",
-    "Matthew Bowles": "Bowles, Matthew",
-    "MatthewBowles": "Bowles, Matthew",
-    "josephframsay": "Ramsay, Joseph F.",
-    "Joseph Ramsay": "Ramsay, Joseph F.",
-    "=": "Ramsay, Joseph F.",
-    "Joe Ramsay": "Ramsay, Joseph F.",
-    "Adam Washington": "Washington, Adam",
-    "Edward Brown": "Brown, Edward",
-    "Matthew Andrew": "Andrew, Matthew",
-    "Mantid-Matthew": "Andrew, Matthew",
-    "Keith Butler": "Butler, Keith T.",
-    "fodblog": "Butler, Keith T.",
-    "Marshall McDonnell": "McDonnell, Marshall",
-    "McDonnell, Marshall T": "McDonnell, Marshall",
-    "Neil Vaytet": "Vaytet, Neil",
-    "Sam": "Sam Jones",
-    "Tom Jubb": "Jubb, Tom",
-    "T Jubb": "Jubb, Tom",
-    "TWJubb": "Jubb, Tom",
-    "Brendan Sullivan": "Sullivan, Brendan",
-    "Joachim Coenen": "Coenen, Joachim",
-    "Alice Russell": "Russell, Alice",
-    "Tom": "Titcombe, Tom",
-    "Tom Titcombe": "Titcombe, Tom",
-    "Igor Gudich": "Gudich, Igor",
-    "igudich": "Gudich, Igor",
-    "Ewan": "Cook, Ewan",
-    "Ewan Cook": "Cook, Ewan",
-    "Lewis Edwards": "Edwards, Lewis",
-    "Michael Turner": "Turner, Michael",
-    "Bhuvan Bezawada": "Bezawada, Bhuvan",
-    "Andre Bamidele": "Bamidele, Andre",
-    "Ayomide Bamidele": "Bamidele, Andre",
-    "Robert Applin": "Applin, Robert",
-    "robertapplin": "Applin, Robert",
-    "Rob": "Applin, Robert",
-    "Rob Applin": "Applin, Robert",
-    "Robert": "Applin, Robert",
-    "Applin": "Applin, Robert",
-    "SamJenkins1": "Jenkins, Sam",
-    "Sam Jenkins": "Jenkins, Sam",
-    "Samuel Jones": "Jones, Sam",
-    "Harry Saunders": "Saunders, Harry",
-    "Geish Miladinovic": "Miladinovic, Geish",
-    "geishm-ansto": "Miladinovic, Geish",
-    "Harrietbrown": "Brown, Harriet",
-    "Harriet Brown": "Brown, Harriet",
-    "Adam J. Jackson": "Jackson, Adam J.",
-    "LolloB": "Basso, Lorenzo",
-    "Lorenzo Basso": "Basso, Lorenzo",
-    "SOKOLOVA": "Sokolova, Anna",
-    "Conor Finn": "Finn, Caila",
-    "Caila Finn": "Finn, Caila",
-    "StephenSmith25": "Smith, Stephen",
-    "Stephen": "Smith, Stephen",
-    "Stephen Smith": "Smith, Stephen",
-    "Gabriele Sala": "Sala, Gabriele",
-    "Hank Wu": "Wu, Hank",
-    "hankwustfc": "Wu, Hank",
-    "Wu": "Wu, Hank",
-    "PhilColebrooke": "Colebrooke, Phil",
-    "Phil": "Colebrooke, Phil",
-    "Phil Colebrooke": "Colebrooke, Phil",
-    "DanielMurphy22": "Murphy, Daniel",
-    "Daniel Murphy": "Murphy, Daniel",
-    "Richard": "Waite, Richard",
-    "RichardWaiteSTFC": "Waite, Richard",
-    "Richard Waite": "Waite, Richard",
-    "Ciara Nightingale": "Nightingale, Ciara",
-    "ciaranightingale": "Nightingale, Ciara",
-    "Danny Hindson": "Hindson, Danny",
-    "DannyHindson": "Hindson, Dannny",
-    "Fahima-Islam": "Islam, Fahima",
-    "giovannidisiena": "Di Siena, Giovanni",
-    "Giovanni Di Siena": "Di Siena, Giovanni",
-    "Takudzwa Makoni": "Makoni, Takudzwa",
-    "William F Godoy": "Godoy, William F",
-    "Islam, Fahima F": "Islam, Fahima",
-    "Mathieu Tillet": "Tillet, Mathieu",
-    "MathieuTillet": "Tillet, Mathieu",
-    "StephenSmith": "Smith, Stephen",
-    "Toluwalase Agoro": "Agoro, Toluwalase",
-    "tolu28-coder": "Agoro, Toluwalase",
-    "joseph-torsney": "Torsney, Joesph",
-    "Joseph Torsney": "Torsney, Joesph",
-    "YannickMeinerzhagen": "Meinerzhagen, Yannick",
-    "ymeinerzhagen": "Meinerzhagen, Yannick",
-    "Du Rong": "Rong, Du",
-    "durong": "Rong, Du",
-    "durong24": "Rong, Du",
-    "Matt Cumber": "Cumber, Matthew",
-    "Matthew Cumber": "Cumber, Matthew",
-    "Tom Clayton": "Clayton, Tom",
-    "Guillaume Communie": "Communie, Guillaume",
-    "Dominik Arominski": "Arominski, Dominik",
-    "Sarah Foxley": "Foxley, Sarah",
-    "sf1919": "Foxley, Sarah",
-    "Sam Tygier": "Tygier, Sam",
-    "Silke Schomann": "Schomann, Silke",
-    "Jenna Delozier": "Delozier, Jenna",
-    "Cole Kendrick": "Kendrick, Cole",
-    "Coleman Kendrick": "Kendrick, Cole",
-    "Zhang, Chen": "Zhang, Chen",
-    "Chen": "Zhang, Chen",
-    "Chen Zhang": "Zhang, Chen",
-    "srikanthravipati": "Ravipati, Srikanth",
-    "Srikanth Ravipati": "Ravipati, Srikanth",
-    "Tom Hampson": "Hampson, Thomas",
-    "Hampson": "Hampson, Thomas",
-    "thomashampson": "Hampson, Thomas",
-    "Michael Walsh": "Walsh, Michael",
-    "walshmm": "Walsh, Michael",
-    "Yuanpeng Zhang": "Zhang, Yuanpeng",
-    "y8z": "Zhang, Yuanpeng",
-    "Zhang Y": "Zhang, Yuanpeng",
-    "Harry Hughes": "Hughes, Harry",
-    "stonecoldhughes": "Hughes, Harry",
-    "Jesse McGaha": "McGaha, Jesse",
-    "jrmcgaha-dev": "McGaha, Jesse",
-    "Zachary Morgan": "Morgan, Zachary",
-    "Zachary Morgan (zgf)": "Morgan, Zachary",
-    "zjmorgan": "Morgan, Zachary",
-    "MialLewis": "Lewis, Mial",
-    "Jan-Lukas Wynen": "Wynen, Jan-Lukas",
-    "Steve K": "King, Steve",
-    "Oleksandr Koshchii": "Koshchii, Oleksandr",
-    "Jens Krüger": "Krüger, Jens",
-    "Tobias Weber (Institut Laue-Langevin)": "Weber, Tobias",
-    "Jonathan Haigh": "Haigh, Jonathan",
-    "rbauststfc": "Baust, Rachel",
-    "Rachel Baust": "Baust, Rachel",
-    "Thomas Mueller": "Mueller, Thomas",
-    "Remi Perenon": "Perenon, Remi",
-    "DonaldChung-HK": "Chung, Donald",
-    "Donald Chung": "Chung, Donald",
-    "AndriiDemk": "Demk, Andrii",
-    "eric pellegrini": "Pellegrini, Eric",
-    "eurydice76": "Pellegrini, Eric",
-    "Robert Bolotovsky": "Bolotovsky, Robert",
-    "bolotovskyr": "Bolotovsky, Robert",
-    "Mohammed Almakki": "Almakki, Mohammed",
-    "Gregory Cage": "Cage, Gregory",
-    "carson sears": "Sears, Carson",
-    "Carson Sears": "Sears, Carson",
-    "searscr": "Sears, Carson",
-    "Reece Boston": "Boston, Reece",
-    "Reece Boston (4rx)": "Boston, Reece",
-    "Boston S R": "Boston, Reece",
-    "rboston628": "Boston, Reece",
-    "Marie Backman": "Backman, Marie",
-    "Maria Patrou": "Patrou, Maria",
-    "Patrou, Maria": "Patrou, Maria",
-    "James Clarke": "Clarke, James",
-    "Adri Diaz": "Diaz-Alvarez, Adrian",
-    "adriazalvarez": "Diaz-Alvarez, Adrian",
-    "Waruna Wickramasingha": "Jayasundara Abeykoon Wickramasingha, Waruna Priyankara",
-    "Waruna Priyankara J A Wickramasingha": "Jayasundara Abeykoon Wickramasingha, Waruna Priyankara",
-    "Kevin A. Tactac": "TacTac, Kevin",
-    "GuiMacielPereira": "Pereira, Guilherme",
-    "Gui Maciel Pereira": "Pereira, Guilherme",
-    "Gui Pereira": "Pereira, Guilherme",
-    "Kort Travis": "Travis, Kort",
-    "korttravis": "Travis, Kort",
-    "yusuf": "Yusuf, Jimoh",
-    "yusufjimoh": "Yusuf, Jimoh",
-    "Jimoh Yusuf": "Yusuf, Jimoh",
-    "Oluwaseun Jimoh": "Yusuf, Jimoh",
-    "Yusuf Jimoh": "Yusuf, Jimoh",
-    "Yusuf Jimoh Local": "Yusuf, Jimoh",
-    "Kyle Ma": "Qianli Ma, Kyle",
-    "Kyle Qianli Ma": "Qianli Ma, Kyle",
-    "Despiix": "Ioannide, Despina",
-    "Despi": "Ioannide, Despina",
-    "glass-ships": "Elsarboukh, Glass",
-    "Glass": "Elsarboukh, Glass",
-    "Ganyushin, Dmitry": "Ganyushin, Dmitry",
-    "Dmitry Ganyushin": "Ganyushin, Dmitry",
-    "Andy Bridger": "Bridger, Andy",
-    "andy-bridger": "Bridger, Andy",
-    "RabiyaF": "Farooq, Rabiya",
-    "Jack": "Allen, Jack E.",
-    "Daniel Caballero": "Caballero, Daniel",
-    "Darsh": "Dinger, Darsh",
-    "Darsh Dinger": "Dinger, Darsh",
-    "Ian Gibbs": "Gibbs, Ian",
-    "Victoria-Hawkins": "Hawkins, Victoria",
-}
-
 # Used to ensure a Git author does not appear in any of the DOIs.  This is NOT
 # to be used in the case where a Git user has multiple accounts; a translation
 # entry would suffice in such an instance.
 _blocklist = [
-    "",
+    # bots
     "unknown",
-    "Yao, Marie",
-    "Utkarsh Ayachit",
-    "Chris Kerr",
-    "Thomas Brooks",
+    "copilot",
+    "dependabot",
     "mantid-builder",
     "mantidbuilder",
+    "pre-commit-ci",
+    # people
+    "Utkarsh Ayachit",
+    "Thomas Brooks",
+    "Chris Kerr",
     "Erik B Knudsen",
     "Bartomeu Llopis",
-    "dpaj",
+    "Thomas Mueller",
     "Daniel Pajerowski",
-    "thomueller",
-    "luz.paz",
-    "davidvoneshen",
-    "dependabot[bot]",
-    "pre-commit-ci[bot]",
+    "Luz Paz",
+    "David Voneshen",
+    "Marie Yao",
 ]
 
 # The allowlist is used for sponsors / contributors who should be included,
@@ -430,39 +87,34 @@ def _get_all_release_git_tags():
 
 def _clean_up_author_list(author_list):
     """Apply translations and blocklist, and get rid of duplicates."""
-    # Double check that all names have no leading or trailing whitespace.
-    result = map(str.strip, author_list)
+    # Get rid of count by splitting on tab - remove whitespace
+    result = [author.split("\t")[-1].strip() for author in author_list]
+    # Get rid of email adddress
+    result = [author.split("<")[0].strip() for author in result]
+    # Remove empty authors
+    result = [author for author in result if bool(author)]
 
     # Remove any names that are on the blocklist.
     result = set(filterfalse(_blocklist.__contains__, result))
 
-    # Make sure there are no names in Git without a corresponding translation.
-    untranslated = set(filterfalse(_translations.keys().__contains__, result))
-    if untranslated:
-        raise RuntimeError(
-            "No translation exists for the following Git author(s): \n"
-            + "\n".join(untranslated)
-            + "\n"
-            + "Please edit the translations table accordingly."
-        )
-
-    # Translate all remaining names.
-    result = [_translations[a] for a in result]
-
-    # Another check for any names in the blocklist, in case we want to remove the
-    # translated name.
-    result = set(filterfalse(_blocklist.__contains__, result))
-
-    # Return the unique list of translated names.
-    return sorted(set(result))
+    # Return the unique list of translated names sorted by last name
+    return sorted(set(result), key=lambda value: value.split()[-1])
 
 
 @run_from_script_dir
 def _authors_from_tag_info(tag_info):
     """Given some tag/commit information, will return the corresponding Git
     authors.
+
+    This assumes that you have the `.gitmailmap` file and it is configured correctly.
+    Contact members of the TWG for the file.
     """
-    args = ["git", "log", "--pretty=short", tag_info, '--format="%aN"', "--reverse"]
+    # -n sort by number of commits
+    # -s suppress commit descriptions
+    # -e show email
+    # --group=author show counts by author rather than committer
+    # --no-merges ignore merge commits
+    args = ["git", "shortlog", "-nse", "--group=author", "--no-merges", tag_info]
     proc = subprocess.run(args, stdout=subprocess.PIPE, encoding="utf-8")
     authors = proc.stdout.replace('"', "").split("\n")
     return _clean_up_author_list(authors)
@@ -548,3 +200,29 @@ def authors_under_git_tag(tag):
     previous_tag = all_tags[all_tags.index(tag) - 1]
 
     return _authors_from_tag_info(previous_tag + ".." + tag)
+
+
+if __name__ == "__main__":
+    """This should normally be run as a library for doi.py, but for testing/development a command line was added."""
+    import argparse
+
+    parser = argparse.ArgumentParser(
+        description="Generate list of authors for a release", epilog="This requires having a .gitmailmap file from a TWG member"
+    )
+    parser.add_argument("version", type=str, help='Version of Mantid whose DOI is to be created/updated in the form "major.minor.patch"')
+    parser.add_argument("--full", action="store_true", help="Get full list of authors back to start of project")
+
+    # process inputs
+    args = parser.parse_args()
+    git_tag = find_tag(args.version)
+
+    # generate list of authors
+    if args.full:
+        authors = authors_up_to_git_tag(git_tag)
+    else:
+        authors = authors_under_git_tag(git_tag)
+
+    # print out the results
+    print("For", git_tag)
+    for author in authors:
+        print(author)
