@@ -47,6 +47,8 @@ void Qxy::init() {
 
   auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(1.0e-12);
+  auto mustBeIntOver2 = std::make_shared<BoundedValidator<int>>();
+  mustBeIntOver2->setLower(3);
 
   declareProperty("MaxQxy", -1.0, mustBePositive, "The upper limit of the Qx-Qy grid (goes from -MaxQxy to +MaxQxy).");
   declareProperty("DeltaQ", -1.0, mustBePositive, "The dimension of a Qx-Qy cell.");
@@ -86,6 +88,11 @@ void Qxy::init() {
                   "_sumOfCounts and _sumOfNormFactors equals the workspace "
                   "returned by the property OutputWorkspace");
   declareProperty("ExtraLength", 0.0, mustBePositive2, "Additional length for gravity correction.");
+  declareProperty(
+      "SolidAngleNumberOfCylinderSlices", 10, mustBeIntOver2,
+      "The number of angular slices used when triangulating a cylinder in order to calculate the solid "
+      "angle of a tube detector. The default is 10 to preserve legacy behaviour, but increased accuracy has "
+      "been observed when using values of 11+");
 }
 
 void Qxy::exec() {
@@ -160,11 +167,12 @@ void Qxy::exec() {
 
     // the solid angle of the detector as seen by the sample is used for
     // normalisation later on
+    const int numberOfCylinderSlices = getProperty("SolidAngleNumberOfCylinderSlices");
     double angle = 0.0;
     for (const auto detID : inputWorkspace->getSpectrum(i).getDetectorIDs()) {
       const auto index = detectorInfo.indexOf(detID);
       if (!detectorInfo.isMasked(index))
-        angle += detectorInfo.detector(index).solidAngle(samplePos);
+        angle += detectorInfo.detector(index).solidAngle({samplePos, numberOfCylinderSlices});
     }
 
     // some bins are masked completely or partially, the following vector will

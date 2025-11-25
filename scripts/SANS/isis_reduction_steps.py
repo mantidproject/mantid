@@ -2886,6 +2886,7 @@ class ConvertToQISIS(ReductionStep):
                     WavePixelAdj=wavepixeladj,
                     ExtraLength=self._grav_extra_length,
                     QResolution=qResolution,
+                    SolidAngleNumberOfCylinderSlices=11,
                 )
             elif self._Q_alg == "Qxy":
                 Qxy(
@@ -2900,6 +2901,7 @@ class ConvertToQISIS(ReductionStep):
                     WaveCut=self.w_cut,
                     OutputParts=self.outputParts,
                     ExtraLength=self._grav_extra_length,
+                    SolidAngleNumberOfCylinderSlices=11,
                 )
                 ReplaceSpecialValues(
                     InputWorkspace=workspace,

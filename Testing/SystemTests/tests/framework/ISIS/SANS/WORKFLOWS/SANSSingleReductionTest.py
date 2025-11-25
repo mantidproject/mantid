@@ -10,7 +10,7 @@ import unittest
 from os import path
 
 import systemtesting
-from systemtesting import MantidSystemTest
+from systemtesting import MantidSystemTest, GENERATE_REFERENCE_FILES, REFERENCE_FILE_DIR
 from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
 from mantid import config
 from mantid.api import AlgorithmManager, WorkspaceGroup
@@ -78,11 +78,11 @@ class SingleReductionTest(unittest.TestCase):
         load_name = "LoadNexusProcessed"
         load_options = {"Filename": reference_file_name, "OutputWorkspace": EMPTY_NAME}
         load_alg = create_unmanaged_algorithm(load_name, **load_options)
-        load_alg.setProperty("OutputWorkspace", reference_file_name.split(".")[0])
         load_alg.execute()
         reference_workspace = load_alg.getProperty("OutputWorkspace").value
 
         # Compare reference file with the output_workspace
+        mismatch_name = reference_file_name if GENERATE_REFERENCE_FILES else mismatch_name
         self._compare_workspace(workspace, reference_workspace, check_spectra_map=check_spectra_map, mismatch_name=mismatch_name)
 
     def _compare_workspace(self, input_workspace, reference_workspace, check_spectra_map=True, tolerance=1e-6, mismatch_name=""):
@@ -110,12 +110,16 @@ class SingleReductionTest(unittest.TestCase):
 
         if not result:
             self._save_output(input_workspace, mismatch_name)
-
-        self.assertTrue(result)
+        with self.subTest(part=f"output ws validation, see {mismatch_name}"):
+            self.assertTrue(result)
 
     def _save_output(self, workspace, mismatch_name):
         # Save the workspace out
-        f_name = path.join(config.getString("defaultsave.directory"), mismatch_name)
+        f_name = (
+            path.join(REFERENCE_FILE_DIR, mismatch_name)
+            if GENERATE_REFERENCE_FILES
+            else path.join(config.getString("defaultsave.directory"), mismatch_name)
+        )
         save_name = "SaveNexus"
         save_options = {"Filename": f_name, "InputWorkspace": workspace}
         save_alg = create_unmanaged_algorithm(save_name, **save_options)
@@ -456,8 +460,8 @@ class SANSSingleReductionTest(SingleReductionTest):
         output_shift_factor = single_reduction_alg.getProperty("OutShiftFactor").value
 
         tolerance = 1e-6
-        expected_shift = 0.00278452
-        expected_scale = 0.81439387
+        expected_shift = 0.00281556
+        expected_scale = 0.81209819
 
         self.assertTrue(abs(expected_shift - output_shift_factor) < tolerance)
         self.assertTrue(abs(expected_scale - output_scale_factor) < tolerance)
