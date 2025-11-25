@@ -59,9 +59,8 @@ public:
     TS_ASSERT(dynamic_cast<WorkspaceProperty<MatrixWorkspace> *>(props[1]))
   }
 
-  void testExec() {
-    MatrixWorkspace_sptr inputWS = WorkspaceCreationHelper::create2DWorkspace(10, 10);
-    AnalysisDataService::Instance().add("InputWS", inputWS);
+  void runExec(const Mantid::API::MatrixWorkspace_sptr &ws) {
+    AnalysisDataService::Instance().add("InputWS", ws);
 
     UnaryOpHelper helper3;
     helper3.initialize();
@@ -74,20 +73,15 @@ public:
     AnalysisDataService::Instance().remove("InputWS");
   }
 
-  void testExecRagged() {
+  void testExecOn2DWorkspace() {
+    MatrixWorkspace_sptr inputWS = WorkspaceCreationHelper::create2DWorkspace(10, 10);
+    runExec(inputWS);
+  }
+
+  void testExecOn2DWorkspaceRagged() {
     MatrixWorkspace_sptr raggedWS = WorkspaceCreationHelper::create2DWorkspaceRagged();
     TS_ASSERT(raggedWS->isRaggedWorkspace());
-    AnalysisDataService::Instance().add("raggedWS", raggedWS);
-
-    UnaryOpHelper helper4;
-    helper4.initialize();
-    TS_ASSERT_THROWS_NOTHING(helper4.setPropertyValue("InputWorkspace", "raggedWS"))
-    TS_ASSERT_THROWS_NOTHING(helper4.setPropertyValue("OutputWorkspace", "raggedWS"))
-
-    TS_ASSERT_THROWS_NOTHING(helper4.execute())
-    TS_ASSERT(helper4.isExecuted())
-
-    AnalysisDataService::Instance().remove("raggedWS");
+    runExec(raggedWS);
   }
 
 private:
