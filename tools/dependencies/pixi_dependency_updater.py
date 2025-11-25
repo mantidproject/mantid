@@ -152,6 +152,14 @@ def update_pin_in_pixi_manifest(package: str, os_name: str, version: str):
     run(command, check=True)
 
 
+def remove_from_pixi_manifest(package: str, os_name: str):
+    os_label_map = {"linux": "linux-64", "win": "win-64", "osx": "osx-arm64"}
+    command = ["pixi", "remove", package]
+    if os_name != "all":
+        command += ["--platform", os_label_map[os_name]]
+    run(command, check=True)
+
+
 def _compare_version_numbers(conda_version: str, pixi_version: str):
     trimmed_conda_version = conda_version.replace(" ", "").lstrip("=").replace(".*", "")
     trimmed_pixi_version = pixi_version.replace(" ", "").lstrip("=").replace(".*", "")
@@ -173,6 +181,16 @@ def main(argv: Sequence[str] = None) -> int:
     pixi_env = get_pixi_mantid_dev_pins()
 
     if (BUILD_CONFIG_PATH in changed_files or MANTID_DEVELOPER_RECIPE_PATH in changed_files) and PIXI_TOML not in changed_files:
+        # search for any removed dependencies
+        for package, pixi_versions in pixi_env.items():
+            if package not in conda_env.keys():
+                remove_from_pixi_manifest(package, "all")
+            else:
+                conda_versions = conda_env.get(package, {})
+                for os_name in pixi_versions.keys():
+                    if os_name not in conda_versions.keys():
+                        remove_from_pixi_manifest(package, os_name)
+        # update changed pins or added dependencies
         for package, conda_versions in conda_env.items():
             pixi_versions = pixi_env.get(package, {})
             for os_name, conda_version in conda_versions.items():
