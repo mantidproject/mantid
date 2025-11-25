@@ -78,6 +78,8 @@ void Q1D2::init() {
                   Direction::Input);
   auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
+  auto mustBeIntOver2 = std::make_shared<BoundedValidator<int>>();
+  mustBeIntOver2->setLower(3);
 
   declareProperty("RadiusCut", 0.0, mustBePositive,
                   "To increase resolution some wavelengths are excluded within "
@@ -101,7 +103,11 @@ void Q1D2::init() {
                   " returned by the property OutputWorkspace "
                   "(default is false).");
   declareProperty("ExtraLength", 0.0, mustBePositive, "Additional length for gravity correction.");
-
+  declareProperty(
+      "SolidAngleNumberOfCylinderSlices", 10, mustBeIntOver2,
+      "The number of angular slices used when triangulating a cylinder in order to calculate the solid "
+      "angle of a tube detector. The default is 10 to preserve legacy behaviour, but increased accuracy has "
+      "been observed when using values of 11+");
   declareProperty(
       std::make_unique<WorkspaceProperty<>>("QResolution", "", Direction::Input, PropertyMode::Optional, dataVal),
       "Workspace to calculate the Q resolution.\n");
@@ -378,11 +384,12 @@ void Q1D2::pixelWeight(const API::MatrixWorkspace_const_sptr &pixelAdj, const si
   const V3D samplePos = detectorInfo.samplePosition();
 
   if (m_doSolidAngle) {
+    const int numberOfCylinderSlices = getProperty("SolidAngleNumberOfCylinderSlices");
     weight = 0.0;
     for (const auto detID : m_dataWS->getSpectrum(wsIndex).getDetectorIDs()) {
       const auto index = detectorInfo.indexOf(detID);
       if (!detectorInfo.isMasked(index))
-        weight += detectorInfo.detector(index).solidAngle(samplePos);
+        weight += detectorInfo.detector(index).solidAngle({samplePos, numberOfCylinderSlices});
     }
   } else
     weight = 1.0;
