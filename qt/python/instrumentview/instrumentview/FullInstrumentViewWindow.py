@@ -22,6 +22,7 @@ from qtpy.QtWidgets import (
     QListWidget,
     QListWidgetItem,
     QAbstractItemView,
+    QScrollArea,
 )
 from qtpy.QtGui import QDoubleValidator, QMovie, QDragEnterEvent, QDropEvent, QDragMoveEvent, QColor, QPalette
 from qtpy.QtCore import Qt, QEvent, QSize
@@ -80,7 +81,6 @@ class FullInstrumentViewWindow(QMainWindow):
 
         super(FullInstrumentViewWindow, self).__init__(parent)
         self.setWindowTitle("Instrument View")
-        self.resize(1500, 1500)
 
         self._off_screen = off_screen
 
@@ -93,10 +93,14 @@ class FullInstrumentViewWindow(QMainWindow):
         pyvista_vertical_layout = QVBoxLayout(pyvista_vertical_widget)
         left_column_layout = QVBoxLayout(left_column_widget)
 
+        left_column_scroll = QScrollArea()
+        left_column_scroll.setWidgetResizable(True)
+        left_column_scroll.setWidget(left_column_widget)
+
         hsplitter = QSplitter(Qt.Horizontal)
-        hsplitter.addWidget(left_column_widget)
+        hsplitter.addWidget(left_column_scroll)
         hsplitter.addWidget(pyvista_vertical_widget)
-        hsplitter.setSizes([100, 200])
+        hsplitter.setSizes([150, 200])
         hsplitter.splitterMoved.connect(self._on_splitter_moved)
         parent_horizontal_layout.addWidget(hsplitter)
 
@@ -115,8 +119,8 @@ class FullInstrumentViewWindow(QMainWindow):
         vsplitter = QSplitter(Qt.Vertical)
         vsplitter.addWidget(self.main_plotter.app_window)
         vsplitter.addWidget(plot_widget)
-        vsplitter.setStretchFactor(0, 0)
-        vsplitter.setStretchFactor(1, 1)
+        vsplitter.setStretchFactor(0, 5)
+        vsplitter.setStretchFactor(1, 4)
         vsplitter.splitterMoved.connect(self._on_splitter_moved)
 
         pyvista_vertical_layout.addWidget(vsplitter)
@@ -201,6 +205,13 @@ class FullInstrumentViewWindow(QMainWindow):
         self.interactor_style = CustomInteractorStyleZoomAndSelect()
         self._overlay_meshes = []
         self._lineplot_overlays = []
+
+        screen_geometry = self.screen().geometry()
+        self.resize(int(screen_geometry.width() * 0.8), int(screen_geometry.height() * 0.8))
+        window_geometry = self.frameGeometry()
+        center_point = screen_geometry.center()
+        window_geometry.moveCenter(center_point)
+        self.move(window_geometry.topLeft())
 
         UsageService.registerFeatureUsage(FeatureType.Interface, "InstrumentView2025", False)
 
