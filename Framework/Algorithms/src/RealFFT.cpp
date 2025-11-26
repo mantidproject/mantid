@@ -11,7 +11,7 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/Exception.h"
 
-#include "MantidKernel/GSL_FFT_Helpers.h"
+#include "MantidKernel/GSL_Helpers.h"
 
 #include <algorithm>
 #include <cmath>
