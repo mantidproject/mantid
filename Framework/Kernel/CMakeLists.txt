@@ -102,6 +102,7 @@ set(SRC_FILES
     src/Smoothing.cpp
     src/SobolSequence.cpp
     src/SpinStateValidator.cpp
+    src/Spline.cpp
     src/SplittingInterval.cpp
     src/StartsWithValidator.cpp
     src/Statistics.cpp
@@ -272,6 +273,7 @@ set(INC_FILES
     inc/MantidKernel/SpecialCoordinateSystem.h
     inc/MantidKernel/SpinStateHelpers.h
     inc/MantidKernel/SpinStateValidator.h
+    inc/MantidKernel/Spline.h
     inc/MantidKernel/SplittingInterval.h
     inc/MantidKernel/StartsWithValidator.h
     inc/MantidKernel/Statistics.h
