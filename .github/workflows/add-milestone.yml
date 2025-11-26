@@ -4,6 +4,9 @@ on:
     types: [opened, reopened]
     branches: [main, release-next]
 
+permissions:
+  pull-requests: write
+
 jobs:
   add-milestone:
     runs-on: ubuntu-latest
