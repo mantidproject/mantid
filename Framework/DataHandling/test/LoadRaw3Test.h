@@ -98,13 +98,19 @@ public:
     for (auto const &filename : logFiles)
       std::cout << "  " << filename << std::endl;
 
+#ifdef _WIN32
+    const std::string PREFIX(".\\");
+#else
+    const std::string PREFIX("");
+#endif
+
     // One .log and four .txt files are listed in the alternate data stream.
     TS_ASSERT_EQUALS(5, logFiles.size());
-    TS_ASSERT(std::find(logFiles.begin(), logFiles.end(), "fakeRawFile.log") != logFiles.end());
-    TS_ASSERT(std::find(logFiles.begin(), logFiles.end(), "fakeRawFile_ICPdebug.txt") != logFiles.end());
-    TS_ASSERT(std::find(logFiles.begin(), logFiles.end(), "fakeRawFile_ICPevent.txt") != logFiles.end());
-    TS_ASSERT(std::find(logFiles.begin(), logFiles.end(), "fakeRawFile_ICPstatus.txt") != logFiles.end());
-    TS_ASSERT(std::find(logFiles.begin(), logFiles.end(), "fakeRawFile_Status.txt") != logFiles.end());
+    TS_ASSERT(std::find(logFiles.begin(), logFiles.end(), PREFIX + "fakeRawFile.log") != logFiles.end());
+    TS_ASSERT(std::find(logFiles.begin(), logFiles.end(), PREFIX + "fakeRawFile_ICPdebug.txt") != logFiles.end());
+    TS_ASSERT(std::find(logFiles.begin(), logFiles.end(), PREFIX + "fakeRawFile_ICPevent.txt") != logFiles.end());
+    TS_ASSERT(std::find(logFiles.begin(), logFiles.end(), PREFIX + "fakeRawFile_ICPstatus.txt") != logFiles.end());
+    TS_ASSERT(std::find(logFiles.begin(), logFiles.end(), PREFIX + "fakeRawFile_Status.txt") != logFiles.end());
 
     std::filesystem::remove(rawFile);
     std::filesystem::remove(logFile);
