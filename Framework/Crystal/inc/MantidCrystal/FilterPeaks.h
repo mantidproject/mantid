@@ -21,7 +21,7 @@ public:
   const std::string name() const override;
   /// Summary of algorithms purpose
   const std::string summary() const override {
-    return "Filters the peaks in a peaks workspace based upon the valur of a "
+    return "Filters the peaks in a peaks workspace based upon the value of a "
            "chosen variable.";
   }
 
