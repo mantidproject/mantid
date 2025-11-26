@@ -293,7 +293,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/ply-3.11-pyhd8ed1ab_3.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/poco-1.14.2-h0a6e815_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/pooch-1.8.2-pyhd8ed1ab_3.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/pre-commit-4.4.0-pyha770c72_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/pre-commit-4.5.0-pyha770c72_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/proj-9.5.1-h0054346_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/prompt-toolkit-3.0.52-pyha770c72_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/propcache-0.3.1-py311h2dc5d0c_0.conda
@@ -662,7 +662,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/ply-3.11-pyhd8ed1ab_3.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/poco-1.14.2-h7183373_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/pooch-1.8.2-pyhd8ed1ab_3.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/pre-commit-4.4.0-pyha770c72_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/pre-commit-4.5.0-pyha770c72_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/proj-9.6.2-hdbeaa80_2.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/prompt-toolkit-3.0.52-pyha770c72_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/propcache-0.3.1-py311h4921393_0.conda
@@ -984,7 +984,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/ply-3.11-pyhd8ed1ab_3.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/poco-1.14.2-h8b29dd2_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/pooch-1.8.2-pyhd8ed1ab_3.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/pre-commit-4.4.0-pyha770c72_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/pre-commit-4.5.0-pyha770c72_0.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/proj-9.6.2-h7990399_2.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/prompt-toolkit-3.0.52-pyha770c72_0.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/propcache-0.3.1-py311h5082efb_0.conda
@@ -1370,6 +1370,7 @@ packages:
   - sysroot_linux-64
   - zstd >=1.5.7,<1.6.0a0
   license: GPL-3.0-only
+  license_family: GPL
   size: 3747046
   timestamp: 1764007847963
 - conda: https://conda.anaconda.org/conda-forge/linux-64/binutils_linux-64-2.45-default_h4852527_104.conda
@@ -1378,6 +1379,7 @@ packages:
   depends:
   - binutils_impl_linux-64 2.45 default_hfdba357_104
   license: GPL-3.0-only
+  license_family: GPL
   size: 36180
   timestamp: 1764007883258
 - conda: https://conda.anaconda.org/conda-forge/linux-64/blosc-1.21.6-hef167b5_0.conda
@@ -1442,6 +1444,7 @@ packages:
   - libbrotlienc 1.2.0 hb03c661_1
   - libgcc >=14
   license: MIT
+  license_family: MIT
   size: 20103
   timestamp: 1764017231353
 - conda: https://conda.anaconda.org/conda-forge/osx-arm64/brotli-1.2.0-h7d5ae5b_1.conda
@@ -1453,6 +1456,7 @@ packages:
   - libbrotlidec 1.2.0 hc919400_1
   - libbrotlienc 1.2.0 hc919400_1
   license: MIT
+  license_family: MIT
   size: 20237
   timestamp: 1764018058424
 - conda: https://conda.anaconda.org/conda-forge/win-64/brotli-1.2.0-h2d644bc_1.conda
@@ -1466,6 +1470,7 @@ packages:
   - vc >=14.3,<15
   - vc14_runtime >=14.44.35208
   license: MIT
+  license_family: MIT
   size: 20342
   timestamp: 1764017988883
 - conda: https://conda.anaconda.org/conda-forge/linux-64/brotli-bin-1.2.0-hb03c661_1.conda
@@ -1477,6 +1482,7 @@ packages:
   - libbrotlienc 1.2.0 hb03c661_1
   - libgcc >=14
   license: MIT
+  license_family: MIT
   size: 21021
   timestamp: 1764017221344
 - conda: https://conda.anaconda.org/conda-forge/osx-arm64/brotli-bin-1.2.0-hc919400_1.conda
@@ -1487,6 +1493,7 @@ packages:
   - libbrotlidec 1.2.0 hc919400_1
   - libbrotlienc 1.2.0 hc919400_1
   license: MIT
+  license_family: MIT
   size: 18628
   timestamp: 1764018033635
 - conda: https://conda.anaconda.org/conda-forge/win-64/brotli-bin-1.2.0-hfd05255_1.conda
@@ -1499,6 +1506,7 @@ packages:
   - vc >=14.3,<15
   - vc14_runtime >=14.44.35208
   license: MIT
+  license_family: MIT
   size: 22714
   timestamp: 1764017952449
 - conda: https://conda.anaconda.org/conda-forge/linux-64/brotli-python-1.2.0-py311h66f275b_1.conda
@@ -1513,6 +1521,7 @@ packages:
   constrains:
   - libbrotlicommon 1.2.0 hb03c661_1
   license: MIT
+  license_family: MIT
   size: 367573
   timestamp: 1764017405384
 - conda: https://conda.anaconda.org/conda-forge/osx-arm64/brotli-python-1.2.0-py311hdc60ec4_1.conda
@@ -1527,6 +1536,7 @@ packages:
   constrains:
   - libbrotlicommon 1.2.0 hc919400_1
   license: MIT
+  license_family: MIT
   size: 359588
   timestamp: 1764018467340
 - conda: https://conda.anaconda.org/conda-forge/win-64/brotli-python-1.2.0-py311hc5da9e4_1.conda
@@ -1541,6 +1551,7 @@ packages:
   constrains:
   - libbrotlicommon 1.2.0 hfd05255_1
   license: MIT
+  license_family: MIT
   size: 335333
   timestamp: 1764018370925
 - conda: https://conda.anaconda.org/conda-forge/linux-64/bzip2-1.0.8-hda65f42_8.conda
@@ -2924,6 +2935,7 @@ packages:
   - libstdcxx >=13.4.0
   - sysroot_linux-64
   license: GPL-3.0-only WITH GCC-exception-3.1
+  license_family: GPL
   size: 70940762
   timestamp: 1764036344926
 - conda: https://conda.anaconda.org/conda-forge/linux-64/gcc_linux-64-13.4.0-h0a5b801_14.conda
@@ -3540,6 +3552,7 @@ packages:
   - sysroot_linux-64
   - tzdata
   license: GPL-3.0-only WITH GCC-exception-3.1
+  license_family: GPL
   size: 13982763
   timestamp: 1764036615205
 - conda: https://conda.anaconda.org/conda-forge/linux-64/gxx_linux-64-13.4.0-h494ab63_14.conda
@@ -3593,6 +3606,7 @@ packages:
   - python >=3.11,<3.12.0a0 *_cpython
   - python_abi 3.11.* *_cp311
   license: BSD-3-Clause
+  license_family: BSD
   size: 1145724
   timestamp: 1764017890824
 - conda: https://conda.anaconda.org/conda-forge/win-64/h5py-3.15.1-nompi_py311hc40ba4b_101.conda
@@ -3608,6 +3622,7 @@ packages:
   - vc >=14.3,<15
   - vc14_runtime >=14.44.35208
   license: BSD-3-Clause
+  license_family: BSD
   size: 1072830
   timestamp: 1764016795703
 - conda: https://conda.anaconda.org/conda-forge/linux-64/harfbuzz-11.5.1-h15599e2_0.conda
@@ -4419,6 +4434,7 @@ packages:
   constrains:
   - binutils_impl_linux-64 2.45
   license: GPL-3.0-only
+  license_family: GPL
   size: 725545
   timestamp: 1764007826689
 - conda: https://conda.anaconda.org/conda-forge/linux-64/lerc-4.0.0-h0aef613_1.conda
@@ -4793,6 +4809,7 @@ packages:
   - __glibc >=2.17,<3.0.a0
   - libgcc >=14
   license: MIT
+  license_family: MIT
   size: 79965
   timestamp: 1764017188531
 - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libbrotlicommon-1.2.0-hc919400_1.conda
@@ -4801,6 +4818,7 @@ packages:
   depends:
   - __osx >=11.0
   license: MIT
+  license_family: MIT
   size: 79443
   timestamp: 1764017945924
 - conda: https://conda.anaconda.org/conda-forge/win-64/libbrotlicommon-1.2.0-hfd05255_1.conda
@@ -4811,6 +4829,7 @@ packages:
   - vc >=14.3,<15
   - vc14_runtime >=14.44.35208
   license: MIT
+  license_family: MIT
   size: 82042
   timestamp: 1764017799966
 - conda: https://conda.anaconda.org/conda-forge/linux-64/libbrotlidec-1.2.0-hb03c661_1.conda
@@ -4821,6 +4840,7 @@ packages:
   - libbrotlicommon 1.2.0 hb03c661_1
   - libgcc >=14
   license: MIT
+  license_family: MIT
   size: 34632
   timestamp: 1764017199083
 - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libbrotlidec-1.2.0-hc919400_1.conda
@@ -4830,6 +4850,7 @@ packages:
   - __osx >=11.0
   - libbrotlicommon 1.2.0 hc919400_1
   license: MIT
+  license_family: MIT
   size: 29452
   timestamp: 1764017979099
 - conda: https://conda.anaconda.org/conda-forge/win-64/libbrotlidec-1.2.0-hfd05255_1.conda
@@ -4841,6 +4862,7 @@ packages:
   - vc >=14.3,<15
   - vc14_runtime >=14.44.35208
   license: MIT
+  license_family: MIT
   size: 34449
   timestamp: 1764017851337
 - conda: https://conda.anaconda.org/conda-forge/linux-64/libbrotlienc-1.2.0-hb03c661_1.conda
@@ -4851,6 +4873,7 @@ packages:
   - libbrotlicommon 1.2.0 hb03c661_1
   - libgcc >=14
   license: MIT
+  license_family: MIT
   size: 298378
   timestamp: 1764017210931
 - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libbrotlienc-1.2.0-hc919400_1.conda
@@ -4860,6 +4883,7 @@ packages:
   - __osx >=11.0
   - libbrotlicommon 1.2.0 hc919400_1
   license: MIT
+  license_family: MIT
   size: 290754
   timestamp: 1764018009077
 - conda: https://conda.anaconda.org/conda-forge/win-64/libbrotlienc-1.2.0-hfd05255_1.conda
@@ -4871,6 +4895,7 @@ packages:
   - vc >=14.3,<15
   - vc14_runtime >=14.44.35208
   license: MIT
+  license_family: MIT
   size: 252903
   timestamp: 1764017901735
 - conda: https://conda.anaconda.org/conda-forge/linux-64/libcap-2.77-h3ff7636_0.conda
@@ -5345,6 +5370,7 @@ packages:
   - libgomp 15.2.0 he0feb66_12
   - libgcc-ng ==15.2.0=*_12
   license: GPL-3.0-only WITH GCC-exception-3.1
+  license_family: GPL
   size: 1043771
   timestamp: 1764036113005
 - conda: https://conda.anaconda.org/conda-forge/noarch/libgcc-devel_linux-64-13.4.0-hd1d28cc_112.conda
@@ -5353,6 +5379,7 @@ packages:
   depends:
   - __unix
   license: GPL-3.0-only WITH GCC-exception-3.1
+  license_family: GPL
   size: 2837787
   timestamp: 1764036038902
 - conda: https://conda.anaconda.org/conda-forge/linux-64/libgcc-ng-15.2.0-h69a702a_12.conda
@@ -5361,6 +5388,7 @@ packages:
   depends:
   - libgcc 15.2.0 he0feb66_12
   license: GPL-3.0-only WITH GCC-exception-3.1
+  license_family: GPL
   size: 29191
   timestamp: 1764036122114
 - conda: https://conda.anaconda.org/conda-forge/linux-64/libgd-2.3.3-h6f5c62b_11.conda
@@ -5456,6 +5484,7 @@ packages:
   constrains:
   - libgfortran-ng ==15.2.0=*_12
   license: GPL-3.0-only WITH GCC-exception-3.1
+  license_family: GPL
   size: 29147
   timestamp: 1764036159796
 - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libgfortran-5.0.0-14_2_0_h6c33f7e_103.conda
@@ -5473,6 +5502,7 @@ packages:
   depends:
   - libgfortran 15.2.0 h69a702a_12
   license: GPL-3.0-only WITH GCC-exception-3.1
+  license_family: GPL
   size: 29193
   timestamp: 1764036391660
 - conda: https://conda.anaconda.org/conda-forge/linux-64/libgfortran5-15.2.0-h68bc16d_12.conda
@@ -5484,6 +5514,7 @@ packages:
   constrains:
   - libgfortran 15.2.0
   license: GPL-3.0-only WITH GCC-exception-3.1
+  license_family: GPL
   size: 2485232
   timestamp: 1764036134431
 - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libgfortran5-14.2.0-h6c33f7e_103.conda
@@ -5610,6 +5641,7 @@ packages:
   depends:
   - __glibc >=2.17,<3.0.a0
   license: GPL-3.0-only WITH GCC-exception-3.1
+  license_family: GPL
   size: 605231
   timestamp: 1764036022611
 - conda: https://conda.anaconda.org/conda-forge/linux-64/libhiredis-1.0.2-h2cc385e_0.tar.bz2
@@ -6399,6 +6431,7 @@ packages:
   - libgcc >=13.4.0
   - libstdcxx >=13.4.0
   license: GPL-3.0-only WITH GCC-exception-3.1
+  license_family: GPL
   size: 6819872
   timestamp: 1764036266923
 - conda: https://conda.anaconda.org/conda-forge/linux-64/libsndfile-1.2.2-hc60ed4a_1.conda
@@ -6518,6 +6551,7 @@ packages:
   constrains:
   - libstdcxx-ng ==15.2.0=*_12
   license: GPL-3.0-only WITH GCC-exception-3.1
+  license_family: GPL
   size: 5854408
   timestamp: 1764036151142
 - conda: https://conda.anaconda.org/conda-forge/noarch/libstdcxx-devel_linux-64-13.4.0-h6963c3b_112.conda
@@ -6526,6 +6560,7 @@ packages:
   depends:
   - __unix
   license: GPL-3.0-only WITH GCC-exception-3.1
+  license_family: GPL
   size: 19882544
   timestamp: 1764036080465
 - conda: https://conda.anaconda.org/conda-forge/linux-64/libstdcxx-ng-15.2.0-hdf11a46_12.conda
@@ -6534,6 +6569,7 @@ packages:
   depends:
   - libstdcxx 15.2.0 h934c35e_12
   license: GPL-3.0-only WITH GCC-exception-3.1
+  license_family: GPL
   size: 29230
   timestamp: 1764036201717
 - conda: https://conda.anaconda.org/conda-forge/linux-64/libsystemd0-257.10-hd0affe5_2.conda
@@ -8719,9 +8755,9 @@ packages:
   license_family: BSD
   size: 55588
   timestamp: 1754941801129
-- conda: https://conda.anaconda.org/conda-forge/noarch/pre-commit-4.4.0-pyha770c72_0.conda
-  sha256: 5eee94ab06bb74ad164862d15c18e932493c5b959928e7889b91dee73f550152
-  md5: c130573bb7a166e93d5bd01c94ae38e1
+- conda: https://conda.anaconda.org/conda-forge/noarch/pre-commit-4.5.0-pyha770c72_0.conda
+  sha256: 8481f4939b1f81cf0db12456819368b41e3f998e4463e41611de4b13752b2c08
+  md5: af8d4882203bccefec6f1aeed70030c6
   depends:
   - cfgv >=2.0.0
   - identify >=1.0.0
@@ -8731,8 +8767,8 @@ packages:
   - virtualenv >=20.10.0
   license: MIT
   license_family: MIT
-  size: 200293
-  timestamp: 1762692428418
+  size: 201265
+  timestamp: 1764067809524
 - conda: https://conda.anaconda.org/conda-forge/linux-64/proj-9.5.1-h0054346_0.conda
   sha256: 835afb9c8198895ec1ce2916320503d47bb0c25b75c228d744c44e505f1f4e3b
   md5: 398cabfd9bd75e90d0901db95224f25f

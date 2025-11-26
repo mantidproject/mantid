@@ -192,8 +192,15 @@ class FullInstrumentViewPresenter:
         self._model.extract_spectra_for_line_plot(unit, self._view.sum_spectra_selected())
         self._view.show_plot_for_detectors(self._model.line_plot_workspace)
         self._view.set_selected_detector_info(self._model.picked_detectors_info_text())
+        self._update_relative_detector_angle()
         self._update_peaks_workspaces()
         self.refresh_lineplot_peaks()
+
+    def _update_relative_detector_angle(self) -> None:
+        if len(self._model.picked_detector_ids) != 2:
+            self._view.set_relative_detector_angle(None)
+        else:
+            self._view.set_relative_detector_angle(self._model.relative_detector_angle())
 
     def on_clear_selected_detectors_clicked(self) -> None:
         self.update_picked_detectors(np.array([]))
