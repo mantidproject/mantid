@@ -24,7 +24,8 @@ from mantid.simpleapi import (
     ExtractMaskToTable,
     SaveMask,
     MaskDetectors,
-    DeleteWorkspace,
+    RenameWorkspace,
+    CloneWorkspace,
 )
 from itertools import groupby
 import numpy as np
@@ -47,12 +48,13 @@ class FullInstrumentViewModel:
         """For the given workspace, calculate detector positions, the map from detector indices to workspace indices, and integrated
         counts. Optionally will draw detector geometry, e.g. rectangular bank or tube instead of points."""
         self._workspace = workspace
-        x_unit = workspace.getAxis(0).getUnit()
+
+    def setup(self):
+        x_unit = self._workspace.getAxis(0).getUnit()
         self._workspace_x_unit = x_unit.unitID()
         self._workspace_x_unit_display = f"{str(x_unit.caption())} ({str(x_unit.symbol())})"
         self._selected_peaks_workspaces = []
 
-    def setup(self):
         component_info = self._workspace.componentInfo()
         self._sample_position = np.array(component_info.samplePosition()) if component_info.hasSample() else np.zeros(3)
         has_source = self._workspace.getInstrument().getSource() is not None
@@ -414,9 +416,6 @@ class FullInstrumentViewModel:
         for i, v in enumerate(self._is_masked):
             self._mask_ws.dataY(i)[:] = v
         # TODO: Check if copies are expensive with big workspaces
-        temp_ws = self._workspace.clone()
-        MaskDetectors(temp_ws, MaskedWorkspace=self._mask_ws)
-        self._workspace = temp_ws.clone(StoreInADS=False)
-        # Update array that tracks permanent mask
-        self._is_masked_in_ws = self._mask_ws.extractY().flatten().astype(bool)
-        DeleteWorkspace(temp_ws)
+        CloneWorkspace(self._workspace.name(), OutputWorkspace="temp_ws")
+        MaskDetectors("temp_ws", MaskedWorkspace=self._mask_ws)
+        RenameWorkspace(InputWorkspace="temp_ws", OutputWorkspace=self._workspace.name())

@@ -12,6 +12,7 @@ from qtpy.QtWidgets import QFileDialog
 from vtk import vtkCylinder
 from mantid import mtd
 from mantid.kernel import logger, ConfigService
+from mantid.simpleapi import AnalysisDataService
 from mantidqt.io import open_a_file_dialog
 
 from instrumentview.FullInstrumentViewModel import FullInstrumentViewModel
@@ -233,6 +234,7 @@ class FullInstrumentViewPresenter:
     def rename_workspace_callback(self, ws_old_name, ws_new_name):
         if self._model._workspace.name() == ws_old_name:
             self._model._workspace = mtd[ws_new_name]
+            self._model.setup()
             logger.warning(f"Workspace {ws_old_name} renamed to {ws_new_name}, updated Experimental Instrument View.")
         self._reload_peaks_workspaces()
 
@@ -243,7 +245,13 @@ class FullInstrumentViewPresenter:
         if ws_name in self.peaks_workspaces_in_ads():
             self._reload_peaks_workspaces()
         elif ws_name == self._model.workspace.name():
-            self._view.close()
+            # This check is needed because observers are triggered
+            # before the RenameWorkspace is completed.
+            # Prevents strange behaviour from workspace not being fully replaced yet
+            if AnalysisDataService.retrieve(ws_name).name() != ws_name:
+                return
+            self._model._workspace = AnalysisDataService.retrieve(ws_name)
+            self._model.setup()
 
     def add_workspace_callback(self, ws_name, ws):
         self._reload_peaks_workspaces()
