@@ -94,6 +94,10 @@ public:
 
     std::list<std::string> logFiles = LoadRawHelper::searchForLogFiles(rawFile.string());
 
+    std::cout << "files returned by LoadRawHelper::searchForLogFiles(" << rawFile.string() << "):" << std::endl;
+    for (auto const &filename : logFiles)
+      std::cout << "  " << filename << std::endl;
+
     // One .log and four .txt files are listed in the alternate data stream.
     TS_ASSERT_EQUALS(5, logFiles.size());
     TS_ASSERT(std::find(logFiles.begin(), logFiles.end(), "fakeRawFile.log") != logFiles.end());
