@@ -1051,7 +1051,7 @@ void InstrumentActor::setDataIntegrationRange(const double &xmin, const double &
       if (spectrumDefinition.size() == 1 &&
           (std::find(monitorIndices.begin(), monitorIndices.end(), i) != monitorIndices.end() ||
            /// Check if detid exists in mask ws
-           (maskWksp && maskWksp->containsDetID(detId) && maskWksp->isMasked(detId))))
+           (maskWksp && maskWksp->isMasked(detId))))
         continue;
 
       auto sum = m_integratedSignal[i];

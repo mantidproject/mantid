@@ -132,7 +132,7 @@ void SaveCalFile::saveCalFile(const std::string &calFileName, const GroupingWork
 
     // Find the selection, if any
     int selected = 1;
-    if (doMask && (!maskWS->containsDetID(detectorID) || maskWS->isMasked(detectorID)))
+    if (doMask && maskWS->isMasked(detectorID))
       selected = 0;
 
     // if(group > 0)

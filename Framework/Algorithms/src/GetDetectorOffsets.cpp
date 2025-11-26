@@ -176,7 +176,7 @@ void GetDetectorOffsets::exec() {
     const auto &dets = inputW->getSpectrum(static_cast<size_t>(wi)).getDetectorIDs();
 
     // If the entire spectrum is already masked, there's nothing to do.
-    if (!maskWS->containsDetIDs(dets) || maskWS->isMasked(dets))
+    if (maskWS->isMasked(dets))
       continue;
 
     // Fit the peak
@@ -199,7 +199,7 @@ void GetDetectorOffsets::exec() {
           continue;
         }
         // Warning: individual detectors in a spectrum may be masked.
-        if (!maskWS->containsDetID(det) || !maskWS->isMasked(det))
+        if (!maskWS->isMasked(det))
           outputW->setValue(det, offset);
       }
     }

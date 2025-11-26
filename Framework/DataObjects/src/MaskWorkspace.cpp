@@ -182,6 +182,11 @@ bool MaskWorkspace::isMasked(const detid_t detectorID) const {
     throw std::runtime_error(msg.str());
   }
 
+  // TODO: remove this case
+  //       and refactor code that depends on non-existence = masked
+  if (!this->contains(detectorID))
+    return true;
+
   // if you are fetching detectorID's that dont exist in your mask workspace
   // this is expected to explode(throw an exception)
   // otherwise we are **masking** an issue with the consuming code
