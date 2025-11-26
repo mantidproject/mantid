@@ -17,13 +17,7 @@ RELEASE_TAG_RE = re.compile(r"^v?\d+.\d+(.\d)?$")
 # to be used in the case where a Git user has multiple accounts; a translation
 # entry would suffice in such an instance.
 _blocklist = [
-    # bots
     "unknown",
-    "copilot",
-    "dependabot",
-    "mantid-builder",
-    "mantidbuilder",
-    "pre-commit-ci",
     # people
     "Utkarsh Ayachit",
     "Thomas Brooks",
@@ -89,8 +83,8 @@ def _clean_up_author_list(author_list):
     """Apply translations and blocklist, and get rid of duplicates."""
     # Get rid of count by splitting on tab - remove whitespace
     result = [author.split("\t")[-1].strip() for author in author_list]
-    # Get rid of email adddress
-    result = [author.split("<")[0].strip() for author in result]
+    # Get rid of email adddress - bot addresses are <bot> in gitmailmap
+    result = [author.split("<")[0].strip() for author in result if "<bot>" not in author]
     # Remove empty authors
     result = [author for author in result if bool(author)]
 
