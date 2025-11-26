@@ -48,7 +48,6 @@ public:
   /// </summary>
   void testAlternateDataStream() {
     std::filesystem::path rawFile("./fakeRawFile.raw");
-#ifdef _WIN32
     std::ofstream file(rawFile);
     file << "data goes here";
 
@@ -109,7 +108,6 @@ public:
     std::filesystem::remove(icpEventFile);
     std::filesystem::remove(icpStatusFile);
     std::filesystem::remove(statusFile);
-#endif
   }
 
   /// <summary>

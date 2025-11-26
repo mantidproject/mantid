@@ -1116,16 +1116,12 @@ int LoadRawHelper::confidence(Kernel::FileDescriptor &descriptor) const {
  * @returns A set containing paths to log files related to RAW file used.
  */
 std::list<std::string> LoadRawHelper::searchForLogFiles(const std::filesystem::path &pathToRawFile) {
-  // If pathToRawFile is the filename of a raw datafile then search for
-  // potential log files
-  // in the directory of this raw datafile. Otherwise check if it is a potential
-  // log file. Add the filename of these potential log files to:
+  // If pathToRawFile is the filename of a raw datafile then search for potential log files in the directory of this raw
+  // datafile. Otherwise check if it is a potential log file. Add the filename of these potential log files to:
   // potentialLogFiles.
   std::set<std::string> potentialLogFiles;
-  // Using a list instead of a set to preserve order. The three column names
-  // will
-  // be added to the end of the list. This means if a column exists in the two
-  // and three column file then it will be overridden correctly.
+  // Using a list instead of a set to preserve order. The three column names will be added to the end of the list. This
+  // means if a column exists in the two and three column file then it will be overridden correctly.
   std::list<std::string> potentialLogFilesList;
 
   // File property checks whether the given path exists, just check that is
@@ -1157,10 +1153,13 @@ std::list<std::string> LoadRawHelper::searchForLogFiles(const std::filesystem::p
       }
       // Check for .log
       std::filesystem::path combinedLogPath = pathToRawFile;
-      combinedLogPath.replace_extension("log");
+      combinedLogPath.replace_extension(".log");
       if (std::filesystem::exists(combinedLogPath)) {
-        // Push three column filename to end of list.
-        potentialLogFilesList.insert(potentialLogFilesList.end(), combinedLogPath.string());
+        // Push three column filename to end of list - things rely on relative path not including the '.'
+        if (pathToRawFile.parent_path().string() == ".")
+          potentialLogFilesList.insert(potentialLogFilesList.end(), combinedLogPath.filename().string());
+        else
+          potentialLogFilesList.insert(potentialLogFilesList.end(), combinedLogPath.string());
       }
     }
 
