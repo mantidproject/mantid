@@ -387,7 +387,7 @@ void GramCharlierComptonProfile::cacheYSpaceValues(const HistogramData::Points &
   }
   // Final value to ensure it ends at maxy
   m_yfine.back() = maxy;
-  // Set up GSL interpolater
+  // Interpolate q values at fine y grid using linear spline
   m_qfine = Mantid::Kernel::LinearSpline<double, double>::getSplinedYValues(m_yfine, sortedy, sortedq);
 
   // Cache voigt function over yfine
