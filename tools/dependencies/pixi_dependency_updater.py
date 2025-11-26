@@ -38,6 +38,7 @@ def get_conda_recipe_pins() -> DependencyPins:
             if not stripped or stripped.startswith("#"):
                 continue
 
+            # assumes this will remain at the end of the file
             if stripped == "pin_run_as_build:":
                 break
 
@@ -161,22 +162,25 @@ def remove_from_pixi_manifest(package: str, os_name: str):
 
 
 def _compare_version_numbers(conda_version: str, pixi_version: str):
-    trimmed_conda_version = conda_version.replace(" ", "").lstrip("=").replace(".*", "")
-    trimmed_pixi_version = pixi_version.replace(" ", "").lstrip("=").replace(".*", "")
+    trimmed_conda_version = conda_version.replace(" ", "").lstrip("=").rstrip(".*")
+    trimmed_pixi_version = pixi_version.replace(" ", "").lstrip("=").rstrip(".*")
 
     return trimmed_conda_version == trimmed_pixi_version
 
 
-def update_pixi_from_conda_changes(conda_env: DependencyPins, pixi_env: DependencyPins):
+def update_pixi_from_conda_changes(conda_env: DependencyPins, pixi_env: DependencyPins) -> bool:
     # search for any removed dependencies
+    made_change_to_pixi = False
     for package, pixi_versions in pixi_env.items():
         if package not in conda_env.keys():
             remove_from_pixi_manifest(package, "all")
+            made_change_to_pixi = True
         else:
             conda_versions = conda_env.get(package, {})
             for os_name in pixi_versions.keys():
                 if os_name not in conda_versions.keys():
                     remove_from_pixi_manifest(package, os_name)
+                    made_change_to_pixi = True
     # update changed pins or added dependencies
     for package, conda_versions in conda_env.items():
         pixi_versions = pixi_env.get(package, {})
@@ -184,10 +188,14 @@ def update_pixi_from_conda_changes(conda_env: DependencyPins, pixi_env: Dependen
             pixi_version = pixi_versions.get(os_name, "")
             if not pixi_version:
                 update_pin_in_pixi_manifest(package, os_name, conda_version)
+                made_change_to_pixi = True
             # if you run pixi add with no spec specified, pixi will add some amount of version restraint;
             # therefore, we want to check that the conda version has actually been specified before updating the toml
             if pixi_version and conda_version and not _compare_version_numbers(conda_version, pixi_version):
                 update_pin_in_pixi_manifest(package, os_name, conda_version)
+                made_change_to_pixi = True
+
+    return made_change_to_pixi
 
 
 def compare_conda_and_pixi_envs(conda_env: DependencyPins, pixi_env: DependencyPins) -> Sequence[str]:
@@ -239,8 +247,8 @@ def main(argv: Sequence[str] = None) -> int:
     pixi_env = get_pixi_mantid_dev_pins()
 
     if (BUILD_CONFIG_PATH in changed_files or MANTID_DEVELOPER_RECIPE_PATH in changed_files) and PIXI_TOML not in changed_files:
-        update_pixi_from_conda_changes(conda_env, pixi_env)
-        return 1
+        if update_pixi_from_conda_changes(conda_env, pixi_env):
+            return 1
 
     if warning_messages := compare_conda_and_pixi_envs(conda_env, pixi_env):
         print("Mismatch between conda and pixi environments found:")
