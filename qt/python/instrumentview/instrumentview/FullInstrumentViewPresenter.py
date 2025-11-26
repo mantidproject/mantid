@@ -328,6 +328,8 @@ class FullInstrumentViewPresenter:
             file_filter="XML files (*xml)",
             directory=ConfigService["defaultsave.directory"],
         )
+        if not filename:
+            return
         # TODO: Figure out if this can be done automatically by the dialog
         if Path(filename).suffix != ".xml":
             filename += ".xml"
