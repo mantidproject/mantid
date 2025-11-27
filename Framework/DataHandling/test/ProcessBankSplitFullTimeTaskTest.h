@@ -87,7 +87,7 @@ public:
     wksps.push_back(ws2);
 
     const std::map<Mantid::detid_t, double> calibration{{1, 1.}, {2, 2.}};
-    const std::map<Mantid::detid_t, double> scale_at_sample{{1, 1.0}, {2, 0.5}};
+    const std::map<Mantid::detid_t, double> scale_at_sample{{1, 1000.0}, {2, 1000.0}};
     const std::set<Mantid::detid_t> masked;
     std::map<Mantid::Types::Core::DateAndTime, int> splitterMap;
     splitterMap.emplace(Mantid::Types::Core::DateAndTime("2024-01-01T00:00:00"), 0);
@@ -96,11 +96,10 @@ public:
     splitterMap.emplace(Mantid::Types::Core::DateAndTime("2024-01-01T00:00:00.015"), 0);
     splitterMap.emplace(Mantid::Types::Core::DateAndTime("2024-01-01T00:00:00.05"), -1);
 
-    bool correction_to_sample = false;
     std::shared_ptr<Mantid::API::Progress> progress = std::make_shared<Mantid::API::Progress>();
 
     ProcessBankSplitFullTimeTask task(bankEntryNames, file, mockLoader, workspaceIndices, wksps, calibration,
-                                      scale_at_sample, masked, 1000, 100, splitterMap, correction_to_sample, progress);
+                                      scale_at_sample, masked, 1000, 100, splitterMap, progress);
 
     // Run the task
     task(tbb::blocked_range<size_t>(0, 1));
@@ -132,11 +131,11 @@ public:
     TS_ASSERT_EQUALS(ws2->readY(0)[0], 3.0);
     TS_ASSERT_EQUALS(ws2->readY(0)[1], 0.0);
 
-    // now test with correction to sample enabled
-    correction_to_sample = true;
+    // now test with different correction to sample
+    const std::map<Mantid::detid_t, double> scale_at_sample2{{1, 1000.}, {2, 500.}};
 
     ProcessBankSplitFullTimeTask task2(bankEntryNames, file, mockLoader, workspaceIndices, wksps, calibration,
-                                       scale_at_sample, masked, 1000, 100, splitterMap, correction_to_sample, progress);
+                                       scale_at_sample2, masked, 1000, 100, splitterMap, progress);
 
     // Run the task
     task2(tbb::blocked_range<size_t>(0, 1));

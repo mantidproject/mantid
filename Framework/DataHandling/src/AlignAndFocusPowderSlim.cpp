@@ -306,7 +306,7 @@ void AlignAndFocusPowderSlim::exec() {
   }
 
   // calculate correction for tof of the neutron at the sample position
-  if (this->getProperty(PropertyNames::CORRECTION_TO_SAMPLE)) {
+  if (this->getProperty(PropertyNames::FULL_TIME)) {
     this->initScaleAtSample(wksp);
   }
 
@@ -439,8 +439,7 @@ void AlignAndFocusPowderSlim::exec() {
 
       ProcessBankSplitFullTimeTask task(bankEntryNames, h5file, is_time_filtered, workspaceIndices, workspaces,
                                         m_calibration, m_scale_at_sample, m_masked, static_cast<size_t>(DISK_CHUNK),
-                                        static_cast<size_t>(GRAINSIZE_EVENTS), pulse_indices, splitterMap,
-                                        this->getProperty(PropertyNames::CORRECTION_TO_SAMPLE), progress);
+                                        static_cast<size_t>(GRAINSIZE_EVENTS), pulse_indices, splitterMap, progress);
 
       // generate threads only if appropriate
       if (num_banks_to_read > 1) {
@@ -633,7 +632,7 @@ void AlignAndFocusPowderSlim::loadCalFile(const Mantid::API::Workspace_sptr &inp
 
 /**
  * For fast logs, calculate the sample position correction. This is a separate implementation of
- * Mantid::API::TimeAtSampleElastic that uses DetectorInfo.
+ * Mantid::API::TimeAtSampleElastic that uses DetectorInfo. Also scale by 1000 to convert from μs to ns.
  */
 void AlignAndFocusPowderSlim::initScaleAtSample(const API::MatrixWorkspace_sptr &wksp) {
   // detector information for all of the L2
@@ -641,11 +640,20 @@ void AlignAndFocusPowderSlim::initScaleAtSample(const API::MatrixWorkspace_sptr 
   // cache a single L1 value
   const double L1 = detInfo.l1();
 
-  // calculate scale factors for each detector
-  for (auto iter = detInfo.cbegin(); iter != detInfo.cend(); ++iter) {
-    if (!iter->isMonitor()) {
-      const double path_correction = L1 / (L1 + iter->l2());
-      m_scale_at_sample.emplace(static_cast<detid_t>(iter->detid()), path_correction);
+  if (this->getProperty(PropertyNames::CORRECTION_TO_SAMPLE)) {
+    // calculate scale factors for each detector
+    for (auto iter = detInfo.cbegin(); iter != detInfo.cend(); ++iter) {
+      if (!iter->isMonitor()) {
+        const double path_correction = L1 / (L1 + iter->l2()) * 1000.0;
+        m_scale_at_sample.emplace(static_cast<detid_t>(iter->detid()), path_correction);
+      }
+    }
+  } else {
+    // set all scale factors to 1.0
+    for (auto iter = detInfo.cbegin(); iter != detInfo.cend(); ++iter) {
+      if (!iter->isMonitor()) {
+        m_scale_at_sample.emplace(static_cast<detid_t>(iter->detid()), 1000.0);
+      }
     }
   }
 }

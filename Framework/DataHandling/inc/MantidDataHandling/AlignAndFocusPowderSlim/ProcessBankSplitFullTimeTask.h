@@ -19,7 +19,8 @@
 
 namespace Mantid::DataHandling::AlignAndFocusPowderSlim {
 
-// we need to include additional pulses because time-of-flight can be greater than a couple of pulse periods
+// We need to include additional pulses because time-of-flight can be greater than a couple of pulse periods.
+// This is in nanoseconds. So four pulses of 1/60s is 66666666 ns.
 const int64_t PULSETIME_OFFSET = 66666666;
 
 class MANTID_DATAHANDLING_DLL ProcessBankSplitFullTimeTask {
@@ -32,7 +33,7 @@ public:
                                const size_t events_per_chunk, const size_t grainsize_event,
                                const std::vector<PulseROI> &pulse_indices,
                                const std::map<Mantid::Types::Core::DateAndTime, int> &splitterMap,
-                               const bool correction_to_sample, std::shared_ptr<API::Progress> &progress);
+                               std::shared_ptr<API::Progress> &progress);
 
   // Constructor with custom loader to allow mocking in tests
   ProcessBankSplitFullTimeTask(std::vector<std::string> &bankEntryNames, H5::H5File &h5file,
@@ -42,7 +43,7 @@ public:
                                const std::map<detid_t, double> &scale_at_sample, const std::set<detid_t> &masked,
                                const size_t events_per_chunk, const size_t grainsize_event,
                                const std::map<Mantid::Types::Core::DateAndTime, int> &splitterMap,
-                               const bool correction_to_sample, std::shared_ptr<API::Progress> &progress);
+                               std::shared_ptr<API::Progress> &progress);
 
   void operator()(const tbb::blocked_range<size_t> &range) const;
 
@@ -60,7 +61,6 @@ private:
   const std::map<Mantid::Types::Core::DateAndTime, int> m_splitterMap;
   /// number of events to histogram in a single thread
   const size_t m_grainsize_event;
-  const bool m_correction_to_sample;
   std::shared_ptr<API::Progress> m_progress;
 };
 } // namespace Mantid::DataHandling::AlignAndFocusPowderSlim

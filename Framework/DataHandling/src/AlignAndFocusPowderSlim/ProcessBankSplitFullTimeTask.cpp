@@ -35,24 +35,23 @@ ProcessBankSplitFullTimeTask::ProcessBankSplitFullTimeTask(
     const std::map<detid_t, double> &calibration, const std::map<detid_t, double> &scale_at_sample,
     const std::set<detid_t> &masked, const size_t events_per_chunk, const size_t grainsize_event,
     const std::vector<PulseROI> &pulse_indices, const std::map<Mantid::Types::Core::DateAndTime, int> &splitterMap,
-    const bool correction_to_sample, std::shared_ptr<API::Progress> &progress)
+    std::shared_ptr<API::Progress> &progress)
     : m_h5file(h5file), m_bankEntries(bankEntryNames),
       m_loader(std::make_shared<NexusLoader>(is_time_filtered, pulse_indices)), m_workspaceIndices(workspaceIndices),
       m_wksps(wksps), m_calibration(calibration), m_scale_at_sample(scale_at_sample), m_masked(masked),
       m_events_per_chunk(events_per_chunk), m_splitterMap(splitterMap), m_grainsize_event(grainsize_event),
-      m_correction_to_sample(correction_to_sample), m_progress(progress) {}
+      m_progress(progress) {}
 
 ProcessBankSplitFullTimeTask::ProcessBankSplitFullTimeTask(
     std::vector<std::string> &bankEntryNames, H5::H5File &h5file, std::shared_ptr<NexusLoader> loader,
     std::vector<int> &workspaceIndices, std::vector<API::MatrixWorkspace_sptr> &wksps,
     const std::map<detid_t, double> &calibration, const std::map<detid_t, double> &scale_at_sample,
     const std::set<detid_t> &masked, const size_t events_per_chunk, const size_t grainsize_event,
-    const std::map<Mantid::Types::Core::DateAndTime, int> &splitterMap, const bool correction_to_sample,
-    std::shared_ptr<API::Progress> &progress)
+    const std::map<Mantid::Types::Core::DateAndTime, int> &splitterMap, std::shared_ptr<API::Progress> &progress)
     : m_h5file(h5file), m_bankEntries(bankEntryNames), m_loader(loader), m_workspaceIndices(workspaceIndices),
       m_wksps(wksps), m_calibration(calibration), m_scale_at_sample(scale_at_sample), m_masked(masked),
       m_events_per_chunk(events_per_chunk), m_splitterMap(splitterMap), m_grainsize_event(grainsize_event),
-      m_correction_to_sample(correction_to_sample), m_progress(progress) {}
+      m_progress(progress) {}
 
 void ProcessBankSplitFullTimeTask::operator()(const tbb::blocked_range<size_t> &range) const {
   auto entry = m_h5file.openGroup("entry"); // type=NXentry
@@ -203,12 +202,10 @@ void ProcessBankSplitFullTimeTask::operator()(const tbb::blocked_range<size_t> &
                 // Calculate the full time at sample: full_time = pulse_time + (tof * correctionFactor), where
                 // correctionFactor is either scale_at_sample[detid] or 1.0
                 const double correctionFactor =
-                    m_correction_to_sample ? calibration->value_scale_at_sample(static_cast<detid_t>((*event_detid)[k]))
-                                           : 1.0;
+                    calibration->value_scale_at_sample(static_cast<detid_t>((*event_detid)[k]));
 
-                const auto tof = static_cast<double>((*event_time_of_flight)[k]) * correctionFactor;
                 const auto tof_in_nanoseconds =
-                    static_cast<int64_t>(tof * 1000.0); // Convert microseconds to nanoseconds
+                    static_cast<int64_t>(static_cast<double>((*event_time_of_flight)[k]) * correctionFactor);
                 const auto pulsetime = (*pulse_times)[(*pulse_times_idx)[k]];
                 const Mantid::Types::Core::DateAndTime full_time = pulsetime + tof_in_nanoseconds;
                 // Linear search for pulsetime in splitter map, assume pulsetime and splitter map are both sorted. This
