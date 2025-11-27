@@ -1,1 +1,1 @@
-- SANS Interface now sends an appropriate error message when a directory is set as an user file path, the interface opens normally after the error is displayed.
+- The :ref:`ISIS_Sans_interface_contents` Interface now sends an appropriate error message when a directory is set as an user file path, the interface opens normally after the error is displayed.
