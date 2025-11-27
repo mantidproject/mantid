@@ -4,7 +4,6 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from tempfile import TemporaryDirectory
 import unittest
 from unittest import mock
 
@@ -192,12 +191,6 @@ class RunTabPresenterTest(unittest.TestCase):
         self.presenter.set_view(view)
 
         self.assertIsNone(self.presenter.on_user_file_load())
-
-    def test_fails_silently_when_user_file_is_a_directory(self):
-        with TemporaryDirectory() as tmp_dir:
-            view, _, _ = create_mock_view(tmp_dir)
-            self.presenter.set_view(view)
-            self.assertIsNone(self.presenter.on_user_file_load())
 
     def test_file_information_exceptions_handled(self):
         for e in [ValueError, RuntimeError, OSError]:

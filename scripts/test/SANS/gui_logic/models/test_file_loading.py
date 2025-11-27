@@ -43,7 +43,7 @@ class FileLoadingTest(unittest.TestCase):
                     FileLoading.load_user_file(mock.Mock(), None)
 
     def test_wraps_legacy_exceptions(self):
-        expected_wrapped = [RuntimeError(), ValueError()]
+        expected_wrapped = [RuntimeError(), ValueError(), IsADirectoryError()]
 
         for known_exception in expected_wrapped:
             with mock.patch("sans.gui_logic.models.file_loading.UserFileReaderAdapter") as mocked_module:
