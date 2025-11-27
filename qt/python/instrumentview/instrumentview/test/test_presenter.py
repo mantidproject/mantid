@@ -45,33 +45,6 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._mock_view.add_masked_mesh.assert_called()
         mock_set_peaks_ws.assert_called_once()
 
-    # @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.set_peaks_workspaces")
-    # def test_projection_stored_in_cache(self, mock_set_peaks_ws):
-    #     self._model._cached_projections_map = {}
-    #     self._mock_view.current_selected_projection.return_value = ProjectionType.CYLINDRICAL_X
-    #     self._presenter.update_plotter()
-    #     self.assertTrue(ProjectionType.CYLINDRICAL_X.name in self._model._cached_projections_map)
-    #     mock_set_peaks_ws.assert_called_once()
-
-    # @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.create_poly_data_mesh")
-    # @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.calculate_projection")
-    # def test_projection_option_axis(self, mock_calculate_projection, mock_create_poly_data_mesh):
-    #     _, options = self._presenter.projection_combo_options()
-    #     for option in options:
-    #         if option.endswith("X"):
-    #             axis = [1, 0, 0]
-    #         elif option.endswith("Y"):
-    #             axis = [0, 1, 0]
-    #         elif option.endswith("Z"):
-    #             axis = [0, 0, 1]
-    #         else:
-    #             return
-    #         self._presenter.on_projection_option_selected(options.index(option))
-    #         mock_calculate_projection.assert_called_once_with(option.startswith("Spherical"), axis)
-    #         mock_create_poly_data_mesh.assert_called()
-    #         mock_calculate_projection.reset_mock()
-    #         mock_create_poly_data_mesh.reset_mock()
-
     @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.update_integration_range")
     @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.set_view_integration_limits")
     def test_on_integration_limits_updated_true(self, mock_set_view_integration_limits, mock_update_integration_range):
@@ -97,17 +70,6 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._presenter._detector_mesh = {}
         self._presenter.set_view_integration_limits()
         np.testing.assert_allclose(self._presenter._detector_mesh[self._presenter._counts_label], self._model.detector_counts)
-
-    # @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.update_picked_detectors")
-    # def test_point_picked(self, mock_update_picked_detectors):
-    #     mock_picker = MagicMock()
-    #
-    #     def get_point_id():
-    #         return 1
-    #
-    #     mock_picker.GetPointId = get_point_id
-    #     self._presenter.point_picked(MagicMock(), mock_picker)
-    #     mock_update_picked_detectors.assert_called_with([1])
 
     def test_update_picked_detectors(self):
         self._model._workspace_indices = np.array([0, 1, 2])
@@ -286,13 +248,6 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._presenter._update_relative_detector_angle()
         mock_relative_detector_angle.assert_called_once()
         self._mock_view.set_relative_detector_angle.assert_called_once()
-
-    # @mock.patch.object(FullInstrumentViewModel, "default_projection", new_callable=mock.PropertyMock)
-    # def test_default_projection(self, mock_default_projection):
-    #     mock_default_projection.return_value = "SPHERICAL_Z"
-    #     default_index, _ = self._presenter.projection_combo_options()
-    #     self.assertEqual(3, default_index)
-    #
 
 
 if __name__ == "__main__":

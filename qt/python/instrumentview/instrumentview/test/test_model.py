@@ -447,7 +447,7 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         angle = model.relative_detector_angle()
         np.testing.assert_allclose(14.324, angle, rtol=0.001)
         mock_picked_detector_ids.assert_called_once()
-        self.assertEquals(2, mock_detector_info.azimuthal.call_count)
+        self.assertEqual(2, mock_detector_info.azimuthal.call_count)
 
     def test_calculate_q_lab_direction(self):
         model, mock_ws = self._setup_model([10])
@@ -468,6 +468,114 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         model = FullInstrumentViewModel(self._ws)
         iv_qlab = model._calculate_q_lab_direction(detector_id)
         np.testing.assert_allclose(q_lab_direction, iv_qlab, rtol=1e-5)
+
+    @mock.patch("instrumentview.FullInstrumentViewModel.CylindricalProjection")
+    def test_cached_projections_map_emtpy(self, mock_projection_constructor):
+        model, _ = self._setup_model([1, 2, 3])
+        model.projection_type = ProjectionType.CYLINDRICAL_X
+        mock_projection = mock.MagicMock(positions=mock.MagicMock(return_value=np.array([[1, 2], [1, 2], [1, 2]])))
+        mock_projection_constructor.return_value = mock_projection
+        model._cached_projections_map = {}
+        positions = model._calculate_projection()
+        np.testing.assert_almost_equal(positions, np.array([[1, 2, 0], [1, 2, 0], [1, 2, 0]]))
+        np.testing.assert_almost_equal(
+            model._cached_projections_map[ProjectionType.CYLINDRICAL_X.name], np.array([[1, 2, 0], [1, 2, 0], [1, 2, 0]])
+        )
+
+    @mock.patch("instrumentview.FullInstrumentViewModel.CylindricalProjection")
+    def test_cached_projections_map_already_cached(self, mock_projection_constructor):
+        model, _ = self._setup_model([1, 2, 3])
+        model.projection_type = ProjectionType.CYLINDRICAL_X
+        model._cached_projections_map = {ProjectionType.CYLINDRICAL_X.name: np.array([[1, 2, 0], [1, 2, 0], [1, 2, 0]])}
+        positions = model._calculate_projection()
+        np.testing.assert_almost_equal(positions, np.array([[1, 2, 0], [1, 2, 0], [1, 2, 0]]))
+        mock_projection_constructor.assert_not_called()
+
+    def test_is_pickable(self):
+        model, _ = self._setup_model([1, 2, 3])
+        model._is_valid = np.array([False, True, True])
+        model._is_masked = np.array([False, False, True])
+        np.testing.assert_array_equal(model.is_pickable, np.array([False, True, False]))
+
+    def test_get_default_projection_index_and_options_3D(self):
+        model, mock_workspace = self._setup_model([1, 2, 3])
+        mock_workspace.getInstrument = mock.MagicMock(return_value=mock.MagicMock(getDefaultView=mock.MagicMock(return_value="3D")))
+        index, projection_options = model.get_default_projection_index_and_options()
+        self.assertEqual(projection_options[index], ProjectionType.THREE_D)
+
+    def test_get_default_projection_index_and_options_non_3D(self):
+        model, mock_workspace = self._setup_model([1, 2, 3])
+        mock_workspace.getInstrument = mock.MagicMock(
+            return_value=mock.MagicMock(getDefaultView=mock.MagicMock(return_value="SPHERICAL_X"))
+        )
+        index, projection_options = model.get_default_projection_index_and_options()
+        self.assertEqual(projection_options[index], ProjectionType.SPHERICAL_X)
+
+    def test_is_2d_projection_false(self):
+        model, _ = self._setup_model([1, 2, 3])
+        model._projection_type = ProjectionType.THREE_D
+        self.assertEqual(model.is_2d_projection, False)
+
+    def test_is_2d_projection_true(self):
+        model, _ = self._setup_model([1, 2, 3])
+        model._projection_type = ProjectionType.SPHERICAL_X
+        self.assertEqual(model.is_2d_projection, True)
+
+    def test_detector_positions_3D(self):
+        model, _ = self._setup_model([1, 2, 3])
+        expected_positions = np.array([[1, 2, 0], [1, 2, 0], [1, 2, 0]])
+        model._detector_positions_3d = expected_positions
+        model._projection_type = ProjectionType.THREE_D
+        model._is_valid = np.array([True, True, True])
+        model._is_masked = np.array([True, False, False])
+        np.testing.assert_array_equal(model.detector_positions, expected_positions[1:])
+
+    @mock.patch.object(FullInstrumentViewModel, "_calculate_projection")
+    def test_detector_positions_non_3D(self, mock_calc_projection):
+        model, _ = self._setup_model([1, 2, 3])
+        expected_positions = np.array([[1, 2, 0], [1, 2, 0], [1, 2, 0]])
+        mock_calc_projection.return_value = expected_positions
+        model._projection_type = ProjectionType.SPHERICAL_X
+        model._is_valid = np.array([True, True, True])
+        model._is_masked = np.array([True, False, False])
+        np.testing.assert_array_equal(model.detector_positions, expected_positions[1:])
+
+    def test_add_mask(self):
+        model, _ = self._setup_model([1, 2, 3])
+        model._cached_masks_map = {}
+        model._is_masked_in_ws = np.array([True, True, False])
+        model._is_valid = np.array([True, True, True])
+        model._is_masked = np.array([True, False, False])
+        model.add_new_detector_mask([True, True])
+        np.testing.assert_array_equal(model._cached_masks_map["Mask 1"], np.array([True, True, True]))
+
+    def test_apply_detector_mask(self):
+        model, _ = self._setup_model([1, 2, 3])
+        # All detectors picked, mask should unpick them
+        model._detector_is_picked = np.array([True, True, True])
+        model._cached_masks_map = {"Mask 1": np.array([True, False, False]), "Mask 2": np.array([False, True, False])}
+        model.apply_detector_masks(["Mask 1", "Mask 2"])
+        np.testing.assert_array_equal(model._is_masked, np.array([True, True, False]))
+        np.testing.assert_array_equal(model._detector_is_picked, np.array([False, False, True]))
+
+    def test_apply_detector_mask_empty(self):
+        model, _ = self._setup_model([1, 2, 3])
+        model._is_masked_in_ws = np.array([True, False, False])
+        model.apply_detector_masks([])
+        np.testing.assert_array_equal(model._is_masked, np.array([True, False, False]))
+        np.testing.assert_array_equal(model._detector_is_picked, np.array([False, False, False]))
+
+    @mock.patch("instrumentview.FullInstrumentViewModel.ExtractMaskToTable")
+    def test_save_mask_workspace_to_ads(self, mock_extract_to_table):
+        model, _ = self._setup_model([1, 2, 3])
+        model.save_mask_workspace_to_ads()
+        mock_extract_to_table.assert_called_once()
+
+    @mock.patch("instrumentview.FullInstrumentViewModel.SaveMask")
+    def test_save_xml_mask(self, mock_save_mask):
+        model, _ = self._setup_model([1, 2, 3])
+        model.save_xml_mask("file")
+        mock_save_mask.assert_called_with(model._mask_ws, OutputFile="file.xml")
 
 
 if __name__ == "__main__":

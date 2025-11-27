@@ -28,6 +28,7 @@ from mantid.simpleapi import (
     CloneWorkspace,
 )
 from itertools import groupby
+from pathlib import Path
 import numpy as np
 
 
@@ -245,6 +246,7 @@ class FullInstrumentViewModel:
     def projection_type(self, value: str):
         self._projection_type = ProjectionType(value)
 
+    @property
     def is_2d_projection(self) -> bool:
         if self._projection_type == ProjectionType.THREE_D:
             return False
@@ -265,8 +267,8 @@ class FullInstrumentViewModel:
     def _calculate_projection(self) -> np.ndarray:
         """Calculate the 2D projection with the specified axis. Can be either cylindrical or spherical."""
 
-        if self._projection_type.value in self._cached_projections_map.keys():
-            return self._cached_projections_map[self._projection_type.value]
+        if self._projection_type.name in self._cached_projections_map.keys():
+            return self._cached_projections_map[self._projection_type.name]
 
         axis = [1, 0, 0]
         if self._projection_type in (ProjectionType.SPHERICAL_Y, ProjectionType.CYLINDRICAL_Y):
@@ -286,7 +288,7 @@ class FullInstrumentViewModel:
         projected_positions = np.zeros_like(self._detector_positions_3d)
         projected_positions[:, :2] = projection.positions()  # Assign only x and y coordinate
 
-        self._cached_projections_map[self._projection_type.value] = projected_positions
+        self._cached_projections_map[self._projection_type.name] = projected_positions
         return projected_positions
 
     def extract_spectra_for_line_plot(self, unit: str, sum_spectra: bool) -> None:
@@ -408,6 +410,8 @@ class FullInstrumentViewModel:
     def save_xml_mask(self, filename) -> None:
         if not filename:
             return
+        if Path(filename).suffix != ".xml":
+            filename += ".xml"
         for i, v in enumerate(self._is_masked):
             self._mask_ws.dataY(i)[:] = v
         SaveMask(self._mask_ws, OutputFile=filename)

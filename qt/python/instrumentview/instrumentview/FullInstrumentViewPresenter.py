@@ -115,7 +115,7 @@ class FullInstrumentViewPresenter:
     def _update_view_main_plotter(self):
         self._detector_mesh = self.create_poly_data_mesh(self._model.detector_positions)
         self._detector_mesh[self._counts_label] = self._model.detector_counts
-        self._view.add_detector_mesh(self._detector_mesh, is_projection=self._model.is_2d_projection(), scalars=self._counts_label)
+        self._view.add_detector_mesh(self._detector_mesh, is_projection=self._model.is_2d_projection, scalars=self._counts_label)
 
         self._pickable_mesh = self.create_poly_data_mesh(self._model.detector_positions)
         self._pickable_mesh[self._visible_label] = self._model.picked_visibility
@@ -139,7 +139,7 @@ class FullInstrumentViewPresenter:
                 selected_mask = selected_mesh.point_data["SelectedPoints"].view(bool)
                 self.update_picked_detectors(selected_mask)
 
-            self._view.enable_rectangle_picking(self._model.is_2d_projection(), callback=rectangle_picked)
+            self._view.enable_rectangle_picking(self._model.is_2d_projection, callback=rectangle_picked)
         else:
 
             def point_picked(point_position: np.ndarray | None, picker: PickerType.POINT.value) -> None:
@@ -150,7 +150,7 @@ class FullInstrumentViewPresenter:
                 picked_mask[point_index] = True
                 self.update_picked_detectors(picked_mask)
 
-            self._view.enable_point_picking(self._model.is_2d_projection(), callback=point_picked)
+            self._view.enable_point_picking(self._model.is_2d_projection, callback=point_picked)
 
     def update_picked_detectors(self, picked_mask: np.ndarray) -> None:
         if np.sum(picked_mask) == 0:
