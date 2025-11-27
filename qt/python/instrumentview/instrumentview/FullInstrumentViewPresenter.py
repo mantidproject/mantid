@@ -213,6 +213,7 @@ class FullInstrumentViewPresenter:
         return transformed_points[:, :3]
 
     def on_aspect_ratio_check_box_clicked(self) -> None:
+        self._view.store_maintain_aspect_ratio_option()
         self.on_projection_option_selected(self._view._projection_combo_box.currentIndex())
 
     def on_multi_select_detectors_clicked(self) -> None:

@@ -33,7 +33,7 @@ from instrumentview.Detectors import DetectorInfo
 from instrumentview.InteractorStyles import CustomInteractorStyleZoomAndSelect, CustomInteractorStyleRubberBand3D
 from typing import Callable
 from mantid.dataobjects import Workspace2D
-from mantid import UsageService
+from mantid import UsageService, ConfigService
 from mantid.kernel import FeatureType
 from mantidqt.plotting.mantid_navigation_toolbar import MantidNavigationToolbar
 import numpy as np
@@ -70,6 +70,7 @@ class FullInstrumentViewWindow(QMainWindow):
     detector, and a line plot of selected detector(s)"""
 
     _detector_spectrum_fig = None
+    _ASPECT_RATIO_SETTING_STRING = "InstrumentView.MaintainAspectRato"
 
     def __init__(self, parent=None, off_screen=False):
         """The instrument in the given workspace will be displayed. The off_screen option is for testing or rendering an image
@@ -164,6 +165,8 @@ class FullInstrumentViewWindow(QMainWindow):
             "If checked, the detectors will be drawn in 2D projections in their original aspect ratio, "
             "otherwise they will fill the available area."
         )
+        aspect_ratio_option = ConfigService.Instance()[self._ASPECT_RATIO_SETTING_STRING]
+        self._aspect_ratio_check_box.setChecked(aspect_ratio_option.casefold() == "yes")
         projection_layout.addWidget(self._projection_combo_box)
         projection_layout.addWidget(self._reset_projection)
         projection_layout.addWidget(self._aspect_ratio_check_box)
@@ -222,6 +225,10 @@ class FullInstrumentViewWindow(QMainWindow):
 
     def is_maintain_aspect_ratio_checkbox_checked(self) -> bool:
         return self._aspect_ratio_check_box.isChecked()
+
+    def store_maintain_aspect_ratio_option(self) -> None:
+        option = "Yes" if self.is_maintain_aspect_ratio_checkbox_checked() else "No"
+        ConfigService.Instance()[self._ASPECT_RATIO_SETTING_STRING] = option
 
     def set_aspect_ratio_box_visibility(self, is_visible: bool) -> None:
         self._aspect_ratio_check_box.setVisible(is_visible)
