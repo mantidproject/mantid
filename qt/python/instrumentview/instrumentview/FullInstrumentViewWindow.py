@@ -158,8 +158,15 @@ class FullInstrumentViewWindow(QMainWindow):
         self._reset_projection = QPushButton("Reset Projection")
         self._reset_projection.setToolTip("Resets the projection to default.")
         self._reset_projection.clicked.connect(self.reset_camera)
+        self._aspect_ratio_check_box = QCheckBox()
+        self._aspect_ratio_check_box.setText("Maintain Aspect Ratio")
+        self._aspect_ratio_check_box.setToolTip(
+            "If checked, the detectors will be drawn in 2D projections in their original aspect ratio, "
+            "otherwise they will fill the available area."
+        )
         projection_layout.addWidget(self._projection_combo_box)
         projection_layout.addWidget(self._reset_projection)
+        projection_layout.addWidget(self._aspect_ratio_check_box)
 
         peak_ws_group_box = QGroupBox("Peaks Workspaces")
         peak_v_layout = QVBoxLayout(peak_ws_group_box)
@@ -212,6 +219,12 @@ class FullInstrumentViewWindow(QMainWindow):
 
     def is_multi_picking_checkbox_checked(self) -> bool:
         return self._multi_select_check.isChecked()
+
+    def is_maintain_aspect_ratio_checkbox_checked(self) -> bool:
+        return self._aspect_ratio_check_box.isChecked()
+
+    def set_aspect_ratio_box_visibility(self, is_visible: bool) -> None:
+        self._aspect_ratio_check_box.setVisible(is_visible)
 
     def _on_splitter_moved(self, pos, index) -> None:
         self._detector_spectrum_fig.tight_layout()
@@ -318,6 +331,7 @@ class FullInstrumentViewWindow(QMainWindow):
         self._export_workspace_button.clicked.connect(self._presenter.on_export_workspace_clicked)
         self._sum_spectra_checkbox.clicked.connect(self._presenter.on_sum_spectra_checkbox_clicked)
         self._peak_ws_list.itemChanged.connect(self._presenter.on_peaks_workspace_selected)
+        self._aspect_ratio_check_box.clicked.connect(self._presenter.on_aspect_ratio_check_box_clicked)
 
         self._add_connections_to_edits_and_slider(
             self._contour_range_min_edit,
