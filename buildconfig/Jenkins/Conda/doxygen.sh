@@ -26,7 +26,9 @@ WORKSPACE=$1
 shift 1
 
 CHECK_FOR_CHANGES=${1-true}
-shift 1
+if [ $# -ne 0 ]; then
+        shift 1
+fi
 
 cd $WORKSPACE
 
