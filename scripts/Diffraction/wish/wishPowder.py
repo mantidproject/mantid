@@ -26,7 +26,6 @@ class WishPowder:
         default_ext="raw",
         sum_equivalent_banks=False,
         subtract_empty=False,
-        correct_attenuation=False,
     ):
         self.calib_dir = calib_dir  # includes cycle
         self.per_detector_van = per_detector_van
@@ -42,7 +41,7 @@ class WishPowder:
             "Material": {"ChemicalFormula": "V", "AttenuationXSection": 4.8756, "ScatteringXSection": 5.16, "SampleNumberDensity": 0.07118},
             "Geometry": {"Shape": "Cylinder", "Height": 6.0, "Radius": 0.15, "Center": [0.0, 0.0, 0.0]},
         }
-        self.sample = {}  # "Geometry": {"Shape": "Cylinder", "Center": [0.0, 0.0, 0.0]}}
+        self.sample = {"Geometry": {"Shape": "Cylinder", "Center": [0.0, 0.0, 0.0]}}
         self.cylinder_abs_kwargs = {"NumberOfSlices": 10, "NumberOfAnnuli": 10, "NumberOfWavelengthPoints": 25, "ExpMethod": "Normal"}
         self.van_smooth_npts = 40  # use same for empty - really
 
@@ -52,18 +51,12 @@ class WishPowder:
         else:
             self.sample[fieldname].update(kwargs)
 
-    def _get_empty_filepath(self, *args, **kwargs):
-        return self._get_filepath_in_calib_dir(self._get_empty_filename(), *args, **kwargs)
-
     def _get_van_filepath(self, *args, **kwargs):
         return self._get_filepath_in_calib_dir(self._get_van_filename(), *args, **kwargs)
 
     def _get_van_filename(self):
         suffix = "" if self.per_detector_van else "_foc"
         return f"vana_{self.sample_env.value}{suffix}.nxs"
-
-    def _get_empty_filename(self):
-        return f"empty_{self.sample_env.value}_foc.nxs"
 
     def _get_mask_filepath(self):
         return self._get_filepath_in_calib_dir("mask.xml")
@@ -91,7 +84,7 @@ class WishPowder:
         mantid.ApplyDiffCal(InstrumentWorkspace=wsname, CalibrationFile=self._get_cal_filepath())
         # mask
         self.apply_mask_to_ws(wsname)
-        # crop prompt pulse in TOF
+        # crop prompt pulse in TOF single-frame
         mantid.CropWorkspace(InputWorkspace=wsname, OutputWorkspace=wsname, XMin=6000, XMax=99000)
         # crop in wavelength
         mantid.ConvertUnits(InputWorkspace=wsname, OutputWorkspace=wsname, Target="Wavelength", Emode="Elastic")
@@ -122,16 +115,15 @@ class WishPowder:
     def process_data(self, runnos, ext=None):
         for runno in runnos:
             wsname = self.load(runno, ext)
+            if self.subtract_empty:
+                mantid.Minus(LHSWorkspace=wsname, RHSWorkspace=self.get_empty_ws(), OutputWorkspace=wsname)
             # correct for attenuation
-            if self.sample:
+            if "Material" in self.sample:
                 mantid.SetSample(InputWorkspace=wsname, **self.sample())
                 self.correct_for_attenuation(wsname)
             else:
                 logger.warning("No sample defined - attenuation correction has been skipped")
             wsname_foc = self.focus(wsname)  # includes vanadium correction
-            # subtract empty
-            if self.subtract_empty:
-                mantid.Minus(LHSWorkspace=wsname_foc, RHSWorkspace=self.get_empty_ws(), OutputWorkspace=wsname_foc)
             # crop in d
             self._crop_focussed_in_dspac(wsname_foc)
             if self.sum_equivalent_banks:
@@ -172,15 +164,8 @@ class WishPowder:
         return self.grp_ws
 
     def get_empty_ws(self):
-        if self.empty_ws:
-            return self.empty_ws
-        empty_filepath = self._get_empty_filepath()
-        if empty_filepath is not None:
-            self.empty_ws = mantid.Load(empty_filepath)
-        elif self.empty_runno:
+        if not self.empty_ws:
             self.empty_ws = self.create_empty()  # need empty_runno
-        else:
-            raise ValueError("No empty runno or saved workspace provided.")
         return self.empty_ws
 
     def get_van_ws(self):
@@ -223,35 +208,27 @@ class WishPowder:
         return wsname_foc
 
     def create_empty(self):
-        wsname_empty = self.load(self.van_runno)
-        wsname_empty_foc = self._focus_ws(wsname_empty)
-        # smooth?
-        mantid.SaveNexus(InputWorkspace=wsname_empty_foc, Filename=self._get_empty_filepath(check_exists=False))
-        mantid.DeleteWorkspace(wsname_empty)
-        return wsname_empty_foc
+        return self.load(self.empty_runno)
 
     def create_vanadium(self):
         wsname_van = self.load(self.van_runno)
-        if self.per_detector_van:
-            self._replace_data_with_wavelength_focussed(wsname_van)
+        # subtract empty
+        mantid.Minus(LHSWorkspace=wsname_van, RHSWorkspace=self.get_empty_ws(), OutputWorkspace=wsname_van)
         # correct for attenuation
         mantid.SetSample(**self.van_sample)
         self.correct_for_attenuation(self, wsname_van)
         if self.per_detector_van:
-            # smooth?
+            self._replace_data_with_wavelength_focussed(wsname_van)
             mantid.SaveNexus(InputWorkspace=wsname_van, Filename=self._get_van_filepath(check_exists=False))
             return wsname_van
         else:
             # focus
             wsname_van_foc = self._focus_ws(wsname_van)
-            mantid.SmoothData(InputWorkspace=wsname_van_foc, OututWorkspace=wsname_van_foc, NPoints=self.van_smooth_npts)
+            # mantid.SmoothData(InputWorkspace=wsname_van_foc, OutputWorkspace=wsname_van_foc, NPoints=self.van_smooth_npts)
             # mantid.StripVanadiumPeaks ?
             # save (in d-spacing)
             mantid.SaveNexus(InputWorkspace=wsname_van_foc, Filename=self._get_van_filepath(check_exists=False))
             mantid.DeleteWorkspace(wsname_van)
-            # suvtract empty
-            # subtract empty
-            mantid.Minus(LHSWorkspace=wsname_van, RHSWorkspace=self.get_empty_ws(), OutputWorkspace=wsname_van)
             return wsname_van_foc
 
     @staticmethod
