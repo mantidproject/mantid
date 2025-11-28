@@ -123,6 +123,13 @@ private:
   void loadInstrument(DataObjects::EventWorkspace_sptr &dataWorkspace);
   /// Validate the imputs into the algorithm, overrides.
   std::map<std::string, std::string> validateInputs() override;
+  /// Validate events per frame inputs
+  std::pair<std::string, std::string> validateEventsPerFrame();
+  /// Validate minimum and maximum TOF
+  std::pair<std::string, std::string> validateMinMaxToF();
+  /// Insert validation result into result map
+  void insertValidationResult(const std::pair<std::string, std::string> &result,
+                              std::map<std::string, std::string> &results);
 };
 
 } // namespace DataHandling

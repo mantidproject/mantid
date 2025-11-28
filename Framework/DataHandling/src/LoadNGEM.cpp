@@ -173,6 +173,12 @@ void LoadNGEM::init() {
 
   // Bin Width
   declareProperty("BinWidth", 10.0, mustBePositiveDbl, "The width of the time bins in the output.");
+  declareProperty("MinToF", std::numeric_limits<double>::max(),
+                  "The minimum ToF bin edge. Required if not PreserveEvents. If PreserveEvents and default, value will "
+                  "be dervied from event data.");
+  declareProperty("MaxToF", -std::numeric_limits<double>::max(),
+                  "The maximum ToF bin edge. Required if not PreserveEvents. If PreserveEvents and default, value will "
+                  "be dervied from event data.");
 
   declareProperty("MinEventsPerFrame", 0, mustBePositive,
                   "The minimum number of events required in a frame before a "
@@ -184,6 +190,10 @@ void LoadNGEM::init() {
       std::make_unique<Kernel::PropertyWithValue<bool>>("GenerateEventsPerFrame", false, Kernel::Direction::Input),
       "Generate a workspace to show the number of events captured by each "
       "frame. (optional, default False).");
+  declareProperty(std::make_unique<Kernel::PropertyWithValue<bool>>("PreserveEvents", true, Kernel::Direction::Input),
+                  "Algorithm preserves events, generating an event workspace. If False, events are not preserved and a "
+                  "Workspace 2D is generated (reduced memory usage). "
+                  "(optional, default True).");
 }
 
 /**
@@ -197,7 +207,8 @@ void LoadNGEM::exec() {
   const int minEventsReq(getProperty("MinEventsPerFrame"));
   const int maxEventsReq(getProperty("MaxEventsPerFrame"));
 
-  double maxToF{-std::numeric_limits<double>::max()}, minToF{std::numeric_limits<double>::max()};
+  double minToF(getProperty("MinToF"));
+  double maxToF(getProperty("MaxToF"));
   const double binWidth(getProperty("BinWidth"));
 
   int rawFrames = 0;
@@ -426,14 +437,51 @@ void LoadNGEM::loadInstrument(DataObjects::EventWorkspace_sptr &dataWorkspace) {
  */
 std::map<std::string, std::string> LoadNGEM::validateInputs() {
   std::map<std::string, std::string> results;
-
-  int MinEventsPerFrame = getProperty("MinEventsPerFrame");
-  int MaxEventsPerFrame = getProperty("MaxEventsPerFrame");
-
-  if (MaxEventsPerFrame < MinEventsPerFrame) {
-    results["MaxEventsPerFrame"] = "MaxEventsPerFrame is less than MinEvents per frame";
-  }
+  insertValidationResult(validateEventsPerFrame(), results);
+  insertValidationResult(validateMinMaxToF(), results);
   return results;
+}
+
+std::pair<std::string, std::string> LoadNGEM::validateEventsPerFrame() {
+  const int MinEventsPerFrame = getProperty("MinEventsPerFrame");
+  const int MaxEventsPerFrame = getProperty("MaxEventsPerFrame");
+  if (MaxEventsPerFrame < MinEventsPerFrame) {
+    return {"MaxEventsPerFrame", "MaxEventsPerFrame is less than MinEvents per frame"};
+  }
+  return {};
+}
+
+std::pair<std::string, std::string> LoadNGEM::validateMinMaxToF() {
+  const double minToF = getProperty("MinToF");
+  const double maxToF = getProperty("MaxToF");
+  const bool preserveEvents = getProperty("PreserveEvents");
+  if (preserveEvents) {
+    if (isDefault("MinToF") && isDefault("MaxToF")) {
+      return {};
+    } else if (isDefault("MinToF")) {
+      return {"MinToF", "Please supply both, or neither, Min and MaxToF if PreserveEvents is True"};
+    } else if (isDefault("MaxToF")) {
+      return {"MaxToF", "Please supply both, or neither, Min and MaxToF if PreserveEvents is True"};
+    }
+  } else {
+    if (isDefault("MinToF")) {
+      return {"MinToF", "MinToF must be supplied if PreserveEvents is False"};
+    } else if (isDefault("MaxToF")) {
+      return {"MaxToF", "MaxToF must be supplied if PreserveEvents is False"};
+    }
+  }
+  if (maxToF <= minToF) {
+    return {"MaxToF", "MaxToF is less than or equal to MinToF"};
+  }
+  return {};
+}
+
+void LoadNGEM::insertValidationResult(const std::pair<std::string, std::string> &result,
+                                      std::map<std::string, std::string> &results) {
+  if (result.first.empty()) {
+    return;
+  }
+  results.insert(result);
 }
 
 } // namespace Mantid::DataHandling
