@@ -103,7 +103,7 @@ private slots:
   void onSuperplotBinsWithErrsClicked();
 
 private:
-  QMenu *createWorkspaceContextMenu(const Mantid::API::Workspace &workspace);
+  QMenu *createWorkspaceContextMenu(QStringList &selectedWorkspaces);
 
   void addMatrixWorkspaceActions(QMenu *menu, const Mantid::API::MatrixWorkspace &workspace);
   void addTableWorkspaceActions(QMenu *menu, const Mantid::API::ITableWorkspace &workspace);

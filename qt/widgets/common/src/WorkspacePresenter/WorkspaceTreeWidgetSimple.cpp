@@ -124,14 +124,9 @@ void WorkspaceTreeWidgetSimple::popupContextMenu() {
     // If no workspace is here then have load items
     menu = m_loadMenu;
   } else {
-    // Check is defensive just in case the workspace has disappeared
-    Workspace_sptr workspace;
-    try {
-      workspace = AnalysisDataService::Instance().retrieve(selectedWsName.toStdString());
-    } catch (Exception::NotFoundError &) {
-      return;
-    }
-    menu = createWorkspaceContextMenu(*workspace);
+    auto selectedWorksapceNames = getSelectedWorkspaceNamesAsQList();
+    selectedWorksapceNames.insert(0, selectedWsName);
+    menu = createWorkspaceContextMenu(selectedWorksapceNames);
   }
 
   // Show the menu at the cursor's current position
@@ -231,26 +226,51 @@ void WorkspaceTreeWidgetSimple::onShowNewInstrumentViewClicked() {
   emit showNewInstrumentViewClicked(getSelectedWorkspaceNamesAsQList());
 }
 
+template <class T> bool checkAllWorkspacesAreTheSameType(const QStringList &workspaceNames) {
+  return std::all_of(workspaceNames.cbegin(), workspaceNames.cend(), [](const auto &workspaceName) {
+    Workspace_sptr workspace;
+    try {
+      workspace = AnalysisDataService::Instance().retrieve(workspaceName.toStdString());
+    } catch (Exception::NotFoundError &) {
+      return true;
+    }
+    auto wsCast = std::dynamic_pointer_cast<T>(workspace);
+    return wsCast != nullptr;
+  });
+}
+
 /**
  * Create a new QMenu object filled with appropriate items for the given workspace
  * The created object has this as its parent and WA_DeleteOnClose set
  */
-QMenu *WorkspaceTreeWidgetSimple::createWorkspaceContextMenu(const Mantid::API::Workspace &workspace) {
+QMenu *WorkspaceTreeWidgetSimple::createWorkspaceContextMenu(QStringList &selectedWorkspaces) {
   auto menu = new QMenu(this);
   menu->setAttribute(Qt::WA_DeleteOnClose, true);
   menu->setObjectName("WorkspaceContextMenu");
 
-  if (auto matrixWS = dynamic_cast<const MatrixWorkspace *>(&workspace))
-    addMatrixWorkspaceActions(menu, *matrixWS);
-  else if (auto tableWS = dynamic_cast<const ITableWorkspace *>(&workspace))
-    addTableWorkspaceActions(menu, *tableWS);
-  else if (auto mdWS = dynamic_cast<const IMDWorkspace *>(&workspace))
-    addMDWorkspaceActions(menu, *mdWS);
-  else if (auto wsGroup = dynamic_cast<const WorkspaceGroup *>(&workspace))
-    addWorkspaceGroupActions(menu, *wsGroup);
-
   // Add for all types
   addGeneralWorkspaceActions(menu);
+
+  const auto &workspaceName = selectedWorkspaces.takeFirst();
+  Workspace_sptr workspace;
+  try {
+    workspace = AnalysisDataService::Instance().retrieve(workspaceName.toStdString());
+  } catch (Exception::NotFoundError &) {
+    return menu;
+  }
+  if (auto matrixWS = std::dynamic_pointer_cast<MatrixWorkspace>(workspace)) {
+    if (checkAllWorkspacesAreTheSameType<MatrixWorkspace>(selectedWorkspaces))
+      addMatrixWorkspaceActions(menu, *matrixWS);
+  } else if (auto tableWS = std::dynamic_pointer_cast<ITableWorkspace>(workspace)) {
+    if (checkAllWorkspacesAreTheSameType<ITableWorkspace>(selectedWorkspaces))
+      addTableWorkspaceActions(menu, *tableWS);
+  } else if (auto mdWS = std::dynamic_pointer_cast<IMDWorkspace>(workspace)) {
+    if (checkAllWorkspacesAreTheSameType<IMDWorkspace>(selectedWorkspaces))
+      addMDWorkspaceActions(menu, *mdWS);
+  } else if (auto wsGroup = std::dynamic_pointer_cast<WorkspaceGroup>(workspace)) {
+    if (checkAllWorkspacesAreTheSameType<WorkspaceGroup>(selectedWorkspaces))
+      addWorkspaceGroupActions(menu, *wsGroup);
+  }
 
   return menu;
 }
