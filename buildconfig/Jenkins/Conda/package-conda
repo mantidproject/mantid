@@ -25,11 +25,27 @@
 #   --git-tag: specify a tag for a release or nightly version
 #   --platform: target architecture, e.g. linux-64
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source $SCRIPT_DIR/mamba-utils
+source $SCRIPT_DIR/pixi-utils
 start_time=$(date +%s)
 
+# For some reason (probably a pixi bug) when dereferencing bash environment variables
+# during a pixi run command (i.e  pixi run "versioningit $REPO_ROOT_DIR")
+# on Windows the slashes were reversed (\). We found that a path in the style C:/one/two/three
+# always worked, we this functions converts a path into that from.
+normalise_windows_path() {
+    local p="$1"
+    # 1. Convert backslashes → forward slashes
+    p="${p//\\//}"
+    # 2. Strip any leading slash before drive letter: /c/... → c/...
+    p="${p#/}"
+    # 3. Uppercase the drive letter: c/... → C/...
+    p="$(printf '%s' "$p" | sed -E 's/^([a-zA-Z])/\U\1/')"
+    # 4. Add colon after drive letter if missing: C/... → C:/...
+    p="$(printf '%s' "$p" | sed -E 's/^([A-Z]):?/\1:/')"
+    echo "$p"
+}
+
 # Setup expected variables
-REPO_ROOT_DIR=$SCRIPT_DIR/../../..
 WORKSPACE=$1
 if [[ -z "$WORKSPACE" ]]; then
     echo "A workspace argument is required"
@@ -37,16 +53,15 @@ if [[ -z "$WORKSPACE" ]]; then
 fi
 shift
 if [[ $OSTYPE == "msys"* ]]; then
-    # Convert all slashes to forward slashes for consistency with the rest of the script.
-    if [[ "$WORKSPACE" == *'\'* ]]; then
-        WORKSPACE="${WORKSPACE//\\//}" # Replace \ with /
-    fi
+    WORKSPACE=$(normalise_windows_path "$WORKSPACE")
+    SCRIPT_DIR=$(normalise_windows_path "$SCRIPT_DIR")
     # Require git settings so that paths can be checked out with longer file names than 260 characters
     if [[ ! $(git config --system --get core.longpaths) == true ]]; then
         echo "This windows machine is does not have longpaths enabled for git, please run this command: git config --system core.longpaths true"
         exit 1
     fi
 fi
+REPO_ROOT_DIR=$SCRIPT_DIR/../../..
 RECIPES_DIR=$REPO_ROOT_DIR/conda/recipes/
 
 # Parse flags
@@ -86,11 +101,8 @@ do
 done
 
 
-# Mamba
-# make sure versions specified here are compatible with the developer meta-package
-setup_mamba $WORKSPACE/miniforge "" true $PLATFORM
-mamba activate base
-mamba install --yes rattler-build=0.51.0 versioningit python=3.11 rattler-index
+# install pixi if not already installed
+install_pixi
 
 # Clean up any legacy conda-recipes git clones
 cd $WORKSPACE
@@ -109,7 +121,7 @@ if [[ -n "$GIT_TAG" ]]; then
 fi
 
 # Set the version to inject into the recipe file
-export MANTID_VERSION=$(versioningit "${REPO_ROOT_DIR}")
+export MANTID_VERSION=$(pixi run -e rattler-builder "versioningit $REPO_ROOT_DIR")
 
 # Set locale to avoid problems building the docs
 # See https://unix.stackexchange.com/questions/87745/what-does-lc-all-c-do
@@ -121,7 +133,7 @@ export LC_ALL=C
 # copy the source to a working folder.
 export CONDA_BLD_PATH=$WORKSPACE/conda-bld
 if [[ -d $CONDA_BLD_PATH ]]; then
-    rattler-index fs $CONDA_BLD_PATH
+    pixi run -e rattler-builder "rattler-index fs $CONDA_BLD_PATH"
 fi
 cd $RECIPES_DIR
 
@@ -135,24 +147,24 @@ fi
 
 export CONDA_SUBDIR=$PLATFORM
 
-echo "CONDA BASE ENVIRONMENT (package-conda):"
-mamba run -n base mamba list
+echo "pixi rattler-builder environment"
+pixi list -e rattler-builder
 
 # Run conda build.
 if [[ $ENABLE_BUILD_MANTID_DEVELOPER == true ]]; then
-    rattler-build build -r ./mantid-developer/ -m ./conda_build_config.yaml --output-dir $CONDA_BLD_PATH -c neutrons $EXTRA_BUILD_OPTIONS
+    pixi run -e rattler-builder "rattler-build build -r ./mantid-developer/ -m ./conda_build_config.yaml --output-dir $CONDA_BLD_PATH -c neutrons $EXTRA_BUILD_OPTIONS"
 fi
 if [[ $ENABLE_BUILD_MANTID == true ]]; then
-    rattler-build build -r ./mantid/ -m ./conda_build_config.yaml --output-dir $CONDA_BLD_PATH $EXTRA_BUILD_OPTIONS
+    pixi run -e rattler-builder "rattler-build build -r ./mantid/ -m ./conda_build_config.yaml --output-dir $CONDA_BLD_PATH $EXTRA_BUILD_OPTIONS"
 fi
 if [[ $ENABLE_BUILD_QT == true ]]; then
-    rattler-build build -r ./mantidqt/ -m ./conda_build_config.yaml --output-dir $CONDA_BLD_PATH $EXTRA_BUILD_OPTIONS
+    pixi run -e rattler-builder "rattler-build build -r ./mantidqt/ -m ./conda_build_config.yaml --output-dir $CONDA_BLD_PATH $EXTRA_BUILD_OPTIONS"
 fi
 if [[ $ENABLE_BUILD_DOCS == true ]]; then
-    rattler-build build -r ./mantiddocs/ -m ./conda_build_config.yaml --output-dir $CONDA_BLD_PATH -c conda-forge -c neutrons $EXTRA_BUILD_OPTIONS
+    pixi run -e rattler-builder "rattler-build build -r ./mantiddocs/ -m ./conda_build_config.yaml --output-dir $CONDA_BLD_PATH -c conda-forge -c neutrons $EXTRA_BUILD_OPTIONS"
 fi
 if [[ $ENABLE_BUILD_WORKBENCH == true ]]; then
-    rattler-build build -r ./mantidworkbench/ -m ./conda_build_config.yaml --output-dir $CONDA_BLD_PATH $EXTRA_BUILD_OPTIONS
+    pixi run -e rattler-builder "rattler-build build -r ./mantidworkbench/ -m ./conda_build_config.yaml --output-dir $CONDA_BLD_PATH $EXTRA_BUILD_OPTIONS"
 fi
 
 # elapsed time with second resolution

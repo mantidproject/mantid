@@ -9,6 +9,23 @@ version = "6.14"
 
 [tasks]
 
+[environments]
+rattler-builder = ["rattler-builder"]
+
+[feature.rattler-builder.dependencies]
+rattler-build = "==0.51.0"
+versioningit = ">=3.3.0,<4"
+rattler-index = ">=0.27.6,<0.28"
+
+[feature.rattler-builder.target.linux-64.dependencies]
+jq = ">=1.8.1,<2"
+
+[feature.rattler-builder.target.osx-arm64.dependencies]
+jq = ">=1.8.1,<2"
+
+[feature.rattler-builder.target.win-64.dependencies]
+m2w64-jq = ">=1.6,<2"
+
 [dependencies]
 cmake = ">=3.21.0"
 doxygen = "1.9.*"
