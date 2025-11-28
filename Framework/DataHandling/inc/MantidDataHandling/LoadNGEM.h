@@ -7,8 +7,8 @@
 #pragma once
 
 #include "MantidAPI/IFileLoader.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataHandling/DllConfig.h"
-#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/FileDescriptor.h"
 
 namespace Mantid {
@@ -112,6 +112,10 @@ private:
                       int &rawFrames, int &goodFrames, const int &minEventsReq, const int &maxEventsReq,
                       MantidVec &frameEventCounts, std::vector<DataObjects::EventList> &events,
                       std::vector<DataObjects::EventList> &eventsInFrame, const size_t &totalFilePaths, int &fileCount);
+  void loadSingleFile(const std::vector<std::string> &filePath, int &eventCountInFrame, double &maxToF, double &minToF,
+                      const double &binWidth, int &rawFrames, int &goodFrames, const int &minEventsReq,
+                      const int &maxEventsReq, MantidVec &frameEventCounts, std::vector<std::vector<double>> &counts,
+                      std::vector<std::vector<double>> &countsInFrame, const size_t &totalFilePaths, int &fileCount);
   /// Check that a file to be loaded is in 128 bit words.
   size_t verifyFileSize(std::ifstream &file);
   /// Reports progress and checks cancel flag.
@@ -120,7 +124,7 @@ private:
   /// Create a workspace to store the number of counts per frame.
   void createCountWorkspace(const std::vector<double> &frameEventCounts);
   /// Load the instrument and attach to the data workspace.
-  void loadInstrument(DataObjects::EventWorkspace_sptr &dataWorkspace);
+  void loadInstrument(API::MatrixWorkspace_sptr &dataWorkspace);
   /// Validate the imputs into the algorithm, overrides.
   std::map<std::string, std::string> validateInputs() override;
   /// Validate events per frame inputs
@@ -130,6 +134,8 @@ private:
   /// Insert validation result into result map
   void insertValidationResult(const std::pair<std::string, std::string> &result,
                               std::map<std::string, std::string> &results);
+  /// Generate bin edge vector if not preserving events
+  std::vector<double> calculateBinEdges(const double minToF, const double maxToF, const double binWidth) const;
 };
 
 } // namespace DataHandling
