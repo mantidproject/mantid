@@ -28,7 +28,7 @@
 #   --extra-cmake-flags: Extra flags to pass directly to cmake, enclose in "", defaults to nothing
 #   --build-threads: pass the number of threads that can be used to build with, default is 1 thread per logical core
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source $SCRIPT_DIR/mamba-utils
+source $SCRIPT_DIR/pixi-utils
 start_time=$(date +%s)
 
 # Check arguments passed are 2 or higher, and aren't optional flags.
@@ -125,9 +125,8 @@ else
 fi
 git clean -d -x --force --exclude=".Xauthority-*" $git_clean_excludes_extra
 
-# Mamba
-setup_mamba $WORKSPACE/miniforge "" $CLEAN_BUILD
-create_and_activate_mantid_developer_env $WORKSPACE $PLATFORM
+# install pixi if not already installed
+install_pixi
 
 # Check whether this is an incremental build that only changes rst files
 if [ -d $BUILD_DIR ]; then
@@ -169,13 +168,13 @@ fi
 set -o pipefail
 
 # Run the script that handles the build
-$SCRIPT_DIR/build $WORKSPACE $CMAKE_PRESET $ENABLE_DOCS $ENABLE_DEV_DOCS $ENABLE_BUILD_CODE $ENABLE_UNIT_TESTS $ENABLE_SYSTEM_TESTS $ENABLE_DOC_TESTS $ENABLE_COVERITY "$EXTRA_CMAKE_FLAGS" | tee $BUILD_DIR/test_logs/build_$OSTYPE.log
+pixi run "$SCRIPT_DIR/build $WORKSPACE $CMAKE_PRESET $ENABLE_DOCS $ENABLE_DEV_DOCS $ENABLE_BUILD_CODE $ENABLE_UNIT_TESTS $ENABLE_SYSTEM_TESTS $ENABLE_DOC_TESTS $ENABLE_COVERITY "$EXTRA_CMAKE_FLAGS" | tee $BUILD_DIR/test_logs/build_$OSTYPE.log"
 
 # Return to original behaviour.
 set +o pipefail
 
 # Run unit and system tests
-$SCRIPT_DIR/run-tests $WORKSPACE $ENABLE_SYSTEM_TESTS $ENABLE_UNIT_TESTS $ENABLE_DOCS $ENABLE_DOC_TESTS $BUILD_THREADS
+pixi run "$SCRIPT_DIR/run-tests $WORKSPACE $ENABLE_SYSTEM_TESTS $ENABLE_UNIT_TESTS $ENABLE_DOCS $ENABLE_DOC_TESTS $BUILD_THREADS"
 
 # elapsed time with second resolution
 end_time=$(date +%s)

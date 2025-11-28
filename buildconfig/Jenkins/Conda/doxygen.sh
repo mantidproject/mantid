@@ -25,9 +25,8 @@ shift 1
 
 cd $WORKSPACE
 
-# Setup Mamba. Create and activate environment
-setup_mamba $WORKSPACE/miniforge "" true ""
-create_and_activate_mantid_developer_env $WORKSPACE
+# install pixi if not already installed
+install_pixi
 
 # Create the build directory if it doesn't exist
 [ -d $WORKSPACE/build ] || mkdir $WORKSPACE/build
@@ -37,7 +36,7 @@ cd $WORKSPACE/build
 export LC_ALL=C
 
 # Configure and generate build files
-cmake --preset=doxygen-ci ..
+pixi run "cmake --preset=doxygen-ci .."
 
 # Build doxygen target
-cmake --build . --target doxygen
+pixi run "cmake --build . --target doxygen"
