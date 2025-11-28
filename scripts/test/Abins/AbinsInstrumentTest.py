@@ -11,6 +11,7 @@ from euphonic import ureg
 from abins.constants import ALL_INSTRUMENTS
 from abins.instruments import get_instrument
 from abins.instruments.instrument import Instrument
+from abins.instruments.pychop import validate_pychop_params
 
 
 class InstrumentTest(unittest.TestCase):
@@ -64,6 +65,36 @@ class LagrangeResolutionTest(unittest.TestCase):
         self.assertAlmostEqual((sigma_below * ureg("1/cm")).to("meV").magnitude, 0.4, 6)
 
         self.assertGreater(sigma_above, sigma_below)
+
+
+class DirectValidationTest(unittest.TestCase):
+    def test_pychop_validation(self):
+        """Test validation function used by Abins with pychop instruments
+
+        If the wrong incident energy / chopper setting are used together, there
+        is no transmission ans pychop will raise errors. The validator should
+        catch this before performing intensity calculations.
+        """
+
+        self.assertFalse(
+            validate_pychop_params(
+                name="MARI",
+                chopper="A",
+                chopper_frequency="400",
+                e_i="4000",
+                energy_units="cm-1",
+            )
+        )
+
+        self.assertTrue(
+            validate_pychop_params(
+                name="MARI",
+                chopper="A",
+                chopper_frequency="400",
+                e_i="10",
+                energy_units="meV",
+            )
+        )
 
 
 if __name__ == "__main__":

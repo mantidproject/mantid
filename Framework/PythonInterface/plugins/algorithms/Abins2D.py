@@ -17,6 +17,7 @@ from mantid.kernel import logger
 from mantid.simpleapi import GroupWorkspaces
 import abins
 from abins.abinsalgorithm import AbinsAlgorithm, AtomInfo, validate_e_init
+from abins.instruments.pychop import validate_pychop_params
 
 
 # noinspection PyPep8Naming,PyMethodMayBeStatic
@@ -93,6 +94,19 @@ class Abins2D(AbinsAlgorithm, PythonAlgorithm):
                 instrument_name=instrument_name,
             )
         )
+
+        if instrument_name in TWO_DIMENSIONAL_CHOPPER_INSTRUMENTS and not set(issues) & (
+            {"Chopper", "ChopperFrequency", "IncidentEnergy", "EnergyUnits"}
+        ):
+            issues.update(
+                validate_pychop_params(
+                    instrument_name,
+                    self.getProperty("Chopper").value,
+                    self.getProperty("ChopperFrequency").value,
+                    self.getProperty("IncidentEnergy").value,
+                    self.getProperty("EnergyUnits").value,
+                )
+            )
 
         return issues
 
