@@ -25,7 +25,7 @@ class WishPowder:
         empty_runno=None,
         default_ext="raw",
         sum_equivalent_banks=False,
-        subtract_empty=False,
+        subtract_empty_from_sample=False,
     ):
         self.calib_dir = calib_dir  # includes cycle
         self.per_detector_van = per_detector_van
@@ -35,7 +35,7 @@ class WishPowder:
         self.user_dir = user_dir
         self.van_runno = van_runno
         self.empty_runno = empty_runno
-        self.subtract_empty = subtract_empty
+        self.subtract_empty_from_sample = subtract_empty_from_sample
         self.grp_ws_fpath = path.join(self.calib_dir, "WISH_banks.xml")
         self.van_sample = {
             "Material": {"ChemicalFormula": "V", "AttenuationXSection": 4.8756, "ScatteringXSection": 5.16, "SampleNumberDensity": 0.07118},
@@ -44,6 +44,9 @@ class WishPowder:
         self.sample = {"Geometry": {"Shape": "Cylinder", "Center": [0.0, 0.0, 0.0]}}
         self.cylinder_abs_kwargs = {"NumberOfSlices": 10, "NumberOfAnnuli": 10, "NumberOfWavelengthPoints": 25, "ExpMethod": "Normal"}
         self.van_smooth_npts = 40  # use same for empty - really
+        self.van_ws = None
+        self.empty_ws = None
+        self.grp_ws = None
 
     def set_sample_property(self, fieldname, **kwargs):
         if fieldname not in self.sample:
@@ -55,14 +58,18 @@ class WishPowder:
         return self._get_filepath_in_calib_dir(self._get_van_filename(), *args, **kwargs)
 
     def _get_van_filename(self):
+        wsname_van = self._get_van_wsname()
+        return f"{wsname_van}.nxs"
+
+    def _get_van_wsname(self):
         suffix = "" if self.per_detector_van else "_foc"
-        return f"vana_{self.sample_env.value}{suffix}.nxs"
+        return f"vana_{self.sample_env.value}{suffix}"
 
     def _get_mask_filepath(self):
         return self._get_filepath_in_calib_dir("mask.xml")
 
     def _get_cal_filepath(self):
-        return self._get_filepath_in_calib_dir("calibration.xml")
+        return self._get_filepath_in_calib_dir("calibration.h5")
 
     def _get_filepath_in_calib_dir(self, filename, check_exists=True):
         fpath = path.join(self.calib_dir, filename)
@@ -71,12 +78,13 @@ class WishPowder:
         else:
             return None
 
-    def load(self, runno, ext=None):
+    def load(self, runno, ext=None, out_wsname=None):
         if ext is None:
             ext = self.default_ext
         # what about multiple runs being summed
-        wsname = f"WISH{runno:08d}"
-        ws = mantid.Load(Filename=f"{wsname}.{ext}", OutputWorkspace=wsname, LoadMonitors=True)
+        fname = f"WISH{runno:08d}"
+        wsname = fname if out_wsname is None else out_wsname
+        ws = mantid.Load(Filename=f"{fname}.{ext}", OutputWorkspace=wsname)
         if isinstance(ws, EventWorkspace):
             mantid.Rebin(InputWorkspace=wsname, OutputWorkspace=wsname, Params="6000,-0.00063,110000")
             mantid.ConvertToMatrixWorkspace(InputWorkspace=wsname, OutputWorkspace=wsname)
@@ -94,7 +102,7 @@ class WishPowder:
         return wsname
 
     def normalise_by_monitor(self, wsname):
-        wsname_mon = self._proccess_monitor(wsname)
+        wsname_mon = self._process_monitor(wsname)
         mantid.NormaliseToMonitor(InputWorkspace=wsname, OutputWorkspace=wsname, MonitorWorkspace=wsname_mon)
         mantid.NormaliseToMonitor(
             InputWorkspace=wsname, OutputWorkspace=wsname, MonitorWorkspace=wsname_mon, IntegrationRangeMin=0.7, IntegrationRangeMax=10.35
@@ -115,8 +123,12 @@ class WishPowder:
     def process_data(self, runnos, ext=None):
         for runno in runnos:
             wsname = self.load(runno, ext)
-            if self.subtract_empty:
-                mantid.Minus(LHSWorkspace=wsname, RHSWorkspace=self.get_empty_ws(), OutputWorkspace=wsname)
+            if self.subtract_empty_from_sample:
+                ws_empty = self.get_empty_ws()
+                if ws_empty:
+                    mantid.Minus(LHSWorkspace=wsname, RHSWorkspace=ws_empty, OutputWorkspace=wsname)
+                else:
+                    logger.warning("Empty worksapce not subtracted as no workspace found and no empty_runno provided.")
             # correct for attenuation
             if "Material" in self.sample:
                 mantid.SetSample(InputWorkspace=wsname, **self.sample())
@@ -126,19 +138,20 @@ class WishPowder:
             wsname_foc = self.focus(wsname)  # includes vanadium correction
             # crop in d
             self._crop_focussed_in_dspac(wsname_foc)
-            if self.sum_equivalent_banks:
-                self._combine_focussed_banks(wsname_foc)
             # convert to TOF
             mantid.ConvertUnits(InputWorkspace=wsname_foc, OutputWorkspace=wsname_foc, Target="TOF")
             # save
             self.save_focussed_data(wsname_foc)
+            if self.sum_equivalent_banks:
+                wsname_foc_summed = self._combine_focussed_banks(wsname_foc)
+                self.save_focussed_data(wsname_foc_summed)
             mantid.DeleteWorkspace(wsname)
 
     def save_focussed_data(self, wsname):
         save_fpath = path.join(self.user_dir, wsname)
         mantid.SaveNexus(InputWorkspace=wsname, Filename=save_fpath + ".nxs")
-        mantid.SaveGSS(InputWorkspace=wsname, Filename=save_fpath + ".gss")
-        mantid.SaveFocusedXYE(InputWorkspace=wsname, Filename=save_fpath + ".dat")
+        mantid.SaveGSS(InputWorkspace=wsname, Filename=save_fpath + ".gss", Append=False, SplitFile=False)
+        mantid.SaveFocusedXYE(InputWorkspace=wsname, Filename=save_fpath + ".dat", Append=False, SplitFile=False)
 
     def apply_mask_to_ws(self, wsname):
         if self._get_mask_filepath() is None:
@@ -165,6 +178,8 @@ class WishPowder:
 
     def get_empty_ws(self):
         if not self.empty_ws:
+            if self.empty_runno is None:
+                return None
             self.empty_ws = self.create_empty()  # need empty_runno
         return self.empty_ws
 
@@ -173,7 +188,7 @@ class WishPowder:
             return self.van_ws
         van_filepath = self._get_van_filepath()
         if van_filepath is not None:
-            self.van_ws = mantid.Load(van_filepath)
+            self.van_ws = mantid.Load(van_filepath, OutputWorkspace=self._get_van_wsname())
         elif self.van_runno:
             self.van_ws = self.create_vanadium()
         else:
@@ -190,13 +205,15 @@ class WishPowder:
             mantid.ReplaceSpecialValues(
                 InputWorkspace=wsname, OutputWorkspace=wsname, NaNValue=0.0, NaNError=0.0, InfinityValue=0.0, InfinityError=0.0
             )
+            self.retrieve(wsname).setDistribution(False)  # for compatibility with DiffrcationFocussing
         wsname_foc = self._focus_ws(wsname)
-        if not self.per_detector:
+        if not self.per_detector_van:
             # divide by focussed vanadium (in d-spacing)
             mantid.Divide(LHSWorkspace=wsname_foc, RHSWorkspace=van_ws, OutputWorkspace=wsname)
             mantid.ReplaceSpecialValues(
                 InputWorkspace=wsname_foc, OutputWorkspace=wsname_foc, NaNValue=0.0, NaNError=0.0, InfinityValue=0.0, InfinityError=0.0
             )
+        return wsname_foc
 
     def _focus_ws(self, wsname):
         grp_ws = self.get_group_ws(wsname)
@@ -211,16 +228,19 @@ class WishPowder:
         return self.load(self.empty_runno)
 
     def create_vanadium(self):
-        wsname_van = self.load(self.van_runno)
-        # subtract empty
-        mantid.Minus(LHSWorkspace=wsname_van, RHSWorkspace=self.get_empty_ws(), OutputWorkspace=wsname_van)
+        wsname_van = self.load(self.van_runno, out_wsname=self._get_van_wsname())
+        ws_empty = self.get_empty_ws()
+        if ws_empty:
+            mantid.Minus(LHSWorkspace=wsname_van, RHSWorkspace=ws_empty, OutputWorkspace=wsname_van)
+        else:
+            logger.warning("Empty workspace not subtracted from vanadium as no empty_runno provided.")
         # correct for attenuation
-        mantid.SetSample(**self.van_sample)
-        self.correct_for_attenuation(self, wsname_van)
+        mantid.SetSample(InputWorkspace=wsname_van, **self.van_sample)
+        self.correct_for_attenuation(wsname_van)
         if self.per_detector_van:
             self._replace_data_with_wavelength_focussed(wsname_van)
             mantid.SaveNexus(InputWorkspace=wsname_van, Filename=self._get_van_filepath(check_exists=False))
-            return wsname_van
+            self.van_ws = wsname_van
         else:
             # focus
             wsname_van_foc = self._focus_ws(wsname_van)
@@ -229,7 +249,8 @@ class WishPowder:
             # save (in d-spacing)
             mantid.SaveNexus(InputWorkspace=wsname_van_foc, Filename=self._get_van_filepath(check_exists=False))
             mantid.DeleteWorkspace(wsname_van)
-            return wsname_van_foc
+            self.van_ws = wsname_van_foc
+        return self.van_ws
 
     @staticmethod
     def _replace_data_with_wavelength_focussed(wsname, ngroups=10):
@@ -271,7 +292,8 @@ class WishPowder:
     def _crop_focussed_in_dspac(ws_foc):
         xmins = cycle([0.8, 0.5, 0.5, 0.4, 0.35])
         xmaxs = cycle([53.3, 13.1, 7.77, 5.86, 4.99])
-        for ispec in range(WishPowder.retreive(ws_foc).getNumberHistograms()):
+        ws_foc = WishPowder.retrieve(ws_foc)
+        for ispec in range(ws_foc.getNumberHistograms()):
             ws_foc = mantid.MaskBins(
                 InputWorkspace=ws_foc, OutputWorkspace=ws_foc.name(), XMin=0, XMax=next(xmins), InputWorkspaceIndexSet=ispec
             )
@@ -280,16 +302,19 @@ class WishPowder:
             )
 
     @staticmethod
-    def _combine_focussed_banks(ws_foc):
-        ws_foc_1to5 = mantid.ExtractSpectra(InputWorkspace=ws_foc, OutputWorkspace=f"{ws_foc.name()}_1to5", WorkspaceIndexList=range(0, 5))
+    def _combine_focussed_banks(wsname_foc):
+        ws_foc_1to5 = mantid.ExtractSpectra(InputWorkspace=wsname_foc, OutputWorkspace=f"{wsname_foc}_1to5", WorkspaceIndexList=range(0, 5))
         ws_foc_6to10 = mantid.ExtractSpectra(
-            InputWorkspace=ws_foc, OutputWorkspace=f"{ws_foc.name()}_6to10", WorkspaceIndexList=range(5, 10)
+            InputWorkspace=wsname_foc, OutputWorkspace=f"{wsname_foc}_6to10", WorkspaceIndexList=range(5, 10)
         )
         # ensure bin edges in equivalent banks are the same (could be different due to calibration)
         ws_foc_6to10 = mantid.RebinToWorkspace(
             WorkspaceToRebin=ws_foc_6to10, WorkspaceToMatch=ws_foc_1to5, OutputWorkspace=ws_foc_6to10.name()
         )
-        mantid.Plus(LHSWorkspace=ws_foc_1to5, RHSWorkspace=ws_foc_6to10, OutputWorkspace=ws_foc.name())
+        ws_foc_summed = f"{wsname_foc}_summed"
+        mantid.Plus(LHSWorkspace=ws_foc_1to5, RHSWorkspace=ws_foc_6to10, OutputWorkspace=ws_foc_summed)
+        mantid.DeleteWorkspaces([ws_foc_1to5, ws_foc_6to10])
+        return ws_foc_summed
 
     @staticmethod
     def retrieve(ws):
