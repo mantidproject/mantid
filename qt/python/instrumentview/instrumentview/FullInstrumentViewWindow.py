@@ -22,6 +22,7 @@ from qtpy.QtWidgets import (
     QListWidget,
     QListWidgetItem,
     QAbstractItemView,
+    QScrollArea,
 )
 from qtpy.QtGui import QDoubleValidator, QMovie, QDragEnterEvent, QDropEvent, QDragMoveEvent, QColor, QPalette
 from qtpy.QtCore import Qt, QEvent, QSize
@@ -116,7 +117,6 @@ class FullInstrumentViewWindow(QMainWindow):
 
         super(FullInstrumentViewWindow, self).__init__(parent)
         self.setWindowTitle("Instrument View")
-        self.resize(1500, 1500)
 
         self._off_screen = off_screen
 
@@ -129,10 +129,14 @@ class FullInstrumentViewWindow(QMainWindow):
         pyvista_vertical_layout = QVBoxLayout(pyvista_vertical_widget)
         left_column_layout = QVBoxLayout(left_column_widget)
 
+        left_column_scroll = QScrollArea()
+        left_column_scroll.setWidgetResizable(True)
+        left_column_scroll.setWidget(left_column_widget)
+
         hsplitter = QSplitter(Qt.Horizontal)
-        hsplitter.addWidget(left_column_widget)
+        hsplitter.addWidget(left_column_scroll)
         hsplitter.addWidget(pyvista_vertical_widget)
-        hsplitter.setSizes([100, 200])
+        hsplitter.setSizes([150, 200])
         hsplitter.splitterMoved.connect(self._on_splitter_moved)
         parent_horizontal_layout.addWidget(hsplitter)
 
@@ -151,8 +155,8 @@ class FullInstrumentViewWindow(QMainWindow):
         vsplitter = QSplitter(Qt.Vertical)
         vsplitter.addWidget(self.main_plotter.app_window)
         vsplitter.addWidget(plot_widget)
-        vsplitter.setStretchFactor(0, 0)
-        vsplitter.setStretchFactor(1, 1)
+        vsplitter.setStretchFactor(0, 5)
+        vsplitter.setStretchFactor(1, 4)
         vsplitter.splitterMoved.connect(self._on_splitter_moved)
 
         pyvista_vertical_layout.addWidget(vsplitter)
@@ -270,11 +274,16 @@ class FullInstrumentViewWindow(QMainWindow):
         self._overlay_meshes = []
         self._lineplot_overlays = []
 
+        screen_geometry = self.screen().geometry()
+        self.resize(int(screen_geometry.width() * 0.8), int(screen_geometry.height() * 0.8))
+        window_geometry = self.frameGeometry()
+        center_point = screen_geometry.center()
+        window_geometry.moveCenter(center_point)
+        self.move(window_geometry.topLeft())
+
         self._current_widget = CylinderWidgetNoRotation()
         self._projection_camera_map = {}
         self._parallel_scales = {}
-
-        # self.main_plotter.add_box_widget(lambda x: None)
 
         UsageService.registerFeatureUsage(FeatureType.Interface, "InstrumentView2025", False)
 
@@ -523,7 +532,7 @@ class FullInstrumentViewWindow(QMainWindow):
     def add_detector_mesh(self, mesh: PolyData, is_projection: bool, scalars=None) -> None:
         """Draw the given mesh in the main plotter window"""
         self.main_plotter.clear()
-        scalar_bar_args = dict(interactive=True, vertical=True, title_font_size=15, label_font_size=12) if scalars is not None else None
+        scalar_bar_args = dict(interactive=True, vertical=False, title_font_size=15, label_font_size=12) if scalars is not None else None
         self.main_plotter.add_mesh(
             mesh, pickable=False, scalars=scalars, render_points_as_spheres=True, point_size=15, scalar_bar_args=scalar_bar_args
         )
@@ -548,7 +557,7 @@ class FullInstrumentViewWindow(QMainWindow):
         self.main_plotter.add_mesh(
             point_cloud,
             scalars=scalars,
-            opacity=[0.0, 0.5],
+            opacity=[0.0, 0.3],
             show_scalar_bar=False,
             pickable=True,
             cmap="Oranges",
