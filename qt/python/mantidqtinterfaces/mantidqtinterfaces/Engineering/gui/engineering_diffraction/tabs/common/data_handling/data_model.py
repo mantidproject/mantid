@@ -20,7 +20,7 @@ from matplotlib.pyplot import subplots
 import os
 
 
-class FittingDataModel(object):
+class FittingDataModel:
     def __init__(self):
         self._last_added = []  # List of workspace names loaded in the last load action.
         self._data_workspaces = FittingWorkspaceRecordContainer()

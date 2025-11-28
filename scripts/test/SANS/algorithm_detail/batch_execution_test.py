@@ -30,12 +30,12 @@ from sans.common.enums import SaveType, ReductionMode
 from sans.common.constants import SCALED_BGSUB_SUFFIX
 
 
-class ADSMock(object):
+class ADSMock:
     """
     An object to mock out the ADS
     """
 
-    class GroupWS(object):
+    class GroupWS:
         def contains(self, _):
             return True
 

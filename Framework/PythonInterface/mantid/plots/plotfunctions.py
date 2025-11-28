@@ -7,7 +7,6 @@
 #  This file is part of the mantid package
 # std imports
 import math
-from typing import List
 
 import numpy as np
 from collections.abc import Sequence
@@ -441,7 +440,7 @@ def get_plot_fig(overplot=None, ax_properties=None, window_title=None, axes_num=
 # -----------------------------------------------------------------------------
 # Private Methods
 # -----------------------------------------------------------------------------
-def _unpack_grouped_workspaces(mixed_list: List):
+def _unpack_grouped_workspaces(mixed_list: list):
     assert isinstance(mixed_list, list), f"Expected list of group + non-group workspaces, got {repr(mixed_list)}"
     ret = []
     for ws in mixed_list:

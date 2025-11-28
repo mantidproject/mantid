@@ -85,7 +85,7 @@ def is_smaller(smaller, larger):
 # ----------------------------------------------------------------------------------------------------------------------
 # Builder
 # ----------------------------------------------------------------------------------------------------------------------
-class StateSliceEventBuilder(object):
+class StateSliceEventBuilder:
     @automatic_setters(StateSliceEvent)
     def __init__(self):
         super(StateSliceEventBuilder, self).__init__()

@@ -129,7 +129,7 @@ class DNSFileSelectorModel(DNSObsModel):
         loaded = {}
         try:
             txt = load_txt("last_filelist.txt", path)
-        except IOError:
+        except OSError:
             return loaded
         try:
             for line in txt:

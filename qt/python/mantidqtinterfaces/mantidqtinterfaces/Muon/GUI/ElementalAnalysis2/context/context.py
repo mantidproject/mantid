@@ -16,7 +16,7 @@ REBINNED_FIXED_WS_SUFFIX = "_EA_Rebinned_Fixed"
 REBINNED_VARIABLE_WS_SUFFIX = "_EA_Rebinned_Variable"
 
 
-class ElementalAnalysisContext(object):
+class ElementalAnalysisContext:
     def __init__(
         self,
         data_context,

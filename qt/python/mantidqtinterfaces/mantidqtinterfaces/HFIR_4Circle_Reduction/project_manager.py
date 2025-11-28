@@ -12,7 +12,7 @@ import pickle
 # Project manager is in charge of importing and exporting a project
 
 
-class ProjectManager(object):
+class ProjectManager:
     """
     Class project manager
     """
@@ -124,7 +124,7 @@ class ProjectManager(object):
                 err_msg += "Unable to load file {0} due to RuntimeError {1}.".format(md_file_path, run_err)
             except OSError as run_err:
                 err_msg += "Unable to load file {0} due to OSError {1}.".format(md_file_path, run_err)
-            except IOError as run_err:
+            except OSError as run_err:
                 err_msg += "Unable to load file {0} due to IOError {1}.".format(md_file_path, run_err)
         # END-FOR
 

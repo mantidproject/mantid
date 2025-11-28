@@ -120,7 +120,7 @@ def get_wavelength_min_and_max(reducer):
     return reducer.to_wavelen.wav_low, reducer.to_wavelen.wav_high
 
 
-class LoadRun(object):
+class LoadRun:
     UNSET_PERIOD = -1
 
     def __init__(self, run_spec=None, trans=False, reload=True, entry=UNSET_PERIOD):
@@ -494,7 +494,7 @@ class LoadRun(object):
             raise RuntimeError("There is a mismatch in the number of periods (entries) in the file between the sample and another run")
 
 
-class LoadTransmissions(object):
+class LoadTransmissions:
     """
     Loads the file used to apply the transmission correction to the
     sample or can
@@ -1282,7 +1282,7 @@ class LoadSample(LoadRun):
         self.move2ws(0)
 
 
-class DarkRunSubtraction(object):
+class DarkRunSubtraction:
     """
     This class handles the subtraction of a dark run from the sample workspace.
     The dark run subtraction does not take place and just passes the workspace through
@@ -2587,7 +2587,7 @@ class AbsoluteUnitsISIS(ReductionStep):
         _ws *= scalefactor
 
 
-class CalculateNormISIS(object):
+class CalculateNormISIS:
     """
     Note this is not a reduction step, see CalculateNorm
 
@@ -3407,7 +3407,7 @@ class UserFile(ReductionStep):
         for line in file_handle:
             try:
                 self.read_line(line, reducer)
-            except IOError:
+            except OSError:
                 # Close the handle
                 file_handle.close()
                 raise RuntimeError(
@@ -3544,11 +3544,11 @@ class UserFile(ReductionStep):
                 elif nparams == 3:
                     fit_type, lambdamin, lambdamax = params
                 else:
-                    raise IOError
+                    raise OSError
                 reducer.transmission_calculator.set_trans_fit(
                     min_=lambdamin, max_=lambdamax, fit_method=fit_type, override=True, selector=selector
                 )
-            except IOError:
+            except OSError:
                 _issueWarning("Incorrectly formatted FIT/TRANS line, %s, line ignored" % upper_line)
 
         elif upper_line.startswith("FIT/MONITOR"):

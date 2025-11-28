@@ -445,7 +445,7 @@ class CorrectToFileStep(ReductionStep):
             )
 
 
-class CalculateNorm(object):
+class CalculateNorm:
     """
     Generates the normalization workspaces required by Q1D or Qxy from output
     of other, sometimes optional, reduction_steps or specified workspaces.

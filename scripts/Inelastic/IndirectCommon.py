@@ -9,7 +9,7 @@ from mantid import config, logger
 from mantid.api import AnalysisDataService, MatrixWorkspace
 import mantid.simpleapi as s_api
 
-from typing import List, Tuple, Union
+from typing import Union
 import math
 import re
 import numpy as np
@@ -44,7 +44,7 @@ def get_run_number(ws_name: str) -> str:
     return log.split(",")[0]
 
 
-def get_instrument_and_run(ws_name: str) -> Tuple[str, str]:
+def get_instrument_and_run(ws_name: str) -> tuple[str, str]:
     """
     Get the instrument name and run number from a workspace.
 
@@ -130,7 +130,7 @@ def get_efixed(workspace: Union[str, MatrixWorkspace]) -> float:
     raise ValueError("No Efixed parameter found")
 
 
-def get_two_theta_angles(workspace: Union[str, MatrixWorkspace]) -> List[float]:
+def get_two_theta_angles(workspace: Union[str, MatrixWorkspace]) -> list[float]:
     if isinstance(workspace, str):
         workspace = AnalysisDataService.retrieve(workspace)
 
@@ -146,7 +146,7 @@ def get_two_theta_angles(workspace: Union[str, MatrixWorkspace]) -> List[float]:
     return angles
 
 
-def get_two_theta_and_q(workspace: Union[str, MatrixWorkspace]) -> Tuple[np.ndarray, np.ndarray]:
+def get_two_theta_and_q(workspace: Union[str, MatrixWorkspace]) -> tuple[np.ndarray, np.ndarray]:
     """
     Returns the theta and elastic Q for each spectrum in a given workspace.
 
@@ -179,7 +179,7 @@ def get_two_theta_and_q(workspace: Union[str, MatrixWorkspace]) -> Tuple[np.ndar
     return two_theta, q
 
 
-def extract_float(data_string: str) -> List[float]:
+def extract_float(data_string: str) -> list[float]:
     """
     Extract float values from an ASCII string
     """
@@ -188,7 +188,7 @@ def extract_float(data_string: str) -> List[float]:
     return values
 
 
-def extract_int(data_string: str) -> List[int]:
+def extract_int(data_string: str) -> list[int]:
     """
     Extract int values from an ASCII string
     """
@@ -279,7 +279,7 @@ def check_analysers_or_e_fixed(workspace1: Union[str, MatrixWorkspace], workspac
         _check_analysers_are_equal(workspace1, workspace2)
 
 
-def check_hist_zero(workspace_name: str) -> Tuple[int, int]:
+def check_hist_zero(workspace_name: str) -> tuple[int, int]:
     """
     Retrieves basic info on a workspace
 
@@ -341,7 +341,7 @@ def check_dimensions_equal(workspace_name1: str, descriptor1: str, workspace_nam
         raise ValueError(f"{error_1} not = {error_2}")
 
 
-def check_x_range(x_range: List[float], range_type: str) -> None:
+def check_x_range(x_range: list[float], range_type: str) -> None:
     if not ((len(x_range) == 2) or (len(x_range) == 4)):
         raise ValueError(f"{range_type} - Range must contain either 2 or 4 numbers")
 
@@ -428,7 +428,7 @@ def transpose_fit_parameters_table(params_table: str, output_table: Union[str, N
     s_api.RenameWorkspace(table_ws.name(), OutputWorkspace=output_table)
 
 
-def _first_non_zero(data: List) -> Union[int, None]:
+def _first_non_zero(data: list) -> Union[int, None]:
     """
     Returns the index of the first non zero value in the list
     """
@@ -437,7 +437,7 @@ def _first_non_zero(data: List) -> Union[int, None]:
             return i
 
 
-def identify_non_zero_bin_range(workspace: MatrixWorkspace, workspace_index: int) -> Tuple[float]:
+def identify_non_zero_bin_range(workspace: MatrixWorkspace, workspace_index: int) -> tuple[float]:
     """
     Identifies the bin range within which there is no trailing or leading zero values for a given workspace index.
 
@@ -454,7 +454,7 @@ def identify_non_zero_bin_range(workspace: MatrixWorkspace, workspace_index: int
     return x_data[start_data_idx], x_data[len(x_data) - end_data_idx - 1]
 
 
-def format_runs(runs: List[str], instrument_name: str) -> List[int]:
+def format_runs(runs: list[str], instrument_name: str) -> list[int]:
     """
     :return: A list of runs prefixed with the given instrument name
     """

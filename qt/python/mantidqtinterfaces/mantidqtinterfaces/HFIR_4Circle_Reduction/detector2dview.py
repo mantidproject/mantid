@@ -17,7 +17,7 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
 
     """
 
-    class MousePress(object):
+    class MousePress:
         RELEASED = 0
         LEFT = 1
         RIGHT = 3

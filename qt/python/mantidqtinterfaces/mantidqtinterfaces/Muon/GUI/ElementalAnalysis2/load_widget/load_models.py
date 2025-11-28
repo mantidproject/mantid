@@ -9,7 +9,7 @@ from mantidqtinterfaces.Muon.GUI.Common.muon_load_data import MuonLoadData
 from mantidqtinterfaces.Muon.GUI.ElementalAnalysis2.context.data_context import RunObject
 
 
-class LoadWidgetModel(object):
+class LoadWidgetModel:
     def __init__(self, loaded_data_store=MuonLoadData(), context=None):
         self._loaded_data_store = loaded_data_store
         self._data_context = context.data_context
@@ -36,7 +36,7 @@ class LoadWidgetModel(object):
         self._context.update_current_data()
 
 
-class BrowseFileWidgetModel(object):
+class BrowseFileWidgetModel:
     def __init__(self, loaded_data_store=MuonLoadData(), context=None):
         self._loaded_data_store = loaded_data_store
         self._data_context = context.data_context
@@ -57,7 +57,7 @@ class BrowseFileWidgetModel(object):
         self._loaded_data_store.clear()
 
 
-class LoadRunWidgetModel(object):
+class LoadRunWidgetModel:
     def __init__(self, loaded_data_store=MuonLoadData(), context=None):
         self._loaded_data_store = loaded_data_store
         self._data_context = context.data_context

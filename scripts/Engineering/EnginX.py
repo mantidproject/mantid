@@ -4,7 +4,8 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from typing import Sequence, Optional
+from typing import Optional
+from collections.abc import Sequence
 
 from mantid.simpleapi import Load, logger
 from Engineering.EnggUtils import GROUP, focus_run, create_new_calibration

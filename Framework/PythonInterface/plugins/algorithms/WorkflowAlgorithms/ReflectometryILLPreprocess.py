@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-# Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
@@ -52,7 +51,6 @@ import ILL_utilities as utils
 from math import fabs, atan
 import numpy as np
 from scipy.constants import physical_constants
-from typing import List, Tuple
 
 
 class Prop:
@@ -123,7 +121,7 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
 
     @staticmethod
     def _calculate_average_background(
-        transposed_ws: MatrixWorkspace, transposed_bkg_ws_name: MatrixWorkspace, ranges: List[float]
+        transposed_ws: MatrixWorkspace, transposed_bkg_ws_name: MatrixWorkspace, ranges: list[float]
     ) -> MatrixWorkspace:
         """Calculates mean background in the specified detector region.
 
@@ -521,7 +519,7 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         self._cleanup.cleanup(ws)
         return wavelength_ws
 
-    def _extract_monitors(self, ws: MatrixWorkspace) -> Tuple[MatrixWorkspace, MatrixWorkspace]:
+    def _extract_monitors(self, ws: MatrixWorkspace) -> tuple[MatrixWorkspace, MatrixWorkspace]:
         """Extract monitor spectra from ws to another workspace.
 
         Keyword arguments:
@@ -577,7 +575,7 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         high_range = [high_end_index + sign * 0.5, high_start_index + sign * 0.5]
         return high_range + low_range
 
-    def _foreground_widths(self) -> List[float]:
+    def _foreground_widths(self) -> list[float]:
         """Return an array of [low angle width, high angle width]."""
         half_widths = self.getProperty(Prop.FOREGROUND_HALF_WIDTH).value
         if len(half_widths) == 0:

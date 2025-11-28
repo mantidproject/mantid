@@ -15,7 +15,6 @@ from mantidqt.gui_helper import show_interface_help
 from mantidqt.utils.qt import load_ui
 import math
 from mantidqtinterfaces.TofConverter import convertUnits
-from typing import Dict
 
 
 class MainWindow(QMainWindow):
@@ -99,7 +98,7 @@ class MainWindow(QMainWindow):
             pass
 
     @staticmethod
-    def get_all_single_value_workspaces() -> Dict[str, float]:
+    def get_all_single_value_workspaces() -> dict[str, float]:
         single_value_workspaces = {}
         ws_names = AnalysisDataService.getObjectNames()
         if len(ws_names) == 0:

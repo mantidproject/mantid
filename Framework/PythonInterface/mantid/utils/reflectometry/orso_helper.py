@@ -5,8 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import numpy as np
-from datetime import datetime, timezone
-from typing import Optional, Union, List
+from datetime import datetime, UTC
+from typing import Optional, Union
 import re
 from orsopy.fileio.data_source import DataSource, Person, Experiment, Sample, Measurement, Polarization, InstrumentSettings
 from orsopy.fileio import Reduction, Software
@@ -160,7 +160,7 @@ class MantidORSODataset:
         Takes a datetime string in UTC and returns a datetime object in local time
         """
         utc_datetime = cls._create_datetime_from_string(str_utc_datetime)
-        return utc_datetime.replace(tzinfo=timezone.utc).astimezone(tz=None)
+        return utc_datetime.replace(tzinfo=UTC).astimezone(tz=None)
 
 
 class MantidORSODataColumns:
@@ -217,7 +217,7 @@ class MantidORSODataColumns:
             )
 
     @property
-    def header_info(self) -> List[Union[Column, ErrorColumn]]:
+    def header_info(self) -> list[Union[Column, ErrorColumn]]:
         return self._header_info
 
     @property

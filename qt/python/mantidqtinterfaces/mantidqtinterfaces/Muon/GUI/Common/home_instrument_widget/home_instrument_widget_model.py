@@ -7,7 +7,7 @@
 from decimal import Decimal, InvalidOperation
 
 
-class InstrumentWidgetModel(object):
+class InstrumentWidgetModel:
     """
     The model holds the muon context and interacts with it, only able to modify the pre-processing parts of each
     run.

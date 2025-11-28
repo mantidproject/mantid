@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 
-class PeaksPresenter(object):
+class PeaksPresenter:
     def __init__(self, view):
         self.view = view
         self.major = self.view.major

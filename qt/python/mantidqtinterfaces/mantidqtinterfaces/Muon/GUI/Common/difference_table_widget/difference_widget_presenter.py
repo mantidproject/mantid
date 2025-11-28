@@ -12,7 +12,7 @@ from mantidqtinterfaces.Muon.GUI.Common.difference_table_widget.difference_widge
 diff_columns = ["diff_name", "to_analyse", "group_1", "group_2"]
 
 
-class DifferencePresenter(object):
+class DifferencePresenter:
     def __init__(self, model):
         self.model = model
         self.group_view = DifferenceTableView()

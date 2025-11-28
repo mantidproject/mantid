@@ -5,7 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import abc
-from typing import List
 from qtpy import QtWidgets
 from mantidqtinterfaces.Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_model import WorkspacePlotInformation
 
@@ -69,7 +68,7 @@ class PlottingCanvasViewInterface(metaclass=PlottingViewMeta):
         pass
 
     @abc.abstractmethod
-    def add_workspaces_to_plot(self, workspace_plot_info_list: List[WorkspacePlotInformation]):
+    def add_workspaces_to_plot(self, workspace_plot_info_list: list[WorkspacePlotInformation]):
         """Add a list of workspaces to the plot - The workspaces are contained in a list PlotInformation
         The PlotInformation contains the workspace name, workspace index and target axis."""
         pass
@@ -79,7 +78,7 @@ class PlottingCanvasViewInterface(metaclass=PlottingViewMeta):
         pass
 
     @abc.abstractmethod
-    def remove_workspace_info_from_plot(self, workspace_plot_info_list: List[WorkspacePlotInformation]):
+    def remove_workspace_info_from_plot(self, workspace_plot_info_list: list[WorkspacePlotInformation]):
         """Remove a list of workspaces to the plot - The workspaces are contained in a list PlotInformation
         The PlotInformation contains the workspace name, workspace index and target axis."""
 

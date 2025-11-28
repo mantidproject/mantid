@@ -7,7 +7,7 @@
 import toml
 
 
-class TomlReader(object):
+class TomlReader:
     @staticmethod
     def get_user_file_dict(toml_file_path):
         try:

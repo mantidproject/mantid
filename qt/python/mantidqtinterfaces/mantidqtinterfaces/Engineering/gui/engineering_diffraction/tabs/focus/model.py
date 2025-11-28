@@ -13,7 +13,7 @@ from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.calibration
 import os
 
 
-class FocusModel(object):
+class FocusModel:
     # model shares code with the EnginX auto reduction script - code is kept in EnggUtils.py
     def __init__(self):
         self._last_focused_files = []

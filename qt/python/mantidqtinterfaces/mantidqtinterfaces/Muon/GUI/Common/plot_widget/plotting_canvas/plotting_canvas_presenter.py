@@ -4,7 +4,6 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from typing import List
 from mantidqtinterfaces.Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_model import PlottingCanvasModel
 from mantidqtinterfaces.Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_presenter_interface import (
     PlottingCanvasPresenterInterface,
@@ -31,7 +30,7 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
         self._shaded_region_info = {}
 
     # general plotting
-    def remove_workspace_names_from_plot(self, workspace_names: List[str]):
+    def remove_workspace_names_from_plot(self, workspace_names: list[str]):
         """Removes the input workspace names from the plot"""
         for workspace_name in workspace_names:
             try:
@@ -112,7 +111,7 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
         self._view.set_title(ax_num, title)
 
     # Interface implementation
-    def plot_workspaces(self, workspace_names: List[str], workspace_indices: List[int], hold_on: bool, autoscale: bool):
+    def plot_workspaces(self, workspace_names: list[str], workspace_indices: list[int], hold_on: bool, autoscale: bool):
         """Plots the input workspace names and indices in the figure window
         If hold_on is True the existing workspaces plotted in the figure are kept"""
         # Create workspace information named tuple from input list

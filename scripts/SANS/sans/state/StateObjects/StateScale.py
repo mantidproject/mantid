@@ -53,7 +53,7 @@ class StateScale(metaclass=JsonSerializable):
 # ----------------------------------------------------------------------------------------------------------------------
 
 
-class StateScaleBuilder(object):
+class StateScaleBuilder:
     @automatic_setters(StateScale)
     def __init__(self, file_information):
         super(StateScaleBuilder, self).__init__()

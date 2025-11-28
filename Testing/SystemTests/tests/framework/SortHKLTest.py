@@ -12,7 +12,7 @@ from mantid.simpleapi import CreatePeaksWorkspace, CreateSimulationWorkspace, Lo
 from mantid.geometry import PointGroupFactory
 
 
-class HKLStatisticsTestMixin(object):
+class HKLStatisticsTestMixin:
     def _init_test_data(self):
         self._ws = CreateSimulationWorkspace(
             Instrument="TOPAZ", BinParams="0,10000,20000", UnitX="TOF", OutputWorkspace="topaz_instrument_workspace"

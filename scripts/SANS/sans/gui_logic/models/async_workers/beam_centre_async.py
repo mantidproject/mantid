@@ -4,7 +4,7 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-from typing import TYPE_CHECKING, Optional, Dict
+from typing import TYPE_CHECKING, Optional
 from dataclasses import dataclass
 
 from mantidqt.utils.async_qt_adaptor import qt_async_task, IQtAsync
@@ -53,7 +53,7 @@ class BeamCentreAsync(IQtAsync):
         self._parent_presenter.on_processing_error_centre_finder(str(result))
 
     @qt_async_task
-    def find_beam_centre(self, state: AllStates, settings: BeamCentreFields) -> Optional[Dict]:
+    def find_beam_centre(self, state: AllStates, settings: BeamCentreFields) -> Optional[dict]:
         """
         This is called from the GUI and runs the find beam centre algorithm given a state model and a beam_centre_model object.
 

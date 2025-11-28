@@ -65,7 +65,7 @@ def errorbar_caps_removed(ax):
         ax.add_line(cap)
 
 
-class FigureInteraction(object):
+class FigureInteraction:
     """
     Defines the behaviour of interaction events on a figure canvas. Note that
     this currently only works with Qt canvas types.

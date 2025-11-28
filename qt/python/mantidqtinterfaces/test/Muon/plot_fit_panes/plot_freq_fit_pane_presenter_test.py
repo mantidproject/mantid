@@ -15,7 +15,7 @@ from mantidqtinterfaces.Muon.GUI.Common.plot_widget.plotting_canvas.plotting_can
 )
 
 
-class MockFitInfo(object):
+class MockFitInfo:
     def __init__(self, name):
         self.fit = "FlatBackground"
         self.input_workspaces = name

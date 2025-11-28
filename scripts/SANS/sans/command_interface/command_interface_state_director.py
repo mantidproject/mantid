@@ -55,7 +55,7 @@ class DataCommandId(Enum):
     SAMPLE_DIRECT = "sample_direct"
 
 
-class NParameterCommandId(object):
+class NParameterCommandId:
     CENTRE = "centre"
     CLEAN = "clean"
     COMPATIBILITY_MODE = "compatibility_mode"
@@ -83,7 +83,7 @@ class NParameterCommandId(object):
     WAV_RANGE_SETTINGS = "wavrange_settings"
 
 
-class Command(object):
+class Command:
     def __init__(self, command_id):
         super(Command, self).__init__()
         self.command_id = command_id
@@ -110,19 +110,19 @@ class NParameterCommand(Command):
         self.values = values
 
 
-class FitData(object):
+class FitData:
     """
     Describes the fit mode. This is not part of the SANSType module since we only need it here. It is slightly
     inconsistent but it is very localized.
     """
 
-    class Sample(object):
+    class Sample:
         pass
 
-    class Can(object):
+    class Can:
         pass
 
-    class Both(object):
+    class Both:
         pass
 
 
@@ -139,7 +139,7 @@ class FitData(object):
 # can process any of the commands we need to find the data entries, since they drive the reduction.
 # All other commands should be setting the SANSState in order.
 # ----------------------------------------------------------------------------------------------------------------------
-class CommandInterfaceStateDirector(object):
+class CommandInterfaceStateDirector:
     def __init__(self, facility):
         super(CommandInterfaceStateDirector, self).__init__()
         self._commands = []

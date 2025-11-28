@@ -14,7 +14,7 @@ from workbench.widgets.about.usage_verification_view import UsageReportingVerifi
 from mantidqt.widgets import manageuserdirectories
 
 
-class AboutPresenter(object):
+class AboutPresenter:
     USAGE_REPORTING = "usagereports.enabled"
     DO_NOT_SHOW_GROUP = "Mantid/FirstUse"
     DO_NOT_SHOW = "DoNotShowUntilNextRelease"

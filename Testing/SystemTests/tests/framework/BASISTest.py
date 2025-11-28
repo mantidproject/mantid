@@ -19,7 +19,7 @@ from mantid.simpleapi import (
 )
 
 
-class PreppingMixin(object):
+class PreppingMixin:
     r"""Common code for tests classes"""
 
     def prepset(self, subdir):

@@ -12,7 +12,7 @@ from mantid.api import AlgorithmFactory, PythonAlgorithm, WorkspaceProperty
 from mantid.kernel import logger, Direction, IntArrayProperty
 
 
-class PeakFinderDerivation(object):
+class PeakFinderDerivation:
     """
     Determine various types of peak for reflectivity.
     Those include specular peaks and low-resolution direction signal range.

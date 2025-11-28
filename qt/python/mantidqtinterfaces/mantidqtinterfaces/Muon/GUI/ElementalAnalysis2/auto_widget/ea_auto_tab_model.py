@@ -60,7 +60,7 @@ def peak_matching_algorithm(workspace, match_table_names):
     )
 
 
-class EAAutoTabModel(object):
+class EAAutoTabModel:
     def __init__(self, context):
         self.context = context
         self.table_entries = Queue()

@@ -10,7 +10,7 @@ from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.ADS_calls import retrieve_ws,
 from mantidqtinterfaces.Muon.GUI.Common import message_box
 
 
-class EAAutoTabPresenter(object):
+class EAAutoTabPresenter:
     def __init__(self, context, view, model, match_table):
         self.view = view
         self.model = model

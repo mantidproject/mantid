@@ -146,7 +146,7 @@ class DirectInelaticSNSTest(systemtesting.MantidSystemTest):
                 temppath.append(os.path.join(folder, prefix + str(ri) + suffix))
                 tempnewruns.append(ri)
                 if not os.path.isfile(temppath[i]):
-                    raise IOError(temppath[i] + " not found")
+                    raise OSError(temppath[i] + " not found")
             path.append(temppath)
             newruns.append(tempnewruns)
         return [path, newruns]

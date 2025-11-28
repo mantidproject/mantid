@@ -5,7 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-from typing import Dict
 from unittest import mock
 import numpy as np
 
@@ -31,7 +30,7 @@ class SliceviewerDataViewTest(unittest.TestCase):
             ColorbarWidget=mock.DEFAULT,
             SliceViewerNavigationToolbar=mock.DEFAULT,
         )
-        self.patched_objs: Dict[mock.Mock] = self.patcher.start()
+        self.patched_objs: dict[mock.Mock] = self.patcher.start()
         self.presenter = mock.Mock()
         self.view = SliceViewerDataView(presenter=self.presenter, dims_info=mock.MagicMock(), can_normalise=mock.Mock())
 

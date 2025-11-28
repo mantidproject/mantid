@@ -12,7 +12,7 @@ from mantidqtinterfaces.Muon.GUI.Common import thread_model
 import functools
 
 
-class SeqFittingTabPresenter(object):
+class SeqFittingTabPresenter:
     def __init__(self, view, model, context):
         self.view = view
         self.model = model

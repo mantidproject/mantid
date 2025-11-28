@@ -13,7 +13,7 @@ from mantidqtinterfaces.Muon.GUI.ElementalAnalysis2.grouping_widget.ea_grouping_
 from mantidqtinterfaces.Muon.GUI.ElementalAnalysis2.grouping_widget.ea_grouping_tab_view import EAGroupingTabView
 
 
-class EAGroupingTabWidget(object):
+class EAGroupingTabWidget:
     def __init__(self, context):
         self.group_tab_model = EAGroupingTabModel(context)
 

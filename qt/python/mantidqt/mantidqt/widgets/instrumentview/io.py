@@ -17,7 +17,7 @@ _InstrumentWidgetEncoder = import_qt("._instrumentview", "mantidqt.widgets.instr
 _InstrumentWidgetDecoder = import_qt("._instrumentview", "mantidqt.widgets.instrumentview", "InstrumentWidgetDecoder")
 
 
-class InstrumentViewAttributes(object):
+class InstrumentViewAttributes:
     # WARNING: If you delete a tag from here instead of adding a new one, it will make old project files obsolete so
     # just add an extra tag to the list e.g. ["InstrumentWidget", "IWidget"]
     _tags = ["InstrumentView", "InstrumentWidget"]

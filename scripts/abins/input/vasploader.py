@@ -8,7 +8,8 @@
 from itertools import chain
 import os
 import re
-from typing import Any, Dict, Iterator, List, Optional
+from typing import Any, Optional
+from collections.abc import Iterator
 from xml.etree import ElementTree
 
 
@@ -39,7 +40,7 @@ class VASPLoader(AbInitioLoader):
         input_filename = self._clerk.get_input_filename()
 
         if not os.path.isfile(input_filename):
-            raise IOError("Could not find file: {}".format(input_filename))
+            raise OSError("Could not find file: {}".format(input_filename))
 
         if input_filename.endswith(".xml"):
             data = self._read_vasprun(input_filename)
@@ -63,7 +64,7 @@ class VASPLoader(AbInitioLoader):
         return abins_data
 
     @classmethod
-    def _read_outcar(cls, filename) -> Dict[str, Any]:
+    def _read_outcar(cls, filename) -> dict[str, Any]:
         # First define some useful regular expressions:
 
         # Float with leading spaced e.g. " -0.0005"
@@ -220,7 +221,7 @@ class VASPLoader(AbInitioLoader):
         return float(line_str.split()[-4]) * imaginary_factor
 
     @staticmethod
-    def _read_vasprun(filename: str, diagonalize: bool = False, apply_sum_rule: bool = False) -> Dict[str, Any]:
+    def _read_vasprun(filename: str, diagonalize: bool = False, apply_sum_rule: bool = False) -> dict[str, Any]:
         file_data = {"k_vectors": np.array([[0, 0, 0]], dtype=FLOAT_TYPE), "weights": np.array([1.0], dtype=FLOAT_TYPE), "atoms": {}}
 
         root = ElementTree.parse(filename).getroot()
@@ -364,7 +365,7 @@ def _to_text(item: ElementTree.Element) -> str:
     return item.text
 
 
-def _collapse_bools(bools: List[str]) -> bool:
+def _collapse_bools(bools: list[str]) -> bool:
     """Intepret T T T/F F F from vasprun.xml varray as True/False"""
     if bools == ["T", "T", "T"]:
         return True

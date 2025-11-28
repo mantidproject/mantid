@@ -14,11 +14,11 @@ from mantid.api import (
     PropertyMode,
     WorkspaceGroup,
 )
-from typing import List, Union
+from typing import Union
 from mantid.kernel import Direction
 
 
-def string_ends_with(string: str, delimiters: List[str]) -> bool:
+def string_ends_with(string: str, delimiters: list[str]) -> bool:
     return any([string.endswith(delimiter) for delimiter in delimiters])
 
 
@@ -34,15 +34,15 @@ def contains_workspace(group: WorkspaceGroup, workspace) -> bool:
     return group.contains(workspace) if isinstance(group, WorkspaceGroup) else False
 
 
-def filter_by_contents(workspace_names: List[str], workspace: str) -> List[str]:
+def filter_by_contents(workspace_names: list[str], workspace: str) -> list[str]:
     return [name for name in workspace_names if contains_workspace(get_ads_workspace(name), workspace)]
 
 
-def filter_by_name_end(workspace_names: List[str], delimiters: List[str]) -> List[str]:
+def filter_by_name_end(workspace_names: list[str], delimiters: list[str]) -> list[str]:
     return [name for name in workspace_names if string_ends_with(name, delimiters)]
 
 
-def find_result_group_containing(workspace_name: str, group_extension: List[str]) -> Union[None, MatrixWorkspace]:
+def find_result_group_containing(workspace_name: str, group_extension: list[str]) -> Union[None, MatrixWorkspace]:
     group_names = [ws for ws in AnalysisDataService.Instance().getObjectNames() if isinstance(get_ads_workspace(ws), WorkspaceGroup)]
     result_groups = filter_by_name_end(group_names, group_extension)
     groups = filter_by_contents(result_groups, workspace_name)
@@ -68,14 +68,14 @@ def get_x_insertion_index(input_workspace: MatrixWorkspace, single_fit_workspace
     return get_bin_index_of_value(input_workspace, bin_value)
 
 
-def get_indices_of_equivalent_labels(input_workspace: MatrixWorkspace, destination_workspace: MatrixWorkspace) -> List[int]:
+def get_indices_of_equivalent_labels(input_workspace: MatrixWorkspace, destination_workspace: MatrixWorkspace) -> list[int]:
     input_labels = input_workspace.getAxis(1).extractValues()
     labels = destination_workspace.getAxis(1).extractValues()
     return [index for index, label in enumerate(labels) if label in input_labels]
 
 
 def fit_parameter_missing(
-    single_fit_workspace: MatrixWorkspace, destination_workspace: MatrixWorkspace, exclude_parameters: List[str]
+    single_fit_workspace: MatrixWorkspace, destination_workspace: MatrixWorkspace, exclude_parameters: list[str]
 ) -> bool:
     single_parameters = single_fit_workspace.getAxis(1).extractValues()
     destination_parameters = destination_workspace.getAxis(1).extractValues()

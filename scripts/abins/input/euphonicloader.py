@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
-from typing import Any, Dict
+from typing import Any
 
 from euphonic import QpointPhononModes
 import numpy as np
@@ -24,7 +24,7 @@ class EuphonicLoader(AbInitioLoader):
         return "FORCECONSTANTS"
 
     @staticmethod
-    def data_dict_from_modes(modes: QpointPhononModes) -> Dict[str, Any]:
+    def data_dict_from_modes(modes: QpointPhononModes) -> dict[str, Any]:
         """Convert from Euphonic phonon modes to data for KpointsData
 
         Drop any zero-weighted modes at this point as they will not be used

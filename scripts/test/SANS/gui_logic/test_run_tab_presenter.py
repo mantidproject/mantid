@@ -63,7 +63,7 @@ def get_non_empty_row_mock(value):
     return value
 
 
-class MultiPeriodMock(object):
+class MultiPeriodMock:
     def __init__(self, call_pattern):
         self._counter = 0
         self._call_pattern = call_pattern
@@ -628,7 +628,7 @@ class RunTabPresenterTest(unittest.TestCase):
         self.assertEqual(self._mock_csv_parser.save_batch_file.call_count, 1, "_save_batch_file should have been called but was not")
 
     def test_save_csv_handles_exceptions(self):
-        for exception in [PermissionError(), IOError()]:
+        for exception in [PermissionError(), OSError()]:
             self.presenter.display_errors = mock.Mock()
             self._mock_csv_parser.save_batch_file.side_effect = exception
             self._mock_table.get_non_empty_rows.return_value = BATCH_FILE_TEST_CONTENT_1

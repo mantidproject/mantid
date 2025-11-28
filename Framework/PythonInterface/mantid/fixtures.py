@@ -10,7 +10,6 @@ from mantid.kernel import logger
 try:
     import pytest
     from mantid.simpleapi import mtd, DeleteWorkspace
-    from typing import List
 
     logger.debug("Pytest fixtures available")
 
@@ -23,7 +22,7 @@ try:
         :param str, ~mantid.kernel.Workspace workspace: Workspace handle or the name of the workspace to be deleted
         :yields: the name of the workspace marked for deletion
         """
-        workspaces: List[str] = []
+        workspaces: list[str] = []
 
         def _clean_workspace(workspace):
             workspaces.append(str(workspace))

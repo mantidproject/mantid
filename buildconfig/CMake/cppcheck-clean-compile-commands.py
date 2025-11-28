@@ -16,7 +16,7 @@ import json
 import logging
 import re
 import sys
-from typing import Mapping, Sequence
+from collections.abc import Mapping, Sequence
 
 DEFAULT_LOG_LEVEL = logging.INFO
 # Reject any file whose regex matches this

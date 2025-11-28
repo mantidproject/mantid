@@ -108,7 +108,7 @@ def find_num_dim(lines):
             rez = found.group()
             return re.search(r"\d", rez).group()
 
-    raise IOError("can not find the string which defines the number of dimensions to process")
+    raise OSError("can not find the string which defines the number of dimensions to process")
 
 
 def parse_file(file_name, start_marker, end_marker):

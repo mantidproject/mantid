@@ -16,7 +16,7 @@ from mantidqtinterfaces.Muon.GUI.Common.grouping_table_widget.grouping_table_wid
 diff_columns = ["diff_name", "to_analyse", "group_1", "group_2"]
 
 
-class DifferenceTablePresenter(object):
+class DifferenceTablePresenter:
     def __init__(self, view, model, group_or_pair):
         self._view = view
         self._model = model

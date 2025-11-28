@@ -9,7 +9,7 @@ from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.fitting.plo
 from mantidqt.utils.observer_pattern import GenericObserverWithArgPassing, GenericObserver
 
 
-class FittingPresenter(object):
+class FittingPresenter:
     def __init__(self, view):
         self.view = view
         self.data_widget = FittingDataWidget(self.view, view=self.view.get_data_widget())

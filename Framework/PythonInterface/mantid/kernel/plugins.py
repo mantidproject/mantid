@@ -17,13 +17,14 @@ import sys
 import importlib.util
 from importlib.machinery import SourceFileLoader
 from . import logger, Logger, config
+import builtins
 
 
 # String that separates paths (should be in the ConfigService)
 PATH_SEPARATOR = ";"
 
 
-class PluginLoader(object):
+class PluginLoader:
     extension = ".py"
 
     def __init__(self, filepath):
@@ -249,9 +250,7 @@ def contains_algorithm(filename):
     """
     alg_found = True
     try:
-        from io import open
-
-        with open(filename, "r", encoding="UTF-8") as plugin_file:
+        with builtins.open(filename, "r", encoding="UTF-8") as plugin_file:
             # linear search through file
             # looking from the bottom would be better, but searching from the top doesn't appear to
             # affect performance

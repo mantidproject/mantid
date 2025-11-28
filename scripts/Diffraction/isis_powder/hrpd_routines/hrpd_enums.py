@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 
-class HRPD_TOF_WINDOWS(object):
+class HRPD_TOF_WINDOWS:
     enum_friendly_name = "TOF windows"
     window_10_50 = "10-50"
     window_10_110 = "10-110"
@@ -15,7 +15,7 @@ class HRPD_TOF_WINDOWS(object):
     window_180_280 = "180-280"
 
 
-class HRPD_MODES(object):
+class HRPD_MODES:
     enum_friendly_name = "Grouping mode"
     coupled = "coupled"
     decoupled = "decoupled"

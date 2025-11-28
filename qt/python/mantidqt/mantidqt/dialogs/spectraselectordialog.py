@@ -42,7 +42,7 @@ def red_asterisk():
 SpectraSelectionDialogUI, SpectraSelectionDialogUIBase = load_ui(__file__, "spectraselectordialog.ui")
 
 
-class SpectraSelection(object):
+class SpectraSelection:
     Individual = 0
     Waterfall = 1
     Tiled = 2

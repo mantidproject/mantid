@@ -10,7 +10,7 @@ from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common impo
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting
 
 
-class CalibrationModel(object):
+class CalibrationModel:
     # model shares code with the EnginX auto reduction script - code is kept in EnggUtils.py
     def __init__(self):
         self._saved_prm_file = ""

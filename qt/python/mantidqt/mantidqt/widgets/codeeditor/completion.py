@@ -231,7 +231,7 @@ def get_module_import_alias(import_name, text):
     return import_name
 
 
-class CodeCompleter(object):
+class CodeCompleter:
     """
     This class generates autocompletions for Workbench's script editor.
     It generates autocompletions from environment globals. These completions

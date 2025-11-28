@@ -7,18 +7,17 @@
 # pylint: disable=C0111
 from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
 from mantidqtinterfaces.Muon.GUI.Common.utilities.run_string_utils import run_list_to_string
-from typing import List
 import itertools
 
 
-class MuonRun(object):
+class MuonRun:
     """
     Holds the experimental runs a dataset corrosponds to.
     Due to the ability to co-add runs on load this can be one to many.
     This is used to index and referance by dataset.
     """
 
-    def __init__(self, run_numbers: List[int]):
+    def __init__(self, run_numbers: list[int]):
         self._runs = tuple(run_numbers)
 
     """
@@ -47,7 +46,7 @@ class MuonRun(object):
         return hash(self._runs)
 
 
-class MuonBase(object):
+class MuonBase:
     """
     Simple structure to store information of a pair or group.
 

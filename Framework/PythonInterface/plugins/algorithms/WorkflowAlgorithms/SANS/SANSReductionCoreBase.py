@@ -10,7 +10,6 @@
 
 import json
 import os
-from typing import Tuple, Dict
 from dataclasses import dataclass
 
 from mantid.api import (
@@ -36,7 +35,7 @@ from sans.common.general_functions import create_child_algorithm, append_to_sans
 from sans.state.Serializer import Serializer
 from sans.state.StateObjects.wavelength_interval import WavRange
 
-WsList = Dict[Tuple[float, float], MatrixWorkspace]
+WsList = dict[tuple[float, float], MatrixWorkspace]
 
 
 @dataclass
@@ -208,7 +207,7 @@ class SANSReductionCoreBase(DataProcessorAlgorithm):
             ws_list[key] = output_ws
         return ws_list
 
-    def _adjustment(self, state, workspaces: WsList, monitor_workspace, component_as_string, data_type) -> Dict[WavRange, AdjustmentStruct]:
+    def _adjustment(self, state, workspaces: WsList, monitor_workspace, component_as_string, data_type) -> dict[WavRange, AdjustmentStruct]:
         transmission_workspace = self._get_transmission_workspace()
         direct_workspace = self._get_direct_workspace()
 
@@ -294,7 +293,7 @@ class SANSReductionCoreBase(DataProcessorAlgorithm):
 
         return workspaces
 
-    def _convert_to_q(self, state, workspaces: WsList, adjustment_dict: Dict[WavRange, AdjustmentStruct]) -> Dict[WavRange, SumsStruct]:
+    def _convert_to_q(self, state, workspaces: WsList, adjustment_dict: dict[WavRange, AdjustmentStruct]) -> dict[WavRange, SumsStruct]:
         """
         A conversion to momentum transfer is performed in this step.
 

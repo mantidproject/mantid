@@ -4,7 +4,6 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-import io
 from pathlib import Path
 
 import numpy as np
@@ -57,7 +56,7 @@ class CRYSTALLoader(AbInitioLoader):
 
         # read data from output CRYSTAL file
         filename = self._clerk.get_input_filename()
-        with io.open(filename, "rb") as crystal_file:
+        with open(filename, "rb") as crystal_file:
             logger.notice("Reading from " + filename)
 
             if system is CRYSTAL:
@@ -90,7 +89,7 @@ class CRYSTALLoader(AbInitioLoader):
         Determines whether the system is a molecule or a crystal.
         :returns: True if calculation for molecule otherwise False
         """
-        with io.open(self._clerk.get_input_filename(), "rb") as crystal_file:
+        with open(self._clerk.get_input_filename(), "rb") as crystal_file:
             lines = crystal_file.read()
 
         if b"MOLECULAR CALCULATION" in lines or b"0D - MOLECULE" in lines:
@@ -113,7 +112,7 @@ class CRYSTALLoader(AbInitioLoader):
         transformation matrix to primitive unit cell from super cell.
         :returns: True if many k-points included in calculations otherwise False
         """
-        with io.open(self._clerk.get_input_filename(), "rb") as crystal_file:
+        with open(self._clerk.get_input_filename(), "rb") as crystal_file:
             lines = crystal_file.read()
 
         phonon_dispersion = lines.count(b"DISPERSION K ") > 1
@@ -121,7 +120,7 @@ class CRYSTALLoader(AbInitioLoader):
         if phonon_dispersion:
             # In case there is more than one k-point super-cell is constructed. In order to obtain metric tensor we
             # need to find expansion transformation.
-            with io.open(self._clerk.get_input_filename(), "rb") as crystal_file:
+            with open(self._clerk.get_input_filename(), "rb") as crystal_file:
                 self._parser.find_first(file_obj=crystal_file, msg="EXPANSION MATRIX OF PRIMITIVE CELL")
                 dim = 3
                 vectors = []

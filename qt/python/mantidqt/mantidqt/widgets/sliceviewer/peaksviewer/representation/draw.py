@@ -15,7 +15,7 @@ from mantid.geometry import PeakShape
 from mantidqt.widgets.sliceviewer.models.sliceinfo import SliceInfo
 
 # standard library
-from typing import Sequence
+from collections.abc import Sequence
 
 # map shape names to representation classes
 # the strings need to match whatever Peak.getPeakShape.shapeName returns

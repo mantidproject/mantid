@@ -13,7 +13,7 @@ from mantid.dataobjects import EventWorkspace, Workspace2D
 from mantidqt.widgets.workspacedisplay.matrix.table_view_model import MatrixWorkspaceTableViewModel, MatrixWorkspaceTableViewModelType
 
 
-class MatrixWorkspaceDisplayModel(object):
+class MatrixWorkspaceDisplayModel:
     SPECTRUM_PLOT_LEGEND_STRING = "{}-{}"
     BIN_PLOT_LEGEND_STRING = "{}-bin-{}"
 

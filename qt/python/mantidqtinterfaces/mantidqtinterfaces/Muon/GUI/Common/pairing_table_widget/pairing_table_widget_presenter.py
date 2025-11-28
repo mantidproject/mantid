@@ -15,7 +15,7 @@ from mantidqtinterfaces.Muon.GUI.Common.grouping_table_widget.grouping_table_wid
 from mantidqtinterfaces.Muon.GUI.Common.pairing_table_widget.pairing_table_widget_view import get_pair_columns, pair_columns
 
 
-class PairingTablePresenter(object):
+class PairingTablePresenter:
     def __init__(self, view, model):
         self._view = view
         self._model = model

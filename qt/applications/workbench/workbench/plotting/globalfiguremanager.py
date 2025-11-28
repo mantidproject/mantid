@@ -26,7 +26,7 @@ class FigureAction(Enum):
     VisibilityChanged = 5
 
 
-class GlobalFigureManagerObserver(object):
+class GlobalFigureManagerObserver:
     def __init__(self, figure_manager=None):
         """
         :param figure_manager: Figure manager that will be used to notify observers.
@@ -61,7 +61,7 @@ class GlobalFigureManagerObserver(object):
             raise ValueError("Notifying for action {} is not supported".format(action))
 
 
-class GlobalFigureManager(object):
+class GlobalFigureManager:
     """
     Singleton to manage a set of integer-numbered figures. It replaces
     matplotlib._pylab_helpers.Gcf as the global figure manager.

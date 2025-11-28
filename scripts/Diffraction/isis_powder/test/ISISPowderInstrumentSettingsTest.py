@@ -187,14 +187,14 @@ class ISISPowderInstrumentSettingsTest(unittest.TestCase):
         self.assertEqual(opt_inst_obj.script_facing_name, optional_value)
 
 
-class SampleEnum(object):
+class SampleEnum:
     enum_friendly_name = "test_enum_name"
     # The mixed casing is intentional
     a_foo = "a foo"
     a_bar = "A BAR"
 
 
-class BadSampleEnum(object):
+class BadSampleEnum:
     a_foo = "a foo"
 
 

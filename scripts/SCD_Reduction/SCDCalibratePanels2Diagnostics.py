@@ -10,7 +10,7 @@ import os
 import logging
 import numpy as np
 import matplotlib.pyplot as plt
-from typing import List, Dict, Union
+from typing import Union
 from mantid.dataobjects import PeaksWorkspace
 from mantid.simpleapi import mtd, FilterPeaks
 
@@ -233,8 +233,8 @@ def SCDCalibratePanels2DiagnosticsPlotBank(
 
 def SCDCalibratePanels2DiagnosticsPlot(
     peaksWorkspace: Union[PeaksWorkspace, str],
-    banknames: Union[str, List[str]] = None,
-    config: Dict[str, str] = {
+    banknames: Union[str, list[str]] = None,
+    config: dict[str, str] = {
         "prefix": "fig",
         "type": "png",
         "saveto": ".",

@@ -32,7 +32,7 @@ HELP_PAGES = {
 }
 
 
-class PlotHelpPages(object):
+class PlotHelpPages:
     @classmethod
     def show_help_page_for_figure(cls, figure):
         fig_type = figure_type(figure)

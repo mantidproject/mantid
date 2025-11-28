@@ -18,7 +18,7 @@ from mantid.api import AlgorithmManager, AnalysisDataService
 from mantid.kernel import ConfigService, Logger
 
 
-class Reducer(object):
+class Reducer:
     """
     Base reducer class. Instrument-specific reduction processes should be
     implemented in a child of this class.

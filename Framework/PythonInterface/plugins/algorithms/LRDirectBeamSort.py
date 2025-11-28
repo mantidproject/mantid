@@ -10,14 +10,13 @@ from mantid.kernel import logger, Direction, IntArrayProperty, StringArrayProper
 from mantid.simpleapi import CreateWorkspace, DeleteWorkspace, FitPeaks, LoadEventNexus, LRScalingFactors
 import functools
 import numpy as np
-from typing import List, Tuple
 import datetime
 from math import ceil
 
 THI_TOLERANCE = 0.002
 
 
-class CompareTwoNXSDataForSFcalculator(object):
+class CompareTwoNXSDataForSFcalculator:
     """
     will return -1, 0 or 1 according to the position of the nexusToPosition in relation to the
     nexusToCompareWith based on the following criteria
@@ -269,7 +268,7 @@ class LRDirectBeamSort(PythonAlgorithm):
         logger.notice(summary)
 
     @staticmethod
-    def _find_peak(ws, crop=25, factor=1.0) -> Tuple[List[int], List[int]]:
+    def _find_peak(ws, crop=25, factor=1.0) -> tuple[list[int], list[int]]:
         """Find peak by Mantid FindPeaks with Gaussian peak in the counts
         summed from detector pixels on the same row.
 

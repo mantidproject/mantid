@@ -15,7 +15,7 @@ from mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.tf_asymmetry_fitting.tf_
 from mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.tf_asymmetry_fitting.tf_asymmetry_fitting_view import TFAsymmetryFittingView
 
 
-class FittingTabWidget(object):
+class FittingTabWidget:
     """
     The FittingTabWidget creates the tab used for fitting. Muon Analysis uses the TF Asymmetry fitting widget, and
     Frequency Domain Analysis uses the Basic fitting widget.

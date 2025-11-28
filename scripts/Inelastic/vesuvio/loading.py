@@ -10,7 +10,7 @@ from vesuvio.instrument import VESUVIO
 from mantid.simpleapi import CropWorkspace, LoadVesuvio, Rebin
 
 
-class VesuvioLoadHelper(object):
+class VesuvioLoadHelper:
     """
     A helper class for loading Vesuvio data from the input of a user script.
 
@@ -73,7 +73,7 @@ class VesuvioLoadHelper(object):
         return Rebin(InputWorkspace=workspace, Params=self._rebin_params, OutputWorkspace="rebinned", StoreInADS=False)
 
 
-class VesuvioTOFFitInput(object):
+class VesuvioTOFFitInput:
     """
     A helper class for loading and storing the specified spectra of the specified
     input sample and container runs, using the given loader.

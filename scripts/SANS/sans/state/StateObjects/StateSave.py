@@ -37,7 +37,7 @@ class StateSave(metaclass=JsonSerializable):
 # ----------------------------------------------------------------------------------------------------------------------
 # Builder
 # ----------------------------------------------------------------------------------------------------------------------
-class StateSaveBuilder(object):
+class StateSaveBuilder:
     @automatic_setters(StateSave)
     def __init__(self):
         super(StateSaveBuilder, self).__init__()

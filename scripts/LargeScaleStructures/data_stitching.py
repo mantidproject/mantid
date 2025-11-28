@@ -32,7 +32,7 @@ if IS_IN_MANTIDGUI:
     from mantidqt.plotting.markers import RangeMarker
 
 
-class RangeSelector(object):
+class RangeSelector:
     """
     Brings up range selector window and connects the user selection to
     a call-back function.
@@ -169,7 +169,7 @@ class RangeSelector(object):
         )
 
 
-class DataSet(object):
+class DataSet:
     """
     Data set class for stitcher
     """
@@ -451,7 +451,7 @@ class DataSet(object):
             RangeSelector.connect([self._ws_name], call_back=call_back)
 
 
-class Stitcher(object):
+class Stitcher:
     """
     Data set stitcher
     """

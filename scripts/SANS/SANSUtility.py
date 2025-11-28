@@ -751,20 +751,20 @@ def get_new_workspace_name(appendix, old_workspace_name, ws_group_name):
     return new_workspace_name
 
 
-class WorkspaceType(object):
-    class Event(object):
+class WorkspaceType:
+    class Event:
         pass
 
-    class Histogram(object):
+    class Histogram:
         pass
 
-    class MultiperiodEvent(object):
+    class MultiperiodEvent:
         pass
 
-    class MultiperiodHistogram(object):
+    class MultiperiodHistogram:
         pass
 
-    class Other(object):
+    class Other:
         pass
 
 
@@ -778,7 +778,7 @@ def get_number_of_periods_from_file(file_name):
             period_group = first_entry["periods"]
             proton_charge_data_set = period_group["proton_charge"]
             number_of_periods = len(proton_charge_data_set)
-    except IOError:
+    except OSError:
         number_of_periods = -1
     return number_of_periods
 
@@ -1031,7 +1031,7 @@ def is_valid_ws_for_removing_zero_errors(input_workspace_name):
     return message, isValid
 
 
-class AddOperation(object):
+class AddOperation:
     """
     The AddOperation allows to add two workspaces at a time.
     """
@@ -1072,7 +1072,7 @@ class AddOperation(object):
         )
 
 
-class CombineWorkspacesFactory(object):
+class CombineWorkspacesFactory:
     """
     Factory to determine how to add workspaces
     """
@@ -1152,7 +1152,7 @@ def _get_average_time_difference(pc, num):
     return np.mean(diffs)
 
 
-class PlusWorkspaces(object):
+class PlusWorkspaces:
     """
     Wrapper for the Plus algorithm
     """
@@ -1190,7 +1190,7 @@ class PlusWorkspaces(object):
             return mtd[workspace]
 
 
-class OverlayWorkspaces(object):
+class OverlayWorkspaces:
     """
     Overlays (in time) a workspace  on top of another workspace. The two
     workspaces overlaid such that the first time entry of their proton_charge entry matches.
@@ -1265,7 +1265,7 @@ class OverlayWorkspaces(object):
 # pylint: disable=too-few-public-methods
 
 
-class TimeShifter(object):
+class TimeShifter:
     """
     The time shifter stores all time shifts for all runs which are to be added. If there is
     a mismatch the time shifts are set to 0.0 seconds.
@@ -1333,7 +1333,7 @@ def transfer_special_sample_logs(from_ws, to_ws):
 # pylint: disable=too-many-instance-attributes
 
 
-class CummulativeTimeSeriesPropertyAdder(object):
+class CummulativeTimeSeriesPropertyAdder:
     """
     Apply shift to RHS sample logs where necessary. This is a hack because Plus cannot handle
     cumulative time series correctly at this point.
@@ -1701,7 +1701,7 @@ def can_load_as_event_workspace(filename):
                     is_event_workspace = ew is not None
                 except:
                     pass
-        except IOError:
+        except OSError:
             pass
     return is_event_workspace
 
@@ -1886,7 +1886,7 @@ def correct_q_resolution_for_merged(count_ws_front, count_ws_rear, output_ws, sc
     output_ws.setDx(0, q_resolution)
 
 
-class MeasurementTimeFromNexusFileExtractor(object):
+class MeasurementTimeFromNexusFileExtractor:
     """
     Extracts the measurement from a nexus file
     """
@@ -1927,7 +1927,7 @@ class MeasurementTimeFromNexusFileExtractor(object):
                         measurement_time = self._get_measurement_time_for_non_processed_file(entry0)
                 except:
                     sanslog.warning("Failed to retrieve the measurement time for " + str(filename_full))
-        except IOError:
+        except OSError:
             sanslog.warning("Failed to open the file: " + str(filename_full))
         return measurement_time
 
@@ -2189,14 +2189,14 @@ def get_correct_combinDet_setting(instrument_name, detector_selection):
     raise RuntimeError("SANSBatchReduce: Unknown instrument {0}.".format(instrument_name))
 
 
-class ReducedType(object):
-    class LAB(object):
+class ReducedType:
+    class LAB:
         pass
 
-    class HAB(object):
+    class HAB:
         pass
 
-    class Merged(object):
+    class Merged:
         pass
 
 
@@ -2440,7 +2440,7 @@ def StripEndZeroes(workspace, flag_value=0.0):
 
 
 @deprecated
-class Orientation(object):
+class Orientation:
     Horizontal = 1
     Vertical = 2
     Rotated = 3
@@ -2450,7 +2450,7 @@ class Orientation(object):
 
 
 @deprecated
-class WorkspaceDetails(object):
+class WorkspaceDetails:
     def __init__(self, name, run_number):
         self._name = name
         run_number = str(run_number).split("-add")[0]
@@ -2471,7 +2471,7 @@ class WorkspaceDetails(object):
 
 
 @deprecated
-class RunDetails(object):
+class RunDetails:
     def __init__(self, raw_ws, final_ws, trans_raw, direct_raw, maskpt_rmin, maskpt_rmax, suffix):
         self._rawworkspace = raw_ws
         self._finalws = final_ws

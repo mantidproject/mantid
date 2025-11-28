@@ -45,11 +45,10 @@ from mantidqt.utils.observer_pattern import Observable
 from mantidqtinterfaces.Muon.GUI.Common.muon_base import MuonRun
 from mantidqtinterfaces.Muon.GUI.Common.muon_pair import MuonPair
 from mantidqtinterfaces.Muon.GUI.Common.muon_diff import MuonDiff
-from typing import List
 from mantid.dataobjects import TableWorkspace
 
 
-class MuonContext(object):
+class MuonContext:
     def __init__(
         self,
         muon_data_context=None,
@@ -154,7 +153,7 @@ class MuonContext(object):
 
         return calculation_func(run, group, periods, run_as_string, periods_as_string, rebin)
 
-    def calculate_diff(self, diff: MuonDiff, run: List[int], rebin: bool = False):
+    def calculate_diff(self, diff: MuonDiff, run: list[int], rebin: bool = False):
         try:
             positive_workspace_name = self._group_pair_context[diff.positive].get_asymmetry_workspace_for_run(run, rebin)
             negative_workspace_name = self._group_pair_context[diff.negative].get_asymmetry_workspace_for_run(run, rebin)
@@ -165,7 +164,7 @@ class MuonContext(object):
         output_workspace_name = get_diff_asymmetry_name(self, diff.name, run_as_string, rebin=rebin)
         return run_minus(positive_workspace_name, negative_workspace_name, output_workspace_name)
 
-    def calculate_pair(self, pair: MuonPair, run: List[int], rebin: bool = False):
+    def calculate_pair(self, pair: MuonPair, run: list[int], rebin: bool = False):
         try:
             forward_group_workspace_name = self._group_pair_context[pair.forward_group].get_counts_workspace_for_run(run, rebin)
             backward_group_workspace_name = self._group_pair_context[pair.backward_group].get_counts_workspace_for_run(run, rebin)
@@ -244,12 +243,12 @@ class MuonContext(object):
         if asymmetry_workspaces is not None:
             self.group_pair_context[group.name].update_asymmetry_workspace(MuonRun(run), *asymmetry_workspaces, rebin)
 
-    def calculate_pair_for(self, run: List[int], pair: MuonPair):
+    def calculate_pair_for(self, run: list[int], pair: MuonPair):
         self._calculate_pair_for(run, pair, rebin=False)
         if self._do_rebin():
             self._calculate_pair_for(run, pair, rebin=True)
 
-    def _calculate_pair_for(self, run: List[int], pair: MuonPair, rebin: bool):
+    def _calculate_pair_for(self, run: list[int], pair: MuonPair, rebin: bool):
         pair_asymmetry_workspace = self.calculate_pair(pair, run, rebin=rebin)
 
         if pair_asymmetry_workspace is not None:
@@ -263,12 +262,12 @@ class MuonContext(object):
                 pairs.append(pair)
         return pairs
 
-    def calculate_diff_for(self, run: List[int], diff: MuonDiff):
+    def calculate_diff_for(self, run: list[int], diff: MuonDiff):
         self._calculate_diff_for(run, diff, rebin=False)
         if self._do_rebin():
             self._calculate_diff_for(run, diff, rebin=True)
 
-    def _calculate_diff_for(self, run: List[int], diff: MuonDiff, rebin: bool):
+    def _calculate_diff_for(self, run: list[int], diff: MuonDiff, rebin: bool):
         diff_asymmetry_workspace = self.calculate_diff(diff, run, rebin=rebin)
 
         if diff_asymmetry_workspace is not None:

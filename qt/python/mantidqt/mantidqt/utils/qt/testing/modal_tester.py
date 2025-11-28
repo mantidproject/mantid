@@ -32,7 +32,7 @@ from qtpy.QtCore import QTimer
 from qtpy.QtWidgets import QApplication
 
 
-class ModalTester(object):
+class ModalTester:
     """
     Helper class for testing modal widgets (dialogs).
     """

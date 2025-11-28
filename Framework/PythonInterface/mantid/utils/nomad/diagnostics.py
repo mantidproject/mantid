@@ -15,7 +15,7 @@ from collections import namedtuple
 import enum
 import random
 import string
-from typing import List, NamedTuple
+from typing import NamedTuple
 
 from mantid.api import MatrixWorkspace
 
@@ -309,7 +309,7 @@ class _NOMADMedianDetectorTest:
         return np.ma.masked_array(intensities, mask=~self.pixel_in_use)  # mask unused pixels
 
     @property
-    def tube_range(self) -> List[List[int]]:
+    def tube_range(self) -> list[list[int]]:
         r"""Begin and (1 + end) tube index for each panel.
         @return nested list of shape (number-of-panels, 2)
         """
