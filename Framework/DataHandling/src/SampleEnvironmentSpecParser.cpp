@@ -23,12 +23,11 @@
 #include "Poco/DOM/NamedNodeMap.h"
 #include "Poco/DOM/NodeFilter.h"
 #include "Poco/DOM/NodeIterator.h"
-#include "Poco/File.h"
-#include "Poco/Path.h"
 #include "Poco/SAX/InputSource.h"
 #include "Poco/SAX/SAXException.h"
 
 #include <boost/algorithm/string.hpp>
+#include <filesystem>
 #include <memory>
 #include <sstream>
 
@@ -208,8 +207,8 @@ void SampleEnvironmentSpecParser::loadFullSpecification(SampleEnvironmentSpec *s
 
     std::string stlFileName = findFile(filename);
 
-    Poco::Path suppliedFileName(stlFileName);
-    std::string fileExt = suppliedFileName.getExtension();
+    std::filesystem::path suppliedFileName(stlFileName);
+    std::string fileExt = suppliedFileName.extension().string().substr(1); // drop the '.'
     std::transform(fileExt.begin(), fileExt.end(), fileExt.begin(), toupper);
 
     std::vector<std::shared_ptr<Geometry::MeshObject>> environmentMeshes;
@@ -336,15 +335,15 @@ std::vector<double> SampleEnvironmentSpecParser::parseTranslationVector(const st
 }
 
 std::string SampleEnvironmentSpecParser::findFile(const std::string &filename) const {
-  Poco::Path suppliedStlFileName(filename);
-  Poco::Path stlFileName;
-  if (suppliedStlFileName.isRelative()) {
+  std::filesystem::path suppliedStlFileName(filename);
+  std::filesystem::path stlFileName;
+  if (suppliedStlFileName.is_relative()) {
     bool useSearchDirectories = true;
     if (!m_filepath.empty()) {
       // if environment spec xml came from a file, search in the same
       // directory as the file
-      stlFileName = Poco::Path(Poco::Path(m_filepath).parent(), filename);
-      if (Poco::File(stlFileName).exists()) {
+      stlFileName = std::filesystem::path(m_filepath).parent_path() / filename;
+      if (std::filesystem::exists(stlFileName)) {
         useSearchDirectories = false;
       }
     }
@@ -353,7 +352,7 @@ std::string SampleEnvironmentSpecParser::findFile(const std::string &filename) c
       // ... and if that doesn't work look in the search directories
       std::string foundFile = Mantid::API::FileFinder::Instance().getFullPath(filename);
       if (!foundFile.empty()) {
-        stlFileName = Poco::Path(foundFile);
+        stlFileName = std::filesystem::path(foundFile);
       } else {
         stlFileName = suppliedStlFileName;
       }
@@ -361,7 +360,7 @@ std::string SampleEnvironmentSpecParser::findFile(const std::string &filename) c
   } else {
     stlFileName = suppliedStlFileName;
   }
-  return stlFileName.toString();
+  return stlFileName.string();
 }
 
 /**
@@ -376,7 +375,7 @@ std::shared_ptr<Geometry::MeshObject> SampleEnvironmentSpecParser::loadMeshFromS
 
     std::string stlFileName = findFile(filename);
 
-    if (Poco::File(stlFileName).exists()) {
+    if (std::filesystem::exists(stlFileName)) {
 
       std::string scaleStr = stlFileElement->getAttribute("scale");
       if (scaleStr.empty()) {

@@ -18,8 +18,8 @@
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/UnitFactory.h"
 
-#include <Poco/File.h>
 #include <boost/lexical_cast.hpp>
+#include <filesystem>
 #include <fstream>
 #include <numeric>
 
@@ -70,7 +70,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(saver->execute());
     TS_ASSERT(saver->isExecuted());
 
-    TS_ASSERT(Poco::File(outputFile).exists());
+    TS_ASSERT(std::filesystem::exists(outputFile));
     std::ifstream file(outputFile.c_str());
 
     std::string tmp;
@@ -125,7 +125,7 @@ public:
     file.close();
 
     AnalysisDataService::Instance().remove(WSName);
-    Poco::File(outputFile).remove();
+    std::filesystem::remove(outputFile);
   }
 
   void testThatOutputIsValidFromWorkspaceWithNumericAxis() {
@@ -141,9 +141,9 @@ public:
     saver->execute();
     TS_ASSERT(saver->isExecuted());
 
-    TS_ASSERT(Poco::File(outputFile).exists());
-    if (Poco::File(outputFile).exists()) {
-      Poco::File(outputFile).remove();
+    TS_ASSERT(std::filesystem::exists(outputFile));
+    if (std::filesystem::exists(outputFile)) {
+      std::filesystem::remove(outputFile);
     }
   }
 

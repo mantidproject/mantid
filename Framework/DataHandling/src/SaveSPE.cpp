@@ -17,11 +17,11 @@
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/Unit.h"
 
-#include "Poco/File.h"
 #include <cmath>
 
 #include <cmath>
 #include <cstdio>
+#include <filesystem>
 #include <stdexcept>
 
 namespace Mantid::DataHandling {
@@ -119,7 +119,7 @@ void SaveSPE::exec() {
     fclose(outSPEFile);
   } catch (std::exception &) {
     fclose(outSPEFile);
-    Poco::File(filename).remove();
+    std::filesystem::remove(filename);
     // throw the exception again so the base class can deal with it too in it's
     // own way
     throw;

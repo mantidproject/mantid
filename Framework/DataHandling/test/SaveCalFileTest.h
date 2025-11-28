@@ -14,8 +14,8 @@
 #include "MantidDataObjects/OffsetsWorkspace.h"
 #include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 #include "MantidKernel/Timer.h"
-#include <Poco/File.h>
 #include <cxxtest/TestSuite.h>
+#include <filesystem>
 #include <fstream>
 #include <iosfwd>
 
@@ -60,7 +60,7 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     std::string filename = alg.getPropertyValue("Filename");
-    TS_ASSERT(Poco::File(filename).exists());
+    TS_ASSERT(std::filesystem::exists(filename));
 
     std::ifstream grFile(filename.c_str());
     std::string str;
@@ -74,7 +74,7 @@ public:
     TS_ASSERT_EQUALS(str, "        2              3      0.0000000       1      45");
 
     grFile.close();
-    if (Poco::File(filename).exists())
-      Poco::File(filename).remove();
+    if (std::filesystem::exists(filename))
+      std::filesystem::remove(filename);
   }
 };

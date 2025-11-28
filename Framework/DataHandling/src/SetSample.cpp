@@ -28,9 +28,9 @@
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/PropertyManagerProperty.h"
 
-#include <Poco/Path.h>
 #include <boost/algorithm/string/case_conv.hpp>
 #include <boost/algorithm/string/predicate.hpp>
+#include <filesystem>
 
 namespace Mantid::DataHandling {
 
@@ -599,7 +599,7 @@ SetSample::setSampleEnvironmentFromFile(API::ExperimentInfo &exptInfo, const Ker
   const auto &instDirs = config.getInstrumentDirectories();
   std::vector<std::string> environDirs(instDirs);
   for (auto &direc : environDirs) {
-    direc = Poco::Path(direc).append("sampleenvironments").toString();
+    direc = (std::filesystem::path(direc) / "sampleenvironments").string();
   }
   auto finder = std::make_unique<SampleEnvironmentSpecFileFinder>(environDirs);
   SampleEnvironmentFactory factory(std::move(finder));

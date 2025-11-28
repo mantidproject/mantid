@@ -19,8 +19,6 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidNexus/NexusClasses.h"
 
-#include <Poco/File.h>
-
 #include <fstream>
 
 using namespace Mantid::DataHandling;

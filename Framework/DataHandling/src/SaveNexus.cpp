@@ -14,7 +14,6 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 
-#include <Poco/File.h>
 #include <cmath>
 #include <memory>
 

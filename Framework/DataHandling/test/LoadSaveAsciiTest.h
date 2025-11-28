@@ -7,6 +7,7 @@
 #pragma once
 
 #include <cxxtest/TestSuite.h>
+#include <filesystem>
 
 #include "MantidDataHandling/LoadAscii.h"
 #include "MantidDataHandling/SaveAscii.h"
@@ -17,8 +18,6 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/Unit.h"
-#include <Poco/File.h>
-
 using namespace Mantid::API;
 using namespace Mantid::DataHandling;
 using namespace Mantid::DataObjects;
@@ -86,6 +85,6 @@ public:
     TS_ASSERT_EQUALS(wsLoaded->y(5)[1], 38.6667);
     TS_ASSERT_EQUALS(wsLoaded->y(8)[8], 338);
 
-    Poco::File(filename).remove();
+    std::filesystem::remove(filename);
   }
 };

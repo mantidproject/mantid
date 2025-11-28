@@ -8,8 +8,8 @@
 
 #include "MantidDataHandling/Load.h"
 #include "MantidDataHandling/SaveNISTDAT.h"
-#include <Poco/File.h>
 #include <cxxtest/TestSuite.h>
+#include <filesystem>
 #include <fstream>
 
 using namespace Mantid::API;
@@ -32,7 +32,7 @@ public:
     outputFile = writer.getPropertyValue("Filename");
     TS_ASSERT_THROWS_NOTHING(writer.execute());
 
-    TS_ASSERT(Poco::File(outputFile).exists());
+    TS_ASSERT(std::filesystem::exists(outputFile));
 
     std::ifstream testFile(outputFile.c_str(), std::ios::in);
     TS_ASSERT(testFile);
@@ -49,6 +49,6 @@ public:
     // remove file created by this algorithm, closing it first as Windows gets
     // tetchy about this
     testFile.close();
-    Poco::File(outputFile).remove();
+    std::filesystem::remove(outputFile);
   }
 };

@@ -18,9 +18,9 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/VisibleWhenProperty.h"
 
-#include <Poco/File.h>
 #include <boost/lexical_cast.hpp>
 #include <cmath>
+#include <filesystem>
 #include <iomanip>
 #include <limits>
 #include <map>
@@ -246,10 +246,10 @@ void SaveReflectometryAscii::header() {
 
 /// Check file
 void SaveReflectometryAscii::checkFile(const std::string &filename) {
-  if (Poco::File(filename).exists()) {
+  if (std::filesystem::exists(filename)) {
     g_log.warning("File already exists and will be overwritten");
     try {
-      Poco::File(filename).remove();
+      std::filesystem::remove(filename);
     } catch (...) { // maybe we do not have the permission to delete the file
       g_log.error("Error deleting file " + filename);
     }

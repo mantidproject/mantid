@@ -31,8 +31,6 @@
 #include "MantidNexus/NexusException.h"
 #include "MantidNexus/NexusFile.h"
 
-#include <Poco/Path.h>
-
 namespace Mantid::DataHandling {
 
 using namespace Kernel;
@@ -783,10 +781,9 @@ void LoadILLSANS::createEmptyWorkspace(const size_t numberOfHistograms, const si
  */
 std::string LoadILLSANS::getInstrumentFilePath(const std::string &instName) const {
 
-  Poco::Path directory(ConfigService::Instance().getInstrumentDirectory());
-  Poco::Path file(instName + "_Definition.xml");
-  Poco::Path fullPath(directory, file);
-  return fullPath.toString();
+  std::filesystem::path directory(ConfigService::Instance().getInstrumentDirectory());
+  std::filesystem::path fullPath = directory / (instName + "_Definition.xml");
+  return fullPath.string();
 }
 
 /**

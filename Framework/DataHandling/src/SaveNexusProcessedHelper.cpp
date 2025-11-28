@@ -24,8 +24,7 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidHistogramData/Histogram.h"
 
-#include <Poco/File.h>
-#include <Poco/Path.h>
+#include <filesystem>
 #include <memory>
 
 namespace Mantid::Nexus {
@@ -93,7 +92,7 @@ void NexusFileIO::openNexusWrite(const std::string &fileName, NexusFileIO::optio
   // if so open as xml
   // format otherwise as compressed hdf5
   //
-  if ((Poco::File(m_filename).exists() && append_to_file) || m_filehandle)
+  if ((std::filesystem::exists(m_filename) && append_to_file) || m_filehandle)
     mode = NXaccess::RDWR;
 
   else {
@@ -107,8 +106,8 @@ void NexusFileIO::openNexusWrite(const std::string &fileName, NexusFileIO::optio
   if (!m_filehandle) {
     // The nexus or HDF5 libraries crash when the filename is greater than 255
     // on OSX and Ubuntu.
-    Poco::Path path(fileName);
-    std::string baseName = path.getBaseName();
+    std::filesystem::path path(fileName);
+    std::string baseName = path.stem().string();
     if (baseName.size() > NAME_MAX) {
       std::string message = "Filename is too long. Unable to open file: ";
       throw Kernel::Exception::FileError(message, fileName);

@@ -16,10 +16,9 @@
 #include "MantidKernel/Property.h"
 #include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/Strings.h"
-#include <Poco/File.h>
-#include <Poco/Path.h>
 #include <boost/algorithm/string.hpp>
 #include <boost/regex.hpp>
+#include <filesystem>
 #include <fstream>
 #include <set>
 
@@ -256,11 +255,11 @@ std::vector<std::string> PDLoadCharacterizations::getFilenames() {
     if (filename.empty())
       continue;
 
-    Poco::File file(filename);
-    if (!file.exists())
+    std::filesystem::path file(filename);
+    if (!std::filesystem::exists(file))
       throw Exception::FileError("File does not exist", filename);
-    Poco::Path path(filename);
-    if (!path.isFile())
+    std::filesystem::path path(filename);
+    if (!std::filesystem::is_regular_file(path))
       throw Exception::FileError("File is not a regular file", filename);
   }
   return filenames;

@@ -12,8 +12,6 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataHandling/LoadPreNexusMonitors.h"
 
-#include <Poco/Path.h>
-
 class LoadPreNexusMonitorsTest : public CxxTest::TestSuite {
 public:
   static LoadPreNexusMonitorsTest *createSuite() { return new LoadPreNexusMonitorsTest(); }
