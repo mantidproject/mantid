@@ -384,7 +384,7 @@ class RunTabPresenter(PresenterCommon):
         # 2. Get the full file path
         user_file_path = FileFinder.getFullPath(user_file_path)
         if not os.path.exists(user_file_path):
-            path_error = f"The user path {user_file_path} does not exists. Make sure a valid user file path has been specified."
+            path_error = f"The user path {user_file_path} does not exist. Make sure a valid user file path has been specified."
             self._on_user_file_load_failure(path_error, error_msg + " when finding file.")
             return
 
