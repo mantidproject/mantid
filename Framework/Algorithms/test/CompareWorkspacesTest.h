@@ -1401,52 +1401,11 @@ public:
     TS_ASSERT_EQUALS(table->cell<std::string>(0, 0), "One workspace is a TableWorkspace and the other is not.");
   }
 
-  MatrixWorkspace_sptr create_RaggedWorkspace(int version = 0) {
-    // create workspace with 2 histograms
-    MatrixWorkspace_sptr raggedWS = WorkspaceCreationHelper::create2DWorkspace(2, 1);
-
-    // create and replace histograms with ragged ones
-    MantidVec x_data{100., 200., 300., 400.};
-    MantidVec y_data{1., 1., 1.};
-    MantidVec e_data{1., 1., 1.};
-    Mantid::HistogramData::HistogramBuilder builder;
-    builder.setX(x_data);
-    builder.setY(y_data);
-    builder.setE(e_data);
-    raggedWS->setHistogram(0, builder.build());
-
-    MantidVec x_data2{200., 400., 600.};
-    MantidVec y_data2{1., 1.};
-    MantidVec e_data2{1., 1.};
-    if (version == 1) {
-      // different number of bins
-      x_data2 = {200., 400.};
-      y_data2 = {1.};
-      e_data2 = {1.};
-    } else if (version == 2) {
-      // same number of bins but different y values
-      y_data2 = {1., 2.};
-    } else if (version == 3) {
-      // same number of bins but different x values
-      x_data2 = {200., 500., 600.};
-    }
-
-    Mantid::HistogramData::HistogramBuilder builder2;
-    builder2.setX(x_data2);
-    builder2.setY(y_data2);
-    builder2.setE(e_data2);
-    raggedWS->setHistogram(1, builder2.build());
-
-    // quick check of the workspace
-    TS_ASSERT(raggedWS->isRaggedWorkspace());
-    return raggedWS;
-  }
-
   void test_ragged_workspace() {
     Mantid::Algorithms::CompareWorkspaces alg;
     alg.initialize();
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Workspace1", create_RaggedWorkspace()));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Workspace2", create_RaggedWorkspace()));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Workspace1", WorkspaceCreationHelper::create2DWorkspaceRagged()));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Workspace2", WorkspaceCreationHelper::create2DWorkspaceRagged()));
     TS_ASSERT(alg.execute());
     TS_ASSERT_EQUALS(alg.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
   }
@@ -1454,7 +1413,7 @@ public:
   void test_ragged_workspace_fail_ragged_and_not() {
     Mantid::Algorithms::CompareWorkspaces alg;
     alg.initialize();
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Workspace1", create_RaggedWorkspace()));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Workspace1", WorkspaceCreationHelper::create2DWorkspaceRagged()));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Workspace2", ws1));
     TS_ASSERT(alg.execute());
     TS_ASSERT_DIFFERS(alg.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
@@ -1466,8 +1425,8 @@ public:
   void test_ragged_workspace_fail_number_of_bins() {
     Mantid::Algorithms::CompareWorkspaces alg;
     alg.initialize();
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Workspace1", create_RaggedWorkspace()));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Workspace2", create_RaggedWorkspace(1)));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Workspace1", WorkspaceCreationHelper::create2DWorkspaceRagged()));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Workspace2", WorkspaceCreationHelper::create2DWorkspaceRagged(1)));
     TS_ASSERT(alg.execute());
     TS_ASSERT_DIFFERS(alg.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
 
@@ -1478,8 +1437,8 @@ public:
   void test_ragged_workspace_fail_different_y_value() {
     Mantid::Algorithms::CompareWorkspaces alg;
     alg.initialize();
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Workspace1", create_RaggedWorkspace()));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Workspace2", create_RaggedWorkspace(2)));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Workspace1", WorkspaceCreationHelper::create2DWorkspaceRagged()));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Workspace2", WorkspaceCreationHelper::create2DWorkspaceRagged(2)));
     TS_ASSERT(alg.execute());
     TS_ASSERT_DIFFERS(alg.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
 
@@ -1490,8 +1449,8 @@ public:
   void test_ragged_workspace_fail_different_x_value() {
     Mantid::Algorithms::CompareWorkspaces alg;
     alg.initialize();
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Workspace1", create_RaggedWorkspace()));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Workspace2", create_RaggedWorkspace(3)));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Workspace1", WorkspaceCreationHelper::create2DWorkspaceRagged()));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Workspace2", WorkspaceCreationHelper::create2DWorkspaceRagged(3)));
     TS_ASSERT(alg.execute());
     TS_ASSERT_DIFFERS(alg.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
 

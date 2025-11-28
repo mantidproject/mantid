@@ -38,6 +38,7 @@
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
+#include "MantidHistogramData/HistogramBuilder.h"
 #include "MantidHistogramData/HistogramDx.h"
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidIndexing/IndexInfo.h"
@@ -286,6 +287,57 @@ WorkspaceGroup_sptr createWorkspaceGroup(int nEntries, int nHist, int nBins, con
     group->add(os.str());
   }
   return group;
+}
+
+/**
+ * Create a ragged 2D workspace
+ */
+MatrixWorkspace_sptr create2DWorkspaceRagged(int version) {
+  // create workspace with 2 histograms
+  MatrixWorkspace_sptr raggedWS = WorkspaceCreationHelper::create2DWorkspace(2, 1);
+
+  // create and replace histograms with ragged ones
+  MantidVec x_data{100., 200., 300., 400.};
+  MantidVec y_data{1., 1., 1.};
+  MantidVec e_data{1., 1., 1.};
+
+  MantidVec x_data2{200., 400., 600.};
+  MantidVec y_data2{1., 1.};
+  MantidVec e_data2{1., 1.};
+
+  // Update values based on version specification
+  if (version == 1) {
+    // different number of bins
+    x_data2 = {200., 400.};
+    y_data2 = {1.};
+    e_data2 = {1.};
+  } else if (version == 2) {
+    // same number of bins but different y values
+    y_data2 = {1., 2.};
+  } else if (version == 3) {
+    // same number of bins but different x values
+    x_data2 = {200., 500., 600.};
+  } else if (version == 4) {
+    // sets up histograms for the Multiply/Divide tests
+    y_data = {2., 2., 2.};
+    e_data = {2., 2., 2.};
+    y_data2 = {2., 2.};
+    e_data2 = {2., 2.};
+  }
+
+  Mantid::HistogramData::HistogramBuilder builder;
+  builder.setX(x_data);
+  builder.setY(y_data);
+  builder.setE(e_data);
+  raggedWS->setHistogram(0, builder.build());
+
+  Mantid::HistogramData::HistogramBuilder builder2;
+  builder2.setX(x_data2);
+  builder2.setY(y_data2);
+  builder2.setE(e_data2);
+  raggedWS->setHistogram(1, builder2.build());
+
+  return raggedWS;
 }
 
 /** Create a 2D workspace with this many histograms and bins.

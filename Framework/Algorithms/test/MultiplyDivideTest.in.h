@@ -1074,44 +1074,10 @@ public:
     if( !replaceInput ) AnalysisDataService::Instance().remove(outputSpace);
   }
 
-  MatrixWorkspace_sptr create_RaggedWorkspace()
-  {
-    // create workspace with 2 histograms
-    MatrixWorkspace_sptr raggedWS = WorkspaceCreationHelper::create2DWorkspace(2, 1);
-
-    // create and replace histograms with ragged ones
-    Mantid::MantidVec x_data{100., 200., 300., 400.};
-    Mantid::MantidVec y_data{2., 2., 2.};
-    Mantid::MantidVec e_data{2., 2., 2.};
-    Mantid::HistogramData::HistogramBuilder builder;
-    builder.setX(x_data);
-    builder.setY(y_data);
-    builder.setE(e_data);
-    raggedWS->setHistogram(0, builder.build());
-
-    Mantid::MantidVec x_data2{200., 400., 600.};
-    Mantid::MantidVec y_data2{2., 2.};
-    Mantid::MantidVec e_data2{2., 2.};
-    Mantid::HistogramData::HistogramBuilder builder2;
-    builder2.setX(x_data2);
-    builder2.setY(y_data2);
-    builder2.setE(e_data2);
-    raggedWS->setHistogram(1, builder2.build());
-
-    // quick check of the workspace
-    TS_ASSERT(raggedWS->isRaggedWorkspace());
-    TS_ASSERT_EQUALS(raggedWS->getNumberHistograms(), 2);
-    TS_ASSERT_EQUALS(raggedWS->x(0).size(), 4);
-    TS_ASSERT_EQUALS(raggedWS->x(1).size(), 3);
-    TS_ASSERT_EQUALS(raggedWS->y(0).size(), 3);
-    TS_ASSERT_EQUALS(raggedWS->y(1).size(), 2);
-    return raggedWS;
-  }
-
   void test_RaggedWorkspace()
   {
-    auto lhs = create_RaggedWorkspace();
-    auto rhs = create_RaggedWorkspace();
+    auto lhs = WorkspaceCreationHelper::create2DWorkspaceRagged(4);
+    auto rhs = WorkspaceCreationHelper::create2DWorkspaceRagged(4);
     auto result = performTest(lhs, rhs, false, DO_DIVIDE ? 1.0 : 4.0, DO_DIVIDE ? 1.4142135625 : 5.6568542436);
     TS_ASSERT(result->isRaggedWorkspace());
     TS_ASSERT_EQUALS(result->isDistribution(), DO_DIVIDE ? true : false);
@@ -1120,8 +1086,8 @@ public:
 
   void test_RaggedWorkspace_sameunit()
   {
-    auto lhs = create_RaggedWorkspace();
-    auto rhs = create_RaggedWorkspace();
+    auto lhs = WorkspaceCreationHelper::create2DWorkspaceRagged(4);
+    auto rhs = WorkspaceCreationHelper::create2DWorkspaceRagged(4);
     lhs->setYUnit("counts");
     rhs->setYUnit("counts");
     DO_DIVIDE = true;
@@ -1133,7 +1099,7 @@ public:
 
   void test_RaggedWorkspace_and_single_value()
   {
-    auto lhs = create_RaggedWorkspace();
+    auto lhs = WorkspaceCreationHelper::create2DWorkspaceRagged(4);
     auto rhs = WorkspaceCreationHelper::createWorkspaceSingleValue(2);
     auto result = performTest(lhs, rhs, false, DO_DIVIDE ? 1.0 : 4.0, DO_DIVIDE ? 1.2247448711 : 4.8989794899);
     TS_ASSERT(result->isRaggedWorkspace());
@@ -1141,7 +1107,7 @@ public:
 
   void test_RaggedWorkspace_not_compatible_x()
   {
-    auto lhs = create_RaggedWorkspace();
+    auto lhs = WorkspaceCreationHelper::create2DWorkspaceRagged(4);
     auto rhs = WorkspaceCreationHelper::create2DWorkspace(2, 4);
     performTest_fails(lhs, rhs);
   }
