@@ -40,5 +40,5 @@ class FileLoading:
         try:
             converter = UserFileReaderAdapter(user_file_name=file_path, file_information=file_information)
             return converter.get_all_states(file_information=file_information)
-        except (RuntimeError, ValueError) as e:
+        except (RuntimeError, ValueError, IsADirectoryError) as e:
             raise UserFileLoadException(e)
