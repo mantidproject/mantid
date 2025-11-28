@@ -161,7 +161,7 @@ class ILLIndirectReductionQENSTest(systemtesting.MantidSystemTest):
 
         self.assertEqual(mtd["out_calib_bg_red"].getItem(0).getNumberHistograms(), 18)
 
-        self.assertDelta(mtd["out_calib_bg_red"].getItem(0).readY(0)[1024 - 580], 0.0035, 0.0001)
+        self.assertDelta(mtd["out_calib_bg_red"].getItem(0).readY(0)[1024 - 580], 0.0055, 0.0001)
 
     def runTestDifferentZeroMonitorChannels(self):
         out_croped_mon = IndirectILLReductionQENS(Run="140721-140722", CropDeadMonitorChannels=True)

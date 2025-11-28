@@ -148,7 +148,6 @@ class POLDIDataAnalysisTestSiPawley(POLDIDataAnalysisTestSi):
 
         # inspect the cell
         cell = AnalysisDataService.retrieve("poldi_data_6904_cell_refined")
-
         # 2 rows for cubic cell
         self.assertTrue(cell.rowCount(), 2)
 
@@ -156,7 +155,7 @@ class POLDIDataAnalysisTestSiPawley(POLDIDataAnalysisTestSi):
         a_err = cell.cell(0, 2)
 
         self.assertLessThan(np.abs(a_err), 5.0e-5)
-        self.assertLessThan(np.abs(a_val - 5.4311946) / a_err, 1.5)
+        self.assertLessThan(np.abs(a_val - 5.4312889) / a_err, 1.5)
 
 
 class POLDIDataAnalysisEmptyFile(systemtesting.MantidSystemTest):

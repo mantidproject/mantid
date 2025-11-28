@@ -30,28 +30,29 @@ void Gaussian::init() {
 }
 
 void Gaussian::functionLocal(double *out, const double *xValues, const size_t nData) const {
-  const double peakHeight = getParameter("Height");
-  const double peakCentre = getParameter("PeakCentre");
-  const double weight = pow(1 / getParameter("Sigma"), 2);
+  const auto peakHeight = getParameter("Height");
+  const auto peakCentre = getParameter("PeakCentre");
+  const auto weight = 1 / getParameter("Sigma");
 
   for (size_t i = 0; i < nData; i++) {
-    double diff = xValues[i] - peakCentre;
-    out[i] = peakHeight * exp(-0.5 * diff * diff * weight);
+    const auto diff = (xValues[i] - peakCentre) * weight;
+    out[i] = peakHeight * exp(-0.5 * diff * diff);
   }
 }
 
 void Gaussian::functionDerivLocal(Jacobian *out, const double *xValues, const size_t nData) {
-  const double peakHeight = getParameter("Height");
-  const double peakCentre = getParameter("PeakCentre");
-  const double weight = pow(1 / getParameter("Sigma"), 2);
+  const auto peakHeight = getParameter("Height");
+  const auto peakCentre = getParameter("PeakCentre");
+  const auto weight = 1 / getParameter("Sigma");
+  const auto weight_sq = weight * weight;
 
   for (size_t i = 0; i < nData; i++) {
-    double diff = xValues[i] - peakCentre;
-    double e = exp(-0.5 * diff * diff * weight);
+    const auto diff = xValues[i] - peakCentre;
+    const auto e = exp(-0.5 * diff * diff * weight_sq);
     out->set(i, 0, e);
-    out->set(i, 1, diff * peakHeight * e * weight);
+    out->set(i, 1, diff * peakHeight * e * weight_sq);
     out->set(i, 2,
-             -0.5 * diff * diff * peakHeight * e); // derivative with respect to weight not sigma
+             -weight * diff * diff * peakHeight * e); // derivative with respect to weight not sigma
   }
 }
 
@@ -60,7 +61,7 @@ void Gaussian::setActiveParameter(size_t i, double value) {
     throw std::runtime_error("Attempt to use an inactive parameter");
   }
   if (parameterName(i) == "Sigma")
-    setParameter(i, sqrt(fabs(1. / value)), false);
+    setParameter(i, 1. / value, false);
   else
     setParameter(i, value, false);
 }
@@ -70,7 +71,7 @@ double Gaussian::activeParameter(size_t i) const {
     throw std::runtime_error("Attempt to use an inactive parameter");
   }
   if (parameterName(i) == "Sigma")
-    return 1. / pow(getParameter(i), 2);
+    return 1. / getParameter(i);
   else
     return getParameter(i);
 }
@@ -130,16 +131,19 @@ void Gaussian::unfixIntensity() { removeTie("Height"); }
 /// @param nBins :: Number of bins.
 void Gaussian::histogram1D(double *out, double left, const double *right, const size_t nBins) const {
 
-  double amplitude = intensity();
-  const double peakCentre = getParameter("PeakCentre");
-  const double sigma2 = getParameter("Sigma") * sqrt(2.0);
+  const auto amplitude = intensity();
+  const auto peakCentre = getParameter("PeakCentre");
+  const auto sigma2 = getParameter("Sigma") * sqrt(2.0);
 
   auto cumulFun = [sigma2, peakCentre](double x) { return 0.5 * erf((x - peakCentre) / sigma2); };
-  double cLeft = cumulFun(left);
+  auto cLeft = cumulFun(left);
+  auto xLeft = left;
   for (size_t i = 0; i < nBins; ++i) {
-    double cRight = cumulFun(right[i]);
-    out[i] = amplitude * (cRight - cLeft);
+    const auto bin_width = right[i] - xLeft;
+    const auto cRight = cumulFun(right[i]);
+    out[i] = amplitude * (cRight - cLeft) / bin_width;
     cLeft = cRight;
+    xLeft = right[i];
   }
 }
 
@@ -150,30 +154,30 @@ void Gaussian::histogram1D(double *out, double left, const double *right, const 
 /// (size = nBins).
 /// @param nBins :: Number of bins.
 void Gaussian::histogramDerivative1D(Jacobian *jacobian, double left, const double *right, const size_t nBins) const {
-  const double h = getParameter("Height");
-  const double c = getParameter("PeakCentre");
-  const double s = getParameter("Sigma");
-  const double w = pow(1 / s, 2);
-  const double sw = sqrt(w);
+  const auto h = getParameter("Height");
+  const auto c = getParameter("PeakCentre");
+  const auto w = 1 / getParameter("Sigma");
 
-  auto cumulFun = [sw, c](double x) { return sqrt(M_PI / 2) / sw * erf(sw / sqrt(2.0) * (x - c)); };
-  auto fun = [w, c](double x) { return exp(-w / 2 * pow(x - c, 2)); };
+  auto e = [w](const double d) { return exp(-0.5 * w * w * d * d); };
+  auto eint = [w](double d) {
+    return std::sqrt(M_PI / 2.0) * (1.0 / w) * std::erf(w * d / M_SQRT2);
+  }; // integral of gaussian (h=1)
 
-  double xl = left;
-  double fLeft = fun(left);
-  double cLeft = cumulFun(left);
-  const double h_over_2w = h / (2 * w);
+  auto dLeft = left - c;
+  auto eLeft = e(dLeft);
+  auto eintLeft = eint(dLeft);
   for (size_t i = 0; i < nBins; ++i) {
-    double xr = right[i];
-    double fRight = fun(xr);
-    double cRight = cumulFun(xr);
-    jacobian->set(i, 0, cRight - cLeft);        // height
-    jacobian->set(i, 1, -h * (fRight - fLeft)); // centre
+    const auto dRight = right[i] - c;
+    const auto bin_width = dRight - dLeft;
+    const auto eRight = e(dRight);
+    const auto eintRight = eint(dRight);
+    jacobian->set(i, 0, (eintRight - eintLeft) / bin_width); // height
+    jacobian->set(i, 1, -h * (eRight - eLeft) / bin_width);  // centre
     jacobian->set(i, 2,
-                  h_over_2w * ((xr - c) * fRight - (xl - c) * fLeft + cLeft - cRight)); // weight
-    fLeft = fRight;
-    cLeft = cRight;
-    xl = xr;
+                  h * ((dRight * eRight - eintRight) - (dLeft * eLeft - eintLeft)) / (w * bin_width)); // weight
+    eLeft = eRight;
+    eintLeft = eintRight;
+    dLeft = dRight;
   }
 }
 

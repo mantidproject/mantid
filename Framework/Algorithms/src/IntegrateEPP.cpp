@@ -87,7 +87,7 @@ void IntegrateEPP::exec() {
       continue;
     }
     const double centre = centreCol->toDouble(i);
-    const double halfWidth = sigmaMultiplier * sigmaCol->toDouble(i);
+    const double halfWidth = sigmaMultiplier * std::abs(sigmaCol->toDouble(i));
     const int index = indexCol->cell<int>(i);
     if (index < 0 || static_cast<size_t>(index) >= begins.size()) {
       throw std::runtime_error("The 'WorkspaceIndex' column contains an invalid value.");

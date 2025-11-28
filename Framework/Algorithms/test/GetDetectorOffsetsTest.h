@@ -245,7 +245,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<OffsetsWorkspace>(outputWS));
     TS_ASSERT(output);
 
-    TS_ASSERT_DELTA(output->y(0)[0], -0.11074, 0.0001);
+    // offset = - peak_cen * step/(dRef + peak_cen * step); step =0.02, dRef=1, peak_cen=1
+    TS_ASSERT_DELTA(output->y(0)[0], -0.019608, 0.0001);
 
     AnalysisDataService::Instance().remove(outputWS);
     AnalysisDataService::Instance().remove(outputWS + "_mask");
@@ -287,7 +288,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<OffsetsWorkspace>(outputWS));
     TS_ASSERT(output);
 
-    TS_ASSERT_DELTA(output->y(0)[0], 2.38925, 0.0001);
+    // offset = offset_relative + (dIdeal - dRef)/dRef; dIdeal = 3.5, dRef=1
+    TS_ASSERT_DELTA(output->y(0)[0], 2.48039, 0.0001);
 
     AnalysisDataService::Instance().remove(outputWS);
     AnalysisDataService::Instance().remove(outputWS + "_mask");
@@ -328,7 +330,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<OffsetsWorkspace>(outputWS));
     TS_ASSERT(output);
 
-    TS_ASSERT_DELTA(output->y(0)[0], -6.22677, 0.01);
+    TS_ASSERT_DELTA(output->y(0)[0], -1.0, 0.01); // offset = - peak_cen
 
     AnalysisDataService::Instance().remove(outputWS);
     AnalysisDataService::Instance().remove(outputWS + "_mask");
@@ -359,7 +361,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(algorithmProperties.setPropertyValue("DReference", "1.00"));
     TS_ASSERT_THROWS_NOTHING(algorithmProperties.setPropertyValue("XMin", "-20.0"));
     TS_ASSERT_THROWS_NOTHING(algorithmProperties.setPropertyValue("XMax", "20.0"));
-    //    TS_ASSERT_THROWS_NOTHING(algorithmProperties.setPropertyValue("MaxOffset", "20.0"));
+    TS_ASSERT_THROWS_NOTHING(algorithmProperties.setPropertyValue("MaxOffset", "0.24")); // peak at x~15.7
 
     std::function<Histogram_sptr(double, double, std::size_t, double, double)> peakFunc =
         [](double x_0, double x_1, std::size_t N_x, double p_0, double p_width) -> Histogram_sptr {
@@ -386,7 +388,6 @@ public:
 
     Workspace2D_sptr input = WorkspaceCreationHelper::create2DWorkspaceFromFunctionAndArgsList(
         peakFunc, {
-                      // note that "{0.0, 200.0, std::size_t(200), 1.0, 1.0}" reliably fails
                       {0.0, 200.0, std::size_t(200), 5.0, 5.0},
                       {0.0, 200.0, std::size_t(200), 6.0, 5.0},
                       {0.0, 200.0, std::size_t(200), 7.0, 5.0},
@@ -405,7 +406,8 @@ public:
     MaskWorkspace_sptr mask = std::make_shared<MaskWorkspace>(input->getInstrument());
     AnalysisDataService::Instance().add(maskWSName, mask);
 
-    Histogram_sptr exampleFailingSpectrum = peakFunc(0.0, 200.0, std::size_t(200), 1.0, 1.0);
+    // put peak with centre larger than max (relative) offset specified
+    Histogram_sptr exampleFailingSpectrum = peakFunc(0.0, 200.0, std::size_t(200), 17, 5.0);
 
     return std::make_tuple(input, maskWSName, expectedPeakFitLocations, exampleFailingSpectrum);
   }
@@ -528,13 +530,12 @@ public:
     TS_ASSERT_THROWS_NOTHING(mask = AnalysisDataService::Instance().retrieveWS<MaskWorkspace>(maskWSName));
     TS_ASSERT(mask);
 
-    maskAllDetectorsInSpectrum(mask, input, 3);
-    maskAllDetectorsInSpectrum(mask, input, 6);
-    maskAllDetectorsInSpectrum(mask, input, 7);
-    std::vector<int> expectedMaskValues(input->getNumberHistograms(), 0);
-    expectedMaskValues[3] = 1;
-    expectedMaskValues[6] = 1;
-    expectedMaskValues[7] = 1;
+    std::vector<size_t> ispec_masked = {3, 6, 7};
+    std::vector<bool> expectedMaskValues(input->getNumberHistograms(), false);
+    for (auto ispec : ispec_masked) {
+      maskAllDetectorsInSpectrum(mask, input, ispec);
+      expectedMaskValues[ispec] = true;
+    }
 
     TS_ASSERT_THROWS_NOTHING(offsets.setProperty("InputWorkspace", input));
     TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("MaskWorkspace", maskWSName));
@@ -549,9 +550,9 @@ public:
     size_t ns(0);
     for (auto it = expectedPeakFitLocations.cbegin(); it != expectedPeakFitLocations.cend(); ++it, ++ns) {
       for (const auto &det : input->getSpectrum(ns).getDetectorIDs()) {
-        if (!mask->isMasked(det))
+        TS_ASSERT(mask->isMasked(det) == expectedMaskValues[ns]);
+        if (!expectedMaskValues[ns])
           TS_ASSERT_DELTA(output->getValue(det), *it, 0.001);
-        TS_ASSERT(mask->isMasked(det) == (expectedMaskValues[ns] == 1));
       }
     }
 
@@ -572,13 +573,12 @@ public:
     auto [input, maskWSName, expectedPeakFitLocations, exampleFailingSpectrum] =
         maskTestInitilization(offsets, uniquePrefix);
 
-    input->getSpectrum(0).setHistogram(*exampleFailingSpectrum);
-    input->getSpectrum(5).setHistogram(*exampleFailingSpectrum);
-    input->getSpectrum(9).setHistogram(*exampleFailingSpectrum);
-    std::vector<int> expectedMaskValues(input->getNumberHistograms(), 0);
-    expectedMaskValues[0] = 1;
-    expectedMaskValues[5] = 1;
-    expectedMaskValues[9] = 1;
+    std::vector<size_t> ispec_masked = {0, 5, 9};
+    std::vector<bool> expectedMaskValues(input->getNumberHistograms(), false);
+    for (auto ispec : ispec_masked) {
+      expectedMaskValues[ispec] = true;
+      input->getSpectrum(ispec).setHistogram(*exampleFailingSpectrum);
+    }
 
     // ---- Run algo -----
     TS_ASSERT_THROWS_NOTHING(offsets.setProperty("InputWorkspace", input));
@@ -597,9 +597,9 @@ public:
     size_t ns(0);
     for (auto it = expectedPeakFitLocations.cbegin(); it != expectedPeakFitLocations.cend(); ++it, ++ns) {
       for (const auto &det : input->getSpectrum(ns).getDetectorIDs()) {
-        if (!mask->isMasked(det))
+        TS_ASSERT(mask->isMasked(det) == expectedMaskValues[ns]);
+        if (!expectedMaskValues[ns])
           TS_ASSERT_DELTA(output->getValue(det), *it, 0.001);
-        TS_ASSERT(mask->isMasked(det) == (expectedMaskValues[ns] == 1));
       }
     }
 
@@ -625,19 +625,18 @@ public:
     TS_ASSERT_THROWS_NOTHING(mask = AnalysisDataService::Instance().retrieveWS<MaskWorkspace>(maskWSName));
     TS_ASSERT(mask);
 
-    maskAllDetectorsInSpectrum(mask, input, 3);
-    maskAllDetectorsInSpectrum(mask, input, 6);
-    maskAllDetectorsInSpectrum(mask, input, 7);
-    input->getSpectrum(0).setHistogram(*exampleFailingSpectrum);
-    input->getSpectrum(5).setHistogram(*exampleFailingSpectrum);
-    input->getSpectrum(9).setHistogram(*exampleFailingSpectrum);
-    std::vector<int> expectedMaskValues(input->getNumberHistograms(), 0);
-    expectedMaskValues[3] = 1;
-    expectedMaskValues[6] = 1;
-    expectedMaskValues[7] = 1;
-    expectedMaskValues[0] = 1;
-    expectedMaskValues[5] = 1;
-    expectedMaskValues[9] = 1;
+    std::vector<size_t> ispec_masked = {0, 3, 5, 9};
+    std::vector<bool> expectedMaskValues(input->getNumberHistograms(), false);
+    for (auto ispec : ispec_masked) {
+      expectedMaskValues[ispec] = true;
+      if (ispec == 0) {
+        // mask in input mask workspace - but spectrum will fit OK
+        maskAllDetectorsInSpectrum(mask, input, ispec);
+      } else {
+        // set spectrum to cause failure
+        input->getSpectrum(ispec).setHistogram(*exampleFailingSpectrum);
+      }
+    }
 
     // ---- Run algo -----
     TS_ASSERT_THROWS_NOTHING(offsets.setProperty("InputWorkspace", input));
@@ -653,73 +652,13 @@ public:
     size_t ns(0);
     for (auto it = expectedPeakFitLocations.cbegin(); it != expectedPeakFitLocations.cend(); ++it, ++ns) {
       for (const auto &det : input->getSpectrum(ns).getDetectorIDs()) {
-        if (!mask->isMasked(det))
+        TS_ASSERT(mask->isMasked(det) == expectedMaskValues[ns]);
+        if (!expectedMaskValues[ns])
           TS_ASSERT_DELTA(output->getValue(det), *it, 0.001);
-        TS_ASSERT(mask->isMasked(det) == (expectedMaskValues[ns] == 1));
       }
     }
-
-    AnalysisDataService::Instance().remove(outputWSName);
-    AnalysisDataService::Instance().remove(maskWSName);
-#endif
-  }
-
-  /**
-   * Verify that the output offsets and mask workspaces are have detector mask flags which are consistent with the mask
-   * values.
-   */
-  void testExecMasksAreConsistentWithDetectorFlags() {
-// Peak fitting gives different results on ARM
-#ifndef __aarch64__
-    const std::string uniquePrefix = "test_EFAM";
-    const std::string outputWSName(uniquePrefix + "_offsets");
-
-    GetDetectorOffsets offsets;
-    TS_ASSERT_THROWS_NOTHING(offsets.initialize());
-    TS_ASSERT(offsets.isInitialized());
-    auto [input, maskWSName, expectedPeakFitLocations, exampleFailingSpectrum] =
-        maskTestInitilization(offsets, uniquePrefix);
-    MaskWorkspace_sptr mask;
-    TS_ASSERT_THROWS_NOTHING(mask = AnalysisDataService::Instance().retrieveWS<MaskWorkspace>(maskWSName));
-    TS_ASSERT(mask);
-
-    maskAllDetectorsInSpectrum(mask, input, 3);
-    maskAllDetectorsInSpectrum(mask, input, 6);
-    maskAllDetectorsInSpectrum(mask, input, 7);
-    input->getSpectrum(0).setHistogram(*exampleFailingSpectrum);
-    input->getSpectrum(5).setHistogram(*exampleFailingSpectrum);
-    input->getSpectrum(9).setHistogram(*exampleFailingSpectrum);
-    std::vector<int> expectedMaskValues(input->getNumberHistograms(), 0);
-    expectedMaskValues[3] = 1;
-    expectedMaskValues[6] = 1;
-    expectedMaskValues[7] = 1;
-    expectedMaskValues[0] = 1;
-    expectedMaskValues[5] = 1;
-    expectedMaskValues[9] = 1;
-
-    // ---- Run algo -----
-    TS_ASSERT_THROWS_NOTHING(offsets.setProperty("InputWorkspace", input));
-    TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("MaskWorkspace", maskWSName));
-    TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("OutputWorkspace", outputWSName));
-    TS_ASSERT_THROWS_NOTHING(offsets.execute());
-    TS_ASSERT(offsets.isExecuted());
-
-    OffsetsWorkspace_const_sptr output;
-    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<OffsetsWorkspace>(outputWSName));
-    TS_ASSERT(output);
-
-    size_t ns(0);
-    for (auto it = expectedPeakFitLocations.cbegin(); it != expectedPeakFitLocations.cend(); ++it, ++ns) {
-      for (const auto &det : input->getSpectrum(ns).getDetectorIDs()) {
-        if (!mask->isMasked(det))
-          TS_ASSERT_DELTA(output->getValue(det), *it, 0.001);
-        TS_ASSERT(mask->isMasked(det) == (expectedMaskValues[ns] == 1));
-      }
-    }
-
     TS_ASSERT(mask->isConsistentWithDetectorMasks());
     TS_ASSERT(mask->isConsistentWithDetectorMasks(output->detectorInfo()));
-
     AnalysisDataService::Instance().remove(outputWSName);
     AnalysisDataService::Instance().remove(maskWSName);
 #endif

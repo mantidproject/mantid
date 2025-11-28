@@ -433,8 +433,8 @@ class RectanglePlotTest(unittest.TestCase):
         # two peaks at once, finds the middle
         rect = Rectangle((150, 150), 100, 100)
         peak = self.rectangle_plot._find_peak(rect)
-        self.assertAlmostEqual(peak[0], 203.94, 2)
-        self.assertAlmostEqual(peak[1], 203.94, 2)
+        self.assertAlmostEqual(peak[0], 203.945, 2)
+        self.assertAlmostEqual(peak[1], 203.945, 2)
 
         # rectangle completely off screen
         rect = Rectangle((-200, -200), 10, 10)
