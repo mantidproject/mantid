@@ -355,17 +355,17 @@ class FullInstrumentViewPresenter:
             return
         # Keeping the points from each workspace separate so we can colour them differently
         for ws_peaks in self._peaks_grouped_by_ws:
-            peaks_detector_ids = np.array([p.detector_id for p in ws_peaks.detector_peaks])
-            detector_ids = self._model.detector_ids
+            peaks_spectrum_nos = np.array([p.spectrum_no for p in ws_peaks.detector_peaks])
+            spectrum_nos = self._model.spectrum_nos
             # Use argsort + searchsorted for fast lookup. Using np.where(np.isin) does not
             # maintain the original order. It is faster to sort then search the sorted
-            # array for matching detector IDs
-            sorted_idx = np.argsort(detector_ids)
-            sorted_detector_ids = detector_ids[sorted_idx]
-            positions = np.searchsorted(sorted_detector_ids, peaks_detector_ids)
+            # array for matching spectrum numbers
+            sorted_idx = np.argsort(spectrum_nos)
+            sorted_spectrum_nos = spectrum_nos[sorted_idx]
+            positions = np.searchsorted(sorted_spectrum_nos, peaks_spectrum_nos)
             # Map back to original indices
             ordered_indices = sorted_idx[positions]
-            valid = sorted_detector_ids[positions] == peaks_detector_ids
+            valid = sorted_spectrum_nos[positions] == peaks_spectrum_nos
             ordered_indices = ordered_indices[valid]
             labels = [p.label for i, p in enumerate(ws_peaks.detector_peaks) if valid[i]]
             projected_points = self._model.detector_positions[ordered_indices]
@@ -382,7 +382,7 @@ class FullInstrumentViewPresenter:
             x_values = []
             labels = []
             for peak in ws_peaks.detector_peaks:
-                if peak.detector_id in self._model.picked_detector_ids:
+                if peak.spectrum_no in self._model.picked_spectrum_nos:
                     match self._view.current_selected_unit():
                         case self._TIME_OF_FLIGHT:
                             x_values += [p.tof for p in peak.peaks]
