@@ -453,7 +453,7 @@ class FullInstrumentViewWindow(QMainWindow):
     def add_main_mesh(self, mesh: PolyData, is_projection: bool, scalars=None) -> None:
         """Draw the given mesh in the main plotter window"""
         self.main_plotter.clear()
-        scalar_bar_args = dict(interactive=True, vertical=True, title_font_size=15, label_font_size=12) if scalars is not None else None
+        scalar_bar_args = dict(interactive=True, vertical=False, title_font_size=15, label_font_size=12) if scalars is not None else None
         self.main_plotter.add_mesh(
             mesh, pickable=False, scalars=scalars, render_points_as_spheres=True, point_size=15, scalar_bar_args=scalar_bar_args
         )
@@ -470,7 +470,7 @@ class FullInstrumentViewWindow(QMainWindow):
         self.main_plotter.add_mesh(
             point_cloud,
             scalars=scalars,
-            opacity=[0.0, 0.5],
+            opacity=[0.0, 0.3],
             show_scalar_bar=False,
             pickable=True,
             cmap="Oranges",
