@@ -33,6 +33,7 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from instrumentview.Detectors import DetectorInfo
 from instrumentview.InteractorStyles import CustomInteractorStyleZoomAndSelect, CustomInteractorStyleRubberBand3D
 from typing import Callable
+from instrumentview.Projections.ProjectionType import ProjectionType
 from mantid.dataobjects import Workspace2D
 from mantid import UsageService
 from mantid.kernel import FeatureType
@@ -42,9 +43,44 @@ import pyvista as pv
 from pyvista.plotting.picking import RectangleSelection
 from pyvista.plotting.opts import PickerType
 import os
+from vtkmodules.vtkInteractionWidgets import vtkImplicitCylinderWidget, vtkImplicitCylinderRepresentation
+from vtkmodules.vtkCommonCore import vtkCommand
+
+
+class CylinderWidgetNoRotation(vtkImplicitCylinderWidget):
+    def __init__(self):
+        super().__init__()
+        self.AddObserver(vtkCommand.StartInteractionEvent, lambda *_: self._on_interaction())
+
+    def _on_interaction(self):
+        if self.GetCylinderRepresentation().GetInteractionState() == 4:
+            self.GetCylinderRepresentation().SetInteractionState(3)
+            return
 
 
 class PeaksWorkspaceListWidget(QListWidget):
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.setDragDropMode(QAbstractItemView.DropOnly)
+
+    def dragEnterEvent(self, event: QDragEnterEvent):
+        if event.mimeData().hasText():
+            event.acceptProposedAction()
+
+    def dragMoveEvent(self, event: QDragMoveEvent):
+        if event.mimeData().hasText():
+            event.acceptProposedAction()
+
+    def dropEvent(self, event: QDropEvent):
+        drop_text = event.mimeData().text()
+        for i in range(self.count()):
+            item = self.item(i)
+            if item.text() == drop_text:
+                item.setCheckState(Qt.Checked)
+        event.acceptProposedAction()
+
+
+class MasksWorkspaceListWidget(QListWidget):
     def __init__(self, parent):
         super().__init__(parent)
         self.setDragDropMode(QAbstractItemView.DropOnly)
@@ -171,6 +207,35 @@ class FullInstrumentViewWindow(QMainWindow):
         self._peak_ws_list.setSizeAdjustPolicy(QListWidget.AdjustToContents)
         peak_v_layout.addWidget(self._peak_ws_list)
 
+        masking_group_box = QGroupBox("Masking")
+        masking_layout = QVBoxLayout(masking_group_box)
+        note = QLabel("Currently only a cylinder/circle shape is supported. A rectangular shape will be added in the next update.")
+        pre_list_layout = QHBoxLayout()
+        self._add_cylinder = QPushButton("Cylinder Shape")
+        self._cylinder_select = QPushButton("Store Mask")
+        self._clear_masks = QPushButton("Clear Masks")
+        pre_list_layout.addWidget(self._add_cylinder)
+        pre_list_layout.addWidget(self._cylinder_select)
+        pre_list_layout.addWidget(self._clear_masks)
+        self._mask_list = MasksWorkspaceListWidget(self)
+        self._mask_list.setSizeAdjustPolicy(QListWidget.AdjustToContents)
+        self._mask_list.setSelectionMode(QAbstractItemView.NoSelection)
+        post_list_layout = QHBoxLayout()
+        self._save_mask_to_ws = QPushButton("Export to ADS")
+        self._save_mask_to_file = QPushButton("Save to XML")
+        self._overwrite_mask = QPushButton("Overwrite Permanently")
+        post_list_layout.addWidget(self._save_mask_to_ws)
+        post_list_layout.addWidget(self._save_mask_to_file)
+        post_list_layout.addWidget(self._overwrite_mask)
+        masking_layout.addWidget(note)
+        masking_layout.addLayout(pre_list_layout)
+        masking_layout.addWidget(self._mask_list)
+        masking_layout.addLayout(post_list_layout)
+
+        # TODO: Find a more apropriate solution than logic in view
+        self._add_cylinder.clicked.connect(lambda: self._add_cylinder.setDisabled(True))
+        self._cylinder_select.clicked.connect(lambda: self._add_cylinder.setDisabled(False))
+
         self.status_group_box = QGroupBox("Status")
         status_layout = QHBoxLayout(self.status_group_box)
         status_label = QLabel("Loading ...")
@@ -198,6 +263,7 @@ class FullInstrumentViewWindow(QMainWindow):
         units_group_box.setLayout(units_vbox)
         options_vertical_layout.addWidget(units_group_box)
         options_vertical_layout.addWidget(peak_ws_group_box)
+        options_vertical_layout.addWidget(masking_group_box)
         options_vertical_layout.addWidget(QSplitter(Qt.Horizontal))
 
         options_vertical_layout.addWidget(self.status_group_box)
@@ -214,6 +280,10 @@ class FullInstrumentViewWindow(QMainWindow):
         center_point = screen_geometry.center()
         window_geometry.moveCenter(center_point)
         self.move(window_geometry.topLeft())
+
+        self._current_widget = CylinderWidgetNoRotation()
+        self._projection_camera_map = {}
+        self._parallel_scales = {}
 
         UsageService.registerFeatureUsage(FeatureType.Interface, "InstrumentView2025", False)
 
@@ -232,7 +302,9 @@ class FullInstrumentViewWindow(QMainWindow):
 
     def reset_camera(self) -> None:
         if not self._off_screen:
-            self.main_plotter.reset_camera()
+            self.main_plotter.camera_position = self._projection_camera_map[self.current_selected_projection()]
+            self.main_plotter.camera.parallel_scale = self._parallel_scales[self.current_selected_projection()]
+        return
 
     def _add_min_max_group_box(self, parent_box: QGroupBox) -> tuple[QLineEdit, QLineEdit, QDoubleRangeSlider]:
         """Creates a minimum and a maximum box (with labels) inside the given group box. The callbacks will be attached to textEdited
@@ -320,8 +392,10 @@ class FullInstrumentViewWindow(QMainWindow):
         self.refresh_peaks_ws_list()
 
     def setup_connections_to_presenter(self) -> None:
-        self._projection_combo_box.currentIndexChanged.connect(self._presenter.on_projection_option_selected)
-        self._multi_select_check.stateChanged.connect(self._presenter.on_multi_select_detectors_clicked)
+        self._projection_combo_box.currentIndexChanged.connect(self._presenter.update_plotter)
+        self._multi_select_check.stateChanged.connect(self._presenter.update_detector_picker)
+        self._add_cylinder.clicked.connect(self._presenter.on_add_cylinder_clicked)
+        self._cylinder_select.clicked.connect(self._presenter.on_cylinder_select_clicked)
         self._clear_selection_button.clicked.connect(self._presenter.on_clear_selected_detectors_clicked)
         self._contour_range_slider.sliderReleased.connect(self._presenter.on_contour_limits_updated)
         self._integration_limit_slider.sliderReleased.connect(self._presenter.on_integration_limits_updated)
@@ -329,6 +403,11 @@ class FullInstrumentViewWindow(QMainWindow):
         self._export_workspace_button.clicked.connect(self._presenter.on_export_workspace_clicked)
         self._sum_spectra_checkbox.clicked.connect(self._presenter.on_sum_spectra_checkbox_clicked)
         self._peak_ws_list.itemChanged.connect(self._presenter.on_peaks_workspace_selected)
+        self._mask_list.itemChanged.connect(self._presenter.on_mask_item_selected)
+        self._save_mask_to_ws.clicked.connect(self._presenter.on_save_mask_to_workspace_clicked)
+        self._save_mask_to_file.clicked.connect(self._presenter.on_save_xml_mask_clicked)
+        self._overwrite_mask.clicked.connect(self._presenter.on_overwrite_mask_clicked)
+        self._clear_masks.clicked.connect(self._presenter.on_clear_masks_clicked)
 
         self._add_connections_to_edits_and_slider(
             self._contour_range_min_edit,
@@ -450,7 +529,7 @@ class FullInstrumentViewWindow(QMainWindow):
         """Draw the given mesh in the main plotter window"""
         self.main_plotter.add_mesh(mesh, color=colour, pickable=pickable)
 
-    def add_main_mesh(self, mesh: PolyData, is_projection: bool, scalars=None) -> None:
+    def add_detector_mesh(self, mesh: PolyData, is_projection: bool, scalars=None) -> None:
         """Draw the given mesh in the main plotter window"""
         self.main_plotter.clear()
         scalar_bar_args = dict(interactive=True, vertical=False, title_font_size=15, label_font_size=12) if scalars is not None else None
@@ -463,10 +542,18 @@ class FullInstrumentViewWindow(QMainWindow):
 
         if is_projection:
             self.main_plotter.view_xy()
+            self.main_plotter.enable_parallel_projection()
             if not self.main_plotter.off_screen:
                 self.main_plotter.enable_zoom_style()
 
-    def add_pickable_main_mesh(self, point_cloud: PolyData, scalars: np.ndarray | str) -> None:
+        if self.current_selected_projection() not in self._projection_camera_map.keys():
+            self.main_plotter.reset_camera()
+            self._projection_camera_map[self.current_selected_projection()] = self.main_plotter.camera_position
+            self._parallel_scales[self.current_selected_projection()] = self.main_plotter.camera.parallel_scale
+
+        self.reset_camera()
+
+    def add_pickable_mesh(self, point_cloud: PolyData, scalars: np.ndarray | str) -> None:
         self.main_plotter.add_mesh(
             point_cloud,
             scalars=scalars,
@@ -477,6 +564,38 @@ class FullInstrumentViewWindow(QMainWindow):
             point_size=30,
             render_points_as_spheres=True,
         )
+
+    def add_masked_mesh(self, mesh: PolyData) -> None:
+        if mesh.number_of_points == 0:
+            return
+        # RGB for dark grey is (64, 64, 64), normalised is (0.25, 0.25, 0.25)
+        self.main_plotter.add_mesh(mesh, color=(0.25, 0.25, 0.25), pickable=False, render_points_as_spheres=True, point_size=15)
+
+    def add_cylinder_widget(self, bounds, callback) -> None:
+        cylinder_repr = vtkImplicitCylinderRepresentation()
+        cylinder_repr.SetOutlineTranslation(False)
+        cylinder_repr.GetOutlineProperty().SetOpacity(0)
+        cylinder_repr.SetMinRadius(0.001)
+
+        # For 2D projections, camera view is always perpendicular to Z axis
+        cylinder_repr.SetAxis([0, 0, 1])
+        # TODO: Find a better way than using fixed bounds
+        cylinder_repr.SetWidgetBounds([-10, 10, -10, 10, 0, 1])
+        cylinder_widget = CylinderWidgetNoRotation()
+        cylinder_widget.SetRepresentation(cylinder_repr)
+        cylinder_widget.SetCurrentRenderer(self.main_plotter.renderer)
+        cylinder_widget.SetInteractor(self.main_plotter.iren.interactor)
+        cylinder_widget.On()
+        self._current_widget = cylinder_widget
+        # The command below is a hacky way of making the widget appear on top of detectors
+        # No idea why it works
+        self.main_plotter.camera_position = self.main_plotter.camera_position
+
+    def get_current_widget(self):
+        return self._current_widget
+
+    def enable_or_disable_mask_widgets(self):
+        self._add_cylinder.setDisabled(self.current_selected_projection() == ProjectionType.THREE_D)
 
     def add_rgba_mesh(self, mesh: PolyData, scalars: np.ndarray | str):
         """Draw the given mesh in the main plotter window, and set the colours manually with RGBA numbers"""
@@ -627,3 +746,17 @@ class FullInstrumentViewWindow(QMainWindow):
     def redraw_lineplot(self) -> None:
         self._detector_spectrum_fig.tight_layout()
         self._detector_figure_canvas.draw()
+
+    def selected_masks(self) -> list[str]:
+        return [
+            self._mask_list.item(row_index).text()
+            for row_index in range(self._mask_list.count())
+            if self._mask_list.item(row_index).checkState() > 0
+        ]
+
+    def set_new_mask_key(self, new_key: str) -> None:
+        list_item = QListWidgetItem(new_key, self._mask_list)
+        list_item.setCheckState(Qt.Checked)
+
+    def clear_mask_list(self) -> None:
+        self._mask_list.clear()
