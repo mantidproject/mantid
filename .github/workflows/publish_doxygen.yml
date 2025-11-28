@@ -1,0 +1,42 @@
+name: Publish Doxygen artifacts to website
+
+on:
+    push:
+        branches:
+            - main
+
+jobs:
+    build_and_publish_doxygen:
+        runs-on: ubuntu-latest
+        defaults:
+            run:
+                shell: bash -l {0}
+
+        steps:
+        -   uses: actions/checkout@v6
+            with:
+                fetch-depth: 0
+
+        -   name: Build Doxygen
+            run:
+                $GITHUB_WORKSPACE/buildconfig/Jenkins/Conda/doxygen.sh $GITHUB_WORKSPACE false
+
+        -   name: Checkout Doxygen repository
+            env:
+                DOXYGEN_REPO_TOKEN: ${{ secrets.DOXYGEN_REPO_TOKEN }}
+            run: |
+                git clone https://$DOXYGEN_REPO_TOKEN@github.com/mantidproject/doxygen.git doxygen_repo
+                rm -rf doxygen_repo/*
+
+        -   name: Copy Doxygen artifacts
+            run: |
+                cp -r $GITHUB_WORKSPACE/build/doxygen/html/* doxygen_repo/
+
+        -   name: Commit and push
+            working-directory: doxygen_repo
+            run: |
+                git config user.name "mantid-tech"
+                git config user.email "mantid-tech@stfc.ac.uk"
+                git add .
+                git commit -m "Update Doxygen docs"
+                git push origin main
