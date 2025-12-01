@@ -23,6 +23,7 @@ PIXI_TOML = mantid_root / Path("pixi.toml")
 
 # package name: {'linux' : '>3.0', 'osx': '>3.1.0'}
 # package name: {'all': '==3.2.1'}
+# occt: {'all': '7.* novtk*'} (example for which uses a build number, just stores the version string from conda)
 DependencyPins = NewType("DependencyPins", Dict[str, Dict[str, str]])
 
 
@@ -234,7 +235,18 @@ def compare_conda_and_pixi_envs(conda_env: DependencyPins, pixi_env: DependencyP
 
 
 def main(argv: Sequence[str] = None) -> int:
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(
+        usage="""
+    This script is intended to be run by pre-commit.
+    It takes as arguments the paths of the files changes by the commit.
+    If changes have been made to the version pinnings / required packages for mantid-developer
+    (as listed in conda/recipes/conda_build_config.yaml and conda/recipe/mantid-developer/recipe.yaml)
+    then those changes will be added to the pixi manifest file.
+
+    In cases where the pixi manifest has been updated (or both the manifest and the conda recipe have been updated)
+    then the two environments will be compared and the pre-commit will fail if they mismatch.
+    """
+    )
     parser.add_argument(
         "filenames",
         nargs="*",
