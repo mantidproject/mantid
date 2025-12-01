@@ -292,80 +292,30 @@ void LoadNGEM::exec() {
   progress(0);
 
   std::vector<std::vector<std::string>> filePaths = getProperty("Filename");
-
   const int minEventsReq(getProperty("MinEventsPerFrame"));
   const int maxEventsReq(getProperty("MaxEventsPerFrame"));
-
   double minToF(getProperty("MinToF"));
   double maxToF(getProperty("MaxToF"));
   const double binWidth(getProperty("BinWidth"));
-
   const bool preserveEvents(getProperty("PreserveEvents"));
 
-  int rawFrames = 0;
-  int goodFrames = 0;
-  std::vector<double> frameEventCounts;
-  int eventCountInFrame = 0;
-
-  // event construction
-  std::vector<DataObjects::EventList> events, eventsInFrame;
-  events.resize(NUM_OF_SPECTRA);
-  eventsInFrame.resize(NUM_OF_SPECTRA);
-
-  std::vector<double> binEdges;
-  std::vector<std::vector<double>> counts;
-  std::vector<std::vector<double>> countsInFrame;
-
-  // histo construction
-  if (!preserveEvents) {
-    binEdges = calculateBinEdges(minToF, maxToF, binWidth);
-    counts.resize(NUM_OF_SPECTRA);
-    for (auto &item : counts) {
-      item.resize(binEdges.size() - 1);
-    }
-    countsInFrame = counts;
-  }
-  progress(0.04);
-
-  size_t totalFilePaths(filePaths.size());
-  int counter(1);
-  for (const auto &filePath : filePaths) {
-    if (preserveEvents) {
-      loadSingleFile(filePath, eventCountInFrame, maxToF, minToF, rawFrames, goodFrames, minEventsReq, maxEventsReq,
-                     frameEventCounts, events, eventsInFrame, totalFilePaths, counter);
-    } else {
-      loadSingleFile(filePath, eventCountInFrame, maxToF, minToF, binWidth, rawFrames, goodFrames, minEventsReq,
-                     maxEventsReq, frameEventCounts, counts, countsInFrame, totalFilePaths, counter);
-    }
-  }
-  // Add the final frame of events (as they are not followed by a T0 event)
+  LoadDataResult res;
   if (preserveEvents) {
-    addFrameToOutputWorkspace(rawFrames, goodFrames, eventCountInFrame, minEventsReq, maxEventsReq, frameEventCounts,
-                              events, eventsInFrame);
-  } else {
-    addFrameToOutputWorkspace(rawFrames, goodFrames, eventCountInFrame, minEventsReq, maxEventsReq, frameEventCounts,
-                              counts, countsInFrame);
+    res = readDataAsEvents(minToF, maxToF, binWidth, minEventsReq, maxEventsReq, filePaths);
+  } else if (!preserveEvents) {
+    res = readDataAsHistograms(minToF, maxToF, binWidth, minEventsReq, maxEventsReq, filePaths);
   }
 
-  progress(0.90);
+  addToSampleLog("raw_frames", res.rawFrames, res.dataWorkspace);
+  addToSampleLog("good_frames", res.goodFrames, res.dataWorkspace);
+  addToSampleLog("max_ToF", maxToF, res.dataWorkspace);
+  addToSampleLog("min_ToF", minToF, res.dataWorkspace);
 
-  API::MatrixWorkspace_sptr dataWorkspace;
-  if (preserveEvents) {
-    dataWorkspace = createEventWorkspace(maxToF, binWidth, events);
-  } else {
-    dataWorkspace = createHistogramWorkspace(std::move(binEdges), std::move(counts));
-  }
+  loadInstrument(res.dataWorkspace);
 
-  addToSampleLog("raw_frames", rawFrames, dataWorkspace);
-  addToSampleLog("good_frames", goodFrames, dataWorkspace);
-  addToSampleLog("max_ToF", maxToF, dataWorkspace);
-  addToSampleLog("min_ToF", minToF, dataWorkspace);
-
-  loadInstrument(dataWorkspace);
-
-  setProperty("OutputWorkspace", dataWorkspace);
+  setProperty("OutputWorkspace", res.dataWorkspace);
   if (this->getProperty("GenerateEventsPerFrame")) {
-    createCountWorkspace(frameEventCounts);
+    createCountWorkspace(res.frameEventCounts);
   }
   progress(1.00);
 }
@@ -435,18 +385,15 @@ void LoadNGEM::loadSingleFile(const std::vector<std::string> &filePath, int &eve
       uint64_t pixel = event.coincidence.getPixel();
       // Convert to microseconds (us)
       const double tof = event.coincidence.timeOfFlight / 1000.0;
-
       if (tof > maxToF) {
         maxToF = tof;
       } else if (tof < minToF) {
         minToF = tof;
       }
       eventsInFrame[pixel].addEventQuickly(Types::Event::TofEvent(tof));
-
     } else if (event.tZero.check()) { // Check for T0 event.
       addFrameToOutputWorkspace(rawFrames, goodFrames, eventCountInFrame, minEventsReq, maxEventsReq, frameEventCounts,
                                 events, eventsInFrame);
-
       if (reportProgressAndCheckCancel(numProcessedEvents, eventCountInFrame, totalNumEvents, totalFilePaths,
                                        fileCount)) {
         return;
@@ -466,7 +413,7 @@ void LoadNGEM::loadSingleFile(const std::vector<std::string> &filePath, int &eve
 }
 
 /**
- * @brief Load a single file into the event lists.
+ * @brief Load a single file into histograms.
  *
  * @param filePath The path to the file.
  * @param eventCountInFrame The number of events in the current frame.
@@ -482,9 +429,9 @@ void LoadNGEM::loadSingleFile(const std::vector<std::string> &filePath, int &eve
  * @param totalFilePaths The total number of file paths.
  * @param fileCount The number of file paths processed.
  */
-void LoadNGEM::loadSingleFile(const std::vector<std::string> &filePath, int &eventCountInFrame, double &maxToF,
-                              double &minToF, const double &binWidth, int &rawFrames, int &goodFrames,
-                              const int &minEventsReq, const int &maxEventsReq, MantidVec &frameEventCounts,
+void LoadNGEM::loadSingleFile(const std::vector<std::string> &filePath, int &eventCountInFrame, const double &minToF,
+                              const double &binWidth, int &rawFrames, int &goodFrames, const int &minEventsReq,
+                              const int &maxEventsReq, MantidVec &frameEventCounts,
                               std::vector<std::vector<double>> &counts, std::vector<std::vector<double>> &countsInFrame,
                               const size_t &totalFilePaths, int &fileCount) {
   // Create file reader
@@ -529,19 +476,11 @@ void LoadNGEM::loadSingleFile(const std::vector<std::string> &filePath, int &eve
       uint64_t pixel = event.coincidence.getPixel();
       // Convert to microseconds (us)
       const double tof = event.coincidence.timeOfFlight / 1000.0;
-
-      if (tof > maxToF) {
-        maxToF = tof;
-      } else if (tof < minToF) {
-        minToF = tof;
-      }
       const int bin_idx = static_cast<int>(std::ceil((tof - minToF) / binWidth)) - 1;
       countsInFrame[pixel][bin_idx]++;
-
     } else if (event.tZero.check()) { // Check for T0 event.
       addFrameToOutputWorkspace(rawFrames, goodFrames, eventCountInFrame, minEventsReq, maxEventsReq, frameEventCounts,
                                 counts, countsInFrame);
-
       if (reportProgressAndCheckCancel(numProcessedEvents, eventCountInFrame, totalNumEvents, totalFilePaths,
                                        fileCount)) {
         return;
@@ -701,4 +640,64 @@ std::pair<std::string, std::string> LoadNGEM::validateMinMaxToF() {
   return {};
 }
 
+LoadDataResult LoadNGEM::readDataAsEvents(double minToF, double maxToF, const double binWidth, const int minEventsReq,
+                                          const int maxEventsReq,
+                                          const std::vector<std::vector<std::string>> &filePaths) {
+  int eventCountInFrame{0};
+  int counter{1};
+  int rawFrames{0};
+  int goodFrames{0};
+  std::vector<double> frameEventCounts;
+  API::MatrixWorkspace_sptr dataWorkspace;
+  size_t totalFilePaths(filePaths.size());
+
+  std::vector<DataObjects::EventList> events, eventsInFrame;
+
+  events.resize(NUM_OF_SPECTRA);
+  eventsInFrame.resize(NUM_OF_SPECTRA);
+  progress(0.04);
+  for (const auto &filePath : filePaths) {
+    loadSingleFile(filePath, eventCountInFrame, maxToF, minToF, rawFrames, goodFrames, minEventsReq, maxEventsReq,
+                   frameEventCounts, events, eventsInFrame, totalFilePaths, counter);
+  }
+  addFrameToOutputWorkspace(rawFrames, goodFrames, eventCountInFrame, minEventsReq, maxEventsReq, frameEventCounts,
+                            events, eventsInFrame);
+  progress(0.90);
+  dataWorkspace = createEventWorkspace(maxToF, binWidth, events);
+
+  return {rawFrames, goodFrames, frameEventCounts, dataWorkspace};
+}
+
+LoadDataResult LoadNGEM::readDataAsHistograms(const double minToF, const double maxToF, const double binWidth,
+                                              const int minEventsReq, const int maxEventsReq,
+                                              const std::vector<std::vector<std::string>> &filePaths) {
+  int eventCountInFrame{0};
+  int counter{1};
+  int rawFrames{0};
+  int goodFrames{0};
+  std::vector<double> frameEventCounts;
+  API::MatrixWorkspace_sptr dataWorkspace;
+  size_t totalFilePaths(filePaths.size());
+
+  std::vector<double> binEdges;
+  std::vector<std::vector<double>> counts;
+  std::vector<std::vector<double>> countsInFrame;
+
+  binEdges = calculateBinEdges(minToF, maxToF, binWidth);
+  counts.resize(NUM_OF_SPECTRA);
+  for (auto &item : counts) {
+    item.resize(binEdges.size() - 1);
+  }
+  countsInFrame = counts;
+  progress(0.04);
+  for (const auto &filePath : filePaths) {
+    loadSingleFile(filePath, eventCountInFrame, minToF, binWidth, rawFrames, goodFrames, minEventsReq, maxEventsReq,
+                   frameEventCounts, counts, countsInFrame, totalFilePaths, counter);
+  }
+  addFrameToOutputWorkspace(rawFrames, goodFrames, eventCountInFrame, minEventsReq, maxEventsReq, frameEventCounts,
+                            counts, countsInFrame);
+  progress(0.90);
+  dataWorkspace = createHistogramWorkspace(std::move(binEdges), std::move(counts));
+  return {rawFrames, goodFrames, frameEventCounts, dataWorkspace};
+}
 } // namespace Mantid::DataHandling

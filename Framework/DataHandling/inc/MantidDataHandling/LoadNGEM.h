@@ -83,6 +83,14 @@ union EventUnion {
   DetectorWord splitWord;
 };
 
+/// Holds variables tracking the data load across all files
+struct LoadDataResult {
+  int rawFrames = 0;
+  int goodFrames = 0;
+  std::vector<double> frameEventCounts;
+  API::MatrixWorkspace_sptr dataWorkspace;
+};
+
 class MANTID_DATAHANDLING_DLL LoadNGEM : public API::IFileLoader<Kernel::FileDescriptor> {
 public:
   /// Algorithm's name for identification.
@@ -112,7 +120,7 @@ private:
                       int &rawFrames, int &goodFrames, const int &minEventsReq, const int &maxEventsReq,
                       MantidVec &frameEventCounts, std::vector<DataObjects::EventList> &events,
                       std::vector<DataObjects::EventList> &eventsInFrame, const size_t &totalFilePaths, int &fileCount);
-  void loadSingleFile(const std::vector<std::string> &filePath, int &eventCountInFrame, double &maxToF, double &minToF,
+  void loadSingleFile(const std::vector<std::string> &filePath, int &eventCountInFrame, const double &minToF,
                       const double &binWidth, int &rawFrames, int &goodFrames, const int &minEventsReq,
                       const int &maxEventsReq, MantidVec &frameEventCounts, std::vector<std::vector<double>> &counts,
                       std::vector<std::vector<double>> &countsInFrame, const size_t &totalFilePaths, int &fileCount);
@@ -131,6 +139,13 @@ private:
   std::pair<std::string, std::string> validateEventsPerFrame();
   /// Validate minimum and maximum TOF
   std::pair<std::string, std::string> validateMinMaxToF();
+  /// Read data from files into as histograms into a workspace2D
+  LoadDataResult readDataAsHistograms(const double minToF, const double maxToF, const double binWidth,
+                                      const int minEventsReq, const int maxEventsReq,
+                                      const std::vector<std::vector<std::string>> &filePaths);
+  /// Read data from files into an event workspace, preserving events
+  LoadDataResult readDataAsEvents(double minToF, double maxToF, const double binWidth, const int minEventsReq,
+                                  const int maxEventsReq, const std::vector<std::vector<std::string>> &filePaths);
 };
 
 } // namespace DataHandling
