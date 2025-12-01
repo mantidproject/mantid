@@ -15,3 +15,4 @@ jobs:
         with:
           farthest: false      # false = use current milestone by due date
           overwrite: false     # don't overwrite if milestone already exists
+          token: ${{ secrets.GITHUB_TOKEN }}
