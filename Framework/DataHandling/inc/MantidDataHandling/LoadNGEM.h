@@ -93,17 +93,18 @@ struct LoadDataResult {
 
 class LoadDataStrategyBase {
 public:
-  virtual void addEvent(double minToF, double maxToF, const double tof, const double binWidth, const size_t pixel) = 0;
-  virtual void addFrame(int rawFrames, int goodFrames, const int eventCountInFrame, const int minEventsReq,
+  virtual void addEvent(double &minToF, double &maxToF, const double tof, const double binWidth,
+                        const size_t pixel) = 0;
+  virtual void addFrame(int &rawFrames, int &goodFrames, const int eventCountInFrame, const int minEventsReq,
                         const int maxEventsReq, MantidVec &frameEventCounts) = 0;
 };
 
 class LoadDataStrategyHisto final : public LoadDataStrategyBase {
 public:
   LoadDataStrategyHisto(const int minToF, const int maxToF, const int binWidth);
-  void addEvent(double minToF, double maxToF, const double tof, const double binWidth,
+  void addEvent(double &minToF, double &maxToF, const double tof, const double binWidth,
                 const size_t pixel) override final;
-  void addFrame(int rawFrames, int goodFrames, const int eventCountInFrame, const int minEventsReq,
+  void addFrame(int &rawFrames, int &goodFrames, const int eventCountInFrame, const int minEventsReq,
                 const int maxEventsReq, MantidVec &frameEventCounts) override;
   inline std::vector<std::vector<double>> &getCounts() { return m_counts; }
   inline std::vector<double> &getBinEdges() { return m_binEdges; }
@@ -117,9 +118,9 @@ private:
 class LoadDataStrategyEvent final : public LoadDataStrategyBase {
 public:
   LoadDataStrategyEvent();
-  void addEvent(double minToF, double maxToF, const double tof, const double binWidth,
+  void addEvent(double &minToF, double &maxToF, const double tof, const double binWidth,
                 const size_t pixel) override final;
-  void addFrame(int rawFrames, int goodFrames, const int eventCountInFrame, const int minEventsReq,
+  void addFrame(int &rawFrames, int &goodFrames, const int eventCountInFrame, const int minEventsReq,
                 const int maxEventsReq, MantidVec &frameEventCounts) override;
   std::vector<DataObjects::EventList> &getEvents() { return m_events; }
 

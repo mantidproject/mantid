@@ -306,7 +306,7 @@ void LoadNGEM::exec() {
   LoadDataResult res;
   if (preserveEvents) {
     res = readDataAsEvents(minToF, maxToF, binWidth, minEventsReq, maxEventsReq, filePaths);
-  } else if (!preserveEvents) {
+  } else {
     res = readDataAsHistograms(minToF, maxToF, binWidth, minEventsReq, maxEventsReq, filePaths);
   }
 
@@ -624,7 +624,7 @@ LoadDataResult LoadNGEM::readDataAsHistograms(double minToF, double maxToF, cons
  * @param binWidth The width of each histogram bin
  * @param pixel The detector pixel index.
  */
-void LoadDataStrategyHisto::addEvent(double minToF, double maxToF, const double tof, const double binWidth,
+void LoadDataStrategyHisto::addEvent(double &minToF, double &maxToF, const double tof, const double binWidth,
                                      const size_t pixel) {
   (void)maxToF;
   const int bin_idx = static_cast<int>(std::ceil((tof - minToF) / binWidth)) - 1;
@@ -641,14 +641,14 @@ void LoadDataStrategyHisto::addEvent(double minToF, double maxToF, const double 
  * @param maxEventsReq The maximum events required to be considered a good frame
  * @param frameEventCounts Event count by frame
  */
-void LoadDataStrategyHisto::addFrame(int rawFrames, int goodFrames, const int eventCountInFrame, const int minEventsReq,
-                                     const int maxEventsReq, MantidVec &frameEventCounts) {
+void LoadDataStrategyHisto::addFrame(int &rawFrames, int &goodFrames, const int eventCountInFrame,
+                                     const int minEventsReq, const int maxEventsReq, MantidVec &frameEventCounts) {
   addFrameToOutputWorkspace(rawFrames, goodFrames, eventCountInFrame, minEventsReq, maxEventsReq, frameEventCounts,
                             m_counts, m_countsInFrame);
 }
 
-LoadDataStrategyHisto::LoadDataStrategyHisto(const int minToF, const int maxToF, const int binWidth) {
-  m_binEdges = calculateBinEdges(minToF, maxToF, binWidth);
+LoadDataStrategyHisto::LoadDataStrategyHisto(const int minToF, const int maxToF, const int binWidth)
+    : m_binEdges{calculateBinEdges(minToF, maxToF, binWidth)} {
   m_counts.resize(NUM_OF_SPECTRA);
   for (auto &item : m_counts) {
     item.resize(m_binEdges.size() - 1);
@@ -665,7 +665,7 @@ LoadDataStrategyHisto::LoadDataStrategyHisto(const int minToF, const int maxToF,
  * @param binWidth The width of each histogram bin
  * @param pixel The detector pixel index.
  */
-void LoadDataStrategyEvent::addEvent(double minToF, double maxToF, const double tof, const double binWidth,
+void LoadDataStrategyEvent::addEvent(double &minToF, double &maxToF, const double tof, const double binWidth,
                                      const size_t pixel) {
   (void)binWidth;
   if (tof > maxToF) {
@@ -686,8 +686,8 @@ void LoadDataStrategyEvent::addEvent(double minToF, double maxToF, const double 
  * @param maxEventsReq The maximum events required to be considered a good frame
  * @param frameEventCounts Event count by frame
  */
-void LoadDataStrategyEvent::addFrame(int rawFrames, int goodFrames, const int eventCountInFrame, const int minEventsReq,
-                                     const int maxEventsReq, MantidVec &frameEventCounts) {
+void LoadDataStrategyEvent::addFrame(int &rawFrames, int &goodFrames, const int eventCountInFrame,
+                                     const int minEventsReq, const int maxEventsReq, MantidVec &frameEventCounts) {
   addFrameToOutputWorkspace(rawFrames, goodFrames, eventCountInFrame, minEventsReq, maxEventsReq, frameEventCounts,
                             m_events, m_eventsInFrame);
 }
