@@ -14,6 +14,22 @@ class SAMPENV(Enum):
     CRYO = "WISHcryo"
 
 
+class FRAME(Enum):
+    SF = 110000  # max. TOF in raw data as integer
+    DF = 206000
+
+
+WAVELENGTH_MIN = 0.7
+WAVELENGTH_CROPPING = {FRAME.SF: {"XMin": WAVELENGTH_MIN, "XMax": 10.35}, FRAME.DF: {"XMin": WAVELENGTH_MIN, "XMax": 20.0}}
+TOF_MIN = 6000
+TOF_CROPPING = {FRAME.SF: {"XMin": TOF_MIN, "XMax": 99900}, FRAME.DF: {"XMin": TOF_MIN, "XMax": 199900}}
+DF_PROMPTPULSE = {"XMin": TOF_CROPPING[FRAME.DF]["XMax"], "XMax": 106000}
+DSPAC_FOC_CROPPING = {
+    "XMins": np.array([0.8, 0.5, 0.5, 0.4, 0.35]),
+    "XMaxs": np.array([53.3, 13.1, 7.77, 5.86, 4.99]),
+}  # for SF (multiply max x2 for DF)
+
+
 class WishPowder:
     def __init__(
         self,
@@ -78,6 +94,14 @@ class WishPowder:
         else:
             return None
 
+    @staticmethod
+    def _get_frame(ws):
+        # get from chopper 1 frequency (10 for DF, 20 for SF)
+        freq = WishPowder.retrieve(ws).run().getPropertyAsSingleValueWithTimeAveragedMean("fr_chop1_tgt")
+        if abs(freq - 10) < 1:
+            return FRAME.DF
+        return FRAME.SF
+
     def load(self, runno, ext=None, out_wsname=None):
         if ext is None:
             ext = self.default_ext
@@ -85,18 +109,21 @@ class WishPowder:
         fname = f"WISH{runno:08d}"
         wsname = fname if out_wsname is None else out_wsname
         ws = mantid.Load(Filename=f"{fname}.{ext}", OutputWorkspace=wsname)
+        frame = self._get_frame(ws)
         if isinstance(ws, EventWorkspace):
-            mantid.Rebin(InputWorkspace=wsname, OutputWorkspace=wsname, Params="6000,-0.00063,110000")
+            mantid.Rebin(InputWorkspace=wsname, OutputWorkspace=wsname, Params="-0.00063")
             mantid.ConvertToMatrixWorkspace(InputWorkspace=wsname, OutputWorkspace=wsname)
         # apply calibration
         mantid.ApplyDiffCal(InstrumentWorkspace=wsname, CalibrationFile=self._get_cal_filepath())
         # mask
         self.apply_mask_to_ws(wsname)
-        # crop prompt pulse in TOF single-frame
-        mantid.CropWorkspace(InputWorkspace=wsname, OutputWorkspace=wsname, XMin=6000, XMax=99000)
+        # crop data
+        mantid.CropWorkspace(InputWorkspace=wsname, OutputWorkspace=wsname, **TOF_CROPPING[frame])
+        if frame == FRAME.DF:
+            mantid.MaskBins(InputWorkspace=wsname, OutputWorkspace=wsname, **DF_PROMPTPULSE)
         # crop in wavelength
         mantid.ConvertUnits(InputWorkspace=wsname, OutputWorkspace=wsname, Target="Wavelength", Emode="Elastic")
-        mantid.CropWorkspace(InputWorkspace=wsname, OutputWorkspace=wsname, XMin=0.7, XMax=10.35)
+        mantid.CropWorkspace(InputWorkspace=wsname, OutputWorkspace=wsname, **WAVELENGTH_CROPPING[frame])
         # normalise by monitor
         self.normalise_by_monitor(wsname)
         return wsname
@@ -104,8 +131,13 @@ class WishPowder:
     def normalise_by_monitor(self, wsname):
         wsname_mon = self._process_monitor(wsname)
         mantid.NormaliseToMonitor(InputWorkspace=wsname, OutputWorkspace=wsname, MonitorWorkspace=wsname_mon)
+        frame = self._get_frame(wsname_mon)
         mantid.NormaliseToMonitor(
-            InputWorkspace=wsname, OutputWorkspace=wsname, MonitorWorkspace=wsname_mon, IntegrationRangeMin=0.7, IntegrationRangeMax=10.35
+            InputWorkspace=wsname,
+            OutputWorkspace=wsname,
+            MonitorWorkspace=wsname_mon,
+            IntegrationRangeMin=WAVELENGTH_CROPPING[frame]["XMin"],
+            IntegrationRangeMax=WAVELENGTH_CROPPING[frame]["XMax"],
         )
         mantid.ReplaceSpecialValues(
             InputWorkspace=wsname, OutputWorkspace=wsname, NaNValue=0.0, NaNError=0.0, InfinityValue=0.0, InfinityError=0.0
@@ -128,7 +160,7 @@ class WishPowder:
                 if ws_empty:
                     mantid.Minus(LHSWorkspace=wsname, RHSWorkspace=ws_empty, OutputWorkspace=wsname)
                 else:
-                    logger.warning("Empty worksapce not subtracted as no workspace found and no empty_runno provided.")
+                    logger.warning("Empty workspace not subtracted as no workspace found and no empty_runno provided.")
             # correct for attenuation
             if "Material" in self.sample:
                 mantid.SetSample(InputWorkspace=wsname, **self.sample())
@@ -290,9 +322,12 @@ class WishPowder:
 
     @staticmethod
     def _crop_focussed_in_dspac(ws_foc):
-        xmins = cycle([0.8, 0.5, 0.5, 0.4, 0.35])
-        xmaxs = cycle([53.3, 13.1, 7.77, 5.86, 4.99])
         ws_foc = WishPowder.retrieve(ws_foc)
+        xmins = (cycle(DSPAC_FOC_CROPPING["XMins"]),)
+        xmaxs = DSPAC_FOC_CROPPING["XMins"]
+        if WishPowder._get_frame(ws_foc) == FRAME.DF:
+            xmaxs = 2 * xmaxs
+        xmaxs = cycle(xmaxs)
         for ispec in range(ws_foc.getNumberHistograms()):
             ws_foc = mantid.MaskBins(
                 InputWorkspace=ws_foc, OutputWorkspace=ws_foc.name(), XMin=0, XMax=next(xmins), InputWorkspaceIndexSet=ispec
