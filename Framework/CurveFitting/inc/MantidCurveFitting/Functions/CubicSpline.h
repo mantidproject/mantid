@@ -10,6 +10,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/Functions/BackgroundFunction.h"
+#include "MantidKernel/GSL_Helpers.h"
 
 #include <boost/scoped_array.hpp>
 #include <gsl/gsl_errno.h>
@@ -51,17 +52,11 @@ private:
   /// Minimum number of data points in spline
   const int m_min_points;
 
-  /// Functor to free a GSL objects in a shared pointer
-  struct GSLFree {
-    void operator()(gsl_spline *spline) { gsl_spline_free(spline); }
-    void operator()(gsl_interp_accel *acc) { gsl_interp_accel_free(acc); }
-  } m_gslFree;
-
   /// GSL interpolation accelerator object
-  std::shared_ptr<gsl_interp_accel> m_acc;
+  Mantid::Kernel::spline::accel_uptr m_acc;
 
   /// GSL data structure used to calculate spline
-  std::shared_ptr<gsl_spline> m_spline;
+  Mantid::Kernel::spline::spline_uptr m_spline;
 
   /// Flag for checking if the spline needs recalculating
   mutable bool m_recalculateSpline;

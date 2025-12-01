@@ -34,8 +34,8 @@ DECLARE_FUNCTION(CubicSpline)
  *
  */
 CubicSpline::CubicSpline()
-    : m_min_points(3), m_acc(gsl_interp_accel_alloc(), m_gslFree),
-      m_spline(gsl_spline_alloc(gsl_interp_cspline, m_min_points), m_gslFree), m_recalculateSpline(true) {
+    : m_min_points(3), m_acc(Kernel::spline::make_interp_accel()),
+      m_spline(gsl_spline_alloc(gsl_interp_cspline, m_min_points)), m_recalculateSpline(true) {
   // setup class with a default set of attributes
   declareAttribute("n", Attribute(m_min_points));
 
@@ -345,7 +345,7 @@ void CubicSpline::initGSLObjects(boost::scoped_array<double> &x, boost::scoped_a
  * @param n :: The new size of the spline object
  */
 void CubicSpline::reallocGSLObjects(const int n) {
-  m_spline.reset(gsl_spline_alloc(gsl_interp_cspline, n), m_gslFree);
+  m_spline.reset(gsl_spline_alloc(gsl_interp_cspline, n));
   gsl_interp_accel_reset(m_acc.get());
 }
 
