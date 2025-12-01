@@ -80,28 +80,6 @@ class PeaksWorkspaceListWidget(QListWidget):
         event.acceptProposedAction()
 
 
-class MasksWorkspaceListWidget(QListWidget):
-    def __init__(self, parent):
-        super().__init__(parent)
-        self.setDragDropMode(QAbstractItemView.DropOnly)
-
-    def dragEnterEvent(self, event: QDragEnterEvent):
-        if event.mimeData().hasText():
-            event.acceptProposedAction()
-
-    def dragMoveEvent(self, event: QDragMoveEvent):
-        if event.mimeData().hasText():
-            event.acceptProposedAction()
-
-    def dropEvent(self, event: QDropEvent):
-        drop_text = event.mimeData().text()
-        for i in range(self.count()):
-            item = self.item(i)
-            if item.text() == drop_text:
-                item.setCheckState(Qt.Checked)
-        event.acceptProposedAction()
-
-
 class FullInstrumentViewWindow(QMainWindow):
     """View for the Instrument View window. Contains the 3D view, the projection view, boxes showing information about the selected
     detector, and a line plot of selected detector(s)"""
@@ -217,7 +195,7 @@ class FullInstrumentViewWindow(QMainWindow):
         pre_list_layout.addWidget(self._add_cylinder)
         pre_list_layout.addWidget(self._cylinder_select)
         pre_list_layout.addWidget(self._clear_masks)
-        self._mask_list = MasksWorkspaceListWidget(self)
+        self._mask_list = QListWidget(self)
         self._mask_list.setSizeAdjustPolicy(QListWidget.AdjustToContents)
         self._mask_list.setSelectionMode(QAbstractItemView.NoSelection)
         post_list_layout = QHBoxLayout()

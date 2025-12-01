@@ -73,13 +73,13 @@ class FullInstrumentViewModel:
         phi = detector_info_table.columnArray("Phi")
         self._spherical_positions = np.transpose(np.vstack([r, theta, phi]))
         self._detector_positions_3d = detector_info_table.columnArray("Position")
-        self._workspace_indices = detector_info_table.columnArray("Index").astype(int)
+        self._workspace_indices = detector_info_table.columnArray("Index")
         # Array of strings 'yes', 'no' and 'n/a'
         self._is_monitor = detector_info_table.columnArray("Monitor")
         self._is_valid = self._is_monitor == "no"
         self._mask_ws, mask_list = ExtractMask(self._workspace, StoreInADS=False)
         self._is_masked_in_ws = self._mask_ws.extractY().flatten().astype(bool)
-        # For computing current mask, detateched from the permanent mask in ws
+        # For computing current mask, detached from the permanent mask in ws
         self._is_masked = self._is_masked_in_ws
         self._monitor_positions = self._detector_positions_3d[self._is_monitor == "yes"]
 
