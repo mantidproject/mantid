@@ -346,6 +346,7 @@ set(PYTHON_PLUGINS
     algorithms/WorkflowAlgorithms/SingleCrystalDiffuseReduction.py
     algorithms/WorkflowAlgorithms/SofQWMoments.py
     algorithms/WorkflowAlgorithms/SofQWMomentsScan.py
+    algorithms/WorkflowAlgorithms/StitchByBackground.py
     algorithms/WorkflowAlgorithms/SwapWidths.py
     algorithms/WorkflowAlgorithms/TOSCABankCorrection.py
     algorithms/WorkflowAlgorithms/TimeSlice.py
