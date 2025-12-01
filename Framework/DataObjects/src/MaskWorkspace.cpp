@@ -182,16 +182,24 @@ bool MaskWorkspace::isMasked(const detid_t detectorID) const {
     throw std::runtime_error(msg.str());
   }
 
+  // return true if the value isn't zero
   // TODO: remove this case
   //       and refactor code that depends on non-existence = masked
-  if (!this->contains(detectorID))
+  if (this->getValue(detectorID, LIVE_VALUE) != LIVE_VALUE) {
     return true;
+  }
 
-  // if you are fetching detectorID's that dont exist in your mask workspace
-  // this is expected to explode(throw an exception)
-  // otherwise we are **masking** an issue with the consuming code
-  // especially if the underlying index map is desynced
-  return this->getValue(detectorID) != LIVE_VALUE;
+  // the mask bit on the workspace can be set
+  // Performance wise, it is not optimal to call detectorInfo() for every index,
+  // but this method seems to be used rarely enough to justify this until the
+  // Instrument-2.0 implementation has progressed far enough to make this cheap.
+  const auto &detectorInfo = this->detectorInfo();
+  try {
+    return detectorInfo.isMasked(detectorInfo.indexOf(detectorID));
+  } catch (std::out_of_range &) {
+    // The workspace can contain bad detector IDs. DetectorInfo::indexOf throws.
+    return false;
+  }
 }
 
 /**
