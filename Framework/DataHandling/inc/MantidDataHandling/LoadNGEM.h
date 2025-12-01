@@ -131,11 +131,6 @@ private:
   std::pair<std::string, std::string> validateEventsPerFrame();
   /// Validate minimum and maximum TOF
   std::pair<std::string, std::string> validateMinMaxToF();
-  /// Insert validation result into result map
-  void insertValidationResult(const std::pair<std::string, std::string> &result,
-                              std::map<std::string, std::string> &results);
-  /// Generate bin edge vector if not preserving events
-  std::vector<double> calculateBinEdges(const double minToF, const double maxToF, const double binWidth) const;
 };
 
 } // namespace DataHandling

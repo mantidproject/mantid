@@ -171,9 +171,8 @@ API::MatrixWorkspace_sptr createEventWorkspace(const double &maxToF, const doubl
 /**
  * @brief Creates an event workspace and fills it with the data.
  *
- * @param maxToF The largest ToF seen so far.
- * @param binWidth The width of each bin.
- * @param events The main events data.
+ * @param binEdges A vector of bin edges to be shared between histograms.
+ * @param counts A vector containing a sub vector for each spectra, each containing counts.
  */
 API::MatrixWorkspace_sptr createHistogramWorkspace(std::vector<double> &&binEdges,
                                                    std::vector<std::vector<double>> &&counts) {
@@ -202,6 +201,28 @@ void addToSampleLog(const std::string &name, const ValueType &value, API::Matrix
   ws->mutableRun().addProperty(name, value, false);
 }
 
+/**
+ * @brief Insert validation results into map, if there is an error.
+ */
+void insertValidationResult(const std::pair<std::string, std::string> &result,
+                            std::map<std::string, std::string> &results) {
+  if (result.first.empty()) {
+    return;
+  }
+  results.insert(result);
+}
+
+/**
+ * @brief Calculate bin edges from min/max ToF and bin width.
+ *
+ * @return std::vector<double> containing bin edge values.
+ */
+std::vector<double> calculateBinEdges(const double minToF, const double maxToF, const double binWidth) {
+  const int numBins = static_cast<int>(std::ceil((maxToF - minToF) / binWidth));
+  auto custom_range =
+      std::views::iota(0) | std::views::transform([&binWidth, &minToF](int n) { return minToF + (n * binWidth); });
+  return {custom_range.begin(), custom_range.begin() + numBins + 1};
+}
 } // namespace
 
 /**
@@ -451,11 +472,11 @@ void LoadNGEM::loadSingleFile(const std::vector<std::string> &filePath, int &eve
  * @param eventCountInFrame The number of events in the current frame.
  * @param maxToF The highest detected ToF
  * @param minToF The lowest detected ToF
+ * @param binWidth The width of histogram bins in ToF
  * @param rawFrames The number of T0 Events detected so far.
  * @param goodFrames The number of good frames detected so far.
  * @param minEventsReq The number of events required to be a good frame.
  * @param maxEventsReq The max events allowed to be a good frame.
- * @param binEdges A vector of containing the histogram bine dges.
  * @param counts A vector containing the histogram counts.
  * @param countsInFrame A map of count index: count, for those events in frame.
  * @param totalFilePaths The total number of file paths.
@@ -636,6 +657,11 @@ std::map<std::string, std::string> LoadNGEM::validateInputs() {
   return results;
 }
 
+/**
+ * @brief validate min/max events per frame inputs.
+ *
+ * @return std::pair<std::string, std::string> subject property: error message.
+ */
 std::pair<std::string, std::string> LoadNGEM::validateEventsPerFrame() {
   const int MinEventsPerFrame = getProperty("MinEventsPerFrame");
   const int MaxEventsPerFrame = getProperty("MaxEventsPerFrame");
@@ -645,6 +671,11 @@ std::pair<std::string, std::string> LoadNGEM::validateEventsPerFrame() {
   return {};
 }
 
+/**
+ * @brief validate min/max ToF inputs.
+ *
+ * @return std::pair<std::string, std::string> subject property: error message.
+ */
 std::pair<std::string, std::string> LoadNGEM::validateMinMaxToF() {
   const double minToF = getProperty("MinToF");
   const double maxToF = getProperty("MaxToF");
@@ -668,21 +699,6 @@ std::pair<std::string, std::string> LoadNGEM::validateMinMaxToF() {
     return {"MaxToF", "MaxToF is less than or equal to MinToF"};
   }
   return {};
-}
-
-void LoadNGEM::insertValidationResult(const std::pair<std::string, std::string> &result,
-                                      std::map<std::string, std::string> &results) {
-  if (result.first.empty()) {
-    return;
-  }
-  results.insert(result);
-}
-
-std::vector<double> LoadNGEM::calculateBinEdges(const double minToF, const double maxToF, const double binWidth) const {
-  const int numBins = static_cast<int>(std::ceil((maxToF - minToF) / binWidth));
-  auto custom_range =
-      std::views::iota(0) | std::views::transform([&binWidth, &minToF](int n) { return minToF + (n * binWidth); });
-  return {custom_range.begin(), custom_range.begin() + numBins + 1};
 }
 
 } // namespace Mantid::DataHandling
