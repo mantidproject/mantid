@@ -202,16 +202,19 @@ public:
     fun.setParameter("Sigma", 0.3);
     fun.function(domain, values);
 
-    TS_ASSERT_DELTA(values.getCalculated(0), 0.00537128264648, 1e-9);
-    TS_ASSERT_DELTA(values.getCalculated(1), 0.0298776137685, 1e-9);
-    TS_ASSERT_DELTA(values.getCalculated(2), 0.108112093951, 1e-9);
-    TS_ASSERT_DELTA(values.getCalculated(3), 0.254691556195, 1e-9);
-    TS_ASSERT_DELTA(values.getCalculated(4), 0.390857798247, 1e-9);
-    TS_ASSERT_DELTA(values.getCalculated(5), 0.390857798247, 1e-9);
-    TS_ASSERT_DELTA(values.getCalculated(6), 0.254691556195, 1e-9);
-    TS_ASSERT_DELTA(values.getCalculated(7), 0.108112093951, 1e-9);
-    TS_ASSERT_DELTA(values.getCalculated(8), 0.0298776137685, 1e-9);
-    TS_ASSERT_DELTA(values.getCalculated(9), 0.00537128264648, 1e-9);
+    // normalise expected height by bin_width
+    auto dx = domain[1] - domain[0];
+
+    TS_ASSERT_DELTA(values.getCalculated(0), 0.00537128264648 / dx, 1e-9);
+    TS_ASSERT_DELTA(values.getCalculated(1), 0.0298776137685 / dx, 1e-9);
+    TS_ASSERT_DELTA(values.getCalculated(2), 0.108112093951 / dx, 1e-9);
+    TS_ASSERT_DELTA(values.getCalculated(3), 0.254691556195 / dx, 1e-9);
+    TS_ASSERT_DELTA(values.getCalculated(4), 0.390857798247 / dx, 1e-9);
+    TS_ASSERT_DELTA(values.getCalculated(5), 0.390857798247 / dx, 1e-9);
+    TS_ASSERT_DELTA(values.getCalculated(6), 0.254691556195 / dx, 1e-9);
+    TS_ASSERT_DELTA(values.getCalculated(7), 0.108112093951 / dx, 1e-9);
+    TS_ASSERT_DELTA(values.getCalculated(8), 0.0298776137685 / dx, 1e-9);
+    TS_ASSERT_DELTA(values.getCalculated(9), 0.00537128264648 / dx, 1e-9);
 
     EigenJacobian jacobian(fun, 10);
     fun.functionDeriv(domain, jacobian);
@@ -253,25 +256,25 @@ public:
       FunctionValues values(domain);
       fun.function(domain, values);
       TS_ASSERT_DELTA(fun.intensity(), a, 1e-15);
-      TS_ASSERT_DELTA(values[0], a, 1e-15);
+      TS_ASSERT_DELTA(values[0] * 20, a, 1e-15);
     }
     { // 1-sigma
       FunctionDomain1DHistogram domain({-sigma, sigma});
       FunctionValues values(domain);
       fun.function(domain, values);
-      TS_ASSERT_DELTA(values[0], 0.6826 * a, 1e-3);
+      TS_ASSERT_DELTA(values[0] * 2 * sigma, 0.6826 * a, 1e-3);
     }
     { // 2-sigma
       FunctionDomain1DHistogram domain({-2.0 * sigma, 2.0 * sigma});
       FunctionValues values(domain);
       fun.function(domain, values);
-      TS_ASSERT_DELTA(values[0], 0.9544 * a, 1e-3);
+      TS_ASSERT_DELTA(values[0] * 4 * sigma, 0.9544 * a, 1e-3);
     }
     { // 3-sigma
       FunctionDomain1DHistogram domain({-3.0 * sigma, 3.0 * sigma});
       FunctionValues values(domain);
       fun.function(domain, values);
-      TS_ASSERT_DELTA(values[0], 0.9973 * a, 1e-3);
+      TS_ASSERT_DELTA(values[0] * 6 * sigma, 0.9973 * a, 1e-3);
     }
   }
 
@@ -286,7 +289,9 @@ public:
     fit.execute();
     IFunction_sptr fun = fit.getProperty("Function");
 
-    TS_ASSERT_DELTA(fun->getParameter("Height"), 1.0 / 0.2 / sqrt(2.0 * M_PI), 1e-5);
+    // normalise expected height by bin_width
+    auto dx = ws->readX(0)[1] - ws->readX(0)[0];
+    TS_ASSERT_DELTA(fun->getParameter("Height"), dx / (0.2 * sqrt(2.0 * M_PI)), 1e-5); // ~1.995
     TS_ASSERT_DELTA(fun->getParameter("PeakCentre"), 0.0, 1e-5);
     TS_ASSERT_DELTA(fun->getParameter("Sigma"), 0.2, 1e-5);
 
@@ -372,7 +377,9 @@ public:
 
     TS_ASSERT_DELTA(fun->getParameter("f0.A0"), 3.1, 1e-5);
     TS_ASSERT_DELTA(fun->getParameter("f0.A1"), 0.3, 1e-5);
-    TS_ASSERT_DELTA(fun->getParameter("f1.Height"), 1.0 / 0.2 / sqrt(2.0 * M_PI), 1e-4);
+    // normalise expected height by bin_width
+    auto dx = ws->readX(0)[1] - ws->readX(0)[0];
+    TS_ASSERT_DELTA(fun->getParameter("f1.Height"), dx / 0.2 / sqrt(2.0 * M_PI), 1e-4);
     TS_ASSERT_DELTA(fun->getParameter("f1.PeakCentre"), 0.0, 1e-5);
     TS_ASSERT_DELTA(fun->getParameter("f1.Sigma"), 0.2, 1e-5);
 
