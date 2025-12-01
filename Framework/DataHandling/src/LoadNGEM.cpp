@@ -640,6 +640,17 @@ std::pair<std::string, std::string> LoadNGEM::validateMinMaxToF() {
   return {};
 }
 
+/**
+ * @brief Read data from provided file paths into event lists, output an event workspace.
+ *
+ * @param minToF The minimum ToF value to consider
+ * @param maxToF The maximum ToF value to consider
+ * @param binWidth The width of bins that the events will be projected into by the resultant workspace
+ * @param minEventsReq The minimum events required in to consider a frame good.
+ * @param maxEventsReq The maximum events required in to consider a frame good.
+ * @param filePaths Paths to the data file to read.
+ * @return A struct containing the output workspace and variables tracking frames
+ */
 LoadDataResult LoadNGEM::readDataAsEvents(double minToF, double maxToF, const double binWidth, const int minEventsReq,
                                           const int maxEventsReq,
                                           const std::vector<std::vector<std::string>> &filePaths) {
@@ -668,6 +679,17 @@ LoadDataResult LoadNGEM::readDataAsEvents(double minToF, double maxToF, const do
   return {rawFrames, goodFrames, frameEventCounts, dataWorkspace};
 }
 
+/**
+ * @brief Read data from provided file paths into a histograms, output a workspace2D.
+ *
+ * @param minToF The minimum ToF value to consider
+ * @param maxToF The maximum ToF value to consider
+ * @param binWidth The width of bins that the events will be projected into by the resultant workspace
+ * @param minEventsReq The minimum events required in to consider a frame good.
+ * @param maxEventsReq The maximum events required in to consider a frame good.
+ * @param filePaths Paths to the data file to read.
+ * @return A struct containing the output workspace and variables tracking frames
+ */
 LoadDataResult LoadNGEM::readDataAsHistograms(const double minToF, const double maxToF, const double binWidth,
                                               const int minEventsReq, const int maxEventsReq,
                                               const std::vector<std::vector<std::string>> &filePaths) {
