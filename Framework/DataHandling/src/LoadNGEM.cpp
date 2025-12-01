@@ -9,7 +9,7 @@
 #include "MantidAPI/MultipleFileProperty.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/Run.h"
-#include "MantidAPI/WorkspaceFactory.h"
+
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
@@ -175,13 +175,13 @@ API::MatrixWorkspace_sptr createEventWorkspace(const double &maxToF, const doubl
  * @param binWidth The width of each bin.
  * @param events The main events data.
  */
-API::MatrixWorkspace_sptr createHistogramWorkspace(const std::vector<double> &binEdges,
-                                                   const std::vector<std::vector<double>> &counts) {
-  API::MatrixWorkspace_sptr dataWorkspace =
-      API::WorkspaceFactory::Instance().create("Workspace2D", NUM_OF_SPECTRA, binEdges.size(), binEdges.size() - 1);
+API::MatrixWorkspace_sptr createHistogramWorkspace(std::vector<double> &&binEdges,
+                                                   std::vector<std::vector<double>> &&counts) {
+  const HistogramData::BinEdges bins{std::move(binEdges)};
+  API::MatrixWorkspace_sptr dataWorkspace = DataObjects::create<DataObjects::Workspace2D>(NUM_OF_SPECTRA, bins);
   PARALLEL_FOR_NO_WSP_CHECK()
   for (int i = 0; i < NUM_OF_SPECTRA; ++i) {
-    dataWorkspace->setHistogram(i, HistogramData::BinEdges{binEdges}, HistogramData::Counts{counts[i]});
+    dataWorkspace->setHistogram(i, bins, HistogramData::Counts{std::move(counts[i])});
     dataWorkspace->getSpectrum(i).setSpectrumNo(i + 1);
     dataWorkspace->getSpectrum(i).setDetectorID(i + 1);
   }
@@ -332,7 +332,7 @@ void LoadNGEM::exec() {
   if (preserveEvents) {
     dataWorkspace = createEventWorkspace(maxToF, binWidth, events);
   } else {
-    dataWorkspace = createHistogramWorkspace(binEdges, counts);
+    dataWorkspace = createHistogramWorkspace(std::move(binEdges), std::move(counts));
   }
 
   addToSampleLog("raw_frames", rawFrames, dataWorkspace);
