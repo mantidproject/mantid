@@ -175,7 +175,6 @@ class ReorientUnitCell(PythonAlgorithm):
         # Step 4: Generate cell symmetry transformation matrices
         point_group_symbol = self.get_point_group_symbol(crystal_system, lattice_system)
         point_group = PointGroupFactory.createPointGroup(point_group_symbol)
-
         # Get symmetry operations with positive determinant to preserve handedness
         transforms = {}
         coords = np.eye(3).astype(int)  # 3x3 identity matrix representing hkl coordinates for the lattice vectors
@@ -185,13 +184,15 @@ class ReorientUnitCell(PythonAlgorithm):
                 name = "{}: ".format(sym_op.getOrder()) + sym_op.getIdentifier()
                 transforms[name] = transform
 
-        # Step 5: Find the symmetry operation that maximizes trace(R @ U @ B @ inv(M)) = trace(U' @ B)
-        # Matrix Reorient goniometer axes such that (R @ U) rotates the orthonormal reciprocal (a*, b*, c*) such that:
-        # a* points along the beam direction (0, 0, 1)
-        # b* points along the horizontal direction (1, 0, 0)
-        # c* points along the vertical direction (0, 1, 0)
+        # Step 5: Find the symmetry operation that maximizes trace(R^{-1} @ U @ B @ inv(M) B^{-1}) = trace(R^{-1} @ U')
+        # Matrix R is the rotation that takes us from the reciprocal orthonormal basis (a*, b*, c*)
+        # to the laboratory frame of reference (x, y, z) when:
+        # a* points along the beam direction (Z-axis in the lab's frame of reference)
+        # b* points along the horizontal direction (X-axis)
+        # c* points along the vertical direction (Y-axis)
         # R equivalent to a 120-degree rotation around diagonal <111>
         R = np.array([[0, 1, 0], [0, 0, 1], [1, 0, 0]])
+        R_inv = np.linalg.inv(R)
         B_inv = np.linalg.inv(B)
         max_trace = -np.inf
         optimal_transform = None
@@ -199,7 +200,7 @@ class ReorientUnitCell(PythonAlgorithm):
         for name, transform in transforms.items():
             try:
                 transform_inv = np.linalg.inv(transform)
-                trace = np.trace(R @ U @ B @ transform_inv @ B_inv)
+                trace = np.trace(R_inv @ U @ B @ transform_inv @ B_inv)
                 if trace > max_trace:
                     max_trace = trace
                     optimal_transform = transform

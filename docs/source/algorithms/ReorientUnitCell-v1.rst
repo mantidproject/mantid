@@ -9,57 +9,60 @@
 Description
 -----------
 
-ReorientUnitCell finds the unit cell most aligned with the goniometer axes by finding rotation :math:`U`
-most similar to the identity matrix. Rotation :math:`U` transforms the reciprocal orthonormal
-vectors :math:`u^{*}, v^{*}, w^{*}` such that:
+ReorientUnitCell finds the orientation of the reciprocal lattice vectors :math:`(\vec{a^{*}}, \vec{b^{*}}, \vec{c^{*}})`
+such that :math:`\vec{a^{*}}` is aligned as closely as possible with the beam direction
+(Z-axis in the laboratory frame of reference).
+Thinking of the orthonormal reciprocal basis :math:`(\vec{u^{*}}, \vec{v^{*}}, \vec{w^{*}})`
+resulting from transforming the reciprocal lattice vectors by the Busing matrix :math:`B`,
+the algorithm will try the following alignment:
 
-- :math:`u^{*}` aligns with the beam ( :math:`Z` axis)
-- :math:`v^{*}` aligns with the horizontal ( :math:`X` axis)
-- :math:`w^{*}` aligns with the vertical ( :math:`Y` axis)
+- align :math:`\vec{u^{*} \equiv \vec{a^{*}}` with the neutron beam ( :math:`Z` axis)
+- align :math:`\vec{v^{*}}` with the horizontal axis ( :math:`X` axis)
+- align :math:`\vec{w^{*}}` with the vertical axis ( :math:`Y` axis)
 
-Thus, the algorithm tries to align the reciprocal lattice vectors as closely as possible
-to these goniometer axes.
-The similarity of :math:`U` to the identity matrix is quantified by the angle of rotation :math:`\theta`,
+Matrix :math:`U` describes the rotation transforming the orthonormal reciprocal basis
+to the laboratory frame of reference :math:`(\vec{x}, \vec{y}, \vec{z})`.
+For the previous alignment, we have:
+
+.. math::
+
+   (\vec{u^{*}}, \vec{v^{*}}, \vec{w^{*}})
+   =
+   (\vec{x}, \vec{y}, \vec{z})
+   \begin{pmatrix}
+   0 & 1 & 0 \\
+   0 & 0 & 1 \\
+   1 & 0 & 0
+   \end{pmatrix}
+    =
+    (\vec{x}, \vec{y}, \vec{z}) \cdot R
+
+where matrix :math:`R` is the particular :math:`U` matrix representing this alignment.
+
+Starting from some initial orientation of the crystal, denoted by transformation matrix :math:`U_0 \cdot B`,
+the algorithm will try to find an orientation :math:`U \cdot B` such that
+:math:`U \cdot B \approx R \cdot B`.
+This is accomplished by applying the proper point symmetry operations :math:`S` (rotations)
+of the lattice system.
+
+.. math::
+
+   U \cdot B \equiv U_0 \cdot B \cdot S \\
+   U = U_0 \cdot B \cdot S \cdot B^{-1} \\
+
+The algorithm selects the rotation :math:`S` such that composite rotation :math:`R^{-1} \cdot U` is as close as possible
+to the identity matrix :math:`I`.
+The similarity to the identity matrix is quantified by the angle of rotation :math:`\theta`,
 which can be calculated from its trace:
 
 .. math::
 
-   Tr(U) = 1 + 2\cos{\theta} \\
+   Tr(R^{-1} \cdot U) = Tr(R^{-1} \cdot U_0 \cdot B \cdot S \cdot B^{-1}) = 1 + 2\cos{\theta} \\
 
-Minimizing :math:`\theta` is therefore equivalent to maximizing :math:`Tr(U)`.
+Minimizing :math:`\theta` is therefore equivalent to maximizing this trace.
 
-Starting with an initial guess for matrices :math:`U` and :math:`B`, where :math:`B` is the Busing matrix
-transforming the reciprocal-lattice vectors to the reciprocal orthonormal frame of reference,
-the algorithm applies all possible rotations :math:`S` of the crystal's point group
-to find matrix :math:`U'` most similar to the identity matrix, where
-
-.. math::
-
-   U' \cdot B = U \cdot B \cdot S \\
-   Tr(U') = Tr(U \cdot (B \cdot S \cdot B^{-1}))
-
-Thus, :math:`S` is the rotation of the point group such that :math:`B \cdot S \cdot B^{-1}`
-is most similar to the inverse of :math:`U`.
-
-The figure belows shows a special case in the hexagonal lattice
-where rotation :math:`S` and Busing matrix :math:`B` commute,
-so that :math:`S` is that rotation most similar to the inverse of :math:`U`.
-
-.. figure:: ../images/ReorientUnitCell_fig1.png
-   :class: screenshot
-   :width: 600px
-   :align: center
-
-In the image, lattice vectors :math:`\{a_1^*, a_2^*\}` transform to reciprocal orthonormal vectors
-:math:`\{u^*, v^*\}` by matrix :math:`B`, then transform to goniometer axes :math:`\{u, v\}`
-by rotation matrix :math:`U`.
-For equivalent lattice vectors :math:`\{{a'}_{1}^{*}, {a'}_{2}^{*}\}`,
-matrix :math:`B` directly transforms to goniometer axes, thus :math:`U'` is the identity matrix.
-Notice that matrix :math:`S \equiv U^{-1}` transforms :math:`\{{a'}_{1}^{*}, {a'}_{2}^{*}\}`
-to :math:`\{a_1^*, a_2^*\}`.
-
-**Note:** The triclinic crystal system has no symmetry operations other than the identity, so no reorientation is possible.
-Hence, this algorithm does not support triclinic crystals.
+**Note:** The triclinic crystal system has no symmetry operations other than the identity,
+so no reorientation is possible. Hence, this algorithm does not support triclinic crystals.
 
 Usage
 -----
@@ -72,34 +75,28 @@ Usage
 
     import numpy as np
 
-    def rotation_angle(workspace):
-        R = np.array(
-            [[0,1,0],
-             [0,0,1],
-             [1,0,0]])
-        oriented_lattice = mtd[str(workspace)].sample().getOrientedLattice()
-        trace = (R @ oriented_lattice.getU()).diagonal().sum()
-        cos_theta = (trace - 1) / 2.0
-        return round(np.degrees(np.arccos(cos_theta)))
+    def getuVector():
+        ol = mtd['peaks'].sample().getOrientedLattice()
+        return "(" + ', '.join([f"{x:.1f}" for x in ol.getuVector()]) + ")"
 
     filename = 'RFMBA2PbI4_Monoclinic_P_5sig.integrate'
     LoadIsawPeaks(Filename=filename, OutputWorkspace='peaks')
     FindUBUsingIndexedPeaks(PeaksWorkspace='peaks')
     ol = mtd['peaks'].sample().getOrientedLattice()
-    # U represents a 120 degree rotation around axis <1 -1 -1>
-    U = np.array([[0, 0, -1], [-1, 0, 0], [0, 1, 0]], dtype=float)
+    # U represents a 120 degree rotation around axis <1 1 -1>
+    U = np.array([[0, 1, 0], [0, 0, -1], [-1, 0, 0]], dtype=float)
     SetUB(Workspace='peaks', UB=(U @ ol.getB()).flatten().tolist())
     IndexPeaks(PeaksWorkspace='peaks', CommonUBForAll=True)
-    print(f"(before) rotation angle {rotation_angle('peaks')}")
+    print(f"(before) u = {getuVector()}")
     ReorientUnitCell(PeaksWorkspace='peaks', CrystalSystem='Monoclinic')
-    print(f"(after ) rotation angle {rotation_angle('peaks')}")
+    print(f"(after) u = {getuVector()}")
 
 Output:
 
 .. testoutput:: ReorientUnitCellExample
 
-    (before) rotation angle 180
-    (after ) rotation angle 0
+    (before) u = (-9.2, 0.0, 0.0)
+    (after ) u = (9.2, 0.0, 0.0)
 
 .. categories::
 
