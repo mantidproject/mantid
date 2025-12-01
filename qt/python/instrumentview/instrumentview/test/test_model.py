@@ -455,12 +455,12 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         peaks = model.peak_overlay_points()
         # Should get one peak with detector ID 4 and spectrum
         # number 1
-        self.assertEquals(1, len(peaks))
+        self.assertEqual(1, len(peaks))
         detector_peak = peaks[0][0]
-        self.assertEquals(1, len(detector_peak.peaks))
-        self.assertEquals(test_detector_id, detector_peak.detector_id)
-        self.assertEquals("(2, 2, 2)", detector_peak.label)
-        self.assertEquals(test_spectrum_no, detector_peak.spectrum_no)
+        self.assertEqual(1, len(detector_peak.peaks))
+        self.assertEqual(test_detector_id, detector_peak.detector_id)
+        self.assertEqual("(2, 2, 2)", detector_peak.label)
+        self.assertEqual(test_spectrum_no, detector_peak.spectrum_no)
         single_peak = detector_peak.peaks[0]
         self.assertEqual(test_detector_id, single_peak.detector_id)
         self.assertEqual(test_spectrum_no, single_peak.spectrum_no)

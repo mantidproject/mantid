@@ -50,6 +50,33 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._mock_view.add_masked_mesh.assert_called()
         mock_set_peaks_ws.assert_called_once()
 
+    @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.reset_cached_projection_positions")
+    @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.set_peaks_workspaces")
+    def test_3d_projection_resets_cache(self, mock_set_peaks_ws, mock_reset_cache):
+        self.assertEqual("3D", self._model._PROJECTION_OPTIONS[0])
+        self._presenter.on_projection_option_selected(0)
+        mock_reset_cache.assert_called_once()
+        self._mock_view.add_main_mesh.assert_called()
+
+    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.create_poly_data_mesh")
+    @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.calculate_projection")
+    def test_projection_option_axis(self, mock_calculate_projection, mock_create_poly_data_mesh):
+        _, options = self._presenter.projection_combo_options()
+        for option in options:
+            if option.endswith("X"):
+                axis = [1, 0, 0]
+            elif option.endswith("Y"):
+                axis = [0, 1, 0]
+            elif option.endswith("Z"):
+                axis = [0, 0, 1]
+            else:
+                return
+            self._presenter.on_projection_option_selected(options.index(option))
+            mock_calculate_projection.assert_called_once_with(option.startswith("Spherical"), axis)
+            mock_create_poly_data_mesh.assert_called()
+            mock_calculate_projection.reset_mock()
+            mock_create_poly_data_mesh.reset_mock()
+
     @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.update_integration_range")
     @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.set_view_integration_limits")
     def test_on_integration_limits_updated_true(self, mock_set_view_integration_limits, mock_update_integration_range):
@@ -224,10 +251,10 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self.assertEqual(["(1, 1, 1)"], overlay_call_args[1])
 
     @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.peak_overlay_points")
-    @mock.patch.object(FullInstrumentViewModel, "picked_detector_ids", new_callable=mock.PropertyMock)
-    def test_refresh_lineplot_peaks_no_detector(self, mock_picked_detector_ids, mock_peak_overlay_points):
+    @mock.patch.object(FullInstrumentViewModel, "picked_spectrum_nos", new_callable=mock.PropertyMock)
+    def test_refresh_lineplot_peaks_no_detector(self, mock_picked_spectrum_nos, mock_peak_overlay_points):
         mock_peak_overlay_points.return_value = [[self._create_detector_peaks(50, 50, np.zeros(3))]]
-        mock_picked_detector_ids.return_value = []
+        mock_picked_spectrum_nos.return_value = []
         self._mock_view.current_selected_unit.return_value = self._presenter._TIME_OF_FLIGHT
         self._presenter._update_peaks_workspaces()
         self._presenter.refresh_lineplot_peaks()
@@ -237,10 +264,10 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._mock_view.plot_lineplot_overlay.assert_not_called()
 
     @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.peak_overlay_points")
-    @mock.patch.object(FullInstrumentViewModel, "picked_detector_ids", new_callable=mock.PropertyMock)
-    def test_refresh_lineplot_peaks_wrong_unit(self, mock_picked_detector_ids, mock_peak_overlay_points):
+    @mock.patch.object(FullInstrumentViewModel, "picked_spectrum_nos", new_callable=mock.PropertyMock)
+    def test_refresh_lineplot_peaks_wrong_unit(self, mock_picked_spectrum_nos, mock_peak_overlay_points):
         mock_peak_overlay_points.return_value = [[self._create_detector_peaks(50, 50, np.zeros(3))]]
-        mock_picked_detector_ids.return_value = [50]
+        mock_picked_spectrum_nos.return_value = [50]
         self._mock_view.current_selected_unit.return_value = "Light Years"
         self._presenter.refresh_lineplot_peaks()
         mock_peak_overlay_points.assert_not_called()
