@@ -1,6 +1,6 @@
 name: Add milestone to new PRs
 on:
-  pull_request:
+  pull_request_target:
     types: [opened, reopened]
     branches: [main, release-next]
 
