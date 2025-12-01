@@ -59,10 +59,10 @@ class WishPowder:
         }
         self.sample = {"Geometry": {"Shape": "Cylinder", "Center": [0.0, 0.0, 0.0]}}
         self.cylinder_abs_kwargs = {"NumberOfSlices": 10, "NumberOfAnnuli": 10, "NumberOfWavelengthPoints": 25, "ExpMethod": "Normal"}
-        self.van_smooth_npts = 40  # use same for empty - really
         self.van_ws = None
         self.empty_ws = None
         self.grp_ws = None
+        self.van_frame = None
 
     def set_sample_property(self, fieldname, **kwargs):
         if fieldname not in self.sample:
@@ -79,7 +79,7 @@ class WishPowder:
 
     def _get_van_wsname(self):
         suffix = "" if self.per_detector_van else "_foc"
-        return f"vana_{self.sample_env.value}{suffix}"
+        return f"vana_{self.sample_env.value}_{self.van_frame.value}_{suffix}"
 
     def _get_mask_filepath(self):
         return self._get_filepath_in_calib_dir("mask.xml")
@@ -229,15 +229,15 @@ class WishPowder:
 
     def focus(self, wsname):
         van_ws = self.get_van_ws()
-        if ADS.retrieve(wsname).getAxis(0).getUnit().unitID() != "Wavelength":
-            mantid.ConvertUnits(InputWorkspace=wsname, OutputWorkspace=wsname, Target="Wavelength")
         # correct by vanadium
         if self.per_detector_van:
+            if ADS.retrieve(wsname).getAxis(0).getUnit().unitID() != "Wavelength":
+                mantid.ConvertUnits(InputWorkspace=wsname, OutputWorkspace=wsname, Target="Wavelength")
             mantid.Divide(LHSWorkspace=wsname, RHSWorkspace=van_ws, OutputWorkspace=wsname)
             mantid.ReplaceSpecialValues(
                 InputWorkspace=wsname, OutputWorkspace=wsname, NaNValue=0.0, NaNError=0.0, InfinityValue=0.0, InfinityError=0.0
             )
-            self.retrieve(wsname).setDistribution(False)  # for compatibility with DiffrcationFocussing
+            self.retrieve(wsname).setDistribution(False)  # for compatibility with DiffractionFocussing
         wsname_foc = self._focus_ws(wsname)
         if not self.per_detector_van:
             # divide by focussed vanadium (in d-spacing)
@@ -260,7 +260,10 @@ class WishPowder:
         return self.load(self.empty_runno)
 
     def create_vanadium(self):
-        wsname_van = self.load(self.van_runno, out_wsname=self._get_van_wsname())
+        wsname_tmp = self.load(self.van_runno)
+        self.van_frame = self._get_frame(wsname_tmp)
+        wsname_van = self._get_van_wsname()  # can only get this after van frame set
+        mantid.RenameWorksapce(InputWokspace=wsname_tmp, OutputWorkspace=wsname_van)
         ws_empty = self.get_empty_ws()
         if ws_empty:
             mantid.Minus(LHSWorkspace=wsname_van, RHSWorkspace=ws_empty, OutputWorkspace=wsname_van)
