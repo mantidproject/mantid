@@ -319,7 +319,7 @@ class FocusWithoutEmptySubtractionTest(systemtesting.MantidSystemTest):
             mantid.mtd.clear()
 
 
-class CreateCalTest(systemtesting.MantidSystemTest):
+class CreateCalTestPearl(systemtesting.MantidSystemTest):
     calibration_results = None
     existing_config = config["datasearch.directories"]
     run_number = 98494
