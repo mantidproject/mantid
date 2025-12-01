@@ -10,7 +10,7 @@ import unittest
 
 class TestPeak(unittest.TestCase):
     def test_label(self):
-        peak = Peak(0, None, (1.233333, 4.0, 36), 0, 0, 0, 0)
+        peak = Peak(0, 0, None, (1.233333, 4.0, 36), 0, 0, 0, 0)
         self.assertEqual("(1.23, 4, 36)", peak.label)
 
 
