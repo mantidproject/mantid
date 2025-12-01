@@ -189,8 +189,8 @@ class FullInstrumentViewWindow(QMainWindow):
         masking_layout = QVBoxLayout(masking_group_box)
         note = QLabel("Currently only a cylinder/circle shape is supported. A rectangular shape will be added in the next update.")
         pre_list_layout = QHBoxLayout()
-        self._add_cylinder = QPushButton("Cylinder Shape")
-        self._cylinder_select = QPushButton("Store Mask")
+        self._add_cylinder = QPushButton("Circle Shape")
+        self._cylinder_select = QPushButton("Apply Mask")
         self._clear_masks = QPushButton("Clear Masks")
         pre_list_layout.addWidget(self._add_cylinder)
         pre_list_layout.addWidget(self._cylinder_select)
@@ -554,6 +554,10 @@ class FullInstrumentViewWindow(QMainWindow):
         cylinder_repr.SetOutlineTranslation(False)
         cylinder_repr.GetOutlineProperty().SetOpacity(0)
         cylinder_repr.SetMinRadius(0.001)
+
+        xmin, xmax, ymin, ymax, zmin, zmax = bounds
+        cylinder_repr.SetCenter((xmin + xmax) / 2, (ymin + ymax) / 2, 0.5)
+        cylinder_repr.SetRadius(np.sqrt((xmax - xmin) ** 2 + (ymax - ymin) ** 2) / 8)
 
         # For 2D projections, camera view is always perpendicular to Z axis
         cylinder_repr.SetAxis([0, 0, 1])
