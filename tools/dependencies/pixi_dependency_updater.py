@@ -236,7 +236,7 @@ def compare_conda_and_pixi_envs(conda_env: DependencyPins, pixi_env: DependencyP
 
 def main(argv: Sequence[str] = None) -> int:
     parser = argparse.ArgumentParser(
-        usage="""
+        description="""
     This script is intended to be run by pre-commit.
     It takes as arguments the paths of the files changes by the commit.
     If changes have been made to the version pinnings / required packages for mantid-developer
