@@ -321,98 +321,6 @@ void LoadNGEM::exec() {
 }
 
 /**
- * @brief Load a single file into the event lists.
- *
- * @param filePath The path to the file.
- * @param eventCountInFrame The number of events in the current frame.
- * @param maxToF The highest detected ToF
- * @param minToF The lowest detected ToF
- * @param rawFrames The number of T0 Events detected so far.
- * @param goodFrames The number of good frames detected so far.
- * @param minEventsReq The number of events required to be a good frame.
- * @param maxEventsReq The max events allowed to be a good frame.
- * @param frameEventCounts A vector of the number of events in each good frame.
- * @param events The main set of events for the data so far.
- * @param eventsInFrame The set of events for the current frame.
- * @param totalFilePaths The total number of file paths.
- * @param fileCount The number of file paths processed.
- */
-void LoadNGEM::loadSingleFile(const std::vector<std::string> &filePath, int &eventCountInFrame, double &maxToF,
-                              double &minToF, int &rawFrames, int &goodFrames, const int &minEventsReq,
-                              const int &maxEventsReq, MantidVec &frameEventCounts,
-                              std::vector<DataObjects::EventList> &events,
-                              std::vector<DataObjects::EventList> &eventsInFrame, const size_t &totalFilePaths,
-                              int &fileCount) {
-  // Create file reader
-  if (filePath.size() > 1) {
-    throw std::runtime_error("Invalid filename parameter.");
-  }
-  std::ifstream file(filePath[0].c_str(), std::ifstream::binary);
-  if (!file.is_open()) {
-    throw std::runtime_error("File could not be found.");
-  }
-
-  const size_t totalNumEvents = verifyFileSize(file) / 16;
-  constexpr size_t SKIP_WORD_SIZE = 4;
-  size_t numProcessedEvents = 0;
-  size_t numWordsSkipped = 0;
-
-  while (true) {
-    // Load an event into the variable.
-    // Occasionally we may get a file where the first event has been chopped,
-    // so we seek to the start of a valid event.
-    // Chopping only seems to occur on a 4 byte word, hence seekg() of 4
-    EventUnion event, eventBigEndian;
-    bool isEventInvalid = true;
-    bool isNotEOFAfterSkip = true;
-    do {
-      file.read(reinterpret_cast<char *>(&eventBigEndian), sizeof(eventBigEndian));
-      // Correct for the big endian format of nGEM datafile.
-      correctForBigEndian(eventBigEndian, event);
-      isEventInvalid = !event.generic.check();
-      if (isEventInvalid) {
-        isNotEOFAfterSkip = !file.seekg(SKIP_WORD_SIZE, std::ios_base::cur).eof();
-        if (isNotEOFAfterSkip) {
-          ++numWordsSkipped;
-        }
-      }
-    } while (isEventInvalid && isNotEOFAfterSkip);
-    if (file.eof()) {
-      break; // we have either not read an event, or only read part of one
-    }
-    if (event.coincidence.check()) { // Check for coincidence event.
-      ++eventCountInFrame;
-      uint64_t pixel = event.coincidence.getPixel();
-      // Convert to microseconds (us)
-      const double tof = event.coincidence.timeOfFlight / 1000.0;
-      if (tof > maxToF) {
-        maxToF = tof;
-      } else if (tof < minToF) {
-        minToF = tof;
-      }
-      eventsInFrame[pixel].addEventQuickly(Types::Event::TofEvent(tof));
-    } else if (event.tZero.check()) { // Check for T0 event.
-      addFrameToOutputWorkspace(rawFrames, goodFrames, eventCountInFrame, minEventsReq, maxEventsReq, frameEventCounts,
-                                events, eventsInFrame);
-      if (reportProgressAndCheckCancel(numProcessedEvents, eventCountInFrame, totalNumEvents, totalFilePaths,
-                                       fileCount)) {
-        return;
-      }
-    } else if (event.generic.check()) { // match all other events and notify.
-      g_log.warning() << "Unexpected event type ID=" << event.generic.id << " loaded.\n";
-    } else { // if we were to get to here, must be a corrupt event
-      g_log.warning() << "Corrupt event detected.\n";
-    }
-  }
-  if (numWordsSkipped > 0) {
-    g_log.warning() << SKIP_WORD_SIZE * numWordsSkipped
-                    << " bytes of file data were skipped when locating valid events.\n";
-  }
-  g_log.information() << "Finished loading a file.\n";
-  ++fileCount;
-}
-
-/**
  * @brief Load a single file into histograms.
  *
  * @param filePath The path to the file.
@@ -424,16 +332,13 @@ void LoadNGEM::loadSingleFile(const std::vector<std::string> &filePath, int &eve
  * @param goodFrames The number of good frames detected so far.
  * @param minEventsReq The number of events required to be a good frame.
  * @param maxEventsReq The max events allowed to be a good frame.
- * @param counts A vector containing the histogram counts.
- * @param countsInFrame A map of count index: count, for those events in frame.
  * @param totalFilePaths The total number of file paths.
- * @param fileCount The number of file paths processed.
+ * @param strategy Object encapsulating histo/event specific logic
  */
-void LoadNGEM::loadSingleFile(const std::vector<std::string> &filePath, int &eventCountInFrame, const double &minToF,
-                              const double &binWidth, int &rawFrames, int &goodFrames, const int &minEventsReq,
-                              const int &maxEventsReq, MantidVec &frameEventCounts,
-                              std::vector<std::vector<double>> &counts, std::vector<std::vector<double>> &countsInFrame,
-                              const size_t &totalFilePaths, int &fileCount) {
+void LoadNGEM::loadSingleFile(const std::vector<std::string> &filePath, int &eventCountInFrame, double &minToF,
+                              double &maxToF, const double &binWidth, int &rawFrames, int &goodFrames,
+                              const int &minEventsReq, const int &maxEventsReq, MantidVec &frameEventCounts,
+                              const size_t &totalFilePaths, std::shared_ptr<LoadDataStrategyBase> strategy) {
   // Create file reader
   if (filePath.size() > 1) {
     throw std::runtime_error("Invalid filename parameter.");
@@ -476,13 +381,11 @@ void LoadNGEM::loadSingleFile(const std::vector<std::string> &filePath, int &eve
       uint64_t pixel = event.coincidence.getPixel();
       // Convert to microseconds (us)
       const double tof = event.coincidence.timeOfFlight / 1000.0;
-      const int bin_idx = static_cast<int>(std::ceil((tof - minToF) / binWidth)) - 1;
-      countsInFrame[pixel][bin_idx]++;
+      strategy->addEvent(minToF, maxToF, tof, binWidth,
+                         pixel);      // If no min and max provided by user, values calculated and mutated
     } else if (event.tZero.check()) { // Check for T0 event.
-      addFrameToOutputWorkspace(rawFrames, goodFrames, eventCountInFrame, minEventsReq, maxEventsReq, frameEventCounts,
-                                counts, countsInFrame);
-      if (reportProgressAndCheckCancel(numProcessedEvents, eventCountInFrame, totalNumEvents, totalFilePaths,
-                                       fileCount)) {
+      strategy->addFrame(rawFrames, goodFrames, eventCountInFrame, minEventsReq, maxEventsReq, frameEventCounts);
+      if (reportProgressAndCheckCancel(numProcessedEvents, eventCountInFrame, totalNumEvents, totalFilePaths)) {
         return;
       }
     } else if (event.generic.check()) { // match all other events and notify.
@@ -496,7 +399,7 @@ void LoadNGEM::loadSingleFile(const std::vector<std::string> &filePath, int &eve
                     << " bytes of file data were skipped when locating valid events.\n";
   }
   g_log.information() << "Finished loading a file.\n";
-  ++fileCount;
+  ++m_fileCount;
 }
 /**
  * @brief Ensure that the file fits into 16, as the detector spits out 128 bit
@@ -530,10 +433,9 @@ size_t LoadNGEM::verifyFileSize(std::ifstream &file) {
  * @return false If the user has not cancelled.
  */
 bool LoadNGEM::reportProgressAndCheckCancel(size_t &numProcessedEvents, int &eventCountInFrame,
-                                            const size_t &totalNumEvents, const size_t &totalFilePaths,
-                                            const int &fileCount) {
+                                            const size_t &totalNumEvents, const size_t &totalFilePaths) {
   numProcessedEvents += eventCountInFrame;
-  std::string message(std::to_string(fileCount) + "/" + std::to_string(totalFilePaths));
+  std::string message(std::to_string(m_fileCount) + "/" + std::to_string(totalFilePaths));
   progress(double(numProcessedEvents) / double(totalNumEvents) / 1.11111, message);
   eventCountInFrame = 0;
   // Check for cancel flag.
@@ -655,26 +557,21 @@ LoadDataResult LoadNGEM::readDataAsEvents(double minToF, double maxToF, const do
                                           const int maxEventsReq,
                                           const std::vector<std::vector<std::string>> &filePaths) {
   int eventCountInFrame{0};
-  int counter{1};
   int rawFrames{0};
   int goodFrames{0};
   std::vector<double> frameEventCounts;
   API::MatrixWorkspace_sptr dataWorkspace;
   size_t totalFilePaths(filePaths.size());
 
-  std::vector<DataObjects::EventList> events, eventsInFrame;
-
-  events.resize(NUM_OF_SPECTRA);
-  eventsInFrame.resize(NUM_OF_SPECTRA);
   progress(0.04);
+  auto strategy = std::make_shared<LoadDataStrategyEvent>();
   for (const auto &filePath : filePaths) {
-    loadSingleFile(filePath, eventCountInFrame, maxToF, minToF, rawFrames, goodFrames, minEventsReq, maxEventsReq,
-                   frameEventCounts, events, eventsInFrame, totalFilePaths, counter);
+    loadSingleFile(filePath, eventCountInFrame, minToF, minToF, binWidth, rawFrames, goodFrames, minEventsReq,
+                   maxEventsReq, frameEventCounts, totalFilePaths, strategy);
   }
-  addFrameToOutputWorkspace(rawFrames, goodFrames, eventCountInFrame, minEventsReq, maxEventsReq, frameEventCounts,
-                            events, eventsInFrame);
+  strategy->addFrame(rawFrames, goodFrames, eventCountInFrame, minEventsReq, maxEventsReq, frameEventCounts);
   progress(0.90);
-  dataWorkspace = createEventWorkspace(maxToF, binWidth, events);
+  dataWorkspace = createEventWorkspace(maxToF, binWidth, strategy->getEvents());
 
   return {rawFrames, goodFrames, frameEventCounts, dataWorkspace};
 }
@@ -690,36 +587,70 @@ LoadDataResult LoadNGEM::readDataAsEvents(double minToF, double maxToF, const do
  * @param filePaths Paths to the data file to read.
  * @return A struct containing the output workspace and variables tracking frames
  */
-LoadDataResult LoadNGEM::readDataAsHistograms(const double minToF, const double maxToF, const double binWidth,
+LoadDataResult LoadNGEM::readDataAsHistograms(double minToF, double maxToF, const double binWidth,
                                               const int minEventsReq, const int maxEventsReq,
                                               const std::vector<std::vector<std::string>> &filePaths) {
-  int eventCountInFrame{0};
-  int counter{1};
   int rawFrames{0};
   int goodFrames{0};
+  int eventCountInFrame{0};
   std::vector<double> frameEventCounts;
   API::MatrixWorkspace_sptr dataWorkspace;
   size_t totalFilePaths(filePaths.size());
 
-  std::vector<double> binEdges;
-  std::vector<std::vector<double>> counts;
-  std::vector<std::vector<double>> countsInFrame;
-
-  binEdges = calculateBinEdges(minToF, maxToF, binWidth);
-  counts.resize(NUM_OF_SPECTRA);
-  for (auto &item : counts) {
-    item.resize(binEdges.size() - 1);
-  }
-  countsInFrame = counts;
   progress(0.04);
+  auto strategy = std::make_shared<LoadDataStrategyHisto>(minToF, maxToF, binWidth);
   for (const auto &filePath : filePaths) {
-    loadSingleFile(filePath, eventCountInFrame, minToF, binWidth, rawFrames, goodFrames, minEventsReq, maxEventsReq,
-                   frameEventCounts, counts, countsInFrame, totalFilePaths, counter);
+    loadSingleFile(filePath, eventCountInFrame, minToF, maxToF, binWidth, rawFrames, goodFrames, minEventsReq,
+                   maxEventsReq, frameEventCounts, totalFilePaths, strategy);
   }
-  addFrameToOutputWorkspace(rawFrames, goodFrames, eventCountInFrame, minEventsReq, maxEventsReq, frameEventCounts,
-                            counts, countsInFrame);
+  strategy->addFrame(rawFrames, goodFrames, eventCountInFrame, minEventsReq, maxEventsReq, frameEventCounts);
   progress(0.90);
-  dataWorkspace = createHistogramWorkspace(std::move(binEdges), std::move(counts));
+  dataWorkspace = createHistogramWorkspace(std::move(strategy->getBinEdges()), std::move(strategy->getCounts()));
   return {rawFrames, goodFrames, frameEventCounts, dataWorkspace};
 }
+
+void LoadDataStrategyHisto::addEvent(double minToF, double maxToF, const double tof, const double binWidth,
+                                     const int pixel) {
+  (void)maxToF;
+  const int bin_idx = static_cast<int>(std::ceil((tof - minToF) / binWidth)) - 1;
+  m_countsInFrame[pixel][bin_idx]++;
+}
+
+void LoadDataStrategyHisto::addFrame(int rawFrames, int goodFrames, const int eventCountInFrame, const int minEventsReq,
+                                     const int maxEventsReq, MantidVec &frameEventCounts) {
+  addFrameToOutputWorkspace(rawFrames, goodFrames, eventCountInFrame, minEventsReq, maxEventsReq, frameEventCounts,
+                            m_counts, m_countsInFrame);
+}
+
+LoadDataStrategyHisto::LoadDataStrategyHisto(const int minToF, const int maxToF, const int binWidth) {
+  m_binEdges = calculateBinEdges(minToF, maxToF, binWidth);
+  m_counts.resize(NUM_OF_SPECTRA);
+  for (auto &item : m_counts) {
+    item.resize(m_binEdges.size() - 1);
+  }
+  m_countsInFrame = m_counts;
+}
+
+void LoadDataStrategyEvent::addEvent(double minToF, double maxToF, const double tof, const double binWidth,
+                                     const int pixel) {
+  (void)binWidth;
+  if (tof > maxToF) {
+    maxToF = tof;
+  } else if (tof < minToF) {
+    minToF = tof;
+  }
+  m_eventsInFrame[pixel].addEventQuickly(Types::Event::TofEvent(tof));
+}
+
+void LoadDataStrategyEvent::addFrame(int rawFrames, int goodFrames, const int eventCountInFrame, const int minEventsReq,
+                                     const int maxEventsReq, MantidVec &frameEventCounts) {
+  addFrameToOutputWorkspace(rawFrames, goodFrames, eventCountInFrame, minEventsReq, maxEventsReq, frameEventCounts,
+                            m_events, m_eventsInFrame);
+}
+
+LoadDataStrategyEvent::LoadDataStrategyEvent() {
+  m_events.resize(NUM_OF_SPECTRA);
+  m_eventsInFrame.resize(NUM_OF_SPECTRA);
+}
+
 } // namespace Mantid::DataHandling

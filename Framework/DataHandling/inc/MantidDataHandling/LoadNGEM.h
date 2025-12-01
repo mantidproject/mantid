@@ -91,6 +91,41 @@ struct LoadDataResult {
   API::MatrixWorkspace_sptr dataWorkspace;
 };
 
+class LoadDataStrategyBase {
+public:
+  virtual void addEvent(double minToF, double maxToF, const double tof, const double binWidth, const int pixel) = 0;
+  virtual void addFrame(int rawFrames, int goodFrames, const int eventCountInFrame, const int minEventsReq,
+                        const int maxEventsReq, MantidVec &frameEventCounts) = 0;
+};
+
+class LoadDataStrategyHisto : public LoadDataStrategyBase {
+public:
+  LoadDataStrategyHisto(const int minToF, const int maxToF, const int binWidth);
+  void addEvent(double minToF, double maxToF, const double tof, const double binWidth, const int pixel) override final;
+  void addFrame(int rawFrames, int goodFrames, const int eventCountInFrame, const int minEventsReq,
+                const int maxEventsReq, MantidVec &frameEventCounts) override final;
+  inline std::vector<std::vector<double>> &getCounts() { return m_counts; }
+  inline std::vector<double> &getBinEdges() { return m_binEdges; }
+
+private:
+  std::vector<std::vector<double>> m_counts;
+  std::vector<std::vector<double>> m_countsInFrame;
+  std::vector<double> m_binEdges;
+};
+
+class LoadDataStrategyEvent : public LoadDataStrategyBase {
+public:
+  LoadDataStrategyEvent();
+  void addEvent(double minToF, double maxToF, const double tof, const double binWidth, const int pixel) override final;
+  void addFrame(int rawFrames, int goodFrames, const int eventCountInFrame, const int minEventsReq,
+                const int maxEventsReq, MantidVec &frameEventCounts) override final;
+  std::vector<DataObjects::EventList> &getEvents() { return m_events; }
+
+private:
+  std::vector<DataObjects::EventList> m_events;
+  std::vector<DataObjects::EventList> m_eventsInFrame;
+};
+
 class MANTID_DATAHANDLING_DLL LoadNGEM : public API::IFileLoader<Kernel::FileDescriptor> {
 public:
   /// Algorithm's name for identification.
@@ -111,24 +146,21 @@ public:
   int confidence(Kernel::FileDescriptor &descriptor) const override;
 
 private:
+  int m_fileCount = 0;
   /// Initialise the algorithm.
   void init() override;
   /// Execute the algorithm.
   void exec() override;
   /// Load a file into the event lists.
-  void loadSingleFile(const std::vector<std::string> &filePath, int &eventCountInFrame, double &maxToF, double &minToF,
-                      int &rawFrames, int &goodFrames, const int &minEventsReq, const int &maxEventsReq,
-                      MantidVec &frameEventCounts, std::vector<DataObjects::EventList> &events,
-                      std::vector<DataObjects::EventList> &eventsInFrame, const size_t &totalFilePaths, int &fileCount);
-  void loadSingleFile(const std::vector<std::string> &filePath, int &eventCountInFrame, const double &minToF,
+  void loadSingleFile(const std::vector<std::string> &filePath, int &eventCountInFrame, double &minToF, double &maxToF,
                       const double &binWidth, int &rawFrames, int &goodFrames, const int &minEventsReq,
-                      const int &maxEventsReq, MantidVec &frameEventCounts, std::vector<std::vector<double>> &counts,
-                      std::vector<std::vector<double>> &countsInFrame, const size_t &totalFilePaths, int &fileCount);
+                      const int &maxEventsReq, MantidVec &frameEventCounts, const size_t &totalFilePaths,
+                      std::shared_ptr<LoadDataStrategyBase> strategy);
   /// Check that a file to be loaded is in 128 bit words.
   size_t verifyFileSize(std::ifstream &file);
   /// Reports progress and checks cancel flag.
   bool reportProgressAndCheckCancel(size_t &numProcessedEvents, int &eventCountInFrame, const size_t &totalNumEvents,
-                                    const size_t &totalFilePaths, const int &fileCount);
+                                    const size_t &totalFilePaths);
   /// Create a workspace to store the number of counts per frame.
   void createCountWorkspace(const std::vector<double> &frameEventCounts);
   /// Load the instrument and attach to the data workspace.
