@@ -5,13 +5,13 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 
-#include "ProcessBankTask.h"
+#include "MantidDataHandling/AlignAndFocusPowderSlim/ProcessBankTask.h"
+#include "MantidDataHandling/AlignAndFocusPowderSlim/ProcessEventsTask.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/ParallelMinMax.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/Unit.h"
 #include "MantidNexus/H5Util.h"
-#include "ProcessEventsTask.h"
 #include "tbb/parallel_for.h"
 #include "tbb/parallel_reduce.h"
 
@@ -27,12 +27,13 @@ auto g_log = Kernel::Logger("ProcessBankTask");
 } // namespace
 ProcessBankTask::ProcessBankTask(std::vector<std::string> &bankEntryNames, H5::H5File &h5file,
                                  const bool is_time_filtered, API::MatrixWorkspace_sptr &wksp,
-                                 const std::map<detid_t, double> &calibration, const std::set<detid_t> &masked,
+                                 const std::map<detid_t, double> &calibration,
+                                 const std::map<detid_t, double> &scale_at_sample, const std::set<detid_t> &masked,
                                  const size_t events_per_chunk, const size_t grainsize_event,
                                  std::vector<PulseROI> pulse_indices, std::shared_ptr<API::Progress> &progress)
     : m_h5file(h5file), m_bankEntries(bankEntryNames), m_loader(is_time_filtered, pulse_indices), m_wksp(wksp),
-      m_calibration(calibration), m_masked(masked), m_events_per_chunk(events_per_chunk),
-      m_grainsize_event(grainsize_event), m_progress(progress) {}
+      m_calibration(calibration), m_scale_at_sample(scale_at_sample), m_masked(masked),
+      m_events_per_chunk(events_per_chunk), m_grainsize_event(grainsize_event), m_progress(progress) {}
 
 void ProcessBankTask::operator()(const tbb::blocked_range<size_t> &range) const {
   auto entry = m_h5file.openGroup("entry"); // type=NXentry
@@ -135,8 +136,9 @@ void ProcessBankTask::operator()(const tbb::blocked_range<size_t> &range) const 
             // only recreate calibration if it doesn't already have the useful information
             if ((!calibration) || (calibration->idmin() > static_cast<detid_t>(minval)) ||
                 (calibration->idmax() < static_cast<detid_t>(maxval))) {
-              calibration = std::make_unique<BankCalibration>(
-                  static_cast<detid_t>(minval), static_cast<detid_t>(maxval), time_conversion, m_calibration, m_masked);
+              calibration =
+                  std::make_unique<BankCalibration>(static_cast<detid_t>(minval), static_cast<detid_t>(maxval),
+                                                    time_conversion, m_calibration, m_scale_at_sample, m_masked);
             }
           },
           [&] { // load time-of-flight

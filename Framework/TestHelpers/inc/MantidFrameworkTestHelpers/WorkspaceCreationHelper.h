@@ -415,7 +415,7 @@ void createInstrumentForWorkspaceWithDistances(const Mantid::API::MatrixWorkspac
                                                const std::vector<Mantid::Kernel::V3D> &detectorPositions);
 
 /// Create a table workspace corresponding to what the FindEPP algorithm gives.
-Mantid::API::ITableWorkspace_sptr createEPPTableWorkspace(const std::vector<EPPTableRow> &rows);
+Mantid::API::ITableWorkspace_sptr createEPPTableWorkspace(const std::vector<EPPTableRow> &rows = {});
 
 /**
  * Create a copy of the SNAP "lite" instrument. This is the normal instrument with the 8x8 pixels added together. The

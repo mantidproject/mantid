@@ -14,42 +14,33 @@ The input workspace must be a group of four single spectrum workspaces,
 each representing the transmission of a known spin state as specified by the ``SpinStates`` parameter. These four spin
 state transmissions are used to calculate the proportion of neutrons lost to the flipper as a function of wavelength.
 
-The polarization of the flipper :math:`P_{F}` is given by:
+With the ``Flipper`` property, the efficiency of the analyzer or polarizer flipper is calculated by choosing, respectively,
+`Analyzer` or `Polarizer`.
+
+The polarization of the polarizer flipper, :math:`P_{F_{P}}`, is given by:
 
 .. math::
 
-   P_F = \frac{(\frac{T_{11} - T_{10}}{T_{11} + T_{10}})}{(\frac{T_{00} - T_{01}}{T_{00} + T_{01}})}
+   P_{F_{P}} = \frac{(\frac{T_{11} - T_{10}}{T_{11} + T_{10}})}{(\frac{T_{00} - T_{01}}{T_{00} + T_{01}})}
 
-Since the efficiency :math:`\epsilon_{F}` is equal to :math:`\frac{1 + P_{F}}{2}`, we can calculate the efficiency of
-the flipper directly using:
-
-.. math::
-
-   \epsilon_{F} = \frac{T_{11}T_{00} - T_{10}T_{01}}{(T_{11} + T_{10})(T_{00} - T_{01})}
-
-The errors are calculated as follows:
+While the polarization of the analyzer flipper, :math:`P_{F_{A}}` is:
 
 .. math::
 
-   \sigma_{\epsilon_{F}} = \sqrt{| \frac{\partial \epsilon_{F}}{\partial T_{11}}|^2 * \sigma^2_{T_{11}} + | \frac{\partial \epsilon_{F}}{\partial T_{00}}|^2 * \sigma^2_{T_{00}} + | \frac{\partial \epsilon_{F}}{\partial T_{10}}|^2 * \sigma^2_{T_{10}} + | \frac{\partial \epsilon_{F}}{\partial T_{01}}|^2 * \sigma^2_{T_{01}}}
+   P_{F_{A}} = \frac{(\frac{T_{11} - T_{01}}{T_{11} + T_{01}})}{(\frac{T_{00} - T_{10}}{T_{00} + T_{10}})}
 
-Where:
-
-.. math::
-
-   \frac{\partial \epsilon_{F}}{\partial T_{11}} = \frac{T_{10} * (T_{00} + T_{01})}{(T_{11} + T_{10})^2 * (T_{00} - T_{01})}
+And the efficiency is calculated from the polarization as :
 
 .. math::
 
-   \frac{\partial \epsilon_{F}}{\partial T_{00}} = \frac{T_{01} * (T_{10} - T_{11})}{(T_{11} + T_{10}) * (T_{00} - T_{01})^2}
+   \epsilon_{F} = \frac{1 + P_{F}}{2}
+
+The errors are calculated with error propagation from the partial derivatives with respect ot the transmission amplitudes:
 
 .. math::
 
-   \frac{\partial \epsilon_{F}}{\partial T_{10}} = \frac{-T_{11} * (T_{00} + T_{01})}{(T_{11} + T_{10})^2 * (T_{00} - T_{01})}
+       \sigma_{\epsilon_{F}} = \sqrt{\sum_{i,j=0,1} \left( \frac{\partial{\epsilon_{F}}}{\partial{T_{ij}}} \right)^{2} \,  \sigma_{i,j}^2 }
 
-.. math::
-
-   \frac{\partial \epsilon_{F}}{\partial T_{01}} = \frac{T_{00} * (T_{11} - T_{10})}{(T_{11} + T_{10}) * (T_{00} - T_{01})^2}
 
 Outputs
 =======

@@ -145,8 +145,8 @@ returnStdMoveLocal:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/LogParser.cpp:256
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/MantidVersion.cpp:100
 invalidLifetime:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/PropertyManager.cpp:142
 variableScope:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/Statistics.cpp:58
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/Strings.cpp:1032
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/Strings.cpp:1082
+useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/Strings.cpp:1033
+useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/Strings.cpp:1083
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/TimeROI.cpp:97
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/TimeSeriesProperty.cpp:38
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/VMD.cpp:504

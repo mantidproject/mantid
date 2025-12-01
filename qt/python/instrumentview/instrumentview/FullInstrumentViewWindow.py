@@ -22,6 +22,7 @@ from qtpy.QtWidgets import (
     QListWidget,
     QListWidgetItem,
     QAbstractItemView,
+    QScrollArea,
 )
 from qtpy.QtGui import QDoubleValidator, QMovie, QDragEnterEvent, QDropEvent, QDragMoveEvent, QColor, QPalette
 from qtpy.QtCore import Qt, QEvent, QSize
@@ -33,6 +34,8 @@ from instrumentview.Detectors import DetectorInfo
 from instrumentview.InteractorStyles import CustomInteractorStyleZoomAndSelect, CustomInteractorStyleRubberBand3D
 from typing import Callable
 from mantid.dataobjects import Workspace2D
+from mantid import UsageService
+from mantid.kernel import FeatureType
 from mantidqt.plotting.mantid_navigation_toolbar import MantidNavigationToolbar
 import numpy as np
 import pyvista as pv
@@ -78,7 +81,6 @@ class FullInstrumentViewWindow(QMainWindow):
 
         super(FullInstrumentViewWindow, self).__init__(parent)
         self.setWindowTitle("Instrument View")
-        self.resize(1500, 1500)
 
         self._off_screen = off_screen
 
@@ -91,10 +93,14 @@ class FullInstrumentViewWindow(QMainWindow):
         pyvista_vertical_layout = QVBoxLayout(pyvista_vertical_widget)
         left_column_layout = QVBoxLayout(left_column_widget)
 
+        left_column_scroll = QScrollArea()
+        left_column_scroll.setWidgetResizable(True)
+        left_column_scroll.setWidget(left_column_widget)
+
         hsplitter = QSplitter(Qt.Horizontal)
-        hsplitter.addWidget(left_column_widget)
+        hsplitter.addWidget(left_column_scroll)
         hsplitter.addWidget(pyvista_vertical_widget)
-        hsplitter.setSizes([100, 200])
+        hsplitter.setSizes([150, 200])
         hsplitter.splitterMoved.connect(self._on_splitter_moved)
         parent_horizontal_layout.addWidget(hsplitter)
 
@@ -113,8 +119,8 @@ class FullInstrumentViewWindow(QMainWindow):
         vsplitter = QSplitter(Qt.Vertical)
         vsplitter.addWidget(self.main_plotter.app_window)
         vsplitter.addWidget(plot_widget)
-        vsplitter.setStretchFactor(0, 0)
-        vsplitter.setStretchFactor(1, 1)
+        vsplitter.setStretchFactor(0, 5)
+        vsplitter.setStretchFactor(1, 4)
         vsplitter.splitterMoved.connect(self._on_splitter_moved)
 
         pyvista_vertical_layout.addWidget(vsplitter)
@@ -128,6 +134,8 @@ class FullInstrumentViewWindow(QMainWindow):
         self._detector_xyz_edit = self._add_detector_info_boxes(detector_info_layout, "XYZ Position")
         self._detector_spherical_position_edit = self._add_detector_info_boxes(detector_info_layout, "Spherical Position")
         self._detector_pixel_counts_edit = self._add_detector_info_boxes(detector_info_layout, "Pixel Counts")
+        self._detector_relative_angle_edit = self._add_detector_info_boxes(detector_info_layout, "Relative Angle (degrees)")
+        self.set_relative_detector_angle(None)
 
         self._integration_limit_group_box = QGroupBox("Time of Flight")
         self._integration_limit_min_edit, self._integration_limit_max_edit, self._integration_limit_slider = self._add_min_max_group_box(
@@ -199,6 +207,15 @@ class FullInstrumentViewWindow(QMainWindow):
         self.interactor_style = CustomInteractorStyleZoomAndSelect()
         self._overlay_meshes = []
         self._lineplot_overlays = []
+
+        screen_geometry = self.screen().geometry()
+        self.resize(int(screen_geometry.width() * 0.8), int(screen_geometry.height() * 0.8))
+        window_geometry = self.frameGeometry()
+        center_point = screen_geometry.center()
+        window_geometry.moveCenter(center_point)
+        self.move(window_geometry.topLeft())
+
+        UsageService.registerFeatureUsage(FeatureType.Interface, "InstrumentView2025", False)
 
     def check_sum_spectra_checkbox(self) -> None:
         self._sum_spectra_checkbox.setChecked(True)
@@ -436,7 +453,10 @@ class FullInstrumentViewWindow(QMainWindow):
     def add_main_mesh(self, mesh: PolyData, is_projection: bool, scalars=None) -> None:
         """Draw the given mesh in the main plotter window"""
         self.main_plotter.clear()
-        self.main_plotter.add_mesh(mesh, pickable=False, scalars=scalars, render_points_as_spheres=True, point_size=15)
+        scalar_bar_args = dict(interactive=True, vertical=False, title_font_size=15, label_font_size=12) if scalars is not None else None
+        self.main_plotter.add_mesh(
+            mesh, pickable=False, scalars=scalars, render_points_as_spheres=True, point_size=15, scalar_bar_args=scalar_bar_args
+        )
 
         if not self.main_plotter.off_screen:
             self.main_plotter.enable_trackball_style()
@@ -450,7 +470,7 @@ class FullInstrumentViewWindow(QMainWindow):
         self.main_plotter.add_mesh(
             point_cloud,
             scalars=scalars,
-            opacity=[0.0, 0.5],
+            opacity=[0.0, 0.3],
             show_scalar_bar=False,
             pickable=True,
             cmap="Oranges",
@@ -539,9 +559,13 @@ class FullInstrumentViewWindow(QMainWindow):
         self._set_detector_edit_text(
             self._detector_spherical_position_edit,
             detector_infos,
-            lambda d: f"r: {d.spherical_position[0]:.3f}, t: {d.spherical_position[1]:.1f}, p: {d.spherical_position[2]:.1f}",
+            lambda d: f"r: {d.spherical_position[0]:.3f}, 2\u03b8: {d.spherical_position[1]:.1f}, \u03c6: {d.spherical_position[2]:.1f}",
         )
         self._set_detector_edit_text(self._detector_pixel_counts_edit, detector_infos, lambda d: str(d.pixel_counts))
+
+    def set_relative_detector_angle(self, angle: float | None) -> None:
+        angle_text = "Select exactly two detectors to show angle" if angle is None else f"{angle:.4f}"
+        self._detector_relative_angle_edit.setPlainText(angle_text)
 
     def _set_detector_edit_text(
         self, edit_box: QTextEdit, detector_infos: list[DetectorInfo], property_lambda: Callable[[DetectorInfo], str]

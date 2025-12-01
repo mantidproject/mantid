@@ -21,9 +21,9 @@
 #include "MantidGeometry/Instrument/FitParameter.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Exception.h"
-#include <Poco/File.h>
 #include <cstring>
 #include <cxxtest/TestSuite.h>
+#include <filesystem>
 #include <fstream>
 #include <vector>
 
@@ -75,7 +75,7 @@ public:
     outputFile = alg.getPropertyValue("Filename");
 
     bool fileExists = false;
-    TS_ASSERT(fileExists = Poco::File(outputFile).exists());
+    TS_ASSERT(fileExists = std::filesystem::exists(outputFile));
 
     if (fileExists) {
 
@@ -100,7 +100,7 @@ public:
       TS_ASSERT_DELTA(ws->y(45)[0], 3.0, 1e-6);
 
       // remove file created by this algorithm
-      Poco::File(outputFile).remove();
+      std::filesystem::remove(outputFile);
     }
 
     // Remove workspace

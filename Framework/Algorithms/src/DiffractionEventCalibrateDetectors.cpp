@@ -25,7 +25,6 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/UnitFactory.h"
 
-#include <Poco/File.h>
 #include <cmath>
 #include <fstream>
 #include <numeric>

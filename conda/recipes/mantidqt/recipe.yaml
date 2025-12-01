@@ -40,7 +40,6 @@ requirements:
     - qt-webengine
     - setuptools
     - tbb-devel ${{ tbb }}
-    - versioningit ${{ versioningit }}
     - if: linux
       then:
         - libgl-devel

@@ -20,15 +20,6 @@ from instrumentview.Peaks.WorkspaceDetectorPeaks import WorkspaceDetectorPeaks
 class FullInstrumentViewPresenter:
     """Presenter for the Instrument View window"""
 
-    _FULL_3D = "3D"
-    _SPHERICAL_X = "Spherical X"
-    _SPHERICAL_Y = "Spherical Y"
-    _SPHERICAL_Z = "Spherical Z"
-    _CYLINDRICAL_X = "Cylindrical X"
-    _CYLINDRICAL_Y = "Cylindrical Y"
-    _CYLINDRICAL_Z = "Cylindrical Z"
-    _PROJECTION_OPTIONS = [_FULL_3D, _SPHERICAL_X, _SPHERICAL_Y, _SPHERICAL_Z, _CYLINDRICAL_X, _CYLINDRICAL_Y, _CYLINDRICAL_Z]
-
     _TIME_OF_FLIGHT = "TOF"
     _D_SPACING = "dSpacing"
     _WAVELENGTH = "Wavelength"
@@ -85,7 +76,7 @@ class FullInstrumentViewPresenter:
             default_index = possible_returns.index(default_projection)
         except ValueError:
             default_index = 0
-        return default_index, self._PROJECTION_OPTIONS
+        return default_index, self._model._PROJECTION_OPTIONS
 
     def on_export_workspace_clicked(self) -> None:
         self._model.save_line_plot_workspace_to_ads()
@@ -122,7 +113,7 @@ class FullInstrumentViewPresenter:
 
     def on_projection_option_selected(self, selected_index: int) -> None:
         """Update the projection based on the selected option."""
-        projection_type = self._PROJECTION_OPTIONS[selected_index]
+        projection_type = self._model._PROJECTION_OPTIONS[selected_index]
 
         if projection_type.startswith("3D"):
             # Plot orange sphere at the origin
@@ -140,24 +131,18 @@ class FullInstrumentViewPresenter:
             self._model.reset_cached_projection_positions()
             return points
 
-        is_spherical = True
-        if projection_type.startswith("Spherical"):
-            is_spherical = True
-        elif projection_type.startswith("Cylindrical"):
-            is_spherical = False
-        else:
-            raise ValueError(f"Unknown projection type: {projection_type}")
-
         if projection_type.endswith("X"):
             axis = [1, 0, 0]
         elif projection_type.endswith("Y"):
             axis = [0, 1, 0]
         elif projection_type.endswith("Z"):
             axis = [0, 0, 1]
+        elif projection_type == self._model._SIDE_BY_SIDE:
+            axis = [0, 0, 1]
         else:
             raise ValueError(f"Unknown projection type {projection_type}")
 
-        return self._model.calculate_projection(is_spherical, axis, points)
+        return self._model.calculate_projection(projection_type, axis, points)
 
     def _apply_projection_state(self, is_projection: bool, positions: np.ndarray) -> None:
         self._is_projection_selected = is_projection
@@ -215,8 +200,15 @@ class FullInstrumentViewPresenter:
         self._model.extract_spectra_for_line_plot(unit, self._view.sum_spectra_selected())
         self._view.show_plot_for_detectors(self._model.line_plot_workspace)
         self._view.set_selected_detector_info(self._model.picked_detectors_info_text())
+        self._update_relative_detector_angle()
         self._update_peaks_workspaces()
         self.refresh_lineplot_peaks()
+
+    def _update_relative_detector_angle(self) -> None:
+        if len(self._model.picked_detector_ids) != 2:
+            self._view.set_relative_detector_angle(None)
+        else:
+            self._view.set_relative_detector_angle(self._model.relative_detector_angle())
 
     def on_clear_selected_detectors_clicked(self) -> None:
         self.update_picked_detectors([])

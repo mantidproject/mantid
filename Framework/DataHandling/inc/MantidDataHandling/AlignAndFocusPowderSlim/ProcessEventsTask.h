@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "BankCalibration.h"
+#include "MantidDataHandling/AlignAndFocusPowderSlim/BankCalibration.h"
 #include <ranges>
 #include <tbb/tbb.h>
 #include <vector>
@@ -38,7 +38,7 @@ public:
     auto tof_iter = std::ranges::next(m_tofs->begin(), range.begin());
     for (size_t i = range.begin(); i < range_end; ++i) {
       const auto &detid = *detid_iter;
-      const auto &calib_factor = m_calibration->value(detid);
+      const auto &calib_factor = m_calibration->value_calibration(detid);
       if (calib_factor < IGNORE_PIXEL) {
         // Apply calibration
         const double &tof = static_cast<double>(*tof_iter) * calib_factor;

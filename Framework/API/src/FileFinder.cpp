@@ -22,7 +22,6 @@
 #include "MantidKernel/StringTokenizer.h"
 #include <Poco/Exception.h>
 #include <Poco/File.h>
-#include <Poco/Glob.h>
 #include <Poco/Path.h>
 #include <boost/lexical_cast.hpp>
 #include <boost/regex.hpp>
@@ -73,7 +72,7 @@ FileFinderImpl::FileFinderImpl() {
 
 // determine from Mantid property how sensitive Mantid should be
 #ifdef _WIN32
-  m_globOption = Poco::Glob::GLOB_DEFAULT;
+  m_globOption = Kernel::Glob::GLOB_DEFAULT;
 #else
   setCaseSensitive(Kernel::ConfigService::Instance().getValue<bool>("filefinder.casesensitive").value_or(false));
 #endif
@@ -85,9 +84,9 @@ FileFinderImpl::FileFinderImpl() {
  */
 void FileFinderImpl::setCaseSensitive(const bool cs) {
   if (cs)
-    m_globOption = Poco::Glob::GLOB_DEFAULT;
+    m_globOption = Kernel::Glob::GLOB_DEFAULT;
   else
-    m_globOption = Poco::Glob::GLOB_CASELESS;
+    m_globOption = Kernel::Glob::GLOB_CASELESS;
 }
 
 /**
@@ -95,7 +94,7 @@ void FileFinderImpl::setCaseSensitive(const bool cs) {
  * @return cs :: If case sensitive return true, if not case sensitive return
  * false
  */
-bool FileFinderImpl::getCaseSensitive() const { return (m_globOption == Poco::Glob::GLOB_DEFAULT); }
+bool FileFinderImpl::getCaseSensitive() const { return (m_globOption == Kernel::Glob::GLOB_DEFAULT); }
 
 /**
  * Return the full path to the file given its name
@@ -643,7 +642,7 @@ std::vector<std::string> FileFinderImpl::findRuns(const std::string &hintstr,
           previousPath = tempPath.makeParent().toString();
           res.emplace_back(path);
         } else {
-          throw Kernel::Exception::NotFoundError("Unable to find file:", run);
+          throw Kernel::Exception::NotFoundError("Unable to find file:", std::move(run));
         }
       }
     } else {

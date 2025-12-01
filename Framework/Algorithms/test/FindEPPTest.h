@@ -138,8 +138,8 @@ public:
       TS_ASSERT_EQUALS(outputWS->cell<std::string>(row, 8), "success");
       TS_ASSERT_DELTA(outputWS->cell<double>(row, 1), 6000.0, m_delta);
       TS_ASSERT_DELTA(outputWS->cell<double>(row, 2), 8.7644, m_delta);
-      TS_ASSERT_DELTA(outputWS->cell<double>(row, 3), 89.3189, m_delta);
-      TS_ASSERT_DELTA(outputWS->cell<double>(row, 4), 7.2309, m_delta);
+      TS_ASSERT_DELTA(outputWS->cell<double>(row, 3), 89.3175, m_delta);
+      TS_ASSERT_DELTA(outputWS->cell<double>(row, 4), 7.1792, m_delta);
       TS_ASSERT_DELTA(outputWS->cell<double>(row, 5), 4.8388, m_delta);
       TS_ASSERT_DELTA(outputWS->cell<double>(row, 6), 0.6161, m_delta);
       TS_ASSERT_DELTA(outputWS->cell<double>(row, 7), 0.1712, m_delta);

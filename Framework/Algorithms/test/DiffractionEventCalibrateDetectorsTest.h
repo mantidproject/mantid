@@ -9,8 +9,8 @@
 #include "MantidAlgorithms/DiffractionEventCalibrateDetectors.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/Timer.h"
-#include <Poco/File.h>
 #include <cxxtest/TestSuite.h>
+#include <filesystem>
 #include <fstream>
 
 using namespace Mantid::Algorithms;
@@ -65,7 +65,7 @@ public:
     TS_ASSERT_DELTA(upy, 0.894435, 0.0001)
     TS_ASSERT_DELTA(upz, 0.447104, 0.0001)
     outFile.close();
-    Poco::File(filename).remove();
+    std::filesystem::remove(filename);
 
     AnalysisDataService::Instance().remove("temp_event_ws");
   }

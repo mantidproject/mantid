@@ -80,6 +80,14 @@ Bugfixes
 .. amalgamate:: Framework/Dependencies/Bugfixes
 
 
+Kernel
+------
+
+New features
+############
+.. amalgamate:: Framework/Kernel/New_features
+
+
 MantidWorkbench
 ---------------
 

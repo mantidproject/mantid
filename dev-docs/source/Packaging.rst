@@ -181,7 +181,7 @@ Building a custom ``mantid-developer`` environment
 
 This is useful if you need to change a pinned version of one of Mantid's dependencies and test the change locally.
 
-1. One can create a new environment specifically for building the package (with ``conda-build``, ``conda-index``, ``rattler-build``, and ``versioningit``), but the build itself happens in a separate sandbox which makes this unneccesary.
+1. One can create a new environment specifically for building the package (with ``rattler-build``, and ``versioningit``), but the build itself happens in a separate sandbox which makes this unneccesary.
 2. Make your changes to the conda recipe files.
 3. Change directory to ``mantid/conda/recipes``
 4. With ``mantid_dev_builder`` active, run
@@ -195,7 +195,7 @@ This is useful if you need to change a pinned version of one of Mantid's depende
 
    .. code-block:: sh
 
-       python -m conda_index /home/me/tmp/rattler/
+       rattler-index fs /home/me/tmp/rattler/
 
    This will allow conda to install the package by name rather than by file. At this time, creating an environment using the filename will skip installing the dependencies and not use any channels.
 6. Create a new environment with the new developer package

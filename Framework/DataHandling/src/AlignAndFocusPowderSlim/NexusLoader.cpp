@@ -5,7 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 
-#include "NexusLoader.h"
+#include "MantidDataHandling/AlignAndFocusPowderSlim/NexusLoader.h"
 #include "MantidNexus/H5Util.h"
 #include <ranges>
 

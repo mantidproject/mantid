@@ -14,7 +14,7 @@
 #include "MantidFrameworkTestHelpers/ScopedFileHelper.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
-#include <Poco/File.h>
+#include <filesystem>
 #include <fstream>
 #include <limits>
 
@@ -301,7 +301,7 @@ private:
     // check that the algorithm has written a file to disk
     std::string outputFile = alg.getProperty("OutputCalFile");
     bool fileExists = false;
-    TS_ASSERT(fileExists = Poco::File(outputFile).exists());
+    TS_ASSERT(fileExists = std::filesystem::exists(outputFile));
 
     // check that we can open the file
     if (fileExists) {

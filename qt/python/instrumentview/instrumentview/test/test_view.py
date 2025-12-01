@@ -63,7 +63,12 @@ class TestFullInstrumentViewWindow(unittest.TestCase):
         mock_scalars = MagicMock()
         self._view.add_main_mesh(mock_mesh, False, mock_scalars)
         self._view.main_plotter.add_mesh.assert_called_once_with(
-            mock_mesh, pickable=False, scalars=mock_scalars, render_points_as_spheres=True, point_size=15
+            mock_mesh,
+            pickable=False,
+            scalars=mock_scalars,
+            render_points_as_spheres=True,
+            point_size=15,
+            scalar_bar_args={"interactive": True, "vertical": False, "title_font_size": 15, "label_font_size": 12},
         )
 
     def test_add_pickable_main_mesh(self):
@@ -74,7 +79,7 @@ class TestFullInstrumentViewWindow(unittest.TestCase):
         self._view.main_plotter.add_mesh.assert_called_once_with(
             mock_mesh,
             scalars=mock_scalars,
-            opacity=[0.0, 0.5],
+            opacity=[0.0, 0.3],
             show_scalar_bar=False,
             pickable=True,
             cmap="Oranges",

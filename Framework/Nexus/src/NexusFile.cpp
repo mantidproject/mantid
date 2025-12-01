@@ -111,6 +111,11 @@ FileID::~FileID() {
   }
 }
 
+using GroupID = UniqueID<&H5Gclose>;
+using DataSetID = UniqueID<&H5Dclose>;
+using DataTypeID = UniqueID<&H5Tclose>;
+using DataSpaceID = UniqueID<&H5Sclose>;
+
 } // namespace Mantid::Nexus
 
 namespace Mantid::Nexus {
@@ -358,8 +363,6 @@ NexusAddress File::groupAddress(NexusAddress const &addr) const {
   }
 }
 
-std::string File::getAddress() const { return m_address; }
-
 bool File::hasAddress(std::string const &name) const {
   if (name == "/") { // NexusDescriptor does not keep the root, but it does exist
     return true;
@@ -566,28 +569,24 @@ void File::openData(std::string const &name) {
   NexusAddress absaddr(formAbsoluteAddress(name));
 
   /* find the ID number and open the dataset */
-  hid_t newData, newType, newSpace;
-  newData = H5Dopen(m_pfile->getId(), absaddr.c_str(), H5P_DEFAULT);
-  if (newData < 0) {
+  DataSetID newData = H5Dopen(m_pfile->getId(), absaddr.c_str(), H5P_DEFAULT);
+  if (newData.getId() < 0) {
     throw NXEXCEPTION("Dataset (" + absaddr + ") not found at this level");
   }
   /* find the ID number of datatype */
-  newType = H5Dget_type(newData);
-  if (newType < 0) {
-    H5Dclose(newData);
+  DataTypeID newType = H5Dget_type(newData.getId());
+  if (newType.getId() < 0) {
     throw NXEXCEPTION("Error opening dataset (" + absaddr + ")");
   }
   /* find the ID number of dataspace */
-  newSpace = H5Dget_space(newData);
-  if (newSpace < 0) {
-    H5Dclose(newData);
-    H5Tclose(newType);
+  DataSpaceID newSpace = H5Dget_space(newData.getId());
+  if (newSpace.getId() < 0) {
     throw NXEXCEPTION("Error opening dataset (" + absaddr + ")");
   }
   // now maintain stack
-  m_current_data_id = newData;
-  m_current_type_id = newType;
-  m_current_space_id = newSpace;
+  m_current_data_id = newData.releaseId();
+  m_current_type_id = newType.releaseId();
+  m_current_space_id = newSpace.releaseId();
   m_address = absaddr;
 }
 
@@ -784,14 +783,11 @@ template <typename NumT> void File::getData(NumT *data) {
   hsize_t ndims = H5Sget_simple_extent_ndims(m_current_space_id);
 
   if (ndims == 0) {
-    hid_t datatype = H5Dget_type(m_current_data_id);
-    hid_t filespace = H5Dget_space(m_current_data_id);
-    hid_t memtype_id = H5Screate(H5S_SCALAR);
-    H5Sselect_all(filespace);
-    ret = H5Dread(m_current_data_id, datatype, memtype_id, filespace, H5P_DEFAULT, data);
-    H5Sclose(memtype_id);
-    H5Sclose(filespace);
-    H5Tclose(datatype);
+    DataTypeID datatype = H5Dget_type(m_current_data_id);
+    DataSpaceID filespace = H5Dget_space(m_current_data_id);
+    DataSpaceID memspace_id = H5Screate(H5S_SCALAR);
+    H5Sselect_all(filespace.getId());
+    ret = H5Dread(m_current_data_id, datatype.getId(), memspace_id.getId(), filespace.getId(), H5P_DEFAULT, data);
   } else {
     if (H5Tget_class(m_current_type_id) == H5T_STRING) {
       this->getData<char>(reinterpret_cast<char *>(data));
@@ -878,10 +874,10 @@ void File::makeCompData(std::string const &name, NXnumtype const type, DimVector
   }
 
   // create the correct datatype for this numeric type
-  hid_t datatype = H5Tcopy(nxToHDF5Type(type));
+  DataTypeID datatype = H5Tcopy(nxToHDF5Type(type));
 
   // create a dataspace
-  hid_t dataspace;
+  DataSpaceID dataspace;
   if (type == NXnumtype::CHAR) {
     std::size_t byte_zahl(mydim.back());
     DimVector mydim1(mydim.cbegin(), mydim.cend());
@@ -897,7 +893,7 @@ void File::makeCompData(std::string const &name, NXnumtype const type, DimVector
       chunkdims.back() = 1;
     }
     dataspace = H5Screate_simple(rank, mydim1.data(), maxdims.data());
-    H5Tset_size(datatype, byte_zahl);
+    H5Tset_size(datatype.getId(), byte_zahl);
   } else {
     if (unlimited) {
       dataspace = H5Screate_simple(rank, mydim.data(), maxdims.data());
@@ -912,8 +908,6 @@ void File::makeCompData(std::string const &name, NXnumtype const type, DimVector
     herr_t ret = H5Pset_chunk(cparms, rank, chunkdims.data());
     if (ret < 0) {
       H5Pclose(cparms);
-      H5Tclose(datatype);
-      H5Sclose(dataspace);
       msg << "Size of chunks could not be set";
       throw NXEXCEPTION(msg.str());
     }
@@ -927,8 +921,6 @@ void File::makeCompData(std::string const &name, NXnumtype const type, DimVector
       herr_t ret = H5Pset_chunk(cparms, rank, chunkdims.data());
       if (ret < 0) {
         H5Pclose(cparms);
-        H5Tclose(datatype);
-        H5Sclose(dataspace);
         msg << "Size of chunks could not be set";
         throw NXEXCEPTION(msg.str());
       }
@@ -940,8 +932,6 @@ void File::makeCompData(std::string const &name, NXnumtype const type, DimVector
     herr_t ret = H5Pset_chunk(cparms, rank, chunkdims.data());
     if (ret < 0) {
       H5Pclose(cparms);
-      H5Tclose(datatype);
-      H5Sclose(dataspace);
       msg << "Size of chunks could not be set";
       throw NXEXCEPTION(msg.str());
     }
@@ -953,20 +943,16 @@ void File::makeCompData(std::string const &name, NXnumtype const type, DimVector
 
   // create the dataset with the compression parameters
   NexusAddress absaddr(formAbsoluteAddress(name));
-  hid_t dataset = H5Dcreate(m_pfile->getId(), absaddr.c_str(), datatype, dataspace, H5P_DEFAULT, cparms, H5P_DEFAULT);
+  DataSetID dataset = H5Dcreate(m_pfile->getId(), absaddr.c_str(), datatype.getId(), dataspace.getId(), H5P_DEFAULT,
+                                cparms, H5P_DEFAULT);
   H5Pclose(cparms);
-  if (dataset < 0) {
-    H5Tclose(datatype);
-    H5Sclose(dataspace);
+  if (dataset.getId() < 0) {
     msg << "Creating chunked dataset failed";
     throw NXEXCEPTION(msg.str());
   }
   if (unlimited) {
-    herr_t ret = H5Dset_extent(dataset, mydim.data());
+    herr_t ret = H5Dset_extent(dataset.getId(), mydim.data());
     if (ret < 0) {
-      H5Tclose(datatype);
-      H5Sclose(dataspace);
-      H5Dclose(dataset);
       msg << "Cannot create dataset " << name;
       throw NXEXCEPTION(msg.str());
     }
@@ -974,23 +960,10 @@ void File::makeCompData(std::string const &name, NXnumtype const type, DimVector
   // cleanup
   registerEntry(absaddr, SCIENTIFIC_DATA_SET);
   if (open_data) {
-    m_current_type_id = datatype;
-    m_current_space_id = dataspace;
-    m_current_data_id = dataset;
+    m_current_type_id = datatype.releaseId();
+    m_current_space_id = dataspace.releaseId();
+    m_current_data_id = dataset.releaseId();
     m_address = absaddr;
-  } else {
-    if (H5Sclose(dataspace) < 0) {
-      msg << "HDF cannot close dataspace";
-      throw NXEXCEPTION(msg.str());
-    }
-    if (H5Tclose(datatype) < 0) {
-      msg << "HDF cannot close datatype";
-      throw NXEXCEPTION(msg.str());
-    }
-    if (H5Dclose(dataset) < 0) {
-      msg << "HDF cannot close dataset";
-      throw NXEXCEPTION(msg.str());
-    }
   }
 }
 
@@ -1012,7 +985,7 @@ template <typename NumT> void File::putSlab(NumT const *data, DimVector const &s
   stringstream msg;
   msg << "putSlab(data, " << toString(start) << ", " << toString(size) << ") failed: ";
 
-  /* check if there is an Dataset open */
+  /* check if there is a Dataset open */
   if (!isDataSetOpen()) {
     msg << "no dataset open";
     throw NXEXCEPTION(msg.str());
@@ -1057,30 +1030,26 @@ template <typename NumT> void File::putSlab(NumT const *data, DimVector const &s
     }
 
     // define slab
-    hid_t filespace = H5Dget_space(m_current_data_id);
-    iRet = H5Sselect_hyperslab(filespace, H5S_SELECT_SET, myStart.data(), nullptr, mySize.data(), nullptr);
+    DataSpaceID filespace = H5Dget_space(m_current_data_id);
+    iRet = H5Sselect_hyperslab(filespace.getId(), H5S_SELECT_SET, myStart.data(), nullptr, mySize.data(), nullptr);
     if (iRet < 0) {
-      H5Sclose(filespace);
       msg << "selecting slab failed";
       throw NXEXCEPTION(msg.str());
     }
     // write slab
-    hid_t dataspace = H5Screate_simple(rank, mySize.data(), nullptr);
-    iRet = H5Dwrite(m_current_data_id, m_current_type_id, dataspace, filespace, H5P_DEFAULT, data);
-    H5Sclose(dataspace);
+    DataSpaceID dataspace = H5Screate_simple(rank, mySize.data(), nullptr);
+    iRet = H5Dwrite(m_current_data_id, m_current_type_id, dataspace.getId(), filespace.getId(), H5P_DEFAULT, data);
     if (iRet < 0) {
-      H5Sclose(filespace);
       msg << "writing slab failed";
       throw NXEXCEPTION(msg.str());
     }
     /* update with new size */
     iRet = H5Sclose(m_current_space_id);
     if (iRet < 0) {
-      H5Sclose(filespace);
       msg << "updating size failed";
       throw NXEXCEPTION(msg.str());
     }
-    m_current_space_id = filespace;
+    m_current_space_id = filespace.releaseId();
   } else { // no unlimited dimensions
     // define slab
     iRet = H5Sselect_hyperslab(m_current_space_id, H5S_SELECT_SET, myStart.data(), nullptr, mySize.data(), nullptr);
@@ -1090,9 +1059,8 @@ template <typename NumT> void File::putSlab(NumT const *data, DimVector const &s
       throw NXEXCEPTION(msg.str());
     }
     // write slab
-    hid_t dataspace = H5Screate_simple(rank, mySize.data(), nullptr);
-    iRet = H5Dwrite(m_current_data_id, m_current_type_id, dataspace, m_current_space_id, H5P_DEFAULT, data);
-    H5Sclose(dataspace);
+    DataSpaceID dataspace = H5Screate_simple(rank, mySize.data(), nullptr);
+    iRet = H5Dwrite(m_current_data_id, m_current_type_id, dataspace.getId(), m_current_space_id, H5P_DEFAULT, data);
     if (iRet < 0) {
       msg << "writing slab failed";
       throw NXEXCEPTION(msg.str());
@@ -1138,10 +1106,10 @@ template <typename NumT> void File::getSlab(NumT *data, DimVector const &start, 
   }
 
   /* map datatypes of other platforms */
-  hid_t memtype;
+  DataTypeID memtype;
   H5T_class_t tclass = H5Tget_class(m_current_type_id);
   if (tclass == H5T_STRING) {
-    memtype = m_current_type_id;
+    memtype = H5Tcopy(m_current_type_id);
   } else {
     memtype = h5MemType(m_current_type_id);
   }
@@ -1151,12 +1119,10 @@ template <typename NumT> void File::getSlab(NumT *data, DimVector const &start, 
   if (rank < 0) {
     throw NXEXCEPTION("Failed to fetch rank for slab data");
   } else if (rank == 0) { // this is an unslabbable SCALAR
-    hid_t memspace = H5Screate(H5S_SCALAR);
-    hid_t filespace = H5Dget_space(m_current_data_id);
-    H5Sselect_all(filespace);
-    iRet = H5Dread(m_current_data_id, memtype, memspace, filespace, H5P_DEFAULT, data);
-    H5Sclose(filespace);
-    H5Sclose(memspace);
+    DataSpaceID memspace = H5Screate(H5S_SCALAR);
+    DataSpaceID filespace = H5Dget_space(m_current_data_id);
+    H5Sselect_all(filespace.getId());
+    iRet = H5Dread(m_current_data_id, memtype.getId(), memspace.getId(), filespace.getId(), H5P_DEFAULT, data);
   } else {
     DimVector myStart(start.cbegin(), start.cend());
     DimVector mySize(size.cbegin(), size.cend());
@@ -1175,27 +1141,23 @@ template <typename NumT> void File::getSlab(NumT *data, DimVector const &start, 
       throw NXEXCEPTION("Selecting slab failed");
     }
 
-    hid_t memspace = H5Screate_simple(rank, mySize.data(), nullptr);
-    iRet = H5Sselect_hyperslab(memspace, H5S_SELECT_SET, mStart.data(), nullptr, mySize.data(), nullptr);
+    DataSpaceID memspace = H5Screate_simple(rank, mySize.data(), nullptr);
+    iRet = H5Sselect_hyperslab(memspace.getId(), H5S_SELECT_SET, mStart.data(), nullptr, mySize.data(), nullptr);
     if (iRet < 0) {
-      H5Tclose(memtype);
-      H5Sclose(memspace);
       throw NXEXCEPTION("Selecting memspace failed");
     }
     // read slab
     if (mtype == NXnumtype::CHAR) {
       std::vector<char> tmp_data(mySize[0] + 1, '\0');
-      iRet = H5Dread(m_current_data_id, memtype, H5S_ALL, H5S_ALL, H5P_DEFAULT, tmp_data.data());
+      iRet = H5Dread(m_current_data_id, memtype.getId(), H5S_ALL, H5S_ALL, H5P_DEFAULT, tmp_data.data());
       char const *data1;
       data1 = tmp_data.data() + myStart[0];
       strncpy(static_cast<char *>(static_cast<void *>(data)), data1, size[0]);
     } else {
-      iRet = H5Dread(m_current_data_id, memtype, memspace, m_current_space_id, H5P_DEFAULT, data);
+      iRet = H5Dread(m_current_data_id, memtype.getId(), memspace.getId(), m_current_space_id, H5P_DEFAULT, data);
     }
-    H5Tclose(memspace);
   }
   /* cleanup */
-  H5Tclose(memtype);
   if (iRet < 0) {
     throw NXEXCEPTION("Reading slab failed");
   }
@@ -1457,7 +1419,7 @@ void File::getEntries(Entries &result) const {
       className = SCIENTIFIC_DATA_SET;
     }
     if (!className.empty())
-      result[name] = className;
+      result[name] = std::move(className);
   }
 }
 

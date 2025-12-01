@@ -110,4 +110,138 @@ public:
       TS_ASSERT_EQUALS(x, 2.0);
     }
   }
+
+  // FFT SMOOTHING
+
+  void test_fftSmooth_invalid() {
+    int N = 10;
+    int zero_cutoff = 0, large_cutoff = N + 1;
+    std::vector<double> input(N, 1);
+    TS_ASSERT_THROWS_ASSERT(fftSmooth(input, zero_cutoff), std::invalid_argument const &e,
+                            TS_ASSERT(strstr(e.what(), "zero")));
+    TS_ASSERT_THROWS_ASSERT(fftSmooth(input, large_cutoff), std::invalid_argument const &e,
+                            TS_ASSERT(strstr(e.what(), "array size")));
+  }
+
+  void test_fftSmooth_flat() {
+    // put flat signal in, get flat signal back out
+    double const flatValue = 3.0;
+    std::vector<double> input(20, flatValue);
+    std::vector<double> output = fftSmooth(input, 10);
+    TS_ASSERT_EQUALS(input, output);
+    TS_ASSERT_EQUALS(input.size(), output.size());
+    for (double const &x : output) {
+      TS_ASSERT_EQUALS(x, flatValue);
+    }
+  }
+
+  void test_fftSmooth_spikey() {
+    // put in flat signal with high-frequency noise, get flat out
+    double const flatValue = 3.0;
+    std::vector<double> input(20, flatValue);
+    // add high-frequency spikes
+    for (std::size_t i = 0; i < input.size(); i++) {
+      input[i] += (i % 2 == 0 ? +1 : -1);
+    }
+    std::vector<double> output = fftSmooth(input, 1);
+    TS_ASSERT_EQUALS(input.size(), output.size());
+    for (double const &x : output) {
+      TS_ASSERT_EQUALS(x, flatValue);
+    }
+  }
+
+  void test_fftSmooth_sines() {
+    // put in low-freq sine data with high-freq noise; get low-freq sine out
+    std::size_t const N{100};
+    std::vector<double> input(N);
+    // make periodic data
+    double const w0 = 6.28318530717958648 / double(N);
+    unsigned n1 = 3, n2 = 15;
+    double w1 = n1 * w0, w2 = n2 * w0;
+    auto sine = [](double w, std::size_t i) { return std::sin(w * double(i)); };
+    for (std::size_t i = 0; i < N; i++) {
+      input[i] = sine(w1, i) + sine(w2, i);
+    }
+    // cut off too low -- signal will be zero
+    std::vector<double> output = fftSmooth(input, n1 - 1);
+    TS_ASSERT_EQUALS(input.size(), output.size());
+    for (std::size_t i = 0; i < output.size(); i++) {
+      TS_ASSERT_DELTA(output[i], 0.0, 1.e-8);
+    }
+    // cutoff too high -- the higher frequency is still there
+    output = fftSmooth(input, n2 + 1);
+    TS_ASSERT_EQUALS(input.size(), output.size());
+    for (std::size_t i = 0; i < output.size(); i++) {
+      TS_ASSERT_DELTA(output[i], input[i], 1.e-8);
+    }
+    // cutoff just right -- the higher frequency part is removed
+    output = fftSmooth(input, n2 - 1);
+    TS_ASSERT_EQUALS(input.size(), output.size());
+    for (std::size_t i = 0; i < output.size(); i++) {
+      TS_ASSERT_DELTA(output[i], sine(w1, i), 1.e-8);
+    }
+  }
+
+  void test_fftSmooth_gauss() {
+    // put in gaussdata with high-freq noise; get gauss out
+    std::size_t const N{100};
+    std::vector<double> input(N);
+    // make gaussian data with noise
+    auto gauss = [](std::size_t i) { return std::exp(-std::pow(double(i) - 40.0, 2) / 15); };
+    for (std::size_t i = 0; i < N; i++) {
+      input[i] = gauss(i);
+    }
+    // add high-frequency noise
+    for (std::size_t i = 0; i < input.size(); i++) {
+      input[i] += (i % 2 == 0 ? +0.5 : -0.5);
+    }
+    // smooth and check
+    std::vector<double> output = fftSmooth(input, 50);
+    TS_ASSERT_EQUALS(input.size(), output.size());
+    for (std::size_t i = 0; i < output.size(); i++) {
+      TS_ASSERT_DELTA(output[i], gauss(i), 1.e-4);
+    }
+  }
+
+  // butterworth
+
+  void test_fftButterworthSmooth_invalid() {
+    int N = 10;
+    int zero_cutoff = 0, large_cutoff = N + 1, good_cutoff = N / 2;
+    int zero_order = 0, good_order = 1;
+    std::vector<double> input(N, 1);
+    TS_ASSERT_THROWS_ASSERT(fftButterworthSmooth(input, zero_cutoff, good_order), std::invalid_argument const &e,
+                            TS_ASSERT(strstr(e.what(), "zero")));
+    TS_ASSERT_THROWS_ASSERT(fftButterworthSmooth(input, large_cutoff, good_order), std::invalid_argument const &e,
+                            TS_ASSERT(strstr(e.what(), "array size")));
+    TS_ASSERT_THROWS_ASSERT(fftButterworthSmooth(input, good_cutoff, zero_order), std::invalid_argument const &e,
+                            TS_ASSERT(strstr(e.what(), "nonzero")));
+  }
+
+  void test_fftButterworthSmooth_flat() {
+    // put flat signal in, get flat signal back out
+    double const flatValue = 3.0;
+    std::vector<double> input(20, flatValue);
+    std::vector<double> output = fftButterworthSmooth(input, 1, 1);
+    TS_ASSERT_EQUALS(input, output);
+    TS_ASSERT_EQUALS(input.size(), output.size());
+    for (double const &x : output) {
+      TS_ASSERT_EQUALS(x, flatValue);
+    }
+  }
+
+  void test_fftButterworthSmooth_spikey() {
+    // put in flat signal with high-frequency noise, get flat out
+    double const flatValue = 3.0;
+    std::vector<double> input(20, flatValue);
+    // add high-frequency spikes
+    for (std::size_t i = 0; i < input.size(); i++) {
+      input[i] += (i % 2 == 0 ? +1 : -1);
+    }
+    std::vector<double> output = fftButterworthSmooth(input, 2, 10);
+    TS_ASSERT_EQUALS(input.size(), output.size());
+    for (double const &x : output) {
+      TS_ASSERT_DELTA(x, flatValue, 1.e-4);
+    }
+  }
 };

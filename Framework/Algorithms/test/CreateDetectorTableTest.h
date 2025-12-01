@@ -327,6 +327,29 @@ public:
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(ws->getName());
   }
+
+  void test_index_column_is_int() {
+    Workspace2D_sptr inputWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(3, 10, true);
+    std::string outWSName = "out_int_detid";
+    CreateDetectorTable alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", std::dynamic_pointer_cast<MatrixWorkspace>(inputWS)));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("DetectorTableWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    TableWorkspace_sptr ws;
+    TS_ASSERT_THROWS_NOTHING(ws = AnalysisDataService::Instance().retrieveWS<TableWorkspace>(outWSName));
+    TS_ASSERT(ws);
+    if (!ws) {
+      return;
+    }
+    const auto indexCol = ws->getColumn(0);
+    TS_ASSERT_EQUALS("Index", indexCol->name());
+    TS_ASSERT(indexCol->isType<int>());
+    AnalysisDataService::Instance().remove(ws->getName());
+  }
 };
 
 class CreateDetectorTablePerformance : public CxxTest::TestSuite {

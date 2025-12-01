@@ -19,7 +19,7 @@
 #include "MantidAlgorithms/GenerateIPythonNotebook.h"
 #include "MantidAlgorithms/Power.h"
 
-#include <Poco/File.h>
+#include <filesystem>
 
 using namespace Mantid;
 using namespace Mantid::Algorithms;
@@ -109,8 +109,8 @@ public:
     TS_ASSERT_EQUALS(alg.getPropertyValue("NotebookText"), " \"nbformat_minor\" : 0,");
 
     file.close();
-    if (Poco::File(filename).exists())
-      Poco::File(filename).remove();
+    if (std::filesystem::exists(filename))
+      std::filesystem::remove(filename);
   }
 
   void create_test_workspace(const std::string &wsName) {

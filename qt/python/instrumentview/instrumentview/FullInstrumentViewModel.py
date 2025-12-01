@@ -5,8 +5,9 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from instrumentview.Detectors import DetectorInfo
-import instrumentview.Projections.SphericalProjection as iv_spherical
-import instrumentview.Projections.CylindricalProjection as iv_cylindrical
+from instrumentview.Projections.SphericalProjection import SphericalProjection
+from instrumentview.Projections.CylindricalProjection import CylindricalProjection
+from instrumentview.Projections.SideBySide import SideBySide
 from instrumentview.Peaks.Peak import Peak
 from instrumentview.Peaks.DetectorPeaks import DetectorPeaks
 
@@ -14,10 +15,30 @@ from mantid.dataobjects import Workspace2D, PeaksWorkspace
 from mantid.simpleapi import CreateDetectorTable, ExtractSpectra, ConvertUnits, AnalysisDataService, SumSpectra, Rebin
 from itertools import groupby
 import numpy as np
+from typing import ClassVar
 
 
 class FullInstrumentViewModel:
     """Model for the Instrument View Window. Will calculate detector positions, indices, and integrated counts that give the colours"""
+
+    _FULL_3D: ClassVar[str] = "3D"
+    _SPHERICAL_X: ClassVar[str] = "Spherical X"
+    _SPHERICAL_Y: ClassVar[str] = "Spherical Y"
+    _SPHERICAL_Z: ClassVar[str] = "Spherical Z"
+    _CYLINDRICAL_X: ClassVar[str] = "Cylindrical X"
+    _CYLINDRICAL_Y: ClassVar[str] = "Cylindrical Y"
+    _CYLINDRICAL_Z: ClassVar[str] = "Cylindrical Z"
+    _SIDE_BY_SIDE: ClassVar[str] = "Side by Side"
+    _PROJECTION_OPTIONS: ClassVar[list[str]] = [
+        _FULL_3D,
+        _SPHERICAL_X,
+        _SPHERICAL_Y,
+        _SPHERICAL_Z,
+        _CYLINDRICAL_X,
+        _CYLINDRICAL_Y,
+        _CYLINDRICAL_Z,
+        _SIDE_BY_SIDE,
+    ]
 
     _sample_position = np.array([0, 0, 0])
     _source_position = np.array([0, 0, 0])
@@ -45,7 +66,9 @@ class FullInstrumentViewModel:
         self._source_position = np.array(component_info.sourcePosition()) if has_source else np.array([0, 0, 0])
         self._root_position = np.array(component_info.position(0))
 
-        detector_info_table = CreateDetectorTable(self._workspace, IncludeDetectorPosition=True, PickOneDetectorID=True, StoreInADS=False)
+        detector_info_table = CreateDetectorTable(
+            self._workspace, IncludeDetectorPosition=True, PickOneDetectorID=True, StoreInADS=False, EnableLogging=False
+        )
 
         # Might have comma-separated multiple detectors, choose first one in the string in that case
         self._detector_ids = detector_info_table.columnArray("Detector ID(s)")
@@ -206,13 +229,18 @@ class FullInstrumentViewModel:
     def reset_cached_projection_positions(self) -> None:
         self._current_projected_positions = self.detector_positions
 
-    def calculate_projection(self, is_spherical: bool, axis: list[int], positions: np.ndarray) -> np.ndarray:
-        """Calculate the 2D projection with the specified axis. Can be either cylindrical or spherical."""
-        projection = (
-            iv_spherical.SphericalProjection(self._sample_position, self._root_position, positions, np.array(axis))
-            if is_spherical
-            else iv_cylindrical.CylindricalProjection(self._sample_position, self._root_position, positions, np.array(axis))
-        )
+    def calculate_projection(self, projection_option: str, axis: list[int], positions: np.ndarray):
+        """Calculate the 2D projection with the specified axis. Can be cylindrical, spherical, or side-by-side."""
+        if projection_option == self._SIDE_BY_SIDE:
+            projection = SideBySide(
+                self._workspace, self.detector_ids, self.sample_position, self._root_position, positions, np.array(axis)
+            )
+        elif projection_option.startswith("Spherical"):
+            projection = SphericalProjection(self.sample_position, self._root_position, positions, np.array(axis))
+        elif projection_option.startswith("Cylindrical"):
+            projection = CylindricalProjection(self.sample_position, self._root_position, positions, np.array(axis))
+        else:
+            raise ValueError(f"Unknown projection type: {projection_option}")
 
         projected_positions = np.zeros_like(positions)
         projected_positions[:, :2] = projection.positions()  # Assign only x and y coordinate
@@ -292,3 +320,19 @@ class FullInstrumentViewModel:
                     detector_peaks.append(DetectorPeaks(list(peaks_for_id)))
             peaks_grouped_by_ws.append(detector_peaks)
         return peaks_grouped_by_ws
+
+    def relative_detector_angle(self) -> float:
+        picked_ids = self.picked_detector_ids
+        if len(picked_ids) != 2:
+            raise RuntimeError("Relative detector angle only valid when two detectors are selected")
+        q_lab_1 = self._calculate_q_lab_direction(picked_ids[0])
+        q_lab_2 = self._calculate_q_lab_direction(picked_ids[1])
+        return np.degrees(np.arccos(np.clip(np.dot(q_lab_1, q_lab_2), -1.0, 1.0)))
+
+    def _calculate_q_lab_direction(self, detector_id: int) -> np.ndarray:
+        detector_info = self.workspace.detectorInfo()
+        detector_index = detector_info.indexOf(int(detector_id))
+        two_theta = detector_info.twoTheta(detector_index)
+        phi = detector_info.azimuthal(detector_index)
+        q_lab = np.array([-np.sin(two_theta) * np.cos(phi), -np.sin(two_theta) * np.sin(phi), 1 - np.cos(two_theta)])
+        return q_lab / np.linalg.norm(q_lab)

@@ -2,7 +2,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.simpleapi import CreateSampleWorkspace, CreatePeaksWorkspace
+from mantid.simpleapi import CreateSampleWorkspace, CreatePeaksWorkspace, AddPeak
 from instrumentview.FullInstrumentViewModel import FullInstrumentViewModel
 import unittest
 from unittest import mock
@@ -131,15 +131,19 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         np.testing.assert_array_equal(model._is_valid, [True, True, False, False])
         np.testing.assert_array_equal(model._counts, [100, 200, 0, 0])
 
-    @mock.patch("instrumentview.Projections.SphericalProjection.SphericalProjection")
+    @mock.patch("instrumentview.FullInstrumentViewModel.SphericalProjection")
     def test_calculate_spherical_projection(self, mock_spherical_projection):
-        self._run_projection_test(mock_spherical_projection, True)
+        self._run_projection_test(mock_spherical_projection, FullInstrumentViewModel._SPHERICAL_Y)
 
-    @mock.patch("instrumentview.Projections.CylindricalProjection.CylindricalProjection")
+    @mock.patch("instrumentview.FullInstrumentViewModel.CylindricalProjection")
     def test_calculate_cylindrical_projection(self, mock_cylindrical_projection):
-        self._run_projection_test(mock_cylindrical_projection, False)
+        self._run_projection_test(mock_cylindrical_projection, FullInstrumentViewModel._CYLINDRICAL_Y)
 
-    def _run_projection_test(self, mock_projection_constructor, is_spherical):
+    @mock.patch("instrumentview.FullInstrumentViewModel.SideBySide")
+    def test_calculate_side_by_side_projection(self, mock_side_by_side):
+        self._run_projection_test(mock_side_by_side, FullInstrumentViewModel._SIDE_BY_SIDE)
+
+    def _run_projection_test(self, mock_projection_constructor, projection_option):
         self._mock_detector_table([1, 2, 3])
         mock_workspace = self._create_mock_workspace([1, 2, 3])
         model = FullInstrumentViewModel(mock_workspace)
@@ -147,7 +151,7 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         mock_projection = mock.MagicMock()
         mock_projection.positions.return_value = [[1, 2], [1, 2], [1, 2]]
         mock_projection_constructor.return_value = mock_projection
-        points = model.calculate_projection(is_spherical, axis=[0, 1, 0], positions=model.detector_positions)
+        points = model.calculate_projection(projection_option, axis=[0, 1, 0], positions=model.detector_positions)
         mock_projection_constructor.assert_called_once()
         self.assertTrue(all(all(point == [1, 2, 0]) for point in points))
 
@@ -428,6 +432,59 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         self.assertEqual(100, detector_peak.detector_id)
         self.assertEqual("[0, 0, 0] x 2", detector_peak.label)
         np.testing.assert_almost_equal(np.array([0, 0, 5.0]), detector_peak.location)
+
+    @mock.patch.object(FullInstrumentViewModel, "picked_detector_ids", new_callable=mock.PropertyMock)
+    def test_relative_detector_angle_no_picked(self, mock_picked_detector_ids):
+        mock_ws = self._create_mock_workspace([10, 11, 12])
+        mock_detector_info = mock_ws.detectorInfo()
+        mock_detector_info.azimuthal.return_value = 0.1
+        model = FullInstrumentViewModel(mock_ws)
+        with self.assertRaisesRegex(RuntimeError, ".*two detectors are selected"):
+            model.relative_detector_angle()
+        mock_picked_detector_ids.assert_called_once()
+
+    @mock.patch.object(FullInstrumentViewModel, "picked_detector_ids", new_callable=mock.PropertyMock)
+    def test_relative_detector_angle_two_picked(self, mock_picked_detector_ids):
+        mock_ws = self._create_mock_workspace([10, 11, 12])
+        mock_detector_info = mock_ws.detectorInfo()
+        mock_detector_info.azimuthal.return_value = 0.1
+
+        def mock_index_of(idx):
+            return idx
+
+        mock_detector_info.indexOf = mock_index_of
+
+        def mock_two_theta(idx):
+            return 0.3 if idx == 10 else 0.8
+
+        mock_detector_info.twoTheta = mock_two_theta
+        mock_picked_detector_ids.return_value = [10, 11]
+        model = FullInstrumentViewModel(mock_ws)
+        angle = model.relative_detector_angle()
+        np.testing.assert_allclose(14.324, angle, rtol=0.001)
+        mock_picked_detector_ids.assert_called_once()
+        self.assertEquals(2, mock_detector_info.azimuthal.call_count)
+
+    def test_calculate_q_lab_direction(self):
+        mock_ws = self._create_mock_workspace([10])
+        mock_detector_info = mock_ws.detectorInfo()
+        mock_detector_info.azimuthal.return_value = 0.1
+        mock_detector_info.twoTheta.return_value = 0.8
+        model = FullInstrumentViewModel(mock_ws)
+        q_lab = model._calculate_q_lab_direction(10)
+        np.testing.assert_allclose([-0.91646, -0.091953, 0.389418], q_lab, rtol=1e-5)
+
+    def test_actual_q_lab_calc(self):
+        detector_info = self._ws.detectorInfo()
+        peaks_ws = CreatePeaksWorkspace(self._ws, 1)
+        detector_id = int(detector_info.detectorIDs()[-1])
+        AddPeak(peaks_ws, self._ws, DetectorID=detector_id, TOF=10000)
+        peak = peaks_ws.getPeak(1)
+        q_lab = np.array(peak.getQLabFrame())
+        q_lab_direction = q_lab / np.linalg.norm(q_lab)
+        model = FullInstrumentViewModel(self._ws)
+        iv_qlab = model._calculate_q_lab_direction(detector_id)
+        np.testing.assert_allclose(q_lab_direction, iv_qlab, rtol=1e-5)
 
 
 if __name__ == "__main__":

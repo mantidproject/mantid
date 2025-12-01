@@ -9,8 +9,8 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/ArrayProperty.h"
-
-#include "Poco/Glob.h"
+#include "MantidKernel/Glob.h"
+#include <regex>
 
 namespace Mantid::Algorithms {
 
@@ -95,13 +95,14 @@ std::map<std::string, std::string> GroupWorkspaces::validateInputs() {
  * @param globExpression glob pattern for selecting names from the ADS
  */
 void GroupWorkspaces::addToGroup(const std::string &globExpression) {
-
-  Poco::Glob glob(globExpression);
+  const std::string globRegexp = Kernel::Glob::globToRegex(globExpression);
+  g_log.debug() << "convert \"" << globExpression << "\" to \"" << globRegexp << "\"\n";
+  std::regex pattern(globRegexp);
 
   const AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
   const auto wsNames = ads.topLevelItems();
   for (const auto &wsName : wsNames) {
-    if (glob.match(wsName.first)) {
+    if (std::regex_match(wsName.first, pattern)) {
       addToGroup(wsName.second);
     }
   }

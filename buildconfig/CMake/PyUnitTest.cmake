@@ -5,17 +5,42 @@
 # test. This directory is added to the PYTHONPATH when tests are executed _testname_prefix :: A prefix for each test
 # that is added to ctest, the name will be ${_testname_prefix}_TestName ${ARGN} :: List of test files
 function(PYUNITTEST_ADD_TEST _test_src_dir _testname_prefix)
+  if(NOT PYUNITTEST_RUNNER)
+    set(_test_runner_module ${CMAKE_SOURCE_DIR}/Framework/PythonInterface/test/testhelpers/testrunner.py)
+  else()
+    set(_test_runner_module ${PYUNITTEST_RUNNER})
+  endif()
+
+  py_add_test("UnitTest" ${_test_runner_module} "" ${ARGV})
+
+endfunction()
+
+# PYSYSTEMTEST_ADD_TEST (public macro to add system tests) Adds a set of python tests based upon the MantidSystemTest
+# class. This adds the system test modules (files), rather than the classes, but will run every class in the module.
+function(PYSYSTEMTEST_ADD_TEST _test_src_dir _testname_prefix)
+  if(NOT PYSYSTEMTEST_RUNNER)
+    set(_systest_runner ${CMAKE_SOURCE_DIR}/Testing/SystemTests/scripts/systestrunner.py)
+  else()
+    set(_systest_runner ${PYSYSTEMTEST_RUNNER})
+  endif()
+  # Check if this is a PR build.
+  if(PR_JOB)
+    set(_pr_flag "True")
+  else()
+    set(_pr_flag "False")
+  endif()
+  py_add_test("SystemTest" ${_systest_runner} ${_pr_flag} ${ARGV})
+
+endfunction()
+
+# PY_ADD_TEST is used by the above test-adding methods. It SHOULD NOT be used directly in CMakeLists.txt files. Use
+# PYSYSTEMTEST_ADD_TEST or PYUNITTEST_ADD_TEST instead.
+function(PY_ADD_TEST _test_type _test_runner_module _additional_flags _test_src_dir _testname_prefix)
   # Property for the module directory
   if(CMAKE_GENERATOR MATCHES "Visual Studio" OR CMAKE_GENERATOR MATCHES "Xcode")
     set(_module_dir ${CMAKE_BINARY_DIR}/bin/$<CONFIG>)
   else()
     set(_module_dir ${CMAKE_BINARY_DIR}/bin)
-  endif()
-
-  if(NOT PYUNITTEST_RUNNER)
-    set(_test_runner_module ${CMAKE_SOURCE_DIR}/Framework/PythonInterface/test/testhelpers/testrunner.py)
-  else()
-    set(_test_runner_module ${PYUNITTEST_RUNNER})
   endif()
 
   # Environment
@@ -58,11 +83,12 @@ function(PYUNITTEST_ADD_TEST _test_src_dir _testname_prefix)
     set(_pyunit_separate_name "${_testname_prefix}.${_suitename}.${_suitename}")
     add_test(NAME ${_pyunit_separate_name}
              COMMAND ${CMAKE_COMMAND} -E chdir "${CMAKE_BINARY_DIR}/bin/Testing" ${Python_EXECUTABLE}
-                     ${_test_runner_module} ${_test_src_dir}/${_filename}
+                     ${_test_runner_module} ${_test_src_dir}/${_filename} ${_additional_flags}
     )
     # Set the PYTHONPATH so that the built modules can be found
     set_tests_properties(
-      ${_pyunit_separate_name} PROPERTIES ENVIRONMENT "${_test_environment}" TIMEOUT ${TESTING_TIMEOUT}
+      ${_pyunit_separate_name} PROPERTIES ENVIRONMENT "${_test_environment}" TIMEOUT ${TESTING_TIMEOUT} LABELS
+                                          ${_test_type}
     )
     if(PYUNITTEST_RUN_SERIAL)
       set_tests_properties(${_pyunit_separate_name} PROPERTIES RUN_SERIAL 1)

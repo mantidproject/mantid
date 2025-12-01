@@ -11,7 +11,6 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Glob.h"
 
-#include <Poco/Glob.h>
 #include <filesystem>
 #include <fstream>
 
@@ -136,7 +135,29 @@ public:
     std::filesystem::path pattern = base / "instrument" / "unit_TESTING/dum_Definition.xml";
 
     std::set<std::string> files;
-    Glob::glob(pattern.string(), files, Poco::Glob::GLOB_CASELESS);
+    Glob::glob(pattern.string(), files, Glob::GLOB_CASELESS);
     TS_ASSERT(!files.empty());
+  }
+
+  void test_glob_to_regex() {
+    // no globbing specified
+    TS_ASSERT_EQUALS(Glob::globToRegex("abcd"), "^abcd$");
+
+    // globbing *
+    TS_ASSERT_EQUALS(Glob::globToRegex("a*bc*d"), "^a.+bc.+d$");
+    TS_ASSERT_EQUALS(Glob::globToRegex("*a*bc*d*"), "^.+a.+bc.+d.+$");
+
+    // globbing * with escapes
+    TS_ASSERT_EQUALS(Glob::globToRegex("a*bc\\*d"), "^a.+bc\\*d$");
+    TS_ASSERT_EQUALS(Glob::globToRegex("\\*a*bc\\*d"), "^\\*a.+bc\\*d$");
+
+    // globbing ?
+    TS_ASSERT_EQUALS(Glob::globToRegex("a?bc*d"), "^a.bc.+d$");
+
+    // globbing ? with escapes
+    TS_ASSERT_EQUALS(Glob::globToRegex("a?bc\\?d"), "^a.bc\\?d$");
+
+    // globbing both
+    TS_ASSERT_EQUALS(Glob::globToRegex("a?bc*d"), "^a.bc.+d$");
   }
 };

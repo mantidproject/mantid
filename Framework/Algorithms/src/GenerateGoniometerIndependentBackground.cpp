@@ -198,7 +198,7 @@ void GenerateGoniometerIndependentBackground::exec() {
 
     MatrixWorkspace_sptr output = group->getProperty("OutputWorkspace");
 
-    grouped_inputs.push_back(output);
+    grouped_inputs.push_back(std::move(output));
   }
 
   // all spectra for all input workspaces have same binning
