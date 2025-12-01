@@ -10,7 +10,7 @@ on:
 jobs:
   merge-release-into-main:
     runs-on: ubuntu-latest
-    if: ${{ github.ref_name == 'release-next' }}
+    if: ${{ github.ref_name == 'release-next' && github.repository_owner == 'mantidproject' }}
     steps:
       - uses: actions/checkout@master
 
@@ -24,7 +24,7 @@ jobs:
 
   merge-ornl-into-main:
     runs-on: ubuntu-latest
-    if: ${{ github.ref_name == 'ornl-next' }}
+    if: ${{ github.ref_name == 'ornl-next' && github.repository_owner == 'mantidproject' }}
     steps:
       - uses: actions/checkout@master
 
