@@ -32,7 +32,7 @@ class FileLoading:
             return parser.parse_toml_file(file_path, file_information=file_information)
         except KeyError as e:
             raise UserFileLoadException(f"The following key is missing: {e}")
-        except (NotImplementedError, ValueError) as e:
+        except (NotImplementedError, ValueError, PermissionError) as e:
             raise UserFileLoadException(e)
 
     @staticmethod
@@ -40,5 +40,5 @@ class FileLoading:
         try:
             converter = UserFileReaderAdapter(user_file_name=file_path, file_information=file_information)
             return converter.get_all_states(file_information=file_information)
-        except (RuntimeError, ValueError) as e:
+        except (RuntimeError, ValueError, IsADirectoryError, PermissionError) as e:
             raise UserFileLoadException(e)
