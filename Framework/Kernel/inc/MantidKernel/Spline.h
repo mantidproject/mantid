@@ -40,6 +40,25 @@ public:
     std::transform(newX.begin(), newX.end(), std::back_inserter(newY), [this](X const x) { return (*this)(x); });
     return newY;
   }
+  Y deriv(X const newX, unsigned int order = 1) const {
+    Y deriv;
+    if (order == 1) {
+      deriv = gsl_spline_eval_deriv(m_spline.get(), newX, m_acc.get());
+    } else if (order == 2) {
+      deriv = gsl_spline_eval_deriv2(m_spline.get(), newX, m_acc.get());
+    } else {
+      // for derivatives higher than 2, just return 0
+      deriv = 0;
+    }
+    return deriv;
+  }
+  std::vector<Y> deriv(std::span<X const> newX, unsigned int order = 1) const {
+    std::vector<Y> derivY;
+    derivY.reserve(newX.size());
+    std::transform(newX.begin(), newX.end(), std::back_inserter(derivY),
+                   [this, order](X const x) { return this->deriv(x, order); });
+    return derivY;
+  }
 };
 
 /**
