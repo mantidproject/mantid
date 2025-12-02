@@ -20,6 +20,8 @@ from instrumentview.FullInstrumentViewWindow import FullInstrumentViewWindow
 from instrumentview.InstrumentViewADSObserver import InstrumentViewADSObserver
 from instrumentview.Peaks.WorkspaceDetectorPeaks import WorkspaceDetectorPeaks
 
+from vtkmodules.vtkRenderingCore import vtkCoordinate
+
 
 class FullInstrumentViewPresenter:
     """Presenter for the Instrument View window"""
@@ -37,6 +39,7 @@ class FullInstrumentViewPresenter:
         any monitors."""
         self._view = view
         self._model = model
+        self._transform = np.eye(4)
         self._model.setup()
         self.setup()
 
@@ -114,17 +117,68 @@ class FullInstrumentViewPresenter:
         self._detector_mesh = self.create_poly_data_mesh(self._model.detector_positions)
         self._detector_mesh[self._counts_label] = self._model.detector_counts
         self._view.add_detector_mesh(self._detector_mesh, is_projection=self._model.is_2d_projection, scalars=self._counts_label)
+        self._update_transform(self._model.is_2d_projection, self._detector_mesh)
+        self._detector_mesh.transform(self._transform, inplace=True)
 
         self._pickable_mesh = self.create_poly_data_mesh(self._model.detector_positions)
         self._pickable_mesh[self._visible_label] = self._model.picked_visibility
+        self._pickable_mesh.transform(self._transform, inplace=True)
         self._view.add_pickable_mesh(self._pickable_mesh, scalars=self._visible_label)
 
         self._masked_mesh = self.create_poly_data_mesh(self._model.masked_positions)
+        self._masked_mesh.transform(self._transform, inplace=True)
         self._view.add_masked_mesh(self._masked_mesh)
 
         self._view.enable_or_disable_mask_widgets()
         self.set_view_contour_limits()
         self.set_view_integration_limits()
+
+    def _update_transform(self, is_projection: bool, mesh: pv.PolyData) -> None:
+        if not is_projection or self._view.is_maintain_aspect_ratio_checkbox_checked():
+            self._transform = np.eye(4)
+        else:
+            self._transform = self._transform_mesh_to_fill_window(mesh)
+
+    def _transform_mesh_to_fill_window(self, mesh: pv.PolyData) -> np.ndarray:
+        x_min, x_max, y_min, y_max, z_min, z_max = mesh.bounds
+        min_max_points = [
+            [x_min, y_min, z_min],
+            [x_max, y_max, z_max],
+        ]
+
+        # Convert to display coordinates (pixels)
+        plotter = self._view.main_plotter
+        coordinate = vtkCoordinate()
+        coordinate.SetCoordinateSystemToWorld()
+        display_coords = []
+        for p in min_max_points:
+            coordinate.SetValue(*p)
+            display_coords.append(coordinate.GetComputedDisplayValue(plotter.renderer))
+
+        window_width, window_height = plotter.window_size
+
+        mesh_width = display_coords[1][0] - display_coords[0][0]
+        mesh_height = display_coords[1][1] - display_coords[0][1]
+
+        return self._scale_matrix_relative_to_centre(mesh.center, window_width / mesh_width, window_height / mesh_height)
+
+    def _scale_matrix_relative_to_centre(self, centre, scale_x=1.0, scale_y=1.0) -> np.ndarray:
+        # Translate to centre, scale, translate back
+        # The matrix below is the product of those three transformations
+        c_x, c_y, _ = centre
+        return np.array([[scale_x, 0, 0, c_x * (1 - scale_x)], [0, scale_y, 0, c_y * (1 - scale_y)], [0, 0, 1, 0], [0, 0, 0, 1]])
+
+    def _transform_vectors_with_matrix(self, points: np.ndarray, transform: np.ndarray) -> np.ndarray:
+        # The transform is a 4x4 matrix, the points are 3D vectors, first we need an extra
+        # entry on the points
+        transformed_points = np.hstack([points, np.ones((points.shape[0], 1))])
+        transformed_points = transformed_points @ transform.T
+        # Now remove extra point
+        return transformed_points[:, :3]
+
+    def on_aspect_ratio_check_box_clicked(self) -> None:
+        self._view.store_maintain_aspect_ratio_option()
+        self.on_projection_option_selected(self._view._projection_combo_box.currentIndex())
 
     def update_detector_picker(self) -> None:
         """Change between single and multi point picking"""
@@ -300,7 +354,8 @@ class FullInstrumentViewPresenter:
             projected_points = self._model.detector_positions[ordered_indices]
             # Plot the peaks and their labels on the projection
             if len(projected_points) > 0:
-                self._view.plot_overlay_mesh(projected_points, labels, ws_peaks.colour)
+                transformed_points = self._transform_vectors_with_matrix(projected_points, self._transform)
+                self._view.plot_overlay_mesh(transformed_points, labels, ws_peaks.colour)
 
     def refresh_lineplot_peaks(self) -> None:
         # Plot vertical lines on the lineplot if the peak detector is selected

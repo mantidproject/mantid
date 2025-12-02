@@ -132,7 +132,7 @@ class POLDIFitPeaks2DPawleyTest(systemtesting.MantidSystemTest):
         cell_a_err = cell.cell(0, 2)
 
         self.assertLessThan(np.abs(cell_a_err), 5.0e-5)
-        self.assertLessThan(np.abs(cell_a - 5.4311946) / cell_a_err, 2.0)
+        self.assertLessThan(np.abs(cell_a - 5.4312889) / cell_a_err, 2.0)
 
         DeleteWorkspace(si_refs)
         DeleteWorkspace(indexed)
