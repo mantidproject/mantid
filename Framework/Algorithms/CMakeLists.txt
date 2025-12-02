@@ -155,6 +155,7 @@ set(SRC_FILES
     src/FitPeak.cpp
     src/FitPeaks.cpp
     src/FixGSASInstrumentFile.cpp
+    src/FlatCell.cpp
     src/FlatPlateAbsorption.cpp
     src/GeneralisedSecondDifference.cpp
     src/GenerateEventsFilter.cpp
@@ -508,6 +509,7 @@ set(INC_FILES
     inc/MantidAlgorithms/FitPeaks.h
     inc/MantidAlgorithms/FixGSASInstrumentFile.h
     inc/MantidAlgorithms/FlatPlateAbsorption.h
+    inc/MantidAlgorithms/FlatCell.h
     inc/MantidAlgorithms/GSLFunctions.h
     inc/MantidAlgorithms/GeneralisedSecondDifference.h
     inc/MantidAlgorithms/GenerateEventsFilter.h
@@ -862,6 +864,7 @@ set(TEST_FILES
     FitPeaksTest.h
     FixGSASInstrumentFileTest.h
     FlatPlateAbsorptionTest.h
+    FlatCellTest.h
     GeneralisedSecondDifferenceTest.h
     GenerateEventsFilterTest.h
     GenerateGoniometerIndependentBackgroundTest.h
