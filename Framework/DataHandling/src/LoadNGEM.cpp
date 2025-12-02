@@ -135,7 +135,8 @@ void addFrameToOutputWorkspace(int &rawFrames, int &goodFrames, const int eventC
     // clear event list in frame in preparation for next frame
     PARALLEL_FOR_NO_WSP_CHECK()
     // Add events that match parameters to workspace
-    for (auto &countsInFramePixel : countsInFrame) {
+    for (size_t i = 0; i < countsInFrame.size(); i++) {
+      auto &countsInFramePixel = countsInFrame[i];
       std::fill(countsInFramePixel.begin(), countsInFramePixel.end(), 0);
     }
   }
@@ -325,7 +326,7 @@ void LoadNGEM::exec() {
 }
 
 /**
- * @brief Load a single file into histograms.
+ * @brief Load a single file into histograms or events.
  *
  * @param filePath The path to the file.
  * @param eventCountInFrame The number of events in the current frame.
