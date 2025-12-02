@@ -8,7 +8,6 @@
 """
 
 import argparse
-import os
 import re
 import tomllib
 import yaml
@@ -16,10 +15,9 @@ from pathlib import Path
 from subprocess import run
 from typing import Sequence, Dict, Tuple, NewType
 
-mantid_root = Path(os.path.dirname(os.path.realpath(__file__))).parent.parent
-BUILD_CONFIG_PATH = mantid_root / Path("conda/recipes/conda_build_config.yaml")
-MANTID_DEVELOPER_RECIPE_PATH = mantid_root / Path("conda/recipes/mantid-developer/recipe.yaml")
-PIXI_TOML = mantid_root / Path("pixi.toml")
+BUILD_CONFIG_PATH = Path("conda/recipes/conda_build_config.yaml")
+MANTID_DEVELOPER_RECIPE_PATH = Path("conda/recipes/mantid-developer/recipe.yaml")
+PIXI_TOML = Path("pixi.toml")
 
 # package name: {'linux' : '>3.0', 'osx': '>3.1.0'}
 # package name: {'all': '==3.2.1'}
@@ -254,6 +252,8 @@ def main(argv: Sequence[str] = None) -> int:
     )
     args = parser.parse_args(argv)
     changed_files = [Path(f) for f in args.filenames]
+
+    print(changed_files)
 
     conda_env = get_mantid_dev_conda_recipe_pins(get_conda_recipe_pins())
     pixi_env = get_pixi_mantid_dev_pins()
