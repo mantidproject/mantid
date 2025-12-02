@@ -175,11 +175,10 @@ private:
   /// Validate minimum and maximum TOF
   std::pair<std::string, std::string> validateMinMaxToF();
   /// Read data from files into as histograms into a workspace2D
-  LoadDataResult readDataAsHistograms(const double minToF, const double maxToF, const double binWidth,
-                                      const int minEventsReq, const int maxEventsReq,
-                                      const std::vector<std::vector<std::string>> &filePaths);
+  LoadDataResult readDataAsHistograms(double &minToF, double &maxToF, const double binWidth, const int minEventsReq,
+                                      const int maxEventsReq, const std::vector<std::vector<std::string>> &filePaths);
   /// Read data from files into an event workspace, preserving events
-  LoadDataResult readDataAsEvents(double minToF, double maxToF, const double binWidth, const int minEventsReq,
+  LoadDataResult readDataAsEvents(double &minToF, double &maxToF, const double binWidth, const int minEventsReq,
                                   const int maxEventsReq, const std::vector<std::vector<std::string>> &filePaths);
 };
 

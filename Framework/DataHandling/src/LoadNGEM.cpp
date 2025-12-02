@@ -557,7 +557,7 @@ std::pair<std::string, std::string> LoadNGEM::validateMinMaxToF() {
  * @param filePaths Paths to the data file to read.
  * @return A struct containing the output workspace and variables tracking frames
  */
-LoadDataResult LoadNGEM::readDataAsEvents(double minToF, double maxToF, const double binWidth, const int minEventsReq,
+LoadDataResult LoadNGEM::readDataAsEvents(double &minToF, double &maxToF, const double binWidth, const int minEventsReq,
                                           const int maxEventsReq,
                                           const std::vector<std::vector<std::string>> &filePaths) {
   int eventCountInFrame{0};
@@ -570,7 +570,7 @@ LoadDataResult LoadNGEM::readDataAsEvents(double minToF, double maxToF, const do
   progress(0.04);
   auto strategy = std::make_shared<LoadDataStrategyEvent>();
   for (const auto &filePath : filePaths) {
-    loadSingleFile(filePath, eventCountInFrame, minToF, minToF, binWidth, rawFrames, goodFrames, minEventsReq,
+    loadSingleFile(filePath, eventCountInFrame, minToF, maxToF, binWidth, rawFrames, goodFrames, minEventsReq,
                    maxEventsReq, frameEventCounts, totalFilePaths, strategy);
   }
   // Add the final frame of events (as they are not followed by a T0 event)
@@ -592,7 +592,7 @@ LoadDataResult LoadNGEM::readDataAsEvents(double minToF, double maxToF, const do
  * @param filePaths Paths to the data file to read.
  * @return A struct containing the output workspace and variables tracking frames
  */
-LoadDataResult LoadNGEM::readDataAsHistograms(double minToF, double maxToF, const double binWidth,
+LoadDataResult LoadNGEM::readDataAsHistograms(double &minToF, double &maxToF, const double binWidth,
                                               const int minEventsReq, const int maxEventsReq,
                                               const std::vector<std::vector<std::string>> &filePaths) {
   int rawFrames{0};
