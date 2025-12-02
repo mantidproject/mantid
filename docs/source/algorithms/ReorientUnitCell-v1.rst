@@ -79,7 +79,7 @@ Usage
         ol = mtd['peaks'].sample().getOrientedLattice()
         return "(" + ', '.join([f"{x:.1f}" for x in ol.getuVector()]) + ")"
 
-    filename = 'TOPAZ_Monoclinic_P_5_sig.integrate'
+    filename = 'TOPAZ_Monoclinic_P_5sig.integrate'
     LoadIsawPeaks(Filename=filename, OutputWorkspace='peaks')
     FindUBUsingIndexedPeaks(PeaksWorkspace='peaks')
     ol = mtd['peaks'].sample().getOrientedLattice()

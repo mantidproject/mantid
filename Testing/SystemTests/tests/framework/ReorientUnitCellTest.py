@@ -6,17 +6,17 @@ from numpy.testing import assert_array_almost_equal
 from mantid.simpleapi import AnalysisDataService, FindUBUsingIndexedPeaks, IndexPeaks, LoadIsawPeaks, mtd, ReorientUnitCell, SetUB
 
 
-class SingleCrystalPeaksIntHKLIntMNPSaveLoadTest(systemtesting.MantidSystemTest):
+class ReorientUnitCellTest(systemtesting.MantidSystemTest):
     def tearDown(self):
         AnalysisDataService.clear()
 
     def requiredFiles(self):
-        return ["RFMBA2PbI4_Monoclinic_P_5sig.integrate"]
+        return ["TOPAZ_Monoclinic_P_5sig.integrate"]
 
     def runTest(self):
         # peaks workspace
         workspace_name = mtd.unique_hidden_name()
-        LoadIsawPeaks(Filename="TOPAZ_Monoclinic_P_5_sig.integrate", OutputWorkspace=workspace_name)
+        LoadIsawPeaks(Filename="TOPAZ_Monoclinic_P_5sig.integrate", OutputWorkspace=workspace_name)
         FindUBUsingIndexedPeaks(PeaksWorkspace=workspace_name)
         ol = mtd[workspace_name].sample().getOrientedLattice()
         ## Initially, Z axis points along `-a*`, X-axis along along `b*`
