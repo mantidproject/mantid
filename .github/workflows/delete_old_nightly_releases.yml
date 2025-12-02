@@ -6,6 +6,8 @@ on:
 
 jobs:
   delete-old-nightly-releases:
+    # do not run in forks
+    if: ${{ github.repository_owner == 'mantidproject' }}
     runs-on: ubuntu-latest
     steps:
       - uses: thomashampson/delete-older-releases@main
