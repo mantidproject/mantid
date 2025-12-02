@@ -19,71 +19,6 @@ using namespace Mantid::API;
 
 class LoadNGEMTest : public CxxTest::TestSuite {
 public:
-  void test_init_histo_no_tof() {
-    LoadNGEM alg;
-    TS_ASSERT_THROWS_NOTHING(alg.initialize());
-
-    TS_ASSERT(alg.isInitialized());
-
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PreserveEvents", false));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", getTestFilePath("GEM000005_00_000_short.edb")));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "ws"));
-    TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
-  }
-
-  void test_init_histo_tof_min_only() {
-    LoadNGEM alg;
-    TS_ASSERT_THROWS_NOTHING(alg.initialize());
-
-    TS_ASSERT(alg.isInitialized());
-
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PreserveEvents", false));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", getTestFilePath("GEM000005_00_000_short.edb")));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "ws"));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("MinToF", 10000.0));
-    TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
-  }
-
-  void test_init_histo_tof_max_only() {
-    LoadNGEM alg;
-    TS_ASSERT_THROWS_NOTHING(alg.initialize());
-
-    TS_ASSERT(alg.isInitialized());
-
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PreserveEvents", false));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", getTestFilePath("GEM000005_00_000_short.edb")));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "ws"));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("MaxToF", 90000.0));
-    TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
-  }
-
-  void test_init_histo_tof_min_over_max() {
-    LoadNGEM alg;
-    TS_ASSERT_THROWS_NOTHING(alg.initialize());
-
-    TS_ASSERT(alg.isInitialized());
-
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PreserveEvents", false));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", getTestFilePath("GEM000005_00_000_short.edb")));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "ws"));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("MaxToF", 90000.0));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("MinToF", 100000.0));
-    TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
-  }
-
-  void test_events_per_frame_min_over_max() {
-    LoadNGEM alg;
-    TS_ASSERT_THROWS_NOTHING(alg.initialize());
-
-    TS_ASSERT(alg.isInitialized());
-
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", getTestFilePath("GEM000005_00_000_short.edb")));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "ws"));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("MaxEventsPerFrame", 1));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("MinEventsPerFrame", 2));
-    TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
-  }
-
   void test_exec_loads_data_to_ads() {
     LoadNGEM alg;
     alg.initialize();
@@ -177,6 +112,58 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("MinEventsPerFrame", 20));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("MaxEventsPerFrame", 10));
 
+    TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
+  }
+
+  void test_init_fails_on_histo_no_tof() {
+    LoadNGEM alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+
+    TS_ASSERT(alg.isInitialized());
+
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PreserveEvents", false));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", getTestFilePath("GEM000005_00_000_short.edb")));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "ws"));
+    TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
+  }
+
+  void test_init_fails_on_histo_tof_min_only() {
+    LoadNGEM alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+
+    TS_ASSERT(alg.isInitialized());
+
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PreserveEvents", false));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", getTestFilePath("GEM000005_00_000_short.edb")));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "ws"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("MinToF", 10000.0));
+    TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
+  }
+
+  void test_init_fails_on_histo_tof_max_only() {
+    LoadNGEM alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+
+    TS_ASSERT(alg.isInitialized());
+
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PreserveEvents", false));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", getTestFilePath("GEM000005_00_000_short.edb")));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "ws"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("MaxToF", 90000.0));
+    TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
+  }
+
+  void test_init_fails_on_histo_tof_min_over_max() {
+    LoadNGEM alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+
+    TS_ASSERT(alg.isInitialized());
+
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PreserveEvents", false));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", getTestFilePath("GEM000005_00_000_short.edb")));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "ws"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("MaxToF", 90000.0));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("MinToF", 100000.0));
     TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
   }
 
