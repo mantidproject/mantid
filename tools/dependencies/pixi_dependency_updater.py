@@ -8,6 +8,7 @@
 """
 
 import argparse
+import shutil
 import re
 import tomllib
 import yaml
@@ -143,6 +144,13 @@ def _get_pixi_dependencies_from_header(header: str, manifest_data: Dict):
 
 
 def update_pin_in_pixi_manifest(package: str, os_name: str, version: str):
+    if not shutil.which("pixi"):
+        print(
+            f"Attempted to update pixi.toml (set {package} on os: {os_name} to {version})"
+            f" but pixi wasn't found! Install pixi for automatic updates (https://pixi.sh)."
+        )
+        return
+
     os_label_map = {"linux": "linux-64", "win": "win-64", "osx": "osx-arm64"}
     if version and version[0] not in ("=", "!", "<", ">"):
         version = "=" + version
