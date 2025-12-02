@@ -16,7 +16,7 @@ class SingleCrystalPeaksIntHKLIntMNPSaveLoadTest(systemtesting.MantidSystemTest)
     def runTest(self):
         # peaks workspace
         workspace_name = mtd.unique_hidden_name()
-        LoadIsawPeaks(Filename="RFMBA2PbI4_Monoclinic_P_5sig.integrate", OutputWorkspace=workspace_name)
+        LoadIsawPeaks(Filename="TOPAZ_Monoclinic_P_5_sig.integrate", OutputWorkspace=workspace_name)
         FindUBUsingIndexedPeaks(PeaksWorkspace=workspace_name)
         ol = mtd[workspace_name].sample().getOrientedLattice()
         ## Initially, Z axis points along `-a*`, X-axis along along `b*`
