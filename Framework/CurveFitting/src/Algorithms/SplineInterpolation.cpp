@@ -13,6 +13,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/Spline.h"
 
 #include <algorithm>
 #include <stdexcept>
@@ -24,12 +25,11 @@ DECLARE_ALGORITHM(SplineInterpolation)
 
 using namespace API;
 using namespace Kernel;
-using Functions::CubicSpline;
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-SplineInterpolation::SplineInterpolation() : m_cspline(std::make_shared<CubicSpline>()) {}
+SplineInterpolation::SplineInterpolation() {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
@@ -170,15 +170,11 @@ void SplineInterpolation::exec() {
     // perform cubic spline interpolation
     // for each histogram in workspace, calculate interpolation and derivatives
     for (size_t i = 0; i < histNo; ++i) {
-      // Create and instance of the cubic spline function
-      m_cspline = std::make_shared<CubicSpline>();
-      // set the interpolation points
-      setInterpolationPoints(iwspt, i);
-      // compare the data set against our spline
-      calculateSpline(mwspt, outputWorkspace, i);
-      // calculate derivatives for each order
-      for (size_t j = 0; j < order; ++j) {
-        calculateDerivatives(mwspt, derivs[i], j + 1);
+      Mantid::Kernel::CubicSpline<double, double> spline(iwspt->x(i).rawData(), iwspt->y(i).rawData());
+      // NOTE for legacy compatibility, this uses only the FIRST spectrum's X-axis for all other interpolations
+      outputWorkspace->mutableY(i) = spline(mwspt->x(0).rawData());
+      for (int j = 0; j < derivOrder; ++j) {
+        derivs[i]->mutableY(j) = spline.deriv(mwspt->x(0).rawData(), j + 1);
       }
       pgress.report();
     }
@@ -192,28 +188,38 @@ void SplineInterpolation::exec() {
     }
 
     for (size_t i = 0; i < histNo; ++i) {
-      // set up the function that needs to be interpolated
-      std::unique_ptr<gsl_interp_accel, void (*)(gsl_interp_accel *)> acc(gsl_interp_accel_alloc(),
-                                                                          gsl_interp_accel_free);
-      std::unique_ptr<gsl_interp, void (*)(gsl_interp *)> linear(gsl_interp_alloc(gsl_interp_linear, binsNo),
-                                                                 gsl_interp_free);
-      gsl_interp_linear->init(linear.get(), &(iwspt->x(i)[0]), &(iwspt->y(i)[0]), binsNo);
-
       // figure out the interpolation range
       const std::pair<size_t, size_t> range = findInterpolationRange(iwspt, mwspt, i);
 
+      // set up the function that needs to be interpolated
+      Mantid::Kernel::LinearSpline<double, double> spline(iwspt->x(i).rawData(), iwspt->y(i).rawData());
+
       // perform interpolation in the range
-      for (size_t k = range.first; k < range.second; ++k) {
-        gsl_interp_linear->eval(linear.get(), &(iwspt->x(i)[0]), &(iwspt->y(i)[0]), binsNo, mwspt->x(0)[k], acc.get(),
-                                &(outputWorkspace->mutableY(i)[k]));
-        // calculate only 1st order derivative if needed
-        if (order > 0) {
-          gsl_interp_linear->eval_deriv(linear.get(), &(iwspt->x(i)[0]), &(iwspt->y(i)[0]), binsNo, mwspt->x(0)[k],
-                                        acc.get(), &(derivs[i]->mutableY(0)[k]));
-        }
-      }
+      // NOTE for legacy compatibility, this uses only the FIRST spectrum's X-axis for all other interpolations
+      std::vector<double> yNew(mwspt->x(0).size());
+      std::span<double const> xInRange(mwspt->x(0).cbegin() + range.first, mwspt->x(0).cbegin() + range.second);
+      std::vector<double> yInterp = spline(xInRange);
+      std::move(yInterp.begin(), yInterp.end(), yNew.begin() + range.first);
+
       // flat extrapolation outside the range
-      extrapolateFlat(outputWorkspace, iwspt, i, range, order > 0, derivs);
+      const double yFirst = iwspt->y(i).front();
+      const double yLast = iwspt->y(i).back();
+      std::fill(yNew.begin(), yNew.begin() + range.first, yFirst);
+      std::fill(yNew.begin() + range.second, yNew.end(), yLast);
+
+      // set the output
+      outputWorkspace->mutableY(i) = yNew;
+
+      // if derivatives are requested, only give first-order
+      if (order > 0) {
+        auto &deriv = derivs[i]->mutableY(0);
+        // 0 outside the range
+        std::fill(deriv.begin(), deriv.begin() + range.first, 0.0);
+        std::fill(deriv.begin() + range.second, deriv.end(), 0.0);
+        // eval inside range
+        std::vector<double> derivInterp = spline.deriv(xInRange);
+        std::move(derivInterp.begin(), derivInterp.end(), deriv.begin() + range.first);
+      }
       pgress.report();
     }
   }
@@ -266,94 +272,6 @@ MatrixWorkspace_sptr SplineInterpolation::convertBinnedData(MatrixWorkspace_sptr
     return converter->getProperty("OutputWorkspace");
   } else {
     return workspace;
-  }
-}
-
-/** Sets the points defining the spline
- *
- * @param inputWorkspace :: The input workspace containing the points of the
- *spline
- * @param row :: The row of spectra to use
- */
-void SplineInterpolation::setInterpolationPoints(const MatrixWorkspace_const_sptr &inputWorkspace,
-                                                 const size_t row) const {
-  const auto &xIn = inputWorkspace->x(row);
-  const auto &yIn = inputWorkspace->y(row);
-  const size_t size = xIn.size();
-
-  // pass x attributes and y parameters to CubicSpline
-  m_cspline->setAttributeValue("n", static_cast<int>(size));
-
-  for (size_t i = 0; i < size; ++i) {
-    m_cspline->setXAttribute(i, xIn[i]);
-    m_cspline->setParameter(i, yIn[i]);
-  }
-}
-
-/** Calculate the derivatives of the given order from the interpolated points
- *
- * @param inputWorkspace :: The input workspace
- * @param outputWorkspace :: The output workspace
- * @param order :: The order of derivatives to calculate
- */
-void SplineInterpolation::calculateDerivatives(const API::MatrixWorkspace_const_sptr &inputWorkspace,
-                                               const API::MatrixWorkspace_sptr &outputWorkspace,
-                                               const size_t order) const {
-  // get x and y parameters from workspaces
-  const size_t nData = inputWorkspace->y(0).size();
-  const double *xValues = &(inputWorkspace->x(0)[0]);
-  double *yValues = &(outputWorkspace->mutableY(order - 1)[0]);
-
-  // calculate the derivatives
-  m_cspline->derivative1D(yValues, xValues, nData, order);
-}
-
-/** Calculate the interpolation of the input points against the spline
- *
- * @param inputWorkspace :: The input workspace
- * @param outputWorkspace :: The output workspace
- * @param row :: The row of spectra to use
- */
-void SplineInterpolation::calculateSpline(const MatrixWorkspace_const_sptr &inputWorkspace,
-                                          const MatrixWorkspace_sptr &outputWorkspace, const size_t row) const {
-  // setup input parameters
-  const size_t nData = inputWorkspace->y(0).size();
-  const double *xValues = &(inputWorkspace->x(0)[0]);
-  double *yValues = &(outputWorkspace->mutableY(row)[0]);
-
-  // calculate the interpolation
-  m_cspline->function1D(yValues, xValues, nData);
-}
-
-/** Extrapolates flat for the points outside the x-range
- * This is used for linear case only, to be consistent with cubic spline case
- * @param ows : output workspace
- * @param iwspt : workspace to interpolate
- * @param row : the workspace index
- * @param indices : the pair of x-axis indices defining the extrapolation range
- * @param doDerivs : whether derivatives are requested
- * @param derivs : the vector of derivative workspaces
- */
-void SplineInterpolation::extrapolateFlat(const MatrixWorkspace_sptr &ows, const MatrixWorkspace_const_sptr &iwspt,
-                                          const size_t row, const std::pair<size_t, size_t> &indices,
-                                          const bool doDerivs, std::vector<MatrixWorkspace_sptr> &derivs) const {
-
-  const double yFirst = iwspt->y(row).front();
-  const double yLast = iwspt->y(row).back();
-  for (size_t bin = 0; bin < indices.first; ++bin) {
-    ows->mutableY(row)[bin] = yFirst;
-    if (doDerivs) {
-      // if derivatives are requested
-      derivs[row]->mutableY(0)[bin] = 0.;
-    }
-  }
-  const size_t numBins = ows->blocksize();
-  for (size_t bin = indices.second; bin < numBins; ++bin) {
-    ows->mutableY(row)[bin] = yLast;
-    if (doDerivs) {
-      // if derivatives are requested
-      derivs[row]->mutableY(0)[bin] = 0.;
-    }
   }
 }
 
