@@ -19,7 +19,7 @@
 
 namespace Mantid::Kernel::fft {
 
-/// Functor to free a GSL objects in a shared pointer
+/// Functor to free GSL objects in a unique pointer
 struct GSLFree {
   void operator()(gsl_fft_real_wavetable *p) { gsl_fft_real_wavetable_free(p); }
   void operator()(gsl_fft_real_workspace *p) { gsl_fft_real_workspace_free(p); }
@@ -40,7 +40,7 @@ namespace Mantid::Kernel::spline {
 /// Minimum number of points needed to fit a cubic spline in GSL
 constexpr unsigned int MIN_CSPLINE_POINTS{3};
 
-/// Functor to free a GSL objects in a shared pointer
+/// Functor to free a GSL objects in a unique pointer
 struct GSLFree {
   void operator()(gsl_spline *spline) { gsl_spline_free(spline); }
   void operator()(gsl_interp_accel *acc) { gsl_interp_accel_free(acc); }

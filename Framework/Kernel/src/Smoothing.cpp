@@ -191,7 +191,7 @@ template <typename Y> struct ButterworthFilter : public FFTFilter<Y> {
   }
 
 private:
-  unsigned m_two_order;
+  unsigned int m_two_order;
   Y m_invcutoff;
 };
 

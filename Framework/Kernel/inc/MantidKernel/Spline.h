@@ -66,7 +66,7 @@ public:
       // if we're outside the range, just return 0
       deriv = 0;
     } else {
-      // otherwise evaltue up to the second derivative
+      // otherwise evaluate up to the second derivative
       if (order == 1) {
         err = gsl_spline_eval_deriv_e(m_spline.get(), newX, m_acc.get(), &deriv);
       } else if (order == 2) {
