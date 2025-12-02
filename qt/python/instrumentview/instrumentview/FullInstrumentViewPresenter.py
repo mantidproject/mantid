@@ -23,6 +23,19 @@ from instrumentview.Peaks.WorkspaceDetectorPeaks import WorkspaceDetectorPeaks
 from vtkmodules.vtkRenderingCore import vtkCoordinate
 
 
+class SuppressRendering:
+    def __init__(self, plotter):
+        self.plotter = plotter
+        self.old_value = plotter.suppress_rendering
+
+    def __enter__(self):
+        self.plotter.suppress_rendering = True
+        return self.plotter
+
+    def __exit__(self, exc_type, exc, tb):
+        self.plotter.suppress_rendering = self.old_value
+
+
 class FullInstrumentViewPresenter:
     """Presenter for the Instrument View window"""
 
@@ -109,9 +122,11 @@ class FullInstrumentViewPresenter:
     def update_plotter(self) -> None:
         """Update the projection based on the selected option."""
         self._model.projection_type = self._view.current_selected_projection()
-        self._update_view_main_plotter()
-        self.update_detector_picker()
-        self.on_peaks_workspace_selected()
+        with SuppressRendering(self._view.main_plotter):
+            self._update_view_main_plotter()
+            self.update_detector_picker()
+            self.on_peaks_workspace_selected()
+        self._view.reset_camera()
 
     def _update_view_main_plotter(self):
         self._detector_mesh = self.create_poly_data_mesh(self._model.detector_positions)
