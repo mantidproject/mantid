@@ -27,6 +27,7 @@ from mantid.simpleapi import (
     RenameWorkspace,
     CloneWorkspace,
 )
+from mantid.api import MatrixWorkspace
 from itertools import groupby
 from pathlib import Path
 import numpy as np
@@ -77,7 +78,7 @@ class FullInstrumentViewModel:
         # Array of strings 'yes', 'no' and 'n/a'
         self._is_monitor = detector_info_table.columnArray("Monitor")
         self._is_valid = self._is_monitor == "no"
-        self._mask_ws, mask_list = ExtractMask(self._workspace, StoreInADS=False)
+        self._mask_ws, _ = ExtractMask(self._workspace, StoreInADS=False)
         self._is_masked_in_ws = self._mask_ws.extractY().flatten().astype(bool)
         # For computing current mask, detached from the permanent mask in ws
         self._is_masked = self._is_masked_in_ws
@@ -168,6 +169,12 @@ class FullInstrumentViewModel:
         except (ValueError, AssertionError):
             return
         self._counts_limits = limits
+
+    @property
+    def mask_ws(self) -> MatrixWorkspace:
+        for i, v in enumerate(self._is_masked):
+            self._mask_ws.dataY(i)[:] = v
+        return self._mask_ws
 
     @property
     def integration_limits(self) -> tuple[float, float]:
@@ -412,14 +419,11 @@ class FullInstrumentViewModel:
             return
         if Path(filename).suffix != ".xml":
             filename += ".xml"
-        for i, v in enumerate(self._is_masked):
-            self._mask_ws.dataY(i)[:] = v
-        SaveMask(self._mask_ws, OutputFile=filename)
+        SaveMask(self.mask_ws, OutputFile=filename)
 
     def overwrite_mask_to_current_workspace(self) -> None:
-        for i, v in enumerate(self._is_masked):
-            self._mask_ws.dataY(i)[:] = v
         # TODO: Check if copies are expensive with big workspaces
-        CloneWorkspace(self._workspace.name(), OutputWorkspace="temp_ws")
-        MaskDetectors("temp_ws", MaskedWorkspace=self._mask_ws)
-        RenameWorkspace(InputWorkspace="temp_ws", OutputWorkspace=self._workspace.name())
+        temp_ws_name = f"__instrument_view_temp_{self._workspace.name()}"
+        CloneWorkspace(self._workspace.name(), OutputWorkspace=temp_ws_name)
+        MaskDetectors(temp_ws_name, MaskedWorkspace=self.mask_ws)
+        RenameWorkspace(InputWorkspace=temp_ws_name, OutputWorkspace=self._workspace.name())

@@ -470,7 +470,7 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         np.testing.assert_allclose(q_lab_direction, iv_qlab, rtol=1e-5)
 
     @mock.patch("instrumentview.FullInstrumentViewModel.CylindricalProjection")
-    def test_cached_projections_map_emtpy(self, mock_projection_constructor):
+    def test_cached_projections_map_empty(self, mock_projection_constructor):
         model, _ = self._setup_model([1, 2, 3])
         model.projection_type = ProjectionType.CYLINDRICAL_X
         mock_projection = mock.MagicMock(positions=mock.MagicMock(return_value=np.array([[1, 2], [1, 2], [1, 2]])))

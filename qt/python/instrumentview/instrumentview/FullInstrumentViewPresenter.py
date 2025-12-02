@@ -20,8 +20,6 @@ from instrumentview.FullInstrumentViewWindow import FullInstrumentViewWindow
 from instrumentview.InstrumentViewADSObserver import InstrumentViewADSObserver
 from instrumentview.Peaks.WorkspaceDetectorPeaks import WorkspaceDetectorPeaks
 
-from pathlib import Path
-
 
 class FullInstrumentViewPresenter:
     """Presenter for the Instrument View window"""
@@ -153,7 +151,7 @@ class FullInstrumentViewPresenter:
             self._view.enable_point_picking(self._model.is_2d_projection, callback=point_picked)
 
     def update_picked_detectors(self, picked_mask: np.ndarray) -> None:
-        if np.sum(picked_mask) == 0:
+        if not np.any(picked_mask):
             self._model.clear_all_picked_detectors()
         else:
             self._model.negate_picked_visibility(picked_mask)
@@ -162,13 +160,13 @@ class FullInstrumentViewPresenter:
         self._update_line_plot_ws_and_draw(self._view.current_selected_unit())
 
     def on_add_cylinder_clicked(self) -> None:
-        self._view.add_cylinder_widget(self._detector_mesh.GetBounds(), lambda *_: None)
+        self._view.add_cylinder_widget(self._detector_mesh.GetBounds())
 
     def on_cylinder_select_clicked(self) -> None:
         widget = self._view.get_current_widget()
         cylinder = vtkCylinder()
         widget.GetCylinderRepresentation().GetCylinder(cylinder)
-        mask = [(cylinder.FunctionValue(self._detector_mesh.GetPoint(i)) < 0) for i in range(self._detector_mesh.GetNumberOfPoints())]
+        mask = [(cylinder.FunctionValue(pt) < 0) for pt in self._detector_mesh.points]
         new_key = self._model.add_new_detector_mask(mask)
         self._view.set_new_mask_key(new_key)
 
@@ -338,7 +336,4 @@ class FullInstrumentViewPresenter:
         )
         if not filename:
             return
-        # TODO: Figure out if this can be done automatically by the dialog
-        if Path(filename).suffix != ".xml":
-            filename += ".xml"
         self._model.save_xml_mask(filename)

@@ -549,13 +549,13 @@ class FullInstrumentViewWindow(QMainWindow):
         # RGB for dark grey is (64, 64, 64), normalised is (0.25, 0.25, 0.25)
         self.main_plotter.add_mesh(mesh, color=(0.25, 0.25, 0.25), pickable=False, render_points_as_spheres=True, point_size=15)
 
-    def add_cylinder_widget(self, bounds, callback) -> None:
+    def add_cylinder_widget(self, bounds) -> None:
         cylinder_repr = vtkImplicitCylinderRepresentation()
         cylinder_repr.SetOutlineTranslation(False)
         cylinder_repr.GetOutlineProperty().SetOpacity(0)
         cylinder_repr.SetMinRadius(0.001)
 
-        xmin, xmax, ymin, ymax, zmin, zmax = bounds
+        xmin, xmax, ymin, ymax, _zmin, _zmax = bounds
         cylinder_repr.SetCenter((xmin + xmax) / 2, (ymin + ymax) / 2, 0.5)
         cylinder_repr.SetRadius(np.sqrt((xmax - xmin) ** 2 + (ymax - ymin) ** 2) / 8)
 
