@@ -70,8 +70,6 @@ void CubicSpline::function1D(double *out, const double *xValues, const size_t nD
 
 /** Sets up the spline object by with the parameters and attributes
  *
- * @param x :: The array of x values defining the spline
- * @param y :: The array of y values defining the spline
  * @param n :: The size of the arrays
  */
 void CubicSpline::setupInput(int const n) const {
