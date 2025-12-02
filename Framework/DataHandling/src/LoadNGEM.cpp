@@ -626,10 +626,10 @@ LoadDataResult LoadNGEM::readDataAsHistograms(double &minToF, double &maxToF, co
  */
 void LoadDataStrategyHisto::addEvent(double &minToF, double &maxToF, const double tof, const double binWidth,
                                      const size_t pixel) {
-  if (tof > maxToF || tof < minToF) {
+  if (tof >= maxToF || tof < minToF) {
     return;
   }
-  const int bin_idx = static_cast<int>(std::ceil((tof - minToF) / binWidth)) - 1;
+  const int bin_idx = static_cast<int>(std::floor((tof - minToF) / binWidth));
   m_countsInFrame[pixel][bin_idx]++;
 }
 
