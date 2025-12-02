@@ -101,7 +101,7 @@ public:
 
 class LoadDataStrategyHisto final : public LoadDataStrategyBase {
 public:
-  LoadDataStrategyHisto(const int minToF, const int maxToF, const int binWidth);
+  LoadDataStrategyHisto(const double minToF, const double maxToF, const double binWidth);
   void addEvent(double &minToF, double &maxToF, const double tof, const double binWidth,
                 const size_t pixel) override final;
   void addFrame(int &rawFrames, int &goodFrames, const int eventCountInFrame, const int minEventsReq,

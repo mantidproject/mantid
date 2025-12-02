@@ -11,6 +11,7 @@
 #include <MantidAPI/Run.h>
 #include <MantidDataHandling/LoadNGEM.h>
 #include <MantidDataObjects/EventWorkspace.h>
+#include <MantidDataObjects/Workspace2D.h>
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
@@ -19,7 +20,7 @@ using namespace Mantid::API;
 
 class LoadNGEMTest : public CxxTest::TestSuite {
 public:
-  void test_exec_loads_data_to_ads() {
+  void test_exec_loads_data_to_ads_event() {
     LoadNGEM alg;
     alg.initialize();
     TS_ASSERT(alg.isInitialized());
@@ -40,6 +41,42 @@ public:
     TS_ASSERT_DELTA(13037.8, xdata[130378], 1e-8);
     TS_ASSERT_DELTA(13037.9, xdata[130379], 1e-8);
     TS_ASSERT_DELTA(1.0, edata[130378], 1e-8);
+    // sample logs
+    const auto &run = outputWS->run();
+    TS_ASSERT_DELTA(700.92, run.getPropertyValueAsType<double>("min_TOF"), 1e-08);
+    TS_ASSERT_DELTA(98132.97, run.getPropertyValueAsType<double>("max_TOF"), 1e-08);
+    TS_ASSERT_EQUALS(224, run.getPropertyValueAsType<int>("raw_frames"));
+    TS_ASSERT_EQUALS(224, run.getPropertyValueAsType<int>("good_frames"));
+
+    TS_ASSERT_THROWS_NOTHING(ads.remove("ws"));
+  }
+
+  void test_exec_loads_data_to_ads_histo() {
+    LoadNGEM alg;
+    alg.initialize();
+    TS_ASSERT(alg.isInitialized());
+
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", getTestFilePath("GEM000005_00_000_short.edb")));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("BinWidth", 50.0));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("MinToF", 700.92));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("MaxToF", 98132.97));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PreserveEvents", false));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "ws_histo"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("GenerateEventsPerFrame", false));
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+
+    auto &ads = AnalysisDataService::Instance();
+    auto outputWS = ads.retrieveWS<DataObjects::Workspace2D>("ws_histo");
+    // check some random values
+    const auto &ydata{outputWS->readY(10304)};
+    const auto &xdata{outputWS->readX(10304)};
+    const auto &edata{outputWS->readE(10304)};
+    TS_ASSERT_DELTA(3.0, ydata[344], 1e-8);
+    TS_ASSERT_DELTA(17900.92, xdata[344], 1e-8);
+    TS_ASSERT_DELTA(1.732051, edata[344], 1e-6);
+    TS_ASSERT_DELTA(1.0, ydata[838], 1e-8);
+    TS_ASSERT_DELTA(42600.92, xdata[838], 1e-8);
+    TS_ASSERT_DELTA(1.0, edata[838], 1e-8);
     // sample logs
     const auto &run = outputWS->run();
     TS_ASSERT_DELTA(700.92, run.getPropertyValueAsType<double>("min_TOF"), 1e-08);

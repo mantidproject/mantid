@@ -647,7 +647,7 @@ void LoadDataStrategyHisto::addFrame(int &rawFrames, int &goodFrames, const int 
                             m_counts, m_countsInFrame);
 }
 
-LoadDataStrategyHisto::LoadDataStrategyHisto(const int minToF, const int maxToF, const int binWidth)
+LoadDataStrategyHisto::LoadDataStrategyHisto(const double minToF, const double maxToF, const double binWidth)
     : m_binEdges{calculateBinEdges(minToF, maxToF, binWidth)} {
   m_counts.resize(NUM_OF_SPECTRA);
   for (auto &item : m_counts) {
