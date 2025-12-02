@@ -12,9 +12,6 @@
 #include "MantidCurveFitting/Functions/BackgroundFunction.h"
 #include "MantidKernel/GSL_Helpers.h"
 
-#include <boost/scoped_array.hpp>
-#include <gsl/gsl_errno.h>
-#include <gsl/gsl_spline.h>
 #include <valarray>
 
 namespace Mantid {
@@ -65,16 +62,13 @@ private:
   void reallocGSLObjects(const int n);
 
   /// Method to setup the gsl function
-  void setupInput(boost::scoped_array<double> &x, boost::scoped_array<double> &y, int n) const;
+  void setupInput(int const n) const;
 
   /// Calculate the spline
   void calculateSpline(double *out, const double *xValues, const size_t nData) const;
 
   /// Calculate the derivative
   void calculateDerivative(double *out, const double *xValues, const size_t nData, const size_t order) const;
-
-  /// Initialise GSL objects if required
-  void initGSLObjects(boost::scoped_array<double> &x, boost::scoped_array<double> &y, int n) const;
 
   /// Check if an error occurred and throw appropriate message
   void checkGSLError(const int status, const int errorType) const;
