@@ -40,6 +40,8 @@ class FullInstrumentViewPresenter:
         self._view = view
         self._model = model
         self._transform = np.eye(4)
+        self._counts_label = "Integrated Counts"
+        self._visible_label = "Visible Picked"
         self._model.setup()
         self.setup()
 
@@ -55,8 +57,6 @@ class FullInstrumentViewPresenter:
             monitor_point_cloud["colours"] = self.generate_single_colour(len(self._model.monitor_positions), 1, 0, 0, 1)
             self._view.add_rgba_mesh(monitor_point_cloud, scalars="colours")
 
-        self._counts_label = "Integrated Counts"
-        self._visible_label = "Visible Picked"
         self._view.show_axes()
         self.update_plotter()
 
@@ -117,6 +117,8 @@ class FullInstrumentViewPresenter:
         self._detector_mesh = self.create_poly_data_mesh(self._model.detector_positions)
         self._detector_mesh[self._counts_label] = self._model.detector_counts
         self._view.add_detector_mesh(self._detector_mesh, is_projection=self._model.is_2d_projection, scalars=self._counts_label)
+        # Update transform needs to happen after adding to plotter
+        # Uses display coordinates
         self._update_transform(self._model.is_2d_projection, self._detector_mesh)
         self._detector_mesh.transform(self._transform, inplace=True)
 
@@ -130,6 +132,7 @@ class FullInstrumentViewPresenter:
         self._view.add_masked_mesh(self._masked_mesh)
 
         self._view.enable_or_disable_mask_widgets()
+        self._view.enable_or_disable_aspect_ratio_box()
         self.set_view_contour_limits()
         self.set_view_integration_limits()
 
@@ -178,7 +181,7 @@ class FullInstrumentViewPresenter:
 
     def on_aspect_ratio_check_box_clicked(self) -> None:
         self._view.store_maintain_aspect_ratio_option()
-        self.on_projection_option_selected(self._view._projection_combo_box.currentIndex())
+        self.update_plotter()
 
     def update_detector_picker(self) -> None:
         """Change between single and multi point picking"""

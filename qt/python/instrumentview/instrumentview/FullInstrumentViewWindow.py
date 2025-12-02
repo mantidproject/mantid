@@ -289,8 +289,8 @@ class FullInstrumentViewWindow(QMainWindow):
         option = "Yes" if self.is_maintain_aspect_ratio_checkbox_checked() else "No"
         ConfigService.Instance()[self._ASPECT_RATIO_SETTING_STRING] = option
 
-    def set_aspect_ratio_box_visibility(self, is_visible: bool) -> None:
-        self._aspect_ratio_check_box.setVisible(is_visible)
+    def enable_or_disable_aspect_ratio_box(self) -> None:
+        self._aspect_ratio_check_box.setDisabled(self.current_selected_projection() == ProjectionType.THREE_D)
 
     def _on_splitter_moved(self, pos, index) -> None:
         self._detector_spectrum_fig.tight_layout()

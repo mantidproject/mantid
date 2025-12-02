@@ -168,7 +168,6 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
     def test_on_peaks_workspace_selected(
         self,
         mock_peak_overlay_points,
-        mock_adjust_points_projection,
         mock_refresh_lineplot_peaks,
         mock_set_peaks_workspaces,
         mock_transform,
@@ -258,23 +257,22 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         mock_relative_detector_angle.assert_called_once()
         self._mock_view.set_relative_detector_angle.assert_called_once()
 
-    @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.reset_cached_projection_positions")
     @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.set_peaks_workspaces")
-    def test_aspect_ratio_box_visibility_set(self, mock_set_peaks, mock_reset_cache):
-        self.assertEquals("3D", self._model._PROJECTION_OPTIONS[0])
-        self._presenter.on_projection_option_selected(0)
-        self._mock_view.set_aspect_ratio_box_visibility.assert_called_once_with(False)
-        self._mock_view.set_aspect_ratio_box_visibility.reset_mock()
-        self._presenter.on_projection_option_selected(1)
-        self._mock_view.set_aspect_ratio_box_visibility.assert_called_once_with(True)
+    def test_aspect_ratio_box_visibility_set(self, mock_set_peaks):
+        self._model.projection_type = ProjectionType.THREE_D
+        self._presenter.update_plotter()
+        self._mock_view.enable_or_disable_aspect_ratio_box.assert_called_once()
+        self._mock_view.enable_or_disable_aspect_ratio_box.reset_mock()
+        self._model.projection_type = ProjectionType.SPHERICAL_X
+        self._presenter.update_plotter()
+        self._mock_view.enable_or_disable_aspect_ratio_box.assert_called_once()
 
-    @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.reset_cached_projection_positions")
     @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.set_peaks_workspaces")
     @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter._update_transform")
-    def test_transform_updated_on_redraw(self, mock_update_transform, mock_set_peaks, mock_reset_cache):
-        self.assertEquals("3D", self._model._PROJECTION_OPTIONS[0])
+    def test_transform_updated_on_redraw(self, mock_update_transform, mock_set_peaks):
         # Anything apart from 3D
-        self._presenter.on_projection_option_selected(2)
+        self._model.projection_type = ProjectionType.SPHERICAL_X
+        self._presenter.update_plotter()
         mock_update_transform.assert_called_once()
 
     @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter._transform_mesh_to_fill_window")
