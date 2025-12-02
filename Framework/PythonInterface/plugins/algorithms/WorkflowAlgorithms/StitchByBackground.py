@@ -7,7 +7,15 @@
 
 from mantid.api import AlgorithmFactory, DataProcessorAlgorithm, ADSValidator, WorkspaceProperty
 from mantid.kernel import Direction, StringArrayProperty, FloatArrayProperty, FloatBoundedValidator
-from mantid.simpleapi import LinearBackground, AnalysisDataService, Fit
+from mantid.simpleapi import (
+    LinearBackground,
+    AnalysisDataService,
+    Fit,
+    CropWorkspaceRagged,
+    CreateSingleValuedWorkspace,
+    CreateWorkspace,
+    Plus,
+)
 
 import numpy as np
 
@@ -50,13 +58,47 @@ class StitchByBackground(DataProcessorAlgorithm):
 
     def PyExec(self):
         ws_name_list = self.getProperty("InputWorkspaces").value
-        ws_list = []
-        for ws_name in ws_name_list:
-            ws_list.append(AnalysisDataService.retrieve(ws_name))
+        ws_list = [AnalysisDataService.retrieve(ws_name) for ws_name in ws_name_list]
+
         stitch_locations = self.getProperty("StitchPoints").value
         overlap_width = self.getProperty("OverlapWidth").value
 
-        self.create_offsests(ws_list, stitch_locations, overlap_width)
+        offsets = self.create_offsests(ws_list, stitch_locations, overlap_width)
+
+        x = []
+        y = []
+        e = []
+        subtracted_workspaces = []
+
+        subtracted_ws = None
+        for ws_index, ws in enumerate(ws_list):
+            background_ws = CreateSingleValuedWorkspace(offsets[ws_index].sum(), ErrorValue=0)
+            subtracted_ws = Plus(ws, background_ws, OutputWorkspace=f"bank{ws_index + 1}_offset")
+            crop_kwargs = {"XMin": 0, "XMax": 100}
+            if ws_index > 0:
+                crop_kwargs["XMin"] = stitch_locations[ws_index - 1]
+            if ws_index < len(ws_list) - 1:
+                crop_kwargs["XMax"] = stitch_locations[ws_index]
+            subtracted_ws = CropWorkspaceRagged(InputWorkspace=subtracted_ws, OutputWorkspace=subtracted_ws.name(), **crop_kwargs)
+            x.extend(subtracted_ws.readX(0)[:-1])
+            y.extend(subtracted_ws.readY(0))
+            e.extend(subtracted_ws.readE(0))
+            subtracted_workspaces.append(subtracted_ws)
+        # Add the final bin edge.
+        x.append(subtracted_ws.readX(0)[-1])
+
+        out_ws_name = self.getProperty("OutputWorkspace").value
+        stitched_ws = CreateWorkspace(
+            x,
+            y,
+            e,
+            OutputWorkspace=out_ws_name,
+            UnitX=subtracted_ws.getAxis(0).getUnit().unitID(),
+            Distribution=subtracted_ws.isDistribution(),
+            ParentWorkspace=subtracted_ws,
+            EnableLogging=False,
+        )
+        self.setProperty("OutputWorkspace", stitched_ws)
 
     def create_offsets(self, workspaces, stitch_points, overlap_width):
         offsets = np.zeros(len(workspaces))
