@@ -97,7 +97,7 @@ std::map<std::string, std::string> GetDetectorOffsets::validateInputs() {
 
   if (MaskWorkspace_const_sptr maskWS = getProperty("MaskWorkspace")) {
     // detectors which are monitors are not included in the mask
-    const bool maskContainsAllDetIDs = maskWS->containsDetIDs(inputWS->getInstrument()->getDetectorIDs());
+    const bool maskContainsAllDetIDs = maskWS->containsDetIDs(inputWS->getInstrument()->getDetectorIDs(true));
 
     if (!maskContainsAllDetIDs) {
       result["MaskWorkspace"] =
@@ -194,8 +194,7 @@ void GetDetectorOffsets::exec() {
       // Use the same offset for all detectors from this pixel
       for (const auto &det : dets) {
         if (spectrumIsMasked) {
-          if (maskWS->containsDetID(det))
-            maskWS->setMasked(det, true);
+          maskWS->setMasked(det, true);
           continue;
         }
         // Warning: individual detectors in a spectrum may be masked.
@@ -217,7 +216,7 @@ void GetDetectorOffsets::exec() {
     for (size_t ns = 0; ns < inputW->getNumberHistograms(); ++ns) {
       const auto dets = inputW->getSpectrum(ns).getDetectorIDs();
       for (const auto &det : dets)
-        trace << "  " << outputW->getValue(det) << (!maskWS->containsDetID(det) || maskWS->isMasked(det) ? "*" : "")
+        trace << "  " << outputW->getValue(det) << maskWS->isMasked(det) ? "*" : "")
               << "\n";
     }
   }

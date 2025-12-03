@@ -283,7 +283,7 @@ void MaskWorkspace::combineToDetectorMasks(DetectorInfo &detectors) const {
   if (N_spectra == N_detectors - N_monitors) {
     // One detector per spectrum
     for (const auto &det : detids) {
-      if (!this->containsDetID(det) || isMasked(det))
+      if (isMasked(det))
         detectors.setMasked(detectors.indexOf(det), true);
     }
     return;
