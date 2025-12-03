@@ -18,7 +18,6 @@
 // test case.
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
-#include <Poco/Path.h>
 #include <Poco/TemporaryFile.h>
 
 using namespace Mantid::API;

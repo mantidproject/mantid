@@ -17,8 +17,6 @@
 #include <Poco/DateTimeFormatter.h>
 #include <Poco/DateTimeParser.h>
 #include <Poco/Glob.h>
-#include <Poco/Path.h>
-
 #include <boost/scoped_array.hpp>
 
 #include <algorithm>

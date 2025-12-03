@@ -8,7 +8,6 @@
 #include "MantidGeometry/Objects/MeshObject.h"
 #include "MantidKernel/DateAndTime.h"
 
-#include <Poco/File.h>
 #include <fstream>
 #include <vector>
 namespace Mantid::DataHandling {

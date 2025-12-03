@@ -9,9 +9,7 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Material.h"
 
-#include "Poco/File.h"
-#include "Poco/Path.h"
-
+#include <filesystem>
 #include <fstream>
 #include <utility>
 
@@ -108,8 +106,8 @@ void SampleEnvironmentFactory::clearCache() { retrieveSpecCache().clear(); }
 SampleEnvironmentSpec_uptr SampleEnvironmentFactory::parseSpec(const std::string &filename,
                                                                const std::string &filepath) const {
   assert(m_finder);
-  Poco::File fullpath(Poco::Path(filepath, filename + ".xml"));
-  return m_finder->parseSpec(filename, fullpath.path());
+  std::filesystem::path fullpath = std::filesystem::path(filepath) / (filename + ".xml");
+  return m_finder->parseSpec(filename, fullpath.string());
 }
 
 //------------------------------------------------------------------------------
@@ -141,27 +139,22 @@ SampleEnvironmentSpecFileFinder::SampleEnvironmentSpecFileFinder(std::vector<std
 SampleEnvironmentSpec_uptr SampleEnvironmentSpecFileFinder::find(const std::string &facility,
                                                                  const std::string &instrument,
                                                                  const std::string &name) const {
-  using Poco::File;
-  using Poco::Path;
+  using std::filesystem::path;
 
-  Path relpath_instr(facility);
-  relpath_instr.append(instrument).append(name + m_fileext);
+  path relpath_instr = path(facility) / instrument / (name + m_fileext);
 
-  Path relpath_facil(facility);
-  relpath_facil.append(name + m_fileext);
+  path relpath_facil = path(facility) / (name + m_fileext);
 
   // check for the instrument environment, then facility environment
   for (const auto &rel_path : {relpath_instr, relpath_facil}) {
     for (const auto &prefixStr : m_rootDirs) {
-      Path prefix(prefixStr);
-      // Ensure the path is a directory (note that this does not create it!)
-      prefix.makeDirectory();
-      File fullpath(Poco::Path(prefix, rel_path));
-      if (fullpath.exists()) {
-        g_log.debug() << "Found environment at \"" << fullpath.path() << "\"\n";
-        return parseSpec(name, fullpath.path());
+      path prefix(prefixStr);
+      path fullpath = prefix / rel_path;
+      if (std::filesystem::exists(fullpath)) {
+        g_log.debug() << "Found environment at \"" << fullpath << "\"\n";
+        return parseSpec(name, fullpath.string());
       } else {
-        g_log.debug() << "Failed to find environment at \"" << fullpath.path() << "\"\n";
+        g_log.debug() << "Failed to find environment at \"" << fullpath << "\"\n";
       }
     }
   }

@@ -13,9 +13,8 @@
 #include "MantidDataObjects/SpecialWorkspace2D.h"
 #include "MantidKernel/Timer.h"
 
-#include "Poco/File.h"
-
 #include <cxxtest/TestSuite.h>
+#include <filesystem>
 
 using namespace Mantid;
 using namespace Mantid::DataHandling;
@@ -90,7 +89,6 @@ public:
     }
 
     // 6. Clean the file
-    Poco::File cleanfile(file1);
-    cleanfile.remove(false);
+    std::filesystem::remove(file1);
   }
 };

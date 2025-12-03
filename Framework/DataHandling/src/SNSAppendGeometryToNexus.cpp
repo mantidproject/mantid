@@ -15,9 +15,7 @@
 #include "MantidNexus/NexusFile.h"
 
 #include <Poco/Exception.h>
-#include <Poco/File.h>
-#include <Poco/Path.h>
-
+#include <filesystem>
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Nexus;
@@ -87,29 +85,29 @@ void SNSAppendGeometryToNexus::exec() {
   m_makeNexusCopy = getProperty("MakeCopy");
 
   if (m_makeNexusCopy) {
-    Poco::File originalFile(m_filename);
-    Poco::Path originalPath(m_filename);
+    std::filesystem::path originalFile(m_filename);
 
-    if (originalFile.exists()) {
-      Poco::File destinationFile(Poco::Path(Poco::Path::temp(), originalPath.getFileName()));
+    if (std::filesystem::exists(originalFile)) {
+      std::filesystem::path destinationFile = std::filesystem::temp_directory_path() / originalFile.filename();
 
       try {
-        originalFile.copyTo(destinationFile.path());
-        g_log.notice() << "Copied " << m_filename << " to " << destinationFile.path() << ".\n";
-        m_filename = destinationFile.path();
+        std::filesystem::copy_file(originalFile, destinationFile);
+        g_log.notice() << "Copied " << m_filename << " to " << destinationFile << ".\n";
+        m_filename = destinationFile.string();
       } catch (Poco::FileAccessDeniedException &) {
         throw std::runtime_error("A Problem occurred in making a copy of the "
                                  "NeXus file. Failed to copy " +
-                                 originalFile.path() + " to " + destinationFile.path() +
+                                 originalFile.string() + " to " + destinationFile.string() +
                                  ". Please check file permissions.");
       }
     } else {
-      g_log.error() << "Cannot copy a file that doesn't exist! (" << originalFile.path() << ").\n";
+      g_log.error() << "Cannot copy a file that doesn't exist! (" << originalFile << ").\n";
     }
   }
 
   // Let's check to see if we can write to the NeXus file.
-  if (!(Poco::File(m_filename).canWrite())) {
+  const auto perms = std::filesystem::status(std::filesystem::path(m_filename)).permissions();
+  if ((perms & std::filesystem::perms::owner_write) == std::filesystem::perms::none) {
     throw std::runtime_error("The specified NeXus file (" + m_filename + ") is not writable.");
   }
 
