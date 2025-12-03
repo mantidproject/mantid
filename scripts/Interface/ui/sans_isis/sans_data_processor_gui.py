@@ -1464,6 +1464,14 @@ class SANSDataProcessorGui(QMainWindow, Ui_SansDataProcessorWindow):
     def transmission_mn_5_shift(self, value):
         self.update_simple_line_edit_field(line_edit="transmission_mn_5_shift_line_edit", value=value)
 
+    @property
+    def wide_angle_correction(self):
+        return self.wide_angle_check_box.isChecked()
+
+    @wide_angle_correction.setter
+    def wide_angle_correction(self, value):
+        self.wide_angle_check_box.setChecked(value)
+
     # ------------------------------------------------------------------------------------------------------------------
     # Transmission fit
     # ------------------------------------------------------------------------------------------------------------------
