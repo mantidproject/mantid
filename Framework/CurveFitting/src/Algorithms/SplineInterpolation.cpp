@@ -166,18 +166,15 @@ void SplineInterpolation::exec() {
   MatrixWorkspace_sptr mwspt = convertBinnedData(mws);
   MatrixWorkspace_const_sptr iwspt = convertBinnedData(iws);
 
+  // a lambda to create a unique pointer to a spline object
+  std::function<std::unique_ptr<Mantid::Kernel::Spline<double, double>>(size_t)> spline_creator;
   if (binsNo > 2) {
     // perform cubic spline interpolation
     // for each histogram in workspace, calculate interpolation and derivatives
-    for (size_t i = 0; i < histNo; ++i) {
-      Mantid::Kernel::CubicSpline<double, double> spline(iwspt->x(i).rawData(), iwspt->y(i).rawData());
-      // NOTE for legacy compatibility, this uses only the FIRST spectrum's X-axis for all other interpolations
-      outputWorkspace->mutableY(i) = spline(mwspt->x(0).rawData());
-      for (int j = 0; j < derivOrder; ++j) {
-        derivs[i]->mutableY(j) = spline.deriv(mwspt->x(0).rawData(), j + 1);
-      }
-      pgress.report();
-    }
+    spline_creator = [iwspt](size_t i) {
+      return std::make_unique<Mantid::Kernel::CubicSpline<double, double>>(iwspt->x(i).rawData(),
+                                                                           iwspt->y(i).rawData());
+    };
   } else {
     // perform linear interpolation
 
@@ -186,43 +183,45 @@ void SplineInterpolation::exec() {
       throw std::runtime_error("X-axis of the workspace to match is not sorted. "
                                "Consider calling SortXAxis before.");
     }
-
-    for (size_t i = 0; i < histNo; ++i) {
-      // figure out the interpolation range
-      const std::pair<size_t, size_t> range = findInterpolationRange(iwspt, mwspt, i);
-
-      // set up the function that needs to be interpolated
-      Mantid::Kernel::LinearSpline<double, double> spline(iwspt->x(i).rawData(), iwspt->y(i).rawData());
-
-      // perform interpolation in the range
-      // NOTE for legacy compatibility, this uses only the FIRST spectrum's X-axis for all other interpolations
-      std::vector<double> yNew(mwspt->x(0).size());
-      std::span<double const> xInRange(mwspt->x(0).cbegin() + range.first, mwspt->x(0).cbegin() + range.second);
-      std::vector<double> yInterp = spline(xInRange);
-      std::move(yInterp.begin(), yInterp.end(), yNew.begin() + range.first);
-
-      // flat extrapolation outside the range
-      const double yFirst = iwspt->y(i).front();
-      const double yLast = iwspt->y(i).back();
-      std::fill(yNew.begin(), yNew.begin() + range.first, yFirst);
-      std::fill(yNew.begin() + range.second, yNew.end(), yLast);
-
-      // set the output
-      outputWorkspace->mutableY(i) = yNew;
-
-      // if derivatives are requested, only give first-order
-      if (order > 0) {
-        auto &deriv = derivs[i]->mutableY(0);
-        // 0 outside the range
-        std::fill(deriv.begin(), deriv.begin() + range.first, 0.0);
-        std::fill(deriv.begin() + range.second, deriv.end(), 0.0);
-        // eval inside range
-        std::vector<double> derivInterp = spline.deriv(xInRange);
-        std::move(derivInterp.begin(), derivInterp.end(), deriv.begin() + range.first);
-      }
-      pgress.report();
-    }
+    spline_creator = [iwspt](size_t i) {
+      return std::make_unique<Mantid::Kernel::LinearSpline<double, double>>(iwspt->x(i).rawData(),
+                                                                            iwspt->y(i).rawData());
+    };
   }
+
+  for (size_t i = 0; i < histNo; ++i) {
+    // figure out the interpolation range
+    const std::pair<size_t, size_t> range = findInterpolationRange(iwspt, mwspt, i);
+
+    // set up the function that needs to be interpolated
+    auto spline = spline_creator(i);
+
+    // perform interpolation in the range
+    // NOTE for legacy compatibility, this uses only the FIRST spectrum's X-axis for all other interpolations
+    std::span<double const> xInRange(mwspt->x(0).cbegin() + range.first, range.second - range.first);
+    auto &yNew = outputWorkspace->mutableY(i);
+    std::transform(xInRange.begin(), xInRange.end(), yNew.begin() + range.first,
+                   [&spline](double x) { return (*spline)(x); });
+
+    // flat extrapolation outside the range
+    const double yFirst = iwspt->y(i).front();
+    const double yLast = iwspt->y(i).back();
+    std::fill(yNew.begin(), yNew.begin() + range.first, yFirst);
+    std::fill(yNew.begin() + range.second, yNew.end(), yLast);
+
+    // if derivatives are requested, only give first-order
+    for (size_t j = 0; j < order; ++j) {
+      auto &deriv = derivs[i]->mutableY(j);
+      // 0 outside the range
+      std::fill(deriv.begin(), deriv.begin() + range.first, 0.0);
+      std::fill(deriv.begin() + range.second, deriv.end(), 0.0);
+      // eval inside range
+      std::transform(xInRange.begin(), xInRange.end(), deriv.begin() + range.first,
+                     [&spline, j](double x) { return spline->deriv(x, j + 1); });
+    }
+    pgress.report();
+  }
+
   // Store the output workspaces
   if (order > 0 && !isDefault("OutputWorkspaceDeriv")) {
     // Store derivatives in a grouped workspace
@@ -302,7 +301,7 @@ std::pair<size_t, size_t> SplineInterpolation::findInterpolationRange(const Matr
     firstIndex = lastIndex;
   } else {
     for (size_t i = 0; i < xAxisOut.size(); ++i) {
-      if (xAxisOut[i] > xAxisIn.front()) {
+      if (xAxisOut[i] >= xAxisIn.front()) {
         firstIndex = i;
         break;
       }
