@@ -217,7 +217,7 @@ void SplineInterpolation::exec() {
       std::fill(deriv.begin() + range.second, deriv.end(), 0.0);
       // eval inside range
       std::transform(xInRange.begin(), xInRange.end(), deriv.begin() + range.first,
-                     [&spline, j](double x) { return spline->deriv(x, j + 1); });
+                     [&spline, j](double x) { return spline->deriv(x, static_cast<unsigned int>(j + 1)); });
     }
     pgress.report();
   }
