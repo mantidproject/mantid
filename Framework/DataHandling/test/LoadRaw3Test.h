@@ -18,13 +18,12 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/Unit.h"
-#include <Poco/File.h>
-#include <Poco/Path.h>
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/lexical_cast.hpp>
 #include <cxxtest/TestSuite.h>
+#include <filesystem>
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -48,14 +47,11 @@ public:
   /// Test that the log file paths are correctly found on Windows when using the alternate data stream.
   /// </summary>
   void testAlternateDataStream() {
-#ifdef _WIN32
-    Poco::Path rawFilePath("./fakeRawFile.raw");
-    Poco::File rawFile(rawFilePath);
-
-    std::ofstream file(rawFile.path());
+    std::filesystem::path rawFile("./fakeRawFile.raw");
+    std::ofstream file(rawFile);
     file << "data goes here";
 
-    std::string adsFileName = rawFile.path() + ":checksum";
+    std::string adsFileName = rawFile.string() + ":checksum";
     std::ofstream adsFile(adsFileName);
     adsFile << "ad0bc56c4c556fa368565000f01e77f7 *fakeRawFile.log" << std::endl;
     adsFile << "d5ace6dc7ac6c4365d48ee1f2906c6f4 *fakeRawFile.nxs" << std::endl;
@@ -70,34 +66,58 @@ public:
 
     // Create the log files, otherwise the searchForLogFiles function won't include them in the
     // list of log files.
-    Poco::File logFile("./fakeRawFile.log");
-    logFile.createFile();
-    Poco::File icpDebugFile("./fakeRawFile_ICPdebug.txt");
-    icpDebugFile.createFile();
-    Poco::File icpEventFile("./fakeRawFile_ICPevent.txt");
-    icpEventFile.createFile();
-    Poco::File icpStatusFile("./fakeRawFile_ICPstatus.txt");
-    icpStatusFile.createFile();
-    Poco::File statusFile("./fakeRawFile_Status.txt");
-    statusFile.createFile();
+    std::filesystem::path logFile("./fakeRawFile.log");
+    {
+      std::ofstream handle(logFile);
+      handle.close();
+    }
+    std::filesystem::path icpDebugFile("./fakeRawFile_ICPdebug.txt");
+    {
+      std::ofstream handle(icpDebugFile);
+      handle.close();
+    }
+    std::filesystem::path icpEventFile("./fakeRawFile_ICPevent.txt");
+    {
+      std::ofstream handle(icpEventFile);
+      handle.close();
+    }
+    std::filesystem::path icpStatusFile("./fakeRawFile_ICPstatus.txt");
+    {
+      std::ofstream handle(icpStatusFile);
+      handle.close();
+    }
+    std::filesystem::path statusFile("./fakeRawFile_Status.txt");
+    {
+      std::ofstream handle(statusFile);
+      handle.close();
+    }
 
-    std::list<std::string> logFiles = LoadRawHelper::searchForLogFiles(rawFilePath);
+    std::list<std::string> logFiles = LoadRawHelper::searchForLogFiles(rawFile.string());
+
+    std::cout << "files returned by LoadRawHelper::searchForLogFiles(" << rawFile.string() << "):" << std::endl;
+    for (auto const &filename : logFiles)
+      std::cout << "  " << filename << std::endl;
+
+#ifdef _WIN32
+    const std::string PREFIX(".\\");
+#else
+    const std::string PREFIX("");
+#endif
 
     // One .log and four .txt files are listed in the alternate data stream.
     TS_ASSERT_EQUALS(5, logFiles.size());
-    TS_ASSERT(std::find(logFiles.begin(), logFiles.end(), "fakeRawFile.log") != logFiles.end());
-    TS_ASSERT(std::find(logFiles.begin(), logFiles.end(), "fakeRawFile_ICPdebug.txt") != logFiles.end());
-    TS_ASSERT(std::find(logFiles.begin(), logFiles.end(), "fakeRawFile_ICPevent.txt") != logFiles.end());
-    TS_ASSERT(std::find(logFiles.begin(), logFiles.end(), "fakeRawFile_ICPstatus.txt") != logFiles.end());
-    TS_ASSERT(std::find(logFiles.begin(), logFiles.end(), "fakeRawFile_Status.txt") != logFiles.end());
+    TS_ASSERT(std::find(logFiles.begin(), logFiles.end(), PREFIX + "fakeRawFile.log") != logFiles.end());
+    TS_ASSERT(std::find(logFiles.begin(), logFiles.end(), PREFIX + "fakeRawFile_ICPdebug.txt") != logFiles.end());
+    TS_ASSERT(std::find(logFiles.begin(), logFiles.end(), PREFIX + "fakeRawFile_ICPevent.txt") != logFiles.end());
+    TS_ASSERT(std::find(logFiles.begin(), logFiles.end(), PREFIX + "fakeRawFile_ICPstatus.txt") != logFiles.end());
+    TS_ASSERT(std::find(logFiles.begin(), logFiles.end(), PREFIX + "fakeRawFile_Status.txt") != logFiles.end());
 
-    rawFile.remove();
-    logFile.remove();
-    icpDebugFile.remove();
-    icpEventFile.remove();
-    icpStatusFile.remove();
-    statusFile.remove();
-#endif
+    std::filesystem::remove(rawFile);
+    std::filesystem::remove(logFile);
+    std::filesystem::remove(icpDebugFile);
+    std::filesystem::remove(icpEventFile);
+    std::filesystem::remove(icpStatusFile);
+    std::filesystem::remove(statusFile);
   }
 
   /// <summary>
@@ -105,7 +125,7 @@ public:
   /// </summary>
   void testLogFileSearch() {
     std::string rawFileName = FileFinder::Instance().getFullPath("NIMROD00001097.raw");
-    Poco::Path rawFilePath(rawFileName);
+    std::filesystem::path rawFilePath(rawFileName);
 
     std::list<std::string> logFiles = LoadRawHelper::searchForLogFiles(rawFilePath);
 

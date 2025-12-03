@@ -18,11 +18,10 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/FacilityInfo.h"
 
-#include <Poco/Path.h>
-
 #include <algorithm>
 #include <cctype>
 #include <cstdio>
+#include <filesystem>
 #include <functional>
 #include <numeric>
 #include <set>
@@ -57,8 +56,8 @@ std::string generateWsNameFromFileNames(const std::vector<std::string> &filename
     if (!wsName.empty())
       wsName += "_";
 
-    Poco::Path path(filename);
-    wsName += path.getBaseName();
+    std::filesystem::path path(filename);
+    wsName += path.stem().string();
   }
 
   return wsName;

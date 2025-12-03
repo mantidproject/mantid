@@ -11,11 +11,8 @@
 #include "MantidAPI/ArchiveSearchFactory.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/InternetHelper.h"
-
 #include "MantidKernel/StringTokenizer.h"
-#include <Poco/Exception.h>
-#include <Poco/File.h>
-#include <Poco/Path.h>
+#include <filesystem>
 
 namespace Mantid::DataHandling {
 namespace {
@@ -87,7 +84,7 @@ std::string ISISDataArchive::getPath(const std::string &fName) const {
     return ""; // Avoid pointless call to service
 
   std::ostringstream os = sendRequest(fName);
-  os << Poco::Path::separator() << fName;
+  os << std::string(1, std::filesystem::path::preferred_separator) << fName;
   std::string expectedPath = os.str();
   return expectedPath;
 }
@@ -138,9 +135,9 @@ std::string ISISDataArchive::getCorrectExtension(const std::string &path, const 
  */
 bool ISISDataArchive::fileExists(const std::string &path) const {
   try {
-    if (Poco::File(path).exists())
+    if (std::filesystem::exists(path))
       return true;
-  } catch (Poco::Exception &) {
+  } catch (const std::filesystem::filesystem_error &) {
   }
   return false;
 }

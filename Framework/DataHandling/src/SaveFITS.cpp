@@ -16,9 +16,6 @@
 
 #include <boost/pointer_cast.hpp>
 
-#include <Poco/File.h>
-#include <Poco/Path.h>
-
 namespace Mantid::DataHandling {
 
 const size_t SaveFITS::g_maxLenHdr = 80;

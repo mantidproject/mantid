@@ -22,9 +22,7 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/VisibleWhenProperty.h"
 
-#include <Poco/File.h>
-#include <Poco/Path.h>
-
+#include <filesystem>
 #include <fstream>
 
 namespace Mantid::DataHandling {
@@ -52,10 +50,7 @@ void assertNumFilesAndSpectraIsValid(size_t numOutFiles, size_t numOutSpectra) {
   }
 }
 
-bool doesFileExist(const std::string &filePath) {
-  auto file = Poco::File(filePath);
-  return file.exists();
-}
+bool doesFileExist(const std::filesystem::path &filePath) { return std::filesystem::exists(filePath); }
 
 double fixErrorValue(const double value) {
   // Fix error if value is less than zero or infinity
@@ -507,21 +502,20 @@ void SaveGSS::generateOutFileNames(size_t numberOfOutFiles) {
 
   m_outFileNames.resize(numberOfOutFiles);
 
-  Poco::Path path(outputFileName);
+  const std::filesystem::path filepath(outputFileName);
   // Filename minus extension
-  const std::string basename = path.getBaseName();
-  const std::string ext = path.getExtension();
+  const std::filesystem::path saveDir = filepath.parent_path();
+  const std::string basename = filepath.stem().string();
+  const std::string ext = filepath.extension().string().substr(1); // remove the '.'
 
   // get file name and check with warning
   const bool append = getProperty("Append");
   for (size_t i = 0; i < numberOfOutFiles; i++) {
     // Construct output name of the form 'base name-i.ext'
-    std::string newFileName = basename;
-    ((newFileName += '-') += std::to_string(i) += ".") += ext;
-    // Remove filename from path
-    path.makeParent();
-    path.append(newFileName);
-    std::string filename = path.toString();
+    const std::string newFileName = basename + '-' + std::to_string(i) + "." + ext;
+    // Construct new path
+    std::filesystem::path newPath = saveDir / newFileName;
+    std::string filename = newPath.string();
     m_outFileNames[i].assign(filename);
     // check and make some warning
     if (!append && doesFileExist(filename)) {

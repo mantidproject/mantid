@@ -14,7 +14,6 @@
 #include "MantidDataHandling/LoadSESANS.h"
 #include "MantidKernel/FileDescriptor.h"
 
-#include <Poco/File.h>
 #include <Poco/TemporaryFile.h>
 
 using Mantid::DataHandling::LoadSESANS;

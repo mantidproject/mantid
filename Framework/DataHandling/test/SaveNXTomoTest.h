@@ -7,14 +7,13 @@
 #pragma once
 
 #include <cxxtest/TestSuite.h>
+#include <filesystem>
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataHandling/SaveNXTomo.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidNexus/NexusFile.h"
-#include <Poco/File.h>
-
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
@@ -57,15 +56,14 @@ public:
     TS_ASSERT(saver->isExecuted());
 
     // Check file exists
-    Poco::File file(m_outputFile);
-    TS_ASSERT(file.exists());
+    TS_ASSERT(std::filesystem::exists(m_outputFile));
 
     checksOnNXTomoFormat(3);
 
     // Tidy up
     AnalysisDataService::Instance().remove(input->getName());
-    if (file.exists())
-      file.remove();
+    if (std::filesystem::exists(m_outputFile))
+      std::filesystem::remove(m_outputFile);
   }
 
   // using image workspaces with one spectrum per row (as opposed to
@@ -89,15 +87,15 @@ public:
     TS_ASSERT(saver->isExecuted());
 
     // Check file exists
-    Poco::File file(m_outputFile);
-    TS_ASSERT(file.exists());
+
+    TS_ASSERT(std::filesystem::exists(m_outputFile));
 
     checksOnNXTomoFormat(2);
 
     // Tidy up
     AnalysisDataService::Instance().remove(input->getName());
-    if (file.exists())
-      file.remove();
+    if (std::filesystem::exists(m_outputFile))
+      std::filesystem::remove(m_outputFile);
   }
 
   void testWriteGroupAppending() {
@@ -109,7 +107,7 @@ public:
     checkWriteSingleCreating(false);
 
     // Test appending a ws group to an existing file
-    if (Poco::File(m_outputFile).exists()) {
+    if (std::filesystem::exists(m_outputFile)) {
       int numberOfPriorWS = 1; // Count of current workspaces in the file
       // Create small test workspaces
       std::vector<Workspace2D_sptr> wspaces(3);
@@ -129,14 +127,13 @@ public:
       TS_ASSERT(saver->isExecuted());
 
       // Check file exists
-      Poco::File file(m_outputFile);
-      TS_ASSERT(file.exists());
+      TS_ASSERT(std::filesystem::exists(m_outputFile));
 
       checksOnNXTomoFormat(static_cast<int>(wspaces.size()) + numberOfPriorWS);
 
       // Tidy up
       AnalysisDataService::Instance().remove(input->getName());
-      file.remove();
+      std::filesystem::remove(m_outputFile);
     }
   }
 
@@ -210,8 +207,7 @@ private:
     TS_ASSERT(saver->isExecuted());
 
     // Check file exists
-    Poco::File file(m_outputFile);
-    TS_ASSERT(file.exists());
+    TS_ASSERT(std::filesystem::exists(m_outputFile));
 
     // Check that the structure of the nxTomo file is correct
     checkNXTomoStructure();
@@ -226,8 +222,8 @@ private:
     checkNXTomoData(1);
 
     if (deleteWhenComplete) {
-      if (file.exists())
-        file.remove();
+      if (std::filesystem::exists(m_outputFile))
+        std::filesystem::remove(m_outputFile);
     }
   }
 

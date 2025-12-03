@@ -29,11 +29,11 @@
 #include "MantidNexus/NexusException.h"
 #include "MantidNexus/NexusFile.h"
 
-#include <Poco/Path.h>
 #include <algorithm>
 #include <boost/lexical_cast.hpp>
 #include <boost/scoped_array.hpp>
 #include <cstdint>
+#include <filesystem>
 #include <functional>
 #include <memory>
 #include <mutex>
@@ -526,10 +526,10 @@ bool LoadEventNexus::runLoadInstrument(const std::string &nexusfilename, T local
           API::InstrumentFileFinder::getInstrumentFilename(instrument, localWorkspace->getWorkspaceStartDate());
     } catch (Kernel::Exception::NotFoundError &) {
       if (instFilename.empty()) {
-        Poco::Path directory(Kernel::ConfigService::Instance().getInstrumentDirectory());
-        Poco::Path file(instrument + "_Definition.xml");
-        Poco::Path fullPath(directory, file);
-        instFilename = fullPath.toString();
+        std::filesystem::path directory(Kernel::ConfigService::Instance().getInstrumentDirectory());
+        std::filesystem::path file(instrument + "_Definition.xml");
+        std::filesystem::path fullPath = directory / file;
+        instFilename = fullPath.string();
       }
     }
   }
