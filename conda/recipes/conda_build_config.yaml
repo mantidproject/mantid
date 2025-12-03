@@ -96,7 +96,7 @@ pydantic:
  - '>=2.11.4,<3'
 
 sphinx:
-  - '>=4.5'
+  - '>=4.5,<9'
 
 sphinx_bootstrap_theme:
   - '==0.8.1'
