@@ -9,10 +9,10 @@
 //------------------------------------------------------------------------------------------------
 #include "MantidCurveFitting/Functions/GramCharlierComptonProfile.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidKernel/Spline.h"
 
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_sf_gamma.h> // for factorial
-#include <gsl/gsl_spline.h>
 
 #include <boost/math/special_functions/hermite.hpp>
 
@@ -381,21 +381,14 @@ void GramCharlierComptonProfile::cacheYSpaceValues(const HistogramData::Points &
   m_qfine.resize(NFINE_Y);
   const double miny(sortedy.front()), maxy(sortedy.back());
   const double step = (maxy - miny) / static_cast<double>((NFINE_Y - 1));
-
-  // Set up GSL interpolater
-  gsl_interp_accel *acc = gsl_interp_accel_alloc();
-  gsl_spline *spline = gsl_spline_alloc(gsl_interp_linear, ncoarseY); // Actually a linear interpolater
-  gsl_spline_init(spline, sortedy.data(), sortedq.data(), ncoarseY);
   for (int i = 0; i < NFINE_Y - 1; ++i) {
     const double xi = miny + step * i;
     m_yfine[i] = xi;
-    m_qfine[i] = gsl_spline_eval(spline, xi, acc);
   }
   // Final value to ensure it ends at maxy
   m_yfine.back() = maxy;
-  m_qfine.back() = gsl_spline_eval(spline, maxy, acc);
-  gsl_spline_free(spline);
-  gsl_interp_accel_free(acc);
+  // Interpolate q values at fine y grid using linear spline
+  m_qfine = Mantid::Kernel::LinearSpline<double, double>::getSplinedYValues(m_yfine, sortedy, sortedq);
 
   // Cache voigt function over yfine
   std::vector<double> minusYFine(NFINE_Y);
