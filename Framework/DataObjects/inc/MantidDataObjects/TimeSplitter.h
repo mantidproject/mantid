@@ -61,6 +61,8 @@ public:
   /// Given a list of times, calculate the corresponding indices in the TimeSplitter
   std::vector<std::pair<int, std::pair<size_t, size_t>>>
   calculate_target_indices(const std::vector<DateAndTime> &times) const;
+  // Return a TimeROI that covers all the time intervals for all targets
+  const Kernel::TimeROI combinedTimeROI(const int64_t start_offset = 0) const;
 
   /// Print the (destination index | DateAndTime boundary) pairs of this splitter.
   std::string debugPrint() const;
