@@ -10,10 +10,8 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/Functions/BackgroundFunction.h"
+#include "MantidKernel/GSL_Helpers.h"
 
-#include <boost/scoped_array.hpp>
-#include <gsl/gsl_errno.h>
-#include <gsl/gsl_spline.h>
 #include <valarray>
 
 namespace Mantid {
@@ -51,17 +49,11 @@ private:
   /// Minimum number of data points in spline
   const int m_min_points;
 
-  /// Functor to free a GSL objects in a shared pointer
-  struct GSLFree {
-    void operator()(gsl_spline *spline) { gsl_spline_free(spline); }
-    void operator()(gsl_interp_accel *acc) { gsl_interp_accel_free(acc); }
-  } m_gslFree;
-
   /// GSL interpolation accelerator object
-  std::shared_ptr<gsl_interp_accel> m_acc;
+  Mantid::Kernel::spline::accel_uptr m_acc;
 
   /// GSL data structure used to calculate spline
-  std::shared_ptr<gsl_spline> m_spline;
+  Mantid::Kernel::spline::spline_uptr m_spline;
 
   /// Flag for checking if the spline needs recalculating
   mutable bool m_recalculateSpline;
@@ -70,16 +62,13 @@ private:
   void reallocGSLObjects(const int n);
 
   /// Method to setup the gsl function
-  void setupInput(boost::scoped_array<double> &x, boost::scoped_array<double> &y, int n) const;
+  void setupInput(int const n) const;
 
   /// Calculate the spline
   void calculateSpline(double *out, const double *xValues, const size_t nData) const;
 
   /// Calculate the derivative
   void calculateDerivative(double *out, const double *xValues, const size_t nData, const size_t order) const;
-
-  /// Initialise GSL objects if required
-  void initGSLObjects(boost::scoped_array<double> &x, boost::scoped_array<double> &y, int n) const;
 
   /// Check if an error occurred and throw appropriate message
   void checkGSLError(const int status, const int errorType) const;

@@ -102,6 +102,7 @@ set(SRC_FILES
     src/Smoothing.cpp
     src/SobolSequence.cpp
     src/SpinStateValidator.cpp
+    src/Spline.cpp
     src/SplittingInterval.cpp
     src/StartsWithValidator.cpp
     src/Statistics.cpp
@@ -191,7 +192,7 @@ set(INC_FILES
     inc/MantidKernel/FunctionTask.h
     inc/MantidKernel/GitHubApiHelper.h
     inc/MantidKernel/Glob.h
-    inc/MantidKernel/GSL_FFT_Helpers.h
+    inc/MantidKernel/GSL_Helpers.h
     inc/MantidKernel/ICatalogInfo.h
     inc/MantidKernel/IPropertyManager.h
     inc/MantidKernel/IPropertySettings.h
@@ -272,6 +273,7 @@ set(INC_FILES
     inc/MantidKernel/SpecialCoordinateSystem.h
     inc/MantidKernel/SpinStateHelpers.h
     inc/MantidKernel/SpinStateValidator.h
+    inc/MantidKernel/Spline.h
     inc/MantidKernel/SplittingInterval.h
     inc/MantidKernel/StartsWithValidator.h
     inc/MantidKernel/Statistics.h
@@ -424,6 +426,7 @@ set(TEST_FILES
     SpecialCoordinateSystemTest.h
     SpinStateHelpersTest.h
     SpinStateValidatorTest.h
+    SplineTest.h
     SplittingIntervalTest.h
     StartsWithValidatorTest.h
     StatisticsTest.h

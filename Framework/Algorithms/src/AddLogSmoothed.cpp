@@ -13,10 +13,8 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/Smoothing.h"
+#include "MantidKernel/Spline.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-
-#include <gsl/gsl_errno.h>
-#include <gsl/gsl_spline.h>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -46,22 +44,6 @@ typedef Mantid::Kernel::EnumeratedString<SmoothingMethod, &smoothingMethods> SMO
 } // namespace
 
 namespace {
-// wrap GSL pointers in unique pointers with deleters for memory leak safety in case of failures
-constexpr auto interp_accel_deleter = [](gsl_interp_accel *p) { gsl_interp_accel_free(p); };
-constexpr auto spline_deleter = [](gsl_spline *p) { gsl_spline_free(p); };
-
-using accel_uptr = std::unique_ptr<gsl_interp_accel, decltype(interp_accel_deleter)>;
-using spline_uptr = std::unique_ptr<gsl_spline, decltype(spline_deleter)>;
-
-accel_uptr make_interp_accel() { return accel_uptr(gsl_interp_accel_alloc()); }
-spline_uptr make_cubic_spline(std::vector<double> const &x, std::vector<double> const &y) {
-  spline_uptr spline(gsl_spline_alloc(gsl_interp_cspline, x.size()));
-  gsl_spline_init(spline.get(), x.data(), y.data(), x.size());
-  return spline;
-}
-} // namespace
-
-namespace {
 using namespace Mantid::Types::Core;
 std::vector<double> getUniformXValues(std::vector<double> const &xVec) {
   std::vector<double> newX;
@@ -76,17 +58,6 @@ std::vector<double> getUniformXValues(std::vector<double> const &xVec) {
     }
   }
   return newX;
-}
-
-std::vector<double> getSplinedYValues(std::vector<double> const &newX, std::vector<double> const &x,
-                                      std::vector<double> const &y) {
-  auto acc = make_interp_accel();
-  auto cspline = make_cubic_spline(x, y);
-  std::vector<double> newY;
-  newY.reserve(newX.size());
-  std::transform(newX.cbegin(), newX.cend(), std::back_inserter(newY),
-                 [&acc, &cspline](double const x) { return gsl_spline_eval(cspline.get(), x, acc.get()); });
-  return newY;
 }
 
 std::vector<DateAndTime> relativeToAbsoluteTime(DateAndTime const &startTime, std::vector<double> const &relTimes) {
@@ -219,14 +190,14 @@ void AddLogSmoothed::exec() {
   }
   case SmoothingMethod::FFT_ZERO: {
     std::vector<double> flatTimes = getUniformXValues(times);
-    std::vector<double> splinedValues = getSplinedYValues(flatTimes, times, values);
+    std::vector<double> splinedValues = CubicSpline<double, double>::getSplinedYValues(flatTimes, times, values);
     std::vector<double> smoothedValues = Smoothing::fftSmooth(splinedValues, params[0]);
     output->addValues(relativeToAbsoluteTime(tsp->nthTime(0), flatTimes), smoothedValues);
     break;
   }
   case SmoothingMethod::FFT_BUTTERWORTH: {
     std::vector<double> flatTimes = getUniformXValues(times);
-    std::vector<double> splinedValues = getSplinedYValues(flatTimes, times, values);
+    std::vector<double> splinedValues = CubicSpline<double, double>::getSplinedYValues(flatTimes, times, values);
     std::vector<double> smoothedValues = Smoothing::fftButterworthSmooth(splinedValues, params[0], params[1]);
     output->addValues(relativeToAbsoluteTime(tsp->nthTime(0), flatTimes), smoothedValues);
     break;

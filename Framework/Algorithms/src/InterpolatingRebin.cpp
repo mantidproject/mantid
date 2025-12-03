@@ -13,13 +13,13 @@
 #include "MantidHistogramData/Histogram.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/RebinParamsValidator.h"
+#include "MantidKernel/Spline.h"
 #include "MantidKernel/VectorHelper.h"
 
 #include <gsl/gsl_errno.h>
-#include <gsl/gsl_interp.h>
-#include <gsl/gsl_spline.h>
 
 #include <boost/lexical_cast.hpp>
+#include <span>
 
 namespace Mantid::Algorithms {
 
@@ -303,41 +303,13 @@ Histogram InterpolatingRebin::cubicInterpolation(const Histogram &oldHistogram, 
   }
 
   // get the GSL to allocate the memory
-  gsl_interp_accel *acc = nullptr;
-  gsl_spline *spline = nullptr;
-  try {
-    acc = gsl_interp_accel_alloc();
-    const size_t nPoints = oldIn2 - oldIn1 + 1;
-    spline = gsl_spline_alloc(gsl_interp_cspline, nPoints);
-
-    // test the allocation
-    if (!acc || !spline ||
-        // calculate those splines, GSL uses pointers to the vector array (which
-        // is always contiguous)
-        gsl_spline_init(spline, &xCensOld[oldIn1], &yOld[oldIn1], nPoints)) {
-      throw std::runtime_error("Error setting up GSL spline functions");
-    }
-
-    for (size_t i = 0; i < size_new; ++i) {
-      yNew[i] = gsl_spline_eval(spline, xCensNew[i], acc);
-      //(basic) error estimate the based on a weighted mean of the errors of the
-      // surrounding input data points
-      eNew[i] = estimateError(xCensOld, eOld, xCensNew[i]);
-    }
-  }
-  // for GSL to clear up its memory use
-  catch (std::exception &) {
-    if (acc) {
-      if (spline) {
-        gsl_spline_free(spline);
-      }
-      gsl_interp_accel_free(acc);
-    }
-    throw;
-  }
-  gsl_spline_free(spline);
-  gsl_interp_accel_free(acc);
-
+  const size_t nPoints = oldIn2 - oldIn1 + 1;
+  std::span<double const> xSpan(xCensOld.cbegin() + oldIn1, nPoints);
+  std::span<double const> ySpan(yOld.cbegin() + oldIn1, nPoints);
+  std::span<double const> xNewSpan(xCensNew.cbegin(), xCensNew.cend());
+  yNew = Mantid::Kernel::CubicSpline<double, double>::getSplinedYValues(xNewSpan, xSpan, ySpan);
+  std::transform(xCensNew.cbegin(), xCensNew.cend(), eNew.begin(),
+                 [this, &xCensOld, &eOld](double x) { return this->estimateError(xCensOld, eOld, x); });
   return newHistogram;
 }
 /** This can be used whenever the original spectrum is filled with only one
