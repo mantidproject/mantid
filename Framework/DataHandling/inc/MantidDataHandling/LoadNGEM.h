@@ -93,7 +93,6 @@ struct LoadDataResult {
 
 class LoadDataStrategyBase {
 public:
-  virtual ~LoadDataStrategyBase() = default;
   virtual void addEvent(double &minToF, double &maxToF, const double tof, const double binWidth,
                         const size_t pixel) = 0;
   virtual void addFrame(int &rawFrames, int &goodFrames, const int eventCountInFrame, const int minEventsReq,

@@ -135,7 +135,7 @@ void addFrameToOutputWorkspace(int &rawFrames, int &goodFrames, const int eventC
     // clear event list in frame in preparation for next frame
     PARALLEL_FOR_NO_WSP_CHECK()
     // Add events that match parameters to workspace
-    for (auto i = 0; i < countsInFrame.size(); ++i) {
+    for (auto i = 0; i < NUM_OF_SPECTRA; ++i) {
       auto &countsInFramePixel = countsInFrame[i];
       std::fill(countsInFramePixel.begin(), countsInFramePixel.end(), 0);
     }
@@ -267,12 +267,14 @@ void LoadNGEM::init() {
 
   // Bin Width
   declareProperty("BinWidth", 10.0, mustBePositiveDbl, "The width of the time bins in the output.");
-  declareProperty("MinToF", std::numeric_limits<double>::max(),
-                  "The minimum ToF bin edge. Required if not PreserveEvents. If PreserveEvents and default, value will "
-                  "be dervied from event data.");
-  declareProperty("MaxToF", -std::numeric_limits<double>::max(),
-                  "The maximum ToF bin edge. Required if not PreserveEvents. If PreserveEvents and default, value will "
-                  "be dervied from event data.");
+  declareProperty(
+      "MinToF", std::numeric_limits<double>::max(),
+      "The minimum ToF bin edge, inclusive. Required if not PreserveEvents. If PreserveEvents and default, value will "
+      "be dervied from event data.");
+  declareProperty(
+      "MaxToF", -std::numeric_limits<double>::max(),
+      "The maximum ToF bin edge, exclusive. Required if not PreserveEvents. If PreserveEvents and default, value will "
+      "be dervied from event data.");
 
   declareProperty("MinEventsPerFrame", 0, mustBePositive,
                   "The minimum number of events required in a frame before a "
