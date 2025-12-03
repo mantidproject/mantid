@@ -29,10 +29,7 @@ public:
     generator = std::default_random_engine();
   }
 
-  void
-
-      void
-      test_cspline_basic() {
+  void test_cspline_basic() {
     // range of test data
     double x0 = 0.0, x1 = 1.0;
 
@@ -78,7 +75,7 @@ public:
       sumc += fabs(y - cspline(x)) / fabs(y);
       count++;
     }
-    sumc /= count;
+    sumc /= static_cast<double>(count);
     TS_ASSERT_LESS_THAN(sumc, 1. / N);
   }
 
@@ -128,7 +125,7 @@ public:
       suml += fabs(y - lspline(x)) / fabs(y);
       count++;
     }
-    suml /= count;
+    suml /= static_cast<double>(count);
     TS_ASSERT_LESS_THAN(suml, 1. / N);
   }
 
@@ -216,9 +213,9 @@ public:
       // create the fit data
       xtest.resize(num_data[I] + 1);
       ytest.resize(num_data[I] + 1);
-      deltax = (x1 - x0) / (num_data[I]);
-      for (int i = 0; i < num_data[I] + 1; i++) {
-        xtest[i] = i * deltax;
+      deltax = (x1 - x0) / static_cast<double>(num_data[I]);
+      for (size_t i = 0; i < num_data[I] + 1; i++) {
+        xtest[i] = static_cast<double>(i) * deltax;
         ytest[i] = quadratic(xtest[i]);
       }
       // create the spline fit
@@ -234,7 +231,7 @@ public:
         sum_fit += fabs(quadratic(x) - cspline(x)) / fabs(quadratic(x));
         count++;
       }
-      sum_fit /= count;
+      sum_fit /= static_cast<double>(count);
       resid[I] = sum_fit;
       xtest.clear();
       ytest.clear();
@@ -264,9 +261,9 @@ public:
       // create the fit data
       xtest.resize(num_data[I] + 1);
       ytest.resize(num_data[I] + 1);
-      deltax = (x1 - x0) / (num_data[I]);
-      for (int i = 0; i < num_data[I] + 1; i++) {
-        xtest[i] = i * deltax;
+      deltax = (x1 - x0) / static_cast<double>(num_data[I]);
+      for (size_t i = 0; i < num_data[I] + 1; i++) {
+        xtest[i] = static_cast<double>(i) * deltax;
         ytest[i] = quadratic(xtest[i]);
       }
       // create the spline fit
@@ -281,7 +278,7 @@ public:
         sum_fit += fabs(quadratic(x) - lspline(x)) / fabs(quadratic(x));
         count++;
       }
-      sum_fit /= count;
+      sum_fit /= static_cast<double>(count);
       resid[I] = sum_fit;
       xtest.clear();
       ytest.clear();
@@ -318,8 +315,8 @@ public:
       sum_deriv += fabs(yprime - spline.deriv(x)) / fabs(yprime);
       count++;
     }
-    sum_fit /= count;
-    sum_deriv /= count;
+    sum_fit /= static_cast<double>(count);
+    sum_deriv /= static_cast<double>(count);
     TS_ASSERT_LESS_THAN(sum_fit, 1.e-8);
     TS_ASSERT_LESS_THAN(sum_deriv, 1.e-8);
   }
