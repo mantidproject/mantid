@@ -21,8 +21,6 @@
 #include "MantidKernel/MantidVersion.h"
 #include "MantidKernel/Unit.h"
 
-#include <Poco/File.h>
-#include <Poco/Path.h>
 #include <boost/scoped_array.hpp>
 #include <limits>
 

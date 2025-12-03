@@ -18,9 +18,8 @@
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidNexus/NexusFile.h"
-#include <Poco/File.h>
-#include <Poco/Path.h>
 #include <cxxtest/TestSuite.h>
+#include <filesystem>
 #include <memory>
 
 using namespace Mantid::API;
@@ -181,9 +180,9 @@ public:
   }
 
   void test_10_monitors() {
-    Poco::Path path(ConfigService::Instance().getTempDir().c_str());
+    std::filesystem::path path(ConfigService::Instance().getTempDir().c_str());
     path.append("LoadNexusMonitorsTestFile.nxs");
-    std::string filename = path.toString();
+    std::string filename = path.string();
 
     createFakeFile(filename);
 
@@ -213,7 +212,7 @@ public:
     TS_ASSERT_EQUALS(WS->y(2)[0], 10);
 
     AnalysisDataService::Instance().clear();
-    Poco::File(filename).remove();
+    std::filesystem::remove(filename);
   }
 
   void testPythonOutputFix() {

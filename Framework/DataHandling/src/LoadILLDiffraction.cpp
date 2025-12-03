@@ -27,9 +27,9 @@
 #include "MantidNexus/NexusFile.h"
 
 #include <H5Cpp.h>
-#include <Poco/Path.h>
 #include <boost/algorithm/string.hpp>
 #include <boost/math/special_functions/round.hpp>
+#include <filesystem>
 #include <numeric>
 
 namespace Mantid::DataHandling {
@@ -735,10 +735,10 @@ void LoadILLDiffraction::moveTwoThetaZero(double twoTheta0Read) {
  */
 std::string LoadILLDiffraction::getInstrumentFilePath(const std::string &instName) const {
 
-  Poco::Path directory(ConfigService::Instance().getInstrumentDirectory());
-  Poco::Path file(instName + "_Definition.xml");
-  Poco::Path fullPath(directory, file);
-  return fullPath.toString();
+  std::filesystem::path directory(ConfigService::Instance().getInstrumentDirectory());
+  std::filesystem::path file(instName + "_Definition.xml");
+  std::filesystem::path fullPath = std::filesystem::path(directory) / file;
+  return fullPath.string();
 }
 
 /** Adds some sample logs needed later by reduction

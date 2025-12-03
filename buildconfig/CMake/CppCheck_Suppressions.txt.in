@@ -82,13 +82,11 @@ useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Functions/BSpline
 variableScope:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Functions/ChebfunBase.cpp:832
 duplicateCondition:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Functions/CrystalFieldFunction.cpp:120
 constParameter:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Functions/DynamicKuboToyabe.cpp:69
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadHFIRSANS.cpp:433
+useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadHFIRSANS.cpp:432
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadILLDiffraction.cpp:567
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadILLDiffraction.cpp:593
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadILLDiffraction.cpp:611
 mismatchingContainerExpression:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadInstrument.cpp:148
-nullPointerOutOfResources:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadLog.cpp:445
-nullPointerOutOfResources:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadLog.cpp:446
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadPLN.cpp:659
 integerOverflowCond:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/byte_rel_comp.cpp:59
 unusedStructMember:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/vms_convert.cpp:222
@@ -101,10 +99,10 @@ unusedStructMember:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/vms_co
 unusedStructMember:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/vms_convert.cpp:233
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/vms_convert.cpp:371
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/vms_convert.cpp:386
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadSpice2D.cpp:418
+useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadSpice2D.cpp:417
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveFullprofResolution.cpp:178
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveNexusProcessed.cpp:571
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveSampleEnvironmentAndShape.cpp:62
+useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveSampleEnvironmentAndShape.cpp:61
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/CoordTransformAligned.cpp:72
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventWorkspace.cpp:665
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/LeanElasticPeaksWorkspace.cpp:384

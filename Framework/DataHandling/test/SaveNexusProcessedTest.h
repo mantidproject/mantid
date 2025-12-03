@@ -34,6 +34,7 @@
 #include <boost/lexical_cast.hpp>
 
 #include <cxxtest/TestSuite.h>
+#include <filesystem>
 #include <fstream>
 #include <memory>
 

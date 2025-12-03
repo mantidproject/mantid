@@ -18,8 +18,8 @@
 #include "MantidKernel/Glob.h"
 #include "cxxtest/TestSuite.h"
 
-#include <Poco/File.h>
 #include <Poco/TemporaryFile.h>
+#include <filesystem>
 #include <fstream>
 
 using namespace Mantid;
@@ -159,7 +159,7 @@ public:
    * @brief test_2BankInstrumentRALF
    */
   void test_unwritablePath() {
-    if (Poco::File("/usr").exists()) {
+    if (std::filesystem::exists("/usr")) {
       // Save a 2 banks diffraction data with instrument using SLOG format
       const std::string wsName = "unwritablePath";
       auto dataws = generateTestMatrixWorkspace(wsName, m_defaultNumHistograms, m_defaultNumBins);
@@ -272,8 +272,7 @@ public:
     std::set<std::string> returnedFiles;
     Kernel::Glob::glob(outFilePath, returnedFiles);
     for (const auto &filename : returnedFiles) {
-      Poco::File pocoFile{filename};
-      pocoFile.remove();
+      std::filesystem::remove(filename);
     }
 
     AnalysisDataService::Instance().remove(wsName);
@@ -325,8 +324,7 @@ public:
     std::set<std::string> returnedFiles;
     Kernel::Glob::glob(globPattern, returnedFiles);
     for (const auto &filename : returnedFiles) {
-      Poco::File pocoFile{filename};
-      pocoFile.remove();
+      std::filesystem::remove(filename);
     }
   }
 

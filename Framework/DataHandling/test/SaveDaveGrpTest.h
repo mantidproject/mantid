@@ -18,9 +18,9 @@
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/UnitFactory.h"
 
-#include <Poco/File.h>
 #include <boost/algorithm/string.hpp>
 
+#include <filesystem>
 #include <fstream>
 
 using namespace Mantid;
@@ -60,7 +60,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(saver->execute());
     TS_ASSERT(saver->isExecuted());
 
-    TS_ASSERT(Poco::File(outputFile).exists());
+    TS_ASSERT(std::filesystem::exists(outputFile));
 
     // check the content of the file
     std::ifstream testfile;
@@ -109,8 +109,8 @@ public:
       testfile.close();
     }
     AnalysisDataService::Instance().remove(WSName);
-    if (Poco::File(outputFile).exists())
-      Poco::File(outputFile).remove();
+    if (std::filesystem::exists(outputFile))
+      std::filesystem::remove(outputFile);
   }
 
   void test_compare_to_original() {
@@ -136,7 +136,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(saver->execute());
     TS_ASSERT(saver->isExecuted());
 
-    TS_ASSERT(Poco::File(outputFile).exists());
+    TS_ASSERT(std::filesystem::exists(outputFile));
     // check the content of the file
     std::ifstream testin, testout;
     testin.open(inputFile.c_str());
@@ -190,8 +190,8 @@ public:
       testout.close();
     }
     AnalysisDataService::Instance().remove(WSName);
-    if (Poco::File(outputFile).exists())
-      Poco::File(outputFile).remove();
+    if (std::filesystem::exists(outputFile))
+      std::filesystem::remove(outputFile);
   }
 
   void test_exec_event() {
@@ -215,7 +215,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(saver->execute());
     TS_ASSERT(saver->isExecuted());
 
-    TS_ASSERT(Poco::File(outputFile).exists());
+    TS_ASSERT(std::filesystem::exists(outputFile));
     // check the content of the file
     std::ifstream testfile;
     testfile.open(outputFile.c_str());
@@ -254,8 +254,8 @@ public:
       testfile.close();
     }
     AnalysisDataService::Instance().remove(outws);
-    if (Poco::File(outputFile).exists())
-      Poco::File(outputFile).remove();
+    if (std::filesystem::exists(outputFile))
+      std::filesystem::remove(outputFile);
   }
 
 private:

@@ -26,8 +26,7 @@
 
 #include <boost/regex.hpp>
 
-#include <Poco/File.h>
-
+#include <filesystem>
 #include <map>
 #include <sstream>
 #include <string>
@@ -323,7 +322,7 @@ void LoadNXSPE::exec() {
   if (!instrument_name.empty() && instrument_name != "NXSPE") {
     std::string IDF_filename = InstrumentFileFinder::getInstrumentFilename(instrument_name);
     std::string instrument_parfile = IDF_filename.substr(0, IDF_filename.find("_Definition")) + "_Parameters.xml";
-    if (Poco::File(instrument_parfile).exists()) {
+    if (std::filesystem::exists(instrument_parfile)) {
       try {
         auto loadParamAlg = createChildAlgorithm("LoadParameterFile");
         loadParamAlg->setProperty("Filename", instrument_parfile);

@@ -20,9 +20,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/UnitFactory.h"
 
-#include <Poco/File.h>
-#include <Poco/Path.h>
-
+#include <filesystem>
 #include <fstream>
 #include <sstream>
 
@@ -119,8 +117,8 @@ public:
   }
 
   void tearDown() override {
-    if (Poco::File(m_filename).exists())
-      Poco::File(m_filename).remove();
+    if (std::filesystem::exists(m_filename))
+      std::filesystem::remove(m_filename);
   }
 
   void testCanSAS1dXML() {
@@ -218,8 +216,8 @@ public:
     testFile.close();
 
     // no more tests on the file are possible after this
-    if (Poco::File(m_filename).exists())
-      Poco::File(m_filename).remove();
+    if (std::filesystem::exists(m_filename))
+      std::filesystem::remove(m_filename);
   }
 
   void testCanSetAdditionalRunNumbersAsProperties() {
@@ -353,8 +351,9 @@ public:
     for (int spec = 0; spec < 3; ++spec) {
       std::ostringstream ss;
       ss << std::string(m_filename, 0, extPos) << "_" << spec << std::string(m_filename, extPos);
-      TS_ASSERT(Poco::File(ss.str()).exists());
-      Poco::File(ss.str()).remove();
+      std::filesystem::path filepath(ss.str());
+      TS_ASSERT(std::filesystem::exists(filepath));
+      std::filesystem::remove(filepath);
     }
 
     // numeric axis
@@ -367,8 +366,9 @@ public:
     for (int spec = 0; spec < 3; ++spec) {
       std::ostringstream ss;
       ss << std::string(m_filename, 0, extPos) << "_" << spec << "_" << spec * spec << std::string(m_filename, extPos);
-      TS_ASSERT(Poco::File(ss.str()).exists());
-      Poco::File(ss.str()).remove();
+      std::filesystem::path filepath(ss.str());
+      TS_ASSERT(std::filesystem::exists(filepath));
+      std::filesystem::remove(filepath);
     }
 
     // bin edge axis
@@ -382,8 +382,9 @@ public:
       std::ostringstream ss;
       ss << std::string(m_filename, 0, extPos) << "_" << spec << "_" << 0.5 * (spec * spec + (spec + 1) * (spec + 1))
          << std::string(m_filename, extPos);
-      TS_ASSERT(Poco::File(ss.str()).exists());
-      Poco::File(ss.str()).remove();
+      std::filesystem::path filepath(ss.str());
+      TS_ASSERT(std::filesystem::exists(filepath));
+      std::filesystem::remove(filepath);
     }
 
     // text axis
@@ -396,8 +397,9 @@ public:
     for (int spec = 0; spec < 3; ++spec) {
       std::ostringstream ss;
       ss << std::string(m_filename, 0, extPos) << "_" << spec << "_ax_" << spec << std::string(m_filename, extPos);
-      TS_ASSERT(Poco::File(ss.str()).exists());
-      Poco::File(ss.str()).remove();
+      std::filesystem::path filepath(ss.str());
+      TS_ASSERT(std::filesystem::exists(filepath));
+      std::filesystem::remove(filepath);
     }
   }
 

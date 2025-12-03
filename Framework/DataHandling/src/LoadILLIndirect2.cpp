@@ -23,7 +23,6 @@
 #include "MantidNexus/NexusException.h"
 #include "MantidNexus/NexusFile.h"
 
-#include <Poco/Path.h>
 #include <algorithm>
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>

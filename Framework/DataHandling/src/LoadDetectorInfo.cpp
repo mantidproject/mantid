@@ -12,10 +12,10 @@
 #include "MantidKernel/Exception.h"
 #include "MantidNexus/NexusFile.h"
 
-#include <Poco/Path.h>
 #include <boost/algorithm/string/compare.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 
+#include <filesystem>
 #include <fstream>
 
 namespace Mantid::DataHandling {
@@ -63,7 +63,7 @@ void LoadDetectorInfo::init() {
 void LoadDetectorInfo::exec() {
   cacheInputs();
   std::string filename = getPropertyValue("DataFilename");
-  std::string ext = Poco::Path(filename).getExtension();
+  std::string ext = std::filesystem::path(filename).extension().string().substr(1); // remove the '.'
   if (boost::iequals(ext, "dat") || boost::iequals(ext, "sca")) {
     loadFromDAT(filename);
   } else if (boost::iequals(ext, "raw")) {

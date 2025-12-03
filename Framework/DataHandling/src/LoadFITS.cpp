@@ -21,8 +21,7 @@
 #include <boost/scoped_array.hpp>
 
 #include <Poco/BinaryReader.h>
-#include <Poco/Path.h>
-
+#include <filesystem>
 using namespace Mantid::DataHandling;
 using namespace Mantid::DataObjects;
 using namespace Mantid::API;
@@ -646,7 +645,7 @@ Workspace2D_sptr LoadFITS::makeWorkspace(const FITSInfo &fileInfo, size_t &newFi
   }
 
   try {
-    ws->setTitle(Poco::Path(fileInfo.filePath).getFileName());
+    ws->setTitle(std::filesystem::path(fileInfo.filePath).filename().string());
   } catch (std::runtime_error &) {
     ws->setTitle(padZeros(newFileNumber, g_DIGIT_SIZE_APPEND));
   }
