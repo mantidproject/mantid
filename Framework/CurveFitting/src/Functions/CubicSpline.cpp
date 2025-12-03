@@ -16,6 +16,8 @@
 #include <stdexcept>
 #include <vector>
 
+#include <gsl/gsl_errno.h>
+
 namespace Mantid::CurveFitting::Functions {
 
 using namespace CurveFitting;
@@ -34,8 +36,8 @@ DECLARE_FUNCTION(CubicSpline)
  *
  */
 CubicSpline::CubicSpline()
-    : m_min_points(3), m_acc(gsl_interp_accel_alloc(), m_gslFree),
-      m_spline(gsl_spline_alloc(gsl_interp_cspline, m_min_points), m_gslFree), m_recalculateSpline(true) {
+    : m_min_points(3), m_acc(Kernel::spline::make_interp_accel()),
+      m_spline(gsl_spline_alloc(gsl_interp_cspline, m_min_points)), m_recalculateSpline(true) {
   // setup class with a default set of attributes
   declareAttribute("n", Attribute(m_min_points));
 
@@ -59,25 +61,23 @@ void CubicSpline::function1D(double *out, const double *xValues, const size_t nD
   // check if spline needs recalculating
   int n = getAttribute("n").asInt();
 
-  boost::scoped_array<double> x(new double[n]);
-  boost::scoped_array<double> y(new double[n]);
-
   // setup the reference points and calculate
   if (m_recalculateSpline)
-    setupInput(x, y, n);
+    setupInput(n);
 
   calculateSpline(out, xValues, nData);
 }
 
 /** Sets up the spline object by with the parameters and attributes
  *
- * @param x :: The array of x values defining the spline
- * @param y :: The array of y values defining the spline
  * @param n :: The size of the arrays
  */
-void CubicSpline::setupInput(boost::scoped_array<double> &x, boost::scoped_array<double> &y, int n) const {
+void CubicSpline::setupInput(int const n) const {
   // Populate data points from the input attributes and parameters
   bool isSorted = true;
+
+  std::vector<double> x(n);
+  std::vector<double> y(n);
 
   for (int i = 0; i < n; ++i) {
 
@@ -112,8 +112,9 @@ void CubicSpline::setupInput(boost::scoped_array<double> &x, boost::scoped_array
     }
   }
 
-  // pass values to GSL objects
-  initGSLObjects(x, y, n);
+  // initialize the spline
+  int status = gsl_spline_init(m_spline.get(), x.data(), y.data(), n);
+  checkGSLError(status, GSL_EINVAL);
   m_recalculateSpline = false;
 }
 
@@ -127,12 +128,10 @@ void CubicSpline::setupInput(boost::scoped_array<double> &x, boost::scoped_array
 void CubicSpline::derivative1D(double *out, const double *xValues, size_t nData, const size_t order) const {
   int n = getAttribute("n").asInt();
 
-  boost::scoped_array<double> x(new double[n]);
-  boost::scoped_array<double> y(new double[n]);
-
   // setup the reference points and calculate
   if (m_recalculateSpline)
-    setupInput(x, y, n);
+    setupInput(n);
+
   calculateDerivative(out, xValues, nData, order);
 }
 
@@ -180,7 +179,7 @@ void CubicSpline::calculateSpline(double *out, const double *xValues, const size
  */
 double CubicSpline::splineEval(const double x) const {
   // calculate the y value
-  double y = gsl_spline_eval(m_spline.get(), x, m_acc.get());
+  double y;
   int errorCode = gsl_spline_eval_e(m_spline.get(), x, m_acc.get(), &y);
 
   // check if GSL function returned an error
@@ -210,10 +209,8 @@ void CubicSpline::calculateDerivative(double *out, const double *xValues, const 
     if (checkXInRange(xValues[i])) {
       // choose the order of the derivative
       if (order == 1) {
-        xDeriv = gsl_spline_eval_deriv(m_spline.get(), xValues[i], m_acc.get());
         errorCode = gsl_spline_eval_deriv_e(m_spline.get(), xValues[i], m_acc.get(), &xDeriv);
       } else if (order == 2) {
-        xDeriv = gsl_spline_eval_deriv2(m_spline.get(), xValues[i], m_acc.get());
         errorCode = gsl_spline_eval_deriv2_e(m_spline.get(), xValues[i], m_acc.get(), &xDeriv);
       }
     } else {
@@ -231,7 +228,7 @@ void CubicSpline::calculateDerivative(double *out, const double *xValues, const 
 
   // inform user that some values weren't calculated
   if (outOfRange) {
-    g_log.information() << "Some x values where out of range and will not be calculated.\n";
+    g_log.information() << "Some x values were out of range and will not be calculated.";
   }
 }
 
@@ -329,23 +326,12 @@ void CubicSpline::checkGSLError(const int status, const int errorType) const {
   }
 }
 
-/** Initilize the GSL spline with the given points
- *
- * @param x :: The x points defining the spline
- * @param y :: The y points defining the spline
- * @param n :: The size of the arrays
- */
-void CubicSpline::initGSLObjects(boost::scoped_array<double> &x, boost::scoped_array<double> &y, int n) const {
-  int status = gsl_spline_init(m_spline.get(), x.get(), y.get(), n);
-  checkGSLError(status, GSL_EINVAL);
-}
-
 /** Reallocate the size of the GSL objects
  *
  * @param n :: The new size of the spline object
  */
 void CubicSpline::reallocGSLObjects(const int n) {
-  m_spline.reset(gsl_spline_alloc(gsl_interp_cspline, n), m_gslFree);
+  m_spline.reset(gsl_spline_alloc(gsl_interp_cspline, n));
   gsl_interp_accel_reset(m_acc.get());
 }
 
