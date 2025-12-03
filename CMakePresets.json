@@ -68,13 +68,21 @@
     },
     {
       "name": "win-64-ci",
-      "description": "Build options for a CI build on windows with Visual Studio",
+      "description": "Build options for a CI build on windows",
       "inherits": [
         "ci-default",
         "conda"
       ],
       "generator": "Visual Studio 17 2022",
       "toolset": "v143"
+    },
+    {
+      "name": "win-64-ci-ninja",
+      "description": "Build options for a CI build on windows with Ninja",
+      "inherits": [
+        "ci-default",
+        "conda"
+      ]
     },
     {
       "name": "cppcheck-ci",
@@ -148,6 +156,7 @@
       "cmakeExecutable": "cmake.exe",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "DebugWithRelRuntime",
+        "USE_PRECOMPILED_HEADERS": "OFF",
         "CMAKE_MAKE_PROGRAM": "ninja.exe"
       }
     },
