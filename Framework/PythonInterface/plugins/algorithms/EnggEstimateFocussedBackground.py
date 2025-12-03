@@ -4,10 +4,12 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+from mantid import AnalysisDataService
 from mantid.api import AlgorithmFactory, MatrixWorkspace, MatrixWorkspaceProperty, PythonAlgorithm, Progress
 from mantid.kernel import Direction, IntBoundedValidator, FloatBoundedValidator
 import numpy as np
 from scipy.signal import savgol_filter
+from joblib import Parallel, delayed
 
 
 class EnggEstimateFocussedBackground(PythonAlgorithm):
@@ -76,77 +78,73 @@ class EnggEstimateFocussedBackground(PythonAlgorithm):
         inws = self.getProperty("InputWorkspace").value
         niter = self.getProperty("NIterations").value
         xwindow = self.getProperty("XWindow").value
-        doSGfilter = self.getProperty("ApplyFilterSG").value
+        do_sg_filter = self.getProperty("ApplyFilterSG").value
 
-        # make output workspace
-        clone_alg = self.createChildAlgorithm("CloneWorkspace", enableLogging=False)
-        clone_alg.setProperty("InputWorkspace", inws)
-        clone_alg.setProperty("OutputWorkspace", self.getProperty("OutputWorkspace").valueAsStr)
-        clone_alg.execute()
-        outws = clone_alg.getProperty("OutputWorkspace").value
-
-        # loop over all spectra
-        nbins = inws.blocksize()
+        # do smoothing in parallel loop over spectra
         nspec = inws.getNumberHistograms()
-        prog_reporter = Progress(self, start=0.0, end=1.0, nreports=nspec)
-        for ispec in range(0, nspec):
-            prog_reporter.report()
+        prog = Progress(self, start=0.0, end=1.0, nreports=nspec)
+        out = Parallel(n_jobs=-2, prefer="threads", return_as="generator")(
+            delayed(find_bg_of_spectrum)(inws.name(), ispec, xwindow, niter, do_sg_filter, prog) for ispec in range(nspec)
+        )
 
-            # get n points in convolution window
-            binwidth = np.mean(np.diff(inws.readX(ispec)))
-            nwindow = int(np.ceil(xwindow / binwidth))
-            if not nwindow % 2:
-                nwindow += 1
-
-            if nwindow < self.MIN_WINDOW_SIZE:
-                raise RuntimeError("Convolution window must have at least three points")
-            elif not nwindow < nbins:
-                # not effective due to edge effects of the convolution
-                raise RuntimeError("Data has must have at least the number of points as the convolution window")
-
-            # do initial filter to remove very high intensity points
-            if doSGfilter:
-                ybg = savgol_filter(inws.readY(ispec), nwindow, polyorder=1)
-            else:
-                ybg = np.copy(inws.readY(ispec))
-            Ibar = np.mean(ybg)
-            Imin = np.min(ybg)
-            ybg[ybg > (Ibar + 2 * (Ibar - Imin))] = Ibar + 2 * (Ibar - Imin)
-
-            # perform iterative smoothing
-            ybg = self.doIterativeSmoothing(ybg, nwindow, niter)
-
-            # replace intensity in output spectrum with background
-            outws.setY(ispec, ybg)
-            outws.setE(ispec, np.zeros(ybg.shape))
+        # make output workspace (with zero errors)
+        alg = self.createChildAlgorithm("SetUncertainties", enableLogging=False)
+        alg.setProperty("InputWorkspace", inws)
+        alg.setProperty("OutputWorkspace", self.getProperty("OutputWorkspace").valueAsStr)
+        alg.setProperty("SetError", "zero")
+        alg.execute()
+        outws = alg.getProperty("OutputWorkspace").value
+        # replace intensity in output spectrum with background
+        [outws.setY(ispec, yvec) for ispec, yvec in enumerate(out)]
 
         # set output
         self.setProperty("OutputWorkspace", outws)
 
-    def doIterativeSmoothing(self, y, nwindow, maxdepth, depth=0):
-        """
-        Iterative smoothing procedure to estimate the background in powder diffraction as published in
-        Bruckner J. Appl. Cryst. (2000). 33, 977-979
-        :param y: signal to smooth
-        :param n: size of window for convolution
-        :param maxdepth: max depth of recursion (i.e. number of iterations)
-        :param depth: current iteration
-        :return:
-        """
-        # smooth with hat function
-        yy = np.copy(y)
-        yy = np.convolve(yy, np.ones(nwindow) / nwindow, mode="same")
-        # normalise end values effected by convolution
-        ends = np.convolve(np.ones(nwindow), np.ones(nwindow) / nwindow, mode="same")
-        yy[0 : nwindow // 2] = yy[0 : nwindow // 2] / ends[0 : nwindow // 2]
-        yy[-nwindow // 2 :] = yy[-nwindow // 2 :] / ends[-nwindow // 2 :]
-        if depth < maxdepth:
-            # compare pt by pt with original and keep lowest
-            idx = yy > y
-            yy[idx] = y[idx]
-            return self.doIterativeSmoothing(yy, nwindow, maxdepth, depth + 1)
-        else:
-            return yy
+
+def find_bg_of_spectrum(wsname, ispec, xwindow, niter, do_sg_filter, prog):
+    ws = AnalysisDataService.retrieve(wsname)
+    # find kernel size
+    binwidth = np.mean(np.diff(ws.readX(ispec)))
+    nwindow = max(int(np.ceil(xwindow / binwidth)), 3)
+    if not nwindow % 2:
+        nwindow += 1
+    # do initial filter to remove very high intensity points
+    ybg = ws.readY(ispec)[:]  # copy
+    if do_sg_filter:
+        ybg = savgol_filter(ybg, nwindow, polyorder=1)
+    yavg = ybg.mean()
+    ymin = ybg.min()
+    threshold = yavg + 2 * (yavg - ymin)
+    ybg[ybg > threshold] = threshold
+    # perform iterative smoothing
+    ybg = do_iterative_smoothing(ybg, nwindow, niter)
+    prog.report()
+    return ybg
+
+
+def do_iterative_smoothing(y, nwindow, maxdepth, depth=0):
+    """
+    Iterative smoothing procedure to estimate the background in powder diffraction as published in
+    Bruckner J. Appl. Cryst. (2000). 33, 977-979
+    :param y: signal to smooth
+    :param n: size of window for convolution
+    :param maxdepth: max depth of recursion (i.e. number of iterations)
+    :param depth: current iteration
+    :return:
+    """
+    # smooth with hat function
+    yy = np.convolve(y, np.ones(nwindow) / nwindow, mode="same")
+    # normalise end values effected by convolution
+    ends = np.convolve(np.ones(nwindow), np.ones(nwindow) / nwindow, mode="same")
+    yy[0 : nwindow // 2] = yy[0 : nwindow // 2] / ends[0 : nwindow // 2]
+    yy[-nwindow // 2 :] = yy[-nwindow // 2 :] / ends[-nwindow // 2 :]
+    if depth < maxdepth:
+        # compare pt by pt with original and keep lowest
+        idx = yy > y
+        yy[idx] = y[idx]
+        return do_iterative_smoothing(yy, nwindow, maxdepth, depth + 1)
+    else:
+        return yy
 
 
 # register algorithm with mantid
