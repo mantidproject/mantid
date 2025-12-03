@@ -11,7 +11,7 @@ jobs:
   merge-release-into-main:
     runs-on: ubuntu-latest
     # run on release-next branch and do not run in forks
-    if: ${{ github.ref_name == 'release-next' && github.event.pull_request.head.repo.full_name == github.repository }}
+    if: ${{ github.ref_name == 'release-next' && github.repository_owner == 'mantidproject' }}
     steps:
       - uses: actions/checkout@master
 
@@ -26,7 +26,7 @@ jobs:
   merge-ornl-into-main:
     runs-on: ubuntu-latest
     # run on ornl-next branche and do not run in forks
-    if: ${{ github.ref_name == 'ornl-next' && github.event.pull_request.head.repo.full_name == github.repository }}
+    if: ${{ github.ref_name == 'ornl-next' && github.repository_owner == 'mantidproject' }}
     steps:
       - uses: actions/checkout@master
 
