@@ -173,6 +173,13 @@ class SettingsTransmissionModelTest(unittest.TestCase):
         self.assertEqual(state_gui_model.transmission_can_wavelength_min, 1.3)
         self.assertEqual(state_gui_model.transmission_can_wavelength_max, 10.3)
 
+    def test_wide_angle_correction_setter_and_default(self):
+        state_gui_model = self.create_model({})
+
+        self.assertEqual(state_gui_model.wide_angle_correction, False)
+        state_gui_model.wide_angle_correction = True
+        self.assertEqual(state_gui_model.wide_angle_correction, True)
+
 
 if __name__ == "__main__":
     unittest.main()
