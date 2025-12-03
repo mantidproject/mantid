@@ -216,8 +216,7 @@ void GetDetectorOffsets::exec() {
     for (size_t ns = 0; ns < inputW->getNumberHistograms(); ++ns) {
       const auto dets = inputW->getSpectrum(ns).getDetectorIDs();
       for (const auto &det : dets)
-        trace << "  " << outputW->getValue(det) << maskWS->isMasked(det) ? "*" : "")
-              << "\n";
+        trace << "  " << outputW->getValue(det) << (maskWS->isMasked(det) ? "*" : "") << "\n";
     }
   }
   // Return the output
