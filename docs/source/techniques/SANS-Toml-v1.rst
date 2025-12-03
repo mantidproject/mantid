@@ -2188,7 +2188,10 @@ algorithm description.
 
 **Replacement Example**
 
-Unsupported, pending future discussion.
+..  code-block:: yaml
+
+  [transmission]
+    wide_angle_correction=true
 
 .. _set_centre-ref:
 
