@@ -10,6 +10,7 @@ from mantid.kernel import Direction, IntBoundedValidator, FloatBoundedValidator
 import numpy as np
 from scipy.signal import savgol_filter
 from joblib import Parallel, delayed
+from functools import lru_cache
 
 
 class EnggEstimateFocussedBackground(PythonAlgorithm):
@@ -101,13 +102,24 @@ class EnggEstimateFocussedBackground(PythonAlgorithm):
         self.setProperty("OutputWorkspace", outws)
 
 
-def find_bg_of_spectrum(wsname, ispec, xwindow, niter, do_sg_filter, prog):
-    ws = AnalysisDataService.retrieve(wsname)
-    # find kernel size
-    binwidth = np.mean(np.diff(ws.readX(ispec)))
+def _get_nbins_in_xwindow(x, xwindow):
+    binwidth = np.mean(np.diff(x))
     nwindow = max(int(np.ceil(xwindow / binwidth)), 3)
     if not nwindow % 2:
         nwindow += 1
+    return nwindow
+
+
+@lru_cache(maxsize=1)
+def _get_end_normalisation(nwindow):
+    # This is cached with size 1 because will nwindows will always be the same for ws with common bins
+    return np.convolve(np.ones(nwindow), np.ones(nwindow) / nwindow, mode="same")
+
+
+def find_bg_of_spectrum(wsname, ispec, xwindow, niter, do_sg_filter, prog):
+    ws = AnalysisDataService.retrieve(wsname)
+    # find kernel size
+    nwindow = _get_nbins_in_xwindow(ws.readX(ispec), xwindow)
     # do initial filter to remove very high intensity points
     ybg = ws.readY(ispec)[:]  # copy
     if do_sg_filter:
@@ -135,7 +147,7 @@ def do_iterative_smoothing(y, nwindow, maxdepth, depth=0):
     # smooth with hat function
     yy = np.convolve(y, np.ones(nwindow) / nwindow, mode="same")
     # normalise end values effected by convolution
-    ends = np.convolve(np.ones(nwindow), np.ones(nwindow) / nwindow, mode="same")
+    ends = _get_end_normalisation(nwindow)
     yy[0 : nwindow // 2] = yy[0 : nwindow // 2] / ends[0 : nwindow // 2]
     yy[-nwindow // 2 :] = yy[-nwindow // 2 :] / ends[-nwindow // 2 :]
     if depth < maxdepth:
