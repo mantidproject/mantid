@@ -426,6 +426,7 @@ set(TEST_FILES
     SpecialCoordinateSystemTest.h
     SpinStateHelpersTest.h
     SpinStateValidatorTest.h
+    SplineTest.h
     SplittingIntervalTest.h
     StartsWithValidatorTest.h
     StatisticsTest.h

@@ -228,7 +228,7 @@ void CubicSpline::calculateDerivative(double *out, const double *xValues, const 
 
   // inform user that some values weren't calculated
   if (outOfRange) {
-    g_log.information() << "Some x values were out of range and will not be calculated.\n";
+    g_log.information() << "Some x values were out of range and will not be calculated.";
   }
 }
 

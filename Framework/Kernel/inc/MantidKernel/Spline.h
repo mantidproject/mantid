@@ -29,24 +29,13 @@ template <typename X, typename Y> class Spline {
   Spline &operator=(Spline const &) = delete;
   Spline &operator=(Spline &&) = delete;
 
-  X xForRange(X const x) const {
-    if (x < m_spline->interp->xmin) {
-      return m_spline->interp->xmin;
-    } else if (x > m_spline->interp->xmax) {
-      return m_spline->interp->xmax;
-    } else {
-      return x;
-    }
-  }
-
 public:
   Spline(std::span<X const> x, std::span<Y const> y, gsl_interp_type const *type)
       : m_spline(spline::make_spline<X, Y>(x, y, type)), m_acc(spline::make_interp_accel()) {}
   virtual ~Spline() = default;
   Y operator()(X const newX) const {
     Y y;
-    X properX = xForRange(newX);
-    int err = gsl_spline_eval_e(m_spline.get(), properX, m_acc.get(), &y);
+    int err = gsl_spline_eval_e(m_spline.get(), newX, m_acc.get(), &y);
     if (err != GSL_SUCCESS) {
       throw std::runtime_error("Failure in GSL spline interpolation at " + std::to_string(newX));
     }
@@ -61,20 +50,14 @@ public:
   Y deriv(X const newX, unsigned int order = 1) const {
     Y deriv;
     int err = GSL_SUCCESS;
-    bool outOfRange = (newX != xForRange(newX)); // xForRange = newX if within bounds
-    if (outOfRange) {
-      // if we're outside the range, just return 0
-      deriv = 0;
+    // evaluate up to the second derivative
+    if (order == 1) {
+      err = gsl_spline_eval_deriv_e(m_spline.get(), newX, m_acc.get(), &deriv);
+    } else if (order == 2) {
+      err = gsl_spline_eval_deriv2_e(m_spline.get(), newX, m_acc.get(), &deriv);
     } else {
-      // otherwise evaluate up to the second derivative
-      if (order == 1) {
-        err = gsl_spline_eval_deriv_e(m_spline.get(), newX, m_acc.get(), &deriv);
-      } else if (order == 2) {
-        err = gsl_spline_eval_deriv2_e(m_spline.get(), newX, m_acc.get(), &deriv);
-      } else {
-        // for derivatives higher than 2, just return 0
-        deriv = 0;
-      }
+      // for derivatives higher than 2, just return 0
+      deriv = 0;
     }
     if (err != GSL_SUCCESS) {
       throw std::runtime_error("Failure in GSL spline derivative at " + std::to_string(newX));
