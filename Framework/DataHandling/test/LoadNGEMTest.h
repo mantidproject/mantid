@@ -43,8 +43,8 @@ public:
     TS_ASSERT_DELTA(1.0, edata[130378], 1e-8);
     // sample logs
     const auto &run = outputWS->run();
-    TS_ASSERT_DELTA(700.92, run.getPropertyValueAsType<double>("min_TOF"), 1e-08);
-    TS_ASSERT_DELTA(98132.97, run.getPropertyValueAsType<double>("max_TOF"), 1e-08);
+    TS_ASSERT_DELTA(700.92, run.getPropertyValueAsType<double>("min_ToF"), 1e-08);
+    TS_ASSERT_DELTA(98132.97, run.getPropertyValueAsType<double>("max_ToF"), 1e-08);
     TS_ASSERT_EQUALS(224, run.getPropertyValueAsType<int>("raw_frames"));
     TS_ASSERT_EQUALS(224, run.getPropertyValueAsType<int>("good_frames"));
 
@@ -61,12 +61,12 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("MinToF", 700.92));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("MaxToF", 98132.97));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("PreserveEvents", false));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "ws_histo"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "ws"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("GenerateEventsPerFrame", false));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 
     auto &ads = AnalysisDataService::Instance();
-    auto outputWS = ads.retrieveWS<DataObjects::Workspace2D>("ws_histo");
+    auto outputWS = ads.retrieveWS<DataObjects::Workspace2D>("ws");
     // check some random values
     const auto &ydata{outputWS->readY(10304)};
     const auto &xdata{outputWS->readX(10304)};
@@ -79,8 +79,8 @@ public:
     TS_ASSERT_DELTA(1.0, edata[838], 1e-8);
     // sample logs
     const auto &run = outputWS->run();
-    TS_ASSERT_DELTA(700.92, run.getPropertyValueAsType<double>("min_TOF"), 1e-08);
-    TS_ASSERT_DELTA(98132.97, run.getPropertyValueAsType<double>("max_TOF"), 1e-08);
+    TS_ASSERT_DELTA(700.92, run.getPropertyValueAsType<double>("min_ToF"), 1e-08);
+    TS_ASSERT_DELTA(98132.97, run.getPropertyValueAsType<double>("max_ToF"), 1e-08);
     TS_ASSERT_EQUALS(224, run.getPropertyValueAsType<int>("raw_frames"));
     TS_ASSERT_EQUALS(224, run.getPropertyValueAsType<int>("good_frames"));
 

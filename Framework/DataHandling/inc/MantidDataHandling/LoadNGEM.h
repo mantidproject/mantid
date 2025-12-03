@@ -93,6 +93,7 @@ struct LoadDataResult {
 
 class LoadDataStrategyBase {
 public:
+  virtual ~LoadDataStrategyBase() = default;
   virtual void addEvent(double &minToF, double &maxToF, const double tof, const double binWidth,
                         const size_t pixel) = 0;
   virtual void addFrame(int &rawFrames, int &goodFrames, const int eventCountInFrame, const int minEventsReq,
@@ -102,8 +103,7 @@ public:
 class LoadDataStrategyHisto final : public LoadDataStrategyBase {
 public:
   LoadDataStrategyHisto(const double minToF, const double maxToF, const double binWidth);
-  void addEvent(double &minToF, double &maxToF, const double tof, const double binWidth,
-                const size_t pixel) override final;
+  void addEvent(double &minToF, double &maxToF, const double tof, const double binWidth, const size_t pixel) override;
   void addFrame(int &rawFrames, int &goodFrames, const int eventCountInFrame, const int minEventsReq,
                 const int maxEventsReq, MantidVec &frameEventCounts) override;
   inline std::vector<std::vector<double>> &getCounts() { return m_counts; }
@@ -118,11 +118,10 @@ private:
 class LoadDataStrategyEvent final : public LoadDataStrategyBase {
 public:
   LoadDataStrategyEvent();
-  void addEvent(double &minToF, double &maxToF, const double tof, const double binWidth,
-                const size_t pixel) override final;
+  void addEvent(double &minToF, double &maxToF, const double tof, const double binWidth, const size_t pixel) override;
   void addFrame(int &rawFrames, int &goodFrames, const int eventCountInFrame, const int minEventsReq,
                 const int maxEventsReq, MantidVec &frameEventCounts) override;
-  std::vector<DataObjects::EventList> &getEvents() { return m_events; }
+  inline std::vector<DataObjects::EventList> &getEvents() { return m_events; }
 
 private:
   std::vector<DataObjects::EventList> m_events;

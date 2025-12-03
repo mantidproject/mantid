@@ -121,7 +121,7 @@ void addFrameToOutputWorkspace(int &rawFrames, int &goodFrames, const int eventC
 
     PARALLEL_FOR_NO_WSP_CHECK()
     // Add events that match parameters to workspace
-    for (size_t i = 0; i < NUM_OF_SPECTRA; ++i) {
+    for (auto i = 0; i < NUM_OF_SPECTRA; ++i) {
       auto &countsInFramePixel = countsInFrame[i];
       for (size_t j = 0; j < countsInFramePixel.size(); ++j) {
         auto &countsInFramePixelByBin = countsInFramePixel[j];
@@ -135,7 +135,7 @@ void addFrameToOutputWorkspace(int &rawFrames, int &goodFrames, const int eventC
     // clear event list in frame in preparation for next frame
     PARALLEL_FOR_NO_WSP_CHECK()
     // Add events that match parameters to workspace
-    for (size_t i = 0; i < countsInFrame.size(); i++) {
+    for (auto i = 0; i < countsInFrame.size(); ++i) {
       auto &countsInFramePixel = countsInFrame[i];
       std::fill(countsInFramePixel.begin(), countsInFramePixel.end(), 0);
     }
@@ -158,7 +158,7 @@ API::MatrixWorkspace_sptr createEventWorkspace(const double maxToF, const double
   DataObjects::EventWorkspace_sptr dataWorkspace = DataObjects::create<DataObjects::EventWorkspace>(
       NUM_OF_SPECTRA, HistogramData::Histogram(HistogramData::BinEdges(xAxis)));
   PARALLEL_FOR_NO_WSP_CHECK()
-  for (int i = 0; i < NUM_OF_SPECTRA; ++i) {
+  for (auto i = 0; i < NUM_OF_SPECTRA; ++i) {
     dataWorkspace->getSpectrum(i) = events[i];
     dataWorkspace->getSpectrum(i).setSpectrumNo(i + 1);
     dataWorkspace->getSpectrum(i).setDetectorID(i + 1);
@@ -180,7 +180,7 @@ API::MatrixWorkspace_sptr createHistogramWorkspace(std::vector<double> &&binEdge
   const HistogramData::BinEdges bins{std::move(binEdges)};
   API::MatrixWorkspace_sptr dataWorkspace = DataObjects::create<DataObjects::Workspace2D>(NUM_OF_SPECTRA, bins);
   PARALLEL_FOR_NO_WSP_CHECK()
-  for (int i = 0; i < NUM_OF_SPECTRA; ++i) {
+  for (auto i = 0; i < NUM_OF_SPECTRA; ++i) {
     dataWorkspace->setHistogram(i, bins, HistogramData::Counts{std::move(counts[i])});
     dataWorkspace->getSpectrum(i).setSpectrumNo(i + 1);
     dataWorkspace->getSpectrum(i).setDetectorID(i + 1);
@@ -322,6 +322,7 @@ void LoadNGEM::exec() {
   if (this->getProperty("GenerateEventsPerFrame")) {
     createCountWorkspace(res.frameEventCounts);
   }
+  m_fileCount = 0;
   progress(1.00);
 }
 
@@ -673,7 +674,8 @@ void LoadDataStrategyEvent::addEvent(double &minToF, double &maxToF, const doubl
   (void)binWidth;
   if (tof > maxToF) {
     maxToF = tof;
-  } else if (tof < minToF) {
+  }
+  if (tof < minToF) {
     minToF = tof;
   }
   m_eventsInFrame[pixel].addEventQuickly(Types::Event::TofEvent(tof));
