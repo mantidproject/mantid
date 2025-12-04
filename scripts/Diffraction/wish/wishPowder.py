@@ -1,4 +1,3 @@
-# Set of routines to normalise WISH data- new look Mantid with mantidsimple removed
 import mantid.simpleapi as mantid
 from mantid.kernel import logger
 from mantid.api import AnalysisDataService as ADS
@@ -62,7 +61,8 @@ class WishPowder:
         self.van_ws = None
         self.empty_ws = None
         self.grp_ws = None
-        self.van_frame = None
+        self.frame = FRAME.SF
+        self.van_smooth_npts = 40
 
     def set_sample_property(self, fieldname, **kwargs):
         if fieldname not in self.sample:
@@ -79,13 +79,13 @@ class WishPowder:
 
     def _get_van_wsname(self):
         suffix = "" if self.per_detector_van else "_foc"
-        return f"vana_{self.sample_env.value}_{self.van_frame.value}_{suffix}"
+        return f"vana_{self.sample_env.value}_{self.frame.name}{suffix}"
 
     def _get_mask_filepath(self):
         return self._get_filepath_in_calib_dir("mask.xml")
 
     def _get_cal_filepath(self):
-        return self._get_filepath_in_calib_dir("calibration.h5")
+        return self._get_filepath_in_calib_dir("calibration.cal")
 
     def _get_filepath_in_calib_dir(self, filename, check_exists=True):
         fpath = path.join(self.calib_dir, filename)
@@ -109,7 +109,7 @@ class WishPowder:
         fname = f"WISH{runno:08d}"
         wsname = fname if out_wsname is None else out_wsname
         ws = mantid.Load(Filename=f"{fname}.{ext}", OutputWorkspace=wsname)
-        frame = self._get_frame(ws)
+        self.frame = self._get_frame(ws)
         if isinstance(ws, EventWorkspace):
             mantid.Rebin(InputWorkspace=wsname, OutputWorkspace=wsname, Params="-0.00063")
             mantid.ConvertToMatrixWorkspace(InputWorkspace=wsname, OutputWorkspace=wsname)
@@ -118,12 +118,12 @@ class WishPowder:
         # mask
         self.apply_mask_to_ws(wsname)
         # crop data
-        mantid.CropWorkspace(InputWorkspace=wsname, OutputWorkspace=wsname, **TOF_CROPPING[frame])
-        if frame == FRAME.DF:
+        mantid.CropWorkspace(InputWorkspace=wsname, OutputWorkspace=wsname, **TOF_CROPPING[self.frame])
+        if self.frame == FRAME.DF:
             mantid.MaskBins(InputWorkspace=wsname, OutputWorkspace=wsname, **DF_PROMPTPULSE)
         # crop in wavelength
         mantid.ConvertUnits(InputWorkspace=wsname, OutputWorkspace=wsname, Target="Wavelength", Emode="Elastic")
-        mantid.CropWorkspace(InputWorkspace=wsname, OutputWorkspace=wsname, **WAVELENGTH_CROPPING[frame])
+        mantid.CropWorkspace(InputWorkspace=wsname, OutputWorkspace=wsname, **WAVELENGTH_CROPPING[self.frame])
         # normalise by monitor
         self.normalise_by_monitor(wsname)
         return wsname
@@ -131,13 +131,12 @@ class WishPowder:
     def normalise_by_monitor(self, wsname):
         wsname_mon = self._process_monitor(wsname)
         mantid.NormaliseToMonitor(InputWorkspace=wsname, OutputWorkspace=wsname, MonitorWorkspace=wsname_mon)
-        frame = self._get_frame(wsname_mon)
         mantid.NormaliseToMonitor(
             InputWorkspace=wsname,
             OutputWorkspace=wsname,
             MonitorWorkspace=wsname_mon,
-            IntegrationRangeMin=WAVELENGTH_CROPPING[frame]["XMin"],
-            IntegrationRangeMax=WAVELENGTH_CROPPING[frame]["XMax"],
+            IntegrationRangeMin=WAVELENGTH_CROPPING[self.frame]["XMin"],
+            IntegrationRangeMax=WAVELENGTH_CROPPING[self.frame]["XMax"],
         )
         mantid.ReplaceSpecialValues(
             InputWorkspace=wsname, OutputWorkspace=wsname, NaNValue=0.0, NaNError=0.0, InfinityValue=0.0, InfinityError=0.0
@@ -182,8 +181,8 @@ class WishPowder:
     def save_focussed_data(self, wsname):
         save_fpath = path.join(self.user_dir, wsname)
         mantid.SaveNexus(InputWorkspace=wsname, Filename=save_fpath + ".nxs")
-        mantid.SaveGSS(InputWorkspace=wsname, Filename=save_fpath + ".gss", Append=False, SplitFile=False)
-        mantid.SaveFocusedXYE(InputWorkspace=wsname, Filename=save_fpath + ".dat", Append=False, SplitFile=False)
+        mantid.SaveGSS(InputWorkspace=wsname, Filename=save_fpath + ".gss", Append=False, SplitFiles=False)
+        mantid.SaveFocusedXYE(InputWorkspace=wsname, Filename=save_fpath + ".dat", Append=False, SplitFiles=False)
 
     def apply_mask_to_ws(self, wsname):
         if self._get_mask_filepath() is None:
@@ -218,6 +217,7 @@ class WishPowder:
     def get_van_ws(self):
         if self.van_ws:
             return self.van_ws
+
         van_filepath = self._get_van_filepath()
         if van_filepath is not None:
             self.van_ws = mantid.Load(van_filepath, OutputWorkspace=self._get_van_wsname())
@@ -260,10 +260,7 @@ class WishPowder:
         return self.load(self.empty_runno)
 
     def create_vanadium(self):
-        wsname_tmp = self.load(self.van_runno)
-        self.van_frame = self._get_frame(wsname_tmp)
-        wsname_van = self._get_van_wsname()  # can only get this after van frame set
-        mantid.RenameWorksapce(InputWokspace=wsname_tmp, OutputWorkspace=wsname_van)
+        wsname_van = self.load(self.van_runno, out_wsname=self._get_van_wsname())
         ws_empty = self.get_empty_ws()
         if ws_empty:
             mantid.Minus(LHSWorkspace=wsname_van, RHSWorkspace=ws_empty, OutputWorkspace=wsname_van)
@@ -275,16 +272,16 @@ class WishPowder:
         if self.per_detector_van:
             self._replace_data_with_wavelength_focussed(wsname_van)
             mantid.SaveNexus(InputWorkspace=wsname_van, Filename=self._get_van_filepath(check_exists=False))
-            self.van_ws = wsname_van
         else:
             # focus
             wsname_van_foc = self._focus_ws(wsname_van)
-            # mantid.SmoothData(InputWorkspace=wsname_van_foc, OutputWorkspace=wsname_van_foc, NPoints=self.van_smooth_npts)
+            mantid.SmoothData(InputWorkspace=wsname_van_foc, OutputWorkspace=wsname_van_foc, NPoints=self.van_smooth_npts)
             # mantid.StripVanadiumPeaks ?
             # save (in d-spacing)
             mantid.SaveNexus(InputWorkspace=wsname_van_foc, Filename=self._get_van_filepath(check_exists=False))
             mantid.DeleteWorkspace(wsname_van)
-            self.van_ws = wsname_van_foc
+            mantid.RenameWorkspace(InputWorkspace=wsname_van_foc, OutputWorkspace=wsname_van)
+        self.van_ws = wsname_van
         return self.van_ws
 
     @staticmethod
@@ -323,12 +320,13 @@ class WishPowder:
         mantid.ConvertFromDistribution(wsname_mon)
         return wsname_mon
 
-    @staticmethod
-    def _crop_focussed_in_dspac(ws_foc):
+    def _crop_focussed_in_dspac(self, ws_foc):
         ws_foc = WishPowder.retrieve(ws_foc)
-        xmins = (cycle(DSPAC_FOC_CROPPING["XMins"]),)
-        xmaxs = DSPAC_FOC_CROPPING["XMins"]
-        if WishPowder._get_frame(ws_foc) == FRAME.DF:
+        if ws_foc.getAxis(0).getUnit().unitID() != "dSpacing":
+            ws_foc = mantid.ConvertUnits(InputWorkspace=ws_foc, OutputWorkspace=ws_foc.name(), Target="dSpacing")
+        xmins = cycle(DSPAC_FOC_CROPPING["XMins"])
+        xmaxs = DSPAC_FOC_CROPPING["XMaxs"]
+        if self.frame == FRAME.DF:
             xmaxs = 2 * xmaxs
         xmaxs = cycle(xmaxs)
         for ispec in range(ws_foc.getNumberHistograms()):
