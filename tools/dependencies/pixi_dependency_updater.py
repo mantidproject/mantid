@@ -261,8 +261,6 @@ def main(argv: Sequence[str] = None) -> int:
     args = parser.parse_args(argv)
     changed_files = [Path(f) for f in args.filenames]
 
-    print(changed_files)
-
     conda_env = get_mantid_dev_conda_recipe_pins(get_conda_recipe_pins())
     pixi_env = get_pixi_mantid_dev_pins()
 
