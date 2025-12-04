@@ -67,10 +67,6 @@ muparser:
 numpy:
   - '2.1.*'
 
-# Mimumum Numpy version at runtime, propagated through pin_compatible
-numpy_min:
-  - '2.0'
-
 matplotlib:
   - '3.9.*'
 
