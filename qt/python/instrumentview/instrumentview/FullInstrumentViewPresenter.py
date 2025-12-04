@@ -84,6 +84,8 @@ class FullInstrumentViewPresenter:
             add_callback=self.add_workspace_callback,
         )
         self._view.hide_status_box()
+        self._is_adding_peak = False
+        self._update_add_peak_button()
 
     def on_export_workspace_clicked(self) -> None:
         self._model.save_line_plot_workspace_to_ads()
@@ -221,6 +223,8 @@ class FullInstrumentViewPresenter:
                 self.update_picked_detectors(selected_mask)
 
             self._view.enable_rectangle_picking(self._model.is_2d_projection, callback=rectangle_picked)
+            self._is_adding_peak = False
+            self._update_add_peak_button()
         else:
 
             def point_picked(point_position: np.ndarray | None, picker: PickerType.POINT.value) -> None:
@@ -241,6 +245,7 @@ class FullInstrumentViewPresenter:
         # Update to visibility shows up in real time
         self._pickable_mesh[self._visible_label] = self._model.picked_visibility
         self._update_line_plot_ws_and_draw(self._view.current_selected_unit())
+        self._update_add_peak_button()
 
     def on_add_cylinder_clicked(self) -> None:
         self._view.add_cylinder_widget(self._detector_mesh_bounds)
@@ -259,6 +264,19 @@ class FullInstrumentViewPresenter:
         self._model.apply_detector_masks(self._view.selected_masks())
         self.update_plotter()
         self._update_line_plot_ws_and_draw(self._view.current_selected_unit())
+        self._update_add_peak_button()
+
+    def on_save_mask_to_workspace_clicked(self) -> None:
+        self._model.save_mask_workspace_to_ads()
+
+    def on_overwrite_mask_clicked(self) -> None:
+        self._model.overwrite_mask_to_current_workspace()
+        self.on_clear_masks_clicked()
+
+    def on_clear_masks_clicked(self) -> None:
+        self._view.clear_mask_list()
+        self._model.clear_stored_masks()
+        self.on_mask_item_selected()
 
     def on_save_mask_to_workspace_clicked(self) -> None:
         self._model.save_mask_workspace_to_ads()
@@ -439,3 +457,20 @@ class FullInstrumentViewPresenter:
         if not filename:
             return
         self._model.save_xml_mask(filename)
+
+    def on_add_peak_clicked(self) -> None:
+        self._is_adding_peak = True
+        self._view.add_peak_cursor_to_lineplot()
+
+    def on_peak_selected(self, x: float) -> None:
+        peaks_ws = self._model.add_peak(x, self._view.selected_peaks_workspaces())
+        self._is_adding_peak = False
+        self._view.set_add_peak_button_enabled(len(self._model.picked_detector_ids) == 1)
+        self._view.remove_peak_cursor_from_lineplot()
+        self._view.select_peaks_workspace(peaks_ws)
+
+    def _update_add_peak_button(self) -> None:
+        self._view.set_add_peak_button_enabled(len(self._model.picked_detector_ids) == 1 and not self._is_adding_peak)
+
+    def select_peaks_workspace_if_not_already(self, peaks_ws: str) -> None:
+        self._view.select_peaks_workspace(peaks_ws)

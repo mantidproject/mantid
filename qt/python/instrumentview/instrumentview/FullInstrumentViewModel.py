@@ -26,6 +26,8 @@ from mantid.simpleapi import (
     MaskDetectors,
     RenameWorkspace,
     CloneWorkspace,
+    CreatePeaksWorkspace,
+    AddPeak,
 )
 from mantid.api import MatrixWorkspace
 from itertools import groupby
@@ -56,6 +58,7 @@ class FullInstrumentViewModel:
         self._workspace_x_unit = x_unit.unitID()
         self._workspace_x_unit_display = f"{str(x_unit.caption())} ({str(x_unit.symbol())})"
         self._selected_peaks_workspaces = []
+        self._instrument_view_peaks_ws_name = f"instrument_view_peaks_{self._workspace.name()}"
 
         component_info = self._workspace.componentInfo()
         self._sample_position = np.array(component_info.samplePosition()) if component_info.hasSample() else np.zeros(3)
@@ -385,6 +388,22 @@ class FullInstrumentViewModel:
 
             peaks_grouped_by_ws.append(detector_peaks)
         return peaks_grouped_by_ws
+
+    def _peaks_workspace_for_adding_new_peak(self, selected_peaks_workspaces: list[str]) -> PeaksWorkspace:
+        # If exactly one Peaks workspace in selected, add the peak to that workspace, otherwise
+        # use a special workspace, which we create if it doesn't exist already.
+        ads = AnalysisDataService.Instance()
+        if len(selected_peaks_workspaces) == 1:
+            return ads.retrieveWorkspaces(selected_peaks_workspaces)[0]
+        if self._instrument_view_peaks_ws_name in ads.getObjectNames():
+            return ads.retrieveWorkspaces([self._instrument_view_peaks_ws_name])[0]
+        return CreatePeaksWorkspace(self._workspace, 0, OutputWorkspace=self._instrument_view_peaks_ws_name)
+
+    def add_peak(self, x: float, selected_peaks_workspaces: list[str]) -> str:
+        peaks_ws = self._peaks_workspace_for_adding_new_peak(selected_peaks_workspaces)
+        detector_id = self.picked_detector_ids[0]
+        AddPeak(peaks_ws, self._workspace, x, int(detector_id))
+        return peaks_ws.name()
 
     def relative_detector_angle(self) -> float:
         picked_ids = self.picked_detector_ids
