@@ -25,10 +25,15 @@ It does so by mapping :term:`Detector ID <Detector ID>`'s to a boolean value.
 `1` = Masked = DEAD_VALUE
 
 
-This boolean is stored in the first and only y-value of one of many spectra mapped 1:1 to Detector ID's. 😐
+This boolean is stored in the first and only y-value of one of many spectra *initially* mapped 1:1 to the Detector ID's of an Instrument. 😐
 
-This seems odd at first, but serves a pragmantic purpose when interfacing with the rest of Workbench.
 This is per the implementation of :py:obj:`mantid.dataobjects.SpecialWorkspace2D`.
+
+**NOTE:** This mapping is not *guaranteed* to always be 1:1, as the mapping allows multiple Detector ID to be associated with the same Spectrum.
+However, it is uncommon to group a mask's detector mapping and the MaskWorkspace interface has no methods supporting such an operation.
+(*An example of such a usecase would improve this article. Otherwise MaskWorkspace should actively enforce a 1:1 policy.*)
+
+This mapping seems odd at first, but serves a pragmantic purpose when interfacing with the rest of Workbench.
 *Opinion:* This implementation conflates frontend/backend representation of the data by modeling its format after what a user might expect particle data to be in.
 E.g. Each Detector has a Spectrum with data recorded over some unit, but for a SpecialWorkspace2D this value would be constant.
 
@@ -39,9 +44,9 @@ However, as a :py:obj:`mantid.dataobjects.SpecialWorkspace2D`, it also has a Spe
 
 This DetectorInfo also has the capability to track whether or not a given Detector ID is masked.😐
 
-The SpectrumInfo *also* can track if a Detector ID is masked by merit of its 1:1 mapping of Detector ID(Though this handled by a DetectorInfo underneath).😐
+The SpectrumInfo *also* can track if a Detector ID is masked but becomes unreliable for more complex mappings.
 
-Don't do this.
+**Don't use either of the above.^**
 
 These objects serve as metadata about the Workspace.
 On any other Workspace, these determine if specific Detector IDs or Spectrum are masked.
@@ -61,7 +66,12 @@ Implementation Notes
 **This document was not written by the author of MaskWorkspace.  These notes may border on speculation.**
 
 MaskWorkspace/SpecialWorkspace2D contains a map member variable `detID_to_WI`.
-This is used to track which Spectrum is associated with which Detector ID.
+This member serves in part as a cache for the map that would normally be generated as part of `MatrixWorkspace::getIndicesFromDetectorIDs`.
+This is used to track which Detector IDs are associated with which Spectrum.
+I do not reccommend doing so, but this mapping supports assiging multiple Detector IDs to the same Spectrum.
+This is a byproduct of being a :py:obj:`mantid.dataobjects.SpecialWorkspace2D`, and is applicable in other child classes such as :py:obj:`mantid.dataobjects.GroupingWorkspace`,
+If this sounds useful, maybe MaskWorkspace could be expanded to support such behavior with additional context beyond just this arbitrary map.
+But currently, it is usually expected to have a 1:1 mapping of Detector ID to Spectrum
 
 This implementation mirrors what DetectorInfo already does except you have the overhead of this map variable (and all the metadata associated with workspaces and specta).
 
