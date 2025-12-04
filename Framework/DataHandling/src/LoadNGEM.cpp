@@ -98,7 +98,7 @@ void addFrameToOutputWorkspace(int &rawFrames, int &goodFrames, const int eventC
 }
 
 /**
- * @brief Add a frame to the main set of events.
+ * @brief Add a frame to the main set of counts.
  *
  * @param rawFrames The number of T0 Events detected so far.
  * @param goodFrames The number of good frames detected so far.
