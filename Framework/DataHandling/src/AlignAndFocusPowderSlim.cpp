@@ -435,7 +435,7 @@ void AlignAndFocusPowderSlim::exec() {
 
       const auto pulse_indices = this->determinePulseIndices(wksp, combined_time_roi);
 
-      const auto splitterMap = timeSplitter.getSplittersMap();
+      const auto &splitterMap = timeSplitter.getSplittersMap();
 
       ProcessBankSplitFullTimeTask task(bankEntryNames, h5file, is_time_filtered, workspaceIndices, workspaces,
                                         m_calibration, m_scale_at_sample, m_masked, static_cast<size_t>(DISK_CHUNK),
