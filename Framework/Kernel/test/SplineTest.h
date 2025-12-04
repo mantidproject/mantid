@@ -42,7 +42,7 @@ public:
     for (std::size_t i = 0; i < data_order; i++) {
       A[i] = coefficient_maker(this->generator);
     }
-    std::function<double(double)> polynomial = [A, data_order](double x) -> double {
+    std::function<double(double)> polynomial = [A](double x) -> double {
       double y = A[0];
       for (std::size_t i = 1; i < data_order; i++) {
         y += A[i] * pow(x, i);
@@ -92,7 +92,7 @@ public:
     for (std::size_t i = 0; i < data_order; i++) {
       A[i] = coefficient_maker(this->generator);
     }
-    std::function<double(double)> polynomial = [A, data_order](double x) -> double {
+    std::function<double(double)> polynomial = [A](double x) -> double {
       double y = A[0];
       for (std::size_t i = 1; i < data_order; i++) {
         y += A[i] * pow(x, i);
