@@ -8,13 +8,13 @@
 """
 
 import argparse
-import shutil
 import re
+import subprocess
 import tomllib
 import yaml
 from pathlib import Path
 from subprocess import run
-from typing import Sequence, Dict, Tuple, NewType
+from typing import Sequence, Dict, Tuple, NewType, List
 
 BUILD_CONFIG_PATH = Path("conda/recipes/conda_build_config.yaml")
 MANTID_DEVELOPER_RECIPE_PATH = Path("conda/recipes/mantid-developer/recipe.yaml")
@@ -144,20 +144,13 @@ def _get_pixi_dependencies_from_header(header: str, manifest_data: Dict):
 
 
 def update_pin_in_pixi_manifest(package: str, os_name: str, version: str):
-    if not shutil.which("pixi"):
-        print(
-            f"Attempted to update pixi.toml (set {package} on os: {os_name} to {version})"
-            f" but pixi wasn't found! Install pixi for automatic updates (https://pixi.sh)."
-        )
-        return
-
     os_label_map = {"linux": "linux-64", "win": "win-64", "osx": "osx-arm64"}
     if version and version[0] not in ("=", "!", "<", ">"):
         version = "=" + version
     command = ["pixi", "add", f"{package}{version}"]
     if os_name != "all":
         command += ["--platform", os_label_map[os_name]]
-    run(command, check=True)
+    _run_pixi_command(command)
 
 
 def remove_from_pixi_manifest(package: str, os_name: str):
@@ -165,7 +158,14 @@ def remove_from_pixi_manifest(package: str, os_name: str):
     command = ["pixi", "remove", package]
     if os_name != "all":
         command += ["--platform", os_label_map[os_name]]
-    run(command, check=True)
+    _run_pixi_command(command)
+
+
+def _run_pixi_command(command: List[str]):
+    process = run(command, check=True, text=True, stderr=subprocess.PIPE)
+    if process.returncode != 0:
+        print(f'Tried to run "{"".join(command)}" but encountered a problem:')
+        print(process.stderr)
 
 
 def _compare_version_numbers(conda_version: str, pixi_version: str):
