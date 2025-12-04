@@ -29,6 +29,9 @@
 #   --build-threads: pass the number of threads that can be used to build with, default is 1 thread per logical core
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source $SCRIPT_DIR/pixi-utils
+if [[ $OSTYPE == "msys"* ]]; then
+    SCRIPT_DIR=$(normalise_windows_path "$SCRIPT_DIR")
+fi
 start_time=$(date +%s)
 
 # Check arguments passed are 2 or higher, and aren't optional flags.
@@ -48,6 +51,11 @@ if [[ -z "$BUILD_THREADS" ]]; then
     else
         BUILD_THREADS="$(grep -c ^processor /proc/cpuinfo)" # Not physical but logical cores, includes hyper threaded.
     fi
+fi
+
+if [[ $OSTYPE == "msys"* ]]; then
+    SCRIPT_DIR=$(normalise_windows_path "$SCRIPT_DIR")
+    WORKSPACE=$(normalise_windows_path "$WORKSPACE")
 fi
 
 XVFB_SERVER_NUM=101
