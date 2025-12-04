@@ -55,9 +55,6 @@ class EnggEstimateFocussedBackground_Test(unittest.TestCase):
         self.assertAlmostEqual(np.median(ws_diff.readY(0)[self.mask]), 0, delta=0.01)
 
     def test_window_validation(self):
-        # test too small a window
-        with self.assertRaisesRegex(RuntimeError, "Convolution window must have at least three points"):
-            EnggEstimateFocussedBackground(InputWorkspace="ws", OutputWorkspace="ws_bg", NIterations=20, XWindow=0.1)
         # test too large a window
         with self.assertRaisesRegex(RuntimeError, "Data has must have at least the number of points as the convolution window"):
             EnggEstimateFocussedBackground(InputWorkspace="ws", OutputWorkspace="ws_bg", NIterations=20, XWindow=200)

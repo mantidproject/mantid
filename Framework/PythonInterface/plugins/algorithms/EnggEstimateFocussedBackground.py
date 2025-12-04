@@ -14,9 +14,10 @@ from functools import lru_cache
 from multiprocessing import cpu_count
 
 
-class EnggEstimateFocussedBackground(PythonAlgorithm):
-    MIN_WINDOW_SIZE = 3
+MIN_WINDOW_SIZE = 3
 
+
+class EnggEstimateFocussedBackground(PythonAlgorithm):
     def category(self):
         return "Diffraction\\Engineering"
 
@@ -71,7 +72,7 @@ class EnggEstimateFocussedBackground(PythonAlgorithm):
         inws = self.getProperty("InputWorkspace").value
         if not isinstance(inws, MatrixWorkspace):
             issues["InputWorkspace"] = "The InputWorkspace must be a MatrixWorkspace."
-        elif inws.blocksize() < self.MIN_WINDOW_SIZE:
+        elif inws.blocksize() < MIN_WINDOW_SIZE:
             issues["InputWorkspace"] = "At least three points needed in each spectra"
         return issues
 
@@ -108,6 +109,9 @@ def _get_nbins_in_xwindow(x, xwindow):
     nwindow = max(int(np.ceil(xwindow / binwidth)), 3)
     if not nwindow % 2:
         nwindow += 1
+    if nwindow >= len(x):
+        # not effective due to edge effects of the convolution
+        raise RuntimeError("Data has must have at least the number of points as the convolution window")
     return nwindow
 
 
