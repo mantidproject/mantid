@@ -131,14 +131,6 @@ void addFrameToOutputWorkspace(int &rawFrames, int &goodFrames, const int eventC
         }
       }
     }
-  } else {
-    // clear event list in frame in preparation for next frame
-    PARALLEL_FOR_NO_WSP_CHECK()
-    // Add events that match parameters to workspace
-    for (auto i = 0; i < NUM_OF_SPECTRA; ++i) {
-      auto &countsInFramePixel = countsInFrame[i];
-      std::fill(countsInFramePixel.begin(), countsInFramePixel.end(), 0);
-    }
   }
 }
 
@@ -204,15 +196,12 @@ void addToSampleLog(const std::string &name, const ValueType &value, API::Matrix
 
 /**
  * @brief Insert validation results into map, if there is an error.
- * @param result error property and associated error message to insert into map
+ * @param result vector containing a list of error properties and associated error message to insert into map
  * @param results map containing validation results
  */
-void insertValidationResult(const std::pair<std::string, std::string> &result,
+void insertValidationResult(const std::vector<std::pair<std::string, std::string>> &result,
                             std::map<std::string, std::string> &results) {
-  if (result.first.empty()) {
-    return;
-  }
-  results.insert(result);
+  std::copy(result.cbegin(), result.cend(), std::inserter(results, results.end()));
 }
 
 /**
@@ -267,14 +256,14 @@ void LoadNGEM::init() {
 
   // Bin Width
   declareProperty("BinWidth", 10.0, mustBePositiveDbl, "The width of the time bins in the output.");
-  declareProperty(
-      "MinToF", std::numeric_limits<double>::max(),
-      "The minimum ToF bin edge, inclusive. Required if not PreserveEvents. If PreserveEvents and default, value will "
-      "be dervied from event data.");
-  declareProperty(
-      "MaxToF", -std::numeric_limits<double>::max(),
-      "The maximum ToF bin edge, exclusive. Required if not PreserveEvents. If PreserveEvents and default, value will "
-      "be dervied from event data.");
+  declareProperty("MinToF", std::numeric_limits<double>::max(),
+                  "The minimum ToF bin edge, inclusive. Required if PreserveEvents=False. If PreserveEvents=True and "
+                  "MinToF is default, value will "
+                  "be dervied from event data.");
+  declareProperty("MaxToF", -std::numeric_limits<double>::max(),
+                  "The maximum ToF bin edge, exclusive. Required if PreserveEvents=False. If PreserveEvents=True and "
+                  "MaxToF is default, value will "
+                  "be dervied from event data.");
 
   declareProperty("MinEventsPerFrame", 0, mustBePositive,
                   "The minimum number of events required in a frame before a "
@@ -509,13 +498,13 @@ std::map<std::string, std::string> LoadNGEM::validateInputs() {
 /**
  * @brief validate min/max events per frame inputs.
  *
- * @return std::pair<std::string, std::string> subject property: error message.
+ * @return A vector of subject property: error message.
  */
-std::pair<std::string, std::string> LoadNGEM::validateEventsPerFrame() {
+std::vector<std::pair<std::string, std::string>> LoadNGEM::validateEventsPerFrame() {
   const int MinEventsPerFrame = getProperty("MinEventsPerFrame");
   const int MaxEventsPerFrame = getProperty("MaxEventsPerFrame");
   if (MaxEventsPerFrame < MinEventsPerFrame) {
-    return {"MaxEventsPerFrame", "MaxEventsPerFrame is less than MinEvents per frame"};
+    return {{"MaxEventsPerFrame", "MaxEventsPerFrame is less than MinEvents per frame"}};
   }
   return {};
 }
@@ -523,31 +512,35 @@ std::pair<std::string, std::string> LoadNGEM::validateEventsPerFrame() {
 /**
  * @brief validate min/max ToF inputs.
  *
- * @return std::pair<std::string, std::string> subject property: error message.
+ * @return A vector of subject property: error message.
  */
-std::pair<std::string, std::string> LoadNGEM::validateMinMaxToF() {
+std::vector<std::pair<std::string, std::string>> LoadNGEM::validateMinMaxToF() {
   const double minToF = getProperty("MinToF");
   const double maxToF = getProperty("MaxToF");
   const bool preserveEvents = getProperty("PreserveEvents");
+  std::vector<std::pair<std::string, std::string>> result;
   if (preserveEvents) {
     if (isDefault("MinToF") && isDefault("MaxToF")) {
-      return {};
-    } else if (isDefault("MinToF")) {
-      return {"MinToF", "Please supply both, or neither, Min and MaxToF if PreserveEvents is True"};
-    } else if (isDefault("MaxToF")) {
-      return {"MaxToF", "Please supply both, or neither, Min and MaxToF if PreserveEvents is True"};
+      return result;
+    }
+    if (isDefault("MinToF")) {
+      result.emplace_back("MinToF", "Please supply both, or neither, Min and MaxToF if PreserveEvents is True");
+    }
+    if (isDefault("MaxToF")) {
+      result.emplace_back("MaxToF", "Please supply both, or neither, Min and MaxToF if PreserveEvents is True");
     }
   } else {
     if (isDefault("MinToF")) {
-      return {"MinToF", "MinToF must be supplied if PreserveEvents is False"};
-    } else if (isDefault("MaxToF")) {
-      return {"MaxToF", "MaxToF must be supplied if PreserveEvents is False"};
+      result.emplace_back("MinToF", "MinToF must be supplied if PreserveEvents is False");
+    }
+    if (isDefault("MaxToF")) {
+      result.emplace_back("MaxToF", "MaxToF must be supplied if PreserveEvents is False");
     }
   }
   if (maxToF <= minToF) {
-    return {"MaxToF", "MaxToF is less than or equal to MinToF"};
+    result.emplace_back("MaxToF", "MaxToF is less than or equal to MinToF");
   }
-  return {};
+  return result;
 }
 
 /**

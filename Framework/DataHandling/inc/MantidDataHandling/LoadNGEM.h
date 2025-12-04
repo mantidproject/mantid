@@ -169,9 +169,9 @@ private:
   /// Validate the imputs into the algorithm, overrides.
   std::map<std::string, std::string> validateInputs() override;
   /// Validate events per frame inputs
-  std::pair<std::string, std::string> validateEventsPerFrame();
+  std::vector<std::pair<std::string, std::string>> validateEventsPerFrame();
   /// Validate minimum and maximum TOF
-  std::pair<std::string, std::string> validateMinMaxToF();
+  std::vector<std::pair<std::string, std::string>> validateMinMaxToF();
   /// Read data from files into as histograms into a workspace2D
   LoadDataResult readDataAsHistograms(double &minToF, double &maxToF, const double binWidth, const int minEventsReq,
                                       const int maxEventsReq, const std::vector<std::vector<std::string>> &filePaths);
