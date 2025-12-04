@@ -83,6 +83,7 @@ requirements:
     - quasielasticbayes ${{ quasielasticbayes }}
     - quickbayes ${{ quickbayes }}
     - zlib
+    - numpy ${{ numpy }}
     - if: linux
       then:
         - libglu ${{ libglu }}
