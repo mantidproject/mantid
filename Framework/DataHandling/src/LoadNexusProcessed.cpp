@@ -548,10 +548,6 @@ void LoadNexusProcessed::reinitSpecialWorkspace2D(std::shared_ptr<SpecialWorkspa
   if (specialLocalWorkspace->isDetectorIDMappingEmpty()) {
     g_log.warning() << "SpecialWorkspace2D has an empty detector ID Mapping!";
   }
-  bool includeMonitors = false;
-  if (std::dynamic_pointer_cast<MaskWorkspace>(specialLocalWorkspace)) {
-    includeMonitors = true;
-  }
   specialLocalWorkspace->buildDetectorIDMapping();
 }
 
