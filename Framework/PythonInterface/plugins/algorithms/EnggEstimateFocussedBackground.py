@@ -11,6 +11,7 @@ import numpy as np
 from scipy.signal import savgol_filter
 from joblib import Parallel, delayed
 from functools import lru_cache
+from multiprocessing import cpu_count
 
 
 class EnggEstimateFocussedBackground(PythonAlgorithm):
@@ -84,7 +85,7 @@ class EnggEstimateFocussedBackground(PythonAlgorithm):
         # do smoothing in parallel loop over spectra
         nspec = inws.getNumberHistograms()
         prog = Progress(self, start=0.0, end=1.0, nreports=nspec)
-        out = Parallel(n_jobs=-2, prefer="threads", return_as="generator")(
+        out = Parallel(n_jobs=min(4, cpu_count()), prefer="threads", return_as="generator")(
             delayed(find_bg_of_spectrum)(inws.name(), ispec, xwindow, niter, do_sg_filter, prog) for ispec in range(nspec)
         )
 
