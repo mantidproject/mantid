@@ -32,13 +32,13 @@ cmake:
 
 # 1.10.0 Produces a warning in Framework/Geometry/src/Crystal/HKLFilter.cpp
 doxygen:
-  - 1.9.*
+  - '1.9.*'
 
 eigen:
-  - 3.4.*
+  - '3.4.*'
 
 hdf4:
-  - 4.2.*
+  - '4.2.*'
 
 hdf5: # this is to move to libcurl>=8.4
   - '>1.14.0,<1.15'
@@ -65,11 +65,11 @@ muparser:
 
 # Aim to build using the latest minor version, and rely on numpy's generous backward compatibility.
 numpy:
-  - 2.1.*
+  - '2.1.*'
 
 # Mimumum Numpy version at runtime, propagated through pin_compatible
 numpy_min:
-  - 2.0.0
+  - '2.0'
 
 matplotlib:
   - '3.9.*'
