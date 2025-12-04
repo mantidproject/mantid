@@ -83,6 +83,9 @@ requirements:
     - quasielasticbayes ${{ quasielasticbayes }}
     - quickbayes ${{ quickbayes }}
     - zlib
+    - ${{ pin_compatible('numpy', lower_bound=numpy_min, upper_bound='x.x') }}
+    - ${{ pin_compatible('libboost-devel', upper_bound='x.x') }}
+    - ${{ pin_compatible('libboost-python-devel', upper_bound='x.x') }}
     - if: linux
       then:
         - libglu ${{ libglu }}
