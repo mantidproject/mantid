@@ -17,19 +17,19 @@ namespace Algorithms {
   @date 2025-11-11
 */
 
-class MANTID_ALGORITHMS_DLL AddLogSmoothed final : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL AddLogInterpolated final : public API::Algorithm {
 public:
   /// Algorithm's name for identification
-  const std::string name() const override { return "AddLogSmoothed"; }
+  const std::string name() const override { return "AddLogInterpolated"; }
   /// Summary of algorithms purpose
   const std::string summary() const override {
-    return "Add a sample log that is the smoothed version of an existing log";
+    return "Interpolates a given log to match a time series log's axis, using a cubic spline ";
   }
 
   /// Algorithm's version for identification
   int version() const override { return 1; }
   const std::vector<std::string> seeAlso() const override {
-    return {"AddSampleLog", "AddLogDerivative", "AddLogInterpolated"};
+    return {"AddSampleLog", "AddLogDerivative", "AddLogSmoothed"};
   }
   /// Algorithm's category for identification
   const std::string category() const override { return "DataHandling\\Logs"; }
@@ -41,6 +41,8 @@ private:
   std::map<std::string, std::string> validateInputs() override;
   /// Run the algorithm
   void exec() override;
+
+  std::pair<size_t, size_t> findInterpolationRange(std::vector<double> const &, std::vector<double> const &) const;
 };
 
 } // namespace Algorithms
