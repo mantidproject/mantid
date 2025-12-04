@@ -139,90 +139,91 @@ void addFrameToOutputWorkspace(int &rawFrames, int &goodFrames, const int eventC
       std::fill(countsInFramePixel.begin(), countsInFramePixel.end(), 0);
     }
   }
+}
 
-  /**
-   * @brief Creates an event workspace and fills it with the data.
-   *
-   * @param maxToF The largest ToF seen so far.
-   * @param binWidth The width of each bin.
-   * @param events The main events data.
-   */
-  API::MatrixWorkspace_sptr createEventWorkspace(const double maxToF, const double binWidth,
-                                                 const std::vector<DataObjects::EventList> &events) {
-    // Round up number of bins needed
-    std::vector<double> xAxis(int(std::ceil(maxToF / binWidth)));
-    std::generate(xAxis.begin(), xAxis.end(), [i = 0, &binWidth]() mutable { return binWidth * i++; });
+/**
+ * @brief Creates an event workspace and fills it with the data.
+ *
+ * @param maxToF The largest ToF seen so far.
+ * @param binWidth The width of each bin.
+ * @param events The main events data.
+ */
+API::MatrixWorkspace_sptr createEventWorkspace(const double maxToF, const double binWidth,
+                                               const std::vector<DataObjects::EventList> &events) {
+  // Round up number of bins needed
+  std::vector<double> xAxis(int(std::ceil(maxToF / binWidth)));
+  std::generate(xAxis.begin(), xAxis.end(), [i = 0, &binWidth]() mutable { return binWidth * i++; });
 
-    DataObjects::EventWorkspace_sptr dataWorkspace = DataObjects::create<DataObjects::EventWorkspace>(
-        NUM_OF_SPECTRA, HistogramData::Histogram(HistogramData::BinEdges(xAxis)));
-    PARALLEL_FOR_NO_WSP_CHECK()
-    for (auto i = 0; i < NUM_OF_SPECTRA; ++i) {
-      dataWorkspace->getSpectrum(i) = events[i];
-      dataWorkspace->getSpectrum(i).setSpectrumNo(i + 1);
-      dataWorkspace->getSpectrum(i).setDetectorID(i + 1);
-    }
-    dataWorkspace->setAllX(HistogramData::BinEdges{xAxis});
-    dataWorkspace->getAxis(0)->unit() = Kernel::UnitFactory::Instance().create("TOF");
-    dataWorkspace->setYUnit("Counts");
-    return std::dynamic_pointer_cast<API::MatrixWorkspace>(dataWorkspace);
+  DataObjects::EventWorkspace_sptr dataWorkspace = DataObjects::create<DataObjects::EventWorkspace>(
+      NUM_OF_SPECTRA, HistogramData::Histogram(HistogramData::BinEdges(xAxis)));
+  PARALLEL_FOR_NO_WSP_CHECK()
+  for (auto i = 0; i < NUM_OF_SPECTRA; ++i) {
+    dataWorkspace->getSpectrum(i) = events[i];
+    dataWorkspace->getSpectrum(i).setSpectrumNo(i + 1);
+    dataWorkspace->getSpectrum(i).setDetectorID(i + 1);
   }
+  dataWorkspace->setAllX(HistogramData::BinEdges{xAxis});
+  dataWorkspace->getAxis(0)->unit() = Kernel::UnitFactory::Instance().create("TOF");
+  dataWorkspace->setYUnit("Counts");
+  return std::dynamic_pointer_cast<API::MatrixWorkspace>(dataWorkspace);
+}
 
-  /**
-   * @brief Creates an event workspace and fills it with the data.
-   *
-   * @param binEdges A vector of bin edges to be shared between histograms.
-   * @param counts A vector containing a sub vector for each spectra, each containing counts.
-   */
-  API::MatrixWorkspace_sptr createHistogramWorkspace(std::vector<double> && binEdges,
-                                                     std::vector<std::vector<double>> && counts) {
-    const HistogramData::BinEdges bins{std::move(binEdges)};
-    API::MatrixWorkspace_sptr dataWorkspace = DataObjects::create<DataObjects::Workspace2D>(NUM_OF_SPECTRA, bins);
-    PARALLEL_FOR_NO_WSP_CHECK()
-    for (auto i = 0; i < NUM_OF_SPECTRA; ++i) {
-      dataWorkspace->setHistogram(i, bins, HistogramData::Counts{std::move(counts[i])});
-      dataWorkspace->getSpectrum(i).setSpectrumNo(i + 1);
-      dataWorkspace->getSpectrum(i).setDetectorID(i + 1);
-    }
-    dataWorkspace->getAxis(0)->unit() = Kernel::UnitFactory::Instance().create("TOF");
-    dataWorkspace->setYUnit("Counts");
-    return dataWorkspace;
+/**
+ * @brief Creates an event workspace and fills it with the data.
+ *
+ * @param binEdges A vector of bin edges to be shared between histograms.
+ * @param counts A vector containing a sub vector for each spectra, each containing counts.
+ */
+API::MatrixWorkspace_sptr createHistogramWorkspace(std::vector<double> &&binEdges,
+                                                   std::vector<std::vector<double>> &&counts) {
+  const HistogramData::BinEdges bins{std::move(binEdges)};
+  API::MatrixWorkspace_sptr dataWorkspace = DataObjects::create<DataObjects::Workspace2D>(NUM_OF_SPECTRA, bins);
+  PARALLEL_FOR_NO_WSP_CHECK()
+  for (auto i = 0; i < NUM_OF_SPECTRA; ++i) {
+    dataWorkspace->setHistogram(i, bins, HistogramData::Counts{std::move(counts[i])});
+    dataWorkspace->getSpectrum(i).setSpectrumNo(i + 1);
+    dataWorkspace->getSpectrum(i).setDetectorID(i + 1);
   }
+  dataWorkspace->getAxis(0)->unit() = Kernel::UnitFactory::Instance().create("TOF");
+  dataWorkspace->setYUnit("Counts");
+  return dataWorkspace;
+}
 
-  /**
-   * @brief Add a value to the sample logs.
-   *
-   * @param name The name of the log.
-   * @param value The content of the log.
-   * @param ws The workspace to add the log to.
-   */
-  template <typename ValueType>
-  void addToSampleLog(const std::string &name, const ValueType &value, API::MatrixWorkspace_sptr &ws) {
-    ws->mutableRun().addProperty(name, value, false);
-  }
+/**
+ * @brief Add a value to the sample logs.
+ *
+ * @param name The name of the log.
+ * @param value The content of the log.
+ * @param ws The workspace to add the log to.
+ */
+template <typename ValueType>
+void addToSampleLog(const std::string &name, const ValueType &value, API::MatrixWorkspace_sptr &ws) {
+  ws->mutableRun().addProperty(name, value, false);
+}
 
-  /**
-   * @brief Insert validation results into map, if there is an error.
-   * @param result vector containing a list of error properties and associated error message to insert into map
-   * @param results map containing validation results
-   */
-  void insertValidationResult(const std::vector<std::pair<std::string, std::string>> &result,
-                              std::map<std::string, std::string> &results) {
-    std::copy(result.cbegin(), result.cend(), std::inserter(results, results.end()));
-  }
+/**
+ * @brief Insert validation results into map, if there is an error.
+ * @param result vector containing a list of error properties and associated error message to insert into map
+ * @param results map containing validation results
+ */
+void insertValidationResult(const std::vector<std::pair<std::string, std::string>> &result,
+                            std::map<std::string, std::string> &results) {
+  std::copy(result.cbegin(), result.cend(), std::inserter(results, results.end()));
+}
 
-  /**
-   * @brief Calculate bin edges from min/max ToF and bin width.
-   * @param minToF minimum of first histo bin
-   * @param maxToF maximum of last histo bin
-   * @param binWidth width of each histo bin
-   * @return std::vector<double> containing bin edge values.
-   */
-  std::vector<double> calculateBinEdges(const double minToF, const double maxToF, const double binWidth) {
-    const int numBins = static_cast<int>(std::ceil((maxToF - minToF) / binWidth));
-    auto custom_range =
-        std::views::iota(0) | std::views::transform([&binWidth, &minToF](int n) { return minToF + (n * binWidth); });
-    return {custom_range.begin(), custom_range.begin() + numBins + 1};
-  }
+/**
+ * @brief Calculate bin edges from min/max ToF and bin width.
+ * @param minToF minimum of first histo bin
+ * @param maxToF maximum of last histo bin
+ * @param binWidth width of each histo bin
+ * @return std::vector<double> containing bin edge values.
+ */
+std::vector<double> calculateBinEdges(const double minToF, const double maxToF, const double binWidth) {
+  const int numBins = static_cast<int>(std::ceil((maxToF - minToF) / binWidth));
+  auto custom_range =
+      std::views::iota(0) | std::views::transform([&binWidth, &minToF](int n) { return minToF + (n * binWidth); });
+  return {custom_range.begin(), custom_range.begin() + numBins + 1};
+}
 } // namespace
 
 /**
