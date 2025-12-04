@@ -185,7 +185,7 @@ bool MaskWorkspace::isMasked(const detid_t detectorID) const {
   // return true if the value isn't zero
   // TODO: remove this case
   //       and refactor code that depends on non-existence = masked
-  if (this->getValue(detectorID, LIVE_VALUE) != LIVE_VALUE) {
+  if (this->contains(detectorID) && this->getValue(detectorID) != LIVE_VALUE) {
     return true;
   }
 

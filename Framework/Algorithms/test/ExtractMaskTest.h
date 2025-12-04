@@ -235,7 +235,8 @@ private:
       TS_ASSERT_EQUALS(outputWS->y(i)[0], expectedValue);
       TS_ASSERT_EQUALS(outputWS->e(i)[0], 0.0);
       TS_ASSERT_EQUALS(outputWS->x(i)[0], 1.0);
-      // Confirm that masking is reflected in spectrum info
+      // Confirm that masking is reflected in spectrum info:
+      // Detectors should not be masked since masking info is carried by Y
       if (oSpecInfo.hasDetectors(i)) {
         TS_ASSERT_EQUALS(oSpecInfo.isMasked(i), false);
       }

@@ -545,7 +545,6 @@ void LoadNexusProcessed::execLoader() {
 }
 
 void LoadNexusProcessed::reinitSpecialWorkspace2D(std::shared_ptr<SpecialWorkspace2D> specialLocalWorkspace) {
-  g_log.warning() << "SpecialWorkspace2D init!";
   if (specialLocalWorkspace->isDetectorIDMappingEmpty()) {
     g_log.warning() << "SpecialWorkspace2D has an empty detector ID Mapping!";
   }
@@ -553,7 +552,6 @@ void LoadNexusProcessed::reinitSpecialWorkspace2D(std::shared_ptr<SpecialWorkspa
   if (std::dynamic_pointer_cast<MaskWorkspace>(specialLocalWorkspace)) {
     includeMonitors = true;
   }
-  specialLocalWorkspace->MatrixWorkspace::rebuildSpectraMapping(includeMonitors);
   specialLocalWorkspace->buildDetectorIDMapping();
 }
 
