@@ -467,8 +467,8 @@ public:
     TS_ASSERT(std::filesystem::exists(pathOn4));
 #else
     TS_ASSERT(!std::filesystem::exists(pathOn2));
-    TS_ASSERT(!fileOn3.exists());
-    TS_ASSERT(!fileOn4.exists());
+    TS_ASSERT(!std::filesystem::exists(pathOn3));
+    TS_ASSERT(!std::filesystem::exists(pathOn4));
 #endif
 
     fileFinder.setCaseSensitive(startingCaseOption);
