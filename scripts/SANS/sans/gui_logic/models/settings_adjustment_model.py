@@ -277,3 +277,11 @@ class SettingsAdjustmentModel(ModelCommon):
         # Note that this is actually part of the move operation, but is conceptually part of transmission
         if hasattr(self._all_states.move, "monitor_5_offset"):
             self._all_states.move.monitor_5_offset = millimeter_2_meter(value)
+
+    @property
+    def wide_angle_correction(self):
+        return self._all_states.adjustment.wide_angle_correction
+
+    @wide_angle_correction.setter
+    def wide_angle_correction(self, value):
+        self._all_states.adjustment.wide_angle_correction = value

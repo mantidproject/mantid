@@ -227,6 +227,9 @@ Transmission targets
 | **Mask files**           | A comma-separated list of paths to Mask files. The detectors specified in the Mask files       |
 |                          | are excluded from the transmission data.                                                       |
 +--------------------------+------------------------------------------------------------------------------------------------+
+| **Wide Angle Correction**| Check to perform wide angle correction to the transmission spectra to account for the larger   |
+|                          | neutron path at larger detection angles.                                                       |
++--------------------------+------------------------------------------------------------------------------------------------+
 
 Additional information:
 
