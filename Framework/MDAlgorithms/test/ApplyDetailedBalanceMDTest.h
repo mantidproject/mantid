@@ -11,6 +11,7 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataHandling/MoveInstrumentComponent.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
@@ -119,6 +120,96 @@ public:
 
     // Check existence and clean
     cleanWorkspace("OutputDetaiedBalanceQ1D", true);
+  }
+
+  /**
+   * @brief Test scaling to new temperature
+   */
+  void test_scale_temperature() {
+    // Create the MDEvent workspace
+    // 1 event at each me from -10 to 10
+    std::string MDEventWSName = "MDE_apply_DB";
+    std::string MDEventWSNameOut = "MDE_apply_DB_output";
+
+    auto create_alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("CreateMDWorkspace");
+    create_alg->initialize();
+    create_alg->setPropertyValue("EventType", "MDEvent");
+    create_alg->setPropertyValue("Dimensions", "2");
+    create_alg->setProperty("Names", "|Q|, DeltaE");
+    create_alg->setProperty("Extents", "0,1,-10,11");
+    create_alg->setProperty("Units", "A^-1,meV");
+    create_alg->setProperty("SplitInto", "1");
+    create_alg->setProperty("MaxRecursionDepth", "1");
+    create_alg->setPropertyValue("OutputWorkspace", MDEventWSName);
+    create_alg->execute();
+
+    auto fake_alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("FakeMDEventData");
+    fake_alg->initialize();
+    fake_alg->setPropertyValue("InputWorkspace", MDEventWSName);
+    fake_alg->setPropertyValue("UniformParams", "-21");
+    fake_alg->execute();
+
+    // add experiment info
+    Mantid::API::IMDEventWorkspace_sptr inputWS;
+    TS_ASSERT_THROWS_NOTHING(inputWS = std::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(
+                                 Mantid::API::AnalysisDataService::Instance().retrieve(MDEventWSName)));
+    TS_ASSERT(inputWS);
+    auto infos = std::dynamic_pointer_cast<MultipleExperimentInfos>(inputWS);
+    ExperimentInfo_sptr info(new ExperimentInfo());
+    infos->addExperimentInfo(info);
+
+    ApplyDetailedBalanceMD alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
+    alg.setPropertyValue("InputWorkspace", MDEventWSName);
+    alg.setProperty("Temperature", "10");
+    alg.setProperty("RescaleToTemperature", "10");
+    alg.setProperty("OutputWorkspace", MDEventWSNameOut);
+
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+
+    // Retrieve the workspace from the algorithm. The type here will probably need to change. It should
+    // be the type using in declareProperty for the "OutputWorkspace" type.
+    // We can't use auto as it's an implicit conversion.
+    Mantid::API::IMDEventWorkspace_sptr outputWS;
+    TS_ASSERT_THROWS_NOTHING(outputWS = std::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(
+                                 Mantid::API::AnalysisDataService::Instance().retrieve(MDEventWSNameOut)));
+    TS_ASSERT(outputWS);
+    auto it = outputWS->createIterator(nullptr);
+    TS_ASSERT_EQUALS(it->getNumEvents(), 21);
+    for (int index = 0; index < 21; index++) {
+      TS_ASSERT_DELTA(it->getInnerSignal(index), 1., 1e-5);
+      TS_ASSERT_DELTA(it->getInnerError(index), 1., 1e-5);
+    }
+
+    // Clean
+    cleanWorkspace(MDEventWSNameOut, false);
+
+    alg.setProperty("Temperature", "34.8");
+    alg.setProperty("RescaleToTemperature", "46.4");
+    alg.setProperty("OutputWorkspace", MDEventWSNameOut);
+
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+
+    TS_ASSERT_THROWS_NOTHING(outputWS = std::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(
+                                 Mantid::API::AnalysisDataService::Instance().retrieve(MDEventWSNameOut)));
+    TS_ASSERT(outputWS);
+    it = outputWS->createIterator(nullptr);
+    TS_ASSERT_EQUALS(it->getNumEvents(), 21);
+
+    double meVtoK = PhysicalConstants::meVtoKelvin;
+    for (int index = 0; index < 21; index++) {
+      double fact = (1 - std::exp(-meVtoK * (index - 10.) / 34.8)) / (1 - std::exp(-meVtoK * (index - 10.) / 46.4));
+      if (index == 10) {
+        fact = 4. / 3.;
+      }
+      TS_ASSERT_DELTA(it->getInnerSignal(index), fact, 1e-5);
+      TS_ASSERT_DELTA(it->getInnerError(index), fact, 1e-5);
+    }
+
+    // Clean
+    cleanWorkspace(MDEventWSNameOut, false);
+    cleanWorkspace(MDEventWSName, false);
   }
 
   /**

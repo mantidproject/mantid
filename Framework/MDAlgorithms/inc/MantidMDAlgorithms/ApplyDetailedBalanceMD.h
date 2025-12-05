@@ -48,6 +48,9 @@ private:
 
   /// map of temperature retrieved from sample logs
   std::map<uint16_t, double> mExpinfoTemperatureMean;
+
+  /// temperature to convert to
+  double mFinalTemperature;
 };
 
 } // namespace MDAlgorithms
