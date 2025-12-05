@@ -144,6 +144,28 @@ set<size_t> MaskWorkspace::getMaskedWkspIndices() const {
   return indices;
 }
 
+bool MaskWorkspace::containsDetID(const detid_t detectorID) const { return this->contains(detectorID); }
+
+bool MaskWorkspace::containsDetIDs(const std::set<detid_t> &detectorIDs) const {
+  if (detectorIDs.empty()) {
+    return false;
+  }
+
+  const auto it = std::find_if_not(detectorIDs.cbegin(), detectorIDs.cend(),
+                                   [this](const auto detectorID) { return this->containsDetID(detectorID); });
+  return it == detectorIDs.cend();
+}
+
+bool MaskWorkspace::containsDetIDs(const std::vector<detid_t> &detectorIDs) const {
+  if (detectorIDs.empty()) {
+    return false;
+  }
+
+  const auto it = std::find_if_not(detectorIDs.cbegin(), detectorIDs.cend(),
+                                   [this](const auto detectorID) { return this->containsDetID(detectorID); });
+  return it == detectorIDs.cend();
+}
+
 //--------------------------------------------------------------------------------------------
 /**
  * @param detectorID :: ID of the detector to check whether it is masked or not
@@ -161,7 +183,9 @@ bool MaskWorkspace::isMasked(const detid_t detectorID) const {
   }
 
   // return true if the value isn't zero
-  if (this->getValue(detectorID, LIVE_VALUE) != LIVE_VALUE) {
+  // TODO: remove this case
+  //       and refactor code that depends on non-existence = masked
+  if (this->contains(detectorID) && this->getValue(detectorID) != LIVE_VALUE) {
     return true;
   }
 
@@ -209,6 +233,9 @@ void MaskWorkspace::setMasked(const detid_t detectorID, const bool mask) {
   if (mask)
     value = DEAD_VALUE;
 
+  // TODO: Consider updating deterctorinfo with .setMask
+  // or deleting this comment
+  // whichever makes more sense.
   this->setValue(detectorID, value, ERROR_VALUE);
 }
 
@@ -338,12 +365,11 @@ bool MaskWorkspace::isConsistentWithDetectorMasks(const DetectorInfo &detectors)
   const size_t N_detectors(detectors.size());
   if (N_spectra == N_detectors - N_monitors) {
     // One detector per spectrum
-    for (const auto &det : detids) {
-      if (isMasked(det) != detectors.isMasked(detectors.indexOf(det)))
-        return false;
-    }
-    return true;
+    auto maskConsistent = [&](const auto &det) { return isMasked(det) == detectors.isMasked(detectors.indexOf(det)); };
+
+    return std::all_of(detids.begin(), detids.end(), maskConsistent);
   }
+
   // Multiple detectors per spectrum
   throw NotImplementedError(
       "MaskWorkspace::isConsistentWithDetectorMasks: not implemented for the case of multiple detectors per spectrum.");

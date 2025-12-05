@@ -19,9 +19,14 @@
 #include "MantidKernel/cow_ptr.h"
 #include "MantidNexus/NexusClasses_fwd.h"
 #include <map>
+#include <memory>
 #include <vector>
 
 namespace Mantid {
+
+namespace DataObjects {
+class SpecialWorkspace2D;
+}
 
 namespace DataHandling {
 /**
@@ -76,6 +81,8 @@ private:
   void init() override;
   /// Overwrites Algorithm method
   void execLoader() override;
+
+  void reinitSpecialWorkspace2D(std::shared_ptr<Mantid::DataObjects::SpecialWorkspace2D> specialLocalWorkspace);
 
   /// Create the workspace name if it's part of a group workspace
   std::string buildWorkspaceName(const std::string &name, const std::string &baseName, size_t wsIndex);
