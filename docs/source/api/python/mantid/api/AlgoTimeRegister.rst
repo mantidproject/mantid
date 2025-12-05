@@ -54,7 +54,7 @@ This example shows the initialization process and adding a time entry
 
 Example Output at `Mantid.user.properties.performance.filename` file:
 
-.. code::
+.. code:: none
 
     START_POINT: 1728507408768867137 MAX_THREAD: 12
     ThreadID=124522639565888, AlgorithmName=demo_function, StartTime=144539, EndTime=1346405816
@@ -63,7 +63,7 @@ Example Output at `Mantid.user.properties.performance.filename` file:
 The performance configuration can be overwritten in the script, by defining a custom `performancelog.filename`
 and calling evertyhing within the `amend_config` with block.
 
-.. code:: python
+.. code:: none
 
     #define `performancelog.filenamer` filepath for ta particular script
     performance_config = {"performancelog.write": "On", "performancelog.filename": <custom filepath>}
@@ -90,7 +90,7 @@ and calling evertyhing within the `amend_config` with block.
 
 Example Output at `performance_config.performance.filename` file:
 
-.. code::
+.. code:: none
 
     START_POINT: 1728507555711066754 MAX_THREAD: 12
     ThreadID=139238466401344, AlgorithmName=demo_function, StartTime=144981, EndTime=4115162290
@@ -124,7 +124,7 @@ In any other case, initialization should be specified very eary on, in the scrip
 
 Example Output at `Mantid.user.properties.performance.filename` file:
 
-.. code::
+.. code:: none
 
     START_POINT: 1728507650978221781 MAX_THREAD: 12
     ThreadID=138583991714880, AlgorithmName=CreateSampleWorkspace, StartTime=154046, EndTime=1818067

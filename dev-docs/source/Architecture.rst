@@ -174,7 +174,7 @@ It makes heavy use of the ``mantidqt`` widgets collection and puts them
 together to build the application shipped to users as ``MantidWorkbench``.
 It is intended to be the main graphical interface provided by the project and
 allows access to the customized interfaces as described in
-`Container <container_>`_.
+`container <Container_>`__.
 
 The application provides some widgets that are only applicable to itself,
 such as the about screen, settings screen and project recovery mechanism that

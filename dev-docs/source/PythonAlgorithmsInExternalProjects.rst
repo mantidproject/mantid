@@ -23,7 +23,7 @@ Create function wrapper at runtime
 An alternative method is to create the function wrappers within the extension code itself after the mantid framework has been initialized.
 The example below is modified from the `shiver project <https://github.com/neutrons/Shiver/blob/23b651e3e57965c32f545a4f8718fc80ead63663/src/shiver/models/makeslices.py#L264-L269>`_.
 
-.. code::
+.. code-block:: python
 
    from mantid.api import AlgorithmFactory
    from mantid.simpleapi import _create_algorithm_function

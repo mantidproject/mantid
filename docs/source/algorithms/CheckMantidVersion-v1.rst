@@ -26,7 +26,7 @@ Usage
 
 **Example - CheckMantidVersion**
 
-.. code::
+.. code-block:: python
 
     (current_version, most_recent_version, is_new_version_available)=CheckMantidVersion()
     print("Current Version: {}".format(current_version))
@@ -35,7 +35,7 @@ Usage
 
 Output:
 
-.. code::
+.. code-block:: none
 
     Current Version: ...
     Most Recent Version: ...
