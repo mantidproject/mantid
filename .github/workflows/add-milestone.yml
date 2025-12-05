@@ -5,6 +5,7 @@ on:
     branches: [main, release-next]
 
 permissions:
+  issues: write
   pull-requests: write
 
 jobs:
