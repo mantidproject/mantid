@@ -295,22 +295,19 @@ std::pair<size_t, size_t> SplineInterpolation::findInterpolationRange(const Matr
   size_t firstIndex = 0;
   size_t lastIndex = xAxisOut.size();
 
-  if (xAxisOut.front() >= xAxisIn.back()) {
-    lastIndex = firstIndex;
-  } else if (xAxisOut.back() <= xAxisIn.front()) {
-    firstIndex = lastIndex;
+  if (xAxisOut.empty() || xAxisIn.empty()) {
+    // if either vector is empty, don't do anything else
   } else {
-    for (size_t i = 0; i < xAxisOut.size(); ++i) {
-      if (xAxisOut[i] >= xAxisIn.front()) {
-        firstIndex = i;
-        break;
-      }
-    }
-    for (size_t i = 0; i < xAxisOut.size(); ++i) {
-      if (xAxisOut[i] > xAxisIn.back()) {
-        lastIndex = i;
-        break;
-      }
+    if (xAxisOut.front() >= xAxisIn.back()) {
+      lastIndex = firstIndex;
+    } else if (xAxisOut.back() <= xAxisIn.front()) {
+      firstIndex = lastIndex;
+    } else {
+      auto start =
+          std::find_if(xAxisOut.cbegin(), xAxisOut.cend(), [&xAxisIn](double x) { return x >= xAxisIn.front(); });
+      firstIndex = std::distance(xAxisOut.begin(), start);
+      auto stop = std::find_if(start, xAxisOut.cend(), [&xAxisIn](double x) { return x > xAxisIn.back(); });
+      lastIndex = std::distance(xAxisOut.begin(), stop);
     }
   }
 
