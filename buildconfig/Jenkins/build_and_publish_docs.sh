@@ -7,6 +7,7 @@ DOCS_GIT_REPOSITORY=https://github.com/mantidproject/docs-nightly
 GIT_USER_NAME=mantid-builder
 GIT_USER_EMAIL="mantid-buildserver@mantidproject.org"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+DATA_MIRROR="$("${SCRIPT_DIR}/data_mirrors")"
 
 # source util functions
 . source/buildconfig/Jenkins/Conda/mamba-utils
@@ -23,7 +24,7 @@ mkdir build && cd build
 LD_PRELOAD="" \
 # Generate build files
 cmake -G Ninja \
-  -DDATA_STORE_MIRROR=$("${SCRIPT_DIR}/data_mirrors")
+  -DDATA_STORE_MIRROR=${DATA_MIRROR} \
   -DMANTID_FRAMEWORK_LIB=SYSTEM \
   -DMANTID_QT_LIB=SYSTEM \
   -DENABLE_WORKBENCH=OFF \
