@@ -10,10 +10,8 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/FacilityInfo.h"
-#include <cxxtest/TestSuite.h>
-
 #include <boost/lexical_cast.hpp>
-
+#include <cxxtest/TestSuite.h>
 #include <filesystem>
 #include <fstream>
 #include <stdio.h>
@@ -30,8 +28,8 @@ public:
   static void destroySuite(FileFinderTest *suite) { delete suite; }
 
   FileFinderTest() : m_facFile("./FileFinderTest_Facilities.xml") {
-    if (m_facFile.exists())
-      m_facFile.remove();
+    if (std::filesystem::exists(m_facFile))
+      std::filesystem::remove(m_facFile);
 
     const std::string xmlStr = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
                                "<facilities>"
@@ -96,18 +94,21 @@ public:
                                "  </facility>"
                                "</facilities>";
 
-    std::ofstream fil(m_facFile.path().c_str());
+    std::ofstream fil(m_facFile);
     fil << xmlStr;
     fil.close();
 
-    ConfigService::Instance().updateFacilities(m_facFile.path());
+    ConfigService::Instance().updateFacilities(m_facFile.string());
     ConfigService::Instance().setString("datacachesearch.directory", "");
     // Update entire config to set search data directories
     const std::string propfile = ConfigService::Instance().getDirectoryOfExecutable() + "Mantid.properties";
     ConfigService::Instance().updateConfig(propfile);
   }
 
-  ~FileFinderTest() override { m_facFile.remove(); }
+  ~FileFinderTest() override {
+    if (std::filesystem::exists(m_facFile))
+      std::filesystem::remove(m_facFile);
+  }
 
   void testGetFullPathWithFilename() {
     std::string path = FileFinder::Instance().getFullPath("CSP78173.raw");

@@ -10,12 +10,11 @@
 
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
-
 #include <boost/algorithm/string.hpp>
 #include <boost/regex.hpp>
 #include <cxxtest/TestSuite.h>
 #include <filesystem>
-
+#include <fstream>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
@@ -125,7 +124,9 @@ public:
     const auto expectedPath = tmpDir / filename;
 
     // Create the file - RAII will close it automatically
-    std::ofstream(expectedPath.string());
+    {
+      std::ofstream tmp(expectedPath);
+    }
 
     const auto result = InstrumentFileFinder::getParameterPath("test", tmpDir.string());
     // Ensure file was found and it's in the tmp dir

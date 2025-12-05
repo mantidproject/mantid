@@ -32,7 +32,7 @@ public:
     for (auto &dataPath : dataPaths) {
       std::filesystem::path path(dataPath);
 
-      if (!path.empty() && path.filename() == "UnitTest") {
+      if (!path.empty() && path.parent_path().filename() == "UnitTest") {
         m_testDataDir = dataPath;
         break;
       }

@@ -118,7 +118,7 @@ std::string createDirectory(const std::string &path) {
   std::filesystem::path stempath(path);
   // If the path doesn't end with a separator, assume it includes a filename component
   // and we should create the parent directory instead
-  if (!path.empty() && path.back() != '/' && path.back() != '\\') {
+  if (std::filesystem::is_regular_file(stempath)) {
     stempath = stempath.parent_path();
   }
 
