@@ -1,0 +1,5 @@
+- Workspace names that do not conform to python variable naming conventions
+  (must start with letter or underscore, and contain only letters, digits and underscores)
+  will invoke a warning message.
+  In a future version of mantid, invalid workspace names will cause an exception to be raised.
+  Please update your scripts to use valid Python identifiers for workspace names.
