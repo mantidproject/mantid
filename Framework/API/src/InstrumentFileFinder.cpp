@@ -5,14 +5,12 @@
 #include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/Logger.h"
 
-#include <Poco/DirectoryIterator.h>
-#include <Poco/File.h>
-#include <Poco/Path.h>
 #include <Poco/SAX/Attributes.h>
 #include <Poco/SAX/ContentHandler.h>
 #include <Poco/SAX/SAXParser.h>
 #include <boost/algorithm/string/find.hpp>
 #include <boost/regex.hpp>
+#include <filesystem>
 
 #include <string>
 #include <utility>
@@ -108,8 +106,8 @@ std::string InstrumentFileFinder::getInstrumentFilename(const std::string &instr
 std::string InstrumentFileFinder::getParameterPath(const std::string &instName, const std::string &dirHint) {
   // Remove the path from the filename, some legacy callers will pass in
   // a full path rather than a filename
-  Poco::Path filePath(instName);
-  const std::string filename = filePath.getFileName();
+  std::filesystem::path filePath(instName);
+  const std::string filename = filePath.filename().string();
 
   // Try the hinted dir first
   if (!dirHint.empty()) {
@@ -153,18 +151,17 @@ std::string InstrumentFileFinder::lookupIPF(const std::string &dir, std::string 
     prefix = filename;
   }
 
-  Poco::Path directoryPath(dir);
-  directoryPath.makeDirectory();
+  std::filesystem::path directoryPath(dir);
 
   // Assemble parameter file name
-  std::string fullPathParamIDF = directoryPath.setFileName(prefix + "_Parameters" + suffix + ext).toString();
+  std::string fullPathParamIDF = (directoryPath / (prefix + "_Parameters" + suffix + ext)).string();
 
-  if (Poco::File(fullPathParamIDF).exists()) {
+  if (std::filesystem::exists(fullPathParamIDF)) {
     return fullPathParamIDF;
   }
 
-  fullPathParamIDF = directoryPath.setFileName(prefix + "_Parameters" + ext).toString();
-  if (Poco::File(fullPathParamIDF).exists()) {
+  fullPathParamIDF = (directoryPath / (prefix + "_Parameters" + ext)).string();
+  if (std::filesystem::exists(fullPathParamIDF)) {
     return fullPathParamIDF;
   }
 
@@ -211,7 +208,6 @@ std::vector<std::string> InstrumentFileFinder::getResourceFilenames(const std::s
   const std::string allFileFormats = ss.str();
 
   const boost::regex regex(prefix + ".*\\." + allFileFormats, boost::regex_constants::icase);
-  Poco::DirectoryIterator end_iter;
   DateAndTime d(date);
 
   DateAndTime refDate("1900-01-31 23:59:00"); // used to help determine the most
@@ -226,15 +222,15 @@ std::vector<std::string> InstrumentFileFinder::getResourceFilenames(const std::s
   for (const auto &directoryName : directoryNames) {
     // Iterate over the directories from user ->etc ->install, and find the
     // first beat file
-    for (Poco::DirectoryIterator dir_itr(directoryName); dir_itr != end_iter; ++dir_itr) {
+    for (const auto &dir_entry : std::filesystem::directory_iterator(directoryName)) {
 
-      const auto &filePath = dir_itr.path();
-      if (!filePath.isFile())
+      const auto &filePath = dir_entry.path();
+      if (!std::filesystem::is_regular_file(filePath))
         continue;
 
-      const std::string &l_filenamePart = filePath.getFileName();
+      const std::string l_filenamePart = filePath.filename().string();
       if (regex_match(l_filenamePart, regex)) {
-        const auto &pathName = filePath.toString();
+        const std::string pathName = filePath.string();
         g_log.debug() << "Found file: '" << pathName << "'\n";
 
         std::string validFrom, validTo;
