@@ -31,7 +31,7 @@ After the grouping is performed, the analysis described in :ref:`algm-EstimateMu
 
 **Note** : The workspaces supplied to the algorithm must have a number of good frames set in their sample logs. The sample log is called "goodfrm" and can be set using;
 
-.. code::
+.. code-block:: python
 
     AddSampleLog(workspace=workspace, LogName="goodfram", LogText ="10")
 
