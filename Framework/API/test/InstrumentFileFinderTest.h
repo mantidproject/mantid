@@ -124,10 +124,8 @@ public:
     const std::string filename = "test_Parameters.xml";
     const auto expectedPath = tmpDir / filename;
 
-    {
-      std::ofstream ofs(expectedPath);
-      ofs.close();
-    }
+    // Create the file - RAII will close it automatically
+    std::ofstream(expectedPath);
 
     const auto result = InstrumentFileFinder::getParameterPath("test", tmpDir.string());
     // Ensure file was found and it's in the tmp dir

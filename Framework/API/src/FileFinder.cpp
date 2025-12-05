@@ -636,7 +636,11 @@ std::vector<std::string> FileFinderImpl::findRuns(const std::string &hintstr,
           // Cache successfully found path and extension
           std::filesystem::path tempPath(path);
           previousExt = tempPath.extension().string();
-          previousPath = (tempPath.parent_path() / "").string();
+          // Append separator for string concatenation later
+          previousPath = tempPath.parent_path().string();
+          if (!previousPath.empty() && previousPath.back() != std::filesystem::path::preferred_separator) {
+            previousPath += std::filesystem::path::preferred_separator;
+          }
           res.emplace_back(path);
         } else {
           throw Kernel::Exception::NotFoundError("Unable to find file:", std::move(run));
