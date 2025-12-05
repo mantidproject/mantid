@@ -74,7 +74,7 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         self._mock_detector_table(list(range(self._ws.getNumberHistograms())))
         model = FullInstrumentViewModel(self._ws)
         model.setup()
-        integrated_spectra = list(range((self._ws.getNumberHistograms())))
+        integrated_spectra = list(range(self._ws.getNumberHistograms()))
         mock_workspace = mock.MagicMock()
         mock_workspace.getIntegratedCountsForWorkspaceIndices.return_value = integrated_spectra
         model._workspace = mock_workspace

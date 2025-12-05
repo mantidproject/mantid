@@ -92,7 +92,7 @@ class StateWavelengthAndPixelAdjustment(metaclass=JsonSerializable):
 # ----------------------------------------------------------------------------------------------------------------------
 # Builder
 # ----------------------------------------------------------------------------------------------------------------------
-class StateWavelengthAndPixelAdjustmentBuilder(object):
+class StateWavelengthAndPixelAdjustmentBuilder:
     @automatic_setters(StateWavelengthAndPixelAdjustment, exclusions=["idf_path"])
     def __init__(self, data_info):
         super(StateWavelengthAndPixelAdjustmentBuilder, self).__init__()

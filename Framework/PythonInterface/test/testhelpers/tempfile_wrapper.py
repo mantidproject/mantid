@@ -8,7 +8,7 @@ from tempfile import NamedTemporaryFile
 import os
 
 
-class TemporaryFileHelper(object):
+class TemporaryFileHelper:
     """Helper class for temporary files in unit tests
 
     This class is a small helper for using temporary files for unit test. On instantiation, a temporary file will be

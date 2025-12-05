@@ -14,7 +14,7 @@ from workbench.widgets.settings.test_utilities.settings_test_utilities import (
 )
 
 
-class MockSettingsView(object):
+class MockSettingsView:
     def __init__(self):
         self.auto_bkg = Mock()
         self.background_args = Mock()

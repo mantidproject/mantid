@@ -29,7 +29,7 @@ from mantid.plots.utility import MantidAxType, zoom
 from qtpy.QtWidgets import QDockWidget
 
 
-class MockConfigService(object):
+class MockConfigService:
     def __init__(self):
         self.setString = StrictMock()
 

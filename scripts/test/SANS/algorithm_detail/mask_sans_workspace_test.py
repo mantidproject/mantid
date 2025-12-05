@@ -135,7 +135,7 @@ class MaskSansWorkspaceTest(unittest.TestCase):
         # e.g. [(50*512 + 9(monitors)] + x in range(0, 512)
         single_horizontal_strip_masks = [50, 53]
         for single_horizontal_strip_mask in single_horizontal_strip_masks:
-            expected_spectra.extend(((single_horizontal_strip_mask * 512 + 9) + x for x in range(0, 512)))
+            expected_spectra.extend((single_horizontal_strip_mask * 512 + 9) + x for x in range(0, 512))
 
         # Detector-specific range horizontal strip mask
         # The horizontal range will be evaluated for SANS2D on the LAB as:
@@ -143,21 +143,21 @@ class MaskSansWorkspaceTest(unittest.TestCase):
         range_horizontal_strip_start = [62, 67]
         range_horizontal_strip_stop = [64, 70]
         for start, stop in zip(range_horizontal_strip_start, range_horizontal_strip_stop):
-            expected_spectra.extend(((start * 512 + 9) + y * 512 + x for y in range(0, stop - start + 1) for x in range(0, 512)))
+            expected_spectra.extend((start * 512 + 9) + y * 512 + x for y in range(0, stop - start + 1) for x in range(0, 512))
 
         # Detector-specific single vertical strip mask
         # The vertical strip will be evaluated for SANS2D on the LAB as:
         # e.g. [(45 + 9(monitors)] + y*512  for y in range(0, 120)]
         single_vertical_strip_masks = [45, 89]
         for single_vertical_strip_mask in single_vertical_strip_masks:
-            expected_spectra.extend(((single_vertical_strip_mask + 9) + y * 512 for y in range(0, 120)))
+            expected_spectra.extend((single_vertical_strip_mask + 9) + y * 512 for y in range(0, 120))
 
         # Detector-specific range vertical strip mask
         # The vertical range will be evaluated for SANS2D on the LAB as:
         range_vertical_strip_start = [99]
         range_vertical_strip_stop = [102]
         for start, stop in zip(range_vertical_strip_start, range_vertical_strip_stop):
-            expected_spectra.extend(((start_elem + 9) + y * 512 for start_elem in range(start, stop + 1) for y in range(0, 120)))
+            expected_spectra.extend((start_elem + 9) + y * 512 for start_elem in range(start, stop + 1) for y in range(0, 120))
 
         mask_builder.set_single_spectra_on_detector(single_spectra)
         mask_builder.set_spectrum_range_on_detector(spectrum_range_start, spectrum_range_stop)
@@ -199,7 +199,7 @@ class MaskSansWorkspaceTest(unittest.TestCase):
             block_horizontal_start, block_horizontal_stop, block_vertical_start, block_vertical_stop
         ):
             expected_spectra.extend(
-                ((h_start * 512 + 9) + y * 512 + x for y in range(0, h_stop - h_start + 1) for x in range(v_start, v_stop + 1))
+                (h_start * 512 + 9) + y * 512 + x for y in range(0, h_stop - h_start + 1) for x in range(v_start, v_stop + 1)
             )
 
         mask_builder.set_LAB_block_horizontal_start(block_horizontal_start)
@@ -395,10 +395,10 @@ class MaskSansWorkspaceTest(unittest.TestCase):
         # The strange double pattern arises from the offset of the SANS2D tube geometry (see InstrumentView)
         for y in range(60, 120):
             if y % 2 == 0:
-                expected_spectra.extend(((y * 512) + 9 + x for x in range(0, 255)))
+                expected_spectra.extend((y * 512) + 9 + x for x in range(0, 255))
             else:
-                expected_spectra.extend(((y * 512) + 9 + x for x in range(0, 257)))
-        expected_spectra.extend((x for x in range(92169, 122889)))  # HAB
+                expected_spectra.extend((y * 512) + 9 + x for x in range(0, 257))
+        expected_spectra.extend(x for x in range(92169, 122889))  # HAB
 
         mask_builder.set_use_mask_phi_mirror(phi_mirror)
         mask_builder.set_phi_min(phi_min)
@@ -436,8 +436,8 @@ class MaskSansWorkspaceTest(unittest.TestCase):
 
         # Expected_spectra, again the tubes are shifted and that will produce the slightly strange masking
         expected_spectra = []
-        expected_spectra.extend((512 * 59 + 9 + x for x in range(0, 257)))
-        expected_spectra.extend((512 * 60 + 9 + x for x in range(0, 255)))
+        expected_spectra.extend(512 * 59 + 9 + x for x in range(0, 257))
+        expected_spectra.extend(512 * 60 + 9 + x for x in range(0, 255))
 
         mask_builder.set_beam_stop_arm_width(beam_stop_arm_width)
         mask_builder.set_beam_stop_arm_angle(beam_stop_arm_angle)
@@ -468,8 +468,8 @@ class MaskSansWorkspaceTest(unittest.TestCase):
 
         # Expected_spectra, again the tubes are shifted and that will produce the slightly strange masking
         expected_spectra = []
-        expected_spectra.extend((7811 + x for x in range(0, 63)))
-        expected_spectra.extend((7939 + x for x in range(0, 63)))
+        expected_spectra.extend(7811 + x for x in range(0, 63))
+        expected_spectra.extend(7939 + x for x in range(0, 63))
 
         mask_builder.set_beam_stop_arm_width(beam_stop_arm_width)
         mask_builder.set_beam_stop_arm_angle(beam_stop_arm_angle)

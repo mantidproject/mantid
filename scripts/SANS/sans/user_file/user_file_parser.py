@@ -145,7 +145,7 @@ rebin_string_no_comma = "(\\s*[-+]?\\d+(\\.\\d+)?)(\\s*\\s*[-+]?\\d+(\\.\\d+)?)*
 # ----------------------------------------------------------------
 # --- Parsers ----------------------------------------------------
 # ----------------------------------------------------------------
-class UserFileComponentParser(object):
+class UserFileComponentParser:
     separator_dash = "/"
     separator_space = "\\s"
     separator_equal = "="
@@ -287,7 +287,7 @@ class BackParser(UserFileComponentParser):
         return "\\s*" + BackParser.get_type() + "\\s*/\\s*"
 
 
-class InstrParser(object):
+class InstrParser:
     """
     InstrParser looks to find the instrument.
     Compared to other parsers, this is a naive implementation
@@ -2446,7 +2446,7 @@ class ZOOMParser(UserFileComponentParser):
         return "\\s*" + ZOOMParser.get_type() + "(\\s*)"
 
 
-class IgnoredParser(object):
+class IgnoredParser:
     """
     The IgnoredParser deals with known commands which are not relevant any longer, but might appear in legacy files.
     This is of particular importance for Collete commands.
@@ -2528,7 +2528,7 @@ class IgnoredParser(object):
         return ignore
 
 
-class UserFileParser(object):
+class UserFileParser:
     def __init__(self):
         super(UserFileParser, self).__init__()
         self._parsers = {

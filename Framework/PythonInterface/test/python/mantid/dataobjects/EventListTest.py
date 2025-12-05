@@ -29,19 +29,19 @@ class EventListTest(unittest.TestCase):
 
     def test_event_list_addEventQuickly(self):
         el = EventList()
-        el.addEventQuickly(float(0.123), DateAndTime(42))
+        el.addEventQuickly(0.123, DateAndTime(42))
         self.assertEqual(el.getNumberEvents(), 1)
         self.assertEqual(el.getEventType(), EventType.TOF)
-        self.assertEqual(el.getTofs()[0], float(0.123))
+        self.assertEqual(el.getTofs()[0], 0.123)
         self.assertEqual(el.getPulseTimes()[0], DateAndTime(42))
         self.assertEqual(el.getPulseTimesAsNumpy()[0], gps_epoch_plus_42_nanoseconds)
 
     def test_event_list_addWeightedEventQuickly(self):
         el = EventList()
         el.switchTo(EventType.WEIGHTED)
-        el.addWeightedEventQuickly(float(0.123), 1.0, 0.1, DateAndTime(42))
+        el.addWeightedEventQuickly(0.123, 1.0, 0.1, DateAndTime(42))
         self.assertEqual(el.getEventType(), EventType.WEIGHTED)
-        self.assertEqual(el.getTofs()[0], float(0.123))
+        self.assertEqual(el.getTofs()[0], 0.123)
         self.assertEqual(el.getPulseTimes()[0], DateAndTime(42))
         self.assertEqual(el.getPulseTimesAsNumpy()[0], gps_epoch_plus_42_nanoseconds)
         self.assertEqual(el.getWeights()[0], 1.0)
@@ -80,7 +80,7 @@ class EventListTest(unittest.TestCase):
         evl.maskCondition(mask)
 
         self.assertEqual(evl.getNumberEvents(), 10)
-        self.assertEqual(evl.getTofMax(), float(9.0))
+        self.assertEqual(evl.getTofMax(), 9.0)
 
 
 if __name__ == "__main__":

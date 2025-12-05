@@ -5,7 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
-from typing import Dict, List
 
 from DocumentationTest import PATH_TO_DOCS, DocumentationTestBase
 from mantid.kernel import ConfigService
@@ -25,7 +24,7 @@ INTERFACES_WITH_NO_DOCS = [
 ]
 
 
-def _get_interface_names() -> Dict[str, List[str]]:
+def _get_interface_names() -> dict[str, list[str]]:
     interfaces = gather_interface_names()
     hidden_interfaces = ConfigService["interfaces.categories.hidden"].split(";")
     interface_names = {key: names for key, names in interfaces.items() if key not in hidden_interfaces}

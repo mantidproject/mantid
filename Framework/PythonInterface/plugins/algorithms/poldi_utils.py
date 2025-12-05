@@ -8,7 +8,8 @@ from __future__ import annotations
 from mantid.api import AlgorithmManager, AnalysisDataService as ADS
 import numpy as np
 from mantid.kernel import UnitConversion, DeltaEModeType, UnitParams, UnitParametersMap
-from typing import Tuple, Sequence, Optional, TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING
+from collections.abc import Sequence
 from joblib import Parallel, delayed
 
 if TYPE_CHECKING:
@@ -79,7 +80,7 @@ def get_t0_parameters(chopper):
     return chopper.getNumberParameter("t0")[0], chopper.getNumberParameter("t0_const")[0]
 
 
-def get_instrument_settings_from_log(ws: Workspace2D) -> Tuple[float, np.ndarray[float], float, float]:
+def get_instrument_settings_from_log(ws: Workspace2D) -> tuple[float, np.ndarray[float], float, float]:
     """
     Function to get instrument settings from logs stored on workspace
     :param ws: POLDI workspace
@@ -101,7 +102,7 @@ def get_instrument_settings_from_log(ws: Workspace2D) -> Tuple[float, np.ndarray
     return cycle_time, slit_offsets, t0_const, l1_chop
 
 
-def get_dspac_limits(tth_min: float, tth_max: float, lambda_min: float, lambda_max: float) -> Tuple[float, float]:
+def get_dspac_limits(tth_min: float, tth_max: float, lambda_min: float, lambda_max: float) -> tuple[float, float]:
     """
     Function to calculate min and max d-spacing to consider in auto-correlation given two-theta coverage and wavelength range.
     :param tth_min: minimum two theta to consider

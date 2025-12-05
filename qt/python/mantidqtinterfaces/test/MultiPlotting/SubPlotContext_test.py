@@ -10,7 +10,7 @@ from unittest import mock
 from mantidqtinterfaces.MultiPlotting.subplot.subplot_context import subplotContext
 
 
-class line(object):
+class line:
     def __init__(self):
         self.label = "test"
 
@@ -27,7 +27,7 @@ class line(object):
         return
 
 
-class label(object):
+class label:
     def __init__(self, name, protected):
         self.text = name
         self.protected = protected

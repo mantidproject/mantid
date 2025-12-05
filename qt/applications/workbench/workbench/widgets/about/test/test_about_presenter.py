@@ -14,19 +14,19 @@ from mantidqt.utils.testing.strict_mock import StrictMock
 from workbench.widgets.about.presenter import AboutPresenter
 
 
-class MockInstrument(object):
+class MockInstrument:
     def __init__(self, idx):
         self.name = StrictMock(return_value="instr{}".format(idx))
 
 
-class MockFacility(object):
+class MockFacility:
     def __init__(self, name):
         self.name = StrictMock(return_value=name)
         self.all_instruments = [MockInstrument(0), MockInstrument(1)]
         self.instruments = StrictMock(return_value=self.all_instruments)
 
 
-class MockConfigService(object):
+class MockConfigService:
     all_facilities = ["facility1", "facility2"]
 
     def __init__(self):
@@ -40,13 +40,13 @@ class MockConfigService(object):
         self.setString = StrictMock()
 
 
-class FakeVersionInfo(object):
+class FakeVersionInfo:
     def __init__(self):
         self.major = "the same"
         self.minor = "every time"
 
 
-class FakeQSettings(object):
+class FakeQSettings:
     def __init__(self, string_value):
         self.string_value = string_value
         self.beginGroup = StrictMock()

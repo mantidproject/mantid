@@ -111,7 +111,7 @@ def get_region_of_interest(mask_ws_name):
     return lower_left_corner, upper_right_corner
 
 
-class RegionOfInterest(object):
+class RegionOfInterest:
     """
     a class to manage region of interest used in application including mask workspace and ROI information
     """

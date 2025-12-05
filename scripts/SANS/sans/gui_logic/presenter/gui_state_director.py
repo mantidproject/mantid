@@ -21,7 +21,7 @@ from sans.gui_logic.models.state_gui_model import StateGuiModel
 from sans.state.StateObjects.StateData import get_data_builder
 
 
-class GuiStateDirector(object):
+class GuiStateDirector:
     def __init__(self, state_gui_model: StateGuiModel, facility):
         self._state_gui_model = state_gui_model
         self._facility = facility

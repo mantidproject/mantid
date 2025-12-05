@@ -73,7 +73,7 @@ class SANSBeamCentrePositionUpdater(unittest.TestCase):
 class TestPositionProvider(unittest.TestCase):
     workspace_name = "dummy_ws"
 
-    class MockSample(object):
+    class MockSample:
         """
         Mocking out the sample
         """

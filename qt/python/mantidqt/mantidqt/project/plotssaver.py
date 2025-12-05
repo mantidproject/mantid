@@ -18,7 +18,7 @@ from mantid.plots.utility import MantidAxType
 from matplotlib.colors import to_hex, Normalize
 
 
-class PlotsSaver(object):
+class PlotsSaver:
     def __init__(self):
         self.figure_creation_args = {}
 

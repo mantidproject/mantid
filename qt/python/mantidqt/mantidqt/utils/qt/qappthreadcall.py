@@ -8,7 +8,8 @@ from dataclasses import dataclass
 import functools
 import inspect
 import sys
-from typing import Any, Callable, Optional, Sequence
+from typing import Any, Optional
+from collections.abc import Callable, Sequence
 
 from qtpy.QtCore import Qt, QMetaObject, QObject, QThread, Slot
 from qtpy.QtWidgets import QApplication

@@ -6,7 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 #
-from typing import List, Sequence, Tuple, Optional
+from typing import Optional
+from collections.abc import Sequence
 
 from mantid.api import MatrixWorkspace, MultipleExperimentInfos
 from mantid.kernel import SpecialCoordinateSystem
@@ -644,7 +645,7 @@ class SliceViewerModel(SliceViewerBaseModel):
 
         return xcut_name, ycut_name, help_msg
 
-    def get_hkl_from_full_point(self, full_point: List[float], qdims_i: List[int]):
+    def get_hkl_from_full_point(self, full_point: list[float], qdims_i: list[int]):
         """Gets the values of h, k and l from a full point which can include 3 or more dimensions."""
         basis_transform = self.get_proj_matrix()
         if basis_transform is None:
@@ -659,7 +660,7 @@ class SliceViewerModel(SliceViewerBaseModel):
 # private functions
 def _roi_binmd_parameters(
     workspace, slicepoint: Sequence[Optional[float]], bin_params: Optional[Sequence[float]], limits: tuple, dimension_indices: tuple
-) -> Tuple[dict, int, int]:
+) -> tuple[dict, int, int]:
     """
     Return a sequence of 2-tuples defining the limits for MDEventWorkspace binning
     :param workspace: MDEventWorkspace that is to be binned

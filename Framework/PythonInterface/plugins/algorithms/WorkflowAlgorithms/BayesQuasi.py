@@ -9,7 +9,6 @@
 import os
 import math
 import numpy as np
-from typing import Tuple
 
 from mantid.api import (
     AlgorithmFactory,
@@ -39,7 +38,7 @@ from IndirectCommon import (
 
 def _calculate_eisf(
     height: np.ndarray, height_error: np.ndarray, amplitude: np.ndarray, amplitude_error: np.ndarray
-) -> Tuple[np.ndarray, np.ndarray]:
+) -> tuple[np.ndarray, np.ndarray]:
     eisf = height / (height + amplitude)
     eisf_error = (1 / (height + amplitude) ** 2) * np.sqrt((amplitude * height_error) ** 2 + (height * amplitude_error) ** 2)
     return eisf, eisf_error

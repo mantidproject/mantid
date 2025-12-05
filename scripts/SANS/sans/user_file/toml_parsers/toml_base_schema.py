@@ -15,7 +15,7 @@ class TomlValidationError(Exception):
     pass
 
 
-class TomlSchemaValidator(object, metaclass=ABCMeta):
+class TomlSchemaValidator(metaclass=ABCMeta):
     # As of the current TOML release there is no way to validate a schema so
     # we must provide an implementation
 

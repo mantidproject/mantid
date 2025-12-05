@@ -12,7 +12,7 @@ from mantidqt.utils.testing.strict_mock import StrictPropertyMock
 from workbench.widgets.settings.presenter import SettingsPresenter
 
 
-class FakeMVP(object):
+class FakeMVP:
     def __init__(self):
         self._view = MockQWidget()
         self.update_properties = MagicMock()
@@ -32,7 +32,7 @@ class FakeSectionsListWidget:
         return self.fake_items[index]
 
 
-class MockSettingsView(object):
+class MockSettingsView:
     def __init__(self):
         self.mock_container = MockQWidget()
         self.mock_current = MockQWidget()

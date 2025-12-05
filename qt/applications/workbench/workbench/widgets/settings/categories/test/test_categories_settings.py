@@ -47,7 +47,7 @@ class MockQTreeWidget(MockQWidget):
         self.itemChanged = Mock()
 
 
-class MockCategoriesView(object):
+class MockCategoriesView:
     def __init__(self):
         self.algorithm_tree_widget = MockQTreeWidget()
         self.interface_tree_widget = MockQTreeWidget()

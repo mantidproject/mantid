@@ -39,7 +39,7 @@ class StateCompatibility(metaclass=JsonSerializable):
 # ----------------------------------------------------------------------------------------------------------------------
 # Builder
 # ----------------------------------------------------------------------------------------------------------------------
-class StateCompatibilityBuilder(object):
+class StateCompatibilityBuilder:
     @automatic_setters(StateCompatibility)
     def __init__(self):
         super(StateCompatibilityBuilder, self).__init__()

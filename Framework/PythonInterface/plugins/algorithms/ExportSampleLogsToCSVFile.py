@@ -291,7 +291,7 @@ class ExportSampleLogsToCSVFile(PythonAlgorithm):
                 log_file = open(self._outputfilename, "w")
             log_file.write(wbuf)
             log_file.close()
-        except IOError:
+        except OSError:
             raise NotImplementedError("Unable to write file %s. Check permission." % (self._outputfilename))
 
         return

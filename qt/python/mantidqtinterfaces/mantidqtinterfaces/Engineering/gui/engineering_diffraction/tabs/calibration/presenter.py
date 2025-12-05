@@ -18,7 +18,7 @@ from mantid.simpleapi import logger
 from mantidqt.utils.observer_pattern import Observable, GenericObservable
 
 
-class CalibrationPresenter(object):
+class CalibrationPresenter:
     def __init__(self, model, view):
         self.model = model
         self.view = view

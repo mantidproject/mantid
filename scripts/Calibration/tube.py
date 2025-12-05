@@ -701,7 +701,7 @@ def correctMisalignedTubes(ws, calibrationTable, peaksTable, spec, idealTube, fi
     return corrections_table
 
 
-class _CalibrationParameterHelper(object):
+class _CalibrationParameterHelper:
     def __init__(self, FITPAR, MARGIN, RANGELIST, CALIBTABLE, PLOTTUBE, EXCLUDESHORT, OVERRIDEPEAKS, FITPOLIN, OUTPUTPEAK):
         self.FITPAR = FITPAR
         self.MARGIN = MARGIN

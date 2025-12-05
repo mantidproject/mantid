@@ -108,7 +108,7 @@ class MessageNotifier(Observable):
         Observable.notify_subscribers(self, *args)
 
 
-class MuonGroupPairContext(object):
+class MuonGroupPairContext:
     def __init__(self, check_group_contains_valid_detectors=lambda x: True):
         self._groups = []
         self._pairs = []

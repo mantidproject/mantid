@@ -6,7 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from os.path import abspath, dirname, join
 from os import rename
-from typing import Callable, Union
+from typing import Union
+from collections.abc import Callable
 from itertools import product
 
 TEMPLATE_DIRECTORY = join(dirname(abspath(__file__)), "templates")

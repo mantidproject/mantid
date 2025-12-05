@@ -4,10 +4,9 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from typing import List
 
 
-class PlotEditContext(object):
+class PlotEditContext:
     def __init__(self):
         self._xlim = [0.0, 15.0]
         self._ylim = [-0.3, 0.3]
@@ -15,10 +14,10 @@ class PlotEditContext(object):
         self._errors = False
         self._auto = True
 
-    def update_xlim(self, values: List[float]):
+    def update_xlim(self, values: list[float]):
         self._xlim = values
 
-    def update_ylim(self, values: List[float]):
+    def update_ylim(self, values: list[float]):
         self._ylim = values
 
     def update_error_state(self, state: bool):
@@ -35,11 +34,11 @@ class PlotEditContext(object):
         return self._plot_index
 
     @property
-    def get_xlim(self) -> List[float]:
+    def get_xlim(self) -> list[float]:
         return self._xlim
 
     @property
-    def get_ylim(self) -> List[float]:
+    def get_ylim(self) -> list[float]:
         return self._ylim
 
     @property

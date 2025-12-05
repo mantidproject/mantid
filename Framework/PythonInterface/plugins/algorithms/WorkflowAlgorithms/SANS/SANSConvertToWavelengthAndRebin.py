@@ -10,7 +10,6 @@
 
 import json
 from json import JSONDecodeError
-from typing import List, Tuple
 
 from mantid.api import (
     DataProcessorAlgorithm,
@@ -85,7 +84,7 @@ class SANSConvertToWavelengthAndRebin(DataProcessorAlgorithm):
 
     def PyExec(self):
         workspace = get_input_workspace_as_copy_if_not_same_as_output_workspace(self)
-        wavelength_pairs: List[Tuple[float, float]] = json.loads(self.getProperty(self.WAV_PAIRS).value)
+        wavelength_pairs: list[tuple[float, float]] = json.loads(self.getProperty(self.WAV_PAIRS).value)
         progress = Progress(self, start=0.0, end=1.0, nreports=1 + len(wavelength_pairs))  # 1 - convert units
 
         # Convert the units into wavelength
@@ -119,7 +118,7 @@ class SANSConvertToWavelengthAndRebin(DataProcessorAlgorithm):
         # Check the wavelength
         wavelength_json = self.getProperty(self.WAV_PAIRS).value
         try:
-            wavelengths: List[Tuple[float, float]] = json.loads(wavelength_json)
+            wavelengths: list[tuple[float, float]] = json.loads(wavelength_json)
         except JSONDecodeError as e:
             errors.update({self.WAV_PAIRS: f"Failed to decode JSON. Exception was: {e}"})
             return errors

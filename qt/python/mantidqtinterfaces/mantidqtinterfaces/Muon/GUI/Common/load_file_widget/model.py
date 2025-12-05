@@ -10,7 +10,7 @@ from mantidqtinterfaces.Muon.GUI.Common.muon_load_data import MuonLoadData
 import mantidqtinterfaces.Muon.GUI.Common.utilities.load_utils as load_utils
 
 
-class BrowseFileWidgetModel(object):
+class BrowseFileWidgetModel:
     def __init__(self, loaded_data_store=MuonLoadData(), context=None):
         # Temporary list of filenames used for load thread
         self._filenames = []

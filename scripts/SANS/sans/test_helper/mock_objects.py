@@ -269,7 +269,7 @@ def create_run_tab_presenter_mock(use_fake_state=True):
     return presenter
 
 
-class FakeParentPresenter(object):
+class FakeParentPresenter:
     def __init__(self):
         super(FakeParentPresenter, self).__init__()
 

@@ -114,7 +114,7 @@ class DNSXMLDumpModelTest(unittest.TestCase):
         testv = self.model._load_file_to_xml_tree("123")
         mock_parse.assert_called_once_with("123")
         self.assertEqual(testv, "test")
-        mock_parse.side_effect = IOError()
+        mock_parse.side_effect = OSError()
         mock_parse.reset_mock()
         testv = self.model._load_file_to_xml_tree("123")
         mock_parse.assert_called_once_with("123")

@@ -13,7 +13,7 @@ from sans.common.enums import OutputMode, FindDirectionEnum, DetectorType
 from sans.algorithm_detail.centre_finder_new import centre_finder_new, centre_finder_mass
 
 
-class SANSBatchReduction(object):
+class SANSBatchReduction:
     def __init__(self):
         super(SANSBatchReduction, self).__init__()
 
@@ -91,7 +91,7 @@ class SANSBatchReduction(object):
         return errors
 
 
-class SANSCentreFinder(object):
+class SANSCentreFinder:
     def __init__(self):
         super(SANSCentreFinder, self).__init__()
 

@@ -21,7 +21,7 @@ from workbench.projectrecovery.projectrecovery import ProjectRecovery
 unicode = str
 
 
-class FakeEncoder(object):
+class FakeEncoder:
     def encode(self, _, __):
         return {}
 

@@ -21,7 +21,7 @@ def instrument_factory(name):
         raise RuntimeError("Instrument %s doesn't exist\n  %s" % (name, sys.exc_info()[1]))
 
 
-class Instrument(object):
+class Instrument:
     def __init__(self, instr_filen=None):
         """
         Reads the instrument definition xml file

@@ -12,7 +12,7 @@ List of user commands.
 from reduction_workflow.reducer import Reducer
 
 
-class ReductionSingleton(object):
+class ReductionSingleton:
     """Singleton reduction class"""
 
     # storage for the instance reference

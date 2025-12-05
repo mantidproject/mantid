@@ -420,7 +420,7 @@ class WorkspaceContainsNanValues(Exception):
     pass
 
 
-class _ResidualsDetails(object):
+class _ResidualsDetails:
     def __init__(self, num_points_considered, mismatched_points, total_residual):
         self.num_points_considered = num_points_considered
         self.mismatched_points = mismatched_points

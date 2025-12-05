@@ -4,7 +4,6 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from typing import Dict
 from dataclasses import dataclass
 
 from sans.common.enums import SANSInstrument, DetectorType
@@ -38,7 +37,7 @@ class StateInstrumentInfo(metaclass=JsonSerializable):
 
     def __init__(self):
         self.detector_names = {DetectorType.LAB.value: DetectorNames(), DetectorType.HAB.value: DetectorNames()}
-        self.monitor_names: Dict[str, str] = dict()
+        self.monitor_names: dict[str, str] = dict()
         self.idf_path: str = ""
 
 

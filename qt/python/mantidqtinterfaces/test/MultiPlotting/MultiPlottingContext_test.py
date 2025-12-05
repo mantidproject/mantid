@@ -12,7 +12,7 @@ from mantidqtinterfaces.MultiPlotting.subplot.subplot_context import subplotCont
 from line_helper import line
 
 
-class gen_ws(object):
+class gen_ws:
     def __init__(self, mock):
         self._input = "in"
         self._OutputWorkspace = mock

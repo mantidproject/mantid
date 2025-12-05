@@ -15,7 +15,7 @@ from mantidqt.widgets.sliceviewer.presenters.zoom import ScrollZoomMixin
 
 
 class ScrollZoomMixinTest(unittest.TestCase):
-    class Canvas(ScrollZoomMixin, object):
+    class Canvas(ScrollZoomMixin):
         def __init__(self):
             self.mpl_connect = MagicMock()
             self.mpl_disconnect = MagicMock()

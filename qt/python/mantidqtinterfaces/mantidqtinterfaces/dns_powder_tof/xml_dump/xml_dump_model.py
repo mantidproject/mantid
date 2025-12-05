@@ -102,7 +102,7 @@ class DNSXMLDumpModel(DNSObsModel):
         if filename:
             try:
                 tree = etree.parse(filename)
-            except IOError:
+            except OSError:
                 print("Error reading file")
                 return None
         return tree

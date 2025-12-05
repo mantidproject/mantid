@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2021 ISIS Rutherford Appleton Laboratory UKRI,
@@ -49,7 +48,7 @@ def _get_selector_speeds(full_data):
 
 
 def _selector_speed_varies(selector_speeds):
-    return any((abs(x - selector_speeds[0]) > 10 for x in selector_speeds))
+    return any(abs(x - selector_speeds[0]) > 10 for x in selector_speeds)
 
 
 def _get_wavelengths(full_data):

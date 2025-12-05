@@ -16,7 +16,7 @@ If this proves useful. It would be sensible to make it more accessible for other
 """
 
 
-class TempFile(object):
+class TempFile:
     __tempFile = None
 
     def __init__(self, contents, extension):

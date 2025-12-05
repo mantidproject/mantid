@@ -29,7 +29,7 @@ CATEGORIES_DIR = "categories"
 INDEX_CATEGORIES = ["Algorithms", "FitFunctions", "Concepts", "Techniques", "Interfaces"]
 
 
-class LinkItem(object):
+class LinkItem:
     """
     Defines a linkable item with a name and html reference
     """

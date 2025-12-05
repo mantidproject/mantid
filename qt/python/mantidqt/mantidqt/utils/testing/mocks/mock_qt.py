@@ -21,7 +21,7 @@ except ImportError:
     pass
 
 
-class MockQTableHeader(object):
+class MockQTableHeader:
     def __init__(self):
         self.addAction = Mock()
 
@@ -32,7 +32,7 @@ class MockQSelection:
         self.first = Mock(return_value=self.mock_item_range)
 
 
-class MockQItemRange(object):
+class MockQItemRange:
     def __init__(self):
         self.top = Mock(return_value=0)
         self.bottom = Mock(return_value=2)
@@ -104,25 +104,25 @@ class MockQtSignal:
         self.emit = Mock()
 
 
-class MockQStatusBar(object):
+class MockQStatusBar:
     def __init__(self):
         self.showMessage = Mock()
 
 
-class MockQClipboard(object):
+class MockQClipboard:
     def __init__(self):
         self.setText = Mock()
         self.Clipboard = 3
 
 
-class MockQButton(object):
+class MockQButton:
     def __init__(self):
         self.mock_clicked_signal = MockQtSignal()
         self.clicked = Mock(return_value=self.mock_clicked_signal)
         self.setEnabled = MagicMock()
 
 
-class MockQWidget(object):
+class MockQWidget:
     def __init__(self):
         self.addWidget = StrictMock()
         self.replaceWidget = StrictMock()

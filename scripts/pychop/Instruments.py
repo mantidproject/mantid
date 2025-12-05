@@ -76,7 +76,7 @@ def soft_hat(x, p):
     return y
 
 
-class FermiChopper(object):
+class FermiChopper:
     """
     Class which represents a Fermi chopper package
     """
@@ -110,7 +110,7 @@ class FermiChopper(object):
         return self.ei_limits[1] if hasattr(self, "ei_limits") else 1000.0
 
 
-class ChopperSystem(object):
+class ChopperSystem:
     """
     Class which represents a set (list) of choppers in a line
     """
@@ -548,7 +548,7 @@ class ChopperSystem(object):
         return self.ei_limits[1] if hasattr(self, "ei_limits") and self.ei_limits else 1000
 
 
-class Moderator(object):
+class Moderator:
     """
     Class which represents a neutron moderator
     """
@@ -663,7 +663,7 @@ class Moderator(object):
         return self.theta if (hasattr(self, "theta") and self.theta) else 0.0
 
 
-class Sample(object):
+class Sample:
     """
     Class which represents a sample shape
     """
@@ -689,7 +689,7 @@ class Sample(object):
         return self.gamma if (hasattr(self, "gamma") and self.gamma) else 0.0
 
 
-class Detector(object):
+class Detector:
     """
     Class which represents a neutron detector
     """
@@ -714,7 +714,7 @@ class Detector(object):
         return self.phi if (hasattr(self, "phi") and self.phi) else 0.0
 
 
-class Instrument(object):
+class Instrument:
     """
     Class which represents a direct geometry neutron spectrometer
     """
@@ -750,7 +750,7 @@ class Instrument(object):
             try:
                 with open(instrument) as f:
                     instrument = yaml.safe_load(f)
-            except (OSError, IOError) as e:
+            except OSError as e:
                 raise RuntimeError("Cannot open file %s . Error is %s" % (instrument, e))
         if (hasattr(instrument, "moderator") or hasattr(instrument, "chopper_system")) or (
             "moderator" in instrument or "chopper_system" in instrument

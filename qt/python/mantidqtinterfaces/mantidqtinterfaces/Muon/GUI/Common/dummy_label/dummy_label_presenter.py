@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 
-class DummyLabelPresenter(object):
+class DummyLabelPresenter:
     """ """
 
     def __init__(self, view, model):

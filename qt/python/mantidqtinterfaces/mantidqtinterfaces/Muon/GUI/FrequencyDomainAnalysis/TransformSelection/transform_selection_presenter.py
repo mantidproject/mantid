@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 
-class TransformSelectionPresenter(object):
+class TransformSelectionPresenter:
     """
     The widget for selecting the widget
     shown in the transformation tab

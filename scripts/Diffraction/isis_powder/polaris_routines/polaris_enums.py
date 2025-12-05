@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 
-class POLARIS_CHOPPER_MODES(object):
+class POLARIS_CHOPPER_MODES:
     enum_friendly_name = "Polaris chopper modes"
     PDF = "PDF"
     PDF_NORM = "PDF_NORM"

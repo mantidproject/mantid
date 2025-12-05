@@ -56,7 +56,7 @@ def parse_fit_options(mass_values, profile_strs, background_str="", constraints_
 # --------------------------------------------------------------------------------
 
 
-class FittingOptions(object):
+class FittingOptions:
     """Holds all of the parameters for the fitting that are not related to the domain"""
 
     def __init__(self, mass_profile, background=None, intensity_constraints=None):

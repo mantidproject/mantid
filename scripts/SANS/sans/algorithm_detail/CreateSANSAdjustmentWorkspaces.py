@@ -17,7 +17,7 @@ from sans.state.AllStates import AllStates
 from sans.state.StateObjects.wavelength_interval import WavRange
 
 
-class CreateSANSAdjustmentWorkspaces(object):
+class CreateSANSAdjustmentWorkspaces:
     def __init__(self, state: AllStates, component, data_type, slice_event_factor=1.0):
         """
         Calculates wavelength adjustment, pixel adjustment workspaces and wavelength-and-pixel adjustment workspaces.

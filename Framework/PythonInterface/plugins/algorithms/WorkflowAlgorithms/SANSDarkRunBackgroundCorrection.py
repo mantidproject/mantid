@@ -254,7 +254,7 @@ class SANSDarkRunBackgroundCorrection(PythonAlgorithm):
         return detector_cleaned_dark_run
 
 
-class DarkRunMonitorAndDetectorRemover(object):
+class DarkRunMonitorAndDetectorRemover:
     """
     This class can set detecors or monitors to 0. Either all monitors can be seletected or only
     a single one.

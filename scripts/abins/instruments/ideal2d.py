@@ -1,5 +1,4 @@
 import numpy as np
-from typing import Tuple
 
 import abins
 from .directinstrument import DirectInstrument
@@ -11,7 +10,7 @@ class Ideal2D(DirectInstrument):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, name="Ideal2D", **kwargs)
 
-    def get_q_bounds(self, pad: float = 0.0) -> Tuple[float, float]:
+    def get_q_bounds(self, pad: float = 0.0) -> tuple[float, float]:
         params = abins.parameters.instruments[self._name]
         q_min, q_max = params.get("q_range")
         return (q_min, q_max * (1.0 + pad))

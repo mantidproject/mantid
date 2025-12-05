@@ -9,7 +9,7 @@ from mantidqtinterfaces.Muon.GUI.Common.corrections_tab_widget.corrections_prese
 from mantidqtinterfaces.Muon.GUI.Common.corrections_tab_widget.corrections_view import CorrectionsView
 
 
-class CorrectionsTabWidget(object):
+class CorrectionsTabWidget:
     """
     The CorrectionsTabWidget creates the tab used for corrections in the Muon Analysis and Frequency Domain Analysis
     interface.

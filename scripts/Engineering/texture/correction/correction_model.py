@@ -26,7 +26,8 @@ from os import path, makedirs
 from scipy import interpolate
 from Engineering.EnggUtils import GROUP
 from Engineering.common.texture_sample_viewer import has_valid_shape
-from typing import Optional, Sequence, Union, Tuple
+from typing import Optional, Union
+from collections.abc import Sequence
 from mantid.dataobjects import Workspace2D
 from Engineering.common.calibration_info import CalibrationInfo
 
@@ -433,7 +434,7 @@ class TextureCorrectionModel:
     def get_reference_ws(self):
         return self.reference_ws
 
-    def get_reference_info(self) -> Tuple[str, bool, str]:
+    def get_reference_info(self) -> tuple[str, bool, str]:
         material = "Not set"
         shape_enabled = False
         if self.reference_ws:

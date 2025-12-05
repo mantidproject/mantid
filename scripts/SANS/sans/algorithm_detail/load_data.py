@@ -758,7 +758,7 @@ class SANSLoadDataISIS(SANSLoadData):
         return workspaces, workspace_monitors
 
 
-class SANSLoadDataFactory(object):
+class SANSLoadDataFactory:
     """A factory for SANSLoadData."""
 
     def __init__(self):

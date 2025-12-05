@@ -46,7 +46,7 @@ def die(msg):
     sys.exit(1)
 
 
-class PullRequest(object):
+class PullRequest:
     """
     Thin wrapper around a pull request
     """

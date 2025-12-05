@@ -7,7 +7,7 @@
 #  This file is part of the mantid workbench.
 
 
-class ObservingPresenter(object):
+class ObservingPresenter:
     """
     This class provides some common functions for classes that need to be observable.
     It is not a GUI class, and if used, should be inherited by the presenter.

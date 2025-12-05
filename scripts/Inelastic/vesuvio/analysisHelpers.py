@@ -211,7 +211,7 @@ def block_fit_ncp(par, first_spectrum, last_spectrum, masses, ws_name, fit_argum
     widths = np.zeros((len(masses), last_spectrum - first_spectrum + 1))
     intensities = np.zeros((len(masses), last_spectrum - first_spectrum + 1))
     centres = np.zeros((len(masses), last_spectrum - first_spectrum + 1))
-    spectra = np.zeros((last_spectrum - first_spectrum + 1))
+    spectra = np.zeros(last_spectrum - first_spectrum + 1)
     tof_fit_ws = sapi.CloneWorkspace(InputWorkspace=str(ws_name), OutputWorkspace=str(ws_name) + "_fit")
     j = 0
     for j, spectrum in enumerate(range(first_spectrum, last_spectrum + 1)):
@@ -340,7 +340,7 @@ def calculate_resolution(spectrum, data_x, mass, IPFile):
 
 def calculate_mean_widths_and_intensities(masses, widths, intensities, spectra, g_log):
     better_widths, better_intensities = np.zeros((len(masses), len(widths[0]))), np.zeros((len(masses), len(widths[0])))
-    mean_widths, widths_std, mean_intensity_ratios = np.zeros((len(masses))), np.zeros((len(masses))), np.zeros((len(masses)))
+    mean_widths, widths_std, mean_intensity_ratios = np.zeros(len(masses)), np.zeros(len(masses)), np.zeros(len(masses))
     for m in range(len(masses)):
         mean_widths[m] = np.nanmean(widths[m])
         widths_std[m] = np.nanstd(widths[m])

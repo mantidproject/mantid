@@ -32,7 +32,7 @@ def _str_or_none(string):
     return string if string != "" else None
 
 
-class DRange(object):
+class DRange:
     """
     A class to represent a dRange.
     """
@@ -72,7 +72,7 @@ TIME_REGIME_TO_DRANGE = {
 }
 
 
-class DRangeToWorkspaceMap(object):
+class DRangeToWorkspaceMap:
     """
     A "wrapper" class for a map, which maps workspaces from their corresponding
     time regimes.

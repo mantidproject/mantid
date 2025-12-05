@@ -17,7 +17,7 @@ from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.platypus import Image, Paragraph, SimpleDocTemplate, Spacer, Table
 
 
-class PeakReport(object):
+class PeakReport:
     """
     Peak Report is a class used to creating one or more peak integration reports as PDFs.
     """

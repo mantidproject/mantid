@@ -341,7 +341,7 @@ def get_isis_nexus_info(file_name):
                 number_of_periods = len(proton_charge_data_set)
             else:
                 number_of_periods = -1
-    except IOError:
+    except OSError:
         is_isis_nexus = False
         number_of_periods = -1
     return is_isis_nexus, number_of_periods
@@ -625,7 +625,7 @@ def get_raw_info(file_name):
             periods = alg_info.getProperty("PeriodCount").value
             is_raw = True
             number_of_periods = periods
-        except IOError:
+        except OSError:
             is_raw = False
             number_of_periods = -1
 
@@ -1115,7 +1115,7 @@ class SANSFileInformationRaw(SANSFileInformation):
         return int(get_from_raw_header(file_name, 1))
 
 
-class SANSFileInformationFactory(object):
+class SANSFileInformationFactory:
     def __init__(self):
         super(SANSFileInformationFactory, self).__init__()
 

@@ -13,7 +13,7 @@ from unittest import TestCase, main
 from workbench.config.user import UserConfig
 
 
-class ConfigUserManager(object):
+class ConfigUserManager:
     def __init__(self, test_name_hint, defaults=None):
         """
 

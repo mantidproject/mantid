@@ -15,7 +15,7 @@ default_dict = {
 }
 
 
-class PhaseTableContext(object):
+class PhaseTableContext:
     def __init__(self):
         self.options_dict = default_dict.copy()
         self.phase_tables = []

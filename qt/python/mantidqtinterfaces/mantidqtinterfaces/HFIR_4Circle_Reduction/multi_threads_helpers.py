@@ -198,7 +198,7 @@ class IntegratePeaksThread(QThread):
             scan_number, pt_number_list, merged = scan_tup
 
             # emit signal for run start (mode 0)
-            mode = int(0)
+            mode = 0
             self.peakMergeSignal.emit(self._expNumber, scan_number, float(index), [0.0, 0.0, 0.0], mode)
 
             # merge if not merged
@@ -312,7 +312,7 @@ class IntegratePeaksThread(QThread):
         # END-FOR
 
         # terminate the process
-        mode = int(2)
+        mode = 2
         self.peakMergeSignal.emit(self._expNumber, -1, len(self._scanTupleList), [0, 0, 0], mode)
         # self._mainWindow.ui.tableWidget_mergeScans.select_all_rows(False)
 

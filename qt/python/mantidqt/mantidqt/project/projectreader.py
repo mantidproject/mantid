@@ -19,7 +19,7 @@ def is_json_file(filename):
             return False
 
 
-class ProjectReader(object):
+class ProjectReader:
     def __init__(self, project_extension):
         self.project_reader_instance = None
         self.project_extension = project_extension

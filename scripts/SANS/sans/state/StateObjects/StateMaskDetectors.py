@@ -10,7 +10,6 @@
 
 import json
 import copy
-from typing import List
 
 from sans.state.JsonSerializable import JsonSerializable
 from sans.state.automatic_setters import automatic_setters
@@ -87,39 +86,39 @@ class StateMaskDetectors(metaclass=JsonSerializable):
     def __init__(self):
         super(StateMaskDetectors, self).__init__()
         # Vertical strip masks
-        self.single_vertical_strip_mask: List[int] = []
-        self.range_vertical_strip_start: List[int] = []
-        self.range_vertical_strip_stop: List[int] = []
+        self.single_vertical_strip_mask: list[int] = []
+        self.range_vertical_strip_start: list[int] = []
+        self.range_vertical_strip_stop: list[int] = []
 
         # Horizontal strip masks
-        self.single_horizontal_strip_mask: List[int] = []
-        self.range_horizontal_strip_start: List[int] = []
-        self.range_horizontal_strip_stop: List[int] = []
+        self.single_horizontal_strip_mask: list[int] = []
+        self.range_horizontal_strip_start: list[int] = []
+        self.range_horizontal_strip_stop: list[int] = []
 
         # Spectrum Block
-        self.block_horizontal_start: List[int] = []
-        self.block_horizontal_stop: List[int] = []
-        self.block_vertical_start: List[int] = []
-        self.block_vertical_stop: List[int] = []
+        self.block_horizontal_start: list[int] = []
+        self.block_horizontal_stop: list[int] = []
+        self.block_vertical_start: list[int] = []
+        self.block_vertical_stop: list[int] = []
 
         # Spectrum block cross
-        self.block_cross_horizontal: List[int] = []
-        self.block_cross_vertical: List[int] = []
+        self.block_cross_horizontal: list[int] = []
+        self.block_cross_vertical: list[int] = []
 
         # Time/Bin mask
-        self.bin_mask_start: List[float] = []
-        self.bin_mask_stop: List[float] = []
+        self.bin_mask_start: list[float] = []
+        self.bin_mask_stop: list[float] = []
 
         # Name of the detector
         self.detector_name = None  # : Str()
         self.detector_name_short = None  # : Str()
 
         # Single Spectra
-        self.single_spectra: List[int] = []
+        self.single_spectra: list[int] = []
 
         # Spectrum Range
-        self.spectrum_range_start: List[int] = []
-        self.spectrum_range_stop: List[int] = []
+        self.spectrum_range_start: list[int] = []
+        self.spectrum_range_stop: list[int] = []
 
     def validate(self):
         is_invalid = {}
@@ -209,11 +208,11 @@ class StateMask(metaclass=JsonSerializable):
         self.radius_max = None  # : Float
 
         # Bin mask
-        self.bin_mask_general_start: List[float] = []
-        self.bin_mask_general_stop: List[float] = []
+        self.bin_mask_general_start: list[float] = []
+        self.bin_mask_general_stop: list[float] = []
 
         # Mask files
-        self.mask_files: List[str] = []
+        self.mask_files: list[str] = []
 
         # Angle masking
         self.phi_min = -90.0
@@ -337,7 +336,7 @@ class StateMaskNoInst(StateMask):
 # ----------------------------------------------------------------------------------------------------------------------
 
 
-class StateMaskBuilder(object):
+class StateMaskBuilder:
     @automatic_setters(StateMask)
     def __init__(self, data_info, state):
         super(StateMaskBuilder, self).__init__()

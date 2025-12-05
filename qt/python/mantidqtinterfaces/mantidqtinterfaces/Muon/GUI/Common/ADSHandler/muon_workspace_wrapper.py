@@ -9,7 +9,7 @@ from mantid.api import Workspace, AnalysisDataService
 from mantid.simpleapi import RenameWorkspace
 
 
-class MuonWorkspaceWrapper(object):
+class MuonWorkspaceWrapper:
     """
     A wrapper around a single workspace for use with MuonAnalysis.
 

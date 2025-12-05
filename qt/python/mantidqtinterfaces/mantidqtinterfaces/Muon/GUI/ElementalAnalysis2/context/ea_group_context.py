@@ -60,7 +60,7 @@ def is_group_valid(group_name):
     return True
 
 
-class EAGroupContext(object):
+class EAGroupContext:
     def __init__(self, check_group_contains_valid_detectors=lambda x: True, error_notifier=None):
         self._groups = []
         self._runs_in_groups = []
