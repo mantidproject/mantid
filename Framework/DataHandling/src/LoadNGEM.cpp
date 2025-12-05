@@ -9,6 +9,8 @@
 #include "MantidAPI/MultipleFileProperty.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/Run.h"
+
+#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -19,6 +21,7 @@
 
 #include <boost/algorithm/string.hpp>
 #include <fstream>
+#include <ranges>
 
 namespace Mantid::DataHandling {
 
@@ -66,8 +69,8 @@ void correctForBigEndian(const EventUnion &bigEndian, EventUnion &smallEndian) {
  * @param events The main set of events for the data so far.
  * @param eventsInFrame The set of events for the current frame.
  */
-void addFrameToOutputWorkspace(int &rawFrames, int &goodFrames, const int &eventCountInFrame, const int &minEventsReq,
-                               const int &maxEventsReq, MantidVec &frameEventCounts,
+void addFrameToOutputWorkspace(int &rawFrames, int &goodFrames, const int eventCountInFrame, const int minEventsReq,
+                               const int maxEventsReq, MantidVec &frameEventCounts,
                                std::vector<DataObjects::EventList> &events,
                                std::vector<DataObjects::EventList> &eventsInFrame) {
   ++rawFrames;
@@ -95,24 +98,66 @@ void addFrameToOutputWorkspace(int &rawFrames, int &goodFrames, const int &event
 }
 
 /**
+ * @brief Add a frame to the main set of counts.
+ *
+ * @param rawFrames The number of T0 Events detected so far.
+ * @param goodFrames The number of good frames detected so far.
+ * @param eventCountInFrame The number of events in the current frame.
+ * @param minEventsReq The number of events required to be a good frame.
+ * @param maxEventsReq The max events allowed to be a good frame.
+ * @param frameEventCounts A vector of the number of events in each good frame.
+ * @param counts A vector of counts, by pixel, for the data so far.
+ * @param countsInFrame A vector of counts, by pixel, for the current frame.
+ */
+void addFrameToOutputWorkspace(int &rawFrames, int &goodFrames, const int eventCountInFrame, const int minEventsReq,
+                               const int maxEventsReq, MantidVec &frameEventCounts,
+                               std::vector<std::vector<double>> &counts,
+                               std::vector<std::vector<double>> &countsInFrame) {
+  ++rawFrames;
+  if (eventCountInFrame >= minEventsReq && eventCountInFrame <= maxEventsReq) {
+    // Add number of event counts to workspace.
+    frameEventCounts.emplace_back(eventCountInFrame);
+    ++goodFrames;
+
+    PARALLEL_FOR_NO_WSP_CHECK()
+    // Add events that match parameters to workspace
+    for (auto i = 0; i < NUM_OF_SPECTRA; ++i) {
+      auto &countsInFramePixel = countsInFrame[i];
+      for (size_t j = 0; j < countsInFramePixel.size(); ++j) {
+        auto &countsInFramePixelByBin = countsInFramePixel[j];
+        if (countsInFramePixelByBin > 0) {
+          counts[i][j] += countsInFramePixelByBin;
+          countsInFramePixelByBin = 0;
+        }
+      }
+    }
+  } else {
+    // clear event list in frame in preparation for next frame
+    PARALLEL_FOR_NO_WSP_CHECK()
+    for (auto i = 0; i < NUM_OF_SPECTRA; ++i) {
+      auto &countsInFramePixel = countsInFrame[i];
+      std::fill(countsInFramePixel.begin(), countsInFramePixel.end(), 0);
+    }
+  }
+}
+
+/**
  * @brief Creates an event workspace and fills it with the data.
  *
  * @param maxToF The largest ToF seen so far.
  * @param binWidth The width of each bin.
  * @param events The main events data.
- * @param dataWorkspace The workspace to add the data to.
  */
-void createEventWorkspace(const double &maxToF, const double &binWidth,
-                          const std::vector<DataObjects::EventList> &events,
-                          DataObjects::EventWorkspace_sptr &dataWorkspace) {
+API::MatrixWorkspace_sptr createEventWorkspace(const double maxToF, const double binWidth,
+                                               const std::vector<DataObjects::EventList> &events) {
   // Round up number of bins needed
   std::vector<double> xAxis(int(std::ceil(maxToF / binWidth)));
   std::generate(xAxis.begin(), xAxis.end(), [i = 0, &binWidth]() mutable { return binWidth * i++; });
 
-  dataWorkspace = DataObjects::create<DataObjects::EventWorkspace>(
+  DataObjects::EventWorkspace_sptr dataWorkspace = DataObjects::create<DataObjects::EventWorkspace>(
       NUM_OF_SPECTRA, HistogramData::Histogram(HistogramData::BinEdges(xAxis)));
   PARALLEL_FOR_NO_WSP_CHECK()
-  for (int i = 0; i < NUM_OF_SPECTRA; ++i) {
+  for (auto i = 0; i < NUM_OF_SPECTRA; ++i) {
     dataWorkspace->getSpectrum(i) = events[i];
     dataWorkspace->getSpectrum(i).setSpectrumNo(i + 1);
     dataWorkspace->getSpectrum(i).setDetectorID(i + 1);
@@ -120,6 +165,28 @@ void createEventWorkspace(const double &maxToF, const double &binWidth,
   dataWorkspace->setAllX(HistogramData::BinEdges{xAxis});
   dataWorkspace->getAxis(0)->unit() = Kernel::UnitFactory::Instance().create("TOF");
   dataWorkspace->setYUnit("Counts");
+  return std::dynamic_pointer_cast<API::MatrixWorkspace>(dataWorkspace);
+}
+
+/**
+ * @brief Creates an event workspace and fills it with the data.
+ *
+ * @param binEdges A vector of bin edges to be shared between histograms.
+ * @param counts A vector containing a sub vector for each spectra, each containing counts.
+ */
+API::MatrixWorkspace_sptr createHistogramWorkspace(std::vector<double> &&binEdges,
+                                                   std::vector<std::vector<double>> &&counts) {
+  const HistogramData::BinEdges bins{std::move(binEdges)};
+  API::MatrixWorkspace_sptr dataWorkspace = DataObjects::create<DataObjects::Workspace2D>(NUM_OF_SPECTRA, bins);
+  PARALLEL_FOR_NO_WSP_CHECK()
+  for (auto i = 0; i < NUM_OF_SPECTRA; ++i) {
+    dataWorkspace->setHistogram(i, bins, HistogramData::Counts{std::move(counts[i])});
+    dataWorkspace->getSpectrum(i).setSpectrumNo(i + 1);
+    dataWorkspace->getSpectrum(i).setDetectorID(i + 1);
+  }
+  dataWorkspace->getAxis(0)->unit() = Kernel::UnitFactory::Instance().create("TOF");
+  dataWorkspace->setYUnit("Counts");
+  return dataWorkspace;
 }
 
 /**
@@ -130,10 +197,33 @@ void createEventWorkspace(const double &maxToF, const double &binWidth,
  * @param ws The workspace to add the log to.
  */
 template <typename ValueType>
-void addToSampleLog(const std::string &name, const ValueType &value, DataObjects::EventWorkspace &ws) {
-  ws.mutableRun().addProperty(name, value, false);
+void addToSampleLog(const std::string &name, const ValueType &value, API::MatrixWorkspace_sptr &ws) {
+  ws->mutableRun().addProperty(name, value, false);
 }
 
+/**
+ * @brief Insert validation results into map, if there is an error.
+ * @param result vector containing a list of error properties and associated error message to insert into map
+ * @param results map containing validation results
+ */
+void insertValidationResult(const std::vector<std::pair<std::string, std::string>> &result,
+                            std::map<std::string, std::string> &results) {
+  std::copy(result.cbegin(), result.cend(), std::inserter(results, results.end()));
+}
+
+/**
+ * @brief Calculate bin edges from min/max ToF and bin width.
+ * @param minToF minimum of first histo bin
+ * @param maxToF maximum of last histo bin
+ * @param binWidth width of each histo bin
+ * @return std::vector<double> containing bin edge values.
+ */
+std::vector<double> calculateBinEdges(const double minToF, const double maxToF, const double binWidth) {
+  const int numBins = static_cast<int>(std::ceil((maxToF - minToF) / binWidth));
+  auto custom_range =
+      std::views::iota(0) | std::views::transform([&binWidth, &minToF](int n) { return minToF + (n * binWidth); });
+  return {custom_range.begin(), custom_range.begin() + numBins + 1};
+}
 } // namespace
 
 /**
@@ -173,6 +263,14 @@ void LoadNGEM::init() {
 
   // Bin Width
   declareProperty("BinWidth", 10.0, mustBePositiveDbl, "The width of the time bins in the output.");
+  declareProperty("MinToF", std::numeric_limits<double>::max(),
+                  "The minimum ToF bin edge, inclusive. Required if PreserveEvents=False. If PreserveEvents=True and "
+                  "MinToF is default, value will "
+                  "be dervied from event data.");
+  declareProperty("MaxToF", -std::numeric_limits<double>::max(),
+                  "The maximum ToF bin edge, exclusive. Required if PreserveEvents=False. If PreserveEvents=True and "
+                  "MaxToF is default, value will "
+                  "be dervied from event data.");
 
   declareProperty("MinEventsPerFrame", 0, mustBePositive,
                   "The minimum number of events required in a frame before a "
@@ -184,6 +282,10 @@ void LoadNGEM::init() {
       std::make_unique<Kernel::PropertyWithValue<bool>>("GenerateEventsPerFrame", false, Kernel::Direction::Input),
       "Generate a workspace to show the number of events captured by each "
       "frame. (optional, default False).");
+  declareProperty(std::make_unique<Kernel::PropertyWithValue<bool>>("PreserveEvents", true, Kernel::Direction::Input),
+                  "Algorithm preserves events, generating an event workspace. If False, events are not preserved and a "
+                  "Workspace 2D is generated (reduced memory usage). "
+                  "(optional, default True).");
 }
 
 /**
@@ -193,74 +295,55 @@ void LoadNGEM::exec() {
   progress(0);
 
   std::vector<std::vector<std::string>> filePaths = getProperty("Filename");
-
   const int minEventsReq(getProperty("MinEventsPerFrame"));
   const int maxEventsReq(getProperty("MaxEventsPerFrame"));
-
-  double maxToF{-std::numeric_limits<double>::max()}, minToF{std::numeric_limits<double>::max()};
+  double minToF(getProperty("MinToF"));
+  double maxToF(getProperty("MaxToF"));
   const double binWidth(getProperty("BinWidth"));
+  const bool preserveEvents(getProperty("PreserveEvents"));
 
-  int rawFrames = 0;
-  int goodFrames = 0;
-  std::vector<double> frameEventCounts;
-  int eventCountInFrame = 0;
-
-  std::vector<DataObjects::EventList> events, eventsInFrame;
-  events.resize(NUM_OF_SPECTRA);
-  eventsInFrame.resize(NUM_OF_SPECTRA);
-  progress(0.04);
-
-  size_t totalFilePaths(filePaths.size());
-  int counter(1);
-  for (const auto &filePath : filePaths) {
-    loadSingleFile(filePath, eventCountInFrame, maxToF, minToF, rawFrames, goodFrames, minEventsReq, maxEventsReq,
-                   frameEventCounts, events, eventsInFrame, totalFilePaths, counter);
+  LoadDataResult res;
+  if (preserveEvents) {
+    res = readDataAsEvents(minToF, maxToF, binWidth, minEventsReq, maxEventsReq, filePaths);
+  } else {
+    res = readDataAsHistograms(minToF, maxToF, binWidth, minEventsReq, maxEventsReq, filePaths);
   }
-  // Add the final frame of events (as they are not followed by a T0 event)
-  addFrameToOutputWorkspace(rawFrames, goodFrames, eventCountInFrame, minEventsReq, maxEventsReq, frameEventCounts,
-                            events, eventsInFrame);
-  progress(0.90);
 
-  DataObjects::EventWorkspace_sptr dataWorkspace;
-  createEventWorkspace(maxToF, binWidth, events, dataWorkspace);
+  addToSampleLog("raw_frames", res.rawFrames, res.dataWorkspace);
+  addToSampleLog("good_frames", res.goodFrames, res.dataWorkspace);
+  addToSampleLog("max_ToF", maxToF, res.dataWorkspace);
+  addToSampleLog("min_ToF", minToF, res.dataWorkspace);
 
-  addToSampleLog("raw_frames", rawFrames, *dataWorkspace);
-  addToSampleLog("good_frames", goodFrames, *dataWorkspace);
-  addToSampleLog("max_ToF", maxToF, *dataWorkspace);
-  addToSampleLog("min_ToF", minToF, *dataWorkspace);
+  loadInstrument(res.dataWorkspace);
 
-  loadInstrument(dataWorkspace);
-
-  setProperty("OutputWorkspace", dataWorkspace);
+  setProperty("OutputWorkspace", res.dataWorkspace);
   if (this->getProperty("GenerateEventsPerFrame")) {
-    createCountWorkspace(frameEventCounts);
+    createCountWorkspace(res.frameEventCounts);
   }
+  m_fileCount = 0;
   progress(1.00);
 }
 
 /**
- * @brief Load a single file into the event lists.
+ * @brief Load a single file into histograms or events.
  *
  * @param filePath The path to the file.
  * @param eventCountInFrame The number of events in the current frame.
- * @param maxToF The highest detected ToF
  * @param minToF The lowest detected ToF
+ * @param maxToF The highest detected ToF
+ * @param binWidth The width of histogram bins in ToF
  * @param rawFrames The number of T0 Events detected so far.
  * @param goodFrames The number of good frames detected so far.
  * @param minEventsReq The number of events required to be a good frame.
  * @param maxEventsReq The max events allowed to be a good frame.
- * @param frameEventCounts A vector of the number of events in each good frame.
- * @param events The main set of events for the data so far.
- * @param eventsInFrame The set of events for the current frame.
+ * @param frameEventCounts A vectot tracking event counts per frame.
  * @param totalFilePaths The total number of file paths.
- * @param fileCount The number of file paths processed.
+ * @param strategy Object encapsulating histo/event specific logic
  */
-void LoadNGEM::loadSingleFile(const std::vector<std::string> &filePath, int &eventCountInFrame, double &maxToF,
-                              double &minToF, int &rawFrames, int &goodFrames, const int &minEventsReq,
-                              const int &maxEventsReq, MantidVec &frameEventCounts,
-                              std::vector<DataObjects::EventList> &events,
-                              std::vector<DataObjects::EventList> &eventsInFrame, const size_t &totalFilePaths,
-                              int &fileCount) {
+void LoadNGEM::loadSingleFile(const std::vector<std::string> &filePath, int &eventCountInFrame, double &minToF,
+                              double &maxToF, const double binWidth, int &rawFrames, int &goodFrames,
+                              const int minEventsReq, const int maxEventsReq, MantidVec &frameEventCounts,
+                              const size_t totalFilePaths, std::shared_ptr<LoadDataStrategyBase> strategy) {
   // Create file reader
   if (filePath.size() > 1) {
     throw std::runtime_error("Invalid filename parameter.");
@@ -300,23 +383,14 @@ void LoadNGEM::loadSingleFile(const std::vector<std::string> &filePath, int &eve
     }
     if (event.coincidence.check()) { // Check for coincidence event.
       ++eventCountInFrame;
-      uint64_t pixel = event.coincidence.getPixel();
+      size_t pixel = event.coincidence.getPixel();
       // Convert to microseconds (us)
       const double tof = event.coincidence.timeOfFlight / 1000.0;
-
-      if (tof > maxToF) {
-        maxToF = tof;
-      } else if (tof < minToF) {
-        minToF = tof;
-      }
-      eventsInFrame[pixel].addEventQuickly(Types::Event::TofEvent(tof));
-
+      strategy->addEvent(minToF, maxToF, tof, binWidth,
+                         pixel);      // If no min and max provided by user, values calculated and mutated
     } else if (event.tZero.check()) { // Check for T0 event.
-      addFrameToOutputWorkspace(rawFrames, goodFrames, eventCountInFrame, minEventsReq, maxEventsReq, frameEventCounts,
-                                events, eventsInFrame);
-
-      if (reportProgressAndCheckCancel(numProcessedEvents, eventCountInFrame, totalNumEvents, totalFilePaths,
-                                       fileCount)) {
+      strategy->addFrame(rawFrames, goodFrames, eventCountInFrame, minEventsReq, maxEventsReq, frameEventCounts);
+      if (reportProgressAndCheckCancel(numProcessedEvents, eventCountInFrame, totalNumEvents, totalFilePaths)) {
         return;
       }
     } else if (event.generic.check()) { // match all other events and notify.
@@ -330,9 +404,8 @@ void LoadNGEM::loadSingleFile(const std::vector<std::string> &filePath, int &eve
                     << " bytes of file data were skipped when locating valid events.\n";
   }
   g_log.information() << "Finished loading a file.\n";
-  ++fileCount;
+  ++m_fileCount;
 }
-
 /**
  * @brief Ensure that the file fits into 16, as the detector spits out 128 bit
  * words (16 bytes)
@@ -360,15 +433,13 @@ size_t LoadNGEM::verifyFileSize(std::ifstream &file) {
  * @param eventCountInFrame The number of events in the current frame.
  * @param totalNumEvents The total number of events in the file.
  * @param totalFilePaths The total number of file paths to process.
- * @param fileCount The number of files processed.
  * @return true If user has cancelled the load.
  * @return false If the user has not cancelled.
  */
 bool LoadNGEM::reportProgressAndCheckCancel(size_t &numProcessedEvents, int &eventCountInFrame,
-                                            const size_t &totalNumEvents, const size_t &totalFilePaths,
-                                            const int &fileCount) {
+                                            const size_t totalNumEvents, const size_t totalFilePaths) {
   numProcessedEvents += eventCountInFrame;
-  std::string message(std::to_string(fileCount) + "/" + std::to_string(totalFilePaths));
+  std::string message(std::to_string(m_fileCount) + "/" + std::to_string(totalFilePaths));
   progress(double(numProcessedEvents) / double(totalNumEvents) / 1.11111, message);
   eventCountInFrame = 0;
   // Check for cancel flag.
@@ -409,7 +480,7 @@ void LoadNGEM::createCountWorkspace(const std::vector<double> &frameEventCounts)
  *
  * @param dataWorkspace The workspace to load into.
  */
-void LoadNGEM::loadInstrument(DataObjects::EventWorkspace_sptr &dataWorkspace) {
+void LoadNGEM::loadInstrument(API::MatrixWorkspace_sptr &dataWorkspace) {
   auto loadInstrument = this->createChildAlgorithm("LoadInstrument");
   loadInstrument->setPropertyValue("InstrumentName", "NGEM");
   loadInstrument->setProperty<API::MatrixWorkspace_sptr>("Workspace", dataWorkspace);
@@ -426,14 +497,211 @@ void LoadNGEM::loadInstrument(DataObjects::EventWorkspace_sptr &dataWorkspace) {
  */
 std::map<std::string, std::string> LoadNGEM::validateInputs() {
   std::map<std::string, std::string> results;
-
-  int MinEventsPerFrame = getProperty("MinEventsPerFrame");
-  int MaxEventsPerFrame = getProperty("MaxEventsPerFrame");
-
-  if (MaxEventsPerFrame < MinEventsPerFrame) {
-    results["MaxEventsPerFrame"] = "MaxEventsPerFrame is less than MinEvents per frame";
-  }
+  insertValidationResult(validateEventsPerFrame(), results);
+  insertValidationResult(validateMinMaxToF(), results);
   return results;
+}
+
+/**
+ * @brief validate min/max events per frame inputs.
+ *
+ * @return A vector of subject property: error message.
+ */
+std::vector<std::pair<std::string, std::string>> LoadNGEM::validateEventsPerFrame() {
+  const int MinEventsPerFrame = getProperty("MinEventsPerFrame");
+  const int MaxEventsPerFrame = getProperty("MaxEventsPerFrame");
+  if (MaxEventsPerFrame < MinEventsPerFrame) {
+    return {{"MaxEventsPerFrame", "MaxEventsPerFrame is less than MinEvents per frame"}};
+  }
+  return {};
+}
+
+/**
+ * @brief validate min/max ToF inputs.
+ *
+ * @return A vector of subject property: error message.
+ */
+std::vector<std::pair<std::string, std::string>> LoadNGEM::validateMinMaxToF() {
+  const double minToF = getProperty("MinToF");
+  const double maxToF = getProperty("MaxToF");
+  const bool preserveEvents = getProperty("PreserveEvents");
+  std::vector<std::pair<std::string, std::string>> result;
+  if (preserveEvents) {
+    if (isDefault("MinToF") && isDefault("MaxToF")) {
+      return result;
+    }
+    if (isDefault("MinToF")) {
+      result.emplace_back("MinToF", "Please supply both, or neither, Min and MaxToF if PreserveEvents is True");
+    }
+    if (isDefault("MaxToF")) {
+      result.emplace_back("MaxToF", "Please supply both, or neither, Min and MaxToF if PreserveEvents is True");
+    }
+  } else {
+    if (isDefault("MinToF")) {
+      result.emplace_back("MinToF", "MinToF must be supplied if PreserveEvents is False");
+    }
+    if (isDefault("MaxToF")) {
+      result.emplace_back("MaxToF", "MaxToF must be supplied if PreserveEvents is False");
+    }
+  }
+  if (maxToF <= minToF) {
+    result.emplace_back("MaxToF", "MaxToF is less than or equal to MinToF");
+  }
+  return result;
+}
+
+/**
+ * @brief Read data from provided file paths into event lists, output an event workspace.
+ *
+ * @param minToF The minimum ToF value to consider
+ * @param maxToF The maximum ToF value to consider
+ * @param binWidth The width of bins that the events will be projected into by the resultant workspace
+ * @param minEventsReq The minimum events required in to consider a frame good.
+ * @param maxEventsReq The maximum events required in to consider a frame good.
+ * @param filePaths Paths to the data file to read.
+ * @return A struct containing the output workspace and variables tracking frames
+ */
+LoadDataResult LoadNGEM::readDataAsEvents(double &minToF, double &maxToF, const double binWidth, const int minEventsReq,
+                                          const int maxEventsReq,
+                                          const std::vector<std::vector<std::string>> &filePaths) {
+  int eventCountInFrame{0};
+  int rawFrames{0};
+  int goodFrames{0};
+  std::vector<double> frameEventCounts;
+  API::MatrixWorkspace_sptr dataWorkspace;
+  size_t totalFilePaths(filePaths.size());
+
+  progress(0.04);
+  auto strategy = std::make_shared<LoadDataStrategyEvent>();
+  for (const auto &filePath : filePaths) {
+    loadSingleFile(filePath, eventCountInFrame, minToF, maxToF, binWidth, rawFrames, goodFrames, minEventsReq,
+                   maxEventsReq, frameEventCounts, totalFilePaths, strategy);
+  }
+  // Add the final frame of events (as they are not followed by a T0 event)
+  strategy->addFrame(rawFrames, goodFrames, eventCountInFrame, minEventsReq, maxEventsReq, frameEventCounts);
+  progress(0.90);
+  dataWorkspace = createEventWorkspace(maxToF, binWidth, strategy->getEvents());
+
+  return {rawFrames, goodFrames, frameEventCounts, dataWorkspace};
+}
+
+/**
+ * @brief Read data from provided file paths into a histograms, output a workspace2D.
+ *
+ * @param minToF The minimum ToF value to consider
+ * @param maxToF The maximum ToF value to consider
+ * @param binWidth The width of bins that the events will be projected into by the resultant workspace
+ * @param minEventsReq The minimum events required in to consider a frame good.
+ * @param maxEventsReq The maximum events required in to consider a frame good.
+ * @param filePaths Paths to the data file to read.
+ * @return A struct containing the output workspace and variables tracking frames
+ */
+LoadDataResult LoadNGEM::readDataAsHistograms(double &minToF, double &maxToF, const double binWidth,
+                                              const int minEventsReq, const int maxEventsReq,
+                                              const std::vector<std::vector<std::string>> &filePaths) {
+  int rawFrames{0};
+  int goodFrames{0};
+  int eventCountInFrame{0};
+  std::vector<double> frameEventCounts;
+  API::MatrixWorkspace_sptr dataWorkspace;
+  size_t totalFilePaths(filePaths.size());
+
+  progress(0.04);
+  auto strategy = std::make_shared<LoadDataStrategyHisto>(minToF, maxToF, binWidth);
+  for (const auto &filePath : filePaths) {
+    loadSingleFile(filePath, eventCountInFrame, minToF, maxToF, binWidth, rawFrames, goodFrames, minEventsReq,
+                   maxEventsReq, frameEventCounts, totalFilePaths, strategy);
+  }
+  // Add the final frame of events (as they are not followed by a T0 event)
+  strategy->addFrame(rawFrames, goodFrames, eventCountInFrame, minEventsReq, maxEventsReq, frameEventCounts);
+  progress(0.90);
+  dataWorkspace = createHistogramWorkspace(std::move(strategy->getBinEdges()), std::move(strategy->getCounts()));
+  return {rawFrames, goodFrames, frameEventCounts, dataWorkspace};
+}
+
+/**
+ * @brief Add an event to the relevant histogram.
+ *
+ * @param minToF The minimum ToF value to consider
+ * @param maxToF The maximum ToF value to consider
+ * @param tof The time of flight associated witht he evenr
+ * @param binWidth The width of each histogram bin
+ * @param pixel The detector pixel index.
+ */
+void LoadDataStrategyHisto::addEvent(double &minToF, double &maxToF, const double tof, const double binWidth,
+                                     const size_t pixel) {
+  if (tof >= maxToF || tof < minToF) {
+    return;
+  }
+  const int bin_idx = static_cast<int>(std::floor((tof - minToF) / binWidth));
+  m_countsInFrame[pixel][bin_idx]++;
+}
+
+/**
+ * @brief Add a completed frame to the count-by-spectra vector.
+ *
+ * @param rawFrames The number of raw frames read from file
+ * @param goodFrames The number of frames that fulfill good quality criteria
+ * @param eventCountInFrame The event counts in current frame
+ * @param minEventsReq The minimum events required to be considered a good frame
+ * @param maxEventsReq The maximum events required to be considered a good frame
+ * @param frameEventCounts Event count by frame
+ */
+void LoadDataStrategyHisto::addFrame(int &rawFrames, int &goodFrames, const int eventCountInFrame,
+                                     const int minEventsReq, const int maxEventsReq, MantidVec &frameEventCounts) {
+  addFrameToOutputWorkspace(rawFrames, goodFrames, eventCountInFrame, minEventsReq, maxEventsReq, frameEventCounts,
+                            m_counts, m_countsInFrame);
+}
+
+LoadDataStrategyHisto::LoadDataStrategyHisto(const double minToF, const double maxToF, const double binWidth)
+    : m_binEdges{calculateBinEdges(minToF, maxToF, binWidth)} {
+  m_counts.resize(NUM_OF_SPECTRA);
+  for (auto &item : m_counts) {
+    item.resize(m_binEdges.size() - 1);
+  }
+  m_countsInFrame = m_counts;
+}
+
+/**
+ * @brief Add an event to the event list.
+ *
+ * @param minToF The minimum ToF value to consider
+ * @param maxToF The maximum ToF value to consider
+ * @param tof The time of flight associated witht he evenr
+ * @param binWidth The width of each histogram bin
+ * @param pixel The detector pixel index.
+ */
+void LoadDataStrategyEvent::addEvent(double &minToF, double &maxToF, const double tof, const double binWidth,
+                                     const size_t pixel) {
+  (void)binWidth;
+  if (tof > maxToF) {
+    maxToF = tof;
+  }
+  if (tof < minToF) {
+    minToF = tof;
+  }
+  m_eventsInFrame[pixel].addEventQuickly(Types::Event::TofEvent(tof));
+}
+
+/**
+ * @brief Add a completed frame to the event list
+ *
+ * @param rawFrames The number of raw frames read from file
+ * @param goodFrames The number of frames that fulfill good quality criteria
+ * @param eventCountInFrame The event counts in current frame
+ * @param minEventsReq The minimum events required to be considered a good frame
+ * @param maxEventsReq The maximum events required to be considered a good frame
+ * @param frameEventCounts Event count by frame
+ */
+void LoadDataStrategyEvent::addFrame(int &rawFrames, int &goodFrames, const int eventCountInFrame,
+                                     const int minEventsReq, const int maxEventsReq, MantidVec &frameEventCounts) {
+  addFrameToOutputWorkspace(rawFrames, goodFrames, eventCountInFrame, minEventsReq, maxEventsReq, frameEventCounts,
+                            m_events, m_eventsInFrame);
+}
+
+LoadDataStrategyEvent::LoadDataStrategyEvent() {
+  m_events.resize(NUM_OF_SPECTRA);
+  m_eventsInFrame.resize(NUM_OF_SPECTRA);
 }
 
 } // namespace Mantid::DataHandling

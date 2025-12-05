@@ -418,7 +418,6 @@ EventList &EventList::operator+=(const std::vector<Types::Event::TofEvent> &more
   switch (this->eventType) {
   case TOF:
     // Simply push the events
-    this->events->reserve(this->events->size() + more_events.size());
     this->events->insert(this->events->end(), more_events.cbegin(), more_events.cend());
     break;
 
@@ -473,7 +472,6 @@ EventList &EventList::operator+=(const std::vector<WeightedEvent> &more_events) 
 
   case WEIGHTED:
     // Append the two lists
-    this->weightedEvents->reserve(this->weightedEvents->size() + more_events.size());
     this->weightedEvents->insert(weightedEvents->end(), more_events.cbegin(), more_events.cend());
     break;
 
@@ -507,7 +505,6 @@ EventList &EventList::operator+=(const std::vector<WeightedEventNoTime> &more_ev
 
   case WEIGHTED_NOTIME:
     // Simple appending of the two lists
-    this->weightedEventsNoTime->reserve(this->weightedEventsNoTime->size() + more_events.size());
     this->weightedEventsNoTime->insert(weightedEventsNoTime->end(), more_events.cbegin(), more_events.cend());
     break;
   }
