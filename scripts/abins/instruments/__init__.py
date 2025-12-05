@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # flake8: noqa
-from abins.constants import ALL_INSTRUMENTS
+from abins.constants import ALL_INSTRUMENTS, TWO_DIMENSIONAL_CHOPPER_INSTRUMENTS
 from .instrument import Instrument
 from .lagrangeinstrument import LagrangeInstrument
 from .panther import PantherInstrument
@@ -18,11 +18,11 @@ instruments = {
     "lagrange": LagrangeInstrument,
     "tosca": ToscaInstrument,
     "ideal2d": Ideal2D,
-    "maps": (PyChopInstrument, {"name": "MAPS"}),
-    "mari": (PyChopInstrument, {"name": "MARI"}),
-    "merlin": (PyChopInstrument, {"name": "MERLIN"}),
     "panther": PantherInstrument,
 }
+
+for name in TWO_DIMENSIONAL_CHOPPER_INSTRUMENTS:
+    instruments[name.lower()] = (PyChopInstrument, {"name": name})
 
 
 def get_instrument(name: str, **kwargs) -> Instrument:
