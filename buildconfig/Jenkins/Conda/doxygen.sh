@@ -12,7 +12,7 @@
 #   1. WORKSPACE: path to the root of the source code. On Windows, only use / for
 #                 this argument do not use \\ or \ in the path.
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source $SCRIPT_DIR/mamba-utils
+source $SCRIPT_DIR/pixi-utils
 
 # Check 1 argument is passed and is not optional
 if [[ $# < 1 || $1 == "--"* ]]; then
@@ -30,9 +30,8 @@ if $SCRIPT_DIR/../check_for_changes doxygen; then
     exit 0
 fi
 
-# Setup Mamba. Create and activate environment
-setup_mamba $WORKSPACE/miniforge "" true ""
-create_and_activate_mantid_developer_env $WORKSPACE
+# install pixi if not already installed
+install_pixi
 
 # Create the build directory if it doesn't exist
 [ -d $WORKSPACE/build ] || mkdir $WORKSPACE/build
@@ -42,7 +41,7 @@ cd $WORKSPACE/build
 export LC_ALL=C
 
 # Configure and generate build files
-cmake --preset=doxygen-ci ..
+pixi run "cmake --preset=doxygen-ci .."
 
 # Build doxygen target
-cmake --build . --target doxygen
+pixi run "cmake --build . --target doxygen"
