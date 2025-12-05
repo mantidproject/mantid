@@ -12,8 +12,6 @@
 #include "MantidKernel/FacilityInfo.h"
 #include <cxxtest/TestSuite.h>
 
-#include <Poco/File.h>
-#include <Poco/Path.h>
 #include <boost/lexical_cast.hpp>
 
 #include <filesystem>
@@ -124,13 +122,13 @@ public:
     // Code has separate path for path relative to working directory so check
     // that too
     std::string tempTestName("__FileFinderTestTempTestDir__");
-    Poco::File tempTestDir(Poco::Path().resolve(tempTestName));
-    tempTestDir.createDirectory();
+    std::filesystem::path tempTestDir = std::filesystem::current_path() / tempTestName;
+    std::filesystem::create_directory(tempTestDir);
 
     path = FileFinder::Instance().getFullPath(tempTestName);
     TS_ASSERT(!path.empty());
 
-    tempTestDir.remove();
+    std::filesystem::remove(tempTestDir);
   }
 
   void testGetFullPathSkipsDirectoriesOnRequest() {
@@ -145,8 +143,8 @@ public:
     // Code has separate path for path relative to working directory so check
     // that too
     std::string tempTestName("__FileFinderTestTempTestDir__");
-    Poco::File tempTestDir(Poco::Path().resolve(tempTestName));
-    tempTestDir.createDirectory();
+    std::filesystem::path tempTestDir = std::filesystem::current_path() / tempTestName;
+    std::filesystem::create_directory(tempTestDir);
 
     path = FileFinder::Instance().getFullPath(tempTestName, ignoreDirs);
     TSM_ASSERT("Expected an empty path when looking for a directory relative "
@@ -154,7 +152,7 @@ public:
                    path,
                path.empty());
 
-    tempTestDir.remove();
+    std::filesystem::remove(tempTestDir);
   }
 
   void testMakeFileNameForISIS() {
@@ -257,8 +255,7 @@ public:
 
     std::string path = FileFinder::Instance().findRun("CNCS7860").result();
     TS_ASSERT(path.find("CNCS_7860_event.nxs") != std::string::npos);
-    Poco::File file(path);
-    TS_ASSERT(file.exists());
+    TS_ASSERT(std::filesystem::exists(path));
   }
 
   void testFindRunForISIS() {
@@ -268,8 +265,7 @@ public:
     ConfigService::Instance().setString("datasearch.searcharchive", "Off");
     std::string path = FileFinder::Instance().findRun("CSP78173").result();
     TS_ASSERT(path.find("CSP78173.raw") != std::string::npos);
-    Poco::File file(path);
-    TS_ASSERT(file.exists());
+    TS_ASSERT(std::filesystem::exists(path));
     path = FileFinder::Instance().findRun("CSP74683", std::vector<std::string>(1, ".s02")).result();
     TS_ASSERT(path.size() > 3);
     TS_ASSERT_EQUALS(path.substr(path.size() - 3), "s02");
@@ -391,8 +387,8 @@ public:
 
   void testFindAddFiles() {
     // create a test file to find
-    Poco::File file("LOQ00111-add.raw");
-    std::ofstream fil(file.path().c_str());
+    std::filesystem::path file("LOQ00111-add.raw");
+    std::ofstream fil(file.string());
     fil << "dummy";
     fil.close();
 
@@ -400,7 +396,7 @@ public:
     std::vector<std::string> files = FileFinder::Instance().findRuns("LOQ111-add");
     TS_ASSERT_EQUALS(files.size(), 1);
 
-    file.remove();
+    std::filesystem::remove(file);
   }
 
   void testFindFileExt() {
@@ -410,8 +406,7 @@ public:
     ConfigService::Instance().setString("datasearch.searcharchive", "Off");
     std::string path = FileFinder::Instance().findRun("CSP78173.raw").result();
     TS_ASSERT(path.find("CSP78173.raw") != std::string::npos);
-    Poco::File file(path);
-    TS_ASSERT(file.exists());
+    TS_ASSERT(std::filesystem::exists(path));
 
     path = FileFinder::Instance().findRun("OFFSPEC4622.log").result();
     // Per discussion with Martyn on Dec 6, 2012: we decided to update this test
@@ -446,38 +441,32 @@ public:
 #else
     TS_ASSERT(path.find("CSP78173.raw") != std::string::npos);
 #endif
-    Poco::File file(path);
-    TS_ASSERT(file.exists());
+    TS_ASSERT(std::filesystem::exists(path));
     std::string path2 = fileFinder.getFullPath("UNiT_TESTiNG/IDF_for_UNiT_TESTiNG.xMl");
-    Poco::File file2(path2);
-    TS_ASSERT(file2.exists());
+    TS_ASSERT(std::filesystem::exists(path2));
 
     // turn on case sensitive - this one should fail on none windows
     FileFinder::Instance().setCaseSensitive(true);
     std::string pathOn = fileFinder.findRun("CSp78173.Raw").result();
-    Poco::File fileOn(pathOn);
 
     std::string pathOn2 = FileFinder::Instance().getFullPath("unit_TeSTinG/IDF_for_UNiT_TESTiNG.xMl");
-    Poco::File fileOn2(pathOn2);
 
     std::string pathOn3 = FileFinder::Instance().getFullPath("unit_testing/IDF_for_UNiT_TESTiNG.xMl");
-    Poco::File fileOn3(pathOn3);
 
     std::string pathOn4 = FileFinder::Instance().getFullPath("CSp78173.Raw");
-    Poco::File fileOn4(pathOn4);
 
     // Refs #4916 -- The FileFinder findRun() method is revised to continue
     // search using the facility supplied extensions
     // if the user supplied filename (containg extension) couldn't be found.
     // Regardless of the platform, this test case
     // would be successful now.
-    TS_ASSERT(fileOn.exists());
+    TS_ASSERT(std::filesystem::exists(pathOn));
 #ifdef _WIN32
-    TS_ASSERT(fileOn2.exists());
-    TS_ASSERT(fileOn3.exists());
-    TS_ASSERT(fileOn4.exists());
+    TS_ASSERT(std::filesystem::exists(pathOn2));
+    TS_ASSERT(std::filesystem::exists(pathOn3));
+    TS_ASSERT(std::filesystem::exists(pathOn4));
 #else
-    TS_ASSERT(!fileOn2.exists());
+    TS_ASSERT(!std::filesystem::exists(pathOn2));
     TS_ASSERT(!fileOn3.exists());
     TS_ASSERT(!fileOn4.exists());
 #endif
@@ -486,7 +475,7 @@ public:
   }
 
 private:
-  Poco::File m_facFile;
+  std::filesystem::path m_facFile;
 };
 
 class FileFinderTestPerformance : public CxxTest::TestSuite {
@@ -504,8 +493,8 @@ public:
         // unheard of.
         m_filesInDir(10000), m_filesToFind(100) {
     // Create some dummy TOSCA run files to use.
-    Poco::File dir(m_dirPath);
-    dir.createDirectories();
+    std::filesystem::path dir(m_dirPath);
+    std::filesystem::create_directories(dir);
 
     for (size_t run = 0; run < m_filesInDir; ++run) {
       std::stringstream filename;
@@ -518,7 +507,7 @@ public:
         const std::string &tmp = filename.str();
         const char *cstr = tmp.c_str();
 
-        // Shun use of Poco, which is slower.
+        // Use standard C file operations for speed
         FILE *pFile;
         pFile = fopen(cstr, "w");
         if (pFile != nullptr) {
@@ -535,10 +524,9 @@ public:
 
     // Add dummy directory to search path, saving old search paths to be put
     // back later.
-    Poco::Path path(dir.path());
-    path = path.makeAbsolute();
+    std::filesystem::path path = std::filesystem::absolute(dir);
     m_oldDataSearchDirectories = Mantid::Kernel::ConfigService::Instance().getString("datasearch.directories");
-    Mantid::Kernel::ConfigService::Instance().setString("datasearch.directories", path.toString());
+    Mantid::Kernel::ConfigService::Instance().setString("datasearch.directories", path.string());
   }
 
   ~FileFinderTestPerformance() override {
@@ -546,11 +534,10 @@ public:
     Mantid::Kernel::ConfigService::Instance().setString("datasearch.directories", m_oldDataSearchDirectories);
 
     // Destroy dummy folder and files.
-    // Use Poco here so removing works on multiple platforms. Recursive
-    // .remove(true) also means we dont have to generate
+    // Recursive remove_all means we dont have to generate
     // the filenames for a second time.
-    Poco::File dir(m_dirPath);
-    dir.remove(true);
+    std::filesystem::path dir(m_dirPath);
+    std::filesystem::remove_all(dir);
   }
 
   void test_largeDirectoryOfFiles() {

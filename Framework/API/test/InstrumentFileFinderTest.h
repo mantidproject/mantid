@@ -11,11 +11,10 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
 
-#include <Poco/DirectoryIterator.h>
-#include <Poco/TemporaryFile.h>
 #include <boost/algorithm/string.hpp>
 #include <boost/regex.hpp>
 #include <cxxtest/TestSuite.h>
+#include <filesystem>
 
 #include <string>
 #include <unordered_map>
@@ -43,22 +42,22 @@ public:
     std::unordered_set<std::string> idfIdentifiers;
 
     boost::regex regex(".*_Definition.*\\.xml", boost::regex_constants::icase);
-    Poco::DirectoryIterator end_iter;
-    for (Poco::DirectoryIterator dir_itr(ConfigService::Instance().getString("instrumentDefinition.directory"));
-         dir_itr != end_iter; ++dir_itr) {
-      if (!Poco::File(dir_itr->path()).isFile())
+    for (const auto &dir_entry :
+         std::filesystem::directory_iterator(ConfigService::Instance().getString("instrumentDefinition.directory"))) {
+      const auto &entry_path = dir_entry.path();
+      if (!std::filesystem::is_regular_file(entry_path))
         continue;
 
-      std::string l_filenamePart = Poco::Path(dir_itr->path()).getFileName();
+      std::string l_filenamePart = entry_path.filename().string();
 
       if (boost::regex_match(l_filenamePart, regex)) {
         std::string validFrom, validTo;
-        InstrumentFileFinder::getValidFromTo(dir_itr->path(), validFrom, validTo);
+        InstrumentFileFinder::getValidFromTo(entry_path.string(), validFrom, validTo);
 
         size_t found;
         found = l_filenamePart.find("_Definition");
         fromToEntry ft;
-        ft.path = dir_itr->path();
+        ft.path = entry_path.string();
         ft.from.setFromISO8601(validFrom);
         // Valid TO is optional
         if (validTo.length() > 0)
@@ -121,23 +120,26 @@ public:
   }
 
   void testFindIPFWithHint() {
-    const auto tmpDir = Poco::Path::temp();
+    const auto tmpDir = std::filesystem::temp_directory_path();
     const std::string filename = "test_Parameters.xml";
-    const std::string expectedPath = tmpDir + filename;
+    const auto expectedPath = tmpDir / filename;
 
-    Poco::TemporaryFile::registerForDeletion(expectedPath);
-    Poco::File fileHandle(expectedPath);
-    fileHandle.createFile();
+    {
+      std::ofstream ofs(expectedPath);
+      ofs.close();
+    }
 
-    const auto result = InstrumentFileFinder::getParameterPath("test", tmpDir);
+    const auto result = InstrumentFileFinder::getParameterPath("test", tmpDir.string());
     // Ensure file was found and it's in the tmp dir
     TS_ASSERT(result.find(filename) != std::string::npos);
-    TS_ASSERT(result.find(tmpDir) != std::string::npos);
+    TS_ASSERT(result.find(tmpDir.string()) != std::string::npos);
+
+    std::filesystem::remove(expectedPath);
   }
 
   void testNonExistantIPFWithHint() {
-    const auto tmpDir = Poco::Path::temp();
-    const auto result = InstrumentFileFinder::getParameterPath("notThere", tmpDir);
+    const auto tmpDir = std::filesystem::temp_directory_path();
+    const auto result = InstrumentFileFinder::getParameterPath("notThere", tmpDir.string());
     TS_ASSERT(result.empty());
   }
 

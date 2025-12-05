@@ -11,8 +11,8 @@
 #include "MantidAPI/FileFinder.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/ConfigService.h"
-#include <Poco/File.h>
 #include <cstdlib>
+#include <filesystem>
 #include <fstream>
 
 using Mantid::API::FileFinder;
@@ -54,7 +54,7 @@ public:
     // above.
     ConfigService::Instance().setFacility("ISIS");
 
-    Poco::File(facilityFilePath).remove();
+    std::filesystem::remove(facilityFilePath);
   }
 
   void testSearchDirs() { TS_ASSERT_DIFFERS(ConfigService::Instance().getDataSearchDirs().size(), 0); }
@@ -175,8 +175,8 @@ public:
 
   void testDirectoryPasses() {
     std::string TestDir(ConfigService::Instance().getDirectoryOfExecutable() + "MyTestFolder");
-    Poco::File dir(TestDir);
-    dir.createDirectory();
+    std::filesystem::path dir(TestDir);
+    std::filesystem::create_directory(dir);
 
     FileProperty fp("SavePath", "", FileProperty::Directory);
     TS_ASSERT_EQUALS(fp.isDirectoryProperty(), true);
@@ -185,7 +185,7 @@ public:
     std::string msg = fp.setValue(TestDir);
     TS_ASSERT_EQUALS(msg, "");
 
-    dir.remove(); // clean up your folder
+    std::filesystem::remove(dir); // clean up your folder
   }
 
   void testExpandUserVariables() {
@@ -197,7 +197,7 @@ public:
       homepath = std::getenv("USERPROFILE");
     }
 
-    if (homepath && Poco::File(homepath).exists()) {
+    if (homepath && std::filesystem::exists(homepath)) {
       // User home variable is set and points to a valid directory
       // We should have no errors
       TS_ASSERT(msg.empty());
