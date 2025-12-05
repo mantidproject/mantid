@@ -138,8 +138,8 @@ void AddLogInterpolated::exec() {
 }
 
 /** Find the region that has to be interpolated
- * @param axisIn : the x-axis of the original data
- * @param axisOut : the x-axis the interpolated data will have
+ * @param xAxisIn : the x-axis of the original data
+ * @param xAxisOut : the x-axis the interpolated data will have
  * @return : pair of indices for representing the interpolation range
  */
 std::pair<size_t, size_t> AddLogInterpolated::findInterpolationRange(std::vector<double> const &xAxisIn,
@@ -153,13 +153,13 @@ std::pair<size_t, size_t> AddLogInterpolated::findInterpolationRange(std::vector
     firstIndex = lastIndex;
   } else {
     for (size_t i = 0; i < xAxisOut.size(); ++i) {
-      if (xAxisOut[i] >= xAxisIn.front()) {
+      if (xAxisOut[i] >= xAxisIn.front()) { // cppcheck-suppress useStlAlgorithm
         firstIndex = i;
         break;
       }
     }
     for (size_t i = firstIndex; i < xAxisOut.size(); ++i) {
-      if (xAxisOut[i] > xAxisIn.back()) {
+      if (xAxisOut[i] > xAxisIn.back()) { // cppcheck-suppress useStlAlgorithm
         lastIndex = i;
         break;
       }
