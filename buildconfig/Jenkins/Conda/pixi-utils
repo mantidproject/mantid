@@ -13,20 +13,3 @@ install_pixi() {
     fi
   fi
 }
-
-# For some reason (probably a pixi bug) when dereferencing bash environment variables
-# during a pixi run command (i.e  pixi run "versioningit $REPO_ROOT_DIR")
-# on Windows the slashes were reversed (\). We found that a path in the style C:/one/two/three
-# always worked, we this functions converts a path into that from.
-normalise_windows_path() {
-    local p="$1"
-    # 1. Convert backslashes → forward slashes
-    p="${p//\\//}"
-    # 2. Strip any leading slash before drive letter: /c/... → c/...
-    p="${p#/}"
-    # 3. Uppercase the drive letter: c/... → C/...
-    p="$(printf '%s' "$p" | sed -E 's/^([a-zA-Z])/\U\1/')"
-    # 4. Add colon after drive letter if missing: C/... → C:/...
-    p="$(printf '%s' "$p" | sed -E 's/^([A-Z]):?/\1:/')"
-    echo "$p"
-}
