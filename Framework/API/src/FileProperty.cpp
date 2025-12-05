@@ -114,10 +114,8 @@ std::string expandUser(const std::string &filepath) {
  */
 std::string createDirectory(const std::string &path) {
   std::filesystem::path stempath(path);
-  if (stempath.has_filename() && !stempath.has_extension()) {
-    // Treat it as a directory
-  } else if (stempath.has_filename()) {
-    // Has a filename with extension, get parent
+  // If the path doesn't end with a separator, assume it includes a filename and get the parent
+  if (!path.empty() && path.back() != '/' && path.back() != '\\') {
     stempath = stempath.parent_path();
   }
 
