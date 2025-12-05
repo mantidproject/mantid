@@ -12,7 +12,7 @@
 namespace Mantid {
 namespace Algorithms {
 
-/** Takes an existing sample log and smooths it using a selected method
+/** Takes an existing sample log and interpolates it according to the time axis of another log
   @author Reece Boston
   @date 2025-11-11
 */
@@ -23,7 +23,7 @@ public:
   const std::string name() const override { return "AddLogInterpolated"; }
   /// Summary of algorithms purpose
   const std::string summary() const override {
-    return "Interpolates a given log to match a time series log's axis, using a cubic spline ";
+    return "Interpolates a given log to match a time series log's axis, using a cubic spline";
   }
 
   /// Algorithm's version for identification

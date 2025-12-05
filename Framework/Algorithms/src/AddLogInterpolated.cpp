@@ -44,11 +44,11 @@ void AddLogInterpolated::init() {
                   "An input/output workspace containing the log to interpolate. The new log will be added to it.");
 
   declareProperty(PropertyNames::LOG_INTERP, "", std::make_shared<MandatoryValidator<std::string>>(),
-                  "The name of the log entry to be interpolated .\nThis log must be a numerical series (double).");
+                  "The name of the log entry to be interpolated. This log must be a numerical series (double).");
 
   declareProperty(
       PropertyNames::LOG_MATCH, "", std::make_shared<MandatoryValidator<std::string>>(),
-      "The name of the log entry defining the interpolation points .\nThis log must be a numerical series (double).");
+      "The name of the log entry defining the interpolation points. This log must be a numerical series (double).");
 
   declareProperty(PropertyNames::NEW_LOG_NAME, "",
                   "Name of the newly created log. If not specified, the string '_interpolated' will be appended to the "
@@ -82,7 +82,7 @@ std::map<std::string, std::string> AddLogInterpolated::validateInputs() {
     return issues;
   }
 
-  // if the properies are present, make sure they are time series logs
+  // if the properties are present, make sure they are time series logs
   auto const *tspMatch = dynamic_cast<TimeSeriesProperty<double> *>(run.getProperty(logMatch));
   if (!tspMatch) {
     issues[PropertyNames::LOG_MATCH] = "Log " + logMatch + " must be a numerical time series (TimeSeries<double>).";
@@ -132,7 +132,7 @@ void AddLogInterpolated::exec() {
 
   run.addProperty(output.release(), true);
 
-  g_log.notice() << "Added log named " << newLogName << " to " << ws << '\n';
+  g_log.notice() << "Added log named " << newLogName << " to " << ws->getName() << '\n';
 
   setProperty(PropertyNames::INPUT_WKSP, ws);
 }

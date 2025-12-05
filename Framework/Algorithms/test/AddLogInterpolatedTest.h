@@ -72,8 +72,6 @@ public:
     alg.setProperty("LogToMatch", "nonexistent_log");
     TS_ASSERT_THROWS_ASSERT(alg.execute(), std::runtime_error const &e,
                             TS_ASSERT(strstr(e.what(), "Log nonexistent_log not found")));
-    TS_ASSERT_THROWS_ASSERT(alg.execute(), std::runtime_error const &e,
-                            TS_ASSERT(strstr(e.what(), "Log nonexistent_log not found")));
 
     // set with a non-tsp log
     PropertyWithValue<double> *pwv1 = new PropertyWithValue<double>("pwv_log1", 0);
@@ -89,7 +87,7 @@ public:
   Workspace2D_sptr make_ws_with_tsp_log(std::vector<double> const &values, double const dx) {
     // setup a workspace with a time series log
     Workspace2D_sptr ws = WorkspaceCreationHelper::create2DWorkspace(1, 1);
-    AnalysisDataService::Instance().addOrReplace("_smooth_test", ws);
+    AnalysisDataService::Instance().addOrReplace("_interpolated_test", ws);
     Mantid::Types::Core::DateAndTime root_time("2016-11-20T16:17");
     TimeSeriesProperty<double> *tspInterp = new TimeSeriesProperty<double>("tsp_interp");
     TimeSeriesProperty<double> *tspMatch = new TimeSeriesProperty<double>("tsp_match");
@@ -121,7 +119,7 @@ public:
       expect[i] = func(x[i]);
     }
 
-    // setup the algorithm for boxcar smoothing
+    // setup the algorithm for cubic spline interpolation
     AddLogInterpolated alg;
     alg.initialize();
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", ws->getName()));
