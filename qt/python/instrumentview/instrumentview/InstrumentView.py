@@ -25,7 +25,7 @@ class InstrumentView:
     def start_app_open_window(file_path: Path) -> None:
         """Load the given file, then open the Instrument View in a separate window with that workspace displayed"""
         app = QApplication(sys.argv)
-        ws = Load(str(file_path), StoreInADS=False)
+        ws = Load(str(file_path))
 
         if (
             not ws.getInstrument()
