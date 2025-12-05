@@ -703,6 +703,7 @@ set(QCH_FILES)
 
 set(TEST_FILES
     test/AlgorithmHintStrategyTest.h
+    test/AlgorithmPropertiesWidgetTest.h
     test/BatchAlgorithmRunnerTest.h
     test/ConvolutionFunctionModelTest.h
     test/FileDialogHandlerTest.h
