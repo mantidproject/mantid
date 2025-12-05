@@ -639,7 +639,7 @@ std::vector<std::string> FileFinderImpl::findRuns(const std::string &hintstr,
           // Append separator for string concatenation later
           previousPath = tempPath.parent_path().string();
           if (!previousPath.empty() && previousPath.back() != '/' && previousPath.back() != '\\') {
-            previousPath += '/';
+            previousPath += "/";
           }
           res.emplace_back(path);
         } else {
