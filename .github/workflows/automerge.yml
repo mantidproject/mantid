@@ -13,10 +13,10 @@ jobs:
     # run on release-next branch and do not run in forks
     if: ${{ github.ref_name == 'release-next' && github.event.pull_request.head.repo.full_name == github.repository }}
     steps:
-      - uses: actions/checkout@master
+      - uses: actions/checkout@v6
 
       - name: Merge release-next into main
-        uses: devmasx/merge-branch@master
+        uses: devmasx/merge-branch@v1.4.0
         with:
           type: now
           target_branch: main
@@ -28,10 +28,10 @@ jobs:
     # run on ornl-next branche and do not run in forks
     if: ${{ github.ref_name == 'ornl-next' && github.event.pull_request.head.repo.full_name == github.repository }}
     steps:
-      - uses: actions/checkout@master
+      - uses: actions/checkout@v6
 
       - name: Merge ornl-next into main
-        uses: devmasx/merge-branch@master
+        uses: devmasx/merge-branch@v1.4.0
         with:
           type: now
           target_branch: main
