@@ -17,6 +17,7 @@
       <handedness val="right"/>
       <theta-sign axis="x"/>
     </reference-frame>
+    <default-view view="cylindrical_y"/>
   </defaults>
 
   <!--SOURCE-->
@@ -72,7 +73,7 @@
           <value val="-167.49840687691767"/>
         </parameter>
         <parameter name="roty">
-          <value val="-167.49840687691767"/>
+          <value val="12.50159312308233"/>
         </parameter>
       </location>
     </component>
@@ -91,7 +92,7 @@
           <value val="-167.49840687691767"/>
         </parameter>
         <parameter name="roty">
-          <value val="-167.49840687691767"/>
+          <value val="12.50159312308233"/>
         </parameter>
       </location>
     </component>
@@ -110,7 +111,7 @@
           <value val="-167.49840687691767"/>
         </parameter>
         <parameter name="roty">
-          <value val="-167.49840687691767"/>
+          <value val="12.50159312308233"/>
         </parameter>
       </location>
     </component>
@@ -129,7 +130,7 @@
           <value val="-167.49840687691767"/>
         </parameter>
         <parameter name="roty">
-          <value val="-167.49840687691767"/>
+          <value val="12.50159312308233"/>
         </parameter>
       </location>
     </component>
@@ -148,7 +149,7 @@
           <value val="-167.49840687691767"/>
         </parameter>
         <parameter name="roty">
-          <value val="-167.49840687691767"/>
+          <value val="12.50159312308233"/>
         </parameter>
       </location>
     </component>
@@ -167,7 +168,7 @@
           <value val="-167.49840687691767"/>
         </parameter>
         <parameter name="roty">
-          <value val="-167.49840687691767"/>
+          <value val="12.50159312308233"/>
         </parameter>
       </location>
     </component>
@@ -186,7 +187,7 @@
           <value val="-167.49840687691767"/>
         </parameter>
         <parameter name="roty">
-          <value val="-167.49840687691767"/>
+          <value val="12.50159312308233"/>
         </parameter>
       </location>
     </component>
@@ -205,7 +206,7 @@
           <value val="-167.49840687691767"/>
         </parameter>
         <parameter name="roty">
-          <value val="-167.49840687691767"/>
+          <value val="12.50159312308233"/>
         </parameter>
       </location>
     </component>
@@ -224,7 +225,7 @@
           <value val="-147.88523442069138"/>
         </parameter>
         <parameter name="roty">
-          <value val="-147.88523442069138"/>
+          <value val="32.114765579308624"/>
         </parameter>
       </location>
     </component>
@@ -243,7 +244,7 @@
           <value val="-147.88523442069138"/>
         </parameter>
         <parameter name="roty">
-          <value val="-147.88523442069138"/>
+          <value val="32.114765579308624"/>
         </parameter>
       </location>
     </component>
@@ -262,7 +263,7 @@
           <value val="-147.88523442069138"/>
         </parameter>
         <parameter name="roty">
-          <value val="-147.88523442069138"/>
+          <value val="32.114765579308624"/>
         </parameter>
       </location>
     </component>
@@ -281,7 +282,7 @@
           <value val="-147.88523442069138"/>
         </parameter>
         <parameter name="roty">
-          <value val="-147.88523442069138"/>
+          <value val="32.114765579308624"/>
         </parameter>
       </location>
     </component>
@@ -300,7 +301,7 @@
           <value val="-147.88523442069138"/>
         </parameter>
         <parameter name="roty">
-          <value val="-147.88523442069138"/>
+          <value val="32.114765579308624"/>
         </parameter>
       </location>
     </component>
@@ -319,7 +320,7 @@
           <value val="-147.88523442069138"/>
         </parameter>
         <parameter name="roty">
-          <value val="-147.88523442069138"/>
+          <value val="32.114765579308624"/>
         </parameter>
       </location>
     </component>
@@ -338,7 +339,7 @@
           <value val="-147.88523442069138"/>
         </parameter>
         <parameter name="roty">
-          <value val="-147.88523442069138"/>
+          <value val="32.114765579308624"/>
         </parameter>
       </location>
     </component>
@@ -357,7 +358,7 @@
           <value val="-147.88523442069138"/>
         </parameter>
         <parameter name="roty">
-          <value val="-147.88523442069138"/>
+          <value val="32.114765579308624"/>
         </parameter>
       </location>
     </component>
@@ -376,7 +377,7 @@
           <value val="-128.27376798421676"/>
         </parameter>
         <parameter name="roty">
-          <value val="-128.27376798421676"/>
+          <value val="51.72623201578324"/>
         </parameter>
       </location>
     </component>
@@ -395,7 +396,7 @@
           <value val="-128.27376798421676"/>
         </parameter>
         <parameter name="roty">
-          <value val="-128.27376798421676"/>
+          <value val="51.72623201578324"/>
         </parameter>
       </location>
     </component>
@@ -414,7 +415,7 @@
           <value val="-128.27376798421676"/>
         </parameter>
         <parameter name="roty">
-          <value val="-128.27376798421676"/>
+          <value val="51.72623201578324"/>
         </parameter>
       </location>
     </component>
@@ -433,7 +434,7 @@
           <value val="-128.27376798421676"/>
         </parameter>
         <parameter name="roty">
-          <value val="-128.27376798421676"/>
+          <value val="51.72623201578324"/>
         </parameter>
       </location>
     </component>
@@ -452,7 +453,7 @@
           <value val="-128.27376798421676"/>
         </parameter>
         <parameter name="roty">
-          <value val="-128.27376798421676"/>
+          <value val="51.72623201578324"/>
         </parameter>
       </location>
     </component>
@@ -471,7 +472,7 @@
           <value val="-128.27376798421676"/>
         </parameter>
         <parameter name="roty">
-          <value val="-128.27376798421676"/>
+          <value val="51.72623201578324"/>
         </parameter>
       </location>
     </component>
@@ -490,7 +491,7 @@
           <value val="-128.27376798421676"/>
         </parameter>
         <parameter name="roty">
-          <value val="-128.27376798421676"/>
+          <value val="51.72623201578324"/>
         </parameter>
       </location>
     </component>
@@ -509,7 +510,7 @@
           <value val="-128.27376798421676"/>
         </parameter>
         <parameter name="roty">
-          <value val="-128.27376798421676"/>
+          <value val="51.72623201578324"/>
         </parameter>
       </location>
     </component>
@@ -528,7 +529,7 @@
           <value val="-108.64749137038126"/>
         </parameter>
         <parameter name="roty">
-          <value val="-108.64749137038126"/>
+          <value val="71.35250862961874"/>
         </parameter>
       </location>
     </component>
@@ -547,7 +548,7 @@
           <value val="-108.64749137038126"/>
         </parameter>
         <parameter name="roty">
-          <value val="-108.64749137038126"/>
+          <value val="71.35250862961874"/>
         </parameter>
       </location>
     </component>
@@ -566,7 +567,7 @@
           <value val="-108.64749137038126"/>
         </parameter>
         <parameter name="roty">
-          <value val="-108.64749137038126"/>
+          <value val="71.35250862961874"/>
         </parameter>
       </location>
     </component>
@@ -585,7 +586,7 @@
           <value val="-108.64749137038126"/>
         </parameter>
         <parameter name="roty">
-          <value val="-108.64749137038126"/>
+          <value val="71.35250862961874"/>
         </parameter>
       </location>
     </component>
@@ -604,7 +605,7 @@
           <value val="-108.64749137038126"/>
         </parameter>
         <parameter name="roty">
-          <value val="-108.64749137038126"/>
+          <value val="71.35250862961874"/>
         </parameter>
       </location>
     </component>
@@ -623,7 +624,7 @@
           <value val="-108.64749137038126"/>
         </parameter>
         <parameter name="roty">
-          <value val="-108.64749137038126"/>
+          <value val="71.35250862961874"/>
         </parameter>
       </location>
     </component>
@@ -642,7 +643,7 @@
           <value val="-108.64749137038126"/>
         </parameter>
         <parameter name="roty">
-          <value val="-108.64749137038126"/>
+          <value val="71.35250862961874"/>
         </parameter>
       </location>
     </component>
@@ -661,7 +662,7 @@
           <value val="-108.64749137038126"/>
         </parameter>
         <parameter name="roty">
-          <value val="-108.64749137038126"/>
+          <value val="71.35250862961874"/>
         </parameter>
       </location>
     </component>
@@ -680,7 +681,7 @@
           <value val="-89.03245179515432"/>
         </parameter>
         <parameter name="roty">
-          <value val="-89.03245179515432"/>
+          <value val="90.96754820484568"/>
         </parameter>
       </location>
     </component>
@@ -699,7 +700,7 @@
           <value val="-89.03245179515432"/>
         </parameter>
         <parameter name="roty">
-          <value val="-89.03245179515432"/>
+          <value val="90.96754820484568"/>
         </parameter>
       </location>
     </component>
@@ -718,7 +719,7 @@
           <value val="-89.03245179515432"/>
         </parameter>
         <parameter name="roty">
-          <value val="-89.03245179515432"/>
+          <value val="90.96754820484568"/>
         </parameter>
       </location>
     </component>
@@ -737,7 +738,7 @@
           <value val="-89.03245179515432"/>
         </parameter>
         <parameter name="roty">
-          <value val="-89.03245179515432"/>
+          <value val="90.96754820484568"/>
         </parameter>
       </location>
     </component>
@@ -756,7 +757,7 @@
           <value val="-89.03245179515432"/>
         </parameter>
         <parameter name="roty">
-          <value val="-89.03245179515432"/>
+          <value val="90.96754820484568"/>
         </parameter>
       </location>
     </component>
@@ -775,7 +776,7 @@
           <value val="-89.03245179515432"/>
         </parameter>
         <parameter name="roty">
-          <value val="-89.03245179515432"/>
+          <value val="90.96754820484568"/>
         </parameter>
       </location>
     </component>
@@ -794,7 +795,7 @@
           <value val="-89.03245179515432"/>
         </parameter>
         <parameter name="roty">
-          <value val="-89.03245179515432"/>
+          <value val="90.96754820484568"/>
         </parameter>
       </location>
     </component>
@@ -813,7 +814,7 @@
           <value val="-89.03245179515432"/>
         </parameter>
         <parameter name="roty">
-          <value val="-89.03245179515432"/>
+          <value val="90.96754820484568"/>
         </parameter>
       </location>
     </component>
@@ -832,7 +833,7 @@
           <value val="12.501561102543636"/>
         </parameter>
         <parameter name="roty">
-          <value val="12.501561102543636"/>
+          <value val="192.50156110254363"/>
         </parameter>
       </location>
     </component>
@@ -851,7 +852,7 @@
           <value val="12.501561102543636"/>
         </parameter>
         <parameter name="roty">
-          <value val="12.501561102543636"/>
+          <value val="192.50156110254363"/>
         </parameter>
       </location>
     </component>
@@ -870,7 +871,7 @@
           <value val="12.501561102543636"/>
         </parameter>
         <parameter name="roty">
-          <value val="12.501561102543636"/>
+          <value val="192.50156110254363"/>
         </parameter>
       </location>
     </component>
@@ -889,7 +890,7 @@
           <value val="12.501561102543636"/>
         </parameter>
         <parameter name="roty">
-          <value val="12.501561102543636"/>
+          <value val="192.50156110254363"/>
         </parameter>
       </location>
     </component>
@@ -908,7 +909,7 @@
           <value val="12.501561102543636"/>
         </parameter>
         <parameter name="roty">
-          <value val="12.501561102543636"/>
+          <value val="192.50156110254363"/>
         </parameter>
       </location>
     </component>
@@ -927,7 +928,7 @@
           <value val="12.501561102543636"/>
         </parameter>
         <parameter name="roty">
-          <value val="12.501561102543636"/>
+          <value val="192.50156110254363"/>
         </parameter>
       </location>
     </component>
@@ -946,7 +947,7 @@
           <value val="12.501561102543636"/>
         </parameter>
         <parameter name="roty">
-          <value val="12.501561102543636"/>
+          <value val="192.50156110254363"/>
         </parameter>
       </location>
     </component>
@@ -965,7 +966,7 @@
           <value val="12.501561102543636"/>
         </parameter>
         <parameter name="roty">
-          <value val="12.501561102543636"/>
+          <value val="192.50156110254363"/>
         </parameter>
       </location>
     </component>
@@ -984,7 +985,7 @@
           <value val="32.11475168844916"/>
         </parameter>
         <parameter name="roty">
-          <value val="32.11475168844916"/>
+          <value val="212.11475168844916"/>
         </parameter>
       </location>
     </component>
@@ -1003,7 +1004,7 @@
           <value val="32.11475168844916"/>
         </parameter>
         <parameter name="roty">
-          <value val="32.11475168844916"/>
+          <value val="212.11475168844916"/>
         </parameter>
       </location>
     </component>
@@ -1022,7 +1023,7 @@
           <value val="32.11475168844916"/>
         </parameter>
         <parameter name="roty">
-          <value val="32.11475168844916"/>
+          <value val="212.11475168844916"/>
         </parameter>
       </location>
     </component>
@@ -1041,7 +1042,7 @@
           <value val="32.11475168844916"/>
         </parameter>
         <parameter name="roty">
-          <value val="32.11475168844916"/>
+          <value val="212.11475168844916"/>
         </parameter>
       </location>
     </component>
@@ -1060,7 +1061,7 @@
           <value val="32.11475168844916"/>
         </parameter>
         <parameter name="roty">
-          <value val="32.11475168844916"/>
+          <value val="212.11475168844916"/>
         </parameter>
       </location>
     </component>
@@ -1079,7 +1080,7 @@
           <value val="32.11475168844916"/>
         </parameter>
         <parameter name="roty">
-          <value val="32.11475168844916"/>
+          <value val="212.11475168844916"/>
         </parameter>
       </location>
     </component>
@@ -1098,7 +1099,7 @@
           <value val="32.11475168844916"/>
         </parameter>
         <parameter name="roty">
-          <value val="32.11475168844916"/>
+          <value val="212.11475168844916"/>
         </parameter>
       </location>
     </component>
@@ -1117,7 +1118,7 @@
           <value val="32.11475168844916"/>
         </parameter>
         <parameter name="roty">
-          <value val="32.11475168844916"/>
+          <value val="212.11475168844916"/>
         </parameter>
       </location>
     </component>
@@ -1136,7 +1137,7 @@
           <value val="51.72623201578324"/>
         </parameter>
         <parameter name="roty">
-          <value val="51.72623201578324"/>
+          <value val="231.72623201578324"/>
         </parameter>
       </location>
     </component>
@@ -1155,7 +1156,7 @@
           <value val="51.72623201578324"/>
         </parameter>
         <parameter name="roty">
-          <value val="51.72623201578324"/>
+          <value val="231.72623201578324"/>
         </parameter>
       </location>
     </component>
@@ -1174,7 +1175,7 @@
           <value val="51.72623201578324"/>
         </parameter>
         <parameter name="roty">
-          <value val="51.72623201578324"/>
+          <value val="231.72623201578324"/>
         </parameter>
       </location>
     </component>
@@ -1193,7 +1194,7 @@
           <value val="51.72623201578324"/>
         </parameter>
         <parameter name="roty">
-          <value val="51.72623201578324"/>
+          <value val="231.72623201578324"/>
         </parameter>
       </location>
     </component>
@@ -1212,7 +1213,7 @@
           <value val="51.72623201578324"/>
         </parameter>
         <parameter name="roty">
-          <value val="51.72623201578324"/>
+          <value val="231.72623201578324"/>
         </parameter>
       </location>
     </component>
@@ -1231,7 +1232,7 @@
           <value val="51.72623201578324"/>
         </parameter>
         <parameter name="roty">
-          <value val="51.72623201578324"/>
+          <value val="231.72623201578324"/>
         </parameter>
       </location>
     </component>
@@ -1250,7 +1251,7 @@
           <value val="51.72623201578324"/>
         </parameter>
         <parameter name="roty">
-          <value val="51.72623201578324"/>
+          <value val="231.72623201578324"/>
         </parameter>
       </location>
     </component>
@@ -1269,7 +1270,7 @@
           <value val="51.72623201578324"/>
         </parameter>
         <parameter name="roty">
-          <value val="51.72623201578324"/>
+          <value val="231.72623201578324"/>
         </parameter>
       </location>
     </component>
@@ -1288,7 +1289,7 @@
           <value val="71.35245618781975"/>
         </parameter>
         <parameter name="roty">
-          <value val="71.35245618781975"/>
+          <value val="251.35245618781977"/>
         </parameter>
       </location>
     </component>
@@ -1307,7 +1308,7 @@
           <value val="71.35245618781975"/>
         </parameter>
         <parameter name="roty">
-          <value val="71.35245618781975"/>
+          <value val="251.35245618781977"/>
         </parameter>
       </location>
     </component>
@@ -1326,7 +1327,7 @@
           <value val="71.35245618781975"/>
         </parameter>
         <parameter name="roty">
-          <value val="71.35245618781975"/>
+          <value val="251.35245618781977"/>
         </parameter>
       </location>
     </component>
@@ -1345,7 +1346,7 @@
           <value val="71.35245618781975"/>
         </parameter>
         <parameter name="roty">
-          <value val="71.35245618781975"/>
+          <value val="251.35245618781977"/>
         </parameter>
       </location>
     </component>
@@ -1364,7 +1365,7 @@
           <value val="71.35245618781975"/>
         </parameter>
         <parameter name="roty">
-          <value val="71.35245618781975"/>
+          <value val="251.35245618781977"/>
         </parameter>
       </location>
     </component>
@@ -1383,7 +1384,7 @@
           <value val="71.35245618781975"/>
         </parameter>
         <parameter name="roty">
-          <value val="71.35245618781975"/>
+          <value val="251.35245618781977"/>
         </parameter>
       </location>
     </component>
@@ -1402,7 +1403,7 @@
           <value val="71.35245618781975"/>
         </parameter>
         <parameter name="roty">
-          <value val="71.35245618781975"/>
+          <value val="251.35245618781977"/>
         </parameter>
       </location>
     </component>
@@ -1421,7 +1422,7 @@
           <value val="71.35245618781975"/>
         </parameter>
         <parameter name="roty">
-          <value val="71.35245618781975"/>
+          <value val="251.35245618781977"/>
         </parameter>
       </location>
     </component>
@@ -1440,7 +1441,7 @@
           <value val="90.96755097389406"/>
         </parameter>
         <parameter name="roty">
-          <value val="90.96755097389406"/>
+          <value val="270.96755097389405"/>
         </parameter>
       </location>
     </component>
@@ -1459,7 +1460,7 @@
           <value val="90.96755097389406"/>
         </parameter>
         <parameter name="roty">
-          <value val="90.96755097389406"/>
+          <value val="270.96755097389405"/>
         </parameter>
       </location>
     </component>
@@ -1478,7 +1479,7 @@
           <value val="90.96755097389406"/>
         </parameter>
         <parameter name="roty">
-          <value val="90.96755097389406"/>
+          <value val="270.96755097389405"/>
         </parameter>
       </location>
     </component>
@@ -1497,7 +1498,7 @@
           <value val="90.96755097389406"/>
         </parameter>
         <parameter name="roty">
-          <value val="90.96755097389406"/>
+          <value val="270.96755097389405"/>
         </parameter>
       </location>
     </component>
@@ -1516,7 +1517,7 @@
           <value val="90.96755097389406"/>
         </parameter>
         <parameter name="roty">
-          <value val="90.96755097389406"/>
+          <value val="270.96755097389405"/>
         </parameter>
       </location>
     </component>
@@ -1535,7 +1536,7 @@
           <value val="90.96755097389406"/>
         </parameter>
         <parameter name="roty">
-          <value val="90.96755097389406"/>
+          <value val="270.96755097389405"/>
         </parameter>
       </location>
     </component>
@@ -1554,7 +1555,7 @@
           <value val="90.96755097389406"/>
         </parameter>
         <parameter name="roty">
-          <value val="90.96755097389406"/>
+          <value val="270.96755097389405"/>
         </parameter>
       </location>
     </component>
@@ -1573,7 +1574,7 @@
           <value val="90.96755097389406"/>
         </parameter>
         <parameter name="roty">
-          <value val="90.96755097389406"/>
+          <value val="270.96755097389405"/>
         </parameter>
       </location>
     </component>
@@ -1591,7 +1592,7 @@
     <cuboid id="pixel-shape">
       <left-front-bottom-point y="-0.00023809374999999975" x="-0.00023809374999999975" z="0.0"/>
       <left-front-top-point y="0.00023809374999999975" x="-0.00023809374999999975" z="0.0"/>
-      <left-back-bottom-point y="-0.00023809374999999975" x="-0.00023809374999999975" z="-0.0001"/>
+      <left-back-bottom-point y="-0.00023809374999999975" x="-0.00023809374999999975" z="-0.001"/>
       <right-front-bottom-point y="0.00023809374999999975" x="0.00023809374999999975" z="0.0"/>
     </cuboid>
     <algebra val="pixel-shape"/>
