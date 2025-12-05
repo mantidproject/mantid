@@ -25,6 +25,8 @@ ENABLE_SYSTEM_TESTS=$7
 ENABLE_DOC_TESTS=$8
 ENABLE_COVERITY=$9
 EXTRA_CMAKE_FLAGS=${10}
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+DATA_MIRROR="$("${SCRIPT_DIR}/../data_mirrors")"
 
 # Only pass MANTID_DATA_STORE to CMake if present in the environment otherwise rely on CMake default
 if [[ -n "${MANTID_DATA_STORE}" ]]; then
@@ -40,7 +42,9 @@ if [[ ${JOB_NAME} == *pull_requests* ]]; then
 fi
 
 # Run CMake using preset and variables
-cmake --preset=${CMAKE_PRESET} ${MANTID_DATA_STORE_CMAKE} ${EXTRA_CMAKE_FLAGS} $WORKSPACE
+cmake --preset=${CMAKE_PRESET} \
+      ${MANTID_DATA_STORE_CMAKE} -DDATA_STORE_MIRROR=${DATA_MIRROR} \
+      ${EXTRA_CMAKE_FLAGS} $WORKSPACE
 
 # Run the actual builds for the code, unit tests, and system tests.
 cd $WORKSPACE/build

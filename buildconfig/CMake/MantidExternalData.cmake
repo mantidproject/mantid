@@ -19,6 +19,18 @@ if(NOT MANTID_DATA_STORE)
   message(FATAL_ERROR "MANTID_DATA_STORE not set. It is required for external data")
 endif()
 
+# add options for selecting which data mirrors to use
+set(_data_store_mirror_options all ral ornl none)
+set(DATA_STORE_MIRROR
+    all
+    CACHE STRING "Local data mirror to enable"
+)
+set_property(CACHE DATA_STORE_MIRROR PROPERTY STRINGS ${_data_store_mirror_options})
+list(FIND _data_store_mirror_options ${DATA_STORE_MIRROR} index)
+if(index EQUAL -1)
+  message(FATAL_ERROR "DATA_STORE_MIRROR must be one of ${_data_store_mirror_options}")
+endif()
+
 # Tell ExternalData module about selected object stores.
 list(APPEND ExternalData_OBJECT_STORES
      # Store selected by Mantid-specific configuration above.
@@ -41,9 +53,17 @@ mark_as_advanced(ExternalData_URL_TEMPLATES)
 list(APPEND ExternalData_URL_TEMPLATES "file:///home/builder/MantidExternalData-readonly/%(algo)/%(hash)")
 list(APPEND ExternalData_URL_TEMPLATES "file:///Users/mantidbuilder/MantidExternalData/%(algo)/%(hash)") # macOS
 list(APPEND ExternalData_URL_TEMPLATES "file:///mantid_data/%(algo)/%(hash)") # ISIS Linux
+
 # facility based mirrors
-list(APPEND ExternalData_URL_TEMPLATES "http://130.246.80.136/external-data/%(algo)/%(hash)") # RAL
-list(APPEND ExternalData_URL_TEMPLATES "https://mantid-cache.sns.gov/testdata/%(algo)/%(hash)") # ORNL
+if((${DATA_STORE_MIRROR} STREQUAL all) OR (${DATA_STORE_MIRROR} STREQUAL ral))
+  message(STATUS "Adding ral data mirror")
+  list(APPEND ExternalData_URL_TEMPLATES "http://130.246.80.136/external-data/%(algo)/%(hash)") # RAL
+endif()
+if((${DATA_STORE_MIRROR} STREQUAL all) OR (${DATA_STORE_MIRROR} STREQUAL ornl))
+  message(STATUS "Adding ornl data mirror")
+  list(APPEND ExternalData_URL_TEMPLATES "https://mantid-cache.sns.gov/testdata/%(algo)/%(hash)") # ORNL
+endif()
+
 # This should always be last as it's the main read/write cache
 list(APPEND ExternalData_URL_TEMPLATES "https://testdata.mantidproject.org/ftp/external-data/%(algo)/%(hash)")
 

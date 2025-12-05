@@ -1,0 +1,17 @@
+#!/bin/bash
+
+# inspects the JENKINS_AGENT_NAME environment variable to decide which data mirrors to enable using the DATA_STORE_MIRROR property in cmake. This returns
+# ral - when agent starts with isis
+# ornl - when agent starts with ornl
+# all - for any other case, including the variable not existing
+case "${JENKINS_AGENT_NAME}" in
+    ornl*)
+	echo "ornl"
+    ;;
+    isis*)
+	echo "ral"
+    ;;
+    *)
+	echo "all"
+    ;;
+esac
