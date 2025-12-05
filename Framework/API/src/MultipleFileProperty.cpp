@@ -14,9 +14,9 @@
 #include "MantidKernel/PropertyHelper.h"
 #include "MantidKernel/VectorHelper.h"
 
-#include <Poco/Path.h>
 #include <boost/algorithm/string.hpp>
 #include <boost/regex.hpp>
+#include <filesystem>
 
 #include <algorithm>
 #include <cctype>
@@ -320,13 +320,13 @@ std::string MultipleFileProperty::setValueAsMultipleFiles(const std::string &pro
   for (const auto &unresolvedFileName : flattenedAllUnresolvedFileNames) {
     try {
       // Check for an extension.
-      Poco::Path path(unresolvedFileName);
-      if (!path.getExtension().empty()) {
-        defaultExt = "." + path.getExtension();
+      std::filesystem::path path(unresolvedFileName);
+      if (path.has_extension()) {
+        defaultExt = path.extension().string();
         break;
       }
 
-    } catch (Poco::Exception &) {
+    } catch (const std::exception &) {
       // Safe to ignore?  Need a better understanding of the circumstances under
       // which this throws.
     }
@@ -347,10 +347,10 @@ std::string MultipleFileProperty::setValueAsMultipleFiles(const std::string &pro
 
       try {
         // Check for an extension.
-        Poco::Path path(unresolvedFileName);
+        std::filesystem::path path(unresolvedFileName);
 
-        useDefaultExt = path.getExtension().empty();
-      } catch (Poco::Exception &) {
+        useDefaultExt = !path.has_extension();
+      } catch (const std::exception &) {
         // Just shove the problematic filename straight into FileProperty and
         // see if we have any luck.
         useDefaultExt = false;
