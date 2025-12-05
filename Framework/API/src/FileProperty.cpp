@@ -109,12 +109,15 @@ std::string expandUser(const std::string &filepath) {
 
 /**
  * Create a given directory if it does not already exist.
- * @param path :: The path to the directory, which can include file stem
+ * @param path :: The path to the directory. Can include a file component - in this case
+ *                the parent directory will be created. Paths ending with a separator are
+ *                treated as directories, others as files.
  * @returns A string indicating a problem if one occurred
  */
 std::string createDirectory(const std::string &path) {
   std::filesystem::path stempath(path);
-  // If the path doesn't end with a separator, assume it includes a filename and get the parent directory
+  // If the path doesn't end with a separator, assume it includes a filename component
+  // and we should create the parent directory instead
   if (!path.empty() && path.back() != std::filesystem::path::preferred_separator) {
     stempath = stempath.parent_path();
   }
