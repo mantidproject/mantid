@@ -546,11 +546,13 @@ class SANSDataProcessorGui(QMainWindow, Ui_SansDataProcessorWindow):
 
     def _on_field_edit(self):
         sender = self.sender()
-        if isinstance(sender, QLineEdit) and not sender.isModified():
+        if (is_line_edit := isinstance(sender, QLineEdit)) and not sender.isModified():
             # We only want editingFinished to fire if a user has modified. This
             # prevents a warning appearing after the first one - commonly when
             # clicking another line edit with invalid input or attempting to close the interface
             return
+        elif is_line_edit and sender.isModified():
+            sender.setModified(False)
 
         self._call_settings_listeners(lambda listener: listener.on_field_edit())
 
