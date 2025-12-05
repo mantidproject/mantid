@@ -132,44 +132,43 @@ class FullInstrumentViewPresenter:
         self._detector_mesh = self.create_poly_data_mesh(self._model.detector_positions)
         self._detector_mesh[self._counts_label] = self._model.detector_counts
         self._view.add_detector_mesh(self._detector_mesh, is_projection=self._model.is_2d_projection, scalars=self._counts_label)
-        # Update transform needs to happen after adding to plotter
-        # Uses display coordinates
-        self._update_transform(self._model.is_2d_projection, self._detector_mesh)
-        self._detector_mesh.transform(self._transform, inplace=True)
 
         self._pickable_mesh = self.create_poly_data_mesh(self._model.detector_positions)
         self._pickable_mesh[self._visible_label] = self._model.picked_visibility
-        self._pickable_mesh.transform(self._transform, inplace=True)
         self._view.add_pickable_mesh(self._pickable_mesh, scalars=self._visible_label)
 
         self._masked_mesh = self.create_poly_data_mesh(self._model.masked_positions)
-        self._masked_mesh.transform(self._transform, inplace=True)
         self._view.add_masked_mesh(self._masked_mesh)
+
+        # Update transform needs to happen after adding to plotter
+        # Uses display coordinates
+        self._update_transform(self._detector_mesh, self._masked_mesh)
+        self._detector_mesh.transform(self._transform, inplace=True)
+        self._pickable_mesh.transform(self._transform, inplace=True)
+        self._masked_mesh.transform(self._transform, inplace=True)
 
         self._view.enable_or_disable_mask_widgets()
         self._view.enable_or_disable_aspect_ratio_box()
         self.set_view_contour_limits()
         self.set_view_integration_limits()
 
-    def _update_transform(self, is_projection: bool, mesh: pv.PolyData) -> None:
-        if not is_projection or self._view.is_maintain_aspect_ratio_checkbox_checked():
+    def _update_transform(self, detector_mesh: pv.PolyData, masked_mesh: pv.PolyData) -> None:
+        if not self._model.is_2d_projection or self._view.is_maintain_aspect_ratio_checkbox_checked():
             self._transform = np.eye(4)
         else:
-            self._transform = self._transform_mesh_to_fill_window(mesh)
+            self._transform = self._transform_mesh_to_fill_window(detector_mesh, masked_mesh)
 
-    def _transform_mesh_to_fill_window(self, mesh: pv.PolyData) -> np.ndarray:
-        x_min, x_max, y_min, y_max, z_min, z_max = mesh.bounds
-        min_max_points = [
-            [x_min, y_min, z_min],
-            [x_max, y_max, z_max],
-        ]
+    def _transform_mesh_to_fill_window(self, detector_mesh: pv.PolyData, masked_mesh: pv.PolyData) -> np.ndarray:
+        meshes_bounds = np.vstack([detector_mesh.bounds, masked_mesh.bounds])
+        min_point = np.min(meshes_bounds[:, 0::2], axis=0)
+        max_point = np.max(meshes_bounds[:, 1::2], axis=0)
 
         # Convert to display coordinates (pixels)
         plotter = self._view.main_plotter
         coordinate = vtkCoordinate()
         coordinate.SetCoordinateSystemToWorld()
         display_coords = []
-        for p in min_max_points:
+        for p in (min_point, max_point):
             coordinate.SetValue(*p)
             display_coords.append(coordinate.GetComputedDisplayValue(plotter.renderer))
 
@@ -178,7 +177,7 @@ class FullInstrumentViewPresenter:
         mesh_width = display_coords[1][0] - display_coords[0][0]
         mesh_height = display_coords[1][1] - display_coords[0][1]
 
-        return self._scale_matrix_relative_to_centre(mesh.center, window_width / mesh_width, window_height / mesh_height)
+        return self._scale_matrix_relative_to_centre((min_point + max_point) / 2, window_width / mesh_width, window_height / mesh_height)
 
     def _scale_matrix_relative_to_centre(self, centre, scale_x=1.0, scale_y=1.0) -> np.ndarray:
         # Translate to centre, scale, translate back
