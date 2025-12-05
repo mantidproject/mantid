@@ -48,10 +48,10 @@ ProcessBankSplitFullTimeTask::ProcessBankSplitFullTimeTask(
     const std::map<detid_t, double> &calibration, const std::map<detid_t, double> &scale_at_sample,
     const std::set<detid_t> &masked, const size_t events_per_chunk, const size_t grainsize_event,
     const std::map<Mantid::Types::Core::DateAndTime, int> &splitterMap, std::shared_ptr<API::Progress> &progress)
-    : m_h5file(h5file), m_bankEntries(bankEntryNames), m_loader(loader), m_workspaceIndices(workspaceIndices),
-      m_wksps(wksps), m_calibration(calibration), m_scale_at_sample(scale_at_sample), m_masked(masked),
-      m_events_per_chunk(events_per_chunk), m_splitterMap(splitterMap), m_grainsize_event(grainsize_event),
-      m_progress(progress) {}
+    : m_h5file(h5file), m_bankEntries(bankEntryNames), m_loader(std::move(loader)),
+      m_workspaceIndices(workspaceIndices), m_wksps(wksps), m_calibration(calibration),
+      m_scale_at_sample(scale_at_sample), m_masked(masked), m_events_per_chunk(events_per_chunk),
+      m_splitterMap(splitterMap), m_grainsize_event(grainsize_event), m_progress(progress) {}
 
 void ProcessBankSplitFullTimeTask::operator()(const tbb::blocked_range<size_t> &range) const {
   auto entry = m_h5file.openGroup("entry"); // type=NXentry
@@ -98,6 +98,9 @@ void ProcessBankSplitFullTimeTask::operator()(const tbb::blocked_range<size_t> &
 
     const auto frequency_log =
         dynamic_cast<const Kernel::TimeSeriesProperty<double> *>(m_wksps.at(0)->run().getProperty("frequency"));
+    if (!frequency_log) {
+      throw std::runtime_error("Frequency log not found");
+    }
     const auto pulse_times =
         std::make_unique<std::vector<Mantid::Types::Core::DateAndTime>>(frequency_log->timesAsVector());
 
