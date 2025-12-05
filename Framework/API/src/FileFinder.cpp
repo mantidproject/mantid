@@ -414,7 +414,7 @@ const API::Result<std::string> FileFinderImpl::findRun(const std::string &hintst
   std::string extension = getExtension(hint, facilityExtensions);
   if (!facilityExtensions.empty())
     filename = hint.substr(0, hint.rfind(extension));
-  if (hintPath.depth() == 0) {
+  if (hintPath.parent_path().empty()) {
     try {
       if (!facility.noFilePrefix()) {
         filename = makeFileName(filename, instrument);
