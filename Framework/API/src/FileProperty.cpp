@@ -114,9 +114,8 @@ std::string expandUser(const std::string &filepath) {
  */
 std::string createDirectory(const std::string &path) {
   std::filesystem::path stempath(path);
-  // If the path has a filename component (i.e., doesn't end with a separator),
-  // assume it includes a filename and get the parent directory
-  if (stempath.has_filename() && !path.empty() && path.back() != std::filesystem::path::preferred_separator) {
+  // If the path doesn't end with a separator, assume it includes a filename and get the parent directory
+  if (!path.empty() && path.back() != std::filesystem::path::preferred_separator) {
     stempath = stempath.parent_path();
   }
 
