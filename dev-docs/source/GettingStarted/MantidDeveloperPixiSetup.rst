@@ -30,14 +30,14 @@ Once `direnv` is properly installed and in your path, create a file ``.envrc`` i
 .. code-block:: sh
 
   watch_file pixi.lock
-  eval "$(pixi shell-hook --change-ps1 false)"
+  eval "$(pixi shell-hook --frozen --change-ps1 false)"
 
 For out of source builds, the build directory should have a ``.envrc`` with the contents
 
 .. code-block:: sh
 
   watch_file /path/to/source/mantid/pixi.lock
-  eval "$(pixi shell-hook --manifest-path=/path/to/source/mantid/ --change-ps1 false)"
+  eval "$(pixi shell-hook --manifest-path=/path/to/source/mantid/ --frozen --change-ps1 false)"
   export PYTHONPATH=/path/to/build/bin/:$PYTHONPATH
 
 The last line is necessary to get the build results into the python path.
