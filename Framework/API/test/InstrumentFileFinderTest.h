@@ -125,7 +125,7 @@ public:
     const auto expectedPath = tmpDir / filename;
 
     // Create the file - RAII will close it automatically
-    std::ofstream(expectedPath);
+    std::ofstream(expectedPath.string());
 
     const auto result = InstrumentFileFinder::getParameterPath("test", tmpDir.string());
     // Ensure file was found and it's in the tmp dir
