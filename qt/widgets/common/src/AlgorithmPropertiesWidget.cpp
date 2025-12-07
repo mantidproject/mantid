@@ -354,7 +354,7 @@ bool AlgorithmPropertiesWidget::isWidgetEnabled(const Property *property, const 
 
   /** The control is disabled if
    *   (1) It is contained in the disabled list or
-   *   (2) A user passed a value into the dialog
+   *   (2) the property's settings indicates it should be disabled.
    */
   if (m_disabled.contains(propName)) {
     return false;
