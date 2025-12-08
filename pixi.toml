@@ -87,7 +87,7 @@ rattler-index = "*"
 # per-platform [target.*.dependencies] tables below: linux-64 pulls the Qt6 stack,
 # win-64 and osx-arm64 keep the Qt5 stack.
 [dependencies]
-cmake = ">=3.21.0"
+cmake = ">=4.2,<5"
 ccache = ">=4.11.3,<5"
 cppcheck = "==2.18.1"
 euphonic = ">=1.6.0,<2.0"
