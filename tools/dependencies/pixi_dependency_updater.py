@@ -14,7 +14,7 @@ import tomllib
 import yaml
 from pathlib import Path
 from subprocess import run
-from typing import Sequence, Dict, Tuple, NewType, List
+from typing import Sequence, Dict, NewType, List
 
 BUILD_CONFIG_PATH = Path("conda/recipes/conda_build_config.yaml")
 MANTID_DEVELOPER_RECIPE_PATH = Path("conda/recipes/mantid-developer/recipe.yaml")
@@ -63,46 +63,41 @@ def get_conda_recipe_pins() -> DependencyPins:
 
 
 def get_mantid_dev_conda_recipe_pins(conda_build_config_pins: DependencyPins) -> DependencyPins:
-    pin_map = {}
+    pin_map: DependencyPins = {}
     with open(MANTID_DEVELOPER_RECIPE_PATH) as file:
         runtime_dependencies = yaml.safe_load(file)["requirements"]["run"]
 
     for pin_string in [entry for entry in runtime_dependencies if isinstance(entry, str)]:
-        package, version = _interpret_recipe_pin(pin_string, "all", conda_build_config_pins)
-        if package:
-            pin_map[package] = {"all": version}
+        _interpret_recipe_pin(pin_string, "all", conda_build_config_pins, pin_map)
 
     for os_section in [entry for entry in runtime_dependencies if isinstance(entry, dict)]:
         os_label = os_section["if"]
         os_names = os_label.split(" or ")
         for pin_string in os_section["then"]:
-            package, version = _interpret_recipe_pin(pin_string, os_names[0], conda_build_config_pins)
-            if package:
-                pin_map.setdefault(package, {})
-                for name in os_names:
-                    pin_map[package] |= {name: version}
+            for name in os_names:
+                _interpret_recipe_pin(pin_string, name, conda_build_config_pins, pin_map)
 
     return pin_map
 
 
-def _interpret_recipe_pin(pin_string: str, os_label: str, conda_build_config_pins: DependencyPins) -> Tuple[str | None, str | None]:
+def _interpret_recipe_pin(pin_string: str, os_label: str, conda_build_config_pins: DependencyPins, pin_map: DependencyPins):
     jinja_pin_pattern = re.compile(r"([\w|\-|_|\.]+) \${{ ([\w|\-|_|\.]+) }}")
     jinja_match = jinja_pin_pattern.search(pin_string)
     if jinja_match:
         package = jinja_match.group(1)
         pin_label = jinja_match.group(2)
+        pin_map.setdefault(package, {})
         for os_name, version in conda_build_config_pins[pin_label].items():
-            if os_label == os_name or os_name == "all":
-                return package, version
-
-    normal_pin_pattern = re.compile(r"([\w|\-|_|\.]+)(\s*([=|!|>|<].*))?")
-    pin_match = normal_pin_pattern.search(pin_string)
-    if pin_match:
-        package = pin_match.group(1)
-        version = pin_match.group(3)
-        return package, version if version is not None else ""
-
-    return None, None
+            if os_label == os_name or os_name == "all" or os_label == "all":
+                pin_map[package] |= {os_name if os_label == "all" else os_label: version}
+    else:
+        normal_pin_pattern = re.compile(r"([\w|\-|_|\.]+)(\s*([=|!|>|<].*))?")
+        pin_match = normal_pin_pattern.search(pin_string)
+        if pin_match:
+            package = pin_match.group(1)
+            version = pin_match.group(3)
+            pin_map.setdefault(package, {})
+            pin_map[package] |= {os_label: version if version is not None else ""}
 
 
 def get_pixi_mantid_dev_pins() -> DependencyPins:

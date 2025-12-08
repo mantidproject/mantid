@@ -273,7 +273,7 @@ The workflow follows these step:
 
 The evolution in the calibration can be seen with
 
-.. code::
+.. code:: python
 
    import matplotlib.pyplot as plt
    from mantid import plots
@@ -610,7 +610,7 @@ Expanding on detector masking
 
 While many of the calibration methods will generate a mask based on the detectors calibrated, sometimes additional metrics for masking are desired. One way is to use :ref:`DetectorDiagnostic <algm-DetectorDiagnostic>`. The result can be combined with an existing mask using
 
-.. code::
+.. code:: python
 
    BinaryOperateMasks(InputWorkspace1='mask_from_cal', InputWorkspace2='mask_detdiag',
                       OperationType='OR', OutputWorkspace='mask_final')
@@ -658,7 +658,7 @@ While this can be done via the "colorfill" plot or sliceviewer,
 a function has been created to annotate the plot with additional information.
 This can be done using the following code
 
-.. code::
+.. code:: python
 
    from mantid.simpleapi import (ApplyDiffCal, ConvertUnits, LoadEventNexus, LoadInstrument, Rebin)
    from Calibration.tofpd import diagnostics
@@ -697,7 +697,7 @@ be included by providing a mask using the ``mask`` parameter. To control the
 scale of the plot, a tuple of the minimum and maximum percentage can be specified
 for the ``vrange`` parameter.
 
-.. code::
+.. code:: python
 
     from Calibration.tofpd import diagnostics
 
@@ -708,7 +708,7 @@ When calibration tables are used as inputs, an additional workspace parameter
 is needed (``instr_ws``) to hold the instrument definition. This can be the GroupingWorkspace
 generated with the calibration tables from :ref:`LoadDiffCal <algm-LoadDiffCal>` as seen below.
 
-.. code::
+.. code:: python
 
     from mantid.simpleapi import LoadDiffCal
     from Calibration.tofpd import diagnostics
@@ -720,7 +720,7 @@ generated with the calibration tables from :ref:`LoadDiffCal <algm-LoadDiffCal>`
 
 Finally, workspaces with DIFC values can be used directly:
 
-.. code::
+.. code:: python
 
     from mantid.simpleapi import CalculateDIFC, LoadDiffCal
     from Calibration.tofpd import diagnostics
@@ -734,7 +734,7 @@ Finally, workspaces with DIFC values can be used directly:
 
 A mask can also be applied with a ``MaskWorkspace`` to hide pixels from the plot:
 
-.. code::
+.. code:: python
 
     from mantid.simpleapi import LoadDiffCal
     from Calibration.tofpd import diagnostics
@@ -761,7 +761,7 @@ Below is an example of the relative strain plot for VULCAN at peak position 1.26
 
 The plot shown above can be generated from the following script:
 
-.. code::
+.. code:: python
 
     import numpy as np
     from mantid.simpleapi import (LoadEventAndCompress, LoadInstrument, PDCalibration, Rebin)
@@ -823,21 +823,26 @@ coefficient of (TOF, d-spacing).
 
 The following script can be used to generate the above plot.
 
-.. code::
+.. code:: python
 
     # import mantid algorithms, numpy and matplotlib
     from mantid.simpleapi import *
     import matplotlib.pyplot as plt
-    import numpy as npfrom Calibration.tofpd import diagnosticsFILENAME = 'VULCAN_192226.nxs.h5'  # 88 sec
+    import numpy as np
+    from Calibration.tofpd import diagnostics
 
-    FILENAME = 'VULCAN_192227.nxs.h5'  # 2.8 hour
-    CALFILE = 'VULCAN_Calibration_CC_4runs_hybrid.h5'peakpositions = np.asarray(
+    FILENAME = 'VULCAN_192226.nxs.h5'  # 88 sec
+    # FILENAME = 'VULCAN_192227.nxs.h5'  # 2.8 hour
+    CALFILE = 'VULCAN_Calibration_CC_4runs_hybrid.h5'
+
+    peakpositions = np.asarray(
       (0.3117, 0.3257, 0.3499, 0.3916, 0.4205, 0.4645, 0.4768, 0.4996, 0.515, 0.5441, 0.5642, 0.6307, 0.6867,
        0.7283, 0.8186, 0.892, 1.0758, 1.2615, 2.06))
 
     peakpositions = peakpositions[peakpositions > 0.4]
     peakpositions = peakpositions[peakpositions < 1.5]
-    peakpositions.sort()LoadEventAndCompress(Filename=FILENAME, OutputWorkspace='ws', FilterBadPulses=0)
+    peakpositions.sort()
+    LoadEventAndCompress(Filename=FILENAME, OutputWorkspace='ws', FilterBadPulses=0)
 
     LoadInstrument(Workspace='ws', Filename="mantid/instrument/VULCAN_Definition.xml", RewriteSpectraMap='True')
     Rebin(InputWorkspace='ws', OutputWorkspace='ws', Params=(5000, -.002, 70000))
@@ -848,6 +853,7 @@ The following script can be used to generate the above plot.
                DiagnosticWorkspaces='diag')
     center_tof = diagnostics.collect_fit_result('diag_fitparam', 'center_tof', peakpositions, donor='ws', infotype='centre')
     fig, ax = diagnostics.plot_corr('center_tof')
+
 
 Peak Information
 ################
@@ -862,7 +868,7 @@ each group rather than individual detector pixels.
 
 The above figure can be generated using the following script:
 
-.. code::
+.. code:: python
 
     import numpy as np
     from mantid.simpleapi import (AlignAndFocusPowder, ConvertUnits, FitPeaks, LoadEventAndCompress,
