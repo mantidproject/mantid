@@ -11,6 +11,7 @@ from instrumentview.Projections.SphericalProjection import SphericalProjection
 from instrumentview.Projections.CylindricalProjection import CylindricalProjection
 from instrumentview.Projections.SideBySide import SideBySide
 from instrumentview.Projections.ProjectionType import ProjectionType
+from instrumentview.ConvertUnitsCalculator import ConvertUnitsCalculator
 
 from mantid.dataobjects import Workspace2D, PeaksWorkspace, MaskWorkspace
 from mantid.simpleapi import (
@@ -59,6 +60,7 @@ class FullInstrumentViewModel:
         self._workspace_x_unit_display = f"{str(x_unit.caption())} ({str(x_unit.symbol())})"
         self._selected_peaks_workspaces = []
         self._instrument_view_peaks_ws_name = f"instrument_view_peaks_{self._workspace.name()}"
+        self._unit_converter = ConvertUnitsCalculator(self._workspace)
 
         component_info = self._workspace.componentInfo()
         self._sample_position = np.array(component_info.samplePosition()) if component_info.hasSample() else np.zeros(3)
@@ -358,9 +360,9 @@ class FullInstrumentViewModel:
     def set_peaks_workspaces(self, peaks_workspace_names: list[str]) -> None:
         self._selected_peaks_workspaces = AnalysisDataService.Instance().retrieveWorkspaces(peaks_workspace_names)
 
-    def peak_overlay_points(self) -> list[list[DetectorPeaks]]:
+    def peak_overlay_points(self) -> dict[str : list[DetectorPeaks]]:
         detector_info = self._workspace.detectorInfo()
-        peaks_grouped_by_ws = []
+        peaks_grouped_by_ws = {}
         for pws in self._selected_peaks_workspaces:
             peaks = []
             peaks_dict = pws.toDict()
@@ -373,9 +375,9 @@ class FullInstrumentViewModel:
             dspacings = peaks_dict["DSpacing"]
             wavelengths = peaks_dict["Wavelength"]
             peaks += [
-                Peak(det_id, spec_no, v, hkl, tof, dspacing, wavelength, 2 * np.pi / dspacing)
-                for (det_id, spec_no, v, hkl, tof, dspacing, wavelength) in zip(
-                    detector_ids, spectrum_nos, positions, hkls, tofs, dspacings, wavelengths, strict=True
+                Peak(det_id, spec_no, v, peak_idx, hkl, tof, dspacing, wavelength, 2 * np.pi / dspacing)
+                for (det_id, spec_no, v, peak_idx, hkl, tof, dspacing, wavelength) in zip(
+                    detector_ids, spectrum_nos, range(len(tofs)), positions, hkls, tofs, dspacings, wavelengths, strict=True
                 )
             ]
             # Combine peaks on the same detector
@@ -386,7 +388,7 @@ class FullInstrumentViewModel:
                 if spec_no in self.spectrum_nos:
                     detector_peaks.append(DetectorPeaks(list(peaks_for_spec)))
 
-            peaks_grouped_by_ws.append(detector_peaks)
+            peaks_grouped_by_ws[pws.name()] = detector_peaks
         return peaks_grouped_by_ws
 
     def _peaks_workspace_for_adding_new_peak(self, selected_peaks_workspaces: list[str]) -> PeaksWorkspace:
@@ -399,11 +401,38 @@ class FullInstrumentViewModel:
             return ads.retrieveWorkspaces([self._instrument_view_peaks_ws_name])[0]
         return CreatePeaksWorkspace(self._workspace, 0, OutputWorkspace=self._instrument_view_peaks_ws_name)
 
-    def add_peak(self, x: float, selected_peaks_workspaces: list[str]) -> str:
+    def add_peak(self, x_in_workspace_unit: float, selected_peaks_workspaces: list[str]) -> str:
         peaks_ws = self._peaks_workspace_for_adding_new_peak(selected_peaks_workspaces)
         detector_id = self.picked_detector_ids[0]
-        AddPeak(peaks_ws, self._workspace, x, int(detector_id))
+        AddPeak(peaks_ws, self._workspace, x_in_workspace_unit, int(detector_id))
         return peaks_ws.name()
+
+    def delete_peak(self, x_in_workspace_unit: float) -> None:
+        detector_id = self.picked_detector_ids[0]
+        peaks_grouped_by_ws = self.peak_overlay_points()
+        closest_peak_by_ws = []
+        for peaks_ws in self._selected_peaks_workspaces:
+            if peaks_ws.name() not in peaks_grouped_by_ws:
+                continue
+            peaks_by_detector = peaks_grouped_by_ws[peaks_ws.name()]
+            picked_detector_peaks = [p for p in peaks_by_detector if p.detector_id == detector_id]
+            if len(picked_detector_peaks) == 0:
+                continue
+            if len(picked_detector_peaks) > 1:
+                raise RuntimeError("Should only be one grouping per detector ID")
+            peaks = picked_detector_peaks[0].peaks
+            # Now we have all the peaks on the selected detector, so we need to find the
+            # closest peak to where the mouse was clicked
+            distance_to_click = np.abs([p.location_in_unit(self.workspace_x_unit) - x_in_workspace_unit for p in peaks])
+            index_of_closest = np.argmin(distance_to_click)
+            closest_peak = peaks[index_of_closest]
+            closest_peak_by_ws.append((peaks_ws, closest_peak.peak_index, distance_to_click[index_of_closest]))
+
+        if len(closest_peak_by_ws) == 0:
+            return
+
+        closest_over_all_workspaces = min(closest_peak_by_ws, key=lambda x: x[2])
+        closest_over_all_workspaces[0].removePeak(closest_over_all_workspaces[1])
 
     def relative_detector_angle(self) -> float:
         picked_ids = self.picked_detector_ids
@@ -479,3 +508,6 @@ class FullInstrumentViewModel:
             for pws in workspaces_in_ads
             if "MaskWorkspace" in str(type(pws)) and pws.getInstrument().getFullName() == self._workspace.getInstrument().getFullName()
         ]
+
+    def convert_units(self, source_unit: str, target_unit: str, detector_id: int, value: float) -> float:
+        return self._unit_converter.convert(source_unit, target_unit, detector_id, value)
