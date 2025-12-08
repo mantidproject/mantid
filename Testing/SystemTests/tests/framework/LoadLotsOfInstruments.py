@@ -35,7 +35,7 @@ class LoadLotsOfInstruments(systemtesting.MantidSystemTest):
         """
         Skip instruments due to, for example, large size
         """
-        instruments = ["IMAGINE", "CG4D"]
+        instruments = ["CG4D"]
         return instruments
 
     def __getDataFileList__(self):
