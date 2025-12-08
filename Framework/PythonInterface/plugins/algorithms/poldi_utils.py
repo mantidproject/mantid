@@ -10,6 +10,8 @@ import numpy as np
 from mantid.kernel import UnitConversion, DeltaEModeType, UnitParams, UnitParametersMap
 from typing import Tuple, Sequence, Optional, TYPE_CHECKING
 from joblib import Parallel, delayed
+import h5py
+
 
 if TYPE_CHECKING:
     from mantid.dataobjects import Workspace2D
@@ -68,6 +70,62 @@ def load_poldi(
     )
     ADS.addOrReplace(output_workspace, ws)
     return ws
+
+
+def load_poldi_h5f(
+    fpath_data: str,
+    fpath_idf: str,
+    t0: float = 0.025701,
+    t0_const: float = 85.0,
+    output_workspace: str = "ws",
+):
+    """
+    Function to load POLDI v2 data from ASCII file containing array of counts
+    :param fpath_data: filepath of ASCII file with counts
+    :param fpath_idf: filepath to instrument definition file
+    :param chopper_speed: chopper speed used on instrument (rpm)
+    :param t0: time offset applied to slit openings (fraction of cycle time)
+    :param t0_const: TZERO diffractometer constant for instrument
+    :param output_workspace: output workspace name
+    :return ws: workspace containing POLDI data
+    """
+    # read in data
+    dat = []
+    with h5py.File(fpath_data, "r") as f:
+        for bank_name in {"south", "north"}:
+            dat.append(np.asarray(f.get(f"entry1/POLDI/detector_{bank_name}/histogram_folded")))
+        chopper_speed = f.get("entry1/POLDI/chopper/rotation_speed_target")[0]
+        monitor_count = f.get("entry1/monitors/monitor_before_sample")[0]
+    dat = np.vstack(dat)
+    # calculate time bins
+    cycle_time = _calc_cycle_time_from_chopper_speed(chopper_speed)
+    bin_width = cycle_time / dat.shape[-1]
+    bin_cens = np.linspace(bin_width / 2, cycle_time - bin_width / 2, dat.shape[-1])
+    ws = exec_alg("CreateWorkspace", DataX=bin_cens, DataY=dat, DataE=np.sqrt(dat), NSpec=dat.shape[0])
+    ADS.addOrReplace(output_workspace, ws)
+    ws = exec_alg("LoadInstrument", Workspace=output_workspace, Filename=fpath_idf, RewriteSpectraMap=True)
+    # add some logs (will eventually be set in file)
+    exec_alg("AddSampleLog", Workspace=output_workspace, LogName="chopperspeed", LogText=str(chopper_speed), LogType="Number")
+    # set t0 (would normally live in parameter file)
+    exec_alg(
+        "SetInstrumentParameter",
+        Workspace=output_workspace,
+        ComponentName="chopper",
+        ParameterName="t0",
+        ParameterType="Number",
+        Value=str(t0),
+    )
+    exec_alg(
+        "SetInstrumentParameter",
+        Workspace=output_workspace,
+        ComponentName="chopper",
+        ParameterName="t0_const",
+        ParameterType="Number",
+        Value=str(t0_const),
+    )
+    # add monitor counts
+    exec_alg("AddSampleLog", Workspace=output_workspace, LogName="gd_prtn_chrg", LogText=str(monitor_count), LogType="Number")
+    return ADS.retrieve(output_workspace)
 
 
 def _calc_cycle_time_from_chopper_speed(chopper_speed):
