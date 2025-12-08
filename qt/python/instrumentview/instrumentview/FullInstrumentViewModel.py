@@ -5,40 +5,36 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from instrumentview.Detectors import DetectorInfo
+from instrumentview.Peaks.Peak import Peak
+from instrumentview.Peaks.DetectorPeaks import DetectorPeaks
 from instrumentview.Projections.SphericalProjection import SphericalProjection
 from instrumentview.Projections.CylindricalProjection import CylindricalProjection
 from instrumentview.Projections.SideBySide import SideBySide
-from instrumentview.Peaks.Peak import Peak
-from instrumentview.Peaks.DetectorPeaks import DetectorPeaks
+from instrumentview.Projections.ProjectionType import ProjectionType
 
 from mantid.dataobjects import Workspace2D, PeaksWorkspace
-from mantid.simpleapi import CreateDetectorTable, ExtractSpectra, ConvertUnits, AnalysisDataService, SumSpectra, Rebin
+from mantid.simpleapi import (
+    CreateDetectorTable,
+    ExtractSpectra,
+    ConvertUnits,
+    AnalysisDataService,
+    SumSpectra,
+    Rebin,
+    ExtractMask,
+    ExtractMaskToTable,
+    SaveMask,
+    MaskDetectors,
+    RenameWorkspace,
+    CloneWorkspace,
+)
+from mantid.api import MatrixWorkspace
 from itertools import groupby
+from pathlib import Path
 import numpy as np
-from typing import ClassVar
 
 
 class FullInstrumentViewModel:
     """Model for the Instrument View Window. Will calculate detector positions, indices, and integrated counts that give the colours"""
-
-    _FULL_3D: ClassVar[str] = "3D"
-    _SPHERICAL_X: ClassVar[str] = "Spherical X"
-    _SPHERICAL_Y: ClassVar[str] = "Spherical Y"
-    _SPHERICAL_Z: ClassVar[str] = "Spherical Z"
-    _CYLINDRICAL_X: ClassVar[str] = "Cylindrical X"
-    _CYLINDRICAL_Y: ClassVar[str] = "Cylindrical Y"
-    _CYLINDRICAL_Z: ClassVar[str] = "Cylindrical Z"
-    _SIDE_BY_SIDE: ClassVar[str] = "Side by Side"
-    _PROJECTION_OPTIONS: ClassVar[list[str]] = [
-        _FULL_3D,
-        _SPHERICAL_X,
-        _SPHERICAL_Y,
-        _SPHERICAL_Z,
-        _CYLINDRICAL_X,
-        _CYLINDRICAL_Y,
-        _CYLINDRICAL_Z,
-        _SIDE_BY_SIDE,
-    ]
 
     _sample_position = np.array([0, 0, 0])
     _source_position = np.array([0, 0, 0])
@@ -54,12 +50,13 @@ class FullInstrumentViewModel:
         """For the given workspace, calculate detector positions, the map from detector indices to workspace indices, and integrated
         counts. Optionally will draw detector geometry, e.g. rectangular bank or tube instead of points."""
         self._workspace = workspace
-        x_unit = workspace.getAxis(0).getUnit()
+
+    def setup(self):
+        x_unit = self._workspace.getAxis(0).getUnit()
         self._workspace_x_unit = x_unit.unitID()
         self._workspace_x_unit_display = f"{str(x_unit.caption())} ({str(x_unit.symbol())})"
         self._selected_peaks_workspaces = []
 
-    def setup(self):
         component_info = self._workspace.componentInfo()
         self._sample_position = np.array(component_info.samplePosition()) if component_info.hasSample() else np.zeros(3)
         has_source = self._workspace.getInstrument().getSource() is not None
@@ -76,18 +73,26 @@ class FullInstrumentViewModel:
         theta = detector_info_table.columnArray("Theta")
         phi = detector_info_table.columnArray("Phi")
         self._spherical_positions = np.transpose(np.vstack([r, theta, phi]))
-        self._detector_positions = detector_info_table.columnArray("Position")
+        self._detector_positions_3d = detector_info_table.columnArray("Position")
         self._workspace_indices = detector_info_table.columnArray("Index")
         # Array of strings 'yes', 'no' and 'n/a'
         self._is_monitor = detector_info_table.columnArray("Monitor")
         self._is_valid = self._is_monitor == "no"
-        self._monitor_positions = self._detector_positions[self._is_monitor == "yes"]
-        self._current_projected_positions = self.detector_positions
+        self._mask_ws, _ = ExtractMask(self._workspace, StoreInADS=False)
+        self._is_masked_in_ws = self._mask_ws.extractY().flatten().astype(bool)
+        # For computing current mask, detached from the permanent mask in ws
+        self._is_masked = self._is_masked_in_ws
+        self._monitor_positions = self._detector_positions_3d[self._is_monitor == "yes"]
 
         # Initialise with zeros
         self._counts = np.zeros_like(self._detector_ids)
         self._counts_limits = (0, 0)
-        self._detector_is_picked = np.full(len(self._detector_ids[self._is_valid]), False)
+        self._detector_is_picked = np.full(len(self._detector_ids), False)
+
+        self._projection_type = ProjectionType.THREE_D
+        self._cached_projections_map = {}
+
+        self._cached_masks_map = {}
 
         # Get min and max integration values
         if self._workspace.isRaggedWorkspace():
@@ -121,40 +126,36 @@ class FullInstrumentViewModel:
         return self._workspace_x_unit_display
 
     @property
-    def default_projection(self) -> str:
-        return self._workspace.getInstrument().getDefaultView()
-
-    @property
     def sample_position(self) -> np.ndarray:
         return self._sample_position
 
     @property
-    def detector_positions(self) -> np.ndarray:
-        return self._detector_positions[self._is_valid]
-
-    @property
     def detector_ids(self) -> np.ndarray:
-        return self._detector_ids[self._is_valid]
+        return self._detector_ids[self.is_pickable]
 
     @property
     def monitor_positions(self) -> np.ndarray:
         return self._monitor_positions
 
     @property
+    def is_pickable(self) -> np.ndarray:
+        return ~self._is_masked & self._is_valid
+
+    @property
     def picked_visibility(self) -> np.ndarray:
-        return self._detector_is_picked.astype(int)
+        return self._detector_is_picked.astype(int)[self.is_pickable]
 
     @property
     def picked_detector_ids(self) -> np.ndarray:
-        return self._detector_ids[self._is_valid][self._detector_is_picked]
+        return self._detector_ids[self._detector_is_picked]
 
     @property
     def picked_workspace_indices(self) -> np.ndarray:
-        return self._workspace_indices[self._is_valid][self._detector_is_picked]
+        return self._workspace_indices[self._detector_is_picked]
 
     @property
     def detector_counts(self) -> np.ndarray:
-        return self._counts[self._is_valid]
+        return self._counts[self.is_pickable]
 
     @property
     def counts_limits(self) -> tuple[int, int]:
@@ -170,8 +171,10 @@ class FullInstrumentViewModel:
         self._counts_limits = limits
 
     @property
-    def current_projected_positions(self) -> np.ndarray:
-        return self._current_projected_positions
+    def mask_ws(self) -> MatrixWorkspace:
+        for i, v in enumerate(self._is_masked):
+            self._mask_ws.dataY(i)[:] = v
+        return self._mask_ws
 
     @property
     def integration_limits(self) -> tuple[float, float]:
@@ -190,7 +193,7 @@ class FullInstrumentViewModel:
 
     def update_integration_range(self, integration_limits: tuple[float, float], entire_range: bool = False) -> None:
         integration_min, integration_max = integration_limits
-        workspace_indices = self._workspace_indices[self._is_valid]
+        workspace_indices = self._workspace_indices[self.is_pickable]
         new_detector_counts = np.array(
             self._workspace.getIntegratedCountsForWorkspaceIndices(
                 workspace_indices, len(workspace_indices), float(integration_min), float(integration_max), entire_range
@@ -198,10 +201,12 @@ class FullInstrumentViewModel:
             dtype=int,
         )
         self._counts_limits = (np.min(new_detector_counts), np.max(new_detector_counts))
-        self._counts[self._is_valid] = new_detector_counts
+        self._counts[self.is_pickable] = new_detector_counts
 
-    def negate_picked_visibility(self, indices: list[int] | np.ndarray) -> None:
-        self._detector_is_picked[indices] = ~self._detector_is_picked[indices]
+    def negate_picked_visibility(self, mask: np.ndarray) -> None:
+        # TODO: Check which selection is quicker, mask or indices
+        # NOTE: This is slightly awkard because cannot do chained mask selections
+        self._detector_is_picked[self.is_pickable] = mask ^ self._detector_is_picked[self.is_pickable]
 
     def clear_all_picked_detectors(self) -> None:
         self._detector_is_picked.fill(False)
@@ -209,11 +214,11 @@ class FullInstrumentViewModel:
     def picked_detectors_info_text(self) -> list[DetectorInfo]:
         """For the specified detector, extract info that can be displayed in the View, and wrap it all up in a DetectorInfo class"""
 
-        picked_ws_indices = self._workspace_indices[self._is_valid][self._detector_is_picked]
-        picked_ids = self._detector_ids[self._is_valid][self._detector_is_picked]
-        picked_xyz_positions = self._detector_positions[self._is_valid][self._detector_is_picked]
-        picked_spherical_positions = self._spherical_positions[self._is_valid][self._detector_is_picked]
-        picked_counts = self._counts[self._is_valid][self._detector_is_picked]
+        picked_ws_indices = self._workspace_indices[self._detector_is_picked]
+        picked_ids = self._detector_ids[self._detector_is_picked]
+        picked_xyz_positions = self._detector_positions_3d[self._detector_is_picked]
+        picked_spherical_positions = self._spherical_positions[self._detector_is_picked]
+        picked_counts = self._counts[self._detector_is_picked]
 
         picked_info = []
         for i, ws_index in enumerate(picked_ws_indices):
@@ -226,26 +231,72 @@ class FullInstrumentViewModel:
             picked_info.append(det_info)
         return picked_info
 
-    def reset_cached_projection_positions(self) -> None:
-        self._current_projected_positions = self.detector_positions
+    def get_default_projection_index_and_options(self) -> tuple[int, list[str]]:
+        possible_returns_map = {
+            "3D": ProjectionType.THREE_D,
+            "SPHERICAL_X": ProjectionType.SPHERICAL_X,
+            "SPHERICAL_Y": ProjectionType.SPHERICAL_Y,
+            "SPHERICAL_Z": ProjectionType.SPHERICAL_Z,
+            "CYLINDRICAL_X": ProjectionType.CYLINDRICAL_X,
+            "CYLINDRICAL_Y": ProjectionType.CYLINDRICAL_Y,
+            "CYLINDRICAL_Z": ProjectionType.CYLINDRICAL_Z,
+        }
+        default_projection_type = possible_returns_map[self._workspace.getInstrument().getDefaultView()]
+        projection_options = [p.value for p in ProjectionType]
+        return projection_options.index(default_projection_type.value), projection_options
 
-    def calculate_projection(self, projection_option: str, axis: list[int], positions: np.ndarray):
-        """Calculate the 2D projection with the specified axis. Can be cylindrical, spherical, or side-by-side."""
-        if projection_option == self._SIDE_BY_SIDE:
-            projection = SideBySide(
-                self._workspace, self.detector_ids, self.sample_position, self._root_position, positions, np.array(axis)
-            )
-        elif projection_option.startswith("Spherical"):
-            projection = SphericalProjection(self.sample_position, self._root_position, positions, np.array(axis))
-        elif projection_option.startswith("Cylindrical"):
-            projection = CylindricalProjection(self.sample_position, self._root_position, positions, np.array(axis))
+    @property
+    def projection_type(self):
+        return self._projection_type
+
+    @projection_type.setter
+    def projection_type(self, value: str):
+        self._projection_type = ProjectionType(value)
+
+    @property
+    def is_2d_projection(self) -> bool:
+        if self._projection_type == ProjectionType.THREE_D:
+            return False
+        return True
+
+    @property
+    def detector_positions(self) -> np.ndarray:
+        if self._projection_type == ProjectionType.THREE_D:
+            return self._detector_positions_3d[self.is_pickable]
+        return self._calculate_projection()[self.is_pickable]
+
+    @property
+    def masked_positions(self) -> np.ndarray:
+        if self._projection_type == ProjectionType.THREE_D:
+            return self._detector_positions_3d[self._is_masked & self._is_valid]
+        return self._calculate_projection()[self._is_masked & self._is_valid]
+
+    def _calculate_projection(self) -> np.ndarray:
+        """Calculate the 2D projection with the specified axis. Can be either cylindrical or spherical."""
+
+        if self._projection_type.name in self._cached_projections_map.keys():
+            return self._cached_projections_map[self._projection_type.name]
+
+        axis = [1, 0, 0]
+        if self._projection_type in (ProjectionType.SPHERICAL_Y, ProjectionType.CYLINDRICAL_Y):
+            axis = [0, 1, 0]
+        elif self._projection_type in (ProjectionType.SPHERICAL_Z, ProjectionType.CYLINDRICAL_Z):
+            axis = [0, 0, 1]
+
+        if self._projection_type in (ProjectionType.SPHERICAL_X, ProjectionType.SPHERICAL_Y, ProjectionType.SPHERICAL_Z):
+            projection = SphericalProjection(self._sample_position, self._root_position, self._detector_positions_3d, np.array(axis))
+        elif self._projection_type in (ProjectionType.CYLINDRICAL_X, ProjectionType.CYLINDRICAL_Y, ProjectionType.CYLINDRICAL_Z):
+            projection = CylindricalProjection(self._sample_position, self._root_position, self._detector_positions_3d, np.array(axis))
         else:
-            raise ValueError(f"Unknown projection type: {projection_option}")
+            projection = SideBySide(
+                self._workspace, self._detector_ids, self._sample_position, self._root_position, self._detector_positions_3d, np.array(axis)
+            )
 
-        projected_positions = np.zeros_like(positions)
+        projected_positions = np.zeros_like(self._detector_positions_3d)
         projected_positions[:, :2] = projection.positions()  # Assign only x and y coordinate
-        self._current_projected_positions = projected_positions
-        return self._current_projected_positions
+
+        self._cached_projections_map[self._projection_type.name] = projected_positions
+        return projected_positions
 
     def extract_spectra_for_line_plot(self, unit: str, sum_spectra: bool) -> None:
         workspace_indices = self.picked_workspace_indices
@@ -320,3 +371,59 @@ class FullInstrumentViewModel:
                     detector_peaks.append(DetectorPeaks(list(peaks_for_id)))
             peaks_grouped_by_ws.append(detector_peaks)
         return peaks_grouped_by_ws
+
+    def relative_detector_angle(self) -> float:
+        picked_ids = self.picked_detector_ids
+        if len(picked_ids) != 2:
+            raise RuntimeError("Relative detector angle only valid when two detectors are selected")
+        q_lab_1 = self._calculate_q_lab_direction(picked_ids[0])
+        q_lab_2 = self._calculate_q_lab_direction(picked_ids[1])
+        return np.degrees(np.arccos(np.clip(np.dot(q_lab_1, q_lab_2), -1.0, 1.0)))
+
+    def _calculate_q_lab_direction(self, detector_id: int) -> np.ndarray:
+        detector_info = self.workspace.detectorInfo()
+        detector_index = detector_info.indexOf(int(detector_id))
+        two_theta = detector_info.twoTheta(detector_index)
+        phi = detector_info.azimuthal(detector_index)
+        q_lab = np.array([-np.sin(two_theta) * np.cos(phi), -np.sin(two_theta) * np.sin(phi), 1 - np.cos(two_theta)])
+        return q_lab / np.linalg.norm(q_lab)
+
+    def clear_stored_masks(self) -> None:
+        self._cached_masks_map.clear()
+
+    def add_new_detector_mask(self, new_mask: list[bool]) -> str:
+        new_key = f"Mask {len(self._cached_masks_map) + 1}"
+        mask_to_save = self._is_masked_in_ws.copy()
+        mask_to_save[self.is_pickable] = new_mask
+        self._cached_masks_map[new_key] = mask_to_save
+        return new_key
+
+    def apply_detector_masks(self, mask_keys: list[str]) -> None:
+        if not mask_keys:
+            mask_total = self._is_masked_in_ws
+        else:
+            mask_total = np.logical_or.reduce([self._cached_masks_map[key] for key in mask_keys])
+        self._is_masked = mask_total
+        self._detector_is_picked[~self.is_pickable] = False
+
+    def save_mask_workspace_to_ads(self) -> None:
+        name_exported_ws = f"instrument_view_mask_{self._workspace.name()}"
+        for i, v in enumerate(self._is_masked):
+            self._mask_ws.dataY(i)[:] = v
+
+        xmin, xmax = self._integration_limits
+        ExtractMaskToTable(self._mask_ws, Xmin=xmin, Xmax=xmax, OutputWorkspace=name_exported_ws)
+
+    def save_xml_mask(self, filename) -> None:
+        if not filename:
+            return
+        if Path(filename).suffix != ".xml":
+            filename += ".xml"
+        SaveMask(self.mask_ws, OutputFile=filename)
+
+    def overwrite_mask_to_current_workspace(self) -> None:
+        # TODO: Check if copies are expensive with big workspaces
+        temp_ws_name = f"__instrument_view_temp_{self._workspace.name()}"
+        CloneWorkspace(self._workspace.name(), OutputWorkspace=temp_ws_name)
+        MaskDetectors(temp_ws_name, MaskedWorkspace=self.mask_ws)
+        RenameWorkspace(InputWorkspace=temp_ws_name, OutputWorkspace=self._workspace.name())
