@@ -11,6 +11,8 @@
 #include "MantidKernel/IPropertySettings.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidQtWidgets/Common/AlgorithmPropertiesWidget.h"
+#include <QCoreApplication>
+#include <QWidget>
 
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
@@ -134,68 +136,67 @@ public:
   void setUp() override {
     // TODO: Initialize QApplication (if needed), create widget under test,
     // and set an appropriate test algorithm on it.
+
+    // Ensure widget is part of a shown hierarchy
+    m_parent = new QWidget();
+    m_parent->show();
+
     m_algorithm = static_cast<IAlgorithm_sptr>(new TestAlgorithm());
     m_algorithm->initialize();
 
-    m_widget = std::make_shared<AlgorithmPropertiesWidget>();
+    m_widget = std::make_shared<TestableAlgorithmPropertiesWidget>(m_parent);
     m_widget->setAlgorithm(m_algorithm);
+
+    QCoreApplication::processEvents();
   }
 
   void tearDown() override {
     // TODO: Destroy / reset widget and any shared state.
     m_widget.reset();
     m_algorithm.reset();
+
+    delete m_parent;
+    m_parent = nullptr;
   }
 
   /// Tests focused on `hideOrDisableProperties` and `IPropertySettings` interaction.
 
   /// Verifies that when a property has any `IPropertySettings` attached which
-  /// indicate the control should be disabled, `hideOrDisableProperties()`
-  /// results in the corresponding PropertyWidget reporting `isEnabled() == false`.
-  void testHideOrDisable_DisablesPropertiesFromSettings() {
+  /// indicate the control should be disabled, `isWidgetEnabled()`
+  /// returns the correct value.
+  void testIsWidgetEnabled_DisablesPropertiesFromSettings() {
+    // WARNING: in a headless tests, it is problematic to test this directly using `QWidget::isEnabled()`.
+    // The private helper method `isWidgetEnabled` is verified instead.
+
     m_algorithm->setPropertySettings("C", std::unique_ptr<IPropertySettings const>(new MockPropertySettings()));
-    auto *settings = dynamic_cast<MockPropertySettings *>(
-        const_cast<IPropertySettings *>(m_algorithm->getPointerToProperty("C")->getSettings()[0].get()));
-#if 0
+    auto *prop = m_algorithm->getPointerToProperty("C");
+    auto *settings =
+        dynamic_cast<MockPropertySettings *>(const_cast<IPropertySettings *>(prop->getSettings()[0].get()));
+
     settings->setIsEnabledReturn(false);
+    TS_ASSERT_EQUALS(m_widget->isWidgetEnabled(prop, "C"), false);
 
-    m_widget->hideOrDisableProperties("");
-    // property is disabled
-    TS_ASSERT(m_widget->m_propWidgets.contains("C"));
-    TS_ASSERT(!m_widget->m_propWidgets["C"]->isEnabled());
-
-    // negative test
-    Mock::VerifyAndClear(settings);
     settings->setIsEnabledReturn(true);
-#endif
-    m_widget->hideOrDisableProperties("");
-    // property is NOT disabled
-    TS_ASSERT(m_widget->m_propWidgets["C"]->isEnabled());
+    TS_ASSERT_EQUALS(m_widget->isWidgetEnabled(prop, "C"), true);
   }
 
   /// Verifies that when a property has any `IPropertySettings` attached which
-  /// indicate the control should not be visible, `hideOrDisableProperties()`
-  /// results in the corresponding PropertyWidget reporting `isVisible() == false`.
-  void testHideOrDisable_HidesPropertiesFromSettings() {
+  /// indicate the control should be hidden, `isWidgetVisible()`
+  /// returns the correct value.
+  void testIsWidgetVisible_HidesPropertiesFromSettings() {
+    // WARNING: in a headless tests, it is problematic to test this directly using `QWidget::isVisible()`.
+    // The private helper method `isWidgetVisible` is verified instead.
+
     m_algorithm->setPropertySettings("C", std::unique_ptr<IPropertySettings const>(new MockPropertySettings()));
-    auto *settings = dynamic_cast<MockPropertySettings *>(
-        const_cast<IPropertySettings *>(m_algorithm->getPointerToProperty("C")->getSettings()[0].get()));
-#if 0
+    auto *prop = m_algorithm->getPointerToProperty("C");
+    auto *settings =
+        dynamic_cast<MockPropertySettings *>(const_cast<IPropertySettings *>(prop->getSettings()[0].get()));
+
     settings->setIsVisibleReturn(false);
+    TS_ASSERT_EQUALS(m_widget->isWidgetVisible(prop, "C"), false);
 
-    m_widget->hideOrDisableProperties("");
-    // property is hidden
-    TS_ASSERT(m_widget->m_propWidgets.contains("C"));
-    TS_ASSERT(!m_widget->m_propWidgets["C"]->isVisible());
-
-    // negative test
-    Mock::VerifyAndClear(settings);
     settings->setIsVisibleReturn(true);
-#endif
-
-    m_widget->hideOrDisableProperties("");
-    // property is NOT hidden
-    TS_ASSERT(m_widget->m_propWidgets["C"]->isVisible());
+    TS_ASSERT_EQUALS(m_widget->isWidgetVisible(prop, "C"), true);
   }
 
   /// Verifies that dynamic `IPropertySetting`s that modify validators or
@@ -247,17 +248,61 @@ public:
   /// applied in `hideOrDisableProperties()` is the logical AND of all
   /// `settings->isEnabled(...)`, so that any single false disables the widget.
   void testMultipleSettings_AnyDisabledDisablesWidget() {
-    // TODO: Attach several settings with at least one reporting isEnabled == false,
-    // call hideOrDisableProperties(""), and assert widget->isEnabled() == false.
+    m_algorithm->setPropertySettings("C", std::unique_ptr<IPropertySettings const>(new MockPropertySettings()));
+    m_algorithm->setPropertySettings("C", std::unique_ptr<IPropertySettings const>(new MockPropertySettings()));
+    auto *prop = m_algorithm->getPointerToProperty("C");
+    auto *settings1 =
+        dynamic_cast<MockPropertySettings *>(const_cast<IPropertySettings *>(prop->getSettings()[0].get()));
+    auto *settings2 =
+        dynamic_cast<MockPropertySettings *>(const_cast<IPropertySettings *>(prop->getSettings()[1].get()));
+
+    // verify the AND truth table
+    settings1->setIsEnabledReturn(false);
+    settings2->setIsEnabledReturn(false);
+    TS_ASSERT_EQUALS(m_widget->isWidgetEnabled(prop, "C"), false);
+
+    settings1->setIsEnabledReturn(false);
+    settings2->setIsEnabledReturn(true);
+    TS_ASSERT_EQUALS(m_widget->isWidgetEnabled(prop, "C"), false);
+
+    settings1->setIsEnabledReturn(true);
+    settings2->setIsEnabledReturn(false);
+    TS_ASSERT_EQUALS(m_widget->isWidgetEnabled(prop, "C"), false);
+
+    settings1->setIsEnabledReturn(true);
+    settings2->setIsEnabledReturn(true);
+    TS_ASSERT_EQUALS(m_widget->isWidgetEnabled(prop, "C"), true);
   }
 
   /// Verifies that when multiple `IPropertySettings` are attached to a
-  /// property, the visible state computed in `hideOrDisableProperties()`
-  /// is the logical AND of all `settings->isVisible(...)`, so that any
-  /// single false hides the widget.
+  /// property, the visible state computed by `isWidgetVisible` and then
+  /// applied in `hideOrDisableProperties()` is the logical AND of all
+  /// `settings->isVisible(...)`, so that any single false hides the widget.
   void testMultipleSettings_AnyHiddenHidesWidget() {
-    // TODO: Attach several settings with at least one reporting isVisible == false,
-    // call hideOrDisableProperties(""), and assert widget->isVisible() == false.
+    m_algorithm->setPropertySettings("C", std::unique_ptr<IPropertySettings const>(new MockPropertySettings()));
+    m_algorithm->setPropertySettings("C", std::unique_ptr<IPropertySettings const>(new MockPropertySettings()));
+    auto *prop = m_algorithm->getPointerToProperty("C");
+    auto *settings1 =
+        dynamic_cast<MockPropertySettings *>(const_cast<IPropertySettings *>(prop->getSettings()[0].get()));
+    auto *settings2 =
+        dynamic_cast<MockPropertySettings *>(const_cast<IPropertySettings *>(prop->getSettings()[1].get()));
+
+    // verify the AND truth table
+    settings1->setIsVisibleReturn(false);
+    settings2->setIsVisibleReturn(false);
+    TS_ASSERT_EQUALS(m_widget->isWidgetVisible(prop, "C"), false);
+
+    settings1->setIsVisibleReturn(false);
+    settings2->setIsVisibleReturn(true);
+    TS_ASSERT_EQUALS(m_widget->isWidgetVisible(prop, "C"), false);
+
+    settings1->setIsVisibleReturn(true);
+    settings2->setIsVisibleReturn(false);
+    TS_ASSERT_EQUALS(m_widget->isWidgetVisible(prop, "C"), false);
+
+    settings1->setIsVisibleReturn(true);
+    settings2->setIsVisibleReturn(true);
+    TS_ASSERT_EQUALS(m_widget->isWidgetVisible(prop, "C"), true);
   }
 
   /// Verifies that for each `IPropertySettings` instance attached to a
@@ -302,6 +347,16 @@ public:
   }
 
 private:
+  class TestableAlgorithmPropertiesWidget : public AlgorithmPropertiesWidget {
+    // This class allows verification of `isWidgetEnabled` and `isWidgetVisible`.
+    friend class AlgorithmPropertiesWidgetTest;
+
+  public:
+    TestableAlgorithmPropertiesWidget(QWidget *parent = nullptr) : AlgorithmPropertiesWidget(parent) {}
+    ~TestableAlgorithmPropertiesWidget() override = default;
+  };
+
+  QWidget *m_parent = nullptr;
+  std::shared_ptr<TestableAlgorithmPropertiesWidget> m_widget;
   IAlgorithm_sptr m_algorithm;
-  std::shared_ptr<AlgorithmPropertiesWidget> m_widget;
 };

@@ -75,9 +75,12 @@ public slots:
   /// Replace WS button was clicked
   void replaceWSClicked(const QString &propName);
 
-private:
+protected:
   bool isWidgetEnabled(const Mantid::Kernel::Property *property, const QString &propName) const;
 
+  bool isWidgetVisible(const Mantid::Kernel::Property *property, const QString &propName) const;
+
+private:
   /// Chosen algorithm name
   QString m_algoName;
 

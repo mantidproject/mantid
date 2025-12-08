@@ -360,17 +360,48 @@ bool AlgorithmPropertiesWidget::isWidgetEnabled(const Property *property, const 
     return false;
   }
   if (!property->getSettings().empty())
+    // Allow any setting in the chain to disable the property.
     return std::all_of(property->getSettings().begin(), property->getSettings().end(),
                        [this](auto const &ptr) { return ptr->isEnabled(this->m_algo.get()); });
   return true;
 }
 
 //-------------------------------------------------------------------------------------------------
-/** Go through all the properties, and check their validators to determine
- * whether they should be made disabled/invisible.
- * It also shows/hides the validators.
- * All properties' values should be set already, otherwise the validators
- * will be running on old data.
+/** Compute if the control should be visible for this property based on settings and error state.
+ *  WARNING: the GUI itself may override this visibility setting (e.g. if a parent widget is hidden).
+ * @param property :: the property that allows to check for the settings.
+ * @param propName :: The name of the property
+ */
+bool AlgorithmPropertiesWidget::isWidgetVisible(const Property *property, const QString &propName) const {
+  // To avoid errors
+  if (propName.isEmpty())
+    return true;
+  if (!property)
+    return true;
+
+  bool visible = true;
+  if (!property->getSettings().empty()) {
+    // Allow any setting in the chain to hide the property.
+    visible = std::all_of(property->getSettings().begin(), property->getSettings().end(),
+                          [this](auto const &ptr) { return ptr->isVisible(this->m_algo.get()); });
+  }
+
+  QString error = "";
+  if (m_errors.contains(propName))
+    error = m_errors[propName];
+  // Always show controls that are in error
+  if (error.length() != 0)
+    visible = true;
+
+  return visible;
+}
+
+//-------------------------------------------------------------------------------------------------
+/** Go through all the properties, and check their settings in order to implement
+ * any changes dependent on upstream properties.
+ * Then, once any changes have been applied, go through settings and validators again
+ * to determine whether properties will be hidden or disabled.
+ * At entry to this method: all properties' values must be current.
  * @param changedPropName :: name of the property that was changed
  */
 void AlgorithmPropertiesWidget::hideOrDisableProperties(const QString &changedPropName) {
@@ -418,23 +449,9 @@ void AlgorithmPropertiesWidget::hideOrDisableProperties(const QString &changedPr
     Mantid::Kernel::Property const *prop = widget->getProperty();
     auto const &propName = QString::fromStdString(prop->name());
 
-    // Set the enabled and visible flags based on what the validators say.
+    // Set the enabled and visible flags based on what the settings and validators say.
     bool enabled = this->isWidgetEnabled(prop, propName);
-    bool visible = true;
-
-    auto const &settings = prop->getSettings();
-    if (!settings.empty()) {
-      visible = std::all_of(settings.begin(), settings.end(),
-                            [this](auto const &ptr) { return ptr->isVisible(this->m_algo.get()); });
-    }
-
-    // Show/hide the validator label (that red star)
-    QString error = "";
-    if (m_errors.contains(propName))
-      error = m_errors[propName];
-    // Always show controls that are in error
-    if (error.length() != 0)
-      visible = true;
+    bool visible = this->isWidgetVisible(prop, propName);
 
     // Hide/disable the widget
     widget->setEnabled(enabled);
