@@ -22,88 +22,121 @@ DECLARE_ALGORITHM(FlatCell)
 
 using namespace Kernel;
 using namespace API;
-using DataObjects::EventWorkspace;
-using DataObjects::EventWorkspace_const_sptr;
-using DataObjects::EventWorkspace_sptr;
+using namespace Mantid::DataObjects;
 
 void FlatCell::init() {
 
-  declareProperty(std::make_unique<WorkspaceProperty<API::Workspace>>("InputWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "", Direction::Input),
                   "The name of the input Workspace.");
-  declareProperty(std::make_unique<WorkspaceProperty<API::Workspace>>("OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "The name of the Workspace containing the flat cell bins.");
+}
+
+/** Computes the mean of the input vector
+ */
+double mean(const std::vector<double> &values) {
+  return std::accumulate(values.begin(), values.end(), 0.0) / static_cast<double>(values.size());
+}
+
+/** Computes the standard deviation of the input vector
+ */
+double stddev(const std::vector<double> &values) {
+  double m = mean(values);
+  double accum = 0.0;
+  for (double x : values) {
+    accum += (x - m) * (x - m);
+  }
+  return std::sqrt(accum / static_cast<double>(values.size()));
 }
 
 /** Execution code.
  *  @throw std::invalid_argument If XMax is less than XMin
  */
 void FlatCell::exec() {
-  // Check for valid X limits
-  int m_startX = 0;
-  int m_endX = 0;
+
+  // Get the Input Workspace and the X values
   MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
-  auto LAB = inputWS->readY(0)[2:16385];
 
-  std::stringstream msg;
-  msg << "LAB (" << LAB << ")";
-  g_log.warning(msg.str());
-  // throw std::invalid_argument(msg.str());
-  // m_endX = getProperty("XMax");
+  // Verify that the Workspace contains just one spectrum and the correct number of values
+  // Will be added when the test are written
 
-  // if (m_startX > m_endX) {
-  //   std::stringstream msg;
-  //   msg << "XMax (" << m_endX << ") must be greater than XMin (" << m_startX << ")";
-  //   g_log.error(msg.str());
-  //   throw std::invalid_argument(msg.str());
-  // }
+  // Only create the output workspace if it's different to the input one
+  MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
+  if (outputWS != inputWS) {
+    outputWS = inputWS->clone();
+    setProperty("OutputWorkspace", outputWS);
+  }
 
-  // // Copy indices from legacy property
-  // std::vector<int64_t> spectraList = this->getProperty("SpectraList");
-  // if (!spectraList.empty()) {
-  //   if (!isDefault("InputWorkspaceIndexSet"))
-  //     throw std::runtime_error("Cannot provide both InputWorkspaceIndexSet and "
-  //                              "SpectraList at the same time.");
-  //   setProperty("InputWorkspaceIndexSet", spectraList);
-  //   g_log.warning("The 'SpectraList' property is deprecated. Use "
-  //                 "'InputWorkspaceIndexSet' instead.");
-  // }
+  // Get the X values
+  const auto &Y = inputWS->readY(0);
 
-  // MatrixWorkspace_sptr inputWS;
-  // std::tie(inputWS, indexSet) = getWorkspaceAndIndices<MatrixWorkspace>("InputWorkspace");
+  // Save the Low and High Angle Bank values into vectors
+  std::vector<double> LAB(Y.begin() + 2, Y.begin() + 16385);
+  std::vector<double> HAB(Y.begin() + 16386, Y.begin() + 17785);
 
-  // // Only create the output workspace if it's different to the input one
-  // MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
-  // if (outputWS != inputWS) {
-  //   outputWS = inputWS->clone();
-  //   setProperty("OutputWorkspace", outputWS);
-  // }
+  // Calculate the mean and stddev of the Original Data
+  double meanLAB = mean(LAB);
+  double stdLAB = stddev(LAB);
 
-  // if (std::dynamic_pointer_cast<const EventWorkspace>(inputWS)) {
-  //   this->execEvent();
-  // } else {
-  //   MantidVec::difference_type startBin(0), endBin(0);
+  double meanHAB = mean(HAB);
+  double stdHAB = stddev(HAB);
 
-  //   // If the binning is the same throughout, we only need to find the index
-  //   // limits once
-  //   const bool commonBins = inputWS->isCommonBins();
-  //   if (commonBins) {
-  //     auto X = inputWS->binEdges(0);
-  //   }
+  // Normalize the values in the LAB and HAB vectors
+  for (auto &v : LAB) {
+    v /= meanLAB;
+  }
+  for (auto &v : HAB) {
+    v /= meanHAB;
+  }
 
-  // Progress progress(this, 0.0, 1.0, indexSet.size());
-  // // Parallel running has problems with a race condition, leading to
-  // // occaisional test failures and crashes
+  // Create the array to save the output
+  std::vector<double> out(17992, 0.0);
+  std::copy(LAB.begin(), LAB.end(), out.begin() + 2);
+  std::copy(HAB.begin(), HAB.end(), out.begin() + 16386);
 
-  // for (const auto wi : indexSet) {
-  //   MantidVec::difference_type startBinLoop(startBin), endBinLoop(endBin);
+  std::vector<double> HAB1(out.begin() + 16386, out.begin() + 16733);
+  std::vector<double> HAB2(out.begin() + 16736, out.begin() + 17083);
+  std::vector<double> HAB3(out.begin() + 17086, out.begin() + 17433);
+  std::vector<double> HAB4(out.begin() + 17436, out.begin() + 17783);
 
-  //   // Loop over masking each bin in the range
-  //   for (auto j = static_cast<int>(startBinLoop); j < static_cast<int>(endBinLoop); ++j) {
-  //     outputWS->maskBin(wi, j);
-  //   }
-  //   progress.report();
-  // }
-}
+  // Calculate the rescale factor of each high angle bank
+  double rescaleHAB1 = 1.0 / mean(HAB1);
+  double rescaleHAB2 = 1.0 / mean(HAB2);
+  double rescaleHAB3 = 1.0 / mean(HAB3);
+  double rescaleHAB4 = 1.0 / mean(HAB4);
+
+  // Rescale the values in the HAB vectors
+  for (auto &v : HAB1) {
+    v *= rescaleHAB1;
+  }
+  for (auto &v : HAB2) {
+    v *= rescaleHAB2;
+  }
+  for (auto &v : HAB3) {
+    v *= rescaleHAB3;
+  }
+  for (auto &v : HAB4) {
+    v *= rescaleHAB4;
+  }
+
+  // Copy the values in the output spectrum
+  std::copy(HAB1.begin(), HAB1.end(), out.begin() + 16386);
+  std::copy(HAB2.begin(), HAB2.end(), out.begin() + 16736);
+  std::copy(HAB3.begin(), HAB3.end(), out.begin() + 17086);
+  std::copy(HAB4.begin(), HAB4.end(), out.begin() + 17436);
+
+  // Save the data into the output WS
+  auto &O = outputWS->mutableY(0);
+  std::copy(out.begin(), out.end(), O.begin());
+
+  // Log for debugging
+  g_log.warning() << "Normalized HAB1 mean = " << rescaleHAB1 << "\n";
+
+  g_log.warning() << "Normalized HAB2 mean = " << rescaleHAB2 << "\n";
+
+  g_log.warning() << "Normalized HAB3 mean = " << rescaleHAB3 << "\n";
+
+  g_log.warning() << "Normalized HAB4 mean = " << rescaleHAB4 << "\n";
 }
 
 /** Execution code for EventWorkspaces
