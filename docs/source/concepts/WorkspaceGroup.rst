@@ -56,7 +56,7 @@ Output:
 
 To avoid interaction with the ADS, a `WorkspaceGroup` object can be instantiated using
 
-.. code::
+.. code:: python
 
     import mantid.api as api
 
@@ -64,7 +64,7 @@ To avoid interaction with the ADS, a `WorkspaceGroup` object can be instantiated
 
 This **will not** be automatically added to the ADS, to do so, use the following line
 
-.. code::
+.. code:: python
 
     AnalysisDataService.add("name", ws_group)
 
