@@ -7,12 +7,10 @@
 #
 # Example command to run a PR build on ubuntu:
 # doxygen.sh $WORKSPACE
-# Example command to run doxygen build without checking for changes
-# doxygen.sh $WORKSPACE false
+#
 # Expected args:
 #   1. WORKSPACE: path to the root of the source code. On Windows, only use / for
 #                 this argument do not use \\ or \ in the path.
-#   2. Bool(optional): whether to check for changes, default is true
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source $SCRIPT_DIR/mamba-utils
 
@@ -25,14 +23,9 @@ fi
 WORKSPACE=$1
 shift 1
 
-CHECK_FOR_CHANGES=${1-true}
-if [ $# -ne 0 ]; then
-        shift 1
-fi
-
 cd $WORKSPACE
 
-if [ "$CHECK_FOR_CHANGES" = true ] && $SCRIPT_DIR/../check_for_changes doxygen; then
+if $SCRIPT_DIR/../check_for_changes doxygen; then
     echo "No C++ files or doxygen configuration have changed. Skipping check."
     exit 0
 fi
