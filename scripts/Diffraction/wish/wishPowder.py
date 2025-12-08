@@ -220,7 +220,8 @@ class WishPowder:
 
         van_filepath = self._get_van_filepath()
         if van_filepath is not None:
-            self.van_ws = mantid.Load(van_filepath, OutputWorkspace=self._get_van_wsname())
+            self.van_ws = self._get_van_wsname()
+            mantid.Load(van_filepath, OutputWorkspace=self.van_ws)
         elif self.van_runno:
             self.van_ws = self.create_vanadium()
         else:
