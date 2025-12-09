@@ -9,11 +9,11 @@
 Description
 -----------
 
-This algorithm performs a cubic spline interpolation over the values in a sample log.
+The values used to define the fitting spline must be in the sample log ``LogToInterpolate``.
+The interpolated values will be fit to the time-series axis in ``LogToMatch``.
 
-The values used to define the fitting spline must be in the sample log ``LogToInterpolate``.  The interpolated values will be fit to the time-series axis in ``LogToMatch``.
-
-If the time range in ``LogToMatch`` is outside the range of ``LogToInterpolate``, the time axis will simply be truncated to fit, without extrapolation.
+If the time range in ``LogToMatch`` is outside the range of ``LogToInterpolate``,
+the time axis will simply be truncated to fit, without extrapolation.
 
 Usage
 -----
