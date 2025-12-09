@@ -15,7 +15,6 @@
 #include "MantidKernel/Strings.h"
 
 #include <filesystem>
-
 #include <iterator>
 #include <memory>
 
@@ -114,7 +113,7 @@ std::string expandUser(const std::string &filepath) {
  *                treated as directories, others as files.
  * @returns A string indicating a problem if one occurred
  */
-std::string createDirectory(const std::string &path) {
+std::string createDirectory(const std::filesystem::path &path) {
   std::filesystem::path stempath(path);
   // If the path doesn't end with a separator, assume it includes a filename component
   // and we should create the parent directory instead
@@ -128,14 +127,14 @@ std::string createDirectory(const std::string &path) {
         std::filesystem::create_directories(stempath);
       } catch (const std::exception &e) {
         std::stringstream msg;
-        msg << "Failed to create directory \"" << stempath.string() << "\": " << e.what();
+        msg << "Failed to create directory \"" << stempath << "\": " << e.what();
         return msg.str();
       }
     }
   } else {
     return "Invalid directory.";
   }
-  return ""; // everything went fine
+  return ""; // no error
 }
 } // Anonymous namespace
 
@@ -227,13 +226,14 @@ std::string FileProperty::setValue(const std::string &propValue) {
 
   // Expand user variables, if there are any
   strippedValue = expandUser(strippedValue);
+  std::filesystem::path strippedPath(strippedValue);
 
   // If this looks like an absolute path then don't do any searching but make
   // sure the
   // directory exists for a Save property
-  if (std::filesystem::path(strippedValue).is_absolute()) {
+  if (strippedPath.is_absolute()) {
     if (isSaveProperty()) {
-      std::string error = createDirectory(strippedValue);
+      std::string error = createDirectory(strippedPath.parent_path());
       if (!error.empty())
         return error;
     }
@@ -385,7 +385,7 @@ std::string FileProperty::setSaveProperty(const std::string &propValue) {
   } else {
     save_dir = std::filesystem::path(save_path);
   }
-  errorMsg = createDirectory(save_dir.string());
+  errorMsg = createDirectory(save_dir);
   if (errorMsg.empty()) {
     std::string fullpath = (save_dir / propValue).string();
     errorMsg = PropertyWithValue<std::string>::setValue(fullpath);
