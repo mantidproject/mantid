@@ -29,7 +29,7 @@ DECLARE_ALGORITHM(AddLogSmoothed)
 
 namespace {
 namespace PropertyNames {
-std::string const INPUT_WKSP("InputWorkspace");
+std::string const INPUT_WKSP("Workspace");
 std::string const LOG_NAME("LogName");
 std::string const SMOOTHING_METHOD("SmoothingMethod");
 std::string const PARAMS("Params");
@@ -210,7 +210,7 @@ void AddLogSmoothed::exec() {
   // Add the log
   run.addProperty(output.release(), true);
 
-  g_log.notice() << "Added log named " << newLogName << " to " << ws << '\n';
+  g_log.notice() << "Added log named " << newLogName << " to " << ws->getName() << '\n';
 }
 
 } // namespace Mantid::Algorithms
