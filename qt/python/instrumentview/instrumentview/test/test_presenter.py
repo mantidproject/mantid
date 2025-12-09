@@ -32,13 +32,8 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._presenter.handle_close()
         self._ws.delete()
 
-    def _create_detector_peaks(self, det_id: int, location: np.ndarray) -> DetectorPeaks:
-        return DetectorPeaks([Peak(det_id, location, (1, 1, 1), 100, 1000, 100, 100)])
-
-    def test_projection_combo_options(self):
-        _, projections = self._presenter.projection_combo_options()
-        self.assertGreater(len(projections), 0)
-        self.assertTrue("Spherical X" in projections)
+    def _create_detector_peaks(self, det_id: int, spec_no: int, location: np.ndarray) -> DetectorPeaks:
+        return DetectorPeaks([Peak(det_id, spec_no, location, (1, 1, 1), 100, 1000, 100, 100)])
 
     @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.set_peaks_workspaces")
     def test_update_plotter(self, mock_set_peaks_ws):
@@ -49,33 +44,6 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._mock_view.add_pickable_mesh.assert_called()
         self._mock_view.add_masked_mesh.assert_called()
         mock_set_peaks_ws.assert_called_once()
-
-    @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.reset_cached_projection_positions")
-    @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.set_peaks_workspaces")
-    def test_3d_projection_resets_cache(self, mock_set_peaks_ws, mock_reset_cache):
-        self.assertEqual("3D", self._model._PROJECTION_OPTIONS[0])
-        self._presenter.on_projection_option_selected(0)
-        mock_reset_cache.assert_called_once()
-        self._mock_view.add_main_mesh.assert_called()
-
-    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.create_poly_data_mesh")
-    @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.calculate_projection")
-    def test_projection_option_axis(self, mock_calculate_projection, mock_create_poly_data_mesh):
-        _, options = self._presenter.projection_combo_options()
-        for option in options:
-            if option.endswith("X"):
-                axis = [1, 0, 0]
-            elif option.endswith("Y"):
-                axis = [0, 1, 0]
-            elif option.endswith("Z"):
-                axis = [0, 0, 1]
-            else:
-                return
-            self._presenter.on_projection_option_selected(options.index(option))
-            mock_calculate_projection.assert_called_once_with(option.startswith("Spherical"), axis)
-            mock_create_poly_data_mesh.assert_called()
-            mock_calculate_projection.reset_mock()
-            mock_create_poly_data_mesh.reset_mock()
 
     @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.update_integration_range")
     @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.set_view_integration_limits")
@@ -205,7 +173,6 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         mock_transform,
     ):
         mock_peak_overlay_points.return_value = [[self._create_detector_peaks(50, 50, np.zeros(3))]]
-        mock_adjust_points_projection.return_value = [mock_peak_overlay_points()[0][0].location]
         self._model._calculate_projection = MagicMock(return_value=np.array([np.zeros(3), np.zeros(3)]))
         self._model._detector_ids = np.array([50, 52])
         self._model._spectrum_nos = np.array([50, 52])
