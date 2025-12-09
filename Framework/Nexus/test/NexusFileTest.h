@@ -1537,7 +1537,7 @@ public:
     cout << "\ntest the file id\n" << std::flush;
 
     Mantid::Nexus::FileID fid;
-    TS_ASSERT_EQUALS(fid.getId(), -1);
+    TS_ASSERT(!fid.isValid());
 
     // create a file
     FileResource resource("test_nexus_fid.nxs");
@@ -1548,11 +1548,11 @@ public:
     TS_ASSERT(file_is_closed(filename));
 
     { // scoped fid
-      hid_t fapl = H5Pcreate(H5P_FILE_ACCESS);
+      Mantid::Nexus::ParameterID fapl = H5Pcreate(H5P_FILE_ACCESS);
       H5Pset_fclose_degree(fapl, H5F_CLOSE_STRONG);
       Mantid::Nexus::FileID fid = H5Fopen(filename.c_str(), H5F_ACC_RDONLY, fapl);
       TS_ASSERT(!file_is_closed(filename));
-      TS_ASSERT_DIFFERS(fid.getId(), -1);
+      TS_ASSERT(fid.isValid());
     } // fid goes out of scope and deconstructor is called
     // the file is now closed
     TS_ASSERT(file_is_closed(filename));
@@ -1570,24 +1570,24 @@ public:
     TS_ASSERT(file_is_closed(filename));
 
     { // scoped fid
-      hid_t fapl = H5Pcreate(H5P_FILE_ACCESS);
+      Mantid::Nexus::ParameterID fapl = H5Pcreate(H5P_FILE_ACCESS);
       H5Pset_fclose_degree(fapl, H5F_CLOSE_STRONG);
       auto pfid1 = std::make_shared<Mantid::Nexus::FileID>(H5Fopen(filename.c_str(), H5F_ACC_RDONLY, fapl));
       auto pfid2(pfid1);
       auto pfid3(pfid2);
       TS_ASSERT(!file_is_closed(filename));
-      TS_ASSERT_DIFFERS(pfid1->getId(), -1);
-      TS_ASSERT_DIFFERS(pfid2->getId(), -1);
-      TS_ASSERT_DIFFERS(pfid3->getId(), -1);
+      TS_ASSERT_DIFFERS(pfid1->get(), Mantid::Nexus::FileID::INVALID_ID);
+      TS_ASSERT_DIFFERS(pfid2->get(), Mantid::Nexus::FileID::INVALID_ID);
+      TS_ASSERT_DIFFERS(pfid3->get(), Mantid::Nexus::FileID::INVALID_ID);
       // close pfid1
       pfid1.reset();
       TS_ASSERT(!file_is_closed(filename));
-      TS_ASSERT_DIFFERS(pfid2->getId(), -1);
-      TS_ASSERT_DIFFERS(pfid3->getId(), -1);
+      TS_ASSERT_DIFFERS(pfid2->get(), Mantid::Nexus::FileID::INVALID_ID);
+      TS_ASSERT_DIFFERS(pfid3->get(), Mantid::Nexus::FileID::INVALID_ID);
       // close pfid3
       pfid3.reset();
       TS_ASSERT(!file_is_closed(filename));
-      TS_ASSERT_DIFFERS(pfid2->getId(), -1);
+      TS_ASSERT_DIFFERS(pfid2->get(), Mantid::Nexus::FileID::INVALID_ID);
     } // last pfid goes out of scope and deconstructor is called
     // the file is now closed
     TS_ASSERT(file_is_closed(filename));

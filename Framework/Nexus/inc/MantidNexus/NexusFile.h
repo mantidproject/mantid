@@ -46,40 +46,13 @@ MYH5DLL herr_t H5Pclose(hid_t);
 namespace Mantid {
 namespace Nexus {
 
+using FileID = UniqueID<&H5Fclose>;
 using GroupID = UniqueID<&H5Gclose>;
 using DataSetID = UniqueID<&H5Dclose>;
 using DataTypeID = UniqueID<&H5Tclose>;
 using DataSpaceID = UniqueID<&H5Sclose>;
 using AttributeID = UniqueID<&H5Aclose>;
 using ParameterID = UniqueID<&H5Pclose>;
-
-/**
- * \class FileID
- * \brief A wrapper class for managing HDF5 file handles (hid_t).
- *
- * The FileID class is designed to manage the lifecycle of HDF5 file handles (hid_t),
- * ensuring that the handle is properly closed when the FileID object is destroyed.
- * This helps prevent resource leaks and ensures proper cleanup of HDF5 resources.
- */
-class MANTID_NEXUS_DLL FileID {
-private:
-  hid_t m_fid;
-  // There is no reason to copy or assign a file ID
-  FileID(FileID const &f) = delete;
-  FileID(FileID &&f) = delete;
-  FileID &operator=(hid_t const) = delete;
-  FileID &operator=(FileID const &) = delete;
-  FileID &operator=(FileID &&) = delete;
-
-public:
-  bool operator==(int const v) const { return static_cast<int>(m_fid) == v; }
-  bool operator<=(int const v) const { return static_cast<int>(m_fid) <= v; }
-  operator hid_t const &() const { return m_fid; }
-  hid_t getId() const { return m_fid; }
-  FileID() : m_fid(-1) {}
-  FileID(hid_t const v) : m_fid(v) {}
-  ~FileID();
-};
 
 /**
  * The Object that allows access to the information in the file.

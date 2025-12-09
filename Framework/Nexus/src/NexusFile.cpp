@@ -102,13 +102,13 @@ template <> MANTID_NEXUS_DLL NXnumtype getType(char const) { return NXnumtype::C
 
 template <> MANTID_NEXUS_DLL NXnumtype getType(string const) { return NXnumtype::CHAR; }
 
-FileID::~FileID() {
-  if (H5Iis_valid(m_fid)) {
-    H5Fclose(m_fid);
-    H5garbage_collect();
-    m_fid = -1;
-  }
-}
+// FileID::~FileID() {
+//   if (H5Iis_valid(m_fid)) {
+//     H5Fclose(m_fid);
+//     H5garbage_collect();
+//     m_fid = -1;
+//   }
+// }
 
 } // namespace Mantid::Nexus
 
@@ -199,7 +199,7 @@ File::File(File const &f)
       m_current_data_id(0), m_current_type_id(0), m_current_space_id(0), m_gid_stack{0}, m_descriptor(f.m_descriptor) {
   // NOTE warning to future devs
   // if you change this method, please run the systemtest VanadiumAndFocusWithSolidAngleTest
-  if (m_pfile->getId() <= 0)
+  if (m_pfile->get() <= 0)
     throw NXEXCEPTION("Error reopening file");
 }
 
@@ -304,11 +304,11 @@ void File::openAddress(std::string const &address) {
   if (groupstack.isRoot()) {
     m_current_group_id = 0;
   } else {
-    m_current_group_id = m_pfile->getId();
+    m_current_group_id = m_pfile->get();
     for (auto const &name : groupstack.parts()) {
       fromroot /= name;
       if (m_descriptor.isEntry(fromroot, m_descriptor.classTypeForName(fromroot))) {
-        hid_t gid = H5Gopen(m_pfile->getId(), fromroot.c_str(), H5P_DEFAULT);
+        hid_t gid = H5Gopen(*m_pfile, fromroot.c_str(), H5P_DEFAULT);
         m_gid_stack.push_back(gid);
         // update stack in case of failure
         m_current_group_id = gid;
@@ -320,11 +320,11 @@ void File::openAddress(std::string const &address) {
   }
   // open the last element -- either a group or a dataset
   if (hasData(absaddr)) { // is a dataset
-    m_current_data_id = H5Dopen(m_pfile->getId(), absaddr.c_str(), H5P_DEFAULT);
+    m_current_data_id = H5Dopen(*m_pfile, absaddr.c_str(), H5P_DEFAULT);
     m_current_type_id = H5Dget_type(m_current_data_id);
     m_current_space_id = H5Dget_space(m_current_data_id);
   } else if (hasAddress(absaddr)) { // not a dataset but exists = is a group
-    hid_t gid = H5Gopen(m_pfile->getId(), absaddr.c_str(), H5P_DEFAULT);
+    hid_t gid = H5Gopen(*m_pfile, absaddr.c_str(), H5P_DEFAULT);
     m_gid_stack.push_back(gid);
     m_current_group_id = gid;
   } else {
@@ -401,7 +401,7 @@ hid_t File::getCurrentId() const {
   } else if (m_current_group_id != 0) {
     return m_current_group_id;
   } else {
-    return m_pfile->getId();
+    return *m_pfile;
   }
 }
 
@@ -411,7 +411,7 @@ std::shared_ptr<H5::H5Object> File::getCurrentObject() const {
   } else if (m_current_group_id != 0) {
     return std::make_shared<H5::Group>(m_current_group_id);
   } else {
-    return std::make_shared<H5::H5File>(m_pfile->getId());
+    return std::make_shared<H5::H5File>(*m_pfile);
   }
 }
 
@@ -441,7 +441,7 @@ void File::makeGroup(const std::string &name, const std::string &nxclass, bool o
   // get full address
   NexusAddress const absaddr(formAbsoluteAddress(name));
   // create group with H5Util by getting an H5File object from iFID
-  H5::H5File h5file(m_pfile->getId());
+  H5::H5File h5file(*m_pfile);
   H5::Group grp = H5Util::createGroupNXS(h5file, absaddr, nxclass);
 
   // cleanup
@@ -474,7 +474,7 @@ void File::openGroup(std::string const &name, std::string const &nxclass) {
 
   hid_t iVID;
   if (m_descriptor.isEntry(absaddr, nxclass)) {
-    iVID = H5Gopen(m_pfile->getId(), absaddr.c_str(), H5P_DEFAULT);
+    iVID = H5Gopen(*m_pfile, absaddr.c_str(), H5P_DEFAULT);
   } else {
     throw NXEXCEPTION("The supplied group " + absaddr + " does not exist");
   }
@@ -557,7 +557,7 @@ void File::openData(std::string const &name) {
   NexusAddress absaddr(formAbsoluteAddress(name));
 
   /* find the ID number and open the dataset */
-  DataSetID newData = H5Dopen(m_pfile->getId(), absaddr.c_str(), H5P_DEFAULT);
+  DataSetID newData = H5Dopen(*m_pfile, absaddr.c_str(), H5P_DEFAULT);
   if (!newData.isValid()) {
     throw NXEXCEPTION("Dataset (" + absaddr + ") not found at this level");
   }
@@ -926,8 +926,7 @@ void File::makeCompData(std::string const &name, NXnumtype const type, DimVector
 
   // create the dataset with the compression parameters
   NexusAddress absaddr(formAbsoluteAddress(name));
-  DataSetID dataset =
-      H5Dcreate(m_pfile->getId(), absaddr.c_str(), datatype, dataspace, H5P_DEFAULT, cparms, H5P_DEFAULT);
+  DataSetID dataset = H5Dcreate(*m_pfile, absaddr.c_str(), datatype, dataspace, H5P_DEFAULT, cparms, H5P_DEFAULT);
   if (!dataset.isValid()) {
     msg << "Creating chunked dataset failed";
     throw NXEXCEPTION(msg.str());
@@ -1613,8 +1612,7 @@ void File::makeLink(NXlink const &link) {
 
   // build addressname to link from our current group and the name of the thing to link
   std::string linkTarget(groupAddress(m_address) / itemName);
-  H5Lcreate_hard(m_pfile->getId(), link.targetAddress.c_str(), H5L_SAME_LOC, linkTarget.c_str(), H5P_DEFAULT,
-                 H5P_DEFAULT);
+  H5Lcreate_hard(*m_pfile, link.targetAddress.c_str(), H5L_SAME_LOC, linkTarget.c_str(), H5P_DEFAULT, H5P_DEFAULT);
 
   // register the entry
   registerEntry(linkTarget, m_descriptor.classTypeForName(link.targetAddress));
