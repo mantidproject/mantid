@@ -19,7 +19,7 @@ private:
   hid_t m_id;
   UniqueID &operator=(UniqueID<deleter> const &) = delete;
   UniqueID &operator=(UniqueID<deleter> const &&) = delete;
-  virtual void closeId();
+  virtual void close();
 
 public:
   UniqueID(UniqueID<deleter> &uid) noexcept : m_id(uid.m_id) { uid.m_id = INVALID_ID; };
@@ -30,20 +30,27 @@ public:
   virtual bool operator<=(int const id) const { return static_cast<int>(m_id) <= id; }
   virtual bool operator<(int const id) const { return static_cast<int>(m_id) < id; }
   virtual operator hid_t const &() const { return m_id; };
-  virtual hid_t getId() const { return m_id; }
-  virtual hid_t releaseId();
-  virtual void resetId(hid_t const id = INVALID_ID);
+  virtual hid_t get() const { return m_id; }
+  virtual hid_t release();
+  virtual void reset(hid_t const id = INVALID_ID);
   virtual bool isValid() const;
   UniqueID() : m_id(INVALID_ID) {}
   UniqueID(hid_t const id) : m_id(id) {}
-  virtual ~UniqueID() { closeId(); }
+  virtual ~UniqueID() { close(); }
 
   static hid_t constexpr INVALID_ID{-1};
 };
 
-template <herr_t (*const D)(hid_t)> bool UniqueID<D>::isValid() const { return H5Iis_valid(m_id); }
+template <herr_t (*const D)(hid_t)> bool UniqueID<D>::isValid() const {
+  // fail early condition
+  if (m_id < 0) {
+    return false;
+  } else {
+    return H5Iis_valid(m_id);
+  }
+}
 
-template <herr_t (*const deleter)(hid_t)> void UniqueID<deleter>::closeId() {
+template <herr_t (*const deleter)(hid_t)> void UniqueID<deleter>::close() {
   if (isValid()) {
     deleter(this->m_id);
     this->m_id = INVALID_ID;
@@ -52,15 +59,15 @@ template <herr_t (*const deleter)(hid_t)> void UniqueID<deleter>::closeId() {
 
 /// @brief  Release hold on the managed ID; it will not be closed by this UniqueID
 /// @return the managed ID
-template <herr_t (*const D)(hid_t)> hid_t UniqueID<D>::releaseId() {
+template <herr_t (*const D)(hid_t)> hid_t UniqueID<D>::release() {
   hid_t tmp = m_id;
   m_id = INVALID_ID;
   return tmp;
 }
 
-template <herr_t (*const D)(hid_t)> void UniqueID<D>::resetId(hid_t const id) {
+template <herr_t (*const D)(hid_t)> void UniqueID<D>::reset(hid_t const id) {
   if (m_id != id) {
-    closeId();
+    close();
     m_id = id;
   }
 }
@@ -68,14 +75,14 @@ template <herr_t (*const D)(hid_t)> void UniqueID<D>::resetId(hid_t const id) {
 /// @brief Assign a HDF5 object ID to be managed
 /// @param id : the ID to be managed
 template <herr_t (*const D)(hid_t)> UniqueID<D> &UniqueID<D>::operator=(hid_t const id) {
-  resetId(id);
+  reset(id);
   return *this;
 }
 
 /// @brief Pass the HDF5 object ID from an existing UniqueID to another UniqueID
 /// @param uid : the UniqueID previously managing the ID; it will lose ownership of the ID.
 template <herr_t (*const D)(hid_t)> UniqueID<D> &UniqueID<D>::operator=(UniqueID<D> &uid) {
-  resetId(uid.m_id);
+  reset(uid.m_id);
   uid.m_id = INVALID_ID;
   return *this;
 }

@@ -89,7 +89,7 @@ public:
     call_count = 0;
     {
       TestUniqueID uid;
-      TS_ASSERT_EQUALS(uid.getId(), TestUniqueID::INVALID_ID);
+      TS_ASSERT_EQUALS(uid.get(), TestUniqueID::INVALID_ID);
       TS_ASSERT(!uid.isValid());
     }
     // no deleter called on invalid ID
@@ -103,8 +103,8 @@ public:
     hid_t test = GOOD_ID;
     {
       TestUniqueID uid(test);
-      TS_ASSERT_EQUALS(uid.getId(), test);
-      TS_ASSERT_DIFFERS(uid.getId(), TestUniqueID::INVALID_ID);
+      TS_ASSERT_EQUALS(uid.get(), test);
+      TS_ASSERT_DIFFERS(uid.get(), TestUniqueID::INVALID_ID);
       TS_ASSERT(uid.isValid());
     }
     // deleter called on valid ID
@@ -123,10 +123,10 @@ public:
         TestUniqueID uid2(uid);
         // copy constructor invalidates uid, sets uid2 to value
         TS_ASSERT(!uid.isValid());
-        TS_ASSERT_EQUALS(uid2.getId(), test);
+        TS_ASSERT_EQUALS(uid2.get(), test);
       }
       // uid2 out of scope, deleter called once, uid still invalid
-      TS_ASSERT_EQUALS(uid.getId(), TestUniqueID::INVALID_ID);
+      TS_ASSERT_EQUALS(uid.get(), TestUniqueID::INVALID_ID);
       TS_ASSERT(!uid.isValid());
       TS_ASSERT_EQUALS(call_count, 1);
     }
@@ -139,11 +139,11 @@ public:
     call_count = 0;
     hid_t val1 = GOOD_ID, val2 = H5T_NATIVE_CHAR;
     {
-      Mantid::Nexus::UniqueID<blank_deleter> uid(val1);
-      TS_ASSERT_EQUALS(uid.getId(), val1);
+      TestUniqueID uid(val1);
+      TS_ASSERT_EQUALS(uid.get(), val1);
       TS_ASSERT(uid.isValid());
       uid = val2;
-      TS_ASSERT_EQUALS(uid.getId(), val2);
+      TS_ASSERT_EQUALS(uid.get(), val2);
       TS_ASSERT(uid.isValid());
       TS_ASSERT_EQUALS(call_count, 1);
     }
@@ -157,11 +157,11 @@ public:
     hid_t val1 = GOOD_ID, val2 = H5T_NATIVE_CHAR;
     {
       Mantid::Nexus::UniqueID<blank_deleter> uid1(val1), uid2(val2);
-      TS_ASSERT_EQUALS(uid1.getId(), val1);
-      TS_ASSERT_EQUALS(uid2.getId(), val2);
+      TS_ASSERT_EQUALS(uid1.get(), val1);
+      TS_ASSERT_EQUALS(uid2.get(), val2);
       uid1 = uid2;
-      TS_ASSERT_EQUALS(uid1.getId(), val2);
-      TS_ASSERT_EQUALS(uid2.getId(), -1);
+      TS_ASSERT_EQUALS(uid1.get(), val2);
+      TS_ASSERT_EQUALS(uid2.get(), TestUniqueID::INVALID_ID);
       TS_ASSERT_EQUALS(call_count, 1);
     }
     TS_ASSERT_EQUALS(call_count, 2);
@@ -175,8 +175,8 @@ public:
     hid_t res;
     {
       TestUniqueID uid(test);
-      TS_ASSERT_THROWS_NOTHING(res = uid.releaseId());
-      TS_ASSERT_EQUALS(uid.getId(), TestUniqueID::INVALID_ID);
+      TS_ASSERT_THROWS_NOTHING(res = uid.release());
+      TS_ASSERT_EQUALS(uid.get(), TestUniqueID::INVALID_ID);
       TS_ASSERT(!uid.isValid());
       TS_ASSERT_EQUALS(res, test);
     }
@@ -192,9 +192,9 @@ public:
     {
       TestUniqueID uid(test);
       TS_ASSERT(uid.isValid());
-      TS_ASSERT_EQUALS(uid.getId(), test);
-      TS_ASSERT_THROWS_NOTHING(uid.resetId(test))
-      TS_ASSERT_EQUALS(uid.getId(), test);
+      TS_ASSERT_EQUALS(uid.get(), test);
+      TS_ASSERT_THROWS_NOTHING(uid.reset(test))
+      TS_ASSERT_EQUALS(uid.get(), test);
       TS_ASSERT_EQUALS(call_count, 0);
     }
   }
@@ -207,9 +207,9 @@ public:
     {
       TestUniqueID uid(test);
       TS_ASSERT(uid.isValid());
-      TS_ASSERT_EQUALS(uid.getId(), test);
-      TS_ASSERT_THROWS_NOTHING(uid.resetId(other))
-      TS_ASSERT_EQUALS(uid.getId(), other);
+      TS_ASSERT_EQUALS(uid.get(), test);
+      TS_ASSERT_THROWS_NOTHING(uid.reset(other))
+      TS_ASSERT_EQUALS(uid.get(), other);
       TS_ASSERT_EQUALS(call_count, 1);
     }
   }
@@ -222,33 +222,83 @@ public:
     {
       TestUniqueID uid(test);
       TS_ASSERT(uid.isValid());
-      TS_ASSERT_EQUALS(uid.getId(), test);
-      TS_ASSERT_THROWS_NOTHING(uid.resetId())
-      TS_ASSERT_EQUALS(uid.getId(), TestUniqueID::INVALID_ID);
+      TS_ASSERT_EQUALS(uid.get(), test);
+      TS_ASSERT_THROWS_NOTHING(uid.reset())
+      TS_ASSERT_EQUALS(uid.get(), TestUniqueID::INVALID_ID);
       TS_ASSERT_EQUALS(call_count, 1);
     }
   }
 
+  void test_uniqueID_groups_close() {
+    cout << "\ntest uniqueID groups close" << endl;
+
+    {
+      // create a file held by a unique ID
+      Mantid::Nexus::UniqueID<&H5Fclose> fid = H5Fcreate("test_uniqueid.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+      TS_ASSERT_EQUALS(H5Fget_obj_count(fid, H5F_OBJ_GROUP), 0);
+      {
+        // create a group within that file
+        Mantid::Nexus::UniqueID<&H5Gclose> gid = H5Gcreate1(fid.get(), "a_group", 1);
+        TS_ASSERT_EQUALS(H5Fget_obj_count(fid, H5F_OBJ_GROUP), 1);
+        TS_ASSERT(gid.isValid());
+        Mantid::Nexus::UniqueID<&H5Gclose> gid2 = H5Gopen1(fid.get(), "a_group");
+        TS_ASSERT(gid2.isValid());
+      }
+      TS_ASSERT_EQUALS(H5Fget_obj_count(fid, H5F_OBJ_GROUP), 0);
+    }
+    // cleanup
+    H5Fdelete("test_uniqueid.h5", H5P_DEFAULT);
+  }
+
   void test_uniqueID_no_double_close() {
     cout << "\ntest uniqueID no double close" << endl;
-    call_count = 0;
-    // create some object, make a unique id, then close the file's ID separately
-    // ensure there is no double-close
-    hid_t fid = H5Fcreate("test_uniqueid.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+
+    // setup the error handler to count errors
+    int err_count = 0;
+    auto err = [](hid_t, void *count) {
+      (*static_cast<int *>(count))++;
+      return 0;
+    };
+    H5Eset_auto2(H5E_DEFAULT, err, &err_count);
+
     {
-      TestUniqueID uid(fid);
-      // this is a valid id
-      TS_ASSERT(H5Iis_valid(fid));
-      TS_ASSERT(uid.isValid());
-      // now close it by some other process
-      H5Fclose(fid);
-      // once fid closed, the unique id is no longer valid
-      TS_ASSERT(!H5Iis_valid(fid));
-      TS_ASSERT(!uid.isValid());
-      // note, double-closing would cause an error if improperly handled
-      TS_ASSERT(H5Fclose(fid) < 0);
+      // create a file to hold a group
+      Mantid::Nexus::UniqueID<&H5Fclose> fid = H5Fcreate("test_uniqueid.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+      TS_ASSERT_EQUALS(H5Fget_obj_count(fid, H5F_OBJ_GROUP), 0);
+      // now create a group in the file with a group ID
+      hid_t gid = H5Gcreate1(fid.get(), "a_group", 1);
+      TS_ASSERT_EQUALS(H5Fget_obj_count(fid, H5F_OBJ_GROUP), 1);
+      {
+        // hold that group ID in a UniqueID
+        Mantid::Nexus::UniqueID<&H5Gclose> uid(gid);
+        // this is a valid id
+        TS_ASSERT_EQUALS(H5Fget_obj_count(fid, H5F_OBJ_GROUP), 1);
+        TS_ASSERT(H5Iis_valid(gid));
+        TS_ASSERT(uid.isValid());
+        // now close it by some other process
+        TS_ASSERT(H5Gclose(gid) >= 0);
+        TS_ASSERT_EQUALS(H5Fget_obj_count(fid, H5F_OBJ_GROUP), 0);
+        // once gid closed, the unique id is no longer valid
+        TS_ASSERT(!H5Iis_valid(gid));
+        TS_ASSERT(!uid.isValid());
+        // note, double-closing would cause an error if improperly handled
+        TS_ASSERT_EQUALS(err_count, 0); // no errors so far
+        TS_ASSERT(H5Gclose(gid) < 0);
+        TS_ASSERT_EQUALS(err_count, 1); // now there's one
+      }
+      // after exit, the deleter was not called because fid is no longer valid
+      TS_ASSERT_EQUALS(err_count, 1); // no further errors registered
+      // close the file by some other process
+      H5Fclose(fid.get());
     }
     // after exit, the deleter was not called because fid is no longer valid
-    TS_ASSERT_EQUALS(call_count, 0);
+    TS_ASSERT_EQUALS(err_count, 1); // no further errors registered
+    // cleanup
+    H5Fdelete("test_uniqueid.h5", H5P_DEFAULT);
+  }
+
+  void test_uniqueID_zero() {
+    TestUniqueID uid(0);
+    TS_ASSERT(!uid.isValid());
   }
 };

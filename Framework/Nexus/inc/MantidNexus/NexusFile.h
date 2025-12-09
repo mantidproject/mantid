@@ -25,6 +25,18 @@ namespace H5 {
 class H5Object;
 } // namespace H5
 
+// forward declare
+// NOTE declare extern "C" to prevent conflict with actual declaration
+extern "C" herr_t H5Gclose(hid_t);
+extern "C" herr_t H5Dclose(hid_t);
+extern "C" herr_t H5Tclose(hid_t);
+extern "C" herr_t H5Sclose(hid_t);
+
+using GroupID = Mantid::Nexus::UniqueID<&H5Gclose>;
+using DataSetID = Mantid::Nexus::UniqueID<&H5Dclose>;
+using DataTypeID = Mantid::Nexus::UniqueID<&H5Tclose>;
+using DataSpaceID = Mantid::Nexus::UniqueID<&H5Sclose>;
+
 /**
  * \file NexusFile.h Definition of the Nexus C++ API.
  * \defgroup cpp_types C++ Types

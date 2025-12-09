@@ -467,7 +467,7 @@ public:
   }
 
   void test_data_putget_string() {
-    cout << "\ntest dataset read/write -- string\n" << std::flush;
+    cout << "\ntest dataset read/write -- string" << std::endl;
 
     // open a file
     FileResource resource("test_nexus_file_stringrw.h5");
@@ -476,7 +476,7 @@ public:
     file.makeGroup("entry", "NXentry", true);
 
     // put/get a string
-    cout << "\nread/write string...\n";
+    cout << "\nread/write string..." << std::endl;
     string in("this is a string"), out;
     file.makeData("string_data", NXnumtype::CHAR, in.size(), true);
     file.putData(&in);
@@ -505,6 +505,7 @@ public:
   }
 
   void test_check_str_length() {
+    cout << "\ntest dataset read/write -- string length" << std::endl;
     FileResource resource("test_nexus_str_len.h5");
     std::string filename = resource.fullPath();
     Mantid::Nexus::File file(filename, NXaccess::CREATE5);
