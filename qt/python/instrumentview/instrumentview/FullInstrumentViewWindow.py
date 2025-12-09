@@ -28,23 +28,25 @@ from qtpy.QtGui import QDoubleValidator, QMovie, QDragEnterEvent, QDropEvent, QD
 from qtpy.QtCore import Qt, QEvent, QSize
 from superqt import QDoubleRangeSlider
 from pyvistaqt import BackgroundPlotter
-import matplotlib.pyplot as plt
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-from instrumentview.Detectors import DetectorInfo
-from instrumentview.InteractorStyles import CustomInteractorStyleZoomAndSelect, CustomInteractorStyleRubberBand3D
-from typing import Callable
-from instrumentview.Projections.ProjectionType import ProjectionType
+from pyvista.plotting.picking import RectangleSelection
+from pyvista.plotting.opts import PickerType
+from vtkmodules.vtkInteractionWidgets import vtkImplicitCylinderWidget, vtkImplicitCylinderRepresentation
+from vtkmodules.vtkCommonCore import vtkCommand
+import numpy as np
+import pyvista as pv
+import matplotlib.pyplot as plt
 from mantid.dataobjects import Workspace2D
 from mantid import UsageService, ConfigService
 from mantid.kernel import FeatureType
 from mantidqt.plotting.mantid_navigation_toolbar import MantidNavigationToolbar
-import numpy as np
-import pyvista as pv
-from pyvista.plotting.picking import RectangleSelection
-from pyvista.plotting.opts import PickerType
+
+from instrumentview.Detectors import DetectorInfo
+from instrumentview.InteractorStyles import CustomInteractorStyleZoomAndSelect, CustomInteractorStyleRubberBand3D
+from instrumentview.Projections.ProjectionType import ProjectionType
+
 import os
-from vtkmodules.vtkInteractionWidgets import vtkImplicitCylinderWidget, vtkImplicitCylinderRepresentation
-from vtkmodules.vtkCommonCore import vtkCommand
+from typing import Callable
 
 
 class CylinderWidgetNoRotation(vtkImplicitCylinderWidget):

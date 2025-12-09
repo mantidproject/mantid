@@ -9,7 +9,6 @@ import pyvista as pv
 from pyvista.plotting.picking import RectangleSelection
 from pyvista.plotting.opts import PickerType
 from qtpy.QtWidgets import QFileDialog
-from vtk import vtkCylinder
 from mantid import mtd
 from mantid.kernel import logger, ConfigService
 from mantid.simpleapi import AnalysisDataService
@@ -21,6 +20,7 @@ from instrumentview.InstrumentViewADSObserver import InstrumentViewADSObserver
 from instrumentview.Peaks.WorkspaceDetectorPeaks import WorkspaceDetectorPeaks
 
 from vtkmodules.vtkRenderingCore import vtkCoordinate
+from vtkmodules.vtkCommonDataModel import vtkCylinder
 
 
 class SuppressRendering:
