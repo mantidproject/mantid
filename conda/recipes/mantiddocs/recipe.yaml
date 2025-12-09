@@ -32,6 +32,7 @@ requirements:
     - sphinx ${{ sphinx }}
     - sphinx_bootstrap_theme ${{ sphinx_bootstrap_theme }}
     - graphviz ${{ graphviz }}
+    - gtest ${{ gtest }}
     - pystog ${{ pystog }}
     - if: linux
       then:
