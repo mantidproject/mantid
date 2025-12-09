@@ -115,22 +115,22 @@ void AddLogInterpolated::exec() {
   // retrieve the time series data
   Run &run = ws->mutableRun();
   auto *tspInterp = dynamic_cast<TimeSeriesProperty<double> *>(run.getProperty(logInterp));
-  std::vector<double> values = tspInterp->valuesAsVector();
-  std::vector<double> times = tspInterp->timesAsVectorSeconds();
+  std::vector<double> valuesInterp = tspInterp->valuesAsVector();
+  std::vector<double> timesInterp = tspInterp->timesAsVectorSeconds();
   auto *tspMatch = dynamic_cast<TimeSeriesProperty<double> *>(run.getProperty(logMatch));
   std::vector<double> newTimes = tspMatch->timesAsVectorSeconds();
 
   // perform interpolation
-  auto output = std::make_unique<TimeSeriesProperty<double>>(newLogName);
-  auto range = this->findInterpolationRange(times, newTimes);
+  auto tspOutput = std::make_unique<TimeSeriesProperty<double>>(newLogName);
+  auto range = this->findInterpolationRange(timesInterp, newTimes);
   std::span<double const> newTimesInRange(newTimes.cbegin() + range.first, range.second - range.first);
   std::vector<DateAndTime> datetimes = tspMatch->timesAsVector();
   std::vector<DateAndTime> newDatetimesInRange(datetimes.cbegin() + range.first, datetimes.cbegin() + range.second);
   std::vector<double> newValues =
-      Mantid::Kernel::CubicSpline<double, double>::getSplinedYValues(newTimesInRange, times, values);
-  output->addValues(newDatetimesInRange, newValues);
+      Mantid::Kernel::CubicSpline<double, double>::getSplinedYValues(newTimesInRange, timesInterp, valuesInterp);
+  tspOutput->addValues(newDatetimesInRange, newValues);
 
-  run.addProperty(output.release(), true);
+  run.addProperty(tspOutput.release(), true);
 
   g_log.notice() << "Added log named " << newLogName << " to " << ws->getName() << '\n';
 
