@@ -284,7 +284,7 @@ void File::openAddress(std::string const &address) {
   }
 
   // close all groups in the stack
-  for (hid_t &gid : m_gid_stack) {
+  for (hid_t const &gid : m_gid_stack) {
     if (gid != 0) {
       H5Gclose(gid);
     }
@@ -559,17 +559,17 @@ void File::openData(std::string const &name) {
 
   /* find the ID number and open the dataset */
   DataSetID newData = H5Dopen(m_pfile->getId(), absaddr.c_str(), H5P_DEFAULT);
-  if (newData < 0) {
+  if (!newData.isValid()) {
     throw NXEXCEPTION("Dataset (" + absaddr + ") not found at this level");
   }
   /* find the ID number of datatype */
   DataTypeID newType = H5Dget_type(newData);
-  if (newType < 0) {
+  if (!newType.isValid()) {
     throw NXEXCEPTION("Error opening dataset (" + absaddr + ")");
   }
   /* find the ID number of dataspace */
   DataSpaceID newSpace = H5Dget_space(newData);
-  if (newSpace < 0) {
+  if (!newSpace.isValid()) {
     throw NXEXCEPTION("Error opening dataset (" + absaddr + ")");
   }
   // now maintain stack
@@ -580,7 +580,7 @@ void File::openData(std::string const &name) {
 }
 
 void File::closeData() {
-  herr_t iRet = 0;
+  herr_t iRet;
   if (m_current_space_id != 0) {
     iRet = H5Sclose(m_current_space_id);
     if (iRet < 0) {
@@ -912,7 +912,7 @@ void File::makeCompData(std::string const &name, NXnumtype const type, DimVector
         throw NXEXCEPTION(msg.str());
       }
     } else {
-      cparms = H5Pcopy(H5P_DEFAULT);
+      cparms.reset(H5Pcopy(H5P_DEFAULT));
     }
   } else if (comp == NXcompression::CHUNK) {
     herr_t ret = H5Pset_chunk(cparms, rank, chunkdims.data());
@@ -922,14 +922,13 @@ void File::makeCompData(std::string const &name, NXnumtype const type, DimVector
     }
   } else {
     g_log->error("HDF5 doesn't support selected compression method! Dataset created without compression");
-    cparms = H5Pcopy(H5P_DEFAULT);
+    cparms.reset(H5Pcopy(H5P_DEFAULT));
   }
 
   // create the dataset with the compression parameters
   NexusAddress absaddr(formAbsoluteAddress(name));
   DataSetID dataset =
       H5Dcreate(m_pfile->getId(), absaddr.c_str(), datatype, dataspace, H5P_DEFAULT, cparms, H5P_DEFAULT);
-  H5Pclose(cparms);
   if (!dataset.isValid()) {
     msg << "Creating chunked dataset failed";
     throw NXEXCEPTION(msg.str());

@@ -1,5 +1,6 @@
+#pragma once
+
 #include "MantidNexus/NexusFile_fwd.h"
-#include <memory>
 
 // external forward declare
 extern "C" herr_t H5Iis_valid(hid_t);
@@ -14,18 +15,19 @@ namespace Mantid::Nexus {
  * ensuring that the handle is properly closed when the UniqueID object is destroyed.
  * This helps prevent resource leaks and ensures proper cleanup of HDF5 resources.
  */
-template <herr_t (*const deleter)(hid_t)> class UniqueID {
+template <herr_t (*const D)(hid_t)> class UniqueID {
 private:
   hid_t m_id;
-  UniqueID &operator=(UniqueID<deleter> const &) = delete;
-  UniqueID &operator=(UniqueID<deleter> const &&) = delete;
-  virtual void close();
+  UniqueID &operator=(UniqueID<D> const &) = delete;
+  UniqueID &operator=(UniqueID<D> const &&) = delete;
+  void close();
 
 public:
-  UniqueID(UniqueID<deleter> &uid) noexcept : m_id(uid.m_id) { uid.m_id = INVALID_ID; };
-  UniqueID(UniqueID<deleter> &&uid) noexcept : m_id(uid.m_id) { uid.m_id = INVALID_ID; };
-  virtual UniqueID &operator=(hid_t const id);
-  virtual UniqueID &operator=(UniqueID<deleter> &uid);
+  UniqueID(UniqueID<D> const &uid) = delete;
+  UniqueID(UniqueID<D> &&uid) noexcept : m_id(uid.m_id) { uid.m_id = INVALID_ID; };
+  UniqueID<D> &operator=(hid_t const id);
+  UniqueID<D> &operator=(UniqueID<D> &uid) = delete;
+  UniqueID<D> &operator=(UniqueID<D> &&uid);
   virtual bool operator==(int const id) const { return static_cast<int>(m_id) == id; }
   virtual bool operator<=(int const id) const { return static_cast<int>(m_id) <= id; }
   virtual bool operator<(int const id) const { return static_cast<int>(m_id) < id; }
@@ -81,7 +83,7 @@ template <herr_t (*const D)(hid_t)> UniqueID<D> &UniqueID<D>::operator=(hid_t co
 
 /// @brief Pass the HDF5 object ID from an existing UniqueID to another UniqueID
 /// @param uid : the UniqueID previously managing the ID; it will lose ownership of the ID.
-template <herr_t (*const D)(hid_t)> UniqueID<D> &UniqueID<D>::operator=(UniqueID<D> &uid) {
+template <herr_t (*const D)(hid_t)> UniqueID<D> &UniqueID<D>::operator=(UniqueID<D> &&uid) {
   reset(uid.m_id);
   uid.m_id = INVALID_ID;
   return *this;

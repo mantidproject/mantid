@@ -112,16 +112,16 @@ public:
     cout << "\ntest uniqueID\n";
   }
 
-  void test_uniqueID_copy_construct() {
-    cout << "\ntest uniqueID copy construct\n";
-    // copy construct
+  void test_uniqueID_move_construct() {
+    cout << "\ntest uniqueID move construct\n";
+    // move construct
     call_count = 0;
     hid_t test = GOOD_ID;
     {
       TestUniqueID uid(test);
       {
-        TestUniqueID uid2(uid);
-        // copy constructor invalidates uid, sets uid2 to value
+        TestUniqueID uid2(std::move(uid));
+        // move constructor invalidates uid, sets uid2 to value
         TS_ASSERT(!uid.isValid());
         TS_ASSERT_EQUALS(uid2.get(), test);
       }
@@ -159,7 +159,7 @@ public:
       Mantid::Nexus::UniqueID<blank_deleter> uid1(val1), uid2(val2);
       TS_ASSERT_EQUALS(uid1.get(), val1);
       TS_ASSERT_EQUALS(uid2.get(), val2);
-      uid1 = uid2;
+      uid1 = std::move(uid2);
       TS_ASSERT_EQUALS(uid1.get(), val2);
       TS_ASSERT_EQUALS(uid2.get(), TestUniqueID::INVALID_ID);
       TS_ASSERT_EQUALS(call_count, 1);
@@ -197,6 +197,8 @@ public:
       TS_ASSERT_EQUALS(uid.get(), test);
       TS_ASSERT_EQUALS(call_count, 0);
     }
+    // deleter called once when uid goes out of scope
+    TS_ASSERT_EQUALS(call_count, 1);
   }
 
   void test_uniqueID_reset_other() {
@@ -212,6 +214,8 @@ public:
       TS_ASSERT_EQUALS(uid.get(), other);
       TS_ASSERT_EQUALS(call_count, 1);
     }
+    // deleter not called when invalid ID (101) exits scope
+    TS_ASSERT_EQUALS(call_count, 1);
   }
 
   void test_uniqueID_reset_none() {

@@ -34,13 +34,6 @@ extern "C" herr_t H5Sclose(hid_t);
 extern "C" herr_t H5Aclose(hid_t);
 extern "C" herr_t H5Pclose(hid_t);
 
-using GroupID = Mantid::Nexus::UniqueID<&H5Gclose>;
-using DataSetID = Mantid::Nexus::UniqueID<&H5Dclose>;
-using DataTypeID = Mantid::Nexus::UniqueID<&H5Tclose>;
-using DataSpaceID = Mantid::Nexus::UniqueID<&H5Sclose>;
-using AttributeID = Mantid::Nexus::UniqueID<&H5Aclose>;
-using ParameterID = Mantid::Nexus::UniqueID<&H5Pclose>;
-
 /**
  * \file NexusFile.h Definition of the Nexus C++ API.
  * \defgroup cpp_types C++ Types
@@ -50,6 +43,13 @@ using ParameterID = Mantid::Nexus::UniqueID<&H5Pclose>;
 
 namespace Mantid {
 namespace Nexus {
+
+using GroupID = UniqueID<&H5Gclose>;
+using DataSetID = UniqueID<&H5Dclose>;
+using DataTypeID = UniqueID<&H5Tclose>;
+using DataSpaceID = UniqueID<&H5Sclose>;
+using AttributeID = UniqueID<&H5Aclose>;
+using ParameterID = UniqueID<&H5Pclose>;
 
 /**
  * \class FileID
