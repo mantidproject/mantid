@@ -34,6 +34,7 @@ mtd_add_qt_tests(
             ${POCO_LIBRARIES}
             Python::Python
             gmock
+            gtest
   MTD_QT_LINK_LIBS MantidQtWidgetsMplCpp MantidQtWidgetsCommon
   PARENT_DEPENDENCIES GUITests
 )

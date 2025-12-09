@@ -10,7 +10,7 @@ if(CXXTEST_FOUND)
   set(TESTHELPER_SRCS KafkaTesting.h KafkaTestThreadHelper.h TestDataListener.cpp TestGroupDataListener.cpp)
 
   cxxtest_add_test(LiveDataTest ${TEST_FILES})
-  target_link_libraries(LiveDataTest PRIVATE Mantid::LiveData gmock)
+  target_link_libraries(LiveDataTest PRIVATE Mantid::LiveData gmock gtest)
   target_include_directories(LiveDataTest PRIVATE ../src/)
   add_framework_test_helpers(LiveDataTest)
   add_dependencies(LiveDataTest DataHandling Algorithms MDAlgorithms)

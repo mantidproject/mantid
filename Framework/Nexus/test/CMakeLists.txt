@@ -5,7 +5,7 @@ if(CXXTEST_FOUND)
 
   cxxtest_add_test(NexusTest ${TEST_FILES})
 
-  target_link_libraries(NexusTest PRIVATE Mantid::Nexus gmock Mantid::Kernel)
+  target_link_libraries(NexusTest PRIVATE Mantid::Nexus gmock gtest Mantid::Kernel)
   add_dependencies(FrameworkTests NexusTest)
   add_dependencies(NexusTest UnitTestData)
   # Add to the 'FrameworkTests' group in VS

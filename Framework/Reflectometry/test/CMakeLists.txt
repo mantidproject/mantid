@@ -30,7 +30,7 @@ if(CXXTEST_FOUND)
   # will go out of scope at the end of this file so doesn't need un-setting
 
   cxxtest_add_test(ReflectometryTest ${TEST_FILES})
-  target_link_libraries(ReflectometryTest PRIVATE Mantid::Algorithms Mantid::Reflectometry gmock)
+  target_link_libraries(ReflectometryTest PRIVATE Mantid::Algorithms Mantid::Reflectometry gmock gtest)
 
   target_include_directories(ReflectometryTest PRIVATE Mantid::Algorithms Mantid::Reflectometry)
 

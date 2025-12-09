@@ -5,7 +5,7 @@ if(CXXTEST_FOUND)
 
   cxxtest_add_test(LegacyNexusTest ${TEST_FILES})
 
-  target_link_libraries(LegacyNexusTest PRIVATE Mantid::LegacyNexus gmock)
+  target_link_libraries(LegacyNexusTest PRIVATE Mantid::LegacyNexus gmock gtest)
   add_framework_test_helpers(LegacyNexusTest)
   add_dependencies(FrameworkTests LegacyNexusTest)
   add_dependencies(LegacyNexusTest UnitTestData)

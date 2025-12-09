@@ -35,8 +35,15 @@ target_link_libraries(
           Geometry
           ${Boost_LIBRARIES}
           ${POCO_LIBRARIES}
-          gmock
 )
+
+if(TARGET GTest::gmock_main)
+  target_link_libraries(PythonWorkspaceCreationHelper PRIVATE GTest::gmock_main)
+elseif(TARGET GTest::gmock AND TARGET GTest::gtest)
+  target_link_libraries(PythonWorkspaceCreationHelper PRIVATE GTest::gmock GTest::gtest)
+else()
+  target_link_libraries(PythonWorkspaceCreationHelper PRIVATE gmock gtest)
+endif()
 
 # Overall testhelpers target .pth file for discovery (only needed for development)
 set(_testhelpers_pth_src "${CMAKE_CURRENT_BINARY_DIR}/testhelpers.pth")

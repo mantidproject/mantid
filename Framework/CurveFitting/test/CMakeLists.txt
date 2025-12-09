@@ -3,7 +3,7 @@ if(CXXTEST_FOUND)
   # This variable is used within the cxxtest_add_test macro to build these helper classes into the test executable. It
   # will go out of scope at the end of this file so doesn't need un-setting
   cxxtest_add_test(CurveFittingTest ${TEST_FILES})
-  target_link_libraries(CurveFittingTest PRIVATE Mantid::CurveFitting Mantid::DataHandling gmock)
+  target_link_libraries(CurveFittingTest PRIVATE Mantid::CurveFitting Mantid::DataHandling gmock gtest)
 
   add_framework_test_helpers(CurveFittingTest)
 

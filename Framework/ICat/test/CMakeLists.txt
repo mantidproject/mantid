@@ -7,7 +7,7 @@ if(CXXTEST_FOUND)
 
   # The actual test suite
   cxxtest_add_test(ICatTest ${TEST_FILES})
-  target_link_libraries(ICatTest PRIVATE Mantid::ICat Mantid::API Mantid::DataObjects gmock)
+  target_link_libraries(ICatTest PRIVATE Mantid::ICat Mantid::API Mantid::DataObjects gmock gtest)
 
   add_framework_test_helpers(ICatTest)
   add_dependencies(FrameworkTests ICatTest)

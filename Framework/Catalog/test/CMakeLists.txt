@@ -3,7 +3,7 @@ if(CXXTEST_FOUND)
 
   # The actual test suite
   cxxtest_add_test(CatalogTest ${TEST_FILES})
-  target_link_libraries(CatalogTest PRIVATE Mantid::Catalog gmock)
+  target_link_libraries(CatalogTest PRIVATE Mantid::Catalog gmock gtest)
   add_dependencies(FrameworkTests CatalogTest)
   add_framework_test_helpers(CatalogTest)
 
