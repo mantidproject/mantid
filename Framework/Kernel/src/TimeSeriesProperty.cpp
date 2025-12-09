@@ -1047,6 +1047,29 @@ template <typename TYPE> std::vector<DateAndTime> TimeSeriesProperty<TYPE>::filt
  * @return Return the series as list of times, where the time is the number of
  * seconds since the start.
  */
+template <typename TYPE> std::vector<double> TimeSeriesProperty<TYPE>::timesAsVectorSeconds() const {
+  // 1. Sort if necessary
+  sortIfNecessary();
+
+  // 2. Output data structure
+  std::vector<double> out;
+  if (!m_values.empty()) {
+    out.reserve(m_values.size());
+
+    DateAndTime start = m_values[0].time();
+    for (size_t i = 0; i < m_values.size(); i++) {
+      out.emplace_back(DateAndTime::secondsFromDuration(m_values[i].time() - start));
+    }
+  }
+
+  return out;
+}
+
+/**
+ * @param start The starting DateAndTime, from which the times in seconds are calculated
+ * @return Return the series as list of times, where the time is the number of
+ * seconds since the start.
+ */
 template <typename TYPE>
 std::vector<double> TimeSeriesProperty<TYPE>::timesAsVectorSeconds(Types::Core::DateAndTime start) const {
   // 1. Sort if necessary
@@ -1056,10 +1079,6 @@ std::vector<double> TimeSeriesProperty<TYPE>::timesAsVectorSeconds(Types::Core::
   std::vector<double> out;
   if (!m_values.empty()) {
     out.reserve(m_values.size());
-
-    if (start == 0) {
-      start = m_values[0].time();
-    }
     for (size_t i = 0; i < m_values.size(); i++) {
       out.emplace_back(DateAndTime::secondsFromDuration(m_values[i].time() - start));
     }

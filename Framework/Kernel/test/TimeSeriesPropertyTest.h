@@ -1318,7 +1318,7 @@ public:
   void test_timesAsVectorSeconds_nonzero_start() {
     TimeSeriesProperty<double> *p = new TimeSeriesProperty<double>("doubleProp");
     DateAndTime start("2007-11-30T16:17:00");
-    // add sequece of times at 1s, 2s, 3s, etc...
+    // add sequence of times at 1s, 2s, 3s, etc...
     for (int i = 0; i <= 4; i++) {
       TS_ASSERT_THROWS_NOTHING(p->addValue((start + double(i + 1)), 0.));
     }

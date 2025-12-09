@@ -223,9 +223,11 @@ public:
   /// Return the time series's times as a vector<DateAndTime>
   std::vector<Types::Core::DateAndTime> timesAsVector() const override;
 
-  /// Return the series as list of times, where the time is the number of
-  /// seconds since the start.
-  std::vector<double> timesAsVectorSeconds(Types::Core::DateAndTime start = 0) const;
+  /// Return the series as list of times, where the time is the number of seconds since the start.
+  std::vector<double> timesAsVectorSeconds() const;
+  /// Return the series as list of times, where the time is the number of seconds since the start.
+  std::vector<double> timesAsVectorSeconds(Types::Core::DateAndTime start) const;
+
   /// Get filtered times as a vector
   virtual std::vector<Types::Core::DateAndTime> filteredTimesAsVector(const Kernel::TimeROI *roi) const;
   // overload method rather than default value so python bindings work
