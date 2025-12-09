@@ -174,18 +174,18 @@ public:
         dynamic_cast<MockPropertySettings *>(const_cast<IPropertySettings *>(prop->getSettings()[0].get()));
 
     settings->setIsEnabledReturn(false);
-    TS_ASSERT_EQUALS(m_widget->isWidgetEnabled(prop, "C"), false);
+    TS_ASSERT(!m_widget->isWidgetEnabled(prop, "C"));
 
     settings->setIsEnabledReturn(true);
-    TS_ASSERT_EQUALS(m_widget->isWidgetEnabled(prop, "C"), true);
+    TS_ASSERT(m_widget->isWidgetEnabled(prop, "C"));
   }
 
   /// Verifies that when a property has any `IPropertySettings` attached which
   /// indicate the control should be hidden, `isWidgetVisible()`
   /// returns the correct value.
   void testIsWidgetVisible_HidesPropertiesFromSettings() {
-    // WARNING: in a headless tests, it is problematic to test this directly using `QWidget::isVisible()`.
-    // The private helper method `isWidgetVisible` is verified instead.
+    // WARNING: in a headless tests, it is problematic to test visibility directly using `QWidget::isVisible()`.
+    // For this reason, the private helper method `isWidgetVisible` is verified instead.
 
     m_algorithm->setPropertySettings("C", std::unique_ptr<IPropertySettings const>(new MockPropertySettings()));
     auto *prop = m_algorithm->getPointerToProperty("C");
@@ -193,10 +193,29 @@ public:
         dynamic_cast<MockPropertySettings *>(const_cast<IPropertySettings *>(prop->getSettings()[0].get()));
 
     settings->setIsVisibleReturn(false);
-    TS_ASSERT_EQUALS(m_widget->isWidgetVisible(prop, "C"), false);
+    TS_ASSERT(!m_widget->isWidgetVisible(prop, "C"));
 
     settings->setIsVisibleReturn(true);
-    TS_ASSERT_EQUALS(m_widget->isWidgetVisible(prop, "C"), true);
+    TS_ASSERT(m_widget->isWidgetVisible(prop, "C"));
+  }
+
+  /// Verifies that when a property's validators indicate an error condition,
+  /// `isWidgetVisible()` always returns `true`, regardless of property-settings' state.
+  void testIsWidgetVisible_DoesNotHideErrors() {
+    // Note: this behavior did not work previously. `AlgorithmDialog` and `AlgorithmPropertiesWidget` retained
+    //   separate `m_errors` maps, and the latter no longer actually set any properties values!
+
+    m_algorithm->setPropertySettings("C", std::unique_ptr<IPropertySettings const>(new MockPropertySettings()));
+    auto *prop = m_algorithm->getPointerToProperty("C");
+    auto *settings =
+        dynamic_cast<MockPropertySettings *>(const_cast<IPropertySettings *>(prop->getSettings()[0].get()));
+
+    settings->setIsVisibleReturn(false);
+    TS_ASSERT(!m_widget->isWidgetVisible(prop, "C"));
+
+    QHash<QString, QString> errors = {{"C", "something is not right!"}};
+    m_widget->shareErrorsMap(errors);
+    TS_ASSERT(m_widget->isWidgetVisible(prop, "C"));
   }
 
   /// Verifies that dynamic `IPropertySetting`s that modify validators or

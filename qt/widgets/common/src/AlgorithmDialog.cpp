@@ -317,12 +317,10 @@ void AlgorithmDialog::showValidators() {
  * @return true if the property is valid.
  */
 bool AlgorithmDialog::setPropertyValue(const QString &pName, bool validateOthers) {
-  // Mantid::Kernel::Property *p = getAlgorithmProperty(pName);
   QString value = getInputValue(pName);
 
   std::string error("");
   try {
-    // error = p->setValue(value.toStdString());
     getAlgorithm()->setPropertyValue(pName.toStdString(), value.toStdString());
   } catch (std::exception &err_details) {
     error = err_details.what();
@@ -451,8 +449,9 @@ bool AlgorithmDialog::isWidgetEnabled(const QString &propName) const {
 
   if (!isForScript()) {
     // Regular C++ algo. Let the property tell us,
-    // possibly using validators, if it is to be shown enabled
+    // possibly using its settings, if it is to be shown enabled
     if (!property->getSettings().empty()) {
+      // Allow any setting in the chain to disable the property.
       return std::all_of(property->getSettings().begin(), property->getSettings().end(),
                          [this](auto const &ptr) { return ptr->isEnabled(this->getAlgorithm().get()); });
     } else

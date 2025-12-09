@@ -82,9 +82,12 @@ void GenericDialog::initLayout() {
   // Mark the properties that will be forced enabled or disabled
   QStringList enabled = m_enabled;
   QStringList disabled = m_disabled;
-  // Disabled the python arguments
+  // Disable any python arguments
   disabled += m_python_arguments;
   m_algoPropertiesWidget->addEnabledAndDisableLists(enabled, disabled);
+
+  // Share the errors map with the parent dialog
+  m_algoPropertiesWidget->shareErrorsMap(m_errors);
 
   // At this point, all the widgets have been added and are visible.
   // This makes sure the viewport does not get scaled smaller, even if some
@@ -161,9 +164,9 @@ void GenericDialog::accept() {
   } else {
     // Highlight the validators that are in error (combined from them + whole
     // algorithm)
-    // If got there, there were errors
+    // If we get to this clause, there are errors
     for (auto it = m_errors.begin(); it != m_errors.end(); it++) {
-      // if these assert is encounted, the property and validate keys may not
+      // if this assert is encountered, the property and validator keys may not
       // match (check case)
       assert(m_algoPropertiesWidget->m_propWidgets[it.key()]);
       m_algoPropertiesWidget->m_propWidgets[it.key()]->updateIconVisibility(it.value());

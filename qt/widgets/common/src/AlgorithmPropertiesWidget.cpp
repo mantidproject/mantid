@@ -38,7 +38,7 @@ namespace MantidQt::API {
 /** Constructor
  */
 AlgorithmPropertiesWidget::AlgorithmPropertiesWidget(QWidget *parent)
-    : QWidget(parent), m_algoName(""), m_algo(), m_inputHistory(nullptr) {
+    : QWidget(parent), m_algoName(""), m_algo(), m_errors(nullptr), m_inputHistory(nullptr) {
   // Create the grid layout that will have all the widgets
   m_inputGrid = new QGridLayout;
 
@@ -135,13 +135,15 @@ void AlgorithmPropertiesWidget::addEnabledAndDisableLists(const QStringList &ena
 }
 
 //---------------------------------------------------------------------------------------------------------------
-/** @return true if the workspace has an input workspace */
-bool haveInputWS(const std::vector<Property *> &prop_list) {
-  // For the few algorithms (mainly loading) that do not have input workspaces,
-  // we do not
-  // want to render the 'replace input workspace button'. Do a quick scan to
-  // check.
-  // Also the ones that don't have a set of allowed values as input workspace
+/** Share the errors map with the parent dialog */
+void AlgorithmPropertiesWidget::shareErrorsMap(const QHash<QString, QString> &errors) { this->m_errors = &errors; }
+
+//---------------------------------------------------------------------------------------------------------------
+/** @return true if there is any input workspace in the properties list */
+bool AlgorithmPropertiesWidget::hasInputWS(const std::vector<Property *> &prop_list) const {
+  // For any algorithm that does not have any input workspaces,
+  // we do not want to render the 'replace input workspace button'.
+  // Do a scan to check.
   std::vector<Property *>::const_iterator pEnd = prop_list.end();
   for (std::vector<Property *>::const_iterator pIter = prop_list.begin(); pIter != pEnd; ++pIter) {
     Property *prop = *pIter;
@@ -178,7 +180,7 @@ void AlgorithmPropertiesWidget::initLayout() {
 
   // Create a grid of properties if there are any available
   const std::vector<Property *> &prop_list = getAlgorithm()->getProperties();
-  bool hasInputWS = haveInputWS(prop_list);
+  bool hasInputWS_ = hasInputWS(prop_list);
 
   if (!prop_list.empty()) {
     // Put the property boxes in a grid
@@ -241,12 +243,12 @@ void AlgorithmPropertiesWidget::initLayout() {
         if (!oldValue.isEmpty()) {
           auto error = prop->setValue(oldValue.toStdString());
           // TODO: [Known defect]: this does not match the initialization sequence
-          //   in `AlgorithmDialog`.  In the `AlgorithmDialog` case the 'valueChanged' SIGNAL
+          //   in `AlgorithmDialog`.  In the `AlgorithmDialog` case, the 'valueChanged' SIGNAL
           //   will already have been connected at the point the previous values are set.
           //   By implication: this initialization will not initialize properties
           //   with dynamic-default values correctly.
-          //   However, at present this clause is not actually executed anywhere in the codebase.
-          //   WHEN this clause is used, this issue might need to be fixed!
+          //   Since at present this clause is not actually executed anywhere in the codebase.
+          //   WHEN this clause is used, this issue should be fixed!
           widget->setError(QString::fromStdString(error));
           widget->setPrevious_isDynamicDefault(false);
           widget->setPreviousValue(oldValue);
@@ -263,7 +265,7 @@ void AlgorithmPropertiesWidget::initLayout() {
 
       // Only show the "Replace Workspace" button if the algorithm has an input
       // workspace.
-      if (hasInputWS && !prop->disableReplaceWSButton())
+      if (hasInputWS_ && !prop->disableReplaceWSButton())
         widget->addReplaceWSButton();
 
       ++row;
@@ -387,8 +389,8 @@ bool AlgorithmPropertiesWidget::isWidgetVisible(const Property *property, const 
   }
 
   QString error = "";
-  if (m_errors.contains(propName))
-    error = m_errors[propName];
+  if (m_errors && m_errors->contains(propName))
+    error = (*m_errors)[propName];
   // Always show controls that are in error
   if (error.length() != 0)
     visible = true;
