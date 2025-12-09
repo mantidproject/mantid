@@ -8,15 +8,9 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAlgorithms/DllConfig.h"
-#include "MantidDataObjects/EventList.h"
-#include "MantidDataObjects/EventWorkspace.h"
-#include "MantidIndexing/SpectrumIndexSet.h"
 
 namespace Mantid {
 
-namespace Histogram {
-class BinEdges;
-}
 namespace Algorithms {
 /** Generates the FlatCell workspace for ISIS SANS reduction of LOQ */
 class MANTID_ALGORITHMS_DLL FlatCell : public API::Algorithm {
