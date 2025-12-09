@@ -143,7 +143,7 @@ class FullInstrumentViewPresenter:
 
         # Update transform needs to happen after adding to plotter
         # Uses display coordinates
-        self._update_transform(self._detector_mesh, self._masked_mesh)
+        self._update_transform()
         self._detector_mesh.transform(self._transform, inplace=True)
         self._pickable_mesh.transform(self._transform, inplace=True)
         self._masked_mesh.transform(self._transform, inplace=True)
@@ -153,16 +153,16 @@ class FullInstrumentViewPresenter:
         self.set_view_contour_limits()
         self.set_view_integration_limits()
 
-    def _update_transform(self, detector_mesh: pv.PolyData, masked_mesh: pv.PolyData) -> None:
+    def _update_transform(self) -> None:
         if not self._model.is_2d_projection or self._view.is_maintain_aspect_ratio_checkbox_checked():
             self._transform = np.eye(4)
         else:
-            self._transform = self._transform_mesh_to_fill_window(detector_mesh, masked_mesh)
+            self._transform = self._transform_mesh_to_fill_window()
 
-    def _transform_mesh_to_fill_window(self, detector_mesh: pv.PolyData, masked_mesh: pv.PolyData) -> np.ndarray:
-        meshes_bounds = np.vstack([detector_mesh.bounds, masked_mesh.bounds])
-        min_point = np.min(meshes_bounds[:, 0::2], axis=0)
-        max_point = np.max(meshes_bounds[:, 1::2], axis=0)
+    def _transform_mesh_to_fill_window(self) -> np.ndarray:
+        xmin, xmax, ymin, ymax, zmin, zmax = self._detector_mesh_bounds
+        min_point = np.array([xmin, ymin, zmin])
+        max_point = np.array([xmax, ymax, zmax])
 
         # Convert to display coordinates (pixels)
         plotter = self._view.main_plotter
@@ -198,6 +198,15 @@ class FullInstrumentViewPresenter:
         self._view.store_maintain_aspect_ratio_option()
         self.update_plotter()
 
+    @property
+    def _detector_mesh_bounds(self) -> list[float]:
+        # Output format matches vtk's mesh.GetBounds()
+        meshes_bounds = np.vstack([self._detector_mesh.bounds, self._masked_mesh.bounds])
+        min_point = np.min(meshes_bounds[:, 0::2], axis=0)
+        max_point = np.max(meshes_bounds[:, 1::2], axis=0)
+        # Return list of xmin, xmax, ymin, ymax, zmin, zmax
+        return [x for pair in zip(min_point, max_point) for x in pair]
+
     def update_detector_picker(self) -> None:
         """Change between single and multi point picking"""
         if self._view.is_multi_picking_checkbox_checked():
@@ -232,7 +241,7 @@ class FullInstrumentViewPresenter:
         self._update_line_plot_ws_and_draw(self._view.current_selected_unit())
 
     def on_add_cylinder_clicked(self) -> None:
-        self._view.add_cylinder_widget(self._detector_mesh.GetBounds())
+        self._view.add_cylinder_widget(self._detector_mesh_bounds)
 
     def on_cylinder_select_clicked(self) -> None:
         widget = self._view.get_current_widget()

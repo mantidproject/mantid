@@ -311,9 +311,6 @@ class FullInstrumentViewWindow(QMainWindow):
         return
 
     def cache_camera_position(self) -> None:
-        if self.current_selected_projection() in self._projection_camera_map.keys():
-            return
-
         self.main_plotter.reset_camera()
         self._projection_camera_map[self.current_selected_projection()] = self.main_plotter.camera_position
         self._parallel_scales[self.current_selected_projection()] = self.main_plotter.camera.parallel_scale
@@ -582,6 +579,7 @@ class FullInstrumentViewWindow(QMainWindow):
     def add_cylinder_widget(self, bounds) -> None:
         cylinder_repr = vtkImplicitCylinderRepresentation()
         cylinder_repr.SetOutlineTranslation(False)
+        # Set bounding box line to invisible
         cylinder_repr.GetOutlineProperty().SetOpacity(0)
         cylinder_repr.SetMinRadius(0.001)
 
@@ -589,10 +587,12 @@ class FullInstrumentViewWindow(QMainWindow):
         cylinder_repr.SetCenter((xmin + xmax) / 2, (ymin + ymax) / 2, 0.5)
         cylinder_repr.SetRadius(np.sqrt((xmax - xmin) ** 2 + (ymax - ymin) ** 2) / 8)
 
+        # Arbritary border factor for bounding box
+        border = (np.sqrt((xmax - xmin) ** 2 + (ymax - ymin) ** 2)) / 2
+        cylinder_repr.SetWidgetBounds([xmin - border, xmax + border, ymin - border, ymax + border, 0, 1])
+
         # For 2D projections, camera view is always perpendicular to Z axis
         cylinder_repr.SetAxis([0, 0, 1])
-        # TODO: Find a better way than using fixed bounds
-        cylinder_repr.SetWidgetBounds([-10, 10, -10, 10, 0, 1])
         cylinder_widget = CylinderWidgetNoRotation()
         cylinder_widget.SetRepresentation(cylinder_repr)
         cylinder_widget.SetCurrentRenderer(self.main_plotter.renderer)
