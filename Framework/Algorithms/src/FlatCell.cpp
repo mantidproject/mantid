@@ -7,13 +7,9 @@
 #include "MantidAlgorithms/FlatCell.h"
 #include "MantidAPI/Algorithm.hxx"
 #include "MantidAPI/HistogramValidator.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/BoundedValidator.h"
 
 #include <limits>
 #include <sstream>
-
-using Mantid::HistogramData::BinEdges;
 
 namespace Mantid::Algorithms {
 
