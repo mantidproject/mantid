@@ -299,10 +299,24 @@ class FullInstrumentViewWindow(QMainWindow):
         self.status_group_box.hide()
 
     def reset_camera(self) -> None:
-        if not self._off_screen:
+        if self._off_screen:
+            return
+
+        if self.current_selected_projection() in self._projection_camera_map.keys():
             self.main_plotter.camera_position = self._projection_camera_map[self.current_selected_projection()]
             self.main_plotter.camera.parallel_scale = self._parallel_scales[self.current_selected_projection()]
+        else:
+            # Apply default position, in case cache not available
+            self.main_plotter.reset_camera()
         return
+
+    def cache_camera_position(self) -> None:
+        if self.current_selected_projection() in self._projection_camera_map.keys():
+            return
+
+        self.main_plotter.reset_camera()
+        self._projection_camera_map[self.current_selected_projection()] = self.main_plotter.camera_position
+        self._parallel_scales[self.current_selected_projection()] = self.main_plotter.camera.parallel_scale
 
     def _add_min_max_group_box(self, parent_box: QGroupBox) -> tuple[QLineEdit, QLineEdit, QDoubleRangeSlider]:
         """Creates a minimum and a maximum box (with labels) inside the given group box. The callbacks will be attached to textEdited
@@ -544,11 +558,6 @@ class FullInstrumentViewWindow(QMainWindow):
             self.main_plotter.enable_parallel_projection()
             if not self.main_plotter.off_screen:
                 self.main_plotter.enable_zoom_style()
-
-        if self.current_selected_projection() not in self._projection_camera_map.keys():
-            self.main_plotter.reset_camera()
-            self._projection_camera_map[self.current_selected_projection()] = self.main_plotter.camera_position
-            self._parallel_scales[self.current_selected_projection()] = self.main_plotter.camera.parallel_scale
 
         self.reset_camera()
 

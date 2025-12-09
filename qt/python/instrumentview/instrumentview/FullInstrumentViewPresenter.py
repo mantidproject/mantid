@@ -126,6 +126,7 @@ class FullInstrumentViewPresenter:
             self._update_view_main_plotter()
             self.update_detector_picker()
             self.on_peaks_workspace_selected()
+        self._view.cache_camera_position()
         self._view.reset_camera()
 
     def _update_view_main_plotter(self):
