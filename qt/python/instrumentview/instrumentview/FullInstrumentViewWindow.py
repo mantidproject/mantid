@@ -539,24 +539,26 @@ class FullInstrumentViewWindow(QMainWindow):
         """Draw the given mesh in the main plotter window"""
         self.main_plotter.add_mesh(mesh, color=colour, pickable=pickable)
 
+    def clear_main_plotter(self) -> None:
+        self.main_plotter.clear()
+
     def add_detector_mesh(self, mesh: PolyData, is_projection: bool, scalars=None) -> None:
         """Draw the given mesh in the main plotter window"""
-        self.main_plotter.clear()
         scalar_bar_args = dict(interactive=True, vertical=False, title_font_size=15, label_font_size=12) if scalars is not None else None
         self.main_plotter.add_mesh(
             mesh, pickable=False, scalars=scalars, render_points_as_spheres=True, point_size=15, scalar_bar_args=scalar_bar_args
         )
 
-        if not self.main_plotter.off_screen:
+        if self.main_plotter.off_screen:
+            return
+
+        if not is_projection:
             self.main_plotter.enable_trackball_style()
+            return
 
-        if is_projection:
-            self.main_plotter.view_xy()
-            self.main_plotter.enable_parallel_projection()
-            if not self.main_plotter.off_screen:
-                self.main_plotter.enable_zoom_style()
-
-        self.reset_camera()
+        self.main_plotter.view_xy()
+        self.main_plotter.enable_parallel_projection()
+        self.main_plotter.enable_zoom_style()
 
     def add_pickable_mesh(self, point_cloud: PolyData, scalars: np.ndarray | str) -> None:
         self.main_plotter.add_mesh(

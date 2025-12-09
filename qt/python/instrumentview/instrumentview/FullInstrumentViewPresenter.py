@@ -76,7 +76,6 @@ class FullInstrumentViewPresenter:
         if self._model.workspace_x_unit in self._UNIT_OPTIONS:
             self._view.set_unit_combo_box_index(self._UNIT_OPTIONS.index(self._model.workspace_x_unit))
 
-        self._view.hide_status_box()
         self._ads_observer = InstrumentViewADSObserver(
             delete_callback=self.delete_workspace_callback,
             rename_callback=self.rename_workspace_callback,
@@ -126,10 +125,10 @@ class FullInstrumentViewPresenter:
             self._update_view_main_plotter()
             self.update_detector_picker()
             self.on_peaks_workspace_selected()
-        self._view.cache_camera_position()
-        self._view.reset_camera()
 
     def _update_view_main_plotter(self):
+        self._view.clear_main_plotter()
+
         self._detector_mesh = self.create_poly_data_mesh(self._model.detector_positions)
         self._detector_mesh[self._counts_label] = self._model.detector_counts
         self._view.add_detector_mesh(self._detector_mesh, is_projection=self._model.is_2d_projection, scalars=self._counts_label)
@@ -152,6 +151,9 @@ class FullInstrumentViewPresenter:
         self._view.enable_or_disable_aspect_ratio_box()
         self.set_view_contour_limits()
         self.set_view_integration_limits()
+
+        self._view.cache_camera_position()
+        self._view.reset_camera()
 
     def _update_transform(self) -> None:
         if not self._model.is_2d_projection or self._view.is_maintain_aspect_ratio_checkbox_checked():
