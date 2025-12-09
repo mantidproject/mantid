@@ -119,13 +119,14 @@ public:
     SaveRMCProfile alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", groupName));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "SaveRMCProfileGroup.gr"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", outFilename));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
     // do the checks
-    std::filesystem::path outFile(outFilename);
-    TS_ASSERT(std::filesystem::is_regular_file(outFile));
+    std::filesystem::path outFile = std::filesystem::current_path() / outFilename;
+    TSM_ASSERT(outFile.string() + std::string(" does not exist"), std::filesystem::exists(outFile));
+    TSM_ASSERT(outFile.string() + std::string(" is not a regular file"), std::filesystem::is_regular_file(outFile));
     TS_ASSERT_EQUALS(countLines(outFile), 1002);
 
     // remove the workspace group
