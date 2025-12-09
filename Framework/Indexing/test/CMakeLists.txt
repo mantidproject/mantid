@@ -4,7 +4,7 @@ if(CXXTEST_FOUND)
   # will go out of scope at the end of this file so doesn't need un-setting
 
   cxxtest_add_test(IndexingTest ${TEST_FILES} ${GMOCK_TEST_FILES})
-  target_link_libraries(IndexingTest PRIVATE Mantid::Types Mantid::Indexing gmock)
+  target_link_libraries(IndexingTest PRIVATE Mantid::Types Mantid::Indexing gmock gtest)
 
   add_framework_test_helpers(IndexingTest)
   add_dependencies(FrameworkTests IndexingTest)

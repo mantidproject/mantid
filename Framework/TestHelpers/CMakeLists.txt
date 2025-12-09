@@ -90,7 +90,14 @@ target_link_libraries(
           Mantid::MDAlgorithms
           Mantid::Muon
           Mantid::NexusGeometry
-          gmock
 )
 
 target_include_directories(FrameworkTestHelpers PRIVATE ${CXXTEST_INCLUDE_DIR})
+
+if(TARGET GTest::gmock_main)
+  target_link_libraries(FrameworkTestHelpers PRIVATE GTest::gmock_main)
+elseif(TARGET GTest::gmock AND TARGET GTest::gtest)
+  target_link_libraries(FrameworkTestHelpers PRIVATE GTest::gmock GTest::gtest)
+else()
+  target_link_libraries(FrameworkTestHelpers PRIVATE gmock gtest)
+endif()

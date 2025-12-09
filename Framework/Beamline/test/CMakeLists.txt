@@ -3,7 +3,7 @@ if(CXXTEST_FOUND)
 
   cxxtest_add_test(BeamlineTest ${TEST_FILES} ${GMOCK_TEST_FILES})
 
-  target_link_libraries(BeamlineTest PRIVATE Mantid::Beamline Mantid::Kernel gmock)
+  target_link_libraries(BeamlineTest PRIVATE Mantid::Beamline Mantid::Kernel gmock gtest)
 
   add_framework_test_helpers(BeamlineTest)
 

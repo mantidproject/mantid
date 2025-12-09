@@ -3,7 +3,7 @@ if(CXXTEST_FOUND)
 
   cxxtest_add_test(HistogramDataTest ${TEST_FILES} ${GMOCK_TEST_FILES})
 
-  target_link_libraries(HistogramDataTest PRIVATE Mantid::HistogramData Mantid::Kernel gmock)
+  target_link_libraries(HistogramDataTest PRIVATE Mantid::HistogramData Mantid::Kernel gmock gtest)
 
   add_framework_test_helpers(HistogramDataTest)
   add_dependencies(FrameworkTests HistogramDataTest)

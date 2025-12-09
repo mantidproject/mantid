@@ -34,7 +34,7 @@ if(CXXTEST_FOUND)
 
   cxxtest_add_test(JsonTest ${TEST_FILES})
   target_include_directories(JsonTest SYSTEM PRIVATE ${CXXTEST_INCLUDE_DIR} ${JSONCPP_INCLUDE_DIR})
-  target_link_libraries(JsonTest PUBLIC ${JSONCPP_LIBRARIES} gmock Json)
+  target_link_libraries(JsonTest PUBLIC ${JSONCPP_LIBRARIES} gmock gtest Json)
 
   add_dependencies(FrameworkTests JsonTest)
 
