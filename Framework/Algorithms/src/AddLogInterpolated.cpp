@@ -120,12 +120,14 @@ void AddLogInterpolated::exec() {
   auto *tspMatch = dynamic_cast<TimeSeriesProperty<double> *>(run.getProperty(logMatch));
   std::vector<double> newTimes = tspMatch->timesAsVectorSeconds();
 
-  // perform interpolation
-  auto tspOutput = std::make_unique<TimeSeriesProperty<double>>(newLogName);
+  // find the overlap range, where the new times overlap the original times
   auto range = this->findInterpolationRange(timesInterp, newTimes);
   std::span<double const> newTimesInRange(newTimes.cbegin() + range.first, range.second - range.first);
   std::vector<DateAndTime> datetimes = tspMatch->timesAsVector();
   std::vector<DateAndTime> newDatetimesInRange(datetimes.cbegin() + range.first, datetimes.cbegin() + range.second);
+
+  // perform interpolation
+  auto tspOutput = std::make_unique<TimeSeriesProperty<double>>(newLogName);
   std::vector<double> newValues =
       Mantid::Kernel::CubicSpline<double, double>::getSplinedYValues(newTimesInRange, timesInterp, valuesInterp);
   tspOutput->addValues(newDatetimesInRange, newValues);
@@ -137,10 +139,10 @@ void AddLogInterpolated::exec() {
   setProperty(PropertyNames::INPUT_WKSP, ws);
 }
 
-/** Find the region that has to be interpolated
+/** Find the overlap region of the two axes, given as two indices within xAxisOut
  * @param xAxisIn : the x-axis of the original data
  * @param xAxisOut : the x-axis the interpolated data will have
- * @return : pair of indices for representing the interpolation range
+ * @return : pair of indices specifying the start and stop of interpolation range inside xAxisOut
  */
 std::pair<size_t, size_t> AddLogInterpolated::findInterpolationRange(std::vector<double> const &xAxisIn,
                                                                      std::vector<double> const &xAxisOut) const {
