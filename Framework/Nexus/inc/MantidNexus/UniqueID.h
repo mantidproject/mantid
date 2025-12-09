@@ -88,8 +88,7 @@ template <herr_t (*const D)(hid_t)> UniqueID<D> &UniqueID<D>::operator=(hid_t co
 /// @param uid : the UniqueID previously managing the ID; it will lose ownership of the ID.
 template <herr_t (*const D)(hid_t)> UniqueID<D> &UniqueID<D>::operator=(UniqueID<D> &&uid) {
   if (this != &uid) {
-    close();
-    m_id = uid.m_id;
+    reset(uid.m_id);
     uid.m_id = INVALID_ID;
   }
   return *this;

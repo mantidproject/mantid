@@ -27,12 +27,14 @@ class H5Object;
 
 // forward declare
 // NOTE declare extern "C" to prevent conflict with actual declaration
-extern "C" MYH5DLL herr_t H5Gclose(hid_t);
-extern "C" MYH5DLL herr_t H5Dclose(hid_t);
-extern "C" MYH5DLL herr_t H5Tclose(hid_t);
-extern "C" MYH5DLL herr_t H5Sclose(hid_t);
-extern "C" MYH5DLL herr_t H5Aclose(hid_t);
-extern "C" MYH5DLL herr_t H5Pclose(hid_t);
+extern "C" {
+MYH5DLL herr_t H5Gclose(hid_t);
+MYH5DLL herr_t H5Dclose(hid_t);
+MYH5DLL herr_t H5Tclose(hid_t);
+MYH5DLL herr_t H5Sclose(hid_t);
+MYH5DLL herr_t H5Aclose(hid_t);
+MYH5DLL herr_t H5Pclose(hid_t);
+}
 
 /**
  * \file NexusFile.h Definition of the Nexus C++ API.
