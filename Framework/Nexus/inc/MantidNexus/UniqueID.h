@@ -3,7 +3,12 @@
 #include "MantidNexus/NexusFile_fwd.h"
 
 // external forward declare
-extern "C" herr_t H5Iis_valid(hid_t);
+#if defined(_MSC_VER) // on Windows builds
+#define MYH5DLL __declspec(dllimport)
+#else
+#define MYH5DLL
+#endif
+extern "C" MYH5DLL herr_t H5Iis_valid(hid_t);
 
 namespace Mantid::Nexus {
 
@@ -23,20 +28,20 @@ private:
   void close();
 
 public:
-  UniqueID(UniqueID<D> &&uid) noexcept : m_id(uid.m_id) { uid.m_id = INVALID_ID; };
+  UniqueID(UniqueID<D> &&uid) noexcept : m_id(uid.m_id) { uid.m_id = INVALID_ID; }
   UniqueID<D> &operator=(hid_t const id);
   UniqueID<D> &operator=(UniqueID<D> &&uid);
   bool operator==(int const id) const { return static_cast<int>(m_id) == id; }
   bool operator<=(int const id) const { return static_cast<int>(m_id) <= id; }
   bool operator<(int const id) const { return static_cast<int>(m_id) < id; }
-  operator hid_t const &() const { return m_id; };
+  operator hid_t() const { return m_id; }
   hid_t get() const { return m_id; }
   hid_t release();
   void reset(hid_t const id = INVALID_ID);
   bool isValid() const;
   UniqueID() : m_id(INVALID_ID) {}
   UniqueID(hid_t const id) : m_id(id) {}
-  virtual ~UniqueID() { close(); }
+  ~UniqueID() { close(); }
 
   static hid_t constexpr INVALID_ID{-1};
 };
