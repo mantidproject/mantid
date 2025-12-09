@@ -1,0 +1,1 @@
+- Verified and corrected IMAGINE-X detector layout using neutron absorbing masks.
