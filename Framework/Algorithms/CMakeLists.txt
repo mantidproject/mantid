@@ -2,6 +2,7 @@ set(SRC_FILES
     src/AbsorptionCorrection.cpp
     src/AddAbsorptionWeightedPathLengths.cpp
     src/AddLogDerivative.cpp
+    src/AddLogInterpolated.cpp
     src/AddLogSmoothed.cpp
     src/AddPeak.cpp
     src/AddSampleLog.cpp
@@ -354,6 +355,7 @@ set(INC_FILES
     inc/MantidAlgorithms/AbsorptionCorrection.h
     inc/MantidAlgorithms/AddAbsorptionWeightedPathLengths.h
     inc/MantidAlgorithms/AddLogDerivative.h
+    inc/MantidAlgorithms/AddLogInterpolated.h
     inc/MantidAlgorithms/AddLogSmoothed.h
     inc/MantidAlgorithms/AddPeak.h
     inc/MantidAlgorithms/AddSampleLog.h
@@ -711,6 +713,7 @@ set(INC_FILES
 set(TEST_FILES
     AddAbsorptionWeightedPathLengthsTest.h
     AddLogDerivativeTest.h
+    AddLogInterpolatedTest.h
     AddLogSmoothedTest.h
     AddPeakTest.h
     AddSampleLogTest.h
