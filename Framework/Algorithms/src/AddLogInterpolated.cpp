@@ -27,7 +27,7 @@ using namespace Kernel;
 
 namespace {
 namespace PropertyNames {
-std::string const INPUT_WKSP("InputWorkspace");
+std::string const INPUT_WKSP("Workspace");
 std::string const LOG_INTERP("LogToInterpolate");
 std::string const LOG_MATCH("LogToMatch");
 std::string const NEW_LOG_NAME("NewLogName");

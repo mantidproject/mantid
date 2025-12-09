@@ -51,16 +51,16 @@ public:
     alg.initialize();
 
     // setting the input requires workspace in ADS
-    TS_ASSERT_THROWS_ASSERT(alg.setProperty("InputWorkspace", "nothing"), std::invalid_argument const &e,
+    TS_ASSERT_THROWS_ASSERT(alg.setProperty("Workspace", "nothing"), std::invalid_argument const &e,
                             TS_ASSERT(strstr(e.what(), "Analysis Data Service")));
     // set with a table workspace -- important quality is that NOT matrix workspace
     ITableWorkspace_sptr tab = WorkspaceCreationHelper::createEPPTableWorkspace();
     AnalysisDataService::Instance().addOrReplace("_tab", tab);
-    TS_ASSERT_THROWS_ASSERT(alg.setProperty("InputWorkspace", "_tab"), std::invalid_argument const &e,
+    TS_ASSERT_THROWS_ASSERT(alg.setProperty("Workspace", "_tab"), std::invalid_argument const &e,
                             TS_ASSERT(strstr(e.what(), "MatrixWorkspace")));
     // set with a workspace2d
     Workspace2D_sptr ws = WorkspaceCreationHelper::create2DWorkspace(1, 1);
-    alg.setProperty("InputWorkspace", ws);
+    alg.setProperty("Workspace", ws);
 
     // trying to set the logname empty creates an error
     TS_ASSERT_THROWS_ASSERT(alg.setProperty("LogToInterpolate", ""), std::invalid_argument const &e,
@@ -122,7 +122,7 @@ public:
     // setup the algorithm for cubic spline interpolation
     AddLogInterpolated alg;
     alg.initialize();
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", ws->getName()));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Workspace", ws->getName()));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("LogToInterpolate", "tsp_interp"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("LogToMatch", "tsp_match"));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
