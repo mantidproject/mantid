@@ -42,9 +42,19 @@ if(MSVC)
     endif()
     list(APPEND opts "/DGTEST_HAS_PTHREAD=0")
 
+    # Add definition for linking against GTest DLL
+    list(APPEND opts "/DGTEST_LINKED_AS_SHARED_LIBRARY=1")
+
     if(USE_SANITIZERS_LOWER STREQUAL "address")
       string(REPLACE "/fsanitize=address" "" opts ${opts})
     endif()
     set_property(TARGET gmock PROPERTY COMPILE_OPTIONS ${opts})
   endif()
+
+  # Apply the same definition to other GTest targets if they exist
+  foreach(target_var gtest gmock_main gtest_main)
+    if(TARGET ${target_var})
+      target_compile_definitions(${target_var} PUBLIC GTEST_LINKED_AS_SHARED_LIBRARY=1)
+    endif()
+  endforeach()
 endif()
