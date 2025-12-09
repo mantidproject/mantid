@@ -247,6 +247,8 @@ class FullInstrumentViewPresenter:
 
     def on_cylinder_select_clicked(self) -> None:
         widget = self._view.get_current_widget()
+        if widget is None:
+            return
         cylinder = vtkCylinder()
         widget.GetCylinderRepresentation().GetCylinder(cylinder)
         mask = [(cylinder.FunctionValue(pt) < 0) for pt in self._detector_mesh.points]

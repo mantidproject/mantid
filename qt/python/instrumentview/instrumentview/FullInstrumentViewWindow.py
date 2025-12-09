@@ -269,7 +269,7 @@ class FullInstrumentViewWindow(QMainWindow):
         window_geometry.moveCenter(center_point)
         self.move(window_geometry.topLeft())
 
-        self._current_widget = CylinderWidgetNoRotation()
+        self._current_widget = None
         self._projection_camera_map = {}
         self._parallel_scales = {}
 
