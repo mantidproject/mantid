@@ -1,8 +1,6 @@
-#include <cstring>
-// REMOVE
+#include "MantidNexus/NexusFile.h"
 #include "MantidNexus/H5Util.h"
 #include "MantidNexus/NexusException.h"
-#include "MantidNexus/NexusFile.h"
 #include "MantidNexus/hdf5_type_helper.h"
 #include "MantidNexus/inverted_napi.h"
 #include "MantidTypes/Core/DateAndTime.h"
@@ -11,6 +9,7 @@
 #include <algorithm>
 #include <array>
 #include <assert.h>
+#include <cstring>
 #include <filesystem>
 #include <hdf5.h>
 #include <iostream>

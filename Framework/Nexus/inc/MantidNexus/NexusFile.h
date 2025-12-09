@@ -64,10 +64,10 @@ private:
   hid_t m_fid;
   // There is no reason to copy or assign a file ID
   FileID(FileID const &f) = delete;
-  FileID(FileID const &&f) = delete;
+  FileID(FileID &&f) = delete;
   FileID &operator=(hid_t const) = delete;
   FileID &operator=(FileID const &) = delete;
-  FileID &operator=(FileID const &&) = delete;
+  FileID &operator=(FileID &&) = delete;
 
 public:
   bool operator==(int const v) const { return static_cast<int>(m_fid) == v; }

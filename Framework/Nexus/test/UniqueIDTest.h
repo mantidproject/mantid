@@ -236,9 +236,10 @@ public:
   void test_uniqueID_groups_close() {
     cout << "\ntest uniqueID groups close" << endl;
 
+    std::string filename{"test_uniqueid.h5"};
     {
       // create a file held by a unique ID
-      Mantid::Nexus::UniqueID<&H5Fclose> fid = H5Fcreate("test_uniqueid.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+      Mantid::Nexus::UniqueID<&H5Fclose> fid = H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
       TS_ASSERT_EQUALS(H5Fget_obj_count(fid, H5F_OBJ_GROUP), 0);
       {
         // create a group within that file
@@ -251,7 +252,7 @@ public:
       TS_ASSERT_EQUALS(H5Fget_obj_count(fid, H5F_OBJ_GROUP), 0);
     }
     // cleanup
-    H5Fdelete("test_uniqueid.h5", H5P_DEFAULT);
+    std::filesystem::remove(filename);
   }
 
   void test_uniqueID_no_double_close() {
@@ -264,10 +265,10 @@ public:
       return 0;
     };
     H5Eset_auto2(H5E_DEFAULT, err, &err_count);
-
+    std::string filename{"test_uniqueid.h5"};
     {
       // create a file to hold a group
-      Mantid::Nexus::UniqueID<&H5Fclose> fid = H5Fcreate("test_uniqueid.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+      Mantid::Nexus::UniqueID<&H5Fclose> fid = H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
       TS_ASSERT_EQUALS(H5Fget_obj_count(fid, H5F_OBJ_GROUP), 0);
       // now create a group in the file with a group ID
       hid_t gid = H5Gcreate1(fid.get(), "a_group", 1);
@@ -298,7 +299,7 @@ public:
     // after exit, the deleter was not called because fid is no longer valid
     TS_ASSERT_EQUALS(err_count, 1); // no further errors registered
     // cleanup
-    H5Fdelete("test_uniqueid.h5", H5P_DEFAULT);
+    std::filesystem::remove(filename);
   }
 
   void test_uniqueID_zero() {

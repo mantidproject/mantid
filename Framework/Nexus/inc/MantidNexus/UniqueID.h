@@ -18,24 +18,22 @@ namespace Mantid::Nexus {
 template <herr_t (*const D)(hid_t)> class UniqueID {
 private:
   hid_t m_id;
+  UniqueID(UniqueID<D> const &uid) = delete;
   UniqueID &operator=(UniqueID<D> const &) = delete;
-  UniqueID &operator=(UniqueID<D> const &&) = delete;
   void close();
 
 public:
-  UniqueID(UniqueID<D> const &uid) = delete;
   UniqueID(UniqueID<D> &&uid) noexcept : m_id(uid.m_id) { uid.m_id = INVALID_ID; };
   UniqueID<D> &operator=(hid_t const id);
-  UniqueID<D> &operator=(UniqueID<D> &uid) = delete;
   UniqueID<D> &operator=(UniqueID<D> &&uid);
-  virtual bool operator==(int const id) const { return static_cast<int>(m_id) == id; }
-  virtual bool operator<=(int const id) const { return static_cast<int>(m_id) <= id; }
-  virtual bool operator<(int const id) const { return static_cast<int>(m_id) < id; }
-  virtual operator hid_t const &() const { return m_id; };
-  virtual hid_t get() const { return m_id; }
-  virtual hid_t release();
-  virtual void reset(hid_t const id = INVALID_ID);
-  virtual bool isValid() const;
+  bool operator==(int const id) const { return static_cast<int>(m_id) == id; }
+  bool operator<=(int const id) const { return static_cast<int>(m_id) <= id; }
+  bool operator<(int const id) const { return static_cast<int>(m_id) < id; }
+  operator hid_t const &() const { return m_id; };
+  hid_t get() const { return m_id; }
+  hid_t release();
+  void reset(hid_t const id = INVALID_ID);
+  bool isValid() const;
   UniqueID() : m_id(INVALID_ID) {}
   UniqueID(hid_t const id) : m_id(id) {}
   virtual ~UniqueID() { close(); }
@@ -84,8 +82,11 @@ template <herr_t (*const D)(hid_t)> UniqueID<D> &UniqueID<D>::operator=(hid_t co
 /// @brief Pass the HDF5 object ID from an existing UniqueID to another UniqueID
 /// @param uid : the UniqueID previously managing the ID; it will lose ownership of the ID.
 template <herr_t (*const D)(hid_t)> UniqueID<D> &UniqueID<D>::operator=(UniqueID<D> &&uid) {
-  reset(uid.m_id);
-  uid.m_id = INVALID_ID;
+  if (this != &uid) {
+    close();
+    m_id = uid.m_id;
+    uid.m_id = INVALID_ID;
+  }
   return *this;
 }
 
