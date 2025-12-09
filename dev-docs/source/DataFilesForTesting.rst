@@ -194,6 +194,11 @@ it is recommended that it be placed on a disk with a large amount of
 space. CMake uses the ``MANTID_DATA_STORE`` variable to define where the
 data is stored.
 
+The data itself can be downloaded from a local mirror as well to decrease build times.
+This is controlled by the ``DATA_STORE_MIRROR`` variable which can be "all" (default), "none", "ornl", or "ral".
+The variable will insert additional data mirrors that facilities have created.
+If the data is not found in a local mirror, it will be downloaded from the central data repository.
+
 Example cmake command:
 ----------------------
 
