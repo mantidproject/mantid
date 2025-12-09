@@ -69,61 +69,28 @@ void FlatCell::exec() {
   // Save the Low and High Angle Bank values into vectors
   std::vector<double> LAB(Y.begin() + 2, Y.begin() + 16386);
 
-  // Log for debugging
-  // g_log.warning() << "Size Original LAB = " << LAB.size() << "\n";
-  // g_log.warning() << "Original LAB[0] = " << LAB[0] << "\n";
-  // g_log.warning() << "Original LAB[-1] = " << LAB[LAB.size() - 1] << "\n";
-
   std::vector<double> HAB(Y.begin() + 16386, Y.begin() + 17786);
-
-  // Log for debugging
-  // g_log.warning() << "Size Original HAB = " << HAB.size() << "\n";
-  // g_log.warning() << "Original HAB[0] = " << HAB[0] << "\n";
-  // g_log.warning() << "Original HAB[-1] = " << HAB[HAB.size() - 1] << "\n";
 
   // Calculate the mean and stddev of the Original Data
   double meanLAB = mean(LAB);
   double stdLAB = stddev(LAB);
 
-  // Log for debugging
-  // g_log.warning() << "Mean LAB = " << meanLAB << "\n";
-  // g_log.warning() << "Std Dev LAB = " <<  stdLAB << "\n";
-
   double meanHAB = mean(HAB);
   double stdHAB = stddev(HAB);
-
-  // Log for debugging
-  // g_log.warning() << "Mean HAB = " << meanHAB << "\n";
-  g_log.warning() << "Std Dev HAB = " << stdHAB << "\n";
 
   // Normalize the values in the LAB and HAB vectors
   for (auto &v : LAB) {
     v /= meanLAB;
   }
 
-  // Log for debugging
-  // g_log.warning() << "Size Normalized LAB = " << LAB.size() << "\n";
-  // g_log.warning() << "Normalized LAB[0] = " << LAB[0] << "\n";
-  // g_log.warning() << "Normalized LAB[-1] = " << LAB[LAB.size() - 1] << "\n";
-
   for (auto &v : HAB) {
     v /= meanHAB;
   }
-
-  // Log for debugging
-  // g_log.warning() << "Size Normalized HAB = " << HAB.size() << "\n";
-  // g_log.warning() << "Normalized HAB[0] = " << HAB[0] << "\n";
-  // g_log.warning() << "Normalized HAB[-1] = " << HAB[HAB.size() - 1] << "\n";
 
   // Create the array to save the output
   std::vector<double> out(17992, 0.0);
   std::copy(LAB.begin(), LAB.end(), out.begin() + 2);
   std::copy(HAB.begin(), HAB.end(), out.begin() + 16386);
-
-  // Log for debugging
-  // g_log.warning() << "Size out = " << out.size() << "\n";
-  // g_log.warning() << "out[2] = " << out[0+2] << "\n";
-  // g_log.warning() << "out[17785] = " << out[17785] << "\n";
 
   std::vector<double> HAB1(out.begin() + 16386, out.begin() + 16734);
   std::vector<double> HAB2(out.begin() + 16736, out.begin() + 17084);
@@ -141,12 +108,6 @@ void FlatCell::exec() {
   double rescaleHAB2 = 1.0 / mean(HAB2);
   double rescaleHAB3 = 1.0 / mean(HAB3);
   double rescaleHAB4 = 1.0 / mean(HAB4);
-
-  // Log for debugging
-  // g_log.warning() << "Rescale HAB1 parameter = " << rescaleHAB1 << "\n";
-  // g_log.warning() << "Rescale HAB2 parameter = " << rescaleHAB2 << "\n";
-  // g_log.warning() << "Rescale HAB3 parameter = " << rescaleHAB3 << "\n";
-  // g_log.warning() << "Rescale HAB4 parameter = " << rescaleHAB4 << "\n";
 
   // Rescale the values in the HAB vectors
   for (auto &v : HAB1) {
@@ -172,21 +133,6 @@ void FlatCell::exec() {
   out[16735] = out[16735] * rescaleHAB2;
   out[17435] = out[17435] * rescaleHAB4;
   out[17784] = out[17784] * rescaleHAB4;
-  // std::copy(HAB1.begin(), HAB1.end(), out.begin() + 16386);
-  // std::copy(HAB2.begin(), HAB2.end(), out.begin() + 16736);
-  // std::copy(HAB3.begin(), HAB3.end(), out.begin() + 17086);
-  // std::copy(HAB4.begin(), HAB4.end(), out.begin() + 17436);
-
-  // Log for debugging
-  // g_log.warning() << "Size out = " << out.size() << "\n";
-  // g_log.warning() << "HAB1 (LOWER) out[16387] = " << out[16386] << "\n";
-  // g_log.warning() << "HAB1 (UPPER) out[16734] = " << out[16733] << "\n";
-  // g_log.warning() << "HAB2 (LOWER) out[16737] = " << out[16736] << "\n";
-  // g_log.warning() << "HAB2 (UPPER) out[17084] = " << out[17083] << "\n";
-  // g_log.warning() << "HAB3 (LOWER) out[17087] = " << out[17086] << "\n";
-  // g_log.warning() << "HAB3 (UPPER) out[17434] = " << out[17433] << "\n";
-  // g_log.warning() << "HAB4 (LOWER) out[17437] = " << out[17436] << "\n";
-  // g_log.warning() << "HAB4 (UPPER) out[17784] = " << out[17783] << "\n";
 
   // Save the Y data into the output WS
   auto &O = outputWS->mutableY(0);
