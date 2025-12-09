@@ -208,6 +208,7 @@ set(SYSTEST_NAMES
     StepScan.py
     SurfLoadingTest.py
     SXDAnalysis.py
+    TOFTOFReductionTest.py
     TOPAZPeakFinding.py
     UnweightedLeastSquaresTest.py
     ValidateInstrumentDir.py
