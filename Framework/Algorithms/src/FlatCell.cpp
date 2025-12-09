@@ -134,6 +134,12 @@ void FlatCell::exec() {
   std::vector<double> HAB3(out.begin() + 17086, out.begin() + 17434);
   std::vector<double> HAB4(out.begin() + 17436, out.begin() + 17784);
 
+  // Log for debugging
+  g_log.warning() << "HAB1 size = " << HAB1.size() << "\n";
+  g_log.warning() << "HAB2 size = " << HAB2.size() << "\n";
+  g_log.warning() << "HAB3 size = " << HAB3.size() << "\n";
+  g_log.warning() << "HAB4 size = " << HAB4.size() << "\n";
+
   // Calculate the rescale factor of each high angle bank
   double rescaleHAB1 = 1.0 / mean(HAB1);
   double rescaleHAB2 = 1.0 / mean(HAB2);
@@ -165,6 +171,15 @@ void FlatCell::exec() {
   std::copy(HAB2.begin(), HAB2.end(), out.begin() + 16736);
   std::copy(HAB3.begin(), HAB3.end(), out.begin() + 17086);
   std::copy(HAB4.begin(), HAB4.end(), out.begin() + 17436);
+
+  // Manually change the values of the edge cases
+  out[16735] = out[16735] * rescaleHAB2;
+  out[17435] = out[17435] * rescaleHAB4;
+  out[17784] = out[17784] * rescaleHAB4;
+  // std::copy(HAB1.begin(), HAB1.end(), out.begin() + 16386);
+  // std::copy(HAB2.begin(), HAB2.end(), out.begin() + 16736);
+  // std::copy(HAB3.begin(), HAB3.end(), out.begin() + 17086);
+  // std::copy(HAB4.begin(), HAB4.end(), out.begin() + 17436);
 
   // Log for debugging
   // g_log.warning() << "Size out = " << out.size() << "\n";
