@@ -49,6 +49,9 @@ gdk_pixbuf:
 graphviz:
   - '>=2.47.0'
 
+gmock:
+  - '1.15.*'
+
 gtest:
   - '1.15.*'
 
