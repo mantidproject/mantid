@@ -11,9 +11,9 @@
 #else
 #define MYH5DLL // gcc and clang do not need a DLL specifier
 #endif
-extern "C" MYH5DLL {
-  herr_t H5Iis_valid(hid_t);
-  herr_t H5Fclose(hid_t);
+extern "C" {
+MYH5DLL herr_t H5Iis_valid(hid_t);
+MYH5DLL herr_t H5Fclose(hid_t);
 }
 
 namespace Mantid::Nexus {

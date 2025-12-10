@@ -27,6 +27,7 @@ class H5Object;
 
 // Forward declarations for HDF5 close functions
 // NOTE declare extern "C" to prevent conflict with actual declaration
+// NOTE use MYH5DLL, set to match HDF5's H5_DLL, to allow Windows build
 extern "C" {
 MYH5DLL herr_t H5Gclose(hid_t);
 MYH5DLL herr_t H5Dclose(hid_t);
