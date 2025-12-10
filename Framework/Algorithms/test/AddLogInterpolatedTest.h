@@ -84,11 +84,11 @@ public:
                             TS_ASSERT(strstr(e.what(), "Log pwv_log1 must be a numerical time series")));
   }
 
-  Workspace2D_sptr make_ws_with_tsp_log(std::vector<double> const &values, double const dx) {
+  Workspace2D_sptr make_ws_with_tsp_log(std::vector<double> const &values, Mantid::Types::Core::DateAndTime root_time,
+                                        double dx) {
     // setup a workspace with a time series log
     Workspace2D_sptr ws = WorkspaceCreationHelper::create2DWorkspace(1, 1);
     AnalysisDataService::Instance().addOrReplace("_interpolated_test", ws);
-    Mantid::Types::Core::DateAndTime root_time("2016-11-20T16:17");
     TimeSeriesProperty<double> *tspInterp = new TimeSeriesProperty<double>("tsp_interp");
     TimeSeriesProperty<double> *tspMatch = new TimeSeriesProperty<double>("tsp_match");
     for (unsigned i = 0; i < values.size(); i++) {
@@ -108,14 +108,16 @@ public:
       double operator()(double i) { return slope * i + intercept; }
     } func;
     double dx = 0.2;
-    std::vector<double> values(5), expect(5);
-    for (int i = 0; i < 5; i++) {
+    int const N = 10;
+    std::vector<double> values(N), expect(N - 1);
+    for (int i = 0; i < N; i++) {
       values[i] = func(i);
     }
-    Workspace2D_sptr ws = make_ws_with_tsp_log(values, dx);
+    Mantid::Types::Core::DateAndTime root_time("2016-11-20T16:17");
+    Workspace2D_sptr ws = make_ws_with_tsp_log(values, root_time, dx);
     auto *tsp = dynamic_cast<TimeSeriesProperty<double> *>(ws->run().getProperty("tsp_match"));
-    auto x = tsp->timesAsVectorSeconds();
-    for (int i = 0; i < 5; i++) {
+    auto x = tsp->timesAsVectorSeconds(root_time);
+    for (int i = 0; i < N - 1; i++) {
       expect[i] = func(x[i]);
     }
 
@@ -130,6 +132,9 @@ public:
 
     auto outTSP = dynamic_cast<TimeSeriesProperty<double> *>(ws->run().getProperty("tsp_interp_interpolated"));
     auto result = outTSP->valuesAsVector();
-    TS_ASSERT_EQUALS(result, expect);
+    TS_ASSERT_EQUALS(result.size(), expect.size());
+    for (int i = 0; i < N - 1; i++) {
+      TS_ASSERT_DELTA(result[i], expect[i], 1.e-12);
+    }
   }
 };
