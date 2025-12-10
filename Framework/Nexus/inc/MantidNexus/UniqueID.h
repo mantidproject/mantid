@@ -35,28 +35,28 @@ private:
   void close();
 
 public:
-// constructors / destructor 
+  // constructors / destructor
   UniqueID() : m_id(INVALID_ID) {}
   UniqueID(hid_t const id) : m_id(id) {}
   ~UniqueID() { close(); }
   UniqueID(UniqueID<D> &&uid) noexcept : m_id(uid.m_id) { uid.m_id = INVALID_ID; }
-  
+
   // assignment
   UniqueID<D> &operator=(hid_t const id);
   UniqueID<D> &operator=(UniqueID<D> &&uid);
-  
+
   // comparators
   bool operator==(int const id) const { return static_cast<int>(m_id) == id; }
   bool operator<=(int const id) const { return static_cast<int>(m_id) <= id; }
   bool operator<(int const id) const { return static_cast<int>(m_id) < id; }
-  
+
   // using the id
   operator hid_t() const { return m_id; }
 
   /// @brief Return the managed HDF5 handle
   /// @return the managed HDF5 handle
   hid_t get() const { return m_id; }
-  
+
   hid_t release();
   void reset(hid_t const id = INVALID_ID);
   bool isValid() const;
@@ -65,7 +65,7 @@ public:
   static hid_t constexpr INVALID_ID{-1};
 };
 
-/// @brief Return whether the UniqueId corresponds to a valid HDF5 object 
+/// @brief Return whether the UniqueId corresponds to a valid HDF5 object
 /// @return true if it is valid; otherwise false; on error, false
 template <herr_t (*const D)(hid_t)> bool UniqueID<D>::isValid() const {
   // fail early condition
@@ -77,7 +77,7 @@ template <herr_t (*const D)(hid_t)> bool UniqueID<D>::isValid() const {
 }
 
 /// @brief Close the held ID by calling its deleter function
-/// @tparam deleter 
+/// @tparam deleter
 template <herr_t (*const deleter)(hid_t)> void UniqueID<deleter>::close() {
   if (isValid()) {
     deleter(this->m_id);
