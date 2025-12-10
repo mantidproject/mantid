@@ -68,8 +68,8 @@ The Wide Angle Correction was set on the legacy user file with the command:
 
 ``SAMPLE/PATH/ON``
 
-For TOML user files, the `wide_angle_correction` boolean flag can be set on the transmission field, if the
-flag is not present on the TOML file, the default value is `false`:
+For TOML user files, the ``wide_angle_correction`` boolean flag can be set on the transmission field, if the
+flag is not present on the TOML file, the default value is ``false``:
 
 ..  code-block:: yaml
 
@@ -107,7 +107,7 @@ Where Corr (Correction factor) in this case will be:
 
 Which is the OutputWorkspace of SANSWideAngleCorrection.
 
-This workspace enters inside :ref:`algm-Q1D` as the workspace property `WavePixelAdj`, but this step is handled automatically inside
+This workspace enters inside :ref:`algm-Q1D` as the workspace property ``WavePixelAdj``, but this step is handled automatically inside
 the reduction workflow.
 
 Comparison with Wide Angle Correction at SNS

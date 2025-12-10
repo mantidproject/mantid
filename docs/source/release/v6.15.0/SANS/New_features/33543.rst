@@ -1,1 +1,1 @@
-- Add option in TOML:ref:`UserFiles<sans_toml_v1-ref toml>` and :ref:`ISIS SANS GUI <ISIS_Sans_interface_contents>` to compute wide-angle corrections on transmission data.
+- Add option in TOML :ref:`UserFiles<sans_toml_v1-ref toml>` and :ref:`ISIS SANS GUI <ISIS_Sans_interface_contents>` to compute wide-angle corrections on transmission data.

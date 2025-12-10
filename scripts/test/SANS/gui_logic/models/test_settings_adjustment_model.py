@@ -176,9 +176,9 @@ class SettingsTransmissionModelTest(unittest.TestCase):
     def test_wide_angle_correction_setter_and_default(self):
         state_gui_model = self.create_model({})
 
-        self.assertEqual(state_gui_model.wide_angle_correction, False)
+        self.assertFalse(state_gui_model.wide_angle_correction)
         state_gui_model.wide_angle_correction = True
-        self.assertEqual(state_gui_model.wide_angle_correction, True)
+        self.assertTrue(state_gui_model.wide_angle_correction)
 
 
 if __name__ == "__main__":
