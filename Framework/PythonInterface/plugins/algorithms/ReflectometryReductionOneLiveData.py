@@ -19,12 +19,16 @@ class LiveValue:
     """
 
     LOG_TYPE_NUM_SERIES = "Number Series"
+    LOG_TYPE_STRING = "String"
+    PROP_TYPE_BLOCK = "Block"
+    PROP_TYPE_RUN = "Run"
 
-    def __init__(self, value, unit, alternative_name, log_type):
+    def __init__(self, value, unit, alternative_name, log_type, prop_type):
         self.value = value
         self.unit = unit
         self.alternative_name = alternative_name
         self.log_type = log_type
+        self.prop_type = prop_type
 
 
 class ReflectometryReductionOneLiveData(DataProcessorAlgorithm):
@@ -59,6 +63,12 @@ class ReflectometryReductionOneLiveData(DataProcessorAlgorithm):
             defaultValue="GetLiveInstrumentValue",
             direction=Direction.Input,
             doc="The algorithm to use to get live values from the instrument",
+        )
+        self.declareProperty(
+            name="ExperimentSettingsState",
+            defaultValue={},
+            direction=Direction.Input,
+            doc="A json serializable object representing the experiment settings table in the reflectometry GUI",
         )
 
         self._child_properties = [
@@ -196,10 +206,10 @@ class ReflectometryReductionOneLiveData(DataProcessorAlgorithm):
         for name, liveValue in liveValues.items():
             if liveValue.value is None:
                 try:
-                    liveValue.value = self._get_block_value_from_instrument(name)
+                    liveValue.value = self._get_value_from_instrument(name, liveValue.prop_type)
                 except:
                     self.log().information("Failed to get value " + name + " from the instrument; trying " + liveValue.alternative_name)
-                    liveValue.value = self._get_block_value_from_instrument(liveValue.alternative_name)
+                    liveValue.value = self._get_value_from_instrument(liveValue.alternative_name, liveValue.prop_type)
         self._fixup_zero_theta(liveValues)
         # check we have all we need
         self._validate_live_values(liveValues)
@@ -208,11 +218,24 @@ class ReflectometryReductionOneLiveData(DataProcessorAlgorithm):
     def _live_value_list(self):
         """Get the list of required live value names and their unit type"""
         liveValues = {
-            self._theta_name(): LiveValue(None, "deg", self._alternative_theta_name(), LiveValue.LOG_TYPE_NUM_SERIES),
-            self._s1vg_name(): LiveValue(None, "m", self._alternative_s1vg_name(), LiveValue.LOG_TYPE_NUM_SERIES),
-            self._s2vg_name(): LiveValue(None, "m", self._alternative_s2vg_name(), LiveValue.LOG_TYPE_NUM_SERIES),
+            self._theta_name(): LiveValue(
+                None, "deg", self._alternative_theta_name(), LiveValue.LOG_TYPE_NUM_SERIES, LiveValue.PROP_TYPE_BLOCK
+            ),
+            self._s1vg_name(): LiveValue(
+                None, "m", self._alternative_s1vg_name(), LiveValue.LOG_TYPE_NUM_SERIES, LiveValue.PROP_TYPE_BLOCK
+            ),
+            self._s2vg_name(): LiveValue(
+                None, "m", self._alternative_s2vg_name(), LiveValue.LOG_TYPE_NUM_SERIES, LiveValue.PROP_TYPE_BLOCK
+            ),
+            self._title_name(): LiveValue(None, "", self._alternative_title_name(), LiveValue.LOG_TYPE_STRING, LiveValue.PROP_TYPE_RUN),
         }
         return liveValues
+
+    def _title_name(self):
+        return "TITLE"
+
+    def _alternative_title_name(self):
+        return "title"
 
     def _theta_name(self):
         return "THETA"
@@ -238,12 +261,12 @@ class ReflectometryReductionOneLiveData(DataProcessorAlgorithm):
             return None
         return value.value
 
-    def _get_block_value_from_instrument(self, logName):
+    def _get_value_from_instrument(self, name, propType):
         algName = self.getProperty("GetLiveValueAlgorithm").value
         alg = self.createChildAlgorithm(algName)
         alg.setProperty("Instrument", self._instrument)
-        alg.setProperty("PropertyType", "Block")
-        alg.setProperty("PropertyName", logName)
+        alg.setProperty("PropertyType", propType)
+        alg.setProperty("PropertyName", name)
         alg.execute()
         return alg.getProperty("Value").value
 
