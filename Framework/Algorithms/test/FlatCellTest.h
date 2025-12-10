@@ -26,7 +26,7 @@ public:
 
   void testVersion() { TS_ASSERT_EQUALS(masker.version(), 1); }
 
-  void testCategory() { TS_ASSERT_EQUALS(masker.category(), "Place\\Holder"); }
+  void testCategory() { TS_ASSERT_EQUALS(masker.category(), "SANS"); }
 
   void testInit() {
     TS_ASSERT_THROWS_NOTHING(masker.initialize());

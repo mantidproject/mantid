@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,attribute-defined-outside-init
 import systemtesting
-from mantid.simpleapi import CompareWorkspaces, FlatCell, LoadAscii
+from mantid.simpleapi import FlatCell, LoadAscii
 
 
 class FlatCellTest(systemtesting.MantidSystemTest):
@@ -22,16 +22,16 @@ class FlatCellTest(systemtesting.MantidSystemTest):
         # Load the output data and save into a workspace
         LoadAscii(Filename="flatcell_output.csv", OutputWorkspace="FlatCellOutput")
 
-        # Compare the results
-        (result, _messages) = CompareWorkspaces("FlatCellInput", "FlatCellOutput", Tolerance=1e-2)
-        self.assertEqual(result, True)
+        # # Compare the results
+        # (result, _messages) = CompareWorkspaces("FlatCellInput", "FlatCellOutput", Tolerance=1e-2)
+        # self.assertEqual(result, True)
 
-    # def requiredFiles(self):
-    #     return ['flatcell_input.csv', 'flatcell_output.csv']
+    def requiredFiles(self):
+        return ["flatcell_input.csv", "flatcell_output.csv"]
 
-    # def validateMethod(self):
-    #     return 'ValidateAscii'
+    def validateMethod(self):
+        return "ValidateAscii"
 
-    # def validate(self):
-    #     self.tolerance = 1e-2
-    #     return ("FlatCellInput", "flatcell_output.csv")
+    def validate(self):
+        self.tolerance = 1e-2
+        return ("FlatCellInput", "flatcell_output.csv")
