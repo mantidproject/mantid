@@ -434,6 +434,18 @@ class FullInstrumentViewModel:
         closest_over_all_workspaces = min(closest_peak_by_ws, key=lambda x: x[2])
         closest_over_all_workspaces[0].removePeak(closest_over_all_workspaces[1])
 
+    def delete_peaks_on_all_selected_detectors(self) -> None:
+        peaks_grouped_by_ws = self.peak_overlay_points()
+        for peaks_ws in self._selected_peaks_workspaces:
+            if peaks_ws.name() not in peaks_grouped_by_ws:
+                continue
+            peaks_by_detector = peaks_grouped_by_ws[peaks_ws.name()]
+            picked_detector_peaks = [p for p in peaks_by_detector if p.detector_id in self.picked_detector_ids]
+            if len(picked_detector_peaks) == 0:
+                continue
+            peaks_to_remove = sum([[p.peak_index for p in detector.peaks] for detector in picked_detector_peaks], [])
+            peaks_ws.removePeaks(peaks_to_remove)
+
     def relative_detector_angle(self) -> float:
         picked_ids = self.picked_detector_ids
         if len(picked_ids) != 2:

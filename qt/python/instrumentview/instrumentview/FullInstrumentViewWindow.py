@@ -199,10 +199,12 @@ class FullInstrumentViewWindow(QMainWindow):
         peak_buttons_h_layout = QHBoxLayout()
         self._add_peak_button = QPushButton("Add Peak")
         self._delete_peak_button = QPushButton("Delete Single Peak")
+        self._delete_all_selected_peaks_button = QPushButton("Delete All Selected Peaks")
         self._peak_ws_list = WorkspaceListWidget(self)
         self._peak_ws_list.setSizeAdjustPolicy(QListWidget.AdjustToContents)
         peak_buttons_h_layout.addWidget(self._add_peak_button)
         peak_buttons_h_layout.addWidget(self._delete_peak_button)
+        peak_buttons_h_layout.addWidget(self._delete_all_selected_peaks_button)
         peak_v_layout.addLayout(peak_buttons_h_layout)
         peak_v_layout.addWidget(self._peak_ws_list)
 
@@ -427,6 +429,7 @@ class FullInstrumentViewWindow(QMainWindow):
         self._aspect_ratio_check_box.clicked.connect(self._presenter.on_aspect_ratio_check_box_clicked)
         self._add_peak_button.clicked.connect(self._presenter.on_add_peak_clicked)
         self._delete_peak_button.clicked.connect(self._presenter.on_delete_peak_clicked)
+        self._delete_all_selected_peaks_button.clicked.connect(self._presenter.on_delete_all_selected_peaks_clicked)
 
         self._add_connections_to_edits_and_slider(
             self._contour_range_min_edit,
@@ -551,6 +554,9 @@ class FullInstrumentViewWindow(QMainWindow):
 
     def set_delete_peak_button_enabled(self, is_enabled: bool) -> None:
         self._delete_peak_button.setEnabled(is_enabled)
+
+    def set_delete_all_selected_peaks_button_enabled(self, is_enabled: bool) -> None:
+        self._delete_all_selected_peaks_button.setEnabled(is_enabled)
 
     def set_unit_combo_box_index(self, index: int) -> None:
         self._units_combo_box.setCurrentIndex(index)

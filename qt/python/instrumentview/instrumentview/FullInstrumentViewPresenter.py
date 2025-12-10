@@ -469,6 +469,9 @@ class FullInstrumentViewPresenter:
         self._view.set_delete_peak_button_enabled(
             self._view.has_any_peak_overlays() and self._peak_interaction_status != PeakInteractionStatus.Adding
         )
+        self._view.set_delete_all_selected_peaks_button_enabled(
+            len(self._model.picked_detector_ids) > 0 and self._peak_interaction_status != PeakInteractionStatus.Adding
+        )
 
     def _on_peak_clicked_in_lineplot(self, status: PeakInteractionStatus) -> None:
         self._peak_interaction_status = status
@@ -477,3 +480,7 @@ class FullInstrumentViewPresenter:
 
     def on_delete_peak_clicked(self) -> None:
         self._on_peak_clicked_in_lineplot(PeakInteractionStatus.Deleting)
+
+    def on_delete_all_selected_peaks_clicked(self) -> None:
+        self._model.delete_peaks_on_all_selected_detectors()
+        self._update_peak_buttons()
