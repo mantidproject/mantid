@@ -1056,7 +1056,7 @@ template <typename TYPE> std::vector<double> TimeSeriesProperty<TYPE>::timesAsVe
   if (!m_values.empty()) {
     out.reserve(m_values.size());
 
-    DateAndTime start = m_values[0].time();
+    Types::Core::DateAndTime start = m_values[0].time();
     for (size_t i = 0; i < m_values.size(); i++) {
       out.emplace_back(DateAndTime::secondsFromDuration(m_values[i].time() - start));
     }
