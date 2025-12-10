@@ -1318,18 +1318,19 @@ public:
   void test_timesAsVectorSeconds_nonzero_start() {
     TimeSeriesProperty<double> *p = new TimeSeriesProperty<double>("doubleProp");
     DateAndTime start("2007-11-30T16:17:00");
+    int const N = 10;
     // add sequence of times at 1s, 2s, 3s, etc...
-    for (int i = 0; i <= 4; i++) {
+    for (int i = 0; i < N; i++) {
       TS_ASSERT_THROWS_NOTHING(p->addValue((start + double(i + 1)), 0.));
     }
     // if no start specified, times are from first time of 1s
     std::vector<double> timeSecFromFirst = p->timesAsVectorSeconds();
-    for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < N; i++) {
       TS_ASSERT_DELTA(timeSecFromFirst[i], double(i), 1e-6);
     }
     // if start specified, times are from 0s
     std::vector<double> timeSecFromStart = p->timesAsVectorSeconds(start);
-    for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < N; i++) {
       TS_ASSERT_DELTA(timeSecFromStart[i], double(i + 1), 1e-6);
     }
     delete p;
