@@ -25,7 +25,7 @@ namespace H5 {
 class H5Object;
 } // namespace H5
 
-// forward declare
+// Forward declarations for HDF5 close functions
 // NOTE declare extern "C" to prevent conflict with actual declaration
 extern "C" {
 MYH5DLL herr_t H5Gclose(hid_t);
@@ -46,7 +46,6 @@ MYH5DLL herr_t H5Pclose(hid_t);
 namespace Mantid {
 namespace Nexus {
 
-using FileID = UniqueID<&H5Fclose>;
 using GroupID = UniqueID<&H5Gclose>;
 using DataSetID = UniqueID<&H5Dclose>;
 using DataTypeID = UniqueID<&H5Tclose>;

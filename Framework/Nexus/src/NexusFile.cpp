@@ -102,14 +102,6 @@ template <> MANTID_NEXUS_DLL NXnumtype getType(char const) { return NXnumtype::C
 
 template <> MANTID_NEXUS_DLL NXnumtype getType(string const) { return NXnumtype::CHAR; }
 
-// FileID::~FileID() {
-//   if (H5Iis_valid(m_fid)) {
-//     H5Fclose(m_fid);
-//     H5garbage_collect();
-//     m_fid = -1;
-//   }
-// }
-
 } // namespace Mantid::Nexus
 
 namespace Mantid::Nexus {
@@ -145,7 +137,7 @@ void File::initOpenFile(std::string const &filename, NXaccess const am) {
   // create file acccess property list
   ParameterID fapl = H5Pcopy(H5Util::defaultFileAcc().getId());
 
-  hid_t temp_fid(-1);
+  FileID temp_fid;
   if (am != NXaccess::CREATE5) {
     if (H5Fis_accessible(filename.c_str(), fapl) <= 0) {
       throw NXEXCEPTION("File is not HDF5");
@@ -155,7 +147,7 @@ void File::initOpenFile(std::string const &filename, NXaccess const am) {
     temp_fid = H5Fcreate(filename.c_str(), (unsigned)am, H5P_DEFAULT, fapl);
   }
 
-  if (temp_fid <= 0) {
+  if (!temp_fid.isValid()) {
     throw NXEXCEPTION("Cannot open file");
   }
 
@@ -183,12 +175,12 @@ void File::initOpenFile(std::string const &filename, NXaccess const am) {
   H5Fflush(temp_fid, H5F_SCOPE_GLOBAL);
 
   m_gid_stack[0] = 0; // root!
-  if (temp_fid <= 0) {
+  if (!temp_fid.isValid()) {
     stringstream msg;
     msg << "File::initOpenFile(" << filename << ", " << am << ") failed";
     throw NXEXCEPTION(msg.str());
   } else {
-    m_pfile = std::make_shared<FileID>(temp_fid);
+    m_pfile = std::make_shared<FileID>(temp_fid.release());
   }
 }
 
@@ -199,7 +191,7 @@ File::File(File const &f)
       m_current_data_id(0), m_current_type_id(0), m_current_space_id(0), m_gid_stack{0}, m_descriptor(f.m_descriptor) {
   // NOTE warning to future devs
   // if you change this method, please run the systemtest VanadiumAndFocusWithSolidAngleTest
-  if (m_pfile->get() <= 0)
+  if (!m_pfile->isValid())
     throw NXEXCEPTION("Error reopening file");
 }
 
@@ -228,16 +220,12 @@ File::~File() {
     gid = 0;
   }
   m_gid_stack.clear();
-  // NOTE warning to future devs
-  // if you change this part of method, please run the systemtest VanadiumAndFocusWithSolidAngleTest
   // decrease reference counts to this file
   close();
   H5garbage_collect();
 }
 
 void File::close() {
-  // NOTE warning to future devs
-  // if you change this method, please run the systemtest VanadiumAndFocusWithSolidAngleTest
   if (m_pfile != nullptr) {
     // decrease reference counts to this file
     m_pfile.reset();

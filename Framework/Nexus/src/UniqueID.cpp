@@ -4,7 +4,19 @@
 
 namespace Mantid::Nexus {
 
-template class MANTID_NEXUS_DLL UniqueID<&H5Fclose>;
+FileID::~FileID() {
+  if (this->isValid()) {
+    H5Fclose(this->m_id);
+    // H5garbage_collect();
+    this->m_id = INVALID_ID;
+  }
+}
+
+FileID &FileID::operator=(hid_t const id) {
+  this->reset(id);
+  return *this;
+}
+
 template class MANTID_NEXUS_DLL UniqueID<&H5Gclose>;
 template class MANTID_NEXUS_DLL UniqueID<&H5Dclose>;
 template class MANTID_NEXUS_DLL UniqueID<&H5Tclose>;
