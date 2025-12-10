@@ -11,10 +11,7 @@
 #else
 #define MYH5DLL // gcc and clang do not need a DLL specifier
 #endif
-extern "C" {
-MYH5DLL herr_t H5Iis_valid(hid_t);
-MYH5DLL herr_t H5Fclose(hid_t);
-}
+extern "C" MYH5DLL herr_t H5Iis_valid(hid_t);
 
 namespace Mantid::Nexus {
 
@@ -118,26 +115,5 @@ template <herr_t (*const D)(hid_t)> UniqueID<D> &UniqueID<D>::operator=(UniqueID
   }
   return *this;
 }
-
-/***
- * @class FileID
- * @brief A special wrapper class for managing HDF5 file handles.
- *  Inherits from UniqueID<&H5Fclose>
- * @details Designed to manage the lifecycle of HDF5 file handles (hid_t),
- * ensuring that the handle is properly closed when the FileID object is destroyed.
- * This helps prevent resource leaks and ensures proper cleanup of HDF5 resources.
- * On close, calls garbage collection.
- * @see UniqueID
- */
-class MANTID_NEXUS_DLL FileID : public UniqueID<&H5Fclose> {
-public:
-  FileID() : UniqueID<&H5Fclose>() {}
-  FileID(hid_t const id) : UniqueID<&H5Fclose>(id) {}
-  ~FileID();
-  FileID &operator=(hid_t const id);
-  // disable move semantics
-  FileID(FileID &&) = delete;
-  FileID &operator=(FileID &&) = delete;
-};
 
 } // namespace Mantid::Nexus
