@@ -592,8 +592,13 @@ class FullInstrumentViewWindow(QMainWindow):
         cylinder_repr.SetMinRadius(0.001)
 
         xmin, xmax, ymin, ymax, _zmin, _zmax = bounds
-        cylinder_repr.SetCenter((xmin + xmax) / 2, (ymin + ymax) / 2, 0.5)
-        cylinder_repr.SetRadius(np.sqrt((xmax - xmin) ** 2 + (ymax - ymin) ** 2) / 8)
+
+        width, height = self.main_plotter.renderer.GetSize()
+        cx, cy, cz = self.display_to_world_coords(width / 2, height / 2, 0)
+        cylinder_repr.SetCenter([cx, cy, 0.5])
+
+        x, y, z = self.display_to_world_coords(width / 2 + 0.15 * width, height / 2, 0)
+        cylinder_repr.SetRadius(np.sqrt((x - cx) ** 2 + (y - cy) ** 2))
 
         # Arbritary border factor for bounding box
         border = (np.sqrt((xmax - xmin) ** 2 + (ymax - ymin) ** 2)) / 2
@@ -610,6 +615,14 @@ class FullInstrumentViewWindow(QMainWindow):
         # The command below is a hacky way of making the widget appear on top of detectors
         # No idea why it works
         self.main_plotter.camera_position = self.main_plotter.camera_position
+
+    def display_to_world_coords(self, x, y, z):
+        # Convert from display coordinates to world coordinates
+        renderer = self.main_plotter.renderer
+        renderer.SetDisplayPoint(x, y, z)
+        renderer.DisplayToWorld()
+        world_x, world_y, world_z, world_w = renderer.GetWorldPoint()
+        return world_x / world_w, world_y / world_w, world_y / world_w
 
     def get_current_widget(self):
         return self._current_widget

@@ -175,10 +175,10 @@ class FullInstrumentViewPresenter:
             coordinate.SetValue(*p)
             display_coords.append(coordinate.GetComputedDisplayValue(plotter.renderer))
 
-        window_width, window_height = plotter.window_size
-
         mesh_width = display_coords[1][0] - display_coords[0][0]
         mesh_height = display_coords[1][1] - display_coords[0][1]
+
+        window_width, window_height = plotter.window_size
 
         return self._scale_matrix_relative_to_centre((min_point + max_point) / 2, window_width / mesh_width, window_height / mesh_height)
 
