@@ -734,19 +734,6 @@ bool LogManager::hasInvalidValuesFilter(const std::string &logName) const {
   return hasProperty(getInvalidValuesFilterLogName(logName));
 }
 
-/// returns the invalid values log if the log has a matching invalid values log filter
-Kernel::TimeSeriesProperty<bool> *LogManager::getInvalidValuesFilter(const std::string &logName) const {
-  try {
-    auto log = getLogData(getInvalidValuesFilterLogName(logName));
-    if (auto tsp = dynamic_cast<TimeSeriesProperty<bool> *>(log)) {
-      return tsp;
-    }
-  } catch (Exception::NotFoundError &) {
-    // do nothing, just drop through tto the return line below
-  }
-  return nullptr;
-}
-
 bool LogManager::operator==(const LogManager &other) const {
   return (*m_manager == *(other.m_manager)) && (*m_timeroi == *(other.m_timeroi));
 }
