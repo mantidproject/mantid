@@ -118,7 +118,8 @@ void AddLogInterpolated::exec() {
   std::vector<double> valuesInterp = tspInterp->valuesAsVector();
   std::vector<double> timesInterp = tspInterp->timesAsVectorSeconds();
   auto *tspMatch = dynamic_cast<TimeSeriesProperty<double> *>(run.getProperty(logMatch));
-  std::vector<double> newTimes = tspMatch->timesAsVectorSeconds();
+  // NOTE times calculated from start of tspInterp times
+  std::vector<double> newTimes = tspMatch->timesAsVectorSeconds(tspInterp->firstTime());
 
   // find the overlap range, where the new times overlap the original times
   auto range = this->findInterpolationRange(timesInterp, newTimes);
