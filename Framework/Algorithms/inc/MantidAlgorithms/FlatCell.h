@@ -26,7 +26,7 @@ public:
   int version() const override { return (1); }
 
   /// Algorithm's category for identification
-  const std::string category() const override { return "Place\\Holder"; }
+  const std::string category() const override { return "SANS"; }
 
 private:
   /// Initialisation code
