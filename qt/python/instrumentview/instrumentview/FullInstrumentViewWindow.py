@@ -201,11 +201,11 @@ class FullInstrumentViewWindow(QMainWindow):
         masking_layout = QVBoxLayout(masking_group_box)
         note = QLabel("Currently only a cylinder/circle shape is supported. A rectangular shape will be added in the next update.")
         pre_list_layout = QHBoxLayout()
-        self._add_cylinder = QPushButton("Circle Shape")
-        self._cylinder_select = QPushButton("Apply Mask")
+        self._circle_widget = QPushButton("Circle Shape")
+        self._add_mask = QPushButton("Add Mask")
         self._clear_masks = QPushButton("Clear Masks")
-        pre_list_layout.addWidget(self._add_cylinder)
-        pre_list_layout.addWidget(self._cylinder_select)
+        pre_list_layout.addWidget(self._circle_widget)
+        pre_list_layout.addWidget(self._add_mask)
         pre_list_layout.addWidget(self._clear_masks)
         self._mask_list = QListWidget(self)
         self._mask_list.setSizeAdjustPolicy(QListWidget.AdjustToContents)
@@ -223,8 +223,12 @@ class FullInstrumentViewWindow(QMainWindow):
         masking_layout.addLayout(post_list_layout)
 
         # TODO: Find a more apropriate solution than logic in view
-        self._add_cylinder.clicked.connect(lambda: self._add_cylinder.setDisabled(True))
-        self._cylinder_select.clicked.connect(lambda: self._add_cylinder.setDisabled(False))
+        def toggle_buttons():
+            self._circle_widget.setEnabled(not self._circle_widget.isEnabled())
+            self._add_mask.setEnabled(not self._add_mask.isEnabled())
+
+        self._circle_widget.clicked.connect(toggle_buttons)
+        self._add_mask.clicked.connect(toggle_buttons)
 
         self.status_group_box = QGroupBox("Status")
         status_layout = QHBoxLayout(self.status_group_box)
@@ -405,8 +409,8 @@ class FullInstrumentViewWindow(QMainWindow):
     def setup_connections_to_presenter(self) -> None:
         self._projection_combo_box.currentIndexChanged.connect(self._presenter.update_plotter)
         self._multi_select_check.stateChanged.connect(self._presenter.update_detector_picker)
-        self._add_cylinder.clicked.connect(self._presenter.on_add_cylinder_clicked)
-        self._cylinder_select.clicked.connect(self._presenter.on_cylinder_select_clicked)
+        self._circle_widget.clicked.connect(self._presenter.on_add_cylinder_clicked)
+        self._add_mask.clicked.connect(self._presenter.on_cylinder_select_clicked)
         self._clear_selection_button.clicked.connect(self._presenter.on_clear_selected_detectors_clicked)
         self._contour_range_slider.sliderReleased.connect(self._presenter.on_contour_limits_updated)
         self._integration_limit_slider.sliderReleased.connect(self._presenter.on_integration_limits_updated)
@@ -611,7 +615,8 @@ class FullInstrumentViewWindow(QMainWindow):
         return self._current_widget
 
     def enable_or_disable_mask_widgets(self):
-        self._add_cylinder.setDisabled(self.current_selected_projection() == ProjectionType.THREE_D)
+        self._circle_widget.setDisabled(self.current_selected_projection() == ProjectionType.THREE_D)
+        self._add_mask.setDisabled(True)
 
     def add_rgba_mesh(self, mesh: PolyData, scalars: np.ndarray | str):
         """Draw the given mesh in the main plotter window, and set the colours manually with RGBA numbers"""
