@@ -36,7 +36,17 @@ class StitchByBackground(DataProcessorAlgorithm):
         return False
 
     def validateInputs(self):
-        return {}
+        errors = {}
+
+        ws_name_list = self.getProperty("InputWorkspaces").value
+        stitch_points_list = self.getProperty("StitchPoints").value
+        print(ws_name_list, stitch_points_list)
+        if len(ws_name_list) != len(stitch_points_list) + 1:
+            errors["StitchPoints"] = (
+                f"There must be one less stitch point ({len(stitch_points_list)}) than input workspaces ({len(ws_name_list)})."
+            )
+
+        return errors
 
     def PyInit(self):
         self.declareProperty(
