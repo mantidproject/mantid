@@ -20,6 +20,7 @@ requirements:
     - graphviz ${{ graphviz }}
     - gsl ${{ gsl }}
     - gtest ${{ gtest }}
+    - gmock ${{ gmock }}}
     - h5py
     - hdf4 ${{ hdf4 }}
     - hdf5 ${{ hdf5 }}

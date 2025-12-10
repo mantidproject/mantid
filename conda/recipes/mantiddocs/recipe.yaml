@@ -21,6 +21,8 @@ requirements:
     - ${{ compiler("cxx") }}
     - cmake ${{ cmake }}
     - git
+    - gtest ${{ gtest }}
+    - gmock ${{ gmock }}
     - if: osx or linux
       then:
         - ninja ${{ ninja }}

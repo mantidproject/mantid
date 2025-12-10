@@ -21,6 +21,8 @@ requirements:
     - ninja ${{ ninja }}
     - cmake ${{ cmake }}
     - git
+    - gtest ${{ gtest }}
+    - gmock ${{ gmock }}
     - if: linux
       then:
         - ${{ stdlib("c") }}
@@ -31,7 +33,6 @@ requirements:
   host:
     - eigen ${{ eigen }}
     - gsl ${{ gsl }}
-    - gtest ${{ gtest }}
     - hdf4 ${{ hdf4 }}
     - h5py
     - hdf5 ${{ hdf5 }}
