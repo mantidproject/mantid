@@ -11,6 +11,9 @@
 using Mantid::DataObjects::SplittersWorkspace;
 
 GET_POINTER_SPECIALIZATION(Mantid::API::WorkspaceProperty<SplittersWorkspace>)
+namespace Mantid::API {
+extern template class WorkspaceProperty<SplittersWorkspace>;
+}
 
 void export_SplittersWorkspaceProperty() {
   using Mantid::PythonInterface::WorkspacePropertyExporter;

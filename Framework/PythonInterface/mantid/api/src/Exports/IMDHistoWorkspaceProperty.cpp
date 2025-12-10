@@ -12,6 +12,9 @@ using Mantid::API::IMDHistoWorkspace;
 using Mantid::API::WorkspaceProperty; // NOLINT
 
 GET_POINTER_SPECIALIZATION(WorkspaceProperty<IMDHistoWorkspace>)
+namespace Mantid::API {
+extern template class WorkspaceProperty<IMDHistoWorkspace>;
+}
 
 void export_IMDHistoWorkspaceProperty() {
   using Mantid::PythonInterface::WorkspacePropertyExporter;

@@ -12,6 +12,9 @@ using Mantid::API::WorkspaceProperty; // NOLINT
 using Mantid::DataObjects::PeaksWorkspace;
 
 GET_POINTER_SPECIALIZATION(WorkspaceProperty<PeaksWorkspace>)
+namespace Mantid::API {
+extern template class WorkspaceProperty<PeaksWorkspace>;
+}
 
 void export_PeaksWorkspaceProperty() {
   using Mantid::PythonInterface::WorkspacePropertyExporter;
