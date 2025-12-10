@@ -156,7 +156,7 @@ class FullInstrumentViewModel:
 
     @property
     def picked_spectrum_nos(self) -> np.ndarray:
-        return self._spectrum_nos[self._is_valid][self._detector_is_picked]
+        return self._spectrum_nos[self._is_valid & self._detector_is_picked]
 
     @property
     def picked_workspace_indices(self) -> np.ndarray:
