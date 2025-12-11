@@ -7,6 +7,7 @@ set(SRC_FILES
     src/NexusException.cpp
     src/NexusFile.cpp
     src/NexusAddress.cpp
+    src/UniqueID.cpp
 )
 
 set(INC_FILES
@@ -20,6 +21,7 @@ set(INC_FILES
     inc/MantidNexus/NexusException.h
     inc/MantidNexus/NexusFile.h
     inc/MantidNexus/NexusAddress.h
+    inc/MantidNexus/UniqueID.h
 )
 
 set(TEST_FILES
@@ -33,6 +35,7 @@ set(TEST_FILES
     NexusFileReadWriteTest.h
     NexusAddressTest.h
     NapiUnitTest.h
+    UniqueIDTest.h
 )
 
 if(COVERAGE)
