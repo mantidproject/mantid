@@ -15,6 +15,7 @@
 // forward declare typedefs from hdf5
 typedef int64_t hid_t;
 typedef uint64_t hsize_t;
+typedef int herr_t;
 
 /** \enum NXaccess
  * Nexus file access codes.
