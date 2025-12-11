@@ -11,7 +11,11 @@
 #else
 #define MYH5DLL // gcc and clang do not need a DLL specifier
 #endif
-extern "C" MYH5DLL herr_t H5Iis_valid(hid_t);
+extern "C" {
+MYH5DLL herr_t H5Iis_valid(hid_t);
+MYH5DLL herr_t H5Fclose(hid_t);
+MYH5DLL herr_t H5garbage_collect();
+}
 
 namespace Mantid::Nexus {
 
@@ -64,7 +68,7 @@ public:
 
 /// @brief Return whether the UniqueId corresponds to a valid HDF5 object
 /// @return true if it is valid; otherwise false; on error, false
-template <herr_t (*const D)(hid_t)> bool UniqueID<D>::isValid() const {
+template <herr_t (*const D)(hid_t)> inline bool UniqueID<D>::isValid() const {
   // fail early condition
   if (m_id < 0) {
     return false;
@@ -75,16 +79,26 @@ template <herr_t (*const D)(hid_t)> bool UniqueID<D>::isValid() const {
 
 /// @brief Close the held ID by calling its deleter function
 /// @tparam deleter
-template <herr_t (*const deleter)(hid_t)> void UniqueID<deleter>::close() {
+template <herr_t (*const deleter)(hid_t)> inline void UniqueID<deleter>::close() {
   if (isValid()) {
     deleter(this->m_id);
     this->m_id = INVALID_ID;
   }
 }
 
+/// @brief Close a ID corresponding to a file; and call garbage collection
+template <> inline void UniqueID<&H5Fclose>::close() {
+  if (isValid()) {
+    H5Fclose(this->m_id);
+    this->m_id = INVALID_ID;
+    // call garbage collection to close any and all open objects on this file
+    H5garbage_collect();
+  }
+}
+
 /// @brief  Release hold on the managed ID; it will not be closed by this UniqueID
 /// @return the managed ID
-template <herr_t (*const D)(hid_t)> hid_t UniqueID<D>::release() {
+template <herr_t (*const D)(hid_t)> inline hid_t UniqueID<D>::release() {
   hid_t tmp = m_id;
   m_id = INVALID_ID;
   return tmp;
@@ -92,7 +106,7 @@ template <herr_t (*const D)(hid_t)> hid_t UniqueID<D>::release() {
 
 /// @brief  Close the existing ID and replace with the new ID; or, set to invalid
 /// @param id The new ID to be held; defaults to invalid
-template <herr_t (*const D)(hid_t)> void UniqueID<D>::reset(hid_t const id) {
+template <herr_t (*const D)(hid_t)> inline void UniqueID<D>::reset(hid_t const id) {
   if (m_id != id) {
     close();
     m_id = id;
@@ -101,14 +115,14 @@ template <herr_t (*const D)(hid_t)> void UniqueID<D>::reset(hid_t const id) {
 
 /// @brief Assign a HDF5 object ID to be managed
 /// @param id : the ID to be managed
-template <herr_t (*const D)(hid_t)> UniqueID<D> &UniqueID<D>::operator=(hid_t const id) {
+template <herr_t (*const D)(hid_t)> inline UniqueID<D> &UniqueID<D>::operator=(hid_t const id) {
   reset(id);
   return *this;
 }
 
 /// @brief Pass the HDF5 object ID from an existing UniqueID to another UniqueID
 /// @param uid : the UniqueID previously managing the ID; it will lose ownership of the ID.
-template <herr_t (*const D)(hid_t)> UniqueID<D> &UniqueID<D>::operator=(UniqueID<D> &&uid) {
+template <herr_t (*const D)(hid_t)> inline UniqueID<D> &UniqueID<D>::operator=(UniqueID<D> &&uid) {
   if (this != &uid) {
     reset(uid.m_id);
     uid.m_id = INVALID_ID;
