@@ -60,7 +60,7 @@ class CylinderWidgetNoRotation(vtkImplicitCylinderWidget):
             return
 
 
-class PeaksWorkspaceListWidget(QListWidget):
+class WorkspaceListWidget(QListWidget):
     def __init__(self, parent):
         super().__init__(parent)
         self.setDragDropMode(QAbstractItemView.DropOnly)
@@ -193,7 +193,7 @@ class FullInstrumentViewWindow(QMainWindow):
 
         peak_ws_group_box = QGroupBox("Peaks Workspaces")
         peak_v_layout = QVBoxLayout(peak_ws_group_box)
-        self._peak_ws_list = PeaksWorkspaceListWidget(self)
+        self._peak_ws_list = WorkspaceListWidget(self)
         self._peak_ws_list.setSizeAdjustPolicy(QListWidget.AdjustToContents)
         peak_v_layout.addWidget(self._peak_ws_list)
 
@@ -207,7 +207,7 @@ class FullInstrumentViewWindow(QMainWindow):
         pre_list_layout.addWidget(self._circle_widget)
         pre_list_layout.addWidget(self._add_mask)
         pre_list_layout.addWidget(self._clear_masks)
-        self._mask_list = QListWidget(self)
+        self._mask_list = WorkspaceListWidget(self)
         self._mask_list.setSizeAdjustPolicy(QListWidget.AdjustToContents)
         self._mask_list.setSelectionMode(QAbstractItemView.NoSelection)
         post_list_layout = QHBoxLayout()
@@ -405,6 +405,7 @@ class FullInstrumentViewWindow(QMainWindow):
         self._integration_limit_group_box.setTitle(self._presenter.workspace_display_unit)
         self.main_plotter.set_color_cycler(self._presenter._COLOURS)
         self.refresh_peaks_ws_list()
+        self.refresh_mask_ws_list()
 
     def setup_connections_to_presenter(self) -> None:
         self._projection_combo_box.currentIndexChanged.connect(self._presenter.update_plotter)
@@ -430,12 +431,6 @@ class FullInstrumentViewWindow(QMainWindow):
             self._contour_range_max_edit,
             self._contour_range_slider,
             self._presenter.on_contour_limits_updated,
-        )
-        self._add_connections_to_edits_and_slider(
-            self._integration_limit_min_edit,
-            self._integration_limit_max_edit,
-            self._integration_limit_slider,
-            self._presenter.on_integration_limits_updated,
         )
 
     def _setup_units_options(self, parent: QVBoxLayout):
@@ -475,6 +470,26 @@ class FullInstrumentViewWindow(QMainWindow):
                 list_item.setCheckState(Qt.Unchecked)
         self._peak_ws_list.blockSignals(False)
         self._peak_ws_list.adjustSize()
+
+    def refresh_mask_ws_list(self) -> None:
+        current_mask_in_ads = self._presenter.mask_workspaces_in_ads()
+        current_mask_in_widget = [self._mask_list.item(i).text() for i in range(self._mask_list.count())]
+
+        # Workspaces in ads but not yet in list
+        for ws_name in current_mask_in_ads:
+            if ws_name not in current_mask_in_widget:
+                item = QListWidgetItem(ws_name, self._mask_list)
+                item.setCheckState(Qt.Unchecked)
+
+        # Workspaces in list but not in ads
+        for i in range(self._mask_list.count() - 1, -1, -1):
+            item = self._mask_list.item(i)
+            # TODO: Should not use string "Mask "
+            if "Mask " in item.text():
+                continue
+            if item.text() not in current_mask_in_ads:
+                removed = self._mask_list.takeItem(i)
+                del removed
 
     def refresh_peaks_ws_list_colours(self) -> None:
         picked_index = 0
@@ -793,4 +808,11 @@ class FullInstrumentViewWindow(QMainWindow):
         list_item.setCheckState(Qt.Checked)
 
     def clear_mask_list(self) -> None:
-        self._mask_list.clear()
+        # TODO: Avoid using string "Mask "
+        # Iterate backwards otherwise breaks indexing
+        for i in range(self._mask_list.count() - 1, -1, -1):
+            item = self._mask_list.item(i)
+            if "Mask " in item.text():
+                removed = self._mask_list.takeItem(i)
+                del removed
+        self.refresh_mask_ws_list()

@@ -12,7 +12,7 @@ from instrumentview.Projections.CylindricalProjection import CylindricalProjecti
 from instrumentview.Projections.SideBySide import SideBySide
 from instrumentview.Projections.ProjectionType import ProjectionType
 
-from mantid.dataobjects import Workspace2D, PeaksWorkspace
+from mantid.dataobjects import Workspace2D, PeaksWorkspace, MaskWorkspace
 from mantid.simpleapi import (
     CreateDetectorTable,
     ExtractSpectra,
@@ -413,20 +413,35 @@ class FullInstrumentViewModel:
         return new_key
 
     def apply_detector_masks(self, mask_keys: list[str]) -> None:
-        if not mask_keys:
-            mask_total = self._is_masked_in_ws
-        else:
-            mask_total = np.logical_or.reduce([self._cached_masks_map[key] for key in mask_keys])
-        self._is_masked = mask_total
+        ws_masks = [ws.extractY().flatten() for ws in self.get_mask_workspaces_in_ads() if ws.name() in mask_keys]
+        cached_masks = [self._cached_masks_map[key] for key in mask_keys if key in self._cached_masks_map.keys()]
+
+        if not ws_masks and not cached_masks:
+            self._is_masked = self._is_masked_in_ws
+            self._detector_is_picked[~self.is_pickable] = False
+            return
+
+        total_mask = self.elementwise_or_ignore_empty(*ws_masks, *cached_masks)
+        self._is_masked = total_mask
         self._detector_is_picked[~self.is_pickable] = False
 
+    def elementwise_or_ignore_empty(self, *arrays):
+        non_empty = [arr for arr in arrays if arr.size > 0]
+        assert non_empty, "All arrays are empty, aborting."
+
+        result = non_empty[0].astype(bool)
+        for arr in non_empty[1:]:
+            result = np.logical_or(result, arr)
+        return result
+
     def save_mask_workspace_to_ads(self) -> None:
-        name_exported_ws = f"instrument_view_mask_{self._workspace.name()}"
         for i, v in enumerate(self._is_masked):
             self._mask_ws.dataY(i)[:] = v
 
         xmin, xmax = self._integration_limits
-        ExtractMaskToTable(self._mask_ws, Xmin=xmin, Xmax=xmax, OutputWorkspace=name_exported_ws)
+        # TODO: Figure out naming convention
+        ExtractMaskToTable(self._mask_ws, Xmin=xmin, Xmax=xmax, OutputWorkspace="MaskTable")
+        CloneWorkspace(self._mask_ws, OutputWorkspace="MaskWorkspace")
 
     def save_xml_mask(self, filename) -> None:
         if not filename:
@@ -441,3 +456,12 @@ class FullInstrumentViewModel:
         CloneWorkspace(self._workspace.name(), OutputWorkspace=temp_ws_name)
         MaskDetectors(temp_ws_name, MaskedWorkspace=self.mask_ws)
         RenameWorkspace(InputWorkspace=temp_ws_name, OutputWorkspace=self._workspace.name())
+
+    def get_mask_workspaces_in_ads(self) -> list[MaskWorkspace]:
+        ads = AnalysisDataService.Instance()
+        workspaces_in_ads = ads.retrieveWorkspaces(ads.getObjectNames())
+        return [
+            pws
+            for pws in workspaces_in_ads
+            if "MaskWorkspace" in str(type(pws)) and pws.getInstrument().getFullName() == self._workspace.getInstrument().getFullName()
+        ]
