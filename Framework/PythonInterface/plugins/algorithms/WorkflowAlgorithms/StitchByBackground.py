@@ -27,7 +27,7 @@ class StitchByBackground(DataProcessorAlgorithm):
         return "Utility"
 
     def summary(self):
-        return "Stitch banks together at a given Q value, without rebinning the data to preserve resolution."
+        return "Stitch banks together at given Q values, without rebinning the data to preserve resolution."
 
     def seeAlso(self):
         return []

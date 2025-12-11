@@ -1,0 +1,2 @@
+- :ref:`algm-StitchByBackground` has been added, which allows for multiple workspaces with different bin widths to be
+  stitched together.
