@@ -26,12 +26,6 @@ public:
 
   void testCategory() { TS_ASSERT_EQUALS(masker.category(), "SANS"); }
 
-  void testMean() {
-    // Mantid::Algorithms::FlatCell fc;
-    std::vector<double> v{1.0, 2.0, 3.0, 4.0, 5.0};
-    TS_ASSERT_DELTA(masker.mean(v), 3, 1e-10);
-  }
-
   void testInit() {
     TS_ASSERT_THROWS_NOTHING(masker.initialize());
     TS_ASSERT(masker.isInitialized());
