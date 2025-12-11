@@ -7,9 +7,16 @@ if(CXXTEST_FOUND)
 
   cxxtest_add_test(NexusGeometryTest ${TEST_FILES})
 
-  target_link_libraries(NexusGeometryTest PRIVATE Mantid::NexusGeometry Mantid::Types Mantid::Kernel gmock gtest)
+  target_link_libraries(NexusGeometryTest PRIVATE Mantid::NexusGeometry Mantid::Types Mantid::Kernel)
 
   add_framework_test_helpers(NexusGeometryTest)
+  if(TARGET GTest::gmock_main)
+    target_link_libraries(NexusGeometryTest PRIVATE GTest::gmock_main)
+  elseif(TARGET GTest::gmock AND TARGET GTest::gtest)
+    target_link_libraries(NexusGeometryTest PRIVATE GTest::gmock GTest::gtest)
+  else()
+    target_link_libraries(NexusGeometryTest PRIVATE gmock gtest)
+  endif()
   add_dependencies(NexusGeometryTest Geometry)
   add_dependencies(FrameworkTests NexusGeometryTest)
   add_dependencies(NexusGeometryTest UnitTestData)
