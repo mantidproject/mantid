@@ -22,6 +22,7 @@ from qtpy.QtWidgets import (
     QDoubleSpinBox,
     QMessageBox,
 )
+from matplotlib.colors import LogNorm
 from matplotlib.figure import Figure
 from mpl_toolkits.axisartist import Subplot as CurveLinearSubPlot, GridHelperCurveLinear
 from mpl_toolkits.axisartist.grid_finder import ExtremeFinderSimple, MaxNLocator
@@ -775,6 +776,14 @@ class SliceViewerDataView(QWidget):
     def scale_norm_changed(self):
         if self.conf is None:
             return
+
+        # Set transparent under color for log scale. Prevents a dotted-pattern artifact when rendering sparse data
+        if self.image:
+            cmap = self.image.get_cmap()
+            if isinstance(self.image.norm, LogNorm):
+                cmap.set_under((1, 1, 1, 0))  # transparent for log scale
+            else:
+                cmap.set_under(cmap(0))  # use first color in colormap (defult behavior)
 
         scale = self.colorbar.norm.currentText()
         self.conf.set(SCALENORM, scale)
