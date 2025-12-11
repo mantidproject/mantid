@@ -4,6 +4,7 @@
 #include "MantidNexus/NexusAddress.h"
 #include "MantidNexus/NexusDescriptor.h"
 #include "MantidNexus/NexusFile_fwd.h"
+#include "MantidNexus/UniqueID.h"
 #include <map>
 #include <memory>
 #include <string>
@@ -24,6 +25,15 @@ namespace H5 {
 class H5Object;
 } // namespace H5
 
+// forward declare
+// NOTE declare extern "C" to prevent conflict with actual declaration
+extern "C" MYH5DLL herr_t H5Gclose(hid_t);
+extern "C" MYH5DLL herr_t H5Dclose(hid_t);
+extern "C" MYH5DLL herr_t H5Tclose(hid_t);
+extern "C" MYH5DLL herr_t H5Sclose(hid_t);
+extern "C" MYH5DLL herr_t H5Aclose(hid_t);
+extern "C" MYH5DLL herr_t H5Pclose(hid_t);
+
 /**
  * \file NexusFile.h Definition of the Nexus C++ API.
  * \defgroup cpp_types C++ Types
@@ -33,6 +43,13 @@ class H5Object;
 
 namespace Mantid {
 namespace Nexus {
+
+using GroupID = UniqueID<&H5Gclose>;
+using DataSetID = UniqueID<&H5Dclose>;
+using DataTypeID = UniqueID<&H5Tclose>;
+using DataSpaceID = UniqueID<&H5Sclose>;
+using AttributeID = UniqueID<&H5Aclose>;
+using ParameterID = UniqueID<&H5Pclose>;
 
 /**
  * \class FileID
@@ -47,10 +64,10 @@ private:
   hid_t m_fid;
   // There is no reason to copy or assign a file ID
   FileID(FileID const &f) = delete;
-  FileID(FileID const &&f) = delete;
+  FileID(FileID &&f) = delete;
   FileID &operator=(hid_t const) = delete;
   FileID &operator=(FileID const &) = delete;
-  FileID &operator=(FileID const &&) = delete;
+  FileID &operator=(FileID &&) = delete;
 
 public:
   bool operator==(int const v) const { return static_cast<int>(m_fid) == v; }
@@ -60,65 +77,6 @@ public:
   FileID() : m_fid(-1) {}
   FileID(hid_t const v) : m_fid(v) {}
   ~FileID();
-};
-
-using Deleter = int (*const)(hid_t);
-
-/**
- * \class UniqueID
- * \brief A wrapper class for managing HDF5 object handles (hid_t).
- *
- * The UniqueID class is designed to manage the lifecycle of HDF5 object handles (hid_t),
- * ensuring that the handle is properly closed when the UniqueID object is destroyed.
- * This helps prevent resource leaks and ensures proper cleanup of HDF5 resources.
- */
-template <Deleter const deleter> class UniqueID {
-private:
-  hid_t m_id;
-  UniqueID &operator=(UniqueID<deleter> const &) = delete;
-  UniqueID &operator=(UniqueID<deleter> const &&) = delete;
-  void closeId() const {
-    if (m_id >= 0) {
-      deleter(m_id);
-    }
-  }
-
-public:
-  UniqueID(UniqueID<deleter> &uid) : m_id(uid.m_id) { uid.m_id = -1; };
-  UniqueID(UniqueID<deleter> &&uid) noexcept : m_id(uid.m_id) { uid.m_id = -1; };
-  /// @brief Assign a HDF5 object ID to be managed
-  /// @param id : the ID to be managed
-  UniqueID &operator=(hid_t const id) {
-    if (id != m_id) {
-      closeId();
-      m_id = id;
-    }
-    return *this;
-  };
-  /// @brief Pass the HDF5 object ID from an existing UniqueID to another UniqueID
-  /// @param uid : the UniqueID previously managing the ID; it will lose ownership of the ID.
-  UniqueID &operator=(UniqueID<deleter> &uid) {
-    if (this != &uid) {
-      closeId();
-      m_id = uid.m_id;
-      uid.m_id = -1;
-    }
-    return *this;
-  }
-  bool operator==(int const v) const { return static_cast<int>(m_id) == v; }
-  bool operator<=(int const v) const { return static_cast<int>(m_id) <= v; }
-  operator hid_t const &() const { return m_id; };
-  hid_t getId() const { return m_id; }
-  /// @brief  Release hold on the managed ID; it will not be closed by this UniqueID
-  /// @return the managed ID
-  hid_t releaseId() {
-    hid_t tmp = m_id;
-    m_id = -1;
-    return tmp;
-  }
-  UniqueID() : m_id(-1) {}
-  UniqueID(hid_t const id) : m_id(id) {}
-  ~UniqueID() { closeId(); }
 };
 
 /**
