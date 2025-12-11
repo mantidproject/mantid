@@ -54,6 +54,8 @@ class SettingsAdjustmentPresenter(PresenterCommon):
         self._set_on_view("wavelength_adjustment_det_1")
         self._set_on_view("wavelength_adjustment_det_2")
 
+        self._set_on_view("wide_angle_correction")
+
     def update_model_from_view(self):
         state_model = self._model
 
@@ -78,6 +80,8 @@ class SettingsAdjustmentPresenter(PresenterCommon):
         self._set_on_custom_model("pixel_adjustment_det_2", state_model)
         self._set_on_custom_model("wavelength_adjustment_det_1", state_model)
         self._set_on_custom_model("wavelength_adjustment_det_2", state_model)
+
+        self._set_on_custom_model("wide_angle_correction", state_model)
 
     def _set_on_state_model_transmission_fit(self, state_model):
         # Behaviour depends on the selection of the fit
