@@ -29,11 +29,22 @@ class StitchByBackgroundTest(unittest.TestCase):
 
     def test_overlap_width_must_be_positive(self):
         with self.assertRaisesRegex(ValueError, "-1 is < the lower bound"):
-            StitchByBackground(InputWorkspaces="ws_group", OverlapWidth=-1)
+            StitchByBackground(InputWorkspaces="ws_group", OverlapWidth=-1, CropUpperBound=1000)
 
     def test_stitch_and_ws_list_correctly_sized(self):
         with self.assertRaisesRegex(RuntimeError, r"There must be one less stitch point \(3\) than input workspaces \(5\)."):
-            StitchByBackground(InputWorkspaces=self.ws_list, OverlapWidth=1, StitchPoints=[1.2, 2.3, 3.4], OutputWorkspace="out")
+            StitchByBackground(
+                InputWorkspaces=self.ws_list, OverlapWidth=1, StitchPoints=[1.2, 2.3, 3.4], OutputWorkspace="out", CropUpperBound=1000
+            )
+
+    def test_crop_bounds_are_tested(self):
+        with self.assertRaisesRegex(RuntimeError, r"Upper bound \(0.0\) must be greater than lower bound \(0.0\)"):
+            StitchByBackground(InputWorkspaces=self.ws_list, OverlapWidth=1, StitchPoints=[1.2, 2.3, 3.4, 4.5], OutputWorkspace="out")
+
+        with self.assertRaisesRegex(RuntimeError, r"Upper bound \(0.0\) must be greater than lower bound \(1000.0\)"):
+            StitchByBackground(
+                InputWorkspaces=self.ws_list, OverlapWidth=1, StitchPoints=[1.2, 2.3, 3.4, 4.5], OutputWorkspace="out", CropLowerBound=1000
+            )
 
     def test_stitching_occurs_correctly(self):
         out_ws = StitchByBackground(

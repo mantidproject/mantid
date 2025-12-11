@@ -41,10 +41,16 @@ class StitchByBackground(DataProcessorAlgorithm):
         ws_name_list = self.getProperty("InputWorkspaces").value
         stitch_points_list = self.getProperty("StitchPoints").value
         if len(ws_name_list) != len(stitch_points_list) + 1:
-            errors["StitchPoints"] = (
-                f"There must be one less stitch point ({len(stitch_points_list)}) than input workspaces ({len(ws_name_list)})."
-            )
+            err_msg = f"There must be one less stitch point ({len(stitch_points_list)}) than input workspaces ({len(ws_name_list)})."
+            errors["InputWorkspaces"] = err_msg
+            errors["StitchPoints"] = err_msg
 
+        upper_bound = self.getProperty("CropUpperBound").value
+        lower_bound = self.getProperty("CropLowerBound").value
+        if not upper_bound > lower_bound:
+            err_msg = f"Upper bound ({upper_bound}) must be greater than lower bound ({lower_bound})."
+            errors["CropUpperBound"] = err_msg
+            errors["CropLowerBound"] = err_msg
         return errors
 
     def PyInit(self):
@@ -63,8 +69,8 @@ class StitchByBackground(DataProcessorAlgorithm):
             validator=FloatBoundedValidator(lower=0),
             doc="The extent to which the fit limits extend from the points given in StitchPoints.",
         )
-        self.declareProperty("CropLowerBound", 0.34, doc="The XMin in Q-space to use when cropping the output workspace.")
-        self.declareProperty("CropUpperBound", 40, doc="The XMax in Q-space to use when cropping the output workspace.")
+        self.declareProperty("CropLowerBound", 0.0, doc="The XMin in Q-space to use when cropping the output workspace.")
+        self.declareProperty("CropUpperBound", 0.0, doc="The XMax in Q-space to use when cropping the output workspace.")
 
     def PyExec(self):
         ws_name_list = self.getProperty("InputWorkspaces").value
