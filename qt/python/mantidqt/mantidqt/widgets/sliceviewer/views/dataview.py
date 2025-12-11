@@ -783,7 +783,7 @@ class SliceViewerDataView(QWidget):
             if isinstance(self.image.norm, LogNorm):
                 cmap.set_under((1, 1, 1, 0))  # transparent for log scale
             else:
-                cmap.set_under(cmap(0))  # use first color in colormap (defult behavior)
+                cmap.set_under(cmap(0))  # use first color in colormap (default behavior)
 
         scale = self.colorbar.norm.currentText()
         self.conf.set(SCALENORM, scale)
