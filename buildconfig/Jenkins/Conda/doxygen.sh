@@ -36,7 +36,7 @@ cd $WORKSPACE/build
 export LC_ALL=C
 
 # Configure and generate build files
-pixi run cmake --preset=doxygen-ci ..
+pixi run --frozen cmake --preset=doxygen-ci ..
 
 # Build doxygen target
-pixi run cmake --build . --target doxygen
+pixi run --frozen cmake --build . --target doxygen
