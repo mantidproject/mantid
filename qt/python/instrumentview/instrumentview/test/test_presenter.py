@@ -278,23 +278,20 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
 
     @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter._transform_mesh_to_fill_window")
     def test_update_transform(self, mock_transform_mesh):
-        self._presenter._update_transform(MagicMock(), MagicMock())
+        self._presenter._update_transform()
         np.testing.assert_allclose(np.eye(4), self._presenter._transform, atol=1e-10)
         mock_transform_mesh.assert_not_called()
         self._mock_view.is_maintain_aspect_ratio_checkbox_checked.return_value = True
-        self._presenter._update_transform(MagicMock(), MagicMock())
+        self._presenter._update_transform()
         np.testing.assert_allclose(np.eye(4), self._presenter._transform, atol=1e-10)
         mock_transform_mesh.assert_not_called()
-        mock_det_mesh = MagicMock()
-        mock_mask_mesh = MagicMock()
         self._mock_view.is_maintain_aspect_ratio_checkbox_checked.return_value = False
-        self._presenter._update_transform(mock_det_mesh, mock_mask_mesh)
-        mock_transform_mesh.assert_called_once_with(mock_det_mesh, mock_mask_mesh)
+        self._presenter._update_transform()
+        mock_transform_mesh.assert_called()
 
     @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter._scale_matrix_relative_to_centre")
     def test_transform_mesh_to_fill_window(self, mock_scale_matrix):
         mock_det_mesh = MagicMock(bounds=[-1, 1, -1, 0, -1, 1])
-        # mock_det_mesh.bounds = [-1, 1, -1, 1, -1, 1]
         mock_mask_mesh = MagicMock(bounds=[0, 1, -1, 1, -1, 1])
 
         self._mock_view.main_plotter.window_size = (10, 10)
@@ -313,7 +310,9 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         with mock.patch("instrumentview.FullInstrumentViewPresenter.vtkCoordinate") as mock_vtk:
             mock_vtk_instance = mock_vtkCoordinate()
             mock_vtk.return_value = mock_vtk_instance
-            self._presenter._transform_mesh_to_fill_window(mock_det_mesh, mock_mask_mesh)
+            self._presenter._detector_mesh = mock_det_mesh
+            self._presenter._masked_mesh = mock_mask_mesh
+            self._presenter._transform_mesh_to_fill_window()
             mock_vtk.assert_called_once()
             self.assertEquals(2, mock_vtk_instance.GetComputedDisplayValueCount)
 
