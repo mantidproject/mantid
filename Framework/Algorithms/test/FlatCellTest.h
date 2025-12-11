@@ -10,8 +10,6 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAlgorithms/FlatCell.h"
-#include "MantidDataObjects/EventList.h"
-#include "MantidDataObjects/EventWorkspace.h"
 
 using namespace Mantid::API;
 using namespace Mantid::DataHandling;
@@ -27,6 +25,12 @@ public:
   void testVersion() { TS_ASSERT_EQUALS(masker.version(), 1); }
 
   void testCategory() { TS_ASSERT_EQUALS(masker.category(), "SANS"); }
+
+  void testMean() {
+    // Mantid::Algorithms::FlatCell fc;
+    std::vector<double> v{1.0, 2.0, 3.0, 4.0, 5.0};
+    TS_ASSERT_DELTA(masker.mean(v), 3, 1e-10);
+  }
 
   void testInit() {
     TS_ASSERT_THROWS_NOTHING(masker.initialize());
