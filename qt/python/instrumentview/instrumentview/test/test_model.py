@@ -410,6 +410,7 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         peaks_ws = CreatePeaksWorkspace(self._ws, 2)
         model._selected_peaks_workspaces = [peaks_ws]
         model._detector_ids = np.array([100])
+        model._spectrum_nos = np.array([2])
         model._is_valid = np.array([True])
         model._is_masked = np.array([False])
         peaks = model.peak_overlay_points()
@@ -418,6 +419,51 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         self.assertEqual(100, detector_peak.detector_id)
         self.assertEqual("[0, 0, 0] x 2", detector_peak.label)
         np.testing.assert_almost_equal(np.array([0, 0, 5.0]), detector_peak.location)
+
+    def test_peaks_with_spectrum_multiple_detectors(self):
+        # We want to test the case where a peaks workspace has a
+        # detector ID that is not in the model. This can happen when
+        # an instrument has multiple detector IDs per spectrum. The
+        # spectrum number should be used instead
+        mock_ws = self._create_mock_workspace([1, 2, 3, 4])
+        test_detector_id = 4
+        test_spectrum_no = 1
+
+        # Detector ID 4 is workspace index 2
+        def mock_getIndicesFromDetectorIDs(ids):
+            return [2]
+
+        mock_ws.getIndicesFromDetectorIDs = mock_getIndicesFromDetectorIDs
+        model = FullInstrumentViewModel(mock_ws)
+        mock_peaks_ws = mock.MagicMock()
+        mock_peaks_ws.toDict.return_value = {
+            "DetID": [test_detector_id],
+            "h": [2],
+            "k": [2],
+            "l": [2],
+            "DSpacing": [10],
+            "Wavelength": [10],
+            "TOF": [10],
+        }
+
+        model._selected_peaks_workspaces = [mock_peaks_ws]
+        # Only read three detectors, not ID 4
+        model._detector_ids = np.array([1, 2, 3])
+        # Everything on spectrum number 1
+        model._spectrum_nos = np.array([test_spectrum_no, test_spectrum_no, test_spectrum_no])
+        model._is_valid = np.array([True, True, True])
+        peaks = model.peak_overlay_points()
+        # Should get one peak with detector ID 4 and spectrum
+        # number 1
+        self.assertEqual(1, len(peaks))
+        detector_peak = peaks[0][0]
+        self.assertEqual(1, len(detector_peak.peaks))
+        self.assertEqual(test_detector_id, detector_peak.detector_id)
+        self.assertEqual("(2, 2, 2)", detector_peak.label)
+        self.assertEqual(test_spectrum_no, detector_peak.spectrum_no)
+        single_peak = detector_peak.peaks[0]
+        self.assertEqual(test_detector_id, single_peak.detector_id)
+        self.assertEqual(test_spectrum_no, single_peak.spectrum_no)
 
     @mock.patch.object(FullInstrumentViewModel, "picked_detector_ids", new_callable=mock.PropertyMock)
     def test_relative_detector_angle_no_picked(self, mock_picked_detector_ids):
