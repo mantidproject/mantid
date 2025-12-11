@@ -6,23 +6,26 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-from mantid.simpleapi import StitchByBackground, CreateWorkspace, GroupWorkspaces
-import numpy as np
+from mantid.simpleapi import StitchByBackground, CreateSampleWorkspace, GroupWorkspaces, AnalysisDataService
 
 
 class StitchByBackgroundTest(unittest.TestCase):
     ws_list = []
+    stitch_points = []
 
     @classmethod
     def setUpClass(cls):
         for i in range(5):
-            ws_name = "ws_" + str(i + 1)
-            data_x = np.arange(i, (i + 1) * 10 + 0.1, 0.1)
-            data_y = np.arange(i, (i + 1) * 10, 0.1)
-            data_e = np.arange(i, (i + 1) * 10, 0.1)
-            CreateWorkspace(OutputWorkspace=ws_name, DataX=data_x, DataY=data_y, DataE=data_e)
-            cls.ws_list.append(ws_name)
+            CreateSampleWorkspace(
+                OutputWorkspace=f"ws_{i + 1}", NumBanks=1, BankPixelWidth=1, Function="Multiple Peaks", XMin=20000 * i, XMax=20000 * (i + 1)
+            )
+            cls.ws_list.append(f"ws_{i + 1}")
+            cls.stitch_points.append(20000 * (i + 1))
+        cls.stitch_points.pop(-1)  # Remove the last stitch point.
         GroupWorkspaces(InputWorkspaces=cls.ws_list, OutputWorkspace="ws_group")
+
+    def teardown(self):
+        AnalysisDataService.clear()
 
     def test_overlap_width_must_be_positive(self):
         with self.assertRaisesRegex(ValueError, "-1 is < the lower bound"):
@@ -31,6 +34,21 @@ class StitchByBackgroundTest(unittest.TestCase):
     def test_stitch_and_ws_list_correctly_sized(self):
         with self.assertRaisesRegex(RuntimeError, r"There must be one less stitch point \(3\) than input workspaces \(5\)."):
             StitchByBackground(InputWorkspaces=self.ws_list, OverlapWidth=1, StitchPoints=[1.2, 2.3, 3.4], OutputWorkspace="out")
+
+    def test_stitching_occurs_correctly(self):
+        out_ws = StitchByBackground(
+            InputWorkspaces=self.ws_list,
+            StitchPoints=self.stitch_points,
+            OutputWorkspace="out",
+            OverlapWidth=2000,
+            CropUpperBound=95000,
+            CropLowerBound=0,
+        )
+
+        self.assertEqual(out_ws.getNumberHistograms(), 1)
+        self.assertEqual(out_ws.blocksize(), 475)  # Cropping upper bound to 95000 drops the number of bins from 500 to 475.
+        self.assertEqual(out_ws.dataY(0)[10], 0.3)
+        self.assertEqual(out_ws.dataY(0)[130], 10.3)
 
 
 if __name__ == "__main__":

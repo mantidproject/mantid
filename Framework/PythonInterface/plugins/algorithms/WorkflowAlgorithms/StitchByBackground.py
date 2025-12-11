@@ -40,7 +40,6 @@ class StitchByBackground(DataProcessorAlgorithm):
 
         ws_name_list = self.getProperty("InputWorkspaces").value
         stitch_points_list = self.getProperty("StitchPoints").value
-        print(ws_name_list, stitch_points_list)
         if len(ws_name_list) != len(stitch_points_list) + 1:
             errors["StitchPoints"] = (
                 f"There must be one less stitch point ({len(stitch_points_list)}) than input workspaces ({len(ws_name_list)})."
@@ -115,10 +114,12 @@ class StitchByBackground(DataProcessorAlgorithm):
         y = []
         e = []
         subtracted_ws = None
+        x_min = self.getProperty("CropLowerBound").value
+        x_max = self.getProperty("CropUpperBound").value
         for ws_index, ws in enumerate(ws_list):
             background_ws = CreateSingleValuedWorkspace(offsets[ws_index:].sum(), ErrorValue=0)
             subtracted_ws = Plus(ws, background_ws, OutputWorkspace=f"bank{ws_index + 1}_offset")
-            crop_kwargs = {"XMin": 0, "XMax": 100}
+            crop_kwargs = {"XMin": x_min, "XMax": x_max}
             if ws_index > 0:
                 crop_kwargs["XMin"] = stitch_locations[ws_index - 1]
             if ws_index < len(ws_list) - 1:
