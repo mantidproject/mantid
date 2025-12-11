@@ -12,7 +12,7 @@
 #   4. LABEL: The label used when uploading to anaconda
 #   5. PACKAGES: A list of args that will be uploaded to anaconda cloud.
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source $SCRIPT_DIR/mamba-utils
+source $SCRIPT_DIR/pixi-utils
 
 # Parse arguments
 WORKSPACE=$1
@@ -21,9 +21,8 @@ CHANNEL=$3
 LABEL=$4
 shift 4
 
-# Setup Mamba
-setup_mamba $WORKSPACE/miniforge "publish-anaconda" false ""
-mamba install --yes anaconda-client
+# pixi
+install_pixi
 
 for package in "$@"
 do
@@ -31,6 +30,6 @@ do
     if [[ $package == *"mantid"* ]]
     then
         echo "Uploading $package"
-        anaconda -t $TOKEN upload -u $CHANNEL $package --label $LABEL --force
+        pixi run -e publish-anaconda --frozen anaconda -t $TOKEN upload -u $CHANNEL $package --label $LABEL --force
     fi
 done
