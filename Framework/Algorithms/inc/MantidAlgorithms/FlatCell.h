@@ -34,6 +34,11 @@ private:
   /// Execution code
   void exec() override;
   void execEvent();
+  double mean(const std::vector<double> &values);
+  double stddev(const std::vector<double> &values);
+  void scale(std::vector<double> &values, double factor);
+
+  friend class FlatCellTest;
 };
 
 } // namespace Algorithms

@@ -30,19 +30,23 @@ void FlatCell::init() {
 
 /** Computes the mean of the input vector
  */
-double mean(const std::vector<double> &values) {
+double FlatCell::mean(const std::vector<double> &values) {
   return std::accumulate(values.begin(), values.end(), 0.0) / static_cast<double>(values.size());
 }
 
 /** Computes the standard deviation of the input vector
  */
-double stddev(const std::vector<double> &values) {
+double FlatCell::stddev(const std::vector<double> &values) {
   double m = mean(values);
-  double accum = 0.0;
-  for (double x : values) {
-    accum += (x - m) * (x - m);
-  }
+  double accum = std::accumulate(values.begin(), values.end(), 0.0,
+                                 [m](double total, double x) { return total + (x - m) * (x - m); });
   return std::sqrt(accum / static_cast<double>(values.size()));
+}
+
+/** Scales each of the elements of the input vector
+ */
+void FlatCell::scale(std::vector<double> &values, double factor) {
+  std::transform(values.begin(), values.end(), values.begin(), [factor](double x) { return x * factor; });
 }
 
 /** Execution code.
@@ -72,20 +76,15 @@ void FlatCell::exec() {
   std::vector<double> HAB(Y.begin() + 16386, Y.begin() + 17786);
 
   // Calculate the mean and stddev of the Original Data
-  double meanLAB = mean(LAB);
-  double stdLAB = stddev(LAB);
+  double meanLAB = FlatCell::mean(LAB);
+  // double stdLAB = stddev(LAB);
 
-  double meanHAB = mean(HAB);
-  double stdHAB = stddev(HAB);
+  double meanHAB = FlatCell::mean(HAB);
+  // double stdHAB = stddev(HAB);
 
   // Normalize the values in the LAB and HAB vectors
-  for (auto &v : LAB) {
-    v /= meanLAB;
-  }
-
-  for (auto &v : HAB) {
-    v /= meanHAB;
-  }
+  FlatCell::scale(LAB, 1 / meanLAB);
+  FlatCell::scale(HAB, 1 / meanHAB);
 
   // Create the array to save the output
   std::vector<double> out(17992, 0.0);
@@ -97,31 +96,17 @@ void FlatCell::exec() {
   std::vector<double> HAB3(out.begin() + 17086, out.begin() + 17434);
   std::vector<double> HAB4(out.begin() + 17436, out.begin() + 17784);
 
-  // Log for debugging
-  g_log.warning() << "HAB1 size = " << HAB1.size() << "\n";
-  g_log.warning() << "HAB2 size = " << HAB2.size() << "\n";
-  g_log.warning() << "HAB3 size = " << HAB3.size() << "\n";
-  g_log.warning() << "HAB4 size = " << HAB4.size() << "\n";
-
   // Calculate the rescale factor of each high angle bank
-  double rescaleHAB1 = 1.0 / mean(HAB1);
-  double rescaleHAB2 = 1.0 / mean(HAB2);
-  double rescaleHAB3 = 1.0 / mean(HAB3);
-  double rescaleHAB4 = 1.0 / mean(HAB4);
+  double rescaleHAB1 = 1.0 / FlatCell::mean(HAB1);
+  double rescaleHAB2 = 1.0 / FlatCell::mean(HAB2);
+  double rescaleHAB3 = 1.0 / FlatCell::mean(HAB3);
+  double rescaleHAB4 = 1.0 / FlatCell::mean(HAB4);
 
   // Rescale the values in the HAB vectors
-  for (auto &v : HAB1) {
-    v *= rescaleHAB1;
-  }
-  for (auto &v : HAB2) {
-    v *= rescaleHAB2;
-  }
-  for (auto &v : HAB3) {
-    v *= rescaleHAB3;
-  }
-  for (auto &v : HAB4) {
-    v *= rescaleHAB4;
-  }
+  FlatCell::scale(HAB1, rescaleHAB1);
+  FlatCell::scale(HAB2, rescaleHAB2);
+  FlatCell::scale(HAB3, rescaleHAB3);
+  FlatCell::scale(HAB4, rescaleHAB4);
 
   // Copy the values in the output spectrum
   std::copy(HAB1.begin(), HAB1.end(), out.begin() + 16386);
