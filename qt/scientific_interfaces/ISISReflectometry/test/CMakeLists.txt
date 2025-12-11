@@ -64,6 +64,7 @@ mtd_add_qt_tests(
   LINK_LIBS ${CORE_MANTIDLIBS}
             Mantid::DataObjects
             gmock
+            gtest
             ${POCO_LIBRARIES}
             ${Boost_LIBRARIES}
             Mantid::PythonInterfaceCore
@@ -74,3 +75,11 @@ mtd_add_qt_tests(
 )
 
 add_framework_test_helpers(MantidScientificInterfacesISISReflectometryTestQt5)
+
+if(TARGET GTest::gmock_main)
+  target_link_libraries(MantidScientificInterfacesISISReflectometryTestQt5 PRIVATE GTest::gmock_main)
+elseif(TARGET GTest::gmock AND TARGET GTest::gtest)
+  target_link_libraries(MantidScientificInterfacesISISReflectometryTestQt5 PRIVATE GTest::gmock GTest::gtest)
+else()
+  target_link_libraries(MantidScientificInterfacesISISReflectometryTestQt5 PRIVATE gmock gtest)
+endif()
