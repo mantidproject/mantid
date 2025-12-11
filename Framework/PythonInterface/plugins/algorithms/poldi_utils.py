@@ -100,16 +100,19 @@ def load_poldi_h5f(
     # calculate time bins
     cycle_time = _calc_cycle_time_from_chopper_speed(chopper_speed)
     bin_width = cycle_time / dat.shape[-1]
-    bin_cens = np.linspace(bin_width / 2, cycle_time - bin_width / 2, dat.shape[-1])
-    ws = exec_alg("CreateWorkspace", DataX=bin_cens, DataY=dat, DataE=np.sqrt(dat), NSpec=dat.shape[0])
-    ADS.addOrReplace(output_workspace, ws)
-    ws = exec_alg("LoadInstrument", Workspace=output_workspace, Filename=fpath_idf, RewriteSpectraMap=True)
+    # bin_cens = np.linspace(bin_width / 2, cycle_time - bin_width / 2, dat.shape[-1])
+    # ws = exec_alg("CreateWorkspace", DataX=bin_cens, DataY=dat, DataE=np.sqrt(dat), NSpec=dat.shape[0])
+    ws = exec_alg("LoadEmptyInstrument", Filename=fpath_idf)
+    ws = exec_alg("Rebin", InputWorkspace=ws, Params=f"0,{bin_width},{cycle_time}")
+    for ispec in range(ws.getNumberHistograms()):
+        ws.setY(ispec, dat[ispec, :])
+    ws = exec_alg("ConvertToPointData", InputWorkspace=ws)
     # add some logs (will eventually be set in file)
-    exec_alg("AddSampleLog", Workspace=output_workspace, LogName="chopperspeed", LogText=str(chopper_speed), LogType="Number")
+    exec_alg("AddSampleLog", Workspace=ws, LogName="chopperspeed", LogText=str(chopper_speed), LogType="Number")
     # set t0 (would normally live in parameter file)
     exec_alg(
         "SetInstrumentParameter",
-        Workspace=output_workspace,
+        Workspace=ws,
         ComponentName="chopper",
         ParameterName="t0",
         ParameterType="Number",
@@ -117,15 +120,16 @@ def load_poldi_h5f(
     )
     exec_alg(
         "SetInstrumentParameter",
-        Workspace=output_workspace,
+        Workspace=ws,
         ComponentName="chopper",
         ParameterName="t0_const",
         ParameterType="Number",
         Value=str(t0_const),
     )
     # add monitor counts
-    exec_alg("AddSampleLog", Workspace=output_workspace, LogName="gd_prtn_chrg", LogText=str(monitor_count), LogType="Number")
-    return ADS.retrieve(output_workspace)
+    exec_alg("AddSampleLog", Workspace=ws, LogName="gd_prtn_chrg", LogText=str(monitor_count), LogType="Number")
+    ADS.addOrReplace(output_workspace, ws)
+    return ws
 
 
 def _calc_cycle_time_from_chopper_speed(chopper_speed):
