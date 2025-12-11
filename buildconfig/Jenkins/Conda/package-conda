@@ -106,7 +106,7 @@ if [[ -n "$GIT_TAG" ]]; then
 fi
 
 # Set the version to inject into the recipe file
-export MANTID_VERSION=$(pixi run -e rattler-builder versioningit $REPO_ROOT_DIR)
+export MANTID_VERSION=$(pixi run -e rattler-builder --frozen versioningit $REPO_ROOT_DIR)
 
 # Set locale to avoid problems building the docs
 # See https://unix.stackexchange.com/questions/87745/what-does-lc-all-c-do
@@ -118,7 +118,7 @@ export LC_ALL=C
 # copy the source to a working folder.
 export CONDA_BLD_PATH=$WORKSPACE/conda-bld
 if [[ -d $CONDA_BLD_PATH ]]; then
-    pixi run -e rattler-builder rattler-index fs $CONDA_BLD_PATH
+    pixi run -e rattler-builder --frozen rattler-index fs $CONDA_BLD_PATH
 fi
 cd $RECIPES_DIR
 
@@ -133,23 +133,23 @@ fi
 export CONDA_SUBDIR=$PLATFORM
 
 echo "pixi rattler-builder environment"
-pixi list -e rattler-builder
+pixi list -e rattler-builder --frozen
 
 # Run conda build.
 if [[ $ENABLE_BUILD_MANTID_DEVELOPER == true ]]; then
-    pixi run -e rattler-builder rattler-build build -r ./mantid-developer/ -m ./conda_build_config.yaml --output-dir $CONDA_BLD_PATH -c neutrons $EXTRA_BUILD_OPTIONS
+    pixi run -e rattler-builder --frozen rattler-build build -r ./mantid-developer/ -m ./conda_build_config.yaml --output-dir $CONDA_BLD_PATH -c neutrons $EXTRA_BUILD_OPTIONS
 fi
 if [[ $ENABLE_BUILD_MANTID == true ]]; then
-    pixi run -e rattler-builder rattler-build build -r ./mantid/ -m ./conda_build_config.yaml --output-dir $CONDA_BLD_PATH $EXTRA_BUILD_OPTIONS
+    pixi run -e rattler-builder --frozen rattler-build build -r ./mantid/ -m ./conda_build_config.yaml --output-dir $CONDA_BLD_PATH $EXTRA_BUILD_OPTIONS
 fi
 if [[ $ENABLE_BUILD_QT == true ]]; then
-    pixi run -e rattler-builder rattler-build build -r ./mantidqt/ -m ./conda_build_config.yaml --output-dir $CONDA_BLD_PATH $EXTRA_BUILD_OPTIONS
+    pixi run -e rattler-builder --frozen rattler-build build -r ./mantidqt/ -m ./conda_build_config.yaml --output-dir $CONDA_BLD_PATH $EXTRA_BUILD_OPTIONS
 fi
 if [[ $ENABLE_BUILD_DOCS == true ]]; then
-    pixi run -e rattler-builder rattler-build build -r ./mantiddocs/ -m ./conda_build_config.yaml --output-dir $CONDA_BLD_PATH -c conda-forge -c neutrons $EXTRA_BUILD_OPTIONS
+    pixi run -e rattler-builder --frozen rattler-build build -r ./mantiddocs/ -m ./conda_build_config.yaml --output-dir $CONDA_BLD_PATH -c conda-forge -c neutrons $EXTRA_BUILD_OPTIONS
 fi
 if [[ $ENABLE_BUILD_WORKBENCH == true ]]; then
-    pixi run -e rattler-builder rattler-build build -r ./mantidworkbench/ -m ./conda_build_config.yaml --output-dir $CONDA_BLD_PATH $EXTRA_BUILD_OPTIONS
+    pixi run -e rattler-builder --frozen rattler-build build -r ./mantidworkbench/ -m ./conda_build_config.yaml --output-dir $CONDA_BLD_PATH $EXTRA_BUILD_OPTIONS
 fi
 
 # elapsed time with second resolution

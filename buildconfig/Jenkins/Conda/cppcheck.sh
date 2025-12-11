@@ -49,13 +49,13 @@ cd $WORKSPACE/build
 # remove old results if they exist
 find -name cppcheck.xml -delete
 
-pixi run cmake --preset=cppcheck-ci -DCPPCHECK_NUM_THREADS=$BUILD_THREADS ..
+pixi run --frozen cmake --preset=cppcheck-ci -DCPPCHECK_NUM_THREADS=$BUILD_THREADS ..
 
 # Run cppcheck
-pixi run cmake --build . --target cppcheck
+pixi run --frozen cmake --build . --target cppcheck
 
 # Generate HTML report
-pixi run cppcheck-htmlreport --file=cppcheck.xml --title=Embedded --report-dir=cppcheck-report
+pixi run --frozen cppcheck-htmlreport --file=cppcheck.xml --title=Embedded --report-dir=cppcheck-report
 
 # Mark build as passed or failed. The additional "|| true" stops the build from failing if there are no errors.
 errors_count=$(grep -c '</error>' cppcheck.xml) || true
