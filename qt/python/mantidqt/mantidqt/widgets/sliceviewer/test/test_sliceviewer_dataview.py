@@ -391,7 +391,7 @@ class SliceviewerDataViewTest(unittest.TestCase):
         view = SliceViewerDataView(presenter=self.presenter, dims_info=mock.MagicMock(), can_normalise=mock.Mock(), add_extents=False)
         self.assertIsNone(view.extents)
 
-    def test_scale_norm_changed_(self):
+    def test_scale_norm_changed(self):
         self.view.conf = mock.Mock()
         self.view.image = mock.Mock()
         cmap_mock = mock.Mock()
