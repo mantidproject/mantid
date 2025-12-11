@@ -21,7 +21,8 @@
 #   --platform: Target platform, e.g. linux-64
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source $SCRIPT_DIR/mamba-utils
+source $SCRIPT_DIR/pixi-utils
+REPO_ROOT_DIR=$SCRIPT_DIR/../../..
 
 # Setup expected variables
 WORKSPACE=$1
@@ -63,23 +64,21 @@ do
   shift
 done
 
-# Mamba
-setup_mamba $WORKSPACE/miniforge "" true $PLATFORM
-mamba activate base
-# Pin conda in the base environment to avoid post-link.bat problems
-mamba install --yes rattler-index conda=24.7
+cd $REPO_ROOT_DIR
 
-echo "CONDA BASE ENVIRONMENT (package-standalone):"
-mamba run -n base mamba list
+# pixi
+install_pixi
+
+echo "pixi package-standalone environment:"
+pixi list -e package-standalone --frozen
 
 # Build packages
 # Setup a local conda channel to find our locally built packages package. It is
 # assumed the raw .bz2 artefacts have been copied into the directory below
 LOCAL_CHANNEL_PATH=$WORKSPACE/conda-bld
-rattler-index fs $LOCAL_CHANNEL_PATH
+pixi run -e package-standalone --frozen rattler-index fs $LOCAL_CHANNEL_PATH
 
 # Jenkins Pipeline expects packages in the root workspace directory
-cd $WORKSPACE
 PACKAGING_SCRIPTS_DIR=$SCRIPT_DIR/../../../installers/conda
 LOCAL_CHANNEL=file://$LOCAL_CHANNEL_PATH
 PACKAGING_ARGS="-c ${LOCAL_CHANNEL}"
@@ -89,14 +88,14 @@ fi
 
 if [[ $OSTYPE == 'msys'* ]]; then
     rm -fr *.exe
-    ${PACKAGING_SCRIPTS_DIR}/win/create_package.sh $PACKAGING_ARGS
+    pixi run -e package-standalone --frozen sh ${PACKAGING_SCRIPTS_DIR}/win/create_package.sh $PACKAGING_ARGS
 elif [[ $OSTYPE == 'darwin'* ]]; then
     rm -fr *.dmg
     if [ -n "${PLATFORM}" ]; then
         PACKAGING_ARGS="${PACKAGING_ARGS} -p ${PLATFORM}"
     fi
-    ${PACKAGING_SCRIPTS_DIR}/osx/create_bundle.sh $PACKAGING_ARGS
+    pixi run -e package-standalone --frozen sh ${PACKAGING_SCRIPTS_DIR}/osx/create_bundle.sh $PACKAGING_ARGS
 else
     rm -fr *.tar.xz
-    ${PACKAGING_SCRIPTS_DIR}/linux/create_tarball.sh $PACKAGING_ARGS
+    pixi run -e package-standalone --frozen sh ${PACKAGING_SCRIPTS_DIR}/linux/create_tarball.sh $PACKAGING_ARGS
 fi

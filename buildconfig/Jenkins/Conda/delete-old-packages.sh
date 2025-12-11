@@ -12,7 +12,7 @@
 #
 # All remaining arguments are package names to remove
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source $SCRIPT_DIR/mamba-utils
+source $SCRIPT_DIR/pixi-utils
 
 WORKSPACE=$1
 ANACONDA_TOKEN=$2
@@ -68,10 +68,9 @@ function delete_package() {
 }
 ###
 
-# Mamba
-setup_mamba $WORKSPACE/miniforge "deletion-anaconda" false ""
-mamba install --yes curl jq
+# pixi
+install_pixi
 
 for name in "$@"; do
-  delete_package $CHANNEL $name $LABEL
+  pixi run -e delete-old-packages --frozen delete_package $CHANNEL $name $LABEL
 done

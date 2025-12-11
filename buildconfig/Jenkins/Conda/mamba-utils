@@ -39,23 +39,3 @@ create_and_activate_env() {
     conda config --env --set subdir "$conda_subdir_str"
   fi
 }
-
-# Build the mantid-developer metapackage from source and
-# install it into an environment called "mantid-developer"
-# Args:
-#   1. Path to pass to the package-conda script for building
-#      the mantid-developer metapackage.
-#   2. Optional platform, e.g. linux-64
-create_and_activate_mantid_developer_env() {
-  local packaging_dir=$1
-  if [[ -z "$packaging_dir" ]]; then
-    echo "A path is required for building the mantid-developer metapackage."
-    exit 1
-  fi
-  shift
-  local platform=$1
-
-  $SCRIPT_DIR/package-conda "$packaging_dir" --build-mantid-developer --platform "$platform"
-  create_and_activate_env mantid-developer "$platform"
-  mamba install -c "$packaging_dir"/conda-bld mantid-developer --yes -c neutrons
-}
