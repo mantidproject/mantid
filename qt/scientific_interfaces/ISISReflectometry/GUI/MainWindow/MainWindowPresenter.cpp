@@ -18,6 +18,7 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
 #include "MantidQtWidgets/Common/ISlitCalculator.h"
+#include "MantidQtWidgets/Common/QtJSONUtils.h"
 #include "Reduction/Batch.h"
 
 #include <algorithm>
@@ -279,6 +280,12 @@ void MainWindowPresenter::initNewBatch(IBatchPresenter *batchPresenter, std::str
 
 void MainWindowPresenter::showHelp() {
   MantidQt::API::HelpWindow::showCustomInterface(std::string("ISIS Reflectometry"), std::string("reflectometry"));
+}
+
+std::string MainWindowPresenter::encodeBatchToStr(const std::string &jsonKey) const {
+  auto tabIndex = m_view->getTabIndex();
+  auto map = m_encoder->encodeBatch(m_view, tabIndex, false); // need to use jsonKey to only pass part of the map.
+  return MantidQt::API::outputJsonToString(map);
 }
 
 void MainWindowPresenter::notifySaveBatchRequested(int tabIndex) {

@@ -66,9 +66,9 @@ class ReflectometryReductionOneLiveData(DataProcessorAlgorithm):
         )
         self.declareProperty(
             name="ExperimentSettingsState",
-            defaultValue={},
+            defaultValue="",
             direction=Direction.Input,
-            doc="A json serializable object representing the experiment settings table in the reflectometry GUI",
+            doc="A JSON string representing the experiment settings table in the reflectometry GUI",
         )
 
         self._child_properties = [

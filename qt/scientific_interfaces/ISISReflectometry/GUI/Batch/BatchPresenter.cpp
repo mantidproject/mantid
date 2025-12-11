@@ -423,4 +423,9 @@ std::optional<ProcessingInstructions> BatchPresenter::getMatchingROIDetectorIDsF
   }
   return std::nullopt;
 }
+
+std::string BatchPresenter::getBatchState(const std::string &jsonKey) const {
+  return m_mainPresenter->encodeBatchToStr(jsonKey);
+}
+
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

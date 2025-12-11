@@ -518,12 +518,15 @@ std::string RunsPresenter::liveDataReductionAlgorithm() { return "ReflectometryR
 
 std::string RunsPresenter::liveDataReductionOptions(const std::string &inputWorkspace, const std::string &instrument) {
   // Get the properties for the reduction algorithm from the settings tabs
-  g_log.warning("Note that lookup of experiment settings by angle/title is not supported for live data.");
   auto options = m_mainPresenter->rowProcessingProperties();
+  auto experimentState = m_mainPresenter->getBatchState(
+      "experimentView/perAngleDefaults/rows"); // replace with string that represents where to start the state
+
   // Add other required input properties to the live data reduction algorithnm
   options->setPropertyValue("InputWorkspace", inputWorkspace);
   options->setPropertyValue("Instrument", instrument);
   options->setPropertyValue("GetLiveValueAlgorithm", "GetLiveInstrumentValue");
+  options->setPropertyValue("ExperimentSettingsState", experimentState);
 
   return convertAlgPropsToString(*options);
 }
@@ -542,6 +545,7 @@ IAlgorithm_sptr RunsPresenter::setupLiveDataMonitorAlgorithm() {
   alg->setProperty("AccumulationMethod", "Replace");
   alg->setProperty("UpdateEvery", static_cast<double>(updateInterval));
   alg->setProperty("PostProcessingAlgorithm", liveDataReductionAlgorithm());
+  // TODO pass state angle into post progressing alg?
   alg->setProperty("PostProcessingProperties", liveDataReductionOptions(inputWorkspace, instrument));
   alg->setProperty("RunTransitionBehavior", "Restart");
   auto errorMap = alg->validateInputs();
