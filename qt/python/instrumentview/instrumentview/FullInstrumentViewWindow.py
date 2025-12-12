@@ -47,6 +47,7 @@ from instrumentview.Projections.ProjectionType import ProjectionType
 
 import os
 from typing import Callable
+from contextlib import suppress
 
 
 class CylinderWidgetNoRotation(vtkImplicitCylinderWidget):
@@ -221,14 +222,6 @@ class FullInstrumentViewWindow(QMainWindow):
         masking_layout.addLayout(pre_list_layout)
         masking_layout.addWidget(self._mask_list)
         masking_layout.addLayout(post_list_layout)
-
-        # TODO: Find a more apropriate solution than logic in view
-        def toggle_buttons():
-            self._circle_widget.setEnabled(not self._circle_widget.isEnabled())
-            self._add_mask.setEnabled(not self._add_mask.isEnabled())
-
-        self._circle_widget.clicked.connect(toggle_buttons)
-        self._add_mask.clicked.connect(toggle_buttons)
 
         self.status_group_box = QGroupBox("Status")
         status_layout = QHBoxLayout(self.status_group_box)
@@ -410,7 +403,6 @@ class FullInstrumentViewWindow(QMainWindow):
     def setup_connections_to_presenter(self) -> None:
         self._projection_combo_box.currentIndexChanged.connect(self._presenter.update_plotter)
         self._multi_select_check.stateChanged.connect(self._presenter.update_detector_picker)
-        self._circle_widget.clicked.connect(self._presenter.on_add_cylinder_clicked)
         self._add_mask.clicked.connect(self._presenter.on_cylinder_select_clicked)
         self._clear_selection_button.clicked.connect(self._presenter.on_clear_selected_detectors_clicked)
         self._contour_range_slider.sliderReleased.connect(self._presenter.on_contour_limits_updated)
@@ -438,6 +430,36 @@ class FullInstrumentViewWindow(QMainWindow):
             self._integration_limit_slider,
             self._presenter.on_integration_limits_updated,
         )
+
+        self._circle_widget.clicked.connect(self._presenter.on_add_cylinder_clicked)
+        self._circle_widget.clicked.connect(self.add_widget)
+        self._add_mask.clicked.connect(self.cancel_widget)
+
+    def add_widget(self):
+        self._circle_widget.setText("Cancel")
+        with suppress(TypeError):
+            self._circle_widget.clicked.disconnect()
+        self._circle_widget.clicked.connect(self.delete_current_widget)
+        self._circle_widget.clicked.connect(self.cancel_widget)
+        self._add_mask.setEnabled(True)
+
+    def cancel_widget(self):
+        self._circle_widget.setText("Circle Shape")
+        with suppress(TypeError):
+            self._circle_widget.clicked.disconnect()
+        self._circle_widget.clicked.connect(self._presenter.on_add_cylinder_clicked)
+        self._circle_widget.clicked.connect(self.add_widget)
+        self._add_mask.setEnabled(False)
+
+    def delete_current_widget(self):
+        # Should delete widgets explicitly, otherwise not garbage collected
+        if not self._current_widget:
+            return
+        self._current_widget.EnabledOff()
+        self._current_widget.SetInteractor(None)
+        self._current_widget.RemoveAllObservers()
+        del self._current_widget
+        self._current_widget = None
 
     def _setup_units_options(self, parent: QVBoxLayout):
         """Add widgets for the units options"""
@@ -567,6 +589,7 @@ class FullInstrumentViewWindow(QMainWindow):
         self.main_plotter.add_mesh(mesh, color=colour, pickable=pickable)
 
     def clear_main_plotter(self) -> None:
+        self.delete_current_widget()
         self.main_plotter.clear()
 
     def add_detector_mesh(self, mesh: PolyData, is_projection: bool, scalars=None) -> None:
@@ -649,6 +672,7 @@ class FullInstrumentViewWindow(QMainWindow):
         return self._current_widget
 
     def enable_or_disable_mask_widgets(self):
+        self.cancel_widget()
         self._circle_widget.setDisabled(self.current_selected_projection() == ProjectionType.THREE_D)
         self._add_mask.setDisabled(True)
 
