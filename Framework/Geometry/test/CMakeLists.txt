@@ -14,9 +14,7 @@ if(CXXTEST_FOUND)
     GeometryTest PRIVATE Mantid::Geometry Mantid::Beamline Mantid::Types Mantid::Kernel ${OpenGL_LIBRARIES}
   )
 
-  if(TARGET GTest::gmock_main)
-    target_link_libraries(GeometryTest PRIVATE GTest::gmock_main)
-  elseif(TARGET GTest::gmock AND TARGET GTest::gtest)
+  if(TARGET GTest::gmock AND TARGET GTest::gtest)
     target_link_libraries(GeometryTest PRIVATE GTest::gmock GTest::gtest)
   else()
     target_link_libraries(GeometryTest PRIVATE gmock gtest)

@@ -27,9 +27,7 @@ mtd_add_qt_tests(
 
 add_framework_test_helpers(MantidQtInterfacesInelasticTestQt5)
 
-if(TARGET GTest::gmock_main)
-  target_link_libraries(MantidQtInterfacesInelasticTestQt5 PRIVATE GTest::gmock_main)
-elseif(TARGET GTest::gmock AND TARGET GTest::gtest)
+if(TARGET GTest::gmock AND TARGET GTest::gtest)
   target_link_libraries(MantidQtInterfacesInelasticTestQt5 PRIVATE GTest::gmock GTest::gtest)
 else()
   target_link_libraries(MantidQtInterfacesInelasticTestQt5 PRIVATE gmock gtest)

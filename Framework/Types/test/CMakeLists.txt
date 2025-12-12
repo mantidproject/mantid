@@ -6,9 +6,7 @@ if(CXXTEST_FOUND)
 
   add_dependencies(FrameworkTests TypesTest)
 
-  if(TARGET GTest::gmock_main)
-    target_link_libraries(TypesTest PRIVATE GTest::gmock_main)
-  elseif(TARGET GTest::gmock AND TARGET GTest::gtest)
+  if(TARGET GTest::gmock AND TARGET GTest::gtest)
     target_link_libraries(TypesTest PRIVATE GTest::gmock GTest::gtest)
   else()
     target_link_libraries(TypesTest PRIVATE gmock gtest)
