@@ -58,17 +58,20 @@ if(MANTID_FRAMEWORK_LIB STREQUAL "BUILD")
     QT_VERSION 5
     INCLUDE_DIRS inc ../common/inc ../../../Framework/DataObjects/inc
     SRC ${TEST_FILES}
-    LINK_LIBS ${CORE_MANTIDLIBS}
-              Mantid::DataObjects
-              ${POCO_LIBRARIES}
-              ${Boost_LIBRARIES}
-              Mantid::PythonInterfaceCore
-              gmock
-              gtest
+    LINK_LIBS ${CORE_MANTIDLIBS} Mantid::DataObjects ${POCO_LIBRARIES} ${Boost_LIBRARIES} Mantid::PythonInterfaceCore
               Python::Python
     MTD_QT_LINK_LIBS MantidQtWidgetsCommon MantidQtWidgetsPlotting MantidQtWidgetsMplCpp
     PARENT_DEPENDENCIES GUITests
   )
 
   add_framework_test_helpers(MantidQtWidgetsPlottingTestQt5)
+
+  if(TARGET GTest::gmock_main)
+    target_link_libraries(MantidQtWidgetsPlottingTest PRIVATE GTest::gmock_main)
+  elseif(TARGET GTest::gmock AND TARGET GTest::gtest)
+    target_link_libraries(MantidQtWidgetsPlottingTest PRIVATE GTest::gmock GTest::gtest)
+  else()
+    target_link_libraries(MantidQtWidgetsPlottingTest PRIVATE gmock gtest)
+  endif()
+
 endif()
