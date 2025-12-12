@@ -31,8 +31,8 @@ mtd_add_qt_tests(
   PARENT_DEPENDENCIES GUITests
 )
 
-if(TARGET GTest::gmock_main)
-  target_link_libraries(MantidQtIconsTestQt5 PRIVATE GTest::gmock_main)
+if(TARGET GTest::gmock AND TARGET GTest::gtest)
+
 elseif(TARGET GTest::gmock AND TARGET GTest::gtest)
   target_link_libraries(MantidQtIconsTestQt5 PRIVATE GTest::gmock GTest::gtest)
 else()
