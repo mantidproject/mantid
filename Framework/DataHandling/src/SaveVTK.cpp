@@ -11,7 +11,7 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/BoundedValidator.h"
-#include <Poco/File.h>
+#include <filesystem>
 #include <fstream>
 #include <string>
 
@@ -130,7 +130,7 @@ void SaveVTK::exec() {
     }
   } else {
     outVTP.close();
-    Poco::File(filename).remove();
+    std::filesystem::remove(filename);
     throw Exception::NotImplementedError("SaveVTK only implemented for Workspace2D\n");
   }
 

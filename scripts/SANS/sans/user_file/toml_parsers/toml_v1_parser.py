@@ -112,6 +112,7 @@ class TomlV1ParserImpl(TomlParserImplBase):
         self._parse_transmission()
         self._parse_transmission_roi()
         self._parse_transmission_fitting()
+        self._parse_transmission_wide_angle()
 
     @property
     def instrument(self):
@@ -149,6 +150,7 @@ class TomlV1ParserImpl(TomlParserImplBase):
 
         self.move.sample_offset = self.get_val("sample_offset", inst_config_dict, 0.0)
         self.convert_to_q.use_gravity = self.get_val("gravity_enabled", inst_config_dict, default=True)
+        self.convert_to_q.solid_angle_cylinder_slices = self.get_val("solid_angle_cylinder_slices", inst_config_dict, 11)
 
     def _parse_detector_configuration(self):
         det_config_dict = self.get_val(["detector", "configuration"])
@@ -362,6 +364,9 @@ class TomlV1ParserImpl(TomlParserImplBase):
             raise ValueError("The ROI filename selected was empty")
 
         self.calculate_transmission.transmission_roi_files = [file]
+
+    def _parse_transmission_wide_angle(self):
+        self.adjustment.wide_angle_correction = self.get_val(["transmission", "wide_angle_correction"], default=False)
 
     def _parse_transmission_fitting(self):
         fit_dict = self.get_val(["transmission", "fitting"])

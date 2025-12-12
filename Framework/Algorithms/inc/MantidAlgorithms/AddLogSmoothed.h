@@ -28,7 +28,9 @@ public:
 
   /// Algorithm's version for identification
   int version() const override { return 1; }
-  const std::vector<std::string> seeAlso() const override { return {"AddSampleLog", "AddLogDerivative"}; }
+  const std::vector<std::string> seeAlso() const override {
+    return {"AddSampleLog", "AddLogDerivative", "AddLogInterpolated"};
+  }
   /// Algorithm's category for identification
   const std::string category() const override { return "DataHandling\\Logs"; }
 

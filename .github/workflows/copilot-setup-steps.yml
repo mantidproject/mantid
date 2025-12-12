@@ -5,6 +5,7 @@ name: "Copilot Setup Steps"
 on:
   workflow_dispatch:
   push:
+    branches: [main, release-next]
     paths:
       - .github/workflows/copilot-setup-steps.yml
   pull_request:
@@ -30,7 +31,7 @@ jobs:
     # The following steps use pixi to set up the development environment as specified in pixi.toml,
     # which includes pre-commit and other dependencies.
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: prefix-dev/setup-pixi@v0.9.3
         with:
           manifest-path: pixi.toml

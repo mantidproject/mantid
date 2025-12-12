@@ -30,7 +30,7 @@ def move_component(component_name, state: AllStates, move_type, workspace, is_tr
     # Ensure we handle a None type
     parsed_component_name = _get_full_component_name(user_comp_name=component_name, inst_info=inst_info)
     # Get the selected component and the beam coordinates
-    if not beam_coordinates:
+    if beam_coordinates is None or not len(beam_coordinates):
         beam_coordinates = _get_coordinates(component_name=parsed_component_name, state=state)
 
     if move_type is MoveTypes.ELEMENTARY_DISPLACEMENT:

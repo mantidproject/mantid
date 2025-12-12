@@ -10,12 +10,13 @@ on:
 jobs:
   merge-release-into-main:
     runs-on: ubuntu-latest
-    if: ${{ github.ref_name == 'release-next' }}
+    # run on release-next branch and do not run in forks
+    if: ${{ github.ref_name == 'release-next' && github.repository_owner == 'mantidproject' }}
     steps:
-      - uses: actions/checkout@master
+      - uses: actions/checkout@v6
 
       - name: Merge release-next into main
-        uses: devmasx/merge-branch@master
+        uses: devmasx/merge-branch@v1.4.0
         with:
           type: now
           target_branch: main
@@ -24,12 +25,13 @@ jobs:
 
   merge-ornl-into-main:
     runs-on: ubuntu-latest
-    if: ${{ github.ref_name == 'ornl-next' }}
+    # run on ornl-next branche and do not run in forks
+    if: ${{ github.ref_name == 'ornl-next' && github.repository_owner == 'mantidproject' }}
     steps:
-      - uses: actions/checkout@master
+      - uses: actions/checkout@v6
 
       - name: Merge ornl-next into main
-        uses: devmasx/merge-branch@master
+        uses: devmasx/merge-branch@v1.4.0
         with:
           type: now
           target_branch: main

@@ -75,7 +75,7 @@ This algorithm accepts the same ``SplitterWorkspace`` inputs as :ref:`FilterEven
 
     CompareWorkspaces(ws, out, CheckUncertainty=False, CheckSpectraMap=False, CheckInstrument=False)
 
-**Example - filter events based on log values**
+**Example - splitting events based on log values**
 
 .. code-block:: python
 
@@ -97,6 +97,11 @@ This algorithm accepts the same ``SplitterWorkspace`` inputs as :ref:`FilterEven
     ws = AlignAndFocusPowderSlim("VULCAN_218062.nxs.h5", SplitterWorkspace='splitter')
     print(ws.getNumberOfEntries())  # should be 6 workspaces in the group
 
+    # By default the events are split based on pulsetime of the events. If you want to split based on full time (pulsetime + tof), set UseFullTime=False.
+    ws2 = AlignAndFocusPowderSlim("VULCAN_218062.nxs.h5",
+                                  SplitterWorkspace='splitter',
+                                  UseFullTime=True)
+
 
 **Example - filter bad pulses**
 
@@ -117,10 +122,6 @@ This algorithm accepts the same ``SplitterWorkspace`` inputs as :ref:`FilterEven
     ws2 = Rebin(ws2, "0,50000,50000", PreserveEvents=False)
 
     CompareWorkspaces(ws, ws2, CheckUncertainty=False, CheckSpectraMap=False, CheckInstrument=False)
-
-.. note::
-
-    We also can currently only filter based on the pulse time, not the event time-of-flight.
 
 .. categories::
 

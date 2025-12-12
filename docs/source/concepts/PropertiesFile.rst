@@ -218,6 +218,9 @@ Mantid Graphical User Interface Properties
 |                                                    |is only relevant if you using both Linux and a      |                 |
 |                                                    |broken version of Mesa.                             |                 |
 +----------------------------------------------------+----------------------------------------------------+-----------------+
+| ``InstrumentView.MaintainAspectRatio``             |Value of the "Maintain Aspect Ratio" option in the  | ``Yes``, ``No`` |
+|                                                    |Instrument View                                     |                 |
++----------------------------------------------------+----------------------------------------------------+-----------------+
 | ``MantidOptions.InvisibleWorkspaces``              |Do not show 'invisible' workspaces                  | ``0``, ``1``    |
 +----------------------------------------------------+----------------------------------------------------+-----------------+
 | ``PeakColumn.hklPrec``                             |Precision of hkl values shown in tables             | ``2``           |

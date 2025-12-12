@@ -467,7 +467,7 @@ public:
   }
 
   void test_data_putget_string() {
-    cout << "\ntest dataset read/write -- string\n" << std::flush;
+    cout << "\ntest dataset read/write -- string" << std::endl;
 
     // open a file
     FileResource resource("test_nexus_file_stringrw.h5");
@@ -476,7 +476,7 @@ public:
     file.makeGroup("entry", "NXentry", true);
 
     // put/get a string
-    cout << "\nread/write string...\n";
+    cout << "\nread/write string..." << std::endl;
     string in("this is a string"), out;
     file.makeData("string_data", NXnumtype::CHAR, in.size(), true);
     file.putData(&in);
@@ -505,6 +505,7 @@ public:
   }
 
   void test_check_str_length() {
+    cout << "\ntest dataset read/write -- string length" << std::endl;
     FileResource resource("test_nexus_str_len.h5");
     std::string filename = resource.fullPath();
     Mantid::Nexus::File file(filename, NXaccess::CREATE5);
@@ -712,30 +713,26 @@ public:
     FileResource resource("test_ess_instrument.nxs");
     std::string filename = resource.fullPath();
     // file permissions
-    hid_t fapl = H5Pcreate(H5P_FILE_ACCESS);
+    Mantid::Nexus::ParameterID fapl = H5Pcreate(H5P_FILE_ACCESS);
     H5Pset_fclose_degree(fapl, H5F_CLOSE_STRONG);
     hid_t fid = H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
-    H5Pclose(fapl);
 
     // put an initial entry
-    hid_t groupid = H5Gcreate(fid, "entry", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    Mantid::Nexus::GroupID groupid = H5Gcreate(fid, "entry", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     // add a NX_class attribute
-    hid_t attrtype = H5Tcopy(H5T_C_S1);
+    Mantid::Nexus::DataTypeID attrtype = H5Tcopy(H5T_C_S1);
     H5Tset_size(attrtype, 7);
-    hid_t attrspce = H5Screate(H5S_SCALAR);
-    hid_t attrid = H5Acreate(groupid, "NX_class", attrtype, attrspce, H5P_DEFAULT, H5P_DEFAULT);
+    Mantid::Nexus::DataSpaceID attrspce = H5Screate(H5S_SCALAR);
+    Mantid::Nexus::AttributeID attrid = H5Acreate(groupid, "NX_class", attrtype, attrspce, H5P_DEFAULT, H5P_DEFAULT);
     H5Awrite(attrid, attrtype, "NXpants");
-    // cleanup attribute
-    H5Sclose(attrspce);
-    H5Tclose(attrtype);
-    H5Aclose(attrid);
 
     // make and put the data
-    hid_t datatype = H5Tcopy(H5T_C_S1);
+    Mantid::Nexus::DataTypeID datatype = H5Tcopy(H5T_C_S1);
     H5Tset_size(datatype, data.size());
     // hsize_t dims[] = {0, data.size()}; // dims are zero
-    hid_t dataspace = H5Screate(H5S_SCALAR); // H5Screate_simple(2, dims, NULL);
-    hid_t dataid = H5Dcreate(groupid, "data", datatype, dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    Mantid::Nexus::DataSpaceID dataspace = H5Screate(H5S_SCALAR); // H5Screate_simple(2, dims, NULL);
+    Mantid::Nexus::DataSetID dataid =
+        H5Dcreate(groupid, "data", datatype, dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     H5Dwrite(dataid, datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, data.c_str());
 
     // verify the file was setup correctly
@@ -748,10 +745,6 @@ public:
     TS_ASSERT_EQUALS(len, data.size());
 
     // cleanup and close file
-    H5Tclose(datatype);
-    H5Sclose(dataspace);
-    H5Dclose(dataid);
-    H5Gclose(groupid);
     H5Fclose(fid);
 
     // now open the file and read

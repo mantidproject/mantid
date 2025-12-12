@@ -36,7 +36,7 @@ class HB3ADetectorPeaksTest(unittest.TestCase):
         self.assertAlmostEqual(peak0.getH(), 0, places=1)
         self.assertAlmostEqual(peak0.getK(), 0, places=1)
         self.assertAlmostEqual(peak0.getL(), 6, places=1)
-        self.assertAlmostEqual(peak0.getIntensity(), 961.6164, delta=1e-5)
+        self.assertAlmostEqual(peak0.getIntensity(), 961.61533, delta=1e-5)
         self.assertAlmostEqual(peak0.getSigmaIntensity(), 10.479567, delta=3e-2)
         self.assertAlmostEqual(peak0.getWavelength(), 1.008)
         self.assertAlmostEqual(peak0.getAzimuthal(), -np.pi, delta=2e-5)
@@ -57,8 +57,8 @@ class HB3ADetectorPeaksTest(unittest.TestCase):
         self.assertAlmostEqual(peak0.getH(), 0, places=1)
         self.assertAlmostEqual(peak0.getK(), 0, places=1)
         self.assertAlmostEqual(peak0.getL(), 6, places=1)
-        self.assertAlmostEqual(peak0.getIntensity(), 990.100785, delta=1e-5)
-        self.assertAlmostEqual(peak0.getSigmaIntensity(), 11.73395, delta=1e-5)
+        self.assertAlmostEqual(peak0.getIntensity(), 990.10107, delta=1e-5)
+        self.assertAlmostEqual(peak0.getSigmaIntensity(), 11.70648, delta=1e-5)
         self.assertAlmostEqual(peak0.getWavelength(), 1.008)
         self.assertAlmostEqual(peak0.getAzimuthal(), -np.pi, delta=2e-5)
         self.assertAlmostEqual(peak0.getScattering(), np.deg2rad(data.getExperimentInfo(0).run()["2theta"].value[0]), delta=1e-5)
@@ -93,7 +93,7 @@ class HB3ADetectorPeaksTest(unittest.TestCase):
         gamma = np.arctan(np.tan(two_th) * np.cos(az))
         # G. J. McIntyre and R. F. D. Stansfield, Acta Cryst A 44, 257 (1988).
         lorentz = abs(np.cos(nu) * np.sin(gamma))
-        self.assertAlmostEqual(peak0.getIntensity(), 961.6164021216964 * lorentz, delta=1e-5)
+        self.assertAlmostEqual(peak0.getIntensity(), 961.615331329 * lorentz, delta=1e-5)
         self.assertAlmostEqual(peak0.getSigmaIntensity(), 10.479567046232615 * lorentz, delta=2e-2)
         q_sample = peak0.getQSampleFrame()
         for i in range(3):
@@ -106,8 +106,8 @@ class HB3ADetectorPeaksTest(unittest.TestCase):
         self.assertAlmostEqual(peak0.getH(), 0, places=1)
         self.assertAlmostEqual(peak0.getK(), 0, places=1)
         self.assertAlmostEqual(peak0.getL(), 6, places=1)
-        self.assertAlmostEqual(peak0.getIntensity(), 960.977625, delta=1e-5)
-        self.assertAlmostEqual(peak0.getSigmaIntensity(), 10.621905, delta=1e-5)
+        self.assertAlmostEqual(peak0.getIntensity(), 960.97711, delta=1e-5)
+        self.assertAlmostEqual(peak0.getSigmaIntensity(), 10.62189, delta=1e-5)
 
         DeleteWorkspace(peaks)
 
@@ -166,7 +166,7 @@ class HB3ADetectorPeaksTest(unittest.TestCase):
         self.assertAlmostEqual(peak0.getH(), 0, places=1)
         self.assertAlmostEqual(peak0.getK(), 0, places=1)
         self.assertAlmostEqual(peak0.getL(), 6, places=1)
-        self.assertAlmostEqual(peak0.getIntensity(), 969.778546, delta=1e-5)
+        self.assertAlmostEqual(peak0.getIntensity(), 969.77797, delta=1e-5)
         self.assertAlmostEqual(peak0.getSigmaIntensity(), 24.776354, delta=3e-2)
         self.assertAlmostEqual(peak0.getWavelength(), 1.008)
         self.assertAlmostEqual(peak0.getAzimuthal(), -np.pi, delta=2e-5)

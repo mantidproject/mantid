@@ -12,7 +12,6 @@ requirements:
   run:
     - ccache
     - cmake ${{ cmake }}
-    - rattler-index
     - doxygen ${{ doxygen }}
     - eigen ${{ eigen }}
     - euphonic ${{ euphonic }}
@@ -54,8 +53,8 @@ requirements:
     - qtpy ${{ qtpy }}
     - quasielasticbayes ${{ quasielasticbayes }}
     - quickbayes ${{ quickbayes }}
-    # something is wrong with versioningit and rattler-build 0.48
-    - rattler-build =0.47
+    - rattler-build ==0.51.0
+    - rattler-index
     - requests>=2.32.4
     - scipy ${{ scipy }}
     - setuptools

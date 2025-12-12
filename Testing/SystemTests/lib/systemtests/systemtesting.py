@@ -28,7 +28,7 @@ import inspect
 from mantid.api import FileFinder
 from mantid.api import FrameworkManager
 from mantid.kernel import config, MemoryStats, ConfigService
-from mantid.simpleapi import AlgorithmManager, Load, SaveNexus
+from mantid.simpleapi import AlgorithmManager, Load, SaveNexus, SaveAscii
 import numpy
 import platform
 import re
@@ -61,12 +61,23 @@ TESTING_FRAMEWORK_DIR = santize_backslash(os.path.dirname(os.path.realpath(__fil
 FRAMEWORK_PYTHONINTERFACE_TEST_DIR = santize_backslash(
     os.path.realpath(os.path.join(TESTING_FRAMEWORK_DIR, "..", "..", "..", "..", "Framework", "PythonInterface", "test"))
 )
+# Path to Reference file directory
+REFERENCE_FILE_DIR = santize_backslash(
+    os.path.realpath(os.path.join(TESTING_FRAMEWORK_DIR, "..", "..", "tests", "Framework", "reference"))
+)
+
+
 # Indicates the child process trying to run the tests had an error
 TESTING_PROC_FAILURE_CODE = 255
 
 if not os.path.exists(FRAMEWORK_PYTHONINTERFACE_TEST_DIR):
     raise ImportError("Expected 'Framework/PythonInterface/test' to be found at '{}' but it wasn'target. Has the directory moved?")
 
+if os.environ.get("GENERATE_REFERENCE_FILES_ON_FAILURE"):
+    # If env variable is set, generate reference files on failure to replace the existing.
+    GENERATE_REFERENCE_FILES = True
+else:
+    GENERATE_REFERENCE_FILES = False
 
 #########################################################################
 # The base test class.
@@ -269,9 +280,9 @@ class MantidSystemTest(unittest.TestCase):
 
         return stuff
 
-    def validateASCII(self):
+    def validateASCII(self, val_names):
         """Validate ASCII files using difflib."""
-        (measured, expected) = self.validate()
+        (measured, expected) = val_names
         if not os.path.isabs(measured):
             measured = FileFinder.Instance().getFullPath(measured)
         if not os.path.isabs(expected):
@@ -300,13 +311,12 @@ class MantidSystemTest(unittest.TestCase):
         else:
             return True
 
-    def validateWorkspaceToNeXus(self):
+    def validateWorkspaceToNeXus(self, valNames):
         """
         Assumes the second item from self.validate() is a nexus file and loads it
         to compare to the supplied workspace. Also supports sequential series of
         comparisons between workspaces and nexus files
         """
-        valNames = list(self.validate())
         numRezToCheck = len(valNames)
         mismatchName = None
 
@@ -314,26 +324,25 @@ class MantidSystemTest(unittest.TestCase):
         # results are in pairs
         for valname, refname in zip(valNames[::2], valNames[1::2]):
             if refname.endswith(".nxs"):
-                Load(Filename=refname, OutputWorkspace="RefFile")
-                refname = "RefFile"
+                outrefname = "RefFile"
+                Load(Filename=refname, OutputWorkspace=outrefname)
             else:
                 raise RuntimeError("Should supply a NeXus file: %s" % refname)
-            valPair = (valname, "RefFile")
+            valPair = (valname, outrefname)
             if numRezToCheck > 2:
                 mismatchName = valname
 
             if not (self.validateWorkspaces(valPair, mismatchName)):
                 validationResult = False
-                print("Workspace {0} not equal to its reference file".format(valname))
+                print(f"Workspace {valname} not equal to its reference file, {refname}")
 
         return validationResult
 
-    def validateWorkspaceToWorkspace(self):
+    def validateWorkspaceToWorkspace(self, valNames):
         """
         Assumes the second item from self.validate() is an existing workspace
         to compare to the supplied workspace.
         """
-        valNames = list(self.validate())
         return self.validateWorkspaces(valNames)
 
     def validateWorkspaces(self, valNames=None, mismatchName=None):
@@ -359,18 +368,16 @@ class MantidSystemTest(unittest.TestCase):
             checker.setProperty("Check" + d, False)
         checker.setProperty("NaNsEqual", self.nanEqual)
         checker.execute()
-        if not checker.getProperty("Result").value:
+        result = checker.getProperty("Result").value
+        if not result and not GENERATE_REFERENCE_FILES:
             print(self.__class__.__name__)
-
             if mismatchName:
                 mismatchName = self.__class__.__name__ + mismatchName + "-mismatch.nxs"
             else:
                 mismatchName = self.__class__.__name__ + "-mismatch.nxs"
             print(f'Saving mismatch to "{mismatchName}"')
             SaveNexus(InputWorkspace=valNames[0], Filename=mismatchName)
-            return False
-
-        return True
+        return result
 
     def doValidation(self):
         """
@@ -397,13 +404,38 @@ class MantidSystemTest(unittest.TestCase):
 
         method = method.lower()
         if "validateworkspacetonexus".endswith(method):
-            return self.validateWorkspaceToNeXus()
+            validation_result = self.validateWorkspaceToNeXus(validation)
+            (GENERATE_REFERENCE_FILES and not validation_result) and self.generate_reference_files(validation, self._save_nexus_ref_file)
         elif "validateworkspacetoworkspace".endswith(method):
-            return self.validateWorkspaceToWorkspace()
+            validation_result = self.validateWorkspaceToWorkspace(validation)
+            (GENERATE_REFERENCE_FILES and not validation_result) and self.generate_reference_files(validation, self._save_ws_ref_file)
         elif "validateascii".endswith(method):
-            return self.validateASCII()
+            validation_result = self.validateASCII(validation)
+            (GENERATE_REFERENCE_FILES and not validation_result) and self.generate_reference_files(validation, self._save_ascii_ref_file)
         else:
             raise RuntimeError("invalid validation method '%s'" % self.validateMethod())
+        return validation_result
+
+    @staticmethod
+    def generate_reference_files(val_names, save_method):
+        res_names = val_names[::2]
+        ref_names = val_names[1::2]
+        for res_ws_name, ref_ws_name in zip(res_names, ref_names):
+            file_path = os.path.join(REFERENCE_FILE_DIR, ref_ws_name)
+            save_method(res_ws_name, file_path)
+
+    @staticmethod
+    def _save_nexus_ref_file(out_ws, full_file_path):
+        SaveNexus(InputWorkspace=out_ws, Filename=full_file_path)
+
+    @staticmethod
+    def _save_ascii_ref_file(out_ws, full_file_path):
+        SaveAscii(InputWorkspace=out_ws, Filename=full_file_path)
+
+    def _save_ws_ref_file(self, out_ws, full_file_path):
+        print(f'Test {type(self).__name__}. Cannot save ref file {out_ws} as reference is a workspace.'
+              f'File format, and post-load processing cannot be inferred.'
+              f'Intended file path: {full_file_path}')
 
     def returnValidationCode(self, code):
         """

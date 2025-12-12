@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/Smoothing.h"
 #include "MantidKernel/DllConfig.h"
-#include "MantidKernel/GSL_FFT_Helpers.h"
+#include "MantidKernel/GSL_Helpers.h"
 
 #include <algorithm>
 #include <cmath>
@@ -191,7 +191,7 @@ template <typename Y> struct ButterworthFilter : public FFTFilter<Y> {
   }
 
 private:
-  unsigned m_two_order;
+  unsigned int m_two_order;
   Y m_invcutoff;
 };
 

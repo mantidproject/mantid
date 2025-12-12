@@ -19,8 +19,6 @@
 #include <Poco/DateTimeFormat.h>
 #include <Poco/DateTimeParser.h>
 #include <Poco/DirectoryIterator.h>
-#include <Poco/File.h>
-#include <Poco/Path.h>
 #include <boost/algorithm/string.hpp>
 
 #include <algorithm>

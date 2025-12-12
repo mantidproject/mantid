@@ -805,7 +805,21 @@ class FitFunctionsTest(unittest.TestCase):
 
         self.assertAlmostEqual(out.get(2, 0), 0.000000008131882500705956)
         self.assertAlmostEqual(out.get(2, 1), -0.0000003045374795085354)
-        self.assertAlmostEqual(out.get(2, 2), -0.0000015775749015123351)
+        self.assertAlmostEqual(out.get(2, 2), -2.6292915025205588e-06)
+
+    def test_function_deriv_with_1DHistogram_agrees_with_1DVector(self):
+        g = FunctionWrapper("Gaussian", Height=100, Sigma=0.6, PeakCentre=5)
+        # histo
+        xedges = np.array([3.975, 4.025])
+        dom_histo = FunctionDomain1DHistogram(xedges)  # bin edges
+        jac_histo = g.functionDeriv(dom_histo)
+        # vec
+        dom_vec = FunctionDomain1DVector(0.5 * (xedges[1:] + xedges[:-1]))  # bin center
+        jac_vec = g.functionDeriv(dom_vec)
+        # assert consistent within relative tolerance
+        for ipar in range(g.nParams()):
+            jac_vec_elem = jac_vec.get(0, ipar)
+            self.assertAlmostEqual(jac_histo.get(0, ipar), jac_vec_elem, delta=abs(jac_vec_elem) * 1e-3)
 
 
 if __name__ == "__main__":

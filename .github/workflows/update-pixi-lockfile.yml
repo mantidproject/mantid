@@ -11,9 +11,10 @@ on:
 
 jobs:
   pixi-update-lockfile:
+    if: ${{ github.repository_owner == 'mantidproject' }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Set up pixi
         uses: prefix-dev/setup-pixi@v0.9.3
         with:
@@ -31,6 +32,8 @@ jobs:
           body-path: diff.md
           branch: update-pixi
           base: main  # change this to the default branch of your repository
-          labels: pixi
+          labels: |
+            pixi
+            Maintenanance
           delete-branch: true
           add-paths: pixi.lock

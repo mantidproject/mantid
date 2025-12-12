@@ -4,6 +4,7 @@
 #include "MantidNexus/NexusAddress.h"
 #include "MantidNexus/NexusDescriptor.h"
 #include "MantidNexus/NexusFile_fwd.h"
+#include "MantidNexus/UniqueID.h"
 #include <map>
 #include <memory>
 #include <string>
@@ -24,6 +25,15 @@ namespace H5 {
 class H5Object;
 } // namespace H5
 
+// forward declare
+// NOTE declare extern "C" to prevent conflict with actual declaration
+extern "C" MYH5DLL herr_t H5Gclose(hid_t);
+extern "C" MYH5DLL herr_t H5Dclose(hid_t);
+extern "C" MYH5DLL herr_t H5Tclose(hid_t);
+extern "C" MYH5DLL herr_t H5Sclose(hid_t);
+extern "C" MYH5DLL herr_t H5Aclose(hid_t);
+extern "C" MYH5DLL herr_t H5Pclose(hid_t);
+
 /**
  * \file NexusFile.h Definition of the Nexus C++ API.
  * \defgroup cpp_types C++ Types
@@ -33,6 +43,13 @@ class H5Object;
 
 namespace Mantid {
 namespace Nexus {
+
+using GroupID = UniqueID<&H5Gclose>;
+using DataSetID = UniqueID<&H5Dclose>;
+using DataTypeID = UniqueID<&H5Tclose>;
+using DataSpaceID = UniqueID<&H5Sclose>;
+using AttributeID = UniqueID<&H5Aclose>;
+using ParameterID = UniqueID<&H5Pclose>;
 
 /**
  * \class FileID
@@ -47,10 +64,10 @@ private:
   hid_t m_fid;
   // There is no reason to copy or assign a file ID
   FileID(FileID const &f) = delete;
-  FileID(FileID const &&f) = delete;
+  FileID(FileID &&f) = delete;
   FileID &operator=(hid_t const) = delete;
   FileID &operator=(FileID const &) = delete;
-  FileID &operator=(FileID const &&) = delete;
+  FileID &operator=(FileID &&) = delete;
 
 public:
   bool operator==(int const v) const { return static_cast<int>(m_fid) == v; }
@@ -190,7 +207,7 @@ public:
    * \return A unix like address string pointing to the current
    *         position in the file
    */
-  std::string getAddress() const;
+  std::string const &getAddress() const { return m_address.string(); };
 
   // CHECK ADDRESS EXISTENCE
 

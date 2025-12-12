@@ -23,11 +23,11 @@ repos:
       - id: end-of-file-fixer
         exclude: .md5$|^external/|^tools/|Testing/Tools/cxxtest
   - repo: https://github.com/gitleaks/gitleaks
-    rev: v8.29.0
+    rev: v8.30.0
     hooks:
       - id: gitleaks
   - repo: https://github.com/pre-commit/mirrors-clang-format
-    rev: v21.1.5
+    rev: v21.1.7
     hooks:
     - id: clang-format
       exclude: Testing/Tools/cxxtest|tools|qt/icons/resources/
@@ -62,10 +62,25 @@ repos:
           )$
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.14.5
+    rev: v0.14.8
     # ruff must appear before black in the list of hooks
     hooks:
       - id: ruff-check
         args: [--fix, --exit-non-zero-on-fix]
       - id: ruff-format
         exclude: scripts/templates/reference/|Testing/Tools/cxxtest
+
+  - repo: local
+    hooks:
+      - id: pixi-deps
+        name: pixi-dependency-updater
+        language: python
+        entry: python tools/dependencies/pixi_dependency_updater.py
+        files: |
+          (?x)^(
+          ^conda/recipes/mantid-developer/recipe.yaml$|
+          ^conda/recipes/conda_build_config.yaml$|
+          ^pixi.toml$
+          )$
+        additional_dependencies:
+          - pyyaml

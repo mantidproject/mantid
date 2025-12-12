@@ -169,6 +169,7 @@ set(PYTHON_PLUGINS
     algorithms/RebinRagged.py
     algorithms/RefinePowderDiffProfileSeq.py
     algorithms/RefineSingleCrystalGoniometer.py
+    algorithms/ReorientUnitCell.py
     algorithms/ReflectometryReductionOneLiveData.py
     algorithms/ReflectometrySliceEventWorkspace.py
     algorithms/RetrieveRunInfo.py

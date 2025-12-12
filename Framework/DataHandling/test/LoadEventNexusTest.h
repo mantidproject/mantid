@@ -22,8 +22,8 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidNexusGeometry/Hdf5Version.h"
 
-#include "Poco/Path.h"
 #include <cxxtest/TestSuite.h>
+#include <filesystem>
 
 using namespace Mantid;
 using namespace Mantid::Geometry;
@@ -230,7 +230,7 @@ public:
         Kernel::ConfigService::Instance().getFullPath("POLARIS9fbf7121b4274c833043ae8933ec643ff7b9313d.vtp", true, 0);
     bool hasVTPDirectory = ConfigService::Instance().hasProperty(vtpDirectoryKey);
     auto origVTPDirectory = ConfigService::Instance().getString(vtpDirectoryKey);
-    ConfigService::Instance().setString(vtpDirectoryKey, Poco::Path(foundFile).parent().toString());
+    ConfigService::Instance().setString(vtpDirectoryKey, std::filesystem::path(foundFile).parent_path().string());
     const std::string file = "POLARIS00130512.nxs";
     LoadEventNexus alg;
     alg.setChild(true);

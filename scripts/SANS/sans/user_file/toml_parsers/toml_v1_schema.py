@@ -31,6 +31,7 @@ class TomlSchemaV1Validator(TomlSchemaValidator):
                 "sample_aperture_diameter",
                 "sample_offset",
                 "trans_monitor",
+                "solid_angle_cylinder_slices",
             },
         }
 
@@ -94,6 +95,7 @@ class TomlSchemaV1Validator(TomlSchemaValidator):
             },
             "ROI": {"file"},
             "fitting": {"enabled": None, "function": None, "polynomial_order": None, "parameters": {"lambda_min", "lambda_max"}},
+            "wide_angle_correction": None,
         }
 
         normalisation_keys = {"monitor": {"*": {"spectrum_number", "background"}}, "all_monitors": {"background", "enabled"}}

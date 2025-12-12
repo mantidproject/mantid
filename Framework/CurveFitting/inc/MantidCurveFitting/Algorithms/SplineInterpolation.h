@@ -8,7 +8,6 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidCurveFitting/DllConfig.h"
-#include "MantidCurveFitting/Functions/CubicSpline.h"
 
 namespace Mantid {
 namespace CurveFitting {
@@ -42,38 +41,16 @@ private:
   void init() override;
   void exec() override;
 
-  /// CubicSpline member used to perform interpolation
-  std::shared_ptr<Functions::CubicSpline> m_cspline;
-
-  /// setup an output workspace using meta data from inws and taking a number of
-  /// spectra
+  /// setup an output workspace using meta data from inws and taking a number of spectra
   API::MatrixWorkspace_sptr setupOutputWorkspace(const API::MatrixWorkspace_sptr &mws,
                                                  const API::MatrixWorkspace_sptr &iws) const;
 
   /// convert a binned workspace to point data using ConvertToPointData
   API::MatrixWorkspace_sptr convertBinnedData(API::MatrixWorkspace_sptr workspace);
 
-  /// set the points that define the spline used for interpolation of a
-  /// workspace
-  void setInterpolationPoints(const API::MatrixWorkspace_const_sptr &inputWorkspace, const size_t row) const;
-
-  /// Calculate the interpolation of the input workspace against the spline and
-  /// store it in outputWorkspace
-  void calculateSpline(const API::MatrixWorkspace_const_sptr &inputWorkspace,
-                       const API::MatrixWorkspace_sptr &outputWorkspace, const size_t row) const;
-
-  /// Calculate the derivatives of the input workspace from the spline.
-  void calculateDerivatives(const API::MatrixWorkspace_const_sptr &inputWorkspace,
-                            const API::MatrixWorkspace_sptr &outputWorkspace, const size_t order) const;
-
   /// Find the interpolation range
   std::pair<size_t, size_t> findInterpolationRange(const API::MatrixWorkspace_const_sptr &iwspt,
                                                    const API::MatrixWorkspace_sptr &mwspt, const size_t row);
-
-  /// Extrapolates flat for the points outside the x-range
-  void extrapolateFlat(const API::MatrixWorkspace_sptr &ows, const API::MatrixWorkspace_const_sptr &iwspt,
-                       const size_t row, const std::pair<size_t, size_t> &indices, const bool doDerivs,
-                       std::vector<API::MatrixWorkspace_sptr> &derivs) const;
 };
 
 } // namespace Algorithms

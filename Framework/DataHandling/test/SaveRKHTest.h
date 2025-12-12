@@ -12,7 +12,7 @@
 #include "MantidHistogramData/LinearGenerator.h"
 #include <cxxtest/TestSuite.h>
 
-#include <Poco/File.h>
+#include <filesystem>
 #include <fstream>
 #include <numeric>
 using namespace Mantid::API;
@@ -29,8 +29,8 @@ public:
 
   ~SaveRKHTest() override {
     // Remove the file
-    if (Poco::File(outputFile).exists()) {
-      Poco::File(outputFile).remove();
+    if (std::filesystem::exists(outputFile)) {
+      std::filesystem::remove(outputFile);
     }
   }
 
@@ -66,7 +66,7 @@ public:
     TS_ASSERT(testAlgorithm1.isExecuted());
 
     // Check if the file exists
-    TS_ASSERT(Poco::File(outputFile).exists());
+    TS_ASSERT(std::filesystem::exists(outputFile));
 
     // Open it and check a few lines
     std::ifstream file(outputFile.c_str());
@@ -132,7 +132,7 @@ public:
     TS_ASSERT(testAlgorithm2.isExecuted());
 
     // Check if the file exists
-    TS_ASSERT(Poco::File(outputFile).exists());
+    TS_ASSERT(std::filesystem::exists(outputFile));
 
     // Open it and check a few lines
     std::ifstream file2(outputFile.c_str());
@@ -201,7 +201,7 @@ public:
     TS_ASSERT(testAlgorithm3.isExecuted());
 
     // Check if the file exists
-    TS_ASSERT(Poco::File(outputFile).exists());
+    TS_ASSERT(std::filesystem::exists(outputFile));
 
     // Open it and check a few lines
     std::ifstream file(outputFile.c_str());

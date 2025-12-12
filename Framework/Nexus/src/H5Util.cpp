@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidNexus/H5Util.h"
+#include "MantidNexus/UniqueID.h"
 #include <Poco/Logger.h>
 
 #include <H5Cpp.h>
@@ -125,9 +126,9 @@ bool isHdf5(std::string const &filename) {
   // Calls C routine H5Fis_accessible to determine whether the file is in
   // HDF5 format.  It returns positive value, 0, or negative value
   // Copies the function in H5Cpp, but using the correct access level
-  hid_t plist = H5Pcopy(H5Util::defaultFileAcc().getId());
+  Mantid::Nexus::UniqueID<&H5Pclose> plist = H5Pcopy(H5Util::defaultFileAcc().getId());
   htri_t ret_value = H5Fis_accessible(filename.c_str(), plist);
-  H5Pclose(plist);
+  plist.reset(); // explicit closure
 
   if (ret_value > 0)
     return true;
@@ -519,13 +520,13 @@ void copyGroup(H5::H5Object &dest, const std::string &destGroupAddress, H5::H5Ob
   //   C++ API support for these HDF5 methods does not yet exist.
 
   // Create intermediate groups, if necessary
-  hid_t lcpl = H5Pcreate(H5P_LINK_CREATE);
+  Mantid::Nexus::UniqueID<&H5Pclose> lcpl = H5Pcreate(H5P_LINK_CREATE);
   if (H5Pset_create_intermediate_group(lcpl, 1) < 0)
     throw std::runtime_error("H5Util::copyGroup: 'H5Pset_create_intermediate_group' error return.");
 
   if (H5Ocopy(src.getId(), srcGroupAddress.c_str(), dest.getId(), destGroupAddress.c_str(), H5P_DEFAULT, lcpl) < 0)
     throw std::runtime_error("H5Util::copyGroup: 'H5Ocopy' error return.");
-  H5Pclose(lcpl);
+  lcpl.reset(); // explicit closure
 }
 
 void deleteObjectLink(H5::H5Object &h5, const std::string &target) {

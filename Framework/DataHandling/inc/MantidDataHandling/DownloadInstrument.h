@@ -11,6 +11,7 @@
 #include "MantidKernel/InternetHelper.h"
 #include "MantidKernel/ProxyInfo.h"
 
+#include <filesystem>
 #include <map>
 #include <set>
 
@@ -39,13 +40,12 @@ private:
   virtual Kernel::InternetHelper::HTTPStatus doDownloadFile(const std::string &urlFile,
                                                             const std::string &localFilePath = "",
                                                             const StringToStringMap &headers = StringToStringMap());
-  StringToStringMap getFileShas(const std::string &directoryPath);
-  const std::string getDownloadableRepoUrl(const std::string &filename) const;
+  StringToStringMap getFileShas(const std::filesystem::path &directoryPath);
   StringToStringMap processRepository();
   std::string getValueOrDefault(const StringToStringMap &mapping, const std::string &key,
                                 const std::string &defaultValue) const;
 
-  size_t removeOrphanedFiles(const std::string &directoryPath,
+  size_t removeOrphanedFiles(const std::filesystem::path &directoryPath,
                              const std::unordered_set<std::string> &filenamesToKeep) const;
 
   Kernel::ProxyInfo m_proxyInfo;

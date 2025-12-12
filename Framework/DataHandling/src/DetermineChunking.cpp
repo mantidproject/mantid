@@ -18,8 +18,8 @@
 #include "MantidNexus/NexusException.h"
 #include "MantidNexus/NexusFile.h"
 
-#include <Poco/File.h>
 #include <exception>
+#include <filesystem>
 #include <set>
 #include <vector>
 
@@ -113,8 +113,8 @@ void DetermineChunking::exec() {
     return;
   }
 
-  Poco::File fileinfo(filename);
-  const double fileSizeGiB = static_cast<double>(fileinfo.getSize()) * BYTES_TO_GiB;
+  std::filesystem::path fileinfo(filename);
+  const double fileSizeGiB = static_cast<double>(std::filesystem::file_size(fileinfo)) * BYTES_TO_GiB;
 
   // don't bother opening the file if its size is "small"
   // note that prenexus "_runinfo.xml" files don't represent what
@@ -130,8 +130,9 @@ void DetermineChunking::exec() {
     string dataDir;
     LoadPreNexus lp;
     lp.parseRuninfo(filename, dataDir, eventFilenames);
+    std::filesystem::path dataPath(dataDir);
     for (const auto &eventFilename : eventFilenames) {
-      BinaryFile<DasEvent> eventfile(dataDir + eventFilename);
+      BinaryFile<DasEvent> eventfile(dataPath / eventFilename);
       // Factor of 2 for compression
       wkspSizeGiB += static_cast<double>(eventfile.getNumElements()) * 48.0 * BYTES_TO_GiB;
     }

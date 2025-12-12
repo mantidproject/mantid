@@ -12,8 +12,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
-#include "MantidAPI/SpectrumInfo.h"
-#include "MantidAPI/TimeAtSampleStrategyElastic.h"
+#include "MantidDataHandling/AlignAndFocusPowderSlim/ProcessBankSplitFullTimeTask.h"
 #include "MantidDataHandling/AlignAndFocusPowderSlim/ProcessBankSplitTask.h"
 #include "MantidDataHandling/AlignAndFocusPowderSlim/ProcessBankTask.h"
 #include "MantidDataHandling/LoadEventNexus.h"
@@ -48,7 +47,6 @@ using Mantid::API::AnalysisDataService;
 using Mantid::API::FileProperty;
 using Mantid::API::ITableWorkspace_sptr;
 using Mantid::API::MatrixWorkspace_sptr;
-using Mantid::API::TimeAtSampleStrategyElastic;
 using Mantid::API::WorkspaceProperty;
 using Mantid::DataObjects::MaskWorkspace_sptr;
 using Mantid::DataObjects::TimeSplitter;
@@ -167,6 +165,9 @@ void AlignAndFocusPowderSlim::init() {
   declareProperty(PropertyNames::CORRECTION_TO_SAMPLE, false,
                   "Find time-of-flight when neutron was at the sample position. This is only necessary for fast logs "
                   "(i.e. more frequent than proton on target pulse).");
+  declareProperty(
+      PropertyNames::FULL_TIME, false,
+      "If true, events will be splitting using full time values (tof+pulsetime) rather than just pulsetime.");
   auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(0);
   declareProperty(PropertyNames::FILTER_BAD_PULSES, false,
@@ -305,7 +306,7 @@ void AlignAndFocusPowderSlim::exec() {
   }
 
   // calculate correction for tof of the neutron at the sample position
-  if (this->getProperty(PropertyNames::CORRECTION_TO_SAMPLE)) {
+  if (this->getProperty(PropertyNames::FULL_TIME)) {
     this->initScaleAtSample(wksp);
   }
 
@@ -409,7 +410,6 @@ void AlignAndFocusPowderSlim::exec() {
     wksp->mutableRun().removeDataOutsideTimeROI();
 
     setProperty(PropertyNames::OUTPUT_WKSP, std::move(wksp));
-
   } else {
     std::string ws_basename = this->getPropertyValue(PropertyNames::OUTPUT_WKSP);
     std::vector<std::string> wsNames;
@@ -423,8 +423,33 @@ void AlignAndFocusPowderSlim::exec() {
     }
 
     auto progress = std::make_shared<API::Progress>(this, .17, .9, num_banks_to_read * workspaceIndices.size());
+    if (this->getProperty(PropertyNames::FULL_TIME)) {
+      g_log.information() << "Using ProcessBankSplitFullTimeTask for splitter processing\n";
 
-    if (this->getProperty(PropertyNames::PROCESS_BANK_SPLIT_TASK)) {
+      // Get the combined time ROI for all targets so we only load necessary events.
+      // Need to offset the start time to account for tof's greater than pulsetime. 66.6ms is 4 pulses.
+      auto combined_time_roi = timeSplitter.combinedTimeROI(PULSETIME_OFFSET);
+      if (!filterROI.useAll()) {
+        combined_time_roi.update_intersection(filterROI);
+      }
+
+      const auto pulse_indices = this->determinePulseIndices(wksp, combined_time_roi);
+
+      const auto &splitterMap = timeSplitter.getSplittersMap();
+
+      ProcessBankSplitFullTimeTask task(bankEntryNames, h5file, is_time_filtered, workspaceIndices, workspaces,
+                                        m_calibration, m_scale_at_sample, m_masked, static_cast<size_t>(DISK_CHUNK),
+                                        static_cast<size_t>(GRAINSIZE_EVENTS), pulse_indices, splitterMap, progress);
+
+      // generate threads only if appropriate
+      if (num_banks_to_read > 1) {
+        tbb::parallel_for(tbb::blocked_range<size_t>(0, num_banks_to_read), task);
+      } else {
+        // a "range" of 1; note -1 to match 0-indexed array with 1-indexed bank labels
+        task(tbb::blocked_range<size_t>(outputSpecNum - 1, outputSpecNum));
+      }
+
+    } else if (this->getProperty(PropertyNames::PROCESS_BANK_SPLIT_TASK)) {
       g_log.information() << "Using ProcessBankSplitTask for splitter processing\n";
       // determine the pulse indices from the time and splitter workspace
       const auto target_to_pulse_indices = this->determinePulseIndicesTargets(wksp, filterROI, timeSplitter);
@@ -607,7 +632,7 @@ void AlignAndFocusPowderSlim::loadCalFile(const Mantid::API::Workspace_sptr &inp
 
 /**
  * For fast logs, calculate the sample position correction. This is a separate implementation of
- * Mantid::API::TimeAtSampleElastic that uses DetectorInfo.
+ * Mantid::API::TimeAtSampleElastic that uses DetectorInfo. Also scale by 1000 to convert from μs to ns.
  */
 void AlignAndFocusPowderSlim::initScaleAtSample(const API::MatrixWorkspace_sptr &wksp) {
   // detector information for all of the L2
@@ -615,11 +640,20 @@ void AlignAndFocusPowderSlim::initScaleAtSample(const API::MatrixWorkspace_sptr 
   // cache a single L1 value
   const double L1 = detInfo.l1();
 
-  // calculate scale factors for each detector
-  for (auto iter = detInfo.cbegin(); iter != detInfo.cend(); ++iter) {
-    if (!iter->isMonitor()) {
-      const double path_correction = (L1 + iter->l2()) / L1;
-      m_scale_at_sample.emplace(static_cast<detid_t>(iter->detid()), path_correction);
+  if (this->getProperty(PropertyNames::CORRECTION_TO_SAMPLE)) {
+    // calculate scale factors for each detector
+    for (auto iter = detInfo.cbegin(); iter != detInfo.cend(); ++iter) {
+      if (!iter->isMonitor()) {
+        const double path_correction = L1 / (L1 + iter->l2()) * 1000.0;
+        m_scale_at_sample.emplace(static_cast<detid_t>(iter->detid()), path_correction);
+      }
+    }
+  } else {
+    // set all scale factors to 1.0
+    for (auto iter = detInfo.cbegin(); iter != detInfo.cend(); ++iter) {
+      if (!iter->isMonitor()) {
+        m_scale_at_sample.emplace(static_cast<detid_t>(iter->detid()), 1000.0);
+      }
     }
   }
 }

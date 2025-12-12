@@ -14,9 +14,8 @@
 #include "MantidGeometry/Objects/MeshObject.h"
 #include "MantidKernel/V3D.h"
 
-#include <Poco/File.h>
-#include <Poco/Path.h>
 #include <cxxtest/TestSuite.h>
+#include <filesystem>
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -49,7 +48,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     auto loadMesh = retrieveSavedMesh();
     assertVectorsMatch(*mesh1, *loadMesh);
-    Poco::File(m_OutputFile).remove();
+    std::filesystem::remove(m_OutputFile);
   }
 
   void testWithEnvironment() {
@@ -69,7 +68,7 @@ public:
     auto loadMesh = retrieveSavedMesh();
     auto checkMesh = createCubes(2, 10);
     assertVectorsMatch(*loadMesh, *checkMesh);
-    Poco::File(m_OutputFile).remove();
+    std::filesystem::remove(m_OutputFile);
   }
 
   void testComplexEnvironment() {
@@ -92,7 +91,7 @@ public:
     auto loadMesh = retrieveSavedMesh();
     auto checkMesh = createCubes(3, 10);
     assertVectorsMatch(*loadMesh, *checkMesh);
-    Poco::File(m_OutputFile).remove();
+    std::filesystem::remove(m_OutputFile);
   }
 
   void testFailNoShape() {
@@ -232,5 +231,5 @@ public:
     return cube;
   }
 
-  const std::string m_OutputFile = Poco::Path::current() + "SaveSampleTest.stl";
+  const std::string m_OutputFile = (std::filesystem::current_path() / "SaveSampleTest.stl").string();
 };

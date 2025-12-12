@@ -11,6 +11,7 @@
 #include <MantidAPI/Run.h>
 #include <MantidDataHandling/LoadNGEM.h>
 #include <MantidDataObjects/EventWorkspace.h>
+#include <MantidDataObjects/Workspace2D.h>
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
@@ -19,21 +20,7 @@ using namespace Mantid::API;
 
 class LoadNGEMTest : public CxxTest::TestSuite {
 public:
-  void test_init() {
-    LoadNGEM alg;
-    TS_ASSERT_THROWS_NOTHING(alg.initialize());
-
-    TS_ASSERT(alg.isInitialized());
-
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", getTestFilePath("GEM000005_00_000_short.edb")));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "ws"));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("BinWidth", 10.0));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("MinEventsPerFrame", 10));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("MaxEventsPerFrame", 20));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("GenerateEventsPerFrame", false));
-  }
-
-  void test_exec_loads_data_to_ads() {
+  void test_exec_loads_data_to_ads_event() {
     LoadNGEM alg;
     alg.initialize();
     TS_ASSERT(alg.isInitialized());
@@ -56,8 +43,44 @@ public:
     TS_ASSERT_DELTA(1.0, edata[130378], 1e-8);
     // sample logs
     const auto &run = outputWS->run();
-    TS_ASSERT_DELTA(700.92, run.getPropertyValueAsType<double>("min_TOF"), 1e-08);
-    TS_ASSERT_DELTA(98132.97, run.getPropertyValueAsType<double>("max_TOF"), 1e-08);
+    TS_ASSERT_DELTA(700.92, run.getPropertyValueAsType<double>("min_ToF"), 1e-08);
+    TS_ASSERT_DELTA(98132.97, run.getPropertyValueAsType<double>("max_ToF"), 1e-08);
+    TS_ASSERT_EQUALS(224, run.getPropertyValueAsType<int>("raw_frames"));
+    TS_ASSERT_EQUALS(224, run.getPropertyValueAsType<int>("good_frames"));
+
+    TS_ASSERT_THROWS_NOTHING(ads.remove("ws"));
+  }
+
+  void test_exec_loads_data_to_ads_histo() {
+    LoadNGEM alg;
+    alg.initialize();
+    TS_ASSERT(alg.isInitialized());
+
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", getTestFilePath("GEM000005_00_000_short.edb")));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("BinWidth", 50.0));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("MinToF", 700.92));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("MaxToF", 98132.97));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PreserveEvents", false));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "ws"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("GenerateEventsPerFrame", false));
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+
+    auto &ads = AnalysisDataService::Instance();
+    auto outputWS = ads.retrieveWS<DataObjects::Workspace2D>("ws");
+    // check some random values
+    const auto &ydata{outputWS->readY(10304)};
+    const auto &xdata{outputWS->readX(10304)};
+    const auto &edata{outputWS->readE(10304)};
+    TS_ASSERT_DELTA(3.0, ydata[344], 1e-8);
+    TS_ASSERT_DELTA(17900.92, xdata[344], 1e-8);
+    TS_ASSERT_DELTA(1.732051, edata[344], 1e-6);
+    TS_ASSERT_DELTA(1.0, ydata[838], 1e-8);
+    TS_ASSERT_DELTA(42600.92, xdata[838], 1e-8);
+    TS_ASSERT_DELTA(1.0, edata[838], 1e-8);
+    // sample logs
+    const auto &run = outputWS->run();
+    TS_ASSERT_DELTA(700.92, run.getPropertyValueAsType<double>("min_ToF"), 1e-08);
+    TS_ASSERT_DELTA(98132.97, run.getPropertyValueAsType<double>("max_ToF"), 1e-08);
     TS_ASSERT_EQUALS(224, run.getPropertyValueAsType<int>("raw_frames"));
     TS_ASSERT_EQUALS(224, run.getPropertyValueAsType<int>("good_frames"));
 
@@ -89,7 +112,11 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().remove("ws"));
-    TS_ASSERT_THROWS_ANYTHING(AnalysisDataService::Instance().retrieve("ws_event_counts"));
+
+    TS_ASSERT_THROWS_EQUALS(AnalysisDataService::Instance().retrieve("ws_event_counts"),
+                            const Kernel::Exception::NotFoundError &e, std::string(e.what()),
+                            "Unable to find Data Object type with name \'ws_event_counts\': data service  search "
+                            "object \'ws_event_counts\'");
   }
 
   void test_init_fails_on_bad_binWidth() {
@@ -97,7 +124,8 @@ public:
     alg.initialize();
     TS_ASSERT(alg.isInitialized());
 
-    TS_ASSERT_THROWS_ANYTHING(alg.setProperty("BinWidth", -10.0));
+    TS_ASSERT_THROWS_EQUALS(alg.setProperty("BinWidth", -10.0), const std::invalid_argument &e, std::string(e.what()),
+                            "When setting value of property \"BinWidth\": Selected value -10 is < the lower bound (0)");
   }
 
   void test_init_fails_on_bad_MaxEventsPerFrame() {
@@ -105,7 +133,9 @@ public:
     alg.initialize();
     TS_ASSERT(alg.isInitialized());
 
-    TS_ASSERT_THROWS_ANYTHING(alg.setProperty("MaxEventsPerFrame", -10));
+    TS_ASSERT_THROWS_EQUALS(
+        alg.setProperty("MaxEventsPerFrame", -10), const std::invalid_argument &e, std::string(e.what()),
+        "When setting value of property \"MaxEventsPerFrame\": Selected value -10 is < the lower bound (0)");
   }
 
   void test_init_fails_on_bad_MinEventsPerFrame() {
@@ -113,7 +143,9 @@ public:
     alg.initialize();
     TS_ASSERT(alg.isInitialized());
 
-    TS_ASSERT_THROWS_ANYTHING(alg.setProperty("MinEventsPerFrame", -10));
+    TS_ASSERT_THROWS_EQUALS(
+        alg.setProperty("MinEventsPerFrame", -10), const std::invalid_argument &e, std::string(e.what()),
+        "When setting value of property \"MinEventsPerFrame\": Selected value -10 is < the lower bound (0)");
   }
 
   void test_init_fails_on_MaxEvents_is_less_than_MinEvents() {
@@ -125,8 +157,82 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "ws"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("MinEventsPerFrame", 20));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("MaxEventsPerFrame", 10));
+    TS_ASSERT_THROWS_EQUALS(
+        alg.execute(), const std::runtime_error &e, std::string(e.what()),
+        "Some invalid Properties found: \n MaxEventsPerFrame: MaxEventsPerFrame is less than MinEvents per frame");
+  }
 
-    TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
+  void test_init_fails_on_histo_no_tof() {
+    LoadNGEM alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+
+    TS_ASSERT(alg.isInitialized());
+
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PreserveEvents", false));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", getTestFilePath("GEM000005_00_000_short.edb")));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "ws"));
+    TS_ASSERT_THROWS_EQUALS(alg.execute(), const std::runtime_error &e, std::string(e.what()),
+                            "Some invalid Properties found: \n MaxToF: MaxToF must be supplied if PreserveEvents is "
+                            "False\n MinToF: MinToF must be supplied if PreserveEvents is False");
+  }
+
+  void test_init_fails_on_histo_tof_min_only() {
+    LoadNGEM alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+
+    TS_ASSERT(alg.isInitialized());
+
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PreserveEvents", false));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", getTestFilePath("GEM000005_00_000_short.edb")));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "ws"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("MinToF", 10000.0));
+    TS_ASSERT_THROWS_EQUALS(
+        alg.execute(), const std::runtime_error &e, std::string(e.what()),
+        "Some invalid Properties found: \n MaxToF: MaxToF must be supplied if PreserveEvents is False");
+  }
+
+  void test_init_fails_on_histo_tof_max_only() {
+    LoadNGEM alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+
+    TS_ASSERT(alg.isInitialized());
+
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PreserveEvents", false));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", getTestFilePath("GEM000005_00_000_short.edb")));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "ws"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("MaxToF", 90000.0));
+    TS_ASSERT_THROWS_EQUALS(alg.execute(), const std::runtime_error &e, std::string(e.what()),
+                            "Some invalid Properties found: \n MaxToF: MaxToF is less than or equal to MinToF\n "
+                            "MinToF: MinToF must be supplied if PreserveEvents is False");
+  }
+
+  void test_init_fails_on_histo_no_tof_max_or_min() {
+    LoadNGEM alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+
+    TS_ASSERT(alg.isInitialized());
+
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PreserveEvents", false));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", getTestFilePath("GEM000005_00_000_short.edb")));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "ws"));
+    TS_ASSERT_THROWS_EQUALS(alg.execute(), const std::runtime_error &e, std::string(e.what()),
+                            "Some invalid Properties found: \n MaxToF: MaxToF must be supplied if PreserveEvents is "
+                            "False\n MinToF: MinToF must be supplied if PreserveEvents is False");
+  }
+
+  void test_init_fails_on_histo_tof_min_over_max() {
+    LoadNGEM alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+
+    TS_ASSERT(alg.isInitialized());
+
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PreserveEvents", false));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", getTestFilePath("GEM000005_00_000_short.edb")));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "ws"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("MaxToF", 90000.0));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("MinToF", 100000.0));
+    TS_ASSERT_THROWS_EQUALS(alg.execute(), const std::runtime_error &e, std::string(e.what()),
+                            "Some invalid Properties found: \n MaxToF: MaxToF is less than or equal to MinToF");
   }
 
   void test_MinEventsPerFrame_removes_low_values() {

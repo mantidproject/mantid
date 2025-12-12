@@ -20,8 +20,6 @@
 #include "MantidNexus/NexusException.h"
 #include "MantidNexus/NexusFile.h"
 
-#include <Poco/Path.h>
-
 namespace Mantid::DataHandling {
 
 using namespace API;
