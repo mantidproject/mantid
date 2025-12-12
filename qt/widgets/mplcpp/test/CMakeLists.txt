@@ -38,9 +38,9 @@ mtd_add_qt_tests(
 )
 
 if(TARGET GTest::gmock_main)
-  target_link_libraries(MantidQtWidgetsMplCppTest PRIVATE GTest::gmock_main)
+  target_link_libraries(MantidQtWidgetsMplCppTestQt5 PRIVATE GTest::gmock_main)
 elseif(TARGET GTest::gmock AND TARGET GTest::gtest)
-  target_link_libraries(MantidQtWidgetsMplCppTest PRIVATE GTest::gmock GTest::gtest)
+  target_link_libraries(MantidQtWidgetsMplCppTestQt5 PRIVATE GTest::gmock GTest::gtest)
 else()
-  target_link_libraries(MantidQtWidgetsMplCppTest PRIVATE gmock gtest)
+  target_link_libraries(MantidQtWidgetsMplCppTestQt5 PRIVATE gmock gtest)
 endif()
