@@ -432,6 +432,12 @@ class FullInstrumentViewWindow(QMainWindow):
             self._contour_range_slider,
             self._presenter.on_contour_limits_updated,
         )
+        self._add_connections_to_edits_and_slider(
+            self._integration_limit_min_edit,
+            self._integration_limit_max_edit,
+            self._integration_limit_slider,
+            self._presenter.on_integration_limits_updated,
+        )
 
     def _setup_units_options(self, parent: QVBoxLayout):
         """Add widgets for the units options"""
