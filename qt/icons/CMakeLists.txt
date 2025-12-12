@@ -33,7 +33,6 @@ mtd_add_qt_tests(
 
 if(TARGET GTest::gmock AND TARGET GTest::gtest)
 
-elseif(TARGET GTest::gmock AND TARGET GTest::gtest)
   target_link_libraries(MantidQtIconsTestQt5 PRIVATE GTest::gmock GTest::gtest)
 else()
   target_link_libraries(MantidQtIconsTestQt5 PRIVATE gmock gtest)

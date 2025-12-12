@@ -96,7 +96,6 @@ target_include_directories(FrameworkTestHelpers PRIVATE ${CXXTEST_INCLUDE_DIR})
 
 if(TARGET GTest::gmock AND TARGET GTest::gtest)
 
-elseif(TARGET GTest::gmock AND TARGET GTest::gtest)
   target_link_libraries(FrameworkTestHelpers PRIVATE GTest::gmock GTest::gtest)
 else()
   target_link_libraries(FrameworkTestHelpers PRIVATE gmock gtest)

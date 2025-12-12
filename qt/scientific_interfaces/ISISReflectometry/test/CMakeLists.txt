@@ -78,7 +78,6 @@ add_framework_test_helpers(MantidScientificInterfacesISISReflectometryTestQt5)
 
 if(TARGET GTest::gmock AND TARGET GTest::gtest)
 
-elseif(TARGET GTest::gmock AND TARGET GTest::gtest)
   target_link_libraries(MantidScientificInterfacesISISReflectometryTestQt5 PRIVATE GTest::gmock GTest::gtest)
 else()
   target_link_libraries(MantidScientificInterfacesISISReflectometryTestQt5 PRIVATE gmock gtest)

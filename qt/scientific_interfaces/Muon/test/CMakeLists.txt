@@ -31,7 +31,6 @@ add_framework_test_helpers(MantidQtInterfacesMuonTestQt5)
 
 if(TARGET GTest::gmock AND TARGET GTest::gtest)
 
-elseif(TARGET GTest::gmock AND TARGET GTest::gtest)
   target_link_libraries(MantidQtInterfacesMuonTestQt5 PRIVATE GTest::gmock GTest::gtest)
 else()
   target_link_libraries(MantidQtInterfacesMuonTestQt5 PRIVATE gmock gtest)
