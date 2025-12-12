@@ -273,12 +273,15 @@ class FullInstrumentViewPresenter:
         self._model.clear_stored_masks()
         self.on_mask_item_selected()
 
-    def _reload_mask_workspaces(self):
+    def _reload_mask_workspaces(self) -> None:
         self._view.refresh_mask_ws_list()
         self.on_mask_item_selected()
 
-    def mask_workspaces_in_ads(self):
+    def mask_workspaces_in_ads(self) -> list[str]:
         return [ws.name() for ws in self._model.get_mask_workspaces_in_ads()]
+
+    def cached_masks_keys(self) -> list[str]:
+        return self._model.cached_masks_keys
 
     def _update_line_plot_ws_and_draw(self, unit: str) -> None:
         self._model.extract_spectra_for_line_plot(unit, self._view.sum_spectra_selected())

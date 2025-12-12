@@ -474,6 +474,7 @@ class FullInstrumentViewWindow(QMainWindow):
     def refresh_mask_ws_list(self) -> None:
         current_mask_in_ads = self._presenter.mask_workspaces_in_ads()
         current_mask_in_widget = [self._mask_list.item(i).text() for i in range(self._mask_list.count())]
+        cached_masks_keys = self._presenter.cached_masks_keys()
 
         # Workspaces in ads but not yet in list
         for ws_name in current_mask_in_ads:
@@ -484,8 +485,7 @@ class FullInstrumentViewWindow(QMainWindow):
         # Workspaces in list but not in ads
         for i in range(self._mask_list.count() - 1, -1, -1):
             item = self._mask_list.item(i)
-            # TODO: Should not use string "Mask "
-            if "Mask " in item.text():
+            if item.text() in cached_masks_keys:
                 continue
             if item.text() not in current_mask_in_ads:
                 removed = self._mask_list.takeItem(i)
@@ -808,11 +808,12 @@ class FullInstrumentViewWindow(QMainWindow):
         list_item.setCheckState(Qt.Checked)
 
     def clear_mask_list(self) -> None:
-        # TODO: Avoid using string "Mask "
         # Iterate backwards otherwise breaks indexing
         for i in range(self._mask_list.count() - 1, -1, -1):
             item = self._mask_list.item(i)
-            if "Mask " in item.text():
-                removed = self._mask_list.takeItem(i)
-                del removed
+            if item.text() not in self._presenter.cached_masks_keys():
+                # Skip items that are workspaces
+                continue
+            removed = self._mask_list.takeItem(i)
+            del removed
         self.refresh_mask_ws_list()

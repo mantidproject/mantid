@@ -402,9 +402,6 @@ class FullInstrumentViewModel:
         q_lab = np.array([-np.sin(two_theta) * np.cos(phi), -np.sin(two_theta) * np.sin(phi), 1 - np.cos(two_theta)])
         return q_lab / np.linalg.norm(q_lab)
 
-    def clear_stored_masks(self) -> None:
-        self._cached_masks_map.clear()
-
     def add_new_detector_mask(self, new_mask: list[bool]) -> str:
         new_key = f"Mask {len(self._cached_masks_map) + 1}"
         mask_to_save = self._is_masked_in_ws.copy()
@@ -421,18 +418,16 @@ class FullInstrumentViewModel:
             self._detector_is_picked[~self.is_pickable] = False
             return
 
-        total_mask = self.elementwise_or_ignore_empty(*ws_masks, *cached_masks)
+        total_mask = np.logical_or.reduce(ws_masks + cached_masks)
         self._is_masked = total_mask
         self._detector_is_picked[~self.is_pickable] = False
 
-    def elementwise_or_ignore_empty(self, *arrays):
-        non_empty = [arr for arr in arrays if arr.size > 0]
-        assert non_empty, "All arrays are empty, aborting."
+    def clear_stored_masks(self) -> None:
+        self._cached_masks_map.clear()
 
-        result = non_empty[0].astype(bool)
-        for arr in non_empty[1:]:
-            result = np.logical_or(result, arr)
-        return result
+    @property
+    def cached_masks_keys(self) -> list[str]:
+        return list(self._cached_masks_map.keys())
 
     def save_mask_workspace_to_ads(self) -> None:
         for i, v in enumerate(self._is_masked):
