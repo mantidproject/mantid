@@ -174,10 +174,10 @@ public:
         dynamic_cast<MockPropertySettings *>(const_cast<IPropertySettings *>(prop->getSettings()[0].get()));
 
     settings->setIsEnabledReturn(false);
-    TS_ASSERT(!m_widget->isWidgetEnabled(prop, "C"));
+    TS_ASSERT(!m_widget->isWidgetEnabled(prop));
 
     settings->setIsEnabledReturn(true);
-    TS_ASSERT(m_widget->isWidgetEnabled(prop, "C"));
+    TS_ASSERT(m_widget->isWidgetEnabled(prop));
   }
 
   /// Verifies that when a property has any `IPropertySettings` attached which
@@ -193,10 +193,10 @@ public:
         dynamic_cast<MockPropertySettings *>(const_cast<IPropertySettings *>(prop->getSettings()[0].get()));
 
     settings->setIsVisibleReturn(false);
-    TS_ASSERT(!m_widget->isWidgetVisible(prop, "C"));
+    TS_ASSERT(!m_widget->isWidgetVisible(prop));
 
     settings->setIsVisibleReturn(true);
-    TS_ASSERT(m_widget->isWidgetVisible(prop, "C"));
+    TS_ASSERT(m_widget->isWidgetVisible(prop));
   }
 
   /// Verifies that when a property's validators indicate an error condition,
@@ -211,11 +211,11 @@ public:
         dynamic_cast<MockPropertySettings *>(const_cast<IPropertySettings *>(prop->getSettings()[0].get()));
 
     settings->setIsVisibleReturn(false);
-    TS_ASSERT(!m_widget->isWidgetVisible(prop, "C"));
+    TS_ASSERT(!m_widget->isWidgetVisible(prop));
 
     QHash<QString, QString> errors = {{"C", "something is not right!"}};
     m_widget->shareErrorsMap(errors);
-    TS_ASSERT(m_widget->isWidgetVisible(prop, "C"));
+    TS_ASSERT(m_widget->isWidgetVisible(prop));
   }
 
   /// Verifies that dynamic `IPropertySetting`s that modify validators or
@@ -278,19 +278,19 @@ public:
     // verify the AND truth table
     settings1->setIsEnabledReturn(false);
     settings2->setIsEnabledReturn(false);
-    TS_ASSERT_EQUALS(m_widget->isWidgetEnabled(prop, "C"), false);
+    TS_ASSERT_EQUALS(m_widget->isWidgetEnabled(prop), false);
 
     settings1->setIsEnabledReturn(false);
     settings2->setIsEnabledReturn(true);
-    TS_ASSERT_EQUALS(m_widget->isWidgetEnabled(prop, "C"), false);
+    TS_ASSERT_EQUALS(m_widget->isWidgetEnabled(prop), false);
 
     settings1->setIsEnabledReturn(true);
     settings2->setIsEnabledReturn(false);
-    TS_ASSERT_EQUALS(m_widget->isWidgetEnabled(prop, "C"), false);
+    TS_ASSERT_EQUALS(m_widget->isWidgetEnabled(prop), false);
 
     settings1->setIsEnabledReturn(true);
     settings2->setIsEnabledReturn(true);
-    TS_ASSERT_EQUALS(m_widget->isWidgetEnabled(prop, "C"), true);
+    TS_ASSERT_EQUALS(m_widget->isWidgetEnabled(prop), true);
   }
 
   /// Verifies that when multiple `IPropertySettings` are attached to a
@@ -309,19 +309,19 @@ public:
     // verify the AND truth table
     settings1->setIsVisibleReturn(false);
     settings2->setIsVisibleReturn(false);
-    TS_ASSERT_EQUALS(m_widget->isWidgetVisible(prop, "C"), false);
+    TS_ASSERT_EQUALS(m_widget->isWidgetVisible(prop), false);
 
     settings1->setIsVisibleReturn(false);
     settings2->setIsVisibleReturn(true);
-    TS_ASSERT_EQUALS(m_widget->isWidgetVisible(prop, "C"), false);
+    TS_ASSERT_EQUALS(m_widget->isWidgetVisible(prop), false);
 
     settings1->setIsVisibleReturn(true);
     settings2->setIsVisibleReturn(false);
-    TS_ASSERT_EQUALS(m_widget->isWidgetVisible(prop, "C"), false);
+    TS_ASSERT_EQUALS(m_widget->isWidgetVisible(prop), false);
 
     settings1->setIsVisibleReturn(true);
     settings2->setIsVisibleReturn(true);
-    TS_ASSERT_EQUALS(m_widget->isWidgetVisible(prop, "C"), true);
+    TS_ASSERT_EQUALS(m_widget->isWidgetVisible(prop), true);
   }
 
   /// Verifies that for each `IPropertySettings` instance attached to a

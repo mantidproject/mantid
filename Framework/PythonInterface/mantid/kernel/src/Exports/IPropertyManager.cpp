@@ -198,6 +198,12 @@ void export_IPropertyManager() {
       .def("setPropertySettings", &setPropertySettings, (arg("self"), arg("name"), arg("settingsManager")),
            "Assign the given IPropertySettings object to the  named property")
 
+      .def("isPropertyEnabled", &IPropertyManager::isPropertyEnabled, (arg("self"), arg("name")),
+           "Returns whether a property should be enabled, according to its settings")
+
+      .def("isPropertyVisible", &IPropertyManager::isPropertyVisible, (arg("self"), arg("name")),
+           "Returns whether a property should be visible, according to its settings")
+
       .def("setPropertyGroup", &IPropertyManager::setPropertyGroup, (arg("self"), arg("name"), arg("group")),
            "Set the group for a given property")
 

@@ -340,59 +340,41 @@ void AlgorithmPropertiesWidget::replaceWSClicked(const QString &propName) {
 
 //-------------------------------------------------------------------------------------------------
 /** Check if the control should be enabled for this property
- * @param property :: the property that allows to check for the settings.
- * @param propName :: The name of the property
+ * @param property :: the property to check
  */
-bool AlgorithmPropertiesWidget::isWidgetEnabled(const Property *property, const QString &propName) const {
-  // To avoid errors
-  if (propName.isEmpty())
-    return true;
-  if (!property)
-    return true;
+bool AlgorithmPropertiesWidget::isWidgetEnabled(const Property *prop) const {
+  if (!prop)
+    throw std::runtime_error("`AlgorithmPropertiesWidget::isWidgetEnabled` called with null property pointer");
+  const std::string &propName = prop->name();
 
   // Keep things enabled if requested
-  if (m_enabled.contains(propName))
+  if (m_enabled.contains(QString::fromStdString(propName)))
     return true;
 
   /** The control is disabled if
    *   (1) It is contained in the disabled list or
-   *   (2) the property's settings indicates it should be disabled.
+   *   (2) the property's settings chain indicates it should be disabled.
    */
-  if (m_disabled.contains(propName)) {
+  if (m_disabled.contains(QString::fromStdString(propName)))
     return false;
-  }
-  if (!property->getSettings().empty())
-    // Allow any setting in the chain to disable the property.
-    return std::all_of(property->getSettings().begin(), property->getSettings().end(),
-                       [this](auto const &ptr) { return ptr->isEnabled(this->m_algo.get()); });
-  return true;
+
+  return m_algo->isPropertyEnabled(propName);
 }
 
 //-------------------------------------------------------------------------------------------------
 /** Compute if the control should be visible for this property based on settings and error state.
  *  WARNING: the GUI itself may override this visibility setting (e.g. if a parent widget is hidden).
  * @param property :: the property that allows to check for the settings.
- * @param propName :: The name of the property
  */
-bool AlgorithmPropertiesWidget::isWidgetVisible(const Property *property, const QString &propName) const {
-  // To avoid errors
-  if (propName.isEmpty())
-    return true;
-  if (!property)
-    return true;
+bool AlgorithmPropertiesWidget::isWidgetVisible(const Property *prop) const {
+  if (!prop)
+    throw std::runtime_error("`AlgorithmPropertiesWidget::isWidgetVisible` called with null property pointer");
+  const std::string &propName = prop->name();
 
-  bool visible = true;
-  if (!property->getSettings().empty()) {
-    // Allow any setting in the chain to hide the property.
-    visible = std::all_of(property->getSettings().begin(), property->getSettings().end(),
-                          [this](auto const &ptr) { return ptr->isVisible(this->m_algo.get()); });
-  }
+  bool visible = m_algo->isPropertyVisible(propName);
 
-  QString error = "";
-  if (m_errors && m_errors->contains(propName))
-    error = (*m_errors)[propName];
-  // Always show controls that are in error
-  if (error.length() != 0)
+  // Always show properties that are in an error state
+  if (m_errors && !m_errors->value(QString::fromStdString(propName)).isEmpty())
     visible = true;
 
   return visible;
@@ -449,11 +431,10 @@ void AlgorithmPropertiesWidget::hideOrDisableProperties(const QString &changedPr
   // set Visible and Enabled as appropriate
   for (auto &widget : m_propWidgets) {
     Mantid::Kernel::Property const *prop = widget->getProperty();
-    auto const &propName = QString::fromStdString(prop->name());
 
     // Set the enabled and visible flags based on what the settings and validators say.
-    bool enabled = this->isWidgetEnabled(prop, propName);
-    bool visible = this->isWidgetVisible(prop, propName);
+    bool enabled = this->isWidgetEnabled(prop);
+    bool visible = this->isWidgetVisible(prop);
 
     // Hide/disable the widget
     widget->setEnabled(enabled);

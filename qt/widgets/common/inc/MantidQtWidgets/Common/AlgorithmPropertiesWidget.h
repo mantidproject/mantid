@@ -78,10 +78,13 @@ public slots:
   void replaceWSClicked(const QString &propName);
 
 protected:
-  // These methods are `protected` rather than `private` to facilitate unit testing.
-  bool isWidgetEnabled(const Mantid::Kernel::Property *property, const QString &propName) const;
+  // These methods are `protected` rather than `private` to facilitate unit testing:
+  //   they should really not be used outside of this dialog class.
+  // For the external methods, see `IPropertyManager::isPropertyEnabled` and
+  // `IPropertyManager::isPropertyVisible`.
+  bool isWidgetEnabled(const Mantid::Kernel::Property *prop) const;
 
-  bool isWidgetVisible(const Mantid::Kernel::Property *property, const QString &propName) const;
+  bool isWidgetVisible(const Mantid::Kernel::Property *prop) const;
 
 private:
   /// Check if there is any input workspace in the properties list

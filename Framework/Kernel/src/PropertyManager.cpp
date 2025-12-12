@@ -16,7 +16,6 @@
 #include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/TimeROI.h"
 
-#include <algorithm>
 #include <json/json.h>
 
 namespace Mantid::Kernel {
@@ -567,12 +566,7 @@ std::string PropertyManager::asString(bool withDefaultValues) const {
   const auto count = static_cast<int>(propertyCount());
   for (int i = 0; i < count; ++i) {
     Property *p = getPointerToPropertyOrdinal(i);
-    bool is_enabled = true;
-    if (!p->getSettings().empty()) {
-      is_enabled = std::all_of(p->getSettings().begin(), p->getSettings().end(),
-                               [this](auto const &ptr) { return ptr->isEnabled(this); });
-    }
-    if (p->isValueSerializable() && (withDefaultValues || !p->isDefault()) && is_enabled) {
+    if (isPropertyEnabled(p->name()) && p->isValueSerializable() && (withDefaultValues || !p->isDefault())) {
       jsonMap[p->name()] = p->valueAsJson();
     }
   }
