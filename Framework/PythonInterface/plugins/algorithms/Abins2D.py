@@ -75,17 +75,6 @@ class Abins2D(AbinsAlgorithm, PythonAlgorithm):
         self._check_advanced_parameter()
 
         instrument_name = self.getProperty("Instrument").value
-        if instrument_name in TWO_DIMENSIONAL_CHOPPER_INSTRUMENTS:
-            allowed_frequencies = abins.parameters.instruments[instrument_name]["chopper_allowed_frequencies"]
-            default_frequency = abins.parameters.instruments[instrument_name].get("chopper_frequency_default", None)
-
-            if (self.getProperty("ChopperFrequency").value) == "" and (default_frequency is None):
-                issues["ChopperFrequency"] = "This instrument does not have a default chopper frequency"
-            elif self.getProperty("ChopperFrequency").value and int(self.getProperty("ChopperFrequency").value) not in allowed_frequencies:
-                issues["ChopperFrequency"] = (
-                    f"This chopper frequency is not valid for the instrument {instrument_name}. "
-                    "Valid frequencies: " + ", ".join([str(freq) for freq in allowed_frequencies])
-                )
 
         issues.update(
             validate_e_init(
@@ -95,9 +84,7 @@ class Abins2D(AbinsAlgorithm, PythonAlgorithm):
             )
         )
 
-        if instrument_name in TWO_DIMENSIONAL_CHOPPER_INSTRUMENTS and not set(issues) & (
-            {"Chopper", "ChopperFrequency", "IncidentEnergy", "EnergyUnits"}
-        ):
+        if instrument_name in TWO_DIMENSIONAL_CHOPPER_INSTRUMENTS and not set(issues) & ({"Chopper", "IncidentEnergy", "EnergyUnits"}):
             issues.update(
                 validate_pychop_params(
                     instrument_name,

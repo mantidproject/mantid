@@ -6,6 +6,7 @@ from pydantic import validate_call
 
 from abins.constants import MILLI_EV_TO_WAVENUMBER
 from abins.logging import get_logger, Logger
+import abins.parameters
 from .directinstrument import DirectInstrument
 
 
@@ -90,6 +91,23 @@ def validate_pychop_params(
     :return: issues dict for Algorithm validation, of form {"ParamName": "Error message"}
 
     """
+
+    allowed_frequencies = abins.parameters.instruments[name]["chopper_allowed_frequencies"]
+    default_frequency = abins.parameters.instruments[name].get("chopper_frequency_default", None)
+
+    if chopper_frequency == "" and default_frequency is None:
+        return {"ChopperFrequency": "This instrument does not have a default chopper frequency"}
+
+    try:
+        int(chopper_frequency)
+    except ValueError:
+        return {"ChopperFrequency": "Invalid chopper frequency, could not cast to integer"}
+
+    if chopper_frequency and int(chopper_frequency) not in allowed_frequencies:
+        return {
+            "ChopperFrequency": f"This chopper frequency is not valid for the instrument {name}. "
+            "Valid frequencies: " + ", ".join([str(freq) for freq in allowed_frequencies])
+        }
 
     EPSILON = 1e-8  # Calculation range is slightly reduced to avoid considering stationary neutrons
 
