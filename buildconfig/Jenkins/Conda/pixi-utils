@@ -1,0 +1,15 @@
+#!/bin/bash
+
+# Download and install pixi (if it isn't installed)
+install_pixi() {
+  # check if pixi is not installed
+  if ! command -v pixi >/dev/null 2>&1
+  then
+    curl -fsSL https://pixi.sh/install.sh | sh
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+      PATH=$PATH:$HOME/.pixi/bin
+    else
+      source ~/.bashrc
+    fi
+  fi
+}
