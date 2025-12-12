@@ -601,6 +601,8 @@ class FullInstrumentViewWindow(QMainWindow):
     def closeEvent(self, QCloseEvent: QEvent) -> None:
         """When closing, make sure to close the plotters and figure correctly to prevent errors"""
         super().closeEvent(QCloseEvent)
+        self._contour_range_max_edit.disconnect()
+        self._contour_range_min_edit.disconnect()
         self.main_plotter.close()
         if self._detector_spectrum_fig is not None:
             plt.close(self._detector_spectrum_fig.get_label())

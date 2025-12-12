@@ -377,7 +377,7 @@ class FullInstrumentViewModel:
             peaks += [
                 Peak(det_id, spec_no, v, peak_idx, hkl, tof, dspacing, wavelength, 2 * np.pi / dspacing)
                 for (det_id, spec_no, v, peak_idx, hkl, tof, dspacing, wavelength) in zip(
-                    detector_ids, spectrum_nos, range(len(tofs)), positions, hkls, tofs, dspacings, wavelengths, strict=True
+                    detector_ids, spectrum_nos, positions, range(len(tofs)), hkls, tofs, dspacings, wavelengths, strict=True
                 )
             ]
             # Combine peaks on the same detector
