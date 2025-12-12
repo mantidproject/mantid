@@ -4,7 +4,6 @@
 
 namespace Mantid::Nexus {
 
-template class MANTID_NEXUS_DLL UniqueID<&H5Fclose>;
 template class MANTID_NEXUS_DLL UniqueID<&H5Gclose>;
 template class MANTID_NEXUS_DLL UniqueID<&H5Dclose>;
 template class MANTID_NEXUS_DLL UniqueID<&H5Tclose>;
