@@ -28,11 +28,11 @@ if(CXXTEST_FOUND)
   add_framework_test_helpers(WorkflowAlgorithmsTest)
 
   if(TARGET GTest::gmock_main)
-    target_link_libraries(BeamlineTest PRIVATE GTest::gmock_main)
+    target_link_libraries(WorkflowAlgorithmsTest PRIVATE GTest::gmock_main)
   elseif(TARGET GTest::gmock AND TARGET GTest::gtest)
-    target_link_libraries(BeamlineTest PRIVATE GTest::gmock GTest::gtest)
+    target_link_libraries(WorkflowAlgorithmsTest PRIVATE GTest::gmock GTest::gtest)
   else()
-    target_link_libraries(BeamlineTest PRIVATE gmock gtest)
+    target_link_libraries(WorkflowAlgorithmsTest PRIVATE gmock gtest)
   endif()
 
   # Add to the 'FrameworkTests' group in VS
