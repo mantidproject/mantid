@@ -109,7 +109,6 @@ public:
     }
     // deleter called on valid ID
     TS_ASSERT_EQUALS(call_count, 1);
-    cout << "\ntest uniqueID\n";
   }
 
   void test_uniqueID_move_construct() {
@@ -193,7 +192,7 @@ public:
       TestUniqueID uid(test);
       TS_ASSERT(uid.isValid());
       TS_ASSERT_EQUALS(uid.get(), test);
-      TS_ASSERT_THROWS_NOTHING(uid.reset(test))
+      TS_ASSERT_THROWS_NOTHING(uid.reset(test));
       TS_ASSERT_EQUALS(uid.get(), test);
       TS_ASSERT_EQUALS(call_count, 0);
     }
@@ -210,7 +209,7 @@ public:
       TestUniqueID uid(test);
       TS_ASSERT(uid.isValid());
       TS_ASSERT_EQUALS(uid.get(), test);
-      TS_ASSERT_THROWS_NOTHING(uid.reset(other))
+      TS_ASSERT_THROWS_NOTHING(uid.reset(other));
       TS_ASSERT_EQUALS(uid.get(), other);
       TS_ASSERT_EQUALS(call_count, 1);
     }
@@ -219,7 +218,7 @@ public:
   }
 
   void test_uniqueID_reset_none() {
-    cout << "\ntest uniqueID  none" << endl;
+    cout << "\ntest uniqueID none" << endl;
     // reset
     call_count = 0;
     hid_t test = GOOD_ID;
@@ -227,7 +226,7 @@ public:
       TestUniqueID uid(test);
       TS_ASSERT(uid.isValid());
       TS_ASSERT_EQUALS(uid.get(), test);
-      TS_ASSERT_THROWS_NOTHING(uid.reset())
+      TS_ASSERT_THROWS_NOTHING(uid.reset());
       TS_ASSERT_EQUALS(uid.get(), TestUniqueID::INVALID_ID);
       TS_ASSERT_EQUALS(call_count, 1);
     }
