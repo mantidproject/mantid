@@ -9,9 +9,12 @@ from typing import Dict
 from unittest import mock
 import numpy as np
 
+from matplotlib.colors import LogNorm
+
 from mantidqt.utils.qt.testing import start_qapplication
 from mantidqt.widgets.sliceviewer.views.toolbar import ToolItemText
 from mantidqt.widgets.sliceviewer.views.view import SliceViewerDataView
+from mantidqt.widgets.sliceviewer.views.dataview import SCALENORM
 from mantidqt.widgets.sliceviewer.models.transform import NonOrthogonalTransform
 
 
@@ -387,6 +390,28 @@ class SliceviewerDataViewTest(unittest.TestCase):
     def test_extents_not_created_if_not_requested(self):
         view = SliceViewerDataView(presenter=self.presenter, dims_info=mock.MagicMock(), can_normalise=mock.Mock(), add_extents=False)
         self.assertIsNone(view.extents)
+
+    def test_scale_norm_changed(self):
+        self.view.conf = mock.Mock()
+        self.view.image = mock.Mock()
+        cmap_mock = mock.Mock()
+        self.view.image.get_cmap.return_value = cmap_mock
+        self.view.colorbar = mock.Mock()
+
+        # user selects "Log" from the scale/norm dropdown
+        self.view.image.norm = LogNorm()
+        self.view.colorbar.norm.currentText.return_value = "Log"
+        self.view.scale_norm_changed()
+        cmap_mock.set_under.assert_called_with((1, 1, 1, 0))
+        self.view.conf.set.assert_called_with(SCALENORM, "Log")
+
+        # user selects "Linear" from the scale/norm dropdown
+        self.view.image.norm = mock.Mock(spec=["vmin", "vmax"])  # Not LogNorm
+        cmap_mock.return_value = (0.1, 0.2, 0.3, 1.0)  # mock cmap(0)
+        self.view.colorbar.norm.currentText.return_value = "Linear"
+        self.view.scale_norm_changed()
+        cmap_mock.set_under.assert_called_with((0.1, 0.2, 0.3, 1.0))
+        self.view.conf.set.assert_called_with(SCALENORM, "Linear")
 
 
 if __name__ == "__main__":
