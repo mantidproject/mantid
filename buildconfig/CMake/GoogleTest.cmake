@@ -2,7 +2,7 @@
 
 # Make gtest_version available everywhere
 set(gtest_version
-    "v1.15.2"
+    "v1.17.0"
     CACHE INTERNAL ""
 )
 
