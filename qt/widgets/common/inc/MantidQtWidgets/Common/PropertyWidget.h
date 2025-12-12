@@ -88,7 +88,7 @@ public:
   QGridLayout *getGridLayout() { return m_gridLayout; }
 
   /// @return the row of the widgets in the Layout
-  int getGridRow() { return m_row; }
+  int getGridRow() const { return m_row; }
 
   void addReplaceWSButton();
 

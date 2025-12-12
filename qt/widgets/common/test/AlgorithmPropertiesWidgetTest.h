@@ -223,25 +223,97 @@ public:
   /// widget instance when `applyChanges(...)` returns true, and that the new
   /// widget occupies the same layout position.
   void testHideOrDisable_DynamicallyReplacesWidgets() {
-    // TODO: Arrange a setting whose applyChanges returns true, call
-    // hideOrDisableProperties("UpstreamProp"), then assert a new widget
-    // instance was created and old one removed.
+    m_algorithm->setPropertySettings("C", std::unique_ptr<IPropertySettings const>(new MockPropertySettings()));
+    auto *prop = m_algorithm->getPointerToProperty("C");
+    auto *settings =
+        dynamic_cast<MockPropertySettings *>(const_cast<IPropertySettings *>(prop->getSettings()[0].get()));
+
+    // First test the negative: widget remains the same when `applyChanges` returns `false`.
+    settings->setIsConditionChangedReturn(true);
+    MockPropertySettings::ApplyCallback cb0 = [](const IPropertyManager *, const std::string &) { return false; };
+    settings->setApplyChangesCallback(cb0);
+    const auto *originalWidget = m_widget->m_propWidgets["C"];
+    int originalRow = originalWidget->getGridRow();
+
+    m_widget->hideOrDisableProperties("A"); // in this test, the name of the upstream property doesn't matter
+    TS_ASSERT(m_widget->m_propWidgets["C"] == originalWidget);
+    TS_ASSERT(m_widget->m_propWidgets["C"]->getGridRow() == originalRow);
+
+    // Next verify that the `PropertyWidget` is replaced when the `IPropertySettings::applyChanges` returns `true`.
+    MockPropertySettings::ApplyCallback cb1 = [](const IPropertyManager *, const std::string &) { return true; };
+    settings->setApplyChangesCallback(cb1);
+    m_widget->hideOrDisableProperties("A"); // in this test, the name of the upstream property doesn't matter
+    TS_ASSERT(m_widget->m_propWidgets["C"] != originalWidget);
+    TS_ASSERT(m_widget->m_propWidgets["C"]->getGridRow() == originalRow);
   }
 
   /// Verifies that properties explicitly listed in the internal `m_enabled`
   /// list remain enabled, regardless of `IPropertySettings` that might
   /// otherwise disable them.
-  void testHideOrDisable_EnabledWhenForcedEnabled() {
-    // TODO: Add a property name to menabled, attach disabling settings,
-    // run hideOrDisableProperties(""), and assert that the widget is enabled.
+  void testIsWidgetEnabled_EnabledWhenForcedEnabled() {
+    // For reasons discussed previously RE GUI testing:
+    //   we test `isWidgetEnabled(prop)` rather than `<property>.isEnabled()`.
+
+    m_algorithm->setPropertySettings("C", std::unique_ptr<IPropertySettings const>(new MockPropertySettings()));
+    auto *prop = m_algorithm->getPointerToProperty("C");
+    auto *settings =
+        dynamic_cast<MockPropertySettings *>(const_cast<IPropertySettings *>(prop->getSettings()[0].get()));
+    settings->setIsEnabledReturn(false);
+
+    {
+      QStringList enabled = {"C"}, disabled = {};
+      m_widget->addEnabledAndDisableLists(enabled, disabled);
+      TS_ASSERT(m_widget->isWidgetEnabled(prop));
+    }
+
+    {
+      // negative case
+      QStringList enabled = {}, disabled = {};
+      m_widget->addEnabledAndDisableLists(enabled, disabled);
+      TS_ASSERT(!m_widget->isWidgetEnabled(prop));
+    }
   }
 
   /// Verifies that properties explicitly listed in the internal `m_disabled`
   /// list are disabled even if `IPropertySettings` would otherwise leave
   /// them enabled.
-  void testHideOrDisable_DisabledWhenForcedDisabled() {
-    // TODO: Add a property name to mdisabled, attach enabling settings,
-    // run hideOrDisableProperties(""), and assert that the widget is disabled.
+  void testIsWidgetEnabled_DisabledWhenForcedDisabled() {
+    m_algorithm->setPropertySettings("C", std::unique_ptr<IPropertySettings const>(new MockPropertySettings()));
+    auto *prop = m_algorithm->getPointerToProperty("C");
+    auto *settings =
+        dynamic_cast<MockPropertySettings *>(const_cast<IPropertySettings *>(prop->getSettings()[0].get()));
+    settings->setIsEnabledReturn(true);
+
+    {
+      QStringList enabled = {}, disabled = {"C"};
+      m_widget->addEnabledAndDisableLists(enabled, disabled);
+      TS_ASSERT(!m_widget->isWidgetEnabled(prop));
+    }
+
+    {
+      // negative case
+      QStringList enabled = {}, disabled = {};
+      m_widget->addEnabledAndDisableLists(enabled, disabled);
+      TS_ASSERT(m_widget->isWidgetEnabled(prop));
+    }
+  }
+
+  /// Verifies that properties explicitly listed in the internal `m_enabled`
+  /// list are enabled even if they are also in the `m_disabled` list.
+  void testIsWidgetEnabled_ForcedEnabledSupercedesForcedDisabled() {
+    auto *prop = m_algorithm->getPointerToProperty("C");
+    {
+      QStringList enabled = {"C"}, disabled = {"C"};
+      m_widget->addEnabledAndDisableLists(enabled, disabled);
+      TS_ASSERT(m_widget->isWidgetEnabled(prop));
+    }
+
+    {
+      // negative case
+      QStringList enabled = {"C"}, disabled = {};
+      m_widget->addEnabledAndDisableLists(enabled, disabled);
+      TS_ASSERT(m_widget->isWidgetEnabled(prop));
+    }
   }
 
   /// Verifies that `hideOrDisableProperties()` updates widget visibility
