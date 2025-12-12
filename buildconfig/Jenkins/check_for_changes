@@ -17,10 +17,6 @@ case "$TYPE" in
     py)
         exit $(git diff --quiet ${BRANCH_TIP} ${BRANCH_BASE} -- \*\.py)
     ;;
-    doxygen)
-        git diff --quiet ${BRANCH_TIP} ${BRANCH_BASE} -- Framework/Doxygen/ || exit $FOUND
-        # fall through into cpp case
-    ;&
     cpp)
         git diff --quiet ${BRANCH_TIP} ${BRANCH_BASE} -- \*\.h || exit $FOUND
         git diff --quiet ${BRANCH_TIP} ${BRANCH_BASE} -- \*\.cpp || exit $FOUND
