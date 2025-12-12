@@ -123,7 +123,7 @@ public:
 
   void testCanSAS1dXML() {
     // read the generated xml file and compare first few lines of the file
-    std::ifstream testFile(m_filename.c_str(), std::ios::in);
+    std::ifstream testFile(m_filename, std::ios::in);
     TS_ASSERT(testFile);
     if (!testFile)
       return;

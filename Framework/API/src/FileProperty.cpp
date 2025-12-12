@@ -89,11 +89,15 @@ const std::string &getHomePath() {
  *  @return The expanded path
  */
 std::string expandUser(const std::string &filepath) {
-  auto start = filepath.begin();
-  auto end = filepath.end();
+  // return immediately if empty
+  if (filepath.empty())
+    return filepath;
+
+  auto const start = filepath.begin();
+  auto const end = filepath.end();
 
   // Filepath empty or contains no user variables
-  if (start == end || *start != '~')
+  if (*start != '~')
     return filepath;
 
   // Position of the first slash after the variable
@@ -104,6 +108,27 @@ std::string expandUser(const std::string &filepath) {
     return filepath;
 
   return getHomePath() + std::string(nextSlash, end);
+}
+
+/**
+ * Replace `./` with current directory if it is at the start of the string
+ */
+std::string resolveCurrentDirectory(const std::string &filepath) {
+  if (filepath.empty())
+    return filepath;
+  // only care about things that start with ./
+  if (filepath[0] != '.') // already know at least one character
+    return filepath;
+  if (filepath.size() > 1 && !(filepath.starts_with("./"))) {
+    return filepath;
+  }
+
+  std::filesystem::path path(filepath);
+  if (!path.is_absolute()) {
+    std::filesystem::path currentPath = std::filesystem::current_path();
+    path = currentPath / path;
+  }
+  return path.string();
 }
 
 /**
@@ -226,6 +251,7 @@ std::string FileProperty::setValue(const std::string &propValue) {
 
   // Expand user variables, if there are any
   strippedValue = expandUser(strippedValue);
+  strippedValue = resolveCurrentDirectory(strippedValue);
   std::filesystem::path strippedPath(strippedValue);
 
   // If this looks like an absolute path then don't do any searching but make
