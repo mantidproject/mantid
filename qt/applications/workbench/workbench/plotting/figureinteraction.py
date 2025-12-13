@@ -157,9 +157,40 @@ class FigureInteraction(object):
             next_yscale = self._get_next_axis_scale(current_yscale)
             self._quick_change_axes(ax, ax.get_xscale(), next_yscale)
 
+        if event.key in ["c", "left", "backspace", "MouseButton.BACK"]:
+            self._navigate_colorbar_normalization(ax, False)
+
+        if event.key in ["v", "right", "MouseButton.FORWARD"]:
+            self._navigate_colorbar_normalization(ax, True)
+
+        if event.key in ["h", "r", "home"]:
+            self.toolbar_manager.emit_sig_home_clicked()
+
     def _get_next_axis_scale(self, current_scale):
         next_index = AXES_SCALE_MENU_OPTS.index(current_scale) + 1
         return AXES_SCALE_MENU_OPTS[next_index] if next_index < len(AXES_SCALE_MENU_OPTS) else AXES_SCALE_MENU_OPTS[0]
+
+    def _navigate_colorbar_normalization(self, ax, forward):
+        """Changes the colorbar normalization to the next or the previous option"""
+        if ax.images:
+            current_normalization = ax.images[-1].norm
+            current_norm_key = next((k for k, v in COLORBAR_SCALE_MENU_OPTS.items() if v == current_normalization.__class__), None)
+            if current_norm_key:
+                colorbar_scale_key_list = list(COLORBAR_SCALE_MENU_OPTS.keys())
+                current_colorbar_norm_key_index = colorbar_scale_key_list.index(current_norm_key)
+                if forward:
+                    next_colorbar_norm_key = (
+                        colorbar_scale_key_list[current_colorbar_norm_key_index + 1]
+                        if current_colorbar_norm_key_index + 1 < len(colorbar_scale_key_list)
+                        else colorbar_scale_key_list[0]
+                    )
+                else:
+                    next_colorbar_norm_key = (
+                        colorbar_scale_key_list[current_colorbar_norm_key_index - 1]
+                        if current_colorbar_norm_key_index > 0
+                        else colorbar_scale_key_list[-1]
+                    )
+                self._change_colorbar_axes(COLORBAR_SCALE_MENU_OPTS[next_colorbar_norm_key])
 
     def _correct_for_scroll_event_on_legend(self, event):
         # Corrects default behaviour in Matplotlib where legend is picked up by scroll event
@@ -828,8 +859,8 @@ class FigureInteraction(object):
             # to duplicate the handling.
             colorbar_log = False
             if ax.images:
-                colorbar_scale = ax.images[-1].norm.__class__
-                colorbar_log = isinstance(colorbar_scale, LogNorm) or isinstance(colorbar_scale, SymLogNorm)
+                norm = ax.images[-1].norm
+                colorbar_log = isinstance(norm, (LogNorm, SymLogNorm))
                 if colorbar_log:
                     self._change_colorbar_axes(Normalize)
 
@@ -850,7 +881,8 @@ class FigureInteraction(object):
                     if cb:
                         datafunctions.add_colorbar_label(cb, ax.get_figure().axes)
                 if colorbar_log:  # If it had a log scaled colorbar before, put it back.
-                    self._change_colorbar_axes(colorbar_scale)
+                    # self._change_colorbar_axes(colorbar_scale)
+                    self._change_colorbar_axes(norm.__class__)
 
                 axesfunctions.update_colorplot_datalimits(ax, ax.images)
 
