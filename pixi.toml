@@ -10,7 +10,7 @@ version = "6.14"
 [tasks]
 
 [dependencies]
-cmake = ">=3.21.0"
+cmake = ">=4.2,<5"
 doxygen = "1.9.*"
 eigen = "3.4.*"
 euphonic = ">=1.4.5,<2.0"

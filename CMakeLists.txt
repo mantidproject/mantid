@@ -1,5 +1,5 @@
 # CMake version check.
-cmake_minimum_required(VERSION 3.21)
+cmake_minimum_required(VERSION 4.2)
 
 # Define the project name.
 project(Mantid)
