@@ -7,7 +7,7 @@ NOTFOUND=0
 TYPE=${1}
 # Assume the current commit is the merged commit created by GitHub.
 # The first and second parents will be the PR target branch & PR branch
-# that is being merged, resepectively. We want the files changes between the
+# that is being merged, respectively. We want the files changes between the
 # base and tail commits of the branch
 BRANCH_TIP=$(git rev-parse HEAD^2)
 BRANCH_BASE=$(git merge-base HEAD^2 HEAD^1)
