@@ -90,6 +90,7 @@ set(TEST_PY_FILES
     SimulatedDensityOfStatesTest.py
     SofQWMomentsTest.py
     SofQWMomentsScanTest.py
+    StitchByBackgroundTest.py
     SwapWidthsTest.py
     TimeSliceTest.py
     TOSCABankCorrectionTest.py
