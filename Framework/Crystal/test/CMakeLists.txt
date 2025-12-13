@@ -8,9 +8,13 @@ if(CXXTEST_FOUND)
   # will go out of scope at the end of this file so doesn't need un-setting
 
   cxxtest_add_test(CrystalTest ${TEST_FILES})
-  target_link_libraries(
-    CrystalTest PRIVATE Mantid::Crystal Mantid::DataHandling Mantid::MDAlgorithms Mantid::Nexus gmock
-  )
+  target_link_libraries(CrystalTest PRIVATE Mantid::Crystal Mantid::DataHandling Mantid::MDAlgorithms Mantid::Nexus)
+
+  if(TARGET GTest::gmock AND TARGET GTest::gtest)
+    target_link_libraries(CrystalTest PRIVATE GTest::gmock GTest::gtest)
+  else()
+    target_link_libraries(CrystalTest PRIVATE gmock gtest)
+  endif()
   add_framework_test_helpers(CrystalTest)
   add_dependencies(CrystalTest Algorithms CurveFitting)
   add_dependencies(FrameworkTests CrystalTest)

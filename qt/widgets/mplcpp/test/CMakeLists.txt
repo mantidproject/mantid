@@ -33,7 +33,13 @@ mtd_add_qt_tests(
             ${Boost_LIBRARIES}
             ${POCO_LIBRARIES}
             Python::Python
-            gmock
   MTD_QT_LINK_LIBS MantidQtWidgetsMplCpp MantidQtWidgetsCommon
   PARENT_DEPENDENCIES GUITests
 )
+
+if(TARGET GTest::gmock AND TARGET GTest::gtest)
+
+  target_link_libraries(MantidQtWidgetsMplCppTestQt5 PRIVATE GTest::gmock GTest::gtest)
+else()
+  target_link_libraries(MantidQtWidgetsMplCppTestQt5 PRIVATE gmock gtest)
+endif()
