@@ -13,11 +13,11 @@
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidFrameworkTestHelpers/NexusTestHelper.h"
 #include "MantidKernel/Property.h"
-#include "Poco/File.h"
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_generators.hpp>
 #include <boost/uuid/uuid_io.hpp>
 #include <cxxtest/TestSuite.h>
+#include <filesystem>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -221,7 +221,7 @@ public:
     TS_ASSERT_THROWS_ANYTHING(loadhandle->openAddress(rootstring + "MantidAlgorithm_5"));
 
     loadhandle->close();
-    Poco::File("WorkspaceHistoryTest_test_SaveNexus.nxs").remove();
+    std::filesystem::remove("WorkspaceHistoryTest_test_SaveNexus.nxs");
   }
 
   void test_SaveNexus_NestedHistory() {
@@ -252,7 +252,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(loadhandle->openAddress(rootstring + "MantidAlgorithm_1/MantidAlgorithm_2/description"));
 
     loadhandle->close();
-    Poco::File("WorkspaceHistoryTest_test_SaveNexus.nxs").remove();
+    std::filesystem::remove("WorkspaceHistoryTest_test_SaveNexus.nxs");
   }
 
   void test_SaveNexus_Empty() {
@@ -270,7 +270,7 @@ public:
     TS_ASSERT_THROWS_ANYTHING(loadhandle->openAddress(rootstring + "MantidAlgorithm_1"));
 
     loadhandle->close();
-    Poco::File("WorkspaceHistoryTest_test_SaveNexus.nxs").remove();
+    std::filesystem::remove("WorkspaceHistoryTest_test_SaveNexus.nxs");
   }
 
   void test_LoadNexus() {

@@ -14,9 +14,7 @@
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/Strings.h"
 
-#include <Poco/File.h>
-#include <Poco/Path.h>
-
+#include <filesystem>
 #include <iterator>
 #include <memory>
 
@@ -91,11 +89,15 @@ const std::string &getHomePath() {
  *  @return The expanded path
  */
 std::string expandUser(const std::string &filepath) {
-  auto start = filepath.begin();
-  auto end = filepath.end();
+  // return immediately if empty
+  if (filepath.empty())
+    return filepath;
+
+  auto const start = filepath.begin();
+  auto const end = filepath.end();
 
   // Filepath empty or contains no user variables
-  if (start == end || *start != '~')
+  if (*start != '~')
     return filepath;
 
   // Position of the first slash after the variable
@@ -109,31 +111,55 @@ std::string expandUser(const std::string &filepath) {
 }
 
 /**
- * Create a given directory if it does not already exist.
- * @param path :: The path to the directory, which can include file stem
- * @returns A string indicating a problem if one occurred
+ * Replace `./` with current directory if it is at the start of the string
  */
-std::string createDirectory(const std::string &path) {
-  Poco::Path stempath(path);
-  if (stempath.isFile()) {
-    stempath.makeParent();
+std::string resolveCurrentDirectory(const std::string &filepath) {
+  if (filepath.empty())
+    return filepath;
+  // only care about things that start with ./
+  if (filepath[0] != '.') // already know at least one character
+    return filepath;
+  if (filepath.size() > 1 && !(filepath.starts_with("./"))) {
+    return filepath;
   }
 
-  if (!stempath.toString().empty()) {
-    Poco::File stem(stempath);
-    if (!stem.exists()) {
+  std::filesystem::path path(filepath);
+  if (!path.is_absolute()) {
+    std::filesystem::path currentPath = std::filesystem::current_path();
+    path = currentPath / path;
+  }
+  return path.string();
+}
+
+/**
+ * Create a given directory if it does not already exist.
+ * @param path :: The path to the directory. Can include a file component - in this case
+ *                the parent directory will be created. Paths ending with a separator are
+ *                treated as directories, others as files.
+ * @returns A string indicating a problem if one occurred
+ */
+std::string createDirectory(const std::filesystem::path &path) {
+  std::filesystem::path stempath(path);
+  // If the path doesn't end with a separator, assume it includes a filename component
+  // and we should create the parent directory instead
+  if (std::filesystem::is_regular_file(stempath)) {
+    stempath = stempath.parent_path();
+  }
+
+  if (!stempath.empty()) {
+    if (!std::filesystem::exists(stempath)) {
       try {
-        stem.createDirectories();
-      } catch (Poco::Exception &e) {
+        std::filesystem::create_directories(stempath);
+      } catch (const std::exception &e) {
         std::stringstream msg;
-        msg << "Failed to create directory \"" << stempath.toString() << "\": " << e.what();
+        msg << "Failed to create directory \"" << stempath << "\": " << e.what();
         return msg.str();
       }
     }
   } else {
     return "Invalid directory.";
   }
-  return ""; // everything went fine
+  return ""; // no error
 }
 } // Anonymous namespace
 
@@ -225,13 +251,15 @@ std::string FileProperty::setValue(const std::string &propValue) {
 
   // Expand user variables, if there are any
   strippedValue = expandUser(strippedValue);
+  strippedValue = resolveCurrentDirectory(strippedValue);
+  std::filesystem::path strippedPath(strippedValue);
 
   // If this looks like an absolute path then don't do any searching but make
   // sure the
   // directory exists for a Save property
-  if (Poco::Path(strippedValue).isAbsolute()) {
+  if (strippedPath.is_absolute()) {
     if (isSaveProperty()) {
-      std::string error = createDirectory(strippedValue);
+      std::string error = createDirectory(strippedPath.parent_path());
       if (!error.empty())
         return error;
     }
@@ -371,23 +399,21 @@ std::string FileProperty::setSaveProperty(const std::string &propValue) {
   std::string errorMsg;
   // We have a relative save path so just prepend the path that is in the
   // 'defaultsave.directory'
-  // Note that this catches the Poco::NotFoundException and returns an empty
-  // string in that case
+  // Note that this catches exceptions and returns an empty string in that case
   std::string save_path = ConfigService::Instance().getString("defaultsave.directory");
-  Poco::Path save_dir;
+  std::filesystem::path save_dir;
   if (save_path.empty()) {
-    save_dir = Poco::Path(propValue).parent();
-    // If we only have a stem filename, parent() will make save_dir empty and
-    // then Poco::File throws
-    if (save_dir.toString().empty()) {
-      save_dir = Poco::Path::current();
+    save_dir = std::filesystem::path(propValue).parent_path();
+    // If we only have a stem filename, parent_path() will make save_dir empty
+    if (save_dir.empty()) {
+      save_dir = std::filesystem::current_path();
     }
   } else {
-    save_dir = Poco::Path(save_path).makeDirectory();
+    save_dir = std::filesystem::path(save_path);
   }
-  errorMsg = createDirectory(save_dir.toString());
+  errorMsg = createDirectory(save_dir);
   if (errorMsg.empty()) {
-    std::string fullpath = save_dir.resolve(propValue).toString();
+    std::string fullpath = (save_dir / propValue).string();
     errorMsg = PropertyWithValue<std::string>::setValue(fullpath);
   }
   return errorMsg;

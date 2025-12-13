@@ -11,13 +11,28 @@
 #include "MantidAPI/FileFinder.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/ConfigService.h"
-#include <Poco/File.h>
 #include <cstdlib>
+#include <filesystem>
 #include <fstream>
 
 using Mantid::API::FileFinder;
 using Mantid::API::FileProperty;
 using Mantid::Kernel::ConfigService;
+
+namespace {
+const std::string getHomePath() { // copied with some changes from FileProperty
+  // try common environment variables
+  char *home = std::getenv("HOME"); // Usually set on Windows and UNIX
+  if (home) {
+    return std::string(home);
+  }
+
+  char *userProfile = std::getenv("USERPROFILE"); // Not usually set on UNIX
+  // Return even if it's an empty string, as we can do no better
+  const std::string homePath = userProfile ? std::string(userProfile) : "";
+  return homePath;
+}
+} // namespace
 
 class FilePropertyTest : public CxxTest::TestSuite {
 public:
@@ -54,7 +69,7 @@ public:
     // above.
     ConfigService::Instance().setFacility("ISIS");
 
-    Poco::File(facilityFilePath).remove();
+    std::filesystem::remove(facilityFilePath);
   }
 
   void testSearchDirs() { TS_ASSERT_DIFFERS(ConfigService::Instance().getDataSearchDirs().size(), 0); }
@@ -175,8 +190,8 @@ public:
 
   void testDirectoryPasses() {
     std::string TestDir(ConfigService::Instance().getDirectoryOfExecutable() + "MyTestFolder");
-    Poco::File dir(TestDir);
-    dir.createDirectory();
+    std::filesystem::path dir(TestDir);
+    std::filesystem::create_directory(dir);
 
     FileProperty fp("SavePath", "", FileProperty::Directory);
     TS_ASSERT_EQUALS(fp.isDirectoryProperty(), true);
@@ -185,26 +200,76 @@ public:
     std::string msg = fp.setValue(TestDir);
     TS_ASSERT_EQUALS(msg, "");
 
-    dir.remove(); // clean up your folder
+    std::filesystem::remove(dir); // clean up your folder
   }
 
-  void testExpandUserVariables() {
+  void testExpandUserVariableDir() {
     FileProperty fp("Dir", "", FileProperty::Directory);
     std::string msg = fp.setValue("~");
 
-    char *homepath = std::getenv("HOME");
-    if (!homepath) {
-      homepath = std::getenv("USERPROFILE");
-    }
-
-    if (homepath && Poco::File(homepath).exists()) {
+    const std::string homepath = getHomePath();
+    if ((!homepath.empty()) && std::filesystem::exists(homepath)) {
       // User home variable is set and points to a valid directory
       // We should have no errors
       TS_ASSERT(msg.empty());
+
+      // check that the value resolves itself
+      const std::string value = fp.value();
+      std::filesystem::path valuePath(value);
+      TS_ASSERT_EQUALS(valuePath, std::filesystem::path(homepath));
     } else {
       // No user variables were set, so we should have an error
       TS_ASSERT(!msg.empty());
     }
+  }
+
+  void testExpandUserVariableFile() {
+    const std::string filename("anyfile.txt");
+
+    FileProperty fp("Filename", "", FileProperty::Save);
+    std::string msg = fp.setValue("~/" + filename);
+
+    const std::string homepath = getHomePath();
+    if ((!homepath.empty()) && std::filesystem::exists(homepath)) {
+      // User home variable is set and points to a valid directory
+      // We should have no errors
+      TS_ASSERT(msg.empty());
+
+      // check that the value resolves itself
+      const std::string value = fp.value();
+      std::filesystem::path valuePath(value);
+      TS_ASSERT_EQUALS(valuePath, std::filesystem::path(homepath) / filename);
+    } else {
+      // No user variables were set, so we should have an error
+      TS_ASSERT(!msg.empty());
+    }
+  }
+
+  // this test is a variant of test setup for SaveCanSAS1dTest2
+  void testExpandCurDir() {
+    FileProperty fp("Dir", "", FileProperty::Directory);
+
+    const auto currentPath = std::filesystem::current_path().string();
+    for (auto const &value : {".", "./"}) {
+      const std::string msg = fp.setValue(value);
+      TS_ASSERT_EQUALS(msg, "");
+
+      const std::string propValue = fp.value();
+      const std::string testerrmsg = std::string("found value ") + propValue + " from " + value;
+      TSM_ASSERT(testerrmsg, !propValue.starts_with("."));
+    }
+  }
+
+  void testExpandCurDirSaveFile() {
+    const std::string filename("anyfile.txt");
+
+    FileProperty fp("Filename", "", FileProperty::Save);
+    const std::string msg = fp.setValue("./" + filename);
+    TS_ASSERT_EQUALS(msg, "");
+
+    const std::string propValue = fp.value();
+    const std::string testerrmsg = std::string("found value ") + propValue + " from ./" + filename;
+    TSM_ASSERT(testerrmsg, !propValue.starts_with("./"));
   }
 
 private:

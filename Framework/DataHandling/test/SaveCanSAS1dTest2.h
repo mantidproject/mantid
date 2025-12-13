@@ -123,7 +123,7 @@ public:
 
   void testCanSAS1dXML() {
     // read the generated xml file and compare first few lines of the file
-    std::ifstream testFile(m_filename.c_str(), std::ios::in);
+    std::ifstream testFile(m_filename, std::ios::in);
     TS_ASSERT(testFile);
     if (!testFile)
       return;
@@ -352,7 +352,7 @@ public:
       std::ostringstream ss;
       ss << std::string(m_filename, 0, extPos) << "_" << spec << std::string(m_filename, extPos);
       std::filesystem::path filepath(ss.str());
-      TS_ASSERT(std::filesystem::exists(filepath));
+      TSM_ASSERT(filepath.string(), std::filesystem::exists(filepath));
       std::filesystem::remove(filepath);
     }
 
@@ -367,7 +367,7 @@ public:
       std::ostringstream ss;
       ss << std::string(m_filename, 0, extPos) << "_" << spec << "_" << spec * spec << std::string(m_filename, extPos);
       std::filesystem::path filepath(ss.str());
-      TS_ASSERT(std::filesystem::exists(filepath));
+      TSM_ASSERT(filepath.string(), std::filesystem::exists(filepath));
       std::filesystem::remove(filepath);
     }
 
@@ -383,7 +383,7 @@ public:
       ss << std::string(m_filename, 0, extPos) << "_" << spec << "_" << 0.5 * (spec * spec + (spec + 1) * (spec + 1))
          << std::string(m_filename, extPos);
       std::filesystem::path filepath(ss.str());
-      TS_ASSERT(std::filesystem::exists(filepath));
+      TSM_ASSERT(filepath.string(), std::filesystem::exists(filepath));
       std::filesystem::remove(filepath);
     }
 
@@ -398,7 +398,7 @@ public:
       std::ostringstream ss;
       ss << std::string(m_filename, 0, extPos) << "_" << spec << "_ax_" << spec << std::string(m_filename, extPos);
       std::filesystem::path filepath(ss.str());
-      TS_ASSERT(std::filesystem::exists(filepath));
+      TSM_ASSERT(filepath.string(), std::filesystem::exists(filepath));
       std::filesystem::remove(filepath);
     }
   }
