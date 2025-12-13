@@ -12,6 +12,7 @@
 #include <memory>
 #include <set>
 #include <string>
+#include <vector>
 
 namespace Mantid {
 namespace API {
@@ -27,6 +28,10 @@ public:
   virtual const std::string id() const { return "IMaskWorkspace"; }
   /// Total number of masked pixels
   virtual std::size_t getNumberMasked() const = 0;
+  /// Check if detector id exists in mask
+  virtual bool containsDetID(const detid_t detectorID) const = 0;
+  virtual bool containsDetIDs(const std::set<detid_t> &detectorIDs) const = 0;
+  virtual bool containsDetIDs(const std::vector<detid_t> &detectorIDs) const = 0;
   /// Check if a detector is masked
   virtual bool isMasked(const detid_t detectorID) const = 0;
   /// Check if all detectors in a set are masked
