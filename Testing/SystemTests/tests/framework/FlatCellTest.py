@@ -29,9 +29,6 @@ class FlatCellTest(systemtesting.MantidSystemTest):
     def requiredFiles(self):
         return ["flatcell_input.csv", "flatcell_output.csv"]
 
-    def validateMethod(self):
-        return "ValidateAscii"
-
     def validate(self):
         self.tolerance = 1e-2
-        return ("FlatCellInput", "flatcell_output.csv")
+        return ("FlatCellInput", "FlatCellOutput")
