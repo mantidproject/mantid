@@ -26,6 +26,9 @@ class FlatCellTest(systemtesting.MantidSystemTest):
         # (result, _messages) = CompareWorkspaces("FlatCellInput", "FlatCellOutput", Tolerance=1e-2)
         # self.assertEqual(result, True)
 
+    def validateMethod(self):
+        return "ValidateWorkspaceToWorkspace"
+
     def requiredFiles(self):
         return ["flatcell_input.csv", "flatcell_output.csv"]
 
