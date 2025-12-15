@@ -727,13 +727,17 @@ public:
   }
 
   void test_sharedId_thread_safety() {
+// NOTE this warning causes build failures; suppress for now
+// the issue is caused by capturing variables of type TestSharedID,
+// which have a deleter method defined at global scope
+#pragma GCC diagnostic ignored "-Wsubobject-linkage"
     constexpr int N{10};
     TestSharedID id(GOOD_ID1);
     std::vector<TestSharedID> ids(N);
     std::vector<std::thread> threads;
 
     // create some ids and increment count
-    std::function<void(int)> make_another = [&id, &ids](int i) { ids[i] = id; };
+    std::function<void(int)> make_another = [&ids, &id](int i) { ids[i] = id; };
     for (int i = 0; i < N; i++) {
       threads.emplace_back(make_another, i);
     }
