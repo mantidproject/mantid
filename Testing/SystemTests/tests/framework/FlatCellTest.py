@@ -22,10 +22,6 @@ class FlatCellTest(systemtesting.MantidSystemTest):
         # Load the output data and save into a workspace
         LoadAscii(Filename="flatcell_output.csv", OutputWorkspace="FlatCellOutput")
 
-        # # Compare the results
-        # (result, _messages) = CompareWorkspaces("FlatCellInput", "FlatCellOutput", Tolerance=1e-2)
-        # self.assertEqual(result, True)
-
     def validateMethod(self):
         return "ValidateWorkspaceToWorkspace"
 
