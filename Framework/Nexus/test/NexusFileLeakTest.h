@@ -46,7 +46,7 @@ public:
    */
 
   void test_leak1() {
-    int const nReOpen = 1000;
+    int constexpr nReOpen = 1000;
     cout << "\nRunning Leak Test 1: " << nReOpen << " iterations" << endl;
     FileResource fr("nexus_leak_test1.nxs");
     std::string const szFile(fr.fullPath());
@@ -125,7 +125,7 @@ public:
     FileResource fr("nexus_leak_test3.nxs");
     std::string const szFile(fr.fullPath());
 
-    int const iBinarySize = TEST_SIZE * TEST_SIZE;
+    int constexpr iBinarySize = TEST_SIZE * TEST_SIZE;
     cout << "Creating array of " << iBinarySize << " integers" << endl;
     int16_t aiBinaryData[iBinarySize];
 

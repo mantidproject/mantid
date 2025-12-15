@@ -420,7 +420,7 @@ public:
     {
       TestSharedID uid(INVALID_HID);
       TS_ASSERT(!uid.isValid());
-      TS_ASSERT_EQUALS(uid.use_count(), 1);
+      TS_ASSERT_EQUALS(uid.use_count(), 0);
     }
     // the deleter was not called on exit
     TS_ASSERT_EQUALS(call_count, 0);

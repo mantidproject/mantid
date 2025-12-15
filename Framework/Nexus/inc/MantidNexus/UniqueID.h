@@ -173,7 +173,7 @@ private:
 public:
   // constructors / destructor
   SharedID() : Hdf5ID<D>(), m_leash_counts(nullptr) {}
-  SharedID(hid_t id) : Hdf5ID<D>(id), m_leash_counts(new std::atomic<std::size_t>(1)) {}
+  SharedID(hid_t id) : Hdf5ID<D>(id), m_leash_counts(this->isValid() ? new std::atomic<std::size_t>(1) : nullptr) {}
   SharedID(SharedID<D> const &uid) : Hdf5ID<D>(uid.m_id), m_leash_counts(uid.m_leash_counts) {
     increment_leash_counts();
   }
@@ -253,14 +253,16 @@ template <herr_t (*const D)(hid_t)> inline void SharedID<D>::increment_leash_cou
 
 template <herr_t (*const D)(hid_t)> inline void SharedID<D>::decrement_leash_counts() {
   if (m_leash_counts) {
-    if (*m_leash_counts > 1) {
+    // atomic-safe access the counts
+    std::size_t counts = (*m_leash_counts).load();
+    if (counts > 1) {
       (*m_leash_counts)--;
-    } else if (*m_leash_counts == 1) {
+    } else if (counts == 1) {
       this->close();
       *m_leash_counts = 0;
       delete m_leash_counts;
       m_leash_counts = nullptr;
-    } else if (*m_leash_counts == 0) {
+    } else if (counts == 0) {
       delete m_leash_counts;
       m_leash_counts = nullptr;
     }
