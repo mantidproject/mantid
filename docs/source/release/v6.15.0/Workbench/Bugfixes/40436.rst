@@ -1,0 +1,3 @@
+- Mantidworkbench used to hang when ``fig.savefig()`` is called immediately after ``fig.show()`` which ended up making a deferred call to schedule a draw via ``canvas.draw_idle()``.
+- Calling ``fig.savefig()`` immadiately after ``fig.show()`` used cause a deadlock in Qt event loop.
+- The fix added here make sure all queued  GUI events are safely processed before moving on to the next opration
