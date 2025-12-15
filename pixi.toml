@@ -46,7 +46,7 @@ gh = "*"
 [feature.publish-anaconda.target.linux-64.dependencies]
 anaconda-client = "*"
 
-[feature.package-standalone.target.linux-64.dependencies]
+[feature.package-standalone.dependencies]
 # Pin conda in the base environment to avoid post-link.bat problems
 conda = "24.7.*"
 rattler-index = "*"
