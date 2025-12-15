@@ -731,7 +731,8 @@ public:
 // NOTE this warning causes build failures; suppress for now
 // the issue is caused by capturing variables of type TestSharedID,
 // which have a deleter method defined at global scope
-#if defined(__GNUC__)
+#if defined(__GNUC__) && !(defined(__clang__))
+#pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wsubobject-linkage"
 #endif
     constexpr int N{10};
@@ -772,7 +773,7 @@ public:
     }
     // now check
     TS_ASSERT_EQUALS(id.use_count(), 1);
-#if defined(__GNUC__)
+#if defined(__GNUC__) && !(defined(__clang__))
 #pragma GCC diagnostic pop
 #endif
   }
