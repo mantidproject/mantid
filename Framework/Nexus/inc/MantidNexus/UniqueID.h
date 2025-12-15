@@ -257,7 +257,7 @@ template <herr_t (*const D)(hid_t)> inline void SharedID<D>::decrement_leash_cou
     std::size_t counts = (*m_leash_counts).load();
     if (counts > 1) {
       (*m_leash_counts)--;
-    } else if (counts == 1) { // cppcheck-suppress knownConditionTrueFalse
+    } else if (counts == 1) {
       this->close();
       *m_leash_counts = 0;
       delete m_leash_counts;
