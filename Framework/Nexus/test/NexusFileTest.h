@@ -1515,7 +1515,7 @@ public:
   }
 
   void test_file_is_closed() {
-    cout << "\ntest closing files\n" << std::flush;
+    cout << "\ntest closing files" << std::endl;
 
     FileResource resource("test_nexus_close.nxs");
     std::string filename(resource.fullPath());
@@ -1531,11 +1531,8 @@ public:
     TS_ASSERT(file_is_closed(filename));
   }
 
-  void test_file_id() {
-    cout << "\ntest the file id\n" << std::flush;
-
-    Mantid::Nexus::FileID fid;
-    TS_ASSERT(!fid.isValid());
+  void test_shared_file_id() {
+    cout << "\ntest the shared file id" << std::endl;
 
     // create a file
     FileResource resource("test_nexus_fid.nxs");

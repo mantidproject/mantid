@@ -22,6 +22,14 @@ std::string getFullPath(const std::string &filename);
 std::string strmakef(char const *const fmt, ...);
 
 /**
+ * This will check if an HDF file is open.  It will first check if any files are open.
+ * If any are, it will looking for the given filename in the list of all opened files.
+ * @param filename the filename to check if opened
+ * @return true if the file has been closed; otherwise false
+ */
+bool hdf_file_is_closed(std::string const &filename);
+
+/**
  * Makes a temporary file in a proper temp folder an ensures deletion on creation and exit.
  * NOTE: this is a copy of a framework test helper, put here to simplify NexusTest build tree.
  */
