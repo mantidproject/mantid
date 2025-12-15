@@ -140,7 +140,6 @@ if(NOT FULL_PACKAGE_BUILD)
   add_subdirectory(PostInstall)
 endif()
 
-include(CMakePackageConfigHelpers)
 configure_package_config_file(
   ${CMAKE_SOURCE_DIR}/buildconfig/CMake/MantidFrameworkConfig.cmake.in
   ${CMAKE_CURRENT_BINARY_DIR}/MantidFrameworkConfig.cmake
