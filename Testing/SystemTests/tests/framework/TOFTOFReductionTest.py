@@ -5,36 +5,10 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
-import numpy as np
 from mantid.kernel import config
 from systemtesting import MantidSystemTest
-from mantid.simpleapi import (
-    Load,
-    MergeRuns,
-    AddSampleLog,
-    DeleteWorkspace,
-    DeleteWorkspaces,
-    GroupWorkspaces,
-    CompareSampleLogs,
-    MaskDetectors,
-    FindDetectorsOutsideLimits,
-    MonitorEfficiencyCorUser,
-    Scale,
-    Minus,
-    CloneWorkspace,
-    Divide,
-    FindEPP,
-    ComputeCalibrationCoefVan,
-    TOFTOFCropWorkspace,
-    CorrectTOF,
-    ConvertUnits,
-    ConvertToDistribution,
-    DetectorEfficiencyCorUser,
-    CorrectKiKf,
-    Rebin,
-    SofQW3,
-    RenameWorkspace,
-)
+from reduction_gui.reduction.toftof.toftof_reduction import TOFTOFScriptElement
+from reduction_gui.reduction.scripter import execute_script
 
 
 class TOFTOFReductionTest(MantidSystemTest):
@@ -70,117 +44,60 @@ class TOFTOFReductionTest(MantidSystemTest):
         ]
 
     def runTest(self):
-        self._assert_reduction_outputs()
+        red_script = self._generate_reduction_script()
+        execute_script(red_script)
 
-    def _assert_reduction_outputs(self) -> None:
-        wsRawVan = Load(Filename="TOFTOF12:14")
-        wsVan = MergeRuns(wsRawVan)
-        wsVan.setComment("Van_res")
-        temperature = np.mean(wsVan.getRun().getLogData("temperature").value)
-        AddSampleLog(wsVan, LogName="temperature", LogText=str(temperature), LogType="Number", LogUnit="K")
-        DeleteWorkspace(wsRawVan)
+    def _generate_reduction_script(self):
+        scriptTest = TOFTOFScriptElement()
 
-        wsRawEC = Load(Filename="TOFTOF15:17")
-        wsEC = MergeRuns(wsRawEC)
-        wsEC.setComment("EC")
-        temperature = np.mean(wsEC.getRun().getLogData("temperature").value)
-        AddSampleLog(wsEC, LogName="temperature", LogText=str(temperature), LogType="Number", LogUnit="K")
-        DeleteWorkspace(wsRawEC)
+        scriptTest.facility_name = config["default.facility"]
+        scriptTest.instrument_name = config["default.instrument"]
+        scriptTest.dataDir = ""
+        scriptTest.prefix = "ws"
 
-        # data runs 1
-        wsRawData1 = Load(Filename="TOFTOF27:29")
-        wsData1 = MergeRuns(wsRawData1)
-        wsData1.setComment("H2O_21C")
-        temperature = np.mean(wsData1.getRun().getLogData("temperature").value)
-        AddSampleLog(wsData1, LogName="temperature", LogText=str(temperature), LogType="Number", LogUnit="K")
-        DeleteWorkspace(wsRawData1)
+        scriptTest.vanRuns = "TOFTOF12:14"
+        scriptTest.vanCmnt = "Van_res"
+        scriptTest.vanTemp = 21
+        scriptTest.vanEcFactor = 1.0
 
-        # data runs 2
-        wsRawData2 = Load(Filename="TOFTOF30:31")
-        wsData2 = MergeRuns(wsRawData2)
-        wsData2.setComment("H2O_34C")
-        temperature = np.mean(wsData2.getRun().getLogData("temperature").value)
-        AddSampleLog(wsData2, LogName="temperature", LogText=str(temperature), LogType="Number", LogUnit="K")
-        DeleteWorkspace(wsRawData2)
+        scriptTest.ecRuns = "TOFTOF15:17"
+        scriptTest.ecComment = "EC"
+        scriptTest.ecTemp = 21
+        scriptTest.ecFactor = 0.9
 
-        # grouping
-        gwsDataRuns = GroupWorkspaces([wsData1, wsData2])
-        gwsAll = GroupWorkspaces([wsVan, wsEC, wsData1, wsData2])
+        scriptTest.maskDetectors = False
 
-        # Ei
-        if CompareSampleLogs(gwsAll, "Ei", 0.001):
-            raise RuntimeError("Ei values do not match")
+        scriptTest.dataRuns = [["TOFTOF27:29", "H2O_21C", 21], ["TOFTOF30:31", "H2O_34C", 34]]
 
-        Ei = wsData1.getRun().getLogData("Ei").value
+        # binning
+        scriptTest.binEon = True
+        scriptTest.binEstart = -6.0
+        scriptTest.binEstep = 0.01
+        scriptTest.binEend = 1.8
 
-        # mask detectors
-        (gwsDetectorsToMask, numberOfFailures) = FindDetectorsOutsideLimits(gwsAll)
-        MaskDetectors(gwsAll, MaskedWorkspace=gwsDetectorsToMask)
-        DeleteWorkspaces([gwsDetectorsToMask])
+        scriptTest.binQon = True
+        scriptTest.binQstart = 0.4
+        scriptTest.binQstep = 0.1
+        scriptTest.binQend = 2.0
 
-        # normalise to monitor
-        wsVanNorm = MonitorEfficiencyCorUser(wsVan)
-        wsECNorm = MonitorEfficiencyCorUser(wsEC)
-        gwsNorm = MonitorEfficiencyCorUser(gwsDataRuns)
-        DeleteWorkspaces([gwsAll])
+        # options
+        scriptTest.subtractECVan = True
+        scriptTest.normalise = 1  # 0: no, 1: monitor, 2: time
+        scriptTest.correctTof = 1  # 0: no, 1: vana, 2: sample
 
-        # subtract empty can
-        ecFactor = 0.900
-        wsScaledEC = Scale(wsECNorm, Factor=ecFactor, Operation="Multiply")
-        gwsDataSubEC = Minus(gwsNorm, wsScaledEC)
-        van_ecFactor = 1.000
-        wsScaledECvan = Scale(wsECNorm, Factor=van_ecFactor, Operation="Multiply")
-        wsVanSubEC = Minus(wsVanNorm, wsScaledECvan)
-        DeleteWorkspaces([wsScaledEC, wsScaledECvan])
+        scriptTest.replaceNaNs = False
+        scriptTest.createDiff = False
+        scriptTest.keepSteps = False
 
-        # group data for processing
-        wsECNorm2 = CloneWorkspace(wsECNorm)
-        gwsData = GroupWorkspaces([wsVanSubEC, wsECNorm2] + list(gwsDataSubEC.getNames()))
+        # save reduced data options
+        scriptTest.saveSofTWNxspe = False
+        scriptTest.saveSofTWNexus = False
+        scriptTest.saveSofTWAscii = False
+        scriptTest.saveSofQWNexus = False
+        scriptTest.saveSofQWAscii = False
 
-        # normalise to vanadium
-        wsEppTable = FindEPP(wsVanSubEC)
-        wsDetCoeffs = ComputeCalibrationCoefVan(wsVanSubEC, wsEppTable)
-        badDetectors = np.where(np.array(wsDetCoeffs.extractY()).flatten() <= 0)[0]
-        MaskDetectors(gwsData, DetectorList=badDetectors)
-        gwsDataCorr = Divide(gwsData, wsDetCoeffs)
-        DeleteWorkspaces([wsDetCoeffs])
-
-        # remove half-filled time bins (clean frame)
-        gwsDataCleanFrame = TOFTOFCropWorkspace(gwsDataCorr)
-        DeleteWorkspaces([gwsDataCorr])
-
-        # apply vanadium TOF correction
-        gwsDataTofCorr = CorrectTOF(gwsDataCleanFrame, wsEppTable)
-        DeleteWorkspaces([gwsDataCleanFrame, gwsData, wsEppTable])
-
-        # convert units
-        gwsDataDeltaE = ConvertUnits(gwsDataTofCorr, Target="DeltaE", EMode="Direct", EFixed=Ei)
-        ConvertToDistribution(gwsDataDeltaE)
-        DeleteWorkspaces([gwsDataTofCorr])
-
-        # correct for energy dependent detector efficiency
-        gwsDataCorrDeltaE = DetectorEfficiencyCorUser(gwsDataDeltaE)
-        DeleteWorkspaces([gwsDataDeltaE])
-
-        # calculate S (Ki/kF correction)
-        gwsDataS = CorrectKiKf(gwsDataCorrDeltaE)
-        DeleteWorkspaces([gwsDataCorrDeltaE])
-
-        # energy binning
-        rebinEnergy = "-6.000, 0.010, 1.800"
-        gwsDataBinE = Rebin(gwsDataS, Params=rebinEnergy, IgnoreBinErrors=True)
-
-        # calculate momentum transfer Q for sample data
-        rebinQ = "0.400, 0.100, 2.000"
-        gwsDataSQW = SofQW3(gwsDataBinE, QAxisBinning=rebinQ, EMode="Direct", EFixed=Ei, ReplaceNaNs=False)
-
-        # make nice workspace names
-        for ws in gwsDataS:
-            RenameWorkspace(ws, OutputWorkspace="ws_S_" + ws.getComment())
-        for ws in gwsDataBinE:
-            RenameWorkspace(ws, OutputWorkspace="ws_E_" + ws.getComment())
-        for ws in gwsDataSQW:
-            RenameWorkspace(ws, OutputWorkspace="ws_" + ws.getComment() + "_sqw")
+        reduction_script = scriptTest.to_script()
+        return reduction_script
 
         # expected_comments = {"H2O_21C", "H2O_34C"}
 
