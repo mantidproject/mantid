@@ -254,15 +254,13 @@ template <herr_t (*const D)(hid_t)> inline void SharedID<D>::increment_leash_cou
 template <herr_t (*const D)(hid_t)> inline void SharedID<D>::decrement_leash_counts() {
   if (m_leash_counts) {
     // atomic-safe access the counts
-    std::size_t counts = (*m_leash_counts).load();
-    if (counts > 1) {
-      (*m_leash_counts)--;
-    } else if (counts == 1) {
+    std::size_t prev_counts = (*m_leash_counts).fetch_sub(1);
+    if (prev_counts == 1) {
       this->close();
-      *m_leash_counts = 0;
       delete m_leash_counts;
       m_leash_counts = nullptr;
-    } else if (counts == 0) { // cppcheck-suppress knownConditionTrueFalse
+    } else if (prev_counts == 0) {
+      m_leash_counts->store(0);
       delete m_leash_counts;
       m_leash_counts = nullptr;
     }
