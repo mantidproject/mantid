@@ -1,6 +1,4 @@
 /** This class defines data types which are used as part of the Nexus API.
- * They should more properly be moved into NexusFile, when the nexus layer has been cleaned up.
- * OR all type and enum definitions in NexusFile all moved here.
  */
 
 #pragma once

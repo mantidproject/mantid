@@ -216,7 +216,7 @@ File::~File() {
     m_current_group_id = INVALID_HID;
   }
   for (hid_t &gid : m_gid_stack) {
-    if (H5Iis_valid(gid)) {
+    if (H5Iis_valid(gid) > 0) {
       H5Gclose(gid);
     }
     gid = INVALID_HID;
@@ -290,7 +290,7 @@ void File::openAddress(std::string const &address) {
   NexusAddress groupstack(absaddr.parent_path());
   NexusAddress fromroot;
   if (groupstack.isRoot()) {
-    m_current_group_id = INVALID_HID;
+    m_current_group_id = 0; // root!
   } else {
     m_current_group_id = m_fileID.get();
     for (auto const &name : groupstack.parts()) {

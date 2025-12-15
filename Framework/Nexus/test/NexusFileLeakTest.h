@@ -117,9 +117,9 @@ public:
     // NOTE the Windows runners do not have enough stack space for the full test (max 1MB stack)
     // Rather than skip the entire test, we can use a smaller array size
     // It is no longer testing the same behavior on Windows with this choice.
-    std::size_t const TEST_SIZE(8);
+    std::size_t constexpr TEST_SIZE(8);
 #else
-    std::size_t const TEST_SIZE(512);
+    std::size_t constexpr TEST_SIZE(512);
 #endif // WIN32
     DimVector array_dims({TEST_SIZE, TEST_SIZE});
     FileResource fr("nexus_leak_test3.nxs");

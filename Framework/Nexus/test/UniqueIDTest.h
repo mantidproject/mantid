@@ -772,5 +772,8 @@ public:
     }
     // now check
     TS_ASSERT_EQUALS(id.use_count(), 1);
+#if defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif
   }
 };
