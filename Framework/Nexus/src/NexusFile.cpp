@@ -137,7 +137,7 @@ void File::initOpenFile(std::string const &filename, NXaccess const am) {
   // create file acccess property list
   ParameterID fapl = H5Pcopy(H5Util::defaultFileAcc().getId());
 
-  FileID temp_fid;
+  UniqueFileID temp_fid;
   if (am != NXaccess::CREATE5) {
     if (H5Fis_accessible(filename.c_str(), fapl) <= 0) {
       throw NXEXCEPTION("File is not HDF5");
@@ -180,18 +180,18 @@ void File::initOpenFile(std::string const &filename, NXaccess const am) {
     msg << "File::initOpenFile(" << filename << ", " << am << ") failed";
     throw NXEXCEPTION(msg.str());
   } else {
-    m_pfile = std::make_shared<FileID>(temp_fid.release());
+    m_fileID = temp_fid.release();
   }
 }
 
 // copy constructors
 
 File::File(File const &f)
-    : m_filename(f.m_filename), m_access(f.m_access), m_address(), m_pfile(f.m_pfile), m_current_group_id(0),
+    : m_filename(f.m_filename), m_access(f.m_access), m_address(), m_fileID(f.m_fileID), m_current_group_id(0),
       m_current_data_id(0), m_current_type_id(0), m_current_space_id(0), m_gid_stack{0}, m_descriptor(f.m_descriptor) {
   // NOTE warning to future devs
   // if you change this method, please run the systemtest VanadiumAndFocusWithSolidAngleTest
-  if (!m_pfile->isValid())
+  if (!m_fileID.isValid())
     throw NXEXCEPTION("Error reopening file");
 }
 
@@ -226,10 +226,8 @@ File::~File() {
 }
 
 void File::close() {
-  if (m_pfile != nullptr) {
-    // decrease reference counts to this file
-    m_pfile.reset();
-  }
+  // decrease reference counts to this file
+  m_fileID.reset();
 }
 
 void File::flush() {
@@ -292,11 +290,11 @@ void File::openAddress(std::string const &address) {
   if (groupstack.isRoot()) {
     m_current_group_id = 0;
   } else {
-    m_current_group_id = m_pfile->get();
+    m_current_group_id = m_fileID.get();
     for (auto const &name : groupstack.parts()) {
       fromroot /= name;
       if (m_descriptor.isEntry(fromroot, m_descriptor.classTypeForName(fromroot))) {
-        hid_t gid = H5Gopen(*m_pfile, fromroot.c_str(), H5P_DEFAULT);
+        hid_t gid = H5Gopen(m_fileID, fromroot.c_str(), H5P_DEFAULT);
         m_gid_stack.push_back(gid);
         // update stack in case of failure
         m_current_group_id = gid;
@@ -308,11 +306,11 @@ void File::openAddress(std::string const &address) {
   }
   // open the last element -- either a group or a dataset
   if (hasData(absaddr)) { // is a dataset
-    m_current_data_id = H5Dopen(*m_pfile, absaddr.c_str(), H5P_DEFAULT);
+    m_current_data_id = H5Dopen(m_fileID, absaddr.c_str(), H5P_DEFAULT);
     m_current_type_id = H5Dget_type(m_current_data_id);
     m_current_space_id = H5Dget_space(m_current_data_id);
   } else if (hasAddress(absaddr)) { // not a dataset but exists = is a group
-    hid_t gid = H5Gopen(*m_pfile, absaddr.c_str(), H5P_DEFAULT);
+    hid_t gid = H5Gopen(m_fileID, absaddr.c_str(), H5P_DEFAULT);
     m_gid_stack.push_back(gid);
     m_current_group_id = gid;
   } else {
@@ -389,7 +387,7 @@ hid_t File::getCurrentId() const {
   } else if (m_current_group_id != 0) {
     return m_current_group_id;
   } else {
-    return *m_pfile;
+    return m_fileID;
   }
 }
 
@@ -399,7 +397,7 @@ std::shared_ptr<H5::H5Object> File::getCurrentObject() const {
   } else if (m_current_group_id != 0) {
     return std::make_shared<H5::Group>(m_current_group_id);
   } else {
-    return std::make_shared<H5::H5File>(*m_pfile);
+    return std::make_shared<H5::H5File>(m_fileID);
   }
 }
 
@@ -429,7 +427,7 @@ void File::makeGroup(const std::string &name, const std::string &nxclass, bool o
   // get full address
   NexusAddress const absaddr(formAbsoluteAddress(name));
   // create group with H5Util by getting an H5File object from iFID
-  H5::H5File h5file(*m_pfile);
+  H5::H5File h5file(m_fileID);
   H5::Group grp = H5Util::createGroupNXS(h5file, absaddr, nxclass);
 
   // cleanup
@@ -462,7 +460,7 @@ void File::openGroup(std::string const &name, std::string const &nxclass) {
 
   hid_t iVID;
   if (m_descriptor.isEntry(absaddr, nxclass)) {
-    iVID = H5Gopen(*m_pfile, absaddr.c_str(), H5P_DEFAULT);
+    iVID = H5Gopen(m_fileID, absaddr.c_str(), H5P_DEFAULT);
   } else {
     throw NXEXCEPTION("The supplied group " + absaddr + " does not exist");
   }
@@ -545,7 +543,7 @@ void File::openData(std::string const &name) {
   NexusAddress absaddr(formAbsoluteAddress(name));
 
   /* find the ID number and open the dataset */
-  DataSetID newData = H5Dopen(*m_pfile, absaddr.c_str(), H5P_DEFAULT);
+  DataSetID newData = H5Dopen(m_fileID, absaddr.c_str(), H5P_DEFAULT);
   if (!newData.isValid()) {
     throw NXEXCEPTION("Dataset (" + absaddr + ") not found at this level");
   }
@@ -914,7 +912,7 @@ void File::makeCompData(std::string const &name, NXnumtype const type, DimVector
 
   // create the dataset with the compression parameters
   NexusAddress absaddr(formAbsoluteAddress(name));
-  DataSetID dataset = H5Dcreate(*m_pfile, absaddr.c_str(), datatype, dataspace, H5P_DEFAULT, cparms, H5P_DEFAULT);
+  DataSetID dataset = H5Dcreate(m_fileID, absaddr.c_str(), datatype, dataspace, H5P_DEFAULT, cparms, H5P_DEFAULT);
   if (!dataset.isValid()) {
     msg << "Creating chunked dataset failed";
     throw NXEXCEPTION(msg.str());
@@ -1600,7 +1598,7 @@ void File::makeLink(NXlink const &link) {
 
   // build addressname to link from our current group and the name of the thing to link
   std::string linkTarget(groupAddress(m_address) / itemName);
-  H5Lcreate_hard(*m_pfile, link.targetAddress.c_str(), H5L_SAME_LOC, linkTarget.c_str(), H5P_DEFAULT, H5P_DEFAULT);
+  H5Lcreate_hard(m_fileID, link.targetAddress.c_str(), H5L_SAME_LOC, linkTarget.c_str(), H5P_DEFAULT, H5P_DEFAULT);
 
   // register the entry
   registerEntry(linkTarget, m_descriptor.classTypeForName(link.targetAddress));

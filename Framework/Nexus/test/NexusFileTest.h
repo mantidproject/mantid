@@ -715,7 +715,7 @@ public:
     // file permissions
     Mantid::Nexus::ParameterID fapl = H5Pcreate(H5P_FILE_ACCESS);
     H5Pset_fclose_degree(fapl, H5F_CLOSE_STRONG);
-    Mantid::Nexus::FileID fid = H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+    Mantid::Nexus::UniqueFileID fid = H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
 
     // put an initial entry
     Mantid::Nexus::GroupID groupid = H5Gcreate(fid, "entry", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
@@ -1421,7 +1421,7 @@ public:
     std::cout << "\ntest getEntries with missing NX_class and soft link\n";
 
     std::string filename = "test_missing_nxclass.h5";
-    Mantid::Nexus::FileID file_id = H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    Mantid::Nexus::UniqueFileID file_id = H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     TS_ASSERT(file_id.isValid());
 
     Mantid::Nexus::GroupID group_id = H5Gcreate(file_id, "/nogroupclass", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
@@ -1503,32 +1503,21 @@ public:
   // TEST RULE OF THREE
   // ################################################################################################################
 
-  bool file_is_closed(std::string const &filename) {
-    // this will check if a file is already opened, by trying to open it with incompatible (WEAK) access
-    // if this operation FAILS (fid <= 0), then the file is STILL OPENED
-    // if this operation SUCCEEDS (fid > 0), then the file was CLOSED
-    // NOTE this is ONLY meaningful AFTER a file with the name has been definitely opened
-    Mantid::Nexus::ParameterID fapl = H5Pcreate(H5P_FILE_ACCESS);
-    H5Pset_fclose_degree(fapl, H5F_CLOSE_WEAK);
-    Mantid::Nexus::FileID fid = H5Fopen(filename.c_str(), H5F_ACC_RDONLY, fapl);
-    return fid.isValid();
-  }
-
   void test_file_is_closed() {
     cout << "\ntest closing files" << std::endl;
 
     FileResource resource("test_nexus_close.nxs");
     std::string filename(resource.fullPath());
     Mantid::Nexus::File file(filename, NXaccess::CREATE5);
-    TS_ASSERT(!file_is_closed(filename));
+    TS_ASSERT(!hdf_file_is_closed(filename));
     file.close();
-    TS_ASSERT(file_is_closed(filename));
+    TS_ASSERT(hdf_file_is_closed(filename));
 
     { // scope the file to check deconstructor
       Mantid::Nexus::File file2(filename, NXaccess::READ);
-      TS_ASSERT(!file_is_closed(filename));
+      TS_ASSERT(!hdf_file_is_closed(filename));
     }
-    TS_ASSERT(file_is_closed(filename));
+    TS_ASSERT(hdf_file_is_closed(filename));
   }
 
   void test_shared_file_id() {
@@ -1540,52 +1529,30 @@ public:
     { // scoped file creation
       Mantid::Nexus::File file(filename, NXaccess::CREATE5);
     }
-    TS_ASSERT(file_is_closed(filename));
+    TS_ASSERT(hdf_file_is_closed(filename));
 
     { // scoped fid
       Mantid::Nexus::ParameterID fapl = H5Pcreate(H5P_FILE_ACCESS);
       H5Pset_fclose_degree(fapl, H5F_CLOSE_STRONG);
-      Mantid::Nexus::FileID fid = H5Fopen(filename.c_str(), H5F_ACC_RDONLY, fapl);
-      TS_ASSERT(!file_is_closed(filename));
-      TS_ASSERT(fid.isValid());
-    } // fid goes out of scope and deconstructor is called
+      auto fid1 = Mantid::Nexus::SharedFileID(H5Fopen(filename.c_str(), H5F_ACC_RDONLY, fapl));
+      auto fid2(fid1);
+      auto fid3(fid2);
+      TS_ASSERT(!hdf_file_is_closed(filename));
+      TS_ASSERT(fid1.isValid());
+      TS_ASSERT(fid2.isValid());
+      TS_ASSERT(fid3.isValid());
+      // close fid1
+      fid1.reset();
+      TS_ASSERT(!hdf_file_is_closed(filename));
+      TS_ASSERT(fid2.isValid());
+      TS_ASSERT(fid3.isValid());
+      // close fid3
+      fid3.reset();
+      TS_ASSERT(!hdf_file_is_closed(filename));
+      TS_ASSERT(fid2.isValid());
+    } // last fid goes out of scope and destructor is called
     // the file is now closed
-    TS_ASSERT(file_is_closed(filename));
-  }
-
-  void test_file_id_shared_ptr() {
-    cout << "\ntest the file id in shared ptr\n" << std::flush;
-
-    // create a file
-    FileResource resource("test_nexus_fid.nxs");
-    std::string filename(resource.fullPath());
-    { // scoped file creation
-      Mantid::Nexus::File file(filename, NXaccess::CREATE5);
-    }
-    TS_ASSERT(file_is_closed(filename));
-
-    { // scoped fid
-      Mantid::Nexus::ParameterID fapl = H5Pcreate(H5P_FILE_ACCESS);
-      H5Pset_fclose_degree(fapl, H5F_CLOSE_STRONG);
-      auto pfid1 = std::make_shared<Mantid::Nexus::FileID>(H5Fopen(filename.c_str(), H5F_ACC_RDONLY, fapl));
-      auto pfid2(pfid1);
-      auto pfid3(pfid2);
-      TS_ASSERT(!file_is_closed(filename));
-      TS_ASSERT_DIFFERS(pfid1->get(), Mantid::Nexus::FileID::INVALID_ID);
-      TS_ASSERT_DIFFERS(pfid2->get(), Mantid::Nexus::FileID::INVALID_ID);
-      TS_ASSERT_DIFFERS(pfid3->get(), Mantid::Nexus::FileID::INVALID_ID);
-      // close pfid1
-      pfid1.reset();
-      TS_ASSERT(!file_is_closed(filename));
-      TS_ASSERT_DIFFERS(pfid2->get(), Mantid::Nexus::FileID::INVALID_ID);
-      TS_ASSERT_DIFFERS(pfid3->get(), Mantid::Nexus::FileID::INVALID_ID);
-      // close pfid3
-      pfid3.reset();
-      TS_ASSERT(!file_is_closed(filename));
-      TS_ASSERT_DIFFERS(pfid2->get(), Mantid::Nexus::FileID::INVALID_ID);
-    } // last pfid goes out of scope and deconstructor is called
-    // the file is now closed
-    TS_ASSERT(file_is_closed(filename));
+    TS_ASSERT(hdf_file_is_closed(filename));
   }
 
   void test_open_concurrent() {
@@ -1601,7 +1568,7 @@ public:
       file.close();
     }
     // check the file is closed
-    TS_ASSERT(file_is_closed(filename));
+    TS_ASSERT(hdf_file_is_closed(filename));
 
     { // scope the files to verify close
       // open the file, twice
@@ -1613,10 +1580,10 @@ public:
       // confirm we are in different locations
       TS_ASSERT_EQUALS(file2.getAddress(), "/entry2");
       TS_ASSERT_EQUALS(file1.getAddress(), "/entry1");
-      TS_ASSERT(!file_is_closed(filename));
+      TS_ASSERT(!hdf_file_is_closed(filename));
     }
     // check the file is closed
-    TS_ASSERT(file_is_closed(filename));
+    TS_ASSERT(hdf_file_is_closed(filename));
   }
 
   void test_copy_creation() {
@@ -1657,7 +1624,7 @@ public:
       TS_ASSERT_EQUALS(file1.getAddress(), "/entry2");
     }
     // check the file is closed
-    TS_ASSERT(file_is_closed(filename));
+    TS_ASSERT(hdf_file_is_closed(filename));
   }
 
   void test_copy_from_pointers() {
@@ -1673,7 +1640,7 @@ public:
       file.putAttr("info", "some info");
       file.closeGroup();
     }
-    TS_ASSERT(file_is_closed(filename));
+    TS_ASSERT(hdf_file_is_closed(filename));
 
     // check with pointers
     { // scope file1
@@ -1686,12 +1653,12 @@ public:
         file2.openGroup("entry", "NXshorts");
         TS_ASSERT_EQUALS(file2.getStrAttr("info"), "some info");
       } // file2 goes out of scope
-      TS_ASSERT(!file_is_closed(filename));
+      TS_ASSERT(!hdf_file_is_closed(filename));
       pfile->openGroup("entry", "NXshorts");
       TS_ASSERT_EQUALS(pfile->getStrAttr("info"), "some info");
     }
     // check the file is closed
-    TS_ASSERT(file_is_closed(filename));
+    TS_ASSERT(hdf_file_is_closed(filename));
 
     // check with shared pointers
     { // scope file1
@@ -1703,11 +1670,11 @@ public:
         file2.openGroup("entry", "NXshorts");
         TS_ASSERT_EQUALS(file2.getStrAttr("info"), "some info");
       } // file2 goes out of scope
-      TS_ASSERT(!file_is_closed(filename));
+      TS_ASSERT(!hdf_file_is_closed(filename));
       pfile->openGroup("entry", "NXshorts");
       TS_ASSERT_EQUALS(pfile->getStrAttr("info"), "some info");
     }
     // check the file is closed
-    TS_ASSERT(file_is_closed(filename));
+    TS_ASSERT(hdf_file_is_closed(filename));
   }
 };
