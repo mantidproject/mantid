@@ -31,6 +31,7 @@ from pyvistaqt import BackgroundPlotter
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from pyvista.plotting.picking import RectangleSelection
 from pyvista.plotting.opts import PickerType
+from vtkmodules.vtkCommonDataModel import vtkBox, vtkCylinder, vtkImplicitFunction
 from vtkmodules.vtkInteractionWidgets import (
     vtkImplicitCylinderWidget,
     vtkImplicitCylinderRepresentation,
@@ -686,9 +687,11 @@ class FullInstrumentViewWindow(QMainWindow):
         rect_repr = vtkBoxRepresentation()
 
         width, height = self.main_plotter.renderer.GetSize()
-        x0, y0, z0 = self.display_to_world_coords(width / 4, height / 4, 0)
-        x1, y1, z1 = self.display_to_world_coords(3 * width / 4, 3 * height / 4, 0)
-        rect_repr.PlaceWidget([x0, x1, y0, y1, 0, 1])
+        x0, y0, z0 = self.display_to_world_coords(width / 3, height / 3, 0)
+        x1, y1, z1 = self.display_to_world_coords(2 * width / 3, 2 * height / 3, 0)
+        rect_repr.SetPlaceFactor(1.0)
+        rect_repr.PlaceWidget([x0, x1, y0, y1, -0.1, 1])
+        rect_repr.SetUseBounds(True)
 
         rect_widget = RectangleWidgetNoRotation()
         rect_widget.SetRepresentation(rect_repr)
@@ -699,6 +702,7 @@ class FullInstrumentViewWindow(QMainWindow):
         # The command below is a hacky way of making the widget appear on top of detectors
         # No idea why it works
         self.main_plotter.camera_position = self.main_plotter.camera_position
+        return
 
     def display_to_world_coords(self, x, y, z):
         # Convert from display coordinates to world coordinates
@@ -708,13 +712,22 @@ class FullInstrumentViewWindow(QMainWindow):
         world_x, world_y, world_z, world_w = renderer.GetWorldPoint()
         return world_x / world_w, world_y / world_w, world_y / world_w
 
-    def get_current_widget(self):
-        return self._current_widget
+    def get_current_widget_implicit_function(self) -> vtkImplicitFunction | None:
+        if isinstance(self._current_widget, CylinderWidgetNoRotation):
+            cylinder = vtkCylinder()
+            self._current_widget.GetCylinderRepresentation().GetCylinder(cylinder)
+            return cylinder
+        elif isinstance(self._current_widget, RectangleWidgetNoRotation):
+            box = vtkBox()
+            box.SetBounds(self._current_widget.GetRepresentation().GetBounds())
+            return box
+        else:
+            return None
 
     def enable_or_disable_mask_widgets(self):
         self.cancel_widget()
         self._circle_widget.setDisabled(self.current_selected_projection() == ProjectionType.THREE_D)
-        self._add_mask.setDisabled(True)
+        # self._add_mask.setDisabled(True)
 
     def add_rgba_mesh(self, mesh: PolyData, scalars: np.ndarray | str):
         """Draw the given mesh in the main plotter window, and set the colours manually with RGBA numbers"""
