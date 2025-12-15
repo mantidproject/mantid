@@ -138,6 +138,11 @@ class PoldiAutoCorrelation(PythonAlgorithm):
         ws_corr = self.exec_child_alg(
             "CreateWorkspace", DataX=dspacs, DataY=corr, UnitX="dSpacing", YUnitLabel="Intensity (a.u.)", NSpec=ngroups, ParentWorkspace=ws
         )
+        # assign detector IDs to autocorr
+        detids_in_groups = np.array_split(ws_corr.detectorInfo().detectorIDs(), ngroups)
+        for ispec, detids in enumerate(detids_in_groups):
+            spec = ws_corr.getSpectrum(ispec)
+            [spec.addDetectorID(int(detid)) for detid in detids]
         ws_corr = self.exec_child_alg("ConvertUnits", InputWorkspace=ws_corr, Target="MomentumTransfer")
         self.setProperty("OutputWorkspace", ws_corr)
 
