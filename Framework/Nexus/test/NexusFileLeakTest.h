@@ -47,7 +47,7 @@ public:
 
   void test_leak1() {
     int const nReOpen = 1000;
-    cout << "\nRunning Leak Test 1: " << nReOpen << " iterations\n";
+    cout << "\nRunning Leak Test 1: " << nReOpen << " iterations" << endl;
     FileResource fr("nexus_leak_test1.nxs");
     std::string const szFile(fr.fullPath());
 
@@ -55,13 +55,13 @@ public:
 
     for (int iReOpen = 0; iReOpen < nReOpen; iReOpen++) {
       if (0 == iReOpen % 100) {
-        cout << "loop count " << iReOpen << "\n";
+        cout << "loop count " << iReOpen << endl;
       }
 
       File other_file(file_obj);
     }
 
-    cout << "Leak Test 1 Success!\n";
+    cout << "Leak Test 1 Success!" << endl;
   }
 
   void test_leak2() {
@@ -70,7 +70,7 @@ public:
     int const nData = 10;
     vector<int16_t> const i2_array{1000, 2000, 3000, 4000};
 
-    cout << "Running Leak Test 2: " << nFiles << " iterations\n";
+    cout << "Running Leak Test 2: " << nFiles << " iterations" << endl;
 
     NXaccess access_mode = NXaccess::CREATE5;
     std::string strFile;
@@ -78,7 +78,7 @@ public:
     for (int iFile = 0; iFile < nFiles; iFile++) {
       FileResource fr(strmakef("nexus_leak_test2_%03d.nxs", iFile));
       strFile = fr.fullPath();
-      cout << "file " << strFile << "\n";
+      cout << "file " << strFile << endl;
 
       File fileid(strFile, access_mode);
 
@@ -105,11 +105,11 @@ public:
       fileid.close();
       removeFile(strFile);
     }
-    cout << "Leak Test 2 Success!\n";
+    cout << "Leak Test 2 Success!" << endl;
   }
 
   void test_leak3() {
-    cout << "Running Leak Test 3\n" << std::flush;
+    cout << "Running Leak Test 3" << endl;
     const int nFiles = 10;
     const int nEntry = 2;
     const int nData = 2;
@@ -126,16 +126,16 @@ public:
     std::string const szFile(fr.fullPath());
 
     int const iBinarySize = TEST_SIZE * TEST_SIZE;
-    cout << "Creating array of " << iBinarySize << " integers\n" << std::flush;
+    cout << "Creating array of " << iBinarySize << " integers" << endl;
     int16_t aiBinaryData[iBinarySize];
 
     for (int i = 0; i < iBinarySize; i++) {
       aiBinaryData[i] = static_cast<int16_t>(rand());
     }
-    cout << "Created " << iBinarySize << " random integers\n";
+    cout << "Created " << iBinarySize << " random integers" << endl;
 
     for (int iFile = 0; iFile < nFiles; iFile++) {
-      cout << "file " << iFile << "\n";
+      cout << "file " << iFile << endl;
 
       File fileid(szFile, NXaccess::CREATE5);
 
@@ -163,6 +163,6 @@ public:
 
       fileid.close();
     }
-    cout << "Leak Test 3 Success!\n";
+    cout << "Leak Test 3 Success!" << endl;
   }
 };
