@@ -11,7 +11,7 @@ from mantid.kernel import UnitConversion, DeltaEModeType, UnitParams, UnitParame
 from typing import Tuple, Sequence, Optional, TYPE_CHECKING
 from joblib import Parallel, delayed
 import h5py
-
+from multiprocessing import cpu_count
 
 if TYPE_CHECKING:
     from mantid.dataobjects import Workspace2D
@@ -100,8 +100,6 @@ def load_poldi_h5f(
     # calculate time bins
     cycle_time = _calc_cycle_time_from_chopper_speed(chopper_speed)
     bin_width = cycle_time / dat.shape[-1]
-    # bin_cens = np.linspace(bin_width / 2, cycle_time - bin_width / 2, dat.shape[-1])
-    # ws = exec_alg("CreateWorkspace", DataX=bin_cens, DataY=dat, DataE=np.sqrt(dat), NSpec=dat.shape[0])
     ws = exec_alg("LoadEmptyInstrument", Filename=fpath_idf)
     ws = exec_alg("Rebin", InputWorkspace=ws, Params=f"0,{bin_width},{cycle_time}")
     for ispec in range(ws.getNumberHistograms()):
@@ -268,7 +266,7 @@ def simulate_2d_data(
     tofs = ws_sim.readX(0)[:, None] + offsets  # same for all spectra
     path_length_ratio = (l2s + l1 - l1_chop) / (l2s + l1)
     tof_d1Ang = np.asarray([si.diffractometerConstants(ispec)[UnitParams.difc] * path_length_ratio[ispec] for ispec in range(nspec)])
-    out = Parallel(n_jobs=-2, prefer="threads", return_as="generator")(
+    out = Parallel(n_jobs=min(4, cpu_count()), prefer="threads", return_as="generator")(
         delayed(_do_interp)(tofs / tof_d1Ang[ispec], ws_1d.readX(0), ws_1d.readY(0)) for ispec in range(nspec)
     )
     # set y values

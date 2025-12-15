@@ -17,6 +17,7 @@ from joblib import Parallel, delayed
 from functools import reduce
 from operator import iadd
 from itertools import islice
+from multiprocessing import cpu_count
 
 
 class PoldiAutoCorrelation(PythonAlgorithm):
@@ -124,7 +125,7 @@ class PoldiAutoCorrelation(PythonAlgorithm):
             do_autocorr = _autocorr_spec_linear
         else:
             do_autocorr = _autocorr_spec_nearest
-        generator = Parallel(n_jobs=-2, prefer="threads", return_as="generator")(
+        generator = Parallel(n_jobs=min(4, cpu_count()), prefer="threads", return_as="generator")(
             delayed(do_autocorr)(ws.readY(ispec), tof_d1Ang[ispec], dspacs, offsets, bin_width, progress) for ispec in range(nspec)
         )
         # sum over spectra in each group
