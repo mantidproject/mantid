@@ -92,7 +92,7 @@ def load_poldi_h5f(
     # read in data
     dat = []
     with h5py.File(fpath_data, "r") as f:
-        for bank_name in {"south", "north"}:
+        for bank_name in ["south", "north"]:
             dat.append(np.asarray(f.get(f"entry1/POLDI/detector_{bank_name}/histogram_folded")))
         chopper_speed = f.get("entry1/POLDI/chopper/rotation_speed_target")[0]
         monitor_count = f.get("entry1/monitors/monitor_before_sample")[0]
