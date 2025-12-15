@@ -209,17 +209,9 @@ class Phase:
 
 
 # make this abstract base class?
-class PawleyPattern1D:
+class PawleyPatternBase(ABC):
     def __init__(self, ws: Workspace2D, phases: Phase, profile: PeakProfile, bg_func: Optional[FunctionWrapper] = None):
         self.ws = ws
-        self.xunit = self.ws.getAxis(0).getUnit().unitID()
-        self.diff_consts = None
-
-        if self.xunit == "TOF":
-            si = self.ws.spectrumInfo()
-            if not si.hasDetectors(0):
-                raise RuntimeError("Workspace has no detectors - cannot convert between TOF and d-spacing.")
-            self.diff_consts = si.diffractometerConstants(0)  # for conversion to TOF if required
         self.phases = phases
         self.alatt_params = [phase.get_params() for phase in self.phases]
         self.alatt_isfree = [np.ones_like(alatt, dtype=bool) for alatt in self.alatt_params]
@@ -247,7 +239,6 @@ class PawleyPattern1D:
         if bg_func is not None:
             self.comp_func += bg_func
         self.comp_func.function.setAttributeValue("NumDeriv", True)
-        self.update_profile_function()
 
     def update_profile_function(self):
         self.profile.p = self.profile_params
@@ -258,10 +249,7 @@ class PawleyPattern1D:
             # set alatt for phase
             phase.set_params(self.alatt_params[iphase])
             dpks = self.inst.get_peak_centre(phase.calc_dspacings())  # apply scale and shift to calculated d
-            if self.xunit == "TOF":
-                pk_cens = [UnitConversion.run("dSpacing", "TOF", dpk, 0, DeltaEModeType.Elastic, self.diff_consts) for dpk in dpks]
-            else:
-                pk_cens = dpks
+            pk_cens = self.get_peak_cens(dpks)  # could involve unit conversion etc.
             for ipk, dpk in enumerate(dpks):
                 self.comp_func[istart + ipk].function.setCentre(pk_cens[ipk])
                 for par_name, val in self.profile.get_mantid_peak_params(dpk).items():
@@ -270,6 +258,9 @@ class PawleyPattern1D:
             istart += phase.nhkls()
         if len(self.bg_params) > 0:
             [self.comp_func[len(self.comp_func) - 1].function.setParameter(ipar, par) for ipar, par in enumerate(self.bg_params)]
+
+    def get_peak_cens(self, dpks: np.ndarray[float]) -> np.ndarray[float]:
+        return dpks
 
     def get_params(self) -> np.ndarray[float]:
         return np.concatenate((*self.alatt_params, *self.intens, *self.profile_params, self.inst_params, self.bg_params))
@@ -311,16 +302,63 @@ class PawleyPattern1D:
         params[self.get_isfree()] = free_params
         self.set_params(params)
 
+    def fit(self, **kwargs) -> OptimizeResult:
+        default_kwargs = {"xtol": 1e-5, "diff_step": 1e-3, "x_scale": "jac", "verbose": 2}
+        kwargs = {**default_kwargs, **kwargs}
+        self.initial_params = self.get_free_params()
+        res = least_squares(lambda p: self.eval_resids(p), self.initial_params, **kwargs)
+        # update parameters
+        self.set_free_params(res.x)
+        self.update_profile_function()
+        return res
+
+    def undo_fit(self):
+        if self.initial_params is not None:
+            self.set_free_params(self.initial_params)
+
+    @abstractmethod
+    def eval_profile(self, params: np.ndarray[float]) -> np.ndarray[float]:
+        raise NotImplementedError()
+
+    @abstractmethod
+    def eval_resids(self, params: np.ndarray[float]) -> np.ndarray[float]:
+        raise NotImplementedError()
+
+    @abstractmethod
+    def estimate_initial_params(self):
+        raise NotImplementedError()
+
+
+class PawleyPattern1D(PawleyPatternBase):
+    def __init__(self, *args, ispec: int = 0, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.xunit = self.ws.getAxis(0).getUnit().unitID()
+        if self.xunit == "TOF":
+            si = self.ws.spectrumInfo()
+            if not si.hasDetectors(ispec):
+                raise RuntimeError("Workspace has no detectors - cannot convert between TOF and d-spacing.")
+        self.ispec = ispec
+        self.update_profile_function()
+
+    def get_peak_cens(self, dpks: np.ndarray[float]) -> np.ndarray[float]:
+        if self.xunit == "TOF":
+            return self._convert_dspac_to_tof(dpks)
+        return dpks
+
+    def _convert_dspac_to_tof(self, dpks: np.ndarray[float]) -> np.ndarray[float]:
+        diff_consts = self.ws.spectrumInfo().diffractometerConstants(self.ispec)
+        return np.asarray([UnitConversion.run("dSpacing", "TOF", dpk, 0, DeltaEModeType.Elastic, diff_consts) for dpk in dpks])
+
     def eval_profile(self, params: np.ndarray[float]) -> np.ndarray[float]:
         self.set_free_params(params)
         self.update_profile_function()
-        return self.comp_func(self.ws.readX(0))
+        return self.comp_func(self.ws.readX(self.ispec))
 
     def eval_resids(self, params: np.ndarray[float]) -> np.ndarray[float]:
-        return self.ws.readY(0) - self.eval_profile(params)
+        return self.ws.readY(self.ispec) - self.eval_profile(params)
 
     def estimate_initial_params(self):
-        y = self.ws.readY(0)
+        y = self.ws.readY(self.ispec)
         bg = 0
         if len(self.bg_params) > 0:
             bg = np.median(y)
@@ -333,18 +371,8 @@ class PawleyPattern1D:
         for iphase in range(len(self.phases)):
             self.intens[iphase] *= scale
 
-    def fit(self, **kwargs) -> OptimizeResult:
-        default_kwargs = {"xtol": 1e-5, "diff_step": 1e-3, "x_scale": "jac", "verbose": 2}
-        kwargs = {**default_kwargs, **kwargs}
-        self.initial_params = self.get_free_params()
-        return least_squares(lambda p: self.eval_resids(p), self.initial_params, **kwargs)
 
-    def undo_fit(self):
-        if self.initial_params is not None:
-            self.set_free_params(self.initial_params)
-
-
-class PawleyPattern2D(PawleyPattern1D):
+class PawleyPattern2D(PawleyPatternBase):
     def __init__(self, *args, global_scale: bool = True, lambda_max: float = 5.0, **kwargs):
         super().__init__(*args, **kwargs)
         self.lambda_max = lambda_max
@@ -361,7 +389,7 @@ class PawleyPattern2D(PawleyPattern1D):
             OutputWorkspace=f"{self.ws.name()}_pattern",
             EnableLogging=False,
         )
-        self.xunit = self.ws_1d.getAxis(0).getUnit()
+        self.update_profile_function()
 
     def set_global_scale(self, global_scale: bool):
         self.global_scale = global_scale
