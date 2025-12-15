@@ -31,7 +31,12 @@ from pyvistaqt import BackgroundPlotter
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from pyvista.plotting.picking import RectangleSelection
 from pyvista.plotting.opts import PickerType
-from vtkmodules.vtkInteractionWidgets import vtkImplicitCylinderWidget, vtkImplicitCylinderRepresentation
+from vtkmodules.vtkInteractionWidgets import (
+    vtkImplicitCylinderWidget,
+    vtkImplicitCylinderRepresentation,
+    vtkBoxWidget2,
+    vtkBoxRepresentation,
+)
 from vtkmodules.vtkCommonCore import vtkCommand
 import numpy as np
 import pyvista as pv
@@ -56,8 +61,21 @@ class CylinderWidgetNoRotation(vtkImplicitCylinderWidget):
         self.AddObserver(vtkCommand.StartInteractionEvent, lambda *_: self._on_interaction())
 
     def _on_interaction(self):
+        # Replace rotation state with translation state
         if self.GetCylinderRepresentation().GetInteractionState() == 4:
             self.GetCylinderRepresentation().SetInteractionState(3)
+            return
+
+
+class RectangleWidgetNoRotation(vtkBoxWidget2):
+    def __init__(self):
+        super().__init__()
+        self.AddObserver(vtkCommand.StartInteractionEvent, lambda *_: self._on_interaction())
+
+    def _on_interaction(self):
+        # Replace rotation state with translation state
+        if self.GetRepresentation().GetInteractionState() == 8:
+            self.GetRepresentation().SetInteractionState(7)
             return
 
 
@@ -203,9 +221,11 @@ class FullInstrumentViewWindow(QMainWindow):
         note = QLabel("Currently only a cylinder/circle shape is supported. A rectangular shape will be added in the next update.")
         pre_list_layout = QHBoxLayout()
         self._circle_widget = QPushButton("Circle Shape")
+        self._rect_widget = QPushButton("Rectangle Shape")
         self._add_mask = QPushButton("Add Mask")
         self._clear_masks = QPushButton("Clear Masks")
         pre_list_layout.addWidget(self._circle_widget)
+        pre_list_layout.addWidget(self._rect_widget)
         pre_list_layout.addWidget(self._add_mask)
         pre_list_layout.addWidget(self._clear_masks)
         self._mask_list = WorkspaceListWidget(self)
@@ -403,6 +423,8 @@ class FullInstrumentViewWindow(QMainWindow):
     def setup_connections_to_presenter(self) -> None:
         self._projection_combo_box.currentIndexChanged.connect(self._presenter.update_plotter)
         self._multi_select_check.stateChanged.connect(self._presenter.update_detector_picker)
+        self._circle_widget.clicked.connect(self._presenter.on_add_cylinder_clicked)
+        self._rect_widget.clicked.connect(self.add_rectangular_widget)
         self._add_mask.clicked.connect(self._presenter.on_cylinder_select_clicked)
         self._clear_selection_button.clicked.connect(self._presenter.on_clear_selected_detectors_clicked)
         self._contour_range_slider.sliderReleased.connect(self._presenter.on_contour_limits_updated)
@@ -656,6 +678,24 @@ class FullInstrumentViewWindow(QMainWindow):
         cylinder_widget.SetInteractor(self.main_plotter.iren.interactor)
         cylinder_widget.On()
         self._current_widget = cylinder_widget
+        # The command below is a hacky way of making the widget appear on top of detectors
+        # No idea why it works
+        self.main_plotter.camera_position = self.main_plotter.camera_position
+
+    def add_rectangular_widget(self, bounds) -> None:
+        rect_repr = vtkBoxRepresentation()
+
+        width, height = self.main_plotter.renderer.GetSize()
+        x0, y0, z0 = self.display_to_world_coords(width / 4, height / 4, 0)
+        x1, y1, z1 = self.display_to_world_coords(3 * width / 4, 3 * height / 4, 0)
+        rect_repr.PlaceWidget([x0, x1, y0, y1, 0, 1])
+
+        rect_widget = RectangleWidgetNoRotation()
+        rect_widget.SetRepresentation(rect_repr)
+        rect_widget.SetCurrentRenderer(self.main_plotter.renderer)
+        rect_widget.SetInteractor(self.main_plotter.iren.interactor)
+        rect_widget.On()
+        self._current_widget = rect_widget
         # The command below is a hacky way of making the widget appear on top of detectors
         # No idea why it works
         self.main_plotter.camera_position = self.main_plotter.camera_position
