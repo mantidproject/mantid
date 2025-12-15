@@ -697,7 +697,7 @@ public:
     TS_ASSERT(hdf_file_is_closed(filename));
     // now check sharing a file id
     { // scoped fid
-      SharedFileID fid1 = H5Fopen(filename.c_str(), H5F_ACC_RDONLY | H5F_ACC_SWMR_READ, fapl);
+      SharedFileID fid1 = H5Fopen(filename.c_str(), H5F_ACC_RDONLY, fapl);
       SharedFileID fid2(fid1);
       SharedFileID fid3(fid2);
       TS_ASSERT_EQUALS(fid1.use_count(), 3);
