@@ -565,7 +565,7 @@ std::string PropertyManager::asString(bool withDefaultValues) const {
   ::Json::Value jsonMap;
   const auto count = static_cast<int>(propertyCount());
   for (int i = 0; i < count; ++i) {
-    Property *p = getPointerToPropertyOrdinal(i);
+    Property const *p = getPointerToPropertyOrdinal(i);
     if (isPropertyEnabled(p->name()) && p->isValueSerializable() && (withDefaultValues || !p->isDefault())) {
       jsonMap[p->name()] = p->valueAsJson();
     }

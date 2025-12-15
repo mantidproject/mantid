@@ -91,11 +91,9 @@ void IPropertyManager::setPropertySettings(const std::string &name, std::unique_
  */
 bool IPropertyManager::isPropertyEnabled(const std::string &name) const {
   Property *prop = getPointerToProperty(name);
-  if (!prop->getSettings().empty())
-    // Allow any setting in the chain of settings to disable the property.
-    return std::all_of(prop->getSettings().begin(), prop->getSettings().end(),
-                       [this](auto const &ptr) { return ptr->isEnabled(this); });
-  return true;
+  // Allow any setting in the chain of settings to disable the property.
+  return std::all_of(prop->getSettings().begin(), prop->getSettings().end(),
+                     [this](auto const &ptr) { return ptr->isEnabled(this); });
 }
 
 /** Test if a given property should be visible,
@@ -110,7 +108,6 @@ bool IPropertyManager::isPropertyVisible(const std::string &name) const {
   // Allow any setting in the chain of settings to hide the property.
   return std::all_of(prop->getSettings().begin(), prop->getSettings().end(),
                      [this](auto const &ptr) { return ptr->isVisible(this); });
-  return true;
 }
 
 /**

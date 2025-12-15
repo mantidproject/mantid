@@ -14,6 +14,8 @@
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
+#include <algorithm>
+#include <iterator>
 #include <unordered_map>
 
 namespace Mantid {
@@ -45,13 +47,11 @@ Property::Property(const Property &right)
       m_direction(right.m_direction), m_units(right.m_units), m_group(right.m_group), m_remember(right.m_remember),
       m_autotrim(right.m_autotrim), m_disableReplaceWSButton(right.m_disableReplaceWSButton),
       m_isDynamicDefault(right.m_isDynamicDefault) {
-  if (m_name.empty()) {
+  if (m_name.empty())
     throw std::invalid_argument("An empty property name is not permitted");
-  }
-  if (!right.m_settings.empty()) {
-    for (const auto &settings : right.m_settings)
-      m_settings.emplace_back(std::unique_ptr<IPropertySettings const>(settings->clone()));
-  }
+
+  std::transform(right.m_settings.begin(), right.m_settings.end(), std::back_inserter(m_settings),
+                 [](auto const &settings) { return std::unique_ptr<IPropertySettings const>(settings->clone()); });
 }
 
 /// Virtual destructor

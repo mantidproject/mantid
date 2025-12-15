@@ -436,15 +436,11 @@ bool AlgorithmDialog::isMessageAvailable() const { return !m_strMessage.isEmpty(
  * @param propName :: The name of the property
  */
 bool AlgorithmDialog::isWidgetEnabled(const QString &propName) const {
-  // TODO: these "to avoid errors" pre-checks may seem like a good idea, but they mask defects.
+  // TODO: these "to avoid errors" prechecks mask defects.
   // They really should be removed!!
 
   // To avoid errors
   if (propName.isEmpty())
-    return true;
-
-  Mantid::Kernel::Property *property = getAlgorithmProperty(propName);
-  if (!property)
     return true;
 
   if (!isForScript()) {
