@@ -11,6 +11,7 @@
 
 #include "test_helper.h"
 
+#include <chrono>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -696,7 +697,7 @@ public:
     TS_ASSERT(hdf_file_is_closed(filename));
     // now check sharing a file id
     { // scoped fid
-      SharedFileID fid1 = H5Fopen(filename.c_str(), H5F_ACC_RDONLY, fapl);
+      SharedFileID fid1 = H5Fopen(filename.c_str(), H5F_ACC_RDONLY | H5F_ACC_SWMR_READ, fapl);
       SharedFileID fid2(fid1);
       SharedFileID fid3(fid2);
       TS_ASSERT_EQUALS(fid1.use_count(), 3);
@@ -730,14 +731,23 @@ public:
 // NOTE this warning causes build failures; suppress for now
 // the issue is caused by capturing variables of type TestSharedID,
 // which have a deleter method defined at global scope
+#if defined(__GNUC__)
 #pragma GCC diagnostic ignored "-Wsubobject-linkage"
+#endif
     constexpr int N{10};
     TestSharedID id(GOOD_ID1);
     std::vector<TestSharedID> ids(N);
     std::vector<std::thread> threads;
 
     // create some ids and increment count
-    std::function<void(int)> make_another = [&ids, &id](int i) { ids[i] = id; };
+    std::function<void(int)> make_another = [&ids, &id](int i) {
+      ids[i] = id;
+      int dart = (53 * i + 122) % 9;
+      std::this_thread::sleep_for(std::chrono::milliseconds(dart));
+      TS_ASSERT_EQUALS(ids[i].get(), id.get());
+      dart = (53 * dart + 122) % 9;
+      std::this_thread::sleep_for(std::chrono::milliseconds(dart));
+    };
     for (int i = 0; i < N; i++) {
       threads.emplace_back(make_another, i);
     }
@@ -749,7 +759,11 @@ public:
 
     // delete some ids and verify counts
     threads.clear();
-    std::function<void(int)> remove_more = [&ids](int i) { ids[i].reset(); };
+    std::function<void(int)> remove_more = [&ids](int i) {
+      int dart = (27 * i + 122) % 7;
+      std::this_thread::sleep_for(std::chrono::milliseconds(dart));
+      ids[i].reset();
+    };
     for (int i = 0; i < N; ++i) {
       threads.emplace_back(remove_more, i);
     }

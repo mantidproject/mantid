@@ -21,11 +21,11 @@ typedef int herr_t;
  * Nexus file access codes.
  * these codes are taken directly from values used in hdf5 package
  * https://github.com/HDFGroup/hdf5/blob/develop/src/H5Fpublic.h
- * \li READ read-only. Same as H5F_ACC_RDONLY
+ * \li READ read-only. Same as H5F_ACC_RDONLY | H5F_ACC_SWMR_READ
  * \li RDWR open an existing file for reading and writing. Same as H5F_ACC_RDWR.
  * \li CREATE5 create a Nexus HDF-5 file. Same as H5F_ACC_TRUNC.
  */
-enum class NXaccess : unsigned int { READ = 0x0000u, RDWR = 0x0001u, CREATE5 = 0x0002u };
+enum class NXaccess : unsigned int { READ = 0x0040u, RDWR = 0x0001u, CREATE5 = 0x0002u };
 
 MANTID_NEXUS_DLL std::ostream &operator<<(std::ostream &os, const NXaccess &value);
 
