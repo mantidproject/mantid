@@ -51,8 +51,6 @@ std::string NexusTest::strmakef(const char *const fmt, ...) {
   return s;
 }
 
-using ssize_t = long int;
-
 bool NexusTest::hdf_file_is_closed(std::string const &filename) {
   ssize_t file_count = H5Fget_obj_count(H5F_OBJ_ALL, H5F_OBJ_FILE);
   if (file_count < 0) {

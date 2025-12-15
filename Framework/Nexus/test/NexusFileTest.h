@@ -23,6 +23,7 @@
 #include <regex>
 #include <sstream>
 #include <string>
+#include <thread>
 #include <vector>
 
 using namespace NexusTest;
@@ -1583,6 +1584,65 @@ public:
       TS_ASSERT(!hdf_file_is_closed(filename));
     }
     // check the file is closed
+    TS_ASSERT(hdf_file_is_closed(filename));
+  }
+
+  void test_open_concurrent_threads() {
+    cout << "\ntest sharing across threads\n" << std::flush;
+
+    // create a file with two entries
+    FileResource resource("test_nexus_concurrent_thread.nxs");
+    std::string filename(resource.fullPath());
+    { // scoped file creation
+      Mantid::Nexus::File file(filename, NXaccess::CREATE5);
+      file.makeGroup("entry1", "NXshorts", false);
+      file.makeGroup("entry2", "NXpants", false);
+      file.close();
+    }
+    // check the file is closed
+    TS_ASSERT(hdf_file_is_closed(filename));
+
+    // now reopen scoped
+    {
+      Mantid::Nexus::File file(filename, NXaccess::READ);
+
+      // prepate two threads to copy the file and read a different group
+      constexpr int N{2};
+      std::string addr1(2, 'x'), addr2(2, 'a');
+      std::vector<std::thread> threads(N);
+      threads[0] = std::thread(
+          [&file](std::string &addr) {
+            Mantid::Nexus::File file1(file);
+            file1.openGroup("entry1", "NXshorts");
+            addr = file1.getAddress();
+            TS_ASSERT_EQUALS(addr, "/entry1");
+            TS_ASSERT_EQUALS(file.getAddress(), "/");
+            file1.closeGroup();
+          },
+          std::ref(addr1));
+      threads[1] = std::thread(
+          [&file](std::string &addr) {
+            Mantid::Nexus::File file2(file);
+            file2.openGroup("entry2", "NXpants");
+            addr = file2.getAddress();
+            TS_ASSERT_EQUALS(addr, "/entry2");
+            TS_ASSERT_EQUALS(file.getAddress(), "/");
+            file2.closeGroup();
+          },
+          std::ref(addr2));
+
+      threads[0].join();
+      threads[1].join();
+
+      TS_ASSERT(!hdf_file_is_closed(filename));
+      TS_ASSERT_EQUALS(file.getAddress(), "/");
+      TS_ASSERT_EQUALS(addr1, "/entry1");
+      TS_ASSERT_EQUALS(addr2, "/entry2");
+
+      file.openGroup("entry1", "NXshorts");
+      TS_ASSERT_EQUALS(file.getAddress(), "/entry1");
+      file.closeGroup();
+    }
     TS_ASSERT(hdf_file_is_closed(filename));
   }
 
