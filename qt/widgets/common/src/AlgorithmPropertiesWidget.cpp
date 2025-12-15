@@ -340,7 +340,7 @@ void AlgorithmPropertiesWidget::replaceWSClicked(const QString &propName) {
 
 //-------------------------------------------------------------------------------------------------
 /** Check if the control should be enabled for this property
- * @param property :: the property to check
+ * @param prop :: the property to check
  */
 bool AlgorithmPropertiesWidget::isWidgetEnabled(const Property *prop) const {
   if (!prop)
@@ -364,7 +364,7 @@ bool AlgorithmPropertiesWidget::isWidgetEnabled(const Property *prop) const {
 //-------------------------------------------------------------------------------------------------
 /** Compute if the control should be visible for this property based on settings and error state.
  *  WARNING: the GUI itself may override this visibility setting (e.g. if a parent widget is hidden).
- * @param property :: the property that allows to check for the settings.
+ * @param prop :: the property that allows to check for the settings.
  */
 bool AlgorithmPropertiesWidget::isWidgetVisible(const Property *prop) const {
   if (!prop)
