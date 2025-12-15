@@ -80,11 +80,20 @@ BankCalibration::BankCalibration(const detid_t idmin, const detid_t idmax, const
     }
   }
 
-  // mask anything that isn't int the group - this could be optimized by assuming the input vector is sorted
-  for (size_t i = 0; i < m_calibration.size(); ++i) {
-    const detid_t detid = static_cast<detid_t>(i) + m_detid_offset;
-    if (std::find(det_in_group.cbegin(), det_in_group.cend(), detid) == det_in_group.cend()) {
-      m_calibration[i] = IGNORE_PIXEL;
+  // mask anything that isn't int the group this assumes both are sorted
+  if (!det_in_group.empty()) {
+    // find the first and last detector id that is in the range being used
+    auto detid_first = std::lower_bound(det_in_group.cbegin(), det_in_group.cend(), idmin);
+    auto detid_last = det_in_group.cend();
+    for (size_t i = 0; i < m_calibration.size(); ++i) {
+      if (m_calibration[i] != IGNORE_PIXEL) {
+        const detid_t detid = static_cast<detid_t>(i) + m_detid_offset;
+        auto detid_found = std::find(detid_first, detid_last, detid);
+        if (detid_found == detid_last)
+          m_calibration[i] = IGNORE_PIXEL; // not in the list
+        else
+          detid_first = detid_found; // next search can start from here
+      }
     }
   }
 }
