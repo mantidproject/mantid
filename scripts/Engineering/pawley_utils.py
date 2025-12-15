@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import annotations
-from mantid.simpleapi import CreateSingleValuedWorkspace, LoadCIF, CreateWorkspace
+from mantid.simpleapi import CreateSingleValuedWorkspace, LoadCIF, CreateWorkspace, EvaluateFunction, Fit
 import numpy as np
 from mantid.fitfunctions import FunctionWrapper, CompositeFunctionWrapper
 from mantid.api import FunctionFactory
@@ -324,10 +324,6 @@ class PawleyPatternBase(ABC):
     def eval_resids(self, params: np.ndarray[float]) -> np.ndarray[float]:
         raise NotImplementedError()
 
-    @abstractmethod
-    def estimate_initial_params(self):
-        raise NotImplementedError()
-
 
 class PawleyPattern1D(PawleyPatternBase):
     def __init__(self, *args, ispec: int = 0, **kwargs):
@@ -356,6 +352,23 @@ class PawleyPattern1D(PawleyPatternBase):
 
     def eval_resids(self, params: np.ndarray[float]) -> np.ndarray[float]:
         return self.ws.readY(self.ispec) - self.eval_profile(params)
+
+    def get_eval_workspace(self, **kwargs):
+        return EvaluateFunction(Function=self.comp_func, InputWorkspace=self.ws, WorkspaceIndex=self.ispec, **kwargs)
+
+    def fit_no_constraints(self, **kwargs):
+        # select cost function
+        default_kwargs = {
+            "Minimizer": "Levenberg-Marquardt",
+            "MaxIterations": 500,
+            "StepSizeMethod": "Sqrt epsilon",
+            "IgnoreInvalidData": True,
+            "CreateOutput": True,
+            "OutputCompositeMembers": False,
+            "CostFunction": "Unweighted least squares",
+        }
+        kwargs = {**default_kwargs, **kwargs}
+        return Fit(Function=self.comp_func, InputWorkspace=self.ws, WorkspaceIndex=self.ispec, **kwargs)
 
     def estimate_initial_params(self):
         y = self.ws.readY(self.ispec)
