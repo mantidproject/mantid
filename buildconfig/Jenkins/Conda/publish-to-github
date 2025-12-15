@@ -12,6 +12,7 @@
 #   Remainder PACKAGES: A list of args that will be uploaded to github release cloud.
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source $SCRIPT_DIR/pixi-utils
+REPO_ROOT_DIR=$SCRIPT_DIR/../../..
 
 # Parse arguments
 WORKSPACE=$1
@@ -39,7 +40,7 @@ install_pixi
 # Shorthand to always set the --repo command for "gh release"
 # All other arguments are passed to the command
 github_release_cmd() {
-  pixi run -e publish-gh --frozen gh release --repo $RELEASES_REPO "$@"
+  pixi run --manifest-path $REPO_ROOT_DIR/pixi.toml -e publish-gh --frozen gh release --repo $RELEASES_REPO "$@"
 }
 
 # Create a release and attach the given assets.

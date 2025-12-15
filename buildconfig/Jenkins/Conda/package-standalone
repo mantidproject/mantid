@@ -64,8 +64,6 @@ do
   shift
 done
 
-# cd $REPO_ROOT_DIR
-
 # pixi
 install_pixi
 
