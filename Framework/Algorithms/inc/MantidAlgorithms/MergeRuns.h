@@ -50,7 +50,7 @@ namespace Algorithms {
 */
 
 namespace MergeRunsParameter {
-/// MergeRuns parameter names of the paramter file for sample log merging
+/// MergeRuns parameter names of the parameter file for sample log merging
 static const std::string SUM_MERGE = "sample_logs_sum";
 static const std::string TIME_SERIES_MERGE = "sample_logs_time_series";
 static const std::string LIST_MERGE = "sample_logs_list";
