@@ -155,6 +155,10 @@ public:
     TS_ASSERT_EQUALS(y_values[0], 0.);
     TS_ASSERT_EQUALS(y_values[NUM_Y / 2], 0.);
     TS_ASSERT_EQUALS(y_values[NUM_Y - 1], 4744.);
+    const auto e_values = outputWS->readE(0);
+    TS_ASSERT_DELTA(e_values[0], 0., 1e-10);
+    TS_ASSERT_DELTA(e_values[NUM_Y / 2], 0., 1e-10);
+    TS_ASSERT_DELTA(e_values[NUM_Y - 1], std::sqrt(4744.), 1e-10);
 
     // do not need to cleanup because workspace did not go into the ADS
 
@@ -201,6 +205,10 @@ public:
     TS_ASSERT_EQUALS(y_values[0], 0.);
     TS_ASSERT_EQUALS(y_values[NUM_Y / 2], 55374.); // observed
     TS_ASSERT_EQUALS(y_values[NUM_Y - 1], 0.);
+    const auto e_values = outputWS->readE(0);
+    TS_ASSERT_DELTA(e_values[0], 0., 1e-10);
+    TS_ASSERT_DELTA(e_values[NUM_Y / 2], std::sqrt(55374.), 1e-10);
+    TS_ASSERT_DELTA(e_values[NUM_Y - 1], 0., 1e-10);
 
     // do not need to cleanup because workspace did not go into the ADS
   }
@@ -464,6 +472,12 @@ public:
       TS_ASSERT_EQUALS(outputWS0->readY(3).front(), 909955);
       TS_ASSERT_EQUALS(outputWS0->readY(4).front(), 310676);
       TS_ASSERT_EQUALS(outputWS0->readY(5).front(), 590230);
+      TS_ASSERT_DELTA(outputWS0->readE(0).front(), std::sqrt(807206), 1e-10);
+      TS_ASSERT_DELTA(outputWS0->readE(1).front(), std::sqrt(805367), 1e-10);
+      TS_ASSERT_DELTA(outputWS0->readE(2).front(), std::sqrt(920983), 1e-10);
+      TS_ASSERT_DELTA(outputWS0->readE(3).front(), std::sqrt(909955), 1e-10);
+      TS_ASSERT_DELTA(outputWS0->readE(4).front(), std::sqrt(310676), 1e-10);
+      TS_ASSERT_DELTA(outputWS0->readE(5).front(), std::sqrt(590230), 1e-10);
     }
   }
 
@@ -511,6 +525,12 @@ public:
       TS_ASSERT_EQUALS(outputWS0->readY(3).front(), 63299);
       TS_ASSERT_EQUALS(outputWS0->readY(4).front(), 22917);
       TS_ASSERT_EQUALS(outputWS0->readY(5).front(), 43843);
+      TS_ASSERT_DELTA(outputWS0->readE(0).front(), std::sqrt(59561), 1e-10);
+      TS_ASSERT_DELTA(outputWS0->readE(1).front(), std::sqrt(59358), 1e-10);
+      TS_ASSERT_DELTA(outputWS0->readE(2).front(), std::sqrt(63952), 1e-10);
+      TS_ASSERT_DELTA(outputWS0->readE(3).front(), std::sqrt(63299), 1e-10);
+      TS_ASSERT_DELTA(outputWS0->readE(4).front(), std::sqrt(22917), 1e-10);
+      TS_ASSERT_DELTA(outputWS0->readE(5).front(), std::sqrt(43843), 1e-10);
 
       /* expected results came from running
 
@@ -737,6 +757,12 @@ public:
       TS_ASSERT_EQUALS(outputWS0->readY(3).front(), 228);
       TS_ASSERT_EQUALS(outputWS0->readY(4).front(), 71);
       TS_ASSERT_EQUALS(outputWS0->readY(5).front(), 144);
+      TS_ASSERT_DELTA(outputWS0->readE(0).front(), std::sqrt(214), 1e-10);
+      TS_ASSERT_DELTA(outputWS0->readE(1).front(), std::sqrt(219), 1e-10);
+      TS_ASSERT_DELTA(outputWS0->readE(2).front(), std::sqrt(269), 1e-10);
+      TS_ASSERT_DELTA(outputWS0->readE(3).front(), std::sqrt(228), 1e-10);
+      TS_ASSERT_DELTA(outputWS0->readE(4).front(), std::sqrt(71), 1e-10);
+      TS_ASSERT_DELTA(outputWS0->readE(5).front(), std::sqrt(144), 1e-10);
 
       auto outputWS1 = std::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(1));
       TS_ASSERT_EQUALS(outputWS1->readY(0).front(), 171);
