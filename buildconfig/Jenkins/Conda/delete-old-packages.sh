@@ -13,6 +13,7 @@
 # All remaining arguments are package names to remove
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source $SCRIPT_DIR/pixi-utils
+REPO_ROOT_DIR=$SCRIPT_DIR/../../..
 
 WORKSPACE=$1
 ANACONDA_TOKEN=$2
@@ -72,5 +73,5 @@ function delete_package() {
 install_pixi
 
 for name in "$@"; do
-  pixi run -e delete-old-packages --frozen delete_package $CHANNEL $name $LABEL
+  pixi run --manifest-path $REPO_ROOT_DIR/pixi.toml -e delete-old-packages --frozen delete_package $CHANNEL $name $LABEL
 done

@@ -2,6 +2,7 @@
 # Build the developer site and push to gh-pages
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source $SCRIPT_DIR/pixi-utils
+REPO_ROOT_DIR=$SCRIPT_DIR/../../..
 
 if [ $# != 1 ]; then
   echo "Usage: build-and-publish-devsite.sh mantid_root_dir"
@@ -34,7 +35,7 @@ install_pixi
 # Build the developer site
 ###############################################################################
 export LC_ALL=C
-pixi run -e devsite --frozen python -m sphinx $WORKSPACE/dev-docs/source $BUILD_DIR
+pixi run --manifest-path $REPO_ROOT_DIR/pixi.toml -e devsite --frozen python -m sphinx $WORKSPACE/dev-docs/source $BUILD_DIR
 
 ###############################################################################
 # Push the results
