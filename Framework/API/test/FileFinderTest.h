@@ -389,7 +389,7 @@ public:
   void testFindAddFiles() {
     // create a test file to find
     std::filesystem::path file("LOQ00111-add.raw");
-    std::ofstream fil(file.string());
+    std::ofstream fil(file);
     fil << "dummy";
     fil.close();
 
