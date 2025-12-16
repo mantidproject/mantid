@@ -157,9 +157,12 @@ void ProcessBankTask::operator()(const tbb::blocked_range<size_t> &range) const 
       std::transform(y_temp.begin(), y_temp.end(), task.y_temp.begin(), y_temp.begin(), std::plus<uint32_t>());
     }
 
-    // copy the data out into the correct spectrum
+    // copy the data out into the correct spectrum and calculate errors
     auto &y_values = spectrum.dataY();
     std::copy(y_temp.cbegin(), y_temp.cend(), y_values.begin());
+    auto &e_values = spectrum.dataE();
+    std::transform(y_temp.cbegin(), y_temp.cend(), e_values.begin(),
+                   [](uint32_t y) { return std::sqrt(static_cast<double>(y)); });
 
     g_log.debug() << bankName << " stop " << timer << std::endl;
     m_progress->report();

@@ -130,6 +130,11 @@ public:
     TS_ASSERT_EQUALS(ws->readY(0)[1], 3.0);
     TS_ASSERT_EQUALS(ws2->readY(0)[0], 3.0);
     TS_ASSERT_EQUALS(ws2->readY(0)[1], 0.0);
+    // error will be sqrt of counts
+    TS_ASSERT_DELTA(ws->readE(0)[0], std::sqrt(7.0), 1e-10);
+    TS_ASSERT_DELTA(ws->readE(0)[1], std::sqrt(3.0), 1e-10);
+    TS_ASSERT_DELTA(ws2->readE(0)[0], std::sqrt(3.0), 1e-10);
+    TS_ASSERT_DELTA(ws2->readE(0)[1], 0.0, 1e-10);
 
     // now test with different correction to sample
     const std::map<Mantid::detid_t, double> scale_at_sample2{{1, 1000.}, {2, 500.}};
@@ -169,5 +174,10 @@ public:
     TS_ASSERT_EQUALS(ws->readY(0)[1], 2.0);
     TS_ASSERT_EQUALS(ws2->readY(0)[0], 3.0);
     TS_ASSERT_EQUALS(ws2->readY(0)[1], 2.0);
+    // error will be sqrt of counts
+    TS_ASSERT_DELTA(ws->readE(0)[0], std::sqrt(7.0), 1e-10);
+    TS_ASSERT_DELTA(ws->readE(0)[1], std::sqrt(2.0), 1e-10);
+    TS_ASSERT_DELTA(ws2->readE(0)[0], std::sqrt(3.0), 1e-10);
+    TS_ASSERT_DELTA(ws2->readE(0)[1], std::sqrt(2.0), 1e-10);
   }
 };
