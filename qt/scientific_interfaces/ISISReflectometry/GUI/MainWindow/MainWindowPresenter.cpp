@@ -285,18 +285,23 @@ void MainWindowPresenter::showHelp() {
 std::string MainWindowPresenter::encodeBatchToStr(const std::vector<std::string> &jsonKey) const {
   auto tabIndex = m_view->getTabIndex();
   QVariant vMap = m_encoder->encodeBatch(m_view, tabIndex, false);
-  QVariantMap map{};
+  QVariantMap map;
+  bool err = false;
   for (auto &key : jsonKey) {
     if (vMap.type() == 8 && vMap.canConvert(8)) { // 8 = map - is there an enum?
       map = vMap.toMap();
-      vMap = map.value(QString::fromStdString(key));
+      auto qKey = QString::fromStdString(key);
+      if (map.contains(qKey)) {
+        vMap = map.value(qKey);
+      } else {
+        throw std::invalid_argument("Invalid json key provided. Json key not in map. Invalid element: " + key);
+      }
     } else {
       throw std::invalid_argument(
           "Invalid json key provided. Json key must allow traversal of nested QMaps. Invalid element: " + key);
     }
   }
-  map = vMap.toMap();
-  return MantidQt::API::outputJsonToString(map);
+  return MantidQt::API::outputJsonToString(vMap);
 }
 
 void MainWindowPresenter::notifySaveBatchRequested(int tabIndex) {
