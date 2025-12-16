@@ -452,6 +452,7 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         # Everything on spectrum number 1
         model._spectrum_nos = np.array([test_spectrum_no, test_spectrum_no, test_spectrum_no])
         model._is_valid = np.array([True, True, True])
+        model._is_masked = np.array([False, False, False])
         peaks = model.peak_overlay_points()
         # Should get one peak with detector ID 4 and spectrum
         # number 1
@@ -622,6 +623,17 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         model, _ = self._setup_model([1, 2, 3])
         model.save_xml_mask("file")
         mock_save_mask.assert_called_with(model._mask_ws, OutputFile="file.xml")
+
+    def test_masked_spectrum_peak_not_included(self):
+        model = FullInstrumentViewModel(self._ws)
+        peaks_ws = CreatePeaksWorkspace(self._ws, 2)
+        model._selected_peaks_workspaces = [peaks_ws]
+        model._detector_ids = np.array([100])
+        model._spectrum_nos = np.array([2])
+        model._is_valid = np.array([True])
+        model._is_masked = np.array([True])
+        peaks = model.peak_overlay_points()
+        self.assertEqual(0, len(peaks[0]))
 
 
 if __name__ == "__main__":

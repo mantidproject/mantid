@@ -136,7 +136,7 @@ class FullInstrumentViewModel:
 
     @property
     def spectrum_nos(self) -> np.ndarray:
-        return self._spectrum_nos[self._is_valid]
+        return self._spectrum_nos[self.is_pickable]
 
     @property
     def monitor_positions(self) -> np.ndarray:
@@ -380,7 +380,7 @@ class FullInstrumentViewModel:
             # groupby groups consecutive matches, so must be sorted
             peaks.sort(key=lambda x: x.spectrum_no)
             for spec_no, peaks_for_spec in groupby(peaks, lambda x: x.spectrum_no):
-                if spec_no in self._spectrum_nos:
+                if spec_no in self.spectrum_nos:
                     detector_peaks.append(DetectorPeaks(list(peaks_for_spec)))
 
             peaks_grouped_by_ws.append(detector_peaks)
