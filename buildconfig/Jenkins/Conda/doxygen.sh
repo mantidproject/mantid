@@ -12,7 +12,7 @@
 #   1. WORKSPACE: path to the root of the source code. On Windows, only use / for
 #                 this argument do not use \\ or \ in the path.
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source $SCRIPT_DIR/mamba-utils
+source $SCRIPT_DIR/pixi-utils
 
 # Check 1 argument is passed and is not optional
 if [[ $# < 1 || $1 == "--"* ]]; then
