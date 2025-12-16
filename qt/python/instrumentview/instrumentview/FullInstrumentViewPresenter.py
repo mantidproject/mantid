@@ -262,6 +262,7 @@ class FullInstrumentViewPresenter:
 
     def on_save_mask_to_workspace_clicked(self) -> None:
         self._model.save_mask_workspace_to_ads()
+        self.on_mask_item_selected()
 
     def on_overwrite_mask_clicked(self) -> None:
         self._model.overwrite_mask_to_current_workspace()
@@ -271,6 +272,16 @@ class FullInstrumentViewPresenter:
         self._view.clear_mask_list()
         self._model.clear_stored_masks()
         self.on_mask_item_selected()
+
+    def _reload_mask_workspaces(self) -> None:
+        self._view.refresh_mask_ws_list()
+        self.on_mask_item_selected()
+
+    def mask_workspaces_in_ads(self) -> list[str]:
+        return [ws.name() for ws in self._model.get_mask_workspaces_in_ads()]
+
+    def cached_masks_keys(self) -> list[str]:
+        return self._model.cached_masks_keys
 
     def _update_line_plot_ws_and_draw(self, unit: str) -> None:
         self._model.extract_spectra_for_line_plot(unit, self._view.sum_spectra_selected())
@@ -313,6 +324,7 @@ class FullInstrumentViewPresenter:
             logger.warning(f"Workspace {ws_name} deleted, closed Experimental Instrument View.")
         else:
             self._reload_peaks_workspaces()
+            self._reload_mask_workspaces()
 
     def rename_workspace_callback(self, ws_old_name, ws_new_name):
         if self._model._workspace.name() == ws_old_name:
@@ -320,6 +332,7 @@ class FullInstrumentViewPresenter:
             self._model.setup()
             logger.warning(f"Workspace {ws_old_name} renamed to {ws_new_name}, updated Experimental Instrument View.")
         self._reload_peaks_workspaces()
+        self._reload_mask_workspaces()
 
     def clear_workspace_callback(self):
         self._view.close()
@@ -327,6 +340,8 @@ class FullInstrumentViewPresenter:
     def replace_workspace_callback(self, ws_name, ws):
         if ws_name in self.peaks_workspaces_in_ads():
             self._reload_peaks_workspaces()
+        elif ws_name in self.mask_workspaces_in_ads():
+            self._reload_mask_workspaces()
         elif ws_name == self._model.workspace.name():
             # This check is needed because observers are triggered
             # before the RenameWorkspace is completed.
@@ -338,6 +353,7 @@ class FullInstrumentViewPresenter:
 
     def add_workspace_callback(self, ws_name, ws):
         self._reload_peaks_workspaces()
+        self._reload_mask_workspaces()
 
     def handle_close(self):
         # The observers are unsubscribed on object deletion, it's safer to manually

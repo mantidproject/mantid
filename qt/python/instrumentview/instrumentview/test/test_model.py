@@ -612,11 +612,13 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         np.testing.assert_array_equal(model._is_masked, np.array([True, False, False]))
         np.testing.assert_array_equal(model._detector_is_picked, np.array([False, False, False]))
 
+    @mock.patch("instrumentview.FullInstrumentViewModel.CloneWorkspace")
     @mock.patch("instrumentview.FullInstrumentViewModel.ExtractMaskToTable")
-    def test_save_mask_workspace_to_ads(self, mock_extract_to_table):
+    def test_save_mask_workspace_to_ads(self, mock_extract_to_table, mock_clone):
         model, _ = self._setup_model([1, 2, 3])
         model.save_mask_workspace_to_ads()
         mock_extract_to_table.assert_called_once()
+        mock_clone.assert_called_once()
 
     @mock.patch("instrumentview.FullInstrumentViewModel.SaveMask")
     def test_save_xml_mask(self, mock_save_mask):
