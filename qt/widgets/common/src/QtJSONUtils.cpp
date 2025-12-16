@@ -79,8 +79,9 @@ QMap<QString, QVariant> loadJSONFromString(const QString &jsonString) {
 }
 
 std::string outputJsonToString(const QMap<QString, QVariant> &map) {
-  (void)map;
-  return {};
+  QJsonDocument doc(QJsonObject::fromVariantMap(map));
+  QString jsonString(doc.toJson(QJsonDocument::Compact));
+  return jsonString.toStdString();
 }
 
 } // namespace MantidQt::API

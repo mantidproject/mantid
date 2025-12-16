@@ -519,8 +519,7 @@ std::string RunsPresenter::liveDataReductionAlgorithm() { return "ReflectometryR
 std::string RunsPresenter::liveDataReductionOptions(const std::string &inputWorkspace, const std::string &instrument) {
   // Get the properties for the reduction algorithm from the settings tabs
   auto options = m_mainPresenter->rowProcessingProperties();
-  auto experimentState = m_mainPresenter->getBatchState(
-      "experimentView/perAngleDefaults/rows"); // replace with string that represents where to start the state
+  auto experimentState = m_mainPresenter->getBatchState({"experimentView", "perAngleDefaults"});
 
   // Add other required input properties to the live data reduction algorithnm
   options->setPropertyValue("InputWorkspace", inputWorkspace);

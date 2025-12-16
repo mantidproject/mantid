@@ -282,9 +282,20 @@ void MainWindowPresenter::showHelp() {
   MantidQt::API::HelpWindow::showCustomInterface(std::string("ISIS Reflectometry"), std::string("reflectometry"));
 }
 
-std::string MainWindowPresenter::encodeBatchToStr(const std::string &jsonKey) const {
+std::string MainWindowPresenter::encodeBatchToStr(const std::vector<std::string> &jsonKey) const {
   auto tabIndex = m_view->getTabIndex();
-  auto map = m_encoder->encodeBatch(m_view, tabIndex, false); // need to use jsonKey to only pass part of the map.
+  QVariant vMap = m_encoder->encodeBatch(m_view, tabIndex, false);
+  QVariantMap map{};
+  for (auto &key : jsonKey) {
+    if (vMap.type() == 8 && vMap.canConvert(8)) { // 8 = map - is there an enum?
+      map = vMap.toMap();
+      vMap = map.value(QString::fromStdString(key));
+    } else {
+      throw std::invalid_argument(
+          "Invalid json key provided. Json key must allow traversal of nested QMaps. Invalid element: " + key);
+    }
+  }
+  map = vMap.toMap();
   return MantidQt::API::outputJsonToString(map);
 }
 

@@ -48,7 +48,7 @@ public:
   virtual Mantid::Geometry::Instrument_const_sptr instrument() const = 0;
   virtual std::string instrumentName() const = 0;
   virtual bool discardChanges(std::string const &message) const = 0;
-  virtual std::string encodeBatchToStr(const std::string &jsonKey) const = 0;
+  virtual std::string encodeBatchToStr(const std::vector<std::string> &jsonKey) const = 0;
 
   virtual ~IMainWindowPresenter() = default;
 };

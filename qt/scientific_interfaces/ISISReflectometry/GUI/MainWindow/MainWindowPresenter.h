@@ -68,7 +68,7 @@ public:
   Mantid::Geometry::Instrument_const_sptr instrument() const override;
   std::string instrumentName() const override;
   bool discardChanges(std::string const &message) const override;
-  std::string encodeBatchToStr(const std::string &jsonKey) const override;
+  std::string encodeBatchToStr(const std::vector<std::string> &jsonKey) const override;
 
   // MainWindowSubscriber overrides
   void notifyHelpPressed() override;
