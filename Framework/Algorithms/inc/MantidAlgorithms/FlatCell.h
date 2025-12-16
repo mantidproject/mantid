@@ -37,6 +37,7 @@ private:
   double mean(const std::vector<double> &values);
   double stddev(const std::vector<double> &values);
   void scale(std::vector<double> &values, double factor);
+  void maskByThreshold(std::vector<double> &values, double threshold);
 
   friend class FlatCellTest;
 };
