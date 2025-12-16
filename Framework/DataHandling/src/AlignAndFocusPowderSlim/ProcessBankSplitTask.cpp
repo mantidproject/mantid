@@ -190,10 +190,13 @@ void ProcessBankSplitTask::operator()(const tbb::blocked_range<size_t> &range) c
           });
     }
 
-    // copy the data out into the correct spectrum
+    // copy the data out into the correct spectrum and calculate errors
     tbb::parallel_for(size_t(0), m_wksps.size(), [&](size_t i) {
       auto &y_values = spectra[i]->dataY();
       std::copy(y_temps[i].cbegin(), y_temps[i].cend(), y_values.begin());
+      auto &e_values = spectra[i]->dataE();
+      std::transform(y_temps[i].cbegin(), y_temps[i].cend(), e_values.begin(),
+                     [](uint32_t y) { return std::sqrt(static_cast<double>(y)); });
     });
 
     g_log.debug() << bankName << " stop " << timer << std::endl;
