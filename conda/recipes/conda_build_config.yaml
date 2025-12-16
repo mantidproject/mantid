@@ -49,6 +49,12 @@ gdk_pixbuf:
 graphviz:
   - '>=2.47.0'
 
+gmock:
+  - '==1.17.0'
+
+gtest:
+  - '==1.17.0'
+
 jemalloc:
   - '==5.2.0'   # [linux]
   - '5.2.*'     # [osx]

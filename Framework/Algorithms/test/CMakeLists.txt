@@ -44,8 +44,14 @@ if(CXXTEST_FOUND)
             Mantid::Kernel
             Boost::boost
             ${BCRYPT}
-            gmock
   )
+
+  # Prefer imported GTest targets when available, otherwise fall back to plain targets
+  if(TARGET GTest::gmock AND TARGET GTest::gtest)
+    target_link_libraries(AlgorithmsTest PRIVATE GTest::gmock GTest::gtest)
+  else()
+    target_link_libraries(AlgorithmsTest PRIVATE gmock gtest)
+  endif()
 
   add_framework_test_helpers(AlgorithmsTest)
 
