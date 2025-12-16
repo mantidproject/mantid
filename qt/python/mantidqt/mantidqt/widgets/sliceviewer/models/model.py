@@ -399,7 +399,7 @@ class SliceViewerModel(SliceViewerBaseModel):
         workspace = self._get_ws()
         dim_limits = _dimension_limits(workspace, slicepoint, bin_params, dimension_indices, limits)
 
-        # Construct paramters to integrate everything first and overrid per cut
+        # Construct parameters to integrate everything first and overrid per cut
         params = {f"P{n + 1}Bin": [*dim_limits[n]] for n in range(workspace.getNumDims())}
         xindex, yindex = WorkspaceInfo.display_indices(slicepoint, transpose)
 
