@@ -638,7 +638,7 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         model._is_valid = np.array([True])
         model._is_masked = np.array([True])
         peaks = model.peak_overlay_points()
-        self.assertEqual(0, len(peaks[0]))
+        self.assertEqual(0, len(peaks[peaks_ws.name()]))
 
     def test_delete_all_peaks_skips_workspaces_not_in_overlay(self):
         """Workspaces missing from overlay mapping are ignored."""
@@ -759,23 +759,6 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         model.delete_peak(2.2)
         ws1.removePeak.assert_not_called()
 
-    def test_raises_if_multiple_groupings_for_same_detector(self):
-        """Multiple group entries for the same detector_id should raise RuntimeError."""
-        model, _ = self._setup_model([7])
-        model._detector_is_picked = [True]
-        ws1 = MagicMock()
-        ws1.name.return_value = "ws1"
-        model._selected_peaks_workspaces = [ws1]
-        overlay = {
-            "ws1": [
-                DetectorPeaks([self._create_peak(10, 7, 1.0)]),
-                DetectorPeaks([self._create_peak(11, 7, 2.0)]),  # duplicate detector_id group
-            ]
-        }
-        model.peak_overlay_points = MagicMock(return_value=overlay)
-        with self.assertRaises(RuntimeError):
-            model.delete_peak(2.2)
-
     def test_removes_closest_peak_in_single_workspace(self):
         """Selects and removes the closest peak within a single workspace."""
         model, _ = self._setup_model([7])
@@ -841,7 +824,9 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         model, _ = self._setup_model([1, 2, 3])
         mock_ads_instance = mock_ads.Instance()
         model._peaks_workspace_for_adding_new_peak([])
-        mock_create_peaks_ws.assert_called_once_with(model._workspace, 0, OutputWorkspace=model._instrument_view_peaks_ws_name)
+        mock_create_peaks_ws.assert_called_once_with(
+            model._workspace, 0, OutputWorkspace=model._instrument_view_peaks_ws_name, StoreInADS=False
+        )
         mock_create_peaks_ws.reset_mock()
 
         model._peaks_workspace_for_adding_new_peak(["my_peaks_ws"])
@@ -856,7 +841,9 @@ class TestFullInstrumentViewModel(unittest.TestCase):
 
         mock_ads_instance.getObjectNames.return_value = []
         model._peaks_workspace_for_adding_new_peak(["my_peaks_ws1", "my_peaks_ws2"])
-        mock_create_peaks_ws.assert_called_once_with(model._workspace, 0, OutputWorkspace=model._instrument_view_peaks_ws_name)
+        mock_create_peaks_ws.assert_called_once_with(
+            model._workspace, 0, OutputWorkspace=model._instrument_view_peaks_ws_name, StoreInADS=False
+        )
 
     @mock.patch("instrumentview.FullInstrumentViewModel.AddPeak")
     @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel._peaks_workspace_for_adding_new_peak")

@@ -399,7 +399,9 @@ class FullInstrumentViewModel:
             return ads.retrieveWorkspaces(selected_peaks_workspaces)[0]
         if self._instrument_view_peaks_ws_name in ads.getObjectNames():
             return ads.retrieveWorkspaces([self._instrument_view_peaks_ws_name])[0]
-        return CreatePeaksWorkspace(self._workspace, 0, OutputWorkspace=self._instrument_view_peaks_ws_name)
+        peaks_ws = CreatePeaksWorkspace(self._workspace, 0, OutputWorkspace=self._instrument_view_peaks_ws_name, StoreInADS=False)
+        ads.addOrReplace(self._instrument_view_peaks_ws_name, peaks_ws)
+        return peaks_ws
 
     def add_peak(self, x_in_workspace_unit: float, selected_peaks_workspaces: list[str]) -> str:
         peaks_ws = self._peaks_workspace_for_adding_new_peak(selected_peaks_workspaces)
@@ -408,19 +410,17 @@ class FullInstrumentViewModel:
         return peaks_ws.name()
 
     def delete_peak(self, x_in_workspace_unit: float) -> None:
-        detector_id = self.picked_detector_ids[0]
+        detector_ids = self.picked_detector_ids
         peaks_grouped_by_ws = self.peak_overlay_points()
         closest_peak_by_ws = []
         for peaks_ws in self._selected_peaks_workspaces:
             if peaks_ws.name() not in peaks_grouped_by_ws:
                 continue
             peaks_by_detector = peaks_grouped_by_ws[peaks_ws.name()]
-            picked_detector_peaks = [p for p in peaks_by_detector if p.detector_id == detector_id]
+            picked_detector_peaks = [p for p in peaks_by_detector if p.detector_id in detector_ids]
             if len(picked_detector_peaks) == 0:
                 continue
-            if len(picked_detector_peaks) > 1:
-                raise RuntimeError("Should only be one grouping per detector ID")
-            peaks = picked_detector_peaks[0].peaks
+            peaks = sum([p.peaks for p in picked_detector_peaks], [])
             # Now we have all the peaks on the selected detector, so we need to find the
             # closest peak to where the mouse was clicked
             distance_to_click = np.abs([p.location_in_unit(self.workspace_x_unit) - x_in_workspace_unit for p in peaks])
