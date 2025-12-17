@@ -13,6 +13,7 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/FilteredTimeSeriesProperty.h"
+#include "MantidKernel/IPropertySettings.h"
 #include "MantidKernel/LogFilter.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/OptionalBool.h"
@@ -25,6 +26,51 @@
 using namespace Mantid::Kernel;
 
 namespace {
+
+class MockPropertySettings : public IPropertySettings {
+public:
+  using ApplyCallback = std::function<bool(const IPropertyManager *, const std::string &)>;
+
+  bool isEnabled(const IPropertyManager *) const override { return m_isEnabledDefault; }
+
+  bool isVisible(const IPropertyManager *) const override { return m_isVisibleDefault; }
+
+  bool isConditionChanged(const IPropertyManager *, const std::string &) const override {
+    return m_isConditionChangedDefault;
+  }
+
+  bool applyChanges(const IPropertyManager *algo, const std::string &currentPropName) const override {
+    if (m_applyCallback)
+      return m_applyCallback(algo, currentPropName);
+    return false;
+  }
+
+  MockPropertySettings() = default;
+
+  IPropertySettings *clone() const override {
+    auto *copy = new MockPropertySettings();
+
+    // Copy configuration state
+    copy->m_isEnabledDefault = m_isEnabledDefault;
+    copy->m_isVisibleDefault = m_isVisibleDefault;
+    copy->m_isConditionChangedDefault = m_isConditionChangedDefault;
+    copy->m_applyCallback = m_applyCallback;
+
+    return copy;
+  }
+
+  void setIsEnabledReturn(bool v) { m_isEnabledDefault = v; }
+  void setIsVisibleReturn(bool v) { m_isVisibleDefault = v; }
+  void setIsConditionChangedReturn(bool v) { m_isConditionChangedDefault = v; }
+  void setApplyChangesCallback(ApplyCallback cb) { m_applyCallback = std::move(cb); }
+
+private:
+  bool m_isEnabledDefault{true};
+  bool m_isVisibleDefault{true};
+  bool m_isConditionChangedDefault{false};
+  ApplyCallback m_applyCallback;
+};
+
 class MockNonSerializableProperty : public PropertyWithValue<int> {
 public:
   MockNonSerializableProperty(const std::string &name, const int defaultValue)
@@ -52,6 +98,7 @@ Mantid::Kernel::TimeSeriesProperty<bool> *createTestFilter() {
   filter->addValue("2007-11-30T16:17:39", false);
   return filter;
 }
+
 } // namespace
 
 class PropertyManagerHelper : public PropertyManager {
@@ -644,13 +691,102 @@ public:
     TSM_ASSERT("Different Keys", !(a == b));
   }
 
-  void test_operator_not_equals_different_vaues() {
+  void test_operator_not_equals_different_values() {
     PropertyManager a;
     PropertyManager b;
     a.declareProperty("Prop1", 1);
     b.declareProperty("Prop1", 2);
     TSM_ASSERT_DIFFERS("Different Values", a, b);
     TSM_ASSERT("Different Values", !(a == b));
+  }
+
+  /// Verifies that when multiple `IPropertySettings` are attached to a
+  /// property, the enabled state computed by `isPropertyEnabled()`
+  /// is the logical AND of all `settings->isEnabled(...)`,
+  /// so that any single false disables the property (e.g. in its owner widget).
+  void testMultipleSettings_AnyDisabledDisablesProperty() {
+    // Implementation notes:
+    // -- This code partially duplicates a test at `AlgorithmPropertiesWidgetTest.h`.
+    // -- `isPropertyEnabled` is an `IPropertyManager` method:
+    //    it is tested here because it requires a non-abstract class in order to test.
+
+    manager->declareProperty("C", 1.11);
+    manager->setPropertySettings("C", std::unique_ptr<IPropertySettings const>(new MockPropertySettings()));
+    manager->setPropertySettings("C", std::unique_ptr<IPropertySettings const>(new MockPropertySettings()));
+    auto *prop = manager->getPointerToProperty("C");
+    auto *settings1 =
+        dynamic_cast<MockPropertySettings *>(const_cast<IPropertySettings *>(prop->getSettings()[0].get()));
+    auto *settings2 =
+        dynamic_cast<MockPropertySettings *>(const_cast<IPropertySettings *>(prop->getSettings()[1].get()));
+
+    // verify the AND truth table
+    settings1->setIsEnabledReturn(false);
+    settings2->setIsEnabledReturn(false);
+    TS_ASSERT_EQUALS(manager->isPropertyEnabled("C"), false);
+
+    settings1->setIsEnabledReturn(false);
+    settings2->setIsEnabledReturn(true);
+    TS_ASSERT_EQUALS(manager->isPropertyEnabled("C"), false);
+
+    settings1->setIsEnabledReturn(true);
+    settings2->setIsEnabledReturn(false);
+    TS_ASSERT_EQUALS(manager->isPropertyEnabled("C"), false);
+
+    settings1->setIsEnabledReturn(true);
+    settings2->setIsEnabledReturn(true);
+    TS_ASSERT_EQUALS(manager->isPropertyEnabled("C"), true);
+  }
+
+  /// Verifies that when no `IPropertySettings` are attached to a
+  /// property, the enabled state computed by `isPropertyEnabled()` is `true`.
+  void testSettings_PropertyEnabledByDefault() {
+    // Implementation notes (as for 'testMultipleSettings_AnyDisabledDisablesProperty' previous).
+    manager->declareProperty("C", 1.11);
+    TS_ASSERT(manager->getPointerToProperty("C")->getSettings().empty());
+    TS_ASSERT_EQUALS(manager->isPropertyEnabled("C"), true);
+  }
+
+  /// Verifies that when multiple `IPropertySettings` are attached to a
+  /// property, the visible state computed by `isPropertyVisible()`
+  /// is the logical AND of all `settings->isVisible(...)`,
+  /// so that any single false hides the property (e.g. in its owner widget).
+  void testMultipleSettings_AnyHiddenHidesProperty() {
+    // Implementation notes (as for 'testMultipleSettings_AnyDisabledDisablesProperty' previous).
+
+    manager->declareProperty("C", 1.11);
+    manager->setPropertySettings("C", std::unique_ptr<IPropertySettings const>(new MockPropertySettings()));
+    manager->setPropertySettings("C", std::unique_ptr<IPropertySettings const>(new MockPropertySettings()));
+    auto *prop = manager->getPointerToProperty("C");
+    auto *settings1 =
+        dynamic_cast<MockPropertySettings *>(const_cast<IPropertySettings *>(prop->getSettings()[0].get()));
+    auto *settings2 =
+        dynamic_cast<MockPropertySettings *>(const_cast<IPropertySettings *>(prop->getSettings()[1].get()));
+
+    // verify the AND truth table
+    settings1->setIsVisibleReturn(false);
+    settings2->setIsVisibleReturn(false);
+    TS_ASSERT_EQUALS(manager->isPropertyVisible("C"), false);
+
+    settings1->setIsVisibleReturn(false);
+    settings2->setIsVisibleReturn(true);
+    TS_ASSERT_EQUALS(manager->isPropertyVisible("C"), false);
+
+    settings1->setIsVisibleReturn(true);
+    settings2->setIsVisibleReturn(false);
+    TS_ASSERT_EQUALS(manager->isPropertyVisible("C"), false);
+
+    settings1->setIsVisibleReturn(true);
+    settings2->setIsVisibleReturn(true);
+    TS_ASSERT_EQUALS(manager->isPropertyVisible("C"), true);
+  }
+
+  /// Verifies that when no `IPropertySettings` are attached to a
+  /// property, the visibility state computed by `isPropertyVisible()` is `true`.
+  void testSettings_PropertyVisibleByDefault() {
+    // Implementation notes (as for 'testMultipleSettings_AnyDisabledDisablesProperty' previous).
+    manager->declareProperty("C", 1.11);
+    TS_ASSERT(manager->getPointerToProperty("C")->getSettings().empty());
+    TS_ASSERT_EQUALS(manager->isPropertyVisible("C"), true);
   }
 
 private:

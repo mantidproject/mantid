@@ -8,6 +8,8 @@
 #include "MantidKernel/IPropertySettings.h"
 #include "MantidKernel/OptionalBool.h"
 
+#include <algorithm>
+
 ///@cond
 DEFINE_IPROPERTYMANAGER_GETVALUE(int16_t)
 DEFINE_IPROPERTYMANAGER_GETVALUE(uint16_t)
@@ -77,10 +79,35 @@ void IPropertyManager::updatePropertyValues(const IPropertyManager &other) {
  * property
  * @param name :: property name
  * @param settings :: IPropertySettings     */
-void IPropertyManager::setPropertySettings(const std::string &name, std::unique_ptr<IPropertySettings> settings) {
+void IPropertyManager::setPropertySettings(const std::string &name, std::unique_ptr<IPropertySettings const> settings) {
   Property *prop = getPointerToProperty(name);
   if (prop)
     prop->setSettings(std::move(settings));
+}
+
+/** Test if a given property should be enabled
+ * @param name :: property name
+ * @return True if the property should be enabled
+ */
+bool IPropertyManager::isPropertyEnabled(const std::string &name) const {
+  Property *prop = getPointerToProperty(name);
+  // Allow any setting in the chain of settings to disable the property.
+  return std::all_of(prop->getSettings().begin(), prop->getSettings().end(),
+                     [this](auto const &ptr) { return ptr->isEnabled(this); });
+}
+
+/** Test if a given property should be visible,
+ *  according to its PropertySettings chain.
+ *  This may be overridden: in general, properties with errors
+ *  will be made visible by the `AlgorithmPropertiesWidget`.
+ * @param name :: property name
+ * @return True if the property should be visible
+ */
+bool IPropertyManager::isPropertyVisible(const std::string &name) const {
+  Property *prop = getPointerToProperty(name);
+  // Allow any setting in the chain of settings to hide the property.
+  return std::all_of(prop->getSettings().begin(), prop->getSettings().end(),
+                     [this](auto const &ptr) { return ptr->isVisible(this); });
 }
 
 /**
