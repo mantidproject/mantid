@@ -526,7 +526,6 @@ std::string RunsPresenter::liveDataReductionOptions(const std::string &inputWork
   options->setPropertyValue("Instrument", instrument);
   options->setPropertyValue("GetLiveValueAlgorithm", "GetLiveInstrumentValue");
   options->setPropertyValue("ExperimentSettingsState", experimentState);
-
   return convertAlgPropsToString(*options);
 }
 
@@ -544,7 +543,6 @@ IAlgorithm_sptr RunsPresenter::setupLiveDataMonitorAlgorithm() {
   alg->setProperty("AccumulationMethod", "Replace");
   alg->setProperty("UpdateEvery", static_cast<double>(updateInterval));
   alg->setProperty("PostProcessingAlgorithm", liveDataReductionAlgorithm());
-  // TODO pass state angle into post progressing alg?
   alg->setProperty("PostProcessingProperties", liveDataReductionOptions(inputWorkspace, instrument));
   alg->setProperty("RunTransitionBehavior", "Restart");
   auto errorMap = alg->validateInputs();

@@ -8,6 +8,8 @@ from mantid.api import AlgorithmFactory, AnalysisDataService, DataProcessorAlgor
 from mantid.kernel import config, Direction, Property, StringListValidator
 from mantid.simpleapi import AddSampleLogMultiple, CloneWorkspace, LoadInstrument, SetInstrumentParameter
 
+import json
+
 
 class LiveValue:
     """Hold the value and unit of a live instrument block value. Also hold an
@@ -129,8 +131,8 @@ class ReflectometryReductionOneLiveData(DataProcessorAlgorithm):
         self.copyProperties("ReflectometryISISLoadAndProcess", self._child_properties)
 
     def PyExec(self):
-        self._setup_workspace_for_reduction()
-        alg = self._setup_reduction_algorithm()
+        live_values = self._setup_workspace_for_reduction()
+        alg = self._setup_reduction_algorithm(live_values)
         self._run_reduction_algorithm(alg)
 
     def _setup_workspace_for_reduction(self):
@@ -145,10 +147,27 @@ class ReflectometryReductionOneLiveData(DataProcessorAlgorithm):
         # Set up the instrument after adding the sample logs in case the IDF uses any log values
         self._setup_instrument()
         self._setup_slits(liveValues)
+        return liveValues
 
-    def _setup_reduction_algorithm(self):
+    def _set_properties_from_experiment_settings(self, alg, live_values):
+        theta = live_values[self._theta_name()]
+        title = live_values[self._title_name()]
+        live_opts = self.getPropertyValue("ExperimentSettingsState")
+        opts = json.loads(live_opts)
+        for row in opts:
+            if not row[0] and not row[1]:  # Wildcard row. These settigns are applied by default.
+                continue
+            if float(row[0]) == theta and row[1] == title:  # Replicate c++ regex behaviour.
+                self._set_properties_from_row(alg, row)
+                break  # select first row, check how is this in GUI.
+
+    def _set_properties_from_row(self, alg, row):
+        pass
+
+    def _setup_reduction_algorithm(self, live_values):
         """Set up the reduction algorithm"""
         alg = self.createChildAlgorithm("ReflectometryISISLoadAndProcess")
+        self._set_properties_from_experiment_settings(alg, live_values)
         self._copy_property_values_to(alg)
         alg.setProperty("InputRunList", self._temp_ws_name)
         alg.setProperty("ThetaLogName", "Theta")
