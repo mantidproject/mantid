@@ -107,7 +107,7 @@ private:
 } // namespace DataObjects
 } // Namespace Mantid
 
-#ifndef MANTID_DATAOBJECTS_EXPORTS
+#ifndef DataObjects_EXPORTS
 #include "MantidAPI/WorkspaceProperty.h"
 namespace Mantid::API {
 extern template class MANTID_DATAOBJECTS_DLL WorkspaceProperty<DataObjects::Workspace2D>;

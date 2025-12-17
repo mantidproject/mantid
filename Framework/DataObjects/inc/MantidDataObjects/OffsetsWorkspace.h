@@ -52,7 +52,7 @@ using OffsetsWorkspace_const_sptr = std::shared_ptr<const OffsetsWorkspace>;
 } // namespace DataObjects
 } // namespace Mantid
 
-#ifndef MANTID_DATAOBJECTS_EXPORTS
+#ifndef DataObjects_EXPORTS
 #include "MantidAPI/WorkspaceProperty.h"
 namespace Mantid::API {
 extern template class MANTID_DATAOBJECTS_DLL WorkspaceProperty<DataObjects::OffsetsWorkspace>;
