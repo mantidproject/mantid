@@ -42,6 +42,7 @@ void copy_values_from_map_to_offset_vector(const std::map<detid_t, double> &map_
  * @param idmax Maximum detector id to include in the calibration
  * @param time_conversion Value to bundle into the calibration constant to account for converting the time-of-flight
  * into microseconds. Applying it here is effectively the same as applying it to each event time-of-flight.
+ * @param det_in_group Detector-ids that are to be used in this group
  * @param calibration_map Calibration for the entire instrument.
  * @param scale_at_sample Scalar factor to multiply the time-of-flight by to get the time-of-flight of the neutron back
  * at the sample position.
