@@ -1,7 +1,8 @@
 #!/bin/bash -ex
 # Build the developer site and push to gh-pages
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source $SCRIPT_DIR/mamba-utils
+source $SCRIPT_DIR/pixi-utils
+REPO_ROOT_DIR=$SCRIPT_DIR/../../..
 
 if [ $# != 1 ]; then
   echo "Usage: build-and-publish-devsite.sh mantid_root_dir"
@@ -26,16 +27,15 @@ else
 fi
 
 ###############################################################################
-# Mamba
+# pixi
 ###############################################################################
-setup_mamba $WORKSPACE/miniforge "devsite" false ""
-mamba install --yes sphinx sphinx_bootstrap_theme
+install_pixi
 
 ###############################################################################
 # Build the developer site
 ###############################################################################
 export LC_ALL=C
-python -m sphinx $WORKSPACE/dev-docs/source $BUILD_DIR
+pixi run --manifest-path $REPO_ROOT_DIR/pixi.toml -e devsite --frozen python -m sphinx $WORKSPACE/dev-docs/source $BUILD_DIR
 
 ###############################################################################
 # Push the results
