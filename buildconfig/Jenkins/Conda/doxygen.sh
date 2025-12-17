@@ -25,9 +25,6 @@ shift 1
 
 cd $WORKSPACE
 
-# install pixi if not already installed
-install_pixi
-
 # Create the build directory if it doesn't exist
 [ -d $WORKSPACE/build ] || mkdir $WORKSPACE/build
 cd $WORKSPACE/build
