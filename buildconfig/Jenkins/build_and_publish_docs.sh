@@ -2,7 +2,6 @@
 #   - Install conda packages
 #   - Build HTML docs
 #   - Publish to GitHub pages
-CONDA_LABEL=mantid/label/nightly
 DOCS_GIT_REPOSITORY=https://github.com/mantidproject/docs-nightly
 GIT_USER_NAME=mantid-builder
 GIT_USER_EMAIL="mantid-buildserver@mantidproject.org"
