@@ -354,6 +354,8 @@ class PawleyPattern1D(PawleyPatternBase):
         return self.ws.readY(self.ispec) - self.eval_profile(params)
 
     def get_eval_workspace(self, **kwargs):
+        if "OutputWorkspace" not in kwargs:
+            kwargs["OutputWorkspace"] = f"{self.ws.name()}_eval"
         return EvaluateFunction(Function=self.comp_func, InputWorkspace=self.ws, WorkspaceIndex=self.ispec, **kwargs)
 
     def fit_no_constraints(self, **kwargs):
@@ -371,18 +373,19 @@ class PawleyPattern1D(PawleyPatternBase):
         return Fit(Function=self.comp_func, InputWorkspace=self.ws, WorkspaceIndex=self.ispec, **kwargs)
 
     def estimate_initial_params(self):
-        y = self.ws.readY(self.ispec)
-        bg = 0
-        if len(self.bg_params) > 0:
-            bg = np.median(y)
-            ipar = self.comp_func[len(self.comp_func) - 1].function.getParameterIndex("A0")
-            self.bg_params[:] = 0
-            self.bg_params[ipar] = bg
-        # estimate average intensity (should get correct order of magnitude)
-        ycalc_sum = np.sum(self.eval_profile(self.get_free_params()) - bg)
-        scale = np.sum(y - bg) / ycalc_sum
+        ws_eval = self.get_eval_workspace(StoreInADS=False)
+        ppval = np.polyfit(ws_eval.readY(1), ws_eval.readY(0), 1)
+        scale, bg = ppval
+        logger.warning(f"scale = {scale}, bg = {ppval[-1]}")
         for iphase in range(len(self.phases)):
-            self.intens[iphase] *= scale
+            self.intens[iphase] = self.intens[iphase] * scale
+            self.intens[iphase][self.intens[iphase] < 1e-8] = 1e-8  # arbitrary small number
+        if len(self.bg_params) > 0:
+            if np.allclose(self.bg_params, 0) and self.comp_func[len(self.comp_func) - 1].function.hasParameter("A0"):
+                # try and set background (assume hasn't been previously fitted)
+                ipar = self.comp_func[len(self.comp_func) - 1].function.getParameterIndex("A0")
+                self.bg_params[ipar] = bg
+        self.update_profile_function()
 
 
 class PawleyPattern2D(PawleyPatternBase):
