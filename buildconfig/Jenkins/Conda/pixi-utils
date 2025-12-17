@@ -12,9 +12,13 @@ install_pixi() {
       exit 1
     fi
     if [[ "$OSTYPE" == "darwin"* ]]; then
-      PATH=$PATH:$HOME/.pixi/bin
+      export PATH=$PATH:$HOME/.pixi/bin
     else
-      source ~/.bashrc
+      if [ -f ~/.bashrc ]; then
+        source ~/.bashrc
+      else
+        export PATH=$PATH:$HOME/.pixi/bin
+      fi
     fi
   fi
 }
