@@ -1,0 +1,1 @@
+- :py:obj:`Property <mantid.kernel.Property>` and :py:obj:`IPropertyManager <mantid.kernel.IPropertyManager>` now support the application of multiple :py:obj:`IPropertySettings <mantid.kernel.IPropertySettings>` instances to a single property instance.  From Python, a property's ``getSettings`` method will now return a *vector* of ``IPropertySetting`` when appropriate.
