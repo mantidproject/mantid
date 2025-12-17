@@ -2,6 +2,7 @@
 
 #include "MantidNexus/DllConfig.h"
 #include "MantidNexus/NexusFile_fwd.h"
+#include <atomic>
 
 // Forward declarations for needed HDF5 functions
 // NOTE declare extern "C" to prevent conflict with actual declaration
@@ -19,6 +20,68 @@ MYH5DLL herr_t H5garbage_collect();
 
 namespace Mantid::Nexus {
 
+/// @brief an ID that HDF5 will always consider invalid
+constexpr hid_t INVALID_HID{-1};
+
+/**
+ * @class Hdf5ID
+ * @brief A very simple wrapper that holds an HDF5 object through its hid_t.
+ */
+template <herr_t (*const D)(hid_t)> class Hdf5ID {
+protected:
+  hid_t m_id;
+
+  void close();
+
+public:
+  // constructors
+  Hdf5ID() noexcept : m_id(INVALID_HID) {}
+  Hdf5ID(hid_t const id) noexcept : m_id(id) {}
+
+  // comparators
+  bool operator==(hid_t const id) const { return m_id == id; }
+  bool operator!=(hid_t const id) const { return m_id != id; }
+  bool operator<=(hid_t const id) const { return m_id <= id; }
+  bool operator<(hid_t const id) const { return m_id < id; }
+
+  /// @brief Return the managed HDF5 handle
+  /// @return the managed HDF5 handle
+  hid_t get() const { return m_id; }
+  operator hid_t() const { return m_id; }
+  /// @brief Return whether the UniqueId corresponds to a valid HDF5 object
+  /// @return true if it is valid; otherwise false; on error, false
+  bool isValid() const {
+    // fail early condition
+    if (m_id <= 0) {
+      return false;
+    } else {
+      return H5Iis_valid(m_id) > 0;
+    }
+  }
+};
+
+/// @brief Close the held object ID
+template <herr_t (*const closer)(hid_t)> inline void Hdf5ID<closer>::close() {
+  if (this->isValid()) {
+    closer(this->m_id);
+    this->m_id = INVALID_HID;
+  }
+}
+
+/// @brief Close a held file ID, and also call garbage collection
+template <> inline void Hdf5ID<&H5Fclose>::close() {
+  if (this->isValid()) {
+    H5Fclose(this->m_id);
+    this->m_id = INVALID_HID;
+    // call garbage collection to close any and all open objects on this file
+    H5garbage_collect();
+  }
+}
+
+// ******************************************************************
+// UNIQUE ID
+// ******************************************************************
+
 /**
  * @class UniqueID
  * @brief A wrapper class for managing HDF5 object handles (hid_t).
@@ -26,90 +89,53 @@ namespace Mantid::Nexus {
  * ensuring that the handle is properly closed when the UniqueID object is destroyed.
  * This helps prevent resource leaks and ensures proper cleanup of HDF5 resources.
  */
-template <herr_t (*const D)(hid_t)> class UniqueID {
-protected:
-  hid_t m_id;
-
+template <herr_t (*const D)(hid_t)> class UniqueID : public Hdf5ID<D> {
 private:
-  UniqueID(UniqueID<D> const &uid) = delete;
+  // prohibit copying a unique ID
+  UniqueID(UniqueID<D> const &) = delete;
   UniqueID &operator=(UniqueID<D> const &) = delete;
-  void close();
 
 public:
   // constructors / destructor
-  UniqueID() : m_id(INVALID_ID) {}
-  UniqueID(hid_t const id) : m_id(id) {}
-  ~UniqueID() { close(); }
-  UniqueID(UniqueID<D> &&uid) noexcept : m_id(uid.m_id) { uid.m_id = INVALID_ID; }
+  UniqueID() : Hdf5ID<D>() {}
+  UniqueID(hid_t const id) : Hdf5ID<D>(id) {}
+  UniqueID(UniqueID<D> &&uid) noexcept : Hdf5ID<D>(uid.m_id) { uid.m_id = INVALID_HID; }
+  ~UniqueID() { this->close(); }
 
   // assignment
-  UniqueID<D> &operator=(hid_t const id);
-  UniqueID<D> &operator=(UniqueID<D> &&uid);
+  UniqueID<D> &operator=(hid_t const);
+  UniqueID<D> &operator=(UniqueID<D> &&);
 
-  // comparators
-  bool operator==(int const id) const { return static_cast<int>(m_id) == id; }
-  bool operator<=(int const id) const { return static_cast<int>(m_id) <= id; }
-  bool operator<(int const id) const { return static_cast<int>(m_id) < id; }
-
-  // using the id
-  operator hid_t() const { return m_id; }
-
-  /// @brief Return the managed HDF5 handle
-  /// @return the managed HDF5 handle
-  hid_t get() const { return m_id; }
-
+  void reset() { reset(INVALID_HID); };
+  void reset(hid_t const);
+  void reset(UniqueID<D> const &) = delete;
+  void reset(UniqueID<D> &&);
   hid_t release();
-  void reset(hid_t const id = INVALID_ID);
-  bool isValid() const;
-
-  /// @brief represents an invalid ID value
-  static hid_t constexpr INVALID_ID{-1};
 };
-
-/// @brief Return whether the UniqueId corresponds to a valid HDF5 object
-/// @return true if it is valid; otherwise false; on error, false
-template <herr_t (*const D)(hid_t)> inline bool UniqueID<D>::isValid() const {
-  // fail early condition
-  if (m_id < 0) {
-    return false;
-  } else {
-    return H5Iis_valid(m_id) > 0;
-  }
-}
-
-/// @brief Close the held ID by calling its deleter function
-/// @tparam deleter
-template <herr_t (*const deleter)(hid_t)> inline void UniqueID<deleter>::close() {
-  if (isValid()) {
-    deleter(this->m_id);
-    this->m_id = INVALID_ID;
-  }
-}
-
-/// @brief Close a ID corresponding to a file; and call garbage collection
-template <> inline void UniqueID<&H5Fclose>::close() {
-  if (isValid()) {
-    H5Fclose(this->m_id);
-    this->m_id = INVALID_ID;
-    // call garbage collection to close any and all open objects on this file
-    H5garbage_collect();
-  }
-}
 
 /// @brief  Release hold on the managed ID; it will not be closed by this UniqueID
 /// @return the managed ID
 template <herr_t (*const D)(hid_t)> inline hid_t UniqueID<D>::release() {
-  hid_t tmp = m_id;
-  m_id = INVALID_ID;
+  hid_t tmp = this->m_id;
+  this->m_id = INVALID_HID;
   return tmp;
 }
 
 /// @brief  Close the existing ID and replace with the new ID; or, set to invalid
 /// @param id The new ID to be held; defaults to invalid
 template <herr_t (*const D)(hid_t)> inline void UniqueID<D>::reset(hid_t const id) {
-  if (m_id != id) {
-    close();
-    m_id = id;
+  if (this->m_id != id) {
+    this->close();
+    this->m_id = id;
+  }
+}
+
+/// @brief  Close the existing ID and replace with the new ID; or, set to invalid
+/// @param uid a UniqueID being moved and releasing control to this UniqueID
+template <herr_t (*const D)(hid_t)> inline void UniqueID<D>::reset(UniqueID<D> &&uid) {
+  if (this != &uid) {
+    reset(uid.m_id);
+    uid.m_id = INVALID_HID;
   }
 }
 
@@ -123,10 +149,136 @@ template <herr_t (*const D)(hid_t)> inline UniqueID<D> &UniqueID<D>::operator=(h
 /// @brief Pass the HDF5 object ID from an existing UniqueID to another UniqueID
 /// @param uid : the UniqueID previously managing the ID; it will lose ownership of the ID.
 template <herr_t (*const D)(hid_t)> inline UniqueID<D> &UniqueID<D>::operator=(UniqueID<D> &&uid) {
-  if (this != &uid) {
-    reset(uid.m_id);
-    uid.m_id = INVALID_ID;
+  reset(std::move(uid));
+  return *this;
+}
+
+// ******************************************************************
+// SHARED ID
+// ******************************************************************
+
+/**
+ * @class SharedID
+ * @brief A wrapper class for managing HDF5 object handles (hid_t) that can be shared.
+ * @details The SharedID class is designed to manage the lifecycle of HDF5 object handles (hid_t),
+ * with multiple ownership, ensuring the handle is properly closed when all leashes to it are dropped.
+ * This helps prevent resource leaks and ensures proper cleanup of HDF5 resources.
+ */
+template <herr_t (*const D)(hid_t)> class SharedID : public Hdf5ID<D> {
+private:
+  std::atomic<std::size_t> *m_leash_counts;
+  void increment_leash_counts();
+  void decrement_leash_counts();
+
+public:
+  // constructors / destructor
+  SharedID() : Hdf5ID<D>(), m_leash_counts(nullptr) {}
+  SharedID(hid_t id) : Hdf5ID<D>(id), m_leash_counts(this->isValid() ? new std::atomic<std::size_t>(1) : nullptr) {}
+  SharedID(SharedID<D> const &uid) : Hdf5ID<D>(uid.m_id), m_leash_counts(uid.m_leash_counts) {
+    increment_leash_counts();
   }
+  SharedID(SharedID<D> &&uid) : Hdf5ID<D>(uid.m_id), m_leash_counts(uid.m_leash_counts) {
+    uid.m_id = INVALID_HID;
+    uid.m_leash_counts = nullptr;
+  }
+  ~SharedID() { decrement_leash_counts(); }
+
+  SharedID<D> &operator=(hid_t const);
+  SharedID<D> &operator=(SharedID<D> const &);
+  SharedID<D> &operator=(SharedID<D> &&);
+
+  /// @brief ensure two SharedIDs are tracking the same object
+  bool operator==(SharedID<D> const &uid) const {
+    if (m_leash_counts == uid.m_leash_counts) {
+      return this->m_id == uid.m_id;
+    } else {
+      return false;
+    }
+  }
+
+  /// @brief Returns the number of SharedID objects holding the same ID
+  std::size_t use_count() const { return (m_leash_counts ? (*m_leash_counts).load() : 0); }
+
+  void reset() { reset(INVALID_HID); };
+  void reset(hid_t const);
+  void reset(SharedID<D> const &);
+  void reset(SharedID<D> &&);
+};
+
+/// @brief  Decrement the existing ID and replace with the new ID; or, set to invalid
+/// @param id The new ID to be held; defaults to invalid
+template <herr_t (*const D)(hid_t)> inline void SharedID<D>::reset(hid_t const id) {
+  if (this->m_id != id) {
+    decrement_leash_counts();
+    this->m_id = id;
+    m_leash_counts = nullptr;
+    increment_leash_counts();
+  }
+}
+
+/// @brief  Decrement the existing ID and replace with the new ID; or, set to invalid
+/// @param uid A SharedID whose ID will be shared
+template <herr_t (*const D)(hid_t)> inline void SharedID<D>::reset(SharedID<D> const &uid) {
+  if (&uid != this && uid.m_id != this->m_id) {
+    decrement_leash_counts();
+    this->m_id = uid.m_id;
+    m_leash_counts = uid.m_leash_counts;
+    increment_leash_counts();
+  }
+}
+
+/// @brief  Decrement the existing ID and replace with the new ID; or, set to invalid
+/// @param uid A SharedID whose ID will be moved to here
+template <herr_t (*const D)(hid_t)> inline void SharedID<D>::reset(SharedID<D> &&uid) {
+  if (&uid != this && uid.m_id != this->m_id) {
+    decrement_leash_counts();
+    this->m_id = uid.m_id;
+    m_leash_counts = uid.m_leash_counts;
+    // unset the moved id
+    uid.m_id = INVALID_HID;
+    uid.m_leash_counts = nullptr;
+    // no increment -- number of leashes is same
+  }
+}
+
+template <herr_t (*const D)(hid_t)> inline void SharedID<D>::increment_leash_counts() {
+  if (this->isValid()) {
+    if (!m_leash_counts) {
+      m_leash_counts = new std::atomic<std::size_t>(1);
+    } else {
+      (*m_leash_counts)++;
+    }
+  }
+}
+
+template <herr_t (*const D)(hid_t)> inline void SharedID<D>::decrement_leash_counts() {
+  if (m_leash_counts) {
+    // atomic-safe access the counts
+    std::size_t prev_counts = (*m_leash_counts).fetch_sub(1);
+    if (prev_counts == 1) {
+      this->close();
+      delete m_leash_counts;
+      m_leash_counts = nullptr;
+    } else if (prev_counts == 0) {
+      m_leash_counts->store(0);
+      delete m_leash_counts;
+      m_leash_counts = nullptr;
+    }
+  }
+}
+
+template <herr_t (*const D)(hid_t)> inline SharedID<D> &SharedID<D>::operator=(hid_t id) {
+  reset(id);
+  return *this;
+}
+
+template <herr_t (*const D)(hid_t)> inline SharedID<D> &SharedID<D>::operator=(SharedID<D> const &uid) {
+  reset(uid);
+  return *this;
+}
+
+template <herr_t (*const D)(hid_t)> inline SharedID<D> &SharedID<D>::operator=(SharedID<D> &&uid) {
+  reset(std::move(uid));
   return *this;
 }
 
