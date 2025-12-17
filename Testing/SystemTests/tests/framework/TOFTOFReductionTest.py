@@ -25,9 +25,6 @@ class TOFTOFReductionTest(MantidSystemTest):
         config["default.facility"] = "MLZ"
         config["default.instrument"] = "TOFTOF"
 
-    # def cleanup(self) -> None:
-    #     mtd.clear()
-
     def requiredFiles(self):
         return [
             "TOFTOF12.nxs",
@@ -44,82 +41,79 @@ class TOFTOFReductionTest(MantidSystemTest):
         ]
 
     def runTest(self):
-        red_script = self._generate_reduction_script()
-        execute_script(red_script)
+        reduction_script = self.generate_reduction_script()
+        execute_script(reduction_script)
 
-    def _generate_reduction_script(self):
-        scriptTest = TOFTOFScriptElement()
+    def validate(self):
+        self.tolerance = 1e-3
+        self.tolerance_is_rel_err = True
+        self.nanEqual = True
+        self.disableChecking = ["Axes"]
+        return [
+            "ws_Van_res_sqw",
+            "TOFTOF_Van_1214_processed.nxs",
+            "ws_EC_sqw",
+            "TOFTOF_EC_1517_processed.nxs",
+            "ws_H2O_21C_sqw",
+            "TOFTOF_Sample_2729_processed.nxs",
+            "ws_H2O_34C_sqw",
+            "TOFTOF_Sample_3031_processed.nxs",
+        ]
 
-        scriptTest.facility_name = config["default.facility"]
-        scriptTest.instrument_name = config["default.instrument"]
-        scriptTest.dataDir = ""
-        scriptTest.prefix = "ws"
+    def generate_reduction_script(self):
+        scripter = TOFTOFScriptElement()
 
-        scriptTest.vanRuns = "TOFTOF12:14"
-        scriptTest.vanCmnt = "Van_res"
-        scriptTest.vanTemp = 21
-        scriptTest.vanEcFactor = 1.0
+        # set general parameters
+        scripter.facility_name = config["default.facility"]
+        scripter.instrument_name = config["default.instrument"]
+        scripter.dataDir = ""
+        scripter.prefix = "ws"
 
-        scriptTest.ecRuns = "TOFTOF15:17"
-        scriptTest.ecComment = "EC"
-        scriptTest.ecTemp = 21
-        scriptTest.ecFactor = 0.9
+        # vanadium inputs
+        scripter.vanRuns = "TOFTOF12:14"
+        scripter.vanCmnt = "Van_res"
+        scripter.vanTemp = 21
+        scripter.vanEcFactor = 1.0
 
-        scriptTest.maskDetectors = False
+        # empty container inputs
+        scripter.ecRuns = "TOFTOF15:17"
+        scripter.ecComment = "EC"
+        scripter.ecTemp = 21
+        scripter.ecFactor = 0.9
 
-        scriptTest.dataRuns = [["TOFTOF27:29", "H2O_21C", 21], ["TOFTOF30:31", "H2O_34C", 34]]
+        # data inputs
+        scripter.dataRuns = [["TOFTOF27:29", "H2O_21C", 21], ["TOFTOF30:31", "H2O_34C", 34]]
+
+        # masking
+        scripter.maskDetectors = "190, 294, 419, 485, 494, 502, 527, 614, 646, 665, 952, 965"
 
         # binning
-        scriptTest.binEon = True
-        scriptTest.binEstart = -6.0
-        scriptTest.binEstep = 0.01
-        scriptTest.binEend = 1.8
+        scripter.binEon = True
+        scripter.binEstart = -6.0
+        scripter.binEstep = 0.01
+        scripter.binEend = 1.8
 
-        scriptTest.binQon = True
-        scriptTest.binQstart = 0.4
-        scriptTest.binQstep = 0.1
-        scriptTest.binQend = 2.0
+        scripter.binQon = True
+        scripter.binQstart = 0.4
+        scripter.binQstep = 0.1
+        scripter.binQend = 2.0
 
         # options
-        scriptTest.subtractECVan = True
-        scriptTest.normalise = 1  # 0: no, 1: monitor, 2: time
-        scriptTest.correctTof = 1  # 0: no, 1: vana, 2: sample
+        scripter.subtractECVan = True
+        scripter.normalise = 1  # 0: none, 1: to monitor, 2: to time
+        scripter.correctTof = 1  # 0: none, 1: vana, 2: sample
 
-        scriptTest.replaceNaNs = False
-        scriptTest.createDiff = False
-        scriptTest.keepSteps = False
+        scripter.replaceNaNs = False
+        scripter.createDiff = False
+        scripter.keepSteps = False
 
         # save reduced data options
-        scriptTest.saveSofTWNxspe = False
-        scriptTest.saveSofTWNexus = False
-        scriptTest.saveSofTWAscii = False
-        scriptTest.saveSofQWNexus = False
-        scriptTest.saveSofQWAscii = False
+        scripter.saveSofTWNxspe = False
+        scripter.saveSofTWNexus = False
+        scripter.saveSofTWAscii = False
+        scripter.saveSofQWNexus = False
+        scripter.saveSofQWAscii = False
 
-        reduction_script = scriptTest.to_script()
+        # generate reduction script
+        reduction_script = scripter.to_script()
         return reduction_script
-
-        # expected_comments = {"H2O_21C", "H2O_34C"}
-
-        # self.assertIn("gwsDataS", mtd)
-        # self.assertIn("gwsDataBinE", mtd)
-        # self.assertIn("gwsDataSQW", mtd)
-
-        # sqw_group = mtd["gwsDataSQW"]
-        # self.assertIsInstance(sqw_group, WorkspaceGroup)
-        # self.assertEqual(set(sqw_group.getNames()), {f"ws_{comment}_sqw" for comment in expected_comments})
-
-        # energy_group = mtd["gwsDataBinE"]
-        # self.assertIsInstance(energy_group, WorkspaceGroup)
-        # self.assertEqual(set(energy_group.getNames()), {f"ws_E_{comment}" for comment in expected_comments})
-
-        # for comment in expected_comments:
-        #     ws_name = f"ws_{comment}_sqw"
-        #     workspace = mtd[ws_name]
-        #     self.assertIsInstance(workspace, MatrixWorkspace)
-        #     self.assertEqual(workspace.getComment(), comment)
-        #     self.assertGreater(workspace.getNumberHistograms(), 0)
-        #     self.assertGreater(workspace.blocksize(), 0)
-        #     signal = workspace.dataY(0)
-        #     self.assertTrue(np.isfinite(signal).any(), f"{ws_name} contains no finite signal values")
-        #     self.assertGreater(np.abs(signal).sum(), 0.0, f"{ws_name} is unexpectedly empty")
