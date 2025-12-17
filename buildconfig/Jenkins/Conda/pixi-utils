@@ -11,14 +11,10 @@ install_pixi() {
       echo "ERROR: pixi installation failed"
       exit 1
     fi
-    if [[ "$OSTYPE" == "darwin"* ]]; then
-      export PATH=$PATH:$HOME/.pixi/bin
+    if [[ "$OSTYPE" != darwin* && -f ~/.bashrc ]]; then
+      source ~/.bashrc
     else
-      if [ -f ~/.bashrc ]; then
-        source ~/.bashrc
-      else
-        export PATH=$PATH:$HOME/.pixi/bin
-      fi
+      export PATH="$PATH:$HOME/.pixi/bin"
     fi
   fi
 }
