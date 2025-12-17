@@ -25,7 +25,6 @@ jobs:
               - 'conda/recipes/mantid-developer/**'
               - 'conda/recipes/conda_build_config.yaml'
               - 'buildconfig/Jenkins/Conda/doxygen.sh'
-              - '.github/workflows/doxygen.yml'
 
       - uses: actions/checkout@v6
         if: steps.changes.outputs.doxygen == 'true'
