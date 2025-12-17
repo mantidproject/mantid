@@ -135,6 +135,64 @@ public:
     TS_ASSERT(hdf_file_is_closed(filename));
   }
 
+  void test_hdf5ID_comparators() {
+    cout << "\ntest hdf5ID comparator operations" << endl;
+
+    TestHdf5ID uid1(GOOD_ID1);
+    TestHdf5ID uid2(GOOD_ID2);
+    TestHdf5ID uid3(INVALID_HID);
+
+    // Test equality operators
+    TS_ASSERT(uid1 == GOOD_ID1);
+    TS_ASSERT(!(uid1 == GOOD_ID2));
+    TS_ASSERT(uid1 != GOOD_ID2);
+    TS_ASSERT(!(uid1 != GOOD_ID1));
+
+    // Test inequality operators
+    TS_ASSERT(uid3 <= INVALID_HID);
+    TS_ASSERT(uid3 == INVALID_HID);
+    TS_ASSERT(!(uid3 < INVALID_HID));
+
+    // Test with different IDs
+    if (GOOD_ID1 < GOOD_ID2) {
+      TS_ASSERT(uid1 < GOOD_ID2);
+      TS_ASSERT(uid1 <= GOOD_ID2);
+    } else {
+      TS_ASSERT(uid2 < GOOD_ID1);
+      TS_ASSERT(uid2 <= GOOD_ID1);
+    }
+  }
+  void test_hdf5ID_implicit_conversion() {
+    cout << "\ntest hdf5ID implicit conversion to hid_t" << endl;
+
+    TestHdf5ID uid(GOOD_ID1);
+    hid_t raw_id = uid; // implicit conversion
+    TS_ASSERT_EQUALS(raw_id, GOOD_ID1);
+
+    // Can be used in HDF5 functions expecting hid_t
+    TS_ASSERT(H5Iis_valid(uid) > 0);
+  }
+
+  void test_hdf5ID_zero_is_invalid() {
+    cout << "\ntest hdf5ID zero is invalid" << endl;
+
+    TestHdf5ID uid(0);
+    TS_ASSERT(!uid.isValid());
+    TS_ASSERT_EQUALS(uid.get(), 0);
+  }
+
+  void test_hdf5ID_negative_values() {
+    cout << "\ntest hdf5ID negative values are invalid" << endl;
+
+    TestHdf5ID uid1(-1);
+    TestHdf5ID uid2(-999);
+
+    TS_ASSERT(!uid1.isValid());
+    TS_ASSERT(!uid2.isValid());
+    TS_ASSERT_EQUALS(uid1.get(), -1);
+    TS_ASSERT_EQUALS(uid2.get(), -999);
+  }
+
   // ******************************************************************
   // UNIQUE ID
   // ******************************************************************
@@ -224,7 +282,7 @@ public:
     TS_ASSERT_EQUALS(call_count, 2);
   }
 
-  void test_uniqueID_assign_uniqueID() {
+  void test_uniqueID_assign_other() {
     cout << "\ntest uniqueID assign" << endl;
     // assign from uid
     hid_t val1 = GOOD_ID1, val2 = GOOD_ID2;
@@ -240,6 +298,46 @@ public:
     }
     TS_ASSERT_EQUALS(call_count, 2);
   }
+
+  void test_uniqueID_assign_move() {
+    cout << "\ntest uniqueID move assign" << endl;
+
+    hid_t test1 = GOOD_ID1;
+    hid_t test2 = GOOD_ID2;
+
+    TestUniqueID uid1(test1);
+    TestUniqueID uid2;
+
+    uid2 = std::move(uid1);
+    TS_ASSERT_EQUALS(uid2.get(), test1);
+    TS_ASSERT_EQUALS(uid1.get(), INVALID_HID);
+
+    uid2 = test2;
+    TS_ASSERT_EQUALS(uid2.get(), test2);
+    TS_ASSERT_EQUALS(call_count, 1);
+  }
+
+#if defined(__GNUC__) && !(defined(__clang__))
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wself-move"
+#endif
+  void test_uniqueID_assign_self() {
+    cout << "\ntest uniqueID self assignment" << endl;
+
+    hid_t test = GOOD_ID1;
+    TestUniqueID uid(test);
+    TS_ASSERT_EQUALS(uid.get(), test);
+
+    // Self-assignment via move
+    uid = std::move(uid);
+    TS_ASSERT_EQUALS(uid.get(), test);
+    TS_ASSERT(uid.isValid());
+    // closer not called on self-move
+    TS_ASSERT_EQUALS(call_count, 0);
+  }
+#if defined(__GNUC__) && !(defined(__clang__))
+#pragma GCC diagnostic pop
+#endif
 
   void test_uniqueID_release() {
     cout << "\ntest uniqueID release" << endl;
@@ -301,6 +399,63 @@ public:
       TS_ASSERT_EQUALS(uid.get(), INVALID_HID);
       TS_ASSERT_EQUALS(call_count, 1);
     }
+  }
+
+  void test_uniqueID_reset_move() {
+    cout << "\ntest uniqueID move reset" << endl;
+
+    hid_t test1 = GOOD_ID1;
+    hid_t test2 = GOOD_ID2;
+
+    TestUniqueID uid1(test1);
+    TestUniqueID uid2(test2);
+
+    // Move reset
+    uid1.reset(std::move(uid2));
+    TS_ASSERT_EQUALS(uid1.get(), test2);
+    TS_ASSERT_EQUALS(uid2.get(), INVALID_HID);
+    TS_ASSERT(uid1.isValid());
+    TS_ASSERT(!uid2.isValid());
+    TS_ASSERT_EQUALS(call_count, 1); // test1 was closed
+  }
+
+  void test_uniqueID_release_then_reset() {
+    cout << "\ntest uniqueID release then reset" << endl;
+
+    hid_t test1 = GOOD_ID1;
+    hid_t test2 = GOOD_ID2;
+    TestUniqueID uid(test1);
+
+    hid_t released = uid.release();
+    TS_ASSERT_EQUALS(released, test1);
+    TS_ASSERT_EQUALS(uid.get(), INVALID_HID);
+    TS_ASSERT(!uid.isValid());
+
+    // Reset after release
+    uid.reset(test2);
+    TS_ASSERT_EQUALS(uid.get(), test2);
+    TS_ASSERT(uid.isValid());
+    // the closer is not called on released id
+    TS_ASSERT_EQUALS(call_count, 0);
+  }
+
+  void test_uniqueID_multiple_resets() {
+    cout << "\ntest uniqueID multiple sequential resets" << endl;
+
+    TestUniqueID uid(GOOD_ID1);
+    TS_ASSERT_EQUALS(call_count, 0);
+
+    uid.reset(GOOD_ID2);
+    TS_ASSERT_EQUALS(call_count, 1);
+    TS_ASSERT_EQUALS(uid.get(), GOOD_ID2);
+
+    uid.reset(BAD_ID);
+    TS_ASSERT_EQUALS(call_count, 2);
+    TS_ASSERT_EQUALS(uid.get(), BAD_ID);
+
+    uid.reset();
+    TS_ASSERT_EQUALS(call_count, 2); // BAD_ID was invalid, no close
+    TS_ASSERT_EQUALS(uid.get(), INVALID_HID);
   }
 
   void test_uniqueID_groups_close() {
@@ -376,11 +531,6 @@ public:
     TS_ASSERT_EQUALS(err_count, 1); // no further errors registered
   }
 
-  void test_uniqueID_zero() {
-    TestUniqueID uid(0);
-    TS_ASSERT(!uid.isValid());
-  }
-
   void test_unique_file_id() {
     cout << "\ntest the file id" << endl;
 
@@ -417,10 +567,20 @@ public:
   void test_sharedID_close_on_exit() {
     cout << "\ntest sharedID close on exit" << endl;
 
+    // if unset, no close on exit
+    {
+      TestSharedID uid;
+      TS_ASSERT(!uid.isValid());
+      TS_ASSERT_EQUALS(uid.get(), INVALID_HID);
+      TS_ASSERT_EQUALS(uid.use_count(), 0);
+    }
+    TS_ASSERT_EQUALS(call_count, 0);
+
     // if set with the invalid ID, no close on exit
     {
       TestSharedID uid(INVALID_HID);
       TS_ASSERT(!uid.isValid());
+      TS_ASSERT_EQUALS(uid.get(), INVALID_HID);
       TS_ASSERT_EQUALS(uid.use_count(), 0);
     }
     // the deleter was not called on exit
@@ -432,16 +592,176 @@ public:
     {
       TestSharedID uid(good);
       TS_ASSERT(uid.isValid());
+      TS_ASSERT_EQUALS(uid.get(), good);
       TS_ASSERT_EQUALS(uid.use_count(), 1);
     }
     // the deleter was called on exit
     TS_ASSERT_EQUALS(call_count, 1);
   }
 
+  void test_sharedID_copy_construct() {
+    cout << "\ntest sharedID copy constructor from invalid" << endl;
+
+    TestSharedID uid1(GOOD_ID1);
+    TS_ASSERT_EQUALS(uid1.use_count(), 1);
+
+    TestSharedID uid2(uid1);
+    TS_ASSERT_EQUALS(uid1.use_count(), 2);
+    TS_ASSERT_EQUALS(uid2.use_count(), 2);
+    TS_ASSERT_EQUALS(uid1.get(), uid2.get());
+    TS_ASSERT_EQUALS(uid1, uid2);
+  }
+
+  void test_sharedID_copy_construct_from_invalid() {
+    cout << "\ntest sharedID copy constructor from invalid" << endl;
+
+    TestSharedID uid1;
+    TS_ASSERT_EQUALS(uid1.use_count(), 0);
+
+    TestSharedID uid2(uid1);
+    TS_ASSERT_EQUALS(uid1.use_count(), 0);
+    TS_ASSERT_EQUALS(uid2.use_count(), 0);
+    TS_ASSERT(!uid1.isValid());
+    TS_ASSERT(!uid2.isValid());
+  }
+
+  void test_sharedID_move_construct() {
+    cout << "\ntest sharedID move construct\n";
+    // move construct
+    hid_t test = GOOD_ID1;
+    {
+      TestSharedID uid1(test);
+      TS_ASSERT_EQUALS(uid1.use_count(), 1);
+      {
+        TestSharedID uid2(std::move(uid1));
+        TS_ASSERT_EQUALS(uid1.use_count(), 0);
+        TS_ASSERT_EQUALS(uid2.use_count(), 1);
+        TS_ASSERT_EQUALS(uid2.get(), test);
+      }
+      // uid2 out of scope, deleter called once
+      TS_ASSERT_EQUALS(call_count, 1);
+    }
+    // ensure no double-delete
+    TS_ASSERT_EQUALS(call_count, 1);
+  }
+
+  void test_sharedID_assign_hid() {
+    // assign from hid_t
+    hid_t val1 = GOOD_ID1, val2 = GOOD_ID2;
+    {
+      TestSharedID uid(val1);
+      TS_ASSERT_EQUALS(uid.use_count(), 1);
+      TS_ASSERT_EQUALS(uid.get(), val1);
+      TS_ASSERT(uid.isValid());
+      // ASSIGN THE VALUE
+      uid = val2;
+      TS_ASSERT_EQUALS(uid.use_count(), 1);
+      TS_ASSERT_EQUALS(uid.get(), val2);
+      TS_ASSERT(uid.isValid());
+      TS_ASSERT_EQUALS(call_count, 1);
+    }
+    TS_ASSERT_EQUALS(call_count, 2);
+  }
+
+  void test_sharedID_assign_other() {
+    cout << "\ntest sharedID copy assignment" << endl;
+
+    TestSharedID uid1(GOOD_ID1);
+    TestSharedID uid2(GOOD_ID2);
+
+    TS_ASSERT_EQUALS(uid1.use_count(), 1);
+    TS_ASSERT_EQUALS(uid2.use_count(), 1);
+
+    // Copy assignment
+    uid1 = uid2;
+    TS_ASSERT_EQUALS(uid1.get(), GOOD_ID2);
+    TS_ASSERT_EQUALS(uid2.get(), GOOD_ID2);
+    TS_ASSERT_EQUALS(uid1.use_count(), 2);
+    TS_ASSERT_EQUALS(uid2.use_count(), 2);
+    TS_ASSERT_EQUALS(call_count, 1); // GOOD_ID1 closed
+    TS_ASSERT(uid1 == uid2);
+  }
+
+  void test_sharedID_assign_self() {
+    cout << "\ntest sharedID self assignment copy" << endl;
+
+    TestSharedID uid(GOOD_ID1);
+    TS_ASSERT_EQUALS(uid.use_count(), 1);
+
+    // Self-assignment via copy
+    uid = uid;
+    TS_ASSERT_EQUALS(uid.get(), GOOD_ID1);
+    TS_ASSERT_EQUALS(uid.use_count(), 1);
+    TS_ASSERT_EQUALS(call_count, 0);
+  }
+
+  void test_sharedID_move_assign() {
+    cout << "\ntest sharedID move assignment" << endl;
+
+    TestSharedID uid1(GOOD_ID1);
+    TestSharedID uid2(GOOD_ID2);
+
+    TS_ASSERT_EQUALS(uid1.use_count(), 1);
+    TS_ASSERT_EQUALS(uid2.use_count(), 1);
+
+    // Move assignment
+    uid1 = std::move(uid2);
+    TS_ASSERT_EQUALS(uid1.get(), GOOD_ID2);
+    TS_ASSERT_EQUALS(uid2.get(), INVALID_HID);
+    TS_ASSERT_EQUALS(uid1.use_count(), 1);
+    TS_ASSERT_EQUALS(uid2.use_count(), 0);
+    TS_ASSERT_EQUALS(call_count, 1); // GOOD_ID1 closed
+    TS_ASSERT(!(uid1 == uid2));
+  }
+
+#if defined(__GNUC__) && !(defined(__clang__))
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wself-move"
+#endif
+  void test_sharedID_move_assign_self() {
+    cout << "\ntest sharedID self assignment move" << endl;
+
+    TestSharedID uid(GOOD_ID1);
+    TS_ASSERT_EQUALS(uid.use_count(), 1);
+
+    // Self-assignment via move
+    uid = std::move(uid);
+    TS_ASSERT_EQUALS(uid.get(), GOOD_ID1);
+    TS_ASSERT_EQUALS(uid.use_count(), 1);
+    TS_ASSERT_EQUALS(call_count, 0);
+  }
+#if defined(__GNUC__) && !(defined(__clang__))
+#pragma GCC diagnostic pop
+#endif
+
+  void test_sharedID_increment_and_decrement() {
+    cout << "\ntest sharedID increment and decrement" << endl;
+
+    TestSharedID uid(GOOD_ID1);
+    std::size_t counts = uid.use_count();
+    constexpr std::size_t N = 10;
+    {
+      TestSharedID uids[N];
+      // up
+      for (std::size_t i = 0; i < N; i++) {
+        uids[i].reset(uid);
+        counts++;
+        TS_ASSERT_EQUALS(uid.use_count(), counts);
+      }
+
+      // down
+      for (std::size_t i = 0; i < N; i++) {
+        uids[i].reset();
+        counts--;
+        TS_ASSERT_EQUALS(uid.use_count(), counts);
+      }
+    }
+    TS_ASSERT_EQUALS(uid.use_count(), 1);
+  }
+
   void test_sharedID_no_close_when_shared() {
     cout << "\ntest sharedID no close when shared" << endl;
 
-    // if set with the invalid ID, no close on exit
     {
       TestSharedID uid1;
       TS_ASSERT_EQUALS(uid1.use_count(), 0);
@@ -494,7 +814,7 @@ public:
       TS_ASSERT_EQUALS(call_count, 1);
     }
     // the deleter was not called on exit (uid1 already invalid)
-    TS_ASSERT_EQUALS(call_count, 1);
+    TS_ASSERT_EQUALS(call_count, 1); // counts still 1
   }
 
   void test_sharedID_no_segfaults() {
@@ -547,29 +867,90 @@ public:
     TS_ASSERT_EQUALS(call_count, 1);
   }
 
-  void test_sharedID_increment_and_decrement() {
-    cout << "\ntest sharedID increment and decrement" << endl;
+  void test_sharedID_reset_copy() {
+    cout << "\ntest sharedID reset with copy" << endl;
+
+    TestSharedID uid1(GOOD_ID1);
+    TestSharedID uid2;
+
+    TS_ASSERT_EQUALS(uid1.use_count(), 1);
+    TS_ASSERT_EQUALS(uid2.use_count(), 0);
+
+    uid2.reset(uid1);
+    TS_ASSERT_EQUALS(uid1.use_count(), 2);
+    TS_ASSERT_EQUALS(uid2.use_count(), 2);
+    TS_ASSERT_EQUALS(uid1.get(), GOOD_ID1);
+    TS_ASSERT_EQUALS(uid2.get(), GOOD_ID1);
+    TS_ASSERT(uid1 == uid2);
+  }
+
+  void test_sharedID_reset_move() {
+    cout << "\ntest sharedID reset with move" << endl;
+
+    TestSharedID uid1(GOOD_ID1);
+    TestSharedID uid2;
+
+    TS_ASSERT_EQUALS(uid1.use_count(), 1);
+    TS_ASSERT_EQUALS(uid2.use_count(), 0);
+
+    uid2.reset(std::move(uid1));
+    TS_ASSERT_EQUALS(uid1.use_count(), 0);
+    TS_ASSERT_EQUALS(uid2.use_count(), 1);
+    TS_ASSERT_EQUALS(uid1.get(), INVALID_HID);
+    TS_ASSERT_EQUALS(uid2.get(), GOOD_ID1);
+  }
+
+  void test_sharedID_reset_with_same_hid() {
+    cout << "\ntest sharedID reset with same hid_t value" << endl;
 
     TestSharedID uid(GOOD_ID1);
-    std::size_t counts = uid.use_count();
+    TS_ASSERT_EQUALS(uid.use_count(), 1);
+    TS_ASSERT_EQUALS(call_count, 0);
+
+    // Reset with same value should not close
+    uid.reset(GOOD_ID1);
+    TS_ASSERT_EQUALS(uid.get(), GOOD_ID1);
+    TS_ASSERT_EQUALS(uid.use_count(), 1);
+    TS_ASSERT_EQUALS(call_count, 0);
+  }
+
+  void test_sharedID_equality_operators() {
+    cout << "\ntest sharedID equality between SharedIDs" << endl;
+
+    TestSharedID uid1(GOOD_ID1);
+    TestSharedID uid2(uid1);
+    TestSharedID uid3(GOOD_ID1); // Same value, different tracking
+    TestSharedID uid4;
+
+    // Same tracking
+    TS_ASSERT(uid1 == uid2);
+    TS_ASSERT(uid2 == uid1);
+
+    // Different tracking even though same hid_t value
+    TS_ASSERT(!(uid1 == uid3));
+    TS_ASSERT(!(uid3 == uid1));
+
+    // Invalid IDs
+    TS_ASSERT(!(uid1 == uid4));
+    TS_ASSERT(!(uid4 == uid1));
+  }
+
+  void test_sharedID_close_vector_on_exit() {
+    cout << "\ntest sharedID in vector operations" << endl;
+
+    TestSharedID original(GOOD_ID1);
+    std::size_t counts = original.use_count();
     constexpr std::size_t N = 10;
     {
-      TestSharedID uids[N];
-      // up
-      for (std::size_t i = 0; i < N; i++) {
-        uids[i].reset(uid);
+      std::vector<TestSharedID> vec;
+      for (std::size_t i = 0; i < N; ++i) {
+        vec.push_back(original);
         counts++;
-        TS_ASSERT_EQUALS(uid.use_count(), counts);
-      }
-
-      // down
-      for (std::size_t i = 0; i < N; i++) {
-        uids[i].reset();
-        counts--;
-        TS_ASSERT_EQUALS(uid.use_count(), counts);
+        TS_ASSERT_EQUALS(original.use_count(), counts);
       }
     }
-    TS_ASSERT_EQUALS(uid.use_count(), 1);
+    TS_ASSERT_EQUALS(original.use_count(), 1);
+    TS_ASSERT_EQUALS(call_count, 0);
   }
 
   void test_sharedID_close_all_on_exit() {
@@ -593,44 +974,6 @@ public:
     delete[] puid;
     // deleting the allocated array clears those counts
     TS_ASSERT_EQUALS(uid.use_count(), 1);
-  }
-
-  void test_sharedID_move_construct() {
-    cout << "\ntest sharedID move construct\n";
-    // move construct
-    hid_t test = GOOD_ID1;
-    {
-      TestSharedID uid1(test);
-      TS_ASSERT_EQUALS(uid1.use_count(), 1);
-      {
-        TestSharedID uid2(std::move(uid1));
-        TS_ASSERT_EQUALS(uid1.use_count(), 0);
-        TS_ASSERT_EQUALS(uid2.use_count(), 1);
-        TS_ASSERT_EQUALS(uid2.get(), test);
-      }
-      // uid2 out of scope, deleter called once
-      TS_ASSERT_EQUALS(call_count, 1);
-    }
-    // ensure no double-delete
-    TS_ASSERT_EQUALS(call_count, 1);
-  }
-
-  void test_sharedID_assign_hid() {
-    // assign from hid_t
-    hid_t val1 = GOOD_ID1, val2 = GOOD_ID2;
-    {
-      TestSharedID uid(val1);
-      TS_ASSERT_EQUALS(uid.use_count(), 1);
-      TS_ASSERT_EQUALS(uid.get(), val1);
-      TS_ASSERT(uid.isValid());
-      // ASSIGN THE VALUE
-      uid = val2;
-      TS_ASSERT_EQUALS(uid.use_count(), 1);
-      TS_ASSERT_EQUALS(uid.get(), val2);
-      TS_ASSERT(uid.isValid());
-      TS_ASSERT_EQUALS(call_count, 1);
-    }
-    TS_ASSERT_EQUALS(call_count, 2);
   }
 
   void test_sharedID_thrice() {
@@ -679,6 +1022,136 @@ public:
     } // last id goes out of scope and deconstructor is called
     // the destructor is now called
     TS_ASSERT_EQUALS(call_count, 1);
+  }
+
+  void test_sharedID_circular_sharing() {
+    cout << "\ntest sharedID circular sharing pattern" << endl;
+
+    TestSharedID uid1(GOOD_ID1);
+    TestSharedID uid2(uid1);
+    TestSharedID uid3(uid2);
+
+    TS_ASSERT_EQUALS(uid1.use_count(), 3);
+    TS_ASSERT_EQUALS(uid2.use_count(), 3);
+    TS_ASSERT_EQUALS(uid3.use_count(), 3);
+
+    // Now reassign in a circle
+    uid1 = uid3;
+    TS_ASSERT_EQUALS(uid1.use_count(), 3);
+    TS_ASSERT_EQUALS(uid2.use_count(), 3);
+    TS_ASSERT_EQUALS(uid3.use_count(), 3);
+    TS_ASSERT_EQUALS(call_count, 0);
+  }
+
+  void test_sharedID_assign_invalid_to_valid() {
+    cout << "\ntest sharedID assign invalid to valid" << endl;
+
+    TestSharedID uid1(GOOD_ID1);
+    TestSharedID uid2;
+
+    TS_ASSERT_EQUALS(uid1.use_count(), 1);
+    TS_ASSERT_EQUALS(uid2.use_count(), 0);
+    TS_ASSERT_EQUALS(call_count, 0);
+
+    uid1 = uid2; // Assign invalid to valid
+    TS_ASSERT_EQUALS(uid1.use_count(), 0);
+    TS_ASSERT_EQUALS(uid2.use_count(), 0);
+    TS_ASSERT(!uid1.isValid());
+    TS_ASSERT(!uid2.isValid());
+    TS_ASSERT_EQUALS(call_count, 1); // GOOD_ID1 was closed
+  }
+
+  void test_sharedID_multiple_resets() {
+    cout << "\ntest sharedID multiple sequential resets" << endl;
+
+    TestSharedID uid(GOOD_ID1);
+    TS_ASSERT_EQUALS(uid.use_count(), 1);
+    TS_ASSERT_EQUALS(call_count, 0);
+
+    uid.reset(GOOD_ID2);
+    TS_ASSERT_EQUALS(uid.use_count(), 1);
+    TS_ASSERT_EQUALS(uid.get(), GOOD_ID2);
+    TS_ASSERT_EQUALS(call_count, 1); // GOOD_ID1 closed
+
+    uid.reset(BAD_ID);
+    TS_ASSERT_EQUALS(uid.use_count(), 0);
+    TS_ASSERT_EQUALS(uid.get(), BAD_ID);
+    TS_ASSERT_EQUALS(call_count, 2); // GOOD_ID2 closed
+
+    uid.reset();
+    TS_ASSERT_EQUALS(uid.use_count(), 0);
+    TS_ASSERT_EQUALS(uid.get(), INVALID_HID);
+    TS_ASSERT_EQUALS(call_count, 2); // BAD_ID was invalid, no close
+  }
+
+  void test_sharedID_close_on_pointer_delete() {
+    cout << "\ntest sharedID complex lifetime management" << endl;
+
+    TestSharedID *uid1 = new TestSharedID(GOOD_ID1);
+    TS_ASSERT_EQUALS(uid1->use_count(), 1);
+
+    TestSharedID *uid2 = new TestSharedID(*uid1);
+    TS_ASSERT_EQUALS(uid1->use_count(), 2);
+    TS_ASSERT_EQUALS(uid2->use_count(), 2);
+
+    TestSharedID *uid3 = new TestSharedID(*uid2);
+    TS_ASSERT_EQUALS(uid1->use_count(), 3);
+    TS_ASSERT_EQUALS(uid2->use_count(), 3);
+    TS_ASSERT_EQUALS(uid3->use_count(), 3);
+
+    delete uid1;
+    TS_ASSERT_EQUALS(uid2->use_count(), 2);
+    TS_ASSERT_EQUALS(uid3->use_count(), 2);
+    TS_ASSERT_EQUALS(call_count, 0);
+
+    delete uid3;
+    TS_ASSERT_EQUALS(uid2->use_count(), 1);
+    TS_ASSERT_EQUALS(call_count, 0);
+
+    delete uid2;
+    TS_ASSERT_EQUALS(call_count, 1); // Finally closed
+  }
+
+  void test_sharedID_swap_pattern() {
+    cout << "\ntest sharedID swap-like pattern" << endl;
+
+    TestSharedID uid1(GOOD_ID1);
+    TestSharedID uid2(GOOD_ID2);
+
+    TS_ASSERT_EQUALS(uid1.use_count(), 1);
+    TS_ASSERT_EQUALS(uid2.use_count(), 1);
+
+    // Swap using temporaries
+    {
+      TestSharedID temp(std::move(uid1));
+      uid1 = std::move(uid2);
+      uid2 = std::move(temp);
+    }
+
+    TS_ASSERT_EQUALS(uid1.get(), GOOD_ID2);
+    TS_ASSERT_EQUALS(uid2.get(), GOOD_ID1);
+    TS_ASSERT_EQUALS(uid1.use_count(), 1);
+    TS_ASSERT_EQUALS(uid2.use_count(), 1);
+    TS_ASSERT_EQUALS(call_count, 0);
+  }
+
+  void test_sharedID_zero_use_count_edge_cases() {
+    cout << "\ntest sharedID zero use_count edge cases" << endl;
+
+    TestSharedID uid1;
+    TS_ASSERT_EQUALS(uid1.use_count(), 0);
+
+    // Operations on zero-count ID
+    uid1.reset();
+    TS_ASSERT_EQUALS(uid1.use_count(), 0);
+
+    TestSharedID uid2(uid1);
+    TS_ASSERT_EQUALS(uid1.use_count(), 0);
+    TS_ASSERT_EQUALS(uid2.use_count(), 0);
+
+    TestSharedID uid3;
+    uid3 = uid1;
+    TS_ASSERT_EQUALS(uid3.use_count(), 0);
   }
 
   void test_sharedID_files() {
