@@ -26,14 +26,7 @@ mtd_add_qt_tests(
   TARGET_NAME MantidQtIconsTest
   SRC ${QT5_TEST_FILES}
   INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/inc ${CMAKE_CURRENT_SOURCE_DIR}/../widgets/common/inc
-  LINK_LIBS ${TARGET_LIBRARIES} ${Boost_LIBRARIES}
+  LINK_LIBS ${TARGET_LIBRARIES} ${Boost_LIBRARIES} gmock
   MTD_QT_LINK_LIBS MantidQtIcons
   PARENT_DEPENDENCIES GUITests
 )
-
-if(TARGET GTest::gmock AND TARGET GTest::gtest)
-
-  target_link_libraries(MantidQtIconsTestQt5 PRIVATE GTest::gmock GTest::gtest)
-else()
-  target_link_libraries(MantidQtIconsTestQt5 PRIVATE gmock gtest)
-endif()

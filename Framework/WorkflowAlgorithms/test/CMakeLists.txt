@@ -19,19 +19,13 @@ if(CXXTEST_FOUND)
   # into the test executable. It will go out of scope at the end of this file so doesn't need un-setting
   cxxtest_add_test(WorkflowAlgorithmsTest ${TEST_FILES})
   target_link_libraries(
-    WorkflowAlgorithmsTest PRIVATE Mantid::WorkflowAlgorithms Mantid::Algorithms Mantid::DataHandling
+    WorkflowAlgorithmsTest PRIVATE Mantid::WorkflowAlgorithms Mantid::Algorithms Mantid::DataHandling gmock
   )
   add_dependencies(WorkflowAlgorithmsTest CurveFitting)
   add_dependencies(FrameworkTests WorkflowAlgorithmsTest)
   # Test data
   add_dependencies(WorkflowAlgorithmsTest UnitTestData)
   add_framework_test_helpers(WorkflowAlgorithmsTest)
-
-  if(TARGET GTest::gmock AND TARGET GTest::gtest)
-    target_link_libraries(WorkflowAlgorithmsTest PRIVATE GTest::gmock GTest::gtest)
-  else()
-    target_link_libraries(WorkflowAlgorithmsTest PRIVATE gmock gtest)
-  endif()
 
   # Add to the 'FrameworkTests' group in VS
   set_property(TARGET WorkflowAlgorithmsTest PROPERTY FOLDER "UnitTests")
