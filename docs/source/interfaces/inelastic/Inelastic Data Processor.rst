@@ -297,7 +297,7 @@ File or Workspace
   Choose to load data from a file or a workspace by using this dropdown menu. See image below for demonstration of how to load files using either option.
 
 .. figure:: ../../images/ElwinLoad.gif
-   :width: 600px
+   :width: 600
    :align: center
 
 Input File
