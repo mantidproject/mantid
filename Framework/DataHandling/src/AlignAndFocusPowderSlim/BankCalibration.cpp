@@ -48,6 +48,7 @@ void copy_values_from_map_to_offset_vector(const std::map<detid_t, double> &map_
  * @param mask detector ids that exist in the map should not be included.
  */
 BankCalibration::BankCalibration(const detid_t idmin, const detid_t idmax, const double time_conversion,
+                                 const std::vector<detid_t> &det_in_group,
                                  const std::map<detid_t, double> &calibration_map,
                                  const std::map<detid_t, double> &scale_at_sample, const std::set<detid_t> &mask)
     : m_detid_offset(idmin) {
@@ -78,10 +79,19 @@ BankCalibration::BankCalibration(const detid_t idmin, const detid_t idmax, const
       m_calibration[detid - m_detid_offset] = IGNORE_PIXEL;
     }
   }
+
+  // mask anything that isn't int the group - this could be optimized by assuming the input vector is sorted
+  for (size_t i = 0; i < m_calibration.size(); ++i) {
+    const detid_t detid = static_cast<detid_t>(i) + m_detid_offset;
+    if (std::find(det_in_group.cbegin(), det_in_group.cend(), detid) == det_in_group.cend()) {
+      m_calibration[i] = IGNORE_PIXEL;
+    }
+  }
 }
 
 /**
- * This assumes that everything is in range. Values that weren't in the calibration map get set to 1.
+ * This assumes that everything is in range. Values that weren't in the calibration map get set to 1. Values that are to
+ * be masked will be set to IGNORE_PIXEL.
  */
 const double &BankCalibration::value_calibration(const detid_t detid) const {
   return m_calibration[detid - m_detid_offset];
