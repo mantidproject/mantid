@@ -81,7 +81,9 @@ class StitchByBackground(DataProcessorAlgorithm):
 
         offsets = self.create_offsets(ws_list, stitch_locations)
 
-        subtracted_ws, x, y, e = self.subtract_background(ws_list, offsets, stitch_locations)
+        x, y, e = self.subtract_background(ws_list, offsets, stitch_locations)
+
+        parent_ws = ws_list[-1]
 
         out_ws_name = self.getProperty("OutputWorkspace").value
         stitched_ws = CreateWorkspace(
@@ -89,9 +91,9 @@ class StitchByBackground(DataProcessorAlgorithm):
             y,
             e,
             OutputWorkspace=out_ws_name,
-            UnitX=subtracted_ws.getAxis(0).getUnit().unitID(),
-            Distribution=subtracted_ws.isDistribution(),
-            ParentWorkspace=subtracted_ws,
+            UnitX=parent_ws.getAxis(0).getUnit().unitID(),
+            Distribution=parent_ws.isDistribution(),
+            ParentWorkspace=parent_ws,
             EnableLogging=False,
             StoreInADS=False,
         )
@@ -144,7 +146,7 @@ class StitchByBackground(DataProcessorAlgorithm):
             e.extend(subtracted_ws.readE(0))
         # Add the final bin edge.
         x.append(subtracted_ws.readX(0)[-1])
-        return subtracted_ws, x, y, e
+        return x, y, e
 
     def crop_output(self, stitched_ws):
         # Crop the output.
