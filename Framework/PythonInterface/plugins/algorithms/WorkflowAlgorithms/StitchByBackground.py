@@ -67,7 +67,8 @@ class StitchByBackground(DataProcessorAlgorithm):
             "OverlapWidth",
             0.05,
             validator=FloatBoundedValidator(lower=0),
-            doc="The extent to which the fit limits extend from the points given in StitchPoints.",
+            doc="A linear background is fitted to data in the region StitchPoint +/- OverlapWidth "
+            "(i.e. the data is fitted to span range 2*OverlapWidth).",
         )
         self.declareProperty("CropLowerBound", 0.0, doc="The XMin to use when cropping the output workspace.")
         self.declareProperty("CropUpperBound", 0.0, doc="The XMax to use when cropping the output workspace.")
