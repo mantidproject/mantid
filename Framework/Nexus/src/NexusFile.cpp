@@ -1388,7 +1388,7 @@ void File::getEntries(Entries &result) const {
       className = SCIENTIFIC_DATA_SET;
     }
     if (!className.empty())
-      result[name] = className;
+      result[name] = std::move(className);
   }
 }
 

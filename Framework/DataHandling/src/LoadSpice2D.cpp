@@ -246,7 +246,7 @@ void LoadSpice2D::setInputPropertiesAsMemberProperties() {
   try {
     m_xmlHandler = XmlHandler(fileName);
   } catch (...) {
-    throw Kernel::Exception::FileError("Unable to parse File:", fileName);
+    throw Kernel::Exception::FileError("Unable to parse File:", std::move(fileName));
   }
 }
 

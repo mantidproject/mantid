@@ -13,13 +13,14 @@
 #include "MantidAPI/MultipleExperimentInfos.h"
 #include "MantidAPI/Run.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
+#include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/Property.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/SpecialCoordinateSystem.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidMDAlgorithms/MDWSDescription.h"
-#include <math.h>
+#include <cmath>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -55,6 +56,14 @@ void ApplyDetailedBalanceMD::init() {
 
   declareProperty(std::make_unique<PropertyWithValue<std::string>>("Temperature", "", Direction::Input),
                   "SampleLog variable name that contains the temperature or a number");
+
+  auto mustBePositive = std::make_shared<BoundedValidator<double>>();
+  mustBePositive->setLower(0.0);
+  mustBePositive->setLowerExclusive(true);
+  declareProperty(std::make_unique<PropertyWithValue<double>>("RescaleToTemperature", EMPTY_DBL(), mustBePositive,
+                                                              Direction::Input),
+                  "The temperature to which to rescale the intensity");
+
   declareProperty(
       std::make_unique<WorkspaceProperty<API::IMDEventWorkspace>>("OutputWorkspace", "", Kernel::Direction::Output),
       "The output MDEventWorkspace with detailed balance applied");
@@ -67,6 +76,12 @@ void ApplyDetailedBalanceMD::init() {
 void ApplyDetailedBalanceMD::exec() {
   // Get input workspace
   API::IMDEventWorkspace_sptr input_ws = getProperty("InputWorkspace");
+
+  // Get temperature to convert to
+  mFinalTemperature = getProperty("RescaleToTemperature");
+  if (mFinalTemperature > EMPTY_DBL() / 2) {
+    mFinalTemperature = -10.; // set to an unphysical value
+  }
 
   // Process input workspace and create output workspace
   std::string output_ws_name = getPropertyValue("OutputWorkspace");
@@ -202,13 +217,25 @@ void ApplyDetailedBalanceMD::applyDetailedBalance(typename Mantid::DataObjects::
       for (auto it = events.begin(); it != events.end(); ++it) {
         // Create the event
         // do calculattion
-        float temperatue(static_cast<float>(mExpinfoTemperatureMean[it->getExpInfoIndex()]));
+        float temperature(static_cast<float>(mExpinfoTemperatureMean[it->getExpInfoIndex()]));
+        float factor;
 
         // delta_e = it->getCenter(mDeltaEIndex);
         // factor = pi * (1 - exp(-deltaE/(kb*T)))
-        float factor = static_cast<float>(M_PI) *
-                       (static_cast<float>(1.) - exp(-it->getCenter(mDeltaEIndex) *
-                                                     static_cast<float>(PhysicalConstants::meVtoKelvin / temperatue)));
+        // using expm1=e^x-1 function
+        if (mFinalTemperature < 0) { // convert to chi''
+          factor =
+              -static_cast<float>(M_PI) * std::expm1f(-static_cast<float>(it->getCenter(mDeltaEIndex)) *
+                                                      static_cast<float>(PhysicalConstants::meVtoKelvin / temperature));
+        } else {
+          float de = static_cast<float>(it->getCenter(mDeltaEIndex));
+          if (std::fabs(de) < 1e-10) {
+            factor = static_cast<float>(mFinalTemperature) / temperature;
+          } else {
+            factor = std::expm1f(-de * static_cast<float>(PhysicalConstants::meVtoKelvin / temperature)) /
+                     std::expm1f(-de * static_cast<float>(PhysicalConstants::meVtoKelvin / mFinalTemperature));
+          }
+        }
 
         // calcalate and set intesity
         auto intensity = it->getSignal() * factor;

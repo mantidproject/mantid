@@ -838,7 +838,7 @@ class BasicFittingModel:
         """Evaluate the plot guess fit function and returns the name of the resulting guess workspace."""
         if self.fitting_context.plot_guess_type == X_FROM_FIT_RANGE:
             data_ws = retrieve_ws(self.current_dataset_name)
-            data = np.linspace(self.current_start_x, self.current_end_x, data_ws.getNumberBins())
+            data = np.linspace(self.current_start_x, self.current_end_x, data_ws.blocksize())
         elif self.fitting_context.plot_guess_type == X_FROM_DATA_RANGE:
             data_ws = retrieve_ws(self.current_dataset_name)
             data = np.linspace(data_ws.dataX(0)[0], data_ws.dataX(0)[-1], self.fitting_context.plot_guess_points)

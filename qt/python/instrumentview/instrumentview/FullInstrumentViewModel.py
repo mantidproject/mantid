@@ -12,7 +12,7 @@ from instrumentview.Projections.CylindricalProjection import CylindricalProjecti
 from instrumentview.Projections.SideBySide import SideBySide
 from instrumentview.Projections.ProjectionType import ProjectionType
 
-from mantid.dataobjects import Workspace2D, PeaksWorkspace
+from mantid.dataobjects import Workspace2D, PeaksWorkspace, MaskWorkspace
 from mantid.simpleapi import (
     CreateDetectorTable,
     ExtractSpectra,
@@ -75,6 +75,7 @@ class FullInstrumentViewModel:
         self._spherical_positions = np.transpose(np.vstack([r, theta, phi]))
         self._detector_positions_3d = detector_info_table.columnArray("Position")
         self._workspace_indices = detector_info_table.columnArray("Index")
+        self._spectrum_nos = detector_info_table.columnArray("Spectrum No")
         # Array of strings 'yes', 'no' and 'n/a'
         self._is_monitor = detector_info_table.columnArray("Monitor")
         self._is_valid = self._is_monitor == "no"
@@ -134,6 +135,10 @@ class FullInstrumentViewModel:
         return self._detector_ids[self.is_pickable]
 
     @property
+    def spectrum_nos(self) -> np.ndarray:
+        return self._spectrum_nos[self.is_pickable]
+
+    @property
     def monitor_positions(self) -> np.ndarray:
         return self._monitor_positions
 
@@ -148,6 +153,10 @@ class FullInstrumentViewModel:
     @property
     def picked_detector_ids(self) -> np.ndarray:
         return self._detector_ids[self._detector_is_picked]
+
+    @property
+    def picked_spectrum_nos(self) -> np.ndarray:
+        return self._spectrum_nos[self._is_valid & self._detector_is_picked]
 
     @property
     def picked_workspace_indices(self) -> np.ndarray:
@@ -353,22 +362,27 @@ class FullInstrumentViewModel:
             peaks = []
             peaks_dict = pws.toDict()
             detector_ids = peaks_dict["DetID"]
-            hkls = zip(peaks_dict["h"], peaks_dict["k"], peaks_dict["l"])
+            workspace_indices = self.workspace.getIndicesFromDetectorIDs(detector_ids)
+            spectrum_nos = self._spectrum_nos[workspace_indices]
+            hkls = zip(peaks_dict["h"], peaks_dict["k"], peaks_dict["l"], strict=True)
             positions = [np.array(detector_info.position(detector_info.indexOf(id))) for id in detector_ids]
             tofs = peaks_dict["TOF"]
             dspacings = peaks_dict["DSpacing"]
             wavelengths = peaks_dict["Wavelength"]
             peaks += [
-                Peak(det_id, v, hkl, tof, dspacing, wavelength, 2 * np.pi / dspacing)
-                for (det_id, v, hkl, tof, dspacing, wavelength) in zip(detector_ids, positions, hkls, tofs, dspacings, wavelengths)
+                Peak(det_id, spec_no, v, hkl, tof, dspacing, wavelength, 2 * np.pi / dspacing)
+                for (det_id, spec_no, v, hkl, tof, dspacing, wavelength) in zip(
+                    detector_ids, spectrum_nos, positions, hkls, tofs, dspacings, wavelengths, strict=True
+                )
             ]
             # Combine peaks on the same detector
             detector_peaks = []
             # groupby groups consecutive matches, so must be sorted
-            peaks.sort(key=lambda x: x.detector_id)
-            for det_id, peaks_for_id in groupby(peaks, lambda x: x.detector_id):
-                if det_id in self.detector_ids:
-                    detector_peaks.append(DetectorPeaks(list(peaks_for_id)))
+            peaks.sort(key=lambda x: x.spectrum_no)
+            for spec_no, peaks_for_spec in groupby(peaks, lambda x: x.spectrum_no):
+                if spec_no in self.spectrum_nos:
+                    detector_peaks.append(DetectorPeaks(list(peaks_for_spec)))
+
             peaks_grouped_by_ws.append(detector_peaks)
         return peaks_grouped_by_ws
 
@@ -388,9 +402,6 @@ class FullInstrumentViewModel:
         q_lab = np.array([-np.sin(two_theta) * np.cos(phi), -np.sin(two_theta) * np.sin(phi), 1 - np.cos(two_theta)])
         return q_lab / np.linalg.norm(q_lab)
 
-    def clear_stored_masks(self) -> None:
-        self._cached_masks_map.clear()
-
     def add_new_detector_mask(self, new_mask: list[bool]) -> str:
         new_key = f"Mask {len(self._cached_masks_map) + 1}"
         mask_to_save = self._is_masked_in_ws.copy()
@@ -399,20 +410,33 @@ class FullInstrumentViewModel:
         return new_key
 
     def apply_detector_masks(self, mask_keys: list[str]) -> None:
-        if not mask_keys:
-            mask_total = self._is_masked_in_ws
-        else:
-            mask_total = np.logical_or.reduce([self._cached_masks_map[key] for key in mask_keys])
-        self._is_masked = mask_total
+        ws_masks = [ws.extractY().flatten() for ws in self.get_mask_workspaces_in_ads() if ws.name() in mask_keys]
+        cached_masks = [self._cached_masks_map[key] for key in mask_keys if key in self._cached_masks_map.keys()]
+
+        if not ws_masks and not cached_masks:
+            self._is_masked = self._is_masked_in_ws
+            self._detector_is_picked[~self.is_pickable] = False
+            return
+
+        total_mask = np.logical_or.reduce(ws_masks + cached_masks)
+        self._is_masked = total_mask
         self._detector_is_picked[~self.is_pickable] = False
 
+    def clear_stored_masks(self) -> None:
+        self._cached_masks_map.clear()
+
+    @property
+    def cached_masks_keys(self) -> list[str]:
+        return list(self._cached_masks_map.keys())
+
     def save_mask_workspace_to_ads(self) -> None:
-        name_exported_ws = f"instrument_view_mask_{self._workspace.name()}"
         for i, v in enumerate(self._is_masked):
             self._mask_ws.dataY(i)[:] = v
 
         xmin, xmax = self._integration_limits
-        ExtractMaskToTable(self._mask_ws, Xmin=xmin, Xmax=xmax, OutputWorkspace=name_exported_ws)
+        # TODO: Figure out naming convention
+        ExtractMaskToTable(self._mask_ws, Xmin=xmin, Xmax=xmax, OutputWorkspace="MaskTable")
+        CloneWorkspace(self._mask_ws, OutputWorkspace="MaskWorkspace")
 
     def save_xml_mask(self, filename) -> None:
         if not filename:
@@ -427,3 +451,12 @@ class FullInstrumentViewModel:
         CloneWorkspace(self._workspace.name(), OutputWorkspace=temp_ws_name)
         MaskDetectors(temp_ws_name, MaskedWorkspace=self.mask_ws)
         RenameWorkspace(InputWorkspace=temp_ws_name, OutputWorkspace=self._workspace.name())
+
+    def get_mask_workspaces_in_ads(self) -> list[MaskWorkspace]:
+        ads = AnalysisDataService.Instance()
+        workspaces_in_ads = ads.retrieveWorkspaces(ads.getObjectNames())
+        return [
+            pws
+            for pws in workspaces_in_ads
+            if "MaskWorkspace" in str(type(pws)) and pws.getInstrument().getFullName() == self._workspace.getInstrument().getFullName()
+        ]

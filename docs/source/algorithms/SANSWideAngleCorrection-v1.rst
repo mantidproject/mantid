@@ -12,11 +12,8 @@ Description
 Algorithm Reference Discussion
 ------------------------------
 
-Looking at `Computing guide for Small Angle Scattering
-Experiments <https://kur.web.psi.ch/sans1/manuals/sas_manual.pdf>`__ by
-Ghosh, Egelhaaf & Rennie, we see that for scattering at larger angles
-the transmission should be modified due to the longer path length after
-the scattering event.
+Transmission for scattering at large angles should be modified to account for the longer
+path length after the scattering event [#Brulet]_ [#Ghosh]_.
 
 The longer path length after scattering will also slightly increase the
 probability of a second scattering event, but this is not dealt with
@@ -30,50 +27,56 @@ If our on-axis transmission is :math:`T_0` through a sample of thickness
 If a neutron scatters at angle :math:`2\theta` at distance :math:`x`
 into the sample, its total transmission is then:
 
-:math:`T^{''} = \exp(-\mu x) \exp( \frac{-\mu(d-x)}{\cos(2\theta)})`
+.. math:: T^{''} = \exp(-\mu x) \exp( \frac{-\mu(d-x)}{\cos(2\theta)})
 
 :math:`T^{''}` should be integrated and averaged between :math:`x = 0`
 and :math:`x = d`.
 
-Hammouda, gives an approximate result for the integral, see page 208 of
-`SANS toolbox <http://www.ncnr.nist.gov/staff/hammouda/the_SANS_toolbox.pdf>`__:
+The resulting integral can be approximated, see page 208 of [#Hammouda]_, as:
 
-:math:`T^{'} = \frac{T_0(T_0^A - 1)}{A \ln(T_0)}`
+.. math::
 
-For:
+    T^{'} = \frac{T_0(T_0^A - 1)}{A \ln(T_0)}
 
-:math:`A = \frac{1}{\cos(2\theta)} - 1`
+With :math:`A = \frac{1}{\cos(2\theta)} - 1`.
 
-For example if :math:`T_0 = 0.2` and :math:`2\theta = 40` then
-:math:`T^{'} = 0.158`, a shift of :math:`~20`\ % of the SANS curve. Note
-that the result is independent of sample thickness.
+For example, if :math:`T_0 = 0.2` and :math:`2\theta = 40` then
+:math:`T^{'} = 0.158`, a shift of :math:`~20`\ % of the SANS curve.
+Note that the result is independent of sample thickness.
 
 :math:`T_0` is a function of neutron wavelength, whilst :math:`A` is a
 function of detector pixel location.
 
 The output of this algorithm is:
 
-:math:`OutputWorkspace = \frac{T^\prime}{T_0}`
+:math:`\text{Output Workspace}=\frac{T^\prime}{T_0}`
 
 Error Propagation
 #################
 
 The error propagation follows this formula:
 
-:math:`OutputWorkspace_{error} = \frac{T_{0E} ^A - 1}{A\ln(T_0E)}`
+:math:`\text{OutputWorkspace}_{error} = \frac{T_{0E} ^A - 1}{A\ln(T_0E)}`
 
-Which means, that we do not consider the error in the definition of the
+Which means, that we do not consider the error in the definition of
 :math:`2\theta` (the parameter A)
 
 Enabling Wide Angle Correction for Reduction of SANS ISIS
 ---------------------------------------------------------
 
-To enable the Wide Angle correction use the User File settings:
+The Wide Angle Correction was set on the legacy user file with the command:
 
 ``SAMPLE/PATH/ON``
 
-More information on:
-`SANS\_User\_File\_Commands#SAMPLE <SANS_User_File_Commands#SAMPLE>`__
+For TOML user files, the ``wide_angle_correction`` boolean flag can be set on the transmission field, if the
+flag is not present on the TOML file, the default value is ``false``:
+
+..  code-block:: yaml
+
+  [transmission]
+    wide_angle_correction=true
+
+More information on :ref:`sans_toml_v1-ref`.
 
 SANS ISIS Reduction
 -------------------
@@ -86,23 +89,26 @@ Wide Angle Correction and the SANS Reduction
 
 The equation for the reduction is (see :ref:`algm-Q1D`)
 
-:math:`P_I(Q) = \frac{\sum_{\{i, j, n\} \supset \{I\}} S(i,j,n)}{\sum_{\{i, j, n\} \supset \{I\}}M(n)\eta(n)T(n)\Omega_{i j}F_{i j}}`
+.. math::
 
-But, :math:`T(n)` is not really :math:`T(n)`, because of the wide
-angles, it is now :math:`T(n,theta)` or :math:`T(n,i,j)`.
+    P_I(Q) = \frac{\sum_{\{i, j, n\} \supset \{I\}} S(i,j,n)}{\sum_{\{i, j, n\} \supset \{I\}}M(n)\eta(n)T(n)\Omega_{i j}F_{i j}}
 
-So, we decided to have a new factor that changes this equation to:
+But :math:`T(n)` is now a function of the detector position to account for wide angles, :math:`T(n,theta)` or :math:`T(n,i,j)`.
 
-:math:`P_I(Q) = \frac{\sum_{\{i, j, n\} \supset \{I\}} S(i,j,n)}{\sum_{\{i, j, n\} \supset \{I\}}M(n)\eta(n)T(n)\Omega_{i j}F_{i j}Corr(i,j,n)}`
+Thus, the correction changes to:
+
+.. math::
+
+    P_I(Q) = \frac{\sum_{\{i, j, n\} \supset \{I\}} S(i,j,n)}{\sum_{\{i, j, n\} \supset \{I\}}M(n)\eta(n)T(n)\Omega_{i j}F_{i j}Corr(i,j,n)}
 
 Where Corr (Correction factor) in this case will be:
 
-:math:`Corr = \frac{T_0^A - 1}{A \ln(T_0)}`
+:math:`\text{Corr}(i,j,n) = \frac{T_0^A - 1}{A \ln(T_0)}`
 
 Which is the OutputWorkspace of SANSWideAngleCorrection.
 
-This parameter enters inside :ref:`algm-Q1D` as WavePixelAdj. But, this is
-all done for you inside the Reduction Script.
+This workspace enters inside :ref:`algm-Q1D` as the workspace property ``WavePixelAdj``, but this step is handled automatically inside
+the reduction workflow.
 
 Comparison with Wide Angle Correction at SNS
 --------------------------------------------
@@ -126,11 +132,12 @@ normalized by the transmission counters.
 References
 ----------
 
-Annie Brulet et al. - Improvement of data treatment in small-angle neutron scattering - `J. Appl.
-Cryst. (2007). 40 <http://dx.doi.org/10.1107/S0021889806051442>`_
+.. [#Brulet] Annie Brulet et al. - Improvement of data treatment in small-angle neutron scattering - `J. Appl.Cryst. (2007). 40 <http://dx.doi.org/10.1107/S0021889806051442>`_
 
-Ghosh, Egelhaaf & Rennie - Computing guide for Small Angle Scattering
-Experiments
+.. [#Ghosh] Ghosh, Egelhaaf & Rennie - Computing guide for Small Angle Scattering
+
+.. [#Hammouda] Hammouda B. The SANS toolbox. NIST Center for Neutron Research, 2008
+
 
 Usage
 -----

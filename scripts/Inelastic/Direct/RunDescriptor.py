@@ -1588,7 +1588,7 @@ class RunDescriptor(PropDescriptor):
         bg_name = ebg_ws.name()
         ebg_local_name = bg_name
 
-        if ebg_ws.getNumberBins() != ws.getNumberBins() or ebg_ws.getNumberHistograms() != ws.getNumberHistograms():
+        if ebg_ws.blocksize() != ws.blocksize() or ebg_ws.getNumberHistograms() != ws.getNumberHistograms():
             # The RD and background workspaces are different if it is just binning or difference is in monitors
             # we can deal with the issue
             preserve_events = False

@@ -411,7 +411,12 @@
    </instrument>
 
    <instrument name="HB2A">
-      <technique>technique</technique>
+      <technique>Powder Diffraction</technique>
+   </instrument>
+
+   <instrument name="MIDAS">
+     <technique>Neutron Diffraction</technique>
+     <technique>Powder Diffraction</technique>
    </instrument>
 
    <instrument name="HB2B">
@@ -458,6 +463,16 @@
      <livedata>
        <connection name="event" address="cg3-daq1.ornl.gov:31415" listener="SNSLiveEventDataListener" />
      </livedata>
+   </instrument>
+   
+   <instrument name="CG4D" shortname="CG4D">
+     <technique>Neutron Diffraction</technique>
+     <technique>Single Crystal Diffraction</technique>
+   </instrument>
+
+   <instrument name="IMAGINE" shortname="CG4D">
+     <technique>Neutron Diffraction</technique>
+     <technique>Single Crystal Diffraction</technique>
    </instrument>
 
    <instrument name="IMAGINE" shortname="CG4D">

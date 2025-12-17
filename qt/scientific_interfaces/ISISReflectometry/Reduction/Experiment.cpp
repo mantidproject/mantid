@@ -30,7 +30,7 @@ Experiment::Experiment(AnalysisMode analysisMode, ReductionType reductionType, S
                        std::map<std::string, std::string> stitchParameters, LookupTable lookupTable, bool diagnostics)
     : m_analysisMode(analysisMode), m_reductionType(reductionType), m_summationType(summationType),
       m_includePartialBins(includePartialBins), m_debug(debug), m_backgroundSubtraction(backgroundSubtraction),
-      m_polarizationCorrections(polarizationCorrections), m_floodCorrections(std::move(floodCorrections)),
+      m_polarizationCorrections(std::move(polarizationCorrections)), m_floodCorrections(std::move(floodCorrections)),
       m_transmissionStitchOptions(std::move(transmissionStitchOptions)),
       m_stitchParameters(std::move(stitchParameters)), m_lookupTable(std::move(lookupTable)),
       m_diagnostics(diagnostics) {}

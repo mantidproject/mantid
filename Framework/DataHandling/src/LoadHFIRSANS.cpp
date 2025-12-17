@@ -160,7 +160,7 @@ void LoadHFIRSANS::setInputFileAsHandler() {
   try {
     m_xmlHandler = XmlHandler(fileName);
   } catch (...) {
-    throw Kernel::Exception::FileError("Unable to parse File:", fileName);
+    throw Kernel::Exception::FileError("Unable to parse File:", std::move(fileName));
   }
   m_metadata = m_xmlHandler.get_metadata(m_tags_to_ignore);
   setSansSpiceXmlFormatVersion();
