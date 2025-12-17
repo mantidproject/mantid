@@ -106,10 +106,10 @@ class InterfaceDirective(BaseDirective):
 
         if align is not None:
             self.add_rst_list(
-                [f".. figure:: {path}", "   :class: screenshot", f"   :width: {width} px", f"   :align: {align}\n", "", f"   {caption}", ""]
+                [f".. figure:: {path}", "   :class: screenshot", f"   :width: {width}px", f"   :align: {align}\n", "", f"   {caption}", ""]
             )
         else:
-            self.add_rst_list([f".. figure:: {path}", "   :class: screenshot", f"   :width: {width} px\n", "", f"   {caption}", ""])
+            self.add_rst_list([f".. figure:: {path}", "   :class: screenshot", f"   :width: {width}px", "", f"   {caption}", ""])
 
 
 # ------------------------------------------------------------------------------------------------------------

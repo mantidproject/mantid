@@ -34,7 +34,7 @@ Input
 ~~~~~
 
 .. figure::  ../../images/ConvFitDataSelection.png
-   :height: 200 px
+   :height: 200px
    :align: center
 
 The input section for QENSFitting tabs consists of, a table along with two buttons 'Add Workspace' and 'Remove'.
@@ -61,7 +61,7 @@ Fit Function
 ~~~~~~~~~~~~
 
 .. figure::  ../../images/ConvFitFunctionSelection.png
-   :height: 300 px
+   :height: 300px
    :align: left
 
 Under 'Fit Function', you can view the selected model and associated parameters as well as make modifications.
@@ -107,7 +107,7 @@ Preview Plots
 ~~~~~~~~~~~~~
 
 .. figure::  ../../images/ConvFitPlotPreview.png
-   :height: 300 px
+   :height: 300px
    :align: left
 
 Two preview plots are included in each of the fitting interfaces. The top preview plot displays the sample, guess
