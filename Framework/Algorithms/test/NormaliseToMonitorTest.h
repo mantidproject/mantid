@@ -355,11 +355,11 @@ public:
     Property *monSpec = norm6.getProperty("MonitorID");
     // this function is usually called by GUI when senning input workspace. It
     // should read monitors and report the condition changed
-    TS_ASSERT(monSpec->getSettings()->isConditionChanged(&norm6));
+    TS_ASSERT(monSpec->getSettings()[0]->isConditionChanged(&norm6));
     // this funciton is called by gui when the above is true. It should not
     // throw and change the validator
-    IPropertySettings *pSett(nullptr);
-    TS_ASSERT_THROWS_NOTHING(pSett = monSpec->getSettings());
+    IPropertySettings const *pSett(nullptr);
+    TS_ASSERT_THROWS_NOTHING(pSett = monSpec->getSettings()[0].get());
     TS_ASSERT_THROWS_NOTHING(pSett->applyChanges(&norm6, monSpec->name()));
     // it should return the list of allowed monitor ID-s
     std::vector<std::string> monitors = monSpec->allowedValues();
@@ -378,10 +378,10 @@ public:
     TS_ASSERT_THROWS_NOTHING(norm6.setPropertyValue("InputWorkspace", "someWS"));
     // this function is usually called by GUI when setting an input workspace.
     // It should read monitors and report the condition changed
-    TS_ASSERT(monSpec->getSettings()->isConditionChanged(&norm6));
+    TS_ASSERT(monSpec->getSettings()[0]->isConditionChanged(&norm6));
     // this funciton is called by gui when the above is true. It should not
     // throw and change the validator
-    TS_ASSERT_THROWS_NOTHING(pSett = monSpec->getSettings());
+    TS_ASSERT_THROWS_NOTHING(pSett = monSpec->getSettings()[0].get());
     TS_ASSERT_THROWS_NOTHING(pSett->applyChanges(&norm6, monSpec->name()));
     // it should return the list of allowed monitor ID-s
     monitors = monSpec->allowedValues();

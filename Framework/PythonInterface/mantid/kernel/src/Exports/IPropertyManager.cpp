@@ -119,7 +119,7 @@ void declareOrReplaceProperty(IPropertyManager &self, const std::string &name,
  */
 void setPropertySettings(IPropertyManager &self, const std::string &propName,
                          const IPropertySettings *settingsManager) {
-  self.setPropertySettings(propName, std::unique_ptr<IPropertySettings>(settingsManager->clone()));
+  self.setPropertySettings(propName, std::unique_ptr<IPropertySettings const>(settingsManager->clone()));
 }
 
 void deleteProperty(IPropertyManager &self, const std::string &propName) { self.removeProperty(propName); }
@@ -197,6 +197,12 @@ void export_IPropertyManager() {
 
       .def("setPropertySettings", &setPropertySettings, (arg("self"), arg("name"), arg("settingsManager")),
            "Assign the given IPropertySettings object to the  named property")
+
+      .def("isPropertyEnabled", &IPropertyManager::isPropertyEnabled, (arg("self"), arg("name")),
+           "Returns whether a property should be enabled, according to its settings")
+
+      .def("isPropertyVisible", &IPropertyManager::isPropertyVisible, (arg("self"), arg("name")),
+           "Returns whether a property should be visible, according to its settings")
 
       .def("setPropertyGroup", &IPropertyManager::setPropertyGroup, (arg("self"), arg("name"), arg("group")),
            "Set the group for a given property")

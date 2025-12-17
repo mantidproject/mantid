@@ -14,6 +14,8 @@
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
+#include <algorithm>
+#include <iterator>
 #include <unordered_map>
 
 namespace Mantid {
@@ -45,11 +47,11 @@ Property::Property(const Property &right)
       m_direction(right.m_direction), m_units(right.m_units), m_group(right.m_group), m_remember(right.m_remember),
       m_autotrim(right.m_autotrim), m_disableReplaceWSButton(right.m_disableReplaceWSButton),
       m_isDynamicDefault(right.m_isDynamicDefault) {
-  if (m_name.empty()) {
+  if (m_name.empty())
     throw std::invalid_argument("An empty property name is not permitted");
-  }
-  if (right.m_settings)
-    m_settings.reset(right.m_settings->clone());
+
+  std::transform(right.m_settings.begin(), right.m_settings.end(), std::back_inserter(m_settings),
+                 [](auto const &settings) { return std::unique_ptr<IPropertySettings const>(settings->clone()); });
 }
 
 /// Virtual destructor
@@ -100,19 +102,20 @@ std::string Property::isValid() const {
  * Takes ownership of the given object
  * @param settings A pointer to an object specifying the settings type
  */
-void Property::setSettings(std::unique_ptr<IPropertySettings> settings) { m_settings = std::move(settings); }
+void Property::setSettings(std::unique_ptr<IPropertySettings const> settings) {
+  m_settings.emplace_back(std::move(settings));
+}
 
 /**
  *
- * @return the PropertySettings for this property
+ * @return the vector of PropertySettings for this property
  */
-const IPropertySettings *Property::getSettings() const { return m_settings.get(); }
-IPropertySettings *Property::getSettings() { return m_settings.get(); }
+std::vector<std::unique_ptr<IPropertySettings const>> const &Property::getSettings() const { return m_settings; }
 
 /**
- * Deletes the PropertySettings object contained
+ * Clear the vector of PropertySettings for this property
  */
-void Property::clearSettings() { m_settings.reset(nullptr); }
+void Property::clearSettings() { m_settings.clear(); }
 
 /**
  * Whether to remember this property input
