@@ -20,9 +20,6 @@
 #include "MantidKernel/Strings.h"
 
 #include "MantidKernel/StringTokenizer.h"
-#include <Poco/Exception.h>
-#include <Poco/File.h>
-#include <Poco/Path.h>
 #include <boost/lexical_cast.hpp>
 #include <boost/regex.hpp>
 
@@ -122,8 +119,8 @@ std::string FileFinderImpl::extractAllowedSuffix(std::string &userString) const 
   }
 
   // ignore any file extension in checking if a suffix is present
-  Poco::Path entry(userString);
-  std::string noExt(entry.getBaseName());
+  std::filesystem::path entry(userString);
+  std::string noExt(entry.stem().string());
   const size_t repNumChars = ALLOWED_SUFFIX.size();
   if (noExt.find(ALLOWED_SUFFIX) == noExt.size() - repNumChars) {
     userString.replace(userString.size() - repNumChars, repNumChars, "");
@@ -143,8 +140,8 @@ const Kernel::InstrumentInfo FileFinderImpl::getInstrument(const string &hint,
                                                            const bool returnDefaultIfNotFound) const {
   if ((!hint.empty()) && (!isdigit(hint[0]))) {
     string instrName(hint);
-    Poco::Path path(instrName);
-    instrName = path.getFileName();
+    std::filesystem::path path(instrName);
+    instrName = path.filename().string();
     if (instrName.starts_with("PG3") || instrName.starts_with("pg3")) {
       instrName = "PG3";
     }
@@ -385,19 +382,19 @@ const API::Result<std::string> FileFinderImpl::findRun(const std::string &hintst
     return API::Result<std::string>("", "File not found.");
 
   // if it looks like a full filename just do a quick search for it
-  Poco::Path hintPath(hint);
-  if (!hintPath.getExtension().empty()) {
+  std::filesystem::path hintPath(hint);
+  if (hintPath.has_extension()) {
     // check in normal search locations
     g_log.debug() << "hintPath is not empty, check in normal search locations"
                   << "\n";
     std::string path = getFullPath(hint);
     if (!path.empty()) {
       try {
-        if (Poco::File(path).exists()) {
+        if (std::filesystem::exists(path)) {
           g_log.information() << "found path = " << path << '\n';
           return API::Result<std::string>(path);
         }
-      } catch (Poco::Exception &) {
+      } catch (const std::exception &) {
       }
     } else {
       g_log.debug() << "Unable to find files via directory search with the "
@@ -417,7 +414,7 @@ const API::Result<std::string> FileFinderImpl::findRun(const std::string &hintst
   std::string extension = getExtension(hint, facilityExtensions);
   if (!facilityExtensions.empty())
     filename = hint.substr(0, hint.rfind(extension));
-  if (hintPath.depth() == 0) {
+  if (hintPath.parent_path().empty()) {
     try {
       if (!facility.noFilePrefix()) {
         filename = makeFileName(filename, instrument);
@@ -617,9 +614,9 @@ std::vector<std::string> FileFinderImpl::findRuns(const std::string &hintstr,
         // path/extension
         if (!previousPath.empty() && !previousExt.empty()) {
           try {
-            const Poco::File file(previousPath + p1.first + run + previousExt);
-            if (file.exists()) {
-              res.emplace_back(file.path());
+            const std::filesystem::path file(previousPath + p1.first + run + previousExt);
+            if (std::filesystem::exists(file)) {
+              res.emplace_back(file.string());
               continue;
             }
           } catch (...) {
@@ -637,9 +634,10 @@ std::vector<std::string> FileFinderImpl::findRuns(const std::string &hintstr,
 
         if (!path.empty()) {
           // Cache successfully found path and extension
-          auto tempPath = Poco::Path(path);
-          previousExt = "." + tempPath.getExtension();
-          previousPath = tempPath.makeParent().toString();
+          std::filesystem::path tempPath(path);
+          previousExt = tempPath.extension().string();
+          // Append separator for string concatenation later
+          previousPath = tempPath.parent_path().string() + std::string(1, std::filesystem::path::preferred_separator);
           res.emplace_back(path);
         } else {
           throw Kernel::Exception::NotFoundError("Unable to find file:", run);
@@ -785,12 +783,11 @@ const API::Result<std::string> FileFinderImpl::getPath(const std::vector<IArchiv
     for (const auto &filename : filenames) {
       for (const auto &searchPath : searchPaths) {
         try {
-          const Poco::Path filePath(searchPath, filename + extension);
-          const Poco::File file(filePath);
-          if (file.exists())
-            return API::Result<std::string>(filePath.toString());
+          const std::filesystem::path filePath = std::filesystem::path(searchPath) / (filename + extension);
+          if (std::filesystem::exists(filePath))
+            return API::Result<std::string>(filePath.string());
 
-        } catch (Poco::Exception &) { /* File does not exist, just carry on. */
+        } catch (const std::exception &) { /* File does not exist, just carry on. */
         }
       }
     }
@@ -800,7 +797,7 @@ const API::Result<std::string> FileFinderImpl::getPath(const std::vector<IArchiv
     for (const auto &filename : filenames) {
       path = getFullPath(filename + extension);
       try {
-        if (!path.empty() && Poco::File(path).exists()) {
+        if (!path.empty() && std::filesystem::exists(path)) {
           g_log.debug() << "path returned from getFullPath() = " << path << '\n';
           return API::Result<std::string>(path);
         }
@@ -836,7 +833,7 @@ const API::Result<std::string> FileFinderImpl::getPath(const std::vector<IArchiv
     const auto archivePath = getArchivePath(archs, filenames, exts);
     if (archivePath) {
       try {
-        if (Poco::File(archivePath.result()).exists())
+        if (std::filesystem::exists(archivePath.result()))
           return archivePath;
       } catch (std::exception &e) {
         g_log.error() << "Cannot open file " << archivePath << ": " << e.what() << '\n';

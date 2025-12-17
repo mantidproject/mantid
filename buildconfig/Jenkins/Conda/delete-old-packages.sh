@@ -12,7 +12,8 @@
 #
 # All remaining arguments are package names to remove
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source $SCRIPT_DIR/mamba-utils
+source $SCRIPT_DIR/pixi-utils
+REPO_ROOT_DIR=$SCRIPT_DIR/../../..
 
 WORKSPACE=$1
 ANACONDA_TOKEN=$2
@@ -48,29 +49,30 @@ function delete_package() {
   package_name=$2
   label=$3
 
+  pixi_command="pixi run --manifest-path $REPO_ROOT_DIR/pixi.toml -e delete-old-packages --frozen"
+
   file_url="https://api.anaconda.org/package/$channel/$package_name/files"
   echo Get from url: $file_url
-  all_packages=$(curl -s -X GET $file_url)
+  all_packages=$($pixi_command curl -s -X GET $file_url)
 
-  latest_version=$(echo $all_packages | jq -r '.[-1].version')
+  latest_version=$(echo $all_packages | $pixi_command jq -r '.[-1].version')
   echo Latest Version: $latest_version
 
-  packages_to_delete=$(echo $all_packages | jq -r ".[] | select(.labels == [\"$label\"] and .version != \"$latest_version\") | .full_name")
+  packages_to_delete=$(echo $all_packages | $pixi_command jq -r ".[] | select(.labels == [\"$label\"] and .version != \"$latest_version\") | .full_name")
   echo Packages to delete: $packages_to_delete
 
-  packages_not_to_delete=$(echo $all_packages | jq -r ".[] | select(.labels == [\"$label\"] and .version == \"$latest_version\") | .full_name")
+  packages_not_to_delete=$(echo $all_packages | $pixi_command jq -r ".[] | select(.labels == [\"$label\"] and .version == \"$latest_version\") | .full_name")
   echo Packages not to delete: $packages_not_to_delete
 
   for package_file in $packages_to_delete; do
       echo Deleting package: $package_file
-      curl -s -X DELETE -H "Authorization: token $ANACONDA_TOKEN" "https://api.anaconda.org/dist/$package_file"
+      $pixi_command curl -s -X DELETE -H "Authorization: token $ANACONDA_TOKEN" "https://api.anaconda.org/dist/$package_file"
   done
 }
 ###
 
-# Mamba
-setup_mamba $WORKSPACE/miniforge "deletion-anaconda" false ""
-mamba install --yes curl jq
+# pixi
+install_pixi
 
 for name in "$@"; do
   delete_package $CHANNEL $name $LABEL
