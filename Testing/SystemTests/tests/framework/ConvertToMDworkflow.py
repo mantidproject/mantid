@@ -37,7 +37,7 @@ class ConvertToMDworkflow(systemtesting.MantidSystemTest):
         # ---> Start loop over contributing files
         for i in range(0, 20, 5):
             # the following operations simulate different workspaces, obtained from experiment using rotating crystal;
-            # For real experiment we  usually just load these workspaces from nxspe files with proper Psi values defined there
+            # For real experiment we usually just load these workspaces from nxspe files with proper Psi values defined there
             # and have to set up ub matrix
             SourceWS = "SourcePart" + str(i)
             # ws emulation begin ---->
