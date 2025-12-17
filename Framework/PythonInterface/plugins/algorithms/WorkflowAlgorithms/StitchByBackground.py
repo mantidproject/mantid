@@ -92,6 +92,7 @@ class StitchByBackground(DataProcessorAlgorithm):
             Distribution=subtracted_ws.isDistribution(),
             ParentWorkspace=subtracted_ws,
             EnableLogging=False,
+            StoreInADS=False,
         )
 
         stitched_ws = self.crop_output(stitched_ws)
@@ -109,7 +110,11 @@ class StitchByBackground(DataProcessorAlgorithm):
                 i_bin_of_stitch = ws.yIndexOfX(stitch_point)
                 background_func = f"name=LinearBackground, A0={ws.readY(0)[i_bin_of_stitch]}, A1={0};"
                 fit_result = Fit(
-                    Function=background_func, InputWorkspace=ws, StartX=stitch_point - overlap_width, EndX=stitch_point + overlap_width
+                    Function=background_func,
+                    InputWorkspace=ws,
+                    StartX=stitch_point - overlap_width,
+                    EndX=stitch_point + overlap_width,
+                    StoreInADS=False,
                 )
                 backgrounds.append(fit_result.Function(stitch_point))
             offsets[stitch_index] = backgrounds[1] - backgrounds[0]
@@ -123,14 +128,16 @@ class StitchByBackground(DataProcessorAlgorithm):
         x_min = self.getProperty("CropLowerBound").value
         x_max = self.getProperty("CropUpperBound").value
         for ws_index, ws in enumerate(ws_list):
-            background_ws = CreateSingleValuedWorkspace(offsets[ws_index:].sum(), ErrorValue=0)
-            subtracted_ws = Plus(ws, background_ws, OutputWorkspace=f"bank{ws_index + 1}_offset")
+            background_ws = CreateSingleValuedWorkspace(offsets[ws_index:].sum(), ErrorValue=0, StoreInADS=False)
+            subtracted_ws = Plus(ws, background_ws, OutputWorkspace=f"bank{ws_index + 1}_offset", StoreInADS=False)
             crop_kwargs = {"XMin": x_min, "XMax": x_max}
             if ws_index > 0:
                 crop_kwargs["XMin"] = stitch_locations[ws_index - 1]
             if ws_index < len(ws_list) - 1:
                 crop_kwargs["XMax"] = stitch_locations[ws_index]
-            subtracted_ws = CropWorkspaceRagged(InputWorkspace=subtracted_ws, OutputWorkspace=subtracted_ws.name(), **crop_kwargs)
+            subtracted_ws = CropWorkspaceRagged(
+                InputWorkspace=subtracted_ws, OutputWorkspace=subtracted_ws.name(), **crop_kwargs, StoreInADS=False
+            )
             x.extend(subtracted_ws.readX(0)[:-1])
             y.extend(subtracted_ws.readY(0))
             e.extend(subtracted_ws.readE(0))
@@ -142,7 +149,9 @@ class StitchByBackground(DataProcessorAlgorithm):
         # Crop the output.
         x_min = self.getProperty("CropLowerBound").value
         x_max = self.getProperty("CropUpperBound").value
-        stitched_ws = CropWorkspaceRagged(InputWorkspace=stitched_ws, OutputWorkspace=stitched_ws.name(), XMin=x_min, XMax=x_max)
+        stitched_ws = CropWorkspaceRagged(
+            InputWorkspace=stitched_ws, OutputWorkspace=stitched_ws.name(), XMin=x_min, XMax=x_max, StoreInADS=False
+        )
         return stitched_ws
 
 
