@@ -6,6 +6,11 @@ install_pixi() {
   if ! command -v pixi >/dev/null 2>&1
   then
     curl -fsSL https://pixi.sh/install.sh | sh
+    # Verify pixi was installed successfully
+    if ! command -v $HOME/.pixi/bin/pixi >/dev/null 2>&1; then
+      echo "ERROR: pixi installation failed"
+      exit 1
+    fi
     if [[ "$OSTYPE" == "darwin"* ]]; then
       PATH=$PATH:$HOME/.pixi/bin
     else
