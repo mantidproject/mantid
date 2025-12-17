@@ -265,7 +265,7 @@ pipeline {
           agent { label 'win-64' }
           options {
               timestamps()
-              retry(3)
+              // retry(3)
           }
           steps {
             // Clean up conda-bld before we start to avoid any
