@@ -9,6 +9,56 @@ version = "6.14"
 
 [tasks]
 
+[environments]
+rattler-builder = {features = ["rattler-builder"], no-default-feature = true}
+delete-old-packages = {features = ["delete-old-packages"], no-default-feature = true}
+devsite = {features = ["devsite"], no-default-feature = true}
+publish-gh = {features = ["publish-gh"], no-default-feature = true}
+publish-anaconda = {features = ["publish-anaconda"], no-default-feature = true}
+package-standalone = {features = ["package-standalone"], no-default-feature = true}
+docs-build = {features = ["docs-build"]}
+
+[feature.rattler-builder.dependencies]
+rattler-build = "==0.51.0"
+versioningit = ">=3.3.0,<4"
+rattler-index = ">=0.27.6,<0.28"
+
+[feature.rattler-builder.target.linux-64.dependencies]
+jq = ">=1.8.1,<2"
+
+[feature.rattler-builder.target.osx-arm64.dependencies]
+jq = ">=1.8.1,<2"
+
+[feature.rattler-builder.target.win-64.dependencies]
+m2w64-jq = ">=1.6,<2"
+
+[feature.delete-old-packages.target.linux-64.dependencies]
+curl = "*"
+jq = "*"
+
+[feature.devsite.target.linux-64.dependencies]
+sphinx = "*"
+sphinx_bootstrap_theme = "*"
+
+[feature.publish-gh.target.linux-64.dependencies]
+gh = "*"
+
+[feature.publish-anaconda.target.linux-64.dependencies]
+anaconda-client = "*"
+
+[feature.package-standalone.dependencies]
+# Pin conda in the base environment to avoid post-link.bat problems
+conda = "24.7.*"
+rattler-index = "*"
+mamba = "<2"
+
+[feature.docs-build]
+channels = ["mantid/label/nightly"]
+
+[feature.docs-build.target.linux-64.dependencies]
+rsync = "*"
+mantidqt = "*"
+
 [dependencies]
 cmake = ">=3.21.0"
 doxygen = "1.9.*"
