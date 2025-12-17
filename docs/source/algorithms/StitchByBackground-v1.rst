@@ -11,7 +11,7 @@ Description
 -----------
 
 This algorithm allows for the stitching of a list of single-spectra workspaces into one workspace by using a number of
-user-defined stitch points (in Q-space) and a threshold around these points in which to perform a background fit.
+user-defined stitch points at x values and an overlap region around these points in which to perform a linear background fit.
 
 In comparison to :ref:`algm-Stitch1DMany` or :ref:`algm-MatchAndMergeWorkspaces`, this algorithm does not perform any
 rebinning during the stitching process, creating a ragged workspace that can be rebinned appropriately later in the

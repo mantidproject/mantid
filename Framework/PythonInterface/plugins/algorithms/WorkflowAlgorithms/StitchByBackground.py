@@ -27,7 +27,7 @@ class StitchByBackground(DataProcessorAlgorithm):
         return "Utility"
 
     def summary(self):
-        return "Stitch banks together at given Q values, without rebinning the data to preserve resolution."
+        return "Stitch banks together at given x-axis values, without rebinning the data to preserve resolution."
 
     def seeAlso(self):
         return []
@@ -61,7 +61,7 @@ class StitchByBackground(DataProcessorAlgorithm):
         self.declareProperty(WorkspaceProperty("OutputWorkspace", "", direction=Direction.Output), doc="The stitched workspace.")
         self.declareProperty(
             FloatArrayProperty("StitchPoints", [], direction=Direction.Input),
-            doc="Values in Q space where the stitch should take place. i.e. Overlaps in the data.",
+            doc="Values on the x-axis (between adjacent spectra) where the stitch should take place. i.e. Overlaps in the data.",
         )
         self.declareProperty(
             "OverlapWidth",
@@ -69,8 +69,8 @@ class StitchByBackground(DataProcessorAlgorithm):
             validator=FloatBoundedValidator(lower=0),
             doc="The extent to which the fit limits extend from the points given in StitchPoints.",
         )
-        self.declareProperty("CropLowerBound", 0.0, doc="The XMin in Q-space to use when cropping the output workspace.")
-        self.declareProperty("CropUpperBound", 0.0, doc="The XMax in Q-space to use when cropping the output workspace.")
+        self.declareProperty("CropLowerBound", 0.0, doc="The XMin to use when cropping the output workspace.")
+        self.declareProperty("CropUpperBound", 0.0, doc="The XMax to use when cropping the output workspace.")
 
     def PyExec(self):
         ws_name_list = self.getProperty("InputWorkspaces").value
