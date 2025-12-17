@@ -5,14 +5,6 @@ on:
       - opened
       - synchronize
       - reopened
-    paths:
-      - '**.cpp'
-      - '**.h'
-      - 'Framework/Doxygen/**'
-      - 'conda/recipes/mantid-developer/**'
-      - 'conda/recipes/conda_build_config.yaml'
-      - 'buildconfig/Jenkins/Conda/doxygen.sh'
-      - '.github/workflows/doxygen.yml'
 
 jobs:
   doxygen:
@@ -25,11 +17,25 @@ jobs:
       - uses: actions/checkout@v6
         with:
           fetch-depth: 0
+      
+      - uses: dorny/paths-filter@v3
+        id: changes
+        with:
+          filters: |
+            doxygen:
+              - '**/*.cpp'
+              - '**/*.h'
+              - 'Framework/Doxygen/**'
+              - 'conda/recipes/mantid-developer/**'
+              - 'conda/recipes/conda_build_config.yaml'
+              - 'buildconfig/Jenkins/Conda/doxygen.sh'
+              - '.github/workflows/doxygen.yml'     
 
       - uses: prefix-dev/setup-pixi@v0.9.3
         with:
           pixi-version: v0.59.0
 
       - name: build doxygen
+        if: steps.changes.outputs.doxygen == 'true'
         run: |
           $GITHUB_WORKSPACE/buildconfig/Jenkins/Conda/doxygen.sh $GITHUB_WORKSPACE
