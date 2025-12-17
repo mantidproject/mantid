@@ -9,6 +9,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include "MantidAPI/DllConfig.h"
 #include "MantidAPI/Workspace_fwd.h"
 
 namespace Mantid {
@@ -26,7 +27,7 @@ struct PropertyMode {
     @author Russell Taylor, Tessella Support Services plc
     @date 11/12/2007
 */
-class IWorkspaceProperty {
+class MANTID_API_DLL IWorkspaceProperty {
 public:
   /// Store a workspace into the AnalysisDataService
   virtual bool store() = 0;
