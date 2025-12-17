@@ -17,8 +17,15 @@ namespace API {
 // -------------------------------------------------------------------------
 // Forward decaration
 // -------------------------------------------------------------------------
+class Workspace;
 class MatrixWorkspace;
 class WorkspaceGroup;
+class IEventWorkspace;
+class IMDEventWorkspace;
+class IMDHistoWorkspace;
+class IMDWorkspace;
+class IPeaksWorkspace;
+class ITableWorkspace;
 
 /// Enumeration for locking behaviour
 struct LockMode {
@@ -132,6 +139,19 @@ private:
 };
 
 template <typename TYPE> Kernel::Logger WorkspaceProperty<TYPE>::g_log("WorkspaceProperty");
+
+#ifndef API_EXPORTS
+// Extern declarations to ensure typeinfo visibility for dynamic_cast on macOS/Clang
+extern template class MANTID_API_DLL WorkspaceProperty<Workspace>;
+extern template class MANTID_API_DLL WorkspaceProperty<IEventWorkspace>;
+extern template class MANTID_API_DLL WorkspaceProperty<IMDEventWorkspace>;
+extern template class MANTID_API_DLL WorkspaceProperty<IMDHistoWorkspace>;
+extern template class MANTID_API_DLL WorkspaceProperty<IMDWorkspace>;
+extern template class MANTID_API_DLL WorkspaceProperty<MatrixWorkspace>;
+extern template class MANTID_API_DLL WorkspaceProperty<IPeaksWorkspace>;
+extern template class MANTID_API_DLL WorkspaceProperty<ITableWorkspace>;
+extern template class MANTID_API_DLL WorkspaceProperty<WorkspaceGroup>;
+#endif
 
 } // namespace API
 } // namespace Mantid
