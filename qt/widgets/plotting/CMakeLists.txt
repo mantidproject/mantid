@@ -39,7 +39,7 @@ mtd_add_qt_library(
   NOMOC ${MPL_INC_FILES}
   DEFS IN_MANTIDQT_PLOTTING
   INCLUDE_DIRS inc
-  LINK_LIBS ${CORE_MANTIDLIBS} Mantid::PythonInterfaceCore ${POCO_LIBRARIES} gmock gtest
+  LINK_LIBS ${CORE_MANTIDLIBS} Mantid::PythonInterfaceCore ${POCO_LIBRARIES}
   MTD_QT_LINK_LIBS MantidQtWidgetsCommon MantidQtWidgetsMplCpp
   INSTALL_DIR ${WORKBENCH_LIB_DIR}
   OSX_INSTALL_RPATH @loader_path/../MacOS @loader_path/../Frameworks
