@@ -29,6 +29,7 @@ class H5Object;
 // NOTE declare extern "C" to prevent conflict with actual declaration
 // NOTE use MYH5DLL, set to match HDF5's H5_DLL, to allow Windows build
 extern "C" {
+MYH5DLL herr_t H5Fclose(hid_t);
 MYH5DLL herr_t H5Gclose(hid_t);
 MYH5DLL herr_t H5Dclose(hid_t);
 MYH5DLL herr_t H5Tclose(hid_t);
@@ -47,7 +48,8 @@ MYH5DLL herr_t H5Pclose(hid_t);
 namespace Mantid {
 namespace Nexus {
 
-using FileID = UniqueID<&H5Fclose>;
+using UniqueFileID = UniqueID<&H5Fclose>;
+using SharedFileID = SharedID<&H5Fclose>;
 using GroupID = UniqueID<&H5Gclose>;
 using DataSetID = UniqueID<&H5Dclose>;
 using DataTypeID = UniqueID<&H5Tclose>;
@@ -70,14 +72,14 @@ private:
   /** The address of currently-opened element */
   NexusAddress m_address;
   /** Variables for use inside the C-API, formerly of NexusFile5
-   * \li m_pfile -- shared ptr to a H5File object
+   * \li m_fileID -- SharedID for an H5File object
    * \li m_current_group_id -- the ID for currently opened group (or 0 if none)
    * \li m_current_data_id -- the ID for currently opened dataset (or 0 if none)
    * \li m_current_type_id -- the ID of the type of the opened dataset
    * \li m_current_space_id -- the ID of the dataspace for the opened dataset
    * \li m_gid_stack -- a vector stack of opened group IDs
    */
-  std::shared_ptr<FileID> m_pfile;
+  SharedFileID m_fileID;
   hid_t m_current_group_id;
   hid_t m_current_data_id;
   hid_t m_current_type_id;

@@ -73,7 +73,7 @@ This algorithm accepts the same ``SplitterWorkspace`` inputs as :ref:`FilterEven
                  GroupWorkspaces=True)
     out = Rebin("filtered_0", "0,50000,50000", PreserveEvents=False)
 
-    CompareWorkspaces(ws, out, CheckUncertainty=False, CheckSpectraMap=False, CheckInstrument=False)
+    CompareWorkspaces(ws, out, CheckSpectraMap=False, CheckInstrument=False)
 
 **Example - splitting events based on log values**
 
@@ -121,7 +121,7 @@ This algorithm accepts the same ``SplitterWorkspace`` inputs as :ref:`FilterEven
     ws2 = FilterBadPulses(ws2)
     ws2 = Rebin(ws2, "0,50000,50000", PreserveEvents=False)
 
-    CompareWorkspaces(ws, ws2, CheckUncertainty=False, CheckSpectraMap=False, CheckInstrument=False)
+    CompareWorkspaces(ws, ws2, CheckSpectraMap=False, CheckInstrument=False)
 
 .. categories::
 

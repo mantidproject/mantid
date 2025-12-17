@@ -2,19 +2,18 @@
 #   - Install conda packages
 #   - Build HTML docs
 #   - Publish to GitHub pages
-CONDA_LABEL=mantid/label/nightly
 DOCS_GIT_REPOSITORY=https://github.com/mantidproject/docs-nightly
 GIT_USER_NAME=mantid-builder
 GIT_USER_EMAIL="mantid-buildserver@mantidproject.org"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DATA_MIRROR="$("${SCRIPT_DIR}/data_mirrors")"
+REPO_ROOT_DIR=$SCRIPT_DIR/../..
 
 # source util functions
-. source/buildconfig/Jenkins/Conda/mamba-utils
+. source/buildconfig/Jenkins/Conda/pixi-utils
 
-# Install conda and environment
-setup_mamba $WORKSPACE/miniforge "docs-build" true ""
-mamba install -c ${CONDA_LABEL} -c neutrons --yes mantid-developer mantidqt rsync
+# pixi
+install_pixi
 
 # Configure a clean build directory
 rm -rf build
@@ -23,7 +22,7 @@ mkdir build && cd build
 # unset LD_PRELOAD as this causes cmake to segfault
 LD_PRELOAD="" \
 # Generate build files
-cmake -G Ninja \
+pixi run --manifest-path $REPO_ROOT_DIR/pixi.toml -e docs-build --frozen cmake -G Ninja \
   -DDATA_STORE_MIRROR=${DATA_MIRROR} \
   -DMANTID_FRAMEWORK_LIB=SYSTEM \
   -DMANTID_QT_LIB=SYSTEM \

@@ -318,3 +318,7 @@ Once your algorithm is working from a script, and provided it is registered with
 ``EnableWhenProperty``, ``VisibleWhenProperty``, and ``InvisibleProperty`` can be used to hide or disable a property in the GUI dialog panel based on various conditions.
 
 ``SetValueWhenProperty``, and ``SetDefaultWhenProperty`` can be used to set the value of a property based on the value of another upstream property, or to emulate the effect of having a property's *default* value depend on the value of another property.  See :ref:`Dynamic dialog properties <DynamicProperties>` for example code showing how to use this feature.
+
+Multiple ``IPropertySettings`` can be attached to a single property, by applying either the ``IPropertyManager::setPropertySettings`` method of the algorithm, or the ``Property::setSettings`` method of the property itself, multiple times.  For this reason the property's ``getSettings`` method returns a *vector* of settings, which will be *empty* in the default no-settings case.
+
+With respect to the property's enabled and visibility states (on its owner widget), any setting in the vector of settings returning ``isEnabled`` or ``isVisible`` values of ``false``, results in disabling or hiding the property's widget.  In general, it is expected that only one instance of each of the ``EnabledWhenProperty`` and ``VisibleWhenProperty`` settings would be attached to a given property, in combination with any number of instances of other ``IPropertySettings``-derived types, although this behavior is not strictly enforced.
