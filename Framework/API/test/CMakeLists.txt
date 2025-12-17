@@ -19,14 +19,9 @@ if(CXXTEST_FOUND)
             Mantid::Nexus
             Mantid::NexusGeometry
             ${BCRYPT}
+            gmock
             Python::Python
   )
-
-  if(TARGET GTest::gmock AND TARGET GTest::gtest)
-    target_link_libraries(APITest PRIVATE GTest::gmock GTest::gtest)
-  else()
-    target_link_libraries(APITest PRIVATE gmock gtest)
-  endif()
 
   add_framework_test_helpers(APITest)
 

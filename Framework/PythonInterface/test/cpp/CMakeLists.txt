@@ -35,18 +35,13 @@ if(CXXTEST_FOUND)
     PythonInterfaceCore
     PythonKernelModule
     PythonAPIModule
+    gmock
     ${OpenGL_LIBRARIES}
     ${TBB_LIBRARIES}
     ${Boost_LIBRARIES}
     ${POCO_LIBRARIES}
     Python::Python
   )
-
-  if(TARGET GTest::gmock AND TARGET GTest::gtest)
-    target_link_libraries(${_pythoninterface_test_target_name} PRIVATE GTest::gmock GTest::gtest)
-  else()
-    target_link_libraries(${_pythoninterface_test_target_name} PRIVATE gmock gtest)
-  endif()
 
   add_dependencies(FrameworkTests ${_pythoninterface_test_target_name})
   # Add to the 'UnitTests' group in VS

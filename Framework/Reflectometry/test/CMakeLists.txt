@@ -30,7 +30,7 @@ if(CXXTEST_FOUND)
   # will go out of scope at the end of this file so doesn't need un-setting
 
   cxxtest_add_test(ReflectometryTest ${TEST_FILES})
-  target_link_libraries(ReflectometryTest PRIVATE Mantid::Algorithms Mantid::Reflectometry)
+  target_link_libraries(ReflectometryTest PRIVATE Mantid::Algorithms Mantid::Reflectometry gmock)
 
   target_include_directories(ReflectometryTest PRIVATE Mantid::Algorithms Mantid::Reflectometry)
 
@@ -38,12 +38,6 @@ if(CXXTEST_FOUND)
   # Test data
   add_dependencies(ReflectometryTest UnitTestData)
   add_framework_test_helpers(ReflectometryTest)
-
-  if(TARGET GTest::gmock AND TARGET GTest::gtest)
-    target_link_libraries(ReflectometryTest PRIVATE GTest::gmock GTest::gtest)
-  else()
-    target_link_libraries(ReflectometryTest PRIVATE gmock gtest)
-  endif()
 
   # Add to the 'ReflectometryTest' group in VS
   set_property(TARGET ReflectometryTest PROPERTY FOLDER "UnitTests")

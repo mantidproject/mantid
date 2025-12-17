@@ -5,14 +5,8 @@ if(CXXTEST_FOUND)
 
   cxxtest_add_test(KernelTest ${TEST_FILES})
   target_include_directories(KernelTest SYSTEM PRIVATE ${CXXTEST_INCLUDE_DIR})
-  target_link_libraries(KernelTest PRIVATE Mantid::Types Mantid::Kernel Mantid::Json)
+  target_link_libraries(KernelTest PRIVATE Mantid::Types Mantid::Kernel Mantid::Json gmock)
   add_framework_test_helpers(KernelTest)
-
-  if(TARGET GTest::gmock AND TARGET GTest::gtest)
-    target_link_libraries(KernelTest PRIVATE GTest::gmock GTest::gtest)
-  else()
-    target_link_libraries(KernelTest PRIVATE gmock gtest)
-  endif()
   add_dependencies(FrameworkTests KernelTest)
   # Test data
   add_dependencies(KernelTest UnitTestData)
