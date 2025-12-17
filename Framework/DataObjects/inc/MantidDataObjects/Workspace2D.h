@@ -110,6 +110,6 @@ private:
 #ifndef MANTID_DATAOBJECTS_EXPORTS
 #include "MantidAPI/WorkspaceProperty.h"
 namespace Mantid::API {
-extern template class MANTID_DATAOBJECTS_DLL WorkspaceProperty<DataObjects::Workspace2D>;
+extern template class WorkspaceProperty<DataObjects::Workspace2D>;
 } // namespace Mantid::API
 #endif

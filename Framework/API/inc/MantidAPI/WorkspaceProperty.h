@@ -142,15 +142,15 @@ template <typename TYPE> Kernel::Logger WorkspaceProperty<TYPE>::g_log("Workspac
 
 #ifndef API_EXPORTS
 // Extern declarations to ensure typeinfo visibility for dynamic_cast on macOS/Clang
-extern template class MANTID_API_DLL WorkspaceProperty<Workspace>;
-extern template class MANTID_API_DLL WorkspaceProperty<IEventWorkspace>;
-extern template class MANTID_API_DLL WorkspaceProperty<IMDEventWorkspace>;
-extern template class MANTID_API_DLL WorkspaceProperty<IMDHistoWorkspace>;
-extern template class MANTID_API_DLL WorkspaceProperty<IMDWorkspace>;
-extern template class MANTID_API_DLL WorkspaceProperty<MatrixWorkspace>;
-extern template class MANTID_API_DLL WorkspaceProperty<IPeaksWorkspace>;
-extern template class MANTID_API_DLL WorkspaceProperty<ITableWorkspace>;
-extern template class MANTID_API_DLL WorkspaceProperty<WorkspaceGroup>;
+extern template class WorkspaceProperty<Workspace>;
+extern template class WorkspaceProperty<IEventWorkspace>;
+extern template class WorkspaceProperty<IMDEventWorkspace>;
+extern template class WorkspaceProperty<IMDHistoWorkspace>;
+extern template class WorkspaceProperty<IMDWorkspace>;
+extern template class WorkspaceProperty<MatrixWorkspace>;
+extern template class WorkspaceProperty<IPeaksWorkspace>;
+extern template class WorkspaceProperty<ITableWorkspace>;
+extern template class WorkspaceProperty<WorkspaceGroup>;
 #endif
 
 } // namespace API

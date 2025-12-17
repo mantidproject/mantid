@@ -98,6 +98,6 @@ using MaskWorkspace_const_sptr = std::shared_ptr<const MaskWorkspace>;
 #ifndef MANTID_DATAOBJECTS_EXPORTS
 #include "MantidAPI/WorkspaceProperty.h"
 namespace Mantid::API {
-extern template class MANTID_DATAOBJECTS_DLL WorkspaceProperty<DataObjects::MaskWorkspace>;
+extern template class WorkspaceProperty<DataObjects::MaskWorkspace>;
 } // namespace Mantid::API
 #endif

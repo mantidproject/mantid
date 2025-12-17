@@ -251,6 +251,6 @@ using PeaksWorkspace_const_sptr = std::shared_ptr<const PeaksWorkspace>;
 #ifndef MANTID_DATAOBJECTS_EXPORTS
 #include "MantidAPI/WorkspaceProperty.h"
 namespace Mantid::API {
-extern template class MANTID_DATAOBJECTS_DLL WorkspaceProperty<DataObjects::PeaksWorkspace>;
+extern template class WorkspaceProperty<DataObjects::PeaksWorkspace>;
 } // namespace Mantid::API
 #endif

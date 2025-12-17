@@ -67,6 +67,6 @@ using GroupingWorkspace_const_sptr = std::shared_ptr<const GroupingWorkspace>;
 #ifndef MANTID_DATAOBJECTS_EXPORTS
 #include "MantidAPI/WorkspaceProperty.h"
 namespace Mantid::API {
-extern template class MANTID_DATAOBJECTS_DLL WorkspaceProperty<DataObjects::GroupingWorkspace>;
+extern template class WorkspaceProperty<DataObjects::GroupingWorkspace>;
 } // namespace Mantid::API
 #endif

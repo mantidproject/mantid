@@ -92,6 +92,6 @@ using WorkspaceSingleValue_const_sptr = std::shared_ptr<const WorkspaceSingleVal
 #ifndef MANTID_DATAOBJECTS_EXPORTS
 #include "MantidAPI/WorkspaceProperty.h"
 namespace Mantid::API {
-extern template class MANTID_DATAOBJECTS_DLL WorkspaceProperty<DataObjects::WorkspaceSingleValue>;
+extern template class WorkspaceProperty<DataObjects::WorkspaceSingleValue>;
 } // namespace Mantid::API
 #endif
