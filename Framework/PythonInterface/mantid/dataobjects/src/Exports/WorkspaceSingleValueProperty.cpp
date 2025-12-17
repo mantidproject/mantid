@@ -11,9 +11,6 @@
 using Mantid::DataObjects::WorkspaceSingleValue;
 
 GET_POINTER_SPECIALIZATION(Mantid::API::WorkspaceProperty<WorkspaceSingleValue>)
-namespace Mantid::API {
-extern template class WorkspaceProperty<WorkspaceSingleValue>;
-}
 
 void export_WorkspaceSingleValueProperty() {
   using Mantid::PythonInterface::WorkspacePropertyExporter;

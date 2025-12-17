@@ -12,9 +12,6 @@ using Mantid::API::ITableWorkspace;
 using Mantid::API::WorkspaceProperty; // NOLINT
 
 GET_POINTER_SPECIALIZATION(WorkspaceProperty<ITableWorkspace>)
-namespace Mantid::API {
-extern template class WorkspaceProperty<ITableWorkspace>;
-}
 
 void export_ITableWorkspaceProperty() {
   using Mantid::PythonInterface::WorkspacePropertyExporter;

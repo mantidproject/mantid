@@ -11,9 +11,6 @@
 using Mantid::DataObjects::GroupingWorkspace;
 
 GET_POINTER_SPECIALIZATION(Mantid::API::WorkspaceProperty<GroupingWorkspace>)
-namespace Mantid::API {
-extern template class WorkspaceProperty<GroupingWorkspace>;
-}
 
 void export_GroupingWorkspaceProperty() {
   using Mantid::PythonInterface::WorkspacePropertyExporter;

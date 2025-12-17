@@ -12,9 +12,6 @@ using Mantid::API::MatrixWorkspace;
 using Mantid::API::WorkspaceProperty; // NOLINT
 
 GET_POINTER_SPECIALIZATION(WorkspaceProperty<MatrixWorkspace>)
-namespace Mantid::API {
-extern template class WorkspaceProperty<MatrixWorkspace>;
-}
 
 void export_MatrixWorkspaceProperty() {
   using Mantid::PythonInterface::WorkspacePropertyExporter;

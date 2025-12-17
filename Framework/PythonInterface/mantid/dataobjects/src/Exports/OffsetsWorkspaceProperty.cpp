@@ -11,9 +11,6 @@
 using Mantid::DataObjects::OffsetsWorkspace;
 
 GET_POINTER_SPECIALIZATION(Mantid::API::WorkspaceProperty<OffsetsWorkspace>)
-namespace Mantid::API {
-extern template class WorkspaceProperty<OffsetsWorkspace>;
-}
 
 void export_OffsetsWorkspaceProperty() {
   using Mantid::PythonInterface::WorkspacePropertyExporter;

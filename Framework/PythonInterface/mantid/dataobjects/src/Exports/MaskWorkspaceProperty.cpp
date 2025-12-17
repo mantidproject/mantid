@@ -12,9 +12,6 @@ using Mantid::API::WorkspaceProperty; // NOLINT
 using Mantid::DataObjects::MaskWorkspace;
 
 GET_POINTER_SPECIALIZATION(WorkspaceProperty<MaskWorkspace>)
-namespace Mantid::API {
-extern template class WorkspaceProperty<MaskWorkspace>;
-}
 
 void export_MaskWorkspaceProperty() {
   using Mantid::PythonInterface::WorkspacePropertyExporter;

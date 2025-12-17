@@ -12,9 +12,6 @@ using Mantid::API::WorkspaceProperty; // NOLINT
 using Mantid::DataObjects::EventWorkspace;
 
 GET_POINTER_SPECIALIZATION(WorkspaceProperty<EventWorkspace>)
-namespace Mantid::API {
-extern template class WorkspaceProperty<EventWorkspace>;
-}
 
 void export_EventWorkspaceProperty() {
   using Mantid::PythonInterface::WorkspacePropertyExporter;

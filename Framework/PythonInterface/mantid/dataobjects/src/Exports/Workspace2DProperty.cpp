@@ -11,9 +11,6 @@
 using Mantid::DataObjects::Workspace2D;
 
 GET_POINTER_SPECIALIZATION(Mantid::API::WorkspaceProperty<Workspace2D>)
-namespace Mantid::API {
-extern template class WorkspaceProperty<Workspace2D>;
-}
 
 void export_Workspace2DProperty() {
   using Mantid::PythonInterface::WorkspacePropertyExporter;
