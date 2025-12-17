@@ -290,7 +290,7 @@ public:
   }
 
   void test_openPath() {
-    cout << "tests for openPath\n" << std::flush;
+    cout << "tests for openPath" << endl;
 
     // make file with path /entry
     FileResource resource("NexusFile_openpathtest.nxs");
@@ -337,18 +337,18 @@ public:
 
     // cleanup
     fileid.close();
-    cout << "NXopenaddress checks OK\n";
+    cout << "NXopenaddress checks OK" << endl;
   }
 
   void test_links() {
-    cout << "tests of linkature\n" << std::flush;
+    cout << "tests of linkature" << endl;
 
     FileResource resource("NexusFile_linktest.nxs");
     std::string const filename(resource.fullPath());
     File fileid = do_prep_files(filename);
 
     // Create some data with a link
-    cout << "create entry at /entry/some_data\n";
+    cout << "create entry at /entry/some_data" << endl;
     string const somedata("this is some data");
     fileid.makeData("some_data", NXnumtype::CHAR, DimVector({(dimsize_t)somedata.size()}));
     fileid.openData("some_data");
@@ -358,7 +358,7 @@ public:
     fileid.flush();
 
     // Create a group, and link it to that data
-    cout << "create group at /entry/data to link to the data\n";
+    cout << "create group at /entry/data to link to the data" << endl;
     fileid.makeGroup("data", "NXdata");
     fileid.openGroup("data", "NXdata");
     fileid.makeLink(datalink);
@@ -372,7 +372,7 @@ public:
     NXlink res1 = fileid.getDataID();
     TS_ASSERT_EQUALS(datalink.linkType, res1.linkType);
     TS_ASSERT_EQUALS(datalink.targetAddress, res1.targetAddress);
-    cout << "data link works\n";
+    cout << "data link works" << endl;
     fileid.closeData();
 
     fileid.openAddress("/entry");
@@ -380,7 +380,7 @@ public:
     // Create two groups, group1 and group2
     // Make a link inside group2 to group1
     // make group1
-    cout << "create group /entry/group1\n" << std::flush;
+    cout << "create group /entry/group1" << endl;
     std::string const strdata("NeXus sample data");
     fileid.makeGroup("group1", "NXentry");
     fileid.openGroup("group1", "NXentry");
@@ -388,7 +388,7 @@ public:
     fileid.closeGroup();
 
     // make group 2
-    cout << "create group /entry/group2/group1\n";
+    cout << "create group /entry/group2/group1" << endl;
     fileid.makeGroup("group2", "NXentry");
     fileid.openGroup("group2", "NXentry");
     fileid.makeLink(grouplink);
@@ -399,6 +399,6 @@ public:
     NXlink res2 = fileid.getGroupID();
     TS_ASSERT_EQUALS(grouplink.linkType, res2.linkType);
     TS_ASSERT_EQUALS(string(grouplink.targetAddress), string(res2.targetAddress));
-    cout << "group link works\n";
+    cout << "group link works" << endl;
   }
 };
