@@ -76,7 +76,7 @@ def insert_placeholder_caption(state_machine):
     placeholder = [
         ".. figure:: /images/ImageNotFound.png",
         "   :class: screenshot",
-        "   :width: 200px",
+        "   :width: 200",
         "\n",
         "   Enable :plots: using DOCS_PLOTDIRECTIVE in CMake", ""
     ]
