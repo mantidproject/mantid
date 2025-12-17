@@ -17,6 +17,11 @@ In comparison to :ref:`algm-Stitch1DMany` or :ref:`algm-MatchAndMergeWorkspaces`
 rebinning during the stitching process, creating a ragged workspace that can be rebinned appropriately later in the
 reduction.
 
+.. image:: /images/StitchByBackground.png
+   :scale: 50 %
+   :alt: StitchByBackground example. Shows 5 different spectra on the right and the stitched result on the left.
+   :align: center
+
 Usage
 -----
 
