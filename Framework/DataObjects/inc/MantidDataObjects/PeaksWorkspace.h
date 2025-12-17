@@ -247,3 +247,10 @@ using PeaksWorkspace_sptr = std::shared_ptr<PeaksWorkspace>;
 using PeaksWorkspace_const_sptr = std::shared_ptr<const PeaksWorkspace>;
 } // namespace DataObjects
 } // namespace Mantid
+
+#ifndef MANTID_DATAOBJECTS_EXPORTS
+#include "MantidAPI/WorkspaceProperty.h"
+namespace Mantid::API {
+extern template class MANTID_DATAOBJECTS_DLL WorkspaceProperty<DataObjects::PeaksWorkspace>;
+} // namespace Mantid::API
+#endif
