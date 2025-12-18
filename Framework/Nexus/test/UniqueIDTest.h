@@ -317,7 +317,7 @@ public:
     TS_ASSERT_EQUALS(call_count, 1);
   }
 
-#if defined(__GNUC__) && !(defined(__clang__))
+#if defined(__GNUC__) || defined(__clang__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wself-move"
 #endif
@@ -335,7 +335,7 @@ public:
     // closer not called on self-move
     TS_ASSERT_EQUALS(call_count, 0);
   }
-#if defined(__GNUC__) && !(defined(__clang__))
+#if defined(__GNUC__) || defined(__clang__)
 #pragma GCC diagnostic pop
 #endif
 
@@ -682,6 +682,10 @@ public:
     TS_ASSERT(uid1 == uid2);
   }
 
+#if defined(__clang__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wself-assign-overloaded"
+#endif
   void test_sharedID_assign_self() {
     cout << "\ntest sharedID self assignment copy" << endl;
 
@@ -694,6 +698,9 @@ public:
     TS_ASSERT_EQUALS(uid.use_count(), 1);
     TS_ASSERT_EQUALS(call_count, 0);
   }
+#if defined(__clang__)
+#pragma GCC diagnostic pop
+#endif
 
   void test_sharedID_move_assign() {
     cout << "\ntest sharedID move assignment" << endl;
@@ -714,7 +721,7 @@ public:
     TS_ASSERT(!(uid1 == uid2));
   }
 
-#if defined(__GNUC__) && !(defined(__clang__))
+#if defined(__GNUC__) || defined(__clang__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wself-move"
 #endif
@@ -730,7 +737,7 @@ public:
     TS_ASSERT_EQUALS(uid.use_count(), 1);
     TS_ASSERT_EQUALS(call_count, 0);
   }
-#if defined(__GNUC__) && !(defined(__clang__))
+#if defined(__GNUC__) || defined(__clang__)
 #pragma GCC diagnostic pop
 #endif
 
