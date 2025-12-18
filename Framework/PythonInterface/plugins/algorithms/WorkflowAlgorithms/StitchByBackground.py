@@ -38,19 +38,46 @@ class StitchByBackground(DataProcessorAlgorithm):
     def validateInputs(self):
         errors = {}
 
-        ws_name_list = self.getProperty("InputWorkspaces").value
-        stitch_points_list = self.getProperty("StitchPoints").value
-        if len(ws_name_list) != len(stitch_points_list) + 1:
-            err_msg = f"There must be one less stitch point ({len(stitch_points_list)}) than input workspaces ({len(ws_name_list)})."
-            errors["InputWorkspaces"] = err_msg
-            errors["StitchPoints"] = err_msg
-
         upper_bound = self.getProperty("CropUpperBound").value
         lower_bound = self.getProperty("CropLowerBound").value
         if not upper_bound > lower_bound:
             err_msg = f"Upper bound ({upper_bound}) must be greater than lower bound ({lower_bound})."
             errors["CropUpperBound"] = err_msg
             errors["CropLowerBound"] = err_msg
+
+        ws_name_list = self.getProperty("InputWorkspaces").value
+        ws_list = [AnalysisDataService.retrieve(ws_name) for ws_name in ws_name_list]
+
+        data_upper = ws_list[-1].dataX(0)[-1]
+        data_lower = ws_list[0].dataX(0)[0]
+
+        if upper_bound > data_upper:
+            errors["CropUpperBound"] = f"{upper_bound} is outside the upper limit of the data ({data_upper})."
+        if lower_bound < data_lower:
+            errors["CropLowerBound"] = f"{lower_bound} is outside the lower limit of the data ({data_lower})."
+
+        stitch_points_list = self.getProperty("StitchPoints").value
+
+        if not all(stitch_points_list[i] <= stitch_points_list[i + 1] for i in range(len(stitch_points_list) - 1)):
+            errors["StitchPoints"] = "All stitch points must be in order - from smallest to largest."
+
+        if len(ws_name_list) != len(stitch_points_list) + 1:
+            err_msg = f"There must be one less stitch point ({len(stitch_points_list)}) than input workspaces ({len(ws_name_list)})."
+            errors["InputWorkspaces"] = err_msg
+            errors["StitchPoints"] = err_msg
+            return errors  # The next check relies on this one being valid.
+
+        invalid_points = []
+        for i, stitch_point in enumerate(stitch_points_list):
+            left_upper = ws_list[i].dataX(0)[-1]
+            right_lower = ws_list[i + 1].dataX(0)[0]
+            if not (right_lower <= stitch_point <= left_upper):
+                invalid_points.append(f"{stitch_point} is not between {right_lower} and {left_upper}")
+        if invalid_points:
+            errors["StitchPoints"] = (
+                f"All stitch points must be in the overlap regions between spectra. Invalid points: {', '.join(invalid_points)}."
+            )
+
         return errors
 
     def PyInit(self):
