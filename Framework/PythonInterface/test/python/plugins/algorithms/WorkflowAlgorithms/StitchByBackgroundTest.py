@@ -17,7 +17,12 @@ class StitchByBackgroundTest(unittest.TestCase):
     def setUpClass(cls):
         for i in range(5):
             CreateSampleWorkspace(
-                OutputWorkspace=f"ws_{i + 1}", NumBanks=1, BankPixelWidth=1, Function="Multiple Peaks", XMin=20000 * i, XMax=20000 * (i + 1)
+                OutputWorkspace=f"ws_{i + 1}",
+                NumBanks=1,
+                BankPixelWidth=1,
+                Function="Multiple Peaks",
+                XMin=2e4 * i - 1e3,
+                XMax=2e4 * (i + 1),
             )
             cls.ws_list.append(f"ws_{i + 1}")
             cls.stitch_points.append(20000 * (i + 1))
@@ -39,11 +44,36 @@ class StitchByBackgroundTest(unittest.TestCase):
 
     def test_crop_bounds_are_tested(self):
         with self.assertRaisesRegex(RuntimeError, r"Upper bound \(0.0\) must be greater than lower bound \(0.0\)"):
-            StitchByBackground(InputWorkspaces=self.ws_list, OverlapWidth=1, StitchPoints=[1.2, 2.3, 3.4, 4.5], OutputWorkspace="out")
+            StitchByBackground(InputWorkspaces=self.ws_list, OverlapWidth=1, StitchPoints=self.stitch_points, OutputWorkspace="out")
 
         with self.assertRaisesRegex(RuntimeError, r"Upper bound \(0.0\) must be greater than lower bound \(1000.0\)"):
             StitchByBackground(
-                InputWorkspaces=self.ws_list, OverlapWidth=1, StitchPoints=[1.2, 2.3, 3.4, 4.5], OutputWorkspace="out", CropLowerBound=1000
+                InputWorkspaces=self.ws_list, OverlapWidth=2e3, StitchPoints=self.stitch_points, OutputWorkspace="out", CropLowerBound=1000
+            )
+
+    def test_data_limits_are_checked_for_crop_bounds(self):
+        with self.assertRaisesRegex(RuntimeError, r"-1001.0 is outside the lower limit of the data \(-1000.0\)"):
+            StitchByBackground(
+                InputWorkspaces=self.ws_list, OverlapWidth=2e3, StitchPoints=self.stitch_points, OutputWorkspace="out", CropLowerBound=-1001
+            )
+
+        with self.assertRaisesRegex(RuntimeError, r"100001.0 is outside the upper limit of the data \(100000.0\)."):
+            StitchByBackground(
+                InputWorkspaces=self.ws_list,
+                OverlapWidth=2e3,
+                StitchPoints=self.stitch_points,
+                OutputWorkspace="out",
+                CropUpperBound=100001,
+            )
+
+    def test_all_stitch_points_are_checked_to_be_within_overlap(self):
+        with self.assertRaisesRegex(RuntimeError, r"Invalid points: 30000.0 is not between 39000.0 and 40000.0."):
+            StitchByBackground(
+                InputWorkspaces=self.ws_list,
+                OverlapWidth=2000,
+                StitchPoints=[2e4, 3e4, 6e4, 8e4],
+                OutputWorkspace="out",
+                CropUpperBound=100000,
             )
 
     def test_stitching_occurs_correctly(self):
@@ -59,7 +89,7 @@ class StitchByBackgroundTest(unittest.TestCase):
         self.assertEqual(out_ws.getNumberHistograms(), 1)
         self.assertEqual(out_ws.blocksize(), 475)  # Cropping upper bound to 95000 drops the number of bins from 500 to 475.
         self.assertEqual(out_ws.dataY(0)[10], 0.3)
-        self.assertEqual(out_ws.dataY(0)[130], 10.3)
+        self.assertEqual(out_ws.dataY(0)[25], 10.3)
 
 
 if __name__ == "__main__":
