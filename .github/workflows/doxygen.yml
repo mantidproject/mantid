@@ -5,6 +5,8 @@ on:
       - opened
       - synchronize
       - reopened
+  push:
+    branches: [main, release-next]
 
 jobs:
   doxygen:
@@ -43,9 +45,9 @@ jobs:
         run: |
           $GITHUB_WORKSPACE/buildconfig/Jenkins/Conda/doxygen.sh $GITHUB_WORKSPACE
 
-      # publish documentation if on main branch
+      # publish documentation if on main branch of mantidproject/mantid
       - name: Checkout Doxygen repository
-        if: ${{ github.ref_name == 'main' && steps.changes.outputs.doxygen == 'true' }}
+        if: ${{ github.repository == 'mantidproject.mantid' && github.ref_name == 'main' && steps.changes.outputs.doxygen == 'true' }}
         env:
           DOXYGEN_REPO_TOKEN: ${{ secrets.DOXYGEN_REPO_TOKEN }}
         run: |
@@ -53,12 +55,12 @@ jobs:
           rm -rf doxygen_repo/*
 
       - name: Copy Doxygen artifacts
-        if: ${{ github.ref_name == 'main' && steps.changes.outputs.doxygen == 'true' }}
+        if: ${{ github.repository == 'mantidproject.mantid' && github.ref_name == 'main' && steps.changes.outputs.doxygen == 'true' }}
         run: |
           cp -r $GITHUB_WORKSPACE/build/doxygen/html/* doxygen_repo/
 
       - name: Commit Doxygen and push
-        if: ${{ github.ref_name == 'main' && steps.changes.outputs.doxygen == 'true' }}
+        if: ${{ github.repository == 'mantidproject.mantid' && github.ref_name == 'main' && steps.changes.outputs.doxygen == 'true' }}
         working-directory: doxygen_repo
         run: |
           git config user.name "github-actions[bot]"
