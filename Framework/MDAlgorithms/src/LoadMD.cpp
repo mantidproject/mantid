@@ -430,8 +430,8 @@ void LoadMD::loadCoordinateSystem() {
     m_file->readData("coordinate_system", readCoord);
     m_coordSystem = static_cast<SpecialCoordinateSystem>(readCoord);
   } else {
-    std::string addressOnEntry = m_file->getAddress();
-    std::string newAddress = addressOnEntry + "/experiment0/logs/CoordinateSystem";
+    std::string const addressOnEntry = m_file->getAddress();
+    std::string const newAddress = addressOnEntry + "/experiment0/logs/CoordinateSystem";
     if (m_file->hasData(newAddress + "/value")) {
       int readCoord(0);
       m_file->openAddress(newAddress);

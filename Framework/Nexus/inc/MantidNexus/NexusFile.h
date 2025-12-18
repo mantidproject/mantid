@@ -185,7 +185,7 @@ public:
    * \return A unix like address string pointing to the current
    *         position in the file
    */
-  std::string const &getAddress() const { return m_address.string(); };
+  std::string getAddress() const { return m_address.string(); };
 
   // CHECK ADDRESS EXISTENCE
 

@@ -186,8 +186,12 @@ public:
     // ------ Make a ExperimentInfo entry ------------
     ExperimentInfo_sptr ei(new ExperimentInfo());
     ei->mutableRun().setProtonCharge(1.234);
+    ei->mutableRun().addLogData(new Mantid::Kernel::PropertyWithValue<int>("x", 1));
     // TODO: Add instrument
     ws1->addExperimentInfo(ei);
+
+    // check that there are logs before saving
+    TS_ASSERT(!ws1->getExperimentInfo(1)->run().getLogData().empty());
 
     // -------- Save it ---------------
     SaveMD2 saver;
@@ -226,6 +230,9 @@ public:
     TS_ASSERT(iws);
     if (!iws)
       return;
+
+    // check that the logs also loaded
+    TS_ASSERT(!iws->getExperimentInfo(1)->run().getLogData().empty())
 
     // Perform the full comparison
     auto ws = std::dynamic_pointer_cast<MDEventWorkspace<MDLeanEvent<nd>, nd>>(iws);
