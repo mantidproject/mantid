@@ -376,7 +376,6 @@ class PawleyPattern1D(PawleyPatternBase):
         ws_eval = self.get_eval_workspace(StoreInADS=False)
         ppval = np.polyfit(ws_eval.readY(1), ws_eval.readY(0), 1)
         scale, bg = ppval
-        logger.warning(f"scale = {scale}, bg = {ppval[-1]}")
         for iphase in range(len(self.phases)):
             self.intens[iphase] = self.intens[iphase] * scale
             self.intens[iphase][self.intens[iphase] < 1e-8] = 1e-8  # arbitrary small number
@@ -396,16 +395,20 @@ class PawleyPattern2D(PawleyPatternBase):
         self.bgs = None
         self.set_global_scale(global_scale)
         # create workspace in d-spacing to contain diffraction pattern
-        dspacs = get_dspac_array_from_ws(self.ws)
-        self.ws_1d = CreateWorkspace(
+        self.ws_1d = self.make_1d_ws(self.ws)
+        self.update_profile_function()
+
+    @staticmethod
+    def make_1d_ws(ws):
+        dspacs = get_dspac_array_from_ws(ws)
+        return CreateWorkspace(
             DataX=dspacs,
             DataY=np.zeros_like(dspacs),
             UnitX="dSpacing",
             YUnitLabel="Intensity (a.u.)",
-            OutputWorkspace=f"{self.ws.name()}_pattern",
+            OutputWorkspace=f"{ws.name()}_pattern",
             EnableLogging=False,
         )
-        self.update_profile_function()
 
     def set_global_scale(self, global_scale: bool):
         self.global_scale = global_scale
@@ -465,3 +468,125 @@ class PawleyPattern2D(PawleyPatternBase):
         ppval = np.polyfit(ws_sim.extractY().flat, self.ws.extractY().flat, 1)
         for iphase in range(len(self.phases)):
             self.intens[iphase] *= ppval[0]
+
+    def create_no_constriants_fit(self):
+        return PawleyPattern2DNoConstraints(self.ws, self.comp_func, self.global_scale, self.lambda_max)
+
+
+class PawleyPattern2DNoConstraints:
+    def __init__(self, ws: Workspace2D, func: FunctionWrapper, global_scale: bool = True, lambda_max: float = 5.0):
+        self.ws = ws
+        self.ws_1d = PawleyPattern2D.make_1d_ws(self.ws)
+        self.comp_func = func
+        self.intens_par_name = self.get_peak_intensity_param_name()
+        self.has_bg = self.comp_func[len(self.comp_func) - 1].name in FunctionFactory.Instance().getBackgroundFunctionNames()
+        self.lambda_max = lambda_max
+        self.scales = None
+        self.bgs = None
+        self.set_global_scale(global_scale)
+        self.initial_params = None
+
+    def get_peak_intensity_param_name(self):
+        pk_func = FunctionFactory.Instance().createPeakFunction(self.comp_func[0].name)
+        pk_func.setIntensity(1.0)
+        return next(pk_func.getParamName(ipar) for ipar in range(pk_func.nParams()) if pk_func.isExplicitlySet(ipar))
+
+    def set_profile_isfree(self, isfree=False):
+        pk_par_names = [self.comp_func[0].function.getParamName(ipar) for ipar in range(self.comp_func[0].nParams())]
+        pk_par_names.pop(pk_par_names.index(self.intens_par_name))
+        pk_par_names.pop(pk_par_names.index(self.comp_func[0].function.getCentreParameterName()))
+        for ipk in range(self.get_npks()):
+            for par_name in pk_par_names:
+                if isfree:
+                    self.comp_func[ipk].free(par_name)
+                else:
+                    self.comp_func[ipk].fix(par_name)
+
+    def set_centers_isfree(self, isfree=False):
+        cen_par_name = self.comp_func[0].function.getCentreParameterName()
+        for ipk in range(self.get_npks()):
+            if isfree:
+                self.comp_func[ipk].free(cen_par_name)
+            else:
+                self.comp_func[ipk].fix(cen_par_name)
+
+    def get_npks(self):
+        return len(self.comp_func) - 1 if self.has_bg else len(self.comp_func)
+
+    def set_global_scale(self, global_scale: bool):
+        self.global_scale = global_scale
+        if not self.global_scale:
+            npks = self.get_npks()
+            ipar_intens = self.comp_func[0].getParameterIndex(self.intens_par_name)
+            ipk_max_intens = 0
+            max_intens = -np.inf
+            any_fixed = False
+            for ipk in range(npks):
+                if self.comp_func[ipk].isFixed(ipar_intens):
+                    any_fixed = True
+                    break
+                intens = self.comp_func[ipk].function.intensity()
+                if intens > max_intens:
+                    max_intens = intens
+                    ipk_max_intens = ipk
+            if not any_fixed:
+                # fix intensity of most intense peak to avoid perfectly correlated scales
+                self.comp_func[ipk_max_intens].fix(self.intens_par_name)
+            # zero global background and fix
+            if self.has_bg:
+                bg_func = self.comp_func[npks]
+                [bg_func.function.setParameter(ipar, 0) for ipar in range(bg_func.nParams())]
+                bg_func.function.fixAll()
+
+    def get_params(self):
+        return np.asarray([self.comp_func.getParameterValue(ipar) for ipar in range(self.comp_func.nParams())])
+
+    def get_free_params(self) -> np.ndarray[float]:
+        params = self.get_params()
+        return params[self.get_isfree()]
+
+    def get_isfree(self) -> np.ndarray[bool]:
+        return np.asarray([not self.comp_func.isFixed(ipar) for ipar in range(self.comp_func.nParams())])
+
+    def set_params(self, params: np.ndarray[float]):
+        [self.comp_func.setParameter(ipar, val) for ipar, val in enumerate(params)]
+
+    def set_free_params(self, free_params: np.ndarray[float]):
+        params = self.get_params()
+        params[self.get_isfree()] = free_params
+        self.set_params(params)
+
+    def eval_profile(self, params: np.ndarray[float]) -> np.ndarray[float]:
+        self.set_free_params(params)
+        return self.comp_func(self.ws_1d.readX(0))
+
+    def eval_2d(self, params: np.ndarray[float]) -> Workspace2D:
+        return PawleyPattern2D.eval_2d(self, params)
+
+    def eval_resids(self, params: np.ndarray[float]) -> np.ndarray[float]:
+        ws_sim = self.eval_2d(params)
+        return (self.ws.extractY() - ws_sim.extractY()).flat
+
+    def fit(self, **kwargs) -> OptimizeResult:
+        default_kwargs = {"xtol": 1e-5, "diff_step": 1e-3, "x_scale": "jac", "verbose": 2}
+        kwargs = {**default_kwargs, **kwargs}
+        self.initial_params = self.get_free_params()
+        res = least_squares(lambda p: self.eval_resids(p), self.initial_params, **kwargs)
+        # update parameters
+        self.set_free_params(res.x)
+        return res
+
+    def undo_fit(self):
+        if self.initial_params is not None:
+            self.set_free_params(self.initial_params)
+
+    def get_peak_centers(self):
+        return np.array(
+            [
+                self.comp_func[ipk].function.getParameterValue(self.comp_func[ipk].function.getCentreParameterName())
+                for ipk in range(self.get_npks())
+            ]
+        )
+
+    def get_peak_fwhm(self):
+        return np.array([self.comp_func[ipk].function.fwhm() for ipk in range(self.get_npks())])
