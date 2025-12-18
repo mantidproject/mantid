@@ -28,8 +28,11 @@
 #include "MantidKernel/ArrayBoundedValidator.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/EnumeratedString.h"
 #include "MantidKernel/EnumeratedStringProperty.h"
+#include "MantidKernel/MandatoryValidator.h"
+#include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/Unit.h"
@@ -54,11 +57,14 @@ using Mantid::DataObjects::Workspace2D;
 using Mantid::Kernel::ArrayBoundedValidator;
 using Mantid::Kernel::ArrayProperty;
 using Mantid::Kernel::BoundedValidator;
+using Mantid::Kernel::CompositeValidator;
 using Mantid::Kernel::Direction;
 using Mantid::Kernel::EnumeratedStringProperty;
+using Mantid::Kernel::MandatoryValidator;
 using Mantid::Kernel::PropertyWithValue;
 using Mantid::Kernel::TimeROI;
 using Mantid::Kernel::TimeSeriesProperty;
+using Mantid::Kernel::Strings::strmakef;
 
 namespace { // anonymous namespace
 
@@ -218,19 +224,29 @@ void AlignAndFocusPowderSlim::init() {
       "The bank for which to read data; if specified, others will be blank");
 
   // parameters for focus position
+  // for L1, mandatory and must be positive
+  auto mandatoryDblValidator = std::make_shared<MandatoryValidator<double>>();
   auto positiveDblValidator = std::make_shared<Mantid::Kernel::BoundedValidator<double>>();
   positiveDblValidator->setLower(0);
-  declareProperty(std::make_unique<PropertyWithValue<double>>(PropertyNames::L1, 43.755, positiveDblValidator),
+  auto l1Validator = std::make_shared<CompositeValidator>();
+  l1Validator->add(mandatoryDblValidator);
+  l1Validator->add(positiveDblValidator);
+  // for L2, 2theta, phi, mandatory arrays with positive valyes
+  auto mandatoryDblArrayValidator = std::make_shared<MandatoryValidator<std::vector<double>>>();
+  auto positionArrayValidator = std::make_shared<CompositeValidator>();
+  positionArrayValidator->add(mandatoryDblArrayValidator);
+  positionArrayValidator->add(mustBePosArr);
+  declareProperty(std::make_unique<PropertyWithValue<double>>(PropertyNames::L1, EMPTY_DBL(), positiveDblValidator),
                   "The primary distance $\\ell_1$ from beam to sample");
-  declareProperty(std::make_unique<ArrayProperty<double>>(
-                      PropertyNames::L2S, std::vector<double>{2.296, 2.296, 2.070, 2.070, 2.070, 2.530}, mustBePosArr),
-                  "The secondary distances $\\ell_2$ from sample to focus group");
-  declareProperty(std::make_unique<ArrayProperty<double>>(
-                      PropertyNames::POLARS, std::vector<double>{90, 90, 120, 150, 157, 65.5}, mustBePosArr),
-                  "The effective polar angle (2$\\theta$) of each focus group");
-  declareProperty(std::make_unique<ArrayProperty<double>>(PropertyNames::AZIMUTHALS,
-                                                          std::vector<double>{180, 0, 0, 0, 0, 0}, mustBePosArr),
-                  "The effective azimuthal angle $\\phi$ for each focus group");
+  declareProperty(
+      std::make_unique<ArrayProperty<double>>(PropertyNames::L2S, std::vector<double>{}, positionArrayValidator),
+      "The secondary distances $\\ell_2$ from sample to focus group");
+  declareProperty(
+      std::make_unique<ArrayProperty<double>>(PropertyNames::POLARS, std::vector<double>{}, positionArrayValidator),
+      "The effective polar angle (2$\\theta$) of each focus group");
+  declareProperty(
+      std::make_unique<ArrayProperty<double>>(PropertyNames::AZIMUTHALS, std::vector<double>{}, mustBePosArr),
+      "The effective azimuthal angle $\\phi$ for each focus group");
 }
 
 std::map<std::string, std::string> AlignAndFocusPowderSlim::validateInputs() {
@@ -272,6 +288,23 @@ std::map<std::string, std::string> AlignAndFocusPowderSlim::validateInputs() {
     errors[PropertyNames::BLOCK_LOGS] = "Cannot specify both allow and block lists";
   }
 
+  // the focus group position parameters must have same lengths
+  std::vector<double> l2s = getProperty(PropertyNames::L2S);
+  std::vector<double> twoTheta = getProperty(PropertyNames::POLARS);
+  if (l2s.size() != twoTheta.size()) {
+    errors[PropertyNames::L2S] = strmakef("L2S has inconsistent length %zu", l2s.size());
+    errors[PropertyNames::POLARS] = strmakef("TwoTheta has inconsistent length %zu", twoTheta.size());
+  }
+  // phi is optional, but if set must also have same size
+  std::vector<double> phi = getProperty(PropertyNames::AZIMUTHALS);
+  if (!phi.empty()) {
+    if (l2s.size() != phi.size()) {
+      errors[PropertyNames::L2S] = strmakef("L2S has inconsistent length %zu", l2s.size());
+      errors[PropertyNames::AZIMUTHALS] = strmakef("Phi has inconsistent length %zu", phi.size());
+      ;
+    }
+  }
+
   return errors;
 }
 
@@ -305,8 +338,13 @@ void AlignAndFocusPowderSlim::exec() {
   // TODO parameters should be input information
   const double l1 = getProperty(PropertyNames::L1);
   const std::vector<double> l2s = getProperty(PropertyNames::L2S);
-  const std::vector<double> polars = getProperty(PropertyNames::POLARS);         // two-theta
-  const std::vector<double> azimuthals = getProperty(PropertyNames::AZIMUTHALS); // angle from positive x-axis
+  const std::vector<double> polars = getProperty(PropertyNames::POLARS); // two-theta
+  // set angle from positive x-axis; will be zero unless specified
+  std::vector<double> setPhi(l2s.size(), 0.0);
+  if (!isDefault(PropertyNames::AZIMUTHALS)) {
+    setPhi = getProperty(PropertyNames::AZIMUTHALS);
+  }
+  const std::vector<double> azimuthals(setPhi);
   const std::vector<specnum_t> specids;
   const auto difc_focused = calculate_difc_focused(l1, l2s, polars);
 

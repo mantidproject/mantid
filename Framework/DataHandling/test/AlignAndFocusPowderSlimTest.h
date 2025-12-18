@@ -60,6 +60,11 @@ struct TestConfig {
   bool processBankSplitTask = false;
   bool useFullTime = false;
   bool correctToSample = false;
+  // focus positions
+  double l1 = 43.755;
+  std::vector<double> l2s = {2.296, 2.296, 2.070, 2.070, 2.070, 2.530};
+  std::vector<double> twoTheta = {90, 90, 120, 150, 157, 65.5};
+  std::vector<double> phi = {180, 0, 0, 0, 0, 0};
 };
 } // namespace
 
@@ -74,6 +79,42 @@ public:
     AlignAndFocusPowderSlim alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
+  }
+
+  void test_focus_position_validators() {
+    TestConfig defaults;
+    AlignAndFocusPowderSlim alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    // l1 is mandatory and must be nonnegative
+    TS_ASSERT_THROWS_ANYTHING(alg.setPropertyValue("L1", ""));
+    TS_ASSERT_THROWS_ANYTHING(alg.setPropertyValue("L1", "-1."));
+    // l2s is mandatory and must be nonnegative
+    TS_ASSERT_THROWS_ANYTHING(alg.setPropertyValue("L2S", ""));
+    TS_ASSERT_THROWS_ANYTHING(alg.setPropertyValue("L2S", "1., -1."));
+    // twoTheta is mandatory and must be nonnegative
+    TS_ASSERT_THROWS_ANYTHING(alg.setProperty("TwoTheta", ""));
+    TS_ASSERT_THROWS_ANYTHING(alg.setProperty("TwoTheta", "1., -1."));
+    // phi is optional, but if specified must be nonnegative
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Phi", ""));
+    TS_ASSERT_THROWS_ANYTHING(alg.setProperty("Phi", "1., -1."));
+
+    // set everything to valid value to move on
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", VULCAN_218062));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "outws"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("L1", defaults.l1));
+
+    // // l2 and twoTheta must have the same length
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("L2S", "1., 2."));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("TwoTheta", "1., 2., 3."));
+    TS_ASSERT_THROWS_ASSERT(alg.execute(), std::runtime_error const &e,
+                            TS_ASSERT(strstr(e.what(), "TwoTheta has inconsistent length 3")));
+
+    // // if phi is given, must have same length as l2and twoTheta
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("L2S", "1., 2."));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("TwoTheta", "1., 2."));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Phi", "1., 2., 3."));
+    TS_ASSERT_THROWS_ASSERT(alg.execute(), std::runtime_error const &e,
+                            TS_ASSERT(strstr(e.what(), "Phi has inconsistent length 3")));
   }
 
   // run the algorithm do some common checks and return output workspace name
@@ -122,6 +163,11 @@ public:
     if (configuration.outputSpecNum != -10) {
       TS_ASSERT_THROWS_NOTHING(alg.setProperty(OUTPUT_SPEC_NUM, configuration.outputSpecNum));
     }
+    // set focus positions
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty(L1, configuration.l1));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty(L2S, configuration.l2s));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty(POLARS, configuration.twoTheta));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty(AZIMUTHALS, configuration.phi));
 
     if (should_throw) {
       TS_ASSERT_THROWS(alg.execute(), const std::invalid_argument &);
@@ -138,7 +184,8 @@ public:
   }
 
   void test_defaults() {
-    auto outputWS = std::dynamic_pointer_cast<MatrixWorkspace>(run_algorithm(VULCAN_218062, TestConfig()));
+    TestConfig config;
+    auto outputWS = std::dynamic_pointer_cast<MatrixWorkspace>(run_algorithm(VULCAN_218062, config));
 
     constexpr size_t NUM_Y{1874}; // observed value
 
@@ -171,6 +218,10 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", VULCAN_218062));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "unused"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("ReadSizeFromDisk", 1000000));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("L1", config.l1));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("L2s", config.l2s));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("TwoTheta", config.twoTheta));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Phi", config.phi));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
 
     Workspace_sptr outputWS2 = alg.getProperty("OutputWorkspace");
