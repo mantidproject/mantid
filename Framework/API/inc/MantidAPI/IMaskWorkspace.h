@@ -19,6 +19,11 @@ namespace API {
 
 /** This class provides an interface to a MaskWorkspace.
  */
+
+// Reference Docs
+// Concepts: TODO
+// API: TODO
+
 class MANTID_API_DLL IMaskWorkspace {
 public:
   IMaskWorkspace() = default;

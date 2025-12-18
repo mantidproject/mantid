@@ -16,7 +16,6 @@ Guides
 
    DeveloperAccounts
    GettingStarted/GettingStarted
-   Glossary
    Packaging
    Architecture
    BuildingOnOSX
@@ -297,7 +296,6 @@ Component Overviews
    Logging
    MatplotlibInCpp
    MultiThreadingInMantid
-   MaskWorkspace
    PythonVSCppAlgorithms
    SampleLogsDev
    ScriptRepository
