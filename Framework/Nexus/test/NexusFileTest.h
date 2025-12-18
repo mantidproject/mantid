@@ -802,6 +802,32 @@ public:
 
   /* NOTE for historical reasons, additional tests exist in NexusFileReadWriteTest.h*/
 
+  void test_getAddress_const() {
+    cout << "\ntest get_address doesn't move\n" << std::flush;
+    FileResource resource("test_nexus_file_grp.h5");
+    std::string filename = resource.fullPath();
+    Mantid::Nexus::File file(filename, NXaccess::CREATE5);
+    // make and open a group
+    file.makeGroup("abc", "NXclass", true);
+    // make another layer -- at "/acb/def"
+    file.makeGroup("def", "NXentry", true);
+    TS_ASSERT_EQUALS("/abc/def", file.getAddress());
+
+    // this function takes the return of file.getAddress() as an argument
+    // it will close a group (changing the file's address), then try to use the address.
+    // make sure the address parameter doesn't move from under us.
+    std::function<void(std::string const &)> test_func = [&file](std::string const &addr) {
+      file.closeGroup();
+      TS_ASSERT_EQUALS("/abc/def", addr);
+    };
+
+    std::string address = file.getAddress();
+    test_func(file.getAddress());
+
+    // the string is still okay
+    TS_ASSERT_EQUALS("/abc/def", address);
+  }
+
   void test_getAddress_groups() {
     cout << "\ntest get_address -- groups only\n" << std::flush;
     FileResource resource("test_nexus_file_grp.h5");
