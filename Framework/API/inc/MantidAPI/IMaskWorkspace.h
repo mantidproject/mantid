@@ -16,6 +16,10 @@
 namespace Mantid {
 namespace API {
 
+// Reference Docs
+// Concepts: https://developer.mantidproject.org/MaskWorkspace.html
+// API: https://docs.mantidproject.org/api/python/mantid/dataobjects/MaskWorkspace.html
+
 /** This class provides an interface to a MaskWorkspace.
  */
 class MANTID_API_DLL IMaskWorkspace {
