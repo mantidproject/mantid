@@ -317,6 +317,7 @@ public:
     TS_ASSERT_EQUALS(call_count, 1);
   }
 
+// NOTE this test performs self-move on purpose
 #if defined(__GNUC__) || defined(__clang__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wself-move"
@@ -682,6 +683,7 @@ public:
     TS_ASSERT(uid1 == uid2);
   }
 
+// NOTE this test performs self-assign on purpose
 #if defined(__clang__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wself-assign-overloaded"
@@ -721,6 +723,7 @@ public:
     TS_ASSERT(!(uid1 == uid2));
   }
 
+// NOTE this test performs self-move on purpose
 #if defined(__GNUC__) || defined(__clang__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wself-move"
