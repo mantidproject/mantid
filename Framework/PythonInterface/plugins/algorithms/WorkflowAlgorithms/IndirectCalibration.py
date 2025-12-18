@@ -48,19 +48,20 @@ class IndirectCalibration(DataProcessorAlgorithm):
         return "Creates a calibration workspace from a White-Beam Vanadium run."
 
     def PyInit(self):
+        self.declareProperty(StringArrayProperty(name="InputFiles"), doc="Comma separated list of input files")
+
         self.declareProperty(
             name="Instrument",
-            defaultValue="",
+            defaultValue="IRIS",
             validator=StringListValidator(["IRIS", "OSIRIS", "TOSCA", "TFXA"]),
             doc="Instrument used during run.",
         )
         self.declareProperty(
             name="Analyser",
-            defaultValue="",
+            defaultValue="graphite",
             validator=StringListValidator(["graphite", "mica", "fmica", "silicon"]),
             doc="Analyser bank used during run.",
         )
-        self.declareProperty(StringArrayProperty(name="InputFiles"), doc="Comma separated list of input files")
 
         self.declareProperty(
             IntArrayProperty(name="DetectorRange", values=[0, 1], validator=IntArrayMandatoryValidator()), doc="Range of detectors."
@@ -165,21 +166,25 @@ class IndirectCalibration(DataProcessorAlgorithm):
         ws_mask, num_zero_spectra = FindDetectorsOutsideLimits(InputWorkspace=calib_ws_name, OutputWorkspace="__temp_ws_mask")
         DeleteWorkspace(ws_mask)
 
-        workflow_prog.report("Integrating calibration file")
-        Integration(
-            InputWorkspace=calib_ws_name, OutputWorkspace=calib_ws_name, RangeLower=self._peak_range[0], RangeUpper=self._peak_range[1]
-        )
+        if self._instrument_name == "OSIRIS" and self._analyser == "silicon":
+            # do something for silicon...
+            print("Osiris with silicon analyser")
+        else:
+            workflow_prog.report("Integrating calibration file")
+            Integration(
+                InputWorkspace=calib_ws_name, OutputWorkspace=calib_ws_name, RangeLower=self._peak_range[0], RangeUpper=self._peak_range[1]
+            )
 
-        workflow_prog.report("Summing Spectra")
-        temp_sum = SumSpectra(InputWorkspace=calib_ws_name, OutputWorkspace="__temp_sum")
-        total = temp_sum.readY(0)[0]
-        DeleteWorkspace(temp_sum)
+            workflow_prog.report("Summing Spectra")
+            temp_sum = SumSpectra(InputWorkspace=calib_ws_name, OutputWorkspace="__temp_sum")
+            total = temp_sum.readY(0)[0]
+            DeleteWorkspace(temp_sum)
 
-        if self._intensity_scale is None:
-            self._intensity_scale = 1 / (total / (number_historgrams - num_zero_spectra))
+            if self._intensity_scale is None:
+                self._intensity_scale = 1 / (total / (number_historgrams - num_zero_spectra))
 
-        workflow_prog.report("Scaling calibration")
-        Scale(InputWorkspace=calib_ws_name, OutputWorkspace=self._out_ws, Factor=self._intensity_scale, Operation="Multiply")
+            workflow_prog.report("Scaling calibration")
+            Scale(InputWorkspace=calib_ws_name, OutputWorkspace=self._out_ws, Factor=self._intensity_scale, Operation="Multiply")
 
         # Remove old workspaces
         if len(runs) > 1:
@@ -195,11 +200,11 @@ class IndirectCalibration(DataProcessorAlgorithm):
         Gets properties.
         """
 
-        self._instrument_name = self.getPropertyValue("Instrument")
-        self._analyser = self.getPropertyValue("Analyser")
-
         self._input_files = self.getProperty("InputFiles").value
         self._out_ws = self.getPropertyValue("OutputWorkspace")
+
+        self._instrument_name = self.getPropertyValue("Instrument")
+        self._analyser = self.getPropertyValue("Analyser")
 
         self._peak_range = self.getProperty("PeakRange").value
         self._back_range = self.getProperty("BackgroundRange").value
