@@ -12,6 +12,7 @@
 #include "GUI/RunsTable/RunsTablePresenter.h"
 #include "IRunsView.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AlgorithmRuntimeProps.h"
 #include "MantidKernel/Logger.h"
 #include "MantidQtWidgets/Common/ProgressPresenter.h"
 #include "MantidQtWidgets/Common/QtAlgorithmRunner.h"
@@ -518,7 +519,9 @@ std::string RunsPresenter::liveDataReductionAlgorithm() { return "ReflectometryR
 
 std::string RunsPresenter::liveDataReductionOptions(const std::string &inputWorkspace, const std::string &instrument) {
   // Get the properties for the reduction algorithm from the settings tabs
-  auto options = m_mainPresenter->rowProcessingProperties();
+  auto options =
+      std::make_unique<Mantid::API::AlgorithmRuntimeProps>(); // Pass default props as live data reduction alg will
+                                                              // parse experiment view for user specified props.
   auto experimentState = m_mainPresenter->getBatchState({"experimentView", "perAngleDefaults", "rows"});
 
   // Add other required input properties to the live data reduction algorithnm
