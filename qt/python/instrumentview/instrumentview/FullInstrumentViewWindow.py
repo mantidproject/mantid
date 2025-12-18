@@ -53,7 +53,6 @@ from instrumentview.Projections.ProjectionType import ProjectionType
 
 import os
 from typing import Callable
-from contextlib import suppress
 
 
 class CylinderWidgetNoRotation(vtkImplicitCylinderWidget):
@@ -219,14 +218,18 @@ class FullInstrumentViewWindow(QMainWindow):
 
         masking_group_box = QGroupBox("Masking")
         masking_layout = QVBoxLayout(masking_group_box)
-        note = QLabel("Currently only a cylinder/circle shape is supported. A rectangular shape will be added in the next update.")
+        shape_label = QLabel("Shape:")
+        shape_label.setFixedWidth(50)
         pre_list_layout = QHBoxLayout()
-        self._circle_widget = QPushButton("Circle Shape")
-        self._rect_widget = QPushButton("Rectangle Shape")
+        self._shape_options = QComboBox()
+        self._shape_options.addItems(["Circle", "Rectangle"])
+        self._add_widget = QPushButton("Add Shape")
+        self._add_widget.setCheckable(True)
         self._add_mask = QPushButton("Add Mask")
         self._clear_masks = QPushButton("Clear Masks")
-        pre_list_layout.addWidget(self._circle_widget)
-        pre_list_layout.addWidget(self._rect_widget)
+        pre_list_layout.addWidget(shape_label)
+        pre_list_layout.addWidget(self._shape_options)
+        pre_list_layout.addWidget(self._add_widget)
         pre_list_layout.addWidget(self._add_mask)
         pre_list_layout.addWidget(self._clear_masks)
         self._mask_list = WorkspaceListWidget(self)
@@ -239,7 +242,6 @@ class FullInstrumentViewWindow(QMainWindow):
         post_list_layout.addWidget(self._save_mask_to_ws)
         post_list_layout.addWidget(self._save_mask_to_file)
         post_list_layout.addWidget(self._overwrite_mask)
-        masking_layout.addWidget(note)
         masking_layout.addLayout(pre_list_layout)
         masking_layout.addWidget(self._mask_list)
         masking_layout.addLayout(post_list_layout)
@@ -424,9 +426,6 @@ class FullInstrumentViewWindow(QMainWindow):
     def setup_connections_to_presenter(self) -> None:
         self._projection_combo_box.currentIndexChanged.connect(self._presenter.update_plotter)
         self._multi_select_check.stateChanged.connect(self._presenter.update_detector_picker)
-        self._circle_widget.clicked.connect(self._presenter.on_add_cylinder_clicked)
-        self._rect_widget.clicked.connect(self.add_rectangular_widget)
-        self._add_mask.clicked.connect(self._presenter.on_cylinder_select_clicked)
         self._clear_selection_button.clicked.connect(self._presenter.on_clear_selected_detectors_clicked)
         self._contour_range_slider.sliderReleased.connect(self._presenter.on_contour_limits_updated)
         self._integration_limit_slider.sliderReleased.connect(self._presenter.on_integration_limits_updated)
@@ -454,25 +453,29 @@ class FullInstrumentViewWindow(QMainWindow):
             self._presenter.on_integration_limits_updated,
         )
 
-        self._circle_widget.clicked.connect(self._presenter.on_add_cylinder_clicked)
-        self._circle_widget.clicked.connect(self.add_widget)
-        self._add_mask.clicked.connect(self.cancel_widget)
+        self._add_widget.toggled.connect(self.on_toggle_add_mask)
+        self._add_mask.clicked.connect(self._presenter.on_add_mask_clicked)
+        self._add_mask.setDisabled(True)
 
-    def add_widget(self):
-        self._circle_widget.setText("Cancel")
-        with suppress(TypeError):
-            self._circle_widget.clicked.disconnect()
-        self._circle_widget.clicked.connect(self.delete_current_widget)
-        self._circle_widget.clicked.connect(self.cancel_widget)
-        self._add_mask.setEnabled(True)
+    def on_toggle_add_mask(self, checked):
+        """
+        Single slot that handles both selected and unselected states.
+        'checked' is True when button is selected, False when unselected.
+        """
+        if checked:
+            if self._shape_options.currentText() == "Circle":
+                self._presenter.on_add_cylinder_clicked()
+            else:
+                self.add_rectangular_widget()
+            self._add_mask.setDisabled(False)
+        else:
+            self.delete_current_widget()
+            self._add_mask.setDisabled(True)
 
-    def cancel_widget(self):
-        self._circle_widget.setText("Circle Shape")
-        with suppress(TypeError):
-            self._circle_widget.clicked.disconnect()
-        self._circle_widget.clicked.connect(self._presenter.on_add_cylinder_clicked)
-        self._circle_widget.clicked.connect(self.add_widget)
-        self._add_mask.setEnabled(False)
+    def enable_or_disable_mask_widgets(self):
+        if self._add_widget.isChecked():
+            self._add_widget.toggle()
+        self._add_widget.setDisabled(self.current_selected_projection() == ProjectionType.THREE_D)
 
     def delete_current_widget(self):
         # Should delete widgets explicitly, otherwise not garbage collected
@@ -658,16 +661,15 @@ class FullInstrumentViewWindow(QMainWindow):
         cylinder_repr.GetOutlineProperty().SetOpacity(0)
         cylinder_repr.SetMinRadius(0.001)
 
-        xmin, xmax, ymin, ymax, _zmin, _zmax = bounds
-
         width, height = self.main_plotter.renderer.GetSize()
-        cx, cy, cz = self.display_to_world_coords(width / 2, height / 2, 0)
+        cx, cy, _cz = self.display_to_world_coords(width / 2, height / 2, 0)
         cylinder_repr.SetCenter([cx, cy, 0.5])
 
-        x, y, z = self.display_to_world_coords(width / 2 + 0.15 * width, height / 2, 0)
+        x, y, _z = self.display_to_world_coords(width / 2 + 0.15 * width, height / 2, 0)
         cylinder_repr.SetRadius(np.sqrt((x - cx) ** 2 + (y - cy) ** 2))
 
         # Arbritary border factor for bounding box
+        xmin, xmax, ymin, ymax, _zmin, _zmax = bounds
         border = (np.sqrt((xmax - xmin) ** 2 + (ymax - ymin) ** 2)) / 2
         cylinder_repr.SetWidgetBounds([xmin - border, xmax + border, ymin - border, ymax + border, 0, 1])
 
@@ -683,12 +685,12 @@ class FullInstrumentViewWindow(QMainWindow):
         # No idea why it works
         self.main_plotter.camera_position = self.main_plotter.camera_position
 
-    def add_rectangular_widget(self, bounds) -> None:
+    def add_rectangular_widget(self) -> None:
         rect_repr = vtkBoxRepresentation()
 
         width, height = self.main_plotter.renderer.GetSize()
-        x0, y0, z0 = self.display_to_world_coords(width / 3, height / 3, 0)
-        x1, y1, z1 = self.display_to_world_coords(2 * width / 3, 2 * height / 3, 0)
+        x0, y0, _z0 = self.display_to_world_coords(width / 3, height / 3, 0)
+        x1, y1, _z1 = self.display_to_world_coords(2 * width / 3, 2 * height / 3, 0)
         rect_repr.SetPlaceFactor(1.0)
         rect_repr.PlaceWidget([x0, x1, y0, y1, -0.1, 1])
         rect_repr.SetUseBounds(True)
@@ -709,7 +711,7 @@ class FullInstrumentViewWindow(QMainWindow):
         renderer = self.main_plotter.renderer
         renderer.SetDisplayPoint(x, y, z)
         renderer.DisplayToWorld()
-        world_x, world_y, world_z, world_w = renderer.GetWorldPoint()
+        world_x, world_y, _world_z, world_w = renderer.GetWorldPoint()
         return world_x / world_w, world_y / world_w, world_y / world_w
 
     def get_current_widget_implicit_function(self) -> vtkImplicitFunction | None:
@@ -723,11 +725,6 @@ class FullInstrumentViewWindow(QMainWindow):
             return box
         else:
             return None
-
-    def enable_or_disable_mask_widgets(self):
-        self.cancel_widget()
-        self._circle_widget.setDisabled(self.current_selected_projection() == ProjectionType.THREE_D)
-        # self._add_mask.setDisabled(True)
 
     def add_rgba_mesh(self, mesh: PolyData, scalars: np.ndarray | str):
         """Draw the given mesh in the main plotter window, and set the colours manually with RGBA numbers"""

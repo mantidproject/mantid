@@ -244,7 +244,7 @@ class FullInstrumentViewPresenter:
     def on_add_cylinder_clicked(self) -> None:
         self._view.add_cylinder_widget(self._detector_mesh_bounds)
 
-    def on_cylinder_select_clicked(self) -> None:
+    def on_add_mask_clicked(self) -> None:
         implicit_function = self._view.get_current_widget_implicit_function()
         if not implicit_function:
             return
