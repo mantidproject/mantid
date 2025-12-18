@@ -281,7 +281,7 @@ class ReflectometryReductionOneLiveData(DataProcessorAlgorithm):
             self._s2vg_name(): LiveValue(
                 None, "m", self._alternative_s2vg_name(), LiveValue.LOG_TYPE_NUM_SERIES, LiveValue.PROP_TYPE_BLOCK
             ),
-            self._title_name(): LiveValue(None, "", self._alternative_title_name(), LiveValue.LOG_TYPE_STRING, LiveValue.PROP_TYPE_RUN),
+            self._title_name(): LiveValue(None, None, self._alternative_title_name(), LiveValue.LOG_TYPE_STRING, LiveValue.PROP_TYPE_RUN),
         }
         return liveValues
 
