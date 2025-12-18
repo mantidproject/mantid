@@ -53,6 +53,12 @@ from instrumentview.Projections.ProjectionType import ProjectionType
 
 import os
 from typing import Callable
+from enum import Enum
+
+
+class WidgetType(str, Enum):
+    Cylinder = "Circle"
+    Box = "Rectangle"
 
 
 class CylinderWidgetNoRotation(vtkImplicitCylinderWidget):
@@ -222,7 +228,7 @@ class FullInstrumentViewWindow(QMainWindow):
         shape_label.setFixedWidth(50)
         pre_list_layout = QHBoxLayout()
         self._shape_options = QComboBox()
-        self._shape_options.addItems(["Circle", "Rectangle"])
+        self._shape_options.addItems([w.value for w in WidgetType])
         self._add_widget = QPushButton("Add Shape")
         self._add_widget.setCheckable(True)
         self._add_mask = QPushButton("Add Mask")
@@ -458,12 +464,8 @@ class FullInstrumentViewWindow(QMainWindow):
         self._add_mask.setDisabled(True)
 
     def on_toggle_add_mask(self, checked):
-        """
-        Single slot that handles both selected and unselected states.
-        'checked' is True when button is selected, False when unselected.
-        """
         if checked:
-            if self._shape_options.currentText() == "Circle":
+            if self._shape_options.currentText() == WidgetType.Cylinder.value:
                 self._presenter.on_add_cylinder_clicked()
             else:
                 self.add_rectangular_widget()
