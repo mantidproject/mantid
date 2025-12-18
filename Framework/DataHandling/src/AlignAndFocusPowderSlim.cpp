@@ -39,6 +39,7 @@
 
 #include <H5Cpp.h>
 #include <numbers>
+#include <ranges>
 #include <regex>
 #include <vector>
 
@@ -318,14 +319,14 @@ void AlignAndFocusPowderSlim::exec() {
   this->progress(.1, "Convert bins to TOF");
   wksp = this->convertToTOF(wksp);
 
-  /* TODO create grouping information
-  // create IndexInfo
-  // prog->doReport("Creating IndexInfo"); TODO add progress bar stuff
-  const std::vector<int32_t> range;
-  LoadEventNexusIndexSetup indexSetup(WS, EMPTY_INT(), EMPTY_INT(), range);
-  auto indexInfo = indexSetup.makeIndexInfo();
-  const size_t numHist = indexInfo.size();
-  */
+  // TODO parameters should be read in from a file
+  std::map<size_t, std::vector<detid_t>> grouping;
+  constexpr detid_t NUM_DETS_PER_BANK{100000};
+  for (size_t outputSpecNum : std::views::iota(0, 6)) {
+    grouping[outputSpecNum] = std::vector<detid_t>(NUM_DETS_PER_BANK);
+    std::iota(grouping[outputSpecNum].begin(), grouping[outputSpecNum].end(),
+              static_cast<detid_t>(NUM_DETS_PER_BANK * outputSpecNum));
+  }
 
   // load run metadata
   this->progress(.11, "Loading metadata");
@@ -391,9 +392,9 @@ void AlignAndFocusPowderSlim::exec() {
     const auto pulse_indices = this->determinePulseIndices(wksp, filterROI);
 
     auto progress = std::make_shared<API::Progress>(this, .17, .9, num_banks_to_read);
-    ProcessBankTask task(bankEntryNames, h5file, is_time_filtered, wksp, m_calibration, m_scale_at_sample, m_masked,
-                         static_cast<size_t>(DISK_CHUNK), static_cast<size_t>(GRAINSIZE_EVENTS), pulse_indices,
-                         progress);
+    ProcessBankTask task(bankEntryNames, h5file, is_time_filtered, wksp, m_calibration, m_scale_at_sample, grouping,
+                         m_masked, static_cast<size_t>(DISK_CHUNK), static_cast<size_t>(GRAINSIZE_EVENTS),
+                         pulse_indices, progress);
     // generate threads only if appropriate
     if (num_banks_to_read > 1) {
       tbb::parallel_for(tbb::blocked_range<size_t>(0, num_banks_to_read), task);
@@ -438,8 +439,9 @@ void AlignAndFocusPowderSlim::exec() {
       const auto &splitterMap = timeSplitter.getSplittersMap();
 
       ProcessBankSplitFullTimeTask task(bankEntryNames, h5file, is_time_filtered, workspaceIndices, workspaces,
-                                        m_calibration, m_scale_at_sample, m_masked, static_cast<size_t>(DISK_CHUNK),
-                                        static_cast<size_t>(GRAINSIZE_EVENTS), pulse_indices, splitterMap, progress);
+                                        m_calibration, m_scale_at_sample, grouping, m_masked,
+                                        static_cast<size_t>(DISK_CHUNK), static_cast<size_t>(GRAINSIZE_EVENTS),
+                                        pulse_indices, splitterMap, progress);
 
       // generate threads only if appropriate
       if (num_banks_to_read > 1) {
@@ -455,7 +457,7 @@ void AlignAndFocusPowderSlim::exec() {
       const auto target_to_pulse_indices = this->determinePulseIndicesTargets(wksp, filterROI, timeSplitter);
 
       ProcessBankSplitTask task(bankEntryNames, h5file, true, workspaceIndices, workspaces, m_calibration,
-                                m_scale_at_sample, m_masked, static_cast<size_t>(DISK_CHUNK),
+                                m_scale_at_sample, grouping, m_masked, static_cast<size_t>(DISK_CHUNK),
                                 static_cast<size_t>(GRAINSIZE_EVENTS), target_to_pulse_indices, progress);
       // generate threads only if appropriate
       if (num_banks_to_read > 1) {
@@ -487,7 +489,7 @@ void AlignAndFocusPowderSlim::exec() {
               const auto pulse_indices = this->determinePulseIndices(target_wksp, target_roi);
 
               ProcessBankTask task(bankEntryNames, h5file, is_time_filtered, target_wksp, m_calibration,
-                                   m_scale_at_sample, m_masked, static_cast<size_t>(DISK_CHUNK),
+                                   m_scale_at_sample, grouping, m_masked, static_cast<size_t>(DISK_CHUNK),
                                    static_cast<size_t>(GRAINSIZE_EVENTS), pulse_indices, progress);
               // generate threads only if appropriate
               if (num_banks_to_read > 1) {
