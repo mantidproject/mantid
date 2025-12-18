@@ -21,18 +21,18 @@ class Field:
 
 
 EXPERIMENT_SETTINGS_FIELDS = {
-    "ANGLE": Field(1),
-    "TITLE": Field(2),
-    "TRANS_RUN_1": Field(3, "FirstTransmissionRunList"),
-    "TRANS_RUN_2": Field(4, "SecondTransmissionRunList"),
-    "TRANS_SPECTRA": Field(5, "TransmissionProcessingInstructions"),
-    "Q_MIN": Field(6, "MomentumTransferMin"),
-    "Q_MAX": Field(7, "MomentumTransferMax"),
-    "Q_STEP": Field(8, "MomentumTransferStep"),
-    "SCALE": Field(9, "ScaleFactor"),
-    "ROI": Field(10, "ProcessingInstructions"),
-    "BACKGROUND": Field(11, "BackgroundProcessingInstructions"),
-    "ROI_DET_ID": Field(12, "ROIDetectorIDs"),
+    "ANGLE": Field(0),
+    "TITLE": Field(1),
+    "TRANS_RUN_1": Field(2, "FirstTransmissionRunList"),
+    "TRANS_RUN_2": Field(3, "SecondTransmissionRunList"),
+    "TRANS_SPECTRA": Field(4, "TransmissionProcessingInstructions"),
+    "Q_MIN": Field(5, "MomentumTransferMin"),
+    "Q_MAX": Field(6, "MomentumTransferMax"),
+    "Q_STEP": Field(7, "MomentumTransferStep"),
+    "SCALE": Field(8, "ScaleFactor"),
+    "ROI": Field(9, "ProcessingInstructions"),
+    "BACKGROUND": Field(10, "BackgroundProcessingInstructions"),
+    "ROI_DET_ID": Field(11, "ROIDetectorIDs"),
 }
 
 
@@ -191,7 +191,8 @@ class ReflectometryReductionOneLiveData(DataProcessorAlgorithm):
                 selected_row = row
                 break
         selected_row = wildcard_row if not selected_row else selected_row
-        self._set_properties_from_row(alg, selected_row)
+        if selected_row:
+            self._set_properties_from_row(alg, selected_row)
 
     def _set_properties_from_row(self, alg, row):
         for field in EXPERIMENT_SETTINGS_FIELDS.values():

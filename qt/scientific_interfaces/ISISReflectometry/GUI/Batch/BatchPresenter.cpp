@@ -369,6 +369,10 @@ std::unique_ptr<Mantid::API::IAlgorithmRuntimeProps> BatchPresenter::rowProcessi
   return m_jobManager->rowProcessingProperties();
 }
 
+std::unique_ptr<Mantid::API::IAlgorithmRuntimeProps> BatchPresenter::rowProcessingPropertiesDefault() const {
+  return m_jobManager->rowProcessingPropertiesDefault();
+}
+
 void BatchPresenter::postDeleteHandle(const std::string &wsName) {
   auto const item = m_jobManager->notifyWorkspaceDeleted(wsName);
   m_runsPresenter->notifyRowModelChanged(item);

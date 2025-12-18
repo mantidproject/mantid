@@ -286,7 +286,6 @@ std::string MainWindowPresenter::encodeBatchToStr(const std::vector<std::string>
   auto tabIndex = m_view->getTabIndex();
   QVariant vMap = m_encoder->encodeBatch(m_view, tabIndex, false);
   QVariantMap map;
-  bool err = false;
   for (auto &key : jsonKey) {
     if (vMap.type() == 8 && vMap.canConvert(8)) { // 8 = map - is there an enum?
       map = vMap.toMap();

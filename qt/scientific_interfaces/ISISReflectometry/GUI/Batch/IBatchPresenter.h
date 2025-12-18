@@ -78,6 +78,7 @@ public:
   virtual std::map<ROIType, ProcessingInstructions> getMatchingProcessingInstructionsForPreviewRow() const = 0;
   virtual std::optional<ProcessingInstructions> getMatchingROIDetectorIDsForPreviewRow() const = 0;
   virtual std::string getBatchState(const std::vector<std::string> &jsonKey) const = 0;
+  virtual std::unique_ptr<Mantid::API::IAlgorithmRuntimeProps> rowProcessingPropertiesDefault() const = 0;
 };
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
