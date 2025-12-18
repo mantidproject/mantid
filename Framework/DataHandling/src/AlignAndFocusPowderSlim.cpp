@@ -56,6 +56,7 @@ using Mantid::Kernel::ArrayProperty;
 using Mantid::Kernel::BoundedValidator;
 using Mantid::Kernel::Direction;
 using Mantid::Kernel::EnumeratedStringProperty;
+using Mantid::Kernel::PropertyWithValue;
 using Mantid::Kernel::TimeROI;
 using Mantid::Kernel::TimeSeriesProperty;
 
@@ -143,13 +144,11 @@ void AlignAndFocusPowderSlim::init() {
                   "The name of the Event NeXus file to read, including its full or relative path. "
                   "The file name is typically of the form INST_####_event.nxs.");
   declareProperty(
-      std::make_unique<Kernel::PropertyWithValue<double>>(PropertyNames::FILTER_TIMESTART, EMPTY_DBL(),
-                                                          Direction::Input),
+      std::make_unique<PropertyWithValue<double>>(PropertyNames::FILTER_TIMESTART, EMPTY_DBL(), Direction::Input),
       "To only include events after the provided start time, in seconds (relative to the start of the run).");
 
   declareProperty(
-      std::make_unique<Kernel::PropertyWithValue<double>>(PropertyNames::FILTER_TIMESTOP, EMPTY_DBL(),
-                                                          Direction::Input),
+      std::make_unique<PropertyWithValue<double>>(PropertyNames::FILTER_TIMESTOP, EMPTY_DBL(), Direction::Input),
       "To only include events before the provided stop time, in seconds (relative to the start of the run).");
   declareProperty(std::make_unique<API::WorkspaceProperty<API::Workspace>>(
                       PropertyNames::SPLITTER_WS, "", Direction::Input, API::PropertyMode::Optional),
@@ -204,19 +203,34 @@ void AlignAndFocusPowderSlim::init() {
   const std::string CHUNKING_PARAM_GROUP("Chunking-temporary");
   auto positiveIntValidator = std::make_shared<Mantid::Kernel::BoundedValidator<int>>();
   positiveIntValidator->setLower(1);
-  declareProperty(std::make_unique<Kernel::PropertyWithValue<int>>(PropertyNames::READ_SIZE_FROM_DISK, 2000 * 50000,
-                                                                   positiveIntValidator),
-                  "Number of elements of time-of-flight or detector-id to read at a time. This is a maximum");
+  declareProperty(
+      std::make_unique<PropertyWithValue<int>>(PropertyNames::READ_SIZE_FROM_DISK, 2000 * 50000, positiveIntValidator),
+      "Number of elements of time-of-flight or detector-id to read at a time. This is a maximum");
   setPropertyGroup(PropertyNames::READ_SIZE_FROM_DISK, CHUNKING_PARAM_GROUP);
   declareProperty(
-      std::make_unique<Kernel::PropertyWithValue<int>>(PropertyNames::EVENTS_PER_THREAD, 1000000, positiveIntValidator),
+      std::make_unique<PropertyWithValue<int>>(PropertyNames::EVENTS_PER_THREAD, 1000000, positiveIntValidator),
       "Number of events to read in a single thread. Higher means less threads are created.");
   setPropertyGroup(PropertyNames::EVENTS_PER_THREAD, CHUNKING_PARAM_GROUP);
 
   // load single spectrum
-  declareProperty(std::make_unique<Kernel::PropertyWithValue<int>>(PropertyNames::OUTPUT_SPEC_NUM, EMPTY_INT(),
-                                                                   positiveIntValidator),
-                  "The bank for which to read data; if specified, others will be blank");
+  declareProperty(
+      std::make_unique<PropertyWithValue<int>>(PropertyNames::OUTPUT_SPEC_NUM, EMPTY_INT(), positiveIntValidator),
+      "The bank for which to read data; if specified, others will be blank");
+
+  // parameters for focus position
+  auto positiveDblValidator = std::make_shared<Mantid::Kernel::BoundedValidator<double>>();
+  positiveDblValidator->setLower(0);
+  declareProperty(std::make_unique<PropertyWithValue<double>>(PropertyNames::L1, 43.755, positiveDblValidator),
+                  "The primary distance $\\ell_1$ from beam to sample");
+  declareProperty(std::make_unique<ArrayProperty<double>>(
+                      PropertyNames::L2S, std::vector<double>{2.296, 2.296, 2.070, 2.070, 2.070, 2.530}, mustBePosArr),
+                  "The secondary distances $\\ell_2$ from sample to focus group");
+  declareProperty(std::make_unique<ArrayProperty<double>>(
+                      PropertyNames::POLARS, std::vector<double>{90, 90, 120, 150, 157, 65.5}, mustBePosArr),
+                  "The effective polar angle (2$\\theta$) of each focus group");
+  declareProperty(std::make_unique<ArrayProperty<double>>(PropertyNames::AZIMUTHALS,
+                                                          std::vector<double>{180, 0, 0, 0, 0, 0}, mustBePosArr),
+                  "The effective azimuthal angle $\\phi$ for each focus group");
 }
 
 std::map<std::string, std::string> AlignAndFocusPowderSlim::validateInputs() {
@@ -289,10 +303,10 @@ void AlignAndFocusPowderSlim::exec() {
   LoadEventNexus::loadInstrument<MatrixWorkspace_sptr>(filename, wksp, ENTRY_TOP_LEVEL, this, &descriptor);
 
   // TODO parameters should be input information
-  const double l1{43.755};
-  const std::vector<double> polars{90, 90, 120, 150, 157, 65.5}; // two-theta
-  const std::vector<double> azimuthals{180, 0, 0, 0, 0, 0};      // angle from positive x-axis
-  const std::vector<double> l2s{2.296, 2.296, 2.070, 2.070, 2.070, 2.530};
+  const double l1 = getProperty(PropertyNames::L1);
+  const std::vector<double> l2s = getProperty(PropertyNames::L2S);
+  const std::vector<double> polars = getProperty(PropertyNames::POLARS);         // two-theta
+  const std::vector<double> azimuthals = getProperty(PropertyNames::AZIMUTHALS); // angle from positive x-axis
   const std::vector<specnum_t> specids;
   const auto difc_focused = calculate_difc_focused(l1, l2s, polars);
 

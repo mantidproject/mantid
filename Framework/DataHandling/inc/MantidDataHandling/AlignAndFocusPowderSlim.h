@@ -87,6 +87,11 @@ const std::string EVENTS_PER_THREAD("EventsPerThread");
 const std::string ALLOW_LOGS("LogAllowList");
 const std::string BLOCK_LOGS("LogBlockList");
 const std::string OUTPUT_SPEC_NUM("OutputSpectrumNumber");
+// focus positions
+const std::string L1("L1");
+const std::string L2S("L2s");
+const std::string POLARS("TwoTheta");
+const std::string AZIMUTHALS("Phi");
 } // namespace PropertyNames
 
 } // namespace Mantid::DataHandling::AlignAndFocusPowderSlim
