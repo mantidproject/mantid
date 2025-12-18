@@ -321,10 +321,11 @@ void AlignAndFocusPowderSlim::exec() {
 
   // TODO parameters should be read in from a file
   std::map<size_t, std::vector<detid_t>> grouping;
-  constexpr size_t NUM_DETS_PER_BANK{100000};
+  constexpr detid_t NUM_DETS_PER_BANK{100000};
   for (size_t outputSpecNum : std::views::iota(0, 6)) {
     grouping[outputSpecNum] = std::vector<detid_t>(NUM_DETS_PER_BANK);
-    std::iota(grouping[outputSpecNum].begin(), grouping[outputSpecNum].end(), NUM_DETS_PER_BANK * outputSpecNum);
+    std::iota(grouping[outputSpecNum].begin(), grouping[outputSpecNum].end(),
+              static_cast<detid_t>(NUM_DETS_PER_BANK * outputSpecNum));
   }
 
   // load run metadata
