@@ -31,9 +31,10 @@ public:
     for (const auto &id : std::views::iota(1, 5))
       calibration_map[id] = id; // simple calibration: tof' = tof * detID for testing
 
-    std::set<detid_t> mask{4}; // mask detID 4
+    std::set<detid_t> mask{4};                     // mask detID 4
+    std::vector<detid_t> det_in_group{1, 2, 3, 4}; // all detectors
 
-    BankCalibration bankCal(1, 4, 1., calibration_map, std::map<detid_t, double>(), mask);
+    BankCalibration bankCal(1, 4, 1., det_in_group, calibration_map, std::map<detid_t, double>(), mask);
 
     ProcessEventsTask task(&detIDs, &tofs, &bankCal, &binEdges);
     task(tbb::blocked_range<size_t>(0, tofs.size()));

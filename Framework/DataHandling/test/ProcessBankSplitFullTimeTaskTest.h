@@ -13,6 +13,7 @@
 #include <H5Cpp.h>
 #include <cxxtest/TestSuite.h>
 #include <filesystem>
+#include <map>
 #include <ranges>
 
 using namespace Mantid::DataHandling::AlignAndFocusPowderSlim;
@@ -68,6 +69,7 @@ public:
 
     std::vector<int> workspaceIndices{0, 1};
     std::vector<Mantid::API::MatrixWorkspace_sptr> wksps;
+    std::map<size_t, std::vector<Mantid::detid_t>> det_in_group; // empty signifies all into one group
 
     // create a two workspaces for output
     Mantid::HistogramData::BinEdges XValues(0);
@@ -99,7 +101,7 @@ public:
     std::shared_ptr<Mantid::API::Progress> progress = std::make_shared<Mantid::API::Progress>();
 
     ProcessBankSplitFullTimeTask task(bankEntryNames, file, mockLoader, workspaceIndices, wksps, calibration,
-                                      scale_at_sample, masked, 1000, 100, splitterMap, progress);
+                                      scale_at_sample, det_in_group, masked, 1000, 100, splitterMap, progress);
 
     // Run the task
     task(tbb::blocked_range<size_t>(0, 1));
@@ -140,7 +142,7 @@ public:
     const std::map<Mantid::detid_t, double> scale_at_sample2{{1, 1000.}, {2, 500.}};
 
     ProcessBankSplitFullTimeTask task2(bankEntryNames, file, mockLoader, workspaceIndices, wksps, calibration,
-                                       scale_at_sample2, masked, 1000, 100, splitterMap, progress);
+                                       scale_at_sample2, det_in_group, masked, 1000, 100, splitterMap, progress);
 
     // Run the task
     task2(tbb::blocked_range<size_t>(0, 1));
