@@ -175,8 +175,8 @@ class ReflectometryReductionOneLiveData(DataProcessorAlgorithm):
         return liveValues
 
     def _set_properties_from_experiment_settings(self, alg, live_values):
-        theta = live_values[self._theta_name()]
-        title = live_values[self._title_name()]
+        theta = live_values[self._theta_name()].value
+        title = live_values[self._title_name()].value
         live_opts = self.getPropertyValue("ExperimentSettingsState")
         opts = json.loads(live_opts)
         wildcard_row = None
@@ -185,9 +185,8 @@ class ReflectometryReductionOneLiveData(DataProcessorAlgorithm):
             if not row[EXPERIMENT_SETTINGS_FIELDS["ANGLE"].index] and not row[EXPERIMENT_SETTINGS_FIELDS["TITLE"].index]:
                 wildcard_row = row
                 continue
-            if float(row[EXPERIMENT_SETTINGS_FIELDS["ANGLE"].index]) == theta and re.search(
-                row[EXPERIMENT_SETTINGS_FIELDS["TITLE"].index], title
-            ):
+            title_regex = row[EXPERIMENT_SETTINGS_FIELDS["TITLE"].index]
+            if float(row[EXPERIMENT_SETTINGS_FIELDS["ANGLE"].index]) == float(theta) and (not title_regex or re.search(title_regex, title)):
                 selected_row = row
                 break
         selected_row = wildcard_row if not selected_row else selected_row
