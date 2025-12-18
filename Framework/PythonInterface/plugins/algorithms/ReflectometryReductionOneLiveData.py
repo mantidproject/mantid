@@ -9,6 +9,31 @@ from mantid.kernel import config, Direction, Property, StringListValidator
 from mantid.simpleapi import AddSampleLogMultiple, CloneWorkspace, LoadInstrument, SetInstrumentParameter
 
 import json
+import re
+from dataclasses import dataclass
+from typing import Optional
+
+
+@dataclass
+class Field:
+    index: int
+    name: Optional[str] = None
+
+
+EXPERIMENT_SETTINGS_FIELDS = {
+    "ANGLE": Field(1),
+    "TITLE": Field(2),
+    "TRANS_RUN_1": Field(3, "FirstTransmissionRunList"),
+    "TRANS_RUN_2": Field(4, "SecondTransmissionRunList"),
+    "TRANS_SPECTRA": Field(5, "TransmissionProcessingInstructions"),
+    "Q_MIN": Field(6, "MomentumTransferMin"),
+    "Q_MAX": Field(7, "MomentumTransferMax"),
+    "Q_STEP": Field(8, "MomentumTransferStep"),
+    "SCALE": Field(9, "ScaleFactor"),
+    "ROI": Field(10, "ProcessingInstructions"),
+    "BACKGROUND": Field(11, "BackgroundProcessingInstructions"),
+    "ROI_DET_ID": Field(12, "ROIDetectorIDs"),
+}
 
 
 class LiveValue:
@@ -154,15 +179,24 @@ class ReflectometryReductionOneLiveData(DataProcessorAlgorithm):
         title = live_values[self._title_name()]
         live_opts = self.getPropertyValue("ExperimentSettingsState")
         opts = json.loads(live_opts)
+        wildcard_row = None
+        selected_row = None
         for row in opts:
-            if not row[0] and not row[1]:  # Wildcard row. These settigns are applied by default.
+            if not row[EXPERIMENT_SETTINGS_FIELDS["ANGLE"].index] and not row[EXPERIMENT_SETTINGS_FIELDS["TITLE"].index]:
+                wildcard_row = row
                 continue
-            if float(row[0]) == theta and row[1] == title:  # Replicate c++ regex behaviour.
-                self._set_properties_from_row(alg, row)
-                break  # select first row, check how is this in GUI.
+            if float(row[EXPERIMENT_SETTINGS_FIELDS["ANGLE"].index]) == theta and re.search(
+                row[EXPERIMENT_SETTINGS_FIELDS["TITLE"].index], title
+            ):
+                selected_row = row
+                break
+        selected_row = wildcard_row if not selected_row else selected_row
+        self._set_properties_from_row(alg, selected_row)
 
     def _set_properties_from_row(self, alg, row):
-        pass
+        for field in EXPERIMENT_SETTINGS_FIELDS.values():
+            if field.name and row[field.index]:
+                alg.setProperty(field.name, row[field.index])
 
     def _setup_reduction_algorithm(self, live_values):
         """Set up the reduction algorithm"""
