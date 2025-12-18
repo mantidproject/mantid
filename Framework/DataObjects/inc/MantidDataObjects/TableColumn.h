@@ -14,6 +14,7 @@
 #include <vector>
 
 #include "MantidAPI/Column.h"
+#include "MantidDataObjects/DllConfig.h"
 #include "MantidKernel/FloatingPointComparison.h"
 #include "MantidKernel/V3D.h"
 
@@ -43,7 +44,7 @@ namespace DataObjects {
     \author Roman Tolchenov
     \date 31/10/2008
 */
-template <class Type> class TableColumn : public API::Column {
+template <class Type> class MANTID_DATAOBJECTS_DLL TableColumn : public API::Column {
   /// Helper struct helping to write a generic casting to double
   struct InconvertibleToDoubleType {
     /// Constructor
