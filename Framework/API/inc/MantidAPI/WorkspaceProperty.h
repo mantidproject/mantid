@@ -140,8 +140,8 @@ private:
 
 template <typename TYPE> Kernel::Logger WorkspaceProperty<TYPE>::g_log("WorkspaceProperty");
 
-#ifndef API_EXPORTS
-// Extern declarations to ensure typeinfo visibility for dynamic_cast on macOS/Clang
+#if !defined(API_EXPORTS) && defined(__APPLE__) && defined(__clang__)
+// Extern template instantiations for macOS/Clang to ensure typeinfo visibility for dynamic_cast
 extern template class WorkspaceProperty<Workspace>;
 extern template class WorkspaceProperty<IEventWorkspace>;
 extern template class WorkspaceProperty<IMDEventWorkspace>;
