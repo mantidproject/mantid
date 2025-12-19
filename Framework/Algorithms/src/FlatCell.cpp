@@ -7,6 +7,7 @@
 #include "MantidAlgorithms/FlatCell.h"
 #include "MantidAPI/Algorithm.hxx"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
 
 #include <limits>
@@ -24,7 +25,7 @@ using namespace Mantid::DataObjects;
 void FlatCell::init() {
   declareProperty(std::make_unique<WorkspaceProperty<EventWorkspace>>("InputWorkspace", "", Direction::Input),
                   "An input event workspace.");
-  declareProperty(std::make_unique<WorkspaceProperty<EventWorkspace>>("OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "An output event workspace.");
   declareProperty("CreateMaskedBins", true, "If true, masked bins workspaces will be created.");
 }
@@ -66,13 +67,14 @@ void FlatCell::exec() {
 
   // Get the input and output WS
   EventWorkspace_sptr inputWS = getProperty("InputWorkspace");
-  EventWorkspace_sptr outputWS = getProperty("OutputWorkspace");
+  const size_t nHist = inputWS->getNumberHistograms();
+  const int nMonitorOffset{8};
+  const int totalDetectorIDs{17784};
+  MatrixWorkspace_sptr outputWS =
+      WorkspaceFactory::Instance().create("Workspace2D", 1, totalDetectorIDs, totalDetectorIDs);
+  setProperty("OutputWorkspace", outputWS);
+
   EventWorkspace_sptr rebinnedWS = inputWS->clone();
-  // Only create the output workspace if it's different to the input one
-  if (outputWS != inputWS) {
-    outputWS = inputWS->clone();
-    setProperty("OutputWorkspace", outputWS);
-  }
 
   // Rebin to one spectrum
   auto rebin = createChildAlgorithm("Rebin");
@@ -83,42 +85,31 @@ void FlatCell::exec() {
   rebin->execute();
 
   // Extract the spectrums into a vector
-  const size_t nHist = rebinnedWS->getNumberHistograms();
   std::vector<double> values;
   for (size_t i = 0; i < nHist; ++i) {
     const auto &Y = rebinnedWS->readY(i);
     values.insert(values.end(), Y.begin(), Y.end());
   }
 
-  g_log.warning() << "Size of values: " << values.size() << "\n";
-
+  const int Ysize{17776};
   const int lowAngleBankStart{0};
-  const int lowAngleBankStop{16384};
-  const int highAngleBankStart{16392};
+  const int lowAngleBankStop{16386};
   const int highAngleBankStop{17776};
 
   // Save the Low and High Angle Bank values into vectors
   std::vector<double> LAB(values.begin() + lowAngleBankStart, values.begin() + lowAngleBankStop);
-  std::vector<double> HAB(values.begin() + highAngleBankStart, values.begin() + highAngleBankStop);
-
-  g_log.warning() << "LAB[0]: " << LAB[0] << "\n";
-  g_log.warning() << "LAB[-1]: " << LAB[LAB.size() - 1] << "\n";
-  g_log.warning() << "HAB[0]: " << HAB[0] << "\n";
-  g_log.warning() << "HAB[-1]: " << HAB[HAB.size() - 1] << "\n";
-
-  g_log.warning() << "Mean LAB: " << FlatCell::mean(LAB) << "\n";
-  g_log.warning() << "Mean HAB: " << FlatCell::mean(HAB) << "\n";
-
-  // Normalize the values in the LAB and HAB vectors
-  FlatCell::scale(LAB, 1 / FlatCell::mean(LAB));
-  FlatCell::scale(HAB, 1 / FlatCell::mean(HAB));
+  std::vector<double> HAB(values.begin() + lowAngleBankStop, values.begin() + highAngleBankStop);
 
   // Calculate the normalized mean of the LAB and HAB
-  const double normMeanLAB = FlatCell::mean(LAB);
-  const double normMeanHAB = FlatCell::mean(HAB);
+  const double meanLAB = FlatCell::mean(std::vector<double>(LAB.begin(), LAB.end() - 2));
+  const double meanHAB = FlatCell::mean(std::vector<double>(HAB.begin() + 6, HAB.end()));
 
-  g_log.warning() << "Norm Mean LAB: " << normMeanLAB << "\n";
-  g_log.warning() << "Norm Mean HAB: " << normMeanHAB << "\n";
+  g_log.warning() << "Mean LAB: " << meanLAB << "\n";
+  g_log.warning() << "Mean HAB: " << meanHAB << "\n";
+
+  // Normalize the values in the LAB and HAB vectors
+  FlatCell::scale(LAB, 1 / meanLAB);
+  FlatCell::scale(HAB, 1 / meanHAB);
 
   // Calculate the normalized std of the LAB and HAB
   const double normStdLAB = FlatCell::stddev(LAB);
@@ -127,30 +118,29 @@ void FlatCell::exec() {
   g_log.warning() << "Norm STD LAB: " << normStdLAB << "\n";
   g_log.warning() << "Norm STD HAB: " << normStdHAB << "\n";
 
-  const int Ysize{17776};
   std::vector<double> out(Ysize, 0.0);
   std::copy(LAB.begin(), LAB.end(), out.begin() + lowAngleBankStart);
-  std::copy(HAB.begin(), HAB.end(), out.begin() + highAngleBankStart);
+  std::copy(HAB.begin(), HAB.end(), out.begin() + lowAngleBankStop);
 
-  const int highAngleBankOneStop{16740};
+  const int highAngleBankOneStop{16735};
   const int highAngleBankTwoStop{17088};
   const int highAngleBankThreeStop{17436};
 
-  std::vector<double> HAB1(out.begin() + highAngleBankStart, out.begin() + highAngleBankOneStop);
+  std::vector<double> HAB1(out.begin() + lowAngleBankStop, out.begin() + highAngleBankOneStop);
   std::vector<double> HAB2(out.begin() + highAngleBankOneStop, out.begin() + highAngleBankTwoStop);
   std::vector<double> HAB3(out.begin() + highAngleBankTwoStop, out.begin() + highAngleBankThreeStop);
   std::vector<double> HAB4(out.begin() + highAngleBankThreeStop, out.begin() + highAngleBankStop);
 
-  g_log.warning() << "Mean HAB-1: " << FlatCell::mean(HAB1) << "\n";
-  g_log.warning() << "Mean HAB-2: " << FlatCell::mean(HAB2) << "\n";
+  g_log.warning() << "Mean HAB-1: " << FlatCell::mean(std::vector<double>(HAB1.begin() + 6, HAB1.end())) << "\n";
+  g_log.warning() << "Mean HAB-2: " << FlatCell::mean(std::vector<double>(HAB2.begin() + 5, HAB2.end())) << "\n";
   g_log.warning() << "Mean HAB-3: " << FlatCell::mean(HAB3) << "\n";
   g_log.warning() << "Mean HAB-4: " << FlatCell::mean(HAB4) << "\n";
 
   // Calculate the rescale factor of each high angle bank
-  double rescaleHAB1 = normMeanHAB / FlatCell::mean(HAB1);
-  double rescaleHAB2 = normMeanHAB / FlatCell::mean(HAB2);
-  double rescaleHAB3 = normMeanHAB / FlatCell::mean(HAB3);
-  double rescaleHAB4 = normMeanHAB / FlatCell::mean(HAB4);
+  double rescaleHAB1 = 1 / FlatCell::mean(std::vector<double>(HAB1.begin() + 6, HAB1.end()));
+  double rescaleHAB2 = 1 / FlatCell::mean(std::vector<double>(HAB2.begin() + 5, HAB2.end()));
+  double rescaleHAB3 = 1 / FlatCell::mean(HAB3);
+  double rescaleHAB4 = 1 / FlatCell::mean(HAB4);
 
   g_log.warning() << "Rescale Factor HAB-1: " << rescaleHAB1 << "\n";
   g_log.warning() << "Rescale Factor HAB-2: " << rescaleHAB2 << "\n";
@@ -164,24 +154,14 @@ void FlatCell::exec() {
   FlatCell::scale(HAB4, rescaleHAB4);
 
   // Copy the values in the output spectrum
-  std::copy(HAB1.begin(), HAB1.end(), out.begin() + highAngleBankStart);
+  std::copy(HAB1.begin(), HAB1.end(), out.begin() + lowAngleBankStop);
   std::copy(HAB2.begin(), HAB2.end(), out.begin() + highAngleBankOneStop);
   std::copy(HAB3.begin(), HAB3.end(), out.begin() + highAngleBankTwoStop);
   std::copy(HAB4.begin(), HAB4.end(), out.begin() + highAngleBankThreeStop);
 
   // Save the Y data into the output WS
-  for (size_t i = 0; i < nHist; ++i) {
-    outputWS->mutableY(i)[0] = out[i];
-  }
-
-  // Update the E values
-  // std::vector<double> e(Ysize, 0.0);
-  // auto &E = outputWS->mutableE(0);
-  // std::copy(e.begin(), e.end(), E.begin());
-
-  // Add to the Analysis Data Service
-  const std::string baseName = getPropertyValue("OutputWorkspace");
-  AnalysisDataService::Instance().addOrReplace(baseName + "_Rebinned", rebinnedWS);
+  auto &O = outputWS->mutableY(0);
+  std::copy(out.begin(), out.end(), O.begin() + nMonitorOffset);
 
   // bool createMaskedWorkspace = getProperty("CreateMaskedBins");
 
