@@ -19,7 +19,7 @@ namespace API {
  @author Jay Rainey, ISIS Rutherford Appleton Laboratory
  @date 24/02/2010
  */
-class ICatalogInfoService {
+class MANTID_API_DLL ICatalogInfoService {
 public:
   // Virtual destructor
   virtual ~ICatalogInfoService() = default;
