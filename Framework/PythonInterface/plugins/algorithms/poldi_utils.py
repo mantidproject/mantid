@@ -240,7 +240,7 @@ def get_max_tof_from_chopper(l1: float, l1_chop: float, l2s: Sequence[float], tt
 
 
 def simulate_2d_data(
-    ws_2d: Workspace2D, ws_1d: Workspace2D, output_workspace: Optional[str] = None, lambda_max: float = 5.0
+    ws_2d: Workspace2D, ws_1d: Workspace2D, output_workspace: Optional[str] = None, lambda_max: float = 5.0, ispec=0
 ) -> Workspace2D:
     """
     Function to simulate 2D pulse overlap data given 1D spectrum in d-spacing (i.e. powder pattern).
@@ -257,7 +257,11 @@ def simulate_2d_data(
         ws_1d = exec_alg("ConvertToPointData", InputWorkspace=ws_1d)
     if output_workspace is None:
         output_workspace = ws_2d.name() + "_simulated"
-    ws_sim = exec_alg("CloneWorkspace", InputWorkspace=ws_2d)
+    if not ws_1d.spectrumInfo().hasDetectors(ispec) or ws_1d.getNumberHistograms() == 1:
+        ws_sim = exec_alg("CloneWorkspace", InputWorkspace=ws_2d)
+    else:
+        # simulate only detector IDs of interest
+        ws_sim = exec_alg("ExtractSpectra", InputWorkspace=ws_2d, DetectorList=np.array(ws_1d.getSpectrum(ispec).getDetectorIDs()))
     # get instrument settings
     cycle_time, slit_offsets, t0_const, l1_chop = get_instrument_settings_from_log(ws_sim)
     si = ws_sim.spectrumInfo()
