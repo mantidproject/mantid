@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,attribute-defined-outside-init
 import systemtesting
-from mantid.simpleapi import FlatCell, LoadAscii
+from mantid.simpleapi import FlatCell, LoadAscii, LoadNexus
 
 
 class FlatCellTest(systemtesting.MantidSystemTest):
@@ -14,20 +14,20 @@ class FlatCellTest(systemtesting.MantidSystemTest):
 
     def runTest(self):
         # Load the input data and save into a workspace
-        LoadAscii(Filename="flatcell_input.csv", OutputWorkspace="FlatCellInput")
+        LoadNexus(Filename="LOQ00113953.nxs", OutputWorkspace="FlatCellEventInput")
 
         # Apply the algorithm to the input data
-        FlatCell(InputWorkspace="FlatCellInput", OutputWorkspace="FlatCellInput")
+        FlatCell(InputWorkspace="FlatCellEventInput", OutputWorkspace="FlatCellOutput")
 
         # Load the output data and save into a workspace
-        LoadAscii(Filename="flatcell_output.csv", OutputWorkspace="FlatCellOutput")
+        LoadAscii(Filename="flatcell_output.csv", OutputWorkspace="FlatCellExpectedOutput", Unit="Dimensionless")
 
     def validateMethod(self):
         return "ValidateWorkspaceToWorkspace"
 
     def requiredFiles(self):
-        return ["flatcell_input.csv", "flatcell_output.csv"]
+        return ["LOQ00113953.nxs", "flatcell_output.csv"]
 
     def validate(self):
-        self.tolerance = 1e-2
-        return ("FlatCellInput", "FlatCellOutput")
+        self.tolerance = 0.07
+        return ("FlatCellOutput", "FlatCellExpectedOutput")
