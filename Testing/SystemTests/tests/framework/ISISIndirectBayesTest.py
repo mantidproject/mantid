@@ -8,6 +8,7 @@
 from abc import ABCMeta, abstractmethod
 import os
 import warnings
+import tempfile
 
 from mantid.api import AnalysisDataService
 from mantid.kernel import config
@@ -37,6 +38,8 @@ class QLresTest(systemtesting.MantidSystemTest):
         return platform == "darwin"
 
     def runTest(self):
+        workdir = tempfile.mkdtemp(prefix="bayes_")
+        config["defaultsave.directory"] = workdir
         prefix = "rt_"
         sname = "irs26176_graphite002_red"
         rname = "irs26173_graphite002_res"
@@ -88,6 +91,8 @@ class QuestTest(systemtesting.MantidSystemTest):
         return platform == "darwin"
 
     def runTest(self):
+        workdir = tempfile.mkdtemp(prefix="bayes_")
+        config["defaultsave.directory"] = workdir
         sname = "irs26176_graphite002_red"
         rname = "irs26173_graphite002_res"
 
@@ -128,6 +133,8 @@ class QSeTest(systemtesting.MantidSystemTest):
         return platform == "darwin"
 
     def runTest(self):
+        workdir = tempfile.mkdtemp(prefix="bayes_")
+        config["defaultsave.directory"] = workdir
         sname = "irs26176_graphite002_red"
         rname = "irs26173_graphite002_res"
         e_min = -0.5
@@ -173,6 +180,8 @@ class QLDataTest(systemtesting.MantidSystemTest):
         return platform == "darwin"
 
     def runTest(self):
+        workdir = tempfile.mkdtemp(prefix="bayes_")
+        config["defaultsave.directory"] = workdir
         sname = "irs26176_graphite002_red"
         rname = "irs26173_graphite002_red"
         e_min = -0.5
@@ -224,6 +233,8 @@ class QLResNormTest(systemtesting.MantidSystemTest):
         return platform == "darwin"
 
     def runTest(self):
+        workdir = tempfile.mkdtemp(prefix="bayes_")
+        config["defaultsave.directory"] = workdir
         sname = "irs26176_graphite002_red"
         rname = "irs26173_graphite002_res"
         rsname = "irs26173_graphite002_ResNorm"
@@ -279,6 +290,8 @@ class QLWidthTest(systemtesting.MantidSystemTest):
         return platform == "darwin"
 
     def runTest(self):
+        workdir = tempfile.mkdtemp(prefix="bayes_")
+        config["defaultsave.directory"] = workdir
         prefix = "wt_"
         sname = "irs26176_graphite002_red"
         rname = "irs26173_graphite002_res"
