@@ -521,6 +521,11 @@ class PawleyPattern2D(Poldi2DEvalMixin, PawleyPatternBase):
     def create_no_constriants_fit(self):
         return PawleyPattern2DNoConstraints(self.ws, self.comp_func, self.global_scale, self.lambda_max)
 
+    def fit(self, *args, **kwargs):
+        res = super().fit(*args, **kwargs)
+        self.eval_2d(res.x)  # ensure 2D simulated workspace up to date
+        return res
+
 
 class PawleyPattern2DNoConstraints(MtdFuncMixin, Poldi2DEvalMixin):
     def __init__(self, ws: Workspace2D, func: FunctionWrapper, global_scale: bool = True, lambda_max: float = 5.0):
@@ -591,6 +596,6 @@ class PawleyPattern2DNoConstraints(MtdFuncMixin, Poldi2DEvalMixin):
         kwargs = {**default_kwargs, **kwargs}
         self.initial_params = self.get_free_params()
         res = least_squares(lambda p: self.eval_resids(p), self.initial_params, **kwargs)
-        # update parameters
-        self.set_free_params(res.x)
+        # update parameters and ensure 2D simulated workspace up to date
+        self.eval_2d(res.x)
         return res
