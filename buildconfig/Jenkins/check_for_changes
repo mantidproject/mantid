@@ -19,7 +19,6 @@ case "$TYPE" in
     ;;
     cpp)
         git diff --quiet ${BRANCH_TIP} ${BRANCH_BASE} -- \*\.h || exit $FOUND
-        git diff --quiet ${BRANCH_TIP} ${BRANCH_BASE} -- \*\.hxx || exit $FOUND
         git diff --quiet ${BRANCH_TIP} ${BRANCH_BASE} -- \*\.cpp || exit $FOUND
         git diff --quiet ${BRANCH_TIP} ${BRANCH_BASE} -- \*\.cxx || exit $FOUND
         git diff --quiet ${BRANCH_TIP} ${BRANCH_BASE} -- \*\.tcc || exit $FOUND

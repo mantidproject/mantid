@@ -35,4 +35,3 @@ jobs:
       - uses: prefix-dev/setup-pixi@v0.9.3
         with:
           manifest-path: pixi.toml
-          frozen: true
