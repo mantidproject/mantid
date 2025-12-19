@@ -95,7 +95,15 @@ def load_poldi_h5f(
         for bank_name in ["south", "north"]:
             dat.append(np.asarray(f.get(f"entry1/POLDI/detector_{bank_name}/histogram_folded")))
         chopper_speed = f.get("entry1/POLDI/chopper/rotation_speed_target")[0]
-        monitor_count = f.get("entry1/monitors/monitor_before_sample")[0]
+        if np.allclose([bank.sum() for bank in dat], 0):
+            monitor_count = 0  # can be error in detector electronics where no data but erroneous monitor counts
+        else:
+            monitor_count = 1
+            # check different fields as monitor name has changed
+            if "entry1/monitors/monitor_before_sample" in f:
+                monitor_count = f.get("entry1/monitors/monitor_before_sample")[0]
+            elif "entry1/monitors/monitor3" in f:
+                monitor_count = f.get("entry1/monitors/monitor3")[0]
     dat = np.vstack(dat)
     # calculate time bins
     cycle_time = _calc_cycle_time_from_chopper_speed(chopper_speed)
