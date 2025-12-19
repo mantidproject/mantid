@@ -21,6 +21,8 @@ requirements:
     - ${{ compiler("cxx") }}
     - cmake ${{ cmake }}
     - git
+    - gtest ${{ gtest }}
+    - gmock ${{ gmock }}
     - if: osx or linux
       then:
         - ninja ${{ ninja }}
@@ -32,6 +34,7 @@ requirements:
     - sphinx ${{ sphinx }}
     - sphinx_bootstrap_theme ${{ sphinx_bootstrap_theme }}
     - graphviz ${{ graphviz }}
+    - gtest ${{ gtest }}
     - pystog ${{ pystog }}
     - if: linux
       then:

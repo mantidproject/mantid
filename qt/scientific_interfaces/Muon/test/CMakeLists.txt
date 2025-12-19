@@ -20,12 +20,7 @@ mtd_add_qt_tests(
   QT_VERSION 5
   SRC ${TEST_FILES}
   INCLUDE_DIRS ../../../../Framework/DataObjects/inc ../
-  LINK_LIBS ${CORE_MANTIDLIBS}
-            Mantid::DataObjects
-            gmock
-            ${POCO_LIBRARIES}
-            ${Boost_LIBRARIES}
-            Mantid::PythonInterfaceCore
+  LINK_LIBS ${CORE_MANTIDLIBS} Mantid::DataObjects ${POCO_LIBRARIES} ${Boost_LIBRARIES} Mantid::PythonInterfaceCore
             Python::Python
   QT5_LINK_LIBS Qt5::Test Qt5::OpenGL
   MTD_QT_LINK_LIBS MantidScientificInterfacesMuon MantidQtWidgetsCommon MantidQtWidgetsMplCpp
@@ -33,3 +28,10 @@ mtd_add_qt_tests(
 )
 
 add_framework_test_helpers(MantidQtInterfacesMuonTestQt5)
+
+if(TARGET GTest::gmock AND TARGET GTest::gtest)
+
+  target_link_libraries(MantidQtInterfacesMuonTestQt5 PRIVATE GTest::gmock GTest::gtest)
+else()
+  target_link_libraries(MantidQtInterfacesMuonTestQt5 PRIVATE gmock gtest)
+endif()

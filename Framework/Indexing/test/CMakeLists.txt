@@ -4,9 +4,15 @@ if(CXXTEST_FOUND)
   # will go out of scope at the end of this file so doesn't need un-setting
 
   cxxtest_add_test(IndexingTest ${TEST_FILES} ${GMOCK_TEST_FILES})
-  target_link_libraries(IndexingTest PRIVATE Mantid::Types Mantid::Indexing gmock)
+  target_link_libraries(IndexingTest PRIVATE Mantid::Types Mantid::Indexing)
 
   add_framework_test_helpers(IndexingTest)
+
+  if(TARGET GTest::gmock AND TARGET GTest::gtest)
+    target_link_libraries(IndexingTest PRIVATE GTest::gmock GTest::gtest)
+  else()
+    target_link_libraries(IndexingTest PRIVATE gmock gtest)
+  endif()
   add_dependencies(FrameworkTests IndexingTest)
   # Add to the 'FrameworkTests' group in VS
   set_property(TARGET IndexingTest PROPERTY FOLDER "UnitTests")
