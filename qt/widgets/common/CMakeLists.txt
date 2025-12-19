@@ -785,17 +785,18 @@ if(MANTID_FRAMEWORK_LIB STREQUAL "BUILD")
     QT_VERSION 5
     SRC ${QT5_TEST_FILES}
     INCLUDE_DIRS ../../../Framework/DataObjects/inc ../../../Framework/Crystal/inc
-    LINK_LIBS ${TARGET_LIBRARIES}
-              ${Boost_LIBRARIES}
-              Mantid::PythonInterfaceCore
-              Mantid::DataObjects
-              gmock
-              Qt5::Test
+    LINK_LIBS ${TARGET_LIBRARIES} ${Boost_LIBRARIES} Mantid::PythonInterfaceCore Mantid::DataObjects Qt5::Test
               Python::Python
     MTD_QT_LINK_LIBS MantidQtWidgetsCommon
     PARENT_DEPENDENCIES GUITests
   )
 
   add_framework_test_helpers(MantidQtWidgetsCommonTestQt5)
+
+  if(TARGET GTest::gmock AND TARGET GTest::gtest)
+    target_link_libraries(MantidQtWidgetsCommonTestQt5 PRIVATE GTest::gmock GTest::gtest)
+  else()
+    target_link_libraries(MantidQtWidgetsCommonTestQt5 PRIVATE gmock gtest)
+  endif()
   pyunittest_add_test(${CMAKE_CURRENT_SOURCE_DIR} MantidQtWidgetsCommonPyTest ${TEST_PY_FILES})
 endif()

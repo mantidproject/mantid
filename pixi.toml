@@ -67,6 +67,8 @@ euphonic = ">=1.4.5,<2.0"
 seekpath = { version = "==2.1.0", build = "*2" }
 graphviz = ">=2.47.0"
 gsl = "2.8.*"
+gtest = "==1.17.0"
+gmock = "==1.17.0"
 hdf4 = "4.2.*"
 hdf5 = ">1.14.0,<1.15"
 jsoncpp = ">=1.9.4,<2"
