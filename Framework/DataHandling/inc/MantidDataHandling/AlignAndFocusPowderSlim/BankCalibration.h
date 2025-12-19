@@ -24,12 +24,12 @@ constexpr double IGNORE_PIXEL{1.e6};
 class MANTID_DATAHANDLING_DLL BankCalibration {
 public:
   BankCalibration(const detid_t idmin, const detid_t idmax, const double time_conversion,
-                  const std::map<detid_t, double> &calibration_map, const std::map<detid_t, double> &scale_at_sample,
-                  const std::set<detid_t> &mask);
+                  const std::vector<detid_t> &det_in_group, const std::map<detid_t, double> &calibration_map,
+                  const std::map<detid_t, double> &scale_at_sample, const std::set<detid_t> &mask);
   const double &value_calibration(const detid_t detid) const;
   /**
    * This returns a value with no bounds checking. If scale_at_sample is not provided, this will have undefined
-   * behavior.
+   * behavior. This value should not be used if the detector is masked.
    */
   double value_scale_at_sample(const detid_t detid) const;
   const detid_t &idmin() const;

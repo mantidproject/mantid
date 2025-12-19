@@ -28,11 +28,13 @@ auto g_log = Kernel::Logger("ProcessBankTask");
 ProcessBankTask::ProcessBankTask(std::vector<std::string> &bankEntryNames, H5::H5File &h5file,
                                  const bool is_time_filtered, API::MatrixWorkspace_sptr &wksp,
                                  const std::map<detid_t, double> &calibration,
-                                 const std::map<detid_t, double> &scale_at_sample, const std::set<detid_t> &masked,
-                                 const size_t events_per_chunk, const size_t grainsize_event,
-                                 std::vector<PulseROI> pulse_indices, std::shared_ptr<API::Progress> &progress)
+                                 const std::map<detid_t, double> &scale_at_sample,
+                                 const std::map<size_t, std::vector<detid_t>> &grouping,
+                                 const std::set<detid_t> &masked, const size_t events_per_chunk,
+                                 const size_t grainsize_event, std::vector<PulseROI> pulse_indices,
+                                 std::shared_ptr<API::Progress> &progress)
     : m_h5file(h5file), m_bankEntries(bankEntryNames), m_loader(is_time_filtered, pulse_indices), m_wksp(wksp),
-      m_calibration(calibration), m_scale_at_sample(scale_at_sample), m_masked(masked),
+      m_calibration(calibration), m_scale_at_sample(scale_at_sample), m_grouping(grouping), m_masked(masked),
       m_events_per_chunk(events_per_chunk), m_grainsize_event(grainsize_event), m_progress(progress) {}
 
 void ProcessBankTask::operator()(const tbb::blocked_range<size_t> &range) const {
@@ -61,6 +63,8 @@ void ProcessBankTask::operator()(const tbb::blocked_range<size_t> &range) const 
 
     // create a histogrammer to process the events
     auto &spectrum = m_wksp->getSpectrum(wksp_index);
+    // which detectors go into the current group - assumes ouput spectrum number is one more than workspace index
+    auto const &detids_in_group = m_grouping.at(wksp_index);
 
     // std::atomic allows for multi-threaded accumulation and who cares about floats when you are just
     // counting things
@@ -136,9 +140,9 @@ void ProcessBankTask::operator()(const tbb::blocked_range<size_t> &range) const 
             // only recreate calibration if it doesn't already have the useful information
             if ((!calibration) || (calibration->idmin() > static_cast<detid_t>(minval)) ||
                 (calibration->idmax() < static_cast<detid_t>(maxval))) {
-              calibration =
-                  std::make_unique<BankCalibration>(static_cast<detid_t>(minval), static_cast<detid_t>(maxval),
-                                                    time_conversion, m_calibration, m_scale_at_sample, m_masked);
+              calibration = std::make_unique<BankCalibration>(
+                  static_cast<detid_t>(minval), static_cast<detid_t>(maxval), time_conversion, detids_in_group,
+                  m_calibration, m_scale_at_sample, m_masked);
             }
           },
           [&] { // load time-of-flight
