@@ -49,6 +49,7 @@ public:
 
   bool isDetectorIDMappingEmpty() const { return detID_to_WI.empty(); }
   void buildDetectorIDMapping();
+  bool contains(const detid_t detectorID) const;
   double getValue(const detid_t detectorID) const;
   double getValue(const detid_t detectorID, const double defaultValue) const;
 
