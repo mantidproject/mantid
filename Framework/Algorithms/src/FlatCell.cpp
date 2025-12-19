@@ -74,6 +74,7 @@ void FlatCell::exec() {
       WorkspaceFactory::Instance().create("Workspace2D", 1, totalDetectorIDs, totalDetectorIDs);
   setProperty("OutputWorkspace", outputWS);
 
+  // Validate before rebinning
   EventWorkspace_sptr rebinnedWS = inputWS->clone();
 
   // Rebin to one spectrum
@@ -86,15 +87,17 @@ void FlatCell::exec() {
 
   // Extract the spectrums into a vector
   std::vector<double> values;
+  if (nHist == 0) {
+    throw std::runtime_error("Input workspace has no histograms");
+  }
   for (size_t i = 0; i < nHist; ++i) {
     const auto &Y = rebinnedWS->readY(i);
     values.insert(values.end(), Y.begin(), Y.end());
   }
 
-  const int Ysize{17776};
-  const int lowAngleBankStart{0};
-  const int lowAngleBankStop{16386};
-  const int highAngleBankStop{17776};
+  constexpr size_t lowAngleBankStart{0};
+  constexpr size_t lowAngleBankStop{16386};
+  constexpr size_t highAngleBankStop{17776};
 
   // Save the Low and High Angle Bank values into vectors
   std::vector<double> LAB(values.begin() + lowAngleBankStart, values.begin() + lowAngleBankStop);
@@ -118,7 +121,7 @@ void FlatCell::exec() {
   g_log.warning() << "Norm STD LAB: " << normStdLAB << "\n";
   g_log.warning() << "Norm STD HAB: " << normStdHAB << "\n";
 
-  std::vector<double> out(Ysize, 0.0);
+  std::vector<double> out(highAngleBankStop, 0.0);
   std::copy(LAB.begin(), LAB.end(), out.begin() + lowAngleBankStart);
   std::copy(HAB.begin(), HAB.end(), out.begin() + lowAngleBankStop);
 
