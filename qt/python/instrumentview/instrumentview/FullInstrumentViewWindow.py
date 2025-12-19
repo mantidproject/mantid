@@ -67,7 +67,7 @@ class CylinderWidgetNoRotation(vtkImplicitCylinderWidget):
         self.AddObserver(vtkCommand.StartInteractionEvent, lambda *_: self._on_interaction())
 
     def _on_interaction(self):
-        # Replace rotation state with translation state
+        # Replace rotation state (integer 4) with translation state (integer 3)
         if self.GetCylinderRepresentation().GetInteractionState() == 4:
             self.GetCylinderRepresentation().SetInteractionState(3)
             return
@@ -79,7 +79,7 @@ class RectangleWidgetNoRotation(vtkBoxWidget2):
         self.AddObserver(vtkCommand.StartInteractionEvent, lambda *_: self._on_interaction())
 
     def _on_interaction(self):
-        # Replace rotation state with translation state
+        # Replace rotation state (integer 8) with translation state (integer 7)
         if self.GetRepresentation().GetInteractionState() == 8:
             self.GetRepresentation().SetInteractionState(7)
             return
@@ -713,8 +713,8 @@ class FullInstrumentViewWindow(QMainWindow):
         renderer = self.main_plotter.renderer
         renderer.SetDisplayPoint(x, y, z)
         renderer.DisplayToWorld()
-        world_x, world_y, _world_z, world_w = renderer.GetWorldPoint()
-        return world_x / world_w, world_y / world_w, world_y / world_w
+        world_x, world_y, world_z, world_w = renderer.GetWorldPoint()
+        return world_x / world_w, world_y / world_w, world_z / world_w
 
     def get_current_widget_implicit_function(self) -> vtkImplicitFunction | None:
         if isinstance(self._current_widget, CylinderWidgetNoRotation):
