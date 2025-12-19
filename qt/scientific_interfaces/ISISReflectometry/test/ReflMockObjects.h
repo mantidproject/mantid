@@ -101,6 +101,7 @@ public:
   MOCK_METHOD1(setUnsavedBatchFlag, void(bool));
   MOCK_CONST_METHOD0(percentComplete, int());
   MOCK_CONST_METHOD0(rowProcessingProperties, std::unique_ptr<Mantid::API::IAlgorithmRuntimeProps>());
+  MOCK_CONST_METHOD0(rowProcessingPropertiesDefault, std::unique_ptr<Mantid::API::IAlgorithmRuntimeProps>());
   MOCK_CONST_METHOD0(requestClose, bool());
   MOCK_CONST_METHOD0(instrument, Mantid::Geometry::Instrument_const_sptr());
   MOCK_CONST_METHOD0(instrumentName, std::string());
@@ -110,6 +111,7 @@ public:
   MOCK_METHOD0(notifyPreviewApplyRequested, void());
   MOCK_CONST_METHOD0(getMatchingProcessingInstructionsForPreviewRow, std::map<ROIType, ProcessingInstructions>());
   MOCK_CONST_METHOD0(getMatchingROIDetectorIDsForPreviewRow, std::optional<ProcessingInstructions>());
+  MOCK_CONST_METHOD1(getBatchState, std::string(const std::vector<std::string> &));
 };
 
 class MockRunsPresenter : public IRunsPresenter {
@@ -367,6 +369,7 @@ public:
   MOCK_METHOD0(notifyAllWorkspacesDeleted, void());
   MOCK_METHOD0(getAlgorithms, std::deque<MantidQt::API::IConfiguredAlgorithm_sptr>());
   MOCK_CONST_METHOD0(rowProcessingProperties, std::unique_ptr<Mantid::API::IAlgorithmRuntimeProps>());
+  MOCK_CONST_METHOD0(rowProcessingPropertiesDefault, std::unique_ptr<Mantid::API::IAlgorithmRuntimeProps>());
   MOCK_CONST_METHOD0(getProcessPartial, bool());
   MOCK_CONST_METHOD0(getProcessAll, bool());
 };
