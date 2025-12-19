@@ -89,14 +89,14 @@ public:
     TS_ASSERT_THROWS_ANYTHING(alg.setPropertyValue("L1", ""));
     TS_ASSERT_THROWS_ANYTHING(alg.setPropertyValue("L1", "-1."));
     // l2s is mandatory and must be nonnegative
-    TS_ASSERT_THROWS_ANYTHING(alg.setPropertyValue("L2S", ""));
-    TS_ASSERT_THROWS_ANYTHING(alg.setPropertyValue("L2S", "1., -1."));
+    TS_ASSERT_THROWS_ANYTHING(alg.setPropertyValue("L2", ""));
+    TS_ASSERT_THROWS_ANYTHING(alg.setPropertyValue("L2", "1., -1."));
     // twoTheta is mandatory and must be nonnegative
-    TS_ASSERT_THROWS_ANYTHING(alg.setProperty("TwoTheta", ""));
-    TS_ASSERT_THROWS_ANYTHING(alg.setProperty("TwoTheta", "1., -1."));
+    TS_ASSERT_THROWS_ANYTHING(alg.setProperty("Polar", ""));
+    TS_ASSERT_THROWS_ANYTHING(alg.setProperty("Polar", "1., -1."));
     // phi is optional, but if specified must be nonnegative
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Phi", ""));
-    TS_ASSERT_THROWS_ANYTHING(alg.setProperty("Phi", "1., -1."));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Azimuthal", ""));
+    TS_ASSERT_THROWS_ANYTHING(alg.setProperty("Azimuthal", "1., -1."));
 
     // set everything to valid value to move on
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", VULCAN_218062));
@@ -104,17 +104,17 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("L1", defaults.l1));
 
     // // l2 and twoTheta must have the same length
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("L2S", "1., 2."));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("TwoTheta", "1., 2., 3."));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("L2", "1., 2."));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Polar", "1., 2., 3."));
     TS_ASSERT_THROWS_ASSERT(alg.execute(), std::runtime_error const &e,
-                            TS_ASSERT(strstr(e.what(), "TwoTheta has inconsistent length 3")));
+                            TS_ASSERT(strstr(e.what(), "Polar has inconsistent length 3")));
 
     // // if phi is given, must have same length as l2and twoTheta
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("L2S", "1., 2."));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("TwoTheta", "1., 2."));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Phi", "1., 2., 3."));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("L2", "1., 2."));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Polar", "1., 2."));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Azimuthal", "1., 2., 3."));
     TS_ASSERT_THROWS_ASSERT(alg.execute(), std::runtime_error const &e,
-                            TS_ASSERT(strstr(e.what(), "Phi has inconsistent length 3")));
+                            TS_ASSERT(strstr(e.what(), "Azimuthal has inconsistent length 3")));
   }
 
   // run the algorithm do some common checks and return output workspace name
@@ -165,7 +165,7 @@ public:
     }
     // set focus positions
     TS_ASSERT_THROWS_NOTHING(alg.setProperty(L1, configuration.l1));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty(L2S, configuration.l2s));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty(L2, configuration.l2s));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty(POLARS, configuration.twoTheta));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty(AZIMUTHALS, configuration.phi));
 
@@ -219,9 +219,9 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "unused"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("ReadSizeFromDisk", 1000000));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("L1", config.l1));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("L2s", config.l2s));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("TwoTheta", config.twoTheta));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Phi", config.phi));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("L2", config.l2s));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Polar", config.twoTheta));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Azimuthal", config.phi));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
 
     Workspace_sptr outputWS2 = alg.getProperty("OutputWorkspace");

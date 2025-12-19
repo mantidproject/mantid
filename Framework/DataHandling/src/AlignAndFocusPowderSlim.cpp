@@ -236,10 +236,10 @@ void AlignAndFocusPowderSlim::init() {
   auto positionArrayValidator = std::make_shared<CompositeValidator>();
   positionArrayValidator->add(mandatoryDblArrayValidator);
   positionArrayValidator->add(mustBePosArr);
-  declareProperty(std::make_unique<PropertyWithValue<double>>(PropertyNames::L1, EMPTY_DBL(), positiveDblValidator),
+  declareProperty(std::make_unique<PropertyWithValue<double>>(PropertyNames::L1, EMPTY_DBL(), l1Validator),
                   "The primary distance $\\ell_1$ from beam to sample");
   declareProperty(
-      std::make_unique<ArrayProperty<double>>(PropertyNames::L2S, std::vector<double>{}, positionArrayValidator),
+      std::make_unique<ArrayProperty<double>>(PropertyNames::L2, std::vector<double>{}, positionArrayValidator),
       "The secondary distances $\\ell_2$ from sample to focus group");
   declareProperty(
       std::make_unique<ArrayProperty<double>>(PropertyNames::POLARS, std::vector<double>{}, positionArrayValidator),
@@ -289,18 +289,18 @@ std::map<std::string, std::string> AlignAndFocusPowderSlim::validateInputs() {
   }
 
   // the focus group position parameters must have same lengths
-  std::vector<double> l2s = getProperty(PropertyNames::L2S);
+  std::vector<double> l2s = getProperty(PropertyNames::L2);
   std::vector<double> twoTheta = getProperty(PropertyNames::POLARS);
   if (l2s.size() != twoTheta.size()) {
-    errors[PropertyNames::L2S] = strmakef("L2S has inconsistent length %zu", l2s.size());
-    errors[PropertyNames::POLARS] = strmakef("TwoTheta has inconsistent length %zu", twoTheta.size());
+    errors[PropertyNames::L2] = strmakef("L2S has inconsistent length %zu", l2s.size());
+    errors[PropertyNames::POLARS] = strmakef("Polar has inconsistent length %zu", twoTheta.size());
   }
   // phi is optional, but if set must also have same size
   std::vector<double> phi = getProperty(PropertyNames::AZIMUTHALS);
   if (!phi.empty()) {
     if (l2s.size() != phi.size()) {
-      errors[PropertyNames::L2S] = strmakef("L2S has inconsistent length %zu", l2s.size());
-      errors[PropertyNames::AZIMUTHALS] = strmakef("Phi has inconsistent length %zu", phi.size());
+      errors[PropertyNames::L2] = strmakef("L2S has inconsistent length %zu", l2s.size());
+      errors[PropertyNames::AZIMUTHALS] = strmakef("Azimuthal has inconsistent length %zu", phi.size());
       ;
     }
   }
@@ -337,7 +337,7 @@ void AlignAndFocusPowderSlim::exec() {
 
   // TODO parameters should be input information
   const double l1 = getProperty(PropertyNames::L1);
-  const std::vector<double> l2s = getProperty(PropertyNames::L2S);
+  const std::vector<double> l2s = getProperty(PropertyNames::L2);
   const std::vector<double> polars = getProperty(PropertyNames::POLARS); // two-theta
   // set angle from positive x-axis; will be zero unless specified
   std::vector<double> setPhi(l2s.size(), 0.0);

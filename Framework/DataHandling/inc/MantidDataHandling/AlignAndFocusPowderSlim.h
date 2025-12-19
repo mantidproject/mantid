@@ -89,9 +89,9 @@ const std::string BLOCK_LOGS("LogBlockList");
 const std::string OUTPUT_SPEC_NUM("OutputSpectrumNumber");
 // focus positions
 const std::string L1("L1");
-const std::string L2S("L2s");
-const std::string POLARS("TwoTheta");
-const std::string AZIMUTHALS("Phi");
+const std::string L2("L2");
+const std::string POLARS("Polar");
+const std::string AZIMUTHALS("Azimuthal");
 } // namespace PropertyNames
 
 } // namespace Mantid::DataHandling::AlignAndFocusPowderSlim
