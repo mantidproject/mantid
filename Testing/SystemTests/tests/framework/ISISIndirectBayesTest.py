@@ -13,7 +13,6 @@ import tempfile
 from mantid.api import AnalysisDataService
 from mantid.kernel import config
 from mantid.simpleapi import BayesStretch, BayesQuasi, ExtractSingleSpectrum, Fit, LoadNexusProcessed, Scale
-from sys import platform
 import systemtesting
 
 
@@ -34,9 +33,6 @@ def _cleanup_files(dirname, filenames):
 
 
 class QLresTest(systemtesting.MantidSystemTest):
-    def skipTests(self):
-        return platform == "darwin"
-
     def runTest(self):
         workdir = tempfile.mkdtemp(prefix="bayes_")
         config["defaultsave.directory"] = workdir
@@ -87,9 +83,6 @@ class QLresTest(systemtesting.MantidSystemTest):
 
 
 class QuestTest(systemtesting.MantidSystemTest):
-    def skipTests(self):
-        return platform == "darwin"
-
     def runTest(self):
         workdir = tempfile.mkdtemp(prefix="bayes_")
         config["defaultsave.directory"] = workdir
@@ -129,9 +122,6 @@ class QuestTest(systemtesting.MantidSystemTest):
 
 
 class QSeTest(systemtesting.MantidSystemTest):
-    def skipTests(self):
-        return platform == "darwin"
-
     def runTest(self):
         workdir = tempfile.mkdtemp(prefix="bayes_")
         config["defaultsave.directory"] = workdir
@@ -176,9 +166,6 @@ class QSeTest(systemtesting.MantidSystemTest):
 
 
 class QLDataTest(systemtesting.MantidSystemTest):
-    def skipTests(self):
-        return platform == "darwin"
-
     def runTest(self):
         workdir = tempfile.mkdtemp(prefix="bayes_")
         config["defaultsave.directory"] = workdir
@@ -229,9 +216,6 @@ class QLDataTest(systemtesting.MantidSystemTest):
 
 
 class QLResNormTest(systemtesting.MantidSystemTest):
-    def skipTests(self):
-        return platform == "darwin"
-
     def runTest(self):
         workdir = tempfile.mkdtemp(prefix="bayes_")
         config["defaultsave.directory"] = workdir
@@ -286,9 +270,6 @@ class QLResNormTest(systemtesting.MantidSystemTest):
 
 
 class QLWidthTest(systemtesting.MantidSystemTest):
-    def skipTests(self):
-        return platform == "darwin"
-
     def runTest(self):
         workdir = tempfile.mkdtemp(prefix="bayes_")
         config["defaultsave.directory"] = workdir
