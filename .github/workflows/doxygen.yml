@@ -18,6 +18,11 @@ jobs:
         shell: bash -l {0}
 
     steps:
+      - uses: actions/checkout@v6
+        if: ${{  github.ref_name == 'main' }}
+        with:
+          fetch-depth: 0
+
       - uses: dorny/paths-filter@v3
         id: changes
         with:
@@ -33,7 +38,7 @@ jobs:
               - '.github/workflows/doxygen.yml'
 
       - uses: actions/checkout@v6
-        if: steps.changes.outputs.doxygen == 'true'
+        if: ${{ steps.changes.outputs.doxygen == 'true' && github.ref_name != 'main' }}
         with:
           fetch-depth: 0
 
