@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
-from mantid.api import AlgorithmFactory, DataProcessorAlgorithm, ADSValidator, WorkspaceProperty
+from mantid.api import AlgorithmFactory, DataProcessorAlgorithm, ADSValidator, WorkspaceProperty, MatrixWorkspace
 from mantid.kernel import Direction, StringArrayProperty, FloatArrayProperty, FloatBoundedValidator
 from mantid.simpleapi import (
     AnalysisDataService,
@@ -46,7 +46,13 @@ class StitchByBackground(DataProcessorAlgorithm):
             errors["CropLowerBound"] = err_msg
 
         ws_name_list = self.getProperty("InputWorkspaces").value
-        ws_list = [AnalysisDataService.retrieve(ws_name) for ws_name in ws_name_list]
+        ws_list = []
+        for ws_name in ws_name_list:
+            ws = AnalysisDataService.retrieve(ws_name)
+            if not isinstance(ws, MatrixWorkspace):
+                errors["InputWorkspaces"] = f"All input workspaces must be a MatrixWorkspace. Invalid Workspace: {ws_name}"
+                return errors  # Everything below relies on data from a MatrixWorkspace.
+            ws_list.append(ws)
 
         data_upper = ws_list[-1].dataX(0)[-1]
         data_lower = ws_list[0].dataX(0)[0]
