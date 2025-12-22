@@ -48,18 +48,23 @@ void copy_values_from_map_to_offset_vector(const std::map<detid_t, double> &map_
  * at the sample position.
  * @param mask detector ids that exist in the map should not be included.
  */
-BankCalibration::BankCalibration(const detid_t idmin, const detid_t idmax, const double time_conversion,
-                                 const std::vector<detid_t> &det_in_group,
+BankCalibration::BankCalibration(const double time_conversion, const std::vector<detid_t> &det_in_group,
                                  const std::map<detid_t, double> &calibration_map,
-                                 const std::map<detid_t, double> &scale_at_sample, const std::set<detid_t> &mask)
-    : m_detid_offset(idmin) {
-  // error check the id-range
-  if (idmax < idmin) {
-    // std::string msg =
-    // std::string("encountered invalid detector ID range ") + std::to_string(idmin) + " > " + std::to_string(idmax);
-    throw std::runtime_error("encountered invalid detector ID range " + std::to_string(idmin) + " > " +
-                             std::to_string(idmax));
+                                 const std::map<detid_t, double> &scale_at_sample, const std::set<detid_t> &mask) {
+  // determine the range
+  detid_t idmin;
+  detid_t idmax;
+  if (det_in_group.empty()) {
+    const auto idrange = getDetidRange(calibration_map);
+    idmin = idrange.first;
+    idmax = idrange.second;
+  } else {
+    const auto idrange = getDetidRange(det_in_group);
+    idmin = idrange.first;
+    idmax = idrange.second;
   }
+
+  m_detid_offset = idmin;
 
   // get the values copied over for calibration
   copy_values_from_map_to_offset_vector(calibration_map, idmin, idmax, m_calibration);
@@ -99,6 +104,17 @@ BankCalibration::BankCalibration(const detid_t idmin, const detid_t idmax, const
   }
 }
 
+const std::pair<detid_t, detid_t> BankCalibration::getDetidRange(const std::vector<detid_t> &det_in_group) {
+  detid_t idmin = det_in_group.front();
+  detid_t idmax = det_in_group.back();
+  return std::make_pair<detid_t, detid_t>(std::move(idmin), std::move(idmax));
+}
+const std::pair<detid_t, detid_t> BankCalibration::getDetidRange(const std::map<detid_t, double> &calibration_map) {
+  detid_t idmin = calibration_map.begin()->first;
+  detid_t idmax = calibration_map.rbegin()->first;
+  return std::make_pair<detid_t, detid_t>(std::move(idmin), std::move(idmax));
+}
+
 /**
  * This assumes that everything is in range. Values that weren't in the calibration map get set to 1. Values that are to
  * be masked will be set to IGNORE_PIXEL.
@@ -113,4 +129,20 @@ double BankCalibration::value_scale_at_sample(const detid_t detid) const {
 
 const detid_t &BankCalibration::idmin() const { return m_detid_offset; }
 detid_t BankCalibration::idmax() const { return m_detid_offset + static_cast<detid_t>(m_calibration.size()) - 1; }
+
+// ----------------- BankCalibrationFactory implementation
+BankCalibrationFactory::BankCalibrationFactory(const std::map<detid_t, double> &calibration_map,
+                                               const std::map<detid_t, double> &scale_at_sample,
+                                               const std::map<size_t, std::vector<detid_t>> &grouping,
+                                               const std::set<detid_t> &mask)
+    : m_calibration_map(calibration_map), m_scale_at_sample(scale_at_sample), m_grouping(grouping), m_mask(mask) {}
+
+BankCalibration BankCalibrationFactory::getCalibration(const double time_conversion, const size_t wksp_index) {
+  if (m_grouping.empty()) {
+    return BankCalibration(time_conversion, std::vector<detid_t>(), m_calibration_map, m_scale_at_sample, m_mask);
+  } else {
+    return BankCalibration(time_conversion, m_grouping.at(wksp_index), m_calibration_map, m_scale_at_sample, m_mask);
+  }
+}
+
 } // namespace Mantid::DataHandling::AlignAndFocusPowderSlim

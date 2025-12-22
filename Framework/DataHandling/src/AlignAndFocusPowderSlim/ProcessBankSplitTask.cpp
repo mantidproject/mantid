@@ -40,6 +40,9 @@ ProcessBankSplitTask::ProcessBankSplitTask(
       m_grainsize_event(grainsize_event), m_progress(progress) {}
 
 void ProcessBankSplitTask::operator()(const tbb::blocked_range<size_t> &range) const {
+  // TODO temporary place for the bank calibration factory - should be supplied to the constructor
+  BankCalibrationFactory calibFactory(m_calibration, m_scale_at_sample, m_grouping, m_masked);
+
   auto entry = m_h5file.openGroup("entry"); // type=NXentry
   for (size_t wksp_index = range.begin(); wksp_index < range.end(); ++wksp_index) {
     const auto &bankName = m_bankEntries[wksp_index];
@@ -72,12 +75,6 @@ void ProcessBankSplitTask::operator()(const tbb::blocked_range<size_t> &range) c
       y_temps.emplace_back(spectra.back()->dataY().size());
     }
 
-    // create object so bank calibration can be re-used
-    std::unique_ptr<BankCalibration> calibration = nullptr;
-
-    // which detectors go into the current group - assumes ouput spectrum number is one more than workspace index
-    std::vector<int> detids_in_group = m_grouping.at(wksp_index);
-
     // get handle to the data
     auto detID_SDS = event_group.openDataSet(NxsFieldNames::DETID);
     // auto tof_SDS = event_group.openDataSet(NxsFieldNames::TIME_OF_FLIGHT);
@@ -85,6 +82,10 @@ void ProcessBankSplitTask::operator()(const tbb::blocked_range<size_t> &range) c
     std::string tof_unit;
     Nexus::H5Util::readStringAttribute(tof_SDS, "units", tof_unit);
     const double time_conversion = Kernel::Units::timeConversionValue(tof_unit, MICROSEC);
+
+    // now the calibration for the output group can be created
+    // which detectors go into the current group - assumes ouput spectrum number is one more than workspace index
+    const auto calibration = calibFactory.getCalibration(time_conversion, wksp_index);
 
     // declare arrays once so memory can be reused
     auto event_detid = std::make_unique<std::vector<uint32_t>>();       // uint32 for ORNL nexus file
@@ -144,15 +145,6 @@ void ProcessBankSplitTask::operator()(const tbb::blocked_range<size_t> &range) c
           [&] { // load detid
             // event_detid->clear();
             m_loader.loadData(detID_SDS, event_detid, offsets, slabsizes);
-            // immediately find min/max to allow for other things to read disk
-            const auto [minval, maxval] = Mantid::Kernel::parallel_minmax(event_detid, m_grainsize_event);
-            // only recreate calibration if it doesn't already have the useful information
-            if ((!calibration) || (calibration->idmin() > static_cast<detid_t>(minval)) ||
-                (calibration->idmax() < static_cast<detid_t>(maxval))) {
-              calibration = std::make_unique<BankCalibration>(
-                  static_cast<detid_t>(minval), static_cast<detid_t>(maxval), time_conversion, detids_in_group,
-                  m_calibration, m_scale_at_sample, m_masked);
-            }
           },
           [&] { // load time-of-flight
             // event_time_of_flight->clear();
@@ -182,7 +174,7 @@ void ProcessBankSplitTask::operator()(const tbb::blocked_range<size_t> &range) c
                                                  return (*event_time_of_flight)[k];
                                                });
 
-              ProcessEventsTask task(&event_id_view_for_target, &event_tof_view_for_target, calibration.get(),
+              ProcessEventsTask task(&event_id_view_for_target, &event_tof_view_for_target, &calibration,
                                      &spectra[idx]->readX());
 
               const tbb::blocked_range<size_t> range_info(0, indices.size(), m_grainsize_event);
