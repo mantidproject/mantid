@@ -243,6 +243,7 @@ class ReflectometryReductionOneLiveDataTest(unittest.TestCase):
         self.assertNotIn("THETA", log_names)
         self.assertNotIn("S1VG", log_names)
         self.assertNotIn("S2VG", log_names)
+        self.assertNotIn("TITLE", log_names)
 
     def test_algorithm_fails_for_invalid_block_names(self):
         self.assertRaisesRegex(
@@ -287,6 +288,16 @@ class ReflectometryReductionOneLiveDataTest(unittest.TestCase):
         # The algorithm should not loop through workspace groups, it should pass them straight through.
         # We only output an IvsLam workspace from the reduction when workspace groups are correctly handled this way.
         self.assertTrue(AnalysisDataService.doesExist("IvsLam"))
+
+    def test_experiment_setting_state_is_parsed(self):
+        workspace = self._run_algorithm_with_experiment_settings_state()
+        self.assertEqual(workspace.dataX(0).size, 36)
+        self._assert_delta(workspace.dataX(0)[2], 0.0022)
+        self._assert_delta(workspace.dataX(0)[15], 0.0035)
+        self._assert_delta(workspace.dataX(0)[31], 0.0051)
+        self._assert_delta(workspace.dataY(0)[2], 3.24424e-5)
+        self._assert_delta(workspace.dataY(0)[15], 2.35158e-6)
+        self._assert_delta(workspace.dataY(0)[31], 2.01589e-7)
 
     def _setup_environment(self):
         self._old_facility = config["default.facility"]
@@ -549,6 +560,11 @@ class ReflectometryReductionOneLiveDataTest(unittest.TestCase):
         args["GetLiveValueAlgorithm"] = "GetFakeLiveInstrumentValuesWithZeroTheta"
         return self._run_algorithm(args)
 
+    def _run_algorithm_with_experiment_settings_state(self):
+        args = self._default_args
+        args["ExperimentSettingsState"] = '[["0.5","test_title","","","","0.002","0.0055","-0.0001","","","",""]]'
+        return self._run_algorithm(args)
+
     def _run_algorithm(self, args):
         alg = create_algorithm("ReflectometryReductionOneLiveData", **args)
         assertRaisesNothing(self, alg.execute)
@@ -583,7 +599,7 @@ class ReflectometryReductionOneLiveDataTest(unittest.TestCase):
         return None
 
     def _check_sample_log_values(self, workspace):
-        expected_logs = {"THETA": (0.5, "deg"), "S1VG": (1.001, "m"), "S2VG": (0.5, "m")}
+        expected_logs = {"THETA": (0.5, "deg"), "S1VG": (1.001, "m"), "S2VG": (0.5, "m"), "TITLE": ("test_title", "None")}
         actual_logs = workspace.getRun().getProperties()
 
         matched_names = []
