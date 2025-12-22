@@ -212,14 +212,15 @@ class DNSElasticSCPlotPresenter(DNSObserver):
             self.view.draw()
 
     def _home_button_clicked(self):
-        self.view.single_crystal_plot.disconnect_ylim_change()
-        # The color bar gets tiny if you zoom out with home button in log scale.
-        # Redrawing color bar fixes the problem.
-        own_dict = self.view.get_state()
-        if own_dict["log_scale"]:
-            self.view.single_crystal_plot.redraw_colorbar()
-        self.view.single_crystal_plot.connect_ylim_change()
-        self._change_displayed_plot_limits()
+        axis_type = self.view.get_axis_type()
+        x_lim, y_lim = self.model.get_data_xy_lim(axis_type["switch"])
+        z_min, z_max, _dummy = self.model.get_data_z_min_max(x_lim, y_lim)
+        self.view._map["x_min"].setValue(x_lim[0])
+        self.view._map["x_max"].setValue(x_lim[1])
+        self.view._map["y_min"].setValue(y_lim[0])
+        self.view._map["y_max"].setValue(y_lim[1])
+        self.view._map["z_min"].setValue(z_min)
+        self.view._map["z_max"].setValue(z_max)
 
     def _get_current_xy_lim(self, zoom=False):
         own_dict = self.view.get_state()

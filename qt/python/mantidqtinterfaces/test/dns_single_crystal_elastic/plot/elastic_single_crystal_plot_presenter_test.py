@@ -462,23 +462,24 @@ class DNSElasticSCPlotPresenterTest(unittest.TestCase):
         mock_tg_proj.assert_called_once()
         self.view.draw.assert_not_called()
 
-    @patch(
-        "mantidqtinterfaces.dns_single_crystal_elastic.plot.elastic_single_crystal_plot_presenter.DNSElasticSCPlotPresenter._change_displayed_plot_limits"
-    )
-    @patch(
-        "mantidqtinterfaces.dns_single_crystal_elastic.plot."
-        "elastic_single_crystal_plot_presenter."
-        "DNSElasticSCPlotPresenter._change_color_bar_range"
-    )
-    def test__home_button_clicked(self, mock_change_cb_range, mock_change_displayed_plot_limits):
-        self.view.get_state.return_value["log_scale"] = True
-        self.model.get_data_xy_lim.return_value = 1, 2
+    def test__home_button_clicked(self):
+        self.model.get_data_xy_lim.return_value = [[1, 2], [3, 4]]
+        self.model.get_data_z_min_max.return_value = 10, 20, 30
+        self.view._map = {
+            "x_min": mock.Mock(),
+            "x_max": mock.Mock(),
+            "y_min": mock.Mock(),
+            "y_max": mock.Mock(),
+            "z_min": mock.Mock(),
+            "z_max": mock.Mock(),
+        }
         self.presenter._home_button_clicked()
-        self.view.single_crystal_plot.disconnect_ylim_change.assert_called_once()
-        self.view.get_state.assert_called_once()
-        self.view.single_crystal_plot.redraw_colorbar.assert_called_once()
-        mock_change_displayed_plot_limits.assert_called_once()
-        self.view.single_crystal_plot.connect_ylim_change.assert_called_once()
+        self.view._map["x_min"].setValue.assert_called_once_with(1)
+        self.view._map["x_max"].setValue.assert_called_once_with(2)
+        self.view._map["y_min"].setValue.assert_called_once_with(3)
+        self.view._map["y_max"].setValue.assert_called_once_with(4)
+        self.view._map["z_min"].setValue.assert_called_once_with(10)
+        self.view._map["z_max"].setValue.assert_called_once_with(20)
 
     def test__get_current_xy_lim(self):
         self.model.get_data_xy_lim.return_value = [5, 6], [7, 8]
