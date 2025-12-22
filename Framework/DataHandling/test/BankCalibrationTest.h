@@ -53,8 +53,10 @@ public:
     // only check values in range
     TS_ASSERT_EQUALS(bankCalib.value_calibration(2), calibration_map[2] * TIME_CONVERSION);
     TS_ASSERT_EQUALS(bankCalib.value_calibration(3), calibration_map[3] * TIME_CONVERSION);
+    TS_ASSERT_EQUALS(bankCalib.value_calibration(4), Mantid::DataHandling::AlignAndFocusPowderSlim::IGNORE_PIXEL);
     TS_ASSERT_EQUALS(bankCalib.value_scale_at_sample(2), scale_map[2]);
     TS_ASSERT_EQUALS(bankCalib.value_scale_at_sample(3), scale_map[3]);
+    TS_ASSERT_EQUALS(bankCalib.value_scale_at_sample(4), scale_map[4]);
   }
 
   void test_partialBankInOutput() {
@@ -120,8 +122,12 @@ public:
     TS_ASSERT_EQUALS(bankCalib.value_calibration(2), calibration_map[2] * TIME_CONVERSION);
     TS_ASSERT_EQUALS(bankCalib.value_calibration(3), calibration_map[3] * TIME_CONVERSION);
     TS_ASSERT_EQUALS(bankCalib.value_calibration(4), Mantid::DataHandling::AlignAndFocusPowderSlim::IGNORE_PIXEL);
+    TS_ASSERT_EQUALS(bankCalib.value_calibration(42),
+                     Mantid::DataHandling::AlignAndFocusPowderSlim::IGNORE_PIXEL); // out of range
     TS_ASSERT_EQUALS(bankCalib.value_scale_at_sample(2), scale_map[2]);
     TS_ASSERT_EQUALS(bankCalib.value_scale_at_sample(3), scale_map[3]);
     TS_ASSERT_EQUALS(bankCalib.value_scale_at_sample(4), scale_map[4]);
+    TS_ASSERT_EQUALS(bankCalib.value_scale_at_sample(42),
+                     Mantid::DataHandling::AlignAndFocusPowderSlim::IGNORE_PIXEL); // out of range
   }
 };

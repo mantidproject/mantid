@@ -38,8 +38,10 @@ public:
   detid_t idmax() const;
 
 private:
-  const std::pair<detid_t, detid_t> getDetidRange(const std::vector<detid_t> &det_in_group);
-  const std::pair<detid_t, detid_t> getDetidRange(const std::map<detid_t, double> &calibration_map);
+  const std::pair<detid_t, detid_t> getDetidRange(const std::vector<detid_t> &det_in_group,
+                                                  const std::map<detid_t, double> &calibration_map);
+  bool detidInRange(const detid_t detid) const;
+
   std::vector<double> m_calibration;
   std::vector<double> m_scale_at_sample;
   detid_t m_detid_offset;

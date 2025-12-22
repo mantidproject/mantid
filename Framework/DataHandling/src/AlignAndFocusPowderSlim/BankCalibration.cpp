@@ -18,10 +18,12 @@ void copy_values_from_map_to_offset_vector(const std::map<detid_t, double> &map_
   vector_values.assign(static_cast<size_t>(idmax - idmin + 1), 1.);
 
   // set up iterators for copying data - assumes ordered map
-  auto iter = map_values.find(idmin);
+  auto iter = std::find_if(map_values.cbegin(), map_values.cend(),
+                           [idmin](const auto &itervalue) { return itervalue.first >= idmin; });
   if (iter == map_values.end())
     throw std::runtime_error("Failed to find idmin=" + std::to_string(idmin) + " in map");
-  auto iter_end = map_values.find(idmax);
+  auto iter_end =
+      std::find_if(iter, map_values.cend(), [idmax](const auto itervalue) { return itervalue.first > idmax; });
   if (iter_end != map_values.end())
     ++iter_end;
 
@@ -52,18 +54,9 @@ BankCalibration::BankCalibration(const double time_conversion, const std::vector
                                  const std::map<detid_t, double> &calibration_map,
                                  const std::map<detid_t, double> &scale_at_sample, const std::set<detid_t> &mask) {
   // determine the range
-  detid_t idmin;
-  detid_t idmax;
-  if (det_in_group.empty()) {
-    const auto idrange = getDetidRange(calibration_map);
-    idmin = idrange.first;
-    idmax = idrange.second;
-  } else {
-    const auto idrange = getDetidRange(det_in_group);
-    idmin = idrange.first;
-    idmax = idrange.second;
-  }
+  auto [idmin, idmax] = getDetidRange(det_in_group, calibration_map);
 
+  // all the outputs are vectors that are offset by the minimum detid in the bank
   m_detid_offset = idmin;
 
   // get the values copied over for calibration
@@ -78,16 +71,15 @@ BankCalibration::BankCalibration(const double time_conversion, const std::vector
   if (!scale_at_sample.empty())
     copy_values_from_map_to_offset_vector(scale_at_sample, idmin, idmax, m_scale_at_sample);
 
-  // setup the detector mask - this assumes there are not many pixels in the overall mask
-  // TODO could benefit from using lower_bound/upper_bound on the input mask rather than all
-  for (const auto &detid : mask) {
-    if (detid >= idmin && detid <= idmax) {
-      m_calibration[detid - m_detid_offset] = IGNORE_PIXEL;
+  // mask values that are in the mask or not in the detector group
+  if (det_in_group.empty()) {
+    for (const auto &detid : mask) {
+      if (this->detidInRange(detid)) {
+        m_calibration[detid - m_detid_offset] = IGNORE_PIXEL;
+      }
     }
-  }
-
-  // mask anything that isn't int the group this assumes both are sorted
-  if (!det_in_group.empty()) {
+  } else {
+    // mask anything that isn't int the group this assumes both are sorted
     // find the first and last detector id that is in the range being used
     auto detid_first = std::lower_bound(det_in_group.cbegin(), det_in_group.cend(), idmin);
     auto detid_last = det_in_group.cend();
@@ -95,24 +87,34 @@ BankCalibration::BankCalibration(const double time_conversion, const std::vector
       if (m_calibration[i] != IGNORE_PIXEL) {
         const detid_t detid = static_cast<detid_t>(i) + m_detid_offset;
         auto detid_found = std::find(detid_first, detid_last, detid);
-        if (detid_found == detid_last)
+        if (detid_found == detid_last) {
           m_calibration[i] = IGNORE_PIXEL; // not in the list
-        else
-          detid_first = detid_found; // next search can start from here
+        } else {
+          if (mask.contains(detid))
+            m_calibration[i] = IGNORE_PIXEL; // shouldn't use it
+          // next search can start from here
+          detid_first = detid_found;
+        }
       }
     }
   }
 }
 
-const std::pair<detid_t, detid_t> BankCalibration::getDetidRange(const std::vector<detid_t> &det_in_group) {
-  detid_t idmin = det_in_group.front();
-  detid_t idmax = det_in_group.back();
-  return std::make_pair<detid_t, detid_t>(std::move(idmin), std::move(idmax));
+const std::pair<detid_t, detid_t> BankCalibration::getDetidRange(const std::vector<detid_t> &det_in_group,
+                                                                 const std::map<detid_t, double> &calibration_map) {
+  if (det_in_group.empty()) {
+    detid_t idmin = calibration_map.begin()->first;
+    detid_t idmax = calibration_map.rbegin()->first;
+    return std::make_pair<detid_t, detid_t>(std::move(idmin), std::move(idmax));
+  } else {
+    detid_t idmin = det_in_group.front();
+    detid_t idmax = det_in_group.back();
+    return std::make_pair<detid_t, detid_t>(std::move(idmin), std::move(idmax));
+  }
 }
-const std::pair<detid_t, detid_t> BankCalibration::getDetidRange(const std::map<detid_t, double> &calibration_map) {
-  detid_t idmin = calibration_map.begin()->first;
-  detid_t idmax = calibration_map.rbegin()->first;
-  return std::make_pair<detid_t, detid_t>(std::move(idmin), std::move(idmax));
+
+bool BankCalibration::detidInRange(const detid_t detid) const {
+  return (!(detid < this->idmin() || detid > this->idmax())); // doesn't always check both
 }
 
 /**
@@ -120,11 +122,17 @@ const std::pair<detid_t, detid_t> BankCalibration::getDetidRange(const std::map<
  * be masked will be set to IGNORE_PIXEL.
  */
 const double &BankCalibration::value_calibration(const detid_t detid) const {
-  return m_calibration[detid - m_detid_offset];
+  if (this->detidInRange(detid))
+    return m_calibration[detid - m_detid_offset];
+  else
+    return IGNORE_PIXEL;
 }
 
 double BankCalibration::value_scale_at_sample(const detid_t detid) const {
-  return m_scale_at_sample[detid - m_detid_offset];
+  if (this->detidInRange(detid))
+    return m_scale_at_sample[detid - m_detid_offset];
+  else
+    return IGNORE_PIXEL;
 }
 
 const detid_t &BankCalibration::idmin() const { return m_detid_offset; }
