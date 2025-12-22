@@ -289,8 +289,7 @@ class ReflectometryReductionOneLiveDataTest(unittest.TestCase):
         # We only output an IvsLam workspace from the reduction when workspace groups are correctly handled this way.
         self.assertTrue(AnalysisDataService.doesExist("IvsLam"))
 
-    def test_experiment_setting_state_is_parsed(self):
-        workspace = self._run_algorithm_with_experiment_settings_state()
+    def _assert_exp_setting_outout_ws_correct(self, workspace):
         self.assertEqual(workspace.dataX(0).size, 36)
         self._assert_delta(workspace.dataX(0)[2], 0.0022)
         self._assert_delta(workspace.dataX(0)[15], 0.0035)
@@ -298,6 +297,23 @@ class ReflectometryReductionOneLiveDataTest(unittest.TestCase):
         self._assert_delta(workspace.dataY(0)[2], 3.24424e-5)
         self._assert_delta(workspace.dataY(0)[15], 2.35158e-6)
         self._assert_delta(workspace.dataY(0)[31], 2.01589e-7)
+
+    def test_experiment_setting_state_is_parsed_one_entry(self):
+        state = '[["0.5","test_title","","","","0.002","0.0055","-0.0001","","","",""]]'
+        workspace = self._run_algorithm_with_experiment_settings_state(state)
+        self._assert_exp_setting_outout_ws_correct(workspace)
+
+    def test_experiment_setting_state_is_parsed_two_entry(self):
+        state = (
+            '[["0.5","false_title","","","","","","","","","",""], ["0.5","test_title","","","","0.002","0.0055","-0.0001","","","",""]]'
+        )
+        workspace = self._run_algorithm_with_experiment_settings_state(state)
+        self._assert_exp_setting_outout_ws_correct(workspace)
+
+    def test_experiment_setting_state_is_parsed_wildcard_entry(self):
+        state = '[["0.5","false_title","","","","","","","","","",""], ["","","","","","0.002","0.0055","-0.0001","","","",""]]'
+        workspace = self._run_algorithm_with_experiment_settings_state(state)
+        self._assert_exp_setting_outout_ws_correct(workspace)
 
     def _setup_environment(self):
         self._old_facility = config["default.facility"]
@@ -560,9 +576,9 @@ class ReflectometryReductionOneLiveDataTest(unittest.TestCase):
         args["GetLiveValueAlgorithm"] = "GetFakeLiveInstrumentValuesWithZeroTheta"
         return self._run_algorithm(args)
 
-    def _run_algorithm_with_experiment_settings_state(self):
+    def _run_algorithm_with_experiment_settings_state(self, state):
         args = self._default_args
-        args["ExperimentSettingsState"] = '[["0.5","test_title","","","","0.002","0.0055","-0.0001","","","",""]]'
+        args["ExperimentSettingsState"] = state
         return self._run_algorithm(args)
 
     def _run_algorithm(self, args):
