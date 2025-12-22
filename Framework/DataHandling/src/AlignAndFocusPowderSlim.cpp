@@ -18,6 +18,7 @@
 #include "MantidDataHandling/AlignAndFocusPowderSlim/ProcessBankTask.h"
 #include "MantidDataHandling/LoadEventNexus.h"
 #include "MantidDataObjects/EventList.h"
+#include "MantidDataObjects/GroupingWorkspace.h"
 #include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidDataObjects/SplittersWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
@@ -183,6 +184,9 @@ void AlignAndFocusPowderSlim::init() {
   range->setBounds(0., 100.);
   declareProperty(PropertyNames::FILTER_BAD_PULSES_LOWER_CUTOFF, 95., range,
                   "The percentage of the average to use as the lower bound when filtering bad pulses.");
+  declareProperty(std::make_unique<WorkspaceProperty<DataObjects::GroupingWorkspace>>(
+                      PropertyNames::GROUPING_WS, "", Direction::Input, API::PropertyMode::Optional),
+                  "A GroupingWorkspace giving the grouping info..");
   const std::vector<std::string> cal_exts{".h5", ".hd5", ".hdf", ".cal"};
   declareProperty(std::make_unique<FileProperty>(PropertyNames::CAL_FILE, "", FileProperty::OptionalLoad, cal_exts),
                   "The .cal file containing the position correction factors. Either this or OffsetsWorkspace needs to "
@@ -264,6 +268,19 @@ std::map<std::string, std::string> AlignAndFocusPowderSlim::validateInputs() {
     errors[PropertyNames::EVENTS_PER_THREAD] = msg;
   }
 
+  // For now only support either grouping or splitter workspace, not both at the same time
+  if ((!isDefault(PropertyNames::GROUPING_WS)) && (!isDefault(PropertyNames::SPLITTER_WS))) {
+    errors[PropertyNames::GROUPING_WS] = "Cannot specify both grouping and splitter workspaces";
+    errors[PropertyNames::SPLITTER_WS] = "Cannot specify both grouping and splitter workspaces";
+  }
+
+  size_t num_hist = NUM_HIST;
+  if (!isDefault(PropertyNames::GROUPING_WS)) {
+    DataObjects::GroupingWorkspace_const_sptr groupingWS = this->getProperty(PropertyNames::GROUPING_WS);
+    const auto groupIds = groupingWS->getGroupIDs(false);
+    num_hist = groupIds.size();
+  }
+
   // validate binning information is consistent with each other
   const std::vector<double> xmins = getProperty(PropertyNames::X_MIN);
   const std::vector<double> xmaxs = getProperty(PropertyNames::X_MAX);
@@ -275,14 +292,14 @@ std::map<std::string, std::string> AlignAndFocusPowderSlim::validateInputs() {
 
   if (std::any_of(deltas.cbegin(), deltas.cend(), [](double d) { return !std::isfinite(d) || d == 0; }))
     errors[PropertyNames::X_DELTA] = "All must be nonzero";
-  else if (!(numDelta == 1 || numDelta == NUM_HIST))
-    errors[PropertyNames::X_DELTA] = "Must have 1 or 6 values";
+  else if (!(numDelta == 1 || numDelta == num_hist))
+    errors[PropertyNames::X_DELTA] = "Must have 1 or " + std::to_string(num_hist) + " values";
 
-  if (!(numMin == 1 || numMin == NUM_HIST))
-    errors[PropertyNames::X_MIN] = "Must have 1 or 6 values";
+  if (!(numMin == 1 || numMin == num_hist))
+    errors[PropertyNames::X_MIN] = "Must have 1 or " + std::to_string(num_hist) + " values";
 
-  if (!(numMax == 1 || numMax == NUM_HIST))
-    errors[PropertyNames::X_MAX] = "Must have 1 or 6 values";
+  if (!(numMax == 1 || numMax == num_hist))
+    errors[PropertyNames::X_MAX] = "Must have 1 or " + std::to_string(num_hist) + " values";
 
   // only specify allow or block list for logs
   if ((!isDefault(PropertyNames::ALLOW_LOGS)) && (!isDefault(PropertyNames::BLOCK_LOGS))) {
@@ -320,9 +337,29 @@ void AlignAndFocusPowderSlim::exec() {
   loadStart.resize(1, 0);
   loadSize.resize(1, 0);
 
+  size_t num_hist = NUM_HIST;
+  bool arbitrary_grouping = false; // if false then we have a direct mapping of bank to output spectrum
+  std::map<size_t, std::vector<detid_t>> grouping;
+  DataObjects::GroupingWorkspace_sptr groupingWS = this->getProperty(PropertyNames::GROUPING_WS);
+  if (groupingWS) {
+    arbitrary_grouping = true; // any bank can go to any output spectrum
+    const auto groupIds = groupingWS->getGroupIDs(false);
+    num_hist = groupIds.size();
+    for (size_t outputSpecNum = 0; outputSpecNum < groupIds.size(); ++outputSpecNum) {
+      grouping[outputSpecNum] = groupingWS->getDetectorIDsOfGroup(groupIds[outputSpecNum]);
+    }
+  } else {
+    constexpr detid_t NUM_DETS_PER_BANK{100000};
+    for (size_t outputSpecNum : std::views::iota(0, 6)) {
+      grouping[outputSpecNum] = std::vector<detid_t>(NUM_DETS_PER_BANK);
+      std::iota(grouping[outputSpecNum].begin(), grouping[outputSpecNum].end(),
+                static_cast<detid_t>(NUM_DETS_PER_BANK * outputSpecNum));
+    }
+  }
+
   this->progress(.0, "Create output workspace");
 
-  MatrixWorkspace_sptr wksp = createOutputWorkspace();
+  MatrixWorkspace_sptr wksp = createOutputWorkspace(num_hist);
 
   const std::string filename = getPropertyValue(PropertyNames::FILENAME);
   { // TODO TEMPORARY - this algorithm is hard coded for VULCAN
@@ -371,15 +408,6 @@ void AlignAndFocusPowderSlim::exec() {
   // convert to TOF if not already
   this->progress(.1, "Convert bins to TOF");
   wksp = this->convertToTOF(wksp);
-
-  // TODO parameters should be read in from a file and should always be sorted
-  std::map<size_t, std::vector<detid_t>> grouping;
-  constexpr detid_t NUM_DETS_PER_BANK{100000};
-  for (size_t outputSpecNum : std::views::iota(0, 6)) {
-    grouping[outputSpecNum] = std::vector<detid_t>(NUM_DETS_PER_BANK);
-    std::iota(grouping[outputSpecNum].begin(), grouping[outputSpecNum].end(),
-              static_cast<detid_t>(NUM_DETS_PER_BANK * outputSpecNum));
-  }
 
   // load run metadata
   this->progress(.11, "Loading metadata");
@@ -446,11 +474,14 @@ void AlignAndFocusPowderSlim::exec() {
 
   if (timeSplitter.empty()) {
     // create the nexus loader for handling combined calls to hdf5
+
+    SpectraProcessingData processingData = initializeSpectraProcessingData(wksp);
+    processingData.arbitraryGrouping = arbitrary_grouping;
     const auto pulse_indices = this->determinePulseIndices(wksp, filterROI);
     auto loader = std::make_shared<NexusLoader>(is_time_filtered, pulse_indices);
 
     auto progress = std::make_shared<API::Progress>(this, .17, .9, num_banks_to_read);
-    ProcessBankTask task(bankEntryNames, h5file, loader, wksp, calibFactory, static_cast<size_t>(DISK_CHUNK),
+    ProcessBankTask task(bankEntryNames, h5file, loader, processingData, calibFactory, static_cast<size_t>(DISK_CHUNK),
                          static_cast<size_t>(GRAINSIZE_EVENTS), progress);
     // generate threads only if appropriate
     if (num_banks_to_read > 1) {
@@ -462,6 +493,9 @@ void AlignAndFocusPowderSlim::exec() {
 
     // close the file so child algorithms can do their thing
     h5file.close();
+
+    // copy data from processingData to wksp
+    storeSpectraProcessingData(processingData, wksp);
 
     // update the run TimeROI and remove log data outside the time ROI
     wksp->mutableRun().setTimeROI(filterROI);
@@ -545,11 +579,12 @@ void AlignAndFocusPowderSlim::exec() {
 
               // clone wksp for this target
               MatrixWorkspace_sptr target_wksp = workspaces[target_index];
+              SpectraProcessingData processingData = initializeSpectraProcessingData(target_wksp);
 
               const auto pulse_indices = this->determinePulseIndices(target_wksp, target_roi);
               auto loader = std::make_shared<NexusLoader>(is_time_filtered, pulse_indices);
 
-              ProcessBankTask task(bankEntryNames, h5file, loader, target_wksp, calibFactory,
+              ProcessBankTask task(bankEntryNames, h5file, loader, processingData, calibFactory,
                                    static_cast<size_t>(DISK_CHUNK), static_cast<size_t>(GRAINSIZE_EVENTS), progress);
               // generate threads only if appropriate
               if (num_banks_to_read > 1) {
@@ -558,6 +593,7 @@ void AlignAndFocusPowderSlim::exec() {
                 // a "range" of 1; note -1 to match 0-indexed array with 1-indexed bank labels
                 task(tbb::blocked_range<size_t>(outputSpecNum - 1, outputSpecNum));
               }
+              storeSpectraProcessingData(processingData, target_wksp);
             }
           });
     }
@@ -597,7 +633,7 @@ void AlignAndFocusPowderSlim::exec() {
   }
 }
 
-MatrixWorkspace_sptr AlignAndFocusPowderSlim::createOutputWorkspace() {
+MatrixWorkspace_sptr AlignAndFocusPowderSlim::createOutputWorkspace(size_t num_hist) {
   // set up the output workspace binning
   const BINMODE binmode = getPropertyValue(PropertyNames::BINMODE);
   const bool linearBins = bool(binmode == BinningMode::LINEAR);
@@ -621,18 +657,18 @@ MatrixWorkspace_sptr AlignAndFocusPowderSlim::createOutputWorkspace() {
     UNUSED_ARG(
         Kernel::VectorHelper::createAxisFromRebinParams(params, XValues.mutableRawData(), resize_xnew, full_bins_only));
   }
-  MatrixWorkspace_sptr wksp = Mantid::DataObjects::create<Workspace2D>(NUM_HIST, XValues);
+  MatrixWorkspace_sptr wksp = Mantid::DataObjects::create<Workspace2D>(num_hist, XValues);
 
   if (raggedBins) {
     // if ragged bins, we need to resize the x-values for each histogram after the first one
     if (x_delta.size() == 1)
-      x_delta.resize(NUM_HIST, x_delta[0]);
+      x_delta.resize(num_hist, x_delta[0]);
     if (x_min.size() == 1)
-      x_min.resize(NUM_HIST, x_min[0]);
+      x_min.resize(num_hist, x_min[0]);
     if (x_max.size() == 1)
-      x_max.resize(NUM_HIST, x_max[0]);
+      x_max.resize(num_hist, x_max[0]);
 
-    for (size_t i = 1; i < NUM_HIST; ++i) {
+    for (size_t i = 1; i < num_hist; ++i) {
       HistogramData::BinEdges XValues_new(0);
 
       if (linearBins) {
@@ -653,6 +689,31 @@ MatrixWorkspace_sptr AlignAndFocusPowderSlim::createOutputWorkspace() {
   wksp->setYUnit("Counts");
 
   return wksp;
+}
+
+SpectraProcessingData
+AlignAndFocusPowderSlim::initializeSpectraProcessingData(const API::MatrixWorkspace_sptr &outputWS) {
+  SpectraProcessingData processingData;
+  const size_t numSpectra = outputWS->getNumberHistograms();
+  for (size_t i = 0; i < numSpectra; ++i) {
+    const auto &spectrum = outputWS->getSpectrum(i);
+    processingData.binedges.emplace_back(&spectrum.readX());
+    processingData.counts.emplace_back(spectrum.dataY().size());
+  }
+  return processingData;
+}
+
+void AlignAndFocusPowderSlim::storeSpectraProcessingData(const SpectraProcessingData &processingData,
+                                                         const API::MatrixWorkspace_sptr &outputWS) {
+  const size_t numSpectra = outputWS->getNumberHistograms();
+  for (size_t i = 0; i < numSpectra; ++i) {
+    auto &spectrum = outputWS->getSpectrum(i);
+    auto &y_values = spectrum.dataY();
+    std::copy(processingData.counts[i].cbegin(), processingData.counts[i].cend(), y_values.begin());
+    auto &e_values = spectrum.dataE();
+    std::transform(processingData.counts[i].cbegin(), processingData.counts[i].cend(), e_values.begin(),
+                   [](uint32_t y) { return std::sqrt(static_cast<double>(y)); });
+  }
 }
 
 void AlignAndFocusPowderSlim::initCalibrationConstants(API::MatrixWorkspace_sptr &wksp,

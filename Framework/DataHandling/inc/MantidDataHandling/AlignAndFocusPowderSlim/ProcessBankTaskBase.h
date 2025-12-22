@@ -19,6 +19,7 @@ public:
                       const BankCalibrationFactory &calibFactory);
   const std::string &bankName(const size_t wksp_index) const;
   BankCalibration getCalibration(const std::string &tof_unit, const size_t wksp_index) const;
+  std::vector<BankCalibration> getCalibrations(const std::string &tof_unit) const;
 
   /**
    *  Load detid and tof at the same time
@@ -39,6 +40,11 @@ public:
                                            std::unique_ptr<std::vector<uint64_t>> *event_index = nullptr) const;
   std::stack<std::pair<int, EventROI>> getEventIndexSplitRanges(H5::Group &event_group,
                                                                 const uint64_t number_events) const;
+
+  /**
+   * Returns a const reference to the calibration factory.
+   */
+  const BankCalibrationFactory &calibFactory() const { return m_calibFactory; }
 
 private:
   const std::vector<std::string> m_bankEntries;

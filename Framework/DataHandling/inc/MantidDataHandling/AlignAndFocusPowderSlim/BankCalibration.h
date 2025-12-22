@@ -60,6 +60,7 @@ public:
    * @param wksp_index Output group for finding grouping information.
    */
   BankCalibration getCalibration(const double time_conversion, const size_t wksp_index) const;
+  std::vector<BankCalibration> getCalibrations(const double time_conversion) const;
 
 private:
   const std::map<detid_t, double> &m_calibration_map;       ///< detid: difc/difc_focussed

@@ -156,4 +156,14 @@ BankCalibration BankCalibrationFactory::getCalibration(const double time_convers
   }
 }
 
+std::vector<BankCalibration> BankCalibrationFactory::getCalibrations(const double time_conversion) const {
+  std::vector<BankCalibration> calibrations;
+  for (const auto &pair : m_grouping) {
+    calibrations.emplace_back(
+        BankCalibration(time_conversion, pair.second, m_calibration_map, m_scale_at_sample, m_mask));
+  }
+
+  return calibrations;
+}
+
 } // namespace Mantid::DataHandling::AlignAndFocusPowderSlim
