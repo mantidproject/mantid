@@ -21,6 +21,7 @@ class GetFakeLiveInstrumentValue(DataProcessorAlgorithm):
         self._theta_name = "THETA"
         self._s1vg_name = "S1VG"
         self._s2vg_name = "S2VG"
+        self._title_name = "TITLE"
 
     def PyInit(self):
         self._declare_properties()
@@ -68,6 +69,8 @@ class GetFakeLiveInstrumentValue(DataProcessorAlgorithm):
             self.setProperty("Value", "1.001")
         elif propertyName == self._s2vg_name:
             self.setProperty("Value", "0.5")
+        elif propertyName == self._title_name:
+            self.setProperty("Value", "test_title")
         else:
             raise RuntimeError("Requested live value for unexpected property name " + propertyName)
 
@@ -164,6 +167,7 @@ class ReflectometryReductionOneLiveDataTest(unittest.TestCase):
             "GetFakeLiveInstrumentValue",
             "GetFakeLiveInstrumentValue",
             "GetFakeLiveInstrumentValue",
+            "GetFakeLiveInstrumentValue",
             "AddSampleLogMultiple",
             "LoadInstrument",
             "SetInstrumentParameter",
@@ -255,6 +259,7 @@ class ReflectometryReductionOneLiveDataTest(unittest.TestCase):
         workspace = self._run_algorithm_with_zero_theta()
         expected = [
             "CloneWorkspace",
+            "GetFakeLiveInstrumentValuesWithZeroTheta",
             "GetFakeLiveInstrumentValuesWithZeroTheta",
             "GetFakeLiveInstrumentValuesWithZeroTheta",
             "GetFakeLiveInstrumentValuesWithZeroTheta",

@@ -178,7 +178,7 @@ class ReflectometryReductionOneLiveData(DataProcessorAlgorithm):
         theta = live_values[self._theta_name()].value
         title = live_values[self._title_name()].value
         live_opts = self.getPropertyValue("ExperimentSettingsState")
-        opts = json.loads(live_opts)
+        opts = json.loads(live_opts) if live_opts else []
         wildcard_row = None
         selected_row = None
         for row in opts:
