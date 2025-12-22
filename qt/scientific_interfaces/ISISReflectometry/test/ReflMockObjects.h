@@ -316,6 +316,7 @@ public:
 class MockEncoder : public IEncoder {
 public:
   MOCK_METHOD3(encodeBatch, QMap<QString, QVariant>(const IMainWindowView *, int, bool));
+  MOCK_CONST_METHOD2(extractFromEncoding, QVariant(const QVariant &, const std::vector<std::string> &));
 };
 
 class MockDecoder : public IDecoder {
