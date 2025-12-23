@@ -10,7 +10,6 @@ from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common impo
     create_error_message,
     CalibrationObserver,
 )
-from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting, set_setting
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import output_settings
 from Engineering.common.calibration_info import CalibrationInfo
 from mantidqt.utils.asynchronous import AsyncTask
@@ -42,10 +41,6 @@ class FocusPresenter(object):
         self.instrument = "ENGINX"
         self.rb_num = None
 
-        last_van_path = get_setting(output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX, "last_vanadium_run")
-        if last_van_path:
-            self.view.set_van_file_text_with_search(last_van_path)
-
         self.set_default_directories()
 
     def set_default_files(self, filepaths):
@@ -65,13 +60,10 @@ class FocusPresenter(object):
         if not self._validate():
             return
         focus_paths = self.view.get_focus_filenames()
-        van_path = self.view.get_vanadium_filename()
         if self._number_of_files_warning(focus_paths):
-            self.start_focus_worker(focus_paths, van_path, self.view.get_plot_output(), self.rb_num, self.current_calibration)
-        van_run = self.view.get_vanadium_run()
-        set_setting(output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX, "last_vanadium_run", van_run)
+            self.start_focus_worker(focus_paths, self.view.get_plot_output(), self.rb_num, self.current_calibration)
 
-    def start_focus_worker(self, focus_paths: list, van_path: str, plot_output: bool, rb_num: str, calibration: CalibrationInfo) -> None:
+    def start_focus_worker(self, focus_paths: list, plot_output: bool, rb_num: str, calibration: CalibrationInfo) -> None:
         """
         Focus data in a separate thread to stop the main GUI from hanging.
         :param focus_paths: List of paths to the files containing the data to focus.
@@ -81,7 +73,7 @@ class FocusPresenter(object):
         """
         self.worker = AsyncTask(
             self.model.focus_run,
-            (focus_paths, van_path, plot_output, rb_num, calibration),
+            (focus_paths, plot_output, rb_num, calibration),
             error_cb=self._on_worker_error,
             finished_cb=self._on_worker_success,
         )
@@ -115,9 +107,6 @@ class FocusPresenter(object):
             return False
         if not self.view.get_focus_valid():
             create_error_message(self.view, "Check run numbers/path is valid.")
-            return False
-        if not self.view.get_vanadium_valid():
-            create_error_message(self.view, "Check vanadium run number/path is valid.")
             return False
         if not self.current_calibration.is_valid():
             create_error_message(self.view, "Create or Load a calibration via the Calibration tab before focusing.")

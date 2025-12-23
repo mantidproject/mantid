@@ -33,6 +33,10 @@ class CalibrationPresenter(object):
         self.instrument = "ENGINX"
         self.rb_num = None
 
+        last_van_path = get_setting(output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX, "last_vanadium_run")
+        if last_van_path:
+            self.view.set_van_file_text_with_search(last_van_path)
+
         # Cropping Options
         self.cropping_widget = CroppingPresenter(parent=self.view, view=self.view.get_cropping_widget())
         self.show_cropping(False)
@@ -53,7 +57,8 @@ class CalibrationPresenter(object):
         else:
             # update current calibration with new data
             sample_file = self.view.get_sample_filename()
-            self.current_calibration.set_calibration_paths(self.instrument, sample_file)
+            van_file = self.view.get_vanadium_filename()
+            self.current_calibration.set_calibration_paths(self.instrument, sample_file, van_file)
             # set group and any additional parameters needed
             if self.view.get_crop_checked():
                 self.current_calibration.set_group(self.cropping_widget.get_group())
@@ -75,6 +80,8 @@ class CalibrationPresenter(object):
             self.update_calibration_from_view()
             self.model.load_existing_calibration_files(self.current_calibration)
             self._notify_updated_calibration()
+        van_run = self.view.get_vanadium_run()
+        set_setting(output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX, "last_vanadium_run", van_run)
 
     def start_calibration_worker(self, plot_output):
         """
@@ -108,7 +115,7 @@ class CalibrationPresenter(object):
         self.prm_filepath_notifier_gsas2.notify_subscribers(self.model.get_last_prm_file_gsas2())
 
     def set_field_value(self):
-        self.view.set_sample_text(self.current_calibration.get_sample())
+        self.view.set_sample_text(self.current_calibration.get_ceria_path())
 
     def load_last_calibration(self) -> None:
         """
@@ -137,6 +144,9 @@ class CalibrationPresenter(object):
             return False
         if not self.view.get_sample_valid():
             create_error_message(self.view, "Check run numbers/path is valid.")
+            return False
+        if not self.view.get_vanadium_valid():
+            create_error_message(self.view, "Check vanadium run number/path is valid.")
             return False
         if self.view.get_crop_checked():
             if self.cropping_widget.get_custom_groupingfile_enabled() and not self.cropping_widget.is_groupingfile_valid():
