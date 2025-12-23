@@ -107,7 +107,6 @@ useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/CoordTransformAlig
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventWorkspace.cpp:665
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/LeanElasticPeaksWorkspace.cpp:384
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/MDHistoWorkspace.cpp:170
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/MaskWorkspace.cpp:341
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/Peak.cpp:680
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/PeaksWorkspace.cpp:627
 useInitializationList:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/TimeSplitter.cpp:36
