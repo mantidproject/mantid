@@ -372,6 +372,7 @@ class DNSElasticSCPlotPresenter(DNSObserver):
         return xlim, ylim, zlim
 
     def _set_spinners_lims(self, include_zlim=True):
+        self.view.sig_manual_lim_changed.disconnect()
         self.view._map["x_min"].setValue(self._plot_param.xlim[0])
         self.view._map["x_max"].setValue(self._plot_param.xlim[1])
         self.view._map["y_min"].setValue(self._plot_param.ylim[0])
@@ -379,6 +380,7 @@ class DNSElasticSCPlotPresenter(DNSObserver):
         if include_zlim:
             self.view._map["z_min"].setValue(self._plot_param.zlim[0])
             self.view._map["z_max"].setValue(self._plot_param.zlim[1])
+        self.view.sig_manual_lim_changed.connect(self._manual_lim_changed)
 
     def _switch_spinners_lims(self):
         xlim, ylim, dummy = self._get_current_spinners_lims()

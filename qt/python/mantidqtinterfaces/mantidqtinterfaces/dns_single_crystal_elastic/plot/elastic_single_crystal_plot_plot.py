@@ -138,18 +138,13 @@ class DNSScPlot:
             self._plot = self._ax.tripcolor(triang, facecolors=z_face, cmap=cmap, edgecolors=edge_colors, shading=shading)
         else:  # "gouraud" shading
             self._plot = self._ax.tripcolor(triang, z, cmap=cmap, edgecolors=edge_colors, shading=shading)
+        self._ax.set_xmargin(0)
+        self._ax.set_ymargin(0)
 
     def plot_quadmesh(self, x, y, z, cmap, edge_colors, shading):
         # pylint: disable=too-many-arguments
         self._ax.set_visible(True)
         self._plot = self._ax.pcolormesh(x, y, z, cmap=cmap, edgecolors=edge_colors, shading=shading)
-        # set 5% padding to pcolormesh, similar to default values in tripcolor and scatter plots
-        x0, x1 = self._ax.get_xlim()
-        y0, y1 = self._ax.get_ylim()
-        dx = (x1 - x0) * 0.05
-        dy = (y1 - y0) * 0.05
-        self._ax.set_xlim(x0 - dx, x1 + dx)
-        self._ax.set_ylim(y0 - dy, y1 + dy)
 
     def plot_scatter(self, x, y, z, cmap):
         self._ax.set_visible(True)

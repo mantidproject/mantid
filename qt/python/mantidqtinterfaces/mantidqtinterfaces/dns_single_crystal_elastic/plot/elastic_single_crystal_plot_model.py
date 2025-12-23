@@ -180,13 +180,8 @@ class DNSElasticSCPlotModel(DNSObsModel):
     def save_default_data_lims(self):
         x_lims, y_lims = self.get_data_xy_lim(switch=False)
         z_min, z_max, pos_z_min = self.get_data_z_min_max()
-        # add 5% padding to comply with default plotting settings
-        x0, x1 = x_lims[0], x_lims[1]
-        y0, y1 = y_lims[0], y_lims[1]
-        dx = (x1 - x0) * 0.05
-        dy = (y1 - y0) * 0.05
-        self._data.x_lims = [x0 - dx, x1 + dx]
-        self._data.y_lims = [y0 - dy, y1 + dy]
+        self._data.x_lims = x_lims
+        self._data.y_lims = y_lims
         self._data.z_lims = [z_min, z_max]
 
     def get_default_data_lims(self):
