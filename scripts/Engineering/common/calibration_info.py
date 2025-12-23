@@ -61,10 +61,11 @@ GROUP_FOC_WS_SUFFIX = {
 
 
 class CalibrationInfo:
-    def __init__(self, group=None, instrument=None, ceria_path=None):
+    def __init__(self, group=None, instrument=None, ceria_path=None, vanadium_path=None):
         self.group = group
         self.instrument = instrument
         self.ceria_path = ceria_path
+        self.vanadium_path = vanadium_path
         self.group_ws = None
         self.prm_filepath = None
         self.grouping_filepath = None
@@ -81,6 +82,7 @@ class CalibrationInfo:
         self.spectra_list = None
         self.spectra_list_str = None
         self.ceria_path = None
+        self.vanadium_path = None
         self.instrument = None
         self.calibration_table = None
         self.extra_group_suffix = ""
@@ -120,6 +122,9 @@ class CalibrationInfo:
         if self.ceria_path and self.instrument:
             return path_handling.get_run_number_from_path(self.ceria_path, self.instrument)
 
+    def get_vanadium_path(self) -> Optional[str]:
+        return self.vanadium_path
+
     def get_instrument(self) -> Optional[str]:
         return self.instrument
 
@@ -144,8 +149,9 @@ class CalibrationInfo:
     def set_calibration_table(self, cal_table: str) -> None:
         self.calibration_table = cal_table
 
-    def set_calibration_paths(self, instrument: str, ceria_path: str) -> None:
+    def set_calibration_paths(self, instrument: str, ceria_path: str, vanadium_path: str) -> None:
         self.ceria_path = ceria_path
+        self.vanadium_path = vanadium_path
         self.instrument = instrument
 
     def set_calibration_from_prm_fname(self, file_path: str) -> None:
@@ -325,6 +331,7 @@ class CalibrationInfo:
         """
         return (
             self.ceria_path is not None
+            and self.vanadium_path is not None
             and self.instrument is not None
             and self.calibration_table is not None
             and self.group_ws is not None

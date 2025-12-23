@@ -331,6 +331,10 @@ def run_calibration(ceria_ws, calibration, full_instrument_cal_ws):
     grp_ws = calibration.get_group_ws()  # (creates if doesn't exist)
     focused_ceria = mantid.DiffractionFocussing(InputWorkspace=ceria_ws, GroupingWorkspace=grp_ws)
     mantid.ApplyDiffCal(InstrumentWorkspace=focused_ceria, ClearCalibration=True)  # DIFC of detector in middle of bank
+
+    ws_van_foc, van_run = process_vanadium(calibration, full_instrument_cal_ws)
+    focused_ceria = _apply_vanadium_norm(focused_ceria, ws_van_foc)
+
     focused_ceria = mantid.ConvertUnits(InputWorkspace=focused_ceria, Target="TOF")
 
     # Run mantid.PDCalibration to fit peaks in TOF
@@ -465,7 +469,7 @@ def focus_run(sample_paths, vanadium_path, plot_output, rb_num, calibration, sav
 
     # check if full instrument calibration exists, if not load it
     # load, focus and process vanadium (retrieve from ADS if exists)
-    ws_van_foc, van_run = process_vanadium(vanadium_path, calibration, full_calib)
+    ws_van_foc, van_run = process_vanadium(calibration, full_calib)
 
     # directories for saved focused data
     calib_is_texture = calibration.group in TEXTURE_GROUPS
@@ -531,8 +535,8 @@ def _check_ws_foc_and_ws_van_foc(ws_foc, ws_van_foc):
         raise AssertionError(error_msg)
 
 
-def process_vanadium(vanadium_path, calibration, full_calib):
-    van_run = path_handling.get_run_number_from_path(vanadium_path, calibration.get_instrument())
+def process_vanadium(calibration, full_calib):
+    van_run = path_handling.get_run_number_from_path(calibration.get_vanadium_path(), calibration.get_instrument())
     van_foc_name = CURVES_PREFIX + calibration.get_group_suffix()
     if ADS.doesExist(van_foc_name):
         if calibration.group == GROUP.CUSTOM or calibration.group == GROUP.CROPPED:
@@ -548,10 +552,14 @@ def process_vanadium(vanadium_path, calibration, full_calib):
         if ADS.doesExist(van_run):
             ws_van = ADS.retrieve(van_run)  # will exist if have only changed the ROI
         else:
-            ws_van = _load_run_and_convert_to_dSpacing(vanadium_path, calibration.get_instrument(), full_calib)
+            ws_van = _load_run_and_convert_to_dSpacing(calibration.get_vanadium_path(), calibration.get_instrument(), full_calib)
             if not ws_van:
                 raise RuntimeError(f"vanadium run {van_run} has no proton_charge - please supply a valid vanadium run to focus.")
-        ws_van_foc = _focus_run_and_apply_roi_calibration(ws_van, calibration, ws_foc_name=van_foc_name)
+        if calibration.get_calibration_table() is not None:
+            ws_van_foc = _focus_run_and_apply_roi_calibration(ws_van, calibration, ws_foc_name=van_foc_name)
+        else:
+            van_foc_name += "_precalib"
+            ws_van_foc = _focus_run(ws_van, calibration, ws_foc_name=van_foc_name)
         ws_van_foc = _smooth_vanadium(ws_van_foc)
     return ws_van_foc, van_run
 
@@ -586,14 +594,24 @@ def _load_run_and_convert_to_dSpacing(filepath, instrument, full_calib):
 
 
 def _focus_run_and_apply_roi_calibration(ws, calibration, ws_foc_name=None):
+    ws_foc = _focus_run(ws, calibration, ws_foc_name)
+    ws_foc = _apply_roi_calibration(ws_foc, calibration)
+    return ws_foc
+
+
+def _focus_run(ws, calibration, ws_foc_name=None):
     if not ws_foc_name:
         ws_foc_name = ws.name() + "_" + FOCUSED_OUTPUT_WORKSPACE_NAME + calibration.get_foc_ws_suffix()
     ws_foc = mantid.DiffractionFocussing(InputWorkspace=ws, OutputWorkspace=ws_foc_name, GroupingWorkspace=calibration.get_group_ws())
     mantid.ApplyDiffCal(InstrumentWorkspace=ws_foc, ClearCalibration=True)
-    ws_foc = mantid.ConvertUnits(InputWorkspace=ws_foc, OutputWorkspace=ws_foc.name(), Target="TOF")
-    mantid.ApplyDiffCal(InstrumentWorkspace=ws_foc, CalibrationWorkspace=calibration.get_calibration_table())
-    ws_foc = mantid.ConvertUnits(InputWorkspace=ws_foc, OutputWorkspace=ws_foc.name(), Target="dSpacing")
     return ws_foc
+
+
+def _apply_roi_calibration(focused_ws, calibration):
+    focused_ws = mantid.ConvertUnits(InputWorkspace=focused_ws, OutputWorkspace=focused_ws.name(), Target="TOF")
+    mantid.ApplyDiffCal(InstrumentWorkspace=focused_ws, CalibrationWorkspace=calibration.get_calibration_table())
+    focused_ws = mantid.ConvertUnits(InputWorkspace=focused_ws, OutputWorkspace=focused_ws.name(), Target="dSpacing")
+    return focused_ws
 
 
 def _smooth_vanadium(van_ws_foc):
