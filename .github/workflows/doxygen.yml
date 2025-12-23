@@ -7,7 +7,6 @@ on:
       - reopened
   push:
     branches: [main]
-    repository: mantidproject.mantid
 
 # cancel previous job if new commit is pushed
 concurrency:
