@@ -9,6 +9,8 @@ permissions:
 
 jobs:
   add-milestone:
+    # Do not run in forks.
+    if: ${{ github.repository_owner == 'mantidproject' }}
     runs-on: ubuntu-latest
     steps:
       - uses: benelan/milestone-action@v3
