@@ -351,6 +351,22 @@ class PawleyPatternBase(MtdFuncMixin, ABC):
         if self.initial_params is not None:
             self.set_free_params(self.initial_params)
 
+    @staticmethod
+    def get_parameter_errors(res: OptimizeResult, cond_thresh=1e8):
+        hessian = res.jac.T @ res.jac
+        cond_num = np.linalg.cond(hessian)
+        if not np.isfinite(cond_num) or cond_num > cond_thresh:
+            # ill-conditioned
+            covar = np.linalg.pinv(hessian)
+            logger.warning(f"Hessian is ill-conditioned (cond={cond_num:.2e}) using pseudoinverse")
+        else:
+            covar = np.linalg.inv(hessian)
+
+        # scale by residual variance (as unweighted fit)
+        ndat, npar = res.jac.shape
+        var = np.sum(res.fun**2) / (ndat - npar)
+        return np.sqrt(np.diag(var * covar))
+
     @abstractmethod
     def eval_profile(self, params: np.ndarray[float]) -> np.ndarray[float]:
         raise NotImplementedError()
