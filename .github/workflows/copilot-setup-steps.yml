@@ -15,6 +15,8 @@ on:
 jobs:
   # The job MUST be called `copilot-setup-steps` or it will not be picked up by Copilot.
   copilot-setup-steps:
+    # Do not run in forks.
+    if: ${{ github.repository_owner == 'mantidproject' }}
     runs-on: ubuntu-latest
 
     # Set the permissions to the lowest permissions possible needed for your steps.
