@@ -106,12 +106,14 @@ class EnggEstimateFocussedBackground(PythonAlgorithm):
 
 def _get_nbins_in_xwindow(x, xwindow):
     binwidth = np.mean(np.diff(x))
-    nwindow = max(int(np.ceil(xwindow / binwidth)), 3)
+    nwindow = int(np.ceil(xwindow / binwidth))
     if not nwindow % 2:
         nwindow += 1
     if nwindow >= len(x):
         # not effective due to edge effects of the convolution
-        raise RuntimeError("Data has must have at least the number of points as the convolution window")
+        raise RuntimeError("Data must have at least as many points as the convolution window")
+    if nwindow < MIN_WINDOW_SIZE:
+        raise RuntimeError("Convolution window must have at least three points")
     return nwindow
 
 
