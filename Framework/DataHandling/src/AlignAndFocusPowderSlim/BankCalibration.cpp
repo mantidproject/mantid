@@ -41,8 +41,6 @@ void copy_values_from_map_to_offset_vector(const std::map<detid_t, double> &map_
  * Calibration of a subset of pixels as requested in the constructor. This is used because a vector is faster lookup
  * than a map for dense array of values.
  *
- * @param idmin Minimum detector id to include in the calibration
- * @param idmax Maximum detector id to include in the calibration
  * @param time_conversion Value to bundle into the calibration constant to account for converting the time-of-flight
  * into microseconds. Applying it here is effectively the same as applying it to each event time-of-flight.
  * @param det_in_group Detector-ids that are to be used in this group
@@ -55,13 +53,13 @@ BankCalibration::BankCalibration(const double time_conversion, const std::vector
                                  const std::map<detid_t, double> &calibration_map,
                                  const std::map<detid_t, double> &scale_at_sample, const std::set<detid_t> &mask) {
   // determine the range
-  auto [idmin, idmax] = getDetidRange(det_in_group, calibration_map);
+  auto [idmin_found, idmax_found] = getDetidRange(det_in_group, calibration_map);
 
   // all the outputs are vectors that are offset by the minimum detid in the bank
-  m_detid_offset = idmin;
+  m_detid_offset = idmin_found;
 
   // get the values copied over for calibration
-  copy_values_from_map_to_offset_vector(calibration_map, idmin, idmax, m_calibration);
+  copy_values_from_map_to_offset_vector(calibration_map, idmin_found, idmax_found, m_calibration);
   // apply time conversion here so it is effectively applied for each detector once rather than on each event
   if (time_conversion != 1.) {
     std::transform(m_calibration.begin(), m_calibration.end(), m_calibration.begin(),
@@ -70,7 +68,7 @@ BankCalibration::BankCalibration(const double time_conversion, const std::vector
 
   // get the values copied over for scale_at_sample
   if (!scale_at_sample.empty())
-    copy_values_from_map_to_offset_vector(scale_at_sample, idmin, idmax, m_scale_at_sample);
+    copy_values_from_map_to_offset_vector(scale_at_sample, idmin_found, idmax_found, m_scale_at_sample);
 
   // mask values that are in the mask or not in the detector group
   if (det_in_group.empty()) {
@@ -82,7 +80,7 @@ BankCalibration::BankCalibration(const double time_conversion, const std::vector
   } else {
     // mask anything that isn't int the group this assumes both are sorted
     // find the first and last detector id that is in the range being used
-    auto detid_first = std::lower_bound(det_in_group.cbegin(), det_in_group.cend(), idmin);
+    auto detid_first = std::lower_bound(det_in_group.cbegin(), det_in_group.cend(), idmin_found);
     auto detid_last = det_in_group.cend();
     for (size_t i = 0; i < m_calibration.size(); ++i) {
       if (m_calibration[i] != IGNORE_PIXEL) {
@@ -104,13 +102,13 @@ BankCalibration::BankCalibration(const double time_conversion, const std::vector
 const std::pair<detid_t, detid_t> BankCalibration::getDetidRange(const std::vector<detid_t> &det_in_group,
                                                                  const std::map<detid_t, double> &calibration_map) {
   if (det_in_group.empty()) {
-    detid_t idmin = calibration_map.begin()->first;
-    detid_t idmax = calibration_map.rbegin()->first;
-    return std::make_pair<detid_t, detid_t>(std::move(idmin), std::move(idmax));
+    detid_t idminE = calibration_map.begin()->first;
+    detid_t idmaxE = calibration_map.rbegin()->first;
+    return std::make_pair<detid_t, detid_t>(std::move(idminE), std::move(idmaxE));
   } else {
-    detid_t idmin = det_in_group.front();
-    detid_t idmax = det_in_group.back();
-    return std::make_pair<detid_t, detid_t>(std::move(idmin), std::move(idmax));
+    detid_t idminG = det_in_group.front();
+    detid_t idmaxG = det_in_group.back();
+    return std::make_pair<detid_t, detid_t>(std::move(idminG), std::move(idmaxG));
   }
 }
 

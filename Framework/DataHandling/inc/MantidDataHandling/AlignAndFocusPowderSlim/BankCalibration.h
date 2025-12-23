@@ -55,7 +55,9 @@ public:
 
   /**
    * Select which detector ids go into the output group. This resets the internal state of the BankCalibration.
-   * @param det_in_group Specifying this effectively reinitializes all of the internal data for what pixels will be used
+   * @param time_conversion Value to bundle into the calibration constant to account for converting the time-of-flight
+   * into microseconds. Applying it here is effectively the same as applying it to each event time-of-flight.
+   * @param wksp_index Output group for finding grouping information.
    */
   BankCalibration getCalibration(const double time_conversion, const size_t wksp_index) const;
 
