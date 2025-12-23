@@ -23,10 +23,6 @@ class FocusView(QtWidgets.QWidget, Ui_focus):
         self.finder_focus.setInstrumentOverride(instrument)
         self.finder_focus.allowMultipleFiles(True)
 
-        self.finder_vanadium.setLabelText("Vanadium #")
-        self.finder_vanadium.setInstrumentOverride(instrument)
-        self.finder_vanadium.allowMultipleFiles(True)
-
     # =================
     # Slot Connectors
     # =================
@@ -43,7 +39,6 @@ class FocusView(QtWidgets.QWidget, Ui_focus):
 
     def set_instrument_override(self, instrument):
         self.finder_focus.setInstrumentOverride(instrument)
-        self.finder_vanadium.setInstrumentOverride(instrument)
 
     def set_focus_button_enabled(self, enabled):
         self.button_focus.setEnabled(enabled)
@@ -53,9 +48,6 @@ class FocusView(QtWidgets.QWidget, Ui_focus):
 
     def set_region_display_text(self, text):
         self.regionDisplay.setText(text)
-
-    def set_van_file_text_with_search(self, text: str):
-        self.finder_vanadium.setFileTextWithSearch(text)
 
     # =================
     # Component Getters
@@ -70,21 +62,12 @@ class FocusView(QtWidgets.QWidget, Ui_focus):
     def get_plot_output(self):
         return self.check_plotOutput.isChecked()
 
-    def get_vanadium_filename(self):
-        return self.finder_vanadium.getFirstFilename()
-
-    def get_vanadium_run(self):
-        return self.finder_vanadium.getText()
-
-    def get_vanadium_valid(self):
-        return self.finder_vanadium.isValid()
-
     # =================
     # State Getters
     # =================
 
     def is_searching(self):
-        return self.finder_focus.isSearching() or self.finder_vanadium.isSearching()
+        return self.finder_focus.isSearching()
 
     # =================
     # Internal Setup
@@ -92,9 +75,7 @@ class FocusView(QtWidgets.QWidget, Ui_focus):
 
     def setup_tabbing_order(self):
         self.finder_focus.focusProxy().setFocusPolicy(QtCore.Qt.StrongFocus)
-        self.finder_vanadium.focusProxy().setFocusPolicy(QtCore.Qt.StrongFocus)
-        self.setTabOrder(self.finder_focus, self.finder_vanadium)
-        self.setTabOrder(self.finder_vanadium, self.check_plotOutput)
+        self.setTabOrder(self.finder_focus, self.check_plotOutput)
         self.setTabOrder(self.check_plotOutput, self.button_focus)
 
     def set_default_files(self, filepaths, directory):
