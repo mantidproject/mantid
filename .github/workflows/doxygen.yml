@@ -9,6 +9,11 @@ on:
     branches: [main]
     repository: mantidproject.mantid
 
+# cancel previous job if new commit is pushed
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   doxygen:
     if: ${{ github.repository_owner == 'mantidproject' }}
