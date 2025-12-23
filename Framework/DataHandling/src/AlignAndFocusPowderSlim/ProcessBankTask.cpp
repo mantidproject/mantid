@@ -27,20 +27,14 @@ auto g_log = Kernel::Logger("ProcessBankTask");
 } // namespace
 ProcessBankTask::ProcessBankTask(std::vector<std::string> &bankEntryNames, H5::H5File &h5file,
                                  const bool is_time_filtered, API::MatrixWorkspace_sptr &wksp,
-                                 const std::map<detid_t, double> &calibration,
-                                 const std::map<detid_t, double> &scale_at_sample,
-                                 const std::map<size_t, std::vector<detid_t>> &grouping,
-                                 const std::set<detid_t> &masked, const size_t events_per_chunk,
+                                 const BankCalibrationFactory &calibFactory, const size_t events_per_chunk,
                                  const size_t grainsize_event, std::vector<PulseROI> pulse_indices,
                                  std::shared_ptr<API::Progress> &progress)
     : m_h5file(h5file), m_bankEntries(bankEntryNames), m_loader(is_time_filtered, pulse_indices), m_wksp(wksp),
-      m_calibration(calibration), m_scale_at_sample(scale_at_sample), m_grouping(grouping), m_masked(masked),
-      m_events_per_chunk(events_per_chunk), m_grainsize_event(grainsize_event), m_progress(progress) {}
+      m_calibFactory(calibFactory), m_events_per_chunk(events_per_chunk), m_grainsize_event(grainsize_event),
+      m_progress(progress) {}
 
 void ProcessBankTask::operator()(const tbb::blocked_range<size_t> &range) const {
-  // TODO temporary place for the bank calibration factory - should be supplied to the constructor
-  BankCalibrationFactory calibFactory(m_calibration, m_scale_at_sample, m_grouping, m_masked);
-
   auto entry = m_h5file.openGroup("entry"); // type=NXentry
   for (size_t wksp_index = range.begin(); wksp_index < range.end(); ++wksp_index) {
     const auto &bankName = m_bankEntries[wksp_index];
@@ -82,7 +76,7 @@ void ProcessBankTask::operator()(const tbb::blocked_range<size_t> &range) const 
 
     // now the calibration for the output group can be created
     // which detectors go into the current group - assumes ouput spectrum number is one more than workspace index
-    const auto calibration = calibFactory.getCalibration(time_conversion, wksp_index);
+    const auto calibration = m_calibFactory.getCalibration(time_conversion, wksp_index);
 
     // declare arrays once so memory can be reused
     auto event_detid = std::make_unique<std::vector<uint32_t>>();       // uint32 for ORNL nexus file

@@ -32,32 +32,25 @@ auto g_log = Kernel::Logger("ProcessBankSplitFullTimeTask");
 ProcessBankSplitFullTimeTask::ProcessBankSplitFullTimeTask(
     std::vector<std::string> &bankEntryNames, H5::H5File &h5file, const bool is_time_filtered,
     std::vector<int> &workspaceIndices, std::vector<API::MatrixWorkspace_sptr> &wksps,
-    const std::map<detid_t, double> &calibration, const std::map<detid_t, double> &scale_at_sample,
-    const std::map<size_t, std::vector<detid_t>> &grouping, const std::set<detid_t> &masked,
-    const size_t events_per_chunk, const size_t grainsize_event, const std::vector<PulseROI> &pulse_indices,
-    const std::map<Mantid::Types::Core::DateAndTime, int> &splitterMap, std::shared_ptr<API::Progress> &progress)
+    const BankCalibrationFactory &calibFactory, const size_t events_per_chunk, const size_t grainsize_event,
+    const std::vector<PulseROI> &pulse_indices, const std::map<Mantid::Types::Core::DateAndTime, int> &splitterMap,
+    std::shared_ptr<API::Progress> &progress)
     : m_h5file(h5file), m_bankEntries(bankEntryNames),
       m_loader(std::make_shared<NexusLoader>(is_time_filtered, pulse_indices)), m_workspaceIndices(workspaceIndices),
-      m_wksps(wksps), m_calibration(calibration), m_scale_at_sample(scale_at_sample), m_grouping(grouping),
-      m_masked(masked), m_events_per_chunk(events_per_chunk), m_splitterMap(splitterMap),
+      m_wksps(wksps), m_calibFactory(calibFactory), m_events_per_chunk(events_per_chunk), m_splitterMap(splitterMap),
       m_grainsize_event(grainsize_event), m_progress(progress) {}
 
 ProcessBankSplitFullTimeTask::ProcessBankSplitFullTimeTask(
     std::vector<std::string> &bankEntryNames, H5::H5File &h5file, std::shared_ptr<NexusLoader> loader,
     std::vector<int> &workspaceIndices, std::vector<API::MatrixWorkspace_sptr> &wksps,
-    const std::map<detid_t, double> &calibration, const std::map<detid_t, double> &scale_at_sample,
-    const std::map<size_t, std::vector<detid_t>> &grouping, const std::set<detid_t> &masked,
-    const size_t events_per_chunk, const size_t grainsize_event,
+    const BankCalibrationFactory &calibFactory, const size_t events_per_chunk, const size_t grainsize_event,
     const std::map<Mantid::Types::Core::DateAndTime, int> &splitterMap, std::shared_ptr<API::Progress> &progress)
     : m_h5file(h5file), m_bankEntries(bankEntryNames), m_loader(std::move(loader)),
-      m_workspaceIndices(workspaceIndices), m_wksps(wksps), m_calibration(calibration),
-      m_scale_at_sample(scale_at_sample), m_grouping(grouping), m_masked(masked), m_events_per_chunk(events_per_chunk),
-      m_splitterMap(splitterMap), m_grainsize_event(grainsize_event), m_progress(progress) {}
+      m_workspaceIndices(workspaceIndices), m_wksps(wksps), m_calibFactory(calibFactory),
+      m_events_per_chunk(events_per_chunk), m_splitterMap(splitterMap), m_grainsize_event(grainsize_event),
+      m_progress(progress) {}
 
 void ProcessBankSplitFullTimeTask::operator()(const tbb::blocked_range<size_t> &range) const {
-  // TODO temporary place for the bank calibration factory - should be supplied to the constructor
-  BankCalibrationFactory calibFactory(m_calibration, m_scale_at_sample, m_grouping, m_masked);
-
   auto entry = m_h5file.openGroup("entry"); // type=NXentry
   for (size_t wksp_index = range.begin(); wksp_index < range.end(); ++wksp_index) {
     const auto &bankName = m_bankEntries[wksp_index];
@@ -99,7 +92,7 @@ void ProcessBankSplitFullTimeTask::operator()(const tbb::blocked_range<size_t> &
 
     // now the calibration for the output group can be created
     // which detectors go into the current group - assumes ouput spectrum number is one more than workspace index
-    const auto calibration = calibFactory.getCalibration(time_conversion, wksp_index);
+    const auto calibration = m_calibFactory.getCalibration(time_conversion, wksp_index);
 
     const auto frequency_log =
         dynamic_cast<const Kernel::TimeSeriesProperty<double> *>(m_wksps.at(0)->run().getProperty("frequency"));

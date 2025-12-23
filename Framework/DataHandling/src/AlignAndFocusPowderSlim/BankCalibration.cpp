@@ -7,6 +7,7 @@
 
 #include "MantidDataHandling/AlignAndFocusPowderSlim/BankCalibration.h"
 #include <algorithm>
+#include <iostream>
 #include <stdexcept>
 
 namespace Mantid::DataHandling::AlignAndFocusPowderSlim {
@@ -143,13 +144,17 @@ BankCalibrationFactory::BankCalibrationFactory(const std::map<detid_t, double> &
                                                const std::map<detid_t, double> &scale_at_sample,
                                                const std::map<size_t, std::vector<detid_t>> &grouping,
                                                const std::set<detid_t> &mask)
-    : m_calibration_map(calibration_map), m_scale_at_sample(scale_at_sample), m_grouping(grouping), m_mask(mask) {}
+    : m_calibration_map(calibration_map), m_scale_at_sample(scale_at_sample), m_grouping(grouping), m_mask(mask) {
+  // in some tests passing empty constructor for no grouping produces invalid object
+  // cache that it is empty with a bonus bool now
+  m_haveGrouping = !m_grouping.empty();
+}
 
-BankCalibration BankCalibrationFactory::getCalibration(const double time_conversion, const size_t wksp_index) {
-  if (m_grouping.empty()) {
-    return BankCalibration(time_conversion, std::vector<detid_t>(), m_calibration_map, m_scale_at_sample, m_mask);
-  } else {
+BankCalibration BankCalibrationFactory::getCalibration(const double time_conversion, const size_t wksp_index) const {
+  if (m_haveGrouping) {
     return BankCalibration(time_conversion, m_grouping.at(wksp_index), m_calibration_map, m_scale_at_sample, m_mask);
+  } else {
+    return BankCalibration(time_conversion, std::vector<detid_t>(), m_calibration_map, m_scale_at_sample, m_mask);
   }
 }
 

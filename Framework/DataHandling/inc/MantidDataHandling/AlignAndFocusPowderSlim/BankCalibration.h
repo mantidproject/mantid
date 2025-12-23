@@ -47,7 +47,7 @@ private:
   detid_t m_detid_offset;
 };
 
-class BankCalibrationFactory {
+class MANTID_DATAHANDLING_DLL BankCalibrationFactory {
 public:
   BankCalibrationFactory(const std::map<detid_t, double> &calibration_map,
                          const std::map<detid_t, double> &scale_at_sample,
@@ -57,12 +57,13 @@ public:
    * Select which detector ids go into the output group. This resets the internal state of the BankCalibration.
    * @param det_in_group Specifying this effectively reinitializes all of the internal data for what pixels will be used
    */
-  BankCalibration getCalibration(const double time_conversion, const size_t wksp_index);
+  BankCalibration getCalibration(const double time_conversion, const size_t wksp_index) const;
 
 private:
-  const std::map<detid_t, double> &m_calibration_map;
-  const std::map<detid_t, double> &m_scale_at_sample;
+  const std::map<detid_t, double> &m_calibration_map;       ///< detid: difc/difc_focussed
+  const std::map<detid_t, double> &m_scale_at_sample;       ///< multiplicative 0<value<1 to move neutron TOF at sample
   const std::map<size_t, std::vector<detid_t>> &m_grouping; ///< detector ids for output workspace index
   const std::set<detid_t> &m_mask;
+  bool m_haveGrouping;
 };
 } // namespace Mantid::DataHandling::AlignAndFocusPowderSlim
