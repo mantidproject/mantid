@@ -16,8 +16,8 @@
 #include "MantidKernel/VectorHelper.h"
 #include "MantidNexus/NexusFile.h"
 
-#include <filesystem>
 #include <boost/scoped_ptr.hpp>
+#include <filesystem>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
