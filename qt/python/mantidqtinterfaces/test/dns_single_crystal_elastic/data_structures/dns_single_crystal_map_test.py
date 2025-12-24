@@ -62,10 +62,10 @@ class DNSScMapTest(unittest.TestCase):
         self.assertEqual(self.map.hkl2, "2,3,4")
         self.assertEqual(self.map.wavelength, 4.74)
         self.assertEqual(len(self.map.hkl_mesh), 3)
-        self.assertTrue(np.allclose(self.map.hklx_mesh, [0.0, 0.0, -0.00022479, -0.00028889, -0.0003854, -0.00051368]))
-        self.assertTrue(np.allclose(self.map.hkly_mesh, [0.0, 0.0, -0.00735043, -0.00734146, -0.01470759, -0.01469189]))
-        self.assertTrue((self.map.z_mesh == np.array([8.0, 11.0, 9.0, 12.0, 10.0, 13.0])).all())
-        self.assertTrue((self.map.error_mesh == np.array([14.0, 17.0, 15.0, 18.0, 16.0, 19.0])).all())
+        self.assertTrue(np.allclose(self.map.hklx_mesh, [[0.0, 0.0], [-0.00022479, -0.00028889], [-0.0003854, -0.00051368]]))
+        self.assertTrue(np.allclose(self.map.hkly_mesh, [[0.0, 0.0], [-0.00735043, -0.00734146], [-0.01470759, -0.01469189]]))
+        self.assertTrue((self.map.z_mesh == np.array([[8.0, 11.0], [9.0, 12.0], [10.0, 13.0]])).all())
+        self.assertTrue((self.map.error_mesh == np.array([[14.0, 17.0], [15.0, 18.0], [16.0, 19.0]])).all())
 
     def test__get_mesh(self):
         data_array = get_fake_elastic_single_crystal_dataset()
