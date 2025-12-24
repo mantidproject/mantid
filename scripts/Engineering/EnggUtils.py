@@ -451,11 +451,10 @@ def _generate_table_workspace_name(bank_num):
 # Focus model functions
 
 
-def focus_run(sample_paths, vanadium_path, plot_output, rb_num, calibration, save_dir, full_calib):
+def focus_run(sample_paths, plot_output, rb_num, calibration, save_dir, full_calib):
     """
     Focus some data using the current calibration.
     :param sample_paths: The paths to the data to be focused.
-    :param vanadium_path: Path to the vanadium file from the current calibration
     :param plot_output: True if the output should be plotted.
     :param rb_num: Number to signify the user who is running this focus
     :param calibration: CalibrationInfo object that holds all info needed about ROI and instrument
