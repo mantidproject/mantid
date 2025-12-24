@@ -10,7 +10,7 @@
 # pylint: disable=too-many-public-methods
 import unittest
 import systemtesting
-from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
+from isis_sans_system_test import ISISSansSystemTest
 from mantid.api import AlgorithmManager
 from mantid.kernel import config
 from isis_reduction_steps import DarkRunSubtraction
