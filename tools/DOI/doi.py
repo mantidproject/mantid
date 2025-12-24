@@ -485,7 +485,10 @@ def run(args):
 if __name__ == "__main__":
     check_for_curl()
 
-    parser = argparse.ArgumentParser(description="Script to generate the DOI needed for a Mantid release.")
+    parser = argparse.ArgumentParser(
+        description="Script to generate the DOI needed for a Mantid release",
+        epilog="This requires having a .gitmailmap file from a TWG member",
+    )
 
     # REQUIRED
     parser.add_argument("version", type=str, help='Version of Mantid whose DOI is to be created/updated in the form "major.minor.patch"')
