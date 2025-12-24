@@ -58,7 +58,11 @@ This algorithm accepts the same ``SplitterWorkspace`` inputs as :ref:`FilterEven
                                  SplitterWorkspace=splitter, RelativeTime=True,
                                  XMin=0, XMax=50000, XDelta=50000,
                                  BinningMode="Linear",
-                                 BinningUnits="TOF")
+                                 BinningUnits="TOF",
+                                 L1=43.755,
+                                 L2=[2.296, 2.296, 2.070, 2.070, 2.070, 2.530],
+                                 Polar=[90, 90, 120, 150, 157, 65.5],
+                                 Azimuthal=[180, 0, 0, 0, 0, 0])
 
     # This is equivalent to using FilterEvents with the same splitter table.
     # But note that this example doesn't align the data so put everything in 1 big bin to compare.
@@ -71,7 +75,7 @@ This algorithm accepts the same ``SplitterWorkspace`` inputs as :ref:`FilterEven
                  FilterByPulseTime=True,
                  OutputWorkspaceBaseName="filtered",
                  GroupWorkspaces=True)
-    out = Rebin("filtered_0", "0,50000,50000", PreserveEvents=False)
+    out = Rebin("filtered", "0,50000,50000", PreserveEvents=False)
 
     CompareWorkspaces(ws, out, CheckSpectraMap=False, CheckInstrument=False)
 
@@ -94,13 +98,21 @@ This algorithm accepts the same ``SplitterWorkspace`` inputs as :ref:`FilterEven
                          LogValueInterval=0.01)
 
     # Use the splitter table to filter the events during loading and output to workspace group
-    ws = AlignAndFocusPowderSlim("VULCAN_218062.nxs.h5", SplitterWorkspace='splitter')
+    ws = AlignAndFocusPowderSlim("VULCAN_218062.nxs.h5", SplitterWorkspace='splitter',
+                                 L1=43.755,
+                                 L2=[2.296, 2.296, 2.070, 2.070, 2.070, 2.530],
+                                 Polar=[90, 90, 120, 150, 157, 65.5],
+                                 Azimuthal=[180, 0, 0, 0, 0, 0])
     print(ws.getNumberOfEntries())  # should be 6 workspaces in the group
 
     # By default the events are split based on pulsetime of the events. If you want to split based on full time (pulsetime + tof), set UseFullTime=False.
     ws2 = AlignAndFocusPowderSlim("VULCAN_218062.nxs.h5",
                                   SplitterWorkspace='splitter',
-                                  UseFullTime=True)
+                                  UseFullTime=True,
+                                  L1=43.755,
+                                  L2=[2.296, 2.296, 2.070, 2.070, 2.070, 2.530],
+                                  Polar=[90, 90, 120, 150, 157, 65.5],
+                                  Azimuthal=[180, 0, 0, 0, 0, 0])
 
 
 **Example - filter bad pulses**
@@ -111,7 +123,11 @@ This algorithm accepts the same ``SplitterWorkspace`` inputs as :ref:`FilterEven
                                  XMin=0, XMax=50000, XDelta=50000,
                                  BinningMode="Linear",
                                  BinningUnits="TOF",
-                                 FilterBadPulses=True)
+                                 FilterBadPulses=True,
+                                 L1=43.755,
+                                 L2=[2.296, 2.296, 2.070, 2.070, 2.070, 2.530],
+                                 Polar=[90, 90, 120, 150, 157, 65.5],
+                                 Azimuthal=[180, 0, 0, 0, 0, 0])
 
     # This is equivalent to using FilterBadPulses.
     # But note that this example doesn't align the data so put everything in 1 big bin to compare.
