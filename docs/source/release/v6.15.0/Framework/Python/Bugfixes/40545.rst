@@ -1,0 +1,2 @@
+- ``jemalloc`` has been removed from the conda activation scripts because it was causing crashes with unrelated applications on Linux due to LD_PRELOAD being set globally.
+  Behaviour is now reverted to Mantid v6.13 where ``jemalloc`` is used only when launching ``mantidworkbench``.
