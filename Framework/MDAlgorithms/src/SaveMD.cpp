@@ -20,7 +20,7 @@
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/Strings.h"
-#include <Poco/File.h>
+#include <filesystem>
 
 using file_holder_type = std::unique_ptr<Mantid::Nexus::File>;
 
@@ -97,9 +97,8 @@ template <typename MDE, size_t nd> void SaveMD::doSaveEvents(typename MDEventWor
   }
 
   if (!wsIsFileBacked) {
-    Poco::File oldFile(filename);
-    if (oldFile.exists())
-      oldFile.remove();
+    if (std::filesystem::exists(filename))
+      std::filesystem::remove(filename);
   }
 
   auto prog = std::make_unique<Progress>(this, 0.0, 0.05, 1);
@@ -215,9 +214,8 @@ void SaveMD::doSaveHisto(const Mantid::DataObjects::MDHistoWorkspace_sptr &ws) {
   std::string filename = getPropertyValue("Filename");
 
   // Erase the file if it exists
-  Poco::File oldFile(filename);
-  if (oldFile.exists())
-    oldFile.remove();
+  if (std::filesystem::exists(filename))
+    std::filesystem::remove(filename);
 
   // Create a new file in HDF5 mode.
   auto file = std::make_unique<Nexus::File>(filename, NXaccess::CREATE5);

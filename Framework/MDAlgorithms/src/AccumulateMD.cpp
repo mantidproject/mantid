@@ -19,10 +19,10 @@
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/PropertyWithValue.h"
 
-#include <Poco/File.h>
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/trim.hpp>
+#include <filesystem>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -82,8 +82,7 @@ bool dataExists(const std::string &data_name) {
 bool fileExists(const std::string &filename) {
   if (filename.empty())
     return false;
-  Poco::File test_file(filename);
-  return test_file.exists();
+  return std::filesystem::exists(filename);
 }
 
 /*

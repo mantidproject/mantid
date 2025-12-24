@@ -16,8 +16,8 @@
 #include "MantidKernel/VectorHelper.h"
 #include "MantidNexus/NexusFile.h"
 
-#include <Poco/File.h>
 #include <boost/scoped_ptr.hpp>
+#include <filesystem>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -350,7 +350,7 @@ void MergeMDFiles::exec() {
   m_fileBasedTargetWS = false;
   if (!outputFile.empty()) {
     m_fileBasedTargetWS = true;
-    if (Poco::File(outputFile).exists())
+    if (std::filesystem::exists(outputFile))
       throw std::invalid_argument(" File " + outputFile +
                                   " already exists. Can not use existing file "
                                   "as the target to MergeMD files.\n" +

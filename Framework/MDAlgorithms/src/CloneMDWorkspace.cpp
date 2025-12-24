@@ -9,8 +9,7 @@
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
-#include <Poco/File.h>
-#include <Poco/Path.h>
+#include <filesystem>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -67,10 +66,10 @@ template <typename MDE, size_t nd> void CloneMDWorkspace::doClone(const typename
     std::string outFilename = getPropertyValue("Filename");
     if (outFilename.empty()) {
       // Auto-generated name
-      Poco::Path path = Poco::Path(originalFile).absolute();
-      std::string newName = path.getBaseName() + "_clone." + path.getExtension();
-      path.setFileName(newName);
-      outFilename = path.toString();
+      std::filesystem::path path = std::filesystem::absolute(originalFile);
+      std::string newName = path.stem().string() + "_clone" + path.extension().string();
+      path.replace_filename(newName);
+      outFilename = path.string();
     }
 
     // Perform the copying. HDF5 takes a file lock out when opening the file. On Windows this
