@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidDataHandling/AlignAndFocusPowderSlim/BankCalibration.h"
 #include "MantidDataHandling/AlignAndFocusPowderSlim/NexusLoader.h"
 #include "MantidDataHandling/DllConfig.h"
 #include "MantidGeometry/IDTypes.h"
@@ -25,22 +26,20 @@ const int64_t PULSETIME_OFFSET = 66666666;
 
 class MANTID_DATAHANDLING_DLL ProcessBankSplitFullTimeTask {
 public:
-  ProcessBankSplitFullTimeTask(
-      std::vector<std::string> &bankEntryNames, H5::H5File &h5file, const bool is_time_filtered,
-      std::vector<int> &workspaceIndices, std::vector<API::MatrixWorkspace_sptr> &wksps,
-      const std::map<detid_t, double> &calibration, const std::map<detid_t, double> &scale_at_sample,
-      const std::map<size_t, std::vector<detid_t>> &grouping, const std::set<detid_t> &masked,
-      const size_t events_per_chunk, const size_t grainsize_event, const std::vector<PulseROI> &pulse_indices,
-      const std::map<Mantid::Types::Core::DateAndTime, int> &splitterMap, std::shared_ptr<API::Progress> &progress);
+  ProcessBankSplitFullTimeTask(std::vector<std::string> &bankEntryNames, H5::H5File &h5file,
+                               const bool is_time_filtered, std::vector<int> &workspaceIndices,
+                               std::vector<API::MatrixWorkspace_sptr> &wksps,
+                               const BankCalibrationFactory &calibFactory, const size_t events_per_chunk,
+                               const size_t grainsize_event, const std::vector<PulseROI> &pulse_indices,
+                               const std::map<Mantid::Types::Core::DateAndTime, int> &splitterMap,
+                               std::shared_ptr<API::Progress> &progress);
 
   // Constructor with custom loader to allow mocking in tests
   ProcessBankSplitFullTimeTask(std::vector<std::string> &bankEntryNames, H5::H5File &h5file,
                                std::shared_ptr<NexusLoader> loader, std::vector<int> &workspaceIndices,
                                std::vector<API::MatrixWorkspace_sptr> &wksps,
-                               const std::map<detid_t, double> &calibration,
-                               const std::map<detid_t, double> &scale_at_sample,
-                               const std::map<size_t, std::vector<detid_t>> &grouping, const std::set<detid_t> &masked,
-                               const size_t events_per_chunk, const size_t grainsize_event,
+                               const BankCalibrationFactory &calibFactory, const size_t events_per_chunk,
+                               const size_t grainsize_event,
                                const std::map<Mantid::Types::Core::DateAndTime, int> &splitterMap,
                                std::shared_ptr<API::Progress> &progress);
 
@@ -52,10 +51,8 @@ private:
   std::shared_ptr<NexusLoader> m_loader;
   std::vector<int> m_workspaceIndices;
   std::vector<API::MatrixWorkspace_sptr> m_wksps;
-  const std::map<detid_t, double> m_calibration;           // detid: 1/difc
-  std::map<detid_t, double> m_scale_at_sample;             ///< multiplicative 0<value<1 to move neutron TOF at sample
-  const std::map<size_t, std::vector<detid_t>> m_grouping; ///< detector ids for output spectrum number
-  const std::set<detid_t> m_masked;
+  /// used to generate actual calibration
+  const BankCalibrationFactory &m_calibFactory;
   /// number of events to read from disk at one time
   const size_t m_events_per_chunk;
   const std::map<Mantid::Types::Core::DateAndTime, int> m_splitterMap;

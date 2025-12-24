@@ -12,6 +12,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
+#include "MantidDataHandling/AlignAndFocusPowderSlim/BankCalibration.h"
 #include "MantidDataHandling/AlignAndFocusPowderSlim/ProcessBankSplitFullTimeTask.h"
 #include "MantidDataHandling/AlignAndFocusPowderSlim/ProcessBankSplitTask.h"
 #include "MantidDataHandling/AlignAndFocusPowderSlim/ProcessBankTask.h"
@@ -371,7 +372,7 @@ void AlignAndFocusPowderSlim::exec() {
   this->progress(.1, "Convert bins to TOF");
   wksp = this->convertToTOF(wksp);
 
-  // TODO parameters should be read in from a file
+  // TODO parameters should be read in from a file and should always be sorted
   std::map<size_t, std::vector<detid_t>> grouping;
   constexpr detid_t NUM_DETS_PER_BANK{100000};
   for (size_t outputSpecNum : std::views::iota(0, 6)) {
@@ -435,6 +436,11 @@ void AlignAndFocusPowderSlim::exec() {
     num_banks_to_read = 1;
   }
 
+  // create the bank calibration factory to share with all of the ProcessBank*Task objects
+  BankCalibrationFactory calibFactory(m_calibration, m_scale_at_sample, grouping, m_masked);
+
+  // TODO create a BankCalibrationFactor to collect together information
+
   // threaded processing of the banks
   const int DISK_CHUNK = getProperty(PropertyNames::READ_SIZE_FROM_DISK);
   const int GRAINSIZE_EVENTS = getProperty(PropertyNames::EVENTS_PER_THREAD);
@@ -444,9 +450,8 @@ void AlignAndFocusPowderSlim::exec() {
     const auto pulse_indices = this->determinePulseIndices(wksp, filterROI);
 
     auto progress = std::make_shared<API::Progress>(this, .17, .9, num_banks_to_read);
-    ProcessBankTask task(bankEntryNames, h5file, is_time_filtered, wksp, m_calibration, m_scale_at_sample, grouping,
-                         m_masked, static_cast<size_t>(DISK_CHUNK), static_cast<size_t>(GRAINSIZE_EVENTS),
-                         pulse_indices, progress);
+    ProcessBankTask task(bankEntryNames, h5file, is_time_filtered, wksp, calibFactory, static_cast<size_t>(DISK_CHUNK),
+                         static_cast<size_t>(GRAINSIZE_EVENTS), pulse_indices, progress);
     // generate threads only if appropriate
     if (num_banks_to_read > 1) {
       tbb::parallel_for(tbb::blocked_range<size_t>(0, num_banks_to_read), task);
@@ -491,9 +496,8 @@ void AlignAndFocusPowderSlim::exec() {
       const auto &splitterMap = timeSplitter.getSplittersMap();
 
       ProcessBankSplitFullTimeTask task(bankEntryNames, h5file, is_time_filtered, workspaceIndices, workspaces,
-                                        m_calibration, m_scale_at_sample, grouping, m_masked,
-                                        static_cast<size_t>(DISK_CHUNK), static_cast<size_t>(GRAINSIZE_EVENTS),
-                                        pulse_indices, splitterMap, progress);
+                                        calibFactory, static_cast<size_t>(DISK_CHUNK),
+                                        static_cast<size_t>(GRAINSIZE_EVENTS), pulse_indices, splitterMap, progress);
 
       // generate threads only if appropriate
       if (num_banks_to_read > 1) {
@@ -508,9 +512,9 @@ void AlignAndFocusPowderSlim::exec() {
       // determine the pulse indices from the time and splitter workspace
       const auto target_to_pulse_indices = this->determinePulseIndicesTargets(wksp, filterROI, timeSplitter);
 
-      ProcessBankSplitTask task(bankEntryNames, h5file, true, workspaceIndices, workspaces, m_calibration,
-                                m_scale_at_sample, grouping, m_masked, static_cast<size_t>(DISK_CHUNK),
-                                static_cast<size_t>(GRAINSIZE_EVENTS), target_to_pulse_indices, progress);
+      ProcessBankSplitTask task(bankEntryNames, h5file, true, workspaceIndices, workspaces, calibFactory,
+                                static_cast<size_t>(DISK_CHUNK), static_cast<size_t>(GRAINSIZE_EVENTS),
+                                target_to_pulse_indices, progress);
       // generate threads only if appropriate
       if (num_banks_to_read > 1) {
         tbb::parallel_for(tbb::blocked_range<size_t>(0, num_banks_to_read), task);
@@ -540,9 +544,9 @@ void AlignAndFocusPowderSlim::exec() {
 
               const auto pulse_indices = this->determinePulseIndices(target_wksp, target_roi);
 
-              ProcessBankTask task(bankEntryNames, h5file, is_time_filtered, target_wksp, m_calibration,
-                                   m_scale_at_sample, grouping, m_masked, static_cast<size_t>(DISK_CHUNK),
-                                   static_cast<size_t>(GRAINSIZE_EVENTS), pulse_indices, progress);
+              ProcessBankTask task(bankEntryNames, h5file, is_time_filtered, target_wksp, calibFactory,
+                                   static_cast<size_t>(DISK_CHUNK), static_cast<size_t>(GRAINSIZE_EVENTS),
+                                   pulse_indices, progress);
               // generate threads only if appropriate
               if (num_banks_to_read > 1) {
                 tbb::parallel_for(tbb::blocked_range<size_t>(0, num_banks_to_read), task);
