@@ -168,6 +168,7 @@ class CalibrationPresenter(object):
 
     def set_create_new_enabled(self, enabled):
         self.view.set_sample_enabled(enabled)
+        self.view.set_van_enabled(enabled)
         if enabled:
             self.set_calibrate_button_text("Calibrate")
             self.view.set_check_plot_output_enabled(True)

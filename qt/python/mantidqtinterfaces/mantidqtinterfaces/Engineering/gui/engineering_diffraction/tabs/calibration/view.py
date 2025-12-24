@@ -76,6 +76,9 @@ class CalibrationView(QtWidgets.QWidget, Ui_calib):
     def set_sample_enabled(self, set_to):
         self.finder_sample.setEnabled(set_to)
 
+    def set_van_enabled(self, set_to):
+        self.finder_vanadium.setEnabled(set_to)
+
     def set_path_enabled(self, set_to):
         self.finder_path.setEnabled(set_to)
 
