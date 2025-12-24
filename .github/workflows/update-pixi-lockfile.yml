@@ -27,6 +27,8 @@ jobs:
         uses: peter-evans/create-pull-request@v8
         with:
           token: ${{ secrets.MANTID_BUILDER_TOKEN }}
+          author: mantid-builder <mantid-builder@users.noreply.github.com>
+          committer: mantid-builder <mantid-builder@users.noreply.github.com>
           commit-message: Update pixi lockfile
           title: Update pixi lockfile
           body-path: diff.md
