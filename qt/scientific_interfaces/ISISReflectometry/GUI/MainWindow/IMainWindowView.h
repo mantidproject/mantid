@@ -45,6 +45,7 @@ public:
   virtual void enableSaveAndLoadBatch() = 0;
   virtual void acceptCloseEvent() = 0;
   virtual void ignoreCloseEvent() = 0;
+  virtual int getTabIndex() const = 0;
 
   virtual ~IMainWindowView() = default;
 };

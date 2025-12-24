@@ -53,6 +53,26 @@ QMap<QString, QVariant> Encoder::encode(const QWidget *gui, const std::string &d
 
 QList<QString> Encoder::tags() { return QList<QString>({QString("ISIS Reflectometry")}); }
 
+QVariant Encoder::extractFromEncoding(const QVariant &vMap, const std::vector<std::string> &jsonKey) const {
+  QVariantMap map;
+  QVariant extract = vMap;
+  for (auto &key : jsonKey) {
+    if (extract.type() == 8 && extract.canConvert(8)) { // 8 = map - is there an enum?
+      map = extract.toMap();
+      auto qKey = QString::fromStdString(key);
+      if (map.contains(qKey)) {
+        extract = map.value(qKey);
+      } else {
+        throw std::invalid_argument("Invalid json key provided. Json key not in map. Invalid element: " + key);
+      }
+    } else {
+      throw std::invalid_argument(
+          "Invalid json key provided. Json key must allow traversal of nested QMaps. Invalid element: " + key);
+    }
+  }
+  return extract;
+}
+
 QMap<QString, QVariant> Encoder::encodeBatch(const IMainWindowView *mwv, int batchIndex, bool projectSave) {
   auto gui = dynamic_cast<const QtBatchView *>(mwv->batches()[batchIndex]);
   auto batchPresenter = findBatchPresenter(gui, mwv);

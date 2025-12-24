@@ -888,7 +888,9 @@ private:
     auto props = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
     props->setPropertyValue("GetLiveValueAlgorithm", "GetLiveInstrumentValue");
     props->setPropertyValue("InputWorkspace", "TOF_live");
+
     props->setPropertyValue("Instrument", instrument);
+    props->setPropertyValue("ExperimentSettingsState", "");
     return props;
   }
 
@@ -1155,7 +1157,9 @@ private:
                            std::string const &instrument = std::string("OFFSPEC"), int const &updateInterval = 15) {
     expectSearchInstrument(instrument);
     expectGetUpdateInterval(updateInterval);
-    EXPECT_CALL(m_mainPresenter, rowProcessingProperties()).Times(1).WillOnce(Return(ByMove(std::move(options))));
+    EXPECT_CALL(m_mainPresenter, rowProcessingPropertiesDefault())
+        .Times(1)
+        .WillOnce(Return(ByMove(std::move(options))));
   }
 
   void expectGetLiveDataOptions(std::string const &instrument, const int &updateInterval) {

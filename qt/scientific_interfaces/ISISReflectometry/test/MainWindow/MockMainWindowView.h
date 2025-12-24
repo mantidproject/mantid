@@ -29,6 +29,8 @@ public:
   MOCK_CONST_METHOD0(batches, std::vector<IBatchView *>());
   MOCK_METHOD0(acceptCloseEvent, void());
   MOCK_METHOD0(ignoreCloseEvent, void());
+  MOCK_CONST_METHOD0(getTabIndex, int());
+
   ~MockMainWindowView() override {};
 };
 } // namespace ISISReflectometry

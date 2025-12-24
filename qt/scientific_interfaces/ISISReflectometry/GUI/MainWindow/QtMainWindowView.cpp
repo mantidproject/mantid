@@ -268,5 +268,7 @@ std::string QtMainWindowView::getFullFilePath(const std::string &filename) const
   }
 }
 
+int QtMainWindowView::getTabIndex() const { return m_ui.mainTabs->currentIndex(); };
+
 } // namespace CustomInterfaces::ISISReflectometry
 } // namespace MantidQt

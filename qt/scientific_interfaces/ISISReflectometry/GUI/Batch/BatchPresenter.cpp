@@ -369,6 +369,10 @@ std::unique_ptr<Mantid::API::IAlgorithmRuntimeProps> BatchPresenter::rowProcessi
   return m_jobManager->rowProcessingProperties();
 }
 
+std::unique_ptr<Mantid::API::IAlgorithmRuntimeProps> BatchPresenter::rowProcessingPropertiesDefault() const {
+  return m_jobManager->rowProcessingPropertiesDefault();
+}
+
 void BatchPresenter::postDeleteHandle(const std::string &wsName) {
   auto const item = m_jobManager->notifyWorkspaceDeleted(wsName);
   m_runsPresenter->notifyRowModelChanged(item);
@@ -423,4 +427,9 @@ std::optional<ProcessingInstructions> BatchPresenter::getMatchingROIDetectorIDsF
   }
   return std::nullopt;
 }
+
+std::string BatchPresenter::getBatchState(const std::vector<std::string> &jsonKey) const {
+  return m_mainPresenter->encodeBatchToStr(jsonKey);
+}
+
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

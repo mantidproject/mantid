@@ -1,0 +1,1 @@
+- The ISIS Reflectometry GUI will now apply angle-title specific settings from the lookup table on Experiment Settings tab when processing live data. Previously it was necessary to ensure a wildcard row was present in table that would be applied uniformly to all live data.

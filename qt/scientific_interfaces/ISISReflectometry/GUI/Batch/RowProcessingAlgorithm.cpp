@@ -406,4 +406,17 @@ createAlgorithmRuntimeProps(IBatch const &model, std::optional<std::reference_wr
   }
   return properties;
 }
+
+/** This function gets the canonical set of properties for performing the reduction, using defaults
+ *
+ * @param model : the Batch model containing all of the default settings and the lookup table
+ * @returns : a custom PropertyManager class with all of the algorithm properties set
+ */
+std::unique_ptr<Mantid::API::IAlgorithmRuntimeProps> createAlgorithmRuntimePropsDefault(IBatch const &model) {
+  auto properties = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
+  // Update properties from settings in the event, experiment and instrument tabs
+  updatePropertiesFromBatchModel(*properties, model);
+  return properties;
+}
+
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry::RowProcessing
