@@ -7,8 +7,8 @@
 import numpy as np
 from os import path, scandir
 import sys
-from Engineering.texture.polefigure.polefigure_model import TextureProjection
 from Engineering.texture.correction.correction_model import TextureCorrectionModel
+from Engineering.texture.polefigure.polefigure_model import TextureProjection
 from mantid.simpleapi import SaveNexus, logger, CreateEmptyTableWorkspace, Fit
 from pathlib import Path
 from Engineering.EnggUtils import GROUP
@@ -19,6 +19,10 @@ from mantid.dataobjects import Workspace2D
 from mantid.fitfunctions import FunctionWrapper, CompositeFunctionWrapper
 from plugins.algorithms.IntegratePeaks1DProfile import PeakFunctionGenerator, calc_intens_and_sigma_arrays
 from Engineering.texture.xtal_helper import get_xtal_structure
+
+# import texture helper functions so they can be accessed by users through the TextureUtils namespace
+from Engineering.texture.texture_helper import plot_pole_figure
+
 # -------- Utility --------------------------------
 
 
@@ -591,7 +595,7 @@ def create_pf(
         wss, params, out_ws, pf_hkl, include_scatt_power, scat_vol_pos, chi2_thresh, peak_thresh, save_dirs, ax_transform, readout_column
     )
 
-    fig, ax = model.plot_pole_figure(
+    fig, ax = plot_pole_figure(
         out_ws,
         projection_method,
         fig=None,
