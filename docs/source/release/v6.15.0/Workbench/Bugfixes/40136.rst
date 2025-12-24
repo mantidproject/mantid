@@ -1,0 +1,4 @@
+- Fixed a bug in :ref:`colorfill plots <Colorfill_Plots>` with log colorscale where it was giving errors when the keys given below are pressed from the keyboard. The behaviour of the colorfill plot after the fix is given below.
+- `c`, `left`, `backspace`, `MouseButton.BACK`, The colorscale of the colorfill plot would change in backwards direction. ex: log to linear,
+- `v`, `right`, `MouseButton.FORWARD`, The colorscale of the colorfill plot would change in forward direction. ex: log to symlog
+- `r`, `h`, `home`, The plot would be reset to Home view, i.e similar to pressing Home button of the plot
