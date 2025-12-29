@@ -14,6 +14,7 @@
 #include "MantidMDAlgorithms/AccumulateMD.h"
 #include <cxxtest/TestSuite.h>
 #include <filesystem>
+#include <fstream>
 
 using Mantid::MDAlgorithms::AccumulateMD;
 using namespace Mantid::API;
