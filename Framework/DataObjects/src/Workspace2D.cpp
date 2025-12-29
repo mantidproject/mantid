@@ -7,6 +7,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/ISpectrum.h"
 #include "MantidAPI/RefAxis.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidHistogramData/LinearGenerator.h"
@@ -132,6 +133,17 @@ size_t Workspace2D::blocksize() const {
     if (it != data.cend())
       throw std::length_error("blocksize undefined because size of histograms is not equal");
     return numBins;
+  }
+}
+
+size_t Workspace2D::getMemorySize() const {
+  if (this->isRaggedWorkspace()) {
+    size_t total = std::accumulate(data.begin(), data.end(), size_t{0},
+                                   [](size_t total, auto const &list) { return total + list->getMemorySize(); });
+    return total + run().getMemorySize();
+  } else {
+    // MatrixWorkspace is correct for non-ragged
+    return MatrixWorkspace::getMemorySize();
   }
 }
 
