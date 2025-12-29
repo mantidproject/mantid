@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 #include "MantidDataHandling/AlignAndFocusPowderSlim/ProcessBankSplitTask.h"
-#include "MantidDataHandling/AlignAndFocusPowderSlim/ProcessBankTaskBase.h"
 #include "MantidDataHandling/AlignAndFocusPowderSlim/ProcessEventsTask.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/ParallelMinMax.h"
@@ -35,14 +34,14 @@ ProcessBankSplitTask::ProcessBankSplitTask(std::vector<std::string> &bankEntryNa
                                            const size_t grainsize_event,
                                            std::vector<std::pair<int, PulseROI>> target_to_pulse_indices,
                                            std::shared_ptr<API::Progress> &progress)
-    : m_h5file(h5file), m_bankEntries(bankEntryNames), m_loader(is_time_filtered, {}, target_to_pulse_indices),
+    : ProcessBankTaskBase(bankEntryNames), m_h5file(h5file), m_loader(is_time_filtered, {}, target_to_pulse_indices),
       m_workspaceIndices(workspaceIndices), m_wksps(wksps), m_calibFactory(calibFactory),
       m_events_per_chunk(events_per_chunk), m_grainsize_event(grainsize_event), m_progress(progress) {}
 
 void ProcessBankSplitTask::operator()(const tbb::blocked_range<size_t> &range) const {
   auto entry = m_h5file.openGroup("entry"); // type=NXentry
   for (size_t wksp_index = range.begin(); wksp_index < range.end(); ++wksp_index) {
-    const auto &bankName = m_bankEntries[wksp_index];
+    const auto &bankName = this->bankName(wksp_index);
     // empty bank names indicate spectra to skip; control should never get here, but just in case
     if (bankName.empty()) {
       continue;

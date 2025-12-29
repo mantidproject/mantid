@@ -5,10 +5,13 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 
+#pragma once
+
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Progress.h"
 #include "MantidDataHandling/AlignAndFocusPowderSlim/BankCalibration.h"
 #include "MantidDataHandling/AlignAndFocusPowderSlim/NexusLoader.h"
+#include "MantidDataHandling/AlignAndFocusPowderSlim/ProcessBankTaskBase.h"
 #include "MantidGeometry/IDTypes.h"
 #include <H5Cpp.h>
 #include <map>
@@ -18,7 +21,7 @@
 
 namespace Mantid::DataHandling::AlignAndFocusPowderSlim {
 
-class ProcessBankTask {
+class ProcessBankTask : public ProcessBankTaskBase {
 public:
   ProcessBankTask(std::vector<std::string> &bankEntryNames, H5::H5File &h5file, const bool is_time_filtered,
                   API::MatrixWorkspace_sptr &wksp, const BankCalibrationFactory &calibFactory,
@@ -29,7 +32,6 @@ public:
 
 private:
   H5::H5File m_h5file;
-  const std::vector<std::string> m_bankEntries;
   mutable NexusLoader m_loader;
   API::MatrixWorkspace_sptr m_wksp;
   /// used to generate actual calibration

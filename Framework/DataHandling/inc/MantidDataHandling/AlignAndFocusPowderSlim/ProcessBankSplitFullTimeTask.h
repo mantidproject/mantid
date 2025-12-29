@@ -5,9 +5,12 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 
+#pragma once
+
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataHandling/AlignAndFocusPowderSlim/BankCalibration.h"
 #include "MantidDataHandling/AlignAndFocusPowderSlim/NexusLoader.h"
+#include "MantidDataHandling/AlignAndFocusPowderSlim/ProcessBankTaskBase.h"
 #include "MantidDataHandling/DllConfig.h"
 #include "MantidGeometry/IDTypes.h"
 #include "MantidKernel/DateAndTime.h"
@@ -24,7 +27,7 @@ namespace Mantid::DataHandling::AlignAndFocusPowderSlim {
 // This is in nanoseconds. So four pulses of 1/60s is 66666666 ns.
 const int64_t PULSETIME_OFFSET = 66666666;
 
-class MANTID_DATAHANDLING_DLL ProcessBankSplitFullTimeTask {
+class MANTID_DATAHANDLING_DLL ProcessBankSplitFullTimeTask : public ProcessBankTaskBase {
 public:
   ProcessBankSplitFullTimeTask(std::vector<std::string> &bankEntryNames, H5::H5File &h5file,
                                const bool is_time_filtered, std::vector<int> &workspaceIndices,
@@ -47,7 +50,6 @@ public:
 
 private:
   H5::H5File m_h5file;
-  const std::vector<std::string> m_bankEntries;
   std::shared_ptr<NexusLoader> m_loader;
   std::vector<int> m_workspaceIndices;
   std::vector<API::MatrixWorkspace_sptr> m_wksps;
