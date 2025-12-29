@@ -12,7 +12,6 @@
 #include "MantidKernel/ParallelMinMax.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/Timer.h"
-#include "MantidKernel/Unit.h"
 #include "MantidNexus/H5Util.h"
 #include "tbb/parallel_for.h"
 #include "tbb/parallel_reduce.h"
@@ -22,8 +21,6 @@
 namespace Mantid::DataHandling::AlignAndFocusPowderSlim {
 
 namespace {
-
-const std::string MICROSEC("microseconds");
 
 // Logger for this class
 auto g_log = Kernel::Logger("ProcessBankSplitFullTimeTask");
@@ -35,9 +32,9 @@ ProcessBankSplitFullTimeTask::ProcessBankSplitFullTimeTask(
     const BankCalibrationFactory &calibFactory, const size_t events_per_chunk, const size_t grainsize_event,
     const std::vector<PulseROI> &pulse_indices, const std::map<Mantid::Types::Core::DateAndTime, int> &splitterMap,
     std::shared_ptr<API::Progress> &progress)
-    : ProcessBankTaskBase(bankEntryNames), m_h5file(h5file),
+    : ProcessBankTaskBase(bankEntryNames, calibFactory), m_h5file(h5file),
       m_loader(std::make_shared<NexusLoader>(is_time_filtered, pulse_indices)), m_workspaceIndices(workspaceIndices),
-      m_wksps(wksps), m_calibFactory(calibFactory), m_events_per_chunk(events_per_chunk), m_splitterMap(splitterMap),
+      m_wksps(wksps), m_events_per_chunk(events_per_chunk), m_splitterMap(splitterMap),
       m_grainsize_event(grainsize_event), m_progress(progress) {}
 
 ProcessBankSplitFullTimeTask::ProcessBankSplitFullTimeTask(
@@ -45,10 +42,9 @@ ProcessBankSplitFullTimeTask::ProcessBankSplitFullTimeTask(
     std::vector<int> &workspaceIndices, std::vector<API::MatrixWorkspace_sptr> &wksps,
     const BankCalibrationFactory &calibFactory, const size_t events_per_chunk, const size_t grainsize_event,
     const std::map<Mantid::Types::Core::DateAndTime, int> &splitterMap, std::shared_ptr<API::Progress> &progress)
-    : ProcessBankTaskBase(bankEntryNames), m_h5file(h5file), m_loader(std::move(loader)),
-      m_workspaceIndices(workspaceIndices), m_wksps(wksps), m_calibFactory(calibFactory),
-      m_events_per_chunk(events_per_chunk), m_splitterMap(splitterMap), m_grainsize_event(grainsize_event),
-      m_progress(progress) {}
+    : ProcessBankTaskBase(bankEntryNames, calibFactory), m_h5file(h5file), m_loader(std::move(loader)),
+      m_workspaceIndices(workspaceIndices), m_wksps(wksps), m_events_per_chunk(events_per_chunk),
+      m_splitterMap(splitterMap), m_grainsize_event(grainsize_event), m_progress(progress) {}
 
 void ProcessBankSplitFullTimeTask::operator()(const tbb::blocked_range<size_t> &range) const {
   auto entry = m_h5file.openGroup("entry"); // type=NXentry
@@ -88,11 +84,9 @@ void ProcessBankSplitFullTimeTask::operator()(const tbb::blocked_range<size_t> &
     auto detID_SDS = event_group.openDataSet(NxsFieldNames::DETID);
     std::string tof_unit;
     Nexus::H5Util::readStringAttribute(tof_SDS, "units", tof_unit);
-    const double time_conversion = Kernel::Units::timeConversionValue(tof_unit, MICROSEC);
-
     // now the calibration for the output group can be created
     // which detectors go into the current group - assumes ouput spectrum number is one more than workspace index
-    const auto calibration = m_calibFactory.getCalibration(time_conversion, wksp_index);
+    const auto calibration = this->getCalibration(tof_unit, wksp_index);
 
     const auto frequency_log =
         dynamic_cast<const Kernel::TimeSeriesProperty<double> *>(m_wksps.at(0)->run().getProperty("frequency"));

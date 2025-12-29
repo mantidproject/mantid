@@ -34,8 +34,6 @@ private:
   H5::H5File m_h5file;
   mutable NexusLoader m_loader;
   API::MatrixWorkspace_sptr m_wksp;
-  /// used to generate actual calibration
-  const BankCalibrationFactory &m_calibFactory;
   /// number of events to read from disk at one time
   const size_t m_events_per_chunk;
   /// number of events to histogram in a single thread

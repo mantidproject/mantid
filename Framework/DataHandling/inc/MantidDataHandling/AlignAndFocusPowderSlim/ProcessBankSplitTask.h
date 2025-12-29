@@ -36,8 +36,6 @@ private:
   mutable NexusLoader m_loader;
   std::vector<int> m_workspaceIndices;
   std::vector<API::MatrixWorkspace_sptr> m_wksps;
-  /// used to generate actual calibration
-  const BankCalibrationFactory &m_calibFactory;
   /// number of events to read from disk at one time
   const size_t m_events_per_chunk;
   /// number of events to histogram in a single thread

@@ -10,7 +10,6 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/ParallelMinMax.h"
 #include "MantidKernel/Timer.h"
-#include "MantidKernel/Unit.h"
 #include "MantidNexus/H5Util.h"
 #include "tbb/parallel_for.h"
 #include "tbb/parallel_reduce.h"
@@ -20,8 +19,6 @@
 namespace Mantid::DataHandling::AlignAndFocusPowderSlim {
 
 namespace {
-
-const std::string MICROSEC("microseconds");
 
 // Logger for this class
 auto g_log = Kernel::Logger("ProcessBankSplitTask");
@@ -34,8 +31,8 @@ ProcessBankSplitTask::ProcessBankSplitTask(std::vector<std::string> &bankEntryNa
                                            const size_t grainsize_event,
                                            std::vector<std::pair<int, PulseROI>> target_to_pulse_indices,
                                            std::shared_ptr<API::Progress> &progress)
-    : ProcessBankTaskBase(bankEntryNames), m_h5file(h5file), m_loader(is_time_filtered, {}, target_to_pulse_indices),
-      m_workspaceIndices(workspaceIndices), m_wksps(wksps), m_calibFactory(calibFactory),
+    : ProcessBankTaskBase(bankEntryNames, calibFactory), m_h5file(h5file),
+      m_loader(is_time_filtered, {}, target_to_pulse_indices), m_workspaceIndices(workspaceIndices), m_wksps(wksps),
       m_events_per_chunk(events_per_chunk), m_grainsize_event(grainsize_event), m_progress(progress) {}
 
 void ProcessBankSplitTask::operator()(const tbb::blocked_range<size_t> &range) const {
@@ -77,11 +74,9 @@ void ProcessBankSplitTask::operator()(const tbb::blocked_range<size_t> &range) c
     // and the units
     std::string tof_unit;
     Nexus::H5Util::readStringAttribute(tof_SDS, "units", tof_unit);
-    const double time_conversion = Kernel::Units::timeConversionValue(tof_unit, MICROSEC);
-
     // now the calibration for the output group can be created
     // which detectors go into the current group - assumes ouput spectrum number is one more than workspace index
-    const auto calibration = m_calibFactory.getCalibration(time_conversion, wksp_index);
+    const auto calibration = this->getCalibration(tof_unit, wksp_index);
 
     // declare arrays once so memory can be reused
     auto event_detid = std::make_unique<std::vector<uint32_t>>();       // uint32 for ORNL nexus file

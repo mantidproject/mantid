@@ -53,8 +53,6 @@ private:
   std::shared_ptr<NexusLoader> m_loader;
   std::vector<int> m_workspaceIndices;
   std::vector<API::MatrixWorkspace_sptr> m_wksps;
-  /// used to generate actual calibration
-  const BankCalibrationFactory &m_calibFactory;
   /// number of events to read from disk at one time
   const size_t m_events_per_chunk;
   const std::map<Mantid::Types::Core::DateAndTime, int> m_splitterMap;
