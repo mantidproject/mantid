@@ -18,8 +18,6 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include <Poco/File.h>
-
 using Mantid::API::AnalysisDataService;
 using Mantid::Geometry::MDHistoDimension;
 using namespace Mantid::API;
