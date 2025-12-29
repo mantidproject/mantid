@@ -969,8 +969,8 @@ public:
 
     // Retrieve the full path; delete any pre-existing file
     std::string filename = saver.getPropertyValue("Filename");
-    if (Poco::File(filename).exists())
-      Poco::File(filename).remove();
+    if (std::filesystem::exists(filename))
+      std::filesystem::remove(filename);
 
     TS_ASSERT_THROWS_NOTHING(saver.execute(););
     TS_ASSERT(saver.isExecuted());
