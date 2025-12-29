@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 #include "MantidDataHandling/AlignAndFocusPowderSlim/ProcessBankTask.h"
+#include "MantidDataHandling/AlignAndFocusPowderSlim/ProcessBankTaskBase.h"
 #include "MantidDataHandling/AlignAndFocusPowderSlim/ProcessEventsTask.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/ParallelMinMax.h"
@@ -149,11 +150,7 @@ void ProcessBankTask::operator()(const tbb::blocked_range<size_t> &range) const 
     }
 
     // copy the data out into the correct spectrum and calculate errors
-    auto &y_values = spectrum.dataY();
-    std::copy(y_temp.cbegin(), y_temp.cend(), y_values.begin());
-    auto &e_values = spectrum.dataE();
-    std::transform(y_temp.cbegin(), y_temp.cend(), e_values.begin(),
-                   [](uint32_t y) { return std::sqrt(static_cast<double>(y)); });
+    copyDataToSpectrum(y_temp, &spectrum);
 
     g_log.debug() << bankName << " stop " << timer << std::endl;
     m_progress->report();
