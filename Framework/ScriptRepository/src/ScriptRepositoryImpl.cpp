@@ -707,12 +707,6 @@ void ScriptRepositoryImpl::download_file(const std::string &file_path, Repositor
       } // dir path is empty
     }
 
-    if (!std::filesystem::exists(local_path)) {
-      // Create an empty file
-      std::ofstream ofs(local_path);
-      ofs.close();
-    }
-
     tmpFile.copyTo(local_path);
 
   } catch (std::filesystem::filesystem_error &) {
@@ -1669,10 +1663,11 @@ std::string ScriptRepositoryImpl::convertPath(const std::string &path) {
     pathFound = inputPath;
     file_is_local = true;
   } else {
+    // Normalize the input path once before the loop
+    std::filesystem::path normalizedPath = std::filesystem::path(path).lexically_normal();
     // try to find the given path at one of the paths at lookAfter.
     for (const auto &searchPath : lookAfter) {
-      std::filesystem::path candidate = std::filesystem::path(searchPath) / path;
-      candidate = candidate.lexically_normal();
+      std::filesystem::path candidate = std::filesystem::path(searchPath) / normalizedPath;
       if (std::filesystem::exists(candidate)) {
         pathFound = candidate;
         file_is_local = true;
