@@ -32,7 +32,6 @@ public:
 
 private:
   H5::H5File m_h5file;
-  std::shared_ptr<const NexusLoader> m_loader;
   API::MatrixWorkspace_sptr m_wksp;
   /// number of events to read from disk at one time
   const size_t m_events_per_chunk;

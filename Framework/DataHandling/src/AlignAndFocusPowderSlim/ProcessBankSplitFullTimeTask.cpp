@@ -32,9 +32,9 @@ ProcessBankSplitFullTimeTask::ProcessBankSplitFullTimeTask(
     std::vector<int> &workspaceIndices, std::vector<API::MatrixWorkspace_sptr> &wksps,
     const BankCalibrationFactory &calibFactory, const size_t events_per_chunk, const size_t grainsize_event,
     const std::map<Mantid::Types::Core::DateAndTime, int> &splitterMap, std::shared_ptr<API::Progress> &progress)
-    : ProcessBankTaskBase(bankEntryNames, calibFactory), m_h5file(h5file), m_loader(std::move(loader)),
-      m_workspaceIndices(workspaceIndices), m_wksps(wksps), m_events_per_chunk(events_per_chunk),
-      m_splitterMap(splitterMap), m_grainsize_event(grainsize_event), m_progress(progress) {}
+    : ProcessBankTaskBase(bankEntryNames, loader, calibFactory), m_h5file(h5file), m_workspaceIndices(workspaceIndices),
+      m_wksps(wksps), m_events_per_chunk(events_per_chunk), m_splitterMap(splitterMap),
+      m_grainsize_event(grainsize_event), m_progress(progress) {}
 
 void ProcessBankSplitFullTimeTask::operator()(const tbb::blocked_range<size_t> &range) const {
   auto entry = m_h5file.openGroup("entry"); // type=NXentry
@@ -59,7 +59,7 @@ void ProcessBankSplitFullTimeTask::operator()(const tbb::blocked_range<size_t> &
     }
 
     std::unique_ptr<std::vector<uint64_t>> event_index = std::make_unique<std::vector<uint64_t>>();
-    auto eventRanges = m_loader->getEventIndexRanges(event_group, total_events, &event_index);
+    auto eventRanges = this->getEventIndexRanges(event_group, total_events, &event_index);
 
     // Get all spectra for this bank.
     // Create temporary y arrays for each workspace.
@@ -136,13 +136,7 @@ void ProcessBankSplitFullTimeTask::operator()(const tbb::blocked_range<size_t> &
       g_log.debug() << oss.str();
 
       // load detid and tof at the same time
-      tbb::parallel_invoke(
-          [&] { // load detid
-            m_loader->loadData(detID_SDS, event_detid, offsets, slabsizes);
-          },
-          [&] { // load time-of-flight
-            m_loader->loadData(tof_SDS, event_time_of_flight, offsets, slabsizes);
-          });
+      this->loadEvents(detID_SDS, tof_SDS, offsets, slabsizes, event_detid, event_time_of_flight);
 
       pulse_times_idx->resize(total_events_to_read);
       // get the pulsetime of every event, event_index maps the first event of each pulse

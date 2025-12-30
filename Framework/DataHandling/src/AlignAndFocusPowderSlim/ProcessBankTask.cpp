@@ -26,7 +26,7 @@ ProcessBankTask::ProcessBankTask(std::vector<std::string> &bankEntryNames, H5::H
                                  std::shared_ptr<NexusLoader> loader, API::MatrixWorkspace_sptr &wksp,
                                  const BankCalibrationFactory &calibFactory, const size_t events_per_chunk,
                                  const size_t grainsize_event, std::shared_ptr<API::Progress> &progress)
-    : ProcessBankTaskBase(bankEntryNames, calibFactory), m_h5file(h5file), m_loader(std::move(loader)), m_wksp(wksp),
+    : ProcessBankTaskBase(bankEntryNames, loader, calibFactory), m_h5file(h5file), m_wksp(wksp),
       m_events_per_chunk(events_per_chunk), m_grainsize_event(grainsize_event), m_progress(progress) {}
 
 void ProcessBankTask::operator()(const tbb::blocked_range<size_t> &range) const {
@@ -51,7 +51,7 @@ void ProcessBankTask::operator()(const tbb::blocked_range<size_t> &range) const 
       continue;
     }
 
-    auto eventRanges = m_loader->getEventIndexRanges(event_group, total_events);
+    auto eventRanges = this->getEventIndexRanges(event_group, total_events);
 
     // create a histogrammer to process the events
     auto &spectrum = m_wksp->getSpectrum(wksp_index);
@@ -120,15 +120,7 @@ void ProcessBankTask::operator()(const tbb::blocked_range<size_t> &range) const 
       g_log.debug() << oss.str();
 
       // load detid and tof at the same time
-      tbb::parallel_invoke(
-          [&] { // load detid
-            // event_detid->clear();
-            m_loader->loadData(detID_SDS, event_detid, offsets, slabsizes);
-          },
-          [&] { // load time-of-flight
-            // event_time_of_flight->clear();
-            m_loader->loadData(tof_SDS, event_time_of_flight, offsets, slabsizes);
-          });
+      this->loadEvents(detID_SDS, tof_SDS, offsets, slabsizes, event_detid, event_time_of_flight);
 
       // Create a local task for this thread
       ProcessEventsTask task(event_detid.get(), event_time_of_flight.get(), &calibration, &spectrum.readX());

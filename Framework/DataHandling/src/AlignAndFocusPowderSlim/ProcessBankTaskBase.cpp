@@ -7,15 +7,16 @@
 
 #include "MantidDataHandling/AlignAndFocusPowderSlim/ProcessBankTaskBase.h"
 #include "MantidKernel/Unit.h"
+#include <tbb/tbb.h>
 
 namespace {
 const std::string MICROSEC("microseconds");
 }
 
 namespace Mantid::DataHandling::AlignAndFocusPowderSlim {
-ProcessBankTaskBase::ProcessBankTaskBase(std::vector<std::string> &bankEntryNames,
+ProcessBankTaskBase::ProcessBankTaskBase(std::vector<std::string> &bankEntryNames, std::shared_ptr<NexusLoader> loader,
                                          const BankCalibrationFactory &calibFactory)
-    : m_bankEntries(bankEntryNames), m_calibFactory(calibFactory) {}
+    : m_bankEntries(bankEntryNames), m_loader(std::move(loader)), m_calibFactory(calibFactory) {}
 
 const std::string &ProcessBankTaskBase::bankName(const size_t wksp_index) const { return m_bankEntries[wksp_index]; }
 BankCalibration ProcessBankTaskBase::getCalibration(const std::string &tof_unit, const size_t wksp_index) const {
@@ -25,6 +26,30 @@ BankCalibration ProcessBankTaskBase::getCalibration(const std::string &tof_unit,
   // now the calibration for the output group can be created
   // which detectors go into the current group - assumes ouput spectrum number is one more than workspace index
   return m_calibFactory.getCalibration(time_conversion, wksp_index);
+}
+
+void ProcessBankTaskBase::loadEvents(H5::DataSet &detID_SDS, H5::DataSet &tof_SDS, const std::vector<size_t> &offsets,
+                                     const std::vector<size_t> &slabsizes,
+                                     std::unique_ptr<std::vector<uint32_t>> &detId_vec,
+                                     std::unique_ptr<std::vector<float>> &tof_vec) const {
+  tbb::parallel_invoke(
+      [&] { // load detid
+        m_loader->loadData(detID_SDS, detId_vec, offsets, slabsizes);
+      },
+      [&] { // load time-of-flight
+        m_loader->loadData(tof_SDS, tof_vec, offsets, slabsizes);
+      });
+}
+
+std::stack<EventROI>
+ProcessBankTaskBase::getEventIndexRanges(H5::Group &event_group, const uint64_t number_events,
+                                         std::unique_ptr<std::vector<uint64_t>> *event_index) const {
+  return m_loader->getEventIndexRanges(event_group, number_events, event_index);
+}
+
+std::stack<std::pair<int, EventROI>> ProcessBankTaskBase::getEventIndexSplitRanges(H5::Group &event_group,
+                                                                                   const uint64_t number_events) const {
+  return m_loader->getEventIndexSplitRanges(event_group, number_events);
 }
 
 void copyDataToSpectrum(const std::vector<uint32_t> &y_temp, API::ISpectrum *spectrum) {
