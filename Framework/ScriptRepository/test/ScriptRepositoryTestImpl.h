@@ -276,7 +276,8 @@ public:
     TSM_ASSERT("Now should be valid!", repo->isValid());
     // checking that repository.json and local.json exists
     {
-      TSM_ASSERT("Failed to create repository.json", std::filesystem::exists(std::string(local_rep).append("/.repository.json")));
+      TSM_ASSERT("Failed to create repository.json",
+                 std::filesystem::exists(std::string(local_rep).append("/.repository.json")));
       TSM_ASSERT("Failed to create local.json", std::filesystem::exists(std::string(local_rep).append("/.local.json")));
     }
 
