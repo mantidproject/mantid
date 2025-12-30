@@ -338,8 +338,7 @@ private:
 
   void checkOutputFile(const IMDEventWorkspace &outputWS, const std::string &outputFilename) {
     TS_ASSERT(outputWS.isFileBacked());
-    Poco::File fileback(outputFilename);
-    TS_ASSERT(fileback.getSize() > 0);
+    TS_ASSERT(std::filesystem::file_size(outputFilename) > 0);
   }
 
   //----------------------------------------------------------------------------
