@@ -129,6 +129,18 @@ Test if a file with this filename already exists
 */
 bool fileExists(const std::string &filename) { return std::filesystem::exists(filename); }
 
+/**
+Convert std::filesystem::last_write_time to DateAndTime via Poco::DateTime
+*/
+DateAndTime convertFileTimeToDateAndTime(const std::filesystem::path &path) {
+  auto ftime = std::filesystem::last_write_time(path);
+  auto sctp = std::chrono::time_point_cast<std::chrono::system_clock::duration>(
+      ftime - std::filesystem::file_time_type::clock::now() + std::chrono::system_clock::now());
+  std::time_t cftime = std::chrono::system_clock::to_time_t(sctp);
+  Poco::DateTime pocoTime = Poco::DateTime(Poco::Timestamp::fromEpochTime(cftime));
+  return DateAndTime(Poco::DateTimeFormatter::format(pocoTime, timeformat));
+}
+
 DECLARE_SCRIPTREPOSITORY(ScriptRepositoryImpl)
 /**
  The main information that ScriptrepositoryImpl needs to be able
@@ -633,12 +645,7 @@ void ScriptRepositoryImpl::download_directory(const std::string &directory_path)
       std::filesystem::create_directories(dir);
 
       entry.second.status = BOTH_UNCHANGED;
-      auto ftime = std::filesystem::last_write_time(dir);
-      auto sctp = std::chrono::time_point_cast<std::chrono::system_clock::duration>(
-          ftime - std::filesystem::file_time_type::clock::now() + std::chrono::system_clock::now());
-      std::time_t cftime = std::chrono::system_clock::to_time_t(sctp);
-      Poco::DateTime pocoTime = Poco::DateTime(Poco::Timestamp::fromEpochTime(cftime));
-      entry.second.downloaded_date = DateAndTime(Poco::DateTimeFormatter::format(pocoTime, timeformat));
+      entry.second.downloaded_date = convertFileTimeToDateAndTime(dir);
       entry.second.downloaded_pubdate = entry.second.pub_date;
       updateLocalJson(entry.first, entry.second);
 
@@ -716,12 +723,7 @@ void ScriptRepositoryImpl::download_file(const std::string &file_path, Repositor
 
   {
     std::filesystem::path local(local_path);
-    auto ftime = std::filesystem::last_write_time(local);
-    auto sctp = std::chrono::time_point_cast<std::chrono::system_clock::duration>(
-        ftime - std::filesystem::file_time_type::clock::now() + std::chrono::system_clock::now());
-    std::time_t cftime = std::chrono::system_clock::to_time_t(sctp);
-    Poco::DateTime pocoTime = Poco::DateTime(Poco::Timestamp::fromEpochTime(cftime));
-    entry.downloaded_date = DateAndTime(Poco::DateTimeFormatter::format(pocoTime, timeformat));
+    entry.downloaded_date = convertFileTimeToDateAndTime(local);
     entry.downloaded_pubdate = entry.pub_date;
     entry.status = BOTH_UNCHANGED;
   }
@@ -867,12 +869,7 @@ void ScriptRepositoryImpl::upload(const std::string &file_path, const std::strin
       RepositoryEntry &entry = repo.at(file_path);
       {
         std::filesystem::path local(absolute_path);
-        auto ftime = std::filesystem::last_write_time(local);
-        auto sctp = std::chrono::time_point_cast<std::chrono::system_clock::duration>(
-            ftime - std::filesystem::file_time_type::clock::now() + std::chrono::system_clock::now());
-        std::time_t cftime = std::chrono::system_clock::to_time_t(sctp);
-        Poco::DateTime pocoTime = Poco::DateTime(Poco::Timestamp::fromEpochTime(cftime));
-        entry.downloaded_date = DateAndTime(Poco::DateTimeFormatter::format(pocoTime, timeformat));
+        entry.downloaded_date = convertFileTimeToDateAndTime(local);
         // update the pub_date and downloaded_pubdate with the pub_date given by
         // the upload.
         // this ensures that the status will be correctly defined.
