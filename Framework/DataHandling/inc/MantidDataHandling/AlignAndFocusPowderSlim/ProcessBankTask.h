@@ -23,16 +23,16 @@ namespace Mantid::DataHandling::AlignAndFocusPowderSlim {
 
 class ProcessBankTask : public ProcessBankTaskBase {
 public:
-  ProcessBankTask(std::vector<std::string> &bankEntryNames, H5::H5File &h5file, const bool is_time_filtered,
+  ProcessBankTask(std::vector<std::string> &bankEntryNames, H5::H5File &h5file, std::shared_ptr<NexusLoader> loader,
                   API::MatrixWorkspace_sptr &wksp, const BankCalibrationFactory &calibFactory,
-                  const size_t events_per_chunk, const size_t grainsize_event, std::vector<PulseROI> pulse_indices,
+                  const size_t events_per_chunk, const size_t grainsize_event,
                   std::shared_ptr<API::Progress> &progress);
 
   void operator()(const tbb::blocked_range<size_t> &range) const;
 
 private:
   H5::H5File m_h5file;
-  const NexusLoader m_loader;
+  std::shared_ptr<const NexusLoader> m_loader;
   API::MatrixWorkspace_sptr m_wksp;
   /// number of events to read from disk at one time
   const size_t m_events_per_chunk;

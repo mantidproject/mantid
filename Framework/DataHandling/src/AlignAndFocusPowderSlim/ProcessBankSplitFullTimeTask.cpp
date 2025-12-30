@@ -26,16 +26,6 @@ namespace {
 auto g_log = Kernel::Logger("ProcessBankSplitFullTimeTask");
 
 } // namespace
-ProcessBankSplitFullTimeTask::ProcessBankSplitFullTimeTask(
-    std::vector<std::string> &bankEntryNames, H5::H5File &h5file, const bool is_time_filtered,
-    std::vector<int> &workspaceIndices, std::vector<API::MatrixWorkspace_sptr> &wksps,
-    const BankCalibrationFactory &calibFactory, const size_t events_per_chunk, const size_t grainsize_event,
-    const std::vector<PulseROI> &pulse_indices, const std::map<Mantid::Types::Core::DateAndTime, int> &splitterMap,
-    std::shared_ptr<API::Progress> &progress)
-    : ProcessBankTaskBase(bankEntryNames, calibFactory), m_h5file(h5file),
-      m_loader(std::make_shared<NexusLoader>(is_time_filtered, pulse_indices)), m_workspaceIndices(workspaceIndices),
-      m_wksps(wksps), m_events_per_chunk(events_per_chunk), m_splitterMap(splitterMap),
-      m_grainsize_event(grainsize_event), m_progress(progress) {}
 
 ProcessBankSplitFullTimeTask::ProcessBankSplitFullTimeTask(
     std::vector<std::string> &bankEntryNames, H5::H5File &h5file, std::shared_ptr<NexusLoader> loader,

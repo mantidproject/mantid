@@ -25,15 +25,13 @@ auto g_log = Kernel::Logger("ProcessBankSplitTask");
 
 } // namespace
 ProcessBankSplitTask::ProcessBankSplitTask(std::vector<std::string> &bankEntryNames, H5::H5File &h5file,
-                                           const bool is_time_filtered, std::vector<int> &workspaceIndices,
+                                           std::shared_ptr<NexusLoader> loader, std::vector<int> &workspaceIndices,
                                            std::vector<API::MatrixWorkspace_sptr> &wksps,
                                            const BankCalibrationFactory &calibFactory, const size_t events_per_chunk,
-                                           const size_t grainsize_event,
-                                           std::vector<std::pair<int, PulseROI>> target_to_pulse_indices,
-                                           std::shared_ptr<API::Progress> &progress)
-    : ProcessBankTaskBase(bankEntryNames, calibFactory), m_h5file(h5file),
-      m_loader(is_time_filtered, {}, target_to_pulse_indices), m_workspaceIndices(workspaceIndices), m_wksps(wksps),
-      m_events_per_chunk(events_per_chunk), m_grainsize_event(grainsize_event), m_progress(progress) {}
+                                           const size_t grainsize_event, std::shared_ptr<API::Progress> &progress)
+    : ProcessBankTaskBase(bankEntryNames, calibFactory), m_h5file(h5file), m_loader(std::move(loader)),
+      m_workspaceIndices(workspaceIndices), m_wksps(wksps), m_events_per_chunk(events_per_chunk),
+      m_grainsize_event(grainsize_event), m_progress(progress) {}
 
 void ProcessBankSplitTask::operator()(const tbb::blocked_range<size_t> &range) const {
   auto entry = m_h5file.openGroup("entry"); // type=NXentry
@@ -57,7 +55,7 @@ void ProcessBankSplitTask::operator()(const tbb::blocked_range<size_t> &range) c
       continue;
     }
 
-    auto eventSplitRanges = m_loader.getEventIndexSplitRanges(event_group, total_events);
+    auto eventSplitRanges = m_loader->getEventIndexSplitRanges(event_group, total_events);
 
     // Get all spectra for this bank.
     // Create temporary y arrays for each workspace.
@@ -135,11 +133,11 @@ void ProcessBankSplitTask::operator()(const tbb::blocked_range<size_t> &range) c
       tbb::parallel_invoke(
           [&] { // load detid
             // event_detid->clear();
-            m_loader.loadData(detID_SDS, event_detid, offsets, slabsizes);
+            m_loader->loadData(detID_SDS, event_detid, offsets, slabsizes);
           },
           [&] { // load time-of-flight
             // event_time_of_flight->clear();
-            m_loader.loadData(tof_SDS, event_time_of_flight, offsets, slabsizes);
+            m_loader->loadData(tof_SDS, event_time_of_flight, offsets, slabsizes);
           });
 
       // loop over targets

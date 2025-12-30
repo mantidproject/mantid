@@ -23,12 +23,11 @@ auto g_log = Kernel::Logger("ProcessBankTask");
 
 } // namespace
 ProcessBankTask::ProcessBankTask(std::vector<std::string> &bankEntryNames, H5::H5File &h5file,
-                                 const bool is_time_filtered, API::MatrixWorkspace_sptr &wksp,
+                                 std::shared_ptr<NexusLoader> loader, API::MatrixWorkspace_sptr &wksp,
                                  const BankCalibrationFactory &calibFactory, const size_t events_per_chunk,
-                                 const size_t grainsize_event, std::vector<PulseROI> pulse_indices,
-                                 std::shared_ptr<API::Progress> &progress)
-    : ProcessBankTaskBase(bankEntryNames, calibFactory), m_h5file(h5file), m_loader(is_time_filtered, pulse_indices),
-      m_wksp(wksp), m_events_per_chunk(events_per_chunk), m_grainsize_event(grainsize_event), m_progress(progress) {}
+                                 const size_t grainsize_event, std::shared_ptr<API::Progress> &progress)
+    : ProcessBankTaskBase(bankEntryNames, calibFactory), m_h5file(h5file), m_loader(std::move(loader)), m_wksp(wksp),
+      m_events_per_chunk(events_per_chunk), m_grainsize_event(grainsize_event), m_progress(progress) {}
 
 void ProcessBankTask::operator()(const tbb::blocked_range<size_t> &range) const {
   auto entry = m_h5file.openGroup("entry"); // type=NXentry
@@ -52,7 +51,7 @@ void ProcessBankTask::operator()(const tbb::blocked_range<size_t> &range) const 
       continue;
     }
 
-    auto eventRanges = m_loader.getEventIndexRanges(event_group, total_events);
+    auto eventRanges = m_loader->getEventIndexRanges(event_group, total_events);
 
     // create a histogrammer to process the events
     auto &spectrum = m_wksp->getSpectrum(wksp_index);
@@ -124,11 +123,11 @@ void ProcessBankTask::operator()(const tbb::blocked_range<size_t> &range) const 
       tbb::parallel_invoke(
           [&] { // load detid
             // event_detid->clear();
-            m_loader.loadData(detID_SDS, event_detid, offsets, slabsizes);
+            m_loader->loadData(detID_SDS, event_detid, offsets, slabsizes);
           },
           [&] { // load time-of-flight
             // event_time_of_flight->clear();
-            m_loader.loadData(tof_SDS, event_time_of_flight, offsets, slabsizes);
+            m_loader->loadData(tof_SDS, event_time_of_flight, offsets, slabsizes);
           });
 
       // Create a local task for this thread

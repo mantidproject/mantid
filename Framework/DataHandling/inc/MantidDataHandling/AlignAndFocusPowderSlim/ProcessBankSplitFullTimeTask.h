@@ -30,15 +30,6 @@ const int64_t PULSETIME_OFFSET = 66666666;
 class MANTID_DATAHANDLING_DLL ProcessBankSplitFullTimeTask : public ProcessBankTaskBase {
 public:
   ProcessBankSplitFullTimeTask(std::vector<std::string> &bankEntryNames, H5::H5File &h5file,
-                               const bool is_time_filtered, std::vector<int> &workspaceIndices,
-                               std::vector<API::MatrixWorkspace_sptr> &wksps,
-                               const BankCalibrationFactory &calibFactory, const size_t events_per_chunk,
-                               const size_t grainsize_event, const std::vector<PulseROI> &pulse_indices,
-                               const std::map<Mantid::Types::Core::DateAndTime, int> &splitterMap,
-                               std::shared_ptr<API::Progress> &progress);
-
-  // Constructor with custom loader to allow mocking in tests
-  ProcessBankSplitFullTimeTask(std::vector<std::string> &bankEntryNames, H5::H5File &h5file,
                                std::shared_ptr<NexusLoader> loader, std::vector<int> &workspaceIndices,
                                std::vector<API::MatrixWorkspace_sptr> &wksps,
                                const BankCalibrationFactory &calibFactory, const size_t events_per_chunk,
