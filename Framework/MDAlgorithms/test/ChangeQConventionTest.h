@@ -15,8 +15,6 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include <Poco/File.h>
-
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::MDAlgorithms;
