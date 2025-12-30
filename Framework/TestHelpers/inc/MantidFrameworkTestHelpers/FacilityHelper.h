@@ -14,7 +14,7 @@
 
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
-#include <Poco/Path.h>
+#include <filesystem>
 
 namespace FacilityHelper {
 
@@ -31,9 +31,9 @@ struct ScopedFacilities {
   ScopedFacilities(const std::string &filename, const std::string &defFacility) {
     auto &config = Mantid::Kernel::ConfigService::Instance();
     defFacilityOnStart = config.getFacility().name();
-    Poco::Path testFile = Poco::Path(config.getInstrumentDirectory()).resolve(filename);
+    std::filesystem::path testFile = std::filesystem::path(config.getInstrumentDirectory()) / filename;
     // Load the test facilities file
-    config.updateFacilities(testFile.toString());
+    config.updateFacilities(testFile.string());
     config.setFacility(defFacility);
   }
 

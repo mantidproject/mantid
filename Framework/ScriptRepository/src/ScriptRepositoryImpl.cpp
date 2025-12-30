@@ -14,7 +14,9 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/NetworkProxy.h"
 #include "MantidKernel/ProxyInfo.h"
+#include <chrono>
 #include <filesystem>
+#include <fstream>
 #include <unordered_set>
 #include <utility>
 
@@ -25,9 +27,7 @@ using Mantid::Types::Core::DateAndTime;
 
 // from poco
 #include <Poco/Exception.h>
-#include <Poco/File.h>
 #include <Poco/Net/NetException.h>
-#include <Poco/Path.h>
 #include <Poco/TemporaryFile.h>
 #include <Poco/URI.h>
 /*#include <Poco/Net/HTTPClientSession.h>
@@ -83,7 +83,7 @@ const char *emptyURL = "The initialization failed because no URL was given that 
 Write json object to file
 */
 void writeJsonFile(const std::string &filename, const Json::Value &json, const std::string &error) {
-  Poco::FileOutputStream filestream(filename);
+  std::ofstream filestream(filename);
   if (!filestream.good()) {
     g_log.error() << error << '\n';
   }
@@ -95,7 +95,7 @@ void writeJsonFile(const std::string &filename, const Json::Value &json, const s
 Read json object from file
 */
 Json::Value readJsonFile(const std::string &filename, const std::string &error) {
-  Poco::FileInputStream fileStream(filename);
+  std::ifstream fileStream(filename);
   if (!fileStream.good()) {
     g_log.error() << error << '\n';
   }
@@ -116,7 +116,7 @@ Json::Value readJsonFile(const std::string &filename, const std::string &error) 
 Write string to file
 */
 void writeStringFile(const std::string &filename, const std::string &stringToWrite, const std::string &error) {
-  Poco::FileStream filestream(filename);
+  std::ofstream filestream(filename);
   if (!filestream.good()) {
     g_log.error() << error << '\n';
   }
@@ -128,8 +128,7 @@ void writeStringFile(const std::string &filename, const std::string &stringToWri
 Test if a file with this filename already exists
 */
 bool fileExists(const std::string &filename) {
-  Poco::File test_file(filename);
-  return test_file.exists();
+  return std::filesystem::exists(filename);
 }
 
 DECLARE_SCRIPTREPOSITORY(ScriptRepositoryImpl)
@@ -217,22 +216,20 @@ ScriptRepositoryImpl::ScriptRepositoryImpl(const std::string &local_rep, const s
   //  - An existing folder
   //  - This folder must have the .repository.json file
   //  - This folder must have the .local.json file
-  // These tests will be done with Poco library
+  // These tests will be done with std::filesystem library
 
-  Poco::Path local(local_repository);
+  std::filesystem::path local(local_repository);
 
   std::string aux_local_rep;
-  if (local.isRelative()) {
-    aux_local_rep = std::string(Poco::Path::current()).append(local_repository);
+  if (local.is_relative()) {
+    aux_local_rep = (std::filesystem::current_path() / local_repository).string();
     local_repository = aux_local_rep;
   }
 
   try { // tests 1 and 2
     {
-      Poco::File local_rep_dir(local);
       std::string repository_json = std::string(local_repository).append(".repository.json");
-      Poco::File rep_json(repository_json);
-      if (!local_rep_dir.exists() || !rep_json.exists()) {
+      if (!std::filesystem::exists(local) || !std::filesystem::exists(repository_json)) {
         g_log.information() << "ScriptRepository was not installed at " << local_repository << '\n';
         return; // this is an invalid repository, because it was not created
                 // (installed)
@@ -241,14 +238,13 @@ ScriptRepositoryImpl::ScriptRepositoryImpl(const std::string &local_rep, const s
     // third test
     {
       std::string repository_json = std::string(local_repository).append(".local.json");
-      Poco::File rep_json(repository_json);
-      if (!rep_json.exists()) {
+      if (!std::filesystem::exists(repository_json)) {
         g_log.error() << "Corrupted ScriptRepository at " << local_repository
                       << ". Please, remove this folder, and install "
                          "ScriptRepository again\n";
       }
     }
-  } catch (Poco::FileNotFoundException & /*ex*/) {
+  } catch (std::filesystem::filesystem_error & /*ex*/) {
     g_log.error() << "Testing the existence of repository.json and local.json failed\n";
     return;
   }
@@ -304,11 +300,10 @@ void ScriptRepositoryImpl::install(const std::string &path) {
     throw ScriptRepoException(ss.str());
   }
   std::string folder = std::string(path);
-  Poco::File repository_folder(folder);
   std::string rep_json_file = std::string(path).append("/.repository.json");
   std::string local_json_file = std::string(path).append("/.local.json");
-  if (!repository_folder.exists()) {
-    repository_folder.createDirectories();
+  if (!std::filesystem::exists(folder)) {
+    std::filesystem::create_directories(folder);
   }
 
   // install the two files inside the given folder
@@ -636,11 +631,16 @@ void ScriptRepositoryImpl::download_directory(const std::string &directory_path)
       // we will not download the directory, but create one with the
       // same name, and update the local json
 
-      Poco::File dir(std::string(local_repository).append(entry.first));
-      dir.createDirectories();
+      std::filesystem::path dir(std::string(local_repository).append(entry.first));
+      std::filesystem::create_directories(dir);
 
       entry.second.status = BOTH_UNCHANGED;
-      entry.second.downloaded_date = DateAndTime(Poco::DateTimeFormatter::format(dir.getLastModified(), timeformat));
+      auto ftime = std::filesystem::last_write_time(dir);
+      auto sctp = std::chrono::time_point_cast<std::chrono::system_clock::duration>(
+          ftime - std::filesystem::file_time_type::clock::now() + std::chrono::system_clock::now());
+      std::time_t cftime = std::chrono::system_clock::to_time_t(sctp);
+      Poco::DateTime pocoTime = Poco::DateTime(Poco::Timestamp::fromEpochTime(cftime));
+      entry.second.downloaded_date = DateAndTime(Poco::DateTimeFormatter::format(pocoTime, timeformat));
       entry.second.downloaded_pubdate = entry.second.pub_date;
       updateLocalJson(entry.first, entry.second);
 
@@ -684,40 +684,46 @@ void ScriptRepositoryImpl::download_file(const std::string &file_path, Repositor
 
     if (state == BOTH_CHANGED) {
       // make a back up of the local version
-      Poco::File f(std::string(local_repository).append(file_path));
-      std::string bck = std::string(f.path()).append("_bck");
-      g_log.notice() << "The current file " << f.path() << " has some local changes"
+      std::filesystem::path f(std::string(local_repository).append(file_path));
+      std::string bck = f.string() + "_bck";
+      g_log.notice() << "The current file " << f.string() << " has some local changes"
                      << " so, a back up copy will be created at " << bck << '\n';
-      f.copyTo(bck);
+      std::filesystem::copy_file(f, bck, std::filesystem::copy_options::overwrite_existing);
     }
 
     // ensure that the path to the local_path exists
     size_t slash_pos = local_path.rfind('/');
-    Poco::File file_out(local_path);
     if (slash_pos != std::string::npos) {
       dir_path = std::string(local_path.begin(), local_path.begin() + slash_pos);
       if (!dir_path.empty()) {
-        Poco::File dir_parent(dir_path);
-        if (!dir_parent.exists()) {
-          dir_parent.createDirectories();
+        if (!std::filesystem::exists(dir_path)) {
+          std::filesystem::create_directories(dir_path);
         }
       } // dir path is empty
     }
 
-    if (!file_out.exists())
-      file_out.createFile();
+    if (!std::filesystem::exists(local_path)) {
+      // Create an empty file
+      std::ofstream ofs(local_path);
+      ofs.close();
+    }
 
     tmpFile.copyTo(local_path);
 
-  } catch (Poco::FileAccessDeniedException &) {
+  } catch (std::filesystem::filesystem_error &) {
     std::stringstream ss;
     ss << "You cannot create file at " << local_path << ". Not downloading ...";
     throw ScriptRepoException(ss.str());
   }
 
   {
-    Poco::File local(local_path);
-    entry.downloaded_date = DateAndTime(Poco::DateTimeFormatter::format(local.getLastModified(), timeformat));
+    std::filesystem::path local(local_path);
+    auto ftime = std::filesystem::last_write_time(local);
+    auto sctp = std::chrono::time_point_cast<std::chrono::system_clock::duration>(
+        ftime - std::filesystem::file_time_type::clock::now() + std::chrono::system_clock::now());
+    std::time_t cftime = std::chrono::system_clock::to_time_t(sctp);
+    Poco::DateTime pocoTime = Poco::DateTime(Poco::Timestamp::fromEpochTime(cftime));
+    entry.downloaded_date = DateAndTime(Poco::DateTimeFormatter::format(pocoTime, timeformat));
     entry.downloaded_pubdate = entry.pub_date;
     entry.status = BOTH_UNCHANGED;
   }
@@ -862,8 +868,13 @@ void ScriptRepositoryImpl::upload(const std::string &file_path, const std::strin
       // update the file
       RepositoryEntry &entry = repo.at(file_path);
       {
-        Poco::File local(absolute_path);
-        entry.downloaded_date = DateAndTime(Poco::DateTimeFormatter::format(local.getLastModified(), timeformat));
+        std::filesystem::path local(absolute_path);
+        auto ftime = std::filesystem::last_write_time(local);
+        auto sctp = std::chrono::time_point_cast<std::chrono::system_clock::duration>(
+            ftime - std::filesystem::file_time_type::clock::now() + std::chrono::system_clock::now());
+        std::time_t cftime = std::chrono::system_clock::to_time_t(sctp);
+        Poco::DateTime pocoTime = Poco::DateTime(Poco::Timestamp::fromEpochTime(cftime));
+        entry.downloaded_date = DateAndTime(Poco::DateTimeFormatter::format(pocoTime, timeformat));
         // update the pub_date and downloaded_pubdate with the pub_date given by
         // the upload.
         // this ensures that the status will be correctly defined.
@@ -1191,23 +1202,20 @@ std::vector<std::string> ScriptRepositoryImpl::check4Update() {
   std::string rep_json_file = std::string(local_repository).append(".repository.json");
   std::string backup = std::string(rep_json_file).append("_backup");
   {
-    Poco::File f(rep_json_file);
-    f.moveTo(backup);
+    std::filesystem::rename(rep_json_file, backup);
   }
   try {
     g_log.debug() << "Download information from the Central Repository status\n";
     doDownloadFile(std::string(remote_url).append("repository.json"), rep_json_file);
   } catch (...) {
     // restore file
-    Poco::File f(backup);
-    f.moveTo(rep_json_file);
+    std::filesystem::rename(backup, rep_json_file);
     throw;
   }
 
   // remote backup
   {
-    Poco::File bak(backup);
-    bak.remove();
+    std::filesystem::remove(backup);
   }
 
 #if defined(_WIN32) || defined(_WIN64)
@@ -1651,20 +1659,27 @@ std::string ScriptRepositoryImpl::getParentFolder(const std::string &file) {
  */
 std::string ScriptRepositoryImpl::convertPath(const std::string &path) {
   std::vector<std::string> lookAfter;
-  using Poco::Path;
-  lookAfter.emplace_back(Path::current());
-  //    lookAfter.emplace_back(Path::home());
+  lookAfter.emplace_back(std::filesystem::current_path().string());
+  //    lookAfter.emplace_back(std::filesystem::path::home());
   lookAfter.emplace_back(local_repository);
 
-  Path pathFound;
-  bool file_is_local;
+  std::filesystem::path pathFound;
+  bool file_is_local = false;
 
   // try to find the given path at one of the paths at lookAfter.
-  file_is_local = Path::find(lookAfter.begin(), lookAfter.end(), path, pathFound);
+  for (const auto &searchPath : lookAfter) {
+    std::filesystem::path candidate = std::filesystem::path(searchPath) / path;
+    if (std::filesystem::exists(candidate)) {
+      pathFound = candidate;
+      file_is_local = true;
+      break;
+    }
+  }
+  
   // get the absolute path:
   std::string absolute_path;
   if (file_is_local)
-    absolute_path = pathFound.absolute().toString();
+    absolute_path = std::filesystem::absolute(pathFound).string();
   else
     absolute_path = path;
   // g_log.debug() << "ConvertPath: Entered: " << path << " and
