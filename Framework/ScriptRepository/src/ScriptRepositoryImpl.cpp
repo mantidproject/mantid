@@ -127,9 +127,7 @@ void writeStringFile(const std::string &filename, const std::string &stringToWri
 /**
 Test if a file with this filename already exists
 */
-bool fileExists(const std::string &filename) {
-  return std::filesystem::exists(filename);
-}
+bool fileExists(const std::string &filename) { return std::filesystem::exists(filename); }
 
 DECLARE_SCRIPTREPOSITORY(ScriptRepositoryImpl)
 /**
@@ -1666,20 +1664,30 @@ std::string ScriptRepositoryImpl::convertPath(const std::string &path) {
   std::filesystem::path pathFound;
   bool file_is_local = false;
 
-  // try to find the given path at one of the paths at lookAfter.
-  for (const auto &searchPath : lookAfter) {
-    std::filesystem::path candidate = std::filesystem::path(searchPath) / path;
-    if (std::filesystem::exists(candidate)) {
-      pathFound = candidate;
-      file_is_local = true;
-      break;
+  // Check if path is already absolute and exists
+  std::filesystem::path inputPath(path);
+  // Normalize the path to handle double slashes and . or ..
+  inputPath = inputPath.lexically_normal();
+  if (inputPath.is_absolute() && std::filesystem::exists(inputPath)) {
+    pathFound = inputPath;
+    file_is_local = true;
+  } else {
+    // try to find the given path at one of the paths at lookAfter.
+    for (const auto &searchPath : lookAfter) {
+      std::filesystem::path candidate = std::filesystem::path(searchPath) / path;
+      candidate = candidate.lexically_normal();
+      if (std::filesystem::exists(candidate)) {
+        pathFound = candidate;
+        file_is_local = true;
+        break;
+      }
     }
   }
-  
+
   // get the absolute path:
   std::string absolute_path;
   if (file_is_local)
-    absolute_path = std::filesystem::absolute(pathFound).string();
+    absolute_path = std::filesystem::absolute(pathFound).lexically_normal().string();
   else
     absolute_path = path;
   // g_log.debug() << "ConvertPath: Entered: " << path << " and
