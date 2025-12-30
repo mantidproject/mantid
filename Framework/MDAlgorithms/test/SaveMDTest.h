@@ -18,7 +18,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include <Poco/File.h>
+#include <filesystem>
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
@@ -75,14 +75,14 @@ public:
     // clean up possible rubbish from the previous runs
     std::string fullName = alg.getPropertyValue("Filename");
     if (fullName != "")
-      if (Poco::File(fullName).exists())
-        Poco::File(fullName).remove();
+      if (std::filesystem::exists(fullName))
+        std::filesystem::remove(fullName);
 
     alg.execute();
     TS_ASSERT(alg.isExecuted());
 
     std::string this_filename = alg.getProperty("Filename");
-    TSM_ASSERT("File was indeed created", Poco::File(this_filename).exists());
+    TSM_ASSERT("File was indeed created", std::filesystem::exists(this_filename));
 
     if (MakeFileBacked) {
       TSM_ASSERT("Workspace was made file-backed", ws->isFileBacked());
@@ -96,8 +96,8 @@ public:
       do_test_OtherFileName(ws, this_filename);
     } else {
       ws->clearFileBacked(false);
-      if (Poco::File(this_filename).exists())
-        Poco::File(this_filename).remove();
+      if (std::filesystem::exists(this_filename))
+        std::filesystem::remove(this_filename);
     }
   }
 
@@ -135,8 +135,8 @@ public:
     // Clean up file
     ws->clearFileBacked(false);
     std::string fullPath = alg.getPropertyValue("Filename");
-    if (Poco::File(fullPath).exists())
-      Poco::File(fullPath).remove();
+    if (std::filesystem::exists(fullPath))
+      std::filesystem::remove(fullPath);
   }
 
   void do_test_OtherFileName(const MDEventWorkspace1Lean::sptr &ws, const std::string &originalFileName) {
@@ -182,11 +182,11 @@ public:
     // Clean up file and other file
     ws->clearFileBacked(false);
     std::string fullPath = algSave->getProperty("Filename");
-    if (Poco::File(fullPath).exists())
-      Poco::File(fullPath).remove();
+    if (std::filesystem::exists(fullPath))
+      std::filesystem::remove(fullPath);
 
-    if (Poco::File(originalFileName).exists())
-      Poco::File(originalFileName).remove();
+    if (std::filesystem::exists(originalFileName))
+      std::filesystem::remove(originalFileName);
   }
 
   void test_saveExpInfo() {
@@ -226,8 +226,8 @@ public:
     TS_ASSERT(alg.isExecuted());
     std::string this_filename = alg.getProperty("Filename");
     ws->clearFileBacked(false);
-    if (Poco::File(this_filename).exists())
-      Poco::File(this_filename).remove();
+    if (std::filesystem::exists(this_filename))
+      std::filesystem::remove(this_filename);
   }
 
   void test_saveAffine() {
@@ -257,8 +257,8 @@ public:
     TS_ASSERT(alg.isExecuted());
     std::string this_filename = alg.getProperty("Filename");
     ws->clearFileBacked(false);
-    if (Poco::File(this_filename).exists()) {
-      Poco::File(this_filename).remove();
+    if (std::filesystem::exists(this_filename)) {
+      std::filesystem::remove(this_filename);
     }
   }
 
@@ -275,9 +275,9 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     filename = alg.getPropertyValue("Filename");
-    TSM_ASSERT("File was indeed created", Poco::File(filename).exists());
-    if (Poco::File(filename).exists())
-      Poco::File(filename).remove();
+    TSM_ASSERT("File was indeed created", std::filesystem::exists(filename));
+    if (std::filesystem::exists(filename))
+      std::filesystem::remove(filename);
   }
 
   void test_histo2() {

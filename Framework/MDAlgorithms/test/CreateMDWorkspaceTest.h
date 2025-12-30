@@ -14,7 +14,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include <Poco/File.h>
+#include <filesystem>
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
@@ -105,8 +105,8 @@ public:
 
     std::string fullName = alg.getPropertyValue("Filename");
     if (fullName != "")
-      if (Poco::File(fullName).exists())
-        Poco::File(fullName).remove();
+      if (std::filesystem::exists(fullName))
+        std::filesystem::remove(fullName);
 
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
@@ -163,12 +163,12 @@ public:
 
     if (Filename != "") {
       std::string s = alg.getPropertyValue("Filename");
-      TSM_ASSERT("File for the back-end was created.", Poco::File(s).exists());
+      TSM_ASSERT("File for the back-end was created.", std::filesystem::exists(s));
       std::cout << "Closing the file.\n";
 
       ws->clearFileBacked(false);
-      if (Poco::File(s).exists())
-        Poco::File(s).remove();
+      if (std::filesystem::exists(s))
+        std::filesystem::remove(s);
     }
 
     // Test the frame type

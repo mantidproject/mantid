@@ -13,7 +13,7 @@
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
-#include <Poco/Path.h>
+#include <filesystem>
 
 #include <utility>
 
@@ -203,7 +203,7 @@ void CreateMD::exec() {
     if (!AnalysisDataService::Instance().doesExist(data_sources[entry_number])) {
       // Strip off any file extension or path to leave just the stem (base)
       // filename
-      std::string filename_noext = Poco::Path(data_sources[entry_number]).getBaseName();
+      std::string filename_noext = std::filesystem::path(data_sources[entry_number]).stem().string();
 
       // Create workspace name of form {filename}_md_{n}
       ws_name << filename_noext << "_md_" << counter;

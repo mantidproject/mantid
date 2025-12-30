@@ -13,7 +13,7 @@
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidMDAlgorithms/CreateMD.h"
 
-#include <Poco/File.h>
+#include <filesystem>
 #include <stdexcept>
 
 using Mantid::MDAlgorithms::CreateMD;
@@ -223,7 +223,7 @@ public:
     TSM_ASSERT_THROWS_NOTHING("Workspaces with and without filebackend should be the same", compare_alg->execute(););
 
     std::string filename = alg.getPropertyValue("Filename");
-    TSM_ASSERT("File was indeed created", Poco::File(filename).exists());
+    TSM_ASSERT("File was indeed created", std::filesystem::exists(filename));
 
     // Clean up workspaces
     Mantid::API::AnalysisDataService::Instance().remove("__CreateMDTest_mdworkspace");

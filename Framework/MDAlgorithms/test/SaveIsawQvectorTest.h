@@ -11,8 +11,8 @@
 #include "MantidFrameworkTestHelpers/MDEventsTestHelper.h"
 #include "MantidMDAlgorithms/SaveIsawQvector.h"
 
-#include <Poco/File.h>
 #include <cxxtest/TestSuite.h>
+#include <filesystem>
 
 using Mantid::API::AnalysisDataService;
 using Mantid::MDAlgorithms::SaveIsawQvector;
@@ -53,14 +53,13 @@ public:
 
     // Get the file
     outfile = alg.getPropertyValue("Filename");
-    Poco::File poco_file(outfile);
-    TS_ASSERT(poco_file.exists());
-    std::size_t bytes = poco_file.getSize();
+    TS_ASSERT(std::filesystem::exists(outfile));
+    std::size_t bytes = std::filesystem::file_size(outfile);
     TS_ASSERT_EQUALS(bytes / (3 * 4),
                      nevents); // 3 floats (Qx,Qy,Qz) for each event
 
-    if (Poco::File(outfile).exists())
-      Poco::File(outfile).remove();
+    if (std::filesystem::exists(outfile))
+      std::filesystem::remove(outfile);
 
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(inWSName);
