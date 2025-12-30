@@ -25,7 +25,6 @@
 #include <Poco/URI.h>
 
 #include <Poco/Exception.h>
-#include <Poco/FileStream.h>
 #include <Poco/Net/Context.h>
 #include <Poco/Net/HTTPClientSession.h>
 #include <Poco/Net/HTTPMessage.h>
@@ -390,7 +389,7 @@ InternetHelper::HTTPStatus InternetHelper::downloadFile(const std::string &urlFi
   g_log.debug() << "DownloadFile from \"" << urlFile << "\" to file: \"" << localFilePath << "\"\n";
 
   Poco::TemporaryFile tempFile;
-  Poco::FileStream tempFileStream(tempFile.path());
+  std::ofstream tempFileStream(tempFile.path());
   const auto retStatus = sendRequest(urlFile, tempFileStream);
   tempFileStream.close();
 
