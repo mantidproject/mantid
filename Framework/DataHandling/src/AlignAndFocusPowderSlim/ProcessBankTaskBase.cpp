@@ -7,6 +7,7 @@
 
 #include "MantidDataHandling/AlignAndFocusPowderSlim/ProcessBankTaskBase.h"
 #include "MantidKernel/Unit.h"
+#include <sstream>
 #include <tbb/tbb.h>
 
 namespace {
@@ -50,6 +51,18 @@ ProcessBankTaskBase::getEventIndexRanges(H5::Group &event_group, const uint64_t 
 std::stack<std::pair<int, EventROI>> ProcessBankTaskBase::getEventIndexSplitRanges(H5::Group &event_group,
                                                                                    const uint64_t number_events) const {
   return m_loader->getEventIndexSplitRanges(event_group, number_events);
+}
+
+std::string toLogString(const std::string &bankName, const size_t total_events_to_read,
+                        const std::vector<size_t> &offsets, const std::vector<size_t> &slabsizes) {
+  std::ostringstream oss;
+  oss << "Processing " << bankName << " with " << total_events_to_read << " events in the ranges: ";
+  for (size_t i = 0; i < offsets.size(); ++i) {
+    oss << "[" << offsets[i] << ", " << (offsets[i] + slabsizes[i]) << "), ";
+  }
+  oss << "\n";
+
+  return oss.str();
 }
 
 void copyDataToSpectrum(const std::vector<uint32_t> &y_temp, API::ISpectrum *spectrum) {

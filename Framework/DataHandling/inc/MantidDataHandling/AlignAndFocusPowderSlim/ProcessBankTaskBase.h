@@ -47,5 +47,8 @@ private:
   const BankCalibrationFactory &m_calibFactory;
 };
 
+std::string toLogString(const std::string &bankName, const size_t total_events_to_read,
+                        const std::vector<size_t> &offsets, const std::vector<size_t> &slabsizes);
+
 void copyDataToSpectrum(const std::vector<uint32_t> &y_temp, API::ISpectrum *spectrum);
 } // namespace Mantid::DataHandling::AlignAndFocusPowderSlim
