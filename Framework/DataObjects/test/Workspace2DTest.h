@@ -257,6 +257,20 @@ public:
     TS_ASSERT_EQUALS(ws->getMemorySize(), totalMem);
   }
 
+  void test_getMemorySizeRagged2() {
+    ws = create2DWorkspaceBinned(nhist, nhist);
+    size_t expMemFromHistograms = 0; // calculate the memory as we go
+    for (size_t i = 0; i < static_cast<size_t>(nhist); ++i) {
+      ws->setHistogram(i, BinEdges(i + 2), Counts(i + 1));  // make every spectra different
+      expMemFromHistograms += (i + 1) * sizeof(double) * 2; // y + e
+      expMemFromHistograms += (i + 2) * sizeof(double);     // x
+    }
+    TS_ASSERT(ws->isRaggedWorkspace());
+
+    size_t expTotalMem = expMemFromHistograms + ws->run().getMemorySize();
+    TS_ASSERT_EQUALS(ws->getMemorySize(), expTotalMem);
+  }
+
   /** Refs #3003: very odd bug when getting detector in parallel only!
    * This does not reproduce it :( */
   void test_getDetector_parallel() {
