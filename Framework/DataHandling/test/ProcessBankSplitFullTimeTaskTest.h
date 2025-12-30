@@ -37,7 +37,7 @@ public:
   }
 
   void loadData(H5::DataSet & /*SDS*/, std::unique_ptr<std::vector<uint32_t>> &data,
-                const std::vector<size_t> & /*offsets*/, const std::vector<size_t> & /*slabsizes*/) override {
+                const std::vector<size_t> & /*offsets*/, const std::vector<size_t> & /*slabsizes*/) const override {
     // add detIDs
     data->resize(15);
     for (size_t i = 0; i < 15; ++i) {
@@ -46,7 +46,7 @@ public:
   }
 
   void loadData(H5::DataSet & /*SDS*/, std::unique_ptr<std::vector<float>> &data,
-                const std::vector<size_t> & /*offsets*/, const std::vector<size_t> & /*slabsizes*/) override {
+                const std::vector<size_t> & /*offsets*/, const std::vector<size_t> & /*slabsizes*/) const override {
     // add TOFS
     data->resize(15);
     for (size_t i = 0; i < 15; ++i) {
