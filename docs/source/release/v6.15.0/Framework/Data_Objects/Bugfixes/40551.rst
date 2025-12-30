@@ -1,1 +1,1 @@
-- Fix issue where ``Workspace2D.getMemorySize()`` reported the wrong value for :ref:`ragged workspaces <Ragged_Workspace>`
+- Fix issue where ``MatrixWorkspace.getMemorySize()`` reported the wrong value for :ref:`ragged workspaces <Ragged_Workspace>`

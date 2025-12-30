@@ -136,17 +136,6 @@ size_t Workspace2D::blocksize() const {
   }
 }
 
-size_t Workspace2D::getMemorySize() const {
-  if (this->isRaggedWorkspace()) {
-    size_t total = std::accumulate(data.begin(), data.end(), size_t{0},
-                                   [](size_t total, auto const &list) { return total + list->getMemorySize(); });
-    return total + run().getMemorySize();
-  } else {
-    // MatrixWorkspace is correct for non-ragged
-    return MatrixWorkspace::getMemorySize();
-  }
-}
-
 /** Returns the number of bins for a given histogram index.
  * @param index :: The histogram index to check for the number of bins.
  * @return the number of bins for a given histogram index.

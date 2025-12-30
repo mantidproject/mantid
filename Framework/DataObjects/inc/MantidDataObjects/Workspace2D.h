@@ -52,8 +52,6 @@ public:
 
   std::size_t blocksize() const override;
 
-  size_t getMemorySize() const override;
-
   /// Returns the number of bins for a given histogram index.
   std::size_t getNumberBins(const std::size_t &index) const override;
   /// Returns the maximum number of bins in a workspace (works on ragged data).
