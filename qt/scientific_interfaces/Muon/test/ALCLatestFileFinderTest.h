@@ -14,7 +14,9 @@
 #include "MantidFrameworkTestHelpers/ScopedFileHelper.h"
 
 #include <Poco/DateTime.h>
-#include <Poco/File.h>
+
+#include <chrono>
+#include <filesystem>
 
 using Mantid::Types::Core::DateAndTime;
 using MantidQt::CustomInterfaces::ALCLatestFileFinder;
@@ -27,21 +29,18 @@ class ScopedDirectory final {
 public:
   /// Constructor: create directory in temp folder
   ScopedDirectory(const std::string &dirName) : m_dirName(dirName) {
-    Poco::Path tmpPath(Mantid::Kernel::ConfigService::Instance().getTempDir());
-    tmpPath.pushDirectory(m_dirName);
-    m_directory = Poco::File(tmpPath);
-    m_directory.createDirectories();
+    std::filesystem::path tmpPath(Mantid::Kernel::ConfigService::Instance().getTempDir());
+    tmpPath /= m_dirName;
+    m_directory = tmpPath;
+    std::filesystem::create_directories(m_directory);
   }
   /// Destructor: delete the directory
-  ~ScopedDirectory() {
-    constexpr bool recursiveRemove(true);
-    m_directory.remove(recursiveRemove);
-  }
+  ~ScopedDirectory() { std::filesystem::remove_all(m_directory); }
   /// Get path of directory
   const std::string &getDirectoryName() const { return m_dirName; }
 
 private:
-  Poco::File m_directory;
+  std::filesystem::path m_directory;
   std::string m_dirName;
 };
 
@@ -58,7 +57,7 @@ public:
   }
   /// Constructor taking any filename
   TestFile(const std::string &time, const std::string &directory, const std::string &name)
-      : m_file("", directory + Poco::Path::separator() + name) {
+      : m_file("", (std::filesystem::path(directory) / name).string()) {
     adjustFileTime(m_file.getFileName(), time);
   }
   std::string getFileName() { return m_file.getFileName(); };
@@ -77,7 +76,7 @@ private:
                              const std::string &extension) {
     static const size_t numberLength = 8;
     std::ostringstream stream;
-    stream << directory << Poco::Path::separator();
+    stream << directory << std::filesystem::path::preferred_separator;
     stream << instrument;
     const size_t numZeros = numberLength - run.size();
     for (size_t i = 0; i < numZeros; i++) {
@@ -94,8 +93,7 @@ private:
    */
   void adjustFileTime(const std::string &path, const std::string &modifiedTime) {
     // Make sure the file exists
-    Poco::File file(path);
-    TS_ASSERT(file.exists() && file.canWrite() && file.isFile());
+    TS_ASSERT(std::filesystem::exists(path) && std::filesystem::is_regular_file(path));
 
     // Parse the time string and convert to Poco's format
     // Ignore sub-second intervals
@@ -103,7 +101,10 @@ private:
     Poco::DateTime pocoTime(time.year(), time.month(), time.day(), time.hour(), time.minute(), time.second());
 
     // Set the file's last modified time
-    file.setLastModified(pocoTime.timestamp());
+    // Convert Poco::Timestamp to std::filesystem::file_time_type
+    auto epoch_time = std::chrono::system_clock::from_time_t(pocoTime.timestamp().epochTime());
+    auto file_time = std::chrono::file_clock::from_sys(epoch_time);
+    std::filesystem::last_write_time(path, file_time);
   }
   ScopedFile m_file;
 };
