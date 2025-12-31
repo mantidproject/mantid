@@ -22,6 +22,10 @@ using Mantid::Types::Core::DateAndTime;
 using MantidQt::CustomInterfaces::ALCLatestFileFinder;
 using ScopedFileHelper::ScopedFile;
 
+namespace {
+const std::string PATH_SEPARATOR(1, std::filesystem::path::preferred_separator);
+}
+
 /**
  * Temporary directory that is deleted when it goes out of scope
  */
@@ -76,7 +80,7 @@ private:
                              const std::string &extension) {
     static const size_t numberLength = 8;
     std::ostringstream stream;
-    stream << directory << '/';
+    stream << directory << PATH_SEPARATOR;
     stream << instrument;
     const size_t numZeros = numberLength - run.size();
     for (size_t i = 0; i < numZeros; i++) {
