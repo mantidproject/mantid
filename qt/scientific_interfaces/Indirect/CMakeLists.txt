@@ -1,6 +1,6 @@
 set(ALL_SRC_FILES)
 set(ALL_MOC_FILES)
-set(ALL_INC_FILES DllConfig.h PrecompiledHeader.h)
+set(ALL_INC_FILES DllConfig.h)
 set(ALL_UI_FILES)
 
 add_subdirectory(Common)

@@ -18,7 +18,7 @@ set(SRC_FILES ${COMMON_SRC_FILES} ${GUI_SRC_FILES} ${REDUCTION_SRC_FILES} ${TEST
 
 # Include files aren't required, but this makes them appear in Visual Studio IMPORTANT: Include files are required in
 # the MOC_FILES set. Scroll down to find it.
-set(INC_FILES ${COMMON_INC_FILES} ${GUI_INC_FILES} ${REDUCTION_INC_FILES} ${TESTHELPERS_INC_FILES} PrecompiledHeader.h)
+set(INC_FILES ${COMMON_INC_FILES} ${GUI_INC_FILES} ${REDUCTION_INC_FILES} ${TESTHELPERS_INC_FILES})
 
 set(MOC_FILES ${GUI_MOC_FILES})
 
