@@ -102,8 +102,10 @@ private:
 
     // Set the file's last modified time
     // Convert Poco::Timestamp to std::filesystem::file_time_type
+    // Use the same conversion pattern as in LoadDNSSCD.cpp but in reverse
     auto epoch_time = std::chrono::system_clock::from_time_t(pocoTime.timestamp().epochTime());
-    auto file_time = std::chrono::file_clock::from_sys(epoch_time);
+    auto file_time = std::chrono::time_point_cast<std::filesystem::file_time_type::duration>(
+        epoch_time - std::chrono::system_clock::now() + std::filesystem::file_time_type::clock::now());
     std::filesystem::last_write_time(path, file_time);
   }
   ScopedFile m_file;
