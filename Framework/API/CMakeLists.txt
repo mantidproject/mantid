@@ -522,7 +522,11 @@ add_library(API ${SRC_FILES} ${INC_FILES})
 add_library(Mantid::API ALIAS API)
 
 # Add a precompiled header where they are supported
-target_precompile_headers(API PRIVATE inc/MantidAPI/PrecompiledHeader.h)
+target_precompile_headers(
+  API
+  PRIVATE "MantidAPI/DllConfig.h" "MantidGeometry/IComponent.h" "MantidGeometry/IDetector.h"
+          "MantidGeometry/Instrument.h" <boost/variant.hpp> <Poco/DOM/DOMParser.h>
+)
 
 target_include_directories(
   API PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc> $<INSTALL_INTERFACE:include/Mantid>

@@ -1066,7 +1066,12 @@ add_library(Algorithms ${SRC_FILES} ${C_SRC_FILES} ${INC_FILES})
 add_library(Mantid::Algorithms ALIAS Algorithms)
 
 # Add a precompiled header where they are supported
-target_precompile_headers(Algorithms PRIVATE inc/MantidAlgorithms/PrecompiledHeader.h)
+target_precompile_headers(
+  Algorithms
+  PRIVATE "MantidAPI/Algorithm.h" "MantidAPI/MatrixWorkspace.h" "MantidAlgorithms/DllConfig.h"
+          <boost/algorithm/string.hpp> <boost/format.hpp> <boost/function.hpp> <boost/lexical_cast.hpp>
+          <boost/math/special_functions.hpp>
+)
 
 target_include_directories(
   Algorithms PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc> $<INSTALL_INTERFACE:include/Mantid>

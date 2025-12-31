@@ -76,7 +76,11 @@ add_library(${_target_name} ${SRC_FILES} ${INC_FILES})
 add_library(Mantid::${_target_name} ALIAS ${_target_name})
 
 # Add a precompiled header
-target_precompile_headers(${_target_name} PRIVATE inc/MantidPythonInterface/core/PrecompiledHeader.h)
+target_precompile_headers(
+  ${_target_name}
+  PRIVATE <memory> <string> <boost/python/class.hpp> <boost/python/dict.hpp> <boost/python/extract.hpp>
+          <boost/python/list.hpp>
+)
 
 target_include_directories(
   ${_target_name} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc> $<INSTALL_INTERFACE:include/Mantid>

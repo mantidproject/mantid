@@ -54,7 +54,9 @@ mtd_add_qt_library(
   SRC ${SRC_FILES}
   MOC ${MOC_FILES}
   NOMOC ${INC_FILES}
-  UI ${UI_FILES} PRECOMPILED inc/MantidQtWidgets/Plugins/AlgorithmDialogs/PrecompiledHeader.h
+  UI ${UI_FILES}
+  PRECOMPILED "MantidAPI/Algorithm.h" "MantidAPI/MatrixWorkspace_fwd.h" "MantidKernel/System.h" <QDialog>
+              <QString> <QWidget> <map> <set> <string> <vector>
   LINK_LIBS ${CORE_MANTIDLIBS} ${POCO_LIBRARIES} ${Boost_LIBRARIES} ${QT_LIBRARIES} ${OPENGL_LIBRARIES}
   QT5_LINK_LIBS Qt5::OpenGL Qt5::Qscintilla
   MTD_QT_LINK_LIBS MantidQtWidgetsCommon

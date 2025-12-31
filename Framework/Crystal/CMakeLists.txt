@@ -236,7 +236,7 @@ add_library(Crystal ${SRC_FILES} ${INC_FILES})
 add_library(Mantid::Crystal ALIAS Crystal)
 
 # Add a precompiled header
-target_precompile_headers(Crystal PRIVATE inc/MantidCrystal/PrecompiledHeader.h)
+target_precompile_headers(Crystal PRIVATE "MantidAPI/Algorithm.h" "MantidCrystal/DllConfig.h")
 
 target_include_directories(
   Crystal PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc> $<INSTALL_INTERFACE:include/Mantid>

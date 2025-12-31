@@ -100,7 +100,23 @@ add_library(PythonKernelModule ${ALL_FILES} ${MODULE_DEFINITION} ${INC_FILES} ${
 add_library(Mantid::PythonKernelModule ALIAS PythonKernelModule)
 
 # Add a precompiled header
-target_precompile_headers(PythonKernelModule PRIVATE inc/MantidPythonInterface/kernel/Registry/PrecompiledHeader.h)
+target_precompile_headers(
+  PythonKernelModule
+  PRIVATE "MantidKernel/DllConfig.h"
+          <memory>
+          <string>
+          <boost/python/class.hpp>
+          <boost/python/copy_const_reference.hpp>
+          <boost/python/def.hpp>
+          <boost/python/default_call_policies.hpp>
+          <boost/python/dict.hpp>
+          <boost/python/enum.hpp>
+          <boost/python/make_constructor.hpp>
+          <boost/python/make_function.hpp>
+          <boost/python/overloads.hpp>
+          <boost/python/register_ptr_to_python.hpp>
+          <boost/python/return_value_policy.hpp>
+)
 
 set_python_properties(PythonKernelModule _kernel)
 
