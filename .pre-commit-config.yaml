@@ -16,12 +16,18 @@ repos:
         exclude: .patch$
       - id: check-added-large-files
         args: ['--maxkb=4096']
+      - id: check-merge-conflict
       - id: check-xml
       - id: check-yaml
         args: [--allow-multiple-documents]
         exclude: conda/recipes/mantid/meta.yaml|conda/recipes/mantid-developer/meta.yaml|conda/recipes/mantidqt/meta.yaml|conda/recipes/mantiddocs/meta.yaml|conda/recipes/mantidworkbench/meta.yaml
       - id: end-of-file-fixer
         exclude: .md5$|^external/|^tools/|Testing/Tools/cxxtest
+      - id: trailing-whitespace
+  - repo: https://github.com/ComPWA/taplo-pre-commit
+    rev: v0.9.3
+    hooks:
+      - id: taplo-format # format toml files
   - repo: https://github.com/gitleaks/gitleaks
     rev: v8.30.0
     hooks:
