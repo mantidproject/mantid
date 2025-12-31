@@ -32,8 +32,17 @@ mtd_add_qt_library(
   NOMOC ${INC_FILES}
   UI ${UI_FILES}
   DEFS IN_MANTIDQT_ISISREFLECTOMETRY
-  PRECOMPILED "MantidAPI/Algorithm.h" "MantidAPI/MatrixWorkspace_fwd.h" "MantidKernel/System.h" <QDialog>
-              <QString> <QWidget> <map> <set> <string> <vector>
+       PRECOMPILED
+       "MantidAPI/Algorithm.h"
+       "MantidAPI/MatrixWorkspace_fwd.h"
+       "MantidKernel/System.h"
+       <QDialog>
+       <QString>
+       <QWidget>
+       <map>
+       <set>
+       <string>
+       <vector>
   INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}
   LINK_LIBS ${CORE_MANTIDLIBS} ${POCO_LIBRARIES} ${Boost_LIBRARIES} ${JSONCPP_LIBRARIES} ${PYTHON_LIBRARIES}
   MTD_QT_LINK_LIBS MantidQtWidgetsCommon MantidQtWidgetsInstrumentView MantidQtIcons MantidQtWidgetsMplCpp

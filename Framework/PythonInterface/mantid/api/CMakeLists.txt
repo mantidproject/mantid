@@ -139,24 +139,25 @@ add_library(Mantid::PythonAPIModule ALIAS PythonAPIModule)
 # Add a precompiled header
 target_precompile_headers(
   PythonAPIModule
-  PRIVATE "MantidAPI/Algorithm.h"
-          <boost/mpl/and.hpp>
-          <boost/mpl/if.hpp>
-          <boost/python/call_method.hpp>
-          <boost/python/class.hpp>
-          <boost/python/copy_const_reference.hpp>
-          <boost/python/def.hpp>
-          <boost/python/dict.hpp>
-          <boost/python/enum.hpp>
-          <boost/python/make_constructor.hpp>
-          <boost/python/make_function.hpp>
-          <boost/python/object.hpp>
-          <boost/python/overloads.hpp>
-          <boost/python/register_ptr_to_python.hpp>
-          <boost/python/return_value_policy.hpp>
-          <boost/python/tuple.hpp>
-          <boost/python/wrapper.hpp>
-          <optional>
+  PRIVATE
+  "MantidAPI/Algorithm.h"
+  <boost/mpl/and.hpp>
+  <boost/mpl/if.hpp>
+  <boost/python/call_method.hpp>
+  <boost/python/class.hpp>
+  <boost/python/copy_const_reference.hpp>
+  <boost/python/def.hpp>
+  <boost/python/dict.hpp>
+  <boost/python/enum.hpp>
+  <boost/python/make_constructor.hpp>
+  <boost/python/make_function.hpp>
+  <boost/python/object.hpp>
+  <boost/python/overloads.hpp>
+  <boost/python/register_ptr_to_python.hpp>
+  <boost/python/return_value_policy.hpp>
+  <boost/python/tuple.hpp>
+  <boost/python/wrapper.hpp>
+  <optional>
 )
 
 target_include_directories(

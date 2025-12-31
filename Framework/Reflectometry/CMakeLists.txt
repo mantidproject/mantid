@@ -64,8 +64,7 @@ add_library(Mantid::Reflectometry ALIAS Reflectometry)
 
 # Add a precompiled header
 target_precompile_headers(
-  Reflectometry
-  PRIVATE "MantidAPI/Algorithm.h" "MantidKernel/Exception.h" "MantidReflectometry/DllConfig.h"
+  Reflectometry PRIVATE "MantidAPI/Algorithm.h" "MantidKernel/Exception.h" "MantidReflectometry/DllConfig.h"
 )
 
 target_include_directories(

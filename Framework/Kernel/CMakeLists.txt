@@ -486,28 +486,29 @@ set_target_properties(Kernel PROPERTIES OUTPUT_NAME MantidKernel COMPILE_DEFINIT
 # Enable precompiled headers
 target_precompile_headers(
   Kernel
-  PRIVATE "MantidKernel/System.h"
-          <crtdefs.h>
-          <cstddef>
-          <cstdint>
-          <cstdio>
-          <cstdlib>
-          <iomanip>
-          <istream>
-          <limits.h>
-          <map>
-          <string>
-          <vector>
-          <boost/algorithm/string.hpp>
-          <boost/date_time/posix_time/posix_time.hpp>
-          <boost/regex.hpp>
-          <memory>
-          <Poco/File.h>
-          <Poco/Message.h>
-          <Poco/Notification.h>
-          <Poco/Path.h>
-          "MantidNexus/NexusException.h"
-          "MantidNexus/NexusFile.h"
+  PRIVATE
+  "MantidKernel/System.h"
+  <crtdefs.h>
+  <cstddef>
+  <cstdint>
+  <cstdio>
+  <cstdlib>
+  <iomanip>
+  <istream>
+  <limits.h>
+  <map>
+  <string>
+  <vector>
+  <boost/algorithm/string.hpp>
+  <boost/date_time/posix_time/posix_time.hpp>
+  <boost/regex.hpp>
+  <memory>
+  <Poco/File.h>
+  <Poco/Message.h>
+  <Poco/Notification.h>
+  <Poco/Path.h>
+  "MantidNexus/NexusException.h"
+  "MantidNexus/NexusFile.h"
 )
 
 target_include_directories(

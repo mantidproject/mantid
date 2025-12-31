@@ -524,8 +524,13 @@ add_library(Mantid::API ALIAS API)
 # Add a precompiled header where they are supported
 target_precompile_headers(
   API
-  PRIVATE "MantidAPI/DllConfig.h" "MantidGeometry/IComponent.h" "MantidGeometry/IDetector.h"
-          "MantidGeometry/Instrument.h" <boost/variant.hpp> <Poco/DOM/DOMParser.h>
+  PRIVATE
+  "MantidAPI/DllConfig.h"
+  "MantidGeometry/IComponent.h"
+  "MantidGeometry/IDetector.h"
+  "MantidGeometry/Instrument.h"
+  <boost/variant.hpp>
+  <Poco/DOM/DOMParser.h>
 )
 
 target_include_directories(

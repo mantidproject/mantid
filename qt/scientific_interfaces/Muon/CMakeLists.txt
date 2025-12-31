@@ -62,8 +62,17 @@ mtd_add_qt_library(
   NOMOC ${INC_FILES}
   UI ${UI_FILES}
   DEFS IN_MANTIDQT_MUONINTERFACE
-  PRECOMPILED "MantidAPI/Algorithm.h" "MantidAPI/MatrixWorkspace_fwd.h" "MantidKernel/System.h" <QDialog>
-              <QString> <QWidget> <map> <set> <string> <vector>
+       PRECOMPILED
+       "MantidAPI/Algorithm.h"
+       "MantidAPI/MatrixWorkspace_fwd.h"
+       "MantidKernel/System.h"
+       <QDialog>
+       <QString>
+       <QWidget>
+       <map>
+       <set>
+       <string>
+       <vector>
   LINK_LIBS ${CORE_MANTIDLIBS} ${POCO_LIBRARIES} ${Boost_LIBRARIES} ${JSONCPP_LIBRARIES}
   MTD_QT_LINK_LIBS MantidQtWidgetsCommon MantidQtWidgetsMplCpp MantidQtWidgetsPlotting
   INSTALL_DIR_BASE ${WORKBENCH_PLUGINS_DIR}

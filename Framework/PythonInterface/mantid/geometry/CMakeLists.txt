@@ -71,17 +71,18 @@ set_python_properties(PythonGeometryModule _geometry)
 # Add a precompiled header
 target_precompile_headers(
   PythonGeometryModule
-  PRIVATE <boost/python/class.hpp>
-          <boost/python/copy_const_reference.hpp>
-          <boost/python/def.hpp>
-          <boost/python/default_call_policies.hpp>
-          <boost/python/dict.hpp>
-          <boost/python/enum.hpp>
-          <boost/python/make_constructor.hpp>
-          <boost/python/make_function.hpp>
-          <boost/python/overloads.hpp>
-          <boost/python/register_ptr_to_python.hpp>
-          <boost/python/return_value_policy.hpp>
+  PRIVATE
+  <boost/python/class.hpp>
+  <boost/python/copy_const_reference.hpp>
+  <boost/python/def.hpp>
+  <boost/python/default_call_policies.hpp>
+  <boost/python/dict.hpp>
+  <boost/python/enum.hpp>
+  <boost/python/make_constructor.hpp>
+  <boost/python/make_function.hpp>
+  <boost/python/overloads.hpp>
+  <boost/python/register_ptr_to_python.hpp>
+  <boost/python/return_value_policy.hpp>
 )
 
 target_include_directories(
