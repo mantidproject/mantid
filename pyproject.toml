@@ -1,3 +1,6 @@
+[project]
+requires-python = ">=3.11"
+
 [tool.ruff]
 line-length = 140
 # https://beta.ruff.rs/docs/rules/
