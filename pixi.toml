@@ -10,13 +10,19 @@ version = "6.14"
 [tasks]
 
 [environments]
-rattler-builder = {features = ["rattler-builder"], no-default-feature = true}
-delete-old-packages = {features = ["delete-old-packages"], no-default-feature = true}
-devsite = {features = ["devsite"], no-default-feature = true}
-publish-gh = {features = ["publish-gh"], no-default-feature = true}
-publish-anaconda = {features = ["publish-anaconda"], no-default-feature = true}
-package-standalone = {features = ["package-standalone"], no-default-feature = true}
-docs-build = {features = ["docs-build"]}
+rattler-builder = { features = ["rattler-builder"], no-default-feature = true }
+delete-old-packages = { features = [
+  "delete-old-packages",
+], no-default-feature = true }
+devsite = { features = ["devsite"], no-default-feature = true }
+publish-gh = { features = ["publish-gh"], no-default-feature = true }
+publish-anaconda = { features = [
+  "publish-anaconda",
+], no-default-feature = true }
+package-standalone = { features = [
+  "package-standalone",
+], no-default-feature = true }
+docs-build = { features = ["docs-build"] }
 
 [feature.rattler-builder.dependencies]
 rattler-build = "==0.51.0"
