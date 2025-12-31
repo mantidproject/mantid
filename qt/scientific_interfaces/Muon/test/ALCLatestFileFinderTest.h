@@ -76,7 +76,7 @@ private:
                              const std::string &extension) {
     static const size_t numberLength = 8;
     std::ostringstream stream;
-    stream << directory << std::filesystem::path::preferred_separator;
+    stream << directory << '/';
     stream << instrument;
     const size_t numZeros = numberLength - run.size();
     for (size_t i = 0; i < numZeros; i++) {
