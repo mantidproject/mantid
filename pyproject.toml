@@ -1,7 +1,29 @@
+[project]
+requires-python = ">=3.11"
+
 [tool.ruff]
 line-length = 140
 # https://beta.ruff.rs/docs/rules/
-lint.select = ["C90", "E", "F", "FURB", "RUF100", "W", "NPY201", "S"]
+lint.select = [
+  "C90",
+  "E",
+  "F",
+  "FURB",
+  "RUF100",
+  "UP001",
+  "UP010",
+  "UP012",
+  "UP019",
+  "UP020",
+  "UP021",
+  "UP025",
+  "UP026",
+  "UP029",
+  "UP036",
+  "W",
+  "NPY201",
+  "S",
+]
 lint.ignore = [
   "E722", # bare except https://docs.astral.sh/ruff/rules/bare-except/
   "S101", # using assert https://docs.astral.sh/ruff/rules/assert/
