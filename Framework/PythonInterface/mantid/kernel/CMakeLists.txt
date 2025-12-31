@@ -103,7 +103,6 @@ add_library(Mantid::PythonKernelModule ALIAS PythonKernelModule)
 target_precompile_headers(
   PythonKernelModule
   PRIVATE
-  "MantidKernel/DllConfig.h"
   <memory>
   <string>
   <boost/python/class.hpp>

@@ -487,8 +487,7 @@ set_target_properties(Kernel PROPERTIES OUTPUT_NAME MantidKernel COMPILE_DEFINIT
 target_precompile_headers(
   Kernel
   PRIVATE
-  "$<$<COMPILE_LANGUAGE:CXX>:${CMAKE_CURRENT_SOURCE_DIR}/inc/MantidKernel/System.h"
-  <crtdefs.h>
+  "$<$<COMPILE_LANGUAGE:CXX>:${CMAKE_CURRENT_SOURCE_DIR}/inc/MantidKernel/System.h>"
   <cstddef>
   <cstdint>
   <cstdio>
@@ -507,8 +506,8 @@ target_precompile_headers(
   <Poco/Message.h>
   <Poco/Notification.h>
   <Poco/Path.h>
-  "MantidNexus/NexusException.h"
-  "MantidNexus/NexusFile.h"
+  <MantidNexus/NexusException.h>
+  <MantidNexus/NexusFile.h>
 )
 
 target_include_directories(

@@ -1069,9 +1069,8 @@ add_library(Mantid::Algorithms ALIAS Algorithms)
 target_precompile_headers(
   Algorithms
   PRIVATE
-  "MantidAPI/Algorithm.h"
-  "MantidAPI/MatrixWorkspace.h"
-  "MantidAlgorithms/DllConfig.h"
+  <MantidAPI/Algorithm.h>
+  <MantidAPI/MatrixWorkspace.h>
   <boost/algorithm/string.hpp>
   <boost/format.hpp>
   <boost/function.hpp>
