@@ -306,6 +306,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
 
         # Hack to ensure the canvas is up to date
         self.canvas.draw_idle()
+        self.canvas.flush_events()
 
         if self.toolbar:
             self.toolbar.set_buttons_visibility(self.canvas.figure)

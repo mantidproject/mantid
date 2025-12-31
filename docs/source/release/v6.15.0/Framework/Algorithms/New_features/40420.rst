@@ -1,0 +1,1 @@
+- Algorithm :ref:`LoadNGEM <algm-LoadNGEM>` has been extended to allow for data to be loaded directly into histograms, via the setting of the PreserveEvents property to ``False``. For workflows where preserving events is not necessary, this reduces load time and memory usage by a large factor.

@@ -1,0 +1,1 @@
+- Disable line edits for not needed runs on either calibration or correction for the algorithm dialog of :ref:`algm-SANSISISPolarizationCorrections`.

@@ -466,6 +466,15 @@ class TomlV1ParserTest(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "empty"):
             self._setup_parser(top_level_dict)
 
+    def test_transmission_wide_angle_correction_defaults_to_false(self):
+        parser = self._setup_parser({})
+        self.assertFalse(parser.get_state_adjustment(None).wide_angle_correction)
+
+    def test_transmission_wide_angle_correction_is_set_with_boolean_flag(self):
+        top_level_dict = {"transmission": {"wide_angle_correction": True}}
+        parser = self._setup_parser(top_level_dict)
+        self.assertTrue(parser.get_state_adjustment(None).wide_angle_correction)
+
     def test_transmission_fitting(self):
         top_level_dict = {"transmission": {"fitting": {}}}
         fitting_dict = top_level_dict["transmission"]["fitting"]

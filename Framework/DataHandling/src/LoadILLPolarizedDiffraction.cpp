@@ -197,7 +197,7 @@ void LoadILLPolarizedDiffraction::loadData() {
     }
 
     // adds the current entry workspace to the output group
-    m_outputWorkspaceGroup.push_back(workspace);
+    m_outputWorkspaceGroup.push_back(std::move(workspace));
     entry.close();
   }
   dataRoot.close();

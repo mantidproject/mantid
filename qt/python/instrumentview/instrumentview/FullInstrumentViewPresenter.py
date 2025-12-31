@@ -9,7 +9,6 @@ import pyvista as pv
 from pyvista.plotting.picking import RectangleSelection
 from pyvista.plotting.opts import PickerType
 from qtpy.QtWidgets import QFileDialog
-from vtk import vtkCylinder
 from mantid import mtd
 from mantid.kernel import logger, ConfigService
 from mantid.simpleapi import AnalysisDataService
@@ -21,6 +20,7 @@ from instrumentview.InstrumentViewADSObserver import InstrumentViewADSObserver
 from instrumentview.Peaks.WorkspaceDetectorPeaks import WorkspaceDetectorPeaks
 
 from vtkmodules.vtkRenderingCore import vtkCoordinate
+from vtkmodules.vtkCommonDataModel import vtkCylinder
 
 
 class SuppressRendering:
@@ -76,7 +76,6 @@ class FullInstrumentViewPresenter:
         if self._model.workspace_x_unit in self._UNIT_OPTIONS:
             self._view.set_unit_combo_box_index(self._UNIT_OPTIONS.index(self._model.workspace_x_unit))
 
-        self._view.hide_status_box()
         self._ads_observer = InstrumentViewADSObserver(
             delete_callback=self.delete_workspace_callback,
             rename_callback=self.rename_workspace_callback,
@@ -126,9 +125,10 @@ class FullInstrumentViewPresenter:
             self._update_view_main_plotter()
             self.update_detector_picker()
             self.on_peaks_workspace_selected()
-        self._view.reset_camera()
 
     def _update_view_main_plotter(self):
+        self._view.clear_main_plotter()
+
         self._detector_mesh = self.create_poly_data_mesh(self._model.detector_positions)
         self._detector_mesh[self._counts_label] = self._model.detector_counts
         self._view.add_detector_mesh(self._detector_mesh, is_projection=self._model.is_2d_projection, scalars=self._counts_label)
@@ -142,7 +142,7 @@ class FullInstrumentViewPresenter:
 
         # Update transform needs to happen after adding to plotter
         # Uses display coordinates
-        self._update_transform(self._detector_mesh, self._masked_mesh)
+        self._update_transform()
         self._detector_mesh.transform(self._transform, inplace=True)
         self._pickable_mesh.transform(self._transform, inplace=True)
         self._masked_mesh.transform(self._transform, inplace=True)
@@ -152,16 +152,19 @@ class FullInstrumentViewPresenter:
         self.set_view_contour_limits()
         self.set_view_integration_limits()
 
-    def _update_transform(self, detector_mesh: pv.PolyData, masked_mesh: pv.PolyData) -> None:
+        self._view.cache_camera_position()
+        self._view.reset_camera()
+
+    def _update_transform(self) -> None:
         if not self._model.is_2d_projection or self._view.is_maintain_aspect_ratio_checkbox_checked():
             self._transform = np.eye(4)
         else:
-            self._transform = self._transform_mesh_to_fill_window(detector_mesh, masked_mesh)
+            self._transform = self._transform_mesh_to_fill_window()
 
-    def _transform_mesh_to_fill_window(self, detector_mesh: pv.PolyData, masked_mesh: pv.PolyData) -> np.ndarray:
-        meshes_bounds = np.vstack([detector_mesh.bounds, masked_mesh.bounds])
-        min_point = np.min(meshes_bounds[:, 0::2], axis=0)
-        max_point = np.max(meshes_bounds[:, 1::2], axis=0)
+    def _transform_mesh_to_fill_window(self) -> np.ndarray:
+        xmin, xmax, ymin, ymax, zmin, zmax = self._detector_mesh_bounds
+        min_point = np.array([xmin, ymin, zmin])
+        max_point = np.array([xmax, ymax, zmax])
 
         # Convert to display coordinates (pixels)
         plotter = self._view.main_plotter
@@ -172,10 +175,10 @@ class FullInstrumentViewPresenter:
             coordinate.SetValue(*p)
             display_coords.append(coordinate.GetComputedDisplayValue(plotter.renderer))
 
-        window_width, window_height = plotter.window_size
-
         mesh_width = display_coords[1][0] - display_coords[0][0]
         mesh_height = display_coords[1][1] - display_coords[0][1]
+
+        window_width, window_height = plotter.window_size
 
         return self._scale_matrix_relative_to_centre((min_point + max_point) / 2, window_width / mesh_width, window_height / mesh_height)
 
@@ -196,6 +199,15 @@ class FullInstrumentViewPresenter:
     def on_aspect_ratio_check_box_clicked(self) -> None:
         self._view.store_maintain_aspect_ratio_option()
         self.update_plotter()
+
+    @property
+    def _detector_mesh_bounds(self) -> list[float]:
+        # Output format matches vtk's mesh.GetBounds()
+        meshes_bounds = np.vstack([self._detector_mesh.bounds, self._masked_mesh.bounds])
+        min_point = np.min(meshes_bounds[:, 0::2], axis=0)
+        max_point = np.max(meshes_bounds[:, 1::2], axis=0)
+        # Return list of xmin, xmax, ymin, ymax, zmin, zmax
+        return [x for pair in zip(min_point, max_point) for x in pair]
 
     def update_detector_picker(self) -> None:
         """Change between single and multi point picking"""
@@ -231,10 +243,12 @@ class FullInstrumentViewPresenter:
         self._update_line_plot_ws_and_draw(self._view.current_selected_unit())
 
     def on_add_cylinder_clicked(self) -> None:
-        self._view.add_cylinder_widget(self._detector_mesh.GetBounds())
+        self._view.add_cylinder_widget(self._detector_mesh_bounds)
 
     def on_cylinder_select_clicked(self) -> None:
         widget = self._view.get_current_widget()
+        if widget is None:
+            return
         cylinder = vtkCylinder()
         widget.GetCylinderRepresentation().GetCylinder(cylinder)
         mask = [(cylinder.FunctionValue(pt) < 0) for pt in self._detector_mesh.points]
@@ -248,6 +262,7 @@ class FullInstrumentViewPresenter:
 
     def on_save_mask_to_workspace_clicked(self) -> None:
         self._model.save_mask_workspace_to_ads()
+        self.on_mask_item_selected()
 
     def on_overwrite_mask_clicked(self) -> None:
         self._model.overwrite_mask_to_current_workspace()
@@ -257,6 +272,16 @@ class FullInstrumentViewPresenter:
         self._view.clear_mask_list()
         self._model.clear_stored_masks()
         self.on_mask_item_selected()
+
+    def _reload_mask_workspaces(self) -> None:
+        self._view.refresh_mask_ws_list()
+        self.on_mask_item_selected()
+
+    def mask_workspaces_in_ads(self) -> list[str]:
+        return [ws.name() for ws in self._model.get_mask_workspaces_in_ads()]
+
+    def cached_masks_keys(self) -> list[str]:
+        return self._model.cached_masks_keys
 
     def _update_line_plot_ws_and_draw(self, unit: str) -> None:
         self._model.extract_spectra_for_line_plot(unit, self._view.sum_spectra_selected())
@@ -299,6 +324,7 @@ class FullInstrumentViewPresenter:
             logger.warning(f"Workspace {ws_name} deleted, closed Experimental Instrument View.")
         else:
             self._reload_peaks_workspaces()
+            self._reload_mask_workspaces()
 
     def rename_workspace_callback(self, ws_old_name, ws_new_name):
         if self._model._workspace.name() == ws_old_name:
@@ -306,6 +332,7 @@ class FullInstrumentViewPresenter:
             self._model.setup()
             logger.warning(f"Workspace {ws_old_name} renamed to {ws_new_name}, updated Experimental Instrument View.")
         self._reload_peaks_workspaces()
+        self._reload_mask_workspaces()
 
     def clear_workspace_callback(self):
         self._view.close()
@@ -313,6 +340,8 @@ class FullInstrumentViewPresenter:
     def replace_workspace_callback(self, ws_name, ws):
         if ws_name in self.peaks_workspaces_in_ads():
             self._reload_peaks_workspaces()
+        elif ws_name in self.mask_workspaces_in_ads():
+            self._reload_mask_workspaces()
         elif ws_name == self._model.workspace.name():
             # This check is needed because observers are triggered
             # before the RenameWorkspace is completed.
@@ -324,6 +353,7 @@ class FullInstrumentViewPresenter:
 
     def add_workspace_callback(self, ws_name, ws):
         self._reload_peaks_workspaces()
+        self._reload_mask_workspaces()
 
     def handle_close(self):
         # The observers are unsubscribed on object deletion, it's safer to manually
@@ -355,17 +385,17 @@ class FullInstrumentViewPresenter:
             return
         # Keeping the points from each workspace separate so we can colour them differently
         for ws_peaks in self._peaks_grouped_by_ws:
-            peaks_detector_ids = np.array([p.detector_id for p in ws_peaks.detector_peaks])
-            detector_ids = self._model.detector_ids
+            peaks_spectrum_nos = np.array([p.spectrum_no for p in ws_peaks.detector_peaks])
+            spectrum_nos = self._model.spectrum_nos
             # Use argsort + searchsorted for fast lookup. Using np.where(np.isin) does not
             # maintain the original order. It is faster to sort then search the sorted
-            # array for matching detector IDs
-            sorted_idx = np.argsort(detector_ids)
-            sorted_detector_ids = detector_ids[sorted_idx]
-            positions = np.searchsorted(sorted_detector_ids, peaks_detector_ids)
+            # array for matching spectrum numbers
+            sorted_idx = np.argsort(spectrum_nos)
+            sorted_spectrum_nos = spectrum_nos[sorted_idx]
+            positions = np.searchsorted(sorted_spectrum_nos, peaks_spectrum_nos)
             # Map back to original indices
             ordered_indices = sorted_idx[positions]
-            valid = sorted_detector_ids[positions] == peaks_detector_ids
+            valid = sorted_spectrum_nos[positions] == peaks_spectrum_nos
             ordered_indices = ordered_indices[valid]
             labels = [p.label for i, p in enumerate(ws_peaks.detector_peaks) if valid[i]]
             projected_points = self._model.detector_positions[ordered_indices]
@@ -382,7 +412,7 @@ class FullInstrumentViewPresenter:
             x_values = []
             labels = []
             for peak in ws_peaks.detector_peaks:
-                if peak.detector_id in self._model.picked_detector_ids:
+                if peak.spectrum_no in self._model.picked_spectrum_nos:
                     match self._view.current_selected_unit():
                         case self._TIME_OF_FLIGHT:
                             x_values += [p.tof for p in peak.peaks]

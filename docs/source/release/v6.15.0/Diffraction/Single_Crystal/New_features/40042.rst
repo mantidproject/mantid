@@ -1,0 +1,1 @@
+- HFIR IMAGINE instrument image plate instrument definition detector add to instruments

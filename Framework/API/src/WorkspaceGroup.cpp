@@ -120,7 +120,7 @@ void WorkspaceGroup::reorderMembersWithIndices(const std::vector<int> &indices) 
   std::vector<Mantid::API::Workspace_sptr> reordered;
   std::transform(indices.cbegin(), indices.cend(), std::back_inserter(reordered),
                  [&](const auto &i) { return m_workspaces[i]; });
-  m_workspaces = reordered;
+  m_workspaces = std::move(reordered);
 }
 
 /**

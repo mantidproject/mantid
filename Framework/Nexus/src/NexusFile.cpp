@@ -1388,7 +1388,7 @@ void File::getEntries(Entries &result) const {
       className = SCIENTIFIC_DATA_SET;
     }
     if (!className.empty())
-      result[name] = className;
+      result[name] = std::move(className);
   }
 }
 
@@ -1520,6 +1520,7 @@ std::vector<AttrInfo> File::getAttrInfos() {
     cname[namelen] = '\0'; // ensure null termination
     // do not include the group class spec
     if (GROUP_CLASS_SPEC == cname) {
+      delete[] cname;
       continue;
     }
     // 2. get the attribute type
@@ -1530,6 +1531,7 @@ std::vector<AttrInfo> File::getAttrInfos() {
     DataSpaceID attrspace = H5Aget_space(attr);
     int rank = H5Sget_simple_extent_ndims(attrspace);
     if (rank > 2 || (rank == 2 && type != NXnumtype::CHAR)) {
+      delete[] cname;
       throw NXEXCEPTION("ERROR iterating through attributes found array attribute not understood by this api");
     }
     DimVector dims(rank, 0);

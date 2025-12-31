@@ -10,6 +10,7 @@
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid::DataObjects;
+using namespace Mantid::API;
 
 /** Test class for the helpers in MantidTestHelpers/WorkspaceCreationHelper.h */
 class WorkspaceCreationHelperTest : public CxxTest::TestSuite {
@@ -55,5 +56,15 @@ public:
     TS_ASSERT_EQUALS(ws->blocksize(), numBins);
     TS_ASSERT_EQUALS(ws->hasMaskedBins(0), true);
     TS_ASSERT_EQUALS(ws->hasMaskedBins(1), false);
+  }
+
+  void test_create2DWorkspaceRagged() {
+    Mantid::API::MatrixWorkspace_sptr ws = WorkspaceCreationHelper::create2DWorkspaceRagged();
+    TS_ASSERT(ws->isRaggedWorkspace());
+    TS_ASSERT_EQUALS(ws->getNumberHistograms(), 2);
+    TS_ASSERT_EQUALS(ws->x(0).size(), 4);
+    TS_ASSERT_EQUALS(ws->x(1).size(), 3);
+    TS_ASSERT_EQUALS(ws->y(0).size(), 3);
+    TS_ASSERT_EQUALS(ws->y(1).size(), 2);
   }
 };

@@ -1347,8 +1347,18 @@ std::shared_ptr<MatrixWorkspace> MatrixWorkspace::monitorWorkspace() const { ret
  * @return bytes used.
  */
 size_t MatrixWorkspace::getMemorySize() const {
-  // 3 doubles per histogram bin.
-  return 3 * size() * sizeof(double) + run().getMemorySize();
+  const size_t runMemSize = run().getMemorySize();
+  if (this->isRaggedWorkspace()) {
+    const auto numHist = this->getNumberHistograms();
+    size_t total{0};
+    for (size_t i = 0; i < numHist; ++i) {
+      total += this->getSpectrum(i).getMemorySize();
+    }
+    return total + runMemSize;
+  } else {
+    // 3 doubles per histogram bin.
+    return 3 * size() * sizeof(double) + runMemSize;
+  }
 }
 
 /** Returns the memory used (in bytes) by the X axes, handling ragged bins.

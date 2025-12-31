@@ -38,8 +38,9 @@ set(PYTHON_PLUGINS
     algorithms/CorrectTOF.py
     algorithms/CreateCacheFilename.py
     algorithms/CreateEmptyTableWorkspace.py
-    algorithms/CreatePoleFigureTableWorkspace.py
+    algorithms/CreateGroupingByComponent.py
     algorithms/CreateLeBailFitInput.py
+    algorithms/CreatePoleFigureTableWorkspace.py
     algorithms/CropWorkspaceForMDNorm.py
     algorithms/CylinderPaalmanPingsCorrection2.py
     algorithms/DNSComputeDetEffCorrCoefs.py
@@ -346,6 +347,7 @@ set(PYTHON_PLUGINS
     algorithms/WorkflowAlgorithms/SingleCrystalDiffuseReduction.py
     algorithms/WorkflowAlgorithms/SofQWMoments.py
     algorithms/WorkflowAlgorithms/SofQWMomentsScan.py
+    algorithms/WorkflowAlgorithms/StitchByBackground.py
     algorithms/WorkflowAlgorithms/SwapWidths.py
     algorithms/WorkflowAlgorithms/TOSCABankCorrection.py
     algorithms/WorkflowAlgorithms/TimeSlice.py

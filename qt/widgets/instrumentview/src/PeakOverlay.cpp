@@ -195,19 +195,16 @@ PeakOverlay::PeakOverlay(UnwrappedSurface *surface, const std::shared_ptr<Mantid
  */
 void PeakOverlay::removeShapes(const QList<Shape2D *> &shapeList) {
   // vectors of rows to delete from the peaks workspace.
-  std::vector<size_t> rows;
+  std::vector<int> rows;
   for (auto shape : shapeList) {
     PeakMarker2D *marker = dynamic_cast<PeakMarker2D *>(shape);
     if (!marker)
       throw std::logic_error("Wrong shape type found.");
-    rows.emplace_back(static_cast<size_t>(marker->getRow()));
+    rows.emplace_back(marker->getRow());
   }
 
-  // Run the DeleteTableRows algorithm to delete the peak.
-  auto alg = Mantid::API::AlgorithmManager::Instance().create("DeleteTableRows", -1);
-  alg->setPropertyValue("TableWorkspace", m_peaksWorkspace->getName());
-  alg->setProperty("Rows", rows);
-  emit executeAlgorithm(alg);
+  m_peaksWorkspace->removePeaks(std::move(rows));
+  recreateMarkers(getCurrentStyle());
 }
 
 /**---------------------------------------------------------------------
