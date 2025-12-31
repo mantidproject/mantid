@@ -129,6 +129,10 @@ macro(CXXTEST_ADD_TEST _cxxtest_testname)
   # macro and used to pass in test helper classes
   add_executable(${_cxxtest_testname} EXCLUDE_FROM_ALL ${_cxxtest_cpp_files} ${_cxxtest_h_files} ${TESTHELPER_SRCS})
 
+  if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/PrecompiledHeader.h)
+    target_precompile_headers(${_cxxtest_testname} PRIVATE PrecompiledHeader.h)
+  endif()
+
   set(_misc_bin $ENV{CONDA_PREFIX}/bin)
   set(_qt5_bin $ENV{CONDA_PREFIX}/Library/bin $ENV{CONDA_PREFIX}/Library/lib)
   set(_qt_qpa_platform_plugin $ENV{CONDA_PREFIX}/Library/plugins)
