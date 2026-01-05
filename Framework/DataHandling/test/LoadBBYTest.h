@@ -229,5 +229,6 @@ public:
     TS_ASSERT(algToBeTested.isExecuted());
     eventWS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outputSpace);
     TS_ASSERT_EQUALS(eventWS->getNumberEvents(), goodEvents - 1);
+    std::cout << "Temporary file used: " << tempPath << std::endl;
   }
 };
