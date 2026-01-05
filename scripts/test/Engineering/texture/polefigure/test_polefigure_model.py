@@ -68,32 +68,6 @@ class TextureProjectionTest(unittest.TestCase):
         self.assertFalse(x0)
 
     @patch(correction_model_path + ".ADS")
-    def test_create_default_parameter_table_with_value(self, mock_ads):
-        mock_ws = MagicMock()
-        mock_ws.getNumberHistograms.return_value = 2
-        mock_ads.retrieve.return_value = mock_ws
-        with patch(correction_model_path + ".CreateEmptyTableWorkspace") as mock_create:
-            mock_table = MagicMock()
-            mock_create.return_value = mock_table
-            self.model.create_default_parameter_table_with_value("ws", 5.0, "out_ws")
-            self.assertEqual(mock_table.addRow.call_count, 2)
-
-    @patch(correction_model_path + ".ADS")
-    def test_get_pole_figure_data_stereographic_projection(self, mock_ads):
-        mock_ws = MagicMock()
-
-        col_data = {"Alpha": np.array([0.1, 0.2]), "Beta": np.array([0.1, 0.2]), "I": np.array([0.1, 0.2])}
-
-        def get_column(col):
-            return col_data.get(col)
-
-        mock_ws.column.side_effect = get_column
-        mock_ads.retrieve.return_value = mock_ws
-
-        result = self.model.get_pole_figure_data("ws", "stereographic")
-        self.assertEqual(result.shape[1], 3)
-
-    @patch(correction_model_path + ".ADS")
     def test_get_pf_table_name_with_hkl(self, mock_ads):
         mock_ads.retrieve.return_value = self.mock_ws
         table_name, grouping = self.model.get_pf_table_name(["ws1", "ws2"], ["param_ws1", "param_ws2"], [1, 1, 1], "I")

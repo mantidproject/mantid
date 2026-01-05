@@ -6,10 +6,17 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import numpy as np
 from os import path
-from mantid.simpleapi import logger, SetGoniometer
+from mantid.simpleapi import (
+    logger,
+    SetGoniometer,
+    CreatePoleFigureTableWorkspace,
+    CreateEmptyTableWorkspace,
+    CloneWorkspace,
+    CombineTableWorkspaces,
+)
 from mantid.api import AnalysisDataService as ADS
 from typing import Optional, Sequence
-from mantid.dataobjects import Workspace2D
+from mantid.dataobjects import Workspace2D, TableWorkspace
 from matplotlib.figure import Figure
 from matplotlib.axes import Axes
 from scipy.interpolate import griddata
@@ -83,6 +90,9 @@ def show_texture_sample_shape(
     model.show_shape_plot(ax_transform, ax_labels)
 
 
+# helper function for applying orientations to a set of workspaces
+
+
 def load_all_orientations(
     wss: Sequence[Workspace2D | str],
     txt_file: str,
@@ -90,6 +100,17 @@ def load_all_orientations(
     euler_scheme: Optional[Sequence[str]] = None,
     euler_sense: Optional[str] = None,
 ) -> None:
+    """
+    A method for providing orientation information on a set of workspaces
+
+    wss: Sequence of workspaces for which the orientation data will be provided
+    txt_file: file containing orientation data, either as euler angles or flattened matrices,
+              each row in the file will be applied to the next workspace in the sequence
+    use_euler: flag for whether the data in the text file is euler angles (True) or matrices (False)
+    euler_scheme: lab frame alignment of the euler axes (not case-sensitive) eg. `XYZ`, or `yxy` would be acceptable inputs
+    euler_sense: comma separated sense of rotation for each euler axis eg. `1,1,1` or `-1,1,-1`
+                 (1 is counter clockwise, -1 is clockwise)
+    """
     if _validate_file(txt_file, ".txt"):
         with open(txt_file, "r") as f:
             goniometer_strings = [line.strip().replace("\t", ",") for line in f]
@@ -121,6 +142,90 @@ def load_all_orientations(
                     SetGoniometer(ws, **kwargs)
         except BaseException as e:
             logger.error(f"{str(e)}. Failed to set goniometer, are your settings for `use_euler_angles` correct? Currently: {use_euler}")
+
+
+def create_default_parameter_table_with_value(ws_name: str, val: float, out_ws: str):
+    tab = CreateEmptyTableWorkspace(OutputWorkspace=out_ws)
+    tab.addColumn("float", "I")
+    ws = ADS.retrieve(ws_name)
+    for _ in range(ws.getNumberHistograms()):
+        tab.addRow(
+            [
+                float(val),
+            ]
+        )
+
+
+def create_pole_figure_tables(
+    wss: Sequence[str],
+    peak_wss: Optional[Sequence[str]],
+    out_ws: str,
+    hkl: Optional[Sequence[int]],
+    inc_scatt_corr: bool,
+    scat_vol_pos: Sequence[float],
+    chi2_thresh: Optional[float],
+    peak_thresh: Optional[float],
+    ax_transform: Sequence[float] = np.eye(3),
+    readout_col: str = "",
+) -> TableWorkspace:
+    """
+    Create a single pole figure table for a sequence of workspaces and their fit parameters
+
+    wss: Sequence of workspaces
+    peak_wss: sequence of table workspaces, one for each of the provided workspaces,
+              which should contain the fit parameters for each spectra in the given workspace
+    out_ws: name to give the output workspace
+    hkl: if the crystal structure is known and you would like to apply thresholds based on target HKL peak location
+         or use a scattering power correction, you can provide that here
+    inc_scatt_corr: flag for whether or not to scale the parameter value by scattering power (also requires HKL)
+    chi2_thresh: if the peak fit parameters have a chi2 per fit,
+                 this can be used to exclude spectra where the chi2 is higher than this supplied value
+    peak_thresh: spectra with x0 more than this value from the `target` x0 will be excluded.
+                 If HKL and crystal structure are provided then this target x0 is the theoretical peak centre for the given HKL
+                 otherwise it is the average x0 of the spectra
+    ax_transform: the coordinate change between the lab frame and the sample frame which defines the initial orientation
+    readout_col: the parameter column which should be read and used to populate the table
+
+    """
+    flat_ax_transform = np.reshape(ax_transform, (9,))
+    table_workspaces = []
+    if peak_wss and (len(peak_wss) == len(wss)):
+        for iws, ws in enumerate(wss):
+            ws_str = f"_{iws}_abi_table"
+            CreatePoleFigureTableWorkspace(
+                InputWorkspace=ws,
+                PeakParameterWorkspace=peak_wss[iws],
+                OutputWorkspace=ws_str,
+                Reflection=hkl,
+                Chi2Threshold=chi2_thresh,
+                PeakPositionThreshold=peak_thresh,
+                ApplyScatteringPowerCorrection=inc_scatt_corr,
+                ScatteringVolumePosition=scat_vol_pos,
+                AxesTransform=flat_ax_transform,
+                ReadoutColumn=readout_col,
+            )
+            table_workspaces.append(ws_str)
+    else:
+        for iws, ws in enumerate(wss):
+            default_param_vals = "_default_param_table"
+            create_default_parameter_table_with_value(ws, iws + 1, default_param_vals)
+            ws_str = f"_{iws}_abi_table"
+            CreatePoleFigureTableWorkspace(
+                InputWorkspace=ws,
+                PeakParameterWorkspace=default_param_vals,
+                OutputWorkspace=ws_str,
+                Reflection=hkl,
+                Chi2Threshold=chi2_thresh,
+                PeakPositionThreshold=peak_thresh,
+                ApplyScatteringPowerCorrection=inc_scatt_corr,
+                ScatteringVolumePosition=scat_vol_pos,
+                AxesTransform=flat_ax_transform,
+            )
+            table_workspaces.append(ws_str)
+    CloneWorkspace(InputWorkspace=table_workspaces[0], OutputWorkspace=out_ws)
+    for tw in table_workspaces[1:]:
+        CombineTableWorkspaces(LHSWorkspace=out_ws, RHSWorkspace=tw, OutputWorkspace=out_ws)
+    return ADS.retrieve(out_ws)
 
 
 def plot_pole_figure(

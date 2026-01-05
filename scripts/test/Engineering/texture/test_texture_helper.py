@@ -9,6 +9,8 @@ import unittest
 from unittest.mock import patch, MagicMock, call, mock_open
 from mantid.api import AnalysisDataService as ADS
 from Engineering.texture.TextureUtils import load_all_orientations
+from Engineering.texture.texture_helper import _read_xml, create_default_parameter_table_with_value, get_pole_figure_data
+import numpy as np
 
 texture_utils_path = "Engineering.texture.texture_helper"
 
@@ -96,3 +98,38 @@ class TestTextureHelperSetGoniometer(unittest.TestCase):
             "are your settings for `use_euler_angles` correct? "
             "Currently: False"
         )
+
+    @patch("builtins.open", new_callable=mock_open, read_data="<xml>test</xml>")
+    @patch(texture_utils_path + "._validate_file", return_value=True)
+    def test_read_xml_reads_file_when_valid(self, mock_validate, mock_file):
+        result = _read_xml("dummy.xml")
+
+        self.assertEqual(result, "<xml>test</xml>")
+        mock_validate.assert_called_once_with("dummy.xml", ".xml")
+        mock_file.assert_called_once_with("dummy.xml", "r")
+
+    @patch(texture_utils_path + ".ADS")
+    def test_create_default_parameter_table_with_value(self, mock_ads):
+        mock_ws = MagicMock()
+        mock_ws.getNumberHistograms.return_value = 2
+        mock_ads.retrieve.return_value = mock_ws
+        with patch(texture_utils_path + ".CreateEmptyTableWorkspace") as mock_create:
+            mock_table = MagicMock()
+            mock_create.return_value = mock_table
+            create_default_parameter_table_with_value("ws", 5.0, "out_ws")
+            self.assertEqual(mock_table.addRow.call_count, 2)
+
+    @patch(texture_utils_path + ".ADS")
+    def test_get_pole_figure_data_stereographic_projection(self, mock_ads):
+        mock_ws = MagicMock()
+
+        col_data = {"Alpha": np.array([0.1, 0.2]), "Beta": np.array([0.1, 0.2]), "I": np.array([0.1, 0.2])}
+
+        def get_column(col):
+            return col_data.get(col)
+
+        mock_ws.column.side_effect = get_column
+        mock_ads.retrieve.return_value = mock_ws
+
+        result = get_pole_figure_data("ws", "stereographic")
+        self.assertEqual(result.shape[1], 3)

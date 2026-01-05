@@ -5,9 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.simpleapi import (
-    CreatePoleFigureTableWorkspace,
-    CloneWorkspace,
-    CombineTableWorkspaces,
     logger,
     SaveNexus,
     CreateEmptyTableWorkspace,
@@ -19,7 +16,7 @@ from typing import Optional, Sequence, Tuple
 from os import path, makedirs
 from Engineering.common.texture_sample_viewer import has_valid_shape
 from Engineering.texture.xtal_helper import get_xtal_structure
-from Engineering.texture.texture_helper import plot_pole_figure, ster_proj, azim_proj
+from Engineering.texture.texture_helper import plot_pole_figure, create_pole_figure_tables
 from matplotlib.figure import Figure
 from matplotlib.axes import Axes
 
@@ -31,7 +28,7 @@ class TextureProjection:
         self,
         wss: Sequence[str],
         peak_wss: Optional[Sequence[str]],
-        out_ws: str,
+        out_ws_name: str,
         hkl: Optional[Sequence[int]],
         inc_scatt_corr: bool,
         scat_vol_pos: Sequence[float],
@@ -41,57 +38,19 @@ class TextureProjection:
         ax_transform: Sequence[float] = np.eye(3),
         readout_col: str = "",
     ) -> None:
-        flat_ax_transform = np.reshape(ax_transform, (9,))
-        table_workspaces = []
-        if peak_wss and (len(peak_wss) == len(wss)):
-            for iws, ws in enumerate(wss):
-                ws_str = f"_{iws}_abi_table"
-                CreatePoleFigureTableWorkspace(
-                    InputWorkspace=ws,
-                    PeakParameterWorkspace=peak_wss[iws],
-                    OutputWorkspace=ws_str,
-                    Reflection=hkl,
-                    Chi2Threshold=chi2_thresh,
-                    PeakPositionThreshold=peak_thresh,
-                    ApplyScatteringPowerCorrection=inc_scatt_corr,
-                    ScatteringVolumePosition=scat_vol_pos,
-                    AxesTransform=flat_ax_transform,
-                    ReadoutColumn=readout_col,
-                )
-                table_workspaces.append(ws_str)
-        else:
-            for iws, ws in enumerate(wss):
-                default_param_vals = "_default_param_table"
-                self.create_default_parameter_table_with_value(ws, iws + 1, default_param_vals)
-                ws_str = f"_{iws}_abi_table"
-                CreatePoleFigureTableWorkspace(
-                    InputWorkspace=ws,
-                    PeakParameterWorkspace=default_param_vals,
-                    OutputWorkspace=ws_str,
-                    Reflection=hkl,
-                    Chi2Threshold=chi2_thresh,
-                    PeakPositionThreshold=peak_thresh,
-                    ApplyScatteringPowerCorrection=inc_scatt_corr,
-                    ScatteringVolumePosition=scat_vol_pos,
-                    AxesTransform=flat_ax_transform,
-                )
-                table_workspaces.append(ws_str)
-        CloneWorkspace(InputWorkspace=table_workspaces[0], OutputWorkspace=out_ws)
-        for tw in table_workspaces[1:]:
-            CombineTableWorkspaces(LHSWorkspace=out_ws, RHSWorkspace=tw, OutputWorkspace=out_ws)
+        out_ws = create_pole_figure_tables(
+            wss=wss,
+            peak_wss=peak_wss,
+            out_ws=out_ws_name,
+            hkl=hkl,
+            inc_scatt_corr=inc_scatt_corr,
+            scat_vol_pos=scat_vol_pos,
+            chi2_thresh=chi2_thresh,
+            peak_thresh=peak_thresh,
+            ax_transform=ax_transform,
+            readout_col=readout_col,
+        )
         self._save_files(out_ws, save_dirs)
-
-    @staticmethod
-    def get_pole_figure_data(ws_name: str, projection: str, readout_col: str = "I"):
-        if projection.lower() == "stereographic":
-            proj = ster_proj
-        else:
-            proj = azim_proj
-        ws = ADS.retrieve(ws_name)
-        alphas = np.asarray(ws.column("Alpha"))
-        betas = np.asarray(ws.column("Beta"))
-        i = np.asarray(ws.column(readout_col))
-        return proj(alphas, betas, i)
 
     @staticmethod
     def get_pf_table_name(

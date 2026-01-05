@@ -16,6 +16,7 @@ from Engineering.common.xml_shapes import get_cube_xml
 from Engineering.texture.correction.correction_model import TextureCorrectionModel
 
 correction_model_path = "Engineering.texture.correction.correction_model"
+texture_helper_path = "Engineering.texture.texture_helper"
 
 
 class TextureCorrectionModelTest(unittest.TestCase):
@@ -66,72 +67,6 @@ class TextureCorrectionModelTest(unittest.TestCase):
         self.assertEqual(mock_set_gonio.call_count, 2)
         expected_calls = [call(self.mock_ws, **target_call) for target_call in target_calls]
         mock_set_gonio.assert_has_calls(expected_calls)
-
-    @patch(correction_model_path + ".SetGoniometer")
-    def test_load_all_orientations_using_euler_angles(self, mock_set_gonio):
-        test_wss = [self.mock_ws, self.mock_ws]
-        txt_data = "30,45,60\n15,30,45"
-        euler_schemes = [["x", "y", "z"], ["y", "x", "y"]]  # try two different rot schemes
-        euler_senses = ["1,1,-1", "-1,-1,1"]  # and two sets of sense
-        target_calls = [
-            (
-                {"Axis0": "30,1,0,0,1", "Axis1": "45,0,1,0,1", "Axis2": "60,0,0,1,-1"},
-                {"Axis0": "15,1,0,0,1", "Axis1": "30,0,1,0,1", "Axis2": "45,0,0,1,-1"},
-            ),
-            (
-                {"Axis0": "30,0,1,0,-1", "Axis1": "45,1,0,0,-1", "Axis2": "60,0,1,0,1"},
-                {"Axis0": "15,0,1,0,-1", "Axis1": "30,1,0,0,-1", "Axis2": "45,0,1,0,1"},
-            ),
-        ]  # expected rot axes
-        for i in range(2):
-            self.run_euler_gonio_test(test_wss, txt_data, euler_schemes[i], euler_senses[i], target_calls[i], mock_set_gonio)
-
-    @patch(correction_model_path + ".SetGoniometer")
-    def test_load_all_orientations_using_rot_mat(self, mock_set_gonio):
-        test_wss = [self.mock_ws, self.mock_ws]
-        txt_data = "1,0,0,0,1,0,0,0,1,2,2,2\n0,1,0,0,0,1,1,0,0,2,2,2"
-
-        target_calls = (
-            {"GoniometerMatrix": [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0]},
-            {"GoniometerMatrix": [0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0]},
-        )
-
-        with patch("builtins.open", mock_open(read_data=txt_data)):
-            self.model.load_all_orientations(test_wss, "rot_mats.txt", use_euler=False)
-
-        self.assertEqual(mock_set_gonio.call_count, 2)
-        expected_calls = [call(self.mock_ws, **target_call) for target_call in target_calls]
-        mock_set_gonio.assert_has_calls(expected_calls)
-
-    @patch(correction_model_path + ".logger")
-    def test_load_all_orientations_error_handling_when_matrix_given_to_euler(self, mock_logger):
-        test_wss = [self.mock_ws, self.mock_ws]
-        txt_data = "1,0,0,0,1,0,0,0,1,2,2,2\n0,1,0,0,0,1,1,0,0,2,2,2"
-
-        with patch("builtins.open", mock_open(read_data=txt_data)):
-            self.model.load_all_orientations(test_wss, "rot_mats.txt", use_euler=True, euler_scheme=["x", "y", "z"], euler_sense=["1,1,1"])
-
-        mock_logger.error.assert_called_once_with(
-            "'list' object has no attribute 'split'. Failed to set goniometer, "
-            "are your settings for `use_euler_angles` correct? Currently: True"
-        )
-
-    @patch(correction_model_path + ".logger")
-    def test_load_all_orientations_error_handling_when_euler_given_as_matrix(self, mock_logger):
-        test_wss = [self.mock_ws, self.mock_ws]
-        txt_data = "30,45,60\n15,30,45"
-
-        with patch("builtins.open", mock_open(read_data=txt_data)):
-            self.model.load_all_orientations(test_wss, "rot_mats.txt", use_euler=False, euler_scheme=["x", "y", "z"], euler_sense=["1,1,1"])
-
-        mock_logger.error.assert_called_once_with(
-            'Problem setting "GoniometerMatrix" in SetGoniometer-v1: '
-            'When converting parameter "GoniometerMatrix": '
-            'When setting value of property "GoniometerMatrix": '
-            "Incorrect size. Failed to set goniometer, "
-            "are your settings for `use_euler_angles` correct? "
-            "Currently: False"
-        )
 
     @patch(correction_model_path + ".TextureCorrectionModel._has_no_orientation_set")
     @patch(correction_model_path + ".TextureCorrectionModel._has_no_valid_material")
@@ -255,15 +190,6 @@ class TextureCorrectionModelTest(unittest.TestCase):
         # bin centres are 1.5 and 2.5, so expect a value halfway between 2 and 4
         self.assertEqual(coefs[0], 3)
 
-    @patch("builtins.open", new_callable=mock_open, read_data="<xml>test</xml>")
-    @patch.object(TextureCorrectionModel, "_validate_file", return_value=True)
-    def test_read_xml_reads_file_when_valid(self, mock_validate, mock_file):
-        result = self.model._read_xml("dummy.xml")
-
-        self.assertEqual(result, "<xml>test</xml>")
-        mock_validate.assert_called_once_with("dummy.xml", ".xml")
-        mock_file.assert_called_once_with("dummy.xml", "r")
-
     def test_validate_file_on_expected_inputs(self):
         valid_file_paths = ["anything.txt", "C:/anything.txt", r"D:\any\thing.txt"]
         ext = ".txt"
@@ -274,20 +200,25 @@ class TextureCorrectionModelTest(unittest.TestCase):
             self.assertTrue(result)
             self.assertFalse(null_result)
 
+    @patch(texture_helper_path + ".get_cube_xml")
     @patch(correction_model_path + ".DefineGaugeVolume")
-    def test_define_gauge_vol_for_preset(self, mock_def_gauge_vol):
+    def test_define_gauge_vol_for_preset(self, mock_def_gauge_vol, mock_get_xml):
+        # this method under the hood should just invoke get_cube_xml with the preset values for a 4mm gauge volume
         preset = "4mmCube"
-        expected_str = (
-            "\n        <cuboid id='some-gv'>         <height val='0.004'  />         "
-            "<width val='0.004' />          <depth  val='0.004' />          "
-            "<centre x='0.0' y='0.0' z='0.0'  />          </cuboid>          "
-            "<algebra val='some-gv' /> \\ "
-        )
+        # the actual xml for this is unimportant so we can use a dummy string, what matters is:
+        # (1) the method is called with the correct parameters
+        # and (2) the return value is then passed to def gauge volume
+        dummy_xml = "example dummy xml string"
+        mock_get_xml.return_value = dummy_xml
         self.model.define_gauge_volume(self.ws_name, preset=preset, custom=None)
-        mock_def_gauge_vol.assert_called_once_with(self.ws_name, expected_str)
+
+        # check (1)
+        mock_get_xml.assert_called_once_with("some-gv", 0.004)
+        # check (2)
+        mock_def_gauge_vol.assert_called_once_with(self.ws_name, dummy_xml)
 
     @patch(correction_model_path + ".DefineGaugeVolume")
-    @patch(correction_model_path + ".TextureCorrectionModel._read_xml")
+    @patch(texture_helper_path + "._read_xml")
     def test_define_gauge_vol_for_custom(self, mock_read_xml, mock_def_gauge_vol):
         preset = "Custom Shape"
         expected_str = get_cube_xml("some-gv", 0.004)
