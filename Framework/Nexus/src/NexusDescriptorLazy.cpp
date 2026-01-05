@@ -11,7 +11,6 @@
 #include "MantidNexus/UniqueID.h"
 
 #include <H5Cpp.h>
-#include <boost/multi_index/detail/index_matcher.hpp>
 #include <hdf5.h>
 
 #include <cstdlib> // malloc, calloc
@@ -22,8 +21,6 @@
 #include <unordered_set>
 #include <utility>
 
-using boost::multi_index::detail::index_matcher::entry;
-
 static unsigned int const INIT_DEPTH = 1;
 static unsigned int const ENTRY_DEPTH = 2;
 static unsigned int const INSTR_DEPTH = 5;
@@ -31,6 +28,26 @@ static std::unordered_set<std::string> const SPECIAL_ADDRESS{"/entry0", "/entry1
 static std::string const NONEXISTENT = "NONEXISTENT"; // register failures as well
 static std::string const UNKNOWN_CLASS = "UNKNOWN_CLASS";
 static std::string const SCIENTIFIC_DATA_SET = "SDS";
+
+namespace {
+template <herr_t (*H5Xclose)(hid_t)> std::string readNXClass(Mantid::Nexus::UniqueID<H5Xclose> const &oid) {
+  std::string nxClass = UNKNOWN_CLASS;
+  if (H5Aexists(oid, "NX_class") > 0) {
+    Mantid::Nexus::UniqueID<&H5Aclose> attrID = H5Aopen_name(oid, "NX_class");
+    if (attrID.isValid()) {
+      H5A_info_t ainfo;
+      if (H5Aget_info(attrID, &ainfo) > 0) {
+        nxClass.resize(ainfo.data_size + 1); // +1 for null terminator
+        Mantid::Nexus::UniqueID<&H5Tclose> typeID(H5Aget_type(attrID));
+        H5Aread(attrID, typeID, nxClass.data());
+      } else {
+        nxClass = UNKNOWN_CLASS;
+      }
+    }
+  }
+  return nxClass;
+}
+} // namespace
 
 namespace Mantid::Nexus {
 
@@ -41,8 +58,9 @@ NexusDescriptorLazy::NexusDescriptorLazy(std::string const &filename)
       m_allEntries(initAllEntries()) {}
 
 bool NexusDescriptorLazy::isEntry(std::string const &entryName) {
-  if (m_allEntries.contains(entryName)) {
-    return m_allEntries[entryName] != NONEXISTENT;
+  auto it = m_allEntries.find(entryName);
+  if (it != m_allEntries.end()) {
+    return it->second != NONEXISTENT;
   } else {
     UniqueID<&H5Oclose> entryID(H5Oopen(m_fileID, entryName.c_str(), H5P_DEFAULT));
     if (entryID.isValid()) {
@@ -53,13 +71,7 @@ bool NexusDescriptorLazy::isEntry(std::string const &entryName) {
         m_allEntries[entryName] = SCIENTIFIC_DATA_SET;
       } else {
         // read NX_class attribute
-        UniqueID<&H5Aclose> attrID = H5Aopen_name(entryID, "NX_class");
-        if (attrID.isValid()) {
-          H5A_info_t ainfo;
-          H5Aget_info(attrID, &ainfo);
-          m_allEntries[entryName].resize(ainfo.data_size + 1); // +1 for null terminator
-          H5Aread(attrID, H5Aget_type(attrID), m_allEntries[entryName].data());
-        }
+        m_allEntries[entryName] = readNXClass(entryID);
       }
       return true;
     } else {
@@ -71,7 +83,11 @@ bool NexusDescriptorLazy::isEntry(std::string const &entryName) {
   return false;
 }
 
-bool NexusDescriptorLazy::classTypeExists(std::string const &classType) const {
+/// @brief not implemented yet
+/// @param classType the NX_class type to check for
+/// @return true if the class type exists anywhere in the file
+/// @throws std::logic_error always
+bool NexusDescriptorLazy::classTypeExists(std::string const &) const {
   throw std::logic_error("NexusDescriptorLazy::classTypeExists not implemented yet");
 }
 
@@ -100,16 +116,7 @@ void NexusDescriptorLazy::loadGroups(std::unordered_map<std::string, std::string
     return;
 
   // get NX_class attribute
-  std::string nxClass = UNKNOWN_CLASS;
-  if (H5Aexists(groupID.get(), "NX_class")) {
-    UniqueID<&H5Aclose> attrID = H5Aopen_name(groupID, "NX_class");
-    if (attrID.isValid()) {
-      int strlen = H5Aread(attrID, H5T_C_S1, nullptr);
-      nxClass.resize(strlen + 1); // +1 for null terminator
-      H5Aread(attrID, H5T_C_S1, nxClass.data());
-    }
-  }
-  allEntries[address] = nxClass;
+  allEntries[address] = readNXClass(groupID);
 
   // iterate over members
   hsize_t numObjs;
@@ -129,7 +136,7 @@ void NexusDescriptorLazy::loadGroups(std::unordered_map<std::string, std::string
     if (type == H5G_GROUP) {
       loadGroups(allEntries, memberAddress, depth + 1, maxDepth);
     } else if (type == H5G_DATASET) {
-      allEntries[memberAddress] = "SDS";
+      allEntries[memberAddress] = SCIENTIFIC_DATA_SET;
     }
   }
 }
@@ -160,16 +167,16 @@ std::unordered_map<std::string, std::string> NexusDescriptorLazy::initAllEntries
     // for levels beyond 2, only load special entries
     depth = 1;
     for (std::string const &specialAddress : SPECIAL_ADDRESS) {
-      if (isEntry(specialAddress))
+      if (allEntries.contains(specialAddress))
         loadGroups(allEntries, specialAddress, depth, ENTRY_DEPTH);
     }
 
     // get instrument up to a depth of 5
     depth = 2;
     for (std::string const &specialAddress : SPECIAL_ADDRESS) {
-      if (isEntry(specialAddress)) {
+      if (allEntries.contains(specialAddress)) {
         std::string instrumentAddress = specialAddress + "/instrument";
-        if (isEntry(instrumentAddress)) {
+        if (allEntries.contains(instrumentAddress)) {
           loadGroups(allEntries, instrumentAddress, depth, INSTR_DEPTH);
         }
       }

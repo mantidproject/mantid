@@ -13,8 +13,6 @@
 #include <filesystem>
 #include <fstream>
 
-#include <cstddef> // std::size_t
-
 #include <cxxtest/TestSuite.h>
 
 using Mantid::Nexus::NexusDescriptorLazy;
@@ -33,6 +31,7 @@ public:
     file << "mock";
     file.close();
     TS_ASSERT_THROWS(Mantid::Nexus::NexusDescriptorLazy nd(filename), std::invalid_argument const &);
+    std::filesystem::remove(filename);
   }
 
   void test_extension() {

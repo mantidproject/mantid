@@ -38,7 +38,7 @@ public:
   ~NexusDescriptorLazy() = default;
 
   /**
-   * Returns a copy of the current file name
+   * Returns a constant reference to the current file name
    * @return
    */
   inline std::string const &filename() const noexcept { return m_filename; }
@@ -68,15 +68,13 @@ public:
   /**
    * Checks if a full-address entry exists for a particular groupClass in a Nexus
    * dataset
-   * @param groupClass e.g. NxLog , Nexus entry attribute
    * @param entryName full address for an entry name /entry/NXlogs
+   * @param groupClass e.g. NxLog , Nexus entry attribute
    * @return true: entryName exists for a groupClass, otherwise false
    */
   bool isEntry(std::string const &entryName, std::string const &groupClass) {
     if (isEntry(entryName)) {
-      if (m_allEntries.at(entryName) == groupClass) {
-        return true;
-      }
+      return m_allEntries.at(entryName) == groupClass;
     } else {
       return false;
     }
