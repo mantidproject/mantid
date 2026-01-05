@@ -32,13 +32,14 @@ public:
   virtual ~NexusLoader();
 
   virtual void loadData(H5::DataSet &SDS, std::unique_ptr<std::vector<uint32_t>> &data,
-                        const std::vector<size_t> &offsets, const std::vector<size_t> &slabsizes);
+                        const std::vector<size_t> &offsets, const std::vector<size_t> &slabsizes) const;
   virtual void loadData(H5::DataSet &SDS, std::unique_ptr<std::vector<float>> &data, const std::vector<size_t> &offsets,
-                        const std::vector<size_t> &slabsizes);
+                        const std::vector<size_t> &slabsizes) const;
 
   virtual std::stack<EventROI> getEventIndexRanges(H5::Group &event_group, const uint64_t number_events,
                                                    std::unique_ptr<std::vector<uint64_t>> *event_index = nullptr) const;
-  std::stack<std::pair<int, EventROI>> getEventIndexSplitRanges(H5::Group &event_group, const uint64_t number_events);
+  std::stack<std::pair<int, EventROI>> getEventIndexSplitRanges(H5::Group &event_group,
+                                                                const uint64_t number_events) const;
 
 private:
   template <typename Type>
@@ -46,7 +47,7 @@ private:
                         const std::vector<size_t> &slabsizes) const;
   const bool m_is_time_filtered;
   const std::vector<PulseROI> m_pulse_indices;
-  std::vector<std::pair<int, PulseROI>> m_target_to_pulse_indices;
+  const std::vector<std::pair<int, PulseROI>> m_target_to_pulse_indices;
   void loadEventIndex(H5::Group &event_group, std::unique_ptr<std::vector<uint64_t>> &data) const;
 };
 

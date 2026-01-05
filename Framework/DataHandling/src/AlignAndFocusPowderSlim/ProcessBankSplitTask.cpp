@@ -10,7 +10,6 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/ParallelMinMax.h"
 #include "MantidKernel/Timer.h"
-#include "MantidKernel/Unit.h"
 #include "MantidNexus/H5Util.h"
 #include "tbb/parallel_for.h"
 #include "tbb/parallel_reduce.h"
@@ -21,27 +20,22 @@ namespace Mantid::DataHandling::AlignAndFocusPowderSlim {
 
 namespace {
 
-const std::string MICROSEC("microseconds");
-
 // Logger for this class
 auto g_log = Kernel::Logger("ProcessBankSplitTask");
 
 } // namespace
 ProcessBankSplitTask::ProcessBankSplitTask(std::vector<std::string> &bankEntryNames, H5::H5File &h5file,
-                                           const bool is_time_filtered, std::vector<int> &workspaceIndices,
+                                           std::shared_ptr<NexusLoader> loader, std::vector<int> &workspaceIndices,
                                            std::vector<API::MatrixWorkspace_sptr> &wksps,
                                            const BankCalibrationFactory &calibFactory, const size_t events_per_chunk,
-                                           const size_t grainsize_event,
-                                           std::vector<std::pair<int, PulseROI>> target_to_pulse_indices,
-                                           std::shared_ptr<API::Progress> &progress)
-    : m_h5file(h5file), m_bankEntries(bankEntryNames), m_loader(is_time_filtered, {}, target_to_pulse_indices),
-      m_workspaceIndices(workspaceIndices), m_wksps(wksps), m_calibFactory(calibFactory),
-      m_events_per_chunk(events_per_chunk), m_grainsize_event(grainsize_event), m_progress(progress) {}
+                                           const size_t grainsize_event, std::shared_ptr<API::Progress> &progress)
+    : ProcessBankTaskBase(bankEntryNames, loader, calibFactory), m_h5file(h5file), m_workspaceIndices(workspaceIndices),
+      m_wksps(wksps), m_events_per_chunk(events_per_chunk), m_grainsize_event(grainsize_event), m_progress(progress) {}
 
 void ProcessBankSplitTask::operator()(const tbb::blocked_range<size_t> &range) const {
   auto entry = m_h5file.openGroup("entry"); // type=NXentry
   for (size_t wksp_index = range.begin(); wksp_index < range.end(); ++wksp_index) {
-    const auto &bankName = m_bankEntries[wksp_index];
+    const auto &bankName = this->bankName(wksp_index);
     // empty bank names indicate spectra to skip; control should never get here, but just in case
     if (bankName.empty()) {
       continue;
@@ -60,7 +54,7 @@ void ProcessBankSplitTask::operator()(const tbb::blocked_range<size_t> &range) c
       continue;
     }
 
-    auto eventSplitRanges = m_loader.getEventIndexSplitRanges(event_group, total_events);
+    auto eventSplitRanges = this->getEventIndexSplitRanges(event_group, total_events);
 
     // Get all spectra for this bank.
     // Create temporary y arrays for each workspace.
@@ -77,11 +71,9 @@ void ProcessBankSplitTask::operator()(const tbb::blocked_range<size_t> &range) c
     // and the units
     std::string tof_unit;
     Nexus::H5Util::readStringAttribute(tof_SDS, "units", tof_unit);
-    const double time_conversion = Kernel::Units::timeConversionValue(tof_unit, MICROSEC);
-
     // now the calibration for the output group can be created
     // which detectors go into the current group - assumes ouput spectrum number is one more than workspace index
-    const auto calibration = m_calibFactory.getCalibration(time_conversion, wksp_index);
+    const auto calibration = this->getCalibration(tof_unit, wksp_index);
 
     // declare arrays once so memory can be reused
     auto event_detid = std::make_unique<std::vector<uint32_t>>();       // uint32 for ORNL nexus file
@@ -128,24 +120,14 @@ void ProcessBankSplitTask::operator()(const tbb::blocked_range<size_t> &range) c
       }
 
       // log the event ranges being processed
-      std::ostringstream oss;
-      oss << "Processing " << bankName << " with " << total_events_to_read << " events in the ranges: ";
-      for (size_t i = 0; i < offsets.size(); ++i) {
-        oss << "[" << offsets[i] << ", " << (offsets[i] + slabsizes[i]) << "), ";
+      g_log.debug(toLogString(bankName, total_events_to_read, offsets, slabsizes));
+
+      if (total_events_to_read == 0) {
+        continue; // nothing to do
       }
-      oss << "\n";
-      g_log.debug() << oss.str();
 
       // load detid and tof at the same time
-      tbb::parallel_invoke(
-          [&] { // load detid
-            // event_detid->clear();
-            m_loader.loadData(detID_SDS, event_detid, offsets, slabsizes);
-          },
-          [&] { // load time-of-flight
-            // event_time_of_flight->clear();
-            m_loader.loadData(tof_SDS, event_time_of_flight, offsets, slabsizes);
-          });
+      this->loadEvents(detID_SDS, tof_SDS, offsets, slabsizes, event_detid, event_time_of_flight);
 
       // loop over targets
       tbb::parallel_for(
@@ -183,13 +165,7 @@ void ProcessBankSplitTask::operator()(const tbb::blocked_range<size_t> &range) c
     }
 
     // copy the data out into the correct spectrum and calculate errors
-    tbb::parallel_for(size_t(0), m_wksps.size(), [&](size_t i) {
-      auto &y_values = spectra[i]->dataY();
-      std::copy(y_temps[i].cbegin(), y_temps[i].cend(), y_values.begin());
-      auto &e_values = spectra[i]->dataE();
-      std::transform(y_temps[i].cbegin(), y_temps[i].cend(), e_values.begin(),
-                     [](uint32_t y) { return std::sqrt(static_cast<double>(y)); });
-    });
+    tbb::parallel_for(size_t(0), m_wksps.size(), [&](size_t i) { copyDataToSpectrum(y_temps[i], spectra[i]); });
 
     g_log.debug() << bankName << " stop " << timer << std::endl;
     m_progress->report();
