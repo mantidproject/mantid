@@ -61,13 +61,31 @@ mtd_add_qt_library(
   MOC ${MOC_FILES}
   NOMOC ${INC_FILES}
   UI ${UI_FILES}
-  DEFS IN_MANTIDQT_MUONINTERFACE PRECOMPILED PrecompiledHeader.h
+  DEFS IN_MANTIDQT_MUONINTERFACE
   LINK_LIBS ${CORE_MANTIDLIBS} ${POCO_LIBRARIES} ${Boost_LIBRARIES} ${JSONCPP_LIBRARIES}
   MTD_QT_LINK_LIBS MantidQtWidgetsCommon MantidQtWidgetsMplCpp MantidQtWidgetsPlotting
   INSTALL_DIR_BASE ${WORKBENCH_PLUGINS_DIR}
   OSX_INSTALL_RPATH @loader_path/../../MacOS @loader_path/../../plugins/qt5
   LINUX_INSTALL_RPATH "\$ORIGIN/../../${LIB_DIR};\$ORIGIN/../../plugins/qt5/"
 )
+
+# Use a precompiled header where they are supported
+if(PARSED_PRECOMPILED)
+  target_precompile_headers(
+    MantidScientificInterfacesMuon
+    PRIVATE
+    <MantidAPI/Algorithm.h>
+    <MantidAPI/MatrixWorkspace_fwd.h>
+    <MantidKernel/System.h>
+    <QDialog>
+    <QString>
+    <QWidget>
+    <map>
+    <set>
+    <string>
+    <vector>
+  )
+endif()
 
 # Testing target
 if(MANTID_FRAMEWORK_LIB STREQUAL "BUILD")
