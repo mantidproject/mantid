@@ -49,7 +49,7 @@ class DMOL3Loader(AbInitioLoader):
         """
         data = {}  # container to store read data
 
-        with io.open(
+        with open(
             self._clerk.get_input_filename(),
             "rb",
         ) as dmol3_file:

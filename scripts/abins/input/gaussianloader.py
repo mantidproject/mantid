@@ -4,7 +4,6 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-import io
 from io import BufferedReader
 from pathlib import Path
 import re
@@ -45,7 +44,7 @@ class GAUSSIANLoader(AbInitioLoader):
 
         data = {}  # container to store read data
 
-        with io.open(
+        with open(
             self._clerk.get_input_filename(),
             "rb",
         ) as gaussian_file:
