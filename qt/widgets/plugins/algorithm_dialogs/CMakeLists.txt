@@ -54,7 +54,7 @@ mtd_add_qt_library(
   SRC ${SRC_FILES}
   MOC ${MOC_FILES}
   NOMOC ${INC_FILES}
-  UI ${UI_FILES} PRECOMPILED inc/MantidQtWidgets/Plugins/AlgorithmDialogs/PrecompiledHeader.h
+  UI ${UI_FILES}
   LINK_LIBS ${CORE_MANTIDLIBS} ${POCO_LIBRARIES} ${Boost_LIBRARIES} ${QT_LIBRARIES} ${OPENGL_LIBRARIES}
   QT5_LINK_LIBS Qt5::OpenGL Qt5::Qscintilla
   MTD_QT_LINK_LIBS MantidQtWidgetsCommon
@@ -62,3 +62,21 @@ mtd_add_qt_library(
   LINUX_INSTALL_RPATH "\$ORIGIN/../../${LIB_DIR}"
   INSTALL_DIR_BASE ${WORKBENCH_PLUGINS_DIR}
 )
+
+# Use a precompiled header where they are supported
+if(PARSED_PRECOMPILED)
+  target_precompile_headers(
+    MantidQtWidgetsPluginsAlgorithmDialogs
+    PRIVATE
+    <MantidAPI/Algorithm.h>
+    <MantidAPI/MatrixWorkspace_fwd.h>
+    <MantidKernel/System.h>
+    <QDialog>
+    <QString>
+    <QWidget>
+    <map>
+    <set>
+    <string>
+    <vector>
+  )
+endif()
