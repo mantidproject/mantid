@@ -19,12 +19,12 @@ NexusLoader::NexusLoader(const bool is_time_filtered, const std::vector<PulseROI
       m_target_to_pulse_indices(target_to_pulse_indices) {}
 
 void NexusLoader::loadData(H5::DataSet &SDS, std::unique_ptr<std::vector<uint32_t>> &data,
-                           const std::vector<size_t> &offsets, const std::vector<size_t> &slabsizes) {
+                           const std::vector<size_t> &offsets, const std::vector<size_t> &slabsizes) const {
   loadDataInternal(SDS, data, offsets, slabsizes);
 }
 
 void NexusLoader::loadData(H5::DataSet &SDS, std::unique_ptr<std::vector<float>> &data,
-                           const std::vector<size_t> &offsets, const std::vector<size_t> &slabsizes) {
+                           const std::vector<size_t> &offsets, const std::vector<size_t> &slabsizes) const {
   loadDataInternal(SDS, data, offsets, slabsizes);
 }
 
@@ -98,7 +98,7 @@ std::stack<EventROI> NexusLoader::getEventIndexRanges(H5::Group &event_group, co
 }
 
 std::stack<std::pair<int, EventROI>> NexusLoader::getEventIndexSplitRanges(H5::Group &event_group,
-                                                                           const uint64_t number_events) {
+                                                                           const uint64_t number_events) const {
   // This will return a stack of pairs, where each pair is the start and stop index of the event ranges with a mapping
   // to target, taking intersection with m_pulse_indices
   std::stack<std::pair<int, EventROI>> ranges;

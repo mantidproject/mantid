@@ -439,19 +439,19 @@ void AlignAndFocusPowderSlim::exec() {
   // create the bank calibration factory to share with all of the ProcessBank*Task objects
   BankCalibrationFactory calibFactory(m_calibration, m_scale_at_sample, grouping, m_masked);
 
-  // TODO create a BankCalibrationFactor to collect together information
-
   // threaded processing of the banks
   const int DISK_CHUNK = getProperty(PropertyNames::READ_SIZE_FROM_DISK);
   const int GRAINSIZE_EVENTS = getProperty(PropertyNames::EVENTS_PER_THREAD);
   g_log.debug() << (DISK_CHUNK / GRAINSIZE_EVENTS) << " threads per chunk\n";
 
   if (timeSplitter.empty()) {
+    // create the nexus loader for handling combined calls to hdf5
     const auto pulse_indices = this->determinePulseIndices(wksp, filterROI);
+    auto loader = std::make_shared<NexusLoader>(is_time_filtered, pulse_indices);
 
     auto progress = std::make_shared<API::Progress>(this, .17, .9, num_banks_to_read);
-    ProcessBankTask task(bankEntryNames, h5file, is_time_filtered, wksp, calibFactory, static_cast<size_t>(DISK_CHUNK),
-                         static_cast<size_t>(GRAINSIZE_EVENTS), pulse_indices, progress);
+    ProcessBankTask task(bankEntryNames, h5file, loader, wksp, calibFactory, static_cast<size_t>(DISK_CHUNK),
+                         static_cast<size_t>(GRAINSIZE_EVENTS), progress);
     // generate threads only if appropriate
     if (num_banks_to_read > 1) {
       tbb::parallel_for(tbb::blocked_range<size_t>(0, num_banks_to_read), task);
@@ -491,13 +491,15 @@ void AlignAndFocusPowderSlim::exec() {
         combined_time_roi.update_intersection(filterROI);
       }
 
+      // create the nexus loader for handling combined calls to hdf5
       const auto pulse_indices = this->determinePulseIndices(wksp, combined_time_roi);
+      auto loader = std::make_shared<NexusLoader>(is_time_filtered, pulse_indices);
 
       const auto &splitterMap = timeSplitter.getSplittersMap();
 
-      ProcessBankSplitFullTimeTask task(bankEntryNames, h5file, is_time_filtered, workspaceIndices, workspaces,
-                                        calibFactory, static_cast<size_t>(DISK_CHUNK),
-                                        static_cast<size_t>(GRAINSIZE_EVENTS), pulse_indices, splitterMap, progress);
+      ProcessBankSplitFullTimeTask task(bankEntryNames, h5file, loader, workspaceIndices, workspaces, calibFactory,
+                                        static_cast<size_t>(DISK_CHUNK), static_cast<size_t>(GRAINSIZE_EVENTS),
+                                        splitterMap, progress);
 
       // generate threads only if appropriate
       if (num_banks_to_read > 1) {
@@ -511,10 +513,12 @@ void AlignAndFocusPowderSlim::exec() {
       g_log.information() << "Using ProcessBankSplitTask for splitter processing\n";
       // determine the pulse indices from the time and splitter workspace
       const auto target_to_pulse_indices = this->determinePulseIndicesTargets(wksp, filterROI, timeSplitter);
+      // create the nexus loader for handling combined calls to hdf5
+      std::vector<PulseROI> pulse_indices; // intentionally empty to get around loader needing const reference
+      auto loader = std::make_shared<NexusLoader>(is_time_filtered, pulse_indices, target_to_pulse_indices);
 
-      ProcessBankSplitTask task(bankEntryNames, h5file, true, workspaceIndices, workspaces, calibFactory,
-                                static_cast<size_t>(DISK_CHUNK), static_cast<size_t>(GRAINSIZE_EVENTS),
-                                target_to_pulse_indices, progress);
+      ProcessBankSplitTask task(bankEntryNames, h5file, loader, workspaceIndices, workspaces, calibFactory,
+                                static_cast<size_t>(DISK_CHUNK), static_cast<size_t>(GRAINSIZE_EVENTS), progress);
       // generate threads only if appropriate
       if (num_banks_to_read > 1) {
         tbb::parallel_for(tbb::blocked_range<size_t>(0, num_banks_to_read), task);
@@ -543,10 +547,10 @@ void AlignAndFocusPowderSlim::exec() {
               MatrixWorkspace_sptr target_wksp = workspaces[target_index];
 
               const auto pulse_indices = this->determinePulseIndices(target_wksp, target_roi);
+              auto loader = std::make_shared<NexusLoader>(is_time_filtered, pulse_indices);
 
-              ProcessBankTask task(bankEntryNames, h5file, is_time_filtered, target_wksp, calibFactory,
-                                   static_cast<size_t>(DISK_CHUNK), static_cast<size_t>(GRAINSIZE_EVENTS),
-                                   pulse_indices, progress);
+              ProcessBankTask task(bankEntryNames, h5file, loader, target_wksp, calibFactory,
+                                   static_cast<size_t>(DISK_CHUNK), static_cast<size_t>(GRAINSIZE_EVENTS), progress);
               // generate threads only if appropriate
               if (num_banks_to_read > 1) {
                 tbb::parallel_for(tbb::blocked_range<size_t>(0, num_banks_to_read), task);
