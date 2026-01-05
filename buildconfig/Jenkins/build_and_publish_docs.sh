@@ -1,3 +1,5 @@
+#!/bin/bash -ex
+
 # Steps:
 #   - Install conda packages
 #   - Build HTML docs
@@ -22,7 +24,7 @@ mkdir build && cd build
 # unset LD_PRELOAD as this causes cmake to segfault
 LD_PRELOAD="" \
 # Generate build files
-pixi run --manifest-path $REPO_ROOT_DIR/pixi.toml -e docs-build --frozen cmake -G Ninja \
+pixi run --manifest-path $REPO_ROOT_DIR/pixi.toml -e docs-build cmake -G Ninja \
   -DDATA_STORE_MIRROR=${DATA_MIRROR} \
   -DMANTID_FRAMEWORK_LIB=SYSTEM \
   -DMANTID_QT_LIB=SYSTEM \
