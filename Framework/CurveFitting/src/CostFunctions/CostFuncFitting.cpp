@@ -9,8 +9,8 @@
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/CostFunctions/CostFuncFitting.h"
 #include "MantidAPI/IConstraint.h"
+#include "MantidCurveFitting/EigenFunctions.h"
 #include "MantidCurveFitting/EigenJacobian.h"
-#include "MantidCurveFitting/GSLFunctions.h"
 #include "MantidCurveFitting/SeqDomain.h"
 #include "MantidKernel/Exception.h"
 

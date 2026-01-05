@@ -215,27 +215,4 @@ GSL_FitData::~GSL_FitData() {
   gsl_vector_free(initFuncParams);
 }
 
-// Replicates equivalent gsl function
-Eigen::MatrixXd covar_from_jacobian(const map_type &J, double epsrel, const map_type &r) {
-  const Eigen::Index m = J.rows(), n = J.cols();
-  const int dof = std::max<int>(1, static_cast<int>(m - n)); // avoid div by 0 for safety
-  const double s2 = r.squaredNorm() / dof;                   // residual variance
-
-  Eigen::JacobiSVD<Eigen::MatrixXd> svd(J, Eigen::ComputeThinU | Eigen::ComputeThinV);
-  const Eigen::VectorXd &s = svd.singularValues(); // length = min(m,n)
-  const Eigen::MatrixXd &V = svd.matrixV();        // n x n (thin: n x r)
-
-  // GSL-style relative threshold on singular values
-  const double smax = s.size() ? s.array().maxCoeff() : 0.0;
-  const double tol = epsrel * smax;
-
-  // Build diag(1/s_i^2) with cutoff
-  Eigen::VectorXd inv_s2 = s.unaryExpr([&](double si) { return (si > tol) ? 1.0 / (si * si) : 0.0; });
-
-  // Covariance = s2 * V * diag(1/s_i^2) * V^T
-  Eigen::MatrixXd C = V * inv_s2.asDiagonal() * V.transpose();
-  C *= s2;
-  return C;
-}
-
 } // namespace Mantid::CurveFitting

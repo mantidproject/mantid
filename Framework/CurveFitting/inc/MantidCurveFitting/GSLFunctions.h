@@ -58,8 +58,5 @@ inline gsl_vector_const_view const getGSLVectorView_const(const vec_map_type v) 
 inline gsl_matrix_const_view const getGSLMatrixView_const(const map_type m) {
   return gsl_matrix_const_view_array(m.data(), m.cols(), m.rows());
 }
-
-Eigen::MatrixXd covar_from_jacobian(const map_type &J, double epsrel, const map_type &r);
-
 } // namespace CurveFitting
 } // namespace Mantid
