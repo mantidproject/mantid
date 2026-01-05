@@ -1,3 +1,5 @@
+#!/bin/bash -ex
+
 # Steps:
 #   - Install conda packages
 #   - Build HTML docs
