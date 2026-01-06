@@ -132,7 +132,7 @@ def load_all_orientations(
                 logger.warning(
                     "No workspaces have been provided - if you are using the UI, ensure you have selected all desired workspaces"
                 )
-            if n_ws < n_gonios:
+            elif n_ws < n_gonios:
                 logger.warning(
                     f"Fewer Workspaces ({n_ws}) provided than lines of orientation data ({n_gonios}). "
                     f"The last {n_gonios - n_ws} lines of the orientation file will be ignored"
@@ -285,6 +285,8 @@ def plot_pole_figure(
         suffix = f"contour_{contour_kernel}"
         fig, ax = plot_contour_pf(pfi, ax_labels, readout_col, fig, contour_kernel, **kwargs)
     if save_dirs:
+        if isinstance(save_dirs, str):
+            save_dirs = [save_dirs]
         for save_dir in save_dirs:
             fig.savefig(str(path.join(save_dir, ws_name + f"_{suffix}.png")))
 

@@ -16,13 +16,16 @@ from Engineering.texture.texture_helper import (
     get_pole_figure_data,
     show_texture_sample_shape,
     get_gauge_vol_str,
+    create_pole_figure_tables,
+    plot_pole_figure,
 )
 import numpy as np
+from os import path
 
 texture_utils_path = "Engineering.texture.texture_helper"
 
 
-class TestTextureHelperSetGoniometer(unittest.TestCase):
+class BaseTextureTestClass(unittest.TestCase):
     def setUp(self):
         self.ws_name = "test_ws"
         # Mock workspace
@@ -33,6 +36,8 @@ class TestTextureHelperSetGoniometer(unittest.TestCase):
         if ADS.doesExist(self.ws_name):
             ADS.remove(self.ws_name)
 
+
+class TestHelperGaugeVolume(BaseTextureTestClass):
     @patch(texture_utils_path + ".get_cube_xml", return_value="example 4mm cube xml")
     def test_get_gauge_volume_string_with_4mm_cube_preset(self, mock_get_cube_xml):
         output_xml = get_gauge_vol_str(preset="4mmCube")
@@ -46,16 +51,45 @@ class TestTextureHelperSetGoniometer(unittest.TestCase):
         mock_read_xml.assert_called_once_with(file)
         self.assertEqual(output_xml, "example xml")
 
-    def test_get_gauge_volume_string_with_no_gauge_volume(self, mock_read_xml):
+    def test_get_gauge_volume_string_with_no_gauge_volume(self):
         output_xml = get_gauge_vol_str(preset="No Gauge Volume")
         self.assertEqual(output_xml, None)
 
-    def test_validate_file(self):
+    @patch(texture_utils_path + "._read_xml", side_effect=RuntimeError("bad xml"))
+    def test_get_gauge_vol_str_custom_runtimeerror_returns_none(self, mock_read_xml):
+        out = get_gauge_vol_str(preset="Custom", custom_file="bad.xml")
+        self.assertIsNone(out)
+        mock_read_xml.assert_called_once_with("bad.xml")
+
+
+class TestHelperFileHandling(BaseTextureTestClass):
+    def test_validate_file_valid(self):
         valid_args = [("path.txt", ".txt"), ("long/path.txt", ".txt"), ("long/path.nxs", ".nxs")]
 
         for file, ext in valid_args:
             with self.subTest(file=file, ext=ext):
                 self.assertTrue(_validate_file(file, ext))
+
+    def test_validate_file_invalid(self):
+        cases = [
+            (None, ".txt"),
+            ("", ".txt"),
+            ("path.txt", ".xml"),
+            ("path", ".txt"),
+            ("path.TXT", ".txt"),
+        ]
+        for file, ext in cases:
+            with self.subTest(file=file, ext=ext):
+                self.assertFalse(_validate_file(file, ext))
+
+    @patch("builtins.open", new_callable=mock_open, read_data="<xml>test</xml>")
+    @patch(texture_utils_path + "._validate_file", return_value=True)
+    def test_read_xml_reads_file_when_valid(self, mock_validate, mock_file):
+        result = _read_xml("dummy.xml")
+
+        self.assertEqual(result, "<xml>test</xml>")
+        mock_validate.assert_called_once_with("dummy.xml", ".xml")
+        mock_file.assert_called_once_with("dummy.xml", "r")
 
     @patch(texture_utils_path + ".ShowSampleModel")
     def test_show_texture_sample_no_gauge_volume(self, mock_model_constructor):
@@ -71,6 +105,8 @@ class TestTextureHelperSetGoniometer(unittest.TestCase):
         mock_model.set_gauge_vol_str.assert_not_called()
         mock_model.show_shape_plot.assert_called_once_with(ax_transform, ax_labels)
 
+
+class TestHelperShowSample(BaseTextureTestClass):
     @patch(texture_utils_path + ".get_gauge_vol_str", return_value="example xml")
     @patch(texture_utils_path + ".ShowSampleModel")
     def test_show_texture_sample_with_gauge_volume(self, mock_model_constructor, mock_gauge_vol_string):
@@ -89,6 +125,8 @@ class TestTextureHelperSetGoniometer(unittest.TestCase):
         mock_model.set_gauge_vol_str.assert_called_once_with("example xml")
         mock_model.show_shape_plot.assert_called_once_with(ax_transform, ax_labels)
 
+
+class TestHelperSetOrientations(BaseTextureTestClass):
     def run_euler_gonio_test(self, test_wss, txt_data, euler_scheme, euler_sense, target_calls, mock_set_gonio):
         mock_set_gonio.reset_mock()
         with patch("builtins.open", mock_open(read_data=txt_data)):
@@ -163,14 +201,68 @@ class TestTextureHelperSetGoniometer(unittest.TestCase):
             "Currently: False"
         )
 
-    @patch("builtins.open", new_callable=mock_open, read_data="<xml>test</xml>")
+    @patch(texture_utils_path + ".logger")
     @patch(texture_utils_path + "._validate_file", return_value=True)
-    def test_read_xml_reads_file_when_valid(self, mock_validate, mock_file):
-        result = _read_xml("dummy.xml")
+    def test_load_all_orientations_no_workspaces_warns(self, mock_validate, mock_logger):
+        with patch("builtins.open", mock_open(read_data="30,45,60\n")):
+            load_all_orientations([], "angles.txt", use_euler=True, euler_scheme=["x", "y", "z"], euler_sense="1,1,1")
+        mock_logger.warning.assert_called_once()
+        self.assertIn("No workspaces have been provided", mock_logger.warning.call_args[0][0])
 
-        self.assertEqual(result, "<xml>test</xml>")
-        mock_validate.assert_called_once_with("dummy.xml", ".xml")
-        mock_file.assert_called_once_with("dummy.xml", "r")
+    @patch(texture_utils_path + ".logger")
+    @patch(texture_utils_path + "._validate_file", return_value=True)
+    def test_load_all_orientations_fewer_workspaces_than_lines_warns(self, mock_validate, mock_logger):
+        with patch("builtins.open", mock_open(read_data="30,45,60\n15,30,45\n")):
+            load_all_orientations([self.mock_ws], "angles.txt", use_euler=True, euler_scheme=["x", "y", "z"], euler_sense="1,1,1")
+        # warns about ignoring extra lines
+        msg = mock_logger.warning.call_args_list[-1][0][0]
+        self.assertIn("will be ignored", msg)
+
+
+class TestHelperPoleFigureTables(BaseTextureTestClass):
+    @staticmethod
+    def get_create_pf_kwargs():
+        return {
+            "out_ws": "out_ws",
+            "hkl": [1, 1, 1],
+            "inc_scatt_corr": True,
+            "scat_vol_pos": [0, 0, 0],
+            "chi2_thresh": 2.0,
+            "peak_thresh": 0.1,
+            "ax_transform": np.eye(3),
+            "readout_col": "I",
+        }
+
+    @patch(texture_utils_path + ".ADS")
+    @patch(texture_utils_path + ".CombineTableWorkspaces")
+    @patch(texture_utils_path + ".CloneWorkspace")
+    @patch(texture_utils_path + ".CreatePoleFigureTableWorkspace")
+    def test_create_pole_figure_tables_with_peak_wss(self, mock_create_pf, mock_clone, mock_combine, mock_ads):
+        mock_ads.retrieve.return_value = MagicMock()  # returned output table
+        out = create_pole_figure_tables(wss=["ws1", "ws2"], peak_wss=["p1", "p2"], **self.get_create_pf_kwargs())
+        self.assertEqual(mock_create_pf.call_count, 2)
+        mock_clone.assert_called_once_with(InputWorkspace="_0_abi_table", OutputWorkspace="out_ws")
+        mock_combine.assert_called_once_with(LHSWorkspace="out_ws", RHSWorkspace="_1_abi_table", OutputWorkspace="out_ws")
+        mock_ads.retrieve.assert_called_once_with("out_ws")
+        self.assertIsNotNone(out)
+
+    @patch(texture_utils_path + ".create_default_parameter_table_with_value")
+    @patch(texture_utils_path + ".ADS")
+    @patch(texture_utils_path + ".CombineTableWorkspaces")
+    @patch(texture_utils_path + ".CloneWorkspace")
+    @patch(texture_utils_path + ".CreatePoleFigureTableWorkspace")
+    def test_create_pole_figure_tables_without_peak_wss_uses_defaults(
+        self, mock_create_pf, mock_clone, mock_combine, mock_ads, mock_default
+    ):
+        mock_ads.retrieve.return_value = MagicMock()
+        out = create_pole_figure_tables(wss=["ws1", "ws2", "ws3"], peak_wss=None, **self.get_create_pf_kwargs())
+        # default table created once per workspace
+        self.assertEqual(mock_default.call_count, 3)
+        self.assertEqual(mock_create_pf.call_count, 3)
+        mock_clone.assert_called_once_with(InputWorkspace="_0_abi_table", OutputWorkspace="out_ws")
+        self.assertEqual(mock_combine.call_count, 2)
+        mock_ads.retrieve.assert_called_once_with("out_ws")
+        self.assertIsNotNone(out)
 
     @patch(texture_utils_path + ".ADS")
     def test_create_default_parameter_table_with_value(self, mock_ads):
@@ -197,3 +289,37 @@ class TestTextureHelperSetGoniometer(unittest.TestCase):
 
         result = get_pole_figure_data("ws", "stereographic")
         self.assertEqual(result.shape[1], 3)
+
+
+class TestHelperPoleFigurePlots(BaseTextureTestClass):
+    @patch(texture_utils_path + ".get_pole_figure_data")
+    @patch(texture_utils_path + ".plot_exp_pf")
+    def test_plot_pole_figure_scatter_calls_plot_exp(self, mock_plot_exp, mock_get):
+        test_pfi = np.ones((2, 3))
+        mock_get.return_value = test_pfi
+        mock_plot_exp.return_value = (MagicMock(), MagicMock())
+        plot_pole_figure("ws", "stereographic", plot_exp=True, save_dirs=None)
+        mock_plot_exp.assert_called_once_with(test_pfi, ("Dir1", "Dir2"), "I", None)
+
+    @patch(texture_utils_path + ".get_pole_figure_data")
+    @patch(texture_utils_path + ".plot_contour_pf")
+    def test_plot_pole_figure_contour_calls_plot_contour(self, mock_plot_contour, mock_get):
+        test_pfi = np.ones((2, 3))
+        mock_get.return_value = test_pfi
+        mock_plot_contour.return_value = (MagicMock(), MagicMock())
+        plot_pole_figure("ws", "stereographic", plot_exp=False, save_dirs=None)
+        mock_plot_contour.assert_called_once_with(test_pfi, ("Dir1", "Dir2"), "I", None, 2.0)
+
+    @patch(texture_utils_path + ".get_pole_figure_data", return_value=np.array([[0.0, 0.0, 1.0]]))
+    @patch(texture_utils_path + ".plot_exp_pf")
+    def test_plot_pole_figure_save_dirs_string_only_saves_once(self, mock_plot_exp, mock_get):
+        fig = MagicMock()
+        ax = MagicMock()
+        mock_plot_exp.return_value = (fig, ax)
+
+        plot_pole_figure("ws", "stereographic", plot_exp=True, save_dirs="outdir")
+        fig.savefig.assert_called_once_with(str(path.join("outdir", "ws_scatter.png")))
+
+
+if __name__ == "__main__":
+    unittest.main()
