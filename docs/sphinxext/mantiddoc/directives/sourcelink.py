@@ -169,6 +169,9 @@ class SourceLinkDirective(AlgorithmBaseDirective):
             if builddir in Path(dir_name).resolve().parents:
                 continue  # don't check or add to the cache
             for fname in file_list:
+                # Ignore files inside pixi environments that live within the source tree
+                if ".pixi" in fname:
+                    continue
                 (base_name, file_extensions) = os.path.splitext(fname)
                 # strip the dot from the extension
                 file_extensions = file_extensions[1:]
