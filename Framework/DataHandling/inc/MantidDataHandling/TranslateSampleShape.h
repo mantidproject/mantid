@@ -10,8 +10,6 @@
 #include "MantidAPI/MultipleExperimentInfos.h"
 #include "MantidDataHandling/DllConfig.h"
 
-namespace Mantid {} // namespace Mantid
-
 namespace Mantid {
 namespace DataHandling {
 
@@ -20,7 +18,7 @@ public:
   /// Algorithm's name for identification
   const std::string name() const override { return "TranslateSampleShape"; };
   /// Summary of algorithms purpose
-  const std::string summary() const override { return "Redefine the initial position of the sample shape mesh"; }
+  const std::string summary() const override { return "Redefine the initial position of the sample shape"; }
 
   /// Algorithm's version for identification
   int version() const override { return 1; };
@@ -33,6 +31,7 @@ private:
   /// Run the algorithm
   void exec() override;
   bool checkIsValidShape(const API::ExperimentInfo_sptr &ei, std::string &shapeXML, bool &isMeshShape);
+  void setSampleShape(const API::Workspace_sptr &ws, std::string &translatedXML);
 };
 
 } // namespace DataHandling

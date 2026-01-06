@@ -14,12 +14,13 @@
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceProperty.h"
 
-#include "MantidDataHandling/CreateSampleShape.h"
+#include "MantidAPI/AlgorithmManager.h"
 
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/MeshObject.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 
+#include "MantidKernel/ArrayLengthValidator.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/V3D.h"
 
@@ -124,7 +125,7 @@ std::string removeTypeTagWrapper(const std::string &xml) {
   try {
     doc = parser.parseString(xml);
   } catch (...) {
-    return xml; // If parsing fails, just return the original
+    throw std::runtime_error("Invalid CSG XML encountered");
   }
   Element *root = doc ? doc->documentElement() : nullptr;
   if (!root)
@@ -189,7 +190,8 @@ void TranslateSampleShape::init() {
                   "The workspace containing the sample whose shape is to be translated");
 
   // Vector to translate shape
-  declareProperty(std::make_unique<ArrayProperty<double>>("TranslationVector", "0,0,0"),
+  declareProperty(std::make_unique<ArrayProperty<double>>("TranslationVector", "0.0,0.0,0.0",
+                                                          std::make_shared<ArrayLengthValidator<double>>(3)),
                   "Vector by which to translate the loaded sample shape (metres)");
 }
 
@@ -241,12 +243,7 @@ void TranslateSampleShape::exec() {
     translatedXML = removeTypeTagWrapper(translatedXML);
 
     // use new csg xml string to replace the shape
-    Mantid::DataHandling::CreateSampleShape creator;
-    creator.initialize();
-    creator.setChild(true);
-    creator.setProperty("InputWorkspace", ws);
-    creator.setPropertyValue("ShapeXML", translatedXML);
-    creator.execute();
+    setSampleShape(ws, translatedXML);
   }
 }
 
@@ -268,6 +265,15 @@ bool TranslateSampleShape::checkIsValidShape(const API::ExperimentInfo_sptr &ei,
     }
   }
   return false;
+}
+
+void TranslateSampleShape::setSampleShape(const Workspace_sptr &ws, std::string &translatedXML) {
+  auto creator = AlgorithmManager::Instance().create("CreateSampleShape");
+  creator->initialize();
+  creator->setChild(true);
+  creator->setProperty("InputWorkspace", ws);
+  creator->setPropertyValue("ShapeXML", translatedXML);
+  creator->execute();
 }
 
 } // namespace Mantid::DataHandling
