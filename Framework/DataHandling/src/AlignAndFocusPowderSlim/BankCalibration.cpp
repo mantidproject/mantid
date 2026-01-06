@@ -158,10 +158,11 @@ BankCalibration BankCalibrationFactory::getCalibration(const double time_convers
 
 std::vector<BankCalibration> BankCalibrationFactory::getCalibrations(const double time_conversion) const {
   std::vector<BankCalibration> calibrations;
-  for (const auto &pair : m_grouping) {
-    calibrations.emplace_back(
-        BankCalibration(time_conversion, pair.second, m_calibration_map, m_scale_at_sample, m_mask));
-  }
+  calibrations.reserve(m_grouping.size());
+  std::transform(m_grouping.begin(), m_grouping.end(), std::back_inserter(calibrations),
+                 [this, time_conversion](const auto &pair) {
+                   return BankCalibration(time_conversion, pair.second, m_calibration_map, m_scale_at_sample, m_mask);
+                 });
 
   return calibrations;
 }
