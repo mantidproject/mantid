@@ -440,6 +440,37 @@ class PawleyPattern1D(PawleyPatternBase):
                 self.bg_params[ipar] = bg
         self.update_profile_function()
 
+    def fit_background(self, **kwargs):
+        if len(self.bg_params) == 0:
+            return
+        default_kwargs = {"xtol": 1e-5, "diff_step": 1e-3, "x_scale": "jac", "verbose": 2}
+        kwargs = {**default_kwargs, **kwargs}
+        res = least_squares(self._calc_robust_bg_resids, self.bg_params, **kwargs)
+        # set bg params
+        self._set_func_params(self.comp_func[len(self.comp_func) - 1], res.x)
+        self.bg_params = res.x
+        return res
+
+    def _eval_bg_func(self, p):
+        bg_func = self.comp_func[len(self.comp_func) - 1]
+        self._set_func_params(bg_func, p)
+        ws = EvaluateFunction(Function=bg_func, InputWorkspace=self.ws, WorkspaceIndex=self.ispec, StoreInADS=False, EnableLogging=False)
+        return ws.readY(1).copy()
+
+    @staticmethod
+    def _set_func_params(func, p):
+        [func.function.setParameter(ipar, param) for ipar, param in enumerate(p)]
+
+    def _calc_robust_bg_resids(self, p):
+        # quadratic for negative residuals, scaled cauchy loss for positive (turnover to logarithmic at ~ 2 sigma)
+        # note at x=0 cauchy loss has second-deriv == 2 (i.e. is quadratic)
+        bg_calc = self._eval_bg_func(p)
+        resids = (self.ws.readY(self.ispec) - bg_calc) / self.ws.readE(self.ispec)
+        ipos = resids > 0
+        resids[ipos] = np.sign(resids[ipos]) * 2 * np.sqrt(np.log(1 + (resids[ipos] / 2) ** 2))
+        resids[~np.isfinite(resids)] = 0  # ignore empty bins
+        return resids
+
 
 class Poldi2DEvalMixin:
     """
