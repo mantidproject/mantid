@@ -300,7 +300,11 @@ class FitPropertyBrowserPlotInteraction(QObject):
         :param removed_prefix: Prefix of the function removed e.g f0
         :return:
         """
-        if not self.guess_lines or removed_prefix[1] == len(self.guess_lines):
+        if not self.guess_lines:
+            return
+        if len(removed_prefix) < 2:
+            return
+        if removed_prefix[1] == len(self.guess_lines):
             return
         for prefixed_function in reversed(list(self.guess_lines)):
             prefix_and_function = prefixed_function.split(".")
