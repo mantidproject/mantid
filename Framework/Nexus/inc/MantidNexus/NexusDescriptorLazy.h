@@ -28,9 +28,12 @@ public:
 
   NexusDescriptorLazy() = delete;
 
-  NexusDescriptorLazy &operator=(NexusDescriptorLazy const &nd) = default;
-
-  NexusDescriptorLazy(NexusDescriptorLazy const &nd) = default;
+  // there is no reason to copy this object
+  NexusDescriptorLazy &operator=(NexusDescriptorLazy const &nd) = delete;
+  NexusDescriptorLazy(NexusDescriptorLazy const &nd) = delete;
+  // there is no reason to move this object
+  NexusDescriptorLazy &operator=(NexusDescriptorLazy &&nd) = delete;
+  NexusDescriptorLazy(NexusDescriptorLazy &&nd) = delete;
 
   /**
    * Using RAII components, no need to deallocate explicitly

@@ -36,8 +36,8 @@ template <herr_t (*H5Xclose)(hid_t)> std::string readNXClass(Mantid::Nexus::Uniq
     Mantid::Nexus::UniqueID<&H5Aclose> attrID = H5Aopen_name(oid, "NX_class");
     if (attrID.isValid()) {
       H5A_info_t ainfo;
-      if (H5Aget_info(attrID, &ainfo) > 0) {
-        nxClass.resize(ainfo.data_size + 1); // +1 for null terminator
+      if (H5Aget_info(attrID, &ainfo) >= 0) {
+        nxClass.resize(ainfo.data_size);
         Mantid::Nexus::UniqueID<&H5Tclose> typeID(H5Aget_type(attrID));
         H5Aread(attrID, typeID, nxClass.data());
       } else {
@@ -65,7 +65,7 @@ bool NexusDescriptorLazy::isEntry(std::string const &entryName) {
     UniqueID<&H5Oclose> entryID(H5Oopen(m_fileID, entryName.c_str(), H5P_DEFAULT));
     if (entryID.isValid()) {
       m_allEntries[entryName] = UNKNOWN_CLASS;
-      H5O_info2_t oinfo;
+      H5O_info_t oinfo;
       H5Oget_info(entryID, &oinfo, H5O_INFO_BASIC);
       if (oinfo.type == H5O_TYPE_DATASET) {
         m_allEntries[entryName] = SCIENTIFIC_DATA_SET;
@@ -80,7 +80,6 @@ bool NexusDescriptorLazy::isEntry(std::string const &entryName) {
       return false;
     }
   }
-  return false;
 }
 
 /// @brief not implemented yet
@@ -126,8 +125,8 @@ void NexusDescriptorLazy::loadGroups(std::unordered_map<std::string, std::string
     ssize_t name_len = H5Gget_objname_by_idx(groupID, i, nullptr, 0);
     if (name_len <= 0)
       continue;
-    std::string memberName(name_len + 1, 'X'); // +1 for null terminator, fill with X for obvious errors
-    H5Gget_objname_by_idx(groupID, i, memberName.data(), name_len + 1);
+    std::string memberName(name_len, 'X');                              // fill with X for obvious errors
+    H5Gget_objname_by_idx(groupID, i, memberName.data(), name_len + 1); // +1 for null terminator,
     std::string memberAddress = address;
     if (!memberAddress.ends_with("/"))
       memberAddress += "/";
