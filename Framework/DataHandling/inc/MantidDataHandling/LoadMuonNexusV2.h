@@ -5,11 +5,12 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
-#include "MantidAPI/NexusFileLoader.h"
+#include "MantidAPI/IFileLoader.h"
 #include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidDataHandling/LoadMuonNexusV2NexusHelper.h"
 #include "MantidDataHandling/LoadMuonStrategy.h"
 #include "MantidGeometry/IDTypes.h"
+#include "MantidNexus/NexusDescriptor.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -35,7 +36,7 @@ OutputWorkspace_PeriodNo)
 @author Stephen Smith, ISIS
 */
 
-class MANTID_DATAHANDLING_DLL LoadMuonNexusV2 : public API::NexusFileLoader {
+class MANTID_DATAHANDLING_DLL LoadMuonNexusV2 : public API::IFileLoader<Nexus::NexusDescriptor> {
 public:
   // Default constructor
   LoadMuonNexusV2();
@@ -60,7 +61,7 @@ private:
   /// Overwrites Algorithm method.
   void init() override;
   /// Overwrites Algorithm method
-  void execLoader() override;
+  void exec() override;
   // Determines whether entry contains multi period data
   void isEntryMultiPeriod();
   // Run child algorithm LoadISISNexus2
