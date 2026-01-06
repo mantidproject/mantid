@@ -32,7 +32,6 @@ from mantidqt.plotting.figuretype import FigureType
 from mantidqt.plotting.functions import plot, pcolormesh_from_names, plot_contour, pcolormesh
 from mantidqt.utils.qt.testing import start_qapplication
 from workbench.plotting.figureinteraction import FigureInteraction, LogNorm
-from matplotlib.colors import Normalize, SymLogNorm
 
 
 @start_qapplication
@@ -841,40 +840,31 @@ class FigureInteractionTest(unittest.TestCase):
         key_press_event.inaxes.set_xlim.assert_called_once_with((0, 100))
         key_press_event.inaxes.set_ylim.assert_called_once_with((5, 10))
 
-    def _util_check_colorbar_norm_navigation(self, test_cases):
-        for key, current_norm, expected_norm_class in test_cases:
-            with self.subTest(key=key, current_norm=current_norm, expected_class=expected_norm_class):
-                with mock.patch(
-                    "workbench.plotting.figureinteraction.FigureInteraction._change_colorbar_axes"
-                ) as mock_change_colorbar_axes:
-                    key_press_event = self._create_mock_key_press_event(key)
-                    mock_norm = MagicMock()
-                    mock_norm.__class__ = current_norm
-                    key_press_event.inaxes.images[-1].norm = mock_norm
-                    key_press_event.inaxes.get_lines.return_value = ["fake_line"]
-                    fig_manager = MagicMock()
-                    fig_manager.canvas = MagicMock()
-                    interactor = FigureInteraction(fig_manager)
-                    interactor.on_key_press(key_press_event)
+    def test_keyboard_shortcut_navigate_backward(self):
+        for key in ["c", "left", "backspace", "MouseButton.BACK"]:
+            with self.subTest(key=key):
+                key_press_event = self._create_mock_key_press_event(key)
+                key_press_event.inaxes = MagicMock()
+                key_press_event.inaxes.get_lines.return_value = ["fake_line"]
+                fig_manager = MagicMock()
+                fig_manager.canvas = MagicMock()
+                interactor = FigureInteraction(fig_manager)
+                interactor.toolbar_manager = MagicMock()
+                interactor.on_key_press(key_press_event)
+                interactor.toolbar_manager.update_navigate_mpl_stack.assert_called_with(nav_forward=False)
 
-                    mock_change_colorbar_axes.assert_called_once_with(expected_norm_class)
-
-    def test_keyboard_shortcut_navigate_colorbar_norm_backward(self):
-        test_cases = [
-            ("c", LogNorm, matplotlib.colors.Normalize),
-            ("left", Normalize, matplotlib.colors.SymLogNorm),
-            ("backspace", SymLogNorm, matplotlib.colors.LogNorm),
-            ("MouseButton.BACK", LogNorm, matplotlib.colors.Normalize),
-        ]
-        self._util_check_colorbar_norm_navigation(test_cases)
-
-    def test_keyboard_shortcut_navigate_colorbar_norm_forward(self):
-        test_cases = [
-            ("v", LogNorm, matplotlib.colors.SymLogNorm),
-            ("right", SymLogNorm, matplotlib.colors.Normalize),
-            ("MouseButton.FORWARD", Normalize, matplotlib.colors.LogNorm),
-        ]
-        self._util_check_colorbar_norm_navigation(test_cases)
+    def test_keyboard_shortcut_navigate_forward(self):
+        for key in ["v", "right", "MouseButton.FORWARD"]:
+            with self.subTest(key=key):
+                key_press_event = self._create_mock_key_press_event(key)
+                key_press_event.inaxes = MagicMock()
+                key_press_event.inaxes.get_lines.return_value = ["fake_line"]
+                fig_manager = MagicMock()
+                fig_manager.canvas = MagicMock()
+                interactor = FigureInteraction(fig_manager)
+                interactor.toolbar_manager = MagicMock()
+                interactor.on_key_press(key_press_event)
+                interactor.toolbar_manager.update_navigate_mpl_stack.assert_called_with(nav_forward=True)
 
     def test_keyboard_shortcut_home_keys(self):
         shortcut_keys = ["r", "home", "h"]

@@ -147,50 +147,25 @@ class FigureInteraction(object):
         if ax is None or isinstance(ax, Axes3D) or len(ax.get_images()) == 0 and len(ax.get_lines()) == 0:
             return
 
-        if event.key == "k":
-            current_xscale = ax.get_xscale()
-            next_xscale = self._get_next_axis_scale(current_xscale)
-            self._quick_change_axes(ax, next_xscale, ax.get_yscale())
-
-        if event.key == "l":
-            current_yscale = ax.get_yscale()
-            next_yscale = self._get_next_axis_scale(current_yscale)
-            self._quick_change_axes(ax, ax.get_xscale(), next_yscale)
-
-        if event.key in ["c", "left", "backspace", "MouseButton.BACK"]:
-            self._navigate_colorbar_normalization(ax, False)
-
-        if event.key in ["v", "right", "MouseButton.FORWARD"]:
-            self._navigate_colorbar_normalization(ax, True)
-
-        if event.key in ["h", "r", "home"]:
-            self.toolbar_manager.emit_sig_home_clicked()
+        match event.key:
+            case "k":
+                current_xscale = ax.get_xscale()
+                next_xscale = self._get_next_axis_scale(current_xscale)
+                self._quick_change_axes(ax, next_xscale, ax.get_yscale())
+            case "l":
+                current_yscale = ax.get_yscale()
+                next_yscale = self._get_next_axis_scale(current_yscale)
+                self._quick_change_axes(ax, ax.get_xscale(), next_yscale)
+            case "c" | "left" | "backspace" | "MouseButton.BACK":
+                self.toolbar_manager.update_navigate_mpl_stack(nav_forward=False)
+            case "v" | "right" | "MouseButton.FORWARD":
+                self.toolbar_manager.update_navigate_mpl_stack(nav_forward=True)
+            case "h" | "r" | "home":
+                self.toolbar_manager.emit_sig_home_clicked()
 
     def _get_next_axis_scale(self, current_scale):
         next_index = AXES_SCALE_MENU_OPTS.index(current_scale) + 1
         return AXES_SCALE_MENU_OPTS[next_index] if next_index < len(AXES_SCALE_MENU_OPTS) else AXES_SCALE_MENU_OPTS[0]
-
-    def _navigate_colorbar_normalization(self, ax, forward):
-        """Changes the colorbar normalization to the next or the previous option"""
-        if ax.images:
-            current_normalization = ax.images[-1].norm
-            current_norm_key = next((k for k, v in COLORBAR_SCALE_MENU_OPTS.items() if v == current_normalization.__class__), None)
-            if current_norm_key:
-                colorbar_scale_key_list = list(COLORBAR_SCALE_MENU_OPTS.keys())
-                current_colorbar_norm_key_index = colorbar_scale_key_list.index(current_norm_key)
-                if forward:
-                    next_colorbar_norm_key = (
-                        colorbar_scale_key_list[current_colorbar_norm_key_index + 1]
-                        if current_colorbar_norm_key_index + 1 < len(colorbar_scale_key_list)
-                        else colorbar_scale_key_list[0]
-                    )
-                else:
-                    next_colorbar_norm_key = (
-                        colorbar_scale_key_list[current_colorbar_norm_key_index - 1]
-                        if current_colorbar_norm_key_index > 0
-                        else colorbar_scale_key_list[-1]
-                    )
-                self._change_colorbar_axes(COLORBAR_SCALE_MENU_OPTS[next_colorbar_norm_key])
 
     def _correct_for_scroll_event_on_legend(self, event):
         # Corrects default behaviour in Matplotlib where legend is picked up by scroll event
