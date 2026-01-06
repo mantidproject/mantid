@@ -125,7 +125,7 @@ class SourceLinkDirective(AlgorithmBaseDirective):
                     + "."
                     + extension
                     + "\n"
-                    + "Possible matches"
+                    + "Possible matches "
                     + str(path_list)
                     + "\n"
                     + "Specify one using the "
