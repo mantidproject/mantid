@@ -739,20 +739,29 @@ def create_initial_reduction_packages(state, workspaces, monitors):
         for workspace_type, workspace_list in list(monitors.items()):
             workspace = get_workspace_for_index(index, workspace_list)
             monitors_for_package.update({workspace_type: workspace})
-        state_copy = deepcopy(state)
 
-        # Set the period on the state
-        if requires_new_period_selection:
-            state_copy.data.sample_scatter_period = index + 1
-        packages.append(
-            ReductionPackage(
-                state=state_copy,
-                workspaces=workspaces_for_package,
-                monitors=monitors_for_package,
-                is_part_of_wavelength_range_reduction=is_multi_wavelength,
-                is_part_of_multi_period_reduction=is_multi_period,
+        # if we require multiple phi slicing
+        phi_range = state.mask.phi_range if state.mask.phi_range else [state.mask.phi_min, state.mask.phi_max]
+        for phi_index in range(0, len(phi_range), 2):
+            phi_min = phi_range[phi_index]
+            phi_max = phi_range[phi_index + 1]
+            state_copy = deepcopy(state)
+            state_copy.mask.phi_min = phi_min
+            state_copy.mask.phi_max = phi_max
+
+            # Set the period on the state
+            if requires_new_period_selection:
+                state_copy.data.sample_scatter_period = index + 1
+
+            packages.append(
+                ReductionPackage(
+                    state=state_copy,
+                    workspaces=workspaces_for_package,
+                    monitors=monitors_for_package,
+                    is_part_of_wavelength_range_reduction=is_multi_wavelength,
+                    is_part_of_multi_period_reduction=is_multi_period,
+                )
             )
-        )
     return packages
 
 
