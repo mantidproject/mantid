@@ -25,8 +25,12 @@ import matplotlib.pyplot as plt
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.show_sample.show_sample_model import ShowSampleModel
 from Engineering.common.xml_shapes import get_cube_xml
 
+# ---------------------------------------------------------#
+##### Utility Gauge Volume Setup Functions ################
+# ---------------------------------------------------------#
 
-def get_gauge_vol_str(preset: str, custom_file: Optional[str]) -> str:
+
+def get_gauge_vol_str(preset: str, custom_file: Optional[str] = None) -> str:
     """
     Create an xml string for a gauge volume
 
@@ -63,6 +67,11 @@ def _validate_file(file: str, ext: str) -> bool:
     return valid
 
 
+# ------------------------------------------------------------#
+##### Utility Texture Sample Viewer Functions ################
+# ------------------------------------------------------------#
+
+
 # wrapper around the show sample logic that is called from the interface
 def show_texture_sample_shape(
     ws: str | Workspace2D,
@@ -90,7 +99,9 @@ def show_texture_sample_shape(
     model.show_shape_plot(ax_transform, ax_labels)
 
 
-# helper function for applying orientations to a set of workspaces
+# --------------------------------------------------------#
+##### Utility Orientation Setup Functions ################
+# --------------------------------------------------------#
 
 
 def load_all_orientations(
@@ -109,7 +120,7 @@ def load_all_orientations(
     use_euler: flag for whether the data in the text file is euler angles (True) or matrices (False)
     euler_scheme: lab frame alignment of the euler axes (not case-sensitive) eg. `XYZ`, or `yxy` would be acceptable inputs
     euler_sense: comma separated sense of rotation for each euler axis eg. `1,1,1` or `-1,1,-1`
-                 (1 is counter clockwise, -1 is clockwise)
+                 (1 is counter-clockwise, -1 is clockwise)
     """
     if _validate_file(txt_file, ".txt"):
         with open(txt_file, "r") as f:
@@ -144,7 +155,19 @@ def load_all_orientations(
             logger.error(f"{str(e)}. Failed to set goniometer, are your settings for `use_euler_angles` correct? Currently: {use_euler}")
 
 
+# -------------------------------------------------------------------#
+##### Utility Pole Figure Tables and Plots Functions ################
+# -------------------------------------------------------------------#
+
+
 def create_default_parameter_table_with_value(ws_name: str, val: float, out_ws: str):
+    """
+    Creates an example parameter table with a row for each spectrum in the supplied workspace and the intensity value provided
+
+    ws_name: Name of the Workspace
+    val: Intensity value desired
+    out_ws: Name to be used for the Output Workspace
+    """
     tab = CreateEmptyTableWorkspace(OutputWorkspace=out_ws)
     tab.addColumn("float", "I")
     ws = ADS.retrieve(ws_name)
@@ -173,7 +196,7 @@ def create_pole_figure_tables(
 
     wss: Sequence of workspaces
     peak_wss: sequence of table workspaces, one for each of the provided workspaces,
-              which should contain the fit parameters for each spectra in the given workspace
+              which should contain the fit parameters for each spectrum in the given workspace
     out_ws: name to give the output workspace
     hkl: if the crystal structure is known and you would like to apply thresholds based on target HKL peak location
          or use a scattering power correction, you can provide that here
@@ -239,6 +262,20 @@ def plot_pole_figure(
     contour_kernel: Optional[float] = 2.0,
     **kwargs,
 ) -> [Figure, Axes]:
+    """
+    Create a pole figure plot for a pole figure table
+
+    ws_name: The name of the pole figure TableWorkspace
+    projection: The projection method for displaying the detector positions (`stereographic`/`azimuthal`)
+    fig: The matplotlib figure that the pole figure plot should be added to (can be None)
+    readout_col: The name of the column from the TableWorkspace which will serve as the plotted intensities
+    save_dirs: Where to save the resulting figure (can also be None)
+    plot_exp: flag for whether the experimental points should be plotted as points (True)
+              or a contour interpolation should be calculated (False)
+    ax_labels: Sequence for the label names for the two inplane sample directions
+    contour_kernel: The sigma value of the gaussian kernel used for a contour interpolation
+
+    """
     pfi = get_pole_figure_data(ws_name, projection, readout_col)
 
     if plot_exp:
@@ -254,7 +291,17 @@ def plot_pole_figure(
     return fig, ax
 
 
-def plot_exp_pf(pfi: np.ndarray, ax_labels: Sequence[str], column_label: str, fig: Optional[Figure] = None, **kwargs) -> [Figure, Axes]:
+def plot_exp_pf(
+    pole_figure_data: np.ndarray, ax_labels: Sequence[str], column_label: str, fig: Optional[Figure] = None, **kwargs
+) -> [Figure, Axes]:
+    """
+    Create a scatter plot pole figure plot for a pole figure table
+
+    pole_figure_data: Array of (N,3) giving the alpha, beta, and intensity for each N point
+    ax_labels: Sequence for the label names for the two inplane sample directions
+    column_label: The label to give the intensity colour bar
+    fig: The matplotlib figure that the pole figure plot should be added to (can be None)
+    """
     u = np.linspace(0, 2 * np.pi, 100)
     x = np.cos(u)
     y = np.sin(u)
@@ -265,17 +312,18 @@ def plot_exp_pf(pfi: np.ndarray, ax_labels: Sequence[str], column_label: str, fi
     gs = fig.add_gridspec(
         1,
         3,
-        width_ratios=[1, 30, 1],  # tweak 30 to control plot vs cbar width
+        width_ratios=[1, 30, 1],
         left=0.05,
         right=0.98,
         top=0.98,
         bottom=0.06,
         wspace=0.05,
     )
-    # left spacer: gs[0, 0] (we don't use it)
     ax = fig.add_subplot(gs[0, 1])
     cax = fig.add_subplot(gs[0, 2])
-    scat_plot = ax.scatter(pfi[:, 1], pfi[:, 0], c=pfi[:, 2], s=20, cmap="jet", label="poles", **kwargs)
+    scat_plot = ax.scatter(
+        pole_figure_data[:, 1], pole_figure_data[:, 0], c=pole_figure_data[:, 2], s=20, cmap="jet", label="poles", **kwargs
+    )
     ax.plot(eq[0], eq[1], c="grey", label="plot bounding circle")
     ax.set_aspect("equal")
     ax.set_axis_off()
@@ -291,9 +339,23 @@ def plot_exp_pf(pfi: np.ndarray, ax_labels: Sequence[str], column_label: str, fi
 
 
 def plot_contour_pf(
-    pfi: np.ndarray, ax_labels: Sequence[str], column_label: str, fig: Optional[Figure] = None, contour_kernel: float = 2.0, **kwargs
+    pole_figure_data: np.ndarray,
+    ax_labels: Sequence[str],
+    column_label: str,
+    fig: Optional[Figure] = None,
+    contour_kernel: float = 2.0,
+    **kwargs,
 ) -> [Figure, Axes]:
-    x, y, z = pfi[:, 1], pfi[:, 0], np.nan_to_num(pfi[:, 2])
+    """
+    Create an interpolated contour plot pole figure plot for a pole figure table
+
+    pole_figure_data: Array of (N,3) giving the alpha, beta, and intensity for each N point
+    ax_labels: Sequence for the label names for the two inplane sample directions
+    column_label: The label to give the intensity colour bar
+    fig: The matplotlib figure that the pole figure plot should be added to (can be None)
+    contour_kernel: The sigma value of the gaussian kernel used for a contour interpolation
+    """
+    x, y, z = pole_figure_data[:, 1], pole_figure_data[:, 0], np.nan_to_num(pole_figure_data[:, 2])
     # Grid definition
     R = 1
     grid_x, grid_y = np.mgrid[-R:R:200j, -R:R:200j]
@@ -320,7 +382,6 @@ def plot_contour_pf(
         bottom=0.06,
         wspace=0.05,
     )
-    # left spacer: gs[0, 0] (we don't use it)
     ax = fig.add_subplot(gs[0, 1])
     cax = fig.add_subplot(gs[0, 2])
     contour_plot = ax.contourf(grid_x, grid_y, grid_z, levels=10, cmap="jet", **kwargs)
@@ -340,6 +401,13 @@ def plot_contour_pf(
 
 
 def get_pole_figure_data(ws_name: str, projection: str, readout_col: str = "I"):
+    """
+    Convert data in a pole figure table into a data array and project it into two dimensions
+
+    ws_name: Name of the TableWorkspace with the pole figure data
+    projection: The projection method for displaying the detector positions (`stereographic`/`azimuthal`)
+    readout_col: The name of the column from the TableWorkspace which will serve as the plotted intensities
+    """
     if projection.lower() == "stereographic":
         proj = ster_proj
     else:
@@ -352,6 +420,13 @@ def get_pole_figure_data(ws_name: str, projection: str, readout_col: str = "I"):
 
 
 def ster_proj(alphas: np.ndarray, betas: np.ndarray, i: np.ndarray) -> np.ndarray:
+    """
+    project pole figure data using a stereographic projection
+
+    alphas: array of spherical coordinate alpha angles (in rad)
+    betas: array of spherical coordinate beta angles (in rad)
+    i: array of intensity values
+    """
     betas = np.pi - betas  # this formula projects onto the north-pole, and beta is taken from the south
     r = np.sin(betas) / (1 - np.cos(betas))
     out = np.zeros((len(alphas), 3))
@@ -362,6 +437,13 @@ def ster_proj(alphas: np.ndarray, betas: np.ndarray, i: np.ndarray) -> np.ndarra
 
 
 def azim_proj(alphas: np.ndarray, betas: np.ndarray, i: np.ndarray) -> np.ndarray:
+    """
+    project pole figure data using an azimuthal projection
+
+    alphas: array of spherical coordinate alpha angles (in rad)
+    betas: array of spherical coordinate beta angles (in rad)
+    i: array of intensity values
+    """
     betas = betas / (np.pi / 2)
     xs = (betas * np.cos(alphas))[:, None]
     zs = (betas * np.sin(alphas))[:, None]

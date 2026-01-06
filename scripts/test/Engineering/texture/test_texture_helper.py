@@ -8,8 +8,15 @@
 import unittest
 from unittest.mock import patch, MagicMock, call, mock_open
 from mantid.api import AnalysisDataService as ADS
-from Engineering.texture.TextureUtils import load_all_orientations
-from Engineering.texture.texture_helper import _read_xml, create_default_parameter_table_with_value, get_pole_figure_data
+from Engineering.texture.texture_helper import (
+    load_all_orientations,
+    _read_xml,
+    _validate_file,
+    create_default_parameter_table_with_value,
+    get_pole_figure_data,
+    show_texture_sample_shape,
+    get_gauge_vol_str,
+)
 import numpy as np
 
 texture_utils_path = "Engineering.texture.texture_helper"
@@ -20,10 +27,67 @@ class TestTextureHelperSetGoniometer(unittest.TestCase):
         self.ws_name = "test_ws"
         # Mock workspace
         self.mock_ws = MagicMock()
+        self.mock_ws.name.return_value = self.ws_name
 
     def tearDown(self):
         if ADS.doesExist(self.ws_name):
             ADS.remove(self.ws_name)
+
+    @patch(texture_utils_path + ".get_cube_xml", return_value="example 4mm cube xml")
+    def test_get_gauge_volume_string_with_4mm_cube_preset(self, mock_get_cube_xml):
+        output_xml = get_gauge_vol_str(preset="4mmCube")
+        mock_get_cube_xml.assert_called_once_with("some-gv", 0.004)
+        self.assertEqual(output_xml, "example 4mm cube xml")
+
+    @patch(texture_utils_path + "._read_xml", return_value="example xml")
+    def test_get_gauge_volume_string_with_custom_xml(self, mock_read_xml):
+        file = "example.xml"
+        output_xml = get_gauge_vol_str(preset="Custom", custom_file=file)
+        mock_read_xml.assert_called_once_with(file)
+        self.assertEqual(output_xml, "example xml")
+
+    def test_get_gauge_volume_string_with_no_gauge_volume(self, mock_read_xml):
+        output_xml = get_gauge_vol_str(preset="No Gauge Volume")
+        self.assertEqual(output_xml, None)
+
+    def test_validate_file(self):
+        valid_args = [("path.txt", ".txt"), ("long/path.txt", ".txt"), ("long/path.nxs", ".nxs")]
+
+        for file, ext in valid_args:
+            with self.subTest(file=file, ext=ext):
+                self.assertTrue(_validate_file(file, ext))
+
+    @patch(texture_utils_path + ".ShowSampleModel")
+    def test_show_texture_sample_no_gauge_volume(self, mock_model_constructor):
+        mock_model = MagicMock()
+        mock_model_constructor.return_value = mock_model
+
+        ax_transform = np.eye(3)
+        ax_labels = ("d1", "d2", "d3")
+        show_texture_sample_shape(self.mock_ws, ax_transform, ax_labels, gauge_vol_preset=None)
+
+        mock_model.set_ws_name.assert_called_once_with(self.ws_name)
+        mock_model.set_fix_axes_to_sample.assert_called_once_with(True)
+        mock_model.set_gauge_vol_str.assert_not_called()
+        mock_model.show_shape_plot.assert_called_once_with(ax_transform, ax_labels)
+
+    @patch(texture_utils_path + ".get_gauge_vol_str", return_value="example xml")
+    @patch(texture_utils_path + ".ShowSampleModel")
+    def test_show_texture_sample_with_gauge_volume(self, mock_model_constructor, mock_gauge_vol_string):
+        mock_model = MagicMock()
+        mock_model_constructor.return_value = mock_model
+
+        ax_transform = np.eye(3)
+        ax_labels = ("d1", "d2", "d3")
+        preset = "Custom"
+        file = "custom.xml"
+        show_texture_sample_shape(self.mock_ws, ax_transform, ax_labels, gauge_vol_preset=preset, custom_file=file)
+
+        mock_model.set_ws_name.assert_called_once_with(self.ws_name)
+        mock_model.set_fix_axes_to_sample.assert_called_once_with(True)
+        mock_gauge_vol_string.assert_called_once_with(preset, file)
+        mock_model.set_gauge_vol_str.assert_called_once_with("example xml")
+        mock_model.show_shape_plot.assert_called_once_with(ax_transform, ax_labels)
 
     def run_euler_gonio_test(self, test_wss, txt_data, euler_scheme, euler_sense, target_calls, mock_set_gonio):
         mock_set_gonio.reset_mock()
