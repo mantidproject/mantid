@@ -224,7 +224,8 @@ class TestFullInstrumentViewWindow(unittest.TestCase):
         mock_repr_call.return_value = mock_repr
         self._view.main_plotter.renderer = MagicMock(GetSize=MagicMock(return_value=(1, 1)))
         self._view.display_to_world_coords = MagicMock(side_effect=[(-1, -2, 3), (1, 2, 3)])
-        self._view.add_cylinder_widget([1, 2, 1, 2, 1, 2])
+        self._view.main_plotter.bounds = [1, 2, 1, 2, 1, 2]
+        self._view.add_cylinder_widget()
         mock_repr.SetCenter.assert_called_with([-1, -2, 0.5])
         mock_repr.SetRadius.assert_called_with(np.sqrt(2**2 + 4**2))
         border = np.sqrt(1**2 + 1**2) / 2

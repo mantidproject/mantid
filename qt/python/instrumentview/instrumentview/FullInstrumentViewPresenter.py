@@ -241,9 +241,6 @@ class FullInstrumentViewPresenter:
         self._pickable_mesh[self._visible_label] = self._model.picked_visibility
         self._update_line_plot_ws_and_draw(self._view.current_selected_unit())
 
-    def on_add_cylinder_clicked(self) -> None:
-        self._view.add_cylinder_widget(self._detector_mesh_bounds)
-
     def on_add_mask_clicked(self) -> None:
         implicit_function = self._view.get_current_widget_implicit_function()
         if not implicit_function:

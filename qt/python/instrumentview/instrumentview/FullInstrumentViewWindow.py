@@ -466,7 +466,7 @@ class FullInstrumentViewWindow(QMainWindow):
     def on_toggle_add_mask(self, checked):
         if checked:
             if self._shape_options.currentText() == WidgetType.Cylinder.value:
-                self._presenter.on_add_cylinder_clicked()
+                self.add_cylinder_widget()
             else:
                 self.add_rectangular_widget()
             self._add_mask.setDisabled(False)
@@ -656,7 +656,7 @@ class FullInstrumentViewWindow(QMainWindow):
         # RGB for dark grey is (64, 64, 64), normalised is (0.25, 0.25, 0.25)
         self.main_plotter.add_mesh(mesh, color=(0.25, 0.25, 0.25), pickable=False, render_points_as_spheres=True, point_size=15)
 
-    def add_cylinder_widget(self, bounds) -> None:
+    def add_cylinder_widget(self) -> None:
         cylinder_repr = vtkImplicitCylinderRepresentation()
         cylinder_repr.SetOutlineTranslation(False)
         # Set bounding box line to invisible
@@ -671,7 +671,7 @@ class FullInstrumentViewWindow(QMainWindow):
         cylinder_repr.SetRadius(np.sqrt((x - cx) ** 2 + (y - cy) ** 2))
 
         # Arbritary border factor for bounding box
-        xmin, xmax, ymin, ymax, _zmin, _zmax = bounds
+        xmin, xmax, ymin, ymax, _zmin, _zmax = self.main_plotter.bounds
         border = (np.sqrt((xmax - xmin) ** 2 + (ymax - ymin) ** 2)) / 2
         cylinder_repr.SetWidgetBounds([xmin - border, xmax + border, ymin - border, ymax + border, 0, 1])
 
