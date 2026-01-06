@@ -447,8 +447,9 @@ class FullInstrumentViewModel:
 
     def overwrite_mask_to_current_workspace(self) -> None:
         # TODO: Check if copies are expensive with big workspaces
+        temp_ws = CloneWorkspace(self._workspace.name(), StoreInADS=False)
         temp_ws_name = f"__instrument_view_temp_{self._workspace.name()}"
-        CloneWorkspace(self._workspace.name(), OutputWorkspace=temp_ws_name)
+        AnalysisDataService.addOrReplace(temp_ws_name, temp_ws)
         MaskDetectors(temp_ws_name, MaskedWorkspace=self.mask_ws)
         RenameWorkspace(InputWorkspace=temp_ws_name, OutputWorkspace=self._workspace.name())
 
