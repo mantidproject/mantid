@@ -20,14 +20,13 @@ Usage
 
 .. testcode:: exFlatCell
 
-    # Load data file from the csv file
-    input = LoadAscii(Filename="flatcell_input.csv", OutputWorkspace="FlatCellInput")
+    # Load event workspace
+    LoadNexus(Filename="LOQ00113953.nxs", OutputWorkspace="FlatCellInput")
 
     # Run the FlatCell Algorithm and save into output workspaces
     FlatCell(InputWorkspace="FlatCellInput", OutputWorkspace="FlatCellOuput")
 
     # Verify the changes are correct
-    print("The range of the input values is {}.".format(np.ptp(mtd['FlatCellInput'].readY(0))))
     print("The range of the output values is {}.".format(np.ptp(mtd['FlatCellOuput'].readY(0))))
 
 
@@ -35,8 +34,7 @@ Output:
 
 .. testoutput:: exFlatCell
 
-   The range of the input values is 32075.0.
-   The range of the output values is 527.7157520726411.
+   The range of the output values is 1390.912709106737.
 
 .. categories::
 

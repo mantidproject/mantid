@@ -1,0 +1,1 @@
+- Added :ref:`algm-FlatCell` for creating a 2D flatcell workspace for ISIS SANS reduction of LOQ. The algorithm also provides an xml file with the detector ids to mask.

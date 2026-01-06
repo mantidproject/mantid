@@ -63,15 +63,12 @@ void FlatCell::scale(std::vector<double> &values, double factor) {
 }
 
 /** Execution code.
- *  @throw std::invalid_argument If XMax is less than XMin
+ *  @throw std::runtime_error If nHist not equal to 17776.
  */
 void FlatCell::exec() {
 
   // Get the input WS
   EventWorkspace_sptr inputWS = getProperty("InputWorkspace");
-
-  // Spectrum Numbers go from 9-17784
-  // Workspace Indices go from 0-17775
 
   // Validate the number of histograms in the Input WS
   const size_t nHist = inputWS->getNumberHistograms();
@@ -113,6 +110,8 @@ void FlatCell::exec() {
   constexpr size_t LABStop{16384};
 
   // Adjusting start values from the excel file because of the spectrum vs indices confusion
+  // Expected spectrum numbers - 9-17784
+  // Expected workspace indices - 0-17775
   constexpr size_t HABStart{16392 - nMonitorOffset};
   constexpr size_t HAB1Stop{16740 - nMonitorOffset};
   constexpr size_t HAB2Stop{17088 - nMonitorOffset};
