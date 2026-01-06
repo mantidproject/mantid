@@ -285,6 +285,9 @@ class RunTabPresenter(PresenterCommon):
         sample_shape = ["Read from file", SampleShape.CYLINDER, SampleShape.FLAT_PLATE, SampleShape.DISC]
         self._view.sample_shape = sample_shape
 
+        phi_step_types = ["MinMax", "Pairs"]
+        self._view.phi_range_step_type = phi_step_types
+
         # Set the q range
         self._view.q_1d_step_type = [RangeStepType.LIN.value, RangeStepType.LOG.value]
 
@@ -507,7 +510,6 @@ class RunTabPresenter(PresenterCommon):
     def update_view_from_table_model(self):
         self._view.clear_table()
         self._view.hide_period_columns()
-
         num_rows = self._table_model.get_number_of_rows()
         for row_index in range(num_rows):
             row = self._table_model.get_row(row_index)
@@ -1039,6 +1041,7 @@ class RunTabPresenter(PresenterCommon):
         # Mask
         self._set_on_view("phi_limit_min")
         self._set_on_view("phi_limit_max")
+        self._set_on_view("phi_range")
         self._set_on_view("phi_limit_use_mirror")
         self._set_on_view("radius_limit_min", self.DEFAULT_DECIMAL_PLACES_MM)
         self._set_on_view("radius_limit_max", self.DEFAULT_DECIMAL_PLACES_MM)
@@ -1162,6 +1165,7 @@ class RunTabPresenter(PresenterCommon):
             self._set_on_custom_model("phi_limit_min", state_model)
             self._set_on_custom_model("phi_limit_max", state_model)
             self._set_on_custom_model("phi_limit_use_mirror", state_model)
+            self._set_on_custom_model("phi_range", state_model)
             self._set_on_custom_model("radius_limit_min", state_model)
             self._set_on_custom_model("radius_limit_max", state_model)
 
