@@ -321,6 +321,7 @@ class SANSDataProcessorGui(QMainWindow, Ui_SansDataProcessorWindow):
         self.background_subtraction_checkbox.stateChanged.connect(self._on_background_subtraction_selection)
 
         self.wavelength_step_type_combo_box.currentIndexChanged.connect(self._on_wavelength_step_type_changed)
+        self.phi_range_step_type_combo_box.currentIndexChanged.connect(self._on_phi_range_step_type_changed)
 
         self.process_selected_button.clicked.connect(self._process_selected_clicked)
         self.process_all_button.clicked.connect(self._process_all_clicked)
@@ -406,6 +407,12 @@ class SANSDataProcessorGui(QMainWindow, Ui_SansDataProcessorWindow):
         elif self.wavelength_step_type == RangeStepType.LIN:
             self.wavelength_stacked_widget.setCurrentIndex(0)
             self.wavelength_step_label.setText("Step [\u00c5]")
+
+    def _on_phi_range_step_type_changed(self):
+        if self.phi_range_step_type == "MinMax":
+            self.phi_range_stacked_widget.setCurrentIndex(0)
+        elif self.phi_range_step_type == "Pairs":
+            self.phi_range_stacked_widget.setCurrentIndex(1)
 
     def create_data_table(self):
         # Delete an already existing table
@@ -1862,6 +1869,23 @@ class SANSDataProcessorGui(QMainWindow, Ui_SansDataProcessorWindow):
         self.update_simple_line_edit_field(line_edit="phi_limit_max_line_edit", value=value)
 
     @property
+    def phi_range(self):
+        return str(self.phi_range_line_edit.text())
+
+    @phi_range.setter
+    def phi_range(self, value):
+        self.phi_range_line_edit.setText(value)
+
+    @property
+    def phi_range_step_type(self):
+        step_type_as_string = self.phi_range_step_type_combo_box.currentText()
+        return step_type_as_string
+
+    @phi_range_step_type.setter
+    def phi_range_step_type(self, value):
+        self.update_gui_combo_box(value=value, expected_type="MinMax", combo_box="phi_range_step_type_combo_box")
+
+    @property
     def phi_limit_use_mirror(self):
         return self.phi_limit_use_mirror_check_box.isChecked()
 
@@ -2031,6 +2055,8 @@ class SANSDataProcessorGui(QMainWindow, Ui_SansDataProcessorWindow):
 
         self.phi_limit_min_line_edit.setText("-90")
         self.phi_limit_max_line_edit.setText("90")
+        self.phi_range_line_edit.setText("")
+        self.phi_range_step_type_combo_box.setCurrentIndex(0)
         self.phi_limit_use_mirror_check_box.setChecked(True)
 
         self.wavelength_min_line_edit.setText("")
