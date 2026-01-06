@@ -130,15 +130,16 @@ Test if a file with this filename already exists
 bool fileExists(const std::string &filename) { return std::filesystem::exists(filename); }
 
 /**
-Convert std::filesystem::last_write_time to DateAndTime via Poco::DateTime
+Convert std::filesystem::last_write_time to DateAndTime
 */
 DateAndTime convertFileTimeToDateAndTime(const std::filesystem::path &path) {
   auto ftime = std::filesystem::last_write_time(path);
   auto sctp = std::chrono::time_point_cast<std::chrono::system_clock::duration>(
       ftime - std::filesystem::file_time_type::clock::now() + std::chrono::system_clock::now());
   std::time_t cftime = std::chrono::system_clock::to_time_t(sctp);
-  Poco::DateTime pocoTime = Poco::DateTime(Poco::Timestamp::fromEpochTime(cftime));
-  return DateAndTime(Poco::DateTimeFormatter::format(pocoTime, timeformat));
+  DateAndTime dateandtime;
+  dateandtime.set_from_time_t(cftime);
+  return dateandtime;
 }
 
 DECLARE_SCRIPTREPOSITORY(ScriptRepositoryImpl)
@@ -1576,8 +1577,7 @@ void ScriptRepositoryImpl::recursiveParsingDirectories(const std::string &path, 
       if (!isEntryValid(entry_path))
         continue;
 
-      // g_log.debug() << "RecursiveParsing: insert : " << entry_path <<
-      // '\n';
+      // g_log.debug() << "RecursiveParsing: insert : " << entry_path << '\n';
       RepositoryEntry &entry = repo[entry_path];
       entry.local = true;
       entry.current_date = DateAndTime(Poco::DateTimeFormatter::format(it->getLastModified(), timeformat));
