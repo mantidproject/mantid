@@ -16,6 +16,8 @@ REPO_ROOT_DIR=$SCRIPT_DIR/../..
 
 # pixi
 install_pixi
+# Allow newly published mantidqt package to be installed
+pixi update --manifest-path $REPO_ROOT_DIR/pixi.toml -e docs-build mantidqt
 
 # Configure a clean build directory
 rm -rf build
