@@ -42,22 +42,20 @@ mtd_add_qt_library(
 )
 
 # Use a precompiled header where they are supported
-if(PARSED_PRECOMPILED)
-  target_precompile_headers(
-    MantidScientificInterfacesISISReflectometry
-    PRIVATE
-    <MantidAPI/Algorithm.h>
-    <MantidAPI/MatrixWorkspace_fwd.h>
-    <MantidKernel/System.h>
-    <QDialog>
-    <QString>
-    <QWidget>
-    <map>
-    <set>
-    <string>
-    <vector>
-  )
-endif()
+target_precompile_headers(
+  MantidScientificInterfacesISISReflectometryQt5 # change for qt6
+  PRIVATE
+  <MantidAPI/Algorithm.h>
+  <MantidAPI/MatrixWorkspace_fwd.h>
+  <MantidKernel/System.h>
+  <QDialog>
+  <QString>
+  <QWidget>
+  <map>
+  <set>
+  <string>
+  <vector>
+)
 
 if(MANTID_FRAMEWORK_LIB STREQUAL "BUILD")
   add_subdirectory(test)

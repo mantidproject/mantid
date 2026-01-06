@@ -695,21 +695,19 @@ mtd_add_qt_library(
 )
 
 # Use a precompiled header where they are supported
-if(PARSED_PRECOMPILED)
-  target_precompile_headers(
-    MantidQtWidgetsCommon
-    PRIVATE
-    <MantidAPI/Algorithm.h>
-    <MantidAPI/AnalysisDataService.h>
-    <QApplication>
-    <QDialog>
-    <QObject>
-    <QPushButton>
-    <QString>
-    <QStringList>
-    <QWidget>
-  )
-endif()
+target_precompile_headers(
+  MantidQtWidgetsCommonQt5 # change for qt6
+  PRIVATE
+  <MantidAPI/Algorithm.h>
+  <MantidAPI/AnalysisDataService.h>
+  <QApplication>
+  <QDialog>
+  <QObject>
+  <QPushButton>
+  <QString>
+  <QStringList>
+  <QWidget>
+)
 
 # Help collection file
 set(QCH_FILES)

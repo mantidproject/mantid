@@ -64,19 +64,17 @@ mtd_add_qt_library(
 )
 
 # Use a precompiled header where they are supported
-if(PARSED_PRECOMPILED)
-  target_precompile_headers(
-    MantidQtWidgetsPluginsAlgorithmDialogs
-    PRIVATE
-    <MantidAPI/Algorithm.h>
-    <MantidAPI/MatrixWorkspace_fwd.h>
-    <MantidKernel/System.h>
-    <QDialog>
-    <QString>
-    <QWidget>
-    <map>
-    <set>
-    <string>
-    <vector>
-  )
-endif()
+target_precompile_headers(
+  MantidQtWidgetsPluginsAlgorithmDialogsQt5 # change for qt6
+  PRIVATE
+  <MantidAPI/Algorithm.h>
+  <MantidAPI/MatrixWorkspace_fwd.h>
+  <MantidKernel/System.h>
+  <QDialog>
+  <QString>
+  <QWidget>
+  <map>
+  <set>
+  <string>
+  <vector>
+)

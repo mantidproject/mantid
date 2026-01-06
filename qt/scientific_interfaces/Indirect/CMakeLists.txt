@@ -27,35 +27,33 @@ mtd_add_qt_library(
 )
 
 # Use a precompiled header where they are supported
-if(PARSED_PRECOMPILED)
-  target_precompile_headers(
-    MantidScientificInterfacesIndirect
-    PRIVATE
-    <MantidAPI/Algorithm.h>
-    <MantidAPI/MatrixWorkspace.h>
-    <MantidAPI/MatrixWorkspace_fwd.h>
-    <MantidKernel/System.h>
-    <MantidQtWidgets/Common/UserInputValidator.h>
-    <QDialog>
-    <QFileInfo>
-    <QMap>
-    <QObject>
-    <QString>
-    <QWidget>
-    <QtCore/QVariant>
-    <QtWidgets/QAction>
-    <QtWidgets/QApplication>
-    <QtWidgets/QButtonGroup>
-    <QtWidgets/QLabel>
-    <QtWidgets/QPushButton>
-    <QtCore/qbytearray.h>
-    <QtCore/qmetatype.h>
-    <map>
-    <set>
-    <string>
-    <vector>
-  )
-endif()
+target_precompile_headers(
+  MantidScientificInterfacesIndirectQt5 # change for qt6
+  PRIVATE
+  <MantidAPI/Algorithm.h>
+  <MantidAPI/MatrixWorkspace.h>
+  <MantidAPI/MatrixWorkspace_fwd.h>
+  <MantidKernel/System.h>
+  <MantidQtWidgets/Common/UserInputValidator.h>
+  <QDialog>
+  <QFileInfo>
+  <QMap>
+  <QObject>
+  <QString>
+  <QWidget>
+  <QtCore/QVariant>
+  <QtWidgets/QAction>
+  <QtWidgets/QApplication>
+  <QtWidgets/QButtonGroup>
+  <QtWidgets/QLabel>
+  <QtWidgets/QPushButton>
+  <QtCore/qbytearray.h>
+  <QtCore/qmetatype.h>
+  <map>
+  <set>
+  <string>
+  <vector>
+)
 
 # Testing target
 if(MANTID_FRAMEWORK_LIB STREQUAL "BUILD")
