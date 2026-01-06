@@ -103,7 +103,7 @@ class TomlSchemaV1Validator(TomlSchemaValidator):
         mask_keys = {
             "prompt_peak": {"start", "stop"},
             "mask_files": None,
-            "phi": {"mirror", "start", "stop"},
+            "phi": {"mirror", "start", "stop", "range"},
             "time": {"tof"},
             "spatial": {
                 "rear": {"detector_columns", "detector_rows", "detector_column_ranges", "detector_row_ranges"},
