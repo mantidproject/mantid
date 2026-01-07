@@ -26,7 +26,7 @@ Eigen::MatrixXd covar_from_jacobian(const map_type &J, double epsrel) {
   if ((nc == 0) || (nr == 0))
     return Eigen::MatrixXd{};
 
-  // Pivoted QR Decomposition: XP = QR (X is J in this case)
+  // Pivoted QR Decomposition: JP = QR
   Eigen::ColPivHouseholderQR<Eigen::MatrixXd> qr(J);
 
   // R is (nc x np) in general; the useful part for J^T J is (nc x nc) block
@@ -53,16 +53,14 @@ Eigen::MatrixXd covar_from_jacobian(const map_type &J, double epsrel) {
 
   if (rank > 0) {
     // cov = (R^T R)^{-1} for the independent cols = R^{-1} R^{-T}
-    const auto R1 = R.topLeftCorner(rank, rank).template triangularView<Eigen::Upper>();
-
-    Eigen::MatrixXd invR1 = R1.solve(Eigen::MatrixXd::Identity(rank, rank));
-    Eigen::MatrixXd cov1 = invR1 * invR1.transpose(); // R^{-1} R^{-T}
-
+    const Eigen::MatrixXd R1 = R.topLeftCorner(rank, rank).template triangularView<Eigen::Upper>();
+    Eigen::MatrixXd invR1 = R1.inverse();
+    Eigen::MatrixXd cov1 = invR1 * invR1.transpose();
     cov_pivot.topLeftCorner(rank, rank) = cov1;
   }
 
   // Unpivot back to original parameter order:
-  // J = Q R P^T  => (J^T J)^{-1} = P (R^T R)^{-1} P^T
+  // cov = (J^T J)^{-1} = P (R^T R)^{-1} P^T
   const Eigen::PermutationMatrix<Eigen::Dynamic, Eigen::Dynamic> P = qr.colsPermutation();
   Eigen::MatrixXd cov = P * cov_pivot * P.transpose();
 
