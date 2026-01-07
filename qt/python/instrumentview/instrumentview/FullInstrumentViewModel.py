@@ -521,5 +521,5 @@ class FullInstrumentViewModel:
             if "MaskWorkspace" in str(type(pws)) and pws.getInstrument().getFullName() == self._workspace.getInstrument().getFullName()
         ]
 
-    def convert_units(self, source_unit: str, target_unit: str, detector_id: int, value: float) -> float:
-        return self._unit_converter.convert(source_unit, target_unit, detector_id, value)
+    def convert_units(self, source_unit: str, target_unit: str, spectrum_no: int, value: float) -> float:
+        return self._unit_converter.convert(source_unit, target_unit, spectrum_no, value)

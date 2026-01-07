@@ -361,7 +361,7 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
     def _setup_on_peak_selected_tests(self):
         self._presenter._model = MagicMock()
         self._presenter._model.workspace_x_unit = "workspace-unit"
-        self._presenter._model.picked_detector_ids = [42]
+        self._presenter._model.picked_spectrum_nos = [42]
         self._presenter._view.current_selected_unit.return_value = "view-unit"
         self._presenter._view.selected_peaks_workspaces.return_value = ["wsA", "wsB"]
         self._presenter._model.convert_units.return_value = 123.456
