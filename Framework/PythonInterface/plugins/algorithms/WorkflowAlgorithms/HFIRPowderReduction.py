@@ -11,8 +11,11 @@ from mantid.kernel import (
     Property,
     FloatBoundedValidator,
     IntArrayProperty,
+    SetDefaultWhenProperty,
 )
 from mantid.dataobjects import MaskWorkspaceProperty
+import h5py
+import numpy as np
 
 
 class HFIRPowderReduction(DataProcessorAlgorithm):
@@ -25,7 +28,7 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
     def summary(self):
         return "Powder reduction for HFIR instruments"
 
-    def PyInit(self):
+    def PyInit(self):  # noqa: C901
         # Load UI properties
         self.declareProperty(
             MultipleFileProperty(name="SampleFilename", action=FileAction.OptionalLoad, extensions=[".nxs.h5"]), "Sample files to Load"
@@ -123,6 +126,173 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
             "Sum",
             False,
             doc="Specifies either single output workspace or output group workspace containing several workspaces.",
+        )
+
+        def checkFilenameforInstrument(algo, currentProp, watchedProp):
+            run = watchedProp.value
+            instrumentName = ""
+            with h5py.File(run[0], "r") as f:
+                instrumentName = f["/entry/instrument/name"][0]
+                instrumentName = instrumentName.decode("utf-8")
+            if "WAND" in instrumentName:
+                currentProp.value = "WAND^2"
+            elif "MIDAS" in instrumentName:
+                currentProp.value = "MIDAS"
+            return True
+
+        self.setPropertySettings("Instrument", SetDefaultWhenProperty("SampleFilename", checkFilenameforInstrument))
+
+        def checkFilenameforWavelength(algo, currentProp, watchedProp):
+            run = watchedProp.value
+            wavelength = 0.0
+            with h5py.File(run[0], "r") as f:
+                wavelength = f["/entry/wavelength"][0]
+                wavelength = wavelength.decode("utf-8")
+                wavelength = float(wavelength)
+            currentProp.value = wavelength
+            return True
+
+        self.setPropertySettings("Wavelength", SetDefaultWhenProperty("SampleFilename", checkFilenameforWavelength))
+
+        def checkFilenameforVanadiumDiameter(algo, currentProp, watchedProp):
+            run = watchedProp.value
+            diameter = 0.0
+            with h5py.File(run[0], "r") as f:
+                diameter = f["/entry/vanadium_diameter"][0]
+                diameter = diameter.decode("utf-8")
+                diameter = float(diameter)
+            currentProp.value = diameter
+            return True
+
+        self.setPropertySettings("VanadiumDiameter", SetDefaultWhenProperty("SampleFilename", checkFilenameforVanadiumDiameter))
+
+        def checkInstrumentforNormaliseBy(algo, currentProp, watchedProp):
+            instrument = watchedProp.value
+            if instrument == "WAND^2":
+                currentProp.value = "Monitor"
+            elif instrument == "MIDAS":
+                currentProp.value = "Time"
+            return True
+
+        self.setPropertySettings("NormaliseBy", SetDefaultWhenProperty("Instrument", checkInstrumentforNormaliseBy))
+
+        def checkFilenameforVanadiumRunNumbers(algo, currentProp, watchedProp):
+            run = watchedProp.value
+            vanadiumRunNumbers = np.array([])
+            with h5py.File(run[0], "r") as f:
+                vanadiumRunNumbers = f["/entry/vanadium_run_numbers"][()]
+            self.setProperty("VanadiumRunNumbers", vanadiumRunNumbers)
+            return True
+
+        self.setPropertySettings("VanadiumRunNumbers", SetDefaultWhenProperty("SampleFilename", checkFilenameforVanadiumRunNumbers))
+
+        def checkFilenameforVanadiumBackgroundRunNumbers(algo, currentProp, watchedProp):
+            run = watchedProp.value
+            vanadiumBGRunNumbers = []
+            with h5py.File(run[0], "r") as f:
+                vanadiumBGRunNumbers = f["/entry/vanadium_background_run_numbers"][()]
+            self.setProperty("VanadiumBackgroundRunNumbers", vanadiumBGRunNumbers)
+            return True
+
+        self.setPropertySettings(
+            "VanadiumBackgroundRunNumbers", SetDefaultWhenProperty("SampleFilename", checkFilenameforVanadiumBackgroundRunNumbers)
+        )
+
+        def checkRunNumbersforWavelength(algo, currentProp, watchedProp):
+            sampleIPTS = self.getProperty("SampleIPTS").value
+            sampleRunNumbers = self.getProperty("SampleRunNumbers").value
+            instrument = self.getProperty("Instrument").value
+            if sampleIPTS == Property.EMPTY_INT or len(sampleRunNumbers) == 0 or instrument == "":
+                return False
+            else:
+                if instrument == "WAND^2":
+                    runs = ["/HFIR/HB2C/IPTS-{}/nexus/HB2C_{}.nxs.h5".format(sampleIPTS, run) for run in sampleRunNumbers]
+                elif instrument == "MIDAS":
+                    runs = ["/HFIR/HB2A/IPTS-{}/nexus/HB2A_{}.nxs.h5".format(sampleIPTS, run) for run in sampleRunNumbers]
+                wavelength = 0.0
+                with h5py.File(runs[0], "r") as f:
+                    wavelength = f["/entry/wavelength"][0]
+                    wavelength = wavelength.decode("utf-8")
+                    wavelength = float(wavelength)
+                currentProp.value = wavelength
+            return True
+
+        self.setPropertySettings("Wavelength", SetDefaultWhenProperty("Instrument", checkRunNumbersforWavelength))
+        self.setPropertySettings("Wavelength", SetDefaultWhenProperty("SampleIPTS", checkRunNumbersforWavelength))
+        self.setPropertySettings("Wavelength", SetDefaultWhenProperty("SampleRunNumbers", checkRunNumbersforWavelength))
+
+        def checkRunNumbersforVanadiumDiameter(algo, currentProp, watchedProp):
+            sampleIPTS = self.getProperty("SampleIPTS").value
+            sampleRunNumbers = self.getProperty("SampleRunNumbers").value
+            instrument = self.getProperty("Instrument").value
+            if sampleIPTS == Property.EMPTY_INT or len(sampleRunNumbers) == 0 or instrument == "":
+                return False
+            else:
+                if instrument == "WAND^2":
+                    runs = ["/HFIR/HB2C/IPTS-{}/nexus/HB2C_{}.nxs.h5".format(sampleIPTS, run) for run in sampleRunNumbers]
+                elif instrument == "MIDAS":
+                    runs = ["/HFIR/HB2A/IPTS-{}/nexus/HB2A_{}.nxs.h5".format(sampleIPTS, run) for run in sampleRunNumbers]
+                diameter = 0.0
+                with h5py.File(runs[0], "r") as f:
+                    diameter = f["/entry/vanadium_diameter"][0]
+                    diameter = diameter.decode("utf-8")
+                    diameter = float(diameter)
+                currentProp.value = diameter
+
+            return True
+
+        self.setPropertySettings("VanadiumDiameter", SetDefaultWhenProperty("Instrument", checkRunNumbersforVanadiumDiameter))
+        self.setPropertySettings("VanadiumDiameter", SetDefaultWhenProperty("SampleIPTS", checkRunNumbersforVanadiumDiameter))
+        self.setPropertySettings("VanadiumDiameter", SetDefaultWhenProperty("SampleRunNumbers", checkRunNumbersforVanadiumDiameter))
+
+        def checkRunNumbersforVanadiumRunNumbers(algo, currentProp, watchedProp):
+            sampleIPTS = self.getProperty("SampleIPTS").value
+            sampleRunNumbers = self.getProperty("SampleRunNumbers").value
+            instrument = self.getProperty("Instrument").value
+            if sampleIPTS == Property.EMPTY_INT or len(sampleRunNumbers) == 0 or instrument == "":
+                return False
+            else:
+                if instrument == "WAND^2":
+                    runs = ["/HFIR/HB2C/IPTS-{}/nexus/HB2C_{}.nxs.h5".format(sampleIPTS, run) for run in sampleRunNumbers]
+                elif instrument == "MIDAS":
+                    runs = ["/HFIR/HB2A/IPTS-{}/nexus/HB2A_{}.nxs.h5".format(sampleIPTS, run) for run in sampleRunNumbers]
+                vanadiumRunNumbers = []
+                with h5py.File(runs[0], "r") as f:
+                    vanadiumRunNumbers = f["/entry/vanadium_run_numbers"][()]
+                self.setProperty("VanadiumRunNumbers", vanadiumRunNumbers)
+
+            return True
+
+        self.setPropertySettings("VanadiumRunNumbers", SetDefaultWhenProperty("Instrument", checkRunNumbersforVanadiumRunNumbers))
+        self.setPropertySettings("VanadiumRunNumbers", SetDefaultWhenProperty("SampleIPTS", checkRunNumbersforVanadiumRunNumbers))
+        self.setPropertySettings("VanadiumRunNumbers", SetDefaultWhenProperty("SampleRunNumbers", checkRunNumbersforVanadiumRunNumbers))
+
+        def checkRunNumbersforVanadiumBackgroundRunNumbers(algo, currentProp, watchedProp):
+            sampleIPTS = self.getProperty("SampleIPTS").value
+            sampleRunNumbers = self.getProperty("SampleRunNumbers").value
+            instrument = self.getProperty("Instrument").value
+            if sampleIPTS == Property.EMPTY_INT or len(sampleRunNumbers) == 0 or instrument == "":
+                return False
+            else:
+                if instrument == "WAND^2":
+                    runs = ["/HFIR/HB2C/IPTS-{}/nexus/HB2C_{}.nxs.h5".format(sampleIPTS, run) for run in sampleRunNumbers]
+                elif instrument == "MIDAS":
+                    runs = ["/HFIR/HB2A/IPTS-{}/nexus/HB2A_{}.nxs.h5".format(sampleIPTS, run) for run in sampleRunNumbers]
+                vanadiumBGRunNumbers = []
+                with h5py.File(runs[0], "r") as f:
+                    vanadiumBGRunNumbers = f["/entry/vanadium_background_run_numbers"][()]
+                self.setProperty("VanadiumBackgroundRunNumbers", vanadiumBGRunNumbers)
+
+            return True
+
+        self.setPropertySettings(
+            "VanadiumBackgroundRunNumbers", SetDefaultWhenProperty("Instrument", checkRunNumbersforVanadiumBackgroundRunNumbers)
+        )
+        self.setPropertySettings(
+            "VanadiumBackgroundRunNumbers", SetDefaultWhenProperty("SampleIPTS", checkRunNumbersforVanadiumBackgroundRunNumbers)
+        )
+        self.setPropertySettings(
+            "VanadiumBackgroundRunNumbers", SetDefaultWhenProperty("SampleRunNumbers", checkRunNumbersforVanadiumBackgroundRunNumbers)
         )
 
     def validateInputs(self):
