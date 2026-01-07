@@ -397,7 +397,7 @@ class FullInstrumentViewModel:
         ads = AnalysisDataService.Instance()
         if len(selected_peaks_workspaces) == 1:
             return ads.retrieveWorkspaces(selected_peaks_workspaces)[0]
-        if self._instrument_view_peaks_ws_name in ads.getObjectNames():
+        if ads.doesExist(self._instrument_view_peaks_ws_name):
             return ads.retrieveWorkspaces([self._instrument_view_peaks_ws_name])[0]
         peaks_ws = CreatePeaksWorkspace(self._workspace, 0, OutputWorkspace=self._instrument_view_peaks_ws_name, StoreInADS=False)
         ads.addOrReplace(self._instrument_view_peaks_ws_name, peaks_ws)

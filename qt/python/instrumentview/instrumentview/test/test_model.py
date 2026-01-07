@@ -823,23 +823,25 @@ class TestFullInstrumentViewModel(unittest.TestCase):
     def test_peaks_workspace_for_adding_new_peak(self, mock_ads, mock_create_peaks_ws):
         model, _ = self._setup_model([1, 2, 3])
         mock_ads_instance = mock_ads.Instance()
+        mock_ads_instance.doesExist.return_value = False
         model._peaks_workspace_for_adding_new_peak([])
         mock_create_peaks_ws.assert_called_once_with(
             model._workspace, 0, OutputWorkspace=model._instrument_view_peaks_ws_name, StoreInADS=False
         )
         mock_create_peaks_ws.reset_mock()
+        mock_ads_instance.doesExist.reset_mock()
 
         model._peaks_workspace_for_adding_new_peak(["my_peaks_ws"])
         mock_create_peaks_ws.assert_not_called()
         mock_ads_instance.retrieveWorkspaces.assert_called_once_with(["my_peaks_ws"])
         mock_ads_instance.retrieveWorkspaces.reset_mock()
 
-        mock_ads_instance.getObjectNames.return_value = [model._instrument_view_peaks_ws_name]
+        mock_ads_instance.doesExist.return_value = True
         model._peaks_workspace_for_adding_new_peak(["my_peaks_ws1", "my_peaks_ws2"])
-        mock_ads_instance.retrieveWorkspaces.assert_called_once_with([model._instrument_view_peaks_ws_name])
-        mock_ads_instance.retrieveWorkspaces.reset_mock()
+        mock_ads_instance.doesExist.assert_called_once_with(model._instrument_view_peaks_ws_name)
+        mock_ads_instance.doesExist.reset_mock()
 
-        mock_ads_instance.getObjectNames.return_value = []
+        mock_ads_instance.doesExist.return_value = False
         model._peaks_workspace_for_adding_new_peak(["my_peaks_ws1", "my_peaks_ws2"])
         mock_create_peaks_ws.assert_called_once_with(
             model._workspace, 0, OutputWorkspace=model._instrument_view_peaks_ws_name, StoreInADS=False
