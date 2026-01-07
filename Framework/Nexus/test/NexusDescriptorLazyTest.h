@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidKernel/ConfigService.h"
 #include "MantidNexus/NexusDescriptorLazy.h"
 #include "test_helper.h"
 

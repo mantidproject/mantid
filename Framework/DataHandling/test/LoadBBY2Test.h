@@ -81,6 +81,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(load.initialize());
     TS_ASSERT_THROWS_NOTHING(load.setPropertyValue("Filename", "BBY0081723.nxs"));
     TS_ASSERT_EQUALS(load.getPropertyValue("LoaderName"), "LoadBBY2");
-    TS_ASSERT_EQUALS(load.getPropertyValue("LoaderVersion"), "1"); // NOTE LoadBBY2 is NOT version of LoadBBY
+    // NOTE LoadBBY2 is a separate loader.  It is NOT version 2 of LoadBBY.
+    TS_ASSERT_EQUALS(load.getPropertyValue("LoaderVersion"), "1");
   }
 };
