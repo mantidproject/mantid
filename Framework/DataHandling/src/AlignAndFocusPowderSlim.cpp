@@ -84,24 +84,12 @@ typedef Mantid::Kernel::EnumeratedString<BinUnit, &unitNames> BINUNIT;
 const size_t NUM_HIST{6}; // TODO make this determined from groupin
 
 // TODO refactor this to use the actual grouping
-double getFocussedPostion(const detid_t detid, const std::vector<double> &difc_focus) {
-  // grouping taken from the IDF for VULCAN
-  if (detid < 0) {
-    throw std::runtime_error("detid < 0 is not supported");
-  } else if (detid < 100000) { // bank1 0-99095
-    return difc_focus[0];
-  } else if (detid < 200000) { // bank2 100000-199095
-    return difc_focus[1];
-  } else if (detid < 300000) { // bank3 200000-289095
-    return difc_focus[2];
-  } else if (detid < 400000) { // bank4 300000-389095
-    return difc_focus[3];
-  } else if (detid < 500000) { // bank5 400000-440095
-    return difc_focus[4];
-  } else if (detid < 600000) { // bank6 500000-554095
-    return difc_focus[5];
+double getFocussedPostion(const detid_t detid, const std::vector<double> &difc_focus,
+                          std::map<detid_t, size_t> &detIDToSpecNum) {
+  if (detIDToSpecNum.contains(detid)) {
+    return difc_focus[detIDToSpecNum[detid]];
   } else {
-    throw std::runtime_error("detid > 600000 is not supported");
+    throw std::runtime_error("detid " + std::to_string(detid) + " not found in detIDToSpecNum map.");
   }
 }
 
@@ -339,21 +327,16 @@ void AlignAndFocusPowderSlim::exec() {
 
   size_t num_hist = NUM_HIST;
   bool arbitrary_grouping = false; // if false then we have a direct mapping of bank to output spectrum
-  std::map<size_t, std::vector<detid_t>> grouping;
+  std::map<size_t, std::set<detid_t>> grouping;
   DataObjects::GroupingWorkspace_sptr groupingWS = this->getProperty(PropertyNames::GROUPING_WS);
   if (groupingWS) {
     arbitrary_grouping = true; // any bank can go to any output spectrum
     const auto groupIds = groupingWS->getGroupIDs(false);
     num_hist = groupIds.size();
+    g_log.information() << "Using grouping workspace with " << num_hist << " groups\n";
     for (size_t outputSpecNum = 0; outputSpecNum < groupIds.size(); ++outputSpecNum) {
-      grouping[outputSpecNum] = groupingWS->getDetectorIDsOfGroup(groupIds[outputSpecNum]);
-    }
-  } else {
-    constexpr detid_t NUM_DETS_PER_BANK{100000};
-    for (size_t outputSpecNum : std::views::iota(0, 6)) {
-      grouping[outputSpecNum] = std::vector<detid_t>(NUM_DETS_PER_BANK);
-      std::iota(grouping[outputSpecNum].begin(), grouping[outputSpecNum].end(),
-                static_cast<detid_t>(NUM_DETS_PER_BANK * outputSpecNum));
+      const auto detids = groupingWS->getDetectorIDsOfGroup(groupIds[outputSpecNum]);
+      grouping[outputSpecNum] = std::set<detid_t>(detids.begin(), detids.end());
     }
   }
 
@@ -387,30 +370,8 @@ void AlignAndFocusPowderSlim::exec() {
   const std::vector<specnum_t> specids;
   const auto difc_focused = calculate_difc_focused(l1, l2s, polars);
 
-  // create values for focusing time-of-flight
-  this->progress(.05, "Creating calibration constants");
-  const std::string cal_filename = getPropertyValue(PropertyNames::CAL_FILE);
-  if (!cal_filename.empty()) {
-    this->loadCalFile(wksp, cal_filename, difc_focused);
-  } else {
-    this->initCalibrationConstants(wksp, difc_focused);
-  }
-
-  // calculate correction for tof of the neutron at the sample position
-  if (this->getProperty(PropertyNames::FULL_TIME)) {
-    this->initScaleAtSample(wksp);
-  }
-
-  // set the instrument
-  this->progress(.07, "Set instrument geometry");
-  wksp = this->editInstrumentGeometry(wksp, l1, polars, specids, l2s, azimuthals);
-
-  // convert to TOF if not already
-  this->progress(.1, "Convert bins to TOF");
-  wksp = this->convertToTOF(wksp);
-
   // load run metadata
-  this->progress(.11, "Loading metadata");
+  this->progress(.01, "Loading metadata");
   // prog->doReport("Loading metadata"); TODO add progress bar stuff
   try {
     LoadEventNexus::loadEntryMetadata(filename, wksp, ENTRY_TOP_LEVEL, descriptor);
@@ -419,7 +380,7 @@ void AlignAndFocusPowderSlim::exec() {
   }
 
   // load logs
-  this->progress(.12, "Loading logs");
+  this->progress(.02, "Loading logs");
   auto periodLog = std::make_unique<const TimeSeriesProperty<int>>("period_log"); // not used
   const std::vector<std::string> &allow_logs = getProperty(PropertyNames::ALLOW_LOGS);
   const std::vector<std::string> &block_logs = getProperty(PropertyNames::BLOCK_LOGS);
@@ -430,7 +391,7 @@ void AlignAndFocusPowderSlim::exec() {
   const auto timeSplitter = this->timeSplitterFromSplitterWorkspace(wksp->run().startTime());
   const auto filterROI = this->getFilterROI(wksp);
   // determine the pulse indices from the time and splitter workspace
-  this->progress(.15, "Determining pulse indices");
+  this->progress(.05, "Determining pulse indices");
 
   // Now we want to go through all the bankN_event entries
   const std::map<std::string, std::set<std::string>> &allEntries = descriptor.getAllEntries();
@@ -443,11 +404,12 @@ void AlignAndFocusPowderSlim::exec() {
     throw std::runtime_error("No NXevent_data entries found in file");
   }
 
-  this->progress(.17, "Reading events");
+  this->progress(.07, "Reading events");
 
   // hard coded for VULCAN 6 banks
   std::vector<std::string> bankEntryNames;
   std::size_t num_banks_to_read;
+
   int outputSpecNum = getProperty(PropertyNames::OUTPUT_SPEC_NUM);
   if (outputSpecNum == EMPTY_INT()) {
     for (size_t i = 1; i <= NUM_HIST; ++i) {
@@ -464,8 +426,51 @@ void AlignAndFocusPowderSlim::exec() {
     num_banks_to_read = 1;
   }
 
+  // get detector ids for each bank
+  std::map<size_t, std::set<detid_t>> bank_detids;
+  for (size_t i = 1; i <= NUM_HIST; ++i) {
+    bank_detids[i - 1] = wksp->getInstrument()->getDetectorIDsInBank("bank" + std::to_string(i));
+  }
+
+  // create map of detid to output spectrum number to be used in focusing
+  if (!grouping.empty()) {
+    for (const auto &group : grouping) {
+      for (const auto &detid : group.second) {
+        detIDToSpecNum[detid] = group.first;
+      }
+    }
+  } else {
+    for (const auto &[i, detids] : bank_detids) {
+      for (const auto &detid : detids) {
+        detIDToSpecNum[detid] = i;
+      }
+    }
+  }
+
+  // create values for focusing time-of-flight
+  this->progress(.1, "Creating calibration constants");
+  const std::string cal_filename = getPropertyValue(PropertyNames::CAL_FILE);
+  if (!cal_filename.empty()) {
+    this->loadCalFile(wksp, cal_filename, difc_focused);
+  } else {
+    this->initCalibrationConstants(wksp, difc_focused);
+  }
+
+  // calculate correction for tof of the neutron at the sample position
+  if (this->getProperty(PropertyNames::FULL_TIME)) {
+    this->initScaleAtSample(wksp);
+  }
+
+  // set the instrument. Needs to happen after we get detector ids for each bank
+  this->progress(.15, "Set instrument geometry");
+  wksp = this->editInstrumentGeometry(wksp, l1, polars, specids, l2s, azimuthals);
+
+  // convert to TOF if not already
+  this->progress(.17, "Convert bins to TOF");
+  wksp = this->convertToTOF(wksp);
+
   // create the bank calibration factory to share with all of the ProcessBank*Task objects
-  BankCalibrationFactory calibFactory(m_calibration, m_scale_at_sample, grouping, m_masked);
+  BankCalibrationFactory calibFactory(m_calibration, m_scale_at_sample, grouping, m_masked, bank_detids);
 
   // threaded processing of the banks
   const int DISK_CHUNK = getProperty(PropertyNames::READ_SIZE_FROM_DISK);
@@ -722,7 +727,7 @@ void AlignAndFocusPowderSlim::initCalibrationConstants(API::MatrixWorkspace_sptr
 
   for (auto iter = detInfo.cbegin(); iter != detInfo.cend(); ++iter) {
     if (!iter->isMonitor()) {
-      const auto difc_focussed = getFocussedPostion(static_cast<detid_t>(iter->detid()), difc_focus);
+      const auto difc_focussed = getFocussedPostion(static_cast<detid_t>(iter->detid()), difc_focus, detIDToSpecNum);
       m_calibration.emplace(static_cast<detid_t>(iter->detid()),
                             difc_focussed / detInfo.difcUncalibrated(iter->index()));
     }
@@ -744,7 +749,7 @@ void AlignAndFocusPowderSlim::loadCalFile(const Mantid::API::Workspace_sptr &inp
   for (size_t row = 0; row < calibrationWS->rowCount(); ++row) {
     const detid_t detid = calibrationWS->cell<int>(row, 0);
     const double detc = calibrationWS->cell<double>(row, 1);
-    const auto difc_focussed = getFocussedPostion(detid, difc_focus);
+    const auto difc_focussed = getFocussedPostion(detid, difc_focus, detIDToSpecNum);
     m_calibration.emplace(detid, difc_focussed / detc);
   }
 

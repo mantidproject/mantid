@@ -303,6 +303,17 @@ void Instrument::getDetectorsInBank(std::vector<IDetector_const_sptr> &dets, con
   getDetectorsInBank(dets, *comp);
 }
 
+std::set<detid_t> Instrument::getDetectorIDsInBank(const std::string &bankName) const {
+  std::set<detid_t> detIDs;
+  std::vector<IDetector_const_sptr> detectors;
+  getDetectorsInBank(detectors, bankName);
+
+  for (const auto &det : detectors) {
+    detIDs.emplace(det->getID());
+  }
+  return detIDs;
+}
+
 /** Checks to see if the Instrument has a source.
  *   @returns True if the instrument has a source cache.
  */

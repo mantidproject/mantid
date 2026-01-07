@@ -7,7 +7,6 @@
 
 #include "MantidDataHandling/AlignAndFocusPowderSlim/BankCalibration.h"
 #include <algorithm>
-#include <iostream>
 #include <stdexcept>
 
 namespace Mantid::DataHandling::AlignAndFocusPowderSlim {
@@ -25,8 +24,6 @@ void copy_values_from_map_to_offset_vector(const std::map<detid_t, double> &map_
     throw std::runtime_error("Failed to find idmin=" + std::to_string(idmin) + " in map");
   auto iter_end =
       std::find_if(iter, map_values.cend(), [idmax](const auto itervalue) { return itervalue.first > idmax; });
-  if (iter_end != map_values.end())
-    ++iter_end;
 
   // copy over values that matter
   for (; iter != iter_end; ++iter) {
@@ -49,11 +46,15 @@ void copy_values_from_map_to_offset_vector(const std::map<detid_t, double> &map_
  * at the sample position.
  * @param mask detector ids that exist in the map should not be included.
  */
-BankCalibration::BankCalibration(const double time_conversion, const std::vector<detid_t> &det_in_group,
+BankCalibration::BankCalibration(const double time_conversion, const std::set<detid_t> &det_in_group,
                                  const std::map<detid_t, double> &calibration_map,
                                  const std::map<detid_t, double> &scale_at_sample, const std::set<detid_t> &mask) {
+  if (det_in_group.empty())
+    return;
+
   // determine the range
-  auto [idmin_found, idmax_found] = getDetidRange(det_in_group, calibration_map);
+  const detid_t idmin_found = *det_in_group.begin();
+  const detid_t idmax_found = *std::prev(det_in_group.end());
 
   // all the outputs are vectors that are offset by the minimum detid in the bank
   m_detid_offset = idmin_found;
@@ -71,44 +72,16 @@ BankCalibration::BankCalibration(const double time_conversion, const std::vector
     copy_values_from_map_to_offset_vector(scale_at_sample, idmin_found, idmax_found, m_scale_at_sample);
 
   // mask values that are in the mask or not in the detector group
-  if (det_in_group.empty()) {
-    for (const auto &detid : mask) {
-      if (this->detidInRange(detid)) {
-        m_calibration[detid - m_detid_offset] = IGNORE_PIXEL;
-      }
-    }
-  } else {
-    // mask anything that isn't int the group this assumes both are sorted
-    // find the first and last detector id that is in the range being used
-    auto detid_first = std::lower_bound(det_in_group.cbegin(), det_in_group.cend(), idmin_found);
-    auto detid_last = det_in_group.cend();
-    for (size_t i = 0; i < m_calibration.size(); ++i) {
-      if (m_calibration[i] != IGNORE_PIXEL) {
-        const detid_t detid = static_cast<detid_t>(i) + m_detid_offset;
-        auto detid_found = std::find(detid_first, detid_last, detid);
-        if (detid_found == detid_last) {
-          m_calibration[i] = IGNORE_PIXEL; // not in the list
-        } else {
-          if (mask.contains(detid))
-            m_calibration[i] = IGNORE_PIXEL; // shouldn't use it
-          // next search can start from here
-          detid_first = detid_found;
-        }
-      }
-    }
-  }
-}
 
-const std::pair<detid_t, detid_t> BankCalibration::getDetidRange(const std::vector<detid_t> &det_in_group,
-                                                                 const std::map<detid_t, double> &calibration_map) {
-  if (det_in_group.empty()) {
-    detid_t idminE = calibration_map.begin()->first;
-    detid_t idmaxE = calibration_map.rbegin()->first;
-    return std::make_pair<detid_t, detid_t>(std::move(idminE), std::move(idmaxE));
-  } else {
-    detid_t idminG = det_in_group.front();
-    detid_t idmaxG = det_in_group.back();
-    return std::make_pair<detid_t, detid_t>(std::move(idminG), std::move(idmaxG));
+  // mask anything that isn't int the group this assumes both are sorted
+  // find the first and last detector id that is in the range being used
+  for (size_t i = 0; i < m_calibration.size(); ++i) {
+    if (m_calibration[i] != IGNORE_PIXEL) {
+      const detid_t detid = static_cast<detid_t>(i) + m_detid_offset;
+      if (!det_in_group.contains(detid) || mask.contains(detid)) {
+        m_calibration[i] = IGNORE_PIXEL; // not in the list or masked
+      }
+    }
   }
 }
 
@@ -137,31 +110,38 @@ double BankCalibration::value_scale_at_sample(const detid_t detid) const {
 const detid_t &BankCalibration::idmin() const { return m_detid_offset; }
 detid_t BankCalibration::idmax() const { return m_detid_offset + static_cast<detid_t>(m_calibration.size()) - 1; }
 
+bool BankCalibration::empty() const { return m_calibration.empty(); }
+
 // ----------------- BankCalibrationFactory implementation
 BankCalibrationFactory::BankCalibrationFactory(const std::map<detid_t, double> &calibration_map,
                                                const std::map<detid_t, double> &scale_at_sample,
-                                               const std::map<size_t, std::vector<detid_t>> &grouping,
-                                               const std::set<detid_t> &mask)
-    : m_calibration_map(calibration_map), m_scale_at_sample(scale_at_sample), m_grouping(grouping), m_mask(mask) {
-  // in some tests passing empty constructor for no grouping produces invalid object
-  // cache that it is empty with a bonus bool now
-  m_haveGrouping = !m_grouping.empty();
+                                               const std::map<size_t, std::set<detid_t>> &grouping,
+                                               const std::set<detid_t> &mask,
+                                               const std::map<size_t, std::set<detid_t>> &bank_detids)
+    : m_calibration_map(calibration_map), m_scale_at_sample(scale_at_sample), m_grouping(grouping), m_mask(mask),
+      m_bank_detids(bank_detids) {}
+
+BankCalibration BankCalibrationFactory::getCalibration(const double time_conversion, const size_t bank_index) const {
+  return BankCalibration(time_conversion, m_bank_detids.at(bank_index), m_calibration_map, m_scale_at_sample, m_mask);
 }
 
-BankCalibration BankCalibrationFactory::getCalibration(const double time_conversion, const size_t wksp_index) const {
-  if (m_haveGrouping) {
-    return BankCalibration(time_conversion, m_grouping.at(wksp_index), m_calibration_map, m_scale_at_sample, m_mask);
-  } else {
-    return BankCalibration(time_conversion, std::vector<detid_t>(), m_calibration_map, m_scale_at_sample, m_mask);
-  }
-}
+std::vector<BankCalibration> BankCalibrationFactory::getCalibrations(const double time_conversion,
+                                                                     const size_t bank_index) const {
 
-std::vector<BankCalibration> BankCalibrationFactory::getCalibrations(const double time_conversion) const {
+  // When arbitrary grouping is used, we need to calculate the intersection of each group with the bank detids. The
+  // intersection may be empty which means that no detectors from that bank are in this group.
+  const auto &bank_detids = m_bank_detids.at(bank_index);
+
   std::vector<BankCalibration> calibrations;
   calibrations.reserve(m_grouping.size());
+
   std::transform(m_grouping.begin(), m_grouping.end(), std::back_inserter(calibrations),
-                 [this, time_conversion](const auto &pair) {
-                   return BankCalibration(time_conversion, pair.second, m_calibration_map, m_scale_at_sample, m_mask);
+                 [this, time_conversion, bank_detids](const auto &pair) {
+                   std::set<detid_t> detids_intersection;
+                   std::set_intersection(pair.second.begin(), pair.second.end(), bank_detids.begin(), bank_detids.end(),
+                                         std::inserter(detids_intersection, detids_intersection.begin()));
+                   return BankCalibration(time_conversion, detids_intersection, m_calibration_map, m_scale_at_sample,
+                                          m_mask);
                  });
 
   return calibrations;

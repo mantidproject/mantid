@@ -14,8 +14,6 @@
 #include "tbb/parallel_for.h"
 #include "tbb/parallel_reduce.h"
 
-#include <iostream>
-
 namespace Mantid::DataHandling::AlignAndFocusPowderSlim {
 
 namespace {
@@ -37,9 +35,9 @@ void ProcessBankTask::operator()(const tbb::blocked_range<size_t> &range) const 
     const auto &bankName = this->bankName(bank_index);
 
     // empty bank names indicate spectra to skip; control should never get here, but just in case
-    if (bankName.empty()) {
+    if (bankName.empty())
       continue;
-    }
+
     Kernel::Timer timer;
     g_log.debug() << bankName << " start" << std::endl;
 
@@ -68,7 +66,7 @@ void ProcessBankTask::operator()(const tbb::blocked_range<size_t> &range) const 
     std::vector<BankCalibration> calibrations;
 
     if (m_processingData.arbitraryGrouping) {
-      calibrations = this->getCalibrations(tof_unit);
+      calibrations = this->getCalibrations(tof_unit, bank_index);
     } else {
       calibration = std::make_unique<BankCalibration>(this->getCalibration(tof_unit, bank_index));
     }

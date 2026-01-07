@@ -65,6 +65,8 @@ private:
   std::vector<int64_t> loadStart;
   /// How much to load in the file
   std::vector<int64_t> loadSize;
+  // map of detectorID to output spectrum number
+  std::map<detid_t, size_t> detIDToSpecNum;
 };
 
 // these properties are public to simplify testing and calling from other code
