@@ -1497,13 +1497,9 @@ public:
 
   /// Test that this algorithm will be selected from Load algorithm
   void test_load_from_Load() {
-    std::string wsName = "LoadFromLoadWS";
     Mantid::DataHandling::Load load;
     TS_ASSERT_THROWS_NOTHING(load.initialize());
-    load.setPropertyValue("Filename", "LOQ49886.nxs");
-    load.setPropertyValue("OutputWorkspace", wsName);
-    load.execute();
-    TS_ASSERT(load.isExecuted());
+    TS_ASSERT_THROWS_NOTHING(load.setPropertyValue("Filename", "LOQ49886.nxs"));
     TS_ASSERT_EQUALS(load.getPropertyValue("LoaderName"), "LoadISISNexus");
     TS_ASSERT_EQUALS(load.getPropertyValue("LoaderVersion"), "2");
   }

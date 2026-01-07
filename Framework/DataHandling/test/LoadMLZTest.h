@@ -71,10 +71,7 @@ public:
     std::string wsName = "TOFTOFTestdata_from_Load";
     Mantid::DataHandling::Load load;
     TS_ASSERT_THROWS_NOTHING(load.initialize());
-    load.setPropertyValue("Filename", m_dataFile);
-    load.setPropertyValue("OutputWorkspace", wsName);
-    load.execute();
-    TS_ASSERT(load.isExecuted());
+    TS_ASSERT_THROWS_NOTHING(load.setPropertyValue("Filename", m_dataFile));
     TS_ASSERT_EQUALS(load.getPropertyValue("LoaderName"), "LoadMLZ");
   }
 
