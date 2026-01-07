@@ -103,15 +103,11 @@ private:
         }
         break;
       case NexusLazy:
-        printf("Checking NexusLazy loader base class\n");
-        fflush(stdout);
         if (!std::is_base_of<IFileLoader<Nexus::NexusDescriptorLazy>, T>::value) {
           throw std::runtime_error(std::string("FileLoaderRegistryImpl::subscribe - Class '") + typeid(T).name() +
                                    "' registered as NexusLazy loader but it does not inherit from "
                                    "API::IFileLoader<Nexus::NexusDescriptorLazy>");
         }
-        printf("Done %s\n", typeid(T).name());
-        fflush(stdout);
         break;
       case Generic:
         if (!std::is_base_of<IFileLoader<Kernel::FileDescriptor>, T>::value) {
