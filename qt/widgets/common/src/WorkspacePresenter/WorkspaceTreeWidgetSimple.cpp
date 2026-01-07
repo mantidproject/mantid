@@ -125,8 +125,8 @@ void WorkspaceTreeWidgetSimple::popupContextMenu() {
     // If no workspace is here then have load items
     menu = m_loadMenu;
   } else {
-    auto selectedWorksapceNames = getSelectedWorkspaceNamesAsQList();
-    menu = createWorkspaceContextMenu(selectedWorksapceNames);
+    auto selectedWorkspaceNames = getSelectedWorkspaceNamesAsQList();
+    menu = createWorkspaceContextMenu(selectedWorkspaceNames);
   }
 
   // Show the menu at the cursor's current position
@@ -317,6 +317,9 @@ QMenu *WorkspaceTreeWidgetSimple::createWorkspaceContextMenu(QStringList &select
 
 std::vector<QAction *>
 WorkspaceTreeWidgetSimple::intersectionOfActions(std::vector<std::vector<QAction *>> actionVecs) {
+  if (actionVecs.empty()) {
+    return {};
+  }
   std::sort(actionVecs.begin(), actionVecs.end(), [](const auto &a, const auto &b) { return a.size() > b.size(); });
   std::vector<QAction *> combinedActions = actionVecs.front();
 

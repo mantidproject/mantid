@@ -19,12 +19,13 @@ namespace Mantid::API {
 class Workspace;
 }
 
+namespace MantidQt::MantidWidgets {
+
 struct plotMenuActions {
   std::vector<QAction *> plotActions = {};
   std::vector<QAction *> plot3DActions = {};
 };
 
-namespace MantidQt::MantidWidgets {
 class MantidDisplayBase;
 class MantidTreeWidget;
 
