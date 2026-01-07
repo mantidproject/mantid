@@ -49,6 +49,12 @@ gdk_pixbuf:
 graphviz:
   - '>=2.47.0'
 
+gmock:
+  - '==1.17.0'
+
+gtest:
+  - '==1.17.0'
+
 jemalloc:
   - '==5.2.0'   # [linux]
   - '5.2.*'     # [osx]
@@ -96,7 +102,7 @@ pydantic:
  - '>=2.11.4,<3'
 
 sphinx:
-  - '>=4.5,<9'
+  - '>=9.0,<10'
 
 sphinx_bootstrap_theme:
   - '==0.8.1'

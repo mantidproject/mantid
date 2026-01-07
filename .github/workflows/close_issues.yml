@@ -8,6 +8,8 @@ on:
 
 jobs:
   close-issue-on-pr-merge:
+    # Do not run in forks.
+    if: ${{ github.repository_owner == 'mantidproject' }}
     runs-on: ubuntu-latest
     steps:
       - name: Closes issues related to a merged pull request.

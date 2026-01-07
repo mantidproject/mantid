@@ -7,6 +7,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/ISpectrum.h"
 #include "MantidAPI/RefAxis.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidHistogramData/LinearGenerator.h"

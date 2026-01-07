@@ -186,8 +186,12 @@ public:
     // ------ Make a ExperimentInfo entry ------------
     ExperimentInfo_sptr ei(new ExperimentInfo());
     ei->mutableRun().setProtonCharge(1.234);
+    ei->mutableRun().addLogData(new Mantid::Kernel::PropertyWithValue<int>("x", 1));
     // TODO: Add instrument
     ws1->addExperimentInfo(ei);
+
+    // check that there are logs before saving
+    TS_ASSERT(!ws1->getExperimentInfo(1)->run().getLogData().empty());
 
     // -------- Save it ---------------
     SaveMD2 saver;
@@ -198,8 +202,8 @@ public:
 
     // Retrieve the full path; delete any pre-existing file
     std::string filename = saver.getPropertyValue("Filename");
-    if (Poco::File(filename).exists())
-      Poco::File(filename).remove();
+    if (std::filesystem::exists(filename))
+      std::filesystem::remove(filename);
 
     TS_ASSERT_THROWS_NOTHING(saver.execute(););
     TS_ASSERT(saver.isExecuted());
@@ -227,6 +231,9 @@ public:
     if (!iws)
       return;
 
+    // check that the logs also loaded
+    TS_ASSERT(!iws->getExperimentInfo(1)->run().getLogData().empty())
+
     // Perform the full comparison
     auto ws = std::dynamic_pointer_cast<MDEventWorkspace<MDLeanEvent<nd>, nd>>(iws);
     do_compare_MDEW(ws, ws1, BoxStructureOnly);
@@ -253,8 +260,8 @@ public:
     if (deleteWorkspace) {
       ws->clearFileBacked(false);
       AnalysisDataService::Instance().remove(outWSName);
-      if (Poco::File(filename).exists())
-        Poco::File(filename).remove();
+      if (std::filesystem::exists(filename))
+        std::filesystem::remove(filename);
     }
   }
 
@@ -410,8 +417,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(saver.setPropertyValue("Filename", "LoadMDTest2.nxs"));
     // clean up possible rubbish from the previous runs
     std::string fullName = saver.getPropertyValue("Filename");
-    if (Poco::File(fullName).exists())
-      Poco::File(fullName).remove();
+    if (std::filesystem::exists(fullName))
+      std::filesystem::remove(fullName);
 
     TS_ASSERT_THROWS_NOTHING(saver.execute(););
     TS_ASSERT(saver.isExecuted());
@@ -440,8 +447,8 @@ public:
 
     AnalysisDataService::Instance().remove(outWSName);
     try {
-      if (Poco::File(filename).exists())
-        Poco::File(filename).remove();
+      if (std::filesystem::exists(filename))
+        std::filesystem::remove(filename);
     } catch (...) { /* ignore windows error */
     }
   }
@@ -483,8 +490,8 @@ public:
       TS_ASSERT_EQUALS(ws->getIsMaskedAt(i), newWS->getIsMaskedAt(i));
     }
 
-    if (Poco::File(filename).exists())
-      Poco::File(filename).remove();
+    if (std::filesystem::exists(filename))
+      std::filesystem::remove(filename);
   }
 
   /** Run SaveMD2 with the MDHistoWorkspace */
@@ -524,8 +531,8 @@ public:
       TS_ASSERT_EQUALS(ws->getIsMaskedAt(i), newWS->getIsMaskedAt(i));
     }
 
-    if (Poco::File(filename).exists())
-      Poco::File(filename).remove();
+    if (std::filesystem::exists(filename))
+      std::filesystem::remove(filename);
   }
 
   void test_histo1D() {
@@ -646,8 +653,8 @@ public:
     loadAlg.execute();
     TS_ASSERT(loadAlg.isExecuted());
 
-    if (Poco::File(this_fileName).exists()) {
-      Poco::File(this_fileName).remove();
+    if (std::filesystem::exists(this_fileName)) {
+      std::filesystem::remove(this_fileName);
     }
 
     return loadAlg.getProperty("OutputWorkspace");
@@ -694,8 +701,8 @@ public:
     TS_ASSERT_EQUALS(affMat[0][1], 1.0);
     TS_ASSERT_EQUALS(affMat[2][0], 1.0);
 
-    if (Poco::File(this_filename).exists()) {
-      Poco::File(this_filename).remove();
+    if (std::filesystem::exists(this_filename)) {
+      std::filesystem::remove(this_filename);
     }
 
     AnalysisDataService::Instance().remove("SaveMDAffineTest_ws");
@@ -759,8 +766,8 @@ public:
     // Only LoadMD should be in the history
     TS_ASSERT_EQUALS(newWSnh->getHistory().size(), 1);
 
-    if (Poco::File(this_filename).exists()) {
-      Poco::File(this_filename).remove();
+    if (std::filesystem::exists(this_filename)) {
+      std::filesystem::remove(this_filename);
     }
 
     AnalysisDataService::Instance().remove("HistoryEvTest_ws");
@@ -806,8 +813,8 @@ public:
                       histoNormalization);
 
     // Clean up
-    if (Poco::File(this_filename).exists()) {
-      Poco::File(this_filename).remove();
+    if (std::filesystem::exists(this_filename)) {
+      std::filesystem::remove(this_filename);
     }
 
     AnalysisDataService::Instance().remove("SaveMDEventNormalizationFlagTest_ws");

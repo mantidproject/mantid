@@ -15,7 +15,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include <Poco/File.h>
+#include <filesystem>
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -82,8 +82,8 @@ public:
         file1 = ws1->getBoxController()->getFileIO()->getFileName();
         file2 = ws2->getBoxController()->getFileIO()->getFileName();
       }
-      TS_ASSERT(Poco::File(file1).exists());
-      TS_ASSERT(Poco::File(file2).exists());
+      TS_ASSERT(std::filesystem::exists(file1));
+      TS_ASSERT(std::filesystem::exists(file2));
     }
 
     // Clean up files

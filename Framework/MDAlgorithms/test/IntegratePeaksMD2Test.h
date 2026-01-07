@@ -31,7 +31,7 @@
 #include <random>
 
 #include <MantidDataObjects/PeakShapeEllipsoid.h>
-#include <Poco/File.h>
+#include <filesystem>
 
 using Mantid::API::AnalysisDataService;
 using Mantid::Geometry::MDHistoDimension;
@@ -349,9 +349,8 @@ public:
     TS_ASSERT_DELTA(peakWS0->getPeak(0).getIntensity(), 2.0, 1e-2);
     // Error is also calculated
     TS_ASSERT_DELTA(peakWS0->getPeak(0).getSigmaIntensity(), M_SQRT2, 1e-2);
-    Poco::File(Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory") +
-               "IntegratePeaksMD2Test_MDEWSGaussian.dat")
-        .remove();
+    std::filesystem::remove(Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory") +
+                            "IntegratePeaksMD2Test_MDEWSGaussian.dat");
 
     // Test profile back to back exponential
     fnct = "BackToBackExponential";
@@ -361,9 +360,8 @@ public:
     // Error is also calculated
     // TS_ASSERT_DELTA( peakWS0->getPeak(0).getSigmaIntensity(), M_SQRT2,
     // 0.2);
-    Poco::File(Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory") +
-               "IntegratePeaksMD2Test_MDEWSBackToBackExponential.dat")
-        .remove();
+    std::filesystem::remove(Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory") +
+                            "IntegratePeaksMD2Test_MDEWSBackToBackExponential.dat");
     /*fnct = "ConvolutionExpGaussian";
     doRun(0.1,0.0,"IntegratePeaksMD2Test_peaks",0.0,true,true,fnct);
 

@@ -8,11 +8,11 @@
 from abc import ABCMeta, abstractmethod
 import os
 import warnings
+import tempfile
 
 from mantid.api import AnalysisDataService
 from mantid.kernel import config
 from mantid.simpleapi import BayesStretch, BayesQuasi, ExtractSingleSpectrum, Fit, LoadNexusProcessed, Scale
-from sys import platform
 import systemtesting
 
 
@@ -33,10 +33,9 @@ def _cleanup_files(dirname, filenames):
 
 
 class QLresTest(systemtesting.MantidSystemTest):
-    def skipTests(self):
-        return platform == "darwin"
-
     def runTest(self):
+        workdir = tempfile.mkdtemp(prefix="bayes_")
+        config["defaultsave.directory"] = workdir
         prefix = "rt_"
         sname = "irs26176_graphite002_red"
         rname = "irs26173_graphite002_res"
@@ -84,10 +83,9 @@ class QLresTest(systemtesting.MantidSystemTest):
 
 
 class QuestTest(systemtesting.MantidSystemTest):
-    def skipTests(self):
-        return platform == "darwin"
-
     def runTest(self):
+        workdir = tempfile.mkdtemp(prefix="bayes_")
+        config["defaultsave.directory"] = workdir
         sname = "irs26176_graphite002_red"
         rname = "irs26173_graphite002_res"
 
@@ -124,10 +122,9 @@ class QuestTest(systemtesting.MantidSystemTest):
 
 
 class QSeTest(systemtesting.MantidSystemTest):
-    def skipTests(self):
-        return platform == "darwin"
-
     def runTest(self):
+        workdir = tempfile.mkdtemp(prefix="bayes_")
+        config["defaultsave.directory"] = workdir
         sname = "irs26176_graphite002_red"
         rname = "irs26173_graphite002_res"
         e_min = -0.5
@@ -169,10 +166,9 @@ class QSeTest(systemtesting.MantidSystemTest):
 
 
 class QLDataTest(systemtesting.MantidSystemTest):
-    def skipTests(self):
-        return platform == "darwin"
-
     def runTest(self):
+        workdir = tempfile.mkdtemp(prefix="bayes_")
+        config["defaultsave.directory"] = workdir
         sname = "irs26176_graphite002_red"
         rname = "irs26173_graphite002_red"
         e_min = -0.5
@@ -220,10 +216,9 @@ class QLDataTest(systemtesting.MantidSystemTest):
 
 
 class QLResNormTest(systemtesting.MantidSystemTest):
-    def skipTests(self):
-        return platform == "darwin"
-
     def runTest(self):
+        workdir = tempfile.mkdtemp(prefix="bayes_")
+        config["defaultsave.directory"] = workdir
         sname = "irs26176_graphite002_red"
         rname = "irs26173_graphite002_res"
         rsname = "irs26173_graphite002_ResNorm"
@@ -275,10 +270,9 @@ class QLResNormTest(systemtesting.MantidSystemTest):
 
 
 class QLWidthTest(systemtesting.MantidSystemTest):
-    def skipTests(self):
-        return platform == "darwin"
-
     def runTest(self):
+        workdir = tempfile.mkdtemp(prefix="bayes_")
+        config["defaultsave.directory"] = workdir
         prefix = "wt_"
         sname = "irs26176_graphite002_red"
         rname = "irs26173_graphite002_res"

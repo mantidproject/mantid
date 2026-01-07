@@ -16,8 +16,8 @@
 #include "MantidMDAlgorithms/PreprocessDetectorsToMD.h"
 
 #include "MantidAPI/AlgorithmManager.h"
-#include <Poco/File.h>
 #include <cxxtest/TestSuite.h>
+#include <filesystem>
 
 #include <utility>
 
@@ -413,8 +413,8 @@ public:
   void test_execute_filebackend() {
     // Arrange
     std::string file_name = "convert_to_md_test_file.nxs";
-    if (Poco::File(file_name).exists())
-      Poco::File(file_name).remove();
+    if (std::filesystem::exists(file_name))
+      std::filesystem::remove(file_name);
     {
       auto test_workspace = createTestWorkspaces();
       Algorithm_sptr min_max_alg = AlgorithmManager::Instance().createUnmanaged("ConvertToMDMinMaxGlobal");
@@ -475,8 +475,8 @@ public:
     }
 
     // Remove the file
-    if (Poco::File(file_name).exists()) {
-      Poco::File(file_name).remove();
+    if (std::filesystem::exists(file_name)) {
+      std::filesystem::remove(file_name);
     }
   }
 

@@ -14,7 +14,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include <Poco/Path.h>
+#include <filesystem>
 
 #include <fstream>
 
@@ -70,9 +70,9 @@ public:
   /// Create a simple input file.
   MDFileObject(const FileContentsBuilder &builder = FileContentsBuilder(),
                const std::string &filename = "test_import_md_event_workspace_file.txt") {
-    Poco::Path path(Mantid::Kernel::ConfigService::Instance().getTempDir().c_str());
-    path.append(filename);
-    m_filename = path.toString();
+    std::filesystem::path path(Mantid::Kernel::ConfigService::Instance().getTempDir().c_str());
+    path /= filename;
+    m_filename = path.string();
     m_file.open(m_filename.c_str(), std::ios_base::out);
     // Invoke the builder to create the contents of the file.
     m_file << builder.create();

@@ -86,14 +86,14 @@ fi
 
 if [[ $OSTYPE == 'msys'* ]]; then
     rm -fr *.exe
-    pixi run --manifest-path $REPO_ROOT_DIR/pixi.toml -e package-standalone --frozen sh ${PACKAGING_SCRIPTS_DIR}/win/create_package.sh $PACKAGING_ARGS
+    pixi run --manifest-path $REPO_ROOT_DIR/pixi.toml -e package-standalone --frozen bash -e ${PACKAGING_SCRIPTS_DIR}/win/create_package.sh $PACKAGING_ARGS
 elif [[ $OSTYPE == 'darwin'* ]]; then
     rm -fr *.dmg
     if [ -n "${PLATFORM}" ]; then
         PACKAGING_ARGS="${PACKAGING_ARGS} -p ${PLATFORM}"
     fi
-    pixi run --manifest-path $REPO_ROOT_DIR/pixi.toml -e package-standalone --frozen sh ${PACKAGING_SCRIPTS_DIR}/osx/create_bundle.sh $PACKAGING_ARGS
+    pixi run --manifest-path $REPO_ROOT_DIR/pixi.toml -e package-standalone --frozen bash ${PACKAGING_SCRIPTS_DIR}/osx/create_bundle.sh $PACKAGING_ARGS
 else
     rm -fr *.tar.xz
-    pixi run --manifest-path $REPO_ROOT_DIR/pixi.toml -e package-standalone --frozen sh ${PACKAGING_SCRIPTS_DIR}/linux/create_tarball.sh $PACKAGING_ARGS
+    pixi run --manifest-path $REPO_ROOT_DIR/pixi.toml -e package-standalone --frozen bash ${PACKAGING_SCRIPTS_DIR}/linux/create_tarball.sh $PACKAGING_ARGS
 fi

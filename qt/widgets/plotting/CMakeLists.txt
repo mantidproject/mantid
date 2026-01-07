@@ -39,7 +39,7 @@ mtd_add_qt_library(
   NOMOC ${MPL_INC_FILES}
   DEFS IN_MANTIDQT_PLOTTING
   INCLUDE_DIRS inc
-  LINK_LIBS ${CORE_MANTIDLIBS} Mantid::PythonInterfaceCore ${POCO_LIBRARIES} gmock
+  LINK_LIBS ${CORE_MANTIDLIBS} Mantid::PythonInterfaceCore ${POCO_LIBRARIES}
   MTD_QT_LINK_LIBS MantidQtWidgetsCommon MantidQtWidgetsMplCpp
   INSTALL_DIR ${WORKBENCH_LIB_DIR}
   OSX_INSTALL_RPATH @loader_path/../MacOS @loader_path/../Frameworks
@@ -58,16 +58,18 @@ if(MANTID_FRAMEWORK_LIB STREQUAL "BUILD")
     QT_VERSION 5
     INCLUDE_DIRS inc ../common/inc ../../../Framework/DataObjects/inc
     SRC ${TEST_FILES}
-    LINK_LIBS ${CORE_MANTIDLIBS}
-              Mantid::DataObjects
-              ${POCO_LIBRARIES}
-              ${Boost_LIBRARIES}
-              Mantid::PythonInterfaceCore
-              gmock
+    LINK_LIBS ${CORE_MANTIDLIBS} Mantid::DataObjects ${POCO_LIBRARIES} ${Boost_LIBRARIES} Mantid::PythonInterfaceCore
               Python::Python
     MTD_QT_LINK_LIBS MantidQtWidgetsCommon MantidQtWidgetsPlotting MantidQtWidgetsMplCpp
     PARENT_DEPENDENCIES GUITests
   )
 
   add_framework_test_helpers(MantidQtWidgetsPlottingTestQt5)
+
+  if(TARGET GTest::gmock AND TARGET GTest::gtest)
+    target_link_libraries(MantidQtWidgetsPlottingTestQt5 PRIVATE GTest::gmock GTest::gtest)
+  else()
+    target_link_libraries(MantidQtWidgetsPlottingTestQt5 PRIVATE gmock gtest)
+  endif()
+
 endif()

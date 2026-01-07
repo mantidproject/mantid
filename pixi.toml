@@ -10,13 +10,19 @@ version = "6.14"
 [tasks]
 
 [environments]
-rattler-builder = {features = ["rattler-builder"], no-default-feature = true}
-delete-old-packages = {features = ["delete-old-packages"], no-default-feature = true}
-devsite = {features = ["devsite"], no-default-feature = true}
-publish-gh = {features = ["publish-gh"], no-default-feature = true}
-publish-anaconda = {features = ["publish-anaconda"], no-default-feature = true}
-package-standalone = {features = ["package-standalone"], no-default-feature = true}
-docs-build = {features = ["docs-build"]}
+rattler-builder = { features = ["rattler-builder"], no-default-feature = true }
+delete-old-packages = { features = [
+  "delete-old-packages",
+], no-default-feature = true }
+devsite = { features = ["devsite"], no-default-feature = true }
+publish-gh = { features = ["publish-gh"], no-default-feature = true }
+publish-anaconda = { features = [
+  "publish-anaconda",
+], no-default-feature = true }
+package-standalone = { features = [
+  "package-standalone",
+], no-default-feature = true }
+docs-build = { features = ["docs-build"] }
 
 [feature.rattler-builder.dependencies]
 rattler-build = "==0.51.0"
@@ -67,6 +73,8 @@ euphonic = ">=1.4.5,<2.0"
 seekpath = { version = "==2.1.0", build = "*2" }
 graphviz = ">=2.47.0"
 gsl = "2.8.*"
+gtest = "==1.17.0"
+gmock = "==1.17.0"
 hdf4 = "4.2.*"
 hdf5 = ">1.14.0,<1.15"
 jsoncpp = ">=1.9.4,<2"
@@ -97,7 +105,7 @@ quickbayes = "==1.0.2"
 rattler-build = "==0.51.0"
 requests = ">=2.32.4"
 scipy = ">=1.10.0"
-sphinx = ">=4.5,<9"
+sphinx = ">=9.0,<10"
 sphinx_bootstrap_theme = "==0.8.1"
 tbb-devel = "2021.*"
 toml = ">=0.10.2"

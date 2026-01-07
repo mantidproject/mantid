@@ -8,7 +8,6 @@ from reduction_gui.reduction.toftof.toftof_reduction import TOFTOFScriptElement,
 import testhelpers
 import unittest
 
-import sys
 
 try:
     unicode("test for unicode type")
@@ -182,9 +181,7 @@ class TOFTOFScriptElementTest(unittest.TestCase):
 
         script = self.scriptElement.to_script()
 
-        HasNullBytesError = TypeError
-        if sys.version_info >= (3, 5):
-            HasNullBytesError = ValueError
+        HasNullBytesError = ValueError
         try:
             compiledScript = compile(script, "<string>", "exec")
         except SyntaxError as e:

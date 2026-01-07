@@ -13,7 +13,7 @@
 #include "MantidMDAlgorithms/ImportMDHistoWorkspace.h"
 #include <cxxtest/TestSuite.h>
 
-#include <Poco/Path.h>
+#include <filesystem>
 
 #include <fstream>
 
@@ -30,9 +30,9 @@ class MDFileObject {
 public:
   /// Create a simple input file.
   MDFileObject(const std::string &filename, const size_t &size) {
-    Poco::Path path(Mantid::Kernel::ConfigService::Instance().getTempDir().c_str());
-    path.append(filename);
-    m_filename = path.toString();
+    std::filesystem::path path(Mantid::Kernel::ConfigService::Instance().getTempDir().c_str());
+    path /= filename;
+    m_filename = path.string();
     m_file.open(m_filename.c_str(), std::ios_base::out);
     for (size_t i = 1; i < size + 1; ++i) {
       m_file << i << "\t" << i + 1 << '\n';

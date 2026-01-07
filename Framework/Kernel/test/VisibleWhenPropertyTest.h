@@ -31,20 +31,20 @@ public:
     TS_ASSERT(prop);
     if (!prop)
       return;
-    TSM_ASSERT("Property always returns enabled.", prop->getSettings()->isEnabled(&alg))
+    TSM_ASSERT("Property always returns enabled.", prop->getSettings()[0]->isEnabled(&alg))
     TSM_ASSERT("Property always returns valid.", prop->isValid().empty())
 
-    TSM_ASSERT("Starts off NOT Visible", !prop->getSettings()->isVisible(&alg));
+    TSM_ASSERT("Starts off NOT Visible", !prop->getSettings()[0]->isVisible(&alg));
     alg.setProperty("MyIntProp", 234);
-    TSM_ASSERT("Becomes visible when another property has been changed", prop->getSettings()->isVisible(&alg));
+    TSM_ASSERT("Becomes visible when another property has been changed", prop->getSettings()[0]->isVisible(&alg));
 
     alg.declareProperty("MySecondValidatorProp", 456);
     alg.setPropertySettings("MySecondValidatorProp",
                             std::make_unique<VisibleWhenProperty>("MyIntProp", IS_NOT_DEFAULT));
     prop = alg.getPointerToProperty("MySecondValidatorProp");
-    TSM_ASSERT("Starts off visible", prop->getSettings()->isVisible(&alg));
+    TSM_ASSERT("Starts off visible", prop->getSettings()[0]->isVisible(&alg));
     alg.setProperty("MyIntProp", 123);
-    TSM_ASSERT("Goes back to not visible", !prop->getSettings()->isVisible(&alg));
+    TSM_ASSERT("Goes back to not visible", !prop->getSettings()[0]->isVisible(&alg));
   }
 
   void test_when_IS_DEFAULT() {
@@ -58,9 +58,9 @@ public:
     TS_ASSERT(prop);
     if (!prop)
       return;
-    TSM_ASSERT("Starts off visible", prop->getSettings()->isVisible(&alg));
+    TSM_ASSERT("Starts off visible", prop->getSettings()[0]->isVisible(&alg));
     alg.setProperty("MyIntProp", -1);
-    TSM_ASSERT("Becomes not visible when another property has been changed", !prop->getSettings()->isVisible(&alg));
+    TSM_ASSERT("Becomes not visible when another property has been changed", !prop->getSettings()[0]->isVisible(&alg));
   }
 
   void test_when_IS_EQUAL_TO() {
@@ -72,10 +72,10 @@ public:
     TS_ASSERT(prop);
     if (!prop)
       return;
-    TSM_ASSERT("Starts off not visible", !prop->getSettings()->isVisible(&alg));
+    TSM_ASSERT("Starts off not visible", !prop->getSettings()[0]->isVisible(&alg));
     alg.setProperty("MyIntProp", 234);
     TSM_ASSERT("Becomes visible when the other property is equal to the given string",
-               prop->getSettings()->isVisible(&alg));
+               prop->getSettings()[0]->isVisible(&alg));
   }
 
   void test_when_IS_NOT_EQUAL_TO() {
@@ -88,10 +88,10 @@ public:
     TS_ASSERT(prop);
     if (!prop)
       return;
-    TSM_ASSERT("Starts off not visible", prop->getSettings()->isVisible(&alg));
+    TSM_ASSERT("Starts off not visible", prop->getSettings()[0]->isVisible(&alg));
     alg.setProperty("MyIntProp", 234);
     TSM_ASSERT("Becomes visible when the other property is equal to the given string",
-               !prop->getSettings()->isVisible(&alg));
+               !prop->getSettings()[0]->isVisible(&alg));
   }
 
   void test_combination_AND() {
@@ -99,7 +99,7 @@ public:
     auto alg = setupCombinationTest(AND, true);
     const auto prop = alg.getPointerToProperty(m_resultPropName);
     TS_ASSERT(prop);
-    const auto propSettings = prop->getSettings();
+    const auto &propSettings = prop->getSettings()[0];
 
     // AND should return true first
     TS_ASSERT(propSettings->isVisible(&alg));
@@ -115,7 +115,7 @@ public:
     auto alg = setupCombinationTest(OR, true);
     const auto prop = alg.getPointerToProperty(m_resultPropName);
     TS_ASSERT(prop);
-    const auto propSettings = prop->getSettings();
+    const auto &propSettings = prop->getSettings()[0];
 
     // OR should return true for both values on
     TS_ASSERT(propSettings->isVisible(&alg));
@@ -140,7 +140,7 @@ public:
     auto alg = setupCombinationTest(XOR, true);
     const auto prop = alg.getPointerToProperty(m_resultPropName);
     TS_ASSERT(prop);
-    const auto propSettings = prop->getSettings();
+    const auto &propSettings = prop->getSettings()[0];
 
     // With both set to the same value this should return false
     TS_ASSERT(!propSettings->isVisible(&alg));
