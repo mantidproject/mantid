@@ -48,6 +48,39 @@ public:
     TS_ASSERT_EQUALS(descriptor.filename(), filename);
   }
 
+  void test_init_loads() {
+    std::cout << "\nTesting initialization in NexusDescriptorLazy" << std::endl;
+    // create a descriptor with the correct values
+    std::string const filename = NexusTest::getFullPath("EQSANS_89157.nxs.h5");
+    Mantid::Nexus::NexusDescriptorLazy descriptor(filename);
+
+    auto entries = descriptor.getAllEntries();
+
+    // verify that entries were loaded
+    TS_ASSERT_EQUALS(entries.count("/entry"), 1);
+    TS_ASSERT_EQUALS(entries.count("/entry/instrument"), 1);
+    TS_ASSERT_EQUALS(entries.count("/entry/instrument/bank39/total_counts"), 1);
+
+    // verify entries have correct classes
+    TS_ASSERT_EQUALS(entries["/entry"], "NXentry");
+    TS_ASSERT_EQUALS(entries["/entry/instrument"], "NXinstrument");
+    TS_ASSERT_EQUALS(entries["/entry/instrument/bank39/total_counts"], "SDS");
+
+    // verify that non-existing groups are not there
+    TS_ASSERT_EQUALS(entries.count("/entry/shorts"), 0);
+    TS_ASSERT_EQUALS(entries.count("/entry/instrument/pants"), 0);
+  }
+
+  void test_firstEntryNameType() {
+    std::cout << "\nTesting firstEntryNameType in NexusDescriptorLazy" << std::endl;
+    // create a descriptor with the correct values
+    std::string const filename = NexusTest::getFullPath("EQSANS_89157.nxs.h5");
+    Mantid::Nexus::NexusDescriptorLazy descriptor(filename);
+    const auto &firstEntry = descriptor.firstEntryNameType();
+    TS_ASSERT_EQUALS(firstEntry.first, "entry");
+    TS_ASSERT_EQUALS(firstEntry.second, "NXentry");
+  }
+
   void test_isEntry() {
     std::cout << "\nTesting isEntry in NexusDescriptorLazy" << std::endl;
     // create a descriptor with the correct values

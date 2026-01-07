@@ -53,6 +53,9 @@ public:
    */
   inline std::string const &extension() const noexcept { return m_extension; }
 
+  /// Returns the name & type of the first entry in the file
+  std::pair<std::string, std::string> const &firstEntryNameType() const { return m_firstEntryNameType; };
+
   /// Query if the given attribute exists on the root node
   bool hasRootAttr(std::string const &name);
 
@@ -110,6 +113,8 @@ private:
   UniqueID<&H5Fclose> m_fileID;
   /// Root attributes
   std::unordered_set<std::string> m_rootAttrs;
+
+  std::pair<std::string, std::string> m_firstEntryNameType;
 
   /**
    * All entries metadata

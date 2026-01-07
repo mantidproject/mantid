@@ -24,7 +24,7 @@
 static unsigned int const INIT_DEPTH = 1;
 static unsigned int const ENTRY_DEPTH = 2;
 static unsigned int const INSTR_DEPTH = 5;
-static std::unordered_set<std::string> const SPECIAL_ADDRESS{"/entry0", "/entry1"};
+static std::unordered_set<std::string> const SPECIAL_ADDRESS{"/entry", "/entry0", "/entry1"};
 static std::string const NONEXISTENT = "NONEXISTENT"; // register failures as well
 static std::string const UNKNOWN_CLASS = "UNKNOWN_CLASS";
 static std::string const SCIENTIFIC_DATA_SET = "SDS";
@@ -54,7 +54,7 @@ namespace Mantid::Nexus {
 // PUBLIC
 
 NexusDescriptorLazy::NexusDescriptorLazy(std::string const &filename)
-    : m_filename(filename), m_extension(std::filesystem::path(m_filename).extension().string()),
+    : m_filename(filename), m_extension(std::filesystem::path(m_filename).extension().string()), m_firstEntryNameType(),
       m_allEntries(initAllEntries()) {}
 
 bool NexusDescriptorLazy::isEntry(std::string const &entryName) {
@@ -107,15 +107,16 @@ bool NexusDescriptorLazy::hasRootAttr(std::string const &name) {
 
 void NexusDescriptorLazy::loadGroups(std::unordered_map<std::string, std::string> &allEntries,
                                      std::string const &address, unsigned int depth, const unsigned int maxDepth) {
-  if (depth >= maxDepth)
-    return;
-
   UniqueID<&H5Gclose> groupID(H5Gopen(m_fileID, address.c_str(), H5P_DEFAULT));
-  if (!groupID.isValid())
+  if (!groupID.isValid()) {
     return;
+  }
 
   // get NX_class attribute
   allEntries[address] = readNXClass(groupID);
+
+  if (depth >= maxDepth)
+    return;
 
   // iterate over members
   hsize_t numObjs;
@@ -162,16 +163,19 @@ std::unordered_map<std::string, std::string> NexusDescriptorLazy::initAllEntries
     // get all top-level entries
     unsigned int depth = 0;
     loadGroups(allEntries, "/", depth, INIT_DEPTH);
+    // set the first entry name/type
+    m_firstEntryNameType = *(allEntries.begin()++);
+    m_firstEntryNameType.first = m_firstEntryNameType.first.substr(1); // remove leading /
 
     // for levels beyond 2, only load special entries
-    depth = 1;
+    depth = INIT_DEPTH;
     for (std::string const &specialAddress : SPECIAL_ADDRESS) {
       if (allEntries.contains(specialAddress))
         loadGroups(allEntries, specialAddress, depth, ENTRY_DEPTH);
     }
 
     // get instrument up to a depth of 5
-    depth = 2;
+    depth = ENTRY_DEPTH;
     for (std::string const &specialAddress : SPECIAL_ADDRESS) {
       if (allEntries.contains(specialAddress)) {
         std::string instrumentAddress = specialAddress + "/instrument";
