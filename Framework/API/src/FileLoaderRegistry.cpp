@@ -185,10 +185,11 @@ bool FileLoaderRegistryImpl::canLoad(const std::string &algorithmName, const std
 
   // Check if it is in one of our lists
   const bool legacynexus = (m_names[LegacyNexus].find(algorithmName) != m_names[LegacyNexus].end());
+  const bool lazyNexus = (m_names[NexusLazy].find(algorithmName) != m_names[NexusLazy].end());
   const bool nexus = (m_names[Nexus].find(algorithmName) != m_names[Nexus].end());
   const bool nonHDF = (m_names[Generic].find(algorithmName) != m_names[Generic].end());
 
-  if (!(legacynexus || nexus || nonHDF))
+  if (!(legacynexus || nexus || nonHDF || lazyNexus))
     throw std::invalid_argument("FileLoaderRegistryImpl::canLoad - Algorithm '" + algorithmName +
                                 "' is not registered as a loader.");
 
@@ -206,6 +207,16 @@ bool FileLoaderRegistryImpl::canLoad(const std::string &algorithmName, const std
         loader = searchForLoader<NexusDescriptor, IFileLoader<NexusDescriptor>>(filename, names, m_log).first;
       } catch (const std::invalid_argument &e) {
         m_log.debug() << "Error in looking for HDF5 based NeXus files: " << e.what() << '\n';
+      }
+    }
+  } else if (lazyNexus) {
+    if (H5::H5File::isHdf5(filename)) {
+      try {
+        loader =
+            searchForLoader<Nexus::NexusDescriptorLazy, IFileLoader<Nexus::NexusDescriptorLazy>>(filename, names, m_log)
+                .first;
+      } catch (const std::invalid_argument &e) {
+        m_log.debug() << "Error in looking for lazy HDF5 based NeXus files: " << e.what() << '\n';
       }
     }
   } else if (nonHDF) {

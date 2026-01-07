@@ -9,8 +9,8 @@
 #include "MantidNexus/DllConfig.h"
 #include "MantidNexus/UniqueID.h"
 
+#include <map>
 #include <string>
-#include <unordered_map>
 #include <unordered_set>
 #include <vector>
 
@@ -69,7 +69,7 @@ public:
    *          (e.g. /entry/log)
    * </pre>
    */
-  std::unordered_map<std::string, std::string> const &getAllEntries() const noexcept { return m_allEntries; }
+  std::map<std::string, std::string> const &getAllEntries() const noexcept { return m_allEntries; }
 
   /**
    * Checks if a full-address entry exists for a particular groupClass in a Nexus
@@ -101,9 +101,9 @@ private:
    * Sets m_allEntries, called in HDF5 constructor.
    * m_filename must be set
    */
-  std::unordered_map<std::string, std::string> initAllEntries();
-  void loadGroups(std::unordered_map<std::string, std::string> &allEntries, std::string const &address,
-                  unsigned int depth, const unsigned int maxDepth);
+  std::map<std::string, std::string> initAllEntries();
+  void loadGroups(std::map<std::string, std::string> &allEntries, std::string const &address, unsigned int depth,
+                  const unsigned int maxDepth);
 
   /** Nexus HDF5 file name */
   std::string const m_filename;
@@ -123,7 +123,7 @@ private:
    *   value: group class (e.g. NXentry, NXlog)
    * </pre>
    */
-  std::unordered_map<std::string, std::string> m_allEntries;
+  std::map<std::string, std::string> m_allEntries;
 };
 
 } // namespace Nexus

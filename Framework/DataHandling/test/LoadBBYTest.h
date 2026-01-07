@@ -48,8 +48,6 @@ class LoadBBYTest : public CxxTest::TestSuite {
 public:
   void test_load_bby_algorithm_init() {
     std::cout << "\nTesting LoadBBY algorithm initialization" << std::endl;
-    printf("HELLO\n");
-    fflush(stdout);
     LoadBBY algToBeTested;
 
     TS_ASSERT_THROWS_NOTHING(algToBeTested.initialize());

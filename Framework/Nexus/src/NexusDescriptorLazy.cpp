@@ -16,8 +16,8 @@
 #include <cstdlib> // malloc, calloc
 #include <cstring> // strcpy
 #include <filesystem>
+#include <map>
 #include <stdexcept> // std::invalid_argument
-#include <unordered_map>
 #include <unordered_set>
 #include <utility>
 
@@ -105,8 +105,8 @@ bool NexusDescriptorLazy::hasRootAttr(std::string const &name) {
 
 // PRIVATE
 
-void NexusDescriptorLazy::loadGroups(std::unordered_map<std::string, std::string> &allEntries,
-                                     std::string const &address, unsigned int depth, const unsigned int maxDepth) {
+void NexusDescriptorLazy::loadGroups(std::map<std::string, std::string> &allEntries, std::string const &address,
+                                     unsigned int depth, const unsigned int maxDepth) {
   UniqueID<&H5Gclose> groupID(H5Gopen(m_fileID, address.c_str(), H5P_DEFAULT));
   if (!groupID.isValid()) {
     return;
@@ -141,11 +141,11 @@ void NexusDescriptorLazy::loadGroups(std::unordered_map<std::string, std::string
   }
 }
 
-std::unordered_map<std::string, std::string> NexusDescriptorLazy::initAllEntries() {
+std::map<std::string, std::string> NexusDescriptorLazy::initAllEntries() {
 
   H5Eset_auto(H5E_DEFAULT, nullptr, nullptr);
 
-  std::unordered_map<std::string, std::string> allEntries;
+  std::map<std::string, std::string> allEntries;
 
   // if the file exists read it
   if (std::filesystem::exists(m_filename)) {
@@ -164,8 +164,8 @@ std::unordered_map<std::string, std::string> NexusDescriptorLazy::initAllEntries
     unsigned int depth = 0;
     loadGroups(allEntries, "/", depth, INIT_DEPTH);
     // set the first entry name/type
-    if (allEntries.size() > 2) {
-      m_firstEntryNameType = *(allEntries.begin()++);
+    if (allEntries.size() > 1) {
+      m_firstEntryNameType = *(++allEntries.begin());
       m_firstEntryNameType.first = m_firstEntryNameType.first.substr(1); // remove leading /
     } else {
       m_firstEntryNameType = std::make_pair("", UNKNOWN_CLASS);
