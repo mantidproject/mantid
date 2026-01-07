@@ -92,7 +92,7 @@ public:
     gsl_matrix *JGsl = make_J_2x2(J11);
     gsl_matrix *covarGsl = gsl_matrix_calloc(2, 2);
 
-    auto covar = Mantid::CurveFitting::covar_from_jacobian(J.inspector(), epsrel);
+    auto covar = Mantid::CurveFitting::covar_from_jacobian(J.mutator(), epsrel);
     gsl_multifit_covar(JGsl, epsrel, covarGsl);
 
     assert_gsl_eigen_equal(covarGsl, covar);

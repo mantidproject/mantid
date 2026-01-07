@@ -10,6 +10,6 @@
 
 namespace Mantid::CurveFitting {
 
-Eigen::MatrixXd covar_from_jacobian(const map_type &J, double epsrel);
+MANTID_CURVEFITTING_DLL Eigen::MatrixXd covar_from_jacobian(const map_type &J, double epsrel);
 
 } // namespace Mantid::CurveFitting
