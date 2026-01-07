@@ -244,7 +244,7 @@ class FullInstrumentViewWindow(QMainWindow):
         post_list_layout = QHBoxLayout()
         self._save_mask_to_ws = QPushButton("Export to ADS")
         self._save_mask_to_file = QPushButton("Save to XML")
-        self._overwrite_mask = QPushButton("Overwrite Permanently")
+        self._overwrite_mask = QPushButton("Apply Permanently")
         post_list_layout.addWidget(self._save_mask_to_ws)
         post_list_layout.addWidget(self._save_mask_to_file)
         post_list_layout.addWidget(self._overwrite_mask)
