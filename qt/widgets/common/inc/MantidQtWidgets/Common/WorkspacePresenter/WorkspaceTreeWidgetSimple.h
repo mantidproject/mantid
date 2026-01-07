@@ -38,7 +38,7 @@ class EXPORT_OPT_MANTIDQT_COMMON WorkspaceTreeWidgetSimple : public WorkspaceTre
   Q_OBJECT
 public:
   explicit WorkspaceTreeWidgetSimple(bool viewOnly = false, QWidget *parent = nullptr);
-  ~WorkspaceTreeWidgetSimple();
+  ~WorkspaceTreeWidgetSimple() override;
 
   // Context Menu Handlers
   void popupContextMenu() override;
@@ -109,7 +109,7 @@ private slots:
   void onSuperplotBinsWithErrsClicked();
 
 private:
-  QMenu *createWorkspaceContextMenu(QStringList &selectedWorkspaces);
+  QMenu *createWorkspaceContextMenu(const QStringList &selectedWorkspaces);
 
   std::tuple<std::vector<QAction *>, plotMenuActions>
   createMatrixWorkspaceActions(const Mantid::API::MatrixWorkspace &workspace);

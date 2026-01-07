@@ -125,8 +125,7 @@ void WorkspaceTreeWidgetSimple::popupContextMenu() {
     // If no workspace is here then have load items
     menu = m_loadMenu;
   } else {
-    auto selectedWorkspaceNames = getSelectedWorkspaceNamesAsQList();
-    menu = createWorkspaceContextMenu(selectedWorkspaceNames);
+    menu = createWorkspaceContextMenu(getSelectedWorkspaceNamesAsQList());
   }
 
   // Show the menu at the cursor's current position
@@ -230,7 +229,7 @@ void WorkspaceTreeWidgetSimple::onShowNewInstrumentViewClicked() {
  * Create a new QMenu object filled with appropriate items for the given workspace
  * The created object has this as its parent and WA_DeleteOnClose set
  */
-QMenu *WorkspaceTreeWidgetSimple::createWorkspaceContextMenu(QStringList &selectedWorkspaces) {
+QMenu *WorkspaceTreeWidgetSimple::createWorkspaceContextMenu(const QStringList &selectedWorkspaces) {
   auto menu = new QMenu(this);
   menu->setAttribute(Qt::WA_DeleteOnClose, true);
   menu->setObjectName("WorkspaceContextMenu");
