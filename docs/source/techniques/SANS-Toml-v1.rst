@@ -121,6 +121,18 @@ This is a required entry to specify the instrument name and `instrument.configur
   [instrument.configuration]
     # ...
 
+Phi Mask
+--------
+
+From Mantid 6.15, a new field for adding a range of phi slices is added to the phi mask. This is to automatize the process
+of reducing with different phi masks. A set of ranges as comma separated pairs can be input and there will be multiple reductions, each one with a different phi range.
+This settings overrides the phi start and stop angles, but is optional.
+
+..  code-block:: yaml
+
+  [mask.phi]
+    range = -15.0,15.0,45.0,90.0
+
 
 Conversion From Legacy User Files
 =================================
