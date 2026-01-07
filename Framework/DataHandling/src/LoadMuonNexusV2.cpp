@@ -133,7 +133,7 @@ void LoadMuonNexusV2::init() {
                   "Table or a group of tables with information about the "
                   "detector grouping.");
 }
-void LoadMuonNexusV2::exec() {
+void LoadMuonNexusV2::execLoader() {
   // prepare nexus entry
   m_entrynumber = getProperty("EntryNumber");
   m_filename = getPropertyValue("Filename");
