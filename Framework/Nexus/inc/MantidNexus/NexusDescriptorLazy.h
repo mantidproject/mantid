@@ -42,7 +42,7 @@ public:
 
   /**
    * Returns a constant reference to the current file name
-   * @return
+   * @return A reference to a const string containing the file name
    */
   inline std::string const &filename() const noexcept { return m_filename; }
 
@@ -64,9 +64,8 @@ public:
    * Nexus HDF5 file
    * @return map holding all entries by group class
    * <pre>
-   *   key: group_class (e.g. NXentry, NXlog)
-   *   value: set with absolute entry names for the group_class key
-   *          (e.g. /entry/log)
+   *   key: group address (absolute entry name, e.g., /entry/log)
+   *   value: group class (e.g., NXentry, NXlog)
    * </pre>
    */
   std::map<std::string, std::string> const &getAllEntries() const noexcept { return m_allEntries; }

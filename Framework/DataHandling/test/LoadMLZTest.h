@@ -68,7 +68,6 @@ public:
 
   /// Test that this algorithm will be selected from Load algorithm
   void test_load_from_Load() {
-    std::string wsName = "TOFTOFTestdata_from_Load";
     Mantid::DataHandling::Load load;
     TS_ASSERT_THROWS_NOTHING(load.initialize());
     TS_ASSERT_THROWS_NOTHING(load.setPropertyValue("Filename", m_dataFile));

@@ -132,7 +132,7 @@ public:
   void loadInstrumentInfoNexus(const std::string &nxFilename, Nexus::File *file, std::string &parameterStr);
   /// Load the instrument from an open NeXus file without reading any parameters
   void loadInstrumentInfoNexus(const std::string &nxFilename, Nexus::File *file);
-  /// Load instrument parameters from an open Nexus file in Instument group if found there
+  /// Load instrument parameters from an open Nexus file in Instrument group if found there
   void loadInstrumentParametersNexus(Nexus::File *file, std::string &parameterStr);
 
   /// Load the sample and log info from an open NeXus file.
