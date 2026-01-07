@@ -8,6 +8,7 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidDataHandling/Load.h"
 #include "MantidDataHandling/LoadQKK.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/ConfigService.h"
@@ -69,5 +70,17 @@ public:
       const auto &e = data->e(i);
       TS_ASSERT_DIFFERS(e[0], 0.0);
     }
+  }
+
+  /// Test that this algorithm will be selected from Load algorithm
+  void test_load_from_Load() {
+    std::string wsName = "QKK0029775_from_Load";
+    Mantid::DataHandling::Load load;
+    TS_ASSERT_THROWS_NOTHING(load.initialize());
+    load.setPropertyValue("Filename", "QKK0029775.nx.hdf");
+    load.setPropertyValue("OutputWorkspace", wsName);
+    load.execute();
+    TS_ASSERT(load.isExecuted());
+    TS_ASSERT_EQUALS(load.getPropertyValue("LoaderName"), "LoadQKK");
   }
 };

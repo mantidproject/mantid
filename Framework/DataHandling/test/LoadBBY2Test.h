@@ -10,6 +10,7 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Run.h"
+#include "MantidDataHandling/Load.h"
 #include "MantidDataHandling/LoadBBY2.h"
 
 using namespace Mantid::API;
@@ -72,5 +73,18 @@ public:
     TS_ASSERT_DELTA(logpm("Ltof_det_value"), 25.444, 1.0e-3);
     AnalysisDataService::Instance().remove(outputSpace);
     std::cout << "LoadBBY2Test completed successfully." << std::endl;
+  }
+
+  /// Test that this algorithm will be selected from Load algorithm
+  void test_load_from_Load() {
+    std::string wsName = "BBY2Testdata_from_Load";
+    Mantid::DataHandling::Load load;
+    TS_ASSERT_THROWS_NOTHING(load.initialize());
+    load.setPropertyValue("Filename", "BBY0081723.nxs");
+    load.setPropertyValue("OutputWorkspace", wsName);
+    load.execute();
+    TS_ASSERT(load.isExecuted());
+    TS_ASSERT_EQUALS(load.getPropertyValue("LoaderName"), "LoadBBY2");
+    TS_ASSERT_EQUALS(load.getPropertyValue("LoaderVersion"), "1"); // NOTE LoadBBY2 is NOT version of LoadBBY
   }
 };

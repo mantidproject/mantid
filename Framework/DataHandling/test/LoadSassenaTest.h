@@ -8,6 +8,7 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidDataHandling/Load.h"
 #include "MantidDataHandling/LoadSassena.h"
 #include <cxxtest/TestSuite.h>
 
@@ -83,6 +84,18 @@ public:
     TS_ASSERT_DELTA(ws->y(4)[14], 656.82368, 1e-05);
 
   } // end of testExec
+
+  /// Test that this algorithm will be selected from Load algorithm
+  void test_load_from_Load() {
+    std::string wsName = "SassenaTestdata_from_Load";
+    Mantid::DataHandling::Load load;
+    TS_ASSERT_THROWS_NOTHING(load.initialize());
+    load.setPropertyValue("Filename", m_inputFile);
+    load.setPropertyValue("OutputWorkspace", wsName);
+    load.execute();
+    TS_ASSERT(load.isExecuted());
+    TS_ASSERT_EQUALS(load.getPropertyValue("LoaderName"), "LoadSassena");
+  }
 
 private:
   std::string m_inputFile;

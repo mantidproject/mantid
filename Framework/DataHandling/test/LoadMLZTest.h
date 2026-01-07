@@ -8,6 +8,7 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidDataHandling/Load.h"
 #include "MantidDataHandling/LoadMLZ.h"
 #include "MantidGeometry/Instrument.h"
 #include <cxxtest/TestSuite.h>
@@ -63,6 +64,18 @@ public:
     TS_ASSERT_DELTA(efixed, 2.272, 0.001);
 
     AnalysisDataService::Instance().clear();
+  }
+
+  /// Test that this algorithm will be selected from Load algorithm
+  void test_load_from_Load() {
+    std::string wsName = "TOFTOFTestdata_from_Load";
+    Mantid::DataHandling::Load load;
+    TS_ASSERT_THROWS_NOTHING(load.initialize());
+    load.setPropertyValue("Filename", m_dataFile);
+    load.setPropertyValue("OutputWorkspace", wsName);
+    load.execute();
+    TS_ASSERT(load.isExecuted());
+    TS_ASSERT_EQUALS(load.getPropertyValue("LoaderName"), "LoadMLZ");
   }
 
 private:
