@@ -30,7 +30,7 @@ using namespace API;
 using namespace Nexus;
 using namespace HistogramData;
 
-DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLTOF3)
+DECLARE_NEXUS_LAZY_FILELOADER_ALGORITHM(LoadILLTOF3)
 
 /**
  * Return the confidence with with this algorithm can load the file
@@ -40,7 +40,7 @@ DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLTOF3)
  * @return An integer specifying the confidence level. 0 indicates it will not
  * be used
  */
-int LoadILLTOF3::confidence(Nexus::NexusDescriptor &descriptor) const {
+int LoadILLTOF3::confidence(Nexus::NexusDescriptorLazy &descriptor) const {
 
   // fields existent only at the ILL
   if ((descriptor.isEntry("/entry0/wavelength") && descriptor.isEntry("/entry0/experiment_identifier") &&
@@ -58,7 +58,7 @@ int LoadILLTOF3::confidence(Nexus::NexusDescriptor &descriptor) const {
   }
 }
 
-LoadILLTOF3::LoadILLTOF3() : API::IFileLoader<Nexus::NexusDescriptor>() {}
+LoadILLTOF3::LoadILLTOF3() : API::IFileLoader<Nexus::NexusDescriptorLazy>() {}
 
 /**
  * Initialises the algorithm
