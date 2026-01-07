@@ -95,8 +95,9 @@ void UpdateInstrumentFromFile::exec() {
 
     // we open and close the HDF5 file.
     boost::scoped_ptr<Nexus::NexusDescriptor> descriptorNexusHDF5(new Nexus::NexusDescriptor(filename));
+    boost::scoped_ptr<Nexus::NexusDescriptorLazy> descriptorNexusLazy(new Nexus::NexusDescriptorLazy(filename));
 
-    if (isisNexus.confidence(*descriptorNexusHDF5) > 0 || eventNexus.confidence(*descriptorNexusHDF5) > 0) {
+    if (isisNexus.confidence(*descriptorNexusLazy) > 0 || eventNexus.confidence(*descriptorNexusHDF5) > 0) {
       const auto &rootEntry = descriptorNexusHDF5->firstEntryNameType();
       Nexus::File nxFile(filename);
       nxFile.openGroup(rootEntry.first, rootEntry.second);
