@@ -9,6 +9,7 @@ import pyvista as pv
 from pyvista.plotting.picking import RectangleSelection
 from pyvista.plotting.opts import PickerType
 from qtpy.QtWidgets import QFileDialog
+from typing import Optional
 from mantid import mtd
 from mantid.kernel import logger, ConfigService
 from mantid.simpleapi import AnalysisDataService
@@ -80,7 +81,7 @@ class FullInstrumentViewPresenter:
         )
         self._view.hide_status_box()
 
-    def _create_and_add_monitor_mesh(self) -> pv.PolyData:
+    def _create_and_add_monitor_mesh(self) -> Optional[pv.PolyData]:
         if len(self._model.monitor_positions) == 0 or not self._view.is_show_monitors_checkbox_checked():
             return None
         monitor_point_cloud = self.create_poly_data_mesh(self._model.monitor_positions)

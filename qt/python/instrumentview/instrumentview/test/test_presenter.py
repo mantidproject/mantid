@@ -373,7 +373,7 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
     def test_create_and_add_monitor_mesh(self):
         self._mock_view.is_show_monitors_checkbox_checked.return_value = False
         mesh = self._presenter._create_and_add_monitor_mesh()
-        self.assertTrue(mesh is None)
+        self.assertIsNone(mesh)
 
         self._mock_view.is_show_monitors_checkbox_checked.return_value = True
         self._model._monitor_positions = [np.zeros(3)]
