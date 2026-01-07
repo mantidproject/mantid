@@ -1,6 +1,6 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+// Copyright &copy; 2026 ISIS Rutherford Appleton Laboratory UKRI,
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
@@ -11,11 +11,11 @@
 
 namespace Mantid::CurveFitting {
 
-// Mimics gsl_multifit_covar(J, epsrel, covar)
-//
-// J:     (m x p) Jacobian
-// epsrel: relative threshold to decide rank deficiency using |R_kk| <= epsrel*|R_11|
-// returns: (p x p) covariance matrix (rows/cols set to zero for dependent params)
+/** Mimics gsl_multifit_covar(J, epsrel, covar)
+ * @param J :: Jacobian
+ * @param epsrel :: relative threshold to decide rank deficiency
+ * @return covariance matrix, rows/cols set to zero for dependent params
+ */
 Eigen::MatrixXd covar_from_jacobian(const map_type &J, double epsrel) {
   if (epsrel < 0.0) {
     throw std::invalid_argument("epsrel must be non-negative");
@@ -24,7 +24,7 @@ Eigen::MatrixXd covar_from_jacobian(const map_type &J, double epsrel) {
   const Eigen::Index nr = J.rows(); // nr = num rows
   const Eigen::Index nc = J.cols(); // nc = num cols
   if ((nc == 0) || (nr == 0))
-    return Eigen::MatrixXd{}; // empty matrix
+    return Eigen::MatrixXd{};
 
   // Pivoted QR Decomposition: XP = QR (X is J in this case)
   Eigen::ColPivHouseholderQR<Eigen::MatrixXd> qr(J);
@@ -40,19 +40,19 @@ Eigen::MatrixXd covar_from_jacobian(const map_type &J, double epsrel) {
       if (std::abs(R(k, k)) > epsrel * r11) { // column considered linerally independant
         ++rank;
       } else {
-        break; // with pivoting, diag typically decreases; stop at first dependent
+        break; // with pivoting, following first dependent subsequent cols should also be dependant
       }
     }
   } else {
-    // R11 == 0 => treat as rank 0 (everything dependent)
+    // R11 == 0, everything dependent
     rank = 0;
   }
 
-  // Build covariance in the *pivoted* parameter order
+  // Build covariance in the pivoted parameter order
   Eigen::MatrixXd cov_pivot = Eigen::MatrixXd::Zero(nc, nc);
 
   if (rank > 0) {
-    // cov = (R^T R)^{-1} in the independent subspace = R^{-1} R^{-T}
+    // cov = (R^T R)^{-1} for the independent cols = R^{-1} R^{-T}
     const auto R1 = R.topLeftCorner(rank, rank).template triangularView<Eigen::Upper>();
 
     Eigen::MatrixXd invR1 = R1.solve(Eigen::MatrixXd::Identity(rank, rank));

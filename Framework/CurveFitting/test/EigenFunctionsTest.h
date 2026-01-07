@@ -1,6 +1,6 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+// Copyright &copy; 2026 ISIS Rutherford Appleton Laboratory UKRI,
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
@@ -13,8 +13,6 @@
 #include <gsl/gsl_matrix.h>
 #include <gsl/gsl_multifit_nlin.h>
 #include <math.h>
-
-#include <iostream>
 
 namespace {
 static int is_zero(double x) { return x == 0.0; }
@@ -34,9 +32,9 @@ static int param_is_dropped(const Eigen::MatrixXd &covar, size_t i) {
   size_t n = covar.rows();
   for (size_t k = 0; k < n; ++k) {
     if (!is_zero(covar(i, k)))
-      return 0; // row not all zero
+      return 0;
     if (!is_zero(covar(k, i)))
-      return 0; // col not all zero
+      return 0;
   }
   return 1;
 }
@@ -59,7 +57,7 @@ static size_t count_dropped_params(const Eigen::MatrixXd &covar) {
   return dropped;
 }
 
-/* Simple Jacobian with two columns that become dependent when J11 = 0 */
+// Simple Jacobian with two columns that become dependent when J11 = 0
 static gsl_matrix *make_J_2x2(double J11) {
   gsl_matrix *J = gsl_matrix_alloc(2, 2);
   gsl_matrix_set(J, 0, 0, 1.0);
@@ -94,7 +92,7 @@ public:
     gsl_matrix *JGsl = make_J_2x2(J11);
     gsl_matrix *covarGsl = gsl_matrix_calloc(2, 2);
 
-    auto covar = Mantid::CurveFitting::covar_from_jacobian(J.mutator(), epsrel);
+    auto covar = Mantid::CurveFitting::covar_from_jacobian(J.inspector(), epsrel);
     gsl_multifit_covar(JGsl, epsrel, covarGsl);
 
     assert_gsl_eigen_equal(covarGsl, covar);
