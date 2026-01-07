@@ -10,6 +10,7 @@
 
 #include <H5Cpp.h>
 #include <Poco/File.h>
+#include <algorithm>
 
 namespace Mantid::API {
 namespace {

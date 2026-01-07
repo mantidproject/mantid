@@ -119,7 +119,7 @@ void NexusDescriptorLazy::loadGroups(std::unordered_map<std::string, std::string
     return;
 
   // iterate over members
-  hsize_t numObjs;
+  hsize_t numObjs = 0;
   H5Gget_num_objs(groupID.get(), &numObjs);
   for (hsize_t i = 0; i < numObjs; i++) {
     H5G_obj_t type = H5Gget_objtype_by_idx(groupID, i);
@@ -164,8 +164,12 @@ std::unordered_map<std::string, std::string> NexusDescriptorLazy::initAllEntries
     unsigned int depth = 0;
     loadGroups(allEntries, "/", depth, INIT_DEPTH);
     // set the first entry name/type
-    m_firstEntryNameType = *(allEntries.begin()++);
-    m_firstEntryNameType.first = m_firstEntryNameType.first.substr(1); // remove leading /
+    if (allEntries.size() > 2) {
+      m_firstEntryNameType = *(allEntries.begin()++);
+      m_firstEntryNameType.first = m_firstEntryNameType.first.substr(1); // remove leading /
+    } else {
+      m_firstEntryNameType = std::make_pair("", UNKNOWN_CLASS);
+    }
 
     // for levels beyond 2, only load special entries
     depth = INIT_DEPTH;

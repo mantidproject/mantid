@@ -94,6 +94,7 @@ void UpdateInstrumentFromFile::exec() {
     LoadEventNexus eventNexus;
 
     // we open and close the HDF5 file.
+    // LoadEventNexus is still using NexusDescriptor rather than NexusDescriptorLazy, so need both
     boost::scoped_ptr<Nexus::NexusDescriptor> descriptorNexusHDF5(new Nexus::NexusDescriptor(filename));
     boost::scoped_ptr<Nexus::NexusDescriptorLazy> descriptorNexusLazy(new Nexus::NexusDescriptorLazy(filename));
 
