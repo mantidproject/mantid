@@ -36,9 +36,8 @@
 #include "MantidFrameworkTestHelpers/MDEventsTestHelper.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 
+#include <filesystem>
 #include <memory>
-
-#include <Poco/File.h>
 
 namespace Mantid::DataObjects {
 
@@ -341,8 +340,8 @@ makeFakeMDHistoWorkspaceWithMDFrame(double signal, size_t numDims, const Mantid:
  */
 void checkAndDeleteFile(const std::string &filename) {
   if (!filename.empty()) {
-    if (Poco::File(filename).exists()) {
-      Poco::File(filename).remove();
+    if (std::filesystem::exists(filename)) {
+      std::filesystem::remove(filename);
     }
   }
 }

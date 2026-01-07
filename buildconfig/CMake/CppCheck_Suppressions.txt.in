@@ -136,9 +136,6 @@ useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/VectorHelp
 nullPointerRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/GitHubApiHelper.cpp:167
 nullPointerRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/GitHubApiHelper.cpp:168
 nullPointerRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/GitHubApiHelper.cpp:169
-nullPointerRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/InternetHelper.cpp:148
-nullPointerRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/InternetHelper.cpp:149
-nullPointerRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/InternetHelper.cpp:150
 returnStdMoveLocal:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/LogParser.cpp:256
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/MantidVersion.cpp:100
 invalidLifetime:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/PropertyManager.cpp:142
