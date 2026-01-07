@@ -856,7 +856,6 @@ class FigureInteraction(object):
                     if cb:
                         datafunctions.add_colorbar_label(cb, ax.get_figure().axes)
                 if colorbar_log:  # If it had a log scaled colorbar before, put it back.
-                    # self._change_colorbar_axes(colorbar_scale)
                     self._change_colorbar_axes(norm.__class__)
 
                 axesfunctions.update_colorplot_datalimits(ax, ax.images)
