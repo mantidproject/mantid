@@ -357,6 +357,29 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         expected_vectors = np.array([[3, 0, 0], [0, 10, 0]])
         np.testing.assert_allclose(expected_vectors, transformed_vectors)
 
+    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter._create_and_add_monitor_mesh")
+    def test_monitor_mesh_added(self, mock_create_monitor_mesh):
+        mock_create_monitor_mesh.return_value = None
+        self._presenter._update_view_main_plotter()
+        mock_create_monitor_mesh.assert_called_once()
+        mock_create_monitor_mesh.reset_mock()
+
+        mock_mesh = MagicMock()
+        mock_create_monitor_mesh.return_value = mock_mesh
+        self._presenter._update_view_main_plotter()
+        mock_create_monitor_mesh.assert_called_once()
+        mock_mesh.transform.assert_called_once()
+
+    def test_create_and_add_monitor_mesh(self):
+        self._mock_view.is_show_monitors_checkbox_checked.return_value = False
+        mesh = self._presenter._create_and_add_monitor_mesh()
+        self.assertTrue(mesh is None)
+
+        self._mock_view.is_show_monitors_checkbox_checked.return_value = True
+        self._model._monitor_positions = [np.zeros(3)]
+        self._presenter._create_and_add_monitor_mesh()
+        self._mock_view.add_rgba_mesh.assert_called_once()
+
 
 if __name__ == "__main__":
     unittest.main()

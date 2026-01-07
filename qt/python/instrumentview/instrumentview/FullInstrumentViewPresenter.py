@@ -82,7 +82,7 @@ class FullInstrumentViewPresenter:
 
     def _create_and_add_monitor_mesh(self) -> pv.PolyData:
         if len(self._model.monitor_positions) == 0 or not self._view.is_show_monitors_checkbox_checked():
-            return
+            return None
         monitor_point_cloud = self.create_poly_data_mesh(self._model.monitor_positions)
         monitor_point_cloud["colours"] = self.generate_single_colour(len(self._model.monitor_positions), 1, 0, 0, 1)
         self._view.add_rgba_mesh(monitor_point_cloud, scalars="colours")
