@@ -235,6 +235,7 @@ QMenu *WorkspaceTreeWidgetSimple::createWorkspaceContextMenu(QStringList &select
   menu->setAttribute(Qt::WA_DeleteOnClose, true);
   menu->setObjectName("WorkspaceContextMenu");
 
+  std::vector<Workspace_sptr> workspaces;
   std::vector<std::vector<QAction *>> actionVecs;
   std::vector<std::vector<QAction *>> plotMenuActionVecs;
   std::vector<std::vector<QAction *>> plotMenu3DActionVecs;
@@ -245,6 +246,7 @@ QMenu *WorkspaceTreeWidgetSimple::createWorkspaceContextMenu(QStringList &select
     } catch (Exception::NotFoundError &) {
       continue;
     }
+    workspaces.push_back(workspace);
     if (auto matrixWS = std::dynamic_pointer_cast<MatrixWorkspace>(workspace)) {
       auto [actions, plotActions] = createMatrixWorkspaceActions(*matrixWS);
       actionVecs.push_back(actions);
@@ -270,6 +272,23 @@ QMenu *WorkspaceTreeWidgetSimple::createWorkspaceContextMenu(QStringList &select
   std::vector<QAction *> combinedActions = intersectionOfActions(actionVecs);
   std::vector<QAction *> combinedPlotMenuActions = intersectionOfActions(plotMenuActionVecs);
   std::vector<QAction *> combined3DPlotMenuActions = intersectionOfActions(plotMenu3DActionVecs);
+
+  const auto it = std::find(combinedActions.cbegin(), combinedActions.cend(), m_showInstrument);
+  if (it != combinedActions.cend()) {
+    const auto showInstrumentViewCheck = [](MatrixWorkspace_const_sptr workspace) {
+      return workspace->getInstrument() && !workspace->getInstrument()->getName().empty() &&
+             workspace->getAxis(1)->isSpectra();
+    };
+    const bool enabled =
+        std::all_of(workspaces.cbegin(), workspaces.cend(), [&showInstrumentViewCheck](Workspace_sptr ws) {
+          if (auto matrixWS = std::dynamic_pointer_cast<MatrixWorkspace>(ws)) {
+            return showInstrumentViewCheck(matrixWS);
+          }
+          return false;
+        });
+    m_showInstrument->setEnabled(enabled);
+    m_showNewInstrumentView->setEnabled(enabled);
+  }
 
   if (!combinedPlotMenuActions.empty()) {
     auto *plotSubMenu = new QMenu("Plot", menu);
@@ -326,9 +345,6 @@ WorkspaceTreeWidgetSimple::createMatrixWorkspaceActions(const Mantid::API::Matri
   actions.push_back(m_showData);
   actions.push_back(m_showAlgorithmHistory);
   actions.push_back(m_showInstrument);
-  // TODO Should do this in the main function over all workspaces if the action is present (same with other setEnabled)
-  m_showInstrument->setEnabled(workspace.getInstrument() && !workspace.getInstrument()->getName().empty() &&
-                               workspace.getAxis(1)->isSpectra());
   actions.push_back(m_sampleLogs);
   actions.push_back(m_sliceViewer);
   actions.push_back(m_showDetectors);
@@ -337,9 +353,6 @@ WorkspaceTreeWidgetSimple::createMatrixWorkspaceActions(const Mantid::API::Matri
     actions.push_back(m_sampleShape);
   }
   actions.push_back(m_showNewInstrumentView);
-  m_showNewInstrumentView->setEnabled(workspace.getInstrument() && !workspace.getInstrument()->getName().empty() &&
-                                      workspace.getAxis(1)->isSpectra() &&
-                                      !workspace.detectorInfo().detectorIDs().empty());
   return std::make_tuple(actions, plotActions);
 }
 
