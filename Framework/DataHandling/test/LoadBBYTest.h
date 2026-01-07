@@ -47,6 +47,9 @@ void replaceValue(std::string &tarPath, int offset, char invalid) {
 class LoadBBYTest : public CxxTest::TestSuite {
 public:
   void test_load_bby_algorithm_init() {
+    std::cout << "\nTesting LoadBBY algorithm initialization" << std::endl;
+    printf("HELLO\n");
+    fflush(stdout);
     LoadBBY algToBeTested;
 
     TS_ASSERT_THROWS_NOTHING(algToBeTested.initialize());
@@ -54,6 +57,7 @@ public:
   }
 
   void test_load_bby_algorithm() {
+    std::cout << "\nTesting LoadBBY algorithm execution" << std::endl;
     LoadBBY algToBeTested;
 
     if (!algToBeTested.isInitialized())
@@ -127,6 +131,7 @@ public:
   }
 
   void test_filter_bby_algorithm() {
+    std::cout << "\nTesting LoadBBY algorithm with time filtering" << std::endl;
     LoadBBY algToBeTested;
 
     if (!algToBeTested.isInitialized())
@@ -165,6 +170,7 @@ public:
   }
 
   void test_default_parameters_logged() {
+    std::cout << "\nTesting LoadBBY algorithm default parameter logging" << std::endl;
     LoadBBY algToBeTested;
 
     if (!algToBeTested.isInitialized())
@@ -193,6 +199,7 @@ public:
   }
 
   void test_invalid_event_logged() {
+    std::cout << "\nTesting LoadBBY algorithm with invalid event handling" << std::endl;
     LoadBBY algToBeTested;
 
     if (!algToBeTested.isInitialized())
@@ -224,5 +231,6 @@ public:
     TS_ASSERT(algToBeTested.isExecuted());
     eventWS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outputSpace);
     TS_ASSERT_EQUALS(eventWS->getNumberEvents(), goodEvents - 1);
+    std::cout << "Temporary file used: " << tempPath << std::endl;
   }
 };

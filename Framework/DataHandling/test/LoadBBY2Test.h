@@ -20,6 +20,7 @@ using namespace Mantid::DataObjects;
 class LoadBBY2Test : public CxxTest::TestSuite {
 public:
   void test_load_bby2_algorithm_init() {
+    std::cout << "\nTesting LoadBBY2 algorithm initialization" << std::endl;
     LoadBBY2 algToBeTested;
 
     TS_ASSERT_THROWS_NOTHING(algToBeTested.initialize());
@@ -27,6 +28,7 @@ public:
   }
 
   void test_load_bby2_algorithm() {
+    std::cout << "\nTesting LoadBBY2 algorithm execution" << std::endl;
     LoadBBY2 algToBeTested;
 
     if (!algToBeTested.isInitialized())
@@ -69,5 +71,6 @@ public:
     TS_ASSERT_DELTA(logpm("L2_det_value"), 7.023, 1.0e-3);
     TS_ASSERT_DELTA(logpm("Ltof_det_value"), 25.444, 1.0e-3);
     AnalysisDataService::Instance().remove(outputSpace);
+    std::cout << "LoadBBY2Test completed successfully." << std::endl;
   }
 };
