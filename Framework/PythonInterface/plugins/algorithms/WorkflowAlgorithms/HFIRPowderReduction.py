@@ -135,9 +135,9 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
                 instrumentName = f["/entry/instrument/name"][0]
                 instrumentName = instrumentName.decode("utf-8")
             if "WAND" in instrumentName:
-                currentProp.value = "WAND^2"
+                self.setProperty("Instrument", "WAND^2")
             elif "MIDAS" in instrumentName:
-                currentProp.value = "MIDAS"
+                self.setProperty("Instrument", "MIDAS")
             return True
 
         self.setPropertySettings("Instrument", SetDefaultWhenProperty("SampleFilename", checkFilenameforInstrument))
