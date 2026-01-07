@@ -6,7 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import numpy as np
 import pyvista as pv
-from pyvista.plotting.picking import RectangleSelection
 from pyvista.plotting.opts import PickerType
 from qtpy.QtWidgets import QFileDialog
 from mantid import mtd
@@ -210,36 +209,17 @@ class FullInstrumentViewPresenter:
 
     def update_detector_picker(self) -> None:
         """Change between single and multi point picking"""
-        if self._view.is_multi_picking_checkbox_checked():
-            self._view.check_sum_spectra_checkbox()
 
-            def rectangle_picked(rectangle: RectangleSelection) -> None:
-                """Get points within the selection rectangle and display information for those detectors"""
-                selected_mesh = self._detector_mesh.select_enclosed_points(rectangle.frustum_mesh)
-                selected_mask = selected_mesh.point_data["SelectedPoints"].view(bool)
-                self.update_picked_detectors(selected_mask)
+        def point_picked(point_position: np.ndarray | None, picker: PickerType.POINT.value) -> None:
+            if point_position is None:
+                return
+            point_index = picker.GetPointId()
+            self._model.update_point_picked_detectors(point_index)
+            # Update to visibility shows up in real time
+            self._pickable_mesh[self._visible_label] = self._model.picked_visibility
+            self._update_line_plot_ws_and_draw(self._view.current_selected_unit())
 
-            self._view.enable_rectangle_picking(self._model.is_2d_projection, callback=rectangle_picked)
-        else:
-
-            def point_picked(point_position: np.ndarray | None, picker: PickerType.POINT.value) -> None:
-                if point_position is None:
-                    return
-                point_index = picker.GetPointId()
-                picked_mask = np.full(self._detector_mesh.GetNumberOfPoints(), False)
-                picked_mask[point_index] = True
-                self.update_picked_detectors(picked_mask)
-
-            self._view.enable_point_picking(self._model.is_2d_projection, callback=point_picked)
-
-    def update_picked_detectors(self, picked_mask: np.ndarray) -> None:
-        if not np.any(picked_mask):
-            self._model.clear_all_picked_detectors()
-        else:
-            self._model.negate_picked_visibility(picked_mask)
-        # Update to visibility shows up in real time
-        self._pickable_mesh[self._visible_label] = self._model.picked_visibility
-        self._update_line_plot_ws_and_draw(self._view.current_selected_unit())
+        self._view.enable_point_picking(self._model.is_2d_projection, callback=point_picked)
 
     def on_add_mask_clicked(self) -> None:
         implicit_function = self._view.get_current_widget_implicit_function()
@@ -307,7 +287,8 @@ class FullInstrumentViewPresenter:
             self._view.set_relative_detector_angle(self._model.relative_detector_angle())
 
     def on_clear_selected_detectors_clicked(self) -> None:
-        self.update_picked_detectors(np.array([]))
+        # TODO: Figure out what triggers clearing the picking
+        return
 
     def create_poly_data_mesh(self, points: np.ndarray, faces=None) -> pv.PolyData:
         """Create a PyVista mesh from the given points and faces"""

@@ -89,6 +89,7 @@ class FullInstrumentViewModel:
         self._counts = np.zeros_like(self._detector_ids)
         self._counts_limits = (0, 0)
         self._detector_is_picked = np.full(len(self._detector_ids), False)
+        self._point_picked_detectors = np.full(len(self._detector_ids), False)
 
         self._projection_type = ProjectionType.THREE_D
         self._cached_projections_map = {}
@@ -213,10 +214,12 @@ class FullInstrumentViewModel:
         self._counts_limits = (np.min(new_detector_counts), np.max(new_detector_counts))
         self._counts[self.is_pickable] = new_detector_counts
 
-    def negate_picked_visibility(self, mask: np.ndarray) -> None:
+    def update_point_picked_detectors(self, index: int) -> None:
         # TODO: Check which selection is quicker, mask or indices
         # NOTE: This is slightly awkard because cannot do chained mask selections
-        self._detector_is_picked[self.is_pickable] = mask ^ self._detector_is_picked[self.is_pickable]
+        global_index = np.argwhere(self.is_pickable)[index]
+        self._detector_is_picked[global_index] = ~self._detector_is_picked[global_index]
+        self._point_picked_detectors[global_index] = self._detector_is_picked[global_index]
 
     def clear_all_picked_detectors(self) -> None:
         self._detector_is_picked.fill(False)
@@ -435,9 +438,9 @@ class FullInstrumentViewModel:
             self._cached_pick_selections_map[key] for key in selection_keys if key in self._cached_pick_selections_map.keys()
         ]
         if not cached_selections:
-            self._detector_is_picked[:] = False
+            self._detector_is_picked = self._point_picked_detectors
             return
-        total_mask = np.logical_or.reduce(cached_selections)
+        total_mask = np.logical_or.reduce([self._point_picked_detectors] + cached_selections)
         self._detector_is_picked = total_mask
 
     def clear_stored_masks(self) -> None:
