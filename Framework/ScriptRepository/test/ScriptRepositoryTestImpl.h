@@ -9,15 +9,13 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidScriptRepository/ScriptRepositoryImpl.h"
 #include <Poco/DateTimeFormatter.h>
-#include <Poco/File.h>
-#include <Poco/FileStream.h>
-#include <Poco/Path.h>
 #include <Poco/TemporaryFile.h>
 #include <boost/algorithm/string.hpp>
 #include <cxxtest/TestSuite.h>
 
 #include <algorithm>
 #include <filesystem>
+#include <fstream>
 
 using Mantid::API::ScriptRepoException;
 using Mantid::API::ScriptRepositoryImpl;
@@ -121,7 +119,7 @@ public:
     if (url_file.find("https://") == std::string::npos) {
       throw ScriptRepoException("Invalid url to download");
     }
-    Poco::FileStream _out(local_file_path);
+    std::ofstream _out(local_file_path);
 
     if (url_file.find("repository.json") != std::string::npos) {
       // request to download repository.json
@@ -214,7 +212,7 @@ public:
   void setUp() override {
     ConfigServiceImpl &config = ConfigService::Instance();
     backup_local_repository_path = config.getString("ScriptLocalRepository");
-    local_rep = std::string(Poco::Path::current()).append("mytemprepository/");
+    local_rep = (std::filesystem::current_path() / "mytemprepository/").string();
     TS_ASSERT_THROWS_NOTHING(repo = std::make_unique<ScriptRepositoryImplLocal>(local_rep, WEBSERVER_URL));
   }
 
@@ -222,10 +220,9 @@ public:
   void tearDown() override {
     repo = nullptr;
     try {
-      Poco::File f(local_rep);
-      f.remove(true);
-    } catch (Poco::Exception &ex) {
-      TS_WARN(ex.displayText());
+      std::filesystem::remove_all(local_rep);
+    } catch (std::filesystem::filesystem_error &ex) {
+      TS_WARN(ex.what());
     }
     ConfigServiceImpl &config = ConfigService::Instance();
     config.setString("ScriptLocalRepository", backup_local_repository_path);
@@ -240,8 +237,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(repo->doDownloadFile(WEBSERVER_URL, ""));
 
     // simulate the installation.
-    Poco::File dir(local_rep);
-    dir.createDirectories();
+    std::filesystem::create_directories(local_rep);
 
     {
       // ensure it can download repository.json
@@ -252,12 +248,10 @@ public:
     {
       // ensure it can download TofConv/README.txt
       std::string local_j_file = std::string(local_rep).append("/TofConv/README.txt");
-      Poco::File dir(std::string(local_rep).append("/TofConv"));
-      dir.createDirectories();
+      std::filesystem::create_directories(std::string(local_rep).append("/TofConv"));
       TS_ASSERT_THROWS_NOTHING(
           repo->doDownloadFile(std::string(WEBSERVER_URL).append("/TofConv/README.txt"), local_j_file));
-      Poco::File f(local_j_file);
-      TS_ASSERT(f.exists());
+      TS_ASSERT(std::filesystem::exists(local_j_file));
     }
   }
 
@@ -282,10 +276,9 @@ public:
     TSM_ASSERT("Now should be valid!", repo->isValid());
     // checking that repository.json and local.json exists
     {
-      Poco::File l(std::string(local_rep).append("/.repository.json"));
-      TSM_ASSERT("Failed to create repository.json", l.exists());
-      Poco::File r(std::string(local_rep).append("/.local.json"));
-      TSM_ASSERT("Failed to create local.json", r.exists());
+      TSM_ASSERT("Failed to create repository.json",
+                 std::filesystem::exists(std::string(local_rep).append("/.repository.json")));
+      TSM_ASSERT("Failed to create local.json", std::filesystem::exists(std::string(local_rep).append("/.local.json")));
     }
 
     // after the installation, all the others instances of ScriptRepositoryImpl
@@ -304,9 +297,8 @@ public:
    */
   void test_installation_do_not_install_on_non_empty_directory() {
     // fill the local_rep path with files
-    Poco::File d(local_rep);
-    d.createDirectories();
-    Poco::FileStream f(std::string(local_rep).append("/myfile"));
+    std::filesystem::create_directories(local_rep);
+    std::ofstream f(std::string(local_rep).append("/myfile"));
     f << "nothing";
     f.close();
     // now, local_rep is not empty!
@@ -362,7 +354,7 @@ public:
 
     // creating a file to test the list Files
     std::string local_file = std::string(local_rep).append("/myfile");
-    Poco::FileStream f(local_file);
+    std::ofstream f(local_file);
     f << "nothing";
     f.close();
 
@@ -536,8 +528,7 @@ public:
     // remove the folder
     {
       std::string path_to_folder = std::string(local_rep).append(folder_name);
-      Poco::File f(path_to_folder);
-      f.remove(true);
+      std::filesystem::remove_all(path_to_folder);
     }
 
     TS_ASSERT_THROWS_NOTHING(repo->listFiles());
@@ -573,13 +564,11 @@ public:
 
       {
         std::string path_to_readme = std::string(local_rep).append(file_name_readme);
-        Poco::File f(path_to_readme);
-        f.remove();
+        std::filesystem::remove(path_to_readme);
       }
       {
         std::string path_to_conv = std::string(local_rep).append(file_name_conv);
-        Poco::File f(path_to_conv);
-        f.remove();
+        std::filesystem::remove(path_to_conv);
       }
     }
     std::cout << "children files removed\n";
@@ -643,7 +632,7 @@ public:
     // we will simulate the change of the file, by, changin the local.json
     // file
 
-    Poco::FileStream ss(std::string(local_rep).append("/local.json"));
+    std::ofstream ss(std::string(local_rep).append("/local.json"));
     ss << "{\n"
        << "\"TofConv/README.txt\":\n"
        << "{\n"
@@ -653,13 +642,12 @@ public:
        << "}";
     ss.close();
     std::string localjson = std::string(local_rep).append("/.local.json");
-    Poco::File f(std::string(local_rep).append("/local.json"));
 
 #if defined(_WIN32) || defined(_WIN64)
     // set the .repository.json and .local.json hidden
     SetFileAttributes(localjson.c_str(), FILE_ATTRIBUTE_NORMAL);
 #endif
-    f.moveTo(localjson);
+    std::filesystem::rename(std::string(local_rep).append("/local.json"), localjson);
 #if defined(_WIN32) || defined(_WIN64)
     // set the .repository.json and .local.json hidden
     SetFileAttributes(localjson.c_str(), FILE_ATTRIBUTE_HIDDEN);
@@ -704,8 +692,7 @@ public:
     // install
     TS_ASSERT_THROWS_NOTHING(repo->install(local_rep));
 
-    Poco::File dir(std::string(local_rep).append(folder_name));
-    dir.createDirectories();
+    std::filesystem::create_directories(std::string(local_rep).append(folder_name));
 
     // list files
     TS_ASSERT_THROWS_NOTHING(repo->listFiles());
@@ -727,8 +714,7 @@ public:
     // now, lets delete this file from the repository
 
     {
-      Poco::File f(std::string(local_rep).append(file_name));
-      f.remove();
+      std::filesystem::remove(std::string(local_rep).append(file_name));
     }
 
     // so, the file should be remote_only and not Mantid::API::BOTH_CHANGED
@@ -748,7 +734,7 @@ public:
     // we will simulate the change of the file, by, changin the local.json
     // file
 
-    Poco::FileStream ss(std::string(local_rep).append("/local.json"));
+    std::ofstream ss(std::string(local_rep).append("/local.json"));
     ss << "{\n"
        << "\"TofConv/README.txt\":\n"
        << "{\n"
@@ -758,13 +744,12 @@ public:
        << "}";
     ss.close();
     std::string localjson = std::string(local_rep).append("/.local.json");
-    Poco::File f(std::string(local_rep).append("/local.json"));
 
 #if defined(_WIN32) || defined(_WIN64)
     // set the .repository.json and .local.json hidden
     SetFileAttributes(localjson.c_str(), FILE_ATTRIBUTE_NORMAL);
 #endif
-    f.moveTo(localjson);
+    std::filesystem::rename(std::string(local_rep).append("/local.json"), localjson);
 #if defined(_WIN32) || defined(_WIN64)
     // set the .repository.json and .local.json hidden
     SetFileAttributes(localjson.c_str(), FILE_ATTRIBUTE_HIDDEN);
@@ -787,8 +772,7 @@ public:
 
     // ensure that a backup was created
     {
-      Poco::File bckf(std::string(local_rep).append(file_name).append("_bck"));
-      TSM_ASSERT("No backup file was created!", bckf.exists());
+      TS_ASSERT(std::filesystem::exists(std::string(local_rep).append(file_name).append("_bck")));
     }
   }
 
@@ -832,9 +816,7 @@ public:
 
     std::string file_path = std::string(local_rep).append("/myfile.pyc");
     { // create a file inside
-      Poco::File f(file_path);
-      f.createFile();
-      Poco::FileStream _out(file_path);
+      std::ofstream _out(file_path);
       _out << "qq";
       _out.close();
     }
@@ -886,8 +868,7 @@ public:
     TS_ASSERT(repo->fileStatus(file_name) == Mantid::API::LOCAL_ONLY);
 
     // assert file does exist inside the local folder
-    Poco::File f(std::string(local_rep).append(file_name));
-    TS_ASSERT(f.exists());
+    TS_ASSERT(std::filesystem::exists(std::string(local_rep).append(file_name)));
   }
 
   /** This test simulate the reaction when the delete from the central
