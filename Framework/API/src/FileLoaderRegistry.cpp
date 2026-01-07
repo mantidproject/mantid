@@ -120,23 +120,36 @@ const std::shared_ptr<IAlgorithm> FileLoaderRegistryImpl::chooseLoader(const std
   IAlgorithm_sptr bestLoader;
 
   if (H5::H5File::isHdf5(filename)) {
-    std::pair<IAlgorithm_sptr, int> NexusResult =
-        searchForLoader<NexusDescriptor, IFileLoader<NexusDescriptor>>(filename, m_names[Nexus], m_log);
 
-    if (NexusResult.second < 80) {
-      // must also try LegacyNexusDescriptor algorithms because LoadMuonNexus can load both HDF4 and HDF5 files
-      // but only need to do this if confidence is less than 80, i.e. not loaded by LoadEventNexus, LoadNexusProcessed,
-      // LoadMuonNexusV2 or LoadMD
-      std::pair<IAlgorithm_sptr, int> LegacyNexusResult =
-          searchForLoader<LegacyNexusDescriptor, IFileLoader<LegacyNexusDescriptor>>(filename, m_names[LegacyNexus],
-                                                                                     m_log);
+    // first, try search with lazy descriptor
+    std::pair<IAlgorithm_sptr, int> NexusLazyResult =
+        searchForLoader<Nexus::NexusDescriptorLazy, IFileLoader<Nexus::NexusDescriptorLazy>>(filename,
+                                                                                             m_names[NexusLazy], m_log);
+    // if not found with lazy descriptor, try normal descriptor
+    if (NexusLazyResult.second < 80) {
+      std::pair<IAlgorithm_sptr, int> NexusResult =
+          searchForLoader<NexusDescriptor, IFileLoader<NexusDescriptor>>(filename, m_names[Nexus], m_log);
 
-      if (NexusResult.second > LegacyNexusResult.second)
-        bestLoader = NexusResult.first;
-      else
-        bestLoader = LegacyNexusResult.first;
-    } else
-      bestLoader = NexusResult.first;
+      // and if not found with normal HDF5 descriptor, try legacy nexus descriptor
+      if (NexusResult.second < 80) {
+        // must also try LegacyNexusDescriptor algorithms because LoadMuonNexus can load both HDF4 and HDF5 files
+        // but only need to do this if confidence is less than 80, i.e. not loaded by LoadEventNexus,
+        // LoadNexusProcessed, LoadMuonNexusV2 or LoadMD
+        std::pair<IAlgorithm_sptr, int> LegacyNexusResult =
+            searchForLoader<LegacyNexusDescriptor, IFileLoader<LegacyNexusDescriptor>>(filename, m_names[LegacyNexus],
+                                                                                       m_log);
+        // select best loaded of three
+        bestLoader = std::max({NexusResult, NexusLazyResult, LegacyNexusResult}, [](const auto &a, const auto &b) {
+                       return a.second < b.second;
+                     }).first;
+      } else {
+        bestLoader = std::max({NexusResult, NexusLazyResult}, [](const auto &a, const auto &b) {
+                       return a.second < b.second;
+                     }).first;
+      }
+    } else {
+      bestLoader = NexusLazyResult.first;
+    }
   } else {
     try {
       bestLoader = searchForLoader<LegacyNexusDescriptor, IFileLoader<LegacyNexusDescriptor>>(
