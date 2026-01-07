@@ -188,15 +188,15 @@ class FullInstrumentViewWindow(QMainWindow):
             self._contour_range_group_box
         )
 
-        multi_select_group_box = QGroupBox("Multi-Select")
-        multi_select_layout = QHBoxLayout(multi_select_group_box)
-        self._multi_select_check = QCheckBox()
-        self._multi_select_check.setText("Rectangular Select")
-        self._multi_select_check.setToolTip("Currently only working on 3D view.")
-        self._clear_selection_button = QPushButton("Clear Selection")
-        self._clear_selection_button.setToolTip("Clear the current selection of detectors")
-        multi_select_layout.addWidget(self._multi_select_check)
-        multi_select_layout.addWidget(self._clear_selection_button)
+        # multi_select_group_box = QGroupBox("Multi-Select")
+        # multi_select_layout = QHBoxLayout(multi_select_group_box)
+        # self._multi_select_check = QCheckBox()
+        # self._multi_select_check.setText("Rectangular Select")
+        # self._multi_select_check.setToolTip("Currently only working on 3D view.")
+        # self._clear_selection_button = QPushButton("Clear Selection")
+        # self._clear_selection_button.setToolTip("Clear the current selection of detectors")
+        # multi_select_layout.addWidget(self._multi_select_check)
+        # multi_select_layout.addWidget(self._clear_selection_button)
 
         projection_group_box = QGroupBox("Projection")
         projection_layout = QHBoxLayout(projection_group_box)
@@ -222,20 +222,23 @@ class FullInstrumentViewWindow(QMainWindow):
         self._peak_ws_list.setSizeAdjustPolicy(QListWidget.AdjustToContents)
         peak_v_layout.addWidget(self._peak_ws_list)
 
-        masking_group_box = QGroupBox("Masking")
-        masking_layout = QVBoxLayout(masking_group_box)
+        shapes_group_box = QGroupBox("Shapes")
+        shapes_layout = QHBoxLayout(shapes_group_box)
         shape_label = QLabel("Shape:")
         shape_label.setFixedWidth(50)
-        pre_list_layout = QHBoxLayout()
         self._shape_options = QComboBox()
         self._shape_options.addItems([w.value for w in WidgetType])
         self._add_widget = QPushButton("Add Shape")
         self._add_widget.setCheckable(True)
+        shapes_layout.addWidget(shape_label)
+        shapes_layout.addWidget(self._shape_options)
+        shapes_layout.addWidget(self._add_widget)
+
+        masking_group_box = QGroupBox("Masking")
+        masking_layout = QVBoxLayout(masking_group_box)
         self._add_mask = QPushButton("Add Mask")
         self._clear_masks = QPushButton("Clear Masks")
-        pre_list_layout.addWidget(shape_label)
-        pre_list_layout.addWidget(self._shape_options)
-        pre_list_layout.addWidget(self._add_widget)
+        pre_list_layout = QHBoxLayout()
         pre_list_layout.addWidget(self._add_mask)
         pre_list_layout.addWidget(self._clear_masks)
         self._mask_list = WorkspaceListWidget(self)
@@ -251,6 +254,27 @@ class FullInstrumentViewWindow(QMainWindow):
         masking_layout.addLayout(pre_list_layout)
         masking_layout.addWidget(self._mask_list)
         masking_layout.addLayout(post_list_layout)
+
+        picking_group_box = QGroupBox("Picking")
+        picking_layout = QVBoxLayout(picking_group_box)
+        self._add_selection = QPushButton("Add Selection")
+        self._clear_selections = QPushButton("Clear Selections")
+        pre_list_layout = QHBoxLayout()
+        pre_list_layout.addWidget(self._add_selection)
+        pre_list_layout.addWidget(self._clear_selections)
+        self._selection_list = WorkspaceListWidget(self)
+        self._selection_list.setSizeAdjustPolicy(QListWidget.AdjustToContents)
+        self._selection_list.setSelectionMode(QAbstractItemView.NoSelection)
+        post_list_layout = QHBoxLayout()
+        self._save_selection_to_ws = QPushButton("Export ROI to ADS")
+        self._save_selection_to_file = QPushButton("Save ROI to XML")
+        self._overwrite_selection = QPushButton("Apply ROI Permanently")
+        post_list_layout.addWidget(self._save_selection_to_ws)
+        post_list_layout.addWidget(self._save_selection_to_file)
+        post_list_layout.addWidget(self._overwrite_selection)
+        picking_layout.addLayout(pre_list_layout)
+        picking_layout.addWidget(self._selection_list)
+        picking_layout.addLayout(post_list_layout)
 
         self.status_group_box = QGroupBox("Status")
         status_layout = QHBoxLayout(self.status_group_box)
@@ -271,7 +295,7 @@ class FullInstrumentViewWindow(QMainWindow):
         options_vertical_layout.addWidget(detector_group_box)
         options_vertical_layout.addWidget(self._integration_limit_group_box)
         options_vertical_layout.addWidget(self._contour_range_group_box)
-        options_vertical_layout.addWidget(multi_select_group_box)
+        # options_vertical_layout.addWidget(multi_select_group_box)
         options_vertical_layout.addWidget(projection_group_box)
         units_group_box = QGroupBox("Units")
         units_vbox = QVBoxLayout()
@@ -279,7 +303,9 @@ class FullInstrumentViewWindow(QMainWindow):
         units_group_box.setLayout(units_vbox)
         options_vertical_layout.addWidget(units_group_box)
         options_vertical_layout.addWidget(peak_ws_group_box)
+        options_vertical_layout.addWidget(shapes_group_box)
         options_vertical_layout.addWidget(masking_group_box)
+        options_vertical_layout.addWidget(picking_group_box)
         options_vertical_layout.addWidget(QSplitter(Qt.Horizontal))
 
         options_vertical_layout.addWidget(self.status_group_box)
@@ -308,7 +334,8 @@ class FullInstrumentViewWindow(QMainWindow):
         self._presenter.on_sum_spectra_checkbox_clicked()
 
     def is_multi_picking_checkbox_checked(self) -> bool:
-        return self._multi_select_check.isChecked()
+        # return self._multi_select_check.isChecked()
+        return False
 
     def is_maintain_aspect_ratio_checkbox_checked(self) -> bool:
         return self._aspect_ratio_check_box.isChecked()
@@ -431,8 +458,8 @@ class FullInstrumentViewWindow(QMainWindow):
 
     def setup_connections_to_presenter(self) -> None:
         self._projection_combo_box.currentIndexChanged.connect(self._presenter.update_plotter)
-        self._multi_select_check.stateChanged.connect(self._presenter.update_detector_picker)
-        self._clear_selection_button.clicked.connect(self._presenter.on_clear_selected_detectors_clicked)
+        # self._multi_select_check.stateChanged.connect(self._presenter.update_detector_picker)
+        # self._clear_selection_button.clicked.connect(self._presenter.on_clear_selected_detectors_clicked)
         self._contour_range_slider.sliderReleased.connect(self._presenter.on_contour_limits_updated)
         self._integration_limit_slider.sliderReleased.connect(self._presenter.on_integration_limits_updated)
         self._units_combo_box.currentIndexChanged.connect(self._presenter.on_unit_option_selected)
@@ -440,6 +467,7 @@ class FullInstrumentViewWindow(QMainWindow):
         self._sum_spectra_checkbox.clicked.connect(self._presenter.on_sum_spectra_checkbox_clicked)
         self._peak_ws_list.itemChanged.connect(self._presenter.on_peaks_workspace_selected)
         self._mask_list.itemChanged.connect(self._presenter.on_mask_item_selected)
+        self._selection_list.itemChanged.connect(self._presenter.on_pick_selection_item_selected)
         self._save_mask_to_ws.clicked.connect(self._presenter.on_save_mask_to_workspace_clicked)
         self._save_mask_to_file.clicked.connect(self._presenter.on_save_xml_mask_clicked)
         self._overwrite_mask.clicked.connect(self._presenter.on_overwrite_mask_clicked)
@@ -460,8 +488,11 @@ class FullInstrumentViewWindow(QMainWindow):
         )
 
         self._add_widget.toggled.connect(self.on_toggle_add_mask)
+
         self._add_mask.clicked.connect(self._presenter.on_add_mask_clicked)
         self._add_mask.setDisabled(True)
+        self._add_selection.clicked.connect(self._presenter.on_add_selection_clicked)
+        self._add_selection.setDisabled(True)
 
     def on_toggle_add_mask(self, checked):
         if checked:
@@ -470,9 +501,11 @@ class FullInstrumentViewWindow(QMainWindow):
             else:
                 self.add_rectangular_widget()
             self._add_mask.setDisabled(False)
+            self._add_selection.setDisabled(False)
         else:
             self.delete_current_widget()
             self._add_mask.setDisabled(True)
+            self._add_selection.setDisabled(True)
 
     def enable_or_disable_mask_widgets(self):
         if self._add_widget.isChecked():
@@ -885,8 +918,19 @@ class FullInstrumentViewWindow(QMainWindow):
             if self._mask_list.item(row_index).checkState() > 0
         ]
 
+    def selected_pick_selections(self) -> list[str]:
+        return [
+            self._selection_list.item(row_index).text()
+            for row_index in range(self._selection_list.count())
+            if self._selection_list.item(row_index).checkState() > 0
+        ]
+
     def set_new_mask_key(self, new_key: str) -> None:
         list_item = QListWidgetItem(new_key, self._mask_list)
+        list_item.setCheckState(Qt.Checked)
+
+    def set_new_picking_selection_key(self, new_key: str) -> None:
+        list_item = QListWidgetItem(new_key, self._selection_list)
         list_item.setCheckState(Qt.Checked)
 
     def clear_mask_list(self) -> None:

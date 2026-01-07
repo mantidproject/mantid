@@ -94,6 +94,7 @@ class FullInstrumentViewModel:
         self._cached_projections_map = {}
 
         self._cached_masks_map = {}
+        self._cached_pick_selections_map = {}
 
         # Get min and max integration values
         if self._workspace.isRaggedWorkspace():
@@ -409,6 +410,13 @@ class FullInstrumentViewModel:
         self._cached_masks_map[new_key] = mask_to_save
         return new_key
 
+    def add_new_detector_picking_selection(self, new_selection: list[bool]) -> str:
+        new_key = f"Pick Selection {len(self._cached_pick_selections_map) + 1} (unsaved)"
+        selection_to_save = np.zeros_like(self._workspace_indices)
+        selection_to_save[self.is_pickable] = new_selection
+        self._cached_pick_selections_map[new_key] = selection_to_save
+        return new_key
+
     def apply_detector_masks(self, mask_keys: list[str]) -> None:
         ws_masks = [ws.extractY().flatten() for ws in self.get_mask_workspaces_in_ads() if ws.name() in mask_keys]
         cached_masks = [self._cached_masks_map[key] for key in mask_keys if key in self._cached_masks_map.keys()]
@@ -421,6 +429,16 @@ class FullInstrumentViewModel:
         total_mask = np.logical_or.reduce(ws_masks + cached_masks)
         self._is_masked = total_mask
         self._detector_is_picked[~self.is_pickable] = False
+
+    def apply_detector_pick_selections(self, selection_keys: list[str]) -> None:
+        cached_selections = [
+            self._cached_pick_selections_map[key] for key in selection_keys if key in self._cached_pick_selections_map.keys()
+        ]
+        if not cached_selections:
+            self._detector_is_picked[:] = False
+            return
+        total_mask = np.logical_or.reduce(cached_selections)
+        self._detector_is_picked = total_mask
 
     def clear_stored_masks(self) -> None:
         self._cached_masks_map.clear()

@@ -249,6 +249,21 @@ class FullInstrumentViewPresenter:
         new_key = self._model.add_new_detector_mask(mask)
         self._view.set_new_mask_key(new_key)
 
+    def on_add_selection_clicked(self) -> None:
+        implicit_function = self._view.get_current_widget_implicit_function()
+        if not implicit_function:
+            return
+        mask = [(implicit_function.EvaluateFunction(pt) < 0) for pt in self._detector_mesh.points]
+        new_key = self._model.add_new_detector_picking_selection(mask)
+        self._view.set_new_picking_selection_key(new_key)
+
+    def on_pick_selection_item_selected(self) -> None:
+        self._model.apply_detector_pick_selections(self._view.selected_pick_selections())
+        # Update to visibility shows up in real time
+        self._pickable_mesh[self._visible_label] = self._model.picked_visibility
+        self._view.enable_or_disable_mask_widgets()
+        self._update_line_plot_ws_and_draw(self._view.current_selected_unit())
+
     def on_mask_item_selected(self) -> None:
         self._model.apply_detector_masks(self._view.selected_masks())
         self.update_plotter()
