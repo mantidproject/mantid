@@ -10,6 +10,8 @@
 #include "MantidFrameworkTestHelpers/ScopedFileHelper.h"
 #include "MantidKernel/Logger.h"
 
+#include <filesystem>
+
 namespace {
 Mantid::Kernel::Logger logger("ScopedFileHelper");
 }
@@ -19,8 +21,8 @@ namespace ScopedFileHelper {
 Constructor generates the file. Sets location to be the temp directory
 */
 ScopedFile::ScopedFile(const std::string &fileContents, const std::string &fileName) {
-  Poco::Path path(Mantid::Kernel::ConfigService::Instance().getTempDir().c_str());
-  path.append(fileName);
+  std::filesystem::path path(Mantid::Kernel::ConfigService::Instance().getTempDir().c_str());
+  path /= fileName;
   doCreateFile(fileContents, path);
 }
 
@@ -28,8 +30,8 @@ ScopedFile::ScopedFile(const std::string &fileContents, const std::string &fileN
 Constructor generates the file. Sets location as defined by the fileDirectory.
 */
 ScopedFile::ScopedFile(const std::string &fileContents, const std::string &fileName, const std::string &fileDirectory) {
-  Poco::Path path(fileDirectory);
-  path.append(fileName);
+  std::filesystem::path path(fileDirectory);
+  path /= fileName;
   doCreateFile(fileContents, path);
 }
 
@@ -58,8 +60,8 @@ ScopedFile::ScopedFile(const ScopedFile &other) {
 Common method used by all constructors. Creates a file containing the ASCII file
 contents and 'remembers' the location of that file.
 */
-void ScopedFile::doCreateFile(const std::string &fileContents, const Poco::Path &fileNameAndPath) {
-  m_filename = fileNameAndPath.toString();
+void ScopedFile::doCreateFile(const std::string &fileContents, const std::filesystem::path &fileNameAndPath) {
+  m_filename = fileNameAndPath.string();
   m_file.open(m_filename.c_str(), std::ios_base::out);
   if (!m_file.is_open()) {
     throw std::runtime_error("Cannot open " + m_filename);
