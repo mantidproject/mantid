@@ -132,7 +132,7 @@ void CostFuncFitting::calActiveCovarianceMatrix(EigenMatrix &covar, double epsre
   m_function->functionDeriv(*m_domain, J);
 
   // let Eigen compute the covariance matrix
-  covar = covar_from_jacobian(j, epsrel, covar.mutator());
+  covar = covar_from_jacobian(j, epsrel);
 }
 
 /** Calculates covariance matrix
