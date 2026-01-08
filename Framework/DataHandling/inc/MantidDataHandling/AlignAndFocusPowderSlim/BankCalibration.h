@@ -66,7 +66,6 @@ private:
   const std::map<detid_t, double> &m_calibration_map;    ///< detid: difc/difc_focussed
   const std::map<detid_t, double> &m_scale_at_sample;    ///< multiplicative 0<value<1 to move neutron TOF at sample
   const std::map<size_t, std::set<detid_t>> &m_grouping; ///< detector ids for output workspace index
-  // const std::map<size_t, std::vector<detid_t>> &m_banks;    ///< detector ids for each bank
   const std::set<detid_t> &m_mask;
   const std::map<size_t, std::set<detid_t>> &m_bank_detids;
 };

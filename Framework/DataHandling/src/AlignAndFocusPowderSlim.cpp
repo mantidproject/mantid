@@ -174,7 +174,7 @@ void AlignAndFocusPowderSlim::init() {
                   "The percentage of the average to use as the lower bound when filtering bad pulses.");
   declareProperty(std::make_unique<WorkspaceProperty<DataObjects::GroupingWorkspace>>(
                       PropertyNames::GROUPING_WS, "", Direction::Input, API::PropertyMode::Optional),
-                  "A GroupingWorkspace giving the grouping info..");
+                  "A GroupingWorkspace giving the grouping info.");
   const std::vector<std::string> cal_exts{".h5", ".hd5", ".hdf", ".cal"};
   declareProperty(std::make_unique<FileProperty>(PropertyNames::CAL_FILE, "", FileProperty::OptionalLoad, cal_exts),
                   "The .cal file containing the position correction factors. Either this or OffsetsWorkspace needs to "
@@ -714,10 +714,14 @@ void AlignAndFocusPowderSlim::storeSpectraProcessingData(const SpectraProcessing
   for (size_t i = 0; i < numSpectra; ++i) {
     auto &spectrum = outputWS->getSpectrum(i);
     auto &y_values = spectrum.dataY();
-    std::copy(processingData.counts[i].cbegin(), processingData.counts[i].cend(), y_values.begin());
+    std::transform(
+        processingData.counts[i].cbegin(), processingData.counts[i].cend(), y_values.begin(),
+        [](const std::atomic_uint32_t &val) { return static_cast<double>(val.load(std::memory_order_relaxed)); });
     auto &e_values = spectrum.dataE();
     std::transform(processingData.counts[i].cbegin(), processingData.counts[i].cend(), e_values.begin(),
-                   [](uint32_t y) { return std::sqrt(static_cast<double>(y)); });
+                   [](const std::atomic_uint32_t &val) {
+                     return std::sqrt(static_cast<double>(val.load(std::memory_order_relaxed)));
+                   });
   }
 }
 
