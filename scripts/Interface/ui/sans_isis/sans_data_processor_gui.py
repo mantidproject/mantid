@@ -367,6 +367,10 @@ class SANSDataProcessorGui(QMainWindow, Ui_SansDataProcessorWindow):
         self.fit_selection_combo_box.currentIndexChanged.connect(self._on_fit_selection_has_changed)
         self._on_fit_selection_has_changed()
 
+        # Set the transmission fit checkbox enabled
+        self.fit_sample_wavelength_combo_box.stateChanged.connect(self._on_fit_custom_range_checkbox_selected)
+        self.fit_can_wavelength_combo_box.stateChanged.connect(self._on_fit_custom_range_checkbox_selected)
+
         # Set the transmission polynomial order
         self.fit_sample_fit_type_combo_box.currentIndexChanged.connect(self._on_transmission_fit_type_has_changed)
         self.fit_can_fit_type_combo_box.currentIndexChanged.connect(self._on_transmission_fit_type_has_changed)
@@ -839,6 +843,16 @@ class SANSDataProcessorGui(QMainWindow, Ui_SansDataProcessorWindow):
         index = 1 if is_rectangular else 0
         self.q_resolution_shape_combo_box.setCurrentIndex(index)
 
+    def _on_fit_custom_range_checkbox_selected(self):
+        if (name := self.sender().objectName()) in ["fit_sample_wavelength_combo_box", "fit_can_wavelength_combo_box"]:
+            checked = self.sender().isChecked()
+            if "sample" in name:
+                self.fit_sample_wavelength_min_line_edit.setEnabled(checked)
+                self.fit_sample_wavelength_max_line_edit.setEnabled(checked)
+            else:
+                self.fit_can_wavelength_min_line_edit.setEnabled(checked)
+                self.fit_can_wavelength_max_line_edit.setEnabled(checked)
+
     def _on_fit_selection_has_changed(self):
         fit_selection = self.fit_selection_combo_box.currentIndex()
         use_settings_for_sample_and_can = fit_selection == 0
@@ -855,6 +869,8 @@ class SANSDataProcessorGui(QMainWindow, Ui_SansDataProcessorWindow):
         self.fit_can_fit_type_combo_box.setVisible(show_can)
         self.fit_can_wavelength_combo_box.setVisible(show_can)
         self.fit_can_polynomial_order_spin_box.setVisible(show_can)
+        self.fit_can_wavelength_min_line_edit.setVisible(show_can)
+        self.fit_can_wavelength_max_line_edit.setVisible(show_can)
 
     def set_fit_selection(self, use_separate):
         index = 1 if use_separate else 0
