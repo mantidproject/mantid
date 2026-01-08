@@ -8,6 +8,7 @@
 // Includes
 //----------------------------------------------------------------------
 
+@AUTO_GENERATE_WARNING@
 /********** Source = MantidVersion.cpp.in *****************************************************/
 
 #include "MantidKernel/MantidVersion.h"
@@ -23,7 +24,6 @@ const std::string VERSION_FULL{"@VERSION_MAJOR@.@VERSION_MINOR@.@VERSION_PATCH@@
 const std::string VERSION_SHORT{"@VERSION_MAJOR@.@VERSION_MINOR@"};
 const std::string REVISION_SHORT{"@REVISION_SHORT@"};
 const std::string REVISION_FULL{"@REVISION_FULL@"};
-const std::string REVISION_DATE{"@REVISION_DATE@"};
 
 /**
  * The input month should only be the first 3 characters of the month name
@@ -56,6 +56,39 @@ std::chrono::month to_month(const std::string &month) {
   else // should never get here
     throw std::runtime_error("Cannot convert \"" + month + "\" to a month object");
 }
+
+Types::Core::DateAndTime create_releaseDateAndTime() {
+  const std::string REVISION_DATE{"@REVISION_DATE@"};
+
+  Types::Core::DateAndTime release;
+  if (REVISION_DATE == "UNKNOWN") {
+    // something went wrong in VersionNumber.cmake so give the default constructor result
+  } else {
+    // pull apart string into year, month, and day objects
+    // WARNING if the format changes this will break
+    const auto day = std::chrono::day(std::stoi(REVISION_DATE.substr(4, 2)));
+    const auto month = to_month(REVISION_DATE.substr(7, 3));
+    const auto year = std::chrono::year(std::stoi(REVISION_DATE.substr(11, 4)));
+    std::string time = REVISION_DATE.substr(16);
+    if (time.empty()) {
+      time = "00:01"; // assume one minute past midnight
+    } else {
+      time.erase(find_if(time.begin(), time.end(), isspace));
+    }
+
+    // create a proper chrono from it
+    std::chrono::year_month_day ymd(year, month, day);
+    // convert to iso8601 string to get to DateAndTime
+    std::stringstream isostr;
+    isostr << ymd << "T" << time;
+
+    release. setFromISO8601(isostr.str());
+  }
+  return release;
+}
+
+const Types::Core::DateAndTime REVISION_DATE_AND_TIME = create_releaseDateAndTime();
+
 } // namespace
 
 /**
@@ -107,32 +140,7 @@ std::string MantidVersion::revision() { return REVISION_SHORT; }
 std::string MantidVersion::revisionFull() { return REVISION_FULL; }
 
 Types::Core::DateAndTime MantidVersion::releaseDateAndTime() {
-  if (REVISION_DATE == "UNKNOWN") {
-    // something went wrong in VersionNumber.cmake so give the default constructor result
-    Types::Core::DateAndTime release;
-    return release;
-  } else {
-    // pull apart string into year, month, and day objects
-    // WARNING if the format changes this will break
-    const auto day = std::chrono::day(std::stoi(REVISION_DATE.substr(4, 2)));
-    const auto month = to_month(REVISION_DATE.substr(7, 3));
-    const auto year = std::chrono::year(std::stoi(REVISION_DATE.substr(11, 4)));
-    std::string time = REVISION_DATE.substr(16);
-    if (time.empty()) {
-      time = "00:01"; // assume one minute past midnight
-    } else {
-      time.erase(find_if(time.begin(), time.end(), isspace));
-    }
-
-    // create a proper chrono from it
-    std::chrono::year_month_day ymd(year, month, day);
-    // convert to iso8601 string to get to DateAndTime
-    std::stringstream isostr;
-    isostr << ymd << "T" << time;
-
-    Types::Core::DateAndTime release(isostr.str());
-    return release;
-  }
+  return REVISION_DATE_AND_TIME;
 }
 
 std::string MantidVersion::releaseDate() {
@@ -144,7 +152,7 @@ std::string MantidVersion::releaseDate() {
 std::string MantidVersion::doi() {
   const std::string MAIN = "http://dx.doi.org/10.5286/Software/Mantid";
   // Cast here in those cases where patch number is of the form 20131022.1356.
-  const unsigned int patchVersion = static_cast<unsigned int>(@VERSION_PATCH @);
+  const unsigned int patchVersion = static_cast<unsigned int>(@VERSION_PATCH@);
 
   // For major/minor/patch releases we point users to a specific release-notes DOI, for
   // dev versions we just point to the main DOI.  A simple way to see whether or not
@@ -155,7 +163,7 @@ std::string MantidVersion::doi() {
     return MAIN;
 
   std::stringstream doi;
-  doi << MAIN << @VERSION_MAJOR @ << "." << @VERSION_MINOR @;
+  doi << MAIN << @VERSION_MAJOR@ << "." << @VERSION_MINOR@;
 
   // Keep to the convention where we write a version number like "3.0.0" as "3.0".
   if (patchVersion != 0)
