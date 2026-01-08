@@ -12,8 +12,12 @@
 /********** Source = MantidVersion.cpp.in *****************************************************/
 
 #include "MantidKernel/MantidVersion.h"
-
+#include "MantidTypes/Core/DateAndTime.h"
+#include <chrono>
+#include <iostream>
 #include <sstream>
+
+namespace Mantid::Kernel {
 
 namespace {
   const std::string DOI{"http://dx.doi.org/10.1016/j.nima.2014.07.029"};
@@ -22,9 +26,39 @@ namespace {
   const std::string REVISION_SHORT{"@REVISION_SHORT@"};
   const std::string REVISION_FULL{"@REVISION_FULL@"};
   const std::string REVISION_DATE{"@REVISION_DATE@"};
-}
 
-namespace Mantid::Kernel {
+  /**
+   * The input month should only be the first 3 characters of the month name
+   */
+  std::chrono::month to_month(const std::string &month) {
+    if (month == "Jan")
+      return std::chrono::January;
+    else if (month == "Feb")
+      return std::chrono::February;
+    else if (month == "Mar")
+      return std::chrono::March;
+    else if (month == "Apr")
+      return std::chrono::April;
+    else if (month == "May")
+      return std::chrono::May;
+    else if (month == "Jun")
+      return std::chrono::June;
+    else if (month == "Jul")
+      return std::chrono::July;
+    else if (month == "Aug")
+      return std::chrono::August;
+    else if (month == "Sep")
+      return std::chrono::September;
+    else if (month == "Oct")
+      return std::chrono::October;
+    else if (month == "Nov")
+      return std::chrono::November;
+    else if (month == "Dec")
+      return std::chrono::December;
+    else // should never get here
+      throw std::runtime_error("Cannot convert \"" + month + "\" to a month object");
+  }
+}
 
 /**
  * See buildconfig/CMake/VersionNumber.cmake for more information on the meaning
@@ -92,7 +126,22 @@ std::string MantidVersion::revisionFull()
 
 std::string MantidVersion::releaseDate()
 {
-  return REVISION_DATE;
+  // pull apart string into year, month, and day objects
+  // WARNING if the format changes this will break
+  const auto day = std::chrono::day(std::stoi(REVISION_DATE.substr(4,2)));
+  const auto month = to_month(REVISION_DATE.substr(7,3));
+  const auto year = std::chrono::year(std::stoi(REVISION_DATE.substr(11,4)));
+  std::string time = REVISION_DATE.substr(15);
+  // create a proper chrono from it
+  std::chrono::year_month_day ymd(year, month, day);
+  // convert to iso8601 to get to DateAndTime
+  std::stringstream isostr;
+  isostr << ymd;
+  isostr << "T00:01"; // add the time-of-day so the string can be parsed
+  Types::Core::DateAndTime revisionDateAndTime(isostr.str());
+
+  const std::string GIT_DATE_FMT("%a, %e %b %Y");
+  return revisionDateAndTime.toFormattedString(GIT_DATE_FMT);
 }
 
 std::string MantidVersion::doi()
