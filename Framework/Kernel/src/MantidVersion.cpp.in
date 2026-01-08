@@ -19,11 +19,6 @@
 namespace Mantid::Kernel {
 
 namespace {
-const std::string DOI{"http://dx.doi.org/10.1016/j.nima.2014.07.029"};
-const std::string VERSION_FULL{"@VERSION_MAJOR@.@VERSION_MINOR@.@VERSION_PATCH@@VERSION_TWEAK@"};
-const std::string VERSION_SHORT{"@VERSION_MAJOR@.@VERSION_MINOR@"};
-const std::string REVISION_SHORT{"@REVISION_SHORT@"};
-const std::string REVISION_FULL{"@REVISION_FULL@"};
 
 /**
  * The input month should only be the first 3 characters of the month name
@@ -61,6 +56,7 @@ Types::Core::DateAndTime create_releaseDateAndTime() {
   const std::string REVISION_DATE{"@REVISION_DATE@"};
 
   Types::Core::DateAndTime release;
+  // cppcheck-suppress knownConditionTrueFalse
   if (REVISION_DATE == "UNKNOWN") {
     // something went wrong in VersionNumber.cmake so give the default constructor result
   } else {
@@ -87,6 +83,11 @@ Types::Core::DateAndTime create_releaseDateAndTime() {
   return release;
 }
 
+const std::string DOI{"http://dx.doi.org/10.1016/j.nima.2014.07.029"};
+const std::string VERSION_FULL{"@VERSION_MAJOR@.@VERSION_MINOR@.@VERSION_PATCH@@VERSION_TWEAK@"};
+const std::string VERSION_SHORT{"@VERSION_MAJOR@.@VERSION_MINOR@"};
+const std::string REVISION_SHORT{"@REVISION_SHORT@"};
+const std::string REVISION_FULL{"@REVISION_FULL@"};
 const Types::Core::DateAndTime REVISION_DATE_AND_TIME = create_releaseDateAndTime();
 
 } // namespace
@@ -96,9 +97,9 @@ const Types::Core::DateAndTime REVISION_DATE_AND_TIME = create_releaseDateAndTim
  * of the version number elements
  */
 
-std::string MantidVersion::version() { return VERSION_FULL; }
+const std::string &MantidVersion::version() { return VERSION_FULL; }
 
-std::string MantidVersion::versionShort() { return VERSION_SHORT; }
+const std::string &MantidVersion::versionShort() { return VERSION_SHORT; }
 
 const MantidVersion::VersionInfo MantidVersion::versionInfo() {
   return {"@VERSION_MAJOR@", "@VERSION_MINOR@", "@VERSION_PATCH@", "@VERSION_TWEAK@"};
@@ -135,9 +136,9 @@ std::string MantidVersion::releaseNotes() {
   return url.str();
 }
 
-std::string MantidVersion::revision() { return REVISION_SHORT; }
+const std::string &MantidVersion::revision() { return REVISION_SHORT; }
 
-std::string MantidVersion::revisionFull() { return REVISION_FULL; }
+const std::string &MantidVersion::revisionFull() { return REVISION_FULL; }
 
 Types::Core::DateAndTime MantidVersion::releaseDateAndTime() {
   return REVISION_DATE_AND_TIME;
@@ -159,6 +160,7 @@ std::string MantidVersion::doi() {
   // we're currently in a dev version is to check if the patch version is larger than
   // some arbitrarily low value.
   const std::string tweakVersion("@VERSION_TWEAK@");
+  // cppcheck-suppress knownConditionTrueFalse
   if (patchVersion > 100 || !tweakVersion.empty())
     return MAIN;
 
@@ -172,6 +174,6 @@ std::string MantidVersion::doi() {
   return doi.str();
 }
 
-std::string MantidVersion::paperCitation() { return DOI; }
+const std::string &MantidVersion::paperCitation() { return DOI; }
 
 } // namespace Mantid::Kernel
