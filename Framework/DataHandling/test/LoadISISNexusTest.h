@@ -13,6 +13,7 @@
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidDataHandling/Load.h"
 #include "MantidDataHandling/LoadISISNexus2.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -1492,6 +1493,15 @@ public:
 
     MatrixWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS");
     TS_ASSERT_EQUALS(ws->getComment(), "");
+  }
+
+  /// Test that this algorithm will be selected from Load algorithm
+  void test_load_from_Load() {
+    Mantid::DataHandling::Load load;
+    TS_ASSERT_THROWS_NOTHING(load.initialize());
+    TS_ASSERT_THROWS_NOTHING(load.setPropertyValue("Filename", "LOQ49886.nxs"));
+    TS_ASSERT_EQUALS(load.getPropertyValue("LoaderName"), "LoadISISNexus");
+    TS_ASSERT_EQUALS(load.getPropertyValue("LoaderVersion"), "2");
   }
 };
 
