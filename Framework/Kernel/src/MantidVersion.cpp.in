@@ -15,6 +15,15 @@
 
 #include <sstream>
 
+namespace {
+  const std::string DOI{"http://dx.doi.org/10.1016/j.nima.2014.07.029"};
+  const std::string VERSION_FULL{"@VERSION_MAJOR@.@VERSION_MINOR@.@VERSION_PATCH@@VERSION_TWEAK@"};
+  const std::string VERSION_SHORT{"@VERSION_MAJOR@.@VERSION_MINOR@"};
+  const std::string REVISION_SHORT{"@REVISION_SHORT@"};
+  const std::string REVISION_FULL{"@REVISION_FULL@"};
+  const std::string REVISION_DATE{"@REVISION_DATE@"};
+}
+
 namespace Mantid::Kernel {
 
 /**
@@ -22,14 +31,14 @@ namespace Mantid::Kernel {
  * of the version number elements
  */
 
-const char* MantidVersion::version()
+std::string MantidVersion::version()
 {
-  return "@VERSION_MAJOR@.@VERSION_MINOR@.@VERSION_PATCH@@VERSION_TWEAK@";
+  return VERSION_FULL;
 }
 
-const char* MantidVersion::versionShort()
+std::string MantidVersion::versionShort()
 {
-  return "@VERSION_MAJOR@.@VERSION_MINOR@";
+  return VERSION_SHORT;
 }
 
 const MantidVersion::VersionInfo MantidVersion::versionInfo() {
@@ -71,19 +80,19 @@ std::string MantidVersion::releaseNotes()
   return url.str();
 }
 
-const char* MantidVersion::revision()
+std::string MantidVersion::revision()
 {
-  return "@REVISION_SHORT@";
+  return REVISION_SHORT;
 }
 
-const char* MantidVersion::revisionFull()
+std::string MantidVersion::revisionFull()
 {
-  return "@REVISION_FULL@";
+  return REVISION_FULL;
 }
 
-const char* MantidVersion::releaseDate()
+std::string MantidVersion::releaseDate()
 {
-  return "@REVISION_DATE@";
+  return REVISION_DATE;
 }
 
 std::string MantidVersion::doi()
@@ -112,7 +121,7 @@ std::string MantidVersion::doi()
 
 std::string MantidVersion::paperCitation()
 {
-  return "http://dx.doi.org/10.1016/j.nima.2014.07.029";
+  return DOI;
 }
 
 } // namespace Mantid::Kernel
