@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.api import DataProcessorAlgorithm, AlgorithmFactory, MultipleFileProperty, FileAction, PropertyMode
+from mantid.api import DataProcessorAlgorithm, AlgorithmFactory, MultipleFileProperty, FileAction, PropertyMode, FileFinder
 from mantid.kernel import (
     StringListValidator,
     Direction,
@@ -12,6 +12,7 @@ from mantid.kernel import (
     FloatBoundedValidator,
     IntArrayProperty,
     SetDefaultWhenProperty,
+    amend_config,
 )
 from mantid.dataobjects import MaskWorkspaceProperty
 import h5py
@@ -144,6 +145,8 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
 
         def checkFilenameforWavelength(algo, currentProp, watchedProp):
             run = watchedProp.value
+            if not run:
+                return False
             wavelength = 0.0
             with h5py.File(run[0], "r") as f:
                 wavelength = f["/entry/wavelength"][0]
@@ -156,6 +159,8 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
 
         def checkFilenameforVanadiumDiameter(algo, currentProp, watchedProp):
             run = watchedProp.value
+            if not run:
+                return False
             diameter = 0.0
             with h5py.File(run[0], "r") as f:
                 diameter = f["/entry/vanadium_diameter"][0]
@@ -178,6 +183,8 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
 
         def checkFilenameforVanadiumRunNumbers(algo, currentProp, watchedProp):
             run = watchedProp.value
+            if not run:
+                return False
             vanadiumRunNumbers = np.array([])
             with h5py.File(run[0], "r") as f:
                 vanadiumRunNumbers = f["/entry/vanadium_run_numbers"][()]
@@ -188,6 +195,8 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
 
         def checkFilenameforVanadiumBackgroundRunNumbers(algo, currentProp, watchedProp):
             run = watchedProp.value
+            if not run:
+                return False
             vanadiumBGRunNumbers = []
             with h5py.File(run[0], "r") as f:
                 vanadiumBGRunNumbers = f["/entry/vanadium_background_run_numbers"][()]
@@ -206,9 +215,16 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
                 return False
             else:
                 if instrument == "WAND^2":
-                    runs = ["/HFIR/HB2C/IPTS-{}/nexus/HB2C_{}.nxs.h5".format(sampleIPTS, run) for run in sampleRunNumbers]
+                    run_str = "HB2C_{}".format(sampleRunNumbers[0])
                 elif instrument == "MIDAS":
-                    runs = ["/HFIR/HB2A/IPTS-{}/nexus/HB2A_{}.nxs.h5".format(sampleIPTS, run) for run in sampleRunNumbers]
+                    run_str = "HB2A_{}".format(sampleRunNumbers[0])
+                else:
+                    return False
+                runs = []
+                with amend_config(facility="HFIR", instrument="HB2C" if instrument == "WAND^2" else "HB2A"):
+                    runs = FileFinder.findRuns(run_str)
+                if not runs:
+                    return False
                 wavelength = 0.0
                 with h5py.File(runs[0], "r") as f:
                     wavelength = f["/entry/wavelength"][0]
@@ -229,9 +245,16 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
                 return False
             else:
                 if instrument == "WAND^2":
-                    runs = ["/HFIR/HB2C/IPTS-{}/nexus/HB2C_{}.nxs.h5".format(sampleIPTS, run) for run in sampleRunNumbers]
+                    run_str = "HB2C_{}".format(sampleRunNumbers[0])
                 elif instrument == "MIDAS":
-                    runs = ["/HFIR/HB2A/IPTS-{}/nexus/HB2A_{}.nxs.h5".format(sampleIPTS, run) for run in sampleRunNumbers]
+                    run_str = "HB2A_{}".format(sampleRunNumbers[0])
+                else:
+                    return False
+                runs = []
+                with amend_config(facility="HFIR", instrument="HB2C" if instrument == "WAND^2" else "HB2A"):
+                    runs = FileFinder.findRuns(run_str)
+                if not runs:
+                    return False
                 diameter = 0.0
                 with h5py.File(runs[0], "r") as f:
                     diameter = f["/entry/vanadium_diameter"][0]
@@ -253,9 +276,16 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
                 return False
             else:
                 if instrument == "WAND^2":
-                    runs = ["/HFIR/HB2C/IPTS-{}/nexus/HB2C_{}.nxs.h5".format(sampleIPTS, run) for run in sampleRunNumbers]
+                    run_str = "HB2C_{}".format(sampleRunNumbers[0])
                 elif instrument == "MIDAS":
-                    runs = ["/HFIR/HB2A/IPTS-{}/nexus/HB2A_{}.nxs.h5".format(sampleIPTS, run) for run in sampleRunNumbers]
+                    run_str = "HB2A_{}".format(sampleRunNumbers[0])
+                else:
+                    return False
+                runs = []
+                with amend_config(facility="HFIR", instrument="HB2C" if instrument == "WAND^2" else "HB2A"):
+                    runs = FileFinder.findRuns(run_str)
+                if not runs:
+                    return False
                 vanadiumRunNumbers = []
                 with h5py.File(runs[0], "r") as f:
                     vanadiumRunNumbers = f["/entry/vanadium_run_numbers"][()]
@@ -275,9 +305,16 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
                 return False
             else:
                 if instrument == "WAND^2":
-                    runs = ["/HFIR/HB2C/IPTS-{}/nexus/HB2C_{}.nxs.h5".format(sampleIPTS, run) for run in sampleRunNumbers]
+                    run_str = "HB2C_{}".format(sampleRunNumbers[0])
                 elif instrument == "MIDAS":
-                    runs = ["/HFIR/HB2A/IPTS-{}/nexus/HB2A_{}.nxs.h5".format(sampleIPTS, run) for run in sampleRunNumbers]
+                    run_str = "HB2A_{}".format(sampleRunNumbers[0])
+                else:
+                    return False
+                runs = []
+                with amend_config(facility="HFIR", instrument="HB2C" if instrument == "WAND^2" else "HB2A"):
+                    runs = FileFinder.findRuns(run_str)
+                if not runs:
+                    return False
                 vanadiumBGRunNumbers = []
                 with h5py.File(runs[0], "r") as f:
                     vanadiumBGRunNumbers = f["/entry/vanadium_background_run_numbers"][()]

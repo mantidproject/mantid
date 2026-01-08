@@ -6,10 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,invalid-name,attribute-defined-outside-init
 import unittest
-from unittest.mock import patch
 from mantid.simpleapi import HFIRPowderReduction
 from mantid.api import AlgorithmManager
-import tempfile
 import h5py
 import os
 import numpy as np
@@ -252,124 +250,69 @@ class AutoPopulateTests(unittest.TestCase):
     def test_auto_populate_wavelength_from_run_numbers(self):
         algo = AlgorithmManager.create("HFIRPowderReduction")
         algo.initialize()
-        with tempfile.NamedTemporaryFile(suffix=".nxs.h5", delete=False) as tmp_file:
-            with h5py.File(tmp_file.name, "w") as f:
-                f.create_dataset("/entry/wavelength", data=[b"2.5"])
-            original_h5py_File = h5py.File
-
-            def mock_file_func(path, mode="r"):
-                if "/HFIR/" in path:
-                    return original_h5py_File(tmp_file.name, mode)
-                else:
-                    return original_h5py_File(path, mode)
-
-            with patch("h5py.File", side_effect=mock_file_func):
-                algo.setProperty("SampleIPTS", 123)
-                algo.setProperty("SampleRunNumbers", [456])
-                algo.setProperty("Instrument", "WAND^2")
-                wavelength_prop = algo.getProperty("Wavelength")
-                if isinstance(wavelength_prop.settings, list):
-                    for setting in wavelength_prop.settings:
-                        if hasattr(setting, "_applyChanges"):
-                            setting._applyChanges(algo, "Wavelength")
-                else:
-                    if hasattr(wavelength_prop.settings, "_applyChanges"):
-                        wavelength_prop.settings._applyChanges(algo, "Wavelength")
-                wavelength = wavelength_prop.value
-                self.assertEqual(wavelength, 2.5)
+        algo.setProperty("SampleIPTS", 123)
+        algo.setProperty("SampleRunNumbers", [456])
+        algo.setProperty("Instrument", "WAND^2")
+        wavelength_prop = algo.getProperty("Wavelength")
+        if isinstance(wavelength_prop.settings, list):
+            for setting in wavelength_prop.settings:
+                if hasattr(setting, "_applyChanges"):
+                    setting._applyChanges(algo, "Wavelength")
+        else:
+            if hasattr(wavelength_prop.settings, "_applyChanges"):
+                wavelength_prop.settings._applyChanges(algo, "Wavelength")
+        wavelength = wavelength_prop.value
+        self.assertEqual(wavelength, 2.5)
 
     def test_auto_populate_vanadium_diameter_from_run_numbers(self):
         algo = AlgorithmManager.create("HFIRPowderReduction")
         algo.initialize()
-        tmp_file = os.path.join(os.getcwd(), "test_vanadium_diameter_run_numbers.h5")
-        with h5py.File(tmp_file, "w") as f:
-            f.create_dataset("/entry/vanadium_diameter", data=[b"0.5"])
-        original_h5py_File = h5py.File
-
-        def mock_file_func(path, mode="r"):
-            if "/HFIR/" in path:
-                return original_h5py_File(tmp_file, mode)
-            else:
-                return original_h5py_File(path, mode)
-
-        with patch("h5py.File", side_effect=mock_file_func):
-            algo.setProperty("SampleIPTS", 123)
-            algo.setProperty("SampleRunNumbers", [456])
-            algo.setProperty("Instrument", "WAND^2")
-            vanadium_diameter_prop = algo.getProperty("VanadiumDiameter")
-            if isinstance(vanadium_diameter_prop.settings, list):
-                for setting in vanadium_diameter_prop.settings:
-                    if hasattr(setting, "_applyChanges"):
-                        setting._applyChanges(algo, "VanadiumDiameter")
-            else:
-                if hasattr(vanadium_diameter_prop.settings, "_applyChanges"):
-                    vanadium_diameter_prop.settings._applyChanges(algo, "VanadiumDiameter")
-            diameter = vanadium_diameter_prop.value
-            self.assertEqual(diameter, 0.5)
-            os.remove(tmp_file)
+        algo.setProperty("SampleIPTS", 123)
+        algo.setProperty("SampleRunNumbers", [456])
+        algo.setProperty("Instrument", "WAND^2")
+        vanadium_diameter_prop = algo.getProperty("VanadiumDiameter")
+        if isinstance(vanadium_diameter_prop.settings, list):
+            for setting in vanadium_diameter_prop.settings:
+                if hasattr(setting, "_applyChanges"):
+                    setting._applyChanges(algo, "VanadiumDiameter")
+        else:
+            if hasattr(vanadium_diameter_prop.settings, "_applyChanges"):
+                vanadium_diameter_prop.settings._applyChanges(algo, "VanadiumDiameter")
+        diameter = vanadium_diameter_prop.value
+        self.assertEqual(diameter, 0.5)
 
     def test_auto_populate_vanadium_run_numbers_from_run_numbers(self):
         algo = AlgorithmManager.create("HFIRPowderReduction")
         algo.initialize()
-        tmp_file = os.path.join(os.getcwd(), "test_vanadium_run_numbers_run_numbers.h5")
-        with h5py.File(tmp_file, "w") as f:
-            f.create_dataset("/entry/vanadium_run_numbers", data=[7001, 7002])
-        original_h5py_File = h5py.File
-
-        def mock_file_func(path, mode="r"):
-            if "/HFIR/" in path:
-                return original_h5py_File(tmp_file, mode)
-            else:
-                return original_h5py_File(path, mode)
-
-        with patch("h5py.File", side_effect=mock_file_func):
-            algo.setProperty("SampleIPTS", 123)
-            algo.setProperty("SampleRunNumbers", [456])
-            algo.setProperty("Instrument", "WAND^2")
-            vanadium_run_numbers_prop = algo.getProperty("VanadiumRunNumbers")
-            if isinstance(vanadium_run_numbers_prop.settings, list):
-                for setting in vanadium_run_numbers_prop.settings:
-                    if hasattr(setting, "_applyChanges"):
-                        setting._applyChanges(algo, "VanadiumRunNumbers")
-            else:
-                if hasattr(vanadium_run_numbers_prop.settings, "_applyChanges"):
-                    vanadium_run_numbers_prop.settings._applyChanges(algo, "VanadiumRunNumbers")
-            run_numbers = vanadium_run_numbers_prop.value
-            compareResult = (run_numbers == np.array([7001, 7002])).all()
-            self.assertTrue(compareResult)
-            os.remove(tmp_file)
+        algo.setProperty("SampleIPTS", 123)
+        algo.setProperty("SampleRunNumbers", [456])
+        algo.setProperty("Instrument", "WAND^2")
+        vanadium_run_numbers_prop = algo.getProperty("VanadiumRunNumbers")
+        if isinstance(vanadium_run_numbers_prop.settings, list):
+            for setting in vanadium_run_numbers_prop.settings:
+                if hasattr(setting, "_applyChanges"):
+                    setting._applyChanges(algo, "VanadiumRunNumbers")
+        else:
+            if hasattr(vanadium_run_numbers_prop.settings, "_applyChanges"):
+                vanadium_run_numbers_prop.settings._applyChanges(algo, "VanadiumRunNumbers")
+        run_numbers = vanadium_run_numbers_prop.value
+        compareResult = (run_numbers == np.array([7001, 7002])).all()
+        self.assertTrue(compareResult)
 
     def test_auto_populate_vanadium_background_run_numbers_from_run_numbers(self):
         algo = AlgorithmManager.create("HFIRPowderReduction")
         algo.initialize()
-        tmp_file = os.path.join(os.getcwd(), "test_vanadium_background_run_numbers_run_numbers.h5")
-        with h5py.File(tmp_file, "w") as f:
-            f.create_dataset("/entry/vanadium_background_run_numbers", data=[7003, 7004])
-        original_h5py_File = h5py.File
-
-        def mock_file_func(path, mode="r"):
-            if "/HFIR/" in path:
-                return original_h5py_File(tmp_file, mode)
-            else:
-                return original_h5py_File(path, mode)
-
-        with patch("h5py.File", side_effect=mock_file_func):
-            algo.setProperty("SampleIPTS", 123)
-            algo.setProperty("SampleRunNumbers", [456])
-            algo.setProperty("Instrument", "WAND^2")
-            vanadium_background_run_numbers_prop = algo.getProperty("VanadiumBackgroundRunNumbers")
-            if isinstance(vanadium_background_run_numbers_prop.settings, list):
-                for setting in vanadium_background_run_numbers_prop.settings:
-                    if hasattr(setting, "_applyChanges"):
-                        setting._applyChanges(algo, "VanadiumBackgroundRunNumbers")
-            else:
-                if hasattr(vanadium_background_run_numbers_prop.settings, "_applyChanges"):
-                    vanadium_background_run_numbers_prop.settings._applyChanges(algo, "VanadiumBackgroundRunNumbers")
-            run_numbers = vanadium_background_run_numbers_prop.value
-            compareResult = (run_numbers == np.array([7003, 7004])).all()
-            self.assertTrue(compareResult)
-            os.remove(tmp_file)
-
-
-if __name__ == "__main__":
-    unittest.main()
+        algo.setProperty("SampleIPTS", 123)
+        algo.setProperty("SampleRunNumbers", [456])
+        algo.setProperty("Instrument", "WAND^2")
+        vanadium_background_run_numbers_prop = algo.getProperty("VanadiumBackgroundRunNumbers")
+        if isinstance(vanadium_background_run_numbers_prop.settings, list):
+            for setting in vanadium_background_run_numbers_prop.settings:
+                if hasattr(setting, "_applyChanges"):
+                    setting._applyChanges(algo, "VanadiumBackgroundRunNumbers")
+        else:
+            if hasattr(vanadium_background_run_numbers_prop.settings, "_applyChanges"):
+                vanadium_background_run_numbers_prop.settings._applyChanges(algo, "VanadiumBackgroundRunNumbers")
+        run_numbers = vanadium_background_run_numbers_prop.value
+        compareResult = (run_numbers == np.array([7003, 7004])).all()
+        self.assertTrue(compareResult)
