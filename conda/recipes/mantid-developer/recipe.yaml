@@ -77,7 +77,6 @@ requirements:
         - lz4
         - pystack
         - qt-gtk-platformtheme
-        - texlive-core ${{ texlive_core }}
         # OpenGL implementation:
         - libgl-devel
         - gxx_linux-64 ${{ cxx_compiler_version }}
