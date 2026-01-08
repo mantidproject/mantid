@@ -103,11 +103,7 @@ bool NexusDescriptorLazy::hasRootAttr(std::string const &name) {
   }
 }
 
-/**
- * Get string data from a dataset at address
- * @param address Full HDF5 address of the dataset
- * @return string data
- */
+/// Get string data from a dataset at address
 std::string NexusDescriptorLazy::getStrData(std::string const &address) {
   std::string strData;
   if (isEntry(address, SCIENTIFIC_DATA_SET)) {
