@@ -12,6 +12,7 @@
 #include "MantidKernel/LegacyNexusDescriptor.h"
 #include "MantidKernel/SingletonHolder.h"
 #include "MantidNexus/NexusDescriptor.h"
+#include "MantidNexus/NexusDescriptorLazy.h"
 
 #ifndef Q_MOC_RUN
 #include <type_traits>
@@ -32,17 +33,15 @@ class IAlgorithm;
 
 /**
 Keeps a registry of algorithm's that are file loading algorithms to allow them
-to be searched
-to find the correct one to load a particular file.
+to be searched to find the correct one to load a particular file.
 
-A macro, DECLARE_FILELOADER_ALGORITHM is defined in RegisterFileLoader.h. Use
-this in place of the standard
-DECLARE_ALGORITHM macro
+A macro, DECLARE_FILELOADER_ALGORITHM is defined in RegisterFileLoader.h.
+Use this in place of the standard DECLARE_ALGORITHM macro
  */
 class MANTID_API_DLL FileLoaderRegistryImpl {
 public:
   /// Defines types of possible file
-  enum LoaderFormat { LegacyNexus, Generic, Nexus };
+  enum LoaderFormat { LegacyNexus = 0, Generic, Nexus, NexusLazy, enum_count };
 
 public:
   /// @returns the number of entries in the registry
@@ -103,6 +102,13 @@ private:
               "' registered as Nexus loader but it does not inherit from API::IFileLoader<Kernel::NexusDescriptor>");
         }
         break;
+      case NexusLazy:
+        if (!std::is_base_of<IFileLoader<Nexus::NexusDescriptorLazy>, T>::value) {
+          throw std::runtime_error(std::string("FileLoaderRegistryImpl::subscribe - Class '") + typeid(T).name() +
+                                   "' registered as NexusLazy loader but it does not inherit from "
+                                   "API::IFileLoader<Nexus::NexusDescriptorLazy>");
+        }
+        break;
       case Generic:
         if (!std::is_base_of<IFileLoader<Kernel::FileDescriptor>, T>::value) {
           throw std::runtime_error(
@@ -121,7 +127,7 @@ private:
 
   /// The list of names. The index pointed to by LoaderFormat defines a set for
   /// that format. The length is equal to the length of the LoaderFormat enum
-  std::array<std::multimap<std::string, int>, 3> m_names;
+  std::array<std::multimap<std::string, int>, enum_count> m_names;
   /// Total number of names registered
   size_t m_totalSize;
 

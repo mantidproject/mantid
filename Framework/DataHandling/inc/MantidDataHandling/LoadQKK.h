@@ -11,7 +11,7 @@
 //---------------------------------------------------
 #include "MantidAPI/IFileLoader.h"
 #include "MantidDataHandling/DllConfig.h"
-#include "MantidNexus/NexusDescriptor.h"
+#include "MantidNexus/NexusDescriptorLazy.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -23,7 +23,7 @@ namespace DataHandling {
      @author Roman Tolchenov, Tessella plc
      @date 31/10/2011
   */
-class MANTID_DATAHANDLING_DLL LoadQKK : public API::IFileLoader<Nexus::NexusDescriptor> {
+class MANTID_DATAHANDLING_DLL LoadQKK : public API::IFileLoader<Nexus::NexusDescriptorLazy> {
 public:
   /// Algorithm's name
   const std::string name() const override { return "LoadQKK"; }
@@ -37,7 +37,7 @@ public:
   const std::string category() const override { return "DataHandling\\Nexus"; }
 
   /// Returns a confidence value that this algorithm can load a file
-  int confidence(Nexus::NexusDescriptor &descriptor) const override;
+  int confidence(Nexus::NexusDescriptorLazy &descriptor) const override;
 
 private:
   /// Initialisation code

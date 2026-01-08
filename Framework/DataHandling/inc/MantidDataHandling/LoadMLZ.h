@@ -12,14 +12,14 @@
 #include "MantidAPI/IFileLoader.h"
 #include "MantidDataHandling/DllConfig.h"
 #include "MantidNexus/NexusClasses_fwd.h"
-#include "MantidNexus/NexusDescriptor.h"
+#include "MantidNexus/NexusDescriptorLazy.h"
 
 namespace Mantid {
 namespace DataHandling {
 /**
     LoadMLZ : Loads MLZ nexus or hdf file into a Mantid workspace.
  */
-class MANTID_DATAHANDLING_DLL LoadMLZ : public API::IFileLoader<Nexus::NexusDescriptor> {
+class MANTID_DATAHANDLING_DLL LoadMLZ : public API::IFileLoader<Nexus::NexusDescriptorLazy> {
 public:
   LoadMLZ();
 
@@ -31,7 +31,7 @@ public:
   const std::string summary() const override { return "Loads a nexus file from MLZ facility."; }
 
   /// Returns a confidence value that this algorithm can load a file
-  int confidence(Nexus::NexusDescriptor &descriptor) const override;
+  int confidence(Nexus::NexusDescriptorLazy &descriptor) const override;
 
 private:
   void init() override;

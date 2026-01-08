@@ -971,10 +971,8 @@ void ExperimentInfo::loadSampleAndLogInfoNexus(Nexus::File *file) {
 void ExperimentInfo::loadExperimentInfoNexus(const std::string &nxFilename, Nexus::File *file,
                                              std::string &parameterStr, const Nexus::NexusDescriptor &fileInfo,
                                              const std::string &prefix) {
-  // TODO
-  // load sample and log info
+  // TODO load sample and log info
   loadSampleAndLogInfoNexus(file, fileInfo, prefix);
-
   loadInstrumentInfoNexus(nxFilename, file, parameterStr);
 }
 
