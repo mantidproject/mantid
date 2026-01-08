@@ -249,6 +249,9 @@ class FullInstrumentViewPresenter:
         self.update_plotter()
         self._update_line_plot_ws_and_draw(self._view.current_selected_unit())
 
+    def on_save_roi_to_workspace_clicked(self) -> None:
+        self._model.save_roi_workspace_to_ads()
+
     def on_save_mask_to_workspace_clicked(self) -> None:
         self._model.save_mask_workspace_to_ads()
         self.on_mask_item_selected()
@@ -257,10 +260,36 @@ class FullInstrumentViewPresenter:
         self._model.overwrite_mask_to_current_workspace()
         self.on_clear_masks_clicked()
 
+    def on_clear_pick_selections_clicked(self) -> None:
+        self._view.clear_pick_selections_list()
+        self._model.clear_all_picked_detectors()
+        self.on_pick_selection_item_selected()
+
     def on_clear_masks_clicked(self) -> None:
         self._view.clear_mask_list()
         self._model.clear_stored_masks()
         self.on_mask_item_selected()
+
+    def on_save_xml_mask_clicked(self):
+        filename = self._get_filename_from_dialog()
+        if not filename:
+            return
+        self._model.save_xml_mask(filename)
+
+    def on_save_xml_roi_clicked(self):
+        filename = self._get_filename_from_dialog()
+        if not filename:
+            return
+        self._model.save_xml_roi(filename)
+
+    def _get_filename_from_dialog(self):
+        filename = open_a_file_dialog(
+            accept_mode=QFileDialog.AcceptSave,
+            file_mode=QFileDialog.AnyFile,
+            file_filter="XML files (*xml)",
+            directory=ConfigService["defaultsave.directory"],
+        )
+        return filename
 
     def _reload_mask_workspaces(self) -> None:
         self._view.refresh_mask_ws_list()
@@ -418,14 +447,3 @@ class FullInstrumentViewPresenter:
             if len(x_values) > 0:
                 self._view.plot_lineplot_overlay(x_values, labels, ws_peaks.colour)
         self._view.redraw_lineplot()
-
-    def on_save_xml_mask_clicked(self):
-        filename = open_a_file_dialog(
-            accept_mode=QFileDialog.AcceptSave,
-            file_mode=QFileDialog.AnyFile,
-            file_filter="XML files (*xml)",
-            directory=ConfigService["defaultsave.directory"],
-        )
-        if not filename:
-            return
-        self._model.save_xml_mask(filename)

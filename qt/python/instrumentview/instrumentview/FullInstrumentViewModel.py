@@ -80,6 +80,7 @@ class FullInstrumentViewModel:
         self._is_monitor = detector_info_table.columnArray("Monitor")
         self._is_valid = self._is_monitor == "no"
         self._mask_ws, _ = ExtractMask(self._workspace, StoreInADS=False)
+        self._roi_ws = self._mask_ws.clone(StoreInADS=False)
         self._is_masked_in_ws = self._mask_ws.extractY().flatten().astype(bool)
         # For computing current mask, detached from the permanent mask in ws
         self._is_masked = self._is_masked_in_ws
@@ -186,6 +187,12 @@ class FullInstrumentViewModel:
         for i, v in enumerate(self._is_masked):
             self._mask_ws.dataY(i)[:] = v
         return self._mask_ws
+
+    @property
+    def roi_ws(self) -> MatrixWorkspace:
+        for i, v in enumerate(~self._detector_is_picked):
+            self._roi_ws.dataY(i)[:] = v
+        return self._roi_ws
 
     @property
     def integration_limits(self) -> tuple[float, float]:
@@ -450,21 +457,33 @@ class FullInstrumentViewModel:
     def cached_masks_keys(self) -> list[str]:
         return list(self._cached_masks_map.keys())
 
-    def save_mask_workspace_to_ads(self) -> None:
-        for i, v in enumerate(self._is_masked):
-            self._mask_ws.dataY(i)[:] = v
+    @property
+    def cached_pick_selections_keys(self) -> list[str]:
+        return list(self._cached_pick_selections_map.keys())
 
+    def save_mask_workspace_to_ads(self) -> None:
+        self._save_mask_workspace_to_ads(self.mask_ws)
+
+    def save_roi_workspace_to_ads(self) -> None:
+        self._save_mask_workspace_to_ads(self.roi_ws)
+
+    def _save_mask_workspace_to_ads(self, ws) -> None:
         xmin, xmax = self._integration_limits
-        # TODO: Figure out naming convention
-        ExtractMaskToTable(self._mask_ws, Xmin=xmin, Xmax=xmax, OutputWorkspace="MaskTable")
-        CloneWorkspace(self._mask_ws, OutputWorkspace="MaskWorkspace")
+        ExtractMaskToTable(ws, Xmin=xmin, Xmax=xmax, OutputWorkspace="MaskTable")
+        CloneWorkspace(ws, OutputWorkspace="MaskWorkspace")
 
     def save_xml_mask(self, filename) -> None:
+        self._save_xml_mask(self.mask_ws, filename)
+
+    def save_xml_roi(self, filename) -> None:
+        self._save_xml_mask(self.roi_ws, filename)
+
+    def _save_xml_mask(self, ws, filename):
         if not filename:
             return
         if Path(filename).suffix != ".xml":
             filename += ".xml"
-        SaveMask(self.mask_ws, OutputFile=filename)
+        SaveMask(ws, OutputFile=filename)
 
     def overwrite_mask_to_current_workspace(self) -> None:
         # TODO: Check if copies are expensive with big workspaces

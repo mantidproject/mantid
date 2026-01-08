@@ -458,7 +458,6 @@ class FullInstrumentViewWindow(QMainWindow):
 
     def setup_connections_to_presenter(self) -> None:
         self._projection_combo_box.currentIndexChanged.connect(self._presenter.update_plotter)
-        # self._multi_select_check.stateChanged.connect(self._presenter.update_detector_picker)
         # self._clear_selection_button.clicked.connect(self._presenter.on_clear_selected_detectors_clicked)
         self._contour_range_slider.sliderReleased.connect(self._presenter.on_contour_limits_updated)
         self._integration_limit_slider.sliderReleased.connect(self._presenter.on_integration_limits_updated)
@@ -469,9 +468,12 @@ class FullInstrumentViewWindow(QMainWindow):
         self._mask_list.itemChanged.connect(self._presenter.on_mask_item_selected)
         self._selection_list.itemChanged.connect(self._presenter.on_pick_selection_item_selected)
         self._save_mask_to_ws.clicked.connect(self._presenter.on_save_mask_to_workspace_clicked)
+        self._save_selection_to_ws.clicked.connect(self._presenter.on_save_roi_to_workspace_clicked)
         self._save_mask_to_file.clicked.connect(self._presenter.on_save_xml_mask_clicked)
+        self._save_selection_to_file.clicked.connect(self._presenter.on_save_xml_roi_clicked)
         self._overwrite_mask.clicked.connect(self._presenter.on_overwrite_mask_clicked)
         self._clear_masks.clicked.connect(self._presenter.on_clear_masks_clicked)
+        self._clear_selections.clicked.connect(self._presenter.on_clear_pick_selections_clicked)
         self._aspect_ratio_check_box.clicked.connect(self._presenter.on_aspect_ratio_check_box_clicked)
 
         self._add_connections_to_edits_and_slider(
@@ -943,3 +945,9 @@ class FullInstrumentViewWindow(QMainWindow):
             removed = self._mask_list.takeItem(i)
             del removed
         self.refresh_mask_ws_list()
+
+    def clear_pick_selections_list(self) -> None:
+        # Iterate backwards otherwise breaks indexing
+        for i in range(self._selection_list.count() - 1, -1, -1):
+            removed = self._selection_list.takeItem(i)
+            del removed
