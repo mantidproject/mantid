@@ -110,6 +110,8 @@ MANTID_NEXUS_DLL std::ostream &operator<<(std::ostream &os, const NXcompression 
 // forward declare
 namespace Mantid::Nexus {
 
+std::string const SCIENTIFIC_DATA_SET("SDS");
+
 typedef hsize_t dimsize_t;
 typedef std::vector<dimsize_t> DimVector;
 

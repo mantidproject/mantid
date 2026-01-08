@@ -110,4 +110,17 @@ public:
     // verify that non-existing root attributes are not there
     TS_ASSERT_EQUALS(descriptor.hasRootAttr("not_an_attr"), false);
   }
+
+  void test_getStrData() {
+    std::cout << "\nTesting getStrData in NexusDescriptorLazy" << std::endl;
+    // create a descriptor with the correct values
+    const std::string filename = NexusTest::getFullPath("EQSANS_89157.nxs.h5");
+    Mantid::Nexus::NexusDescriptorLazy descriptor(filename);
+
+    // verify that existing data can be read
+    TS_ASSERT_EQUALS(descriptor.getStrData("/entry/instrument/name"), "EQ-SANS");
+
+    // verify that non-existing data throws
+    TS_ASSERT_EQUALS(descriptor.getStrData("/entry/instrument/not_a_data"), "");
+  }
 };
