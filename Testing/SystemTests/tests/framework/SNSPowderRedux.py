@@ -216,7 +216,7 @@ class PG3AbsorptionCorrection(systemtesting.MantidSystemTest):
 
 
 class PG3StripPeaks(systemtesting.MantidSystemTest):
-    ref_file = "PG3_4866_reference.gsa"
+    ref_file = "PG3_4866_reference.nxs"
     cal_file = "PG3_FERNS_d4832_2011_08_24.cal"
 
     def skipTests(self):
@@ -273,7 +273,7 @@ class PG3StripPeaks(systemtesting.MantidSystemTest):
 
         # load output gsas file and the golden one
         LoadGSS(Filename="PG3_4866.gsa", OutputWorkspace="PG3_4866")
-        LoadGSS(Filename=self.ref_file, OutputWorkspace="PG3_4866_golden")
+        LoadNexus(Filename=self.ref_file, OutputWorkspace="PG3_4866_golden")
 
     def validateMethod(self):
         self.tolerance = 0.1
