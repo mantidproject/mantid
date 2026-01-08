@@ -12,7 +12,6 @@
 /********** Source = MantidVersion.cpp.in *****************************************************/
 
 #include "MantidKernel/MantidVersion.h"
-#include "MantidTypes/Core/DateAndTime.h"
 #include <chrono>
 #include <iostream>
 #include <sstream>
@@ -124,24 +123,40 @@ std::string MantidVersion::revisionFull()
   return REVISION_FULL;
 }
 
+Types::Core::DateAndTime MantidVersion::releaseDateAndTime() {
+  if (REVISION_DATE == "UNKNOWN") {
+    // something went wrong in VersionNumber.cmake so give the default constructor result
+    Types::Core::DateAndTime release;
+    return release;
+  } else {
+    // pull apart string into year, month, and day objects
+    // WARNING if the format changes this will break
+    const auto day = std::chrono::day(std::stoi(REVISION_DATE.substr(4,2)));
+    const auto month = to_month(REVISION_DATE.substr(7,3));
+    const auto year = std::chrono::year(std::stoi(REVISION_DATE.substr(11,4)));
+    std::string time = REVISION_DATE.substr(16);
+    if (time.empty()) {
+      time = "00:01"; // assume one minute past midnight
+    } else {
+      time.erase(find_if(time.begin(), time.end(), isspace));
+    }
+
+    // create a proper chrono from it
+    std::chrono::year_month_day ymd(year, month, day);
+    // convert to iso8601 string to get to DateAndTime
+    std::stringstream isostr;
+    isostr << ymd << "T" << time;
+
+    Types::Core::DateAndTime release(isostr.str());
+    return release;
+  }
+}
+
 std::string MantidVersion::releaseDate()
 {
-  // pull apart string into year, month, and day objects
-  // WARNING if the format changes this will break
-  const auto day = std::chrono::day(std::stoi(REVISION_DATE.substr(4,2)));
-  const auto month = to_month(REVISION_DATE.substr(7,3));
-  const auto year = std::chrono::year(std::stoi(REVISION_DATE.substr(11,4)));
-  std::string time = REVISION_DATE.substr(15);
-  // create a proper chrono from it
-  std::chrono::year_month_day ymd(year, month, day);
-  // convert to iso8601 to get to DateAndTime
-  std::stringstream isostr;
-  isostr << ymd;
-  isostr << "T00:01"; // add the time-of-day so the string can be parsed
-  Types::Core::DateAndTime revisionDateAndTime(isostr.str());
-
   const std::string GIT_DATE_FMT("%a, %e %b %Y");
-  return revisionDateAndTime.toFormattedString(GIT_DATE_FMT);
+  const auto release = releaseDateAndTime();
+  return release.toFormattedString(GIT_DATE_FMT);
 }
 
 std::string MantidVersion::doi()

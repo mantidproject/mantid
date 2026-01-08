@@ -98,9 +98,6 @@ execute_process(
 )
 if(REVISION_DATE STREQUAL "")
   set(REVISION_DATE "UNKNOWN")
-else()
-  # only the last portion of the datetime
-  string(SUBSTRING ${REVISION_DATE} 0 15 REVISION_DATE)
 endif()
 
 message(STATUS "Git revision ${REVISION_FULL} on ${REVISION_DATE}")

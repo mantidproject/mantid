@@ -51,6 +51,8 @@ void export_MantidVersion() {
   def("revision", &Mantid::Kernel::MantidVersion::revision, "Returns the abbreviated SHA-1 of the last commit");
   def("revision_full", &Mantid::Kernel::MantidVersion::revisionFull, "Returns the full SHA-1 of the last commit");
   def("release_date", &Mantid::Kernel::MantidVersion::releaseDate, "Returns the date of the last commit");
+  def("release_date_and_time", &Mantid::Kernel::MantidVersion::releaseDateAndTime,
+      "Returns the DateAndTime of the last commit");
   def("doi", &Mantid::Kernel::MantidVersion::doi, "Returns the DOI for this release of Mantid");
   def("paper_citation", &Mantid::Kernel::MantidVersion::paperCitation, "Returns The citation for the Mantid paper");
 }
