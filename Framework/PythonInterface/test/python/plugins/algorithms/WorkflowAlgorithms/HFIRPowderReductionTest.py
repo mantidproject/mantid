@@ -316,3 +316,7 @@ class AutoPopulateTests(unittest.TestCase):
         run_numbers = vanadium_background_run_numbers_prop.value
         compareResult = (run_numbers == np.array([7003, 7004])).all()
         self.assertTrue(compareResult)
+
+
+if __name__ == "__main__":
+    unittest.main()
