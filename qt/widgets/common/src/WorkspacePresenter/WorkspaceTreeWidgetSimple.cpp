@@ -314,7 +314,7 @@ QMenu *WorkspaceTreeWidgetSimple::createWorkspaceContextMenu(const QStringList &
   return menu;
 }
 
-MenuActions WorkspaceTreeWidgetSimple::intersectionOfActions(const std::vector<MenuActions> &actionVecs) {
+MenuActions WorkspaceTreeWidgetSimple::intersectionOfActions(std::vector<MenuActions> actionVecs) {
   if (actionVecs.empty()) {
     return {};
   }

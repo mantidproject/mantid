@@ -121,7 +121,7 @@ private:
 
   PlotMenuActions createMatrixWorkspacePlotMenu(bool hasMultipleBins);
 
-  MenuActions intersectionOfActions(const std::vector<MenuActions> &actionVecs);
+  MenuActions intersectionOfActions(std::vector<MenuActions> actionVecs);
 
   QAction *m_plotSpectrum, *m_plotBin, *m_overplotSpectrum, *m_plotSpectrumWithErrs, *m_overplotSpectrumWithErrs,
       *m_plotColorfill, *m_sampleLogs, *m_sliceViewer, *m_showInstrument, *m_showData, *m_showAlgorithmHistory,
