@@ -54,6 +54,19 @@ set(INC_FILES
 
 set(UI_FILES ALCBaselineModellingView.ui ALCDataLoadingView.ui ALCInterface.ui ALCPeakFittingView.ui)
 
+set(PRECOMP_HEADERS
+    <MantidAPI/Algorithm.h>
+    <MantidAPI/MatrixWorkspace_fwd.h>
+    <MantidKernel/System.h>
+    <QDialog>
+    <QString>
+    <QWidget>
+    <map>
+    <set>
+    <string>
+    <vector>
+)
+
 mtd_add_qt_library(
   TARGET_NAME MantidScientificInterfacesMuon
   QT_VERSION 5
@@ -61,28 +74,12 @@ mtd_add_qt_library(
   MOC ${MOC_FILES}
   NOMOC ${INC_FILES}
   UI ${UI_FILES}
-  DEFS IN_MANTIDQT_MUONINTERFACE
+  DEFS IN_MANTIDQT_MUONINTERFACE PRECOMPILED ${PRECOMP_HEADERS}
   LINK_LIBS ${CORE_MANTIDLIBS} ${POCO_LIBRARIES} ${Boost_LIBRARIES} ${JSONCPP_LIBRARIES}
   MTD_QT_LINK_LIBS MantidQtWidgetsCommon MantidQtWidgetsMplCpp MantidQtWidgetsPlotting
   INSTALL_DIR_BASE ${WORKBENCH_PLUGINS_DIR}
   OSX_INSTALL_RPATH @loader_path/../../MacOS @loader_path/../../plugins/qt5
   LINUX_INSTALL_RPATH "\$ORIGIN/../../${LIB_DIR};\$ORIGIN/../../plugins/qt5/"
-)
-
-# Use a precompiled header where they are supported
-target_precompile_headers(
-  MantidScientificInterfacesMuonQt5 # change for qt6
-  PRIVATE
-  <MantidAPI/Algorithm.h>
-  <MantidAPI/MatrixWorkspace_fwd.h>
-  <MantidKernel/System.h>
-  <QDialog>
-  <QString>
-  <QWidget>
-  <map>
-  <set>
-  <string>
-  <vector>
 )
 
 # Testing target

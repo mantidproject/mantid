@@ -46,6 +46,19 @@ set(UI_FILES
     inc/MantidQtWidgets/Plugins/AlgorithmDialogs/SortTableWorkspaceDialog.ui
 )
 
+set(PRECOMP_HEADERS
+    <MantidAPI/Algorithm.h>
+    <MantidAPI/MatrixWorkspace_fwd.h>
+    <MantidKernel/System.h>
+    <QDialog>
+    <QString>
+    <QWidget>
+    <map>
+    <set>
+    <string>
+    <vector>
+)
+
 include_directories(inc inc/MantidQtWidgets/Plugins/AlgorithmDialogs)
 
 mtd_add_qt_library(
@@ -54,27 +67,11 @@ mtd_add_qt_library(
   SRC ${SRC_FILES}
   MOC ${MOC_FILES}
   NOMOC ${INC_FILES}
-  UI ${UI_FILES}
+  UI ${UI_FILES} PRECOMPILED ${PRECOMP_HEADERS}
   LINK_LIBS ${CORE_MANTIDLIBS} ${POCO_LIBRARIES} ${Boost_LIBRARIES} ${QT_LIBRARIES} ${OPENGL_LIBRARIES}
   QT5_LINK_LIBS Qt5::OpenGL Qt5::Qscintilla
   MTD_QT_LINK_LIBS MantidQtWidgetsCommon
   OSX_INSTALL_RPATH @loader_path/../../MacOS
   LINUX_INSTALL_RPATH "\$ORIGIN/../../${LIB_DIR}"
   INSTALL_DIR_BASE ${WORKBENCH_PLUGINS_DIR}
-)
-
-# Use a precompiled header where they are supported
-target_precompile_headers(
-  MantidQtWidgetsPluginsAlgorithmDialogsQt5 # change for qt6
-  PRIVATE
-  <MantidAPI/Algorithm.h>
-  <MantidAPI/MatrixWorkspace_fwd.h>
-  <MantidKernel/System.h>
-  <QDialog>
-  <QString>
-  <QWidget>
-  <map>
-  <set>
-  <string>
-  <vector>
 )

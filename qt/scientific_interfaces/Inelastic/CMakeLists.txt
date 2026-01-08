@@ -8,6 +8,32 @@ add_subdirectory(Corrections)
 add_subdirectory(Processor)
 add_subdirectory(QENSFitting)
 
+set(PRECOMP_HEADERS
+    <MantidAPI/Algorithm.h>
+    <MantidAPI/MatrixWorkspace.h>
+    <MantidAPI/MatrixWorkspace_fwd.h>
+    <MantidKernel/System.h>
+    <MantidQtWidgets/Common/UserInputValidator.h>
+    <QDialog>
+    <QFileInfo>
+    <QMap>
+    <QObject>
+    <QString>
+    <QWidget>
+    <QtCore/QVariant>
+    <QtWidgets/QAction>
+    <QtWidgets/QApplication>
+    <QtWidgets/QButtonGroup>
+    <QtWidgets/QLabel>
+    <QtWidgets/QPushButton>
+    <QtCore/qbytearray.h>
+    <QtCore/qmetatype.h>
+    <map>
+    <set>
+    <string>
+    <vector>
+)
+
 mtd_add_qt_library(
   TARGET_NAME MantidScientificInterfacesInelastic
   QT_VERSION 5
@@ -15,7 +41,7 @@ mtd_add_qt_library(
   MOC ${ALL_MOC_FILES}
   NOMOC ${ALL_INC_FILES}
   UI ${ALL_UI_FILES}
-  DEFS IN_MANTIDQT_INELASTIC
+  DEFS IN_MANTIDQT_INELASTIC PRECOMPILED ${PRECOMP_HEADERS}
   INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}
   LINK_LIBS ${CORE_MANTIDLIBS} Mantid::PythonInterfaceCore ${POCO_LIBRARIES} ${Boost_LIBRARIES} Python::Python
   MTD_QT_LINK_LIBS MantidQtWidgetsCommon MantidQtWidgetsPlotting MantidQtWidgetsMplCpp MantidQtWidgetsSpectroscopy
@@ -23,35 +49,6 @@ mtd_add_qt_library(
   INSTALL_DIR_BASE ${WORKBENCH_PLUGINS_DIR}
   OSX_INSTALL_RPATH @loader_path/../../MacOS @loader_path/../../Frameworks @loader_path/../../plugins/qt5
   LINUX_INSTALL_RPATH "\$ORIGIN/../../${LIB_DIR};\$ORIGIN/../../plugins/qt5/"
-)
-
-# Use a precompiled header where they are supported
-target_precompile_headers(
-  MantidScientificInterfacesInelasticQt5 # change for qt6
-  PRIVATE
-  <MantidAPI/Algorithm.h>
-  <MantidAPI/MatrixWorkspace.h>
-  <MantidAPI/MatrixWorkspace_fwd.h>
-  <MantidKernel/System.h>
-  <MantidQtWidgets/Common/UserInputValidator.h>
-  <QDialog>
-  <QFileInfo>
-  <QMap>
-  <QObject>
-  <QString>
-  <QWidget>
-  <QtCore/QVariant>
-  <QtWidgets/QAction>
-  <QtWidgets/QApplication>
-  <QtWidgets/QButtonGroup>
-  <QtWidgets/QLabel>
-  <QtWidgets/QPushButton>
-  <QtCore/qbytearray.h>
-  <QtCore/qmetatype.h>
-  <map>
-  <set>
-  <string>
-  <vector>
 )
 
 # Testing target

@@ -24,6 +24,19 @@ set(MOC_FILES ${GUI_MOC_FILES})
 
 set(UI_FILES ${GUI_UI_FILES})
 
+set(PRECOMP_HEADERS
+    <MantidAPI/Algorithm.h>
+    <MantidAPI/MatrixWorkspace_fwd.h>
+    <MantidKernel/System.h>
+    <QDialog>
+    <QString>
+    <QWidget>
+    <map>
+    <set>
+    <string>
+    <vector>
+)
+
 mtd_add_qt_library(
   TARGET_NAME MantidScientificInterfacesISISReflectometry
   QT_VERSION 5
@@ -31,7 +44,7 @@ mtd_add_qt_library(
   MOC ${MOC_FILES}
   NOMOC ${INC_FILES}
   UI ${UI_FILES}
-  DEFS IN_MANTIDQT_ISISREFLECTOMETRY
+  DEFS IN_MANTIDQT_ISISREFLECTOMETRY PRECOMPILED ${PRECOMP_HEADERS}
   INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}
   LINK_LIBS ${CORE_MANTIDLIBS} ${POCO_LIBRARIES} ${Boost_LIBRARIES} ${JSONCPP_LIBRARIES} ${PYTHON_LIBRARIES}
   MTD_QT_LINK_LIBS MantidQtWidgetsCommon MantidQtWidgetsInstrumentView MantidQtIcons MantidQtWidgetsMplCpp
@@ -39,22 +52,6 @@ mtd_add_qt_library(
   INSTALL_DIR_BASE ${WORKBENCH_PLUGINS_DIR}
   OSX_INSTALL_RPATH @loader_path/../../MacOS @loader_path/../../Frameworks @loader_path/../../plugins/qt5
   LINUX_INSTALL_RPATH "\$ORIGIN/../../${LIB_DIR}"
-)
-
-# Use a precompiled header where they are supported
-target_precompile_headers(
-  MantidScientificInterfacesISISReflectometryQt5 # change for qt6
-  PRIVATE
-  <MantidAPI/Algorithm.h>
-  <MantidAPI/MatrixWorkspace_fwd.h>
-  <MantidKernel/System.h>
-  <QDialog>
-  <QString>
-  <QWidget>
-  <map>
-  <set>
-  <string>
-  <vector>
 )
 
 if(MANTID_FRAMEWORK_LIB STREQUAL "BUILD")
