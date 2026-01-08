@@ -36,7 +36,7 @@ using HistogramData::BinEdges;
 using HistogramData::Counts;
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadMLZ)
+DECLARE_NEXUS_LAZY_FILELOADER_ALGORITHM(LoadMLZ)
 
 /** Constructor
  */
@@ -99,7 +99,7 @@ void LoadMLZ::exec() {
  * @returns An integer specifying the confidence level. 0 indicates it will not
  * be used
  */
-int LoadMLZ::confidence(Nexus::NexusDescriptor &descriptor) const {
+int LoadMLZ::confidence(Nexus::NexusDescriptorLazy &descriptor) const {
   // fields existent only at the MLZ
   if (descriptor.isEntry("/Scan/wavelength") && descriptor.isEntry("/Scan/title") && descriptor.isEntry("/Scan/mode")) {
     return 80;
