@@ -21,9 +21,11 @@ class Workspace;
 
 namespace MantidQt::MantidWidgets {
 
-struct plotMenuActions {
-  std::vector<QAction *> plotActions = {};
-  std::vector<QAction *> plot3DActions = {};
+using MenuActions = std::vector<QAction *>;
+
+struct PlotMenuActions {
+  MenuActions plotActions = {};
+  MenuActions plot3DActions = {};
 };
 
 class MantidDisplayBase;
@@ -111,18 +113,15 @@ private slots:
 private:
   QMenu *createWorkspaceContextMenu(const QStringList &selectedWorkspaces);
 
-  std::tuple<std::vector<QAction *>, plotMenuActions>
-  createMatrixWorkspaceActions(const Mantid::API::MatrixWorkspace &workspace);
-  std::vector<QAction *> createTableWorkspaceActions(const Mantid::API::ITableWorkspace &workspace);
-  std::tuple<std::vector<QAction *>, plotMenuActions>
-  createMDWorkspaceActions(const Mantid::API::IMDWorkspace &workspace);
-  std::tuple<std::vector<QAction *>, plotMenuActions>
-  createWorkspaceGroupActions(const Mantid::API::WorkspaceGroup &workspace);
+  std::tuple<MenuActions, PlotMenuActions> createMatrixWorkspaceActions(const Mantid::API::MatrixWorkspace &workspace);
+  MenuActions createTableWorkspaceActions(const Mantid::API::ITableWorkspace &workspace);
+  std::tuple<MenuActions, PlotMenuActions> createMDWorkspaceActions(const Mantid::API::IMDWorkspace &workspace);
+  std::tuple<MenuActions, PlotMenuActions> createWorkspaceGroupActions(const Mantid::API::WorkspaceGroup &workspace);
   void addGeneralWorkspaceActions(QMenu *menu) const;
 
-  plotMenuActions createMatrixWorkspacePlotMenu(bool hasMultipleBins);
+  PlotMenuActions createMatrixWorkspacePlotMenu(bool hasMultipleBins);
 
-  std::vector<QAction *> intersectionOfActions(std::vector<std::vector<QAction *>> actionVecs);
+  MenuActions intersectionOfActions(const std::vector<MenuActions> &actionVecs);
 
   QAction *m_plotSpectrum, *m_plotBin, *m_overplotSpectrum, *m_plotSpectrumWithErrs, *m_overplotSpectrumWithErrs,
       *m_plotColorfill, *m_sampleLogs, *m_sliceViewer, *m_showInstrument, *m_showData, *m_showAlgorithmHistory,
