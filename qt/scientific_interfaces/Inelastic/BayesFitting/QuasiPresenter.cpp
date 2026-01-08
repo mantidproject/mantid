@@ -182,17 +182,14 @@ void QuasiPresenter::handleRun() {
   auto const eMin = m_view->eMin();
   auto const eMax = m_view->eMax();
 
-  // Temporary developer flag to allow the testing of quickBayes in the Bayes fitting interface
-  auto const useQuickBayes = SettingsHelper::hasDevelopmentFlag("quickbayes");
-
   // Construct an output base name for the output workspaces
   auto const resType = resolutionName.substr(resolutionName.length() - 3);
   auto const programName = program == "QL" ? resType == "res" ? "QLr" : "QLd" : program;
-  auto const algoType = useQuickBayes ? "_quickbayes" : "_quasielasticbayes";
+  auto const algoType = m_useQuickBayes ? "_quickbayes" : "_quasielasticbayes";
   auto const baseName = sampleName.substr(0, sampleName.length() - 3) + programName + algoType;
 
   API::IConfiguredAlgorithm_sptr bayesQuasiAlgorithm;
-  if (useQuickBayes) {
+  if (m_useQuickBayes) {
     bayesQuasiAlgorithm =
         m_model->setupBayesQuasi2Algorithm(program, baseName, background, eMin, eMax, m_view->elasticPeak());
   } else {
@@ -203,6 +200,11 @@ void QuasiPresenter::handleRun() {
   }
 
   m_algorithmRunner->execute(bayesQuasiAlgorithm);
+}
+
+void QuasiPresenter::notifyBackendChanged(const BayesBackendType &backend) {
+  m_useQuickBayes = (backend == BayesBackendType::QUICK_BAYES);
+  m_view->updateBackend(m_useQuickBayes);
 }
 
 void QuasiPresenter::runComplete(IAlgorithm_sptr const &algorithm, bool const error) {

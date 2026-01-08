@@ -85,6 +85,23 @@
        </spacer>
       </item>
       <item>
+       <widget class="QComboBox" name="backendChoice">
+        <property name="currentIndex">
+         <number>0</number>
+        </property>
+        <item>
+         <property name="text">
+          <string>quasielasticbayes</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>quickbayes</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item>
        <widget class="QPushButton" name="pbManageDirs">
         <property name="text">
          <string>Manage Directories</string>
@@ -96,8 +113,6 @@
    </layout>
   </widget>
  </widget>
- <resources>
-  <include location="../../../MantidPlot/icons/icons.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>
