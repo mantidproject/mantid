@@ -21,6 +21,7 @@ class GetFakeLiveInstrumentValue(DataProcessorAlgorithm):
         self._theta_name = "THETA"
         self._s1vg_name = "S1VG"
         self._s2vg_name = "S2VG"
+        self._title_name = "TITLE"
 
     def PyInit(self):
         self._declare_properties()
@@ -68,6 +69,8 @@ class GetFakeLiveInstrumentValue(DataProcessorAlgorithm):
             self.setProperty("Value", "1.001")
         elif propertyName == self._s2vg_name:
             self.setProperty("Value", "0.5")
+        elif propertyName == self._title_name:
+            self.setProperty("Value", "test_title")
         else:
             raise RuntimeError("Requested live value for unexpected property name " + propertyName)
 
@@ -164,6 +167,7 @@ class ReflectometryReductionOneLiveDataTest(unittest.TestCase):
             "GetFakeLiveInstrumentValue",
             "GetFakeLiveInstrumentValue",
             "GetFakeLiveInstrumentValue",
+            "GetFakeLiveInstrumentValue",
             "AddSampleLogMultiple",
             "LoadInstrument",
             "SetInstrumentParameter",
@@ -239,6 +243,7 @@ class ReflectometryReductionOneLiveDataTest(unittest.TestCase):
         self.assertNotIn("THETA", log_names)
         self.assertNotIn("S1VG", log_names)
         self.assertNotIn("S2VG", log_names)
+        self.assertNotIn("TITLE", log_names)
 
     def test_algorithm_fails_for_invalid_block_names(self):
         self.assertRaisesRegex(
@@ -255,6 +260,7 @@ class ReflectometryReductionOneLiveDataTest(unittest.TestCase):
         workspace = self._run_algorithm_with_zero_theta()
         expected = [
             "CloneWorkspace",
+            "GetFakeLiveInstrumentValuesWithZeroTheta",
             "GetFakeLiveInstrumentValuesWithZeroTheta",
             "GetFakeLiveInstrumentValuesWithZeroTheta",
             "GetFakeLiveInstrumentValuesWithZeroTheta",
@@ -282,6 +288,32 @@ class ReflectometryReductionOneLiveDataTest(unittest.TestCase):
         # The algorithm should not loop through workspace groups, it should pass them straight through.
         # We only output an IvsLam workspace from the reduction when workspace groups are correctly handled this way.
         self.assertTrue(AnalysisDataService.doesExist("IvsLam"))
+
+    def _assert_exp_setting_outout_ws_correct(self, workspace):
+        self.assertEqual(workspace.dataX(0).size, 36)
+        self._assert_delta(workspace.dataX(0)[2], 0.0022)
+        self._assert_delta(workspace.dataX(0)[15], 0.0035)
+        self._assert_delta(workspace.dataX(0)[31], 0.0051)
+        self._assert_delta(workspace.dataY(0)[2], 3.24424e-5)
+        self._assert_delta(workspace.dataY(0)[15], 2.35158e-6)
+        self._assert_delta(workspace.dataY(0)[31], 2.01589e-7)
+
+    def test_experiment_setting_state_is_parsed_one_entry(self):
+        state = '[["0.5","test_title","","","","0.002","0.0055","-0.0001","","","",""]]'
+        workspace = self._run_algorithm_with_experiment_settings_state(state)
+        self._assert_exp_setting_outout_ws_correct(workspace)
+
+    def test_experiment_setting_state_is_parsed_two_entry(self):
+        state = (
+            '[["0.5","false_title","","","","","","","","","",""], ["0.5","test_title","","","","0.002","0.0055","-0.0001","","","",""]]'
+        )
+        workspace = self._run_algorithm_with_experiment_settings_state(state)
+        self._assert_exp_setting_outout_ws_correct(workspace)
+
+    def test_experiment_setting_state_is_parsed_wildcard_entry(self):
+        state = '[["0.5","false_title","","","","","","","","","",""], ["","","","","","0.002","0.0055","-0.0001","","","",""]]'
+        workspace = self._run_algorithm_with_experiment_settings_state(state)
+        self._assert_exp_setting_outout_ws_correct(workspace)
 
     def _setup_environment(self):
         self._old_facility = config["default.facility"]
@@ -544,6 +576,11 @@ class ReflectometryReductionOneLiveDataTest(unittest.TestCase):
         args["GetLiveValueAlgorithm"] = "GetFakeLiveInstrumentValuesWithZeroTheta"
         return self._run_algorithm(args)
 
+    def _run_algorithm_with_experiment_settings_state(self, state):
+        args = self._default_args
+        args["ExperimentSettingsState"] = state
+        return self._run_algorithm(args)
+
     def _run_algorithm(self, args):
         alg = create_algorithm("ReflectometryReductionOneLiveData", **args)
         assertRaisesNothing(self, alg.execute)
@@ -578,7 +615,7 @@ class ReflectometryReductionOneLiveDataTest(unittest.TestCase):
         return None
 
     def _check_sample_log_values(self, workspace):
-        expected_logs = {"THETA": (0.5, "deg"), "S1VG": (1.001, "m"), "S2VG": (0.5, "m")}
+        expected_logs = {"THETA": (0.5, "deg"), "S1VG": (1.001, "m"), "S2VG": (0.5, "m"), "TITLE": ("test_title", "None")}
         actual_logs = workspace.getRun().getProperties()
 
         matched_names = []

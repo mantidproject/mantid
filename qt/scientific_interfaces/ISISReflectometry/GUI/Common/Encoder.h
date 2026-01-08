@@ -49,6 +49,7 @@ public:
   QMap<QString, QVariant> encode(const QWidget *window, const std::string &directory) override;
   QList<QString> tags() override;
   QMap<QString, QVariant> encodeBatch(const IMainWindowView *mwv, int batchIndex, bool projectSave = false) override;
+  QVariant extractFromEncoding(const QVariant &vMap, const std::vector<std::string> &jsonKey) const override;
 
 private:
   BatchPresenter *findBatchPresenter(const QtBatchView *gui, const IMainWindowView *mwv);
