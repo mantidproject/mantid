@@ -120,7 +120,7 @@ public:
     // verify that existing data can be read
     TS_ASSERT_EQUALS(descriptor.getStrData("/entry/instrument/name"), "EQ-SANS");
 
-    // verify that non-existing data throws
+    // verify that non-existing data returns empty string
     TS_ASSERT_EQUALS(descriptor.getStrData("/entry/instrument/not_a_data"), "");
   }
 };

@@ -112,8 +112,9 @@ std::string NexusDescriptorLazy::getStrData(std::string const &address) {
   std::string strData;
   if (isEntry(address, SCIENTIFIC_DATA_SET)) {
     // open the data set and get its string data
-    H5::H5File file(m_fileID.get());
-    H5::DataSet dataset = file.openDataSet(address);
+    // using H5Cpp interface because trying to read string data is an absolute nightmare with the C API
+    UniqueID<&H5Dclose> did(H5Dopen(m_fileID, address.c_str(), H5P_DEFAULT));
+    H5::DataSet dataset(did);
     H5::DataType dtype = dataset.getDataType();
     if (dtype.isVariableStr() || dtype.getClass() == H5T_STRING) {
       dataset.read(strData, dtype, dataset.getSpace());

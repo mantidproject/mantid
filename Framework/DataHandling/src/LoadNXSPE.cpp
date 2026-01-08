@@ -44,15 +44,16 @@ using Mantid::HistogramData::BinEdges;
  * @return confidence 0 - 100%
  */
 int LoadNXSPE::identiferConfidence(const std::string &value) {
-  int identifierConfidence = 0;
+  int identifierConfidence(0);
   if (value.empty()) {
-    // do nothing
+    identifierConfidence = 0;
   } else if (value == "NXSPE") {
     identifierConfidence = 99;
   } else {
     // convert to be uppercase for case insensitive comparison
     std::string valueUpper = value;
-    std::transform(valueUpper.begin(), valueUpper.end(), valueUpper.begin(), ::toupper);
+    std::transform(valueUpper.begin(), valueUpper.end(), valueUpper.begin(),
+                   [](unsigned char c) { return std::toupper(c); });
     if (valueUpper.starts_with("NXSP")) {
       identifierConfidence = 95;
     }
