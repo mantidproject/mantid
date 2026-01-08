@@ -1,0 +1,1 @@
+- Fixed a bug where selecting multiple workspaces and right-clicking would open a context menu appropriate for one, but not necessarily all, of the workspaces. This could lead to errors (such as trying to plot a TableWorkspaces). The context menu should now only contain actions support by all selected workspaces.
