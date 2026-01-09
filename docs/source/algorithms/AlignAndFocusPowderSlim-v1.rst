@@ -141,7 +141,7 @@ This algorithm accepts the same ``SplitterWorkspace`` inputs as :ref:`FilterEven
 
 **Example - using a GroupingWorkspace**
 
-You can provide a ``GroupingWorkspace`` to define how the detectors are grouped in the output workspace. By default each bank is treated as a group.
+You can provide a ``GroupingWorkspace`` to define how the detectors are grouped in the output workspace. If a ``GroupingWorkspace`` is not provided, the grouping from the calibration file will be used if provided, else a default grouping of one group per bank is used.
 
 The example done here is using :ref:`GenerateGroupingPowder <algm-GenerateGroupingPowder>` to create a grouping workspace. With an angle step of 45 degrees, this will create 3 groups.
 

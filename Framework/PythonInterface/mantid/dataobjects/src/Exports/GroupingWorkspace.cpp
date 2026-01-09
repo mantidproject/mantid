@@ -36,7 +36,7 @@ void export_GroupingWorkspace() {
       .def("getGroupIDs", &GroupingWorkspace::getGroupIDs, return_value_policy<Policies::VectorToNumpy>(),
            (arg("self"), arg("includeUnsetGroup") = true))
       .def("getDetectorIDsOfGroup", &GroupingWorkspace::getDetectorIDsOfGroup,
-           return_value_policy<Policies::VectorToNumpy>(), (arg("self,"), arg("groupID")));
+           return_value_policy<Policies::VectorToNumpy>(), (arg("self"), arg("groupID")));
 
   // register pointers
   RegisterWorkspacePtrToPython<GroupingWorkspace>();

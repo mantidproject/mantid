@@ -1006,7 +1006,7 @@ public:
     load->execute();
 
     // Use GenerateGroupingPowder to create grouping workspace. This will have a many-to-many relationship between banks
-    // and output spectra. 10 degress gives us 12 groups for VULCAN
+    // and output spectra. 10 degrees gives us 12 groups for VULCAN
     auto gen = AlgorithmManager::Instance().createUnmanaged("GenerateGroupingPowder");
     gen->initialize();
     gen->setProperty("InputWorkspace", "instrument");
@@ -1053,7 +1053,7 @@ public:
     load->execute();
 
     // Use GenerateGroupingPowder to create grouping workspace. This will have a many-to-many relationship between banks
-    // and output spectra. 45 degress gives us 3 groups for VULCAN
+    // and output spectra. 45 degrees gives us 3 groups for VULCAN
     auto gen = AlgorithmManager::Instance().createUnmanaged("GenerateGroupingPowder");
     gen->initialize();
     gen->setProperty("InputWorkspace", "instrument");

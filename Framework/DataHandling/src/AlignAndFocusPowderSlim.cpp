@@ -12,6 +12,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataHandling/AlignAndFocusPowderSlim/BankCalibration.h"
 #include "MantidDataHandling/AlignAndFocusPowderSlim/ProcessBankSplitFullTimeTask.h"
 #include "MantidDataHandling/AlignAndFocusPowderSlim/ProcessBankSplitTask.h"
@@ -54,6 +55,7 @@ using Mantid::API::FileProperty;
 using Mantid::API::ITableWorkspace_sptr;
 using Mantid::API::MatrixWorkspace_sptr;
 using Mantid::API::WorkspaceProperty;
+using Mantid::DataObjects::GroupingWorkspace_sptr;
 using Mantid::DataObjects::MaskWorkspace_sptr;
 using Mantid::DataObjects::TimeSplitter;
 using Mantid::DataObjects::Workspace2D;
@@ -83,13 +85,15 @@ typedef Mantid::Kernel::EnumeratedString<BinUnit, &unitNames> BINUNIT;
 
 const size_t NUM_HIST{6}; // TODO make this determined from groupin
 
+const std::string ENTRY_TOP_LEVEL("entry");
+
 // TODO refactor this to use the actual grouping
 double getFocussedPostion(const detid_t detid, const std::vector<double> &difc_focus,
                           std::map<detid_t, size_t> &detIDToSpecNum) {
   if (detIDToSpecNum.contains(detid)) {
     return difc_focus[detIDToSpecNum[detid]];
   } else {
-    throw std::runtime_error("detid " + std::to_string(detid) + " not found in detIDToSpecNum map.");
+    throw std::runtime_error("Detector ID " + std::to_string(detid) + " not found in detIDToSpecNum map.");
   }
 }
 
@@ -174,8 +178,8 @@ void AlignAndFocusPowderSlim::init() {
                   "The percentage of the average to use as the lower bound when filtering bad pulses.");
   declareProperty(std::make_unique<WorkspaceProperty<DataObjects::GroupingWorkspace>>(
                       PropertyNames::GROUPING_WS, "", Direction::Input, API::PropertyMode::Optional),
-                  "A GroupingWorkspace giving the grouping info. If not provided then the grouping is one per bank. "
-                  "You need to provide");
+                  "A GroupingWorkspace giving the grouping info. If not provided then the grouping from the "
+                  "calibration file will be used if provided, else a default grouping of one group per bank.");
   const std::vector<std::string> cal_exts{".h5", ".hd5", ".hdf", ".cal"};
   declareProperty(std::make_unique<FileProperty>(PropertyNames::CAL_FILE, "", FileProperty::OptionalLoad, cal_exts),
                   "The .cal file containing the position correction factors. Either this or OffsetsWorkspace needs to "
@@ -259,18 +263,37 @@ std::map<std::string, std::string> AlignAndFocusPowderSlim::validateInputs() {
 
   // For now only support either grouping or splitter workspace, not both at the same time
   if ((!isDefault(PropertyNames::GROUPING_WS)) && (!isDefault(PropertyNames::SPLITTER_WS))) {
-    errors[PropertyNames::GROUPING_WS] = "Cannot specify both grouping and splitter workspaces";
-    errors[PropertyNames::SPLITTER_WS] = "Cannot specify both grouping and splitter workspaces";
+    const std::string limitationMsg =
+        "Both grouping and splitter workspaces cannot be used together (limitation to be addressed in a future update)";
+    errors[PropertyNames::GROUPING_WS] = limitationMsg;
+    errors[PropertyNames::SPLITTER_WS] = limitationMsg;
   }
 
-  size_t num_hist = NUM_HIST;
-  if (!isDefault(PropertyNames::GROUPING_WS)) {
-    DataObjects::GroupingWorkspace_const_sptr groupingWS = this->getProperty(PropertyNames::GROUPING_WS);
-    const auto groupIds = groupingWS->getGroupIDs(false);
-    num_hist = groupIds.size();
+  // only specify allow or block list for logs
+  if ((!isDefault(PropertyNames::ALLOW_LOGS)) && (!isDefault(PropertyNames::BLOCK_LOGS))) {
+    errors[PropertyNames::ALLOW_LOGS] = "Cannot specify both allow and block lists";
+    errors[PropertyNames::BLOCK_LOGS] = "Cannot specify both allow and block lists";
   }
 
-  // validate binning information is consistent with each other
+  // the focus group position parameters must have same lengths
+  std::vector<double> l2s = getProperty(PropertyNames::L2);
+  const auto num_l2s = l2s.size();
+  std::vector<double> twoTheta = getProperty(PropertyNames::POLARS);
+  if (num_l2s != twoTheta.size()) {
+    errors[PropertyNames::L2] = strmakef("L2S has inconsistent length %zu", num_l2s);
+    errors[PropertyNames::POLARS] = strmakef("Polar has inconsistent length %zu", twoTheta.size());
+  }
+  // phi is optional, but if set must also have same size
+  std::vector<double> phi = getProperty(PropertyNames::AZIMUTHALS);
+  if (!phi.empty()) {
+    if (num_l2s != phi.size()) {
+      errors[PropertyNames::L2] = strmakef("L2S has inconsistent length %zu", num_l2s);
+      errors[PropertyNames::AZIMUTHALS] = strmakef("Azimuthal has inconsistent length %zu", phi.size());
+      ;
+    }
+  }
+
+  // validate binning information is consistent with each other and number of focus groups
   const std::vector<double> xmins = getProperty(PropertyNames::X_MIN);
   const std::vector<double> xmaxs = getProperty(PropertyNames::X_MAX);
   const std::vector<double> deltas = getProperty(PropertyNames::X_DELTA);
@@ -281,38 +304,13 @@ std::map<std::string, std::string> AlignAndFocusPowderSlim::validateInputs() {
 
   if (std::any_of(deltas.cbegin(), deltas.cend(), [](double d) { return !std::isfinite(d) || d == 0; }))
     errors[PropertyNames::X_DELTA] = "All must be nonzero";
-  else if (!(numDelta == 1 || numDelta == num_hist))
-    errors[PropertyNames::X_DELTA] = "Must have 1 or " + std::to_string(num_hist) + " values";
+  else if (!(numDelta == 1 || numDelta == num_l2s))
+    errors[PropertyNames::X_DELTA] = "Must have 1 or consistent number of values";
 
-  if (!(numMin == 1 || numMin == num_hist))
-    errors[PropertyNames::X_MIN] = "Must have 1 or " + std::to_string(num_hist) + " values";
-
-  if (!(numMax == 1 || numMax == num_hist))
-    errors[PropertyNames::X_MAX] = "Must have 1 or " + std::to_string(num_hist) + " values";
-
-  // only specify allow or block list for logs
-  if ((!isDefault(PropertyNames::ALLOW_LOGS)) && (!isDefault(PropertyNames::BLOCK_LOGS))) {
-    errors[PropertyNames::ALLOW_LOGS] = "Cannot specify both allow and block lists";
-    errors[PropertyNames::BLOCK_LOGS] = "Cannot specify both allow and block lists";
-  }
-
-  // the focus group position parameters must have same lengths
-  std::vector<double> l2s = getProperty(PropertyNames::L2);
-  std::vector<double> twoTheta = getProperty(PropertyNames::POLARS);
-  if (l2s.size() != twoTheta.size()) {
-    errors[PropertyNames::L2] = strmakef("L2S has inconsistent length %zu", l2s.size());
-    errors[PropertyNames::POLARS] = strmakef("Polar has inconsistent length %zu", twoTheta.size());
-  }
-  // phi is optional, but if set must also have same size
-  std::vector<double> phi = getProperty(PropertyNames::AZIMUTHALS);
-  if (!phi.empty()) {
-    if (l2s.size() != phi.size()) {
-      errors[PropertyNames::L2] = strmakef("L2S has inconsistent length %zu", l2s.size());
-      errors[PropertyNames::AZIMUTHALS] = strmakef("Azimuthal has inconsistent length %zu", phi.size());
-      ;
-    }
-  }
-
+  if (!(numMin == 1 || numMin == num_l2s))
+    errors[PropertyNames::X_MIN] = "Must have 1 or consistent number of values";
+  if (!(numMax == 1 || numMax == num_l2s))
+    errors[PropertyNames::X_MAX] = "Must have 1 or consistent number of values";
   return errors;
 }
 
@@ -320,7 +318,15 @@ std::map<std::string, std::string> AlignAndFocusPowderSlim::validateInputs() {
 /** Execute the algorithm.
  */
 void AlignAndFocusPowderSlim::exec() {
-  // create a histogram workspace
+
+  const std::string filename = getPropertyValue(PropertyNames::FILENAME);
+  { // TODO TEMPORARY - this algorithm is hard coded for VULCAN
+    // it needs to be made more generic
+    if (filename.find("VULCAN") == std::string::npos) {
+      throw std::runtime_error("File does not appear to be for VULCAN");
+    }
+  }
+  const Nexus::NexusDescriptor descriptor(filename);
 
   // These give the limits in each file as to which events we actually load (when filtering by time).
   loadStart.resize(1, 0);
@@ -329,7 +335,20 @@ void AlignAndFocusPowderSlim::exec() {
   size_t num_hist = NUM_HIST;
   bool arbitrary_grouping = false; // if false then we have a direct mapping of bank to output spectrum
   std::map<size_t, std::set<detid_t>> grouping;
-  DataObjects::GroupingWorkspace_sptr groupingWS = this->getProperty(PropertyNames::GROUPING_WS);
+  GroupingWorkspace_sptr groupingWS = this->getProperty(PropertyNames::GROUPING_WS);
+
+  // load calibration file if provided
+  const std::string cal_filename = getPropertyValue(PropertyNames::CAL_FILE);
+  ITableWorkspace_sptr calibrationWS;
+  if (!cal_filename.empty()) {
+    // Create a dummy workspace to load the instrument. This is needed for LoadDiffCal but we cannot create the
+    // output workspace yet because we need grouping information from the cal file to know the correct number of
+    // spectra.
+    auto ws = API::WorkspaceFactory::Instance().create("Workspace2D", 1, 2, 1);
+    LoadEventNexus::loadInstrument<MatrixWorkspace_sptr>(filename, ws, ENTRY_TOP_LEVEL, this, &descriptor);
+    calibrationWS = this->loadCalFile(ws, cal_filename, groupingWS);
+  }
+
   if (groupingWS) {
     arbitrary_grouping = true; // any bank can go to any output spectrum
     const auto groupIds = groupingWS->getGroupIDs(false);
@@ -342,20 +361,10 @@ void AlignAndFocusPowderSlim::exec() {
   }
 
   this->progress(.0, "Create output workspace");
-
+  // create a histogram workspace
   MatrixWorkspace_sptr wksp = createOutputWorkspace(num_hist);
 
-  const std::string filename = getPropertyValue(PropertyNames::FILENAME);
-  { // TODO TEMPORARY - this algorithm is hard coded for VULCAN
-    // it needs to be made more generic
-    if (filename.find("VULCAN") == std::string::npos) {
-      throw std::runtime_error("File does not appear to be for VULCAN");
-    }
-  }
-  const Nexus::NexusDescriptor descriptor(filename);
-
   // instrument is needed for lots of things
-  const std::string ENTRY_TOP_LEVEL("entry");
   LoadEventNexus::loadInstrument<MatrixWorkspace_sptr>(filename, wksp, ENTRY_TOP_LEVEL, this, &descriptor);
 
   // TODO parameters should be input information
@@ -450,9 +459,8 @@ void AlignAndFocusPowderSlim::exec() {
 
   // create values for focusing time-of-flight
   this->progress(.1, "Creating calibration constants");
-  const std::string cal_filename = getPropertyValue(PropertyNames::CAL_FILE);
-  if (!cal_filename.empty()) {
-    this->loadCalFile(wksp, cal_filename, difc_focused);
+  if (calibrationWS) {
+    this->initCalibrationConstantsFromCalWS(difc_focused, calibrationWS);
   } else {
     this->initCalibrationConstants(wksp, difc_focused);
   }
@@ -739,28 +747,38 @@ void AlignAndFocusPowderSlim::initCalibrationConstants(API::MatrixWorkspace_sptr
   }
 }
 
-void AlignAndFocusPowderSlim::loadCalFile(const Mantid::API::Workspace_sptr &inputWS, const std::string &filename,
-                                          const std::vector<double> &difc_focus) {
-  auto alg = createChildAlgorithm("LoadDiffCal");
-  alg->setProperty("InputWorkspace", inputWS);
-  alg->setPropertyValue("Filename", filename);
-  alg->setProperty<bool>("MakeCalWorkspace", true);
-  alg->setProperty<bool>("MakeGroupingWorkspace", false);
-  alg->setProperty<bool>("MakeMaskWorkspace", true);
-  alg->setPropertyValue("WorkspaceName", "temp");
-  alg->executeAsChildAlg();
-
-  const ITableWorkspace_sptr calibrationWS = alg->getProperty("OutputCalWorkspace");
+void AlignAndFocusPowderSlim::initCalibrationConstantsFromCalWS(const std::vector<double> &difc_focus,
+                                                                const ITableWorkspace_sptr calibrationWS) {
   for (size_t row = 0; row < calibrationWS->rowCount(); ++row) {
     const detid_t detid = calibrationWS->cell<int>(row, 0);
     const double detc = calibrationWS->cell<double>(row, 1);
     const auto difc_focussed = getFocussedPostion(detid, difc_focus, detIDToSpecNum);
     m_calibration.emplace(detid, difc_focussed / detc);
   }
+}
+
+const ITableWorkspace_sptr AlignAndFocusPowderSlim::loadCalFile(const Mantid::API::Workspace_sptr &inputWS,
+                                                                const std::string &filename,
+                                                                GroupingWorkspace_sptr groupingWS) {
+  auto alg = createChildAlgorithm("LoadDiffCal");
+  alg->setProperty("InputWorkspace", inputWS);
+  alg->setPropertyValue("Filename", filename);
+  alg->setProperty<bool>("MakeCalWorkspace", true);
+  alg->setProperty<bool>("MakeGroupingWorkspace", !bool(groupingWS));
+  alg->setProperty<bool>("MakeMaskWorkspace", true);
+  alg->setPropertyValue("WorkspaceName", "temp");
+  alg->executeAsChildAlg();
+
+  if (!groupingWS)
+    groupingWS = alg->getProperty("OutputGroupingWorkspace");
+
+  const ITableWorkspace_sptr calibrationWS = alg->getProperty("OutputCalWorkspace");
 
   const MaskWorkspace_sptr maskWS = alg->getProperty("OutputMaskWorkspace");
   m_masked = maskWS->getMaskedDetectors();
   g_log.debug() << "Masked detectors: " << m_masked.size() << '\n';
+
+  return calibrationWS;
 }
 
 /**
