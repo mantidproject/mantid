@@ -40,8 +40,8 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(BoxTree.saveBoxStructure("someFile.nxs"));
 
-    Poco::File testFile("someFile.nxs");
-    TSM_ASSERT("BoxTree was not able to create test file", testFile.exists());
+    std::filesystem::path testFile("someFile.nxs");
+    TSM_ASSERT("BoxTree was not able to create test file", std::filesystem::exists(testFile));
 
     MDBoxFlatTree BoxStoredTree;
     int nDims = 3;
