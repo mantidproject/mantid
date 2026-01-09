@@ -18,9 +18,10 @@
 #include "MantidMuon/PlotAsymmetryByLogValue.h"
 #include <cxxtest/TestSuite.h>
 
-#include <Poco/File.h>
 #include <Poco/NObserver.h>
-#include <Poco/TemporaryFile.h>
+
+#include <filesystem>
+#include <fstream>
 
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;
@@ -34,29 +35,30 @@ public:
   /// Constructor: rename the file and store its original name
   explicit TemporaryRenamer(const std::string &fileName) : m_originalName(fileName) {
     try {
-      Poco::File file(m_originalName);
-      TS_ASSERT(file.exists() && file.canWrite() && file.isFile());
-      m_tempName = Poco::TemporaryFile::tempName();
-      file.copyTo(m_tempName);
-      file.remove();
-    } catch (const Poco::FileException &ex) {
+      std::filesystem::path file(m_originalName);
+      TS_ASSERT(std::filesystem::exists(file) && std::filesystem::is_regular_file(file));
+      m_tempName = std::filesystem::temp_directory_path() / std::filesystem::path("temp_" + std::to_string(std::hash<std::string>{}(m_originalName)));
+      m_tempName = m_tempName.string();
+      std::filesystem::copy_file(file, m_tempName, std::filesystem::copy_options::overwrite_existing);
+      std::filesystem::remove(file);
+    } catch (const std::filesystem::filesystem_error &ex) {
       failCopyWithError(m_originalName, m_tempName, ex);
     }
   }
   /// Destructor: restore the file's original name
   ~TemporaryRenamer() {
     try {
-      Poco::File file(m_tempName);
-      file.copyTo(m_originalName);
-      file.remove();
-    } catch (const Poco::FileException &ex) { // Do not throw in the destructor!
+      std::filesystem::path file(m_tempName);
+      std::filesystem::copy_file(file, m_originalName, std::filesystem::copy_options::overwrite_existing);
+      std::filesystem::remove(file);
+    } catch (const std::filesystem::filesystem_error &ex) { // Do not throw in the destructor!
       failCopyWithError(m_tempName, m_originalName, ex);
     }
   }
   /// Fail with an error
-  void failCopyWithError(const std::string &from, const std::string &to, const Poco::FileException &error) const {
+  void failCopyWithError(const std::string &from, const std::string &to, const std::filesystem::filesystem_error &error) const {
     std::ostringstream message;
-    message << "Failed to copy " << from << " to " << to << ": " << error.displayText();
+    message << "Failed to copy " << from << " to " << to << ": " << error.what();
     TS_FAIL(message.str());
   }
 
@@ -304,7 +306,7 @@ public:
 
     TS_ASSERT_DELTA(Y[0], 0.15214, 0.00001);
     TS_ASSERT_DELTA(Y[1], 0.14492, 0.00001);
-    Poco::File(deadTimeFile).remove();
+    std::filesystem::remove(deadTimeFile);
   }
 
   void test_DeadTimeCorrection_FromRunData() {

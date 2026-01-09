@@ -31,7 +31,8 @@
 #include "MantidKernel/TimeROI.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidMuon/PlotAsymmetryByLogValue.h"
-#include "Poco/File.h"
+
+#include <filesystem>
 
 using namespace Mantid::DataObjects;
 using namespace Mantid::HistogramData;
@@ -223,14 +224,13 @@ const std::string PlotAsymmetryByLogValue::getLogUnits(const std::string &fileNa
  */
 std::string PlotAsymmetryByLogValue::getDirectoryFromFileName(const std::string &fileName) const {
   const auto path = FileFinder::Instance().getFullPath(fileName);
-  Poco::File fileBase(path);
-  std::size_t found = fileBase.path().find_last_of("/\\");
-
-  if (found == std::string::npos)
-    return ""; // Empty string if file name could not be found so directory
-               // could not be determined
-
-  return fileBase.path().substr(0, found + 1);
+  std::filesystem::path fileBase(path);
+  
+  if (fileBase.has_parent_path()) {
+    return fileBase.parent_path().string() + "/";
+  }
+  
+  return ""; // Empty string if file name could not be found so directory could not be determined
 }
 
 /**  Loops files between first and last values and adds to vector of file names
@@ -251,7 +251,7 @@ void PlotAsymmetryByLogValue::populateFileNamesFromFirstLast(std::string firstRu
     file << m_filenameBase << fileRunNumber.str() << m_filenameExt;
 
     // Check if file exists
-    if (!Poco::File(file.str()).exists()) {
+    if (!std::filesystem::exists(file.str())) {
       m_log.warning() << "File " << file.str() << " not found\n";
     } else {
       m_fileNames.emplace_back(file.str());
@@ -583,12 +583,12 @@ void PlotAsymmetryByLogValue::parseRunNames(std::string &firstFN, std::string &l
 
     // Try to correct this on the fly by
     // checking if the last run can be found in the first directory...
-    if (Poco::File(pathLast).exists()) {
+    if (std::filesystem::exists(pathLast)) {
       fnBase = firstBase;
       fnExt = firstExt;
       g_log.warning() << "First and last run are not in the same directory. File " << pathLast
                       << " will be used instead.\n";
-    } else if (Poco::File(pathFirst).exists()) {
+    } else if (std::filesystem::exists(pathFirst)) {
       // ...or viceversa
       fnBase = lastBase;
       fnExt = lastExt;
