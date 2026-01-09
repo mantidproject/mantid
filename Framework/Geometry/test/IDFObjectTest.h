@@ -54,14 +54,14 @@ public:
         std::filesystem::path(ConfigService::Instance().getInstrumentDirectory()) / "unit_testing";
     std::string filename = (expectedDir / "IDF_for_UNIT_TESTING.xml").string();
     IDFObject obj(filename);
-    TS_ASSERT_EQUALS(expectedDir.string(), obj.getParentDirectory().string());
+    TS_ASSERT_EQUALS(expectedDir, obj.getParentDirectory());
   }
 
   void testGetFullPath() {
     const std::string filename =
         ConfigService::Instance().getInstrumentDirectory() + "/unit_testing/IDF_for_UNIT_TESTING.xml";
     IDFObject obj(filename);
-    TS_ASSERT_EQUALS(std::filesystem::path(filename).string(), obj.getFileFullPath().string());
+    TS_ASSERT_EQUALS(std::filesystem::path(filename), obj.getFileFullPath());
   }
 
   void testGetExtension() {
