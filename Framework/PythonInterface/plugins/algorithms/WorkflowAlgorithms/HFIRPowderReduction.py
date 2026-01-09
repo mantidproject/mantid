@@ -13,6 +13,7 @@ from mantid.kernel import (
     IntArrayProperty,
 )
 from mantid.dataobjects import MaskWorkspaceProperty
+from mantid.simpleapi import LoadWAND, LoadEventAsWorkspace2D, MaskBTP, mtd, GroupWorkspaces, GroupDetectors
 
 
 class HFIRPowderReduction(DataProcessorAlgorithm):
@@ -193,8 +194,76 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
 
         return issues
 
+    def _loadWANDData(self, filename, ipts, runNumbers, outputName):
+        LoadWAND(filename=filename, IPTS=ipts, RunNumbers=runNumbers, OutputWorkspace=f"_{outputName}")
+
+    def group_detectors(workspace, group_size):
+        detector_list = ""
+        num_columns = 512  # Adjust this for your detector dimensions
+        num_rows = 1  # Adjust this for your detector dimensions
+
+        for x in range(0, num_rows, group_size):
+            for y in range(0, num_columns, group_size):
+                spectra_list = []
+                for j in range(group_size):
+                    for i in range(group_size):
+                        if (x + j) < num_rows and (y + i) < num_columns:
+                            spectra_list.append(str(y + i + (x + j) * num_columns))
+                if spectra_list:
+                    detector_list += "," + "+".join(spectra_list)
+
+        # Remove leading comma
+        detector_list = detector_list.removeprefix(",")
+
+        return GroupDetectors(InputWorkspace=workspace, GroupingPattern=detector_list, EnableLogging=False)
+
+    def _loadMIDASData(self, filename, ipts, runNumbers, outputName):
+        runs = filename
+
+        if not runs:
+            runs = ["/HFIR/HB2A/IPTS-{}/nexus/HB2A_{}.nxs.h5".format(ipts, run) for run in runNumbers]
+
+        outWS = outputName
+        group_names = []
+
+        grouping = self.getProperty("Grouping").value
+        if grouping == "None":
+            grouping = 1
+        else:
+            grouping = 2 if grouping == "2x2" else 4
+
+        LoadEventAsWorkspace2D(
+            Filename=runs,
+            OutputWorkspace=outWS,
+        )
+        if self.getProperty("ApplyMask").value:
+            MaskBTP(outWS, Instrument="MIDAS", Pixel="1-8,506-512", EnableLogging=False)
+
+        if len(runNumbers) > 1:
+            group_names.append(outWS)
+
+            GroupWorkspaces(InputWorkspaces=group_names, OutputWorkspace=outWS)
+
+    def loadData(self, instrument, filename, ipts, runNumbers, outputName):
+        if instrument == "WAND^2":
+            return self._loadWANDData(filename, ipts, runNumbers, outputName)
+        elif instrument == "MIDAS":
+            return self._loadMIDASData(filename, ipts, runNumbers, outputName)
+        else:
+            raise ValueError(f"Unsupported instrument: {instrument}")
+
     def PyExec(self):
-        raise NotImplementedError("HFIRPowderReduction algorithm is not yet implemented.")
+        loadFields = ["Sample", "Vanadium", "VanadiumBackground", "SampleBackground"]
+        for field in loadFields:
+            if f"_{field}" not in mtd:
+                filename = self.getProperty(f"{field}Filename").value
+                ipts = self.getProperty(f"{field}IPTS").value
+                runNumbers = self.getProperty(f"{field}RunNumbers").value
+                instrument = self.getProperty("Instrument").value
+                if filename or (ipts != Property.EMPTY_INT and len(runNumbers) > 0):
+                    self.loadData(instrument, filename, ipts, runNumbers, field)
+
+        raise NotImplementedError("HFIRPowderReduction algorithm is not fully implemented.")
 
 
 AlgorithmFactory.subscribe(HFIRPowderReduction)

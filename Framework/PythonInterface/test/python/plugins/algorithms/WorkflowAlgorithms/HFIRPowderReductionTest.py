@@ -7,6 +7,8 @@
 # pylint: disable=no-init,invalid-name,attribute-defined-outside-init
 import unittest
 from mantid.simpleapi import HFIRPowderReduction
+from mantid import mtd
+from unittest import mock
 
 
 class LoadInputErrorMessages(unittest.TestCase):
@@ -153,6 +155,125 @@ class LoadInputErrorMessages(unittest.TestCase):
         error_msg = str(cm.exception)
         self.assertIn("VanadiumDiameter", error_msg)
         self.assertIn("VanadiumDiameter must be provided", error_msg)
+
+    def test_load_wand_data(self):
+        # Test that valid WAND^2 data loads without error
+        try:
+            HFIRPowderReduction(
+                SampleFilename="HB2C_7000.nxs.h5", Instrument="WAND^2", Wavelength=2.5, VanadiumDiameter=0.5, XMin=1.0, XMax=10.0
+            )
+        except RuntimeError as e:
+            self.fail(f"Valid WAND^2 data failed to load: {e}")
+
+    def test_load_wand_workspaces(self):
+        # Test loading WAND^2 for each type of input and verify workspaces are created
+        HFIRPowderReduction(
+            SampleFilename="HB2C_7000.nxs.h5",
+            VanadiumFilename="HB2C_7000.nxs.h5",
+            SampleBackgroundFilename="HB2C_7000.nxs.h5",
+            VanadiumBackgroundFilename="HB2C_7000.nxs.h5",
+            Instrument="WAND^2",
+            Wavelength=2.5,
+            VanadiumDiameter=0.5,
+            XMin=1.0,
+            XMax=10.0,
+        )
+        self.assertTrue("_Sample" in mtd)
+        self.assertTrue("_Vanadium" in mtd)
+        self.assertTrue("_VanadiumBackground" in mtd)
+        self.assertTrue("_SampleBackground" in mtd)
+
+    def test_load_existing_wand(self):
+        # Test loading WAND^2 data that has already been loaded into Mantid
+        HFIRPowderReduction(
+            SampleFilename="HB2C_7000.nxs.h5", Instrument="WAND^2", Wavelength=2.5, VanadiumDiameter=0.5, XMin=1.0, XMax=10.0
+        )
+        self.assertTrue("_Sample" in mtd)
+
+        # Now load again, and make sure loadData is not called again
+        with mock.patch("mantid.plugins.algorithm.WorkflowAlgorithms.HFIRPowderReduction.loadData") as mock_load:
+            HFIRPowderReduction(
+                SampleFilename="HB2C_7000.nxs.h5", Instrument="WAND^2", Wavelength=2.5, VanadiumDiameter=0.5, XMin=1.0, XMax=10.0
+            )
+            mock_load.assert_not_called()
+
+    def test_load_midas_data(self):
+        # Test that valid MIDAS data loads without error
+        try:
+            HFIRPowderReduction(
+                SampleFilename="Midas_HFIR_1234.nxs.h5", Instrument="MIDAS", Wavelength=1.5, VanadiumDiameter=0.3, XMin=0.5, XMax=8.0
+            )
+        except RuntimeError as e:
+            self.fail(f"Valid MIDAS data failed to load: {e}")
+
+    def test_load_midas_contents(self):
+        # Test loading MIDAS data and verify contents
+        ws = HFIRPowderReduction(
+            SampleFilename="Midas_HFIR_1234.nxs.h5", Instrument="MIDAS", Wavelength=1.5, VanadiumDiameter=0.3, XMin=0.5, XMax=8.0
+        )
+        self.assertTrue(ws)
+        self.assertEqual(ws.blocksize(), 1)
+        self.assertEqual(ws.getNumberHistograms(), 1966080 // 4)
+        self.assertEqual(ws.readY(257775), 4)
+        self.assertEqual(ws.run().getProtonCharge(), 907880)
+        self.assertAlmostEqual(ws.run().getLogData("duration").value, 40.05)
+
+        # Check masking
+        self.assertTrue(ws.detectorInfo().isMasked(0))
+        self.assertTrue(ws.detectorInfo().isMasked(1))
+        self.assertFalse(ws.detectorInfo().isMasked(2))
+        self.assertTrue(ws.detectorInfo().isMasked(512))
+        self.assertTrue(ws.detectorInfo().isMasked(480 * 512 * 8 - 256))
+        self.assertFalse(ws.detectorInfo().isMasked(480 * 512 * 8 - 256 - 512 * 6))
+
+    def test_load_midas_workspaces(self):
+        # Test loading MIDAS data and verify workspaces are created
+        HFIRPowderReduction(
+            SampleFilename="Midas_HFIR_1234.nxs.h5",
+            VanadiumFilename="Midas_HFIR_1234.nxs.h5",
+            SampleBackgroundFilename="Midas_HFIR_1234.nxs.h5",
+            VanadiumBackgroundFilename="Midas_HFIR_1234.nxs.h5",
+            Instrument="MIDAS",
+            Wavelength=1.5,
+            VanadiumDiameter=0.3,
+            XMin=0.5,
+            XMax=8.0,
+        )
+        self.assertTrue("_Sample" in mtd)
+        self.assertTrue("_Vanadium" in mtd)
+        self.assertTrue("_VanadiumBackground" in mtd)
+        self.assertTrue("_SampleBackground" in mtd)
+
+    def test_load_existing_midas(self):
+        # Test loading MIDAS data that has already been loaded into Mantid
+        HFIRPowderReduction(
+            SampleFilename="HB2C_7000.nxs.h5", Instrument="MIDAS", Wavelength=2.5, VanadiumDiameter=0.5, XMin=1.0, XMax=10.0
+        )
+        self.assertTrue("_Sample" in mtd)
+
+        # Now load again, and make sure loadData is not called again
+        with mock.patch("mantid.plugins.algorithm.WorkflowAlgorithms.HFIRPowderReduction.loadData") as mock_load:
+            HFIRPowderReduction(
+                SampleFilename="HB2C_7000.nxs.h5", Instrument="MIDAS", Wavelength=2.5, VanadiumDiameter=0.5, XMin=1.0, XMax=10.0
+            )
+            mock_load.assert_not_called()
+
+    def test_load_invalid_instrument(self):
+        # Test that providing an invalid instrument raises a RuntimeError
+        with self.assertRaises(RuntimeError) as cm:
+            HFIRPowderReduction(
+                SampleFilename="HB2C_7000.nxs.h5",
+                Instrument="INVALID_INSTRUMENT",
+                Wavelength=2.5,
+                VanadiumDiameter=0.5,
+                XMin=1.0,
+                XMax=10.0,
+            )
+
+        # Check the error message
+        error_msg = str(cm.exception)
+        self.assertIn("Instrument", error_msg)
+        self.assertIn("Unsupported instrument: INVALID_INSTRUMENT", error_msg)
 
 
 if __name__ == "__main__":
