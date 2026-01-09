@@ -184,6 +184,53 @@ class PawleyPattern1DTest(unittest.TestCase):
         pawley = PawleyPattern1D(ws_tof, [self.phase], profile=GaussianProfile())
         self.assertAlmostEqual(pawley.comp_func[0]["PeakCentre"], 57166, delta=1)
 
+    def test_fit_no_constraints(self):
+        pawley = PawleyPattern1D(self.ws, [self.phase], profile=GaussianProfile())
+        initial_comp_func = str(pawley.comp_func)
+        result = pawley.fit_no_constraints(IgnoreInvalidData=False, MaxIterations=2)
+        # assert initial parameters changed
+        self.assertNotEqual(initial_comp_func, str(result.Function))
+
+    # MtdFuncMixin tests
+
+
+class MtdFuncMixinTest(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        dspacs = linspace(0.69, 4.15, 2460)
+        cls.ws = CreateWorkspace(
+            DataX=dspacs, DataY=zeros_like(dspacs), UnitX="dSpacing", YUnitLabel="Intensity (a.u.)", OutputWorkspace="ws"
+        )
+
+    @classmethod
+    def tearDownClass(cls):
+        AnalysisDataService.clear()
+
+    def setUp(self):
+        # can init a mixing so init class that inherits from it
+        self.phase = Phase.from_alatt(3 * [5.43094], "F d -3 m")  # can be changed by the class
+        self.phase.set_hkls([[1, 1, 1], [2, 2, 2]])
+        self.pawley = PawleyPattern1D(self.ws, [self.phase], profile=GaussianProfile(), bg_func=FlatBackground(A0=2))
+
+    def test_get_peak_centers(self):
+        assert_array_almost_equal(self.pawley.get_peak_centers(), array([3.14, 1.57]), decimal=2)
+
+    def test_get_peak_params(self):
+        assert_array_almost_equal(self.pawley.get_peak_params("Height"), array([125.64, 242.43]), decimal=2)
+
+    def test_get_peak_fwhm(self):
+        assert_array_almost_equal(self.pawley.get_peak_fwhm(), array([0.007, 0.004]), decimal=3)
+
+    def test_get_peak_intensities(self):
+        assert_array_almost_equal(self.pawley.get_peak_intensities(), ones(2), decimal=3)
+
+    def test_set_mantid_peak_param_isfree(self):
+        self.pawley.set_mantid_peak_param_isfree(["Height", "PeakCentre"])
+        self.assertEqual(
+            str(self.pawley.comp_func),
+            "composite=CompositeFunction,NumDeriv=true;name=Gaussian,Height=125.644,PeakCentre=3.13555,Sigma=0.00317517,ties=(Height=125.644,PeakCentre=3.13555);name=Gaussian,Height=242.433,PeakCentre=1.56778,Sigma=0.00164558,ties=(Height=242.433,PeakCentre=1.56778);name=FlatBackground,A0=2",
+        )
+
 
 class PawleyPattern2DTest(unittest.TestCase):
     @classmethod
