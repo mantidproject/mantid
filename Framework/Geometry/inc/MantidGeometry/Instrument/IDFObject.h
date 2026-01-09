@@ -77,8 +77,12 @@ private:
 
 public:
   NullIDFObject() : m_emptyResponse(""), m_emptyPath("") {}
-  std::filesystem::path getParentDirectory() const override { throw std::runtime_error("Not implemented on NullIDFObject"); }
-  const std::filesystem::path &getFileFullPath() const override { throw std::runtime_error("Not implemented on NullIDFObject"); }
+  std::filesystem::path getParentDirectory() const override {
+    throw std::runtime_error("Not implemented on NullIDFObject");
+  }
+  const std::filesystem::path &getFileFullPath() const override {
+    throw std::runtime_error("Not implemented on NullIDFObject");
+  }
   const std::string &getFileFullPathStr() const override { return m_emptyResponse; }
   std::string getFileNameOnly() const override { return m_emptyResponse; }
   std::string getExtension() const override { return m_emptyResponse; }

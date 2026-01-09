@@ -50,7 +50,8 @@ public:
   }
 
   void testGetParentDirectory() {
-    const std::filesystem::path expectedDir = std::filesystem::path(ConfigService::Instance().getInstrumentDirectory()) / "unit_testing";
+    const std::filesystem::path expectedDir =
+        std::filesystem::path(ConfigService::Instance().getInstrumentDirectory()) / "unit_testing";
     std::string filename = (expectedDir / "IDF_for_UNIT_TESTING.xml").string();
     IDFObject obj(filename);
     TS_ASSERT_EQUALS(expectedDir.string(), obj.getParentDirectory().string());

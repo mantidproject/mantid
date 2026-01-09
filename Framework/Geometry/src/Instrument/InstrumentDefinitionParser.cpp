@@ -2517,8 +2517,9 @@ InstrumentDefinitionParser::writeAndApplyCache(IDFObject_const_sptr firstChoiceC
   g_log.notice("Geometry cache is not available");
   try {
     std::filesystem::path dir = usedCache->getParentDirectory();
-    if (dir.empty() || !std::filesystem::exists(dir) || 
-        (std::filesystem::status(dir).permissions() & std::filesystem::perms::owner_write) == std::filesystem::perms::none) {
+    if (dir.empty() || !std::filesystem::exists(dir) ||
+        (std::filesystem::status(dir).permissions() & std::filesystem::perms::owner_write) ==
+            std::filesystem::perms::none) {
       usedCache = std::move(fallBackCache);
       cachingOption = WroteCacheTemp;
       g_log.information() << "Geometrycache directory is read only, writing cache "
@@ -2554,7 +2555,8 @@ InstrumentDefinitionParser::CachingOption InstrumentDefinitionParser::setupGeome
   // If the instrument directory is writable, put them there else use
   // temporary
   // directory.
-  std::filesystem::path fallBackPath = std::filesystem::path(ConfigService::Instance().getTempDir()) / (this->getMangledName() + ".vtp");
+  std::filesystem::path fallBackPath =
+      std::filesystem::path(ConfigService::Instance().getTempDir()) / (this->getMangledName() + ".vtp");
   IDFObject_const_sptr fallBackCache = std::make_shared<const IDFObject>(fallBackPath.string());
   CachingOption cachingOption = NoneApplied;
   if (m_cacheFile->exists()) {
@@ -2965,7 +2967,8 @@ const std::string InstrumentDefinitionParser::createVTPFileName() {
   std::string retVal;
   std::string filename = getMangledName();
   if (!filename.empty()) {
-    std::filesystem::path path = std::filesystem::path(ConfigService::Instance().getVTPFileDirectory()) / (filename + ".vtp");
+    std::filesystem::path path =
+        std::filesystem::path(ConfigService::Instance().getVTPFileDirectory()) / (filename + ".vtp");
     retVal = path.string();
   }
   return retVal;

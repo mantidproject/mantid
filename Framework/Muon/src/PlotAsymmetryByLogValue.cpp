@@ -225,11 +225,11 @@ const std::string PlotAsymmetryByLogValue::getLogUnits(const std::string &fileNa
 std::string PlotAsymmetryByLogValue::getDirectoryFromFileName(const std::string &fileName) const {
   const auto path = FileFinder::Instance().getFullPath(fileName);
   std::filesystem::path fileBase(path);
-  
+
   if (fileBase.has_parent_path()) {
     return fileBase.parent_path().string() + "/";
   }
-  
+
   return ""; // Empty string if file name could not be found so directory could not be determined
 }
 

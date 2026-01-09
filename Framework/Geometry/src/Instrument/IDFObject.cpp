@@ -23,8 +23,8 @@ const std::string AbstractIDFObject::expectedExtension() { return ".xml"; }
 /** Constructor
  */
 IDFObject::IDFObject(const std::string &fileName)
-    : m_hasFileName(!fileName.empty()), m_cachePath(fileName),
-      m_cacheParentDirectory(m_cachePath.parent_path()), m_cachePathStr(m_cachePath.string())
+    : m_hasFileName(!fileName.empty()), m_cachePath(fileName), m_cacheParentDirectory(m_cachePath.parent_path()),
+      m_cachePathStr(m_cachePath.string())
 
 {}
 
