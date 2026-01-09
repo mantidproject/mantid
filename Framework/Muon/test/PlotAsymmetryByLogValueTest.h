@@ -37,9 +37,9 @@ public:
     try {
       std::filesystem::path file(m_originalName);
       TS_ASSERT(std::filesystem::exists(file) && std::filesystem::is_regular_file(file));
-      m_tempName = std::filesystem::temp_directory_path() /
-                   std::filesystem::path("temp_" + std::to_string(std::hash<std::string>{}(m_originalName)));
-      m_tempName = m_tempName.string();
+      m_tempName = (std::filesystem::temp_directory_path() /
+                    std::filesystem::path("temp_" + std::to_string(std::hash<std::string>{}(m_originalName))))
+                       .string();
       std::filesystem::copy_file(file, m_tempName, std::filesystem::copy_options::overwrite_existing);
       std::filesystem::remove(file);
     } catch (const std::filesystem::filesystem_error &ex) {

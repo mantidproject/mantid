@@ -113,8 +113,8 @@ public:
     outstr << contents;
     outstr.flush(); // to pass everything to the digest engine
 
-    auto head = path.getFileName();
-    auto tail = DigestEngine::digestToHex(sha1.digest());
+    auto const head = path.filename().string();
+    auto const tail = DigestEngine::digestToHex(sha1.digest());
 
     IDFObject obj(filename);
 
