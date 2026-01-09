@@ -252,6 +252,8 @@ class FullInstrumentViewPresenter:
         # Update to visibility shows up in real time
         self._pickable_mesh[self._visible_label] = self._model.picked_visibility
         self._update_line_plot_ws_and_draw(self._view.current_selected_unit())
+        self._peak_interaction_status = PeakInteractionStatus.Disabled
+        self._view.remove_peak_cursor_from_lineplot()
         self._update_peak_buttons()
 
     def on_add_cylinder_clicked(self) -> None:
