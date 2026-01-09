@@ -129,11 +129,11 @@ class FullInstrumentViewWindow(QMainWindow):
         self._detector_spectrum_fig, self._detector_spectrum_axes = plt.subplots(subplot_kw={"projection": "mantid"})
         self._detector_figure_canvas = FigureCanvas(self._detector_spectrum_fig)
         self._detector_figure_canvas.setMinimumSize(QSize(0, 0))
-        plot_toolbar = MantidNavigationToolbar(self._detector_figure_canvas, self)
+        self._plot_toolbar = MantidNavigationToolbar(self._detector_figure_canvas, self)
         plot_widget = QWidget()
         plot_layout = QVBoxLayout(plot_widget)
         plot_layout.addWidget(self._detector_figure_canvas)
-        plot_layout.addWidget(plot_toolbar)
+        plot_layout.addWidget(self._plot_toolbar)
         self._lineplot_peak_cursor = None
 
         vsplitter = QSplitter(Qt.Vertical)
@@ -884,6 +884,7 @@ class FullInstrumentViewWindow(QMainWindow):
         return len(self._lineplot_overlays) > 0
 
     def _on_axes_click(self, event) -> None:
+        self._plot_toolbar.setDisabled(False)
         if event.inaxes is not self._detector_spectrum_axes or event.xdata is None:
             return
         self._presenter.on_peak_selected(event.xdata)
@@ -891,6 +892,7 @@ class FullInstrumentViewWindow(QMainWindow):
     def add_peak_cursor_to_lineplot(self) -> None:
         self._lineplot_peak_cursor = Cursor(self._detector_spectrum_axes, color="tab:red", linewidth=1, horizOn=False)
         self._figure_canvas_click_id = self._detector_figure_canvas.mpl_connect("button_press_event", self._on_axes_click)
+        self._plot_toolbar.setDisabled(True)
 
     def remove_peak_cursor_from_lineplot(self) -> None:
         if self._lineplot_peak_cursor is not None:
