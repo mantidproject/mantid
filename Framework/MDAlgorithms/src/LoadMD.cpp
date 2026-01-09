@@ -137,9 +137,6 @@ void LoadMD::execLoader() {
   if (!m_file)
     throw Kernel::Exception::FileError("Can not open file " + for_access, m_filename);
 
-  // The main entry
-  const std::shared_ptr<Mantid::Nexus::NexusDescriptor> fileInfo = getFileInfo();
-
   std::string entryName;
   if (m_file->hasGroup("/MDEventWorkspace", "NXentry")) {
     entryName = "MDEventWorkspace";
@@ -207,7 +204,7 @@ void LoadMD::execLoader() {
     auto prog = std::make_unique<Progress>(this, 0.0, 0.1, 1);
     prog->report("Load experiment information.");
     bool lazyLoadExpt = fileBacked;
-    MDBoxFlatTree::loadExperimentInfos(m_file.get(), m_filename, ws, *fileInfo.get(), "MDEventWorkspace", lazyLoadExpt);
+    MDBoxFlatTree::loadExperimentInfos(m_file.get(), m_filename, ws, "MDEventWorkspace", lazyLoadExpt);
 
     // Wrapper to cast to MDEventWorkspace then call the function
     CALL_MDEVENT_FUNCTION(this->doLoad, ws);
