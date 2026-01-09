@@ -174,7 +174,8 @@ void AlignAndFocusPowderSlim::init() {
                   "The percentage of the average to use as the lower bound when filtering bad pulses.");
   declareProperty(std::make_unique<WorkspaceProperty<DataObjects::GroupingWorkspace>>(
                       PropertyNames::GROUPING_WS, "", Direction::Input, API::PropertyMode::Optional),
-                  "A GroupingWorkspace giving the grouping info.");
+                  "A GroupingWorkspace giving the grouping info. If not provided then the grouping is one per bank. "
+                  "You need to provide");
   const std::vector<std::string> cal_exts{".h5", ".hd5", ".hdf", ".cal"};
   declareProperty(std::make_unique<FileProperty>(PropertyNames::CAL_FILE, "", FileProperty::OptionalLoad, cal_exts),
                   "The .cal file containing the position correction factors. Either this or OffsetsWorkspace needs to "
@@ -231,16 +232,16 @@ void AlignAndFocusPowderSlim::init() {
   positionArrayValidator->add(mandatoryDblArrayValidator);
   positionArrayValidator->add(mustBePosArr);
   declareProperty(std::make_unique<PropertyWithValue<double>>(PropertyNames::L1, EMPTY_DBL(), l1Validator),
-                  "The primary distance $\\ell_1$ from beam to sample");
+                  "The primary distance :math:`\\ell_1` from beam to sample");
   declareProperty(
       std::make_unique<ArrayProperty<double>>(PropertyNames::L2, std::vector<double>{}, positionArrayValidator),
-      "The secondary distances $\\ell_2$ from sample to focus group");
+      "The secondary distances :math:`\\ell_2` from sample to focus group");
   declareProperty(
       std::make_unique<ArrayProperty<double>>(PropertyNames::POLARS, std::vector<double>{}, positionArrayValidator),
-      "The effective polar angle (2$\\theta$) of each focus group");
+      "The effective polar angle (:math:`2\\theta`) of each focus group");
   declareProperty(
       std::make_unique<ArrayProperty<double>>(PropertyNames::AZIMUTHALS, std::vector<double>{}, mustBePosArr),
-      "The effective azimuthal angle $\\phi$ for each focus group");
+      "The effective azimuthal angle :math:`\\phi` for each focus group");
 }
 
 std::map<std::string, std::string> AlignAndFocusPowderSlim::validateInputs() {

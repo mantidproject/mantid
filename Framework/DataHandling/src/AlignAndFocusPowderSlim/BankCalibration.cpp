@@ -73,7 +73,7 @@ BankCalibration::BankCalibration(const double time_conversion, const std::set<de
 
   // mask values that are in the mask or not in the detector group
 
-  // mask anything that isn't int the group this assumes both are sorted
+  // mask anything that isn't in the group this assumes both are sorted
   // find the first and last detector id that is in the range being used
   for (size_t i = 0; i < m_calibration.size(); ++i) {
     if (m_calibration[i] != IGNORE_PIXEL) {
