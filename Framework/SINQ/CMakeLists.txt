@@ -140,7 +140,7 @@ add_library(SINQ ${SRC_FILES} ${INC_FILES})
 add_library(Mantid::SINQ ALIAS SINQ)
 
 # Add a precompiled header where they are supported
-target_precompile_headers(SINQ PRIVATE <MantidAPI/Algorithm.h> <MantidKernel/Exception.h> <memory>)
+target_precompile_headers(SINQ PRIVATE "MantidAPI/Algorithm.h" "MantidKernel/Exception.h" <memory>)
 
 target_include_directories(
   SINQ PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc> $<INSTALL_INTERFACE:include/Mantid>

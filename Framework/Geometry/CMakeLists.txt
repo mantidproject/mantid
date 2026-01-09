@@ -453,15 +453,15 @@ add_library(Mantid::Geometry ALIAS Geometry)
 target_precompile_headers(
   Geometry
   PRIVATE
-  <MantidKernel/DateAndTime.h>
-  <MantidKernel/Exception.h>
-  <MantidKernel/Interpolation.h>
-  <MantidKernel/Logger.h>
-  <MantidKernel/Matrix.h>
-  <MantidKernel/Quat.h>
-  <MantidKernel/System.h>
-  <MantidKernel/V2D.h>
-  <MantidKernel/V3D.h>
+  "MantidKernel/DateAndTime.h"
+  "MantidKernel/Exception.h"
+  "MantidKernel/Interpolation.h"
+  "MantidKernel/Logger.h"
+  "MantidKernel/Matrix.h"
+  "MantidKernel/Quat.h"
+  "MantidKernel/System.h"
+  "MantidKernel/V2D.h"
+  "MantidKernel/V3D.h"
   <cfloat>
   <cmath>
   <map>

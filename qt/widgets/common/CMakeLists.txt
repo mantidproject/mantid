@@ -628,8 +628,8 @@ set(UI_FILES
 )
 
 set(PRECOMP_HEADERS
-    <MantidAPI/Algorithm.h>
-    <MantidAPI/AnalysisDataService.h>
+    "MantidAPI/Algorithm.h"
+    "MantidAPI/AnalysisDataService.h"
     <QApplication>
     <QDialog>
     <QObject>

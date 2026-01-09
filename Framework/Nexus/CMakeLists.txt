@@ -48,6 +48,17 @@ endif()
 add_library(Nexus ${SRC_FILES} ${INC_FILES})
 add_library(Mantid::Nexus ALIAS Nexus)
 
+# Use a precompiled header
+target_precompile_headers(
+  Nexus
+  PRIVATE
+  "$<$<COMPILE_LANGUAGE:CXX>:${CMAKE_CURRENT_SOURCE_DIR}/inc/MantidNexus/NexusFile.h>"
+  <climits>
+  <map>
+  <string>
+  <vector>
+)
+
 target_include_directories(
   Nexus PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc> $<INSTALL_INTERFACE:include/Mantid>
 )

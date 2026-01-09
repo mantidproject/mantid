@@ -16,6 +16,11 @@ if(CXXTEST_FOUND)
                              Mantid::HistogramData
   )
 
+  target_precompile_headers(
+    DataHandlingTest PRIVATE <cxxtest/WrappedTestSuite.h> "MantidAPI/Algorithm.h"
+    "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h" "MantidKernel/System.h"
+  )
+
   if(TARGET GTest::gmock AND TARGET GTest::gtest)
     target_link_libraries(DataHandlingTest PRIVATE GTest::gmock GTest::gtest)
   else()

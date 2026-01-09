@@ -25,9 +25,9 @@ set(MOC_FILES ${GUI_MOC_FILES})
 set(UI_FILES ${GUI_UI_FILES})
 
 set(PRECOMP_HEADERS
-    <MantidAPI/Algorithm.h>
-    <MantidAPI/MatrixWorkspace_fwd.h>
-    <MantidKernel/System.h>
+    "MantidAPI/Algorithm.h"
+    "MantidAPI/MatrixWorkspace_fwd.h"
+    "MantidKernel/System.h"
     <QDialog>
     <QString>
     <QWidget>

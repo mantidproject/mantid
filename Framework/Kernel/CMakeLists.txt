@@ -506,8 +506,8 @@ target_precompile_headers(
   <Poco/Message.h>
   <Poco/Notification.h>
   <Poco/Path.h>
-  <MantidNexus/NexusException.h>
-  <MantidNexus/NexusFile.h>
+  "MantidNexus/NexusException.h"
+  "MantidNexus/NexusFile.h"
 )
 
 target_include_directories(

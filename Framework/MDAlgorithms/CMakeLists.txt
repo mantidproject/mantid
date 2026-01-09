@@ -373,8 +373,8 @@ add_library(Mantid::MDAlgorithms ALIAS MDAlgorithms)
 
 # Use a precompiled header
 target_precompile_headers(
-  MDAlgorithms PRIVATE <MantidAPI/Algorithm.h> <MantidDataObjects/EventWorkspace.h>
-  <MantidDataObjects/MDEventWorkspace.h> <MantidKernel/Exception.h>
+  MDAlgorithms PRIVATE "MantidAPI/Algorithm.h" "MantidDataObjects/EventWorkspace.h"
+  "MantidDataObjects/MDEventWorkspace.h" "MantidKernel/Exception.h"
 )
 
 target_include_directories(

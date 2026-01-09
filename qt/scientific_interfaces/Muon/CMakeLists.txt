@@ -55,9 +55,9 @@ set(INC_FILES
 set(UI_FILES ALCBaselineModellingView.ui ALCDataLoadingView.ui ALCInterface.ui ALCPeakFittingView.ui)
 
 set(PRECOMP_HEADERS
-    <MantidAPI/Algorithm.h>
-    <MantidAPI/MatrixWorkspace_fwd.h>
-    <MantidKernel/System.h>
+    "MantidAPI/Algorithm.h"
+    "MantidAPI/MatrixWorkspace_fwd.h"
+    "MantidKernel/System.h"
     <QDialog>
     <QString>
     <QWidget>

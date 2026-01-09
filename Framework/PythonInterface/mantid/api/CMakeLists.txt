@@ -140,7 +140,7 @@ add_library(Mantid::PythonAPIModule ALIAS PythonAPIModule)
 target_precompile_headers(
   PythonAPIModule
   PRIVATE
-  <MantidAPI/Algorithm.h>
+  "MantidAPI/Algorithm.h"
   <boost/mpl/and.hpp>
   <boost/mpl/if.hpp>
   <boost/python/call_method.hpp>

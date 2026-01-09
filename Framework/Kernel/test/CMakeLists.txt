@@ -6,6 +6,16 @@ if(CXXTEST_FOUND)
   cxxtest_add_test(KernelTest ${TEST_FILES})
   target_include_directories(KernelTest SYSTEM PRIVATE ${CXXTEST_INCLUDE_DIR})
   target_link_libraries(KernelTest PRIVATE Mantid::Types Mantid::Kernel Mantid::Json)
+  target_precompile_headers(
+    KernelTest
+    PRIVATE
+    <cxxtest/WrappedTestSuite.h>
+    "MantidKernel/System.h"
+    <set>
+    <string>
+    <vector>
+  )
+
   add_framework_test_helpers(KernelTest)
 
   if(TARGET GTest::gmock AND TARGET GTest::gtest)
