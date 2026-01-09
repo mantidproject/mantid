@@ -872,10 +872,10 @@ std::string expandEnvironmentInFilepath(const std::string &target) {
     size_t end = result.find('%', pos + 1);
     if (end == std::string::npos)
       break;
-    
+
     std::string varName = result.substr(pos + 1, end - pos - 1);
     const char *envValue = std::getenv(varName.c_str());
-    
+
     if (envValue) {
       result.replace(pos, end - pos + 1, envValue);
       pos += std::strlen(envValue);
@@ -890,7 +890,7 @@ std::string expandEnvironmentInFilepath(const std::string &target) {
     size_t start = pos;
     size_t end;
     std::string varName;
-    
+
     if (pos + 1 < result.length() && result[pos + 1] == '{') {
       // ${VAR} format
       end = result.find('}', pos + 2);
@@ -908,7 +908,7 @@ std::string expandEnvironmentInFilepath(const std::string &target) {
       }
       varName = result.substr(pos + 1, end - pos - 1);
     }
-    
+
     if (!varName.empty()) {
       const char *envValue = std::getenv(varName.c_str());
       if (envValue) {
@@ -922,7 +922,7 @@ std::string expandEnvironmentInFilepath(const std::string &target) {
     }
   }
 #endif
-  
+
   return result;
 }
 } // namespace
