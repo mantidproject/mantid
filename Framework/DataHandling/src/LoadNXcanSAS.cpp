@@ -475,12 +475,12 @@ void loadTransmissionData(const H5::Group &transmission, const Mantid::API::Matr
 
 namespace Mantid::DataHandling::NXcanSAS {
 // Register the algorithm into the AlgorithmFactory
-DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadNXcanSAS)
+DECLARE_NEXUS_LAZY_FILELOADER_ALGORITHM(LoadNXcanSAS)
 
 /// constructor
 LoadNXcanSAS::LoadNXcanSAS() = default;
 
-int LoadNXcanSAS::confidence(Nexus::NexusDescriptor &descriptor) const {
+int LoadNXcanSAS::confidence(Nexus::NexusDescriptorLazy &descriptor) const {
   const std::string &extn = descriptor.extension();
   if (extn != ".nxs" && extn != ".h5") {
     return 0;
