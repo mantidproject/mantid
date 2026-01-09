@@ -166,9 +166,6 @@ quickbayes:
 tbb:
   - '2021.*'
 
-texlive_core:
-  - '>=20180414'
-
 toml:
   - '>=0.10.2'
 # Keep gsl a specific version to reduce changes in our fitting
