@@ -19,10 +19,10 @@
 #include "MantidQtWidgets/Common/QtJSONUtils.h"
 #include "MantidQtWidgets/Common/SlitCalculator.h"
 
-#include <filesystem>
-#include <fstream>
 #include <QMessageBox>
 #include <QToolButton>
+#include <filesystem>
+#include <fstream>
 
 #include <fstream>
 

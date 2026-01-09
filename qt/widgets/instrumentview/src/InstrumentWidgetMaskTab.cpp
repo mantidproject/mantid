@@ -41,7 +41,6 @@
 #endif
 #endif
 
-#include <filesystem>
 #include <QAction>
 #include <QApplication>
 #include <QCheckBox>
@@ -59,6 +58,7 @@
 #include <QTextEdit>
 #include <QToolTip>
 #include <QVBoxLayout>
+#include <filesystem>
 
 #include "MantidQtWidgets/Common/FileDialogHandler.h"
 
