@@ -568,6 +568,13 @@ public:
    */
   std::string getTopLevelEntryName() const;
 
+  /** Check if a class type exists in the file
+   *
+   * \param class_type The class type to check for
+   * \return true if the class type exists
+   */
+  bool classTypeExists(std::string const &class_type) const { return m_descriptor.classTypeExists(class_type); }
+
   //------------------------------------------------------------------------------------------------------------------
   // ATTRIBUTE METHODS
   //------------------------------------------------------------------------------------------------------------------
