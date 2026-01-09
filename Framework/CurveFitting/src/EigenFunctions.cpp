@@ -30,7 +30,7 @@ Eigen::MatrixXd covar_from_jacobian(const map_type &J, double epsrel) {
   Eigen::ColPivHouseholderQR<Eigen::MatrixXd> qr(J);
 
   // R is (nc x np) in general; the useful part for J^T J is (nc x nc) block
-  Eigen::MatrixXd R = qr.matrixR().topLeftCorner(nc, nc).template triangularView<Eigen::Upper>();
+  Eigen::MatrixXd R = qr.matrixR().topLeftCorner(nc, nc).template triangularView<Eigen::Upper>().toDenseMatrix();
 
   // Determine rank using the same rule as GSL: compare diag entries to |R_11|
   const double r11 = std::abs(R(0, 0));
