@@ -140,6 +140,31 @@ public:
     m_presenter->notifySaveClicked();
   }
 
+  void test_notifyBackendChanged_calls_view() {
+    EXPECT_CALL(*m_view, updateBackend(true)).Times(1);
+
+    m_presenter->notifyBackendChanged(BayesBackendType::QUICK_BAYES);
+
+    EXPECT_CALL(*m_view, updateBackend(false)).Times(1);
+
+    m_presenter->notifyBackendChanged(BayesBackendType::QUASI_ELASTIC_BAYES);
+  }
+
+  void test_notifyBackendChanged_changes_stretchAlgorithm_call() {
+    StretchRunData runData("sample_ws", "res_ws", -0.5, 0.5, 50, true, "flat", 30, 1, true);
+
+    ON_CALL(*m_view, getRunData()).WillByDefault(Return(runData));
+    EXPECT_CALL(*m_model, stretchAlgorithm(_, _, _, true)).Times(1);
+
+    m_presenter->notifyBackendChanged(BayesBackendType::QUICK_BAYES);
+    m_presenter->handleRun();
+
+    EXPECT_CALL(*m_model, stretchAlgorithm(_, _, _, false)).Times(1);
+
+    m_presenter->notifyBackendChanged(BayesBackendType::QUASI_ELASTIC_BAYES);
+    m_presenter->handleRun();
+  }
+
 private:
   NiceMock<MockAlgorithmRunner> *m_algorithmRunner;
   NiceMock<MockStretchModel> *m_model;
