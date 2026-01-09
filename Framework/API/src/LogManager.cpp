@@ -646,7 +646,7 @@ void LogManager::loadNexus(Nexus::File *file, const std::string &group, bool kee
   }
 }
 
-void LogManager::loadNexus(Nexus::File *file, const Nexus::NexusDescriptor &, const std::string &prefix) {
+void LogManager::loadNexus(Nexus::File *file, std::string const &prefix) {
 
   // Only load from NXlog entries
   auto const nxLogEntries = file->getEntriesByClass("NXlog");

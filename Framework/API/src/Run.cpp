@@ -706,7 +706,7 @@ void Run::loadNexus(Nexus::File *file, const std::string &group, const Nexus::Ne
 
   // Example: /MDEventWorkspace/experiment4 + / + logs
   const std::string absoluteGroupName = prefix + "/" + group;
-  LogManager::loadNexus(file, fileInfo, absoluteGroupName);
+  LogManager::loadNexus(file, absoluteGroupName);
 
   // group hierarchy levels
   const auto levels = std::count(absoluteGroupName.begin(), absoluteGroupName.end(), '/');

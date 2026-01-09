@@ -29,9 +29,7 @@ class Property;
 namespace PropertyNexus {
 
 /**
- * @brief Opens a NXlog group in a nexus file and creates the correct Property object from it. Overload that uses
- * NexusDescriptor for faster metadata lookup.
- *
+ * @brief Opens a NXlog group in a nexus file and creates the correct Property object from it.
  * @param file currently opened NeXus file
  * @param group current group (relative name)
  * @param prefix indicates current group location in file (absolute name)

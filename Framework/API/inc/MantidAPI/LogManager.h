@@ -186,7 +186,7 @@ public:
   virtual void loadNexus(Nexus::File *file, const std::string &group, const Mantid::Nexus::NexusDescriptor &fileInfo,
                          const std::string &prefix, bool keepOpen = false);
   /// Load the run from a NeXus file with a given group name
-  virtual void loadNexus(Nexus::File *file, const std::string &group, bool keepOpen = false);
+  virtual void loadNexus(Nexus::File *file, const std::string &group, bool keepOpen);
   /// Clear the logs
   void clearLogs();
 
@@ -210,7 +210,7 @@ protected:
   bool hasEndTime() const;
   bool hasValidProtonChargeLog(std::string &error) const;
 
-  void loadNexus(Nexus::File *file, const Mantid::Nexus::NexusDescriptor &fileInfo, const std::string &prefix);
+  void loadNexus(Nexus::File *file, const std::string &prefix);
   /// Load the run from a NeXus file with a given group name
   void loadNexus(Nexus::File *file, const std::map<std::string, std::string> &entries);
   /// A pointer to a property manager
