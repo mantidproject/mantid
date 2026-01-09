@@ -10,7 +10,6 @@
 #include "MantidDataObjects/MDLeanEvent.h"
 #include "MantidFrameworkTestHelpers/MDEventsTestHelper.h"
 
-#include <Poco/File.h>
 #include <cxxtest/TestSuite.h>
 #include <memory>
 
@@ -94,8 +93,8 @@ public:
     }
 
     // Clean up file
-    if (testFile.exists())
-      testFile.remove();
+    if (std::filesystem::exists(testFile))
+      std::filesystem::remove(testFile);
   }
 
 private:

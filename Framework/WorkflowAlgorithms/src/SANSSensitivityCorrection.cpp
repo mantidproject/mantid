@@ -188,7 +188,7 @@ void SANSSensitivityCorrection::exec() {
           m_output_message += "   |No beam center provided: skipping!\n";
       }
 
-      const std::string rawFloodWSName = "__flood_data_" + path.getBaseName();
+      const std::string rawFloodWSName = "__flood_data_" + path.stem().string();
       MatrixWorkspace_sptr rawFloodWS;
       if (!reductionManager->existsProperty("LoadAlgorithm")) {
         auto loadAlg = createChildAlgorithm("Load", 0.1, 0.3);
