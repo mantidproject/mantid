@@ -2554,8 +2554,8 @@ InstrumentDefinitionParser::CachingOption InstrumentDefinitionParser::setupGeome
   // If the instrument directory is writable, put them there else use
   // temporary
   // directory.
-  IDFObject_const_sptr fallBackCache = std::make_shared<const IDFObject>(
-      Poco::Path(ConfigService::Instance().getTempDir()).append(this->getMangledName() + ".vtp").toString());
+  std::filesystem::path fallBackPath = std::filesystem::path(ConfigService::Instance().getTempDir()) / (this->getMangledName() + ".vtp");
+  IDFObject_const_sptr fallBackCache = std::make_shared<const IDFObject>(fallBackPath.string());
   CachingOption cachingOption = NoneApplied;
   if (m_cacheFile->exists()) {
     applyCache(m_cacheFile);
@@ -2965,10 +2965,8 @@ const std::string InstrumentDefinitionParser::createVTPFileName() {
   std::string retVal;
   std::string filename = getMangledName();
   if (!filename.empty()) {
-    Poco::Path path(ConfigService::Instance().getVTPFileDirectory());
-    path.makeDirectory();
-    path.append(filename + ".vtp");
-    retVal = path.toString();
+    std::filesystem::path path = std::filesystem::path(ConfigService::Instance().getVTPFileDirectory()) / (filename + ".vtp");
+    retVal = path.string();
   }
   return retVal;
 }
