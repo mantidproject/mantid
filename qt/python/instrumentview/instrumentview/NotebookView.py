@@ -5,6 +5,11 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
+from mantid.dataobjects import Workspace2D
+
+from matplotlib.axes import Axes
+import matplotlib.pyplot as plt
+import numpy as np
 import pyvista as pv
 
 
@@ -33,8 +38,33 @@ class NotebookView:
         self._plotter.enable_parallel_projection()
         self._plotter.enable_zoom_style()
 
+    def add_pickable_mesh(self, point_cloud: pv.PolyData, scalars: np.ndarray | str) -> None:
+        self._plotter.add_mesh(
+            point_cloud,
+            scalars=scalars,
+            opacity=[0.0, 0.3],
+            show_scalar_bar=False,
+            pickable=False,
+            cmap="Oranges",
+            point_size=30,
+            render_points_as_spheres=True,
+        )
+
     def reset_camera(self) -> None:
         self._plotter.reset_camera()
 
     def show_axes(self) -> None:
         self._plotter.show_axes()
+
+    def pick_detectors(self, detector_ids: list[int] | np.ndarray, sum_spectra: bool = True) -> None:
+        self._presenter.pick_detectors(detector_ids, sum_spectra)
+
+    def _plot_spectra(self, workspace: Workspace2D, sum_spectra: bool) -> Axes:
+        if workspace is not None and workspace.getNumberHistograms() > 0:
+            spectra = workspace.getSpectrumNumbers()
+            _, detector_spectrum_axes = plt.subplots(subplot_kw={"projection": "mantid"})
+            for spec in spectra:
+                detector_spectrum_axes.plot(workspace, specNum=spec, label=f"Spectrum {spec}" if not sum_spectra else None)
+            if not sum_spectra:
+                detector_spectrum_axes.legend(fontsize=8.0).set_draggable(True)
+            return detector_spectrum_axes
