@@ -15,7 +15,6 @@
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/cow_ptr.h"
-#include "MantidNexus/NexusDescriptor.h"
 
 #include <mutex>
 
@@ -124,7 +123,7 @@ public:
   void saveExperimentInfoNexus(Nexus::File *file, bool saveInstrument, bool saveSample, bool saveLogs) const;
 
   void loadExperimentInfoNexus(const std::string &nxFilename, Nexus::File *file, std::string &parameterStr,
-                               const Mantid::Nexus::NexusDescriptor &fileInfo, const std::string &prefix);
+                               const std::string &prefix);
 
   /// Loads an experiment description from the open NeXus file
   void loadExperimentInfoNexus(const std::string &nxFilename, Nexus::File *file, std::string &parameterStr);
@@ -136,9 +135,8 @@ public:
   void loadInstrumentParametersNexus(Nexus::File *file, std::string &parameterStr);
 
   /// Load the sample and log info from an open NeXus file.
-  /// Overload that uses NexusDescriptor for faster metadata lookup
-  void loadSampleAndLogInfoNexus(Nexus::File *file, const Mantid::Nexus::NexusDescriptor &fileInfo,
-                                 const std::string &prefix);
+  /// Overload that uses the file's NexusDescriptor for faster metadata lookup
+  void loadSampleAndLogInfoNexus(Nexus::File *file, std::string const &prefix);
   /// Load the sample and log info from an open NeXus file.
   void loadSampleAndLogInfoNexus(Nexus::File *file);
   /// Populate the parameter map given a string
