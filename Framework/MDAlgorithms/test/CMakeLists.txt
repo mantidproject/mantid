@@ -17,9 +17,9 @@ if(CXXTEST_FOUND)
   target_precompile_headers(
     MDAlgorithmsTest
     PRIVATE
-    "MantidAPI/AnalysisDataService.h"
-    "MantidFrameworkTestHelpers/MDEventsTestHelper.h"
-    "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
+    <MantidAPI/AnalysisDataService.h>
+    <MantidFrameworkTestHelpers/MDEventsTestHelper.h>
+    <MantidFrameworkTestHelpers/WorkspaceCreationHelper.h>
     <cxxtest/WrappedTestSuite.h>
     <set>
     <string>

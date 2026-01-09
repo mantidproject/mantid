@@ -9,10 +9,10 @@ if(CXXTEST_FOUND)
     CurveFittingTest
     PRIVATE
     <cxxtest/WrappedTestSuite.h>
-    "MantidAPI/Algorithm.h"
-    "MantidAPI/IFunction.h"
-    "MantidAPI/IPeakFunction.h"
-    "MantidKernel/System.h"
+    <MantidAPI/Algorithm.h>
+    <MantidAPI/IFunction.h>
+    <MantidAPI/IPeakFunction.h>
+    <MantidKernel/System.h>
     <set>
     <string>
     <vector>

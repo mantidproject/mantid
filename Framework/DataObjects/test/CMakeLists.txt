@@ -13,7 +13,7 @@ if(CXXTEST_FOUND)
     DataObjectsTest
     PRIVATE
     <cxxtest/WrappedTestSuite.h>
-    "MantidAPI/MatrixWorkspace.h"
+    <MantidAPI/MatrixWorkspace.h>
     <set>
     <string>
     <vector>

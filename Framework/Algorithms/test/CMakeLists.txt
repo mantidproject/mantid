@@ -50,8 +50,8 @@ if(CXXTEST_FOUND)
     AlgorithmsTest
     PRIVATE
     <cxxtest/WrappedTestSuite.h>
-    "MantidAPI/Algorithm.h"
-    "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
+    <MantidAPI/Algorithm.h>
+    <MantidFrameworkTestHelpers/WorkspaceCreationHelper.h>
     <set>
     <string>
     <vector>

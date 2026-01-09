@@ -10,7 +10,7 @@ if(CXXTEST_FOUND)
     KernelTest
     PRIVATE
     <cxxtest/WrappedTestSuite.h>
-    "MantidKernel/System.h"
+    <MantidKernel/System.h>
     <set>
     <string>
     <vector>

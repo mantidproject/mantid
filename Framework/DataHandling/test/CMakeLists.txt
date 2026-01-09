@@ -17,8 +17,8 @@ if(CXXTEST_FOUND)
   )
 
   target_precompile_headers(
-    DataHandlingTest PRIVATE <cxxtest/WrappedTestSuite.h> "MantidAPI/Algorithm.h"
-    "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h" "MantidKernel/System.h"
+    DataHandlingTest PRIVATE <cxxtest/WrappedTestSuite.h> <MantidAPI/Algorithm.h>
+    <MantidFrameworkTestHelpers/WorkspaceCreationHelper.h> <MantidKernel/System.h>
   )
 
   if(TARGET GTest::gmock AND TARGET GTest::gtest)

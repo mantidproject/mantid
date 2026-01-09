@@ -549,7 +549,7 @@ add_library(CurveFitting ${SRC_FILES} ${INC_FILES})
 add_library(Mantid::CurveFitting ALIAS CurveFitting)
 
 # Add a precompiled header
-target_precompile_headers(CurveFitting PRIVATE "MantidAPI/IFunction1D.h")
+target_precompile_headers(CurveFitting PRIVATE <MantidAPI/IFunction1D.h>)
 
 target_include_directories(
   CurveFitting PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc> $<INSTALL_INTERFACE:include/Mantid>
