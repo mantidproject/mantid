@@ -48,7 +48,6 @@ namespace { // anonymous namespace to keep it in the file
 
 std::string const GROUP_CLASS_SPEC("NX_class");
 std::string const TARGET_ATTR_NAME("target");
-std::string const SCIENTIFIC_DATA_SET("SDS");
 std::string const UNKNOWN_GROUP_SPEC("NX_UNKNOWN_GROUP");
 constexpr int DEFAULT_DEFLATE_LEVEL(6);
 
