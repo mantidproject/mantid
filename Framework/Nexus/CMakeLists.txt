@@ -52,7 +52,7 @@ add_library(Mantid::Nexus ALIAS Nexus)
 target_precompile_headers(
   Nexus
   PRIVATE
-  "$<$<COMPILE_LANGUAGE:CXX>:${CMAKE_CURRENT_SOURCE_DIR}/inc/MantidNexus/NexusFile_fwd.h>"
+  inc/MantidNexus/NexusFile.h
   <climits>
   <map>
   <string>

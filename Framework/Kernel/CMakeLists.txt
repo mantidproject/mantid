@@ -487,7 +487,7 @@ set_target_properties(Kernel PROPERTIES OUTPUT_NAME MantidKernel COMPILE_DEFINIT
 target_precompile_headers(
   Kernel
   PRIVATE
-  "$<$<COMPILE_LANGUAGE:CXX>:${CMAKE_CURRENT_SOURCE_DIR}/inc/MantidKernel/System.h>"
+  inc/MantidKernel/System.h
   <cstddef>
   <cstdint>
   <cstdio>
