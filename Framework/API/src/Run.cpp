@@ -697,8 +697,7 @@ void Run::saveNexus(Nexus::File *file, const std::string &group, bool keepOpen) 
  * @param prefix indicates current group location in file (absolute name)
  * @param keepOpen :: If true, then the file is left open after doing to load
  */
-void Run::loadNexus(Nexus::File *file, const std::string &group, const Nexus::NexusDescriptor &fileInfo,
-                    const std::string &prefix, bool keepOpen) {
+void Run::loadNexus(Nexus::File *file, std::string const &group, std::string const &prefix, bool keepOpen) {
 
   if (!group.empty()) {
     file->openGroup(group, "NXgroup");
@@ -708,39 +707,45 @@ void Run::loadNexus(Nexus::File *file, const std::string &group, const Nexus::Ne
   const std::string absoluteGroupName = prefix + "/" + group;
   LogManager::loadNexus(file, absoluteGroupName);
 
-  // group hierarchy levels
-  const auto levels = std::count(absoluteGroupName.begin(), absoluteGroupName.end(), '/');
-
-  const auto &allEntries = fileInfo.getAllEntries();
-  // loop through nxClass sets
-  for (const auto &nxClassPair : allEntries) {
-    const std::set<std::string> &nxClassEntries = nxClassPair.second;
-
-    // since std::set is ordered, just find the iterators
-    // for the bounds of the current experiment number
-    // take advantage of the fact that std::set is sorted, find by prefix bounds
-    auto itLower = nxClassEntries.lower_bound(absoluteGroupName);
-    // not prefixed
-    if (itLower == nxClassEntries.end()) {
-      continue;
-    }
-    if (itLower->compare(0, absoluteGroupName.size(), absoluteGroupName) != 0) {
-      continue;
-    }
-
-    // loop through the set with prefix absoluteGroupName
-    for (auto it = itLower;
-         it != nxClassEntries.end() && it->compare(0, absoluteGroupName.size(), absoluteGroupName) == 0; ++it) {
-
-      // only next level entries
-      const std::string &absoluteEntryName = *it;
-      if (std::count(absoluteEntryName.begin(), absoluteEntryName.end(), '/') != levels + 1) {
-        continue;
-      }
-      const std::string nameClass = absoluteEntryName.substr(absoluteEntryName.find_last_of('/') + 1);
-      loadNexusCommon(file, nameClass);
-    }
+  // get the entries off of this group
+  auto const entries = file->getEntries();
+  for (auto const &entry : entries) {
+    loadNexusCommon(file, entry.first);
   }
+
+  // group hierarchy levels
+  // const auto levels = std::count(absoluteGroupName.begin(), absoluteGroupName.end(), '/');
+
+  // const auto &allEntries = fileInfo.getAllEntries();
+  // loop through nxClass sets
+  // for (const auto &nxClassPair : allEntries) {
+  //   const std::set<std::string> &nxClassEntries = nxClassPair.second;
+
+  //   // since std::set is ordered, just find the iterators
+  //   // for the bounds of the current experiment number
+  //   // take advantage of the fact that std::set is sorted, find by prefix bounds
+  //   auto itLower = nxClassEntries.lower_bound(absoluteGroupName);
+  //   // not prefixed
+  //   if (itLower == nxClassEntries.end()) {
+  //     continue;
+  //   }
+  //   if (itLower->compare(0, absoluteGroupName.size(), absoluteGroupName) != 0) {
+  //     continue;
+  //   }
+
+  //   // loop through the set with prefix absoluteGroupName
+  //   for (auto it = itLower;
+  //        it != nxClassEntries.end() && it->compare(0, absoluteGroupName.size(), absoluteGroupName) == 0; ++it) {
+
+  //     // only next level entries
+  //     const std::string &absoluteEntryName = *it;
+  //     if (std::count(absoluteEntryName.begin(), absoluteEntryName.end(), '/') != levels + 1) {
+  //       continue;
+  //     }
+  //     const std::string nameClass = absoluteEntryName.substr(absoluteEntryName.find_last_of('/') + 1);
+  //     loadNexusCommon(file, nameClass);
+  //   }
+  // }
 
   if (!(group.empty() || keepOpen))
     file->closeGroup();

@@ -612,14 +612,12 @@ void LogManager::saveNexus(Nexus::File *file, const std::string &group, bool kee
  * @param file :: open NeXus file
  * @param group :: name of the group to open. Pass an empty string to NOT open a
  * group
- * @param fileInfo :: The corresponding Nexus HDF5 file descriptor
  * @param prefix :: The prefix of the provided file
  * @param keepOpen :: do not close group on exit to allow overloading and child
  * classes reading from the same group
  * load any NXlog in the current open group.
  */
-void LogManager::loadNexus(Nexus::File * /*file*/, const std::string & /*group*/,
-                           const Nexus::NexusDescriptor & /*fileInfo*/, const std::string & /*prefix*/,
+void LogManager::loadNexus(Nexus::File * /*file*/, std::string const & /*group*/, std::string const & /*prefix*/,
                            bool /*keepOpen*/) {
   throw std::runtime_error("LogManager::loadNexus should not be used");
 }

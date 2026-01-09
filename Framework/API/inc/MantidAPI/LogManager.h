@@ -183,10 +183,9 @@ public:
   virtual void saveNexus(Nexus::File *file, const std::string &group, bool keepOpen = false) const;
 
   /// Load the run from a NeXus file with a given group name. Overload that uses NexusDescriptor for faster
-  virtual void loadNexus(Nexus::File *file, const std::string &group, const Mantid::Nexus::NexusDescriptor &fileInfo,
-                         const std::string &prefix, bool keepOpen = false);
+  virtual void loadNexus(Nexus::File *file, std::string const &group, std::string const &prefix, bool keepOpen = false);
   /// Load the run from a NeXus file with a given group name
-  virtual void loadNexus(Nexus::File *file, const std::string &group, bool keepOpen);
+  virtual void loadNexus(Nexus::File *file, std::string const &group, bool keepOpen);
   /// Clear the logs
   void clearLogs();
 
