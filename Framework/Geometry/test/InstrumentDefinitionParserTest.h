@@ -43,7 +43,7 @@ private:
   public:
     MockIDFObjectWithParentDirectory(const std::string &fileName) : Mantid::Geometry::IDFObject(fileName) {}
     MOCK_CONST_METHOD0(exists, bool());
-    MOCK_CONST_METHOD0(getParentDirectory, const Poco::Path());
+    MOCK_CONST_METHOD0(getParentDirectory, std::filesystem::path());
   };
   GNU_DIAG_ON_SUGGEST_OVERRIDE
   /**
@@ -732,7 +732,7 @@ public:
     EXPECT_CALL(*mockCache, exists()).WillRepeatedly(Return(false)); // Mock expectation set such that Cache
                                                                      // file does not exist, and location is
                                                                      // inaccessible.
-    EXPECT_CALL(*mockCache, getParentDirectory()).WillRepeatedly(Return(Poco::Path("this does not exist")));
+    EXPECT_CALL(*mockCache, getParentDirectory()).WillRepeatedly(Return(std::filesystem::path("this does not exist")));
 
     IDFObject_const_sptr idf(mockIDF);
     IDFObject_const_sptr cache(mockCache);

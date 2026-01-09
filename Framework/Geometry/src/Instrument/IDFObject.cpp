@@ -6,7 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Instrument/IDFObject.h"
 #include "MantidKernel/ChecksumHelper.h"
+
 #include <Poco/String.h>
+#include <filesystem>
 
 namespace Mantid::Geometry {
 //----------------------------------------------------------------------------------------------
@@ -21,8 +23,8 @@ const std::string AbstractIDFObject::expectedExtension() { return ".xml"; }
 /** Constructor
  */
 IDFObject::IDFObject(const std::string &fileName)
-    : m_defFile(fileName), m_hasFileName(!fileName.empty()), m_cachePath(m_defFile.path()),
-      m_cacheParentDirectory(m_cachePath.parent()), m_cachePathStr(m_cachePath.toString())
+    : m_hasFileName(!fileName.empty()), m_cachePath(fileName),
+      m_cacheParentDirectory(m_cachePath.parent_path()), m_cachePathStr(m_cachePath.string())
 
 {}
 
@@ -30,13 +32,13 @@ IDFObject::IDFObject(const std::string &fileName)
 Gets the parent directory of the file.
 @return Parent directory path.
 */
-const Poco::Path IDFObject::getParentDirectory() const { return m_cacheParentDirectory; }
+std::filesystem::path IDFObject::getParentDirectory() const { return m_cacheParentDirectory; }
 
 /**
 Getter for the full file path.
 @return Full file path.
 */
-const Poco::Path &IDFObject::getFileFullPath() const { return m_cachePath; }
+const std::filesystem::path &IDFObject::getFileFullPath() const { return m_cachePath; }
 
 const std::string &IDFObject::getFileFullPathStr() const { return m_cachePathStr; }
 
@@ -44,18 +46,15 @@ const std::string &IDFObject::getFileFullPathStr() const { return m_cachePathStr
 Gets the filename for the FileObject.
 @return filename only.
 */
-std::string IDFObject::getFileNameOnly() const { return m_cachePath.getFileName(); }
+std::string IDFObject::getFileNameOnly() const { return m_cachePath.filename().string(); }
 
 /**
  * Gets the extension of this IDF file, including the leading period
  * @return A string containing the extension for this file
  */
 std::string IDFObject::getExtension() const {
-  std::string ext = m_cachePath.getExtension();
-  if (ext.empty())
-    return ext;
-  else
-    return "." + ext;
+  std::string ext = m_cachePath.extension().string();
+  return ext; // std::filesystem includes the leading dot
 }
 
 /**
@@ -72,6 +71,6 @@ std::string IDFObject::getMangledName() const {
 Check that the file exists.
 @return True if it exists otherwise False.
 */
-bool IDFObject::exists() const { return m_hasFileName && m_defFile.exists(); }
+bool IDFObject::exists() const { return m_hasFileName && std::filesystem::exists(m_cachePath); }
 
 } // namespace Mantid::Geometry

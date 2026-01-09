@@ -33,12 +33,12 @@
 #include <Poco/DOM/NodeFilter.h>
 #include <Poco/DOM/NodeIterator.h>
 #include <Poco/DOM/NodeList.h>
-#include <Poco/Path.h>
 #include <Poco/SAX/AttributesImpl.h>
 #include <Poco/String.h>
 #include <Poco/XML/XMLWriter.h>
 
 #include <boost/regex.hpp>
+#include <filesystem>
 #include <memory>
 #include <unordered_set>
 #include <utility>
@@ -2516,14 +2516,15 @@ InstrumentDefinitionParser::writeAndApplyCache(IDFObject_const_sptr firstChoiceC
 
   g_log.notice("Geometry cache is not available");
   try {
-    Poco::File dir = usedCache->getParentDirectory();
-    if (dir.path().empty() || !dir.exists() || !dir.canWrite()) {
+    std::filesystem::path dir = usedCache->getParentDirectory();
+    if (dir.empty() || !std::filesystem::exists(dir) || 
+        (std::filesystem::status(dir).permissions() & std::filesystem::perms::owner_write) == std::filesystem::perms::none) {
       usedCache = std::move(fallBackCache);
       cachingOption = WroteCacheTemp;
       g_log.information() << "Geometrycache directory is read only, writing cache "
                              "to system temp.\n";
     }
-  } catch (Poco::FileNotFoundException &) {
+  } catch (std::filesystem::filesystem_error &) {
     g_log.error() << "Unable to find instrument definition while attempting to "
                      "write cache.\n";
     throw std::runtime_error("Unable to find instrument definition while "
