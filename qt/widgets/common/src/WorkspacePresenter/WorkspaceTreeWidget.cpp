@@ -29,8 +29,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
-#include <Poco/Path.h>
-
+#include <filesystem>
 #include <memory>
 
 #include <QFileDialog>

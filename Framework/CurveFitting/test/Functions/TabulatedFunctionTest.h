@@ -19,8 +19,7 @@
 
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 
-#include <Poco/File.h>
-
+#include <filesystem>
 #include <fstream>
 
 using namespace Mantid::CurveFitting;

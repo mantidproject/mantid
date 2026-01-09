@@ -15,9 +15,9 @@
 #include "MantidQtWidgets/Common/MantidDesktopServices.h"
 
 #include <Poco/ActiveResult.h>
-#include <Poco/Path.h>
 
-#include <QDesktopWidget>
+#include <filesystem>
+#include <fstream>
 #include <QFileDialog>
 #include <QSettings>
 #include <QStyle>
@@ -1031,8 +1031,13 @@ std::unordered_set<std::string> CatalogSearch::getDataFileExtensions(const Manti
   // For every filename in the column...
   for (unsigned row = 0; row < column->size(); row++) {
     // Add the file extension to the set if it does not exist.
-    QString extension = QString::fromStdString(Poco::Path(column->cell<std::string>(row)).getExtension());
-    extensions.insert(extension.toLower().toStdString());
+    std::filesystem::path filePath(column->cell<std::string>(row));
+    std::string extension = filePath.extension().string();
+    if (!extension.empty() && extension[0] == '.') {
+      extension = extension.substr(1); // remove leading dot
+    }
+    QString qExtension = QString::fromStdString(extension);
+    extensions.insert(qExtension.toLower().toStdString());
   }
 
   return (extensions);
@@ -1157,7 +1162,8 @@ void CatalogSearch::loadDataFiles() {
     // Set the filename (path) of the algorithm to load from.
     loadAlgorithm->setPropertyValue("Filename", filePath);
     // Sets the output workspace to be the name of the file.
-    loadAlgorithm->setPropertyValue("OutputWorkspace", Poco::Path(Poco::Path(filePath).getFileName()).getBaseName());
+    std::filesystem::path path(filePath);
+    loadAlgorithm->setPropertyValue("OutputWorkspace", path.stem().string());
 
     Poco::ActiveResult<bool> result(loadAlgorithm->executeAsync());
     while (!result.available()) {
