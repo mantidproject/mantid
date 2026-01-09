@@ -7,7 +7,6 @@
 #pragma once
 
 #include "MantidKernel/System.h"
-#include "MantidNexus/NexusDescriptor.h"
 #include <memory>
 #include <string>
 
@@ -35,12 +34,11 @@ namespace PropertyNexus {
  *
  * @param file currently opened NeXus file
  * @param group current group (relative name)
- * @param fileInfo descriptor with in-memory index with all entries
  * @param prefix indicates current group location in file (absolute name)
  * @return std::unique_ptr<Property>
  */
 DLLExport std::unique_ptr<Property> loadProperty(Nexus::File *file, const std::string &group,
-                                                 const Nexus::NexusDescriptor &fileInfo, const std::string &prefix);
+                                                 const std::string &prefix);
 
 DLLExport std::unique_ptr<Property> loadProperty(Nexus::File *file, const std::string &group);
 

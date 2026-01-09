@@ -672,7 +672,7 @@ void LogManager::loadNexus(Nexus::File *file, const Nexus::NexusDescriptor &file
     }
     const std::string nameClass = absoluteEntryName.substr(absoluteEntryName.find_last_of('/') + 1);
 
-    auto prop = PropertyNexus::loadProperty(file, nameClass, fileInfo, prefix);
+    auto prop = PropertyNexus::loadProperty(file, nameClass, prefix);
     if (prop) {
       // get TimeROI
       if (prop->name() == Kernel::TimeROI::NAME) {
