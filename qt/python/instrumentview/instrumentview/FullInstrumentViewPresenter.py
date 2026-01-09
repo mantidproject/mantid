@@ -448,9 +448,7 @@ class FullInstrumentViewPresenter:
 
     def on_peak_selected(self, x: float) -> None:
         # First convert to workspace x unit
-        x_in_workspace_unit = self._model.convert_units(
-            self._view.current_selected_unit(), self._model.workspace_x_unit, self._model.picked_spectrum_nos[0], x
-        )
+        x_in_workspace_unit = self._model.convert_units(self._view.current_selected_unit(), self._model.workspace_x_unit, 0, x)
         if self._peak_interaction_status == PeakInteractionStatus.Adding:
             peaks_ws = self._model.add_peak(x_in_workspace_unit, self._view.selected_peaks_workspaces())
             self._view.select_peaks_workspace(peaks_ws)

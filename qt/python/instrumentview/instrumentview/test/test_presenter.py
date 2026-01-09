@@ -362,6 +362,7 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._presenter._model = MagicMock()
         self._presenter._model.workspace_x_unit = "workspace-unit"
         self._presenter._model.picked_spectrum_nos = [42]
+        self._presenter._model.picked_detector_ids = [42]
         self._presenter._view.current_selected_unit.return_value = "view-unit"
         self._presenter._view.selected_peaks_workspaces.return_value = ["wsA", "wsB"]
         self._presenter._model.convert_units.return_value = 123.456
@@ -375,7 +376,7 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         returned_ws = MagicMock(name="ReturnedWorkspace")
         self._presenter._model.add_peak.return_value = returned_ws
         self._presenter.on_peak_selected(3.14)
-        self._presenter._model.convert_units.assert_called_once_with("view-unit", "workspace-unit", 42, 3.14)
+        self._presenter._model.convert_units.assert_called_once_with("view-unit", "workspace-unit", 0, 3.14)
         self._presenter._model.add_peak.assert_called_once_with(123.456, ["wsA", "wsB"])
         self._presenter._view.select_peaks_workspace.assert_called_once_with(returned_ws)
         self.assertEqual(self._presenter._peak_interaction_status, PeakInteractionStatus.Disabled)
@@ -388,7 +389,7 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._setup_on_peak_selected_tests()
         self._presenter._peak_interaction_status = PeakInteractionStatus.Deleting
         self._presenter.on_peak_selected(9.81)
-        self._presenter._model.convert_units.assert_called_once_with("view-unit", "workspace-unit", 42, 9.81)
+        self._presenter._model.convert_units.assert_called_once_with("view-unit", "workspace-unit", 0, 9.81)
         self._presenter._model.delete_peak.assert_called_once_with(123.456)
         self._presenter._model.add_peak.assert_not_called()
         self._presenter._view.select_peaks_workspace.assert_not_called()
@@ -407,7 +408,7 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._presenter._peak_interaction_status = FakeStatus.Unknown
         with self.assertRaises(RuntimeError):
             self._presenter.on_peak_selected(1.23)
-        self._presenter._model.convert_units.assert_called_once_with("view-unit", "workspace-unit", 42, 1.23)
+        self._presenter._model.convert_units.assert_called_once_with("view-unit", "workspace-unit", 0, 1.23)
         self._presenter._model.add_peak.assert_not_called()
         self._presenter._model.delete_peak.assert_not_called()
         self._presenter._view.select_peaks_workspace.assert_not_called()

@@ -22,7 +22,7 @@ class TestConvertUnitsCalculator(unittest.TestCase):
     def test_convert_same_unit(self, mock_run_conversion):
         test_value = 10
         for unit in self.units_to_test:
-            converted = self.calculator.convert(unit, unit, 101, test_value)
+            converted = self.calculator.convert(unit, unit, 101, 113, test_value)
             self.assertEqual(test_value, converted)
             mock_run_conversion.assert_not_called()
 
@@ -33,7 +33,7 @@ class TestConvertUnitsCalculator(unittest.TestCase):
             for target_unit in self.units_to_test:
                 if source_unit == target_unit:
                     continue
-                self.calculator.convert(source_unit, target_unit, 101, test_value)
+                self.calculator.convert(source_unit, target_unit, 101, 113, test_value)
                 mock_run_conversion.assert_called_once()
                 mock_run_conversion.reset_mock()
 
