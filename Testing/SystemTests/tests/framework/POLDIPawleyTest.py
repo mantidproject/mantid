@@ -1,0 +1,75 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2026 ISIS Rutherford Appleton Laboratory UKRI,
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
+# SPDX - License - Identifier: GPL - 3.0 +
+# pylint: disable=no-init,invalid-name,too-many-locals,too-few-public-methods
+import systemtesting
+from mantid.api import AnalysisDataService as ADS, FileFinder
+from mantid.simpleapi import PoldiAutoCorrelation, ConvertUnits, ConvertToPointData, ExtractSpectra, FlatBackground
+from Engineering.pawley_utils import Phase, GaussianProfile, PawleyPattern1D, PawleyPattern2D
+from plugins.algorithms.poldi_utils import load_poldi_h5f
+
+
+class POLDIPawleyWorkflow(systemtesting.MantidSystemTest):
+    def setUp(self):
+        fpath_data = FileFinder.getFullPath("poldi2025n012174.hdf")  # for np.loadtxt so need full path
+        self.ws = load_poldi_h5f(fpath_data, "POLDI_Definition_896.xml", t0=5.824e-02, t0_const=-12.68, output_workspace="poldi_silicon")
+        self.ws_autocorr = PoldiAutoCorrelation(self.ws, OutputWorkspace=self.ws.name() + "_ac", NGroups=2)
+        self.ws_autocorr = ConvertUnits(InputWorkspace=self.ws_autocorr, OutputWorkspace=self.ws_autocorr.name(), Target="dSpacing")
+        self.ws_autocorr = ConvertToPointData(InputWorkspace=self.ws_autocorr, OutputWorkspace=self.ws_autocorr.name())
+        self.ispec = 1  # North Bank
+        self.ws_crop = ExtractSpectra(
+            InputWorkspace=self.ws,
+            OutputWorkspace=f"{self.ws.name()}_crop",
+            DetectorList=self.ws_autocorr.getSpectrum(self.ispec).getDetectorIDs(),
+        )
+
+    def cleanup(self):
+        ADS.clear()
+
+    def runTest(self):
+        # setup phase
+        si = Phase.from_alatt(3 * [5.43105], "F d -3 m", "Si 3/4 3/4 1/4 1.0 0.08")
+        si.set_hkls_from_dspac_limits(0.7, 3.5)
+        si.merge_reflections()
+
+        # run 1D Pawley refinement
+        pawley1d = PawleyPattern1D(self.ws_autocorr, [si], profile=GaussianProfile(), bg_func=FlatBackground())
+        pawley1d.ispec = 1  # optimise north bank only
+        pawley1d.estimate_initial_params()
+        res = pawley1d.fit()
+        # collect attributes to assert
+        self.cost_1d = res.cost
+        self.alatt_1d = self.alatt_params[0][0]
+
+        # 2D Pawley refinement
+        pawley2d = PawleyPattern2D(self.ws_crop, [si], profile=GaussianProfile(), global_scale=False)
+        pawley2d.set_params_from_pawley1d(pawley1d)
+        res = pawley2d.fit()
+        # collect attributes to assert
+        self.cost_2d = res.cost
+        self.alatt_2d = self.alatt_params[0][0]
+
+        # Do unconstrained 2D fit (all peaks independent)
+        pawley2d_free = pawley2d.create_no_constriants_fit()
+        res = pawley2d_free.fit()
+        # collect attributes to assert
+        self.cost_2d_free = res.cost  # 499004.0850025586
+        # get residual d-spacing
+        dspacs_free = pawley2d_free.get_peak_centers()
+        dspacs_pawley = pawley2d.phases[0].calc_dspacings()
+        self.residual_dspacs = dspacs_pawley - dspacs_free
+
+    def validate(self):
+        # 1D Pawley
+        self.assertAlmostEqual(self.alatt_1d, 5.4312, delta=1e-4)
+        self.assertAlmostEqual(self.cost_1d, 422.1, delta=1e-1)
+        # 2D Pawley
+        self.assertAlmostEqual(self.alatt_2d, 5.4312, delta=1e-4)
+        self.assertAlmostEqual(self.cost_2d, 499058, delta=1)
+        # 2D Pawley Free
+        self.assertLessThan(self.cost_2d_free, self.cost_2d)
+        self.assertLessThan(abs(self.residual_dspacs.mean()), 2e-05)
+        return True

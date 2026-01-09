@@ -214,19 +214,19 @@ class MtdFuncMixin:
     PawleyPattern2DNoConstraints (although the getters may also be helpful for debugging PawleyPattern2D fits
     """
 
-    def get_peak_centers(self):
+    def get_peak_centers(self) -> np.ndarray[float]:
         cen_par_name = self.comp_func[0].function.getCentreParameterName()
         return self.get_peak_params(cen_par_name)
 
-    def get_peak_params(self, param_name: str):
+    def get_peak_params(self, param_name: str) -> np.ndarray[float]:
         bg_func_names = FunctionFactory.Instance().getBackgroundFunctionNames()
         return np.array([f.function.getParameterValue(param_name) for f in self.comp_func if f.name not in bg_func_names])
 
-    def get_peak_fwhm(self):
+    def get_peak_fwhm(self) -> np.ndarray[float]:
         bg_func_names = FunctionFactory.Instance().getBackgroundFunctionNames()
         return np.array([f.function.fwhm() for f in self.comp_func if f.name not in bg_func_names])
 
-    def get_peak_intensities(self):
+    def get_peak_intensities(self) -> np.ndarray[float]:
         bg_func_names = FunctionFactory.Instance().getBackgroundFunctionNames()
         return np.array([f.function.intensity() for f in self.comp_func if f.name not in bg_func_names])
 
