@@ -646,12 +646,10 @@ void LogManager::loadNexus(Nexus::File *file, const std::string &group, bool kee
   }
 }
 
-void LogManager::loadNexus(Nexus::File *file, const Nexus::NexusDescriptor &fileInfo, const std::string &prefix) {
+void LogManager::loadNexus(Nexus::File *file, const Nexus::NexusDescriptor &, const std::string &prefix) {
 
   // Only load from NXlog entries
-  const auto &allEntries = fileInfo.getAllEntries();
-  auto itNxLogEntries = allEntries.find("NXlog");
-  const auto nxLogEntries = (itNxLogEntries != allEntries.end()) ? itNxLogEntries->second : std::set<std::string>{};
+  auto const nxLogEntries = file->getEntriesByClass("NXlog");
 
   const auto levels = std::count(prefix.begin(), prefix.end(), '/');
 

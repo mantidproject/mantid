@@ -1406,6 +1406,11 @@ std::string File::getTopLevelEntryName() const {
   return top;
 }
 
+std::set<std::string> File::getEntriesByClass(std::string const &class_type) const {
+  std::vector<std::string> allAddresses = m_descriptor.allAddressesOfType(class_type);
+  return std::set<std::string>(allAddresses.begin(), allAddresses.end());
+}
+
 //------------------------------------------------------------------------------------------------------------------
 // ATTRIBUTE METHODS
 //------------------------------------------------------------------------------------------------------------------
