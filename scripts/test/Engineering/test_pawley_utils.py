@@ -291,5 +291,50 @@ class PawleyPattern2DTest(unittest.TestCase):
         return mock_pawley1d
 
 
+class PawleyPattern2DNoConstraintsTest(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        fpath_data = FileFinder.getFullPath("poldi_448x500_chopper5k_silicon.txt")  # for np.loadtxt so need full path
+        cls.ws = load_poldi(fpath_data, "POLDI_Definition_448_calibrated.xml", chopper_speed=5000, t0=5.855e-02, t0_const=-9.00)
+
+    @classmethod
+    def tearDownClass(cls):
+        AnalysisDataService.clear()
+
+    def setUp(self):
+        self.phase = Phase.from_alatt(3 * [5.43094], "F d -3 m")  # can be changed by the class
+        self.phase.set_hkls_from_dspac_limits(1.9, 3.5)  # 2 peaks
+        self.init_kwargs = {"ws": self.ws, "phases": [self.phase], "profile": GaussianProfile()}
+
+    def test_global_scale_false_no_bg(self):
+        pawley = PawleyPattern2D(**self.init_kwargs, global_scale=False).create_no_constriants_fit()
+        # note intensity on first peak fixed
+        assert_array_equal(pawley.get_isfree(), array([False, True, True, True, True, True]))
+
+    def test_global_scale_true_no_bg(self):
+        pawley = PawleyPattern2D(**self.init_kwargs, global_scale=True).create_no_constriants_fit()
+        # no intensities fixed
+        assert_array_equal(pawley.get_isfree(), ones(6, dtype=bool))
+
+    def test_global_scale_true_with_bg(self):
+        pawley = PawleyPattern2D(**self.init_kwargs, global_scale=True, bg_func=FlatBackground(A0=2)).create_no_constriants_fit()
+        # no intensities or bg fixed
+        assert_array_equal(pawley.get_isfree(), ones(7, dtype=bool))
+
+    def test_global_scale_false_with_bg(self):
+        pawley = PawleyPattern2D(**self.init_kwargs, global_scale=False, bg_func=FlatBackground(A0=2)).create_no_constriants_fit()
+        # note intensity on first peak fixed and bg fixed
+        assert_array_equal(pawley.get_isfree(), array([False, True, True, True, True, True, False]))
+
+    def test_fit(self):
+        # run fit with 2 func eval to check no error, result returned and params changed
+        pawley = PawleyPattern2D(**self.init_kwargs, global_scale=True).create_no_constriants_fit()
+        result = pawley.fit(max_nfev=2)
+
+        self.assertEqual(result.nfev, 2)
+        # assert parameters changed
+        self.assertFalse(allclose(pawley.initial_params, pawley.get_free_params()))
+
+
 if __name__ == "__main__":
     unittest.main()
