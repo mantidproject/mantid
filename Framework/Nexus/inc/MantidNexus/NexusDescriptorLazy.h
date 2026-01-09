@@ -95,6 +95,11 @@ public:
   /// Query if a given type exists somewhere in the file
   bool classTypeExists(std::string const &classType) const;
 
+  /// @brief Get string data from a dataset at address
+  /// @param address Full HDF5 address of the dataset
+  /// @return string data at this address, if it is string dataset, else empty
+  std::string getStrData(std::string const &address);
+
 private:
   /**
    * Sets m_allEntries, called in HDF5 constructor.

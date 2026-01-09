@@ -10,6 +10,7 @@
 #include "MantidNexus/NexusException.h"
 #include "MantidNexus/UniqueID.h"
 
+#include "MantidNexus/NexusFile_fwd.h"
 #include <H5Cpp.h>
 #include <hdf5.h>
 
@@ -27,7 +28,6 @@ static unsigned int const INSTR_DEPTH = 5;
 static std::unordered_set<std::string> const SPECIAL_ADDRESS{"/entry", "/entry0", "/entry1"};
 static std::string const NONEXISTENT = "NONEXISTENT"; // register failures as well
 static std::string const UNKNOWN_CLASS = "UNKNOWN_CLASS";
-static std::string const SCIENTIFIC_DATA_SET = "SDS";
 
 namespace {
 template <herr_t (*H5Xclose)(hid_t)> std::string readNXClass(Mantid::Nexus::UniqueID<H5Xclose> const &oid) {
@@ -101,6 +101,22 @@ bool NexusDescriptorLazy::hasRootAttr(std::string const &name) {
       return false;
     }
   }
+}
+
+/// Get string data from a dataset at address
+std::string NexusDescriptorLazy::getStrData(std::string const &address) {
+  std::string strData;
+  if (isEntry(address, SCIENTIFIC_DATA_SET)) {
+    // open the data set and get its string data
+    // using H5Cpp interface because trying to read string data is an absolute nightmare with the C API
+    UniqueID<&H5Dclose> did(H5Dopen(m_fileID, address.c_str(), H5P_DEFAULT));
+    H5::DataSet dataset(did);
+    H5::DataType dtype = dataset.getDataType();
+    if (dtype.isVariableStr() || dtype.getClass() == H5T_STRING) {
+      dataset.read(strData, dtype, dataset.getSpace());
+    }
+  }
+  return strData;
 }
 
 // PRIVATE

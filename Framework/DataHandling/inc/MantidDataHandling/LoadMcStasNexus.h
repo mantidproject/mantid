@@ -8,14 +8,14 @@
 
 #include "MantidAPI/IFileLoader.h"
 #include "MantidDataHandling/DllConfig.h"
-#include "MantidNexus/NexusDescriptor.h"
+#include "MantidNexus/NexusDescriptorLazy.h"
 
 namespace Mantid {
 namespace DataHandling {
 
 /** LoadMcStasNexus : TODO: DESCRIPTION
  */
-class MANTID_DATAHANDLING_DLL LoadMcStasNexus : public API::IFileLoader<Nexus::NexusDescriptor> {
+class MANTID_DATAHANDLING_DLL LoadMcStasNexus : public API::IFileLoader<Nexus::NexusDescriptorLazy> {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose
@@ -26,7 +26,7 @@ public:
   const std::string category() const override;
 
   /// Returns a confidence value that this algorithm can load a file
-  int confidence(Nexus::NexusDescriptor &descriptor) const override;
+  int confidence(Nexus::NexusDescriptorLazy &descriptor) const override;
 
 private:
   void init() override;

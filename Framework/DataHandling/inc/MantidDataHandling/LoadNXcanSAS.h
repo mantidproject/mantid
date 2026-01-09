@@ -12,7 +12,7 @@
 #include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidDataHandling/DllConfig.h"
 #include "MantidDataHandling/NXcanSASUtil.h"
-#include "MantidNexus/NexusDescriptor.h"
+#include "MantidNexus/NexusDescriptorLazy.h"
 
 namespace H5 {
 class Group;
@@ -23,7 +23,7 @@ namespace Mantid::DataHandling::NXcanSAS {
 /** LoadNXcanSAS : Tries to load an NXcanSAS file type into a Workspace2D.
  *  This can load either 1D or 2D data
  */
-class MANTID_DATAHANDLING_DLL LoadNXcanSAS : public API::IFileLoader<Nexus::NexusDescriptor> {
+class MANTID_DATAHANDLING_DLL LoadNXcanSAS : public API::IFileLoader<Nexus::NexusDescriptorLazy> {
 public:
   /// Constructor
   LoadNXcanSAS();
@@ -40,7 +40,7 @@ public:
   const std::string category() const override { return "DataHandling\\Nexus"; }
 
   /// Returns a confidence value that this algorithm can load a file
-  int confidence(Nexus::NexusDescriptor &descriptor) const override;
+  int confidence(Nexus::NexusDescriptorLazy &descriptor) const override;
 
 private:
   /// Loads the transmission runs
