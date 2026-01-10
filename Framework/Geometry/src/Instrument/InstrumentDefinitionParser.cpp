@@ -2523,7 +2523,7 @@ InstrumentDefinitionParser::writeAndApplyCache(IDFObject_const_sptr firstChoiceC
       g_log.information() << "Geometrycache directory does not exist, writing cache "
                              "to system temp.\n";
     } else if (!dir.empty() && (std::filesystem::status(dir).permissions() & std::filesystem::perms::owner_write) ==
-                                    std::filesystem::perms::none) {
+                                   std::filesystem::perms::none) {
       usedCache = std::move(fallBackCache);
       cachingOption = WroteCacheTemp;
       g_log.information() << "Geometrycache directory is read only, writing cache "
