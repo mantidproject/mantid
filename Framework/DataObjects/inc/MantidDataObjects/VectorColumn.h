@@ -28,7 +28,12 @@ namespace DataObjects {
   it will work correctly with complex or user types, but it might.
 */
 
+// Apply visibility attribute for non-MSVC builds (needed for clang/OSX).
+#if defined(_MSC_VER)
+template <class Type> class VectorColumn : public API::Column {
+#else
 template <class Type> class MANTID_DATAOBJECTS_DLL VectorColumn : public API::Column {
+#endif
 public:
   VectorColumn() { m_type = typeName(); }
 

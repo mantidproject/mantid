@@ -33,7 +33,12 @@ namespace DataObjects {
  * @date Dec 3, 2010
  *
  * */
+// Apply visibility attribute for non-MSVC builds (needed for clang/OSX).
+#if defined(_MSC_VER)
+template <size_t nd> class MDEvent : public MDLeanEvent<nd> {
+#else
 template <size_t nd> class MANTID_DATAOBJECTS_DLL MDEvent : public MDLeanEvent<nd> {
+#endif
 protected:
   /** 0-based index of which run this event belongs to.
    * This refers to the particular ExperimentInfo that is stored in the
