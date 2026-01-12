@@ -119,7 +119,7 @@ void BayesFitting::applySettings(std::map<std::string, QVariant> const &settings
 std::string BayesFitting::documentationPage() const { return "Inelastic Bayes Fitting"; }
 
 void BayesFitting::setBackend(const QString &text) {
-  BayesBackendType newBackend;
+  BayesBackendType newBackend = m_backend;
   if (text == "quasielasticbayes") {
     newBackend = BayesBackendType::QUASI_ELASTIC_BAYES;
   } else if (text == "quickbayes") {
