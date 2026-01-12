@@ -10,7 +10,6 @@
 #include "MantidDataObjects/MDLeanEvent.h"
 #include "MantidFrameworkTestHelpers/MDEventsTestHelper.h"
 
-#include <Poco/File.h>
 #include <cxxtest/TestSuite.h>
 #include <memory>
 
@@ -40,8 +39,8 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(BoxTree.saveBoxStructure("someFile.nxs"));
 
-    Poco::File testFile("someFile.nxs");
-    TSM_ASSERT("BoxTree was not able to create test file", testFile.exists());
+    std::filesystem::path testFile("someFile.nxs");
+    TSM_ASSERT("BoxTree was not able to create test file", std::filesystem::exists(testFile));
 
     MDBoxFlatTree BoxStoredTree;
     int nDims = 3;
@@ -94,8 +93,8 @@ public:
     }
 
     // Clean up file
-    if (testFile.exists())
-      testFile.remove();
+    if (std::filesystem::exists(testFile))
+      std::filesystem::remove(testFile);
   }
 
 private:
