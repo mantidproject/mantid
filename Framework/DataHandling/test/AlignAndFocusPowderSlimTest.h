@@ -1082,6 +1082,40 @@ public:
     TS_ASSERT_EQUALS(outputWS->readY(2).front(), 34871349);
   }
 
+  void test_grouping_workspace_sparse() {
+    // create grouping workspace for VULCAN instrument, default is no grouping (all 0)
+    auto createGroups = AlgorithmManager::Instance().createUnmanaged("CreateGroupingWorkspace");
+    createGroups->initialize();
+    createGroups->setProperty("InstrumentName", "VULCAN");
+    createGroups->setProperty("OutputWorkspace", "grouping");
+    createGroups->execute();
+
+    auto groupingWS = std::dynamic_pointer_cast<Mantid::DataObjects::GroupingWorkspace>(
+        AnalysisDataService::Instance().retrieve("grouping"));
+
+    // Create 2 groups using only 3 detectors
+    groupingWS->setValue(30, 1);
+    groupingWS->setValue(40, 2);
+    groupingWS->setValue(50, 1);
+
+    TestConfig configuration({0.}, {50000.}, {50000.}, "Linear", "TOF");
+    configuration.l2s = std::vector<double>(2, 2.0);
+    configuration.twoTheta = std::vector<double>(2, 90.0);
+    configuration.phi = std::vector<double>(2, 0.0);
+    configuration.groupingWS = groupingWS;
+    auto outputWS = std::dynamic_pointer_cast<MatrixWorkspace>(run_algorithm(VULCAN_218062, configuration));
+
+    /* expected results came from running
+    ws = LoadEventNexus("VULCAN_218062.nxs.h5", NumberOfBins=1)
+    print(ws.readY(30) + ws.readY(50))
+    print(ws.readY(40))
+    */
+
+    TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 2);
+    TS_ASSERT_EQUALS(outputWS->readY(0).front(), 543);
+    TS_ASSERT_EQUALS(outputWS->readY(1).front(), 260);
+  }
+
   // ==================================
   // TODO things below this point are for benchmarking and will be removed later
   // ==================================

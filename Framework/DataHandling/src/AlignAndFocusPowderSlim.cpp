@@ -93,7 +93,7 @@ double getFocussedPostion(const detid_t detid, const std::vector<double> &difc_f
   if (detIDToSpecNum.contains(detid)) {
     return difc_focus[detIDToSpecNum[detid]];
   } else {
-    throw std::runtime_error("Detector ID " + std::to_string(detid) + " not found in detIDToSpecNum map.");
+    return IGNORE_PIXEL;
   }
 }
 
@@ -740,8 +740,11 @@ void AlignAndFocusPowderSlim::initCalibrationConstants(API::MatrixWorkspace_sptr
   for (auto iter = detInfo.cbegin(); iter != detInfo.cend(); ++iter) {
     if (!iter->isMonitor()) {
       const auto difc_focussed = getFocussedPostion(static_cast<detid_t>(iter->detid()), difc_focus, detIDToSpecNum);
-      m_calibration.emplace(static_cast<detid_t>(iter->detid()),
-                            difc_focussed / detInfo.difcUncalibrated(iter->index()));
+      if (difc_focussed == IGNORE_PIXEL)
+        m_calibration.emplace(static_cast<detid_t>(iter->detid()), IGNORE_PIXEL);
+      else
+        m_calibration.emplace(static_cast<detid_t>(iter->detid()),
+                              difc_focussed / detInfo.difcUncalibrated(iter->index()));
     }
   }
 }
@@ -752,7 +755,10 @@ void AlignAndFocusPowderSlim::initCalibrationConstantsFromCalWS(const std::vecto
     const detid_t detid = calibrationWS->cell<int>(row, 0);
     const double detc = calibrationWS->cell<double>(row, 1);
     const auto difc_focussed = getFocussedPostion(detid, difc_focus, detIDToSpecNum);
-    m_calibration.emplace(detid, difc_focussed / detc);
+    if (difc_focussed == IGNORE_PIXEL)
+      m_calibration.emplace(detid, IGNORE_PIXEL);
+    else
+      m_calibration.emplace(detid, difc_focussed / detc);
   }
 }
 
