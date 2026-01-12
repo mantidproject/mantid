@@ -36,7 +36,7 @@ jobs:
           base: main
           labels: |
             pixi
-            Maintenanance
+            Maintenance
             DevOps
           delete-branch: true
           add-paths: pixi.lock
