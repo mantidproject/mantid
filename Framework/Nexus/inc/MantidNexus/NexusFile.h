@@ -7,6 +7,7 @@
 #include "MantidNexus/UniqueID.h"
 #include <map>
 #include <memory>
+#include <set>
 #include <string>
 #include <utility>
 #include <vector>
@@ -580,6 +581,8 @@ public:
    * \return A set of string names of all entries of the given class type
    */
   std::set<std::string> getEntriesByClass(std::string const &class_type) const;
+
+  NexusDescriptor const &getFileDescriptor() const { return m_descriptor; }
 
   //------------------------------------------------------------------------------------------------------------------
   // ATTRIBUTE METHODS
