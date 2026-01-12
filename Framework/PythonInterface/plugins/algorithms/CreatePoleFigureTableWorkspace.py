@@ -48,6 +48,10 @@ class CreatePoleFigureTableWorkspace(PythonAlgorithm):
             doc="Output workspace containing the table of alphas, betas and intensities.",
         )
         self.declareProperty(
+            MatrixWorkspaceProperty("SpectraWorkspace", "", Direction.Output, PropertyMode.Optional),
+            doc="Output workspace containing the spectra corresponding to each row of the Output Table Workspace.",
+        )
+        self.declareProperty(
             "ReadoutColumn",
             defaultValue="I",
             direction=Direction.Input,
@@ -81,6 +85,12 @@ class CreatePoleFigureTableWorkspace(PythonAlgorithm):
             defaultValue=True,
             direction=Direction.Input,
             doc="Flag for determining whether the provided intensities should be corrected for scattering power",
+        )
+        self.declareProperty(
+            "IncludeSpectrumInfo",
+            defaultValue=False,
+            direction=Direction.Input,
+            doc="Flag for whether to include a column in the table containing focused workspace name and spectrum number",
         )
         self.declareProperty(
             FloatArrayProperty("ScatteringVolumePosition", [0.0, 0.0, 0.0], FloatArrayLengthValidator(3), direction=Direction.Input),
@@ -159,6 +169,7 @@ class CreatePoleFigureTableWorkspace(PythonAlgorithm):
     def PyExec(self):
         # get inputs
         ws = self.getProperty("InputWorkspace").value
+        create_spec_ws = not self.getProperty("SpectraWorkspace").isDefault
         peak_param_ws = self.getProperty("PeakParameterWorkspace").value
         readout_column = self.getProperty("ReadoutColumn").value
         hkl = self.getProperty("Reflection").value
@@ -168,6 +179,7 @@ class CreatePoleFigureTableWorkspace(PythonAlgorithm):
         apply_scatt_corr = self.getProperty("ApplyScatteringPowerCorrection").value
         sample_pos = np.asarray(self.getProperty("ScatteringVolumePosition").value)
         ax_trans = np.asarray(self.getProperty("AxesTransform").value).reshape((3, 3))
+        inc_spec_info = self.getProperty("IncludeSpectrumInfo").value
 
         # generate a detector table to get detector positions
         det_table = self.exec_child_alg(
@@ -234,6 +246,9 @@ class CreatePoleFigureTableWorkspace(PythonAlgorithm):
         table_ws.addColumn(type="double", name="Beta", plottype=2)
         table_ws.addColumn(type="double", name="Alpha", plottype=2)
         table_ws.addColumn(type="double", name=readout_column, plottype=2)
+        if inc_spec_info:
+            table_ws.addColumn(type="str", name="DataWorkspace", plottype=6)
+            table_ws.addColumn(type="int", name="WorkspaceIndex", plottype=2)
 
         # check which spectra meet inclusion thresholds
         valid_spec_mask = self._thresh_criteria_mask(ab_arr.shape[0], chi_thresh, x0_thresh, chi2, x0s, peak)
@@ -242,7 +257,19 @@ class CreatePoleFigureTableWorkspace(PythonAlgorithm):
                 # amend intensity for any scattering correction
                 intensity = intensities[spec_index] / scat_power if not use_default_intensity else default_intensity
                 # add data to table
-                table_ws.addRow({"Beta": ab_arr[spec_index, 1], "Alpha": ab_arr[spec_index, 0], readout_column: intensity})
+                row = {"Beta": ab_arr[spec_index, 1], "Alpha": ab_arr[spec_index, 0], readout_column: intensity}
+                if inc_spec_info:
+                    row["DataWorkspace"] = ws.name()
+                    row["WorkspaceIndex"] = spec_index
+                table_ws.addRow(row)
+        if create_spec_ws:
+            invalid_spec_ids = ",".join([str(x) for x in np.where(~valid_spec_mask)[0]])
+            spectra_ws = self.exec_child_alg("CloneWorkspace", InputWorkspace=ws, OutputWorkspace="__spec")
+            if len(invalid_spec_ids) > 0:
+                spectra_ws = self.exec_child_alg(
+                    "RemoveSpectra", InputWorkspace=spectra_ws, OutputWorkspace="__spec", WorkspaceIndices=invalid_spec_ids
+                )
+            self.setProperty("SpectraWorkspace", spectra_ws)
 
         self.setProperty("OutputWorkspace", table_ws)
 

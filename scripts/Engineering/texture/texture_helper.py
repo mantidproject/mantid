@@ -13,6 +13,7 @@ from mantid.simpleapi import (
     CreateEmptyTableWorkspace,
     CloneWorkspace,
     CombineTableWorkspaces,
+    ConjoinWorkspaces,
 )
 from mantid.api import AnalysisDataService as ADS
 from typing import Optional, Sequence
@@ -183,6 +184,7 @@ def create_pole_figure_tables(
     wss: Sequence[str],
     peak_wss: Optional[Sequence[str]],
     out_ws: str,
+    combined_ws: Optional[str] = None,
     hkl: Optional[Sequence[int]] = None,
     inc_scatt_corr: bool = False,
     scat_vol_pos: Sequence[float] = (0, 0, 0),
@@ -190,6 +192,7 @@ def create_pole_figure_tables(
     peak_thresh: Optional[float] = 0.0,
     ax_transform: Sequence[float] = np.eye(3),
     readout_col: str = "I",
+    include_spec_info: bool = False,
 ) -> TableWorkspace:
     """
     Create a single pole figure table for a sequence of workspaces and their fit parameters
@@ -197,7 +200,8 @@ def create_pole_figure_tables(
     wss: Sequence of workspaces
     peak_wss: sequence of table workspaces, one for each of the provided workspaces,
               which should contain the fit parameters for each spectrum in the given workspace
-    out_ws: name to give the output workspace
+    out_ws: name to give the output Table Workspace containing the Pole Figure Data
+    combined_ws: Name to give the Output Workspace containing the diffractogram for each point in the Pole Figure Table
     hkl: if the crystal structure is known and you would like to apply thresholds based on target HKL peak location
          or use a scattering power correction, you can provide that here
     inc_scatt_corr: flag for whether or not to scale the parameter value by scattering power (also requires HKL)
@@ -208,17 +212,20 @@ def create_pole_figure_tables(
                  otherwise it is the average x0 of the spectra
     ax_transform: the coordinate change between the lab frame and the sample frame which defines the initial orientation
     readout_col: the parameter column which should be read and used to populate the table
-
+    include_spec_info: if True will include columns with information on the spectra each point has been generated from
     """
     flat_ax_transform = np.reshape(ax_transform, (9,))
     table_workspaces = []
+    spec_workspaces = []
     if peak_wss and (len(peak_wss) == len(wss)):
         for iws, ws in enumerate(wss):
             ws_str = f"_{iws}_abi_table"
+            spec_ws = f"_{iws}_spec_ws" if combined_ws else ""
             CreatePoleFigureTableWorkspace(
                 InputWorkspace=ws,
                 PeakParameterWorkspace=peak_wss[iws],
                 OutputWorkspace=ws_str,
+                SpectraWorkspace=spec_ws,
                 Reflection=hkl,
                 Chi2Threshold=chi2_thresh,
                 PeakPositionThreshold=peak_thresh,
@@ -226,28 +233,38 @@ def create_pole_figure_tables(
                 ScatteringVolumePosition=scat_vol_pos,
                 AxesTransform=flat_ax_transform,
                 ReadoutColumn=readout_col,
+                IncludeSpectrumInfo=include_spec_info,
             )
             table_workspaces.append(ws_str)
+            spec_workspaces.append(spec_ws)
     else:
         for iws, ws in enumerate(wss):
             default_param_vals = "_default_param_table"
             create_default_parameter_table_with_value(ws, iws + 1, default_param_vals)
             ws_str = f"_{iws}_abi_table"
+            spec_ws = f"_{iws}_spec_ws" if combined_ws else ""
             CreatePoleFigureTableWorkspace(
                 InputWorkspace=ws,
                 PeakParameterWorkspace=default_param_vals,
                 OutputWorkspace=ws_str,
+                SpectraWorkspace=spec_ws,
                 Reflection=hkl,
                 Chi2Threshold=chi2_thresh,
                 PeakPositionThreshold=peak_thresh,
                 ApplyScatteringPowerCorrection=inc_scatt_corr,
                 ScatteringVolumePosition=scat_vol_pos,
                 AxesTransform=flat_ax_transform,
+                IncludeSpectrumInfo=include_spec_info,
             )
             table_workspaces.append(ws_str)
+            spec_workspaces.append(spec_ws)
     CloneWorkspace(InputWorkspace=table_workspaces[0], OutputWorkspace=out_ws)
     for tw in table_workspaces[1:]:
         CombineTableWorkspaces(LHSWorkspace=out_ws, RHSWorkspace=tw, OutputWorkspace=out_ws)
+    if combined_ws:
+        CloneWorkspace(InputWorkspace=spec_workspaces[0], OutputWorkspace=combined_ws)
+        for ws in spec_workspaces[1:]:
+            ConjoinWorkspaces(InputWorkspace1=combined_ws, InputWorkspace2=ws, CheckOverlapping=False)
     return ADS.retrieve(out_ws)
 
 
@@ -260,6 +277,7 @@ def plot_pole_figure(
     plot_exp: bool = True,
     ax_labels: Sequence[str] = ("Dir1", "Dir2"),
     contour_kernel: Optional[float] = 2.0,
+    display_debug_info: bool = False,
     **kwargs,
 ) -> [Figure, Axes]:
     """
@@ -274,14 +292,16 @@ def plot_pole_figure(
               or a contour interpolation should be calculated (False)
     ax_labels: Sequence for the label names for the two inplane sample directions
     contour_kernel: The sigma value of the gaussian kernel used for a contour interpolation
-
+    display_debug_info: If True, will label points with the available information from the table
     """
     ws = _retrieve_ws_object(ws)
     pfi = get_pole_figure_data(ws, projection, readout_col)
 
+    debug_info = get_debug_info(ws) if display_debug_info else None
+
     if plot_exp:
         suffix = "scatter"
-        fig, ax = plot_exp_pf(pfi, ax_labels, readout_col, fig, **kwargs)
+        fig, ax = plot_exp_pf(pfi, ax_labels, readout_col, fig, debug_info, **kwargs)
     else:
         suffix = f"contour_{contour_kernel}"
         fig, ax = plot_contour_pf(pfi, ax_labels, readout_col, fig, contour_kernel, **kwargs)
@@ -294,7 +314,12 @@ def plot_pole_figure(
 
 
 def plot_exp_pf(
-    pole_figure_data: np.ndarray, ax_labels: Sequence[str], column_label: str, fig: Optional[Figure] = None, **kwargs
+    pole_figure_data: np.ndarray,
+    ax_labels: Sequence[str],
+    column_label: str,
+    fig: Optional[Figure] = None,
+    debug_info: Optional[Sequence[str]] = None,
+    **kwargs,
 ) -> [Figure, Axes]:
     """
     Create a scatter plot pole figure plot for a pole figure table
@@ -307,36 +332,73 @@ def plot_exp_pf(
     u = np.linspace(0, 2 * np.pi, 100)
     x = np.cos(u)
     y = np.sin(u)
-    z = np.zeros_like(x)
-    eq = np.concatenate((x[None, :], y[None, :], z[None, :]), axis=0)
 
-    fig = plt.figure(layout="constrained") if not fig else fig
-    gs = fig.add_gridspec(
-        1,
-        3,
-        width_ratios=[1, 30, 1],
-        left=0.05,
-        right=0.98,
-        top=0.98,
-        bottom=0.06,
-        wspace=0.05,
-    )
+    fig = plt.figure(layout="constrained") if fig is None else fig
+    gs = fig.add_gridspec(1, 3, width_ratios=[1, 30, 1], left=0.05, right=0.98, top=0.98, bottom=0.06, wspace=0.05)
     ax = fig.add_subplot(gs[0, 1])
     cax = fig.add_subplot(gs[0, 2])
-    scat_plot = ax.scatter(
-        pole_figure_data[:, 1], pole_figure_data[:, 0], c=pole_figure_data[:, 2], s=20, cmap="jet", label="poles", **kwargs
-    )
-    ax.plot(eq[0], eq[1], c="grey", label="plot bounding circle")
+
+    xy = np.c_[pole_figure_data[:, 1], pole_figure_data[:, 0]]  # (x, y) points
+    vals = pole_figure_data[:, 2]
+
+    scat_plot = ax.scatter(xy[:, 0], xy[:, 1], c=vals, s=20, cmap="jet", label="poles", **kwargs)
+
+    ax.plot(x, y, c="grey", label="plot bounding circle")
     ax.set_aspect("equal")
     ax.set_axis_off()
+
     ax.quiver(-1, -1, 0.2, 0, color="blue", scale=1)
     ax.quiver(-1, -1, 0, 0.2, color="red", scale=1)
     ax.text(-0.8, -0.95, ax_labels[-1], fontsize=10)
     ax.text(-0.95, -0.8, ax_labels[0], fontsize=10)
+
     cbar = fig.colorbar(scat_plot, cax=cax)
+    cbar.set_label(column_label, rotation=0, labelpad=15)
+
+    labels = debug_info if debug_info is not None else [f"Workspace Index: {i}" for i in range(len(xy))]
+
+    ann = ax.annotate(
+        "",
+        xy=(0, 0),
+        xytext=(0.0, 1.02),
+        textcoords="axes fraction",
+        bbox=dict(boxstyle="round,pad=0.2", fc="white", alpha=0.8),
+        arrowprops=dict(arrowstyle="->", alpha=0.6),
+    )
+    ann.set_visible(False)
+    ann.set_clip_on(False)
+    max_px = 20
+
+    def on_click(event):
+        # add annotation to nearest point to click, when "a" is held
+        if event.inaxes != ax:
+            return
+
+        if event.key != "a":
+            return
+
+        if event.xdata is None or event.ydata is None:
+            return
+
+        pts_px = ax.transData.transform(xy)
+        click_px = np.array([event.x, event.y])
+
+        d2 = np.sum((pts_px - click_px) ** 2, axis=1)
+        i = int(np.argmin(d2))
+
+        if d2[i] > max_px**2:
+            ann.set_visible(False)
+            event.canvas.draw_idle()
+            return
+
+        ann.xy = (xy[i, 0], xy[i, 1])
+        ann.set_text(labels[i])
+        ann.set_visible(True)
+        event.canvas.draw_idle()
+
+    fig.canvas.mpl_connect("button_press_event", on_click)
     ax.set_label("Pole Figure Plot")
     scat_plot.set_label("pole figure data")
-    cbar.set_label(column_label, rotation=0, labelpad=15)
     return fig, ax
 
 
@@ -400,6 +462,17 @@ def plot_contour_pf(
     cbar = fig.colorbar(contour_plot, cax=cax)
     cbar.set_label(column_label, rotation=0, labelpad=15)
     return fig, ax
+
+
+def get_debug_info(ws: TableWorkspace):
+    """
+    Format the rows of the Pole Figure Table as labels for points in the plot
+    """
+    debug_info = []
+    for i in range(ws.rowCount()):
+        row_dict = ws.row(i)
+        debug_info.append(", ".join([f"{k}: {v}" for k, v in row_dict.items()]))
+    return debug_info
 
 
 def get_pole_figure_data(ws: TableWorkspace, projection: str, readout_col: str = "I"):

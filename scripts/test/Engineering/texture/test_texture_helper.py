@@ -224,6 +224,7 @@ class TestHelperPoleFigureTables(BaseTextureTestClass):
     def get_create_pf_kwargs():
         return {
             "out_ws": "out_ws",
+            "combined_ws": "combined_ws",
             "hkl": [1, 1, 1],
             "inc_scatt_corr": True,
             "scat_vol_pos": [0, 0, 0],
@@ -231,6 +232,7 @@ class TestHelperPoleFigureTables(BaseTextureTestClass):
             "peak_thresh": 0.1,
             "ax_transform": np.eye(3),
             "readout_col": "I",
+            "include_spec_info": False,
         }
 
     @patch(texture_utils_path + ".ADS")

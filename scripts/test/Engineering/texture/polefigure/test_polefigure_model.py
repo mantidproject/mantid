@@ -70,13 +70,13 @@ class TextureProjectionTest(unittest.TestCase):
     @patch(correction_model_path + ".ADS")
     def test_get_pf_table_name_with_hkl(self, mock_ads):
         mock_ads.retrieve.return_value = self.mock_ws
-        table_name, grouping = self.model.get_pf_table_name(["ws1", "ws2"], ["param_ws1", "param_ws2"], [1, 1, 1], "I")
+        table_name, grouping = self.model.get_pf_output_names(["ws1", "ws2"], ["param_ws1", "param_ws2"], [1, 1, 1], "I")
         self.assertEqual("111_instrument_123456-123456_Texture20_pf_table_I", table_name)
 
     @patch(correction_model_path + ".ADS")
     def test_get_pf_table_name_with_no_hkl_and_no_params(self, mock_ads):
         mock_ads.retrieve.return_value = self.mock_ws
-        table_name, grouping = self.model.get_pf_table_name(["ws1", "ws2"], None, None, "I")
+        table_name, grouping = self.model.get_pf_output_names(["ws1", "ws2"], None, None, "I")
         self.assertEqual("instrument_123456-123456_Texture20_pf_table_I", table_name)
 
     @patch(correction_model_path + ".ADS")
@@ -90,7 +90,7 @@ class TextureProjectionTest(unittest.TestCase):
             return ads_wss.get(key)
 
         mock_ads.retrieve.side_effect = get_ads_ws
-        table_name, grouping = self.model.get_pf_table_name(["ws1", "ws2"], ["param_ws1", "param_ws2"], None, "I")
+        table_name, grouping = self.model.get_pf_output_names(["ws1", "ws2"], ["param_ws1", "param_ws2"], None, "I")
         self.assertEqual("2.0_instrument_123456-123456_Texture20_pf_table_I", table_name)
 
     def test_parse_hkl_valid(self):

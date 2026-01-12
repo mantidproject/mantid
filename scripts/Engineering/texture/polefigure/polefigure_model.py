@@ -29,6 +29,7 @@ class TextureProjection:
         wss: Sequence[str],
         peak_wss: Optional[Sequence[str]],
         out_ws_name: str,
+        combined_ws_name: Optional[str],
         hkl: Optional[Sequence[int]],
         inc_scatt_corr: bool,
         scat_vol_pos: Sequence[float],
@@ -37,11 +38,13 @@ class TextureProjection:
         save_dirs: Optional[Sequence[str]] = None,
         ax_transform: Sequence[float] = np.eye(3),
         readout_col: str = "",
+        include_spec_info: bool = False,
     ) -> None:
-        out_ws = create_pole_figure_tables(
+        create_pole_figure_tables(
             wss=wss,
             peak_wss=peak_wss,
             out_ws=out_ws_name,
+            combined_ws=combined_ws_name,
             hkl=hkl,
             inc_scatt_corr=inc_scatt_corr,
             scat_vol_pos=scat_vol_pos,
@@ -49,13 +52,16 @@ class TextureProjection:
             peak_thresh=peak_thresh,
             ax_transform=ax_transform,
             readout_col=readout_col,
+            include_spec_info=include_spec_info,
         )
-        self._save_files(out_ws, save_dirs)
+        self._save_files(out_ws_name, save_dirs)
+        if combined_ws_name:
+            self._save_files(combined_ws_name, save_dirs, ascii=False)
 
     @staticmethod
-    def get_pf_table_name(
+    def get_pf_output_names(
         wss: Sequence[str], fit_params: Sequence[str], hkl: Optional[Sequence[int]], readout_column: str
-    ) -> Tuple[str, str]:
+    ) -> Tuple[str, str, str]:
         fws, lws = ADS.retrieve(wss[0]), ADS.retrieve(wss[-1])
         try:
             run_range = f"{fws.getRun().getLogData('run_number').value}-{lws.getRun().getLogData('run_number').value}"
@@ -71,10 +77,12 @@ class TextureProjection:
             # try and get a peak reference either from hkl or from the X0 column of param
             peak = "".join([str(ind) for ind in hkl]) if hkl else str(np.round(np.mean(ADS.retrieve(fit_params[0]).column("X0")), 2))
             table_name = f"{peak}_{instr}_{run_range}_{grouping}_pf_table_{readout_column}"
+            combined_wsname = f"{peak}_{instr}_{run_range}_{grouping}_spectra"
         except Exception:
             # if no param table given, no peak reference
             table_name = f"{instr}_{run_range}_{grouping}_pf_table_{readout_column}"
-        return table_name, grouping
+            combined_wsname = f"{instr}_{run_range}_{grouping}_spectra"
+        return table_name, combined_wsname, grouping
 
     # ~~~~~ Pole Figure Plotting functions ~~~~~~~~
 
@@ -94,10 +102,11 @@ class TextureProjection:
         return save_dirs
 
     @staticmethod
-    def _save_files(ws: str, save_dirs: Sequence[str]) -> None:
+    def _save_files(ws: str, save_dirs: Sequence[str], ascii=True) -> None:
         for save_dir in save_dirs:
             SaveNexus(InputWorkspace=ws, Filename=path.join(save_dir, ws + ".nxs"))
-            SaveAscii(InputWorkspace=ws, Filename=path.join(save_dir, ws + ".txt"), Separator="Tab")
+            if ascii:
+                SaveAscii(InputWorkspace=ws, Filename=path.join(save_dir, ws + ".txt"), Separator="Tab")
 
     def get_ws_info(self, ws_name: str, parameter_file: str, select: bool = True) -> dict:
         return {
