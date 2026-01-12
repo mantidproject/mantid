@@ -337,16 +337,17 @@ void AlignAndFocusPowderSlim::exec() {
   std::map<size_t, std::set<detid_t>> grouping;
   GroupingWorkspace_sptr groupingWS = this->getProperty(PropertyNames::GROUPING_WS);
 
+  // Create a temporary workspace to load the instrument. This is needed for LoadDiffCal but we cannot create the
+  // output workspace yet because we need grouping information from the cal file to know the correct number of
+  // spectra.
+  auto inst_ws = API::WorkspaceFactory::Instance().create("Workspace2D", 1, 2, 1);
+  LoadEventNexus::loadInstrument<MatrixWorkspace_sptr>(filename, inst_ws, ENTRY_TOP_LEVEL, this, &descriptor);
+
   // load calibration file if provided
   const std::string cal_filename = getPropertyValue(PropertyNames::CAL_FILE);
   ITableWorkspace_sptr calibrationWS;
   if (!cal_filename.empty()) {
-    // Create a dummy workspace to load the instrument. This is needed for LoadDiffCal but we cannot create the
-    // output workspace yet because we need grouping information from the cal file to know the correct number of
-    // spectra.
-    auto ws = API::WorkspaceFactory::Instance().create("Workspace2D", 1, 2, 1);
-    LoadEventNexus::loadInstrument<MatrixWorkspace_sptr>(filename, ws, ENTRY_TOP_LEVEL, this, &descriptor);
-    calibrationWS = this->loadCalFile(ws, cal_filename, groupingWS);
+    calibrationWS = this->loadCalFile(inst_ws, cal_filename, groupingWS);
   }
 
   if (groupingWS) {
@@ -361,11 +362,8 @@ void AlignAndFocusPowderSlim::exec() {
   }
 
   this->progress(.0, "Create output workspace");
-  // create a histogram workspace
-  MatrixWorkspace_sptr wksp = createOutputWorkspace(num_hist);
-
-  // instrument is needed for lots of things
-  LoadEventNexus::loadInstrument<MatrixWorkspace_sptr>(filename, wksp, ENTRY_TOP_LEVEL, this, &descriptor);
+  // create a histogram workspace with correct number of histograms and bins
+  MatrixWorkspace_sptr wksp = createOutputWorkspace(inst_ws->getInstrument(), num_hist);
 
   // TODO parameters should be input information
   const double l1 = getProperty(PropertyNames::L1);
@@ -647,7 +645,8 @@ void AlignAndFocusPowderSlim::exec() {
   }
 }
 
-MatrixWorkspace_sptr AlignAndFocusPowderSlim::createOutputWorkspace(size_t num_hist) {
+MatrixWorkspace_sptr AlignAndFocusPowderSlim::createOutputWorkspace(const Geometry::Instrument_const_sptr inst,
+                                                                    size_t num_hist) {
   // set up the output workspace binning
   const BINMODE binmode = getPropertyValue(PropertyNames::BINMODE);
   const bool linearBins = bool(binmode == BinningMode::LINEAR);
@@ -671,7 +670,7 @@ MatrixWorkspace_sptr AlignAndFocusPowderSlim::createOutputWorkspace(size_t num_h
     UNUSED_ARG(
         Kernel::VectorHelper::createAxisFromRebinParams(params, XValues.mutableRawData(), resize_xnew, full_bins_only));
   }
-  MatrixWorkspace_sptr wksp = Mantid::DataObjects::create<Workspace2D>(num_hist, XValues);
+  MatrixWorkspace_sptr wksp = Mantid::DataObjects::create<Workspace2D>(inst, num_hist, XValues);
 
   if (raggedBins) {
     // if ragged bins, we need to resize the x-values for each histogram after the first one
@@ -759,7 +758,7 @@ void AlignAndFocusPowderSlim::initCalibrationConstantsFromCalWS(const std::vecto
 
 const ITableWorkspace_sptr AlignAndFocusPowderSlim::loadCalFile(const Mantid::API::Workspace_sptr &inputWS,
                                                                 const std::string &filename,
-                                                                GroupingWorkspace_sptr groupingWS) {
+                                                                GroupingWorkspace_sptr &groupingWS) {
   auto alg = createChildAlgorithm("LoadDiffCal");
   alg->setProperty("InputWorkspace", inputWS);
   alg->setPropertyValue("Filename", filename);
@@ -769,8 +768,10 @@ const ITableWorkspace_sptr AlignAndFocusPowderSlim::loadCalFile(const Mantid::AP
   alg->setPropertyValue("WorkspaceName", "temp");
   alg->executeAsChildAlg();
 
-  if (!groupingWS)
+  if (!groupingWS) {
+    g_log.debug() << "Loading grouping workspace from calibration file\n";
     groupingWS = alg->getProperty("OutputGroupingWorkspace");
+  }
 
   const ITableWorkspace_sptr calibrationWS = alg->getProperty("OutputCalWorkspace");
 

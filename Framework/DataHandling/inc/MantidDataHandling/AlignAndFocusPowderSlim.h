@@ -33,7 +33,7 @@ private:
   std::map<std::string, std::string> validateInputs() override;
   void exec() override;
 
-  API::MatrixWorkspace_sptr createOutputWorkspace(size_t num_hist);
+  API::MatrixWorkspace_sptr createOutputWorkspace(const Geometry::Instrument_const_sptr inst, size_t num_hist);
   SpectraProcessingData initializeSpectraProcessingData(const API::MatrixWorkspace_sptr &outputWS);
   void storeSpectraProcessingData(const SpectraProcessingData &processingData,
                                   const API::MatrixWorkspace_sptr &outputWS);
@@ -47,7 +47,7 @@ private:
   void initCalibrationConstantsFromCalWS(const std::vector<double> &difc_focus,
                                          const API::ITableWorkspace_sptr calibrationWS);
   const API::ITableWorkspace_sptr loadCalFile(const API::Workspace_sptr &inputWS, const std::string &filename,
-                                              DataObjects::GroupingWorkspace_sptr groupingWS);
+                                              DataObjects::GroupingWorkspace_sptr &groupingWS);
   void initScaleAtSample(const API::MatrixWorkspace_sptr &wksp);
   std::vector<std::pair<size_t, size_t>> determinePulseIndices(const API::MatrixWorkspace_sptr &wksp,
                                                                const Kernel::TimeROI &filterROI);
