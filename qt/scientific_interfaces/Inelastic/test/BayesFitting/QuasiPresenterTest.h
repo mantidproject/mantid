@@ -157,6 +157,7 @@ public:
   }
 
   void test_notifyBackendChanged_alters_the_model_call() {
+    ON_CALL(*m_view, resolutionName()).WillByDefault(Return("res_ws"));
     EXPECT_CALL(*m_model, setupBayesQuasi2Algorithm(_, _, _, _, _, _)).Times(1);
 
     m_presenter->notifyBackendChanged(BayesBackendType::QUICK_BAYES);
