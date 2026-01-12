@@ -12,9 +12,9 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Strings.h"
-#include <Poco/File.h>
 
 #include <algorithm>
+#include <filesystem>
 #include <utility>
 
 using file_holder_type = std::unique_ptr<Mantid::Nexus::File>;
@@ -671,8 +671,8 @@ Mantid::Nexus::File *MDBoxFlatTree::createOrOpenMDWSgroup(const std::string &fil
                                                           const std::string &WSEventType, bool readOnly,
                                                           bool &alreadyExists) {
   alreadyExists = false;
-  Poco::File oldFile(fileName);
-  bool fileExists = oldFile.exists();
+  std::filesystem::path oldFile(fileName);
+  bool fileExists = std::filesystem::exists(oldFile);
   if (!fileExists && readOnly)
     throw Kernel::Exception::FileError("Attempt to open non-existing file in read-only mode", fileName);
 

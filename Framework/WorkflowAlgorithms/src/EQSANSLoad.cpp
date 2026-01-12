@@ -20,11 +20,11 @@
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/regex.hpp>
 
-#include "Poco/DirectoryIterator.h"
 #include "Poco/NumberFormatter.h"
 #include "Poco/NumberParser.h"
 #include "Poco/String.h"
 
+#include <filesystem>
 #include <fstream>
 
 namespace Mantid::WorkflowAlgorithms {
@@ -122,7 +122,7 @@ std::string EQSANSLoad::findConfigFile(const int &run) {
   // Append the standard location of EQSANS config file to the data search
   // directory list
   std::string sns_folder = "/SNS/EQSANS/shared/instrument_configuration";
-  if (Poco::File(sns_folder).exists())
+  if (std::filesystem::exists(sns_folder))
     Kernel::ConfigService::Instance().appendDataSearchDir(sns_folder);
 
   const std::vector<std::string> &searchPaths = Kernel::ConfigService::Instance().getDataSearchDirs();
@@ -132,17 +132,16 @@ std::string EQSANSLoad::findConfigFile(const int &run) {
   static boost::regex re1("eqsans_configuration\\.([0-9]+)$");
   boost::smatch matches;
   for (const auto &searchPath : searchPaths) {
-    if (Poco::File(searchPath).exists()) {
-      Poco::DirectoryIterator file_it(searchPath);
-      Poco::DirectoryIterator end;
-      for (; file_it != end; ++file_it) {
-        if (boost::regex_search(file_it.name(), matches, re1)) {
+    if (std::filesystem::exists(searchPath)) {
+      for (const auto &entry : std::filesystem::directory_iterator(searchPath)) {
+        std::string filename = entry.path().filename().string();
+        if (boost::regex_search(filename, matches, re1)) {
           std::string s = matches[1];
           int run_number = 0;
           Poco::NumberParser::tryParse(s, run_number);
           if (run_number > max_run_number && run_number <= run) {
             max_run_number = run_number;
-            config_file = file_it.path().toString();
+            config_file = entry.path().string();
           }
         }
       }
