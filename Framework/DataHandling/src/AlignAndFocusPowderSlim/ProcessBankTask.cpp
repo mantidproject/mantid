@@ -122,21 +122,24 @@ void ProcessBankTask::operator()(const tbb::blocked_range<size_t> &range) const 
 
       if (m_processingData.arbitraryGrouping) {
         // Loop over all output spectra / groups
-        for (size_t output_index = 0; output_index < m_processingData.counts.size(); ++output_index) {
-          // Create a local task for this thread
-          ProcessEventsTask task(event_detid.get(), event_time_of_flight.get(), &calibrations.at(output_index),
-                                 m_processingData.binedges[output_index]);
+        tbb::parallel_for(
+            tbb::blocked_range<size_t>(0, m_processingData.counts.size()),
+            [&](const tbb::blocked_range<size_t> &output_range) {
+              for (size_t output_index = output_range.begin(); output_index < output_range.end(); ++output_index) {
+                // Create a local task for this thread
+                ProcessEventsTask task(event_detid.get(), event_time_of_flight.get(), &calibrations.at(output_index),
+                                       m_processingData.binedges[output_index]);
 
-          // Non-blocking processing of the events
-          const tbb::blocked_range<size_t> range_info(0, event_time_of_flight->size(), m_grainsize_event);
-          tbb::parallel_reduce(range_info, task);
+                const tbb::blocked_range<size_t> range_info(0, event_time_of_flight->size(), m_grainsize_event);
+                tbb::parallel_reduce(range_info, task);
 
-          // Accumulate results into shared y_temp to combine local histograms
-          // Use atomic fetch_add to accumulate results into shared vectors
-          for (size_t i = 0; i < m_processingData.counts[output_index].size(); ++i) {
-            m_processingData.counts[output_index][i].fetch_add(task.y_temp[i], std::memory_order_relaxed);
-          }
-        }
+                // Accumulate results into shared y_temp to combine local histograms
+                // Use atomic fetch_add to accumulate results into shared vectors
+                for (size_t i = 0; i < m_processingData.counts[output_index].size(); ++i) {
+                  m_processingData.counts[output_index][i].fetch_add(task.y_temp[i], std::memory_order_relaxed);
+                }
+              }
+            });
       } else {
         // Create a local task for this thread
         ProcessEventsTask task(event_detid.get(), event_time_of_flight.get(), calibration.get(),
