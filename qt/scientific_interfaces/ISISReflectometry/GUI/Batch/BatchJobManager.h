@@ -60,6 +60,7 @@ public:
 
   std::deque<MantidQt::API::IConfiguredAlgorithm_sptr> getAlgorithms() override;
   std::unique_ptr<Mantid::API::IAlgorithmRuntimeProps> rowProcessingProperties() const override;
+  std::unique_ptr<Mantid::API::IAlgorithmRuntimeProps> rowProcessingPropertiesDefault() const override;
 
   bool getProcessPartial() const override;
   bool getProcessAll() const override;

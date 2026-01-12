@@ -39,7 +39,6 @@ requirements:
     - if: linux
       then:
         - libgl-devel
-        - texlive-core ${{ texlive_core }}
         - xorg-libxxf86vm
         - xorg-libx11
         - xorg-xorgproto

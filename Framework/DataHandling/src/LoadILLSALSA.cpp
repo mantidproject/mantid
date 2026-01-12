@@ -22,7 +22,7 @@
 
 namespace Mantid::DataHandling {
 
-DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLSALSA)
+DECLARE_NEXUS_LAZY_FILELOADER_ALGORITHM(LoadILLSALSA)
 
 const size_t LoadILLSALSA::VERTICAL_NUMBER_PIXELS = 256;
 const size_t LoadILLSALSA::HORIZONTAL_NUMBER_PIXELS = 256;
@@ -34,7 +34,7 @@ const size_t LoadILLSALSA::HORIZONTAL_NUMBER_PIXELS = 256;
  *
  * @return An integer specifying the confidence level. 0 indicates it will not be used
  */
-int LoadILLSALSA::confidence(Nexus::NexusDescriptor &descriptor) const {
+int LoadILLSALSA::confidence(Nexus::NexusDescriptorLazy &descriptor) const {
   if ((descriptor.isEntry("/entry0/data_scan") || descriptor.isEntry("/entry0/data")) &&
       descriptor.isEntry("/entry0/instrument/Tx") && descriptor.isEntry("/entry0/instrument/Ty") &&
       descriptor.isEntry("/entry0/instrument/Tz"))

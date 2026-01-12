@@ -12,9 +12,15 @@
 #include "MantidDataObjects/Histogram1D.h"
 #include "MantidKernel/DateAndTimeHelpers.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidLegacyNexus/NexusClasses.h"
 #include "MantidMuon/DllConfig.h"
 #include "MantidMuon/LoadMuonNexus.h"
+
+// forward declarations from legacy NexusClasses
+namespace Mantid::LegacyNexus {
+template <typename T> class NXDataSetTyped;
+class NXEntry;
+using NXInt = NXDataSetTyped<int>;
+} // namespace Mantid::LegacyNexus
 
 namespace Mantid {
 

@@ -16,7 +16,7 @@
 #include "MantidDataObjects/Workspace2D_fwd.h"
 #include "MantidHistogramData/HistogramX.h"
 #include "MantidNexus/NexusClasses_fwd.h"
-#include "MantidNexus/NexusDescriptor.h"
+#include "MantidNexus/NexusDescriptorLazy.h"
 #include "MantidNexus/NexusFile.h"
 
 #include <boost/scoped_ptr.hpp>
@@ -56,7 +56,7 @@ multi-period file)
 
 @author Roman Tolchenov, Tessella plc
 */
-class MANTID_DATAHANDLING_DLL LoadISISNexus2 : public API::IFileLoader<Nexus::NexusDescriptor> {
+class MANTID_DATAHANDLING_DLL LoadISISNexus2 : public API::IFileLoader<Nexus::NexusDescriptorLazy> {
 public:
   /// Default constructor
   LoadISISNexus2();
@@ -71,7 +71,7 @@ public:
   const std::string summary() const override { return "Loads a file in ISIS NeXus format."; }
 
   /// Returns a confidence value that this algorithm can load a file
-  int confidence(Nexus::NexusDescriptor &descriptor) const override;
+  int confidence(Nexus::NexusDescriptorLazy &descriptor) const override;
 
   /// Spectra block descriptor
   struct SpectraBlock {

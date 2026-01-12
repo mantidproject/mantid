@@ -50,7 +50,7 @@ using namespace API;
 using namespace Nexus;
 
 // register the algorithm
-DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadBBY2)
+DECLARE_NEXUS_LAZY_FILELOADER_ALGORITHM(LoadBBY2)
 
 // consts
 static const int LAST_INDEX = -1;
@@ -140,7 +140,7 @@ LoadBBY2::LoadBBY2() {}
  * @returns An integer specifying the confidence level. 0 indicates it will not
  * be used
  */
-int LoadBBY2::confidence(Nexus::NexusDescriptor &descriptor) const {
+int LoadBBY2::confidence(Nexus::NexusDescriptorLazy &descriptor) const {
 
   static const std::set<std::string> requiredEntries = {"/entry1/program_name",
                                                         "/entry1/experiment/gumtree_version",
@@ -227,7 +227,7 @@ void LoadBBY2::init() {
 /**
  * Execute the algorithm.
  */
-void LoadBBY2::execLoader() {
+void LoadBBY2::exec() {
 
   // Delete the output workspace name if it existed
   std::string outName = getPropertyValue("OutputWorkspace");

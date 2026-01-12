@@ -9,7 +9,7 @@
 #include "MantidAPI/IFileLoader.h"
 #include "MantidDataHandling/DllConfig.h"
 #include "MantidNexus/NexusClasses_fwd.h"
-#include "MantidNexus/NexusDescriptor.h"
+#include "MantidNexus/NexusDescriptorLazy.h"
 
 #include <H5Cpp.h>
 
@@ -19,7 +19,7 @@ namespace DataHandling {
 /** LoadILLSANS; supports D11, D22 and D33 (TOF/monochromatic)
  */
 
-class MANTID_DATAHANDLING_DLL LoadILLSANS : public API::IFileLoader<Nexus::NexusDescriptor> {
+class MANTID_DATAHANDLING_DLL LoadILLSANS : public API::IFileLoader<Nexus::NexusDescriptorLazy> {
 public:
   LoadILLSANS();
   const std::string name() const override;
@@ -28,7 +28,7 @@ public:
   const std::vector<std::string> seeAlso() const override { return {"LoadNexus"}; }
   const std::string category() const override;
   /// Returns a confidence value that this algorithm can load a file
-  int confidence(Nexus::NexusDescriptor &descriptor) const override;
+  int confidence(Nexus::NexusDescriptorLazy &descriptor) const override;
 
 private:
   enum MultichannelType { TOF, KINETIC, SCAN };

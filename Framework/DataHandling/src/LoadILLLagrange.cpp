@@ -29,10 +29,10 @@ using namespace Nexus;
 using Types::Core::DateAndTime;
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLLagrange)
+DECLARE_NEXUS_LAZY_FILELOADER_ALGORITHM(LoadILLLagrange)
 
 /// Returns confidence. @see IFileLoader::confidence
-int LoadILLLagrange::confidence(Nexus::NexusDescriptor &descriptor) const {
+int LoadILLLagrange::confidence(Nexus::NexusDescriptorLazy &descriptor) const {
 
   // fields existent only at the ILL Diffraction
   if (descriptor.isEntry("/entry0/IN1")) {
@@ -57,7 +57,7 @@ const std::string LoadILLLagrange::summary() const { return "Loads ILL Lagrange 
 /**
  * Constructor
  */
-LoadILLLagrange::LoadILLLagrange() : IFileLoader<Nexus::NexusDescriptor>() {}
+LoadILLLagrange::LoadILLLagrange() : IFileLoader<Nexus::NexusDescriptorLazy>() {}
 
 /**
  * Initialize the algorithm's properties.

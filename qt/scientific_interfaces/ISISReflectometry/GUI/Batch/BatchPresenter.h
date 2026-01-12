@@ -97,6 +97,8 @@ public:
   void notifyPreviewApplyRequested() override;
   std::map<ROIType, ProcessingInstructions> getMatchingProcessingInstructionsForPreviewRow() const override;
   std::optional<ProcessingInstructions> getMatchingROIDetectorIDsForPreviewRow() const override;
+  std::string getBatchState(const std::vector<std::string> &jsonKey) const override;
+  std::unique_ptr<Mantid::API::IAlgorithmRuntimeProps> rowProcessingPropertiesDefault() const override;
 
   // WorkspaceObserver overrides
   void postDeleteHandle(const std::string &wsName) override;

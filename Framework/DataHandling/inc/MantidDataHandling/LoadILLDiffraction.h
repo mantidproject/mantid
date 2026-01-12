@@ -13,7 +13,7 @@
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/V3D.h"
 #include "MantidNexus/NexusClasses_fwd.h"
-#include "MantidNexus/NexusDescriptor.h"
+#include "MantidNexus/NexusDescriptorLazy.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -22,14 +22,14 @@ namespace DataHandling {
 
   @date 15/05/17
 */
-class MANTID_DATAHANDLING_DLL LoadILLDiffraction : public API::IFileLoader<Nexus::NexusDescriptor> {
+class MANTID_DATAHANDLING_DLL LoadILLDiffraction : public API::IFileLoader<Nexus::NexusDescriptorLazy> {
 public:
   const std::string name() const override;
   int version() const override;
   const std::vector<std::string> seeAlso() const override { return {"LoadNexus"}; }
   const std::string category() const override;
   const std::string summary() const override;
-  int confidence(Nexus::NexusDescriptor &descriptor) const override;
+  int confidence(Nexus::NexusDescriptorLazy &descriptor) const override;
   LoadILLDiffraction();
 
 private:

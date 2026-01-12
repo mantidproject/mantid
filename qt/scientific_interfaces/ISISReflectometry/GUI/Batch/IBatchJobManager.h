@@ -46,6 +46,7 @@ public:
   virtual void notifyAllWorkspacesDeleted() = 0;
   virtual std::deque<MantidQt::API::IConfiguredAlgorithm_sptr> getAlgorithms() = 0;
   virtual std::unique_ptr<Mantid::API::IAlgorithmRuntimeProps> rowProcessingProperties() const = 0;
+  virtual std::unique_ptr<Mantid::API::IAlgorithmRuntimeProps> rowProcessingPropertiesDefault() const = 0;
   virtual bool getProcessPartial() const = 0;
   virtual bool getProcessAll() const = 0;
 };

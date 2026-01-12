@@ -25,6 +25,7 @@ class IEncoder {
 public:
   virtual ~IEncoder() {};
   virtual QMap<QString, QVariant> encodeBatch(const IMainWindowView *mwv, int batchIndex, bool projectSave = false) = 0;
+  virtual QVariant extractFromEncoding(const QVariant &vMap, const std::vector<std::string> &jsonKey) const = 0;
 };
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces

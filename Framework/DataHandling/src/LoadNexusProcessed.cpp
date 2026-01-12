@@ -52,7 +52,7 @@
 namespace Mantid::DataHandling {
 
 // Register the algorithm into the algorithm factory
-DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadNexusProcessed)
+DECLARE_NEXUS_LAZY_FILELOADER_ALGORITHM(LoadNexusProcessed)
 
 using namespace Mantid::Nexus;
 using namespace DataObjects;
@@ -194,7 +194,7 @@ LoadNexusProcessed::~LoadNexusProcessed() = default;
  * @returns An integer specifying the confidence level. 0 indicates it will not
  * be used
  */
-int LoadNexusProcessed::confidence(Nexus::NexusDescriptor &descriptor) const {
+int LoadNexusProcessed::confidence(Nexus::NexusDescriptorLazy &descriptor) const {
   if (descriptor.isEntry("/mantid_workspace_1"))
     return 80;
   else
@@ -374,7 +374,7 @@ Workspace_sptr LoadNexusProcessed::doAccelleratedMultiPeriodLoading(NXRoot &root
  *
  *  @throw runtime_error Thrown if algorithm cannot execute
  */
-void LoadNexusProcessed::execLoader() {
+void LoadNexusProcessed::exec() {
 
   API::Workspace_sptr tempWS;
   size_t nWorkspaceEntries = 0;
@@ -1936,8 +1936,7 @@ API::Workspace_sptr LoadNexusProcessed::loadEntry(NXRoot &root, const std::strin
     // For workspaces saved via SaveNexusESS, these warnings are not
     // relevant. Such workspaces will contain an `NXinstrument` entry
     // with the name of the instrument.
-    const auto &entries = getFileInfo()->getAllEntries();
-    if (version() < 2 || entries.find("NXinstrument") == entries.end()) {
+    if (version() < 2 || m_nexusFile->classTypeExists("NXinstrument")) {
       g_log.warning("Error loading Instrument section of nxs file");
       g_log.warning(e.what());
       g_log.warning("Try running LoadInstrument Algorithm on the Workspace to "

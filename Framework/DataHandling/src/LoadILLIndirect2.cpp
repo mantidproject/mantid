@@ -35,7 +35,7 @@ using namespace API;
 using namespace Nexus;
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLIndirect2)
+DECLARE_NEXUS_LAZY_FILELOADER_ALGORITHM(LoadILLIndirect2)
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
@@ -59,7 +59,7 @@ const std::string LoadILLIndirect2::category() const { return "DataHandling\\Nex
  * @returns An integer specifying the confidence level. 0 indicates it will not
  * be used
  */
-int LoadILLIndirect2::confidence(Nexus::NexusDescriptor &descriptor) const {
+int LoadILLIndirect2::confidence(Nexus::NexusDescriptorLazy &descriptor) const {
 
   // fields existent only at the ILL
   if (descriptor.isEntry("/entry0/wavelength")               // ILL

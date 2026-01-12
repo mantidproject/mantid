@@ -8,12 +8,11 @@
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
+#include <filesystem>
 #include <fstream>
 #include <string>
 
 #include "MantidKernel/ConfigService.h"
-
-#include <Poco/Path.h>
 
 namespace ScopedFileHelper {
 /** File object type. Provides exception save file creation/destruction.
@@ -32,7 +31,7 @@ public:
   ~ScopedFile();
 
 private:
-  void doCreateFile(const std::string &fileContents, const Poco::Path &fileNameAndPath);
+  void doCreateFile(const std::string &fileContents, const std::filesystem::path &fileNameAndPath);
 
   mutable std::string m_filename;
   std::ofstream m_file;

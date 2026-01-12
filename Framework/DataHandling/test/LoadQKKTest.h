@@ -8,6 +8,7 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidDataHandling/Load.h"
 #include "MantidDataHandling/LoadQKK.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/ConfigService.h"
@@ -30,7 +31,7 @@ public:
     loader.initialize();
     loader.setPropertyValue("Filename",
                             "QKK0029775.nx.hdf"); // find the full path
-    Mantid::Nexus::NexusDescriptor descr(loader.getPropertyValue("Filename"));
+    Mantid::Nexus::NexusDescriptorLazy descr(loader.getPropertyValue("Filename"));
     TS_ASSERT_EQUALS(80, loader.confidence(descr));
   }
 
@@ -69,5 +70,13 @@ public:
       const auto &e = data->e(i);
       TS_ASSERT_DIFFERS(e[0], 0.0);
     }
+  }
+
+  /// Test that this algorithm will be selected from Load algorithm
+  void test_load_from_Load() {
+    Mantid::DataHandling::Load load;
+    TS_ASSERT_THROWS_NOTHING(load.initialize());
+    TS_ASSERT_THROWS_NOTHING(load.setPropertyValue("Filename", "QKK0029775.nx.hdf"));
+    TS_ASSERT_EQUALS(load.getPropertyValue("LoaderName"), "LoadQKK");
   }
 };
