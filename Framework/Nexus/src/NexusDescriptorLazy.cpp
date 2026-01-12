@@ -14,6 +14,7 @@
 #include <H5Cpp.h>
 #include <hdf5.h>
 
+#include <algorithm>
 #include <cstdlib> // malloc, calloc
 #include <cstring> // strcpy
 #include <filesystem>
@@ -82,12 +83,12 @@ bool NexusDescriptorLazy::isEntry(std::string const &entryName) {
   }
 }
 
-/// @brief not implemented yet
+/// @brief Check if a class type exists in the file
 /// @param classType the NX_class type to check for
 /// @return true if the class type exists anywhere in the file
-/// @throws std::logic_error always
-bool NexusDescriptorLazy::classTypeExists(std::string const &) const {
-  throw std::logic_error("NexusDescriptorLazy::classTypeExists not implemented yet");
+bool NexusDescriptorLazy::classTypeExists(std::string const &classType) const {
+  return std::any_of(m_allEntries.begin(), m_allEntries.end(),
+                     [&classType](auto const &entry) { return entry.second == classType; });
 }
 
 bool NexusDescriptorLazy::hasRootAttr(std::string const &name) {

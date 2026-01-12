@@ -238,12 +238,6 @@ std::unique_ptr<Property> loadProperty(Nexus::File *file, const std::string &gro
     getTimeAndStart(file, timeSec, startStr);
   }
 
-  // // Get the entries so that you can check if the "time" field is present
-  // std::map<std::string, std::string> entries = file->getEntries();
-  // if (entries.find("time") != entries.end()) {
-  //   getTimeAndStart(file, timeSec, startStr);
-  // }
-
   return loadPropertyCommon(file, group, timeSec, startStr);
 }
 

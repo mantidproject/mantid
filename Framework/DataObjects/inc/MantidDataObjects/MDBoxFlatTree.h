@@ -11,7 +11,6 @@
 #include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidDataObjects/MDGridBox.h"
 #include "MantidKernel/Matrix.h"
-#include "MantidNexus/NexusDescriptor.h"
 
 namespace Mantid {
 namespace DataObjects {

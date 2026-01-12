@@ -931,7 +931,6 @@ void ExperimentInfo::saveExperimentInfoNexus(Nexus::File *file, bool saveInstrum
 
 /** Load the sample and log info from an open NeXus file.
  * @param file :: open NeXus file object
- * @param fileInfo :: The file info descriptor corresponding to the provided file
  * @param prefix :: The prefix of the file
  */
 void ExperimentInfo::loadSampleAndLogInfoNexus(Nexus::File *file, std::string const &prefix) {

@@ -687,8 +687,7 @@ void LogManager::loadNexus(Nexus::File *file, std::string const &prefix) {
 }
 
 //--------------------------------------------------------------------------------------------
-/** Load the object from an open NeXus file. Avoid multiple expensive calls to
- * getEntries().
+/** Load the object from an open NeXus file. Avoid multiple expensive calls to getEntries().
  * @param file :: open NeXus file
  * @param entries :: The entries available in the current place in the file.
  * load any NXlog in the current open group.
