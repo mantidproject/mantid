@@ -33,10 +33,10 @@ void getGroup(H5::Group groupID, std::map<std::string, std::set<std::string>> &a
    * Return the NX_class attribute associate with objectName group entry
    */
   auto lf_getNxClassAttribute = [&](H5::Group groupID) -> std::string {
-    std::string attribute = "";
+    std::string attribute = UNKNOWN_GROUP_SPEC;
 
-    if (groupID.attrExists("NX_class")) {
-      const auto attributeID = groupID.openAttribute("NX_class");
+    if (groupID.attrExists(GROUP_CLASS_SPEC)) {
+      const auto attributeID = groupID.openAttribute(GROUP_CLASS_SPEC);
       attributeID.read(attributeID.getDataType(), attribute);
     }
 
