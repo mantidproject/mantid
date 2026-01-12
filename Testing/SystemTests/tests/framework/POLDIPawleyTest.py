@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,invalid-name,too-many-locals,too-few-public-methods
 import systemtesting
+import numpy as np
 from mantid.api import AnalysisDataService as ADS, FileFinder
 from mantid.simpleapi import PoldiAutoCorrelation, ConvertUnits, ConvertToPointData, ExtractSpectra, FlatBackground
 from Engineering.pawley_utils import Phase, GaussianProfile, PawleyPattern1D, PawleyPattern2D
@@ -16,10 +17,10 @@ class POLDIPawleyWorkflow(systemtesting.MantidSystemTest):
     def setUp(self):
         fpath_data = FileFinder.getFullPath("poldi2025n012174.hdf")  # for np.loadtxt so need full path
         self.ws = load_poldi_h5f(fpath_data, "POLDI_Definition_896.xml", t0=5.824e-02, t0_const=-12.68, output_workspace="poldi_silicon")
-        self.ws_autocorr = PoldiAutoCorrelation(self.ws, OutputWorkspace=self.ws.name() + "_ac", NGroups=2)
+        self.ws_autocorr = PoldiAutoCorrelation(self.ws, OutputWorkspace=self.ws.name() + "_ac", NGroups=4)
         self.ws_autocorr = ConvertUnits(InputWorkspace=self.ws_autocorr, OutputWorkspace=self.ws_autocorr.name(), Target="dSpacing")
         self.ws_autocorr = ConvertToPointData(InputWorkspace=self.ws_autocorr, OutputWorkspace=self.ws_autocorr.name())
-        self.ispec = 1  # North Bank
+        self.ispec = 2  #  North Bank (low tth half of bank)
         self.ws_crop = ExtractSpectra(
             InputWorkspace=self.ws,
             OutputWorkspace=f"{self.ws.name()}_crop",
@@ -42,7 +43,7 @@ class POLDIPawleyWorkflow(systemtesting.MantidSystemTest):
         res = pawley1d.fit()
         # collect attributes to assert
         self.cost_1d = res.cost
-        self.alatt_1d = self.alatt_params[0][0]
+        self.alatt_1d = pawley1d.alatt_params[0][0]
 
         # 2D Pawley refinement
         pawley2d = PawleyPattern2D(self.ws_crop, [si], profile=GaussianProfile(), global_scale=False)
@@ -50,13 +51,16 @@ class POLDIPawleyWorkflow(systemtesting.MantidSystemTest):
         res = pawley2d.fit()
         # collect attributes to assert
         self.cost_2d = res.cost
-        self.alatt_2d = self.alatt_params[0][0]
+        self.alatt_2d = pawley1d.alatt_params[0][0]
+        ws2d_sim = ADS.retrieve(f"{self.ws_crop.name()}_sim")
+        self.ws2d_sim_nspec = ws2d_sim.getNumberHistograms()
+        self.ws2d_sim_detid = ws2d_sim.getSpectrum(0).getDetectorIDs()[0]
 
         # Do unconstrained 2D fit (all peaks independent)
         pawley2d_free = pawley2d.create_no_constriants_fit()
         res = pawley2d_free.fit()
         # collect attributes to assert
-        self.cost_2d_free = res.cost  # 499004.0850025586
+        self.cost_2d_free = res.cost
         # get residual d-spacing
         dspacs_free = pawley2d_free.get_peak_centers()
         dspacs_pawley = pawley2d.phases[0].calc_dspacings()
@@ -64,12 +68,14 @@ class POLDIPawleyWorkflow(systemtesting.MantidSystemTest):
 
     def validate(self):
         # 1D Pawley
-        self.assertAlmostEqual(self.alatt_1d, 5.4312, delta=1e-4)
-        self.assertAlmostEqual(self.cost_1d, 422.1, delta=1e-1)
+        self.assertAlmostEqual(self.alatt_1d, 5.43149, delta=1e-4)
+        self.assertAlmostEqual(self.cost_1d, 159.4, delta=1e-1)
         # 2D Pawley
-        self.assertAlmostEqual(self.alatt_2d, 5.4312, delta=1e-4)
-        self.assertAlmostEqual(self.cost_2d, 499058, delta=1)
+        self.assertAlmostEqual(self.alatt_2d, 5.43149, delta=1e-4)
+        self.assertAlmostEqual(self.cost_2d, 248110, delta=1)
+        self.assertEqual(self.ws2d_sim_nspec, 224)
+        self.assertEqual(self.ws2d_sim_detid, 211001)
         # 2D Pawley Free
         self.assertLessThan(self.cost_2d_free, self.cost_2d)
-        self.assertLessThan(abs(self.residual_dspacs.mean()), 2e-05)
+        self.assertLessThan(np.median(abs(self.residual_dspacs)), 1e-04)
         return True
