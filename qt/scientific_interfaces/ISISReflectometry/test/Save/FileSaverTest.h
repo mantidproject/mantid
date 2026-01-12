@@ -14,8 +14,8 @@
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MockSaveAlgorithmRunner.h"
 
-#include <Poco/Path.h>
 #include <cxxtest/TestSuite.h>
+#include <filesystem>
 #include <gmock/gmock.h>
 
 using namespace MantidQt::CustomInterfaces::ISISReflectometry;
@@ -201,19 +201,19 @@ private:
   }
 
   std::string expectedSavePath(const std::string &wsName, const NamedFormat format) {
-    auto savePath = Poco::Path(m_saveDirectory);
+    std::filesystem::path savePath(m_saveDirectory);
 
     if (format == NamedFormat::Custom) {
-      savePath.append(m_prefix + wsName + std::string(".dat"));
+      savePath /= (m_prefix + wsName + std::string(".dat"));
     } else if (format == NamedFormat::ORSOAscii) {
-      savePath.append(m_prefix + wsName + std::string(".ort"));
+      savePath /= (m_prefix + wsName + std::string(".ort"));
     } else if (format == NamedFormat::ORSONexus) {
-      savePath.append(m_prefix + wsName + std::string(".orb"));
+      savePath /= (m_prefix + wsName + std::string(".orb"));
     } else {
-      savePath.append(m_prefix + wsName);
+      savePath /= (m_prefix + wsName);
     }
 
-    return savePath.toString();
+    return savePath.string();
   }
 
   void expectSaveAsciiAlgorithmCalled(MockSaveAlgorithmRunner &mockSaveAlgorithmRunner, const std::string &wsName,

@@ -20,8 +20,9 @@
 #include "MantidKernel/DiskBuffer.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidNexus/NexusFile.h"
-#include <Poco/File.h>
+
 #include <cxxtest/TestSuite.h>
+#include <filesystem>
 #include <map>
 #include <memory>
 #include <utility>
@@ -45,8 +46,8 @@ class MDBoxSaveableTest : public CxxTest::TestSuite {
   /** Deletes the file created by do_saveNexus */
   static std::string do_deleteNexusFile(const std::string &barefilename = "MDBoxTest.nxs") {
     std::string filename(ConfigService::Instance().getString("defaultsave.directory") + barefilename);
-    if (Poco::File(filename).exists())
-      Poco::File(filename).remove();
+    if (std::filesystem::exists(filename))
+      std::filesystem::remove(filename);
     return filename;
   }
 
@@ -807,8 +808,8 @@ public:
     delete b;
     const std::string filename = fbc->getFileName();
     fbc->closeFile();
-    if (Poco::File(filename).exists())
-      Poco::File(filename).remove();
+    if (std::filesystem::exists(filename))
+      std::filesystem::remove(filename);
   }
 
   //-----------------------------------------------------------------------------------------

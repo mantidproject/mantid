@@ -21,10 +21,10 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidNexus/NexusException.h"
 #include "MantidNexus/NexusFile.h"
-#include "Poco/File.h"
 #include "Poco/NumberFormatter.h"
-#include "Poco/Path.h"
 #include "Poco/String.h"
+
+#include <filesystem>
 
 namespace Mantid::WorkflowAlgorithms {
 
@@ -88,8 +88,8 @@ void SANSSensitivityCorrection::init() {
  */
 bool SANSSensitivityCorrection::fileCheck(const std::string &filePath) {
   // Check the file extension
-  Poco::Path path(filePath);
-  const std::string extn = path.getExtension();
+  std::filesystem::path path(filePath);
+  const std::string extn = path.extension().string().substr(1); // remove leading dot
   const std::string nxs("nxs");
   const std::string nx5("nx5");
   if (!(Poco::icompare(nxs, extn) == 0 || Poco::icompare(nx5, extn) == 0))
@@ -140,10 +140,10 @@ void SANSSensitivityCorrection::exec() {
   const std::string fileName = getPropertyValue("Filename");
 
   // Look for an entry for the dark current in the reduction table
-  Poco::Path path(fileName);
-  const std::string entryName = "Sensitivity" + path.getBaseName();
+  std::filesystem::path path(fileName);
+  const std::string entryName = "Sensitivity" + path.stem().string();
   MatrixWorkspace_sptr floodWS;
-  std::string floodWSName = "__sensitivity_" + path.getBaseName();
+  std::string floodWSName = "__sensitivity_" + path.stem().string();
 
   if (reductionManager->existsProperty(entryName)) {
     std::string wsName = reductionManager->getPropertyValue(entryName);
@@ -188,7 +188,7 @@ void SANSSensitivityCorrection::exec() {
           m_output_message += "   |No beam center provided: skipping!\n";
       }
 
-      const std::string rawFloodWSName = "__flood_data_" + path.getBaseName();
+      const std::string rawFloodWSName = "__flood_data_" + path.stem().string();
       MatrixWorkspace_sptr rawFloodWS;
       if (!reductionManager->existsProperty("LoadAlgorithm")) {
         auto loadAlg = createChildAlgorithm("Load", 0.1, 0.3);

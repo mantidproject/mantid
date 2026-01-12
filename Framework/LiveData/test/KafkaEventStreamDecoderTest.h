@@ -17,9 +17,9 @@
 
 #include "MantidLiveData/Kafka/KafkaEventStreamDecoder.h"
 
-#include <Poco/Path.h>
 #include <condition_variable>
 #include <cxxtest/TestSuite.h>
+#include <filesystem>
 #include <iostream>
 #include <thread>
 
@@ -32,9 +32,9 @@ public:
     using Mantid::Kernel::ConfigService;
     auto &config = ConfigService::Instance();
     auto baseInstDir = config.getInstrumentDirectory();
-    Poco::Path testFile = Poco::Path(baseInstDir).resolve("unit_testing/UnitTestFacilities.xml");
+    std::filesystem::path testFile = std::filesystem::path(baseInstDir) / "unit_testing" / "UnitTestFacilities.xml";
     // Load the test facilities file
-    config.updateFacilities(testFile.toString());
+    config.updateFacilities(testFile.string());
     config.setFacility("TEST");
     // Update instrument search directory
     config.setString("instrumentDefinition.directory", baseInstDir + "/unit_testing");
