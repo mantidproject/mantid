@@ -184,6 +184,8 @@ void AlignAndFocusPowderSlim::init() {
   declareProperty(std::make_unique<FileProperty>(PropertyNames::CAL_FILE, "", FileProperty::OptionalLoad, cal_exts),
                   "The .cal file containing the position correction factors. Either this or OffsetsWorkspace needs to "
                   "be specified.");
+  declareProperty(PropertyNames::CAL_FILE_USE_GROUPS, true,
+                  "If true, use the grouping information from the CalFile unless a GroupingWorkspace is provided.");
   auto mustBePosArr = std::make_shared<Kernel::ArrayBoundedValidator<double>>();
   mustBePosArr->setLower(0.0);
   declareProperty(std::make_unique<ArrayProperty<double>>(PropertyNames::X_MIN, std::vector<double>{0.1}, mustBePosArr),
@@ -765,16 +767,18 @@ void AlignAndFocusPowderSlim::initCalibrationConstantsFromCalWS(const std::vecto
 const ITableWorkspace_sptr AlignAndFocusPowderSlim::loadCalFile(const Mantid::API::Workspace_sptr &inputWS,
                                                                 const std::string &filename,
                                                                 GroupingWorkspace_sptr &groupingWS) {
+  const bool load_grouping = !groupingWS && this->getProperty(PropertyNames::CAL_FILE_USE_GROUPS);
+
   auto alg = createChildAlgorithm("LoadDiffCal");
   alg->setProperty("InputWorkspace", inputWS);
   alg->setPropertyValue("Filename", filename);
   alg->setProperty<bool>("MakeCalWorkspace", true);
-  alg->setProperty<bool>("MakeGroupingWorkspace", !bool(groupingWS));
+  alg->setProperty<bool>("MakeGroupingWorkspace", load_grouping);
   alg->setProperty<bool>("MakeMaskWorkspace", true);
   alg->setPropertyValue("WorkspaceName", "temp");
   alg->executeAsChildAlg();
 
-  if (!groupingWS) {
+  if (load_grouping) {
     g_log.debug() << "Loading grouping workspace from calibration file\n";
     groupingWS = alg->getProperty("OutputGroupingWorkspace");
   }
