@@ -1,0 +1,14 @@
+- Added calibrated IDF for POLDI (PSI) post upgrade in December 2025
+- New loader ``load_poldi_h5f`` for h5f file produced by POLDI post instrument upgrade in ``plugins.algorithms.poldi_utils``
+- New features in :ref:`algm-PoldiAutoCorrelation-v6`
+
+  - Add parameter ``NGroups```  to split POLDI detectors into groups and produce a autocorrelation spectrum per grouping
+  - Associate detector IDs with autocorrelation spectra in output workspace
+
+- New features in ``PawleyPattern1D`` class in ``Engineering.pawley_utils``
+
+  - Method to perform 'free' fit - i.e. do not constrain peak centres to predicted positions
+  - Improvements to robustness of background estimation
+  - Method to fit background function to 1D data using one-sided 'robust' cost function that is biased to minimize negative residuals.
+
+- Added class ``PawleyPattern2DNoConstraints`` in ``Engineering.pawley_utils`` to do a 'free' 2D refinement of POLDI data
