@@ -62,8 +62,10 @@ LoadMD::LoadMD()
  */
 int LoadMD::confidence(Nexus::NexusDescriptorLazy &descriptor) const {
   int confidence = 0;
-  if (descriptor.isEntry("/MDEventWorkspace", "NXentry") || descriptor.isEntry("/MDHistoWorkspace", "NXentry")) {
-    confidence = 95;
+  if (descriptor.classTypeExists("NXentry")) {
+    if (descriptor.isEntry("/MDEventWorkspace") || descriptor.isEntry("/MDHistoWorkspace")) {
+      confidence = 95;
+    }
   }
   return confidence;
 }
