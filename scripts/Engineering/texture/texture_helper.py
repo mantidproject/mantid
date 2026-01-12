@@ -183,13 +183,13 @@ def create_pole_figure_tables(
     wss: Sequence[str],
     peak_wss: Optional[Sequence[str]],
     out_ws: str,
-    hkl: Optional[Sequence[int]],
-    inc_scatt_corr: bool,
-    scat_vol_pos: Sequence[float],
-    chi2_thresh: Optional[float],
-    peak_thresh: Optional[float],
+    hkl: Optional[Sequence[int]] = None,
+    inc_scatt_corr: bool = False,
+    scat_vol_pos: Sequence[float] = (0, 0, 0),
+    chi2_thresh: Optional[float] = 0.0,
+    peak_thresh: Optional[float] = 0.0,
     ax_transform: Sequence[float] = np.eye(3),
-    readout_col: str = "",
+    readout_col: str = "I",
 ) -> TableWorkspace:
     """
     Create a single pole figure table for a sequence of workspaces and their fit parameters
@@ -252,7 +252,7 @@ def create_pole_figure_tables(
 
 
 def plot_pole_figure(
-    ws_name: str,
+    ws: TableWorkspace | str,
     projection: str,
     fig: Optional[Figure] = None,
     readout_col: str = "I",
@@ -265,7 +265,7 @@ def plot_pole_figure(
     """
     Create a pole figure plot for a pole figure table
 
-    ws_name: The name of the pole figure TableWorkspace
+    ws: The pole figure TableWorkspace
     projection: The projection method for displaying the detector positions (`stereographic`/`azimuthal`)
     fig: The matplotlib figure that the pole figure plot should be added to (can be None)
     readout_col: The name of the column from the TableWorkspace which will serve as the plotted intensities
@@ -276,7 +276,8 @@ def plot_pole_figure(
     contour_kernel: The sigma value of the gaussian kernel used for a contour interpolation
 
     """
-    pfi = get_pole_figure_data(ws_name, projection, readout_col)
+    ws = _retrieve_ws_object(ws)
+    pfi = get_pole_figure_data(ws, projection, readout_col)
 
     if plot_exp:
         suffix = "scatter"
@@ -288,8 +289,7 @@ def plot_pole_figure(
         if isinstance(save_dirs, str):
             save_dirs = [save_dirs]
         for save_dir in save_dirs:
-            fig.savefig(str(path.join(save_dir, ws_name + f"_{suffix}.png")))
-
+            fig.savefig(str(path.join(save_dir, ws.name() + f"_{suffix}.png")))
     return fig, ax
 
 
@@ -377,12 +377,12 @@ def plot_contour_pf(
     gs = fig.add_gridspec(
         1,
         3,
-        width_ratios=[1, 30, 1],  # tweak 30 to control plot vs cbar width
+        width_ratios=[1, 30, 1],
         left=0.05,
-        right=0.98,
+        right=0.85,
         top=0.98,
         bottom=0.06,
-        wspace=0.05,
+        wspace=0.04,
     )
     ax = fig.add_subplot(gs[0, 1])
     cax = fig.add_subplot(gs[0, 2])
@@ -391,10 +391,10 @@ def plot_contour_pf(
     ax.add_patch(circle)
     ax.set_aspect("equal")
     ax.set_axis_off()
-    ax.quiver(-1, -1, 0.2, 0, color="blue", scale=1)
-    ax.quiver(-1, -1, 0, 0.2, color="red", scale=1)
-    ax.text(-0.8, -0.95, ax_labels[-1], fontsize=10)
-    ax.text(-0.95, -0.8, ax_labels[0], fontsize=10)
+    ax.quiver(-0.98, -0.98, 0.2, 0, color="blue", scale=1)
+    ax.quiver(-0.98, -0.98, 0, 0.2, color="red", scale=1)
+    ax.text(-0.78, -0.93, ax_labels[-1], fontsize=10)
+    ax.text(-0.93, -0.78, ax_labels[0], fontsize=10)
     ax.set_label("Pole Figure Plot")
     contour_plot.set_label("pole figure data")
     cbar = fig.colorbar(contour_plot, cax=cax)
@@ -402,11 +402,11 @@ def plot_contour_pf(
     return fig, ax
 
 
-def get_pole_figure_data(ws_name: str, projection: str, readout_col: str = "I"):
+def get_pole_figure_data(ws: TableWorkspace, projection: str, readout_col: str = "I"):
     """
     Convert data in a pole figure table into a data array and project it into two dimensions
 
-    ws_name: Name of the TableWorkspace with the pole figure data
+    ws: TableWorkspace with the pole figure data
     projection: The projection method for displaying the detector positions (`stereographic`/`azimuthal`)
     readout_col: The name of the column from the TableWorkspace which will serve as the plotted intensities
     """
@@ -414,7 +414,6 @@ def get_pole_figure_data(ws_name: str, projection: str, readout_col: str = "I"):
         proj = ster_proj
     else:
         proj = azim_proj
-    ws = ADS.retrieve(ws_name)
     alphas = np.asarray(ws.column("Alpha"))
     betas = np.asarray(ws.column("Beta"))
     i = np.asarray(ws.column(readout_col))
@@ -451,3 +450,9 @@ def azim_proj(alphas: np.ndarray, betas: np.ndarray, i: np.ndarray) -> np.ndarra
     zs = (betas * np.sin(alphas))[:, None]
     out = np.concatenate([xs, zs, i[:, None]], axis=1)
     return out
+
+
+def _retrieve_ws_object(ws: str | Workspace2D | TableWorkspace):
+    if isinstance(ws, str):
+        return ADS.retrieve(ws)
+    return ws
