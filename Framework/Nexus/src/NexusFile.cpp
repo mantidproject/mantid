@@ -1372,7 +1372,6 @@ void File::getEntries(Entries &result) const {
   for (auto const &entry : m_descriptor.getAllEntries()) {
     for (NexusAddress const addr : entry.second) { // cppcheck-suppress iterateByValue
       if (addr.parent_path() == currentAddress) {
-        printf("Entry: %s | %s | %s\n", addr.c_str(), entry.first.c_str(), addr.stem().c_str());
         result.emplace(addr.stem(), entry.first);
       }
     }
