@@ -7,6 +7,7 @@
 from pyvista import PolyData
 from qtpy.QtWidgets import (
     QMainWindow,
+    QTabWidget,
     QVBoxLayout,
     QHBoxLayout,
     QWidget,
@@ -222,20 +223,41 @@ class FullInstrumentViewWindow(QMainWindow):
         self._peak_ws_list.setSizeAdjustPolicy(QListWidget.AdjustToContents)
         peak_v_layout.addWidget(self._peak_ws_list)
 
-        shapes_group_box = QGroupBox("Shapes")
-        shapes_layout = QHBoxLayout(shapes_group_box)
-        shape_label = QLabel("Shape:")
-        shape_label.setFixedWidth(50)
-        self._shape_options = QComboBox()
-        self._shape_options.addItems([w.value for w in WidgetType])
-        self._add_widget = QPushButton("Add Shape")
-        self._add_widget.setCheckable(True)
-        shapes_layout.addWidget(shape_label)
-        shapes_layout.addWidget(self._shape_options)
-        shapes_layout.addWidget(self._add_widget)
+        grouping_masking_group_box = QGroupBox("Grouping and Masking")
+        grouping_masking_group_layout = QVBoxLayout(grouping_masking_group_box)
+        shapes_widget = QWidget()
+        shapes_layout = QHBoxLayout(shapes_widget)
+        self._add_circle = QPushButton("Add Circle")
+        self._add_circle.setCheckable(True)
+        self._add_rectangle = QPushButton("Add Rectangle")
+        self._add_rectangle.setCheckable(True)
+        shapes_layout.addWidget(self._add_circle)
+        shapes_layout.addWidget(self._add_rectangle)
+        self._shape_buttons = [self._add_circle, self._add_rectangle]
 
-        masking_group_box = QGroupBox("Masking")
-        masking_layout = QVBoxLayout(masking_group_box)
+        tab_1 = QWidget()
+        picking_layout = QVBoxLayout(tab_1)
+        self._add_selection = QPushButton("Add Selection")
+        self._clear_selections = QPushButton("Clear Selections")
+        pre_list_layout = QHBoxLayout()
+        pre_list_layout.addWidget(self._add_selection)
+        pre_list_layout.addWidget(self._clear_selections)
+        self._selection_list = WorkspaceListWidget(self)
+        self._selection_list.setSizeAdjustPolicy(QListWidget.AdjustToContents)
+        self._selection_list.setSelectionMode(QAbstractItemView.NoSelection)
+        post_list_layout = QHBoxLayout()
+        self._save_selection_to_ws = QPushButton("Export ROI to ADS")
+        self._save_selection_to_file = QPushButton("Save ROI to XML")
+        self._overwrite_selection = QPushButton("Apply ROI Permanently")
+        post_list_layout.addWidget(self._save_selection_to_ws)
+        post_list_layout.addWidget(self._save_selection_to_file)
+        post_list_layout.addWidget(self._overwrite_selection)
+        picking_layout.addLayout(pre_list_layout)
+        picking_layout.addWidget(self._selection_list)
+        picking_layout.addLayout(post_list_layout)
+
+        tab_2 = QWidget()
+        masking_layout = QVBoxLayout(tab_2)
         self._add_mask = QPushButton("Add Mask")
         self._clear_masks = QPushButton("Clear Masks")
         pre_list_layout = QHBoxLayout()
@@ -255,26 +277,11 @@ class FullInstrumentViewWindow(QMainWindow):
         masking_layout.addWidget(self._mask_list)
         masking_layout.addLayout(post_list_layout)
 
-        picking_group_box = QGroupBox("Picking")
-        picking_layout = QVBoxLayout(picking_group_box)
-        self._add_selection = QPushButton("Add Selection")
-        self._clear_selections = QPushButton("Clear Selections")
-        pre_list_layout = QHBoxLayout()
-        pre_list_layout.addWidget(self._add_selection)
-        pre_list_layout.addWidget(self._clear_selections)
-        self._selection_list = WorkspaceListWidget(self)
-        self._selection_list.setSizeAdjustPolicy(QListWidget.AdjustToContents)
-        self._selection_list.setSelectionMode(QAbstractItemView.NoSelection)
-        post_list_layout = QHBoxLayout()
-        self._save_selection_to_ws = QPushButton("Export ROI to ADS")
-        self._save_selection_to_file = QPushButton("Save ROI to XML")
-        self._overwrite_selection = QPushButton("Apply ROI Permanently")
-        post_list_layout.addWidget(self._save_selection_to_ws)
-        post_list_layout.addWidget(self._save_selection_to_file)
-        post_list_layout.addWidget(self._overwrite_selection)
-        picking_layout.addLayout(pre_list_layout)
-        picking_layout.addWidget(self._selection_list)
-        picking_layout.addLayout(post_list_layout)
+        picking_masking_tab = QTabWidget()
+        picking_masking_tab.addTab(tab_1, "Grouping")
+        picking_masking_tab.addTab(tab_2, "Masking")
+        grouping_masking_group_layout.addWidget(shapes_widget)
+        grouping_masking_group_layout.addWidget(picking_masking_tab)
 
         self.status_group_box = QGroupBox("Status")
         status_layout = QHBoxLayout(self.status_group_box)
@@ -295,7 +302,6 @@ class FullInstrumentViewWindow(QMainWindow):
         options_vertical_layout.addWidget(detector_group_box)
         options_vertical_layout.addWidget(self._integration_limit_group_box)
         options_vertical_layout.addWidget(self._contour_range_group_box)
-        # options_vertical_layout.addWidget(multi_select_group_box)
         options_vertical_layout.addWidget(projection_group_box)
         units_group_box = QGroupBox("Units")
         units_vbox = QVBoxLayout()
@@ -303,9 +309,7 @@ class FullInstrumentViewWindow(QMainWindow):
         units_group_box.setLayout(units_vbox)
         options_vertical_layout.addWidget(units_group_box)
         options_vertical_layout.addWidget(peak_ws_group_box)
-        options_vertical_layout.addWidget(shapes_group_box)
-        options_vertical_layout.addWidget(masking_group_box)
-        options_vertical_layout.addWidget(picking_group_box)
+        options_vertical_layout.addWidget(grouping_masking_group_box)
         options_vertical_layout.addWidget(QSplitter(Qt.Horizontal))
 
         options_vertical_layout.addWidget(self.status_group_box)
@@ -489,30 +493,41 @@ class FullInstrumentViewWindow(QMainWindow):
             self._presenter.on_integration_limits_updated,
         )
 
-        self._add_widget.toggled.connect(self.on_toggle_add_mask)
+        self._add_circle.toggled.connect(self.on_toggle_add_circle)
+        self._add_rectangle.toggled.connect(self.on_toggle_add_rectangle)
 
         self._add_mask.clicked.connect(self._presenter.on_add_mask_clicked)
         self._add_mask.setDisabled(True)
         self._add_selection.clicked.connect(self._presenter.on_add_selection_clicked)
         self._add_selection.setDisabled(True)
 
-    def on_toggle_add_mask(self, checked):
+    def on_toggle_add_circle(self, checked):
+        self._on_toggle_add_shape(checked, self.add_cylinder_widget)
+
+    def on_toggle_add_rectangle(self, checked):
+        self._on_toggle_add_shape(checked, self.add_rectangular_widget)
+
+    def _on_toggle_add_shape(self, checked, add_widget_function: Callable):
         if checked:
-            if self._shape_options.currentText() == WidgetType.Cylinder.value:
-                self.add_cylinder_widget()
-            else:
-                self.add_rectangular_widget()
+            add_widget_function()
             self._add_mask.setDisabled(False)
             self._add_selection.setDisabled(False)
+            for btn in self._shape_buttons:
+                if btn != self.sender():
+                    btn.setDisabled(True)
         else:
             self.delete_current_widget()
             self._add_mask.setDisabled(True)
             self._add_selection.setDisabled(True)
+            for btn in self._shape_buttons:
+                if btn != self.sender():
+                    btn.setDisabled(False)
 
     def enable_or_disable_mask_widgets(self):
-        if self._add_widget.isChecked():
-            self._add_widget.toggle()
-        self._add_widget.setDisabled(self.current_selected_projection() == ProjectionType.THREE_D)
+        for btn in self._shape_buttons:
+            if btn.isChecked():
+                btn.toggle()
+            btn.setDisabled(self.current_selected_projection() == ProjectionType.THREE_D)
 
     def delete_current_widget(self):
         # Should delete widgets explicitly, otherwise not garbage collected
