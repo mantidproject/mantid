@@ -129,8 +129,6 @@ public:
     // create a descriptor with the correct values
     std::string const filename = NexusTest::getFullPath("HB3A_data.nxs");
     Mantid::Nexus::NexusDescriptorLazy descriptor(filename);
-
-    auto const &entries = descriptor.getAllEntries();
     // verify that class types are correctly identified
     TS_ASSERT_EQUALS(descriptor.classTypeExists("NXentry"), true);
     TS_ASSERT(descriptor.isEntry("/MDHistoWorkspace"));

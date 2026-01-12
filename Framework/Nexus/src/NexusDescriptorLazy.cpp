@@ -34,14 +34,15 @@ namespace {
 template <herr_t (*H5Xclose)(hid_t)> std::string readNXClass(Mantid::Nexus::UniqueID<H5Xclose> const &oid) {
   std::string nxClass = UNKNOWN_CLASS;
   if (H5Aexists(oid, Mantid::Nexus::GROUP_CLASS_SPEC.c_str()) > 0) {
-    Mantid::Nexus::UniqueID<&H5Aclose> attrID = H5Aopen_name(oid, Mantid::Nexus::GROUP_CLASS_SPEC.c_str());
+    Mantid::Nexus::UniqueID<&H5Aclose> attrID = H5Aopen(oid, Mantid::Nexus::GROUP_CLASS_SPEC.c_str(), H5P_DEFAULT);
     if (attrID.isValid()) {
       Mantid::Nexus::UniqueID<&H5Tclose> atype(H5Aget_type(attrID));
       if (H5Tis_variable_str(atype)) {
         // variable length string
         char *rdata;
-        H5Aread(attrID, atype, &rdata);
-        nxClass = std::string(rdata);
+        if (H5Aread(attrID, atype, &rdata) >= 0) {
+          nxClass = std::string(rdata);
+        }
         // reclaim memory allocated for rdata by HDF5
         H5free_memory(rdata);
       } else {
