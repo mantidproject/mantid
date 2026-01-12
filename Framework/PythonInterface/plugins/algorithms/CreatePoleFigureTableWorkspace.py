@@ -227,7 +227,7 @@ class CreatePoleFigureTableWorkspace(PythonAlgorithm):
             if not self.no_x0_needed:
                 x0s = np.asarray(peak_param_ws.column("X0"))
                 # if no hkl provided, peak will be set to mean x0
-                peak = np.mean(x0s)
+                peak = np.mean(x0s[np.isfinite(x0s)])  # only use non nan x0s
             if not self.no_chi2_needed:
                 chi2 = np.asarray(peak_param_ws.column("chi2"))
         else:

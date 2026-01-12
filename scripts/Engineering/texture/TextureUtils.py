@@ -6,17 +6,12 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import numpy as np
 from os import path, scandir
+from Engineering.texture.polefigure.polefigure_model import TextureProjection
 import sys
 from Engineering.texture.correction.correction_model import TextureCorrectionModel
 from Engineering.texture.polefigure.polefigure_model import TextureProjection
 from mantid.simpleapi import SaveNexus, logger, CreateEmptyTableWorkspace, Fit
 from mantid.simpleapi import (
-    SaveNexus,
-    logger,
-    CreateEmptyTableWorkspace,
-    LoadCIF,
-    Fit,
-    CreateSingleValuedWorkspace,
     ConvertUnits,
     Rebunch,
 )
@@ -27,15 +22,14 @@ from mantid.api import AnalysisDataService as ADS, MultiDomainFunction, Function
 from typing import Optional, Sequence, Union, Tuple
 from mantid.dataobjects import Workspace2D
 from mantid.fitfunctions import FunctionWrapper, CompositeFunctionWrapper
-from plugins.algorithms.IntegratePeaks1DProfile import PeakFunctionGenerator, calc_intens_and_sigma_arrays
+from plugins.algorithms.IntegratePeaks1DProfile import calc_intens_and_sigma_arrays
 from Engineering.texture.xtal_helper import get_xtal_structure
 
 # import texture helper functions so they can be accessed by users through the TextureUtils namespace
 from Engineering.texture.texture_helper import plot_pole_figure
 
 from mantid.kernel import DeltaEModeType, UnitConversion
-from plugins.algorithms.IntegratePeaks1DProfile import calc_intens_and_sigma_arrays
-from mantid.kernel import DeltaEModeType, UnitConversion, UnitParams
+from mantid.kernel import UnitParams
 from plugins.algorithms.peakdata_utils import PeakData
 # -------- Utility --------------------------------
 
@@ -658,8 +652,11 @@ def get_default_values(params, no_fit_dict):
     return defaults
 
 
-def replace_nans(vals, method: str):
+def replace_nans(vals, method: Optional[str]):
     new_vals = np.zeros_like(vals.T)  # want to iterate over table columns
+    # if no method leave nans as are
+    if not method:
+        return vals
     # if method is zero, replace all nans with zero
     if method == "zeros":
         return np.nan_to_num(vals)
