@@ -66,7 +66,7 @@ WorkspaceTreeWidgetSimple::WorkspaceTreeWidgetSimple(bool viewOnly, QWidget *par
       m_superplotWithErrs(new QAction("Superplot with errors...", this)),
       m_superplotBins(new QAction("Superplot bins...", this)),
       m_superplotBinsWithErrs(new QAction("Superplot bins with errors...", this)),
-      m_showNewInstrumentView(new QAction("(Experimental) Show Instrument", this)) {
+      m_showNewInstrumentView(new QAction("(Experimental) Show Instrument", this)), m_separator(new QAction()) {
 
   // Replace the double click action on the MantidTreeWidget
   m_tree->m_doubleClickAction = [&](const QString &wsName) { emit workspaceDoubleClicked(wsName); };
@@ -101,6 +101,7 @@ WorkspaceTreeWidgetSimple::WorkspaceTreeWidgetSimple(bool viewOnly, QWidget *par
   connect(m_superplotBins, SIGNAL(triggered()), this, SLOT(onSuperplotBinsClicked()));
   connect(m_superplotBinsWithErrs, SIGNAL(triggered()), this, SLOT(onSuperplotBinsWithErrsClicked()));
   connect(m_showNewInstrumentView, SIGNAL(triggered()), this, SLOT(onShowNewInstrumentViewClicked()));
+  m_separator->setSeparator(true);
 }
 
 WorkspaceTreeWidgetSimple::~WorkspaceTreeWidgetSimple() = default;
@@ -124,14 +125,7 @@ void WorkspaceTreeWidgetSimple::popupContextMenu() {
     // If no workspace is here then have load items
     menu = m_loadMenu;
   } else {
-    // Check is defensive just in case the workspace has disappeared
-    Workspace_sptr workspace;
-    try {
-      workspace = AnalysisDataService::Instance().retrieve(selectedWsName.toStdString());
-    } catch (Exception::NotFoundError &) {
-      return;
-    }
-    menu = createWorkspaceContextMenu(*workspace);
+    menu = createWorkspaceContextMenu(getSelectedWorkspaceNamesAsQList());
   }
 
   // Show the menu at the cursor's current position
@@ -235,19 +229,84 @@ void WorkspaceTreeWidgetSimple::onShowNewInstrumentViewClicked() {
  * Create a new QMenu object filled with appropriate items for the given workspace
  * The created object has this as its parent and WA_DeleteOnClose set
  */
-QMenu *WorkspaceTreeWidgetSimple::createWorkspaceContextMenu(const Mantid::API::Workspace &workspace) {
+QMenu *WorkspaceTreeWidgetSimple::createWorkspaceContextMenu(const QStringList &selectedWorkspaces) {
   auto menu = new QMenu(this);
   menu->setAttribute(Qt::WA_DeleteOnClose, true);
   menu->setObjectName("WorkspaceContextMenu");
 
-  if (auto matrixWS = dynamic_cast<const MatrixWorkspace *>(&workspace))
-    addMatrixWorkspaceActions(menu, *matrixWS);
-  else if (auto tableWS = dynamic_cast<const ITableWorkspace *>(&workspace))
-    addTableWorkspaceActions(menu, *tableWS);
-  else if (auto mdWS = dynamic_cast<const IMDWorkspace *>(&workspace))
-    addMDWorkspaceActions(menu, *mdWS);
-  else if (auto wsGroup = dynamic_cast<const WorkspaceGroup *>(&workspace))
-    addWorkspaceGroupActions(menu, *wsGroup);
+  std::vector<Workspace_sptr> workspaces;
+  std::vector<MenuActions> actionVecs;
+  std::vector<MenuActions> plotMenuActionVecs;
+  std::vector<MenuActions> plotMenu3DActionVecs;
+  for (const auto &workspaceName : selectedWorkspaces) {
+    Workspace_sptr workspace;
+    try {
+      workspace = AnalysisDataService::Instance().retrieve(workspaceName.toStdString());
+    } catch (Exception::NotFoundError &) {
+      continue;
+    }
+    workspaces.push_back(workspace);
+    if (auto matrixWS = std::dynamic_pointer_cast<MatrixWorkspace>(workspace)) {
+      auto [actions, plotActions] = createMatrixWorkspaceActions(*matrixWS);
+      actionVecs.push_back(actions);
+      plotMenuActionVecs.push_back(plotActions.plotActions);
+      plotMenu3DActionVecs.push_back(plotActions.plot3DActions);
+    } else if (auto tableWS = std::dynamic_pointer_cast<ITableWorkspace>(workspace)) {
+      actionVecs.push_back(createTableWorkspaceActions(*tableWS));
+      plotMenuActionVecs.push_back(MenuActions{});
+      plotMenu3DActionVecs.push_back(MenuActions{});
+    } else if (auto mdWS = std::dynamic_pointer_cast<IMDWorkspace>(workspace)) {
+      auto [actions, plotActions] = createMDWorkspaceActions(*mdWS);
+      actionVecs.push_back(actions);
+      plotMenuActionVecs.push_back(plotActions.plotActions);
+      plotMenu3DActionVecs.push_back(plotActions.plot3DActions);
+    } else if (auto wsGroup = std::dynamic_pointer_cast<WorkspaceGroup>(workspace)) {
+      auto [actions, plotActions] = createWorkspaceGroupActions(*wsGroup);
+      actionVecs.push_back(actions);
+      plotMenuActionVecs.push_back(plotActions.plotActions);
+      plotMenu3DActionVecs.push_back(plotActions.plot3DActions);
+    }
+  }
+
+  MenuActions combinedActions = intersectionOfActions(actionVecs);
+  MenuActions combinedPlotMenuActions = intersectionOfActions(plotMenuActionVecs);
+  MenuActions combined3DPlotMenuActions = intersectionOfActions(plotMenu3DActionVecs);
+
+  const auto it = std::find(combinedActions.cbegin(), combinedActions.cend(), m_showInstrument);
+  if (it != combinedActions.cend()) {
+    const auto showInstrumentViewCheck = [](const MatrixWorkspace_const_sptr &workspace) {
+      return workspace->getInstrument() && !workspace->getInstrument()->getName().empty() &&
+             workspace->getAxis(1)->isSpectra();
+    };
+    const bool enabled =
+        std::all_of(workspaces.cbegin(), workspaces.cend(), [&showInstrumentViewCheck](const Workspace_sptr &ws) {
+          if (const auto matrixWS = std::dynamic_pointer_cast<MatrixWorkspace>(ws)) {
+            return showInstrumentViewCheck(matrixWS);
+          }
+          return false;
+        });
+    m_showInstrument->setEnabled(enabled);
+    m_showNewInstrumentView->setEnabled(enabled);
+  }
+
+  if (!combinedPlotMenuActions.empty()) {
+    auto *plotSubMenu = new QMenu("Plot", menu);
+    for (const auto &action : combinedPlotMenuActions) {
+      plotSubMenu->addAction(action);
+    }
+    if (!combined3DPlotMenuActions.empty()) {
+      auto *plot3DMenu = new QMenu("3D", menu);
+      for (const auto &action : combined3DPlotMenuActions) {
+        plot3DMenu->addAction(action);
+      }
+      plotSubMenu->addMenu(plot3DMenu);
+    }
+    menu->addMenu(plotSubMenu);
+  }
+
+  for (const auto &action : combinedActions) {
+    menu->addAction(action);
+  }
 
   // Add for all types
   addGeneralWorkspaceActions(menu);
@@ -255,44 +314,64 @@ QMenu *WorkspaceTreeWidgetSimple::createWorkspaceContextMenu(const Mantid::API::
   return menu;
 }
 
-void WorkspaceTreeWidgetSimple::addMatrixWorkspaceActions(QMenu *menu, const Mantid::API::MatrixWorkspace &workspace) {
+MenuActions WorkspaceTreeWidgetSimple::intersectionOfActions(std::vector<MenuActions> actionVecs) {
+  if (actionVecs.empty()) {
+    return {};
+  }
+  std::sort(actionVecs.begin(), actionVecs.end(), [](const auto &a, const auto &b) { return a.size() > b.size(); });
+  MenuActions combinedActions = actionVecs.front();
+
+  std::erase_if(combinedActions, [&actionVecs](QAction *action) {
+    return (!std::all_of(actionVecs.cbegin() + 1, actionVecs.cend(), [&action](const MenuActions &actionVec) {
+      const auto it = std::find(actionVec.cbegin(), actionVec.cend(), action);
+      return it != actionVec.cend();
+    }));
+  });
+
+  return combinedActions;
+}
+
+std::tuple<MenuActions, PlotMenuActions>
+WorkspaceTreeWidgetSimple::createMatrixWorkspaceActions(const Mantid::API::MatrixWorkspace &workspace) {
+  MenuActions actions;
   // Show just data for a single value.
   if (hasSingleValue(workspace)) {
-    menu->addAction(m_showData);
-    return;
+    actions.push_back(m_showData);
+    return std::make_tuple(actions, PlotMenuActions());
   }
 
-  menu->addMenu(createMatrixWorkspacePlotMenu(menu, hasMultipleBins(workspace)));
-  menu->addSeparator();
-  menu->addAction(m_showData);
-  menu->addAction(m_showAlgorithmHistory);
-  menu->addAction(m_showInstrument);
-  m_showInstrument->setEnabled(workspace.getInstrument() && !workspace.getInstrument()->getName().empty() &&
-                               workspace.getAxis(1)->isSpectra());
-  menu->addAction(m_sampleLogs);
-  menu->addAction(m_sliceViewer);
-  menu->addAction(m_showDetectors);
+  auto plotActions = createMatrixWorkspacePlotMenu(hasMultipleBins(workspace));
+  actions.push_back(m_separator);
+  actions.push_back(m_showData);
+  actions.push_back(m_showAlgorithmHistory);
+  actions.push_back(m_showInstrument);
+  actions.push_back(m_sampleLogs);
+  actions.push_back(m_sliceViewer);
+  actions.push_back(m_showDetectors);
   if (m_tree->selectedItems().size() == 1) {
-    menu->addAction(m_sampleMaterial);
-    menu->addAction(m_sampleShape);
+    actions.push_back(m_sampleMaterial);
+    actions.push_back(m_sampleShape);
   }
-  menu->addAction(m_showNewInstrumentView);
-  m_showNewInstrumentView->setEnabled(workspace.getInstrument() && !workspace.getInstrument()->getName().empty() &&
-                                      workspace.getAxis(1)->isSpectra() &&
-                                      !workspace.detectorInfo().detectorIDs().empty());
+  actions.push_back(m_showNewInstrumentView);
+  return std::make_tuple(actions, plotActions);
 }
 
-void WorkspaceTreeWidgetSimple::addTableWorkspaceActions(QMenu *menu, const Mantid::API::ITableWorkspace &workspace) {
-  menu->addAction(m_showData);
-  menu->addAction(m_showAlgorithmHistory);
+MenuActions WorkspaceTreeWidgetSimple::createTableWorkspaceActions(const Mantid::API::ITableWorkspace &workspace) {
+  MenuActions actions;
+  actions.push_back(m_showData);
+  actions.push_back(m_showAlgorithmHistory);
   if (dynamic_cast<const IPeaksWorkspace *>(&workspace)) {
-    menu->addAction(m_showDetectors);
+    actions.push_back(m_showDetectors);
   }
+  return actions;
 }
 
-void WorkspaceTreeWidgetSimple::addMDWorkspaceActions(QMenu *menu, const Mantid::API::IMDWorkspace &workspace) {
-  menu->addAction(m_showAlgorithmHistory);
-  menu->addAction(m_sampleLogs);
+std::tuple<MenuActions, PlotMenuActions>
+WorkspaceTreeWidgetSimple::createMDWorkspaceActions(const Mantid::API::IMDWorkspace &workspace) {
+  MenuActions actions;
+  PlotMenuActions plotMenu;
+  actions.push_back(m_showAlgorithmHistory);
+  actions.push_back(m_sampleLogs);
 
   // launch slice viewer or plot spectrum conditionally
   bool addSliceViewer = false;
@@ -316,18 +395,17 @@ void WorkspaceTreeWidgetSimple::addMDWorkspaceActions(QMenu *menu, const Mantid:
   }
 
   if (addSliceViewer) {
-    menu->addAction(m_sliceViewer);
+    actions.push_back(m_sliceViewer);
   } else if (add1DPlot) {
-    auto *plotSubMenu = new QMenu("Plot", menu);
-    plotSubMenu->addAction(m_plotMDHisto1D);
-    plotSubMenu->addAction(m_overplotMDHisto1D);
-    plotSubMenu->addAction(m_plotMDHisto1DWithErrs);
-    plotSubMenu->addAction(m_overplotMDHisto1DWithErrs);
-    menu->addMenu(plotSubMenu);
+    plotMenu.plotActions = {m_plotMDHisto1D, m_overplotMDHisto1D, m_plotMDHisto1DWithErrs, m_overplotMDHisto1DWithErrs};
   }
+  return std::make_tuple(actions, plotMenu);
 }
 
-void WorkspaceTreeWidgetSimple::addWorkspaceGroupActions(QMenu *menu, const Mantid::API::WorkspaceGroup &workspace) {
+std::tuple<MenuActions, PlotMenuActions>
+WorkspaceTreeWidgetSimple::createWorkspaceGroupActions(const Mantid::API::WorkspaceGroup &workspace) {
+  MenuActions actions;
+  PlotMenuActions plotMenu;
   auto workspaces = workspace.getAllItems();
   bool containsMatrixWorkspace{false};
   bool containsPeaksWorkspace{false};
@@ -343,15 +421,16 @@ void WorkspaceTreeWidgetSimple::addWorkspaceGroupActions(QMenu *menu, const Mant
   // Add plotting options if the group contains at least one matrix
   // workspace.
   if (containsMatrixWorkspace) {
-    menu->addMenu(createMatrixWorkspacePlotMenu(menu, true));
-    menu->addSeparator();
-    menu->addAction(m_showDetectors);
+    plotMenu = createMatrixWorkspacePlotMenu(true);
+    actions.push_back(m_separator);
+    actions.push_back(m_showDetectors);
   }
 
   if (containsPeaksWorkspace) {
-    menu->addAction(m_showData);
-    menu->addAction(m_showDetectors);
+    actions.push_back(m_showData);
+    actions.push_back(m_showDetectors);
   }
+  return std::make_tuple(actions, plotMenu);
 }
 
 void WorkspaceTreeWidgetSimple::addGeneralWorkspaceActions(QMenu *menu) const {
@@ -362,34 +441,19 @@ void WorkspaceTreeWidgetSimple::addGeneralWorkspaceActions(QMenu *menu) const {
   menu->addAction(m_delete);
 }
 
-QMenu *WorkspaceTreeWidgetSimple::createMatrixWorkspacePlotMenu(QWidget *parent, bool hasMultipleBins) {
-  auto *plotSubMenu = new QMenu("Plot", parent);
+PlotMenuActions WorkspaceTreeWidgetSimple::createMatrixWorkspacePlotMenu(bool hasMultipleBins) {
+  PlotMenuActions plotMenu;
   if (hasMultipleBins) {
-    plotSubMenu->addAction(m_plotSpectrum);
-    plotSubMenu->addAction(m_overplotSpectrum);
-    plotSubMenu->addAction(m_plotSpectrumWithErrs);
-    plotSubMenu->addAction(m_overplotSpectrumWithErrs);
-    plotSubMenu->addAction(m_plotAdvanced);
-    plotSubMenu->addAction(m_superplot);
-    plotSubMenu->addAction(m_superplotWithErrs);
-    plotSubMenu->addSeparator();
-    plotSubMenu->addAction(m_plotColorfill);
+    plotMenu.plotActions = {m_plotSpectrum, m_overplotSpectrum, m_plotSpectrumWithErrs, m_overplotSpectrumWithErrs,
+                            m_plotAdvanced, m_superplot,        m_superplotWithErrs,    m_separator,
+                            m_plotColorfill};
     // 3D
-    auto *plot3DSubMenu = new QMenu("3D", plotSubMenu);
-    plot3DSubMenu->addAction(m_plotSurface);
-    plot3DSubMenu->addAction(m_plotWireframe);
-    plot3DSubMenu->addAction(m_plotContour);
-    plotSubMenu->addMenu(plot3DSubMenu);
-
+    plotMenu.plot3DActions = {m_plotSurface, m_plotWireframe, m_plotContour};
   } else {
-    plotSubMenu->addAction(m_plotBin);
-    plotSubMenu->addAction(m_superplotBins);
-    plotSubMenu->addAction(m_superplotBinsWithErrs);
-    plotSubMenu->addSeparator();
-    plotSubMenu->addAction(m_plotColorfill);
+    plotMenu.plotActions = {m_superplotBins, m_superplotBinsWithErrs, m_separator, m_plotColorfill};
   }
 
-  return plotSubMenu;
+  return plotMenu;
 }
 
 } // namespace MantidQt::MantidWidgets
