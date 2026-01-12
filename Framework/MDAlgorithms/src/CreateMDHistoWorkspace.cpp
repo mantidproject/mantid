@@ -16,12 +16,6 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 
 namespace Mantid::MDAlgorithms {
-/**
-Helper type to compute the square in-place.
-*/
-struct Square {
-  void operator()(double &i) { i *= i; }
-};
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CreateMDHistoWorkspace)
@@ -89,6 +83,27 @@ void CreateMDHistoWorkspace::init() {
                   "your unit selection if it is not compatible with the frame.");
 }
 
+std::map<std::string, std::string> CreateMDHistoWorkspace::validateInputs() {
+  std::map<std::string, std::string> errors;
+  size_t binProduct = this->getBinProduct();
+
+  const std::vector<double> &signalValues = getProperty("SignalInput");
+  const std::vector<double> &errorValues = getProperty("ErrorInput");
+  const std::vector<double> &numberOfEvents = getProperty("NumberOfEvents");
+
+  const std::string msg("All inputs must match size: " + std::to_string(binProduct));
+
+  if (signalValues.size() != binProduct)
+    errors["SignalInput"] = msg;
+  if (errorValues.size() != binProduct)
+    errors["ErrorInput"] = msg;
+  // don't need to add message to empty array
+  if ((!numberOfEvents.empty()) && (numberOfEvents.size() != binProduct))
+    errors["NumberOfEvents"] = msg;
+
+  return errors;
+}
+
 //----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
@@ -97,21 +112,16 @@ void CreateMDHistoWorkspace::exec() {
   auto signals = ws->mutableSignalArray();
   auto errors = ws->mutableErrorSquaredArray();
   auto nEvents = ws->mutableNumEventsArray();
+  size_t binProduct = this->getBinProduct();
 
   const std::vector<double> &signalValues = getProperty("SignalInput");
   const std::vector<double> &errorValues = getProperty("ErrorInput");
   const std::vector<double> &numberOfEvents = getProperty("NumberOfEvents");
 
-  size_t binProduct = this->getBinProduct();
-  if (signalValues.size() != binProduct || errorValues.size() != binProduct ||
-      (!numberOfEvents.empty() && numberOfEvents.size() != binProduct)) {
-    throw std::invalid_argument("All inputs must match size: " + std::to_string(binProduct));
-  }
-
   // Fast memory copies and squaring
   std::memcpy(signals, signalValues.data(), binProduct * sizeof(double));
-  for (size_t i = 0; i < binProduct; ++i)
-    errors[i] = errorValues[i] * errorValues[i];
+  std::transform(errorValues.cbegin(), errorValues.cend(), errors, // first element
+                 [](const auto &value) { return value * value; });
 
   if (numberOfEvents.empty()) {
     std::fill(nEvents, nEvents + binProduct, 1.0);
