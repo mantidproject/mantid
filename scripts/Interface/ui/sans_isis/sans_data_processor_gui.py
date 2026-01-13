@@ -1977,6 +1977,10 @@ class SANSDataProcessorGui(QMainWindow, Ui_SansDataProcessorWindow):
         # --------------------------------
         # Q tab
         # --------------------------------
+        self.radius_limit_min_line_edit.setValidator(double_validator)
+        self.radius_limit_max_line_edit.setValidator(double_validator)
+        self.phi_limit_min_line_edit.setValidator(double_validator)
+        self.phi_limit_max_line_edit.setValidator(double_validator)
         self.q_1d_min_line_edit.setValidator(double_validator)
         self.q_1d_max_line_edit.setValidator(double_validator)
         self.q_1d_step_line_edit.setValidator(positive_double_validator)
