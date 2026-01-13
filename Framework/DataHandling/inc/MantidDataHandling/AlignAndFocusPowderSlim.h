@@ -7,8 +7,11 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidDataHandling/AlignAndFocusPowderSlim/SpectraProcessingData.h"
 #include "MantidDataHandling/DllConfig.h"
+#include "MantidDataObjects/GroupingWorkspace.h"
 #include "MantidDataObjects/TimeSplitter.h"
 #include "MantidGeometry/IDTypes.h"
 #include "MantidKernel/TimeROI.h"
@@ -30,7 +33,10 @@ private:
   std::map<std::string, std::string> validateInputs() override;
   void exec() override;
 
-  API::MatrixWorkspace_sptr createOutputWorkspace();
+  API::MatrixWorkspace_sptr createOutputWorkspace(const Geometry::Instrument_const_sptr inst, size_t num_hist);
+  SpectraProcessingData initializeSpectraProcessingData(const API::MatrixWorkspace_sptr &outputWS);
+  void storeSpectraProcessingData(const SpectraProcessingData &processingData,
+                                  const API::MatrixWorkspace_sptr &outputWS);
   API::MatrixWorkspace_sptr editInstrumentGeometry(API::MatrixWorkspace_sptr &wksp, const double l1,
                                                    const std::vector<double> &polars,
                                                    const std::vector<specnum_t> &specids,
@@ -38,8 +44,10 @@ private:
                                                    const std::vector<double> &azimuthals);
   API::MatrixWorkspace_sptr convertToTOF(API::MatrixWorkspace_sptr &wksp);
   void initCalibrationConstants(API::MatrixWorkspace_sptr &wksp, const std::vector<double> &difc_focus);
-  void loadCalFile(const API::Workspace_sptr &inputWS, const std::string &filename,
-                   const std::vector<double> &difc_focus);
+  void initCalibrationConstantsFromCalWS(const std::vector<double> &difc_focus,
+                                         const API::ITableWorkspace_sptr calibrationWS);
+  const API::ITableWorkspace_sptr loadCalFile(const API::Workspace_sptr &inputWS, const std::string &filename,
+                                              DataObjects::GroupingWorkspace_sptr &groupingWS);
   void initScaleAtSample(const API::MatrixWorkspace_sptr &wksp);
   std::vector<std::pair<size_t, size_t>> determinePulseIndices(const API::MatrixWorkspace_sptr &wksp,
                                                                const Kernel::TimeROI &filterROI);
@@ -61,6 +69,8 @@ private:
   std::vector<int64_t> loadStart;
   /// How much to load in the file
   std::vector<int64_t> loadSize;
+  // map of detectorID to output spectrum number
+  std::map<detid_t, size_t> detIDToSpecNum;
 };
 
 // these properties are public to simplify testing and calling from other code
@@ -69,6 +79,7 @@ const std::string FILENAME("Filename");
 const std::string CAL_FILE("CalFileName");
 const std::string FILTER_TIMESTART("FilterByTimeStart");
 const std::string FILTER_TIMESTOP("FilterByTimeStop");
+const std::string GROUPING_WS("GroupingWorkspace");
 const std::string SPLITTER_WS("SplitterWorkspace");
 const std::string SPLITTER_RELATIVE("RelativeTime");
 const std::string CORRECTION_TO_SAMPLE("CorrectionToSample");

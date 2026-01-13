@@ -116,6 +116,7 @@ public:
 
   void getDetectorsInBank(std::vector<IDetector_const_sptr> &dets, const IComponent &comp) const;
   void getDetectorsInBank(std::vector<IDetector_const_sptr> &dets, const std::string &bankName) const;
+  std::set<detid_t> getDetectorIDsInBank(const std::string &bankName) const;
 
   /// Returns a list containing the detector ids of monitors
   std::vector<detid_t> getMonitors() const;
