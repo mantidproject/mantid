@@ -236,33 +236,45 @@ class TestHelperPoleFigureTables(BaseTextureTestClass):
         }
 
     @patch(texture_utils_path + ".ADS")
+    @patch(texture_utils_path + ".ConjoinWorkspaces")
     @patch(texture_utils_path + ".CombineTableWorkspaces")
     @patch(texture_utils_path + ".CloneWorkspace")
     @patch(texture_utils_path + ".CreatePoleFigureTableWorkspace")
-    def test_create_pole_figure_tables_with_peak_wss(self, mock_create_pf, mock_clone, mock_combine, mock_ads):
+    def test_create_pole_figure_tables_with_peak_wss(self, mock_create_pf, mock_clone, mock_combine, mock_conjoin, mock_ads):
         mock_ads.retrieve.return_value = MagicMock()  # returned output table
         out = create_pole_figure_tables(wss=["ws1", "ws2"], peak_wss=["p1", "p2"], **self.get_create_pf_kwargs())
         self.assertEqual(mock_create_pf.call_count, 2)
-        mock_clone.assert_called_once_with(InputWorkspace="_0_abi_table", OutputWorkspace="out_ws")
+        clone_calls = [
+            {"InputWorkspace": "_0_abi_table", "OutputWorkspace": "out_ws"},
+            {"InputWorkspace": "_0_spec_ws", "OutputWorkspace": "combined_ws"},
+        ]
+        mock_clone.assert_has_calls([call(**target_call) for target_call in clone_calls])
         mock_combine.assert_called_once_with(LHSWorkspace="out_ws", RHSWorkspace="_1_abi_table", OutputWorkspace="out_ws")
+        mock_conjoin.assert_called_once_with(InputWorkspace1="combined_ws", InputWorkspace2="_1_spec_ws", CheckOverlapping=False)
         mock_ads.retrieve.assert_called_once_with("out_ws")
         self.assertIsNotNone(out)
 
     @patch(texture_utils_path + ".create_default_parameter_table_with_value")
     @patch(texture_utils_path + ".ADS")
+    @patch(texture_utils_path + ".ConjoinWorkspaces")
     @patch(texture_utils_path + ".CombineTableWorkspaces")
     @patch(texture_utils_path + ".CloneWorkspace")
     @patch(texture_utils_path + ".CreatePoleFigureTableWorkspace")
     def test_create_pole_figure_tables_without_peak_wss_uses_defaults(
-        self, mock_create_pf, mock_clone, mock_combine, mock_ads, mock_default
+        self, mock_create_pf, mock_clone, mock_combine, mock_conjoin, mock_ads, mock_default
     ):
         mock_ads.retrieve.return_value = MagicMock()
         out = create_pole_figure_tables(wss=["ws1", "ws2", "ws3"], peak_wss=None, **self.get_create_pf_kwargs())
         # default table created once per workspace
         self.assertEqual(mock_default.call_count, 3)
         self.assertEqual(mock_create_pf.call_count, 3)
-        mock_clone.assert_called_once_with(InputWorkspace="_0_abi_table", OutputWorkspace="out_ws")
+        clone_calls = [
+            {"InputWorkspace": "_0_abi_table", "OutputWorkspace": "out_ws"},
+            {"InputWorkspace": "_0_spec_ws", "OutputWorkspace": "combined_ws"},
+        ]
+        mock_clone.assert_has_calls([call(**target_call) for target_call in clone_calls])
         self.assertEqual(mock_combine.call_count, 2)
+        self.assertEqual(mock_conjoin.call_count, 2)
         mock_ads.retrieve.assert_called_once_with("out_ws")
         self.assertIsNotNone(out)
 
@@ -289,38 +301,43 @@ class TestHelperPoleFigureTables(BaseTextureTestClass):
         mock_ws.column.side_effect = get_column
         mock_ads.retrieve.return_value = mock_ws
 
-        result = get_pole_figure_data("ws", "stereographic")
+        result = get_pole_figure_data(mock_ws, "stereographic")
         self.assertEqual(result.shape[1], 3)
 
 
 class TestHelperPoleFigurePlots(BaseTextureTestClass):
+    @patch(texture_utils_path + "._retrieve_ws_object")
     @patch(texture_utils_path + ".get_pole_figure_data")
     @patch(texture_utils_path + ".plot_exp_pf")
-    def test_plot_pole_figure_scatter_calls_plot_exp(self, mock_plot_exp, mock_get):
+    def test_plot_pole_figure_scatter_calls_plot_exp(self, mock_plot_exp, mock_get, mock_retrieve):
         test_pfi = np.ones((2, 3))
         mock_get.return_value = test_pfi
+        mock_retrieve.return_value = MagicMock()
         mock_plot_exp.return_value = (MagicMock(), MagicMock())
-        plot_pole_figure("ws", "stereographic", plot_exp=True, save_dirs=None)
-        mock_plot_exp.assert_called_once_with(test_pfi, ("Dir1", "Dir2"), "I", None)
+        plot_pole_figure("ws", "stereographic", plot_exp=True, save_dirs=None, fig=None)
+        mock_plot_exp.assert_called_once_with(test_pfi, ("Dir1", "Dir2"), "I", None, None)
 
+    @patch(texture_utils_path + "._retrieve_ws_object")
     @patch(texture_utils_path + ".get_pole_figure_data")
     @patch(texture_utils_path + ".plot_contour_pf")
-    def test_plot_pole_figure_contour_calls_plot_contour(self, mock_plot_contour, mock_get):
+    def test_plot_pole_figure_contour_calls_plot_contour(self, mock_plot_contour, mock_get, mock_retrieve):
         test_pfi = np.ones((2, 3))
         mock_get.return_value = test_pfi
+        mock_retrieve.return_value = MagicMock()
         mock_plot_contour.return_value = (MagicMock(), MagicMock())
         plot_pole_figure("ws", "stereographic", plot_exp=False, save_dirs=None)
         mock_plot_contour.assert_called_once_with(test_pfi, ("Dir1", "Dir2"), "I", None, 2.0)
 
+    @patch(texture_utils_path + "._retrieve_ws_object")
     @patch(texture_utils_path + ".get_pole_figure_data", return_value=np.array([[0.0, 0.0, 1.0]]))
     @patch(texture_utils_path + ".plot_exp_pf")
-    def test_plot_pole_figure_save_dirs_string_only_saves_once(self, mock_plot_exp, mock_get):
+    def test_plot_pole_figure_save_dirs_string_only_saves_once(self, mock_plot_exp, mock_get, mock_retrieve):
         fig = MagicMock()
         ax = MagicMock()
         mock_plot_exp.return_value = (fig, ax)
-
-        plot_pole_figure("ws", "stereographic", plot_exp=True, save_dirs="outdir")
-        fig.savefig.assert_called_once_with(str(path.join("outdir", "ws_scatter.png")))
+        mock_retrieve.return_value = self.mock_ws
+        plot_pole_figure(self.mock_ws, "stereographic", plot_exp=True, save_dirs="outdir")
+        fig.savefig.assert_called_once_with(str(path.join("outdir", "test_ws_scatter.png")))
 
 
 if __name__ == "__main__":
