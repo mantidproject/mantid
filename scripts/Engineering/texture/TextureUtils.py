@@ -14,6 +14,11 @@ from mantid.simpleapi import SaveNexus, logger, CreateEmptyTableWorkspace, Fit
 from mantid.simpleapi import (
     ConvertUnits,
     Rebunch,
+    Rebin,
+    SumSpectra,
+    AppendSpectra,
+    CloneWorkspace,
+    CropWorkspace,
 )
 from pathlib import Path
 from Engineering.EnggUtils import GROUP
@@ -254,16 +259,60 @@ def validate_abs_corr_inputs(
 # -------- Fitting Script Logic--------------------------------
 
 
+def fit_initial_summed_spectra(wss, peaks, peak_window, fit_kwargs):
+    for i, ws in enumerate(wss):
+        Rebin(ws, "0.7, 0.001, 2.4", OutputWorkspace=f"rebin_{i}")
+        SumSpectra(f"rebin_{i}", OutputWorkspace=f"sum_{i}")
+    CloneWorkspace("sum_0", OutputWorkspace="sum_runs_ws")
+    for i in range(1, len(wss)):
+        AppendSpectra("sum_runs_ws", f"sum_{i}", OutputWorkspace="sum_runs_ws")
+        SumSpectra("sum_runs_ws", OutputWorkspace="sum_ws")
+
+    x0_lims = []
+    for i, peak in enumerate(peaks):
+        # set the ws bounds based on the supplied peak window
+        low_bound, hi_bound = peak - peak_window, peak + peak_window
+        window_ws = CropWorkspace("sum_ws", low_bound, hi_bound, OutputWorkspace=f"peak_window_{i}")
+
+        # set up a function to fit
+        bg_func = FunctionFactory.createFunction("LinearBackground")
+        peak_func = FunctionFactory.Instance().createPeakFunction("BackToBackExponential")
+
+        # estimate starting params
+        intens, sigma, bg, x0 = _estimate_intensity_background_and_centre(window_ws, 0, 0, len(window_ws.readX(0)) - 1, peak)
+        peak_func.setCentre(peak)
+        peak_func.setIntensity(intens)
+        cen_par_name = peak_func.getCentreParameterName()
+        peak_func.addConstraints(f"{low_bound} < {cen_par_name} < {hi_bound}")
+        peak_func.addConstraints("I > 0")
+        comp_func = CompositeFunctionWrapper(FunctionWrapper(peak_func), FunctionWrapper(bg_func), NumDeriv=True)
+        fit_kwargs["InputWorkspace"] = window_ws.name()
+        fit_kwargs["StartX"] = low_bound
+        fit_kwargs["EndX"] = hi_bound
+
+        fit_object = Fit(
+            Function=comp_func,
+            Output=f"composite_fit_{peak}",
+            MaxIterations=50,  # if it hasn't fit in 50 it is likely because the texture has the peak missing
+            **fit_kwargs,
+        )
+        b2b_func = fit_object.Function.function.getFunction(0)
+        x0 = b2b_func.getParameterValue("X0")
+        x0_lims.append((x0 * (1 - 3e-3), x0 * (1 + 3e-3)))
+    return x0_lims
+
+
 def get_initial_fit_function_and_kwargs_from_specs(
     ws: Workspace2D,
     ws_tof: Workspace2D,
     peak: float,
     x_window: tuple[float, float],
+    x0_window: tuple[float, float],
     parameters_to_tie: Sequence[str],
     peak_func_name: str,
     bg_func_name: str,
     tie_bkg: bool,
-) -> Tuple[str, dict, Sequence[float], float]:
+) -> Tuple[str, dict, Sequence[float]]:
     # modification of get_initial_fit_function_and_kwargs to just fit a peak within the x_window
 
     # get the number of spectra
@@ -312,15 +361,16 @@ def get_initial_fit_function_and_kwargs_from_specs(
         peak_func.setIntensity(intens)
 
         # calculate constraint values
-        # allow x0 to move 10% of the total fit window from the estimate (highest point)
-        x0_move = (tof_end - tof_start) / 10
+        # convert x0 bounds to TOF
+        x0_lower = UnitConversion.run("dSpacing", "TOF", x0_window[0], 0, DeltaEModeType.Elastic, diff_consts)
+        x0_upper = UnitConversion.run("dSpacing", "TOF", x0_window[1], 0, DeltaEModeType.Elastic, diff_consts)
         # constrain the values of S to be at least half bin width and no more than half the window size
         scale_factor = 2 * np.sqrt(2 * np.log(2))
         width_min = 0.5 * ((tof_end - tof_start) / (iend - istart)) * scale_factor
         width_max = max(width_min + 1e-10, ((tof_end - tof_start) / 2) * scale_factor)
 
         # add these constraints
-        peak_func.addConstraints(f"{centre - x0_move} < {cen_par_name} < {centre + x0_move}")
+        peak_func.addConstraints(f"{x0_lower} < {cen_par_name} < {x0_upper}")
         peak_func.addConstraints(f"{intens / 5} < {intens_par_name} < {intens * 5}")
         peak_func.addConstraints(f"{width_min}<{width_par_name}<{width_max}")
 
@@ -365,7 +415,7 @@ def get_initial_fit_function_and_kwargs_from_specs(
 
     # if ties are to be added, do so as a string as it is faster
     func = f"{str(function)};ties=({','.join(ties)})" if ties else function
-    return func, fit_kwargs, intensity_estimates, x0_move
+    return func, fit_kwargs, intensity_estimates
 
 
 def rerun_fit_with_new_ws(
@@ -373,7 +423,7 @@ def rerun_fit_with_new_ws(
     fit_kwargs: dict,
     md_fit_kwargs: dict,
     new_ws: Workspace2D,
-    x0_move: float,
+    x0_frac_move: float,
     iters: int,
     parameters_to_fix: Sequence[str],
     tie_background: bool = False,
@@ -396,7 +446,7 @@ def rerun_fit_with_new_ws(
         intens = max(peak.getParameterValue("I"), 1)
         x0 = peak.getParameterValue("X0")
         new_peak.addConstraints(f"{max(intens / 2, 1e-6)}<I<{intens * 2}")
-        new_peak.addConstraints(f"{x0 - x0_move}<X0<{x0 + x0_move}")
+        new_peak.addConstraints(f"{x0 * (1 - x0_frac_move)}<X0<{x0 * (1 + x0_frac_move)}")
         if tie_background and idom > 0:
             for ipar_bg in range(bg.nParams()):
                 par = bg.getParamName(ipar_bg)
@@ -472,6 +522,11 @@ def fit_all_peaks(
         "CostFunction": "Unweighted least squares",
     }
 
+    # we are initially going to fit a summed spectra to get a good starting point for the peak centre
+    # we will then fix the amount this can change in the individual fits
+
+    x0_lims = fit_initial_summed_spectra(wss, peaks, peak_window, fit_kwargs.copy())
+
     for iws, wsname in enumerate(wss):
         # notice user how far through the fitting they are (useful if any fits fail)
         logger.notice(f"Fitting Workspace: {wsname} ({iws + 1}/{len(wss)})")
@@ -484,7 +539,7 @@ def fit_all_peaks(
         # perform fitting in TOF as the parameter magnitudes are better for fitting (A, B, and S)
         ws_tof = ConvertUnits(InputWorkspace=ws, OutputWorkspace="ws_tof", Target="TOF")
 
-        # approach will be to use interative fits and these iteration can have optionally 'rebunched' data to improve SNR
+        # approach will be to use iterative fits and these iteration can have optionally 'rebunched' data to improve SNR
         fit_wss = []
         bkg_is_tied = []
         if len(smooth_vals) > 0:
@@ -501,7 +556,7 @@ def fit_all_peaks(
             bkg_is_tied.append(True)
 
         # loop over the peaks
-        for peak in peaks:
+        for ipeak, peak in enumerate(peaks):
             # low level information
             logger.information(f"Workspace: {wsname}, Peak: {peak}")
 
@@ -518,8 +573,8 @@ def fit_all_peaks(
 
             # perform initial fit set up and fit
             fit_ws = fit_wss[fit_num]
-            initial_function, md_fit_kwargs, intensity_estimates, x0_move = get_initial_fit_function_and_kwargs_from_specs(
-                ws, fit_ws, peak, (xmin, xmax), parameters_to_tie, peak_func_name, bg_func_name, bkg_is_tied[fit_num]
+            initial_function, md_fit_kwargs, intensity_estimates = get_initial_fit_function_and_kwargs_from_specs(
+                ws, fit_ws, peak, (xmin, xmax), x0_lims[ipeak], parameters_to_tie, peak_func_name, bg_func_name, bkg_is_tied[fit_num]
             )
             fit_object = Fit(
                 Function=initial_function,
@@ -539,7 +594,7 @@ def fit_all_peaks(
                     fit_kwargs,
                     md_fit_kwargs,
                     fit_ws,
-                    x0_move,
+                    0.01,  # allow x0 to only vary by 1% from previous fit
                     50,
                     subsequent_fit_param_fix,
                     bkg_is_tied[fit_num],
