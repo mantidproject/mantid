@@ -14,6 +14,7 @@ from mantid.simpleapi import (
     CloneWorkspace,
     CombineTableWorkspaces,
     ConjoinWorkspaces,
+    RebinToWorkspace,
 )
 from mantid.api import AnalysisDataService as ADS
 from typing import Optional, Sequence
@@ -192,7 +193,7 @@ def create_pole_figure_tables(
     peak_thresh: Optional[float] = 0.0,
     ax_transform: Sequence[float] = np.eye(3),
     readout_col: str = "I",
-    include_spec_info: bool = False,
+    include_spec_info: bool = True,
 ) -> TableWorkspace:
     """
     Create a single pole figure table for a sequence of workspaces and their fit parameters
@@ -264,6 +265,7 @@ def create_pole_figure_tables(
     if combined_ws:
         CloneWorkspace(InputWorkspace=spec_workspaces[0], OutputWorkspace=combined_ws)
         for ws in spec_workspaces[1:]:
+            RebinToWorkspace(WorkspaceToRebin=ws, WorkspaceToMatch=spec_workspaces[0], OutputWorkspace=ws)
             ConjoinWorkspaces(InputWorkspace1=combined_ws, InputWorkspace2=ws, CheckOverlapping=False)
     return ADS.retrieve(out_ws)
 
@@ -277,7 +279,7 @@ def plot_pole_figure(
     plot_exp: bool = True,
     ax_labels: Sequence[str] = ("Dir1", "Dir2"),
     contour_kernel: Optional[float] = 2.0,
-    display_debug_info: bool = False,
+    display_debug_info: bool = True,
     **kwargs,
 ) -> [Figure, Axes]:
     """
@@ -360,7 +362,7 @@ def plot_exp_pf(
     ann = ax.annotate(
         "",
         xy=(0, 0),
-        xytext=(0.0, 1.02),
+        xytext=(0.0, -0.01),
         textcoords="axes fraction",
         bbox=dict(boxstyle="round,pad=0.2", fc="white", alpha=0.8),
         arrowprops=dict(arrowstyle="->", alpha=0.6),
