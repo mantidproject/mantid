@@ -332,7 +332,7 @@ void AlignAndFocusPowderSlim::exec() {
   loadStart.resize(1, 0);
   loadSize.resize(1, 0);
 
-  size_t num_hist = NUM_HIST;
+  size_t num_hist;
   std::map<size_t, std::set<detid_t>> grouping;
   GroupingWorkspace_sptr groupingWS = this->getProperty(PropertyNames::GROUPING_WS);
 
@@ -365,7 +365,7 @@ void AlignAndFocusPowderSlim::exec() {
   // temparary until we update splitting workflow to support arbitrary grouping
   API::Workspace_sptr splitter_ws = this->getProperty(PropertyNames::SPLITTER_WS);
   if (splitter_ws != nullptr) {
-    num_hist = 6;
+    num_hist = NUM_HIST;
   }
 
   this->progress(.0, "Create output workspace");
