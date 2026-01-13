@@ -1,0 +1,1 @@
+- ``GenerateEventsFilter`` will now be able to handle cases where there is no second pulse in the ROI.
