@@ -14,6 +14,18 @@ if(CXXTEST_FOUND)
                              Mantid::Kernel
   )
 
+  target_precompile_headers(
+    MDAlgorithmsTest
+    PRIVATE
+    <MantidAPI/AnalysisDataService.h>
+    <MantidFrameworkTestHelpers/MDEventsTestHelper.h>
+    <MantidFrameworkTestHelpers/WorkspaceCreationHelper.h>
+    <cxxtest/WrappedTestSuite.h>
+    <set>
+    <string>
+    <vector>
+  )
+
   if(TARGET GTest::gmock AND TARGET GTest::gtest)
     target_link_libraries(MDAlgorithmsTest PRIVATE GTest::gmock GTest::gtest)
   else()

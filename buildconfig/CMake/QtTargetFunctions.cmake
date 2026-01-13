@@ -64,7 +64,7 @@ endfunction()
 # * keyword: LINUX_INSTALL_RPATH Install path for CMAKE_SYSTEM_NAME == Linux
 function(mtd_add_qt_target)
   set(options LIBRARY EXECUTABLE NO_SUFFIX EXCLUDE_FROM_ALL)
-  set(oneValueArgs TARGET_NAME OUTPUT_NAME QT_VERSION OUTPUT_DIR_BASE OUTPUT_SUBDIR PRECOMPILED)
+  set(oneValueArgs TARGET_NAME OUTPUT_NAME QT_VERSION OUTPUT_DIR_BASE OUTPUT_SUBDIR)
   set(multiValueArgs
       SRC
       UI
@@ -79,6 +79,7 @@ function(mtd_add_qt_target)
       QT5_LINK_LIBS
       MTD_QT_LINK_LIBS
       OSX_INSTALL_RPATH
+      PRECOMPILED
       LINUX_INSTALL_RPATH
       INSTALL_DIR
       INSTALL_DIR_BASE

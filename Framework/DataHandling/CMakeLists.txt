@@ -668,7 +668,20 @@ add_library(DataHandling ${SRC_FILES} ${INC_FILES})
 add_library(Mantid::DataHandling ALIAS DataHandling)
 
 # Use a precompiled header
-target_precompile_headers(DataHandling PRIVATE inc/MantidDataHandling/PrecompiledHeader.h)
+target_precompile_headers(
+  DataHandling
+  PRIVATE
+  <MantidAPI/Algorithm.h>
+  <MantidDataObjects/EventWorkspace.h>
+  <MantidDataObjects/Workspace2D.h>
+  <MantidGeometry/Instrument.h>
+  <MantidNexus/NexusException.h>
+  <MantidNexus/NexusFile.h>
+  <Poco/DOM/DOMParser.h>
+  <Poco/DOM/Document.h>
+  <Poco/DOM/Element.h>
+  <Poco/DOM/NodeList.h>
+)
 
 target_include_directories(
   DataHandling PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc> $<INSTALL_INTERFACE:include/Mantid>
