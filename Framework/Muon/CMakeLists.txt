@@ -100,8 +100,7 @@ if(COVERAGE)
   endforeach(loop_var)
 endif()
 
-# Add a precompiled header where they are supported enable_precompiled_headers (inc/MantidAlgorithms/PrecompiledHeader.h
-# SRC_FILES ) Add the target for this directory
+# Add the target for this directory
 add_library(Muon ${SRC_FILES} ${C_SRC_FILES} ${INC_FILES})
 add_library(Mantid::Muon ALIAS Muon)
 

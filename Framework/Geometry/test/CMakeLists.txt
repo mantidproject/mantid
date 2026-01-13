@@ -14,6 +14,8 @@ if(CXXTEST_FOUND)
     GeometryTest PRIVATE Mantid::Geometry Mantid::Beamline Mantid::Types Mantid::Kernel ${OpenGL_LIBRARIES}
   )
 
+  target_precompile_headers(GeometryTest PRIVATE <cxxtest/WrappedTestSuite.h> <set> <string> <vector>)
+
   if(TARGET GTest::gmock AND TARGET GTest::gtest)
     target_link_libraries(GeometryTest PRIVATE GTest::gmock GTest::gtest)
   else()
