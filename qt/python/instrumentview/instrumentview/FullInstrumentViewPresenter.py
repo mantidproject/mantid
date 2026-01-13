@@ -10,6 +10,7 @@ from enum import Enum
 from pyvista.plotting.picking import RectangleSelection
 from pyvista.plotting.opts import PickerType
 from qtpy.QtWidgets import QFileDialog
+from typing import Optional
 from mantid import mtd
 from mantid.kernel import logger, ConfigService
 from mantid.simpleapi import AnalysisDataService
@@ -72,11 +73,6 @@ class FullInstrumentViewPresenter:
         self._view.set_contour_range_limits(self._model.counts_limits)
         self._view.set_integration_range_limits(self._model.integration_limits)
 
-        if len(self._model.monitor_positions) > 0:
-            monitor_point_cloud = self.create_poly_data_mesh(self._model.monitor_positions)
-            monitor_point_cloud["colours"] = self.generate_single_colour(len(self._model.monitor_positions), 1, 0, 0, 1)
-            self._view.add_rgba_mesh(monitor_point_cloud, scalars="colours")
-
         self._view.show_axes()
         self.update_plotter()
 
@@ -93,6 +89,14 @@ class FullInstrumentViewPresenter:
         self._view.hide_status_box()
         self._peak_interaction_status = PeakInteractionStatus.Disabled
         self._update_peak_buttons()
+
+    def _create_and_add_monitor_mesh(self) -> Optional[pv.PolyData]:
+        if len(self._model.monitor_positions) == 0 or not self._view.is_show_monitors_checkbox_checked():
+            return None
+        monitor_point_cloud = self.create_poly_data_mesh(self._model.monitor_positions)
+        monitor_point_cloud["colours"] = self.generate_single_colour(len(self._model.monitor_positions), 1, 0, 0, 1)
+        self._view.add_rgba_mesh(monitor_point_cloud, scalars="colours")
+        return monitor_point_cloud
 
     def on_export_workspace_clicked(self) -> None:
         self._model.save_line_plot_workspace_to_ads()
@@ -149,12 +153,16 @@ class FullInstrumentViewPresenter:
         self._masked_mesh = self.create_poly_data_mesh(self._model.masked_positions)
         self._view.add_masked_mesh(self._masked_mesh)
 
+        monitor_mesh = self._create_and_add_monitor_mesh()
+
         # Update transform needs to happen after adding to plotter
         # Uses display coordinates
         self._update_transform()
         self._detector_mesh.transform(self._transform, inplace=True)
         self._pickable_mesh.transform(self._transform, inplace=True)
         self._masked_mesh.transform(self._transform, inplace=True)
+        if monitor_mesh is not None:
+            monitor_mesh.transform(self._transform, inplace=True)
 
         self._view.enable_or_disable_mask_widgets()
         self._view.enable_or_disable_aspect_ratio_box()
@@ -484,3 +492,6 @@ class FullInstrumentViewPresenter:
     def on_delete_all_selected_peaks_clicked(self) -> None:
         self._model.delete_peaks_on_all_selected_detectors()
         self._update_peak_buttons()
+
+    def on_show_monitors_check_box_clicked(self) -> None:
+        self.update_plotter()

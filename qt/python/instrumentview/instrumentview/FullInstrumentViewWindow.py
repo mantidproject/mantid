@@ -190,9 +190,12 @@ class FullInstrumentViewWindow(QMainWindow):
         )
         aspect_ratio_option = ConfigService.Instance()[self._ASPECT_RATIO_SETTING_STRING]
         self._aspect_ratio_check_box.setChecked(aspect_ratio_option.casefold() == "yes")
+        self._show_monitors_check_box = QCheckBox()
+        self._show_monitors_check_box.setText("Show Monitors?")
         projection_layout.addWidget(self._projection_combo_box)
         projection_layout.addWidget(self._reset_projection)
         projection_layout.addWidget(self._aspect_ratio_check_box)
+        projection_layout.addWidget(self._show_monitors_check_box)
 
         peak_ws_group_box = QGroupBox("Peaks Workspaces")
         peak_v_layout = QVBoxLayout(peak_ws_group_box)
@@ -300,6 +303,9 @@ class FullInstrumentViewWindow(QMainWindow):
 
     def enable_or_disable_aspect_ratio_box(self) -> None:
         self._aspect_ratio_check_box.setDisabled(self.current_selected_projection() == ProjectionType.THREE_D)
+
+    def is_show_monitors_checkbox_checked(self) -> bool:
+        return self._show_monitors_check_box.isChecked()
 
     def _on_splitter_moved(self, pos, index) -> None:
         self._detector_spectrum_fig.tight_layout()
@@ -430,6 +436,7 @@ class FullInstrumentViewWindow(QMainWindow):
         self._add_peak_button.clicked.connect(self._presenter.on_add_peak_clicked)
         self._delete_peak_button.clicked.connect(self._presenter.on_delete_peak_clicked)
         self._delete_all_selected_peaks_button.clicked.connect(self._presenter.on_delete_all_selected_peaks_clicked)
+        self._show_monitors_check_box.clicked.connect(self._presenter.on_show_monitors_check_box_clicked)
 
         self._add_connections_to_edits_and_slider(
             self._contour_range_min_edit,
