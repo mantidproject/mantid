@@ -33,6 +33,7 @@ using Mantid::API::Workspace_sptr;
 using Mantid::API::WorkspaceGroup;
 using Mantid::API::WorkspaceGroup_sptr;
 using Mantid::DataHandling::AlignAndFocusPowderSlim::AlignAndFocusPowderSlim;
+using Mantid::DataObjects::GroupingWorkspace;
 using Mantid::DataObjects::GroupingWorkspace_sptr;
 using Mantid::DataObjects::TableWorkspace_sptr;
 
@@ -77,6 +78,20 @@ public:
   // This means the constructor isn't called when running other tests
   static AlignAndFocusPowderSlimTest *createSuite() { return new AlignAndFocusPowderSlimTest(); }
   static void destroySuite(AlignAndFocusPowderSlimTest *suite) { delete suite; }
+
+  AlignAndFocusPowderSlimTest() {
+    // CreateGroupingWorkspace(InstrumentName="VULCAN", GroupDetectorsBy="bank", OutputWorkspace="groups")
+    auto gen = AlgorithmManager::Instance().createUnmanaged("CreateGroupingWorkspace");
+    gen->initialize();
+    gen->setProperty("InstrumentName", "VULCAN");
+    gen->setProperty("GroupDetectorsBy", "bank");
+    gen->setProperty("OutputWorkspace", "bank_groups");
+    gen->execute();
+    bank_grouping_ws =
+        std::dynamic_pointer_cast<GroupingWorkspace>(AnalysisDataService::Instance().retrieve("bank_groups"));
+  }
+
+  ~AlignAndFocusPowderSlimTest() { AnalysisDataService::Instance().remove("bank_groups"); }
 
   void test_Init() {
     AlignAndFocusPowderSlim alg;
@@ -191,6 +206,7 @@ public:
 
   void test_defaults() {
     TestConfig config;
+    config.groupingWS = bank_grouping_ws;
     auto outputWS = std::dynamic_pointer_cast<MatrixWorkspace>(run_algorithm(VULCAN_218062, config));
 
     constexpr size_t NUM_Y{1874}; // observed value
@@ -224,6 +240,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", VULCAN_218062));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "unused"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("ReadSizeFromDisk", 1000000));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("GroupingWorkspace", bank_grouping_ws));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("L1", config.l1));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("L2", config.l2s));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Polar", config.twoTheta));
@@ -242,8 +259,38 @@ public:
     TS_ASSERT(result);
   }
 
+  void test_no_grouping() {
+    // this should result in 1 spectrum in the output when no grouping is given
+    TestConfig config;
+    config.l2s = {2.296};
+    config.twoTheta = {90};
+    config.phi = {0};
+    auto outputWS = std::dynamic_pointer_cast<MatrixWorkspace>(run_algorithm(VULCAN_218062, config));
+
+    constexpr size_t NUM_Y{1874}; // observed value
+
+    // verify the output
+    TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 1);
+    TS_ASSERT_EQUALS(outputWS->blocksize(), NUM_Y);
+    TS_ASSERT_EQUALS(outputWS->getAxis(0)->unit()->unitID(), "TOF");
+    // default values in algorithm
+    TS_ASSERT_DELTA(outputWS->readX(0).front(), 1646., 1);
+    TS_ASSERT_DELTA(outputWS->readX(0).back(), 32925., 1);
+    // observed values from running
+    const auto y_values = outputWS->readY(0);
+    TS_ASSERT_EQUALS(y_values.size(), NUM_Y);
+    TS_ASSERT_EQUALS(y_values[0], 0.);
+    TS_ASSERT_EQUALS(y_values[NUM_Y / 2], 0.);
+    TS_ASSERT_EQUALS(y_values[NUM_Y - 1], 34622.); // expect larger value then before since all counts go to 1 spectrum
+    const auto e_values = outputWS->readE(0);
+    TS_ASSERT_DELTA(e_values[0], 0., 1e-10);
+    TS_ASSERT_DELTA(e_values[NUM_Y / 2], 0., 1e-10);
+    TS_ASSERT_DELTA(e_values[NUM_Y - 1], std::sqrt(34622.), 1e-10);
+  }
+
   void test_common_x() {
     TestConfig configuration({13000.}, {36000.}, {}, "Logarithmic", "TOF");
+    configuration.groupingWS = bank_grouping_ws;
     auto outputWS = std::dynamic_pointer_cast<MatrixWorkspace>(run_algorithm(VULCAN_218062, configuration));
 
     constexpr size_t NUM_Y{637}; // observed value
@@ -273,6 +320,7 @@ public:
   void test_ragged_bins_x_min_max() {
     TestConfig configuration({13000., 14000., 15000., 16000., 17000., 18000.},
                              {36000., 37000., 38000., 39000., 40000., 41000.}, {}, "Logarithmic", "TOF");
+    configuration.groupingWS = bank_grouping_ws;
     auto outputWS = std::dynamic_pointer_cast<MatrixWorkspace>(run_algorithm(VULCAN_218062, configuration));
 
     // verify the output
@@ -290,6 +338,7 @@ public:
 
   void test_ragged_bins_x_delta() {
     TestConfig configuration({13000.}, {36000.}, {1000., 2000., 3000., 4000., 5000., 6000.}, "Linear", "TOF");
+    configuration.groupingWS = bank_grouping_ws;
     auto outputWS = std::dynamic_pointer_cast<MatrixWorkspace>(run_algorithm(VULCAN_218062, configuration));
 
     // verify the output
@@ -349,6 +398,7 @@ public:
   void run_test_with_different_units(std::vector<double> xmin, std::vector<double> xmax, std::vector<double> xdelta,
                                      std::string units) {
     TestConfig configuration(xmin, xmax, xdelta, "Linear", units);
+    configuration.groupingWS = bank_grouping_ws;
     auto outputWS = std::dynamic_pointer_cast<MatrixWorkspace>(run_algorithm(VULCAN_218062, configuration));
 
     // verify the output
@@ -364,6 +414,7 @@ public:
 
   void test_load_nexus_logs() {
     TestConfig configuration({0.}, {50000.}, {50000.}, "Linear", "TOF");
+    configuration.groupingWS = bank_grouping_ws;
     configuration.timeMin = 0.;
     configuration.timeMax = 300.;
     configuration.logListBlock = "skf*";
@@ -386,6 +437,7 @@ public:
 
   void test_start_stop_time_filtering() {
     TestConfig configuration({0.}, {50000.}, {50000.}, "Linear", "TOF");
+    configuration.groupingWS = bank_grouping_ws;
     configuration.timeMin = 200.;
     configuration.timeMax = 300.;
     auto outputWS = std::dynamic_pointer_cast<MatrixWorkspace>(run_algorithm(VULCAN_218062, configuration));
@@ -420,6 +472,7 @@ public:
 
   void test_start_time_filtering() {
     TestConfig configuration({0.}, {50000.}, {50000.}, "Linear", "TOF");
+    configuration.groupingWS = bank_grouping_ws;
     configuration.timeMin = 200.;
     auto outputWS = std::dynamic_pointer_cast<MatrixWorkspace>(run_algorithm(VULCAN_218062, configuration));
 
@@ -441,6 +494,7 @@ public:
 
   void test_stop_time_filtering() {
     TestConfig configuration({0.}, {50000.}, {50000.}, "Linear", "TOF");
+    configuration.groupingWS = bank_grouping_ws;
     configuration.timeMax = 300.;
     auto outputWS = std::dynamic_pointer_cast<MatrixWorkspace>(run_algorithm(VULCAN_218062, configuration));
 
@@ -463,6 +517,7 @@ public:
   void test_all_time_filtering() {
     // run is only ~600 seconds long so this include all events
     TestConfig configuration({0.}, {50000.}, {50000.}, "Linear", "TOF");
+    configuration.groupingWS = bank_grouping_ws;
     configuration.timeMax = 3000.;
     auto outputWS = std::dynamic_pointer_cast<MatrixWorkspace>(run_algorithm(VULCAN_218062, configuration));
 
@@ -485,6 +540,7 @@ public:
   void test_invalid_time_filtering() {
     // start time > stop time
     TestConfig configuration({0.}, {50000.}, {50000.}, "Linear", "TOF");
+    configuration.groupingWS = bank_grouping_ws;
     configuration.timeMin = 300.;
     configuration.timeMax = 200.;
     run_algorithm(VULCAN_218062, configuration, true);
@@ -910,6 +966,7 @@ public:
 
   void test_filter_bad_pulses() {
     TestConfig configuration({0.}, {50000.}, {50000.}, "Linear", "TOF");
+    configuration.groupingWS = bank_grouping_ws;
     configuration.filterBadPulses = true;
     auto outputWS = std::dynamic_pointer_cast<MatrixWorkspace>(run_algorithm(VULCAN_218062, configuration));
 
@@ -932,6 +989,7 @@ public:
 
   void test_filter_bad_pulses_and_time_start_stop() {
     TestConfig configuration({0.}, {50000.}, {50000.}, "Linear", "TOF");
+    configuration.groupingWS = bank_grouping_ws;
     configuration.filterBadPulses = true;
     configuration.timeMin = 200.;
     configuration.timeMax = 300.;
@@ -971,6 +1029,7 @@ public:
 
   void test_output_specnum() {
     TestConfig configuration({0.}, {50000.}, {50000.}, "Linear", "TOF"); // bins set for single bin
+    configuration.groupingWS = bank_grouping_ws;
     constexpr int NUM_HIST{6};
     for (int i = 1; i <= NUM_HIST; i++) {
       configuration.outputSpecNum = i;
@@ -1139,4 +1198,7 @@ public:
   void xtest_exec10GB() { run_test(DATA_LOCATION + "VULCAN_218092.nxs.h5"); }
 
   void xtest_exec18GB() { run_test(DATA_LOCATION + "VULCAN_217967.nxs.h5"); }
+
+private:
+  GroupingWorkspace_sptr bank_grouping_ws;
 };

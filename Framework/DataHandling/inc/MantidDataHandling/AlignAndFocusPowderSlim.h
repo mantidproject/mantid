@@ -77,7 +77,6 @@ private:
 namespace PropertyNames {
 const std::string FILENAME("Filename");
 const std::string CAL_FILE("CalFileName");
-const std::string CAL_FILE_USE_GROUPS("CalFileUseGrouping");
 const std::string FILTER_TIMESTART("FilterByTimeStart");
 const std::string FILTER_TIMESTOP("FilterByTimeStop");
 const std::string GROUPING_WS("GroupingWorkspace");

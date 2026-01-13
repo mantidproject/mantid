@@ -41,11 +41,6 @@ public:
   std::stack<std::pair<int, EventROI>> getEventIndexSplitRanges(H5::Group &event_group,
                                                                 const uint64_t number_events) const;
 
-  /**
-   * Returns a const reference to the calibration factory.
-   */
-  const BankCalibrationFactory &calibFactory() const { return m_calibFactory; }
-
 private:
   const std::vector<std::string> m_bankEntries;
   std::shared_ptr<const NexusLoader> m_loader;

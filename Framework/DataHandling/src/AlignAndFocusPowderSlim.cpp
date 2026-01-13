@@ -184,8 +184,6 @@ void AlignAndFocusPowderSlim::init() {
   declareProperty(std::make_unique<FileProperty>(PropertyNames::CAL_FILE, "", FileProperty::OptionalLoad, cal_exts),
                   "The .cal file containing the position correction factors. Either this or OffsetsWorkspace needs to "
                   "be specified.");
-  declareProperty(PropertyNames::CAL_FILE_USE_GROUPS, true,
-                  "If true, use the grouping information from the CalFile unless a GroupingWorkspace is provided.");
   auto mustBePosArr = std::make_shared<Kernel::ArrayBoundedValidator<double>>();
   mustBePosArr->setLower(0.0);
   declareProperty(std::make_unique<ArrayProperty<double>>(PropertyNames::X_MIN, std::vector<double>{0.1}, mustBePosArr),
@@ -335,7 +333,6 @@ void AlignAndFocusPowderSlim::exec() {
   loadSize.resize(1, 0);
 
   size_t num_hist = NUM_HIST;
-  bool arbitrary_grouping = false; // if false then we have a direct mapping of bank to output spectrum
   std::map<size_t, std::set<detid_t>> grouping;
   GroupingWorkspace_sptr groupingWS = this->getProperty(PropertyNames::GROUPING_WS);
 
@@ -353,7 +350,6 @@ void AlignAndFocusPowderSlim::exec() {
   }
 
   if (groupingWS) {
-    arbitrary_grouping = true; // any bank can go to any output spectrum
     const auto groupIds = groupingWS->getGroupIDs(false);
     num_hist = groupIds.size();
     g_log.information() << "Using grouping workspace with " << num_hist << " groups\n";
@@ -361,6 +357,15 @@ void AlignAndFocusPowderSlim::exec() {
       const auto detids = groupingWS->getDetectorIDsOfGroup(groupIds[outputSpecNum]);
       grouping[outputSpecNum] = std::set<detid_t>(detids.begin(), detids.end());
     }
+  } else {
+    // if no grouping defined then everything goes to one spectrum
+    num_hist = 1;
+  }
+
+  // temparary until we update splitting workflow to support arbitrary grouping
+  API::Workspace_sptr splitter_ws = this->getProperty(PropertyNames::SPLITTER_WS);
+  if (splitter_ws != nullptr) {
+    num_hist = 6;
   }
 
   this->progress(.0, "Create output workspace");
@@ -449,10 +454,21 @@ void AlignAndFocusPowderSlim::exec() {
         detIDToSpecNum[detid] = group.first;
       }
     }
-  } else {
+  } else if (splitter_ws) {
+    // this is temporary until we update splitting workflow to support arbitrary grouping
     for (const auto &[i, detids] : bank_detids) {
+      grouping[i] = detids;
       for (const auto &detid : detids) {
         detIDToSpecNum[detid] = i;
+      }
+    }
+  } else {
+    // no grouping provided so evenything goes in the 1 output spectrum
+    grouping[0] = std::set<detid_t>{};
+    for (const auto &[i, detids] : bank_detids) {
+      grouping[0].insert(detids.begin(), detids.end());
+      for (const auto &detid : detids) {
+        detIDToSpecNum[detid] = 0;
       }
     }
   }
@@ -490,7 +506,6 @@ void AlignAndFocusPowderSlim::exec() {
     // create the nexus loader for handling combined calls to hdf5
 
     SpectraProcessingData processingData = initializeSpectraProcessingData(wksp);
-    processingData.arbitraryGrouping = arbitrary_grouping;
     const auto pulse_indices = this->determinePulseIndices(wksp, filterROI);
     auto loader = std::make_shared<NexusLoader>(is_time_filtered, pulse_indices);
 
@@ -767,7 +782,7 @@ void AlignAndFocusPowderSlim::initCalibrationConstantsFromCalWS(const std::vecto
 const ITableWorkspace_sptr AlignAndFocusPowderSlim::loadCalFile(const Mantid::API::Workspace_sptr &inputWS,
                                                                 const std::string &filename,
                                                                 GroupingWorkspace_sptr &groupingWS) {
-  const bool load_grouping = !groupingWS && this->getProperty(PropertyNames::CAL_FILE_USE_GROUPS);
+  const bool load_grouping = !groupingWS;
 
   auto alg = createChildAlgorithm("LoadDiffCal");
   alg->setProperty("InputWorkspace", inputWS);

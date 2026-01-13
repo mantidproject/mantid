@@ -14,7 +14,6 @@ struct SpectraProcessingData {
   // There must be the same number of counts and binedges entries
   std::vector<std::vector<std::atomic_uint32_t>> counts; // [spectrum][bin]
   std::vector<const std::vector<double> *> binedges;
-  bool arbitraryGrouping{false};
 };
 
 } // namespace Mantid::DataHandling::AlignAndFocusPowderSlim
