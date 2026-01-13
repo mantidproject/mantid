@@ -90,10 +90,13 @@ public:
    * @param entryName full address for an entry name /entry/NXlogs
    * @return true: entryName exists, otherwise false
    */
-  bool isEntry(std::string const &entryName);
+  bool isEntry(std::string const &entryName) const;
 
   /// Query if a given type exists somewhere in the file
   bool classTypeExists(std::string const &classType) const;
+
+  /// Query if a given type exists as a immediate child of the supplied parentPath
+  bool classTypeExistsChild(const std::string &parentPath, const std::string &classType) const;
 
   /// @brief Get string data from a dataset at address
   /// @param address Full HDF5 address of the dataset
@@ -127,7 +130,7 @@ private:
    *   value: group class (e.g. NXentry, NXlog)
    * </pre>
    */
-  std::map<std::string, std::string> m_allEntries;
+  mutable std::map<std::string, std::string> m_allEntries;
 };
 
 } // namespace Nexus

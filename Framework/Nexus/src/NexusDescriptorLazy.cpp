@@ -65,7 +65,7 @@ NexusDescriptorLazy::NexusDescriptorLazy(std::string const &filename)
     : m_filename(filename), m_extension(std::filesystem::path(m_filename).extension().string()), m_firstEntryNameType(),
       m_allEntries(initAllEntries()) {}
 
-bool NexusDescriptorLazy::isEntry(std::string const &entryName) {
+bool NexusDescriptorLazy::isEntry(std::string const &entryName) const {
   auto it = m_allEntries.find(entryName);
   if (it != m_allEntries.end()) {
     return it->second != NONEXISTENT;
@@ -96,6 +96,22 @@ bool NexusDescriptorLazy::isEntry(std::string const &entryName) {
 bool NexusDescriptorLazy::classTypeExists(std::string const &classType) const {
   return std::any_of(m_allEntries.begin(), m_allEntries.end(),
                      [&classType](auto const &entry) { return entry.second == classType; });
+}
+
+bool NexusDescriptorLazy::classTypeExistsChild(const std::string &parentPath, const std::string &classType) const {
+  // if the parent doesn't exist, the child doesn't either
+  if (!this->isEntry(parentPath))
+    return false;
+
+  // linear search through all entries - stop at first match
+  const auto delimitedEntryName = parentPath + '/';
+  for (auto const &[name, cls] : m_allEntries) {
+    // match the class first since that limits the list more
+    if (cls == classType && name.starts_with(delimitedEntryName)) {
+      return true;
+    }
+  }
+  return false;
 }
 
 bool NexusDescriptorLazy::hasRootAttr(std::string const &name) {
