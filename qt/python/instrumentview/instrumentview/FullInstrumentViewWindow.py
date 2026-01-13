@@ -53,6 +53,7 @@ from instrumentview.InteractorStyles import CustomInteractorStyleZoomAndSelect, 
 from instrumentview.Projections.ProjectionType import ProjectionType
 
 import os
+from contextlib import suppress
 from typing import Callable
 from enum import Enum
 
