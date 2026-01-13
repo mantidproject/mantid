@@ -18,6 +18,7 @@ from enum import Enum
 from mantidqt import icons
 from mantidqt.interfacemanager import InterfaceManager
 from mantidqt.utils.qt import load_ui
+from mantidqt.utils.qt.line_edit_double_validator import LineEditDoubleValidator
 from mantidqt.widgets import jobtreeview, manageuserdirectories
 from reduction_gui.reduction.scripter import execute_script
 from sans.common.enums import ReductionDimensionality, OutputMode, SANSInstrument, RangeStepType, ReductionMode, FitType
@@ -1935,29 +1936,33 @@ class SANSDataProcessorGui(QMainWindow, Ui_SansDataProcessorWindow):
     # $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 
     def _attach_validators(self):
-        # Setup the list of validators
-        double_validator = QDoubleValidator()
-        positive_double_validator = QDoubleValidator()
-        positive_double_validator.setBottom(0.0)
+        def create_line_edit_validator(line_edit, initial_value="", is_positive=False):
+            # Helper to create line edit double validator, more sturdy against wrong double values(e.g. `1e`)
+            dv = LineEditDoubleValidator(line_edit, initial_value)
+            if is_positive:
+                dv.setBottom(0.0)
+            line_edit.setValidator(dv)
+
+        # Setup the integer validator
         positive_integer_validator = QIntValidator()
         positive_integer_validator.setBottom(1)
 
         # -------------------------------
         # General tab
         # -------------------------------
-        self.merged_shift_line_edit.setValidator(double_validator)
-        self.merged_scale_line_edit.setValidator(double_validator)
-        self.merged_q_range_start_line_edit.setValidator(double_validator)
-        self.merged_q_range_stop_line_edit.setValidator(double_validator)
-        self.merged_max_line_edit.setValidator(double_validator)
-        self.merged_min_line_edit.setValidator(double_validator)
+        create_line_edit_validator(self.merged_shift_line_edit)
+        create_line_edit_validator(self.merged_scale_line_edit)
+        create_line_edit_validator(self.merged_q_range_start_line_edit)
+        create_line_edit_validator(self.merged_q_range_stop_line_edit)
+        create_line_edit_validator(self.merged_max_line_edit)
+        create_line_edit_validator(self.merged_min_line_edit)
 
-        self.wavelength_min_line_edit.setValidator(positive_double_validator)
-        self.wavelength_max_line_edit.setValidator(positive_double_validator)
-        self.wavelength_step_line_edit.setValidator(positive_double_validator)
+        create_line_edit_validator(self.wavelength_min_line_edit, is_positive=True)
+        create_line_edit_validator(self.wavelength_max_line_edit, is_positive=True)
+        create_line_edit_validator(self.wavelength_step_line_edit, is_positive=True)
 
-        self.absolute_scale_line_edit.setValidator(double_validator)
-        self.z_offset_line_edit.setValidator(double_validator)
+        create_line_edit_validator(self.z_offset_line_edit)
+        create_line_edit_validator(self.absolute_scale_line_edit)
 
         # --------------------------------
         # Adjustment tab
@@ -1965,41 +1970,41 @@ class SANSDataProcessorGui(QMainWindow, Ui_SansDataProcessorWindow):
         self.monitor_normalization_line_edit.setValidator(positive_integer_validator)
         self.transmission_line_edit.setValidator(positive_integer_validator)
         self.transmission_monitor_line_edit.setValidator(positive_integer_validator)
-        self.transmission_radius_line_edit.setValidator(positive_double_validator)
-        self.transmission_mn_4_shift_line_edit.setValidator(double_validator)
-        self.transmission_mn_5_shift_line_edit.setValidator(double_validator)
+        create_line_edit_validator(self.transmission_radius_line_edit, "", is_positive=True)
+        create_line_edit_validator(self.transmission_mn_4_shift_line_edit, "")
+        create_line_edit_validator(self.transmission_mn_5_shift_line_edit, "")
 
-        self.fit_sample_wavelength_min_line_edit.setValidator(positive_double_validator)
-        self.fit_sample_wavelength_max_line_edit.setValidator(positive_double_validator)
-        self.fit_can_wavelength_min_line_edit.setValidator(positive_double_validator)
-        self.fit_can_wavelength_max_line_edit.setValidator(positive_double_validator)
+        create_line_edit_validator(self.fit_sample_wavelength_min_line_edit, is_positive=True)
+        create_line_edit_validator(self.fit_sample_wavelength_max_line_edit, is_positive=True)
+        create_line_edit_validator(self.fit_can_wavelength_min_line_edit, is_positive=True)
+        create_line_edit_validator(self.fit_can_wavelength_max_line_edit, is_positive=True)
 
         # --------------------------------
         # Q tab
         # --------------------------------
-        self.radius_limit_min_line_edit.setValidator(double_validator)
-        self.radius_limit_max_line_edit.setValidator(double_validator)
-        self.phi_limit_min_line_edit.setValidator(double_validator)
-        self.phi_limit_max_line_edit.setValidator(double_validator)
-        self.q_1d_min_line_edit.setValidator(double_validator)
-        self.q_1d_max_line_edit.setValidator(double_validator)
-        self.q_1d_step_line_edit.setValidator(positive_double_validator)
-        self.q_xy_max_line_edit.setValidator(positive_double_validator)  # Yes, this should be positive!
-        self.q_xy_step_line_edit.setValidator(positive_double_validator)
+        create_line_edit_validator(self.radius_limit_min_line_edit)
+        create_line_edit_validator(self.radius_limit_max_line_edit)
+        create_line_edit_validator(self.phi_limit_min_line_edit, "-90.0")
+        create_line_edit_validator(self.phi_limit_max_line_edit, "90.0")
+        create_line_edit_validator(self.q_1d_min_line_edit)
+        create_line_edit_validator(self.q_1d_max_line_edit)
 
-        self.r_cut_line_edit.setValidator(positive_double_validator)
-        self.w_cut_line_edit.setValidator(positive_double_validator)
+        create_line_edit_validator(self.q_1d_step_line_edit, is_positive=True)
+        create_line_edit_validator(self.q_xy_max_line_edit, is_positive=True)  # Yes, this should be positive!
+        create_line_edit_validator(self.q_xy_step_line_edit, is_positive=True)
 
-        self.gravity_extra_length_line_edit.setValidator(double_validator)
+        create_line_edit_validator(self.r_cut_line_edit, is_positive=True)
+        create_line_edit_validator(self.w_cut_line_edit, is_positive=True)
 
-        self.q_resolution_source_a_line_edit.setValidator(positive_double_validator)
-        self.q_resolution_sample_a_line_edit.setValidator(positive_double_validator)
-        self.q_resolution_source_h_line_edit.setValidator(positive_double_validator)
-        self.q_resolution_sample_h_line_edit.setValidator(positive_double_validator)
-        self.q_resolution_source_w_line_edit.setValidator(positive_double_validator)
-        self.q_resolution_sample_w_line_edit.setValidator(positive_double_validator)
-        self.q_resolution_delta_r_line_edit.setValidator(positive_double_validator)
-        self.q_resolution_collimation_length_line_edit.setValidator(double_validator)
+        create_line_edit_validator(self.gravity_extra_length_line_edit)
+
+        create_line_edit_validator(self.q_resolution_source_a_line_edit, is_positive=True)
+        create_line_edit_validator(self.q_resolution_sample_a_line_edit, is_positive=True)
+        create_line_edit_validator(self.q_resolution_source_w_line_edit, is_positive=True)
+        create_line_edit_validator(self.q_resolution_sample_w_line_edit, is_positive=True)
+        create_line_edit_validator(self.q_resolution_source_h_line_edit, is_positive=True)
+        create_line_edit_validator(self.q_resolution_sample_w_line_edit, is_positive=True)
+        create_line_edit_validator(self.q_resolution_collimation_length_line_edit)
 
     def reset_all_fields_to_default(self):
         # ------------------------------
