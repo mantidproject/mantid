@@ -136,8 +136,8 @@ class TestFullInstrumentViewModel(unittest.TestCase):
     def test_negate_picked_visibility(self):
         model, _ = self._setup_model([1, 2, 3])
         model._detector_is_picked = np.array([False, False, False])
-        model.negate_picked_visibility(np.array([False, True, True]))
-        np.testing.assert_equal(model._detector_is_picked, [False, True, True])
+        model.update_point_picked_detectors(1)
+        np.testing.assert_equal(model._detector_is_picked, [False, True, False])
 
     def test_clear_all_picked_detectors(self):
         model, _ = self._setup_model([1, 2, 3])

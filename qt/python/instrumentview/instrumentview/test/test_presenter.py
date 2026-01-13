@@ -72,39 +72,14 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._presenter.set_view_integration_limits()
         np.testing.assert_allclose(self._presenter._detector_mesh[self._presenter._counts_label], self._model.detector_counts)
 
-    def test_update_picked_detectors(self):
-        self._model._workspace_indices = np.array([0, 1, 2])
-        self._model._is_valid = np.array([True, True, True])
-        self._model._is_masked = np.array([False, False, False])
-        self._model._detector_is_picked = np.array([True, True, False])
-        self._model._detector_ids = np.array([1, 2, 3])
-        self._model.picked_detectors_info_text = MagicMock(return_value=["a", "a"])
-        self._model.extract_spectra_for_line_plot = MagicMock()
-        self._presenter._pickable_mesh = {}
-        self._presenter._pickable_projection_mesh = {}
-        self._mock_view.current_selected_unit.return_value = "TOF"
-        self._mock_view.sum_spectra_selected.return_value = True
-        self._presenter.update_picked_detectors([])
-        np.testing.assert_allclose(self._presenter._pickable_mesh[self._presenter._visible_label], self._model._detector_is_picked)
-        self._mock_view.show_plot_for_detectors.assert_called_once_with(self._model.line_plot_workspace)
-        self._mock_view.set_selected_detector_info.assert_called_once_with(["a", "a"])
-        self._model.extract_spectra_for_line_plot.assert_called_once_with("TOF", True)
-
     def test_generate_single_colour(self):
         green_vector = self._presenter.generate_single_colour(2, 0, 1, 0, 0)
         self.assertEqual(len(green_vector), 2)
         self.assertTrue(green_vector.all(where=[0, 1, 0, 0]))
 
-    def test_set_multi_select_enabled(self):
-        self._mock_view.is_multi_picking_checkbox_checked.return_value = True
-        self._presenter.update_detector_picker()
-        self._mock_view.enable_rectangle_picking.assert_called_once()
-        self._mock_view.enable_point_picking.assert_not_called()
-
-    def test_set_multi_select_disabled(self):
+    def test_update_detector_picker(self):
         self._mock_view.is_multi_picking_checkbox_checked.return_value = False
         self._presenter.update_detector_picker()
-        self._mock_view.enable_rectangle_picking.assert_not_called()
         self._mock_view.enable_point_picking.assert_called_once()
 
     @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.extract_spectra_for_line_plot")
@@ -142,6 +117,7 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
 
     def test_model_refresh_on_correct_ws_replace(self):
         self._model.setup = MagicMock()
+        self._presenter.update_plotter = MagicMock()
         ws_name = self._model.workspace.name()
         self._presenter.replace_workspace_callback(ws_name, None)
         self._model.setup.assert_called_once()
