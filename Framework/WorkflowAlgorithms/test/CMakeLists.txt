@@ -21,6 +21,7 @@ if(CXXTEST_FOUND)
   target_link_libraries(
     WorkflowAlgorithmsTest PRIVATE Mantid::WorkflowAlgorithms Mantid::Algorithms Mantid::DataHandling
   )
+  target_precompile_headers(WorkflowAlgorithmsTest PRIVATE <cxxtest/WrappedTestSuite.h> <set> <string> <vector>)
   add_dependencies(WorkflowAlgorithmsTest CurveFitting)
   add_dependencies(FrameworkTests WorkflowAlgorithmsTest)
   # Test data

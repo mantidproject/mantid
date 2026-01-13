@@ -484,7 +484,31 @@ add_library(Mantid::Kernel ALIAS Kernel)
 set_target_properties(Kernel PROPERTIES OUTPUT_NAME MantidKernel COMPILE_DEFINITIONS "IN_MANTID_KERNEL;PSAPI_VERSION=1")
 
 # Enable precompiled headers
-target_precompile_headers(Kernel PRIVATE inc/MantidKernel/PrecompiledHeader.h)
+target_precompile_headers(
+  Kernel
+  PRIVATE
+  inc/MantidKernel/System.h
+  <cstddef>
+  <cstdint>
+  <cstdio>
+  <cstdlib>
+  <iomanip>
+  <istream>
+  <limits.h>
+  <map>
+  <string>
+  <vector>
+  <boost/algorithm/string.hpp>
+  <boost/date_time/posix_time/posix_time.hpp>
+  <boost/regex.hpp>
+  <memory>
+  <Poco/File.h>
+  <Poco/Message.h>
+  <Poco/Notification.h>
+  <Poco/Path.h>
+  <MantidNexus/NexusException.h>
+  <MantidNexus/NexusFile.h>
+)
 
 target_include_directories(
   Kernel PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc> $<INSTALL_INTERFACE:include/Mantid>
